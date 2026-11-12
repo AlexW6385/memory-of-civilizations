@@ -6,6 +6,7 @@
 import { box, fromTriangles, lathe } from '../../core/geom.js';
 import { local, wallRun, barrel, archBand, spandrel, polyGeo, rng, archCurve, merlons, stuccoPanel, orientedBox } from './kit.js';
 import { archway } from './palace.js';
+import { dressFront, furnish, zir, pithos } from './dress.js';
 
 const YAW = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 };
 const WALLS = [['brick_baked', 'plaster_white'], ['brick_buff', 'brick_buff'], ['mudbrick', 'mud_plaster'], ['plaster_white', 'plaster_white'], ['brick_baked', 'brick_baked'], ['mud_plaster', 'mud_plaster']];
@@ -49,6 +50,7 @@ function house(el, ctx) {
     const frontOps = [{ at: hw + ox, w: 1.5, h: 2.7 }];
     wallRun(c, { a: [-hw, hd - T / 2], b: [hw, hd - T / 2], th: T, y0: y, y1: y + H, mat, ops: frontOps });
     if (!simple) archBand(bag, { O: [ox - 0.75, hd - T / 2], U: [1, 0], N: [0, 1] }, 0, y, 1.5, 2.7, 0.3, T / 2, T / 2 + 0.07, ['brick_baked', 'brick_buff']);
+    if (!simple) dressFront(c, { hw, hd, T, y, H, ox, mat, top, rand, storeys });
     const sideOps = (L) => (simple ? [] : [0.25, 0.5, 0.75].map((f) => win(L * f, y + 2.3)));
     wallRun(c, { a: [hw - T / 2, hd], b: [hw - T / 2, -hd], th: T, y0: y, y1: y + H, mat });
     wallRun(c, { a: [-hw + T / 2, -hd], b: [-hw + T / 2, hd], th: T, y0: y, y1: y + H, mat });
@@ -58,6 +60,7 @@ function house(el, ctx) {
     for (const [a, b] of [[[-hw, hd - T / 2], [hw, hd - T / 2]], [[hw - T / 2, hd], [hw - T / 2, -hd]], [[-hw + T / 2, -hd], [-hw + T / 2, hd]], [[hw, -hd + T / 2], [-hw, -hd + T / 2]]]) { bag.add(top, orientedBox(a, b, T * 0.7, y + H, y + H + 0.5)); }
     // the court: ranges 3.6 (front), 3.4 (sides), 4.8 (north, with the iwan)
     const fd = Math.min(3.6, d * 0.25), sdp = Math.min(3.4, w * 0.22), bd = Math.min(4.8, d * 0.3);
+    const hollow = !!el.open;
     const cx0 = -hw + sdp, cx1 = hw - sdp, cz0 = -hd + bd, cz1 = hd - fd;
     if (cx1 - cx0 < 3 || cz1 - cz0 < 3) { bag.add(top, box(-hw + T, y, -hd + T, hw - T, y + H, hd - T)); col.rect([-hw, -hd, hw, hd], y, y + H); roof(-hw, -hd, hw, hd, H); return; }
     // the front range: solid, but a bent passage: from the door at ox to the court at the other side
@@ -81,8 +84,24 @@ function house(el, ctx) {
         void hRange;
       }
     };
-    bag.add(mat, box(-hw + T, y, -hd + T, cx0, y + H, hd - fd - 0.0)); col.rect([-hw + T, -hd + T, cx0, cz1], y, y + H);
-    bag.add(mat, box(cx1, y, -hd + T, hw - T, y + H, hd - fd - 0.0)); col.rect([cx1, -hd + T, hw - T, cz1], y, y + H);
+    const KINDS = ['reception', 'bedroom', 'store', 'kitchen', 'bedroom', 'reception'];
+    const sideRange = (sgn) => {
+      const xa = sgn < 0 ? -hw + T : cx1, xb = sgn < 0 ? cx0 : hw - T, wx = sgn < 0 ? cx0 - 0.25 : cx1 + 0.25, door = sgn < 0 ? '+x' : '-x';
+      const zA = -hd + T, zB = cz1, n = Math.max(1, Math.floor((zB - zA) / 4.2)), rl = (zB - zA) / n;
+      for (let k = 0; k < n; k++) {
+        const z0r = zA + k * rl, z1r = z0r + rl;
+        wallRun(c, { a: [wx, z0r], b: [wx, z1r], th: 0.5, y0: y, y1: y + H, mat, ops: [{ at: rl / 2, w: 1.3, h: 2.5 }] });
+        if (k > 0) wallRun(c, { a: [xa, z0r], b: [xb, z0r], th: 0.4, y0: y, y1: y + H, mat });
+        bag.add('mud_plaster', box(Math.min(xa, xb), y + H, z0r, Math.max(xa, xb), y + H + 0.14, z1r));
+        bag.add('timber', box(Math.min(xa, xb), y + 3.2, z0r, Math.max(xa, xb), y + 3.36, z1r)); bag.add('brick_paving', box(Math.min(xa, xb), y - 0.2, z0r, Math.max(xa, xb), y + 0.02, z1r));
+        furnish(c, KINDS[(k + (sgn < 0 ? 0 : 3) + Math.floor(rand() * 2)) % KINDS.length], [Math.min(xa, xb) + 0.4, z0r + 0.25, Math.max(xa, xb) - 0.3, z1r - 0.25], door, y + 0.02, 3.2, rand, { light: k === 0 });
+      }
+      wallRun(c, { a: [xa < xb ? xa : xb, zA], b: [xa < xb ? xb : xa, zA], th: 0.4, y0: y, y1: y + H, mat });
+      wallRun(c, { a: [xa < xb ? xa : xb, zB], b: [xa < xb ? xb : xa, zB], th: 0.4, y0: y, y1: y + H, mat });
+      wallRun(c, { a: [sgn < 0 ? xa : xb, zA], b: [sgn < 0 ? xa : xb, zB], th: 0.3, y0: y, y1: y + H, mat });
+    };
+    if (hollow) { sideRange(-1); sideRange(1); }
+    else { bag.add(mat, box(-hw + T, y, -hd + T, cx0, y + H, hd - fd - 0.0)); col.rect([-hw + T, -hd + T, cx0, cz1], y, y + H); bag.add(mat, box(cx1, y, -hd + T, hw - T, y + H, hd - fd - 0.0)); col.rect([cx1, -hd + T, hw - T, cz1], y, y + H); }
     faceStuff({ O: [cx0, cz0], U: [0, 1], N: [1, 0] }, cz1 - cz0, H, 1);
     faceStuff({ O: [cx1, cz1], U: [0, -1], N: [-1, 0] }, cz1 - cz0, H, 1);
     // the front range's court face
@@ -90,7 +109,6 @@ function house(el, ctx) {
     // the north range: the iwan (3.2 m wide, a vault 4.2 m high for one storey, up to 6.6 for two), rooms either side
     const iw = Math.min(3.4, (cx1 - cx0) * 0.4), iwh = storeys === 2 ? 6.4 : 4.4, spring = archCurve(iw, iwh).spring;
     const nx0 = -hw + T, nx1 = hw - T, nz0 = -hd + T, nz1 = cz0;
-    const hollow = !!el.open;
     if (hollow) {
       // rooms either side of the iwan, hollow, with a door each on the court; ceilings of timber, a roof over
       for (const sgn of [-1, 1]) {
@@ -99,6 +117,7 @@ function house(el, ctx) {
         wallRun(c, { a: [sgn < 0 ? rx1 : rx0, nz1], b: [sgn < 0 ? rx1 : rx0, nz0], th: T, y0: y, y1: y + H, mat });
         bag.add('timber', box(rx0, y + 3.2, nz0, rx1, y + 3.36, nz1)); bag.add('mud_plaster', box(rx0, y + H, nz0, rx1, y + H + 0.14, nz1));
         bag.add('reed_mat', box(rx0 + 0.3, y + 0.02, nz0 + 0.3, rx1 - 0.3, y + 0.04, nz1 - 0.6));
+        furnish(c, sgn < 0 ? 'reception' : 'bedroom', [rx0 + 0.4, nz0 + 0.3, rx1 - 0.4, nz1 - 0.3], '+z', y + 0.02, 3.2, rand);
       }
       bag.add('brick_paving', box(nx0, y - 0.2, nz0, nx1, y + 0.02, nz1));
     } else { bag.add(mat, box(nx0, y, nz0, nx1, y + H, nz1)); col.rect([nx0, nz0, nx1, nz1], y, y + H); }

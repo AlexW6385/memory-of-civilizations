@@ -22,14 +22,14 @@ export function archway({ bag, col }, { x = 0, w, hh, z0, z1, top, mat = 'brick_
 }
 
 /** A row of columns of teak along a line, each with a capital block, on a base; returns nothing. h = to the top of the capital. */
-function teak(bag, col, x, z, y, h, r = 0.24) {
+export function teak(bag, col, x, z, y, h, r = 0.24) {
   bag.add('cedar', lathe([[r * 1.3, 0], [r * 1.25, 0.12], [r, 0.2], [r * 0.9, h * 0.5], [r * 0.92, h - 0.5], [r * 1.15, h - 0.3], [r * 1.5, h - 0.18], [r * 1.5, h - 0.06], [r * 1.9, h - 0.06], [0.001, h - 0.06]], 10, null, x, y, z));
   bag.add('limestone', box(x - r * 1.5, y - 0.02, z - r * 1.5, x + r * 1.5, y + 0.14, z + r * 1.5));
   col.circle(x, z, r * 1.2, y, y + h);
 }
 
 /** A rug laid on a floor: a field with a border and a few bands, rect centred (x, z), size w × d, at height y. */
-function rug(bag, x, z, w, d, y, c1 = 'cloth_maroon', c2 = 'cloth_indigo', c3 = 'cloth_ochre') {
+export function rug(bag, x, z, w, d, y, c1 = 'cloth_maroon', c2 = 'cloth_indigo', c3 = 'cloth_ochre') {
   bag.add(c2, box(x - w / 2, y, z - d / 2, x + w / 2, y + 0.018, z + d / 2));
   bag.add(c1, box(x - w / 2 + 0.12, y + 0.018, z - d / 2 + 0.12, x + w / 2 - 0.12, y + 0.026, z + d / 2 - 0.12));
   bag.add(c3, box(x - w / 2 + 0.3, y + 0.026, z - d / 2 + 0.3, x + w / 2 - 0.3, y + 0.032, z + d / 2 - 0.3));
@@ -37,7 +37,7 @@ function rug(bag, x, z, w, d, y, c1 = 'cloth_maroon', c2 = 'cloth_indigo', c3 = 
   bag.add(c2, lathe([[0.001, 0], [Math.min(w, d) * 0.2, 0], [Math.min(w, d) * 0.2, 0.006], [0.001, 0.006]], 12, null, x, y + 0.038, z));
 }
 /** A cushion, a bolster or a divan seat. */
-const cushion = (bag, mat, x, z, y, w = 0.6, d = 0.6, h = 0.16) => bag.add(mat, box(x - w / 2, y, z - d / 2, x + w / 2, y + h, z + d / 2));
+export const cushion = (bag, mat, x, z, y, w = 0.6, d = 0.6, h = 0.16) => bag.add(mat, box(x - w / 2, y, z - d / 2, x + w / 2, y + h, z + d / 2));
 
 // ── the palace ──────────────────────────────────────────────────────────────
 

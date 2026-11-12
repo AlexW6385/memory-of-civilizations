@@ -1,7 +1,7 @@
 // Abbasid Baghdad — the animals (src/engine/fauna.js draws them; docs/settlements/abbasid-baghdad.md §10): carp and barbel in the Tigris and the
 // canal, swallows and swifts over the river and the esplanade, kites (crows stand in) over the walls, sparrows on the suq rows and the quays,
 // egrets at the reeds of the river bank.
-import { RIVER, CANAL, SUQS, C, JETTIES, jettyAt, riverX, canalEnd } from './layout.js';
+import { RIVER, CANAL, ALL_SUQS as SUQS, C, JETTIES, jettyAt, riverX, canalEnd } from './layout.js';
 import { ground } from './ground.js';
 
 const fish = [];

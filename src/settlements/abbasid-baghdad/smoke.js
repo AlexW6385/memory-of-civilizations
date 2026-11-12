@@ -3,7 +3,7 @@
 // part is src/engine/smoke.js (one draw call); positions come from layout.js.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, MOSQUE, SUQS, lots } from './layout.js';
+import { RADIUS, MOSQUE, ALL_SUQS as SUQS, lots } from './layout.js';
 
 const ID = 'abbasid-baghdad';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }

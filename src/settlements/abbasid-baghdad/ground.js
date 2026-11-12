@@ -2,10 +2,10 @@
 // streets and on the esplanade; the Tigris in its trench with the Isa canal and the moat as water; date palms and tamarisk on the
 // banks, orchards and fields beyond the walls; the hot, dusty sky of the middle Tigris.
 
-import { RADIUS, RC, C, RIVER, CANAL, WATER, PALACE, MOSQUE, LIBRARY, SERVICE, AVENUES, ROADS_IN, ROADS_OUT, SUQS, SHOP, riverX, canalEnd, inRiver, inCanal, inMoat, onCauseway, inLot, inRect, rad, smooth as sm } from './layout.js';
+import { RADIUS, RC, C, RIVER, CANAL, WATER, PALACE, MOSQUE, LIBRARY, SERVICE, AVENUES, ROADS_IN, ROADS_OUT, SUQS, ALL_SUQS, SHOP, riverX, canalEnd, inRiver, inCanal, inMoat, onCauseway, inLot, inRect, rad, smooth as sm } from './layout.js';
 
-const BUILT = [PALACE, MOSQUE, LIBRARY, SHOP, ...SERVICE.map((s) => s.rect), ...SUQS.map((s) => s.rect)];
-const PAVED = [...AVENUES, ...ROADS_IN, ...ROADS_OUT, ...SUQS.map((s) => s.rect)];
+const BUILT = [PALACE, MOSQUE, LIBRARY, SHOP, ...SERVICE.map((s) => s.rect), ...ALL_SUQS.map((s) => s.rect)];
+const PAVED = [...AVENUES, ...ROADS_IN, ...ROADS_OUT, ...ALL_SUQS.map((s) => s.rect)];
 
 function height(x, z) {
   const r0 = Math.hypot(x, z);

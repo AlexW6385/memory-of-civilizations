@@ -40,6 +40,14 @@ export const SUQS = [
   { rect: [-96, 378, 46, 392], trades: ['fruit', 'grain'], name: 'fruit and grain' },
   { rect: [60, 318, 74, 356], trades: ['cloth', 'paper'], name: 'second row' },
 ];
+// the inner ring's avenues, from the inner wall's gate road to the main wall's gate: arcaded streets of shops (docs §4, §12)
+export const AVENUE_SUQS = [
+  { rect: [C[0] - 262, C[1] - 7, C[0] - 216, C[1] + 7], trades: ['copper', 'pottery', 'grain'], name: 'west avenue' },
+  { rect: [C[0] + 216, C[1] - 7, C[0] + 262, C[1] + 7], trades: ['cloth', 'spice', 'fruit'], name: 'east avenue' },
+  { rect: [C[0] - 7, C[1] - 262, C[0] + 7, C[1] - 216], trades: ['paper', 'money', 'spice'], name: 'north avenue' },
+  { rect: [C[0] - 7, C[1] + 216, C[0] + 7, C[1] + 262], trades: ['fruit', 'cloth', 'pottery', 'grain'], name: 'south avenue' },
+];
+export const ALL_SUQS = [...SUQS, ...AVENUE_SUQS];
 export const SHOP = [-148, 318, -138, 336];           // the bookseller's shop you can enter (a house-like room beside the paper suq)
 // streets (rects) the walkers use and the lots keep clear of
 const rc = (x0, z0, x1, z1) => [x0, z0, x1, z1];
@@ -123,7 +131,7 @@ export function inLot(x, z, m = 0) {
 export function streets() {
   const out = [];
   for (const r of [...AVENUES, ...ROADS_IN, ...ROADS_OUT]) out.push({ r, weight: 1.4, market: 0.4, kind: 'street' });
-  for (const s of SUQS) out.push({ r: s.rect, weight: 3, market: 1.5, kind: 'street' });
+  for (const s of ALL_SUQS) out.push({ r: s.rect, weight: 3, market: 1.5, kind: 'street' });
   // the esplanade: a loop of open ground round the palace (the guards, officials, scribes crossing)
   out.push({ r: rc(C[0] - 150, C[1] + 42, C[0] + 150, C[1] + 56), weight: 0.8, market: 0.1, kind: 'street' }, { r: rc(C[0] + 42, C[1] - 150, C[0] + 56, C[1] + 150), weight: 0.8, market: 0.1, kind: 'street' }, { r: rc(C[0] - 150, C[1] - 56, C[0] + 150, C[1] - 42), weight: 0.8, market: 0.1, kind: 'street' }, { r: rc(C[0] - 56, C[1] - 150, C[0] - 42, C[1] + 150), weight: 0.8, market: 0.1, kind: 'street' });
   // the quay street along the north bank of the canal and the road along the Tigris's west bank

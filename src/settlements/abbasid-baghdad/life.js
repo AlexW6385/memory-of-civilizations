@@ -3,7 +3,7 @@
 // porters and boatmen at the jetties, water-carriers, women with jars, donkeys and camels, goods in the streets. Still figures and objects
 // of use (src/objects); the walkers are the movers'.
 import { lodTiles } from '../lod.js';
-import { C, PALACE, MOSQUE, LIBRARY, SUQS, RC, RIVER, CANAL, JETTIES, jettyAt, riverX, lots, inRect } from './layout.js';
+import { ALL_SUQS, C, PALACE, MOSQUE, LIBRARY, SUQS, RC, RIVER, CANAL, JETTIES, jettyAt, riverX, lots, inRect } from './layout.js';
 import { suqKeepers } from '../../styles/abbasid/market.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -21,7 +21,7 @@ export async function lifePlan() {
   const porter = (at, y, rot, o = {}) => P.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: 'tunic', legs: 'bare', cloth: pick(['cloth_brown', 'cloth_ochre', 'cloth_grey', 'cloth_white']), cloth2: pick(['cloth_brown', 'cloth_grey']), over: 'belt', skin: 'skin_dark', hat: 'cap', feet: 'bare', hair: 'short', beard: rand() < 0.5, ...o });
   const guard = (at, y, rot, o = {}) => P.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: BLACK, cloth2: 'cloth_grey', over: 'sash', skin: skin(), hat: 'cap', hatMat: 'cloth_black', feet: 'shod', hair: 'short', beard: rand() < 0.6, pose: 'stand', carry: 'staff', arms: 'staff', ...o });
   // ── the keepers: in each bay, cross-legged on the rug behind the counter, facing the street ──
-  SUQS.forEach((s) => {
+  ALL_SUQS.forEach((s) => {
     for (const k of suqKeepers({ rect: s.rect })) {
       if (rand() < 0.22) continue;
       const rot = face(k.at, [k.at[0] + k.toward[0], k.at[1] + k.toward[1]]);
@@ -29,7 +29,7 @@ export async function lifePlan() {
     }
   });
   // buyers at the stalls, in the suq streets and at the crossings (a few; the walkers are the movers')
-  for (const s of SUQS) {
+  for (const s of ALL_SUQS) {
     const horiz = s.rect[2] - s.rect[0] > s.rect[3] - s.rect[1], L = horiz ? s.rect[2] - s.rect[0] : s.rect[3] - s.rect[1];
     for (let k = 0; k < Math.floor(L / 14); k++) {
       const u = 6 + k * 14 + rand() * 4, c = horiz ? [s.rect[0] + u, (s.rect[1] + s.rect[3]) / 2] : [(s.rect[0] + s.rect[2]) / 2, s.rect[1] + u], sd = rand() < 0.5 ? -1 : 1;
