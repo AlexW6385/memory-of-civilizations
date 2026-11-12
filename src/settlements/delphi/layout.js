@@ -128,9 +128,10 @@ function village() {
   // tiers: all the detail near the sanctuary's ways, less farther out
   const HOT = [[-36, 4], [-70, 30], [96, 70], [112, 100]];
   for (const l of LOTS) { const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, d = Math.min(...HOT.map(([x, z]) => Math.hypot(cx - x, cz - z))); l.tier = d < 70 ? 2 : d < 120 ? 1 : 0; }
-  // the walk-in houses: about one in five of those within reach, never two side by side
-  let last = -9;
-  LOTS.forEach((l, i) => { const w = l.rect[2] - l.rect[0]; if (l.tier >= 1 && w > 9.6 && i - last > 1 && l.rect[2] > -168 && rand() < 0.34 && !ALLEYS.some((a) => a.k === l.row && Math.abs(a.x0 - l.rect[2]) < 0.4 && false)) { l.open = true; l.trade = ['bronze', 'perfume', 'cloth', 'wine', 'carpenter', 'pottery', 'weaver', 'cook'][Math.floor(rand() * 8)]; last = i; } });
+  // the walk-in houses: the ten nearest the arrival (62, 16) within 125 m, wide enough for the house's rooms, each of a different trade in turn
+  // (the east village's rows below the sanctuary are the houses within reach of the temple terrace; the west village is far)
+  { const AR = [62, 16], TR = ['bronze', 'perfume', 'cloth', 'wine', 'carpenter', 'pottery', 'weaver', 'cook'], dist = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - AR[0], (l.rect[1] + l.rect[3]) / 2 - AR[1]);
+    LOTS.filter((l) => l.tier >= 1 && l.rect[2] - l.rect[0] >= 9.0 && dist(l) <= 125).sort((a, b) => dist(a) - dist(b)).slice(0, 10).forEach((l, i) => { l.open = true; l.trade = TR[i % TR.length]; l.variant = i % 4; }); }
   // the alleys' stairs: from the lane above down to the row's own level
   for (const a of ALLEYS) {
     const up = LANES.find((r) => r.k === a.k - 1 && a.x0 >= r.x0 - 0.01 && a.x1 <= r.x1 + 0.01), dn = LANES.find((r) => r.k === a.k && a.x0 >= r.x0 - 0.01 && a.x1 <= r.x1 + 0.01);
