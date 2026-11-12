@@ -81,6 +81,10 @@ export function people() {
     figures.push({ t: 'figure', at: [hx + 0.9, hz + 0.3], y: T, rot: k % 2 ? E : W, h: 1.66, seed: seed(), dress: 'trousers', cloth: ['cloth_brown', 'cloth_green', 'cloth_ochre', 'cloth_red'][k], cloth2: 'cloth_brown', over: 'belt', hat: 'cap', hatMat: 'cloth_brown', beard: k % 2 === 0, skin: 'skin_medium', feet: 'shod', pose: 'staff', carry: 'staff', len: 1.5, staffMat: 'wood_dark' });
   }
   figures.push({ t: 'trough', at: [-96, -96.5], y: T, rot: 0, mat: 'limestone_persian', seed: seed() });
+  // fodder heaped on mats beside the nobles' horses, jars of water for the waiting delegations, and the water-bearers who fill them
+  for (let k = 0; k < 4; k++) figures.push({ t: 'goods_mat', at: [-116 + k * 5.2 - 0.9, -96 + (k % 2) * 0.8 + 1.9], y: T, rot: 0, seed: seed(), goods: ['heap', 'baskets'], mat: 'reed_mat' });
+  for (const [x, gz] of [[-104.5, -79.5], [-104.5, -40.5]]) figures.push({ t: 'goods_mat', at: [x, gz], y: T, rot: 0, seed: seed(), goods: ['pottery', 'pottery'], mat: 'reed_mat' });
+  for (const [x, gz, rt] of [[-106.4, -79.2, W], [-106.4, -40.8, W]]) figures.push({ t: 'figure', at: [x, gz], y: T, rot: rt, h: 1.64, seed: seed(), dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_ochre', over: 'belt', hat: 'cap', hatMat: 'cloth_brown', beard: false, skin: 'skin_medium', feet: 'shod', pose: 'stand', carry: 'pot', arms: 'head' });
   // courtiers in conversation, waiting to be called: groups of three and four either side of the royal way and farther off
   [[-111, -69.5], [-111, -50.5], [-100, -62.5 + 0], [-108, -88], [-113, -33], [-102, -105]].forEach(([gx, gz], gi) => {
     if (gi === 2) return;
