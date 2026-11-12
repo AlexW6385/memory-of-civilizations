@@ -90,3 +90,14 @@ Dust and the salt that rises in the baked brick (efflorescence at the foot), mud
 - https://en.wikipedia.org/wiki/Great_Bath,_Mohenjo-daro
 - https://en.wikipedia.org/wiki/Indus_Valley_Civilisation
 - https://anantamias.com/harappan-architecture/
+
+## 12. The Citadel deepening pass (browser review fixes)
+
+- **The Great Bath's water [inferred, from the brief's review]:** the pool is 2.4 m deep with a bitumen lining [stated: Wikipedia "Great Bath, Mohenjo-daro"]; the water now stands about 1 m below the coping so that at a visitor's grazing view the black bitumen lining and the wet steps read as a tank, not as paving. The steps of the two stairs that stand in the water are dark (wet brick), those within half a metre above it are damp, the rest dry baked brick. The bathers stand waist-deep on the third step from the bed and sit hip-deep on the fifth.
+- **Drains of the platform [stated for the city: covered brick drains with manholes, Wikipedia; anantamias.com]:** the platform's streets and lanes get the same covered channel at their own height (the Lower Town's were drawn at the plain), falling east to a spout through the parapet and a salt-stained run down the facing [inferred: the outfall's placement].
+- **Wells [stated: "over 700 wells, roughly one for every three houses"; the wells are lined with wedge-shaped bricks, Wikipedia]:** street wells on the platform and at the mouths of some lanes in the Lower Town, each with a paved apron, trough, rope and pot [inferred: rope and pot; no windlass is attested].
+- **The pipal [stated: seals show a deity among the branches of a pipal (Ficus religiosa), Wikipedia "Pashupati seal" and general accounts; inferred: a tree on a brick seat in the Citadel]:** two trees on round brick seats with elders sitting under them.
+- **Dressing of the Bath's court [inferred]:** a gutter round the court that takes the splash, racks of timber for the bathers' cloth, lamp niches blackened by soot in the piers, washing lines between them, folded cloth and clay ladles at the coping, puddles where wet feet have come out of the pool, reed curtains rolled over the doors.
+- **The platform's streets [inferred]:** benches of mud brick along the College's north face, sacks and jars at the granary's ramp, a stack of baked brick for mending the facing, braziers at the stair's head, a scribe's mat with clay blanks, a water-stand under a mat shade, banner poles on the corner towers; every third house of the platform's quarters is open, lit and furnished.
+
+Still below Suzhou: the platform has no walking townspeople (the walker system follows the plain's ways only; static figures stand in for them); upper storeys on few houses; the quarters' fronts are repeated lots.
