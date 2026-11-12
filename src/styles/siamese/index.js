@@ -305,6 +305,20 @@ function canalBank(el, { bag, col }) {
   const [x0, z0, x1, z1] = norm(el.rect), bed = el.bed ?? -2.3, top = el.top ?? 0.1, ew = x1 - x0 > z1 - z0;
   const sides = ew ? [[x0, z0 - 1.0, x1, z0 + 0.5], [x0, z1 - 0.5, x1, z1 + 1.0]] : [[x0 - 1.0, z0, x0 + 0.5, z1], [x1 - 0.5, z0, x1 + 1.0, z1]];
   for (const r of sides) { bag.add('brick', box(r[0], bed, r[1], r[2], top, r[3])); col.rect(r, bed, top); }
+  // the waterline's dark algae band on both faces, brick steps down to the water every ~30 m, a mooring pile beside some
+  for (const r of sides) { const inner = ew ? (r[1] < z0 ? z0 + 0.5 : z1 - 0.5) : (r[0] < x0 ? x0 + 0.5 : x1 - 0.5), s = ew ? (r[1] < z0 ? -1 : 1) : (r[0] < x0 ? -1 : 1);
+    if (ew) bag.add('plaster_damp', box(r[0], -1.35, inner + (s < 0 ? 0 : -0.03) - 0.0, r[2], -0.55, inner + (s < 0 ? 0.03 : 0))); else bag.add('plaster_damp', box(inner + (s < 0 ? 0 : -0.03), -1.35, r[1], inner + (s < 0 ? 0.03 : 0), -0.55, r[3]));
+    const len = ew ? r[2] - r[0] : r[3] - r[1];
+    for (let t = 24 + (el.rect[0] * 7 + el.rect[1] * 3 + (s + 2) * 11) % 17; t < len - 20; t += 31) {
+      const a = (ew ? r[0] : r[1]) + t;
+      for (let n = 0; n < 5; n++) {
+        const d0 = n * 0.3, d1 = d0 + 0.3, top = 0.1 - n * 0.5, p = inner - s * d0, q = inner - s * d1, lo = Math.min(p, q), hi = Math.max(p, q);
+        const rr = ew ? [a, lo, a + 1.4, hi] : [lo, a, hi, a + 1.4];
+        bag.add('brick_baked', box(rr[0], -2.3, rr[1], rr[2], top, rr[3])); if (top > -0.6) col.floor(rr, top);
+      }
+      const px = ew ? a + 2.2 : inner - s * 0.05, pz = ew ? inner - s * 0.05 : a + 2.2; bag.add('timber', lathe([[0.12, 0], [0.1, 2.9]], 6, null, px, -2.3, pz)); col.circle(px, pz, 0.14, -2.3, 0.6);
+    }
+  }
   for (const r of sides) { const q = ew ? [r[0], r[1] === z0 - 1.0 ? z0 - 0.4 : z1 - 0.1, r[2], r[1] === z0 - 1.0 ? z0 + 0.1 : z1 + 0.4] : [r[0] === x0 - 1.0 ? x0 - 0.4 : x1 - 0.1, r[1], r[0] === x0 - 1.0 ? x0 + 0.1 : x1 + 0.4, r[3]]; bag.add('laterite', box(q[0], top, q[1], q[2], top + 0.1, q[3])); }
 }
 /** thai_bridge: { c, dir ('x'|'z' the way), kind ('brick'|'hurdle'), span (the canal's width, 8), y (the bank's level) } */
@@ -346,6 +360,11 @@ function landing(el, { bag, col }) {
   const R = (a, b) => { const p = [x + d[0] * a - d[1] * wd / 2, z + d[1] * a + d[0] * wd / 2], q = [x + d[0] * b + d[1] * wd / 2, z + d[1] * b - d[0] * wd / 2]; return norm([p[0], p[1], q[0], q[1]]); };
   const r = R(0, len);
   bag.add('timber', box(r[0], top - 0.12, r[1], r[2], top, r[3])); col.floor(r, top);
+  // a washing place: the women's pots, a bucket and the beating paddle on the stage, laundry steeping
+  { const px = x + d[0] * (len - 0.7) - d[1] * 0.45, pz = z + d[1] * (len - 0.7) + d[0] * 0.45;
+    bag.add('terracotta', lathe([[0.001, 0], [0.15, 0.01], [0.24, 0.16], [0.18, 0.36], [0.12, 0.4]], 8, null, px, top, pz));
+    bag.add('cloth_indigo', box(px + d[0] * 0.3 - 0.2, top, pz + d[1] * 0.3 - 0.2, px + d[0] * 0.3 + 0.2, top + 0.12, pz + d[1] * 0.3 + 0.2));
+    bag.add('timber', rod([px - 0.5, top + 0.02, pz + 0.5], [px - 0.1, top + 0.06, pz + 0.3], 0.03, 4)); }
   for (const a of [0.3, len - 0.3]) for (const s of [-1, 1]) { const px = x + d[0] * a - d[1] * s * (wd / 2 - 0.1), pz = z + d[1] * a + d[0] * s * (wd / 2 - 0.1); bag.add('timber', lathe([[0.1, 0], [0.09, top + 0.9 + 2.3]], 6, null, px, -2.3, pz)); }
 }
 // ── boats ─────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -371,6 +390,9 @@ export function boatParts(el) {
     q([-hw, ya, z0], [-hw, ya, z1], [0, ya + 0.32, z1], [0, ya + 0.32, z0]); q([hw, ya, z1], [hw, ya, z0], [0, ya + 0.32, z0], [0, ya + 0.32, z1]);
     add(el.awning === 'cloth' ? 'cloth_ochre' : 'thatch_palm', fromTriangles(T));
     for (const z of [z0, z1]) for (const s of [-1, 1]) add('bamboo_culm', rod([s * hw * 0.95, D, z], [s * hw, ya, z], 0.025, 4));
+    // wares hung from the awning's front pole: strings of baskets, gourds and dried fish at the vendor's reach
+    for (let t = 0; t < 7; t++) { const zz = z0 + (z1 - z0) * (t + 0.5) / 7, hh = 0.25 + rand() * 0.25, r = rand(); add('rope_fibre', rod([-hw * 0.5, ya, zz], [-hw * 0.5, ya - hh, zz], 0.005, 3)); add(r < 0.4 ? 'wicker' : r < 0.7 ? 'glaze_yellow' : 'silver', lathe([[0.001, 0], [0.07, 0.02], [0.09, 0.14], [0.001, 0.2]], 6, null, -hw * 0.5, ya - hh - 0.2, zz)); }
+    add('bamboo_culm', rod([-hw * 0.5, ya - 0.02, z0], [-hw * 0.5, ya - 0.02, z1], 0.018, 4));
   }
   void k; void rand;
   return out;

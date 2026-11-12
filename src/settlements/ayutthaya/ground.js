@@ -29,13 +29,14 @@ function planting(x, z) {
     if (edge < 2 || edge > 9 || Math.abs(x - WAT.axisX) < 14 || inRect([-66, -170, 120, -118], x, z, 6)) return null;
     return { grass: 10, banyan: 0.01 };
   }
-  if (!inRect(ISLAND, x, z, 6)) return { grass: 26, neem: 0.012 };
-  const near = wet(x, z) < 9 ? 1 : 0;
-  return { grass: 22, bamboo: 0.015 + 0.03 * near, neem: 0.03, teak: 0.008 };
+  if (!inRect(ISLAND, x, z, 6)) return { grass: 26, neem: 0.012, date_palm: 0.01, reeds: wetRiver(x, z) < 14 ? 0.6 : 0 };
+  const near = wet(x, z) < 9 ? 1 : 0, bank = wet(x, z) < 5.5 ? 1 : 0;
+  // coconut palms (the date palm stands in: tall, one trunk, a crown of fronds) among the houses, reeds and rushes on the banks, fig and neem for shade
+  return { grass: 22, bamboo: 0.015 + 0.03 * near, neem: 0.03, teak: 0.008, date_palm: 0.035, fig: 0.012, reeds: bank ? 0.8 : 0 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { banyan: 0.012, bamboo: 0.045, neem: 0.03, teak: 0.008 },
+  maxDensity: { banyan: 0.012, bamboo: 0.045, neem: 0.03, teak: 0.008, date_palm: 0.04, fig: 0.012, reeds: 0.8 },
   climate: {
     sun: { az: 150, el: 62, color: [1.0, 0.94, 0.84], intensity: 3.4, lat: 14, dec: 12, hour: 10 },
     sky: { turbidity: 5.2, rayleigh: 1.35, mie: 0.007, mieG: 0.8, zenith: [0.12, 0.19, 0.32], horizon: [0.6, 0.58, 0.54] },

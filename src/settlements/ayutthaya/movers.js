@@ -13,8 +13,8 @@ import { boatParts } from '../../styles/siamese/index.js';
 import { addFigure, factor, flat, SLOT } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 36, night: 5, rain: 0.6, reach: 150, spawnMin: 26, far: 42 },
-  boats: { count: 10, reach: 240, spawnMin: 50, far: 95, speed: [0.7, 1.15], bridgeSpeed: 0.6 },
+  walkers: { day: 46, night: 6, rain: 0.6, reach: 150, spawnMin: 26, far: 42 },
+  boats: { count: 12, reach: 240, spawnMin: 50, far: 95, speed: [0.7, 1.15], bridgeSpeed: 0.6 },
   water: WATER,
 };
 
@@ -46,7 +46,7 @@ export async function staticBoats() {
   const out = [];
   for (const e of waterElements()) {
     if (e.t === 'boat') { const L = e.kind === 'vendor' ? 5.2 : 6, r = e.rot ?? 0; out.push({ c: e.at, u: [Math.sin(r), Math.cos(r)], hl: L / 2 + 0.6, hw: 0.9 }); }
-    else if (e.t === 'floating_house') { const r = e.rot ?? 0, d = (e.d ?? 5.6) + 2, w = e.w ?? 4.4; out.push({ c: [e.c[0] - Math.sin(r) * 0.9 * 0, e.c[1]], u: [Math.sin(r), Math.cos(r)], hl: d / 2 + 0.6, hw: w / 2 + 0.7 }); }
+    else if (e.t === 'floating_house' || e.t === 'floating_shop') { const r = e.rot ?? 0, d = (e.d ?? 5.6) + 2, w = e.w ?? 4.4; out.push({ c: [e.c[0] - Math.sin(r) * 0.9 * 0, e.c[1]], u: [Math.sin(r), Math.cos(r)], hl: d / 2 + 0.6, hw: w / 2 + 0.7 }); }
   }
   return out;
 }
