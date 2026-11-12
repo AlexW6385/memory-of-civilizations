@@ -1,4 +1,3 @@
-import { lodTiles } from '../lod.js';
 // The terraces of Westminster and Lambeth (docs/settlements/london.md §5); the traffic of about 1870 (§5a): hansom
 // cabs and knifeboard omnibuses on Westminster Bridge, in Bridge Street and Parliament Street, gas lamps along them;
 // on the Thames the penny steamers, one at the floating pier by the bridge, and the coal lighters.
@@ -146,9 +145,27 @@ function openSet(all) {
   near([30, BRIDGE.z - 40], (l) => !l.shop && !l.pub, 3); near([272, BRIDGE.z + 14], (l) => !l.shop && !l.pub, 2);
   return out;
 }
+/** The terraces cut into TILE-metre tiles, each built in full (near) and simple (far) like ../lod.js lodTiles, but larger: a plan costs one mesh
+ *  per material, so fewer, larger tiles keep the mesh count down (the geometry budget); `near` grows with the tile so the same ground shows in full. */
+const TILE = 160, NEAR = 220 + (TILE - 100) * 0.6;
+function terraceTiles(id, elements) {
+  const tiles = new Map();
+  for (const e of elements) {
+    const x = (e.rect[0] + e.rect[2]) / 2, z = (e.rect[1] + e.rect[3]) / 2, k = `${Math.floor(x / TILE)},${Math.floor(z / TILE)}`;
+    if (!tiles.has(k)) tiles.set(k, []);
+    tiles.get(k).push(e);
+  }
+  const plans = [];
+  for (const [k, list] of tiles) {
+    const [i, j] = k.split(',').map(Number), b = { style: 'victorian', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 'n' }, center: [(i + 0.5) * TILE, (j + 0.5) * TILE] };
+    plans.push({ ...b, id: `${id}-${k}`, near: NEAR, elements: list });
+    plans.push({ ...b, id: `${id}-${k}-far`, far: NEAR, elements: list.map((e) => ({ ...e, simple: true })), nocollide: true });
+  }
+  return plans;
+}
 export async function houses() {
   const all = lots(), plans = [], open = openSet(all);
-  plans.push(...lodTiles('london-terraces', 'victorian', all.map((l) => ({ t: l.pub ? 'pub' : l.shop ? 'shop_house' : 'terrace_house', ...l, ...(open.has(l) ? { open: true } : {}) })), { R: RADIUS }));
+  plans.push(...terraceTiles('london-terraces', all.map((l) => ({ t: l.pub ? 'pub' : l.shop ? 'shop_house' : 'terrace_house', ...l, ...(open.has(l) ? { open: true } : {}) }))));
   const sq = square();
   return [...plans, base('london-square', sq), base('london-square-life', sq.flatMap(ridersOf), 'life'), ...traffic(), ...furniture(), base('london-street-folk', streetFolk(), 'life'), base('london-river-folk', riverFolk(), 'life')];
 }
