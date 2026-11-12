@@ -39,7 +39,7 @@ export function streetPlans() {
       pilgrim(x, z, kneel ? Math.PI / 2 : Math.atan2(x - gx, z - gz) + Math.PI, kneel ? { pose: 'kneel', arms: 'pray', carry: 'none' } : { pose: rand() < 0.5 ? 'talk' : 'stand' });
     }
   }
-  for (let i = 0; i < 9; i++) pilgrim(OVAL.c[0] + 110 - i * 9 + rand() * 2, (rand() - 0.5) * 6, Math.PI / 2 + (rand() - 0.5) * 0.4, { pose: 'stand' });   // walking in from the Borgo toward the church
+  for (let i = 0; i < 9; i++) pilgrim(OVAL.c[0] + 110 - i * 9 + rand() * 2, (i % 2 ? 1 : -1) * (1.6 + rand() * 2.6), Math.PI / 2 + (rand() - 0.5) * 0.4, { pose: 'stand' });   // walking in from the Borgo toward the church
   // beggars on the ground by the colonnade's inner columns, a seller of rosaries and medals at a stall
   for (const [x, z] of [[OVAL.c[0] - 30, -78], [OVAL.c[0] + 28, 80], [OVAL.c[0] - 52, 62]]) L.push({ t: 'figure', at: [x, z], y: 0, rot: Math.atan2(OVAL.c[0] - x, OVAL.c[1] - z) + Math.PI, seed: Math.floor(x * 11 + z), pose: 'ground', dress: 'robe', cloth: 'cloth_grey', cloth2: 'cloth_brown', skin: 'skin_medium', hat: 'none', over: 'cape', feet: 'bare' });
   L.push({ t: 'stall', at: [OVAL.c[0] + 40, 46], rot: -2.3, seed: 77, awning: 'cloth_white', goods: ['basket', 'cloth', 'basket'], w: 2.2, d: 1.2 });
@@ -87,7 +87,7 @@ export function streetPlans() {
   const guard = (x, z, rot, y = 0) => L.push(sc({ at: [x, z], y, rot, seed: Math.floor(x * 5 + z), pose: 'stand', dress: 'tunic', legs: 'hose', cloth: 'cloth_red', cloth2: 'cloth_ochre', hat: 'cap', over: 'cape', carry: 'staff', len: 2.3 }));
   for (const s of [-1, 1]) { guard(OVAL.c[0] + 62, s * 38, s > 0 ? Math.PI - 0.4 : 0.4); guard(OVAL.c[0] + 64.5, s * 36, s > 0 ? Math.PI - 0.4 : 0.4); guard(FRONT_X + 3, s * 9, Math.PI / 2, FLOOR + 0.05); guard(FRONT_X + 3, s * 12.5, Math.PI / 2, FLOOR + 0.05); }
   // people on the steps and the sagrato: sitting at the edge of a flight, pilgrims resting
-  for (let i = 0; i < 9; i++) { const x = FRONT_X + 10.5 + rand() * 12, z = (rand() - 0.5) * 60, g = Math.max(0, Math.min(FLOOR, (FRONT_X + 23 - x) / 22 * FLOOR)); L.push(sc({ at: [x, z], y: g, rot: Math.PI / 2 + (rand() - 0.5) * 1.2, seed: Math.floor(rand() * 1e9), pose: rand() < 0.4 ? 'sit_low' : 'stand', dress: 'robe', legs: 'hose', cloth: ['cloth_brown', 'cloth_black', 'cloth_grey', 'cloth_ochre'][Math.floor(rand() * 4)], cloth2: 'cloth_brown', hat: rand() < 0.6 ? 'brim' : 'veil', over: 'cape', carry: rand() < 0.3 ? 'staff' : 'none' })); }
+  for (let i = 0; i < 9; i++) { const x = FRONT_X + 10.5 + rand() * 12, z = (i % 2 ? 1 : -1) * (3 + rand() * 27), g = Math.max(0, Math.min(FLOOR, (FRONT_X + 23 - x) / 22 * FLOOR)); L.push(sc({ at: [x, z], y: g, rot: Math.PI / 2 + (rand() - 0.5) * 1.2, seed: Math.floor(rand() * 1e9), pose: rand() < 0.4 ? 'sit_low' : 'stand', dress: 'robe', legs: 'hose', cloth: ['cloth_brown', 'cloth_black', 'cloth_grey', 'cloth_ochre'][Math.floor(rand() * 4)], cloth2: 'cloth_brown', hat: rand() < 0.6 ? 'brim' : 'veil', over: 'cape', carry: rand() < 0.3 ? 'staff' : 'none' })); }
   // the market at the Borgo's mouth: stalls of fruit and bread, the sellers behind and a buyer before each, a water-seller with his yoke, a handcart, two carts
   const stalls = [[108, -19, 0, 'heap'], [114, 16, Math.PI, 'bread'], [122, -22, 0, 'greens'], [104, 19, Math.PI, 'melons'], [128, 19.5, Math.PI, 'fish'], [96, -8, Math.PI / 2, 'bolts']];
   for (const [x, z, rot, g] of stalls) {

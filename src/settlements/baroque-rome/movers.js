@@ -10,7 +10,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 34, night: 5, rain: 0.6, reach: 150, spawnMin: 28, far: 42 },
+  walkers: { day: 42, night: 5, rain: 0.6, reach: 160, spawnMin: 28, far: 42 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -5,
 };
@@ -41,6 +41,12 @@ export const WALKERS = [
     c1: [CL.brown, CL.grey, CL.black, CL.ochre], c2: [CL.brown, CL.brown, CL.grey], c3: [CL.brown], speed: [0.85, 1.1], stride: 1.3 },
   { id: 'porter', weight: 0.7, market: 1.3, el: { dress: 'tunic', legs: 'hose', hair: 'short', hat: 'cap', carry: 'pole', arms: 'pole' }, wet: 'cloak', swing: 0.75,
     c1: [CL.grey, CL.brown, CL.ochre], c2: [CL.brown, CL.grey], c3: [CL.brown, CL.grey], speed: [1.0, 1.25], stride: 1.1, pole: true },
+  { id: 'waterseller', weight: 0.35, market: 1.2, el: { dress: 'tunic', legs: 'hose', hair: 'short', hat: 'cap', carry: 'yoke' }, wet: 'cloak', swing: 0.7,
+    c1: [CL.brown, CL.grey, CL.ochre], c2: [CL.brown, CL.white], c3: [CL.brown], speed: [0.9, 1.1], stride: 1.15 },
+  { id: 'basketwoman', weight: 0.6, market: 1.4, el: { dress: 'robe', hair: 'bun', hat: 'veil', over: 'shawl', carry: 'basket' }, wet: 'cloak', swing: 0.5,
+    c1: [CL.maroon, CL.green, CL.ochre, CL.indigo], c2: [CL.white, CL.black], c3: [CL.black], speed: [0.85, 1.05], stride: 1.2, h: [0.9, 0.97] },
+  { id: 'guard', weight: 0.3, market: 0.2, el: { dress: 'tunic', legs: 'hose', hair: 'short', hat: 'cap', over: 'cape', carry: 'staff', arms: 'staff' }, wet: 'cloak',
+    c1: [CL.red, CL.red, CL.ochre], c2: [CL.ochre, CL.red], c3: [CL.red], speed: [0.9, 1.1], stride: 1.4 },
   { id: 'boy', weight: 0.5, market: 0.6, el: { dress: 'tunic', legs: 'hose', hair: 'short', arms: 'hang' },
     c1: [CL.ochre, CL.green, CL.red, CL.blue], c2: [CL.white, CL.red, CL.blue], c3: [CL.brown], speed: [1.2, 1.7], stride: 1.0, h: [0.6, 0.72], swing: 1.1 },
 ];

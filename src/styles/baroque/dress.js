@@ -1,5 +1,5 @@
 // Baroque Rome — the dressing of the open ground and the fortress (docs/settlements/baroque-rome.md §5, §6):
-// the lines of travertine that run in the piazza's pavement, the Vatican gardens' parterre of clipped box
+// the lines of travertine that run in the piazza's pavement and the focal stones, the Vatican gardens' parterre of clipped box
 // with its fountain and its lemon trees in pots, the Passetto di Borgo with its arcade, its small windows and
 // its battlements, Castel Sant'Angelo's drum, bastions, papal apartments and its angel.
 
@@ -23,8 +23,8 @@ export function piazzaLines(el, { bag }) {
     const n = 72;
     for (let i = 0; i < n; i++) bag.add(m, orientedBox(pt(i / n * Math.PI * 2, k), pt((i + 1) / n * Math.PI * 2, k), th, y0, m === T ? y1 : y1 + 0.02, 0.03));
   }
-  // the winds: small round marble discs set in the pavement along the two axes
-  for (const s of [-1, 1]) for (const k of [0.45, 0.67, 0.88]) for (const [px, pz] of [[ox + s * ax * k, oz], [ox, oz + s * bz * k]]) bag.add('marble_smooth', lathe([[0.4, 0], [0.4, 0.035], [0.001, 0.035]], 12, null, px, y0, pz));
+  // the two focal stones set in the pavement between the obelisk and the fountains, from which each colonnade's four rows of columns appear as one
+  for (const sg of [-1, 1]) bag.add('marble_smooth', lathe([[0.45, 0], [0.45, 0.065], [0.001, 0.065]], 14, null, ox, y0, oz + sg * 21));
   if (el.rect) {
     const [x0, z0, x1, z1] = el.rect;
     for (let x = x0 + 4; x < x1 - 1; x += 6) bag.add(T, box(x, y0, z0 + 1.0, x + 0.3, y1, z1 - 1.0));
@@ -204,4 +204,53 @@ export function naveDress(el, { bag, col }) {
   for (const s of [-1, 1]) for (const [dx, dz] of [[-4, 24], [4, 24], [-3, 46]]) stand(cx + s * dx, cz + s * dz);
   for (const s of [-1, 1]) for (const dx of [-4, 0, 4]) { const x = cx + dx, z = cz + s * 50.5; bag.add('wood_dark', box(x - 0.6, y, z - 0.35, x + 0.6, y + 0.32, z + 0.35)); bag.add('cloth_red', box(x - 0.58, y + 0.32, z - 0.33, x + 0.58, y + 0.38, z + 0.33)); bag.add('wood_dark', box(x - 0.6, y + 0.32, z + (s > 0 ? 0.35 : -0.5), x + 0.6, y + 0.95, z + (s > 0 ? 0.5 : -0.35))); }
   void n;
+}
+
+/**
+ * ship_mill: { at, rot, y (the water), seed } — one of the floating mills of the Tiber: two long hulls side by side with the
+ * paddle wheel turning between them, a plank hut with a tiled roof on the hulls, moored by a post to the bank
+ * [stated: the Tiber's ship-mills, in use until the late 19th century; Wikipedia "Ship mill"].
+ */
+export function shipMill(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y, rot = el.rot ?? 0, rand = rng(el.seed ?? 3);
+  const c = Math.cos(rot), s = Math.sin(rot);
+  const P = (lx, lz) => [x + lx * c + lz * s, z - lx * s + lz * c];   // lx along the hulls
+  const rotG = (g, lx, ly, lz) => { g.rotateY(rot); const p = P(lx, lz); g.translate(p[0] - lx * 0 - 0, y + ly, p[1]); return g; };
+  void rotG;
+  const seg = (a, b, w, y0, y1, m) => bag.add(m, orientedBox(P(a[0], a[1]), P(b[0], b[1]), w, y + y0, y + y1));
+  for (const sz of [-1, 1]) { seg([-5.5, sz * 2.1], [5.5, sz * 2.1], 1.3, -0.4, 0.95, 'timber'); seg([-5.5, sz * 2.1], [5.5, sz * 2.1], 1.38, 0.55, 0.62, 'wood_dark'); col.segment(P(-5.5, sz * 2.1), P(5.5, sz * 2.1), 1.3, y - 0.4, y + 0.95); }
+  for (const lx of [-4.5, 2.6, 4.5]) seg([lx, -2.1], [lx, 2.1], 0.25, 0.7, 0.95, 'wood_dark');          // the cross beams
+  seg([0.8, -2.1], [5.0, -2.1], 1.0, 0.95, 3.2, 'planks_grey'); seg([0.8, 2.1], [5.0, 2.1], 1.0, 0.95, 3.2, 'planks_grey');   // the hut's two sides over the hulls
+  seg([0.8, -1.7], [0.8, 1.7], 0.15, 0.95, 3.2, 'planks_grey'); seg([5.0, -1.7], [5.0, 1.7], 0.15, 0.95, 3.2, 'planks_grey');
+  seg([0.8, 0], [5.0, 0], 4.5, 3.2, 3.3, 'wood_dark');
+  for (const k of [-1, 1]) seg([0.8, k * 1.0], [5.0, k * 1.0], 0.12, 3.3, 4.3, 'roof_tile');
+  seg([0.8, 0], [5.0, 0], 0.2, 3.9, 4.35, 'roof_tile');
+  // the wheel between the hulls: an axle, two rims, the paddle boards round
+  const [wx, wz] = P(-1.6, 0), axisX = -s, axisZ = -c;                                                   // (the axle lies across the hulls)
+  void axisX; void axisZ;
+  seg([-1.6, -2.1], [-1.6, 2.1], 0.22, 0.2, 0.44, 'wood_dark');
+  for (let k = 0; k < 10; k++) { const a = k / 10 * Math.PI * 2, ry = 1.8 + Math.cos(a) * 1.45, lx = -1.6 + Math.sin(a) * 1.45; if (ry > -5) seg([lx, -1.35], [lx, 1.35], 0.45, Math.max(-0.45, ry - 1.5 - 0.15), Math.max(-0.3, ry - 1.5 + 0.15), 'timber'); }
+  void wx; void wz;
+  seg([-5.4, 0], [-3.0, 0], 0.6, 0.95, 1.2, 'rope_fibre');                                              // a coil of mooring rope on the bow
+  // sacks of grain and flour on the deck
+  for (let k = 0; k < 4; k++) { const [px, pz] = P(-4.8 + (k % 2) * 0.7, -0.6 + Math.floor(k / 2) * 0.8); bag.add('sacking', lathe([[0.2, 0], [0.26, 0.3], [0.2, 0.55], [0.001, 0.6]], 8, null, px, y + 0.95, pz)); }
+  void rand;
+}
+
+/**
+ * tiber_landing: { x, z, h (bank height over the water) } — a stair of travertine from the top of the bank to the water with a
+ * timber jetty at its foot, two mooring posts and a ring in the wall (the river's banks were not embanked until after 1870, so
+ * the landings were rough ones cut into the slope).
+ */
+export function tiberLanding(el, { bag, col }) {
+  const { x, z } = el, dir = el.dir ?? 1, y0 = el.level;
+  const n = 11, run = 1.3;
+  for (let k = 0; k < n; k++) {
+    const top = el.top - (k + 1) * (el.top - y0 - 0.15) / n, xx = x + dir * k * run;
+    bag.add(T, box(Math.min(xx, xx + dir * run), top - 1.2, z - 1.4, Math.max(xx, xx + dir * run), top, z + 1.4)); col.floor([Math.min(xx, xx + dir * run), z - 1.4, Math.max(xx, xx + dir * run), z + 1.4], top);
+  }
+  const jx = x + dir * n * run;
+  bag.add('timber', box(Math.min(jx, jx + dir * 5), y0 + 0.1, z - 1.2, Math.max(jx, jx + dir * 5), y0 + 0.28, z + 1.2)); col.floor([Math.min(jx, jx + dir * 5), z - 1.2, Math.max(jx, jx + dir * 5), z + 1.2], y0 + 0.28);
+  for (const sz of [-1, 1]) for (const k of [0, 1, 2, 3]) bag.add('wood_dark', box(jx + dir * (0.6 + k * 1.5) - 0.07, y0 - 1.2, z + sz * 1.15 - 0.07, jx + dir * (0.6 + k * 1.5) + 0.07, y0 + 0.8, z + sz * 1.15 + 0.07));
+  for (const sz of [-1, 1]) bag.add('wood_dark', lathe([[0.16, 0], [0.16, 1.1], [0.2, 1.15], [0.001, 1.2]], 8, null, jx + dir * 4.6, y0 + 0.28, z + sz * 1.9));
 }

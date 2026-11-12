@@ -26,7 +26,7 @@ export const stpeter = {
     { id: 'nave', rect: [CROSSING[0] + 21, -13.75, FRONT_X - 4 - 9.2, 13.75], y: FLOOR, kind: 'hall' },
     { id: 'crossing', rect: [CROSSING[0] - 21, -21, CROSSING[0] + 21, 21], y: FLOOR, kind: 'hall', sealed: true },
   ],
-  walks: [Object.assign([[125, 0], [40, 0], [FRONT_X + 26, 0]], { y0: 0 })],
+  walks: [Object.assign([[125, 0], [58, 0], [56, -11], [24, -11], [22, 0], [FRONT_X + 26, 0], [FRONT_X - 3, 0], [FRONT_X - 20, 0]], { y0: 0 })],   // (round the obelisk, up the steps, through the portico into the nave)
 };
 export const vatican = {
   id: 'baroque-rome-vatican', style: 'baroque', origin: [0, 0], base: 0, yaw: 0, feature: true,
@@ -54,5 +54,14 @@ export const river = {
   entrance: { at: [0, 0], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
   // (out to where its bed comes up to the water by the disc's edge)
   elements: [{ t: 'water_cells', rect: [TIBER.x - 60, -RADIUS, TIBER.x + 60, RADIUS], y: TIBER.level, cell: 1.5, inside: (x, z) => Math.abs(x - tiberX(z)) < TIBER.w / 2 + 6 && height(x, z) < TIBER.level }],
+};
+export const tiberworks = {
+  id: 'baroque-rome-tiberworks', style: 'baroque', origin: [0, 0], base: 0, yaw: 0, feature: true,
+  entrance: { at: [125, 0], facing: 'w' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
+  // the ship-mills moored in the stream, the landings cut into the bank (the west bank slopes from the street down to the water)
+  elements: [
+    ...[-52, 78, 205].map((z, i) => ({ t: 'ship_mill', at: [tiberX(z) - 9, z], rot: 0.1 + i * 0.05, y: TIBER.level, seed: 30 + i })),
+    ...[-165, 115, -85].map((z) => ({ t: 'tiber_landing', x: tiberX(z) - TIBER.w / 2 - 6, z, dir: 1, top: height(tiberX(z) - TIBER.w / 2 - 6, z), level: TIBER.level })),
+  ],
 };
 export default stpeter;
