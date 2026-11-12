@@ -26,6 +26,8 @@ function castleLife(fig, samurai, rand) {
   // the Ninomaru, seen from the Hishi gate's stair
   fig([-14, 14.5], 0.2, { y: y2, dress: 'robe', hair: 'bun', cloth: 'cloth_indigo', over: 'sash', cloth2: 'cloth_white', feet: 'shod' });
   samurai([6, 9], -1.2, y2);
+  // the Hishi gate's guards at the head of the long stair, facing down it
+  samurai([-3.4, 28.2], S, y2 - 0.9); samurai([3.4, 28.2], S, y2 - 0.9);
   void rand;
 }
 
