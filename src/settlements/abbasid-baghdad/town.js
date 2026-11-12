@@ -6,7 +6,7 @@ import '../../styles/abbasid/index.js';
 import '../../objects/index.js';
 import { suqKeepers } from '../../styles/abbasid/market.js';
 import { khanRooms, hammamRooms, worldRect, KHAN, HAMMAM } from '../../styles/abbasid/khan.js';
-import { KHAN_RECT, HAMMAM_RECT, WORKSHOPS, ALL_SUQS, RADIUS, RC, GATE, C, PALACE, MOSQUE, LIBRARY, SUQS, SHOP, RIVER, CANAL, CANAL_BRIDGES, BRIDGES, WATER, JETTIES, lots, moored, jettyAt, riverX, canalEnd, inRect } from './layout.js';
+import { ESPLANADE, KHAN_RECT, HAMMAM_RECT, WORKSHOPS, ALL_SUQS, RADIUS, RC, GATE, C, PALACE, MOSQUE, LIBRARY, SUQS, SHOP, RIVER, CANAL, CANAL_BRIDGES, BRIDGES, WATER, JETTIES, lots, moored, jettyAt, riverX, canalEnd, inRect } from './layout.js';
 import { lifePlan } from './life.js';
 
 const base = (id, elements, style = 'abbasid') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [C[0], C[1] + 60], facing: 'n' } });
@@ -87,6 +87,9 @@ export async function town() {
     plans.push({ ...base('abbasid-baghdad-hammam', [{ t: 'abbasid_hammam', rect: HAMMAM_RECT, face: 'n', y: 0, seed: 88 }]), bounds: bnd(HAMMAM_RECT), rooms: hammamRooms().map((r) => ({ id: r.id, rect: worldRect('n', hc, r.rect), y: 0, kind: 'hall' })) });
     WORKSHOPS.forEach((w, i) => plans.push({ ...base(`abbasid-baghdad-work${i}`, [{ t: 'abbasid_workshop', rect: w.rect, face: 'n', kind: w.kind, y: 0, seed: 90 + i }]), bounds: bnd(w.rect), rooms: [{ id: `${w.kind} workshop`, rect: [w.rect[0] + 0.6, w.rect[1] + 0.6, w.rect[2] - 0.6, w.rect[3] - 0.6], y: 0, kind: 'hall' }] }));
   }
+  // ── the south gate road's service houses and shops: one plan, each a furnished room with its own front ──
+  plans.push({ ...base('abbasid-baghdad-esplanade', ESPLANADE.map((b, i) => ({ t: 'abbasid_workshop', rect: b.rect, face: b.face, kind: b.kind, front: b.front, mat: b.mat, y: 0, seed: 120 + i * 7 }))),
+    bounds: [-150, 18, -74, 116], rooms: ESPLANADE.map((b) => ({ id: b.name, rect: [b.rect[0] + 0.6, b.rect[1] + 0.6, b.rect[2] - 0.6, b.rect[3] - 0.6], y: 0, kind: 'hall' })) });
   // ── the water: the river, the canal, the bridges, the jetties and the boats ──
   const pts = []; for (let z = -540; z <= 540; z += 30) pts.push([riverX(z), z]);
   const river = [{ t: 'tigris', pts, w: RIVER.w + 3, y: WATER }, { t: 'canal', rect: [CANAL.x0, CANAL.z - CANAL.w / 2, canalEnd() + 2, CANAL.z + CANAL.w / 2], y: CANAL.water, bed: CANAL.bed, along: 'x' }];

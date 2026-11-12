@@ -3,7 +3,7 @@
 // lamp on its post; on the flat roofs washing on poles; at the esplanade's roads the shade stalls of the water-sellers. Placed from the lots'
 // own door (the same rule as the house style: the door's offset from the seed), so nothing floats and nothing stands in a doorway.
 import { rng } from '../../styles/abbasid/kit.js';
-import { C, RC, lots, AVENUES, ROADS_IN, inRect } from './layout.js';
+import { C, RC, lots, AVENUES, ROADS_IN, ESPLANADE, inRect } from './layout.js';
 import { houseToWorld } from './town.js';
 
 const YAW = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 };
@@ -55,3 +55,36 @@ export function esplanadeElements() {
   return E;
 }
 const pick2 = (r) => ['cloth_white', 'cloth_ochre', 'cloth_indigo', 'cloth_green'][Math.floor(r() * 4)];
+
+/** The service houses of the south gate road: goods and figures before each front (clear of the awning or arcade), by kind; and who is inside. Local frame of each building: the street at +z. */
+export function esplanadeShopFronts() {
+  const E = [], P = [], I = [], rand = (() => { let s = 5151; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); })();
+  ESPLANADE.forEach((b, i) => {
+    const l = { rect: b.rect, face: b.face }, turned = b.face === 's' || b.face === 'n', w = turned ? b.rect[2] - b.rect[0] : b.rect[3] - b.rect[1], d = turned ? b.rect[3] - b.rect[1] : b.rect[2] - b.rect[0], hw = w / 2, hd = d / 2;
+    const rot = YAW[b.face], deep = b.front === 'awning' ? 2.4 : b.front === 'portico' ? 2.9 : 0.8, at = (x, z) => houseToWorld(l, x, hd + z), seed = 700 + i;
+    const side = i % 2 ? 1 : -1, xs = side * Math.min(hw - 1.2, 3.8);
+    switch (b.kind) {
+      case 'bakery': E.push({ t: 'sacks', at: at(xs, deep + 0.4), y: 0, rot, n: 4, seed }, { t: 'firewood', at: at(-xs, deep + 0.5), y: 0, rot: rot + Math.PI / 2, len: 1.8, seed }); break;
+      case 'guard': { E.push({ t: 'stool', at: at(2.2, 1.2), y: 0, rot: rot + Math.PI }); const [x, z] = at(2.2, 1.2); P.push({ at: [x, z], y: 0, rot: rot + Math.PI, pose: 'sit_low' }); break; }
+      case 'diwan': E.push({ t: 'goods_mat', at: at(xs, 1.4), y: 0, rot, goods: ['basket'], seed }); break;
+      case 'perfumer': E.push({ t: 'pot', kind: 'water_pot', n: 2, at: at(xs, deep + 0.5), y: 0, seed }, { t: 'lantern', kind: 'oil', h: 2.2, at: at(-xs, deep + 0.4), y: 0, rot, seed }); break;
+      case 'kitchen': E.push({ t: 'firewood', at: at(xs, 0.8), y: 0, rot: rot + Math.PI / 2, len: 1.6, seed }, { t: 'pot', kind: 'zir', n: 2, at: at(-xs, 0.7), y: 0, seed }, { t: 'chickens', kind: 'hen', n: 4, at: at(0, 3.0), y: 0, seed }); break;
+      case 'store': E.push({ t: 'pot', kind: 'zir', n: 2, at: at(xs, 0.9), y: 0, seed }, { t: 'pot', kind: 'water_pot', n: 2, at: at(-xs, 1.0), y: 0, seed: seed + 1 }, { t: 'sacks', at: at(xs + side * 1.4, 1.6), y: 0, rot, n: 3, seed }); break;
+      case 'coppersmith': E.push({ t: 'pot', kind: 'vat', n: 2, at: at(xs, 1.4), y: 0, seed }, { t: 'goods_mat', at: at(-xs, 1.6), y: 0, rot, goods: ['heap'], seed }); break;
+      case 'stable': E.push({ t: 'animal', kind: 'donkey', at: at(xs, deep + 0.6), y: 0, rot: rot + 1.57, seed, gear: true }, { t: 'firewood', at: at(-xs, deep + 0.6), y: 0, rot, len: 1.4, seed }); break;
+      case 'treasury': E.push({ t: 'lantern', kind: 'oil', h: 2.2, at: at(2.0, 0.4), y: 0, rot, seed }); break;
+      case 'reception': { const [x, z] = at(2.6, 1.0); E.push({ t: 'stool', at: [x, z], y: 0, rot: rot + Math.PI }); P.push({ at: [x, z], y: 0, rot: rot + Math.PI, pose: 'sit_low' }); E.push({ t: 'goods_mat', at: at(-2.6, 1.4), y: 0, rot, goods: ['basket'], seed }); break; }
+      case 'potter': E.push({ t: 'pot', kind: 'pithos', n: 2, at: at(xs, deep + 0.5), y: 0, seed }, { t: 'pot', kind: 'water_pot', n: 2, at: at(-xs, deep + 0.5), y: 0, seed: seed + 3 }); break;
+      case 'bedroom': E.push({ t: 'animal', kind: 'donkey', at: at(xs, 2.0), y: 0, rot: rot + 1.0, seed, gear: true }, { t: 'sacks', at: at(-xs, 0.6), y: 0, rot, n: 2, seed }); break;
+      default: break;
+    }
+    // who is inside: the keeper facing the street a little inside the door (the furniture stands at the back and the sides)
+    const inside = (x, z, o = {}) => I.push({ at: houseToWorld(l, x, hd - z), rot: rot + Math.PI, ...o });
+    const k = b.kind;
+    if (k === 'reception') { I.push({ at: houseToWorld(l, -0.9, -0.3), rot: rot + Math.PI / 2 * (b.face === 'e' ? 1 : -1) + Math.PI, pose: 'cross', talk: true }, { at: houseToWorld(l, 0.9, 0.1), rot: rot, pose: 'cross', talk: true }); }
+    else if (k === 'guard') inside(1.6, 2.4, { guard: true });
+    else if (k !== 'store' && k !== 'bedroom') inside(1.7 * (i % 2 ? -1 : 1), 2.3, { pose: k === 'diwan' || k === 'perfumer' ? 'cross' : 'stand' });
+    void rand;
+  });
+  return { E, P, I };
+}
