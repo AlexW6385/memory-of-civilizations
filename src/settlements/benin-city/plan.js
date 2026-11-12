@@ -25,6 +25,14 @@ E.push({ t: 'benin_tower', c: [-121, -70], h: 17.5, snake: 's', seed: 31 });
 E.push({ t: 'benin_tower', c: [-9, -70], h: 17.5, snake: 's', seed: 32 });
 for (const [c, s] of [[[X0 + 4.5, Z1 - 4.5], 'e'], [[X1 - 4.5, Z1 - 4.5], 'w'], [[X0 + 4.5, Z0 + 4.5], 'e'], [[X1 - 4.5, Z0 + 4.5], 'w']]) E.push({ t: 'benin_tower', c, h: 11.5, snake: s, seed: 40 + Math.round(c[0]) });
 
+// the servants' and stores' ranges in the two strips of the compound beside the outer court: their rooms open to a lane before the court's side walls
+for (const [z0, z1] of [[-118, -90], [-88, -60], [-58, -30], [-26, -10]]) {
+  E.push({ t: 'benin_range', rect: [-1.5, z0, 8.7, z1], front: 'w', seed: Math.round(-z0), kinds: ['store', 'kitchen', 'sleep', 'brass', 'sleep', 'store'] });
+  E.push({ t: 'benin_range', rect: [-138.6, z0, -133.0, z1], front: 'e', seed: Math.round(-z0) + 50, kinds: ['sleep', 'store', 'kitchen', 'sleep', 'brass', 'kitchen'] });
+}
+// the cast leopards at the gate
+for (const s of [-1, 1]) E.push({ t: 'benin_leopard', at: [GATE_X + s * 3.6, 3.6], y: 0, s });
+
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
   room('outer court', [-124, -63, -12, -3], 0.03, 'open'),

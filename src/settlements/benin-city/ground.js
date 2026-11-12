@@ -2,7 +2,7 @@
 // square and the market, grass and oil palms between the compounds, the bank and ditch of the Iya, the forest beyond it (silk-cotton
 // stand-ins, teak, bamboo); the hot, humid, hazy light of the wet season, damp and algae on the clay.
 
-import { RADIUS, PALACE, SQUARE, MARKET, GUILD, height, depth, inRect, inLot, onStreet } from './layout.js';
+import { RADIUS, PALACE, SQUARE, MARKET, GUILD, GREAT, CROSS, height, depth, inRect, inLot, onStreet } from './layout.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0.05, grass: 0.3, rock: 0.05, soil: 0.45, fields: 0, dry: 0.3, warmth: 0.85, red: 0.7, road: 0, snow: 0, forest: 0 };
@@ -22,9 +22,13 @@ function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6) return null;
   if (d < -30) return { teak: 0.05, banyan: 0.012, date_palm: 0.02, bamboo: 0.012, grass: 14 };
   if (d < 14) return { grass: 8, maquis: 0.015 };
+  // the shade trees of the broad streets: silk-cotton and oil palms along the verges, and at the square's two sides
+  if (inRect(GREAT, x, z) && !inRect(SQUARE, x, z, 4) && !inRect(CROSS, x, z, 4) && (z < GREAT[1] + 7 || z > GREAT[3] - 7) && depth(x, z) > 14) return { banyan: 0.0028, date_palm: 0.006, grass: 0 };
+  if (inRect(CROSS, x, z) && !inRect(GREAT, x, z, 6) && (x < CROSS[0] + 6 || x > CROSS[2] - 6) && depth(x, z) > 14) return { banyan: 0.0024, date_palm: 0.006, grass: 0 };
+  if (inRect(SQUARE, x, z) && (x < SQUARE[0] + 9 || x > SQUARE[2] - 9) && z > SQUARE[1] + 14) return { banyan: 0.003, grass: 0 };
   if (inRect(PALACE, x, z, 2) || inLot(x, z, 1.5) || onStreet(x, z, 0.5) || inRect(GUILD, x, z, 1) || inRect(SQUARE, x, z, 0)) return null;
-  if (inRect(MARKET, x, z)) return { banyan: 0.0015, grass: 0 };
-  return { date_palm: 0.012, banyan: 0.002, grass: 6 };
+  if (inRect(MARKET, x, z)) return { banyan: 0.0032, date_palm: 0.002, grass: 0 };
+  return { date_palm: 0.02, banyan: 0.003, grass: 6 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater, rim: 0,

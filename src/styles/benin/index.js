@@ -5,6 +5,7 @@ import { registerStyle } from '../../core/build.js';
 import { PALACE_EL } from './palace.js';
 import { HOUSES } from './house.js';
 import { TOWN_EL } from './town.js';
+import { STREET_EL } from './street.js';
 
-export const benin = { elements: { ...PALACE_EL, ...HOUSES, ...TOWN_EL } };
+export const benin = { elements: { ...PALACE_EL, ...HOUSES, ...TOWN_EL, ...STREET_EL } };
 registerStyle('benin', benin);
