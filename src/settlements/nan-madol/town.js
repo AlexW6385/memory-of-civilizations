@@ -3,7 +3,7 @@
 // in two rows along each islet's path, cook-houses with their earth ovens, the sea wall's columns, the mangroves of the shore; and
 // the people and animals: the sakau pounded at the stones of Nandauwas, priests in its courts, the household at every nah, canoe
 // builders on Dapahu, food landed by canoe at the Peiniot islet.
-import { RADIUS, WATER, ISLETS, ISLET, FORDS, LANDINGS, edges, gaps, village, cooks, height, inland, inRect, SAKAU, TOMB, INNER, OUTER, OUTER_GATE, INNER_GATE, TOMB_COURT, LESSER_TOMB } from './layout.js';
+import { RADIUS, WATER, ISLETS, ISLET, FORDS, LANDINGS, edges, gaps, village, cooks, height, inland, inRect, SAKAU, TOMB, INNER, OUTER, OUTER_GATE, INNER_GATE, TOMB_COURT, LESSER_TOMB, FORECOURT } from './layout.js';
 import '../../objects/index.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -58,9 +58,9 @@ export async function town() {
   // the sea wall: a high wall of columns along the outer edge of the islets that make it (foundations of columnar basalt and boulders [stated: NRHP])
   for (const s of ISLETS.filter((q) => q.kind === 'seawall')) {
     const [x0, z0, x1, z1] = s.rect;
-    if (s.id.startsWith('se')) E.push({ t: 'crib_wall', a: [x1 - 1.2, z0 + 1.5], b: [x1 - 1.2, z1 - 1.5], th: 1.6, top: 2.4, seed: seed++, ends: [0, 0], proj: 0 });
-    else if (s.id.startsWith('ss')) E.push({ t: 'crib_wall', a: [x0 + 1.5, z1 - 1.2], b: [x1 - 1.5, z1 - 1.2], th: 1.6, top: 2.4, seed: seed++, ends: [0, 0], proj: 0 });
-    else { E.push({ t: 'crib_wall', a: [x1 - 1.2, z0 + 1.5], b: [x1 - 1.2, z1 - 1.5], th: 1.6, top: 2.4, seed: seed++, ends: [0, 0], proj: 0 }); E.push({ t: 'crib_wall', a: [x0 + 1.5, z1 - 1.2], b: [x1 - 1.5, z1 - 1.2], th: 1.6, top: 2.4, seed: seed++, ends: [0, 0], proj: 0 }); }
+    if (s.id.startsWith('se')) E.push({ t: 'crib_wall', a: [x1 - 1.2, z0 + 1.5], b: [x1 - 1.2, z1 - 1.5], th: 1.6, top: 2.4, seed: seed++, ends: [0, 0], proj: 0, rough: 0.1, cap: true });
+    else if (s.id.startsWith('ss')) E.push({ t: 'crib_wall', a: [x0 + 1.5, z1 - 1.2], b: [x1 - 1.5, z1 - 1.2], th: 1.6, top: 2.4, seed: seed++, ends: [0, 0], proj: 0, rough: 0.1, cap: true });
+    else { E.push({ t: 'crib_wall', a: [x1 - 1.2, z0 + 1.5], b: [x1 - 1.2, z1 - 1.5], th: 1.6, top: 2.4, seed: seed++, ends: [0, 0], proj: 0, rough: 0.1, cap: true }); E.push({ t: 'crib_wall', a: [x0 + 1.5, z1 - 1.2], b: [x1 - 1.5, z1 - 1.2], th: 1.6, top: 2.4, seed: seed++, ends: [0, 0], proj: 0, rough: 0.1, cap: true }); }
   }
   // ── the nahs and the cook-houses ──
   const taroOf = (h, k) => (h.islet[0] === 'w' || 's2,s3,s5,s6'.includes(h.islet)) && k % 4 === 1 && (h.depth ?? 0) >= 6.5 && !h.back;
@@ -79,6 +79,10 @@ export async function town() {
     E.push({ t: 'court', kind: 'topdress', a: [cx0, cz0], b: [cx1, cz0], top: () => 3.3, seed: 21 }); E.push({ t: 'court', kind: 'topdress', a: [cx1, cz0], b: [cx1, cz1], top: () => 3.3, seed: 22 });
   }
   for (const k of cooks()) E.push({ t: 'cookhouse', c: k.c, yaw: k.yaw, seed: k.seed });
+  // the forecourt of Idehd, along the way from the crossroads to the causeway: worked ground either side, lamps down the way
+  E.push({ t: 'things', list: FORECOURT.things, seed: 16 });
+  for (const c of FORECOURT.lamps) E.push({ t: 'court', kind: 'lamp', c });
+  for (const [x, z, yw, sd] of [[-13.6, 13.6, 0.3, 21], [-6.4, 14.6, -0.2, 22], [-14.0, 6.9, 0.1, 23]]) E.push({ t: 'court', kind: 'offering', c: [x, z], yaw: yw, seed: sd });
   // ── canoes at the landings; hulls drawn up on Dapahu where they are built ──
   for (const m of moored()) E.push({ t: 'canoe', at: m.at, yaw: m.yaw, len: m.len, y: m.y, side: m.side });
   // ── the posts the canoes are made fast to, the weirs on the reef flat, the plants ──
@@ -100,6 +104,8 @@ export async function town() {
     // in front of the houses of rank: a coconut by the path's side
     if (!h.back && prand() < 0.12) plant(h.islet, 'coconut', F(h.w / 2 + 1.0, -h.l / 2 - 1.2), 1);
   });
+  // the palace forecourt's flanks: coconut palms and bananas outside the cleared way, so that the view stays open to the wall
+  for (const [x, z, k] of [[-22.4, 9.6, 'coconut'], [1.0, 9.0, 'coconut'], [-21.6, 25.4, 'banana'], [0.6, 25.8, 'banana'], [-22.8, 13.2, 'banana'], [1.2, 15.6, 'coconut']]) plant('s1', k, [x, z], 0.9 + prand() * 0.3);
   // the sea wall's islets: pandanus on prop roots, hibiscus and a few coconuts at the shore's edge, beach litter of driftwood
   for (const s of ISLETS.filter((q) => q.kind === 'seawall')) {
     const [x0, z0, x1, z1] = s.rect, area = (x1 - x0) * (z1 - z0);
@@ -184,6 +190,29 @@ export async function town() {
   }
   // children about the houses, a few
   v.houses.forEach((h, k) => { if (k % 6 !== 3) return; const F = frameW(h.c, h.yaw); for (let i = 0; i < 2; i++) { const at = F(-1.5 + i * 2.2, -h.l / 2 - 1.5 - i * 0.7); man(at, 0, rand() * 6.28, { h: 0.62, pose: 'stand', beard: false, hair: 'long' }); } });
+  // the forecourt of Idehd, which the arrival looks down: women at the pounding boards, men at the canoe hull, someone at every rack and net,
+  // porters and priests on the way to the causeway (none nearer than 9 m of the arrival at (−10, 28))
+  { const at = (x, z) => [x, z], fc = (a, b, o = {}, f = woman) => f(a, 0, face(a, b), o);
+    for (const [bx, bz] of [[-17.2, 15.8], [-5.6, 19.0]]) { const a = at(bx + 0.1, bz + 1.0); woman(a, 0, face(a, [bx, bz]), { pose: 'kneel' }); const b = at(bx + 1.3, bz + 0.5); woman(b, 0, face(b, [bx, bz]), { pose: 'sit_ground' }); }
+    for (const [x, z, bx, bz] of [[-17.4, 21.9, -17.4, 20.6], [-16.2, 19.3, -16.6, 20.6], [-19.8, 19.6, -19.0, 20.4]]) man(at(x, z), 0, face([x, z], [bx, bz]), { pose: x < -18.8 ? 'squat' : 'kneel', cloth: 'hide_tan' });
+    fc([-16.0, 9.9], [-16.1, 8.8], { pose: 'stand' }, woman); fc([-13.6, 9.7], [-14.6, 8.8], { pose: 'kneel' }, woman);
+    fc([-18.4, 12.6], [-19.8, 12.4], { pose: 'stand' }, man); fc([-4.0, 12.8], [-5.1, 13.0], { pose: 'stand' }, woman);
+    fc([-3.4, 16.4], [-4.8, 16.2], { pose: 'sit_ground' }, woman);
+    // the pen's pig and the children
+    P.push({ t: 'animal', kind: 'pig', at: [-4.2, 9.4], y: 0, rot: 1.2, seed: 1601 }, { t: 'animal', kind: 'pig', at: [-4.5, 8.8], y: 0, rot: 3.9, seed: 1602 });
+    man([-2.6, 11.2], 0, 2.0, { h: 0.62, pose: 'stand', beard: false, hair: 'long' }); man([-13.0, 15.2], 0, 4.0, { h: 0.66, pose: 'stand', beard: false, hair: 'long' });
+    // on the way: porters with poles of baskets to the causeway, two priests with their white mats, an old man with a staff
+    man([-7.6, 12.2], 0, Math.PI, { carry: 'pole' }); woman([-12.5, 14.2], 0, Math.PI, { carry: 'basket' }); woman([-12.4, 8.6], 0, 0.3, { carry: 'basket' });
+    man([-7.7, 19.4], 0, face([-7.7, 19.4], [-12.3, 19.6]), { cloth: 'cloth_white', cloth2: 'cloth_white', over: 'cloak', pose: 'talk', beard: true, hair: 'bun' }); man([-12.3, 19.6], 0, face([-12.3, 19.6], [-7.7, 19.4]), { cloth: 'cloth_white', cloth2: 'cloth_white', over: 'cloak', pose: 'talk', beard: true });
+    for (const [x, z] of [[-14.6, 17.4], [-6.6, 11.4], [-14.2, 21.0]]) P.push({ t: 'basket', n: 2, at: [x, z], y: 0, seed: Math.round(x * 10), goods: 'cloth_ochre' });
+    for (const [x, z] of [[-18.2, 17.6], [-2.4, 22.6]]) P.push({ t: 'firewood', at: [x, z], y: 0, rot: 0.4, len: 1.4, seed: Math.round(z) });
+    P.push({ t: 'chickens', n: 4, at: [-12.8, 20.8], y: 0, rot: 2, seed: 1603 }, { t: 'animal', kind: 'dog', at: [-8.4, 20.2], y: 0, rot: 4.4, seed: 1604 });
+  }
+  // on the causeway to Nandauwas (the middle distance of the arrival): a woman wading with a basket-trap, a man with a fish spear on the kerb,
+  // two priests at the gate's jambs and others sitting on the seats of columns before it
+  woman([-8.7, 1.0], -1.0, 1.57, { pose: 'stand', carry: 'basket' }); man([-11.4, 2.6], -1.0, -1.57, { pose: 'stand', carry: 'staff' });
+  for (const x of [-13.4, -6.6]) man([x, -5.2], 0, face([x, -5.2], [-10, 4]), { cloth: 'cloth_white', cloth2: 'cloth_white', over: 'cloak', pose: 'stand', beard: true, hair: 'bun', carry: 'staff' });
+  for (const [x, yw] of [[-17.0, 0], [-2.8, 0]]) man([x, -3.2], 0, Math.PI, { cloth: 'cloth_white', pose: 'cross', beard: true });
   // the arrival: families on Peiniot by the cross path and the canoes at its landings, someone aboard half the moored canoes
   for (const [x, z, k] of [[-13.2, 66, 0], [-6.8, 70, 1], [-6.6, 84, 2], [-13.4, 86, 3], [-12.8, 77, 4], [-7.0, 77, 5]]) { const at = [x, z]; (k % 2 ? man : woman)(at, 0, face(at, [-10, z + (k % 3 - 1) * 3]), { pose: k < 2 ? 'talk' : k < 4 ? 'sit_ground' : 'stand' }); }
   moored().forEach((m, i) => { if (i % 2) return; const at = [m.at[0], m.at[1]]; man(at, m.y + 0.18, m.yaw + Math.PI, { pose: 'cross', hat: 'none' }); });

@@ -11,8 +11,8 @@ import { figure } from '../../objects/figures.js';
 import { addFigure, factor, flat, SLOT } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 30, night: 3, rain: 0.4, reach: 150, spawnMin: 26, far: 44 },
-  boats: { count: 6, reach: 250, spawnMin: 60, far: 100, speed: [0.9, 1.3], bridgeSpeed: 0.8 },
+  walkers: { day: 36, night: 3, rain: 0.45, reach: 150, spawnMin: 22, far: 44 },
+  boats: { count: 8, reach: 250, spawnMin: 32, far: 100, speed: [0.9, 1.3], bridgeSpeed: 0.8 },
   water: WATER,
 };
 

@@ -10,7 +10,7 @@ import { Matrix4 } from '../../core/three.js';
 import { subtractRects } from '../../core/build.js';
 import { cribWall, cribCollide, laid, rng, R, C, ROCK } from './crib.js';
 import { canoe } from './canoe.js';
-import { yard, works, tomb_court, wall_dress, post, weir } from './dress.js';
+import { yard, works, tomb_court, wall_dress, post, weir, things } from './dress.js';
 import { plants, taro_bed } from './plants.js';
 import { court } from './court.js';
 
@@ -216,7 +216,7 @@ function pile(el, { bag }) {
 
 registerStyle('nanmadol', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { crib_wall, islet_wall, steps, ford, tomb, nah, cookhouse, canoe, mangrove, sakau, pile, yard, works, tomb_court, wall_dress, post, weir, plants, taro_bed, court },
+  elements: { crib_wall, islet_wall, steps, ford, tomb, nah, cookhouse, canoe, mangrove, sakau, pile, yard, works, things, tomb_court, wall_dress, post, weir, plants, taro_bed, court },
   objects: {},
 });
 export { canoe };

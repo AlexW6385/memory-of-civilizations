@@ -12,7 +12,11 @@ export const C = 0.5;                     // a course's height
 const FLAT = R * Math.sqrt(3);
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 export const ROCK = ['granite_black', 'dolerite_spotted', 'granite_black', 'basalt'];
+// the courses read as bands from afar: the stretchers dark, the headers' ends a paler grey (weathered, salt-bloomed) in a honeycomb
+const ROCK_S = ['granite_black', 'granite_black', 'basalt', 'granite_black'], ROCK_H = ['dolerite_spotted', 'basalt', 'dolerite_spotted', 'dolerite_spotted'];
 
+// a few lengths only, so that the prisms are instanced in few batches (draws, load time)
+const LEN3 = [0.88, 1, 1.12];
 const CACHE = new Map();
 /** A hexagonal prism along +z from 0 to len, a vertex up (so that neighbours in a row meet flat to flat). */
 export function hexPrism(len, r = R) {
@@ -40,7 +44,7 @@ export function laid(bag, mat, len, x, y, z, dx, dz, reach = 200, r = R) {
  * (th / 2 to meet a cross wall at a corner, 0 at a free end); proj: the courses (parity 0 or 1) whose corner
  * columns project 0.2 m; r: the prism radius (islet walls use heavier columns); reach for instancing.
  */
-export function cribWall(bag, { a, b, y0 = 0, th = 2.6, top = 3, seed = 1, sides = [1, -1], ends = null, proj = 0, r = R, core = true, depth = 0.9, coreMat = 'coral_rag', reach = 220 }) {
+export function cribWall(bag, { a, b, y0 = 0, th = 2.6, top = 3, seed = 1, sides = [1, -1], ends = null, proj = 0, r = R, core = true, depth = 0.9, coreMat = 'coral_rag', reach = 220, jut = 0.2, rough = 0.04, cap = false }) {
   const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz), ux = dx / L, uz = dz / L, rand = rng(seed);
   const e = ends ?? [th / 2, th / 2], c = r === R ? C : r * Math.sqrt(3) + 0.03, flat = r * Math.sqrt(3);
   const T = typeof top === 'function' ? top : () => top;
@@ -56,17 +60,19 @@ export function cribWall(bag, { a, b, y0 = 0, th = 2.6, top = 3, seed = 1, sides
       if (n < 1) continue;
       const p = P(u, -th / 2 + 0.04), q = P(u1, th / 2 - 0.04);
       bag.add(coreMat, box(Math.min(p[0], q[0]), y0, Math.min(p[1], q[1]), Math.max(p[0], q[0]), y0 + n * c, Math.max(p[1], q[1])));
+      // the wall's crown: a pale skin of coral rubble over the core between the columns' ends, a light line against the dark courses and the sky
+      if (cap) { const p2 = P(u, -th / 2 + 0.3), q2 = P(u1, th / 2 - 0.3); bag.add('coral', box(Math.min(p2[0], q2[0]), y0 + n * c, Math.min(p2[1], q2[1]), Math.max(p2[0], q2[0]), y0 + n * c + 0.12, Math.max(p2[1], q2[1]))); }
     }
   }
   for (let k = 0; k < nmax; k++) {
-    const header = k % 2 === 0, yc = y0 + (k + 0.5) * c, ext = (k % 2 === proj ? 0.2 : -0.03);
+    const header = k % 2 === 0, yc = y0 + (k + 0.5) * c, ext = (k % 2 === proj ? jut : -0.03);
     const ua = -e[0] - (e[0] ? ext : 0), ub = L + e[1] + (e[1] ? ext : 0);
     // a free end shows the ends of columns across its thickness
     for (const [i, u0, sg] of [[0, 0, 1], [1, L, -1]]) {
       if (e[i] || N(u0) <= k) continue;
       for (let v = -th / 2 + flat / 2; v <= th / 2 - flat / 2 + 1e-6; v += flat) {
         const p = P(u0, v);
-        laid(bag, ROCK[Math.floor(rand() * 4)], depth * (0.85 + rand() * 0.3), p[0], yc, p[1], ux * sg, uz * sg, reach, r);
+        laid(bag, (header ? ROCK_H : ROCK_S)[Math.floor(rand() * 4)], depth * LEN3[Math.floor(rand() * 3)], p[0], yc, p[1], ux * sg, uz * sg, reach, r);
       }
     }
     for (const s of sides) {
@@ -75,9 +81,9 @@ export function cribWall(bag, { a, b, y0 = 0, th = 2.6, top = 3, seed = 1, sides
       if (header) {
         for (let u = ua + flat / 2; u <= ub - flat / 2 + 1e-6; u += flat) {
           if (N(u) <= k) continue;
-          const p = P(u, s * face), len = depth * (0.85 + rand() * 0.3);
-          const mat = ROCK[Math.floor(rand() * 4)];
-          laid(bag, mat, len, p[0] + nx * (rand() * 0.04), yc, p[1] + nz * (rand() * 0.04), -nx, -nz, reach, r);
+          const p = P(u, s * face), len = depth * LEN3[Math.floor(rand() * 3)];
+          const mat = ROCK_H[Math.floor(rand() * 4)];
+          laid(bag, mat, len, p[0] + nx * (rand() * rough), yc, p[1] + nz * (rand() * rough), -nx, -nz, reach, r);
         }
       } else {
         // two columns thick along the face: the outer row is the face
@@ -85,11 +91,11 @@ export function cribWall(bag, { a, b, y0 = 0, th = 2.6, top = 3, seed = 1, sides
           const v = s * (face - flat / 2 - row * flat);
           let u = ua;
           while (u < ub - 0.4) {
-            const len = Math.min(ub - u, [2.0, 2.4, 2.8, 3.2][Math.floor(rand() * 4)] - row * 0.4 * rand());
+            const len = Math.min(ub - u, [2.0, 2.4, 2.8, 3.2][Math.floor(rand() * 4)] - row * 0.4);
             if (len < 0.5) break;
             if (N(u + len / 2) > k) {
               const p = P(u, v);
-              laid(bag, ROCK[Math.floor(rand() * 4)], len, p[0], yc, p[1], ux, uz, reach, r);
+              laid(bag, ROCK_S[Math.floor(rand() * 4)], len, p[0] + nx * (row === 0 ? rand() * rough * 0.5 : 0), yc, p[1] + nz * (row === 0 ? rand() * rough * 0.5 : 0), ux, uz, reach, r);
             }
             u += len + 0.02;
           }
