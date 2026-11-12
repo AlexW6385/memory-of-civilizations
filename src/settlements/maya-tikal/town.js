@@ -3,7 +3,7 @@
 // houses of poles, daub and palm thatch on low rubble platforms round it — with their people; the rites on the temples, a game in
 // the ball court, the palace rooms occupied.
 
-import { RADIUS, PLAZA, groups, CAUSEWAYS, CW_H, RESERVOIRS, resDist, T1, T2, T4, BALL, CA } from './layout.js';
+import { RADIUS, PLAZA, groups, CAUSEWAYS, CW_H, RESERVOIRS, resDist, T1, T2, T4, BALL, CA, NA } from './layout.js';
 import { ground } from './ground.js';
 import { SOUTH_RANGE, STEP_PALACE } from './plan.js';
 import { frame } from '../../styles/tikal/kit.js';
@@ -121,6 +121,59 @@ function people() {
   return [{ ...base('maya-tikal-people', L), style: 'life' }, base('maya-tikal-ball', B)];
 }
 
+/**
+ * The Great Plaza's day beyond the crowd (maya-tikal.md §5, deepening): a procession of nobles and priests in two files toward Temple I's stair
+ * with attendants, worshippers kneeling with offerings at the stair's foot and before the stelae, plasterers renewing the floor, a corner of
+ * the plaza where women sell cloth, cacao and pottery under awnings, turkeys and dogs about the plaza. None within 9 m of the arrival (-18, 28).
+ */
+function plazaLife() {
+  const rand = rng(8812), L = [], M = [], pick = (a) => a[Math.floor(rand() * a.length)], Y = 0.04, E = -Math.PI / 2, W = Math.PI / 2;
+  const far = (x, z) => Math.hypot(x + 18, z - 28) > 9, NAH = NA.H;
+  // the procession: two files east along the way to Temple I, a pace or two apart, the lord and his attendants in the middle
+  for (const sg of [-1, 1]) for (let k = 0; k < 6; k++) {
+    const x = 0 + k * 4.2 + (sg > 0 ? 1.2 : 0), z = sg * (3.2 + (k % 2) * 0.4);
+    L.push(k === 2 ? priest(rand, x, z, Y, E, { pose: 'stand' }) : person(rand, x, z, Y, E, { woman: k % 3 === 1, carry: k === 4 ? 'basket' : 'none', ...(k === 0 ? { over: 'cape', cloth2: 'cloth_blue' } : {}) }));
+  }
+  L.push(priest(rand, 12, 0.2, Y, E, { cloth2: 'cloth_red', over: 'cloak', pose: 'stand' }), person(rand, 9.2, -0.6, Y, E, { woman: false, carry: 'staff' }), person(rand, 9.2, 1.1, Y, E, { woman: false, carry: 'staff' }));
+  // at the foot of Temple I's stair: worshippers kneeling with offerings, copal burning
+  for (let k = 0; k < 7; k++) {
+    const z = -7 + k * 2.3 + (rand() - 0.5) * 0.6, x = 30.6 + rand() * 1.4;
+    if (Math.abs(z) < 1.5 && k !== 3) continue;
+    L.push(person(rand, x, z, Y, E, { woman: k % 2 === 0, pose: 'kneel', over: 'none' }));
+    if (k % 2 === 0) L.push({ t: k % 4 === 0 ? 'pot' : 'basket', ...(k % 4 === 0 ? { kind: 'dark_pot', n: 1 } : { n: 1, goods: 'paint_ochre' }), at: [x + 0.7, z], y: Y, seed: 80 + k });
+  }
+  // at the stelae: a woman with a basket of flowers and cacao, a man with a bowl of copal; and before the North Acropolis' stair
+  for (const [x, z, rot] of [[-14.8, -35.4, 0], [14.8, -35.4, 0], [-8.5, 20, W], [11.4, 20.5, E]]) { if (far(x, z)) L.push(person(rand, x, z, Y, rot, { woman: x < 0, pose: 'kneel', over: 'none' })); L.push({ t: 'pot', kind: 'water_pot', n: 2, at: [x + (rot ? 0.6 * Math.sign(rot) : 0), z + (rot ? 0 : 0.6)], y: Y, seed: Math.round(x * 3 + z) }); }
+  // the plasterers: lime plaster being laid on a worn patch of the plaza floor, baskets of lime, a man with a polishing stone
+  for (const [x, z] of [[14, -26], [-16, -22]]) {
+    L.push(person(rand, x, z, Y, rand() * 6.28, { woman: false, pose: 'kneel' }), person(rand, x + 1.3, z + 0.5, Y, rand() * 6.28, { woman: false, pose: 'kneel' }), person(rand, x - 1.2, z + 0.8, Y, 1.4, { woman: true, carry: 'basket', over: 'none' }));
+    L.push({ t: 'basket', n: 2, at: [x + 0.7, z + 1.5], y: Y, goods: 'lime_plaster', seed: Math.round(x) }, { t: 'pot', kind: 'water_pot', n: 2, at: [x - 0.8, z - 1.2], y: Y, seed: Math.round(z) });
+    M.push({ t: 'k_stains', rect: [x - 2.5, z - 2, x + 2.5, z + 2], y: Y + 0.012, n: 4, seed: Math.round(x + z) });
+  }
+  // a corner of the plaza by Temple II: women at their mats with cloth, cacao beans, pots, under awnings; buyers between
+  for (let i = 0; i < 4; i++) {
+    const x = -29.4 + (i % 2) * 5.2, z = 3 + Math.floor(i / 2) * 6.5 + (i === 3 ? 6 : 0);
+    if (!far(x, z)) continue;
+    M.push({ t: 'k_awning', at: [x, z], y: Y, w: 2.8, d: 2.4, rot: (rand() - 0.5) * 0.12 }, { t: 'petate', at: [x, z + 0.4], y: Y, w: 1.9, d: 1.2, rot: 0.1 * i });
+    L.push(person(rand, x, z - 0.55, Y, Math.PI, { woman: true, pose: rand() < 0.5 ? 'squat' : 'sit_ground', over: 'none' }));
+    for (let k = 0; k < 3; k++) L.push(k < 2 ? { t: 'basket', at: [x - 0.6 + k * 0.6, z + 0.45], y: Y + 0.015, seed: i * 7 + k, goods: pick(['paint_ochre', 'cloth_red', 'cloth_ochre', 'fresco_green']) } : { t: 'pot', kind: pick(['dark_pot', 'water_pot']), at: [x + 0.6, z + 0.45], y: Y + 0.015, seed: i * 7 + 5 });
+    L.push(person(rand, x + 0.4 + (rand() - 0.5), z + 1.8, Y, 0, { woman: rand() < 0.6, carry: pick(['basket', 'pot', 'none']), pose: 'stand' }));
+  }
+  // the Central Acropolis: guards with spears at the head of its stair, in the first court weavers at the backstrap loom, a scribe and his
+  // attendants, a cook; on the North Acropolis' terrace the priests' attendants by the lower ranges
+  const CH = CA.H;
+  for (const x of [-19.5, 1.5]) L.push(person(rand, x, 47.9, CH, 0, { woman: false, carry: 'staff', cloth2: 'cloth_red', over: 'cape' }));
+  for (const [x, z, rot] of [[-16, 71, 0.4], [-12.8, 73.6, -0.5], [-18.2, 75, 1.2]]) L.push(person(rand, x, z, CH, rot, { woman: true, pose: 'sit_ground', over: 'none' }));
+  L.push({ t: 'basket', n: 2, at: [-14.6, 72.2], y: CH, goods: 'cloth_white', seed: 5 });
+  L.push(priest(rand, -10, 84, CH, 2.6, { pose: 'talk' }), person(rand, -8.8, 85.4, CH, 2.6 - Math.PI, { woman: false, pose: 'stand' }), person(rand, -14, 90, CH, 0, { woman: false, pose: 'sit_ground', hat: 'none' }));
+  L.push(person(rand, -39, 70, CH, E, { woman: true, pose: 'kneel', over: 'none' }), { t: 'pot', kind: 'dark_pot', n: 2, at: [-37.8, 70.6], y: CH, seed: 9 });
+  for (const [x, z, rot] of [[-18, -70, E], [-18, -82, E], [18, -70, W], [18, -82, W]]) L.push(priest(rand, x, z, NAH, rot, { pose: 'stand' }));
+  // dogs and turkeys: about the plaza's edges and the stelae
+  for (const [x, z] of [[-26, -18], [24, 28], [-4, -30], [20, -20], [-24, 8], [4, 24], [28, 18]]) if (far(x, z)) L.push({ t: 'chickens', kind: 'turkey', n: 3, at: [x, z], y: Y, rot: rand() * 6, seed: Math.round(x + z * 3) });
+  for (const [x, z] of [[-31, 26], [10, -28], [26, 22], [-20, -12]]) if (far(x, z)) L.push({ t: 'animal', kind: 'dog', at: [x, z], y: Y, rot: rand() * 6.28, seed: Math.round(x * 2 + z) });
+  return [{ ...base('maya-tikal-plaza-life', L), style: 'life' }, base('maya-tikal-plaza-dress', M)];
+}
+
 /** The life at the reservoirs: women with jars and washing at the rim, a fisher in a dugout canoe, ducks. */
 function reservoirLife() {
   const rand = rng(2210), L = [], out = [];
@@ -167,7 +220,7 @@ export async function town() {
     const [cx, cz] = R.c, r = Math.max(R.a, R.b) + 2;
     plans.push({ ...base(`maya-tikal-water-${R.id}`, [{ t: 'water_cells', rect: [cx - r, cz - r, cx + r, cz + r], y: R.water, cell: 1, inside: (x, z) => resDist(R, x, z) < -0.3 && ground.height(x, z) < R.water + 0.3 }]), style: 'ming' });
   }
-  plans.push(...market(), ...people(), ...reservoirLife());
+  plans.push(...market(), ...people(), ...plazaLife(), ...reservoirLife());
   void PLAZA;
   return plans;
 }
