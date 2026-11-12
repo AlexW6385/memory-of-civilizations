@@ -1,6 +1,6 @@
 // Walls and gates of Pagan (docs/settlements/bagan.md §2): the brick city wall with its parapet and the Tharabar Gate, the temple precincts' low walls with their gates.
 import { box } from '../../core/geom.js';
-import { Fr, archWall, vault, miniStupa } from './kit.js';
+import { Fr, archWall, vault, miniStupa, rng } from './kit.js';
 
 /** bgn_wall: { a, b, th, h, mat, merlon (true: a crenellated top), gaps: [{ at, w }] } — axis-aligned, a brick wall; at the gaps nothing (gates stand there). */
 export function wall(el, ctx) {
@@ -13,6 +13,21 @@ export function wall(el, ctx) {
     const r = R(s0, s1);
     bag.add(mat, box(r[0], -0.3, r[1], r[2], h, r[3])); col.rect(r, -0.3, h);
     bag.add('limewash_white', box(r[0] - (alongX ? 0 : 0.12), h, r[1] - (alongX ? 0.12 : 0), r[2] + (alongX ? 0 : 0.12), h + 0.28, r[3] + (alongX ? 0.12 : 0)));
+    // the weathering: a damp band at the foot (the rains' stain and moss), patches of the old limewash flaking from the brick on both faces
+    {
+      const rr = rng((Math.round(ax * 7 + az * 13 + s0 * 3) | 0) + 11), L2 = s1 - s0, hh = Math.min(h, 7);
+      for (const o of [-1, 1]) {
+        const fo = o * th / 2, e = 0.04;
+        const slab = (a0, a1, y0, y1, mat) => bag.add(mat, alongX
+          ? box(Math.min(ax + sg * a0, ax + sg * a1), y0, az + fo + (o > 0 ? 0 : -e), Math.max(ax + sg * a0, ax + sg * a1), y1, az + fo + (o > 0 ? e : 0))
+          : box(ax + fo + (o > 0 ? 0 : -e), y0, Math.min(az + sg * a0, az + sg * a1), ax + fo + (o > 0 ? e : 0), y1, Math.max(az + sg * a0, az + sg * a1)));
+        if (L2 > 1) slab(s0, s1, -0.1, 0.5, 'plaster_damp');
+        for (let q = s0 + 0.5; q < s1 - 2.2; q += 3.4) {
+          const w2 = 0.9 + rr() * 1.4, y0 = 0.7 + rr() * (hh * 0.45), y1 = y0 + 0.5 + rr() * Math.min(1.8, hh * 0.35);
+          if (rr() < 0.7) slab(q + rr() * 0.5, q + rr() * 0.5 + w2, y0, Math.min(y1, h - 0.3), rr() < 0.6 ? 'stucco_cream' : 'plaster_streak');
+        }
+      }
+    }
     if (el.merlon) {
       // the crenels: a merlon every 1.6 m, along both edges of the top
       for (let s = s0 + 0.8; s < s1 - 0.4; s += 1.6) for (const o of [-1, 1]) {

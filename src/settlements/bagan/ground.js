@@ -14,7 +14,7 @@ function cover(x, z, h) {
   if (d < 2) { c.sand = 0.8; c.soil = 0.2; c.dry = 0.3; return c; }
   if (inTank(x, z, 2)) { c.soil = 0.8; c.sand = 0.1; c.grass = 0.1; return c; }
   if (onRoad(x, z, 0.4)) { c.road = 0.9; c.sand = 0.5; c.soil = 0.3; return c; }
-  if (inPrec(x, z)) { c.road = 0.55; c.sand = 0.6; c.soil = 0.2; return c; }
+  if (inPrec(x, z)) { c.road = 0.75; c.sand = 0.6; c.soil = 0.2; return c; }
   if (inLot(x, z, 0.5)) { c.road = 0.25; c.sand = 0.5; c.soil = 0.4; return c; }
   c.grass = 0.08 + 0.1 * hash2(x * 0.05, z * 0.05); c.sand = 0.5 + 0.2 * hash2(x * 0.09, z * 0.09);
   c.dry = 0.9;
@@ -30,17 +30,19 @@ function planting(x, z) {
   if (onRoad(x, z, 0.5) || inLot(x, z, 0.4) || inPlainTemple(x, z, 1.2)) return null;
   if (inRect(PRECINCT, x, z, 0)) {
     if (Math.hypot(x - 105, z) < 52) return null;
-    return { banyan: 0.012, neem: 0.05, date_palm: 0.05, grass_dry: 6 };
+    return { banyan: 0.012, neem: 0.05, date_palm: 0.05, fig: 0.012, oleander: 0.03, grass_dry: 6 };
   }
   if (inRect(SHWE_PREC, x, z, 0) || inRect(SULA_PREC, x, z, 0)) return Math.hypot(x - 140, z + 190) < 40 || Math.hypot(x - 155, z - 198) < 34 ? null : { neem: 0.04, date_palm: 0.05, grass_dry: 5 };
   if (inRect(THAT_ENC, x, z, 0) || inRect(PALACE, x, z, 0)) return Math.hypot(x + 198, z - 82) < 40 ? null : { neem: 0.05, date_palm: 0.06, grass_dry: 5 };
+  if (inLot(x, z, 7)) return { date_palm: 0.14, neem: 0.07, bamboo: 0.09, jujube: 0.05, fig: 0.012, grass_dry: 5 };     // the yards and village edges: palmyras, neem, bamboo clumps, jujube
   if (inRect(CITY, x, z, 0)) return { date_palm: 0.08, neem: 0.05, grass_dry: 6 };
+  if (x - bankX(z) < 22) return { date_palm: 0.05, tamarisk: 0.5, acacia: 0.06, grass_dry: 10 };       // the bank's scrub
   const n = hash2(x * 0.02, z * 0.02);
   return n < 0.4 ? { date_palm: 0.07, acacia: 0.1, neem: 0.03, grass_dry: 14 } : { acacia: 0.12, neem: 0.025, teak: 0.012, grass_dry: 10 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { date_palm: 0.08, neem: 0.05, acacia: 0.12, teak: 0.012, banyan: 0.012, tamarisk: 0.4 },
+  maxDensity: { date_palm: 0.14, neem: 0.07, acacia: 0.12, teak: 0.012, banyan: 0.012, tamarisk: 0.5, bamboo: 0.09, jujube: 0.05, fig: 0.012, oleander: 0.03 },
   climate: {
     sun: { az: 140, el: 58, color: [1.0, 0.94, 0.82], intensity: 3.5, lat: 21.2, dec: 12, hour: 10 },
     sky: { turbidity: 5.2, rayleigh: 1.3, mie: 0.008, mieG: 0.8, zenith: [0.14, 0.21, 0.36], horizon: [0.72, 0.66, 0.56] },

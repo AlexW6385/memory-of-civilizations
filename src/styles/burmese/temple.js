@@ -3,6 +3,7 @@
 // the hollow multi-storey temple of the Thatbyinnyu and Sulamani type, and the small temples of the plain.
 import { box, lathe } from '../../core/geom.js';
 import { rng, Fr, sideFrame, archWall, vault, miniStupa, hti } from './kit.js';
+import { offering } from './detail.js';
 
 const WHITE = 'limewash_white', TRIM = 'stucco_cream', BRICK = 'brick_baked', GLAZE = 'glaze_green';
 const SIDES = ['n', 'e', 's', 'w'];
@@ -126,7 +127,22 @@ export function ananda(el, ctx) {
       const a = sg < 0 ? [-13.4, -2.6] : [2.6, 13.4];
       F.b('sandstone_relief', a[0], f + 1.0, HW - 0.06, a[1], f + 3.3, HW, false);
       F.b('sandstone_relief', a[0], f + 1.0, HI, a[1], f + 3.3, HI + 0.06, false);
+      // the murals above the reliefs: panels of painted plaster in gilt frames (the Jataka scenes), a band of glaze between
+      const pm = ['paint_ochre', 'paint_blue', 'fresco_green', 'stucco_ochre', 'paint_ochre'];
+      for (let q = 0; q < 4; q++) {
+        const ua = a[0] + (q * (a[1] - a[0])) / 4 + 0.15, ub = a[0] + ((q + 1) * (a[1] - a[0])) / 4 - 0.15;
+        const pn = pm[(q + (sg < 0 ? 0 : 2)) % 5];
+        F.b('gilt_bronze', ua - 0.06, f + 3.55, HW - 0.06, ub + 0.06, f + 5.45, HW, false);
+        F.b(pn, ua, f + 3.62, HW - 0.075, ub, f + 5.38, HW - 0.06, false);
+        F.b('gilt_bronze', ua - 0.06, f + 3.55, HI, ub + 0.06, f + 5.45, HI + 0.06, false);
+        F.b(pn, ua, f + 3.62, HI + 0.06, ub, f + 5.38, HI + 0.075, false);
+      }
+      F.b(GLAZE, a[0], f + 3.3, HW - 0.07, a[1], f + 3.5, HW, false); F.b(GLAZE, a[0], f + 3.3, HI, a[1], f + 3.5, HI + 0.07, false);
     }
+    // before each standing Buddha: offering tables beside the passage, lamp pillars, and the monks' mats on the passage floor
+    offering(F, -1.7, f, 17.6, 1.1); offering(F, 1.7, f, 17.6, 1.1);
+    F.b('reed_mat', -1.0, f, 14.2, 1.0, f + 0.03, 15.4, false);
+
   }
   // the Buddhas: Kakusandha north, Konagamana east, Kassapa south, Gautama west
   for (const s of SIDES) { buddha(S[s], 0, 11.5, 9.5, 2.4); }
