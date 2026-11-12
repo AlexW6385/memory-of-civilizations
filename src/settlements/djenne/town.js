@@ -89,6 +89,24 @@ function market() {
     k++;
   }
   for (let k = 0; k < 7; k++) { const at = [48 + rand() * 62, MARKET[1] + 6 + rand() * 80]; if (!inView(at[0], at[1]) && !E.some((e) => e.c && Math.hypot(e.c[0] - at[0], e.c[1] - at[1]) < 2)) P.push({ t: 'chickens', at, y: 0, rot: rand() * 6, n: 3 + Math.floor(rand() * 3), kind: 'hen', seed: k }); }
+  // children running and playing between the aisles (boys in a short tunic, a girl with a small pot), cats under the stalls, dogs at the edge
+  for (let k = 0, n = 0; n < 16 && k < 200; k++) {
+    const x = pick([45, 52, 66, 80, 94, 101]) + (rand() - 0.5) * 4, z = MARKET[1] + 6 + rand() * (MARKET[3] - MARKET[1] - 12), at = [x, z];
+    if (inView(x, z, 2.5) || P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 1.4)) continue;
+    n++;
+    P.push({ t: 'figure', at, y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), dress: n % 3 ? 'tunic' : 'wrap', legs: 'bare', cloth: pick(W), cloth2: pick(W), skin: 'skin_dark', hat: 'none', feet: 'bare', h: 0.6 + rand() * 0.14, pose: rand() < 0.4 ? 'squat' : 'stand', ...(n % 3 === 0 ? { carry: 'pot' } : {}) });
+  }
+  for (let k = 0, n = 0; n < 9 && k < 100; k++) { const at = [pick([52, 66, 80, 94]) + 1.0 + (rand() - 0.5), MARKET[1] + 8 + rand() * 80]; if (inView(at[0], at[1], 2)) continue; n++; P.push({ t: 'animal', kind: n % 4 === 0 ? 'dog' : 'cat', at, y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e6) }); }
+  // porters crossing the square with sacks and baskets on the head or the shoulder, a salt bearer with the slabs (the trade of the Sahara)
+  for (let k = 0, n = 0; n < 12 && k < 200; k++) {
+    const x = pick([45, 59, 73, 87, 101]) + (rand() - 0.5) * 1.8, z = MARKET[1] + 6 + rand() * (MARKET[3] - MARKET[1] - 12), at = [x, z];
+    if (inView(x, z, 2.5) || P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 1.3)) continue;
+    n++;
+    (n % 2 ? man : woman)(at, rand() < 0.5 ? 0 : Math.PI, { carry: n % 3 === 0 ? 'sack' : n % 3 === 1 ? 'basket' : 'pot', pose: 'stand' });
+  }
+  // the sacks of grain and salt stacked at the market's edge ready for the boats, old men resting in the wall's shade on mats
+  for (let z = MARKET[1] + 10; z < MARKET[3] - 8; z += 14 + rand() * 6) if (!inView(MARKET[2] - 1.5, z, 3)) P.push({ t: 'sacks', at: [MARKET[2] - 1.5, z], y: 0, rot: rand() * 6, n: 5, seed: Math.floor(z) });
+  for (const z of [-30, -14, 4, 22, 36]) { const at = [MARKET[0] - 1.2, z]; if (inView(at[0], at[1], 2)) continue; E.push({ t: 'market_mat', at, rot: -Math.PI / 2, goods: 'mats', seed: Math.floor(z + 50) }); man([at[0] - 0.6, z], Math.PI / 2, { pose: 'sit_ground', hat: 'turban' }); }
   return { E, P };
 }
 
