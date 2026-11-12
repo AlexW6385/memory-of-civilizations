@@ -1,7 +1,7 @@
 // The gorge floor's life and the workers' village (docs/settlements/ajanta.md §6, §7): mud-walled huts with thatch
 // round a yard with its well on the east bank, a pilgrims' shelter at the stair's foot, the monks, painters, masons and
 // worshippers at the caves, goats, zebu and fowl.
-import { RADIUS, EAST, XF, ZW, FLOOR, VILLAGE, WELL, PEN, THRESH, VSHRINE, GRANARIES, GHATS, C1, C19, C12, PATHS, rng, inRect, riverX } from './layout.js';
+import { RADIUS, RIVER, EAST, XF, ZW, FLOOR, VILLAGE, WELL, PEN, THRESH, VSHRINE, GRANARIES, GHATS, C1, C19, C12, PATHS, rng, inRect, riverX } from './layout.js';
 import '../../styles/ajanta/index.js';
 
 const base = (id, style, elements, b = 0) => ({ id, style, origin: [0, 0], base: b, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-20, 14], facing: 'w' } });
@@ -113,6 +113,32 @@ export async function town() {
   worker([riverX(34) + 6.2, 39], 0, -Math.PI / 2, { pose: 'stand', carry: 'staff' });
   // pigeons on the ledge before the painted caves
   T.push({ t: 'chickens', kind: 'pigeon', at: [XF + 3.0, -12], y: FLOOR[1], seed: 5 }); T.push({ t: 'chickens', kind: 'pigeon', at: [XF + 3.0, 28], y: FLOOR[1], seed: 6 });
+  // ── the arrival's view (the east bank's path at (-21.5, -4), looking west-north-west across the river at the cave row)
+  // the river's foreground: a herd boy and two buffalo wallowing in the shallows, a reed boat drawn up on the bank, a fisherman
+  T.push({ t: 'animal', kind: 'buffalo', at: [riverX(-9) + 2.4, -9], y: -0.3, rot: 1.9, seed: 81 });
+  T.push({ t: 'animal', kind: 'buffalo', at: [riverX(-12) + 3.1, -12.5], y: -0.3, rot: 1.2, seed: 82, graze: true });
+  worker([riverX(-9) + 7.4, -9.5], 0, -1.9, { pose: 'stand', carry: 'staff', cloth: 'cloth_ochre' });
+  T.push({ t: 'boat', kind: 'reed', at: [riverX(-17) + 4.4, -17], y: RIVER.water - 0.12, rot: 0.25, seed: 83 });
+  worker([riverX(-17) + 8.0, -15.8], 0, -1.6, { pose: 'sit_ground', cloth: 'cloth_white' });
+  T.push({ t: 'basket', at: [riverX(-17) + 8.6, -17.2], y: 0, rot: 0.4, seed: 84 });
+  // the east bank's path: a family going up to the ford with a bundle, a woman with water, a pair of monks with bowls, a boy with goats
+  monk([riverX(2) + 8.7, 3], 0, 0, { pose: 'stand', carry: 'staff' }); monk([riverX(2) + 9.9, 5.2], 0, 0, { pose: 'stand' });
+  lay([riverX(8) + 8.4, 9.5], 0, 0.2, { pose: 'stand', carry: 'basket' }); woman([riverX(8) + 9.4, 10.6], 0, 0.1, { pose: 'stand', carry: 'child' });
+  woman([riverX(-25) + 8.8, -25.5], 0, Math.PI, { pose: 'stand', carry: 'pot', arms: 'head' });
+  worker([riverX(-30) + 12.5, -30], 0, 2.4, { pose: 'stand', carry: 'staff' });
+  for (let k = 0; k < 4; k++) T.push({ t: 'animal', kind: 'goat', at: [riverX(-30) + 10.5 + (k % 2) * 1.5, -33 + k * 1.2], y: 0, rot: 1.5 + k, seed: 85 + k, graze: k % 2 === 0 });
+  // across the river: the washing place's women are GHATS' own; the pilgrims climbing the stair to the ledge (the ramp's height under each)
+  { const sx = XF + 7.2; for (const [z, k] of [[-55.2, 0], [-51.8, 1], [-47.6, 2], [-44.2, 3]]) { const y = (z + 57) / 15 * 9; (k % 2 ? lay : monk)([sx, z], y, 0, { pose: 'stand', carry: k === 1 ? 'basket' : k === 3 ? 'staff' : 'none' }); } }
+  // before Cave 1's porch: the faithful coming with offerings, two lay friends in talk, a flute and a lute at the ledge's edge, a monk at his meditation in the porch, three standing in its pillars
+  lay([-56.6, -33.2], y1, -Math.PI / 2, { pose: 'stand', carry: 'basket' }); woman([-56.3, -31.4], y1, -Math.PI / 2, { pose: 'stand', carry: 'pot', arms: 'head' }); monk([-57.0, -29.4], y1, -Math.PI / 2, { pose: 'stand', carry: 'staff' });
+  lay([-57.0, -20.4], y1, Math.PI / 2 + 0.3, { pose: 'talk' }); monk([-58.2, -19.2], y1, -Math.PI / 2 - 0.3, { pose: 'talk' });
+  monk([-56.7, -12.6], y1, -Math.PI / 2, { pose: 'cross', carry: 'flute' }); lay([-56.1, -14.1], y1, -Math.PI / 2, { pose: 'cross', carry: 'lute' });
+  monk([-62.6, -23.9], y1, Math.PI / 2, { pose: 'cross', arms: 'pray' });
+  for (const [z, rot] of [[-33.6, 0.4], [-29.6, -0.3], [-21.8, 0.2]]) lay([-62.2, z], y1, Math.PI / 2 + rot, { pose: 'stand' });
+  monk([-62.0, -17.8], y1, Math.PI / 2, { pose: 'stand', carry: 'staff' });
+  // before Cave 19: a pair of monks come from the cell, pilgrims at the chaitya's porch, a woman with a lamp-oil jar
+  monk([-56.4, 17.0], y1, Math.PI, { pose: 'stand' }); lay([-57.0, 19.2], y1, -Math.PI / 2, { pose: 'talk' }); monk([-57.6, 20.4], y1, -Math.PI / 2 + 0.4, { pose: 'talk' });
+  woman([-57.3, 30.0], y1, Math.PI / 2, { pose: 'stand', carry: 'pot', arms: 'head' }); lay([-58.9, 27.0], y1, Math.PI / 2, { pose: 'kneel', arms: 'pray' }); lay([-58.4, 21.6], y1, Math.PI / 2, { pose: 'kneel', arms: 'pray' });
   T = V;
   // the village: the well and its women, hearths, grain, wood, fowl, goats and a zebu with a cart
   const [wx, wz] = WELL;

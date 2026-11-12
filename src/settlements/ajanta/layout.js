@@ -13,6 +13,7 @@ export const ZOUT = ZW + ROCK;                       // the wings' outer sides
 export const FLOOR = [0.0, 9.0, 20.0];               // gorge floor, the ledge, the unreachable upper tier
 export const LEDGE = { x0: XF, x1: XF + 6, z0: -57, z1: 57 };
 export const STAIR = { x0: XF + 6, x1: XF + 8.4, z0: -57, z1: -42 };   // rises to the south from the path to the ledge
+export const STAIR2 = { x0: XF + 6, x1: XF + 8.4, z0: 42, z1: 57 };    // the south stair: rises to the north from the path to the ledge
 export const PLATEAU = 30;
 export const EAST = 8;                               // the east bank's plateau, over the gorge floor
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
@@ -58,6 +59,11 @@ export const PATHS = [
   [[-48, -44], [-48, -58]],
   [[-48, 14], [-15, 14], [20, 20], [40, 30]],
 ];
+/** The east bank's path from the ford's far end north along the Waghora (8.6 m east of its axis) to the north gap: the arrival stands on it. */
+export const EASTPATH = [[-15, 14], ...[6, -4, -14, -24, -34, -43].map((z) => [Math.round((riverX(z) + 8.6) * 10) / 10, z]), [-3, -52]];
+PATHS.push(EASTPATH);
+// the second stair, at the south end of the ledge, rising north from the path's bend to the ledge
+PATHS.push([[-48, 40], [-48, 58], [-52.8, 58]]);
 export const PATH_W = 2.2;
 export const VILLAGE = [XF + 98, 4, XF + 160, 84];   // x0 z0 x1 z1 (the huts east of the river, south of the ford)
 export const WELL = [XF + 120, 30];
@@ -65,7 +71,7 @@ export const PEN = [XF + 135, 36, XF + 144, 43];       // the cattle pen, its ga
 export const THRESH = [XF + 146, 28];                   // the threshing floor
 export const VSHRINE = [XF + 106, 23];                  // the village deity's platform
 export const GRANARIES = [[XF + 110, 45], [XF + 112.5, 46], [XF + 148, 47]];
-export const GHATS = [-30, 34];                         // the washing places on the river's west bank (z)
+export const GHATS = [-17, 34];                         // the washing places on the river's west bank (z): the first in the view from the arrival
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export function onPath(x, z, m = 0) {
   for (const P of PATHS) for (let i = 0; i < P.length - 1; i++) {

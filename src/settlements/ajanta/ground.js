@@ -38,13 +38,18 @@ const fromWater = (x, z) => Math.min(Math.abs(x - riverX(z)), Math.hypot(x - FAL
 function planting(x, z) {
   const r = Math.hypot(x, z), az = Math.abs(z);
   if (r > RADIUS - 6 || inRock(x, z, 2) || onPath(x, z, 1) || inRiver(x, z, 1) || inPool(x, z, 1.5)) return null;
-  if (x < XF + 14 && az < ZOUT) return null;                         // the foot of the cliff
+  if (x < XF + 14 && x > XF - ROCK - 4 && az < ZOUT) return null;     // the foot of the cliff and the rock's back (the plateau beyond is forest)
   if (x < WX1 + 14 && az >= 56 && az < ZOUT + 12 && x > XF - 6) return null;                // the wings' feet
+  // the east bank beside the arrival's path: neem and jujube, a few date palms and tamarind-like figs in the dry grass, framing the view across the river (the lens's own corridor kept open)
+  { const re = x - riverX(z);
+    if (re > 4.5 && re < 17 && x < 6 && z > -50 && z < 34 && !(Math.abs(x + 21.5) < 9 && Math.abs(z + 4) < 11)) return { neem: 0.34, jujube: 0.16, date_palm: 0.1, fig: 0.05, grass_dry: 5 }; }
   if (inRect(VILLAGE, x, z, 1)) return { neem: 0.14, jujube: 0.05, date_palm: 0.05, banyan: 0.006, grass_dry: 4 };
   // the millet fields of the village's east and south edge, in plots with fallow between
   if (inRect([VILLAGE[0] - 4, VILLAGE[1] - 14, VILLAGE[2] + 26, VILLAGE[3] + 20], x, z, 0) && r < RADIUS - 24) { const plot = (Math.floor(x / 9) + Math.floor(z / 11) * 3) % 4; return plot === 3 ? { grass_dry: 6, acacia: 0.02 } : { maize: 30, grass_dry: 3 }; }
   // oleander clumps at the pilgrims' shelter and the washing places
   if (Math.abs(x - riverX(z)) < 12 && Math.abs(Math.abs(z) - 32) < 8) return { oleander: 0.12, grass: 5, reeds: 0.1 };
+  // the plateau behind the cliff: dry teak forest, thicker along the rim so that crowns stand over the cliff's lip
+  if (x < XF - ROCK - 4 && x > XF - ROCK - 40 && az < ZOUT) return { teak: 0.2, neem: 0.05, acacia: 0.04, banyan: 0.01, grass_dry: 5 };
   if (x < XF - ROCK - 4 || (az > ZOUT + 4 && x < WX1)) return { teak: 0.08, neem: 0.02, acacia: 0.03, grass_dry: 5 };
   const dr = Math.abs(x - riverX(z));
   if (dr < 16 && az > 48) return { bamboo: 0.08, fig: 0.03, banyan: 0.01, grass: 6 };
@@ -54,7 +59,7 @@ function planting(x, z) {
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { maize: 40, jujube: 0.08, oleander: 0.14, teak: 0.16, neem: 0.12, acacia: 0.05, bamboo: 0.12, fig: 0.04, banyan: 0.012, date_palm: 0.06, reeds: 0.4 },
+  maxDensity: { maize: 40, jujube: 0.2, oleander: 0.14, teak: 0.24, neem: 0.4, acacia: 0.05, bamboo: 0.12, fig: 0.06, banyan: 0.012, date_palm: 0.12, reeds: 0.4 },
   climate: {
     sun: { az: 150, el: 62, color: [1.0, 0.92, 0.8], intensity: 3.7, lat: 20.5, dec: 12, hour: 10 },
     sky: { turbidity: 4.0, rayleigh: 1.2, mie: 0.006, mieG: 0.8, zenith: [0.1, 0.18, 0.38], horizon: [0.64, 0.64, 0.6] },
