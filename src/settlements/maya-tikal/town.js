@@ -13,10 +13,12 @@ const base = (id, elements, style = 'tikal') => ({ id, style, origin: [0, 0], ba
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (dx, dz) => Math.atan2(-dx, -dz);                       // a figure faces −z when rot = 0
 
+/** The groups beyond 150 m of the plaza are built lighter (no stains, chultun, damp patches or strings on the houses): the visitor sees them from afar. */
+const outer = (g) => Math.hypot((g.rect[0] + g.rect[2]) / 2, (g.rect[1] + g.rect[3]) / 2) > 150;
 function groupElements(g) {
-  const [x0, z0, x1, z1] = g.rect, E = [];
+  const [x0, z0, x1, z1] = g.rect, E = [], lite = outer(g);
   E.push({ t: 'lane', rect: [x0, z0, x1, z1], y: 0.1, mat: 'lime_plaster' });
-  for (const h of g.houses) E.push({ t: 'k_house', c: h.c, w: h.w, d: h.d, door: h.door, seed: h.seed, kitchen: h.kitchen });
+  for (const h of g.houses) E.push({ t: 'k_house', c: h.c, w: h.w, d: h.d, door: h.door, seed: h.seed, kitchen: h.kitchen, lite });
   // the shrine on the east side: a platform with a small stepped altar on it
   const [sx, sz] = g.shrine;
   E.push({ t: 'block', rect: [sx - 2.2, sz - 2.2, sx + 2.2, sz + 2.2], y0: 0, y1: 1.3, batter: [1.4, 1.4, 1.4, 1.4], mat: 'lime_plaster', collide: false, walk: true });
@@ -25,8 +27,7 @@ function groupElements(g) {
   const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
   E.push({ t: 'k_shed', c: [x1 - 4.4, z0 + 3.4], w: 3.4, d: 2.8, seed: g.seed });
   E.push({ t: 'k_granary', c: [x1 - 3.6, z1 - 3.4], seed: g.seed + 1 });
-  E.push({ t: 'k_chultun', at: [cx + 2, cz - 3.2], y: 0.1, seed: g.seed + 2 });
-  E.push({ t: 'k_stains', rect: [x0 + 7, z0 + 6, x1 - 7, z1 - 6], y: 0.11, n: 3, seed: g.seed + 3 });
+  if (!lite) { E.push({ t: 'k_chultun', at: [cx + 2, cz - 3.2], y: 0.1, seed: g.seed + 2 }); E.push({ t: 'k_stains', rect: [x0 + 7, z0 + 6, x1 - 7, z1 - 6], y: 0.11, n: 3, seed: g.seed + 3 }); }
   // the low wall of dry stone round the group, a gate in the middle of the east side and the corners left open
   const r0 = x0 - 0.6, r1 = z0 - 0.6, r2 = x1 + 0.6, r3 = z1 + 0.6;
   for (const pts of [[[r0 + 3, r1], [r2, r1], [r2, cz - 1.6]], [[r2, cz + 1.6], [r2, r3], [r0 + 3, r3]], [[r0, r1 + 3], [r0, cz - 1.6]], [[r0, cz + 1.6], [r0, r3 - 3]]]) E.push({ t: 'albarrada', pts, h: 0.7 });
@@ -46,14 +47,14 @@ function groupLife(g, rand, L, P) {
     if (rand() < 0.4) L.push({ t: 'animal', kind: 'dog', at: [px + s[0] * 1.2 + (rand() - 0.5), pz + s[1] * 1.2 + (rand() - 0.5)], y: 0.1, rot: rand() * 6.28, seed: h.seed });
     else if (rand() < 0.4) L.push({ t: 'chickens', kind: 'turkey', n: 2 + Math.floor(rand() * 3), at: [px + s[0] * 2 + (rand() - 0.5) * 2, pz + s[1] * 2 + (rand() - 0.5) * 2], y: 0.1, seed: h.seed });
     // a person in the patio, by trade
-    if (rand() < 0.45) {
+    if (rand() < 0.45 && !outer(g)) {
       const q = [h.c[0] + s[0] * (hw + 1.8 + rand()) , h.c[1] + s[1] * (hd + 1.8 + rand())];
       P.push(person(rand, q[0], q[1], 0.1, face(-s[0], -s[1]), rand() < 0.65 ? { woman: true, pose: rand() < 0.4 ? 'kneel' : 'stand', over: 'none' } : {}));
     }
   }
   // the cook at the metate under her shed, firewood stacked at its post, jars in the court
   { const sx = g.rect[2] - 4.4, sz = g.rect[1] + 3.4;
-    if (rand() < 0.7) P.push(person(rand, sx + 0.7, sz + 1.05, 0.2, 0, { woman: true, pose: 'kneel', over: 'none' }));
+    if (rand() < 0.7 && !outer(g)) P.push(person(rand, sx + 0.7, sz + 1.05, 0.2, 0, { woman: true, pose: 'kneel', over: 'none' }));
     L.push({ t: 'firewood', at: [sx - 2.4, sz + 1.0], y: 0.1, rot: 0, len: 1.1, seed: g.seed });
     L.push({ t: 'pot', kind: 'water_pot', n: 2, at: [g.rect[2] - 1.4, sz + 2.4], y: 0.1, seed: g.seed }); }
   void x0; void z0;
@@ -99,7 +100,7 @@ function people() {
   for (let k = 0; k < 34; k++) {
     const x = -32 + rand() * 64, z = -34 + rand() * 68;
     if ((Math.abs(x) > 26 && Math.abs(z) < 9) || (Math.abs(x) < 7 && Math.abs(z) > 30) || Math.abs(z + 37.5) < 3 || [[-10, -20], [10, -20], [-10, 20], [10, 20]].some(([a, b]) => Math.hypot(a - x, b - z) < 2.5)) continue;
-    if (taken.some(([a, b]) => Math.hypot(a - x, b - z) < 1.6)) continue;
+    if (taken.some(([a, b]) => Math.hypot(a - x, b - z) < 1.6) || Math.hypot(x + 18, z - 28) < 9) continue;   // (nobody in the first metres of the arrival's view, (-18, 28))
     taken.push([x, z]);
     const r = rand();
     if (r < 0.28) L.push(person(rand, x, z, 0.04, rand() * 6.28, { woman: true, carry: pick(['pot', 'basket']) }));

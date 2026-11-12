@@ -17,7 +17,8 @@ export const PARAMS = {
 /** The ways: the plaza (busiest), the market, the causeways, and the lanes in the gaps between the groups outside the core. */
 export function walkways() {
   const rects = [], links = [], clip = RADIUS - 14;
-  rects.push({ r: [PLAZA[0] + 2, PLAZA[1] + 3, PLAZA[2] - 2, PLAZA[3] - 3], weight: 2.4, market: 2.0, kind: 'street' });
+  // the plaza, but for the corner where the visitor arrives (-18, 28): nobody walks within ~9 m of it
+  for (const r of [[PLAZA[0] + 2, PLAZA[1] + 3, PLAZA[2] - 2, 19], [-8, 19, PLAZA[2] - 2, PLAZA[3] - 3], [PLAZA[0] + 2, 19, -28, PLAZA[3] - 3], [-28, 37, -8, PLAZA[3] - 3]]) rects.push({ r, weight: 2.4, market: 2.0, kind: 'street' });
   rects.push({ r: [86, 24, 138, 62], weight: 1.8, market: 2.6, kind: 'street' });
   rects.push({ r: [98, -34, 102, 26], weight: 0.8, market: 0.8, kind: 'street' });
   // the causeways: straight legs as rects, diagonals in overlapping squares
