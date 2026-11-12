@@ -500,6 +500,16 @@ function ringWall(el, { bag, col }) {
     quad4(t, at(i, half + lean, yb), at(i, -half, yb), at(i, -half, yt), at(i, half, yt), d);
   }
   bag.add(el.mat || 'granite_rough', fromTriangles(t));
+  // lichen and damp on the terrace walls' faces (as on the houses'): crusts 0.15–0.5 m across, more toward the head
+  { const rand = rng(Math.round(pts[0][0] * 31 + pts[0][1] * 17 + n)), H = yt - yb, tilt = Math.atan2(lean, H);
+    for (let i = 0; i + 1 < n; i++) {
+      const L = Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]), m = Math.floor(L * H * 0.022 + rand());
+      for (let q = 0; q < m; q++) {
+        const f = rand(), v = H * (0.2 + 0.78 * Math.sqrt(rand())), kk = half + lean * (1 - v / H) + 0.004, nx = nor[i][0] + (nor[i + 1][0] - nor[i][0]) * f, nz = nor[i][1] + (nor[i + 1][1] - nor[i][1]) * f;
+        const px = pts[i][0] + (pts[i + 1][0] - pts[i][0]) * f + nx * kk, pz = pts[i][1] + (pts[i + 1][1] - pts[i][1]) * f + nz * kk, mm = rand(), size = 0.15 + rand() * 0.35;
+        patch(bag, mm < 0.5 ? 'plaster_damp' : mm < 0.85 ? 'lime_plaster_rough' : 'paint_ochre', [px, yb + v, pz], [nx, 0, nz], size, size * (0.6 + rand() * 0.5), Math.floor(rand() * 1e6), 0.004, tilt, 7);
+      }
+    } }
 }
 
 /**
