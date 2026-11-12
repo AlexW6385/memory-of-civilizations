@@ -57,7 +57,20 @@ export function lots() {
     row(bz0 + 12.5, bz1 - 12.5, (zc, w, d) => lots_push({ at: [bx0, zc], facing: 'w', w, d, rect: [bx0, zc - w / 2, bx0 + d, zc + w / 2] }));
     row(bz0 + 12.5, bz1 - 12.5, (zc, w, d) => lots_push({ at: [bx1, zc], facing: 'e', w, d, rect: [bx1 - d, zc - w / 2, bx1, zc + w / 2] }));
   }
-  function lots_push(l) { if (!farRect(l.rect, 22)) LOTS.push({ ...l, seed: Math.floor(rand() * 1e6), trade: TR[Math.floor(rand() * TR.length)] }); }
+  // Ginkaku-ji's gate-town and its service houses (docs/settlements/muromachi-kyoto.md §5): the shops of the approach
+  // street south of the lane on the way from the stream to the gate (pilgrims' food, sandals, tea, paper, wood), and within
+  // the precinct's walls the houses of its keepers — the kitchen (kuri), the monks' quarters, the gardeners' and the
+  // gatekeeper's houses — every one open inside. Each is a machiya of the shared kind; seeds chosen so that
+  // the fronts differ (one or two storeys, roofs of planks, bark or straw, walls, shutter or latticed or open front).
+  const MZ = [[126, 5.6, 'sandals'], [132.1, 6.8, 'food'], [139.4, 5.2, 'wood'], [145.1, 7.4, 'tea'], [153, 5.8, 'paper'], [159.3, 6.4, 'pottery'], [166.2, 7.0, 'food'], [173.7, 5.5, 'rice'], [179.7, 6.2, 'sake'], [186.4, 7.2, 'tea']];
+  const GATE_SEEDS = [41203, 77011, 90417, 13579, 25813, 60291, 33644, 85127, 4521, 70809];
+  MZ.forEach(([x, w, trade], i) => lots_push({ at: [x + w / 2, 103.5], facing: 'n', w, d: 10.5 + (i % 3) * 0.7, rect: [x, 103.5, x + w, 103.5 + 10.5 + (i % 3) * 0.7], seed: GATE_SEEDS[i], trade, open: true }));
+  // within the precinct: along the east wall facing the court (west), and along the west side facing east
+  const PH = [[266, 36, 'w', 6.4, 'food'], [266, 44.4, 'w', 5.6, 'tea'], [266, 51.8, 'w', 7.0, 'paper'], [266, 60.2, 'w', 5.8, 'wood'],
+    [127.5, 40, 'e', 6.0, 'tea'], [127.5, 47.4, 'e', 6.8, 'sandals'], [127.5, 55.6, 'e', 5.6, 'wood'], [127.5, 62.6, 'e', 6.4, 'food']];
+  const PH_SEEDS = [18340, 52719, 9021, 66338, 31177, 47820, 72915, 20604];
+  PH.forEach(([x, z, f, w, trade], i) => { const d = 10.4 + (i % 2) * 0.8; lots_push({ at: [x, z + w / 2], facing: f, w, d, rect: f === 'w' ? [x, z, x + d, z + w] : [x - d, z, x, z + w], seed: PH_SEEDS[i], trade, open: true, keeper: true }); });
+  function lots_push(l) { if (!farRect(l.rect, 22)) LOTS.push({ seed: Math.floor(rand() * 1e6), trade: TR[Math.floor(rand() * TR.length)], ...l }); }
   return LOTS;
 }
 /** The yard of each block, inside its rows of houses: [x0, z0, x1, z1]. */
@@ -83,5 +96,5 @@ export function onStreet(x, z, m = 0) {
 }
 export const inPrecinctAt = (x, z, m = 0) => PRECINCTS.some((p) => inRect(p, x, z, m));
 /** Which houses are open inside: nearly half (the shops), the tea-sellers' and eating-houses always. */
-export const isOpen = (l) => l.seed % 20 < 9 || l.trade === 'tea' || l.trade === 'food';
+export const isOpen = (l) => l.open === true || l.seed % 20 < 9 || l.trade === 'tea' || l.trade === 'food';
 export { far };

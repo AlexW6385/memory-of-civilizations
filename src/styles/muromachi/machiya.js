@@ -140,6 +140,7 @@ function machiya(el, ctx) {
       B('plaster_grey', cx - 0.38, y0 + fl - 0.03, cz - 0.38, cx + 0.38, y0 + fl, cz + 0.38); B('flame', cx - 0.05, y0 + fl, cz - 0.05, cx + 0.05, y0 + fl + 0.07, cz + 0.05);
       L('iron', [[0.001, 0], [0.14, 0.03], [0.17, 0.12], [0.1, 0.2], [0.001, 0.21]], 10, cx, y0 + fl + 0.55, cz); B(WD, cx - 0.01, y0 + fl + 0.76, cz - 0.01, cx + 0.01, yT - 0.4, cz + 0.01);
       for (let k = 0; k < 3; k++) L('pottery_dark', [[0.001, 0], [0.05, 0], [0.08, 0.06], [0.001, 0.05]], 8, x0 + 0.5 + k * 0.3, y0 + fl + 0.9, -d + 0.3);
+      B(WD, cx + 0.85, y0 + fl, cz + 0.55, cx + 1.05, y0 + fl + 0.08, cz + 0.75); B('lamp_white', cx + 0.88, y0 + fl + 0.08, cz + 0.58, cx + 1.02, y0 + fl + 0.5, cz + 0.72); B(WD, cx + 0.85, y0 + fl + 0.5, cz + 0.55, cx + 1.05, y0 + fl + 0.54, cz + 0.75);   // the standing lantern (andon), lit
       B(TM, x0 + 0.3, y0 + fl + 0.86, -d + 0.15, x0 + 1.3, y0 + fl + 0.9, -d + 0.45);
       B('lacquer_black', x1 - 1.4, y0 + fl, -d + 0.15, x1 - 0.4, y0 + fl + 0.7, -d + 0.65); B('iron', x1 - 1.38, y0 + fl + 0.5, -d + 0.65, x1 - 0.42, y0 + fl + 0.54, -d + 0.67);        // the chest (tansu)
       B('cloth_indigo', x1 - 0.5, y0 + fl, -d + 0.8, x1 - 0.1, y0 + fl + 0.5, -d + 1.9); B('cloth_white', x1 - 0.5, y0 + fl + 0.5, -d + 0.8, x1 - 0.1, y0 + fl + 0.58, -d + 1.9);   // the folded bedding
