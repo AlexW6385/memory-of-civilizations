@@ -7,6 +7,8 @@
 // capital; a monastery of cells round a court.
 
 import { registerStyle, orientedBox } from '../../core/build.js';
+import { villageElements } from './village.js';
+import { rite, diya } from './rites.js';
 import { box, lathe, fromTriangles, rod, orientOutward, place } from '../../core/geom.js';
 import { hexa, obox } from '../chinese/index.js';
 
@@ -306,9 +308,9 @@ function stupa(el, { bag, col }) {
       const x0 = Math.min(cx + k * xl, cx + k * xr), x1 = Math.max(cx + k * xl, cx + k * xr);
       const n = Math.round(HM / 0.18), dir = k > 0 ? 'w' : 'e';
       for (let i = 0; i < n; i++) {
-        const t1 = (i + 1) / n, yTop = y + HM * t1;
-        const xa = k > 0 ? cx + xr - (xr - xl) * t1 : x0, xb = k > 0 ? x1 : cx - xr + (xr - xl) * t1;
-        bag.add(STONE, box(xa, y - 0.01, zs0 + 0.1 * s, xb, yTop, zs1));
+        // step i: its top at (i + 1)/n of the rise, reaching from the landing out to where the next step up begins
+        const t1 = (i + 1) / n, yTop = y + HM * t1, outer = cx + k * (xl + (xr - xl) * (1 - i / n));
+        bag.add(STONE, box(Math.min(cx + k * xl, outer), y - 0.01, zs0 + 0.1 * s, Math.max(cx + k * xl, outer), yTop, zs1));
       }
       col.ramp([x0, zs0 + 0.1 * s, x1, zs1], y, y + HM, dir);
       // the balustrade on the outer side
@@ -453,6 +455,10 @@ function vihara(el, { bag, col }) {
     const tx = -nz, tz = nx, c0 = [cx + nx * 1.35 - tx * 0.7, cz + nz * 1.35 - tz * 0.7];
     bag.add(STONE, orientedBox([c0[0] - nx * 0.95, c0[1] - nz * 0.95], [c0[0] + nx * 0.95, c0[1] + nz * 0.95], 0.9, y, y + 0.42));
     bag.add(STONE, orientedBox([c0[0] - nx * 0.95, c0[1] - nz * 0.95], [c0[0] + nx * 0.95, c0[1] + nz * 0.95], 0.98, y + 0.42, y + 0.5));
+    // the monk's things: a folded ochre robe at the bed's head, the alms bowl beside it, a clay lamp in the doorway's corner
+    bag.add('cloth_ochre', orientedBox([c0[0] - nx * 0.8, c0[1] - nz * 0.8], [c0[0] - nx * 0.15, c0[1] - nz * 0.15], 0.5, y + 0.5, y + 0.58));
+    bag.add('pottery_dark', lathe([[0.001, 0], [0.07, 0.008], [0.11, 0.05], [0.125, 0.09], [0.105, 0.09], [0.065, 0.03], [0.001, 0.03]], 10, null, c0[0] + nx * 0.55, y + 0.5, c0[1] + nz * 0.55));
+    diya(bag, cx + nx * 1.0 + tx * 0.45, y + 0.02, cz + nz * 1.0 + tz * 0.45, 1.2);
     const p = [cx + nx * 1.5 + tx * 1.0, cz + nz * 1.5 + tz * 1.0];
     bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.02], [0.2, 0.14], [0.22, 0.26], [0.15, 0.38], [0.1, 0.42], [0.12, 0.46], [0.001, 0.46]], 12, null, p[0], y, p[1]));
   };
@@ -523,6 +529,6 @@ registerStyle('indian', {
   column: () => {},
   trim: () => {},
   opening: () => {},
-  elements: { stupa },
+  elements: { stupa, rite, ...villageElements },
   objects: { ashoka_pillar: ashokaPillar, vihara },
 });

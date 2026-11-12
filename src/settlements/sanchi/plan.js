@@ -2,9 +2,10 @@
 // gateways, companions, pillar and monasteries (the full building of the previous design,
 // src/buildings/sanchi-great-stupa) on the summit; Stupa 2 on its terrace at the foot of the west slope;
 // Temple 40's pillared hall on the summit; the monks and pilgrims.
-import { TOP, STUPA2, TEMPLE40, VOTIVE, height } from './layout.js';
+import { TOP, STUPA2, TEMPLE40, VOTIVE, VIHARA2, height } from './layout.js';
 import stupaPlan from '../../buildings/sanchi-great-stupa/plan.js';
 import './style.js';
+import { summitElements, SUMMIT_STALLS, HALL2, BOWL } from './summit.js';
 export const stupa = { ...stupaPlan, origin: [0, 0], base: TOP, district: undefined, view: [-32, -32, 32, 32], viewY: TOP };
 
 // Stupa 2: turned so that its double stairway faces east, toward the hill [stated: the stairway faces east]
@@ -19,7 +20,7 @@ export const stupa2 = {
 const [t0, z0, t1, z1] = STUPA2.terrace, cx = STUPA2.c[0];
 export const site = {
   id: 'sanchi-site', style: 'sanchi-site', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [],
-  bounds: [t0 - 4, -84, TEMPLE40.rect[2] + 52, TEMPLE40.rect[3] + 2], entrance: { at: [cx, z0 - 5], facing: 's' },
+  bounds: [t0 - 4, -84, TEMPLE40.rect[2] + 52, 100], entrance: { at: [cx, z0 - 5], facing: 's' },
   elements: [
     { t: 'block', rect: [t0, z0, t1, z1], y0: -0.6, y1: STUPA2.y - 0.12, mat: 'rubble' },
     { t: 'block', rect: [t0 - 0.12, z0 - 0.12, t1 + 0.12, z1 + 0.12], y0: STUPA2.y - 0.12, y1: STUPA2.y - 0.04, mat: 'sandstone_dressed', collide: false },
@@ -28,6 +29,7 @@ export const site = {
     { t: 'temple40', c: TEMPLE40.c, y: TOP },
     ...VOTIVE.map(([x, z, s]) => ({ t: 'stupa', c: [x, z], s, y: TOP, gates: [], stair: false })),
     ...offerings(),
+    ...summitElements(),
   ],
 };
 
@@ -86,6 +88,38 @@ function people() {
     const y = height(x, z);
     if (k === 0) man([x, z], y, [0, 1]); else if (k === 1) woman([x, z], y, [0, 1]); else if (k === 2) monk([x, z], y, [0, 1]); else man([x, z], y, [0.1, 1], { carry: 'pole', cloth: 'cloth_ochre', hat: 'none' });
   }
+  // the south approach (the arrival's view): the sellers sitting behind their stalls, buyers and pilgrims on the way, monks with their bowls
+  const SY = TOP + 0.03;
+  for (const [sx, sz, front, trade] of SUMMIT_STALLS) {
+    const d = front === 'e' ? [1, 0] : [-1, 0];
+    woman([sx - d[0] * 0.2, sz + 0.1], TOP + 0.15, d, { pose: 'sit_low', carry: 'none', cloth: trade === 'robes' ? 'cloth_ochre' : (seed % 2 ? 'cloth_red' : 'cloth_indigo') });
+    if (seed % 3) man([sx + d[0] * 2.3, sz - 0.9], SY, [-d[0], 0.3], { carry: seed % 2 ? 'basket' : 'none', pose: seed % 4 === 0 ? 'talk' : 'stand' });
+  }
+  for (const [x, z, dir] of [[1.2, 52, [0, -1]], [-1.4, 58, [0, -1]], [0.4, 66, [0, 1]], [-0.9, 72, [0.1, -1]], [1.6, 79, [0, -1]], [-1.1, 86, [0, 1]]]) {
+    if (seed % 2) woman([x, z], SY, dir, { carry: seed % 3 ? 'pot' : 'basket' }); else man([x, z], SY, dir);
+  }
+  monk([2.2, 61], SY, [0, -1], { carry: 'staff' }); monk([-2.0, 75], SY, [0.2, 1], { carry: 'staff' }); monk([3.0, 88], SY, [0, -1], { pose: 'talk' });
+  L.push({ t: 'figure', at: [-1.9, 63.5], y: SY, rot: face([1, 0]), seed: seed++ * 7919, dress: 'wrap', top: 'bare', cloth: 'cloth_white', cloth2: 'cloth_white', skin: 'skin_dark', hat: 'none', hair: 'short', pose: 'stand', carry: 'none', feet: 'bare', h: 0.62 });
+  L.push({ t: 'animal', kind: 'zebu', at: [-19, 66], y: TOP, rot: 0.9, seed: seed++, graze: true, mat: 'hide_white' });
+  L.push({ t: 'animal', kind: 'dog', at: [6.5, 60.5], y: SY, rot: 2.2, seed: seed++ });
+  L.push({ t: 'animal', kind: 'dog', at: [-7, 83], y: SY, rot: 4.1, seed: seed++ });
+  // the second rest hall: monks and pilgrims at rest
+  const [h0, h1, h2, h3] = HALL2, hy = TOP + 0.5;
+  monk([h0 + 3, h1 + 1.1], hy, [0, 1], { pose: 'cross' }); man([h0 + 6.5, h1 + 1.1], hy, [0, 1], { pose: 'sit_low' }); man([(h0 + h2) / 2, (h1 + h3) / 2 + 0.2], hy, [0, 1], { pose: 'cross', top: 'bare' }); woman([h2 - 1.3, h3 - 1.2], hy, [-1, 0], { carry: 'pot' });
+  // the monastery's court: monks seated in the assembly's pavilion before the teacher on his stone seat, one at the well
+  const vx = 49, vz = 17, vy = TOP + 0.4;
+  monk([vx, vz - 2.0], vy + 0.4, [0, 1], { pose: 'cross', arms: 'pray' });
+  for (const [dx, dz] of [[-1.7, 0.9], [0, 1.5], [1.7, 0.9], [-0.8, 2.4], [0.9, 2.4]]) monk([vx + dx, vz + dz], vy, [0, -1], { pose: 'cross' });
+  monk([vx - 5.5 + 1.4, vz + 4], TOP, [-1, 0], { carry: 'pot' });
+  // the second monastery's court: monks seated before the teacher in the pavilion
+  { const wx = (VIHARA2[0] + VIHARA2[2]) / 2, wz = (VIHARA2[1] + VIHARA2[3]) / 2, wy = TOP + 0.4;
+    monk([wx, wz - 2.0], wy + 0.4, [0, 1], { pose: 'cross', arms: 'pray' });
+    for (const [dx, dz] of [[-1.5, 1.0], [0.2, 1.6], [1.6, 1.0], [-0.6, 2.4]]) monk([wx + dx, wz + dz], wy, [0, -1], { pose: 'cross' });
+    monk([wx - 5.5 + 1.4, wz + 4], TOP, [-1, 0], { carry: 'pot' }); man([VIHARA2[0] - 2.2, wz + 0.8], TOP, [1, 0]); }
+  // at the Great Bowl: a monk ladling the food, monks with their alms bowls coming for it, a lay donor
+  monk([BOWL[0] + 1.9, BOWL[1] + 0.4], TOP, [-1, 0], { carry: 'pot' }); monk([BOWL[0] - 1.9, BOWL[1] - 0.6], TOP, [1, 0.2], { carry: 'basket' }); monk([BOWL[0] - 0.8, BOWL[1] + 2.3], TOP, [0.3, -1]); man([BOWL[0] + 0.8, BOWL[1] - 2.4], TOP, [-0.2, 1], { carry: 'basket' });
+  // Temple 40: a monk and a pilgrim before the altar
+  { const [tx, tz] = TEMPLE40.c, ty = TOP + 3.35; monk([tx - 14.8, tz - 1.0], ty, [-1, 0], { pose: 'kneel', arms: 'pray' }); woman([tx - 14.6, tz + 1.3], ty, [-1, 0], { pose: 'kneel', arms: 'pray' }); monk([tx + 8, tz + 5.4], ty, [0, 1], { pose: 'cross' }); }
   return { id: 'sanchi-people', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: L, rooms: [], bounds: [-300, -300, 300, 300], entrance: { at: [0, -180], facing: 's' } };
 }
 export const pilgrims = people();
