@@ -2,7 +2,7 @@
 // towers and parapet, the east stair and the south ramp; the Great Bath (court, pool, stairs, gallery of stepped piers, doors, the cells and the well);
 // the granary or great hall on its 27 blocks; the Pillared Hall; the College of Priests. Authored in world coordinates (origin 0, yaw 0).
 
-import { PLAT, MOUND, MOUND_BATTER, EAST_STAIR, SOUTH_RAMP, BATH, GRANARY, PILLARED, COLLEGE } from './layout.js';
+import { PLAT, MOUND, MOUND_BATTER, EAST_STAIR, SOUTH_RAMP, BATH, GRANARY, PILLARED, COLLEGE, TOP, lanes, inRect } from './layout.js';
 
 const E = [];
 E.push({ t: 'indus_mound', rect: MOUND, y: PLAT, batter: MOUND_BATTER, gaps: [EAST_STAIR.rect, SOUTH_RAMP.rect] });
@@ -19,6 +19,21 @@ E.push({ t: 'indus_bath', B: BATH, y: PLAT });
 E.push({ t: 'indus_granary', rect: GRANARY, y: PLAT });
 E.push({ t: 'indus_pillared', rect: PILLARED, y: PLAT });
 E.push({ t: 'indus_college', rect: COLLEGE, y: PLAT });
+
+// the works of the platform: the covered drains of its streets and lanes at the platform's height, falling east to an outfall through the parapet; the wells, the trees,
+// the water-stands, the banners of the towers, the dressing of the Bath's court
+{
+  const streetsTop = [[-198, -62, -116, -62], [-196, -20, -196, -62], [-116, 30, -116, -62], [-116, -62, -116, -79], [-116, -79, -65.5, -79]];
+  const laneRuns = lanes().filter((l) => inRect(MOUND, (l[0] + l[2]) / 2, (l[1] + l[3]) / 2)).map((l) => (l[2] - l[0] > l[3] - l[1] ? [l[0], (l[1] + l[3]) / 2, l[2], (l[1] + l[3]) / 2] : [(l[0] + l[2]) / 2, l[1], (l[0] + l[2]) / 2, l[3]]));
+  E.push({ t: 'indus_drains', y: PLAT, runs: streetsTop, w: 0.6, manhole: 12, seed: 61 });
+  E.push({ t: 'indus_drains', y: PLAT, runs: laneRuns, w: 0.3, manhole: 16, seed: 62 });
+  E.push({ t: 'indus_outfall', at: [-65.47, -79], dir: 'e', y: PLAT });
+  for (const [x, z, k] of [[-124, -71, 1], [-192, -80.5, 2], [-72, -92, 3], [-150, -18, 4]]) E.push({ t: 'indus_pwell', c: [x, z], y: PLAT, seed: k });
+  E.push({ t: 'indus_pipal', c: [-121, -97], y: PLAT, h: 9, seed: 4 }, { t: 'indus_pipal', c: [-178, -80], y: PLAT, h: 7.5, seed: 9 });
+  E.push({ t: 'indus_pshade', c: [-188, -67], y: PLAT });
+  [[TOP[0] + 3, TOP[1] + 3], [TOP[2] - 3, TOP[1] + 3], [TOP[0] + 3, TOP[3] - 3], [TOP[2] - 3, TOP[3] - 3]].forEach(([x, z], i) => E.push({ t: 'indus_banner', c: [x, z], y: PLAT + 4.85, h: 3.4, seed: i }));
+  E.push({ t: 'indus_bathdress', B: BATH, y: PLAT, seed: 5 });
+}
 
 const room = (id, rect, y, kind, o = {}) => ({ id, rect, y, kind, ...o });
 const [cx0, cz0, cx1, cz1] = BATH.court, ex = BATH.outer[2] - 7.2 - 0.45;

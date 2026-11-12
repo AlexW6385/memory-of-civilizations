@@ -1,7 +1,7 @@
 // Round the Citadel (docs/settlements/mohenjo-daro.md §2, §6, §7): the Lower Town's houses in their grid with the drains along the streets and
 // lanes, the workshops, the market place with its great well, the town wall on the south, the landing on the Indus with its boats and the
 // harbour office, and the people — priests at the Bath, craftsmen, merchants, porters, carts with zebu.
-import { RADIUS, PLAT, XS, STREET_W, PLAZA, WELL_BIG, WALL, WALL_Z, RIVER, QUAY, CUSTOMS, BATH, GRANARY, PILLARED, COLLEGE, EAST_STAIR, riverX, streets, lanes, lots, inRect } from './layout.js';
+import { RADIUS, PLAT, XS, STREET_W, PLAZA, WELL_BIG, WALL, WALL_Z, RIVER, QUAY, CUSTOMS, BATH, GRANARY, PILLARED, COLLEGE, EAST_STAIR, MOUND, riverX, streets, lanes, lots, inRect } from './layout.js';
 import { boatFloat } from '../../objects/index.js';
 import { stallSpots } from '../../styles/indus/town.js';
 
@@ -45,6 +45,15 @@ function people() {
   // the granary: porters with sacks at the ramp, a clerk at the tally
   for (let k = 0; k < 4; k++) man([GRANARY[0] + 24 + k * 0.5, GRANARY[3] + 3 + k * 2.2], Math.PI, { y: PLAT, arms: 'sack', carry: 'sack', cloth: 'cloth_ochre', beard: 0 });
   man([GRANARY[0] + 12, GRANARY[1] + 3.5], Math.PI, { y: PLAT + 1.78, pose: 'cross', cloth: 'cloth_white' });
+  // the Citadel's streets: at each well a woman with her pot on the head and a man waiting his turn; elders and a woman seated on the pipal's brick seat; the water-stand's keeper
+  for (const [wx, wz] of [[-124, -71], [-192, -80.5], [-72, -92], [-150, -18]]) {
+    const f = (x, z) => Math.atan2(wx - x, -(wz - z));
+    woman([wx + 1.9, wz + 0.9], f(wx + 1.9, wz + 0.9), { y: PLAT, carry: 'pot', arms: 'head' });
+    man([wx - 1.8, wz - 1.6], f(wx - 1.8, wz - 1.6), { y: PLAT, pose: 'stand' });
+  }
+  for (const [px, pz, n] of [[-121, -97, 4], [-178, -80, 2]]) for (let k = 0; k < n; k++) { const a = 0.6 + k * (6.28 / n), x = px + Math.cos(a) * 1.9, z = pz + Math.sin(a) * 1.9; (k % 3 === 2 ? woman : man)([x, z], Math.atan2(px - x, -(pz - z)), { y: PLAT + 0.58, pose: 'cross', hair: k % 2 ? 'shaven' : 'bun', beard: k % 2 ? 0 : 1 }); }
+  man([-188, -66.3], 0, { y: PLAT + 0.44, pose: 'sit', cloth: 'cloth_white' }); woman([-187.2, -68.4], Math.PI, { y: PLAT, carry: 'pot', arms: 'head' });
+  for (const [x, z, r] of [[-176, -61, 0], [-146, -63.5, Math.PI], [-134, -61, Math.PI / 2]]) man([x, z], r, { y: PLAT, arms: 'sack', carry: 'sack', cloth: 'cloth_ochre', beard: 0 });
   // the market place: sellers on their mats, buyers, a water-carrier at the well
   for (const sp of stallSpots(PLAZA)) {
     const dx = sp.along ? 0 : sp.face, dz = sp.along ? sp.face : 0, r = Math.atan2(dx, -dz), kind = sp.goods;
@@ -117,6 +126,16 @@ export async function town() {
   const plans = [], LT = lots();
   plans.push(base('md-streets', [{ t: 'indus_streets', streets: streets(), lanes: lanes() }]));
   { const ST = streets(); for (let i = 0; i < ST.length; i += 3) plans.push(base(`md-streetwork-${i / 3}`, [{ t: 'indus_streetwork', streets: ST.slice(i, i + 3), seed: 40 + i, avoid: [PLAZA, [QUAY.x0, QUAY.z0, QUAY.x1, QUAY.z1], CUSTOMS] }])); }
+  // wells at the mouths of some lanes, in the street before them: the lanes' neighbours draw from them (one well to every three houses is the city's figure; the courts keep their own)
+  {
+    const W = [];
+    lanes().filter((l) => l[3] - l[1] > l[2] - l[0] && l[3] - l[1] > 30 && !inRect(MOUND, (l[0] + l[2]) / 2, (l[1] + l[3]) / 2)).forEach((l, i) => {
+      const x = (l[0] + l[2]) / 2, z = i % 2 ? l[1] - 2.9 : l[3] + 2.9;
+      if (i % 4 !== 1 || Math.hypot(x, z) > RADIUS - 70 || inRect(PLAZA, x, z, 9) || x > QUAY.x0 - 12) return;
+      W.push({ t: 'indus_pwell', c: [x, z], y: 0, seed: 100 + i });
+    });
+    for (let i = 0; i < W.length; i += 6) plans.push(base(`md-wells-${i / 6}`, W.slice(i, i + 6)));
+  }
   plans.push(base('md-market', [{ t: 'indus_market', rect: PLAZA, well: WELL_BIG }, ...[[12, 12], [36, 12], [12, 36], [36, 36]].map(([a, b]) => ({ t: 'indus_shade', c: [PLAZA[0] + a, PLAZA[1] + b] }))], { rooms: [{ id: 'market place', rect: PLAZA, y: 0, kind: 'open', market: true }] }));
   // the river in strips of 30 m, each its own plan, so that each one's bounds stay inside the disc
   for (let x = QUAY.x1, k = 0; x < 439; x += 30, k++) plans.push(base('md-river-' + k, [{ t: 'indus_river', x0: x, x1: x + 30, level: RIVER.level }]));
