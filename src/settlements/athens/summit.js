@@ -57,6 +57,10 @@ export function summitLife() {
     else slave([x, z], r + (rand() - 0.5) * 0.7, { carry: rand() < 0.5 ? 'sack' : 'basket' });
     if (k % 3 === 0) man([x + 1.1, z + 0.35], r + 2.8, { pose: 'talk', cloth: 'cloth_grey' });
   });
+  // on the east steps and in the pteron before the great door: visitors sitting on the second step in the sun, others waiting under the colonnade for the priest, a woman with her jar
+  for (const z of [21.2, 23.0, 28.6, 31.4]) { man([53.05, z], E, { pose: 'sit_low', cloth: pick(['cloth_white', 'linen', 'cloth_ochre']) }); L[L.length - 1].y = T + 1.04; if (z > 28) L[L.length - 1].dress = 'robe'; }
+  woman([53.05, 25.4], E, { pose: 'sit_low' }); L[L.length - 1].y = T + 1.04; boy([52.95, 26.3], E + 0.3, {}); L[L.length - 1].y = T + 1.04;
+  for (const [x, z, r, o] of [[48.2, 9.5, S, {}], [48.9, 12.4, E, { pose: 'talk' }], [49.4, 13.2, W, { pose: 'talk' }], [48.4, 24.6, N, {}], [49.2, 29.6, S, { carry: 'pot', arms: 'head' }], [47.6, 5.2, E, { pose: 'pray' }]]) { (o.carry ? woman : man)([x, z], r, o); L[L.length - 1].y = T + 1.56; }
   // the bronzes: dedications on their bases, cast figures in the cloak or bare, one hand a little out
   STATUES.forEach(([x, z, r, kind], k) => L.push({ t: 'figure', at: [x, z], y: Y + 1.34, rot: r, seed: seed(), skin: 'bronze', hairMat: 'bronze', hairShade: 1, dress: kind === 'robe' ? 'robe' : 'loincloth', top: kind === 'robe' ? undefined : 'bare', cloth: 'bronze', cloth2: 'bronze', over: kind === 'robe' ? 'cloak' : 'none', hair: 'short', beard: k % 3 === 0 ? 1 : 0, hat: 'none', feet: 'bare', pose: k % 2 ? 'stand' : 'staff', carry: k % 2 ? 'none' : 'staff', len: 1.9 }));
   // in the Parthenon's cella (local x 8..21 of the temple at (18, 18), its floor 2.26 m up): the priestess and a kneeling woman before the basin, men standing in awe, a child held by the hand,
