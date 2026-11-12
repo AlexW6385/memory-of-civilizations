@@ -132,3 +132,6 @@ The booksellers on the Spassky bridge, merchants and buyers in the trading rows,
 - [Kremlin History 2 — Caroun](https://www.caroun.com/Countries/Europe/Russia/Kremlin/03-Kremlin-History-2.html)
 - [On the Subject of the Original Rooftop Type of Spasskaya Tower — Architectural Heritage](https://www.archiheritage.org/issues/273/120/On-the-Subject-of-the-Original-Rooftop-Type-of-Spasskaya-Tower-of-the-Moscow-Kremlin.html)
 - [Saint Basil's Cathedral — cavac.at mirror of Wikipedia](https://cavac.at/cavacopedia/Saint_Basil%27s_Cathedral)
+
+## Deepening pass (2026-11) — the market's people
+- About two of every five stalls in the rows of Red Square have a buyer at the counter (a woman with a basket, a man haggling, a boy); boys and a pedlar with his pack join the walkers; pigeons feed on the beaten earth of the square. [inferred: the square was the city's market, its stalls (lotki) open on one side]
