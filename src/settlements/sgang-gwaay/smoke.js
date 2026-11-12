@@ -4,6 +4,7 @@
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
 import { houses, village, height, G, RADIUS, toWorld } from './layout.js';
+import { yards } from './yards.js';
 
 const ID = 'sgang-gwaay';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -15,6 +16,7 @@ export function emitters() {
     const [x, z] = toWorld(h, 0, 0);
     E.push({ p: [x, G + h.ridge + 0.5, z], kind: 'kitchen', thr: h.landmark ? 0 : 0.05 + 0.6 * r(), seed: h.i * 17 + 3 });
   }
+  for (const f of yards().props) if (f.kind === 'fire') E.push({ p: [f.c[0], f.y + 0.5, f.c[1]], kind: 'kitchen', thr: 0.1 + 0.3 * r(), seed: f.seed % 997 });
   for (const rk of village().racks) E.push({ p: [rk.c[0], height(rk.c[0], rk.c[1] + 1.2) + 0.3, rk.c[1] + 1.2], kind: 'kitchen', thr: 0.25 + 0.4 * r(), seed: Math.round(rk.c[1]) });
   for (const z of [-60, 40, 120]) E.push({ p: [-95, height(-95, z) + 6, z], kind: 'mist', thr: 0, seed: z });
   return E;

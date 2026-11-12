@@ -24,9 +24,11 @@ function planting(x, z) {
   if (inHouse(x, z, -4)) return null;
   const v = village();
   if (v.poles.some((p) => Math.hypot(p.c[0] - x, p.c[1] - z) < 3) || v.canoes.some((c) => !c.moored && Math.hypot(c.c[0] - x, c.c[1] - z) < c.l / 2 + 1.5)) return null;
-  if (h < 0.9) return { boulder: 0.1 };
-  if (dE < 34) return null;
-  if (dE < 46) return { grass: 25, maquis: 0.25 };
+  if (h < 0.9) return h > 0.15 ? { boulder: 0.1, grass: 5 } : { boulder: 0.1 };    // the beach top: drift boulders and sea-rye tufts
+  if (dE < 30) return null;                                                           // the street and the houses
+  if (dE < 34) return { grass: 16, maquis: 0.14 };                                    // fern and salmonberry against the houses' backs
+  if (dE < 40) return { grass: 30, maquis: 0.45, sugi: 0.06 };
+  if (dE < 48) return { grass: 36, maquis: 0.7, sugi: 0.3, spruce: 0.2 };             // the forest's edge, the first cedars and spruce
   return { sugi: 0.7, spruce: 0.5, maquis: 0.9, grass: 40 };
 }
 export const ground = {
