@@ -2,6 +2,7 @@
 // with its ghat and moored boats, the stilt houses in their strips, the Shwezigon and the Sulamani in their precincts, the temples and stupas of the plain, kyaungs and rest
 // houses, the roadside stalls, the brickworks and the tank, and the people and animals about them. Several plans, so that each builds in turn while the visitor already walks.
 import '../../styles/burmese/index.js';
+import { dressing } from './dressing.js';
 import {
   RADIUS, RIVER_Y, bankX, CITY, WALL, GATE, THAT, THAT_ENC, PALACE, PAL_HALL, SHWE, SHWE_PREC, SULA, SULA_PREC, TANK, TANK_Y, KILNS, KYAUNGS, PRECINCT, MAIN_ROAD,
   ANANDA, OKKYAUNG, lots, plainTemples, cityWalls, streets, inLot, inPlainTemple, inRect, inRiver, inTank,
@@ -243,6 +244,6 @@ function people() {
 }
 
 export async function town() {
-  return [...city(), houses(), temples(), people()];
+  return [...city(), houses(), temples(), people(), base('bagan-dressing', dressing(), 'life')];
 }
 void MAIN_ROAD; void PRECINCT;

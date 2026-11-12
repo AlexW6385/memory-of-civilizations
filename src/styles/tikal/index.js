@@ -285,9 +285,9 @@ function house(el, ctx) {
   // outside: the doorway's poles, strings of maize and chiles under the eave, a log bench, the stains where the rain splashes the daub
   { const F2 = frame(side, ...(side === 'n' ? [cx, cz - d / 2] : side === 's' ? [cx, cz + d / 2] : side === 'w' ? [cx - w / 2, cz] : [cx + w / 2, cz])), dn = [-F2.U[0], 0, -F2.U[1]];
     for (const v of [-0.58, 0.58]) { const p = F2.P(-0.06, v); bag.add(TIM, rod([p[0], P, p[1]], [p[0], P + dh, p[1]], 0.05, 5)); }
-    for (const [v, m, hh] of [[-0.95, 'wood_ochre', 0.5], [-1.05, 'stucco_red', 0.4], [0.95, 'wood_ochre', 0.45]]) { const p = F2.P(-0.14, v); bag.add('rope_fibre', rod([p[0], P + wh - 0.25, p[1]], [p[0], P + wh - 0.25 - hh, p[1]], 0.012, 4)); bag.add(m, box(p[0] - 0.07, P + wh - 0.25 - hh, p[1] - 0.07, p[0] + 0.07, P + wh - 0.3, p[1] + 0.07)); }
+    for (const [v, m, hh] of el.lite ? [] : [[-0.95, 'wood_ochre', 0.5], [-1.05, 'stucco_red', 0.4], [0.95, 'wood_ochre', 0.45]]) { const p = F2.P(-0.14, v); bag.add('rope_fibre', rod([p[0], P + wh - 0.25, p[1]], [p[0], P + wh - 0.25 - hh, p[1]], 0.012, 4)); bag.add(m, box(p[0] - 0.07, P + wh - 0.25 - hh, p[1] - 0.07, p[0] + 0.07, P + wh - 0.3, p[1] + 0.07)); }
     if (rand() < 0.6) { const q = F2.R(-1.05, -0.65, 0.9, 2.1); bag.add(TIM, box(q[0], P, q[1], q[2], P + 0.28, q[3])); }
-    for (let k = 0; k < 3; k++) { const v = (rand() - 0.5) * (side === 'n' || side === 's' ? w : d) * 0.8, p = F2.P(-0.01, v); patch(bag, 'plaster_damp', [p[0], P + 0.3, p[1]], dn, 0.6 + rand() * 0.8, 0.4, Math.floor(rand() * 1e6), 0.01); }
+    for (let k = 0; k < (el.lite ? 0 : 3); k++) { const v = (rand() - 0.5) * (side === 'n' || side === 's' ? w : d) * 0.8, p = F2.P(-0.01, v); patch(bag, 'plaster_damp', [p[0], P + 0.3, p[1]], dn, 0.6 + rand() * 0.8, 0.4, Math.floor(rand() * 1e6), 0.01); }
     if (el.kitchen) soot(bag, [cx, P + wh + 0.8, cz], [0, -1, 0], 1.2, 1.2, el.seed || 3); }
   const j = at(e1 - 0.3, (long ? d : w) / 2 - 0.6); put(bag, waterJarKit(), j[0], F, j[1], 0); col.circle(j[0], j[1], 0.33, F, F + 0.8);
   const s = at(e0 + 0.35, -((long ? d : w) / 2 - 0.55)); put(bag, storeJarKit(), s[0], F, s[1], 0);

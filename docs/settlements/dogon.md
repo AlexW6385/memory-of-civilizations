@@ -105,3 +105,11 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 - Houses are separated by stone walls and so close that a floor may begin where the neighbour's roof ends [stated: encyclopedia.com "Dogon"]; our compounds keep a 3.4 m lane between them so that a walker can pass [inferred].
 
 Sources added: encyclopedia.com, "Dogon"; dogon-lobi.ch, "The smithy".
+
+## Deepening pass (2026-11-12)
+- **The market on the place:** cloth-awninged stalls along the place's north edge (cotton strips, indigo cloth, millet, shallots, baskets) with the sellers on low stools behind and buyers before them; more mats of goods on the earth [inferred: the Dogon weekly market of the Sahel; the stall's cloth awning is a stand-in for the mat-and-pole shade of a market, no Dogon source read for its form].
+- **Lane crossings:** a bench of logs at the meeting of the centre lane with the lanes between the rows, old men in white on it with staffs, a child at their feet [inferred from the toguna's role: men of age talk and judge in the shade; the Dogon men sit in the toguna, not on lane benches, so the benches are a plain village habit, not an institution].
+- **Fronts:** wood stacked at the walls, shallots and millet drying on a mat at the door, children at play, a dog asleep in the dust [inferred]. The Dogon's shallot (onion) gardens of Ireli and Sangha are a known trade [stated: general; not read here].
+- **The fields:** farmers with the daba (hoe) in the millet at the village's foot, a woman with a water jar, sacks and a donkey at the field's edge, a boy with a goat troop above the upper row [inferred].
+- **Arrival:** at (4.5, 27.5) on the place, 8 m from the toguna, looking north; nobody walks or stands within 7 m of it (the walkers' lane strips end at z = 20 and avoid the place's middle).
+

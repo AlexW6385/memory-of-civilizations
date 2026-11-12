@@ -89,3 +89,10 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 - Milpas: maize plots in the gaps about the groups; ramón and fruit trees in the courts [stated: §5].
 - The reservoirs' rim: women kneeling to fill jars and wash, a fisher in a dugout canoe, ducks [inferred; dugout canoes: Maya sources, general].
 - Market: sellers under palm-thatch awnings on poles, on mats; about thirty buyers in the aisles [inferred].
+
+## 12. Second deepening pass (2026-11-12)
+
+- Load: patio groups beyond 150 m of the plaza are built lighter (no chultun, no stains, no damp patches or strings of maize on the houses, no people in the court), the group lookups of the relief, cover and planting go by the 38 m grid cell instead of all 43 groups [inferred: what is seen from the plaza at that distance is the roofs].
+- The Great Plaza's day: a procession of nobles and priests in two files toward Temple I with attendants; worshippers kneeling at the stair's foot with offerings of copal and flowers [inferred: Classic Maya rites at stelae and altars before temples; Tikal's Great Plaza was the ceremonial centre, Wikipedia "Tikal"]; plasterers renewing the plaza floor (the plazas were replastered many times; Tikal's Great Plaza has several superimposed floors, Wikipedia "Tikal": "a number of layers of paving"); a corner of women selling cloth, cacao and pottery (the main market was the East Plaza, so this is a lesser one) [inferred]; turkeys (domesticated by the Maya) and dogs about the plaza [stated: general Maya ethnography].
+- The Central Acropolis: guards with spears at its stair, women at the backstrap loom in the first court, a scribe and his attendants [inferred: palace life of the Classic Maya, from painted vases and the Bonampak murals].
+- Arrival (-18, 28): nobody stands or walks within 9 m of it; the plaza's walkway rect leaves the corner out.

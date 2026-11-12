@@ -65,7 +65,20 @@ export function groups() {
   }
   return GROUPS;
 }
-export const inGroup = (x, z, m = 0) => groups().some((g) => inRect(g.rect, x, z, m));
-export const nearHouse = (x, z, m) => groups().some((g) => g.houses.some((h) => Math.abs(x - h.c[0]) < (h.dir === 'x' ? h.w : h.d) / 2 + m + 1 && Math.abs(z - h.c[1]) < (h.dir === 'x' ? h.d : h.w) / 2 + m + 1));
+// the groups sit on a 38 m grid (one at most to a cell, never leaving it): a point only needs the nine cells about it (the relief, the cover
+// and the planting ask these a million times)
+let CELLS = null;
+const cellAt = (i, j) => {
+  if (!CELLS) { CELLS = new Array(32 * 32).fill(null); for (const g of groups()) CELLS[Math.floor((g.rect[0] + 300) / 38) * 32 + Math.floor((g.rect[1] + 300) / 38)] = g; }
+  return i < 0 || j < 0 || i > 31 || j > 31 ? null : CELLS[i * 32 + j];
+};
+/** The first group of the nine cells about (x, z) for which f(group) is truthy. */
+const anyNear = (x, z, f) => {
+  const i = Math.floor((x + 300) / 38), j = Math.floor((z + 300) / 38);
+  for (let a = i - 1; a <= i + 1; a++) for (let b = j - 1; b <= j + 1; b++) { const g = cellAt(a, b); if (g && f(g)) return true; }
+  return false;
+};
+export const inGroup = (x, z, m = 0) => anyNear(x, z, (g) => inRect(g.rect, x, z, m));
+export const nearHouse = (x, z, m) => anyNear(x, z, (g) => g.houses.some((h) => Math.abs(x - h.c[0]) < (h.dir === 'x' ? h.w : h.d) / 2 + m + 1 && Math.abs(z - h.c[1]) < (h.dir === 'x' ? h.d : h.w) / 2 + m + 1));
 /** Distance (m) to the nearest patio group's rectangle (large when far): the ground is levelled under and about the groups. */
-export const groupDist = (x, z) => { let m = 1e9; for (const g of groups()) { const r = g.rect, dx = Math.max(r[0] - x, 0, x - r[2]), dz = Math.max(r[1] - z, 0, z - r[3]); if (dx < 30 && dz < 30) m = Math.min(m, Math.hypot(dx, dz)); } return m; };
+export const groupDist = (x, z) => { let m = 1e9; anyNear(x, z, (g) => { const r = g.rect, dx = Math.max(r[0] - x, 0, x - r[2]), dz = Math.max(r[1] - z, 0, z - r[3]); if (dx < 30 && dz < 30) m = Math.min(m, Math.hypot(dx, dz)); return false; }); return m; };
