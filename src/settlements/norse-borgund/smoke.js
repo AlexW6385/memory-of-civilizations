@@ -11,11 +11,11 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1
 export function emitters() {
   const E = [], r = rng(1253);
   for (const b of buildings()) {
-    if (b.kind !== 'stue') continue;
+    if (b.kind !== 'stue' && b.kind !== 'smithy') continue;
     const [x0, z0, x1, z1] = b.rect, alongX = x1 - x0 >= z1 - z0, span = alongX ? z1 - z0 : x1 - x0;
     // the ljore: over the ridge (styles/norse logHouse: H 3.1, eave 0.45, pitch 0.5; its hood 0.35 over the ridge)
     const top = b.y + 3.1 + 0.45 * 0.5 + span / 2 * 0.5 + 0.35 + 0.5;
-    E.push({ p: [(x0 + x1) / 2 - (alongX ? 0.6 : 0), top, (z0 + z1) / 2 - (alongX ? 0 : 0.6)], kind: 'kitchen', thr: r() * 0.35, seed: b.seed + 1 });
+    E.push({ p: [(x0 + x1) / 2 - (alongX ? 0.6 : 0), top, (z0 + z1) / 2 - (alongX ? 0 : 0.6)], kind: 'kitchen', thr: b.kind === 'smithy' ? 0 : r() * 0.35, seed: b.seed + 1 });
   }
   // the river's morning mist
   for (let x = -280; x <= 280; x += 36) {
