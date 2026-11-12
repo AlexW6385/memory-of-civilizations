@@ -162,6 +162,15 @@ Code: `layout.js` (street widths, `paveRects`, `isPaved`, `isMargin`), `plan.js`
 Sources for this section: [Along the River During the Qingming Festival — Wikipedia](https://en.wikipedia.org/wiki/Along_the_River_During_the_Qingming_Festival); [Along the River During the Qingming Festival — Smarthistory](https://smarthistory.org/?p=61959); [Architecture of the Song dynasty — Wikipedia](https://en.wikipedia.org/wiki/Architecture_of_the_Song_dynasty); [Yingzao Fashi — Wikipedia](https://en.wikipedia.org/wiki/Yingzao_Fashi); [吴钩：小市酒旗能唤客 (rujiazg 3505)](https://www.rujiazg.com/article/3505); [吴钩：细读《清明上河图》(rujiazg 29200)](https://www.rujiazg.com/article/29200); [吴钩：宋朝市民出行 (rujiazg 14532)](https://www.rujiazg.com/article/14532).
 
 
+## 15. Deepening pass (walkable town, climbable pagoda, cloisters)
+
+- **Shops and houses can be entered.** Two-bay-or-wider shops and wine shops under 140 m from the bridge, and furnished houses under 120 m, have an open door bay, back and side walls, a floor, a ceiling (timber slab with joists) and counters in every bay but the door's. Things hung over the street (blinds, boards, rafter ends) have undersides so the walker is not stopped by them. Street clutter (carts, chairs, barrows, lantern boxes, awning posts, sign poles) keeps clear of door corridors (`doors.js`). In simulation 49 of 51 sampled doors can be entered. [inferred: interiors follow the shop plans of the scroll and the *Dongjing meng hua lu*]
+- **The Iron Pagoda is climbable.** A stair in the wall thickness spirals up round the core, with the ground-floor door on the south face and a window in the west face of every storey; a flight of steps leads up the base. [stated: the real tower has a spiral stair inside its shell and openings on its faces; inferred: the number and placing of the openings]
+- **Cloisters (lang).** Covered galleries run along the west, east and south walls of the monastery and along the north walls, with a brick floor, red posts, a lean-to tile roof, lanterns, benches and murals. [inferred: a Song monastery of the Chan/Buddhist type was laid out on a cloistered plan]
+- **Groves.** Eight groves of pagoda trees stand in the monastery's side courts; the axis stays open. [inferred]
+- **Monastery life.** Pilgrims kneel round the incense ding; monks sweep, talk under the cloisters and carry water; cake and fruit sellers stand at the way in; sparrows on the court and crows on the hall ridges; paths of walkers along the side courts. [inferred]
+- **Open items.** Upper storeys of shops, inns and warehouses are closed; thatched houses are solid; lane dressing (laundry lines, jars, gutters) and water life (fishermen, washers, ducks) still thin.
+
 ## Sources
 
 - [Memorial Temple of Lord Bao & Iron Pagoda — travelchinaguide](https://www.travelchinaguide.com/attraction/henan/kaifeng/baogong.htm)
