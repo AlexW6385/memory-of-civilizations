@@ -2,6 +2,9 @@
 // tile along the approach), and the people of the monastery: monks at their drill in the training hall (standing in the worn pits with
 // staffs), kneeling in the Mahavira Hall, sweeping the courts, pilgrims and villagers in Ming dress, dogs. Several plans.
 import '../../styles/shaolin/index.js';
+import { STYLES } from '../../core/build.js';
+import { slFronttrim } from './trim.js';
+STYLES.life.elements.sl_fronttrim = slFronttrim;
 import { PAL_HOUSE } from '../../styles/shaolin/index.js';
 import { HOUSES, YARDS, GAP, AXIS, PLAT, HGT, RANGES, CELL, RADIUS, rng } from './layout.js';
 
@@ -96,6 +99,7 @@ function frontLife() {
       if (r() < 0.35) L.push({ t: 'drying_tray', at: F.P(0.3 + r() * 0.4, 1.3), y: Y, rot: r() * 6.28, seed: sd() });
       if (r() < 0.3) L.push({ t: 'chickens', at: F.P(r(), 1.8), y: Y, rot: r() * 6.28, seed: sd() });
     }
+    L.push({ t: 'sl_fronttrim', at: F.P(0.5, 0.0), y: FRONT_Y, rot: F.rot, L: F.L, eave: h.H - 0.2, couplets: h.kind !== 'shop', strings: h.kind === 'shop' ? r() < 0.35 : r() < 0.65, seed: h.seed + 3 });
     if (r() < 0.45) L.push({ t: 'ladder', at: F.P(0.05, 0.4), y: Y, rot: F.rot, seed: sd() });
     if (r() < 0.35) L.push({ t: 'basket', at: F.P(0.05 + r() * 0.9, 0.8), y: Y, rot: r() * 6.28, n: 2, seed: sd() });
   };
