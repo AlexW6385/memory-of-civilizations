@@ -151,3 +151,9 @@ The opening season, and the didgeridoo and clapsticks of the Gadigal people, the
 - [Cahill Expressway — Wikipedia](https://en.wikipedia.org/wiki/Cahill_Expressway)
 - [Australia Square — Wikipedia](https://en.wikipedia.org/wiki/Australia_Square)
 - [Royal Botanic Garden, Sydney — Wikipedia](https://en.wikipedia.org/wiki/Royal_Botanic_Garden,_Sydney)
+
+### 1i. The shells as sails, and the Point's west wall (2026-11-12)
+
+- Each shell is two convex circular arcs in section (cut from one sphere, as built: "each shell is a section of a sphere of 75.2 m radius" [stated: Wikipedia "Sydney Opera House"]) meeting in a sharp ridge; the ridge sweeps up from the pedestal in a near-straight line to a point leaning out over the glass, the mouth narrowing toward it. The body is plain glossy white tile, the matte cream tiles are the bolder chevrons, ribs and ridge on it [stated: the two tile colours, §1; inferred: the pattern and sizes].
+- A 2.6 m wide slot through each flank at the door of each hall lets one walk in from the gap between the halls (the routes of plan.js now walk).
+- 1973 life at the arrival: the promenade along the Point's west wall with benches facing the water and the Opera House, lamps, anglers with rods on the coping, couples and families strolling, picnics, dogs, gulls on the wall, walkers on the promenade, and more moorings and launches in the cove's mouth [inferred: the people and their numbers; the place from §1f's Point].

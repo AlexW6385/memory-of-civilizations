@@ -28,6 +28,10 @@ export function craft() {
   for (let i = 0; i < 12; i++) { const east = rand() < 0.5; add('yacht', [-260, -330, 260, -110], 30, 22, { rot: east ? -Math.PI / 2 + (rand() - 0.5) * 0.5 : Math.PI / 2 + (rand() - 0.5) * 0.5, len: 9 + rand() * 7, sail: 'up' }); }
   for (let i = 0; i < 2; i++) add('tug', [-120, -300, 120, -120], 30, 26, { rot: rand() * 6, len: 22 + rand() * 4 });
   for (let i = 0; i < 4; i++) add('launch', [-250, -330, 250, -110], 20, 14, { rot: rand() * 6, len: 8 + rand() * 4 });
+  // the cove's mouth below the Point (the arrival's water, 20–90 m out): a few more moorings, launches at work, a yacht reaching home
+  for (let i = 0; i < 4; i++) add('yacht', [166, -168, 206, -104], 9, 12, { rot: 2.2 + (rand() - 0.5) * 0.4, len: 8 + rand() * 5, sail: 'furled' });
+  for (let i = 0; i < 4; i++) add('launch', [160, -172, 206, -104], 8, 9, { rot: rand() * 6, len: 7 + rand() * 4 });
+  for (let i = 0; i < 2; i++) add('yacht', [150, -230, 200, -170], 14, 16, { rot: Math.PI / 2 + (rand() - 0.5) * 0.4, len: 9 + rand() * 4, sail: 'up' });
   return out;
 }
 
@@ -65,6 +69,27 @@ export function sceneLife() {
   // strollers and a picnic on the Point's lawn
   for (let i = 0; i < 18; i++) { const x = 226 + rand() * 100, z0 = edge(x); if (z0 == null) continue; const z = z0 + 9 + rand() * 24; if (!inRect(MACQUARIE, x, z)) continue; person([x, z], height(x, z), rand() * 6.28, rand() < 0.5 ? { pose: 'talk' } : {}); }
   for (let i = 0; i < 4; i++) { const x = 240 + rand() * 70, z0 = edge(x); if (z0 == null) continue; const z = z0 + 14 + rand() * 12, c = [x, z]; for (let k = 0; k < 3; k++) person([c[0] + Math.cos(k * 2.1) * 0.9, c[1] + Math.sin(k * 2.1) * 0.9], height(...c), k * 2.1 + Math.PI / 2, { pose: 'sit_ground' }); }
+  // ── the Point's west wall (the arrival's foreground, looking west over the cove's mouth to the Opera House): the promenade along the
+  //    wall with benches facing the water and the Opera House, lamps, couples and families strolling, anglers on the coping, a picnic on the lawn ──
+  const wallX = (z) => { let x = 205; while (shore(x, z) <= 1.8 && x < 260) x += 0.25; return x; };
+  const wz0 = -142, wz1 = -99;
+  for (let z = wz0 + 3; z < wz1; z += 8.5) {
+    const wx = wallX(z), at = [wx + 3.2, z + 0.5 * Math.sin(z)];
+    L.push({ t: 'bench', at, y: height(...at), rot: -Math.PI / 2, len: 1.9, back: true, mat: 'timber', seed: Math.floor(z) + 31 });
+    for (const dz of [-0.4, 0.4]) if (rand() < 0.62) person([at[0] - 0.05, at[1] + dz], height(...at), Math.PI / 2, { pose: 'sit' });
+    L.push({ t: 'street_lamp', at: [wx + 2.1, z + 4.2], y: height(wx + 2.1, z + 4.2), h: 4.6 });
+  }
+  for (let i = 0; i < 9; i++) { const z = wz0 + 4 + rand() * (wz1 - wz0 - 8), wx = wallX(z); person([wx + 1.5 + rand() * 1.0, z], height(wx + 2, z), Math.PI / 2 + (rand() - 0.5) * 0.4, { carry: 'staff', len: 2.4, hat: 'brim', hatMat: 'cloth_ochre' }); }
+  for (let i = 0; i < 16; i++) {                                    // strollers and talkers on the promenade, in twos, the women with their hair done for the weekend
+    const z = wz0 + 2 + rand() * (wz1 - wz0 - 4), wx = wallX(z), x = wx + 4.4 + rand() * 3.5, r = rand() < 0.5 ? 0 : Math.PI;
+    if (rand() < 0.55) { person([x, z], height(x, z), r, rand() < 0.4 ? { pose: 'talk' } : {}); person([x + 0.7, z + 0.2], height(x, z), r + 0.15, {}); } else person([x, z], height(x, z), r + (rand() - 0.5), {});
+  }
+  for (let i = 0; i < 5; i++) { const z = wz0 + 8 + rand() * (wz1 - wz0 - 16), x = wallX(z) + 8 + rand() * 12, c = [x, z]; for (let k = 0; k < 3 + (i % 2); k++) person([c[0] + Math.cos(k * 1.9) * 0.9, c[1] + Math.sin(k * 1.9) * 0.9], height(...c), k * 1.9 + Math.PI / 2, { pose: 'sit_ground' }); }
+  for (let i = 0; i < 12; i++) {                                    // and the stretch the arrival looks along (the wall from 8 to 30 m ahead-right): more of them, so that the first view has people in it
+    const z = -140 + rand() * 20, wx = wallX(z), x = wx + 1.6 + rand() * 6;
+    if (i < 4) person([wx + 1.4 + rand() * 0.8, z], height(wx + 2, z), Math.PI / 2 + (rand() - 0.5) * 0.3, { carry: 'staff', len: 2.4, hat: 'brim', hatMat: 'cloth_ochre' }); else person([x, z], height(x, z), rand() * 6.28, rand() < 0.4 ? { pose: 'talk' } : {});
+  }
+  for (let i = 0; i < 4; i++) { const z = wz0 + 6 + rand() * (wz1 - wz0 - 12), x = wallX(z) + 6 + rand() * 18; L.push({ t: 'animal', kind: 'dog', at: [x, z], y: height(x, z), rot: rand() * 6.28, seed: Math.floor(rand() * 1e6) }); }
   // ── the Garden: benches and lamps along the paths, people on them (the paths of movers.js, the one across the lawns at z 44, the one down the east side at x 200) ──
   for (let x = 176; x < 400; x += 22) {
     const at = [x, 40.8]; if (!inRect(GARDEN, x, 40)) continue;
@@ -89,7 +114,8 @@ export function sceneLife() {
     L.push({ t: 'car', at: [lx0 + (k + 0.5) * lw, z], y: BRIDGE.deck, rot: k < 4 ? 0 : Math.PI, era: 1970, s: cs, seed: Math.floor(rand() * 1e9) });
   }
   for (const [dz, rot] of [[-8.5, -Math.PI / 2], [-4.8, -Math.PI / 2], [4.8, Math.PI / 2], [8.5, Math.PI / 2]]) for (let x = QUAY[0] + 4 + rand() * 6; x < QUAY[2] - 3; x += 9 + rand() * 18) L.push({ t: 'car', at: [x, (QUAY[1] + QUAY[3]) / 2 + dz * 0.6 + 0.0], y: 13, rot, era: 1970, seed: Math.floor(rand() * 1e9) });
-  return L;
+  // (nothing stands within 4.5 m of the arrival at (222, −116))
+  return L.filter((e) => !(e.at && Math.hypot(e.at[0] - 222, e.at[1] + 116) < 4.5));
 }
 
 /** The elements in modern style: the chair on the Point's rock. */
