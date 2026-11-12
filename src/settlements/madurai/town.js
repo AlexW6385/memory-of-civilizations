@@ -5,11 +5,12 @@ import { pudhuMandapam } from './plan.js';
 const base = (id, elements) => ({ id, style: 'dravidian', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-20, 200], facing: 'n' } });
 /** How far from the temple wall the houses and shops are hollow and furnished (the first four streets' rows). */
 export const RICH = 125;
+const TILE = 160;   // m: one plan per tile and material, so larger tiles mean fewer meshes (geometry budget)
 export async function town() {
   const plans = [], tiles = new Map();
   for (const l of lots()) {
     if (l.kind === 'yard') continue;
-    const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, k = `${Math.floor(cx / 100)},${Math.floor(cz / 100)}`;
+    const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, k = `${Math.floor(cx / TILE)},${Math.floor(cz / TILE)}`;
     if (!tiles.has(k)) tiles.set(k, []);
     tiles.get(k).push({ t: l.kind === 'court' ? 'court_house' : 'tamil_house', ...l, rich: l.kind !== 'court' && outside(cx, cz) < RICH });
   }
@@ -81,7 +82,7 @@ function street() {
   E.push({ t: 'animal', kind: 'zebu', at: [190, pz + 2.4], y: 1.2, rot: 1.3, seed: 31, mat: 'hide_white', graze: false });
   man([214, pz - 3.7], 1.2, [0, 1], { pose: 'sit_ground' });
   // cows in the streets
-  for (const [x, z, rot] of [[60, WALL[3] + 19, 0.6], [-90, WALL[3] + 17, 2.4], [WALL[2] + 18, 60, 4.2], [WALL[0] - 19, -70, 1.9], [-20, WALL[3] + 80, 3.1]]) E.push({ t: 'animal', kind: 'zebu', at: [x, z], y: 0, rot, seed: seed++, mat: pick(['hide_white', 'hide_grey', 'hide_white']) });
+  for (const [x, z, rot] of [[60, WALL[3] + 19, 0.6], [-90, WALL[3] + 17, 2.4], [WALL[2] + 18, 60, 4.2], [WALL[0] - 19, -70, 1.9], [-14.5, WALL[3] + 80, 3.1]]) E.push({ t: 'animal', kind: 'zebu', at: [x, z], y: 0, rot, seed: seed++, mat: pick(['hide_white', 'hide_grey', 'hide_white']) });
   return { id: 'madurai-street-life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: E, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-20, 200], facing: 'n' } };
 }
 
