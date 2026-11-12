@@ -86,7 +86,7 @@ for (const sz of [-1, 1]) {
     add({ t: 'stair', rect: [TRIB_STAIR.x0, ZC - hw, TRIB_STAIR.x1, ZC + hw], dir: 'e', y0: 0, y1: TRIB, riser: 0.19, mat: 'limestone_yellow' });
     for (const z of [ZC - hw - 0.06, ZC + hw + 0.06]) add({ t: 'wall', a: [TRIB_STAIR.hole, z], b: [TRIB_STAIR.x1 - 1.0, z], th: 0.12, y0: TRIB, y1: TRIB + 0.95, mat: 'wood_dark', openings: [] });
     // the breast of the tribune toward the nave, the outer wall and the east end: nothing to walk out through (the carved wall above is open work)
-    for (const [r, y1] of [[[XW, -AI + 0.02, TW1, -AI - 1.3], 14.8], [[XW, -AO + 0.05, TW1, -AO - 1.2], OUT], [[TW1, -AO, TW1 + 0.3, -AI], OUT]]) add({ t: 'blocker', rect: r, y0: TRIB, y1 });
+    for (const [r, y1] of [[[XW, -AI + 0.02, TW1, -AI - 0.3], 14.8], [[XW, -AO + 0.05, TW1, -AO - 1.2], OUT], [[TW1, -AO, TW1 + 0.3, -AI], OUT]]) add({ t: 'blocker', rect: r, y0: TRIB, y1 });
   } else {
     add({ t: 'barrel', axis: 'x', s0: XW, s1: TW1 + 2.85, c: sz * (AI + AO) / 2, y: AISLE_SPR, r: (AO - AI) / 2, th: 0.4, mat: 'limestone_yellow' });
     add({ t: 'slab', rect: [XW, sz * AI, TW1, sz * AO], y0: AISLE_CROWN + 0.4, y1: TRIB, mat: 'limestone_yellow' });
@@ -325,7 +325,7 @@ const walks = [
   // out by the south aisle into the cloister, round its galleries
   [[12, 0], [12, 6.6], [9.4, 6.6], [8.2, 6.6], [8.2, 11.2], [1.5, 11.2], [1.5, 27.6], [17.9, 27.6], [17.9, 11.2], [8.2, 11.2]],
 ];
-walks.push([[4.4, -6.6], [16, -6.6], [20.1, -6.6], [20.1, -5.4], [12, -5.4], [6, -5.4]]);   // up the stair to the tribune and along it
+walks.push([[4.4, -6.6], [16, -6.6], [20.1, -6.6], [20.1, -7.9], [12, -7.9], [6, -7.9]]);   // up the stair to the tribune and along it
 walks[3].y0 = 0;
 walks[0].y0 = 0; walks[1].y0 = 0; walks[2].y0 = 0;
 

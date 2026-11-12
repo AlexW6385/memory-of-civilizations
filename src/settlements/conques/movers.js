@@ -70,6 +70,10 @@ export const WALKERS = [
     c1: [CL.blue, CL.red, CL.ochre, CL.grey], c2: [CL.white, CL.brown], c3: [CL.white], speed: [0.9, 1.15], stride: 1.25, h: [0.9, 0.97] },
   { id: 'peasant', weight: 0.9, market: 0.6, el: { dress: 'robe', hair: 'short', hat: 'cap', over: 'sash', carry: 'sack', arms: 'hang' },
     c1: [CL.brown, CL.grey, CL.green], c2: [CL.brown, CL.grey], c3: [CL.brown], speed: [0.85, 1.1], stride: 1.3 },
+  { id: 'carrier', weight: 0.6, market: 0.8, el: { dress: 'robe', hair: 'short', hat: 'cap', over: 'sash', carry: 'pails', arms: 'hang' },
+    c1: [CL.brown, CL.grey, CL.blue], c2: [CL.brown, CL.white], c3: [CL.brown], speed: [0.85, 1.05], stride: 1.3 },
+  { id: 'woodman', weight: 0.5, market: 0.2, el: { dress: 'robe', hair: 'short', hat: 'cap', over: 'sash', carry: 'wood_head', arms: 'hang' },
+    c1: [CL.brown, CL.green, CL.grey], c2: [CL.brown], c3: [CL.brown], speed: [0.85, 1.1], stride: 1.3 },
   { id: 'child', weight: 0.5, market: 0.8, el: { dress: 'robe', hair: 'short', arms: 'hang' },
     c1: [CL.brown, CL.red, CL.ochre], c2: [CL.white, CL.grey], c3: [CL.black], speed: [1.1, 1.5], stride: 1.0, h: [0.55, 0.7], swing: 1.1 },
 ];

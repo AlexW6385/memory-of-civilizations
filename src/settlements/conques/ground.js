@@ -23,14 +23,14 @@ function planting(x, z) {
   const dz = Math.abs(z - (RIVER.z + 14 * Math.sin(x / 90)));
   if (dz < RIVER.w / 2 + 4) return { willow: 0.12, reeds: 3, grass: 20 };
   if (dz < RIVER.w / 2 + 16) return { poplar: 0.06, willow: 0.03, grass: 25 };
-  if (r > 170) return { oak: 0.35, grass: 15 };
+  if (r > 170) return { oak: 0.35, maquis: 0.07, grass: 15 };
   // elms and walnuts (elms stand in) by the houses, apples in the terraced gardens
-  if (inLot(x, z, 6)) return { apple: 0.03, grass: 18 };
+  if (inLot(x, z, 6)) return { apple: 0.03, elm: 0.015, grass: 18 };
   return { apple: 0.03, oak: 0.05, grass: 20 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { oak: 0.35, apple: 0.05, willow: 0.12, poplar: 0.06, elm: 0.02, reeds: 3 },
+  maxDensity: { oak: 0.35, apple: 0.05, willow: 0.12, poplar: 0.06, elm: 0.02, reeds: 3, maquis: 0.08 },
   climate: {
     sun: { az: 160, el: 45, color: [1.0, 0.96, 0.9], intensity: 3.3, lat: 45, dec: 8, hour: 11 },
     sky: { turbidity: 2.8, rayleigh: 1.05, mie: 0.006, mieG: 0.78, zenith: [0.08, 0.15, 0.38], horizon: [0.64, 0.68, 0.72] },

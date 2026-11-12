@@ -15,10 +15,12 @@ const flights = [
   { kind: 'crow', n: 6, loop: { c: [ABBEY.origin[0] + 36, 0], a: [34, 26], rot: 0.5 }, y: [32, 14], speed: 8 },
 ];
 const perches = [];
+// crows on the ridge of the nave and the gables of the west front
+for (const [lx, lz] of [[12, 0], [22, 0], [-0.3, 0], [34, 0]]) perches.push({ kind: 'crow', x: ABBEY.origin[0] + lx, z: lz, y: 27.6, rot: Math.PI / 2, range: [1.2, 0], alert: 12 });
 // house sparrows on the cobbles of the lanes and the square
 {
   let k = 0;
-  for (const l of lanes()) for (let x = l.x0 + 10; x < l.x1 - 6; x += 38) {
+  for (const l of lanes()) for (let x = l.x0 + 10; x < l.x1 - 6; x += 21) {
     const px = x + (k % 4) * 3, pz = l.z + ((k * 7) % 5 - 2) * 0.25;
     if (Math.hypot(px, pz) > RADIUS - 150) { k++; continue; }
     perches.push({ kind: 'sparrow', x: px, z: pz, y: ground.height(px, pz), rot: 0.4 + (k % 7) * 0.8, range: [1.4, 1.1] }); k++;

@@ -108,14 +108,14 @@ export function insides() {
   const rand = rng(4114), L = [], O = ABBEY.origin;
   const robe = (at, y, rot, o) => L.push({ t: 'figure', at, y, rot, h: 1.58 + rand() * 0.14, seed: Math.floor(rand() * 1e9), dress: 'robe', skin: 'skin_light', ...o });
   // the tribune (§1i): pilgrims keeping vigil along its breast, looking down the nave to the Majesty
-  for (const [lx, lz, p] of [[8.5, -6.2, 'kneel'], [11.2, -5.7, 'kneel'], [14.0, -6.3, 'kneel'], [6.8, -5.6, 'stand'], [17.5, -5.4, 'stand']]) {
+  for (const [lx, lz, p] of [[8.5, -5.6, 'kneel'], [11.2, -5.5, 'kneel'], [14.0, -5.7, 'kneel'], [6.8, -5.6, 'stand'], [18.0, -5.4, 'stand']]) {
     const at = [O[0] + lx, O[1] + lz];
     robe(at, 10.9, face(at, [at[0] + 4, 0]), { cloth: CL[Math.floor(rand() * 3)], cloth2: 'cloth_grey', hat: p === 'kneel' ? 'cap' : 'brim', hatMat: 'cloth_brown', pose: p, ...(p === 'kneel' ? { arms: 'pray' } : {}) });
   }
   // the cloister: monks walking the galleries, one reading by the basin, one on his knees at the beds of the garth, two in talk
   const cl = [O[0], O[1] + 9.7];                              // the cloister square's west-north corner (nave's outer wall at z = 9.7)
   const mk = (lx, lz, to, o = {}) => { const at = [cl[0] + lx, cl[1] + lz]; robe(at, 0.05, face(at, [cl[0] + to[0], cl[1] + to[1]]), { cloth: 'cloth_black', cloth2: 'cloth_black', hat: 'veil', hatMat: 'cloth_black', hair: 'shaven', over: 'cape', ...o }); };
-  mk(9.7, 1.4, [14, 1.4]); mk(1.6, 9.7, [1.6, 15], { pose: 'staff' }); mk(17.8, 8.5, [17.8, 3]);
+  mk(9.7, 2.5, [14, 2.5]); mk(2.6, 9.7, [2.6, 15], { pose: 'staff' }); mk(16.8, 8.5, [16.8, 3]);
   mk(7.6, 8.9, [9.7, 9.7], { pose: 'talk' }); mk(8.6, 10.6, [7.6, 8.9], { pose: 'talk' });
   mk(13.2, 12.6, [9.7, 9.7], { pose: 'kneel', arms: 'hang', hat: 'none' });
   mk(12.4, 4.6, [9.7, 6.0]);
