@@ -17,8 +17,8 @@ export async function town() {
     }
     plans.push({ ...base(`samarkand-houses-${i / 24}`, part.map((h) => ({ t: h.garden ? 'tim_garden' : 'tim_house', h })), [-RADIUS, -RADIUS, RADIUS, RADIUS]), rooms });
   }
-  plans.push(base('samarkand-bibi-khanym', [{ t: 'bibi_khanym', c: BIBI.c }], [BIBI.c[0] - 105, BIBI.c[1] - 105, BIBI.c[0] + 105, BIBI.c[1] + 105], [{ id: 'bibi court', rect: [BIBI.c[0] - 30, BIBI.c[1] - 30, BIBI.c[0] + 30, BIBI.c[1] + 30], y: 0, kind: 'open' }]));
-  plans.push(base('samarkand-gur-e-amir', [{ t: 'gur_e_amir', rect: GUR.rect }], [GUR.rect[0] - 8, GUR.rect[1] - 8, GUR.rect[2] + 8, GUR.rect[3] + 8]));
+  plans.push(base('samarkand-bibi-khanym', [{ t: 'bibi_khanym', c: BIBI.c }], [BIBI.c[0] - 105, BIBI.c[1] - 105, BIBI.c[0] + 105, BIBI.c[1] + 105], [{ id: 'bibi prayer hall', rect: [BIBI.c[0] - 0.7071 * 62 - 8, BIBI.c[1] + 0.7071 * 62 - 8, BIBI.c[0] - 0.7071 * 62 + 8, BIBI.c[1] + 0.7071 * 62 + 8], y: 0, kind: 'hall' }, { id: 'bibi court', rect: [BIBI.c[0] - 30, BIBI.c[1] - 30, BIBI.c[0] + 30, BIBI.c[1] + 30], y: 0, kind: 'open' }]));
+  plans.push(base('samarkand-gur-e-amir', [{ t: 'gur_e_amir', rect: GUR.rect }], [GUR.rect[0] - 8, GUR.rect[1] - 8, GUR.rect[2] + 8, GUR.rect[3] + 8], [{ id: 'mausoleum', rect: [(GUR.rect[0] + GUR.rect[2]) / 2 - 6, GUR.rect[3] - 13 - 6, (GUR.rect[0] + GUR.rect[2]) / 2 + 6, GUR.rect[3] - 13 + 6], y: 0, kind: 'hall' }, { id: 'mausoleum passage', rect: [(GUR.rect[0] + GUR.rect[2]) / 2 - 2, GUR.rect[3] - 26, (GUR.rect[0] + GUR.rect[2]) / 2 + 2, GUR.rect[3] - 19], y: 0, kind: 'hall' }]));
   plans.push({ ...base('samarkand-observatory', [{ t: 'observatory', c: OBS.c, y: OBS.y, r: OBS.r }], [OBS.c[0] - 60, OBS.c[1] - 40, OBS.c[0] + 60, OBS.c[1] + 80]) });
   // the chorsu and the bazaar's streets
   const E = [{ t: 'chorsu', c: CHORSU.c, r: CHORSU.r }];

@@ -4,6 +4,8 @@
 
 import { box, lathe, fromTriangles, clothBox, addCloth, place } from '../../core/geom.js';
 import { hungCarpet } from './market.js';
+import { frame } from './frame.js';
+import { chamber, cenotaph, prayerHall } from './interiors.js';
 import { orientedBox } from '../../core/build.js';
 import { arcadeWall } from '../mughal/index.js';
 import * as F from '../mughal/furnish.js';
@@ -102,8 +104,18 @@ export function bibiKhanym(el, ctx) {
     for (const [p, q] of [[a, b], [b2, c2]]) { const L = Math.hypot(q[0] - p[0], q[1] - p[1]), n = 4, w = L / n, aa = []; for (let i = 0; i < n; i++) aa.push({ at: (i + 0.5) * w, w: 2.8, h: 7.5, depth: 0.2, back: 'tile_lapis' }); arcadeWall(bag, col, p, q, 0, WH, 0.8, B, aa, M(0, CV + 100)); }
     void ar; }
   // the sanctuary: the iwan on the court, the great dome behind it (about 40 m outside), 13 m square walls
-  pishtaqOf({ a: M(-17, CV + 0.6), b: M(17, CV + 0.6), facing: M(0, 0), y: 0, h: 30, depth: 8, iwan: { w: 14, h: 24, depth: 7 } }, ctx);
-  domeBlock({ c: M(0, 62), half: 13, y: 0, wallH: 16, trans: 3.5, drum: { r: 8.6, h: 8 }, dome: { r: 10.2, h: 12.5, ribs: 32 } }, ctx);
+  pishtaqOf({ a: M(-17, CV + 0.6), b: M(17, CV + 0.6), facing: M(0, 0), y: 0, h: 30, depth: 8, iwan: { w: 14, h: 24, depth: 7, pass: true, doorH: 7 } }, ctx);
+  { // the prayer hall under the great dome: 22 × 22 m inside, walls 2 m (3.4 m at the entrance), the passage behind the iwan; built in the enclosure's own frame
+    const fr = frame(ctx, C[0], C[1], -0.5), sol = (x0, z0, x1, z1, y0, y1, m = B) => { fr.bag.add(m, box(x0, y0, z0, x1, y1, z1)); fr.col.rect([x0, z0, x1, z1], y0, y1); };
+    sol(-13, 47.6, -11, 75, 0, 16); sol(11, 47.6, 13, 75, 0, 16); sol(-11, 73, 11, 75, 0, 16);
+    sol(-11, 47.6, -2.3, 51, 0, 16); sol(2.3, 47.6, 11, 51, 0, 16);
+    fr.bag.add(B, box(-2.3, 7, 47.6, 2.3, 16, 51)); fr.col.rect([-2.3, 47.6, 2.3, 51], 7, 16);
+    fr.bag.add('marble_floor', box(-2.3, 0, 47.4, 2.3, 0.06, 51));
+    for (const sgn of [-1, 1]) bannai(fr.bag, { a: [sgn * 13, 60], b: [sgn * 13, 74], n: [sgn, 0], d: 0.02, y: 0, s0: 0.2, s1: 13.8, v0: 13.2, v1: 14.8, kind: 'kufic', base: LAP, ink: WHI, alt: CRE, ink2: TUR, cell: 0.55, seed: 77 + sgn });
+    domeBlock({ c: [0, 62], half: 13, y: 0, walls: false, wallH: 16, trans: 3.5, drum: { r: 8.6, h: 8 }, dome: { r: 10.2, h: 12.5, ribs: 32 } }, { bag: fr.bag, col: fr.col });
+    chamber(fr, { c: [0, 62], hx: 11, hz: 11, h: 16, innerR: 8.1, drumH: 12, domeH: 10, ribs: 32, dado: 2.6, doorWall: 2, door: [8.7, 13.3] });
+    prayerHall(fr, { c: [0, 62], hx: 11, hz: 11, lampY: 10.5, lampTop: 16 }, fr.lights);
+  }
   // the two lesser domes at the middles of the long sides, behind a pishtaq each
   for (const s of [-1, 1]) {
     pishtaqOf({ a: M(s * (CU + 0.6), -11), b: M(s * (CU + 0.6), 11), facing: M(0, 0), y: 0, h: 18, depth: 21, iwan: { w: 10, h: 14, depth: 6 } }, ctx);
@@ -150,8 +162,22 @@ export function gurEAmir(el, ctx) {
   void south;
   // the mausoleum: a square block 26 m across, the pishtaq on the court, the octagon, the tall drum, the ribbed dome
   const A = 13;
-  solid(bag, col, B, [cx - A, mz - A, cx + A, mz + A], 0, 12);
-  pishtaqOf({ a: [cx - 10, mz - A + 0.6], b: [cx + 10, mz - A + 0.6], facing: [cx, mz - 80], y: 0, h: 16, depth: 4, iwan: { w: 9, h: 12, depth: 3.4 } }, ctx);
+  // the walls round the tomb chamber (12 × 12 inside): the entrance through the portal's iwan, a passage in the thick north wall
+  solid(bag, col, B, [cx - A, mz - 11.8, cx - 6, mz + A], 0, 12); solid(bag, col, B, [cx + 6, mz - 11.8, cx + A, mz + A], 0, 12);
+  solid(bag, col, B, [cx - 6, mz + 6, cx + 6, mz + A], 0, 12);
+  solid(bag, col, B, [cx - 6, mz - 11.8, cx - 4.5, mz - 8.2], 0, 12); solid(bag, col, B, [cx + 4.5, mz - 11.8, cx + 6, mz - 8.2], 0, 12);
+  solid(bag, col, B, [cx - 6, mz - 8.2, cx - 2.03, mz - 6], 0, 12); solid(bag, col, B, [cx + 2.03, mz - 8.2, cx + 6, mz - 6], 0, 12);
+  bag.add(B, box(cx - 2.03, 5.2, mz - 8.2, cx + 2.03, 12, mz - 6)); col.rect([cx - 2.03, mz - 8.2, cx + 2.03, mz - 6], 5.2, 12);
+  bag.add('marble_floor', box(cx - 2.03, 0, mz - 8.2, cx + 2.03, 0.06, mz - 6));
+  pishtaqOf({ a: [cx - 10, mz - A + 0.6], b: [cx + 10, mz - A + 0.6], facing: [cx, mz - 80], y: 0, h: 16, depth: 4, iwan: { w: 9, h: 12, depth: 3.4, pass: true, doorH: 5.2 } }, ctx);
+  { // inside: the finish of the chamber, the cenotaphs, the lamps
+    const fr = frame(ctx, 0, 0, 0);
+    chamber(fr, { c: [cx, mz], hx: 6, hz: 6, h: 12, innerR: 5.9, drumH: 11, domeH: 8, ribs: 32, doorWall: 2, door: [3.97, 8.03] });
+    cenotaph(bag, col, cx, mz, Math.PI / 2, true, 1.0);
+    for (const [dx, dz] of [[-3.5, 0.3], [3.5, 0.3], [-1.7, 3.5], [1.7, 3.5], [0, -3.7]]) cenotaph(bag, col, cx + dx, mz + dz, Math.PI / 2, false, 0.92);
+    for (const [dx, dz] of [[-3.5, -3.5], [3.5, -3.5], [-3.5, 3.5], [3.5, 3.5]]) F.mosqueLamp(bag, ctx.lights, cx + dx, 8.2, mz + dz, 12, { k: 1.5, enamel: true, glow: 4, reach: 16 });
+    F.mosqueLamp(bag, ctx.lights, cx, 7.0, mz, 12, { k: 1.9, enamel: true, glow: 5, reach: 20 });
+  }
   domeBlock({ c: [cx, mz], half: A, y: 0, wallH: 12, walls: false, trans: 3.2, drum: { r: 7.6, h: 11 }, dome: { r: 9, h: 12.5, ribs: 32 } }, ctx);
   // four minarets: two on the portal's flanks, two at the mausoleum's front corners
   for (const [x, z] of [[cx - 7.5, z0 + 1], [cx + 7.5, z0 + 1], [cx - A + 0.5, mz - A + 0.5], [cx + A - 0.5, mz - A + 0.5]]) tiledMinaret(bag, col, { c: [x, z], y: 0, h: 30, r: 2.1 });
