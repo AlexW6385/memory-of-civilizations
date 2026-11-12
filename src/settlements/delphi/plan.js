@@ -2,7 +2,8 @@
 // Column, the Naxian sphinx and the offerings), and the sanctuary below and above it: the Sacred Way with its treasuries (the Athenian
 // among them) and the Athenian Stoa under the polygonal wall, the theatre and the stadium above, the Castalian spring, the gate and
 // the forecourt. Elements; the heights come from layout.js.
-import { STAIR, TT, TT_Y, TREASURIES, STOA, THEATRE, STADIUM, STADIUM_Y, SPRING, SPRING_Y, WAY, WAY2, wayY, way2Y, wayPoints, FC, FC_Y, height, WALL_S } from './layout.js';
+import { STALLS, STAIR, TT, TT_Y, TREASURIES, STOA, THEATRE, STADIUM, STADIUM_Y, SPRING, SPRING_Y, WAY, WAY2, wayY, way2Y, wayPoints, FC, FC_Y, height, WALL_S } from './layout.js';
+import { terraceDedications, wayDedications } from './votives.js';
 import { temple, treasury, stoa, terraceMonuments, terraceWalls, retain } from './buildings.js';
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
@@ -12,6 +13,7 @@ const T = [];
 const tr = temple(T);
 T.push({ t: 'floor', rect: [TT[0] + 0.5, TT[1] + 0.5, TT[2] - 0.5, TT[3] - 0.5], y: TT_Y + 0.03, th: 0.3, mat: 'limestone', walk: false });
 terraceMonuments(T);
+terraceDedications(T);
 const rib = (P, o) => ({ t: 'ribbon', pts: P.map((p) => [p[0], p[2]]), ys: P.map((p) => p[1]), ...o });
 T.push(rib(wayPoints(WAY, wayY).filter((p) => p[2] < 30), { w: 3.6, mat: 'flagstone', kerb: false, lift: 0.04 }));
 const terraceRooms = [room('the terrace', [-34, -20, 90, 24], TT_Y, 'open'), room('before the temple', [30, -12, 70, 12], TT_Y, 'open'), ...tr.rooms];
@@ -39,6 +41,7 @@ terraceWalls(S);
 S.push({ t: 'stair', rect: STAIR, dir: 'n', y0: 13.1, y1: TT_Y, riser: 0.17, base: 11, mat: 'limestone' });
 S.push(rib(wayPoints(WAY, wayY).filter((p) => p[2] >= 24 && !(p[0] > 85.9 && p[0] < 86.1 && p[2] < 43.9)), { w: 3.6, mat: 'flagstone', kerb: true, lift: 0.04 }));
 S.push(rib(wayPoints(WAY2, way2Y), { w: 2.4, mat: 'flagstone', kerb: false, lift: 0.04 }));
+wayDedications(S);
 const sanctRooms = [];
 for (const t of TREASURIES) sanctRooms.push(treasury(S, t));
 STOA.y = STOA.y ?? 0;
@@ -72,7 +75,40 @@ retain(S, [THEATRE.c[0] - 24, THEATRE.c[1] + 9], [THEATRE.c[0] + 24, THEATRE.c[1
 }
 // the gate's forecourt: stalls of the votive sellers beside the way in
 {
-  [[100.2, 112, 103.6, 114.4], [100.2, 119, 103.6, 121.4], [88.5, 116, 92, 118.4], [88.5, 123, 92, 125.4], [106, 124, 109.4, 126.4]].forEach((r, i) => S.push({ t: 'stall', rect: r, y: FC_Y, seed: i }));
+  STALLS.slice(0, 5).forEach((r, i) => S.push({ t: 'stall', rect: r, y: FC_Y, seed: i }));
+}
+// the forecourt as a market: two more rows of stalls, the water trough, benches in the shade of the planes, a herm at the gate, braziers
+{
+  const y = FC_Y;
+  STALLS.slice(5).forEach((r, k) => S.push({ t: 'stall', rect: r, y, seed: 20 + k }));
+  for (const [x, z] of [[104.5, 118], [123, 119.5], [146, 118.5]]) S.push({ t: 'tree', kind: 'plane', at: [x, z], y, seed: Math.round(x) });
+  for (const [x, z, yw] of [[106.2, 121.5, 0], [125.5, 116.5, 0], [141, 121, Math.PI]]) S.push({ t: 'stone_bench', at: [x, z], y, yaw: yw, len: 2.4 });
+  S.push({ t: 'block', rect: [116, 119.6, 119.4, 120.4], y0: y, y1: y + 0.6, mat: 'limestone' }, { t: 'block', rect: [116.1, 119.7, 119.3, 120.3], y0: y + 0.5, y1: y + 0.52, mat: 'water', collide: false });
+  S.push({ t: 'brazier', at: [101.8, 110.6], y }, { t: 'brazier', at: [134, 112.8], y }, { t: 'basin', at: [93.2, 109.3], y: FC_Y + 0.35 });
+  S.push({ t: 'herm', at: [93, 111.3], y: FC_Y + 0.3, rot: 0 }, { t: 'herm', at: [99.6, 111.3], y: FC_Y + 0.3, rot: 0 });
+  // the cliffs' side: the wall holding the lane above
+}
+// the theatre's front row of stone for the priests, the thymele in the orchestra, trees on the bank behind
+{
+  const [cx, cz] = THEATRE.c;
+  for (const a of [-0.55, -0.27, 0, 0.27, 0.55]) { const x = cx + Math.sin(a) * (THEATRE.d0 + 0.7), z = cz - Math.cos(a) * (THEATRE.d0 + 0.7); S.push({ t: 'stone_bench', at: [x, z], y: THEATRE.y - 0.1, yaw: -a + Math.PI / 2 * 0 + 0, len: 1.9, mat: 'marble' }); }
+  S.push({ t: 'block', rect: [cx - 0.6, cz - 0.6, cx + 0.6, cz + 0.6], y0: THEATRE.y - 0.3, y1: THEATRE.y + 0.35, mat: 'limestone' });
+  for (const [dx, dz] of [[-24, -34], [18, -36], [34, -22], [-34, -18], [4, -40]]) { const x = cx + dx, z = cz + dz; S.push({ t: 'tree', kind: dx % 2 ? 'cypress' : 'holm', at: [x, z], y: height(x, z), seed: dx * 3 }); }
+}
+// the stadium: trees on its banks, benches for the judges, the athletes' basin, a herm at the starting sills
+{
+  const [x0, z0, x1, z1] = STADIUM, y = STADIUM_Y;
+  for (let k = 0; k < 7; k++) { const x = x0 + 10 + k * 14, z = z1 + 5 + (k % 2) * 3; S.push({ t: 'tree', kind: k % 3 ? 'cypress' : 'holm', at: [x, z], y: height(x, z), seed: 70 + k }); }
+  for (let k = 0; k < 4; k++) { const x = x1 - 20 - k * 22; S.push({ t: 'stone_bench', at: [x, z0 - 1.8], y: height(x, z0 - 1.8), yaw: Math.PI, len: 2.4 }); }
+  S.push({ t: 'basin', at: [x1 - 6, z1 + 2.2], y: y + 0.0 }, { t: 'herm', at: [x1 - 3.6, z0 + 1.3], y, rot: -Math.PI / 2 }, { t: 'herm', at: [x1 - 3.6, z1 - 1.3], y, rot: -Math.PI / 2 });
+  S.push({ t: 'tree', kind: 'plane', at: [x1 + 5, z0 + 10], y: height(x1 + 5, z0 + 10), seed: 3 });
+}
+// the spring: planes in the ravine, benches, a niche with offerings
+{
+  const [x0, z0] = SPRING;
+  for (const [dx, dz] of [[-16, -4], [-14, 6], [-20, 1]]) { const x = x0 + dx, z = z0 + 9 + dz; S.push({ t: 'tree', kind: 'plane', at: [x, z], y: height(x, z), seed: 5 + dx }); }
+  for (const [dx, dz] of [[-12, 4], [-11, 3]]) { const x = x0 + dx, z = z0 + dz; S.push({ t: 'tree', kind: 'bay', at: [x, z], y: height(x, z), seed: dx }); }
+  S.push({ t: 'offering_table', at: [x0 - 6.8, 0], y: SPRING_Y, yaw: Math.PI / 2, seed: 31 });
 }
 void FC; void WALL_S; void TT;
 const swalks = [wayPoints(WAY, wayY, 4).map(([x, , z]) => [x, z]).filter(([, z]) => z >= 26)];

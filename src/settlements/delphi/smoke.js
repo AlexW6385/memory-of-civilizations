@@ -9,10 +9,13 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1
 export function emitters() {
   const E = [], r = rng(400);
   // the hearths of the Delphians' houses at the meals (the smoke leaves by the roof)
-  for (const l of lots()) if (r() < 0.55) E.push({ p: [l.rect[0] + (l.rect[2] - l.rect[0]) * (0.3 + r() * 0.3), l.y + 4.2, l.rect[1] + (l.rect[3] - l.rect[1]) * (0.4 + r() * 0.3)], kind: 'kitchen', thr: 0.1 + 0.7 * r(), seed: Math.round(l.rect[0] * 3 + l.rect[1]) });
+  for (const l of lots()) if (r() < 0.72) E.push({ p: [l.rect[0] + (l.rect[2] - l.rect[0]) * (0.3 + r() * 0.3), l.y + 4.2, l.rect[1] + (l.rect[3] - l.rect[1]) * (0.4 + r() * 0.3)], kind: 'kitchen', thr: 0.1 + 0.7 * r(), seed: Math.round(l.rect[0] * 3 + l.rect[1]) });
   // the sacrifices on the altar of the Chians burn all day and the temple's hearth of pine is never let out: a plume over the altar, a thin one from the temple's roof
   E.push({ p: [ALTAR.c[0], TT_Y + 3.2, ALTAR.c[1]], kind: 'kitchen', thr: 0, seed: 3 });
   E.push({ p: [-2.5, TT_Y + 14.5, TEMPLE.cz], kind: 'kitchen', thr: 0.05, seed: 4 });
+  // the forges and cook-shops of the walk-in houses burn all day; the braziers of the terrace and the forecourt
+  for (const l of lots()) if (l.open && (l.trade === 'bronze' || l.trade === 'cook')) E.push({ p: [l.rect[0] + 3, l.y + 4.4, l.rect[3] - 3], kind: l.trade === 'cook' ? 'steam' : 'kitchen', thr: 0.02, seed: Math.round(l.rect[0] * 5 + l.rect[1]) });
+  for (const [x, z, y] of [[ALTAR.c[0] - 7.6, ALTAR.c[1] - 3.4, TT_Y + 1.1], [ALTAR.c[0] - 7.6, ALTAR.c[1] + 3.4, TT_Y + 1.1], [101.8, 110.6, 2.6], [134, 112.8, 2.6]]) E.push({ p: [x, y + 0.5, z], kind: 'steam', thr: 0.1, seed: Math.round(x + z) });
   // the gate's stalls: a brazier of the cook-shop by the forecourt
   E.push({ p: [112, 2.2, 121], kind: 'steam', thr: 0.2, seed: 8 });
   return E;
