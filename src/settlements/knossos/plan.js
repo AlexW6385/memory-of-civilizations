@@ -8,7 +8,8 @@ import { COURT, THEATRAL } from './layout.js';
 
 const E = [];
 // the Central Court's paving
-E.push({ t: 'floor', rect: COURT, y: 0.05, th: 0.3, mat: 'flagstone' });
+E.push({ t: 'floor', rect: [COURT[0], -28, COURT[2], 28], y: 0.05, th: 0.3, mat: 'flagstone' });
+E.push({ t: 'court_paving', rect: [COURT[0], -27.5, COURT[2], 27.5], y: 0.05, strip: 1.9, seed: 5 });
 // the wings
 // the West Wing, with the Throne Room cut into it behind its antechamber: the room, the lustral basin sunk in its
 // south-west corner under a light well open to the sky, the two double doors from the antechamber
@@ -30,8 +31,8 @@ for (const [z0, z1, out, st, sd] of [[-60, -38, 2.4, 3, 11], [-30, -12, 1.2, 2, 
 E.push({ t: 'portico', a: [-62, 34], b: [-62, 44], n: 1, depth: 4, side: -1, h: 3.6 });
 // three rooms cut in the wings and furnished (§4e): the archive in the North Wing's east part (opening on the Entrance passage), the oil store in its west part, the kitchen in the South Wing (a doorway on the court)
 const AR = [4.6, -52, 15, -41], ST = [-17, -52, -6.4, -41], KI = [6, 30, 16.4, 39];
-E.push({ t: 'wing', rect: [-19, -62, -3, -28], storeys: 2, windows: 'n', seed: 2, holes: [{ rect: ST, h: 3.3 }, { rect: [ST[2], -48, -3, -46], h: 2.6, lintel: true }] },
-  { t: 'wing', rect: [3, -62, 40, -28], storeys: 2, windows: 'ne', seed: 3, holes: [{ rect: AR, h: 3.3 }, { rect: [3, -48, AR[0], -46], h: 2.6, lintel: true }] });
+E.push({ t: 'wing', rect: [-19, -62, -3, -28], storeys: 2, windows: 'ns', seed: 2, holes: [{ rect: ST, h: 3.3 }, { rect: [ST[2], -48, -3, -46], h: 2.6, lintel: true }] },
+  { t: 'wing', rect: [3, -62, 40, -28], storeys: 2, windows: 'nes', seed: 3, holes: [{ rect: AR, h: 3.3 }, { rect: [3, -48, AR[0], -46], h: 2.6, lintel: true }] });
 E.push({ t: 'furnished_room', rect: AR, y: 0, front: 'w', kind: 'archive', seed: 31 }, { t: 'furnished_room', rect: ST, y: 0, front: 'e', kind: 'store', seed: 32 });
 // the East Wing of four storeys: the light well of the Grand Staircase, its colonnades storey above storey; the
 // Queen's Megaron opening off it with the dolphins on its wall; a passage in from the court's portico
@@ -51,7 +52,7 @@ E.push({ t: 'megaron_bench', rect: [23, 7.0, 23.45, 12.2], y: 0 });
 E.push({ t: 'fresco', kind: 'dancer', at: [23, 9.6], face: 'e', y0: 1.3, w: 1.7, h: 1.6, bg: 'plaster_white' });
 // the bull-leaping fresco on the back wall of the east portico, toward its north end
 E.push({ t: 'fresco', kind: 'bull_leaping', at: [19, -12], face: 'w', y0: 1.1, w: 1.9, h: 1.0, bg: 'egyptian_blue' });
-E.push({ t: 'wing', rect: [-19, 28, -3, 58], storeys: 2, windows: 's', seed: 5 }, { t: 'wing', rect: [3, 28, 19, 58], storeys: 2, windows: 's', seed: 6, holes: [{ rect: KI, h: 3.3 }, { rect: [10, 28, 12.4, KI[1]], h: 2.6, lintel: true }] });
+E.push({ t: 'wing', rect: [-19, 28, -3, 58], storeys: 2, windows: 'sn', seed: 5 }, { t: 'wing', rect: [3, 28, 19, 58], storeys: 2, windows: 'sn', seed: 6, holes: [{ rect: KI, h: 3.3 }, { rect: [10, 28, 12.4, KI[1]], h: 2.6, lintel: true }] });
 E.push({ t: 'furnished_room', rect: KI, y: 0, front: 'n', kind: 'kitchen', seed: 33 });
 // porticoes on the court: the Throne Room's antechamber, the Tripartite Shrine, the east side, the south
 E.push({ t: 'portico', a: [-14.2, -20], b: [-14.2, -8], n: 4, depth: 4.6, side: -1, h: 3.4 });
@@ -103,6 +104,22 @@ E.push({ t: 'court_dress', y: 0.05, seed: 4,
   tubs: [[-11.5, -23.5], [11.5, -23.5], [11.5, 23.5], [-11.5, 23.5]],
   stands: [[-12.2, 18], [12.2, -17], [12.2, 17], [-12.2, -17]],
   torches: [[-13.0, -9], [13.0, -1], [13.0, 12], [-13.0, 3]] });
+
+// the painted fronts of the wings on the court (§4f): pier-and-door bays, dado, panels of lilies, shields and the crowd of the Grandstand
+E.push({ t: 'court_front', face: 'w', p: 19, u0: -27.5, u1: 27.5, y: 0, seed: 1,
+  doors: [{ u: -24.2, n: 1 }, { u: -8.4, n: 2, w: 1.1 }, { u: 5.6, n: 2, w: 1.1 }, { u: 15.6, n: 1 }, { u: 25, n: 1 }],
+  panels: [{ u: -20.4, kind: 'shields', w: 3.0 }, { u: -16.2, kind: 'lilies', w: 3.2 }, { u: -3.6, kind: 'grandstand', w: 3.6 }, { u: 10.2, kind: 'lilies', w: 3.0 }, { u: 13.4, kind: 'shields', w: 2.4, flip: true }, { u: 23.0, kind: 'grandstand', w: 2.4 }],
+  jars: [[-22, 0.8, 1], [-2.0, 0.8, 0.9], [8, 0.8, 1.05], [17.2, 0.8, 0.95]] });
+E.push({ t: 'court_front', face: 's', p: -28, u0: -13.5, u1: -3.4, y: 0, seed: 2, doors: [{ u: -11.2, n: 2, w: 1.1 }, { u: -5.6, n: 1 }], panels: [{ u: -8.4, kind: 'lilies', w: 2.0 }], jars: [[-13, 0.8, 1]] });
+E.push({ t: 'court_front', face: 's', p: -28, u0: 3.4, u1: 13.5, y: 0, seed: 3, doors: [{ u: 5.6, n: 1 }, { u: 11.4, n: 2, w: 1.1 }], panels: [{ u: 8.4, kind: 'shields', w: 2.0 }], jars: [[13, 0.8, 1]] });
+E.push({ t: 'court_front', face: 'n', p: 28, u0: -13.5, u1: -3.4, y: 0, seed: 4, doors: [{ u: -11.2, n: 1 }, { u: -5.6, n: 1 }], panels: [{ u: -8.4, kind: 'grandstand', w: 2.0 }] });
+E.push({ t: 'court_front', face: 'n', p: 28, u0: 3.4, u1: 13.5, y: 0, seed: 5, doors: [{ u: 5.6, n: 1 }, { u: 11.2, n: 1 }], panels: [{ u: 8.4, kind: 'lilies', w: 2.0 }] });
+E.push({ t: 'court_front', face: 'e', p: -19, u0: 13, u1: 27.5, y: 0, seed: 6, doors: [{ u: 15.6, n: 1 }, { u: 25.4, n: 1 }], panels: [{ u: 18.6, kind: 'lilies', w: 2.6 }, { u: 22.2, kind: 'shields', w: 2.4 }], jars: [[20.5, 0.8, 1]] });
+E.push({ t: 'court_front', face: 'e', p: -19, u0: -27.5, u1: -20.4, y: 0, seed: 7, doors: [{ u: -25.5, n: 1 }] });
+E.push({ t: 'tripartite_front', x: -19, z0: 0, z1: 12, y: 0 });
+// the youth vaulting the bull of the rehearsal (the bull stands in life.js, at [1.6, -3.2] facing +x, seed 11): its size as the animal code draws it
+{ const r = ((1664525 * 11 + 1013904223) >>> 0) / 4294967296; const S = 1.15 * (0.92 + r * 0.16); E.push({ t: 'bull_leaper', at: [1.6, -3.2], rot: -Math.PI / 2, s: S, y: 0.05 }); }
+E.push({ t: 'offering_table', at: [-16.7, 4.2], rot: Math.PI / 2, y: 0.05 });
 
 const room = (id, rect, y, kind, extra = {}) => ({ id, rect, y, kind, ...extra });
 const rooms = [room('central court', COURT, 0.05, 'open'), room('west court', [-120, -50, -64, 50], 0.05, 'open', { market: true }), room('throne room antechamber', [-19, -20, -14, -8], 0, 'hall'),

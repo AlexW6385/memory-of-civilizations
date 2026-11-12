@@ -11,6 +11,7 @@ const T0 = 0.5;
 export const YARD = [-212, -86.4, -204, -81.0];
 
 export function life() {
+  const faceTo = (a, b) => Math.atan2(-(b[0] - a[0]), -(b[1] - a[1]));            // a figure faces −z at rot 0, and by rot looks along (−sin, −cos)
   const rand = rng(1601), L = [], seed = () => Math.floor(rand() * 1e9);
   const man = (at, rot, o = {}) => L.push({ t: 'figure', at, y: o.y ?? height(at[0], at[1]), rot, seed: seed(), skin: 'skin_medium', dress: rand() < 0.5 ? 'shendyt' : 'loincloth',
     cloth: ['cloth_white', 'cloth_red', 'cloth_ochre', 'cloth_indigo'][Math.floor(rand() * 4)], over: 'belt', hair: 'long', beard: 0, feet: 'bare', hat: 'none', pose: 'stand', ...o });
@@ -37,14 +38,31 @@ export function life() {
     if (Math.hypot(x + 110, z + 35.5) < 11 || (x > -119 && x < -64 && z > 36.8 && z < 41.2) || (x > -92.2 && x < -87.8)) continue;
     (rand() < 0.45 ? woman : man)([x, z], rand() * 6.28, { y: 0.05, pose: rand() < 0.4 ? 'talk' : 'stand' });
   }
-  // the Central Court: a few people under the porticoes and crossing; the priestess before the shrine with her offering
-  for (let k = 0; k < 10; k++) {
-    const x = -11 + rand() * 22, z = -23 + rand() * 46;
-    if (Math.abs(x) > 9.5 || (x < -8 && z > -2 && z < 13) || Math.abs(x) < 1.6 || (z > 18 && z < 22.5)) continue;
-    (rand() < 0.5 ? woman : man)([x, z], rand() * 6.28, { y: 0.05, pose: rand() < 0.3 ? 'talk' : 'stand' });
-  }
-  woman([-11.6, 6], -Math.PI / 2, { y: 0.05, cloth: 'cloth_indigo', cloth2: 'cloth_ochre', pose: 'pray' });
-  for (const z of [4.6, 7.4]) L.push({ t: 'pot', kind: 'water_pot', at: [-12.6, z], y: 0.05, n: 1, seed: seed() });
+  // the Central Court (§4f): the bull-leaping rehearsal at its middle — the bull held by two handlers, the youth vaulting it, the girl and the second
+  // youth waiting behind, the flute and the lyre; the bearers coming in from the south passage with jars and rhytons; servants at the pithoi under the
+  // east portico; the priestesses at the offering table before the Tripartite Shrine; the court ladies in talk by the columns
+  const OX = { at: [1.6, -3.2], rot: -Math.PI / 2, s: 1.15, seed: 11 };
+  L.push({ t: 'animal', kind: 'ox', at: OX.at, y: 0.05, rot: OX.rot, seed: OX.seed, mat: 'hide_tan', graze: false, gear: false, s: OX.s });
+  const fp = (a, b) => faceTo(a, b), bull = [OX.at[0] + 1.0, OX.at[1]];
+  for (const [p, q] of [[[3.5, -2.0], 2.4], [[3.5, -4.5], 3.9]]) man(p, fp(p, bull), { y: 0.05, pose: 'pull', carry: 'rope', len: 1.6, dress: 'shendyt', cloth: q === 2.4 ? 'cloth_red' : 'cloth_white' });
+  woman([-1.4, -5.6], fp([-1.4, -5.6], OX.at), { y: 0.05, pose: 'stand', arms: 'talk', dress: 'loincloth', cloth: 'cloth_red', top: 'bare', skin: 'skin_light', hair: 'long' });
+  man([-1.5, -0.8], fp([-1.5, -0.8], OX.at), { y: 0.05, pose: 'stand', arms: 'talk', dress: 'loincloth', cloth: 'cloth_white', top: 'bare' });
+  man([6.6, -6.4], Math.PI / 2 + 0.3, { y: 0.05, pose: 'flute', dress: 'shendyt', cloth: 'cloth_indigo' });
+  man([7.3, -0.2], Math.PI / 2 - 0.3, { y: 0.05, pose: 'lute', dress: 'shendyt', cloth: 'cloth_ochre' });
+  L.push({ t: 'animal', kind: 'dog', at: [4.8, -0.6], y: 0.05, rot: 2.2, seed: 5 });
+  // the watchers along the portico steps
+  for (const [x, z, f, k] of [[9.6, -9.5, 0.4, 0], [10.4, -8.7, 3.5, 1], [-9.2, 14.5, 1.2, 0], [-8.4, 15.6, 5.0, 1], [8.5, 11.5, 4.4, 1], [9.4, 12.4, 2.2, 0], [-6.2, -15, 0.8, 1], [-5.3, -16.2, 4.0, 0]]) (k ? woman : man)([x, z], f, { y: 0.05, pose: 'talk' });
+  // the bearers coming up from the south passage
+  for (const [x, z, k] of [[-0.9, 15.8, 0], [0.8, 13.0, 1], [-0.7, 10.2, 0], [0.9, 7.6, 1]]) woman([x, z], 0, { y: 0.05, carry: k ? 'pot' : 'basket', cloth: k ? 'cloth_red' : 'cloth_indigo' });
+  man([0.2, 5.0], 0, { y: 0.05, carry: 'sack', dress: 'loincloth', cloth: 'cloth_ochre' });
+  // the pithoi under the east portico and the servants at them
+  for (const z of [-8.2, -6.4, -4.6]) L.push({ t: 'pot', kind: 'pithos', at: [11.2, z], y: 0.05, n: 1, seed: seed() });
+  woman([10.0, -6.9], -Math.PI / 2 * 0 + Math.PI / 2 * 3, { y: 0.05, carry: 'pot', cloth: 'cloth_ochre' }); man([10.2, -3.4], Math.PI, { y: 0.05, pose: 'stand', dress: 'loincloth', cloth: 'cloth_brown', carry: 'sack' });
+  // the priestesses before the Tripartite Shrine and its table of offerings
+  woman([-15.3, 3.4], Math.PI / 2, { y: 0.05, cloth: 'cloth_indigo', cloth2: 'cloth_ochre', pose: 'pray' });
+  woman([-15.4, 5.2], Math.PI / 2, { y: 0.05, cloth: 'cloth_red', cloth2: 'cloth_white', pose: 'kneel', arms: 'pray', hair: 'long' });
+  woman([-15.0, 8.4], Math.PI / 2, { y: 0.05, cloth: 'cloth_white', cloth2: 'cloth_red', pose: 'stand', carry: 'pot' });
+  for (const z of [1.2, 9.6]) L.push({ t: 'pot', kind: 'water_pot', at: [-12.6, z], y: 0.05, n: 1, seed: seed() });
   // the East Wing's rooms (§4d): the weaver at her loom in the residential hall, a woman seated on the bench, the lapidary at the
   // bow drill, a workman at the middle table, a boy bringing water
   woman([36.8, 22.45], Math.PI, { y: 0.03, cloth: 'cloth_red', cloth2: 'cloth_white', pose: 'stand' });
@@ -54,7 +72,6 @@ export function life() {
   man([26.5, 28.6], 0, { y: 0.03, pose: 'stand', dress: 'shendyt', cloth: 'cloth_red' });
 
   // ── the town (§10a): those at home in the open houses, people in the lanes, the washing at the Kairatos, the flock on the slope ──
-  const faceTo = (a, b) => Math.atan2(-(b[0] - a[0]), -(b[1] - a[1]));            // a figure faces −z at rot 0, and by rot looks along (−sin, −cos)
   const R2 = rand, openKinds = openHouses();
   for (const [l, kind] of openKinds) {
     const el = { rect: l.rect, front: l.front, seed: l.seed }, F = dwellingFrame(el), y0 = Math.min(height(l.rect[0], l.rect[1]), height(l.rect[2], l.rect[1]), height(l.rect[0], l.rect[3]), height(l.rect[2], l.rect[3])) + 0.22;

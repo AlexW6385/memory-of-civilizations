@@ -143,6 +143,9 @@ function portico(el, { bag, col }) {
   const r = [Math.min(ax, bx, ax + nx * dp, bx + nx * dp), Math.min(az, bz, az + nz * dp, bz + nz * dp), Math.max(ax, bx, ax + nx * dp, bx + nx * dp), Math.max(az, bz, az + nz * dp, bz + nz * dp)];
   bag.add('timber', box(r[0] - 0.2, y + h + 0.25, r[1] - 0.2, r[2] + 0.2, y + h + 0.7, r[3] + 0.2));
   bag.add('plaster', box(r[0] - 0.3, y + h + 0.7, r[1] - 0.3, r[2] + 0.3, y + h + 1.0, r[3] + 0.3)); col.floor(r, y + h + 1.0);
+  // horns of consecration on the roof's edge, one over each bay, on the side away from the wall
+  const alongX = Math.abs(ux) > 0.5, edge = alongX ? (nz > 0 ? r[1] + 0.15 : r[3] - 0.15) : (nx > 0 ? r[0] + 0.15 : r[2] - 0.15);
+  for (let i = 0; i < n; i++) { const t = (i + 0.5) / n, px = ax + ux * L * t, pz = az + uz * L * t; if (alongX) horns(bag, px, y + h + 1.0, edge, 0.8, true); else horns(bag, edge, y + h + 1.0, pz, 0.8, false); }
 }
 
 /** steps: a stepped area { rect, y0, n, rise, dir ('n'|'s'|'e'|'w': which way they climb) } of gypsum. */
