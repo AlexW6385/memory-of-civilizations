@@ -2,13 +2,13 @@
 // priests with shaven heads in white linen, workmen and porters in the short kilt, the officials and scribes, women bearing bread and water, boys.
 // Data for the engine's movers; the ways come from layout.js. The boats stand moored at the quay; none are poled on the river.
 
-import { RADIUS, TERRACE, WAY, SMALL_TERRACE, PRIESTS, CAMP, QUAY, WALL, GATE } from './layout.js';
+import { RADIUS, TERRACE, WAY, SMALL_TERRACE, QUAY, GATE, SGATE, lanes } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 26, night: 2, rain: 0.2, reach: 150, spawnMin: 22, far: 40 },
+  walkers: { day: 44, night: 3, rain: 0.2, reach: 150, spawnMin: 22, far: 40 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -8.0,
 };
@@ -17,18 +17,26 @@ const way = (a, b, w, weight, market = 0.6, kind = 'street') => ({ r: [Math.min(
 
 export function walkways() {
   const rects = [];
-  // the terrace before the Great Temple: the way along the façade, the way from the gate to the quay ramp
+  // the terrace before the Great Temple: the way along the façade, the way from the gate to the quay ramp, between the gates
   rects.push(way([TERRACE[0] + 8, 0], [TERRACE[2] - 2, 0], 6, 1.4, 0.6));
   rects.push(way([TERRACE[0] + 8, -24], [TERRACE[0] + 8, 24], 4.5, 1.0, 0.5));
+  rects.push(way([TERRACE[0] + 8, -14], [TERRACE[2] - 4, -14], 3, 0.7, 0.4));
+  rects.push(way([TERRACE[0] + 8, 14], [TERRACE[2] - 4, 14], 3, 0.7, 0.4));
   rects.push(way([GATE.x, -30], [GATE.x, -22], GATE.w, 0.8, 0.4));
+  rects.push(way([GATE.x, -24], [TERRACE[0] + 8, -24], 3, 0.8, 0.4));
+  rects.push(way([SGATE.x, 22], [SGATE.x, 36], SGATE.w + 0.4, 1.6, 1.0));
+  rects.push(way([TERRACE[0] + 8, 22], [SGATE.x, 22], 3, 0.8, 0.5));
   // the way north to the Small Temple, its terrace
   rects.push(way([(WAY[0] + WAY[2]) / 2, WAY[1] + 2], [(WAY[0] + WAY[2]) / 2, WAY[3] - 2], 3.4, 0.9, 0.4));
   rects.push(way([SMALL_TERRACE[0] + 6, (SMALL_TERRACE[1] + SMALL_TERRACE[3]) / 2], [SMALL_TERRACE[2] - 2, (SMALL_TERRACE[1] + SMALL_TERRACE[3]) / 2], 5, 0.7, 0.3));
-  // the priests' lane and the camp's lanes
-  rects.push(way([PRIESTS[0] + 11, PRIESTS[1] + 2], [PRIESTS[0] + 11, PRIESTS[3] - 2], 2.4, 1.2, 0.5));
-  for (let c = 0; c < 4; c++) rects.push(way([CAMP[0] + c * 11.4 + 10.2, CAMP[1] + 2], [CAMP[0] + c * 11.4 + 10.2, CAMP[3] - 4], 1.8, 1.6, 1.0));
-  rects.push(way([CAMP[0] + 2, CAMP[1] + 90 - 4], [CAMP[2] + 4, CAMP[1] + 90 - 4], 2.2, 1.6, 1.0));
-  // the quay
+  // the lanes of the priests' quarter and of the camp (the market street the busiest), the cross lanes
+  for (const L of lanes()) {
+    const [x0, z0, x1, z1] = L.r, horiz = x1 - x0 > z1 - z0, w = horiz ? z1 - z0 : x1 - x0;
+    const [a, b] = horiz ? [[x0 + 1, (z0 + z1) / 2], [x1 - 1, (z0 + z1) / 2]] : [[(x0 + x1) / 2, z0 + 1], [(x0 + x1) / 2, z1 - 1]];
+    rects.push(way(a, b, Math.min(w - 0.4, 3.2), L.kind === 'market' ? 3.0 : L.kind === 'cross' ? 1.8 : 1.4, L.kind === 'market' ? 2.4 : 1.0));
+  }
+  // the quay and the ramp down to it
+  rects.push(way([TERRACE[2], 0], [QUAY[0], 0], 5, 1.2, 0.6));
   rects.push(way([QUAY[0] + 4, QUAY[1] + 2], [QUAY[0] + 4, QUAY[3] - 2], 5, 1.4, 1.2));
   return { rects, links: [], clip: RADIUS - 14 };
 }

@@ -2,7 +2,7 @@
 // mudbrick walls, the stone gate and the altar of Ra-Horakhty; and the Small Temple of Nefertari and Hathor to the north. The rooms are the
 // halls cut in the rock (the sealed interiors), the forecourt open.
 
-import { FX, FXS, ZS, TERRACE, WALL, GATE, ALTAR, SMALL_TERRACE, WAY } from './layout.js';
+import { FX, FXS, ZS, TERRACE, WALL, GATE, SGATE, ALTAR, SMALL_TERRACE, WAY } from './layout.js';
 import { greatRooms, greatChambers, smallRooms, FLOOR } from '../../styles/ramesside/dims.js';
 
 const E = [];
@@ -10,11 +10,14 @@ E.push({ t: 'great_temple', fx: FX });
 // the terrace paved before the façade, between the mudbrick walls
 E.push({ t: 'floor', rect: TERRACE, y: FLOOR, th: 0.4, mat: 'sandstone_floor' });
 {
-  const w = (z, gate) => E.push({ t: 'wall', a: [WALL.x0, z], b: [WALL.x1, z], th: WALL.th, y0: -0.2, y1: WALL.h, mat: 'mudbrick', ...(gate ? { openings: [{ at: GATE.x - WALL.x0, w: GATE.w, h: GATE.h }] } : {}) });
-  w(-WALL.z, true); w(WALL.z, false);
+  const w = (z, g) => E.push({ t: 'wall', a: [WALL.x0, z], b: [WALL.x1, z], th: WALL.th, y0: -0.2, y1: WALL.h, mat: 'mudbrick', openings: [{ at: g.x - WALL.x0, w: g.w, h: g.h }] });
+  w(-WALL.z, GATE); w(WALL.z, SGATE);
   E.push({ t: 'stone_gate', at: [GATE.x, -WALL.z], w: GATE.w, h: GATE.h, th: WALL.th, y: 0 });
+  E.push({ t: 'stone_gate', at: [SGATE.x, WALL.z], w: SGATE.w, h: SGATE.h, th: WALL.th, y: 0 });
   E.push({ t: 'sun_altar', at: [ALTAR.x, ALTAR.z], y: FLOOR });
 }
+// the halls furnished: tables of offerings, braziers, the priests' benches, the god's barque in the vestibule
+E.push({ t: 'temple_furnish', kind: 'great', fx: FX, z: 0 });
 // the way north to the Small Temple, paved, walled low on the cliff side
 E.push({ t: 'floor', rect: [WAY[0], WAY[1], WAY[2], WAY[3] + 0.3], y: FLOOR, th: 0.4, mat: 'sandstone_floor' });
 const room = (id, rect, y, kind, extra = {}) => ({ id, rect, y, kind, ...extra });
@@ -47,6 +50,7 @@ const S = [];
 S.push({ t: 'small_temple', fx: FXS, z: ZS });
 S.push({ t: 'floor', rect: SMALL_TERRACE, y: FLOOR, th: 0.4, mat: 'sandstone_floor' });
 for (const dz of [-21, 21]) S.push({ t: 'wall', a: [FXS, ZS + dz], b: [SMALL_TERRACE[2], ZS + dz], th: 1.6, y0: -0.2, y1: 3.0, mat: 'mudbrick' });
+S.push({ t: 'temple_furnish', kind: 'small', fx: FXS, z: ZS });
 const SR = smallRooms();
 const smallRoomsList = [
   room('the small terrace', [FXS + 4, ZS - 17, SMALL_TERRACE[2] - 3, ZS + 17], FLOOR, 'open'),

@@ -3,7 +3,9 @@
 // at the settlement's east edge; the halls' floors cut below the plateau (so that the terrain does not meet the floor); palms, tamarisk and
 // papyrus along the water, nothing on the desert; the clear, hot sky of Nubia (lat 22°). Pure (used by the relief, the collision and the plant workers).
 
-import { RADIUS, WATER, BANK_X, BED_X, TERRACE, GATE, PRIESTS, CAMP, FX, FXS, ZS, inRect, smooth as sm } from './layout.js';
+import { RADIUS, WATER, BANK_X, BED_X, TERRACE, GATE, PRIESTS, CAMP, MARKET, FIELDS, FX, FXS, ZS, inRect, lanes, smooth as sm } from './layout.js';
+
+const YARD = [-36, 141, 10, 170];
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 /** How far inside a rectangle (negative outside). */
@@ -21,6 +23,9 @@ function height(x, z) {
 function cover(x, z, h, ny) {
   const c = { sand: 0.75, grass: 0, rock: 0.25, soil: 0, fields: 0, dry: 1, warmth: 1, red: 0.35, road: 0, snow: 0, forest: 0 };
   if (inRect(TERRACE, x, z)) { c.road = 1; c.sand = 0.25; c.rock = 0.7; return c; }
+  if (FIELDS.some((f) => inRect(f, x, z, 1)) && h > WATER + 3) { c.fields = 1; c.soil = 0.5; c.sand = 0.1; c.dry = 0.15; c.rock = 0; c.warmth = 0.9; return c; }
+  if (inRect(MARKET, x, z) || LANE_RECTS.some((r) => inRect(r, x, z))) { c.road = 0.7; c.soil = 0.5; c.sand = 0.4; c.rock = 0; return c; }
+  if (inRect(YARD, x, z, 2)) { c.sand = 0.7; c.rock = 0.3; c.road = 0.2; return c; }
   if (x > BANK_X - 2 && x < BED_X + 10) {
     if (h < WATER + 0.6) { c.soil = 0.8; c.sand = 0.1; c.dry = 0.3; c.rock = 0; return c; }
     c.soil = 0.35 * sm(BANK_X, 50, x); c.sand = 0.65 - c.soil; c.rock = 0.1; return c;
@@ -30,6 +35,7 @@ function cover(x, z, h, ny) {
   if (ny < 0.8) { c.rock = 0.8; c.sand = 0.2; return c; }
   c.sand = 0.6 + 0.3 * hash2(x * 0.05, z * 0.05); c.rock = 1 - c.sand; return c;
 }
+const LANE_RECTS = lanes().map((l) => l.r);
 const water = (x, z, y) => x > 30 && y < WATER + 0.3;
 const waterLevel = (x) => (x > 30 ? WATER : -Infinity);
 const fromWater = (x) => (x > 54 ? -3 : Math.min(40, 54 - x));
@@ -38,14 +44,17 @@ function planting(x, z, p) {
   const r = Math.hypot(x, z);
   if (r > RADIUS - 8 || x < -30 || inRect(TERRACE, x, z, 6) || Math.abs(z) < 7 && x > BANK_X - 4 && x < BED_X) return null;
   if (x > 46 && x < 64 && Math.abs(z) > 14) return { papyrus: 9, reeds: 10 };
-  if (x > BANK_X && x < 46) return { date_palm: 0.5, doum_palm: 0.12, tamarisk: 0.5, halfa: 4 };
+  if (FIELDS.some((f) => inRect(f, x, z, -0.5)) && x % 4.5 < 3.0) return { wheat: 60 };      // emmer and barley in the basins between the ridges
+  if (x > BANK_X && x < 46) return { date_palm: 0.5, doum_palm: 0.12, tamarisk: 0.5, halfa: 4, sycamore_fig: 0.08 };
+  // nothing in the blocks of houses and lanes, the market, the masons' yard: the planting is a ring round them (palms in the yards' margins, tamarisk)
+  if (inRect(CAMP, x, z, 1) || inRect(PRIESTS, x, z, 1) || inRect(YARD, x, z, 1)) return null;
   if (inRect(CAMP, x, z, 10) || inRect(PRIESTS, x, z, 8)) return hash2(x * 0.3, z * 0.3) < 0.35 ? { date_palm: 0.25, tamarisk: 0.3 } : null;
   if (x > -30 && x < BANK_X) return { tamarisk: 0.12, acacia: 0.03, halfa: 5 };
   void p; return null;
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { date_palm: 0.5, doum_palm: 0.12, tamarisk: 0.5, acacia: 0.03 },
+  maxDensity: { date_palm: 0.5, doum_palm: 0.12, tamarisk: 0.5, acacia: 0.03, sycamore_fig: 0.08, wheat: 60 },
   climate: {
     sun: { az: 140, el: 58, color: [1.0, 0.95, 0.85], intensity: 3.7, lat: 22.4, dec: 5, hour: 10.5 },
     sky: { turbidity: 3.0, rayleigh: 1.05, mie: 0.005, mieG: 0.82, zenith: [0.11, 0.2, 0.4], horizon: [0.66, 0.64, 0.58] },

@@ -16,7 +16,11 @@ export function emitters() {
     if (l.kind === 'bakery') {
       E.push({ p: [mx, ground.height(mx, z1) + 1.5, z1 - 0.9], kind: 'kitchen', thr: 0, seed: l.seed + 1 });
       if (r() < 0.6) E.push({ p: [mx + 0.9, ground.height(mx, z0) + 1.2, z0 + 2.2], kind: 'steam', thr: 0.1 + r() * 0.3, seed: l.seed + 2 });
-    } else if (l.kind === 'house' && r() < 0.35) {
+    } else if (l.kind === 'shop' && (l.trade === 'potter' || l.trade === 'brewer')) {
+      // the potter's kiln and the brewer's fire, at the back of the shop, out of a vent in the roof
+      const x = x1 - 1.1, z = l.front === 'n' ? z0 + 1.3 : z1 - 1.3;
+      E.push({ p: [x, ground.height(x, z) + 3.7, z], kind: l.trade === 'potter' ? 'kitchen' : 'steam', thr: 0.05 + r() * 0.2, seed: l.seed + 4 });
+    } else if (l.kind === 'house' && r() < 0.5) {
       const x = x0 + (x1 - x0) * (0.55 + 0.2 * r()), z = z0 + (z1 - z0) * (0.3 + 0.3 * r());
       E.push({ p: [x, ground.height(x, z) + 1.6, z], kind: 'kitchen', thr: 0.3 + 0.6 * r(), seed: l.seed + 3 });
     }
@@ -24,6 +28,8 @@ export function emitters() {
   // incense on the sun altar before the great façade and at the Small Temple's door
   E.push({ p: [ALTAR.x, 1.0, ALTAR.z], kind: 'incense', thr: 0, seed: 21 });
   E.push({ p: [-34 + 3, 1.0, -112], kind: 'incense', thr: 0.1, seed: 22 });
+  // the braziers before the colossi, at the pilgrims' tables
+  for (const z of [-9.8, 9.8]) E.push({ p: [TERRACE[0] + 14.5, 0.9, z], kind: 'incense', thr: 0.2, seed: Math.round(23 + z) });
   return E;
 }
 
