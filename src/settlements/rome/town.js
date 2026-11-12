@@ -1,10 +1,28 @@
 // The insulae of the Campus Martius (docs/settlements/rome.md §5): in 100 m tiles, each in full
-// (shops, windows, shutters, balconies, cornices) near and in outline far (src/settlements/lod.js).
-import { lodTiles } from '../lod.js';
+// (shops, windows, shutters, balconies, cornices) near and in outline far (as src/settlements/lod.js, but in 160 m tiles:
+// fewer plan x material buckets, DESIGN geometry budget).
 import { RADIUS, VIA_LATA, lots, inRect, rows, INN, FULLER, STADIUM, saeptaRows, quayRows, riverEdge, fountains, fills, gardens, FORUM, TEMPLE, PISTRINUM, LATRINE } from './layout.js';
 import '../../styles/roman/ways.js';
 import '../../styles/roman/houses.js';
 import { DOMUS, LITTER, lifePlan } from './life.js';
+/** lodTiles of src/settlements/lod.js with a wider tile (the geometry budget counts plan x material buckets). */
+function tiles160(id, style, elements, { near, R, entrance, T = 160 }) {
+  const tiles = new Map();
+  for (const e of elements) {
+    const [x, z] = e.rect ? [(e.rect[0] + e.rect[2]) / 2, (e.rect[1] + e.rect[3]) / 2] : (e.at ?? e.c);
+    const k = `${Math.floor(x / T)},${Math.floor(z / T)}`;
+    if (!tiles.has(k)) tiles.set(k, []);
+    tiles.get(k).push(e);
+  }
+  const plans = [];
+  for (const [k, list] of tiles) {
+    const [i, j] = k.split(',').map(Number), center = [i * T + T / 2, j * T + T / 2];
+    const base = { style, origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-R, -R, R, R], entrance, center };
+    plans.push({ ...base, id: `${id}-${k}`, near, elements: list });
+    plans.push({ ...base, id: `${id}-${k}-far`, far: near, elements: list.map((e) => ({ ...e, simple: true })), nocollide: true });
+  }
+  return plans;
+}
 const site = (id, elements, rooms = []) => ({ id, style: 'rome-site', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -200], facing: 's' } });
 export async function town() {
   // the lot by the street north of the Pantheon holds the atrium house with its thermopolium (§4.4), walked into
@@ -51,7 +69,7 @@ export async function town() {
     for (const i of [4, 14, 24, 31]) if (E[i]) ways.push({ t: 'landing', at: [E[i][0], E[i][1]], land: 1, level: -5, w: 4 });
     for (const i of [9, 20]) if (E[i]) ways.push({ t: 'crane', at: [E[i][0] + 5.5, E[i][1]], rot: -Math.PI / 2, y: 0.06 });
     for (const r of quayRows()) ways.push({ t: 'taberna_row', ...r }); }
-  const tiles = await lodTiles('rome-insulae', 'roman', [...ways, ...free.map((l) => ({ t: 'insula', ...l })), ...rows().map((r) => ({ t: 'taberna_row', ...r })), ...saeptaRows().map((r) => ({ t: 'taberna_row', ...r })), ...fountains().map((f) => ({ t: 'fountain', ...f })), ...forum], { R: RADIUS, entrance: { at: [0, -200], facing: 's' } });
+  const tiles = tiles160('rome-insulae', 'roman', [...ways, ...free.map((l) => ({ t: 'insula', ...l })), ...rows().map((r) => ({ t: 'taberna_row', ...r })), ...saeptaRows().map((r) => ({ t: 'taberna_row', ...r })), ...fountains().map((f) => ({ t: 'fountain', ...f })), ...forum], { near: 270, R: RADIUS, entrance: { at: [0, -200], facing: 's' } });
   const [x0, z0, x1, z1] = DOMUS;
   return [...tiles, houses,
     site('rome-domus', [{ t: 'domus', rect: DOMUS, y: 0 }, { t: 'litter', at: LITTER.at, y: 0, rot: LITTER.rot }], [
