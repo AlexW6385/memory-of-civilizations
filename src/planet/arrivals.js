@@ -76,7 +76,7 @@ export const ARRIVALS = {
   'sydney':           [214.5, null, -112, 1.0, 0.05],    // at the sea wall of Mrs Macquarie's Point: the Opera House across the water, the Harbour Bridge behind
   'dunhuang': [14, 0.1, 0, 1.5708, 0.2],   // On the main street east of the stream, looking west along its axis over the timber bridge: the Mogao cliff with its tiers of caves and galleries, the Nine-Storey building stepping up over the Great Buddha's hall at its middle.
   'catalhoyuk':       [1.2, 2.6, 19, 1.1, -0.05],            // the landmark house whole across the ground: its south wall, the ladder up to the roof, the packed roofscape behind
-  'abu-simbel': [4, null, 0, 1.5708, 0.3],   // the Great Temple's façade whole across the terrace: four seated colossi of Ramesses II cut in the cliff, the baboon frieze above the door, the Nile below
+  'abu-simbel': [-4, null, 12, 1.22, 0.12],  // the Great Temple's façade from the terrace's south-east, 41 m off and slightly oblique: the four painted colossi of Ramesses II fill the frame, the baboon frieze above, the cliff cut off
   'nalanda': [-2, null, 70, 0.2, 0.28],   // the Great Temple's stepped east face and its stair, and Monastery 1's gate and turrets across the sacred way
   'han-changan': [-110, null, 10, 0, 0.1],   // from the Weiyang forecourt up the ramp-stair to the Front Hall on its terrace
   'lu-qufu': [-26, null, -59, -0.45, 0.18],   // across the court before the Dacheng Hall: the Apricot Altar and the double-eaved hall on its terrace
