@@ -33,6 +33,14 @@ E.push({ t: 'calmecac', rect: [-140, -140, -84, -104], seed: 5 });
 E.push({ t: 'court_house', rect: [-138, 100, -90, 138], h: 3.8, ring: 8, seed: 6 });
 // ---- the palace of Moctezuma
 E.push({ t: 'tecpan', rect: PALACE });
+// the people of the palace's courts and gate: lords and petitioners barefoot in the first court, servants sweeping, the guard at the stair, the garden's women
+{
+  const [qx0, qz0, qx1, qz1] = PALACE, Y = 1.0, zc = (qz0 + qz1) / 2, rp = ((q) => () => ((q = (q * 1664525 + 1013904223) >>> 0) / 4294967296))(1524), P = [];
+  P.push([qx0 - 2.8, zc - 3, 0.3, Math.PI / 2, 'guard', 400], [qx0 - 2.8, zc + 3, 0.3, Math.PI / 2, 'guard', 401]);
+  for (let i = 0; i < 9; i++) P.push([qx0 + 18 + rp() * 20, qz0 + 14 + rp() * 24, Y, rp() * 6.28, ['noble', 'man', 'bearer', 'noble', 'woman', 'sweeper', 'man', 'child', 'noble'][i], 410 + i]);
+  for (let i = 0; i < 7; i++) P.push([qx0 + 18 + rp() * 20, zc + 12 + rp() * 22, Y, rp() * 6.28, ['woman', 'sweeper', 'woman', 'noble', 'child', 'woman', 'man'][i], 430 + i]);
+  E.push({ t: 'mx_people', people: P });
+}
 // ---- the causeway west over the lake
 const cw = Math.sqrt((RADIUS - 26) ** 2 - CAUSEWAY.z1 ** 2);
 for (const [a, b] of [[-cw, GAP[0]], [GAP[1], -ISLAND + 6]]) {

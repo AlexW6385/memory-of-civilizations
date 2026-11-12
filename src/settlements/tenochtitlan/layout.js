@@ -27,7 +27,7 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
 
 let HOUSES = null, YARDS = null;
 /**
- * Calpulli houses round patios, 13.4–15.4 m, on blocks between streets 3.6–5.4 m wide (the compounds' walls make continuous
+ * Calpulli houses round patios, 12.4–14.4 m, on blocks between streets 4.6–6.6 m wide (the compounds' walls make continuous
  * fronts along the lanes), clear of the precinct, the palace, the canals and the causeway. The cells left empty
  * (one in sixteen) are the orchard-yards: yards().
  */
@@ -36,7 +36,7 @@ export function houses() {
   HOUSES = []; YARDS = [];
   const rand = rng(1519), S = 19;
   for (let x = -RADIUS; x < RADIUS; x += S) for (let z = -RADIUS; z < RADIUS; z += S) {
-    const w = 13.4 + rand() * 2, d = 13.4 + rand() * 2, r = [x + 2, z + 2, x + 2 + w, z + 2 + d], cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
+    const w = 12.4 + rand() * 2, d = 12.4 + rand() * 2, r = [x + 2, z + 2, x + 2 + w, z + 2 + d], cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
     if (Math.max(...[[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].map(([a, b]) => Math.hypot(a, b))) > 300) continue;
     if (inRect(PRECINCT, cx, cz, w / 2 + 10) || inRect(PALACE, cx, cz, w / 2 + 6) || inRect(MARKET, cx, cz, w / 2 + 3) || CANALS.some((c) => inRect(c, cx, cz, w / 2 + 4))) continue;
     if (Math.abs(cz) < 12 + d / 2 && cx < -150) continue;
