@@ -2,13 +2,13 @@
 // lay worshippers in white with shawls and turbans, women in saris with pots and baskets, masons and labourers with
 // baskets of rubble and bare torsos, goatherds; along the paths of the gorge floor, over the ford, round the village
 // yard. No boats. Data for src/engine/movers.js; the ways come from layout.js.
-import { RADIUS, PATHS, FORD, RIVER, riverX, VILLAGE, WELL, XF } from './layout.js';
+import { RADIUS, PATHS, FORD, RIVER, riverX, VILLAGE, WELL, XF, ZW, THRESH, GHATS } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 30, night: 3, rain: 0.4, reach: 150, spawnMin: 24, far: 44 },
+  walkers: { day: 46, night: 3, rain: 0.4, reach: 150, spawnMin: 22, far: 44 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: RIVER.water,
 };
@@ -22,6 +22,12 @@ export function walkways() {
   // the village yard, round the well, and the lanes between the rows of huts
   rects.push({ r: [VILLAGE[0] + 4, 18, VILLAGE[2] - 4, 40], weight: 1.0, market: 0.8, kind: 'street' });
   for (const z of [30]) rects.push({ r: [VILLAGE[0] - 6, z - 1.0, VILLAGE[0] + 6, z + 1.0], weight: 0.8, market: 0.3, kind: 'lane' });
+  // the lane between the two inner rows of the village, the threshing floor, the washing places and the masons' yard
+  rects.push({ r: [VILLAGE[0] + 4, 66.5, VILLAGE[2] - 4, 73.5], weight: 0.9, market: 0.4, kind: 'lane' });
+  rects.push({ r: [THRESH[0] - 4, THRESH[1] - 4, THRESH[0] + 4, THRESH[1] + 4], weight: 0.6, market: 0.2, kind: 'street' });
+  for (const z of GHATS) rects.push({ r: [riverX(z) - 8, z - 4, riverX(z) - 3.5, z + 4], weight: 0.5, market: 0.2, kind: 'street' });
+  rects.push({ r: [XF + 20, -ZW + 1, XF + 30, -ZW + 12.5], weight: 0.7, market: 0.2, kind: 'street' });
+  rects.push({ r: [-34, -48.5, -20, -43], weight: 0.9, market: 1.6, kind: 'street' });
   // the foot of the cliff before the stair, and the pocket's bank
   rects.push({ r: [XF + 9.5, -58, XF + 13.5, -44.4], weight: 0.9, market: 0.2, kind: 'street' });
   return { rects, links, clip: RADIUS - 24 };
@@ -46,6 +52,12 @@ export const WALKERS = [
   // the mason or labourer: bare to the waist, a pole across the shoulder with two loads of rubble
   { id: 'porter', weight: 1.6, market: 1.0, el: { dress: 'wrap', top: 'bare', hat: 'none', over: 'none', carry: 'pole', arms: 'sack', feet: 'bare' },
     c1: [CL.white, CL.brown], c2: [CL.brown], c3: [CL.brown], speed: [0.8, 1.05], stride: 1.3 },
+  // the pilgrim: a white wrap, a staff, a bundle; walking to the stair
+  { id: 'pilgrim', weight: 1.5, market: 1.2, el: { dress: 'wrap', hat: 'turban', over: 'shawl', carry: 'staff', arms: 'hang', feet: 'bare', beard: 0.5 },
+    c1: [CL.white, CL.ochre], c2: [CL.white], c3: [CL.white], speed: [0.8, 1.0], stride: 1.3 },
+  // the herdsman: bare to the waist, a stick, a head cloth
+  { id: 'herd', weight: 0.9, market: 0.5, el: { dress: 'wrap', top: 'bare', hat: 'turban', over: 'none', carry: 'staff', arms: 'hang', feet: 'bare' },
+    c1: [CL.white, CL.brown], c2: [CL.red, CL.white], c3: [CL.brown], speed: [0.85, 1.1], stride: 1.3 },
   { id: 'boy', weight: 0.6, market: 0.7, el: { dress: 'wrap', top: 'bare', hat: 'none', over: 'none', arms: 'hang', feet: 'bare' },
     c1: [CL.white, CL.ochre], c2: [CL.brown], c3: [CL.brown], speed: [1.1, 1.5], stride: 1.0, h: [0.6, 0.72], swing: 1.1 },
 ];

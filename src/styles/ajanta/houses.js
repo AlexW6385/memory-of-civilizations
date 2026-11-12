@@ -87,8 +87,8 @@ export function house(el, { bag, col }) {
     B(F, bag, 'pottery_dark', hu - 0.05, 0.34, hv + 0.45, hu + 0.75, 1.6, hv + 0.5); }                                    // the soot on the wall
   { const cu = left ? W - t - 1.8 : t + 0.1, cv = D - t - 1.05;
     for (const a of [0.08, 1.62]) for (const b of [0.08, 0.82]) { const [lx, lz] = F.xz(cu + a, cv + b); bag.add('timber', rod([lx, 0, lz], [lx, 0.42, lz], 0.04, 5)); }
-    B(F, bag, 'timber', cu, 0.4, cv, cu + 1.7, 0.46, cv + 0.9); B(F, bag, 'rope_fibre', cu + 0.06, 0.44, cv + 0.06, cu + 1.64, 0.465, cv + 0.84);
-    B(F, bag, rand() < 0.5 ? 'cloth_white' : 'cloth_ochre', cu + 0.15, 0.465, cv + 0.12, cu + 1.0, 0.52, cv + 0.78);
+    B(F, bag, 'timber', cu, 0.4, cv, cu + 1.7, 0.46, cv + 0.9); B(F, bag, 'rope_fibre', cu + 0.06, 0.44, cv + 0.06, cu + 1.64, 0.49, cv + 0.84);
+    B(F, bag, rand() < 0.5 ? 'cloth_white' : 'cloth_ochre', cu + 0.15, 0.49, cv + 0.12, cu + 1.0, 0.54, cv + 0.78);
     C(F, col, cu, cv, cu + 1.7, cv + 0.9, 0, 0.48); }
   { const gu = left ? W - t - 0.6 : t + 0.6, [gx, gz] = F.xz(gu, t + 0.65);
     bag.add('terracotta', lathe([[0.001, 0], [0.34, 0.03], [0.5, 0.45], [0.46, 0.85], [0.3, 1.05], [0.34, 1.12], [0.001, 1.12]], 12, null, gx, 0, gz)); bag.add('thatch_palm', lathe([[0.001, 0], [0.36, 0], [0.2, 0.18], [0.001, 0.24]], 10, null, gx, 1.1, gz)); col.circle(gx, gz, 0.5, 0, 1.2); }

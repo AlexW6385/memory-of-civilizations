@@ -26,6 +26,17 @@ function monkKit(ctx, bx, yb, bz, px, pz, y, k = 0) {
   bag.add('cloth_white', box(px + 0.3, y, pz - 0.2, px + 0.8, y + 0.015, pz + 0.3));
   bag.add('timber', box(px + 0.38, y + 0.015, pz - 0.12, px + 0.7, y + 0.06, pz + 0.18));
 }
+
+/** Offerings before an image at (x, z) on floor y, facing +x: a reed mat, a tray of flowers, rice and fruit, an incense stand, bowls. */
+function offerings(ctx, x, y, z, seed = 1) {
+  const { bag } = ctx;
+  bag.add('reed_mat', box(x, y + 0.003, z - 1.0, x + 1.6, y + 0.02, z + 1.0));
+  bag.add('bronze', lathe([[0.001, 0], [0.3, 0.0], [0.34, 0.05], [0.001, 0.05]], 12, null, x + 0.5, y + 0.02, z));
+  for (let k = 0; k < 14; k++) { const a = k * 2.4, r = 0.05 + (k % 5) * 0.045; bag.add(k % 3 ? 'paint_ochre' : k % 2 ? 'cloth_red' : 'paint_white', lathe([[0.001, 0], [0.05, 0.005], [0.04, 0.035], [0.001, 0.045]], 6, null, x + 0.5 + Math.cos(a + seed) * r, y + 0.07, z + Math.sin(a + seed) * r)); }
+  for (const dz of [-0.55, 0.55]) bag.add('pottery_dark', lathe([[0.001, 0], [0.1, 0], [0.14, 0.07], [0.13, 0.1], [0.001, 0.07]], 8, null, x + 0.9, y + 0.02, z + dz));
+  bag.add('bronze', rod([x + 1.3, y + 0.02, z - 0.7], [x + 1.3, y + 0.55, z - 0.7], 0.02, 5));
+  bag.add('flame', lathe([[0.008, 0], [0.012, 0.015], [0.001, 0.035]], 5, null, x + 1.3, y + 0.56, z - 0.7));
+}
 const slab = (ctx, mat, x0, y0, z0, x1, y1, z1) => ctx.bag.add(mat, box(x0, y0, z0, x1, y1, z1));
 function floorOf(ctx, x0, z0, x1, z1, y, mat = FLOORM) { slab(ctx, mat, Math.min(x0, x1), y - 0.12, Math.min(z0, z1), Math.max(x0, x1), y, Math.max(z0, z1)); ctx.col.floor([x0, z0, x1, z1], y); }
 /** A thin plaster lining on the plane x = at (axis 'x') or z = at ('z'), on the side n (±1), spanning [a0, a1] × [y0, y1] minus holes ([a0, y0, a1, y1] rects). */
@@ -161,6 +172,7 @@ export function vihara(ctx, xf, zc, y) {
   plane(ctx, 'x', sx0, 1, zc - 2.5, zc + 2.5, y, y + 4.3); slab(ctx, PLASTER, sx0, y + 4.26, zc - 2.5, sx1, y + 4.3, zc + 2.5);
   seatedBuddha(ctx, sx0 + 1.2, y, zc, 3.4);
   const P = wall(bag, sx0, zc + 2.5, [1, 0], y, 5.0); P.ell(PAL.green2, 2.5, 2.4, 1.2, 1.6, 1, 14); P.disc(PAL.ochre, 2.5, 2.8, 0.7, 2, 14); for (const s of [-1, 1]) { figM(P, 2.5 + s * 1.7, 0.2, 2.0, { dir: -s, halo: PAL.ochre, dhoti: s > 0 ? PAL.blue : PAL.green }, 2); } P.flush();
+  offerings(ctx, sx0 + 3.4, y, zc, 2);
   lamp(ctx, sx1 - 0.7, y, zc - 1.9, 0.9, 1.4, 8); lamp(ctx, sx1 - 0.7, y, zc + 1.9, 0.9, 1.4, 8);
   // the cells: lining, a stone bed with a raised pillow, a lamp niche
   for (const c of cells) {
@@ -269,6 +281,7 @@ export function chaitya(ctx, xf, zc, y) {
   const mur = (x, z, n, len, fn) => { const P = wall(bag, x, z, n, y, len); fn(P, len); P.flush(); };
   mur(xn0, zc - hw, [0, 1], CH.len, (P, L) => { P.rect(PAL.ground, 0.1, 0.1, L - 0.1, 3.7, 1); for (let i = 0; i < 7; i++) buddhaM(P, 1.0 + i * (L - 2) / 6.0, 0.25, 1.5, { robe: i % 2 ? PAL.blue : PAL.ochre }, 2); lotusBand(P, 0, L, 3.35, 3.78, 1, 0); });
   mur(xn1, zc + hw, [0, -1], CH.len, (P, L) => { P.rect(PAL.ground, 0.1, 0.1, L - 0.1, 3.7, 1); for (let i = 0; i < 7; i++) buddhaM(P, 1.0 + i * (L - 2) / 6.0, 0.25, 1.5, { robe: i % 2 ? PAL.green : PAL.ochre }, 2); lotusBand(P, 0, L, 3.35, 3.78, 1, 1); });
+  offerings(ctx, xs + 2.4, y, zc - 0.6, 5); offerings(ctx, xs + 4.6, y, zc + 0.9, 8);
   lamp(ctx, xn1 - 1.2, y, zc - 3.0, 1.0, 1.6, 10); lamp(ctx, xs + 0.8, y, zc + 3.0, 1.0, 1.8, 10);
 }
 
