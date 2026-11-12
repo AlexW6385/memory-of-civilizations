@@ -1,7 +1,7 @@
 // The town's houses (docs/settlements/cahokia.md §5), four of them opened and furnished (§5.1), and the
 // life of the plaza and the yards (§5.2): chunkey played on the plaza's yards with the crowd along
 // their banks, people on the ramp up Monks Mound, women at work at the house doors, dogs.
-import { RADIUS, PLAZA, YARDS, PALISADE, SUMMIT, CREEK, lots, gaps, height, onMound, inLot, inRect, inPond, inCreek, creekZ, smallPlazas, inSmallPlaza } from './layout.js';
+import { RADIUS, LODGES, PLAZA, YARDS, HALLS, PALISADE, SUMMIT, CREEK, lots, gaps, height, onMound, inLot, inRect, inPond, inCreek, creekZ, smallPlazas, inSmallPlaza } from './layout.js';
 import { HOUSE_KINDS } from '../../styles/mississippian/dress.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -158,6 +158,23 @@ function life() {
     (rand() < 0.5 ? man : woman)([x, z], 0, rand() * 6.28, rand() < 0.3 ? { carry: 'basket' } : {});
   }
   for (const z of [-44, -52, -61, -70, -112, -125, -138]) { const at = [-25 + (rand() - 0.5) * 3, z]; man(at, height(at[0], at[1]), (rand() < 0.7 ? 0 : Math.PI) + (rand() - 0.5) * 0.3); }
+  // the guards at the gates of the stairs, either side, a staff each, turned to the plaza
+  for (const gz of [-42, -78, -151]) for (const sd of [-1, 1]) { const at = [-25 + sd * 5.2, gz + 0.8]; man(at, height(at[0], at[1]), face(at, [at[0], at[1] + 9]), { carry: 'staff', len: 1.9, pose: 'stand', over: sd < 0 ? 'cape' : 'none' }); }
+  // offerings of jars and maize at the foot of the first gate, dogs lying about the corridor between the games
+  for (const [x, z] of [[-31.5, -39.5], [-18.5, -39.5], [-27, -44.5], [-23, -44.5]]) E.push({ t: 'pot', kind: 'dark_pot', n: 2 + Math.floor(rand() * 2), at: [x, z], y: height(x, z), seed: Math.floor(x * 7 + z) });
+  for (const [x, z] of [[-31, -26], [-17, -31], [-35, -14], [-14, -12]]) E.push({ t: 'animal', kind: 'dog', at: [x, z], y: 0, rot: rand() * 6.28, seed: Math.floor(x + z * 3) + 400 });
+  // the first terrace: the households of the chief's kin and the priests at their doors, men at the lip looking over the plaza
+  for (let k = 0; k < 16; k++) {
+    const x = -52 + rand() * 104, z = -118 + rand() * 38, at = [x, z];
+    if (HALLS.some((r) => inRect(r, x, z, 5)) || LODGES.some((r) => inRect(r, x, z, 5)) || Math.abs(x + 25) < 6) continue;
+    (rand() < 0.5 ? man : woman)(at, height(x, z), rand() * 6.28, rand() < 0.35 ? { carry: 'basket' } : rand() < 0.3 ? { pose: 'talk' } : {});
+  }
+  for (const x of [-52, -44, -38, -12, -5, 3, 12, 20, 31, 40, 50]) { const at = [x + (rand() - 0.5), -77.2]; man(at, height(at[0], at[1]), Math.PI * 0 + (rand() - 0.5) * 0.6, { pose: 'stand', over: rand() < 0.5 ? 'cape' : 'none' }); }
+  // the summit's forecourt: the priests in white about the great post and the fire, the keepers of the stores
+  for (const [x, z, w] of [[-10, -183, 0], [-3, -181, 0], [4, -184, 1], [8, -172, 0], [12, -178, 1], [-30, -186, 1], [-34, -178, 0], [36, -183, 0], [30, -166, 1], [-12, -160, 0], [0, -158, 1]]) {
+    const at = [x, z], o = z === -183 || z === -181 || z === -184 ? { over: 'cape', cloth: 'cloth_white', cloth2: 'hide_white', pose: 'stand' } : rand() < 0.4 ? { pose: 'squat' } : {};
+    (w ? woman : man)(at, height(x, z), rand() * 6.28, { ...o });
+  }
   // at the open houses: the household at its work inside, another at the mortar or the pots by the door
   const L = lots();
   for (const [k, kind] of openSet()) {

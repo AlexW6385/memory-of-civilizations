@@ -1,8 +1,7 @@
 // Mississippian Cahokia about 1175 (docs/settlements/cahokia.md §2–§4).
-import { RADIUS, SUMMIT, PLAZA, YARDS, PALISADE, WOODHENGE, MOUNDS, MONKS, FOX, CONES, RIDGES, HALLS, height, smallPlazas, mRamp } from './layout.js';
+import { RADIUS, LODGES, SUMMIT, PLAZA, YARDS, PALISADE, WOODHENGE, MOUNDS, MONKS, FOX, CONES, RIDGES, HALLS, height, smallPlazas, mRamp } from './layout.js';
 
 const mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
-const LODGES = [[-54, -104, -32, -90], [26, -104, 48, -90]];
 const lodge = ([x, z, s]) => [x - 0.45 * s, z - 0.33 * s, x + 0.45 * s, z + 0.33 * s];
 export const monks = {
   id: 'cahokia-monks',

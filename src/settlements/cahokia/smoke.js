@@ -5,7 +5,7 @@
 // engine part is src/engine/smoke.js; the coordinator registers this system.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { lots, smallPlazas, RADIUS, CREEK, creekZ, SUMMIT, FOX, height } from './layout.js';
+import { lots, LODGES, GATES, HALLS, smallPlazas, RADIUS, CREEK, creekZ, SUMMIT, FOX, height } from './layout.js';
 import { fillerList, openSet } from './town.js';
 
 const ID = 'cahokia';
@@ -27,6 +27,9 @@ function emitters() {
   // the great house on the summit: its hearths' smoke leaves by the roof
   const cx = (SUMMIT[0] + SUMMIT[2]) / 2, cz = SUMMIT[1] + 30, yS = height(cx, cz);
   for (const f of [0.3, 0.7]) E.push({ p: [SUMMIT[0] + (SUMMIT[2] - SUMMIT[0]) * f, yS + 4.4 + 9.6, cz], kind: 'kitchen', thr: 0, seed: 31 + Math.floor(f * 10) });
+  // the braziers at the gates of the stairs, the lodges' hearths leaving by their roofs
+  for (const [gx, gz] of GATES) for (const sd of [-1, 1]) { const x = gx + sd * 5.4, z = gz + 1.5; E.push({ p: [x, height(x, z) + 1.9, z], kind: 'incense', thr: 0, seed: Math.floor(gz) + sd * 7 + 200 }); }
+  for (const r of [...LODGES, HALLS[1]]) { const x = (r[0] + r[2]) / 2, z = (r[1] + r[3]) / 2; E.push({ p: [x, height(x, z) + 4 + 5.5, z], kind: 'kitchen', thr: 0, seed: Math.floor(x) + 300 }); }
   // the eternal fire of the charnel house
   const fx = (FOX[0] + FOX[2]) / 2, fz = (FOX[1] + FOX[3]) / 2;
   E.push({ p: [fx, height(fx, fz) + 3.0 + 6.0, fz], kind: 'incense', thr: 0, seed: 17 });

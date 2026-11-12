@@ -10,6 +10,8 @@ export const RADIUS = 420;
 export const MONKS = { main: [-80, -265, 80, -120, 30], first: [-70, -146, 70, -62, 12], west: [-110, -230, -80, -140, 18], east: [80, -215, 112, -150, 16] };
 export const SUMMIT = [-20, -235, 22, -170];                 // the main summit's top, for the great house
 export const HALLS = [[SUMMIT[0], SUMMIT[1] + 20, SUMMIT[2], SUMMIT[1] + 40], [-14, -100, 8, -86]];   // the two opened great houses, summit and first terrace
+export const LODGES = [[-54, -104, -32, -90], [26, -104, 48, -90]];   // the two lodges on the first terrace
+export const GATES = [[-25, -42, 9], [-25, -78, 8], [-25, -151, 8]];   // x, z, height of the posts of the stairs' gates
 export const PLAZA = [-115, -40, 115, 150];
 // the chunkey yards of the Grand Plaza (long strips of beaten clay, 4 m wide): two run toward the ramp either side of its foot, so that the visitor who comes to the stair walks between two games [inferred: the places]; two more further south
 export const YARDS = [[-42, -36, -38, -8], [-12, -36, -8, -8], [-80, 92, -44, 96], [58, 104, 62, 140]];
