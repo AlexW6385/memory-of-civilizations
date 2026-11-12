@@ -3,7 +3,7 @@
 // before it, ducks, the stone lanterns (ishidoro) at the hall's steps, the tea-seller and benches on the gravel above
 // the pier. Plan data, world coordinates.
 
-import { POND_LEVEL, RADIUS, HALL, height } from './layout.js';
+import { POND_LEVEL, RADIUS, HALL, height, pondDistance, islandDistance } from './layout.js';
 
 const base = (id, style, elements, bounds, at, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], elements, bounds, entrance: { at, facing: 'w' }, ...extra });
 export const VIEW_PIER = { a: [40.5, 0], b: [4.2, 0], y: POND_LEVEL + 0.45, w: 2.6 };
@@ -67,9 +67,23 @@ function shoreLife() {
   L.push({ t: 'animal', kind: 'dog', at: [39.2, 19], y: height(39.2, 19), rot: Math.PI, seed: 31 });
   // ducks (mandarins) on the water before the pier and in the bay to the north; a heap of cut reeds on the beach
   L.push({ t: 'chickens', kind: 'duck', at: [-4, 9], y: POND_LEVEL, rot: 1.2, n: 5, seed: 41 }, { t: 'chickens', kind: 'duck', at: [18, 24], y: POND_LEVEL, rot: 3.5, n: 4, seed: 43 }, { t: 'chickens', kind: 'duck', at: [-12, -26], y: POND_LEVEL, rot: 0.4, n: 3, seed: 45 });
+  // on the hall's island before its steps: a monk sweeping the gravel with a besom, a monk with his staff, pilgrims at the podium's edge looking east over the pond
+  const hx = HALL.origin[0], yi = 0.02;
+  P(hx + 8.2, 10.5, [0.6, 1], { y: yi, dress: 'robe', hair: 'shaven', over: 'sash', cloth: 'cloth_grey', cloth2: 'cloth_ochre', hat: 'none', carry: 'besom' });
+  P(hx + 10.4, -8.5, [1, 0], { y: yi, dress: 'robe', hair: 'shaven', over: 'sash', cloth: 'cloth_black', cloth2: 'cloth_ochre', hat: 'none', carry: 'staff', pose: 'staff' });
+  P(hx + 9.8, 6.4, [1, 0.1], { y: yi, dress: 'robe', cloth: 'cloth_maroon', cloth2: 'cloth_white', hat: 'veil', hair: 'long', h: 1.5, over: 'collar' });
+  P(hx + 9.9, 7.5, [1, 0.1], { y: yi, dress: 'robe', cloth: 'cloth_black', cloth2: 'cloth_white', hat: 'cap', hatMat: 'lacquer_black', over: 'collar' });
+  P(hx + 9.5, -6.2, [1, -0.1], { y: yi, dress: 'robe', cloth: 'cloth_green', cloth2: 'cloth_white', hat: 'veil', hair: 'long', h: 1.48, over: 'collar' });
   L.push({ t: 'haystack', at: [47, 22], y: height(47, 22), kind: 'pole', seed: 7, s: 0.6 });
   return base('heian-uji-shore-life', 'life', L, [-RADIUS, -RADIUS, RADIUS, RADIUS], [0, 0]);
 }
+/** Lotus of the Pure Land in the pond's coves and lilies along the shallows (the plan in the 'ming' style, whose lotus field it is). */
+function lotusPlan() {
+  const inside = (x, z) => pondDistance(x, z) < -2.2 && islandDistance(x, z) > 2 && !(Math.abs(z) < 6 && x > -20) && !(z < -24 && z > -36 && x > 20);
+  const E = [{ t: 'lotus', c: [20, 30], r: 12, n: 70, y: POND_LEVEL, seed: 11, inside }, { t: 'lotus', c: [-8, 44], r: 10, n: 50, y: POND_LEVEL, seed: 12, inside }, { t: 'lotus', c: [-10, -42], r: 11, n: 55, y: POND_LEVEL, seed: 13, inside }, { t: 'lotus', kind: 'lily', c: [26, -8], r: 8, n: 40, y: POND_LEVEL, seed: 14, inside }];
+  return base('heian-uji-lotus', 'ming', E, [-36, -70, 44, 70], [30, 40]);
+}
+export const lotusCoves = lotusPlan();
 export const viewPier = pierPlan();
 export const [courtBoat, courtBoatPeople] = boatPlan();
 export const shoreFolk = shoreLife();
