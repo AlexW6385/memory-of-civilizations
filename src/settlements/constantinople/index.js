@@ -12,7 +12,8 @@ import { houses } from './town.js';
 import { lifePlan } from './life.js';
 import { processionPlan } from './procession.js';
 import { laneLifePlans } from './lanelife.js';
+import { hippodromePlan } from './hippodrome.js';
 import { interiorPlan, interiorLifePlan } from './interiors.js';
 export { music };
 export const landmarks = [{ plan: sophia, music }];
-export async function town() { return [city, lifePlan(), processionPlan(), interiorPlan(), interiorLifePlan(), ...laneLifePlans(), ...(await houses())]; }
+export async function town() { return [city, lifePlan(), processionPlan(), interiorPlan(), interiorLifePlan(), ...laneLifePlans(), hippodromePlan(), ...(await houses())]; }
