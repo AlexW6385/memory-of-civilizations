@@ -2,6 +2,7 @@
 import '../../styles/greek/index.js';
 import '../../styles/byzantine/index.js';
 import '../../styles/romanesque/index.js';
+import '../../styles/romanesque/parvis.js';
 import '../../styles/vernacular/index.js';
 import '../../styles/ming/index.js';
 import { abbey, terrace, bridge, river } from './plan.js';

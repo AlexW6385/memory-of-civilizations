@@ -13,6 +13,8 @@ import { chapel, city, bridges, bridgeHouses, boats, river, streetLife } from '.
 import { lifePlans } from './life.js';
 import music from './music.js';
 import { houses } from './town.js';
+import '../../styles/gothic/court.js';
+import { courtGround, courtLife } from './court.js';
 export { music };
 export const landmarks = [{ plan: chapel, music }];
-export async function town() { return [city, river, ...bridges, bridgeHouses(), boats, ...streetLife(), ...lifePlans(), ...(await houses())]; }
+export async function town() { return [city, river, ...bridges, bridgeHouses(), boats, ...streetLife(), ...lifePlans(), courtGround(), courtLife(), ...(await houses())]; }

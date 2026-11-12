@@ -173,3 +173,7 @@ Sources for §10: [Generalife — Wikipedia](https://en.wikipedia.org/wiki/Gener
 - **Reach.** All medina houses are of this kind and enterable; the Albaicín's first rows above the Darro are the same houses as closed blocks.
 - **Slopes.** The walls' foot grown with figs and brambles, the Albaicín's slopes with figs and scrub between the lanes (cármenes) [inferred].
 - **Sound.** An oud plays in the open zone (lanes, courts) and, quieter, in the halls.
+
+## 16. The Court of the Myrtles and the Court of the Lions, peopled (deepening pass 3)
+- The chancery's courts were where petitioners and envoys waited [inferred from the Court of the Myrtles' role before the Hall of the Ambassadors, see §4.2]. Built: men sitting on rugs under the Barca's portico, a vizier's retinue talking on the west walk, a secretary and a servant with a tray on the east walk, a gardener clipping the hedges' edge, a boy with a jar, tall glazed jars (tinajas) at the piers, a marble bench, doves and a cat; in the Court of the Lions scribes on rugs in the south gallery, a servant crossing, two boys at the fountain, a cat, doves, jars. Two walkers' ways along the Myrtles' side walks.
+- Still below Suzhou: the halls' interiors have few figures and no carpets or lamps; the Alcazaba has no garrison life; the generalife route 1 of tools/walk-check is stuck near (241.8, 43.7) (not caused by this pass).

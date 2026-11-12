@@ -4,6 +4,7 @@
 // Suzhou's; the ways come from layout.js.
 
 import { RADIUS, RIVER, NORTH_ARM, SOUTH_ARM, BRIDGES, lots, streets } from './layout.js';
+import { COURT_WAYS } from './court.js';
 import { STYLES } from '../../core/build.js';
 import '../../styles/gothic/index.js';
 import '../../styles/gothic/town.js';
@@ -30,6 +31,7 @@ export function walkways() {
     const m = shopShare(r);
     return { r, weight: (parvis ? 3.2 : bridge ? 2.8 : 1.0) * (0.6 + 2 * m), market: parvis ? 1 : bridge ? 0.9 : m, kind: w > 6 ? 'street' : 'lane' };
   });
+  rects.push(...COURT_WAYS);
   return { rects, links: [], clip: RADIUS - 12 };
 }
 /** The Seine's two arms (their middle lines) and the bridges over them. */
