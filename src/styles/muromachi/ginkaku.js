@@ -73,7 +73,7 @@ function kannonDen(el, ctx) {
     // the walls of the lower floor stand as walls: the doorway in the middle bay is the way in
     col.rect([-hw, -hd, hw, -hd + 0.15], y0, yT); col.rect([-hw, -hd, -hw + 0.15, hd], y0, yT); col.rect([hw - 0.15, -hd, hw, hd], y0, yT);
     col.rect([-hw, hd - 0.12, -0.93, hd], y0, yT); col.rect([0.93, hd - 0.12, hw, hd], y0, yT);
-    col.floor([-hw + 0.15, -hd + 0.15, hw - 0.15, hd - 0.12], y1);
+    col.floor([-hw + 0.15, -hd + 0.15, hw - 0.15, hd], y1);
     // the lower room (the Shinkū-den, in the manner of a shoin): mats laid over the room, the altar of the Buddha on its dais against the back
     // wall, the library corner in the north-east, the stair along the west wall
     tatami(B, -hw + 0.2, hw - 0.2, -hd + 0.2, hd - 0.4, y1 + 0.03, true);
@@ -90,19 +90,19 @@ function kannonDen(el, ctx) {
     B(WD, hw - 0.5, y1 + 0.03, -hd + 1.4, hw - 0.2, y1 + 1.6, -hd + 3.0); for (let k = 0; k < 4; k++) B(WD, hw - 0.5, y1 + 0.4 + k * 0.35, -hd + 1.4, hw - 0.2, y1 + 0.43 + k * 0.35, -hd + 3.0);
     for (let k = 0; k < 3; k++) for (let j = 0; j < 5; j++) B('paint_white', hw - 0.45, y1 + 0.43 + k * 0.35, -hd + 1.5 + j * 0.28, hw - 0.28, y1 + 0.43 + k * 0.35 + 0.2, -hd + 1.7 + j * 0.28);
     col.rect([hw - 0.5, -hd + 1.4, hw - 0.2, -hd + 3.0], y1, y1 + 1.6); col.rect([-1.9, -hd + 0.15, 1.9, -hd + 1.55], y1, y1 + 2.4);
-    // the stair (a steep one, as the ladder-stairs of such halls): from the west wall up to the east, through the ceiling into the upper room
-    const sz0 = -1.9, sz1 = -0.7, sxa = -hw + 0.3, sxb = -1.0, n = 12, rise = (yT - y1) / n, run = (sxb - sxa) / n;
-    for (let k = 0; k < n; k++) { B(TM, sxa + k * run, y1 + 0.03, sz0, sxa + (k + 1) * run, y1 + (k + 1) * rise, sz1); }
-    for (const z of [sz0 - 0.05, sz1 + 0.05]) { B('lacquer_black', sxa, y1 + 0.4, z - 0.03, sxb, y1 + 0.46, z + 0.03); for (let k = 0; k <= n; k += 3) B('lacquer_black', sxa + k * run - 0.03, y1 + k * rise + 0.46, z - 0.03, sxa + k * run + 0.03, y1 + k * rise + 1.0, z + 0.03); B('lacquer_black', sxa, y1 + 1.0, z - 0.03, sxb, y1 + 0.46 + (yT - y1) + 0.6, z + 0.03); }
-    col.ramp([sxa, sz0, sxb, sz1], y1, yT, 'e');
+    // the stair (the ladder-stair of such halls, laid gently here): from the east wall of the room up to the west, its mouth in the upper floor
+    const sz0 = 0.5, sz1 = 1.7, sxa = hw - 0.3, sxb = -0.8, n = 14, rise = (yT - y1) / n, run = (sxa - sxb) / n;
+    for (let k = 0; k < n; k++) B(TM, sxa - (k + 1) * run, y1 + 0.03, sz0, sxa - k * run, y1 + (k + 1) * rise, sz1);
+    for (const z of [sz0 - 0.05, sz1 + 0.05]) { B('lacquer_black', sxb, y1 + 0.4, z - 0.03, sxa, y1 + 0.46, z + 0.03); for (let k = 0; k <= n; k += 2) B('lacquer_black', sxa - k * run - 0.03, y1 + k * rise + 0.46, z - 0.03, sxa - k * run + 0.03, y1 + k * rise + 1.0, z + 0.03); B('lacquer_black', sxb, y1 + 1.0 + (yT - y1) - 0.5, z - 0.03, sxa, y1 + 1.0 + 0.0, z + 0.03); }
+    col.ramp([sxb, sz0, sxa, sz1], y1, yT, 'w');
     // the ceiling of boards, open over the stair
-    { const hx0 = -3.2, hx1 = -0.9, hz0 = -1.95, hz1 = -0.65, cy = yT - 0.12;
+    { const hx0 = -0.7, hx1 = 2.5, hz0 = 0.4, hz1 = 1.8, cy = yT - 0.12;
       B(TM, -hw, cy, -hd, hw, yT, hz0); B(TM, -hw, cy, hz1, hw, yT, hd); B(TM, -hw, cy, hz0, hx0, yT, hz1); B(TM, hx1, cy, hz0, hw, yT, hz1);
       for (let x = -hw + 1.05; x < hw; x += 2.1) B(WD, x - 0.07, cy - 0.14, -hd, x + 0.07, cy, hd); }
     // the upper room is reached by the stair; its floor has the stair's mouth
     const ux = 3.15, uz = 2.1;
-    col.floor([-ux + 0.1, -uz + 0.1, ux - 0.1, -1.9], yT); col.floor([-ux + 0.1, -0.7, ux - 0.1, uz - 0.1], yT); col.floor([-1.0, -1.9, ux - 0.1, -0.7], yT);
-    for (const r of [[-ux, -uz, ux, -1.9], [-ux, -0.7, ux, uz], [-0.9, -1.9, ux, -0.7]]) B(TM, r[0], yT - 0.15, r[1], r[2], yT, r[3]);
+    for (const r of [[-ux, -uz, ux, 0.4], [-ux, 1.8, ux, uz], [-ux, 0.4, -0.7, 1.8], [2.5, 0.4, ux, 1.8]]) B(TM, r[0], yT - 0.15, r[1], r[2], yT, r[3]);
+    for (const r of [[-ux + 0.1, -uz + 0.1, ux - 0.1, 0.4], [-ux + 0.1, 1.8, ux - 0.1, uz - 0.1], [-ux + 0.1, 0.4, -0.7, 1.8], [2.5, 0.4, ux - 0.1, 1.8]]) col.floor(r, yT);
     col.rect([-ux, -uz, ux, -uz + 0.18], yT, yU); col.rect([-ux, -uz, -ux + 0.18, uz], yT, yU); col.rect([ux - 0.18, -uz, ux, uz], yT, yU); col.rect([-ux, uz - 0.18, ux, uz], yT, yU);
     // the pent roof's mass outside the upper room, and the upper roof
     for (const r of [[-hw - 1.3, uz, hw + 1.3, hd + 1.3], [-hw - 1.3, -hd - 1.3, hw + 1.3, -uz], [-hw - 1.3, -uz, -ux, uz], [ux, -uz, hw + 1.3, uz]]) col.rect(r, yT + 0.05, yT + 1.4);

@@ -97,7 +97,7 @@ export function waterLife() {
   for (const z of STREAM_STEPS) {
     if (Math.hypot(STREAM.x0, z) > RADIUS - 40) continue;
     const side = z % 2 === 0 ? 1 : -1;
-    for (let k = 0; k < 2; k++) if (rand() < 0.8) L.push(person(rand, [STREAM.x0 + 1.0 + k * 1.3, z + 1.0 - k * 0.6], W + 0.02, Math.PI / 2, { pose: 'squat', woman: true, hat: 'none' }));
+    for (let k = 0; k < 2; k++) if (rand() < 0.85) L.push(person(rand, [STREAM.x0 + 1.0 + k * 0.65, z + 0.9 - k * 0.8], k ? -0.317 : -0.083, -Math.PI / 2, { pose: 'squat', woman: true, hat: 'none' }));
     L.push({ t: 'basket', at: [STREAM.x0 - 0.5, z + 0.3], y: 0.05, rot: rand() * 6, n: 2, seed: Math.floor(rand() * 1e9) });
     void side;
   }
@@ -132,9 +132,25 @@ export function streetLife() {
   return L;
 }
 
+/** The yards' life: the wash on its line with the woman at it, hens, a rick of straw, a child, a dog, a cat on the woodshed. */
+export function yardLife() {
+  const L = [], rand = rng(1541);
+  for (const y of yards()) {
+    const w = y[2] - y[0], d = y[3] - y[1];
+    if (w < 24 || d < 24) continue;
+    const c = (i, j) => [y[0] + w / 3 * (i + 0.5), y[1] + d / 3 * (j + 0.5)], sd = () => Math.floor(rand() * 1e9);
+    { const [x, z] = c(1, 2); L.push({ t: 'laundry', at: [x, z], y: 0, rot: 0, len: 4, seed: sd() }); if (rand() < 0.7) L.push(person(rand, [x + 0.6, z + 1.4], 0, Math.PI, { woman: true, carry: 'basket', hat: 'none' })); }
+    { const [x, z] = c(0, 1); L.push({ t: 'chickens', at: [x, z], y: 0, rot: rand() * 6, kind: 'hen', seed: sd() }); if (rand() < 0.5) L.push({ t: 'haystack', at: [x + 3, z + 2], y: 0, kind: 'rick', seed: sd() }); }
+    if (rand() < 0.5) { const [x, z] = c(1, 1); L.push(person(rand, [x + 4, z + 4], 0, rand() * 6, { child: true, h: 1.0 + rand() * 0.2, woman: rand() < 0.5, hat: 'none' })); }
+    if (rand() < 0.4) { const [x, z] = c(2, 2); L.push({ t: 'animal', kind: 'dog', at: [x, z], y: 0, rot: rand() * 6, seed: sd() }); }
+    if (rand() < 0.5) { const [x, z] = c(1, 0); L.push({ t: 'animal', kind: 'cat', at: [x, z - 0.2], y: 0, rot: rand() * 6, seed: sd() }); }
+  }
+  return L;
+}
+
 /** All of it in tiles of 100 m: [{ id, elements, center }]. */
 export function lifeTiles() {
-  const all = [...fronts(), ...inside(), ...waterLife(), ...streetLife()];
+  const all = [...fronts(), ...inside(), ...waterLife(), ...streetLife(), ...yardLife()];
   const tiles = new Map();
   for (const e of all) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   return [...tiles].map(([k, elements]) => { const [i, j] = k.split(',').map(Number); return { id: `muromachi-life-${k}`, elements, center: [i * 100 + 50, j * 100 + 50] }; });

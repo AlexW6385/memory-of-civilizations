@@ -4,6 +4,7 @@
 // yards; the shopkeepers at their counters, monks, samurai.
 import { RADIUS, STREAM, BRIDGES, SHRINE, TEA, GINKAKU, RYOAN, lots, yards, isOpen, inRect } from './layout.js';
 import { lifeTiles } from './life.js';
+import { gutters, furniture, yardWork, streamWork, templeWork } from './streetwork.js';
 
 const base = (id, elements, style = 'muromachi') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [190, 100], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -66,6 +67,9 @@ export async function town() {
   const all = lots(), plans = [];
   for (let i = 0; i < all.length; i += 60) plans.push(base(`muromachi-town-${i / 60}`, all.slice(i, i + 60).map((l) => ({ t: 'machiya_m', at: l.at, facing: l.facing, w: l.w, d: l.d, seed: l.seed, trade: l.trade, open: isOpen(l), y: 0 }))));
   plans.push(base('muromachi-civic', civic()));
+  plans.push(base('muromachi-gutters', gutters()));
+  plans.push(base('muromachi-furniture', [...furniture(), ...streamWork(), ...templeWork()]));
+  plans.push(base('muromachi-yards', yardWork()));
   plans.push(base('muromachi-people', people(), 'life'));
   for (const t of lifeTiles()) plans.push({ ...base(t.id, t.elements, 'life'), center: t.center, near: 230 });
   return plans;
