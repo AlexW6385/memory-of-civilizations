@@ -6,6 +6,9 @@ import '../chinese/index.js';
 import '../../objects/index.js';
 import { shaolinStupa, shaolinStele, practiceFloor, courtCenser, stoneLion, bellHung, pathEarth } from './stupa.js';
 import { shaolinInterior } from './interiors.js';
+import { shaolinRoom } from './rooms.js';
+import { shaolinGear, shaolinWear } from './gear.js';
+import { suzhouShop } from '../../settlements/ming-suzhou/shops.js';
 import { hallFurniture } from '../../settlements/ming-suzhou/halls.js';
 import { Parts, plaqueBuild } from '../../settlements/ming-suzhou/props.js';
 
@@ -25,7 +28,10 @@ registerStyle('shaolin', {
   elements: {
     ...base.elements,
     shaolin_stupa: shaolinStupa, shaolin_stele: shaolinStele, practice_floor: practiceFloor, court_censer: courtCenser, stone_lion: stoneLion, bell_hung: bellHung, path_earth: pathEarth, shaolin_interior: shaolinInterior,
-    hall_furniture: hallFurniture, plaque,
+    hall_furniture: hallFurniture, plaque, shaolin_room: shaolinRoom, shaolin_gear: shaolinGear, shaolin_wear: shaolinWear,
   },
   objects: { ...STYLES.chinese.objects },
 });
+
+// the shop fronts' signs and goods are an element of the street life (shared with Suzhou's shops)
+STYLES.life.elements.suzhou_shop ??= suzhouShop;

@@ -1,6 +1,6 @@
 // Shaolin — the ground: the flat of the compound, the village plain south, the foothills round, Mount
 // Song rising in the north; cypress and pine; the dry, hazy sky of the Zhongyuan (docs/settlements/shaolin.md §4, §7).
-import { RADIUS, WALL, FOREST, STUPAS, RANGES, AXIS, HOUSES, ROADS, MOUNT, inRect, onRoad, smooth as sm, pathNear } from './layout.js';
+import { RADIUS, WALL, FOREST, STUPAS, RANGES, AXIS, HOUSES, YARDS, GEAR, ROADS, MOUNT, inRect, onRoad, smooth as sm, pathNear } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 function vnoise(x, z) {
@@ -17,7 +17,7 @@ function height(x, z) {
   // the flats: compound, village, road
   // gentle foothills east and west of the compound and on the forest's side
   const side = Math.max(0, Math.abs(x) - 75) * 0.08 * sm(-110, 20, z);
-  h += side + 0.6 * vnoise(x * 0.03, z * 0.03) * sm(60, 120, Math.abs(x));
+  h += side + 0.6 * vnoise(x * 0.03, z * 0.03) * sm(60, 120, Math.abs(x)) * (1 - sm(125, 145, z));
   if (x < -100) h += (-100 - x) * 0.035 * sm(0, 40, z + 20);
   return h * (1 - sm(RADIUS - 30, RADIUS, r));
 }
@@ -36,14 +36,15 @@ const water = () => false, waterLevel = () => -Infinity, fromWater = () => 99;
 function planting(x, z, p) {
   const r = Math.hypot(x, z);
   if (r > RADIUS - 6) return null;
-  if (z > 128 && z < 150 && Math.abs(x) < 16) return null;
-  if (HOUSES.some((q) => inRect(q.rect, x, z, 2.5)) || onRoad(x, z, 1.5)) return null;
+  if (z > 128 && z < 152 && Math.abs(x) < 16) return [[-13.8, 134], [13.8, 134], [-13.8, 147], [13.8, 147]].some((c) => Math.hypot(c[0] - x, c[1] - z) < 2.6) ? { pagoda_tree: 7, cypress: 3 } : null;
+  if (HOUSES.some((q) => inRect(q.rect, x, z, 1.6)) || onRoad(x, z, 1.5)) return null;
+  if (YARDS.some((q) => inRect(q.rect, x, z, -0.9))) return { jujube: 1.1, persimmon: 0.7, grass_dry: 4 };
   if (STUPAS.some((s) => Math.hypot(s.c[0] - x, s.c[1] - z) < s.rad + 0.8)) return null;
   if (pathNear(x, z, 2.2)) return null;
   if (inRect(WALL, x, z, 0.5)) {
     // inside the compound: old cypresses in the courts and along the cross walls, ginkgo stand-ins, nothing on the paving
     if (RANGES.some((q) => inRect(q.rect, x, z, 1.2)) || Object.values(AXIS).some((q) => inRect(q, x, z, 3))) return null;
-    if (Math.abs(x) < 5) return null;
+    if (Math.abs(x) < 5 || GEAR.some((q) => Math.hypot(q.at[0] - x, q.at[1] - z) < q.rad + 1.2)) return null;
     const n = vnoise(x * 0.12 + 3, z * 0.12);
     return { cypress: 0.14 * sm(0.1, 0.5, n), arborvitae: 0.1 * sm(0.0, 0.5, -n), pagoda_tree: 0.05 };
   }
@@ -57,7 +58,7 @@ function planting(x, z, p) {
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { cypress: 0.4, arborvitae: 0.2, pagoda_tree: 0.06, chinese_pine: 0.8, oak: 0.2, maquis: 0.4, jujube: 0.06, poplar: 0.1, grass_dry: 20 },
+  maxDensity: { persimmon: 0.9, cypress: 3, arborvitae: 0.2, pagoda_tree: 7, chinese_pine: 0.8, oak: 0.2, maquis: 0.4, jujube: 1.2, poplar: 0.1, grass_dry: 20 },
   climate: {
     damp: 0.2,
     sun: { az: 150, el: 44, color: [1.0, 0.95, 0.86], intensity: 3.3, lat: 34.5, dec: 10, hour: 10.5 },

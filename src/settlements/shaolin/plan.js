@@ -3,7 +3,7 @@
 // censers and bell and drum towers, the side ranges, and the Pagoda Forest of memorial stupas west of the wall.
 import '../../styles/shaolin/index.js';
 import { PAL, PAL_HOUSE } from '../../styles/shaolin/index.js';
-import { WALL, AXIS, PLAT, HGT, BELL, DRUM, CROSS, RANGES, STUPAS, FOREST, FOREST_PATH, CELL, gateX, hw, inRect } from './layout.js';
+import { WALL, AXIS, PLAT, HGT, BELL, DRUM, CROSS, RANGES, STUPAS, FOREST, FOREST_PATH, CELL, GEAR, gateX, hw, inRect, rng } from './layout.js';
 import { ground } from './ground.js';
 
 const E = [];
@@ -24,7 +24,14 @@ E.push({ t: 'paving', rect: [-4, 152, 4, 190], y: 0.02, th: 0.3, mat: 'granite_g
 for (const [za, zb] of courts) E.push({ t: 'paving', rect: [-2.2, za + 0.2, 2.2, zb - 0.2], y: 0.04, th: 0.3, mat: 'granite_grey' });
 
 // ── the walls ─────────────────────────────────────────────────────────────────────────
-const wall = (a, b, o = {}) => E.push({ t: 'ming_wall', a, b, y: 0, h: 4.6, th: 0.55, pal: PAL, ...o });
+const wall = (a, b, o = {}) => {
+  E.push({ t: 'ming_wall', a, b, y: 0, h: 4.6, th: 0.55, pal: PAL, ...o });
+  const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
+  // (gate positions are measured along the wall from its start in ming_wall; both walls of a cross pair run from the outside in)
+  const skip = (o.gates ?? []).map((g) => { const at = Math.abs(g.at); return [at - g.w / 2 - 0.3, at + g.w / 2 + 0.3]; });
+  void ux; void uz;
+  E.push({ t: 'shaolin_wear', a, b, y: 0.0, h: 4.6, th: 0.55, seed: Math.round(a[0] * 7 + a[1] * 13 + b[0] * 3) & 0xffff, skip });
+};
 // the east and west walls (the west one with a gate to the Pagoda Forest at z 70), the north wall
 wall([WALL[2], WALL[3]], [WALL[2], WALL[1]]);
 wall([WALL[0], WALL[3]], [WALL[0], WALL[1]], { gates: [{ at: WALL[3] - 70, w: 2.6, h: 3.2 }] });
@@ -94,6 +101,10 @@ for (const [r, kind] of [[BELL, 'bell'], [DRUM, 'drum']]) {
   E.push({ t: 'block', rect: R(r, 0.25), y0: top - 0.35, y1: top, mat: 'granite_grey' });
   E.push({ t: 'block', rect: R(r, 0.25), y0: 0, y1: 0.4, mat: 'granite_grey' });
   E.push({ t: 'ming_pavilion', c: [cx, cz], shape: 'square', w: r[2] - r[0] - 0.8, d: r[3] - r[1] - 0.8, y: top, H: 3.6, plat: 0.3, open: [0, 1, 2, 3], pal: PAL });
+  // the stair up the court side of the podium to the pavilion's floor
+  { const n = Math.ceil(top / 0.17), run = n * 0.32, east = kind === 'bell';
+    if (east) E.push({ t: 'stair', rect: [r[2], cz - 1.3, r[2] + run, cz + 1.3], y0: 0.02, y1: top, dir: 'w', riser: 0.17, mat: 'granite_block' });
+    else E.push({ t: 'stair', rect: [r[0] - run, cz - 1.3, r[0], cz + 1.3], y0: 0.02, y1: top, dir: 'e', riser: 0.17, mat: 'granite_block' }); }
   if (kind === 'bell') E.push({ t: 'bell_hung', at: [cx, cz], y: top + 0.4, kind });
   else E.push({ t: 'bell_hung', at: [cx, cz], y: top + 0.4, kind });
 }
@@ -104,6 +115,28 @@ for (const q of RANGES) {
   E.push({ t: 'ming_hall', rect: q.rect, y: 0.02 + 0.35, H: big ? 4.6 : 3.8, front: q.front, four: false, roof: 'gable', plat: 0.35, platMargin: 0.5, eave: 1.0, pal: PAL, lat: 'lattice_red', walls, winWall: true });
 }
 E.push({ t: 'shaolin_interior', kind: 'cell', rect: CELL.rect, y: 0.02 + 0.35, H: 3.8 });
+for (const q of RANGES) {
+  if (q.kind === 'cell') continue;
+  const kind = { guest: 'guest', patriarch: 'patriarch', refectory: 'refectory', kitchen: 'kitchen', cells: 'dorm' }[q.kind];
+  const big = q.kind === 'guest' || q.kind === 'patriarch' || q.kind === 'refectory';
+  E.push({ t: 'shaolin_room', kind, rect: q.rect, front: q.front, y: 0.02 + 0.35, H: big ? 4.6 : 3.8, seed: Math.round(q.rect[1]) });
+  // the plinth and the foot of the walls splashed with mud, the plaster fallen in patches
+  const r = q.rect;
+  for (const [a, b] of [[[r[0], r[1]], [r[2], r[1]]], [[r[0], r[3]], [r[2], r[3]]], [q.front === 'e' ? [r[0], r[1]] : [r[2], r[1]], q.front === 'e' ? [r[0], r[3]] : [r[2], r[3]]]]) E.push({ t: 'shaolin_wear', a, b, y: 0.37, h: 3.4, th: 0.28, seed: Math.round(a[0] + a[1] * 5) & 0xfff });
+}
+// the shanmen's passage: the Vajra guardians
+E.push({ t: 'shaolin_room', kind: 'shanmen', rect: AXIS.shanmen, front: 's', y: 0.02 + PLAT.shanmen, H: HGT.shanmen });
+// the gear of the courts
+for (const q of GEAR) E.push({ t: 'shaolin_gear', kind: q.kind, at: q.at, y: 0.02, rot: q.rot ?? 0, seed: q.seed ?? 3, n: q.n });
+// dry grass in the joints along the foot of the walls and at the platforms
+{
+  const r = rng(77);
+  for (const [z0, z1] of [[-112, -88], [-87, -56], [-55, -30], [-29, 1], [2, 38], [39, 91], [92, 127]]) {
+    E.push({ t: 'shaolin_wear', kind: 'tufts', rect: [WALL[0] + 0.5, z0, WALL[0] + 2.0, z1], y: 0.3, n: 14, seed: Math.floor(r() * 999) });
+    E.push({ t: 'shaolin_wear', kind: 'tufts', rect: [WALL[2] - 2.0, z0, WALL[2] - 0.5, z1], y: 0.3, n: 14, seed: Math.floor(r() * 999) });
+    E.push({ t: 'shaolin_wear', kind: 'tufts', rect: [-9, z0, 9, z1], y: 0.3, n: 8, seed: Math.floor(r() * 999) });
+  }
+}
 
 // ── steles, lions, trees' places ─────────────────────────────────────────────────────────────
 const stele = (x, z, o = {}) => E.push({ t: 'shaolin_stele', at: [x, z], y: 0.02, yaw: 0, ...o });
@@ -134,7 +167,8 @@ const rooms = [
   room('tianwang', AXIS.tianwang, 0.02 + PLAT.tianwang, 'hall'), room('mahavira', AXIS.mahavira, 0.02 + PLAT.mahavira, 'hall'),
   room('fatang', AXIS.fatang, 0.02 + PLAT.fatang, 'hall'), room('qianfo', AXIS.qianfo, 0.02 + PLAT.qianfo, 'hall'),
   room('fangzhang', AXIS.fangzhang, 0.02 + PLAT.fangzhang, 'hall'), room('lixue', AXIS.lixue, 0.02 + PLAT.lixue, 'hall'),
-  room('cell', CELL.rect, 0.37, 'hall'),
+  room('cell', CELL.rect, 0.37, 'hall'), room('shanmen', AXIS.shanmen, 0.02 + PLAT.shanmen, 'hall'),
+  ...RANGES.filter((q) => q.kind !== 'cell').map((q, i) => room('range' + i, q.rect, 0.37, 'hall')),
   room('monastery', WALL, 0, 'open'), room('forest', FOREST, 0, 'open'),
 ];
 const gm = gateX('mahavira'), gf = gateX('fatang'), ga = gateX('fangzhang'), gl = gateX('lixue');

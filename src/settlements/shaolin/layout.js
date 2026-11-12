@@ -45,18 +45,45 @@ export const gateX = (name) => hw(name) + 1.2 + 3.0;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
-/** The approach road (south of the gate) and the village streets, as rectangles. */
-export const ROADS = [[-4, 131.5, 4, 190], [-95, 152, 95, 158], [-60, 160, -54, 190], [54, 160, 60, 190]];
+/** The approach road (south of the gate) and the village streets, as rectangles (the approach with its shoulders under the house fronts). */
+export const ROADS = [[-5.2, 131.5, 5.2, 190], [-90, 152, 90, 158], [-60, 160, -54, 190], [54, 160, 60, 190]];
 export const onRoad = (x, z, m = 0) => ROADS.some((r) => inRect(r, x, z, m));
-/** Courtyard houses of the village: rect, front. */
-export const HOUSES = [];
+/** The forecourt before the gate (bluestone, x ±16, z 128.8…152): the stalls of the pilgrims' trade stand round its edge. */
+export const PLAZA = [-16, 128.8, 16, 152];
+/** The trades of the village street and the pilgrim road (the Suzhou shop vocabulary: src/settlements/ming-suzhou/shops.js). */
+export const TRADES = ['tea', 'food', 'rice', 'cloth', 'medicine', 'wine', 'pottery', 'iron', 'books', 'food', 'tea', 'cloth'];
+/**
+ * The houses of the village, in continuous fronts: both sides of the village street (party walls, no gaps) and both flanks of the
+ * approach road. Each: { rect, front, seed, kind ('shop' | 'home'), trade, H, roof, w, d }; and the yards behind: { rect, house }.
+ */
+export const HOUSES = [], YARDS = [];
+export const GAP = 0.7;                                         // between neighbours: the party wall
 {
   const r = rng(1600);
-  for (const [x0, x1, side] of [[-100, -66, 1], [-50, -12, 1], [12, 50, 1], [66, 100, 1], [-100, -66, -1], [-50, -12, -1], [12, 50, -1], [66, 100, -1]]) {
-    for (let x = x0; x + 9 <= x1; x += 9 + r() * 3) {
-      const w = 7 + r() * 2.5, d = 4.4 + r() * 1.4;
-      if (side > 0) { const z0 = 160 + r() * 2; HOUSES.push({ rect: [x, z0, x + w, z0 + d], front: 'n', seed: Math.floor(r() * 1e6) }); }
-      else { const z1 = 150 - r() * 2; HOUSES.push({ rect: [x, z1 - d, x + w, z1], front: 's', seed: Math.floor(r() * 1e6) }); }
+  const lot = (rect, front, o = {}) => {
+    const shop = o.shop ?? r() < 0.6, wide = rect[2] - rect[0], deep = rect[3] - rect[1];
+    HOUSES.push({ rect, front, seed: Math.floor(r() * 1e6), kind: shop ? 'shop' : 'home', trade: TRADES[Math.floor(r() * TRADES.length)], H: 3.5 + r() * 0.6, roof: r() < 0.2 ? 'hip' : 'gable', w: wide, d: deep, ...o });
+  };
+  // the village street: north row facing north, south row facing south; the plaza and the approach left open
+  for (const [side, xa, xb] of [[1, -88, -12.2], [1, 12.2, 88], [-1, -88, -17], [-1, 17, 88]]) {
+    let x = xa;
+    while (true) {
+      const w = 6.6 + r() * 2.2, d = 5 + r() * 1.5;
+      if (x + w > xb) break;
+      if (side > 0) { const z0 = 159.3 + (r() < 0.3 ? 0.35 : 0); lot([x, z0, x + w, z0 + d], 'n'); YARDS.push({ rect: [x - GAP / 2, z0 + d, x + w + GAP / 2, z0 + d + 6.5 + r() * 2], house: HOUSES.length - 1 }); }
+      else { const z1 = 150.7 - (r() < 0.3 ? 0.35 : 0); lot([x, z1 - d, x + w, z1], 's'); YARDS.push({ rect: [x - GAP / 2, z1 - d - 6.5 - r() * 2, x + w + GAP / 2, z1 - d], house: HOUSES.length - 1 }); }
+      x += w + GAP;
+    }
+  }
+  // the flanks of the approach road: houses facing the road, mostly shops (the pilgrims pass here)
+  for (const [side, front] of [[1, 'w'], [-1, 'e']]) {
+    let z = 160.6;
+    while (true) {
+      const w = 5.8 + r() * 1.8, d = 5.2 + r() * 1.0;
+      if (z + w > 188) break;
+      const x0 = side > 0 ? 6.0 : -6.0 - d;
+      lot([x0, z, x0 + d, z + w], front, { shop: r() < 0.75 });
+      z += w + GAP;
     }
   }
 }
@@ -86,3 +113,27 @@ export const MOUNT = (x, z) => {
   const n = Math.max(0, -125 - z), ridge = 1 + 0.2 * Math.sin(x / 38) + 0.1 * Math.sin(x / 15 + z / 23);
   return 0.35 * Math.pow(n, 1.05) * ridge;
 };
+
+/** What stands in the courts (src/styles/shaolin/gear.js): fire cisterns, stone lamps, the training court's racks, locks, piles and dummies, robe lines, brooms. */
+export const GEAR = [];
+{
+  const g = (kind, x, z, o = {}) => GEAR.push({ kind, at: [x, z], rad: o.rad ?? 1.4, ...o });
+  for (const [zc, zl1, zl2] of [[108, 122, 101], [56, 82, 66], [20, 28, 10], [-14, -20, -8], [-42, -47, -36]]) {
+    for (const sx of [-1, 1]) { g('cistern', sx * 9.5, zc, { rad: 1.5 }); g('lamp', sx * 4.6, zl1, { rad: 0.6 }); g('lamp', sx * 4.6, zl2, { rad: 0.6 }); }
+  }
+  // the training court before the Thousand Buddha Hall
+  for (const sx of [-1, 1]) {
+    g('piles', sx * 16, -71, { rad: 3.3, seed: 5 + sx });
+    g('rack', sx * 30, -60.5, { rad: 2, rot: 0 });
+    g('locks', sx * 24 - 1.4, -77, { rad: 2, seed: 8 });
+    g('dummy', sx * 36, -73, { rad: 0.8 }); g('dummy', sx * 36, -79, { rad: 0.8 }); g('dummy', sx * 31, -76, { rad: 0.8 });
+    g('brooms', sx * 22, -58.5, { rad: 1, rot: sx * 0.2 });
+  }
+  // robes drying in the yards of the cells, brooms by every range door
+  for (const q of RANGES) {
+    if (q.kind !== 'cells' && q.kind !== 'cell') continue;
+    const west = q.front === 'w', cz = (q.rect[1] + q.rect[3]) / 2, x = west ? q.rect[0] - 3.5 : q.rect[2] + 3.5;
+    g('robes', x, cz - 2, { n: 4, seed: Math.round(cz) & 63, rad: 2.6, rot: Math.PI / 2 });
+    g('brooms', west ? q.rect[0] - 1.0 : q.rect[2] + 1.0, cz + (q.rect[3] - q.rect[1]) / 2 - 1.2, { rad: 1, rot: west ? Math.PI / 2 : -Math.PI / 2 });
+  }
+}
