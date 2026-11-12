@@ -11,6 +11,8 @@ export const MONKS = { main: [-80, -265, 80, -120, 30], first: [-70, -120, 70, -
 export const SUMMIT = [-20, -235, 22, -170];                 // the main summit's top, for the great house
 export const HALLS = [[SUMMIT[0], SUMMIT[1] + 20, SUMMIT[2], SUMMIT[1] + 40], [-14, -100, 8, -86]];   // the two opened great houses, summit and first terrace
 export const PLAZA = [-115, -40, 115, 150];
+// the chunkey yards of the Grand Plaza (long strips of beaten clay, 4 m wide): two run toward the ramp either side of its foot, so that the visitor who comes to the stair walks between two games [inferred: the places]; two more further south
+export const YARDS = [[-42, -36, -38, -8], [-12, -36, -8, -8], [-80, 92, -44, 96], [58, 104, 62, 140]];
 export const FOX = [-62, 178, -18, 222, 9];
 export const ROUNDTOP = [36, 200, 22, 12];                   // centre x, z, radius, height (conical)
 export const PALISADE = [-160, -300, 160, 252];

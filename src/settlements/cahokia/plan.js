@@ -1,5 +1,5 @@
 // Mississippian Cahokia about 1175 (docs/settlements/cahokia.md §2–§4).
-import { RADIUS, SUMMIT, PLAZA, PALISADE, WOODHENGE, MOUNDS, MONKS, FOX, CONES, RIDGES, HALLS, height, smallPlazas, mRamp } from './layout.js';
+import { RADIUS, SUMMIT, PLAZA, YARDS, PALISADE, WOODHENGE, MOUNDS, MONKS, FOX, CONES, RIDGES, HALLS, height, smallPlazas, mRamp } from './layout.js';
 
 const mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
 const LODGES = [[-54, -104, -32, -90], [26, -104, 48, -90]];
@@ -31,9 +31,7 @@ export const monks = {
     { t: 'terrace_fence', from: [-50, -150], to: [-30, -150], y: height }, { t: 'terrace_fence', from: [-18, -150], to: [50, -150], y: height },
     { t: 'plaza_pole', c: [0, 55], y: 0, h: 14 },
     // chunkey yards on the Grand Plaza
-    { t: 'chunkey_yard', rect: [12, 20, 48, 24], y: 0, seed: 3 },
-    { t: 'chunkey_yard', rect: [-80, 92, -44, 96], y: 0, seed: 5 },
-    { t: 'chunkey_yard', rect: [58, 104, 62, 140], y: 0, seed: 7 },
+    ...YARDS.map((rect, i) => ({ t: 'chunkey_yard', rect, y: 0, seed: 3 + i * 2 })),
   ],
   rooms: [{ id: 'plaza', rect: PLAZA, y: 0, kind: 'open' }, ...LODGES.map((r, i) => ({ id: 'lodge-' + i, rect: [r[0] + 0.6, r[1] + 0.6, r[2] - 0.6, r[3] - 0.6], y: height(...mid(r)), kind: 'hall' })), { id: 'summit-hall', rect: [SUMMIT[0] + 0.6, SUMMIT[1] + 20.6, SUMMIT[2] - 0.6, SUMMIT[1] + 39.4], y: height(...mid(SUMMIT)), kind: 'hall' }],
   walks: [Object.assign([[-25, -5], [-25, -36]], { y0: 0 })],

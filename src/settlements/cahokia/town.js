@@ -1,7 +1,7 @@
 // The town's houses (docs/settlements/cahokia.md §5), four of them opened and furnished (§5.1), and the
 // life of the plaza and the yards (§5.2): chunkey played on the plaza's yards with the crowd along
 // their banks, people on the ramp up Monks Mound, women at work at the house doors, dogs.
-import { RADIUS, PLAZA, PALISADE, SUMMIT, CREEK, lots, gaps, height, onMound, inLot, inRect, inPond, inCreek, creekZ, smallPlazas, inSmallPlaza } from './layout.js';
+import { RADIUS, PLAZA, YARDS, PALISADE, SUMMIT, CREEK, lots, gaps, height, onMound, inLot, inRect, inPond, inCreek, creekZ, smallPlazas, inSmallPlaza } from './layout.js';
 import { HOUSE_KINDS } from '../../styles/mississippian/dress.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -67,8 +67,8 @@ function fillers() {
   for (let i = 0; i < E.length; i += 120) out.push(base(`cahokia-fill-${i / 120}`, E.slice(i, i + 120)));
   return out;
 }
-export const PLAZA_STALLS = [[-105, -14, 'shell'], [-105, 28, 'pots'], [-105, 48, 'chert'], [-105, 90, 'hides'], [-105, 112, 'salt'], [105, -14, 'copper'], [105, 28, 'maize'], [105, 48, 'pots'], [105, 90, 'shell'], [105, 112, 'hides'], [-60, 138, 'maize'], [-20, 138, 'chert'], [20, 138, 'salt'], [60, 138, 'copper'], [-60, -28, 'pots'], [60, -28, 'hides']];
-export const PLAZA_ARBORS = [[28, 31, 34, 36], [-65, 104, -59, 109], [73, 120, 79, 125]];
+export const PLAZA_STALLS = [[-105, -14, 'shell'], [-105, 28, 'pots'], [-105, 48, 'chert'], [-105, 90, 'hides'], [-105, 112, 'salt'], [105, -14, 'copper'], [105, 28, 'maize'], [105, 48, 'pots'], [105, 90, 'shell'], [105, 112, 'hides'], [-60, 138, 'maize'], [-20, 138, 'chert'], [20, 138, 'salt'], [60, 138, 'copper'], [-66, -30, 'pots'], [66, -30, 'hides']];
+export const PLAZA_ARBORS = [[8, -22, 14, -17], [-65, 104, -59, 109], [73, 120, 79, 125]];
 /** The Grand Plaza's trade and shade: the traders' mats under hide awnings along its edges, the arbors by the chunkey yards. */
 function plazaGoods() {
   const E = PLAZA_STALLS.map(([x, z, kind], i) => ({ t: 'trade_mat', c: [x, z], y: 0, rot: x === -105 ? 0 : x === 105 ? 0 : 1.57, kind, seed: 50 + i }));
@@ -139,11 +139,11 @@ function life() {
   const man = (at, y, rot, o = {}) => { const sk = skin(), cape = rand() < 0.25; E.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: 'loincloth', cloth: 'hide_tan', cloth2: cape ? 'hide_brown' : 'hide_tan', over: cape ? 'cape' : 'none', skin: sk, hat: 'none', feet: 'shod', hair: rand() < 0.5 ? 'topknot' : 'bun', beard: false, ...o }); };
   const woman = (at, y, rot, o = {}) => E.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: ['cloth_brown', 'hide_tan', 'cloth_ochre', 'cloth_black'][Math.floor(rand() * 4)], cloth2: 'hide_tan', over: rand() < 0.6 ? 'shawl' : 'none', skin: skin(), hat: 'none', feet: 'shod', hair: 'long', beard: false, ...o });
   // chunkey: at the head of each yard two players with their poles, one stone rolling down it; the crowd along the banks
-  for (const [r, axis] of [[[12, 20, 48, 24], 'x'], [[-80, 92, -44, 96], 'x'], [[58, 104, 62, 140], 'z']]) {
-    const [x0, z0, x1, z1] = r, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  for (const r of YARDS) {
+    const [x0, z0, x1, z1] = r, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, axis = x1 - x0 >= z1 - z0 ? 'x' : 'z';
     const head = axis === 'x' ? [x0 + 3, cz] : [cx, z0 + 3], down = axis === 'x' ? [x1, cz] : [cx, z1];
     for (const s of [-0.7, 0.7]) { const at = axis === 'x' ? [head[0], cz + s] : [cx + s, head[1]]; man(at, 0, face(at, down), { carry: 'pole', len: 1.8, pose: 'stand', over: 'none' }); }
-    const n = 22;
+    const n = Math.round(Math.max(x1 - x0, z1 - z0) * 0.6);
     for (let k = 0; k < n; k++) {
       const f = 0.05 + 0.9 * k / n + (rand() - 0.5) * 0.02, side = k % 2 ? 1 : -1, off = 2.6 + rand() * 1.2;
       const at = axis === 'x' ? [x0 + (x1 - x0) * f, (side > 0 ? z1 : z0) + side * off] : [(side > 0 ? x1 : x0) + side * off, z0 + (z1 - z0) * f];
@@ -154,7 +154,7 @@ function life() {
   // people on the plaza and on the ramp up the mound
   for (let k = 0; k < 60; k++) {
     const x = PLAZA[0] + 8 + rand() * (PLAZA[2] - PLAZA[0] - 16), z = PLAZA[1] + 8 + rand() * (PLAZA[3] - PLAZA[1] - 16);
-    if (E.some((e) => Math.hypot(e.at[0] - x, e.at[1] - z) < 2.5) || Math.hypot(x, z - 55) < 3) continue;
+    if (E.some((e) => Math.hypot(e.at[0] - x, e.at[1] - z) < 2.5) || Math.hypot(x, z - 55) < 3 || YARDS.some((y) => inRect(y, x, z, 6)) || Math.hypot(x + 25, z + 8) < 12) continue;
     (rand() < 0.5 ? man : woman)([x, z], 0, rand() * 6.28, rand() < 0.3 ? { carry: 'basket' } : {});
   }
   for (const z of [-44, -52, -61, -70, -112, -125, -138]) { const at = [-25 + (rand() - 0.5) * 3, z]; man(at, height(at[0], at[1]), (rand() < 0.7 ? 0 : Math.PI) + (rand() - 0.5) * 0.3); }

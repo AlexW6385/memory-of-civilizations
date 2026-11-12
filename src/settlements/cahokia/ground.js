@@ -1,14 +1,27 @@
 // Cahokia — the ground: the grassed slopes of the mounds, the plaza's packed clay, the courtyards
 // and paths of bare earth, fields of maize, squash and sunflower beyond the town, the creek's
 // willows and the bottomland woods; the hot, humid light of an American Bottom summer.
-import { RADIUS, PLAZA, CREEK, height, inPond, inCreek, inRect, inLot, onMound, mounds, creekZ, inSmallPlaza, HALLS } from './layout.js';
+import { RADIUS, PLAZA, YARDS, MONKS, smooth, CREEK, height, inPond, inCreek, inRect, inLot, onMound, mounds, creekZ, inSmallPlaza, HALLS } from './layout.js';
 
-function cover(x, z, h) {
+/** Where the way up Monks Mound is worn: along x = -25, from the plaza to the main summit's edge. */
+const wayW = (x, z) => (z > -152 && z < -30 ? 1 - smooth(2.6, 4.2, Math.abs(x + 25)) : 0);
+function cover(x, z, h, ny = 1) {
   const c = { sand: 0.05, grass: 0.5, rock: 0, soil: 0.4, fields: 0, dry: 0.15, warmth: 0.5, red: 0.05, road: 0, snow: 0, forest: 0 };
-  if (inRect(PLAZA, x, z)) { c.soil = 0.75; c.grass = 0.25; if (Math.abs(x + 25) < 4 || Math.abs(z - 5) < 2 || Math.abs(x + 95) < 2) { c.soil = 0.95; c.grass = 0.05; c.dry = 0.3; } return c; }
-  if (Math.abs(x + 25) < 4 && z > -150 && z < -34) { c.soil = 0.9; c.grass = 0.1; return c; }                    // the worn way up the ramp
-  if (inSmallPlaza(x, z, 1.5)) { c.soil = 0.85; c.grass = 0.1; c.dry = 0.3; return c; }
-  if (onMound(x, z)) { c.grass = 0.85; c.soil = 0.15; return c; }
+  if (inRect(PLAZA, x, z)) {
+    // the Grand Plaza: clay beaten pale and hard, paler along the walking lines and on the chunkey yards
+    c.soil = 0.78; c.grass = 0.22; c.road = 0.5 + 0.2 * Math.sin(x / 9) * Math.sin(z / 7); c.warmth = 0.7;
+    if (Math.abs(x + 25) < 4 || Math.abs(z - 5) < 2 || Math.abs(x + 95) < 2 || Math.abs(x - 85) < 2 || YARDS.some((y) => inRect(y, x, z, 2.2))) { c.soil = 0.97; c.grass = 0.03; c.dry = 0.3; c.road = 0.95; }
+    return c;
+  }
+  const way = wayW(x, z);
+  if (way > 0.02) { c.soil = 0.95; c.grass = 0.05; c.dry = 0.3; c.road = way; c.warmth = 0.7; return c; }                 // the worn way up the ramp
+  if (inSmallPlaza(x, z, 1.5)) { c.soil = 0.85; c.grass = 0.1; c.dry = 0.3; c.road = 0.4; return c; }
+  if (onMound(x, z)) {
+    // the mound's tops in short grass, its faces (the risers between the terraces) plastered with pale clay: each stage reads, the tops green, the faces buff
+    const face = smooth(0.985, 0.9, ny), edge = inRect(MONKS.main, x, z) || inRect(MONKS.first, x, z) || inRect(MONKS.west, x, z) || inRect(MONKS.east, x, z);
+    c.grass = 0.9 - 0.7 * face; c.soil = 0.1 + 0.7 * face; c.dry = 0.28 + 0.22 * face; c.road = face * (edge ? 0.65 : 0.3); c.warmth = 0.75;
+    return c;
+  }
   if (Math.hypot(x, z) < 300) {                                                                         // beaten earth: the lanes between the houses, the yards about them
     const o = x + RADIUS - 20, q = z + RADIUS - 20, lane = Math.min(Math.abs(((o % 11) + 11) % 11 - 0), 11 - ((o % 11) + 11) % 11, ((q % 11) + 11) % 11, 11 - ((q % 11) + 11) % 11);
     if (lane < 0.9 || inLot(x, z, 1.8)) { c.soil = 0.85; c.grass = 0.12; c.dry = 0.3; return c; }
