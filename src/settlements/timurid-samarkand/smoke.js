@@ -5,7 +5,7 @@
 
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { houses, RADIUS, GUR } from './layout.js';
+import { houses, RADIUS, GUR, TAPCHANS } from './layout.js';
 
 const ID = 'timurid-samarkand';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -18,6 +18,8 @@ function emitters() {
     // the kitchen at the back of the court's far wing, its smoke leaving by a hole in the flat roof (the roof at about 4.5 m)
     E.push({ p: [x0 + 2 + rand() * (x1 - x0 - 4), 5.2, z1 - 2], kind: 'kitchen', seed: h.seed + 1 });
   }
+  // the charcoal under the kettles of the tea-houses' platforms
+  for (const [x, z] of TAPCHANS) E.push({ p: [x + 0.7, 1.15, z + 0.3], kind: 'kitchen', thr: 0.05, seed: Math.floor(x * 5 + z) });
   E.push({ p: [(GUR.rect[0] + GUR.rect[2]) / 2 + 3, 1.0, GUR.rect[1] + 4], kind: 'incense', thr: 0, seed: 7 });
   return E;
 }

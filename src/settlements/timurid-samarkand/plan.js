@@ -16,6 +16,9 @@ E.push({ t: 'shop_row', rect: SHOPS_S, front: 'n', unit: 3.6, enter: [5, 11, 17,
   E.push({ t: 'tim_market', rect: SQUARE, seed: 5, stalls, spreads, litter: 260 });
   for (const [x, z, yaw] of TAPCHANS) E.push({ t: 'tim_tapchan', at: [x, z], yaw, seed: Math.floor(x * 7 + z) });
 }
+// a paved apron of limestone flags before the pishtaq, worn in the middle (the students' and the faithful's way), edged with a kerb of dressed stone
+E.push({ t: 'block', walk: true, rect: [-45, -9, -33, 9], y0: 0, y1: 0.04, mat: 'flagstone' });
+E.push({ t: 'block', walk: true, rect: [-33.3, -9, -33, 9], y0: 0.04, y1: 0.09, mat: 'limestone' });
 const [mx0, mz0, mx1, mz1] = MADRASA, zm = (mz0 + mz1) / 2;
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
