@@ -10,7 +10,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 22, night: 2, rain: 0.5, reach: 120, spawnMin: 20, far: 40 },
+  walkers: { day: 34, night: 3, rain: 0.5, reach: 120, spawnMin: 14, far: 40 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: MARSH.water,
 };
@@ -48,6 +48,12 @@ export const WALKERS = [
     c1: [CL.brown, CL.tan], c2: [CL.fur, CL.fur, CL.tan], c3: [CL.black], speed: [0.7, 0.9], stride: 1.1 },
   { id: 'reeds', weight: 1.0, market: 0.4, el: { dress: 'loincloth', hat: 'none', over: 'none', arms: 'sack', carry: 'sack', hair: 'long', beard: false, feet: 'bare' },
     c1: [CL.brown, CL.tan], c2: [CL.tan], c3: [CL.black], speed: [0.85, 1.1], stride: 1.3 },
+  { id: 'basket', weight: 1.2, market: 1.0, el: { dress: 'wrap', hat: 'none', over: 'none', carry: 'basket', arms: 'head', hair: 'long', feet: 'bare' }, swing: 0.5,
+    c1: [CL.tan, CL.brown, CL.grey], c2: [CL.ochre], c3: [CL.black], speed: [0.75, 1.0], stride: 1.15, h: [0.9, 0.97] },
+  { id: 'pole', weight: 0.9, market: 0.4, el: { dress: 'loincloth', hat: 'none', over: 'none', carry: 'pole', arms: 'pole', hair: 'long', beard: false, feet: 'bare' },
+    c1: [CL.brown, CL.tan], c2: [CL.tan], c3: [CL.black], speed: [0.85, 1.1], stride: 1.3 },
+  { id: 'herder', weight: 0.8, market: 0.3, el: { dress: 'loincloth', hat: 'none', over: 'cloak', carry: 'staff', arms: 'staff', hair: 'long', beard: true, feet: 'bare' },
+    c1: [CL.brown, CL.grey], c2: [CL.fur, CL.tan], c3: [CL.black], speed: [0.8, 1.05], stride: 1.25 },
   { id: 'child', weight: 0.8, market: 0.8, el: { dress: 'loincloth', hat: 'none', over: 'none', arms: 'hang', hair: 'long', beard: false, feet: 'bare' },
     c1: [CL.tan, CL.brown], c2: [CL.tan], c3: [CL.black], speed: [1.1, 1.5], stride: 1.0, h: [0.55, 0.68], swing: 1.1 },
 ];

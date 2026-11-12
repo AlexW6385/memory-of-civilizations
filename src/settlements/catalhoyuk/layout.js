@@ -39,6 +39,23 @@ export const TOP = KIND.map((row, i) => row.map((k, j) => {
   const r = rng(i * 97 + j * 13 + 5)();
   return ST + (Math.floor(r * 3) - 1) * 0.2;
 }));
+/** The houses one can go down into (besides the landmark): nearest the arrival first, the rest spread through the town; each a trade (variant 0–4: painted bands and bucrania, leopards in relief, seated figurine, knapper, baker) and a side (mirror). */
+export const ENTER = (() => {
+  const out = [];
+  const cands = [];
+  for (let i = 0; i < ROWS; i++) for (let j = 0; j < COLS; j++) if (KIND[i][j] === 'h') cands.push({ i, j, d: Math.hypot(j - LM.j, (i - LM.i) * 1.2) + ((i * 7 + j * 3) % 5) * 0.5 });
+  cands.sort((a, b) => a.d - b.d);
+  const used = new Set();
+  for (const c of cands) {
+    if (out.length >= 14) break;
+    if ([[0, 1], [1, 0], [0, -1], [-1, 0]].some(([a, b]) => used.has((c.i + a) + ',' + (c.j + b)))) continue;   // no two side by side: the rest stay solid
+    used.add(c.i + ',' + c.j);
+    out.push({ i: c.i, j: c.j, variant: (c.i * 3 + c.j * 5) % 5, mirror: (c.i + c.j) % 2 === 1 });
+  }
+  return out;
+})();
+/** The trade of each court (0 baker, 1 potter, 2 knapper, 3 hide-worker, 4 mat-maker), fixed so the people can be put at their work. */
+export const TRADE = KIND.map((row, i) => row.map((k, j) => (i * 5 + j * 3 + 1) % 5));
 export const cellRect = (i, j) => [colX(j), rowZ(i), colX(j) + CW[j], rowZ(i) + CD[i]];
 export const CLUSTER = [X0, Z0, X0 + W, Z0 + D];
 export const LANDMARK = { i: LM.i, j: LM.j, rect: cellRect(LM.i, LM.j) };
@@ -66,3 +83,10 @@ export function height(x, z) {
 }
 /** The ground's height near the town (the mound is level under it). */
 export const baseY = () => 0;
+
+/** The reed landings on the pools nearest the town: the shore point toward the town (1.12 radii out) and the angle into the water. */
+export const LANDINGS = [0, 1, 3].map((k) => {
+  const [pcx, pcz, a, b] = POOLS[k], th = Math.atan2(-pcz / b, -pcx / a), x = pcx + a * 1.12 * Math.cos(th), z = pcz + b * 1.12 * Math.sin(th);
+  return { at: [x, z], toward: Math.atan2(pcz - z, pcx - x), k };
+});
+export const nearLanding = (x, z, m) => LANDINGS.some((L) => { const dx = x - L.at[0], dz = z - L.at[1], s = dx * Math.cos(L.toward) + dz * Math.sin(L.toward), t = -dx * Math.sin(L.toward) + dz * Math.cos(L.toward); return s > -m - 4 && s < m + 11 && Math.abs(t) < m + 4; });
