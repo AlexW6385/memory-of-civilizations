@@ -31,6 +31,12 @@ function wall(bag, S, seed, o = {}) {
   for (let x = S.x0 + 1; x < S.x1 - 1; x += 2.2 + rand() * 1.6) motif(x + (rand() - 0.5) * 1.2, 0.8 + rand() * 1.8, 3, 1);
   // the newest: white and yellow over red, in clusters (a "panel" every ~8 m)
   for (let c = S.x0 + 3; c < S.x1 - 2; c += 7 + rand() * 4) for (let k = 0; k < 3; k++) motif(c + (rand() - 0.5) * 3, 0.7 + rand() * 1.9, 6 + k * 2, 2);
+  // the great panel (the part of the wall one sees from the apron): a few big fish, a turtle and a wallaby, fresh white and yellow
+  // laid over the red, so that they read from thirty metres
+  if (o.great) for (const [x, v, L, kind, dir, c] of o.great) {
+    const pal = c ? { line: PAL.red, fill: PAL.white, band: PAL.yellow, fresh: true } : { line: PAL.red, fill: PAL.yellow, band: PAL.white, fresh: true };
+    if (kind === 'fish') fish(P, x, v, L, dir, pal, 20, rand); else if (kind === 'turtle') turtle(P, x, v, L, dir, pal, 20); else wallaby(P, x, v, L, dir, pal, 20);
+  }
   // the wall's age: patches where the surface has scaled away, over the paint (the wall's own tone)
   for (let k = 0; k < (o.flakes ?? 9); k++) flake(P, S.x0 + 1 + rand() * (W - 2), 0.4 + rand() * 2.8, 0.1 + rand() * 0.22, S.tone, 15, rand);
   // hand stencils, mostly in the low shelter
@@ -53,9 +59,9 @@ function ceiling(bag, S, seed) {
   P.flush();
 }
 export function gallery(el, { bag, col }) {
-  shelterSurfaces(MAIN, 'sandstone_white', { bag });
+  shelterSurfaces(MAIN, 'sandstone_rose', { bag });
   shelterSurfaces(SMALL, 'sandstone_yellow', { bag });
-  wall(bag, MAIN, 501, { hands: 3, tone: 'sandstone_white', flakes: 14 });
+  wall(bag, MAIN, 501, { hands: 3, tone: 'sandstone_rose', flakes: 14, great: [[-13, 2.35, 2.9, 'fish', 1, 1], [-4.5, 1.45, 2.4, 'fish', -1, 0], [3.5, 2.4, 2.7, 'fish', 1, 1], [11, 1.5, 1.9, 'turtle', 1, 0], [16.5, 2.5, 2.4, 'fish', -1, 1], [-19, 1.8, 1.9, 'wallaby', 1, 0], [-1, 0.9, 1.4, 'turtle', -1, 1]] });
   wall(bag, SMALL, 502, { hands: 9, tone: 'sandstone_yellow', flakes: 9 });
   ceiling(bag, MAIN, 503);
   ceiling(bag, SMALL, 504);

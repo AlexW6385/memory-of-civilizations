@@ -137,3 +137,9 @@ Chant in the ge'ez mode with the kebero drum and sistrum, the begena's buzzing s
 - [Orthodox Tewahedo music — Wikipedia](https://en.wikipedia.org/wiki/Orthodox_Tewahedo_music)
 - [Ṣanāṣel (sistrum) — The Met](https://www.metmuseum.org/art/collection/search/503879)
 - [The Rock-hewn Churches of Lalibela — The Met](https://www.metmuseum.org/essays/the-rock-hewn-churches-of-lalibela)
+
+## Fix pass: seeing the roof cross
+
+- Bete Giyorgis' roof is level with the ground round its pit, so from the rim it can only be seen at a grazing angle. The way pilgrims and visitors see it whole is from the slope above: we raise a broad swell of the hill's terraced shoulder south-west of the pit (flat for 6 m round the cuts, 9 m high, no houses on it) and arrive on it, looking down at the church and along the trench [inferred: the site lies on a sloping hillside, the trench to Bete Giyorgis descending from the west, see §2].
+- The roof carries a dark weathered plate with the three nested crosses stepped up in tones (hewn, lichen-grey, dark), each 0.38 m, the last level with the ground [stated: three crosses carved on the roof, §13].
+- Pilgrims in the descending trench are set at the trench floor's true level (they had been buried by the slope), with a priest at the head of the file, others at the trench's lips and sitting on the hill's edge.
