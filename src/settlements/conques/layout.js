@@ -120,7 +120,7 @@ function build() {
           G: shop ? 2.9 : storeys === 1 ? 2.45 + rand() * 0.2 : 2.75 + rand() * 0.2, G2: 2.35 + rand() * 0.15,
           pitch: 0.95 + rand() * 0.2, ridgeAlong: Lw >= 6.2 || rand() < 0.55,
           stone: rand() < 0.22 ? 'limestone_yellow' : 'schist_rubble', twin: rand() < 0.35, gallery: storeys > 1 && rand() < 0.22, dormer: rand() < 0.3,
-          shop,
+          shop, perron: front === 's' && storeys > 1 && Lw >= 7.4 && !shop && rand() < 0.55,
         });
       }
     }
@@ -134,13 +134,20 @@ function build() {
     const u = Lw > 6 && l.seed % 3 ? Lw - 0.8 : 0.8, v = D * 0.45;
     l.chim = f === 's' ? [x1 - u, z1 - v] : f === 'n' ? [x0 + u, z0 + v] : f === 'e' ? [x1 - v, z0 + u] : [x0 + v, z1 - u];
   }
-  // the lots nearest the arrival, whose insides can be entered: the hostel, the two shops nearest the pilgrims' arrival and two homes
+  // the trades of the shops (a stream of its own: the lots stay as they were) — a pilgrim's town: its goods first
+  const rt = rng(4711), TR = ['shells', 'staffs', 'bread', 'cloth', 'pots', 'tavern', 'smith', 'weaver'];
+  for (const l of LOTS) if (l.shop) l.trade = TR[(l.seed + Math.floor(rt() * 3)) % TR.length];
+  // the lots nearest the arrival, whose insides can be entered: the hostel, the shops along the pilgrims' way (each of the
+  // trades once) and homes of two kinds
   const ax = -47, az = 12, dist = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - ax, (l.rect[1] + l.rect[3]) / 2 - az);
   const ok = (l) => !l.hostel && l.rect[2] - l.rect[0] >= (l.shop ? 5.4 : 4.6) && l.rect[3] - l.rect[1] >= 6.6 && l.storeys > 1;
   const sorted = LOTS.filter(ok).sort((a, b) => dist(a) - dist(b));
-  const shops = sorted.filter((l) => l.shop).slice(0, 2), homes = sorted.filter((l) => !l.shop).slice(0, 2);
+  const seen = new Set(), shops = [];
+  for (const l of sorted.filter((q) => q.shop)) { if (shops.length >= 14) break; if (seen.has(l.trade) && shops.length < TR.length) continue; seen.add(l.trade); shops.push(l); }
+  for (const l of sorted.filter((q) => q.shop && !shops.includes(q))) { if (shops.length >= 12) break; shops.push(l); }
+  const homes = sorted.filter((l) => !l.shop && !l.perron).slice(0, 10);
   for (const l of shops) l.open = 'shop';
-  for (const l of homes) l.open = 'home';
+  homes.forEach((l, i) => { l.open = 'home'; l.homeKind = i % 3; });
   LOTS.find((l) => l.hostel).open = 'hostel';
 }
 /** The houses (and the hostel) on the shelves. */

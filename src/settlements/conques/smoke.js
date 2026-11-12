@@ -18,6 +18,7 @@ export function emitters() {
     if (!l.chim) continue;
     const [cx, cz] = l.chim, top = chimneyTop(l) + 0.3;
     if (l.hostel || rand() < 0.55) E.push({ p: [cx, top, cz], kind: 'kitchen', seed: l.seed + 1 });
+    if (l.open === 'shop' && ['bread', 'smith'].includes(l.trade)) E.push({ p: [cx, top, cz], kind: l.trade === 'smith' ? 'kitchen' : 'steam', thr: 0, seed: l.seed + 3 });
     if (l.shop && l.seed % 5 === 2) E.push({ p: [cx, top, cz], kind: 'steam', thr: rand() * 0.3, seed: l.seed + 2 });     // the baker's oven
   }
   // incense before the Majesty

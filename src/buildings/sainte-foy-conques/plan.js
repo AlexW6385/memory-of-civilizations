@@ -31,6 +31,7 @@ const RH = PZ;                       // hemicycle columns' radius
 const RA = AO, RAO = WZ;             // ambulatory outer wall (inner, outer radius)
 const CHAPELS = [-60, 0, 60], RCH = 10.3, rch = 1.8;
 const APSIDIOLE_Z = 13.0;
+const TRIB_STAIR = { x0: 3.8, x1: 20.4, hole: 16.4, cut: 16.0, zc: -6.6, w: 1.2 };   // the pilgrims' stair to the north tribune
 
 // heights
 const ARC_SPR = 6.9, AISLE_SPR = 8.6, AISLE_CROWN = 10.5, TRIB = 10.9;
@@ -72,8 +73,24 @@ for (const sz of [-1, 1]) {
   pwall({ o: [0, z], u: [1, 0], th: 2 * PS, u0: XW, u1: XC0 - PS, y0: TRIB, y1: EAVE, arches: twin, mat: 'limestone_yellow', collide: false });
   for (const a of twin) bifora([0, sz * (PZ - 0.1)], [1, 0], a.uc);
   // the aisle's barrel vault, the tribune floor over it, the tribune's half-barrel
-  add({ t: 'barrel', axis: 'x', s0: XW, s1: TW1 + 2.85, c: sz * (AI + AO) / 2, y: AISLE_SPR, r: (AO - AI) / 2, th: 0.4, mat: 'limestone_yellow' });
-  add({ t: 'slab', rect: [XW, sz * AI, TW1, sz * AO], y0: AISLE_CROWN + 0.4, y1: TRIB, mat: 'limestone_yellow' });
+  if (sz < 0) {
+    // the north aisle carries the pilgrims' stair to the tribune (§1i): the vault is left off over its last bays, a flat floor
+    // 0.4 m thick in its place, pierced over the stair's head; the tribune floor beside it is walkable
+    const ZC = TRIB_STAIR.zc, hw = TRIB_STAIR.w / 2;
+    add({ t: 'barrel', axis: 'x', s0: XW, s1: TRIB_STAIR.cut, c: sz * (AI + AO) / 2, y: AISLE_SPR, r: (AO - AI) / 2, th: 0.4, mat: 'limestone_yellow' });
+    add({ t: 'barrel', axis: 'x', s0: TW1, s1: TW1 + 2.85, c: sz * (AI + AO) / 2, y: AISLE_SPR, r: (AO - AI) / 2, th: 0.4, mat: 'limestone_yellow' });
+    const sl = (r) => add({ t: 'slab', rect: r, y0: TRIB - 0.4, y1: TRIB, mat: 'limestone_yellow', walk: true });
+    sl([XW, -AO, TRIB_STAIR.hole, -AI]);
+    sl([TRIB_STAIR.hole, -AO, TW1, ZC - hw]); sl([TRIB_STAIR.hole, ZC + hw, TW1, -AI]); sl([TRIB_STAIR.x1, ZC - hw, TW1, ZC + hw]);
+    // the flights: a straight stair of 57 risers between the aisle's walls, 1.2 m wide, up through the floor
+    add({ t: 'stair', rect: [TRIB_STAIR.x0, ZC - hw, TRIB_STAIR.x1, ZC + hw], dir: 'e', y0: 0, y1: TRIB, riser: 0.19, mat: 'limestone_yellow' });
+    for (const z of [ZC - hw - 0.06, ZC + hw + 0.06]) add({ t: 'wall', a: [TRIB_STAIR.hole, z], b: [TRIB_STAIR.x1 - 1.0, z], th: 0.12, y0: TRIB, y1: TRIB + 0.95, mat: 'wood_dark', openings: [] });
+    // the breast of the tribune toward the nave, the outer wall and the east end: nothing to walk out through (the carved wall above is open work)
+    for (const [r, y1] of [[[XW, -AI + 0.02, TW1, -AI - 0.3], 14.8], [[XW, -AO + 0.05, TW1, -AO - 1.2], OUT], [[TW1, -AO, TW1 + 0.3, -AI], OUT]]) add({ t: 'blocker', rect: r, y0: TRIB, y1 });
+  } else {
+    add({ t: 'barrel', axis: 'x', s0: XW, s1: TW1 + 2.85, c: sz * (AI + AO) / 2, y: AISLE_SPR, r: (AO - AI) / 2, th: 0.4, mat: 'limestone_yellow' });
+    add({ t: 'slab', rect: [XW, sz * AI, TW1, sz * AO], y0: AISLE_CROWN + 0.4, y1: TRIB, mat: 'limestone_yellow' });
+  }
   add({ t: 'barrel', axis: 'x', s0: XW, s1: TW0, c: sz * AI, y: TRIB_SPR, r: AO - AI, th: 0.4, a0: sz > 0 ? 0 : 90, a1: sz > 0 ? 90 : 180, mat: 'limestone_yellow' });
   // the outer wall: red sandstone below with the aisle windows, yellow limestone above with the
   // tribune windows; the door to the cloister in the south aisle
@@ -297,6 +314,7 @@ const rooms = [
   room('choir', [33.5, -2, 39.5, 2], 0, 'sanctuary'),
   room('ambulatory', [XH + 5, -2, XH + 7.5, 2], 0, 'hall'),
   room('cloister', [1, 11, 18, 12.5], 0.05, 'open'),
+  room('tribune', [6, -7.8, 15, -5.4], TRIB, 'hall'),
 ];
 const amb = Array.from({ length: 13 }, (_, k) => { const a = (-90 + 15 * k) * D2R; return [XH + Math.cos(a) * 6.4, Math.sin(a) * 6.4]; });
 const walks = [
@@ -307,6 +325,8 @@ const walks = [
   // out by the south aisle into the cloister, round its galleries
   [[12, 0], [12, 6.6], [9.4, 6.6], [8.2, 6.6], [8.2, 11.2], [1.5, 11.2], [1.5, 27.6], [17.9, 27.6], [17.9, 11.2], [8.2, 11.2]],
 ];
+walks.push([[4.4, -6.6], [16, -6.6], [20.1, -6.6], [20.1, -7.9], [12, -7.9], [6, -7.9]]);   // up the stair to the tribune and along it
+walks[3].y0 = 0;
 walks[0].y0 = 0; walks[1].y0 = 0; walks[2].y0 = 0;
 
 export const sainteFoy = {
