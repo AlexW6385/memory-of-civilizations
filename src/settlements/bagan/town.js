@@ -4,7 +4,7 @@
 import '../../styles/burmese/index.js';
 import {
   RADIUS, RIVER_Y, bankX, CITY, WALL, GATE, THAT, THAT_ENC, PALACE, PAL_HALL, SHWE, SHWE_PREC, SULA, SULA_PREC, TANK, TANK_Y, KILNS, KYAUNGS, PRECINCT, MAIN_ROAD,
-  lots, plainTemples, cityWalls, inRect, inRiver, inTank,
+  ANANDA, OKKYAUNG, lots, plainTemples, cityWalls, streets, inLot, inPlainTemple, inRect, inRiver, inTank,
 } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -26,9 +26,18 @@ function enclosure(E, rect, gates, o = {}) {
   }
 }
 
+/** The moored boats of the river (shared by the city and the people on them). */
+let MOORED = null;
+function moored() {
+  if (MOORED) return MOORED;
+  const r = rng(1201);
+  MOORED = [-130, -96, -76, -58, -30, -14, 14, 36, 56, 74, 96, 118, 140, 160, 182].map((z) => ({ at: [Math.round((bankX(z) - 7 - r() * 8) * 10) / 10, z], y: RIVER_Y, len: 9 + r() * 7, yaw: (r() - 0.5) * 0.3, seed: Math.floor(z + 300), canopy: r() < 0.7 }));
+  return MOORED;
+}
+
 /** The city: its walls and the Tharabar Gate, the Thatbyinnyu, the palace, the river and its ghat, the tank and the kilns. */
 function city() {
-  const E = [], r = rng(1200);
+  const E = [];
   for (const w of cityWalls()) {
     const gaps = w.gaps.map((g) => ({ at: g.at, w: GATE.pw + 7.2 }));
     E.push({ t: 'bgn_wall', a: w.a, b: w.b, th: WALL.th, h: WALL.h, mat: 'brick', merlon: true, gaps });
@@ -47,7 +56,7 @@ function city() {
   const edge = []; for (let z = -RADIUS; z <= RADIUS; z += 8) edge.push([z, bankX(z) - 3]);
   E.push({ t: 'bgn_river', edge, y: RIVER_Y, x0: -RADIUS - 4 });
   E.push({ t: 'bgn_ghat', at: [bankX(0) - 1, 0], y: RIVER_Y, w: 7 });
-  for (const z of [-96, -58, -30, 36, 74, 118, 160]) E.push({ t: 'bgn_boat', at: [bankX(z) - 8 - r() * 6, z], y: RIVER_Y, len: 10 + r() * 6, yaw: (r() - 0.5) * 0.3, seed: Math.floor(z + 300), canopy: r() < 0.7 });
+  for (const b of moored()) E.push({ t: 'bgn_boat', ...b });
   E.push({ t: 'bgn_tank', rect: TANK, y: TANK_Y });
   KILNS.forEach(([x, z], i) => E.push({ t: 'bgn_kiln', c: [x, z], seed: i + 4 }));
   return base('bagan-city', E);
@@ -55,8 +64,78 @@ function city() {
 
 /** The stilt houses in their strips. */
 function houses() {
-  const E = lots().map((l) => ({ t: 'bgn_house', rect: l.rect, front: l.front, seed: l.seed, open: l.open }));
+  const E = [];
+  for (const l of lots()) {
+    if (!l.shop) { E.push({ t: 'bgn_house', rect: l.rect, front: l.front, seed: l.seed, open: true, kind: l.kind }); continue; }
+    // a shop on the road, the owner's house behind it
+    const [x0, z0, x1, z1] = l.rect, S = 9.8;
+    E.push({ t: 'bgn_shop', rect: l.rect, front: l.front, seed: l.seed, trade: ['lacquer', 'pottery', 'cloth', 'offerings', 'betel', 'rice', 'tea', 'parasols'][l.seed % 8] });
+    E.push({ t: 'bgn_house', rect: l.front === 's' ? [x0, z0, x1, z1 - S] : [x0, z0 + S, x1, z1], front: l.front, seed: l.seed + 1, open: true, kind: 'small' });
+  }
   return base('bagan-houses', E);
+}
+
+/** Roadside props along the streets (water-pot stands, shrines, benches, festival poles, lamp pillars, firewood, drying mats), placed from the street rectangles, on the verge, facing the road. */
+function roadside() {
+  const r = rng(1213), items = [], taken = [];
+  const free = (x, z, m) => !inRiver(x, z, 4) && !inTank(x, z, 2) && !inLot(x, z, m) && !inPlainTemple(x, z, 1) && !taken.some(([a, b]) => Math.hypot(a - x, b - z) < 5)
+    && !streets().some((q) => inRect(q, x, z, 0.4)) && ![PRECINCT, SHWE_PREC, SULA_PREC, THAT_ENC, PALACE].some((q) => inRect(q, x, z, 0.5)) && Math.hypot(x, z) < RADIUS - 24;
+  const kinds = [['potstand', 4], ['bench', 2], ['pole', 1.2], ['shrine', 1.0], ['lamp', 1.0], ['firewood', 1.2], ['dry', 1.4], ['spirit', 0.8], ['pounder', 0.5]];
+  const tot = kinds.reduce((a, [, w]) => a + w, 0);
+  const pick = () => { let q = r() * tot; for (const [k, w] of kinds) { q -= w; if (q <= 0) return k; } return 'potstand'; };
+  for (const s of streets()) {
+    const horiz = s[2] - s[0] >= s[3] - s[1], L = horiz ? s[2] - s[0] : s[3] - s[1];
+    if (L < 24 || Math.min(s[2] - s[0], s[3] - s[1]) > 12) continue;
+    for (let a = 8 + r() * 10; a < L - 6; a += 14 + r() * 16) for (const side of [-1, 1]) {
+      if (r() < 0.35) continue;
+      const off = 1.4 + r() * 0.8, k = pick();
+      const x = horiz ? s[0] + a : (side < 0 ? s[0] - off : s[2] + off), z = horiz ? (side < 0 ? s[1] - off : s[3] + off) : s[1] + a;
+      if (!free(x, z, 1.2)) continue;
+      const rot = horiz ? (side < 0 ? 0 : Math.PI) : (side < 0 ? Math.PI / 2 : -Math.PI / 2);
+      items.push({ k, c: [Math.round(x * 10) / 10, Math.round(z * 10) / 10], rot, seed: Math.floor(r() * 1e6) });
+      taken.push([x, z]);
+    }
+  }
+  return items;
+}
+
+/** The precinct furniture of the Ananda: the chinthe pairs at the four gates, lamp pillars and festival poles along the approaches, rows of votive stupas inside the walls, offerings by the porches. */
+function anandaCourt() {
+  const [px0, pz0, px1, pz1] = PRECINCT, [ax, az] = ANANDA.c, items = [], r = rng(1105);
+  const lions = [[px0 + 2.6, az, -Math.PI / 2, 'z'], [px1 - 2.6, az, Math.PI / 2, 'z'], [ax, pz0 + 2.6, Math.PI, 'x'], [ax, pz1 - 2.6, 0, 'x']];
+  for (const [x, z, rot, ax2] of lions) for (const sd of [-1, 1]) items.push({ k: 'chinthe', c: ax2 === 'z' ? [x, z + sd * 5] : [x + sd * 5, z], rot, s: 1.15 });
+  for (let x = px0 + 9; x < ax - 52; x += 7) for (const sd of [-1, 1]) items.push({ k: 'lamp', c: [x, az + sd * 6.2], rot: 0, seed: x });
+  for (const [dx, dz] of [[-62, -9], [-62, 9], [-70, -9], [-70, 9], [62, -9], [62, 9], [-9, -62], [9, -62], [-9, 62], [9, 62]]) items.push({ k: 'pole', c: [ax + dx, az + dz], rot: 0, seed: Math.round(dx * 7 + dz) });
+  const rows = [[60, pz0 + 3.5, 0, 22], [150, pz0 + 3.5, 0, 22], [60, pz1 - 3.5, 0, 22], [150, pz1 - 3.5, 0, 22], [px0 + 4, -48, Math.PI / 2, 26], [px0 + 4, 52, Math.PI / 2, 26], [px1 - 4, 40, Math.PI / 2, 20],
+    [60, pz0 + 6.5, 0, 14], [150, pz1 - 6.5, 0, 14]];
+  for (const [x, z, rot, n] of rows) items.push({ k: 'votive', c: [x, z], rot, n, h: 2.4, gilt: true, seed: Math.round(x + z) });
+  // offerings before the four porches' steps, and the pot stands by them
+  for (const [dx, dz, rot] of [[-52.5, 0, 0], [52.5, 0, 0], [0, -52.5, 0], [0, 52.5, 0]]) { items.push({ k: 'offering', c: [ax + dx, az + dz + (dx ? 4 : 0)], rot: dx ? (dx < 0 ? Math.PI / 2 : -Math.PI / 2) : 0, w: 1.6 }); void rot; }
+  for (const [x, z] of [[40, -12], [40, 12], [170, -12], [170, 12], [105, -75], [105, 75]]) items.push({ k: 'potstand', c: [x, z], rot: 0, seed: x + z });
+  void r; void OKKYAUNG;
+  return items;
+}
+
+/** The other courts: the Thatbyinnyu's enclosure and the palace (brick libraries, lions at the gates, poles, lamps, votive stupas), the Shwezigon and the Sulamani (lions, votive rows, lamps). */
+function courts() {
+  const items = [], E = [];
+  for (const [x, z] of [[-240, 45], [-240, 120], [-156, 45], [-156, 122]]) E.push({ t: 'bgn_library', c: [x, z], rot: x < -200 ? Math.PI / 2 : -Math.PI / 2, seed: Math.round(x + z) });
+  for (const [x, z] of [[-240, -44], [-156, -44]]) E.push({ t: 'bgn_library', c: [x, z], rot: Math.PI, seed: Math.round(x - z) });
+  E.push({ t: 'bgn_kyaung', c: [-232, -90], A: 6, B: 4.5, y: 1.8, tiers: 3, palace: true, rot: 0, seed: 11 });
+  E.push({ t: 'bgn_kyaung', c: [-164, -90], A: 6, B: 4.5, y: 1.8, tiers: 3, palace: true, rot: 0, seed: 12 });
+  E.push({ t: 'bgn_kyaung', c: [-240, 82], A: 5, B: 4, y: 1.6, tiers: 3, rot: Math.PI / 2, seed: 13 });
+  E.push({ t: 'bgn_zayat', c: [-156, 82 + 14], A: 4.5, B: 3.2, y: 0.1, seed: 14 });
+  const lion = (x, z, rot, s = 1.1) => items.push({ k: 'chinthe', c: [x, z], rot, s });
+  lion(-198 - 4.5, 30 + 2.6, Math.PI); lion(-198 + 4.5, 30 + 2.6, Math.PI); lion(-146 - 2.6, 82 - 4.5, Math.PI / 2); lion(-146 - 2.6, 82 + 4.5, Math.PI / 2);
+  lion(-198 - 4.5, -30 - 2.6, 0); lion(-198 + 4.5, -30 - 2.6, 0);
+  lion(140 - 4.5, -148 - 2.6, 0); lion(140 + 4.5, -148 - 2.6, 0); lion(98 + 2.6, -190 - 4.5, -Math.PI / 2); lion(98 + 2.6, -190 + 4.5, -Math.PI / 2);
+  lion(155 - 4.5, 160 + 2.6, Math.PI); lion(155 + 4.5, 160 + 2.6, Math.PI); lion(112 + 2.6, 198 - 4.5, -Math.PI / 2); lion(112 + 2.6, 198 + 4.5, -Math.PI / 2);
+  for (const [x, z, rot, n] of [[-198, 133, 0, 12], [-198, 33, 0, 12], [140, -150.5, 0, 8], [155, 234, 0, 8], [-248, 90, Math.PI / 2, 10]]) items.push({ k: 'votive', c: [x, z], rot, n, h: 2.2, gilt: true, seed: Math.round(x + z) });
+  for (const [x, z] of [[-190, 36], [-206, 36], [-140, 70], [-140, 94], [-206, -34], [-190, -34], [135, -152], [145, -152], [150, 164], [160, 164]]) items.push({ k: 'lamp', c: [x, z], rot: 0, seed: Math.round(x + z) });
+  for (const [x, z] of [[-215, 40], [-181, 40], [-215, 125], [-181, 125], [-232, -40], [-164, -40], [-214, -48], [-182, -48]]) items.push({ k: 'pole', c: [x, z], rot: 0, seed: Math.round(x * 3 + z) });
+  for (const [x, z] of [[-236, 100], [-160, 60], [-214, -118], [-182, -118], [-242, -76], [-154, -76]]) items.push({ k: 'potstand', c: [x, z], rot: 0, seed: Math.round(x + z) });
+  E.push({ t: 'bgn_props', items });
+  return E;
 }
 
 /** The Shwezigon and the Sulamani in their precincts, the temples and stupas of the plain, kyaungs, rest houses, stalls. */
@@ -76,8 +155,12 @@ function temples() {
   for (const [x, z] of [[112, -168], [112, -212], [168, -212]]) E.push({ t: 'bgn_zayat', c: [x, z], A: 4.5, B: 3.2, y: 0.1, seed: Math.round(x * 3 + z) });
   // the stalls: along the main road before the Ananda's west gate, and on the roads to the great temples
   const goods = ['flowers', 'candles', 'pots', 'fruit'];
-  [[-70, -7, 0], [-52, 7, Math.PI], [-34, -7, 0], [-16, 7, Math.PI], [0, -7, 0]].forEach(([x, z, rot], i) => E.push({ t: 'bgn_stall', c: [x, z], y: 0, rot, seed: i + 30, goods: goods[i % 4] }));
   [[26, -8, 0], [26, 8, Math.PI], [105 - 9, 100, Math.PI], [105 + 9, -100, 0], [96, -112, Math.PI / 2], [96, 112, Math.PI / 2]].forEach(([x, z, rot], i) => E.push({ t: 'bgn_stall', c: [x, z], y: 0, rot, seed: i + 40, goods: goods[(i + 1) % 4] }));
+  E.push(...courts());
+  E.push({ t: 'bgn_props', items: [...anandaCourt(), ...roadside()] });
+  // more stalls inside the Ananda's west gate and by the gates of the other two great temples (flowers, candles, gold leaf, water-pots for the pilgrims)
+  [[31, -10.5, 0], [31, 10.5, Math.PI], [45, -10.5, 0], [45, 10.5, Math.PI], [120, -100, Math.PI / 2], [150, -144, Math.PI], [130, 153, 0], [112 - 8, 190, Math.PI / 2], [112 - 8, 206, Math.PI / 2]]
+    .forEach(([x, z, rot], i) => E.push({ t: 'bgn_stall', c: [x, z], y: 0, rot, seed: i + 60, goods: goods[(i + 2) % 4] }));
   return base('bagan-temples', E);
 }
 
@@ -104,6 +187,46 @@ function people() {
   }
   // the ghat: women filling pots, boatmen
   for (let k = 0; k < 6; k++) lay([bankX(0) + 1.5 + k * 0.9, -4 + k * 1.4], 1.57, { carry: k % 2 ? 'pot' : undefined });
+
+  // ── the settled figures (the dossier §10): pilgrims kneeling before the Ananda's porches and before its Buddhas, guards at the gates, shopkeepers behind their counters, monks in the rest houses, women
+  //    squatting by the drying mats, fishermen on the boats ──
+  const face = (x, z, tx, tz) => Math.atan2(-(tx - x), -(tz - z));
+  const [ax, az] = ANANDA.c;
+  for (const [dx, dz] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+    for (let k = 0; k < 4; k++) {
+      const d = 51.2 + k * 1.5, lat = (k % 2 ? 1 : -1) * (1.2 + (k >> 1) * 1.8), x = ax + dx * d + (dz ? lat : 0), z = az + dz * d + (dx ? lat : 0);
+      lay([x, z], face(x, z, ax, az), { pose: 'kneel', arms: 'pray' });
+    }
+    const x = ax + dx * 14.0, z = az + dz * 14.0;
+    P.push({ t: 'figure', at: [x, z], y: 1.2, rot: face(x, z, ax, az), seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: 'cloth_white', cloth2: 'cloth_red', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: 'bun', beard: false, pose: 'kneel', arms: 'pray' });
+    const mx = ax + dx * 21.4 + (dz ? 1.7 : 0), mz = az + dz * 21.4 + (dx ? 1.7 : 0);
+    P.push({ t: 'figure', at: [mx, mz], y: 1.2, rot: face(mx, mz, ax, az), seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: 'cloth_red', cloth2: 'cloth_red', over: 'shawl', skin: skin(), hat: 'none', feet: 'bare', hair: 'shaven', beard: false, pose: 'cross' });
+  }
+  for (const [x, z, tx, tz] of [[GATE.x + 2.6, -2.4, GATE.x + 2.6, 5], [GATE.x + 2.6, 2.4, GATE.x + 2.6, -5], [-198 - 3, -30 + 2, -198, -20], [-198 + 3, -30 + 2, -198, -20], [-146 - 2, 82 - 4, -156, 82], [-146 - 2, 82 + 4, -156, 82]]) {
+    fig([x, z], face(x, z, tx, tz), { pose: 'staff', cloth: 'cloth_red', cloth2: 'cloth_black', over: 'none', hair: 'short', hat: 'none', skin: skin(), carry: 'staff' });
+  }
+  // the shopkeepers and a customer or two
+  for (const l of lots()) {
+    if (!l.shop) continue;
+    const [x0, z0, x1, z1] = l.rect, W = x1 - x0, s = l.front === 's' ? 1 : -1, cx = x0 + W / 2, fz = s > 0 ? z1 : z0;
+    const keeper = (rand() < 0.75);
+    if (keeper) P.push({ t: 'figure', at: [cx + (rand() - 0.5) * 2, fz - s * 1.5], y: 0.55, rot: s > 0 ? Math.PI : 0, seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: ['cloth_green', 'cloth_brown', 'cloth_red', 'cloth_white'][Math.floor(rand() * 4)], cloth2: 'cloth_white', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: rand() < 0.5 ? 'bun' : 'short', beard: false, ...(rand() < 0.4 ? { pose: 'cross' } : {}) });
+    if (rand() < 0.4) { const x = cx + (rand() - 0.5) * 4, z = fz + s * 2.6; if (free(x, z, 1.2)) lay([x, z], s > 0 ? 0 : Math.PI, { pose: 'talk', carry: rand() < 0.5 ? 'basket' : undefined }); }
+  }
+  // monks and laity in the rest houses
+  for (const [x, z] of [[42, -62], [42, 62], [170, 62], [166, -30], [112, -168], [112, -212], [168, -212], [-156, 96]]) {
+    P.push({ t: 'figure', at: [x + 1.8, z + 0.4], y: 1.0, rot: Math.PI / 2, seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: 'cloth_red', cloth2: 'cloth_red', over: 'shawl', skin: skin(), hat: 'none', feet: 'bare', hair: 'shaven', beard: false, pose: 'cross' });
+    P.push({ t: 'figure', at: [x - 1.8, z + 0.4], y: 1.0, rot: -Math.PI / 2, seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: 'cloth_white', cloth2: 'cloth_red', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: 'bun', beard: false, pose: 'cross' });
+  }
+  // by the roadside stands and mats
+  for (const it of roadside()) {
+    if (it.k === 'dry' && rand() < 0.7) { const x = it.c[0] + Math.sin(it.rot) * -1.8, z = it.c[1] - Math.cos(it.rot) * 1.8; if (free(x, z, 0.8)) lay([x, z], it.rot + Math.PI, { pose: 'squat' }); }
+    if (it.k === 'potstand' && rand() < 0.3) { const x = it.c[0] + Math.sin(it.rot) * 1.4, z = it.c[1] + Math.cos(it.rot) * 1.4; if (free(x, z, 0.8)) lay([x, z], it.rot + Math.PI, { carry: 'pot' }); }
+    if (it.k === 'bench' && rand() < 0.6) { const x = it.c[0] + Math.sin(it.rot) * 0.4, z = it.c[1] + Math.cos(it.rot) * 0.4; P.push({ t: 'figure', at: [x, z], y: 0, rot: it.rot, seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: 'cloth_brown', cloth2: 'cloth_ochre', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: 'short', beard: false, pose: 'sit' }); }
+  }
+  // the boatmen standing at the sterns, women washing at the ghat
+  for (const b of moored()) if (b.len > 10) P.push({ t: 'figure', at: [b.at[0], b.at[1] + b.len / 2 - 1.3], y: b.y + 0.55, rot: 0, seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: 'cloth_brown', cloth2: 'cloth_white', over: 'none', skin: skin(), hat: 'straw', feet: 'bare', hair: 'short', beard: false });
+  for (let k = 0; k < 4; k++) { const z = 8 + k * 2.2; lay([bankX(z) + 0.6, z], -1.57, { pose: 'squat' }); }
   const A = [];
   for (let k = 0; k < 26; k++) {
     const x = -250 + rand() * 440, z = -150 + rand() * 300;

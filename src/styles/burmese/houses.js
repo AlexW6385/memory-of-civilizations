@@ -2,6 +2,7 @@
 // the open rest house (zayat), the teak hall under tiered roofs (pyatthat) for the palace and the monasteries, the brick monastery (okkyaung).
 import { box, lathe, fromTriangles, orientOutward, frustum } from '../../core/geom.js';
 import { rng, Fr, archWall, vault, miniStupa } from './kit.js';
+import { pot, potStand, firewood, hangBasket, laundryLine, dryMat, pounder, loom, hammock, shelf, bench, spiritHouse, sign } from './detail.js';
 
 /** A frame on a lot: u along the street from a corner, v from the street into the lot. */
 export function lotFrame(ctx, rect, front) {
@@ -50,9 +51,10 @@ export function house(el, ctx) {
   F.b('wood_ochre', u0 - 0.35, fl - 0.12, v0 - 0.35, u1 + 0.35, fl, v1 + 0.35, false);
   // the walls: woven bamboo; the front with the doorway when open
   const t = 0.1, du = u0 + hw * (0.3 + r() * 0.4), dw = 0.95;
-  const wall = (a0, a1, b0, b1) => F.b('wicker', a0, fl, b0, a1, fl + wh, b1, true);
+  const open = true, rich = r() < 0.35, WM = rich ? (r() < 0.5 ? 'planks_grey' : 'wood_ochre') : 'wicker';
+  const wall = (a0, a1, b0, b1) => F.b(WM, a0, fl, b0, a1, fl + wh, b1, true);
   wall(u0, u1, v1 - t, v1); wall(u0, u0 + t, v0, v1); wall(u1 - t, u1, v0, v1);
-  if (el.open) { wall(u0, du - dw / 2, v0, v0 + t); wall(du + dw / 2, u1, v0, v0 + t); F.b('wicker', du - dw / 2, fl + 1.75, v0, du + dw / 2, fl + wh, v0 + t, false); }
+  if (open) { wall(u0, du - dw / 2, v0, v0 + t); wall(du + dw / 2, u1, v0, v0 + t); F.b(WM, du - dw / 2, fl + 1.75, v0, du + dw / 2, fl + wh, v0 + t, false); }
   else wall(u0, u1, v0, v0 + t);
   F.b('timber', u0 - 0.04, fl + wh - 0.1, v0 - 0.04, u1 + 0.04, fl + wh + 0.06, v1 + 0.04, false);
   // the roof: thatch, the ridge along the depth for the narrower house, along the width for the long one
@@ -78,8 +80,9 @@ export function house(el, ctx) {
   const fence = (a0, b0, a1, b1) => F.b('bamboo_culm', Math.min(a0, a1) - 0.04, 0, Math.min(b0, b1) - 0.04, Math.max(a0, a1) + 0.04, 1.15, Math.max(b0, b1) + 0.04, true);
   fence(0.1, 0.5, 0.1, D - 0.1); fence(W - 0.1, 0.5, W - 0.1, D - 0.1); fence(0.1, D - 0.1, W - 0.1, D - 0.1);
   fence(0.1, 0.1, du - 2.6 < 1 ? 1 : (u0 - 0.8 > 1.5 ? u0 - 0.8 : 1), 0.1); fence(Math.min(W - 1, u1 + 1.6), 0.1, W - 0.1, 0.1);
-  // inside, when open: the floor to walk on, the mat, the hearth, pots, a rack, a lamp
-  if (el.open) {
+  houseDetail(F, r, { u0, u1, v0, v1, fl, wh, du, hw, hd, W, D, big, rich, rise });
+  // inside: the floor to walk on, the mat, the hearth, pots, a rack, a lamp
+  if (open) {
     F.floor(u0 + t, v0 + t, u1 - t, v1 - t, fl);
     F.b('reed_mat', u0 + 0.8, fl, v0 + 1.0, u0 + 2.6, fl + 0.03, v0 + 2.6, false);
     F.b('brick', u1 - 1.6, fl, v1 - 1.5, u1 - 0.5, fl + 0.22, v1 - 0.4, true);
@@ -208,3 +211,56 @@ export function okkyaung(el, ctx) {
   for (let k = 0; k < 4; k++) F.b('reed_mat', 2.2 + k * (W - 5.4) / 3, f, 3.0, 3.6 + k * (W - 5.4) / 3, f + 0.03, 4.6, false);
   F.light(W / 2, f + 3.2, D / 2, '#ffc98a', 5, 14);
 }
+
+/** The dressing of a stilt house (called by house()): shuttered windows, the yard (water-pot stand, firewood, drying mats, laundry, spirit house, pounder), the storage under the floor, the shelf and bedding inside. */
+function houseDetail(F, r, o) {
+  const { u0, u1, v0, v1, fl, wh, du, W, D, big, rich } = o;
+  // windows on the side walls and beside the door: a dark opening under a propped shutter
+  const win = (u, v, side) => {
+    const du2 = side === 'f' ? 0.4 : 0, dv = side === 'f' ? 0 : 0.4;
+    if (side === 'f') {
+      F.b('wood_dark', u - du2, fl + 0.95, v0 - 0.03, u + du2, fl + 1.65, v0, false);
+      F.b(rich ? 'planks_grey' : 'wicker', u - du2 - 0.05, fl + 1.68, v0 - 0.45, u + du2 + 0.05, fl + 1.74, v0 - 0.02, false);
+    } else {
+      const uu = side === 'l' ? u0 : u1, sg = side === 'l' ? -1 : 1;
+      F.b('wood_dark', Math.min(uu, uu + sg * 0.03), fl + 0.95, v - dv, Math.max(uu, uu + sg * 0.03), fl + 1.65, v + dv, false);
+      F.b(rich ? 'planks_grey' : 'wicker', Math.min(uu, uu + sg * 0.45), fl + 1.68, v - dv - 0.05, Math.max(uu, uu + sg * 0.45), fl + 1.74, v + dv + 0.05, false);
+    }
+  };
+  const nw = Math.max(1, Math.round((v1 - v0) / 3.2));
+  for (let i = 0; i < nw; i++) { const v = v0 + ((i + 0.5) * (v1 - v0)) / nw; win(0, v, 'l'); win(0, v, 'r'); }
+  for (const u of [u0 + 0.9, u1 - 0.9]) if (Math.abs(u - du) > 1.1) win(u, 0, 'f');
+  // the carved fascia of a rich house, a gilt finial
+  if (rich) { F.b('wood_dark', u0 - 0.1, fl + wh - 0.45, v0 - 0.05, u1 + 0.1, fl + wh - 0.1, v0 + 0.02, false); }
+  // the yard: the water-pot stand by the lane, then two or three things by the house
+  const pu = du + 2.1 + 0.9 < W - 0.3 ? du + 2.1 : du - 2.1;
+  if (pu > 1.2 && pu < W - 1.2) potStand(F, pu, 1.3, r);
+  const side = (u1 + 0.5 < W - 2.4) ? [u1 + 0.6, W - 0.6] : (u0 - 0.5 > 2.4 ? [0.6, u0 - 0.5] : null);
+  const vb = v0 + 0.8;
+  if (side) {
+    const [a, b] = side, k = Math.floor(r() * 4);
+    if (k === 0) dryMat(F, a, vb, Math.min(1.8, b - a), 1.3, ['chilli', 'grain', 'bean'][Math.floor(r() * 3)], r);
+    else if (k === 1) firewood(F, a, vb, Math.min(1.5, b - a - 0.1), 0.7, r);
+    else if (k === 2) laundryLine(F, a, vb + 0.4, Math.max(a + 1, b - 0.4), vb + 0.4, 1.8, r);
+    else spiritHouse(F, (a + b) / 2, vb + 1.5);
+    if (D - v1 > 2.8 && b - a > 2) { if (r() < 0.5) pounder(F, (a + b) / 2, v1 + 1.0); else dryMat(F, a, v1 + 0.6, 1.4, 1.1, 'grain', r); }
+  }
+  // under the floor (1.3 m): a loom, a bench, firewood or the oxcart's yoke, the water jars
+  const uk = r();
+  if (uk < 0.3 && u1 - u0 > 4) loom(F, (u0 + u1) / 2 + 0.6, v0 + 1.6, r);
+  else if (uk < 0.6) { bench(F, u0 + 0.5, v0 + 1.4, 1.5); pot(F, u0 + 2.4, 0, v0 + 1.6, 1.4, 'pottery_dark'); }
+  else if (uk < 0.85) firewood(F, u0 + 0.6, v1 - 1.4, 1.8, 0.8, r);
+  else hammock(F, u0 + 0.6, v0 + 2.2, u1 - 0.8, 0.6);
+  // a hanging basket or two from the eave of the roof
+  hangBasket(F, u0 + 0.3, fl + wh - 0.5, v0 - 0.35, 1.1);
+  if (big) hangBasket(F, u1 - 0.3, fl + wh - 0.5, v0 - 0.35, 1.3, 'bamboo_culm');
+  // inside: the Buddha shelf on the east/back wall, the bedding, a chest, a lamp hung from the beam
+  shelf(F, (u0 + u1) / 2, fl + 1.55, v1 - 0.2, 'u');
+  F.b('cloth_white', u1 - 1.5, fl, v0 + 1.0, u1 - 0.5, fl + 0.12, v0 + 1.9, false);
+  F.b('cloth_red', u1 - 1.5, fl + 0.12, v0 + 1.3, u1 - 0.5, fl + 0.15, v0 + 1.9, false);
+  F.b('lacquer_red', u1 - 1.1, fl, v0 + 3.1, u1 - 0.3, fl + 0.55, v0 + 3.9, true);
+  F.b('lacquer_black', u1 - 1.1, fl + 0.55, v0 + 3.1, u1 - 0.3, fl + 0.6, v0 + 3.9, false);
+  F.b('lamp_paper', (u0 + u1) / 2 - 0.12, fl + wh - 0.55, (v0 + v1) / 2 - 0.12, (u0 + u1) / 2 + 0.12, fl + wh - 0.25, (v0 + v1) / 2 + 0.12, false);
+  void sign;
+}
+

@@ -10,9 +10,10 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1
 export function emitters() {
   const E = [], r = rng(1200);
   for (const l of lots()) {
-    if (r() > 0.4) continue;
     const [x0, z0, x1, z1] = l.rect;
-    E.push({ p: [x0 + (x1 - x0) * (0.35 + r() * 0.3), 4.4, z0 + (z1 - z0) * (0.35 + r() * 0.3)], kind: 'kitchen', thr: 0.1 + 0.7 * r(), seed: l.seed % 1000 });
+    if (l.shop && l.seed % 8 === 6) E.push({ p: [(x0 + x1) / 2, 3.6, l.front === 's' ? z1 - 3 : z0 + 3], kind: 'steam', thr: 0.1, seed: l.seed % 1000 });     // the tea shop's kettle
+    if (r() > 0.55) continue;
+    E.push({ p: [x0 + (x1 - x0) * (0.35 + r() * 0.3), l.shop ? 4.6 : 4.4, l.shop ? (l.front === 's' ? z0 + 4 : z1 - 4) : z0 + (z1 - z0) * (0.35 + r() * 0.3)], kind: 'kitchen', thr: 0.1 + 0.7 * r(), seed: l.seed % 1000 });
   }
   for (const [x, z] of KILNS) { E.push({ p: [x - 1.2, 2.7, z], kind: 'kitchen', thr: 0, seed: Math.round(x) }); E.push({ p: [x + 1.2, 2.7, z + 0.6], kind: 'kitchen', thr: 0.05, seed: Math.round(z) }); }
   for (const [dx, dz] of [[-50, 0], [50, 0], [0, -50], [0, 50]]) E.push({ p: [ANANDA.c[0] + dx, 1.9, ANANDA.c[1] + dz], kind: 'steam', thr: 0.1, seed: Math.round(dx + dz + 7) });
