@@ -72,6 +72,15 @@ function streetFolk() {
     fig([x, z], rot, lady ? { dress: 'robe', cloth: rand() < 0.5 ? 'cloth_maroon' : 'cloth_green', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_black', over: 'cape' }
       : { dress: 'trousers', cloth: 'cloth_black', cloth2: 'cloth_grey', hat: 'brim', hatMat: 'cloth_black', over: 'cloak', beard: rand() < 0.5 });
   }
+  // the bridge's pavements (the deck is 0.4 m above the street): a ballad-seller, two strollers by the parapet looking at the river, a flower girl, a pair of clerks
+  { const dk = GROUND + 0.4, on = (x, z, rot, o) => L.push({ t: 'figure', at: [x, z], y: dk, rot, h: 1.6 + rand() * 0.12, seed: Math.floor(rand() * 1e9), skin: 'skin_light', feet: 'shod', ...o });
+    on(176, BRIDGE.z + 6.3, N, { dress: 'trousers', cloth: 'cloth_black', cloth2: 'cloth_grey', hat: 'brim', hatMat: 'cloth_black', over: 'cloak', pose: 'stand' });
+    on(177.1, BRIDGE.z + 6.4, N, { dress: 'robe', cloth: 'cloth_maroon', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_black', over: 'cape', pose: 'talk' });
+    on(158, BRIDGE.z - 6.3, S, { h: 1.5, dress: 'robe', cloth: 'cloth_indigo', cloth2: 'cloth_red', hat: 'none', over: 'shawl', carry: 'basket', pose: 'stand' });
+    on(146, BRIDGE.z - 5.4, E, { dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_brown', hat: 'cap', hatMat: 'cloth_grey', over: 'collar', carry: 'sack', pose: 'stand' });
+    on(131, BRIDGE.z + 5.6, W, { dress: 'trousers', cloth: 'cloth_black', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_black', over: 'collar', pose: 'talk' });
+    on(130.1, BRIDGE.z + 5.7, W, { dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_black', over: 'cloak', pose: 'stand' });
+    L.push({ t: 'animal', kind: 'dog', at: [143, BRIDGE.z - 5.8], y: dk, rot: 1.2, seed: 77 }); }
   // the crossing sweeper with his broom at the corner of Parliament Street, the policeman on his beat
   fig([46, BRIDGE.z - 5.2], E, { dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_brown', hat: 'cap', hatMat: 'cloth_grey', carry: 'staff', pose: 'staff', len: 1.5, h: 1.45 });
   fig([108, BRIDGE.z + 5.6], W, { dress: 'trousers', cloth: 'prussian_blue', cloth2: 'prussian_blue', hat: 'brim', hatMat: 'prussian_blue', over: 'belt' });
@@ -101,6 +110,7 @@ function streetFolk() {
       else L.push({ t: 'animal', kind: 'dog', at: [x, z], y: GROUND, rot: rot + 1.57, seed: Math.floor(rand() * 1e6) });
     }
   }
+  for (const [i, [x, z, rot]] of SQ_STALLS.entries()) fig([x + 0.3, z + (rot ? 0.9 : -0.9)], rot ? 0 : Math.PI, { h: 1.6, dress: i % 2 ? 'robe' : 'trousers', cloth: ['cloth_brown', 'cloth_indigo', 'cloth_grey'][i % 3], cloth2: 'cloth_black', hat: i % 2 ? 'none' : 'cap', hatMat: 'cloth_brown', over: i % 2 ? 'shawl' : 'apron', pose: 'stand' });
   // the cabmen of the rank, each by his cab's horse
   for (const x of [-48, -41, -34, -27]) fig([x + 0.4, -149.4], S, { dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_black', over: 'cloak', pose: rand() < 0.5 ? 'talk' : 'stand' });
   return L;
@@ -124,12 +134,15 @@ function furniture() {
   for (const zc of streetsZ()) { if (Math.abs(zc - BRIDGE.z) > 62) continue; for (let x = -200 + rand() * 30; x < 200; x += 55 + rand() * 40) add('trestle_stall', x, zc + (rand() < 0.5 ? -1 : 1) * (Math.abs(zc - BRIDGE.z) < 1 ? 5.6 : 2.0), { rot: rand() < 0.5 ? 0 : Math.PI, goods: rand() < 0.5 ? 'wicker' : 'cloth_red' }); }
   return [base('london-furniture', L)];
 }
+const SQ_STALLS = [[-30, -185, 0, 'wicker'], [-2, -174.8, Math.PI, 'cloth_red'], [14, -185, 0, 'wicker'], [-38, -175, Math.PI, 'hide_brown'], [26, -172.5, Math.PI, 'cloth_green'], [3, -185, 0, 'cloth_red']];
 /** Parliament Square (§5c): lawns, walks, Canning's statue, beds, benches; the cab rank, the barrel organ and Punch and Judy at its edges. */
 function square() {
   const wz = -180, wx = -10, st = [22, wz], L = [];
   L.push({ t: 'parliament_square', rect: SQUARE, y: GROUND, statue: st, walkZ: wz, walkX: wx });
   L.push({ t: 'barrel_organ', at: [-26, wz + 3.4], y: GROUND, rot: 0.4 });
   L.push({ t: 'punch_booth', at: [8, wz + 4.2], y: GROUND, rot: Math.PI });
+  // the costers' trestle stalls along the square's walks (a seller behind each: streetFolk)
+  for (const [x, z, rot, goods] of SQ_STALLS) L.push({ t: 'trestle_stall', at: [x, z], y: GROUND, rot, goods });
   for (const [i, x] of [-48, -41, -34, -27].entries()) L.push({ t: 'hansom_cab', at: [x, -148.2], y: GROUND, rot: W, seed: 60 + i, riders: false });
   for (const [x, z] of [[-45, -190], [-45, -172], [30, -196], [30, -164], [-10, -199], [-10, -161], [8, -174], [-30, -186]]) L.push({ t: 'gas_lamp', at: [x, z], y: GROUND });
   return L;
@@ -141,8 +154,8 @@ function openSet(all) {
   const d = (l, p) => Math.hypot(cx(l) - p[0], cz(l) - p[1]), ok = (l) => l.rect[3] - l.rect[1] >= 8 && l.rect[2] - l.rect[0] >= 5;
   const near = (p, f, n, per = 99) => { const seen = {}; for (const l of all.filter((q) => ok(q) && f(q) && !out.has(q)).sort((a, b) => d(a, p) - d(b, p))) { const k = l.trade ?? 'x'; if ((seen[k] = (seen[k] ?? 0) + 1) > per) continue; out.add(l); if (--n === 0) break; } };
   const A = [60, BRIDGE.z];
-  near(A, (l) => l.pub, 2); near(A, (l) => l.shop, 10, 2);
-  near([30, BRIDGE.z - 40], (l) => !l.shop && !l.pub, 3); near([272, BRIDGE.z + 14], (l) => !l.shop && !l.pub, 2);
+  near(A, (l) => l.pub, 2); near(A, (l) => l.shop, 14, 2);
+  near([30, BRIDGE.z - 40], (l) => !l.shop && !l.pub, 5); near([272, BRIDGE.z + 14], (l) => !l.shop && !l.pub, 2);
   return out;
 }
 /** The terraces cut into TILE-metre tiles, each built in full (near) and simple (far) like ../lod.js lodTiles, but larger: a plan costs one mesh
