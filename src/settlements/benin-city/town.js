@@ -3,7 +3,7 @@
 // in rows along the streets.
 import { lodTiles } from '../lod.js';
 import { frame } from '../../styles/greek/agora.js';
-import { RADIUS, GATES, GATE_W, MARKET, YARDS, GATE_X, GREAT, CROSS, SQUARE, ALLEYS_X, crest, height, lots, depth, inRect, onStreet } from './layout.js';
+import { RADIUS, GATES, GATE_W, MARKET, YARDS, GATE_X, GREAT, CROSS, SQUARE, ALLEYS_X, SHEDS, BAYS, crest, height, lots, depth, inRect, onStreet } from './layout.js';
 
 const base = (id, elements, extra = {}) => ({ id, style: 'benin', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [GATE_X, 12], facing: 'n' }, ...extra });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -68,7 +68,9 @@ function marketFolk(F) {
 }
 function palaceFolk(F) {
   const { man, chief, pick } = F, rand = rng(5);
-  for (const s of [-1, 1]) man([GATE_X + s * 3.6, -3], 0.12, face([GATE_X + s * 3.6, -3], [GATE_X + s * 3.6, 8]), { dress: 'wrap', cloth: 'cloth_red', cloth2: 'cloth_white', carry: 'staff', len: 1.9, over: 'collar', pose: 'stand' });
+  // the two guards with staves at the porch of the gate, standing between the pillars; the courtiers wait on the clay seats at its ends
+  for (const s of [-1, 1]) man([GATE_X + s * 7.1, 1.7], 0.22, Math.PI, { dress: 'wrap', cloth: 'cloth_red', cloth2: 'cloth_white', carry: 'staff', len: 1.9, over: 'collar', pose: 'stand' });
+  for (const s of [-1, 1]) for (const j of [-0.6, 0.6]) { const at = [GATE_X + s * 9.0 + j, 0.78]; (j < 0 ? chief : man)(at, 0.22, Math.PI + (rand() - 0.5) * 0.3, { pose: 'sit', carry: 'none', ...(j < 0 ? {} : { cloth: pick(['cloth_white', 'cloth_red']), over: 'collar' }) }); }
   for (let k = 0; k < 7; k++) { const at = [-120 + rand() * 108, -10 - rand() * 50]; man(at, 0.03, rand() * 6.28, { cloth: pick(['cloth_white', 'cloth_red']), pose: rand() < 0.4 ? 'talk' : 'stand', over: 'collar' }); }
   for (const s of [-1, 1]) chief([-65 + s * 4.5, -74.5], 0.9, 0, { pose: 'stand', carry: 'staff', len: 1.7 });
   chief([-65, -72.2], 1.45 - 0.55, 0, { pose: 'sit', cloth: 'cloth_white', cloth2: 'cloth_red', hat: 'cap' });
@@ -121,13 +123,15 @@ function streetLife(F) {
 /** The king's square at the arrival: petitioners and chiefs on the clay seats, the drummer at the log drum, groups in talk, women with pots, children, fowls and goats, sellers on mats along the street side. */
 function squareFolk(F, out) {
   const { man, woman, chief, pick } = F, rand = rng(2024), [x0, z0, x1, z1] = SQUARE, cx = (x0 + x1) / 2;
-  const clear = (x, z) => Math.hypot(x - ARR[0], z - ARR[1]) > 4 && !(Math.abs(x - ARR[0]) < 4 && z > ARR[1] - 8 && z < ARR[1] + 1);
+  // clear of the arrival, of the way to the gate, of the sheds, the bays on the wall and the two ranks of mat sellers (arrivalLife)
+  const taken = (x, z) => SHEDS.some((sh) => inRect(sh.rect, x, z, 1.8)) || (z < 3.9 && x > -120 && x < -4 && Math.abs(x - GATE_X) > 10) || (z > 15.4 && z < 21.6 && x > -114 && x < -20) || (Math.abs(x - GATE_X) < 6.5 && z > 4 && z < 24);
+  const clear = (x, z) => Math.hypot(x - ARR[0], z - ARR[1]) > 4 && !(Math.abs(x - ARR[0]) < 4 && z > ARR[1] - 8 && z < ARR[1] + 1) && !taken(x, z);
   const put = (f, at, rot, o) => { if (clear(at[0], at[1])) f(at, 0, rot, o); };
   // the north row of seats faces the middle (south), the south row faces north; two or three sit on each
   for (let k = 0; k < 5; k++) {
     const x = x0 + 12 + k * (x1 - x0 - 24) / 4;
     for (let j = 0; j < 2 + (k % 2); j++) {
-      const at = [x - 1.3 + j * 1.3 + (rand() - 0.5) * 0.2, z0 + 3.55];
+      const at = [x - 1.3 + j * 1.3 + (rand() - 0.5) * 0.2, z0 + 4.75];
       put(j === 0 && k % 2 === 0 ? chief : rand() < 0.4 ? woman : man, at, Math.PI + (rand() - 0.5) * 0.3, { pose: 'sit', carry: 'none' });
     }
   }
@@ -157,6 +161,50 @@ function squareFolk(F, out) {
     woman([x, z1 - 8.3], 0, 0, { pose: 'sit_ground', dress: 'wrap' });
   }
 }
+/**
+ * The life at the arrival, which holds in every weather (the walkers thin out in the rain; these do not): the waiting sheds with their seated
+ * petitioners, a goat tethered and children by them, the bays of thatch on the palace wall with someone on every other seat, the mat sellers on the
+ * open ground before the sheds, hens and a dog, a woman with a pot at the sheds, the chiefs in talk under the gate's porch.
+ */
+function arrivalLife(F, out) {
+  const { man, woman, chief, pick } = F, rand = rng(7071), CLO = ['cloth_white', 'cloth_indigo', 'cloth_ochre', 'cloth_blue', 'cloth_maroon'];
+  const seed = () => Math.floor(rand() * 1e9);
+  // under the sheds: three on the seat at the back, three on the mats, one standing at the edge
+  for (const sh of SHEDS) {
+    const [x0, z0, x1, z1] = sh.rect, Y = 0.12, L = x1 - x0;
+    for (let i = 0; i < 4; i++) { const at = [x0 + 1.2 + i * 1.25 + (i > 1 ? L - 7 : 0), z0 + 0.78]; (i === 0 ? chief : rand() < 0.4 ? woman : man)(at, 0.1, Math.PI + (rand() - 0.5) * 0.3, { pose: 'sit', carry: 'none' }); }
+    for (let k = 0, u = x0 + 1.5; u + 1.5 < x1 - 0.4; k++, u += 2.2) { const at = [u + 0.4, z0 + 2.9 + (k % 2) * 0.5]; (rand() < 0.55 ? man : woman)(at, Y, rand() * 6.28, { pose: rand() < 0.5 ? 'cross' : 'sit_ground', carry: 'none' }); if (rand() < 0.6) { const b = [u + 1.2, z0 + 3.5]; (rand() < 0.5 ? woman : man)(b, Y, rand() * 6.28, { pose: 'sit_ground', carry: 'none' }); } }
+    woman([x1 - 0.7, z1 + 0.9], 0, -0.7, { pose: 'stand', carry: 'pot' });
+    out.push({ t: 'animal', kind: 'goat', at: [x0 - 0.9, (z0 + z1) / 2], y: 0, rot: rand() * 6.28, seed: seed() });
+    out.push({ t: 'chickens', at: [x1 + 1.3, z1 + 0.6], y: 0, rot: rand() * 6.28, n: 4, seed: seed() });
+    man([x0 - 1.6, z1 + 1.4], 0, 0.6, { dress: 'loincloth', h: 0.64, pose: 'stand', carry: 'none' });
+  }
+  // the bays on the palace wall: a person on the seat in two of three, one on the mat in some, pots; the rest empty, as a bay would stand
+  BAYS.forEach((b, i) => {
+    const [x0, , , ] = b.rect;
+    if (i % 3 !== 2 || i === 4) for (const du of [1.2, 2.6, 3.8]) if (rand() < 0.72) (rand() < 0.5 ? man : woman)([x0 + du, 0.8], 0.1, Math.PI + (rand() - 0.5) * 0.4, { pose: 'sit', carry: 'none', cloth: pick(CLO) });
+    if (rand() < 0.5) (rand() < 0.5 ? man : woman)([x0 + 2.4, 2.35], 0.12, rand() * 6.28, { pose: 'sit_ground', carry: 'none' });
+    if (rand() < 0.3) out.push({ t: 'animal', kind: rand() < 0.7 ? 'goat' : 'dog', at: [x0 + 4.3, 3.4], y: 0, rot: rand() * 6.28, seed: seed() });
+  });
+  // the mat sellers before the sheds, two ranks, with the way to the gate left free
+  for (const [z, x0, x1, step] of [[16.6, -112, -22, 8.2], [20.2, -108, -26, 10]]) {
+    for (let x = x0; x < x1; x += step * (0.85 + rand() * 0.4)) {
+      if (Math.abs(x - GATE_X) < 6.5) continue;
+      const g = pick([['pottery', 'baskets'], ['bolts', 'baskets'], ['spice', 'heap'], ['melons', 'greens'], ['fish', 'baskets'], ['heap', 'pottery']]);
+      out.push({ t: 'goods_mat', at: [x, z], y: 0, rot: 0, goods: g, seed: seed(), produce: ['cloth_red', 'cloth_ochre', 'cloth_green'], spices: ['cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_brown'] });
+      woman([x, z - 0.8], 0, Math.PI, { pose: 'sit_ground', dress: 'wrap' });
+      if (rand() < 0.4) out.push({ t: 'chickens', at: [x + 1.6, z - 0.2], y: 0, rot: rand() * 6.28, n: 3, seed: seed() });
+      else if (rand() < 0.3) out.push({ t: 'animal', kind: 'goat', at: [x - 1.7, z - 0.4], y: 0, rot: rand() * 6.28, seed: seed() });
+    }
+  }
+  // in the open between: two chiefs in talk with a page, women with pots going to the sheds, a mother and child, a petitioner kneeling at the gate path
+  chief([GATE_X - 9, 22.5], 0, Math.PI * 0.8, { pose: 'talk' }); man([GATE_X - 7.9, 21.8], 0, -Math.PI * 0.3, { pose: 'talk', cloth: 'cloth_white' });
+  chief([GATE_X + 11, 20.6], 0, -Math.PI * 0.8, { pose: 'talk' }); woman([GATE_X + 12.1, 21.4], 0, Math.PI * 0.4, { pose: 'talk', carry: 'basket' });
+  woman([GATE_X - 13.5, 13.8], 0, 0.5, { pose: 'stand', carry: 'pot' }); woman([GATE_X + 8, 14.4], 0, -0.4, { pose: 'stand', carry: 'basket' });
+  man([GATE_X + 3.5, 11.5], 0, Math.PI, { pose: 'kneel', carry: 'none', cloth: 'cloth_white' });
+  man([GATE_X - 16, 17.4], 0, 1.2, { dress: 'loincloth', h: 0.66, pose: 'stand' }); man([GATE_X - 15.2, 18.4], 0, 2.6, { dress: 'loincloth', h: 0.6, pose: 'stand' });
+  out.push({ t: 'animal', kind: 'dog', at: [GATE_X + 4.5, 17.5], y: 0, rot: 2.2, seed: seed() });
+}
 const P2 = [];
 /** The gates of the Iya: two guards with staves, travellers with loads waiting to be let in. */
 function gateFolk(F) {
@@ -173,6 +221,7 @@ export async function town() {
   yardPeople(F); marketFolk(F); palaceFolk(F); gateFolk(F);
   const lifeEls = streetLife(F);
   squareFolk(F, lifeEls);
+  arrivalLife(F, lifeEls);
   { // the open floor of the Oba market south of the stalls: sellers on their mats, fowls and goats, a shade of baskets
     const rand = rng(404), { woman, man, pick } = F;
     for (const z of [17, 22.5, 28, 32.5]) for (let x = MARKET[0] + 6; x < MARKET[2] - 5; x += 4.3 + rand() * 1.4) {
@@ -203,6 +252,7 @@ export async function town() {
     for (const z of [GREAT[1] + 2.0, GREAT[3] - 2.0]) for (let x = -250; x < 250; x += 36) if (ok(x, z) && !ALLEYS_X.some((a) => Math.abs(x - a) < 6) && Math.abs(x - CROSS[0] - 12) > 14) st.push({ t: 'benin_lamp', at: [x + (z < 57 ? 0 : 18), z], y: 0, seed: Math.round(x) });
     for (const x of [CROSS[0] + 2, CROSS[2] - 2]) for (let z = -230; z < 230; z += 40) if (ok(x, z) && !(z > GREAT[1] - 8 && z < GREAT[3] + 8)) st.push({ t: 'benin_lamp', at: [x, z + 12], y: 0, seed: z });
     st.push({ t: 'benin_square', rect: SQUARE, seed: 5 });
+    for (const sh of [...SHEDS, ...BAYS]) st.push({ t: 'benin_shelter', ...sh });
     for (const a of ALLEYS_X) for (const [z, dz] of [[GREAT[3] - 1.2, 1], [GREAT[1] + 1.2, -1]]) if (ok(a, z) && depth(a, z) > 26) st.push({ t: 'benin_mouth', at: [a + 5.6, z], along: [1, 0], seed: Math.round(a + z) });
     plans.push(...lodTiles('benin-street', 'benin', st, { R: RADIUS }));
   }

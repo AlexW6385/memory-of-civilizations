@@ -13,6 +13,10 @@ export const GATE_X = -65;                                  // the palace gate, 
 export const SQUARE = [-150, 0, 20, 40];                    // the king's square
 export const GREAT = [-RADIUS, 40, RADIUS, 74];             // the great street, 34 m
 export const CROSS = [86, -RADIUS, 110, RADIUS];            // the cross street, 24 m
+// the waiting sheds of the king's square (docs/settlements/benin-city.md §11): two gabled sheds of thatch before the gate, and bays of thatch leaning on
+// the palace wall either side of the gate's portico, where the petitioners and the idle sit out the sun and the rain
+export const SHEDS = [{ rect: [-87, 8, -76.5, 13.5], kind: 'gable', seed: 71 }, { rect: [-45.5, 6.5, -35.5, 11.5], kind: 'gable', seed: 72 }];
+export const BAYS = [-117, -112, -107, -100, -95, -90, -85, -50, -45, -40, -33, -28, -23, -16, -11].map((x, i) => ({ rect: [x, 0.2, x + 5, 3.0], kind: 'lean', seed: 80 + i }));
 export const GUILD = [18, -126, 86, 2];                     // the guild quarters
 export const LANE = [48, -124, 56, 0];                      // the guild lane
 export const MARKET = [114, -100, 214, 36];                 // the Oba market

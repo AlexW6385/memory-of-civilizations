@@ -41,9 +41,9 @@ export function hip(ctx, rect, y, rise, mat, over = 0.5) {
   ctx.bag.add(mat, frustum([x0 - over, z0 - over, x1 + over, z1 + over], y, y + rise, i, i, i, i, { noBottom: true }));
 }
 /** A tall pillar sheathed in cast brass: post of radius r from y to y+h, a carved collar and capital. */
-export function pillar(ctx, x, z, y, h, r = 0.21) {
+export function pillar(ctx, x, z, y, h, r = 0.21, mat = 'bronze') {
   const { bag, col } = ctx;
-  bag.add('bronze', lathe([[r * 1.25, 0], [r * 1.25, 0.12], [r, 0.2], [r, h - 0.3], [r * 1.2, h - 0.2], [r * 1.35, h - 0.1], [r * 1.35, h], [0.001, h]], 10, null, x, y, z));
+  bag.add(mat, lathe([[r * 1.25, 0], [r * 1.25, 0.12], [r, 0.2], [r, h - 0.3], [r * 1.2, h - 0.2], [r * 1.35, h - 0.1], [r * 1.35, h], [0.001, h]], 10, null, x, y, z));
   bag.add('wood_dark', lathe([[r * 1.45, 0], [r * 1.45, 0.14], [0.001, 0.14]], 8, null, x, y - 0.14, z));
   col.circle(x, z, r * 1.3, y, y + h);
 }
@@ -79,17 +79,20 @@ export function head(ctx, x, y, z, rot, seed, tusk = true) {
   }
 }
 /** The brass bird on a spire: body, tail, two spread wings, a head. */
-export function bird(ctx, x, y, z, s = 1, rot = 0) {
-  const { bag } = ctx, g = (a) => { a.rotateY(rot); a.translate(x, y, z); bag.add('bronze', a); };
+export function bird(ctx, x, y, z, s = 1, rot = 0, mat = 'bronze') {
+  const { bag } = ctx, g = (a) => { a.rotateY(rot); a.translate(x, y, z); bag.add(mat, a); };
   g(box(-0.1 * s, 0.08 * s, -0.22 * s, 0.1 * s, 0.26 * s, 0.2 * s)); g(box(-0.04 * s, 0.1 * s, 0.2 * s, 0.04 * s, 0.16 * s, 0.5 * s)); g(box(-0.05 * s, 0.22 * s, -0.36 * s, 0.05 * s, 0.34 * s, -0.2 * s));
   g(box(-0.55 * s, 0.2 * s, -0.12 * s, -0.08 * s, 0.22 * s, 0.14 * s)); g(box(0.08 * s, 0.2 * s, -0.12 * s, 0.55 * s, 0.22 * s, 0.14 * s));
 }
-/** A brass snake running down a face: a wavy body of short rods from (x, yTop, z) down h, along `al` the face's across-direction, standing off `dir`. */
-export function snake(ctx, x, yTop, z, h, al, dir, amp = 0.35, r = 0.09) {
-  const pts = [];
-  for (let i = 0; i <= 14; i++) { const t = i / 14, u = Math.sin(t * Math.PI * 4) * amp; pts.push([x + al[0] * u + dir[0] * 0.1, yTop - t * h, z + al[1] * u + dir[1] * 0.1]); }
-  for (let i = 0; i < 14; i++) ctx.bag.add('bronze', rod(pts[i], pts[i + 1], r * (1 - i / 40), 6));
-  const hd = pts[14]; ctx.bag.add('bronze', lathe([[0.001, 0], [r * 1.5, 0.05], [r * 1.5, 0.25], [r * 0.8, 0.34], [0.001, 0.36]], 6, null, hd[0], hd[1] - 0.3, hd[2]));
+/**
+ * A brass snake running down a face: a wavy body of short rods from (x, yTop, z) down h, along `al` the face's across-direction, standing
+ * off `dir`; mat: the metal (new cast brass is bright, `gilt_bronze`), waves: how many turns, the head at the foot pointing down.
+ */
+export function snake(ctx, x, yTop, z, h, al, dir, amp = 0.35, r = 0.09, mat = 'bronze', waves = 4) {
+  const pts = [], n = Math.max(14, Math.round(h * 3.2));
+  for (let i = 0; i <= n; i++) { const t = i / n, u = Math.sin(t * Math.PI * waves) * amp; pts.push([x + al[0] * u + dir[0] * 0.1, yTop - t * h, z + al[1] * u + dir[1] * 0.1]); }
+  for (let i = 0; i < n; i++) ctx.bag.add(mat, rod(pts[i], pts[i + 1], r * (1 - 0.55 * i / n), 6));
+  const hd = pts[n]; ctx.bag.add(mat, lathe([[0.001, 0], [r * 1.5, 0.05], [r * 1.5, 0.25], [r * 0.8, 0.34], [0.001, 0.36]], 6, null, hd[0], hd[1] - 0.3, hd[2]));
 }
 /**
  * A royal ancestral altar (Wikipedia "Benin ancestral altars": royal altars are round, of white clay): a round platform of two steps in
