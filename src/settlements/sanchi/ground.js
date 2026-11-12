@@ -2,7 +2,7 @@
 // the red-brown plain with fields, neem, banyan and palms round the village; the hot, hazy sky
 // of central India before the rains.
 
-import { RADIUS, TOP, VOTIVE, PATH, SUMMIT, STAIR, STUPA2, TEMPLE40, TANK, HALL, SHRINE, PLAZA, STREETS, height, out, inLot, inRect, onStreet, yards, tankD, inTank, inTankWater } from './layout.js';
+import { RADIUS, TOP, VOTIVE, PATH, SUMMIT, STAIR, STUPA2, TEMPLE40, TANK, HALL, SHRINE, PLAZA, NORTH, STREETS, height, out, inLot, inRect, onStreet, yards, tankD, inTank, inTankWater } from './layout.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0.2, grass: 0.3, rock: 0, soil: 0.5, fields: 0, dry: 0.75, warmth: 0.85, red: 0.5, road: 0, snow: 0, forest: 0 };
@@ -10,6 +10,7 @@ function cover(x, z, h, ny) {
   if (inRect(STUPA2.terrace, x, z, 3) || (Math.abs(x - STUPA2.c[0]) < 2.5 && z < STUPA2.terrace[1] && z > -60)) { c.road = 0.6; c.grass = 0.25; return c; }
   if (Math.abs(x - STAIR.x) < STAIR.w + 1 && z > STAIR.z0 - 2 && z < STAIR.z1 + 4) { c.road = 0.9; c.grass = 0; return c; }
   if (inRect(PLAZA, x, z, 1) || inRect(HALL, x, z, 2) || inRect([SHRINE.c[0] - 5, SHRINE.c[1] - 5, SHRINE.c[0] + 5, SHRINE.c[1] + 8], x, z)) { c.road = 0.75; c.grass = 0.05; return c; }
+  if (inRect(NORTH.plaza, x, z, 1) || inRect(NORTH.hall, x, z, 2)) { c.road = 0.75; c.grass = 0.05; return c; }
   if (onStreet(x, z, 0.8)) { c.road = 0.85; c.grass = 0; c.sand = 0.35; return c; }
   if (yards().some((y) => inRect(y.rect, x, z, 0))) { c.road = 0.3; c.soil = 0.65; c.grass = 0.1; return c; }
   if (h < -0.4) { c.soil = 0.7; c.grass = 0.25; return c; }
@@ -24,7 +25,7 @@ function fromWater(x, z) { return Math.max(-5, Math.min(40, tankD(x, z))); }
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inLot(x, z, 1) || inRect(STUPA2.terrace, x, z, 4) || (Math.abs(x - STUPA2.c[0]) < 3.5 && z < STUPA2.terrace[1] && z > -62) || (Math.abs(x - PATH.x) < PATH.w + 1 && z < -SUMMIT.half[1] + 5)) return null;
   if (inTank(x, z) || (Math.abs(x - STAIR.x) < STAIR.w + 2 && z > STAIR.z0 - 4 && z < STAIR.z1 + 6) || inRect(PLAZA, x, z, 2) || inRect(HALL, x, z, 3) || inRect([SHRINE.c[0] - 6, SHRINE.c[1] - 6, SHRINE.c[0] + 6, SHRINE.c[1] + 9], x, z)) return null;
-  if (onStreet(x, z, 1.6)) return null;
+  if (onStreet(x, z, 1.6) || inRect(NORTH.plaza, x, z, 3) || inRect(NORTH.hall, x, z, 3) || (Math.abs(x) < 14 && z < -150 && z > -196)) return null;
   const d = out(x, z);
   if (d === 0) {
     // on the summit, clear of the monuments and the ways between them: dry grass, a few neem and a pipal (a fig)

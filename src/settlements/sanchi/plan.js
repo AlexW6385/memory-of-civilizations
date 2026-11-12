@@ -20,7 +20,7 @@ export const stupa2 = {
 const [t0, z0, t1, z1] = STUPA2.terrace, cx = STUPA2.c[0];
 export const site = {
   id: 'sanchi-site', style: 'sanchi-site', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [],
-  bounds: [t0 - 4, -84, TEMPLE40.rect[2] + 52, TEMPLE40.rect[3] + 2], entrance: { at: [cx, z0 - 5], facing: 's' },
+  bounds: [t0 - 4, -84, TEMPLE40.rect[2] + 52, 100], entrance: { at: [cx, z0 - 5], facing: 's' },
   elements: [
     { t: 'block', rect: [t0, z0, t1, z1], y0: -0.6, y1: STUPA2.y - 0.12, mat: 'rubble' },
     { t: 'block', rect: [t0 - 0.12, z0 - 0.12, t1 + 0.12, z1 + 0.12], y0: STUPA2.y - 0.12, y1: STUPA2.y - 0.04, mat: 'sandstone_dressed', collide: false },

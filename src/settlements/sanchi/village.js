@@ -2,7 +2,7 @@
 // with their walls, the pilgrims' rest house and the tree shrine at the stair's foot, the plaza with its stalls, the stair
 // itself, the tank's ghat; and every front dressed at eye level (a plan of its own, style life).
 import { lodTiles } from '../lod.js';
-import { RADIUS, TOP, STAIR, TANK, HALL, SHRINE, PLAZA, STREETS, lots, yards, height, tankD } from './layout.js';
+import { RADIUS, TOP, STAIR, TANK, HALL, SHRINE, PLAZA, NORTH, STUPA2, STREETS, lots, yards, height, tankD } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const OUT = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] };
@@ -48,6 +48,13 @@ export function extras() {
     const f = front === 'e' || front === 'w';
     E.push({ t: 'stall', rect: f ? [cx - 1.3, cz - 1.8, cx + 1.3, cz + 1.8] : [cx - 1.8, cz - 1.3, cx + 1.8, cz + 1.3], front, y: 0, seed: Math.floor(cx * 31 + cz * 17), trade });
   }
+  // the foot of the north path: its plaza, a rest hall and the stalls
+  E.push({ t: 'floor', rect: NORTH.plaza, y: 0.03, mat: 'sandstone_floor', th: 0.06 });
+  E.push({ t: 'pilgrim_hall', rect: NORTH.hall, plinth: 0.5, h: 3.0 });
+  for (const [cx, cz, front, trade] of NORTH.stalls) E.push({ t: 'stall', rect: [cx - 1.3, cz - 1.8, cx + 1.3, cz + 1.8], front, y: 0, seed: Math.floor(cx * 31 + cz * 17), trade });
+  // Stupa 2's terrace: lamps and an offering at the head of the flight
+  { const cx = STUPA2.c[0], z0 = STUPA2.terrace[1];
+    E.push({ t: 'rite', kind: 'lamps', at: [cx - 1.5, z0 + 1.0], to: [cx + 1.5, z0 + 1.0], y: STUPA2.y + 0.03, count: 5 }, { t: 'rite', kind: 'offering', at: [cx + 2.3, z0 + 1.6], y: STUPA2.y + 0.03, n: [-1, 0], seed: 8 }); }
   // the ghat: steps down the tank's north bank, their tops following the ground, a landing at each end
   const cx = TANK.c[0], rz = TANK.r[1], steps = 7;
   for (const [xa, xb] of [[cx - 4, cx + 4], [cx - 22, cx - 17], [cx + 17, cx + 22]]) {
@@ -77,6 +84,30 @@ export function dressing() {
   const F = (at, y, dir, o) => L.push({ t: 'figure', at, y, rot: faceDir(dir), seed: seed++ * 7919, feet: 'bare', hat: 'none', carry: 'none', pose: 'stand', skin: rand() < 0.6 ? 'skin_medium' : 'skin_dark', dress: 'wrap', cloth: 'cloth_white', cloth2: 'cloth_white', hair: 'short', ...o });
   const pickOf = (a) => a[Math.floor(rand() * a.length)];
   const woman = (at, y, dir, o = {}) => F(at, y, dir, { cloth: pickOf(['cloth_red', 'cloth_green', 'cloth_indigo', 'cloth_ochre']), cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5, ...o });
+  // the farmsteads on the plain: a haystack, the cattle tied by the house, hens, pots by the door
+  for (const l of lots()) {
+    if (!l.farm) continue;
+    const out = OUT[l.front], Lw = (l.front === 's' || l.front === 'n') ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1];
+    const P = (u, v) => frontPoint(l, u, v), rotOut = awayDir(out);
+    L.push({ t: 'haystack', at: P(Lw + 2.2, 3), y: 0, kind: 'rick', seed: seed++, rot: 0 });
+    L.push({ t: 'animal', kind: rand() < 0.4 ? 'buffalo' : 'zebu', at: P(Lw * 0.4, -2.8), y: 0, rot: rotOut + 1.4, seed: seed++, graze: false, mat: pickOf(['hide_white', 'hide_grey', 'hide_tan']) });
+    L.push({ t: 'chickens', at: P(Lw * 0.8, -2.2), y: 0, rot: rotOut, seed: seed++, n: 4 });
+    L.push({ t: 'pot', at: P(1, -0.7), y: 0.4, seed: seed++, kind: 'matka', n: 2 });
+    if (rand() < 0.5) L.push({ t: 'bench', at: P(Lw * 0.7, -0.8), y: 0, rot: rotOut + 1.57, seed: seed++, len: 1.4 });
+    if (rand() < 0.5) F(P(Lw * 0.5, -1.4), 0, [-out[0], -out[1]], { pose: 'sit_low', top: 'bare', hat: 'turban' });
+  }
+  // the fields: a well with its sweep and a woman at it, a farmer with his hoe among the crop, a pair of oxen at rest by a haystack
+  {
+    const R2 = rng(909);
+    for (let k = 0, n = 0; k < 300 && n < 14; k++) {
+      const a = R2() * 6.28, rr = 215 + R2() * 40, x = Math.cos(a) * rr, z = Math.sin(a) * rr;
+      if (z < 110 || Math.hypot(x, z) > RADIUS - 24 || tankD(x, z) < 20 || STREETS.some((s) => (s.axis === 'x' ? Math.abs(z - s.c) < s.w + 8 && x > s.a - 8 && x < s.b + 8 : Math.abs(x - s.c) < s.w + 8 && z > s.a - 8 && z < s.b + 8)) || lots().some((l) => x > l.rect[0] - 12 && x < l.rect[2] + 12 && z > l.rect[1] - 12 && z < l.rect[3] + 12)) continue;
+      n++;
+      if (n % 3 === 0) { L.push({ t: 'well', at: [x, z], y: 0, kind: 'shaduf', mat: 'sandstone', seed: seed++ }); woman([x + 1.3, z + 0.4], 0, [-1, 0], { carry: 'pot' }); }
+      else if (n % 3 === 1) { F([x, z], 0, [rand() - 0.5, 1], { top: 'bare', carry: 'hoe', hat: 'turban' }); F([x + 3.5, z + 1.2], 0, [1, 0.3], { top: 'bare', carry: 'hoe' }); }
+      else { L.push({ t: 'haystack', at: [x, z], y: 0, kind: 'pole', seed: seed++, rot: 0 }); L.push({ t: 'animal', kind: 'zebu', at: [x + 3, z + 1], y: 0, rot: 1, seed: seed++, graze: false, mat: 'hide_white' }); L.push({ t: 'animal', kind: 'zebu', at: [x + 3.8, z + 2.3], y: 0, rot: 1.4, seed: seed++, graze: true, mat: 'hide_grey' }); }
+    }
+  }
   for (const l of lots()) {
     if (l.farm) continue;
     const out = OUT[l.front], Lw = (l.front === 's' || l.front === 'n') ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1];
@@ -154,6 +185,18 @@ export function dressing() {
     const x = cx - 24 + k * 7 + rand() * 2, ed = TANK.c[1] - TANK.r[1] * Math.sqrt(Math.max(0.05, 1 - ((x - cx) / TANK.r[0]) ** 2)) - 1.4 - rand() * 2.5, y = height(x, ed);
     if (k % 3 === 0) woman([x, ed], y, [0, 1], { carry: 'pot' }); else if (k % 3 === 1) F([x, ed], y, [0, 1], { top: 'bare', arms: 'pray' }); else F([x, ed], y, [0, 1], { pose: 'squat', top: 'bare' });
   }
+  // the north path's foot: sellers at the stalls, the pilgrims setting out, monks at rest in the hall
+  for (const [cx, cz, front, trade] of NORTH.stalls) {
+    const d = front === 'e' ? [1, 0] : [-1, 0];
+    woman([cx - d[0] * 0.2, cz + 0.2], 0, d, { carry: 'none', pose: 'sit_low' });
+    F([cx + d[0] * 2.3, cz - 0.4], 0, [-d[0], 0.2], { carry: rand() < 0.5 ? 'basket' : 'none', cloth: pickOf(['cloth_white', 'cloth_ochre']), hat: pickOf(['turban', 'none']) });
+    void trade;
+  }
+  { const [h0, h1, h2, h3] = NORTH.hall;
+    F([h0 + 3.5, h1 + 1.1], 0.5, [0, 1], { pose: 'cross', top: 'bare', cloth: 'cloth_ochre', cloth2: 'cloth_ochre', dress: 'robe', over: 'sash', hair: 'shaven' });
+    F([h0 + 8, h1 + 1.1], 0.5, [0, 1], { pose: 'sit_low', hat: 'turban' });
+    woman([h2 - 1.3, h3 - 1.2], 0.5, [-1, 0], { carry: 'pot' }); }
+  for (const [x, z, d] of [[1.5, -178, [0, 1]], [-1.4, -184, [0, 1]], [2.0, -188, [0, 1]]]) F([x, z], 0.03, d, { carry: rand() < 0.5 ? 'basket' : 'none' });
   // cattle and goats on the open ground between the hill's foot and the first rows
   for (const [x, z, rot, graze] of [[-48, 134, 0.8, true], [-60, 140, 2.2, false], [48, 135, 4.1, true], [66, 132, 1.2, true], [-90, 160, 3.3, false], [96, 160, 0.3, true]]) L.push({ t: 'animal', kind: rand() < 0.3 ? 'buffalo' : 'zebu', at: [x, z], y: 0, rot, seed: seed++, graze, mat: pickOf(['hide_white', 'hide_grey', 'hide_tan']) });
   for (const [x, z] of [[-40, 131], [-36, 133], [56, 133], [60, 130]]) L.push({ t: 'animal', kind: 'goat', at: [x, z], y: 0, rot: rand() * 6, seed: seed++, graze: true });

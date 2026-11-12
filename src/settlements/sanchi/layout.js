@@ -14,6 +14,8 @@ export const TANK = { c: [100, 214], r: [30, 18], level: -1.4 };
 /** The pilgrims' rest house and the tree shrine at the stair's foot. */
 export const HALL = [-27, 133, -10, 143];
 export const SHRINE = { c: [19, 139], r: 3.2 };
+/** The foot of the north path (the settlement's entrance): a small plaza, a rest hall and stalls for those who come that way. */
+export const NORTH = { plaza: [-9, -190, 9, -171], hall: [-30, -189, -15, -179], stalls: [[-10.5, -176, 'e', 'water'], [10.5, -176, 'w', 'flowers'], [-10.5, -183, 'e', 'flowers'], [10.5, -183, 'w', 'lamps']] };
 export const tankD = (x, z) => (Math.hypot((x - TANK.c[0]) / TANK.r[0], (z - TANK.c[1]) / TANK.r[1]) - 1) * Math.min(...TANK.r);
 export const inTank = (x, z) => tankD(x, z) < 0;
 /** Stupa 2 on its built terrace at the foot of the west slope, against the hill (docs/settlements/sanchi.md §10). */
