@@ -28,6 +28,7 @@ E.push({ t: 'terrace_paving', rect: [-148, -140, -86, -20], y: T, drains: [[-148
 // the wear of the paving, the incense stands at the head of the royal way, the awnings over the scribes and over the grooms' horses
 E.push({ t: 'court_wear', rect: [-148, -140, -86, -20], y: T, way: [-64.5, -55.5], seed: 480, dust: [[-145, -138, 6, 4], [-145, -142, 5, 5], [-88, -60, 3, 18], [-122, -122, 14, 3], [-108, -27, 16, 3]] });
 for (const [x, z] of COURT.stands) E.push({ t: 'incense_stand', at: [x, z], y: T });
+E.push({ t: 'parasol', at: [-110.3, -69.5], y: T, cloth: 'cloth_red' }, { t: 'parasol', at: [-110.1, -49.7], y: T, cloth: 'cloth_indigo' });
 E.push({ t: 'court_awning', rect: [-104.5, -38, -95, -29.5], y: T, h: 2.9, cloth: 'cloth_white', trim: 'cloth_red' });
 E.push({ t: 'court_awning', rect: [-119, -99, -98, -93.5], y: T, h: 2.9, cloth: 'cloth_ochre', trim: 'cloth_indigo' });
 // the scribes of the court seated at their mats by the stair, tablets drying beside them (the Aramaic scribes: leather scrolls)

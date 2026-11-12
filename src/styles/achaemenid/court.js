@@ -99,7 +99,10 @@ export function porchDress(el, { bag }) {
         bag.add('marble_dark', R(u - 0.85, u - 0.6, h0 - 0.2, h1 + 0.35, o * 2.2)); bag.add('marble_dark', R(u + 0.6, u + 0.85, h0 - 0.2, h1 + 0.35, o * 2.2));
         bag.add('marble_dark', R(u - 0.85, u + 0.85, h1, h1 + 0.35, o * 2.8)); bag.add('marble_dark', R(u - 0.7, u + 0.7, h0 - 0.2, h0, o * 2.8));
       }
+      // rain streaks from the frieze's lower edge between the niches
+      for (const k of [-1, 1]) { const us = u + k * 2.2, len = 2.6 + ((i * 5 + (k > 0 ? 2 : 0)) % 4) * 0.9; bag.add('plaster_damp', R(us - 0.12, us + 0.12, fy - len, fy, o * 0.4)); }
     }
+    bag.add('plaster_damp', R(a, b, 1.25, 1.75, o * 0.4));      // the damp at the dado's top
   }
   void free;
 }

@@ -80,3 +80,12 @@ export function courtWear(el, { bag }) {
     }
   }
 }
+
+/** parasol: { at: [x, z], y, h, cloth } — the parasol a servant holds over a great man (the reliefs show it over the king): a pole, a ribbed disc, a fringe. */
+export function parasol(el, { bag }) {
+  const [x, z] = el.at, y = el.y ?? 0, h = el.h ?? 2.35, cloth = el.cloth ?? 'cloth_red';
+  bag.add('wood_dark', rod([x, y + 0.9, z], [x, y + h + 0.2, z], 0.022, 6));
+  bag.add(cloth, lathe([[0.001, 0.2], [0.35, 0.14], [0.7, 0.04], [0.82, -0.02], [0.8, -0.05], [0.001, 0.12]], 16, null, x, y + h, z));
+  bag.add('cloth_white', lathe([[0.82, -0.02], [0.83, -0.18], [0.78, -0.18], [0.77, -0.04]], 16, null, x, y + h, z));
+  bag.add('gilt_bronze', lathe([[0.001, 0], [0.04, 0.03], [0.001, 0.1]], 8, null, x, y + h + 0.2, z));
+}
