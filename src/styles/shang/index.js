@@ -6,13 +6,14 @@ import { shangHall, shangGate } from './hall.js';
 import { shangPits, shangTomb, shangArchive, shangRiver, shangBridge } from './ritual.js';
 import { shangFoundry } from './foundry.js';
 import { shangCourt } from './court.js';
+import { shangLanding } from './river.js';
 import { courtHouse, pitYard, rowHouse, workshop } from './houses.js';
 
 registerStyle('shang', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     shang_hall: shangHall, shang_gate: shangGate, shang_pits: shangPits, shang_tomb: shangTomb, shang_archive: shangArchive,
-    shang_river: shangRiver, shang_bridge: shangBridge, shang_foundry: shangFoundry, shang_court: shangCourt,
+    shang_river: shangRiver, shang_bridge: shangBridge, shang_foundry: shangFoundry, shang_court: shangCourt, shang_landing: shangLanding,
     shang_court_house: courtHouse, shang_pit_yard: pitYard, shang_row_house: rowHouse, shang_workshop: workshop,
   },
   objects: {},

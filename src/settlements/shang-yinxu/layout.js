@@ -148,3 +148,27 @@ export const BRIDGES = [
   { a: [-216, riverZ(-216) - 20], b: [-216, riverZ(-216) + 20] },
   { a: [riverX(0) - 20, 0], b: [riverX(0) + 20, 0] },
 ];
+
+// ── a lot's points: (u, v) the metres along the lot's street front and in from it (the frame of src/styles/shang/geo.js) ──
+/** The world point of (u, v) in lot l. */
+export function lotPoint(l, u, v) { const [x0, z0, , z1] = l.rect; return [x0 + u, l.front === 's' ? z1 - v : z0 + v]; }
+/** The direction the lot's front faces, as the yaw that turns an object's +z outward (π: north, 0: south). */
+export const lotRot = (l) => (l.front === 'n' ? Math.PI : 0);
+/** The fixed places of a yard by kind (the builders in src/styles/shang/houses.js put the well, hearth, pen and gate there): { gate, hearth, well, pen, yard, door }. */
+export function spots(kind, W, D) {
+  if (kind === 'court') return { gate: [W / 2, 0.5], hearth: [W / 2 + 4.5, 12.2], well: [W / 2 - 4.6, 11], pen: [W - 3.9, D - 5.3], yard: [W / 2, 8], door: [W / 2, D - 8.6] };
+  if (kind === 'pits') return { gate: [W / 2, 0.5], hearth: [W / 2, D / 2 - 1], well: [4.6, D / 2 - 1], pen: [W - 4.1, 9], yard: [W / 2, D / 2 + 2], door: [W / 2 - 0.7, D - 6.4] };
+  if (kind === 'row') return { gate: [10.1, 0.5], hearth: [W / 2 + 3, 11], well: [W / 2 - 5, 12.4], pen: [W - 3.8, 10.7], yard: [W / 2, 12], door: [W / 2, 0.7] };
+  return { gate: [W / 2, 0.5], hearth: [W / 2, D / 2 - 2], well: [W / 2, 8], pen: [W - 5, 8], yard: [W / 2, 8], door: [W / 2, D - 10] };
+}
+
+// ── the landings on the Huan: a plank stage on piles from the bank into the water, with the boats moored by it ──
+/** { a (bank end), b (water end), n (unit vector bank → water), tang (unit along the bank), rot (yaw of a boat moored along it) } */
+export function landings() {
+  const out = [], H = RIVER.half;
+  for (const x of [-290, -262, -236, -196, -168, -142, -112, -84, -52, -22, 8, 38]) { const z = riverZ(x), s = x % 2 ? 1 : 1; out.push({ a: [x, z + H + 1.2 * s], b: [x, z + H - 4.2], n: [0, -1], tang: [1, 0], rot: Math.PI / 2 }); }
+  for (const x of [-258, -178, -96]) { const z = riverZ(x); out.push({ a: [x, z - H - 1.2], b: [x, z - H + 4.2], n: [0, 1], tang: [1, 0], rot: Math.PI / 2 }); }
+  for (const z of [-34, 8, 52, 96, 134, 178, 222]) { const x = riverX(z); out.push({ a: [x - H - 1.2, z], b: [x - H + 4.2, z], n: [1, 0], tang: [0, 1], rot: 0 }); }
+  for (const z of [-20, 76, 160]) { const x = riverX(z); out.push({ a: [x + H + 1.2, z], b: [x + H - 4.2, z], n: [-1, 0], tang: [0, 1], rot: 0 }); }
+  return out.filter((q) => Math.hypot(q.a[0], q.a[1]) < RADIUS - 24 && !BRIDGES.some((b) => Math.hypot(b.a[0] - q.a[0], b.a[1] - q.a[1]) < 24 || Math.hypot(b.b[0] - q.a[0], b.b[1] - q.a[1]) < 24));
+}

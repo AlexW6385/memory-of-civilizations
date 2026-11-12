@@ -57,6 +57,23 @@ export function shangTomb(el, { bag, col, lights }) {
     bag.add('planks_grey', frustum([x + 0.3, z + 0.3, x + 5.3, z + 8.1], 0.18, 0.26, 0.05, 0.05, 0.05, 0.05, { noBottom: true }));
   }
   chariot(bag, col, qx0 + 9, -98.4, 0);
+  // ── Fu Hao's tomb dressed (docs §2a): the offering table before the platform, bells on a mat, jades, a lamp; the wattle fence round the zone;
+  // the ridge and the weathering of the small hall; a second parked chariot's wheel leaned on the pit's rim ──
+  { const tx = cx, tz = plat[3] + 3.6;
+    bag.add('lacquer_black', box(tx - 1.6, 0, tz, tx + 1.6, 0.5, tz + 1.0)); col.rect([tx - 1.6, tz, tx + 1.6, tz + 1.0], 0, 0.5); bag.add('lacquer_red', box(tx - 1.6, 0.5, tz, tx + 1.6, 0.54, tz + 1.0));
+    vessel('ding', bag, tx - 1.0, 0.54, tz + 0.5, 1.1); vessel('gui', bag, tx, 0.54, tz + 0.5, 0.9); vessel('zun', bag, tx + 0.9, 0.54, tz + 0.5, 1.1); vessel('jue', bag, tx + 1.3, 0.54, tz + 0.3, 0.9);
+    for (let k = 0; k < 4; k++) bag.add('inlay_jade', box(tx - 0.8 + k * 0.45, 0.54, tz + 0.85, tx - 0.6 + k * 0.45, 0.57, tz + 0.95));
+    bag.add('reed_mat', box(tx - 2.2, 0.01, tz + 1.3, tx + 2.2, 0.04, tz + 3.2));
+    for (let i = 0; i < 3; i++) bag.add('bronze', lathe([[0.001, 0.4], [0.11 + i * 0.03, 0.43], [0.14 + i * 0.03, 0.1], [0.19 + i * 0.03, 0.0]], 8, null, tx - 1.0 + i * 0.6, 0.04, tz + 2.2));
+    for (const s of [-1, 1]) { bag.add('bronze', lathe([[0.001, 0], [0.18, 0.03], [0.04, 0.3], [0.04, 0.9], [0.12, 1.0], [0.001, 1.02]], 8, null, tx + s * 2.6, 0, tz + 0.5)); bag.add('flame', lathe([[0.001, 0], [0.07, 0.04], [0.001, 0.26]], 6, null, tx + s * 2.6, 1.1, tz + 0.5)); } }
+  { const [fx0, fz0, fx1, fz1] = [-80, -126, -26, -94], fence = (a, b, c, d) => { bag.add('wicker', box(a, 0, b, c, 1.3, d)); col.rect([a, b, c, d], 0, 1.3); bag.add('thatch', box(a - 0.05, 1.3, b - 0.07, c + 0.05, 1.44, d + 0.07)); };
+    fence(fx0, fz0, fx1, fz0 + 0.18); fence(fx0, fz0, fx0 + 0.18, fz1 - 6); fence(fx1 - 0.18, fz0, fx1, fz1 - 6);
+    for (let x = fx0; x <= fx1; x += 3) bag.add('timber', box(x - 0.07, 0, fz0 - 0.07, x + 0.07, 1.6, fz0 + 0.25));
+    for (const x of [fx0 + 0.1, fx1 - 0.1]) for (let z = fz0; z <= fz1 - 6; z += 3) bag.add('timber', box(x - 0.1, 0, z - 0.07, x + 0.1, 1.6, z + 0.07)); }
+  { const hv = (hz0 + hz1 - 0.3) / 2, top = y + wh + 0.25 + 2.8; bag.add('roof_ridge', box(hx0 - 0.6, top - 0.1, hv - 0.18, hx1 + 0.6, top + 0.16, hv + 0.18)); }
+  bag.add('kokowai', box(hx0 - 0.02, y, hz0 - 0.02, hx1 + 0.02, y + 0.6, hz0)); for (const [a, b, c, d] of [[hx0 - 0.02, hz0, hx0, hz1 - 3], [hx1, hz0, hx1 + 0.02, hz1 - 3]]) bag.add('kokowai', box(a, y, b, c, y + 0.6, d));
+  bag.add('earth_wall', box(hx0 - 0.04, y, hz0 - 0.04, hx1 + 0.04, y + 0.45, hz0 + 0.02)); for (let k = 0; k < 4; k++) bag.add('plaster_streak', box(hx0 + 0.8 + k * 1.6, y + wh - 0.9, hz0 - 0.03, hx0 + 0.95 + k * 1.6, y + wh, hz0 + 0.01));
+  wheel(bag, qx0 - 1.2, 0.62, -94.8, 0.62, 'x', 14);
 }
 
 /** shang_archive: {} — the oracle-bone archive: a long low store of rammed earth under thatch, the shells and scapulae on shelves; before it the diviners' shed. */
@@ -103,6 +120,21 @@ export function shangArchive(el, { bag, col, lights }) {
     lights.push({ at: [bx, 1.1, bz], color: '#ffb468', intensity: 1.2, distance: 8 }); }
   for (let k = 0; k < 14; k++) { const a = k * 2.399, rr = 0.2 + (k % 5) * 0.2; bag.add('hide_grey', frustum([sx1 - 5 + Math.cos(a) * rr - 0.3, sz1 - 3.4 + Math.sin(a) * rr - 0.25, sx1 - 5 + Math.cos(a) * rr + 0.3, sz1 - 3.4 + Math.sin(a) * rr + 0.25], 0.1 * (k % 4), 0.1 * (k % 4) + 0.1, 0.05, 0.05, 0.05, 0.05)); }
   for (const x of [sx1 - 8.5, sx1 - 7.8]) bag.add('pottery_dark', lathe([[0.001, 0], [0.2, 0.02], [0.28, 0.3], [0.2, 0.5], [0.001, 0.5]], 8, null, x, 0, sz1 - 2));
+  // ── the archive dressed (docs §2b): racks of fresh plastrons drying, a trough of water for soaking shells, heaps of sawn waste, baskets of scapulae;
+  // inside, a reading table with its lamp, tally bundles on the shelves, a ladder to the loft; the foot of the walls splashed, the walls streaked ──
+  { const rk = (x, z, n) => { for (const s of [0, n * 0.5]) { bag.add('timber', box(x + s - 0.05, 0, z - 0.2, x + s + 0.05, 1.5, z - 0.1)); bag.add('timber', box(x + s - 0.05, 0, z + 0.1, x + s + 0.05, 1.5, z + 0.2)); } bag.add('timber', box(x, 1.45, z - 0.05, x + n * 0.5, 1.52, z + 0.05)); for (let k = 0; k < n; k++) bag.add('ivory', box(x + 0.1 + k * 0.5 - 0.0, 0.7, z - 0.04, x + 0.4 + k * 0.5, 1.45, z + 0.04)); };
+    rk(x0 - 6, z1 + 5, 5); rk(x1 + 3.5, z1 + 5, 5); rk(x0 - 6, z1 + 9, 4);
+    const tx = x1 + 4, tz = z1 + 10; for (const [a, b, c, d] of [[-0.9, -0.4, 0.9, -0.33], [-0.9, 0.33, 0.9, 0.4], [-0.9, -0.4, -0.83, 0.4], [0.83, -0.4, 0.9, 0.4]]) bag.add('planks_grey', box(tx + a, 0, tz + b, tx + c, 0.5, tz + d)); bag.add('planks_grey', box(tx - 0.9, 0, tz - 0.4, tx + 0.9, 0.08, tz + 0.4)); bag.add('water', box(tx - 0.82, 0.36, tz - 0.32, tx + 0.82, 0.38, tz + 0.32)); col.rect([tx - 0.9, tz - 0.4, tx + 0.9, tz + 0.4], 0, 0.5);
+    for (const [hx, hz] of [[x0 - 3, z1 + 1.5], [x1 + 2, z1 + 2]]) bag.add('hide_grey', frustum([hx - 1, hz - 0.8, hx + 1, hz + 0.8], 0, 0.5, 0.3, 0.3, 0.3, 0.3, { noBottom: true }));
+    for (const [bx, bz] of [[x1 + 1.5, z1 + 6], [x0 - 2, z1 + 6.5]]) { bag.add('wicker', lathe([[0.3, 0], [0.36, 0.4], [0.32, 0.42], [0.001, 0.42]], 8, null, bx, 0, bz)); bag.add('ivory', lathe([[0.3, 0.38], [0.18, 0.5], [0.001, 0.52]], 8, null, bx, 0, bz)); }
+    bag.add('earth_wall', box(x0 - 0.62, 0, z1 - 0.02, x1 + 0.62, 0.45, z1 + 0.62)); for (let k = 0; k < 6; k++) bag.add('plaster_streak', box(x0 + 1.5 + k * 4.4, y + wh - 0.8, z1 + 0.0, x0 + 1.7 + k * 4.4, y + wh, z1 + 0.04));
+    bag.add('roof_ridge', box(x0 - 1.3, y + wh + 2.6 - 0.1, (z0 + z1) / 2 - 0.17, x1 + 1.3, y + wh + 2.6 + 0.16, (z0 + z1) / 2 + 0.17));
+    // inside
+    const ix = cx, iz = z0 + 12; bag.add('timber', box(ix - 1.5, 0.62 + y, iz, ix + 1.5, 0.7 + y, iz + 1.0)); for (const dx of [0.1, 2.8]) bag.add('timber', box(ix - 1.5 + dx, y, iz + 0.4, ix - 1.4 + dx, y + 0.62, iz + 0.5)); col.rect([ix - 1.5, iz, ix + 1.5, iz + 1.0], y, y + 0.7);
+    for (let k = 0; k < 4; k++) bag.add('ivory', box(ix - 1.2 + k * 0.7, y + 0.7, iz + 0.2, ix - 0.8 + k * 0.7, y + 0.74, iz + 0.8)); bag.add('bronze', lathe([[0.001, 0], [0.12, 0.02], [0.04, 0.2], [0.001, 0.26]], 8, null, ix + 1.1, y + 0.7, iz + 0.5)); bag.add('flame', lathe([[0.001, 0], [0.05, 0.03], [0.001, 0.18]], 6, null, ix + 1.1, y + 0.96, iz + 0.5));
+    bag.add('reed_mat', box(ix - 2, y + 0.04, iz + 1.3, ix + 2, y + 0.07, iz + 2.9));
+    for (let k = 0; k < 8; k++) bag.add('hide_tan', box(x0 + tw + 1.3 + k * 0.12, y + 0.8, z0 + tw + 1.0 - 0.02, x0 + tw + 1.38 + k * 0.12, y + 1.3, z0 + tw + 0.99));
+    for (const s of [0, 0.5]) bag.add('timber', box(x1 - tw - 0.4 - s * 0 + 0.0 - 0.06, y, z0 + 5.6 + 0.0 - 0.0 + s * 0, x1 - tw - 0.34, y + 2.4, z0 + 5.66)); for (let k = 0; k < 8; k++) bag.add('timber', box(x1 - tw - 0.4, y + 0.3 + k * 0.28, z0 + 5.6, x1 - tw - 0.1, y + 0.34 + k * 0.28, z0 + 5.66)); }
   void ball; void quad; void fromTriangles;
 }
 
