@@ -13,7 +13,7 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1
 export function emitters() {
   const E = [], r = rng(1710);
   for (const l of lots()) {
-    if (Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) > 120 || r() > 0.3) continue;
+    if (l.use || Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) > 120 || r() > 0.3) continue;
     const H = houseHeight(l.n), cx = l.rect[0] + (l.rect[2] - l.rect[0]) * (0.3 + 0.4 * r()), cz = l.rect[1] + (l.rect[3] - l.rect[1]) * (0.3 + 0.4 * r());
     E.push({ p: [cx, H + 1.4, cz], kind: 'kitchen', thr: 0.1 + 0.7 * r(), seed: l.seed });
   }

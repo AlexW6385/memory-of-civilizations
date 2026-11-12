@@ -40,19 +40,19 @@ export function houseParts(el, ctx, { hipRoof }) {
     B(ox + OW, 0, 0, W, H, T, wm); RC(ox + OW, 0, 0, W, h0, T);
     B(ox, 2.5, 0, ox + OW, H, T, wm);                                                // over the opening
     B(ox - 0.02, 2.2, -0.14, ox + OW + 0.02, 2.5, T + 0.02, 'timber');                      // its lintel beam
-    for (const x of [ox - 0.12, ox + OW - 0.1]) { B(x, 0, -0.14, x + 0.22, 2.5, 0.2, 'timber'); RC(x, 0, -0.14, x + 0.22, 2.5, 0.2); }
+    for (const x of [ox - 0.12, ox + OW - 0.1]) { B(x, 0.03, -0.14, x + 0.22, 2.5, 0.2, 'timber'); RC(x, 0, -0.14, x + 0.22, 2.5, 0.2); }
     // the floor, the ceiling of joists and planks (the upper storeys solid above it)
     const f0 = toW(T, T), f1 = toW(W - T, D - T);
     B(T, 0, T, W - T, 0.1, D - T, 'plaster_ochre'); col.floor([Math.min(f0[0], f1[0]), Math.min(f0[1], f1[1]), Math.max(f0[0], f1[0]), Math.max(f0[1], f1[1])], 0.1);
     B(ox, 0, -0.5, ox + OW, 0.1, T, 'sandstone'); { const a = toW(ox, -0.5), b = toW(ox + OW, T); col.floor([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], 0.1); }
-    for (let x = T + 0.25; x < W - T; x += 0.55) RODL([x, 2.5, T], [x, 2.5, D - T], 0.09, 'timber', 5);
+    for (let x = T + 0.25; x < W - T; x += 0.55) RODL([x, 2.5, T + 0.02], [x, 2.5, D - T - 0.02], 0.09, 'timber', 5);
     B(T, 2.58, T, W - T, 2.9, D - T, 'wood_ochre');
     for (const x of [W * 0.3, W * 0.7]) { B(x - 0.13, 0.1, D * 0.5 - 0.13, x + 0.13, 2.58, D * 0.5 + 0.13, 'timber'); B(x - 0.3, 2.3, D * 0.5 - 0.3, x + 0.3, 2.58, D * 0.5 + 0.3, 'wood_painted'); const c = toW(x, D * 0.5); col.circle(c[0], c[1], 0.17, 0, 2.6); }
     furnish(el.trade || 'home');
   }
 
   // the facade: a timber band at every floor, the plinth wash, the ground storey, the windows above
-  for (let i = 1; i <= n; i++) B(-0.04, Y[i] - 0.1, -0.09, W + 0.04, Y[i] + 0.08, 0.0, 'timber');
+  for (let i = 1; i <= n; i++) B(-0.04, Y[i] - 0.1, -0.09, W + 0.04, Y[i] + 0.08, 0.03, 'timber');
   if (!open) {
     const wash = rand() < 0.5;
     if (wash) B(0, 0, -0.04, W, 0.95, 0, rand() < 0.5 ? 'plaster_ochre' : 'mud_plaster');

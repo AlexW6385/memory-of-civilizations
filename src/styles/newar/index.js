@@ -11,6 +11,7 @@ import '../qing/index.js';
 import { houseParts } from './house.js';
 import { pagoda, shikhara, chaitya } from './temples.js';
 import { potCourt, potterWheel, kiln, pot } from './pottery.js';
+import { lane, makeCourt } from './street.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const bx = (x0, y0, z0, x1, y1, z1) => box(Math.min(x0, x1), Math.min(y0, y1), Math.min(z0, z1), Math.max(x0, x1), Math.max(y0, y1), Math.max(z0, z1));
@@ -118,6 +119,8 @@ function pipalTree(el, { bag, col }) {
   bag.add('brick', box(x - 1.5, 0, z - 1.5, x + 1.5, 0.45, z + 1.5)); col.rect([x - 1.5, z - 1.5, x + 1.5, z + 1.5], 0, 0.45); col.floor([x - 1.5, z - 1.5, x + 1.5, z + 1.5], 0.45);
 }
 
+const newarCourt = makeCourt({ dhara, pati, tree: pipalTree });
+
 registerStyle('newar', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
@@ -125,7 +128,7 @@ registerStyle('newar', {
     newar_paving: paving, newar_pagoda: pagoda, newar_shikhara: shikhara, newar_chaitya: chaitya,
     newar_house: (el, ctx) => houseParts(el, ctx, { hipRoof }),
     newar_dabali: dabali, newar_pati: pati, newar_dhara: dhara, newar_stall: stall, newar_tree: pipalTree,
-    newar_pot_court: potCourt, newar_wheel: potterWheel, newar_kiln: kiln,
+    newar_lane: lane, newar_court: newarCourt, newar_pot_court: potCourt, newar_wheel: potterWheel, newar_kiln: kiln,
   },
   objects: {},
 });
