@@ -161,3 +161,17 @@ export function cityWalls() {
   seg(WALL_N, WALL_S, WALL_E, 'z');         // east
   return out;
 }
+
+/** The shop rows of a market: four quadrants about the cross lanes, rows in back-to-back pairs with a lane between: [{ rect, front, n, seed }]. */
+export function marketShops(rect, seedBase, th = MARKET_WALL.th) {
+  const [x0, z0, x1, z1] = rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, lane = 8, out = [];
+  const quads = [[x0 + th + 3, z0 + th + 3, cx - lane, cz - lane], [cx + lane, z0 + th + 3, x1 - th - 3, cz - lane], [x0 + th + 3, cz + lane, cx - lane, z1 - th - 3], [cx + lane, cz + lane, x1 - th - 3, z1 - th - 3]];
+  let seed = seedBase;
+  for (const [qx0, qz0, qx1, qz1] of quads) {
+    const nShops = Math.max(2, Math.floor((qx1 - qx0) / 5.2));
+    for (let zz = qz0; zz + 12 <= qz1 + 0.01; zz += 16) {
+      out.push({ rect: [qx0, zz, qx0 + nShops * 5.2, zz + 6], front: 'n', n: nShops, seed: seed++ }, { rect: [qx0, zz + 6, qx0 + nShops * 5.2, zz + 12], front: 's', n: nShops, seed: seed++ });
+    }
+  }
+  return out;
+}

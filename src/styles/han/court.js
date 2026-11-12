@@ -3,9 +3,18 @@
 import { box } from '../../core/geom.js';
 import { ding, drumPost, banner, lampTree, stele, chariot, rngOf, qbox } from './props.js';
 
+/** The chariots' places in the two courts: [{ x, z, yaw, canopy, lacquer }] (the poles toward the axis). */
+export function chariotSpots(ax, z1, seed = 5) {
+  const rand = rngOf(seed), out = [];
+  for (const s of [-1, 1]) for (let i = 0; i < 6; i++) for (let j = 0; j < 2; j++) {
+    const x = ax + s * (30 + i * 6.5) + (rand() - 0.5) * 0.6, z = z1 - 64 - j * 7, yaw = (s < 0 ? 0 : Math.PI) + (rand() - 0.5) * 0.12;
+    out.push({ x, z, yaw, canopy: (i + j) % 2 === 0, lacquer: (i + j) % 3 ? 'lacquer_black' : 'lacquer_red' });
+  }
+  return out;
+}
 /** han_court: { ax, z0, z1 (the paved axis from the ramp's foot z0 to the gate z1, z0 < z1), seed } */
 export function court(el, ctx) {
-  const { bag, col } = ctx, ax = el.ax, rand = rngOf(el.seed ?? 5);
+  const { bag, col } = ctx, ax = el.ax;
   const solid = (x, z, r, h) => col.circle(x, z, r, 0, h);
   // at the ramp's foot: a pair of ding and a pair of drums; lamp trees and steles down the axis
   for (const s of [-1, 1]) {
@@ -27,11 +36,5 @@ export function court(el, ctx) {
     }
   }
   // the chariot park: rows of carriages, poles toward the axis, in the two courts
-  for (const s of [-1, 1]) {
-    for (let i = 0; i < 6; i++) for (let j = 0; j < 2; j++) {
-      const x = ax + s * (30 + i * 6.5) + (rand() - 0.5) * 0.6, z = el.z1 - 64 - j * 7, yaw = s < 0 ? 0 : Math.PI;
-      chariot(bag, x, 0, z, yaw + (rand() - 0.5) * 0.12, (i + j) % 2 === 0, (i + j) % 3 ? 'lacquer_black' : 'lacquer_red');
-      col.rect([x - 1.1, z - 1.1, x + 1.1, z + 1.1], 0, 1.1);
-    }
-  }
+  for (const c of chariotSpots(ax, el.z1, el.seed ?? 5)) { chariot(bag, c.x, 0, c.z, c.yaw, c.canopy, c.lacquer); col.rect([c.x - 1.1, c.z - 1.1, c.x + 1.1, c.z + 1.1], 0, 1.1); }
 }

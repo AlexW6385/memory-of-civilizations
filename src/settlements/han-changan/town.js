@@ -4,8 +4,9 @@
 // and the caravans of the Silk Road at the west gate.
 
 import { RADIUS, AX, PALACE, PALACE_WALL, HALL, CROWN, EAST_GATE, SOUTH_GATE, CHANGLE, CHANGLE_HALL, WEST_MARKET, EAST_MARKET, MARKET_WALL, LAKE, LAKE_Y, ACADEMY, WARDS, WARD_WALL, GARDEN_POND, POND_Y, JIAOFANG,
-  RAMP, CITY_WALL, WALL_W, WALL_S, GATE_W, GATE_S, cityWalls, lots, TIERS } from './layout.js';
+  RAMP, CITY_WALL, WALL_W, WALL_S, GATE_W, GATE_S, cityWalls, lots, TIERS, marketShops } from './layout.js';
 
+import { lifePlans } from './life.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements, o = {}) => ({ id, style: 'han', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [AX, 60], facing: 'n' }, ...o });
 const pick = (rand, a) => a[Math.floor(rand() * a.length) % a.length];
@@ -64,18 +65,9 @@ function people() {
   return L;
 }
 
-/** The shop rows of a market: four quadrants about the cross lanes, rows in back-to-back pairs with a lane between. */
+/** The shop rows of a market (layout.js marketShops) as elements. */
 function marketRows(rect, seedBase) {
-  const [x0, z0, x1, z1] = rect, th = MARKET_WALL.th, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, lane = 8, E = [];
-  const quads = [[x0 + th + 3, z0 + th + 3, cx - lane, cz - lane], [cx + lane, z0 + th + 3, x1 - th - 3, cz - lane], [x0 + th + 3, cz + lane, cx - lane, z1 - th - 3], [cx + lane, cz + lane, x1 - th - 3, z1 - th - 3]];
-  let seed = seedBase;
-  for (const [qx0, qz0, qx1, qz1] of quads) {
-    const nShops = Math.max(2, Math.floor((qx1 - qx0) / 5.2));
-    for (let zz = qz0; zz + 12 <= qz1 + 0.01; zz += 16) {
-      E.push({ t: 'han_shop_row', rect: [qx0, zz, qx0 + nShops * 5.2, zz + 6], front: 'n', n: nShops, seed: seed++ }, { t: 'han_shop_row', rect: [qx0, zz + 6, qx0 + nShops * 5.2, zz + 12], front: 's', n: nShops, seed: seed++ });
-    }
-  }
-  return E;
+  return marketShops(rect, seedBase).map((r) => ({ t: 'han_shop_row', ...r }));
 }
 
 let CACHE = null;
@@ -150,7 +142,7 @@ export async function town() {
     plans.push(base('han-academy', L));
     plans.push(base('han-lake', [{ t: 'han_lake', c: LAKE.c, rx: LAKE.rx, rz: LAKE.rz, y: LAKE_Y, pier: [LAKE.c[0] + 40, LAKE.c[1] - LAKE.rz * 0.96] }, { t: 'han_ship', at: [LAKE.c[0] - 8, LAKE.c[1] + 4], y: LAKE_Y, len: 16, yaw: 0 }]));
   }
-  plans.push({ ...base('han-people', people()), style: 'life' });
+  plans.push({ ...base('han-people', people()), style: 'life' }, ...lifePlans());
   void TIERS; void rand;
   return (CACHE = plans);
 }

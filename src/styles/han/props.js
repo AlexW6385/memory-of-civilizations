@@ -12,7 +12,7 @@ export function qbox(bag, mat, x, z, q, u0, y0, v0, u1, y1, v1) {
   const P = turnPt(x, z, q), a = P(u0, v0), b = P(u1, v1);
   bag.add(mat, box(Math.min(a[0], b[0]), y0, Math.min(a[1], b[1]), Math.max(a[0], b[0]), y1, Math.max(a[1], b[1])));
 }
-const blob = (bag, mat, r, h, x, y, z, seg = 9) => bag.add(mat, lathe([[0.001, 0], [r * 0.7, 0.01 * h], [r, 0.4 * h], [r * 0.85, 0.8 * h], [r * 0.5, h], [0.001, h]], seg, null, x, y, z));
+const blob = (bag, mat, r, h, x, y, z, seg = 5) => bag.add(mat, lathe([[0.001, 0], [r, 0.45 * h], [0.001, h]], Math.min(seg, 5), null, x, y, z));
 
 /** The bronze tripod cauldron (ding): the round belly, two upright ears, three stout legs. s scales. */
 export function ding(bag, x, y, z, s = 1) {
