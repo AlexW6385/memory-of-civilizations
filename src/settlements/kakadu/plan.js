@@ -2,6 +2,7 @@
 // walls and ceilings, the rock steps to the lookout, boulders at the foot.
 import { MAIN, SMALL, BLOCKS, FLIGHTS, height, rng, inRect, TRACKS, ROUTE } from './layout.js';
 import '../../styles/kakadu/index.js';
+import { faceSpots } from '../../styles/kakadu/outcrop.js';
 
 const E = [];
 E.push({ t: 'ka_rock' }, { t: 'ka_gallery' }, { t: 'ka_steps' });
@@ -18,6 +19,17 @@ E.push({ t: 'ka_rock' }, { t: 'ka_gallery' }, { t: 'ka_steps' });
   }
   // slabs shed from the roof's lip and the piers, lying on the apron where people sit by the camps
   for (const q of [[-5.8, -24.2, 0.8], [5.6, -24.6, 0.75], [-19.5, -23.6, 0.9], [18.5, -24.2, 0.8], [-29.5, -24.5, 1.1], [29.5, -24, 1.0]]) list.push(q);
+  // rock falls: at the foot of each open cleft a heap of the blocks that came out of it, and a slab leaning on the face beside it
+  const rr = rng(405);
+  for (const sp of faceSpots()) {
+    if (sp.kind !== 'cleft') continue;
+    for (let k = 0; k < 4; k++) {
+      const s = k === 0 ? 1.2 + rr() * 0.8 : 0.45 + rr() * 0.8, x = sp.x + (rr() - 0.5) * 4.5, z = sp.z + 1.8 + rr() * 3.2;
+      if (z > -23 || BLOCKS.some((B) => inRect(B.r, x, z, s * 0.6)) || FLIGHTS.some((F) => inRect(F.rect, x, z, 4)) || inRect([MAIN.x0 - 5, MAIN.zb, MAIN.x1 + 5, MAIN.zl + 12], x, z) || inRect([SMALL.x0 - 4, SMALL.zb, SMALL.x1 + 4, SMALL.zl + 10], x, z)) continue;
+      if (list.some((b) => Math.hypot(b[0] - x, b[1] - z) < 1.6 + (b[2] + s) * 0.55)) continue;
+      list.push([x, z, s]);
+    }
+  }
   E.push({ t: 'ka_boulders', list });
 }
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });

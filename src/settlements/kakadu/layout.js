@@ -146,18 +146,3 @@ export function shelterSpots() {
   out.push(['ladder', M.x0 + 26, M.zb + 0.05, 0], ['ladder', S.x0 + 9.5, S.zb + 0.05, 0]);
   return out;
 }
-/** The rock's tops: where plants root in the crevices and on the ledges: [x, z, y]. */
-export function topSpots() {
-  const r = rng(95), out = [];
-  for (const B of BLOCKS) {
-    if (B.slab) continue;
-    const [x0, z0, x1, z1] = B.r, area = (x1 - x0) * (z1 - z0), n = Math.min(14, Math.max(2, Math.round(area / 120)));
-    for (let k = 0; k < n; k++) {
-      const x = x0 + 1.5 + r() * (x1 - x0 - 3), z = z0 + 1.5 + r() * (z1 - z0 - 3);
-      if (BLOCKS.some((C) => C !== B && C.y[1] > B.y[1] - 0.3 && inRect(C.r, x, z, 1.2))) continue;
-      if (FLIGHTS.some((F) => inRect(F.rect, x, z, 1.5)) || onWay(x, z, 3.2)) continue;
-      out.push([x, z, B.y[1], B.m]);
-    }
-  }
-  return out;
-}
