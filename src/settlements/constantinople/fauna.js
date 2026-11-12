@@ -14,7 +14,7 @@ const flights = [
   { kind: 'swallow', n: 4, loop: { c: [-240, 200], a: [70, 40], rot: 0.8 }, y: [14, 40], speed: 7 },
 ];
 const perches = [];
-const spots = [[-30, 150], [-14, 160], [0, 135], [-45, 170], [-10, 120], [-80, 108], [-120, 112], [-175, 90], [-182, 60], [-230, 40], [-280, 36], [FORUM.c[0] + 10, FORUM.c[1] + 12], [FORUM.c[0] - 12, FORUM.c[1] - 10], [-140, 20], [-20, 60]];
+const spots = [[-30, 150], [-14, 160], [0, 135], [-45, 170], [-10, 120], [-80, 108], [-120, 112], [-175, 90], [-182, 60], [-230, 40], [-280, 36], [FORUM.c[0] + 10, FORUM.c[1] + 12], [FORUM.c[0] - 12, FORUM.c[1] - 10], [-140, 20], [-20, 60], [-12, 48], [6, 64], [-30, 72], [14, 86], [-24, 94], [4, 100], [24, 62], [-8, 58], [32, 80], [-40, 90]];
 for (const [x, z] of spots) perches.push({ kind: 'sparrow', x, z, y: ground.height(x, z), rot: (x * 7) % 3, range: [1.8, 1.6] });
 // pigeons and sparrows on the lanes' paving at the row ends near the core, and on the garden walls
 { let n = 0; for (const l of lots()) { if (l.abut.e || Math.hypot(l.rect[2], l.rect[3]) > 260 || (l.seed % 3)) continue; const x = l.rect[2] + 2.5, z = (l.rect[1] + l.rect[3]) / 2 + (l.seed % 5) - 2; perches.push({ kind: l.seed % 2 ? 'sparrow' : 'sparrow', x, z, y: ground.height(x, z), rot: (l.seed % 7) / 2, range: [2.2, 1.2] }); if (++n > 40) break; } }

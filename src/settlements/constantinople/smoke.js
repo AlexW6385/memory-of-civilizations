@@ -22,6 +22,7 @@ export function emitters() {
   for (const k of ['tavern', 'bakery']) if (S[k]) E.push({ p: [S[k].rect[0] + 3.2, S[k].y + 11.6, S[k].rect[1] + 3], kind: 'kitchen', seed: 31 + k.length }, { p: [S[k].rect[0] + 3.4, S[k].y + 11.6, S[k].rect[1] + 3.2], kind: 'steam', thr: 0.1, seed: 41 + k.length });
   const ch = S.chapel.rect; E.push({ p: [ch[2] - 6, S.chapel.y + 9.9, (ch[1] + ch[3]) / 2], kind: 'incense', thr: 0.1, seed: 23 });
   E.push({ p: [-6, 1.0, 40], kind: 'incense', thr: 0, seed: 24 }, { p: [6, 1.0, 40], kind: 'incense', thr: 0, seed: 25 });
+  E.push({ p: [-33, 2.2, 52.5], kind: 'kitchen', seed: 51 }, { p: [16, 2.2, 52.5], kind: 'kitchen', seed: 52 });          // the cook-stalls of the forecourt
   const r = rng(562);
   for (const st of MESE_STOAS) if (st.shops && r() < 0.7) {
     const [ax, az] = st.a, [bx, bz] = st.b, L = Math.hypot(bx - ax, bz - az), u = [(bx - ax) / L, (bz - az) / L], s = st.side;

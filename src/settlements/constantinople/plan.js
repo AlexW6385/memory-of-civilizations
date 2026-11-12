@@ -60,6 +60,9 @@ export const MESE_STOAS = [
   { a: [-187, 100], b: [-187, 50], side: -1, back: true },
   { a: [-190, 33], b: [-296, 33], side: 1, shops: 5 },
   { a: [-190, 47], b: [-296, 47], side: -1, shops: 5 },
+  // the forecourt south of Hagia Sophia (layout.js FORECOURT): a row of shops under a portico on either side, their doors on the court
+  { a: [-54, 50], b: [-54, 92], side: 1, shops: 5 },
+  { a: [42, 94], b: [42, 50], side: 1, shops: 5 },
 ];
 for (const s of MESE_STOAS) E.push({ t: 'stoa', y: height(...s.a), depth: 5, h: 6, d: 0.62, spacing: 3.8, ...s });
 
