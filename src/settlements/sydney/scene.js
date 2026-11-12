@@ -76,9 +76,10 @@ export function sceneLife() {
   const [ox0, , ox1, oz1] = OPERA.rect, yS = height(100, -190), n = 18;
   for (let i = 0; i < 46; i++) {
     const k = 1 + Math.floor(rand() * (n - 2)), zz = oz1 + OPERA.stair * (1 - k / n) - OPERA.stair / n * 0.55, yy = yS + OPERA.h * (k + 1) / n, x = ox0 + 10 + rand() * (ox1 - ox0 - 20);
+    if (Math.abs(x - 100) < 4) continue;
     person([x, zz], yy, Math.PI + (rand() - 0.5) * 0.5, rand() < 0.75 ? { pose: 'sit_low' } : {});
   }
-  for (let i = 0; i < 16; i++) { const x = ox0 + 8 + rand() * (ox1 - ox0 - 16), z = oz1 + OPERA.stair + 3 + rand() * 7; person([x, z], height(x, z), rand() * 6.28, rand() < 0.5 ? { pose: 'talk' } : {}); }
+  for (let i = 0; i < 16; i++) { const x = ox0 + 8 + rand() * (ox1 - ox0 - 16), z = oz1 + OPERA.stair + 3 + rand() * 7; if (Math.abs(x - 100) < 4) continue; person([x, z], height(x, z), rand() * 6.28, rand() < 0.5 ? { pose: 'talk' } : {}); }
   for (let z = -112; z < -100; z += 5) for (const x of [64, 136]) L.push({ t: 'street_lamp', at: [x, z], y: height(x, z), h: 4.6 });
   for (let x = 62; x <= 140; x += 13) L.push({ t: 'street_lamp', at: [x, oz1 + OPERA.stair + 9], y: height(x, oz1 + OPERA.stair + 9), h: 4.6 });
   // ── the traffic on the Harbour Bridge's deck (eight lanes, left-hand: the west four run north) and on the Cahill Expressway ──
