@@ -2,7 +2,8 @@
 // before the throne and at the gates. The engine part is src/engine/smoke.js (one draw call); positions from the layout.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, WENCHANG, MARKET, TOWER, lots as townLots } from './layout.js';
+import { RADIUS, WENCHANG, MARKET, TOWER, SPARROW, ICE, TIGER, stairRect, zOf, lots as townLots } from './layout.js';
+import { COMPOUND } from './dressing.js';
 import { ground } from './ground.js';
 
 const ID = 'wei-ye';
@@ -23,6 +24,11 @@ export function emitters() {
   // incense: before the throne, in the hall's aisle, in the Sparrow's ground storey, at the palace gate
   const dz = WENCHANG.z0, f = WENCHANG.floor;
   for (const [x, y, z, thr] of [[-2.8, f + 1.8, dz + 4.3, 0], [2.8, f + 1.8, dz + 4.3, 0], [-4.6, f + 0.8, WENCHANG.z1 - 2.5, 0.1], [4.6, f + 0.8, WENCHANG.z1 - 2.5, 0.1], [TOWER.c[0], TOWER.floor + 1.2, TOWER.c[1] - 2, 0], [0, 1.0, -10, 0.2]]) E.push({ p: [x, y, z], kind: 'incense', thr, seed: Math.round(x * 3 + z) });
+  // the compound's cookhouses (the barracks' ovens), the braziers at the terraces' stairs and the palace's forecourt
+  for (const [x, z] of [[190, -36], [208, -38], [200, -26]]) E.push({ p: [x, 4.4, z], kind: 'kitchen', thr: 0, seed: Math.round(x) });
+  void COMPOUND; void SPARROW;
+  for (const t of [ICE, SPARROW, TIGER]) { const st = stairRect(t), zc = zOf(t); for (const sg of [-1, 1]) E.push({ p: [st[2] + 1.8, 1.1, zc + sg * 5.4], kind: 'incense', thr: 0.2, seed: Math.round(zc + sg) }); }
+  for (const sg of [-1, 1]) for (const z of [-14, -22, -30]) E.push({ p: [sg * 7.8, 1.1, z], kind: 'incense', thr: 0.3, seed: Math.round(z * sg) });
   return E;
 }
 

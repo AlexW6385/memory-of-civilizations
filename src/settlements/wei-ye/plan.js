@@ -66,7 +66,7 @@ const rooms = [
 ];
 // the way in: across the garden, up the stair on the east face, over the crown, up to the dais, into the tower by its east door
 const sx = faceX(SPARROW);
-const walks = [[[-100, zOf(SPARROW)], [-141, zOf(SPARROW)], [sx + 1, zOf(SPARROW)], [-172, zOf(SPARROW)], [-180, zOf(SPARROW)], [-186, zOf(SPARROW)], [-192, zOf(SPARROW)], [tx, zOf(SPARROW)]]];
+const walks = [[[-100, zOf(SPARROW)], [-141, zOf(SPARROW)], [sx + 1, zOf(SPARROW)], [-172, zOf(SPARROW)], [-180, zOf(SPARROW)], [-186, zOf(SPARROW)], [-192, zOf(SPARROW)], [tx + 3, zOf(SPARROW)], [tx + 5.5, tz - 5.0], [tx + 6.8, tz - 6.55], [tx + 0.8, tz - 6.55], [tx - 1.5, tz - 4.0], [tx - 3, tz]]];
 walks[0].y0 = 0;
 
 export const sparrow = {

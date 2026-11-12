@@ -39,6 +39,11 @@ function people() {
     if (cols.some(([cx, cz]) => Math.hypot(cx - x, cz - z) < 1.9) || Math.abs(x - W.cx) > W.w / 2 - 3 || rand() < 0.15) continue;
     fig([x, z + 0.3], 0, { y: f + 0.05, pose: 'seiza', cloth: pick(rand, ['cloth_blue', 'cloth_indigo', 'cloth_brown', 'cloth_green', 'cloth_red']), cloth2: 'cloth_white', hat: 'cap', over: 'sash', beard: rand() < 0.5 ? 1 : 0 });
   }
+  // the poets of the loft above it (the second storey), at their mats and the zither
+  for (let k = 0; k < 3; k++) for (const s of [0, 1]) if (rand() < 0.8) fig([TOWER.c[0] - 5.0 + k * 3.0, TOWER.c[1] + 0.6 + s * 3.4 + 0.3], 0, { y: TOWER.floor + 4.9 + 0.05, pose: 'seiza', cloth: pick(rand, ['cloth_white', 'cloth_blue', 'cloth_grey', 'cloth_indigo']), cloth2: 'cloth_white', hat: 'cap', over: 'sash', beard: rand() < 0.4 ? 1 : 0 });
+  // the garden: scholars at the pond looking at the ships, the musicians at the pavilion, attendants at the stair's foot
+  for (const [x, z, r0] of [[-128, -132, 2.6], [-124, -131.5, 2.8], [-100, -131.6, 3.3], [-93, -128, 3.5], [-104, -92, 1.5], [-102, -84, -1.5]]) fig([x, z], r0, { cloth: pick(rand, ['cloth_white', 'cloth_blue', 'cloth_indigo']), hat: 'cap', over: 'sash', pose: 'stand' });
+  for (let k = 0; k < 3; k++) fig([POND[2] + 5.0 + k * 1.1, POND[1] + 8.6], Math.PI, { y: 0, pose: 'seiza', cloth: pick(rand, ['cloth_red', 'cloth_blue', 'cloth_white']), cloth2: 'cloth_white', hat: 'cap', over: 'sash' });
   // the poets at their mats in the Sparrow's ground storey (the same places as src/styles/wei/terrace.js), and standing on the dais
   const [tx, tz] = TOWER.c, tf = TOWER.floor;
   for (const s of [-1, 1]) for (let k = 0; k < 3; k++) if (rand() < 0.8) fig([tx - 3.6 + k * 3.6, tz + s * 4.6 + 0.3], 0, { y: tf + 0.05, pose: 'seiza', cloth: pick(rand, ['cloth_white', 'cloth_blue', 'cloth_grey', 'cloth_indigo']), cloth2: 'cloth_white', hat: 'cap', over: 'sash', beard: rand() < 0.4 ? 1 : 0 });
