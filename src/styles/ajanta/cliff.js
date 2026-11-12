@@ -6,6 +6,8 @@ import { subtractRects } from '../../core/build.js';
 import { XF, ROCK, ZW, ZOUT, WX1, FLOOR, LEDGE, STAIR, FACES, CAVES, C1, rng } from '../../settlements/ajanta/layout.js';
 import { vihara, viharaGeo, chaitya, chaityaGeo, cellHall, cellGeo, hole } from './caves.js';
 import { Panel, PAL, wall, buddhaM, figM, lotusBand } from './paint.js';
+import { ledgeFoot, cliffSkin } from './rockface.js';
+import { facades } from './facades.js';
 
 const MATS = ['sandstone_relief', 'sandstone_carved', 'sandstone_relief', 'rubble'];   // the basalt's warm brown-grey, not a grey wall
 const STONE = 'sandstone_dressed', PLASTER = 'plaster_ochre';
@@ -95,11 +97,8 @@ export function cliff(el, ctx) {
   // the ledge before the painted caves and the stair up to it
   {
     const { x0, x1, z0, z1 } = LEDGE;
-    bag.add('rubble', box(x0, -0.7, z0, x1, FLOOR[1], z1));
-    bag.add('sandstone_carved', box(x1 - 0.5, FLOOR[1] - 1.1, z0, x1 + 0.2, FLOOR[1], z1));
     col.floor([x0, z0, x1, z1], FLOOR[1]);
-    // the foot of the ledge: its front stepped back in a few ragged blocks
-    for (let z = z0; z < z1; z += 3 + rand() * 4) { const w = 2 + rand() * 3; bag.add('rubble', box(x1 - 0.3, -0.75, z, x1 + 0.3 + rand() * 0.7, 1.2 + rand() * 3.5, Math.min(z1, z + w))); }
+    ledgeFoot(ctx);
   }
   {
     const { x0, x1, z0, z1 } = STAIR, n = Math.round((FLOOR[1] - FLOOR[0]) / 0.17), L = (z1 - z0) / n;
@@ -110,6 +109,8 @@ export function cliff(el, ctx) {
   vihara(ctx, XF, c1.s, y1);
   chaitya(ctx, XF, c19.s, y1);
   cellHall(ctx, XF, c12.s, y1);
+  facades(ctx);
+  cliffSkin(ctx, holes);
   void C1;
   // the weathering of the rock: iron-red streaks and pale salt under the cave mouths and ledges (thin pieces on the face)
   const r2 = rng(19);

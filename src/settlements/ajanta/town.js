@@ -69,7 +69,7 @@ export async function town() {
   monk([-62.8, C12.z + 2.2], y1 + 0.45, 0, { pose: 'cross' });
   // the ledge: monks, pilgrims and offerings
   for (const [z, rot] of [[-36, -Math.PI / 2], [3, Math.PI / 2], [12, -Math.PI / 2], [38, Math.PI / 2]]) monk([XF + 3.4, z], y1, rot, { pose: 'stand', carry: 'staff' });
-  for (const [z, rot] of [[-45, 0.5], [8, 2.5], [30, 3.8], [52, -2.0]]) lay([XF + 4.2 + rand(), z], y1, rot, { pose: rand() < 0.5 ? 'pray' : 'talk' });
+  for (const [z, rot, x] of [[-45, 0.5, -57.5], [8, 2.5, -57.6], [52, -2.0, -57.6]]) lay([x + rand() * 0.1, z], y1, rot, { pose: rand() < 0.5 ? 'pray' : 'talk' });
   monk([XF + 2.0, 6], y1, -Math.PI / 2, { pose: 'cross', arms: 'pray' });
   for (const z of [-8, 16]) T.push({ t: 'pot', kind: 'water_pot', n: 3, at: [XF + 2.2, z], y: y1, seed: Math.round(z) });
   for (const z of [-44, -10, 29]) T.push({ t: 'basket', at: [XF + 4.6, z], y: y1, rot: z, seed: Math.round(z) });
@@ -128,17 +128,17 @@ export async function town() {
   worker([riverX(-30) + 12.5, -30], 0, 2.4, { pose: 'stand', carry: 'staff' });
   for (let k = 0; k < 4; k++) T.push({ t: 'animal', kind: 'goat', at: [riverX(-30) + 10.5 + (k % 2) * 1.5, -33 + k * 1.2], y: 0, rot: 1.5 + k, seed: 85 + k, graze: k % 2 === 0 });
   // across the river: the washing place's women are GHATS' own; the pilgrims climbing the stair to the ledge (the ramp's height under each)
-  { const sx = XF + 7.2; for (const [z, k] of [[-55.2, 0], [-51.8, 1], [-47.6, 2], [-44.2, 3]]) { const y = (z + 57) / 15 * 9; (k % 2 ? lay : monk)([sx, z], y, 0, { pose: 'stand', carry: k === 1 ? 'basket' : k === 3 ? 'staff' : 'none' }); } }
+  { const sx = XF + 8.1; for (const [z, k] of [[-55.2, 0], [-51.8, 1], [-47.6, 2], [-44.2, 3]]) { const y = (z + 57) / 15 * 9; (k % 2 ? lay : monk)([sx, z], y, 0, { pose: 'stand', carry: k === 1 ? 'basket' : k === 3 ? 'staff' : 'none' }); } }
   // before Cave 1's porch: the faithful coming with offerings, two lay friends in talk, a flute and a lute at the ledge's edge, a monk at his meditation in the porch, three standing in its pillars
-  lay([-56.6, -33.2], y1, -Math.PI / 2, { pose: 'stand', carry: 'basket' }); woman([-56.3, -31.4], y1, -Math.PI / 2, { pose: 'stand', carry: 'pot', arms: 'head' }); monk([-57.0, -29.4], y1, -Math.PI / 2, { pose: 'stand', carry: 'staff' });
-  lay([-57.0, -20.4], y1, Math.PI / 2 + 0.3, { pose: 'talk' }); monk([-58.2, -19.2], y1, -Math.PI / 2 - 0.3, { pose: 'talk' });
-  monk([-56.7, -12.6], y1, -Math.PI / 2, { pose: 'cross', carry: 'flute' }); lay([-56.1, -14.1], y1, -Math.PI / 2, { pose: 'cross', carry: 'lute' });
+  lay([-58.0, -33.2], y1, -Math.PI / 2, { pose: 'stand', carry: 'basket' }); woman([-58.0, -31.4], y1, -Math.PI / 2, { pose: 'stand', carry: 'pot', arms: 'head' }); monk([-58.3, -29.4], y1, -Math.PI / 2, { pose: 'stand', carry: 'staff' });
+  lay([-58.0, -20.4], y1, Math.PI / 2 + 0.3, { pose: 'talk' }); monk([-58.2, -19.2], y1, -Math.PI / 2 - 0.3, { pose: 'talk' });
+  monk([-58.9, -13.2], y1, -Math.PI / 2, { pose: 'cross', carry: 'flute' }); lay([-58.9, -14.6], y1, -Math.PI / 2, { pose: 'cross', carry: 'lute' });
   monk([-62.6, -23.9], y1, Math.PI / 2, { pose: 'cross', arms: 'pray' });
   for (const [z, rot] of [[-33.6, 0.4], [-29.6, -0.3], [-21.8, 0.2]]) lay([-62.2, z], y1, Math.PI / 2 + rot, { pose: 'stand' });
   monk([-62.0, -17.8], y1, Math.PI / 2, { pose: 'stand', carry: 'staff' });
   // before Cave 19: a pair of monks come from the cell, pilgrims at the chaitya's porch, a woman with a lamp-oil jar
-  monk([-56.4, 17.0], y1, Math.PI, { pose: 'stand' }); lay([-57.0, 19.2], y1, -Math.PI / 2, { pose: 'talk' }); monk([-57.6, 20.4], y1, -Math.PI / 2 + 0.4, { pose: 'talk' });
-  woman([-57.3, 30.0], y1, Math.PI / 2, { pose: 'stand', carry: 'pot', arms: 'head' }); lay([-58.9, 27.0], y1, Math.PI / 2, { pose: 'kneel', arms: 'pray' }); lay([-58.4, 21.6], y1, Math.PI / 2, { pose: 'kneel', arms: 'pray' });
+  monk([-58.0, 17.0], y1, Math.PI, { pose: 'stand' }); lay([-58.0, 19.2], y1, -Math.PI / 2, { pose: 'talk' }); monk([-58.5, 20.4], y1, -Math.PI / 2 + 0.4, { pose: 'talk' });
+  woman([-58.0, 30.0], y1, Math.PI / 2, { pose: 'stand', carry: 'pot', arms: 'head' }); lay([-58.9, 27.0], y1, Math.PI / 2, { pose: 'kneel', arms: 'pray' }); lay([-58.4, 21.6], y1, Math.PI / 2, { pose: 'kneel', arms: 'pray' });
   T = V;
   // the village: the well and its women, hearths, grain, wood, fowl, goats and a zebu with a cart
   const [wx, wz] = WELL;
