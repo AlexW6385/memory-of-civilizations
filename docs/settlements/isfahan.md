@@ -162,3 +162,6 @@ Sources added:
 - [Masjid-i Imam (Isfahan) — Archnet](https://archnet.org/sites/1622)
 - [Traditional Persian residential architecture — Wikipedia](https://en.wikipedia.org/wiki/Traditional_Persian_residential_architecture)
 - [Bazaar of Isfahan — Iran Chamber Society](https://www.iranchamber.com/architecture/articles/bazaar_of_isfahan5.php)
+
+## 20. The maidan on a market day (fix pass)
+- [stated] The Naqsh-e Jahan was a working market as well as the polo ground and the shah's parade ground: Chardin, Della Valle and Kaempfer describe stalls, tents and goods spread on the square, hawkers, storytellers and entertainers, with the field cleared for polo and reviews. [inferred] Built as four rows of awninged stalls across the field with an aisle down the axis to the Shah Mosque's portal, goods mats between them, carts, laden donkeys and camels at the sides, grooms with horses, a storyteller's circle near the arrival, and the arcades' fronts dressed bay by bay (goods on the walk, hung cloth, jars, bales).
