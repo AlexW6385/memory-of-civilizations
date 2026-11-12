@@ -20,6 +20,6 @@ for (const l of lots()) {
   const [x0, z0, x1, z1] = l.rect, st = l.kind === 'house' ? l.storeys : 1, x = x0 + (x1 - x0) * (0.3 + 0.4 * ((l.seed % 7) / 7)), z = z0 + (z1 - z0) * (0.3 + 0.4 * ((l.seed % 11) / 11));
   sp(x, z, l.y + st * 2.95 + 0.42);
 }
-sp(-100, 7, GATE_Y + 6.2); sp(-96, -7, GATE_Y + 7.0);
+sp(-125.8, -5.0); sp(-119.8, 5.6); sp(-100, 7, GATE_Y + 6.2); sp(-96, -7, GATE_Y + 7.0);
 flights.push({ kind: 'swallow', n: 6, loop: { c: [-120, 0], a: [50, 30], rot: 0.05 }, y: [6, 14], speed: 9 }, { kind: 'crow', n: 2, loop: { c: [-150, -40], a: [60, 40], rot: 0.5 }, y: [25, 45], speed: 8 });
 export default { fish, flights, perches };

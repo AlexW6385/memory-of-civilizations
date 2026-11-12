@@ -15,7 +15,7 @@ const flights = [
 ];
 const perches = [];
 // sparrows on the Way, in the Agora, by the fountain, in the Kerameikos lane, on the summit
-const spots = [[-255, -210], [-240, -215], [-225, -195], [-250, -170], [-262, -150], [-210, -160], [-195, -180], [-190, -128], [-176, -121], [-236, -118], [-200, -108], [-215, 20], [-290, 62], [-148, 2], [-120, 4], [-60, -10], [-12, 4]];
+const spots = [[-255, -210], [-240, -215], [-225, -195], [-250, -170], [-262, -150], [-210, -160], [-195, -180], [-190, -128], [-176, -121], [-236, -118], [-200, -108], [-215, 20], [-290, 62], [-148, 2], [-120, 4], [-60, -10], [-12, 4], [66, 21.5], [80.6, 21], [86, 16.5], [92, 24], [104, 30], [61.5, 31], [96, 12]];
 for (const w of WORKSHOPS) spots.push([w.yardMid[0], w.yardMid[1]]);
 for (const [x, z] of spots) perches.push({ kind: 'sparrow', x, z, y: ground.height(x, z), rot: (x * 7) % 3, range: [1.8, 1.6] });
 // house sparrows on the lanes before the houses nearest the visitor's ways, swallows skimming the longest lanes between the roofs

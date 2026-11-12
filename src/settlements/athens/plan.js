@@ -7,6 +7,7 @@ import { ACRO, AGORA, KOLONOS, NCOURT, height, pathAt, WAY } from './layout.js';
 import { subtractRects } from '../../core/build.js';
 import parthenonPlan from '../../buildings/parthenon/plan.js';
 import { southSlope, summitSanctuaries } from './slope.js';
+import { summitAltar } from './summit.js';
 
 const T = ACRO.top, E = [];
 // ── the Propylaia (Mnesikles, 437–432; docs/settlements/athens.md §4b) ──
@@ -248,7 +249,7 @@ for (const z of [-221, -218, -215, -212]) E.push({ t: 'herm', at: [wayX(z) + 7, 
 }
 
 // the summit's smaller sanctuaries and the south slope (docs/settlements/athens.md §4e–§4f)
-E.push(...summitSanctuaries(T + 0.04), ...southSlope());
+E.push(...summitSanctuaries(T + 0.04), ...summitAltar(), ...southSlope());
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('acropolis', [-108, -55, 128, 55], T + 0.04, 'open'), room('agora', AGORA, 0, 'open')];

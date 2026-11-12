@@ -115,6 +115,12 @@ All [stated] items from Archnet site 3780.
 - **Vaults:** trifoliate — "One such barrel vault is supported by quarter vaults resulting in a ribbed trifoliate shape and set into the walls by curved pendentives" [stated]; ours `trefoilVault`: in section two quarter lobes from the long walls to cusps and a round middle lobe, ribs along the cusps. Octagonal — "the cornice line is shaped into an octagon by flat pendentives" [stated]; ours `octPendentives`: a flat triangle across each corner at the springing of a barrel vault. Conical — ours a steep dome (rise 1.6 × radius) on pendentives.
 - **Walkability:** the declared rooms now include the second suite's ante-room and main room, the South Court's upper terrace and its upper rooms; all reachable (`tools/plan-check.mjs kilwa`). The manager's house's upper storey still has no stair.
 
+## 19. The Great Mosque's hall furnished (deepening pass, 2026-11-12)
+
+- **Furnishing of the hall** [inferred: the coast's mosques are known from their plans and bowl-decorated vaults, not from furniture]: the imam's carpet of red, indigo and ochre before the mihrab; small rugs by the pillars; a Qur'an stand (rehal) with its open book at about two pillars in five, outside the central aisle (`mosqueStands` in the swahili style, 29 of them), most with a reader sitting at them; a water jar on a tripod with its cup, and a row of sandals, inside each south door; an alms chest by the door nearest the arrival.
+- **People** [inferred]: a teacher with a half circle of boys reciting on a mat in a side bay, two men resting in the shade of a bay, a man at the jar; outside, a Qur'an school in the shade of the palms at the mosque's south-east corner and a water-seller at the north door. No reader stands within 7 m of the arrival in the aisle.
+- **Still below Suzhou:** the hall's walls carry no inscriptions or niches; the mats are one pattern; the manager's house's upper storey has no stair; Husuni Kubwa's court life is thinner than the town's.
+
 ## Sources (2026-11-06)
 
 - [Husuni Kubwa — Archnet](https://archnet.org/sites/3780)

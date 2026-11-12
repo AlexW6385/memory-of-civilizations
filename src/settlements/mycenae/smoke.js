@@ -23,6 +23,8 @@ export function emitters() {
   const M = PALACE.megaron;
   E.push({ p: [M.x0 + 6.4 + 0.9 + 3.7 + 0.9 + 6, PAL_Y + 7.6, M.ax], kind: 'incense', thr: 0, seed: 21 });
   E.push({ p: [43.5, PAL_Y + 0.8, 3], kind: 'incense', thr: 0.1, seed: 22 });
+  // the drovers' cooking fire at the caravan halt on the approach road (town.js verge())
+  E.push({ p: [-124.2, ground.height(-124.2, -5.6) + 0.35, -5.6], kind: 'kitchen', thr: 0, seed: 31 });
   void ground;
   return E;
 }
