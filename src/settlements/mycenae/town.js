@@ -212,7 +212,7 @@ function nearLane(x, z) {
 }
 function laneWalls() {
   const E = [], rand = rng(606), courts = lots().filter((l) => l.court).map((l) => l.court);
-  const free = (x, z) => !(inHouse(x, z, 1.1) || courts.some((c) => x > c[0] - 1.2 && x < c[2] + 1.2 && z > c[1] - 1.2 && z < c[3] + 1.2) || nearLane(x, z) || sdCircuit(x, z) < 8
+  const free = (x, z) => !((x > -136 && x < -111 && Math.abs(z) < 12) || inHouse(x, z, 1.1) || courts.some((c) => x > c[0] - 1.2 && x < c[2] + 1.2 && z > c[1] - 1.2 && z < c[3] + 1.2) || nearLane(x, z) || sdCircuit(x, z) < 8
     || Math.hypot(x, z) > RADIUS - 24 || (x > TREAS.x0 - 10 && x < TREAS.xf + 6 && Math.abs(z - TREAS.z) < 16) || Math.hypot(x - TREAS.x, z - TREAS.z) < 30);
   LANES.forEach((lane, li) => {
     for (let i = 0; i < lane.length - 1; i++) {
