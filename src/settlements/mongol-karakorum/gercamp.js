@@ -8,7 +8,7 @@ const g = G[OPEN];
 E.push({ t: 'tug', at: [CAMPS.sw[0] - 30, CAMPS.sw[1] - 16], h: 6.5 });
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('ger', [g.c[0] - g.r + 0.3, g.c[1] - g.r + 0.3, g.c[0] + g.r - 0.3, g.c[1] + g.r - 0.3], 0, 'hall'), room('camp', [CAMPS.sw[0] - 44, CAMPS.sw[1] - 24, CAMPS.sw[0] + 44, CAMPS.sw[1] + 30], 0, 'open')];
-const walks = [[[g.c[0], g.c[1] + g.r + 6], [g.c[0], g.c[1] + g.r + 1], [g.c[0], g.c[1] + 1.2], [g.c[0] + 1.6, g.c[1] - 1.4]]];
+const walks = [[[g.c[0], g.c[1] + g.r + 6], [g.c[0], g.c[1] + g.r + 1], [g.c[0], g.c[1] + 1.6], [g.c[0] + 1.5, g.c[1] + 0.8], [g.c[0] + 1.6, g.c[1] - 1.4]]];
 walks[0].y0 = 0;
 export const gerCamp = {
   id: 'karakorum-ger-camp',

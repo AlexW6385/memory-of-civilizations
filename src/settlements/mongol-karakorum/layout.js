@@ -86,6 +86,13 @@ export const COURTS = (() => {
   SECRETARIES.forEach((q, i) => add(q, i ? 'n' : 's', 77 + i));
   return out;
 })();
+/** Where the kitchen hearth of a courtyard house stands (world x, z) and the height of its roof: for the smoke. { rect, gate, floors } */
+export function hearthOf({ rect, gate, floors = 1 }) {
+  const [x0, z0, x1, z1] = rect, T = 0.45, k = 0.44;
+  const dd = gate === 's' ? [x0 + T, z0 + T, x1 - T, z0 + (z1 - z0) * k] : [x0 + T, z1 - (z1 - z0) * k, x1 - T, z1 - T];
+  const W = dd[2] - dd[0], D = dd[3] - dd[1], pu = Math.round(W * 0.62), u = pu + 1.1;
+  return { p: [dd[0] + u, gate === 's' ? dd[1] + 0.95 : dd[3] - 0.95], y: (floors > 1 ? 6.2 : 3.6) + 0.6, D };
+}
 /** The wells of the quarters. */
 export const WELLS = [[-70, 12], [-20, -40], [30, 40], [-100, -45]];
 /** Everything built in the town that a person cannot walk through (rects, with a margin test): for placing life. */

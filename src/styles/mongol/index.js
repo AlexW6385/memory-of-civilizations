@@ -11,13 +11,14 @@ import { silverTree, tug, tortoise, kiln, tileStack, forge, pen, cofferCart } fr
 import { earthWall, townGate, cornerTower, brickWall, gateHall, mosque, church } from './walls.js';
 import { mudCompound } from './house.js';
 import { shopRow } from './shops.js';
+import { courtPath, hitch, cellar, shed } from './court.js';
 
 registerStyle('mongol', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
     ger, palace_hall: palaceHall, tile_hall: tileHall, great_hall: greatHall, silver_tree: silverTree, tug, tortoise, kiln, tile_stack: tileStack, forge, pen, coffer_cart: cofferCart,
-    earth_wall: earthWall, town_gate: townGate, corner_tower: cornerTower, brick_wall: brickWall, gate_hall: gateHall, mud_compound: mudCompound, mosque, church, shop_row: shopRow,
+    earth_wall: earthWall, town_gate: townGate, corner_tower: cornerTower, brick_wall: brickWall, gate_hall: gateHall, mud_compound: mudCompound, mosque, church, shop_row: shopRow, court_path: courtPath, hitch, cellar, shed,
   },
   objects: {},
 });
