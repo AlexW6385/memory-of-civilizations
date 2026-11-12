@@ -124,9 +124,9 @@ export function streets() {
       else LT(tileOf(at[0], at[1])).push({ t: 'animal', kind: 'cat', at, y: yg + 0.04, rot: rand() * 6, seed: Math.floor(rand() * 1e6) });
     }
     // washing across the lane between the upper floors, where the lane is wide enough for the balconies and a line
-    if (opp && gap > 2.4 && l.kind === 'terrace' && rand() < 0.28) {
+    if (opp && gap > 3.4 && l.kind === 'terrace' && rand() < 0.4) {
       const mid = onFace(l.rect, f, len / 2 + (rand() - 0.5) * (len * 0.4), gap / 2);
-      LT(tileOf(mid[0], mid[1])).push({ t: 'wash_line', at: mid, y: l.y + 0.5 + 3.5 + 1.0, rot: f === 'n' || f === 's' ? Math.PI / 2 : 0, len: gap + 0.5, emb: [0.2, 0.2], seed: Math.floor(rand() * 1e6) });
+      LT(tileOf(mid[0], mid[1])).push({ t: 'wash_line', at: mid, y: l.y + 0.5 + 3.5 + 1.9, rot: f === 'n' || f === 's' ? Math.PI / 2 : 0, len: gap + 0.5, emb: [0.2, 0.2], seed: Math.floor(rand() * 1e6) });
     }
   }
   // ── the people at the shops: standing, talking in twos, looking in the windows ──────────────────────────────────────

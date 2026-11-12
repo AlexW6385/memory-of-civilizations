@@ -84,9 +84,9 @@ export function rocksTerrace(el, { bag, col, lights }) {
     // eye-level dressing of the front (docs §5b): a downpipe with its rainwater head at the party wall, pots with ferns and geraniums on the step,
     // a milk crate and bottles, a boot scraper, a brass house number and knocker, a canvas blind over the parlour window, a birdcage
     {
-      const dpU = i % 2 ? u0 + fw - 0.12 : u0 + 0.12;
-      bag.add('iron_galv', B(dpU - 0.05, dpU + 0.05, -0.1, 0, y + 0.5, top - 0.3)); bag.add('iron_galv', B(dpU - 0.11, dpU + 0.11, -0.16, 0, top - 0.7, top - 0.3));
-      for (const yy of [y + 1.6, y + 3.4, y + 5.4]) bag.add('iron', B(dpU - 0.07, dpU + 0.07, -0.12, 0.01, yy, yy + 0.04));
+      const dpU = i % 2 ? u0 + fw : u0;
+      bag.add('iron_galv', B(dpU - 0.045, dpU + 0.045, -0.13, 0.02, y + 0.5, top - 0.3)); bag.add('iron_galv', B(dpU - 0.11, dpU + 0.11, -0.19, 0.02, top - 0.7, top - 0.3));
+      for (const yy of [y + 1.6, y + 3.4, y + 5.4]) bag.add('iron', B(dpU - 0.07, dpU + 0.07, -0.145, 0.02, yy, yy + 0.04));
       if (!ent) {
         for (const [k, du] of [[0, -0.1], [1, 1.1]]) if (rand() < 0.55) {
           const p = W(da + du, -0.22, y + 0.5), fern = rand() < 0.5;
@@ -96,10 +96,10 @@ export function rocksTerrace(el, { bag, col, lights }) {
         }
         if (rand() < 0.22) { for (const du of [0.2, 0.34]) { const p = W(db + 0.05 + (du - 0.2), -0.2, y + 0.5); bag.add('glass_outer', lathe([[0.04, 0], [0.04, 0.16], [0.02, 0.22], [0.02, 0.27], [0.001, 0.27]], 8, null, p[0], p[1], p[2])); } bag.add('wood_painted', B(db + 0.0, db + 0.45, -0.28, -0.12, y + 0.5, y + 0.58)); }
         bag.add('iron', B(db + 0.18, db + 0.34, -0.12, -0.02, y + 0.5 + 0.0, y + 0.54));
-        bag.add('gilt_bronze', B(da + 0.45, da + 0.55, PR - 0.15, PR - 0.12, y + 2.0, y + 2.1)); bag.add('gilt_bronze', B(da + 0.4, da + 0.6, PR - 0.15, PR - 0.12, y + 1.45, y + 1.55));
+        bag.add('gilt_bronze', B(da + 0.45, da + 0.55, PR - 0.17, PR - 0.13, y + 2.0, y + 2.1)); bag.add('gilt_bronze', B(da + 0.4, da + 0.6, PR - 0.17, PR - 0.13, y + 1.45, y + 1.55));
       }
       const [wa, wb, wya] = openings[1];
-      if (rand() < 0.3) { const T3 = [W(wa - 0.1, PR - 0.08, wya + 1.85), W(wb + 0.1, PR - 0.08, wya + 1.85), W(wb + 0.1, -0.6, wya + 1.25), W(wa - 0.1, PR - 0.08, wya + 1.85), W(wb + 0.1, -0.6, wya + 1.25), W(wa - 0.1, -0.6, wya + 1.25)]; T(['cloth_ochre', 'cloth_green', 'cloth_red', 'cloth_white'][Math.floor(rand() * 4)], T3); bag.add('iron', rod(W(wa - 0.1, -0.6, wya + 1.25), W(wb + 0.1, -0.6, wya + 1.25), 0.012, 4)); }
+      if (rand() < 0.3) { const T3 = [W(wa - 0.1, PR - 0.08, wya + 1.85), W(wb + 0.1, PR - 0.08, wya + 1.85), W(wb + 0.1, -0.6, wya + 1.25), W(wa - 0.1, PR - 0.08, wya + 1.85), W(wb + 0.1, -0.6, wya + 1.25), W(wa - 0.1, -0.6, wya + 1.25)]; T(['cloth_ochre', 'cloth_green', 'cloth_red', 'cloth_white'][Math.floor(rand() * 4)], T3); bag.add('iron', rod(W(wa - 0.1, -0.6, wya + 1.22), W(wb + 0.1, -0.6, wya + 1.22), 0.012, 4)); }
     }
     // the balcony: cantilevered over the footpath, a cast-iron railing of balusters, a skillion roof on posts
     if (balcony) {
@@ -118,7 +118,7 @@ export function rocksTerrace(el, { bag, col, lights }) {
       // on the balcony: a fern in a pot, a cane chair, washing over the rail
       if (rand() < 0.6) { const p = W(u0 + 0.3, -0.7, by); bag.add('terracotta', lathe([[0.001, 0], [0.13, 0.01], [0.17, 0.3], [0.001, 0.3]], 8, null, p[0], p[1], p[2])); bag.add('palm_leaf', lathe([[0.001, 0.28], [0.26, 0.42], [0.3, 0.66], [0.001, 0.85]], 8, null, p[0], p[1], p[2])); }
       if (rand() < 0.35) bag.add('wicker', B(u0 + fw - 0.9, u0 + fw - 0.4, -0.95, -0.45, by + 0.42, by + 0.47)), bag.add('wicker', B(u0 + fw - 0.9, u0 + fw - 0.4, -0.5, -0.45, by + 0.47, by + 0.95));
-      if (rand() < 0.4) for (let k = 0; k < 2 + Math.floor(rand() * 3); k++) { const uu = u0 + 0.5 + k * 0.45; bag.add(['cloth_white', 'cloth_blue', 'cloth_red', 'cloth_ochre', 'cloth_grey'][Math.floor(rand() * 5)], B(uu, uu + 0.38, -1.19, -1.13, by + 0.3 - rand() * 0.2, by + 1.18)); }
+      if (rand() < 0.4 && (el.lane ?? 0) > 3.4) for (let k = 0; k < 2 + Math.floor(rand() * 3); k++) { const uu = u0 + 0.35 + k * 0.4 + rand() * 0.03; bag.add(['cloth_white', 'cloth_blue', 'cloth_red', 'cloth_ochre', 'cloth_grey'][Math.floor(rand() * 5)], B(uu, uu + 0.33, -1.27, -1.225, by + 0.2 + rand() * 0.1, by + 1.18)); }
       // the side screens of the balcony, boarded
       for (const u of [u0 + 0.04, u0 + fw - 0.04]) bag.add(wall, B(u - 0.04, u + 0.04, -1.2, 0, by, ry + 0.4));
     }

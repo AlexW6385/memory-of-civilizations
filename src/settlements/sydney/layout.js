@@ -136,6 +136,13 @@ export function lots() {
     const [x0, z0, x1, z1] = l.rect, clear = (r) => !LOTS.some((o) => o !== l && o.rect[0] < r[2] && o.rect[2] > r[0] && o.rect[1] < r[3] && o.rect[3] > r[1]);
     l.shops = [['n', [x0, z0 - 3, x1, z0]], ['s', [x0, z1, x1, z1 + 3]], ['w', [x0 - 3, z0, x0, z1]], ['e', [x1, z0, x1 + 3, z1]]].filter(([, r]) => clear(r)).map(([f]) => f).join('');
   }
+  // the width of the lane before each Rocks front (the balconies of the two rows project 1.2 m each: what hangs from them wants room)
+  for (const l of LOTS) {
+    if (l.t !== 'rocks_terrace') continue;
+    const f = l.front, near = f === 'n' ? [l.rect[0], l.rect[1] - 7, l.rect[2], l.rect[1]] : [l.rect[0], l.rect[3], l.rect[2], l.rect[3] + 7];
+    const o = LOTS.filter((q) => q !== l && q.rect[0] < near[2] && q.rect[2] > near[0] && q.rect[1] < near[3] && q.rect[3] > near[1]).map((q) => (f === 'n' ? l.rect[1] - q.rect[3] : q.rect[1] - l.rect[3])).sort((a, b) => a - b)[0];
+    l.lane = o ?? 7;
+  }
   // the two rooms one can walk into (rooms.js, §1f): a tenant's terrace house in the Rocks and an espresso bar near the quay
   const clearR = (l, r) => !LOTS.some((o) => o !== l && o.rect[0] < r[2] && o.rect[2] > r[0] && o.rect[1] < r[3] && o.rect[3] > r[1]);
   const strip = (l, f) => { const [x0, z0, x1, z1] = l.rect; return f === 'n' ? [x0, z0 - 3, x1, z0] : [x0, z1, x1, z1 + 3]; };
