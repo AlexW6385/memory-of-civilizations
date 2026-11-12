@@ -21,6 +21,19 @@ export async function lifePlans() {
   // the room's frame runs from the shop's back wall to its counter line, the floor at the shop's plinth (0.3)
   const ins = interiorShops().filter((s) => s.side === 'w');
   out.push(base('qing-beijing-interiors-shops', 'life', ins.map((s) => ({ t: s.kind === 'teahouse' ? 'bj_teahouse' : s.kind === 'pharmacy' ? 'bj_pharmacy' : 'bj_shop_' + s.kind, rect: [s.front - s.depth, s.z0, s.front - 0.1, s.z1], y: 0.3, front: 'e', H: 3.4, seed: s.seed })), ins.length ? [ins[0].front - 4, (ins[0].z0 + ins[0].z1) / 2] : [0, 295]));
+  // the people in the shops (§30): the shopman at his counter, a customer or two, the storyteller on his platform; `a` across (towards −z), `b` from the back wall
+  {
+    const P2 = [], Fg = (s, a, b, dx, extra = {}) => P2.push({ t: 'figure', at: [s.front - s.depth + b, (s.z0 + s.z1) / 2 - a], y: 0.34 + (extra.up ?? 0), rot: face([dx, 0]), seed: Math.floor(rand() * 1e9), ...FIG, cloth: CL[Math.floor(rand() * CL.length)], pose: 'stand', ...extra });
+    for (const s of ins) {
+      const Dp = s.depth - 0.1, hw = (s.z1 - s.z0) / 2 - 0.5;
+      if (s.kind === 'teahouse') { Fg(s, -(hw - 0.5), 1.6, 1, { up: 0.25, carry: 'staff', pose: 'staff', len: 0.6, staffMat: 'timber' }); Fg(s, hw - 0.4, 2.8, 1); continue; }
+      if (s.kind === 'pharmacy') { Fg(s, 0.6, 1.8, 1, { cloth: 'cloth_white' }); continue; }
+      if (s.kind === 'pawn') { Fg(s, 0.2, Math.max(3.4, Dp * 0.46) - 1.0, 1, { hat: 'cap' }); Fg(s, -hw + 0.5, Dp - 1.7, 1); continue; }
+      Fg(s, hw - 1.2, Dp - 1.4, 1);
+      if (s.kind !== 'lantern') Fg(s, -(hw - 1.0), Dp * 0.45, -1);
+    }
+    out.push({ ...base('qing-beijing-shop-people', 'life', P2), center: [-16, 280], near: 150 });
+  }
   // courtyard houses furnished inside, fitted to the shells (houses.js houseParts): the five lod-0 houses nearest the avenue's mouth
   const near = furnishedHouses(10);
   out.push(base('qing-beijing-interiors-houses', 'life', near.map((h) => ({ t: 'bj_rooms', rect: h.rect, seed: h.seed, courts: h.courts, gate: h.gate, lod: h.lod })), [-40, 235]));
