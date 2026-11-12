@@ -1,6 +1,7 @@
 // Cave 96: the Great Buddha's hall cut in the rock (the Maitreya, 35.5 m, seated, made in 695) and the
 // Nine-Storey building of timber that stands against the cliff over its face (docs/settlements/dunhuang.md §4).
 import { box, lathe, fromTriangles, quad, rod } from '../../core/geom.js';
+import { subtractRects } from '../../core/build.js';
 import { buddha } from '../chinese/index.js';
 import { XF, FLOOR } from '../../settlements/dunhuang/layout.js';
 import { Panel, wallPanel, PAL, tableauM, friezeM, apsaraM, lotusM, thousandM } from './paint.js';
@@ -40,12 +41,19 @@ export function greatCave(ctx, c) {
 }
 
 // ── the building ──
-const LV = (() => {
+export const LV = (() => {
   const L = []; let y = FLOOR[0];
   const hs = [8.2, 5.2, 4.3, 4.2, 4.1, 4.0, 3.9, 3.8, 3.7];
   for (let k = 0; k < 9; k++) L.push({ k, y, h: hs[k], w: 13 - 1.0 * k, d: 9.5 - 0.75 * k }), y += hs[k] + 0.12;
   return L;
 })();
+/** The stair from storey k−1 to k: a strip along the front inside the columns, rising along z (odd k: from the north end, even k: from the south end). */
+export function nineStair(k) {
+  const a = LV[k - 1], b = LV[k], rise = b.y - a.y, L = Math.min(rise * 1.7, 2 * a.w - 3), dir = k % 2 ? 1 : -1;
+  const x1 = XF + b.d - 0.7, x0 = x1 - 1.5, zS = dir > 0 ? -a.w + 1.0 : a.w - 1.0, zT = zS + dir * L;
+  const hole = dir > 0 ? [x0, zT - 2.2 * L / rise, x1, zT] : [x0, zT, x1, zT - 2.2 * L / rise * -1];
+  return { x0, x1, zS, zT, dir, rise, L, y0: a.y, y1: b.y, hole: [hole[0], Math.min(hole[1], hole[3]), hole[2], Math.max(hole[1], hole[3])] };
+}
 export const NINE_TOP = LV[8].y + LV[8].h + 2.5;
 
 /** A tiled eave round three sides of a storey's top: an inner flat deck, a sloping skirt out and down, a fascia, soffit, bells at the corners. */
@@ -85,9 +93,20 @@ export function nineStorey(ctx) {
     const x0 = XF, x1 = XF + s.d, z0 = -s.w, z1 = s.w, y = s.y, top = y + s.h;
     const bays = Math.max(3, Math.round((2 * s.w) / 3.6) | 1), bw = (2 * s.w) / bays;
     // the platform (floor) and the front's columns, a beam under the eave, the infill: plastered panels with lattice windows
-    if (i >= 1 && i <= 3) { bag.add('timber', box(x0 + 3.5, y - 0.12, z0, x1, y, z1)); bag.add('timber', box(x0, y - 0.12, z0, x0 + 3.5, y, -6.8)); bag.add('timber', box(x0, y - 0.12, 6.8, x0 + 3.5, y, z1)); }
-    else if (i > 3) bag.add('timber', box(x0, y - 0.12, z0, x1, y, z1));
+    if (i >= 1) {
+      const holes = [nineStair(i).hole], pieces = [];
+      if (i <= 3) pieces.push([x0 + 3.5, z0, x1, z1], [x0, z0, x0 + 3.5, -6.8], [x0, 6.8, x0 + 3.5, z1]); else pieces.push([x0, z0, x1, z1]);
+      for (const pc of pieces) for (const r of subtractRects(pc, holes)) { bag.add('timber', box(r[0], y - 0.12, r[1], r[2], y, r[3])); col.floor(r, y); }
+      // the stair up from this storey to the next: treads on a pair of strings, a rail on the open side
+      if (i < 8) {
+        const st = nineStair(i + 1), n = Math.round(st.L / 0.3);
+        for (let q = 0; q < n; q++) { const za = st.zS + st.dir * q * st.L / n, zb = st.zS + st.dir * (q + 1) * st.L / n, h = st.y0 + st.rise * (q + 1) / n; bag.add('timber', box(st.x0, h - 0.06, Math.min(za, zb), st.x1, h, Math.max(za, zb))); }
+        col.ramp([st.x0, Math.min(st.zS, st.zT), st.x1, Math.max(st.zS, st.zT)], st.y0 + 0.05, st.y1, st.dir > 0 ? 's' : 'n');
+        for (const xr of [st.x0 - 0.04, st.x1 + 0.04]) bag.add('timber_red', rod([xr, st.y0 + 1.0, st.zS], [xr, st.y1 + 1.0, st.zT], 0.04, 5));
+      }
+    }
     if (i === 0) {
+      { const st = nineStair(1), n = Math.round(st.L / 0.3); for (let q = 0; q < n; q++) { const za = st.zS + st.dir * q * st.L / n, zb = st.zS + st.dir * (q + 1) * st.L / n, h = st.y0 + st.rise * (q + 1) / n; bag.add('timber', box(st.x0, h - 0.06, Math.min(za, zb), st.x1, h, Math.max(za, zb))); } col.ramp([st.x0, Math.min(st.zS, st.zT), st.x1, Math.max(st.zS, st.zT)], st.y0 + 0.05, st.y1, st.dir > 0 ? 's' : 'n'); for (const xr of [st.x0 - 0.04, st.x1 + 0.04]) bag.add('timber_red', rod([xr, st.y0 + 1.0, st.zS], [xr, st.y1 + 1.0, st.zT], 0.04, 5)); }
       bag.add('flagstone', box(x0, y - 0.3, z0 + 0.5, x1 + 0.6, y, z1 - 0.5));
       col.floor([x0, z0 + 0.5, x1 + 0.6, z1 - 0.5], y);
     }

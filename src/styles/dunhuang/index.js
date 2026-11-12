@@ -6,9 +6,10 @@ import '../chinese/index.js';
 import '../../objects/index.js';
 import { cliff } from './cliff.js';
 import { TOWN_ELEMENTS } from './town.js';
+import { WEAR_ELEMENTS } from './wear.js';
 
 registerStyle('dunhuang', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.chinese.elements, dh_cliff: cliff, ...TOWN_ELEMENTS },
+  elements: { ...STYLES.chinese.elements, dh_cliff: cliff, ...TOWN_ELEMENTS, ...WEAR_ELEMENTS },
   objects: {},
 });
