@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v11.0 — every settlement built, and a first deepening pass for all (2026-11-12)
+
+All 94 settlements of the plan now stand on the planet: 39 new ones were built (among them Tang and Han Chang'an, Qin Xianyang with Pit 1, Shang Yinxu, Qufu, Ye, the Hakka tulou, Dunhuang, Shaolin, Muromachi Kyoto, Mohenjo-daro, Ajanta, Nalanda, Bhaktapur, Bagan, Ayutthaya, the Balinese village, Timurid Samarkand, Karakorum, Çatalhöyük, Abbasid Baghdad, Shibam, New Kingdom Thebes, Abu Simbel, Ptolemaic Alexandria, Fez, the Dogon villages, Benin City, Mycenae, Delphi, Manueline Lisbon, Vienna, the Bauhaus at Dessau, Tikal, SG̱ang Gwaay, Brasília, Kakadu and Nan Madol). Then every settlement had a deepening pass toward the Ming Suzhou standard: continuous street fronts, house and shop designs of their own, many furnished rooms to walk into, goods and wear at eye level, life at the water, more people and animals. Nine large cities were brought back inside the geometry budget by larger tiles and shared materials. None of this has been reviewed on screen yet; the visual review and the frame budgets come next.
+
 ## Unreleased — a faster start (2026-11-11)
 
 The first start should take a fraction of the time it did: the loading screen compiles the shaders side by side instead of one after another, the merging of a settlement no longer waits at each step, the ground near rivers is built twice as fast, the far views and the open country's plants come in just after arriving instead of during the start, and each material now needs one shader instead of two.
