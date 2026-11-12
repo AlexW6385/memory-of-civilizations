@@ -74,6 +74,10 @@ export const FLIGHTS = [
 export const CAMPS = [
   { c: [-34, -7], hut: [-38, -9, 0.4], lean: [-29, -4, 0], fire: [-33, -5], rack: [-27, -9], trough: true, grind: true },
   { c: [-11, 14], hut: null, lean: [-16, 16, 0.2], fire: [-11, 14], rack: [-6, 17], fish: true, turtle: true },
+  { c: [-54, -25], hut: [-59, -26, 0.2], lean: [-49, -27, 0.1], fire: [-54, -25], rack: [-47, -23], grind: true },      // under the small shelter's apron
+  { c: [8, -9], hut: null, lean: [3, -10, 0.1], fire: [8, -9], rack: [13, -7], trough: true, turtle: true },            // on the apron, in front of the arrival
+  { c: [-30, 26], hut: [-34, 28, 0.5], lean: [-26, 30, -0.2], fire: [-30, 26], rack: [-24, 25], fish: true },          // the billabong's west bank
+  { c: [57, 10], hut: [61, 13, -0.3], lean: [52, 12, 0.3], fire: [57, 10], rack: [62, 8], grind: true, fish: true },   // by the east hollow
 ];
 /** Paperbark and pandanus round the billabong and the hollows; the termite mounds on the dry edge. Seeded, outside the shelters and tracks. */
 export function groves() {
@@ -84,4 +88,65 @@ export function groves() {
   for (const [cx, cz, a, b] of HOLLOWS) for (let k = 0; k < 3; k++) { const t = r() * 6.28, x = cx + Math.cos(t) * (a + 2.5), z = cz + Math.sin(t) * (b + 2.5); if (clear(x, z, 0)) (k ? pand : paper).push([x, z, k ? 3.5 + r() * 2 : 7 + r() * 3]); }
   for (let k = 0; k < 300 && term.length < 14; k++) { const x = -80 + r() * 160, z = -18 + r() * 90; if (clear(x, z, 0) && poolD(x, z) > 1.4 && !inRect([-70, -20, 45, -10], x, z)) term.push([x, z, 0.6 + r() * 1.2]); }
   return { paper, pand, term };
+}
+
+/** The woodland: stringybark gums on the dry ground and the rock's flanks, cycads and fallen logs; clear of water, camps, tracks, the shelters' mouths and the arrival. */
+export function woodland() {
+  const r = rng(88), gum = [], cyc = [], log = [];
+  const ok = (x, z, m) => Math.hypot(x, z) < RADIUS - 5 && !inPool(x, z, 0.12) && !inHollow(x, z, 1.5) && !CAMPS.some((k) => Math.hypot(x - k.c[0], z - k.c[1]) < 7 + m)
+    && !inRect([MAIN.x0 - 6, MAIN.zb, MAIN.x1 + 6, MAIN.zl + 14], x, z) && !inRect([SMALL.x0 - 5, SMALL.zb, SMALL.x1 + 5, SMALL.zl + 12], x, z)
+    && !FLIGHTS.some((F) => inRect(F.rect, x, z, 6)) && !BLOCKS.some((B) => inRect(B.r, x, z, 2.5 + m)) && Math.hypot(x + 4, z + 2) > 9 && !TRACKS.some((t) => t.some(([a, b], i) => i && Math.hypot(x - a, z - b) < 3));
+  for (let k = 0; k < 2500 && gum.length < 70; k++) { const x = -86 + r() * 172, z = -34 + r() * 120; const dry = poolD(x, z) > 1.5; if (ok(x, z, 1) && (dry || r() < 0.2) && (z < -18 || r() < 0.7) && !gum.some((g) => Math.hypot(g[0] - x, g[1] - z) < 5)) gum.push([x, z, 7 + r() * 7]); }
+  for (let k = 0; k < 1500 && cyc.length < 36; k++) { const x = -86 + r() * 172, z = -34 + r() * 120; if (ok(x, z, 0) && poolD(x, z) > 1.45 && !cyc.some((g) => Math.hypot(g[0] - x, g[1] - z) < 2.5)) cyc.push([x, z, 0.4 + r() * 1.1]); }
+  for (let k = 0; k < 800 && log.length < 14; k++) { const x = -80 + r() * 160, z = -30 + r() * 100; if (ok(x, z, 0) && poolD(x, z) > 1.3) log.push([x, z, 1.8 + r() * 2.4, r() * 3.14]); }
+  return { gum, cyc, log };
+}
+/** Tufts of spinifex and dry grass: dense at the rock's foot and the billabong's margin, thin on the plain. [x, z] only; the town adds heights. */
+export function tuftSpots() {
+  const r = rng(91), out = [];
+  const ok = (x, z) => Math.hypot(x, z) < RADIUS - 6 && !inPool(x, z, -0.02) && !inHollow(x, z, 0.2) && !BLOCKS.some((B) => inRect(B.r, x, z, 0.8)) && !inRect([MAIN.x0 - 3, MAIN.zb, MAIN.x1 + 3, MAIN.zl + 4], x, z) && !inRect([SMALL.x0 - 3, SMALL.zb, SMALL.x1 + 3, SMALL.zl + 4], x, z)
+    && !TRACKS.some((t) => t.some(([a, b], i) => i && Math.hypot(x - a, z - b) < 1.6)) && !CAMPS.some((k) => Math.hypot(x - k.c[0], z - k.c[1]) < 3.4) && Math.hypot(x + 4, z + 2) > 3;
+  for (let k = 0; k < 6000 && out.length < 700; k++) {
+    const x = -88 + r() * 176, z = -40 + r() * 128, foot = z < -16 ? 1 : 0, edge = poolD(x, z) < 1.5 ? 1 : 0;
+    if (r() > 0.18 + 0.5 * foot + 0.35 * edge) continue;
+    if (ok(x, z)) out.push([x, z, foot ? 1 : 0, r() * 6.28, 0.7 + r() * 0.8]);
+  }
+  return out;
+}
+/** Fragments fallen from the faces: on the shelters' floors and along the foot of the rock. [x, z, s]. */
+export function screeSpots() {
+  const r = rng(93), out = [];
+  for (const S of [MAIN, SMALL]) for (let k = 0; k < 26; k++) out.push([S.x0 + 1.5 + r() * (S.x1 - S.x0 - 3), S.zb + 0.5 + r() * (S.zl - S.zb - 2.2), 0.12 + r() * 0.2, 1]);
+  for (let k = 0; k < 260 && out.length < 120; k++) {
+    const x = -80 + r() * 160, z = -34 + r() * 20;
+    if (BLOCKS.some((B) => inRect(B.r, x, z, 0.4)) || inRect([MAIN.x0 - 4, MAIN.zb, MAIN.x1 + 4, MAIN.zl + 3], x, z) || inRect([SMALL.x0 - 3, SMALL.zb, SMALL.x1 + 3, SMALL.zl + 3], x, z) || FLIGHTS.some((F) => inRect(F.rect, x, z, 2))) continue;
+    if (!BLOCKS.some((B) => inRect(B.r, x, z, 6))) continue;
+    out.push([x, z, 0.1 + r() ** 2 * 0.5, 0]);
+  }
+  return out;
+}
+/** Where the shelters are furnished: hearths, beds, painters' stones, a pole ladder to the high panels, yams, bark and spears. [kind, x, z, rot]. Within each shelter, x from its x0. */
+export function shelterSpots() {
+  const out = [];
+  const M = MAIN, S = SMALL, zf = (T, d) => T.zl - d;
+  out.push(['hearth', M.x0 + 5, zf(M, 2.2)], ['hearth', M.x1 - 6, zf(M, 2.0)], ['hearth', S.x0 + 4, zf(S, 2.2)]);
+  for (const [T, xs] of [[M, [3, 9, 15, 21, 30, 38]], [S, [9, 12]]]) xs.forEach((d, i) => out.push([['bed', 'bark', 'yams', 'spears', 'bags', 'mat'][i % 6], T.x0 + d, T.zb + (i % 2 ? 1.6 : 2.4), (i % 2 ? 0.15 : -0.1)]));
+  out.push(['paint', M.x0 + 18, M.zb + 1.1, 0], ['paint', M.x0 + 33, M.zb + 1.1, 0], ['paint', S.x0 + 6, S.zb + 1.1, 0]);
+  out.push(['ladder', M.x0 + 26, M.zb + 0.05, 0], ['ladder', S.x0 + 9.5, S.zb + 0.05, 0]);
+  return out;
+}
+/** The rock's tops: where plants root in the crevices and on the ledges: [x, z, y]. */
+export function topSpots() {
+  const r = rng(95), out = [];
+  for (const B of BLOCKS) {
+    if (B.slab) continue;
+    const [x0, z0, x1, z1] = B.r, area = (x1 - x0) * (z1 - z0), n = Math.min(14, Math.max(2, Math.round(area / 120)));
+    for (let k = 0; k < n; k++) {
+      const x = x0 + 1.5 + r() * (x1 - x0 - 3), z = z0 + 1.5 + r() * (z1 - z0 - 3);
+      if (BLOCKS.some((C) => C !== B && C.y[1] > B.y[1] - 0.3 && inRect(C.r, x, z, 1.2))) continue;
+      if (FLIGHTS.some((F) => inRect(F.rect, x, z, 1.5))) continue;
+      out.push([x, z, B.y[1], B.m]);
+    }
+  }
+  return out;
 }
