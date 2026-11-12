@@ -2,7 +2,7 @@
 // Bibi-Khanym mosque, the Gur-e Amir complex, Ulugh Beg's observatory, the chorsu (the bazaar's domed crossing)
 // and the rows of shops, with the wall and dome helpers they share.
 
-import { box, lathe, fromTriangles, clothBox, addCloth, place } from '../../core/geom.js';
+import { box, lathe, fromTriangles, clothBox, addCloth, place, rod } from '../../core/geom.js';
 import { hungCarpet } from './market.js';
 import { frame } from './frame.js';
 import { chamber, cenotaph, prayerHall } from './interiors.js';
@@ -191,14 +191,51 @@ export function gurEAmir(el, ctx) {
 export function observatory(el, ctx) {
   const { bag, col } = ctx, [cx, cz] = el.c, y = el.y ?? 0, R = el.r ?? 23, H = el.h ?? 31, N = 32;
   const poly = Array.from({ length: N }, (_, k) => { const a = k / N * Math.PI * 2; return [cx + Math.cos(a) * R, cz + Math.sin(a) * R]; });
-  bag.add(B, lathe([[R - 2.6, 0], [R - 2.6, H]], N, null, cx, y, cz));
-  col.circle(cx, cz, R - 1.5, y, y + H);
+  // the drum's mass is a ring of bars round the ground-floor hall (15 m radius), open at the south door (face 8)
+  const DOOR = 8, HR = 15, RO = R - 1.1, rc = (HR + RO) / 2, chord = 2 * RO * Math.tan(Math.PI / N) + 0.15;
+  for (let j = 0; j < N; j++) {
+    const th = (j + 0.5) / N * Math.PI * 2, t = [-Math.sin(th), Math.cos(th)], c = [cx + Math.cos(th) * rc, cz + Math.sin(th) * rc];
+    const a = [c[0] - t[0] * chord / 2, c[1] - t[1] * chord / 2], b = [c[0] + t[0] * chord / 2, c[1] + t[1] * chord / 2];
+    if (j === DOOR) { bar(bag, col, B, a, b, RO - HR, y + 6.8, y + H); continue; }
+    bar(bag, col, B, a, b, RO - HR, y, y + H);
+  }
+  bag.add('brick_buff', lathe([[R - 1.2, H], [0.001, H]], N, null, cx, y, cz));
+  { // the hall: a marble floor, a painted ceiling under the first floor, a central pier with the armillary sphere, tables with astrolabes, star charts
+    bag.add('marble_floor', lathe([[HR, 0.06], [0.001, 0.06]], 40, null, cx, y, cz));
+    bag.add('ceiling_painted', lathe([[0.001, 9.6], [HR, 9.6]], 40, null, cx, y, cz));
+    bag.add('tile_lapis', lathe([[HR - 0.02, 9.6], [HR - 0.02, 8.9]], 40, null, cx, y, cz));
+    bag.add('mosaic_gold', lathe([[HR - 0.03, 8.9], [HR - 0.03, 8.8]], 40, null, cx, y, cz));
+    bag.add('marble', lathe([[HR - 0.03, 1.6], [HR - 0.03, 0.06]], 40, null, cx, y, cz));
+    // pier and armillary sphere: three rings of rods on a bronze stand
+    bag.add('brick_buff', lathe([[2.4, 0], [2.4, 0.4], [1.9, 0.5], [1.9, 1.0]], 24, null, cx, y, cz)); col.circle(cx, cz, 2.4, y, y + 1.0);
+    bag.add('bronze', lathe([[0.4, 0], [0.4, 0.1], [0.1, 0.2], [0.1, 0.9]], 12, null, cx, y + 1.0, cz));
+    const ring = (rad, tilt, spin) => { const P = []; for (let i = 0; i < 28; i++) { const a = i / 28 * Math.PI * 2; let px = Math.cos(a) * rad, py = Math.sin(a) * rad, pz = 0; const y1 = py * Math.cos(tilt) - pz * Math.sin(tilt), z1 = py * Math.sin(tilt) + pz * Math.cos(tilt); py = y1; pz = z1; const x2 = px * Math.cos(spin) + pz * Math.sin(spin), z2 = -px * Math.sin(spin) + pz * Math.cos(spin); P.push([cx + x2, y + 2.2 + py, cz + z2]); } for (let i = 0; i < 28; i++) bag.add('bronze', rod(P[i], P[(i + 1) % 28], 0.025, 4)); };
+    ring(0.9, 0, 0); ring(0.9, Math.PI / 2, 0); ring(0.9, Math.PI / 2, Math.PI / 2); ring(0.7, 0.41, 0.6);
+    bag.add('gilt_bronze', lathe([[0.001, -0.12], [0.12, 0], [0.001, 0.12]], 10, null, cx, y + 2.2, cz));
+    bag.add('bronze', rod([cx, y + 1.9, cz], [cx, y + 2.5, cz], 0.02, 4));
+    for (let i = 0; i < 6; i++) {
+      const a = (i + 0.5) / 6 * Math.PI * 2 + 0.3, tx = cx + Math.cos(a) * 9, tz = cz + Math.sin(a) * 9;
+      bag.add('wood_dark', box(tx - 0.9, y + 0.74, tz - 0.5, tx + 0.9, y + 0.8, tz + 0.5));
+      for (const [dx, dz] of [[-0.85, -0.45], [0.85, -0.45], [-0.85, 0.45], [0.85, 0.45]]) bag.add('wood_dark', box(tx + dx - 0.035, y, tz + dz - 0.035, tx + dx + 0.035, y + 0.74, tz + dz + 0.035));
+      col.rect([tx - 0.9, tz - 0.5, tx + 0.9, tz + 0.5], y, y + 0.8);
+      F.rahle(bag, tx - 0.4, y + 0.8, tz, a); bag.add('bronze', lathe([[0.001, 0], [0.15, 0], [0.16, 0.015], [0.001, 0.02]], 14, null, tx + 0.35, y + 0.8, tz)); bag.add('bronze', lathe([[0.001, 0.02], [0.13, 0.02], [0.001, 0.05]], 14, null, tx + 0.35, y + 0.8, tz));
+      F.cushion(bag, tx, y + 0.07, tz + (a > 3 ? 0.9 : -0.9), 0.7, 0.55, 0.12, a, 'cloth_indigo');
+    }
+    // star charts on the wall: a lapis disc ringed with gold, gilt stars
+    for (const a0 of [0.2, 1.4, 2.6, 3.9, 5.1]) {
+      const wx = cx + Math.cos(a0) * (HR - 0.05), wz = cz + Math.sin(a0) * (HR - 0.05), yaw = -a0 - Math.PI / 2;
+      const d1 = lathe([[0.001, 0], [1.3, 0], [1.3, 0.04], [0.001, 0.04]], 24); d1.rotateX(Math.PI / 2); bag.add('tile_lapis', place(d1, wx - Math.cos(a0) * 0.05, y + 3.2, wz - Math.sin(a0) * 0.05, yaw));
+      const d2 = lathe([[1.3, 0.06], [1.45, 0.06], [1.45, 0], [1.3, 0]], 24); d2.rotateX(Math.PI / 2); bag.add('mosaic_gold', place(d2, wx - Math.cos(a0) * 0.05, y + 3.2, wz - Math.sin(a0) * 0.05, yaw));
+      for (let i = 0; i < 14; i++) { const q = i * 2.4, rr = 0.2 + (i % 5) * 0.2; bag.add('mosaic_gold', place(box(-0.04, -0.04, 0.045, 0.04, 0.04, 0.06), wx - Math.cos(a0) * 0.05 + Math.cos(q) * rr * -Math.sin(a0) * -1, y + 3.2 + Math.sin(q) * rr, wz - Math.sin(a0) * 0.05 + Math.cos(q) * rr * Math.cos(a0), yaw)); }
+    }
+    for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2 + 0.8; F.mosqueLamp(bag, ctx.lights, cx + Math.cos(a) * 6, y + 6.2, cz + Math.sin(a) * 6, y + 9.6, { k: 1.4, enamel: true, glow: 4, reach: 14 }); }
+  }
   // the plinth: two steps of marble
   bag.add('marble', lathe([[R + 3.2, 0], [R + 3.2, 0.3], [R + 1.8, 0.3], [R + 1.8, 0.6], [R + 0.5, 0.6]], 48, null, cx, y, cz));
-  col.circle(cx, cz, R + 3.2, y, y + 0.6);
+  col.circle(cx, cz, R + 3.2, y, y + 0.3); col.circle(cx, cz, R + 1.8, y, y + 0.6);
   for (let k = 0; k < N; k++) {
     const p = poly[k], q = poly[(k + 1) % N], ar = [], L = Math.hypot(q[0] - p[0], q[1] - p[1]);
-    ar.push({ at: L / 2, w: L * 0.5, h: 7.5, sill: 0.6, depth: 0.3, back: 'tile_lapis' }, { at: L / 2, w: L * 0.46, h: 6.8, sill: 9.8, depth: 0.3, back: 'kahgel' }, { at: L / 2, w: L * 0.44, h: 6.5, sill: 18.8, depth: 0.3, back: 'kahgel' });
+    ar.push(k === DOOR ? { at: L / 2, w: L * 0.42, h: 6.6, pass: true } : { at: L / 2, w: L * 0.5, h: 7.5, sill: 0.6, depth: 0.3, back: 'tile_lapis' }, { at: L / 2, w: L * 0.46, h: 6.8, sill: 9.8, depth: 0.3, back: 'kahgel' }, { at: L / 2, w: L * 0.44, h: 6.5, sill: 18.8, depth: 0.3, back: 'kahgel' });
     arcadeWall(bag, col, p, q, y, H, 2.2, B, ar, [cx, cz], undefined);
     const mx = (p[0] + q[0]) / 2 - cx, mz = (p[1] + q[1]) / 2 - cz, ml = Math.hypot(mx, mz);
     bannai(bag, { a: p, b: q, n: [mx / ml, mz / ml], d: 1.1, y, s0: 0.3, s1: L - 0.3, v0: H - 1.7, v1: H - 0.6, kind: 'kufic', base: LAP, ink: WHI, alt: CRE, ink2: TUR, cell: 0.55, seed: k + 1 });

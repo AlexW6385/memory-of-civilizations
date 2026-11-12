@@ -79,7 +79,7 @@ export function cenotaph(bag, col, x, z, yaw, jade = false, k = 1) {
 export function prayerHall(fr, o, lights) {
   const { bag, col } = fr, [cx, cz] = o.c, hx = o.hx, hz = o.hz, zq = cz + hz;
   // the mihrab: a pointed niche in a lapis-and-turquoise frame on the qibla wall, muqarnas cells over it, gilt inscription band
-  const mw = 3.4, mh = 7.5;
+  const mw = 3.4, mh = o.mh ?? 7.5;
   bx(bag, 'tile_lapis', cx - mw / 2 - 0.9, 0.06, zq - 0.14, cx + mw / 2 + 0.9, mh + 1.4, zq - 0.08);
   bx(bag, 'tile_turquoise', cx - mw / 2 - 0.6, 0.06, zq - 0.2, cx - mw / 2 - 0.3, mh + 1.0, zq - 0.14); bx(bag, 'tile_turquoise', cx + mw / 2 + 0.3, 0.06, zq - 0.2, cx + mw / 2 + 0.6, mh + 1.0, zq - 0.14);
   bx(bag, 'tile_turquoise', cx - mw / 2 - 0.6, mh + 0.7, zq - 0.2, cx + mw / 2 + 0.6, mh + 1.0, zq - 0.14);
@@ -88,16 +88,18 @@ export function prayerHall(fr, o, lights) {
   for (let i = 0; i < 5; i++) { const w2 = mw - i * 0.55; bx(bag, i % 2 ? 'tile_cream' : 'tile_turquoise', cx - w2 / 2, mh - 1.4 + i * 0.5, zq - 0.3 - i * 0.04, cx + w2 / 2, mh - 0.9 + i * 0.5, zq - 0.26 - i * 0.04); }
   bx(bag, 'mosaic_gold', cx - 0.3, 0.06, zq - 0.3, cx + 0.3, 0.8, zq - 0.26);
   // the minbar: a flight of steps with side boards and a canopy, beside the mihrab
-  { const mx = cx + mw / 2 + 2.4, steps = 7;
+  { const mx = cx + mw / 2 + 2.4, steps = o.steps ?? 7;
     for (let i = 0; i < steps; i++) bx(bag, 'wood_dark', mx - 0.55, 0.06, zq - 0.3 - (steps - i) * 0.4, mx + 0.55, 0.3 + i * 0.3, zq - 0.3 - (steps - i) * 0.4 + 0.4);
     for (const sx of [-0.6, 0.6]) bx(bag, 'wood_painted', mx + sx - 0.04, 0.3, zq - 0.3 - steps * 0.4, mx + sx + 0.04, 2.5, zq - 0.3);
     bx(bag, 'wood_painted', mx - 0.65, 2.5, zq - 0.3 - 0.8, mx + 0.65, 2.65, zq - 0.3); bx(bag, 'wood_ochre', mx - 0.55, 2.2, zq - 0.9, mx + 0.55, 2.5, zq - 0.3);
     col.rect([mx - 0.7, zq - 0.3 - steps * 0.4, mx + 0.7, zq - 0.3], 0, 2.7); }
   // rows of prayer rugs facing the qibla, a Qur'an stand and a lamp at the wall
-  const rows = Math.floor((hz * 2 - 5) / 2.2), per = Math.floor((hx * 2 - 3) / 1.1);
+  const rows = o.single ? 0 : Math.floor((hz * 2 - 5) / 2.2), per = Math.floor((hx * 2 - 3) / 1.1);
   for (let r = 0; r < rows; r++) for (let i = 0; i < per; i++) if (((i + r) * 7) % 5 !== 0) F.prayerRug(bag, cx - hx + 1.5 + i * 1.1 + (r % 2) * 0.25, 0.065, cz - hz + 2.2 + r * 2.2, Math.PI, ['persian', 'blue', 'maroon'][(i + r) % 3]);
-  F.carpet(bag, cx, 0.06, zq - 3.5, 6, 3.0, 0, 'persian');
-  for (const sx of [-4.2, 4.2, 0]) { F.rahle(bag, cx + sx - 0.0, 0.065, zq - 7.5 + (sx === 0 ? 1 : 0), Math.PI, { h: 0.5 }); }
+  if (o.single) { for (let i = 0; i < per; i++) if (Math.abs(i * 1.1 - per * 0.55) > 1.9) F.prayerRug(bag, cx - hx + 1.5 + i * 1.1, 0.065, zq - 1.35, Math.PI, ['persian', 'blue', 'maroon'][i % 3]); F.carpet(bag, cx, 0.06, zq - 1.5, 3.6, 2.0, 0, 'persian'); for (const sx of [-5, 5, 10, -10]) F.rahle(bag, cx + sx, 0.065, zq - 0.7, Math.PI, { h: 0.5 }); }
+  else { F.carpet(bag, cx, 0.06, zq - 3.5, 6, 3.0, 0, 'persian');
+  for (const sx of [-4.2, 4.2, 0]) { F.rahle(bag, cx + sx - 0.0, 0.065, zq - 7.5 + (sx === 0 ? 1 : 0), Math.PI, { h: 0.5 }); } }
+  if (o.single) { for (const sx of [-12, -6, 0, 6, 12]) F.mosqueLamp(bag, lights, cx + sx, o.lampY, cz, o.lampTop, { k: 1.1, enamel: true, glow: 3, reach: 9 }); return; }
   for (const sx of [-1, 1]) F.mosqueLamp(bag, lights, cx + sx * hx * 0.45, o.lampY ?? 7, cz + hz * 0.3, o.lampTop ?? 12, { k: 1.4, enamel: true, glow: 4, reach: 18 });
   F.mosqueLamp(bag, lights, cx, o.lampY ?? 7, cz - hz * 0.2, o.lampTop ?? 12, { k: 1.6, enamel: true, glow: 5, reach: 22 });
   void rod;
