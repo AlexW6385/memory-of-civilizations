@@ -27,6 +27,12 @@ export function dressHouse(el, { bag, col }, g) {
   B('thatch_palm', ru - 0.22, -0.09, ru + 0.22, -0.05, fy + 0.95, fy + 1.75);
   B('wood_dark', ru - 0.3, -0.11, ru + 0.3, -0.05, fy + 1.78, fy + 1.84);
   if (r() < 0.6) bundle(bag, 'thatch', ...(() => { const p = P(ru + 0.45, -0.1); return [p[0], fy + 1.3, p[1]]; })(), 0.4);
+  // a shop's noren: short indigo curtains split in strips over the door, with a plank sign on a bracket (on the roads and for the trades that sell)
+  if (el.kind === 'road' || ['brewer', 'weaver', 'potter'].includes(trade)) {
+    const nm = trade === 'brewer' ? 'cloth_white' : trade === 'potter' ? 'cloth_brown' : 'cloth_indigo';
+    for (let k = 0; k < 3; k++) { const u0 = door - dw / 2 + 0.02 + k * (dw - 0.04) / 3; B(nm, u0, -0.1, u0 + (dw - 0.04) / 3 - 0.04, -0.07, fy + 1.45, fy + 1.9); }
+    B('wood_dark', door + dw / 2 + 0.1, -0.5, door + dw / 2 + 0.16, -0.06, fy + 1.9, fy + 1.96); B('timber', door + dw / 2 + 0.12, -0.55, door + dw / 2 + 0.14, -0.45, fy + 1.4, fy + 1.9);
+  }
   // hung under the eave: bundles of radish and onions, gourds, strings of persimmons drying
   const hang = r() < 0.75, hm = ['thatch', 'cloth_ochre', 'pottery_dark', 'cloth_red'][Math.floor(r() * 4)];
   if (hang) for (let u = 0.5; u < L - 0.4; u += 0.35 + r() * 0.3) if (Math.abs(u - door) > 0.9 && r() < 0.6) { const p = P(u, -0.3); bag.add('bamboo_culm', rod([p[0], y + H - 0.1, p[1]], [p[0], y + H - 0.55, p[1]], 0.008, 3)); bundle(bag, hm, p[0], y + H - 1.0, p[1], 0.45); }

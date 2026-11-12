@@ -56,7 +56,7 @@ function heianHouse(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, f = el.front || 's', along = f === 's' || f === 'n';
   const L = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0;
   const kind = rand() < 0.4 ? 'board' : rand() < 0.55 ? 'thatch' : 'bark';
-  const H = 2.5, sill = 0.45, fy = y + sill;
+  const H = 2.5 + [0, 0.3, 0.6, 0.3][Math.floor(rng((el.seed || 1) * 3 + 101)() * 4)], sill = 0.45, fy = y + sill;   // eaves at 2.5–3.1 m: the low farmhouse, the tall shop-house
   const P = (u, v) => (f === 's' ? [x0 + u, z1 - v] : f === 'n' ? [x1 - u, z0 + v] : f === 'e' ? [x1 - v, z0 + u] : [x0 + v, z1 - u]);
   const rc = (u0, v0, u1, v1) => { const a = P(u0, v0), b = P(u1, v1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
   const B = (m, u0, v0, u1, v1, ya, yb, c = false) => { const r = rc(u0, v0, u1, v1); bag.add(m, box(r[0], ya, r[1], r[2], yb, r[3])); if (c) col.rect(r, ya - 0.3, yb); };
@@ -90,6 +90,7 @@ function heianHouse(el, { bag, col }) {
     { const p = P(L - T - 0.55, T + 0.52); pot(bag, 'iron', p[0], fy + 0.8, p[1], 0.3, 0.24); }
     { const p = P(T + 0.5, T + 0.6); pot(bag, 'pottery_dark', p[0], fy, p[1], 0.32, 0.8); }
     B('timber', T, T, L - T, D - T, y + H - 0.06, y + H - 0.02);
+    { const lp = P(hu + 0.95, hv + 0.35); B('wood_dark', hu + 0.9 - 0.0, hv + 0.3, hu + 1.0, hv + 0.4, ry, ry + 0.32); bag.add('lamp_white', lathe([[0.001, 0], [0.1, 0.05], [0.13, 0.17], [0.07, 0.26], [0.001, 0.28]], 9, null, lp[0], ry + 0.32, lp[1])); }   // an andon lamp: paper shade on a stand, the room's light
     furnishTrade(el, { bag, col }, { P, B, ry, T, L, D, g0 });
   } else {
     B(wallMat, 0, 0, L, D, fy, y + H, true);
