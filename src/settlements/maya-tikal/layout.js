@@ -17,6 +17,7 @@ export const NA_TEMPLE = { c: [0, -76], base: [14, 14], top: [8, 8], H: 12, tier
 export const NA_SMALL = [[-38, -56, 'e'], [38, -56, 'w'], [-34, -94, 'e'], [34, -94, 'w'], [-12, -108, 's'], [12, -108, 's']];
 export const CA = { rect: [-58, 46, 40, 128], H: 5.2 };                       // the Central Acropolis platform
 export const BALL = { alley: [46, 22, 54, 40], mound: 5 };
+export const T3 = { c: [-112, -62], base: [13, 13], top: [7, 7], H: 26, tiers: 7, face: 'e', stairW: 7 };           // Temple III, the temple of the Jaguar Priest, west of Temple II
 export const T4 = { c: [-262, 0], base: [30, 30], top: [13, 13], H: 40, tiers: 9, face: 'e', stairW: 8 };   // Temple IV, brought in
 // causeways: polylines, width, height
 export const CAUSEWAYS = [

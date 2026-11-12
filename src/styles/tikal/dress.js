@@ -132,5 +132,18 @@ export function awning(el, { bag, col }) {
   const m = T(0, 0.1); bag.add('reed_mat', box(-w / 2 + 0.2, 0.002, -d / 2 + 0.5, w / 2 - 0.2, 0.018, d / 2 - 0.3).rotateY(rot).translate(m[0], y, m[1]));
 }
 
-export const DRESS = { k_mask: mask, k_shed: shed, k_granary: granary, k_brazier: brazier, k_chultun: chultun, k_awning: awning };
+/** k_stains { rect, y, n, seed, skip?: (x, z) => bool }: the damp, moss in the joints and worn patches on a plastered floor. */
+export function stains(el, { bag }) {
+  const [x0, z0, x1, z1] = el.rect, rand = rng(el.seed ?? 3), y = el.y ?? 0.05;
+  for (let i = 0; i < (el.n ?? 30); i++) {
+    const x = x0 + rand() * (x1 - x0), z = z0 + rand() * (z1 - z0);
+    if (el.skip && el.skip(x, z)) continue;
+    const r = rand();
+    if (r < 0.5) patch(bag, 'plaster_damp', [x, y, z], [0, 1, 0], 1.2 + rand() * 2.6, 0.8 + rand() * 1.6, Math.floor(rand() * 1e6), 0.004);
+    else if (r < 0.85) for (let k = 0; k < 3; k++) patch(bag, 'stucco_leaf', [x + (rand() - 0.5) * 0.9, y, z + (rand() - 0.5) * 0.9], [0, 1, 0], 0.25 + rand() * 0.4, 0.2 + rand() * 0.3, Math.floor(rand() * 1e6), 0.006, 0, 8);
+    else patch(bag, 'rubble', [x, y, z], [0, 1, 0], 0.4 + rand() * 0.6, 0.3 + rand() * 0.4, Math.floor(rand() * 1e6), 0.005, 0, 8);
+  }
+}
+
+export const DRESS = { k_stains: stains, k_mask: mask, k_shed: shed, k_granary: granary, k_brazier: brazier, k_chultun: chultun, k_awning: awning };
 export { slab };

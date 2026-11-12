@@ -39,7 +39,7 @@ function fromWater(x, z) { return Math.max(-5, Math.min(40, wetOf(x, z))); }
 function planting(x, z, p) {
   if (Math.hypot(x, z) > RADIUS - 6 || wetOf(x, z) < 1.5) return null;
   if (inRect(PLAZA, x, z, 3) || onCauseway(x, z, 2.5)) return null;
-  if (inRect([-62, -126, 130, 134], x, z) || inRect([-296, -36, -232, 36], x, z) || nearHouse(x, z, 1.8)) return null;       // the acropolises, the temples, Temple IV
+  if (inRect([-62, -126, 148, 134], x, z) || inRect([-128, -80, -92, -44], x, z) || inRect([-296, -36, -232, 36], x, z) || nearHouse(x, z, 1.8)) return null;       // the acropolises, the temples, Temple IV
   if (inGroup(x, z, 0.5)) return { grass: 20, fig: 0.1, neem: 0.05 };
   const f = sm(70, 190, Math.hypot(x, z));
   return { grass: 25, banyan: 0.04 + 0.1 * f, teak: 0.1 + 0.4 * f, sycamore_fig: 0.05 + 0.2 * f, neem: 0.1 * f, fig: 0.15 };
