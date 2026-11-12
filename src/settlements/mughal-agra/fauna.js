@@ -35,5 +35,10 @@ perches.push({ kind: 'heron', x: 110, z: RIVER_Z + 7, y: -2.3, rot: -1.57, stay:
 }
 // more of the river's birds: egrets and herons along the sand and the shallows on both sides of the terrace
 for (const [x, z, k] of [[-120, RIVER_Z + 4, 'egret'], [-20, RIVER_Z + 7, 'egret'], [45, RIVER_Z + 5, 'heron'], [150, RIVER_Z + 6, 'egret'], [-170, RIVER_Z + 3, 'heron'], [196, RIVER_Z + 9, 'egret']]) perches.push({ kind: k, x, z, y: -2.25, rot: -1.57, stay: [80, 240], gone: [40, 150], alert: k === 'heron' ? 11 : 10 });
+// the garden and the plinth (§13): blue rock pigeons on the marble before the tomb and along the channel's kerb, mynas on the
+// walks and the lawns of the beds
+for (const [x, z] of [[-14, -148], [9, -151], [-22, -150], [16, -153]]) perches.push({ kind: 'pigeon', x, z, y: 7.25, rot: 0.5 + (Math.abs(x) % 3), range: [1.6, 1.4] });
+for (const [x, z] of [[-6, -60], [6, -96], [-6.6, -30], [6.6, 46], [-6, 104], [7.4, 128]]) perches.push({ kind: 'pigeon', x, z, y: 0.57, rot: 1.2 + (Math.abs(x + z) % 3), range: [1.8, 1.4] });
+for (const [x, z] of [[-24, -62], [30, -40], [-38, 70], [52, 88], [-70, -96], [90, -60], [-96, 36], [64, 40]]) perches.push({ kind: 'myna', x, z, y: 0.02, rot: 2 + (Math.abs(x) % 4), range: [2.4, 2.0] });
 void FORECOURT;
 export default { fish, flights, perches };
