@@ -5,7 +5,7 @@
 // Every piece is a hexahedron with jittered corners whose faces are separate displaced grids (hard edges, smooth within a face); all of it
 // goes into one geometry per material.
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
-import { BLOCKS, MAIN, SMALL, FLIGHTS, rng, smooth, height } from '../../settlements/kakadu/layout.js';
+import { BLOCKS, MAIN, SMALL, FLIGHTS, rng, smooth, height, inRect, onWay } from '../../settlements/kakadu/layout.js';
 
 const hash = (i, j, k, s) => { let h = Math.imul(i, 374761393) ^ Math.imul(j, 668265263) ^ Math.imul(k, 2147483647) ^ Math.imul(s | 0, 1274126177); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296 * 2 - 1; };
 export function noise3(x, y, z, s = 0) {
@@ -235,7 +235,7 @@ export function columnMass(acc, o) {
         const c = Math.cos(t), sn = Math.sin(t), e = 2 / s.n, fw = top && y > s.yb - s.rt - 0.01 ? smooth(-0.25, 0.4, sn) : 1;
         const prof = 1 + 0.1 * noise3(y * 0.37, seed * 0.013, 0.5, seed + 2), sxs = 0.3 * noise3(y * 0.3, 1.5, 0.5, seed + 4), lz = s.lean * (y - s.ya) / Math.max(0.5, s.yb - s.ya);
         const hxx = Math.max(0.3, (hx - ins * fw) * prof), hzz = Math.max(0.3, (hz - ins * fw) * prof);
-        let x = cx + sxs + hxx * sgnPow(c, e), z = cz + lz + hzz * sgnPow(sn, e);
+        let x = cx + sxs + hxx * sgnPow(c, e), z = cz + lz + hz * (1 - prof) + hzz * sgnPow(sn, e);
         const gx = sgnPow(c, 2 - e) / hxx, gz = sgnPow(sn, 2 - e) / hzz, gl = Math.hypot(gx, gz) || 1, nx = gx / gl, nz = gz / gl;
         let d = o.amp * (0.62 * noise3(x * 0.4, y * 0.4, z * 0.4, seed) + 0.38 * noise3(x * 1.1, y * 1.1, z * 1.1, seed + 5)) + 0.3 * noise3(x * 0.16, y * 0.2, z * 0.16, seed + 9);
         let pd = 0;
@@ -302,6 +302,8 @@ export function outcropBlock(acc, B, o = {}) {
   }
   // the roof's soffit, one flat face (the walker's shell test needs an underside to see the roof as a roof)
   if (slab && !acc.dry) {
+    // a covering plane inside the lowest bed (the top field of the walk test needs something over the soffit wherever the columns stand back or part)
+    hex(acc, B.m, corners(x0 + 0.1, x1 - 0.1, y0, y0 + 0.9, z0 + 0.1, z1 - 0.05, uniformJit(0), rnd), { T: { res: 3 } });
     const A = acc.of(BANDS[B.m]?.[0] ?? B.m), yS = y0 - 0.02, pts = [[x0 + 0.1, z1 - 0.05], [x1 - 0.1, z1 - 0.05], [x1 - 0.1, z0 + 0.1], [x0 + 0.1, z0 + 0.1]];
     for (const q of [[0, 2, 1], [0, 3, 2]]) for (const i of q) { A.p.push(pts[i][0], yS, pts[i][1]); A.n.push(0, -1, 0); }
   }
@@ -309,9 +311,9 @@ export function outcropBlock(acc, B, o = {}) {
   const joints = [];
   if (S) for (const x of [S.x0 - 1.2, S.x1 + 1.2]) joints.push({ x, g: 0.4, forced: true });
   for (let x = x0 + 2.6 + rnd() * 2.5; x < x1 - 2.8; x += 2.8 + rnd() * 3.2) if (!joints.some((j) => Math.abs(j.x - x) < 2.4)) joints.push({ x, g: 0.3 + rnd() * 0.45, cleft: !slab && rnd() < 0.2 });
-  for (const j of joints) if (j.cleft) j.g = 1.1 + rnd() * 1.1;
+  for (const j of joints) { if (S && j.x > S.x0 - 1.3 && j.x < S.x1 + 1.3) j.cleft = false; if (j.cleft) j.g = 1.1 + rnd() * 1.1; }
   joints.sort((a, b) => a.x - b.x);
-  const edges = [{ x: x0, g: 0 }, ...joints, { x: x1, g: 0 }];
+  const edges = [{ x: x0, g: 0 }, ...joints, { x: x1, g: 0 }], tops = [];
   for (let c = 0; c + 1 < edges.length; c++) {
     const xa = edges[c].x + edges[c].g / 2, xb = edges[c + 1].x - edges[c + 1].g / 2, w = xb - xa, seed = B.seed * 53 + c * 7;
     if (w < 1.2) continue;
@@ -342,15 +344,26 @@ export function outcropBlock(acc, B, o = {}) {
     if (slab) slices[0].rb = 0;
     void H;
     const gapL = edges[c].g, gapR = edges[c + 1].g;
+    if (!slab && !flat) tops.push({ x: xa + 0.9 + rnd() * Math.max(0.1, w - 1.8), y: yTop, z: z1 - deepC * (0.35 + rnd() * 0.3) });
     columnMass(acc, { fine: z1 > -31 ? 0.4 : z1 > -40 ? 0.55 : 0.8, xa, xb, zf: z1, deep: deepC, slices, seed, res, amp: 0.2 + rnd() * 0.12, darkL: gapL > 0.9, darkR: gapR > 0.9, bridge: slab ? 0.2 : 0 });
     // plants: the ledges where a slice stands back from the one under it, the feet of the clefts
     if (o.spots) {
       slices.forEach((s, k) => {
         if (!k) return;
         const p = slices[k - 1], led = s.set - p.set;
-        if (led > 0.4 && !flat && rnd() < 0.85) o.spots.push({ x: xa + 0.6 + rnd() * Math.max(0.1, w - 1.2), y: p.yb - 0.02, z: z1 - s.set + led * (0.25 + rnd() * 0.4), w: led, kind: 'ledge' });
+        if (led > 0.4 && !flat && rnd() < 0.85) { const zz = z1 - s.set + led * (0.25 + rnd() * 0.4); o.spots.push({ x: xa + 0.6 + rnd() * Math.max(0.1, w - 1.2), y: p.yb - 0.02, z: zz, w: led, lim: z1 - zz, kind: 'ledge' }); }
       });
     }
+  }
+  // the tops: where plants root on the broken crown (the plateau behind the columns and each column's cap), clear of the steps and the way
+  if (o.spots) {
+    const area = (x1 - x0) * Math.max(0, z1 - deepC - z0), n = slab ? 0 : Math.min(10, Math.max(1, Math.round(area / 120)));
+    for (let k = 0; k < n; k++) {
+      const x = x0 + 1.5 + rnd() * Math.max(0.1, x1 - x0 - 3), z = z0 + 1.5 + rnd() * Math.max(0.1, z1 - deepC - z0 - 2.5);
+      if (BLOCKS.some((C) => C !== B && C.y[1] > B.y[1] - 0.3 && inRect(C.r, x, z, 1.2)) || FLIGHTS.some((F) => inRect(F.rect, x, z, 1.5)) || onWay(x, z, 3.2)) continue;
+      o.spots.push({ x, y: y1, z, w: 1, kind: 'top', m: B.m });
+    }
+    for (const t of tops) if (rnd() < 0.8) o.spots.push({ x: t.x, y: t.y - 0.05, z: t.z, w: 1, kind: 'top', m: B.m });
   }
   if (o.spots) for (const j of joints) if (j.cleft) o.spots.push({ x: j.x, y: height(j.x, z1 - 1.2), z: z1 - 1.2, w: 1, kind: 'cleft' });
 }

@@ -2,7 +2,7 @@
 // the dry edge, lilies on the water; the bark hut, the lean-to, the fires with their trough, grindstone and turtle, the racks of geese;
 // the people at the camp (bare, with fibre belts, ochre and white clay), dingoes, and magpie geese crowded on the water [docs §5].
 import { faceSpots } from '../../styles/kakadu/outcrop.js';
-import { RADIUS, POOL, CAMPS, height, groves, inPool, poolD, rng, inRect, MAIN, SMALL, woodland, tuftSpots, screeSpots, shelterSpots, topSpots } from './layout.js';
+import { RADIUS, POOL, CAMPS, height, groves, inPool, poolD, rng, inRect, MAIN, SMALL, woodland, tuftSpots, screeSpots, shelterSpots } from './layout.js';
 
 const plan = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -14], facing: 's' } });
 
@@ -62,20 +62,22 @@ export async function town() {
   const tl = tuftSpots();
   K.push({ t: 'ka_tufts', list: tl.map(([x, z, foot, rot, s]) => [x, z, height(x, z) - 0.02, s, rot, foot ? 'bark_olive' : 'ichu']) });
   K.push({ t: 'ka_scree', list: screeSpots().map(([x, z, s, fl], k) => [x, z, height(x, z), s, (k * 0.37) % 1 * 6.28, k % 3 === 0 ? 2 : fl ? 1 : 0]) });
-  // the rock's tops: gums in the cracks, cycads and tufts on the ledges
-  topSpots().forEach(([x, z, y], k) => {
-    const q = R2(), yy = y - 0.12;
-    if (q < 0.3) K.push({ t: 'ka_gum', at: [x, z], y: yy, rot: R2() * 6.28, h: 3 + Math.floor(R2() * 4), seed: k });
-    else if (q < 0.5) K.push({ t: 'ka_cycad', at: [x, z], y: yy, rot: R2() * 6.28, h: 0.4 + Math.floor(R2() * 3) * 0.25, seed: k });
-    else if (q < 0.65) K.push({ t: 'ka_pandanus', at: [x, z], y: yy, rot: R2() * 6.28, h: 2 + Math.floor(R2() * 3) * 0.5, seed: k % 3 });
-    else K.push({ t: 'ka_tufts', list: [[x, z, yy, 1.1, R2() * 6.28, 'bark_olive'], [x + 0.7, z + 0.4, yy, 0.8, R2() * 6.28, 'ichu'], [x - 0.5, z + 0.9, yy, 0.9, R2() * 6.28, 'ichu']] });
-  });
-  // the rock's face: gums and cycads rooted on the ledges of the soft beds, pandanus and cycads at the feet of the open clefts, tufts between
-  faceSpots().forEach(({ x, y, z, w, kind }, k) => {
+  // the rock's face and crown: gums and cycads rooted on the ledges of the soft beds (small where the crown would hang over open ground, which would stand as a roof over the walker),
+  // pandanus and cycads at the feet of the open clefts, tufts between; gums, cycads and pandanus in the cracks of the tops
+  faceSpots().forEach(({ x, y, z, w, kind, lim }, k) => {
     const q = R2();
+    if (kind === 'top') {
+      if (q < 0.3) K.push({ t: 'ka_gum', at: [x, z], y: y - 0.07, rot: R2() * 6.28, h: 3 + Math.floor(R2() * 4), seed: k });
+      else if (q < 0.5) K.push({ t: 'ka_cycad', at: [x, z], y: y - 0.07, rot: R2() * 6.28, h: 0.4 + Math.floor(R2() * 3) * 0.25, seed: k });
+      else if (q < 0.65) K.push({ t: 'ka_pandanus', at: [x, z], y: y - 0.07, rot: R2() * 6.28, h: 2 + Math.floor(R2() * 3) * 0.5, seed: k % 3 });
+      else K.push({ t: 'ka_tufts', list: [[x, z, y - 0.07, 1.1, R2() * 6.28, 'bark_olive'], [x + 0.7, z + 0.4, y - 0.07, 0.8, R2() * 6.28, 'ichu'], [x - 0.5, z + 0.9, y - 0.07, 0.9, R2() * 6.28, 'ichu']] });
+      return;
+    }
     if (kind === 'cleft') { K.push({ t: 'ka_pandanus', at: [x, z], y, rot: R2() * 6.28, h: 2.5 + Math.floor(R2() * 3) * 0.5, seed: k % 3 }); K.push({ t: 'ka_cycad', at: [x + 1.1, z + 0.5], y, rot: R2() * 6.28, h: 0.6 + Math.floor(R2() * 3) * 0.25, seed: k }); return; }
-    if (q < 0.4 && w > 0.5) K.push({ t: 'ka_gum', at: [x, z], y, rot: R2() * 6.28, h: 2.5 + Math.floor(R2() * 4) * 0.5, seed: k });
-    else if (q < 0.65) K.push({ t: 'ka_cycad', at: [x, z], y, rot: R2() * 6.28, h: 0.4 + Math.floor(R2() * 3) * 0.25, seed: k });
+    const hg = Math.min(2.5 + Math.floor(R2() * 4) * 0.5, Math.floor(((lim ?? 0) - 0.4) / 0.55 * 2) / 2);
+    if (q < 0.4 && w > 0.5 && hg >= 2.5) K.push({ t: 'ka_gum', at: [x, z], y, rot: R2() * 6.28, h: hg, seed: k });
+    else if (q < 0.65 && (lim ?? 0) > 1.2) K.push({ t: 'ka_cycad', at: [x, z], y, rot: R2() * 6.28, h: 0.4 + Math.floor(R2() * 3) * 0.25, seed: k });
+    else if (q < 0.8 && (lim ?? 0) > 2.2) K.push({ t: 'ka_pandanus', at: [x, z], y, rot: R2() * 6.28, h: 2 + Math.floor(R2() * 2) * 0.5, seed: k % 3 });
     K.push({ t: 'ka_tufts', list: [[x + 0.5, z, y, 0.9, R2() * 6.28, 'bark_olive'], [x - 0.6, z + 0.1, y, 0.8, R2() * 6.28, 'ichu'], [x + 1.4, z - 0.1, y, 0.7, R2() * 6.28, 'ichu']] });
   });
   // the shelters furnished
