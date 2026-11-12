@@ -8,7 +8,10 @@ import { box, frustum } from '../../core/geom.js';
 import { Matrix4 } from '../../core/three.js';
 import { OPEN_ELEMENTS } from './open.js';
 import { MOSQUE_ELEMENTS } from './mosque.js';
-import { windowPieces, doorPieces, bayPieces } from './parts.js';
+import { windowPieces, doorPieces, bayPieces, doorVariant, shopFront } from './parts.js';
+import { hollowShell, furnishShop, furnishHall } from './shops.js';
+import { dressFace, dressRoof, dressWindow, SABAT_ELEMENTS } from './dress.js';
+import { GARDEN_ELEMENTS } from './garden.js';
 import '../../objects/index.js';
 import { GH, SH, K, topOf } from './dims.js';
 
@@ -31,13 +34,19 @@ function towerHouse(el, ctx) {
   const ins = (y) => [a(free.w) * K * y, a(free.e) * K * y, a(free.n) * K * y, a(free.s) * K * y];
   const pw = 0.08;
   // the plinth of rubble and lime to the street's level and above
-  bag.add('schist_rubble', frustum([x0 - pw * a(free.w), z0 - pw * a(free.n), x1 + pw * a(free.e), z1 + pw * a(free.s)], -0.6, 1.1, 0, 0, 0, 0, { noBottom: true }));
+  if (!el.shop && !el.hall) bag.add('schist_rubble', frustum([x0 - pw * a(free.w), z0 - pw * a(free.n), x1 + pw * a(free.e), z1 + pw * a(free.s)], -0.6, 1.1, 0, 0, 0, 0, { noBottom: true }));
   // the brown earth-plastered body, then the limewashed top storeys
-  const iA = ins(yA);
-  bag.add('mud_plaster', frustum([x0, z0, x1, z1], 0, yA, ...iA, { noBottom: true }));
+  const iA = ins(yA), hollow = !!(el.shop || el.hall);
+  if (hollow) {
+    // the ground storey hollowed into a room, the body above standing on its ceiling
+    const q0 = ins(GH);
+    bag.add('mud_plaster', frustum([x0 + q0[0], z0 + q0[2], x1 - q0[1], z1 - q0[3]], GH, yA, iA[0] - q0[0], iA[1] - q0[1], iA[2] - q0[2], iA[3] - q0[3]));
+    hollowShell(ctx, el, el.hall ? 3.2 : 1.5);
+    (el.hall ? furnishHall : furnishShop)(ctx, el);
+  } else bag.add('mud_plaster', frustum([x0, z0, x1, z1], 0, yA, ...iA, { noBottom: true }));
   const r2 = [x0 + iA[0], z0 + iA[2], x1 - iA[1], z1 - iA[3]], iT = ins(top - yA);
   bag.add('lime_plaster', frustum(r2, yA, top, ...iT, { noBottom: true }));
-  col.rect(el.rect, -1, top);
+  col.rect(el.rect, hollow ? GH : -1, top);
   // parapet and corner piers on the roof, a lime band under it and where the lime begins
   const t = ins(top), px0 = x0 + t[0], pz0 = z0 + t[2], px1 = x1 - t[1], pz1 = z1 - t[3], pt = 0.28;
   bag.add('lime_plaster', box(px0, top, pz0, px1, top + 0.9, pz0 + pt)); bag.add('lime_plaster', box(px0, top, pz1 - pt, px1, top + 0.9, pz1));
@@ -45,6 +54,7 @@ function towerHouse(el, ctx) {
   const pier = el.towers ? 1.4 : 0.55;
   for (const [cx, cz] of [[px0, pz0], [px1 - 0.55, pz0], [px0, pz1 - 0.55], [px1 - 0.55, pz1 - 0.55]]) bag.add('lime_plaster', box(cx, top, cz, cx + 0.55, top + (el.towers ? 3.2 : 1.35), cz + 0.55));
   void pier;
+  dressRoof(ctx, el, top, [px0, pz0, px1, pz1], rand);
   const band = (y, h, p) => {
     const q = ins(y);
     if (free.n) bag.add('lime_plaster', box(x0 + q[0] - 0.02, y, z0 + q[2] - p, x1 - q[1] + 0.02, y + h, z0 + q[2]));
@@ -62,7 +72,14 @@ function towerHouse(el, ctx) {
     const L = u1 - u0, c = L < 5.2 ? 1 : L < 8.4 ? 2 : 3;
     const front = el.front === f;
     // the door on the front: off the middle, a step up
-    if (front) { const u = u0 + L * (0.3 + 0.4 * rand()), p = at(u, 0); put(ctx.bag, doorPieces(), p[0], 0, p[2], nx, nz); el._door = u; }
+    if (front) {
+      const u = el.door ?? u0 + L * (0.3 + 0.4 * rand()), p = at(u, 0); rand();
+      if (el.shop) put(ctx.bag, shopFront(el.hall ? 3.2 : 1.5, el.shop.awning ?? ['reed_mat', 'cloth_indigo', 'reed_mat', 'cloth_ochre'][(el.seed >>> 3) & 3]), p[0], 0, p[2], nx, nz);
+      else if (el.hall) put(ctx.bag, shopFront(3.2, 'cloth_indigo'), p[0], 0, p[2], nx, nz);
+      else put(ctx.bag, doorVariant((el.seed >>> 5) & 3), p[0], 0, p[2], nx, nz);
+      el._door = u;
+      dressFace(ctx, el, f, nx, nz, u, p, rand);
+    }
     for (let s = 0; s < n; s++) {
       const y = yOf(s);
       for (let i = 0; i < c; i++) {
@@ -74,6 +91,7 @@ function towerHouse(el, ctx) {
         if (el.rich && front && s === Math.max(3, n - 3) && i === Math.floor(c / 2)) { const p = at(u, y + 0.8); put(ctx.bag, bayPieces(), p[0] + nx * 0.02, y + 0.8, p[2] + nz * 0.02, nx, nz); continue; }
         const p = at(u, sy);
         put(ctx.bag, windowPieces(kind), p[0], sy, p[2], nx, nz);
+        if (s >= 1) dressWindow(ctx, kind, p, sy, nx, nz, rand);
       }
     }
   }
@@ -90,6 +108,6 @@ function merlons(el, { bag }) {
 
 registerStyle('hadhrami', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.life?.elements, tower_house: towerHouse, merlons, ...OPEN_ELEMENTS, ...MOSQUE_ELEMENTS },
+  elements: { ...STYLES.life?.elements, tower_house: towerHouse, merlons, ...OPEN_ELEMENTS, ...MOSQUE_ELEMENTS, ...SABAT_ELEMENTS, ...GARDEN_ELEMENTS, reserve_wall: () => {} },
   objects: {},
 });

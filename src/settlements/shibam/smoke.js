@@ -2,7 +2,7 @@
 // some houses, incense from the mosque's court at the calls. Engine part src/engine/smoke.js (one draw call); positions from the layout.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, lots, heightOf } from './layout.js';
+import { RADIUS, lots, heightOf, shops } from './layout.js';
 
 const ID = 'shibam';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -14,6 +14,8 @@ export function emitters() {
     const [x0, z0, x1, z1] = l.rect, x = x0 + (x1 - x0) * (0.3 + 0.4 * r()), z = z0 + (z1 - z0) * (0.3 + 0.4 * r());
     E.push({ p: [x, heightOf(l) + 1.0, z], kind: 'kitchen', thr: 0.2 + 0.7 * r(), seed: l.seed % 1000 });
   }
+  // the hearths of the trades: the coffee houses, the smithies and the spice shops with their coals, on the roofs above
+  for (const l of shops()) if (l.shop.trade === 'qahwa' || l.shop.trade === 'smith' || l.shop.trade === 'spice') E.push({ p: [l.cx, heightOf(l) + 1.0, l.cz], kind: 'kitchen', thr: l.shop.trade === 'smith' ? 0.05 : 0.12, seed: l.seed % 1000 });
   E.push({ p: [-40, 0.8, -12], kind: 'incense', thr: 0.1, seed: 21 });
   return E;
 }
