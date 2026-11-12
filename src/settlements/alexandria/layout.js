@@ -109,4 +109,10 @@ export const SHIPS = [
   { kind: 'merchant', at: [-330, -97], rot: Math.PI / 2, len: 24, seed: 13 }, { kind: 'merchant', at: [-292, -97], rot: Math.PI / 2, len: 26, seed: 14 },
   { kind: 'lighter', at: [-372, -95.5], rot: Math.PI / 2, len: 9, seed: 15 }, { kind: 'merchant', at: [-120, -257.5], rot: Math.PI / 2, len: 24, seed: 16 },
   { kind: 'merchant', at: [-60, -257.5], rot: Math.PI / 2, len: 26, seed: 17 },
+  // the pier before the arrival and the ships lying off it, in the view to the Pharos (the arrival looks north-west)
+  { kind: 'merchant', at: [72.6, -108], rot: 0, len: 26, seed: 18 }, { kind: 'lighter', at: [84.9, -112], rot: 0.04, len: 9, seed: 19 },
+  { kind: 'merchant', at: [40, -170], rot: 1.1, len: 24, seed: 20 }, { kind: 'galley', at: [112, -190], rot: 1.9, len: 34, seed: 21 },
+  { kind: 'lighter', at: [96, -140], rot: 0.5, len: 9, seed: 22 }, { kind: 'merchant', at: [10, -215], rot: 2.2, len: 26, seed: 23 },
 ];
+/** The pier running out into the Great Harbour before the arrival (x0, z0, x1, z1): its deck is the quay's level, ships on both sides, a crane at its head. */
+export const PIER = [77, -126, 83, -90];

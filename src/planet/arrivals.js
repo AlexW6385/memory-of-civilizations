@@ -64,7 +64,7 @@ export const ARRIVALS = {
   'cahokia':          [-25, 0.1, 20, 0, 0.25],           // Monks Mound across the Grand Plaza
   'shaolin':          [0, 0.1, 160, 0, 0.07],            // from the village road north up the axis to the Shanmen, red walls and grey roofs, Mount Song behind
   'hakka-tulou':      [0, 0.1, 72, 0, 0.1],             // from the stream's near bank, north to the round tulou whole on its plinth
-  'taos':             [0, 0.1, 25, 0.3, 0.12],           // the north house across the plaza
+  'taos':             [-30, 0.1, -20, -0.35, 0.14],       // the North House's tall middle close across the racks and the plaza's life
   'bhaktapur':        [19, 0.1, 21, 0.66, 0.3],          // the Nyatapola whole on its plinth across Taumadhi square
   'new-york':         [-14.15, 0.1, 37.89, 2.282, 0.55], // the Empire State whole over Fifth Avenue's towers (the grid turned 29°: Fifth at 38th, looking down the avenue)
   'rapa-nui':         [0, 0.3, 46, 3.1416, 0.12],        // the row of moai on their platform, whole
@@ -72,7 +72,7 @@ export const ARRIVALS = {
   'nan-madol':        [-10, null, 80, 0, 0.12],          // Nandauwas whole across the canal from the landing islet
   'maori':            [0, 0.2, 150, 0, 0.2],             // the pā's palisade and carved gateway
   'ayutthaya':        [10, 0.1, -100, 0, 0.3],      // the three chedis of Wat Phra Si Sanphet in their row, from the forecourt in line with the gate
-  'alexandria':       [100, null, -86, 0.50, 0.17],      // the Pharos across the Great Harbour, from the quay before the Museion
+  'alexandria':       [100, null, -86, 0.62, 0.15],      // the Pharos across the Great Harbour, from the quay before the Museion
   'sydney':           [214.5, null, -112, 1.0, 0.05],    // at the sea wall of Mrs Macquarie's Point: the Opera House across the water, the Harbour Bridge behind
   'dunhuang': [14, 0.1, 0, 1.5708, 0.2],   // On the main street east of the stream, looking west along its axis over the timber bridge: the Mogao cliff with its tiers of caves and galleries, the Nine-Storey building stepping up over the Great Buddha's hall at its middle.
   'catalhoyuk':       [1.2, 2.6, 19, 1.1, -0.05],            // the landmark house whole across the ground: its south wall, the ladder up to the roof, the packed roofscape behind
