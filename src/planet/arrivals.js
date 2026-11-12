@@ -24,7 +24,7 @@ export const ARRIVALS = {
   'mughal-agra':      [0, 0.4, 60, 0, 0.1],              // the Taj Mahal down the garden's water channel
   'angkor':           [-178, 1.05, 1.5, -1.5708, 0.08],  // Angkor Wat's towers at the end of the causeway
   'borobudur':        [110, 0.1, 0, 1.5708, 0.18],       // the monument up the east way
-  'abbasid-baghdad':  [-110, 0.1, 0, 0, 0.22],               // the Palace of the Golden Gate and its Green Dome across the esplanade, the Great Mosque on the left
+  'abbasid-baghdad':  [-110, 0.1, 16, 0, 0.2],               // the Palace of the Golden Gate and its Green Dome across the esplanade, now busy with petitioners, horses, a caravan and mat-sellers
   'ur':               [0, 0.1, -118, 3.1416, 0.22],      // the ziggurat across its court
   'babylon':          [-40, 0.1, -360, 3.1416, 0.2],     // the Processional Way's lions to the Ishtar Gate
   'persepolis':       [-135, 14.05, -75, -1.571, 0.16],  // on the terrace, the Apadana's porch
