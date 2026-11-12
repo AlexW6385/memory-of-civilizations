@@ -194,5 +194,16 @@ export function house(el, ctx) {
   bx(ctx, 'wood_ochre', x0 + t + 0.1, f, z0 + t + 0.1, x0 + t + 1.5, f + 0.4, z1 - t - 0.1);
   bx(ctx, 'reed_mat', x0 + t + 0.1, f + 0.4, z0 + t + 0.1, x0 + t + 1.5, f + 0.43, z1 - t - 0.1);
   bx(ctx, 'wood_dark', x1 - t - 0.9, f, z0 + t + 0.1, x1 - t - 0.1, f + 0.7, z0 + t + 0.8);
+  // the room's furnishing: tie-beams under the thatch, the pillow and a folded cloth on the platform, offerings on a ledge at the head, jars and a rice sack by the chest, a cloth hung on the wall
+  const sd = el.seed ?? 1;
+  for (let k = 0; k < 3; k++) bx(ctx, 'wood_dark', x0 + t, f + H - 0.22, z0 + t + (z1 - z0 - 2 * t) * (k + 0.5) / 3 - 0.06, x1 - t, f + H - 0.1, z0 + t + (z1 - z0 - 2 * t) * (k + 0.5) / 3 + 0.06);
+  bx(ctx, 'cloth_white', x0 + t + 0.15, f + 0.43, z0 + t + 0.2, x0 + t + 0.6, f + 0.52, z0 + t + 0.65);
+  bx(ctx, ['cloth_red', 'cloth_indigo', 'cloth_ochre'][sd % 3], x0 + t + 0.7, f + 0.43, z0 + t + 0.15, x0 + t + 1.4, f + 0.47, z0 + t + 0.8);
+  bx(ctx, 'wood_dark', x0 + t, f + 1.1, z1 - t - 1.3, x0 + t + 0.3, f + 1.16, z1 - t - 0.1);
+  canang(ctx, x0 + t + 0.15, f + 1.16, z1 - t - 0.7, sd);
+  ctx.bag.add('pottery_dark', lathe([[0.001, 0], [0.15, 0.02], [0.2, 0.2], [0.13, 0.4], [0.1, 0.44]], 8, null, x1 - t - 0.3, f, z1 - t - 0.3));
+  ctx.bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.02], [0.16, 0.16], [0.1, 0.3]], 8, null, x1 - t - 0.75, f, z1 - t - 0.25));
+  bx(ctx, 'sacking', x1 - t - 0.9, f, z0 + t + 0.9, x1 - t - 0.35, f + 0.55, z0 + t + 1.4);
+  bx(ctx, ['cloth_red', 'cloth_black', 'cloth_ochre'][(sd >> 2) % 3], x1 - t - 0.06, f + 0.9, z0 + t + 0.3, x1 - t - 0.02, f + 1.9, z0 + t + 0.9);
   void pick; void rng;
 }

@@ -17,6 +17,9 @@ export const WANTILAN = [15, -12, 31, 4];
 export const KULKUL = [-22, -6];
 export const BANYAN = [-10, 0.5];
 export const CHANNEL_X = -4.7;
+/** The pura dalem (the temple of the dead) at the kelod end of the street's east side, its split gate on the street (docs/settlements/bali-village.md §4.4). */
+export const DALEM = [5.5, 116, 31, 133.5];
+export const DALEM_C = [(DALEM[0] + DALEM[2]) / 2, (DALEM[1] + DALEM[3]) / 2];
 
 /** The compounds' lots: { rect, front, seed, rich, gate: [x, z] }. */
 let LOTS = null;
@@ -35,14 +38,35 @@ export function lots() {
     for (let i = 0; i < n; i++) fn(e[i], e[i + 1]);
   };
   // the village street: west lots front east, east lots front west
-  for (const [a, b] of [[-46, -14], [14, 133]]) run(a, b, (t0, t1) => { add([-30, t0, -5.5, t1], 'e'); add([5.5, t0, 30, t1], 'w'); });
+  // (the east side stops short of the street's end: the pura dalem stands there)
+  for (const [a, b] of [[-46, -14], [14, 133]]) run(a, b, (t0, t1) => { add([-30, t0, -5.5, t1], 'e'); if (t0 < 108) add([5.5, t0, 30, t1], 'w'); });
   // the cross lane: north side fronting south, south side fronting north
   for (const sd of [-1, 1]) run(32, 97, (t0, t1) => {
     const x0 = sd < 0 ? -t1 : t0, x1 = sd < 0 ? -t0 : t1;
     add([x0, -17.5, x1, 5.5], 's'); add([x0, 13.5, x1, 36.5], 'n');
   });
+  // the trades: every third lot on the street, a few on the lane, keep a shop in the front of the compound (the street wall opened on it)
+  const TRADES = ['warung', 'pande', 'carver', 'weaver', 'offerings', 'potter', 'cloth', 'basket', 'warung', 'carver', 'weaver', 'offerings', 'potter', 'cloth'];
+  let k = 0;
+  const street = LOTS.filter((l) => l.front === 'e' || l.front === 'w').sort((a, b) => a.rect[1] - b.rect[1] || a.rect[0] - b.rect[0]);
+  const lane = LOTS.filter((l) => l.front === 'n' || l.front === 's').sort((a, b) => Math.abs(a.rect[0] + a.rect[2]) - Math.abs(b.rect[0] + b.rect[2]));
+  const mark = (l) => {
+    const W = l.front === 'n' || l.front === 's' ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1], g = W * l.gateF;
+    const [u0, u1] = g > W / 2 ? [0.8, g - 2.9] : [g + 2.9, W - 0.8];
+    l.shop = { kind: TRADES[k++ % TRADES.length], u0: Math.max(u0, u1 - 6.2), u1, d: 3.0 };
+  };
+  street.forEach((l, i) => { if (i % 3 === 1) mark(l); });
+  lane.forEach((l, i) => { if (i % 4 === 0 && i < 12) mark(l); });
   return LOTS;
 }
+/** The frame of a lot: P(u, v) → world [x, z], u along the street from the left as one looks from it into the lot, v inward. */
+export function lotFrame(l) {
+  const [x0, z0, x1, z1] = l.rect, f = l.front;
+  return (u, v) => (f === 'n' ? [x0 + u, z0 + v] : f === 's' ? [x1 - u, z1 - v] : f === 'w' ? [x0 + v, z1 - u] : [x1 - v, z0 + u]);
+}
+/** Unit vector from a lot into its street. */
+export const outward = (l) => ({ e: [1, 0], w: [-1, 0], n: [0, -1], s: [0, 1] }[l.front]);
+export const inDalem = (x, z, m = 0) => inRect(DALEM, x, z, m);
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
 /** Rectangles of the streets (free of houses). */
 export const streets = () => [STREET, LANE, FORECOURT];

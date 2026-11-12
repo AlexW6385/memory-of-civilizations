@@ -30,7 +30,7 @@ function paddyWater() {
 
 function compounds() {
   const L = lots(), plans = [];
-  for (let i = 0; i < L.length; i += 7) plans.push(base(`bali-compounds-${i / 7}`, 'balinese', L.slice(i, i + 7).map((l) => ({ t: 'bali_compound', rect: l.rect, front: l.front, seed: l.seed, rich: l.rich, gateF: l.gateF }))));
+  for (let i = 0; i < L.length; i += 7) plans.push(base(`bali-compounds-${i / 7}`, 'balinese', L.slice(i, i + 7).map((l) => ({ t: 'bali_compound', rect: l.rect, front: l.front, seed: l.seed, rich: l.rich, gateF: l.gateF, shop: l.shop }))));
   return plans;
 }
 

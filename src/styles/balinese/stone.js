@@ -30,6 +30,16 @@ export function wall(el, ctx) {
     bx(ctx, 'andesite', f[0], y0 - 0.3, f[1], f[2], y0 + 0.5, f[3]);
     if (el.cap === 'thatch') { const c = R(s0, s1, th + 0.5); bx(ctx, 'thatch', c[0], y0 + h, c[1], c[2], y0 + h + 0.35, c[3]); }
     else { const c = R(s0, s1, th + 0.1); coping(ctx, c[0] + 0.04, c[1] + 0.04, c[2] - 0.04, c[3] - 0.04, y0 + h); }
+    // the weathering of a humid climate: a damp, green-black band above the footing, moss at the foot, streaks running down from the coping, patches where the plaster has gone
+    if (el.weather !== false && s1 - s0 > 0.8) {
+      const hs = Math.imul(Math.round(ax * 7.3 + az * 3.1 + s0 * 5.7), 2654435761) >>> 0, hr = (k) => ((Math.imul(hs ^ (k * 0x9e3779b1), 1274126177) >>> 0) / 4294967296);
+      const wb = R(s0 + 0.03, s1 - 0.03, th + 0.03); bx(ctx, 'plaster_damp', wb[0], y0 + 0.5, wb[1], wb[2], y0 + 0.9, wb[3]);
+      const nm = Math.floor((s1 - s0) / 1.8);
+      for (let k = 0; k < nm; k++) { const a = s0 + 0.2 + hr(k) * Math.max(0.1, s1 - s0 - 0.9), m = R(a, a + 0.35 + hr(k + 9) * 0.4, th + 0.07); bx(ctx, 'sod', m[0], y0 + 0.45 + hr(k + 3) * 0.3, m[1], m[2], y0 + 0.62 + hr(k + 3) * 0.5, m[3]); }
+      const ns = Math.floor((s1 - s0) / 2.4);
+      for (let k = 0; k < ns; k++) { const a = s0 + 0.3 + hr(k + 20) * Math.max(0.1, s1 - s0 - 0.8), st = R(a, a + 0.12 + hr(k + 30) * 0.14, th + 0.11), len = Math.min(0.7 + hr(k + 40) * 0.9, h - 1.17); bx(ctx, 'plaster_streak', st[0], y0 + h - len, st[1], st[2], y0 + h, st[3]); }
+      if (hr(77) < 0.5) { const a = s0 + 0.4 + hr(78) * Math.max(0.1, s1 - s0 - 1.4), pt = R(a, a + 0.6, th + 0.05); bx(ctx, 'plaster_damp', pt[0], y0 + 1.04, pt[1], pt[2], y0 + 1.5 + hr(79) * 0.3, pt[3]); }
+    }
     // the pilasters
     const n = Math.max(0, Math.floor((s1 - s0) / 4.4));
     for (let k = 0; k <= n; k++) {
