@@ -28,6 +28,11 @@ export function streetLife({ fig, woman, P, rand }) {
   // a Dixi at the east kerb opposite the wing, a delivery van at the west kerb
   P.push({ t: 'car', at: [Ee - 1.3, 31.0], y: 0, rot: 0.05, seed: 31, era: 1930, mat: 'car_blue' });
   P.push({ t: 'car', at: [Wk + 1.4, 22.0], y: 0, rot: Math.PI - 0.03, seed: 32, era: 1930, mat: 'car_cream' });
+  // a coal merchant's dray at the kerb with its horse and the coalman at the tail, pigeons on the roadway, a dog at the gate
+  P.push({ t: 'cart', at: [Wk + 3.2, 11.0], y: 0, rot: 0.04, seed: 61, kind: 'two', beast: 'horse', load: 'sacks' });
+  mf(Wk + 4.6, 15.0, 3.0, { hat: 'cap', cloth: 'cloth_black', cloth2: 'cloth_black', carry: 'sack', pose: 'stand' });
+  P.push({ t: 'chickens', kind: 'pigeon', at: [Wk + 9.0, 40.0], n: 7, seed: 71, spread: 2.2 }, { t: 'chickens', kind: 'pigeon', at: [Ee - 3.0, 14.0], n: 5, seed: 72, spread: 1.8 });
+  P.push({ t: 'animal', kind: 'dog', at: [GARDEN[0] + 1.2, GARDEN_GATE[0] - 1.4], y: 0, rot: 0.8, seed: 81 });
   // ── the garden ──
   const gx0 = GARDEN[0], path = GARDEN_PATHS[0];
   // at the gate: three students with portfolios, the notice board read by one
@@ -38,6 +43,9 @@ export function streetLife({ fig, woman, P, rand }) {
   for (const [x, z, r] of [[-10, 46.5, 0.7], [-1.5, 56.4, 5.4], [3, 45, 2.4]]) mw(x, z, r, { pose: 'sit_ground', cloth: 'cloth_white' });
   mf(-11.4, 47.2, 1.3, { pose: 'sit_ground', cloth: 'cloth_brown' }); mf(5.5, 43.5, 3.9, { pose: 'sit_ground', cloth: 'cloth_grey' });
   for (const [x, z, r, w] of [[-5.6, 43.4, 3.14, 1], [-4.0, 43.4, 3.14, 0], [-5.6, 45.6, 0, 0], [-4.0, 45.6, 0, 1]]) (w ? mw : mf)(x, z, r, { pose: 'sit', cloth: w ? 'cloth_red' : 'cloth_indigo' });
+  // the lamps along the path and a line of washing from the Prellerhaus's students, pigeons on the lawn
+  for (const x of [-12, 4, 22]) P.push({ t: 'street_lamp', at: [x, path[3] + 0.5], y: 0, h: 4.2 });
+  P.push({ t: 'laundry', at: [17, 68.3], y: 0, rot: 0, len: 5, seed: 91 }, { t: 'chickens', kind: 'pigeon', at: [-1, 49.2], n: 6, seed: 73, spread: 1.6 });
   // gardeners at the beds: bending women, a man with a hoe, a girl with a watering can (a basket), seven in all
   GARDEN_BEDS.forEach((b, i) => {
     if (i % 3 === 1) return;
@@ -51,6 +59,10 @@ export function streetLife({ fig, woman, P, rand }) {
   // the Prellerhaus's balconies on its east face (the studios' girls and boys out in the sun, one reading, one sewing), five of the 28
   const SZ = (B.pre[3] - 0.3 - (B.pre[1] + 0.3)) / 7, zm = (i) => B.pre[1] + 0.3 + i * SZ + SZ / 2, PLY = [3.45, 6.6, 9.75, 12.9];
   for (const [k, i, w] of [[0, 2, 1], [1, 5, 0], [2, 1, 1], [3, 4, 1], [3, 0, 0]]) (w ? mw : mf)(50.4, zm(i), -1.57, { y: PLY[k] , pose: 'stand', cloth: w ? 'cloth_red' : 'cloth_grey', hat: 'none' });
+  // behind the glass wall: visitors at the vestibule's vitrines, the smith at his anvil and two at the lathe, draughtsmen at the bridge's tables (docs §6)
+  for (const [x, z, r, w] of [[-13.4, 8.4, 3.1, 0], [-10.0, 12.6, 0.2, 1], [-6.2, 8.6, 1.57, 1]]) (w ? mw : mf)(x, z, r, { y: 0.3, pose: 'stand', cloth: w ? 'cloth_green' : 'cloth_black', hat: w ? 'none' : 'brim' });
+  mf(-14.0, 21.2, 3.1, { y: 8.5, pose: 'stand', cloth: 'cloth_indigo', cloth2: 'cloth_indigo', over: 'apron' }); mf(-8.5, 23.3, 3.1, { y: 8.5, pose: 'stand', cloth: 'cloth_grey', over: 'apron' }); mw(-7.2, 19.4, 1.57, { y: 8.5, pose: 'stand', cloth: 'cloth_white' });
+  for (const [x, z] of [[-12.6, 1.0], [-9.6, 1.0]]) mf(x, z, 0, { y: 8.5, pose: 'sit', cloth: 'cloth_brown' });
   // at the glass wall's foot: a girl on the plinth steps of the vestibule's door, a workman sweeping the pavement
   mf(B.ww[0] - 1.2, 8.0, 0, { cloth: 'cloth_grey', hat: 'cap', carry: 'broom' });
   void rand;
