@@ -112,6 +112,9 @@ E.push({ t: 'yagura_mon', rect: [-12, MIDDLE.z0 - 9, 12, MIDDLE.z0 - 1], y: 0, p
   // the Honmaru's south yard, the foreground of the arrival: the guards' hall west of the stair (the lord's reception hall of the Honmaru, after Honda's time) and two plastered storehouses east of it
   E.push({ t: 'goten', y: H, halls: [[-76, -27, -52, -9]], open: { 0: { face: 'e', W: 12, dq: 7 } } });
   for (const x of [8, 17]) E.push({ t: 'kura', rect: [x, -28, x + 7, -20], y: H });
+  // a garden before the hall: pruned pines, stone lanterns, the flagstone path from the stair
+  pine(-49, -24.5, H, 5.2, 201); pine(-50.5, -8, H, 6, 202); pine(-3.5, -27, H, 5.5, 203);
+  E.push({ t: 'ishidoro', at: [-49.5, -17.8], y: H, s: 1.15 }, { t: 'ishidoro', at: [-38.5, -12.5], y: H, s: 1.0 });
   E.push({ t: 'kosatsu', at: [-12, -23.5], y: H, rot: 0 });
   E.push({ t: 'lane', rect: [-52, -20, -34, -14], y: H + 0.02, mat: 'flagstone' });
   E.push({ t: 'ido', at: [-46, 11], y: N, rot: 0.4 }, { t: 'ido', at: [46, -72], y: N, rot: 1.2 }, { t: 'ido', at: [-72, -14], y: H, rot: 2 });
