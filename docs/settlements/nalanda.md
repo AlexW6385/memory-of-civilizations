@@ -66,6 +66,24 @@ Monks in ochre and maroon robes, shaven, barefoot; novices carrying books and wa
 
 Chanting from the shrines, the tap of a wooden gong, the debate's claps, doves and crows, cicadas and frogs from the tanks, cattle from the village. Music: a drone with a plucked string in a pentatonic mode (shared with Sanchi) and a recited chant near the shrines. [inferred]
 
+## 12. The way's furniture (deepening pass)
+
+- Lamp pillars of brick with a dish of oil along both edges of the way between the gates; pilgrims' booths (flowers, clay lamps and incense, pots, grain, cloth, vegetables) on the margins; thatched water-sheds with rows of pots; brick benches (otla) against the monasteries' fronts where monks sit. Lamp-lighting and offering of flowers and incense are the ordinary acts at Buddhist shrines; booths and water-sheds are [inferred] from the pilgrim traffic Xuanzang and Yijing describe and from Indian practice of the period (the water-hut, *prapā*); sizes [inferred].
+- The way ends north in a great votive stūpa; the enclosure's gate stands at the south end: two brick towers, a lintel and a room over the passage, walls running off. Xuanzang: "one gate opened into the great college". [stated: Wikipedia "Nalanda"]; towers [inferred].
+
+## 13. The monasteries, all of them, and the annexes
+
+- All five monasteries are enterable (the excavated monasteries share one plan: cells round a court). Courts differ: Monastery 1 teaches (podium and mats), two have a great votive stūpa with small ones at its corners and devotees' mats, two a pillared pavilion with a seated Buddha. Cells carry a robe on the partition, a lamp on a stand and a bowl; robes dry on poles between the verandah's piers; a wooden gong hangs at a corner (the wooden gong is how the monastic day was called). [inferred; shunya.net describes the plan, podium, shrine and well]
+- Annexes on the lanes east of each monastery: refectory, two kitchens with three hearths each, granary with clay bins, infirmary (medicine, *cikitsāvidyā*, was taught here). [inferred from the taught subjects and the monastic day; Yijing describes the dining and the hospital-like care of the sick monks in India: inferred]
+- Temples 2 and 12 have a small top shrine with its Buddha, as Temple 3.
+- The library: all three towers have a ground hall of shelves (the tallest at its door a hall of the most sacred manuscripts); Ratnarañjaka has a stair to an upper hall with shelves and reading stands.
+
+## 14. The tanks and the village
+
+- Tanks: brick coping cut at the ghats; lotus leaves and flowers on the water ("an azure pool with blue lotuses winds around the monasteries", Xuanzang, as quoted in Wikipedia "Nalanda"); roofed ghat pavilions on the east tank.
+- Village: houses in continuous rows on lanes, yards between (pens with zebu and goats, the potter's with kiln and stacked pots); behind the houses dung-cake stacks, clay grain bins, charpoys, hay; a bazaar of booths on the road to it and along its main street. [inferred: village practice of Bihar]
+- Mango/neem groves thickened round the compound; the lanes kept open.
+
 ## 11. Sources
 
 - Wikipedia "Nalanda" (https://en.wikipedia.org/wiki/Nalanda, read through https://ipfs.ssi.eecc.de/ipns/en.wikipedia-on-ipfs.org/wiki/Nalanda)

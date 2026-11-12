@@ -15,19 +15,28 @@ const waterLevel = (x, z) => (inTankWater(x, z) ? LEVEL : -Infinity);
 const fromWater = (x, z) => Math.max(-5, Math.min(40, tankD(x, z)));
 // the arrival's view (the way, the temple's east face, the monastery's gate) kept clear of trees
 const EYE = [-3, 62];
-function inView(x, z) { return Math.hypot(x - EYE[0], z - EYE[1]) < 60 && x > -75 && x < 40 && z > -10; }
+function inView(x, z) { return Math.hypot(x - EYE[0], z - EYE[1]) < 42 && x > -48 && x < 30 && z > 10; }
+// the lanes of the village and of the ghats stay open
+function onLane(x, z) {
+  if (x > 70 && z > 88 && ((z - 92) % 13 + 13) % 13 > 7.8 && ((z - 92) % 13 + 13) % 13 < 12.2) return true;
+  if (x > 132 && ((x - 134) % 13 + 13) % 13 > 9.6) return true;
+  if (x > 122 && x < 130) return true;
+  if (x > 60 && x < 125 && [-75, -25, 25, 75].some((g) => Math.abs(z - g) < 4)) return true;
+  return z > 123 && z < 129 && x > 0;
+}
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || inTank(x, z, 1) || nearCore(x, z, 2) || inLot(x, z, 1)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || inTank(x, z, 1) || nearCore(x, z, 2) || inLot(x, z, 1) || onLane(x, z)) return null;
   if (inView(x, z)) return { grass: 9 };
-  if (tankD(x, z) < 8) return { reeds: 3, grass: 10 };
+  if (tankD(x, z) < 6) return { reeds: 3, grass: 10 };
   // the mango groves of the monasteries, pipal by the tanks, tala palms on the bunds
-  if (tankD(x, z) < 24) return { fig: 0.05, neem: 0.05, date_palm: 0.05, grass_dry: 7 };
-  if (x < -70 || x > 124 || z < -130) return { neem: 0.12, fig: 0.03, banyan: 0.012, date_palm: 0.05, grass_dry: 6 };
-  return { neem: 0.03, grass_dry: 9 };
+  if (tankD(x, z) < 24) return { fig: 0.5, neem: 0.5, date_palm: 0.5, grass_dry: 7 };
+  if (x < -70 || z < -130) return { neem: 1.5, fig: 0.5, banyan: 0.1, date_palm: 0.7, grass_dry: 6 };
+  if (x > 124 || z > 128) return { neem: 0.7, fig: 0.2, date_palm: 0.4, grass_dry: 8 };
+  return { neem: 0.5, fig: 0.2, date_palm: 0.2, grass_dry: 9 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { neem: 0.12, fig: 0.05, banyan: 0.012, date_palm: 0.05 },
+  maxDensity: { neem: 1.6, fig: 0.6, banyan: 0.12, date_palm: 0.8 },
   climate: {
     sun: { az: 125, el: 58, color: [1.0, 0.95, 0.85], intensity: 3.5, lat: 25, dec: 10, hour: 9.5 },
     sky: { turbidity: 4.5, rayleigh: 1.3, mie: 0.006, mieG: 0.8, zenith: [0.1, 0.17, 0.36], horizon: [0.64, 0.62, 0.58] },

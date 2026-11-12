@@ -6,6 +6,7 @@
 // palm-leaf manuscripts; votive stupas; brick-edged tanks with their ghats.
 import { registerStyle, orientedBox, subtractRects } from '../../core/build.js';
 import { box, lathe, frustum, fromTriangles } from '../../core/geom.js';
+import makeDress from './dress.js';
 
 const BR = 'brick', BRB = 'brick_baked', PL = 'lime_plaster', TB = 'timber';
 
@@ -153,6 +154,12 @@ function monastery(el, ctx) {
           const q = P(c + pitch / 2 - 0.55, CELL.out + 0.45);
           if (r() < 0.8) bag.add('terracotta', lathe([[0.001, 0], [0.1, 0.02], [0.19, 0.14], [0.2, 0.26], [0.13, 0.38], [0.09, 0.42], [0.11, 0.46], [0.001, 0.46]], 10, null, q[0], yb, q[1]));
           col.rect(rectOf2(P(s0, CELL.out), P(s0 + 0.9, CELL.out + 1.9)), yb, yb + 0.45);
+          // a robe hung on the far partition, a lamp on a small stand by the bed's head, a bowl on the sill of the slit
+          const sp = c + pitch / 2 - 0.25;
+          bag.add(r() < 0.5 ? 'cloth_ochre' : 'cloth_maroon', orientedBox(P(sp, CELL.out + 1.2), P(sp, CELL.out + 1.85), 0.05, yb + 1.0, yb + 1.85, 0));
+          bag.add(TB, orientedBox(P(s0 + 1.15, CELL.out + 0.3), P(s0 + 1.15, CELL.out + 0.3), 0.22, yb, yb + 0.4, 0.11));
+          bag.add('terracotta', lathe([[0.001, 0], [0.06, 0], [0.1, 0.03], [0.001, 0.03]], 6, null, ...(() => { const q = P(s0 + 1.15, CELL.out + 0.3); return [q[0], yb + 0.4, q[1]]; })()));
+          if (r() < 0.5) { const q = P(s0 + 0.45, CELL.out + 0.2); bag.add('pottery_dark', lathe([[0.001, 0], [0.09, 0], [0.13, 0.06], [0.001, 0.06]], 6, null, q[0], yb + 0.45, q[1])); }
         }
       }
     }
@@ -230,7 +237,7 @@ function monastery(el, ctx) {
   buddha(bag, sx1 - 1.9, 0.35, mz, 1.5, 'w');
   B(bag, 'sandstone_dressed', sx1 - 2.6, 0.35, mz - 0.9, sx1 - 1.2, 0.75, mz + 0.9);
   // the lecture platform: a podium with steps toward the court's middle, the teacher's seat, rows of mats before it
-  if (enter) {
+  if (el.court === 'teach') {
     const lx0 = mx - 5.5, lx1 = mx + 1.5, lz0 = mz + 6.2, lz1 = mz + 10.6;
     B(bag, BRB, lx0, 0, lz0, lx1, 1.0, lz1); B(bag, PL, lx0 - 0.1, 1.0, lz0 - 0.1, lx1 + 0.1, 1.1, lz1 + 0.1);
     col.floor([lx0, lz0, lx1, lz1], 1.1);
@@ -245,6 +252,44 @@ function monastery(el, ctx) {
       if (Math.hypot(mx2 - wx, mz2 - wz) < 2.2) continue;
       bag.add('reed_mat', orientedBox([mx2 - 0.55, mz2], [mx2 + 0.55, mz2], 0.8, 0, 0.03, 0));
     }
+  }
+  if (el.court === 'stupa') {
+    // a great votive stupa of the court on its plinth, small ones at its corners, mats of the devout before it
+    votiveStupa(ctx, mx - 2, mz + 6.5, 0, 2.0);
+    for (const [dx, dz] of [[-6.2, 3.2], [2.4, 3.2], [-6.2, 10.0], [2.4, 10.0]]) votiveStupa(ctx, mx + dx, mz + dz, 0, 0.8);
+    for (let k = 0; k < 4; k++) bag.add('reed_mat', orientedBox([mx - 5 + k * 2.2, mz + 2.2], [mx - 4.2 + k * 2.2, mz + 2.2], 0.8, 0, 0.03, 0));
+  } else if (el.court === 'pavilion') {
+    // a pillared pavilion of timber under a hipped tile roof, the Buddha in the middle on a brick seat, benches round
+    const px0 = mx - 8, pz0 = mz + 4.2, px1 = mx + 0.5, pz1 = mz + 12.2;
+    B(bag, BRB, px0 - 0.4, 0, pz0 - 0.4, px1 + 0.4, 0.4, pz1 + 0.4); col.floor([px0 - 0.4, pz0 - 0.4, px1 + 0.4, pz1 + 0.4], 0.4);
+    flight(ctx, [mx - 4.6, pz0 - 2.2, mx - 3.0, pz0 - 0.4], 's', 0, 0.4, -0.1, 0.2, BR);
+    for (const x of [px0 + 0.3, px1 - 0.3]) for (const z of [pz0 + 0.3, pz1 - 0.3]) { B(bag, TB, x - 0.16, 0.5, z - 0.16, x + 0.16, 3.5, z + 0.16); col.rect([x - 0.17, z - 0.17, x + 0.17, z + 0.17], 0.4, 3.5); B(bag, BRB, x - 0.28, 0.4, z - 0.28, x + 0.28, 0.65, z + 0.28); }
+    for (const z of [pz0 + 0.3, pz1 - 0.3]) bag.add('wood_dark', orientedBox([px0, z], [px1, z], 0.3, 3.5, 3.85, 0.1));
+    for (const x of [px0 + 0.3, px1 - 0.3]) bag.add('wood_dark', orientedBox([x, pz0], [x, pz1], 0.3, 3.5, 3.85, 0.1));
+    bag.add('roof_tile', frustum([px0 - 1.0, pz0 - 1.0, px1 + 1.0, pz1 + 1.0], 3.85, 5.6, 3.0, 3.0, 3.0, 3.0));
+    bag.add(BRB, lathe([[0.4, 0], [0.3, 0.3], [0.001, 1.0]], 8, null, (px0 + px1) / 2, 5.6, (pz0 + pz1) / 2));
+    const bx = (px0 + px1) / 2, bz = (pz0 + pz1) / 2;
+    B(bag, BR, bx - 1.1, 0.4, bz - 1.1, bx + 1.1, 0.95, bz + 1.1); col.rect([bx - 1.1, bz - 1.1, bx + 1.1, bz + 1.1], 0.4, 0.95);
+    buddha(bag, bx, 0.95, bz, 1.2, 'n');
+    for (const z of [pz0 + 1.0, pz1 - 1.0]) { bag.add(BR, orientedBox([px0 + 1.4, z], [px1 - 1.4, z], 0.5, 0.4, 0.8, 0)); col.segment([px0 + 1.4, z], [px1 - 1.4, z], 0.5, 0.4, 0.8); }
+  }
+  // lamp pillars in the court, at the verandah's edge by the gate, and at the porch
+  D.lamps({ at: [[cx0 + 1.5, mz - 9], [cx0 + 1.5, mz + 9], [cx1 - 1.5, mz - 10], [cx1 - 1.5, mz + 10], [x0 - 3.1, gz - 3.7], [x0 - 3.1, gz + 3.7]] }, ctx);
+  // robes drying on poles between the piers of the verandah, a wooden gong hung at the north-east corner
+  if (enter) {
+    const rr = rng((el.seed ?? 5) * 17);
+    for (let i = 0; i < 4; i++) {
+      const a = corners[i], b = corners[(i + 1) % 4], u = [(b[0] - a[0]) / Math.hypot(b[0] - a[0], b[1] - a[1]), (b[1] - a[1]) / Math.hypot(b[0] - a[0], b[1] - a[1])];
+      for (let k = 1; k < 11; k++) {
+        if (rr() > 0.3 || (i === 3 && Math.abs(k - 5.5) < 1.6)) continue;
+        const p0 = [a[0] + (b[0] - a[0]) * k / 11, a[1] + (b[1] - a[1]) * k / 11], p1 = [a[0] + (b[0] - a[0]) * (k + 1) / 11, a[1] + (b[1] - a[1]) * (k + 1) / 11];
+        bag.add(TB, orientedBox(p0, p1, 0.05, 1.98, 2.04, 0));
+        for (let q = 0; q < 3; q++) { const t = 0.2 + q * 0.3, c = [p0[0] + (p1[0] - p0[0]) * t, p0[1] + (p1[1] - p0[1]) * t]; bag.add(rr() < 0.55 ? 'cloth_ochre' : 'cloth_maroon', orientedBox([c[0] - u[0] * 0.24, c[1] - u[1] * 0.24], [c[0] + u[0] * 0.24, c[1] + u[1] * 0.24], 0.04, 0.95 + rr() * 0.15, 1.98, 0)); }
+      }
+    }
+    const gx = px1 - 1.0, gzz = pz0 + 1.0;
+    B(bag, TB, gx - 0.07, 0, gzz - 1.0, gx + 0.07, 2.4, gzz - 0.86); B(bag, TB, gx - 0.07, 0, gzz + 0.86, gx + 0.07, 2.4, gzz + 1.0); B(bag, TB, gx - 0.07, 2.3, gzz - 1.0, gx + 0.07, 2.4, gzz + 1.0);
+    B(bag, 'wood_dark', gx - 0.05, 1.5, gzz - 0.5, gx + 0.05, 2.25, gzz + 0.5);
   }
   // the court's paving: a darker way from the gate to the shrine
   bag.add('cotto_floor', frustum([x0 + BLOCK + 2.9, mz - 1.4, sx0 - 0.5, mz + 1.4], 0, 0.02, 0, 0, 0, 0, { noBottom: true }));
@@ -335,28 +380,45 @@ function tower(el, ctx) {
     wallGaps(sc, [cx - hx, cz + hz], [cx - hx, cz - hz], 0.9, -0.1, SH);
     wallGaps(sc, [cx + hx, cz - hz], [cx + hx, cz + hz], 0.9, -0.1, SH, [{ s0: hz - 1.2, s1: hz + 1.2, y0: -0.2, y1: 2.9 }]);
     bag.add(TB, orientedBox([cx + hx, cz - 1.5], [cx + hx, cz + 1.5], 1.0, 2.9, 3.1, 0));
-    B(bag, PL, cx - hx, SH, cz - hz, cx + hx, SH + 0.3, cz + hz);
+    const SY = SH + 0.3, st = [cx + hx - 3.6, cz + 1.7, cx + hx - 1.8, cz + hz - 0.5];
+    if (el.upper) {
+      for (const q of subtractRects([cx - hx, cz - hz, cx + hx, cz + hz], [st])) { B(bag, PL, q[0], SH, q[1], q[2], SY, q[3]); col.floor(q, SY); }
+      flight(ctx, st, 'n', 0, SY, -0.1, SY / 20, BR);
+    } else B(bag, PL, cx - hx, SH, cz - hz, cx + hx, SH + 0.3, cz + hz);
     // shelves of palm-leaf manuscripts along the west wall and the two long walls: posts, shelves, bundles tied in cloth between boards
-    const shelf = (a, b, nx, nz) => {
+    const shelf = (a, b, nx, nz, yb = 0) => {
       const L = Math.hypot(b[0] - a[0], b[1] - a[1]), u = [(b[0] - a[0]) / L, (b[1] - a[1]) / L];
-      bag.add(TB, orientedBox(a, b, 0.5, 0, 0.08, 0));
-      for (let i = 0; i <= Math.round(L / 2.4); i++) { const s = i * L / Math.round(L / 2.4), p = [a[0] + u[0] * s, a[1] + u[1] * s]; B(bag, TB, p[0] - 0.05, 0, p[1] - 0.05, p[0] + 0.05, 2.3, p[1] + 0.05); }
+      bag.add(TB, orientedBox(a, b, 0.5, yb, yb + 0.08, 0));
+      for (let i = 0; i <= Math.round(L / 2.4); i++) { const s = i * L / Math.round(L / 2.4), p = [a[0] + u[0] * s, a[1] + u[1] * s]; B(bag, TB, p[0] - 0.05, yb, p[1] - 0.05, p[0] + 0.05, yb + 2.3, p[1] + 0.05); }
       for (let row = 0; row < 5; row++) {
-        const yy = 0.1 + row * 0.5;
+        const yy = yb + 0.1 + row * 0.5;
         bag.add(TB, orientedBox(a, b, 0.5, yy, yy + 0.04, 0));
         for (let i = 0; i < Math.floor(L / 0.6); i++) {
           const s = 0.3 + i * 0.6, p = [a[0] + u[0] * s, a[1] + u[1] * s];
           bag.add(i % 3 === 2 ? 'cloth_red' : 'cloth_ochre', orientedBox([p[0] - u[0] * 0.22, p[1] - u[1] * 0.22], [p[0] + u[0] * 0.22, p[1] + u[1] * 0.22], 0.34, yy + 0.04, yy + 0.3, 0));
         }
       }
-      col.segment(a, b, 0.5, 0, 2.3);
+      col.segment(a, b, 0.5, yb, yb + 2.3);
       void nx; void nz;
     };
     shelf([cx - hx + 0.7, cz - hz + 4], [cx - hx + 0.7, cz + hz - 4], 1, 0);
     shelf([cx - hx + 3, cz - hz + 0.7], [cx + hx - 5, cz - hz + 0.7], 0, 1);
     shelf([cx - hx + 3, cz + hz - 0.7], [cx + hx - 5, cz + hz - 0.7], 0, -1);
     // the copyists' desks: a low desk of timber and a mat, a lamp-stand beside it
-    for (let i = 0; i < 4; i++) for (const sz of [-1, 1]) {
+    if (el.upper) {
+      // the upper hall (reached by the stair at the east end): shelves round the walls, rows of mats with low reading stands
+      shelf([cx - hx + 1.7, cz - hz + 4], [cx - hx + 1.7, cz + hz - 4], 1, 0, SY);
+      shelf([cx - hx + 3, cz - hz + 1.7], [cx + hx - 5, cz - hz + 1.7], 0, 1, SY);
+      shelf([cx - hx + 3, cz + hz - 1.7], [cx + hx - 5, cz + hz - 1.7], 0, -1, SY);
+      for (let i = 0; i < 3; i++) for (const sz of [-1, 1]) {
+        const dx = cx - 4 + i * 3.4, dz = cz + sz * 2.4;
+        B(bag, TB, dx - 0.4, SY + 0.28, dz - 0.3, dx + 0.4, SY + 0.34, dz + 0.3);
+        for (const [a, b] of [[-0.35, -0.25], [0.35, -0.25], [-0.35, 0.25], [0.35, 0.25]]) B(bag, TB, dx + a - 0.03, SY, dz + b - 0.03, dx + a + 0.03, SY + 0.28, dz + b + 0.03);
+        bag.add('reed_mat', orientedBox([dx - 0.7, dz + sz * 0.8], [dx + 0.7, dz + sz * 0.8], 0.7, SY, SY + 0.03, 0));
+        bag.add('cloth_red', orientedBox([dx - 0.25, dz], [dx + 0.25, dz], 0.25, SY + 0.34, SY + 0.4, 0));
+      }
+    }
+    for (let i = 0; i < (hx >= 9 ? 4 : 2); i++) for (const sz of [-1, 1]) {
       const dx = cx - 3 + i * 3.2, dz = cz + sz * 2.6;
       B(bag, TB, dx - 0.7, 0.3, dz - 0.35, dx + 0.7, 0.36, dz + 0.35);
       for (const [a, b] of [[-0.6, -0.28], [0.6, -0.28], [-0.6, 0.28], [0.6, 0.28]]) B(bag, TB, dx + a - 0.03, 0, dz + b - 0.03, dx + a + 0.03, 0.3, dz + b + 0.03);
@@ -369,17 +431,21 @@ function tower(el, ctx) {
   }
   for (let s = k0; s < n; s++) {
     const inset = Math.floor(s / 2) * 0.6, ax = hx - (hall ? 0 : inset), az = hz - (hall ? 0 : inset), y0 = s * SH + (hall && s === 1 ? 0.3 : 0), y1 = (s + 1) * SH + (hall ? 0.3 : 0);
-    bag.add(BR, frustum([cx - ax, cz - az, cx + ax, cz + az], y0, y1 - 0.4, 0, 0, 0, 0, { noBottom: s === 0 }));
+    if (hall && el.upper && s === 1) {
+      const e0 = ax - 0.45, e1 = az - 0.45, wh = (len) => { const h = []; for (let q = 1.6; q < len - 1; q += 3.0) h.push({ s0: q - 0.3, s1: q + 0.3, y0: y0 + 1.2, y1: y0 + 2.6 }); return h; };
+      wallGaps(sc, [cx - e0, cz - e1], [cx + e0, cz - e1], 0.9, y0, y1 - 0.4, wh(e0 * 2)); wallGaps(sc, [cx + e0, cz + e1], [cx - e0, cz + e1], 0.9, y0, y1 - 0.4, wh(e0 * 2));
+      wallGaps(sc, [cx - e0, cz + e1], [cx - e0, cz - e1], 0.9, y0, y1 - 0.4, wh(e1 * 2)); wallGaps(sc, [cx + e0, cz - e1], [cx + e0, cz + e1], 0.9, y0, y1 - 0.4, wh(e1 * 2));
+    } else bag.add(BR, frustum([cx - ax, cz - az, cx + ax, cz + az], y0, y1 - 0.4, 0, 0, 0, 0, { noBottom: s === 0 }));
     B(bag, BRB, cx - ax - 0.25, y1 - 0.4, cz - az - 0.25, cx + ax + 0.25, y1 - 0.2, cz + az + 0.25);
     B(bag, PL, cx - ax - 0.15, y1 - 0.2, cz - az - 0.15, cx + ax + 0.15, y1, cz + az + 0.15);
     if (s === 0 && !hall) col.rect([cx - ax, cz - az, cx + ax, cz + az], 0, n * SH);
-    if (s === 0 && hall) col.rect([cx - ax, cz - az, cx + ax, cz + az], SH, n * SH + 1);
+    if (s === 0 && hall) col.rect([cx - ax, cz - az, cx + ax, cz + az], el.upper ? 7.5 : SH, n * SH + 1);
     // the slit windows
     for (const [dx, dz] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
       const len = (dz ? ax : az) * 2, m = Math.max(2, Math.floor(len / 2.8));
       for (let i = 0; i < m; i++) {
         const t = -len / 2 + len * (i + 0.5) / m, px = dz ? cx + t : cx + dx * ax, pz = dz ? cz + dz * az : cz + t;
-        if (hall && s === 0) continue;
+        if (hall && (s === 0 || (el.upper && s === 1))) continue;
         B(bag, 'opening', px - (dz ? 0.25 : 0) + dx * 0.04, y0 + 1.5, pz - (dx ? 0.25 : 0) + dz * 0.04, px + (dz ? 0.25 : 0) + dx * 0.1, y0 + 2.6, pz + (dx ? 0.25 : 0) + dz * 0.1);
       }
     }
@@ -403,6 +469,19 @@ function tank(el, ctx) {
     else if (g.side === 'n') flight(ctx, [g.at - w / 2, z0 - 3.2, g.at + w / 2, z0 + 0.3], 'n', y - 0.4, 0, y - 2.2, 0.2, BR);
     else flight(ctx, [g.at - w / 2, z1 - 0.3, g.at + w / 2, z1 + 3.2], 's', y - 0.4, 0, y - 2.2, 0.2, BR);
   }
+  // the coping: a low band of baked brick round the tank, cut at the ghats
+  const m = 3.0, q0 = x0 - m, q1 = x1 + m, r0 = z0 - m, r1 = z1 + m;
+  const seg = (a, b, side) => {
+    const L = Math.hypot(b[0] - a[0], b[1] - a[1]), u = [(b[0] - a[0]) / L, (b[1] - a[1]) / L];
+    const holes = (el.ghats || []).filter((g) => g.side === side).map((g) => {
+      const t0 = g.at - (g.w ?? 6) / 2 - 0.4, t1 = g.at + (g.w ?? 6) / 2 + 0.4, horiz = side === 'n' || side === 's';
+      const p0 = horiz ? [t0, a[1]] : [a[0], t0], p1 = horiz ? [t1, a[1]] : [a[0], t1];
+      const s0 = (p0[0] - a[0]) * u[0] + (p0[1] - a[1]) * u[1], s1 = (p1[0] - a[0]) * u[0] + (p1[1] - a[1]) * u[1];
+      return { s0: Math.min(s0, s1), s1: Math.max(s0, s1), y0: -1, y1: 2 };
+    });
+    wallGaps({ bag, col: { segment() {} } }, a, b, 0.7, -0.05, 0.32, holes, BRB);
+  };
+  seg([q0, r1], [q0, r0], 'w'); seg([q1, r0], [q1, r1], 'e'); seg([q0, r0], [q1, r0], 'n'); seg([q1, r1], [q0, r1], 's');
 }
 const fromArray = (a) => fromTriangles(a);
 
@@ -411,8 +490,9 @@ function votives(el, ctx) { for (const [x, z, s] of el.at) votiveStupa(ctx, x, z
 /** A low brick wall a→b, height h, thickness th. */
 function brickWall(el, ctx) { wallGaps(ctx, el.a, el.b, el.th ?? 0.7, -0.2, el.h ?? 2.6, el.holes || [], BR); if (el.cap !== false) ctx.bag.add(BRB, orientedBox(el.a, el.b, (el.th ?? 0.7) + 0.2, el.h ?? 2.6, (el.h ?? 2.6) + 0.15, 0.1)); }
 
+const D = makeDress({ B, wallGaps, votiveStupa, buddha });
 registerStyle('nalanda', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { monastery, temple, tower, tank, votives, brick_wall: brickWall },
+  elements: { monastery, temple, tower, tank, votives, brick_wall: brickWall, ...D },
   objects: {},
 });

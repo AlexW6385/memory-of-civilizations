@@ -9,9 +9,9 @@ const [mx0, mz0, mx1, mz1] = M1.rect, mzc = (mz0 + mz1) / 2;
 const cxm = (mx0 + 7.6 + mx1 - 7.6) / 2;                          // the court's middle
 const L = LIBRARY.c;
 export const TOWERS = [
-  { c: [L[0], L[1] - 4], half: [7, 7], storeys: 9 },                  // Ratnodadhi, nine storeys
-  { c: [L[0] - 23, L[1] - 3], half: [6, 8], storeys: 6 },             // Ratnasagara
-  { c: [L[0] + 21, L[1]], half: [9, 7], storeys: 4, hall: true },     // Ratnarañjaka, its ground hall open to readers
+  { c: [L[0], L[1] - 4], half: [7, 7], storeys: 9, hall: true },                  // Ratnodadhi, nine storeys, a ground hall of the most sacred manuscripts
+  { c: [L[0] - 23, L[1] - 3], half: [6, 8], storeys: 6, hall: true },             // Ratnasagara
+  { c: [L[0] + 21, L[1]], half: [9, 7], storeys: 4, hall: true, upper: true },    // Ratnarañjaka, its ground hall and its upper hall open to readers
 ];
 export const HALL = TOWERS[2];
 
@@ -26,7 +26,7 @@ export function yardWalls() {
 }
 
 const E = [];
-E.push({ t: 'monastery', rect: M1.rect, enter: true, seed: M1.seed });
+E.push({ t: 'monastery', rect: M1.rect, enter: true, court: 'teach', seed: M1.seed });
 E.push({ t: 'temple', ...T3, y: 0 });
 for (const t of TOWERS) E.push({ t: 'tower', ...t });
 E.push(...yardWalls());
@@ -49,6 +49,9 @@ export const landmark = {
     room('temple top', [T3.c[0] - 8, -8, T3.c[0] + 8, 8], 20, 'open'),
     room('temple shrine', [T3.c[0] - 3, -2, T3.c[0] + 1, 2], 20, 'hall'),
     room('library hall', [HALL.c[0] - 5, HALL.c[1] - 1.2, HALL.c[0] + 5, HALL.c[1] + 1.2], 0, 'hall'),
+    room('library upper hall', [HALL.c[0] - 5, HALL.c[1] - 1.2, HALL.c[0] + 5, HALL.c[1] + 1.2], 4.1, 'hall'),
+    room('sacred hall', [TOWERS[0].c[0] - 3, TOWERS[0].c[1] - 1.2, TOWERS[0].c[0] + 3, TOWERS[0].c[1] + 1.2], 0, 'hall'),
+    room('second hall', [TOWERS[1].c[0] - 2, TOWERS[1].c[1] - 1.2, TOWERS[1].c[0] + 2, TOWERS[1].c[1] + 1.2], 0, 'hall'),
   ],
   walks: [
     Object.assign([[0, 40], [0, mzc], [mx0 - 2, mzc], [mx0 + 12, mzc], [cxm, mzc], [mx1 - 14, mzc]], { y0: 0 }),
