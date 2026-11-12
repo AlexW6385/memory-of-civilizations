@@ -118,8 +118,9 @@ function people() {
     for (let i = 0; i < 3; i++) for (const sz of [-1, 1]) if (r() < 0.6) monk([hx0 - 4 + i * 3.4, hz0 + sz * 2.4 + sz * 0.8], SY + 0.03, [0, -sz], { pose: 'cross', cloth: 'cloth_ochre' });
     for (const t of TOWERS.slice(0, 2)) monk([t.c[0] - 1, t.c[1] + 1.8], 0.03, [0, -1], { pose: 'cross' });
     lay([LIBRARY.yard[2] - 1.5, (LIBRARY.yard[1] + LIBRARY.yard[3]) / 2 + 3.2], 0, [-1, 0], { pose: 'stand', hat: 'none' }); monk([LIBRARY.yard[2] - 4, -92 - 6], 0, [-1, 0.4], { pose: 'talk' }); monk([LIBRARY.yard[2] - 5.2, -92 - 5.6], 0, [1, 0], { pose: 'talk' }); }
-  // the gate: two guards, pilgrims coming in with their bundles
+  // the gate: two gatekeepers in plain dress
   lay([-6.2, GATE.c[1] + 5.2], 0, [0, -1], { pose: 'stand', hat: 'none' }); lay([6.2, GATE.c[1] + 5.2], 0, [0, -1], { pose: 'stand', hat: 'none' });
+  // pilgrims coming in with their bundles
   lay([-1.5, GATE.c[1] + 9], 0, [0, -1], { pose: 'stand', carry: 'bundle' }); woman([1.8, GATE.c[1] + 11], 0, [0, -1], { pose: 'stand', carry: 'basket' });
   // the yards: zebu and goats in the pens, hay
   yards().forEach((y, i) => { const [a0, b0, a1, b1] = y.rect; if (i % 3 === 2) return; P.push({ t: 'animal', kind: 'zebu', at: [(a0 + a1) / 2 - 1, (b0 + b1) / 2], y: 0, rot: r() * 6, seed: 300 + i }, { t: 'animal', kind: i % 2 ? 'goat' : 'zebu', at: [(a0 + a1) / 2 + 1.5, (b0 + b1) / 2 + 1], y: 0, rot: r() * 6, seed: 400 + i }); });

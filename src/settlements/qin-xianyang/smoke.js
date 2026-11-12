@@ -3,7 +3,8 @@
 // soot). The engine part is src/engine/smoke.js (one draw call); positions come from layout.js.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, HALL, STAIR, PIT, RAMP, rampZ, shopLots, lots as townLots } from './layout.js';
+import { RADIUS, HALL, STAIR, PIT, RAMP, rampZ, lots as townLots } from './layout.js';
+import { shopLots } from './town.js';
 import { ground } from './ground.js';
 
 const ID = 'qin-xianyang';
