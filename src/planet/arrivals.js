@@ -72,7 +72,7 @@ export const ARRIVALS = {
   'nan-madol':        [-10, null, 80, 0, 0.12],          // Nandauwas whole across the canal from the landing islet
   'maori':            [0, 0.2, 150, 0, 0.2],             // the pā's palisade and carved gateway
   'ayutthaya':        [10, 0.1, -100, 0, 0.3],      // the three chedis of Wat Phra Si Sanphet in their row, from the forecourt in line with the gate
-  'alexandria':       [100, null, -86, 0.50, 0.17],      // the Pharos across the Great Harbour, from the quay before the Museion
+  'alexandria':       [100, null, -86, 0.62, 0.15],      // the Pharos across the Great Harbour, from the quay before the Museion
   'sydney':           [214.5, null, -112, 1.0, 0.05],    // at the sea wall of Mrs Macquarie's Point: the Opera House across the water, the Harbour Bridge behind
   'dunhuang': [14, 0.1, 0, 1.5708, 0.2],   // On the main street east of the stream, looking west along its axis over the timber bridge: the Mogao cliff with its tiers of caves and galleries, the Nine-Storey building stepping up over the Great Buddha's hall at its middle.
   'catalhoyuk':       [1.2, 2.6, 19, 1.1, -0.05],            // the landmark house whole across the ground: its south wall, the ladder up to the roof, the packed roofscape behind
