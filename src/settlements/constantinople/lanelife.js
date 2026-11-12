@@ -6,7 +6,7 @@
 import { RADIUS, lots, height } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-const TILE = 160, NEAR = 170, PEOPLE = 150;
+const TILE = 160, NEAR = 120, PEOPLE = 150;
 
 export function laneLife() {
   const E = [];
