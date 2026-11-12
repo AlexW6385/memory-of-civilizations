@@ -28,7 +28,7 @@ function quarter(el, { bag, col, lights }) {
     if (k === '.') { yard(bag, col, X(j), Z(i), X(j) + C[j], Z(i) + R[i], rand); continue; }
     const x0 = X(j), z0 = Z(i), x1 = x0 + C[j], z1 = z0 + R[i], cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
     if (k === 'm') { midden(bag, x0, z0, x1, z1, rand); continue; }
-    if (k === 'c') { court2(bag, col, x0, z0, x1, z1, rand, Math.floor(rand() * 5)); continue; }
+    if (k === 'c') { court2(bag, col, x0, z0, x1, z1, rand, el.trades ? el.trades[i][j] : Math.floor(rand() * 5)); continue; }
     const top = T[i][j], en = ENTER.get(i + ',' + j);
     if (en) cell({ rect: [x0, z0, x1, z1], top, seed: i * 31 + j * 7 + 3, variant: en.variant, mirror: en.mirror }, { bag, col, lights });
     else {

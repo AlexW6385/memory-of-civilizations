@@ -54,6 +54,8 @@ export const ENTER = (() => {
   }
   return out;
 })();
+/** The trade of each court (0 baker, 1 potter, 2 knapper, 3 hide-worker, 4 mat-maker), fixed so the people can be put at their work. */
+export const TRADE = KIND.map((row, i) => row.map((k, j) => (i * 5 + j * 3 + 1) % 5));
 export const cellRect = (i, j) => [colX(j), rowZ(i), colX(j) + CW[j], rowZ(i) + CD[i]];
 export const CLUSTER = [X0, Z0, X0 + W, Z0 + D];
 export const LANDMARK = { i: LM.i, j: LM.j, rect: cellRect(LM.i, LM.j) };

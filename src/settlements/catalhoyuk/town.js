@@ -2,11 +2,16 @@
 // in the courts, a woman grinding in the storeroom of the opened house, another sitting on the platform, sheep, goats and cattle
 // in the pens, dogs, the people of the middens. Dress after [inferred] §7: wraps and skirts of hide and woven fibre, leopard-skin
 // cloaks for a few, no hats, bare feet, hair loose, ochre on the skin.
-import { CW, CD, X0, Z0, KIND, TOP, LANDMARK, PENS, ST, colX, rowZ } from './layout.js';
+import { CW, CD, X0, Z0, KIND, TOP, LANDMARK, PENS, ST, ENTER, TRADE, MARSH, colX, rowZ } from './layout.js';
+import { landings } from './plan.js';
+import { cellGeom } from '../../styles/catal/cell.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const plan = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-130, -130, 130, 130], entrance: { at: [0, 30], facing: 'n' } });
 
+const z1c = (i) => rowZ(i) + CD[i];
+
+const face0 = (dx, dz) => Math.atan2(dx, dz);
 export async function town() {
   const rand = rng(6500), P = [], E = [];
   const skin = () => (rand() < 0.75 ? 'skin_medium' : 'skin_dark');
@@ -20,7 +25,7 @@ export async function town() {
   // on the roofs: a figure at a corner of a house, sitting or standing; now and then two talking
   for (let i = 0; i < KIND.length; i++) for (let j = 0; j < KIND[0].length; j++) {
     const k = KIND[i][j], x0 = colX(j), z0 = rowZ(i);
-    if (k === 'h' && rand() < 0.3) {
+    if (k === 'h' && rand() < 0.5) {
       const y = TOP[i][j] + 0.09, at = [x0 + 0.8 + rand() * 0.4, z0 + CD[i] - 0.9 - rand() * 0.5], rot = rand() * 6.28;
       const r = rand();
       if (r < 0.3) woman(at, y, rot, { pose: 'sit_ground' });
@@ -29,13 +34,47 @@ export async function town() {
       else if (r < 0.85) man(at, y, rot, rand() < 0.5 ? { pose: 'talk' } : {});
       else man(at, y, rot, { pose: 'squat' });
     } else if (k === 'c') {
-      const cx = x0 + CW[j] / 2, cz = z0 + CD[i] / 2;
-      woman([cx - 1.0, cz + 0.5], 0, Math.PI, { pose: 'kneel', over: 'none' });                 // at the oven
-      if (rand() < 0.7) woman([cx + 0.3, cz + 1.9], 0, 0, { pose: 'kneel', over: 'none' });        // at the grinding stone
-      if (rand() < 0.6) woman([cx + 1.5, cz - 1.8], 0, rand() * 6, { child: true, h: 0.9 });
+      const cx = x0 + CW[j] / 2, cz = z0 + CD[i] / 2, tr = TRADE[i][j];
+      if (tr === 0) {
+        woman([cx - 1.0, cz + 0.5], 0, Math.PI, { pose: 'kneel', over: 'none' });                 // at the oven
+        woman([cx + 0.3, cz + 1.9], 0, 0, { pose: 'kneel', over: 'none' });                          // at the grinding stone
+      } else if (tr === 1) {
+        woman([cx, cz + 0.5], 0, Math.PI, { pose: 'kneel', over: 'none' });                          // at the pots drying on the bench
+        man([x0 + 1.9, z0 + 1.9], 0, 2.4, { pose: 'squat' });                                       // at the clay
+      } else if (tr === 2) {
+        man([cx - 0.9, cz + 0.8], 0, Math.PI, { pose: 'squat' });                                   // knapping at the anvil stone
+        man([cx + 1.2, cz + 1.5], 0, Math.PI * 1.3, { pose: 'sit_ground' });
+      } else if (tr === 3) {
+        woman([cx, cz - 0.4], 0, Math.PI, {});                                       // scraping the hide on the frame
+        woman([x0 + 1.2, z0 + 2.3], 0, 1.0, { pose: 'kneel', over: 'none' });
+      } else {
+        woman([cx - 0.2, cz + 0.9], 0, Math.PI, { pose: 'sit_ground', over: 'none' });                // plaiting a mat
+        woman([cx + 1.2, cz + 1.0], 0, Math.PI * 0.8, { pose: 'sit_ground', over: 'none' });
+      }
+      if (rand() < 0.7) woman([cx + 1.5, cz - 1.8], 0, rand() * 6, { child: true, h: 0.9 });
+      if (rand() < 0.5) E.push({ t: 'animal', kind: 'dog', at: [x0 + 1.0, z1c(i) - 0.9], y: 0, rot: rand() * 6, seed: i * 9 + j });
     } else if (k === 'm' && rand() < 0.6) {
       man([x0 + 1.0, z0 + 1.2], 0, rand() * 6, { carry: 'basket' });
     }
+  }
+  // the houses one can go down into: who is at home, by the house's trade
+  for (const e of ENTER) {
+    const G = cellGeom([colX(e.j), rowZ(e.i), colX(e.j) + CW[e.j], rowZ(e.i) + CD[e.i]], e.mirror), { lx, lz, W, D, S } = G, F = 0.05, face = (dx, dz) => Math.atan2(dx, dz);
+    const [hx, hz] = G.hearth, [ox, oz] = G.oven;
+    woman([hx + S * 0.2, hz - 0.65], F, face(0, 1), { pose: 'kneel', over: 'none' });                  // at the hearth
+    if (rand() < 0.7) woman([lx(W - 0.7), lz(0.75)], 0.45 + F, face(-S, 0), { pose: 'sit_ground', over: 'none', ...(rand() < 0.5 ? { child: true, h: 0.6 } : {}) });   // on the north platform's end
+    if (e.variant === 3) man([lx(1.6), lz(2.3) + 0.8], F, face(-S * 0.2, -1), { pose: 'squat' });       // at the knapper's anvil
+    else if (e.variant === 4) woman([lx(W * 0.5 + 0.4), lz(D - 0.95)], F, face(0, 1), { pose: 'kneel', over: 'none' });   // at the quern
+    else if (rand() < 0.6) woman([ox + S * 0.9, oz - 0.7], F, face(-S * 0.6, 0.6), { pose: 'kneel', over: 'none' });          // at the oven's mouth
+  }
+  // the marsh landings: a man poling a raft, a woman in the shallows with a basket, a child at the net, ducks on the water
+  for (const L of landings) {
+    const [x, z] = L.at, dx = Math.cos(L.toward), dz = Math.sin(L.toward), P = (s, t) => [x + dx * s - dz * t, z + dz * s + dx * t], W = MARSH.water;
+    man(P(4.5, 1.8), W + 0.22, face0(dx, dz), { carry: 'pole' });
+    woman(P(2.0, -1.0), W - 0.12, face0(dx, dz) + 0.6, { carry: 'basket' });
+    woman(P(-3.0, 0.7), L.y, face0(-dz, dx), { child: true, h: 0.9 });
+    man(P(-2.0, -1.8), L.y, face0(dx, dz) - 1, { pose: 'squat' });
+    E.push({ t: 'chickens', kind: 'duck', n: 5, at: P(9, -3), y: W - 0.02, seed: 7 + Math.floor(x) });
   }
   // outside the town: people coming back from the marsh with reed bundles, a man leading sheep
   for (let q = 0; q < 6; q++) {

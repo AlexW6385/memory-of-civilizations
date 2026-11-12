@@ -1,13 +1,13 @@
 // Çatalhöyük, c. 6500 BC (docs/settlements/catalhoyuk.md §4–§5): the packed town of mudbrick houses, the one house opened
 // (the landmark, reached by its ladder up the south wall and through the roof hatch), the hurdle pens at the edge.
 
-import { CW, CD, X0, Z0, KIND, TOP, LANDMARK, PENS, CLUSTER, RADIUS, ST, ENTER, height, POOLS, MARSH } from './layout.js';
+import { CW, CD, X0, Z0, KIND, TOP, LANDMARK, PENS, CLUSTER, RADIUS, ST, ENTER, TRADE, height, POOLS, MARSH } from './layout.js';
 import '../../styles/catal/index.js';
 import { cellGeom } from '../../styles/catal/cell.js';
 import { colX, rowZ } from './layout.js';
 
 const E = [];
-E.push({ t: 'catal_quarter', x0: X0, z0: Z0, cols: CW, rows: CD, kind: KIND, tops: TOP, seed: 6500, enter: ENTER });
+E.push({ t: 'catal_quarter', x0: X0, z0: Z0, cols: CW, rows: CD, kind: KIND, tops: TOP, seed: 6500, enter: ENTER, trades: TRADE });
 E.push({ t: 'catal_house', rect: LANDMARK.rect, top: ST, seed: 77 });
 for (const p of PENS) E.push({ t: 'catal_pen', rect: p.rect, gate: p.gate });
 // the trodden ring and its outwork, clear of the arrival, the ladder, the lanes to the pens and the south lane
