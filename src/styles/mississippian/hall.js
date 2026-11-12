@@ -8,6 +8,7 @@
 // observers [stated: see the dossier]; the furnishing [inferred].
 import { box, frustum, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { WALL, TH, rng, tri, thatchHip } from './kit.js';
+import { slab } from './dress.js';
 
 /** The inside of a hip roof: woven mats lined on the slopes, facing in, the rafters and ridge beam along them. */
 function lining(bag, [x0, z0, x1, z1], y, rise) {
@@ -156,6 +157,23 @@ export function chiefHall(el, { bag, col, lights }) {
   for (const [bx, bz, r] of [[x1 - t - 0.5, cz + 1.5, 0.3], [x1 - t - 0.6, cz + 2.3, 0.24]]) bag.add('wicker', lathe([[0.001, 0], [r * 0.8, 0.01], [r, r * 0.9], [r * 0.9, r * 0.9], [r * 0.72, 0.05], [0.001, 0.04]], 12, null, bx, F, bz));
   // weapons on the east wall: bows, arrows, a war club
   for (let k = 0; k < 3; k++) { const wz = cz - 1.5 + k * 1.1; bag.add('timber', rod([x1 - t - 0.12, F + 0.3, wz], [x1 - t - 0.2, F + 2.1, wz + 0.05], 0.028, 6)); bag.add('flagstone', box(x1 - t - 0.23, F + 2.1, wz, x1 - t - 0.17, F + 2.25, wz + 0.1)); }
+  // the porch before the door: a lean-to roof of thatch on posts, a beam along its front, the door posts' paint carried on a frieze
+  if (el.porch) {
+    const pd = el.porch, pw = Math.min(L * 0.5, 16), px0 = cx - pw / 2, px1 = cx + pw / 2, zf = z1 + pd, yh = top - 0.9, yl = y + 2.7, n = Math.max(3, Math.round(pw / 2.8));
+    for (let k = 0; k <= n; k++) {
+      const x = px0 + pw * k / n;
+      if (Math.abs(x - cx) < 1.7) continue;
+      bag.add('timber', rod([x, y - 0.4, zf], [x, yl, zf], 0.13, 8)); col.circle(x, zf, 0.13, y, yl);
+      if (k % 2 === 0) bag.add('timber_red', rod([x, yl - 1.0, zf + 0.14], [x, yl - 0.55, zf + 0.14], 0.14, 8));
+    }
+    bag.add('timber', rod([px0 - 0.2, yl, zf], [px1 + 0.2, yl, zf], 0.11, 8));
+    for (const x of [px0 - 0.2, px1 + 0.2]) bag.add('timber', rod([x, yl, zf], [x, yh, z1 + 0.3], 0.07, 6));
+    slab(bag, TH, [px0 - 0.5, yh, z1 + 0.5], [px1 + 0.5, yh, z1 + 0.5], [px1 + 0.5, yl + 0.12, zf + 0.6], [px0 - 0.5, yl + 0.12, zf + 0.6], 0.34);
+    bag.add('timber', rod([px0 - 0.4, yh - 0.05, z1 + 0.3], [px1 + 0.4, yh - 0.05, z1 + 0.3], 0.1, 8));
+    // the clay floor of the porch, worn
+    bag.add(WALL, box(px0 - 0.3, y - 0.3, z1, px1 + 0.3, F, zf + 0.3));
+    col.floor([px0 - 0.3, z1, px1 + 0.3, zf + 0.3], F);
+  }
   // the great post before the door
   if (el.post) { const [px, pz] = el.post; bag.add('timber_red', lathe([[0.5, 0], [0.46, 9], [0.36, 9.6], [0.001, 9.8]], 12, null, px, y - 0.8, pz)); col.circle(px, pz, 0.5, y, y + 9); }
   void frustum; void TH; void along;

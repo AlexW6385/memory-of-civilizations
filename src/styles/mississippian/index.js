@@ -13,6 +13,7 @@ import { WALL, TH, rng, tri, thatchHip, doorway } from './kit.js';
 import { neighbourhoodElements } from './neighbourhood.js';
 import { chiefHall } from './hall.js';
 import { placeElements } from './place.js';
+import { moundElements } from './mound.js';
 import { dressHouse, leanTo, furnishKind } from './dress.js';
 /**
  * great_house: { rect, y, h, rise, post (a great post before the door: [x, z]) } — a large
@@ -343,6 +344,6 @@ const flip = (t) => { const o = []; for (let i = 0; i < t.length; i += 9) o.push
 
 registerStyle('mississippian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, great_house: greatHouse, chief_hall: chiefHall, ...neighbourhoodElements, ...placeElements, miss_house: house, palisade, woodhenge, plaza_pole: pole, chunkey_yard: chunkeyYard, charnel_house: charnelHouse },
+  elements: { ...STYLES.qing.elements, great_house: greatHouse, chief_hall: chiefHall, ...neighbourhoodElements, ...placeElements, ...moundElements, miss_house: house, palisade, woodhenge, plaza_pole: pole, chunkey_yard: chunkeyYard, charnel_house: charnelHouse },
   objects: {},
 });

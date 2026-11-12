@@ -7,7 +7,7 @@
 // (Monks Mound ~291 × 236 m → 200 × 170 m, height true). Pure data. +x east, +z south.
 
 export const RADIUS = 420;
-export const MONKS = { main: [-80, -265, 80, -120, 30], first: [-70, -120, 70, -62, 12], west: [-110, -230, -80, -140, 18], east: [80, -215, 112, -150, 16] };
+export const MONKS = { main: [-80, -265, 80, -120, 30], first: [-70, -146, 70, -62, 12], west: [-110, -230, -80, -140, 18], east: [80, -215, 112, -150, 16] };
 export const SUMMIT = [-20, -235, 22, -170];                 // the main summit's top, for the great house
 export const HALLS = [[SUMMIT[0], SUMMIT[1] + 20, SUMMIT[2], SUMMIT[1] + 40], [-14, -100, 8, -86]];   // the two opened great houses, summit and first terrace
 export const PLAZA = [-115, -40, 115, 150];
