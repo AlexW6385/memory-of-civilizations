@@ -246,18 +246,25 @@ function whare(el, ctx) {
     const a = [s * (w / 2 + ov), e, -l / 2 - 0.1], b = [s * (w / 2 + ov), e, l / 2 + 0.2], c = [0, ridge, l / 2 + 0.2], d = [0, ridge, -l / 2 - 0.1];
     tr.push(...a, ...b, ...c, ...a, ...c, ...d, ...a, ...c, ...b, ...a, ...d, ...c);
   }
-  add(TH, fromTriangles(tr));
+  const RM = el.roof ?? TH;
+  add(RM, fromTriangles(tr));
   // the thatch's lashings: battens tied down the slopes at intervals, and the ridge capped with a roll of raupō [inferred: after museum models of thatched whare]
   if (!small && rank < 2) {
     const sl = (x) => e + (ridge - e) * (1 - Math.abs(x) / (w / 2 + ov));
     for (const s of [-1, 1]) for (let zz = -l / 2 + 0.5; zz < l / 2 - 0.2; zz += 1.1) add('rope_fibre', rod([s * (w / 2 + ov - 0.05), sl(w / 2 + ov - 0.05) + 0.03, zz], [s * 0.1, sl(0.1) + 0.04, zz], 0.022, 4));
-    add(TH, rod([0, ridge + 0.04, -l / 2 - 0.1], [0, ridge + 0.04, l / 2 + 0.2], 0.1, 6));
+    add(RM, rod([0, ridge + 0.04, -l / 2 - 0.1], [0, ridge + 0.04, l / 2 + 0.2], 0.1, 6));
   }
   // the underside of the thatch, smoke-darkened (rafters and the inner layer of reed): a ceiling under the roof, so that one may walk in
   if (!small) { const tu = tr.slice(); for (let q = 1; q < tu.length; q += 3) tu[q] -= 0.1; add('wood_dark', fromTriangles(tu)); }
   // the ridge beam (tāhuhu) under the ridge, the rafters (heke) of the porch
   add(carved ? K : 'timber', box(-0.1, ridge - 0.32, -l / 2 - 0.05, 0.1, under(0.1) - 0.005, l / 2 - t));
   for (const s of [-1, 1]) for (let zz = -l / 2 + 0.2; zz < zf - 0.1; zz += 0.45) add(carved ? K : 'timber', board([s * (w / 2 - 0.05), under(w / 2 - 0.05) - 0.06], [s * 0.12, under(0.12) - 0.06], 0.1, zz - 0.04, zz + 0.04));
+  // a common house's plain bargeboards (maihi) at the porch's gable and the ridge-board's end standing out over it [inferred: the plain form of the carved maihi]
+  if (!carved && !small && rank < 2) {
+    const zb0 = -l / 2 - 0.2, zb1 = -l / 2 - 0.1;
+    for (const s of [-1, 1]) add('timber', board([0, ridge + 0.1], [s * (w / 2 + ov + 0.05), e - 0.08], 0.2, zb0, zb1));
+    add('timber', rod([0, ridge + 0.05, -l / 2 - 0.45], [0, ridge + 0.1, -l / 2 + 0.2], 0.05, 5));
+  }
   // door and window frames
   add('timber', box(dl - 0.1, -0.2, zf - 0.04, dl, dh, zf)); add('timber', box(dr, -0.2, zf - 0.04, dr + 0.1, dh, zf));
   if (!small) { add('timber', box(wl - 0.08, wb - 0.08, zf - 0.04, wr + 0.08, wb, zf)); add('timber', box(wl - 0.08, wt, zf - 0.04, wr + 0.08, wt + 0.08, zf)); }

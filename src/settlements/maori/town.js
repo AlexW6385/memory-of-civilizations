@@ -15,7 +15,7 @@ const CHIEF = ['hide_white', 'hide_brown'];
 
 export async function town() {
   const v = village(), E = [], P = [], rand = rng(1769);
-  for (const h of v.houses.slice(1)) E.push({ t: 'whare', carved: false, walls: (h.c[0] * 7 + h.c[1] * 3) % 5 < 2 ? 'reed_mat' : 'raupo', ...h, ...(Math.hypot(h.c[0], h.c[1]) > 250 ? { furnished: false } : {}) });
+  for (const h of v.houses.slice(1)) E.push({ t: 'whare', carved: false, walls: (h.c[0] * 7 + h.c[1] * 3) % 5 < 2 ? 'reed_mat' : 'raupo', roof: (h.c[0] * 3 + h.c[1] * 11) % 7 < 2 ? 'thatch' : 'raupo', ...h, ...(Math.hypot(h.c[0], h.c[1]) > 250 ? { furnished: false } : {}) });
   for (const p of v.pataka.slice(1)) E.push({ t: 'pataka', ...p });
   for (const p of v.pits) E.push({ t: 'rua', ...p });
   for (const w of v.waka) E.push({ t: 'waka', ...w });
