@@ -34,7 +34,7 @@ export const ARRIVALS = {
   'jerusalem':        [-67.6, 18, -40, -1.78, 0.16],     // on the esplanade, the Dome of the Rock
   'constantinople':   [-70, null, 110, -0.517, 0.16],    // Hagia Sophia's dome over its buttresses, from the south-west
   'ottoman-istanbul': [0, 22.1, -91, 3.1416, 0.42],      // the Süleymaniye's cascading domes and four minarets, whole
-  'giza':             [160, 0.1, -285, 2.563, 0.2],      // the Great Pyramid whole from the north-east across the plateau, two faces (the enclosure's corner had stood in front)
+  'giza':             [242, 0.1, -50, 1.62, 0.24],       // on the plateau's east side, 270 m from the apex: the Great Pyramid whole over the mortuary temple and the causeway's head, a queen's pyramid at the left, the casing ramp half taken down and its hauling gangs at the right, a procession crossing before the doorway
   'mamluk-cairo':     [110, null, 120, 1.03, 0.22],      // Sultan Hasan's walls, dome and minarets from the square
   'djenne':           [95, 0.1, 30, 1.25, 0.13],         // the Great Mosque over the market
   'lalibela':         [-217, 0.1, 113, -2.356, -0.42],   // at the pit's north-west corner, down its diagonal onto the cross
