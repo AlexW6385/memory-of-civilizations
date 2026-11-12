@@ -18,7 +18,43 @@ for (const [t, sd] of [[ICE, 71], [TIGER, 73]]) {
   E.push({ t: 'han_hall', cx: -196, z1: zc, bays: 5, bayW: 6, depth: 2, depthW: 6, floor: t.top + 0.6, base: 0.6, h: 5.4, roof: 'hip', rise: 4.4, overhang: 2.6, ap: 2.2, furnish: 'court', open: [2, 2], seed: sd });
 }
 for (const s of SKYWAYS) E.push({ t: 'wei_skyway', a: [s.a[0], s.a[1]], b: [s.b[0], s.b[1]], y: 12, w: 4.4 });
-void zOf; void faceX; void POND; void POND_Y;
+// ── what stands about the terraces: the army's banners, the bronze of the court, the guards' racks, the drum and bells of the dais ──
+for (const t of [ICE, SPARROW, TIGER]) {
+  const st = stairRect(t), zc = zOf(t), fx = st[2];
+  for (const sg of [-1, 1]) {
+    E.push({ t: 'wei_prop', kind: 'flag', at: [fx + 3.5, zc + sg * 7.2], yaw: sg > 0 ? 0 : Math.PI, h: 7.2, cloth: sg > 0 ? 'cloth_red' : 'cloth_black', long: t === SPARROW });
+    E.push({ t: 'wei_prop', kind: 'brazier', at: [fx + 1.8, zc + sg * 5.4] });
+    E.push({ t: 'wei_prop', kind: 'rack', at: [fx + 7, zc + sg * 6.4], yaw: Math.PI / 2, n: 7 });
+    E.push({ t: 'wei_prop', kind: 'brazier', at: [st[0] + 1.5, zc + sg * 5.2], y: t.top });
+    E.push({ t: 'wei_prop', kind: 'ding', at: [fx - 4, zc + sg * 8.2], s: 1.1 });
+  }
+  E.push({ t: 'wei_prop', kind: 'block', at: [fx + 1.6, zc + 10.5], yaw: Math.PI / 2 });
+  E.push({ t: 'wei_prop', kind: 'rail', at: [fx + 12, zc + 12.5], len: 4 });
+}
+{
+  const [d0, d1, d2, d3] = SPARROW.dais, y = SPARROW.daisTop, [tx, tz] = TOWER.c;
+  // the dais: the drum of the hours north of the tower, the bell frame south of it, the dings and lamp trees by its door, braziers at the stair
+  E.push({ t: 'wei_prop', kind: 'drum', at: [tx, d1 + 5.2], y, yaw: 0 });
+  E.push({ t: 'wei_prop', kind: 'bells', at: [tx, d3 - 5.2], y, yaw: 0, n: 6 });
+  for (const sg of [-1, 1]) {
+    E.push({ t: 'wei_prop', kind: 'ding', at: [d2 - 3.2, tz + sg * 3.4], y, s: 1.0 });
+    E.push({ t: 'wei_prop', kind: 'lamp', at: [d2 - 6, tz + sg * 6.5], y });
+    E.push({ t: 'wei_prop', kind: 'lamp', at: [d0 + 4, tz + sg * 7.5], y });
+    E.push({ t: 'wei_prop', kind: 'brazier', at: [d2 - 2, tz + sg * 8.5], y });
+  }
+  E.push({ t: 'wei_prop', kind: 'bench', at: [d0 + 3.2, tz], y, yaw: Math.PI / 2, len: 3 });
+  // the crown below the dais: banners at the corners of the terrace
+  for (const [x, z] of [[-169.6, -114.5], [-169.6, -61.5], [-219.5, -114.5], [-219.5, -61.5]]) E.push({ t: 'wei_prop', kind: 'flag', at: [x, z], y: SPARROW.top, h: 6.5, cloth: 'cloth_red', long: true });
+}
+// the Golden Tiger's and the Ice Well's crowns: stores' hoists - lumber and jars at the foot of the halls, benches, lamps
+for (const [t, sd] of [[ICE, 1], [TIGER, 2]]) {
+  const zc = t.r[3] - 8;
+  E.push({ t: 'wei_prop', kind: 'jars', at: [-212.5, zc + 4.6], y: t.top, seed: sd, n: 6 });
+  E.push({ t: 'wei_prop', kind: 'lamp', at: [-176, zc + 4.6], y: t.top });
+  E.push({ t: 'wei_prop', kind: 'bench', at: [-204, zc + 4.2], y: t.top, len: 3 });
+  E.push({ t: 'wei_prop', kind: 'brazier', at: [-186, zc + 4.4], y: t.top });
+}
+void faceX; void POND; void POND_Y;
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const [tx, tz] = TOWER.c, a = TOWER.half;

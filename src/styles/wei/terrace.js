@@ -79,9 +79,30 @@ const bird = (bag, x, y, z) => {
   bag.add('gilt_bronze', box(x - 0.1, y + 2.4, z - 1.2, x + 0.1, y + 2.55, z - 0.5));
 };
 
+/** A triangle added so that its normal points up (up = true) or down. */
+function tri(out, a, b, c, up = true) {
+  const ux = c[0] - b[0], uy = c[1] - b[1], uz = c[2] - b[2], vx = a[0] - b[0], vy = a[1] - b[1], vz = a[2] - b[2];
+  const ny = uz * vx - ux * vz;
+  if ((ny > 0) === up) out.push(...a, ...b, ...c); else out.push(...a, ...c, ...b);
+}
+/** The pent roof (the ping zuo eave) round the foot of an upper storey: from the outer edge (half O, height yo) up to the wall (half I, height yi), the four trapezoids. */
+function pentRoof(ctx, cx, cz, O, I, yo, yi) {
+  const { bag } = ctx, top = [], under = [];
+  const corner = (sx, sz, h, y) => [cx + sx * h, y, cz + sz * h];
+  for (const [sx, sz, tx, tz] of [[1, 1, -1, 1], [-1, 1, -1, -1], [-1, -1, 1, -1], [1, -1, 1, 1]]) {
+    const o0 = corner(sx, sz, O, yo), o1 = corner(tx, tz, O, yo), i0 = corner(sx, sz, I, yi), i1 = corner(tx, tz, I, yi);
+    tri(top, o0, o1, i1, true); tri(top, o0, i1, i0, true);
+    const u = (p) => [p[0], p[1] - 0.3, p[2]];
+    tri(under, u(o0), u(o1), u(i1), false); tri(under, u(o0), u(i1), u(i0), false);
+  }
+  bag.add('tile_grey', fromTriangles(top)); bag.add('timber_red', fromTriangles(under));
+  eaveTiles(bag, cx, cz, O, O, yo, 0, 0.42, 0.11);
+}
+
 /**
- * wei_tower: { c: [x, z], half, floor, storeys (3), seed } — three storeys of red timber, plaster and lattice, each under its hipped tile roof and each
- * smaller than the one below; the ground storey is a room with a door in the east and west faces, furnished; the bird on the top.
+ * wei_tower: { c: [x, z], half, floor, seed } — three storeys of red timber, plaster and lattice under hipped tile roofs: the ground storey a furnished
+ * room with a door in the east and west faces; a stair of 20 steps along its north wall rises through the ceiling to the second storey, a
+ * furnished room of its own behind lattice, under the great hipped roof; the third storey is solid under the gilded bird.
  */
 export function tower(el, ctx) {
   const { bag, col, lights } = ctx, [cx, cz] = el.c, a = el.half, f = el.floor, rand = rng(el.seed ?? 5);
@@ -115,30 +136,50 @@ export function tower(el, ctx) {
     for (const u of [-door, door]) bag.add('timber_red', box(cx + s * a - 0.25, f, cz + u - 0.25, cx + s * a + 0.25, f + 3.3, cz + u + 0.25));
     bag.add('timber_red', box(cx + s * a - 0.28, f + 3.3, cz - door - 0.3, cx + s * a + 0.28, f + 3.6, cz + door + 0.3));
   }
-  bag.add('ceiling_coffer', box(cx - a, f + H - 0.1, cz - a, cx + a, f + H - 0.02, cz + a));
   bag.add('timber_red', box(cx - a - 0.3, f + H - 0.55, cz - a - 0.3, cx + a + 0.3, f + H - 0.1, cz + a + 0.3));
-  // the roof of the first storey
+  // the ceiling and the floor of the second storey: one slab with the stairwell cut out of it (the stair rises west along the north wall)
+  const f2 = f + H + 0.3, hx0 = cx + 0.3, hx1 = cx + 7.3, hz0 = cz - 7.5, hz1 = cz - 5.6;
+  const slab = (x0, z0, x1, z1) => {
+    bag.add('ceiling_coffer', box(x0, f + H - 0.1, z0, x1, f2 - 0.03, z1));
+    bag.add('lacquer_chestnut', box(x0, f2 - 0.03, z0, x1, f2, z1));
+    col.floor([x0, z0, x1, z1], f2);
+  };
+  slab(cx - a, cz - a, cx + a, hz0); slab(cx - a, hz1, cx + a, cz + a); slab(cx - a, hz0, hx0, hz1); slab(hx1, hz0, cx + a, hz1);
+  steps(bag, col, [hx0, hz0, hx1, hz1], f, f2, 'w', 'bluestone', 0.25, f - 0.05, 'brick_paving');
+  // the stair's rails on the second floor, round the well's open sides
+  for (const r of [[hx0, hz1, hx1, hz1 + 0.1], [hx1 - 0.1, hz0, hx1, hz1]]) { bag.add('lacquer_red', box(r[0], f2 + 0.9, r[1], r[2], f2 + 1.0, r[3])); bag.add('lacquer_red', box(r[0], f2 + 0.4, r[1], r[2], f2 + 0.45, r[3])); col.rect(r, f2, f2 + 1.1); }
+  for (let x = hx0 + 0.05; x <= hx1; x += 1.2) bag.add('lacquer_red', box(x - 0.05, f2, hz1, x + 0.05, f2 + 1.0, hz1 + 0.1));
+  // the pent roof round the second storey, and the second storey itself: a hollow room, lattice above a plaster foot, a door-less ring of walls
+  const a2 = a - 0.6, hh2 = 4.6;
+  pentRoof(ctx, cx, cz, a + 2.8, a2, f + H - 0.3, f + H + 0.9);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) bag.add('timber_red', box(cx + sx * a2 - 0.25, f2, cz + sz * a2 - 0.25, cx + sx * a2 + 0.25, f2 + hh2 - 0.5, cz + sz * a2 + 0.25));
+  for (const s of [-1, 1]) {
+    wallseg(cx - a2, cz + s * a2 - t, cx + a2, cz + s * a2 + t, f2, f2 + 0.9, 'lime_plaster'); wallseg(cx - a2, cz + s * a2 - t, cx + a2, cz + s * a2 + t, f2 + 0.9, f2 + hh2 - 0.5, 'lattice');
+    wallseg(cx + s * a2 - t, cz - a2, cx + s * a2 + t, cz + a2, f2, f2 + 0.9, 'lime_plaster'); wallseg(cx + s * a2 - t, cz - a2, cx + s * a2 + t, cz + a2, f2 + 0.9, f2 + hh2 - 0.5, 'lattice');
+    col.rect([cx - a2, cz + s * a2 - t, cx + a2, cz + s * a2 + t], f2, f2 + hh2); col.rect([cx + s * a2 - t, cz - a2, cx + s * a2 + t, cz + a2], f2, f2 + hh2);
+  }
+  bag.add('timber_red', box(cx - a2 - 0.3, f2 + hh2 - 0.5, cz - a2 - 0.3, cx + a2 + 0.3, f2 + hh2, cz + a2 + 0.3));
+  bag.add('ceiling_coffer', box(cx - a2, f2 + hh2 - 0.55, cz - a2, cx + a2, f2 + hh2 - 0.5, cz + a2));
+  // the roofs
   const eave = (aa, y, rise) => { hipLite({ c: [cx, cz], A: aa, B: aa, y, rise, lift: 0.5, pow: 1.2, mat: 'tile_grey', soffit: 'timber_red', noChiwei: true }, ctx); eaveTiles(bag, cx, cz, aa, aa, y, 0.5, 0.4, 0.11); };
-  eave(a + 2.8, f + H - 0.3, 2.4);
-  // the second and third storeys: solid (not entered), plaster and lattice with red columns' bands
+  eave(a2 + 2.6, f2 + hh2 - 0.1, 2.4);
+  // the third storey: solid, plaster and lattice with red columns' bands, under its own roof
   const upper = (aa, y0, hh, roofA, rise) => {
     bag.add('lime_plaster', box(cx - aa, y0, cz - aa, cx + aa, y0 + 0.9, cz + aa)); bag.add('lattice', box(cx - aa - 0.03, y0 + 0.9, cz - aa - 0.03, cx + aa + 0.03, y0 + hh - 0.5, cz + aa + 0.03));
     bag.add('timber_red', box(cx - aa - 0.3, y0 + hh - 0.5, cz - aa - 0.3, cx + aa + 0.3, y0 + hh, cz + aa + 0.3));
-    for (const sx of [-1, 1]) for (const sz of [-1, 1]) bag.add('timber_red', box(cx + sx * aa - 0.25 - (sx > 0 ? 0 : 0), y0, cz + sz * aa - 0.25, cx + sx * aa + 0.25, y0 + hh - 0.5, cz + sz * aa + 0.25));
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) bag.add('timber_red', box(cx + sx * aa - 0.25, y0, cz + sz * aa - 0.25, cx + sx * aa + 0.25, y0 + hh - 0.5, cz + sz * aa + 0.25));
     col.rect([cx - aa, cz - aa, cx + aa, cz + aa], y0, y0 + hh);
     eave(roofA, y0 + hh - 0.1, rise);
   };
-  const y2 = f + H + 1.1, a2 = a * 0.72;
-  upper(a2, y2, 3.8, a2 + 2.4, 2.2);
-  const y3 = y2 + 3.8 + 1.0, a3 = a * 0.46;
+  const y3 = f2 + hh2 + 1.0, a3 = a * 0.46;
   upper(a3, y3, 3.2, a3 + 2.2, 2.8);
   bird(bag, cx, y3 + 3.1 + 2.8 - 0.1, cz);
-  // inside: a screen of black lacquer at the west door's north side, mats and low tables in two rows, lamps, a censer
+  // inside the ground storey: a screen of black lacquer at the west door's north side, mats and low tables in two rows, lamps, a censer
   const y = f + 0.02;
   for (const s of [-1, 1]) for (let k = 0; k < 3; k++) {
     const x = cx - 3.6 + k * 3.6, z = cz + s * 4.6;
     bag.add('reed_mat', box(x - 1.0, y, z - 0.75, x + 1.0, y + 0.03, z + 0.75));
-    bag.add('lacquer_black', box(x - 0.55, y + 0.03, z - 0.3 - s * 0.0 - 0.3, x + 0.55, y + 0.36, z - 0.3 + 0.3));
+    bag.add('lacquer_black', box(x - 0.55, y + 0.03, z - 0.6, x + 0.55, y + 0.36, z));
     bag.add('lacquer_red', box(x - 0.45, y + 0.36, z - 0.55, x + 0.45, y + 0.39, z - 0.05));
     if (rand() < 0.6) bag.add('bronze', lathe([[0.001, 0], [0.07, 0.01], [0.1, 0.09], [0.001, 0.09]], 8, null, x + 0.1, y + 0.39, z - 0.3));
   }
@@ -150,6 +191,29 @@ export function tower(el, ctx) {
     bag.add('bronze', lathe([[0.2, 0], [0.18, 0.05], [0.05, 0.12], [0.04, 1.1], [0.1, 1.15], [0.24, 1.25], [0.2, 1.3]], 10, null, cx + dx * a / 8 * 1.2, y, cz + dz * a / 8 * 1.2));
   }
   lights.push({ at: [cx, f + H - 1.2, cz], color: '#ffd7a0', intensity: 6, distance: 16 });
+  // inside the second storey (the poets' loft, over the stair's end): mats and tables in two rows facing the south windows, the books of the library on
+  // a shelf along the south wall (bamboo slips in bundles), a zither (qin) on its table, a bronze lamp tree at each end, a censer
+  const y2 = f2 + 0.02;
+  for (let k = 0; k < 3; k++) for (const s of [0, 1]) {
+    const x = cx - 5.0 + k * 3.0, z = cz + 0.6 + s * 3.4;
+    bag.add('reed_mat', box(x - 1.0, y2, z - 0.75, x + 1.0, y2 + 0.03, z + 0.75));
+    bag.add('lacquer_black', box(x - 0.55, y2 + 0.03, z - 0.6, x + 0.55, y2 + 0.38, z - 0.05)); bag.add('lacquer_red', box(x - 0.5, y2 + 0.38, z - 0.55, x + 0.5, y2 + 0.41, z - 0.08));
+    if (k === 1 && !s) { bag.add('wood_dark', box(x - 0.45, y2 + 0.41, z - 0.4, x + 0.35, y2 + 0.46, z - 0.2)); bag.add('lacquer_black', box(x - 0.4, y2 + 0.46, z - 0.37, x + 0.3, y2 + 0.48, z - 0.23)); }
+    else for (let q = 0; q < 3; q++) bag.add(q % 2 ? 'wood_ochre' : 'bamboo_culm', box(x - 0.3 + q * 0.25, y2 + 0.41, z - 0.4, x - 0.2 + q * 0.25, y2 + 0.47, z - 0.15));
+  }
+  for (let k = 0; k < 5; k++) {
+    const x = cx - 6.2 + k * 2.6;
+    bag.add('timber', box(x - 1.1, y2, cz + a2 - 1.0, x + 1.1, y2 + 0.04, cz + a2 - 0.35));
+    bag.add('timber', box(x - 1.1, y2 + 0.04, cz + a2 - 0.4, x + 1.1, y2 + 1.8, cz + a2 - 0.35));
+    for (let r = 0; r < 4; r++) for (let q = 0; q < 6; q++) bag.add((q + r) % 3 ? 'wood_ochre' : 'bamboo_culm', box(x - 1.0 + q * 0.34, y2 + 0.1 + r * 0.42, cz + a2 - 0.95, x - 0.7 + q * 0.34, y2 + 0.45 + r * 0.42, cz + a2 - 0.42));
+    col.rect([x - 1.1, cz + a2 - 1.0, x + 1.1, cz + a2 - 0.3], f2, f2 + 1.9);
+  }
+  for (const s of [-1, 1]) {
+    bag.add('bronze', lathe([[0.2, 0], [0.18, 0.05], [0.05, 0.12], [0.04, 1.3], [0.1, 1.35], [0.24, 1.45], [0.2, 1.5]], 10, null, cx + s * (a2 - 1.0), y2, cz - 1.0));
+    col.circle(cx + s * (a2 - 1.0), cz - 1.0, 0.25, f2, f2 + 1.5);
+  }
+  bag.add('bronze', lathe([[0.001, 0], [0.18, 0.04], [0.2, 0.2], [0.14, 0.34], [0.001, 0.36]], 10, null, cx - 5.0, y2 + 0.41, cz + 0.45));
+  lights.push({ at: [cx - 2, f2 + hh2 - 1.4, cz + 1], color: '#ffd7a0', intensity: 5, distance: 15 });
 }
 
 /** wei_skyway: { a, b (the centre line, axis-aligned), y (the deck), w } — the covered walk (gé dào) between two terraces: a timber deck on posts, rails, a gabled roof. */

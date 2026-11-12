@@ -78,6 +78,30 @@ export async function town() {
     E.push({ t: 'han_hall', cx: 0, z1: -128, bays: 7, bayW: 6.6, depth: 2, depthW: 6.5, floor: 0.9, base: 0.9, h: 5.8, roof: 'hip', rise: 4.6, overhang: 2.8, ap: 1.8, furnish: 'court', open: [3, 3], seed: 31 });
     for (const [cx, sd] of [[-56, 41], [56, 43]]) E.push({ t: 'han_hall', cx, z1: -112, bays: 4, bayW: 5.2, depth: 2, depthW: 5, floor: 0.9, base: 0.9, h: 5.0, roof: 'gable', rise: 3.4, overhang: 2.2, ap: 1.4, furnish: 'office', open: [1, 2], seed: sd });
     E.push({ t: 'floor', rect: [-6, -37.5, 6, PALACE[3] - 1.5], y: 0.03, mat: 'bluestone', th: 0.3 }, { t: 'floor', rect: [-30, -50, 30, -37.5], y: 0.02, mat: 'brick_paving', th: 0.3 });
+    // the que before the gate, the banners, braziers and bronze of the forecourt, the court's drum and bells, the guards' racks
+    for (const sg of [-1, 1]) E.push({ t: 'han_que', at: [sg * 16.5, 3], sub: [sg, 0], h: 11, seed: 3 });
+    for (const sg of [-1, 1]) {
+      for (const z of [-14, -22, -30]) E.push({ t: 'wei_prop', kind: 'brazier', at: [sg * 7.8, z] });
+      for (const x of [14, 24, 34]) E.push({ t: 'wei_prop', kind: 'flag', at: [sg * x, -44.5], yaw: sg > 0 ? 0 : Math.PI, h: 7.4, cloth: x === 24 ? 'cloth_black' : 'cloth_red', long: x === 14 });
+      E.push({ t: 'wei_prop', kind: 'ding', at: [sg * 9, -45], s: 1.3 });
+      E.push({ t: 'wei_prop', kind: 'rack', at: [sg * 13, -12.5], n: 8 });
+      E.push({ t: 'wei_prop', kind: 'jars', at: [sg * 33, -15], seed: 5 + sg, n: 5 });
+      E.push({ t: 'wei_prop', kind: 'board', at: [sg * 22, -11.5], yaw: Math.PI });
+      E.push({ t: 'wei_prop', kind: 'bench', at: [sg * 30, -33.5], yaw: 0, len: 3 });
+    }
+    E.push({ t: 'wei_prop', kind: 'drum', at: [-24, -20], yaw: 0 }, { t: 'wei_prop', kind: 'bells', at: [24, -20], yaw: 0, n: 7 });
+    // the inner palace behind the Wenchang: the residences of the court's households, and the guards' halls beside the terrace
+    for (const [cx, sd] of [[-62, 51], [-34, 52], [34, 53], [62, 54]]) E.push({ t: 'han_hall', cx, z1: -150, bays: 3, bayW: 4.6, depth: 2, depthW: 5, floor: 0.7, base: 0.7, h: 4.6, roof: 'gable', rise: 2.8, overhang: 2.0, ap: 1.4, furnish: 'office', open: [1, 1], seed: sd });
+    for (const [cx, sd] of [[-64, 55], [64, 56]]) E.push({ t: 'han_hall', cx, z1: -62, bays: 3, bayW: 4.4, depth: 2, depthW: 4.8, floor: 0.6, base: 0.6, h: 4.2, roof: 'gable', rise: 2.4, overhang: 2.0, ap: 1.2, furnish: 'office', open: [1, 1], seed: sd });
+    for (const sg of [-1, 1]) {
+      E.push({ t: 'han_corridor', a: [sg * 64, -73], b: [sg * 64, -102], w: 3.0, h: 3.4, wall: sg });
+      E.push({ t: 'wei_prop', kind: 'well', at: [sg * 64, -86], yaw: 0 });
+      E.push({ t: 'wei_prop', kind: 'rack', at: [sg * 58, -56], n: 6 });
+      E.push({ t: 'wei_prop', kind: 'granary', at: [sg * 68, -128], yaw: 0, w: 4.6, d: 3.6 });
+      E.push({ t: 'wei_prop', kind: 'granary', at: [sg * 54, -128], yaw: 0, w: 4.6, d: 3.6 });
+      E.push({ t: 'wei_prop', kind: 'lamp', at: [sg * 12, -118] }, { t: 'wei_prop', kind: 'ding', at: [sg * 26, -123], s: 1.0 });
+      E.push({ t: 'wei_prop', kind: 'brazier', at: [sg * 52, -97] });
+    }
     plans.push(base('wei-palace', E));
   }
   // ── the garden: the Xuanwu pond, the pavilions of the Tongque Garden ──
@@ -86,6 +110,26 @@ export async function town() {
     E.push({ t: 'han_pavilion', c: [POND[2] + 6, POND[1] + 8], A: 3.4, B: 3.4, y: 0, h: 3.6, tiers: 1, walls: false });
     E.push({ t: 'han_pavilion', c: [POND[0] - 8, POND[3] - 6], A: 3.4, B: 3.4, y: 0, h: 3.6, tiers: 1, walls: false });
     E.push({ t: 'floor', rect: [-141, zOf(SPARROW) - 5.5, -100, zOf(SPARROW) + 5.5], y: 0.02, mat: 'brick_paving', th: 0.3 });
+    // the paths of the garden: north to the pond's landing, south to the poets' hall, east to the palace's west gate
+    E.push({ t: 'floor', rect: [-114, -135, -108, -93], y: 0.02, mat: 'brick_paving', th: 0.3 }, { t: 'floor', rect: [-114, -83, -108, -37], y: 0.02, mat: 'brick_paving', th: 0.3 },
+      { t: 'floor', rect: [-136, -37.5, -98, -33], y: 0.02, mat: 'brick_paving', th: 0.3 });
+    // the poets' hall (the Wenxue hall of the Jian'an circle) with its corridor, a pavilion on each of the garden's hummocks, the garden's furniture
+    E.push({ t: 'han_hall', cx: -117, z1: -26, bays: 5, bayW: 5.4, depth: 2, depthW: 5.4, floor: 0.7, base: 0.7, h: 4.8, roof: 'hip', rise: 3.6, overhang: 2.4, ap: 1.6, furnish: 'lecture', open: [2, 2], seed: 61 });
+    E.push({ t: 'han_corridor', a: [-143, -29], b: [-131, -29], w: 3.0, h: 3.4, wall: 1 });
+    for (const [x, z] of [[-95, -100], [-150, -118], [-92, -60]]) E.push({ t: 'han_pavilion', c: [x, z], A: 3.4, B: 3.4, y: 0, h: 3.6, tiers: 1, walls: false });
+    for (let x = -137; x <= -103; x += 11) for (const sg of [-1, 1]) E.push({ t: 'wei_prop', kind: 'lamp', at: [x, zOf(SPARROW) + sg * 6.4] });
+    for (const x of [-132, -122, -106]) for (const sg of [-1, 1]) E.push({ t: 'wei_prop', kind: 'bench', at: [x, zOf(SPARROW) + sg * 7.4], len: 2.2 });
+    const rr = rng(77);
+    for (let k = 0; k < 20; k++) {
+      const a = k / 20 * 6.28, rx = 33 + rr() * 6, rz = 20 + rr() * 5, x = (POND[0] + POND[2]) / 2 + Math.cos(a) * rx, z = (POND[1] + POND[3]) / 2 + Math.sin(a) * rz;
+      if (z > -100 || (x > -150 && x < -90 && z > -135 && z < -130)) continue;
+      E.push({ t: 'wei_prop', kind: 'rock', at: [x, z], seed: k + 4, s: 0.8 + rr() * 0.9 });
+    }
+    for (const [x, z] of [[-128, -128], [-108, -128], [-124, -66], [-146, -64], [-100, -110]]) E.push({ t: 'wei_prop', kind: 'rock', at: [x, z], seed: Math.round(x), s: 1.2 });
+    // the fleet's pond: the tower-ship at anchor, fighting ships and a skiff, the landing
+    E.push({ t: 'han_ship', at: [-120, -147.5], y: POND_Y, len: 15, yaw: 0 });
+    E.push({ t: 'wei_boat', at: [-97, -142], y: POND_Y, yaw: 1.2, len: 8, kind: 'war' }, { t: 'wei_boat', at: [-104, -153], y: POND_Y, yaw: 0.25, len: 9, kind: 'war' },
+      { t: 'wei_boat', at: [-132, -139], y: POND_Y, yaw: 0.5, len: 5, kind: 'skiff' });
     plans.push(base('wei-garden', E));
   }
   // ── the offices along the avenue ──
