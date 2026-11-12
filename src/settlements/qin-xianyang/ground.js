@@ -36,14 +36,18 @@ function planting(x, z) {
   if (inRect([PIT.x0 - 8, PIT.z0 - 8, PIT.x1 + RAMP.len + 8, PIT.z1 + 8], x, z)) return inRect([PIT.x0 - 6, PIT.z0 - 6, ROOF.bareX + 16, PIT.z1 + 6], x, z) ? { grass_dry: 14 } : null;
   if (inRect([TERRACE.x0 - TERRACE.rim - 6, TERRACE.z0 - TERRACE.rim - 6, TERRACE.x1 + TERRACE.rim + 6, TERRACE.z1 + TERRACE.rim + 6], x, z)) return null;
   if (inRect([WS_X[0] - 6, WS_Z - 40, WS_X[1] + 6, WS_Z + 40], x, z) && inLot(x, z, 0.5)) return null;
-  if (inLot(x, z, 0.5)) { const l = lots().find((q) => inRect(q.rect, x, z)); return l && l.kind === 'garden' ? { mulberry: 1.4, jujube: 0.9, grass: 6 } : null; }
+  if (inLot(x, z, 0.5)) { const l = lots().find((q) => inRect(q.rect, x, z)); if (!l) return null;
+    if (l.kind === 'garden') return { mulberry: 1.4, jujube: 0.9, grass: 6 };
+    // the court houses' yards: a jujube or an elm in the middle of the court, away from the gate's line and the well
+    if (l.kind === 'court') { const v = l.front === 's' ? l.rect[3] - z : z - l.rect[1], u = (x - l.rect[0]) / (l.rect[2] - l.rect[0]); if (v > 1.4 && v < 5.2 && u > 0.3 && u < 0.7) return { jujube: 0.35, elm: 0.2 }; }
+    return null; }
   if (r > RADIUS - 130) return { poplar: 0.05, elm: 0.02, grass_dry: 3 };
   if (hash2(x * 0.3, z * 0.3) < 0.2) return { elm: 0.06, jujube: 0.06, grass_dry: 10 };
   return { grass_dry: 8 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { chinese_pine: 5, mulberry: 1.4, jujube: 0.9, elm: 0.06, poplar: 3.2 },
+  maxDensity: { chinese_pine: 5, mulberry: 1.4, jujube: 0.9, elm: 0.2, poplar: 3.2 },
   climate: {
     sun: { az: 150, el: 56, color: [1.0, 0.95, 0.85], intensity: 3.7, lat: 34.4, dec: 5, hour: 10 },
     sky: { turbidity: 3.0, rayleigh: 1.0, mie: 0.005, mieG: 0.8, zenith: [0.1, 0.18, 0.4], horizon: [0.7, 0.68, 0.6] },
