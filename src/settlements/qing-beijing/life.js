@@ -82,6 +82,8 @@ export async function lifePlans() {
     figs.push(man([sx * 15.5, 15.5], face([0, 1]), { y: TIERS[2].y, carry: 'staff', pose: 'staff', len: 2.2, staffMat: 'timber', cloth: 'cloth_red', cloth2: 'cloth_black' }));
     figs.push(man([sx * 36, 26.5], face([0, 1]), { y: TIERS[1].y, carry: 'staff', pose: 'staff', len: 2.2, staffMat: 'timber', cloth: 'cloth_maroon', cloth2: 'cloth_black' }));
   }
+  // the guard of honour's standards before the hall, in two rows either side of the stair (the tripods stand at x ±19.5…31.5, the cranes at ±13.5)
+  for (const [x0, n] of [[-8, 3], [8, 3], [-24, 3], [24, 3]]) court.push({ t: 'bj_lubu', at: [x0 + (x0 < 0 ? -1 : 1) * 0.0, 13.9], y: TIERS[2].y, rot: 0, n, step: 3.2 });
   // the approach (§32): before the Meridian Gate's forecourt the officials' mounts and sedan chairs wait for their masters, the grooms squatting
   // by them; a knot of petitioners and the gate's own guards under the wall
   for (const sx of [-1, 1]) {
