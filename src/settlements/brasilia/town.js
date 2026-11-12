@@ -81,6 +81,7 @@ export async function town() {
     const w = o.w ?? woman(), t = rand();
     const o2 = o.kind === 'student' ? { dress: w ? 'robe' : 'trousers', cloth: 'cloth_white', cloth2: 'cloth_blue', hat: 'none', hair: w ? 'bun' : 'short', h: 0.8 }
       : o.kind === 'worker' ? { dress: 'trousers', cloth: pick(['cloth_ochre', 'cloth_brown', 'cloth_grey']), cloth2: pick(['cloth_brown', 'cloth_indigo']), hat: pick(['straw', 'cap']), hair: 'short', over: 'belt' }
+      : o.kind === 'guard' ? { dress: 'trousers', cloth: 'prussian_blue', cloth2: 'prussian_blue', hat: 'cap', hair: 'short', over: 'belt' }
       : o.kind === 'nun' ? { dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_black', hat: 'veil', over: 'none' }
       : o.kind === 'priest' ? { dress: 'robe', cloth: 'cloth_black', cloth2: 'cloth_black', hat: 'none', hair: 'short', over: 'none' }
       : w ? { dress: 'robe', cloth: pick(DRESS), cloth2: pick(['cloth_white', 'cloth_black']), hat: 'none', hair: pick(['bun', 'short', 'long']), over: pick(['none', 'belt']) }
@@ -98,6 +99,9 @@ export async function town() {
   for (let k = 0; k < 10; k++) person(-6 + rand() * 38, -104 + rand() * 22, rand() * 6.28, { inside: true, kind: k < 2 ? 'student' : undefined });
   person(-7.5, -95.5, Math.PI / 2, { inside: true, kind: 'worker', w: false }); person(-7.5, -88.5, Math.PI / 2, { inside: true, kind: 'worker', w: false });
   for (let k = 0; k < 30; k++) { const x = -6 + rand() * 70, z = -100 + rand() * 200; if (Math.hypot(x - 38, z + 72) < 28 || Math.hypot(x - 38, z - 72) < 38 || (x > 28 && x < 48 && Math.abs(Math.abs(z) - 32) < 16) || Math.abs(z) < 3.5) continue; person(x, z, rand() * 6.28, { inside: true, y: 6.5, kind: rand() < 0.12 ? 'student' : undefined }); }
+  // the palaces' lobbies: clerks and visitors at the reception, a guard at each door; sentries at the Planalto's ramp
+  for (const [x0, x1, z0, z1, y, n] of [[-79, -43, 163, 193, 0.54, 7], [-79, -43, -193, -163, 0.54, 7], [156, 244, -176, -151, 0.66, 12], [172, 228, 151, 169, 0.66, 8]]) for (let k = 0; k < n; k++) person(x0 + rand() * (x1 - x0), z0 + rand() * (z1 - z0), rand() * 6.28, { inside: true, y, kind: k < 2 ? 'worker' : undefined });
+  for (const [x, z, r, y] of [[200, -141, Math.PI, 0.3], [206, -141, Math.PI, 0.3], [201, 140.5, 0, 0.3], [207, 140.5, 0, 0.3], [-61, 159.2, 0, 0.5], [-61, -159.2, Math.PI, 0.5]]) person(x, z, r, { inside: true, kind: 'guard', w: false, y });
   // the ramp's apron and the pools: visitors, a priest and nuns by the Cathedral
   for (let k = 0; k < 22; k++) person(-112 + rand() * 16, -24 + rand() * 48, rand() * 6.28, {});
   for (let k = 0; k < 40; k++) person(PRACA[0] + 10 + rand() * 220, -120 + rand() * 240, rand() * 6.28, { kind: rand() < 0.12 ? 'student' : undefined });
