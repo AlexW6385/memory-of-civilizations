@@ -1,7 +1,7 @@
 // Qin Xianyang — the animals (src/engine/fauna.js draws them; docs/settlements/qin-xianyang.md §7): swallows over the market and the road,
 // crows (rooks) over the palace's roofs and the pit's mound, sparrows on the paving of the forecourt, the market and the walls,
 // a pair of kites high over the plain. No water, so no fish.
-import { height, TERRACE, MARKET, FORECOURT, PIT, ROOF, WS_Z, YARD, HAUL, lots } from './layout.js';
+import { height, TERRACE, MARKET, FORECOURT, PIT, ROOF, WS_Z, YARD, HAUL, rampZ, lots } from './layout.js';
 
 const fish = [];
 const flights = [
@@ -25,5 +25,7 @@ for (const [x, z] of [[-40, -120], [10, -130], [30, -110]]) perches.push({ kind:
 // on the ridges and the wall-tops of the town: a scatter of houses, the yard's stacks and its watch tower
 { let n = 0; for (const l of lots()) { if (l.trade || l.kind === 'garden' || (n++ % 7)) continue; const [x0, z0, x1, z1] = l.rect, x = (x0 + x1) / 2 + (l.seed % 5 - 2), z = (z0 + z1) / 2; perches.push({ kind: 'sparrow', x, z, y: height(x, z) + (l.kind === 'official' ? 6.6 : 4.6), rot: (l.seed % 6), range: [2.4, 0.4], alert: 6 }); } }
 for (const [x, z] of [[YARD[0] + 16, -148], [YARD[0] + 22, -146], [YARD[0] + 40, -100], [YARD[0] + 8, -96]]) perches.push({ kind: 'sparrow', x, z, y: 0.12, rot: x % 3, range: [1.6, 1.4] });
+// at the ramps' heads: sparrows on the guard logs of the ramps' edges
+for (const i of [0, 1, 2]) { const z = rampZ(i); for (const s of [-1, 1]) perches.push({ kind: 'sparrow', x: PIT.x1 + 6 + i * 3, z: z + s * 3.7, y: 0.36, rot: s, range: [3.5, 0.2], alert: 3 }); }
 void MARKET; void FORECOURT; void PIT;
 export default { fish, flights, perches };

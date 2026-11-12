@@ -31,6 +31,8 @@ function planting(x, z) {
   if (dz < 1.4 && !inRect(MARKET, x, z, 4)) return { chinese_pine: 5, grass_dry: 6 };
   // the haul road's two rows of poplars, 4 m off its edges; the yard bare
   if (x > HAUL.x0 && x < HAUL.x1 + 8 && Math.abs(Math.abs(z - HAUL.z) - (HAUL.w / 2 + 4)) < 1.5) return { poplar: 3.2, grass_dry: 6 };
+  // the yard's edges: elms and jujubes where the works end, with dry grass, and a few tufts along the foot of the pit's earth walls
+  if (inRect(YARD, x, z, 9) && !inRect(YARD, x, z, 1.5) && !inLot(x, z, 0.5) && !onStreet(x, z) && !(Math.abs(z - HAUL.z) < HAUL.w / 2 + 6 && x > HAUL.x0 - 6) && x > YARD[0] + 4) return { elm: 0.28, jujube: 0.2, grass_dry: 9 };
   if (inRect(YARD, x, z, 2) || (Math.abs(z - HAUL.z) < HAUL.w / 2 + 2 && x > HAUL.x0 - 2)) return null;
   if (onRoad(x, z) || onStreet(x, z) || inRect(FORECOURT, x, z, 3) || inRect(MARKET, x, z, 4)) return null;
   if (inRect([PIT.x0 - 8, PIT.z0 - 8, PIT.x1 + RAMP.len + 8, PIT.z1 + 8], x, z)) return inRect([PIT.x0 - 6, PIT.z0 - 6, ROOF.bareX + 16, PIT.z1 + 6], x, z) ? { grass_dry: 14 } : null;

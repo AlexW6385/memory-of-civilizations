@@ -71,6 +71,14 @@ Hammers on clay, the beat of rammers (the labourers' chant), kiln roar, carts' a
 - **Palace hall.** A coffered ceiling, murals along the inner walls (a white ground, chariots and horses, banqueters, tribute-bearers in red, ochre, blue and green: the Xianyang palace murals show "a mud-based plaster layer, a white ground layer, and a paint layer" — §5), black valances and red streamers, a canopy over the sovereign's mat, bronze tripods; on the terrace paving, dragon-head spouts, censers; in the forecourt lamp-posts, banner staffs and two long galleries for those who wait. [stated for the mural layers; the subjects and the furnishing are inferred]
 - **Street life.** Benches with old men and women sitting, water vats, firewood, baskets, drying trays, laundry lines, hens, dogs at the fronts; gangs, scribes, guards and ox carts in the yard; shopkeepers in the market. Sound: the pit has its own music (a low drone under a long reverb), the palace the bells, the rest the open music. [inferred]
 
+## 9b. Arrival in the front gallery (third pass)
+
+- **Arrival** at x 126.5, z −121 (inside the middle ramp's door, in line with corridor 5): three ranks of archers at 10–13 m (the fine face level reaches 12 m), the aisle receding between two files. [inferred: our device; the ranks and files follow §4]
+- **Only the three open corridors are drawn.** Corridors 2, 5 and 8 open on the gallery through the archers' ranks; the other eight lie between solid rammed-earth partitions under the log roof, so their figures and chariots can never be seen or reached; they keep their colliders and are not drawn. [inferred: our model of the roofed pit; saves most of the figure triangles]
+- **Ramp walls** shored like the trench they are: posts the cut's height at 2.2 m, boards over the lower 1.9 m, the rammed courses showing above as light clay bands, a rope rail, bronze lamps on every second post, a guard log along the edge. [inferred: the Qin pit walls were rammed and the pit roofed on posts and beams; the shoring is our reading]
+- **Doors** in the east wall: red-lacquered frame, black valance, plank leaves folded back, a granite threshold; the gallery's east wall panelled with black hangings; reed runners on the aisles. [inferred]
+- **Yard:** finished soldiers wrapped in reed mats on sledges, a ramming ground with stone rammers and their gangs, ruts from the apron. "Fired in a kiln built at the mausoleum site" and carried to the pit (§6). [inferred]
+
 ## 8. Sources
 
 - Terracotta Army — https://en.wikipedia.org/wiki/Terracotta_Army

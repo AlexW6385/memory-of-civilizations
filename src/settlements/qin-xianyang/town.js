@@ -111,6 +111,10 @@ function frontLife() {
   L.push({ t: 'figure', at: [yx + 19, rampZ(2) + 9.5], y: 0, rot: Math.PI, seed: sd(), dress: 'robe', cloth: 'cloth_black', cloth2: 'cloth_red', over: 'sash', skin: 'skin_light', hat: 'cap', feet: 'shod', hair: 'topknot', beard: true, pose: 'seiza' });
   L.push({ t: 'figure', at: [yx + 20.5, rampZ(2) + 9.5], y: 0, rot: Math.PI * 1.5, seed: sd(), dress: 'robe', cloth: 'cloth_indigo', cloth2: 'cloth_brown', over: 'sash', skin: 'skin_light', hat: 'cap', feet: 'shod', hair: 'topknot', beard: false, pose: 'seiza' });
   [[YARD[0] + 40, HAUL.z - 2, Math.PI / 2], [YARD[0] + 78, HAUL.z + 2, -Math.PI / 2], [YARD[0] + 112, HAUL.z - 2, Math.PI / 2]].forEach(([x, z, rot], i) => L.push({ t: 'cart', kind: 'two', at: [x, z], y: 0, rot, seed: sd(), load: i === 1 ? 'hay' : 'barrels', beast: i === 1 ? 'horse' : 'ox' }));
+  { // the ramming gang: four on the ropes of each rammer (the rammers: styles/qin/yard.js qin_sledges)
+    const gx = yx + 26, gz = rampZ(1) + 15;
+    [[-4, -1.5], [0, 2], [4, -1]].forEach(([dx, dz]) => [0.4, 1.97, 3.54, 5.11].forEach((a) => L.push({ t: 'figure', at: [gx + dx + Math.cos(a) * 1.35, gz + dz + Math.sin(a) * 1.35], y: 0, rot: Math.PI / 2 - a, seed: sd(), dress: 'tunic', legs: 'hose', cloth: rand() < 0.5 ? 'cloth_grey' : 'cloth_brown', cloth2: 'cloth_brown', over: 'belt', skin: 'skin_medium', hat: 'none', feet: 'bare', hair: 'shaven', beard: false })));
+  }
   L.push({ t: 'sledge', at: [yx + 14, base - 8], y: 0, rot: 0, seed: sd(), beast: 'ox', load: 'empty' });
   for (const [x, z] of [[yx + 30, base - 1], [yx + 34, base + 22]]) L.push({ t: 'animal', kind: 'ox', at: [x, z], y: 0, rot: rand() * 6.28, seed: sd() });
   const tiles = new Map();
@@ -150,7 +154,7 @@ export async function town() {
   if (CACHE) return CACHE;
   const plans = [], { S, Q } = market();
   plans.push(base('qin-road', [{ t: 'qin_road', x0: -RADIUS + 14, x1: RADIUS - 14 }, { t: 'qin_pavilion', at: [-150, ROAD.z0 - 6] }, { t: 'qin_pavilion', at: [170, ROAD.z1 + 6] }]));
-  plans.push(base('qin-yard', [{ t: 'qin_yard' }, { t: 'qin_haul' }]));
+  plans.push(base('qin-yard', [{ t: 'qin_yard' }, { t: 'qin_haul' }, { t: 'qin_sledges' }]));
   plans.push(base('qin-shops', shopLots().map((l) => ({ t: 'qin_shop', ...l }))));
   plans.push(base('qin-market', [{ t: 'qin_market' }, ...Q]));
   plans.push({ ...base('qin-stalls', S), style: 'life' });
