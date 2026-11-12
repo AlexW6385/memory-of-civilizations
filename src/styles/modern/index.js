@@ -134,7 +134,10 @@ function operaHouse(el, { bag, col, lights }) {
   for (const hall of el.halls ?? []) {
     // (inside the Concert Hall's room, below its ceiling, the later shells' bases are not drawn — hall.js)
     const last = hall.shells[hall.shells.length - 1], zN = last[1] + (last[0] - last[1]) * 0.62, zS = hall.shells[0][0] - 10 - 16, aw = hall.hw * 0.55;
-    CLIP = hall.concert || hall.theatre ? (px, py, pz) => px > hall.x - aw + 0.25 && px < hall.x + aw - 0.25 && pz > zN && pz < zS - 0.25 && py < y + h + envOf(hall, px, pz) * 0.82 - 1.2 : null;
+    // (and the door's way in through the shell's flank: a 2.6 m wide slot, through the whole thickness, from the gap between the halls to the enclosure's wall)
+    const dz = zS - 0.6 - 1.5, side = hall.concert ? 1 : -1, wx0 = hall.x + side * (aw - 0.3), wx1 = hall.x + side * (hall.hw + 3);
+    CLIP = hall.concert || hall.theatre ? (px, py, pz) => (px > hall.x - aw + 0.25 && px < hall.x + aw - 0.25 && pz > zN && pz < zS - 0.25 && py < y + h + envOf(hall, px, pz) * 0.82 - 1.2)
+      || (px > Math.min(wx0, wx1) && px < Math.max(wx0, wx1) && pz > dz - 1.3 && pz < dz + 1.3) : null;
     for (const [a, b, H, hw] of hall.shells) shell(bag, hall.x, a, b, hw ?? hall.hw, H, y + h);
     CLIP = null;
   }
