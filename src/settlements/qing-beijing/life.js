@@ -52,8 +52,40 @@ export async function lifePlans() {
   for (const [x, z, dir] of [[-6, 128, [0, 1]], [6, 128, [0, 1]], [-80, 120, [0, 1]], [-68, 120, [0, 1]], [68, 120, [0, 1]], [80, 120, [0, 1]], [-8, 36, [0, 1]], [8, 36, [0, 1]],
     [-93, -6, [1, 0]], [93, -6, [-1, 0]], [-28, 168.5, [0, -1]], [28, 168.5, [0, -1]], [-40, -168, [0, 1]], [40, -168, [0, 1]]])
     figs.push(man([x, z], face(dir), { carry: 'staff', pose: 'staff', len: 2.2, staffMat: 'timber', cloth: 'cloth_maroon', cloth2: 'cloth_black' }));
-  for (const sx of [-1, 1]) for (let i = 0; i < 6; i++) figs.push(man([sx * (9 + (i % 2) * 1.6), 62 - i * 3.4], face([-sx, 0]), { pose: 'stand', cloth: ['cloth_blue', 'cloth_indigo', 'cloth_green'][i % 3], cloth2: 'cloth_black' }));
-  for (const [x, z, dir] of [[-40, 58, [1, 1]], [50, 80, [-1, 0]], [-52, 96, [0, -1]], [30, 20, [0, 1]]]) figs.push(man([x, z], face(dir), { carry: 'staff', pose: 'staff', len: 1.6, staffMat: 'timber', cloth: 'cloth_grey', cloth2: 'cloth_black' }));
+  // the great court's life (§32): the rank markers in two files, officials waiting in knots by the markers' far end and in the court's
+  // corners (none within 15 m of the arrival at (0, 70), none in the middle: the stone way is the emperor's), the court servants
+  // sweeping, officials on the benches under the galleries, the guards in pairs at the stairs
+  const court = [];
+  for (const sx of [-1, 1]) court.push({ t: 'bj_rankstones', at: [sx * 14, 72], y: 0.03, rot: sx * -Math.PI / 2, n: 18, step: 3.0 });
+  const OFF = ['cloth_blue', 'cloth_indigo', 'cloth_green', 'cloth_maroon', 'cloth_grey', 'cloth_brown'];
+  const off = (at, rot, extra = {}) => figs.push(man(at, rot, { pose: 'stand', cloth: OFF[Math.floor(rand() * OFF.length)], cloth2: rand() < 0.5 ? 'cloth_black' : 'cloth_blue', ...extra }));
+  // the officials in their places behind the markers at the terrace's end, facing the hall (−z)
+  for (const sx of [-1, 1]) for (let i = 0; i < 5; i++) off([sx * (17 + (i % 2) * 1.8), 53 - i * 3.0 + rand() * 0.6], face([0, -1]) + (rand() - 0.5) * 0.25);
+  // knots in conversation (2–4 each), turned to one another
+  const knots = [[-30, 50], [-47, 62], [-24, 86], [-60, 92], [-72, 52], [-70, 76], [29, 49], [47, 66], [26, 90], [62, 96], [72, 55], [69, 80], [-86, 60], [86, 90], [-40, 100], [42, 101]];
+  for (const [kx, kz] of knots) {
+    const m = 2 + Math.floor(rand() * 3), a0 = rand() * 6.28;
+    for (let j = 0; j < m; j++) { const a = a0 + j / m * 6.28; off([kx + Math.cos(a) * 0.75, kz + Math.sin(a) * 0.75], a + Math.PI, { pose: 'talk' }); }
+  }
+  // the court servants sweeping with the long brooms, and a pair carrying a covered box on a pole between them
+  for (const [x, z, r] of [[-55, 68, 0.6], [-37, 94, 2.2], [53, 61, -0.5], [38, 82, 1.0], [-18, 104, 3.0], [20, 44.5, 1.5]]) figs.push(man([x, z], r, { carry: 'broom', dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_indigo', hat: 'cap', over: 'none' }));
+  for (const [x, z, r] of [[-66, 44.5, 1.57], [64, 99, -1.57]]) figs.push(man([x, z], r, { carry: 'pole', dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_black', hat: 'brim', over: 'none' }));
+  // officials waiting on the benches under the galleries' eaves
+  for (const sx of [-1, 1]) for (const z of [74, 92]) {
+    const bx = sx * 92.2;
+    court.push({ t: 'bench', at: [bx, z], y: 0.03, rot: Math.PI / 2, len: 2.2, seed: Math.floor(rand() * 1e6) });
+    for (const q of [-0.55, 0.55]) if (rand() < 0.8) off([bx, z + q], face([-sx, 0]), { pose: 'sit' });
+  }
+  // the approach (§32): before the Meridian Gate's forecourt the officials' mounts and sedan chairs wait for their masters, the grooms squatting
+  // by them; a knot of petitioners and the gate's own guards under the wall
+  for (const sx of [-1, 1]) {
+    for (const [dx, dz] of [[34, 193], [47, 197]]) { court.push({ t: 'bj_sedan', at: [sx * dx, dz], y: 0.03, rot: sx * 0.12, seed: Math.floor(rand() * 1e6), tone: sx < 0 ? 'cloth_green' : 'cloth_blue' }); }
+    for (const [dx, dz] of [[58, 190], [60.5, 197]]) {
+      court.push({ t: 'animal', kind: 'horse', at: [sx * dx, dz], y: 0.03, rot: Math.PI / 2 + sx * 0.3, gear: true, graze: false, seed: Math.floor(rand() * 1e6) });
+      figs.push(man([sx * (dx - 1.4), dz + 0.8], 0.5, { pose: 'squat', dress: 'trousers', hat: 'brim', cloth: 'cloth_brown', over: 'none' }));
+    }
+    for (let i = 0; i < 3; i++) off([sx * (22 + i * 1.1), 199 + (i % 2) * 1.1], face([0, -1]) + (i - 1) * 0.5, { pose: i === 1 ? 'talk' : 'stand', dress: 'trousers', hat: 'brim', cloth: 'cloth_brown', cloth2: 'cloth_grey', over: 'none' });
+  }
   void HALLS; void AVENUE;
   // the visitors of the Danbi way and its plaza (the Temple of Heaven): small parties walking up and standing, an old man with his bird cage, pigeons
   {
@@ -72,7 +104,7 @@ export async function lifePlans() {
     out.push({ ...base('qing-beijing-moat-life', 'life', E2), center: [0, 0], near: 300 });
   }
   out.push(...streetPlans(rand));
-  out.push(base('qing-beijing-people-life', 'life', [...pig, ...figs], [0, 120]));
+  out.push(base('qing-beijing-people-life', 'life', [...pig, ...figs, ...court], [0, 120]));
   return out;
 }
 

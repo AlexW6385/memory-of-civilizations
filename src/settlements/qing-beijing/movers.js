@@ -64,6 +64,9 @@ export function walkways() {
   const [a0, b0, a1, b1] = MOAT.outer;
   // the ring street, its four sides
   for (const r of [[RING[0], RING[1], RING[2], b0], [RING[0], b1, -NOTCH.x, RING[3]], [NOTCH.x, b1, RING[2], RING[3]], [RING[0], b0, a0, b1], [a1, b0, RING[2], b1]]) push(r, 1.0, 'street');
+  // the great court of the Hall of Supreme Harmony (palace.js: its floor is level, the stone way on the axis is the emperor's): officials and
+  // servants go along the galleries and across the court's two ends, never over the stone way (no strip crosses |x| < 12)
+  for (const r of [[-86, 46, -80, 100], [80, 46, 86, 100], [-80, 47, -12, 51], [12, 47, 80, 51], [-80, 95, -20, 99], [20, 95, 80, 99]]) push(r, 2.4, 'court');
   push([-2, AVENUE[1], 2, AVENUE[3]], 1.7, 'street');      // the middle of the carriageway: the stands, carts and camels keep to its edges
   // the paved aprons before the shop fronts (the shoppers stand and walk there)
   for (const r of SHOP_APRONS) {
