@@ -96,4 +96,13 @@ Fassi men in djellabas and turbans, scholars and students in white, merchants, a
 - Courts: bitter-orange trees, pot rows, side rooms with divans in the open houses; weathered fronts, beam ends, shutters, spouts, roof-top jars and washing [inferred].
 - Street life: keepers, customers, benches, donkeys with muleteers, cats, fountain users, mat sellers, quay wash-place women, anglers, ducks [inferred].
 - Seffarine square: coppersmiths' anvils, stumps and braziers [stated]. Qarawiyyin: rahles, water jars and book cupboards in the gallery [inferred].
-- Known: walk-check routes bou-inania#1 and qarawiyyin#1 fail at a 0.5 m step in the street; identical before this pass.
+- Walk-check routes: they failed before the arrival-fix pass (the portal's first step was 0.28 m high at the lane's true level, the portal canopy's tile sheet overhung its beam without a soffit so the top-field read a shell down to the ground, the route ran into the gallery's middle pillar, the Qarawiyyin route ran under the sahn's eave); all four are corrected and `node tools/walk-check.mjs fez --sites` passes.
+
+## 12. Arrival-fix pass (2026-11-12) — what was added and on what ground
+
+- **Arrival.** The court of the Bou Inania from the north gallery. The two talking men stood 2.6 m ahead and 3 m to the right of the visitor (the figure cut by the screen's edge in the review): moved to the east gallery, 8 m away [inferred: staging].
+- **The students' places.** Reed mats under the seated students of the north, east and west galleries, with a rahle (book-stand) before each reader and the master's cushion at the east end [inferred; the madrasa was a teaching house with students lodged in the cells above, Wikipedia "Bou Inania Madrasa"]; brass hanging lamps from the gallery lintels [inferred; lamps hung in Marinid madrasas and mosques].
+- **Babouches.** Pairs of slippers of yellow leather left at the prayer hall's bridges, at the classroom arches and at the north rooms' doors: one enters the hall and the classroom barefoot or in socks [stated: custom of mosque and madrasa; the slippers' form after the Fassi balgha, inferred].
+- **The basin.** Ewers of brass on the kerb stones and two porous jars of water at its foot, the marble wet and dark round it (ablutions) [inferred]. Pigeons, a cat, a youth washing his feet, a water-seller's boy [inferred].
+- **At the portal.** A mint-seller on her mat, an old man on the steps, a donkey with sacks in the lane [inferred: the Talaa Kebira's trade].
+- **Vines over the derbs.** Cedar poles across the quiet lanes at 3 m, the canes along them, leaves and bunches hanging: about a quarter of the derb and lane stretches of the core carry one [inferred: vines trained over the lanes and courts of Fez's medina are a commonplace of its descriptions; marked inferred].
