@@ -115,3 +115,12 @@ Respect. The village is the home of the Kunghit Haida and a World Heritage Site 
 - Wikipedia, "Pacific Northwest canoes": https://en.wikipedia.org/wiki/Pacific_Northwest_canoes
 - Haida Gwaii Museum, "Cedar Bentwood Box": https://haidagwaii.emuseum.com/objects/12353/cedar-bentwood-box
 - Not fetched, cited from the standard ethnographies for [inferred] items: J. R. Swanton, *Contributions to the Ethnology of the Haida* (1905); G. M. Dawson, *Report on the Queen Charlotte Islands* (1880); G. F. MacDonald, *Haida Monumental Art* (1983).
+
+### 5b. The second deepening pass (the street at eye level)
+
+- **The arrival's ground** (the beach top before the landmark house) keeps clear for 6 m: no sitter, bench or fire there, so the first view is the house and its pole across the street.
+- **More work in the open**: a cedar splitting block with wedges, maul and billets; a frame on which a cedar-bark mat is plaited; spruce-root work on a peg-rail; the children's play (a toy canoe, a ring of stones); the tide's wrack of kelp and shell along the beach top; ancestral walkways behind some houses edged with white clamshells [stated for the shell-lined trails: worldheritagesites.net, §5; the rest inferred from the ethnographies].
+- **The damp**: puddles in the beaten street, sword fern and salal at the houses' back corners, sparse tufts of sea-rye in the street [inferred: climate, damp = 1].
+- **Birds**: ravens circling the street before the landmark house, two bald eagles high over the village [inferred: the species of the coast].
+- **Light**: the exposure raised a little (the first tour found the village dark under its cloud).
+- **Still below Suzhou**: no paddled canoes (the movers' boat pipeline is not built for the Haida canoe); the inside of every house is a rich room but the same plan; the forest edge is sparse at 1–20 m.

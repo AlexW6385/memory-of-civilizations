@@ -64,6 +64,9 @@ export const ALL_BLOCKS = [...BLOCKS, ...BLOCKS2];
 export const inSQ = (x, z, m = 0) => SQS.some((q) => inRect(q, x, z, m));
 // the little church (Igrejinha, 1958) on the lawn south of the first superquadra's blocks, and the City Museum on the Square
 export const CHAPEL = [-152, 420, -134, 436];
+// the candangos' camp at the plateau's west edge, beyond the last ministries (the builders' shacks of the 1950s that still stand in 1970) [inferred, docs §10]
+export const CAMP = [-498, 38, -466, 106];
+export const CAMP_FIRES = [[-482, 60], [-478, 70], [-486, 66]];
 export const MUSEU = [136, -56, 162, -30];
 export const PLAYS = [[-124, 418, -106, 434], [190, 418, 208, 434]];
 export const PITCH_AT = [118, 418, 154, 436];
@@ -101,7 +104,7 @@ export const onRoad = (x, z, m = 0) => inRect(ROAD_N, x, z, m) || inRect(ROAD_S,
   || SQS.some((q) => inRect([q[0] - RING, q[1] - RING, q[2] + RING, q[3] + RING], x, z, m) && !inRect(q, x, z, -m));
 export const inPraca = (x, z, m = 0) => inRect(PRACA, x, z, m);
 export const inBuilding = (x, z, m = 0) => inRect(PLATFORM, x, z, m) || inRect(PLANALTO, x, z, m) || inRect(STF, x, z, m) || inRect(ITAMARATY, x, z, m) || inRect(JUSTICE, x, z, m)
-  || MINISTRIES.some((b) => inRect(b.rect, x, z, m)) || ALL_BLOCKS.some((b) => inRect(b.rect, x, z, m)) || inRect(SHOPS, x, z, m) || inRect(CHAPEL, x, z, m) || inRect(MUSEU, x, z, m) || PLAYS.some((r) => inRect(r, x, z, m)) || inRect(PITCH_AT, x, z, m)
+  || MINISTRIES.some((b) => inRect(b.rect, x, z, m)) || ALL_BLOCKS.some((b) => inRect(b.rect, x, z, m)) || inRect(SHOPS, x, z, m) || inRect(CHAPEL, x, z, m) || inRect(CAMP, x, z, m) || inRect(MUSEU, x, z, m) || PLAYS.some((r) => inRect(r, x, z, m)) || inRect(PITCH_AT, x, z, m)
   || Math.hypot(x - CATH.c[0], z - CATH.c[1]) < CATH.pool + m || inRect(TUNNEL_BOX(), x, z, m) || inRect([RAMP.x0, RAMP.z0, RAMP.x1, RAMP.z1], x, z, m) || POOLS.some((p) => inRect(p, x, z, m));
 function TUNNEL_BOX() { return [TUNNEL.x0, TUNNEL.zR, TUNNEL.x1, TUNNEL.z0]; }
 

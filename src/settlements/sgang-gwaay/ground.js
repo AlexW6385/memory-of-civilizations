@@ -25,7 +25,8 @@ function planting(x, z) {
   const v = village();
   if (v.poles.some((p) => Math.hypot(p.c[0] - x, p.c[1] - z) < 3) || v.canoes.some((c) => !c.moored && Math.hypot(c.c[0] - x, c.c[1] - z) < c.l / 2 + 1.5)) return null;
   if (h < 0.9) return h > 0.15 ? { boulder: 0.1, grass: 5 } : { boulder: 0.1 };    // the beach top: drift boulders and sea-rye tufts
-  if (dE < 30) return null;                                                           // the street and the houses
+  if (dE < 14 && dE > 4) return { grass: 2.2 };                                        // the street: sparse tufts of sea-rye and plantain on the trampled ground
+  if (dE < 30) return null;                                                           // the houses
   if (dE < 34) return { grass: 16, maquis: 0.14 };                                    // fern and salmonberry against the houses' backs
   if (dE < 40) return { grass: 30, maquis: 0.45, sugi: 0.06 };
   if (dE < 48) return { grass: 36, maquis: 0.7, sugi: 0.3, spruce: 0.2 };             // the forest's edge, the first cedars and spruce
@@ -39,7 +40,7 @@ export const ground = {
     sun: { az: 170, el: 34, color: [1.0, 0.95, 0.88], intensity: 3.0, lat: 52, dec: 15, hour: 11 },
     sky: { turbidity: 2.6, rayleigh: 1.0, mie: 0.006, mieG: 0.78, zenith: [0.1, 0.15, 0.27], horizon: [0.55, 0.6, 0.65] },
     fog: { color: [0.7, 0.74, 0.77], density: 0.0009, height: 0.02 },
-    exposure: 0.5,
+    exposure: 0.6,
     damp: 1,                // the wettest of the set: moss, dark stains and silvering on every plank
     waterline: SEA,
     wind: [1.0, 0.3],

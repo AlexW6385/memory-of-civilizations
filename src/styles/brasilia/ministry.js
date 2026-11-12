@@ -2,6 +2,7 @@
 // (blinds drawn on some floors, rain streaks on the end walls, a different roof), a furnished lobby one can enter, the porters' counter,
 // benches, planters and the flag under the pilotis.
 import { box, lathe, rod } from '../../core/geom.js';
+import { ministryVerge } from './dressing.js';
 import { rngOf, solidBox, shrub, stool, letters } from './kit.js';
 
 const WHITE = 'plaster_white', CONC = 'concrete_light';
@@ -60,5 +61,6 @@ export function ministry(el, { bag, col, lights }) {
   bag.add('cloth_green', box(fx + 0.04, 2.6, fz - 0.02, fx + 1.5, 3.9, fz + 0.02)); bag.add('cloth_ochre', box(fx + 0.3, 2.95, fz - 0.03, fx + 1.2, 3.55, fz + 0.03));
   for (const bx of [x0 + 2.5, x1 - 4.5]) { solidBox(bag, col, 'timber', bx, 0.42, zf + sg * 3.2 - 0.3, bx + 1.8, 0.48, zf + sg * 3.2 + 0.3); for (const e of [0.1, 1.6]) bag.add(CONC, box(bx + e, 0, zf + sg * 3.2 - 0.25, bx + e + 0.1, 0.42, zf + sg * 3.2 + 0.25)); }
   for (const [px, pz] of [[x0 + 1.0, zf + sg * 6.5], [x1 - 1.0, zf + sg * 6.5], [x0 + 1.0, zf + sg * 12], [x1 - 1.0, zf + sg * 12]]) { solidBox(bag, col, CONC, px - 0.5, 0, pz - 0.5, px + 0.5, 0.5, pz + 0.5); shrub(bag, px, pz, 0.5, 0.45, 'palm_leaf'); }
+  ministryVerge(el, { bag, col });
   stool; void stool;
 }

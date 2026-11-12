@@ -13,6 +13,8 @@ const flights = [
   { kind: 'crow', n: 3, loop: { c: [40, 100], a: [35, 40], rot: 0.3 }, y: [6, 18], speed: 7 },
   { kind: 'swallow', n: 4, lane: { a: [40, -150], b: [40, 150] }, y: [0.8, 4], speed: 9 },
 ];
+flights.push({ kind: 'crow', n: 3, loop: { c: [36, 4], a: [26, 22], rot: 0.5 }, y: [5, 16], speed: 6 });        // ravens over the street before the landmark house
+flights.push({ kind: 'eagle', n: 1, loop: { c: [20, -30], a: [70, 55], rot: 0.1 }, y: [45, 75], speed: 6 }, { kind: 'eagle', n: 1, loop: { c: [30, 80], a: [60, 50], rot: 0.8 }, y: [40, 65], speed: 6 });
 flights.find((f) => f.kind === 'swallow').a = [30, 4];
 const perches = [];
 const v = village();

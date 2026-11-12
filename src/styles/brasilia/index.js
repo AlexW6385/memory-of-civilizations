@@ -11,10 +11,11 @@ import { shopsRow } from './shops.js';
 import { busShelter, kiosk, cart, parking, roadmarks, playground, pitch } from './street.js';
 import { chapel, museu } from './civic.js';
 import { car60, bus } from './vehicles.js';
+import { apron, camp, lawnKit } from './dressing.js';
 
 registerStyle('brasilia', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: { congress, cathedral, ministry, arcade_palace: arcadePalace, colonnade_palace: colonnadePalace, praca, superblock, shops_row: shopsRow, car60, bus,
-    bus_shelter: busShelter, kiosk, cart, parking, roadmarks, playground, pitch, chapel, museu },
+    bus_shelter: busShelter, kiosk, cart, parking, roadmarks, playground, pitch, chapel, museu, apron, camp, lawn_kit: lawnKit },
   objects: {},
 });

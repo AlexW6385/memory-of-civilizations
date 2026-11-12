@@ -5,6 +5,7 @@
 import { G, SEA, LANDMARK, houses, village, height, shoreX, arc, toWorld, inHouse, inSea } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+export const ARRIVAL = [43, 5];                                           // arrivals.js: the beach top before the landmark house
 let FIT = null;
 const frontOf = (z) => { const slope = 0.0036 * z, fl = Math.hypot(1, slope); return [1 / fl, -slope / fl]; };
 
@@ -13,7 +14,8 @@ export function yards() {
   const rand = rng(1851), H = houses(), V = village();
   const props = [], sit = [], folk = [], boats = [], racks = [];
   const taken = [...V.poles.map((p) => [p.c[0], p.c[1], 1.6]), ...V.racks.map((r) => [r.c[0], r.c[1], r.w / 2 + 1.2]), ...V.stacks.map((s) => [s.c[0], s.c[1], 2.2]),
-    ...V.canoes.filter((c) => !c.moored).map((c) => [c.c[0], c.c[1], c.l / 2 + 1.6]), [V.hollow.c[0], V.hollow.c[1], V.hollow.l / 2 + 2.5]];
+    ...V.canoes.filter((c) => !c.moored).map((c) => [c.c[0], c.c[1], c.l / 2 + 1.6]), [V.hollow.c[0], V.hollow.c[1], V.hollow.l / 2 + 2.5],
+    [ARRIVAL[0], ARRIVAL[1], 6.5]];                                    // the arrival's own ground: no bench, fire or sitter within 6 m of the visitor
   const free = (x, z, r) => !inHouse(x, z, -(r + 1.2)) && !taken.some(([a, b, q]) => Math.hypot(a - x, b - z) < q + r);
   const put = (kind, x, z, yaw, o = {}) => {
     const r = o.r ?? 1.1;
@@ -48,6 +50,14 @@ export function yards() {
       if (p && kind === 'logbench' && rand() < 0.8) sit.push({ at: [x, z], y: p.y, rot: h.yaw + (rand() - 0.5) * 0.6, pose: 'sit', who: rand() < 0.5 ? 'elder' : rand() < 0.5 ? 'woman' : 'man' });
       if (p && kind === 'hideframe') sit.push({ at: [x, z - 1.0], y: height(x, z - 1.0), rot: Math.PI, pose: 'kneel', who: 'woman' });
     }
+    // the work in the open and the damp of the place: a splitting block, a mat frame, spruce-root work, the children's play, ferns at the corners, puddles
+    if (k % 2 === 0) { const [x, z] = at(h, hw + 2.6 + rand(), -hd * 0.1 + rand() * hd * 0.5); put('chopblock', x, z, h.yaw + rand() * 6, { r: 1.5 }); }
+    if (k % 4 === 1) { const [x, z] = at(h, -hw - 2.4 - rand(), -hd * 0.3 + rand() * hd * 0.5), p = put('matframe', x, z, h.yaw + (rand() - 0.5) * 0.4, { r: 1.5 }); if (p) sit.push({ at: [x + 0.2, z - 0.9], y: height(x, z - 0.9), rot: Math.PI, pose: 'kneel', who: 'woman' }); }
+    if (k % 5 === 2) { const [x, z] = at(h, (rand() - 0.5) * hw, -hd - 3.4 - rand() * 2); put('roots', x, z, h.yaw, { r: 1.5 }); }
+    if (k % 3 === 0) { const [x, z] = at(h, hw * 0.4, -hd - 4.6 - rand() * 2), p = put('toy', x, z, h.yaw + rand(), { r: 1.2 }); if (p) sit.push({ at: [x + 0.9, z + 0.7], y: height(x + 0.9, z + 0.7), rot: Math.atan2(-(x - (x + 0.9)), -(z - (z + 0.7))), pose: 'sit_ground', who: 'child' }); }
+    if ((k % 3 === 2 && k % 2 === 0) || h.landmark) { const [x, z] = at(h, (rand() - 0.5) * 2, hd + 1.2); props.push({ kind: 'trail', c: [x, z], yaw: h.yaw, y: height(x, z), w: 12 + rand() * 3, seed: Math.floor(rand() * 1e6) }); }
+    for (const sg of [-1, 1]) { const [x, z] = at(h, sg * (hw + 0.7), hd + 0.2 + rand() * 0.5); put('ferns', x, z, rand() * 6, { r: 0.5, minH: 0.5 }); }
+    for (let j = 0; j < 3; j++) { const [x, z] = at(h, (rand() - 0.5) * (h.w + 3), -hd - 2.2 - rand() * 9.5); put('puddle', x, z, h.yaw + rand(), { r: 0.15, w: 1.3 + rand() * 1.4, minH: 0.7 }); }
     // between this house and the next: a drying rack running toward the sea, and the plank screen of a smoking frame behind it
     if (k < H.length - 1) {
       const nz = Math.hypot(H[k + 1].c[0] - h.c[0], H[k + 1].c[1] - h.c[1]), gap = nz - (h.w + H[k + 1].w) / 2;
@@ -71,6 +81,8 @@ export function yards() {
     const x = shoreX(z) - 1.6 - rand() * 2;
     if (rand() < 0.45) put('clams', x, z, Math.PI / 2, { r: 1.4, minH: 0.1 }); else put('floats', x, z, rand() * 6, { r: 1.0, minH: 0.1 });
   }
+  // the tide's wrack along the beach top, in ropes of kelp and shell
+  for (let z = -155; z <= 155; z += 9 + rand() * 7) { const x = shoreX(z) + 0.2 + rand() * 1.5; put('wrack', x, z, Math.PI / 2 + (rand() - 0.5) * 0.6, { r: 0.4, w: 2.4 + rand() * 2.2, minH: -0.6 }); }
   { const zn = H[0].c[1] - 16, [nx] = frontOf(zn); for (const dz of [-17, 18]) { const c = [arc(zn + dz) - 9 * nx, zn + dz]; put('cradle', c[0], c[1], Math.PI / 2 + 0.05, { w: 8 + rand() * 3, r: 2.2 }); } }
   for (const z of [-118, -62, -14, 52, 104, 140]) { const x = shoreX(z) + 8.5 + rand() * 1.5; if (inSea(x + 3, z) || height(x, z) < SEA) props.push({ kind: 'weir', c: [x, z], yaw: Math.PI / 2 + (rand() - 0.5) * 0.4, y: height(x, z), seed: Math.floor(rand() * 1e6) }); }
   for (let z = -150; z <= 150; z += 19 + rand() * 12) for (let k = 0; k < 2; k++) { const x = shoreX(z) + 9 + rand() * 18; if (inSea(x, z)) props.push({ kind: 'kelp', c: [x, z], yaw: rand() * 6, y: SEA, w: 3 + rand() * 3, seed: Math.floor(rand() * 1e6) }); }

@@ -108,3 +108,12 @@ What was added, and what it rests on. Tags as above.
 - **Moving life.** More walkers (52 by day), a lane for each new square and the pavements along the ministries; swallows over the carriageways, a vulture loop over the east quadra, sparrows at the playgrounds, shops and the museum forecourt.
 
 Sources fetched in this pass: Waymarking (Igrejinha); Câmara dos Deputados "Salão Negro" pages.
+
+## 11. Deepening pass (eye level at the Congress apron, the lawn and the camp)
+
+- **The apron** at the ramp's foot: granite paving in 4 m slabs with black joints, red laterite dust blown into the corners, four masts with the national flag, granite seats facing the ramp, concrete planters with young palms, Burle Marx-style terraced beds of one plant each beside it, a bronze plaque, litter bins, lamps, pigeons [inferred: the plaza's use; Burle Marx's landscaping is [stated] in the Brasília entry of Wikipedia].
+- **Weather**: ten years of rain-and-dust streaks down the towers' long faces, the platform's fascia and the ramp's cheeks; dark waterlines on the pools' curbs; slender plumes of water in the two pools [inferred: climate §1 — a rainy season of 253 mm in November].
+- **The Esplanade's kerbside**: litter bins at every second lamp, drinking fountains and street-name plates at the bus stops; each ministry's verge has a name slab, a guard's hut, a bicycle rack and bins [inferred].
+- **The candangos' camp** at the plateau's west edge (the builders' settlement of 1956–60, "candango" being the name of the workers who came to build the city [stated: the Praça's Candangos monument, §1c]): two rows of plank shacks under zinc roofs round a yard, some open and furnished (bed, table, stove, shelf, oil lamp), three hearths, a water tank on a timber tower, wash lines, stores of planks, bricks, sand and cement, a company signboard [inferred: the camps of the construction years; that part of them stood in 1970 is our reading].
+- **Walkers**: a street sweeper and a vendor with a basket added. **Animals**: pigeons on the apron, the Square and the Cathedral's plaza; stray dogs under the pilotis and in the camp.
+- **Still below Suzhou**: the ministries' upper floors and the Cathedral's outer ring are not furnished; no moving vehicles (the cars and buses stand); the Esplanade lawn remains large and quiet between the figure groups.

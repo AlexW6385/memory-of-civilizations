@@ -3,7 +3,7 @@
 // the bus-stop's exhaust is not drawn. The engine part is src/engine/smoke.js; positions come from layout.js.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { SHOPS, RADIUS, KIOSKS, CARTS, CHAPEL, inBuilding } from './layout.js';
+import { SHOPS, RADIUS, KIOSKS, CARTS, CHAPEL, CAMP_FIRES, inBuilding } from './layout.js';
 
 const ID = 'brasilia';
 export function emitters() {
@@ -13,7 +13,7 @@ export function emitters() {
   KIOSKS.forEach(([x, z, , kind], i) => { if (kind === 'lanchonete' && !inBuilding(x, z, 2)) E.push({ p: [x + 0.3, 2.6, z], kind: 'steam', thr: 0.15 + (i % 4) / 20, seed: 300 + i }); });
   CARTS.forEach(([x, z, kind], i) => { if ((kind === 'pipoca' || kind === 'churro') && !inBuilding(x, z, 1.5)) E.push({ p: [x, 1.4, z], kind: 'steam', thr: 0.12, seed: 400 + i }); });
   // the camp of the candangos beyond the ministries, west: three cooking fires
-  for (const [x, z, s] of [[-482, 60, 11], [-478, 70, 12], [-486, 66, 13]]) E.push({ p: [x, 0.6, z], kind: 'kitchen', thr: 0.1, seed: s });
+  for (const [[x, z], s] of CAMP_FIRES.map((f, i) => [f, 11 + i])) E.push({ p: [x, 0.6, z], kind: 'kitchen', thr: 0.1, seed: s });
   return E;
 }
 const ATT = [];

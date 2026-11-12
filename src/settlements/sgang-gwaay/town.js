@@ -2,7 +2,7 @@
 // sgang-gwaay.md §5), sheds and trails behind, and the people of the village at their work (§9): hats of spruce root and capes
 // of cedar bark, the canoes launched and landed, fish split and hung, a log being hollowed, children and dogs on the beach.
 import { RADIUS, G, LANDMARK, houses, village, height, shoreX, arc, toWorld, inHouse, tiers, SEA } from './layout.js';
-import { yards } from './yards.js';
+import { yards, ARRIVAL } from './yards.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));     // a figure faces −z when rot = 0
@@ -40,7 +40,8 @@ export async function town() {
   // ---- the people ----
   const skin = () => (rand() < 0.7 ? 'skin_medium' : 'skin_light');
   const CAPE = ['roof_bark', 'cloth_brown', 'hide_tan', 'cloth_ochre'];
-  const person = (at, y, rot, o = {}) => P.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: CAPE[Math.floor(rand() * CAPE.length)], cloth2: 'cloth_brown', over: 'cape', skin: skin(), hat: rand() < 0.75 ? 'straw' : 'none', feet: 'bare', hair: 'long', beard: false, ...o });
+  const nearArrival = (p) => Math.hypot(p[0] - ARRIVAL[0], p[1] - ARRIVAL[1]) < 7;
+  const person = (at, y, rot, o = {}) => nearArrival(at) ? 0 : P.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: CAPE[Math.floor(rand() * CAPE.length)], cloth2: 'cloth_brown', over: 'cape', skin: skin(), hat: rand() < 0.75 ? 'straw' : 'none', feet: 'bare', hair: 'long', beard: false, ...o });
   const at = (x, z) => [x, z, height(x, z)];
   // the people of the yards: benches, fires, hide frames; inside every house; the crews of the boats
   const WHO = {
@@ -85,7 +86,7 @@ export async function town() {
     else person(pos, y, rand() * 6.28, rand() < 0.4 ? { dress: 'tunic', hair: 'bun', hat: 'none', over: 'cape' } : {});
   }
   // children and dogs on the beach
-  for (let k = 0; k < 10; k++) { const z = -120 + rand() * 240, x = shoreX(z) - 1 - rand() * 4; if (height(x, z) > -0.5) P.push({ t: 'animal', kind: 'dog', at: [x, z], y: height(x, z), rot: rand() * 6.28, seed: k + 5 }); }
+  for (let k = 0; k < 10; k++) { const z = -120 + rand() * 240, x = shoreX(z) - 1 - rand() * 4; if (height(x, z) > -0.5 && !nearArrival([x, z])) P.push({ t: 'animal', kind: 'dog', at: [x, z], y: height(x, z), rot: rand() * 6.28, seed: k + 5 }); }
   for (let k = 0; k < 6; k++) { const z = -100 + rand() * 200, x = shoreX(z) - 3 - rand() * 3; person([x, z], height(x, z), rand() * 6.28, { child: true, h: 1.05, hat: 'none' }); }
   plans.push(plan('sgang-people', 'life', P));
   void LANDMARK;
