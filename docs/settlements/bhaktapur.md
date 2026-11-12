@@ -77,3 +77,19 @@ What was built, and what is [inferred]:
 - **Life:** water buffalo in two lanes, cats on pidhas, dogs before shops, sparrows on the steps; walkers 72 by day (porters, bearers with a pole, a sweeper, water-bearers, elders, boys); the planting richer (bamboo, neem, pipal figs in the courts).
 
 Still below Suzhou: the upper storeys of the shop-houses are shut (the stair ends in a trap), only the Bhairabnath of the temples is entered, the lanes' walls are repetitive in plan (one house form in several variants) and carry no relief carving beyond the windows and lintels, and there is no interior sound zone for the shops.
+
+## 13. The deepening pass of November 2026
+
+Sources: the Newar window (the projecting bay of the upper storeys, carved lattice) [stated: [Wikipedia, "Newar window"](https://en.wikipedia.org/wiki/Newar_window); [Woodworkers Institute, "Mhaykhā Jhyā – Peacock Window"](https://woodworkersinstitute.com/?p=62047)]; the brick-paved squares and the house forms [stated: [Heidelberg, "The Neoclassical Residences of the Newars in Nepal"](https://archiv.ub.uni-heidelberg.de/volltextserver/10691/1/The_Neoclassical_Residences_of_the_Newars_in_Nepal.pdf), for the earlier house]; the festival dressing of the lanes [inferred from the town's festivals: strings of coloured flags].
+
+Built:
+- **Arrival:** no figure within 6 m of the visitor (a woman stood 3.4 m away, at the right of the lens, in the first screenshot of the review).
+- **Paving:** the squares and the lanes laid in the red-brown brick (`cotto_floor`; the grey of `brick_paving` read as a concrete floor) [inferred: Newar squares are brick-paved, here with the stone bands of §12's lanes]; dressed-sandstone inlay bands in the square (a margin along its edges, a ring round each temple, straight bands every 9 m) [inferred].
+- **Nyatapola and Bhairabnath:** a row of oil lamps along the front edge of each stage's tread and a lamp tray before the door, a marigold garland on every guardian's pedestal, flower heaps at the foot of each flight, an iron trident with a garland on either side of the Bhairabnath's stair [inferred: the worshippers' offerings; tridents are Bhairab's weapon].
+- **Houses:** the projecting bay window (sajhyah) on the second storey of about two houses in five (a plank floor on two struts, a lattice front and sides, a small tiled roof) [stated: bay windows are a Newar form]; a wall niche with a gilt Ganesh, a lamp and marigold at the end of the front of about one house in four [inferred]; a cloth awning on poles with strings of chillies and garlic over the shop-front stalls [inferred].
+- **First floors:** the lit shop-houses (the fourteen nearest to the square, and the enterable house on its south side) open to a first floor by a walkable stair (14 treads of 0.2 m rise): a plank floor round the stair's well, the room closed to a man's height, the lit lattice windows with a window seat and cushions, a mat with cushions, a low table, a family shrine in the wall, chests and jars, washing on a line [inferred: the living floor of the Newar house; the kitchen is on the top floor]. A walk route in plan.js goes up the stair of the enterable house. Each is also a `hall` sound zone.
+- **Balconies:** a plank balcony with a railing of balusters along the third storey on about three of ten houses of four storeys [inferred].
+- **Lanes:** strings of festival pennants across the lanes between facing houses, about 55 of them within 105 m, at 5–5.5 m, red, yellow, white and green [inferred].
+- **Square:** eight flocks of pigeons on the paving about the temples (the square is known for them) [inferred].
+
+Still below Suzhou: the upper floors of the plain houses are shut and only the lit shop-houses open upward (no second stair to the top floor and its kitchen), only the Bhairabnath of the temples is entered, the lanes' houses are one plan with the variants above, and no relief carving beyond the windows, lintels and bays.

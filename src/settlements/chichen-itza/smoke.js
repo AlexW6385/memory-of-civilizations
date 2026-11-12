@@ -23,6 +23,9 @@ export function emitters() {
   E.push({ p: [-5.6, ground.height(-5.6, -240.2) + 0.5, -240.2], kind: 'incense', thr: 0, seed: 31 });   // the ladle censer at the cenote
   E.push({ p: [0, 24.9, 8.6], kind: 'incense', thr: 0, seed: 32 });                                  // the Castillo's summit
   E.push({ p: [118.0, 14.2, -13.2], kind: 'incense', thr: 0, seed: 33 });                              // the altar of the Atlanteans
+  // the copal of the pilgrims at the Castillo's stair, and the camp's small fires along the plaza's south edge
+  E.push({ p: [4.0, 0.8, 41.0], kind: 'incense', thr: 0, seed: 34 }, { p: [-4.0, 0.8, 41.0], kind: 'incense', thr: 0, seed: 35 });
+  for (const [x, z] of [[-14, 100], [8, 99], [62, 98], [-68, 98]]) E.push({ p: [x, 0.5, z], kind: 'kitchen', thr: 0.3, seed: 60 + Math.floor(x) });
   return E;
 }
 

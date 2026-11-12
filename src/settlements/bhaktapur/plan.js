@@ -2,11 +2,15 @@
 // five pairs of guardians, the Bhairabnath, the Siddhi Lakshmi shikhara, a dabali, a pati, a stone spout, a chaitya and two pipals on the
 // brick-paved square, the stalls of the market, the enterable Newar house on its south side; Pottery Square with its drying ground, wheels and kilns.
 
-import { SQ, POT, NYATAPOLA, BHAIRAB, SHI, DABALI, PATI, DHARA, CHAITYA, TREES, HOUSE, STALLS } from './layout.js';
+import { lots, SQ, POT, NYATAPOLA, BHAIRAB, SHI, DABALI, PATI, DHARA, CHAITYA, TREES, HOUSE, STALLS } from './layout.js';
 
 const E = [];
-E.push({ t: 'newar_paving', rect: SQ, y: 0.05, th: 0.3, mat: 'brick_paving' });
+const KEEP_RINGS = [[NYATAPOLA.c[0] - 8.5, NYATAPOLA.c[1] - 8.5, NYATAPOLA.c[0] + 15.5, NYATAPOLA.c[1] + 8.5], [BHAIRAB.c[0] - 11, BHAIRAB.c[1] - 6, BHAIRAB.c[0] + 6, BHAIRAB.c[1] + 6]];
+E.push({ t: 'newar_paving', rect: SQ, y: 0.05, th: 0.3, mat: 'cotto_floor' });
+E.push({ t: 'newar_inlay', rect: SQ, rings: KEEP_RINGS, seed: 4 });
 E.push({ t: 'newar_pagoda', ...NYATAPOLA });
+E.push({ t: 'newar_offerings', pagoda: NYATAPOLA, seed: 11 });
+E.push({ t: 'newar_trisul', c: [BHAIRAB.c[0] - 7.4, BHAIRAB.c[1] - 4.2], s: 1 }, { t: 'newar_trisul', c: [BHAIRAB.c[0] - 7.4, BHAIRAB.c[1] + 4.2], s: 1 });
 E.push({ t: 'newar_pagoda', ...BHAIRAB });
 E.push({ t: 'newar_shikhara', c: SHI.c, s: 1 });
 E.push({ t: 'newar_dabali', rect: DABALI, h: 0.8, stair: 'n' });
@@ -34,11 +38,16 @@ const h = HOUSE.rect;
 const rooms = [
   room('house', [h[0] + 0.6, h[1] + 0.6, h[2] - 0.6, h[3] - 0.6], 0.1, 'hall'),
   room('bhairabnath', [BHAIRAB.c[0] - 2.6, BHAIRAB.c[1] - 2.6, BHAIRAB.c[0] + 2.6, BHAIRAB.c[1] + 2.6], 2.7, 'hall'),
+  // the lit shop-houses: a hushed room within (their ground floor and the first floor above)
+  ...lots().filter((l) => l.open && l.light).map((l, i) => room('shop-' + i, [l.rect[0] + 0.6, l.rect[1] + 0.6, l.rect[2] - 0.6, l.rect[3] - 0.6], 0.1, 'hall')),
   room('taumadhi', SQ, 0.05, 'open'),
   room('pottery', POT, 0, 'open'),
 ];
 const walks = [[[12, 6], [4, 14], [19, 22], [19, 28], [10, 6], [14, 9], [22, 9.5], [28, 8], [10, 22]]];
 walks[0].y0 = 0;
+// up the stair of the enterable house to its first floor and about it
+walks.push([[19, 22], [17.5, 25.4], [17.5, 28.2], [20, 29.6], [22, 27], [20, 26.2]]);
+walks[1].y0 = 0;
 
 export const taumadhi = {
   id: 'bhaktapur-taumadhi',

@@ -138,3 +138,15 @@ Drums (huehuetl, teponaztli), clay flutes and conch trumpets, rattles (a plucked
 - [Aztec clothing — Wikipedia](https://en.wikipedia.org/wiki/Aztec_clothing)
 - [Aztec Transport and Travel — ancient-history-sites](https://www.ancient-history-sites.com/?p=141859)
 - [Lago Texcoco — Western Hemisphere Shorebird Reserve Network](https://www.whsrn.org/lago-texcoco)
+
+## 16. The deepening pass of November 2026
+
+Sources: stuccoed floors of the Templo Mayor and the ritual residues on them [stated: [Cambridge, "Stuccoed floors: a resource for the study of ritual activities, the case of Templo Mayor"](https://www.cambridge.org/core/journals/mrs-online-proceedings-library-archive/article/stuccoed-floors-a-resource-for-the-study-of-ritual-activities-the-case-of-templo-mayor-mexico/35BA3D0A94AF1B30053ABB5EBAA429A1)]; the temple's copal, flowers and paper offerings [stated: Sahagún and the temple's excavated offerings, §13; [Wikipedia, "Templo Mayor"](https://en.wikipedia.org/wiki/Templo_Mayor)].
+
+Built:
+- **Precinct floor:** the plaza's stucco worn and stained (patches, cracks, tufts in the joints, the new plaster lighter), a red band with a blue line round the Templo Mayor's platform and three trodden ways from the gates (west to the temple's stair, north and south to the plaza's middle) [inferred].
+- **Offering sellers:** eight sellers on mats before the Tzompantli's side (x 3–32, z 22–44), each with baskets of copal and flowers, pots and now and then hens, a buyer by every second; guards at the stair's foot; 26 more people crossing the plaza, none within 11 m of the arrival [inferred: the pilgrims' trade in offerings].
+- **Ballcourt:** a game of tlachtli in the alley (two teams of three in hip-guards with the rubber ball) and eighteen lords and people watching from the tops of the side platforms [stated: the ballgame was played in the precinct's court, §3; the teams' dress inferred].
+- **Braziers and offerings:** four braziers (tlexictli: a basalt bowl on a stepped foot, coals, ash) burning at the stair's foot, with copal smoke; heaps of marigold and red flowers on leaves with copal balls, bundles of bark paper and fuel sticks [inferred].
+
+Still below Suzhou: the palace's upper storey over the west range is solid; the compounds are one plan with variation and no two-storey lords' houses; the lake's fringe has little beyond plants, canoes and tule.

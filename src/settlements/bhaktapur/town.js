@@ -21,7 +21,7 @@ export async function town() {
   const rand = rng(1710), L = lots();
   const out = [];
   // the streets' brick paving, and the small stupas at some crossings
-  out.push(base('bhaktapur-streets', 'newar', [...PAVED.map((rect) => ({ t: 'newar_paving', rect, y: 0.05, th: 0.3, mat: 'brick_paving' })), ...PAVED.map((rect, i) => ({ t: 'newar_lane', rect, y: 0.05, seed: i + 3 }))]));
+  out.push(base('bhaktapur-streets', 'newar', [...PAVED.map((rect) => ({ t: 'newar_paving', rect, y: 0.05, th: 0.3, mat: 'cotto_floor' })), ...PAVED.map((rect, i) => ({ t: 'newar_lane', rect, y: 0.05, seed: i + 3 }))]));
   const stupas = [];
   for (const [x, z] of [[8, -72], [8, 44], [-52, 0], [60, 0], [-52, -72], [60, 44], [-82, 0], [94, 0], [8, -106], [8, 78]]) if (Math.hypot(x, z) < 150) stupas.push({ t: 'newar_chaitya', c: [x, z], s: 0.9 });
   out.push(base('bhaktapur-shrines', 'newar', stupas));
@@ -31,6 +31,22 @@ export async function town() {
   for (const l of L) { if (l.use) { courts.push({ t: 'newar_court', rect: l.rect, front: l.front, use: l.use, seed: l.seed }); continue; } const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2; Q[(cx < 0 ? 0 : 1) + (cz < 0 ? 0 : 2)].push({ t: 'newar_house', ...l }); }
   Q.forEach((els, i) => out.push(base('bhaktapur-houses-' + i, 'newar', els)));
   out.push(base('bhaktapur-courts', 'newar', courts));
+  // the strings of festival pennants across the lanes, from house to house where both sides stand (the first 110 m)
+  {
+    const strings = [], br = rng(2710);
+    const stand = (x, z) => inLot(x, z, 0.1);
+    for (const [c, w] of [[0, 7], [-106, 5], [44, 5], [-72, 5], [78, 5]]) for (let x = -105; x < 105; x += 9 + br() * 6) {
+      const a = c - w / 2, b = c + w / 2;
+      if (!stand(x, a - 0.8) || !stand(x, b + 0.8) || Math.hypot(x, c) > 105 || inRect(SQ, x, c, 2)) continue;
+      strings.push([x, a - 0.05, x, b + 0.05, 5.0 + br() * 0.5, 0.45 + br() * 0.3]);
+    }
+    for (const [c, w] of [[8, 6], [-52, 5], [60, 6], [-82, 5], [94, 5]]) for (let z = -105; z < 105; z += 9 + br() * 6) {
+      const a = c - w / 2, b = c + w / 2;
+      if (!stand(a - 0.8, z) || !stand(b + 0.8, z) || Math.hypot(c, z) > 105 || inRect(SQ, c, z, 2)) continue;
+      strings.push([a - 0.05, z, b + 0.05, z, 5.0 + br() * 0.5, 0.45 + br() * 0.3]);
+    }
+    out.push(base('bhaktapur-bunting', 'newar', [{ t: 'newar_bunting', strings }]));
+  }
   // the people
   const { man, woman } = newar(rand), P = [];
   // the walk-check's routes are kept clear of figures (they stand as obstacles)
@@ -104,7 +120,12 @@ export async function town() {
   for (const l of L) if (!l.use && !l.open && l.pid && rand() < 0.22 && Math.hypot(...fp(l, 2, 0)) < 100) { const q = fp(l, 3.2, -0.45); A.push({ t: 'animal', kind: 'cat', at: q, y: 0.46, rot: rand() * 6.28, seed: l.seed % 97 }); }
   for (const l of L) if (l.open && rand() < 0.35) { const q = fp(l, (l.rect[2] - l.rect[0] > 0 ? 1.0 : 1.0) + rand() * 2, -1.2); A.push({ t: 'animal', kind: 'dog', at: q, y: 0.05, rot: rand() * 6.28, seed: l.seed % 53 }); }
   for (const [x, z] of [[8, 60], [-70, -30]]) A.push({ t: 'animal', kind: 'goat', at: [x, z], y: 0, rot: rand() * 6.28, seed: Math.round(z) });
+  // the pigeons of Taumadhi: flocks on the paving about the temples and on the dabali, women scattering grain [stated: the square is known for them]
+  for (const [x, z, n] of [[-16, -2, 9], [2, -3, 8], [26, 2, 10], [-24, 14, 7], [33, 19, 8], [12, 18, 7], [-6, 17, 6], [36, -12, 6]]) if (free(x, z, 0.3) && Math.hypot(x - 19, z - 21) > 6) A.push({ t: 'chickens', kind: 'pigeon', at: [x, z], y: 0.05, rot: rand() * 6.28, seed: Math.round(x * 3 + z), n });
   void STREETS;
-  out.push({ ...base('bhaktapur-people', 'life', [...P, ...A]), feature: true });
+  // the arrival (src/planet/arrivals.js, 19 m, 21 m): no figure within 6 m of the visitor's feet, and none close on the right of the lens
+  const AR = [19, 21];
+  const awayFromArrival = (e) => Math.hypot(e.at[0] - AR[0], e.at[1] - AR[1]) > 6;
+  out.push({ ...base('bhaktapur-people', 'life', [...P.filter(awayFromArrival), ...A.filter(awayFromArrival)]), feature: true });
   return out;
 }

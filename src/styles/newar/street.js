@@ -17,9 +17,9 @@ export function lane(el, { bag }) {
   const cross = horiz ? Math.hypot(0, mid) : Math.hypot(mid, 0);
   const R = Math.sqrt(Math.max(0, reach * reach - cross * cross));
   const seg = cl(a0, a1, R); if (!seg) return;
-  put('granite_grey', seg[0], mid - 0.18, seg[1], mid + 0.18, 0.012);
-  for (const side of [c0, c1 - 0.28]) put('sandstone_floor', seg[0], side, seg[1], side + 0.28, 0.02);
-  for (let u = seg[0] + 2 + rand() * 6; u < seg[1] - 1; u += 9 + rand() * 5) put('sandstone_floor', u, c0 + 0.28, u + 0.55 + rand() * 0.25, c1 - 0.28, 0.014);
+  put('granite_grey', seg[0], mid - 0.18, seg[1], mid + 0.18, 0.022);
+  for (const side of [c0, c1 - 0.28]) put('sandstone_floor', seg[0], side, seg[1], side + 0.28, 0.032);
+  for (let u = seg[0] + 2 + rand() * 6; u < seg[1] - 1; u += 9 + rand() * 5) put('sandstone_floor', u, c0 + 0.28, u + 0.55 + rand() * 0.25, c1 - 0.28, 0.026);
   void wide;
 }
 

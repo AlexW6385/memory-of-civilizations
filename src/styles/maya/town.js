@@ -368,4 +368,28 @@ function sacbeEdge(el, { bag }) {
   for (const [mat, g] of merged(k)) bag.add(mat, g.clone());
 }
 
-export const mayaTownElements = { maya_yard: mayaYard, maya_range: mayaRange, maya_awning: mayaAwning, plaza_wear: plazaWear, maya_stela: mayaStela, maya_shrine: mayaShrine, maya_ceiba: mayaCeiba, maya_cenote_life: cenoteLife, maya_sweatbath: mayaSweatbath, maya_weather: mayaWeather, sacbe_edge: sacbeEdge };
+
+/**
+ * plaza_marks { rect, ring: [x0, z0, x1, z1], skip, y }: the painted bands of the Great Plaza [inferred: the plaster floors were painted and
+ * renewed]: a red band round the Castillo's apron, a thin blue-green line a metre outside it, and the worn way (a darker, trodden strip of
+ * plaster) from the south edge to the stair's foot; 2.5 cm proud of the plaster.
+ */
+function plazaMarks(el, { bag }) {
+  const [a0, b0, a1, b1] = el.ring, y = el.y ?? 0.04, h = 0.025, skip = el.skip ?? [];
+  const ok = (x0, z0, x1, z1) => !skip.some((r) => (x0 + x1) / 2 > r[0] && (x0 + x1) / 2 < r[2] && (z0 + z1) / 2 > r[1] && (z0 + z1) / 2 < r[3]);
+  const band = (mat, x0, z0, x1, z1) => { if (ok(x0, z0, x1, z1)) bag.add(mat, box(x0, y, z0, x1, y + h, z1)); };
+  const ring = (mat, m, w) => {
+    const r = [a0 - m, b0 - m, a1 + m, b1 + m];
+    for (let x = r[0]; x < r[2]; x += 6) { band(mat, x, r[1], Math.min(r[2], x + 6), r[1] + w); band(mat, x, r[3] - w, Math.min(r[2], x + 6), r[3]); }
+    for (let z = r[1]; z < r[3]; z += 6) { band(mat, r[0], z, r[0] + w, Math.min(r[3], z + 6)); band(mat, r[2] - w, z, r[2], Math.min(r[3], z + 6)); }
+  };
+  ring('stucco_red', 0, 0.55); ring('maya_blue', 1.2, 0.18);
+  if (!el.noWay) for (let z = b1 + 2; z < (el.rect ? el.rect[3] - 4 : b1 + 70); z += 5) band('plaster_grey', -1.8 + 0.3 * Math.sin(z * 0.2), z, 1.8 + 0.3 * Math.sin(z * 0.2), z + 5.2);
+  // trodden ways [[x0, z0, x1, z1]] (the long side runs along the way): a darker strip worn in the plaster
+  for (const [x0, z0, x1, z1] of el.ways ?? []) {
+    if (x1 - x0 > z1 - z0) for (let x = x0; x < x1; x += 5) band('plaster_grey', x, z0 + 0.3 * Math.sin(x * 0.2), Math.min(x1, x + 5.2), z1 + 0.3 * Math.sin(x * 0.2));
+    else for (let z = z0; z < z1; z += 5) band('plaster_grey', x0 + 0.3 * Math.sin(z * 0.2), z, x1 + 0.3 * Math.sin(z * 0.2), Math.min(z1, z + 5.2));
+  }
+}
+
+export const mayaTownElements = { plaza_marks: plazaMarks, maya_yard: mayaYard, maya_range: mayaRange, maya_awning: mayaAwning, plaza_wear: plazaWear, maya_stela: mayaStela, maya_shrine: mayaShrine, maya_ceiba: mayaCeiba, maya_cenote_life: cenoteLife, maya_sweatbath: mayaSweatbath, maya_weather: mayaWeather, sacbe_edge: sacbeEdge };

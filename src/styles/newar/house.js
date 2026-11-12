@@ -24,6 +24,7 @@ export function houseParts(el, ctx, { hipRoof }) {
   const RODL = (p, q, r, mat, seg = 5) => { const a = toW(p[0], p[2]), b = toW(q[0], q[2]); bag.add(mat, rod([a[0], p[1], a[1]], [b[0], q[1], b[1]], r, seg)); };
   const Y = [0]; for (let i = 0; i < n; i++) Y.push(Y[i] + HS[i]);
   const H = Y[n], open = !!el.open;
+  const up = open && !!el.light && n >= 2 && (el.trade || 'home') !== 'curd';       // the stair leads up to a furnished first floor (the lit shop-houses)
   // the brick of this house: mostly the red, some darker-baked, an old one greyed [inferred]; the plan's own door place and kinds (layout.js lots())
   const wm = el.wall ?? ['brick', 'brick', 'brick', 'brick_baked', 'brick', 'brick_grey'][Math.floor(rand() * 6)];
   const damp = el.damp ?? rand();
@@ -46,7 +47,8 @@ export function houseParts(el, ctx, { hipRoof }) {
     B(T, 0, T, W - T, 0.1, D - T, 'plaster_ochre'); col.floor([Math.min(f0[0], f1[0]), Math.min(f0[1], f1[1]), Math.max(f0[0], f1[0]), Math.max(f0[1], f1[1])], 0.1);
     B(ox, 0, -0.5, ox + OW, 0.1, T, 'sandstone'); { const a = toW(ox, -0.5), b = toW(ox + OW, T); col.floor([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], 0.1); }
     for (let x = T + 0.25; x < W - T; x += 0.55) RODL([x, 2.5, T + 0.02], [x, 2.5, D - T - 0.02], 0.09, 'timber', 5);
-    B(T, 2.58, T, W - T, 2.9, D - T, 'wood_ochre');
+    if (!up) B(T, 2.58, T, W - T, 2.9, D - T, 'wood_ochre');
+    else upper();
     for (const x of [W * 0.3, W * 0.7]) { B(x - 0.13, 0.1, D * 0.5 - 0.13, x + 0.13, 2.58, D * 0.5 + 0.13, 'timber'); B(x - 0.3, 2.3, D * 0.5 - 0.3, x + 0.3, 2.58, D * 0.5 + 0.3, 'wood_painted'); const c = toW(x, D * 0.5); col.circle(c[0], c[1], 0.17, 0, 2.6); }
     furnish(el.trade || 'home');
   }
@@ -63,6 +65,14 @@ export function houseParts(el, ctx, { hipRoof }) {
       B(sxl - 0.14, 0.45, -0.12, sxl, 2.35, 0.05, 'timber'); B(sxl + sw, 0.45, -0.12, sxl + sw + 0.14, 2.35, 0.05, 'timber'); B(sxl - 0.14, 2.2, -0.14, sxl + sw + 0.14, 2.38, 0.05, 'timber');
       B(sxl - 0.1, 0.58, -0.3, sxl + sw + 0.1, 0.68, 0.0, 'wood_ochre');                    // the counter
       B(sxl + sw * 0.55, 0.68, -0.5, sxl + sw * 0.55 + sw * 0.4, 2.15, -0.06, 'wood_painted'); // the shutter stood open, boards on end
+      // the cloth awning over the stall, on two poles, and strings of chillies and garlic under it
+      if (det > 0) {
+        const am = ['cloth_red', 'cloth_ochre', 'cloth_indigo', 'cloth_white'][Math.floor(rand() * 4)], ay0 = 2.35, ay1 = 2.0, ad = 1.25;
+        B(sxl - 0.2, ay0 - 0.03, -ad, sxl + sw + 0.2, ay0 + 0.01, -0.02, am);
+        for (const x of [sxl - 0.12, sxl + sw + 0.12]) { RODL([x, 0, -ad + 0.08], [x, ay0, -ad + 0.08], 0.03, 'timber', 4); RC(x - 0.03, 0, -ad + 0.05, x + 0.03, ay0, -ad + 0.11); }
+        for (let k = 0; k < 4; k++) B(sxl + 0.2 + k * (sw - 0.4) / 3 - 0.02, ay0 - 0.75, -0.9, sxl + 0.2 + k * (sw - 0.4) / 3 + 0.02, ay0 - 0.03, -0.86, 'rope_fibre');
+        for (let k = 0; k < 4; k++) B(sxl + 0.14 + k * (sw - 0.4) / 3, ay0 - 0.78, -0.94, sxl + 0.26 + k * (sw - 0.4) / 3, ay0 - 0.4, -0.82, k % 2 ? 'cloth_red' : 'cloth_ochre');
+      }
       const g = rand();
       for (let k = 0; k < 4; k++) {
         const p = toW(sxl + 0.25 + k * 0.38, -0.15);
@@ -88,13 +98,27 @@ export function houseParts(el, ctx, { hipRoof }) {
     }
     if (W >= 6.5) {
       const wS = 0.85, wC = 1.05, g = 0.16, tw = wS * 2 + wC + g * 2, lx0 = cx - tw / 2, sill = y0 + 0.5;
-      lattice(lx0, sill, wS, 1.2, det); lattice(lx0 + wS + g, sill - 0.05, wC, 1.45, det); lattice(lx0 + wS + g + wC + g, sill, wS, 1.2, det);
+      // the projecting bay (sajhyah) of the better houses: the middle window stands out 0.6 m on brackets under its own small tiled roof [stated: Newar bay windows]
+      if (i === 1 && n > 2 && ((el.seed || 1) * 2654435761 >>> 0) % 100 < 38) {
+        lattice(lx0, sill, wS, 1.2, det); lattice(lx0 + wS + g + wC + g, sill, wS, 1.2, det);
+        bay(lx0 + wS + g + wC / 2, sill, 1.7, 1.5);
+      } else { lattice(lx0, sill, wS, 1.2, det); lattice(lx0 + wS + g, sill - 0.05, wC, 1.45, det); lattice(lx0 + wS + g + wC + g, sill, wS, 1.2, det); }
       B(lx0 - 0.12, sill - 0.12, -0.2, lx0 + tw + 0.12, sill - 0.02, 0.0, 'timber');            // the carved sill
       if (det > 1) B(lx0 - 0.12, sill + 1.5, -0.16, lx0 + tw + 0.12, sill + 1.64, 0.0, 'timber');  // the cornice
       if (det > 1 && rand() < 0.4) for (let k = 0; k < 3; k++) B(lx0 + 0.3 + k * 0.9, sill - 0.7, -0.14, lx0 + 0.42 + k * 0.9, sill - 0.14, -0.04, rand() < 0.5 ? 'cloth_red' : 'cloth_ochre');   // chillies and maize hung to dry
     } else {
       lattice(cx - 0.9, y0 + 0.55, 0.8, 1.15, det); lattice(cx + 0.1, y0 + 0.55, 0.8, 1.15, det);
     }
+  }
+  // a balcony along the third storey of the taller houses: a plank slab on struts, a railing of turned balusters, a cloth thrown over it [inferred]
+  if (n > 3 && W >= 6.5 && ((el.seed || 1) * 69069 >>> 0) % 100 < 30) {
+    const by = Y[2], x0b = 0.5, x1b = W - 0.5;
+    B(x0b, by + 0.02, -0.65, x1b, by + 0.14, 0.0, 'wood_dark');
+    for (let x = x0b + 0.3; x < x1b - 0.2; x += 1.4) RODL([x, by - 0.7, -0.02], [x, by + 0.02, -0.6], 0.045, 'wood_painted');
+    B(x0b, by + 0.14, -0.67, x1b, by + 0.2, -0.6, 'wood_dark'); B(x0b, by + 1.0, -0.67, x1b, by + 1.07, -0.6, 'wood_dark');
+    for (let x = x0b; x <= x1b; x += 0.32) B(x, by + 0.2, -0.655, x + 0.04, by + 1.0, -0.615, 'wood_dark');
+    B(x0b, by + 0.14, -0.67, x0b + 0.05, by + 1.07, 0.0, 'wood_dark'); B(x1b - 0.05, by + 0.14, -0.67, x1b, by + 1.07, 0.0, 'wood_dark');
+    if (((el.seed || 1) * 7) % 3 === 0) B(x0b + 1.0, by + 0.45, -0.7, x0b + 2.1, by + 1.05, -0.64, ['cloth_red', 'cloth_indigo', 'cloth_ochre'][(el.seed || 0) % 3]);
   }
   // ── weathering (the monsoon's damp, the plaster's loss) and the eye-level dressing of the front ──
   if (det > 0) {
@@ -130,6 +154,13 @@ export function houseParts(el, ctx, { hipRoof }) {
       if (det > 1) { B(dx + 1.38, 1.2, -0.08, dx + 1.62, 1.55, 0.0, 'wood_dark'); B(dx + 1.42, 1.25, -0.1, dx + 1.58, 1.45, -0.04, 'opening'); const p = toW(dx + 1.5, -0.08); bag.add('flame', lathe([[0.02, 0], [0.001, 0.06]], 5, null, p[0], 1.28, p[1])); }
       if (det > 0 && rand() < 0.6) for (let k = 0; k < 5; k++) B(dx + 0.1 + k * 0.2, 1.5 - 0.1 * Math.sin(k * 0.8), -0.1, dx + 0.2 + k * 0.2, 1.62 - 0.1 * Math.sin(k * 0.8), -0.04, 'cloth_ochre');
     }
+    // a wall niche with a Ganesh at the end of the front, a lamp and a marigold before it
+    if (!open && W > 7 && ((el.seed || 1) * 40503 >>> 0) % 100 < 28) {
+      const nx = W - 0.85;
+      B(nx - 0.08, 1.25, -0.12, nx + 0.58, 2.05, 0.0, 'wood_dark'); B(nx, 1.33, -0.14, nx + 0.5, 1.97, -0.04, 'opening');
+      { const p = toW(nx + 0.25, -0.07); bag.add('gilt_bronze', lathe([[0.001, 0], [0.09, 0], [0.07, 0.14], [0.04, 0.22], [0.001, 0.26]], 6, null, p[0], 1.36, p[1])); }
+      B(nx - 0.1, 1.2, -0.22, nx + 0.6, 1.26, 0.0, 'sandstone'); B(nx + 0.15, 1.26, -0.2, nx + 0.35, 1.31, -0.08, 'cloth_ochre');
+    }
     // washing on a line along an upper storey, a flower pot on a sill
     if (n > 2 && rand() < 0.4) {
       const ly = Y[2] - 0.45, lx0 = 0.5 + rand() * 0.6, lx1 = W - 0.5 - rand() * 0.6;
@@ -153,6 +184,48 @@ export function houseParts(el, ctx, { hipRoof }) {
     if (det > 1) B(x - 0.04, H - 0.85, -0.5, x + 0.04, H - 0.35, -0.42, 'gilt_bronze');
   }
 
+  /** The first floor of a lit shop-house: a plank floor round the stair's well, the walls closed to a man's height, a window seat under the lit lattice, mats, chests, a shrine, a lamp. */
+  function upper() {
+    const y = Y[1], yc = Y[2], sx0 = W - T - 3.4, sx1 = W - T - 2.5, sz1 = 4.5, fl = (a, b, c, d, y0, y1, m) => { B(a, y0, b, c, y1, d, m); };
+    const floorRect = (a, b, c, d) => { const p = toW(a, b), q = toW(c, d); col.floor([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], y); };
+    for (const [a, b, c, d] of [[T, T, sx0, D - T], [sx1, T, W - T, D - T], [sx0, sz1, sx1, D - T]]) { fl(a, b, c, d, y - 0.32, y, 'wood_ochre'); floorRect(a, b, c, d); }
+    // the walls close the room to the first floor's ceiling (colliders; the facade's lattice windows are lit from within by pale panels)
+    RC(0, y, 0, W, yc, T); RC(0, y, D - T, W, yc, D); RC(0, y, 0, T, yc, D); RC(W - T, y, 0, W, yc, D);
+    B(T, yc - 0.3, T, W - T, yc, D - T, 'wood_ochre');
+    for (let x = T + 0.4; x < W - T; x += 0.6) RODL([x, yc - 0.3, T + 0.02], [x, yc - 0.3, D - T - 0.02], 0.08, 'timber', 5);
+    const wc = W / 2, ws = W >= 6.5 ? [-1.1, 0, 1.1] : [-0.5, 0.5];
+    for (const o of ws) { const a = wc + o - 0.45; B(a, y + 0.55, T - 0.01, a + 0.9, y + 1.75, T + 0.03, 'paint_white'); for (let k = 1; k < 5; k++) B(a + 0.9 * k / 5 - 0.012, y + 0.55, T + 0.0, a + 0.9 * k / 5 + 0.012, y + 1.75, T + 0.05, 'wood_dark'); for (const yy of [y + 1.15]) B(a, yy - 0.012, T + 0.0, a + 0.9, yy + 0.012, T + 0.05, 'wood_dark'); B(a - 0.06, y + 0.5, T - 0.0, a + 0.96, y + 0.55, T + 0.08, 'wood_dark'); }
+    // the window seat along the facade, a cushion on it
+    B(T + 0.2, y, T, W - T - 0.2, y + 0.42, T + 0.5, 'wood_ochre'); RC(T + 0.2, y, T, W - T - 0.2, y + 0.42, T + 0.5);
+    for (let x = T + 0.5; x < W - T - 1.2; x += 1.5) B(x, y + 0.42, T + 0.04, x + 0.9, y + 0.5, T + 0.46, ['cloth_red', 'cloth_ochre', 'cloth_indigo'][Math.floor(x * 3) % 3]);
+    // the mat with its cushions and a low table, the family's shrine in the left wall, chests and jars at the back, a lamp
+    B(W * 0.25, y, D * 0.45, W * 0.25 + 2.2, y + 0.03, D * 0.45 + 1.5, 'reed_mat');
+    for (const [dx, dz, m] of [[0.2, 0.2, 'cloth_red'], [1.2, 0.3, 'cloth_ochre'], [0.6, 1.1, 'cloth_indigo']]) B(W * 0.25 + dx, y + 0.03, D * 0.45 + dz, W * 0.25 + dx + 0.5, y + 0.14, D * 0.45 + dz + 0.4, m);
+    B(W * 0.25 + 0.5, y + 0.03, D * 0.45 + 0.55, W * 0.25 + 1.4, y + 0.3, D * 0.45 + 0.95, 'wood_dark');
+    { const z = Math.min(D * 0.55, D - T - 1.2); B(T - 0.01, y + 1.0, z - 0.45, T + 0.12, y + 1.9, z + 0.45, 'wood_painted'); B(T + 0.1, y + 1.08, z - 0.35, T + 0.13, y + 1.82, z + 0.35, 'opening'); const p = toW(T + 0.3, z); bag.add('gilt_bronze', lathe([[0.001, 0], [0.1, 0], [0.08, 0.2], [0.05, 0.3], [0.001, 0.36]], 6, null, p[0], y + 1.1, p[1])); bag.add('flame', lathe([[0.03, 0], [0.001, 0.09]], 5, null, p[0], y + 1.02, p[1])); B(T, y + 0.95, z - 0.5, T + 0.4, y + 1.0, z + 0.5, 'wood_dark'); }
+    for (let k = 0; k < 3; k++) { const x = T + 0.3 + k * 1.1; if (x + 1.0 > sx0) break; B(x, y, D - T - 0.9, x + 1.0, y + 0.55, D - T - 0.1, 'wood_dark'); B(x - 0.02, y + 0.55, D - T - 0.94, x + 1.02, y + 0.6, D - T - 0.06, 'wood_ochre'); RC(x, y, D - T - 0.9, x + 1.0, y + 0.6, D - T - 0.1); }
+    for (let k = 0; k < 4; k++) { const p = toW(W - T - 0.5 - (k % 2) * 0.55, D - T - 0.5 - Math.floor(k / 2) * 0.6); pot(bag, p[0], y, p[1], 'jar', 1.4 - 0.15 * k); col.circle(p[0], p[1], 0.3, y, y + 0.8); }
+    RODL([T + 0.3, yc - 0.55, D * 0.5], [sx0 - 0.2, yc - 0.55, D * 0.5], 0.02, 'timber', 4);
+    for (let x = T + 0.6, k = 0; x < sx0 - 0.6; x += 0.55, k++) B(x, yc - 1.55 + (k % 2) * 0.1, D * 0.5 - 0.02, x + 0.38, yc - 0.55, D * 0.5 + 0.02, ['cloth_white', 'cloth_red', 'cloth_indigo'][k % 3]);
+    if (lights && el.light) { const p = toW(W / 2, D / 2); lights.push({ at: [p[0], y + 1.9, p[1]], color: '#ffe3b0', intensity: 1.5, distance: 8 }); }
+  }
+
+  /** The bay window: a floor of planks on two struts, a lattice front and two lattice sides, a cornice and a little hipped roof. */
+  function bay(cx, y, w, h) {
+    const x0b = cx - w / 2, x1b = cx + w / 2, o = 0.62;
+    B(x0b - 0.05, y - 0.2, -o - 0.05, x1b + 0.05, y - 0.08, 0.0, 'wood_dark');
+    for (const x of [x0b + 0.2, x1b - 0.2]) RODL([x, y - 1.0, -0.02], [x, y - 0.2, -o + 0.06], 0.05, 'wood_painted');
+    B(x0b, y - 0.08, -o - 0.02, x1b, y + h, -o + 0.04, 'opening');
+    B(x0b - 0.08, y - 0.08, -o - 0.1, x1b + 0.08, y, -o + 0.04, 'wood_dark'); B(x0b - 0.08, y + h, -o - 0.1, x1b + 0.08, y + h + 0.1, -o + 0.04, 'wood_dark');
+    for (const x of [x0b - 0.08, x1b]) B(x, y - 0.08, -o - 0.1, x + 0.08, y + h, -o + 0.04, 'wood_dark');
+    const m = det > 0 ? Math.round(w / 0.17) : 4;
+    for (let k = 1; k < m; k++) { const x = x0b + w * k / m; B(x - 0.015, y, -o - 0.06, x + 0.015, y + h, -o - 0.02, 'wood_dark'); }
+    if (det > 1) for (let k = 1; k < 4; k++) B(x0b, y + h * k / 4 - 0.015, -o - 0.07, x1b, y + h * k / 4 + 0.015, -o - 0.03, 'wood_dark');
+    for (const x of [x0b, x1b - 0.03]) { B(x, y, -o, x + 0.03, y + h, -0.0, 'wood_dark'); B(x, y + h * 0.2, -o + 0.05, x + 0.03, y + h * 0.8, -0.02, 'opening'); }
+    const a = toW(x0b - 0.12, -o - 0.12), b = toW(x1b + 0.12, 0.0);
+    hipRoof(bag, [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], y + h + 0.1, 0.28, [0.04, 0.04, 0.04, 0.04], 'roof_tile', ns);
+  }
+
   /** A lattice window at (lx, y) of width w and height h: the dark recess, a carved frame, the screen of bars. */
   function lattice(lx, y, w, h, d) {
     B(lx, y, -0.05, lx + w, y + h, 0.0, 'opening');
@@ -169,8 +242,15 @@ export function houseParts(el, ctx, { hipRoof }) {
   function furnish(kind) {
     const bk = D - T;
     // the steep wooden stair to the rooms above, in the back corner: 9 boards, a hole closed by a trap
-    for (let k = 0; k < 9; k++) B(W - T - 3.4 - 0.0, 0.1 + k * 0.28, 1.0 + k * 0.1, W - T - 2.5, 0.38 + k * 0.28, 1.45 + k * 0.1, 'wood_ochre');
-    RC(W - T - 3.4, 0.1, 1.0, W - T - 2.5, 2.5, 2.4);
+    if (up) {
+      // 14 treads of 0.2 m rise and 0.25 m run up to the first floor; walkable
+      for (let k = 0; k < 14; k++) B(W - T - 3.4, 0.1, 1.0 + k * 0.25, W - T - 2.5, 0.3 + k * 0.2, 1.25 + k * 0.25, 'wood_ochre');
+      { const a = toW(W - T - 3.4, 1.0), b = toW(W - T - 2.5, 4.5); col.ramp([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], 0.1, 2.9, { s: 'n', n: 's', e: 'w', w: 'e' }[f]); }
+      B(W - T - 2.56, 0.1, 1.0, W - T - 2.5, 1.2, 4.5, 'wood_dark');                       // the rail on the wall side
+    } else {
+      for (let k = 0; k < 9; k++) B(W - T - 3.4 - 0.0, 0.1 + k * 0.28, 1.0 + k * 0.1, W - T - 2.5, 0.38 + k * 0.28, 1.45 + k * 0.1, 'wood_ochre');
+      RC(W - T - 3.4, 0.1, 1.0, W - T - 2.5, 2.5, 2.4);
+    }
     // the side shrine: a framed niche in the left wall with a gilt image and a lit lamp
     { const z = Math.min(D * 0.55, bk - 1.2); B(T - 0.01, 1.0, z - 0.45, T + 0.12, 1.9, z + 0.45, 'wood_painted'); B(T + 0.1, 1.08, z - 0.35, T + 0.13, 1.82, z + 0.35, 'opening');
       const p = toW(T + 0.3, z); bag.add('gilt_bronze', lathe([[0.001, 0], [0.1, 0], [0.08, 0.2], [0.05, 0.3], [0.001, 0.36]], 6, null, p[0], 1.1, p[1])); bag.add('flame', lathe([[0.03, 0], [0.001, 0.09]], 5, null, p[0], 1.02, p[1])); B(T, 0.95, z - 0.5, T + 0.4, 1.0, z + 0.5, 'wood_dark'); }
@@ -222,7 +302,7 @@ export function houseParts(el, ctx, { hipRoof }) {
       B(W * 0.38, 0.1, D * 0.62, W * 0.38 + 1.7, 0.12, D * 0.62 + 1.1, 'reed_mat');
       for (let k = 0; k < 3; k++) B(T + 0.1, 0.1 + k * 0.28, bk - 0.9, T + 0.8, 0.38 + k * 0.28, bk - 0.1, k % 2 ? 'sacking' : 'cloth_white');
       RC(T + 0.1, 0.1, bk - 0.9, T + 0.8, 1.0, bk - 0.1);
-      if (kind === 'grain') { for (let k = 0; k < 5; k++) { const p = toW(T + 1.4 + k * 0.6, 1.8 + (k % 2) * 0.3); bag.add(k % 2 ? 'sacking' : 'cloth_ochre', lathe([[0.001, 0.1], [0.24, 0.1], [0.28, 0.4], [0.18, 0.62], [0.001, 0.66]], 8, null, p[0], 0, p[1])); col.circle(p[0], p[1], 0.28, 0.1, 0.7); } { const a = toW(W * 0.5, 2.9); bag.add('bronze', rod([a[0], 0.1, a[1]], [a[0], 1.4, a[1]], 0.02, 5)); bag.add('bronze', rod([a[0] - 0.4, 1.35, a[1]], [a[0] + 0.4, 1.35, a[1]], 0.015, 4)); for (const s of [-0.4, 0.4]) bag.add('bronze', lathe([[0.001, 0], [0.12, 0.02], [0.14, 0.04]], 8, null, a[0] + s, 0.95, a[1])); } }
+      if (kind === 'grain') { for (let k = 0; k < 5; k++) { if (T + 1.4 + k * 0.6 > W - T - 3.8) continue; const p = toW(T + 1.4 + k * 0.6, 1.8 + (k % 2) * 0.3); bag.add(k % 2 ? 'sacking' : 'cloth_ochre', lathe([[0.001, 0.1], [0.24, 0.1], [0.28, 0.4], [0.18, 0.62], [0.001, 0.66]], 8, null, p[0], 0, p[1])); col.circle(p[0], p[1], 0.28, 0.1, 0.7); } { const a = toW(W * 0.5, 2.9); bag.add('bronze', rod([a[0], 0.1, a[1]], [a[0], 1.4, a[1]], 0.02, 5)); bag.add('bronze', rod([a[0] - 0.4, 1.35, a[1]], [a[0] + 0.4, 1.35, a[1]], 0.015, 4)); for (const s of [-0.4, 0.4]) bag.add('bronze', lathe([[0.001, 0], [0.12, 0.02], [0.14, 0.04]], 8, null, a[0] + s, 0.95, a[1])); } }
     }
     if (lights && el.light) { const p = toW(W / 2, D / 2); lights.push({ at: [p[0], 2.2, p[1]], color: '#ffd9a0', intensity: 2.2, distance: 10 }); }
   }

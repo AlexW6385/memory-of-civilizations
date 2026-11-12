@@ -31,6 +31,8 @@ function emitters() {
   for (const [x, z] of comals()) E.push({ p: [x, 0.5, z], kind: 'steam', thr: rand() * 0.3, seed: Math.floor(rand() * 1e6) }, { p: [x, 0.9, z], kind: 'kitchen', thr: 0.1 + rand() * 0.3, seed: Math.floor(rand() * 1e6) });
   // the palace's kitchens
   for (const [x, z] of [[PALACE[0] + 40, PALACE[1] + 70], [PALACE[0] + 12, PALACE[1] + 60], [PALACE[0] + 30, PALACE[1] + 18]]) E.push({ p: [x, 7.4, z], kind: 'kitchen', thr: 0.05, seed: 600 + Math.floor(x) });
+  // the braziers kept burning at the temple's stair foot
+  for (const [x, z] of [[35, -16.5], [35, 16.5], [35, -10], [35, 10]]) E.push({ p: [x, 1.15, z], kind: 'incense', thr: 0, seed: 700 + Math.floor(z) });
   // copal: the braziers at the stairheads of the Templo Mayor, out of the shrines' doors, on the summits of the lesser temples
   const top = TM.h, sx = TM.c[0] - TM.top.w / 2 + 2;
   for (const s of [-1, 1]) {
