@@ -1,7 +1,7 @@
 // The village round the churches (docs/settlements/lalibela.md §5): round stone houses with conical thatch;
 // and the people of the churches (§10): pilgrims wrapped in white in the pits, the trenches and on
 // the rims looking down, priests among them holding their hand crosses.
-import { RADIUS, PITS, PRECINCT, cutDepth, houses, slope, inRect } from './layout.js';
+import { RADIUS, POOL, PITS, PRECINCT, TERR, cutDepth, houses, compounds, slope, inRect } from './layout.js';
 const base = (id, elements, style = 'zagwe') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-240, 100], facing: 's' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -70,11 +70,50 @@ function people() {
       else { const hx = 0.152 * kk, hz = -0.33 * kk; Z.push({ t: 'sistrum', at: [at[0] + hx * c + hz * s, at[1] - hx * s + hz * c], y: y + 1.09 * kk, rot }); }
     }
     priestAt([71.6, zr + 0.4], y, Math.PI - 0.5); }
+  // at the Jordan's pool: women washing white cloth at its kerb, a priest with his cross at the steps, a pilgrim waiting his turn
+  { const [px0, pz0, px1, pz1] = POOL;
+    for (let k = 0; k < 4; k++) { const p = [px0 + 4 + k * 6.5 + rand(), pz1 + 0.9 + rand() * 0.3]; L.push({ t: 'figure', at: p, y: yAt(...p), rot: 0, seed: Math.floor(rand() * 1e9), dress: 'robe', over: 'shawl', cloth: 'cloth_white', cloth2: 'cloth_ochre', hat: 'veil', hatMat: 'cloth_white', hair: 'bun', skin: 'skin_dark', feet: 'bare', pose: 'squat' }); }
+    priestAt([px1 + 2.8, (pz0 + pz1) / 2 + 1.6], yAt(px1 + 2.8, (pz0 + pz1) / 2 + 1.6), Math.PI / 2);
+    for (let k = 0; k < 2; k++) pilgrim([px1 + 4.2 + k * 0.9, (pz0 + pz1) / 2 + 2.6 + k * 0.4], -Math.PI / 2, 'sit_ground');
+    for (let k = 0; k < 3; k++) { const p = [px0 + 5 + k * 9, pz1 + 0.6]; Z.push({ t: 'cloth_pile', at: p, y: yAt(...p) }); } }
   return [base('lalibela-people', L, 'life'), base('lalibela-crosses', Z)];
 }
 
+/** The still life of the compounds: animals in the pens and about the yards, hens, a woman at her work by the kitchen door, a man on the stone seat. */
+function village() {
+  const rand = rng(2112), out = [[], [], [], []], P = [];
+  const fig = (L, at, rot, pose, o = {}) => L.push({ t: 'figure', at, y: slope(...at), rot, seed: Math.floor(rand() * 1e9), dress: 'robe', over: 'shawl', cloth: 'cloth_white', cloth2: rand() < 0.4 ? 'cloth_ochre' : 'cloth_white', hat: 'none', skin: 'skin_dark', feet: 'bare', pose, ...o });
+  for (const q of compounds()) {
+    const L = out[quad(...q.c)], u = [Math.cos(q.gate), Math.sin(q.gate)], v = [-u[1], u[0]], M = q.main, md = M.door ?? q.gate, mu = [Math.cos(md), Math.sin(md)], mv = [-mu[1], mu[0]];
+    const an = (kind, at, o = {}) => L.push({ t: 'animal', kind, at, y: slope(...at), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), ...o });
+    if (q.pen) {
+      const n = 3 + Math.floor(rand() * 3), cow = rand() < 0.35;
+      for (let k = 0; k < n; k++) { const a = rand() * 6.28, d = rand() * 1.5; an(cow && k < 2 ? 'zebu' : rand() < 0.6 ? 'goat' : 'sheep', [q.pen[0] + Math.cos(a) * d, q.pen[1] + Math.sin(a) * d]); }
+    }
+    if (rand() < 0.7) L.push({ t: 'chickens', at: [q.c[0] + v[0] * q.R * 0.3, q.c[1] + v[1] * q.R * 0.3], y: slope(q.c[0] + v[0] * q.R * 0.3, q.c[1] + v[1] * q.R * 0.3), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), n: 3 + Math.floor(rand() * 4), kind: 'hen' });
+    if (rand() < 0.3) an('donkey', [q.c[0] + u[0] * q.R * 0.5 + v[0] * q.R * 0.5, q.c[1] + u[1] * q.R * 0.5 + v[1] * q.R * 0.5]);
+    if (rand() < 0.3) an('dog', [M.c[0] + mu[0] * (M.r + 1.5) + mv[0] * 2.6, M.c[1] + mu[1] * (M.r + 1.5) + mv[1] * 2.6]);
+    if (rand() < 0.45) fig(L, [M.c[0] + mu[0] * (M.r + 1.2) + mv[0] * 0.2, M.c[1] + mu[1] * (M.r + 1.2) + mv[1] * 0.2], Math.atan2(-mu[0], -mu[1]) + 3.14 * 0 + Math.PI, 'squat', { hat: 'veil', hair: 'bun', over: 'shawl' });
+    if (rand() < 0.35) fig(L, [M.c[0] + mu[0] * (M.r + 0.55) - mv[0] * 1.9, M.c[1] + mu[1] * (M.r + 0.55) - mv[1] * 1.9], Math.atan2(-mu[0], -mu[1]) + Math.PI, 'sit_low', { hat: rand() < 0.4 ? 'turban' : 'none', hatMat: 'cloth_white', beard: 0.6, hair: 'short', over: 'cape' });
+    if (rand() < 0.4) fig(L, [q.c[0] + u[0] * q.R * 0.55 - v[0] * 1.2, q.c[1] + u[1] * q.R * 0.55 - v[1] * 1.2], rand() * 6.28, 'stand', { h: 1.1, over: 'none', hair: 'short', cloth: rand() < 0.5 ? 'cloth_ochre' : 'cloth_white' });
+  }
+  for (let k = 0; k < 4; k++) P.push(base(`lalibela-hamlet-life-${k}`, out[k], 'life'));
+  return P;
+}
+const quad = (x, z) => (x < 0 ? 0 : 1) + (z < 0 ? 0 : 2);
 export async function town() {
-  const all = houses(), plans = [];
-  for (let i = 0; i < all.length; i += 140) plans.push(base(`lalibela-village-${i / 140}`, all.slice(i, i + 140).map((h) => ({ t: 'tukul', ...h, y: slope(h.c[0], h.c[1]), yard: Math.hypot(h.c[0], h.c[1]) < PRECINCT - h.r - 5 }))));
-  return [...plans, ...people()];
+  const all = houses(), plans = [], Q = [[], [], [], []], Y = [[], [], [], []];
+  for (const h of all) {
+    if (h.enter) { Q[quad(...h.c)].push({ t: 'hut', c: h.c, r: h.r, y: slope(h.c[0], h.c[1]), door: h.door, seed: h.seed, kind: h.enter }); continue; }
+    Q[quad(...h.c)].push({ t: 'tukul', c: h.c, r: h.r, storeys: h.storeys, seed: h.seed, door: h.door, y: slope(h.c[0], h.c[1]), yard: h.kind === 'lone' && Math.hypot(h.c[0], h.c[1]) < PRECINCT - h.r - 5 });
+  }
+  for (const q of compounds()) Y[quad(...q.c)].push({ t: 'yard', c: q.c, R: q.R, gate: q.gate, seed: q.seed, stone: q.stone, main: { c: q.main.c, r: q.main.r, door: q.main.door }, granary: q.granary, pen: q.pen });
+  for (let k = 0; k < 4; k++) plans.push(base(`lalibela-village-${k}`, Q[k]), base(`lalibela-yards-${k}`, Y[k]));
+  // the terraces: each riser's wall in four arcs
+  for (let k = 0; k < 4; k++) {
+    const E = [];
+    for (let n = 0; n < TERR.n; n++) E.push({ t: 'terrace', n, from: -Math.PI + k * Math.PI / 2, to: -Math.PI + (k + 1) * Math.PI / 2 });
+    plans.push(base(`lalibela-terraces-${k}`, E));
+  }
+  return [...plans, ...village(), ...people()];
 }

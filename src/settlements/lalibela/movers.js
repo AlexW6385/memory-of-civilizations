@@ -4,7 +4,7 @@
 // the churches' courts, down the trenches and the Jordan and along the paths to the village. Data for the
 // engine's movers (src/engine/movers.js, read in its worker); the ways come from layout.js. No boats.
 
-import { RADIUS, PITS, TRENCHES, EDGE } from './layout.js';
+import { RADIUS, PITS, TRENCHES, EDGE, LINKS, lanes } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure, factor, flat, SLOT } from '../../engine/movers-kit.js';
@@ -42,15 +42,16 @@ export function walkways() {
   R([58.4, -100.4, 78.6, -97.6], 1.0); R([58.4, -82.4, 78.6, -79.6], 0.8); R([57.6, -99.4, 59.6, -80.6], 0.8);
   R([-67, -100.6, -37, -98.6], 0.7);                                 // Golgotha's north gap
   // the trenches (their floors between the rock walls) and the Jordan, joined to the courts, and the paths beyond
-  R([-150, -19, 212, -9], 2.0);                                      // the Jordan with its two ramps
+  R([-150, -14.6, 212, -9], 2.0);                                      // the Jordan with its two ramps
   R([-340, -17, -150, -11], 0.9); R([212, -17, 340, -11], 0.9);       // the paths out west and east
   R([-340, 126, -211, 130], 1.2);                                    // down to Bete Giyorgis and the way to it
   R([7, -252, 13, -106], 1.5);                                       // to Medhane Alem from the north
   R([-55, -252, -49, -99.5], 0.8); R([-252, -252, 10, -248], 0.7);                                   // to Golgotha
   R([29, -93, 58.6, -87], 1.0);                                        // Medhane Alem to Maryam
   R([37, -19, 43, 49], 1.0); R([117, -19, 123, 33], 0.9);            // the Jordan to Amanuel and to Gabriel-Rufael
-  // the village: footpaths from the Jordan's roads out over the slopes
-  links.push({ a: [-250, -14], b: [-250, -250], w: 1.2, kind: 'street', weight: 0.5 }, { a: [-250, -14], b: [-250, 128], w: 1.2, kind: 'street', weight: 0.5 }, { a: [250, -14], b: [250, 150], w: 1.2, kind: 'street', weight: 0.5 });
+  // the village: footpaths from the Jordan's roads out over the slopes, and the lanes of the hamlets to their compounds' gates
+  for (const l of LINKS) links.push({ a: l.a, b: l.b, w: l.w, kind: 'street', weight: 0.5 });
+  for (const l of lanes()) links.push({ a: l.a, b: l.b, w: l.w, kind: 'street', weight: l.w > 1.6 ? 0.45 : 0.2 });
   void TRENCHES;
   return { rects, links, clip: RADIUS - 12 };
 }

@@ -87,12 +87,30 @@ Chant in the ge'ez mode with the kebero drum and sistrum, the begena's buzzing s
 - **Living systems.** Pilgrims in white cotton, women with jars and baskets, farmers with sacks, priests in turbans, boys, walking the courts, trenches, the Jordan and the paths out to the village (`movers.js`: courts and trenches as ways; day 44, night 4); swallows over the pits, ravens high over the plateau, sparrows on the rims and roofs (`fauna.js`); kitchen smoke through the thatch at the three meals, incense in the church doors, mist in the Jordan at dawn (`smoke.js`) [inferred: all counts and hours]. Soundscape was already in the engine.
 - **Not built.** Eucalyptus: it came to Ethiopia only in the 1890s, so the c. 1220 planting stays juniper, wild olive and acacia.
 
+## 15. Eighth pass: the village as a settlement (deepening toward the Suzhou standard)
+
+- **Compounds.** The 420 scattered houses are replaced by about 107 walled compounds in 30 hamlets on the level precinct between the pits, each: a yard walled with piled stone (55 %) or fenced with wattle and posts, a gate gap with two posts and a pole laid by it, the family's round house at the back of the yard (some two-storey), a smaller kitchen house, in half the yards a store, a granary on stone piers, a pen, a threshing floor, haystacks on poles, firewood, water pots by the door, a stone seat, a grindstone, a washing line of white shawls, hanging log beehives; footpaths from every gate to the hamlet's lane and from the hamlet to the nearest road [inferred: the plan, from the UNESCO description of the Lasta tukuls and common highland farmstead practice; the single-family walled yard with outbuildings is typical of Ethiopian highland farmsteads, FAO/PMC landscape studies, not verified house by house].
+- **Terraced slopes.** Beyond 262 m the ground steps up in nine terraces (9 m a ring, a 1.4 m riser each) with a dry-stone retaining wall on each riser; the treads in plots of wheat/barley, fallow and grass [inferred: northern Ethiopia's terraced landscapes are old and well documented, https://www.fao.org/4/x5523e/x5523e04.htm and https://pmc.ncbi.nlm.nih.gov/articles/PMC4190142 (landscape studies; their age at c. 1220 not verified)]. The village houses stand only on the level ground and the first slope.
+- **Houses to enter.** Nine main houses near the visitor's ways (and the original one) are furnished as a household, a weaver's (frame loom with warp and the cloth woven up), a brewer's (fermenting jars, cups on a shelf, gesho bundle), a scribe-priest's (book stand with a parchment manuscript between wooden boards, hand cross, prayer stick, lamp) and a farmer's store (sacks, mud grain bins, plough and yoke leaning on the wall, hides). Every house has smoke gourds and peppers hung over the hearth [inferred]. Eucalyptus and coffee-ceremony furniture are left out as later.
+- **Still life.** Goats, sheep and some zebu in the pens, hens, a donkey, a dog, a woman squatting at her work by the kitchen door, a man on the stone seat, a child in the yard [inferred].
+
+## 16. Eighth pass: the churches' inside and the courts
+
+- **The Aksumite-manner churches hollowed.** Bete Golgotha, Bete Amanuel and Bete Gabriel-Rufael are now enterable: a west door with steps, thick walls pierced by open windows, rows of square pillars under a flat ceiling, the sanctuary screened by a wall and a red curtain, an altar with the tabot's casket, a rush mat, hanging lamps. Bete Golgotha is "the one church in Lalibela that women are prohibited from entering", its Selassie chapel "off limits to all visitors" [stated: Rough Guides, https://www.roughguides.com/destinations/africa/ethiopia/lalibela-around/lalibela/lalibela-church-complex/the-southeast-cluster-2/ ]; Bete Amanuel "the most precisely worked church of the cluster" [stated: same]. The seven saints in relief on Golgotha's walls are widely reported [inferred: not verified in a page read here]; ours has eight robed figures with haloes in relief on its nave walls. The Amanuel and Gabriel interiors are not described in the sources read: ours is the same plan as Golgotha's without the saints [inferred].
+- **Weathering.** Dark rain streaks down every cut face from the rim, pale lichen patches, damp at the foot [inferred]. Whitewashed-grey damp band round each house's base.
+- **Courts.** Sandals left in rows at the church doors (the pilgrims go in barefoot), staffs leaning at the rock walls' foot, white bundles, water jars, and rock seats left by the masons [inferred from pilgrim accounts, myjoyonline, §10].
+- **Descents.** The long ramps of the trenches (to Bete Giyorgis, to Medhane Alem, to Golgotha, the Jordan's two ends) have steps cut in their floors, 0.9 m runs [inferred; the sources describe a "descending trench"].
+- **The Jordan's pool.** A kerbed basin of 30 × 3.6 m in the river-bed's floor with water in it; washerwomen at its kerb, a priest with his cross at its steps, pilgrims waiting to be blessed with its water, washed shawls spread on the stones [inferred: the Jordan's baptismal use, Met essay §12: "baptismal pools"].
+- **Lamps.** Seventeen hanging brass lamps with a warm light in the five great churches' naves [inferred].
+
 ## Sources (additions)
 
 - [House of Saint George — dragontravelmag](https://dragontravelmag.blogspot.com/2010/10/house-of-saint-george.html)
 - [The southeastern group — The Velvet Rocket](https://thevelvetrocket.com/2010/05/13/the-rock-hewn-churches-of-lalibela-ethiopia-the-southeastern-group/)
 - [Processional Cross — The Met](https://metmuseum.org/toah/works-of-art/2011.159)
 - [Procession around the New Cathedral, Axum — Alamy](https://www.alamy.com/ethiopian-orthodox-christianity-procession-of-priests-and-believers-image7339811.html)
+- [Rough Guides — the south-east cluster](https://www.roughguides.com/destinations/africa/ethiopia/lalibela-around/lalibela/lalibela-church-complex/the-southeast-cluster-2/)
+- [FAO — terraced landscapes methods](https://www.fao.org/4/x5523e/x5523e04.htm)
 - [Konso housing study — core.ac.uk](https://core.ac.uk/download/231823328.pdf)
 
 ## Sources
