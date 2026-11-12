@@ -30,9 +30,10 @@ function people() {
   // bathers on the pool's steps (the water stands at the coping less 0.35 m; the steps rise 0.2 m each, 0.283 m deep), attendants on the benches of the court's west wall
   {
     const yb = PLAT - BATH.depth, stepY = (s) => yb + 0.2 * (Math.floor(s / 0.2833) + 1);
-    for (const [s, x, south] of [[1.7, px0 + 1.3, false], [2.3, px0 + 3.4, false], [1.9, px1 - 1.3, false], [1.8, px0 + 2.2, true], [2.4, px1 - 2.4, true]]) {
+    // (the water stands 1.05 m below the coping: waist-deep on the third step from the bed, seated hip-deep on the fifth)
+    for (const [s, x, south, sit] of [[0.7, px0 + 1.3, false, false], [0.7, px0 + 3.4, false, false], [1.25, px1 - 1.3, false, true], [0.7, px0 + 2.2, true, false], [0.7, px1 - 2.0, true, false], [1.25, px0 + 4.5, true, true]]) {
       const z = south ? pz1 - 3.4 + s : pz0 + 3.4 - s;
-      man([x, z], south ? 0 : Math.PI, { y: stepY(s), dress: 'loincloth', over: 'none', cloth: 'cloth_white', hair: 'shaven', beard: 0, pose: s > 2.0 ? 'sit' : 'stand' });
+      man([x, z], south ? 0 : Math.PI, { y: stepY(s), dress: 'loincloth', over: 'none', cloth: 'cloth_white', hair: 'shaven', beard: 0, pose: sit ? 'sit' : 'stand' });
     }
     for (let k = 0; k < 4; k++) man([BATH.outer[0] + 1.2 + 0.3, cz0 + 3 + k * 4.5 + 0.0], Math.PI / 2, { y: PLAT + 0.45, pose: 'cross', cloth: 'cloth_white', hair: 'shaven', beard: 0 });
     for (const [x, z] of [[cx0 + 2, cz0 + 4], [cx1 - 2.5, cz1 - 3], [cx1 - 2, cz0 + 8]]) woman([x, z], rand() * 6.28, { y: PLAT, carry: 'pot', arms: 'head' });
