@@ -24,6 +24,8 @@ E.push({ t: 'crib_wall', a: [ix1, iz0], b: [ix1, iz1], th: ith, top: innerTop, s
 E.push({ t: 'crib_wall', a: [ix0, iz0], b: [ix0, iz1], th: ith, top: innerTop, seed: 23, proj: 1 });
 E.push({ t: 'crib_wall', a: [ix0, iz1], b: [INNER_GATE[0], iz1], th: ith, top: (u, L) => 3.6 + 1.0 * (1 - sm(0, 6, u)), seed: 24, proj: 0, ends: [ith / 2, 0] });
 E.push({ t: 'crib_wall', a: [INNER_GATE[1], iz1], b: [ix1, iz1], th: ith, top: (u, L) => 3.6 + 1.0 * (1 - sm(0, 6, L - u)), seed: 25, proj: 0, ends: [0, ith / 2] });
+// from the canal the walls must read: the log-cabin corners' columns run well past each other (0.55 m on the outer wall), the faces' headers stand proud by uneven amounts, the crown is skinned in pale coral
+for (const e of E) if (e.t === 'crib_wall') Object.assign(e, { jut: e.th > 2 ? 0.55 : 0.4, rough: 0.12, cap: true });
 E.push({ t: 'tomb', ...TOMB, seed: 31 });
 for (const [x, z, yaw] of SAKAU) E.push({ t: 'sakau', c: [x, z], yaw });
 // heaps of coral gravel against the inner court's walls, where the floor is raked
@@ -64,7 +66,7 @@ export const nandauwas = {
   entrance: { at: [-10, 80], facing: 'n' },
   bounds: [-48, -80, 28, 12],
   bakeBounds: [-48, -80, 28, 12],
-  view: [ox0, oz0, ox1, 40],   // the walls and the lagoon before them to the causeway's head: Nandauwas stands in the water, so it is seen from the landing
+  view: [ox0, oz0, ox1, 14],   // the walls and the canal before them: Nandauwas stands in the water, so it is seen from the palace islet's crossroads down the causeway's axis
   bakeTop: 12,
   elements: E,
   rooms,

@@ -58,9 +58,9 @@ export async function town() {
   // the sea wall: a high wall of columns along the outer edge of the islets that make it (foundations of columnar basalt and boulders [stated: NRHP])
   for (const s of ISLETS.filter((q) => q.kind === 'seawall')) {
     const [x0, z0, x1, z1] = s.rect;
-    if (s.id.startsWith('se')) E.push({ t: 'crib_wall', a: [x1 - 1.2, z0 + 1.5], b: [x1 - 1.2, z1 - 1.5], th: 1.6, top: 2.4, seed: seed++, ends: [0, 0], proj: 0 });
-    else if (s.id.startsWith('ss')) E.push({ t: 'crib_wall', a: [x0 + 1.5, z1 - 1.2], b: [x1 - 1.5, z1 - 1.2], th: 1.6, top: 2.4, seed: seed++, ends: [0, 0], proj: 0 });
-    else { E.push({ t: 'crib_wall', a: [x1 - 1.2, z0 + 1.5], b: [x1 - 1.2, z1 - 1.5], th: 1.6, top: 2.4, seed: seed++, ends: [0, 0], proj: 0 }); E.push({ t: 'crib_wall', a: [x0 + 1.5, z1 - 1.2], b: [x1 - 1.5, z1 - 1.2], th: 1.6, top: 2.4, seed: seed++, ends: [0, 0], proj: 0 }); }
+    if (s.id.startsWith('se')) E.push({ t: 'crib_wall', a: [x1 - 1.2, z0 + 1.5], b: [x1 - 1.2, z1 - 1.5], th: 1.6, top: 2.4, seed: seed++, ends: [0, 0], proj: 0, rough: 0.1, cap: true });
+    else if (s.id.startsWith('ss')) E.push({ t: 'crib_wall', a: [x0 + 1.5, z1 - 1.2], b: [x1 - 1.5, z1 - 1.2], th: 1.6, top: 2.4, seed: seed++, ends: [0, 0], proj: 0, rough: 0.1, cap: true });
+    else { E.push({ t: 'crib_wall', a: [x1 - 1.2, z0 + 1.5], b: [x1 - 1.2, z1 - 1.5], th: 1.6, top: 2.4, seed: seed++, ends: [0, 0], proj: 0, rough: 0.1, cap: true }); E.push({ t: 'crib_wall', a: [x0 + 1.5, z1 - 1.2], b: [x1 - 1.5, z1 - 1.2], th: 1.6, top: 2.4, seed: seed++, ends: [0, 0], proj: 0, rough: 0.1, cap: true }); }
   }
   // ── the nahs and the cook-houses ──
   const taroOf = (h, k) => (h.islet[0] === 'w' || 's2,s3,s5,s6'.includes(h.islet)) && k % 4 === 1 && (h.depth ?? 0) >= 6.5 && !h.back;
