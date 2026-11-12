@@ -110,7 +110,7 @@ function colonnade(el, { bag, col }) {
     const pt = (a, off) => { const s = 1 + off / ((ax + bz) / 2); return [ox + Math.cos(a) * ax * s, oz - Math.sin(a) * bz * s]; };
     for (let i = 0; i <= n; i++) {
       const a = a0 + (a1 - a0) * i / n;
-      for (let r = 0; r < rows; r++) { const [x, z] = pt(a, r * depth / (rows - 1)); bag.add(T, lathe([[0.9, 0], [0.9, 0.6], [0.75, 0.9], [0.65, h - 1.2], [0.95, h - 0.6], [0.95, h]], 10, null, x, y, z)); col.circle(x, z, 0.8, y, y + h); }
+      for (let r = 0; r < rows; r++) { const [x, z] = pt(a, r * depth / (rows - 1)); bag.add(T, lathe([[0.9, 0], [0.9, 0.6], [0.75, 0.9], [0.65, h - 1.2], [0.95, h - 0.6], [0.95, h]], 10, null, x, y, z)); col.circle(x, z, 0.8, y, y + h); bag.add('plaster_damp', lathe([[0.935, 0], [0.935, 0.45], [0.84, 0.5]], 10, null, x, y, z)); }
       if (i < n) {
         const b = a0 + (a1 - a0) * (i + 1) / n, [px, pz] = pt(a, depth / 2), [qx, qz] = pt(b, depth / 2);
         bag.add(T, orientedBox([px, pz], [qx, qz], depth + 2.5, y + h, y + h + 3.2, 0.05));
@@ -128,15 +128,6 @@ function colonnade(el, { bag, col }) {
     for (const a of [a0, a1]) { const [px, pz] = pt(a, depth / 2), [qx, qz] = pt(a + (a1 > a0 ? -1 : 1) * 0.04, depth / 2); bag.add(T, orientedBox([px, pz], [qx, qz], depth + 4, y - 0.3, y + h + 5.5, 1.5)); col.segment([px, pz], [qx, qz], depth + 4, y, y + h + 5.5); }
   }
   bag.add('flagstone', box(ox - ax * 1.05, y - 0.4, oz - bz * 1.05, ox + ax * 1.05, y + 0.02, oz + bz * 1.05));
-}
-/** castel: { c, r, h, y } — Castel Sant'Angelo: the square base with corner bastions, the great drum, the papal apartments and the angel. */
-function castel(el, { bag, col }) {
-  const [x, z] = el.c, r = el.r ?? 32, h = el.h ?? 22, y = el.y ?? 0, s = r * 1.5;
-  bag.add('rubble', box(x - s, y - 0.5, z - s, x + s, y + 8, z + s)); col.rect([x - s, z - s, x + s, z + s], y, y + 8); col.floor([x - s, z - s, x + s, z + s], y + 8);
-  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { bag.add('rubble', lathe([[8, 0], [8, 10], [0.001, 10]], 5, null, x + dx * s, y - 0.5, z + dz * s)); col.circle(x + dx * s, z + dz * s, 8, y, y + 10); }
-  bag.add('brick', lathe([[r, 0], [r, h], [r + 0.8, h + 0.6], [r + 0.8, h + 1.4], [0.001, h + 1.4]], 32, null, x, y + 8, z)); col.circle(x, z, r, y, y + 8 + h);
-  bag.add(ST, box(x - r * 0.5, y + 8 + h, z - r * 0.4, x + r * 0.5, y + 8 + h + 12, z + r * 0.4));
-  bag.add('gilt_bronze', lathe([[0.8, 0], [0.6, 3], [1.4, 4], [0.001, 6]], 8, null, x, y + 8 + h + 12, z));
 }
 /** paving: { rect, y } — travertine flags. */
 function paving(el, { bag }) { const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0; bag.add('flagstone', box(x0, y - 0.4, z0, x1, y + 0.02, z1)); }
