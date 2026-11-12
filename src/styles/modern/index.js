@@ -19,14 +19,19 @@ import { streetKit } from './street.js';
 import { shopRoom } from './shops.js';
 import { smallCraft, macquarieChair } from './harbour.js';
 
+// The shells as sails: each is cut from one sphere, so a section across it is two circular arcs (convex, steepening to the podium)
+// meeting in a sharp ridge; the ridge rises from the pedestal in a near-straight sweep to a point leaning out over the glass.
+const SEC_C = 1.0, SEC_R = 1 + SEC_C, secArc = (q) => Math.sqrt(Math.max(0, SEC_R * SEC_R - (q + SEC_C) * (q + SEC_C)));
+const secOf = (a) => secArc(Math.min(1, Math.abs(a))) / secArc(0);
+const ridgeOf = (t) => 0.3 * (1 - (1 - t) ** 2.2) + 0.7 * t ** 1.3;
+const widthOf = (hw, t) => hw * (1 - 0.4 * t);
 /** The lowest inner surface of a hall's shells over (xx, zz), above the podium, from their section and profile. */
 function envOf(hall, xx, zz) {
   let best = 0;
   for (const [a, b, H, hw0] of hall.shells) {
     const hw = hw0 ?? hall.hw, t = (zz - a) / (b - a); if (t < 0 || t > 1) continue;
-    const w = hw * (1 - 0.3 * t), sx = (xx - hall.x) / w; if (Math.abs(sx) >= 1) continue;
-    const c = 0.55, R = 1 + c, arc = (q) => Math.sqrt(Math.max(0, R * R - (q + c) * (q + c))), sect = (arc(Math.abs(sx)) - arc(1)) / (arc(0) - arc(1));
-    best = Math.max(best, H * (1 - (1 - t) ** 2.2) * sect - 0.6);
+    const w = widthOf(hw, t), sx = (xx - hall.x) / w; if (Math.abs(sx) >= 1) continue;
+    best = Math.max(best, H * ridgeOf(t) * secOf(sx) - 0.6);
   }
   return best;
 }
@@ -54,17 +59,13 @@ const hits = (a, b) => { if (!CLIP) return false; const n = Math.max(2, Math.cei
 const tri2 = (t, a, b, c) => t.push(...a, ...b, ...c, ...a, ...c, ...b);
 /** One shell: from the south base at z0 to the mouth at z1 (z1 < z0: it opens north), half-width hw, height H, on y. */
 function shell(bag, cx, z0, z1, hw, H, y) {
-  // each half of the shell's section is an arc of a circle (the shells are cut from one sphere), the two
-  // meeting in a sharp ridge along the top
-  const c = 0.55, R = 1 + c, arc = (a) => Math.sqrt(Math.max(0, R * R - (a + c) * (a + c))), a0 = arc(0), a1 = arc(1);
-  const sect = (s) => (arc(Math.abs(s)) - a1) / (a0 - a1);
-  const nu = 16, nv = 14, P = (i, j) => {
-    const s = -1 + 2 * i / nu, t = j / nv, h = H * (1 - (1 - t) ** 2.2), w = hw * (1 - 0.3 * t);
-    return [cx + s * w, y + h * sect(s), z0 + (z1 - z0) * t + (z1 - z0) * 0.16 * t * t * (1 - Math.abs(s))];
+  const nu = 20, nv = 16, P = (i, j) => {
+    const s = -1 + 2 * i / nu, t = j / nv, h = H * ridgeOf(t), w = widthOf(hw, t);
+    return [cx + s * w, y + h * secOf(s), z0 + (z1 - z0) * t + (z1 - z0) * 0.2 * t * t * (1 - Math.abs(s))];
   };
   const T = [];
   for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) { tri2(T, P(i, j), P(i + 1, j), P(i + 1, j + 1)); tri2(T, P(i, j), P(i + 1, j + 1), P(i, j + 1)); }
-  bag.add('tile_opera', fromTriangles(clipped(T)));
+  bag.add('tile_white', fromTriangles(clipped(T)));
   // the underside: the precast concrete of the shell, 0.4 m under the tiles, its edge at the mouth, and the ribs
   // running up it from the pedestal to the mouth (§1a)
   const Q = (i, j) => { const p = P(i, j); return [p[0], p[1] - 0.4, p[2]]; }, U = [], E = [];
@@ -74,20 +75,20 @@ function shell(bag, cx, z0, z1, hw, H, y) {
   for (let i = 1; i < nu; i++) for (let j = 1; j < nv; j++) { const a = Q(i, j), b = Q(i, j + 1); if (a[1] - y < 1.2 || hits(a, b)) continue; bag.add('concrete_light', rod([a[0], a[1] - 0.12, a[2]], [b[0], b[1] - 0.12, b[2]], 0.2, 4)); }
   // the ridge: a rib of the cream tiles along the top, and the ribs fanning down the shell's face
   const rib = [];
-  for (let j = 0; j < nv; j++) { const a = P(nu / 2, j), b = P(nu / 2, j + 1); if (hits(a, b)) continue; rib.push(rod([a[0], a[1] + 0.05, a[2]], [b[0], b[1] + 0.05, b[2]], 0.28, 6)); }
-  for (const i of [3, 6, 10, 13]) for (let j = 2; j < nv; j++) { const a = P(i, j), b = P(i, j + 1); if (hits(a, b)) continue; rib.push(rod(a, b, 0.12, 4)); }
+  for (let j = 0; j < nv; j++) { const a = P(nu / 2, j), b = P(nu / 2, j + 1); if (hits(a, b)) continue; rib.push(rod([a[0], a[1] + 0.05, a[2]], [b[0], b[1] + 0.05, b[2]], 0.4, 6)); }
+  for (const i of [2, 4, 6, 8, 12, 14, 16, 18]) for (let j = 2; j < nv; j++) { const a = P(i, j), b = P(i, j + 1); if (hits(a, b)) continue; rib.push(rod(a, b, 0.1, 4)); }
   for (const g of rib) bag.add('tile_cream', g);
   // the chevrons of the tile lids: V-shaped joints of the cream tiles between the ribs, pointing up the shell
   const ch = [];
-  for (const [ia, ib] of [[0, 3], [3, 6], [6, 8], [8, 10], [10, 13], [13, 16]]) for (let j = 3; j < nv - 1; j += 2) {
+  for (const [ia, ib] of [[0, 4], [4, 8], [8, 10], [10, 12], [12, 16], [16, 20]]) for (let j = 2; j < nv - 1; j += 2) {
     const im = Math.round((ia + ib) / 2), a = P(ia, j), m = P(im, j + 1), b = P(ib, j);
     if (hits(a, m) || hits(m, b)) continue;
-    ch.push(rod(a, m, 0.07, 4), rod(m, b, 0.07, 4));
+    ch.push(rod(a, m, 0.16, 5), rod(m, b, 0.16, 5));
   }
   for (const g of ch) bag.add('tile_cream', g);
   // the glass wall hung in the mouth: pleated, its folds running down from the shell's edge to the podium,
   // on steel mullions, with transoms every few metres
-  const G = [], depth = (z0 - z1) * 0.07, foot = (i) => { const a = P(i, nv); return [a[0], y, z1 + depth + (i % 2 ? 1.1 : -0.2) + (z1 - z0) * 0.16 * (1 - Math.abs(-1 + 2 * i / nu)) * 0.7]; };
+  const G = [], depth = (z0 - z1) * 0.07, foot = (i) => { const a = P(i, nv); return [a[0], y, z1 + depth + (i % 2 ? 1.1 : -0.2) + (z1 - z0) * 0.2 * (1 - Math.abs(-1 + 2 * i / nu)) * 0.7]; };
   for (let i = 0; i < nu; i++) {
     const a = P(i, nv), b = P(i + 1, nv), fa = foot(i), fb = foot(i + 1);
     if (a[1] - y < 0.3 && b[1] - y < 0.3) continue;
