@@ -6,6 +6,7 @@ import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
 import { RADIUS, lots, SHOPROW, height } from './layout.js';
 import { WORKSHOPS, ALTAR_PROMETHEUS } from './quarters.js';
+import { ALTAR } from './summit.js';
 
 const ID = 'athens';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -24,6 +25,8 @@ export function emitters() {
   // the altars
   E.push({ p: [-240, 1.4, -208], kind: 'incense', thr: 0, seed: 41 });
   E.push({ p: [ALTAR_PROMETHEUS[0], 1.9, ALTAR_PROMETHEUS[1]], kind: 'incense', thr: 0.1, seed: 42 });
+  // Athena's altar before the Parthenon: the fat and thigh-bones burning, the incense
+  { const ax = (ALTAR.x0 + ALTAR.x1) / 2, az = (ALTAR.z0 + ALTAR.z1) / 2, ay = height(ax, az) + 1.8; E.push({ p: [ax, ay, az], kind: 'kitchen', thr: 0, seed: 43 }, { p: [ax + 1.2, ay, az - 0.4], kind: 'incense', thr: 0, seed: 44 }); }
   void height;
   return E;
 }
