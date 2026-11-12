@@ -29,7 +29,7 @@ export function emitters() {
   void COMPOUND; void SPARROW;
   for (const t of [ICE, SPARROW, TIGER]) { const st = stairRect(t), zc = zOf(t); for (const sg of [-1, 1]) E.push({ p: [st[2] + 1.8, 1.1, zc + sg * 5.4], kind: 'incense', thr: 0.2, seed: Math.round(zc + sg) }); }
   // the censers on the royal way before the Sparrow's stair (forecourt.js)
-  for (const sg of [-1, 1]) E.push({ p: [stairRect(SPARROW)[2] + 9.5, 1.85, zOf(SPARROW) + sg * 2.8], kind: 'incense', thr: 0, seed: 900 + sg });
+  for (const sg of [-1, 1]) E.push({ p: [stairRect(SPARROW)[2] + 13, 1.85, zOf(SPARROW) + sg * 2.6], kind: 'incense', thr: 0, seed: 900 + sg });
   for (const sg of [-1, 1]) for (const z of [-14, -22, -30]) E.push({ p: [sg * 7.8, 1.1, z], kind: 'incense', thr: 0.3, seed: Math.round(z * sg) });
   return E;
 }

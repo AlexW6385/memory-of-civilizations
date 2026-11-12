@@ -20,16 +20,12 @@ export function forecourtElements() {
   E.push({ t: 'floor', rect: [FOOT - 0.2, ZC - 5.8, -141, ZC + 5.8], y: 0.02, mat: 'brick_paving', th: 0.3 });
   E.push({ t: 'floor', rect: [FOOT - 0.2, ZC - 0.9, -100, ZC + 0.9], y: 0.03, mat: 'bluestone', th: 0.3 });
   for (const s of [-1, 1]) E.push({ t: 'floor', rect: [FOOT - 0.2, ZC + s * 5.5 - 0.15, -100, ZC + s * 5.5 + 0.15], y: 0.03, mat: 'bluestone', th: 0.3 });
-  // the chimeras flanking the stair's foot, the banners of the army and the braziers of the watch
+  // the chimeras flanking the royal way before the stair (the banners, braziers and racks of the stair's foot are plan.js's), the censers on the way beyond them
   for (const s of [-1, 1]) {
-    E.push(P('beast', FOOT + 1.6, ZC + s * 6.6, { yaw: Math.PI / 2, s: 1.15 }));
-    E.push(P('flag', FOOT - 6, ZC + s * 8.4, { h: 8.6, cloth: s < 0 ? 'cloth_red' : 'cloth_black', cloth2: s < 0 ? 'cloth_black' : 'cloth_red', long: true, yaw: 0 }));
-    E.push(P('brazier', FOOT + 3.6, ZC + s * 5.0));
-    E.push(P('censer', FOOT + 9.5, ZC + s * 2.8, { s: 1.15 }));
-    E.push(P('rack', FOOT + 1.2, ZC + s * 9.6, { n: 6, yaw: Math.PI / 2 }));
-    E.push(P('block', FOOT + 6, ZC + s * 7.6, {}));
+    E.push(P('beast', FOOT + 5.6, ZC + s * 3.6, { yaw: Math.PI / 2, s: 1.15 }));
+    E.push(P('censer', FOOT + 13, ZC + s * 2.6, { s: 1.15 }));
   }
-  E.push(P('drum', FOOT + 14, ZC - 8.6, { yaw: Math.PI / 2 }), P('bells', FOOT + 14, ZC + 8.6, { yaw: Math.PI / 2, n: 5 }));
+  E.push(P('drum', FOOT + 16, ZC - 9.4, { yaw: Math.PI / 2 }), P('bells', FOOT + 16, ZC + 9.4, { yaw: Math.PI / 2, n: 5 }));
   // the officials' carriages in the shade on the lawns (the horses and grooms are in life)
   for (const [x, z, yaw, cloth] of CARRIAGES) E.push(P('chariot', x, z, { yaw, cloth }));
   // the poets' mats
@@ -69,7 +65,7 @@ export function forecourtLife() {
   });
   // the officials at the stair's foot talking, the porters at the carriages' rear, a woman of the court with her maid
   const [ax, az] = [FOOT - 4.5, ZC];
-  fig([-131, ZC - 1.8], 0.4, { cloth: 'cloth_black', cloth2: 'cloth_red', pose: 'talk', beard: 1 }); fig([-130.1, ZC - 1.3], 0.4 + Math.PI, { cloth: 'cloth_blue', pose: 'talk', beard: 1 });
+  fig([-127, ZC - 0.4], 0.4, { cloth: 'cloth_black', cloth2: 'cloth_red', pose: 'talk', beard: 1 }); fig([-126.1, ZC + 0.1], 0.4 + Math.PI, { cloth: 'cloth_blue', pose: 'talk', beard: 1 });
   fig([-128, ZC + 3.4], 1.9, { cloth: 'cloth_red', hat: 'none', hair: 'bun', over: 'none', h: 1.5, pose: 'stand' }); fig([-129.3, ZC + 4.3], 1.9, { cloth: 'cloth_green', hat: 'none', hair: 'bun', over: 'none', h: 1.48, pose: 'stand', carry: 'pot' });
   fig([-137, ZC + 8.9], Math.PI / 2, { cloth: 'cloth_grey', hat: 'cap', pose: 'staff', carry: 'staff', len: 2.0 });
   void ax; void az;
