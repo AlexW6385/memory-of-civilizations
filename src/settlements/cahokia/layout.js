@@ -7,10 +7,14 @@
 // (Monks Mound ~291 × 236 m → 200 × 170 m, height true). Pure data. +x east, +z south.
 
 export const RADIUS = 420;
-export const MONKS = { main: [-80, -265, 80, -120, 30], first: [-70, -120, 70, -62, 12], west: [-110, -230, -80, -140, 18], east: [80, -215, 112, -150, 16] };
+export const MONKS = { main: [-80, -265, 80, -120, 30], first: [-70, -146, 70, -62, 12], west: [-110, -230, -80, -140, 18], east: [80, -215, 112, -150, 16] };
 export const SUMMIT = [-20, -235, 22, -170];                 // the main summit's top, for the great house
 export const HALLS = [[SUMMIT[0], SUMMIT[1] + 20, SUMMIT[2], SUMMIT[1] + 40], [-14, -100, 8, -86]];   // the two opened great houses, summit and first terrace
+export const LODGES = [[-54, -104, -32, -90], [26, -104, 48, -90]];   // the two lodges on the first terrace
+export const GATES = [[-25, -42, 9], [-25, -78, 8], [-25, -151, 8]];   // x, z, height of the posts of the stairs' gates
 export const PLAZA = [-115, -40, 115, 150];
+// the chunkey yards of the Grand Plaza (long strips of beaten clay, 4 m wide): two run toward the ramp either side of its foot, so that the visitor who comes to the stair walks between two games [inferred: the places]; two more further south
+export const YARDS = [[-42, -36, -38, -8], [-12, -36, -8, -8], [-80, 92, -44, 96], [58, 104, 62, 140]];
 export const FOX = [-62, 178, -18, 222, 9];
 export const ROUNDTOP = [36, 200, 22, 12];                   // centre x, z, radius, height (conical)
 export const PALISADE = [-160, -300, 160, 252];
@@ -60,7 +64,8 @@ export function mounds(x, z) {
 export const onMound = (x, z) => mounds(x, z) > 0.8;
 export function height(x, z) {
   const d = Math.abs(z - creekZ(x)), fade = 1 - smooth(RADIUS - 60, RADIUS - 30, Math.hypot(x, z));
-  const plaza = inRect(PLAZA, x, z) ? 0 : 0.6 * Math.sin(x / 37) * Math.sin(z / 29) * (1 - smooth(0.05, 1.5, mounds(x, z)));                 // the plaza levelled, the rest gently uneven
+  const pdx = Math.max(PLAZA[0] - x, x - PLAZA[2], 0), pdz = Math.max(PLAZA[1] - z, z - PLAZA[3], 0);
+  const plaza = 0.6 * Math.sin(x / 37) * Math.sin(z / 29) * smooth(0, 14, Math.hypot(pdx, pdz)) * (1 - smooth(0.05, 1.5, mounds(x, z)));                 // the plaza levelled, the rest gently uneven, the unevenness coming in over 14 m (no step at the plaza's edge)
   let base = mounds(x, z) + plaza;
   base += (CREEK.bed - base) * smooth(CREEK.w / 2 + 5, CREEK.w / 2 - 4, d);
   for (const p of PONDS) base += (CREEK.bed + 0.3 - base) * smooth(1.45, 0.6, pondE(x, z, p));

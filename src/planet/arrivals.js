@@ -61,7 +61,7 @@ export const ARRIVALS = {
   'maya-tikal':       [-18, 0.1, 28, -1.2, 0.3],         // Temple I across the Great Plaza
   'tenochtitlan':     [-10, 0.1, 30, -1.293, 0.25],      // the Templo Mayor's twin shrines
   'machu-picchu':     [-21, null, 129.8, -0.08, -0.12],         // from the Guardhouse's knoll (17.6 m) at the saddle's narrow south end, down the neck and over the terraced town to Huayna Picchu, the gorge's walls on both sides
-  'cahokia':          [-25, 0.1, 20, 0, 0.25],           // Monks Mound across the Grand Plaza
+  'cahokia':          [-25, 0.1, -18, 0, 0.12],          // up the ramp of Monks Mound from the plaza's north edge: the stair, the terrace lodges, the summit house, the chunkey yards either side
   'shaolin':          [0, 0.1, 160, 0, 0.07],            // from the village road north up the axis to the Shanmen, red walls and grey roofs, Mount Song behind
   'hakka-tulou':      [0, 0.1, 72, 0, 0.1],             // from the stream's near bank, north to the round tulou whole on its plinth
   'taos':             [-30, 0.1, -20, -0.35, 0.14],       // the North House's tall middle close across the racks and the plaza's life

@@ -13,6 +13,7 @@ import { WALL, TH, rng, tri, thatchHip, doorway } from './kit.js';
 import { neighbourhoodElements } from './neighbourhood.js';
 import { chiefHall } from './hall.js';
 import { placeElements } from './place.js';
+import { moundElements } from './mound.js';
 import { dressHouse, leanTo, furnishKind } from './dress.js';
 /**
  * great_house: { rect, y, h, rise, post (a great post before the door: [x, z]) } — a large
@@ -49,11 +50,16 @@ function house(el, ctx) {
     if (along) { const hz = (z1 - z0) / 2 + o; bag.add(TH, frustum(r, y + wh, y + wh + rise, 0, 0, hz, hz, { noTop: true })); bag.add(TH, rod([x0 - o - 0.1, y + wh + rise + 0.04, (z0 + z1) / 2], [x1 + o + 0.1, y + wh + rise + 0.04, (z0 + z1) / 2], 0.2, 7)); }
     else { const hx = (x1 - x0) / 2 + o; bag.add(TH, frustum(r, y + wh, y + wh + rise, hx, hx, 0, 0, { noTop: true })); bag.add(TH, rod([(x0 + x1) / 2, y + wh + rise + 0.04, z0 - o - 0.1], [(x0 + x1) / 2, y + wh + rise + 0.04, z1 + o + 0.1], 0.2, 7)); }
   }
+  // the ridge's ends finished with crossed poles on some of the gabled houses [inferred]
+  if (!hipped && (el.lod ?? 0) < 2 && rand() < 0.4) {
+    const ry = y + wh + rise + 0.05, cr = (a, b) => { for (const s2 of [-1, 1]) bag.add('timber', rod([a - (along ? 0.35 * s2 : 0), ry - 0.1, b - (along ? 0 : 0.35 * s2)], [a + (along ? 0.35 * s2 : 0), ry + 0.8, b + (along ? 0 : 0.35 * s2)], 0.03, 5)); };
+    if (along) { cr(x0 - o - 0.1, (z0 + z1) / 2); cr(x1 + o + 0.1, (z0 + z1) / 2); } else { cr((x0 + x1) / 2, z0 - o - 0.1); cr((x0 + x1) / 2, z1 + o + 0.1); }
+  }
   const f = el.door ? (el.door === 'n' ? z0 : z1) : rand() < 0.5 ? z0 : z1, sg = f === z0 ? -1 : 1, mx = (x0 + x1) / 2;
   bag.add('opening', box(mx - 0.4, y, f + sg * 0.01, mx + 0.4, y + 1.5, f + sg * 0.05));
   // the door posts and the lintel pole across them
   const z0d = Math.min(f, f + sg * 0.16), z1d = Math.max(f, f + sg * 0.16);
-  for (const sd of [-1, 1]) bag.add('timber', box(mx + sd * 0.48 - 0.07, foot, z0d, mx + sd * 0.48 + 0.07, y + 1.72, z1d));
+  for (const sd of [-1, 1]) bag.add(el.seed % 7 === 0 ? 'timber_red' : 'timber', box(mx + sd * 0.48 - 0.07, foot, z0d, mx + sd * 0.48 + 0.07, y + 1.72, z1d));
   bag.add('timber', box(mx - 0.68, y + 1.58, z0d - 0.005, mx + 0.68, y + 1.74, z1d + 0.005));
   // eye-level dressing, weathering, a lean-to store at one end (docs §5.7)
   const lod = el.lod ?? 0, w = x1 - x0;
@@ -178,6 +184,12 @@ function palisade(el, { bag, col }) {
       const pb = P(s1), bx = pb[0] + ox * 1.8, bz = pb[1] + oz * 1.8, yb = Math.min(yf(bx, bz), yf(...pb)), R = 2.6;
       bag.add(WALL, lathe([[R + 0.1, -1], [R, h + 1.0], [R - 0.5, h + 1.0], [R - 0.5, h + 0.2], [0.001, h + 0.2]], 20, null, bx, yb, bz));
       col.circle(bx, bz, R, yb - 1, yb + h + 1.0);
+      // a watch shelter on every third bastion: four posts and a thatched cone over the sentry's platform [inferred]
+      if (k % 3 === 0) {
+        for (let q = 0; q < 4; q++) { const aq = q * Math.PI / 2 + Math.PI / 4; bag.add('timber', rod([bx + Math.cos(aq) * 2.0, yb + h + 0.9, bz + Math.sin(aq) * 2.0], [bx + Math.cos(aq) * 2.0, yb + h + 3.6, bz + Math.sin(aq) * 2.0], 0.1, 6)); }
+        bag.add(TH, lathe([[3.6, 0], [3.2, 0.18], [1.2, 1.5], [0.001, 2.4]], 14, null, bx, yb + h + 3.5, bz));
+        bag.add('timber_red', rod([bx, yb + h + 5.8, bz], [bx, yb + h + 6.6, bz], 0.05, 5));
+      }
       for (let q = 0; q < 40; q++) { const ang = q / 40 * Math.PI * 2; tops.push([bx + Math.cos(ang) * (R - 0.22), yb + h + 0.8, bz + Math.sin(ang) * (R - 0.22), 0.18, 0.5 + (q % 3) * 0.08]); }
     }
   });
@@ -343,6 +355,6 @@ const flip = (t) => { const o = []; for (let i = 0; i < t.length; i += 9) o.push
 
 registerStyle('mississippian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, great_house: greatHouse, chief_hall: chiefHall, ...neighbourhoodElements, ...placeElements, miss_house: house, palisade, woodhenge, plaza_pole: pole, chunkey_yard: chunkeyYard, charnel_house: charnelHouse },
+  elements: { ...STYLES.qing.elements, great_house: greatHouse, chief_hall: chiefHall, ...neighbourhoodElements, ...placeElements, ...moundElements, miss_house: house, palisade, woodhenge, plaza_pole: pole, chunkey_yard: chunkeyYard, charnel_house: charnelHouse },
   objects: {},
 });
