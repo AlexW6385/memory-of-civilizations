@@ -4,7 +4,7 @@
 // plough; the monastery's gate, its shrines and paved ways. Plans in the settlement's frame; the style is `javanese`, the
 // people and beasts `life`.
 
-import { RADIUS, MONASTERY, HAMLETS, WAY, WAYHOUSES, houses, inRect, frontVec, coreOf, wellAt, wayStalls, fieldSpots, CELLS, cellRect, nearArrival } from './layout.js';
+import { RADIUS, MONASTERY, HAMLETS, WAY, WAYHOUSES, houses, floorOf, inRect, frontVec, coreOf, wellAt, wayStalls, fieldSpots, CELLS, cellRect, nearArrival } from './layout.js';
 import { ground } from './ground.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -119,6 +119,8 @@ function lodgings() {
     L.push(person(rand, at(1.9, -0.9), 0, rot + Math.PI / 2 * (rand() < 0.5 ? 1 : -1), { pose: 'sit', man: i % 2 === 0 }));
     L.push(person(rand, at(2.6, 1.3), 0, rot + Math.PI, { pose: 'talk', man: i % 2 === 1 }));
     L.push({ t: 'chickens', kind: 'hen', n: 4, at: at(3.4, 0.4), y: 0, seed: sd + 3, rot: rand() * 6.28 }, { t: 'drying_tray', at: at(2.7, -2.5), y: 0, seed: sd + 4 }, { t: 'firewood', at: at(-0.4, -(front === 'e' || front === 'w' ? z1 - z0 : x1 - x0) / 2 - 0.6), y: 0, len: 1.4, seed: sd + 5, rot: front === 'e' || front === 'w' ? Math.PI / 2 : 0 });
+    // someone indoors on the matted floor, clear of the hearth, the loom and the sleeping platform: a weaver at the loom, a man at his rice, a woman with the lamp (variants 0–2)
+    if (i % 3 !== 1) { const q = at(-half - 0.1, 0.4), vr = h.variant; L.push(person(rand, q, floorOf(h.seed), vr === 1 ? rot : rot + Math.PI, { pose: vr === 1 ? 'cross' : 'stand', man: vr === 0, carry: 'none' })); }
     if (i % 2 === 0) L.push({ t: 'animal', kind: 'goat', graze: true, at: at(4.6, 2.4), y: 0, rot: rand() * 6.28, seed: sd + 6 });
     else L.push({ t: 'wash_line', rot: Math.atan2(-tz, tx), len: 3.5, pole: true, emb: [0.15, 0.15], clear: [0.3, 0.3], seed: sd + 7, at: at(4.2, 0.4), y: 0 });
   }
