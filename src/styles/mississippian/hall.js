@@ -91,6 +91,20 @@ export function chiefHall(el, { bag, col, lights }) {
     bag.add('timber_red', rod([p[0], p[1] - 1.2, p[2]], [p[0], p[1] + 2.0, p[2]], 0.16, 8));
     bag.add('timber_red', lathe([[0.001, 0], [0.26, 0.08], [0.3, 0.3], [0.2, 0.5], [0.001, 0.62]], 8, null, p[0], p[1] + 2.0, p[2]));
   }
+  // a white disc on a mast at each end of the ridge, red plumes either side of it: the hall's mark against the sky
+  for (const p of [a, b]) {
+    const dk = lathe([[0.001, 0], [1.0, 0], [1.0, 0.1], [0.001, 0.1]], 16, null, 0, 0, 0); dk.rotateX(Math.PI / 2).translate(p[0], p[1] + 3.0, p[2]);
+    bag.add('paint_white', dk);
+    const bs = lathe([[0.001, 0], [0.45, 0], [0.45, 0.13], [0.001, 0.13]], 14, null, 0, 0, 0); bs.rotateX(Math.PI / 2).translate(p[0], p[1] + 3.0, p[2] + 0.05);
+    bag.add('paint_ochre', bs);
+    bag.add('timber_red', rod([p[0], p[1] + 2.0, p[2]], [p[0], p[1] + 2.5, p[2]], 0.06, 6));
+  }
+  // the walls' outer face: a band of ochre under the eaves with a white stripe along it, over the daub
+  { const yb = y + h - 1.5, o = 0.025;
+    for (const r of [[x0 - o, z0 - o, x1 + o, z0], [x0 - o, z0, x0, z1], [x1, z0, x1 + o, z1], [x0 - o, z1, cx - dw / 2, z1 + o], [cx + dw / 2, z1, x1 + o, z1 + o]]) {
+      bag.add('paint_ochre', box(r[0], yb, r[1], r[2], yb + 0.8, r[3]));
+      bag.add('paint_white', box(r[0] - (r[2] - r[0] < 0.1 ? 0.012 : 0), yb + 0.3, r[1] - (r[3] - r[1] < 0.1 ? 0.012 : 0), r[2] + (r[2] - r[0] < 0.1 ? 0.012 : 0), yb + 0.5, r[3] + (r[3] - r[1] < 0.1 ? 0.012 : 0)));
+    } }
   lining(bag, el.rect, top, rise - 0.25);
   // the two rows of great posts that carry the roof, tied by beams along and across
   const along = long ? 'x' : 'z', len = long ? L : D, nP = Math.max(2, Math.round((len - 6) / 5.2) + 1), off = (long ? D : L) * 0.2, ph = h + 2.2, tieY = y + ph;

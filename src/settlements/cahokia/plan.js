@@ -29,6 +29,15 @@ export const monks = {
     { t: 'yard_fire', c: [8, -176], y: height, seed: 24 },
     { t: 'terrace_fence', from: [-50, -150], to: [-30, -150], y: height }, { t: 'terrace_fence', from: [-18, -150], to: [50, -150], y: height },
     { t: 'plaza_pole', c: [0, 55], y: 0, h: 14 },
+    // the first terrace's back court: the stores and the work of the chief's kin and the priests
+    { t: 'granary', c: [-46, -117], y: height, s: 2.8, seed: 41 }, { t: 'granary', c: [-40, -113], y: height, s: 2.5, seed: 42 }, { t: 'granary', c: [41, -117], y: height, s: 2.8, seed: 43 }, { t: 'granary', c: [47, -112], y: height, s: 2.5, seed: 44 },
+    { t: 'yard_fire', c: [-6, -116], y: height, seed: 45 }, { t: 'yard_fire', c: [14, -112], y: height, seed: 46 },
+    { t: 'drying_rack', rect: [16, -122, 22, -121.4], y: height, kind: 'maize', seed: 47 }, { t: 'drying_rack', rect: [-14, -122, -8, -121.4], y: height, kind: 'hide', seed: 48 },
+    { t: 'craft_arbor', rect: [29, -120, 32.4, -117.6], y: height, trade: 'shell', seed: 49 }, { t: 'craft_arbor', rect: [-52, -124, -48.6, -121.6], y: height, trade: 'pottery', seed: 50 },
+    { t: 'shade_arbor', rect: [38, -86, 44, -81], y: height }, { t: 'shade_arbor', rect: [-52, -84, -46, -79], y: height },
+    // the summit: a shade for the chief's guests, the work of the bead makers, racks
+    { t: 'shade_arbor', rect: [30, -162, 36, -157], y: height }, { t: 'craft_arbor', rect: [-46, -170, -42.6, -167.6], y: height, trade: 'shell', seed: 51 },
+    { t: 'drying_rack', rect: [26, -150, 32, -149.4], y: height, kind: 'hide', seed: 52 },
     // the gates of painted posts at the foot of each stair, the standards along the lips of the terraces
     { t: 'ramp_gate', c: [-25, -42], y: height, span: 14, h: 9, seed: 1 },
     { t: 'ramp_gate', c: [-25, -78], y: height, span: 14, h: 8, seed: 2 },

@@ -179,6 +179,12 @@ function palisade(el, { bag, col }) {
       const pb = P(s1), bx = pb[0] + ox * 1.8, bz = pb[1] + oz * 1.8, yb = Math.min(yf(bx, bz), yf(...pb)), R = 2.6;
       bag.add(WALL, lathe([[R + 0.1, -1], [R, h + 1.0], [R - 0.5, h + 1.0], [R - 0.5, h + 0.2], [0.001, h + 0.2]], 20, null, bx, yb, bz));
       col.circle(bx, bz, R, yb - 1, yb + h + 1.0);
+      // a watch shelter on every third bastion: four posts and a thatched cone over the sentry's platform [inferred]
+      if (k % 3 === 0) {
+        for (let q = 0; q < 4; q++) { const aq = q * Math.PI / 2 + Math.PI / 4; bag.add('timber', rod([bx + Math.cos(aq) * 2.0, yb + h + 0.9, bz + Math.sin(aq) * 2.0], [bx + Math.cos(aq) * 2.0, yb + h + 3.6, bz + Math.sin(aq) * 2.0], 0.1, 6)); }
+        bag.add(TH, lathe([[3.6, 0], [3.2, 0.18], [1.2, 1.5], [0.001, 2.4]], 14, null, bx, yb + h + 3.5, bz));
+        bag.add('timber_red', rod([bx, yb + h + 5.8, bz], [bx, yb + h + 6.6, bz], 0.05, 5));
+      }
       for (let q = 0; q < 40; q++) { const ang = q / 40 * Math.PI * 2; tops.push([bx + Math.cos(ang) * (R - 0.22), yb + h + 0.8, bz + Math.sin(ang) * (R - 0.22), 0.18, 0.5 + (q % 3) * 0.08]); }
     }
   });
