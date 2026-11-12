@@ -26,15 +26,15 @@ const lenOf = (rect, f) => (f === 'n' || f === 's' ? rect[2] - rect[0] : rect[3]
 export function house(el, ctx) {
   const { bag, col, lights } = ctx, y = el.y, rand = rng(el.seed ?? 1), kind = el.kind ?? 'house', face = el.face ?? 'n';
   const m = mapper(el.rect, face), { W, D, B, R } = m;
-  const st = kind === 'store' || kind === 'workshop' || kind === 'cult' ? 1 : (el.storeys ?? 1), SH = 2.95, T = 0.45, H = st * SH, low = el.low ?? y - 3.5;
-  const wallMat = kind === 'cult' ? 'lime_plaster' : WALLS[Math.floor(rand() * WALLS.length)];
+  const st = (kind === 'house' || kind === 'magazine' || kind === 'suite') ? (el.storeys ?? 1) : 1, SH = el.sh ?? 2.95, T = 0.45, H = st * SH, low = el.low ?? y - 3.5;
+  const wallMat = kind === 'cult' || kind === 'magazine' || kind === 'suite' ? 'lime_plaster' : WALLS[Math.floor(rand() * WALLS.length)];
   const G = new Map(), add = (mat, g) => { if (!G.has(mat)) G.set(mat, []); G.get(mat).push(g); };
   const Bm = (mat, ...a) => add(mat, B(...a));
   const solid = (u0, v0, u1, v1, ya, yb) => col.rect(R(u0, v0, u1, v1), ya, yb);
   // ── the openings of each wall ──
-  const wide = kind === 'workshop' || kind === 'store', dw = wide ? 1.5 : 1.05, dh = 2.15;
+  const wide = kind === 'workshop' || kind === 'store' || kind === 'magazine', dw = el.dw ?? (wide ? 1.5 : 1.05), dh = el.dh ?? 2.15;
   const du = el.du ?? Math.max(dw / 2 + T + 0.3, Math.min(W - dw / 2 - T - 0.3, W * (rand() < 0.5 ? 0.3 : 0.7) + (rand() - 0.5) * 0.8));
-  const two = D >= 6.6 && W >= 6.8 && kind !== 'cult', Vp = two ? Math.round(D * 0.55 * 2) / 2 : -1, pu = W - du < W / 2 ? W - du : W - du;
+  const two = (kind === 'house' || kind === 'suite') && D >= 6.6 && W >= 6.8, Vp = two ? Math.round(D * 0.55 * 2) / 2 : -1, pu = W - du < W / 2 ? W - du : W - du;
   const wins = (axis, len, ya, extra = []) => {
     // small windows spaced along a wall, avoiding the openings given
     const out = [];
@@ -78,8 +78,8 @@ export function house(el, ctx) {
   // ── the walls, ground floor ──
   const sideWins = (len) => wins('v', len, y);
   wall('u', 0, T, 0, W, y, y + SH - 0.4, [...front, ...fwin.map((o) => ({ ...o }))]);
-  wall('u', D - T, D, 0, W, y, y + SH - 0.4, kind === 'store' ? [] : wins('u', W, y).slice(0, 2));
-  const sideV = (u0, u1) => wall('v', u0, u1, T, D - T, y, y + SH - 0.4, kind === 'store' ? [] : sideWins(D).filter((o) => o.c > T + 0.8 && o.c < D - T - 0.8).slice(0, 2));
+  wall('u', D - T, D, 0, W, y, y + SH - 0.4, kind === 'store' || kind === 'magazine' ? [] : wins('u', W, y).slice(0, 2));
+  const sideV = (u0, u1) => wall('v', u0, u1, T, D - T, y, y + SH - 0.4, kind === 'store' || kind === 'magazine' ? [] : sideWins(D).filter((o) => o.c > T + 0.8 && o.c < D - T - 0.8).slice(0, 2));
   sideV(0, T); sideV(W - T, W);
   if (Vp > 0) wall('u', Vp - 0.15, Vp + 0.15, T, W - T, y, y + SH - 0.4, [{ c: doorU, w: 1.0, y0: y, y1: y + 2.1 }], 'mud_plaster');
   // ── storeys: the floor slab (with a stairwell), the upper walls ──
@@ -101,11 +101,11 @@ export function house(el, ctx) {
     wall('u', D - T, D, 0, W, y2 - 0.4, y2 + SH - 0.4, [{ c: W * 0.3, w: 0.6, y0: y2 + 1.1, y1: y2 + 1.9 }, { c: W * 0.7, w: 0.6, y0: y2 + 1.1, y1: y2 + 1.9 }]);
     for (const [a, b] of [[0, T], [W - T, W]]) wall('v', a, b, T, D - T, y2 - 0.4, y2 + SH - 0.4, [{ c: D * 0.45, w: 0.6, y0: y2 + 1.1, y1: y2 + 1.9 }]);
     rooms.push({ id: 'the loft', rect: R(T, T, W - T, D - T), y: y2, kind: 'inner' });
-    const FL = F_(y2); FIT.loft(FL, { u0: T + 0.1, v0: T + 0.1, u1: W - T - 0.1, v1: D - T - 0.1 }, { sy: y2 }); FL.done();
+    const FL = F_(y2); if (kind === 'magazine') FIT.archive(FL, { u0: T + 0.1, v0: T + 0.1, u1: W - T - 0.1, v1: D - T - 0.1 }); else FIT.loft(FL, { u0: T + 0.1, v0: T + 0.1, u1: W - T - 0.1, v1: D - T - 0.1 }, { sy: y2 }); FL.done();
   }
   const top = y + H;
   // ── the roof: beams, clay, a parapet, the smoke hole over the hearth ──
-  const hv = Vp > 0 ? Vp / 2 : D / 2, hu = W / 2, hole2 = kind === 'store' ? null : [hu - 0.32, hv - 0.32, hu + 0.32, hv + 0.32];
+  const hv = Vp > 0 ? Vp / 2 : D / 2, hu = W / 2, hole2 = kind === 'store' || kind === 'magazine' ? null : [hu - 0.32, hv - 0.32, hu + 0.32, hv + 0.32];
   const slabs = hole2 && st === 1 ? [[0, 0, W, hole2[1]], [0, hole2[1], hole2[0], hole2[3]], [hole2[2], hole2[1], W, hole2[3]], [0, hole2[3], W, D]] : [[0, 0, W, D]];
   for (const [a, b, c, d] of slabs) { add('timber', B(a, top - 0.4, b, c, top - 0.28, d)); add('earth_wall', B(a - 0.06, top - 0.28, b - 0.06, c + 0.06, top, d + 0.06)); }
   if (hole2 && st === 1) add('mud_plaster', mergeG([B(hole2[0] - 0.12, top, hole2[1] - 0.12, hole2[2] + 0.12, top + 0.3, hole2[1]), B(hole2[0] - 0.12, top, hole2[3], hole2[2] + 0.12, top + 0.3, hole2[3] + 0.12), B(hole2[0] - 0.12, top, hole2[1], hole2[0], top + 0.3, hole2[3]), B(hole2[2], top, hole2[1], hole2[2] + 0.12, top + 0.3, hole2[3])]));
@@ -157,7 +157,9 @@ export function house(el, ctx) {
   const door = du, fr = { u0: T + 0.1, v0: T + 0.1, u1: W - T - 0.1, v1: (Vp > 0 ? Vp - 0.25 : D - T - 0.1) };
   const F = F_(y), lit = !!el.lit;
   if (kind === 'cult') FIT.cult(F, { u0: T, v0: T, u1: W - T, v1: D - T });
-  else if (kind === 'store') FIT.store(F, { u0: T, v0: T, u1: W - T, v1: D - T }, { door });
+  else if (kind === 'store' || kind === 'magazine') FIT.store(F, { u0: T, v0: T, u1: W - T, v1: D - T }, { door, stairs: st > 1 });
+  else if (kind === 'guard') FIT.guard(F, { u0: T, v0: T, u1: W - T, v1: D - T });
+  else if (kind === 'suite') { FIT.workshop(F, { u0: T, v0: T, u1: W - T, v1: Vp - 0.25 }, { trade: el.trade ?? 'ivory', light: lit }); FIT.guest(F, { u0: T + 0.1, v0: Vp + 0.25, u1: W - T - 0.1, v1: D - T - 0.1 }, { stairs: st > 1 }); }
   else if (kind === 'workshop') FIT.workshop(F, { u0: T, v0: T, u1: W - T, v1: D - T }, { trade: el.trade ?? 'potter', light: lit });
   else {
     FIT.living(F, fr, { light: lit, door });

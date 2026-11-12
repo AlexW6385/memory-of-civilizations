@@ -111,7 +111,7 @@ const INSIDE = [
   [-78, -29, -66, -19, 'house'], [-62, -26, -50, -14, 'workshop'], [-46, -32, -34, -20, 'house'], [-30, -30, -18, -16, 'workshop'], [-14, -33, -2, -20, 'house'], [2, -36, 24, -22, 'store'],
   [-48, 11, -38, 22, 'house'], [-34, 12, -22, 26, 'cult'], [-20, 10, -8, 24, 'cult'], [-46, 28, -32, 42, 'house'], [-28, 30, -14, 44, 'house'], [-10, 28, 6, 44, 'house'], [8, 30, 22, 46, 'house'],
   [88, -30, 102, -14, 'house'], [90, 0, 106, 14, 'store'], [86, 22, 100, 36, 'house'],
-  [28, 38, 42, 50, 'workshop'], [46, 38, 60, 49, 'store'], [62, 37, 74, 44, 'house'],
+  [28, 38, 42, 50, 'workshop'], [46, 38, 60, 49, 'store'], [62, 37, 74, 44, 'house'], [-84, -13, -75, -5.2, 'guard'],
 ];
 /** The granary just inside the gate, to the right of the way, against the wall. */
 export const GRANARY = [-84, 4.5, -74, 12.5];

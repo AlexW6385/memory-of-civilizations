@@ -154,7 +154,7 @@ export async function town() {
       els.push({ t: 'house', rect: l.rect, y: l.y, face: l.face, storeys: l.storeys, seed: l.seed, kind: l.kind, trade: l.trade, du: l.du, gd, lit: l.lit, ...(l.inside ? { low: l.y - 2.5 } : {}) });
       if (l.court) els.push({ t: 'forecourt', rect: l.court, face: l.face, y: l.y, du: l.du, seed: l.seed });
       const [x0, z0, x1, z1] = l.rect, st = l.kind === 'house' ? l.storeys : 1;
-      const name = l.kind === 'store' ? 'a storehouse' : l.kind === 'workshop' ? `a ${l.trade}'s workshop` : l.kind === 'cult' ? 'a shrine' : 'a house';
+      const name = l.kind === 'store' ? 'a storehouse' : l.kind === 'workshop' ? `a ${l.trade}'s workshop` : l.kind === 'cult' ? 'a shrine' : l.kind === 'guard' ? 'the guard-room' : 'a house';
       rooms.push({ id: name, rect: [x0 + 0.5, z0 + 0.5, x1 - 0.5, z1 - 0.5], y: l.y, kind: 'inner' });
       if (st > 1) rooms.push({ id: 'the loft', rect: [x0 + 0.5, z0 + 0.5, x1 - 0.5, z1 - 0.5], y: l.y + 2.95, kind: 'inner' });
     }

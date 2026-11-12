@@ -130,14 +130,52 @@ export const FIT = {
     for (let i = 0; i < 4; i++) F.hang(cu - 1.2 + i * 0.8 + rand() * 0.2, (v0 + v1) / 2 + (rand() - 0.5), 2.3);
     void yy;
   },
-  store(F, r, { door = 0 } = {}) {
+  store(F, r, { door = 0, stairs = false } = {}) {
     const { u0, v0, u1, v1 } = r, rand = F.rand;
     // rows of pithoi on either side of a free aisle, sacks, a scribe's bench
-    const cu = (u0 + u1) / 2, aisle = 1.2;
-    for (let u = u0 + 0.6; u < cu - aisle / 2 - 0.4; u += 1.05) for (const v of [v1 - 0.65, v1 - 1.75, v1 - 2.85]) if (v > v0 + 1.9) F.pithos(u, v, 0.9 + rand() * 0.25);
-    for (let u = u1 - 0.6; u > cu + aisle / 2 + 0.4; u -= 1.05) for (const v of [v1 - 0.65, v1 - 1.75]) F.pithos(u, v, 0.9 + rand() * 0.25);
-    F.sacks(u1 - 1.0, v0 + 0.6, 4); F.sacks(u0 + 0.5, v0 + 0.5, 3);
-    F.bench(Math.min(u1 - 0.3, Math.max(u0 + 0.3, door + 0.9)), v0 + 0.1, Math.min(u1 - 0.1, Math.max(u0 + 0.3, door + 0.9) + 1.5), v0 + 0.55, 0.42);
+    const cu = (u0 + u1) / 2, aisle = 1.2, su = stairs ? u0 + 4.9 : u0 + 0.6;
+    for (let u = su; u < cu - aisle / 2 - 0.4; u += 1.05) for (let v = v1 - 0.65; v > v0 + 2.4; v -= 1.1) F.pithos(u, v, 0.9 + rand() * 0.25);
+    for (let u = u1 - 0.6; u > cu + aisle / 2 + 0.4; u -= 1.05) for (let v = v1 - 0.65; v > v0 + 2.4; v -= 1.1) F.pithos(u, v, 0.9 + rand() * 0.25);
+    F.sacks(u1 - 1.0, v0 + 0.6, 4); F.sacks(u0 + (stairs ? 5.0 : 0.5), v0 + 0.5, 3);
+    const bu = Math.min(u1 - 1.8, Math.max(u0 + 0.3, door + 1.2));
+    F.bench(bu, v0 + 0.1, bu + 1.5, v0 + 0.55, 0.42);
+  },
+  /** the archive of the palace: shelves of clay tablets in baskets, the scribes' tables */
+  archive(F, r) {
+    const { u0, v0, u1, v1 } = r, y0 = F.y0, rand = F.rand;
+    for (const hy of [0.5, 1.1, 1.7]) {
+      F.B('timber', u0 + 0.2, y0 + hy, v1 - 0.4, u1 - 0.2, y0 + hy + 0.04, v1 - 0.02);
+      const tb = [];
+      for (let u = u0 + 0.35; u < u1 - 0.5; u += 0.34) { const hh = 0.1 + rand() * 0.06; F.B('mud_plaster', u, y0 + hy + 0.04, v1 - 0.34, u + 0.24, y0 + hy + 0.04 + hh, v1 - 0.06); }
+    }
+    for (const u of [u0 + 0.3, u1 - 0.3]) F.B('timber', u - 0.04, y0, v1 - 0.4, u + 0.04, y0 + 1.9, v1 - 0.02);
+    F.table((u0 + u1) / 2 - 2.2, (v0 + v1) / 2, 1.6, 0.8); F.table((u0 + u1) / 2 + 2.2, (v0 + v1) / 2, 1.6, 0.8);
+    for (const du of [-2.2, 2.2]) { const cu = (u0 + u1) / 2 + du; F.stool(cu - 0.4, (v0 + v1) / 2 + 0.9); F.stool(cu + 0.4, (v0 + v1) / 2 + 0.9); for (let k = 0; k < 4; k++) F.B('mud_plaster', cu - 0.6 + k * 0.3, y0 + 0.72, (v0 + v1) / 2 - 0.2, cu - 0.4 + k * 0.3, y0 + 0.78, (v0 + v1) / 2 + 0.1); }
+    for (let k = 0; k < 6; k++) F.basket(u0 + 0.6 + k * 0.55, v0 + 0.6, y0, 0.9);
+    F.chest(u1 - 0.8, v0 + 0.5, 1.1, 0.55); F.chest(u1 - 2.2, v0 + 0.5, 1.0, 0.5);
+  },
+  /** a guest room of the palace: beds, a bath of clay, a chest, a brazier */
+  guest(F, r, { stairs = false } = {}) {
+    const { u0, v0, u1, v1 } = r, y0 = F.y0, cu = (u0 + u1) / 2;
+    const su = stairs ? u0 + 4.8 : u0;
+    F.bed(su + 0.2, v1 - 1.2, su + 2.4, v1 - 0.12, 'cloth_indigo'); F.bed(u1 - 2.6, v1 - 1.2, u1 - 0.4, v1 - 0.12, 'cloth_red');
+    // the bathtub: a clay basin with a rim, a pitcher beside it
+    F.B('terracotta', cu - 0.5, y0, v0 + 0.5, cu + 0.5, y0 + 0.55, v0 + 1.7); F.B('plaster_white', cu - 0.4, y0 + 0.5, v0 + 0.6, cu + 0.4, y0 + 0.56, v0 + 1.6); F.solid(cu - 0.5, v0 + 0.5, cu + 0.5, v0 + 1.7, y0, y0 + 0.56);
+    F.jug(cu + 0.9, v0 + 0.7, y0, 1.3, 'terracotta'); F.stool(cu - 1.0, v0 + 0.9);
+    F.chest(su + 0.8, v0 + 0.5); F.table(cu + 2.2, (v0 + v1) / 2, 1.3, 0.7); F.hearth(u1 - 1.2, v0 + 0.9, 0.5, false);
+    F.rack(su + 0.2, Math.min(su + 3.0, u1 - 3), v1 - 1.6, 0.0, 1);
+  },
+  /** the guard-room of the gate: spears in a rack, figure-eight shields on the wall, a bench, a table with the dice, a brazier */
+  guard(F, r) {
+    const { u0, v0, u1, v1 } = r, y0 = F.y0, cu = (u0 + u1) / 2;
+    for (let i = 0; i < 7; i++) { const u = u0 + 0.5 + i * 0.28; F.B('timber', u - 0.015, y0, v1 - 0.25, u + 0.015, y0 + 2.2, v1 - 0.22); F.B('bronze', u - 0.03, y0 + 2.2, v1 - 0.26, u + 0.03, y0 + 2.4, v1 - 0.21); }
+    F.B('timber', u0 + 0.4, y0 + 0.5, v1 - 0.3, u0 + 0.5 + 6 * 0.28 + 0.1, y0 + 0.55, v1 - 0.12);
+    for (let i = 0; i < 3; i++) { const u = cu + 0.8 + i * 1.0; F.B('hide_brown', u - 0.35, y0 + 0.7, v1 - 0.05, u + 0.35, y0 + 1.9, v1 - 0.0); F.B('hide_white', u - 0.12, y0 + 0.7, v1 - 0.06, u + 0.12, y0 + 1.9, v1 - 0.0); }
+    F.bench(u0 + 0.1, v0 + 0.1, u0 + 0.6, v1 - 1.2, 0.42, 'timber'); F.bench(u1 - 0.6, v0 + 0.1, u1 - 0.1, v1 - 1.2, 0.42, 'timber');
+    F.table(cu, (v0 + v1) / 2 + 0.3, 1.2, 0.8); F.stool(cu - 0.8, (v0 + v1) / 2 + 0.3); F.stool(cu + 0.8, (v0 + v1) / 2 + 0.3);
+    F.add('bronze', lathe([[0.3, 0], [0.12, 0.04], [0.06, 0.3], [0.06, 0.8], [0.22, 0.9], [0.001, 0.9]], 10, null, ...F.pp(u1 - 0.9, v0 + 0.9, y0)));
+    F.B('ivory', cu - 0.3, y0 + 0.77, (v0 + v1) / 2 + 0.2, cu - 0.2, y0 + 0.82, (v0 + v1) / 2 + 0.3);
+    F.pithos(u0 + 0.5, v1 - 1.0, 0.8); F.jug(cu - 0.1, (v0 + v1) / 2 + 0.4, y0 + 0.72, 1, 'terracotta');
   },
   cult(F, r) {
     const { u0, v0, u1, v1 } = r, cu = (u0 + u1) / 2, cv = (v0 + v1) / 2;

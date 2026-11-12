@@ -22,10 +22,12 @@ E.push({ t: 'court', rect: PALACE.court, y: PY, altar: [43.5, 3] });
 // the court's west wall with the propylon's door; the wings round the court
 E.push({ t: 'wall', a: [29.6, -28], b: [29.6, 30], th: 0.8, y0: PY - 0.3, y1: PY + 4.4, mat: 'lime_plaster', openings: [{ at: 31, w: 2.6, h: 3.4 }] });
 E.push({ t: 'propylon', rect: PALACE.propylon, y: PY });
-E.push({ t: 'palace_wing', rect: [30, -28, 56, -10], y: PY, h: 6.6, faces: 'sn', seed: 1 });
-E.push({ t: 'palace_wing', rect: [30, 16, 56, 30], y: PY, h: 6.0, faces: 'ns', seed: 2 });
-E.push({ t: 'palace_wing', rect: [56, -28, 84, M.z0], y: PY, h: 7.0, faces: 'wne', seed: 3 });
-E.push({ t: 'palace_wing', rect: [56, M.z1, 84, 30], y: PY, h: 6.6, faces: 'wse', seed: 4 });
+// the wings are houses of the palace you can enter from the Great Court: the magazines of oil and wine with the archive above, the suites with a workshop, a bath and a loft
+const wing = (rect, face, du, kind, o = {}) => E.push({ t: 'house', rect, face, du, kind, y: PY, gd: PY, storeys: 2, sh: 3.3, dw: 2.2, dh: 2.9, lit: true, ...o });
+wing([30, 16, 56, 30], 'n', 11, 'magazine', { seed: 2 });
+wing([30, -28, 56, -10], 's', 11, 'suite', { seed: 1, trade: 'ivory' });
+wing([56, -28, 84, M.z0], 'w', -6 - -28, 'magazine', { seed: 3 });
+wing([56, M.z1, 84, 30], 'w', 12.5 - M.z1, 'suite', { seed: 4, trade: 'perfume' });
 E.push({ t: 'palace_wing', rect: [M.x1, M.z0, 84, M.z1], y: PY, h: 6.6, faces: 'e', seed: 5 });
 // the megaron's walls: the sides, the back, the porch's back wall and the hall's front wall with their doors
 const wy0 = PY - 0.4, wy1 = PY + 6.0, th = M.th, wall = (a, b, o) => E.push({ t: 'wall', a, b, th, y0: wy0, y1: wy1, mat: 'lime_plaster', ...o });
@@ -40,6 +42,7 @@ E.push({ t: 'megaron', ...M, y: PY, seed: 3 });
 E.push({ t: 'stair', rect: [18, 0.5, 24, 5.5], dir: 'e', y0: yIn(18) + 0.2, y1: PY, riser: 0.2, base: yIn(18) - 1, mat: 'limestone_yellow' });
 
 const room = (id, rect, y, kind, extra = {}) => ({ id, rect, y, kind, ...extra });
+const wr = (id, r) => room(id, [r[0] + 0.5, r[1] + 0.5, r[2] - 0.5, r[3] - 0.5], PAL_Y, 'inner');
 const rooms = [
   room('the Lion Gate', [-91, -1.5, -87, 1.5], GATE_Y, 'open'),
   room('the great court', [32, -9, 55, 15], PY, 'open'),
@@ -47,6 +50,7 @@ const rooms = [
   room('the porch', [M.x0 + 1.5, M.z0 + 1.2, xP - 0.2, M.z1 - 1.2], PY, 'hall'),
   room('the vestibule', [xP + 1.2, M.z0 + 1.2, xP + 4.6, M.z1 - 1.2], PY, 'hall'),
   room('the megaron', [xH + 1, M.z0 + 1.5, M.x1 - 1.8, M.z1 - 1.5], PY, 'hall'),
+  wr('the south magazines', [30, 16, 56, 30]), wr('the north suite', [30, -28, 56, -10]), wr('the oil magazines', [56, -28, 84, M.z0]), wr('the perfume suite', [56, M.z1, 84, 30]),
   room('grave circle A', [GCA.x - 8, GCA.z - 8, GCA.x + 8, GCA.z + 8], GCA.y + 0.03, 'open'),
 ];
 const walks = [[[-150, 0], [-107, 0], [-89, 0], [-80, -2], [-60, -6], [-30, -8], [-10, -4], [8, 0], [27, 3], [45, 3], [58, 3], [64, 3], [75, 3]]];
