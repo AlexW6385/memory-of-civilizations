@@ -4,7 +4,9 @@
 import { lodTiles } from '../lod.js';
 import { frame } from '../../styles/greek/agora.js';
 import { TRADES } from '../../styles/greek/shops.js';
-import { RADIUS, GROUND, SEA, QUAYS, CHANNELS, SHIPS, CANOPIC, QUAY, SOMA, AGORA, GYM, SEROUTE, HILL, JEWISH, OPEN_HOUSE, ROYAL, MOLE, inRect, wet, lots } from './layout.js';
+import { streetPlans } from './streets.js';
+import { houseRooms } from '../../styles/ptolemaic/house.js';
+import { RADIUS, GROUND, SEA, QUAYS, CHANNELS, SHIPS, CANOPIC, QUAY, SOMA, AGORA, GYM, SEROUTE, HILL, JEWISH, OPEN_HOUSE, ROYAL, MOLE, inRect, wet, height, lots } from './layout.js';
 
 const base = (id, elements, extra = {}) => ({ id, style: 'ptolemaic', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [100, -86], facing: 'e' }, ...extra });
 const g = GROUND;
@@ -80,17 +82,33 @@ function serapeum() {
   E.push({ t: 'pylon', c: [x1, zc], y, face: 'e', w: 5, h: 13, tower: 8 });
   E.push({ t: 'floor', rect: [x0 + 1, z0 + 1, x1 - 1, z1 - 1], y: y + 0.03, th: 0.2, mat: 'sandstone_floor' });
   E.push({ t: 'serapeum_temple', rect: [x0 + 14, zc - 20, x0 + 54, zc + 20], y: y + 0.03 });
-  for (const s of [-1, 1]) E.push({ t: 'sphinx', at: [x1 + 12, zc + s * 5.5], yaw: Math.PI / 2, y: y - 0.3, s: 1.1 });
-  return base('alexandria-serapeum', E);
+  for (const s of [-1, 1]) for (const dx of [12, 22, 32, 42]) E.push({ t: 'sphinx', at: [x1 + dx, zc + s * 5.5], yaw: Math.PI / 2, y: (dx === 12 ? y : height(x1 + dx, zc + s * 5.5)) - 0.3, s: dx === 12 ? 1.1 : 0.9 });
+  // the colonnades round the court (the daughter library in the south one), trees in the court, shrines before the wall
+  const st = { y: y + 0.03, h: 4.6, d: 0.6, sp: 2.6, flutes: 0, simple: true, mat: 'limestone', wall: 'plaster_white', triglyphMat: 'egyptian_blue' };
+  E.push({ t: 'stoa', rect: [x0 + 3, z0 + 1.2, x1 - 14, z0 + 8.5], front: 's', seed: 91, ...st });
+  E.push({ t: 'stoa', rect: [x0 + 3, z1 - 8.5, x1 - 14, z1 - 1.2], front: 'n', seed: 92, ...st });
+  for (const [dx, dz, k] of [[60, -22, 'palm'], [60, 22, 'palm'], [66, -12, 'fig'], [66, 12, 'fig'], [8, -14, 'palm'], [8, 14, 'palm']]) E.push({ t: 'ptol_tree', at: [x0 + dx, zc + dz], y: y + 0.03, kind: k, h: k === 'palm' ? 6.5 : 3.4, seed: dx + dz + 7 });
+  for (const dz of [-30, 30]) E.push({ t: 'shrine', at: [x0 + 62, zc + dz], y: y + 0.03, rot: dz > 0 ? Math.PI : 0 });
+  return base('alexandria-serapeum', E, { rooms: [{ id: 'cella of Serapis', rect: [x0 + 16, zc - 18, x0 + 48, zc + 18], y: y + 1.1, kind: 'hall', market: false }, { id: 'Serapeum court', rect: [x0 + 56, z0 + 10, x1 - 14, z1 - 10], y: y + 0.03, kind: 'open', market: false }, { id: 'north colonnade', rect: [x0 + 5, z0 + 3, x1 - 16, z0 + 7], y: y + 0.03, kind: 'inner', market: false }, { id: 'library of the Serapeum', rect: [x0 + 5, z1 - 7, x1 - 16, z1 - 3], y: y + 0.03, kind: 'inner', market: false }] });
+}
+/** The houses: courtyard houses (Greek and Jewish quarters) and the houses of Rhakotis, each with its rooms furnished; the nearest to the arrival with a lit lamp. */
+function houses() {
+  const L = lots(), ARR = [100, -86];
+  const byD = [...L].sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 - ARR[0], (a.rect[1] + a.rect[3]) / 2 - ARR[1]) - Math.hypot((b.rect[0] + b.rect[2]) / 2 - ARR[0], (b.rect[1] + b.rect[3]) / 2 - ARR[1]));
+  const lamp = new Set(byD.slice(0, 10));
+  const els = L.map((l) => (l.warehouse ? { t: 'horreum', rect: l.rect, front: 'n', y: l.y, seed: l.seed } : l.quarter === 'egyptian'
+    ? { t: 'egyptian_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front }
+    : { t: 'ptol_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front, quarter: l.quarter, lamp: lamp.has(l) }));
+  const plans = lodTiles('alexandria-houses', 'ptolemaic', els, { R: RADIUS, near: 150 });
+  for (const e of els) {
+    if (e.t !== 'ptol_house') continue;
+    const [x, z] = [(e.rect[0] + e.rect[2]) / 2, (e.rect[1] + e.rect[3]) / 2], id = `alexandria-houses-${Math.floor(x / 100)},${Math.floor(z / 100)}`;
+    plans.find((p) => p.id === id).rooms.push(...houseRooms(e, e.y));
+  }
+  return plans;
 }
 export async function town() {
-  const plans = [harbour(), ...shopStoas(), civic(), serapeum()];
-  const els = lots().map((l) => {
-    const r = l.rect;
-    if (l.quarter === 'egyptian') { const w = r[2] - r[0], d = r[3] - r[1]; return { t: 'egyptian_house', rect: [r[0] + 1.5, r[1] + 1.5, r[2] - 1.5 - Math.max(0, w - 12), r[3] - 1.5 - Math.max(0, d - 11)], seed: l.seed, y: l.y }; }
-    return { t: 'ptol_house', rect: r, seed: l.seed, y: l.y, front: l.front, quarter: l.quarter };
-  });
-  plans.push(...lodTiles('alexandria-houses', 'ptolemaic', els, { R: RADIUS }));
+  const plans = [harbour(), ...shopStoas(), civic(), serapeum(), ...houses(), ...streetPlans()];
   void HILL; void JEWISH;
   return plans;
 }

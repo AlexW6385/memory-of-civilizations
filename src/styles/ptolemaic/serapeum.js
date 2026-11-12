@@ -62,8 +62,28 @@ function temple(el, ctx) {
   bag.add('marble', box(sx[0], ya, z0 + 0.4, xf - 0.9, ya + ent + fr + 0.45, z0 + 1.6)); bag.add('marble', box(sx[0], ya, z1 - 1.6, xf - 0.9, ya + ent + fr + 0.45, z1 - 0.4));
   G.pediment_roof({ rect: [x0 + 0.2, z0 + 0.1, x1 - 1.0, z1 - 0.1], y: ya + ent + fr + 0.45, rise: (z1 - z0) * 0.13, tympanumInset: 0.5, rakingGeison: 0.4, mat: 'marble', tileMat: 'roof_tile', ridge: 'x' }, ctx);
   cavetto(bag, 'marble', [xc1 - 0.5, (zc0 + zc1) / 2 - 1.8, xc1 + 0.5, (zc0 + zc1) / 2 + 1.8], y1 + 5.9, 0.6, 0.35);
-  // the cult image seen in the cella's depth is not built (the door's leaves stand shut)
-  bag.add('cedar', box(xc1 - 0.15, y1, (zc0 + zc1) / 2 - 1.3, xc1 + 0.1, y1 + 5.2, (zc0 + zc1) / 2 + 1.3)); col.rect([xc1 - 0.15, (zc0 + zc1) / 2 - 1.3, xc1 + 0.1, (zc0 + zc1) / 2 + 1.3], y1, y1 + 5.2);
+  // the cella's door stands open; inside: the cult image of Serapis enthroned at the west wall, two rows of columns, lamps, altars, stelae
+  const zm = (zc0 + zc1) / 2, ci = xc0 + 1.4;
+  for (const s of [-1, 1]) bag.add('cedar', box(xc1 - 0.68, y1, zm + s * 1.3 - (s > 0 ? 0 : 1.3), xc1 - 0.52, y1 + 5.2, zm + s * 1.3 + (s > 0 ? 1.3 : 0)));
+  bag.add('marble_floor', box(xc0 + 0.6, y1 - 0.02, zc0 + 0.6, xc1 - 0.6, y1 + 0.02, zc1 - 0.6));
+  bag.add('marble', box(ci - 1.0, y1, zm - 2.6, ci + 3.2, y1 + 1.0, zm + 2.6)); col.rect([ci - 1.0, zm - 2.6, ci + 3.2, zm + 2.6], y1, y1 + 1.0);   // the base
+  bag.add('timber', box(ci, y1 + 1.0, zm - 1.7, ci + 2.2, y1 + 1.8, zm + 1.7)); bag.add('timber', box(ci, y1 + 1.8, zm - 1.7, ci + 0.4, y1 + 5.0, zm + 1.7));    // the throne and its back
+  for (const s of [-1, 1]) bag.add('timber', box(ci + 0.2, y1 + 1.8, zm + s * 1.6 - 0.12, ci + 2.2, y1 + 2.6, zm + s * 1.6 + 0.12));
+  bag.add('ivory', lathe([[0.001, 0], [0.62, 0.05], [0.7, 0.8], [0.6, 1.6], [0.5, 2.2], [0.3, 2.5], [0.001, 2.6]], 10, null, ci + 1.2, y1 + 1.8, zm));        // the god: the robed body
+  bag.add('ivory', lathe([[0.001, 0], [0.3, 0.1], [0.34, 0.45], [0.2, 0.7], [0.001, 0.8]], 10, null, ci + 1.2, y1 + 4.3, zm));                                       // the head
+  bag.add('gilt_bronze', lathe([[0.001, 0], [0.34, 0], [0.4, 0.5], [0.36, 0.85], [0.001, 0.85]], 10, null, ci + 1.2, y1 + 5.0, zm));                                   // the modius on the head (wheat-measure)
+  bag.add('ivory', rod([ci + 1.6, y1 + 3.4, zm - 0.7], [ci + 2.3, y1 + 4.0, zm - 1.8], 0.12, 5));
+  bag.add('bronze', rod([ci + 2.6, y1 + 1.0, zm + 2.0], [ci + 2.6, y1 + 5.6, zm + 2.0], 0.06, 5));       // the sceptre
+  for (const dz of [-0.5, 0, 0.5]) bag.add('granite_black', lathe([[0.001, 0], [0.16, 0.03], [0.18, 0.3], [0.001, 0.38]], 6, null, ci + 3.1, y1 + 1.0 + 0.22, zm + 2.0 + dz * 0.3));   // Cerberus's three heads at his side
+  bag.add('granite_black', box(ci + 2.7, y1 + 1.0, zm + 1.6, ci + 3.4, y1 + 1.5, zm + 2.4));
+  // two rows of columns down the nave (simple Doric, painted), their beams
+  for (const sz of [-9, 9]) for (let x = xc0 + 9; x < xc1 - 3; x += 6.2) STYLES.greek.column({ at: [x, zm + sz], y: y1, h: colH - 0.4, d: 0.9, mat: 'marble_column', flutes: 0, simple: true }, ctx);
+  for (const sz of [-9, 9]) { bag.add('cedar', box(xc0 + 8, y1 + colH - 0.4, zm + sz - 0.45, xc1 - 2, y1 + colH + 0.2, zm + sz + 0.45)); }
+  // the altar of offerings before the god, tables of offerings, incense, lampstands (two lit), stelae and benches along the walls
+  bag.add('limestone', box(ci + 6.2, y1, zm - 1.0, ci + 8.0, y1 + 1.0, zm + 1.0)); bag.add('bronze', lathe([[0.001, 0], [0.5, 0.05], [0.55, 0.3], [0.001, 0.3]], 8, null, ci + 7.1, y1 + 1.0, zm)); bag.add('flame', lathe([[0.001, 0], [0.2, 0.02], [0.001, 0.5]], 6, null, ci + 7.1, y1 + 1.3, zm)); col.rect([ci + 6.2, zm - 1.0, ci + 8.0, zm + 1.0], y1, y1 + 1.0);
+  for (const [lx, lz] of [[ci + 4.6, zm - 3.4], [ci + 4.6, zm + 3.4]]) { bag.add('bronze', lathe([[0.001, 0], [0.2, 0], [0.12, 0.08], [0.03, 0.12], [0.025, 1.7], [0.1, 1.75], [0.001, 1.75]], 8, null, lx, y1, lz)); bag.add('flame', lathe([[0.001, 0], [0.05, 0.01], [0.001, 0.2]], 5, null, lx, y1 + 1.75, lz)); col.circle(lx, lz, 0.2, y1, y1 + 1.8); if (ctx.lights) ctx.lights.push({ at: [lx, y1 + 2.0, lz], color: '#ffb46b', intensity: 4, distance: 16 }); }
+  for (const sz of [-1, 1]) for (let k = 0; k < 4; k++) { const x = xc0 + 6 + k * 9, z = sz > 0 ? zc1 - 1.2 : zc0 + 1.2; bag.add('marble_smooth', box(x - 0.3, y1, z - 0.12, x + 0.3, y1 + 1.8, z + 0.12)); bag.add('limestone', box(x - 0.4, y1, z - 0.2, x + 0.4, y1 + 0.3, z + 0.2)); col.rect([x - 0.4, z - 0.2, x + 0.4, z + 0.2], y1, y1 + 1.8); }
+  for (let k = 0; k < 5; k++) { const x = xc0 + 12 + k * 7.5, z = zm + (k % 2 ? 3 : -3); bag.add('cedar', box(x - 0.6, y1 + 0.7, z - 0.4, x + 0.6, y1 + 0.78, z + 0.4)); for (const dx of [-0.5, 0.5]) bag.add('wood_dark', box(x + dx - 0.04, y1, z - 0.35, x + dx + 0.04, y1 + 0.7, z + 0.35)); col.rect([x - 0.6, z - 0.4, x + 0.6, z + 0.4], y1, y1 + 0.78); bag.add('bronze', lathe([[0.001, 0], [0.1, 0.01], [0.12, 0.09], [0.001, 0.08]], 6, null, x, y1 + 0.78, z)); }
   // the altar before the front: a block of limestone with horns, where the incense burns
   const ax = x1 + st * tread + 4, az = (z0 + z1) / 2;
   bag.add('limestone', box(ax - 1.0, y, az - 0.8, ax + 1.0, y + 1.2, az + 0.8)); bag.add('limestone', box(ax - 1.2, y + 1.2, az - 1.0, ax + 1.2, y + 1.4, az + 1.0)); col.rect([ax - 1.2, az - 1.0, ax + 1.2, az + 1.0], y, y + 1.4);
