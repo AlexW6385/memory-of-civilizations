@@ -55,7 +55,7 @@ const EXTRA = (() => {
     }
   }
   // the vans: along the cross streets at the kerb (the south kerb heading east, the north kerb heading west: traffic keeps right), more of them west of Fifth
-  const BODY = ['car_cream', 'shutter_green', 'car_blue', 'car_red', 'paint_white', 'paint_cab_yellow', 'car_cream'];
+  const BODY = ['paint_white', 'shutter_green', 'car_black', 'car_red', 'paint_white', 'paint_cab_yellow', 'shutter_green'];
   for (const [sz] of STREETS) for (let x = -RADIUS + 20 + rand() * 30; x < RADIUS - 70; x += (x < -10 ? 66 : 130) + rand() * 70) {
     const south = rand() < 0.5, z = sz + (south ? 4.6 : -4.6);
     if (AVENUES.some(([ax, w]) => Math.abs(x - ax) < w / 2 + 4.5) || !free(x, z, 3.2, 1.3) || !apart(x, z, 3.2, 1.3)) continue;
