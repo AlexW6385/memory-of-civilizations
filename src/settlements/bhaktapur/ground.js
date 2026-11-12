@@ -21,12 +21,12 @@ function planting(x, z) {
   if (r > RADIUS - 6 || inRect(SQ, x, z, 1) || inRect(POT, x, z, 1) || onStreet(x, z, 1) || KEEP.some((k) => inRect(k, x, z, 2))) return null;
   if (r > HOUSE_R + 4) return { grass: 30, pine: r > RADIUS - 40 ? 0.05 : 0 };
   if (inLot(x, z, 1.2)) return null;
-  return { bamboo: 0.12, fig: 0.025, grass: 22 };
+  return { bamboo: 0.2, fig: 0.03, neem: 0.025, grass: 24 };
 }
 void lots;
 export const ground = { lift: 15,   // the disc stands 15 m above the valley floor at its centre, so the rim meets the rising country without a step
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { bamboo: 0.12, fig: 0.025, pine: 0.05 },
+  maxDensity: { bamboo: 0.2, fig: 0.03, neem: 0.025, pine: 0.05 },
   climate: {
     sun: { az: 150, el: 50, color: [1.0, 0.95, 0.86], intensity: 3.4, lat: 27.7, dec: 5, hour: 9.5 },
     sky: { turbidity: 3.4, rayleigh: 1.2, mie: 0.005, mieG: 0.8, zenith: [0.09, 0.17, 0.38], horizon: [0.66, 0.66, 0.64] },

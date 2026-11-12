@@ -14,7 +14,7 @@ E.push({ t: 'newar_pati', rect: PATI });
 E.push({ t: 'newar_dhara', ...DHARA });
 E.push({ t: 'newar_chaitya', c: CHAITYA.c, s: 1 });
 TREES.forEach(([x, z], i) => E.push({ t: 'newar_tree', at: [x, z], h: 9.5 + i, seed: i * 2 }));
-E.push({ t: 'newar_house', ...HOUSE, open: true, detail: 2, seed: 77 });
+E.push({ t: 'newar_house', ...HOUSE, open: true, detail: 2, seed: 77, light: true, trade: 'home', shop: false, dx: 4.5, pid: false });
 STALLS.forEach(([x, z, yaw, kind], i) => E.push({ t: 'newar_stall', at: [x, z], yaw, kind, seed: i + 5 }));
 
 // Pottery Square: the drying ground, the wheels along its north edge, the kilns behind them (the south-west)
@@ -22,20 +22,22 @@ const WHEELS = [[-92, 57.6], [-82, 57.6], [-72, 57.6], [-63, 57.6]];
 const KILNS = [[-94, 86], [-62, 86]];
 E.push({
   t: 'newar_pot_court', rect: [POT[0] + 2, POT[1] + 3.2, POT[2] - 2, POT[3] - 2.5], seed: 3,
-  skip: [...WHEELS.map(([x, z]) => [x - 1.4, z - 1, x + 1.4, z + 4]), ...KILNS.map(([x, z]) => [x - 5, z - 5, x + 5, z + 5]), [-80, 52, -76, 92]],
+  skip: [[-89, 84.5, -84, 92], [-75, 84.5, -69.5, 92], ...WHEELS.map(([x, z]) => [x - 1.4, z - 1, x + 1.4, z + 4]), ...KILNS.map(([x, z]) => [x - 5, z - 5, x + 5, z + 5]), [-80, 52, -76, 92]],
 });
 for (const [x, z] of WHEELS) E.push({ t: 'newar_wheel', c: [x, z], yaw: Math.PI });
 for (const [x, z] of KILNS) E.push({ t: 'newar_kiln', c: [x, z], r: 1.8 });
+E.push({ t: 'newar_yard', c: [-86.5, 88.2], seed: 1 }, { t: 'newar_yard', c: [-72.5, 88.2], seed: 2 });
 export const POT_WHEELS = WHEELS, POT_KILNS = KILNS;
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const h = HOUSE.rect;
 const rooms = [
   room('house', [h[0] + 0.6, h[1] + 0.6, h[2] - 0.6, h[3] - 0.6], 0.1, 'hall'),
+  room('bhairabnath', [BHAIRAB.c[0] - 2.6, BHAIRAB.c[1] - 2.6, BHAIRAB.c[0] + 2.6, BHAIRAB.c[1] + 2.6], 2.7, 'hall'),
   room('taumadhi', SQ, 0.05, 'open'),
   room('pottery', POT, 0, 'open'),
 ];
-const walks = [[[12, 6], [4, 14], [19, 22], [19, 28], [10, 6], [28, 8], [10, 22]]];
+const walks = [[[12, 6], [4, 14], [19, 22], [19, 28], [10, 6], [14, 9], [22, 9.5], [28, 8], [10, 22]]];
 walks[0].y0 = 0;
 
 export const taumadhi = {

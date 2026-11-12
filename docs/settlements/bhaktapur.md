@@ -1,7 +1,7 @@
 # Bhaktapur (Taumadhi and the Newar town), about 1710 — dossier
 
 Settlement id: `bhaktapur` · Style: `newar` (own, `src/styles/newar/`) · Region: Nepal (Kathmandu Valley) · Code: `src/settlements/bhaktapur/`
-Status of this dossier: L2 — the Nyatapola on its five-stage plinth with its five pairs of guardians, the Bhairabnath temple, Taumadhi square, the Siddhi Lakshmi stone shrine, an enterable Newar house, Pottery Square, the brick town in its streets, with people, birds, smoke and music.
+Status of this dossier: L2, deepened (§12) — the Nyatapola on its five-stage plinth with its five pairs of guardians, the Bhairabnath temple, Taumadhi square, the Siddhi Lakshmi stone shrine, an enterable Newar house, Pottery Square, the brick town in its streets, with people, birds, smoke and music.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -60,3 +60,20 @@ Temple bells and the wind bells of the Nyatapola; a drum (the Newar dhime) now a
 - A report on the Nyatapola (dimensions, bells, materials): https://www.oocities.org/architecture2056/report/nyatapola.htm
 - Guide to Pottery Square: https://www.thelongestwayhome.com/travel-guides/nepal/bhaktapur/guide-to-pottery-square-bolachha-tol.html
 - bhaktapur.com, "Nyatapola Temple": https://www.bhaktapur.com/discover/nyatapola/
+
+## 12. The deepening pass (Suzhou standard)
+
+Facts used [stated: bhaktapur.com "A closer insight into typical traditional Newari house"]: the ground floor (chidi) mainly stores farm tools and manure and holds the bathrooms, living there is rare; the first floor (matang) has the family rooms and the second (chuata) receives visitors; the kitchen is in the attic (buigal); the roof is tile; walls are exposed terracotta brick; carved latticed windows and doorways, the doors deliberately low so that visitors bow; houses stand in blocks round a courtyard (chowk) within a tol. Sources for the town's trades: Bhaktapur's potters [stated: Wikipedia "Bhaktapur"], woodcarving [stated: Wikipedia "Bhaktapur"; dossier §1], the curd of the valley's Newar towns, juju dhau, served in clay pots (the "king of curds") [inferred: general knowledge of Bhaktapur, not cited here].
+
+What was built, and what is [inferred]:
+- **Shop-houses (up to 40 open, within 100 m):** the ground storey open, furnished by trade: curd (cup pots in tiers, jars of milk), cloth (bolts in cubbies, a frame loom), brass (beaten vessels, an anvil block), woodcarver (bench, struts and panels leaning), grain (sacks, a balance), potter (tiers and ranks of pots, in Pottery Square's frontage) [inferred: trades from the town's known crafts; shop interiors from the type]. Each has the stair to the rooms above and a side shrine with a lit lamp; the first 14 give light.
+- **Fronts:** brick red, darker-baked or greyed (varied by house) [inferred]; the pidha, a raised brick seat with plank top on either side of the door on about a third of plain houses [inferred: the Newar house's front seat]; carved lintel board with gilt ornament, an oil-lamp niche, marigold garlands on the door; firewood stacked end-out, a water-pot stand, baskets, chillies and grain on a reed mat before the house, washing on a line at the second storey, flowers on a sill, a gilt finial on a rich house's ridge, a flag-pole on others [inferred, a morning in the dry season].
+- **Weathering:** the monsoon's green-grey damp at the foot (broken strips), plaster come away from brick, rain streaks below the sills, older darker tiles on one roof in five [inferred].
+- **Lanes:** the granite drain down the middle, sandstone kerbs and cross slabs every 9-14 m [inferred], within 125 m.
+- **Courts kept between houses:** a stone spout with women and pots, a rest-house (pati) with men seated, a pipal on its seat with a small stupa, a small stone shikhara with two stupas and a woman at prayer; walled in brick, the front open between gate posts [inferred: the settlement has these along its lanes (hiti, phalcha, chaitya, shrine); their places are by rule].
+- **Bhairabnath:** the ground tier hollowed as a walkable sanctum (walls 0.7 m, a door 1.5 m wide, a ceiling of joists, a stone seat with the gilt image of Bhairab, lamps, a bell) [inferred: the temple enshrines Bhairab; the interior's form]. The Nyatapola's chamber stays shut [inferred from general knowledge: its shrine is closed to the public].
+- **Square:** eleven stalls with cloth awnings (five new), women worshipping on the Nyatapola's plinth treads, about 80 people in the square at the stalls and the dabali [inferred].
+- **Pottery Square:** two yards at the kilns (straw ricks, a heap of black clay, a rack of drying bowls, firewood) [inferred from the kilns' fuel].
+- **Life:** water buffalo in two lanes, cats on pidhas, dogs before shops, sparrows on the steps; walkers 72 by day (porters, bearers with a pole, a sweeper, water-bearers, elders, boys); the planting richer (bamboo, neem, pipal figs in the courts).
+
+Still below Suzhou: the upper storeys of the shop-houses are shut (the stair ends in a trap), only the Bhairabnath of the temples is entered, the lanes' walls are repetitive in plan (one house form in several variants) and carry no relief carving beyond the windows and lintels, and there is no interior sound zone for the shops.

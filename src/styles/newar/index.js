@@ -11,6 +11,7 @@ import '../qing/index.js';
 import { houseParts } from './house.js';
 import { pagoda, shikhara, chaitya } from './temples.js';
 import { potCourt, potterWheel, kiln, pot } from './pottery.js';
+import { lane, makeCourt, yard } from './street.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const bx = (x0, y0, z0, x1, y1, z1) => box(Math.min(x0, x1), Math.min(y0, y1), Math.min(z0, z1), Math.max(x0, x1), Math.max(y0, y1), Math.max(z0, z1));
@@ -97,6 +98,10 @@ function stall(el, { bag, col }) {
   bag.add('wood_ochre', bx(a[0], 0.62, a[1], b[0], 0.68, b[1]));
   for (const u of [-0.85, 0.85]) for (const v of [-0.35, 0.35]) { const p = P(u, v); bag.add('wood_dark', bx(p[0] - 0.04, 0, p[1] - 0.04, p[0] + 0.04, 0.62, p[1] + 0.04)); }
   col.rect([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], 0, 0.7);
+  // two poles and a cloth awning over the seller's end
+  const aw = ['cloth_red', 'cloth_ochre', 'cloth_indigo', 'cloth_white'][(el.seed ?? 0) % 4];
+  for (const u of [-1.0, 1.0]) { const p = P(u, -0.5); bag.add('timber', bx(p[0] - 0.03, 0, p[1] - 0.03, p[0] + 0.03, 2.25, p[1] + 0.03)); }
+  { const q0 = P(-1.2, -0.65), q1 = P(1.2, 0.75); bag.add(aw, bx(q0[0], 2.2, q0[1], q1[0], 2.26, q1[1])); }
   const kind = el.kind ?? 'pots';
   for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) {
     const p = P(-0.65 + i * 0.43, -0.18 + j * 0.36);
@@ -118,6 +123,8 @@ function pipalTree(el, { bag, col }) {
   bag.add('brick', box(x - 1.5, 0, z - 1.5, x + 1.5, 0.45, z + 1.5)); col.rect([x - 1.5, z - 1.5, x + 1.5, z + 1.5], 0, 0.45); col.floor([x - 1.5, z - 1.5, x + 1.5, z + 1.5], 0.45);
 }
 
+const newarCourt = makeCourt({ dhara, pati, tree: pipalTree });
+
 registerStyle('newar', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
@@ -125,7 +132,7 @@ registerStyle('newar', {
     newar_paving: paving, newar_pagoda: pagoda, newar_shikhara: shikhara, newar_chaitya: chaitya,
     newar_house: (el, ctx) => houseParts(el, ctx, { hipRoof }),
     newar_dabali: dabali, newar_pati: pati, newar_dhara: dhara, newar_stall: stall, newar_tree: pipalTree,
-    newar_pot_court: potCourt, newar_wheel: potterWheel, newar_kiln: kiln,
+    newar_lane: lane, newar_yard: yard, newar_court: newarCourt, newar_pot_court: potCourt, newar_wheel: potterWheel, newar_kiln: kiln,
   },
   objects: {},
 });

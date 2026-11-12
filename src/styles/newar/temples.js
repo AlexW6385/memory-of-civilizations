@@ -58,7 +58,7 @@ function guardian(bag, col, kind, x, y, z, sx, s) {
  * newar_pagoda: the pagoda temple { c, front ('e'|'w'), plinth: { hw: [by stage, lowest first], h (stage height), tread (the stair side's tread), top (the east face of the highest stage is at hw + top) },
  * roofs: [{ hw (eave half-width), core (the wall's half-width under it), wall (its height), rise }], guard: ['wrestler' ...] (a pair at the foot of each flight), bells, door }.
  */
-export function pagoda(el, { bag, col }) {
+export function pagoda(el, { bag, col, lights }) {
   const [cx, cz] = el.c, sx = el.front === 'w' ? -1 : 1, P = el.plinth, h = P.h, n = P.hw.length;
   const X = (u) => cx + sx * u, rect = (u0, v0, u1, v1) => { const a = X(u0), b = X(u1); return [Math.min(a, b), cz + v0, Math.max(a, b), cz + v1]; };
   const uFace = []; for (let k = n - 1, u = P.hw[n - 1] + (P.top ?? 1); k >= 0; k--, u += P.tread) uFace[k] = u;
@@ -81,13 +81,34 @@ export function pagoda(el, { bag, col }) {
   R.forEach((q, i) => {
     const ye = yb + q.wall, next = R[i + 1] ? R[i + 1].core : 0.55, run = q.hw - next, ov = q.hw - q.core;
     const c0 = rect(-q.core, -q.core, q.core, q.core);
-    bag.add('brick', box(c0[0], yb, c0[1], c0[2], ye, c0[3]));
-    if (i === 0) col.rect(c0, 0, ye + q.rise);
+    if (i === 0 && el.chamber) {
+      // the sanctum on the ground tier is open to the front: walls 0.7 m thick on three sides and a front wall with the door, a ceiling of joists under the second tier
+      const t = 0.7, dw = 0.75, ch = el.chamber, c = q.core, y0 = yb;
+      const wl = (u0, v0, u1, v1, y1 = ye) => { const r = rect(u0, v0, u1, v1); bag.add('brick', box(r[0], y0, r[1], r[2], y1, r[3])); col.rect(r, y0 - 1, y1); };
+      wl(-c, -c, -c + t, c); wl(-c, -c, c, -c + t); wl(-c, c - t, c, c);
+      wl(c - t, -c, c, -dw); wl(c - t, dw, c, c);
+      { const r = rect(c - t, -dw, c, dw); bag.add('brick', box(r[0], y0 + 2.1, r[1], r[2], ye, r[3])); }
+      { const r = rect(-c + t, -c + t, c - t, c - t); bag.add('wood_dark', box(r[0], ye - 0.25, r[1], r[2], ye, r[3])); }
+      // within: the image of Bhairab on a stone seat (a gilt head with a crown, great eyes, a garland), a lamp, a bell, offerings
+      const ix = X(-c + t + 0.9), iz = cz;
+      bag.add(STONE, box(ix - 0.8, y0, iz - 0.8, ix + 0.8, y0 + 0.5, iz + 0.8)); col.rect([ix - 0.8, iz - 0.8, ix + 0.8, iz + 0.8], y0, y0 + 0.5);
+      bag.add('gilt_bronze', lathe([[0.001, 0], [0.34, 0.02], [0.4, 0.3], [0.32, 0.62], [0.2, 0.78], [0.001, 0.82]], 10, null, ix, y0 + 0.5, iz));
+      bag.add('gilt_bronze', lathe([[0.25, 0], [0.3, 0.2], [0.14, 0.45], [0.001, 0.6]], 8, null, ix, y0 + 1.28, iz));
+      for (const v of [-0.14, 0.14]) bag.add('paint_white', ball(0.07).translate(ix + sx * 0.3, y0 + 1.12, iz + v)), bag.add('iron', ball(0.03).translate(ix + sx * 0.37, y0 + 1.12, iz + v));
+      bag.add('cloth_ochre', lathe([[0.42, 0], [0.45, 0.06], [0.42, 0.12], [0.38, 0.06]], 10, null, ix, y0 + 0.9, iz));
+      for (const v of [-1.4, 1.4]) { const lx = X(-c + t + 1.3); bag.add('bronze', lathe([[0.001, 0], [0.2, 0], [0.25, 0.14], [0.001, 0.14]], 8, null, lx, y0, iz + v)); bag.add('flame', lathe([[0.03, 0], [0.001, 0.08]], 5, null, lx, y0 + 0.14, iz + v)); }
+      bag.add('bronze', rod([X(c - t - 0.3), y0 + 2.05, cz], [X(c - t - 0.3), y0 + 1.5, cz], 0.02, 5)); bag.add('bronze', lathe([[0.001, 0], [0.12, 0.02], [0.1, 0.22], [0.001, 0.22]], 7, null, X(c - t - 0.3), y0 + 1.3, cz));
+      { const dr = rect(-c + t, -c + t, c - t, c - t); bag.add('wood_ochre', box(dr[0], y0, dr[1], dr[2], y0 + 0.04, dr[3])); col.floor(dr, y0 + 0.04); void ch; }
+      if (lights) lights.push({ at: [X(0), y0 + 2.0, cz], color: '#ffd9a0', intensity: 2.0, distance: 9 });
+    } else {
+      bag.add('brick', box(c0[0], yb, c0[1], c0[2], ye, c0[3]));
+      if (i === 0) col.rect(c0, 0, ye + q.rise);
+    }
     // the openings of the tier: a door on the front at the first, a lattice window on every face above [stated: a chamber with gates on the four sides — oocities]
     for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       const door = i === 0 && dx === sx, w = door ? 0.9 : 0.55, hh = door ? 2.0 : 1.1, y0 = door ? yb : yb + 0.8, off = 0.03;
       const px = cx + dx * (q.core + off), pz = cz + dz * (q.core + off);
-      bag.add('opening', bx(px - (dz ? w : 0.02), y0, pz - (dx ? w : 0.02), px + (dz ? w : 0.02), y0 + hh, pz + (dx ? w : 0.02)));
+      if (!(door && el.chamber)) bag.add('opening', bx(px - (dz ? w : 0.02), y0, pz - (dx ? w : 0.02), px + (dz ? w : 0.02), y0 + hh, pz + (dx ? w : 0.02)));
       const fo = 0.08, fx = cx + dx * (q.core + fo), fz = cz + dz * (q.core + fo);
       bag.add('timber_red', bx(fx - (dz ? w + 0.12 : 0.03), y0, fz - (dx ? w + 0.12 : 0.03), fx + (dz ? w + 0.12 : 0.03), y0 + 0.1, fz + (dx ? w + 0.12 : 0.03)));
       bag.add('timber_red', bx(fx - (dz ? w + 0.12 : 0.03), y0 + hh, fz - (dx ? w + 0.12 : 0.03), fx + (dz ? w + 0.12 : 0.03), y0 + hh + 0.14, fz + (dx ? w + 0.12 : 0.03)));
