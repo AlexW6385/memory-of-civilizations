@@ -17,6 +17,8 @@ function cover(x, z, h) {
   const s = Math.max(Math.abs(height(x + 1, z) - height(x - 1, z)), Math.abs(height(x, z + 1) - height(x, z - 1))) / 2;
   if (s > 0.7 && h > -1) { c.rock = 0.85; c.red = 0.35; c.grass = 0.05; c.sand = 0.2; c.soil = 0.1; return c; }
   if (onHeadland(x, z)) { c.road = 0.3; c.grass = 0.15; c.soil = 0.45; return c; }
+  // gardens and millet fields behind the town [inferred: the island fed itself in part]
+  { const dh = Math.hypot(x + 45, z - 10); if (h > 1.5 && z > 60 && dh > 175 && dh < 255) { c.fields = 0.45 * smooth(175, 195, dh) * (1 - smooth(235, 255, dh)); c.grass = 0.25; } }
   if (h < 1) { c.sand = 0.9; c.grass = 0; return c; }
   return c;
 }

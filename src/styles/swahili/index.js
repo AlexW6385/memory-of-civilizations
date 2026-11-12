@@ -10,7 +10,8 @@ import '../qing/index.js';
 import { pointedSpandrel, orientBy } from '../sahel/index.js';
 import { HUSUNI } from './husuni.js';
 import { house } from './house.js';
-import { coconutPalm, baobab, tusks } from './plants.js';
+import { coconutPalm, baobab, tusks, mangrove, banana } from './plants.js';
+import { tank, tomb, benchRag, fishRack } from './yard.js';
 import { wall, carvedPanel, wallFace } from './kit.js';
 import { Quaternion, Vector3, Matrix4 } from '../../core/three.js';
 
@@ -259,6 +260,6 @@ function mtepe(el, { bag, col }) {
 }
 registerStyle('swahili', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, swahili_mosque: mosque, swahili_house: house, ...HUSUNI, mtepe, coconut_palm: coconutPalm, baobab, tusks },
+  elements: { ...STYLES.qing.elements, swahili_mosque: mosque, swahili_house: house, ...HUSUNI, mtepe, coconut_palm: coconutPalm, baobab, tusks, mangrove, banana, swahili_tank: tank, swahili_tomb: tomb, swahili_bench: benchRag, fish_rack: fishRack },
   objects: {},
 });

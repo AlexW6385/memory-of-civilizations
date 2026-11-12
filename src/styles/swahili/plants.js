@@ -98,3 +98,32 @@ export function tusks(el, { bag }) {
     bag.add('ivory', fromTriangles(T));
   }
 }
+
+/** mangrove: { at, y, h, seed } — a stand of Rhizophora at the tide's edge: a cluster of arching prop roots from a low trunk, the dense dark-green crown in lumps. */
+export function mangrove(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, r = rnd(el.seed ?? 5), h = el.h ?? 5;
+  const T = [], tops = [];
+  for (let k = 0; k < 9; k++) { const a = r() * Math.PI * 2, rr = 0.9 + r() * 1.3; beamTris(T, [x + Math.cos(a) * rr, y - 0.15, z + Math.sin(a) * rr], [x + Math.cos(a) * 0.12, y + 1.0 + r() * 0.8, z + Math.sin(a) * 0.12], 0.05, 0.07); }
+  for (let k = 0; k < 3; k++) { const a = r() * Math.PI * 2, o = 0.5 + r() * 0.6, tp = [x + Math.cos(a) * o, y + h * (0.65 + r() * 0.3), z + Math.sin(a) * o]; beamTris(T, [x, y + 0.9, z], tp, 0.1, 0.14); tops.push(tp); }
+  bag.add('bark_dark', fromTriangles(T));
+  for (const [tx, ty, tz] of tops) for (let j = 0; j < 2; j++) bag.add('palm_leaf', lathe([[0.001, -0.55], [0.8, -0.3], [1.35, 0.1], [1.1, 0.5], [0.5, 0.75], [0.001, 0.85]], 8, (th, i) => 1 + 0.12 * Math.sin(th * 3 + i * 2 + j), tx + (r() - 0.5) * 1.1, ty + j * 0.45, tz + (r() - 0.5) * 1.1));
+  col.circle(x, z, 0.5, y, y + h);
+}
+
+/** banana: { at, y, h, seed } — a clump of banana plants: pale-green pseudostems, the long torn leaves arching out, a hanging bunch. */
+export function banana(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, r = rnd(el.seed ?? 6), n = 3 + Math.floor(r() * 3), stems = [], leaves = [];
+  for (let s = 0; s < n; s++) {
+    const a = r() * Math.PI * 2, o = s === 0 ? 0 : 0.5 + r() * 0.5, h = (el.h ?? 3.2) * (0.7 + r() * 0.4), bx = x + Math.cos(a) * o, bz = z + Math.sin(a) * o;
+    stems.push([bx, bz, h]);
+    bag.add('doum_leaf', lathe([[0.2, 0], [0.16, h * 0.5], [0.1, h], [0.001, h]], 7, null, bx, y, bz));
+    for (let k = 0; k < 7; k++) {
+      const az = k * 2.4 + r(), len = 1.9 + r() * 0.7, up = 0.5 - k * 0.07, w = 0.3, ux = Math.cos(az), uz = Math.sin(az), sx = -uz, sz = ux, P = [];
+      for (let i = 0; i < 5; i++) { const d = i / 4 * len; P.push([bx + ux * d * Math.cos(up), y + h + Math.sin(up) * d - 0.5 * d * d / len, bz + uz * d * Math.cos(up)]); }
+      for (let i = 0; i < 4; i++) { const a0 = P[i], b0 = P[i + 1], wa = w * Math.sin(Math.PI * (i + 0.5) / 4.6) + 0.02; leaves.push(a0[0] + sx * wa, a0[1], a0[2] + sz * wa, b0[0] + sx * wa, b0[1], b0[2] + sz * wa, a0[0] - sx * wa, a0[1], a0[2] - sz * wa, b0[0] + sx * wa, b0[1], b0[2] + sz * wa, b0[0] - sx * wa, b0[1], b0[2] - sz * wa, a0[0] - sx * wa, a0[1], a0[2] - sz * wa); }
+    }
+  }
+  bag.add('palm_leaf', fromTriangles(leaves));
+  const [bx, bz, h0] = stems[0]; bag.add('hide_tan', lathe([[0.001, 0], [0.09, 0.05], [0.12, 0.25], [0.06, 0.45], [0.001, 0.5]], 6, null, bx + 0.25, y + h0 - 0.55, bz));
+  col.circle(x, z, 0.3, y, y + 2);
+}
