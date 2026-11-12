@@ -10,7 +10,7 @@ const E = [];
 const [ex0, ez0, ex1, ez1] = ENCLOSURE;
 // the court round the pyramid, paved with limestone, its enclosure wall
 E.push({ t: 'lane', rect: [ex0 + 1, ez0 + 1, ex1 - 1, ez1 - 1], y: 0.05, mat: 'tura_limestone' });
-const wall = (a, b, gates = []) => E.push({ t: 'ming_wall', a, b, y: 0, h: 8, th: 3, gates, pal: { plaster: 'limestone_core', roof: 'limestone_core', plinth: 'limestone_core' } });
+const wall = (a, b, gates = []) => { E.push({ t: 'ming_wall', a, b, y: 0, h: 8, th: 3, gates, pal: { plaster: 'limestone_core', roof: 'limestone_core', plinth: 'limestone_core' } }); E.push({ t: 'ok_wall_dress', a, b, h: 8, th: 3 }); };
 wall([ex0, ez0], [ex1, ez0]); wall([ex0, ez1], [ex1, ez1]); wall([ex0, ez0], [ex0, ez1]);
 wall([ex1, ez0], [ex1, -66]); wall([ex1, -14], [ex1, ez1]);
 // the entrance left open in the north face for the burial (§4.6): the passages and chambers are a plan of their own (town.js)

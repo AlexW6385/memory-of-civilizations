@@ -5,7 +5,7 @@
 import { RADIUS, PYRAMID, VALLEY, TOWN_Y, VALLEY_TEMPLE, HARBOUR, CROW_WALL, BOAT_PITS, SHIP, SPHINX, KHAFRE_VT, KV_Y, KHAFRE_CW, QUARRY, ENCLOSURE, mastabas, slots, furnished, town as townLots } from './layout.js';
 import { ground } from './ground.js';
 import { RAMP, haulRoad } from './works.js';
-import { CAMP_ITEMS, CHIPS, campLife } from './camps.js';
+import { CAMP_ITEMS, CHIPS, HAUL, campLife, haulLife } from './camps.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));     // a figure faces −z when rot = 0
@@ -239,7 +239,7 @@ export async function town() {
     ]));
   }
   plans.push(worksPlan(), { ...base('giza-works-life', worksLife()), style: 'life' });
-  plans.push(base('giza-camps', [{ t: 'ok_camp', items: CAMP_ITEMS }, { t: 'ok_chips', at: CHIPS }]), { ...base('giza-camp-life', campLife()), style: 'life' });
+  plans.push(base('giza-camps', [{ t: 'ok_camp', items: CAMP_ITEMS }, { t: 'ok_chips', at: CHIPS }, { t: 'stone_sledge', at: HAUL.at, y: 0.06, rot: HAUL.ang, w: 1.15, len: 1.7 }]), { ...base('giza-camp-life', [...campLife(), ...haulLife()]), style: 'life' });
   const Q = quarryWorks();
   plans.push(base('giza-quarry', [{ t: 'ok_quarry', blocks: Q.blocks }, { t: 'ok_track', pts: Q.pts, w: 3.6 }, { t: 'ok_tools', at: Q.toolAt }, { t: 'stone_sledge', at: [116, 122], y: Q.sledgeY + 0.1, rot: 0, w: 1.15, len: 1.7 }]));
   plans.push({ ...base('giza-quarry-life', quarryLife(Q)), style: 'life' });

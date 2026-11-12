@@ -78,3 +78,29 @@ export function causewayDress(el, { bag }) {
   bag.add('tura_limestone', fromTriangles(C));
   bag.add('vault_stars', fromTriangles(S));
 }
+
+/**
+ * ok_wall_dress { a, b, h, th, y }: the enclosure wall's faces in the palace-façade manner of the Old Kingdom — a plinth, pilasters
+ * a little proud at every 3.2 m (the recesses between them in shadow), a cavetto cornice and a roll along the top — on both faces.
+ */
+export function wallDress(el, { bag }) {
+  const [ax, az] = el.a, [bx, bz] = el.b, h = el.h ?? 8, o = (el.th ?? 3) / 2, y = el.y ?? 0;
+  const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, nx = -uz, nz = ux;
+  const B = [], C = [], K = [];
+  for (const s of [-1, 1]) {
+    const f = (d) => [[ax + nx * d * s, az + nz * d * s], [bx + nx * d * s, bz + nz * d * s]];
+    const [p0, p1] = f(o + 0.14);
+    beamTris(B, [p0[0], y, p0[1]], [p1[0], y, p1[1]], 0.14, 0.7);                                   // the plinth
+    const [c0, c1] = f(o + 0.1);
+    beamTris(C, [c0[0], y + h, c0[1]], [c1[0], y + h, c1[1]], 0.22, 0.32);                           // the cornice
+    const [r0, r1] = f(o + 0.2);
+    beamTris(C, [r0[0], y + h + 0.32, r0[1]], [r1[0], y + h + 0.32, r1[1]], 0.1, 0.18);              // the roll
+    for (let t = 1.6; t < L - 0.8; t += 3.2) {                                                       // the pilasters
+      const q = [ax + ux * t + nx * (o + 0.09) * s, az + uz * t + nz * (o + 0.09) * s];
+      beamTris(K, [q[0] - ux * 0.3, y + 0.7, q[1] - uz * 0.3], [q[0] + ux * 0.3, y + 0.7, q[1] + uz * 0.3], 0.09, h - 0.7);
+    }
+  }
+  bag.add('limestone_core', fromTriangles(B));
+  bag.add('tura_limestone', fromTriangles(C));
+  bag.add('tura_limestone', fromTriangles(K));
+}
