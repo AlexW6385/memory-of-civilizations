@@ -55,6 +55,7 @@ export function yards() {
     if (k % 4 === 1) { const [x, z] = at(h, -hw - 2.4 - rand(), -hd * 0.3 + rand() * hd * 0.5), p = put('matframe', x, z, h.yaw + (rand() - 0.5) * 0.4, { r: 1.5 }); if (p) sit.push({ at: [x + 0.2, z - 0.9], y: height(x, z - 0.9), rot: Math.PI, pose: 'kneel', who: 'woman' }); }
     if (k % 5 === 2) { const [x, z] = at(h, (rand() - 0.5) * hw, -hd - 3.4 - rand() * 2); put('roots', x, z, h.yaw, { r: 1.5 }); }
     if (k % 3 === 0) { const [x, z] = at(h, hw * 0.4, -hd - 4.6 - rand() * 2), p = put('toy', x, z, h.yaw + rand(), { r: 1.2 }); if (p) sit.push({ at: [x + 0.9, z + 0.7], y: height(x + 0.9, z + 0.7), rot: Math.atan2(-(x - (x + 0.9)), -(z - (z + 0.7))), pose: 'sit_ground', who: 'child' }); }
+    if ((k % 3 === 2 && k % 2 === 0) || h.landmark) { const [x, z] = at(h, (rand() - 0.5) * 2, hd + 1.2); props.push({ kind: 'trail', c: [x, z], yaw: h.yaw, y: height(x, z), w: 12 + rand() * 3, seed: Math.floor(rand() * 1e6) }); }
     for (const sg of [-1, 1]) { const [x, z] = at(h, sg * (hw + 0.7), hd + 0.2 + rand() * 0.5); put('ferns', x, z, rand() * 6, { r: 0.5, minH: 0.5 }); }
     for (let j = 0; j < 3; j++) { const [x, z] = at(h, (rand() - 0.5) * (h.w + 3), -hd - 2.2 - rand() * 9.5); put('puddle', x, z, h.yaw + rand(), { r: 0.15, w: 1.3 + rand() * 1.4, minH: 0.7 }); }
     // between this house and the next: a drying rack running toward the sea, and the plank screen of a smoking frame behind it

@@ -720,6 +720,13 @@ function prop(el, ctx) {
       add('wicker', lathe([[0.001, 0], [0.3, 0.02], [0.24, 0.16], [0.08, 0.26], [0.001, 0.27]], 10, null, 1.1, 0, 0.5));
       add('wicker', lathe([[0.25, 0.0], [0.28, 0.25], [0.001, 0.26]], 9, null, -0.6, 0, 0.7)); circ(1.0, 1.5); break;
     }
+    case 'trail': {
+      // an ancestral walkway behind the houses: a strip of trampled earth edged with white clamshells, worn stones set in it, moss at the verge
+      const L = w;
+      add('chalk', box(-0.5, 0.0, 0, -0.42, 0.03, L)); add('chalk', box(0.42, 0.0, 0, 0.5, 0.03, L));
+      for (let z = 0.3; z < L; z += 0.9 + rand() * 0.8) add('rock_boulder', lathe([[0.13, 0], [0.1, 0.05], [0.001, 0.08]], 6, null, (rand() - 0.5) * 0.5, 0.0, z));
+      for (let z = 0.5; z < L; z += 1.6 + rand() * 1.4) add('sod', lathe([[0.3, 0], [0.22, 0.05], [0.001, 0.08]], 7, null, (rand() < 0.5 ? -1 : 1) * (0.7 + rand() * 0.3), 0, z)); break;
+    }
     case 'toy': {
       // the children's play: a toy canoe of cedar bark with a paddle, a ring of small stones, a doll of rushes
       add('cedar', ellipse(0, 0.04, 0.45, 0.07, -0.09, 0.09, 8).rotateY(0)); add('roof_bark', box(-0.4, 0.05, -0.06, 0.4, 0.14, 0.06)); add('wood_dark', rod([0.1, 0.1, 0.1], [0.5, 0.18, 0.6], 0.012, 4));
