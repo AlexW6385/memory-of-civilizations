@@ -86,6 +86,9 @@ export function life() {
   // the bearers coming up from the south passage
   for (const [x, z, k] of [[-0.9, 15.8, 0], [0.8, 13.0, 1], [-0.7, 10.2, 0], [0.9, 7.6, 1]]) woman([x, z], 0, { y: 0.05, carry: k ? 'pot' : 'basket', cloth: k ? 'cloth_red' : 'cloth_indigo' });
   man([0.2, 5.0], 0, { y: 0.05, carry: 'sack', dress: 'loincloth', cloth: 'cloth_ochre' });
+  // the roofs of the east portico (4.6 m up) and the west porticoes: the household watching the court from above, leaning at the horns
+  for (const [x, z, f, k] of [[16.4, -17.5, 4.7, 1], [16.9, -16.4, 1.6, 0], [16.2, -9.0, 4.6, 1], [16.6, -3.0, 4.9, 0], [16.4, 4.4, 4.8, 1], [16.8, 5.6, 1.6, 1], [16.5, 14.0, 4.7, 0]]) (k ? woman : man)([x, z], f, { y: 4.6, pose: 'talk' });
+  for (const [x, z, f] of [[-16.6, -14, 1.5], [-16.2, 5, 1.6], [-16.9, 9.6, 1.4]]) woman([x, z], f, { y: 4.4, pose: 'talk' });
   // the pithoi under the east portico and the servants at them
   for (const z of [-8.2, -6.4, -4.6]) L.push({ t: 'pot', kind: 'pithos', at: [11.2, z], y: 0.05, n: 1, seed: seed() });
   woman([10.0, -6.9], -Math.PI / 2 * 0 + Math.PI / 2 * 3, { y: 0.05, carry: 'pot', cloth: 'cloth_ochre' }); man([10.2, -3.4], Math.PI, { y: 0.05, pose: 'stand', dress: 'loincloth', cloth: 'cloth_brown', carry: 'sack' });
