@@ -3,7 +3,7 @@
 // the Wu corridors, the Resting Hall and the Hall of Sage Traces, the side compounds of the ancestors and the parents.
 // Authored in world coordinates (origin 0, yaw 0). The temple faces south; the axis is x = 0.
 
-import { TEMPLE, INNER_X, WALL_Z, TEMPLE_WALL, GATE_HALLS, GATE_D, LINGXING, TAIHE, POOL, POOL_Y, POOL_BED, BRIDGE, KUIWEN, STELE_PAV, ALTAR, HALL, BASE, MOON, WU, QIN, SAGE, SIDE, SIDE_GATE_Z } from './layout.js';
+import { TEMPLE, INNER_X, WALL_Z, TEMPLE_WALL, GATE_HALLS, GATE_D, LINGXING, TAIHE, POOL, POOL_Y, POOL_BED, BRIDGE, KUIWEN, STELE_PAV, ALTAR, HALL, BASE, MOON, WU, QIN, SAGE, SIDE, SIDE_GATE_Z, OLD } from './layout.js';
 
 const E = [];
 const [tx0, tz0, tx1, tz1] = TEMPLE, W = TEMPLE_WALL;
@@ -89,6 +89,24 @@ const flight = (cx, zEdge, y, dir) => { const len = 2.2 + y * 1.6; E.push({ t: '
 flight(0, KUIWEN.rect[3] + 1.6, KUIWEN.y, 'n'); flight(0, KUIWEN.rect[1] - 1.6, KUIWEN.y, 's');
 flight(0, QIN.rect[3] + 1.4, QIN.y, 'n'); flight(0, QIN.rect[1] - 1.4, QIN.y, 's');
 flight(0, SAGE.rect[3] + 1.4, SAGE.y, 'n');
+
+// ── the rooms of the halls: the shrines, the sage slabs, the tablets of the Wu, the books of Kuiwen ──
+E.push({ t: 'lu_inside', kind: 'shrine', rect: QIN.rect, y: QIN.y, seed: 3, scale: 0.55 });
+E.push({ t: 'lu_inside', kind: 'sage', rect: SAGE.rect, y: SAGE.y, seed: 5 });
+E.push({ t: 'lu_inside', kind: 'kuiwen', rect: KUIWEN.rect, y: KUIWEN.y, seed: 9 });
+for (const w of WU) E.push({ t: 'lu_inside', kind: 'wu', rect: w.rect, y: 0.45, front: w.front });
+for (const s of SIDE) E.push({ t: 'lu_inside', kind: 'shrine', rect: s.rect, y: 0.45, seed: s.c > 0 ? 21 : 22, scale: 0.45 });
+
+// ── the dressing of the courts: stone guards round the old trees, the stone lamps along the axis, burners, the crane and the tortoise ──
+for (const [px, pz] of OLD) if (Math.abs(px) < 90 && pz > -232 && pz < 118 && !(Math.abs(px) < 60 && pz > -150 && pz < -96)) E.push({ t: 'lu_treeguard', at: [px, pz], w: 1.4, bench: pz > -60 });
+for (const z of [84, 60, 20, -30]) for (const s of [-1, 1]) E.push({ t: 'lu_lamp', at: [s * 5.2, z] });
+for (const s of [-1, 1]) {
+  E.push({ t: 'bronze', kind: 'vat', at: [s * 9.5, -44], y: 0.03, s: 0.9, face: [0, 1] });
+  E.push({ t: 'bronze', kind: s < 0 ? 'crane' : 'tortoise', at: [s * 14, -90], y: 0.03, s: 0.9, face: [0, 1] });
+}
+E.push({ t: 'bronze', kind: 'sundial', at: [24, ALTAR.c[1] + 18], y: 0.03, s: 0.9 });
+// the stone benches under the cypresses by the Bishui pool, and the pool's kerb planted with weeds
+for (const x of [-30, -18, 18, 30]) E.push({ t: 'lu_lamp', at: [x, 112] });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [

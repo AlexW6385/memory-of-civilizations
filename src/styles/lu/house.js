@@ -14,7 +14,7 @@ const Hall = withPal(mingHall), Wall = withPal(mingWall);
 const W_ = 'wood_dark';
 
 /** A thin helper bound to the build context: boxes (solid or not) and lathes. */
-function tools(ctx) {
+export function tools(ctx) {
   const { bag, col } = ctx;
   const B = (mat, x0, y0, z0, x1, y1, z1, solid = false) => {
     if (x1 - x0 < 1e-4 || z1 - z0 < 1e-4 || y1 - y0 < 1e-4) return;
@@ -92,13 +92,13 @@ function leant(T, x, y, z, kind, rand) {
 
 // ── the furniture of a room ──────────────────────────────────────────────────────────────────
 /** A table: top, apron, four legs. */
-function table(T, x, y, z, w, d, h, m = W_) {
+export function table(T, x, y, z, w, d, h, m = W_) {
   T.B(m, x - w / 2, y + h - 0.045, z - d / 2, x + w / 2, y + h, z + d / 2);
   T.B(m, x - w / 2 + 0.04, y + h - 0.13, z - d / 2 + 0.04, x + w / 2 - 0.04, y + h - 0.045, z + d / 2 - 0.04);
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) T.B(m, x + sx * (w / 2 - 0.07) - 0.03, y, z + sz * (d / 2 - 0.07) - 0.03, x + sx * (w / 2 - 0.07) + 0.03, y + h - 0.045, z + sz * (d / 2 - 0.07) + 0.03);
   T.col.rect([x - w / 2, z - d / 2, x + w / 2, z + d / 2], y, y + h);
 }
-function chair(T, x, y, z, face, m = W_) {            // face: 'n'|'s'|'e'|'w' — the direction the sitter looks
+export function chair(T, x, y, z, face, m = W_) {            // face: 'n'|'s'|'e'|'w' — the direction the sitter looks
   const f = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[face], px = -f[1], pz = f[0];
   const p = (a, b) => [x + f[0] * a + px * b, z + f[1] * a + pz * b];
   const seat = [p(-0.24, -0.23), p(0.24, 0.23)], bk = [p(-0.27, -0.23), p(-0.23, 0.23)];
@@ -107,12 +107,12 @@ function chair(T, x, y, z, face, m = W_) {            // face: 'n'|'s'|'e'|'w' �
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) { const q = p(0.2 * sx, 0.2 * sz); T.B(m, q[0] - 0.025, y, q[1] - 0.025, q[0] + 0.025, y + 0.46, q[1] + 0.025); }
   T.col.circle(x, z, 0.3, y, y + 0.5);
 }
-function stool(T, x, y, z, h = 0.42, m = W_) {
+export function stool(T, x, y, z, h = 0.42, m = W_) {
   T.B(m, x - 0.17, y + h - 0.04, z - 0.17, x + 0.17, y + h, z + 0.17);
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) T.B(m, x + sx * 0.13 - 0.02, y, z + sz * 0.13 - 0.02, x + sx * 0.13 + 0.02, y + h - 0.04, z + sz * 0.13 + 0.02);
 }
 /** The main hall's middle bay (the tang): along the back (north) wall the long table with its vases and censer, the hanging painting and couplet; before it the square table and chairs. */
-function tang(T, cx, y, zb, bw, rand) {
+export function tang(T, cx, y, zb, bw, rand) {
   const tw = Math.min(2.4, bw - 0.6);
   table(T, cx, y, zb + 0.3, tw, 0.45, 0.92);
   for (const sx of [-1, 1]) {
@@ -133,7 +133,7 @@ function tang(T, cx, y, zb, bw, rand) {
   void rand;
 }
 /** A side room of the main house: the kang (the heated brick bed, its mat, the low table, folded quilts), the wardrobe, the chest. kind 0 bedroom, 1 study. */
-function chamber(T, [x0, x1], y, zb, zf, kind, rand) {
+export function chamber(T, [x0, x1], y, zb, zf, kind, rand) {
   const w = x1 - x0, cx = (x0 + x1) / 2;
   if (kind === 0) {
     const kx1 = x1 - 0.2, kx0 = Math.max(x0 + 1.3, kx1 - 2.2), kz1 = zb + 1.9;

@@ -2,8 +2,9 @@
 // gate, the Jinsheng Yuzhen archway, Queli Street and its shops, the courtyard houses of the town, the edge of the Kong Forest with
 // Confucius's tomb, and the people: the sacrificing officials and the guards of the temple, students in the court, the shopkeepers.
 
-import { RADIUS, TEMPLE, MANSION, MX, MANSION_HALLS, MANSION_RANGES, CITY_WALL, WANREN, JINSHENG, QUELI, SQUARE, HALL, GATE_HALLS, ALTAR, KONG_FOREST, streets, lots, shopRuns } from './layout.js';
+import { RADIUS, TEMPLE, MANSION, MX, MANSION_HALLS, MANSION_RANGES, CITY_WALL, WANREN, JINSHENG, QUELI, SQUARE, HALL, GATE_HALLS, ALTAR, KONG_FOREST, DRUM, OLD, streets, lots, shopRuns, streetItems, laneZs, LANES_X, STREET_W } from './layout.js';
 import { HOUSE } from '../../styles/qing/index.js';
+void [laneZs, LANES_X, STREET_W];
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements, style = 'lu') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -60], facing: 'n' } });
@@ -46,6 +47,8 @@ function mansion() {
   for (const h of [cg, nz]) { const z = zc(h); wall([x0, z], [MX - hw(h), z]); wall([MX + hw(h), z], [x1, z]); }
   wall([x0, -146], [MX - 4, -146]); wall([MX + 4, -146], [x1, -146]);
   for (const h of MANSION_HALLS) E.push({ t: 'qing_hall', rect: h.rect, y: 0.45, H: h.H, ...(h.double ? { double: h.double } : {}), roof: 'xieshan', bays: h.bays, front: 's', doors: h.doors, four: false, plat: 0.45, platMargin: 1.2, pal: HOUSE });
+  const KIND = { chongguang: ['yamen'], datang: ['yamen', 1], ertang: ['yamen'], santang: ['yamen'], neizhai: ['parlor'], qianshang: ['parlor'], qiantang: ['parlor'], houtang: ['parlor'], flower: ['study'] };
+  for (const h of MANSION_HALLS) if (KIND[h.id]) E.push({ t: 'lu_inside', kind: KIND[h.id][0], grand: !!KIND[h.id][1], rect: h.rect, y: 0.45, seed: Math.abs(Math.round(h.rect[1])) + 11 });
   for (const r of MANSION_RANGES) E.push({ t: 'qing_hall', rect: r.rect, y: 0.4, H: 4.0, roof: 'gable', bays: [11, 2], front: r.front, four: false, plat: 0.4, pal: HOUSE });
   E.push({ t: 'lane', rect: [MX - 3.5, -146, MX + 3.5, 112], y: 0.04, mat: 'bluestone' });
   E.push({ t: 'lane', rect: [x0 + 2, 36, x1 - 2, 108], y: 0.03, mat: 'brick_paving' });
@@ -54,6 +57,33 @@ function mansion() {
   E.push({ t: 'ming_pavilion', c: [MX + 26, -158], shape: 'oct', r: 2.6, y: 0.45, H: 3.8, plat: 0.45, pal: HOUSE });
   for (const [dx, dz] of [[-10, -152], [12, -160], [0, -164]]) E.push({ t: 'taihu', c: [MX + dx, dz], y: 0.1, h: 2.2, seed: Math.abs(Math.round(dx)) + 7, lod: 1 });
   return base('qufu-mansion', E);
+}
+
+/** The Drum Tower on its brick platform across the west street, the passage through it, the stair up the east side. */
+function drumTower() {
+  const E = [], { x, z, w, d, h, pass, stair } = DRUM;
+  for (const [a, b, y0] of [[x - w / 2, x - pass / 2, 0], [x + pass / 2, x + w / 2, 0], [x - pass / 2, x + pass / 2, 4.6]]) E.push({ t: 'block', rect: [a, z - d / 2, b, z + d / 2], y0, y1: h, mat: 'brick_grey', walk: true, batter: [0, 0, 0, 0] });
+  for (const sx of [-1, 1]) E.push({ t: 'block', rect: [x + sx * w / 2 - 0.4, z - d / 2 - 0.3, x + sx * w / 2 + 0.4, z + d / 2 + 0.3], y0: h, y1: h + 0.9, mat: 'granite_grey', collide: true });
+  E.push({ t: 'qing_hall', rect: [x - w / 2 + 2, z - d / 2 + 2, x + w / 2 - 2, z + d / 2 - 2], y: h, H: 4.4, double: 3.4, roof: 'xieshan', bays: [5, 2], front: 's', four: true, plat: 0.3, pal: HOUSE });
+  E.push({ t: 'lu_inside', kind: 'drum', rect: [x - w / 2 + 2, z - d / 2 + 2, x + w / 2 - 2, z + d / 2 - 2], y: h });
+  E.push({ t: 'stairs', rect: stair, y0: 0.03, y1: h, dir: 'w' });
+  E.push({ t: 'lane', rect: [x - pass / 2, z - d / 2 - 0.5, x + pass / 2, z + d / 2 + 0.5], y: 0.04, mat: 'bluestone' });
+  return base('qufu-drum', E);
+}
+
+/** The street furniture and the carts and animals of the lanes. */
+function streetLife() {
+  const S = streetItems(), E = [], L = [];
+  for (const a of S.stalls) E.push({ t: 'lu_stall', ...a });
+  for (const a of S.wells) E.push({ t: 'lu_well', ...a });
+  for (const a of S.lamps) E.push({ t: 'lu_lamp', ...a });
+  for (const a of S.hitches) E.push({ t: 'lu_hitch', ...a });
+  for (const a of S.carts) E.push({ t: 'lu_handcart', ...a });
+  for (const [px, pz] of OLD) if (Math.abs(px) < 90 && pz > -232 && pz < 118) E.push({ t: 'lu_treeguard', at: [px, pz], w: 1.4, bench: pz > -60 });
+  let k = 1;
+  for (const a of S.hitches) L.push({ t: 'animal', kind: 'donkey', at: [a.at[0], a.at[1] + 1.8], y: 0, rot: 0, gear: true, graze: false, seed: k++ });
+  for (const a of S.carts.slice(0, 6)) L.push({ t: 'animal', kind: 'donkey', at: [a.at[0] + 2.2, a.at[1]], y: 0, rot: a.seed % 6, gear: false, graze: true, seed: k++ });
+  return [base('qufu-street', E), { ...base('qufu-street-animals', L), style: 'life' }];
 }
 
 function houses() {
@@ -111,5 +141,5 @@ let CACHE = null;
 export async function town() {
   if (CACHE) return CACHE;
   void TEMPLE; void MANSION_RANGES;
-  return (CACHE = [paving(), cityWall(), mansion(), ...houses(), shops(), forest(), people()]);
+  return (CACHE = [paving(), cityWall(), drumTower(), mansion(), ...houses(), shops(), ...streetLife(), forest(), people()]);
 }

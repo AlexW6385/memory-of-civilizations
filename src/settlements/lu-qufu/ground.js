@@ -3,7 +3,7 @@
 // Forest's edge, pagoda trees and elms in the town, jujube and persimmon in the courtyard houses, wheat outside the wall; a warm hazy sky.
 // Pure (used by the relief, the collision and the plant workers).
 
-import { RADIUS, TEMPLE, INNER_X, POOL, POOL_Y, KONG_FOREST, MANSION, CITY_WALL, ALTAR, HALL, height, inPool, inRect, inLot, lots, streets, buildRects, SHOP_RECTS, smooth } from './layout.js';
+import { RADIUS, TEMPLE, INNER_X, POOL, POOL_Y, KONG_FOREST, MANSION, CITY_WALL, ALTAR, HALL, OLD, DRUM, height, inPool, inRect, inLot, lots, streets, buildRects, SHOP_RECTS, smooth } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 function vnoise(x, z) {
@@ -34,7 +34,6 @@ function cover(x, z, h) {
 const water = (x, z, y) => inPool(x, z) && y < POOL_Y + 0.3;
 const waterLevel = (x, z) => (inPool(x, z, 0.5) ? POOL_Y : -Infinity);
 const fromWater = (x, z) => (inPool(x, z) ? -3 : Math.max(-5, Math.min(40, Math.hypot(Math.max(POOL[0] - x, 0, x - POOL[2]), Math.max(POOL[1] - z, 0, z - POOL[3])))));
-const OLD = [[-34, -66], [34, -66], [-34, -90], [34, -90], [-36, -112], [36, -112], [-36, -134], [36, -134], [-30, -160], [30, -160], [-16, -158], [16, -158], [-30, -200], [30, -200], [-16, -200], [16, -200], [-54, -214], [54, -214], [-22, 10], [22, 10], [-62, -20], [62, -20], [-62, 50], [62, 50], [-70, 90], [70, 90]];
 /** Plants per 100 m². */
 function planting(x, z) {
   const r = Math.hypot(x, z);

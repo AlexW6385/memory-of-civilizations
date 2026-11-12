@@ -23,7 +23,7 @@ function dragonColumn(P, h, seed) {
 }
 
 /** A seated statue facing +z: robe, torso, head, crown; s the scale (the Master about 3.4 m seated). */
-function seatedSage(P, robe, s, crown) {
+export function seatedSage(P, robe, s, crown) {
   P.add(robe, T(ball(0.95, 0.5, 0.8, 10, 6), 0, 0.5, 0));                         // the lap and legs
   P.add(robe, limb([0, 0.7, -0.1], [0, 1.9, -0.05], 0.62, 0.4, 10));                 // the body
   for (const sx of [-1, 1]) P.add(robe, limb([sx * 0.45, 1.75, 0], [sx * 0.55, 0.95, 0.55], 0.17, 0.13, 6));   // the arms to the gui
