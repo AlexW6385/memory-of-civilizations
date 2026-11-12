@@ -7,7 +7,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 34, night: 3, rain: 0.45, reach: 150, spawnMin: 26, far: 44 },
+  walkers: { day: 40, night: 3, rain: 0.45, reach: 150, spawnMin: 26, far: 44 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -100,
 };
@@ -16,7 +16,7 @@ export function walkways() {
   const rects = [], R = (r, weight, market = 0.3, kind = 'street') => rects.push({ r, weight, market, kind });
   R([STREET[0] + 0.4, STREET[1] + 2, STREET[2] - 0.4, STREET[3] - 4], 2.6, 0.5);                   // the village street, west bank clear of the channel
   R([LANE[0] + 6, LANE[1] + 0.4, LANE[2] - 6, LANE[3] - 0.4], 1.8, 0.5, 'lane');                  // the cross lane
-  R([FORECOURT[0] + 1, FORECOURT[1] + 1, FORECOURT[2] - 1, FORECOURT[3]], 1.6, 0.4);              // the temple's forecourt
+  R([-8, FORECOURT[1] + 1, 8, FORECOURT[3]], 1.8, 0.7, 'market');                                  // the temple's forecourt between the market's stalls
   R([-14, -4, 14, 22], 1.5, 0.6);                                                                  // the crossing
   return { rects, links: [], clip: RADIUS - 24 };
 }

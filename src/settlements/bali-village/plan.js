@@ -36,11 +36,23 @@ E.push({ t: 'bali_bale', rect: [-31, -125, -20, -118], y: y2, floor: 0.7, h: 2.6
 E.push({ t: 'bali_bale', rect: [20, -125, 31, -118], y: y2, floor: 0.7, h: 2.6, bays: [3, 1], roof: 'palm', furnish: 'mats', stairs: 'w', gold: true, seed: 12 });
 { const o = []; for (const x of [-4, -2, 2, 4]) o.push([x, y2 + 0.01, -112]); for (const x of [-6, -3, 3, 6]) o.push([x, y1 + 0.01, -76]); E.push({ t: 'bali_offerings', list: o }); }
 
+// the carved and festival detail: guardian figures at the split gate, niches of carved stone along the forecourt wall, the row of small shrines of the middle court's east side,
+// the ceremonial umbrellas by the merus and the padmasana, the towers of offerings on the bales, the long banners of the odalan down the forecourt
+for (const s of [-1, 1]) E.push({ t: 'bali_guard', at: [s * (gap / 2 + 4.4 + 0.75), zS + 2.6], y: 0, h: 1.4 });
+E.push({ t: 'bali_niches', a: [x0 + 1.5, zS], b: [-cb - 0.8, zS], y: 0, side: 1, n: 5 });
+E.push({ t: 'bali_niches', a: [cb + 0.8, zS], b: [x1 - 1.5, zS], y: 0, side: 1, n: 5 });
+for (const z of [-90, -86, -78, -74.8]) E.push({ t: 'bali_shrine', c: [x1 - 2.2, z], y: y1, kind: 'small', face: 'w' });
+for (const [x, m] of [[-6.4, 'cloth_white'], [6.4, 'cloth_ochre'], [-19.5, 'cloth_ochre'], [19.5, 'cloth_white'], [-29, 'cloth_red'], [29, 'cloth_red']]) E.push({ t: 'bali_tedung', at: [x, x === -29 || x === 29 ? -131.5 : -139.5], y: y2, h: 3.1, mat: m });
+for (const [x, z, f] of [[-27.5, -121.7, y2 + 0.7], [-24.0, -121.7, y2 + 0.7], [23.5, -121.7, y2 + 0.7], [27, -121.7, y2 + 0.7], [-27, -98, y1 + 0.6], [-20, -97.5, y1 + 0.6]]) E.push({ t: 'bali_gebogan', at: [x, z], y: f });
+for (let z = -69; z >= -50; z -= 4.5) for (const s of [-1, 1]) E.push({ t: 'bali_umbul', at: [s * 12.2, z], y: 0, h: 8.5 + ((z * 7) % 3), dir: [-s, 0] });
+
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
-  room('forecourt', [-12, zS + 1, 12, -46], 0, 'open'),
+  room('forecourt', [-12, zS + 1, 12, -46], 0, 'market'),
   room('jaba-tengah', [x0 + 1, zM + 1, x1 - 1, zS - 3], y1, 'open'),
-  room('jeroan', [x0 + 1, zN + 1, x1 - 1, zM - 3], y2, 'open'),
+  room('jeroan', [x0 + 1, zN + 1, x1 - 1, zM - 3], y2, 'inner'),
+  room('gong-pavilion', [15, -103, 27, -94.5], y1 + 0.5, 'hall'),
+  room('bale-agung', [-29.5, -101.5, -16.5, -93.5], y1 + 0.6, 'hall'),
 ];
 const walks = [[[0, -30], [0, -60], [0, -80], [0, -100], [0, -112], [0, -125], [0, -133]]];
 walks[0].y0 = 0;

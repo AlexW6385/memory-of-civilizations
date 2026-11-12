@@ -5,6 +5,9 @@ import { registerStyle } from '../../core/build.js';
 import { wall, candiBentar, kori, padmasana, shrine, gate } from './stone.js';
 import { meru, kulkul, bale, wantilan, paon, lumbung, house } from './bale.js';
 import { compound } from './compound.js';
+import { shop } from './shops.js';
+import { dalem } from './dalem.js';
+import { guard, umbul, tedung, gebogan, niches, cockpit, pondok, scarecrow } from './fest.js';
 import { water, channel, footbridge, subakShrine, penjor, offerings, banyanSeat } from './land.js';
 
 registerStyle('balinese', {
@@ -12,7 +15,7 @@ registerStyle('balinese', {
   elements: {
     bali_wall: wall, bali_candi_bentar: candiBentar, bali_kori: kori, bali_padmasana: padmasana, bali_shrine: shrine, bali_gate: gate,
     bali_meru: meru, bali_kulkul: kulkul, bali_bale: bale, bali_wantilan: wantilan, bali_paon: paon, bali_lumbung: lumbung, bali_house: house,
-    bali_compound: compound, bali_water: water, bali_channel: channel, bali_footbridge: footbridge, bali_subak_shrine: subakShrine, bali_penjor: penjor,
+    bali_compound: compound, bali_shop: shop, bali_dalem: dalem, bali_guard: guard, bali_umbul: umbul, bali_tedung: tedung, bali_gebogan: gebogan, bali_niches: niches, bali_cockpit: cockpit, bali_pondok: pondok, bali_scarecrow: scarecrow, bali_water: water, bali_channel: channel, bali_footbridge: footbridge, bali_subak_shrine: subakShrine, bali_penjor: penjor,
     bali_offerings: offerings, bali_banyan_seat: banyanSeat,
   },
   objects: {},
