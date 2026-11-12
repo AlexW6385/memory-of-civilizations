@@ -68,3 +68,20 @@ The Muslims of the 12th-century conquest were confined to Mouraria, Alfama and t
 - Mild Atlantic climate: warm dry summers, a bright light; stone pines, cork oaks, olive, orange and lemon trees in gardens, fig, vines; the Tagus's mud and sand shore, reeds; gulls, kites (the river's), swallows and swifts [inferred]. Humid sea air: damp 0.55.
 - Sound: gulls, the river, hammers and saws at the yard, bells, cart wheels on cobbles, fishwives' cries, church bells, plainchant of the Hieronymites [inferred]. Music: a modal plainchant over a drone for the church; vihuela and flute for the town.
 - Smoke: kitchen smoke from the houses at the meals; the yard's pitch kettle; incense in the church.
+
+## 10. Deepening pass (to the Suzhou standard)
+
+Gaps found against Ming Suzhou, and what closed them:
+1. Ordinary houses solid, one design → `manu_house` rebuilt: hipped or gabled roofs, hooded twin-light windows, iron balconies, rótulas, damp bands, rain streaks, bare-masonry patches, tiles of two ages; 25 walled yards (quintais) with orange trees, pergola and well where lots were empty.
+2. Only two enterable buildings → thirteen houses can be entered: eight Rua Nova shops (spice, porcelain, cloth, jeweller, parrots and ivory, chandler, grocer, apothecary), three fishermen's and two Alfama homes; each with shop, hall with a stair to a furnished chamber, kitchen with hearth.
+3. Streets bare → rounded-stone paving with a flagstone gutter wherever the ground is level; every house front dressed (hanging board signs, pots, benches, stalls, crates, firewood, washing, ladders, dogs and cats), shopkeepers in the open shops.
+4. Arrival plaza empty → pilgrims facing the portal, beggars on the steps, friars, candle-sellers' stalls, a well, benches, ox-carts, pigeons, orange trees; the Terreiro a market of 21 stalls with a crowd, guards at the palace; the quay with hauling gangs, porters, cart.
+5. Church thin → gallery reachable by a stone stair along the north aisle; choir stalls and lectern; side altars; pulpit; font; hanging lamps; votive stands; founder's tomb niche and sedilia; grave slabs.
+6. Belém Tower solid → hollow, enterable by its south door: cistern/magazine, Governor's hall, King's hall, Audience hall, chapel, a switchback stair [inferred; Wikipedia gives a spiral stair] and a hatch to the terrace; courtyard with shot, barrels and flagstaff.
+7. Cloister court had olives → an orange grove (twenty trees) round the basin.
+8. Beach at Belém bare → six boats hauled up, nets on poles, fish on racks, mending men, fishwives.
+9. Planting thin → holm oak (cork oak), carob, fig, olive, stone pine, cypress on the hills; reeds and tamarisk on the shore.
+10. Living systems → 60 walkers by day (children, brown friars added), friars walking the cloister galleries, fishwives on the beach, more sparrows, egrets, swallows over Rua Nova; kitchen smoke from every open house.
+
+Facts [stated: Wikipedia "Belém Tower"]: the ground floor is a vaulted cistern; the first the octagonal Governor's Hall; the second the King's Hall opening onto the seven-arched loggia; the third the Audience Hall with twin windows and the royal arms; the fourth a chapel with a ribbed vault and carved corbels; a terrace with Order of Christ shields and a further terrace above. [inferred] shop fittings: shelves of jars, counters with scales, cages, bolts of cloth — from the goods listed in §6 (The Art Newspaper); chambers and hearths from general Iberian town houses.
+Still below Suzhou: the Ribeira palace, the Sé and the castle are closed shells; the Alfama's lanes are not stepped or arched over; the carracks carry no crew on deck; the tower's loggia is a panel; interiors of ordinary houses beyond the thirteen are shut.

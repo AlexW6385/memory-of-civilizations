@@ -22,16 +22,17 @@ const waterLevel = (x, z) => (inWater(x, z) ? SEA : -Infinity);
 const fromWater = (x, z) => Math.max(-5, Math.min(40, height(x, z) - SEA));
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 70 || inWater(x, z) || wet(x, z) < 2 || inLot(x, z, 1.5) || onStreet(x, z, 1.5)) return null;
-  if (inRect(CLOISTER, x, z, 8)) return inRect(CLOISTER, x, z, -8) && Math.abs(x - (CLOISTER[0] + CLOISTER[2]) / 2) > 4 && Math.abs(z - (CLOISTER[1] + CLOISTER[3]) / 2) > 4 ? { olive: 0.04, grass_dry: 2 } : null;
+  if (inRect(CLOISTER, x, z, 8)) return inRect(CLOISTER, x, z, -8) && Math.abs(x - (CLOISTER[0] + CLOISTER[2]) / 2) > 4 && Math.abs(z - (CLOISTER[1] + CLOISTER[3]) / 2) > 4 ? { grass: 2 } : null;
   if (BUILT.some((r) => inRect(r, x, z, 3)) || inRect(TERREIRO, x, z, 3)) return null;
-  if (wet(x, z) < 14 && x < -100) return { grass_dry: 1.5 };
-  if (Math.hypot(x - HILL.c[0], z - HILL.c[1]) < HILL.R * 0.9 && z < -40) return { stone_pine: 0.02, cypress: 0.03, olive: 0.04, grass_dry: 3 };
-  return { fig: 0.03, olive: 0.04, stone_pine: 0.02, cypress: 0.01, grass_dry: 3 };
+  if (wet(x, z) < 5 && x < -100) return { reeds: 0.25, tamarisk: 0.01, grass_dry: 1 };
+  if (wet(x, z) < 14 && x < -100) return { grass_dry: 1.5, tamarisk: 0.005 };
+  if (Math.hypot(x - HILL.c[0], z - HILL.c[1]) < HILL.R * 0.9 && z < -40) return { stone_pine: 0.02, cypress: 0.03, olive: 0.04, carob: 0.02, holm_oak: 0.012, fig: 0.02, grass_dry: 3 };
+  return { fig: 0.03, olive: 0.04, stone_pine: 0.02, holm_oak: 0.012, carob: 0.015, cypress: 0.01, grass_dry: 3 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater, rim: -10,
   sea: SEA,
-  maxDensity: { fig: 0.05, olive: 0.06, stone_pine: 0.05, cypress: 0.05 },
+  maxDensity: { fig: 0.05, olive: 0.06, stone_pine: 0.05, cypress: 0.05, carob: 0.04, holm_oak: 0.03, reeds: 0.4, tamarisk: 0.03 },
   climate: {
     sun: { az: 160, el: 54, color: [1.0, 0.95, 0.86], intensity: 3.5, lat: 38.7, dec: 14, hour: 10 },
     sky: { turbidity: 3.2, rayleigh: 1.0, mie: 0.006, mieG: 0.8, zenith: [0.1, 0.2, 0.42], horizon: [0.68, 0.72, 0.76] },

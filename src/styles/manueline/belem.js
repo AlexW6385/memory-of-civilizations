@@ -4,6 +4,7 @@
 // causeway to the shore. Element `belem_tower` { c, y (the deck), causeway: [x0, z0, x1, z1] }.
 import { box, lathe, rod, sweep, fromTriangles } from '../../core/geom.js';
 import { archWall } from '../gothic/nd-interior.js';
+import { towerShell, deckDressing } from './tower.js';
 import { orderCross, armillary, prism, pinnacle, addBox, wallRun } from './util.js';
 
 const MAT = 'limestone', CARVED = 'limestone_carved';
@@ -55,7 +56,7 @@ export function belem(el, ctx) {
   col.floor([cx - 9.5, cz + 10, cx + 9.5, cz + 12.3], y);
   // ── the tower: 12 m wide, 11 deep, 30 m high on the landward side of the deck
   const tx0 = cx - 6, tx1 = cx + 6, tz0 = cz - 5, tz1 = cz + 6, top = y + 28.5;
-  bag.add(MAT, box(tx0, y - 0.2, tz0, tx1, top, tz1)); col.rect([tx0, tz0, tx1, tz1], y, top);
+  towerShell(ctx, { cx, cz, y, top }); deckDressing(ctx, { cx, cz, y });
   for (const yy of [6.4, 12.6, 18.8, 25.0]) bag.add(CARVED, sweep([[0, 0], [0.18, 0.05], [0.28, 0.2], [0.18, 0.35], [0, 0.4]], [[tx0, tz0], [tx1, tz0], [tx1, tz1], [tx0, tz1]].reverse(), y + yy, true));
   // windows: dark panels framed in stone on the four faces of each storey (the south face carries the loggia)
   const win = (face, u, yy, w, h) => {
@@ -86,7 +87,8 @@ export function belem(el, ctx) {
   for (const [dx] of [[-3.6], [3.6]]) { addBox(bag, 'opening', cx + dx - 0.5, y + 8.6, tz1 + 0.0, cx + dx + 0.5, y + 10.6, tz1 + 0.12); bag.add(CARVED, lathe([[0.22, 0], [0.26, 0.5], [0.2, 1.3], [0.12, 1.5], [0.001, 1.6]], 8, null, cx + dx, y + 8.6, tz1 + 0.4)); }  // St Vincent and St Michael in their niches
   // the tower's terrace: parapet with shields, the four bartizans with domes at the corners, a Virgin and Child in her niche
   const ty = top;
-  bag.add(MAT, box(tx0 - 0.4, ty, tz0 - 0.4, tx1 + 0.4, ty + 0.4, tz1 + 0.4));
+  { const wx0 = tx0 + 1.4, wx1 = tx0 + 2.6, hz0 = tz0 + 1.4 + 1.4, hz1 = tz1 - 1.4 - 1.4;
+    for (const [a, b, c, d] of [[tx0 - 0.4, tz0 - 0.4, wx0, tz1 + 0.4], [wx1, tz0 - 0.4, tx1 + 0.4, tz1 + 0.4], [wx0, tz0 - 0.4, wx1, hz0], [wx0, hz1, wx1, tz1 + 0.4]]) { bag.add(MAT, box(a, ty, b, c, ty + 0.4, d)); col.floor([a, b, c, d], ty + 0.4); } }
   for (const [a, b] of [[[tx0 - 0.4, tz0 - 0.4], [tx1 + 0.4, tz0 - 0.4]], [[tx0 - 0.4, tz1 + 0.4], [tx1 + 0.4, tz1 + 0.4]], [[tx0 - 0.4, tz0 - 0.4], [tx0 - 0.4, tz1 + 0.4]], [[tx1 + 0.4, tz0 - 0.4], [tx1 + 0.4, tz1 + 0.4]]]) {
     const Lg = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / Lg, uz = (b[1] - a[1]) / Lg, n = Math.floor(Lg / 1.6), nx = uz, nz = -ux;
     bag.add(MAT, box(Math.min(a[0], b[0]) - 0.0, ty + 0.4, Math.min(a[1], b[1]) - 0.0, Math.max(a[0], b[0]) + 0.0 + (ux === 0 ? 0.45 : 0), ty + 1.1, Math.max(a[1], b[1]) + (uz === 0 ? 0.45 : 0)));

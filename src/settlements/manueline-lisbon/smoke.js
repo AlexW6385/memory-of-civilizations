@@ -11,7 +11,7 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1
 function emitters() {
   const E = [], rand = rng(1520);
   for (const l of lots()) {
-    if (rand() > 0.3) continue;
+    if (!l.open && rand() > 0.45) continue;
     const [x0, z0, x1, z1] = l.rect;
     E.push({ p: [x0 + (x1 - x0) * (0.3 + 0.4 * rand()), l.y + (l.kind === 'merchant' ? 11 : 7), z0 + (z1 - z0) * (0.3 + 0.4 * rand())], kind: 'kitchen', seed: l.seed + 1 });
   }

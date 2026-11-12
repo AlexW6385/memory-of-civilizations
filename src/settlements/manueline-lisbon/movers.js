@@ -3,7 +3,7 @@
 // the Jerónimos, nobles in doublet and cape; small lateen boats on the Tagus. Data for the engine's movers (src/engine/movers.js,
 // read in its worker); the format is Alexandria's and Suzhou's. The ways come from layout.js.
 
-import { SEA, SHIPS, RADIUS, QUAY, RUA_NOVA, TERREIRO, PLAZA, SQUARE, YARD, PALACE, ZS, ALLEYS, wet, inLot, inRect } from './layout.js';
+import { SEA, SHIPS, RADIUS, QUAY, RUA_NOVA, TERREIRO, PLAZA, SQUARE, YARD, PALACE, ZS, ALLEYS, CLOISTER, CHURCH, shore, wet, inLot, inRect } from './layout.js';
 import '../../styles/manueline/index.js';
 import { shipParts } from '../../styles/manueline/ships.js';
 import '../../objects/index.js';
@@ -11,7 +11,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure, factor, flat, SLOT } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 44, night: 5, rain: 0.6, reach: 150, spawnMin: 28, far: 44 },
+  walkers: { day: 60, night: 6, rain: 0.6, reach: 160, spawnMin: 28, far: 46 },
   boats: { count: 8, reach: 260, spawnMin: 60, far: 95, speed: [0.9, 1.5], bridgeSpeed: 0.7 },
   water: SEA,
 };
@@ -36,6 +36,12 @@ export function walkways() {
     { r: [YARD[0] + 6, YARD[1] + 6, YARD[2] - 10, YARD[3] - 8], weight: 1.4, market: 0.3, kind: 'street', yard: 1 },
     { r: [PLAZA[0] + 6, PLAZA[1] + 4, PLAZA[2] - 6, PLAZA[3] - 6], weight: 1.8, market: 0.8, kind: 'street', monk: 1 },
     { r: [SQUARE[0] + 3, SQUARE[1] + 3, SQUARE[2] - 3, SQUARE[3] - 3], weight: 1.6, market: 1.2, kind: 'street' },
+    { r: [-260, shore(-200) - 14, -118, shore(-130) - 3], weight: 1.4, market: 0.6, kind: 'street', quay: 1.6 },
+    // the cloister's four galleries: the friars walk them
+    { r: [CLOISTER[0] + 1.5, CLOISTER[1] + 1.2, CLOISTER[2] - 1.5, CLOISTER[1] + 5.8], weight: 1.0, market: 0, kind: 'street', monk: 5 },
+    { r: [CLOISTER[0] + 1.5, CLOISTER[3] - 5.8, CLOISTER[2] - 1.5, CLOISTER[3] - 1.2], weight: 1.0, market: 0, kind: 'street', monk: 5 },
+    { r: [CLOISTER[0] + 1.2, CLOISTER[1] + 6, CLOISTER[0] + 5.8, CLOISTER[3] - 6], weight: 1.0, market: 0, kind: 'street', monk: 5 },
+    { r: [CLOISTER[2] - 5.8, CLOISTER[1] + 6, CLOISTER[2] - 1.2, CLOISTER[3] - 6], weight: 1.0, market: 0, kind: 'street', monk: 5 },
   ];
   for (const z of ZS) for (const [a, b] of runs(z, true, -300, 290)) rects.push({ r: [a, z - 1.8, b, z + 1.8], weight: 1.0, market: 0.6, kind: 'street' });
   for (const x of ALLEYS) for (const [a, b] of runs(x, false, -250, 95)) rects.push({ r: [x - 1.6, a, x + 1.6, b], weight: 0.8, market: 0.5, kind: 'street' });
@@ -64,6 +70,8 @@ export const WALKERS = [
   { id: 'sailor', weight: 1.2, market: 1.4, quay: 2.8, yard: 1.2, el: { dress: 'tunic', legs: 'hose', hair: 'short', hat: 'cap', over: 'belt', arms: 'hang' }, c1: [CL.white, CL.brown, CL.ochre, CL.blue], c2: [CL.red, CL.brown, CL.grey], c3: [CL.red, CL.brown], speed: [1.1, 1.4], stride: 1.45 },
   { id: 'porter', weight: 1.1, market: 1.5, quay: 2.4, yard: 1.0, el: { dress: 'tunic', hair: 'short', carry: 'sack', over: 'belt' }, c1: [CL.brown, CL.ochre, CL.grey], c2: [CL.brown], c3: [CL.brown], speed: [0.95, 1.2], stride: 1.15 },
   { id: 'shipwright', weight: 0.9, market: 0.3, yard: 4.0, el: { dress: 'tunic', hair: 'short', hat: 'cap', over: 'apron', arms: 'hang' }, c1: [CL.brown, CL.ochre, CL.white], c2: [CL.brown, CL.grey], c3: [CL.brown], speed: [0.9, 1.15], stride: 1.3 },
+  { id: 'child', weight: 0.5, market: 1.0, el: { dress: 'tunic', child: true, hair: 'short', hat: 'none', over: 'none' }, c1: [CL.brown, CL.ochre, CL.white, CL.red], c2: [CL.brown], c3: [CL.brown], speed: [1.0, 1.5], stride: 1.0 },
+  { id: 'friar_brown', weight: 0.3, market: 0.5, el: { dress: 'robe', hair: 'shaven', over: 'cape', arms: 'hang' }, c1: [CL.brown, CL.grey], c2: [CL.brown], c3: [CL.brown], speed: [0.8, 1.0], stride: 1.2 },
   { id: 'monk', weight: 0.5, market: 0.4, monk: 4.0, el: { dress: 'robe', hair: 'shaven', over: 'cape', arms: 'hang' }, c1: [CL.white], c2: [CL.black], c3: [CL.white], speed: [0.7, 0.9], stride: 1.2 },
   { id: 'slave', weight: 0.6, market: 1.0, quay: 1.4, el: { dress: 'tunic', hair: 'short', carry: 'sack', over: 'none' }, c1: [CL.grey, CL.brown, CL.ochre], c2: [CL.brown], c3: [CL.brown], speed: [0.95, 1.2], stride: 1.2 },
   { id: 'soldier', weight: 0.4, market: 0.7, el: { dress: 'tunic', legs: 'hose', hair: 'short', hat: 'brim', over: 'cape', carry: 'staff', beard: false }, c1: [CL.red, CL.maroon, CL.white], c2: [CL.maroon, CL.red], c3: [CL.brown], speed: [1.0, 1.2], stride: 1.4 },

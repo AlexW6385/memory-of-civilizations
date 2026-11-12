@@ -5,6 +5,7 @@
 import { box, lathe, rod, fromTriangles, orientOutward } from '../../core/geom.js';
 import { archWall } from '../gothic/nd-interior.js';
 import { tube } from '../../objects/kit.js';
+import { furnishChurch } from './furnish.js';
 import { ropeColumn, netVault, pinnacle, armillary, orderCross, wallRun, addBox } from './util.js';
 
 const T = 2.5, SPRING = 19.5, CROWN = 25.5, WALL = 26;
@@ -71,8 +72,8 @@ export function jeronChurch(el, ctx) {
   // the choir gallery over the low vault at the west: its floor, a carved parapet, two columns under it
   const gy = y + 8.4;
   bag.add('limestone', box(xi0, gy - 0.5, zi0, bays[1], gy, zi1));
-  addBox(bag, CARVED, bays[1] - 0.35, gy, zi0, bays[1], gy + 1.15, zi1);
-  for (let u = zi0 + 0.6; u < zi1; u += 1.2) addBox(bag, 'limestone', bays[1] - 0.52, gy + 0.2, u, bays[1] - 0.2, gy + 1.0, u + 0.35);
+  addBox(bag, CARVED, bays[1] - 0.35, gy, zi0, bays[1], gy + 1.15, zi0 + 0.9); addBox(bag, CARVED, bays[1] - 0.35, gy, zi0 + 3.4, bays[1], gy + 1.15, zi1);
+  for (let u = zi0 + 0.6; u < zi1; u += 1.2) if (u < zi0 + 0.9 || u > zi0 + 3.2) addBox(bag, 'limestone', bays[1] - 0.52, gy + 0.2, u, bays[1] - 0.2, gy + 1.0, u + 0.35);
   for (const rz of rows) ropeColumn(ctx, bays[1] - 0.1, rz, y, 8.0, 0.55, { mat: MAT, carved: CARVED, capital: false });
   for (let c = 0; c < 3; c++) netVault(bag, [xi0, zedges[c], bays[1], zedges[c + 1]], y + 6.4, y + 8.0, { mat: 'limestone', rib: MAT, rich: false, n: 4 });
   // the roof: a stone terrace over the vaults with a parapet
@@ -134,9 +135,10 @@ export function jeronChurch(el, ctx) {
   addBox(bag, 'cloth_red', ax - 4.55, ay + 1.1, zc - 2.05, ax - 2.15, ay + 1.16, zc + 2.05);
   addBox(bag, 'gilt_bronze', ax - 3.5, ay + 1.16, zc - 0.1, ax - 3.2, ay + 2.0, zc + 0.1);
   // the nave: benches of the monks' choir in the western bays are not here (the choir is in the gallery); a pair of candlesticks and prayer stools
-  for (const z of [zc - 9.2, zc + 9.2]) for (const xb of [bays[2] + 5, bays[3] + 5]) { addBox(bag, 'wood_dark', xb - 1.2, y, z - 0.35, xb + 1.2, y + 0.45, z + 0.35); col.rect([xb - 1.2, z - 0.35, xb + 1.2, z + 0.35], y, y + 0.45); }
+  for (const z of [zc - 7.0, zc + 9.2]) for (const xb of [bays[2] + 5, bays[3] + 5]) { addBox(bag, 'wood_dark', xb - 1.2, y, z - 0.35, xb + 1.2, y + 0.45, z + 0.35); col.rect([xb - 1.2, z - 0.35, xb + 1.2, z + 0.35], y, y + 0.45); }
   for (const [lx, lz] of [[bays[2] + 5, zc], [bays[4] - 5, zc], [chancel + 6, zc - 5], [chancel + 6, zc + 5]]) lights.push({ at: [lx, y + 4.5, lz], color: '#ffc27a', intensity: 7, distance: 16 });
   for (const [lx, lz] of [[bays[2] + 5, zc], [bays[4] - 5, zc]]) { bag.add('iron', rod([lx, y + 9, lz], [lx, y + 4.8, lz], 0.02, 4)); bag.add('gilt_bronze', lathe([[0.4, 0], [0.1, 0.25], [0.3, 0.45]], 8, null, lx, y + 4.4, lz)); }
+  furnishChurch(ctx, rect, y, px);
 }
 function frustum2(xa, za, xb, zb, y0, rise) {
   // the portal's gable: a thin prism, its ridge along x, as a stepped ogee suggestion (a plain triangle)
