@@ -337,7 +337,7 @@ export function shopRow(el, { bag, col, lights }) {
       else for (let k2 = 0; k2 < 4; k2++) bag.add('terracotta', lathe([[0.001, 0], [0.1, 0.04], [0.14, 0.15], [0.1, 0.24], [0.001, 0.26]], 8, null, ia + 0.35 + k2 * 0.45 * (w - 0.9) / 2.0, 2.5 - 0.05 * (k2 % 2), hz + sg * 0.06));
       if (i % 2 === 1) { const bxp = xa + 0.35, bzp = fz + sg * 0.6; bag.add('wicker', lathe([[0.001, 0], [0.2, 0], [0.27, 0.2], [0.26, 0.26], [0.22, 0.24], [0.001, 0.2]], 10, null, bxp, 0, bzp)); bag.add(['cloth_red', 'cloth_ochre', 'cloth_green'][i % 3], lathe([[0.22, 0.22], [0.15, 0.32], [0.001, 0.36]], 10, null, bxp, 0, bzp)); }
     }
-    if (i === (el.enter ?? 3)) {
+    if ([].concat(el.enter ?? 3).includes(i)) {
       // the entered shop: a balance on the sill, a kettle on a brazier, a lamp, a chest
       F.trayTable(bag, xc + 0.4, 0.5, Z(D - 0.8), { seed: i });
       F.brazier(bag, lights, ia + 0.5, 0, Z(D - 1.9), 0.2); F.ewer(bag, ia + 0.5, 0.5, Z(D - 1.9), 0.8, 0, 'bronze');

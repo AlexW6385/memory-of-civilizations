@@ -40,6 +40,14 @@ function lanes(el, { bag, col }) {
       for (let r = 0; r < 4; r++) bx(r % 2 ? 'brick_baked' : 'mudbrick', -0.8 + r * 0.05, 0.04 + r * 0.2, -0.45, 0.8 - r * 0.07, 0.24 + r * 0.2, 0.45);
     } else if (p.kind === 'bench') {
       bx('mudbrick', -1.0, 0.04, -0.28, 1.0, 0.46, 0.28); bx('reed_mat', -0.9, 0.46, -0.24, 0.5, 0.47, 0.24, false);
+    } else if (p.kind === 'offering') {
+      // a table of baked brick under a linen cloth for the pilgrims' gifts: loaves, a heap of dates, a jar of beer, a lamp; a clay-lined basin at its foot for libations
+      bx('brick_baked', -0.7, 0.04, -0.4, 0.7, 0.86, 0.4); bx('linen', -0.74, 0.86, -0.44, 0.74, 0.9, 0.44, false); bx('cloth_red', -0.74, 0.7, -0.455, 0.74, 0.9, -0.44, false);
+      for (let k = 0; k < 4; k++) bx('brick_buff', -0.55 + k * 0.17, 0.9, -0.28, -0.42 + k * 0.17, 0.96, -0.12, false);
+      Lt('bark_dark', [[0.001, 0], [0.14, 0], [0.1, 0.1], [0.001, 0.12]], 0.15, 0.12, 0.9, 8);
+      Lt('terracotta', [[0.001, 0], [0.1, 0.01], [0.14, 0.12], [0.08, 0.26], [0.09, 0.3], [0.001, 0.3]], 0.5, 0.0, 0.9, 10);
+      Lt('pottery_dark', [[0.001, 0], [0.06, 0], [0.04, 0.05], [0.001, 0.05]], -0.4, 0.15, 0.9, 8); bx('flame', -0.42, 0.95, 0.13, -0.38, 1.0, 0.17, false);
+      bx('brick_baked', -0.35, 0.04, 0.55, 0.35, 0.16, 0.95, false); bx('bitumen', -0.28, 0.15, 0.62, 0.28, 0.17, 0.88, false);
     } else if (p.kind === 'zir') {
       bx('brick_baked', -0.36, 0.04, -0.36, 0.36, 0.3, 0.36); Lt('terracotta', ZIR.map(([r, y]) => [r * 1.25, y * 1.25]), 0, 0, 0.3, 12);
       Lt('pottery_dark', [[0.001, 1.25], [0.16, 1.26], [0.2, 1.32], [0.001, 1.33]], 0, 0, 0.3, 10);

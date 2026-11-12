@@ -128,7 +128,7 @@ function build() {
   for (const l of near) {
     const way = l.col === 'way', q = rr();
     if (l.col === 'precinct') { if (q < 0.1 && nOpen < 18) { l.open = true; nOpen++; } else if (q > 0.85) l.shop = null; continue; }
-    if (way && dist(l) < 120 && q < 0.42 && nOpen < 8) { l.open = true; nOpen++; if (nOpen === 4) l.school = true; }
+    if (way && dist(l) < 195 && q < 0.4 && nOpen < 12) { l.open = true; nOpen++; if (nOpen === 4) l.school = true; }
     else if (q < (way ? 0.78 : 0.13) && nShop < 26 && (way || dist(l) < 200)) { l.shop = TRADES[nShop++ % TRADES.length]; }
     else if (!way && q > 0.93 && nOpen < 16) { l.open = true; nOpen++; }
   }

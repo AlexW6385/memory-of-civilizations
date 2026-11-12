@@ -44,7 +44,7 @@ function fromWater() { return 1e4; }
 function planting(x, z) {
   const r = Math.hypot(x, z);
   if (x > 60 && Math.abs(z) < 3.5) return null;      // the paved way from the east
-  if (nearWay(x, z) && x < WAY.x1 + 6) return Math.abs(z) < 9 ? { grass: 14 } : { banyan: 0.14, teak: 0.3, date_palm: 0.7, bamboo: 0.3, grass: 20 };   // bare verges, then shade trees along the way
+  if (nearWay(x, z) && x < WAY.x1 + 6) return Math.abs(z) < 9 ? { grass: 14 } : inHouse(x, z, 2.2) || Math.abs(x - WAY.gate) < 2.6 ? null : { banyan: 0.14, teak: 0.3, date_palm: 0.7, bamboo: 0.3, grass: 20 };   // (the lodgings' lots are clear)   // bare verges, then shade trees along the way
   if (r > RADIUS - 6 || r < 100) return r < 100 && r > 75 ? { grass: 30 } : null;
   if (inHouse(x, z, 1.5) || inRect(MONASTERY, x, z, 1)) return null;
   if (nearHamlet(x, z)) return { date_palm: 1.0, bamboo: 0.8, banyan: 0.08, teak: 0.25, grass: 25 };
@@ -62,9 +62,9 @@ export const ground = {
     damp: 0.8,      // the wet tropics: rain streaks down the andesite, moss on the shaded foot of the walls
     wind: [0.2, 0.1],
     weather: [
-      { id: 'morning-mist', weight: 2, clouds: 0.3, cloudDensity: 0.4, sun: 0.7, fog: 3.2, fogColor: [0.8, 0.82, 0.82] },
+      { id: 'morning-mist', weight: 2, clouds: 0.3, cloudDensity: 0.4, sun: 0.7, fog: 2.2, fogColor: [0.8, 0.82, 0.82] },
       { id: 'bright', weight: 3, clouds: 0.35, cloudDensity: 0.45, sun: 1.0, fog: 1 },
-      { id: 'shower', weight: 1.2, clouds: 0.9, cloudDensity: 0.8, sun: 0.35, fog: 2, rain: 0.6 },
+      { id: 'shower', weight: 1.2, clouds: 0.9, cloudDensity: 0.8, sun: 0.4, fog: 1.4, rain: 0.6 },
     ],
   },
 };

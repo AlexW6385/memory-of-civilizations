@@ -4,7 +4,7 @@
 // Euphrates at dawn. The engine part is src/engine/smoke.js (one draw call); positions come from the layout.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, ZIGGURAT, ESAGILA, RIVER, QUAY, lots, yards, riverX, esagilaChambers } from './layout.js';
+import { RADIUS, WAY, ZIGGURAT, ESAGILA, RIVER, QUAY, lots, yards, riverX, esagilaChambers } from './layout.js';
 
 const ID = 'babylon';
 /** The turned frame of a lot (u along its front, v in from it): the W of src/styles/babylonian/shop.js frameOf. */
@@ -43,6 +43,9 @@ export function emitters() {
   // the censers at the foot of the tower's stair (south)
   E.push({ p: [ZIGGURAT.c[0] - 7, 1.4, ZIGGURAT.c[1] + 60], kind: 'incense', thr: 0.15, seed: 14 });
   E.push({ p: [ZIGGURAT.c[0] + 7, 1.4, ZIGGURAT.c[1] + 60], kind: 'incense', thr: 0.15, seed: 15 });
+  // the braziers of the Processional Way, and the incense on the offering tables at the walls' foot before the gate
+  for (const [dx, z] of [[-5, -322], [5, -322], [-5, -266], [5, -266], [-5, -64], [5, -64]]) E.push({ p: [WAY.x + dx, 1.45, z], kind: 'incense', thr: 0.05, seed: Math.floor(z * 3 + dx) });
+  for (const [dx, z] of [[-9.5, -374], [9.5, -350]]) E.push({ p: [WAY.x + dx, 1.2, z], kind: 'incense', thr: 0.1, seed: Math.floor(z * 5 + dx) });
   // the river's mist, along its length
   for (let z = -300; z < 330; z += 34) E.push({ p: [riverX(z), RIVER.level + 0.45, z], kind: 'mist', thr: 0, seed: z + 400 });
   void QUAY;

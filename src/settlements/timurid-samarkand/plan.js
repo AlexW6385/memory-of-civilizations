@@ -2,19 +2,23 @@
 // Beg's madrasa on its west side with its pishtaq, minarets, court and cells (the north-east corner hall a furnished
 // classroom), the khanqah on the east, the rows of shops on the north and south. The other monuments are in town.js.
 
-import { SQUARE, MADRASA, KHANQAH, SHOPS_N, SHOPS_S, marketLayout } from './layout.js';
+import { SQUARE, MADRASA, KHANQAH, SHOPS_N, SHOPS_S, TAPCHANS, marketLayout } from './layout.js';
 
 const E = [];
 E.push({ t: 'tim_madrasa', rect: MADRASA });
 E.push({ t: 'khanqah', rect: KHANQAH.rect });
-E.push({ t: 'shop_row', rect: SHOPS_N, front: 's', unit: 3.6, enter: 8, seed: 14 });
-E.push({ t: 'shop_row', rect: SHOPS_S, front: 'n', unit: 3.6, enter: 17, seed: 15 });
+E.push({ t: 'shop_row', rect: SHOPS_N, front: 's', unit: 3.6, enter: [3, 8, 14, 19, 24], seed: 14 });
+E.push({ t: 'shop_row', rect: SHOPS_S, front: 'n', unit: 3.6, enter: [5, 11, 17, 21, 24], seed: 15 });
 
 // the market on the square: two rows of stalls under awnings, goods spread on mats between them and the shops
 {
   const { stalls, spreads } = marketLayout();
-  E.push({ t: 'tim_market', rect: SQUARE, seed: 5, stalls, spreads });
+  E.push({ t: 'tim_market', rect: SQUARE, seed: 5, stalls, spreads, litter: 260 });
+  for (const [x, z, yaw] of TAPCHANS) E.push({ t: 'tim_tapchan', at: [x, z], yaw, seed: Math.floor(x * 7 + z) });
 }
+// a paved apron of limestone flags before the pishtaq, worn in the middle (the students' and the faithful's way), edged with a kerb of dressed stone
+E.push({ t: 'block', walk: true, rect: [-45, -9, -33, 9], y0: 0, y1: 0.04, mat: 'flagstone' });
+E.push({ t: 'block', walk: true, rect: [-33.3, -9, -33, 9], y0: 0.04, y1: 0.09, mat: 'limestone' });
 const [mx0, mz0, mx1, mz1] = MADRASA, zm = (mz0 + mz1) / 2;
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [

@@ -174,6 +174,18 @@ Euphrates poplar and tamarisk at the banks, date orchards behind them and west o
 
 Upper storeys of the ordinary houses are shut (the open houses are one-storey); houses are boxes of one design with variations in dressing; no moving boats (the round boats stand moored or on the stream); the palace's rooms other than the throne room are solid; Esagila's upper floors and the ziggurat's inner stages are solid (they were solid); the Hanging Gardens remain undecided.
 
+## 14. The Way before the gate (2026-11-12 pass)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| The approach lived in | Between the arrival (z −360) and the gate: sellers on reed mats along both walls with their buyers, a file of seven priests going down to the gate with incense, a loaded ass and its driver, water carriers, pilgrims in twos and threes, boys at knucklebones in the dust, dogs; nothing within 4 m of the arrival | the Processional Way as the road of the New Year festival's procession of the gods [stated: the Akitu festival, worldhistory.org/article/990 and the dossier §4]; sellers by the walls, the dress and the crowd [inferred] |
+| Offering tables and water stands | Beside the standards, at the glazed walls' foot: tables of baked brick under a linen cloth with loaves, a heap of dates, a jar of beer, a lamp and a bitumen-lined basin for libations; the great water jars on their stands, brick seats, a heap of bricks | the offering table with bread, dates and beer as the form of Mesopotamian cult gifts [inferred]; the places [inferred] |
+| What a street collects | Drifts of dust at the walls' foot, straw dropped from loads, potsherds, dung on the paving | [inferred] |
+| Incense | At the Way's braziers and the offering tables | [inferred] |
+| Palms over the walls | Groves of date palm and tamarisk on either hand of the approach outside the inner wall, their crowns rising over the glazed walls | the gardens and orchards outside the city wall [inferred] |
+| More open houses | Furnished houses opened on the lanes beside the Way as far as the gate (up to 12) | [inferred] |
+
+
 ## Sources
 
 - [Etemenanki — Wikipedia](https://en.wikipedia.org/wiki/Etemenanki)

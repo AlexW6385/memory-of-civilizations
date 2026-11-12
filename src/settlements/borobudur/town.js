@@ -1,7 +1,7 @@
 // The hamlets round the monument (docs/settlements/borobudur.md §5): houses on posts in their groves;
 // and the pilgrims on the monument (§10): monks and lay people walking the galleries clockwise,
 // the monument on their right, as the reliefs are read, climbing terrace by terrace.
-import { RADIUS, MONUMENT, SQUARES, CIRCLES, MONASTERY, HAMLETS, houses, inRect, frontVec, wellAt } from './layout.js';
+import { nearArrival, RADIUS, MONUMENT, SQUARES, CIRCLES, MONASTERY, HAMLETS, houses, inRect, frontVec, wellAt } from './layout.js';
 import { villagePlans } from './village.js';
 const base = (id, elements) => ({ id, style: 'javanese', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [90, 0], facing: 'w' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -60,7 +60,8 @@ function pilgrims() {
     const x = 80 + k * 6.5 + rand() * 3, z = (k % 2 ? 1 : -1) * (0.7 + rand() * 0.6), carry = pick(['basket', 'basket', 'pot', 'pole', 'none']);
     L.push({ t: 'figure', at: [x, z], y: 0, rot: faceTo([-1, 0]), seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: pick(['cloth_white', 'cloth_brown', 'cloth_red', 'cloth_indigo']), cloth2: 'cloth_white', skin: pick(['skin_medium', 'skin_dark']), hat: 'none', carry, hair: pick(['bun', 'long', 'short']) });
   }
-  return { ...base('borobudur-pilgrims', L), style: 'life', center: [0, 0], near: 260 };
+  const kept = L.filter((e) => !(e.at && nearArrival(e.at[0], e.at[1])));
+  return { ...base('borobudur-pilgrims', kept), style: 'life', center: [0, 0], near: 260 };
 }
 
 /**
@@ -119,6 +120,6 @@ function yards(hi) {
 export async function town() {
   const plans = [];
   HAMLETS.forEach((h, hi) => plans.push(base(`borobudur-hamlet-${hi}`, houses().filter((q) => q.hamlet === hi).map((q) => ({ t: 'rumah', ...q }))), yards(hi)));
-  plans.push(pilgrims(), monastery(), ...villagePlans());
+  plans.push(base('borobudur-wayhouses', houses().filter((q) => q.hamlet < 0).map((q) => ({ t: 'rumah', ...q }))), pilgrims(), monastery(), ...villagePlans());
   return plans;
 }

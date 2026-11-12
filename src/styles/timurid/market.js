@@ -71,7 +71,39 @@ export function market(el, { bag, col, lights }) {
     else if (kind === 'grain') for (const u of [-0.7, 0, 0.7]) { const p = P(u, 0); F.spiceSacks(bag, p[0], 0.025, p[1], yaw, 2); }
     else for (const u of [-0.7, 0, 0.7]) { const p = P(u, 0.1); basket(bag, p[0], 0.025, p[1], ['cloth_red', 'cloth_ochre', 'cloth_green'][Math.floor(rand() * 3)], 1.1); }
   }
+  // what a market square collects (§15): straw dropped from the loads, rinds of melons, dung, sherds, scraps of cloth, dust in drifts at the stalls' feet
+  if (el.litter) {
+    const [x0, z0, x1, z1] = el.rect, lr = rng((el.seed ?? 5) * 17 + 3), n = el.litter | 0;
+    for (let k = 0; k < n; k++) {
+      const x = x0 + 1 + lr() * (x1 - x0 - 2), z = z0 + 1 + lr() * (z1 - z0 - 2), q = lr(), a = lr() < 0.5;
+      if (q < 0.4) bx(bag, 'thatch', x, 0.02, z, x + (a ? 0.45 : 0.03), 0.035, z + (a ? 0.03 : 0.45));
+      else if (q < 0.55) bx(bag, lr() < 0.5 ? 'cloth_green' : 'cloth_ochre', x, 0.02, z, x + 0.2, 0.045, z + 0.07);
+      else if (q < 0.7) bx(bag, 'mud_plaster', x, 0.02, z, x + 0.14, 0.07, z + 0.13);
+      else if (q < 0.85) bx(bag, 'pebbles', x, 0.02, z, x + 0.08, 0.05, z + 0.07);
+      else bx(bag, CLOTHS[Math.floor(lr() * 6)], x, 0.02, z, x + 0.25, 0.03, z + 0.18);
+    }
+  }
   void lights;
+}
+
+/**
+ * tim_tapchan: a raised platform of the tea-house { at, yaw (the open side's direction), seed }: 3.4 × 2.6 m, 0.65 m up on posts with a low
+ * rail on three sides, a carpet and cushions, a tray table with the bowls and the ewer, a white cloth awning on four poles, steps at the open side.
+ */
+export function tapchan(el, { bag, col }) {
+  const [x, z] = el.at, yaw = el.yaw ?? 0, c = Math.cos(yaw), s = Math.sin(yaw), P = (u, v) => [x + u * c + v * s, z - u * s + v * c], rand = rng(el.seed ?? 1);
+  const W = 3.4, D = 2.6, H = 0.65, R = (u0, v0, u1, v1) => { const a = P(u0, v0), b = P(u1, v1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
+  bag.add('timber', place(box(-W / 2, H - 0.07, -D / 2, W / 2, H, D / 2), x, 0, z, yaw)); col.rect(R(-W / 2, -D / 2, W / 2, D / 2), 0, H);
+  for (const u of [-W / 2 + 0.12, W / 2 - 0.12]) for (const v of [-D / 2 + 0.12, D / 2 - 0.12]) bag.add('wood_dark', place(box(u - 0.06, 0, v - 0.06, u + 0.06, H - 0.07, v + 0.06), x, 0, z, yaw));
+  for (const [u0, v0, u1, v1] of [[-W / 2, -D / 2, W / 2, -D / 2 + 0.05], [-W / 2, -D / 2, -W / 2 + 0.05, D / 2], [W / 2 - 0.05, -D / 2, W / 2, D / 2]]) bag.add('wood_dark', place(box(u0, H, v0, u1, H + 0.3, v1), x, 0, z, yaw));
+  const k = ['persian', 'maroon', 'blue'][Math.floor(rand() * 3)];
+  F.carpet(bag, x, H + 0.002, z, W - 0.3, D - 0.3, yaw, k);
+  for (const [u, v] of [[-1.2, -0.95], [1.2, -0.95], [-1.2, 0.95], [1.2, 0.95], [0, -1.0]]) { const p = P(u, v); F.cushion(bag, p[0], H + 0.02, p[1], 0.5, 0.5, 0.14, yaw + (rand() - 0.5) * 0.4, CLOTHS[Math.floor(rand() * 6)]); }
+  const t = P(0, 0.05); F.trayTable(bag, t[0], H + 0.01, t[1], { seed: Math.floor(rand() * 99) });
+  const e = P(0.7, 0.3); F.ewer(bag, e[0], H + 0.01, e[1], 0.9, yaw, 'bronze'); const b = P(-0.7, 0.3); F.pots(bag, b[0], H + 0.01, b[1], yaw, 3, ['glaze_blue', 'glaze_white', 'glaze_blue']);
+  for (const u of [-W / 2 - 0.1, W / 2 + 0.1]) for (const v of [-D / 2 - 0.1, D / 2 + 0.1]) { const p = P(u, v); bag.add('timber', box(p[0] - 0.045, 0, p[1] - 0.045, p[0] + 0.045, 2.7, p[1] + 0.045)); col.circle(p[0], p[1], 0.06, 0, 2.7); }
+  addCloth(bag, rand() < 0.5 ? 'cloth_white' : 'cloth_ochre', place(clothBox(-W / 2 - 0.35, -0.03, -D / 2 - 0.35, W / 2 + 0.35, 0.03, D / 2 + 0.35, 0.25), x, 2.72, z, yaw), 2.8);
+  bag.add('timber', place(box(-0.9, 0, D / 2, 0.9, 0.3, D / 2 + 0.4), x, 0, z, yaw)); col.rect(R(-0.9, D / 2, 0.9, D / 2 + 0.4), 0, 0.3);
 }
 
 /**

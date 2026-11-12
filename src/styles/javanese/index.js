@@ -840,6 +840,19 @@ function warung(el, ctx) {
   // the bench in front for the buyers
   { const [x, z] = P(W / 2 - 1.1, D / 2 + 0.25); life.bench({ t: 'bench', at: [x, z], y: 0, rot: ({ n: Math.PI, s: 0, e: -Math.PI / 2, w: Math.PI / 2 })[el.face] ?? 0, len: 1.6, mat: 'bamboo_culm', seed: el.seed }, ctx); }
   thatch(bag, F, rand() < 0.6 ? 'thatch_palm' : 'ijuk', W - 0.3, D - 0.2, fl + H, 0.75, { ov: 0.65, th: 0.26, horns: false });
+  // from a bamboo rail under the front eave: bunches of bananas and hanging baskets for the food stalls, strings of flower garlands and lamps for the offerings
+  {
+    const yr = fl + H - 0.22, vr = D / 2 - 0.5;
+    bx('bamboo_culm', -W / 2 + 0.1, vr - 0.03, W / 2 - 0.1, vr + 0.03, yr, yr + 0.06);
+    const m = Math.max(2, Math.floor((W - 0.8) / 1.0));
+    for (let k = 0; k < m; k++) {
+      const u = -W / 2 + 0.5 + (k + 0.5) * (W - 1.0) / m + (rand() - 0.5) * 0.2, [x, z] = P(u, vr), j = (k + (el.seed | 0)) % 3;
+      bag.add('rope_fibre', box(x - 0.008, yr - 0.35, z - 0.008, x + 0.008, yr, z + 0.008));
+      if (food && j !== 2) { for (let b = 0; b < 4; b++) bag.add('glaze_yellow', ellipsoid([x + (b - 1.5) * 0.045, yr - 0.5 - (b % 2) * 0.05, z + (b % 2 ? 0.04 : -0.04)], 0.045, 0.16, 0.045, 6)); bag.add('palm_leaf', ellipsoid([x, yr - 0.3, z], 0.07, 0.05, 0.07, 6)); }
+      else if (food) bag.add('wicker', lathe([[0.001, 0], [0.12, 0.03], [0.16, 0.16], [0.001, 0.18]], 8, null, x, yr - 0.55, z));
+      else { for (let f = 0; f < 6; f++) bag.add(f % 2 ? 'cloth_white' : 'cloth_ochre', ellipsoid([x, yr - 0.1 - f * 0.1, z], 0.05, 0.045, 0.05, 6)); }
+    }
+  }
   // a sign: a pole with a hanging cloth (red for the food, white for the offerings)
   { const u = -W / 2 - 0.15, v = D / 2 - 0.4; bx('bamboo_culm', u - 0.03, v - 0.03, u + 0.03, v + 0.03, 0, 3.0); bx('cloth_ochre', u - 0.02, v - 0.5, u + 0.02, v, 1.9, 2.7); }
 }
@@ -938,8 +951,36 @@ function gamelan(el, ctx) {
   const dr = P(1.0, 1.7); bag.add('timber_red', ellipsoid([dr[0], y + 0.5, dr[1]], 0.26, 0.26, 0.42, 12)); col.circle(dr[0], dr[1], 0.4, y, y + 0.8);
 }
 
+/**
+ * umbul: a pennant pole { at, y, h, rot, seed, cloth } — a bamboo pole leaning a little, a crossbar near the top, long tapering streamers of
+ * cloth hanging from it and stirring to one side, a bronze finial; on a small andesite footing. The pilgrims' way is hung with them.
+ */
+function umbul(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, rand = rng(el.seed || 1), h = el.h ?? 5.2, rot = el.rot ?? 0, c = Math.cos(rot), sn = Math.sin(rot);
+  const lean = (rand() - 0.5) * 0.3, P = (u, v) => [x + c * u + sn * v, z - sn * u + c * v];
+  bag.add(A, box(x - 0.3, y, z - 0.3, x + 0.3, y + 0.22, z + 0.3));
+  const t = []; const top = P(lean, 0); beamTris(t, [x, y + 0.2, z], [top[0], y + h, top[1]], 0.035, 0.035); bag.add('bamboo_culm', fromTriangles(t));
+  const cb = [], yb = y + h - 0.35, e0 = P(lean - 0.5, 0), e1 = P(lean + 0.5, 0); beamTris(cb, [e0[0], yb, e0[1]], [e1[0], yb, e1[1]], 0.02, 0.02); bag.add('bamboo_culm', fromTriangles(cb));
+  bag.add('bronze', ellipsoid([top[0], y + h + 0.07, top[1]], 0.05, 0.1, 0.05, 6));
+  const cl = el.cloth ?? ['cloth_red', 'cloth_white', 'cloth_ochre', 'cloth_indigo'][Math.floor(rand() * 4)];
+  const flag = (u, len, w0, sway, mat) => {
+    const tri = [], n = 7;
+    let prev = null;
+    for (let i = 0; i <= n; i++) {
+      const f = i / n, w = w0 * (1 - 0.85 * f), off = Math.sin(f * 2.6 + u) * sway * f, p = P(lean + u + off, 0), yy = yb - 0.04 - f * len;
+      const a = P(lean + u + off - w / 2, 0), b = P(lean + u + off + w / 2, 0);
+      void p;
+      const cur = [[a[0], yy, a[1]], [b[0], yy, b[1]]];
+      if (prev) { const [a0, b0] = prev, [a1, b1] = cur; tri.push(...a0, ...b0, ...a1, ...b0, ...b1, ...a1, ...a0, ...a1, ...b0, ...b0, ...a1, ...b1); }
+      prev = cur;
+    }
+    bag.add(mat, fromTriangles(tri));
+  };
+  flag(-0.34, h * 0.5, 0.36, 0.14, cl); flag(0, h * 0.62, 0.42, -0.12, cl === 'cloth_white' ? 'cloth_red' : 'cloth_white'); flag(0.34, h * 0.44, 0.34, 0.16, cl);
+  col.circle(x, z, 0.12, y, y + h);
+}
 registerStyle('javanese', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, borobudur, rumah, pendopo, hallfit, pagar, rite, warung, gapura, cetiya, lesung, gubuk, orang, pagarbambu, gamelan },
+  elements: { ...STYLES.qing.elements, borobudur, rumah, pendopo, hallfit, pagar, rite, warung, gapura, cetiya, lesung, gubuk, orang, pagarbambu, gamelan, umbul },
   objects: {},
 });
