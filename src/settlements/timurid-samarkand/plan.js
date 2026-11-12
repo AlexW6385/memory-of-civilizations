@@ -2,7 +2,7 @@
 // Beg's madrasa on its west side with its pishtaq, minarets, court and cells (the north-east corner hall a furnished
 // classroom), the khanqah on the east, the rows of shops on the north and south. The other monuments are in town.js.
 
-import { SQUARE, MADRASA, KHANQAH, SHOPS_N, SHOPS_S } from './layout.js';
+import { SQUARE, MADRASA, KHANQAH, SHOPS_N, SHOPS_S, marketLayout } from './layout.js';
 
 const E = [];
 E.push({ t: 'tim_madrasa', rect: MADRASA });
@@ -12,10 +12,7 @@ E.push({ t: 'shop_row', rect: SHOPS_S, front: 'n', unit: 3.6, enter: 17, seed: 1
 
 // the market on the square: two rows of stalls under awnings, goods spread on mats between them and the shops
 {
-  const kinds = ['melon', 'pots', 'cloth', 'bread', 'copper', 'carpets', 'fruit'], stalls = [], spreads = [];
-  for (let i = 0; i < 16; i++) { const x = -34 + i * 3.9; stalls.push([x, -34, 0, kinds[(i * 3) % 7]], [x + 1.2, 34, Math.PI, kinds[(i * 5 + 2) % 7]]); }
-  const sk = ['melon', 'pots', 'grain', 'fruit', 'melon'];
-  for (let i = 0; i < 10; i++) { spreads.push([-33 + i * 5.2, -26.5, (i % 3) * 0.2, sk[i % 5]], [-31 + i * 5.2, 26.5, Math.PI + (i % 3) * 0.2, sk[(i + 2) % 5]]); }
+  const { stalls, spreads } = marketLayout();
   E.push({ t: 'tim_market', rect: SQUARE, seed: 5, stalls, spreads });
 }
 const [mx0, mz0, mx1, mz1] = MADRASA, zm = (mz0 + mz1) / 2;

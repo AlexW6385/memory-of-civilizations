@@ -43,7 +43,7 @@ export function chamber(fr, o) {
   });
   // the ring from the square to the round drum, the inner drum, the inner dome
   const diag = Math.hypot(hx, hz) + 0.3;
-  bag.add('tile_lapis', lathe([[ir, h], [diag, h]], 28, null, cx, 0, cz));
+  bag.add('tile_lapis', lathe([[ir - 0.45, h], [diag, h]], 28, null, cx, 0, cz));
   bag.add('mosaic_gold', lathe([[ir, h - 0.04], [ir + 0.5, h - 0.04]], 28, null, cx, 0, cz));
   const dh = o.drumH, dh0 = h, ir2 = ir;
   bag.add('plaster_persian', lathe([[ir2, dh0 + dh], [ir2, dh0]], 40, null, cx, 0, cz));

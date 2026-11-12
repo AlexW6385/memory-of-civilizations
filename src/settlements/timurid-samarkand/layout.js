@@ -116,3 +116,11 @@ export function houseGeom(h) {
 }
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 export const built = (x, z, m = 0) => blocked(x, z, m) || inHouse(x, z, m);
+
+/** The Registan's market: stalls [x, z, yaw (the front's direction), kind] in two rows under the shops, goods spread on mats between. */
+export function marketLayout() {
+  const kinds = ['melon', 'pots', 'cloth', 'bread', 'copper', 'carpets', 'fruit'], stalls = [], spreads = [], sk = ['melon', 'pots', 'grain', 'fruit', 'melon'];
+  for (let i = 0; i < 16; i++) stalls.push([-34 + i * 3.9, -34, 0, kinds[(i * 3) % 7]], [-34 + i * 3.9 + 1.2, 34, Math.PI, kinds[(i * 5 + 2) % 7]]);
+  for (let i = 0; i < 10; i++) spreads.push([-33 + i * 5.2, -26.5, (i % 3) * 0.2, sk[i % 5]], [-31 + i * 5.2, 26.5, Math.PI + (i % 3) * 0.2, sk[(i + 2) % 5]]);
+  return { stalls, spreads };
+}
