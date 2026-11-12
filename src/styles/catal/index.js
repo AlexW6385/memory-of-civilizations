@@ -71,6 +71,14 @@ function quarter(el, { bag, col, lights }) {
       else if (q < 0.78) { dome(bag, 'cloth_ochre', qx + 0.4, ty, qz + 0.3, 0.45, 0.3, 1.2, 1, rand() * 3, 0.1); basket(bag, qx + 1.2, ty, qz + 0.3, 0.2); }
       else if (q < 0.9) { bag.add('wicker', lathe([[0.3, 0], [0.34, 0.12], [0.3, 0.14], [0.001, 0.03]], 9, null, qx + 0.3, ty, qz + 0.3)); bag.add(LOG, rod([qx + 0.7, ty, qz], [qx + 1.4, ty + 0.01, qz + 0.5], 0.02, 4)); }
     }
+    // a third thing, at the roof's far corner: a drying rack of strips of meat and hide, sheaves of emmer stood up, a mat of lentils and a quern, a stack of pots, a lean-to of reed over a sleeping place
+    {
+      const wx = x1 - 1.2 - rand() * 0.5, wz = hz < cz ? z1 - 0.8 : z0 + 0.8, q = rand();
+      if (q < 0.2) { for (const a of [0, 1.4]) bag.add(LOG, rod([wx + a - 1.0, ty, wz], [wx + a - 1.0, ty + 1.15, wz], 0.03, 4)); bag.add(LOG, rod([wx - 1.0, ty + 1.12, wz], [wx + 0.4, ty + 1.12, wz], 0.025, 4)); for (let a = 0; a < 5; a++) bag.add(a % 2 ? 'hide_brown' : 'hide_tan', box(wx - 0.9 + a * 0.28, ty + 0.55, wz - 0.015, wx - 0.74 + a * 0.28, ty + 1.1, wz + 0.015)); }
+      else if (q < 0.4) { for (let a = 0; a < 6; a++) { const bx = wx - 0.2 + (a % 3) * 0.2, bz = wz + Math.floor(a / 3) * 0.2; bag.add('thatch', lathe([[0.001, 0], [0.09, 0.04], [0.075, 0.6], [0.04, 0.78], [0.001, 0.8]], 7, null, bx, ty, bz)); } bag.add(LOG, rod([wx - 0.3, ty + 0.38, wz + 0.1], [wx + 0.4, ty + 0.4, wz + 0.1], 0.012, 4)); }
+      else if (q < 0.55) { bag.add('reed_mat', box(wx - 0.8, ty, wz - 0.4, wx + 0.1, ty + 0.02, wz + 0.4)); bag.add('sandstone', lathe([[0.001, 0], [0.26, 0.02], [0.28, 0.07], [0.001, 0.09]], 8, null, wx - 0.35, ty + 0.02, wz)); for (let a = 0; a < 5; a++) bag.add('banco', lathe([[0.001, 0], [0.05, 0.02], [0.001, 0.05]], 5, null, wx - 0.7 + a * 0.12, ty + 0.02, wz + 0.3)); }
+      else if (q < 0.7) { jar(bag, wx, ty, wz, 1.0); jar(bag, wx - 0.4, ty, wz + 0.05, 0.85, 'pottery_dark'); jar(bag, wx - 0.2, ty, wz - 0.4, 0.9); basket(bag, wx + 0.4, ty, wz, 0.2, 'cloth_ochre'); }
+    }
     // a ladder up from the ground on some houses at the edge of the town
     const free = (di, dj) => !topAt(i + di, j + dj) && K[i + di]?.[j + dj] !== 'c' && K[i + di]?.[j + dj] !== 'm';
     for (const [di, dj, side] of [[1, 0, 's'], [-1, 0, 'n'], [0, 1, 'e'], [0, -1, 'w']]) {
