@@ -27,6 +27,8 @@ export function extras() {
   }
   E.push({ t: 'rest_house', rect: [-20, 17, -3, 26], plinth: 0.7, h: 3.2 });
   E.push(...laneRites());
+  // the forecourt before Kandariya's stair, flagged in sandstone between the lane's end and the flight (a flush slab: it reads as stone, not earth, from the lane)
+  E.push({ t: 'block', rect: [-33.2, -66.4, -24.4, -53.6], y0: -0.3, y1: 0.03, mat: 'sandstone_floor', walk: true });
   // the ghat: steps down the tank's north bank, their tops following the ground, a landing at each end with a kiosk
   const cx = TANK.c[0], rz = TANK.r[1], steps = 7;
   for (const [xa, xb] of [[cx - 4, cx + 4], [cx - 22, cx - 17], [cx + 17, cx + 22]]) {
