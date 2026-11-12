@@ -3,6 +3,7 @@ import '../../styles/greek/ward.js';
 import { RADIUS, lots, pathAt, WAY, RAMP, inRect, SLOPE, AGORA } from './layout.js';
 import { TRADES } from '../../styles/greek/shops.js';
 import { SIMON, lifePlan } from './life.js';
+import { summitLife } from './summit.js';
 import { fronts, crossings, openLife } from './fronts.js';
 import { WORKSHOPS, FOUNTAIN, SHOPROW, ACADEMY, PALAESTRA, XYSTOS, PARADROMIS, GATE, ALTAR_PROMETHEUS, HEROON, EXEDRA, ACADEMY_PATHS } from './quarters.js';
 const base = (id, elements) => ({ id, style: 'greek', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-300, 70], facing: 'e' } });
@@ -43,6 +44,7 @@ export async function town() {
   { const { herms, wells } = crossings();
     plans.push(base('athens-herms', herms.map((h) => ({ t: 'herm', ...h }))));
     plans.push({ ...lifePlan(), id: 'athens-fronts', elements: [...fronts(), ...wells, ...openLife()] }); }
+  plans.push({ ...lifePlan(), id: 'athens-summit-life', elements: summitLife() });
   plans.push(lifePlan());
   return plans;
 }

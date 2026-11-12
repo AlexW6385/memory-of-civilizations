@@ -1,0 +1,68 @@
+// The Acropolis' east terrace about 410 BC (docs/settlements/athens.md §4g): the great altar of Athena before the Parthenon's east front, where the
+// hecatomb of the Panathenaia was burnt (Pausanias 1.24.5 puts the altar of Athena before the temple, to the east); the people at it — priest, the basket-bearer
+// and the garlanded ox led up, the flute-player, worshippers, women with their hydriai, children, pigeons on the paving — and the goods of a feast day.
+// Elements for the greek style (the altar) and for the life style (people, jars, wood). y = the summit's paving.
+
+import { ACRO } from './layout.js';
+
+const T = ACRO.top, Y = T + 0.04;
+export const ALTAR = { x0: 70, z0: 16.4, x1: 76, z1: 19.6 };
+
+/** The altar: two low steps, the block of marble, the slab with its burnt top; a kerb of limestone paving about it. */
+export function summitAltar() {
+  const { x0, z0, x1, z1 } = ALTAR, E = [];
+  E.push({ t: 'block', rect: [x0 - 3.4, z0 - 3.0, x1 + 3.4, z1 + 3.0], y0: Y - 0.4, y1: Y + 0.06, mat: 'limestone', walk: true });
+  E.push({ t: 'block', rect: [x0 - 1.4, z0 - 1.2, x1 + 1.4, z1 + 1.2], y0: Y + 0.06, y1: Y + 0.36, mat: 'marble', walk: true });
+  E.push({ t: 'block', rect: [x0 - 0.7, z0 - 0.6, x1 + 0.7, z1 + 0.6], y0: Y + 0.36, y1: Y + 0.66, mat: 'marble', walk: true });
+  E.push({ t: 'block', rect: [x0, z0, x1, z1], y0: Y + 0.66, y1: Y + 1.52, mat: 'marble' });
+  E.push({ t: 'block', rect: [x0 - 0.2, z0 - 0.2, x1 + 0.2, z1 + 0.2], y0: Y + 1.52, y1: Y + 1.64, mat: 'marble' });
+  E.push({ t: 'block', rect: [x0 + 0.5, z0 + 0.4, x1 - 0.5, z1 - 0.4], y0: Y + 1.64, y1: Y + 1.69, mat: 'basalt', collide: false });          // the ash and char of the burnt thighs
+  // the horns of the altar's corners, and a row of stelae with the decrees and the lists of the treasurers along the temple's flank
+  for (const [x, z] of [[x0 - 0.1, z0 - 0.1], [x1 + 0.1, z0 - 0.1], [x0 - 0.1, z1 + 0.1], [x1 + 0.1, z1 + 0.1]]) E.push({ t: 'block', rect: [x - 0.14, z - 0.14, x + 0.14, z + 0.14], y0: Y + 1.64, y1: Y + 1.9, mat: 'marble', collide: false });
+  for (const [x, z, h, yaw] of [[58.5, 2.2, 2.6, Math.PI / 2], [58.5, 3.8, 1.9, Math.PI / 2], [58.5, 33.6, 2.8, Math.PI / 2], [58.5, 35.2, 2.0, Math.PI / 2], [64, 38.6, 1.7, 0], [80.5, 11.6, 2.3, Math.PI / 2], [82.5, 12.4, 1.6, Math.PI / 2]]) E.push({ t: 'votive', kind: 'stele', at: [x, z], y: Y, yaw, h, w: h > 2.2 ? 0.8 : 0.6 });
+  for (const [x, z] of [[62, 5.5], [79.5, 27.5], [66, 30.4]]) E.push({ t: 'votive', kind: 'tripod', at: [x, z], y: Y });
+  return E;
+}
+
+/** The people and the goods (life style). */
+export function summitLife() {
+  let s = 4101; const rand = () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296), seed = () => Math.floor(rand() * 1e9);
+  const L = [], pick = (a) => a[Math.floor(rand() * a.length)];
+  const man = (at, rot, o = {}) => L.push({ t: 'figure', at, y: Y, rot, seed: seed(), skin: 'skin_medium', dress: 'robe', cloth: pick(['cloth_white', 'linen', 'cloth_ochre']), cloth2: pick(['cloth_white', 'cloth_brown', 'cloth_indigo', 'cloth_red']), over: 'cloak', hair: 'short', beard: 1, hat: 'none', pose: 'stand', ...o });
+  const woman = (at, rot, o = {}) => L.push({ t: 'figure', at, y: Y, rot, seed: seed(), skin: 'skin_light', dress: 'robe', cloth: pick(['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white']), cloth2: 'cloth_white', over: 'shawl', hair: 'bun', hat: rand() < 0.4 ? 'veil' : 'none', pose: 'stand', ...o });
+  const boy = (at, rot, o = {}) => L.push({ t: 'figure', at, y: Y, rot, seed: seed(), skin: 'skin_medium', dress: 'tunic', legs: 'bare', cloth: 'linen', over: 'none', hair: 'short', beard: 0, hat: 'none', feet: 'bare', pose: 'stand', child: true, h: 1.15, ...o });
+  const slave = (at, rot, o = {}) => L.push({ t: 'figure', at, y: Y, rot, seed: seed(), skin: 'skin_medium', dress: 'tunic', legs: 'bare', cloth: pick(['cloth_brown', 'cloth_grey', 'linen']), over: 'belt', hair: 'short', beard: 0.4, hat: 'none', feet: 'bare', pose: 'stand', ...o });
+  const put = (t, x, z, rot = 0, o = {}) => L.push({ t, at: [x, z], y: Y, rot, seed: seed(), ...o });
+  const E = Math.PI / 2, W = -Math.PI / 2, N = 0, S = Math.PI;
+  const { x0, z0, x1, z1 } = ALTAR, zm = (z0 + z1) / 2;
+  // the sacrifice: the priest at the altar's south side, the basket-bearer and the boy with the water, the garlanded ox led up from the temple with its herdsman,
+  // the flute-player cross-legged on the paving, a slave with the knife-box and the barley
+  man([x0 + 2.2, z1 + 1.9], N, { pose: 'pray', cloth: 'cloth_white', cloth2: 'cloth_white', beard: 1 });
+  woman([x0 - 3.6, zm + 1.6], E, { carry: 'basket', cloth: 'cloth_white', cloth2: 'cloth_ochre', hat: 'none', arms: 'head' });
+  boy([x0 - 4.8, zm + 2.2], E, { carry: 'pot', arms: 'head' });
+  put('animal', x0 - 5.6, zm - 0.9, E, { kind: 'ox', seed: 77, gear: false });
+  slave([x0 - 6.9, zm - 1.9], E, { carry: 'staff', pose: 'staff', len: 1.7 });
+  man([x0 + 3.4, z1 + 4.0], N, { pose: 'flute', dress: 'robe', cloth: 'cloth_ochre', hair: 'short', beard: 0.3 });
+  slave([x1 + 2.6, zm - 0.6], W, { carry: 'basket', cloth: 'cloth_brown' });
+  // the citizens and their wives about the altar and across the terrace: in talk, praying, watching; children running between
+  const spots = [[64, 12.5, N], [66.4, 14.3, E], [81.6, 20.4, W], [79.4, 23.6, W], [62.2, 24.4, E], [60.6, 21.0, E], [83.4, 15.6, W], [74.2, 26.8, N], [68, 28.2, N], [77.6, 30.6, W], [72, 34.6, N], [64.8, 33.2, E], [82.6, 28.6, W], [59.4, 12.8, E], [85.8, 22.4, W], [70.4, 11.2, S]];
+  spots.forEach(([x, z, r], k) => {
+    const j = rand();
+    if (j < 0.4) man([x, z], r + (rand() - 0.5) * 0.7, rand() < 0.5 ? { pose: 'talk' } : rand() < 0.3 ? { pose: 'pray' } : {});
+    else if (j < 0.7) woman([x, z], r + (rand() - 0.5) * 0.6, rand() < 0.4 ? { carry: 'pot', arms: 'head' } : {});
+    else if (j < 0.85) boy([x, z], r + (rand() - 0.5) * 1.6);
+    else slave([x, z], r + (rand() - 0.5) * 0.7, { carry: rand() < 0.5 ? 'sack' : 'basket' });
+    if (k % 3 === 0) man([x + 1.1, z + 0.35], r + 2.8, { pose: 'talk', cloth: 'cloth_grey' });
+  });
+  // the stelae's readers, two men before the treasurers' lists
+  man([60.2, 3.0], W, { pose: 'talk' }); man([60.4, 4.5], W, { pose: 'talk', cloth: 'cloth_grey' });
+  // the feast day's goods: a table for the offerings by the altar's west step, wood for the fire, the lustral basin, jars and baskets, barley sacks, pigeons on the paving
+  put('bench', x0 - 2.4, z0 - 2.0, N, { len: 2.4, mat: 'marble' }); put('pot', x0 - 2.9, z0 - 2.0, 0, { kind: 'amphora', n: 2 }); put('pot', x0 - 1.5, z0 - 2.1, 0, { kind: 'water_pot', n: 3 });
+  put('firewood', x1 + 3.4, z0 - 1.0, N, { len: 1.8 }); put('firewood', x1 + 3.4, z0 - 0.3, N, { len: 1.6 });
+  put('trough', x1 + 4.8, z1 + 1.6, 0, { mat: 'marble' });
+  put('basket', x0 - 4.2, z1 + 1.1, 0, { n: 3 }); put('sacks', x1 + 2.9, z1 + 2.6, 0.4, { n: 3 }); put('pot', x1 + 1.8, z1 + 3.4, 0, { kind: 'pithos', n: 1 });
+  put('stool', x0 + 3.9, z1 + 3.0, 0, {});
+  put('pot', 66.5, 6.2, 0, { kind: 'amphora', n: 2 }); put('pot', 80, 31.8, 0, { kind: 'water_pot', n: 2 });
+  put('chickens', 61.4, 29.2, 0.4, { kind: 'pigeon', n: 6 }); put('chickens', 75.2, 24.4, 2.0, { kind: 'pigeon', n: 5 }); put('chickens', 83.4, 18.8, 4.0, { kind: 'pigeon', n: 6 }); put('chickens', 63.5, 15.5, 1.0, { kind: 'pigeon', n: 5 });
+  return L;
+}
