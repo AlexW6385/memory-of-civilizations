@@ -17,7 +17,7 @@ function vnoise(x, z) {
 /** The terraces' profile along z: [z, y], flat on the rows of compounds, ramps across the lanes between them. */
 const TERR = [[44, 0], [31, 1.2], [21, 1.2], [11.5, 4.3], [0.5, 4.3], [-6.5, 6.8], [-16.5, 6.8], [-22.5, 9.2], [-32.5, 9.2], [-40, 11.1], [-46, 12.2]];
 export const PLACE_Y = 1.2;
-export const CLIFF_Z = -46, CLIFF_H = 46;
+export const CLIFF_Z = -46, CLIFF_H = 9;      // the terrain keeps only a low rocky shelf at the foot (the rim clamp below cannot hold a tall cliff); the escarpment itself is the built wall (cliff.js, wallFace/wallTop below)
 function terraceY(z) {
   if (z >= TERR[0][0]) return 0;
   if (z <= TERR[TERR.length - 1][0]) return TERR[TERR.length - 1][1];
@@ -53,12 +53,27 @@ export function height(x, z) {
   const lim = Math.max(0, RADIUS - 1 - r) * 0.9;
   return Math.max(-lim, Math.min(lim, h * (1 - smooth(70, RADIUS, r))));
 }
-/** z on the cliff's face (x) at height y (m), found by search from the foot inward. */
+/** z on the terrain shelf's face (x) at height y (m), found by search from the foot inward. */
 export function faceZ(x, y) {
   let lo = cliffFoot(x) + 4, hi = cliffFoot(x) - 16;
   for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (height(x, m) < y) lo = m; else hi = m; }
   return (lo + hi) / 2;
 }
+
+// ── the escarpment: a built wall of sandstone strata behind the village's plateau (cliff.js), 36 m above the plateau at the middle,
+// sinking into the ground toward both ends before the rim. Its face line z(x); the alcoves of the Tellem dwellings cut into it.
+export const WALL_DX = 2, WALL_DY = 1.2, WALL_X = 66;
+export const wallFace = (x) => -58 - 2.2 * Math.sin(x / 13 + 0.7) - 1.2 * Math.sin(x / 5.1 + 1) + 0.0035 * x * x * 0.5;
+export const wallBase = (x) => height(x, wallFace(x));
+export const wallTop = (x) => wallBase(x) + (34 + 5 * Math.sin(x / 9 + 2) + 3 * Math.sin(x / 3.7)) * (1 - smooth(26, 72, Math.abs(x))) + 1.5;
+/** The strata: hard bands stand proud of the soft ones. */
+export const strata = (y) => (Math.floor(y / 3.6) % 3 === 1 ? 0.55 : 0) + 0.25 * Math.sin(y * 1.7);
+export const wallZ = (x, y) => wallFace(x) + strata(y) * 0.5 - 0.45 * Math.sin(x * 0.9 + y * 0.35) * Math.min(1, (y - wallBase(x)) / 4);
+/** The ledges of the Tellem: alcoves cut into the face — x of the middle (a multiple of 2), width (multiple of 2), y of the floor (a multiple of 1.2), 5 rows (6 m) high. */
+export const LEDGES = [
+  { x: -16, w: 12, y: 8 * 1.2 + 14.4 }, { x: 14, w: 10, y: 9 * 1.2 + 14.4 }, { x: -2, w: 12, y: 15 * 1.2 + 14.4 }, { x: -30, w: 8, y: 6 * 1.2 + 14.4 },
+  { x: 34, w: 8, y: 6 * 1.2 + 14.4 }, { x: 4, w: 8, y: 6 * 1.2 + 14.4 },
+];
 
 // ── the compounds ────────────────────────────────────────────────────────
 const ROWS = [
@@ -90,6 +105,13 @@ export const COMPOUNDS = [];
   L.landmark = true;
   // a compound or two of the plainer, older kind (smooth facades)
   COMPOUNDS.forEach((c, n) => { if (!c.landmark && n % 4 === 1) c.ginna = 'plain'; });
+  // the compounds whose ginna is opened to walk into (the nearest of rows C and B, the middle of row A): the house on the pad's west
+  // part (hw) or its east part, the courtyard beside it
+  COMPOUNDS.forEach((c) => {
+    const cx = (c.rect[0] + c.rect[2]) / 2;
+    c.hw = c.landmark ? true : c.seed % 2 === 0;
+    c.open = c.landmark || (c.row !== 'A' && Math.abs(cx) <= 34) || (c.row === 'A' && Math.abs(cx) <= 20);
+  });
 }
 export const LANDMARK = COMPOUNDS.find((c) => c.landmark);
 /** The toguna and its place. */
@@ -98,15 +120,20 @@ export const PLACE = [-26, 14, 24, 33];
 /** The village's pads, the lanes between them, the place: where nothing grows. */
 export const inCompound = (x, z, m = 0) => COMPOUNDS.some((c) => inRect(c.rect, x, z, m));
 export const VILLAGE = [-68, -42, 68, 13];
-export const inVillage = (x, z, m = 0) => inRect(VILLAGE, x, z, m) || inRect(PLACE, x, z, m);
+/** The open places and trades round the place: the shade trees, the forge, the dyers, the threshing floors, the pens (all on the flat at y = PLACE_Y). */
+export const SHADE = [{ at: [15.5, 23.5], r: 0.66, h: 5.6, seed: 3 }, { at: [-24.5, 22.8], r: 0.6, h: 5.2, seed: 8 }, { at: [38.5, 24.5], r: 0.62, h: 5.4, seed: 12 }, { at: [-37.5, 30.5], r: 0.58, h: 5.0, seed: 15 }];
+export const FORGE = { at: [-44.5, 29.5], seed: 7 };
+export const DYE = { at: [19.5, 29.2], seed: 9 };
+export const THRESH = [{ at: [-19.5, 27.2], r: 3.0, seed: 3 }, { at: [31.5, 27.5], r: 3.1, seed: 5 }];
+export const PENS = [{ at: [-34, 25], r: 3.2, seed: 4, gap: 2 }, { at: [46.5, 28], r: 2.8, seed: 6, gap: 9 }];
+const EXTRA = [[-52, 17, -28, 34], [25, 17, 52, 34]];
+export const inVillage = (x, z, m = 0) => inRect(VILLAGE, x, z, m) || inRect(PLACE, x, z, m) || EXTRA.some((r) => inRect(r, x, z, m));
 /** Punulu (the menstruation huts, round) at the village's edges. */
 export const PUNULU = [[-61, 19], [58, 17], [-55, -38]];
 /** Altars: conical Lébé altars at the lanes' ends and the binu shrine. */
 export const ALTARS = [
   { at: [-12.2, 13.4], kind: 'cone' }, { at: [0, -3.6], kind: 'binu' }, { at: [13.2, 15], kind: 'cone' }, { at: [0.2, -19.6], kind: 'cone' },
 ];
-/** The ledges of the Tellem: x centre, width, ledge height. */
-export const LEDGES = [{ x: -16, w: 14, y: 27.5 }, { x: 14, w: 11, y: 28.5 }, { x: -2, w: 13, y: 43 }, { x: -30, w: 8, y: 41 }];
 /** The baobabs. */
 export const BAOBABS = [{ at: [-34, 41], r: 2.3 }, { at: [46, 28], r: 1.8 }, { at: [66, 6], r: 2.0 }];
 /** The millet fields on the plain. */
