@@ -67,9 +67,26 @@ Palisades of close-set split posts with taller carved posts (red ochre); fightin
 - **Living systems**: walkers (`movers.js`) in kilt of flax strands, cloaks of fibre and dog skin, women in wrap and shawl, bare feet, kete on the head, men with a pole of fish, elders, children, men with the taiaha; ways up the path, round each terrace, the foot, the shore and the gardens [inferred from Cook/Banks/Parkinson 1769 as in §4a]. Smoke: hearths, the summit's hāngī, vents, lake mist. Fauna: eels and fish in the shallows, welcome swallows, a white heron and an egret on the shore; no crows or sparrows, which came with Europeans [stated: Te Ara "Birds"; the egret stands for the kōtuku].
 - Sources added: [Māori housing — Te Ara](https://teara.govt.nz/en/maori-housing-te-noho-whare/print), [Whakarewarewa geothermal meals](https://whakarewarewa.com/experiences-traditional-food/).
 
+## 4e. Fifth pass: the pā filled — houses by footprint, doors you can walk through, household things, trees, the way in
+
+Brought toward the Suzhou standard (docs/suzhou-method.md). What was below it: about 90 houses, sparse on the terraces and scattered on the flat; every common house solid (its 0.64 m door too narrow for the walker, its inside shut under a roof the walker could not stand in); bare fronts; no trees but flax; one canoe party; few people at the arrival.
+
+- **Number and grouping.** Missionaries recorded pā with one or two hundred houses [stated: ruapekapeka.co.nz, §1]; now about 195 houses, 75 pātaka and 70 pits. On the terraces the houses stand in two rows along each ring, their doors toward the summit, each laid by its true footprint with its porch yard; outside the ditch the kāinga is grouped in about twenty whānau compounds, three to six houses round one yard with its cooking place (hāngī), a pātaka and a pit at its rim [inferred: the grouping, from the open-village pattern in Te Ara "Māori housing" and from the household work of §4b].
+- **Walking in.** The door is now 0.95 m (was 0.64 m, after the doorway recorded as low and narrow, Te Ara "Māori architecture") so that a visitor can enter; the inside of the thatch has an underlay so that the roof is a ceiling over the space [inferred: a compromise for the walker; the historical door was smaller]. The headmen's houses (rank 1) are furnished like the common ones; the chief's house has, besides the carved walls, sleeping places with folded cloaks, a carved box (waka huia) on its stand, dog-skin cloaks on pegs, a taiaha on the back wall and kete hung from the rafters [inferred; sleeping places down both sides, Te Ara].
+- **Household things at every front** (`yard`): firewood stacked against stakes; a line between two posts with cloaks of flax fibre drying, their borders of taniko in black; kete of kūmara and fern root and a wooden bowl; gourds (hue) on the ground and on a stake; an adze leaning on a stump with a beating stone and bundles of fern root; strung fish on a small gallows; a windbreak of reed between stakes (pākaru); a mat with bowl, kete and carved box [stated: dried fish on racks, Te Ara "Drying fish"; kete, §4b; inferred: the forms and places].
+- **Wall materials.** Walls of raupō, toetoe or nīkau [stated: Te Ara, §4a]: about two houses in five have the paler woven wall (`reed_mat` stands in for toetoe/nīkau), the rest raupō.
+- **Trees.** Cabbage trees (tī kōuka, Cordyline australis) and tree ferns (ponga) drawn at 3–7 m and 1.6–5 m: a stout pale trunk forking into a few limbs, each with a drooping head of strap leaves; a slender dark trunk with a crown of arching fronds. Cabbage trees along the lake shore, round the compounds and lining the way in; tree ferns behind the compounds, along the ditch's bank and on the terraces' scarps with flax [stated: both are native to the North Island; inferred: their places — a search of Te Ara pages found no statement of their siting in a pā].
+- **Carved posts** (`pou`): four on the marae ātea and two pairs on the path where it comes through the gardens, red ochre with a figure at the head [inferred from the pou whakarae of §4a and the boundary posts known from ethnography].
+- **The way in.** One arrives at the gardens' end; the clear corridor through the plots (x −11…10) now has four gardeners' huts facing the path, a fish rack and a store, cabbage trees along both sides, gardeners squatting at their plots in the lanes between them, two men and a kurī by the path [inferred; gardeners' huts: temporary shelters at the gardens are recorded for kūmara growing, Te Ara "Kūmara"].
+- **Terraces and compounds, people.** A person at about every third door on the terraces, a cooking place on some, women and children at each compound's yard, a man at work, a dog [inferred].
+- **The lake.** Four canoes out on the water, three small fishing canoes with two paddlers each and a waka taua with eight seated; drawn up on the shore the six already there [inferred: the numbers; Parkinson's engraving §4a for the waka taua].
+- **Ground.** Trodden bare earth round every house and across each yard, the grass between [inferred]. Planting keeps off it.
+- **Fauna.** More fish in the shallows, swallows over the gardens and each kāinga, three herons and egrets by the shore (kōtuku, §4d).
+- **Sound.** The chief's house is a hall room (voices, flute with reverberation); the summit and the rest open.
+
 ## 5. The town
 
-About 130 houses, a dozen pātaka and the pits, on the terraces and in the kāinga. [inferred; within the range recorded]
+About 195 houses, 75 pātaka and 70 pits: on the terraces in two rows along each ring, and in the kāinga in whānau compounds. [inferred; within the range recorded]
 
 ## 6. Ground and water
 
@@ -107,3 +124,4 @@ Waiata (sung chant), the kōauau and pūtōrino flutes, the pūkāea trumpet. [i
 - [Maori art (1966) — Te Ara](https://teara.govt.nz/en/1966/maori-art/page-5)
 - [Te hopu tuna — eeling — Te Ara](https://teara.govt.nz/en/te-hopu-tuna-eeling/page-3)
 - [Kurī — Polynesian dogs — Te Ara](https://teara.govt.nz/en/kuri-polynesian-dogs/print)
+- [Horticultural use of native plants — Te Ara](https://teara.govt.nz/en/node/8349)
