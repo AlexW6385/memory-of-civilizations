@@ -34,7 +34,7 @@ export function courtLife() {
   // the tall glazed jars (tinajas) at the piers of both porticoes and at the south door; water jars and a bench in the corners of the court
   for (const x of [mx0 + 1.4, mx1 - 1.4]) for (const z of [mz0 + 0.9, mz1 - 0.9]) L.push({ t: 'pot', kind: 'glazed_jar', at: [x, z], y: T, rot: 0, n: 1, seed: seed++ });
   L.push({ t: 'pot', kind: 'water_pot', at: [mx0 + 1.2, mz1 - 3.0], y: T, rot: 0, n: 2, seed: seed++ }, { t: 'pot', kind: 'water_pot', at: [mx1 - 1.2, mz0 + 3.2], y: T, rot: 0, n: 2, seed: seed++ });
-  L.push({ t: 'bench', at: [mx0 + 0.9, mz0 + 16], y: T, rot: Math.PI / 2, len: 1.8, back: false, mat: 'marble' });
+  L.push({ t: 'bench', at: [mx0 + 0.9, mz0 + 16], y: T, rot: -Math.PI / 2, len: 1.8, back: false, mat: 'marble' });
   // doves on the kerb and the tiles, a cat asleep in the sun by the south fountain, sparrows at the water
   L.push({ t: 'chickens', kind: 'pigeon', at: [cx + 4.9, mz0 + 14], y: T, n: 5, seed: 51 }, { t: 'chickens', kind: 'pigeon', at: [cx - 5.3, mz0 + 26], y: T, n: 4, seed: 53 });
   L.push({ t: 'animal', kind: 'cat', at: [cx + 5.0, mz1 - 6], y: T, rot: 2.1, seed: 57, pose: 'lie' });

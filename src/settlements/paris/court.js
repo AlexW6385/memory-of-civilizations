@@ -55,12 +55,12 @@ export function courtLife() {
   mer.forEach((g, i) => {
     const x = -258 + i * 11.5, z = -40.6;
     L.push({ t: 'stall', at: [x, z], y: y0, rot: 0, goods: g, awning: aw[i], w: 2.4, d: 1.3, seed: 70 + i });
-    fig([x, z - 1.05], 0, { pose: 'stand', over: 'sash', hat: pick(['cap', 'brim']) });
+    fig([x, z - 1.05], Math.PI, { pose: 'stand', over: 'sash', hat: pick(['cap', 'brim']) });
     for (let k = 0; k < 1 + (i % 2); k++) { const a = [x + (rand() - 0.5) * 1.6, z + 1.9 + rand() * 0.8]; fig(a, face(a, [x, z]), { pose: rand() < 0.5 ? 'talk' : 'stand', carry: rand() < 0.35 ? 'basket' : 'none' }); }
   });
   // clerks and advocates in black on the bench by the hall's stair, waiting for their cause to be called
   for (const bx of [-250, -243]) L.push({ t: 'bench', at: [bx, -38.4], y: y0, rot: Math.PI, len: 2.0, back: true });
-  for (const [x, z] of [[-250.5, -38.5], [-249.6, -38.5], [-243.4, -38.5]]) fig([x, z], 0, { pose: 'sit', dress: 'robe', cloth: 'cloth_black', cloth2: 'cloth_grey', hat: 'cap', hatMat: 'cloth_black', over: 'cape', hair: 'short' });
+  for (const [x, z] of [[-250.5, -38.5], [-249.6, -38.5], [-243.4, -38.5]]) fig([x, z], Math.PI, { pose: 'sit', dress: 'robe', cloth: 'cloth_black', cloth2: 'cloth_grey', hat: 'cap', hatMat: 'cloth_black', over: 'cape', hair: 'short' });
   // horses at the rails with their grooms, a mounted party's mounts; the groom feeding from a bag
   for (const [x, z, r] of [[-232, 15.6, 0], [-176, 15.4, 0]]) {
     L.push({ t: 'animal', kind: 'horse', at: [x - 0.6, z + 0.55], y: y0, rot: -Math.PI / 2 + (r ? 0.1 : -0.1), seed: Math.floor(Math.abs(x)), gear: true });
@@ -77,6 +77,29 @@ export function courtLife() {
   // pigeons on the paving by the May tree and the well, dogs at the stalls, a cat under the stair
   L.push({ t: 'chickens', kind: 'pigeon', at: [-241, 14], y: y0, n: 7, seed: 31 }, { t: 'chickens', kind: 'pigeon', at: [-226, -34], y: y0, n: 5, seed: 33 });
   L.push({ t: 'animal', kind: 'dog', at: [-246.5, -37.2], y: y0, rot: 1.0, seed: 41, pose: 'lie' }, { t: 'animal', kind: 'dog', at: [-216, 4], y: y0, rot: 2.2, seed: 43 });
+  // inside the chapel: in the lower chapel (the servants' and parishioners' church of the palace) a chaplain at the altar in his surplice, women kneeling
+  // in the nave and a clerk in the aisle; in the upper chapel (the king's) a canon of the chapel at the altar, visitors looking up at the glass, a pilgrim kneeling
+  // before the tribune of the relics. Chapel-local coordinates (x along the nave from the porch, z across) turned to the world.
+  const C = (lx, lz) => [OX + lx, OZ + lz], LY = y0 + 0.15, UY = y0 + 7.6;
+  const at = (lx, lz, y, to, o) => { const a = C(lx, lz); L.push({ t: 'figure', at: a, y, rot: face(a, C(to[0], to[1])), h: 1.56 + rand() * 0.14, seed: Math.floor(rand() * 1e9), dress: 'robe', skin: 'skin_light', cloth: pick(CL), cloth2: 'cloth_white', hat: 'none', hair: 'short', ...o }); };
+  at(21.6, 0, LY, [0, 0], { cloth: 'cloth_white', cloth2: 'cloth_white', over: 'cape', hair: 'shaven', pose: 'stand' });
+  for (const [lx, lz] of [[10.0, 1.1], [12.4, -1.3], [16.2, 0.9]]) at(lx, lz, LY, [22, 0], { pose: 'kneel', arms: 'pray', hat: 'veil', hatMat: 'cloth_white', cloth: pick(['cloth_indigo', 'cloth_brown', 'cloth_grey']) });
+  at(7.4, 4.1, LY, [14, 4.1], { pose: 'talk', cloth: 'cloth_black', hat: 'cap', hatMat: 'cloth_black' }); at(8.6, 4.1, LY, [7.4, 4.1], { pose: 'talk', cloth: 'cloth_brown', hat: 'cap' });
+  at(25.0, 0.2, UY, [0, 0], { cloth: 'cloth_white', cloth2: 'cloth_black', over: 'cape', hair: 'shaven', hat: 'none', pose: 'stand' });
+  for (const [lx, lz, to] of [[8.5, 3.6, [8.5, 9]], [10.0, -3.8, [10.0, -9]], [14.8, 3.7, [14.8, 9]], [17.0, 3.6, [17, 9]]]) at(lx, lz, UY, to, { pose: 'stand', hat: pick(['cap', 'brim', 'none']), over: pick(['sash', 'cape']) });
+  at(26.8, -3.0, UY, [30.5, 0], { pose: 'kneel', arms: 'pray', cloth: 'cloth_brown', hat: 'brim', hatMat: 'cloth_brown' });
+  // the king's garden west of the court (§1c): the gardeners at the beds with their hoes, a lay brother cutting herbs, two ladies of the household on the bench by the
+  // well with a child, a hound; straw skeps of bees against the wall; and the orchard's windfalls collected in baskets
+  fig([-275.6, -22], -Math.PI / 2, { pose: 'squat', dress: 'tunic', legs: 'hose', hat: 'cap', hatMat: 'cloth_white', cloth: 'cloth_brown', over: 'belt' });
+  fig([-275.2, 6], face([-275.2, 6], [-281, 6]), { dress: 'tunic', legs: 'hose', hat: 'brim', hatMat: 'cloth_brown', cloth: 'cloth_grey', carry: 'hoe', arms: 'hoe', over: 'belt' });
+  fig([-300.2, 36], Math.PI, { pose: 'kneel', arms: 'hang', dress: 'robe', hat: 'cap', hatMat: 'cloth_white', cloth: 'cloth_white', cloth2: 'cloth_grey', hair: 'shaven', over: 'cape' });
+  L.push({ t: 'basket', at: [-298.9, 36.8], y: y0, rot: 0.4, n: 1, seed: 61, goods: 'hide_tan' });
+  L.push({ t: 'bench', at: [-283.6, 24.4], y: y0, rot: Math.PI, len: 1.9, back: true });
+  fig([-284.2, 24.1], Math.PI, { pose: 'sit', dress: 'robe', hat: 'veil', hatMat: 'cloth_white', cloth: 'cloth_blue', cloth2: 'cloth_white', hair: 'long', over: 'none' });
+  fig([-283.1, 24.1], Math.PI, { pose: 'sit', dress: 'robe', hat: 'veil', hatMat: 'cloth_white', cloth: 'cloth_maroon', cloth2: 'cloth_white', hair: 'long', over: 'none' });
+  fig([-283.6, 26.6], face([-283.6, 26.6], [-283.6, 24.4]), { child: true, h: 1.05, dress: 'tunic', hat: 'none', hair: 'short', cloth: 'cloth_red' });
+  L.push({ t: 'animal', kind: 'dog', at: [-281.6, 26.4], y: y0, rot: 2.6, seed: 67, pose: 'lie' });
+  for (const z of [-34.6, -29.6]) L.push({ t: 'barrel', at: [-273.4, z], y: y0, rot: 0, n: 1, seed: z | 0 });
   L.push({ t: 'lantern', kind: 'iron', at: [-221.4, -21.0], y: y0, rot: 0, h: 2.9 });
   return { id: 'paris-court-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [-250, -10], facing: 'e' }, bounds: [PALACE[0], PALACE[1], PALACE[2] + 4, PALACE[3]], rooms: [], elements: L };
 }
