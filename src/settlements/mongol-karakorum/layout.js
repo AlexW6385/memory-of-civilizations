@@ -75,6 +75,19 @@ export const LOTS = (() => {
 
 /** The footprint of a shop row. */
 export const shopRect = (s) => (s.face === 'e' || s.face === 'w' ? [s.a[0], s.a[1], s.a[0] + s.d, s.a[1] + s.n * SHOP_W] : [s.a[0], s.a[1], s.a[0] + s.n * SHOP_W, s.a[1] + s.d]);
+/** The courts of the courtyard houses (the part of the lot between the house and the gate): { rect, gu (the gate's position along the wall) }. */
+export const COURTS = (() => {
+  const out = [], add = (rect, gate, seed) => {
+    const [x0, z0, x1, z1] = rect, h = (z1 - z0) * 0.44 + 0.95, r = rng(seed || 5); r();
+    const gu = (x0 + x1) / 2 + (r() - 0.5) * (x1 - x0) * 0.3;
+    out.push({ rect: gate === 's' ? [x0 + 1.4, z0 + h, x1 - 1.4, z1 - 1.2] : [x0 + 1.4, z0 + 1.2, x1 - 1.4, z1 - h], gu });
+  };
+  for (const l of LOTS) if (l.kind === 'house') add(l.rect, l.gate, l.seed);
+  SECRETARIES.forEach((q, i) => add(q, i ? 'n' : 's', 77 + i));
+  return out;
+})();
+/** The wells of the quarters. */
+export const WELLS = [[-70, 12], [-20, -40], [30, 40], [-100, -45]];
 /** Everything built in the town that a person cannot walk through (rects, with a margin test): for placing life. */
 export const BUILT = [
   ...LOTS.filter((l) => l.kind === 'house').map((l) => l.rect), ...MOSQUES, CHURCH, ...SECRETARIES, ...TEMPLES, ...TEMPLES_NW, ...WORKSHOPS,

@@ -38,6 +38,23 @@ export function earthWall(el, { bag, col }) {
   }
   if (alongX) { const zz = z0 + out * (th / 2 - inset) - (out > 0 ? 0.3 : -0.3); col.segment([x0, zz], [x1, zz], 0.6, h, h + 1.15); }
   else { const xx = x0 + out * (th / 2 - inset) - (out > 0 ? 0.3 : -0.3); col.segment([xx, z0], [xx, z1], 0.6, h, h + 1.15); }
+  // weathering: rubble slumped at the foot, rain gullies down the battered face, a buttress of rammed earth every 16 m inside, a few missing merlons
+  { const rr = rng(Math.round(x0 * 13 + z0 * 7 + 3));
+    for (let u = 3; u < L - 2; u += 4 + rr() * 7) {
+      const s = rr() < 0.5 ? -1 : 1, off = th / 2 + 0.5 + rr() * 0.4, rad = 0.7 + rr() * 0.9;
+      const cx = alongX ? x0 + u : z0 + s * off, cz = alongX ? z0 + s * off : z0 + u, px = alongX ? cx : x0 + s * off, pz = alongX ? z0 + s * off : cz;
+      bag.add(EARTH, lathe([[rad, 0], [rad * 0.7, 0.3], [rad * 0.35, 0.55], [0.001, 0.62]], 7, null, px, 0, pz));
+    }
+    for (let u = 2; u < L - 1; u += 2.5 + rr() * 4) {
+      const s = rr() < 0.5 ? -1 : 1, yy = 1.0 + rr() * 2.4, hh = 1.4 + rr() * 2.0, inN = inset * (yy + hh / 2) / h;
+      if (alongX) { const zz = z0 + s * (th / 2 - inN); bag.add('mudbrick', box(x0 + u, yy, Math.min(zz, zz + s * 0.04), x0 + u + 0.22, yy + hh, Math.max(zz, zz + s * 0.04))); }
+      else { const xx = x0 + s * (th / 2 - inN); bag.add('mudbrick', box(Math.min(xx, xx + s * 0.04), yy, z0 + u, Math.max(xx, xx + s * 0.04), yy + hh, z0 + u + 0.22)); }
+    }
+    for (let u = 8; u < L - 8; u += 16) {
+      if (Math.abs((alongX ? x0 : z0) + u) < 34) continue;
+      const inside = -out; if (alongX) { const zb = z0 + inside * (th / 2); bag.add(EARTH, frustum([x0 + u - 1.2, Math.min(zb, zb + inside * 1.5), x0 + u + 1.2, Math.max(zb, zb + inside * 1.5)], 0, h * 0.72, 0.9, 0.9, 0.6, 0.6, { noBottom: true })); col.rect([x0 + u - 1.2, Math.min(zb, zb + inside * 1.5), x0 + u + 1.2, Math.max(zb, zb + inside * 1.5)], 0, h * 0.72); }
+      else { const xb = x0 + inside * (th / 2); bag.add(EARTH, frustum([Math.min(xb, xb + inside * 1.5), z0 + u - 1.2, Math.max(xb, xb + inside * 1.5), z0 + u + 1.2], 0, h * 0.72, 0.6, 0.6, 0.9, 0.9, { noBottom: true })); col.rect([Math.min(xb, xb + inside * 1.5), z0 + u - 1.2, Math.max(xb, xb + inside * 1.5), z0 + u + 1.2], 0, h * 0.72); }
+    } }
 }
 /** town_gate: { c: [x, z], along ('x' for a wall running east–west | 'z'), inward (+1/−1: which way the town lies across the wall), w (the passage) }: piers, lintel, the gate pavilion on top, ramps up the inner side. */
 export function townGate(el, { bag, col }) {
@@ -118,20 +135,22 @@ export function gateHall(el, { bag, col }) {
 }
 
 /** mosque: a brick mosque of the Saracen quarter: a court with an ablution pool, the prayer hall with a dome and a pishtaq of turquoise tile, a square minaret. { rect, seed } faces south. */
-export function mosque(el, { bag, col }) {
+export function mosque(el, { bag, col, lights }) {
   const [x0, z0, x1, z1] = el.rect, cx = (x0 + x1) / 2, T = 0.6, WH = 3.4, hz1 = z0 + (z1 - z0) * 0.55;
   // the court wall with its gate, the prayer hall along the back (north)
   wallRun(bag, col, [x0, z1], [x1, z1], T, 0, WH, 'brick_buff', [{ at: cx - x0, w: 2.6, h: 2.9 }]);
   wallRun(bag, col, [x0, z0], [x1, z0], T, 0, WH, 'brick_buff'); wallRun(bag, col, [x0, z0], [x0, z1], T, 0, WH, 'brick_buff'); wallRun(bag, col, [x1, z0], [x1, z1], T, 0, WH, 'brick_buff');
   for (const [a, b] of [[[x0, z1], [x1, z1]], [[x0, z0], [x1, z0]], [[x0, z0], [x0, z1]], [[x1, z0], [x1, z1]]]) bag.add('brick_buff', obox(a, b, T + 0.1, WH, WH + 0.12));
   const hw = x1 - x0 - 2 * T, hallH = 6.2;
-  bag.add('brick_buff', box(x0 + T, 0, z0 + T, x1 - T, hallH, hz1)); col.rect([x0 + T, z0 + T, x1 - T, hz1], 0, hallH);
+  mosqueHall(bag, col, lights, x0 + T, z0 + T, x1 - T, hz1, cx, hallH, el.seed || 0);
   bag.add('plaster_white', box(x0 + T, hallH, z0 + T, x1 - T, hallH + 0.3, hz1));
   // the pishtaq: a tall frame in front of the hall with a pointed niche, bands of turquoise tile
   const pw = Math.min(6.4, hw * 0.45);
-  bag.add('brick_buff', box(cx - pw / 2, 0, hz1, cx + pw / 2, hallH + 1.6, hz1 + 0.5)); col.rect([cx - pw / 2, hz1, cx + pw / 2, hz1 + 0.5], 0, hallH + 1.6);
+  bag.add('brick_buff', box(cx - pw / 2, 0, hz1, cx - 1.2, hallH + 1.6, hz1 + 0.5)); col.rect([cx - pw / 2, hz1, cx - 1.2, hz1 + 0.5], 0, hallH + 1.6);
+  bag.add('brick_buff', box(cx + 1.2, 0, hz1, cx + pw / 2, hallH + 1.6, hz1 + 0.5)); col.rect([cx + 1.2, hz1, cx + pw / 2, hz1 + 0.5], 0, hallH + 1.6);
+  bag.add('brick_buff', box(cx - 1.2, 4.6, hz1, cx + 1.2, hallH + 1.6, hz1 + 0.5)); col.rect([cx - 1.2, hz1, cx + 1.2, hz1 + 0.5], 4.6, hallH + 1.6);
   bag.add('tile_turquoise', box(cx - pw / 2 + 0.2, hallH - 0.4, hz1 + 0.5, cx + pw / 2 - 0.2, hallH + 1.2, hz1 + 0.53));
-  bag.add('opening', box(cx - 1.1, 0, hz1 + 0.5, cx + 1.1, 4.4, hz1 + 0.53));
+  bag.add('tile_turquoise', box(cx - 1.2, 4.3, hz1 + 0.5, cx + 1.2, 4.6, hz1 + 0.53)); for (const s of [-1, 1]) bag.add('wood_dark', box(cx + s * 1.1 - 0.06, 0, hz1 + 0.3, cx + s * 1.1 + 0.06, 4.3, hz1 + 0.5));
   for (const s of [-1, 1]) bag.add('tile_turquoise', box(cx + s * (pw / 2 - 0.45) - 0.12, 0, hz1 + 0.5, cx + s * (pw / 2 - 0.45) + 0.12, hallH + 1.2, hz1 + 0.53));
   // the dome behind it, on a drum, turquoise
   const dr = Math.min(hw, hz1 - z0) * 0.3, dcx = cx, dcz = (z0 + T + hz1) / 2;
@@ -170,3 +189,49 @@ export function church(el, { bag, col }) {
   for (let k = 0; k < 3; k++) for (const s of [-1, 1]) { bag.add('timber', box(x0 + 2.2 + k * 2.2, 0.03, cz + s * 1.0 - 0.18, x0 + 3.5 + k * 2.2, 0.45, cz + s * 1.0 + 0.18)); col.rect([x0 + 2.2 + k * 2.2, cz + s * 1.0 - 0.18, x0 + 3.5 + k * 2.2, cz + s * 1.0 + 0.18], 0.03, 0.45); }
 }
 void rectRoof;
+
+/**
+ * The prayer hall of a mosque, walkable: walls with the door through the pishtaq and latticed windows, a floor of rows of prayer carpets facing the qibla (to the west-south-west
+ * from Karakorum [inferred]: a mihrab niche in the west wall), timber columns carrying the roof, a minbar of three steps, a Qur'an stand, brass lamps, a ceiling of beams.
+ */
+function mosqueHall(bag, col, lights, x0, z0, x1, z1, cx, H, seed) {
+  const T = 0.6, cz = (z0 + z1) / 2, W = x1 - x0, D = z1 - z0, rand = rng(seed + 31);
+  wallRun(bag, col, [x0, z1], [x1, z1], T, 0, H, 'brick_buff', [{ at: cx - x0, w: 2.4, h: 4.3 }, { at: 3, w: 0.9, h: 1.3, y0: 2.2, lat: true }, { at: W - 3, w: 0.9, h: 1.3, y0: 2.2, lat: true }], 'lattice');
+  wallRun(bag, col, [x0, z0], [x1, z0], T, 0, H, 'brick_buff', [{ at: W * 0.25, w: 0.9, h: 1.3, y0: 2.2, lat: true }, { at: W * 0.75, w: 0.9, h: 1.3, y0: 2.2, lat: true }], 'lattice');
+  wallRun(bag, col, [x0, z0], [x0, z1], T, 0, H, 'brick_buff');
+  wallRun(bag, col, [x1, z0], [x1, z1], T, 0, H, 'brick_buff', [{ at: D / 2, w: 0.9, h: 1.3, y0: 2.2, lat: true }], 'lattice');
+  bag.add('flagstone', box(x0, -0.2, z0, x1, 0.03, z1)); col.floor([x0, z0, x1, z1], 0.03);
+  // the carpets: rows of prayer rugs, each with its niche shape, in green, red and blue
+  const cols = ['cloth_green', 'cloth_red', 'cloth_blue', 'cloth_maroon'];
+  for (let r = 0; r < 4; r++) for (let k = 0; k < Math.floor((D - 2) / 1.0); k++) {
+    const z = z0 + 1.0 + k * 1.0, xs = x0 + 3.0 + r * 2.0;
+    if (rand() < 0.1) continue;
+    bag.add(cols[(r + k) % 4], box(xs, 0.03, z, xs + 1.5, 0.042, z + 0.7));
+  }
+  bag.add('cloth_ochre', box(x0 + 1.0, 0.03, z0 + 0.6, x1 - 1.0, 0.034, z1 - 0.6));
+  // the columns on stone bases, the beams, the ceiling
+  for (const fx of [0.3, 0.55, 0.8]) for (const fz of [0.33, 0.67]) {
+    const x = x0 + W * fx, z = z0 + D * fz;
+    bag.add('granite_grey', lathe([[0.38, 0], [0.38, 0.1], [0.3, 0.24], [0.001, 0.24]], 10, null, x, 0.03, z));
+    bag.add('cedar', lathe([[0.2, 0], [0.18, H - 0.5], [0.001, H - 0.5]], 10, null, x, 0.27, z)); col.circle(x, z, 0.24, 0, H);
+    bag.add('wood_dark', box(x - 0.45, H - 0.55, z - 0.45, x + 0.45, H - 0.25, z + 0.45));
+  }
+  for (const fz of [0.33, 0.67]) bag.add('wood_dark', obox([x0, z0 + D * fz], [x1, z0 + D * fz], 0.34, H - 0.7, H - 0.3));
+  bag.add('timber', box(x0, H - 0.3, z0, x1, H, z1));
+  // the mihrab in the west wall: a pointed niche framed in turquoise tile with a lamp hung before it; the minbar beside it
+  const my = z0 + D / 2;
+  bag.add('opening', box(x0 + T / 2 - 0.05, 0.03, my - 0.8, x0 + T / 2 + 0.2, 3.2, my + 0.8));
+  bag.add('tile_turquoise', box(x0 + T / 2 + 0.2, 0.03, my - 1.1, x0 + T / 2 + 0.26, 3.5, my - 0.8)); bag.add('tile_turquoise', box(x0 + T / 2 + 0.2, 0.03, my + 0.8, x0 + T / 2 + 0.26, 3.5, my + 1.1)); bag.add('tile_turquoise', box(x0 + T / 2 + 0.2, 3.2, my - 1.1, x0 + T / 2 + 0.26, 3.5, my + 1.1));
+  bag.add('tile_lapis', box(x0 + T / 2 + 0.2, 3.5, my - 1.4, x0 + T / 2 + 0.24, 4.4, my + 1.4));
+  for (let k = 0; k < 3; k++) { bag.add('timber', box(x0 + T / 2, 0.03, my + 1.8 + k * 0.0, x0 + T / 2 + 1.0 + (3 - k) * 0.5, 0.35 + k * 0.35, my + 2.8)); }
+  col.rect([x0 + T / 2, my + 1.8, x0 + T / 2 + 2.5, my + 2.8], 0.03, 1.0);
+  bag.add('wood_dark', box(x0 + T / 2, 1.1, my + 1.8, x0 + T / 2 + 0.5, 2.4, my + 2.8));
+  bag.add('wood_dark', box(x0 + 4.0, 0.03, my + 4.0, x0 + 4.8, 0.7, my + 4.6)); col.rect([x0 + 4.0, my + 4.0, x0 + 4.8, my + 4.6], 0.03, 0.7);
+  bag.add('cloth_white', box(x0 + 4.05, 0.7, my + 4.05, x0 + 4.75, 0.74, my + 4.55));
+  for (const [fx, fz] of [[0.42, 0.5], [0.68, 0.5], [0.42, 0.17], [0.68, 0.83]]) {
+    const x = x0 + W * fx, z = z0 + D * fz;
+    bag.add('iron', rod([x, H - 0.3, z], [x, H - 1.2, z], 0.008, 3));
+    bag.add('bronze', lathe([[0.001, 0], [0.2, 0.05], [0.24, 0.2], [0.001, 0.3]], 10, null, x, H - 1.5, z)); bag.add('glass_lamp', lathe([[0.1, 0], [0.12, 0.1], [0.001, 0.2]], 8, null, x, H - 1.45, z));
+    lights?.push({ at: [x, H - 1.3, z], color: '#ffd9a0', intensity: 1.8, distance: 9 });
+  }
+}

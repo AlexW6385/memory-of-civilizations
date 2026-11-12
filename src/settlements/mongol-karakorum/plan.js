@@ -21,7 +21,7 @@ E.push({ t: 'ger', c: COURT_CART.c, r: COURT_CART.r, cart: true, rich: true, see
 for (const at of BANNERS) E.push({ t: 'tug', at, h: 7.5 });
 E.push({ t: 'tortoise', at: TORTOISE, yaw: 0.4 });
 // the storehouses (provisions and treasure "in great barns" [stated: Rubruck via UW]) and, on the west, the kitchens and the cellar of the drinks
-STORES.forEach((r, i) => E.push({ t: 'tile_hall', rect: r, y: 0.6, nx: 3, H: 4.0, kind: i < 2 ? 'gable' : 'hip', mat: 'tile_grey', wallMat: 'brick_grey', altar: null }));
+STORES.forEach((r, i) => E.push({ t: 'tile_hall', rect: r, y: 0.6, nx: 3, H: 4.0, kind: i < 2 ? 'gable' : 'hip', mat: 'tile_grey', wallMat: 'brick_grey', altar: null, furnish: 'store', seed: 200 + i }));
 // the cellar's mouth: a low brick vault set into the ground north of the hall, from which the drink is carried
 E.push({ t: 'tile_stack', rect: [96, -90, 100, -88], y: 0, rows: 3 });
 

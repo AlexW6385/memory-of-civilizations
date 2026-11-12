@@ -14,10 +14,10 @@ export function campGers(c, seed, n = 9) {
   }
   return out;
 }
-export function campElements(c, seed, openIndex = -1, n = 9) {
+export function campElements(c, seed, openIndex = -1, n = 9, extraOpen = []) {
   const E = [], G = campGers(c, seed, n);
   G.forEach((g, i) => {
-    E.push({ t: 'ger', c: g.c, r: g.r, cart: g.cart, open: i === openIndex, rich: i % 3 === 0, seed: g.seed, door: Math.PI / 2 });
+    E.push({ t: 'ger', c: g.c, r: g.r, cart: g.cart, open: i === openIndex || (extraOpen.includes(i) && !g.cart && g.r >= 3.1), rich: i % 3 === 0, seed: g.seed, door: Math.PI / 2 });
   });
   return { E, G };
 }
