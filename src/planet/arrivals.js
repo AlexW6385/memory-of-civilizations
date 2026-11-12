@@ -7,7 +7,7 @@
 // was good, otherwise composed on the spot. Change one only after looking at it again.
 export const ARRIVALS = {
   'tang-wutai':       [35, 13.1, 6, -1.40, 0.36],        // on the upper terrace, the Great East Hall's front, eaves and Buddhas
-  'tang-changan':     [28, 0.1, 20, -1.95, 0.25],         // from the avenue's crossing, the Big Wild Goose Pagoda rising over Daci'en's wall
+  'tang-changan':     [102, 0.1, 112, -0.62, 0.40],       // Daci'en's pagoda court, west of the main hall: the Big Wild Goose Pagoda on its platform, cypresses and monks in the court
   'song-kaifeng':     [160, 0.1, -140, 0, 0.38],         // the Iron Pagoda, whole, in its enclosure
   'song-hangzhou':    [-110, 0.1, 138, 0, 0.32],         // the stair up to the pagoda
   'ming-suzhou':      [4, 0.3, -49.5, 3.027, 0.08],      // from the zigzag bridge between the two islands, south across the lotus pond to the Hall of Distant Fragrance, whole on its terrace
@@ -78,7 +78,7 @@ export const ARRIVALS = {
   'catalhoyuk':       [1.2, 2.6, 19, 1.1, -0.05],            // the landmark house whole across the ground: its south wall, the ladder up to the roof, the packed roofscape behind
   'abu-simbel': [4, null, 0, 1.5708, 0.3],   // the Great Temple's façade whole across the terrace: four seated colossi of Ramesses II cut in the cliff, the baboon frieze above the door, the Nile below
   'nalanda': [-2, null, 70, 0.2, 0.28],   // the Great Temple's stepped east face and its stair, and Monastery 1's gate and turrets across the sacred way
-  'han-changan': [-110, null, 10, 0, 0.1],   // from the Weiyang forecourt up the ramp-stair to the Front Hall on its terrace
+  'han-changan': [-110, 7.75, -122, 0, 0.15],   // near the head of the ramp-stair: the Front Hall across the crown's apron, banners and the officials' ranks
   'lu-qufu': [-26, null, -59, -0.45, 0.18],   // across the court before the Dacheng Hall: the Apricot Altar and the double-eaved hall on its terrace
   'thebes': [-236, 0.1, 0, -1.5708, 0.12],   // from the Nile quay at the avenue's end, down the double row of ram sphinxes to the gateway in the great mudbrick wall, the second pylon of Karnak and its flagstaffs standing over it
   'mongol-karakorum': [70, 0.1, -12, 0, 0.2],   // Standing in the south gate of Möngke Khan's palace compound: the great hall on its rammed-earth podium across the court, the nine-tailed banners on either hand, the brick wall and the storehouses beyond.
