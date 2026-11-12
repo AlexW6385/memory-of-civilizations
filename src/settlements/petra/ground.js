@@ -52,7 +52,7 @@ export const ground = {
     sun: { az: 130, el: 50, color: [1.0, 0.95, 0.86], intensity: 3.6, lat: 30, dec: 5, hour: 10 },
     sky: { turbidity: 3.2, rayleigh: 1.1, mie: 0.005, mieG: 0.78, zenith: [0.08, 0.15, 0.4], horizon: [0.66, 0.64, 0.62] },
     fog: { color: [0.8, 0.76, 0.72], density: 0.0003, height: 0.01 },
-    exposure: 0.48,
+    exposure: 0.56,
     wind: [0.4, 0.2],
     weather: [
       { id: 'clear', weight: 5, clouds: 0.1, cloudDensity: 0.3, sun: 1.0, fog: 1 },
