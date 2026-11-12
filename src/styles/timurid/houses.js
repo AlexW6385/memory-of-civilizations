@@ -8,6 +8,7 @@ import { box, lathe, place, rod, clothBox, addCloth } from '../../core/geom.js';
 import * as F from '../mughal/furnish.js';
 import { houseGeom } from '../../settlements/timurid-samarkand/layout.js';
 import { frame } from './frame.js';
+import { laneItem } from './market.js';
 import { bannai, rng, B, LAP, TUR, CRE, WHI } from './kit.js';
 
 const bx = (bag, m, x0, y0, z0, x1, y1, z1) => bag.add(m, box(Math.min(x0, x1), y0, Math.min(z0, z1), Math.max(x0, x1), y1, Math.max(z0, z1)));
@@ -178,6 +179,15 @@ export function timHouse(el, ctx) {
   dressFace(Nf, bag, rand, { H: HN, wy: 2.5, windows: rand() < 0.5 ? [W / 2] : [], brick: WALL === 'brick_buff' });
   dressFace(Ef, bag, rand, { H, wy: 2.4, windows: h.full && rsgn > 0 ? [] : [D / 2], brick: WALL === 'brick_buff' });
   dressFace(Wf, bag, rand, { H, wy: 2.4, windows: h.full && rsgn < 0 ? [] : [D / 2], brick: WALL === 'brick_buff' });
+  // things of the lane on the other faces: a cart, a ladder to the roof, dung cakes drying, straw, a hung carpet, jars
+  for (const [f, hh, n] of [[Nf, HN, 1 + (rand() < 0.4 ? 1 : 0)], [Ef, H, 1 + (rand() < 0.5 ? 1 : 0)], [Wf, H, 1 + (rand() < 0.5 ? 1 : 0)], [S, HS, rand() < 0.35 ? 1 : 0]])
+    for (let i = 0; i < n; i++) {
+      const kinds = ['cart', 'dung', 'straw', 'ladder', 'carpet', 'jars', 'jars'], kind = kinds[Math.floor(rand() * kinds.length)];
+      const span = f.L - 6, s = 3 + rand() * span;
+      if (f === S && Math.abs(s - (xd - x0)) < 4.5) continue;
+      if (f !== S && (kind === 'cart') && f.L < 12) continue;
+      laneItem({ ...f, s }, kind, rand, bag, col, hh);
+    }
   // ---- the street door: a frame of brick, a carved lintel, the leaves open against the passage walls, studs, a step
   { const s = xd - x0, w2 = PW / 2;
     S.put(bag, 'brick_buff', s - w2 - 0.4, s - w2, 0, 2.95, 0, 0.14); S.put(bag, 'brick_buff', s + w2, s + w2 + 0.4, 0, 2.95, 0, 0.14);

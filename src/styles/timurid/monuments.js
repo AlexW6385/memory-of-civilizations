@@ -2,7 +2,8 @@
 // Bibi-Khanym mosque, the Gur-e Amir complex, Ulugh Beg's observatory, the chorsu (the bazaar's domed crossing)
 // and the rows of shops, with the wall and dome helpers they share.
 
-import { box, lathe, fromTriangles } from '../../core/geom.js';
+import { box, lathe, fromTriangles, clothBox, addCloth, place } from '../../core/geom.js';
+import { hungCarpet } from './market.js';
 import { orientedBox } from '../../core/build.js';
 import { arcadeWall } from '../mughal/index.js';
 import * as F from '../mughal/furnish.js';
@@ -252,6 +253,21 @@ export function shopRow(el, { bag, col, lights }) {
     else if (kind === 'copper') { F.copperware(bag, xc, 1.16, Z(0.8), yaw, i, 5); F.copperware(bag, xc, 2.06, Z(0.8), yaw, i + 3, 4); F.copperware(bag, ia + 0.5, 0, gz, yaw, i + 7, 3); }
     else if (kind === 'pots') { F.pots(bag, xc, 1.16, Z(0.8), yaw, 5); F.pots(bag, ia + 0.6, 0, gz, yaw, 4); F.pots(bag, ib - 0.6, 0, gz, yaw, 3); }
     else { F.spiceSacks(bag, ia + 0.7, 0, gz, yaw, 4); F.pots(bag, xc, 1.16, Z(0.8), yaw, 4, ['terracotta', 'glaze_white', 'terracotta']); }
+    // the awning over the sill (cloth in the wind with a valance) on posts, the goods hung from the lintel, a basket at the foot
+    {
+      const AW = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green', 'cloth_maroon', 'cloth_white'][Math.floor(rand() * 6)], xa = x0 + i * w + 0.1, xb = x0 + (i + 1) * w - 0.1;
+      const za = Math.min(fz, fz + sg * 1.8), zb = Math.max(fz, fz + sg * 1.8);
+      addCloth(bag, AW, clothBox(xa, 2.72, za, xb, 2.77, zb, 0.3), 2.77);
+      addCloth(bag, AW, clothBox(xa, 2.38, fz + sg * 1.8 - 0.03, xb, 2.72, fz + sg * 1.8 + 0.03, 0.17), 2.72);
+      if (i % 2 === 0) for (const px of [xa + 0.05, xb - 0.05]) { const pz = fz + sg * 1.75; bag.add('timber', box(px - 0.04, 0, pz - 0.04, px + 0.04, 2.76, pz + 0.04)); col.circle(px, pz, 0.06, 0, 2.7); }
+      const hz = fz - sg * 0.12, hx = (kind === 'carpets' ? 0.3 : 0.45);
+      if (kind === 'carpets') hungCarpet(bag, ia + hx + 0.3, 2.95, hz, 1.0, 1.5, front === 's' ? 0 : Math.PI, rand);
+      else if (kind === 'cloth') for (let k2 = 0; k2 < 3; k2++) addCloth(bag, ['cloth_red', 'cloth_ochre', 'cloth_indigo', 'cloth_white'][(i + k2) % 4], clothBox(ia + 0.15 + k2 * 0.34, 1.7, hz - 0.03, ia + 0.4 + k2 * 0.34, 2.95, hz + 0.03), 2.95);
+      else if (kind === 'copper') for (let k2 = 0; k2 < 4; k2++) bag.add('bronze', place(lathe([[0.001, 0], [0.2, 0], [0.22, 0.03], [0.001, 0.012]], 14, null, 0, 0, 0), ia + 0.4 + k2 * 0.6 * (w - 0.9) / 2.1 * 0.5, 2.1 + (k2 % 2) * 0.45, hz + sg * 0.03));
+      else if (kind === 'spice') for (let k2 = 0; k2 < 5; k2++) addCloth(bag, k2 % 2 ? 'cloth_red' : 'cloth_ochre', clothBox(ia + 0.2 + k2 * 0.55 * (w - 0.9) / 2.7, 2.2, hz - 0.04, ia + 0.34 + k2 * 0.55 * (w - 0.9) / 2.7, 2.95, hz + 0.04), 2.95);
+      else for (let k2 = 0; k2 < 4; k2++) bag.add('terracotta', lathe([[0.001, 0], [0.1, 0.04], [0.14, 0.15], [0.1, 0.24], [0.001, 0.26]], 8, null, ia + 0.35 + k2 * 0.45 * (w - 0.9) / 2.0, 2.5 - 0.05 * (k2 % 2), hz + sg * 0.06));
+      if (i % 2 === 1) { const bxp = xa + 0.35, bzp = fz + sg * 0.6; bag.add('wicker', lathe([[0.001, 0], [0.2, 0], [0.27, 0.2], [0.26, 0.26], [0.22, 0.24], [0.001, 0.2]], 10, null, bxp, 0, bzp)); bag.add(['cloth_red', 'cloth_ochre', 'cloth_green'][i % 3], lathe([[0.22, 0.22], [0.15, 0.32], [0.001, 0.36]], 10, null, bxp, 0, bzp)); }
+    }
     if (i === (el.enter ?? 3)) {
       // the entered shop: a balance on the sill, a kettle on a brazier, a lamp, a chest
       F.trayTable(bag, xc + 0.4, 0.5, Z(D - 0.8), { seed: i });

@@ -18,7 +18,7 @@ export function life() {
   };
   const [sx0, sz0, sx1, sz1] = SQUARE;
   // the Registan: scholars crossing to the madrasa's pishtaq, merchants talking, a few standing in groups
-  for (let k = 0; k < 14; k++) person([sx0 + 6 + rand() * 40, -30 + rand() * 60], rand() * 6.28);
+  for (let k = 0; k < 14; k++) person([sx0 + 6 + rand() * 40, -21 + rand() * 42], rand() * 6.28);
   for (const z of [-20, -8, 6, 18]) person([-40, z], Math.PI / 2, { man: true, pose: 'stand', cloth: 'cloth_white', cloth2: 'cloth_white' });
   // a caravan resting at the east side: camels kneeling and standing with their bales, the cameleers, donkeys
   for (let k = 0; k < 5; k++) L.push({ t: 'animal', kind: 'camel', at: [32 + (k % 2) * 3, -26 + k * 5.5], y: 0.04, rot: Math.PI / 2 + (rand() - 0.5) * 0.4, seed: Math.floor(rand() * 1e9), gear: k !== 2 });

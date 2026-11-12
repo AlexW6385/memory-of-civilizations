@@ -22,7 +22,7 @@ export async function town() {
   plans.push({ ...base('samarkand-observatory', [{ t: 'observatory', c: OBS.c, y: OBS.y, r: OBS.r }], [OBS.c[0] - 60, OBS.c[1] - 40, OBS.c[0] + 60, OBS.c[1] + 80]) });
   // the chorsu and the bazaar's streets
   const E = [{ t: 'chorsu', c: CHORSU.c, r: CHORSU.r }];
-  for (const { a, b } of BAZAAR) E.push({ t: 'bazaar', a, b, w: 5, h: 7, bay: 5, shops: 5 });
+  for (const { a, b } of BAZAAR) { E.push({ t: 'bazaar', a, b, w: 5, h: 7, bay: 5, shops: 5 }); E.push({ t: 'tim_bazaar_dress', a, b, w: 5, bay: 5, seed: Math.round(a[0] + a[1] * 3) }); }
   plans.push(base('samarkand-bazaar', E, [CHORSU.c[0] - 110, CHORSU.c[1] - 70, CHORSU.c[0] + 110, CHORSU.c[1] + 75]));
   plans.push(aryk());
   return [...plans, lifePlan()];
