@@ -1,7 +1,10 @@
 // The town of Delphi (docs/settlements/delphi.md §4.5, §8): the houses of the Delphians on their terraces west and east of the
 // sanctuary, and the people of the oracle: pilgrims and consultants on the Sacred Way, the priests and the Pythia's escort at the
 // temple, the goat for the sacrifice, the washers at the Castalian spring, the sellers at the gate, athletes in the stadium.
-import { RADIUS, lots, height, pathAt, WAY, WAY2, TT_Y, TEMPLE, ALTAR, SPRING, STADIUM, STADIUM_Y, FC, FC_Y, THEATRE, TREASURIES, STOA, TT, inRect } from './layout.js';
+import { houseRooms } from '../../styles/delphi/house.js';
+import { retain } from './buildings.js';
+import { wayPoints } from './layout.js';
+import { lanes, alleys, ROW_PITCH, RADIUS, lots, height, pathAt, WAY, WAY2, TT_Y, TEMPLE, ALTAR, SPRING, STADIUM, STADIUM_Y, FC, FC_Y, THEATRE, TREASURIES, STOA, TT, inRect } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [98, 134], facing: 'n' } });
@@ -10,8 +13,26 @@ const wayAt = (P, s) => { let acc = 0; for (let i = 0; i + 1 < P.length; i++) { 
 
 export async function town() {
   const all = lots(), plans = [];
-  const near = (r) => pathAt((r[0] + r[2]) / 2, (r[1] + r[3]) / 2, WAY)[0] < 50 || inRect(FC, (r[0] + r[2]) / 2, (r[1] + r[3]) / 2, 40);
-  for (let i = 0; i < all.length; i += 40) plans.push(base(`delphi-houses-${i / 40}`, 'delphi', all.slice(i, i + 40).map((l) => ({ t: 'greek_house', simple: true, near: near(l.rect), ...l }))));
+  const closed = all.filter((l) => !l.open), opened = all.filter((l) => l.open);
+  for (let i = 0; i < closed.length; i += 30) plans.push(base(`delphi-houses-${i / 30}`, 'delphi', closed.slice(i, i + 30).map((l) => ({ t: 'athens_house', rect: l.rect, front: 's', seed: l.seed, y: l.y, tier: l.tier, fall: l.fall }))));
+  // the walk-in houses: each a plan of its own with its rooms
+  opened.forEach((l, k) => plans.push({ ...base(`delphi-open-${k}`, 'delphi', [{ t: 'delphi_house', rect: l.rect, seed: l.seed, y: l.y, trade: l.trade, fall: l.fall, tier: l.tier }]), rooms: houseRooms(l.rect, l.seed, l.y, l.trade) }));
+  // the lanes: paved ribbons along each terrace with the parapet on the downhill side, the stairs in the alleys
+  { const E = [];
+    for (const r of lanes()) {
+      const pts = [[r.x0 - 0.5, r.z - 0.3], [r.x1 + 0.5, r.z - 0.3]], seg = [];
+      for (let x = r.x0 - 0.5; x < r.x1 + 0.5; x += 2.5) seg.push([x, r.z - 0.3]); seg.push(pts[1]);
+      E.push({ t: 'ribbon', pts: seg, ys: seg.map(() => r.y), w: 2.6, mat: 'rubble', kerb: false, lift: 0.03 });
+      // the parapet: gaps at the alleys
+      let a = r.x0 - 0.5; const gaps = alleys().filter((q) => q.k === r.k + 1 && q.x0 > r.x0 && q.x1 < r.x1).sort((p, q) => p.x0 - q.x0);
+      for (const g of [...gaps, { x0: r.x1 + 0.5 }]) { if (g.x0 - a > 0.8) retain(E, [a, r.z + 1.45], [g.x0, r.z + 1.45], r.y, -1, 700 + r.k * 13, { rough: true, th: 0.55, cap: 0.85 }); a = (g.x1 ?? g.x0) ; }
+    }
+    for (const q of alleys()) if (q.up && q.dn) {
+      const yU = q.up.y, yD = q.dn.y;
+      E.push({ t: 'stair', rect: [q.x0 + 0.1, q.up.z + 1.2, q.x1 - 0.1, q.up.z + 1.2 + Math.max(4, (yU - yD) * 2.2)], dir: 'n', y0: yD, y1: yU, riser: 0.17, base: yD - 0.6, mat: 'limestone' });
+      E.push({ t: 'ribbon', pts: [[(q.x0 + q.x1) / 2, q.up.z + 5.5], [(q.x0 + q.x1) / 2, q.dn.z - 0.5]], ys: [yD, yD], w: 1.8, mat: 'rubble', kerb: false, lift: 0.03 });
+    }
+    plans.push(base('delphi-lanes', 'delphi', E)); void ROW_PITCH; void wayPoints; }
   const rand = rng(400), L = [], seed = () => Math.floor(rand() * 1e9);
   const citizen = (at, rot, o = {}) => L.push({ t: 'figure', at, y: o.y ?? height(at[0], at[1]), rot, seed: seed(), skin: 'skin_medium', dress: 'robe', cloth: ['cloth_white', 'linen', 'cloth_ochre'][Math.floor(rand() * 3)], cloth2: ['cloth_white', 'cloth_brown', 'cloth_indigo', 'cloth_red'][Math.floor(rand() * 4)], over: 'cloak', hair: 'short', beard: 1, hat: rand() < 0.25 ? 'brim' : 'none', pose: 'stand', ...o });
   const worker = (at, rot, o = {}) => L.push({ t: 'figure', at, y: o.y ?? height(at[0], at[1]), rot, seed: seed(), skin: 'skin_medium', dress: 'tunic', legs: 'bare', cloth: ['cloth_brown', 'cloth_grey', 'linen', 'cloth_ochre'][Math.floor(rand() * 4)], over: 'belt', hair: 'short', beard: 0.5, hat: rand() < 0.2 ? 'cap' : 'none', feet: 'bare', pose: 'stand', ...o });

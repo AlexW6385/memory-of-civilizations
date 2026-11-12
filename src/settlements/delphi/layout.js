@@ -91,22 +91,57 @@ export const SPRING = [138, -9, 146, 9];                               // the fo
 export const SPRING_Y = 19.2;
 export const WALL_S = 106, WALL_E = 104;                              // the precinct's south and east walls
 
-// ── the village: lots in terraces west and east of the sanctuary
-let LOTS = null;
-export function lots() {
-  if (LOTS) return LOTS;
-  LOTS = [];
-  const rand = rng(400);
-  const zones = [[-168, -26, -80, 96, 16, 15], [112, 36, 166, 98, 15, 15]];
-  for (const [xa, za, xb, zb, dx, dz] of zones) for (let z = za; z < zb; z += dz) for (let x = xa; x < xb; x += dx) {
-    if (rand() < 0.22) continue;
-    const w = 9.5 + rand() * 2.5, d = 9 + rand() * 2, x0 = x + rand() * 1.5, z0 = z + rand() * 1.5, cx = x0 + w / 2, cz = z0 + d / 2;
-    if (Math.hypot(cx, cz) > RADIUS - 34 || pathAt(cx, cz, WAY2)[0] < 9 || inRect(FC, cx, cz, 5) || inRect(SPRING, cx, cz, 14) || inRect([-168, -40, -90, -10], cx, cz) && cz < -26) continue;
-    LOTS.push({ rect: [x0, z0, x0 + w, z0 + d], seed: Math.floor(rand() * 1e6), y: Math.round(slopeY(cz) * 4) / 4 + 0.2 });
+// ── the village: houses in terrace rows west and east of the sanctuary (docs/settlements/delphi.md §4.5). Each row is a lane along the
+// contour with the houses on its uphill side, fronts to the south onto it; the lane's downhill edge is a parapet over the roofs of
+// the row below, whose backs stand against it. Houses run wall to wall; here and there an alley between two of them with a stair up
+// to the lane above.
+export const ROW_PITCH = 17, ROW_Z0 = -6, HOUSE_D = 13;
+const ZONES = [{ x: [-170, -80], k: [0, 6] }, { x: [110, 160], k: [3, 6] }];
+let LOTS = null, LANES = null, ALLEYS = null;
+const rowZ = (k) => ROW_Z0 + ROW_PITCH * k;
+const rowY = (k) => Math.round(slopeY(rowZ(k) - 8.5) * 4) / 4 + 0.2;
+const THEATRE_C = [-34, -52];
+function village() {
+  LOTS = []; LANES = []; ALLEYS = [];
+  const rand = rng(400), runs = {};
+  for (const Z of ZONES) for (let k = Z.k[0]; k <= Z.k[1]; k++) {
+    const zl = rowZ(k), y = rowY(k), z0 = zl - 2 - HOUSE_D, z1 = zl - 2;
+    let x = Z.x[0] + rand() * 3, n = 0, run = null, sinceAlley = 0;
+    const ok = (r) => {
+      const cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
+      if (Math.hypot(cx, cz) > RADIUS - 34 || Math.hypot(r[0], r[1]) > RADIUS - 28 || Math.hypot(r[0], r[3]) > RADIUS - 28 || Math.hypot(r[2], r[3]) > RADIUS - 28 || Math.hypot(r[2], r[1]) > RADIUS - 28) return false;
+      for (const [px, pz] of [[cx, cz], [r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]]) if (pathAt(px, pz, WAY2)[0] < 8.5) return false;
+      if (inRect(FC, cx, cz, 6) || inRect(SPRING, cx, cz, 16) || Math.hypot(cx - THEATRE_C[0], cz - THEATRE_C[1]) < 50) return false;
+      if (r[2] > 104 - 4 && r[0] < 104 + 6 && r[3] > -60) return false;
+      return true;
+    };
+    while (x < Z.x[1]) {
+      const w = 8.8 + rand() * 3.0, r = [x, z0, x + w, z1];
+      if (x + w > Z.x[1] + 4) break;
+      if (!ok(r)) { run = null; x += w + 0.15; continue; }
+      if (!run) { run = { x0: x, x1: x + w, k, z: zl, y }; (runs[k] ??= []).push(run); LANES.push(run); } else run.x1 = x + w;
+      LOTS.push({ rect: r, front: 's', seed: Math.floor(rand() * 1e6), y, fall: 3.0, row: k, idx: n++ });
+      x += w + 0.15; sinceAlley++;
+      if (k > Z.k[0] && sinceAlley >= 3 && rand() < 0.6 && x + 2.4 < Z.x[1]) { ALLEYS.push({ x0: x - 0.15, x1: x + 2.25, k }); run.x1 = x + 2.25; x += 2.25; sinceAlley = 0; }
+    }
   }
-  return LOTS;
+  // tiers: all the detail near the sanctuary's ways, less farther out
+  const HOT = [[-36, 4], [-70, 30], [96, 70], [112, 100]];
+  for (const l of LOTS) { const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, d = Math.min(...HOT.map(([x, z]) => Math.hypot(cx - x, cz - z))); l.tier = d < 70 ? 2 : d < 120 ? 1 : 0; }
+  // the walk-in houses: about one in five of those within reach, never two side by side
+  let last = -9;
+  LOTS.forEach((l, i) => { const w = l.rect[2] - l.rect[0]; if (l.tier >= 1 && w > 9.6 && i - last > 1 && l.rect[2] > -168 && rand() < 0.34 && !ALLEYS.some((a) => a.k === l.row && Math.abs(a.x0 - l.rect[2]) < 0.4 && false)) { l.open = true; l.trade = ['bronze', 'perfume', 'cloth', 'wine', 'carpenter', 'pottery', 'weaver', 'cook'][Math.floor(rand() * 8)]; last = i; } });
+  // the alleys' stairs: from the lane above down to the row's own level
+  for (const a of ALLEYS) {
+    const up = LANES.find((r) => r.k === a.k - 1 && a.x0 >= r.x0 - 0.01 && a.x1 <= r.x1 + 0.01), dn = LANES.find((r) => r.k === a.k && a.x0 >= r.x0 - 0.01 && a.x1 <= r.x1 + 0.01);
+    a.up = up ?? null; a.dn = dn ?? null;
+  }
 }
+export function lots() { if (!LOTS) village(); return LOTS; }
+export function lanes() { if (!LOTS) village(); return LANES; }
+export function alleys() { if (!LOTS) village(); return ALLEYS; }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+export const inLane = (x, z, m = 0) => lanes().some((r) => inRect([r.x0, r.z - 1.8, r.x1, r.z + 1.7], x, z, m)) || alleys().some((a) => a.up && a.dn && inRect([a.x0, a.up.z + 1.2, a.x1, a.dn.z - 1.8], x, z, m));
 
 // the pads of the buildings: [rect, y]
 const PADS = [];
@@ -118,7 +153,7 @@ for (const t of TREASURIES) {
 STOA.y = wayY(pathAt(15, 46, WAY)[1]) + 0.2;
 PADS.push([[STOA[0] - 1, STOA[1] - 1, STOA[2] + 1, STOA[3] + 1.2], STOA.y]);
 export const PADS_ALL = PADS;
-const PAD_BOX = () => PADS.concat(lots().map((l) => [[l.rect[0] - 1, l.rect[1] - 1, l.rect[2] + 1, l.rect[3] + 1], l.y]));
+const PAD_BOX = () => PADS.concat(lots().map((l) => [[l.rect[0] - 1, l.rect[1] - 1, l.rect[2] + 1, l.rect[3] + 1], l.y]), lanes().map((r) => [[r.x0 - 0.5 - 1, r.z - 1.8 - 1, r.x1 + 0.5 + 1, r.z + 1.2 + 1], r.y]));
 
 let CACHE = null;
 export function height(x, z) {
@@ -154,5 +189,5 @@ export function height(x, z) {
 export const onWay = (x, z, m = 0) => pathAt(x, z, WAY)[0] < 3 + m || pathAt(x, z, WAY2)[0] < 2.6 + m;
 /** Where nothing grows: built ground. */
 export function built(x, z, m = 0) {
-  return inRect(TT, x, z, m) || inRect(FC, x, z, m) || inRect(STADIUM, x, z, m + 2) || theatreD(x, z) > T_FRONT - m && theatreD(x, z) < T_BACK + m && theatreOut(x, z) < m + 1 || inRect(SPRING, x, z, m + 8) || inLot(x, z, m + 1) || onWay(x, z, m + 1.5) || PADS.some(([q]) => inRect(q, x, z, m)) || (z > WALL_S - 1 && x > -70 && x < WALL_E && z < WALL_S + 1.4);
+  return inRect(TT, x, z, m) || inRect(FC, x, z, m) || inRect(STADIUM, x, z, m + 2) || theatreD(x, z) > T_FRONT - m && theatreD(x, z) < T_BACK + m && theatreOut(x, z) < m + 1 || inRect(SPRING, x, z, m + 8) || inLot(x, z, m + 1) || inLane(x, z, m + 1) || onWay(x, z, m + 1.5) || PADS.some(([q]) => inRect(q, x, z, m)) || (z > WALL_S - 1 && x > -70 && x < WALL_E && z < WALL_S + 1.4);
 }

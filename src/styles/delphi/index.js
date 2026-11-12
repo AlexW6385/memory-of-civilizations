@@ -9,6 +9,8 @@ import '../greek/town.js';
 import '../greek/quarter.js';
 import '../greek/gymnasium.js';
 import '../greek/house-interior.js';
+import '../greek/ward.js';
+import './house.js';
 import { human, placed, blob, limb } from '../greek/sculpture.js';
 import { merge } from '../greek/columns.js';
 
