@@ -4,7 +4,7 @@
 // market's lanes (wells, notice boards, barrows, carts), at the avenue's ditches (washers, ducks), in the temple courts (pilgrims kneeling,
 // monks sweeping, lamps) and the Daoist court. Every position is derived from layout.js.
 import { YAW, rng } from '../../styles/tang/kit.js';
-import { lots, STREETS, AVE, DITCH, MARKET_LANES, MARKET_INNER, DACI, DACI_AX, DACI_MAIN, DAO_AX, PAGODA, RADIUS, WARDS } from './layout.js';
+import { lots, STREETS, AVE, DITCH, MARKET_LANES, MARKET_INNER, DACI, DACI_AX, DACI_MAIN, DAO_AX, PAGODA, RADIUS, WARDS, ARRIVE } from './layout.js';
 
 const ext = (rect, f) => { const w = rect[2] - rect[0], d = rect[3] - rect[1]; return f === 'n' || f === 's' ? [w, d] : [d, w]; };
 const frameOf = (c, front) => { const yaw = YAW[front], cs = Math.round(Math.cos(yaw)), sn = Math.round(Math.sin(yaw)); return { P: ([x, z]) => [c[0] + x * cs + z * sn, c[1] - x * sn + z * cs], D: ([x, z]) => [x * cs + z * sn, -x * sn + z * cs] }; };
@@ -104,6 +104,20 @@ export function dressLife() {
   for (const s of [-1, 1]) for (let k = 0; k < 4; k++) { L.push({ t: 'bench', at: [ax + s * 30, 160 + k * 7], y: 0, rot: Math.PI / 2, len: 2.0 }); if (k % 2 === 0) (k < 2 ? monk : fig)([ax + s * 30, 160 + k * 7], faceTo([-s, 0]), { pose: 'sit' }); }
   for (const s of [-1, 1]) for (const z of [100, 112, 124]) L.push({ t: 'lantern', kind: 'iron', at: [ax + s * 20, z], y: 0, h: 2.0 });
   for (let k = 0; k < 6; k++) { const a = rand() * 6.28; monk([PAGODA[0] + Math.cos(a) * 30, PAGODA[1] + 25 + Math.abs(Math.sin(a)) * 10], faceTo([Math.cos(a), 0.2]), { pose: rand() < 0.4 ? 'talk' : 'stand' }); }
+  // ── the arrival, in the pagoda court's south-west corner: the court in view of the visitor, from 5 to 45 m (monks sweeping and reading, pilgrims
+  // with incense, a bench, a donkey with its driver, lanterns; none within 4 m of the arrival) ──
+  { const [vx, vz] = [PAGODA[0] - ARRIVE[0], PAGODA[1] - ARRIVE[1]], vl = Math.hypot(vx, vz), F = [vx / vl, vz / vl], R = [-F[1], F[0]];
+    const P = (f, r) => [ARRIVE[0] + F[0] * f + R[0] * r, ARRIVE[1] + F[1] * f + R[1] * r], toward = (a, b) => faceTo([b[0] - a[0], b[1] - a[1]]);
+    const sweeper = P(9, -5), reader = P(14, 6);
+    monk(sweeper, toward(sweeper, P(9, 3)), { carry: 'staff', pose: 'stand' });
+    L.push({ t: 'basket', at: [sweeper[0] + 1.1, sweeper[1] + 0.5], y: 0, rot: 1.1, n: 2, seed: 311 });
+    monk(reader, toward(reader, P(14, 12)), { pose: 'sit' }); L.push({ t: 'bench', at: reader, y: 0, rot: faceTo(R), len: 1.9 });
+    for (const [f, r, k] of [[18, 3, 0], [19.4, 4.6, 1], [26, -7, 2]]) (k === 1 ? woman : k === 2 ? hu : fig)(P(f, r), toward(P(f, r), P(60, 0)), { pose: 'stand', carry: k === 0 ? 'basket' : 'none' });
+    { const a = P(23, -2), b = P(24, -0.4); monk(a, toward(a, b), { pose: 'talk' }); fig(b, toward(b, a), { pose: 'talk', dress: 'robe', beard: true, hat: 'cap' }); }
+    for (const [f, r] of [[12, 9], [31, 7]]) { const q = P(f, r); L.push({ t: 'lantern', kind: 'iron', at: q, y: 0, h: 2.0 }); }
+    { const q = P(7, 10); L.push({ t: 'animal', kind: 'donkey', at: q, y: 0, rot: toward(q, P(7, 20)), seed: 313, gear: true }); fig(P(6.2, 11.6), toward(P(6.2, 11.6), q), { pose: 'stand', carry: 'staff', hat: 'straw' }); }
+    for (let k = 0; k < 3; k++) { const q = P(33 + k * 2.1, -9 - (k % 2) * 1.2); (k === 1 ? woman : fig)(q, toward(q, P(36, 4)), { pose: 'kneel', arms: 'pray', carry: 'none' }); }
+  }
   // ── the Daoist court: priests in indigo with topknots, visitors ──
   for (let k = 0; k < 5; k++) fig([DAO_AX + (rand() - 0.5) * 30, -60 - rand() * 40], rand() * 6.28, { dress: 'robe', cloth: 'cloth_indigo', cloth2: 'cloth_white', over: 'sash', hat: 'cap', hatMat: 'cloth_black', beard: true, pose: rand() < 0.4 ? 'talk' : 'stand' });
   for (const s of [-1, 1]) for (let k = 0; k < 3; k++) L.push({ t: 'bench', at: [DAO_AX + s * 12, -62 - k * 9], y: 0, rot: Math.PI / 2, len: 2.0 });

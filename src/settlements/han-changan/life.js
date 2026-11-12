@@ -2,7 +2,7 @@
 // in groups and the guards lining the paved way of the forecourt; the sellers behind their counters and the customers in the market lanes, the stalls
 // of the cross lanes; the palace quarters' lanes with their benches, wells and woodpiles; the keepers at the ward gates; ox-carts on the great
 // avenue. Plans of style 'life' (src/objects/index.js), placed from layout.js.
-import { RADIUS, AX, PALACE, WEST_MARKET, EAST_MARKET, WARDS, WARD_WALL, AVENUE, QUARTERS, QUARTER_LANES, MARKET_WALL, marketShops, GATE_S, GATE_W, WALL_W, WALL_S, LAKE, LAKE_Y, GARDEN_POND, POND_Y, inLake, ACADEMY } from './layout.js';
+import { CROWN, TIERS, HALL, RADIUS, AX, PALACE, WEST_MARKET, EAST_MARKET, WARDS, WARD_WALL, AVENUE, QUARTERS, QUARTER_LANES, MARKET_WALL, marketShops, GATE_S, GATE_W, WALL_W, WALL_S, LAKE, LAKE_Y, GARDEN_POND, POND_Y, inLake, ACADEMY } from './layout.js';
 import { chariotSpots } from '../../styles/han/court.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -39,8 +39,44 @@ function forecourt() {
     const cx = AX + s * (60 + rand() * 10), cz = -40 + g * 26 + rand() * 6, n = 3 + (g & 1);
     for (let k = 0; k < n; k++) { const a = k / n * Math.PI * 2 + g, x = cx + Math.cos(a) * 1.0, z = cz + Math.sin(a) * 1.0; L.push(figure(rand, [x, z], faceTo(cx - x, cz - z), 'official', { pose: 'talk' })); }
   }
+  // the supply carts of the palace's kitchens and stores queuing along the forecourt's sides toward the gate: ox-carts with their drivers, porters with loads
+  for (const s of [-1, 1]) for (let k = 0; k < 4; k++) {
+    const x = AX + s * (22 + (k % 2) * 3.2), z = 66 + k * 11 + rand() * 2, load = pick(rand, ['sacks', 'barrels', 'hay', 'sacks']);
+    L.push({ t: 'cart', kind: 'two', beast: 'ox', load, at: [x, z], y: 0, rot: Math.PI / 2 * s + (rand() - 0.5) * 0.15, seed: Math.floor(rand() * 1e9) });
+    L.push(figure(rand, [x - s * 2.6, z + 1.0], rand() * 6, 'labourer', { carry: 'staff', len: 1.8, pose: 'staff' }));
+    if (k % 2) L.push(figure(rand, [x + s * 3.4, z - 0.8], faceTo(-s, 0), 'seller', { pose: 'talk' }));
+  }
+  // a string of porters with the carrying pole going up toward the ramp, and officials' grooms holding saddled horses at the sheds
+  for (const s of [-1, 1]) for (let k = 0; k < 3; k++) { const x = AX + s * (13 + k * 2.2), z = -52 - k * 3; L.push(figure(rand, [x, z], faceTo(-s, -0.2), 'labourer', { carry: 'pole', pose: 'stand' })); }
+  for (const s of [-1, 1]) for (let k = 0; k < 2; k++) { const x = AX + s * 74, z = -20 + k * 24; L.push({ t: 'animal', kind: 'horse', at: [x - s * 1.2, z], y: 0, rot: faceTo(s, 0), seed: Math.floor(rand() * 1e9), gear: true }); L.push(figure(rand, [x - s * 2.6, z + 0.6], faceTo(s, 0), 'guard', { pose: 'stand', carry: 'none' })); }
   // the guards in pairs down the paved way, facing it
   for (let z = 70; z > -80; z -= 14) for (const s of [-1, 1]) L.push(figure(rand, [AX + s * 6.9, z], s < 0 ? -Math.PI / 2 : Math.PI / 2, 'guard'));
+  return L;
+}
+
+/**
+ * The crown and the ramp: what the visitor sees from the ramp's head (the arrival): halberdiers in pairs up the shelves of the tiers and down the
+ * apron to the Front Hall's steps, the officials of the morning court in ranks either side of the way (turned to the hall, some bowing, some talking),
+ * an usher with his tablet, a drummer's boy, attendants at the ding, a litter-bearer pair waiting; on the shelves of the lower tiers sentries.
+ */
+function crown() {
+  const rand = rng(612), L = [], T = CROWN, zf = TIERS[TIERS.length - 1].r[3], zh = HALL.z1;
+  // sentries on the shelves of the lower tiers beside the ramp, facing the axis
+  for (const [z, y] of [[-118, TIERS[0].top], [-124, TIERS[1].top]]) for (const s of [-1, 1]) L.push(figure(rand, [AX + s * 8.4, z], s < 0 ? -Math.PI / 2 : Math.PI / 2, 'guard', { y, len: 2.3 }));
+  // the halberdiers down the apron, in pairs facing the way
+  for (let z = zf - 6; z > zh + 4; z -= 7.5) for (const s of [-1, 1]) L.push(figure(rand, [AX + s * 4.4, z], s < 0 ? -Math.PI / 2 : Math.PI / 2, 'guard', { y: T, len: 2.3, cloth: pick(rand, ['cloth_black', 'cloth_brown']), cloth2: 'cloth_red' }));
+  // the officials' ranks: two files on each side, in the order of rank, facing the axis; the nearer ones talking in twos
+  for (const s of [-1, 1]) for (let r = 0; r < 2; r++) for (let z = zf - 14; z > zh + 6; z -= 3.1) {
+    if (rand() < 0.22) continue;
+    const x = AX + s * (11.5 + r * 2.4) + (rand() - 0.5) * 0.4, face = s < 0 ? -Math.PI / 2 : Math.PI / 2;
+    const o = figure(rand, [x, z + (rand() - 0.5) * 0.6], face + (rand() - 0.5) * 0.4, 'official', { y: T });
+    if (rand() < 0.25) { o.pose = 'talk'; o.rot = faceTo(-s, 0.3); }
+    L.push(o);
+  }
+  // an usher with his tablet at the hall's steps, a kneeling petitioner, a pair of attendants with a fan and a parasol at the ding
+  L.push(figure(rand, [AX + 2.2, zh + 5.5], 0, 'official', { y: T, cloth: 'cloth_red', cloth2: 'cloth_white', carry: 'staff', len: 1.4 }));
+  L.push(figure(rand, [AX - 1.0, zh + 14], 0, 'official', { y: T, pose: 'kneel', arms: 'pray' }));
+  for (const s of [-1, 1]) L.push(figure(rand, [AX + s * 8.2, zh + 11], faceTo(-s, 0), 'boy', { y: T, cloth: 'cloth_red', hat: 'cap' }));
   return L;
 }
 
@@ -145,5 +181,5 @@ function academy() {
 }
 
 export function lifePlans() {
-  return [plan('han-life-court', forecourt()), plan('han-life-west', market(WEST_MARKET, 600)), plan('han-life-east', market(EAST_MARKET, 700)), plan('han-life-quarters', quarters()), plan('han-life-gates', gates()), plan('han-life-lake', lake()), plan('han-life-academy', academy())];
+  return [plan('han-life-court', forecourt()), plan('han-life-crown', crown()), plan('han-life-west', market(WEST_MARKET, 600)), plan('han-life-east', market(EAST_MARKET, 700)), plan('han-life-quarters', quarters()), plan('han-life-gates', gates()), plan('han-life-lake', lake()), plan('han-life-academy', academy())];
 }
