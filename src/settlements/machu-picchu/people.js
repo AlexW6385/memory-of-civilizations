@@ -84,6 +84,26 @@ export function people() {
   figures.push(woman({ at: [5.4, 137.8], y: ground.height(5.4, 137.8), rot: N, carry: 'bundle', h: 1.48 }));
   for (const [x, z] of [[6.6, 149.5], [6.8, 152.0]]) figures.push({ t: 'animal', kind: 'llama', at: [x, z], y: ground.height(x, z), rot: N + (rand() - 0.5) * 0.2, seed: seed(), graze: false });
   figures.push(man({ at: [6.4, 154.4], y: ground.height(6.4, 154.4), rot: N, pose: 'staff', staffMat: 'wood_dark', len: 1.1, over: 'cape' }));
+  // the neck's fields below the Guardhouse (the arrival's foreground): a team ploughing a plot, a woman with her hoe facing them,
+  // women weeding the maize on the other side of the road, a boy with his llamas on the knoll's terraces, spearmen at the gate
+  {
+    const plough = (at, rot, h) => {
+      const y = ground.height(at[0], at[1]);
+      figures.push(man({ at, y, rot, h, arms: 'staff', pose: 'stand' }));
+      const hand = toPlan(at, y, rot, h, [0.25, 1.11, -0.25]), lean = 0.3, k = 1.3, d = [Math.sin(rot) * Math.sin(lean), Math.cos(lean), Math.cos(rot) * Math.sin(lean)];
+      gear.push({ t: 'chakitaqlla', at: [hand[0] - d[0] * k, hand[2] - d[2] * k], y: hand[1] - d[1] * k, yaw: rot + Math.PI, lean });
+    };
+    for (let i = 0; i < 3; i++) plough([-13.4 + i * 1.4, 104.5], N, 1.58 + rand() * 0.1);
+    figures.push(woman({ at: [-12, 102.4], y: ground.height(-12, 102.4), rot: S, carry: 'hoe', h: 1.5 }));
+    for (const [x, z] of [[9.2, 100.5], [11.3, 102.6], [9.9, 105.8], [12, 108]]) figures.push(woman({ at: [x, z], y: ground.height(x, z), rot: rand() * 6.28, pose: 'squat', h: 1.45 + rand() * 0.08 }));
+    figures.push(man({ at: [-38, 103.5], y: ground.height(-38, 103.5), rot: E + 0.4, carry: 'basket', h: 1.6 }));
+    // the boy and his llamas on the knoll's treads, facing the way in
+    const kt = (m, th) => { const d = KNOLL.r + 6 - 2.4 * (m + 0.5), x = KNOLL.c[0] + Math.cos(th) * d, z = KNOLL.c[1] + Math.sin(th) * d; return [x, z, 2.2 * m]; };
+    for (const [m, th] of [[1, -1.2], [1, -1.62], [2, -1.9], [3, -1.35], [1, -2.05]]) { const [x, z, y] = kt(m, th); figures.push({ t: 'animal', kind: 'llama', at: [x, z], y, rot: rand() * 6.28, seed: seed(), graze: true }); }
+    { const [x, z, y] = kt(1, -1.45); figures.push(man({ at: [x, z], y, rot: S + 0.6, h: 1.1, pose: 'staff', staffMat: 'wood_dark', len: 1.0, over: 'belt' })); }
+    // the spearmen of the gate, inside the wall to either side of the road
+    for (const [x, z, r] of [[-0.5, 81.2, S + 0.15], [4.5, 81.2, S - 0.15]]) figures.push(man({ at: [x, z], y: 0, rot: r, pose: 'staff', staffMat: 'wood_dark', len: 1.85, cloth: 'cloth_red', cloth2: 'cloth_black', over: 'cape', h: 1.7 }));
+  }
   // the women at the fountains, urpu under the jet, on every third of the sixteen
   for (const [i, f] of fountains().entries()) {
     if (i % 3 !== 1) continue;

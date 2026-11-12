@@ -4,7 +4,7 @@
 // on the terraces, cloud forest on the slopes; mist and cloud of the eastern Andes.
 // Pure (used by the relief, the collision and the plant workers).
 
-import { RADIUS, SITE, TERRACE, PLAZA, PEAKS, DITCH, FIELDS, STORES, HILL, KNOLL, hillHeight, inRect, outside, terraceAt, inHouse, paved, ploughed, smooth as sm } from './layout.js';
+import { RADIUS, SITE, TERRACE, PLAZA, PEAKS, DITCH, FIELDS, STORES, HUT, HILL, KNOLL, hillHeight, inRect, outside, terraceAt, inHouse, paved, ploughed, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 function vnoise(x, z) {
@@ -85,8 +85,15 @@ function planting(x, z, p) {
   if (Math.hypot(x, z) > RADIUS - 6 || paved(x, z)) return null;
   const d = outside(x, z);
   if (d < 0 && inRect(FIELDS, x, z)) {
-    // the fields of maize south of the ditch, in plots with grass between; the path to the gate and the storehouses kept clear
-    if (Math.abs(x - 2) < 2.2 || STORES.some((r) => inRect(r, x, z, 1.5)) || ground.height(x, z) > 0.5) return { grass: 30 };
+    // the fields of maize south of the ditch, in plots with grass between; the path to the gate, the storehouses and the chaski's yard kept clear
+    const hk = ground.height(x, z);
+    if (Math.abs(x - 2) < 2.2 || inRect(HUT, x, z, 2.5) || STORES.some((r) => inRect(r, x, z, 1.5))) return { grass: 30 };
+    if (hk > 0.5) {
+      // the Guardhouse's knoll: maize on the middle of its treads (not the top, not the stair)
+      const kd = Math.hypot(x - KNOLL.c[0], z - KNOLL.c[1]), ph = ((KNOLL.r + 6 - kd) / 2.4) % 1;
+      if (hk < 2.2 * KNOLL.n - 0.5 && ph > 0.2 && ph < 0.85 && !(z < KNOLL.c[1] && Math.abs(x - KNOLL.c[0]) < 2.6) && hash2(Math.floor(x / 5), Math.floor(z / 5)) < 0.65) return { maize: 30, grass: 8 };
+      return { grass: 30 };
+    }
     const plot = ((Math.floor((x + 200) / 9) + Math.floor(z / 7)) % 3);
     return plot === 2 ? { grass: 45 } : { maize: 34, grass: 6 };
   }

@@ -4,7 +4,7 @@
 // the layout (the houses' stoves stand in a back corner, so the smoke rises through the roof's thatch near the ridge).
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, KALLANKA, houses, outside } from './layout.js';
+import { RADIUS, KALLANKA, NECK, houses, outside } from './layout.js';
 import { ground } from './ground.js';
 
 const ID = 'machu-picchu';
@@ -26,6 +26,12 @@ export function emitters() {
     const x = Math.cos(t) * 150, z = Math.sin(t) * 250;
     if (Math.hypot(x, z) > RADIUS - 24 || outside(x, z) < 20) continue;
     E.push({ p: [x, ground.height(x, z) + 0.6, z], kind: 'mist', thr: 0, seed: Math.floor(t * 100) + 17 });
+  }
+  // ...and in the gorge on either side of the neck, below the arrival
+  for (const sg of [-1, 1]) for (const z of [92, 112, 134, 156]) {
+    const x = NECK.xc + sg * (NECK.w + 62 + (z % 7) * 3);
+    if (Math.hypot(x, z) > RADIUS - 24 || outside(x, z) < 20) continue;
+    E.push({ p: [x, ground.height(x, z) + 0.6, z], kind: 'mist', thr: 0, seed: Math.floor(z * 3 + sg * 50) + 101 });
   }
   return E;
 }

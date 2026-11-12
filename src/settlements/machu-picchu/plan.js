@@ -35,7 +35,9 @@ for (let k = 0; k < TERRACE.n; k++) {
   if (pts.length > 1) E.push({ t: 'ring_wall', pts, y0, y1 });
   // the shoulders' walls, straight across (z = z0 + s) from the neck's edge to the ellipse, and the neck's own, down its edges to the ellipse again
   const ez = (x) => b * Math.sqrt(Math.max(0, 1 - (x / a) ** 2)), ex = (z) => a * Math.sqrt(Math.max(0, 1 - (z / b) ** 2));
-  const line = (P, Q, side) => { const L = Math.hypot(Q[0] - P[0], Q[1] - P[1]), m = Math.max(2, Math.ceil(L / 6)); if (L < 0.5) return; E.push({ t: 'ring_wall', pts: Array.from({ length: m + 1 }, (_, i) => [P[0] + (Q[0] - P[0]) * i / m, P[1] + (Q[1] - P[1]) * i / m]), y0, y1, side }); };
+  const line = (P, Q, side) => { const L = Math.hypot(Q[0] - P[0], Q[1] - P[1]), m = Math.max(2, Math.ceil(L / 6)); if (L < 0.5) return; E.push({ t: 'ring_wall', pts: Array.from({ length: m + 1 }, (_, i) => [P[0] + (Q[0] - P[0]) * i / m, P[1] + (Q[1] - P[1]) * i / m]), y0, y1, side });
+    // a flight of long stones standing out of the wall's face, the way down to the terrace below (the outside is the normal of Q→P here)
+    if (L > 12 && (k + Math.round(P[0])) % 3 === 0) { const f = (u) => [P[0] + (Q[0] - P[0]) * u, P[1] + (Q[1] - P[1]) * u]; E.push({ t: 'flying_stair', a: f(0.7), b: f(0.3), from: 0.8, y0, y1, dir: 1 }); } };
   if (zc < b) {
     const xe = ex(zc);
     if (NECK.xc - wn > -xe) line([-xe, zc], [NECK.xc - wn, zc], 1);          // west shoulder, going east: its outside is the south

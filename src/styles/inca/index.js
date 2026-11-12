@@ -272,11 +272,12 @@ function incaHouse(el, { bag, col }) {
     pegs(bag, F, y, list, off(h - 0.32), 1, 0.16, 0.05);
   }
   if (el.roof === 'none') return;
-  gableRoof(bag, walls, el.rect, y, h, th, mat);
+  // most roofs weathered dark, a third of them newly thatched in pale golden ichu
+  gableRoof(bag, walls, el.rect, y, h, th, mat, el.roofMat || (rng((el.seed || 1) * 13 + 5)() < 0.3 ? 'ichu' : 'thatch'));
 }
 
 /** The stone gables at a building's short ends (the wall carried up in a triangle, its pegs along the rakes) and the steep roof of ichu thatch between them. */
-function gableRoof(bag, walls, rect, y, h, th, mat) {
+function gableRoof(bag, walls, rect, y, h, th, mat, roofMat = 'thatch') {
   const [x0, z0, x1, z1] = rect, along = x1 - x0 >= z1 - z0;
   const B = (along ? z1 - z0 : x1 - x0) / 2, A = (along ? x1 - x0 : z1 - z0) / 2, rise = B * 1.45;
   for (const k of along ? ['e', 'w'] : ['n', 's']) {
@@ -293,7 +294,7 @@ function gableRoof(bag, walls, rect, y, h, th, mat) {
   }
   const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
   // the roof's thatch weathered dark, the eaves short (an Inca roof stops at the wall's head), a stone-weighted ridge line
-  rectRoof({ c: [cx, cz], A: A + th / 2 + 0.3, B: B + th / 2 + 0.35, y: y + h - 0.12, rise: rise + 0.35, kind: 'gable', sweep: 0, p: 1, curl: false, alongZ: !along, mat: 'thatch', soffit: 'thatch' }, bag);
+  rectRoof({ c: [cx, cz], A: A + th / 2 + 0.3, B: B + th / 2 + 0.35, y: y + h - 0.12, rise: rise + 0.35, kind: 'gable', sweep: 0, p: 1, curl: false, alongZ: !along, mat: roofMat, soffit: 'thatch' }, bag);
 }
 
 /**

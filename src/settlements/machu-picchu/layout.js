@@ -21,7 +21,9 @@ export function hillHeight(H, x, z) { const d = Math.hypot(x - H.c[0], z - H.c[1
  * and the five storehouses [stated: "five storerooms" in the agricultural sector — peru-explorer].
  */
 export const TOWN_WALL = { z: 84, gate: 2 }, DITCH = { z: 89, top: 3, bottom: 1, depth: 2, x0: -50 };
-export const FIELDS = [-90, 93, 90, 116];
+export const FIELDS = [-90, 93, 90, 175];
+/** The chaski's hut by the road and its yard: bare ground. */
+export const HUT = [6.5, 118.6, 10.9, 123.2];
 export const STORES = Array.from({ length: 5 }, (_, i) => [-50 + i * 7.6, 96, -44.6 + i * 7.6, 100.2]);
 /** The kallanka on the Main Plaza's east side, 47.5 × 6.5 m, its seven doors to the plaza [stated: 47.5 × 6.5 m, the largest building of Machu Picchu — Wikipedia, "Kallanka"; inferred: the place]. */
 export const KALLANKA = [24.5, -49, 31, -1.5];

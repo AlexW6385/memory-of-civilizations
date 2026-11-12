@@ -55,7 +55,7 @@ export async function town() {
     E.push({ t: 'inca_feast', c: [4, -24], y: ground.height(4, -24), seed: 12 });
     plans.push(base('machu-picchu-goods', E)); }
   // the flagged road in from the gate to the plaza and the paved gates of the kanchas
-  { const E = [{ t: 'lane', rect: [0.4, 8.5, 3.6, TOWN_WALL.z - 0.4], y: 0.025, mat: 'granite_rough' }];
+  { const E = [{ t: 'lane', rect: [0.4, 8.5, 3.6, TOWN_WALL.z - 0.4], y: 0.025, mat: 'granite_rough' }, { t: 'lane', rect: [0.4, 93.4, 3.6, 120], y: 0.025, mat: 'granite_rough' }];
     for (const K of kanchas()) {
       const r = K.rect, gateE = K.inward[0] < 0, lane = gateE ? [r[2] + 0.25, r[1] + 1, r[2] + 1.75, r[3] - 1] : [r[0] - 1.75, r[1] + 1, r[0] - 0.25, r[3] - 1];
       const ok = [[lane[0], lane[1]], [lane[2], lane[1]], [lane[0], lane[3]], [lane[2], lane[3]], [(lane[0] + lane[2]) / 2, (lane[1] + lane[3]) / 2]].every(([x, z]) => !all.some((h) => x > h.rect[0] - 0.3 && x < h.rect[2] + 0.3 && z > h.rect[1] - 0.3 && z < h.rect[3] + 0.3) && outside(x, z) < -2 && ground.height(x, z) === 0);
