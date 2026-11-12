@@ -4,7 +4,7 @@
 // not camels); a shepherd with sheep and goats; porters carrying jars up from the moored boats on the quay;
 // a fisherman mending his net. Figures and beasts are a 'life' plan; the scribe's mat and tablets, the
 // net and the stacked jars are the 'sumerian' style's (`scribe_kit`, `quay_goods`).
-import { MARKET, HARBOUR, houses, usedLots, BOATS, YARD } from './layout.js';
+import { MARKET, COURT, HARBOUR, houses, usedLots, BOATS, YARD } from './layout.js';
 import { doorOf } from '../../styles/sumerian/index.js';
 import { lotPoint, lotRot, tradeRoom } from '../../styles/sumerian/house.js';
 import { TRADE_SPOT } from '../../styles/sumerian/trades.js';
@@ -58,6 +58,7 @@ export function urLife() {
   figures.push({ t: 'figure', at: [6, -196], y: 0, rot: E + 0.3, seed: seed(), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'shawl', hair: 'bun', skin: 'skin_medium', feet: 'bare', carry: 'pot', h: 1.52 });
   figures.push({ t: 'figure', at: [7.1, -195.2], y: 0, rot: E + 0.2, seed: seed(), dress: 'robe', cloth: 'linen', cloth2: 'cloth_brown', over: 'shawl', hair: 'bun', skin: 'skin_medium', feet: 'bare', h: 1.5 });
   figures.push({ t: 'figure', at: [-20.5, -219.2], y: 0, rot: S, seed: seed(), child: true, dress: 'wrap', top: 'bare', cloth: 'linen', hair: 'shaven', feet: 'bare' });
+  courtLife(figures, gear, man, rand, seed);
   tradeWorkers(figures, man, rand);
   harbourLife(figures, gear, man, rand, seed);
   doorLife(figures, man, rand, seed);
@@ -127,4 +128,50 @@ function doorLife(figures, man, rand, seed) {
     else if (k < 0.9) figures.push({ t: 'animal', kind: 'dog', at: [x, z], y: 0, rot: rand() * 6.28, seed: seed() });
     else figures.push({ t: 'animal', kind: 'donkey', at: P(dc + side * 2.0, 0.9), y: 0, rot: rot + 1.57, seed: seed(), gear: true });
   }
+}
+
+/**
+ * The Court of Nanna at the visitor's arrival (§4.4): priests and temple staff at the altar and the table of offerings, a file of
+ * bearers with jars, loaves and bundles going up the axis to the stairs, a lamb led to the pen, donkeys unloading fuel and grain by the
+ * pen, worshippers at the stelae and the washing basins, scribes and musicians in the reed pavilion. Positions are from the court's rect
+ * and the court furnishing (court.js), all 4 m or more from the arrival (the arrival is at the court's z0 + 22 looking south: everything is set in front of it, from z0 + 26 to the stairs' foot).
+ */
+function courtLife(figures, gear, man, rand, seed) {
+  const z0 = COURT[1], robe = (cloth, o = {}) => ({ dress: 'robe', top: '', cloth, over: 'shawl', cloth2: 'cloth_white', hair: 'shaven', beard: rand() < 0.5, ...o });
+  // the priests round the altar of burnt offering (x -17, z0 + 40) and at the table of offerings (x 17): one burns, one pours, others stand by
+  man([-17, z0 + 37.4], 0, S, robe('cloth_white', { pose: 'stand', arms: 'clasp' }));
+  man([-14.8, z0 + 41.2], 0, W, robe('linen', { pose: 'stand', carry: 'staff', len: 1.6, staffMat: 'wood_dark' }));
+  man([-19.4, z0 + 41.6], 0, E, robe('cloth_white', { pose: 'talk' }));
+  man([17, z0 + 38.2], 0, S, robe('cloth_white', { pose: 'stand', arms: 'clasp' }));
+  man([19.4, z0 + 41.6], 0, W, { pose: 'stand', carry: 'pot' });
+  figures.push({ t: 'figure', at: [14.6, z0 + 41.4], y: 0, rot: E, seed: seed(), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'shawl', hair: 'bun', skin: 'skin_medium', feet: 'bare', carry: 'basket', h: 1.52 });
+  // the file of bearers going up the way to the stairs: jars, baskets, loaves, a bundle of reeds, two women, a boy
+  const bear = [[-2.6, 28, 'pot'], [2.4, 31.5, 'basket'], [-2.2, 35, 'bundle'], [2.8, 39, 'pot'], [-2.8, 43.5, 'basket'], [2.2, 47.5, 'pot'], [-2.4, 52, 'pot'], [2.6, 56, 'basket']];
+  bear.forEach(([x, dz, carry], i) => {
+    if (i % 3 === 1) figures.push({ t: 'figure', at: [x, z0 + dz], y: 0, rot: S + (rand() - 0.5) * 0.2, seed: seed(), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'shawl', hair: 'bun', skin: 'skin_medium', feet: 'bare', carry, h: 1.52 });
+    else man([x, z0 + dz], 0, S + (rand() - 0.5) * 0.2, { carry });
+  });
+  man([0.4, z0 + 41], 0, S, { child: true, carry: 'none' });
+  // a lamb led to the pen of the offering (x -33, z0 + 52) by a temple herdsman, sheep inside it, a boy with a kid
+  man([-24.5, z0 + 47], 0, E, { carry: 'staff', len: 1.7, pose: 'staff', staffMat: 'wood_dark', over: 'shawl', top: '', cloth: 'cloth_brown' });
+  figures.push({ t: 'animal', kind: 'sheep', at: [-26.4, z0 + 47.4], y: 0, rot: E, seed: seed() }, { t: 'animal', kind: 'sheep', at: [-27.5, z0 + 46.4], y: 0, rot: E + 0.3, seed: seed() });
+  for (let k = 0; k < 5; k++) figures.push({ t: 'animal', kind: k < 4 ? 'sheep' : 'goat', at: [-36.4 + k * 1.6 + (rand() - 0.5) * 0.4, z0 + 51.3 + (rand() - 0.5) * 2.4], y: 0, rot: rand() * 6.28, seed: seed() });
+  // donkeys by the fuel stack and the pen, unloaded by their drivers: fuel for the altar, jars of beer and grain
+  for (const [x, dz, r] of [[-30, 28, E + 0.5], [-28.2, 31.5, E - 0.3]]) figures.push({ t: 'animal', kind: 'donkey', at: [x, z0 + dz], y: 0, rot: r, seed: seed(), gear: true });
+  man([-27.2, z0 + 29.6], 0, W, { carry: 'staff', len: 1.5, staffMat: 'wood_dark', pose: 'staff' });
+  man([-29.4, z0 + 26.6], 0, N, { carry: 'bundle' });
+  // worshippers at the stelae (x +-31, z0 + 28) and at the basins (x +-12, z0 + 14): kneeling, a man washing his hands
+  for (const sx of [-1, 1]) {
+    man([sx * 31 + 0.4, z0 + 31.4], 0, N, { pose: 'kneel', arms: 'pray' });
+    man([sx * 29.2, z0 + 30.6], 0, N + 0.3, robe('cloth_ochre', { pose: 'stand', arms: 'clasp' }));
+  }
+  // the pavilion's shade (x 33, z0 + 52): the temple scribes on the bench and on the mat, a musician with a lyre's place
+  man([32, z0 + 51], 0, N, robe('linen', { pose: 'cross' })); man([35, z0 + 50.4], 0, N, robe('cloth_white', { pose: 'cross', beard: true }));
+  man([33.6, z0 + 54.2], 0, S, { pose: 'sit', over: 'shawl', top: '', cloth: 'cloth_ochre' });
+  // two women with water jars on their heads by the entrance's jar stands, a pair of boys crossing, a dog
+  for (const [x, dz, r] of [[-11.5, 31, S], [11.2, 34.5, N + 0.4]]) figures.push({ t: 'figure', at: [x, z0 + dz], y: 0, rot: r, seed: seed(), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'shawl', hair: 'bun', skin: 'skin_medium', feet: 'bare', carry: 'pot', h: 1.5 });
+  man([-9.5, z0 + 29], 0, E, { child: true }); man([-7.8, z0 + 29.8], 0, E, { child: true, carry: 'basket' });
+  figures.push({ t: 'animal', kind: 'dog', at: [8, z0 + 27], y: 0, rot: 1.2, seed: seed() });
+  // the guards at the terrace stairs' foot with spear and shield, the temple's door-keepers
+  for (const sx of [-1, 1]) man([sx * 8.2, z0 + 60.5], 0, N, { pose: 'staff', carry: 'staff', len: 2.0, staffMat: 'wood_dark', over: 'belt' });
 }
