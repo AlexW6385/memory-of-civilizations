@@ -22,10 +22,20 @@ export async function town() {
   woman([bx + 0.35, iz0 + 4.88], 0.05, Math.PI, { pose: 'kneel', over: 'none' });
   woman([ix0 + 4.1, iz0 + 2.6], 0.45, -Math.PI / 2, { pose: 'sit_ground', over: 'none' });
   woman([ix0 + 1.1, iz0 + 3.55], 0.05, 0, { pose: 'sit_ground', child: true, h: 0.6, over: 'none' });
+  // a second household member on the far corner of some roofs, a dog on others, a child with a bowl
+  const roof2 = (i, j) => {
+    const x0 = colX(j), z0 = rowZ(i), y = TOP[i][j] + 0.09, at = [x0 + CW[j] - 0.9 - rand() * 0.4, z0 + 0.9 + rand() * 0.5], r = rand();
+    if (r < 0.3) woman(at, y, rand() * 6.28, { pose: 'kneel', over: 'none' });
+    else if (r < 0.5) man(at, y, rand() * 6.28, { pose: 'sit_ground' });
+    else if (r < 0.7) E.push({ t: 'animal', kind: 'dog', at, y, rot: rand() * 6.28, seed: i * 17 + j });
+    else if (r < 0.85) woman(at, y, rand() * 6.28, { child: true, h: 0.9, pose: 'sit_ground' });
+    else man(at, y, rand() * 6.28, { carry: 'basket' });
+  };
   // on the roofs: a figure at a corner of a house, sitting or standing; now and then two talking
   for (let i = 0; i < KIND.length; i++) for (let j = 0; j < KIND[0].length; j++) {
     const k = KIND[i][j], x0 = colX(j), z0 = rowZ(i);
-    if (k === 'h' && rand() < 0.5) {
+    if (k === 'h' && rand() < 0.5) roof2(i, j);
+    if (k === 'h' && rand() < 0.78) {
       const y = TOP[i][j] + 0.09, at = [x0 + 0.8 + rand() * 0.4, z0 + CD[i] - 0.9 - rand() * 0.5], rot = rand() * 6.28;
       const r = rand();
       if (r < 0.3) woman(at, y, rot, { pose: 'sit_ground' });
@@ -82,6 +92,24 @@ export async function town() {
     if (Math.abs(at[0]) < 36 && Math.abs(at[1] + 8) < 30) continue;
     (rand() < 0.5 ? woman : man)(at, 0, rand() * 6.28, { carry: rand() < 0.5 ? 'pole' : 'basket' });
   }
+  // south of the opened house, in the trodden yard before the town: a potter's drying ground with pots on a mat and firewood, a woman grinding
+  // grain at a saddle quern with a child at her knee, a man mending a basket, children at play with clay balls, a dog asleep, a hearth fire's ash
+  {
+    const cxm = (LANDMARK.rect[0] + LANDMARK.rect[2]) / 2, zs = LANDMARK.rect[3];
+    const A = [cxm - 8.5, zs + 9], B = [cxm + 8.5, zs + 8];
+    E.push({ t: 'goods_mat', at: A, y: 0.02, rot: 0.3, goods: 'pottery', seed: 11 });
+    E.push({ t: 'pot', kind: 'water_pot', n: 3, at: [A[0] + 1.6, A[1] + 0.4], y: 0.02, seed: 12 });
+    E.push({ t: 'firewood', at: [A[0] - 1.8, A[1] - 0.4], y: 0.02, rot: 0.2, len: 1.0, seed: 13 });
+    woman([A[0] + 0.2, A[1] + 1.3], 0.02, Math.PI + 0.3, { pose: 'squat', over: 'none' });
+    E.push({ t: 'goods_mat', at: B, y: 0.02, rot: -0.2, goods: 'produce', seed: 14 });
+    woman([B[0] + 0.2, B[1] + 1.2], 0.02, Math.PI, { pose: 'kneel', over: 'none' });
+    woman([B[0] - 0.9, B[1] + 1.0], 0.02, 0.5, { child: true, h: 0.7, pose: 'sit_ground' });
+    E.push({ t: 'basket', n: 3, at: [B[0] + 1.8, B[1] - 0.3], y: 0.02, seed: 15 });
+    man([B[0] + 2.6, B[1] + 1.6], 0.02, 2.4, { pose: 'sit_ground' });
+    for (let q = 0; q < 3; q++) woman([cxm - 2.5 + q * 1.1, zs + 12.5 + (q % 2) * 0.8], 0.02, rand() * 6, { child: true, h: 0.8 + q * 0.05 });
+    E.push({ t: 'animal', kind: 'dog', at: [cxm + 4.2, zs + 11], y: 0, rot: 2, seed: 61 });
+    man([cxm - 13, zs + 14], 0.02, -1.2, { carry: 'basket' }); woman([cxm + 12, zs + 16], 0.02, 3, { carry: 'pole' });
+  }
   // the pens: sheep and goats in one, cattle (the great aurochs' kin, dark and long-horned) in the other
   PENS.forEach((p, n) => {
     const [x0, z0, x1, z1] = p.rect;
@@ -91,6 +119,12 @@ export async function town() {
     }
     woman([p.gate === 'w' ? x0 - 1.5 : x1 + 1.5, (z0 + z1) / 2 + 1.2], 0, p.gate === 'w' ? Math.PI / 2 : -Math.PI / 2, {});
   });
+  // flocks grazing on the plain with a herder and a dog: sheep and goats mixed, a few kids
+  for (const [fx, fz, n] of [[-52, 30, 10], [50, 36, 9], [-6, 58, 8], [-56, -40, 7]]) {
+    for (let q = 0; q < n; q++) E.push({ t: 'animal', kind: q % 3 === 2 ? 'goat' : 'sheep', at: [fx + (rand() - 0.5) * 10, fz + (rand() - 0.5) * 7], y: 0.02, rot: rand() * 6.28, graze: true, seed: q * 5 + Math.floor(fx) });
+    man([fx + 6, fz + 3], 0, -2, { pose: 'staff', carry: 'staff' });
+    E.push({ t: 'animal', kind: 'dog', at: [fx + 4.5, fz - 3], y: 0, rot: 1, seed: Math.floor(fz) });
+  }
   for (let q = 0; q < 6; q++) {
     const a = rand() * 6.28, r = 38 + rand() * 12;
     E.push({ t: 'animal', kind: 'dog', at: [Math.cos(a) * r * 1.1, Math.sin(a) * r * 0.8 + 4], y: 0, rot: rand() * 6.28, seed: q + 3 });

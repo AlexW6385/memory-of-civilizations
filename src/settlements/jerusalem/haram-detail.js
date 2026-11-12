@@ -82,7 +82,7 @@ export function haramLife() {
   // attendants sweeping the platform and the esplanade (the cleaning of the Haram), incense carriers, a water carrier
   for (let k = 0; k < 14; k++) {
     const onP = k < 8, x = onP ? PLATFORM[0] + 6 + rand() * (PLATFORM[2] - PLATFORM[0] - 12) : hx0 + 20 + rand() * (hx1 - hx0 - 40), z = onP ? PLATFORM[1] + 6 + rand() * (PLATFORM[3] - PLATFORM[1] - 12) : -180 + rand() * 340;
-    if ((onP && Math.hypot(x, z + 20) < 28) || (!onP && (inPlat(x, z, -6) || (Math.abs(x) < 46 && z > 112)))) continue;
+    if ((onP && (Math.hypot(x, z + 20) < 28 || Math.hypot(x - 40, z + 2) < 9)) || (!onP && (inPlat(x, z, -6) || (Math.abs(x) < 46 && z > 112)))) continue;
     person(x, z, onP ? PY : T, rand() * 6.28, { carry: 'broom', cloth: pick(['cloth_grey', 'cloth_brown', 'linen']), hat: 'cap' });
   }
   // gatekeepers at the stairs and gates: two at each (ten to a gate by the tradition; the nearest few shown)
@@ -93,7 +93,7 @@ export function haramLife() {
   // pilgrims and townsmen strolling and standing in twos and threes across platform and esplanade
   for (let k = 0; k < 90; k++) {
     const onP = k < 45, x = onP ? PLATFORM[0] + 3 + rand() * 134 : hx0 + 8 + rand() * 284, z = onP ? PLATFORM[1] + 3 + rand() * 114 : hz0 + 8 + rand() * 384;
-    if (onP ? Math.hypot(x, z + 20) < 27 : (inPlat(x, z, -5) || (Math.abs(x) < 46 && z > 112) || x > 150)) continue;
+    if (onP ? Math.hypot(x, z + 20) < 27 || Math.hypot(x - 40, z + 2) < 9 : (inPlat(x, z, -5) || (Math.abs(x) < 46 && z > 112) || x > 150)) continue;
     const y = onP ? PY : T, rot = rand() * 6.28;
     const g = rand();
     if (g < 0.25) { person(x, z, y, rot, { pose: 'talk' }); person(x + 0.8, z + 0.3, y, rot + 2.8, { pose: 'talk' }); }
