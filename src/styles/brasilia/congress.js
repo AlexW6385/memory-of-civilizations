@@ -50,14 +50,48 @@ function door(bag, c, R0, R1, ang, w, h, y) {
   bag.add('timber', box(c[0] + dx * (rm - t / 2 - 0.1) - 0.3, y, c[1] - w / 2 - 0.1, c[0] + dx * (rm - t / 2 - 0.1) + 0.3, y + 0.04, c[1] + w / 2 + 0.1));
 }
 
+/** The Salão Negro: black granite floor and walls, two files of round piers, panels, a reception, the bust of Kubitschek's era, benches, flags. */
+function salaoNegro(bag, col, lights, H, hy) {
+  const [hx0, hz0, hx1, hz1] = H, T = 0.4, rnd = (() => { let s = 1960; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); })();
+  bag.add('granite_black', box(hx0, 0.0, hz0, hx1, 0.06, hz1)); col.floor(H, 0.06);
+  for (let k = 0; k < 8; k++) bag.add('granite_grey', box(hx0 + 2 + k * 4.4, 0.055, hz0 + 0.3, hx0 + 2.15 + k * 4.4, 0.065, hz1 - 0.3));       // joints in the floor
+  // the walls: black granite on the north, south and east inner faces, the west a glazed front with a door
+  const wl = (a, b, c, d) => { bag.add('granite_black', box(a, 0.06, b, c, hy, d)); };
+  wl(hx0, hz0, hx1, hz0 + 0.3); wl(hx0, hz1 - 0.3, hx1, hz1); wl(hx1 - 0.3, hz0, hx1, hz1);
+  const door = [-94, -90];
+  for (const [a, b] of [[hz0, door[0]], [door[1], hz1]]) { bag.add('glass_outer', box(hx0 - 0.12, 0.2, a, hx0, hy - 0.5, b)); col.rect([hx0 - 0.12, a, hx0, b], 0, hy); bag.add('granite_black', box(hx0 - 0.12, 0, a, hx0, 0.2, b)); }
+  bag.add(CONC, box(hx0 - 0.12, hy - 0.5, hz0, hx0, hy, hz1));
+  for (const zz of [door[0] - 0.08, door[1]]) bag.add('steel_chrome', box(hx0 - 0.15, 0, zz, hx0 + 0.05, 3.2, zz + 0.08));
+  // two files of round piers (the roof deck's supports), the upper floors' lamps between
+  for (let x = hx0 + 6; x < hx1 - 3; x += 6) for (const z of [hz0 + 9, hz1 - 9]) { bag.add(WHITE, lathe([[0.5, 0], [0.4, hy - 0.4], [0.5, hy]], 12, null, x, 0.06, z)); col.circle(x, z, 0.55, 0, hy); }
+  // the Brazilian flag on its stand and the pedestals with bronze busts along the north wall
+  bag.add('steel_chrome', lathe([[0.06, 0], [0.04, 3.6], [0.001, 3.7]], 6, null, hx0 + 4, 0.06, hz0 + 3)); bag.add('cloth_green', box(hx0 + 4.04, 1.9, hz0 + 2.98, hx0 + 6.0, 3.4, hz0 + 3.02)); bag.add('cloth_ochre', box(hx0 + 4.5, 2.25, hz0 + 2.97, hx0 + 5.6, 3.05, hz0 + 3.03)); col.circle(hx0 + 4, hz0 + 3, 0.1, 0, 3.7);
+  for (let k = 0; k < 4; k++) { const bx = hx0 + 10 + k * 7, bz = hz0 + 1.2; bag.add('granite_grey', box(bx - 0.4, 0.06, bz - 0.4, bx + 0.4, 1.2, bz + 0.4)); bag.add('bronze', lathe([[0.001, 0], [0.2, 0.05], [0.22, 0.3], [0.16, 0.48], [0.001, 0.52]], 10, null, bx, 1.2, bz)); col.rect([bx - 0.4, bz - 0.4, bx + 0.4, bz + 0.4], 0, 1.8); }
+  // painted panels on the east wall (abstract bands, Brazilian modernist: colour fields) and a long inscription wall
+  const mc = ['cloth_blue', 'cloth_ochre', 'cloth_red', 'cloth_green', 'cloth_white', 'cloth_maroon'];
+  for (let k = 0; k < 3; k++) { const pz = hz0 + 3 + k * 7.5; bag.add('timber', box(hx1 - 0.36, 0.9, pz, hx1 - 0.3, 3.9, pz + 5.2)); for (let b = 0; b < 6; b++) bag.add(mc[Math.floor(rnd() * 6)], box(hx1 - 0.4, 1.0 + b * 0.48, pz + 0.1, hx1 - 0.36, 1.4 + b * 0.48, pz + 5.1)); }
+  // the reception desk and the benches in groups, exhibition stands with their glass
+  solidB(bag, col, 'timber', hx0 + 5, 0.06, hz1 - 6, hx0 + 11, 1.1, hz1 - 5); bag.add('marble', box(hx0 + 4.9, 1.1, hz1 - 6.1, hx0 + 11.1, 1.16, hz1 - 4.9));
+  for (let k = 0; k < 4; k++) for (const s of [0, 1]) { const bx = hx0 + 14 + k * 5, bz = (s ? hz0 + 6 : hz1 - 7); solidB(bag, col, 'leather_bench', bx, 0.06, bz, bx + 2.2, 0.5, bz + 0.6); bag.add('leather_bench', box(bx, 0.5, bz + (s ? 0.5 : 0.0), bx + 2.2, 0.95, bz + (s ? 0.6 : 0.1))); }
+  for (let k = 0; k < 3; k++) { const ex = hx0 + 16 + k * 6, ez = (hz0 + hz1) / 2; solidB(bag, col, 'timber', ex, 0.06, ez - 0.7, ex + 2.0, 0.95, ez + 0.7); bag.add('glass_outer', box(ex + 0.05, 0.95, ez - 0.65, ex + 1.95, 1.35, ez + 0.65)); bag.add(['bronze', 'gilt_bronze', 'marble'][k], lathe([[0.001, 0], [0.18, 0.04], [0.15, 0.3], [0.001, 0.36]], 8, null, ex + 1.0, 0.95, ez)); }
+  for (let x = hx0 + 3; x < hx1 - 3; x += 9) for (const z of [hz0 + 5, hz1 - 5]) { bag.add('lamp_white', box(x - 0.8, hy - 0.12, z - 0.25, x + 0.8, hy - 0.02, z + 0.25)); }
+  lights.push({ at: [hx0 + 8, 3.8, (hz0 + hz1) / 2], color: '#ffe8c8', intensity: 4, distance: 18 }, { at: [hx0 + 24, 3.8, (hz0 + hz1) / 2], color: '#ffe8c8', intensity: 4, distance: 18 }, { at: [hx0 + 16, 3.8, hz0 + 8], color: '#ffe8c8', intensity: 3, distance: 14 }, { at: [hx0 + 16, 3.8, hz1 - 8], color: '#ffe8c8', intensity: 3, distance: 14 });
+}
+function solidB(bag, col, mat, x0, y0, z0, x1, y1, z1) { bag.add(mat, box(x0, y0, z0, x1, y1, z1)); col.rect([x0, z0, x1, z1], y0, y1); }
 export function congress(el, { bag, col, lights }) {
   const [x0, z0, x1, z1] = PLATFORM, y = DECK;
   // ── the platform: a mass of white concrete, the marble roof deck, a parapet, the glazed band of the Salão Negro along its front ──
-  bag.add(CONC, box(x0, -1, z0, x1, y - 0.35, z1));
+  // the mass is cut for the Salão Negro, the black hall under the deck north of the pool (36 × 26 m, 4.8 m high), entered by a glazed door in the west face
+  const HALL = [x0, -106, x0 + 36, -80], hy = 4.8;
+  const mass = (a, b, c, d) => { bag.add(CONC, box(a, -1, b, c, y - 0.35, d)); col.rect([a, b, c, d], -1, y); };
+  mass(x0, z0, x1, HALL[1]); mass(x0, HALL[3], x1, z1); mass(HALL[2], HALL[1], x1, HALL[3]);
+  bag.add(CONC, box(HALL[0], hy, HALL[1], HALL[2], y - 0.35, HALL[3])); col.rect([HALL[0], HALL[1], HALL[2], HALL[3]], hy, y);
   bag.add('marble', box(x0, y - 0.35, z0, x1, y, z1));
-  col.rect(PLATFORM, -1, y); col.floor(PLATFORM, y);
+  col.floor(PLATFORM, y);
+  salaoNegro(bag, col, lights, HALL, hy);
   for (let z = z0 + 2; z < z1 - 2; z += 4.4) {
     if (z > RAMP.z0 - 4.4 && z < RAMP.z1 + 0.2) continue;
+    if (z + 4.4 > HALL[1] && z < HALL[3]) continue;
     bag.add('glass_outer', box(x0 - 0.12, 0.8, z, x0, y - 1.6, z + 3.8));
     bag.add(CONC, box(x0 - 0.2, 0.4, z + 3.8, x0 + 0.05, y - 1.0, z + 4.4));
   }
@@ -102,6 +136,10 @@ export function congress(el, { bag, col, lights }) {
   bag.add('glass_outer', box(tx0 + 0.9, TOWERS.bridge[0] + 0.6, zb0 + 0.1, tx1 - 0.9, TOWERS.bridge[1] - 0.6, zb1 - 0.1));
   col.rect([tx0 + 1, zb0, tx1 - 1, zb1], TOWERS.bridge[0], TOWERS.bridge[1]);
 
+  // ── the deck's furniture: benches along the parapet, planters, the lamp posts, a guard's booth at the chambers' doors ──
+  for (const zz of [z0 + 6, z1 - 6]) for (let xx = x0 + 8; xx < x1 - 6; xx += 14) { if (Math.abs(xx - DOME.c[0]) < 26 && Math.abs(zz - DOME.c[1]) < 30) continue; if (Math.abs(xx - BOWL.c[0]) < 36 && Math.abs(zz - BOWL.c[1]) < 36) continue; bag.add('timber', box(xx, y + 0.42, zz, xx + 1.9, y + 0.48, zz + 0.5)); bag.add(CONC, box(xx + 0.1, y, zz + 0.05, xx + 0.2, y + 0.42, zz + 0.45)); bag.add(CONC, box(xx + 1.7, y, zz + 0.05, xx + 1.8, y + 0.42, zz + 0.45)); col.rect([xx, zz, xx + 1.9, zz + 0.5], y, y + 0.5); }
+  for (const [px, pz] of [[x0 + 4, -30], [x0 + 4, 30], [x0 + 4, -2], [x0 + 4, 2]]) { bag.add(CONC, box(px - 0.6, y, pz - 0.6, px + 0.6, y + 0.55, pz + 0.6)); bag.add('palm_leaf', lathe([[0.001, 0], [0.5, 0.12], [0.7, 0.5], [0.4, 0.9], [0.001, 1.0]], 8, null, px, y + 0.55, pz)); col.rect([px - 0.6, pz - 0.6, px + 0.6, pz + 0.6], y, y + 0.6); }
+  for (const [gx, gz] of [[DOME.c[0] - DOME.R - 3, DOME.c[1]], [BOWL.c[0] - BOWL.R - 3, BOWL.c[1] + 4]]) { bag.add('plaster_white', box(gx - 0.8, y, gz - 0.8, gx + 0.8, y + 2.4, gz + 0.8)); bag.add('glass_outer', box(gx - 0.6, y + 1.0, gz - 0.82, gx + 0.6, y + 2.0, gz - 0.8)); bag.add(CONC, box(gx - 1.0, y + 2.4, gz - 1.0, gx + 1.0, y + 2.55, gz + 1.0)); col.rect([gx - 0.8, gz - 0.8, gx + 0.8, gz + 0.8], y, y + 2.55); }
   // ── the Senate: the dome, hollow, its door on the west ──
   {
     const { c, R, h, r: rIn, door: ang, doorW } = DOME, hIn = h * 0.86, dh = 3.6, half = doorW / 2 / rIn;

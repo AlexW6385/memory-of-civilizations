@@ -7,8 +7,8 @@ const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const E1 = [
   { t: 'congress' },
   { t: 'praca', rect: PRACA, flag: [296, 0], pillory: [206, 0], warriors: [150, 96], justice: [206, 124] },
-  { t: 'colonnade_palace', rect: PLANALTO, floors: 3, face: 'x', name: 'Planalto' },
-  { t: 'colonnade_palace', rect: STF, floors: 2, face: 'x', name: 'Supremo' },
+  { t: 'colonnade_palace', rect: PLANALTO, floors: 3, face: 'x', name: 'Planalto', door: 'z1' },
+  { t: 'colonnade_palace', rect: STF, floors: 2, face: 'x', name: 'Supremo', door: 'z0' },
 ];
 const dome = [DOME.c[0] - DOME.R, DOME.c[1] - DOME.R, DOME.c[0] + DOME.R, DOME.c[1] + DOME.R];
 const bowl = [BOWL.c[0] - BOWL.R, BOWL.c[1] - BOWL.R, BOWL.c[0] + BOWL.R, BOWL.c[1] + BOWL.R];
