@@ -123,7 +123,7 @@ export const SITES = [
   { id: 'vienna', name: { en: 'Vienna, 1902', zh: '1902年的维也纳' }, era: '1902', region: 'danube', lat: 48.21, lon: 16.37, radius: 330 },
   { id: 'brasilia', name: { en: 'Brasília', zh: '巴西利亚' }, era: '1960s', region: 'brazil', lat: -15.8, lon: -47.86, radius: 520 },
   { id: 'bauhaus-dessau', name: { en: 'Bauhaus Dessau', zh: '包豪斯德绍' }, era: 'c. 1927', region: 'germany', lat: 51.84, lon: 12.23, radius: 190 },
-  { id: 'sgang-gwaay', name: { en: 'SG̱ang Gwaay Llnagaay', zh: '斯冈瓜伊' }, era: 'c. 1850', region: 'northwest-coast', lat: 52.09, lon: -131.22, radius: 190 },
+  { id: 'sgang-gwaay', name: { en: 'SG̱ang Gwaay Llnagaay', zh: '斯冈瓜伊' }, era: 'c. 1850', region: 'northwest-coast', lat: 52.09, lon: -131.22, water: true, island: true, radius: 190 },
 ];
 
 for (const s of SITES) s.radius ??= 190;

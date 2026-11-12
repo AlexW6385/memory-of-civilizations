@@ -117,6 +117,11 @@ export const wet = (x, z) => (x > WIEN.x0 && x < WIEN.x1 ? Math.max(WIEN.z0 - z,
 export const inWater = (x, z) => x > WIEN.x0 + 0.6 && x < WIEN.x1 - 0.6 && z > WIEN.z0 + 0.1 && z < WIEN.z1 - 0.1;
 /** The ground: level, but for the Wien's channel (the bed between the walls) and the Stadtbahn's ledge on its south side. */
 export function height(x, z) {
+  // the rim meets the open country at no more than 0.9 m in 1 m (tests/planet.test.mjs: no step)
+  const h = heightIn(x, z), lim = Math.max(0, RADIUS - 1 - Math.hypot(x, z)) * 0.9;
+  return Math.max(-lim, Math.min(lim, h));
+}
+function heightIn(x, z) {
   if (x <= WIEN.x0 + 0.6 || x >= WIEN.x1 - 0.6) return GROUND;
   if (z > WIEN.z0 - 1.0 && z < WIEN.z1 + 1.2) return z < WIEN.z0 + 0.1 || z > WIEN.z1 - 0.1 ? (z > WIEN.z1 + 0.1 ? LEDGE.y : GROUND + WIEN.bed * smooth(WIEN.z0 + 0.1, WIEN.z0 - 0.9, z)) : WIEN.bed;
   if (z >= LEDGE.z0 && z <= LEDGE.z1 + 0.6) return LEDGE.y;

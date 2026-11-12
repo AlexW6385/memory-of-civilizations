@@ -85,7 +85,7 @@ export function height(x, z) {
     if (Math.abs(z - H.c[1]) > H.d / 2 + 4) continue;
     const [u, v] = toLocal(H, x, z);
     const k = smooth(0, 0.8, Math.min(H.w / 2 - 0.65 - Math.abs(u), H.d / 2 - 0.65 - Math.abs(v)));
-    if (k > 0) h = h + (G - PIT - h) * k;
+    if (k > 0 && h > G - PIT) h = h + (G - PIT - h) * k;   // a pit only lowers the ground (a house by the shore leaves the sea bed alone)
   }
   return h;
 }

@@ -49,7 +49,7 @@ export const nandauwas = {
   entrance: { at: [-10, 80], facing: 'n' },
   bounds: [-48, -80, 28, 12],
   bakeBounds: [-48, -80, 28, 12],
-  view: [ox0, oz0, ox1, oz1],
+  view: [ox0, oz0, ox1, 40],   // the walls and the lagoon before them to the causeway's head: Nandauwas stands in the water, so it is seen from the landing
   bakeTop: 12,
   elements: E,
   rooms,

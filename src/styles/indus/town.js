@@ -92,9 +92,9 @@ export function office(el, ctx) {
 /** indus_river: { x0, level, bed } — the Indus: its water from x0 eastward over the whole width (the ground hides it where it is dry). */
 export function river(el, ctx) {
   // strips across x, each as long as the disc allows (the water stays inside the settlement's disc)
-  const R = 440, t = [], y = el.level;
-  for (let x = el.x0; x < R - 1; x += 10) {
-    const x2 = Math.min(x + 10, R - 1), z = Math.sqrt(R * R - x2 * x2);
+  const R = 440, t = [], y = el.level, end = Math.min(el.x1 ?? R - 1, R - 1);
+  for (let x = el.x0; x < end; x += 10) {
+    const x2 = Math.min(x + 10, end), z = Math.sqrt(R * R - x2 * x2);
     t.push(x, y, -z, x, y, z, x2, y, z, x, y, -z, x2, y, z, x2, y, -z);
   }
   ctx.bag.add('water', fromTriangles(t));

@@ -30,7 +30,6 @@ function emitters() {
   return E;
 }
 
-}
 
 const ATT = [];
 registerSystem({

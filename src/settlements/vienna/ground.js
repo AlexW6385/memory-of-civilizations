@@ -27,7 +27,7 @@ function planting(x, z) {
   return null;
 }
 export const ground = {
-  height, cover, water, waterLevel, planting, fromWater, rim: -4,
+  height, cover, water, waterLevel, planting, fromWater, rim: 0,
   maxDensity: { plane_tree: 0.5, elm: 0.008 },
   climate: {
     sun: { az: 160, el: 46, color: [1.0, 0.96, 0.9], intensity: 3.3, lat: 48, dec: 10, hour: 11 },

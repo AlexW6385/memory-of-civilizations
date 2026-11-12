@@ -83,7 +83,8 @@ export async function town() {
   const plans = [], LT = lots();
   plans.push(base('md-streets', [{ t: 'indus_streets', streets: streets(), lanes: lanes() }]));
   plans.push(base('md-market', [{ t: 'indus_market', rect: PLAZA, well: WELL_BIG }], { rooms: [{ id: 'market place', rect: PLAZA, y: 0, kind: 'open', market: true }] }));
-  plans.push(base('md-river', [{ t: 'indus_river', x0: QUAY.x1, level: RIVER.level }]));
+  // the river in strips of 30 m, each its own plan, so that each one's bounds stay inside the disc
+  for (let x = QUAY.x1, k = 0; x < 439; x += 30, k++) plans.push(base('md-river-' + k, [{ t: 'indus_river', x0: x, x1: x + 30, level: RIVER.level }]));
   plans.push(base('md-quay', [{ t: 'indus_quay', ...QUAY, bed: RIVER.bed, level: RIVER.level }, { t: 'indus_office', rect: CUSTOMS }]));
   // the wall on the south with its gate and towers
   {
