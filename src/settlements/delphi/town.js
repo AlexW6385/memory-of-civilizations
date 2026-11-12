@@ -71,6 +71,12 @@ export async function town() {
     // in the adyton: the Pythia on her tripod? no: she is shown standing at the omphalos, veiled, a laurel bough in her hand
     woman([-18.9, TEMPLE.cz - 3.4], -Math.PI / 2, { y: TT_Y + 0.45, cloth: 'cloth_maroon', cloth2: 'cloth_maroon', hat: 'veil' });
   }
+  // the consultants' line from the altar to the temple's steps: each with his cake (the pelanos) in a basket and his fee, a servant behind with the goat's cord, the herald
+  // calling them in their order (the Delphians first, then the cities of the council, then the other Greeks)
+  { const y = TT_Y + 0.03, zq = 5.6;
+    for (let k = 0; k < 6; k++) { const x = 36.5 + k * 1.55 + (k % 2) * 0.2, zz = zq + (k % 2 ? 0.45 : -0.2);
+      (k % 3 === 1 ? woman : citizen)([x, zz], -Math.PI / 2 + (k % 2 ? 0.12 : -0.1), { y, carry: k % 2 ? 'basket' : 'none', pose: 'stand' }); }
+    priest([TEMPLE.X + 7.6, zq - 1.6], -Math.PI / 2 + 0.3, { y, pose: 'talk' }); }
   // the mason's yard: the carver at the stele, his boy with the water, a second mason at the block; the pen: the animals for the sacrifice and the boy who watches them
   { const [yx, yz] = YARD.at, c = Math.cos(YARD.yaw), s = Math.sin(YARD.yaw), at = (u, v) => [yx + u * c + v * s, yz - u * s + v * c], y = TT_Y + 0.03;
     worker(at(-1.6, 1.9), face(0, -1) + YARD.yaw, { y, pose: 'squat', cloth: 'cloth_grey', hat: 'none' });
