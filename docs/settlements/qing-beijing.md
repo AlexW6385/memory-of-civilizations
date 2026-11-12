@@ -306,3 +306,8 @@ Sources for §25:
 ## 33. Autumn stores at the lane gates (bjDrying)
 
 - "Awning, fish jar, pomegranate tree" is the siheyuan in summer (§11); in autumn a household set out corn, chilies and persimmons to dry [inferred: general knowledge of northern autumn]. Ours: before about two houses in five (full and middle rings) a rack of two posts and a cross-pole hung with strings of corn cobs and of red chilies, and a round bamboo tray of persimmons and jujubes on a trestle.
+
+## 33. The great court's life, deepening pass (2026-11-12)
+- The rank markers (pinji shan) stand in two files of 18 either side of the stone way before the terrace [stated: Palace Museum; the files' exact line inferred], tablets facing the axis; at the great audiences the officials stood at their own rank's marker. Built as `bj_rankstones`.
+- The guard of honour's standards (lubu: parasols, banners, feather fans) were set out before the hall on audience days [stated: Qing court ceremonial; numbers and order inferred]: `bj_lubu` on the upper terrace in front of the hall.
+- Officials wait in knots, servants sweep with long brooms, mounts and sedan chairs wait outside the Meridian Gate's forecourt [inferred]; walkers use the court's gallery sides and its two ends, never crossing the imperial way (movers.js).
