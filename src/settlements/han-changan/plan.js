@@ -19,6 +19,8 @@ E.push({ t: 'han_hall', cx: CH.cx, z1: CH.z1, bays: 7, bayW: 6, depth: 3, depthW
 const wx = PALACE[2], gz = EAST_GATE.z;
 for (const [dz, s] of [[-14, 1], [14, -1]]) E.push({ t: 'han_que', at: [wx + PALACE_WALL.th / 2 + 6, gz + dz], sub: [0, s], h: 11 });
 
+E.push({ t: 'han_court', ax: AX, z0: RAMP.z1, z1: PALACE[3] - 2, seed: 5 });
+
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const fh = [AX - HALL.w / 2, HALL.z0, AX + HALL.w / 2, HALL.z1];
 const rooms = [
