@@ -196,3 +196,16 @@ export function paving() {
   for (const st of strips) for (const r of cut([st], have)) { walk.push(r); have = [...have, r]; }
   return { drive, walk };
 }
+
+/** The room of a shop that can be walked into (wall 0.5 m, room 8 m deep: styles/viennese/shopint.js) and the passage of a Durchhaus. */
+export function shopRoomRect(l) {
+  const [x0, z0, x1, z1] = l.rect, T = 0.5, RD = Math.min(8, (l.front === 'n' || l.front === 's' ? z1 - z0 : x1 - x0) - 4);
+  return l.front === 's' ? [x0 + T, z1 - T - RD, x1 - T, z1 - T] : l.front === 'n' ? [x0 + T, z0 + T, x1 - T, z0 + T + RD] : l.front === 'e' ? [x1 - T - RD, z0 + T, x1 - T, z1 - T] : [x0 + T, z0 + T, x0 + T + RD, z1 - T];
+}
+export function passageRect(l) {
+  const [x0, z0, x1, z1] = l.rect, along = l.front === 'n' || l.front === 's', c = along ? (x0 + x1) / 2 : (z0 + z1) / 2;
+  return along ? [c - 1.45, z0, c + 1.45, z1] : [x0, c - 1.45, x1, c + 1.45];
+}
+export const inYard = (x, z, m = 0) => yards().some((y) => inRect(y.rect, x, z, m));
+/** The free middle of a yard, between its rear wings (where the trees stand). */
+export const yardHeart = (x, z) => yards().some((y) => x > y.rect[0] + 3 && x < y.rect[2] - 3 && z > y.rect[1] + WING + 3.5 && z < y.rect[3] - WING - 3.5);

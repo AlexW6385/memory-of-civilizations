@@ -5,7 +5,7 @@
 import { lodTiles } from '../lod.js';
 import { subtractRects } from '../../core/build.js';
 import '../../styles/viennese/index.js';
-import { RADIUS, EW, NS, WIEN, LEDGE, BRIDGES, OPERA, KARLSKIRCHE, PAVILIONS, PATHS, SQUARE, NASCH, PROMENADE, RING_TRACKS, CAFE, SEC, WING, lots, yards, paving, inRect, onStreet, inLot } from './layout.js';
+import { RADIUS, EW, NS, WIEN, LEDGE, BRIDGES, OPERA, KARLSKIRCHE, PAVILIONS, PATHS, SQUARE, NASCH, PROMENADE, RING_TRACKS, CAFE, SEC, WING, lots, yards, shopRoomRect, passageRect, paving, inRect, onStreet, inLot } from './layout.js';
 
 const base = (id, elements, extra = {}) => ({ id, style: 'viennese', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -64], facing: 's' }, ...extra });
 const cut = (rs, holes) => rs.flatMap((r) => subtractRects(r, holes)).filter((r) => r[2] - r[0] > 0.3 && r[3] - r[1] > 0.3);
@@ -135,8 +135,17 @@ function hofs() {
   return out;
 }
 
+/** The rooms of the shops, the Durchhäuser and the yards (the music and the ambience change at their doors). */
+function houseRooms() {
+  const rooms = [];
+  for (const l of lots()) if (l.open) rooms.push({ id: `shop ${l.open}`, rect: shopRoomRect(l), y: 0.12, kind: 'inner' });
+  for (const l of lots()) if (l.passage !== undefined) rooms.push({ id: 'Durchhaus', rect: passageRect(l), y: 0, kind: 'inner' });
+  for (const yd of yards()) if (yd.entry) rooms.push({ id: 'Hof', rect: yd.rect, y: 0.05, kind: 'open', market: false });
+  return base('vienna-houserooms', [], { rooms });
+}
+
 export async function town() {
-  const plans = [streets(), wien(), ...furniture(), naschmarkt(), karlsplatz()];
+  const plans = [streets(), wien(), ...furniture(), naschmarkt(), karlsplatz(), houseRooms()];
   const els = lots().map((l) => ({ t: 'mietshaus', rect: l.rect, front: l.front, kind: l.kind, storeys: l.storeys, seed: l.seed, y: 0, side: l.side, lod: l.lod, faience: l.faience, medallions: l.medallions, mat: l.mat, passage: l.passage, yardAt: l.yardAt, open: l.open }));
   els.push(...hofs());
   plans.push(...lodTiles('vienna-houses', 'viennese', els, { R: RADIUS }));
