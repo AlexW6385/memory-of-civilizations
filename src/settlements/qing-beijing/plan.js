@@ -209,6 +209,12 @@ for (let i = 0; i + 1 < walks[0].length; i++) {
   for (let t = 0; t <= L; t += 3) { const x = ax + (bx - ax) * t / L, z = az + (bz - az) * t / L; E.push({ t: 'block', rect: [x - 1.5, z - 1.5, x + 1.5, z + 1.5], y0: -0.6, y1: -0.3, mat: 'brick_paving' }); }
 }
 
+// The same for the great court's middle (the strip of the stone way, the rank markers' two files, the visitor's arrival at (0, 70)): the engine's
+// strollers fill the court at random (PEOPLE in src/objects/life.js), and they stood at the arrival's elbow, at the edges of the first view, among the
+// markers and on the emperor's way, in a place the court life of life.js (the markers, the officials in their order, the servants) already dresses.
+// One hidden slab under the paving keeps them out of it; they stand in the court's two sides.
+E.push({ t: 'block', rect: [-22, 30, 22, 100], y0: -0.6, y1: -0.3, mat: 'brick_paving' });
+
 // The throne rooms' fittings (the dragons, thrones, screens, ceilings: ~220 000 triangles) are a plan of their own, drawn only
 // within 100 m of the middle hall (the engine's `near`, as the town's tiles): from the Meridian Gate's forecourt they lie behind
 // walls and doors that show nothing of them, and were a tenth of that view's frame.
