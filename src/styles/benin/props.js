@@ -115,18 +115,18 @@ export function wear(ctx, a, b, th, ya, yb, seed, { damp = 1, patches = 1 } = {}
   const ux = (b[0] - a[0]) / Ln, uz = (b[1] - a[1]) / Ln, at = (s) => [a[0] + ux * s, a[1] + uz * s];
   // (boxes are axis-aligned: walls here run along x or z; the strip is as thin as the wall's face)
   const alongX = Math.abs(ux) > Math.abs(uz), T = 0.035, face = th / 2 + T / 2 - 0.012;
-  const put = (s0, s1, y0, y1, mat) => {
+  const put = (s0, s1, y0, y1, mat, ex = 0) => {
     const p = at(s0), q = at(s1);
     for (const sg of [-1, 1]) {
-      if (alongX) ctx.bag.add(mat, box(Math.min(p[0], q[0]), y0, p[1] + sg * face - T / 2, Math.max(p[0], q[0]), y1, p[1] + sg * face + T / 2));
-      else ctx.bag.add(mat, box(p[0] + sg * face - T / 2, y0, Math.min(p[1], q[1]), p[0] + sg * face + T / 2, y1, Math.max(p[1], q[1])));
+      if (alongX) ctx.bag.add(mat, box(Math.min(p[0], q[0]), y0, p[1] + sg * (face + ex) - T / 2, Math.max(p[0], q[0]), y1, p[1] + sg * (face + ex) + T / 2));
+      else ctx.bag.add(mat, box(p[0] + sg * (face + ex) - T / 2, y0, Math.min(p[1], q[1]), p[0] + sg * (face + ex) + T / 2, y1, Math.max(p[1], q[1])));
     }
   };
   // splash band at the foot, in runs
   for (let s = 0; s < Ln;) { const l = 1.2 + rand() * 2.8; if (rand() < 0.85) put(s, Math.min(Ln, s + l), ya, ya + 0.35 + rand() * 0.3, 'scoria_red'); s += l + rand() * 0.8; }
-  for (let i = 0, n = Math.round(Ln / 4 * damp); i < n; i++) { const s = rand() * (Ln - 1.2); put(s, s + 0.5 + rand() * 0.7, ya + 0.04, ya + 0.3 + rand() * 0.55, 'plaster_damp'); }
-  for (let i = 0, n = Math.round(Ln / 3.2); i < n; i++) { const s = 0.4 + rand() * (Ln - 0.8), h = 0.8 + rand() * 1.3; put(s, s + 0.07 + rand() * 0.08, yb - h - 0.12, yb - 0.1, 'plaster_streak'); }
-  for (let i = 0, n = Math.round(Ln / 5 * patches); i < n; i++) { const s = rand() * (Ln - 1.4), y = ya + 0.7 + rand() * (yb - ya - 1.8); put(s, s + 0.6 + rand() * 0.7, y, y + 0.4 + rand() * 0.35, 'mud_plaster'); }
+  for (let i = 0, n = Math.round(Ln / 4 * damp); i < n; i++) { const s = rand() * (Ln - 1.2); put(s, s + 0.5 + rand() * 0.7, ya + 0.04, ya + 0.3 + rand() * 0.55, 'plaster_damp', 0.004); }
+  for (let i = 0, n = Math.round(Ln / 3.2); i < n; i++) { const s = 0.4 + rand() * (Ln - 0.8), h = Math.min((yb - ya) * 0.6, 0.8 + rand() * 1.3); put(s, s + 0.07 + rand() * 0.08, yb - h - 0.12, yb - 0.1, 'plaster_streak', 0.02); }
+  for (let i = 0, n = Math.round(Ln / 5 * patches); i < n; i++) { const s = rand() * (Ln - 1.4), y = ya + 0.7 + rand() * (yb - ya - 1.8); put(s, s + 0.6 + rand() * 0.7, y, y + 0.4 + rand() * 0.35, 'mud_plaster', 0.036); }
 }
 /** A bench of clay against a wall, `rect` its plan, 0.45 high, with a mat on it. */
 export function claySeat(ctx, r, y, seed) {

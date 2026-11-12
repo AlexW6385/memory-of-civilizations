@@ -135,7 +135,7 @@ function house(el, ctx) {
     }
     // calabashes on a shelf and cloth on pegs on the room's side wall
     { const r = rr(0.62, 1.2, 0.95, fd - 1.2); bag.add('timber', box(r[0], Yf + 1.55, r[1], r[2], Yf + 1.6, r[3])); for (let k = 0; k < 4; k++) { const [qx, qz] = P(0.8, 1.7 + k * 0.7); bag.add('wicker', lathe([[0.001, 0], [0.12, 0.05], [0.15, 0.13], [0.11, 0.16], [0.001, 0.14]], 7, null, qx, Yf + 1.6, qz)); } }
-    for (let k = 0; k < 3; k++) { const [qx, qz] = P(L - 0.65, 1.5 + k * 1.1); const c = ['cloth_indigo', 'cloth_ochre', 'cloth_red'][k]; bag.add(c, box(qx - 0.04, Yf + 1.4, qz - 0.2, qx + 0.04, Yf + 2.3, qz + 0.2)); }
+    for (let k = 0; k < 3; k++) { const [qx, qz] = P(L - 0.7, 1.5 + k * 1.1); const c = ['cloth_indigo', 'cloth_ochre', 'cloth_red'][k]; bag.add(c, box(qx - 0.04, Yf + 1.4, qz - 0.2, qx + 0.04, Yf + 2.3, qz + 0.2)); }
   }
   // ── the court and the back range: the shrine, the kitchen, drying racks, the yam mortar, firewood, washing, a plantain ──
   {

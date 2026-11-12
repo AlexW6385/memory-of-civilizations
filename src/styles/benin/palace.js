@@ -2,8 +2,10 @@
 // plaques, an impluvium in each court; the great gallery of audience with the Oba's dais; the ancestral altars with their cast heads
 // and carved tusks; the turrets with their spires, brass snakes down their faces and brass birds on their points; the gate.
 import { fromTriangles, quad } from '../../core/geom.js';
-import { rng, wallMat, B, clayWall, gable, lean, hip, pillar, plaque, head, bird, snake, altar, box, frustum, lathe } from './kit.js';
+import { rng, wallMat, B, clayWall, gable, lean, hip, pillar, plaque, head, bird, snake, altar, box, frustum, lathe, rod } from './kit.js';
 import { orientedBox } from '../../core/build.js';
+import { frame } from '../greek/agora.js';
+import { pot, pots, stool, bed, chest, hearth, mortar, wood, wear, claySeat, hung } from './props.js';
 
 const SHINGLE = 'roof_bark';
 const PH = 4.35, GY = 0.3;                        // pillar height, gallery floor
@@ -47,7 +49,7 @@ function court(el, ctx) {
     bag.add('tuff_red', box(r[0], 0, r[1], r[2], GY, r[3])); col.floor(r, GY);
     // the back wall on the court's outer edge, doors cut in it
     const a = { n: [x0, z0 + 0.3], s: [x0, z1 - 0.3], w: [x0 + 0.3, r[1]], e: [x1 - 0.3, r[1]] }[side], b = alongX ? [x1, a[1]] : [a[0], r[3]];
-    if (!(el.noWall && el.noWall.includes(side))) clayWall(ctx, a, b, 0.6, GY, WH, wm, doorsOf(side, L));
+    if (!(el.noWall && el.noWall.includes(side))) { clayWall(ctx, a, b, 0.6, GY, WH, wm, doorsOf(side, L)); if (el.near !== false) wear(ctx, a, b, 0.6, GY, WH, (el.seed ?? 1) * 5 + side.charCodeAt(0)); }
     // the roof sloping to the court
     lean(ctx, r, { n: 'zp', s: 'zn', w: 'xp', e: 'xn' }[side], PH, WH + 0.1, SHINGLE, 0.35);
     // the pillars along the inner edge, sheathed, with plaques on both faces
@@ -80,6 +82,21 @@ function court(el, ctx) {
       altar(ctx, ar, face, (el.seed ?? 1) * 13 + i, 5);
     }
   }
+  // the seats of clay along the galleries (the courtiers wait on them), stools, big water jars at the corners, mats
+  if (el.near !== false) {
+    for (const side of ['n', 's', 'w', 'e']) {
+      if (!S[side]) continue;
+      const r = regions[side], alongX = side === 'n' || side === 's', len = alongX ? r[2] - r[0] : r[3] - r[1], inner = { n: r[3], s: r[1], w: r[2], e: r[0] }[side], dirIn = { n: 1, s: -1, w: 1, e: -1 }[side];
+      for (let k = 0; k < Math.max(1, Math.floor(len / 14)); k++) {
+        if (el.altars && el.altars.side === side) continue;
+        const c = (alongX ? r[0] : r[1]) + len * (k + 0.5) / Math.max(1, Math.floor(len / 14)), b0 = inner - dirIn * 0.9;
+        const seat = alongX ? [c - 2.2, Math.min(b0, b0 - dirIn * 0.5), c + 2.2, Math.max(b0, b0 - dirIn * 0.5)] : [Math.min(b0, b0 - dirIn * 0.5), c - 2.2, Math.max(b0, b0 - dirIn * 0.5), c + 2.2];
+        claySeat(ctx, [seat[0], seat[1], seat[2], seat[3]].map((v) => v), GY, k + side.charCodeAt(0));
+      }
+    }
+    for (const [px, pz] of [[cx - 7, cz - 6], [cx + 7, cz - 6], [cx - 7, cz + 6], [cx + 7, cz + 6]]) pots(ctx, px, 0.03, pz, Math.floor(px * 31 + pz), 2);
+    for (let i = 0; i < 4; i++) stool(ctx, cx - 2.4 + i * 1.6, 0.03, cz + 4.0 + (i % 2) * 0.5);
+  }
   // brass birds on little spired towers at the roof corners
   for (const [px, pz] of [[x0 + 0.8, z0 + 0.8], [x1 - 0.8, z0 + 0.8], [x0 + 0.8, z1 - 0.8], [x1 - 0.8, z1 - 0.8]]) spire(ctx, px, pz, WH + 1.5, 2.6, rand);
 }
@@ -98,6 +115,7 @@ function hall(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, rand = rng(el.seed ?? 3), wm = wallMat(rand), cx = (x0 + x1) / 2, Y = 0.35, T = 4.7;
   bag.add('tuff_red', box(x0, 0, z0, x1, Y, z1)); col.floor(el.rect, Y);
   clayWall(ctx, [x0, z0 + 0.3], [x1, z0 + 0.3], 0.6, Y, T + 0.3, wm, (el.doors ?? [cx]).map((at) => ({ at: at - x0, w: 3, h: 3.1 })));
+  if (el.near !== false) for (const x of [x0 + 0.3, x1 - 0.3]) wear(ctx, [x, z0], [x, z1], 0.6, Y, T + 0.3, Math.round(x));
   for (const x of [x0 + 0.3, x1 - 0.3]) clayWall(ctx, [x, z0], [x, z1], 0.6, Y, T + 0.3, wm, [{ at: (z1 - z0) / 2, w: 3, h: 3.1 }]);
   bag.add('timber', box(x0 - 0.9, T, z0 - 0.9, x1 + 0.9, T + 0.1, z1 + 0.9));
   gable(ctx, el.rect, T + 0.1, 5.2, SHINGLE, 'x', 0.9);
@@ -123,8 +141,63 @@ function hall(el, ctx) {
   B(ctx, 'bronze', [cx - 0.7, dz0 + 1.05, cx + 0.7, dz0 + 1.1], Y + 0.9, Y + 1.5);
   for (const s of [-1, 1]) { B(ctx, 'ivory', [cx + s * 2.6 - 0.07, dz0 + 1.4, cx + s * 2.6 + 0.07, dz0 + 1.54], Y + 0.9, Y + 2.8); head(ctx, cx + s * 2.0, Y + 0.9, dz0 + 1.3, 0, 40 + s, false); }
   for (const s of [-1, 1]) altar(ctx, [cx + s * 16 - 2.6, z0 + 0.7, cx + s * 16 + 2.6, z0 + 2.2], 's', 90 + s, 5);
+  // the furnishings of the great gallery: leopard skins on the dais, the cast leopards at its steps, the stools of the chiefs in two rows,
+  // mats in the aisle, benches of clay under the side walls
+  if (el.near !== false) {
+    for (let i = 0; i < 4; i++) for (const s of [-1, 1]) { const x = cx + s * (1.5 + i * 0.6), z = dz0 + 2.9; bag.add('hide_tan', box(x - 0.3, Y + 0.9, z - 0.4, x + 0.3, Y + 0.92, z + 0.4)); bag.add('hide_black', box(x - 0.08, Y + 0.92, z - 0.12, x + 0.08, Y + 0.925, z + 0.02)); }
+    for (const s of [-1, 1]) leopard(ctx, cx + s * 5.2, Y, dz1 + 0.6, s);
+    for (let i = 0; i < 6; i++) for (const s of [-1, 1]) { stool(ctx, cx + s * (7 + i * 1.9), Y, z0 + 7.6 + (i % 2) * 0.4); }
+    for (let x = x0 + 4; x < x1 - 3; x += 7) bag.add('reed_mat', box(x, Y, z0 + 8.4, x + 3, Y + 0.02, z1 - 1.6));
+    for (const s of [-1, 1]) for (let k = 0; k < 3; k++) { const bx = s < 0 ? x0 + 0.9 : x1 - 0.9; claySeat(ctx, [bx - 0.4, z0 + 8 + k * 1.8, bx + 0.4, z0 + 9.6 + k * 1.8], Y, k); }
+    for (let x = x0 + 6; x < x1 - 5; x += 6.4) { const [a, b] = [x, z0 + 12]; bag.add('bronze', lathe([[0.001, 0], [0.16, 0.03], [0.13, 0.3], [0.001, 0.38]], 8, null, a, T - 0.7, b)); bag.add('iron', rod([a, T - 0.35, b], [a, T - 0.25, b], 0.02, 4)); }
+  }
   // the front's steps
   for (let i = 0; i < 2; i++) B(ctx, 'tuff_red', [cx - 5 - i * 0.4, z1 + i * 0.3, cx + 5 + i * 0.4, z1 + 0.3 + i * 0.3], 0, 0.2 - i * 0.1);
+}
+
+
+/** A cast brass leopard, standing, at (x, y, z), facing +z (s = ±1 turns it to look across): the guardian of the Oba's steps. */
+function leopard(ctx, x, y, z, s = 1) {
+  const { bag, col } = ctx, g = (m, b) => { b.rotateY(s > 0 ? 0.25 : -0.25); b.translate(x, y, z); bag.add(m, b); };
+  g('bronze', box(-0.22, 0.42, -0.62, 0.22, 0.82, 0.5)); g('bronze', box(-0.17, 0.5, 0.45, 0.17, 0.85, 0.82)); g('bronze', box(-0.14, 0.52, 0.8, 0.14, 0.78, 1.0));
+  for (const sx of [-0.14, 0.14]) for (const sz of [-0.5, 0.35]) g('bronze', box(sx - 0.05, 0, sz - 0.05, sx + 0.05, 0.45, sz + 0.05));
+  g('bronze', box(-0.04, 0.55, -1.15, 0.04, 0.65, -0.6));
+  for (let i = 0; i < 5; i++) g('gilt_bronze', box(-0.225, 0.5 + (i % 2) * 0.15, -0.5 + i * 0.2, 0.225, 0.56 + (i % 2) * 0.15, -0.44 + i * 0.2));
+  col.rect([x - 0.4, z - 0.8, x + 0.4, z + 0.9], y, y + 0.9);
+}
+/**
+ * benin_range: { rect, front ('e' | 'w' | 'n' | 's'), seed, kinds } — a range of single rooms of the palace's servants and stores under one lean-to
+ * roof, each 4.4 m wide and open to the lane by a doorway: stores of tusks and chests, kitchens, sleeping rooms, the casters' stock of brass.
+ */
+function range(el, ctx) {
+  const { bag, col } = ctx, F = frame(el.rect, el.front), { L, D, P, R } = F, rand = rng(el.seed ?? 1), wm = wallMat(rand), H = 3.1, Y = 0.2;
+  const n = Math.max(1, Math.round(L / 4.6)), rw = L / n, kinds = el.kinds ?? ['store', 'kitchen', 'sleep', 'sleep', 'brass', 'store', 'kitchen'];
+  bag.add('tuff_red', box(el.rect[0], -0.3, el.rect[1], el.rect[2], Y, el.rect[3])); col.floor(el.rect, Y);
+  const w = (u0, v0, u1, v1, ops = []) => { const a = P(u0, v0), b = P(u1, v1); clayWall(ctx, a, b, 0.5, Y, H, wm, ops, !el.simple); if (!el.simple) wear(ctx, a, b, 0.5, Y, H, (el.seed ?? 1) * 3 + Math.round(u0 * 7 + v0)); };
+  for (let i = 0; i <= n; i++) w(i * rw, 0, i * rw, D);
+  w(0, D - 0.25, L, D - 0.25);
+  for (let i = 0; i < n; i++) w(i * rw, 0.25, (i + 1) * rw, 0.25, [{ at: rw / 2, w: 1.5, h: 2.3 }]);
+  lean(ctx, R(0, 0, L, D), el.front === 'e' ? 'xp' : el.front === 'w' ? 'xn' : el.front === 'n' ? 'zn' : 'zp', H - 0.3, H + 1.0, 'thatch_palm', 0.6, !el.simple);
+  if (el.simple) return;
+  for (let i = 0; i < n; i++) {
+    const k = kinds[(i + (el.seed ?? 0)) % kinds.length], u0 = i * rw + 0.4, u1 = (i + 1) * rw - 0.4;
+    const at = (u, v) => P(u, v), yy = Y;
+    if (k === 'store') {
+      for (let j = 0; j < 5; j++) { const [a, b] = at(u0 + 0.3 + j * 0.28, D - 0.7), [c, d] = at(u0 + 0.5 + j * 0.28, D - 1.0); bag.add('ivory', rod([a, yy, b], [c, yy + 2.0 - (j % 2) * 0.2, d], 0.055, 6)); }
+      const [x, z] = at(u1 - 0.6, D - 1.2); chest(ctx, x, yy, z, 0.9, 0.55); const [x2, z2] = at(u1 - 0.6, 1.6); chest(ctx, x2, yy, z2, 0.9, 0.55);
+      const [p1, p2] = at(u0 + 0.6, 1.5); pots(ctx, p1, yy, p2, i + 3, 3);
+    } else if (k === 'kitchen') {
+      const [x, z] = at((u0 + u1) / 2, D - 1.8); hearth(ctx, x, yy, z, i + 9); const [m1, m2] = at(u1 - 0.3, 1.6); mortar(ctx, m1, yy, m2, i + 4);
+      const [w1, w2] = at(u0 + 0.6, 2.2); wood(ctx, w1, yy, w2, F.along, 1.2, i + 5); const [p1, p2] = at(u1 - 0.5, D - 0.8); pots(ctx, p1, yy, p2, i + 7, 3);
+    } else if (k === 'sleep') {
+      const r = R(u0, D - 2.6, u0 + 2.4, D - 1.2); bed(ctx, r, yy, (el.seed ?? 1) + i); const [x, z] = at(u1 - 0.6, 1.8); stool(ctx, x, yy, z); const [c1, c2] = at(u1 - 0.6, D - 0.7); chest(ctx, c1, yy, c2, 0.8, 0.5);
+    } else {
+      // the casters' stock: heads and plaques on shelves, crucibles of clay in a row
+      for (const h of [0.9, 1.6]) { const r = R(u0 - 0.1, D - 1.2, u1 + 0.1, D - 0.5); bag.add('timber', box(r[0], yy + h, r[1], r[2], yy + h + 0.05, r[3])); }
+      for (let j = 0; j < 4; j++) { const [x, z] = at(u0 + 0.5 + j * 0.75, D - 0.85); head(ctx, x, yy + 1.65, z, 0, (el.seed ?? 1) * 11 + i * 5 + j, false); if (j < 3) head(ctx, x, yy + 0.95, z, 0, (el.seed ?? 1) * 13 + i * 7 + j, false); }
+      for (let j = 0; j < 5; j++) { const [x, z] = at(u0 + 0.4 + j * 0.5, 1.8); bag.add('earth_wall', lathe([[0.001, yy], [0.16, yy + 0.01], [0.2, yy + 0.2], [0.12, yy + 0.32], [0.001, yy + 0.34]], 7, null, x, 0, z)); }
+    }
+  }
 }
 
 /** benin_tower: { c, h, snake (face 'n' | 's' | 'e' | 'w'), seed } — a turret: a battered clay body, an open lantern, a steep spire of shingle with its brass bird. */
@@ -170,6 +243,7 @@ function gatehouse(el, ctx) {
 function pwall(el, ctx) {
   const rand = rng(el.seed ?? 1), th = el.th ?? 0.9, h = el.h ?? 3.6, mat = wallMat(rand);
   clayWall(ctx, el.a, el.b, th, 0, h, mat, el.openings ?? []);
+  if (!el.simple) wear(ctx, el.a, el.b, th, 0, h, (el.seed ?? 1) * 17);
   const Ln = Math.hypot(el.b[0] - el.a[0], el.b[1] - el.a[1]), ux = (el.b[0] - el.a[0]) / Ln, uz = (el.b[1] - el.a[1]) / Ln;
   let s = 0;
   for (const o of [...(el.openings ?? []).map((q) => [q.at - q.w / 2, q.at + q.w / 2]).sort((p, q) => p[0] - q[0]), [Ln, Ln]]) {
@@ -177,5 +251,5 @@ function pwall(el, ctx) {
     s = o[1];
   }
 }
-export const PALACE_EL = { benin_court: court, benin_hall: hall, benin_tower: tower, benin_gatehouse: gatehouse, benin_wall: pwall };
+export const PALACE_EL = { benin_court: court, benin_hall: hall, benin_tower: tower, benin_gatehouse: gatehouse, benin_wall: pwall, benin_range: range, benin_leopard: (el, ctx) => leopard(ctx, el.at[0], el.y ?? 0, el.at[1], el.s ?? 1) };
 void hip;
