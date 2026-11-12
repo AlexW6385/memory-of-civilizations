@@ -54,7 +54,7 @@ function door(bag, c, R0, R1, ang, w, h, y) {
 function salaoNegro(bag, col, lights, H, hy) {
   const [hx0, hz0, hx1, hz1] = H, T = 0.4, rnd = (() => { let s = 1960; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); })();
   bag.add('granite_black', box(hx0, 0.0, hz0, hx1, 0.06, hz1)); col.floor(H, 0.06);
-  for (let k = 0; k < 8; k++) bag.add('granite_grey', box(hx0 + 2 + k * 4.4, 0.055, hz0 + 0.3, hx0 + 2.15 + k * 4.4, 0.065, hz1 - 0.3));       // joints in the floor
+  for (let k = 0; k < 8; k++) bag.add('granite_grey', box(hx0 + 2 + k * 4.4, 0.03, hz0 + 0.3, hx0 + 2.15 + k * 4.4, 0.09, hz1 - 0.3));       // joints in the floor
   // the walls: black granite on the north, south and east inner faces, the west a glazed front with a door
   const wl = (a, b, c, d) => { bag.add('granite_black', box(a, 0.06, b, c, hy, d)); };
   wl(hx0, hz0, hx1, hz0 + 0.3); wl(hx0, hz1 - 0.3, hx1, hz1); wl(hx1 - 0.3, hz0, hx1, hz1);
@@ -139,7 +139,7 @@ export function congress(el, { bag, col, lights }) {
   // ── the deck's furniture: benches along the parapet, planters, the lamp posts, a guard's booth at the chambers' doors ──
   for (const zz of [z0 + 6, z1 - 6]) for (let xx = x0 + 8; xx < x1 - 6; xx += 14) { if (Math.abs(xx - DOME.c[0]) < 26 && Math.abs(zz - DOME.c[1]) < 30) continue; if (Math.abs(xx - BOWL.c[0]) < 36 && Math.abs(zz - BOWL.c[1]) < 36) continue; bag.add('timber', box(xx, y + 0.42, zz, xx + 1.9, y + 0.48, zz + 0.5)); bag.add(CONC, box(xx + 0.1, y, zz + 0.05, xx + 0.2, y + 0.42, zz + 0.45)); bag.add(CONC, box(xx + 1.7, y, zz + 0.05, xx + 1.8, y + 0.42, zz + 0.45)); col.rect([xx, zz, xx + 1.9, zz + 0.5], y, y + 0.5); }
   for (const [px, pz] of [[x0 + 4, -30], [x0 + 4, 30], [x0 + 4, -2], [x0 + 4, 2]]) { bag.add(CONC, box(px - 0.6, y, pz - 0.6, px + 0.6, y + 0.55, pz + 0.6)); bag.add('palm_leaf', lathe([[0.001, 0], [0.5, 0.12], [0.7, 0.5], [0.4, 0.9], [0.001, 1.0]], 8, null, px, y + 0.55, pz)); col.rect([px - 0.6, pz - 0.6, px + 0.6, pz + 0.6], y, y + 0.6); }
-  for (const [gx, gz] of [[DOME.c[0] - DOME.R - 3, DOME.c[1]], [BOWL.c[0] - BOWL.R - 3, BOWL.c[1] + 4]]) { bag.add('plaster_white', box(gx - 0.8, y, gz - 0.8, gx + 0.8, y + 2.4, gz + 0.8)); bag.add('glass_outer', box(gx - 0.6, y + 1.0, gz - 0.82, gx + 0.6, y + 2.0, gz - 0.8)); bag.add(CONC, box(gx - 1.0, y + 2.4, gz - 1.0, gx + 1.0, y + 2.55, gz + 1.0)); col.rect([gx - 0.8, gz - 0.8, gx + 0.8, gz + 0.8], y, y + 2.55); }
+  for (const [gx, gz] of [[DOME.c[0] - DOME.R - 3, DOME.c[1] - 9], [BOWL.c[0] - BOWL.R - 3, BOWL.c[1] + 12]]) { bag.add('plaster_white', box(gx - 0.8, y, gz - 0.8, gx + 0.8, y + 2.4, gz + 0.8)); bag.add('glass_outer', box(gx - 0.6, y + 1.0, gz - 0.82, gx + 0.6, y + 2.0, gz - 0.8)); bag.add(CONC, box(gx - 1.0, y + 2.4, gz - 1.0, gx + 1.0, y + 2.55, gz + 1.0)); col.rect([gx - 0.8, gz - 0.8, gx + 0.8, gz + 0.8], y, y + 2.55); }
   // ── the Senate: the dome, hollow, its door on the west ──
   {
     const { c, R, h, r: rIn, door: ang, doorW } = DOME, hIn = h * 0.86, dh = 3.6, half = doorW / 2 / rIn;

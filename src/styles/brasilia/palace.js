@@ -3,6 +3,7 @@
 // hall (a long table with chairs, bookcases, flags), the upper floors stay closed.
 import { box, lathe } from '../../core/geom.js';
 import { rngOf, solidBox, shrub, stool } from './kit.js';
+import { wedgeZ } from './util.js';
 
 const WHITE = 'plaster_white', CONC = 'concrete_light', FH = 4.4;
 /** The Alvorada column: its bow-like swelling profile, flat across its width (1 : 0.38). */
@@ -92,7 +93,8 @@ export function colonnadePalace(el, { bag, col, lights }) {
       col.circle(px[0], px[1], 0.5, y0, y0 + H);
     }
   }
-  // the entrance: a broad ramp of marble between the columns' bay and the glass door
-  const zD = doorSide === 'z1' ? gz1 : gz0, sgn = doorSide === 'z1' ? 1 : -1;
-  bag.add('marble', box(dxc - 4, y0, Math.min(zD, zD + sgn * (z1 - gz1)), dxc + 4, y0 + 0.02, Math.max(zD, zD + sgn * (z1 - gz1)))); void stool;
+  // the entrance: a broad marble ramp from the square up to the podium before the door's bay (the podium stands 0.62 m)
+  if (doorSide === 'z0') { bag.add('marble', wedgeZ(dxc - 4, dxc + 4, z0 - 9, z0 - 3, 0.04, y0, -0.3)); col.ramp([dxc - 4, z0 - 9, dxc + 4, z0 - 3], 0.04, y0, 's'); }
+  else { bag.add('marble', wedgeZ(dxc - 4, dxc + 4, z1 + 3, z1 + 9, y0, 0.04, -0.3)); col.ramp([dxc - 4, z1 + 3, dxc + 4, z1 + 9], 0.04, y0, 'n'); }
+  void stool;
 }

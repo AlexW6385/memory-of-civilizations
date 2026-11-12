@@ -104,3 +104,7 @@ export const inBuilding = (x, z, m = 0) => inRect(PLATFORM, x, z, m) || inRect(P
   || MINISTRIES.some((b) => inRect(b.rect, x, z, m)) || ALL_BLOCKS.some((b) => inRect(b.rect, x, z, m)) || inRect(SHOPS, x, z, m) || inRect(CHAPEL, x, z, m) || inRect(MUSEU, x, z, m) || PLAYS.some((r) => inRect(r, x, z, m)) || inRect(PITCH_AT, x, z, m)
   || Math.hypot(x - CATH.c[0], z - CATH.c[1]) < CATH.pool + m || inRect(TUNNEL_BOX(), x, z, m) || inRect([RAMP.x0, RAMP.z0, RAMP.x1, RAMP.z1], x, z, m) || POOLS.some((p) => inRect(p, x, z, m));
 function TUNNEL_BOX() { return [TUNNEL.x0, TUNNEL.zR, TUNNEL.x1, TUNNEL.z0]; }
+
+// the kiosks (x, z, quarter turns toward the front, trade) and vendors' carts (x, z, trade): on the lawn, the Square, the Cathedral's plaza, the avenue
+export const KIOSKS = [[-420, -104, 0, 'lanchonete'], [-345, 104, 2, 'banca'], [-270, -104, 0, 'coco'], [-185, 104, 2, 'lanchonete'], [-100, -104, 0, 'banca'], [-60, 104, 2, 'coco'], [120, 60, 2, 'banca'], [120, -70, 0, 'coco'], [250, 100, 2, 'lanchonete'], [-130, 230, 0, 'coco'], [-132, 150, 2, 'sorvete'], [38.5, 300, 3, 'banca']];
+export const CARTS = [[110, 20, 'pipoca'], [118, -22, 'picole'], [180, 40, 'churro'], [260, -60, 'pipoca'], [200, -110, 'picole'], [-120, -40, 'pipoca'], [-118, 40, 'picole'], [-100, 18, 'churro'], [-170, 142, 'pipoca'], [-150, 255, 'picole'], [-175, 262, 'churro'], [47, 330, 'pipoca'], [-20, 288, 'picole'], [92, 300, 'pipoca']];

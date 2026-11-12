@@ -2,7 +2,7 @@
 // and the Justice palaces at the Congress end, the superquadra's eight blocks on pilotis with the commercial strip, the carriageways'
 // and the avenue's traffic of cars and buses, the lamps and benches, and the people of the lawn, the pavements, the square and the
 // plaza. Everything is placed from layout.js.
-import { RADIUS, LAWN, ROAD_N, ROAD_S, AVENUE, SQ, SQ2, SQS, RING, MINISTRIES, ITAMARATY, JUSTICE, ALL_BLOCKS, SHOPS, CATH, PRACA, TUNNEL, POOLS, RAMP, PLATFORM, PARKS, CHAPEL, MUSEU, PLAYS, PITCH_AT, inRect, inBuilding, rng } from './layout.js';
+import { RADIUS, LAWN, ROAD_N, ROAD_S, AVENUE, SQ, SQ2, SQS, RING, MINISTRIES, ITAMARATY, JUSTICE, ALL_BLOCKS, SHOPS, CATH, PRACA, TUNNEL, POOLS, RAMP, PLATFORM, PARKS, CHAPEL, MUSEU, PLAYS, PITCH_AT, KIOSKS, CARTS, inRect, inBuilding, rng } from './layout.js';
 
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-110, 0], facing: 'e' } });
 const N = -Math.PI / 2, S = Math.PI / 2;   // heading east (rot −π/2) and west (π/2); north 0, south π
@@ -25,9 +25,8 @@ export async function town() {
   // the street furniture: bus shelters on the lawn's kerbs and the avenue's pavements, kiosks and vendors' carts where people gather
   for (const x of [-405, -310, -215, -130, -40]) { B.push({ t: 'bus_shelter', at: [x, -115.2], r: 2, seed: x }, { t: 'bus_shelter', at: [x - 30, 115.2], r: 0, seed: x + 1 }); }
   B.push({ t: 'bus_shelter', at: [15.2, 333.5], r: 1, seed: 3 }, { t: 'bus_shelter', at: [46.2, 316], r: 3, seed: 4 }, { t: 'bus_shelter', at: [46.2, 386], r: 3, seed: 5 }, { t: 'bus_shelter', at: [15.2, 380], r: 1, seed: 6 });
-  [[-420, -104, 0, 'lanchonete'], [-345, 104, 2, 'banca'], [-270, -104, 0, 'coco'], [-185, 104, 2, 'lanchonete'], [-100, -104, 0, 'banca'], [-60, 104, 2, 'coco']].forEach(([x, z, r, kind], i) => B.push({ t: 'kiosk', at: [x, z], r, kind, seed: i + 1 }));
-  [[120, 60, 2, 'banca'], [120, -70, 0, 'coco'], [250, 100, 2, 'lanchonete'], [-130, 230, 0, 'coco'], [-132, 150, 2, 'sorvete'], [38.5, 300, 3, 'banca']].forEach(([x, z, r, kind], i) => { if (inBuilding(x, z, 2)) return; B.push({ t: 'kiosk', at: [x, z], r, kind, seed: i + 20 }); });
-  [[110, 20, 'pipoca'], [118, -22, 'picole'], [180, 40, 'churro'], [260, -60, 'pipoca'], [200, -110, 'picole'], [-120, -40, 'pipoca'], [-118, 40, 'picole'], [-100, 18, 'churro'], [-170, 142, 'pipoca'], [-150, 255, 'picole'], [-175, 262, 'churro'], [47, 330, 'pipoca'], [-20, 288, 'picole'], [92, 300, 'pipoca']].forEach(([x, z, kind], i) => { if (!inBuilding(x, z, 1.5)) B.push({ t: 'cart', at: [x, z], r: i % 4, kind }); });
+  KIOSKS.forEach(([x, z, r, kind], i) => { if (i < 6 || !inBuilding(x, z, 2)) B.push({ t: 'kiosk', at: [x, z], r, kind, seed: i + 1 }); });
+  CARTS.forEach(([x, z, kind], i) => { if (!inBuilding(x, z, 1.5)) B.push({ t: 'cart', at: [x, z], r: i % 4, kind }); });
 
   // ── traffic ──
   const clear = (x, z, m) => !inBuilding(x, z, m);
