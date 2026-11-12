@@ -22,17 +22,17 @@ const FLOOR = 0.28;                                   // the floor of houses.js'
 const FRONT = { s: { o: (r) => [(r[0] + r[2]) / 2, r[3]], v: [0, -1] }, n: { o: (r) => [(r[0] + r[2]) / 2, r[1]], v: [0, 1] }, e: { o: (r) => [r[2], (r[1] + r[3]) / 2], v: [-1, 0] }, w: { o: (r) => [r[0], (r[1] + r[3]) / 2], v: [1, 0] } };
 
 /** goods on a shelf row by trade (y: the shelf's top): jars, bowls, bolts, volumes, boxes... in the shelf's own frame (a along it, b across). */
-function stock(S, trade, a0, a1, y, b, rand, step = 0.34) {
+function stock(S, trade, a0, a1, y, b, rand, step = 0.46) {
   const mk = (kind, x) => {
     const Q = new Parts();
-    if (kind === 'jar') { Q.add('pottery_dark', jar(0.1, 0.22, 0, 0, 0)); Q.add(DK, drum(0.06, 0.05, 0.025, 6, 0, 0.22, 0)); }
+    if (kind === 'jar') { Q.add('pottery_dark', jar(0.1, 0.22, 0, 0, 0)); }
     else if (kind === 'wine') { Q.add('pottery_dark', jar(0.13, 0.3, 0, 0, 0)); Q.add('cloth_red', ly([[0.08, 0.28], [0.09, 0.32], [0.04, 0.38], [0.001, 0.39]], 10)); }
-    else if (kind === 'bowls') for (let k = 0; k < 4; k++) Q.add(trade === 'pottery' ? 'glaze_blue' : 'glaze_white', bowl(0, k * 0.05, 0, 1));
+    else if (kind === 'bowls') for (let k = 0; k < 3; k++) Q.add(trade === 'pottery' ? 'glaze_blue' : 'glaze_white', bowl(0, k * 0.05, 0, 1));
     else if (kind === 'bolt') { Q.add(['cloth_indigo', 'cloth_white', 'cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_grey'][Math.floor(rand() * 6)], drum(0.07, 0.07, 0.34, 8, 0, 0, 0).rotateX(Math.PI / 2).translate(0, 0.07, 0)); }
-    else if (kind === 'books') { for (let k = 0; k < 5; k++) Q.add(k % 2 ? 'cloth_indigo' : 'paint_white', box(-0.14, k * 0.03, -0.1, 0.14, k * 0.03 + 0.028, 0.1)); }
+    else if (kind === 'books') { for (let k = 0; k < 3; k++) Q.add(k % 2 ? 'cloth_indigo' : 'paint_white', box(-0.14, k * 0.05, -0.1, 0.14, k * 0.05 + 0.046, 0.1)); }
     else if (kind === 'box') { Q.add('lacquer_red', box(-0.14, 0, -0.1, 0.14, 0.14, 0.1)); Q.add('lacquer_black', box(-0.15, 0.14, -0.11, 0.15, 0.17, 0.11)); }
     else if (kind === 'packet') { for (let k = 0; k < 3; k++) Q.add('cloth_white', box(-0.1 + k * 0.07, 0, -0.07, -0.04 + k * 0.07, 0.1 + k * 0.02, 0.07)); Q.add('cloth_red', box(-0.1, 0.1, -0.01, 0.04, 0.11, 0.01)); }
-    else if (kind === 'tea') { Q.add('glaze_white', jar(0.08, 0.22, 0, 0, 0)); Q.add(DK, drum(0.05, 0.045, 0.03, 6, 0, 0.22, 0)); }
+    else if (kind === 'tea') { Q.add('glaze_white', jar(0.08, 0.22, 0, 0, 0)); }
     else if (kind === 'pan') { Q.add('iron', ly([[0.001, 0], [0.04, 0], [0.12, 0.06], [0.15, 0.1], [0.13, 0.1], [0.001, 0.03]], 10)); }
     else if (kind === 'bridle') { Q.add('hide_brown', rod([0, 0.3, 0], [0, 0.05, 0.03], 0.012, 4)); Q.add('iron', box(-0.05, 0.0, 0, 0.05, 0.05, 0.02)); }
     Q.emit(S, x, y, b);
@@ -45,7 +45,7 @@ function stock(S, trade, a0, a1, y, b, rand, step = 0.34) {
 function interior(el, { bag, col }) {
   const rect = el.rect, f = el.front, F = FRONT[f], o = F.o(rect), v = F.v, rand = rng(el.seed || 1), pick = (a) => a[Math.floor(rand() * a.length)];
   const along = f === 'n' || f === 's', W = along ? rect[2] - rect[0] : rect[3] - rect[1], D = along ? rect[3] - rect[1] : rect[2] - rect[0];
-  const y = el.y ?? FLOOR, kind = el.kind, trade = el.trade || 'cloth';
+  const y = el.y ?? FLOOR, kind = el.kind, trade = el.trade || 'cloth', lite = !!el.lite;      // lite: the far rooms (vertex budget) have half the goods and the small furniture left out
   const yaw = Math.atan2(v[0], v[1]), cs = Math.cos(yaw), sn = Math.sin(yaw);
   const WC = (a, b) => [o[0] + a * cs + b * sn, o[1] - a * sn + b * cs];
   const blk = (a0, b0, a1, b1, h) => { const p = WC(a0, b0), q = WC(a1, b1); col?.rect([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], y, y + h); };
@@ -57,7 +57,7 @@ function interior(el, { bag, col }) {
 
   if (kind === 'shop') {
     // (the counters of the open front and the goods on them are houses.js's; here the shelves along the back wall, stocked by trade, a chest, a stool, a lamp)
-    for (let r = 0; r < 2; r++) { const w = Math.min(2.2, W - 1.0), a = (r ? -1 : 1) * (w / 2 + 0.1) * 0 + (r ? -hx + w / 2 : hx - w / 2); if (W < 5 && r) break; put((Q) => { const ys = shelves(Q, w, 0.4, 2.0); stock(Q, trade, -w / 2, w / 2, 0, 0, rand); for (const yy of ys.slice(1)) stock(Q, trade, -w / 2, w / 2, yy, 0, rand); }, a, b1 - 0.22, Math.PI); blk(a - w / 2, b1 - 0.45, a + w / 2, b1, 2.0); }
+    for (let r = 0; r < 2; r++) { const w = Math.min(2.2, W - 1.0), a = (r ? -1 : 1) * (w / 2 + 0.1) * 0 + (r ? -hx + w / 2 : hx - w / 2); if (W < 5 && r) break; put((Q) => { const ys = shelves(Q, w, 0.4, 2.0); const st = lite ? 0.8 : 0.46; stock(Q, trade, -w / 2, w / 2, 0, 0, rand, st); for (const yy of ys.slice(1, lite ? 4 : 9)) stock(Q, trade, -w / 2, w / 2, yy, 0, rand, st); }, a, b1 - 0.22, Math.PI); blk(a - w / 2, b1 - 0.45, a + w / 2, b1, 2.0); }
     put(chest, -hx + 0.55, b0 + 2.2, 0.4, 0, 0.8, 0.45, 0.45); blk(-hx + 0.1, b0 + 1.95, -hx + 1.0, b0 + 2.45, 0.45);
     put(stool, hx - 0.6, b0 + 1.2, rand() * 6, 0, WD, false);
     put(lantern, -hx + 0.7, b0 + 1.5, 0, ceil - 0.5, 'lamp_paper', 0.45);
@@ -98,10 +98,10 @@ function interior(el, { bag, col }) {
     put(teaSet, 0, tb, 0.3, 0.8, el.seed); put(chair, -0.95, tb, Math.PI / 2, 0, LQ, true); put(chair, 0.95, tb, -Math.PI / 2, 0, LQ, true);
     put(table, 0, tb + 1.2 < b1 - 0.5 ? tb + 1.4 : tb + 1.0, 0, 0, 1.2, 0.4, 0.9, LQ);
     wallScroll(0, 1.2, 0.9, 1.6, el.seed + 3);
-    put(plumVase, -0.55, tb + 1.4, 0, 0.9); 
+    if (!lite) put(plumVase, -0.55, tb + 1.4, 0, 0.9);
     if (W > 4.5) { put(bed, hx - 1.1, b1 - 1.6, Math.PI, 0, 2.0, 1.1); blk(hx - 2.1, b1 - 2.15, hx - 0.1, b1 - 1.05, 0.5); }
     put(chest, -hx + 0.5, b1 - 0.5, 0, 0, 0.9, 0.5, 0.5); put(lampStand, -hx + 0.3, tb, 0, 0, 1.3);
-    put(screen, -hx + 1.8, b1 - 2.9, 0, 0, 2.0, 1.6);
+    if (!lite) put(screen, -hx + 1.8, b1 - 2.9, 0, 0, 2.0, 1.6);
     // the kitchen stove (zao): a brick block with two pot holes, an iron pot, a chimney; jars and a vat beside it, a stack of firewood
     const sa = -hx + 0.8;
     put((Q) => { Q.add('brick_grey', box(-0.5, 0, -0.35, 0.5, 0.75, 0.35)); Q.add('iron', ly([[0.001, 0.75], [0.2, 0.75], [0.28, 0.85], [0.24, 0.97], [0.001, 0.97]], 12, -0.2, 0, 0)); Q.add('wicker', drum(0.22, 0.2, 0.08, 10, 0.2, 0.75, 0)); Q.add('brick_grey', box(-0.15, 0.75, 0.2, 0.15, 2.8, 0.35)); Q.add('flame', box(-0.4, 0.2, -0.36, -0.2, 0.35, -0.35)); }, sa + (hx * 2 - 1.6) / 2, b1 - 0.4, Math.PI);
@@ -147,7 +147,7 @@ export const furnishedLots = () => new Set(picks().filter((p) => p.furnish).map(
 const ceilOf = (l, kind) => (l.kind === 'wine' ? 3.2 : l.storeys === 2 ? 2.95 : 2.7);
 /** The furniture elements (style song) of the furnished lots. */
 export function interiorElements() {
-  return picks().filter((p) => p.furnish).map(({ l, kind, trade }) => ({ t: 'kf_interior', rect: l.foot, front: l.front, y: FLOOR, kind, trade, seed: l.seed + 3, ceil: ceilOf(l, kind) }));
+  return picks().filter((p) => p.furnish).map(({ l, kind, trade }) => ({ t: 'kf_interior', rect: l.foot, front: l.front, y: FLOOR, kind, trade, seed: l.seed + 3, ceil: ceilOf(l, kind), lite: Math.hypot((l.foot[0] + l.foot[2]) / 2 - BRIDGE.at[0], (l.foot[1] + l.foot[3]) / 2 - BRIDGE.at[1]) > 85 }));
 }
 /**
  * The rooms (music and acoustics: kinds shop, tea, tavern, inn, house) of the lots of picks(): { id, rect, y, kind }. The buildings
