@@ -238,6 +238,27 @@ function frontsLife(all) {
   return P;
 }
 
+/** The doors of the lanes about the market: water jars and firewood at the corners of the fronts, a basket of millet, a goat or a hen tethered, a boy on an errand. */
+function laneLife(all) {
+  const rand = rng(7311), P = [], W = ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_brown'];
+  const pick = (a) => a[Math.floor(rand() * a.length)];
+  for (const h of all) {
+    const [x0, z0, x1, z1] = h.rect, f = h.front;
+    if (Math.hypot((x0 + x1) / 2 - 40, (z0 + z1) / 2) > 120 || rand() < 0.45 || (f !== 's' && f !== 'n' && f !== 'w')) continue;
+    const L = f === 'w' ? z1 - z0 : x1 - x0;
+    if (L < 6) continue;
+    const u = rand() < 0.5 ? 0.55 : L - 0.55, o = 0.55;
+    const at = f === 's' ? [x0 + u, z1 + o] : f === 'n' ? [x1 - u, z0 - o] : [x0 - o, z0 + u], seed = Math.floor(rand() * 1e6), r = rand();
+    if (r < 0.35) P.push({ t: 'pot', kind: 'water_pot', at, y: 0, n: 3, seed });
+    else if (r < 0.55) P.push({ t: 'firewood', at, y: 0, rot: f === 'w' ? Math.PI / 2 : 0, len: 1.3, seed });
+    else if (r < 0.75) P.push({ t: 'basket', at, y: 0, seed });
+    else if (r < 0.88) P.push({ t: 'animal', kind: 'goat', at, y: 0, rot: rand() * 6.28, seed });
+    else P.push({ t: 'chickens', kind: 'hen', at, y: 0, rot: rand() * 6.28, n: 3, seed });
+    if (rand() < 0.12) { const q = f === 's' ? [at[0] + 1.8, at[1] + 1.4] : f === 'n' ? [at[0] - 1.8, at[1] - 1.4] : [at[0] - 1.4, at[1] + 1.8]; P.push({ t: 'figure', at: q, y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), dress: 'tunic', legs: 'bare', cloth: pick(W), cloth2: pick(W), skin: 'skin_dark', hat: 'cap', hatMat: 'cloth_white', feet: 'bare', h: 0.7, pose: 'stand', carry: 'basket' }); }
+  }
+  return P;
+}
+
 /** The faithful at prayer in the hall, in the aisles of matting facing the qibla, a teacher with his pupils in the court's gallery, men resting between the piers. */
 function mosqueLife() {
   const rand = rng(1907 + 3), P = [], xm = MOSQUE.c[0] + 2, x1 = MOSQUE.c[0] + MOSQUE.a - 4, z0 = MOSQUE.c[1] - MOSQUE.a + 8, z1 = MOSQUE.c[1] + MOSQUE.a - 8, py = MOSQUE.py;
@@ -282,6 +303,6 @@ export async function town() {
   plans.push(base('djenne-shops', [{ t: 'sahel_shops', rect: SHOPS, n: 8, seed: 3 }, { t: 'sahel_court_house', rect: COURT, seed: 9 }]));
   const all = houses(), homes = enterable(all);
   for (let i = 0; i < all.length; i += 110) plans.push(base(`djenne-houses-${i / 110}`, all.slice(i, i + 110).map((h) => ({ t: homes.has(h) ? 'sahel_home' : 'sahel_house', ...h }))));
-  plans.push({ ...base('djenne-home-life', [...homeLife(homes), ...frontsLife(all), ...mosqueLife(), ...plain()]), style: 'life' });
+  plans.push({ ...base('djenne-home-life', [...homeLife(homes), ...frontsLife(all), ...laneLife(all), ...mosqueLife(), ...plain()]), style: 'life' });
   return plans;
 }
