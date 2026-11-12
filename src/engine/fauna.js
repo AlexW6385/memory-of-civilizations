@@ -513,7 +513,7 @@ function buildBirds(flights, perches, site) {
       if (fl.loop.dist) { const f = fitLoop(fl.loop.dist, [fl.loop.c[0] - 3, fl.loop.c[1] - 3, fl.loop.c[0] + 3, fl.loop.c[1] + 3], fl.loop.a, fl.loop.ratio ?? 0.35, fl.k ?? 2, rot, fl.loop.margin ?? 1.5, rand, 3); if (!f) continue; loop = f; }
       else loop = [fl.loop.c[0], fl.loop.c[1], fl.loop.a[0], fl.loop.a[1]];
     }
-    const ax = loop ? loop[2] : fl.a[0], az = loop ? loop[3] : fl.a[1], k = fl.k ?? (KIND[fl.kind] === 1 ? 1 : 2);
+    const la = fl.a ?? [8, fl.half ?? 2.5], ax = loop ? loop[2] : la[0], az = loop ? loop[3] : la[1], k = fl.k ?? (KIND[fl.kind] === 1 ? 1 : 2);
     const mean = Math.max(ax, az) * 0.64;
     for (let i = 0; i < fl.n; i++) {
       const sp = fl.speed * (0.85 + 0.3 * rand()), w = (sp / Math.max(mean, 4)) * (rand() < 0.5 ? 1 : -1);
