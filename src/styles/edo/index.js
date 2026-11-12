@@ -47,7 +47,7 @@ const faces = ([x0, z0, x1, z1], e = 0.04) => [[[x1, z0 - e], [x0, z0 - e]], [[x
  * earth), walk }: the faces curve — steep at the top, spreading at the foot (ōgi-no-kōbai).
  */
 function ishigaki(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, y0 = el.y0 ?? 0, y1 = el.y1, b = el.batter ?? (y1 - y0) * 0.3, N = el.coursed ? Math.max(8, Math.min(26, Math.round((y1 - y0) / (el.course ?? 0.5)))) : Math.max(6, Math.min(16, Math.round((y1 - y0) / 0.95)));
+  const [x0, z0, x1, z1] = el.rect, y0 = el.y0 ?? 0, y1 = el.y1, b = el.batter ?? (y1 - y0) * 0.3, N = el.coursed ? Math.max(8, Math.min(64, Math.round((y1 - y0) / (el.course ?? 0.5)))) : Math.max(6, Math.min(16, Math.round((y1 - y0) / 0.95)));
   // `rect` is the top; the faces lean out by out(t) at height fraction t: vertical at the top,
   // spreading at the foot
   const out = (t) => b * (1 - t) * (1 - t);
@@ -56,7 +56,7 @@ function ishigaki(el, { bag, col }) {
       const t0 = k / N, t1 = (k + 1) / N, ya = y0 + (y1 - y0) * t0, yb = y0 + (y1 - y0) * t1, o = out(t0), d = o - out(t1);
       const r0 = [rx0 - (sd.w ? o : 0), rz0 - (sd.n ? o : 0), rx1 + (sd.e ? o : 0), rz1 + (sd.s ? o : 0)];
       // a coursed rampart alternates two tones of granite from course to course, so the courses read from far
-      bag.add(el.coursed && k % 3 === 1 ? 'granite_block' : el.mat ?? ST, frustum(r0, ya, yb, sd.w ? d : 0, sd.e ? d : 0, sd.n ? d : 0, sd.s ? d : 0));
+      bag.add(el.coursed && k % 3 === 1 ? 'granite_inca' : el.coursed && k % 3 === 2 ? 'granite_block' : el.mat ?? ST, frustum(r0, ya, yb, sd.w ? d : 0, sd.e ? d : 0, sd.n ? d : 0, sd.s ? d : 0));
       col.rect(r0, ya, yb);
     }
   };
@@ -65,9 +65,10 @@ function ishigaki(el, { bag, col }) {
     const r = rng(Math.round(rx0 * 7 + rz0 * 13) + 5), p = 0.07;
     for (let k = 0; k < N; k++) {
       const t0 = k / N, t1 = (k + 1) / N, ya = y0 + (y1 - y0) * t0 + 0.03, yb = y0 + (y1 - y0) * t1 - 0.03, tm = (t0 + t1) / 2, om = out(tm);
+      if (el.reliefFrom != null && yb < el.reliefFrom) continue;                  // the courses buried in the hill need no blocks
       const lay = (len, face) => {
         for (let u = 1.4; u < len - 3;) {
-          const w = 0.7 + r() * 0.9, gap = 0.3 + r() * 1.2, m = r() < 0.7 ? 'granite_grey' : 'granite_black';
+          const w = 0.7 + r() * 0.9, gap = 0.3 + r() * 1.2, q = r(), m = q < 0.45 ? 'granite_inca' : q < 0.8 ? 'granite_grey' : 'granite_black';
           if (r() < 0.55) face(u, w, m);
           u += w + gap;
         }
@@ -440,6 +441,31 @@ function yaguraMon(el, { bag, col }) {
 }
 
 /**
+ * kabuki_mon: a plain timber gate in a plastered wall { rect, y, w (the passage), h }: two stout posts and a head
+ * beam (kabuki) carrying a tiled gabled roof, the leaves of banded planks swung open inward, stone footings; the
+ * passage runs along z.
+ */
+function kabukiMon(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 3.4, w = el.w ?? 3.4, cx = (x0 + x1) / 2, a = cx - w / 2, b = cx + w / 2, P = 0.22;
+  for (const [u0, u1] of [[a - P, a + P], [b - P, b + P]]) for (const [v0, v1] of [[z0 + 0.2, z0 + 0.2 + 2 * P], [z1 - 0.2 - 2 * P, z1 - 0.2]]) {
+    bag.add(ST, box(u0 - 0.08, y, v0 - 0.08, u1 + 0.08, y + 0.3, v1 + 0.08));
+    bag.add(WD, box(u0, y + 0.3, v0, u1, y + h, v1)); col.rect([u0, v0, u1, v1], y, y + h);
+  }
+  for (const v of [z0 + 0.2 + P, z1 - 0.2 - P]) {
+    bag.add(WD, box(a - 0.5, y + h - 0.5, v - 0.2, b + 0.5, y + h - 0.05, v + 0.2));
+    bag.add(WD, box(a - 0.45, y + h - 1.05, v - 0.1, b + 0.45, y + h - 0.85, v + 0.1));
+  }
+  bag.add('gilt_bronze', box(cx - 0.14, y + h - 0.45, z1 - 0.2 - P + 0.2, cx + 0.14, y + h - 0.12, z1 - 0.2 - P + 0.23));
+  for (const sd of [-1, 1]) {
+    const u = cx + sd * (w / 2 - 0.5), uA = Math.min(u, u + sd * 0.1), uB = Math.max(u, u + sd * 0.1);
+    bag.add(WD, box(uA, y + 0.04, z0 + 0.5, uB, y + h - 1.15, z0 + 0.5 + w / 2 - 0.45)); col.rect([uA, z0 + 0.5, uB, z0 + 0.5 + w / 2 - 0.45], y, y + h - 1.15);
+    for (let k = 0; k < 4; k++) bag.add('iron', box(uA - 0.012, y + 0.3 + k * 0.5, z0 + 0.5, uB + 0.012, y + 0.36 + k * 0.5, z0 + 0.5 + w / 2 - 0.45));
+  }
+  roof(bag, [a - 0.7, z0 - 0.1, b + 0.7, z1 + 0.1], y + h, 0.9, 'gable', 1.15, { alongZ: false });
+  col.floor([a - P, z0, b + P, z1], y);
+}
+
+/**
  * hishi_mon: the Hishi gate, the turret gate at the entrance of the Ninomaru { rect, y, passage, h }
  * (docs/settlements/edo-himeji.md §4): the passage through the middle along z, the guard room on the
  * west and a plastered pier on the east on stone footings; the white plaster leaving the posts, the
@@ -687,7 +713,7 @@ registerStyle('edo', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
-    ishigaki, dobei, tenshu: J(tenshu), yagura: J(yagura), watari: J(watari), yagura_mon: J(yaguraMon), hishi_mon: J(hishiMon), goten: J(goten), yashiki: J(yashiki), machiya: J(machiya), kago, daisho,
+    ishigaki, dobei, tenshu: J(tenshu), yagura: J(yagura), watari: J(watari), yagura_mon: J(yaguraMon), hishi_mon: J(hishiMon), kabuki_mon: J(kabukiMon), goten: J(goten), yashiki: J(yashiki), machiya: J(machiya), kago, daisho,
     ido: (el, ctx) => ido(ctx.bag, ctx.col, el.at[0], el.at[1], el.y ?? 0, el.rot ?? 0),
     ishidoro: (el, ctx) => ishidoro(ctx.bag, ctx.col, el.at[0], el.at[1], el.y ?? 0, el.s ?? 1),
     niwaki: (el, ctx) => niwaki(ctx.bag, ctx.col, el.at[0], el.at[1], el.y ?? 0, el.h ?? 5, el.seed),

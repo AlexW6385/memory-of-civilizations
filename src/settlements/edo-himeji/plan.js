@@ -42,8 +42,10 @@ E.push({ t: 'stairs', rect: [-3, iz1, 3, iz1 + 10], y0: 0, y1: BANK, dir: 'n', m
 E.push({ t: 'lane', rect: [-gx, iz1, gx, oz1], y: 0.02, mat: 'flagstone' });
 
 // ---- the hill's baileys on their ramparts, the paths up
-const plat = (p, b) => E.push({ t: 'ishigaki', rect: p.rect, y0: 0, y1: p.top, batter: b });
-plat(NINO, 6); plat(NISHI, 5); plat(HON, 4); plat(DAI, 3);
+// coursed: the stones of the ramparts read as laid courses, long and short at the corners; the dressed blocks stand
+// out of the face only where the rampart is seen (the Honmaru's and the keep's, the Ninomaru's upper 9 m)
+const plat = (p, b, y0, from) => E.push({ t: 'ishigaki', rect: p.rect, y0, y1: p.top, batter: b, coursed: true, course: 0.6, reliefFrom: from });
+plat(NINO, 6, 0, NINO.top - 9); plat(NISHI, 5, 0, NISHI.top - 9); plat(HON, 5, NINO.top - 1, 0); plat(DAI, 4.5, HON.top - 1, 0);
 E.push({ t: 'stairs', rect: [-4, NINO.rect[3], 4, NINO.rect[3] + 42], y0: BANK, y1: NINO.top, dir: 'n', mat: ST });
 E.push({ t: 'stairs', rect: [8, HON.rect[3], 16, HON.rect[3] + 12], y0: NINO.top, y1: HON.top, dir: 'n', mat: ST });
 E.push({ t: 'stairs', rect: [-34, DAI.rect[3], -28, DAI.rect[3] + 13], y0: HON.top, y1: DAI.top, dir: 'n', mat: ST });
@@ -58,6 +60,11 @@ ring(NINO.rect, NINO.top, [[-10, 10]]);
 // the Hishi gate, the turret gate of the Ninomaru's entrance, at the head of the way up (§4)
 E.push({ t: 'hishi_mon', rect: [-10, NINO.rect[3] - 8.5, 10, NINO.rect[3] - 0.5], y: NINO.top, passage: 5, h: 4.4, front: 's' });
 ring(HON.rect, HON.top, [[6, 18]]);
+// the keep cluster's own wall on the edge of its stone base (white, loopholed), broken on the south by the plain gate at the head of the stair from the Honmaru
+{ const [dx0, dz0, dx1, dz1] = DAI.rect, e = 1, g0 = -33.1, g1 = -28.9;
+  wall([dx0 + e, dz1 - e], [g0, dz1 - e], DAI.top); wall([g1, dz1 - e], [dx1 - e, dz1 - e], DAI.top);
+  wall([dx0 + e, dz0 + e], [dx0 + e, dz1 - e], DAI.top); wall([dx1 - e, dz0 + e], [dx1 - e, dz1 - e], DAI.top); wall([dx0 + e, dz0 + e], [dx1 - e, dz0 + e], DAI.top);
+  E.push({ t: 'kabuki_mon', rect: [g0, dz1 - 2.6, g1, dz1 - 0.4], y: DAI.top, w: 3.6, h: 3.5 }); }
 for (const [x, z] of [[NINO.rect[0], NINO.rect[1]], [NINO.rect[2] - 9, NINO.rect[1]], [NINO.rect[0], NINO.rect[3] - 9], [NINO.rect[2] - 9, NINO.rect[3] - 9], [HON.rect[2] - 8, HON.rect[3] - 8], [HON.rect[0], HON.rect[3] - 8]]) {
   const y = z > HON.rect[1] && z < HON.rect[3] && x > HON.rect[0] - 1 && x < HON.rect[2] ? HON.top : NINO.top;
   E.push({ t: 'yagura', rect: [x + 0.5, z + 0.5, x + (y === HON.top ? 7.5 : 8.5), z + (y === HON.top ? 7.5 : 8.5)], y, storeys: 2 });
