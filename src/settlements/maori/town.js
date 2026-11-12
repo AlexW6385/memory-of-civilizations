@@ -249,7 +249,7 @@ export async function town() {
   { const a = [hx - 17.8, hz - 2.4]; woman(a, top, face(a, [hx - 17.8, hz - 4.3]), { pose: 'stand', over: 'none' }); }
   // children at play between the marae and the cooking place: a ring squatting at a string game, two running, a girl with a kete
   for (let k = 0; k < 5; k++) { const a = k / 5 * 6.28, at = [hx + 5.5 + Math.cos(a) * 0.8, hz + 14 + Math.sin(a) * 0.8]; person(at, top, a + Math.PI + 0.3, { hair: k % 2 ? 'short' : 'long', h: 0.95 + 0.1 * (k % 3) * 0.5, over: 'none', pose: 'squat', beard: false }); }
-  for (const [px, pz, r] of [[hx + 12, hz + 17, 2.2], [hx + 2, hz + 22, -1.0]]) person([px, pz], top, r, { hair: 'short', h: 1.0, over: 'none', pose: 'stand', cloth: 'cloth_ochre' });
+  for (const [px, pz, r] of [[hx + 12, hz + 17, 2.2], [hx + 9.5, hz + 8, -1.0]]) person([px, pz], top, r, { hair: 'short', h: 1.0, over: 'none', pose: 'stand', cloth: 'cloth_ochre' });
   // a second and a third store, a rack for the chief's cloaks; the second pātaka carved like the first
   for (const [x, z, yaw] of [[hx - 17, hz - 11, Math.PI], [hx + 16, hz - 12, Math.PI]]) E.push({ t: 'pataka', c: [x, z], y: top, yaw });
   // cabbage trees and tree ferns at the summit's rim, inside the palisade, and a pair at the gate

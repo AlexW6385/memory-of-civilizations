@@ -23,7 +23,11 @@ import { WORKS } from './works.js';
 const K = 'kokowai', P = 'palisade', TH = 'raupo', PAUA = 'shell_inlay';
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-const post = (bag, x, y, z, r, h, mat = P) => bag.add(mat, lathe([[r, 0], [r * 0.9, h], [0.001, h + r]], 7, null, x, y, z));
+const POST = lathe([[1, 0], [0.9, 1], [0.001, 1.07]], 7);       // one post at unit size, instanced at each place (the palisade has some five thousand)
+const post = (bag, x, y, z, r, h, mat = P) => {
+  if (!bag.addInstance) return bag.add(mat, lathe([[r, 0], [r * 0.9, h], [0.001, h + r]], 7, null, x, y, z));
+  bag.addInstance(mat, POST, new Matrix4().makeTranslation(x, y, z).multiply(new Matrix4().makeScale(r, h, r)), { reach: 300 });
+};
 /** A convex solid from its corner points, as triangles faced outward. */
 function hull(pts) {
   const n = pts.length / 2, t = [];
