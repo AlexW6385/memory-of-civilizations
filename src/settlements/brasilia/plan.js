@@ -38,7 +38,7 @@ export const congress = {
   origin: [0, 0], base: 0, yaw: 0,
   entrance: { at: [-110, 0], facing: 'e' },
   bounds: [-120, -190, 335, 180],
-  view: [-100, -190, 335, 180],
+  view: [0, -100, 96, 100],   // the Congress itself: platform, towers, dome and bowl (the arrival test looks for a place within 50 m of it)
   bakeTop: 105,
   elements: E1,
   rooms: rooms1,
