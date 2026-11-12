@@ -233,7 +233,7 @@ function house(el, { bag, col }) {
     for (let s = 1; s < n; s++) if (rand() < 0.5 && !cumAt.length) { const u = 0.3 + rand() * (L - 1.4); put("plaster_streak", u, u + 0.5 + rand() * 0.4, s * st + 0.37, s * st + 1.1 + rand() * 0.6, 0.004, 0.02); }
     if (rand() < 0.4) { const u = 0.3 + rand() * (L - 1.2); put('timber', u, u + 0.7, st * Math.min(n - 1, 1) + 0.4, st * Math.min(n - 1, 1) + 1.2, 0.004, 0.016); }
     // washing on a pole out of an upper window, a vine on the ground storey's wall, pots by the door
-    if (n > 1 && !cumAt.length && rand() < 0.22) { const u = 0.8 + rand() * (L - 1.6); put('wood_dark', u - 0.02, u + 0.02, st + 1.6, st + 1.64, 0, 1.3); for (let k = 0; k < 3; k++) put(pick(rand, CLOTH), u + 0.1 + k * 0.28, u + 0.34 + k * 0.28, st + 0.7 + rand() * 0.2, st + 1.6, 1.0 + k * 0.1, 1.03 + k * 0.1); }
+    if (n > 1 && !cumAt.length && rand() < 0.22) { const u = 0.8 + rand() * (L - 1.6); put('wood_dark', u - 0.02, u + 0.02, st + 1.6, st + 1.64, 0, 0.75); for (let k = 0; k < 3; k++) put(pick(rand, CLOTH), u + 0.1 + k * 0.28, u + 0.34 + k * 0.28, st + 0.7 + rand() * 0.2, st + 1.6, 0.45 + k * 0.08, 0.48 + k * 0.08); }   // kept short of the opposite house's cumba across the lane (jetties 0.8 + 0.8 m, lane 3.4 m)
     if (rand() < 0.3) { const u = 0.5 + rand() * (L - 1.0); put('fresco_green', u, u + 0.9, 0.6, 2.6, 0.0, 0.06, gz); }
   }
   // the top: the eaves' boards, the hip of tiles, a chimney with its conical cap
