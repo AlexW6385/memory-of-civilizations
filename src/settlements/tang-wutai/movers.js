@@ -22,7 +22,7 @@ export function walkways() {
     { r: [GATE_X - 2, -1.6, 46, 1.6], weight: 2.6, market: 0.6, kind: 'street' },
     { r: [-31.2, -33, -28.8, 33], weight: 1.0, market: 0.6, kind: 'lane' },       // the lower courtyard's cross walk
     { r: [12.8, -34, 15.2, 34], weight: 1.0, market: 0.6, kind: 'lane' },          // the middle terrace's
-    { r: [32.8, -34, 35.2, 34], weight: 0.8, market: 0.6, kind: 'lane' },          // the upper terrace's, before the pillar
+    { r: [27.0, -34, 29.4, 34], weight: 0.8, market: 0.6, kind: 'lane' },          // the upper terrace's, before the pillar (kept 5 m behind the arrival at x=35)
     ...LANES.slice(1).map((r) => ({ r, weight: 0.8, market: 0, kind: 'lane' })),
     // the hill path from the upper terrace's south-east corner to the hermit's cell (dress.js), in short axis-aligned stretches
     { r: [95, 33.8, 114, 41.8], weight: 0.25, market: 1.0, kind: 'lane' }, { r: [113, 38, 131, 51.5], weight: 0.25, market: 1.0, kind: 'lane' },

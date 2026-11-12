@@ -42,6 +42,9 @@ function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z) || inCanal(x, z)) return null;
   if (inRect(T1.rect, x, z, 3) || inRect(T2.rect, x, z, 3) || (Math.abs(x + 110) < 8 && z > 30 && z < 135)) return null;
   if (inRect(WAZI.rect, x, z, 3)) return null;
+  // the approach to the pagoda from the river road (the arrival's view): its old camphors and ginkgos are placed trees (plan.js); no scattered flora here, whose crown clumps hang
+  // as bare clumps in the sky of that view
+  if (x > -170 && x < -50 && z > 84 && z < 132) return null;
   const d = lakeDepth(x, z);
   // the lake's shallows and its shore: reeds in the shallows, willows on the bank with peach trees behind them
   if (d > WEST_LAKE.waterDepth) return null;

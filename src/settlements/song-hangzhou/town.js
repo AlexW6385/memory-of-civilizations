@@ -17,7 +17,8 @@ const faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
 
 function tideDay() {
   const S = [], L = [], rand = rng(1165), pick = (a) => a[Math.floor(rand() * a.length)], yW = 1.0, zc = (WALL.z0 + WALL.z1) / 2;
-  const person = (at, y, rot, extra = {}) => L.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: rand() < 0.75 ? 'robe' : 'trousers', cloth: pick(CLOTH), cloth2: pick(CLOTH), skin: 'skin_light', hat: pick(['none', 'cap', 'cap', 'brim', 'veil']), carry: 'none', ...extra });
+  // nobody stands within 6 m of the arrival at the pagoda's stair (src/planet/arrivals.js: -110, 138): the view must not open on a figure at the lens
+  const person = (at, y, rot, extra = {}) => Math.hypot(at[0] + 110, at[1] - 138) < 6 ? undefined : L.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: rand() < 0.75 ? 'robe' : 'trousers', cloth: pick(CLOTH), cloth2: pick(CLOTH), skin: 'skin_light', hat: pick(['none', 'cap', 'cap', 'brim', 'veil']), carry: 'none', ...extra });
   // the stands along the wall, either side of the pagoda's stair; people seated in them, the crowd at the wall's edge
   for (let x = -200; x < CANAL.x0 - 20; x += 7.5) {
     if (Math.abs(x - PAGODA.c[0]) < 9) continue;
