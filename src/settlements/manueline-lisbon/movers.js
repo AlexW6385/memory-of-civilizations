@@ -34,7 +34,7 @@ export function walkways() {
     { r: [RUA_NOVA[0] + 4, RUA_NOVA[1] + 1, RUA_NOVA[2] - 4, RUA_NOVA[3] - 1], weight: 3.4, market: 2.2, kind: 'street' },
     { r: [TERREIRO[0] + 4, TERREIRO[1] + 6, TERREIRO[2] - 4, TERREIRO[3] - 6], weight: 2.4, market: 1.2, kind: 'street' },
     { r: [YARD[0] + 6, YARD[1] + 6, YARD[2] - 10, YARD[3] - 8], weight: 1.4, market: 0.3, kind: 'street', yard: 1 },
-    { r: [PLAZA[0] + 6, PLAZA[1] + 4, PLAZA[2] - 6, PLAZA[3] - 6], weight: 1.8, market: 0.8, kind: 'street', monk: 1 },
+    { r: [PLAZA[0] + 6, PLAZA[1] + 4, -170, PLAZA[3] - 6], weight: 1.8, market: 0.8, kind: 'street', monk: 1 },
     { r: [SQUARE[0] + 3, SQUARE[1] + 3, SQUARE[2] - 3, SQUARE[3] - 3], weight: 1.6, market: 1.2, kind: 'street' },
     { r: [-260, shore(-200) - 14, -118, shore(-130) - 3], weight: 1.4, market: 0.6, kind: 'street', quay: 1.6 },
     // the cloister's four galleries: the friars walk them

@@ -23,7 +23,7 @@ export function lifeElements() {
   const child = (at, y, rot, e = {}) => person(at, y, rot, { dress: 'tunic', child: true, hat: 'none', over: 'none', ...e });
   const faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
   const ok = ([x, z]) => Math.hypot(x, z) < RADIUS - 40 && wet(x, z) > 2;
-  const crowd = (n, rect, y, mix) => { for (let k = 0; k < n; k++) { const p = [rect[0] + rand() * (rect[2] - rect[0]), rect[1] + rand() * (rect[3] - rect[1])]; if (!ok(p) || inLot(p[0], p[1], 0.3)) continue; if (Math.hypot(p[0] - ARR[0], p[1] - ARR[1]) < 8) p[1] -= 12; mix(p, y, rand() * 6.28); } };
+  const crowd = (n, rect, y, mix) => { for (let k = 0; k < n; k++) { const p = [rect[0] + rand() * (rect[2] - rect[0]), rect[1] + rand() * (rect[3] - rect[1])]; if (!ok(p) || inLot(p[0], p[1], 0.3)) continue; if (Math.hypot(p[0] - ARR[0], p[1] - ARR[1]) < 8) p[1] -= 12; if (Math.abs(p[0] - ARR[0]) < 1.6 && p[1] > 40 && p[1] < 118) p[0] += 2.4; mix(p, y, rand() * 6.28); } };
 
   // ── the house fronts
   for (const l of lots()) {
@@ -91,7 +91,7 @@ export function lifeElements() {
   const px = -206;
   for (const [p, r] of [[[px - 5, 52], 3.1], [[px + 4, 56], 2.6], [[px + 8, 49], 3.4], [[px - 12, 60], 1.4]]) friar(p, g + 0.05, r, { pose: pick(['stand', 'talk']) });
   for (const p of [[px - 4.4, 47], [px + 4.6, 47.4], [px - 8, 47.2]]) person(p, g + 0.05, 3.1, { dress: 'robe', cloth: 'cloth_grey', hat: 'none', over: 'none', pose: 'sit_ground', hair: 'long', beard: true });
-  for (let k = 0; k < 8; k++) { const p = [px - 16 + k * 4 + rand() * 2, 62 + rand() * 4]; (k % 2 ? woman : merchant)(p, g + 0.05, faceTo([0, -1]) + (rand() - 0.5), { pose: 'stand' }); }   // pilgrims facing the portal
+  for (let k = 0; k < 8; k++) { const p = [px - 16 + k * 4 + rand() * 2, 62 + rand() * 4]; if (Math.abs(p[0] - px) < 1.6) p[0] += 2.4; (k % 2 ? woman : merchant)(p, g + 0.05, faceTo([0, -1]) + (rand() - 0.5), { pose: 'stand' }); }   // pilgrims facing the portal
   crowd(26, [PLAZA[0] + 8, 46, PLAZA[2] - 8, 112], g + 0.05, (p, y, r) => { const k = rand(); if (k < 0.2) merchant(p, y, r); else if (k < 0.4) woman(p, y, r, { carry: pick(['basket', 'none', 'none']) }); else if (k < 0.5) noble(p, y, r); else if (k < 0.62) labourer(p, y, r); else if (k < 0.74) child(p, y, r); else if (k < 0.82) friar(p, y, r); else person(p, y, r, { dress: 'robe', hat: 'veil', cloth: 'cloth_black', over: 'shawl', hair: 'bun', pose: 'talk' }); });
   for (const [dx, dz, c] of [[-26, 66, 'cloth_white'], [-12, 76, 'cloth_ochre'], [14, 72, 'cloth_red'], [28, 64, 'cloth_white'], [-40, 82, 'cloth_green'], [34, 84, 'cloth_ochre']]) { L.push({ t: 'stall', at: [px + dx, dz], y: g + 0.04, rot: 0, awning: c, stripe: 'cloth_white', goods: pick([['produce'], ['basket'], ['blue_jar', 'glazed_jar']]), seed: seed() }); person([px + dx, dz - 1.4], g + 0.04, 0, { dress: 'robe', hat: 'veil', over: 'apron', cloth: pick(CL), hair: 'bun' }); }
   // the masons' lodge at the church's west end (civic.js masons_yard): masons at the bankers, a pair at the hoist, a donkey with its panniers
