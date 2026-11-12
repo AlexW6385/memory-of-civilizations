@@ -5,7 +5,7 @@
 
 import { frame } from '../../styles/greek/agora.js';
 import { houseLayout } from '../../styles/ptolemaic/house.js';
-import { RADIUS, GROUND, SEA, QUAY, CANOPIC, SOMA, AGORA, STREETS_Z, ALLEYS_X, ROYAL, GYMZONE, MOLE, lots, wet, inRect, inLot } from './layout.js';
+import { RADIUS, GROUND, SEA, QUAY, PIER, CANOPIC, SOMA, AGORA, STREETS_Z, ALLEYS_X, ROYAL, GYMZONE, MOLE, lots, wet, inRect, inLot } from './layout.js';
 
 const g = GROUND;
 const FIG = [];            // the figures at the quay's work (filled by quayLife, drawn by streetLife)
@@ -63,6 +63,32 @@ function quayLife() {
   // date palms along the promenade and in the agora, fig trees in the agora's corners
   for (let x = -200; x < 420; x += 34 + rand() * 10) if (dry(x, -83, 2) && !E.some((e) => e.at && Math.abs(e.at[0] - x) < 6 && Math.abs(e.at[1] + 85) < 3) && Math.abs(x - 100) > 12) E.push({ t: 'ptol_tree', at: [x, -82.8], y, kind: 'palm', h: 5 + rand() * 3, seed: Math.floor(rand() * 1e6) });
   for (const [dx, dz] of [[2, 2], [AGORA[2] - AGORA[0] - 2, 2], [2, AGORA[3] - AGORA[1] - 2], [AGORA[2] - AGORA[0] - 2, AGORA[3] - AGORA[1] - 2]]) E.push({ t: 'ptol_tree', at: [AGORA[0] + dx, AGORA[1] + dz], y: g + 0.04, kind: 'fig', h: 3.6, seed: dx * 3 + dz });
+  // the pier before the arrival: the solid stone of its head out into the harbour, goods piled along both edges with a lane between,
+  // a treadwheel crane at the head, moorings, and the dockers, the carriers, a ship's master and a merchant at their business
+  {
+    const [px0, pz0, px1, pz1] = PIER, pc = (px0 + px1) / 2, py = g + 0.05, ARR = [100, -86], fa = (p) => Math.atan2(-(ARR[0] - p[0]), -(ARR[1] - p[1]));
+    E.push({ t: 'quay', rect: [px0, pz0, px1, pz1 + 1.5], y0: SEA - 2.2, y1: py, bollards: false });
+    E.push({ t: 'cargo_pile', at: [px0 + 1.5, -97], y: py, rot: Math.PI / 2, kind: 'amphorae', n: 3, seed: 501 });
+    E.push({ t: 'cargo_pile', at: [px1 - 1.5, -101], y: py, rot: Math.PI / 2, kind: 'sacks', n: 3, seed: 502 });
+    E.push({ t: 'cargo_pile', at: [px0 + 1.4, -108], y: py, rot: Math.PI / 2, kind: 'bales', n: 2, seed: 503 });
+    E.push({ t: 'cargo_pile', at: [px1 - 1.4, -112], y: py, rot: Math.PI / 2, kind: 'crates', n: 3, seed: 504 });
+    E.push({ t: 'cargo_pile', at: [px0 + 1.5, -117], y: py, rot: Math.PI / 2, kind: 'ingots', n: 3, seed: 505 });
+    E.push({ t: 'crane', at: [pc + 1.2, pz0 + 3.2], y: py, rot: 0 });
+    for (const z of [-96, -104, -114, -122]) for (const x of [px0 + 0.35, px1 - 0.35]) E.push({ t: 'mooring', at: [x, z], y: py, rot: z * 3 + x, seed: Math.round(-z * 7 + x) });
+    E.push({ t: 'net_rack', at: [px1 + 1.2, -92.5], y: g + 0.04, rot: Math.PI / 2, len: 3.0, seed: 506 });
+    const f = (at, o) => FIG.push({ at, rot: fa(at), dress: 'tunic', hair: 'short', skin: 'skin_medium', seed: Math.round(at[0] * 13 - at[1] * 7), ...o });
+    f([pc + 0.3, -94], { carry: 'sack', cloth: 'cloth_brown', hat: 'cap', rot: Math.PI });
+    f([pc - 0.6, -99.5], { carry: 'sack', cloth: 'linen', hat: 'cap', skin: 'skin_dark', rot: 0 });
+    f([pc + 0.7, -104.5], { carry: 'sack', cloth: 'cloth_ochre', hat: 'cap', rot: Math.PI });
+    f([pc - 0.4, -110.5], { pose: 'talk', dress: 'robe', over: 'cape', cloth: 'cloth_white', beard: true, hat: 'brim', rot: -2.3 });
+    f([pc + 0.9, -111.3], { pose: 'talk', cloth: 'cloth_maroon', over: 'belt', hat: 'cap', rot: 0.85 });
+    f([pc - 1.0, -116], { dress: 'loincloth', cloth: 'linen', hair: 'shaven', skin: 'skin_dark', rot: Math.PI });
+    f([pc + 1.0, -118.5], { dress: 'loincloth', cloth: 'linen', hair: 'shaven', skin: 'skin_dark', rot: 3.5 });
+    f([px0 + 0.3, -121], { pose: 'sit_ground', dress: 'loincloth', cloth: 'linen', hair: 'shaven', skin: 'skin_dark', rot: -1.57 });
+    f([px1 - 0.5, -119.5], { pose: 'sit_ground', cloth: 'cloth_brown', hat: 'cap', rot: 1.57 });
+    f([pc, -124.3], { pose: 'stand', dress: 'tunic', cloth: 'cloth_red', over: 'belt', hat: 'cap', rot: 0 });
+    f([pc + 1.1, -100], { dress: 'robe', over: 'cape', cloth: 'cloth_indigo', beard: true, hat: 'brim', rot: 0.4 });
+  }
   // the quay's workers: sitting at the nets, standing by the cranes, porters with sacks
   for (const e of E) {
     if (e.t === 'net_rack') FIG.push({ at: [e.at[0] + 0.8, e.at[1] + 1.4], rot: 0, pose: 'sit_ground', dress: 'loincloth', cloth: 'linen', hair: 'shaven', skin: 'skin_dark', seed: e.seed });

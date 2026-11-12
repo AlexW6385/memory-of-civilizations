@@ -53,7 +53,7 @@ export function waterways() {
 }
 /** The ships at their moorings, as rectangles the moving boats keep clear of. */
 export async function staticBoats() {
-  return SHIPS.map((s) => ({ c: s.at, u: [1, 0], hl: s.len / 2 + 0.6, hw: s.len * 0.15 + 0.6 }));   // (all lie along x)
+  return SHIPS.map((s) => ({ c: s.at, u: Math.abs(Math.sin(s.rot)) > 0.5 ? [1, 0] : [0, 1], hl: s.len / 2 + 0.6, hw: s.len * 0.15 + 0.6 }));   // (along x, or along z for those rotated)
 }
 
 // ── who walks ────────────────────────────────────────────────────────────────

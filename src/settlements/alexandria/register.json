@@ -1,6 +1,6 @@
 {
   "site": { "id": "alexandria", "name": { "en": "Ptolemaic Alexandria", "zh": "托勒密亚历山大" }, "era": "3rd c. BC", "region": "egypt", "lat": 31.20, "lon": 29.92, "radius": 520, "water": true, "island": true },
-  "arrival": [100, null, -86, 0.50, 0.17],
+  "arrival": [100, null, -86, 0.62, 0.15],
   "arrivalNote": "from the quay before the Museion, across the Great Harbour with its ships, the Pharos on its island at the harbour's mouth",
   "card": {
     "en": [
