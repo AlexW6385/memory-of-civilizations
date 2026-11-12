@@ -98,6 +98,16 @@ export const GARDEN = [150, -38, 420, 150];
 export const STREETS_X = [-250, -180, -110, -40, 30, 100];       // George, Pitt and the rest, running south
 export const STREETS_Z = [70, 140, 210, 280, 350];
 const onStreet = (x, z) => STREETS_X.some((s) => Math.abs(x - s) < 9) || STREETS_Z.some((s) => Math.abs(z - s) < 8);
+/**
+ * The streets as the lot grid leaves them: the one 16 m cell each of the streets above takes out of the grid (lots start on the
+ * grid's lines, x = −440 + 16k and z = −120 + 16k), as [from, to, centre] — the cells' real extent, not the nominal axes.
+ */
+export function streetCells() {
+  const xs = [], zs = [];
+  for (let x = -RADIUS + 20; x < RADIUS - 20; x += 16) if (STREETS_X.some((s) => Math.abs(x + 8 - s) < 9)) xs.push([x, x + 16, x + 8]);
+  for (let z = -120; z < RADIUS - 20; z += 16) if (STREETS_Z.some((s) => Math.abs(z + 8 - s) < 8)) zs.push([z, z + 16, z + 8]);
+  return { xs, zs };
+}
 let LOTS = null;
 /** The city's buildings: sandstone terraces in the Rocks, office towers of the 1960s and 70s among older blocks in the city. */
 export function lots() {
@@ -107,7 +117,8 @@ export function lots() {
   for (let x = -RADIUS + 20; x < RADIUS - 20; x += 16) for (let z = -120; z < RADIUS - 20; z += 16) {
     const w = 11 + rand() * 4, d = 11 + rand() * 4, cx = x + 8, cz = z + 8;
     if (Math.hypot(cx, cz) > RADIUS - 45 || shore(cx, cz) < 10 || inRect(GARDEN, cx, cz, 4) || inRect(MACQUARIE, cx, cz, 4) || inRect(QUAY, cx, cz, 10) || inRect(BENNELONG, cx, cz, 4) || onStreet(cx, cz)
-      || Math.abs(cx - BRIDGE.x) < 31 && cz < -30 || Math.hypot(cx - AUSTRALIA_SQ[0], cz - AUSTRALIA_SQ[1]) < 34 || rand() < 0.12) continue;
+      || Math.abs(cx - BRIDGE.x) < 31 && cz < -30 || Math.hypot(cx - AUSTRALIA_SQ[0], cz - AUSTRALIA_SQ[1]) < 34) continue;
+    const gap = rand() < 0.12;      // (a lot the city has not built up: a low shop or a garage, not a bare block)
     const rocks = cx < -100 && cz < 70, ys = [height(cx - w / 2, cz - d / 2), height(cx + w / 2, cz - d / 2), height(cx - w / 2, cz + d / 2), height(cx + w / 2, cz + d / 2)];
     let h, mat;
     if (rocks) {
@@ -116,7 +127,7 @@ export function lots() {
       LOTS.push({ t: 'rocks_terrace', rect: [x, z, x + w, z + d], y: Math.max(...ys), y0: Math.min(...ys), front: Math.floor((z + 1000) / 16) % 2 ? 's' : 'n', kind: store ? 'store' : 'terrace', seed });
       continue;
     }
-    h = 15 + rand() * 30; mat = ['facade_buff', 'facade_grey', 'facade_limestone'][Math.floor(rand() * 3)]; if (rand() < 0.22) { h = 60 + rand() * 90; mat = rand() < 0.6 ? 'facade_glass' : 'facade_grey'; }
+    h = 15 + rand() * 30; mat = ['facade_buff', 'facade_grey', 'facade_limestone'][Math.floor(rand() * 3)]; if (gap) h = 6.5 + rand() * 5; else if (rand() < 0.22) { h = 60 + rand() * 90; mat = rand() < 0.6 ? 'facade_glass' : 'facade_grey'; }
     LOTS.push({ rect: [x, z, x + w, z + d], y: Math.max(...ys), h: Math.round(h), mat, seed: Math.floor(rand() * 1e6), tanks: false });
   }
   // shop fronts only on the faces with a street or a lane of at least 3 m before them
@@ -125,19 +136,38 @@ export function lots() {
     const [x0, z0, x1, z1] = l.rect, clear = (r) => !LOTS.some((o) => o !== l && o.rect[0] < r[2] && o.rect[2] > r[0] && o.rect[1] < r[3] && o.rect[3] > r[1]);
     l.shops = [['n', [x0, z0 - 3, x1, z0]], ['s', [x0, z1, x1, z1 + 3]], ['w', [x0 - 3, z0, x0, z1]], ['e', [x1, z0, x1 + 3, z1]]].filter(([, r]) => clear(r)).map(([f]) => f).join('');
   }
+  // the width of the lane before each Rocks front (the balconies of the two rows project 1.2 m each: what hangs from them wants room)
+  for (const l of LOTS) {
+    if (l.t !== 'rocks_terrace') continue;
+    const f = l.front, near = f === 'n' ? [l.rect[0], l.rect[1] - 7, l.rect[2], l.rect[1]] : [l.rect[0], l.rect[3], l.rect[2], l.rect[3] + 7];
+    const o = LOTS.filter((q) => q !== l && q.rect[0] < near[2] && q.rect[2] > near[0] && q.rect[1] < near[3] && q.rect[3] > near[1]).map((q) => (f === 'n' ? l.rect[1] - q.rect[3] : q.rect[1] - l.rect[3])).sort((a, b) => a - b)[0];
+    l.lane = o ?? 7;
+  }
   // the two rooms one can walk into (rooms.js, §1f): a tenant's terrace house in the Rocks and an espresso bar near the quay
   const clearR = (l, r) => !LOTS.some((o) => o !== l && o.rect[0] < r[2] && o.rect[2] > r[0] && o.rect[1] < r[3] && o.rect[3] > r[1]);
   const strip = (l, f) => { const [x0, z0, x1, z1] = l.rect; return f === 'n' ? [x0, z0 - 3, x1, z0] : [x0, z1, x1, z1 + 3]; };
   const best = (cands, tx, tz) => cands.sort((a, b) => Math.hypot(a.rect[0] - tx, a.rect[1] - tz) - Math.hypot(b.rect[0] - tx, b.rect[1] - tz))[0];
   const terr = best(LOTS.filter((l) => l.t === 'rocks_terrace' && l.kind === 'terrace' && clearR(l, strip(l, l.front)) && shore((l.rect[0] + l.rect[2]) / 2, l.front === 'n' ? l.rect[1] - 2 : l.rect[3] + 2) > 8
     && l.y + 0.5 - height(l.rect[0] + 0.85, l.front === 'n' ? l.rect[1] - 1.2 : l.rect[3] + 1.2) < 1.4), -170, 10);
-  if (terr) { terr.enter = 0; terr.gy = height(terr.rect[0] + 0.85, terr.front === 'n' ? terr.rect[1] - 1.2 : terr.rect[3] + 1.2); }
+  const okT = (l) => l.t === 'rocks_terrace' && l.kind === 'terrace' && clearR(l, strip(l, l.front)) && shore((l.rect[0] + l.rect[2]) / 2, l.front === 'n' ? l.rect[1] - 2 : l.rect[3] + 2) > 8 && l.y + 0.5 - height(l.rect[0] + 0.85, l.front === 'n' ? l.rect[1] - 1.2 : l.rect[3] + 1.2) < 1.4;
+  const terrs = [terr];
+  for (const [tx, tz] of [[-250, -40], [-150, -80], [-220, 50]]) { const t2 = best(LOTS.filter((l) => okT(l) && !terrs.includes(l)), tx, tz); if (t2) terrs.push(t2); }
+  for (const t of terrs) if (t) { t.enter = 0; t.gy = height(t.rect[0] + 0.85, t.front === 'n' ? t.rect[1] - 1.2 : t.rect[3] + 1.2); }
   const AMP = [-40, 30, 20, 76];
   const cafe = best(LOTS.filter((l) => !l.t && !inRect(AMP, (l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2, 14) && !LOTS.some((o) => o !== l && o.rect[0] < l.rect[2] + 0.5 && o.rect[2] > l.rect[0] - 0.5 && o.rect[1] < l.rect[3] + 0.5 && o.rect[3] > l.rect[1] - 0.5 && false)
     && ['n', 's'].some((f) => clearR(l, strip(l, f))) && l.rect[2] - l.rect[0] >= 11), -10, 90);
   if (cafe) {
     const f = clearR(cafe, strip(cafe, 'n')) ? 'n' : 's', [x0, z0, x1, z1] = cafe.rect, du = (x1 - x0) * 0.62;
     Object.assign(cafe, { t: 'espresso_bar', front: f, gy: height(x0 + du, f === 'n' ? z0 - 1.2 : z1 + 1.2), wall: 'brick' });
+  }
+  // the three more (shops.js, §1g): the public bar of a sandstone hotel at the Rocks' edge, a newsagent and a greengrocer
+  const used = new Set(cafe ? [cafe] : []);
+  for (const [kind, tx, tz, wall, name] of [['pub', -100, 30, 'sandstone_dressed', 'HOTEL'], ['newsagent', -80, 130, null, 'NEWSAGENT'], ['greengrocer', 70, 150, null, 'FRUIT VEG']]) {
+    const c = best(LOTS.filter((l) => !l.t && !used.has(l) && !inRect(AMP, (l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2, 14) && ['n', 's'].some((f) => clearR(l, strip(l, f))) && l.rect[2] - l.rect[0] >= 11 && l.rect[3] - l.rect[1] >= 11), tx, tz);
+    if (!c) continue;
+    used.add(c);
+    const f = clearR(c, strip(c, 'n')) ? 'n' : 's', [x0, z0, x1, z1] = c.rect, du = (x1 - x0) * (kind === 'pub' ? 0.5 : 0.3) + 0.3;
+    Object.assign(c, { t: 'shop_room', kind, name, front: f, gy: height(x0 + du, f === 'n' ? z0 - 1.2 : z1 + 1.2), ...(wall ? { wall } : {}) });
   }
   return LOTS;
 }

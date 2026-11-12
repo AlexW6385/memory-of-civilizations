@@ -4,7 +4,7 @@
 // Suzhou's: the ways come from layout.js; the boats are the modern style's ferry (with its passengers baked into the hull set); they
 // have no oar and no boatman (those variants are empty).
 
-import { RADIUS, LEVEL, STREETS_X, STREETS_Z, OPERA, QUAY, BENNELONG } from './layout.js';
+import { RADIUS, LEVEL, streetCells, OPERA, QUAY, BENNELONG } from './layout.js';
 import { STYLES } from '../../core/build.js';
 import '../../styles/modern/index.js';
 import '../../objects/index.js';
@@ -24,11 +24,13 @@ export function walkways() {
   const rects = [];
   const street = (r, weight, market = 0.6, kind = 'street') => rects.push({ r, weight, market, kind });
   // the city's streets running south: George, Pitt and the rest; the cross streets east–west (the Garden's edge at x ≈ 162)
-  for (const s of STREETS_X) {
-    const north = s < -100 ? -80 : s > 90 && s < 120 ? oz1 + OPERA.stair + 4 : 34;       // (the Rocks' streets run down to Dawes Point; the one at x 100 to the Opera House's stair)
-    street([s - 4, north, s + 4, RADIUS - 20], s === -40 || s === 30 ? 3.2 : 2.2, 1);
+  // (the streets are the cells the lot grid leaves, layout.js streetCells: the footpaths 2.6 m inside the lots' faces, the walkers on them)
+  const { xs, zs } = streetCells();
+  for (const [a, b, c] of xs) {
+    const north = c < -100 ? -80 : c > 80 && c < 120 ? oz1 + OPERA.stair + 4 : 34;       // (the Rocks' streets run down to Dawes Point; the one at x 100 to the Opera House's stair)
+    street([a + 0.3, north, b - 0.3, RADIUS - 20], c === -32 || c === 32 ? 3.2 : 2.2, 1);
   }
-  for (const z of STREETS_Z) street([-RADIUS + 30, z - 3.5, z < 160 ? 162 : RADIUS - 30, z + 3.5], z === 70 ? 3.0 : 2.0, 1);
+  for (const [a, b, c] of zs) street([-RADIUS + 30, a + 0.3, c < 160 ? 162 : RADIUS - 30, b - 0.3], c === 64 ? 3.0 : 2.0, 1);
   // the Rocks' lanes between the facing rows of terraces (layout.js lots: rows every 16 m, the fronts of the pairs face each other)
   for (let k = 0; k < 12; k += 2) street([-300, -120 + 16 * (k + 1) - 2.2, -104, -120 + 16 * (k + 1) - 0.4], 1.0, 0.3, 'lane');
   // the quay's promenade along the head of the cove, and the ways up round the viaduct to the streets beyond

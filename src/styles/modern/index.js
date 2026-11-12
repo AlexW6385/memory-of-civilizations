@@ -5,6 +5,7 @@
 // sandstone terraces.
 
 import { concertHall } from './hall.js';
+import { operaTheatre } from './theatre.js';
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, rod, frustum } from '../../core/geom.js';
 import '../qing/index.js';
@@ -14,6 +15,9 @@ import { archBridge } from './bridge.js';
 import { wharf, quayCrowd } from './wharf.js';
 import { seaWall } from './seawall.js';
 import { espressoBar } from './rooms.js';
+import { streetKit } from './street.js';
+import { shopRoom } from './shops.js';
+import { smallCraft, macquarieChair } from './harbour.js';
 
 /** The lowest inner surface of a hall's shells over (xx, zz), above the podium, from their section and profile. */
 function envOf(hall, xx, zz) {
@@ -129,7 +133,7 @@ function operaHouse(el, { bag, col, lights }) {
   for (const hall of el.halls ?? []) {
     // (inside the Concert Hall's room, below its ceiling, the later shells' bases are not drawn — hall.js)
     const last = hall.shells[hall.shells.length - 1], zN = last[1] + (last[0] - last[1]) * 0.62, zS = hall.shells[0][0] - 10 - 16, aw = hall.hw * 0.55;
-    CLIP = hall.concert ? (px, py, pz) => px > hall.x - aw + 0.25 && px < hall.x + aw - 0.25 && pz > zN && pz < zS - 0.25 && py < y + h + envOf(hall, px, pz) * 0.82 - 1.2 : null;
+    CLIP = hall.concert || hall.theatre ? (px, py, pz) => px > hall.x - aw + 0.25 && px < hall.x + aw - 0.25 && pz > zN && pz < zS - 0.25 && py < y + h + envOf(hall, px, pz) * 0.82 - 1.2 : null;
     for (const [a, b, H, hw] of hall.shells) shell(bag, hall.x, a, b, hw ?? hall.hw, H, y + h);
     CLIP = null;
   }
@@ -142,6 +146,7 @@ function operaHouse(el, { bag, col, lights }) {
     const last = hall.shells[hall.shells.length - 1], zMouth = last[1], zN = zMouth + (last[0] - last[1]) * 0.62, zS = hall.shells[0][0] - 10, aw = hall.hw * 0.55;
     // the Concert Hall (the west hall) is built hollow and furnished (§1d); the opera theatre's enclosure stays solid
     if (hall.concert) concertHall(bag, col, lights, { x: hall.x, aw, zS, zN, yf, env });
+    else if (hall.theatre) operaTheatre(bag, col, lights, { x: hall.x, aw, zS, zN, yf, env });
     else for (let zz = zS; zz > zN; zz -= 4) {
       const zb = Math.max(zN, zz - 4), hh = Math.min(env(hall.x - aw, zz), env(hall.x - aw, zb), env(hall.x + aw, zz), env(hall.x + aw, zb)) * 0.82;
       if (hh < 3) continue;
@@ -152,7 +157,7 @@ function operaHouse(el, { bag, col, lights }) {
     for (let k = 0; k < 3; k++) bag.add('brushbox', box(hall.x - aw + k * 0.8, yf + hN * k / 3, zN - 3 + k * 1.0, hall.x + aw - k * 0.8, yf + hN * (k + 1) / 3 - 0.05, zN));
     for (let k = 0; k < 3; k++) for (let u = hall.x - aw + k * 0.8 + 0.4; u < hall.x + aw - k * 0.8 - 0.3; u += 0.6) bag.add('brushbox', box(u - 0.08, yf + hN * k / 3 + (k ? 0.05 : 0.3), zN - 3 + k * 1.0 - 0.1, u + 0.08, yf + hN * (k + 1) / 3 - 0.4, zN - 3 + k * 1.0));   // the brush-box battens
     for (let k = 1; k < 3; k++) bag.add('glass_outer', box(hall.x - aw + 2, yf + hN * k / 3 - 0.05 - 1.4, zN - 3 + (k - 1) * 1.0 - 0.02, hall.x + aw - 2, yf + hN * k / 3 - 0.35, zN - 3 + (k - 1) * 1.0));
-    col.rect([hall.x - aw, zN - 3, hall.x + aw, hall.concert ? zN : zS], yf, yf + 20);
+    col.rect([hall.x - aw, zN - 3, hall.x + aw, hall.concert || hall.theatre ? zN : zS], yf, yf + 20);
     // the foyer's floor, the bar, benches facing the harbour, lamps on stands
     const f0 = zMouth + 2.5, f1 = zN - 3;
     bag.add('timber', box(hall.x - aw - 4, yf, f0, hall.x + aw + 4, yf + 0.04, f1));
@@ -239,6 +244,6 @@ function ferry(el, { bag, col }) {
 }
 registerStyle('modern', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.artdeco.elements, opera_house: operaHouse, arch_bridge: archBridge, round_tower: roundTower, wharf, viaduct, ferry, rocks_terrace: rocksTerrace, sea_wall: seaWall, espresso_bar: espressoBar, quay_crowd: quayCrowd },
+  elements: { ...STYLES.qing.elements, ...STYLES.artdeco.elements, opera_house: operaHouse, arch_bridge: archBridge, round_tower: roundTower, wharf, viaduct, ferry, rocks_terrace: rocksTerrace, sea_wall: seaWall, espresso_bar: espressoBar, street_kit: streetKit, shop_room: shopRoom, craft: smallCraft, macquarie_chair: macquarieChair, quay_crowd: quayCrowd },
   objects: {},
 });

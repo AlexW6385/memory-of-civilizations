@@ -7,7 +7,7 @@
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 
 /** The local frame of a lot: u along the front from a0, d inward from the front face; returns W (point) and B (box). */
-function frame(rect, f) {
+export function frame(rect, f) {
   const [x0, z0, x1, z1] = rect, along = f === 'n' || f === 's', L = along ? x1 - x0 : z1 - z0, Dp = along ? z1 - z0 : x1 - x0, a0 = along ? x0 : z0;
   const o = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1;
   const W = (u, d, yy) => { const q = o - sg * d; return along ? [a0 + u, yy, q] : [q, yy, a0 + u]; };
@@ -18,7 +18,7 @@ function frame(rect, f) {
 const both = (t) => { const o = [...t]; for (let i = 0; i < t.length; i += 9) o.push(...t.slice(i, i + 3), ...t.slice(i + 6, i + 9), ...t.slice(i + 3, i + 6)); return o; };
 
 /** A table-height thing's kit: a chair at (u, d) with its back toward `bk` (+1: toward larger d, −1: toward the front, 'u+'/'u−': along). */
-function chair(bag, B, u, d, yy, bk, mat = 'wood_painted', seat = 'cloth_red') {
+export function chair(bag, B, u, d, yy, bk, mat = 'wood_painted', seat = 'cloth_red') {
   const s = 0.21, h = 0.45;
   bag.add(mat, B(u - s, u + s, d - s, d + s, yy + h - 0.04, yy + h)); bag.add(seat, B(u - s + 0.01, u + s - 0.01, d - s + 0.01, d + s - 0.01, yy + h, yy + h + 0.03));
   for (const [a, b] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) bag.add(mat, B(u + a * (s - 0.02) - 0.015, u + a * (s - 0.02) + 0.015, d + b * (s - 0.02) - 0.015, d + b * (s - 0.02) + 0.015, yy, yy + h - 0.04));
