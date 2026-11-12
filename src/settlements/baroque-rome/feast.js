@@ -21,8 +21,8 @@ export function feast({ L, C, coachAt, arrival }) {
   const taken = L.filter((e) => e.at).map((e) => e.at);       // what stands already (figures, stalls, animals, props)
   const keep = (x, z, r = 0.8) => { for (const [a, b] of taken) if ((a - x) ** 2 + (b - z) ** 2 < r * r) return false; return true; };
   const take = (x, z) => taken.push([x, z]);
-  // the ways kept open: the walk round the obelisk and up to the steps (src/settlements/baroque-rome/plan.js) and a free ring about the arrival
-  const WALK = [[125, 0], [58, 0], [56, -11], [24, -11], [22, 0], [FRONT_X + 26, 0]];
+  // the ways kept open: the walk round the obelisk (by its south side, the procession keeping the north) and up to the steps (src/settlements/baroque-rome/plan.js) and a free ring about the arrival
+  const WALK = [[125, 0], [58, 0], [56, 11], [24, 11], [22, 0], [FRONT_X + 26, 0]];
   const segD = (x, z, [ax, az], [bx, bz]) => { const dx = bx - ax, dz = bz - az, t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz))); return Math.hypot(x - ax - t * dx, z - az - t * dz); };
   const onWalk = (x, z) => WALK.slice(1).some((p, i) => segD(x, z, WALK[i], p) < 1.7);
   const blocked = (x, z) => (arrival && Math.hypot(x - arrival[0], z - arrival[1]) < 7)
