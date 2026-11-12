@@ -96,6 +96,9 @@ export function lots() {
   }
   return LOTS;
 }
+// the farmsteads outside the gates: [x0, z0, x1, z1, front] (the lot's door side), houses with their yards
+export const FARMS = [[-60, 186, -46, 206, 'n'], [32, 186, 46, 206, 'n'], [-100, 186, -86, 206, 'n'], [160, 186, 174, 206, 'n'], [258, 34, 272, 56, 'n'], [258, -24, 272, -6, 's'], [-272, 34, -258, 56, 'n'], [-272, -24, -258, -6, 's'], [-30, -216, -16, -196, 's'], [120, -216, 134, -196, 's']];
+export const inFarm = (x, z, m = 0) => FARMS.some((f) => x >= f[0] - m - 1 && x <= f[2] + m + 16 && z >= f[1] - m - 6 && z <= f[3] + m + 6);
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
 /** Rectangles of the streets, lanes and open ways (free of houses). */
 export function streets() {

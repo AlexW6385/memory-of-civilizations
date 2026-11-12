@@ -1,6 +1,7 @@
 // Round the terraces (docs/settlements/wei-ye.md §2, §6–§7): the palace's walls, gate, corridors and halls; the offices of the court along the avenue;
 // the walled wards with their houses, the Qili ward; the market with its tower and shop rows; the city wall with its gates; the Xuanwu pond; the Zhang River;
 // the people — the court in the Wenchang Hall, the poets on the terrace, the guards, the merchants.
+import { streetElements, marketElements, wallElements, compoundElements, riverElements, farmElements, lifeElements } from './dressing.js';
 import { RADIUS, PALACE, PALACE_WALL, WENCHANG, W_TERRACE, MARKET, MARKET_WALL, WARDS, WARD_WALL, POND, POND_Y, CITY_WALL, WALL, GATES_S, GATES_N, GATE_W, AVENUE_Z, TOWER, SPARROW, ICE, TIGER,
   cityWalls, lots, riverZ, RIVER, stairRect, zOf } from './layout.js';
 
@@ -152,7 +153,7 @@ export async function town() {
   // ── the market ──
   {
     const cx = (MARKET[0] + MARKET[2]) / 2, cz = (MARKET[1] + MARKET[3]) / 2;
-    plans.push(base('wei-market', [{ t: 'han_market', rect: MARKET, gates: { n: cx, s: cx, e: cz, w: cz }, th: MARKET_WALL.th, h: MARKET_WALL.h }, ...marketRows(MARKET, 600)]));
+    plans.push(base('wei-market', [{ t: 'han_market', rect: MARKET, gates: { n: cx, s: cx, e: cz, w: cz }, th: MARKET_WALL.th, h: MARKET_WALL.h }, ...marketRows(MARKET, 600), ...marketElements()]));
   }
   // ── the city wall and its gates; the river ──
   {
@@ -167,8 +168,12 @@ export async function town() {
       E.push({ t: 'han_wall', a, b, th, h, mat: 'earth_wall', walk: true, layers: true, gaps });
     }
     for (const g of gates) { const r = Math.hypot(...g.c); if (r < RADIUS - 30) E.push({ t: 'han_gate', c: g.c, axis: g.axis, th, h, n: 3, pw: 6, pier: 2.4, ph: 5.4 }); }
-    plans.push(base('wei-citywall', E));
-    plans.push(base('wei-river', [{ t: 'wei_river', x0: -218, x1: 218, zc: riverZ, w: RIVER.w, y: RIVER.y }]));
+    plans.push(base('wei-citywall', [...E, ...wallElements()]));
+    plans.push(base('wei-river', [{ t: 'wei_river', x0: -218, x1: 218, zc: riverZ, w: RIVER.w, y: RIVER.y }, ...riverElements()]));
+    plans.push(base('wei-streets', streetElements()));
+    plans.push(base('wei-compound', compoundElements()));
+    plans.push(base('wei-farms', farmElements()));
+    plans.push({ ...base('wei-life', lifeElements()), style: 'life' });
   }
   plans.push({ ...base('wei-people', people()), style: 'life' });
   return (CACHE = plans);
