@@ -2,18 +2,21 @@
 // Gur-e Amir, the observatory, the chorsu and the bazaar's streets), the courtyard houses (the one by the bazaar open and furnished), the aryk
 // in the lanes. Each a plan of its own so that they stream.
 
-import { RADIUS, ARYK_X, ARYK_W, BIBI, GUR, OBS, CHORSU, BAZAAR, houses, OPEN_HOUSE, onAryk } from './layout.js';
+import { RADIUS, ARYK_X, ARYK_W, BIBI, GUR, OBS, CHORSU, BAZAAR, houses, houseGeom, onAryk } from './layout.js';
 import { lifePlan } from './life.js';
 
 const base = (id, elements, bounds, rooms = []) => ({ id, style: 'timurid', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms, bounds, entrance: { at: [38, 0], facing: 'w' } });
 
 export async function town() {
-  const all = houses(), open = OPEN_HOUSE(), plans = [];
-  const shut = all.filter((h) => h !== open);
-  for (let i = 0; i < shut.length; i += 90) plans.push(base(`samarkand-houses-${i / 90}`, shut.slice(i, i + 90).map((h) => ({ t: 'khaneh', ...h })), [-RADIUS, -RADIUS, RADIUS, RADIUS]));
-  const [x0, z0, x1, z1] = open.rect;
-  plans.push({ ...base('samarkand-open-house', [{ t: 'khaneh_open', rect: open.rect, entry: 'w', seed: open.seed }], [x0 - 2, z0 - 2, x1 + 2, z1 + 2]),
-    rooms: [{ id: 'talar', rect: [x0 + 3.6, z0 + 0.6, x1 - 3.8, z0 + 4.35], y: 0.45, kind: 'hall' }, { id: 'house court', rect: [x0 + 3.6, z0 + 4.8, x1 - 3.8, z1 - 3.4], y: 0, kind: 'open' }] });
+  const all = houses().slice().sort((p, q) => Math.hypot(p.rect[0], p.rect[1]) - Math.hypot(q.rect[0], q.rect[1])), plans = [];
+  for (let i = 0; i < all.length; i += 24) {
+    const part = all.slice(i, i + 24), rooms = [];
+    for (const h of part) if (h.full && !h.garden) {
+      const G = houseGeom(h), [ax, az] = G.toWorld(-3.6, -G.D / 2 + 2.3), [bx2, bz] = G.toWorld(3.6, -G.D / 2 + 4.8);
+      rooms.push({ id: `talar ${h.seed}`, rect: [Math.min(ax, bx2), Math.min(az, bz), Math.max(ax, bx2), Math.max(az, bz)], y: 0.45, kind: 'hall' });
+    }
+    plans.push({ ...base(`samarkand-houses-${i / 24}`, part.map((h) => ({ t: h.garden ? 'tim_garden' : 'tim_house', h })), [-RADIUS, -RADIUS, RADIUS, RADIUS]), rooms });
+  }
   plans.push(base('samarkand-bibi-khanym', [{ t: 'bibi_khanym', c: BIBI.c }], [BIBI.c[0] - 105, BIBI.c[1] - 105, BIBI.c[0] + 105, BIBI.c[1] + 105], [{ id: 'bibi court', rect: [BIBI.c[0] - 30, BIBI.c[1] - 30, BIBI.c[0] + 30, BIBI.c[1] + 30], y: 0, kind: 'open' }]));
   plans.push(base('samarkand-gur-e-amir', [{ t: 'gur_e_amir', rect: GUR.rect }], [GUR.rect[0] - 8, GUR.rect[1] - 8, GUR.rect[2] + 8, GUR.rect[3] + 8]));
   plans.push({ ...base('samarkand-observatory', [{ t: 'observatory', c: OBS.c, y: OBS.y, r: OBS.r }], [OBS.c[0] - 60, OBS.c[1] - 40, OBS.c[0] + 60, OBS.c[1] + 80]) });

@@ -2,7 +2,7 @@
 // madrasa's court and its classroom, merchants and their camels and donkeys at the Registan's east side and the
 // bazaar, shopkeepers sitting on the sills of the shops, water carriers at the aryk. (The walkers are in movers.js.)
 
-import { RADIUS, SQUARE, MADRASA, SHOPS_N, SHOPS_S, BAZAAR, CHORSU, OPEN_HOUSE } from './layout.js';
+import { RADIUS, SQUARE, MADRASA, SHOPS_N, SHOPS_S, BAZAAR, CHORSU } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -51,8 +51,6 @@ export function life() {
     }
   }
   for (const [x, z] of [[100, 25], [96, 100]]) { L.push({ t: 'animal', kind: 'donkey', at: [x, z], y: 0.04, rot: 0, seed: Math.floor(rand() * 1e9), gear: true }); person([x + 0.6, z - 1.4], 0, { man: true, pose: 'stand', cloth: 'cloth_brown' }); }
-  // the open house: the master on the carpet of the talar, a servant in the court
-  { const [x0, z0, x1, z1] = OPEN_HOUSE().rect, hx = (x0 + 3.6 + x1 - 3.8) / 2; person([hx - 1.4, z0 + 1.9], Math.PI, { man: true, pose: 'cross', y: 0.47, cloth: 'cloth_green', cloth2: 'cloth_white' }); person([x1 - 4.6, z1 - 4.4], Math.PI / 2, { man: true, cloth: 'cloth_white' }); }
   void CHORSU;
   return L;
 }

@@ -3,7 +3,7 @@
 // monuments, dusty lanes between the houses, aryk (irrigation channels) with poplars and plane trees along them, orchards
 // of apple, mulberry and jujube at the edge; the dry, clear continental sky.
 
-import { RADIUS, SQUARE, MADRASA, GUR, BIBI, HILL, inRect, inHouse, inBibi, inBazaar, onAryk, onHill, hillHeight, OPEN_HOUSE, CHORSU } from './layout.js';
+import { RADIUS, SQUARE, MADRASA, GUR, BIBI, HILL, inRect, inHouse, inBibi, inBazaar, onAryk, onHill, hillHeight, houseAt, houseGeom, CHORSU } from './layout.js';
 
 function height(x, z) { return onHill(x, z) ? hillHeight(x, z) : 0; }
 function cover(x, z) {
@@ -13,7 +13,7 @@ function cover(x, z) {
   if (inRect(SQUARE, x, z)) { c.sand = 0.5; c.soil = 0.4; c.road = 0.6; return c; }
   if (inRect(MADRASA, x, z) || inRect(GUR.rect, x, z) || inBibi(x, z) || inBazaar(x, z)) { c.road = 0.3; return c; }
   if (d > RADIUS - 70) { c.fields = 0.5; c.grass = 0.3; c.soil = 0.3; c.dry = 0.4; return c; }
-  c.road = inHouse(x, z, 0.3) ? 0 : 0.5;
+  { const hs = houseAt(x, z, 0.3); c.road = hs ? (hs.garden ? 0 : 0) : 0.5; if (hs?.garden) { c.grass = 0.5; c.soil = 0.6; } }
   if (onAryk(x, z, 0.8)) { c.grass = 0.4; c.dry = 0.2; c.road = 0.1; }
   return c;
 }
@@ -32,7 +32,11 @@ function planting(x, z) {
     if (Math.hypot(x - HILL.c[0], z - HILL.c[1]) < HILL.plateau + 30) return { grass_dry: 14 };
     return { grass_dry: 12, apple: 0.02 };
   }
-  { const [x0, z0, x1, z1] = OPEN_HOUSE().rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2; if (Math.abs(x - cx) < 0.9 && Math.abs(z - cz + 2.2) < 0.9) return { mulberry: 1.5 }; }
+  { const hs = houseAt(x, z, 0.4);
+    if (hs) {
+      for (const t of houseGeom(hs).trees) if (Math.abs(x - t.at[0]) < 0.9 && Math.abs(z - t.at[1]) < 0.9) return { [t.kind]: 1.5 };
+      return hs.garden ? { grass: 14 } : null;
+    } }
   if (inHouse(x, z, 0.6)) return null;
   if (onAryk(x, z, 2.6) && !onAryk(x, z, 0.9)) { const k = Math.abs(Math.round(z / 6)) % 2; return ((z % 6) + 6) % 6 < 1.2 ? { [k ? 'poplar' : 'plane_tree']: 2 } : { grass: 25 }; }
   if (d > RADIUS - 70) return inBibi(x, z, 45) || inRect(GUR.rect, x, z, 30) ? { grass: 20 } : { apple: 0.5, mulberry: 0.25, jujube: 0.2, grass: 24 };
@@ -41,7 +45,7 @@ function planting(x, z) {
 void CHORSU; void BIBI;
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { plane_tree: 2, poplar: 2, apple: 0.9, mulberry: 1.5, jujube: 0.3, elm: 0.03 },
+  maxDensity: { fig: 1.5, plane_tree: 2, poplar: 2, apple: 0.9, mulberry: 1.5, jujube: 0.3, elm: 0.03 },
   climate: {
     sun: { az: 150, el: 48, color: [1.0, 0.96, 0.88], intensity: 3.4, lat: 39.7, dec: 5, hour: 10.5 },
     sky: { turbidity: 2.8, rayleigh: 1.1, mie: 0.004, mieG: 0.8, zenith: [0.1, 0.18, 0.37], horizon: [0.62, 0.65, 0.68] },

@@ -12,6 +12,7 @@ import { arcadeWall } from '../mughal/index.js';
 import '../safavid/index.js';
 import { B, LAP, TUR, CRE, WHI, unit, away, solid, wallRun, bannai, ribbedDome, tiledMinaret, deck, bar, boxR } from './kit.js';
 import { madrasa } from './madrasa.js';
+import { timHouse, timGarden } from './houses.js';
 import { bibiKhanym, gurEAmir, observatory, chorsu, shopRow, domeBlock, nicheWall, khanqah } from './monuments.js';
 
 /**
@@ -75,7 +76,7 @@ registerStyle('timurid', {
     ...STYLES.safavid.elements,
     tim_pishtaq: pishtaq, tim_minaret: (el, { bag, col }) => tiledMinaret(bag, col, el),
     tim_dome: (el, { bag, col }) => ribbedDome(bag, col, el), tim_dome_block: domeBlock, niche_wall: nicheWall,
-    tim_madrasa: madrasa, bibi_khanym: bibiKhanym, gur_e_amir: gurEAmir, observatory, chorsu, shop_row: shopRow, khanqah,
+    tim_madrasa: madrasa, bibi_khanym: bibiKhanym, gur_e_amir: gurEAmir, observatory, chorsu, shop_row: shopRow, khanqah, tim_house: timHouse, tim_garden: timGarden,
   },
   objects: {},
 });
