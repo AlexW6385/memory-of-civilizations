@@ -32,7 +32,7 @@ export const ARRIVALS = {
   'timurid-samarkand': [14, 0.1, 0, 1.5708, 0.32],      // the Registan: Ulugh Beg's madrasa, its pishtaq and four minarets across the square
   'petra':            [146, 0.1, -160, 1.5708, 0.36],    // the Treasury close at the Siq's mouth, 36 m off: columns, pediment and tholos each legible
   'jerusalem':        [-67.6, 18, -40, -1.78, 0.16],     // on the esplanade, the Dome of the Rock
-  'constantinople':   [-70, null, 110, -0.517, 0.16],    // Hagia Sophia's dome over its buttresses, from the south-west
+  'constantinople':   [-10, 0.1, 86, -0.12, 0.22],       // the south door of Hagia Sophia across the forecourt: the dome over the buttressed flank, the procession on the right, the pilgrims' market and its shop fronts either side
   'ottoman-istanbul': [0, 22.1, -91, 3.1416, 0.42],      // the Süleymaniye's cascading domes and four minarets, whole
   'giza':             [242, 0.1, -50, 1.62, 0.24],       // on the plateau's east side, 270 m from the apex: the Great Pyramid whole over the mortuary temple and the causeway's head, a queen's pyramid at the left, the casing ramp half taken down and its hauling gangs at the right, a procession crossing before the doorway
   'mamluk-cairo':     [110, null, 120, 1.03, 0.22],      // Sultan Hasan's walls, dome and minarets from the square

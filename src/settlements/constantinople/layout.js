@@ -18,6 +18,10 @@ export const HIPPODROME = [-290, 62, -195, 360];
 export const PALACE = [60, 140, 260, 330];
 export const MESE = { w: 12, path: [[-60, 110], [-180, 110], [-180, 40], [-RADIUS, 40]] };
 export const MILION = [-90, 110];
+/** The paved court between Hagia Sophia's south front and the Augustaion proper: the pilgrims' market, shops under porticoes on its west and east. */
+export const FORECOURT = [-54, 42, 42, 108];
+/** Where the plane trees of the garden court west of the forecourt's shops grow (ground.js). */
+export const GARDEN_COURT = [-100, 40, -66, 100];
 export const FORUM = { c: [-345, 30], r: 36 };
 /** On the Augustaion's east side the Senate house (its portico west of the rect), on its south-east corner the Chalke (§4.4). */
 export const SENATE = [16, 112, 40, 138];

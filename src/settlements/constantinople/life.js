@@ -6,10 +6,11 @@
 import { RADIUS, AUGUSTAION, MESE, FORUM, SENATE, CHALKE, height } from './layout.js';
 import { MESE_STOAS } from './plan.js';
 import { nearProcession } from './procession.js';
+import { forecourt } from './forecourt.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-// where the visitor arrives (src/planet/arrivals.js): the street's mouth by the Augustaion, looking at Hagia Sophia
-const ARRIVAL = [-70, 110];
+// where the visitor arrives (src/planet/arrivals.js): the forecourt, looking at Hagia Sophia's south door
+const ARRIVAL = [-10, 86];
 const fp = (o, u, s, t) => [o[0] + s * u[0] - t * u[1], o[1] + s * u[1] + t * u[0]];
 
 export function life() {
@@ -68,6 +69,8 @@ export function life() {
     if (Math.hypot(x - (x0 + 24), z - (z0 + 32)) < 9 || nearProcession(x, z, 6)) continue;   // the column's steps, the procession
     person([x, z], rand() * 6.28);
   }
+  // the forecourt south of Hagia Sophia, where the visitor arrives
+  forecourt({ person, push: (e) => L.push(e), rand, pick });
   // the Forum of Constantine: people under its porticoes and about the column
   for (let k = 0; k < 18; k++) {
     const a = rand() * 6.28, r = rand() < 0.5 ? 12 + rand() * 18 : FORUM.r + 1.5 + rand() * 3;

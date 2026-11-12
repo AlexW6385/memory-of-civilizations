@@ -28,6 +28,9 @@ export function walkways() {
   rects.push({ r: [-100, 104, -60, 118], weight: 2, market: 2, kind: 'street' });
   rects.push({ r: [FORUM.c[0] - 26, FORUM.c[1] - 26, FORUM.c[0] + 26, FORUM.c[1] + 26], weight: 1.5, market: 1.5, kind: 'street' });
   rects.push({ r: [-60, 40, -50, 108], weight: 0.8, market: 0.5, kind: 'street' });
+  // the forecourt south of Hagia Sophia: the way from the Augustaion to the south door (the middle, clear of the stalls and the shop fronts) and the strips before the shops
+  rects.push({ r: [-16, 40, 8, 108], weight: 3, market: 1.5, kind: 'street' });
+  rects.push({ r: [-50, 56, -40, 100], weight: 1, market: 2, kind: 'street' }, { r: [32, 56, 40, 100], weight: 1, market: 2, kind: 'street' });
   // the lanes between the rows of houses (only where houses stand on them), the quieter ways
   const seen = new Set();
   for (const l of lots()) {

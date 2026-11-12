@@ -16,6 +16,9 @@ E.push({ t: 'senate', rect: SENATE, y: 0, porch: 12, h: 18 });
 E.push({ t: 'chalke', c: CHALKE.c, y: 0 });
 // the column of Justinian on the Augustaion's west side, his horse facing east
 E.push({ t: 'honor_column', kind: 'justinian', at: [AUGUSTAION[0] + 24, AUGUSTAION[1] + 32], y: 0, h: 34, d: 3.2 });
+// honorific statues on marble bases (the Augustaion "was full of statues": Theodosius, Eudoxia, Pulcheria and others, after Procopius and the Patria) and phialai (canopied basins) in the squares
+for (const [x, z, r] of [[-30, 124, 0.4], [-4, 128, -0.3], [-24, 156, 0.8], [-8, 166, 3.1], [-38, 46, 0.2], [27, 46, -0.2], [-47, 104, 1.4]]) E.push({ t: 'charioteer_statue', at: [x, z], y: 0, rot: r });
+for (const [x, z] of [[-14, 140], [24, 72]]) E.push({ t: 'byz_fountain', at: [x, z], y: 0, kind: 'canopy', r: 1.8 });
 // Hagia Eirene: the domed basilica (57 × 32 m) with its atrium on the west
 E.push({ t: 'domed_basilica', rect: [EIRENE[0] + 23, -138.5, EIRENE[2], -106.5], atrium: 23, y: 0 });
 E.push({ t: 'thermae', rect: ZEUXIPPUS, h: 20 });
@@ -60,6 +63,9 @@ export const MESE_STOAS = [
   { a: [-187, 100], b: [-187, 50], side: -1, back: true },
   { a: [-190, 33], b: [-296, 33], side: 1, shops: 5 },
   { a: [-190, 47], b: [-296, 47], side: -1, shops: 5 },
+  // the forecourt south of Hagia Sophia (layout.js FORECOURT): a row of shops under a portico on either side, their doors on the court
+  { a: [-54, 50], b: [-54, 92], side: 1, shops: 5 },
+  { a: [42, 94], b: [42, 50], side: 1, shops: 5 },
 ];
 for (const s of MESE_STOAS) E.push({ t: 'stoa', y: height(...s.a), depth: 5, h: 6, d: 0.62, spacing: 3.8, ...s });
 

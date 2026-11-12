@@ -107,7 +107,7 @@ for (const sx of [-1, 1]) {
     exedrae.push({ th, ux, uz, pc: [cx + ux * DC, uz * DC] });
   }
   const a0 = sx > 0 ? -90 : 90, a1 = sx > 0 ? 90 : 270;
-  add({ t: 'sphere', c: [cx, YS, 0], R: S, clips, a0, a1, segA: 160, segE: 44, mat: 'mosaic_gold', outer: { t: 0.8, mat: 'lead' } });
+  add({ t: 'sphere', c: [cx, YS, 0], R: S, clips, a0, a1, segA: 160, segE: 44, mat: 'mosaic_gold', outer: { t: 0.8, mat: 'lead', ribs: 14 } });
   // the piers between the openings of the semidome's foot, from the floor to its springing
   const half = (w) => Math.asin(w / S) / D2R;
   const cA = half(5.2), cE = half(RE);
@@ -123,7 +123,7 @@ for (const sx of [-1, 1]) {
   for (const ex of exedrae) {
     const [px, pz] = ex.pc, th = ex.th;
     const P = (phi, r = RE + 0.4) => [px + r * Math.cos(phi * D2R), pz + r * Math.sin(phi * D2R)];
-    add({ t: 'sphere', c: [px, YS, pz], R: RE, a0: th - 90, a1: th + 90, segA: 120, segE: 24, mat: 'mosaic_gold', outer: { t: 0.7, mat: 'lead' } });
+    add({ t: 'sphere', c: [px, YS, pz], R: RE, a0: th - 90, a1: th + 90, segA: 120, segE: 24, mat: 'mosaic_gold', outer: { t: 0.7, mat: 'lead', ribs: 5 } });
     add({ t: 'arc_wall', c: [px, pz], r0: RE, r1: RE + 0.8, a0: th - 90, a1: th + 90, y0: 21.6, y1: YS, mat: 'revetment_byz', collide: false,
       gaps: [-60, -30, 0, 30, 60].map((d) => ({ a: th + d, w: 1.1, y0: 22.5, y1: 24.2 })) });
     add({ t: 'arc_wall', c: [px, pz], r0: RE, r1: RE + 0.8, a0: th - 90, a1: th + 90, y0: 14.0, y1: GF, mat: 'revetment_byz', collide: false });
@@ -164,7 +164,7 @@ add({ t: 'arch_band', c: [0, YS, 0], span: 'z', r0: 5.2, r1: 6.4, d0: AX, d1: XE
 for (const sz of [-1, 1]) block([AX, Math.min(sz * 5.2, sz * 6.7), XE, Math.max(sz * 5.2, sz * 6.7)], 0, YS, 'revetment_byz');
 add({ t: 'arc_wall', c: [XE, 0], r0: 5.2, r1: 6.7, a0: -90, a1: 90, y0: 0, y1: YS, mat: 'revetment_byz',
   gaps: [-45, 0, 45].flatMap((a) => [{ a, w: 1.6, y0: 7.0, y1: 12.0 }, { a, w: 1.6, y0: 15.0, y1: 21.0 }]) });
-add({ t: 'sphere', c: [XE, YS, 0], R: 5.2, a0: -90, a1: 90, segA: 100, segE: 24, mat: 'mosaic_gold', outer: { t: 0.8, mat: 'lead' } });
+add({ t: 'sphere', c: [XE, YS, 0], R: 5.2, a0: -90, a1: 90, segA: 100, segE: 24, mat: 'mosaic_gold', outer: { t: 0.8, mat: 'lead', ribs: 5 } });
 block([XE - 0.1, -6.7, XE + 7.0, 6.7], YS + 6.1, YS + 6.5, 'lead', { collide: false });
 obj('synthronon', 0, 0, 0, { c: [XE, 0], r: 5.2, a0: -84, a1: 84, tiers: 4 });
 obj('ciborium', 31.6, 0, 0, { s: 2.0, h: 5.0 });

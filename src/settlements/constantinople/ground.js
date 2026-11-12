@@ -1,7 +1,7 @@
 // Constantinople — the ground: the paved squares and streets of the first hill, gardens with
 // cypresses, plane trees and vines on the slopes toward the sea; the bright, windy Bosphorus sky.
 
-import { RADIUS, SOPHIA, AUGUSTAION, EIRENE, ZEUXIPPUS, HIPPODROME, PALACE, FORUM, height, onMese, inRect, inLot, onLane, gardens } from './layout.js';
+import { GARDEN_COURT, RADIUS, SOPHIA, AUGUSTAION, EIRENE, ZEUXIPPUS, HIPPODROME, PALACE, FORUM, height, onMese, inRect, inLot, onLane, gardens } from './layout.js';
 
 const PAVED = [SOPHIA, AUGUSTAION, EIRENE, ZEUXIPPUS, HIPPODROME];
 // the Great Palace's courts and halls (plan.js); between them the palace gardens
@@ -16,6 +16,7 @@ function cover(x, z) {
 }
 const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 function planting(x, z) {
+  if (inRect(GARDEN_COURT, x, z, 0)) return { plane_tree: 0.7, cypress: 0.35 };           // the plane trees and cypresses west of the forecourt's shops
   if (inRect(PALACE, x, z, 0) && !inCourt(x, z, 5) && Math.hypot(x, z) < RADIUS - 20) return { cypress: 0.03, plane_tree: 0.012, olive: 0.01, grass: 26 };
   if (inGarden(x, z, -0.8)) return { fig: 0.035, olive: 0.02, cypress: 0.012, apple: 0.02, plane_tree: 0.004, grass: 30 };
   if (onLane(x, z, 0.6) || inGarden(x, z, 1) || Math.hypot(x, z) > RADIUS - 6 || inRect(PALACE, x, z, 6) || PAVED.some((r) => inRect(r, x, z, 6)) || onMese(x, z, 12) || inLot(x, z, 1) || Math.hypot(x - FORUM.c[0], z - FORUM.c[1]) < FORUM.r + 9 || inRect([0, 108, 62, 178], x, z)) return null;
@@ -23,7 +24,7 @@ function planting(x, z) {
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { cypress: 0.04, plane_tree: 0.01, fig: 0.035, olive: 0.02, apple: 0.02 },
+  maxDensity: { cypress: 0.4, plane_tree: 0.7, fig: 0.035, olive: 0.02, apple: 0.02 },
   climate: {
     sun: { az: 150, el: 52, color: [1.0, 0.96, 0.9], intensity: 3.5, lat: 41, dec: 10, hour: 10.5 },
     sky: { turbidity: 2.6, rayleigh: 1.05, mie: 0.005, mieG: 0.78, zenith: [0.07, 0.15, 0.4], horizon: [0.62, 0.66, 0.72] },
