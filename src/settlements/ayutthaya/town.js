@@ -124,6 +124,11 @@ function people() {
   for (const [x, z] of [[WAT.gate[0] - 4.5, -128], [WAT.gate[0] + 4.5, -128]]) { fig([x, z + 1.2], 0, 0, { pose: 'sit_ground', legs: 'kneel', hair: 'bun', top: '', over: 'shawl' }); }
   fig([WAT.gate[0] + 14, -104], 0, 1.2, { pose: 'sit_ground', legs: 'cross', hair: 'bun', top: '', over: 'shawl' }); monk([WAT.gate[0] + 15.5, -104], 0, -1.9);
   for (const [x, z, r] of [[WAT.gate[0] + 3, -104, 2.0], [WAT.gate[0] - 3, -107, -1.0], [WAT.gate[0] + 1, -112, 0.4]]) fig([x, z], 0, r, { child: true, h: 0.62 });
+  // the forecourt seen from the gate road: pilgrims with lotus and incense walking to the wat, a monk with his alms bowl, women with offering trays, children, a seller of garlands (all 6-45 m from the arrival, none within 3 m of it)
+  for (const [dx, z, r, o] of [[-9, -112, 0.2, { carry: 'basket', hat: 'straw' }], [-14, -116, -0.3, { carry: 'pot' }], [8, -117, 3.0, { carry: 'basket' }], [14, -115, 0.1, { hat: 'straw', carry: 'pole' }], [-3, -114, 2.8, { carry: 'pot' }], [24, -116, -0.4, {}], [-20, -110, 1.6, { pose: 'talk' }], [-21.2, -110, -1.5, {}], [30, -109, 3.3, { carry: 'basket' }], [4, -107, 0.0, {}]])
+    fig([WAT.gate[0] + dx, z], 0, r, o);
+  monk([WAT.gate[0] - 6, -116], 0, 0.15); monk([WAT.gate[0] + 11, -113], 0, -2.8); monk([WAT.gate[0] + 22, -108], 0, 1.0);
+  fig([WAT.gate[0] - 11, -111], 0, 0, { pose: 'sit_ground', legs: 'cross', hair: 'bun', top: '', over: 'shawl', hat: 'straw' });
   for (const z of [-143.2, -136.8]) fig([PALACE.wall[2] + 2.5, z], 0, -Math.PI / 2, { hat: 'cap', top: 'bare', over: 'sash', carry: 'pole' });
   // washing at the landings: a woman squatting at the water's edge with her cloth and pot, a man casting a net from the bank
   { const lr = rng(77); for (const c of CANALS) { const [a, b, c1, d] = c.rect, ew = c1 - a > d - b; for (let k = 0; k < 3; k++) { const t = lr(), x = ew ? a + 24 + t * (c1 - a - 60) : (lr() < 0.5 ? a - 1.6 : c1 + 1.6), z = ew ? (lr() < 0.5 ? b - 1.6 : d + 1.6) : b + 24 + t * (d - b - 60);
