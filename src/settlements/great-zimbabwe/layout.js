@@ -7,6 +7,9 @@
 export const RADIUS = 380;
 export const HILL = { c: [-30, -190], r: [140, 70], h: 32 };
 export const ENCLOSURE = { c: [40, 120], r: [52, 38] };
+// the conical tower and the platform beside it, inside the north entrance (the entrance's gap is x 32–53 at z 82)
+export const TOWER = { c: [38, 108], r: 2.8, h: 10 };
+export const PLATFORM = [54, 108];
 // the Hill Complex (docs/settlements/great-zimbabwe.md §11): the Western Enclosure at the hill's
 // west end, its floor levelled with daga (zimfieldguide: deposits 4.3 m deep); the Recess Enclosure
 // east of it; the Ancient Ascent climbing the south face through a cleft between boulders
@@ -60,7 +63,7 @@ export function compounds() {
     return { c: [x, z], r: R, gap, y: 0, huts, granary: [x + Math.cos(a0) * 6.2, z + Math.sin(a0) * 6.2], seed: Math.floor(rand() * 1e6), inner: true };
   };
   const [ex, ez] = ENCLOSURE.c;
-  for (const [dx, dz, o] of [[-27, -12, true], [-26, 8, false], [-8, 20, true], [-9, -14, false]]) COMP.push(mk(ex + dx, ez + dz, o));
+  for (const [dx, dz, o] of [[-27, -12, true], [-26, 8, false], [-8, 20, true], [-10, -1, false]]) COMP.push(mk(ex + dx, ez + dz, o));
   const ok = (x, z) => {
     if (Math.hypot(x, z) > RADIUS - 56 || inEnclosure(x, z, 14) || inWalled(x, z, R + 6)) return false;
     if (KRAAL_AT.some(([kx, kz, kr]) => Math.hypot(kx - x, kz - z) < kr + R + 4)) return false;

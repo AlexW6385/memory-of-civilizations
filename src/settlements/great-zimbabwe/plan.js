@@ -2,7 +2,7 @@
 // outer and inner walls, the parallel passage and the conical tower; the Hill Complex's walls; the
 // Valley Ruins' enclosures.
 
-import { ENCLOSURE, HILL, WEST, RECESS, ASCENT, VALLEY, height, inWalled, onAscent } from './layout.js';
+import { ENCLOSURE, TOWER, PLATFORM, HILL, WEST, RECESS, ASCENT, VALLEY, height, inWalled, onAscent } from './layout.js';
 import { goodsAt, courtAt, kraals } from './life.js';
 
 const E = [];
@@ -10,13 +10,14 @@ const ellipse = (c, r, n, a0 = 0, a1 = Math.PI * 2) => Array.from({ length: n + 
 const [ex, ez] = ENCLOSURE.c, [ra, rb] = ENCLOSURE.r;
 // the outer wall (11 m high at its greatest, chevron band on the north-east), with the north entrance
 E.push({ t: 'dry_wall', pts: ellipse(ENCLOSURE.c, ENCLOSURE.r, 40, -Math.PI * 0.42, Math.PI * 1.45), h: 10, th: 4.5, y: 0, chevron: [0, 0.2], drains: [0.035, 0.06, 0.092, 0.12, 0.152, 0.185] });
-// the inner wall forming the narrow parallel passage on the east, and an inner ring round the tower's court
+// the inner wall forming the narrow parallel passage on the east
 E.push({ t: 'dry_wall', pts: ellipse(ENCLOSURE.c, [ra - 7, rb - 7], 14, -Math.PI * 0.35, Math.PI * 0.35), h: 8, th: 2.5, y: 0 });
-E.push({ t: 'dry_wall', pts: ellipse([ex + 25, ez - 5], [16, 14], 14, Math.PI * 0.6, Math.PI * 1.9), h: 4, th: 1.6, y: 0 });
-E.push({ t: 'cone_tower', c: [ex + 30, ez - 8], r: 2.8, h: 10 });
-E.push({ t: 'cone_tower', c: [ex + 24, ez - 10], r: 1.2, h: 4, dentelle: false });
-// the platform beside the tower, 7.6 m across, the largest at Great Zimbabwe (zimfieldguide)
-E.push({ t: 'platform', c: [ex + 31, ez], r: 3.8, h: 0.9, step: Math.PI * 1.15 });
+// the conical tower stands just inside the north entrance, left of the path, so that the visitor coming up from the valley
+// sees its cone between the rounded ends of the outer wall (TOWER in layout.js: the arrival looks at it); its small companion
+// beside it, and the platform "beside the tower", the largest at Great Zimbabwe (zimfieldguide), across the path
+E.push({ t: 'cone_tower', c: TOWER.c, r: TOWER.r, h: TOWER.h });
+E.push({ t: 'cone_tower', c: [TOWER.c[0] - 5.5, TOWER.c[1] - 3], r: 1.2, h: 4, dentelle: false });
+E.push({ t: 'platform', c: PLATFORM, r: 3.8, h: 0.9, step: Math.PI * 1.0 });
 const yh = (x, z) => height(x, z);
 // the Hill Complex: walls along the ridge among the boulders, broken on the south where the Ancient
 // Ascent comes up through its cleft (docs/settlements/great-zimbabwe.md §11)

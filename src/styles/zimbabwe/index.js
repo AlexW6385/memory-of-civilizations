@@ -57,20 +57,32 @@ function dryWall(el, { bag, col }) {
   const tri = [], S = path.map((_, i) => sect(i)), segs = closed ? n : n - 1;
   // each face turned by its own side of the wall (outer, top, inner): a curved wall's faces cannot be
   // oriented from the centre of the whole wall
-  const put = (a, b, c, w) => {
+  const put = (a, b, c, w, arr = tri) => {
     const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
     const nn = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
-    if (nn[0] * w[0] + nn[1] * w[1] + nn[2] * w[2] < 0) tri.push(...a, ...c, ...b); else tri.push(...a, ...b, ...c);
+    if (nn[0] * w[0] + nn[1] * w[1] + nn[2] * w[2] < 0) arr.push(...a, ...c, ...b); else arr.push(...a, ...b, ...c);
+  };
+  // the coursing seen from afar: a course's joints fade in the distance, so the faces are laid in patches of
+  // lighter, coarser and darker granite, a metre or two high and four to nine metres long (slabs split from different
+  // beds differ in tone), which read as courses at fifty metres; the faces of low walls keep one stone
+  const patchy = h >= 3.5, lt = [], dk = [];
+  const tone = (kc, i) => {
+    if (!patchy) return tri;
+    const r = hash(Math.floor(kc / 2) * 31 + Math.floor(len[i] / (4 + 5 * hash(Math.floor(kc / 2), 9))), 51);
+    return r < 0.24 ? lt : r > 0.84 ? dk : tri;
   };
   for (let i = 0; i < segs; i++) {
     const A = S[i], B = S[(i + 1) % n], j = (i + 1) % n, nx = (fr[i][0] + fr[j][0]) / 2, nz = (fr[i][1] + fr[j][1]) / 2;
     for (let k = 0; k < A.length - 1; k++) {
       const w = k < 2 * K ? [nx, 0.2, nz] : k === 2 * K ? [0, 1, 0] : [-nx, 0.2, -nz];
-      put(A[k], B[k], B[k + 1], w); put(A[k], B[k + 1], A[k + 1], w);
+      const arr = k === 2 * K ? tri : tone(k < 2 * K ? k : 4 * K - k + 1, i);
+      put(A[k], B[k], B[k + 1], w, arr); put(A[k], B[k + 1], A[k + 1], w, arr);
     }
     col.segment(path[i], path[(i + 1) % n], th, yOf(path[i]) - 1, yOf(path[i]) + h);
   }
   bag.add(G, fromTriangles(tri));
+  if (lt.length) bag.add('granite_rough', fromTriangles(lt));
+  if (dk.length) bag.add('andesite', fromTriangles(dk));
   // fallen and tumbled blocks along the foot of both faces: slabs that have come off the courses, lying where they fell
   if (el.rubble !== false && h >= 3) {
     const Nb = Math.floor(len[n - 1] / 2.3);

@@ -88,8 +88,8 @@ export function people() {
   // in the Western Enclosure on the hill and in the Great Enclosure
   man([WEST.c[0] + 2, WEST.c[1] + 9], WEST.y, 0.4, { over: 'cape', cloth: 'hide_brown' });
   woman([WEST.c[0] - 4, WEST.c[1] + 8], WEST.y, -0.6, { carry: 'basket' });
-  man([ENCLOSURE.c[0] + 18, ENCLOSURE.c[1] - 2], 0, 1.9, { over: 'cape', cloth: 'hide_tan' });
-  man([ENCLOSURE.c[0] + 20, ENCLOSURE.c[1] - 0.6], 0, -1.2);
+  man([43.5, 112], 0, 1.9, { over: 'cape', cloth: 'hide_tan' });
+  man([56, 113], 0, -1.2);
   return L;
 }
 /** The working place of Valley court i: between the court's entrance and its houses (the goods of the coast in court 0, the smithy in 1, the stone carver in 2). */
