@@ -8,6 +8,7 @@ import { animal } from '../../objects/animals.js';
 import { rng } from '../../objects/kit.js';
 import { PIT, CORR, GALLERY, ROOF, RAMP, ARCHERS, FILES, FILE_STEP, CHARIOTS, corrZ, rampZ } from '../../settlements/qin-xianyang/layout.js';
 import { soldier } from './warriors.js';
+import { dressPit } from './pitdress.js';
 
 const FL = PIT.floor, PT = FL + 4.3;                                  // floor, partitions' top (−0.7)
 
@@ -80,6 +81,7 @@ export function qinPit(el, { bag, col, lights }) {
     for (let k = 0; k < 3; k++) { const x = 118.5 + k * 2.4; bag.add('timber', box(x, FL, zz + sg * 1.0, x + 1.0, FL + 0.5, zz + sg * 1.6)); bag.add('timber_red', box(x - 0.02, FL + 0.5, zz + sg * 0.98, x + 1.02, FL + 0.55, zz + sg * 1.62)); col.rect([x, Math.min(zz + sg, zz + sg * 1.6), x + 1.0, Math.max(zz + sg, zz + sg * 1.6)], FL, FL + 0.55); }
     bag.add('terracotta', lathe([[0.001, 0], [0.2, 0.03], [0.35, 0.4], [0.3, 0.8], [0.18, 0.95], [0.001, 0.95]], 10, null, GALLERY[1] - 0.6, FL, zz + sg * 0.9)); col.circle(GALLERY[1] - 0.6, zz + sg * 0.9, 0.35, FL, FL + 1.0);
   }
+  dressPit(bag, col);
   // the corridors: the partitions' timber posts carry a lintel of squared logs at every second post, a plank wall-shelf with a lamp and its oil jar at the mouths
   for (let k = 0; k < CORR.n; k++) for (let x = CORR.x0 + 3; x < CORR.x1; x += 14) bag.add('timber', box(x - 0.2, PT - 0.25, corrZ(k) - CORR.w / 2, x + 0.2, PT - 0.05, corrZ(k) + CORR.w / 2));
 }
@@ -131,7 +133,10 @@ function boxAxisSpoke(cx, cy, cz, dx, dy) {
 export function qinArmy(el, ctx) {
   const { bag, col } = ctx, rot = -Math.PI / 2, y = FL + 0.02, r = rng(2100), colOnly = !!el.colOnly;
   const zones = new Map();                                                       // corridor k → [[xa, xb]] kept for the chariots
-  for (const c of CHARIOTS) { const l = zones.get(c.k) ?? []; l.push([c.x - 8.0, c.x + 1.0]); zones.set(c.k, l); chariot(bag, col, ctx, c.x, corrZ(c.k), c.k * 31 + Math.round(c.x), colOnly); }
+  // only the three corridors that open on the gallery (RAMP.zs, the aisles) can be entered or looked into: the others lie between solid
+  // partitions under the roof of logs, so their figures and chariots are never in sight and are left undrawn (colliders only)
+  const seen = (k) => RAMP.zs.includes(k);
+  for (const c of CHARIOTS) { const l = zones.get(c.k) ?? []; l.push([c.x - 8.0, c.x + 1.0]); zones.set(c.k, l); chariot(bag, col, ctx, c.x, corrZ(c.k), c.k * 31 + Math.round(c.x), colOnly || !seen(c.k)); }
   const inZone = (k, x) => (zones.get(k) ?? []).some(([a, b]) => x > a && x < b);
   for (let k = 0; k < CORR.n; k++) for (const f of FILES) {
     const z = corrZ(k) + f;
@@ -141,7 +146,7 @@ export function qinArmy(el, ctx) {
       if (run === null) run = x - 0.3;
       const q = r();
       const kind = n % 17 === 6 && f > 0 ? 'officer' : q < 0.3 ? 'arm' : q < 0.5 ? 'arm_spear' : q < 0.62 ? 'arm_halberd' : q < 0.82 ? 'inf' : 'inf_spear';
-      if (!colOnly) soldier(bag, { at: [x, z], y, rot, kind, seed: k * 4093 + n * 7 + (f > 0 ? 1 : 0) });
+      if (!colOnly && seen(k)) soldier(bag, { at: [x, z], y, rot, kind, seed: k * 4093 + n * 7 + (f > 0 ? 1 : 0) });
     }
     if (run !== null) col.rect([run, z - 0.3, CORR.x1, z + 0.3], FL, FL + 2);
   }

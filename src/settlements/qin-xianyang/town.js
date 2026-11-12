@@ -55,7 +55,16 @@ function people() {
   // the middle ramp, seen at the arrival: two guards at its foot, facing up it; gangs carrying earth up and down its sides (kept clear of its axis)
   {
     const zc = rampZ(1), rampY = (x) => PIT.floor * (1 - (x - PIT.x1) / RAMP.len);
-    for (const s of [-1, 1]) guard([PIT.x1 - 2.4, zc + s * 2.1], -Math.PI / 2, {}, PIT.floor + 0.02);
+    for (const s of [-1, 1]) guard([PIT.x1 - 0.9, zc + s * 2.1], -Math.PI / 2, {}, PIT.floor + 0.02);
+    // the front gallery, seen from the arrival (x 126.5, z = zc, looking west): none within 3 m of it or of its line of sight;
+    // lamp-tenders with oil jars, an inspecting officer with his clerk, a messenger, an armourer with spare bolts
+    const FL = PIT.floor + 0.02, gx = 122;
+    for (const [dx, dz, rot, carry] of [[gx - 1, 4.6, 0.4, 'pot'], [gx + 2.5, -5.4, -0.5, 'pot'], [gx - 3.4, -7.2, Math.PI, 'basket']])
+      fig([dx, zc + dz], -Math.PI / 2 + rot, { cloth: 'cloth_brown', hair: 'topknot', carry, over: 'belt' }, FL);
+    official([gx - 2.2, zc - 4.4], -Math.PI / 2 - 0.6, { pose: 'talk', hat: 'cap' }, FL); official([gx - 2.9, zc - 5.6], -Math.PI / 2 + 0.7, { pose: 'talk' }, FL);
+    guard([gx + 3.6, zc + 5.2], -Math.PI / 2 + 0.3, {}, FL);
+    for (const k of [0, 2]) { const z = rampZ(k); guard([PIT.x1 - 0.9, z - 2.1], -Math.PI / 2, {}, FL); guard([PIT.x1 - 0.9, z + 2.1], -Math.PI / 2, {}, FL); }
+    official([gx + 1, rampZ(0) + 5.2], 0.4, { pose: 'stand' }, FL);
     [[PIT.x1 + 7, 1, -Math.PI / 2, 'basket'], [PIT.x1 + 10.5, -1, Math.PI / 2, 'sack'], [PIT.x1 + 14, 1, Math.PI / 2, 'pole'], [PIT.x1 + 4.2, -1, -Math.PI / 2, 'basket']]
       .forEach(([x, s, rot, carry], i) => fig([x, zc + s * 1.75], rot, { cloth: i % 2 ? 'cloth_grey' : 'cloth_brown', hair: 'shaven', beard: false, carry, over: 'belt' }, rampY(x)));
   }
