@@ -55,6 +55,7 @@ function cover(x, z) {
   }
   // the earth banks beyond the stone ones, trodden along the towpath on the north side
   if (bank(x, z)) { c.road = z < RIVER.z0 ? 0.55 : 0.15; c.grass = z < RIVER.z0 ? 0.25 : 0.6; return c; }
+  if (inRect(MONASTERY, x, z) && Math.abs(x - 160) >= 28) { c.road = 0.55; c.soil = 0.5; c.grass = 0.12; c.sand = 0.1; return c; }
   if (inLot(x, z, 0.3)) { c.road = 0; return c; }
   // the yards behind the houses: trodden earth with grass at the edges; outside the gate the ground is earth and field
   if (lotAt(x, z)) { c.road = 0.2; c.soil = 0.6; c.grass = 0.35; return c; }
@@ -65,6 +66,8 @@ function water(x, z, y) { return wet(x, z) && y < RIVER.water + 0.3; }
 function waterLevel(x, z) { return wet(x, z) ? RIVER.water : -Infinity; }
 function fromWater(x, z) { return wet(x, z) ? 0 : Math.min(Math.abs(z - RIVER.z0), Math.abs(z - RIVER.z1)); }
 /** Plants per 100 m²: willows on the riverbanks, pagoda trees (huai) and jujubes in the gaps between the houses and in the monastery's court. */
+/** The monastery's groves of old pagoda trees: [x, z, radius]; mirrored east and west of the court. */
+export const GROVES = [[108, -238, 9], [116, -198, 7], [108, -150, 10], [112, -127, 7], [212, -238, 9], [204, -198, 7], [212, -150, 10], [208, -127, 7]];
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || wet(x, z)) return null;
   // the river streets' earth strip by the water (within the paved reach): willows in a row along the edge, grass tufts and bare earth behind, none on the paved walk and its landing paths
@@ -93,7 +96,11 @@ function planting(x, z) {
   }
   if ((z > RIVER.z0 - 4 && z < RIVER.z0) || (z > RIVER.z1 && z < RIVER.z1 + 4)) return Math.abs(x) > 24 ? { willow: 2.4 } : null;
   if (inRect(APPROACH, x, z, 1)) return null;                                                   // the paved approach
-  if (inRect(MONASTERY, x, z)) return Math.abs(x - 160) < 28 ? null : { pagoda_tree: 0.08, grass: 12 };   // the court is paved (court.js): nothing grows on it
+  if (inRect(MONASTERY, x, z)) {
+    // the court is paved (court.js): nothing grows on it; to either side of it old pagoda trees (huai) stand in groves, the ground between swept bare
+    if (Math.abs(x - 160) < 28) return null;
+    return GROVES.some(([gx, gz, gr]) => (x - gx) ** 2 + (z - gz) ** 2 < gr * gr) ? { pagoda_tree: 2.4, grass: 3 } : { grass: 1.5 };
+  }
   // the streets' own trees: pagoda trees (huai) and poplars along the lanes, willows by the wall's foot; the gaps between the blocks
   if (Math.abs(x - WALL_X) < 14) return { willow: 0.3, pagoda_tree: 0.1, grass: 10 };
   if (zoneOf(x) === 'suburb') return { pagoda_tree: 0.12, willow: 0.12, poplar: 0.06, jujube: 0.1, grass: 12 };

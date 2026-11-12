@@ -50,6 +50,17 @@ for (const s of [-1, 1]) {
 }
 // the paved axis from the gate hall to the pagoda's apron, the paths to the side halls and the stele pavilions, the beds of pines and cypresses
 E.push({ t: 'song_court', ax: PAGODA[0], c: PAGODA, z1: SHANMEN.c[1] - 5.2, apron: 13, cross: -150, pav: 20.5, north: MAIN[3] + 0.9 + 0.25, halls: [[mx0 + 14 + 6, -185], [mx1 - 14 - 6, -185]] });
+// the cloisters (lang) along the inside of the precinct's four walls (the south wall's two runs stop at the gate hall)
+{
+  const k = 0.4 + 0.02, N = Math.round, sd = (a, b, side, seed) => E.push({ t: 'cloister', a, b, side, depth: 3.8, post: 2.45, wall: 3.6, seed });
+  sd([mx0 + k, mz0 + 4.1 + 0.4 + 0.4], [mx0 + k, mz1 - 4.2 - 0.4], [1, 0], 3);
+  sd([mx1 - k, mz0 + 4.1 + 0.8], [mx1 - k, mz1 - 4.2 - 0.4], [-1, 0], 4);
+  sd([mx0 + 4.4, mz1 - k], [PAGODA[0] - smW / 2 - 2.5, mz1 - k], [0, -1], 5);
+  sd([PAGODA[0] + smW / 2 + 2.5, mz1 - k], [mx1 - 4.4, mz1 - k], [0, -1], 6);
+  sd([mx0 + 4.4, mz0 + k], [PAGODA[0] - 18 - 3, mz0 + k], [0, 1], 7);
+  sd([PAGODA[0] + 18 + 3, mz0 + k], [mx1 - 4.4, mz0 + k], [0, 1], 8);
+  void N;
+}
 E.push({ t: 'incense_ding', at: [PAGODA[0], -158], y: 0.075, s: 1.5 });
 E.push({ t: 'incense_ding', at: [PAGODA[0], -219], y: 0, s: 1.4 });
 // ---- the river: water, stone landings near the bridge, the Rainbow Bridge, boats

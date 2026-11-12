@@ -19,7 +19,7 @@ const STREETS = LY.STREETS, lots = LY.lots;
 
 // ── how many, how fast ───────────────────────────────────────────────────────
 export const PARAMS = {
-  walkers: { day: 80, night: 9, rain: 0.7, reach: 130, spawnMin: 20, far: 42 },
+  walkers: { day: 90, night: 9, rain: 0.7, reach: 130, spawnMin: 20, far: 42 },
   boats: { count: 9, reach: 260, spawnMin: 60, far: 100, speed: [0.85, 1.3], bridgeSpeed: 0.7 },
   water: RIVER.water,
 };
@@ -57,6 +57,9 @@ function streetRects() {
 /** The streets as rectangles, the bridge as a link over the river: { rects, links, clip }. */
 export function walkways() {
   const rects = streetRects();
+  // the Kaibao monastery's court: two ways north from the gate hall on either side of the censers and the stone lamps, the pagoda's apron (pilgrims, monks, vendors: the great temples held markets)
+  const [mx0, , mx1] = LY.MONASTERY, px = LY.PAGODA[0];
+  rects.push({ r: [px - 6.5, -252, px - 2.5, -112], weight: 1.1, market: 0.2, kind: 'street' }, { r: [px + 2.5, -252, px + 6.5, -112], weight: 1.1, market: 0.2, kind: 'street' }, { r: [mx0 + 24, -152, mx1 - 24, -147], weight: 0.6, market: 0.2, kind: 'street' });
   const links = [{ a: [BRIDGE.at[0], RIVER.z0], b: [BRIDGE.at[0], RIVER.z1], w: BRIDGE.width / 2, kind: 'bridge', weight: 2.4 }];
   return { rects, links, clip: RADIUS - 12 };
 }

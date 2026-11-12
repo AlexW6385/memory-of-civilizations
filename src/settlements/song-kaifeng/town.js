@@ -7,6 +7,7 @@
 // round them, ox carts under their mat covers, a one-wheeled barrow drawn by a donkey, a dray of wine
 // casks, the trackers hauling a boat up the river, the fields to the east with a train of donkeys.
 import { RADIUS, RIVER, BRIDGE, GATE, WALL_X, FIELDS_X, STREETS, inRect, inLot, lots, wineLots, teaLots, bridgeDeck } from './layout.js';
+import * as LY from './layout.js';
 import './style.js';
 import { STONE_BANK, WHARVES, STEPS, LANES, onLane } from './layout.js';
 import { ground } from './ground.js';
@@ -141,6 +142,22 @@ const clear = (x, z, r, street = false) => !inLot(x, z, r) && !(z > RIVER.z0 - 1
 function more(S, L, rand, person, pick) {
   const P = (x, z, rot, lx, lz) => [x + lx * Math.cos(rot) + lz * Math.sin(rot), z - lx * Math.sin(rot) + lz * Math.cos(rot)];
   const animal = (kind, at, rot, extra = {}) => L.push({ t: 'animal', kind, at, y: 0.04, rot, seed: Math.floor(rand() * 1e9), ...extra });
+  // ---- the Kaibao monastery: pilgrims kneeling round the censer, visitors looking up at the pagoda, monks sweeping, talking under the cloisters and fetching water, the incense sellers at the way in
+  {
+    const M = LY.MONASTERY, ax = LY.PAGODA[0], mk = (at, y, dir, o = {}) => person(at, y, faceTo(dir), { dress: 'robe', hair: 'shaven', hat: 'none', beard: false, cloth: pick(['cloth_grey', 'cloth_brown', 'cloth_ochre']), cloth2: pick(['cloth_ochre', 'cloth_maroon', 'cloth_brown']), skin: 'skin_medium', ...o });
+    const ding = [ax, -158];
+    for (let k = 0; k < 6; k++) { const a = -0.5 + k * 0.95, p = [ding[0] + Math.sin(a) * 2.7, ding[1] + 1.4 + Math.cos(a) * 1.6]; person(p, 0.075, faceTo([ding[0] - p[0], ding[1] - p[1]]), { pose: k % 3 === 2 ? 'cross' : 'kneel', arms: 'pray', dress: 'robe', hat: k % 2 ? 'none' : 'cap', hair: k % 2 ? 'bun' : 'topknot', cloth: pick(['cloth_white', 'cloth_indigo', 'cloth_green', 'cloth_grey']) }); }
+    for (const [dx, z] of [[-2.4, -173.5], [0.5, -174.2], [3.1, -173]]) person([ax + dx, z], 0.06, faceTo([0.2, -1]), { pose: dx > 2 ? 'talk' : 'stand', dress: 'robe', hat: 'cap', cloth: pick(CLOTH) });
+    for (const [x, z, dx, dz] of [[ax - 11, -134, 1, 0.5], [ax + 14, -121, -1, 0.3], [ax - 17, -205, 0.3, 1]]) mk([x, z], 0.06, [dx, dz], { carry: 'staff', pose: 'stand' });
+    for (const [x, z, side, dir] of [[M[0] + 3.2, -151, 1, 1], [M[0] + 3.2, -149.8, 1, -1], [M[2] - 3.2, -176, -1, 1], [M[2] - 3.2, -174.8, -1, -1], [M[0] + 45, M[3] - 3.0, 0, 0], [M[2] - 45, M[3] - 3.0, 0, 0]]) mk([x, z], 0.1, [side || 0.01, dir || -1], { pose: 'talk' });
+    mk([ax - 4, -232], 0.9, [0, 1], { carry: 'pails', pose: 'stand', dress: 'trousers', cloth: 'cloth_brown', h: 1.35 });
+    for (const sx of [-1, 1]) {
+      const x = ax + sx * 18.5, z = -96;
+      S.push({ t: 'hawker_stall', at: [x, z], y: 0.04, rot: -sx * Math.PI / 2, kind: 'cakes', w: 2.4, awning: sx < 0 ? 'cloth_ochre' : 'reed_mat' });
+      person([x + sx * 0.7, z], 0.04, faceTo([-sx, 0]), { pose: 'stand', dress: 'robe', hat: 'cap' });
+      for (let k = 0; k < 2; k++) person([x - sx * (1.4 + k * 0.7), z + (k ? 0.8 : -0.5)], 0.04, faceTo([sx, 0]), { pose: k ? 'talk' : 'stand', carry: k ? 'basket' : 'none' });
+    }
+  }
   // ---- the Sun Yang main shop: the great standing sign at its corner, the wine jars heaped in the yard behind
   {
     const l = wineShops()[0], F = frontLine(l), back = l.front === 'e' ? [-1, 0] : l.front === 'w' ? [1, 0] : l.front === 's' ? [0, -1] : [0, 1];
