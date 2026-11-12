@@ -75,7 +75,8 @@ function people() {
   // the sellers sitting behind their stalls and mats, men sitting in the shade on the ground, the water drawn at the well
   for (const [x, z] of [[-26, -24], [-19, -24], [-12, -24.5], [-2, -24], [6, -24.5], [13, -24], [-26, -15], [-14, -3.5], [14, -3.5], [21, -3], [27, -6]]) man([x, z - 1.05], 0, { pose: 'cross', beard: true });
   for (const [x, z] of [[12, -13], [15.5, -15.5], [-24, -9], [-21.5, -7], [24, -11], [26, -10.5]]) man([x, z], rand() * 6.28, { pose: 'cross' });
-  for (const d of [[-4, -13.4, 0], [-2.8, -10.8, 3.2]]) woman([d[0], d[1]], d[2], { carry: 'pot' });
+  // (both on the well's far side, away from the arrival's view)
+  for (const d of [[-5.0, -13.6, 0], [-2.9, -14.3, 0.4]]) woman([d[0], d[1]], d[2], { carry: 'pot' });
   // along the main street from the gate and the streets round the square
   for (let k = 0; k < 14; k++) { const at = [GATE.x - 2.4 + rand() * 4.8, 20 + rand() * 76]; if (rand() < 0.45) man(at, rand() * 6.28, { carry: 'sack' }); else if (rand() < 0.6) woman(at, rand() * 6.28, { carry: 'bundle' }); else man(at, rand() * 6.28, { pose: 'talk' }); }
   // sitting at the doors on the mastabas, along the streets
@@ -92,6 +93,12 @@ function people() {
     if (ground.cover(x, z).fields < 0.3) continue;
     woman(at, rand() * 6.28, { hat: 'straw', cloth: 'cloth_indigo', carry: 'hoe', ...(rand() < 0.5 ? { pose: 'squat', carry: 'none' } : {}) });
   }
+  // boys at a game of stones in the dust east of the well, a water seller with his goatskin crossing, women with bundles of fodder on the head
+  for (const [x, z, r] of [[7.5, -7.2, 1.0], [8.7, -6.4, 4.1], [8.2, -8.4, 2.5]]) man([x, z], r, { h: 0.66, hat: 'cap', over: 'none', cloth: 'cloth_ochre', pose: 'squat' });
+  man([-13, -6.5], 1.6, { carry: 'bundle', loadCloth: 'hide_brown', cloth: 'cloth_brown', hat: 'cap', over: 'sash' });
+  for (const [x, z, r] of [[15.5, -4.6, 3.1], [-21, -4.2, 0.4]]) woman([x, z], r, { carry: 'bundle', pose: 'stand' });
+  // a man sharpening at his stone, a porter resting against the sacks along the palace front
+  man([-8.2, -26.6], 1.57, { pose: 'sit_low', cloth: 'cloth_brown' }); man([12.4, -26.7], 4.7, { carry: 'sack', pose: 'stand' });
   // at the gate: a guard and a man with camels
   man([GATE.x + 3.4, 99.5], Math.PI, { pose: 'staff', carry: 'staff', len: 1.6 });
   man([GATE.x - 3.4, 99.5], Math.PI, { pose: 'sit_low', beard: true });
