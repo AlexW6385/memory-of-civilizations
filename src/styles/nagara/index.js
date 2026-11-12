@@ -279,6 +279,11 @@ function temple(el, ctx) {
   if (el.frieze && !el.simple) platformFrieze(bag, T, y0, y, cz, W * 0.14 + 0.2);
   const sw = W * 0.28, sr = [T[2], cz - sw / 2, T[2] + J * 2.2, cz + sw / 2], n = Math.round(J / 0.22);
   for (let i = 0; i < n; i++) { const z = sr[0] + (sr[2] - sr[0]) * (1 - (i + 1) / n), yy = y0 + J * (i + 1) / n; bag.add(S, box(z, y0 - 0.5, sr[1], z + (sr[2] - sr[0]) / n + 0.02, yy, sr[3])); col.floor([z, sr[1], z + (sr[2] - sr[0]) / n, sr[3]], yy); }
+  // the stair's cheek walls (the balustrade of the flight), pale coping, a moonstone-like step pad at the foot
+  if (!el.simple) {
+    for (const zz of [sr[1] - 0.4, sr[3]]) bag.add(LIGHT, frustum([sr[0], zz, sr[2], zz + 0.4], y0 - 0.5, y + 0.75, 0, (sr[2] - sr[0]) * 0.93, 0, 0));
+    bag.add(PALE, lathe([[0.001, 0], [sw * 0.6, 0], [sw * 0.6, 0.06], [0.001, 0.06]], 20, null, sr[2] + 0.4, y0 - 0.02, cz));
+  }
   // the high moulded plinth under all the halls
   const P = [cx - W / 2, cz - W * 0.42, cx + L, cz + W * 0.42];
   bag.add(S, box(P[0], y, P[1], P[2], y + plinth, P[3])); col.rect(P, y, y + plinth);

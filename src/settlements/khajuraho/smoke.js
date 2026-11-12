@@ -17,6 +17,13 @@ function emitters() {
     const [x0, z0, x1, z1] = l.rect;
     E.push({ p: [x0 + (x1 - x0) * (0.3 + rand() * 0.4), 3.9, z0 + (z1 - z0) * (0.55 + rand() * 0.2)], kind: 'kitchen', seed: l.seed + 1 });
   }
+  // the pilgrims' lane: the sweet-makers' fires never go out in the day (a ghee-fried batch for the offerings), incense at the foot of the stair
+  for (const l of lots()) {
+    if (l.street !== 'approach' || l.trade !== 'sweets' || l.kind !== 'shop') continue;
+    const [x0, z0, x1, z1] = l.rect;
+    E.push({ p: [(x0 + x1) / 2, 3.9, z0 + (z1 - z0) * 0.7], kind: 'kitchen', seed: l.seed + 3 });
+  }
+  for (const sz of [-1, 1]) E.push({ p: [-30.6, 1.0, -60 + sz * 5.3], kind: 'incense', thr: 0, seed: 31 + sz });
   // incense burning before the sanctum's door, at the porch's west end
   TEMPLES.forEach((t, i) => { const { r, floor, cz } = porchOf(t); E.push({ p: [r[0] + 0.9, floor + 1.0, cz + 0.9], kind: 'incense', thr: 0, seed: 7 + i }); });
   // mist banks over the tank's middle at dawn

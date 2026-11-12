@@ -105,6 +105,20 @@ export function dressing() {
       else L.push({ t: 'goods_mat', at: at(Lw / 2, -0.9), y: yPl, rot: faceDir(out), seed: seed++, goods: ['heap', 'heap', 'baskets'], produce: ['cloth_white', 'cloth_white', 'cloth_red'] });
       if (!l.open || rand() < 0.5) F(at(Lw / 2 + (rand() - 0.5), -0.5), yPl, out, { pose: 'cross', top: 'bare', hat: pickOf(['turban', 'none']), arms: 'hang' });
       if (rand() < 0.3) F(at(u2, -2.4), 0, [out[1] * 0.5 - out[0] * 0.2, out[0] * 0.5], { carry: pickOf(['basket', 'none']), cloth: pickOf(['cloth_white', 'cloth_ochre']) });
+      // an open shop: the keeper sits inside behind his counter (counters at 0.9–2.2 m in, by trade), looking out at the lane
+      if (l.open) {
+        const kv = { flowers: 2.1, sweets: 2.4, cloth: 2.9, oil: 1.4, potter: 1.5, grain: 2.2, smith: 1.2 }[trade] ?? 2.0, ku = trade === 'oil' ? Lw * 0.2 : trade === 'potter' ? Lw * 0.15 : Lw * (0.35 + rand() * 0.3);
+        F(at(ku, kv), yPl, out, { pose: 'cross', top: rand() < 0.5 ? 'bare' : undefined, hat: pickOf(['turban', 'none']), arms: 'hang', cloth: pickOf(['cloth_white', 'cloth_ochre']) });
+      }
+      // on the pilgrims' lane a buyer stands before the shop, his basket on the arm, facing it
+      if (l.street === 'approach' && rand() < 0.55) F(at(u1 + 0.6, -2.0), 0, [-out[0], -out[1]], { carry: 'basket', cloth: pickOf(['cloth_white', 'cloth_ochre', 'cloth_white']), hat: pickOf(['turban', 'none']) });
+    } else if (kind === 'haveli') {
+      // the merchant's house: a woman at the balcony of the upper floor, a pot of basil (tulsi) by the door, a dog on the platform
+      const nbal = Math.max(1, Math.floor(Lw / 3.4));
+      if (rand() < 0.6) F(at((0.5 + Math.floor(rand() * nbal)) * Lw / nbal, -0.45), 3.56, out, { pose: 'stand', arms: 'hang', ...(rand() < 0.5 ? { dress: 'wrap', cloth: pickOf(['cloth_red', 'cloth_green', 'cloth_indigo']), cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5 } : { top: 'bare', hat: 'turban' }) });
+      L.push({ t: 'pot', at: at(u1, -0.7), y: yPl, seed: seed++, kind: 'matka', n: 2 });
+      if (rand() < 0.4) L.push({ t: 'animal', kind: 'dog', at: at(u2, -0.8), y: yPl, rot: rotOut + 1.0, seed: seed++ });
+      if (rand() < 0.5) L.push({ t: 'bench', at: at(u2, -0.7), y: 0.0, rot: rotOut + 1.57, seed: seed++, len: 1.4 });
     } else if (kind === 'shed') {
       L.push({ t: 'animal', kind: 'zebu', at: at(Lw * 0.35, -0.7), y: 0.42, rot: rotOut + 1.57, seed: seed++, graze: false, mat: pickOf(['hide_white', 'hide_grey', 'hide_tan']) });
       L.push({ t: 'trough', at: at(Lw * 0.75, -1.0), y: 0, rot: rotOut, seed: seed++ });
