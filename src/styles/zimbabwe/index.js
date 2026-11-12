@@ -334,6 +334,8 @@ function hut(el, ctx) {
   const fr = r + (ver ? 1.3 : 0.45);
   bag.add('mud_plaster', lathe([[fr + 0.08, -0.3], [fr + 0.08, 0.12], [fr - 0.04, 0.24], [0.001, 0.24]], 18, null, x, y, z));
   const a = ((seed % 628) / 100), ux = Math.cos(a), uz = Math.sin(a), tx = -uz, tz = ux;
+  // the foot of the wall splashed dark by the rain off the eaves, a hand's breadth of earth and dung-wash above the kerb
+  bag.add('silt', lathe([[r + 0.075, 0.2], [r + 0.065, 0.5], [r + 0.06, 0.52], [r + 0.02, 0.5], [r + 0.02, 0.2]], 18, (th) => 1 + 0.01 * Math.sin(th * 7 + seed), x, y, z));
   if (el.open) hutInside(el, ctx, { x, z, r, y, h, a, seed });
   else {
     // each house's daga is its own earth: the walls differ a little in tone from house to house (Shona houses were replastered by hand each season)

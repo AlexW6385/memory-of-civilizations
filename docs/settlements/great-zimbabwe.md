@@ -110,6 +110,18 @@ Sources as §14–§15 (Herald kitchens, Met, Smarthistory, Zimbabwe Field Guide
 - **Life.** Women kneeling at the mortars, goats and dogs in the homesteads nearest the arrival, women with pots and a man in his cape on the path to the north entrance, four beasts and a herd boy within sight of the arrival; more swallows over the entrance path, crows over the enclosure, sparrows on the Valley walls; a rhythmic voice line in the music (clapping and mbira patterns) [inferred].
 - Not built: the covered stairway with its twist, the cave.
 
+## 17. Deepening pass: the arrival, the walls from afar, the ways (2026-11-12)
+
+Sources as §14–§16; the browser review of the arrival found the enclosure walls smooth and grey and the conical tower not in view.
+- **The walls from afar.** The coursing is real (§15) but a 0.42 m course is a pixel or two at fifty metres and the texture's joints fade there. The faces of every wall over 3.5 m are now laid in patches of three tones (the base granite, a lighter coarse granite, a darker one), a course or two high and four to nine metres long, so the courses and the patchwork of beds read at a distance [slabs split from beds of different tone: inferred]. Dry grass at the foot and on the wall tops, and an aloe rosette here and there on the tops [inferred: the plateau's granite carries aloes].
+- **The conical tower.** Wikipedia gives it as 5.5 m across and 9 m high, inside the Great Enclosure [stated]; its place against the entrance is not fixed in our sources. Ours stands just inside the north entrance, to the east of the path, so that the visitor coming up from the valley sees its cone, 10 m, between the rounded ends of the outer wall; the small companion beside it, a daga collar with a kerb round its foot, the 7.6 m platform across the path [placing inferred]. The inner wall of the parallel passage now runs 5.9 m inside the outer wall (a passage about 2 m wide, "narrow", §1) from the north-east round to the south-east.
+- **The entrance.** A kerbed daga forecourt in its mouth; two round platforms each with a monolith inside it (§10: platforms of daga carried monoliths) [inferred].
+- **The ways.** Worn paths of trodden red earth, about 2 m wide, run in straight lines from the entrance to the Valley courts and the foot of the Ancient Ascent (the lines the walkers follow); no grass or planting on them, the homesteads keep clear of them [inferred].
+- **Cattle and life in sight of the arrival.** Cattle were "a key source of wealth" (Met, §14). Two herds, six and four head, graze the grass on either side of the path 20 m from the arrival, a herd boy with them, goats and a dog; cattle egrets stand among them (they follow cattle); two men sit talking in the shade of the wall's end; a woman goes in with a basket. Kites and an eagle wheel high over the valley [all inferred].
+- **Houses.** Each house's daga is its own earth (four tones), a third of the thatch is the paler new grass, a reed screen leans by half the doors, a clay pot caps the apex of a quarter of the roofs, the foot of every wall is splashed dark. The homesteads inside the Great Enclosure all keep a fire.
+- **Termite mounds.** About forty-six red-earth cones in the open grass of the valley [inferred: a feature of the Zimbabwean savanna].
+- Not done: the Great Enclosure's real narrow entrance with its stepped threshold; the inner passage's walkable sealed stretch; the Hill Complex's dressing beyond the above.
+
 ## Sources
 
 - [Great Zimbabwe — Wikipedia](https://en.wikipedia.org/wiki/Great_Zimbabwe)

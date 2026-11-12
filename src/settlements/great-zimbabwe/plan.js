@@ -10,8 +10,8 @@ const ellipse = (c, r, n, a0 = 0, a1 = Math.PI * 2) => Array.from({ length: n + 
 const [ex, ez] = ENCLOSURE.c, [ra, rb] = ENCLOSURE.r;
 // the outer wall (11 m high at its greatest, chevron band on the north-east), with the north entrance
 E.push({ t: 'dry_wall', pts: ellipse(ENCLOSURE.c, ENCLOSURE.r, 40, -Math.PI * 0.42, Math.PI * 1.45), h: 10, th: 4.5, y: 0, chevron: [0, 0.2], drains: [0.035, 0.06, 0.092, 0.12, 0.152, 0.185] });
-// the inner wall forming the narrow parallel passage on the east
-E.push({ t: 'dry_wall', pts: ellipse(ENCLOSURE.c, [ra - 7, rb - 7], 14, -Math.PI * 0.35, Math.PI * 0.35), h: 8, th: 2.5, y: 0 });
+// the inner wall forming the narrow parallel passage (about 2 m wide) on the east, from the north-east round to the south-east
+E.push({ t: 'dry_wall', pts: ellipse(ENCLOSURE.c, [ra - 5.9, rb - 5.9], 16, -Math.PI * 0.3, Math.PI * 0.4), h: 8, th: 2.5, y: 0, lichen: 0.1 });
 // the conical tower stands just inside the north entrance, left of the path, so that the visitor coming up from the valley
 // sees its cone between the rounded ends of the outer wall (TOWER in layout.js: the arrival looks at it); its small companion
 // beside it, and the platform "beside the tower", the largest at Great Zimbabwe (zimfieldguide), across the path
