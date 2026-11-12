@@ -12,9 +12,10 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1
 export function emitters() {
   const E = [], r = rng(1350);
   for (const k of compounds()) for (const h of k.huts) {
-    if (r() > 0.45) continue;
+    const q = r();
+    if (!k.inner && q > 0.45) continue;     // (the homesteads inside the Great Enclosure, in sight of the arrival, all keep a fire)
     // the thatch's apex: the wall 0.2 + h 2.1 − 0.15, then 1.3 r of cone
-    E.push({ p: [h.c[0], h.y + 2.15 + h.r * 1.3 + 0.1, h.c[1]], kind: 'kitchen', thr: 0.15 + 0.8 * r(), seed: k.seed + 1 });
+    E.push({ p: [h.c[0], h.y + 2.15 + h.r * 1.3 + 0.1, h.c[1]], kind: 'kitchen', thr: k.inner ? 0.05 + 0.4 * r() : 0.15 + 0.8 * r(), seed: k.seed + 1 });
   }
   // the smith's forge in the second Valley court (the pole shed's thatch apex 3.7 m up), lit at every hour of work
   { const f = courtAt(1); E.push({ p: [f.at[0], f.y + 3.9, f.at[1]], kind: 'kitchen', thr: 0.02, seed: 777 }); }

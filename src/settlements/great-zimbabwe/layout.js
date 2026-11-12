@@ -7,6 +7,9 @@
 export const RADIUS = 380;
 export const HILL = { c: [-30, -190], r: [140, 70], h: 32 };
 export const ENCLOSURE = { c: [40, 120], r: [52, 38] };
+// the conical tower and the platform beside it, inside the north entrance (the entrance's gap is x 32–53 at z 82)
+export const TOWER = { c: [38, 108], r: 2.8, h: 10 };
+export const PLATFORM = [54, 108];
 // the Hill Complex (docs/settlements/great-zimbabwe.md §11): the Western Enclosure at the hill's
 // west end, its floor levelled with daga (zimfieldguide: deposits 4.3 m deep); the Recess Enclosure
 // east of it; the Ancient Ascent climbing the south face through a cleft between boulders
@@ -21,6 +24,19 @@ export const VALLEY = [
   { c: [60, -50], r: [20, 15], a0: 2.0, a1: Math.PI * 2 + 1.6 },
   { c: [-120, 60], r: [16, 12], a0: -1.2, a1: Math.PI * 2 - 1.6 },
 ];
+// the worn ways: from the Great Enclosure's north entrance to the Valley courts and the foot of the Ancient Ascent, straight lines
+// (the walkers of movers.js follow the same ones); the ground there is trodden red earth, bare of grass
+export const GATE = [ENCLOSURE.c[0] + 6, ENCLOSURE.c[1] - ENCLOSURE.r[1] - 2];
+export const PATHS = [...VALLEY.map((V) => [V.c[0] + V.r[0] + 3, V.c[1]]), [ASCENT.x, ASCENT.z0 + 6]].map((h) => [GATE, h]);
+/** Distance from (x, z) to the nearest worn way. */
+export function pathDist(x, z) {
+  let best = 1e9;
+  for (const [[ax, az], [bx, bz]] of PATHS) {
+    const dx = bx - ax, dz = bz - az, t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz)));
+    best = Math.min(best, Math.hypot(x - ax - dx * t, z - az - dz * t));
+  }
+  return best;
+}
 const ell = (E, x, z, m = 0) => Math.hypot((x - E.c[0]) / (E.r[0] + m), (z - E.c[1]) / (E.r[1] + m));
 /** Is (x, z) within a Hill or Valley enclosure (m: margin, metres)? */
 export const inWalled = (x, z, m = 0) => [WEST, RECESS, ...VALLEY].some((E) => ell(E, x, z, m) < 1);
@@ -60,9 +76,9 @@ export function compounds() {
     return { c: [x, z], r: R, gap, y: 0, huts, granary: [x + Math.cos(a0) * 6.2, z + Math.sin(a0) * 6.2], seed: Math.floor(rand() * 1e6), inner: true };
   };
   const [ex, ez] = ENCLOSURE.c;
-  for (const [dx, dz, o] of [[-27, -12, true], [-26, 8, false], [-8, 20, true], [-9, -14, false]]) COMP.push(mk(ex + dx, ez + dz, o));
+  for (const [dx, dz, o] of [[-27, -12, true], [-26, 8, false], [-8, 20, true], [-10, -1, false]]) COMP.push(mk(ex + dx, ez + dz, o));
   const ok = (x, z) => {
-    if (Math.hypot(x, z) > RADIUS - 56 || inEnclosure(x, z, 14) || inWalled(x, z, R + 6)) return false;
+    if (Math.hypot(x, z) > RADIUS - 56 || inEnclosure(x, z, 14) || inWalled(x, z, R + 6) || pathDist(x, z) < R + 2) return false;
     if (KRAAL_AT.some(([kx, kz, kr]) => Math.hypot(kx - x, kz - z) < kr + R + 4)) return false;
     for (let a = 0; a < 6.3; a += 0.9) if (height(x + Math.cos(a) * R, z + Math.sin(a) * R) > 4 || onAscent(x + Math.cos(a) * R, z + Math.sin(a) * R, 3)) return false;
     return height(x, z) < 3.5 && !COMP.some((k) => Math.hypot(k.c[0] - x, k.c[1] - z) < 2 * R + 5);

@@ -2,7 +2,7 @@
 // outer and inner walls, the parallel passage and the conical tower; the Hill Complex's walls; the
 // Valley Ruins' enclosures.
 
-import { ENCLOSURE, HILL, WEST, RECESS, ASCENT, VALLEY, height, inWalled, onAscent } from './layout.js';
+import { ENCLOSURE, TOWER, PLATFORM, HILL, WEST, RECESS, ASCENT, VALLEY, height, inWalled, onAscent } from './layout.js';
 import { goodsAt, courtAt, kraals } from './life.js';
 
 const E = [];
@@ -10,13 +10,22 @@ const ellipse = (c, r, n, a0 = 0, a1 = Math.PI * 2) => Array.from({ length: n + 
 const [ex, ez] = ENCLOSURE.c, [ra, rb] = ENCLOSURE.r;
 // the outer wall (11 m high at its greatest, chevron band on the north-east), with the north entrance
 E.push({ t: 'dry_wall', pts: ellipse(ENCLOSURE.c, ENCLOSURE.r, 40, -Math.PI * 0.42, Math.PI * 1.45), h: 10, th: 4.5, y: 0, chevron: [0, 0.2], drains: [0.035, 0.06, 0.092, 0.12, 0.152, 0.185] });
-// the inner wall forming the narrow parallel passage on the east, and an inner ring round the tower's court
-E.push({ t: 'dry_wall', pts: ellipse(ENCLOSURE.c, [ra - 7, rb - 7], 14, -Math.PI * 0.35, Math.PI * 0.35), h: 8, th: 2.5, y: 0 });
-E.push({ t: 'dry_wall', pts: ellipse([ex + 25, ez - 5], [16, 14], 14, Math.PI * 0.6, Math.PI * 1.9), h: 4, th: 1.6, y: 0 });
-E.push({ t: 'cone_tower', c: [ex + 30, ez - 8], r: 2.8, h: 10 });
-E.push({ t: 'cone_tower', c: [ex + 24, ez - 10], r: 1.2, h: 4, dentelle: false });
-// the platform beside the tower, 7.6 m across, the largest at Great Zimbabwe (zimfieldguide)
-E.push({ t: 'platform', c: [ex + 31, ez], r: 3.8, h: 0.9, step: Math.PI * 1.15 });
+// the inner wall forming the narrow parallel passage (about 2 m wide) on the east, from the north-east round to the south-east
+E.push({ t: 'dry_wall', pts: ellipse(ENCLOSURE.c, [ra - 5.9, rb - 5.9], 16, -Math.PI * 0.3, Math.PI * 0.4), h: 8, th: 2.5, y: 0, lichen: 0.1 });
+// the conical tower stands just inside the north entrance, left of the path, so that the visitor coming up from the valley
+// sees its cone between the rounded ends of the outer wall (TOWER in layout.js: the arrival looks at it); its small companion
+// beside it, and the platform "beside the tower", the largest at Great Zimbabwe (zimfieldguide), across the path
+E.push({ t: 'cone_tower', c: TOWER.c, r: TOWER.r, h: TOWER.h });
+E.push({ t: 'cone_tower', c: [TOWER.c[0] - 5.5, TOWER.c[1] - 3], r: 1.2, h: 4, dentelle: false });
+E.push({ t: 'platform', c: PLATFORM, r: 3.8, h: 0.9, step: Math.PI * 1.0 });
+// the tower's foot paved with daga, a kerb round it; the forecourt in the entrance's mouth, a kerbed court of daga that the path crosses
+// (zimfieldguide: courtyards paved with dhaka "often with raised kerbs" [placing inferred]); two round platforms each with its monolith
+E.push({ t: 'daga_yard', c: TOWER.c, r: [5.4, 5.4], y: 0 });
+E.push({ t: 'daga_yard', c: [43, 85.5], r: [9, 5], y: 0 });
+for (const [px, pz, pr, mh] of [[30.5, 97, 1.7, 2.1], [57.5, 97.5, 1.4, 1.8]]) {
+  E.push({ t: 'platform', c: [px, pz], r: pr, h: 0.7, step: Math.PI * 0.5 });
+  E.push({ t: 'monolith', at: [px, pz], y: 0.64, rot: px * 0.3, h: mh });
+}
 const yh = (x, z) => height(x, z);
 // the Hill Complex: walls along the ridge among the boulders, broken on the south where the Ancient
 // Ascent comes up through its cleft (docs/settlements/great-zimbabwe.md §11)

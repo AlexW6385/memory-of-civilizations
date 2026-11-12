@@ -57,20 +57,32 @@ function dryWall(el, { bag, col }) {
   const tri = [], S = path.map((_, i) => sect(i)), segs = closed ? n : n - 1;
   // each face turned by its own side of the wall (outer, top, inner): a curved wall's faces cannot be
   // oriented from the centre of the whole wall
-  const put = (a, b, c, w) => {
+  const put = (a, b, c, w, arr = tri) => {
     const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
     const nn = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
-    if (nn[0] * w[0] + nn[1] * w[1] + nn[2] * w[2] < 0) tri.push(...a, ...c, ...b); else tri.push(...a, ...b, ...c);
+    if (nn[0] * w[0] + nn[1] * w[1] + nn[2] * w[2] < 0) arr.push(...a, ...c, ...b); else arr.push(...a, ...b, ...c);
+  };
+  // the coursing seen from afar: a course's joints fade in the distance, so the faces are laid in patches of
+  // lighter, coarser and darker granite, a metre or two high and four to nine metres long (slabs split from different
+  // beds differ in tone), which read as courses at fifty metres; the faces of low walls keep one stone
+  const patchy = h >= 3.5, lt = [], dk = [];
+  const tone = (kc, i) => {
+    if (!patchy) return tri;
+    const r = hash(Math.floor(kc / 2) * 31 + Math.floor(len[i] / (4 + 5 * hash(Math.floor(kc / 2), 9))), 51);
+    return r < 0.24 ? lt : r > 0.84 ? dk : tri;
   };
   for (let i = 0; i < segs; i++) {
     const A = S[i], B = S[(i + 1) % n], j = (i + 1) % n, nx = (fr[i][0] + fr[j][0]) / 2, nz = (fr[i][1] + fr[j][1]) / 2;
     for (let k = 0; k < A.length - 1; k++) {
       const w = k < 2 * K ? [nx, 0.2, nz] : k === 2 * K ? [0, 1, 0] : [-nx, 0.2, -nz];
-      put(A[k], B[k], B[k + 1], w); put(A[k], B[k + 1], A[k + 1], w);
+      const arr = k === 2 * K ? tri : tone(k < 2 * K ? k : 4 * K - k + 1, i);
+      put(A[k], B[k], B[k + 1], w, arr); put(A[k], B[k + 1], A[k + 1], w, arr);
     }
     col.segment(path[i], path[(i + 1) % n], th, yOf(path[i]) - 1, yOf(path[i]) + h);
   }
   bag.add(G, fromTriangles(tri));
+  if (lt.length) bag.add('granite_rough', fromTriangles(lt));
+  if (dk.length) bag.add('andesite', fromTriangles(dk));
   // fallen and tumbled blocks along the foot of both faces: slabs that have come off the courses, lying where they fell
   if (el.rubble !== false && h >= 3) {
     const Nb = Math.floor(len[n - 1] / 2.3);
@@ -81,6 +93,36 @@ function dryWall(el, { bag, col }) {
       const ux = tx * ca - tz * sa, uz = tx * sa + tz * ca, y = yOf(a);
       bag.add(hash(j, 37) < 0.25 ? 'granite_rough' : G, orientedBox([cx - ux * w / 2, cz - uz * w / 2], [cx + ux * w / 2, cz + uz * w / 2], d, y - 0.08, y + 0.14 + hash(j, 38) * 0.26, 0.04));
     }
+  }
+  // what grows on and under the walls: tufts of dry grass on the wall top and at the foot, here and there an aloe rosette on the
+  // top (aloes grow out of the granite of the plateau; inferred), each leaf a flat blade; sparse, a cluster every few metres
+  if (h >= 3.5) {
+    const dry = [], green = [], total2 = len[n - 1];
+    const blade = (arr, x, y, z, ang, lean, L, w) => {
+      const c = Math.cos(ang), s2 = Math.sin(ang), tx = -s2, tz = c, tip = [x + c * lean * L, y + L * Math.sqrt(Math.max(0.05, 1 - lean * lean)), z + s2 * lean * L];
+      const a = [x - tx * w, y, z - tz * w], b = [x + tx * w, y, z + tz * w];
+      arr.push(...a, ...b, ...tip, ...a, ...tip, ...b);
+    };
+    for (let j = 0, N = Math.floor(total2 / 5.2); j < N; j++) {
+      const d = (j + hash(j, 61)) * 5.2, i = Math.min(n - 2, Math.max(0, len.findIndex((l) => l >= d)));
+      const [x, z] = path[i], [nx, nz] = fr[i], r = hash(j, 62);
+      if (r < 0.62) {
+        // dry grass on the top, a little to one side of the middle
+        const u = (hash(j, 63) - 0.5) * th * 0.55, y = yOf(path[i]) + top(i) - 0.04, bx = x + nx * u, bz = z + nz * u;
+        for (let k = 0; k < 11; k++) blade(dry, bx + (hash(j * 11 + k, 64) - 0.5) * 0.25, y, bz + (hash(j * 11 + k, 65) - 0.5) * 0.25, hash(j * 11 + k, 66) * 6.28, 0.35 + hash(j * 11 + k, 67) * 0.4, 0.35 + hash(j * 11 + k, 68) * 0.4, 0.022);
+      } else if (r < 0.74) {
+        // an aloe rosette on the top: eight thick leaves, curving up and out
+        const u = (hash(j, 63) - 0.5) * th * 0.4, y = yOf(path[i]) + top(i) - 0.03, bx = x + nx * u, bz = z + nz * u;
+        for (let k = 0; k < 9; k++) blade(green, bx, y, bz, k / 9 * 6.28 + hash(j, 69), 0.6, 0.5 + 0.1 * (k % 2), 0.07);
+      }
+      // at the foot of either face, grass in the lee of the stone
+      if (hash(j, 70) < 0.55) {
+        const side = hash(j, 71) > 0.5 ? 1 : -1, u = side * (th / 2 + 0.25 + hash(j, 72) * 0.4), y = yOf(path[i]) - 0.02, bx = x + nx * u, bz = z + nz * u;
+        for (let k = 0; k < 13; k++) blade(dry, bx + (hash(j * 13 + k, 73) - 0.5) * 0.4, y, bz + (hash(j * 13 + k, 74) - 0.5) * 0.4, hash(j * 13 + k, 75) * 6.28, 0.3 + hash(j * 13 + k, 76) * 0.45, 0.45 + hash(j * 13 + k, 77) * 0.55, 0.025);
+      }
+    }
+    if (dry.length) bag.add('reed_mat', fromTriangles(dry));
+    if (green.length) bag.add('flax_leaf', fromTriangles(green));
   }
   // the rounded ends of an open wall
   if (!closed) for (const i of [0, n - 1]) {
@@ -250,6 +292,18 @@ function soapstoneBird(el, { bag, col }) {
   ell([[0.001, 0], [0.024, 0.01], [0.022, 0.05], [0.012, 0.085], [0.001, 0.09]], 0.8, W(0.03 * s, 0, yb + 0.395 * s), 0.1, true);
   col.circle(x, z, 0.3, y, y + H + 0.5);
 }
+/**
+ * termite_mound: a termite hill of the savanna { c, r, h, y, seed }: a lumpy cone of red earth, a ragged top with a chimney or
+ * two, a darker skirt of loose soil at its foot, a few stems of dry grass round it.
+ */
+function termiteMound(el, { bag, col }) {
+  const [x, z] = el.c, r = el.r ?? 1, h = el.h ?? 1.5, y = el.y ?? 0, seed = el.seed ?? 1;
+  const n = (th, i) => 1 + 0.18 * Math.sin(th * 3 + seed) + 0.1 * Math.sin(th * 7 + seed * 1.3 + i * 0.9);
+  bag.add('banco', lathe([[r * 1.25, -0.2], [r * 1.18, 0.05], [r * 0.85, h * 0.3], [r * 0.6, h * 0.6], [r * 0.38, h * 0.85], [r * 0.2, h * 0.97], [0.001, h]], 10, n, x, y, z));
+  for (let k = 0; k < 2; k++) { const a = seed * 0.7 + k * 2.4, cx = x + Math.cos(a) * r * 0.35, cz = z + Math.sin(a) * r * 0.35; bag.add('banco', lathe([[r * 0.2, 0], [r * 0.13, h * 0.2], [r * 0.07, h * 0.3], [0.001, h * 0.32]], 6, null, cx, y + h * 0.78, cz)); }
+  bag.add('silt', lathe([[r * 1.9, 0], [r * 1.3, 0.12], [0.001, 0.14]], 10, (th) => 1 + 0.15 * Math.sin(th * 4 + seed), x, y - 0.02, z));
+  col.circle(x, z, r * 0.9, y, y + h);
+}
 /** monolith: a tall natural slab of granite standing in a socket { at, rot, h, y }. */
 function monolith(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0, a = el.rot ?? 0, h = el.h ?? 2.2, ux = Math.cos(a), uz = Math.sin(a);
@@ -280,9 +334,14 @@ function hut(el, ctx) {
   const fr = r + (ver ? 1.3 : 0.45);
   bag.add('mud_plaster', lathe([[fr + 0.08, -0.3], [fr + 0.08, 0.12], [fr - 0.04, 0.24], [0.001, 0.24]], 18, null, x, y, z));
   const a = ((seed % 628) / 100), ux = Math.cos(a), uz = Math.sin(a), tx = -uz, tz = ux;
+  // the foot of the wall splashed dark by the rain off the eaves, a hand's breadth of earth and dung-wash above the kerb
+  bag.add('silt', lathe([[r + 0.075, 0.2], [r + 0.065, 0.5], [r + 0.06, 0.52], [r + 0.02, 0.5], [r + 0.02, 0.2]], 18, (th) => 1 + 0.01 * Math.sin(th * 7 + seed), x, y, z));
   if (el.open) hutInside(el, ctx, { x, z, r, y, h, a, seed });
   else {
-    bag.add('mud_plaster', lathe([[r + 0.06, 0], [r - 0.06, h], [0.001, h]], 16, null, x, y + 0.2, z));
+    // each house's daga is its own earth: the walls differ a little in tone from house to house (Shona houses were replastered by hand each season)
+    bag.add(['mud_plaster', 'banco_smooth', 'adobe_taos', 'kahgel'][seed % 4], lathe([[r + 0.06, 0], [r - 0.06, h], [0.001, h]], 16, null, x, y + 0.2, z));
+    // a screen of woven reed leaning against the wall at one side of the door, a water stain streaking the daga below the eave
+    if (seed % 2 === 1) bag.add('reed_mat', orientedBox([x + ux * (r + 0.1) + tx * 0.62, z + uz * (r + 0.1) + tz * 0.62], [x + ux * (r + 0.1) + tx * 1.02, z + uz * (r + 0.1) + tz * 1.02], 0.07, y + 0.22, y + 1.55));
     if (seed % 3 === 0) {
       // a band painted in ochre and white round the wall, hanging triangles under it (the patterns painted and cut into Shona daga walls; inferred)
       const rb = r + 0.06 - 0.12 * (1.45 / h) + 0.012, T = [], W2 = [], N = 18;
@@ -299,7 +358,7 @@ function hut(el, ctx) {
   const yl = el.open ? 2.05 : 1.85;
   bag.add('timber', orientedBox([x + ux * (r + 0.07) - tx * 0.55, z + uz * (r + 0.07) - tz * 0.55], [x + ux * (r + 0.07) + tx * 0.55, z + uz * (r + 0.07) + tz * 0.55], 0.14, y + yl, y + yl + 0.12));
   const ye = y + 0.2 + h - 0.15, eave = ver ? fr + 0.15 : r + 0.75;
-  bag.add('thatch', lathe([[eave, -0.08], [eave - 0.05, 0.06], [(eave + r * 0.5) / 2 + 0.12, eave * 0.36], [(eave + r * 0.5) / 2, eave * 0.36 + 0.05], [r * 0.32, r * 1.0], [0.06, r * 1.22], [0.001, r * 1.3]], 16, (th, i) => (i < 2 ? 1 + 0.025 * Math.sin(th * 11 + seed) : 1), x, ye, z));
+  bag.add(seed % 5 < 2 ? 'thatch_palm' : 'thatch', lathe([[eave, -0.08], [eave - 0.05, 0.06], [(eave + r * 0.5) / 2 + 0.12, eave * 0.36], [(eave + r * 0.5) / 2, eave * 0.36 + 0.05], [r * 0.32, r * 1.0], [0.06, r * 1.22], [0.001, r * 1.3]], 16, (th, i) => (i < 2 ? 1 + 0.025 * Math.sin(th * 11 + seed) : 1), x, ye, z));
   // the thatch bound down with rings of withy: two bands round the cone, standing a finger's breadth out of it
   for (const [rr, vv] of [[0.78, 0.5], [0.52, 0.8]]) {
     const E0 = [(eave + r * 0.5) / 2, eave * 0.36 + 0.05], T0 = [r * 0.32, r * 1.0], P0 = [0.06, r * 1.22];
@@ -307,6 +366,8 @@ function hut(el, ctx) {
     bag.add('wicker', lathe([[rc + 0.045, -0.03], [rc + 0.05, 0.0], [rc + 0.045, 0.03], [rc + 0.01, 0.03], [rc + 0.01, -0.03]], 20, null, x, ye + hc, z));
     void rr;
   }
+  // a clay pot set over the apex of some roofs, to shed the rain from the point
+  if (seed % 4 === 1) bag.add('terracotta', lathe(potProf(0.7).map(([rr, vv]) => [rr, -vv + 0.22]).reverse(), 8, null, x, ye + r * 1.3 - 0.06, z));
   if (ver) for (let k = 0; k < 8; k++) { const b = a + Math.PI / 8 + k * Math.PI / 4; bag.add('timber', lathe([[0.06, 0], [0.055, ye - y - 0.2 + 0.1], [0.001, ye - y - 0.15]], 6, null, x + Math.cos(b) * (fr - 0.2), y + 0.2, z + Math.sin(b) * (fr - 0.2))); }
   if (el.open) {
     // the thatch seen from within: a cone a little under the outer one, blackened by the hearth's smoke, the
@@ -638,6 +699,6 @@ function stoneCarver(el, { bag, col }) {
 }
 registerStyle('zimbabwe', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, dry_wall: dryWall, cone_tower: coneTower, daga_hut: hut, platform, soapstone_bird: soapstoneBird, monolith, boulder, stone_steps: stoneSteps, daga_yard: dagaYard, thatch_roof: thatchRoof, kraal, trade_goods: tradeGoods, granary, compound, homestead_goods: homesteadGoods, millet_plot: milletPlot, smithy, stone_carver: stoneCarver },
+  elements: { ...STYLES.qing.elements, dry_wall: dryWall, cone_tower: coneTower, daga_hut: hut, platform, soapstone_bird: soapstoneBird, monolith, boulder, stone_steps: stoneSteps, daga_yard: dagaYard, thatch_roof: thatchRoof, kraal, trade_goods: tradeGoods, granary, compound, homestead_goods: homesteadGoods, millet_plot: milletPlot, smithy, stone_carver: stoneCarver, termite_mound: termiteMound },
   objects: {},
 });

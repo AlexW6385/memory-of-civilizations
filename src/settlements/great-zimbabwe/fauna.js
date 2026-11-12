@@ -10,9 +10,14 @@ const flights = [
   { kind: 'swallow', n: 4, loop: { c: [ENCLOSURE.c[0] + 6, ENCLOSURE.c[1] - 50], a: [40, 24], rot: 0.2 }, y: [3, 10], speed: 9 },
   { kind: 'crow', n: 3, loop: { c: [ENCLOSURE.c[0], ENCLOSURE.c[1]], a: [30, 22], rot: 0.5 }, y: [14, 30], speed: 7 },
   { kind: 'crow', n: 6, loop: { c: [HILL.c[0], HILL.c[1]], a: [90, 50], rot: 0.1 }, y: [50, 80], speed: 8 },
+  // raptors (kites and eagles) wheeling high over the valley and the hill on the day's warm air
+  { kind: 'kite', n: 2, loop: { c: [20, 20], a: [160, 110], rot: 0.3 }, y: [60, 95], speed: 7 },
+  { kind: 'eagle', n: 1, loop: { c: [HILL.c[0] + 30, HILL.c[1] + 40], a: [70, 45], rot: 1.1 }, y: [45, 70], speed: 6 },
 ];
 const perches = [];
 for (const k of compounds().filter((_, i) => i % 2 === 0)) perches.push({ kind: 'sparrow', x: k.c[0], z: k.c[1], y: height(k.c[0], k.c[1]) + 0.3, rot: k.seed % 3, range: [2.2, 2.0] });
+// cattle egrets in the grass among the herds beside the path to the entrance (they follow the cattle; they stand and pick at the ground)
+for (const [x, z] of [[53, 73.5], [57.5, 77.5], [30, 74], [26.5, 77], [62, 74]]) perches.push({ kind: 'egret', x, z, y: height(x, z), rot: x * 0.7, range: [1.2, 0.8], alert: 7 });
 // on the Great Enclosure's outer wall top (10 m, a little less where the top undulates)
 for (const [x, z] of [[ENCLOSURE.c[0] - 30, ENCLOSURE.c[1] + 33], [ENCLOSURE.c[0] + 40, ENCLOSURE.c[1] + 24]]) perches.push({ kind: 'sparrow', x, z, y: 9.6, rot: 0, range: [2.5, 0], alert: 6 });
 // on the tops of the Valley courts' walls (3.5 m, the top a little uneven), at a point of each wall's arc

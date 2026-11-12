@@ -2,7 +2,7 @@
 // grass on the valley floor, cleared ground round the houses, the miombo woodland (acacia stands
 // in) and msasa trees beyond; the high plateau's clear, bright sky.
 
-import { RADIUS, HILL, height, huts, inEnclosure, inWalled, onAscent } from './layout.js';
+import { RADIUS, HILL, height, huts, inEnclosure, inWalled, onAscent, pathDist } from './layout.js';
 import { kraals } from './life.js';
 
 function cover(x, z, h, ny) {
@@ -10,11 +10,14 @@ function cover(x, z, h, ny) {
   if (inWalled(x, z, -1) || onAscent(x, z, -1)) { c.soil = 0.75; c.rock = 0.1; c.grass = 0.15; return c; }
   if (h > 6 || ny < 0.8) { c.rock = 0.8; c.grass = 0.2; return c; }
   if (inEnclosure(x, z)) { c.soil = 0.8; c.grass = 0.2; return c; }
+  // the worn ways: trodden red earth about two metres wide, the edges ragged
+  const d = pathDist(x, z) + 0.35 * Math.sin(x * 0.9 + z * 0.4) * Math.sin(z * 0.7 - x * 0.3);
+  if (d < 2.2) { const k = 1 - Math.max(0, (d - 0.9) / 1.3); c.road = k; c.grass *= 1 - 0.9 * k; c.dry *= 1 - 0.8 * k; }
   return c;
 }
 const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || inEnclosure(x, z, 4) || inWalled(x, z, 3) || onAscent(x, z, 3) || huts().some((h) => Math.hypot(h.c[0] - x, h.c[1] - z) < h.r + 2) || kraals().some((k) => Math.hypot(k.c[0] - x, k.c[1] - z) < k.r + 3)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || pathDist(x, z) < 1.9 || inEnclosure(x, z, 4) || inWalled(x, z, 3) || onAscent(x, z, 3) || huts().some((h) => Math.hypot(h.c[0] - x, h.c[1] - z) < h.r + 2) || kraals().some((k) => Math.hypot(k.c[0] - x, k.c[1] - z) < k.r + 3)) return null;
   const h = height(x, z);
   if (h > 6) return { boulder: 0.6, grass_dry: 6, acacia: 0.02 };
   // miombo savanna: open woodland of msasa (stood in for by acacia and neem), wild figs, granite boulders in the long dry grass
