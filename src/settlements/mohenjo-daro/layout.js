@@ -124,7 +124,8 @@ export function lots() {
   }
   // a few small, poor houses (a single row of rooms), and the open ones on the platform
   for (const l of LOTS) if (l.kind === 'house' && l.seed % 11 === 0 && !l.open) l.kind = 'small';
-  const top = LOTS.filter((l) => l.tag === 'top'); if (top[3]) top[3].open = true;
+  // the platform's quarters are the nearest houses to the visitor on the Citadel: every third one is open, lit and furnished, with its well, so that the lanes show doors ajar
+  const top = LOTS.filter((l) => l.tag === 'top'); top.forEach((l, i) => { if (i % 3 === 1 || i === 3) l.open = true; });
   return LOTS;
 }
 export function lanes() { lots(); return LANES; }

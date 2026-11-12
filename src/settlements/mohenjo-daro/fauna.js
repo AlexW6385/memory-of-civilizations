@@ -17,6 +17,8 @@ const flights = [
 const perches = [];
 const spots = [[-150, -50], [-120, -60], [-60, -44], [-20, -40], [62, -80], [62, 10], [62, 100], [154, -80], [154, 30], [154, 110], [48, -40], [76, -30], [30, 48], [100, 48], [-30, -100], [-30, 120], [240, -60], [250, 20], [-160, 70], [-200, -150]];
 for (const [x, z] of spots) perches.push({ kind: 'sparrow', x, z, y: height(x, z) + 0.12, rot: (x * 7) % 3, range: [1.6, 1.4] });
+for (const [x, z] of [[-121, -97], [-178, -80]]) perches.push({ kind: 'crow', x: x + 1.5, z: z + 1, y: 7 + 7.4, rot: x % 3, range: [2, 1.6], stay: [30, 120], gone: [30, 90], alert: 12 });
+for (const [x, z] of [[-124, -71], [-192, -80.5], [-72, -92], [-150, -18]]) perches.push({ kind: 'sparrow', x: x + 1.4, z: z - 1.1, y: 7.1, rot: (x * 3) % 3, range: [1.6, 1.4] });
 perches.push({ kind: 'sparrow', x: -160, z: -72, y: 7.1, rot: 1, range: [1.6, 1.4] }, { kind: 'sparrow', x: -145, z: -50, y: 7.1, rot: 2, range: [1.6, 1.4] });
 // sparrows on the market's stalls and the quay's sheds, crows on the Citadel's parapet and the granary roof, egrets at the weirs
 for (const [x, z, y] of [[44, -62, 2.3], [58, -62, 2.3], [78, -62, 2.3], [44, -18, 2.3], [70, -18, 2.3], [255, -98, 3.4], [255, -50, 3.4], [255, -8, 3.4], [255, 22, 3.4]]) perches.push({ kind: 'sparrow', x, z, y, rot: (x * 5) % 3, range: [1.8, 1.4] });

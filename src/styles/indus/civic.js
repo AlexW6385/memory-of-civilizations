@@ -121,10 +121,23 @@ export function bath(el, ctx) {
   bag.add('bitumen', box(px0, yb, pz0, px0 + 0.06, y - 0.05, pz1)); bag.add('bitumen', box(px1 - 0.06, yb, pz0, px1, y - 0.05, pz1));
   bag.add('brick', box(px0 - 0.35, y, pz0 - 0.35, px1 + 0.35, y + 0.14, pz0), false); bag.add('brick', box(px0 - 0.35, y, pz1, px1 + 0.35, y + 0.14, pz1 + 0.35), false);
   bag.add('brick', box(px0 - 0.35, y, pz0, px0, y + 0.14, pz1), false); bag.add('brick', box(px1, y, pz0, px1 + 0.35, y + 0.14, pz1), false);
-  bag.add('water', box(px0 + 0.06, y - 0.5, pz0, px1 - 0.06, y - 0.3, pz1), false);   // a slab, as the Roman baths' pools: a bare quad did not show
+  // the water stands a metre below the coping (at a grazing look it only mirrors the haze, so the dark bitumen lining must stand above it): a slab, as the Roman baths' pools
+  const WL = y - 1.05;
+  bag.add('water', box(px0 + 0.06, WL - 0.2, pz0, px1 - 0.06, WL, pz1), false);
   // the stairs at both short ends, 3.4 m long, down to the bed
-  W.stairs(px0 + 0.06, pz0, px1 - 0.06, pz0 + 3.4, yb, y, -1, 'brick', 0.2);
-  W.stairs(px0 + 0.06, pz1 - 3.4, px1 - 0.06, pz1, yb, y, 1, 'brick', 0.2);
+  // (the steps wet from the water up 0.5 m are dark, the dried ones above are brick)
+  const bstairs = (z0, z1, dv) => {
+    const n = Math.round(B.depth / 0.2), vs = z1 - z0;
+    for (let i = 0; i < n; i++) {
+      const top = yb + (B.depth * (i + 1)) / n, a = dv > 0 ? z0 + (vs * i) / n : z0, b = dv > 0 ? z1 : z1 - (vs * i) / n;
+      bag.add(top < WL + 0.02 ? 'bitumen' : top < WL + 0.55 ? 'pottery_dark' : 'brick', box(px0 + 0.06, yb + (B.depth * i) / n - 0.05 * (i === 0), a, px1 - 0.06, top, b));
+    }
+    col.ramp([px0 + 0.06, z0, px1 - 0.06, z1], yb, y, dv > 0 ? 's' : 'n');
+  };
+  bstairs(pz0, pz0 + 3.4, -1);
+  bstairs(pz1 - 3.4, pz1, 1);
+  // the lining's wet band above the water (darker, black-green) and the ledge's dark lip
+  bag.add('pottery_dark', box(px0 + 0.04, WL, pz0 + 3.4, px0 + 0.1, WL + 0.45, pz1 - 3.4), false); bag.add('pottery_dark', box(px1 - 0.1, WL, pz0 + 3.4, px1 - 0.04, WL + 0.45, pz1 - 3.4), false);
   // the outlet at the south-west corner, the drain across the court under its cover to the west wall and the corbelled mouth outside
   bag.add('bitumen', box(ox0 + wt, y + 0.004, pz1 - 0.55, px0, y + 0.02, pz1 - 0.15), false);
   for (let k = 0; k < 3; k++) { const w = 0.9 - k * 0.25; bag.add('brick', box(ox0 - 0.5 - 0.0, y + 0.2 + k * 0.28, pz1 - 0.35 - w / 2 - 0.1, ox0 + wt * 0.5, y + 0.48 + k * 0.28, pz1 - 0.35 + w / 2 + 0.1), false); }
