@@ -218,3 +218,20 @@ export function wash(el, { bag }) {
   for (let k = 0; k < 4; k++) { const cx = x - 1.8 - k * 1.1, [a, b] = zs(hw + 1.2, hw + 2.0); bag.add(cls[(k + (Math.abs(Math.round(x)) % 5)) % 5], box(cx - 0.45, y + 0.025, a, cx + 0.45, y + 0.04, b)); }
 }
 
+
+/** fez_trellis: { at: [x, z], axis ('x' | 'z': the lane's direction), w (the lane's clear width), len, y (the lane's floor), seed } — a vine trained over a derb: cedar poles across at 3 m, the canes
+ *  along them, a roof of leaves (green) with bunches of grapes hanging; the dappled shade of the quiet lanes. Over the lane only (no collision: the clearance is 2.8 m). */
+export function trellis(el, { bag }) {
+  const [x, z] = el.at, alongX = el.axis === 'x', w = el.w + 0.6, len = el.len ?? 3.4, y = el.y + 3.0, n = Math.max(3, Math.round(len / 1.1));
+  const B = (u0, u1, y0, y1, v0, v1) => (alongX ? box(x + u0, y0, z + v0, x + u1, y1, z + v1) : box(x + v0, y0, z + u0, x + v1, y1, z + u1));
+  for (let i = 0; i < n; i++) { const u = -len / 2 + len * (i + 0.5) / n; bag.add('cedar', B(u - 0.05, u + 0.05, y, y + 0.1, -w / 2, w / 2)); }
+  for (const v of [-w * 0.3, 0, w * 0.3]) bag.add('wood_dark', B(-len / 2, len / 2, y + 0.1, y + 0.14, v - 0.02, v + 0.02));
+  const r = rngT(el.seed ?? 1);
+  for (let k = 0; k < 7; k++) {
+    const u = -len / 2 + 0.2 + r() * (len - 0.4), v = (r() - 0.5) * w * 0.9, a = 0.5 + r() * 0.5, b = 0.5 + r() * 0.6;
+    bag.add('palm_leaf', B(u - a / 2, u + a / 2, y + 0.14 + r() * 0.12, y + 0.3 + r() * 0.12, v - b / 2, v + b / 2));
+  }
+  bag.add('palm_leaf', B(-len / 2 + 0.1, len / 2 - 0.1, y + 0.14, y + 0.2, -w / 2 + 0.1, w / 2 - 0.1));
+  for (let k = 0; k < 5; k++) { const u = -len / 2 + 0.3 + r() * (len - 0.6), v = (r() - 0.5) * w * 0.7, [bx, bz] = alongX ? [x + u, z + v] : [x + v, z + u]; bag.add(k % 2 ? 'glaze_green' : 'cloth_maroon', lathe([[0.001, 0], [0.06, 0.1], [0.07, 0.22], [0.001, 0.3]], 6, null, bx, y - 0.3, bz)); }
+}
+function rngT(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }

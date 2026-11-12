@@ -8,10 +8,10 @@ import { house, mass } from './house.js';
 import { souk, square } from './souk.js';
 import { tannery } from './tannery.js';
 import { qarawiyyin } from './qarawiyyin.js';
-import { river, bridge, wall, gate, darMagana, sabat, fountain, funduq, mosque, lane, wash } from './civic.js';
+import { river, bridge, wall, gate, darMagana, sabat, fountain, funduq, mosque, lane, wash, trellis } from './civic.js';
 
 registerStyle('marinid', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { bou_inania: bouInania, fez_house: house, fez_mass: mass, fez_souk: souk, fez_square: square, fez_tannery: tannery, fez_river: river, fez_bridge: bridge, fez_wall: wall, fez_gate: gate, fez_darmagana: darMagana, fez_sabat: sabat, fez_fountain: fountain, fez_lane: lane, fez_wash: wash, fez_funduq: funduq, fez_mosque: mosque, fez_qarawiyyin: qarawiyyin, fez_court: court },
+  elements: { bou_inania: bouInania, fez_house: house, fez_mass: mass, fez_souk: souk, fez_square: square, fez_tannery: tannery, fez_river: river, fez_bridge: bridge, fez_wall: wall, fez_gate: gate, fez_darmagana: darMagana, fez_sabat: sabat, fez_fountain: fountain, fez_lane: lane, fez_wash: wash, fez_funduq: funduq, fez_mosque: mosque, fez_qarawiyyin: qarawiyyin, fez_court: court, fez_trellis: trellis },
   objects: {},
 });

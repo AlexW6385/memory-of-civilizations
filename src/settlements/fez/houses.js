@@ -50,6 +50,17 @@ export function laneElements() {
       if (inLot(q.r[0] - 0.7, zm) && inLot(q.r[2] + 0.7, zm) && inLot(q.r[0] - 0.7, z) && inLot(q.r[2] + 0.7, z + 3.2)) out.push({ t: 'fez_sabat', rect: [q.r[0], z, q.r[2], z + 3.2], y: ground0(c, zm), clear: 4.0 });
     }
   }
+  // vines trained over the quiet derbs and lanes of the core: a trellis every so often (the shade of Fez's lanes), never over a covered stretch or a main street
+  for (const q of lanes()) {
+    if (q.kind === 'street' || q.w > 3.4 || q.w < 1.2) continue;
+    const alongX = q.axis === 'x', len = alongX ? q.r[2] - q.r[0] : q.r[3] - q.r[1], c = alongX ? (q.r[1] + q.r[3]) / 2 : (q.r[0] + q.r[2]) / 2, u0 = alongX ? q.r[0] : q.r[1];
+    if (len < 9) continue;
+    for (let u = u0 + 3 + rand() * 4; u < u0 + len - 3.5; u += 9 + rand() * 7) {
+      const at = alongX ? [u, c] : [c, u];
+      if (Math.hypot(at[0], at[1]) > 175 || rand() > 0.24) continue;
+      out.push({ t: 'fez_trellis', at, axis: q.axis, w: q.w, len: 3.2 + rand() * 1.6, y: ground0(at[0], at[1]), seed: 400 + n++ });
+    }
+  }
   for (const { x, side } of washPlaces()) out.push({ t: 'fez_wash', at: [x, riverZ(x) + side * (RIVER.w / 2 + 1.5)], side, top: quayY(x, side), water: RIVER.water, cz: riverZ(x) });
   return out;
 }
