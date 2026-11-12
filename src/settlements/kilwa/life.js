@@ -32,6 +32,18 @@ export function trees() {
     if (!free(x, z, R + 4) || near(x, z, R + 9)) continue;
     TREES.push({ t: 'baobab', at: [x, z], y: height(x, z) - 0.2, h: 9 + R * 2.2, r: R, seed: Math.floor(rand() * 1e6) }); n++;
   }
+  // mangroves at the tide's edge where the shore is flat and no town stands (the island's two ends along the harbour)
+  for (let k = 0, n = 0; k < 900 && n < 26; k++) {
+    const x = rand() < 0.5 ? -270 + rand() * 80 : 80 + rand() * 40, z = shoreAt(x) - 6 + rand() * 24, hh = height(x, z);
+    if (hh < 0.15 || hh > 1.1 || inSea(x, z) || Math.hypot(x, z) > RADIUS - 40 || near(x, z, 3.5)) continue;
+    TREES.push({ t: 'mangrove', at: [x, z], y: hh - 0.1, h: 4 + rand() * 3, seed: Math.floor(rand() * 1e6) }); n++;
+  }
+  // banana groves in the open ground at the town's edge, and among the outer houses
+  for (let k = 0, n = 0; k < 900 && n < 16; k++) {
+    const x = -230 + rand() * 330, z = 20 + rand() * 200;
+    if (Math.hypot(x + 45, z - 10) < 110 || !free(x, z, 2.5) || near(x, z, 4)) continue;
+    TREES.push({ t: 'banana', at: [x, z], y: height(x, z) - 0.05, h: 3 + rand(), seed: Math.floor(rand() * 1e6) }); n++;
+  }
   return TREES;
 }
 export const inTree = (x, z, m = 0) => trees().some((t) => Math.hypot(t.at[0] - x, t.at[1] - z) < (t.r ?? 0.6) + m);

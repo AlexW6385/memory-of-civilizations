@@ -14,7 +14,7 @@ export function emitters() {
   const E = [], r = rng(1331);
   for (const l of lots()) {
     if (r() > 0.38) continue;
-    const [x0, z0, x1, z1] = l.rect, x = x0 + (x1 - x0) * (0.3 + 0.5 * r()), z = z1 - 1.2 - r();
+    const [x0, z0, x1, z1] = l.rect, x = x0 + (x1 - x0) * (0.3 + 0.5 * r()), z = l.flip ? z0 + 1.2 + r() : z1 - 1.2 - r();
     E.push({ p: [x, l.y + 3.9, z], kind: 'kitchen', thr: r(), seed: l.seed + 1 });
   }
   // a cooking pot on the fire at one in four of the market's stalls (hot food for the porters and sailors)

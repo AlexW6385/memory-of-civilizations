@@ -2,7 +2,7 @@
 // mtepe under their mat sails working the harbour. Data for the engine's movers (src/engine/movers.js, read in its worker);
 // the format is Suzhou's (src/settlements/ming-suzhou/movers.js). The ways come from layout.js (STREETS, HARBOUR).
 
-import { RADIUS, SEA, SOKO, MOSQUE_STREET, SPINE, LANES, HARBOUR } from './layout.js';
+import { RADIUS, SEA, SOKO, MOSQUE_STREET, SPINE, LANES, ALLEYS, HARBOUR } from './layout.js';
 import { STYLES } from '../../core/build.js';
 import '../../styles/swahili/index.js';
 import '../../objects/index.js';
@@ -10,7 +10,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure, factor, flat, SLOT } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 34, night: 5, rain: 0.6, reach: 150, spawnMin: 28, far: 42 },
+  walkers: { day: 46, night: 6, rain: 0.6, reach: 150, spawnMin: 28, far: 42 },
   boats: { count: 5, reach: 260, spawnMin: 70, far: 110, speed: [0.9, 1.4], bridgeSpeed: 0.8 },
   water: SEA,
 };
@@ -22,6 +22,7 @@ export function walkways() {
     { r: [SOKO[0] + 6, SOKO[1] + 1.2, SOKO[2] - 6, SOKO[3] - 1.2], weight: 3.0, market: 2.4, kind: 'street' },
     { r: [MOSQUE_STREET[0] + 6, MOSQUE_STREET[1] + 1.2, MOSQUE_STREET[2] - 6, MOSQUE_STREET[3] - 1.2], weight: 2.0, market: 1.4, kind: 'street' },
     { r: [SPINE[0] + 1.2, SPINE[1], SPINE[2] - 1.2, SPINE[3]], weight: 2.4, market: 1.0, kind: 'street' },
+    ...ALLEYS.filter((r) => r[1] < 100).map((r) => ({ r: [r[0] + 6, r[1] + 0.3, r[2] - 6, r[3] - 0.3], weight: 0.7, market: 0.5, kind: 'lane' })),
     ...LANES.map((r) => ({ r: [r[0] + 0.8, r[1], r[2] - 0.8, r[3]], weight: 1.0, market: 0.8, kind: 'lane' })),
   ];
   return { rects, links: [], clip: RADIUS - 20 };

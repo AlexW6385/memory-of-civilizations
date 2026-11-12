@@ -94,18 +94,59 @@ export const SPINE = [-18, -89.6, -11.5, -24.5];
 export const STREETS = [SOKO, MOSQUE_STREET, SPINE, ...LANES];
 /** The open harbour water the sailing boats work in, north of the beach (clear of the dhows at anchor). */
 export const HARBOUR = [-200, -215, 90, -185];
+/**
+ * The stone town's houses in rows of back-to-back pairs (docs/settlements/kilwa.md §18): a row's front on the north (the
+ * house's street, `flip` false) or on the south (`flip`: the house built turned about its middle line), the pair sharing its
+ * back wall, narrow alleys (2.2 m) between the pairs where the fronts face each other; party walls side by side (houses
+ * of 6.5–11.5 m, 8 cm apart), cut by the lanes. The first row of the market block fronts the soko, the last the footpath
+ * north of the mosque street; south of the mosque street the first row fronts that street. Thinner with the distance
+ * from the town's heart; none on the beach side of the soko (the landing places and the boats).
+ */
+export const ROW_D = 9.4, ALLEY = 2.2;
+const BLOCKS = [
+  // the market block: its first row (front north) on the soko, a pair back to back, the alley, a pair
+  [-78.4, -69.0, false], [-69.0, -59.6, true], [-57.4, -48.0, false], [-48.0, -38.6, true],
+];
+// south of the mosque street: pairs with an alley between each
+for (let z = -23.9; z < 125; z += 2 * ROW_D + ALLEY) BLOCKS.push([z, z + ROW_D, false], [z + ROW_D, z + 2 * ROW_D, true]);
+/** The alleys between the pairs of rows (the fronts face each other across them): rectangles [x0, z0, x1, z1]. */
+export const ALLEYS = [];
+for (let i = 1; i < BLOCKS.length; i++) if (Math.abs(BLOCKS[i][0] - BLOCKS[i - 1][1] - ALLEY) < 1e-6) { const z0 = BLOCKS[i - 1][1], z1 = BLOCKS[i][0]; if (z1 > MOSQUE[1] - 7 && z0 < MOSQUE[3] + 7) ALLEYS.push([-222, z0, MOSQUE[0] - 7, z1], [MOSQUE[2] + 7, z0, 124, z1]); else ALLEYS.push([-222, z0, 124, z1]); }
+const heart = (cx, cz) => Math.hypot(cx + 45, cz - 10);
 let LOTS = null;
 export function lots() {
   if (LOTS) return LOTS;
   LOTS = [];
   const rand = rng(1330);
-  for (let x = -220; x < 120; x += 12) for (let z = -100; z < 160; z += 11) {
-    const w = 8 + rand() * 3, d = 8 + rand() * 2, cx = x + w / 2, cz = z + d / 2;
-    if (Math.hypot(cx, cz) > RADIUS - 110 || inRect(MOSQUE, cx, cz, 10) || height(cx, cz) < 1.5 || rand() < 0.3 + 0.4 * smooth(100, 220, Math.hypot(cx, cz))) continue;
-    if (STREETS.some((r) => inRect(r, cx, cz, 0) || (cx + w / 2 > r[0] - 0.3 && cx - w / 2 < r[2] + 0.3 && cz + d / 2 > r[1] - 0.3 && cz - d / 2 < r[3] + 0.3))) continue;
-    const ys = [[x, z], [x + w, z], [x, z + d], [x + w, z + d]].map(([a, b]) => height(a, b));
-    LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: Math.max(...ys), low: Math.min(...ys) });
+  const cuts = [...LANES, SPINE];
+  for (const [z0, z1, flip] of BLOCKS) {
+    const d = z1 - z0, cz = (z0 + z1) / 2;
+    // the market block's rows lie between the soko and the mosque street; further south the SPINE does not reach
+    for (let x = -222; x < 124;) {
+      const w = 6.5 + rand() * 5;
+      let hit = null;
+      for (const r of cuts) if (cz > r[1] - 0.2 && cz < r[3] + 0.2 && x + w > r[0] - 0.35 && x < r[2] + 0.35) hit = r;
+      if (hit) { x = hit[2] + 0.35; continue; }
+      const x1 = x + w, cx = (x + x1) / 2, dh = heart(cx, cz);
+      const ys = [[x, z0], [x1, z0], [x, z1], [x1, z1]].map(([a, b]) => height(a, b));
+      const skipP = 0.04 + 0.72 * smooth(100, 200, dh), r1 = rand(), seed = Math.floor(rand() * 1e6);
+      x = x1 + 0.08;
+      if (dh > 205 || Math.min(...ys) < 1.3 || r1 < skipP) continue;
+      if (x1 > MOSQUE[0] - 7 && x1 - w < MOSQUE[2] + 7 && z1 > MOSQUE[1] - 7 && z0 < MOSQUE[3] + 7) continue;
+      if (STREETS.some((r) => cx + w / 2 > r[0] - 0.3 && cx - w / 2 < r[2] + 0.3 && cz + d / 2 > r[1] - 0.3 && cz - d / 2 < r[3] + 0.3)) continue;
+      LOTS.push({ rect: [x1 - w, z0, x1, z1], seed, flip, y: Math.max(...ys), low: Math.min(...ys), dh });
+    }
   }
   return LOTS;
 }
-export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+// a spatial index: the lots are many
+let GRID = null;
+const GC = 16;
+export function inLot(x, z, m = 0) {
+  if (!GRID) {
+    GRID = new Map();
+    for (const l of lots()) for (let i = Math.floor((l.rect[0] - 10) / GC); i <= Math.floor((l.rect[2] + 10) / GC); i++) for (let j = Math.floor((l.rect[1] - 10) / GC); j <= Math.floor((l.rect[3] + 10) / GC); j++) { const k = i + ',' + j; (GRID.get(k) || GRID.set(k, []).get(k)).push(l); }
+  }
+  const L = GRID.get(Math.floor(x / GC) + ',' + Math.floor(z / GC));
+  return !!L && L.some((l) => inRect(l.rect, x, z, m));
+}

@@ -17,5 +17,8 @@ for (const r of LANES) { const x = (r[0] + r[2]) / 2, z = -60; perches.push({ ki
 perches.push({ kind: 'sparrow', x: -15, z: MOSQUE_STREET[1] + 2, y: height(-15, MOSQUE_STREET[1] + 2), rot: 0.4, range: [1.5, 1.2] });
 // reef egrets on the beach, facing the water
 for (const x of [-120, -62, -20, 25]) { const z = shoreAt(x) + 7; if (height(x, z) > 0.2) perches.push({ kind: 'egret', x, z, y: height(x, z), rot: -Math.PI / 2, stay: [60, 200], gone: [60, 160], alert: 10 }); }
+// pied crows round the fish-drying racks on the beach, and sparrows in the alleys
+for (const x of [-165, -95, -22, 48]) { const z = shoreAt(x) + 13.5; if (height(x, z) > 0.4) perches.push({ kind: 'crow', x, z, y: height(x, z), rot: 2, stay: [30, 90], gone: [40, 120], alert: 12 }); }
+for (let x = -190; x < 60; x += 33) { const z = -58.5 + ((x * 3) % 2); perches.push({ kind: 'sparrow', x, z, y: height(x, z), rot: x, range: [1.2, 0.5] }); }
 void RADIUS;
 export default { fish: [], flights, perches };
