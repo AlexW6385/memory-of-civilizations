@@ -867,7 +867,10 @@ function make(spec) {
       // than the one highlight the moon's light gives a still surface)
       const wn = normalize(vec3(w.mul(0.06), 1, noiseT(vec3(P.z.mul(0.9).sub(t), P.x.mul(0.9), t.mul(0.7))).mul(0.06)));
       const rv = reflect(v, wn);
-      m.emissiveNode = waterSky(r).mul(fres).mul(open).add(moonGlint(rv).mul(smoothstep(0.6, 0.9, normalLocal.y)));
+      // (the reflection near the horizon is mostly of banks, walls and trees, not of the open sky: a pool in a court
+      // or a canal between houses mirrored the pale haze of the horizon and read as paving; darker toward a grazing ray)
+      const low = mix(float(0.45), float(1), smoothstep(0.02, 0.3, r.y));
+      m.emissiveNode = waterSky(r).mul(fres).mul(open).mul(low).add(moonGlint(rv).mul(smoothstep(0.6, 0.9, normalLocal.y)));
       break;
     }
     case 'leaf': {
