@@ -122,7 +122,9 @@ export function lots() {
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
 
 /** The lanes (rectangles between the cells), cut where a river, the moat or a fixed place is. */
+let STREETS = null;
 export function streets() {
+  if (STREETS) return STREETS;
   const out = [], seg = (a) => {
     const n = Math.max(1, Math.round(Math.max(a[2] - a[0], a[3] - a[1]) / 12));
     const horiz = a[2] - a[0] > a[3] - a[1];
@@ -140,7 +142,7 @@ export function streets() {
     const q = M.find((m) => (Math.abs(m[2] - r[0]) < 0.01 && m[1] === r[1] && m[3] === r[3]) || (Math.abs(m[3] - r[1]) < 0.01 && m[0] === r[0] && m[2] === r[2]));
     if (!q) M.push(r.slice()); else { q[0] = Math.min(q[0], r[0]); q[1] = Math.min(q[1], r[1]); q[2] = Math.max(q[2], r[2]); q[3] = Math.max(q[3], r[3]); }
   }
-  return M;
+  return (STREETS = M);
 }
 
 /** The bridges over the Huan: a plank bridge on piles, at x −216 (the western reach) and z 0 (the eastern). */

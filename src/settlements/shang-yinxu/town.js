@@ -21,12 +21,25 @@ function people() {
   noble([AXIS, -88.9], 0, { pose: 'seiza', cloth: 'cloth_red', cloth2: 'cloth_black', beard: true, hat: 'none' }, hy);
   for (const s of [-1, 1]) noble([AXIS + s * 6, -89.0], 0, { pose: 'seiza', cloth: 'cloth_black', cloth2: 'cloth_red', beard: true }, hy);
   noble([AXIS - 6, -92.4], 0.3, { pose: 'talk' }, hy);
-  for (const s of [-1, 1]) guard([AXIS + s * 4, -78.3], Math.PI, {}, HALL.h);
+  for (const s of [-1, 1]) guard([AXIS + s * 4, -78.3], 0, {}, HALL.h);
   // the court: diviners kneeling over fires heating plastrons, officials and petitioners, guards along the sides, the pits' tenders
   for (let k = 0; k < 4; k++) { const x = 4 + k * 10.5; fig([x, -30], 0, { pose: 'kneel', dress: 'robe', legs: undefined, cloth: 'cloth_black', cloth2: 'cloth_red', over: 'sash', beard: true }); }
-  for (let k = 0; k < 18; k++) { const x = COURT[0] + 4 + rand() * (COURT[2] - COURT[0] - 8), z = -74 + rand() * 110; if (!free(x, z, 1.6) || (Math.abs(x - AXIS) < 3.4 && z < -70)) continue; (rand() < 0.5 ? noble : fig)([x, z], rand() * 6.28, rand() < 0.3 ? { pose: 'talk' } : {}); }
+  for (let k = 0; k < 18; k++) { const x = COURT[0] + 4 + rand() * (COURT[2] - COURT[0] - 8), z = -74 + rand() * 110; if (!free(x, z, 1.6) || (Math.abs(x - AXIS) < 3.4 && z < -70) || Math.hypot(x - AXIS, z + 34) < 9 || (z > -62 && z < -38)) continue; (rand() < 0.5 ? noble : fig)([x, z], rand() * 6.28, rand() < 0.3 ? { pose: 'talk' } : {}); }
   for (const z of [-20, 0, 20]) for (const x of [-2, 42]) guard([x, z], x < 0 ? Math.PI / 2 : -Math.PI / 2);
   for (const s of [-1, 1]) guard([AXIS + s * 3.6, 44.6], Math.PI);
+  // the court seen from the arrival (20, -34): the rite of the pits and the people of the court, none nearer than ~10 m
+  { const kn = (at, rot, o = {}) => noble(at, rot, { pose: 'kneel', ...o });
+    // officiants kneeling at the north rim of the first pit row, facing the pits, a bearer with a vessel behind each pair
+    for (const x of [5.5, 11.5, 28.5, 34.5]) { kn([x, -60.2], 0, { cloth: 'cloth_black', cloth2: 'cloth_red' }); kn([x + 1.3, -60.2], 0, { cloth: 'cloth_red', cloth2: 'cloth_black' }); fig([x + 0.6, -62.0], 0, { carry: 'pot' }); }
+    // the keepers of the beasts at the tether posts, one each, staff in hand
+    for (const x of [6, 12.5, 27.5, 34]) fig([x + 1.0, -48.3], -Math.PI / 2 * (x < 20 ? -1 : 1), { pose: 'staff', carry: 'staff', len: 1.9, cloth: 'cloth_brown' });
+    // the craftsmen at the drying frames and the cleaning benches on the flanks (shells scraped and bored for the diviners)
+    for (const [x, z, s] of [[-3.4, -46, 1], [43.4, -46, -1], [-3.4, -36, 1], [43.4, -36, -1]]) { fig([x + s * 1.4, z + 0.4], s > 0 ? -Math.PI / 2 : Math.PI / 2, { pose: 'kneel' }); fig([x + s * 2.4, z + 0.5], s > 0 ? -Math.PI / 2 : Math.PI / 2, { pose: 'kneel', hair: 'topknot' }); fig([x + s * 1.6, z + 2.8], rand() * 6, { carry: 'basket' }); }
+    // petitioners and officials gathered at the offering tables before the stair, and a line of bearers coming up the court with the grain wine
+    for (const s of [-1, 1]) { noble([AXIS + s * 5.2 - 1.6, -66.2], 0, { pose: 'talk' }); noble([AXIS + s * 5.2 + 0.6, -66.4], 0.4, { pose: 'stand' }); kn([AXIS + s * 8.5, -62.5], 0, { cloth: 'cloth_grey', cloth2: 'cloth_grey' }); }
+    for (let k = 0; k < 6; k++) { const s = k % 2 ? 1 : -1; fig([AXIS + s * 3.0 + (k % 3) * s * 0.7, -52 + Math.floor(k / 2) * 2.6], Math.PI, { carry: pick(rand, ['pot', 'basket', 'sack']) }); }
+    for (const [x, z] of [[-1.5, -52], [41.5, -52], [-1.5, -66], [41.5, -66], [-5.5, -22], [45.5, -22]]) { woman([x, z], rand() * 6, { carry: 'pot' }); fig([x + 1.0, z + 0.5], rand() * 6, { child: true, h: 1.05 }); }
+  }
   // the flanking halls: attendants on their platforms
   for (const f of FLANKS) { const cx = (f.plat[0] + f.plat[2]) / 2; for (const z of [-55, -40]) noble([cx, z], rand() * 6, { pose: rand() < 0.5 ? 'talk' : 'stand' }, f.h); }
   // Fu Hao's tomb: mourners kneeling at the offering table, guards at the chariot
@@ -91,6 +104,9 @@ function animals() {
     if (l.lod === 0 && i % 4 === 1) { const q = lotPoint(l, 8 + rand() * 12, -1.6); L.push({ t: 'animal', kind: 'dog', at: q, y: 0, rot: rand() * 6.28, seed: i + 29 }); }
   });
   for (const [x, z] of [[-4, -10], [40, 10], [18, 30]]) L.push({ t: 'animal', kind: 'dog', at: [x, z], y: 0, rot: rand() * 6.28, seed: Math.round(x) + 40 });
+  // the beasts led to the sacrifice, tethered at the posts between the pits' rows: oxen, a ram, a pig, a dog
+  [[6, 'ox'], [12.5, 'sheep'], [27.5, 'ox'], [34, 'pig']].forEach(([x, kind], i) => L.push({ t: 'animal', kind, at: [x, -49.9], y: 0, rot: Math.PI / 2 + (i % 2) * 0.5, seed: 210 + i, graze: false }));
+  L.push({ t: 'animal', kind: 'sheep', at: [13.7, -49.6], y: 0, rot: 1.9, seed: 215, graze: false }, { t: 'animal', kind: 'dog', at: [30, -53], y: 0, rot: 2.3, seed: 216 });
   // the teams of the two chariots parked in the court (src/styles/shang/court.js): two horses abreast before the pole
   for (const [cx, cz] of [[0.5, 14], [40, 18]]) for (const s of [-0.5, 0.5]) L.push({ t: 'animal', kind: 'horse', at: [cx + s, cz + 4.3], y: 0, rot: Math.PI + (s * 0.1), seed: Math.round(cx) + 90 + (s > 0 ? 1 : 0) });
   for (const s of [-0.55, 0.55]) L.push({ t: 'animal', kind: 'horse', at: [-43 + s, -94.2], y: 0, rot: Math.PI, seed: 70 + (s > 0 ? 1 : 0) });

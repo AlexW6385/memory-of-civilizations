@@ -19,14 +19,14 @@ const h = W.th / 2;
 const side = [{ at: tz1 + h - 40, w: 3.8, h: 3.6 }];                  // the side gates of the outer wall (west and east), at z 40
 wall([tx0, tz1 + h], [tx0, tz0 + 5], side, 0.13); wall([tx1, tz1 + h], [tx1, tz0 + 5], side, 0.13); wall([tx0 + 5, tz0], [tx1 - 5, tz0], null, 0.13);
 // the corner towers of the temple's wall (jiaolou), at the two north corners
-for (const sx of [-1, 1]) E.push({ t: 'corner_tower', c: [sx * (tx1 - 1.5), tz0 + 1.5], y: 0, s: 0.42, out: [sx, -1] });
+for (const sx of [-1, 1]) E.push({ t: 'corner_tower', c: [sx * (tx1 - 1.5), tz0 + 1.5], y: 0, s: 0.42, out: [sx, -1], simple: true });
 for (const g of GATE_HALLS) { const z = g.z; wall([tx0 + h, z], [-g.w / 2 - 1, z], null, -0.12); wall([g.w / 2 + 1, z], [tx1 - h, z], null, -0.12); }
 for (const s of [-1, 1]) wall([s * INNER_X, WALL_Z.dacheng - h], [s * INNER_X, tz0 + h], [{ at: Math.abs(SIDE_GATE_Z - WALL_Z.dacheng) - h, w: 3.8, h: 3.6 }], -0.06);
 
 // ── the gate halls ──
 for (const g of GATE_HALLS) {
   const dacheng = g.id === 'dacheng';
-  E.push({ t: 'qing_hall', rect: [-g.w / 2, g.z - GATE_D / 2, g.w / 2, g.z + GATE_D / 2], y: 0.45, H: dacheng ? 5.4 : 4.7, roof: 'xieshan', bays: [g.bays, 2], front: 's', doors: ['n'], four: false, plat: 0.45, orn: { figures: dacheng ? 7 : 5 } });
+  E.push({ t: 'qing_hall', rect: [-g.w / 2, g.z - GATE_D / 2, g.w / 2, g.z + GATE_D / 2], y: 0.45, H: dacheng ? 5.4 : 4.7, roof: 'xieshan', bays: [g.bays, 2], front: 's', doors: ['n'], four: false, plat: 0.45, orn: { figures: dacheng ? 7 : 5 }, ...(dacheng ? {} : { simple: true }) });   // the south gates lie behind a visitor arriving at the great court: the lighter build
 }
 // ── the stone portals before the temple ──
 E.push({ t: 'lu_pailou', c: [0, LINGXING.z], across: 'x', w: LINGXING.w, h: 7.4, n: 4, roof: false });
@@ -82,7 +82,7 @@ E.push({ t: 'qing_hall', rect: QIN.rect, y: QIN.y, H: 5.6, double: 4.2, roof: 'x
 E.push({ t: 'qing_hall', rect: SAGE.rect, y: SAGE.y, H: 5.2, roof: 'xieshan', bays: [5, 3], front: 's', four: false, plat: SAGE.y, platMargin: 1.4, orn: { figures: 5 } });
 
 // ── the side compounds ──
-for (const s of SIDE) E.push({ t: 'qing_hall', rect: s.rect, y: 0.45, H: 5.2, roof: 'xieshan', bays: [5, 2], front: 's', doors: ['n'], four: false, plat: 0.45, orn: { figures: 5 } });
+for (const s of SIDE) E.push({ t: 'qing_hall', rect: s.rect, y: 0.45, H: 5.2, roof: 'xieshan', bays: [5, 2], front: 's', doors: ['n'], four: false, plat: 0.45, orn: { figures: 5 }, simple: true });
 
 // the stairs up to the high platforms of Kuiwen, the Resting Hall and the Hall of Sage Traces (a platform over half a metre needs them)
 const flight = (cx, zEdge, y, dir) => { const len = 2.2 + y * 1.6; E.push({ t: 'stairs', rect: dir === 'n' ? [cx - 1.6, zEdge, cx + 1.6, zEdge + len] : [cx - 1.6, zEdge - len, cx + 1.6, zEdge], y0: 0.03, y1: y, dir }); };

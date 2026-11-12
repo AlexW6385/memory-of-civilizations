@@ -12,7 +12,12 @@ function cover(x, z) {
   if (dr < RIVER.half + 4) { c.sand = 0.55; c.soil = 0.5; c.grass = dr > RIVER.half ? 0.25 : 0; return c; }
   if (inRect(COURT, x, z, 3) || inRect([ARCHIVE.rect[0] - 6, ARCHIVE.rect[1] - 6, ARCHIVE.rect[2] + 6, ARCHIVE.shed[3] + 4], x, z) || inRect([TOMB.plat[0] - 6, TOMB.plat[1] - 6, TOMB.pits[2] + 6, -92], x, z)) { c.road = 0.9; c.sand = 0.3; c.soil = 0.2; c.grass = 0; return c; }
   if (inFoundry(x, z, 2) || onStreet(x, z) || inLot(x, z, 0.5) || inMoat(x, z, 1)) { c.road = 0.8; c.sand = 0.3; c.grass = 0.05; return c; }
-  if (Math.hypot(x, z) > 150 && !reserved(x, z)) { c.fields = 0.7; c.grass = 0.2; c.dry = 0.4; return c; }
+  if (Math.hypot(x, z) > 150 && !reserved(x, z)) {
+    // millet and wheat plots in a patchwork (about half of the plain, thinner far out), fallow strips between: a third of the plants a solid carpet would need
+    const r = Math.hypot(x, z), plot = hash2(Math.floor(x / 36), Math.floor(z / 28)) < (r < 235 ? 0.62 : 0.4);
+    if (plot) { c.fields = 0.55; c.grass = 0.2; c.dry = 0.4; } else { c.grass = 0.3; c.dry = 0.55; }
+    return c;
+  }
   return c;
 }
 const water = (x, z, y) => inRiver(x, z, -1.2) && y < RIVER.water + 0.3;

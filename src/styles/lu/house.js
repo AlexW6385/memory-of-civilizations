@@ -5,12 +5,12 @@
 // with its stove, the store with its jars and sacks), the screen wall, the well or the millstone or the stone table, strings of corn and
 // peppers under the eaves. At the lane the front is dressed at eye level and weathered: the damp band at the foot, the streaks under the eaves.
 // Detail is by distance (lod 0 everything, 1 the facade's dressing, 2 the shell).
-import { box, lathe, rod } from '../../core/geom.js';
+import { box, lathe, rod, frustum } from '../../core/geom.js';
 import { mingHall, mingWall, withPal } from '../ming/index.js';
 import { HOUSE } from '../qing/index.js';
 import { rng } from './kit.js';
 
-const Hall = withPal(mingHall), Wall = withPal(mingWall);
+const Hall0 = withPal(mingHall), Wall = withPal(mingWall);
 const W_ = 'wood_dark';
 
 /** A thin helper bound to the build context: boxes (solid or not) and lathes. */
@@ -214,6 +214,14 @@ function court(T, rect, cx, zc, rand, kinds) {
   }
 }
 
+/** The far shell of a house (lod 2): one box of wall and one gable of grey tile, no windows, no doors, no ornament. ridge along x unless `alongZ`. */
+function shellBlock(T, rect, y, H, rise, ov, alongZ = false) {
+  const [x0, z0, x1, z1] = rect;
+  T.B('brick_grey', x0, y, z0, x1, y + H, z1, true);
+  const hx = (x1 - x0 + 2 * ov) / 2, hz = (z1 - z0 + 2 * ov) / 2;
+  T.bag.add('tile_grey', frustum([x0 - ov, z0 - ov, x1 + ov, z1 + ov], y + H, y + H + rise, alongZ ? hx : 0, alongZ ? hx : 0, alongZ ? 0 : hz, alongZ ? 0 : hz, { noBottom: true }));
+}
+
 // ── the element ──────────────────────────────────────────────────────────────────────────────
 /**
  * lu_house: { rect, seed, wealth, lod, shop, trade } — a courtyard house facing south onto the lane below its south edge.
@@ -224,12 +232,14 @@ export function luHouse(el, ctx) {
   const [x0, z0, x1, z1] = el.rect, W = x1 - x0, D = z1 - z0, lod = el.lod ?? 0, pal = HOUSE, cx = (x0 + x1) / 2;
   const rich = (el.wealth ?? 0) > 0.55;
   // the walls: north, west and east (the lot's front is the front range, whole)
-  const wall = (a, b) => Wall({ a, b, y: 0, h: 3.0, th: 0.42, gates: [], pal, simple: true }, ctx);
+  const far = lod >= 2;
+  const wall = (a, b) => (far ? T.B('brick_grey', Math.min(a[0], b[0]) - 0.2, 0, Math.min(a[1], b[1]) - 0.2, Math.max(a[0], b[0]) + 0.2, 3.0, Math.max(a[1], b[1]) + 0.2, true) : Wall({ a, b, y: 0, h: 3.0, th: 0.42, gates: [], pal, simple: true }, ctx));
   wall([x0, z0], [x1, z0]); wall([x0, z0], [x0, z1]); wall([x1, z0], [x1, z1]);
+  const Hall = far ? () => {} : Hall0;
   // the front range along the lane, in one run but for the gate
   const dS = 4.4, fz0 = z1 - 0.35 - dS, fz1 = z1 - 0.35;
   const gw = el.shop ? 1.9 : 1.7, gx = x0 + 3.6 + (el.shop ? (rand() < 0.5 ? 0.25 : 0.7) : rand()) * Math.max(0, W - 7.2);
-  const hallOpts = { y: 0.3, H: 3.3, four: false, roof: 'gable', plat: 0.3, pal, eave: 0.75, platMargin: 0.35, winWall: lod < 2 };
+  const hallOpts = { y: 0.3, H: 3.3, four: false, roof: 'gable', plat: 0.3, pal, eave: 0.75, platMargin: 0.35, winWall: false, simple: true };
   const runs = [[x0 + 0.35, gx - gw - 1.0], [gx + gw + 1.0, x1 - 0.35]];
   const shopRun = el.shop ? (runs[0][1] - runs[0][0] >= runs[1][1] - runs[1][0] ? 0 : 1) : -1;
   for (let i = 0; i < 2; i++) {
@@ -241,9 +251,9 @@ export function luHouse(el, ctx) {
   }
   // the gate: the hood over the passage and the doors standing open into the court
   Hall({ rect: [gx - gw - 0.9, fz0 - 0.2, gx + gw + 0.9, fz1 + 0.1], y: 0.35, H: 3.5, front: 's', four: false, roof: 'gable', plat: 0.35, bays: [1, 1], pal, eave: 0.8, platMargin: 0.3 }, ctx);
-  for (const sx of [-1, 1]) bag.add('lacquer_red', box(gx + sx * gw * 0.5 - 0.03, 0.35, fz0 + 0.2, gx + sx * gw * 0.5 + 0.03, 2.5, fz0 + 1.1));
+  if (!far) for (const sx of [-1, 1]) bag.add('lacquer_red', box(gx + sx * gw * 0.5 - 0.03, 0.35, fz0 + 0.2, gx + sx * gw * 0.5 + 0.03, 2.5, fz0 + 1.1));
   // the screen wall inside the gate
-  Wall({ a: [gx - 2.0, fz0 - 2.4], b: [gx + 2.0, fz0 - 2.4], y: 0, h: 2.5, th: 0.36, pal }, ctx);
+  if (!far) Wall({ a: [gx - 2.0, fz0 - 2.4], b: [gx + 2.0, fz0 - 2.4], y: 0, h: 2.5, th: 0.36, pal, simple: true }, ctx);
   // the main house: three, five or seven bays, raised a little, a gable roof; its partitions and doors
   const nbm = W > 30 || rich ? 7 : W > 25 ? 5 : 3, dN = Math.min(7.6, D * 0.28), dE = Math.min(4.6, W * 0.2);
   const main = [x0 + dE * 0.35, z0 + 0.6, x1 - dE * 0.35, z0 + 0.6 + dN];
@@ -256,17 +266,23 @@ export function luHouse(el, ctx) {
     Hall({ rect: west, y: 0.4, H: 3.2, front: 'e', four: false, roof: 'gable', plat: 0.4, bays: [3, 1], pal, eave: 0.8, platMargin: 0.8 }, ctx);
     Hall({ rect: east, y: 0.4, H: 3.2, front: 'w', four: false, roof: 'gable', plat: 0.4, bays: [3, 1], pal, eave: 0.8, platMargin: 0.8 }, ctx);
   }
+  if (far) {
+    // the far shell: the runs of the front range, the gate hood over the passage, the main house, the two wings
+    for (const [a, b] of runs) if (b - a > 3.2) shellBlock(T, [a, fz0, b, fz1], 0.3, 3.3, 1.5, 0.6);
+    shellBlock(T, [gx - gw - 0.9, fz0 - 0.2, gx + gw + 0.9, fz1 + 0.1], 0.35, 3.5, 1.5, 0.5);
+    shellBlock(T, main, 0.6, 3.5, 1.9, 0.9);
+    if (sz1 - sz0 > 4) { shellBlock(T, west, 0.4, 3.2, 1.3, 0.6, true); shellBlock(T, east, 0.4, 3.2, 1.3, 0.6, true); }
+  }
   bag.add('brick_paving', box(x0 + 0.3, -0.2, z0 + 0.3, x1 - 0.3, 0.03, z1 - 0.3));
   col.floor([x0 + 0.3, z0 + 0.3, x1 - 0.3, z1 - 0.3], 0.03);
   // the paths: from the gate to the main house, across the court
   const pz0 = mz1 + 1.1;
-  bag.add('bluestone', box(cx - 0.6, 0.0, pz0, cx + 0.6, 0.06, fz0 - 0.4));
-  bag.add('bluestone', box(gx - 1.0, 0.0, fz0 - 3.4, gx + 1.0, 0.06, fz1 + 0.2));
+  if (!far) { bag.add('bluestone', box(cx - 0.6, 0.0, pz0, cx + 0.6, 0.06, fz0 - 0.4)); bag.add('bluestone', box(gx - 1.0, 0.0, fz0 - 3.4, gx + 1.0, 0.06, fz1 + 0.2)); }
   const zc = (sz0 + sz1) / 2;
   // ── the facade at the lane (lod < 2): drum stones, lanterns, couplets, damp band, streaks, goods ──
   const zf = z1 - 0.35 + 0.14;                                  // the lane face of the front range's wall (the wall line plus its half thickness)
-  for (const sx of [-1, 1]) drumStone(T, gx + sx * (gw + 1.25), 0.3, zf + 0.5);
-  for (const sx of [-1, 1]) {
+  if (!far) for (const sx of [-1, 1]) drumStone(T, gx + sx * (gw + 1.25), 0.3, zf + 0.5);
+  if (!far) for (const sx of [-1, 1]) {
     T.B('cloth_red', gx + sx * (gw + 0.55) - 0.12, 1.0, zf + 0.04, gx + sx * (gw + 0.55) + 0.12, 2.4, zf + 0.06);
     for (let k = 0; k < 5; k++) T.B('lacquer_black', gx + sx * (gw + 0.55) - 0.05, 2.2 - k * 0.24, zf + 0.06, gx + sx * (gw + 0.55) + 0.05, 2.2 - k * 0.24 + 0.12, zf + 0.07);
   }
@@ -283,7 +299,7 @@ export function luHouse(el, ctx) {
     for (let i = 0; i < 2; i++) { const [a, b] = runs[i]; if (i !== shopRun && b - a > 3.2) for (let u = a + 0.6; u < b - 1.0; u += 1.6) slots.push(u); }
     for (let k = slots.length - 1; k > 0; k--) { const j = Math.floor(rand() * (k + 1)); [slots[k], slots[j]] = [slots[j], slots[k]]; }
     const picks = ['wood', 'jar', 'bench', 'ladder', 'sack', 'broom', 'basket', 'jar2', 'laundry', 'braid'];
-    for (let i = 0; i < Math.min(slots.length, 5); i++) {
+    for (let i = 0; i < Math.min(slots.length, lod ? 3 : 5); i++) {
       const u = slots[i], what = picks[Math.floor(rand() * picks.length)];
       if (what === 'wood') firewood({ ...T }, u, 0.3, zf + 0.0, 1.5, 4 + Math.floor(rand() * 3), 'x', rand);
       else if (what === 'jar') { jar(T, u + 0.3, 0.3, zf + 0.4, 1.0); jar(T, u + 0.95, 0.3, zf + 0.35, 0.8, 'glaze_green'); T.col.circle(u + 0.3, zf + 0.4, 0.38, 0.3, 1.2); T.col.circle(u + 0.95, zf + 0.35, 0.3, 0.3, 1.0); }
@@ -298,7 +314,7 @@ export function luHouse(el, ctx) {
     }
   }
   // ── the shop in the front range ──
-  if (el.shop && shopRun >= 0) shopCounter(T, runs[shopRun], zf, fz0, fz1, el.trade ?? 0, rand, lod);
+  if (el.shop && shopRun >= 0 && !far) shopCounter(T, runs[shopRun], zf, fz0, fz1, el.trade ?? 0, rand, lod);
   // ── the interiors and the court (lod 0) ──
   if (lod === 0) {
     const y = 0.6, zb = mz0 + 0.17, mid = (nbm - 1) / 2;

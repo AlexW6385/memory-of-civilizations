@@ -15,6 +15,12 @@ export function shangPits(el, { bag }) {
     bag.add('earth_wall', frustum([x - 0.15, z - 0.15, x + 1.75, z + 3.75], 0, 0.1, 0.05, 0.05, 0.05, 0.05, { noBottom: true }));
     bag.add('planks_grey', frustum([x + 0.1, z + 0.1, x + 1.5, z + 3.5], 0.1, 0.16, 0.02, 0.02, 0.02, 0.02, { noBottom: true }));
     for (const dz of [0.6, 1.8, 3.0]) bag.add('timber', box(x + 0.05, 0.16, z + dz, x + 1.55, 0.2, z + dz + 0.1));
+    // the lid dressed for the rite: a red-ochre rim, a runner of reed mat, and on every third pit the offering (a bronze set or a jar of grain wine)
+    const k = Math.round((x - x0) / 4.5) + r * 3;
+    bag.add('kokowai', box(x - 0.15, 0.1, z - 0.15, x + 1.75, 0.115, z - 0.03)); bag.add('kokowai', box(x - 0.15, 0.1, z + 3.63, x + 1.75, 0.115, z + 3.75));
+    if (k % 2 === 0) bag.add('reed_mat', box(x + 0.35, 0.2, z + 0.3, x + 1.25, 0.215, z + 3.3));
+    if (k % 3 === 0) { vessel(k % 2 ? 'gui' : 'ding', bag, x + 0.8, 0.215, z + 1.9, 0.9); vessel('jue', bag, x + 0.8, 0.215, z + 2.7, 1); }
+    else if (k % 3 === 1) bag.add('pottery_dark', lathe([[0.001, 0], [0.2, 0.02], [0.3, 0.3], [0.22, 0.55], [0.12, 0.62], [0.001, 0.62]], 9, null, x + 0.8, 0.2, z + 3.1));
   }
 }
 
