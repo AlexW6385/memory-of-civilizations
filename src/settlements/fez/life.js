@@ -32,6 +32,19 @@ export function life() {
   man([cx + 2.2, b[3] - 3.6], yb, Math.PI, { pose: 'kneel', arms: 'pray', cloth: 'cloth_white' });
   // (the talkers stand by the east gallery, well off the arrival's line: nothing within 5 m of the visitor's first view)
   man([cx + 6.2, cz0 + 7.4], yb, 0.4, { pose: 'talk' }); man([cx + 7.1, cz0 + 7.5], yb, Math.PI + 0.4, { pose: 'talk', cloth: 'cloth_grey' });
+  // the court's small life: pigeons at the basin's wet marble, a cat sunning on the east gallery's edge, two students reading alone on the west gallery's mats,
+  // a young man washing his feet at the basin, a water-seller's boy, and at the portal a mint-seller on her mat and an old man on the steps
+  { const bx = cx, gx0 = b[0] + 6.4, gx1 = b[2] - 6.4;
+    for (let k = 0; k < 6; k++) L.push({ t: 'chickens', kind: 'pigeon', at: [bx + 2.2 + rand() * 2.6 - 3.2, zm + 1.2 + rand() * 3.4], y: yb, rot: rand() * 6.28, seed: 150 + k });
+    L.push({ t: 'animal', kind: 'cat', at: [gx1 - 0.35, zm - 4.6], y: yb, rot: 2.2, seed: 11 });
+    man([gx0 + 1.1, zm - 6.6], yb, -Math.PI / 2, { pose: 'cross', cloth: 'cloth_white', hat: 'turban' });
+    man([gx0 + 1.1, zm + 5.6], yb, -Math.PI / 2, { pose: 'cross', cloth: 'cloth_grey', hat: 'cap' });
+    man([bx + 1.95, zm + 0.9], yb, Math.PI + 0.7, { pose: 'squat', dress: 'tunic', legs: 'bare', cloth: 'cloth_white', hat: 'cap' });
+    L.push({ t: 'figure', at: [bx - 4.4, zm + 3.8], y: yb, rot: 0.8, seed: 8123, skin: 'skin_medium', dress: 'tunic', cloth: 'cloth_ochre', cloth2: 'cloth_white', hat: 'cap', hair: 'short', h: 1.2, carry: 'pot', pose: 'stand' });
+    L.push({ t: 'goods_mat', at: [cx - 7.5, -21.5], y: ground0(cx - 7.5, -21.5), rot: Math.PI, goods: ['greens', 'baskets'], produce: ['cloth_green', 'cloth_ochre'], seed: 31 });
+    woman([cx - 7.5, -22.2], ground0(cx - 7.5, -22.2), Math.PI, { pose: 'sit_ground' });
+    man([cx + 2.6, b[1] - 0.55], ground0(cx + 2.6, b[1] - 0.55) + 0.12, Math.PI, { pose: 'sit', cloth: 'cloth_grey', hat: 'cap' });
+    L.push({ t: 'animal', kind: 'donkey', at: [cx + 7.0, -21.2], y: ground0(cx + 7, -21.2), rot: Math.PI / 2, seed: 17 }, { t: 'sacks', at: [cx + 7.0, -20.2], y: ground0(cx + 7, -20.2), rot: 0.4, n: 3, seed: 18 }); }
   // the Qarawiyyin: circles of students round a master in the sahn's gallery, men at prayer in the hall
   const q = SITES.qar, yq = siteY('qar') + 0.05, qn = (q[2] - q[0]) / 14, sahnX = q[0] + qn * 4;
   for (let c = 0; c < 3; c++) { const x = sahnX + 5 + c * 9, z = q[1] + 3.5 + 1.4; man([x, z], yq, Math.PI, { pose: 'cross', hat: 'turban', cloth: 'cloth_white' }); for (let k = 0; k < 4; k++) man([x - 1.6 + k * 1.1, z + 1.5], yq, 0, { pose: 'cross' }); }

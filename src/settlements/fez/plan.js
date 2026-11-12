@@ -4,6 +4,7 @@ import { SITES, siteY, ground0 } from './layout.js';
 const b = SITES.bou, y = siteY('bou'), cx = (b[0] + b[2]) / 2;
 const E = [];
 E.push({ t: 'bou_inania', rect: b, y, yLane: ground0(cx, b[1] - 3), seed: 5 });
+E.push({ t: 'fez_court', rect: b, y, seed: 5 });
 E.push({ t: 'fez_darmagana', rect: SITES.daMagana, y: siteY('daMagana') });
 E.push({ t: 'fez_sabat', rect: [-141, b[1] - 4, -137, b[1]], y: ground0(-139, b[1] - 2), clear: 4.4 });
 const room = (id, rect, yy, kind) => ({ id, rect, y: yy, kind });
