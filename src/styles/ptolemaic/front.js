@@ -101,4 +101,11 @@ function obelisk(el, ctx) {
   bag.add('granite_red', frustum([x - b0, z - b0, x + b0, z + b0], y + 1.3, y + 1.3 + h, b0 - b1, b0 - b1, b0 - b1, b0 - b1));
   bag.add('gold', frustum([x - b1, z - b1, x + b1, z + b1], y + 1.3 + h, y + 1.3 + h + 1.0, b1, b1, b1, b1));
 }
-export const FRONT_EL = { obelisk, quay_steps: quaySteps, harbour_gate: harbourGate, wall_front: wallFront, customs_post: customsPost };
+/** quay_lamp: { at [x, z], y } — a stone pillar with a bronze brazier on its head, a basket of fuel at the foot: the quay's fire at night. */
+function quayLamp(el, ctx) {
+  const { bag, col } = ctx, [x, z] = el.at, y = el.y ?? 0;
+  bag.add('limestone', box(x - 0.35, y, z - 0.35, x + 0.35, y + 0.35, z + 0.35)); bag.add('limestone', lathe([[0.22, 0], [0.18, 2.4], [0.26, 2.5], [0.001, 2.5]], 8, null, x, y + 0.35, z));
+  bag.add('bronze', lathe([[0.15, 0], [0.4, 0.15], [0.46, 0.4], [0.36, 0.4], [0.001, 0.2]], 8, null, x, y + 2.85, z)); bag.add('flame', lathe([[0.001, 0], [0.2, 0.02], [0.08, 0.4], [0.001, 0.62]], 6, null, x, y + 3.15, z));
+  bag.add('wicker', lathe([[0.2, 0], [0.26, 0.3], [0.22, 0.38], [0.001, 0.38]], 7, null, x + 0.6, y, z + 0.3)); col.circle(x, z, 0.35, y, y + 2.9);
+}
+export const FRONT_EL = { quay_lamp: quayLamp, obelisk, quay_steps: quaySteps, harbour_gate: harbourGate, wall_front: wallFront, customs_post: customsPost };

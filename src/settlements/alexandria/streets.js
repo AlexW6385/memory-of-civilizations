@@ -61,6 +61,11 @@ function quayLife() {
     FIG.push({ at: [cx - 4.2, cz - 1.8], rot: fq(cx - 4.2, cz - 1.8), pose: 'talk', dress: 'robe', over: 'cape', cloth: 'cloth_indigo', beard: true, skin: 'skin_medium', seed: 644 });
     FIG.push({ at: [cx - 4.9, cz - 0.9], rot: 1.1, pose: 'talk', dress: 'tunic', cloth: 'cloth_brown', hat: 'cap', skin: 'skin_dark', hair: 'short', seed: 645 });
     E.push({ t: 'cargo_pile', at: [cx - 7.5, cz - 1.2], y, rot: 0.1, kind: 'bales', n: 2, seed: 646 }); }
+  // at the water stairs: boys fishing with a line from the top step, a washerwoman with her jar, a boatman waiting
+  for (const sx of [114, 190, -35]) {
+    FIG.push({ at: [sx - 1.0, -90.3], rot: Math.PI, pose: 'sit_ground', dress: 'loincloth', cloth: 'linen', hair: 'shaven', skin: 'skin_dark', seed: sx * 3 });
+    FIG.push({ at: [sx + 1.5, -89.6], rot: Math.PI * 0.8, pose: 'stand', dress: 'sheath', cloth: 'cloth_white', hair: 'long', carry: 'pot', skin: 'skin_medium', seed: sx * 5 });
+  }
   // the island of Pharos: palms along its quay, nets and the fishermen at them, the fuel for the fire stacked by its store, a shrine at the court
   { const I = isle();
     for (const [x, z] of I.palms) E.push({ t: 'ptol_tree', at: [x, z], y, kind: 'palm', h: 5.5 + rand() * 2.5, seed: Math.floor(rand() * 1e6) });

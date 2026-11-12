@@ -18,6 +18,7 @@ function harbour() {
   for (const s of SHIPS) E.push({ t: 'ship', ...s, y: SEA });
   for (const x of [-128, -35, 114, 190, 298]) E.push({ t: 'quay_steps', at: [x, QUAYS[0][1]], w: 3, y: g + 0.05, yw: SEA });
   for (const x of [SOMA[0] - 3.5, SOMA[2] + 3.5]) E.push({ t: 'obelisk', at: [x, -85.6], y: g + 0.05, h: 11 });
+  for (let x = -200; x < 420; x += 26) if (wet(x, -89) > 1 && ![-128, -35, 114, 190, 298].some((q) => Math.abs(q - x) < 6) && Math.abs(x - 61) > 22 && Math.abs(x - 80) > 6) E.push({ t: 'quay_lamp', at: [x + 0.7, QUAYS[0][1] + 2.8], y: g + 0.05 });
   E.push({ t: 'harbour_gate', c: [(SOMA[0] + SOMA[2]) / 2, -77], y: g, face: 'n', gw: 12, tower: 6, h: 13 });
   // the promenade and the great streets paved in slabs of limestone
   E.push({ t: 'floor', rect: [QUAY[0], QUAY[1], QUAY[2], QUAY[3]], y: g + 0.04, th: 0.2, mat: 'travertine' });
