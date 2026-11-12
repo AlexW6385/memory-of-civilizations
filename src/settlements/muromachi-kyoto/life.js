@@ -167,7 +167,7 @@ export function templeLife() {
   L.push(person(rand, [SHRINE.noh[0] - 6.5, SHRINE.noh[1] + 1], 0, -Math.PI / 2, { cloth: 'cloth_white', cloth2: 'cloth_red', hat: 'cap', over: 'collar', woman: false }));
   // Ryōan-ji: guests seated on the veranda before the garden, a lay woman and a boy at the gate
   const hj = RYOAN.hojo;
-  for (const [dx, w] of [[-9, 0], [-7.8, 1], [2.5, 0], [5.4, 1], [8.4, 0]]) L.push(person(rand, [hj[0] + dx, hj[1] - 7.1], 0.85, 0, { pose: 'seiza', woman: !!w, hat: 'none' }));
+  for (const [dx, w] of [[5.4, 0], [8.4, 1], [10.8, 0]]) L.push(person(rand, [hj[0] + dx, hj[1] - 7.1], 0.85, 0, { pose: 'seiza', woman: !!w, hat: 'none' }));
   L.push(person(rand, [RYOAN.gate[0] + 2.5, RYOAN.gate[1] - 3], 0, 0.3, { woman: true, hat: 'none' })); L.push(person(rand, [RYOAN.gate[0] + 3.2, RYOAN.gate[1] - 3.2], 0, 0.2, { child: true, h: 1.1, hat: 'none' }));
   return L;
 }
