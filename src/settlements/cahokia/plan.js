@@ -1,7 +1,9 @@
 // Mississippian Cahokia about 1175 (docs/settlements/cahokia.md §2–§4).
-import { RADIUS, SUMMIT, PLAZA, PALISADE, WOODHENGE, MOUNDS, FOX, CONES, RIDGES, HALLS, height, smallPlazas } from './layout.js';
+import { RADIUS, SUMMIT, PLAZA, PALISADE, WOODHENGE, MOUNDS, MONKS, FOX, CONES, RIDGES, HALLS, height, smallPlazas, mRamp } from './layout.js';
 
 const mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
+const LODGES = [[-54, -104, -32, -90], [26, -104, 48, -90]];
+const lodge = ([x, z, s]) => [x - 0.45 * s, z - 0.33 * s, x + 0.45 * s, z + 0.33 * s];
 export const monks = {
   id: 'cahokia-monks',
   name: { en: 'Monks Mound and the Grand Plaza', zh: '僧侣丘与大广场' },
@@ -18,18 +20,28 @@ export const monks = {
     // the log stairs up the ramp, the first stretch to the terrace, the second to the summit
     { t: 'log_stair', from: [-25, -36], to: [-25, -76], width: 7, y: height, step: 1.5 },
     { t: 'log_stair', from: [-25, -106], to: [-25, -150], width: 7, y: height, step: 1.5 },
+    // the first terrace: two more lodges (the houses of the chief's kin and of the priests), a fence of painted posts along its south edge, broken by the ramp
+    { t: 'chief_hall', rect: LODGES[0], y: height(...mid(LODGES[0])), h: 4, rise: 6.5, seed: 13 },
+    { t: 'chief_hall', rect: LODGES[1], y: height(...mid(LODGES[1])), h: 4, rise: 6.5, seed: 14 },
+    { t: 'terrace_fence', from: [-57, -75], to: [-33, -75], y: height },
+    { t: 'terrace_fence', from: [-17, -75], to: [57, -75], y: height },
+    // the summit about the great house: stores, the fire before it
+    { t: 'granary', c: [34, -190], y: height, s: 2.8, seed: 21 }, { t: 'granary', c: [-34, -186], y: height, s: 2.8, seed: 22 }, { t: 'granary', c: [38, -176], y: height, s: 2.5, seed: 23 },
+    { t: 'yard_fire', c: [8, -176], y: height, seed: 24 },
+    { t: 'terrace_fence', from: [-50, -150], to: [-30, -150], y: height }, { t: 'terrace_fence', from: [-18, -150], to: [50, -150], y: height },
     { t: 'plaza_pole', c: [0, 55], y: 0, h: 14 },
     // chunkey yards on the Grand Plaza
     { t: 'chunkey_yard', rect: [12, 20, 48, 24], y: 0, seed: 3 },
     { t: 'chunkey_yard', rect: [-80, 92, -44, 96], y: 0, seed: 5 },
     { t: 'chunkey_yard', rect: [58, 104, 62, 140], y: 0, seed: 7 },
   ],
-  rooms: [{ id: 'plaza', rect: PLAZA, y: 0, kind: 'open' }, { id: 'summit-hall', rect: [SUMMIT[0] + 0.6, SUMMIT[1] + 20.6, SUMMIT[2] - 0.6, SUMMIT[1] + 39.4], y: height(...mid(SUMMIT)), kind: 'hall' }],
+  rooms: [{ id: 'plaza', rect: PLAZA, y: 0, kind: 'open' }, ...LODGES.map((r, i) => ({ id: 'lodge-' + i, rect: [r[0] + 0.6, r[1] + 0.6, r[2] - 0.6, r[3] - 0.6], y: height(...mid(r)), kind: 'hall' })), { id: 'summit-hall', rect: [SUMMIT[0] + 0.6, SUMMIT[1] + 20.6, SUMMIT[2] - 0.6, SUMMIT[1] + 39.4], y: height(...mid(SUMMIT)), kind: 'hall' }],
   walks: [Object.assign([[-25, -5], [-25, -36]], { y0: 0 })],
 };
 export const precinct = {
   id: 'cahokia-precinct', style: 'mississippian', origin: [0, 0], base: 0, yaw: 0, feature: true,
-  entrance: { at: [-25, -5], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
+  entrance: { at: [-25, -5], facing: 'n' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS],
+  rooms: [],
   elements: [
     { t: 'palisade', rect: PALISADE, y: height, every: 26, gates: [[2, 0.5], [3, 0.45], [1, 0.55]] },
     { t: 'woodhenge', c: WOODHENGE.c, r: WOODHENGE.r, y: height(...WOODHENGE.c) },
@@ -39,7 +51,11 @@ export const precinct = {
     ...smallPlazas().map((p) => ({ t: 'small_plaza', c: p.c, y: height, seed: p.seed })),
     // the twin mounds: on the platform mound the charnel house, its door to the plaza; the conical mound beside it for burial
     { t: 'charnel_house', c: mid(FOX), y: height(...mid(FOX)), s: 9 },
-    ...MOUNDS.map(([x, z, s, h]) => ({ t: 'great_house', rect: [x - s * 0.4, z - s * 0.3, x + s * 0.4, z + s * 0.3], y: height(x, z), h: 3, rise: 5 })),
+    // the buildings of the lesser platform mounds, opened (lodges), each reached by a log stair up the ramp on its south face
+    ...MOUNDS.map((m, i) => ({ t: 'chief_hall', rect: lodge(m), y: height(m[0], m[1]), h: 4.2, rise: 6, seed: 30 + i })),
+    ...MOUNDS.map((m) => { const r = mRamp(m); return { t: 'log_stair', from: [r.x, r.zOut], to: [r.x, r.zIn - 0.4], width: 4.4, y: height, step: 1.4 }; }),
+    // the west and east terraces of Monks Mound: rows of cedar posts along their outer edges
+    ...[[-104, -222], [-104, -190], [-104, -158], [106, -208], [106, -182], [106, -158]].map(([x, z]) => ({ t: 'plaza_pole', c: [x, z], y: height(x, z), h: 9 })),
   ],
 };
 export default monks;
