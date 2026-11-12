@@ -77,6 +77,7 @@ export function people() {
   { const [bx, bz] = BASIL, by = height(bx, bz) + 4.02;
     fig([bx + 1.6, bz], -Math.PI / 2, { y: by, cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'cape', hat: 'none', beard: 1, hair: 'long' });
     for (let q = 0; q < 7; q++) { const at = [bx - 0.5 - rand() * 3, bz + (rand() - 0.5) * 4.5]; fig(at, -Math.PI / 2 + (rand() - 0.5) * 0.4, { y: by, pose: 'stand', hat: 'none' }); } }
+  stallFolk(L, rand, fig, face);
   squareLife(L, rand, fig, face);
   return L;
 }
@@ -112,20 +113,28 @@ function streets() {
   return streetSegments().map(({ a, b }, i) => ({ t: 'street_log', a, b, w: 5, y: height, seed: 11 + i }));
 }
 /** The market on Red Square: rows of stalls west of the lane before the trading rows, back to back along the square's east side, a few more on the Nikolsky side. */
-function market() {
-  const L = [], x0 = SQUARE[2] - 20;
+const marketRows = () => {
+  const R = [], x0 = SQUARE[2] - 20;
   for (const [z, n] of [[-110, 6], [-62, 6], [-12, 5], [100, 5]]) {
-    L.push({ t: 'stalls', c: [x0 + 2.4, z], n, along: 'z', face: -1, y: height, seed: 40 + z, gap: 0.4 });
-    L.push({ t: 'stalls', c: [x0 + 6.0, z], n, along: 'z', face: 1, y: height, seed: 90 + z, gap: 0.4 });
+    R.push({ c: [x0 + 2.4, z], n, face: -1, seed: 40 + z }, { c: [x0 + 6.0, z], n, face: 1, seed: 90 + z });
   }
   // a second market, west of the open middle of the square: two more double rows of booths, the way between them and the Lobnoye Mesto kept clear
-  for (const [z, n] of [[-112, 6], [-64, 6], [-16, 6], [34, 5]]) {
-    L.push({ t: 'stalls', c: [-3.4, z], n, along: 'z', face: -1, y: height, seed: 140 + z, gap: 0.4 });
-    L.push({ t: 'stalls', c: [0.2, z], n, along: 'z', face: 1, y: height, seed: 190 + z, gap: 0.4 });
-  }
-  return L;
+  for (const [z, n] of [[-112, 6], [-64, 6], [-16, 6], [34, 5]]) R.push({ c: [-3.4, z], n, face: -1, seed: 140 + z }, { c: [0.2, z], n, face: 1, seed: 190 + z });
+  return R;
+};
+function market() {
+  return marketRows().map((r) => ({ t: 'stalls', c: r.c, n: r.n, along: 'z', face: r.face, y: height, seed: r.seed, gap: 0.4 }));
 }
-
+/** Buyers and sellers at the stalls: a woman with a basket, a man haggling, a boy, in front of about two stalls in five (the stalls open on one side, 1.5 m deep). */
+function stallFolk(L, rand, fig, face) {
+  for (const r of marketRows()) for (let i = 0; i < r.n; i++) {
+    if (rand() > 0.42) continue;
+    const t = (i - (r.n - 1) / 2) * 2.7, at = [r.c[0] + r.face * (2.3 + rand() * 0.5), r.c[1] + t + (rand() - 0.5) * 0.8];
+    if (Math.hypot(at[0] - 40, at[1] - 20) < 6) continue;
+    const k = rand();
+    fig(at, face(at, [r.c[0], at[1]]) + (rand() - 0.5) * 0.4, k < 0.4 ? { pose: rand() < 0.5 ? 'talk' : 'stand', carry: 'basket', dress: 'robe', hair: 'bun', over: 'shawl', hat: 'none' } : k < 0.8 ? { pose: rand() < 0.5 ? 'talk' : 'stand', beard: 1 } : { pose: 'stand', h: 1.1, hat: 'cap' });
+  }
+}
 /**
  * The yards (docs §5.3): in the free strip beside each house, within its own cell, a small log building (bania, klet, byre) or a well sweep
  * at the back, and a kitchen garden in the strip on the other side or in the same when there is no room for both.
