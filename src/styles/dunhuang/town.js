@@ -214,14 +214,14 @@ function spring(el, { bag }) {
 /** An awning over a stall row: poles, a ridge pole and cloth, from a to b along the street, facing `dir`. */
 function awning(el, { bag, col }) {
   const [ax, az] = el.a, [bx, bz] = el.b, d = el.depth ?? 2.2, dir = el.dir ?? [0, 1], h = el.h ?? 2.5, cloth = el.cloth ?? 'cloth_ochre';
-  const L = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.round(L / 3)), ux = (bx - ax) / L, uz = (bz - az) / L;
+  const horizA = Math.abs(bx - ax) > Math.abs(bz - az), L = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.round(L / 3)), ux = (bx - ax) / L, uz = (bz - az) / L;
   for (let k = 0; k <= n; k++) {
     const x = ax + ux * L * k / n, z = az + uz * L * k / n;
-    bag.add('timber', rod([x, 0, z], [x, h, z], 0.06, 6)); col.circle(x, z, 0.08, 0, h);
+    if (!(el.gaps || []).some((g) => (horizA ? x : z) > g[0] && (horizA ? x : z) < g[1])) { bag.add('timber', rod([x, 0, z], [x, h, z], 0.06, 6)); col.circle(x, z, 0.08, 0, h); }
     bag.add('timber', rod([x + dir[0] * d, 0, z + dir[1] * d], [x + dir[0] * d, h - 0.4, z + dir[1] * d], 0.05, 6));
   }
   const t = [], A = [ax, h, az], B = [bx, h, bz], C = [bx + dir[0] * d, h - 0.4, bz + dir[1] * d], D = [ax + dir[0] * d, h - 0.4, az + dir[1] * d];
-  quad(t, A, B, C, D); quad(t, D, C, B, A);
+  quad(t, A, B, C, D); quad(t, [D[0], D[1] - 0.1, D[2]], [C[0], C[1] - 0.1, C[2]], [B[0], B[1] - 0.1, B[2]], [A[0], A[1] - 0.1, A[2]]);
   bag.add(cloth + '+wind', fromTriangles(t));
 }
 

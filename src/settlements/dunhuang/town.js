@@ -3,6 +3,7 @@
 // with camels and loads, the market's awnings and stalls, the painters, monks and pilgrims at the cliff foot.
 import { RADIUS, XF, FLOOR, STREET, CROSS, LANE_W, TOWN, SERAI, GATE, CAVES, rng, inRect, riverX } from './layout.js';
 import '../../styles/dunhuang/index.js';
+import { doorU } from '../../styles/dunhuang/homes.js';
 
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [14, 0], facing: 'w' } });
 const clash = (r, o, m = 0.5) => !(r[2] + m <= o[0] || r[0] - m >= o[2] || r[3] + m <= o[1] || r[1] - m >= o[3]);
@@ -56,7 +57,11 @@ export async function town() {
   E.push({ t: 'dh_spring' });
   // the market: awnings on both sides of the street between the first two cross lanes
   const cl = ['cloth_ochre', 'cloth_red', 'cloth_blue', 'cloth_white', 'cloth_green'];
-  for (let x = 30, k = 0; x < 66; x += 9, k++) { E.push({ t: 'dh_awning', a: [x, -5.95], b: [x + 7, -5.95], dir: [0, 1], depth: 2.1, cloth: cl[k % 5] }); E.push({ t: 'dh_awning', a: [x + 1, 5.95], b: [x + 8, 5.95], dir: [0, -1], depth: 2.1, cloth: cl[(k + 2) % 5] }); }
+  // the doors along the main street (the market keeps off them)
+  const doorsX = (side) => lots().filter((l) => l.front === side && Math.abs(l.rect[side === 's' ? 3 : 1]) === 6).map((l) => l.rect[0] + doorU(l.rect[2] - l.rect[0], !!l.trade, rng(l.seed * 7 + 3)()));
+  const dS = doorsX('s'), dN = doorsX('n'), gapsOf = (d) => d.map((x) => [x - 1.3, x + 1.3]);
+  const nearDoor = (d, x) => d.some((q) => Math.abs(q - x) < 3.0);
+  for (let x = 30, k = 0; x < 66; x += 9, k++) { E.push({ t: 'dh_awning', a: [x, -5.95], b: [x + 7, -5.95], dir: [0, 1], depth: 2.1, cloth: cl[k % 5], gaps: gapsOf(dS) }); E.push({ t: 'dh_awning', a: [x + 1, 5.95], b: [x + 8, 5.95], dir: [0, -1], depth: 2.1, cloth: cl[(k + 2) % 5], gaps: gapsOf(dN) }); }
   // ── the life
   const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));
   const man = (at, y, rot, o = {}) => L.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: ['cloth_brown', 'cloth_grey', 'cloth_blue', 'cloth_ochre'][Math.floor(rand() * 4)], over: 'sash', skin: 'skin_medium', hat: 'none', hair: 'short', feet: 'shod', ...o });
@@ -64,9 +69,9 @@ export async function town() {
   const monk = (at, y, rot, o = {}) => man(at, y, rot, { dress: 'robe', cloth: ['cloth_ochre', 'cloth_brown', 'cloth_grey'][Math.floor(rand() * 3)], cloth2: 'cloth_brown', over: 'shawl', hair: 'shaven', hat: 'none', feet: 'shod', ...o });
   // the market's stalls under the awnings (the stall's front is +z)
   for (let x = 30, k = 0; x < 66; x += 9, k++) {
-    L.push({ t: 'stall', at: [x + 3.5, -6.4], y: 0, rot: 0, awning: cl[k % 5], goods: [['cloth', 'produce', 'basket'][k % 3]], w: 2.2, d: 1.4 });
-    L.push({ t: 'stall', at: [x + 4.5, 6.4], y: 0, rot: Math.PI, awning: cl[(k + 2) % 5], goods: [['basket', 'cloth', 'produce'][k % 3]], w: 2.2, d: 1.4 });
-    sogdian([x + 3.5, -7.5], 0, Math.PI, { pose: 'stand' }); man([x + 4.5, 7.6], 0, 0);
+    if (!nearDoor(dS, x + 3.5)) L.push({ t: 'stall', at: [x + 3.5, -6.4], y: 0, rot: 0, awning: cl[k % 5], goods: [['cloth', 'produce', 'basket'][k % 3]], w: 2.2, d: 1.4 });
+    if (!nearDoor(dN, x + 4.5)) L.push({ t: 'stall', at: [x + 4.5, 6.4], y: 0, rot: Math.PI, awning: cl[(k + 2) % 5], goods: [['basket', 'cloth', 'produce'][k % 3]], w: 2.2, d: 1.4 });
+    if (!nearDoor(dS, x + 3.5)) sogdian([x + 3.5, -7.5], 0, Math.PI, { pose: 'stand' }); if (!nearDoor(dN, x + 4.5)) man([x + 4.5, 7.6], 0, 0);
   }
   // the caravan at the serai's gate: Bactrian camels (the one-humped beast standing in), loaded, with drivers
   const cx = (SERAI.x0 + SERAI.x1) / 2;
