@@ -263,6 +263,33 @@ export function tomb_court(el, { bag, col }) {
   cribWall(bag, { a: [x0, g[1]], b: [x0, z1], th, top, seed: seed + 4, ends: [0, th / 2], proj: 1 }); col.segment([x0, g[1]], [x0, z1 + th / 2], th, 0, top);
 }
 
+/**
+ * things { list: [{ k, at: [x, z], rot, side }], seed }: single pieces of the dressing of an open ground (the palace islet's forecourt):
+ * k is 'rack', 'net', 'matline', 'pound', 'nuts', 'pen', 'logs' or 'hull' (a canoe's dug-out hull on its rollers, the adze work half done).
+ */
+export function things(el, { bag, col }) {
+  const rand = rng(el.seed ?? 1), F = mk([0, 0], 0);
+  for (const t of el.list) {
+    const [x, z] = t.at, r = t.rot ?? 0;
+    if (t.k === 'rack') rack(bag, col, F, x, z, r, rand, t.len ?? 1.9, t.wid ?? 0.9);
+    else if (t.k === 'net') net(bag, col, F, x, z, r, rand);
+    else if (t.k === 'matline') matline(bag, col, F, x, z, r, rand);
+    else if (t.k === 'pound') pounding(bag, col, F, x, z, r, rand);
+    else if (t.k === 'nuts') nutheap(bag, col, F, x, z, r, rand);
+    else if (t.k === 'pen') pen(bag, col, F, x, z, r, rand, t.side ?? 2.4);
+    else if (t.k === 'logs') logs(bag, col, F, x, z, r, rand, t.len ?? 2.6);
+    else if (t.k === 'hull') {
+      // the log hull: two sawn-off trunks' length of dug-out wood on three rollers, chips round it, the adze marks pale on the cut side
+      const G = sub(F, x, z, r), put = (m, g) => { g.applyMatrix4(G.M); bag.add(m, g); }, L = t.len ?? 5.2;
+      for (const u of [-L * 0.35, 0, L * 0.35]) put('timber', lathe([[0.1, 0], [0.1, 1.0]], 6).rotateX(Math.PI / 2).translate(u, 0.1, -0.5));
+      put(WOOD, lathe([[0.001, 0], [0.34, 0.35], [0.42, L * 0.5], [0.34, L - 0.35], [0.001, L]], 8).rotateZ(-Math.PI / 2).translate(-L / 2, 0.55, 0));
+      put('timber', box(-L / 2 + 0.3, 0.74, -0.16, L / 2 - 0.3, 0.8, 0.16));
+      for (let i = 0; i < 12; i++) put('palm_leaf', box(-L / 2 + rand() * L, 0.0, -0.9 + rand() * 1.8, -L / 2 + rand() * L + 0.12, 0.03, -0.9 + rand() * 1.8 + 0.08));
+      col.segment(G.W(-L / 2, 0), G.W(L / 2, 0), 1.0, 0, 0.8);
+    }
+  }
+}
+
 /** Moss, salt and fern on a stretch of an islet's retaining wall: wall_dress { a, b, out, seed }. */
 export function wall_dress(el, { bag }) {
   const [a, b] = [el.a, el.b], dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz), ux = dx / L, uz = dz / L, [nx, nz] = el.out, rand = rng(el.seed ?? 1);

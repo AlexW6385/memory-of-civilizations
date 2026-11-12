@@ -2,7 +2,7 @@
 // paths and in the courts, grass and shade trees between the houses), the mud flat with its mangroves and the low shore of Temwen
 // island to the north-west, the reef flat beyond the sea wall; the hot, wet equatorial sky (docs/settlements/nan-madol.md §8–§9).
 
-import { RADIUS, WATER, RIM, height, inland, isletAt, ISLET, village, cooks, inRect, onFord, NAN } from './layout.js';
+import { RADIUS, WATER, RIM, height, inland, isletAt, ISLET, village, cooks, inRect, onFord, NAN, FORECOURT } from './layout.js';
 
 const HOUSES = () => village().houses;
 function cover(x, z, h) {
@@ -20,6 +20,7 @@ function cover(x, z, h) {
     // the paths between the houses: trodden coral earth
     const [x0, z0, x1, z1] = s.rect, alongX = x1 - x0 >= z1 - z0, pc = alongX ? (z0 + z1) / 2 : (x0 + x1) / 2;
     if (Math.abs((alongX ? z : x) - pc) < 1.8) { c.road = 0.5; c.grass = 0.03; c.sand = 0.5; return c; }
+    if (s.id === 's1' && inRect(FORECOURT.way, x, z)) { c.road = 0.6; c.grass = 0.02; c.sand = 0.55; return c; }       // the processional way, packed coral gravel
     c.grass = s.kind === 'seawall' ? 0.05 : 0.45; c.soil = 0.35; c.sand = 0.35;
   }
   return c;
@@ -40,7 +41,8 @@ function planting(x, z) {
   const [x0, z0, x1, z1] = s.rect, alongX = x1 - x0 >= z1 - z0, pc = alongX ? (z0 + z1) / 2 : (x0 + x1) / 2;
   if (Math.abs((alongX ? z : x) - pc) < 2.2) return null;
   if (houseCircles().some(([hx, hz, hr]) => Math.hypot(hx - x, hz - z) < hr)) return null;
-  if (s.kind === 'landing' && Math.abs(x + 10) < 10) return null;                         // the arrival's view
+  if (s.kind === 'landing' && Math.abs(x + 10) < 10) return null;                         // the landing's view
+  if (s.id === 's1' && inRect(FORECOURT.clear, x, z)) return { grass: 6 };                // the arrival's view: no crowns between the crossroads and the wall
   if (s.kind === 'seawall') return { grass: 8 };
   return { date_palm: 0.5, fig: 0.35, grass: 14 };
 }

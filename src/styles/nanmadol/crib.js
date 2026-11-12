@@ -15,6 +15,8 @@ export const ROCK = ['granite_black', 'dolerite_spotted', 'granite_black', 'basa
 // the courses read as bands from afar: the stretchers dark, the headers' ends a paler grey (weathered, salt-bloomed) in a honeycomb
 const ROCK_S = ['granite_black', 'granite_black', 'basalt', 'granite_black'], ROCK_H = ['dolerite_spotted', 'basalt', 'dolerite_spotted', 'dolerite_spotted'];
 
+// a few lengths only, so that the prisms are instanced in few batches (draws, load time)
+const LEN3 = [0.88, 1, 1.12];
 const CACHE = new Map();
 /** A hexagonal prism along +z from 0 to len, a vertex up (so that neighbours in a row meet flat to flat). */
 export function hexPrism(len, r = R) {
@@ -70,7 +72,7 @@ export function cribWall(bag, { a, b, y0 = 0, th = 2.6, top = 3, seed = 1, sides
       if (e[i] || N(u0) <= k) continue;
       for (let v = -th / 2 + flat / 2; v <= th / 2 - flat / 2 + 1e-6; v += flat) {
         const p = P(u0, v);
-        laid(bag, (header ? ROCK_H : ROCK_S)[Math.floor(rand() * 4)], depth * (0.85 + rand() * 0.3), p[0], yc, p[1], ux * sg, uz * sg, reach, r);
+        laid(bag, (header ? ROCK_H : ROCK_S)[Math.floor(rand() * 4)], depth * LEN3[Math.floor(rand() * 3)], p[0], yc, p[1], ux * sg, uz * sg, reach, r);
       }
     }
     for (const s of sides) {
@@ -79,7 +81,7 @@ export function cribWall(bag, { a, b, y0 = 0, th = 2.6, top = 3, seed = 1, sides
       if (header) {
         for (let u = ua + flat / 2; u <= ub - flat / 2 + 1e-6; u += flat) {
           if (N(u) <= k) continue;
-          const p = P(u, s * face), len = depth * (0.85 + rand() * 0.3);
+          const p = P(u, s * face), len = depth * LEN3[Math.floor(rand() * 3)];
           const mat = ROCK_H[Math.floor(rand() * 4)];
           laid(bag, mat, len, p[0] + nx * (rand() * rough), yc, p[1] + nz * (rand() * rough), -nx, -nz, reach, r);
         }
@@ -89,7 +91,7 @@ export function cribWall(bag, { a, b, y0 = 0, th = 2.6, top = 3, seed = 1, sides
           const v = s * (face - flat / 2 - row * flat);
           let u = ua;
           while (u < ub - 0.4) {
-            const len = Math.min(ub - u, [2.0, 2.4, 2.8, 3.2][Math.floor(rand() * 4)] - row * 0.4 * rand());
+            const len = Math.min(ub - u, [2.0, 2.4, 2.8, 3.2][Math.floor(rand() * 4)] - row * 0.4);
             if (len < 0.5) break;
             if (N(u + len / 2) > k) {
               const p = P(u, v);

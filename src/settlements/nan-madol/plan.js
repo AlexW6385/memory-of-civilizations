@@ -37,6 +37,9 @@ E.push({ t: 'court', kind: 'rake', rect: [ox0 + 1.8, oz0 + 1.8, ox1 - 1.8, oz1 -
   skip: [sk(INNER, 1.8), [-12, -18.5, 3.5, -13], [-12, -18.5, -8, -6.5], ...SAKAU.map(([x, z, yw]) => (Math.abs(Math.sin(yw)) > 0.5 ? [x - 3.2, z - 4, x + 3.2, z + 4] : [x - 4, z - 3.2, x + 4, z + 3.2]))] });
 E.push({ t: 'court', kind: 'rake', rect: [ix0 + 1.2, iz0 + 1.2, ix1 - 1.2, iz1 - 1.2], step: 1.3,
   skip: [sk(TOMB.rect, 1.6), [TOMB.stair[0] - 1.5, TOMB.stair[1], TOMB.stair[2] + 1.5, TOMB.stair[3] + 0.8], [ix0, -28.6, ix1, -24.2]] });
+// the apron between the causeway and the gate: gravel raked in lines up to the way, a seat of columns each side of the gate
+E.push({ t: 'court', kind: 'rake', rect: [-38.5, -5.5, 18.5, -2.9], skip: [[-12.4, -6, -7.6, -2.4]], step: 1.3 });
+for (const [a, b] of [[[-19.5, -4.2], [-14.2, -4.2]], [[-5.8, -4.2], [-0.5, -4.2]]]) E.push({ t: 'court', kind: 'seat', a, b });
 for (const [x, z, yaw, sd] of [[-26, -47, 0.2, 1], [-25.5, -29.5, 0.9, 2], [6, -22.5, 0.1, 3], [10.5, -9.8, 1.3, 4], [-19, -38, 1.57, 5], [-1.6, -38, 1.57, 6], [-10, -50.5, 0, 7], [-1.5, -45, 0.5, 8]]) E.push({ t: 'court', kind: 'offering', c: [x, z], yaw, seed: sd });
 for (const [a, b] of [[[-31.6, -64.2], [-13, -64.2]], [[-6.5, -64.2], [11.5, -64.2]], [[12.4, -60], [12.4, -44]], [[-32.2, -60], [-32.2, -45]], [[-32.2, -28], [-32.2, -14]], [[12.4, -36], [12.4, -22]]]) E.push({ t: 'court', kind: 'seat', a, b });
 for (const c of [[-13, -5.4], [-7, -5.4], [-1.9, -20.2], [3.5, -20.2], [-26, -63], [9, -63]]) E.push({ t: 'court', kind: 'lamp', c });

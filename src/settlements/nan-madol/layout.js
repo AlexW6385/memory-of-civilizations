@@ -160,7 +160,7 @@ export function gaps(s) {
 }
 /** Canoe landings: islet → [[side, u (m along the edge from its start)], …]. Edges run clockwise from the north-west corner. */
 export const LANDINGS = {
-  s4: [['s', 31], ['e', 18]], n1: [['n', 20], ['w', 30]], n2: [['n', 20]], n3: [['e', 22]], s1: [['w', 14]],
+  s4: [['s', 31], ['e', 18]], n1: [['n', 20], ['w', 30]], n2: [['n', 20]], n3: [['e', 22]], s1: [['w', 14], ['n', 22], ['n', 40]],
   s6: [['e', 18]], s5: [['s', 20]], e1: [['e', 30]], w1: [['w', 30]], nan: [['e', 56]],
 };
 
@@ -248,6 +248,25 @@ export function walkPaths() {
   return { rects, links };
 }
 
+/**
+ * The forecourt of Idehd (the palace islet) between the causeway to Nandauwas and the crossroads: the processional way (x −11.4…−8.6) is kept clear
+ * so that the whole south wall is seen from the crossroads; both sides of it are worked ground — drying racks, nets, pounding boards, nuts, a pen,
+ * a canoe hull on its rollers — with two cook-houses and a line of lamps along the way. Positions in the islet's frame (x, z).
+ */
+export const FORECOURT = {
+  way: [-11.4, 6, -8.6, 27],
+  clear: [-21.5, 6, 1.5, 27.4],                         // no trees here
+  cooks: [[-15.2, 23.4, 811], [-4.6, 23.8, 812]],
+  lamps: [[-12.8, 10], [-7.2, 10], [-12.8, 17], [-7.2, 17], [-12.8, 23.5], [-7.2, 23.5]],
+  things: [
+    { k: 'rack', at: [-17.6, 8.8], rot: 0 }, { k: 'rack', at: [-14.6, 8.8], rot: 0 }, { k: 'net', at: [-19.8, 12.4], rot: Math.PI / 2 },
+    { k: 'matline', at: [-15.4, 12.6], rot: 0 }, { k: 'pound', at: [-17.2, 15.8], rot: 0.15 }, { k: 'nuts', at: [-14.6, 18.8], rot: 0.5 },
+    { k: 'hull', at: [-18.6, 20.6], rot: 0.08 },
+    { k: 'pen', at: [-4.2, 9.2], rot: 0 }, { k: 'rack', at: [-5.1, 13.0], rot: Math.PI / 2 }, { k: 'matline', at: [-4.8, 16.2], rot: Math.PI / 2 },
+    { k: 'pound', at: [-5.6, 19.0], rot: -0.2 }, { k: 'nuts', at: [-3.7, 21.4], rot: 1.1 },
+  ],
+};
+
 /** Cook-houses and their earth ovens (umu): beside every fifth house, on its back side; [{ c, yaw, islet, seed }]. */
 let CK = null;
 export function cooks() {
@@ -262,6 +281,7 @@ export function cooks() {
     if (village().paths.some((q) => { const dx = q.b[0] - q.a[0], dz = q.b[1] - q.a[1], t = Math.max(0, Math.min(1, ((c[0] - q.a[0]) * dx + (c[1] - q.a[1]) * dz) / (dx * dx + dz * dz))); return Math.hypot(c[0] - q.a[0] - dx * t, c[1] - q.a[1] - dz * t) < 3.4; })) return;
     CK.push({ c, yaw: h.yaw, islet: h.islet, seed: h.seed });
   });
+  for (const [x, z, seed] of FORECOURT.cooks) CK.push({ c: [x, z], yaw: 0, islet: 's1', seed });
   return CK;
 }
 
