@@ -22,7 +22,7 @@ const waterLevel = (x, z) => (inWater(x, z) ? SEA : -Infinity);
 const fromWater = (x, z) => Math.max(-5, Math.min(40, height(x, z) - SEA));
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 70 || inWater(x, z) || wet(x, z) < 2 || inLot(x, z, 1.5) || onStreet(x, z, 1.5)) return null;
-  if (inRect(CLOISTER, x, z, 8)) return inRect(CLOISTER, x, z, -8) && Math.abs(x - (CLOISTER[0] + CLOISTER[2]) / 2) > 4 && Math.abs(z - (CLOISTER[1] + CLOISTER[3]) / 2) > 4 ? { olive: 0.04, grass_dry: 2 } : null;
+  if (inRect(CLOISTER, x, z, 8)) return inRect(CLOISTER, x, z, -8) && Math.abs(x - (CLOISTER[0] + CLOISTER[2]) / 2) > 4 && Math.abs(z - (CLOISTER[1] + CLOISTER[3]) / 2) > 4 ? { grass: 2 } : null;
   if (BUILT.some((r) => inRect(r, x, z, 3)) || inRect(TERREIRO, x, z, 3)) return null;
   if (wet(x, z) < 14 && x < -100) return { grass_dry: 1.5 };
   if (Math.hypot(x - HILL.c[0], z - HILL.c[1]) < HILL.R * 0.9 && z < -40) return { stone_pine: 0.02, cypress: 0.03, olive: 0.04, grass_dry: 3 };
