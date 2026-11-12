@@ -125,6 +125,7 @@ function streetPlans(rand) {
     if (Math.hypot(gx, z1) > RADIUS - 40) continue;
     H.push({ t: 'bj_lane', at: [gx, z1], seed: h.seed, lod: h.lod });
     if (h.lod < 2 && rand() < 0.3) H.push({ t: 'bj_pet', kind: rand() < 0.45 ? 'cat' : 'dog', at: [gx - 1.2 - rand() * 6, z1 + 1.0 + rand() * 2], y: 0.03, rot: rand() * 6.28, seed: seed() });
+    if (h.lod < 2 && rand() < 0.4) H.push({ t: 'bj_drying', at: [gx - 14 - rand() * 3, z1 + 1.5], y: 0.03, rot: 0, seed: seed() });
     if (h.lod === 0 && rand() < 0.22) H.push({ t: 'laundry', at: [gx - 6 - rand() * 6, z1 + 1.1], y: 0.03, rot: 0, len: 3, seed: seed() });
     if (h.lod === 0 && rand() < 0.35) H.push({ t: 'figure', at: [gx - 4 - rand() * 8, z1 + 1.6 + rand() * 2], y: 0.03, rot: rand() * 6.28, seed: seed(), ...FIG, cloth: 'cloth_red', child: true, pose: 'squat', dress: 'trousers', hat: 'none' });
     void x0;
