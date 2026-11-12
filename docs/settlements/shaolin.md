@@ -103,3 +103,8 @@ Sources: a web search for training equipment returned only page titles (chinesem
 - **Village:** ~50 grey-brick houses in continuous fronts along the street and the approach, each furnished (see §6b).
 - **Life:** monks in the pits of the training hall, kneeling in the Mahavira Hall, reading, in a cell, sweeping and carrying; pilgrims and villagers; walkers (monks, staff-bearers, scholars, townsmen, women, farmers, porters); swallows, sparrows, crows; incense and kitchen smoke.
 - **Left out:** Weituo behind Maitreya, the two-storey Dharma Hall, the Bodhidharma cave, Chuzu Temple, Songyue and Zhongyue, a ginkgo species (stand-in `pagoda_tree`).
+
+## 6c. The village fronts and the forecourt, deepening pass (2026-11-12)
+- Strings of corn cobs, red peppers and garlic under the eaves, red door couplets (duilian) and a straw hat on a nail on the village fronts [inferred: the common picture of north-China farm houses in autumn; `sl_fronttrim`].
+- The forecourt: paper lamp posts down the processional way, pilgrims kneeling before the gate steps, a hitching place for pilgrims' donkeys at the plaza's corners, weeds in the plaza's joints [inferred].
+- The arrival's foreground is kept clear (town.js `keepClear`): nothing alive within 6.5 m of (0, 160) and no figure cut by the frame within 12 m.

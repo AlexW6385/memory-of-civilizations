@@ -202,3 +202,7 @@ Sources for this section: [Along the River During the Qingming Festival — Wiki
 - [吴钩：小市酒旗能唤客，宋朝的广告与商标 (rujiazg 3505)](https://www.rujiazg.com/article/3505)
 - [吴钩：细读《清明上河图》(rujiazg 29200)](https://www.rujiazg.com/article/29200)
 - [吴钩：从宋画看宋人的造船技术 (rujiazg 11895)](https://www.rujiazg.com/article/11895)
+
+## The Kaibao court's fair and furniture, deepening pass (2026-11-12)
+- The great temples of the capital held markets in their courts [stated: Dongjing menghua lu on the Xiangguo Temple's market; the Kaibao's own fair is inferred]: four rows of hawkers' stalls with buyers either side of the flagstone field, seated vendors on mats at the cloister's foot.
+- Stone benches under the cloisters with resting monks and pilgrims, water tubs against fire at the halls' corners, incense sellers' tables at the great censer's foot, swallows round the pagoda's eaves [inferred].

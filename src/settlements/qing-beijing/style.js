@@ -8,6 +8,9 @@ import { pekingCart, camelString } from '../../styles/qing/street.js';
 import { bjRooms, bjTeahouse, bjPharmacy } from './interiors.js';
 import { bjClothShop, bjGrainShop, bjPawnShop, bjWineShop, bjLanternShop, bjShoeShop } from './shoprooms.js';
 
+import { bjRankstones, bjLubu } from './courtlife.js';
+STYLES.life.elements.bj_rankstones = bjRankstones;
+STYLES.life.elements.bj_lubu = bjLubu;
 STYLES.life.elements.bj_booth = bjBooth;
 STYLES.life.elements.bj_rooms = bjRooms;
 STYLES.life.elements.bj_teahouse = bjTeahouse;

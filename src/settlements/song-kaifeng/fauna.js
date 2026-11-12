@@ -23,6 +23,9 @@ const flights = [
   { kind: 'swallow', n: 5, lane: { a: [X0, mid], b: [X1, mid] }, y: [-0.4, 3.0], speed: 9, a: [26, 8] },
   { kind: 'swallow', n: 3, lane: { a: [0, -200], b: [0, RIVER.z0 - 10] }, y: [1.5, 5], speed: 9, a: [26, 4] },
   { kind: 'swallow', n: 3, lane: { a: [0, RIVER.z1 + 10], b: [0, 200] }, y: [1.5, 5], speed: 9, a: [26, 4] },
+  // swallows hawking round the Iron Pagoda's eaves, high in the monastery court
+  { kind: 'swallow', n: 5, loop: { c: [PAGODA[0], PAGODA[1]], a: [17, 15], rot: 0.3 }, y: [9, 44], speed: 9 },
+  { kind: 'swallow', n: 3, loop: { c: [PAGODA[0], -140], a: [30, 18], rot: -0.2 }, y: [3, 12], speed: 9 },
   // crows over the monastery's trees at twilight
   { kind: 'crow', n: 8, loop: { c: [(MONASTERY[0] + MONASTERY[2]) / 2, (MONASTERY[1] + MONASTERY[3]) / 2], a: [60, 40], rot: 0.4 }, y: [34, 14], speed: 9 },
 ];

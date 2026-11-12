@@ -30,16 +30,22 @@ const flights = [
   { kind: 'swallow', n: 3, lane: { a: [-130, 212], b: [130, 212] }, y: [1.5, 9], speed: 9 },
   { kind: 'swallow', n: 3, lane: { a: [0, 215], b: [0, 370] }, y: [2, 10], speed: 9 },
   { kind: 'swallow', n: 2, lane: { a: [-127, -200], b: [-127, 190] }, y: [-0.5, 3], speed: 8 },
+  // swallows hawking over the great court
+  { kind: 'swallow', n: 3, lane: { a: [-88, 60], b: [88, 60] }, y: [2.5, 11], speed: 9 },
   // crows at dusk, wheeling over the Hall of Supreme Harmony and the courts
   { kind: 'crow', n: 9, loop: { c: [0, -10], a: [70, 55], rot: 0.3 }, y: [38, 16], speed: 8 },
   { kind: 'crow', n: 5, loop: { c: [-50, 90], a: [45, 30], rot: -0.4 }, y: [26, 12], speed: 8 },
 ];
 flights[0].a = flights[1].a = flights[2].a = [30, 4];
+flights[3].a = [30, 4];
 
 const perches = [];
 // tree sparrows on the paving of the lanes and the avenue
 for (const [x, z] of [[-60, 202], [-20, 201], [40, 202], [100, 203], [-180, 118], [-90, 60], [90, 60], [-160, 175], [160, 175], [-8, 250], [8, 300], [-8, 340], [-214, 40], [214, -40], [-290, 90], [290, 10]])
   perches.push({ kind: 'sparrow', x, z, y: 0.03, rot: 0.3 + (x * 7 % 3), range: [1.4, 1.3] });
+// ...and in the great court's brick, in its corners and along the galleries' feet, hopping off before the visitor
+for (const [x, z] of [[-24, 56], [26, 58], [-46, 74], [50, 70], [-30, 96], [34, 94], [-84, 58], [84, 78], [-8, 132], [10, 150], [-40, 150], [44, 156]])
+  perches.push({ kind: 'sparrow', x, z, y: 0.03, rot: 0.6 + (x * 5 % 3), range: [1.6, 1.4], alert: 6 });
 // ...and on the red wall's yellow coping, 8.5 m up, hopping along it
 for (const [x, z, rot] of [[-40, WALL.rect[3], 0], [60, WALL.rect[3], 0], [WALL.rect[0], 20, Math.PI / 2], [WALL.rect[2], -80, Math.PI / 2], [-60, WALL.rect[1], 0]])
   perches.push({ kind: 'sparrow', x, z, y: WALL.h + 0.9, rot, range: [2.6, 0], alert: 5 });
