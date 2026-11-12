@@ -70,34 +70,31 @@ export function furnishRoom(L, kind, room, y, rand, H = 3.2) {
 function houseBody(L, o) {
   const { W, D, floors, mat, rand, kind } = o;
   const T = 0.5, hh = floors > 1 ? 6.2 : 3.6, FY = 3.5;
-  const dc = W * (0.4 + rand() * 0.2);
-  const ops = [{ at: dc, w: 1.1, h: 2.4 }];
+  const dc = W * (0.22 + rand() * 0.2);
+  const ops = [{ at: dc, w: 1.3, h: 2.4 }];
   for (const f of [0.17, 0.83]) if (Math.abs(W * f - dc) > 1.6) ops.push({ at: W * f, w: 0.9, h: 1.0, y0: 1.2, lat: true });
   // shell: front (door and windows), back, the two ends
   L.wall(mat, 0, -T / 2, W, -T / 2, T, 0, hh, ops, 'lattice');
   L.wall(mat, 0, -D + T / 2, W, -D + T / 2, T, 0, hh);
   L.wall(mat, T / 2, 0, T / 2, -D, T, 0, hh); L.wall(mat, W - T / 2, 0, W - T / 2, -D, T, 0, hh);
   // the door's timber frame and leaf standing open, a painted lintel
-  { const u = dc; L.box('wood_dark', u - 0.6, 0.02, u - 0.52, 0.12, -0.06, 0, 2.45); L.box('wood_dark', u + 0.52, 0.02, u + 0.6, 0.12, -0.06, 0, 2.45); L.box('wood_dark', u - 0.6, 0.02, u + 0.6, 0.14, -0.06, 2.4, 2.55);
-    L.box('tile_turquoise', u - 0.6, 0.03, u + 0.6, 0.05, 2.55, 2.75); L.slab('wood_dark', u - 0.5, 0.2, u - 0.5, 1.0, 0.04, 0, 2.3); }
+  { const u = dc; L.box('wood_dark', u - 0.72, -0.06, u - 0.62, 0.12, 0, 2.45); L.box('wood_dark', u + 0.62, -0.06, u + 0.72, 0.12, 0, 2.45); L.box("wood_dark", u - 0.72, -0.06, u + 0.72, 0.12, 2.4, 2.55);
+    L.box('tile_turquoise', u - 0.72, 0.12, u + 0.72, 0.14, 2.55, 2.75); L.slab('wood_dark', u - 0.5, 0.2, u - 0.5, 1.0, 0.04, 0, 2.3); }
   // floors and the roof/ceiling
   const room = [T, -D + T, W - T, -T];
   L.box('mud_plaster', room[0], room[1], room[2], room[3], -0.2, 0.03); L.floor(room[0], room[1], room[2], room[3], 0.03);
   const partition = W >= 10.5, pu = partition ? Math.round(W * 0.62) : W - T;
   if (partition) {
-    L.wall(mat, pu, -T, pu, -D + T, 0.4, 0, floors > 1 ? FY : hh - 0.2, [{ at: D * 0.45, w: 1.0, h: 2.2 }]);
+    L.wall(mat, pu, -T, pu, -D + T, 0.4, 0, floors > 1 ? FY : hh - 0.2, [{ at: 1.3, w: 1.3, h: 2.2 }]);
     // the kitchen room: a hearth with a cauldron and a chimney of mud brick, water jars, firewood, sacks of millet
     const ku0 = pu + 0.3, ku1 = W - T;
-    L.box('mudbrick', ku1 - 1.6, -D + T, ku1, -D + T + 1.2, 0, 0.8, true);
-    L.lathe('iron', [[0.001, 0], [0.26, 0.02], [0.32, 0.18], [0.26, 0.34], [0.001, 0.34]], 10, ku1 - 0.8, -D + T + 0.6, 0.8);
-    L.lathe('flame', [[0.1, 0], [0.05, 0.12], [0.001, 0.24]], 6, ku1 - 0.8, -D + T + 0.6, 0.78);
-    L.light(ku1 - 0.8, 1.3, -D + T + 0.8, '#ff9a4a', 1.2, 5);
-    for (let k = 0; k < 3; k++) L.lathe('terracotta', [[0.06, 0], [0.18, 0.08], [0.22, 0.22], [0.16, 0.36], [0.08, 0.4], [0.001, 0.42]], 8, ku0 + 0.4 + k * 0.5, -T - 0.5, 0);
-    L.box('timber', ku0 + 0.1, -D + T, ku0 + 0.7, -D + T + 1.6, 0, 1.2, false);
-    for (let k = 0; k < 6; k++) L.rod('bark_dark', [ku0 + 0.15 + (k % 3) * 0.17, 0.2 + Math.floor(k / 3) * 0.3, -D + T + 0.1], [ku0 + 0.15 + (k % 3) * 0.17, 0.2 + Math.floor(k / 3) * 0.3, -D + T + 1.5], 0.07, 5);
-    L.col.rect(L.R(ku0 + 0.1, -D + T, ku0 + 0.7, -D + T + 1.6), 0, 1.2);
-    L.circle(ku0 + 0.4, -T - 0.5, 0.3, 0, 0.5);
-    if (floors === 1) L.box('cloth_ochre', ku0 + 0.9, -T - 1.4, ku0 + 2.0, -T - 0.6, 0, 0.012);
+    L.box('mudbrick', ku0, -D + T, ku0 + 1.6, -D + T + 1.2, 0, 0.8, true);
+    L.lathe('iron', [[0.001, 0], [0.26, 0.02], [0.32, 0.18], [0.26, 0.34], [0.001, 0.34]], 10, ku0 + 0.8, -D + T + 0.6, 0.8);
+    L.lathe('flame', [[0.1, 0], [0.05, 0.12], [0.001, 0.24]], 6, ku0 + 0.8, -D + T + 0.6, 0.78);
+    L.light(ku0 + 0.8, 1.3, -D + T + 0.8, '#ff9a4a', 1.2, 5);
+    for (let k = 0; k < 3; k++) L.lathe('terracotta', [[0.06, 0], [0.18, 0.08], [0.22, 0.22], [0.16, 0.36], [0.08, 0.4], [0.001, 0.42]], 8, ku0 + 2.3 + k * 0.42, -D + T + 0.35, 0);
+    L.col.rect(L.R(ku0 + 2.05, -D + T, ku0 + 3.5, -D + T + 0.7), 0, 0.45);
+    for (let k = 0; k < 6; k++) L.rod('bark_dark', [ku0 + 1.75, 0.2 + Math.floor(k / 3) * 0.3, -D + T + 0.1 + (k % 3) * 0.17], [ku0 + 2.0, 0.2 + Math.floor(k / 3) * 0.3, -D + T + 0.1 + (k % 3) * 0.17], 0.07, 5);
     furnishRoom(L, kind, [T, -D + T, pu - 0.2, -T], 0.03, rand, hh);
   } else furnishRoom(L, kind, room, 0.03, rand, hh);
   L.light((room[0] + (partition ? pu : room[2])) / 2, 2.4, -D / 2);
@@ -109,16 +106,14 @@ function houseBody(L, o) {
     L.box('wood_dark', T, -D + T, W - T, -T, ceilY - 0.02, ceilY);
   } else {
     // the stair in the kitchen strip up to the upper floor along the partition, the landing at the back
-    const su0 = pu + 0.45, su1 = su0 + 1.2, v0s = -0.9, v1s = -D + 2.0;
+    const su1 = W - T, su0 = su1 - 1.25, v0s = -0.9, v1s = -D + 2.0;
     const n = 20;
     for (let i = 0; i < n; i++) { const a = v0s + (v1s - v0s) * i / n, b = v0s + (v1s - v0s) * (i + 1) / n; L.box('timber', su0, Math.min(a, b), su1, Math.max(a, b), 0.03, 0.03 + (FY - 0.03) * (i + 1) / n); }
     L.ramp(su0, v1s, su1, v0s, 0.03, FY, '-v');
-    L.col.rect(L.R(su0 - 0.08, v1s, su0, v0s), 0, FY); L.col.rect(L.R(su1, v1s, su1 + 0.08, v0s), 0, FY);
-    L.box('wood_dark', su1, v1s, su1 + 0.06, v0s, 1.0, 1.1); L.box('wood_dark', su0 - 0.06, v1s, su0, v0s, 1.0, 1.1);
+    L.box('wood_dark', su0 - 0.06, v1s, su0, v0s, 1.0, 1.1);
     // the upper floor: planks on beams, open over the stair only up to its top
-    const slabs = [[T, -D + T, pu - 0.0, -T], [pu, -D + T, su0, -T], [su1, -D + T, W - T, -T], [su0, v1s, su1, -D + T]];
+    const slabs = [[T, -D + T, su0, -T], [su0, -D + T, su1, v1s], [su0, v0s, su1, -T]];
     for (const [a, b, c, d] of slabs) { if (c - a < 0.05) continue; L.box('timber', a, b, c, d, FY - 0.2, FY); L.floor(a, b, c, d, FY); }
-    L.box('wood_dark', su0, -T, su1, -T - 0.05, FY - 0.2, FY);
     // the upper room: carpets, cushions, a low bench under the windows, a lamp; ceiling and roof beams
     L.box('cloth_red', T + 0.8, -D + T + 0.8, pu - 0.8, -T - 1.0, FY, FY + 0.012);
     L.box('cloth_blue', T + 1.2, -D + T + 1.2, pu - 1.2, -T - 1.4, FY + 0.012, FY + 0.024);
@@ -138,7 +133,7 @@ function houseBody(L, o) {
   for (let k = 0; k < 5; k++) { const u = 0.5 + rand() * (W - 1.5), w = 0.4 + rand() * 0.9, y = 0.5 + rand() * (hh - 1.5), h = 0.3 + rand() * 0.7; if (Math.abs(u - dc) < 1.4 && y < 2.6) continue; L.box('mudbrick', u, 0.025, u + w, 0.0, y, y + h); }
   for (let k = 0; k < 4; k++) { const u = 0.8 + rand() * (W - 1.6); if (Math.abs(u - dc) < 1.0) continue; L.box('bark_dark', u, 0.02, u + 0.025, 0.0, 0.8 + rand() * 1.0, 2.0 + rand() * 1.4); }
   L.box('plaster_white', 0, 0.02, W, -0.01, hh - 0.35, hh - 0.2);
-  return hh;
+  return { hh, dc };
 }
 
 export function mudCompound(el, { bag, col, lights }) {
@@ -174,7 +169,7 @@ export function mudCompound(el, { bag, col, lights }) {
   const dd = gate === 's' ? [x0 + T, z0 + T, x1 - T, z0 + (z1 - z0) * 0.44] : gate === 'n' ? [x0 + T, z1 - (z1 - z0) * 0.44, x1 - T, z1 - T] : gate === 'e' ? [x0 + T, z0 + T, x0 + (x1 - x0) * 0.44, z1 - T] : [x1 - (x1 - x0) * 0.44, z0 + T, x1 - T, z1 - T];
   const F = frontFrame(dd, gate), L = new Local(bag, col, lights, F.O, F.U, F.V);
   const kind = ['family', 'merchant', 'craft', 'family'][Math.floor(rand() * 4)];
-  const hh = houseBody(L, { W: F.W, D: F.D, floors, mat, rand, kind });
+  const { hh, dc: doorU } = houseBody(L, { W: F.W, D: F.D, floors, mat, rand, kind });
   if (el.dome) {
     const [cx, cz] = L.P(F.W * 0.3, -F.D / 2), r = Math.min(2.6, Math.min(F.W, F.D) * 0.32);
     bag.add('brick_buff', lathe([[r, 0], [r, 0.5], [r * 0.9, 1.0], [r * 0.62, 1.7], [r * 0.2, 2.15], [0.001, 2.2]], 14, null, cx, hh + 0.12, cz));
@@ -189,9 +184,9 @@ export function mudCompound(el, { bag, col, lights }) {
   // dung cakes stacked against the court wall at the oven
   for (let k = 0; k < 4; k++) L.box('bark_dark', ou + side * 1.9 - 0.45, ov + 1.0 + 0.0, ou + side * 1.9 + 0.45, ov + 1.35, k * 0.14, k * 0.14 + 0.13);
   // the jars by the door, a water pot with its lid, a bench of timber
-  const dcu = F.W * 0.5;
-  for (let k = 0; k < 3; k++) L.lathe(k === 1 ? 'glaze_blue' : 'terracotta', [[0.08, 0], [0.22, 0.1], [0.27, 0.28], [0.2, 0.46], [0.1, 0.52], [0.001, 0.52]], 8, dcu + 1.6 + k * 0.55, 0.6, 0);
-  L.circle(dcu + 2.2, 0.6, 0.5, 0, 0.5);
+  const dcu = doorU;
+  for (let k = 0; k < 3; k++) L.lathe(k === 1 ? 'glaze_blue' : 'terracotta', [[0.08, 0], [0.22, 0.1], [0.27, 0.28], [0.2, 0.46], [0.1, 0.52], [0.001, 0.52]], 8, dcu + 1.5 + k * 0.5, 0.7, 0);
+  L.circle(dcu + 2.0, 0.7, 0.45, 0, 0.5);
   L.box('timber', dcu - 2.8, 0.55, dcu - 1.2, 0.95, 0.42, 0.48); L.box('wood_dark', dcu - 2.7, 0.6, dcu - 2.6, 0.9, 0, 0.42); L.box('wood_dark', dcu - 1.4, 0.6, dcu - 1.3, 0.9, 0, 0.42);
   L.col.rect(L.R(dcu - 2.8, 0.55, dcu - 1.2, 0.95), 0, 0.48);
   L.box('cloth_red', dcu - 2.7, 0.58, dcu - 1.8, 0.92, 0.48, 0.5);

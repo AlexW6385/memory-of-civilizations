@@ -54,7 +54,7 @@ for (const [z, n] of [[-92, 7], [-64, 7], [32, 7], [59, 7]]) { SHOPS.push({ a: [
 
 /** The courtyard lots of the Saracen quarter and the open ground between: { rect, gate, kind: 'house' | 'open', seed }. */
 export const LOTS = (() => {
-  const r = rng(1254), out = [], taken = [...MOSQUES, CHURCH, ...SECRETARIES.map((q) => q), [-62, -93, -36, -68]];
+  const r = rng(1254), out = [], taken = [...MOSQUES, CHURCH, ...SECRETARIES.map((q) => q), ...TEMPLES_NW, [-62, -93, -36, -68]];
   const rows = [[-70, -56, 's'], [-52, -38, 's'], [-34, -18, 's'], [18, 32, 'n'], [36, 50, 'n'], [54, 68, 'n'], [72, 86, 'n']];
   for (const [z0, z1, gate] of rows) {
     for (let x = -128; x < -30; x += 17.5) {
