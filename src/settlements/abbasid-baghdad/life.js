@@ -102,6 +102,34 @@ export async function lifePlan() {
   for (const j of JETTIES.slice(0, 7)) { const J = jettyAt(j); E.push({ t: 'sacks', at: [J.a[0] - J.dir * 2.6, j.z + 2.5], y: 0, rot: 0.3, n: 4, seed: Math.round(j.z) }); potAt(J.a[0] - J.dir * 2.4, j.z - 2.6, 'water_pot', 2); E.push({ t: 'barrel', at: [J.a[0] - J.dir * 3.6, j.z + 3.4], y: 0, seed: Math.round(j.z) + 1 }); }
   E.push({ t: 'well', kind: 'shaduf', at: [riverX(20) + RIVER.w / 2 + 12, 20], y: 0, rot: 3.14 }, { t: 'well', kind: 'shaduf', at: [riverX(-180) + RIVER.w / 2 + 12, -180], y: 0, rot: 3.14 }, { t: 'well', kind: 'open', at: [C[0] + 30, C[1] + 80], y: 0 }, { t: 'well', kind: 'open', at: [C[0] - 90, C[1] + 90], y: 0 });
   E.push({ t: 'handcart', at: [-98, 330], y: 0, rot: 0.2, seed: 1 }, { t: 'handcart', at: [-98, 460], y: 0, rot: -0.1, seed: 2 });
+  // ── the Golden Gate's approach, as seen from the arrival (the esplanade's south road, 16 m south of the stalls): a queue of petitioners and a scribe for hire at the gate, the guards' horses with grooms, a caravan unloading, traders on mats, water-sellers, children ──
+  {
+    const gx = C[0], gz = C[1] + 36;                                   // the Golden Gate in the palace's south wall
+    // petitioners with their papers, waiting at the gate; a letter-writer on his mat with a client
+    for (const [dx, dz, rot] of [[-5.5, 4.2, 0.2], [-3.4, 5.6, -0.1], [-1.2, 6.6, 0.15], [1.4, 7.2, 0], [3.6, 5.4, -0.2], [6.0, 4.4, 0.3]]) man([gx + dx, gz + dz], 0, rot, { pose: rand() < 0.5 ? 'stand' : 'talk', cloth: pick(CL), over: pick(['sash', 'cloak']) });
+    woman([gx - 7.4, gz + 6.8], 0, -0.3, { child: false }); woman([gx + 8.2, gz + 6.4], 0, 0.5, { carry: 'pot', arms: 'head' });
+    E.push({ t: 'goods_mat', at: [gx + 10.5, gz + 8.5], y: 0, rot: Math.PI, goods: ['heap', 'basket'], seed: 7 });
+    man([gx + 10.5, gz + 9.6], 0, Math.PI, { pose: 'cross', cloth: 'cloth_grey', beard: true }); man([gx + 9.3, gz + 7.2], 0, -2.4, { pose: 'stand', cloth: 'cloth_ochre' });
+    // two couriers' horses held by grooms, a rider's mount saddled, at the gate's west side
+    for (const [dx, dz, rot, sd] of [[-13.5, 5.5, 1.2, 71], [-15.8, 7.5, 1.9, 72]]) E.push({ t: 'animal', kind: 'horse', at: [gx + dx, gz + dz], y: 0, rot, seed: sd, gear: true });
+    porter([gx - 14.6, gz + 5.0], 0, -1.2, { pose: 'stand', carry: 'staff', len: 1.6, arms: 'staff' }); man([gx - 17.6, gz + 8.4], 0, 1.0, { pose: 'talk', cloth: 'cloth_black', hat: 'cap', hatMat: 'cloth_black' });
+    // the caravan from the Khurasan road, halted on the west side of the esplanade: camels couched under their loads, drivers, merchants bargaining, sacks and bales
+    for (const [dx, dz, rot, k] of [[-19, 14, 1.6, 1], [-23.5, 17, 1.4, 2], [-28, 14.5, 1.7, 3], [-32.5, 18, 1.5, 4]]) E.push({ t: 'animal', kind: 'camel', at: [gx + dx, gz + dz], y: 0, rot, seed: 80 + k, gear: true });
+    for (const [dx, dz] of [[-20.5, 20.5], [-26, 21], [-31, 22.5]]) E.push({ t: 'sacks', at: [gx + dx, gz + dz], y: 0, rot: rand() * 3, n: 4, seed: Math.round(dx * 5) });
+    porter([gx - 16.5, gz + 17.2], 0, 2.0, { carry: 'sack', arms: 'sack' }); porter([gx - 25, gz + 11.5], 0, -1.6, { pose: 'stand' });
+    man([gx - 22.4, gz + 23.8], 0, -0.5, { pose: 'talk', cloth: 'cloth_green', beard: true }); man([gx - 20.6, gz + 23.2], 0, 0.9, { pose: 'talk', cloth: 'cloth_maroon', beard: true });
+    // a string of donkeys with water jars on the east side, their driver, a boy with a goat
+    for (let k = 0; k < 4; k++) E.push({ t: 'animal', kind: 'donkey', at: [gx + 17 + k * 2.8, gz + 12 + (k % 2) * 1.2], y: 0, rot: 3.14 + (rand() - 0.5) * 0.2, seed: 90 + k, gear: true });
+    porter([gx + 15, gz + 12.6], 0, -1.4, { pose: 'stand', carry: 'staff', len: 1.5, arms: 'staff' }); man([gx + 28, gz + 18], 0, 2.6, { pose: 'talk', cloth: 'cloth_indigo' });
+    // fruit and bread sellers on mats at the stalls' feet, buyers before them, an old man on a brick bench, children at play, a dog
+    for (const [dx, dz, g] of [[-15, 19.5, ['heap', 'basket']], [14, 19.5, ['heap', 'heap']], [-8, 23, ['basket', 'heap']], [9.5, 24.5, ['basket', 'basket']]]) {
+      E.push({ t: 'goods_mat', at: [gx + dx, gz + dz], y: 0, rot: 0, goods: g, seed: Math.round(dx * 11 + dz) });
+      (rand() < 0.4 ? woman : man)([gx + dx + 0.3, gz + dz + 1.0], 0, Math.PI, { pose: 'sit_ground' }); man([gx + dx - 0.4, gz + dz - 1.7], 0, 0.1 + rand() * 0.3, { pose: 'talk' });
+    }
+    for (const [dx, dz, rot] of [[-12 + 1.3, 31.4, 0], [12 - 1.3, 31.5, 0]]) man([gx + dx, gz + dz], 0, rot, { pose: 'stand', carry: 'pot', cloth: 'cloth_white' });
+    man([gx - 12.4, gz + 24.6], 0, 0.3, { child: true }); man([gx - 13.8, gz + 25.4], 0, -0.6, { child: true }); man([gx + 16, gz + 28], 0, 1.0, { child: true });
+    E.push({ t: 'animal', kind: 'dog', at: [gx + 6, gz + 18], y: 0, rot: 0.8, seed: 21 }, { t: 'chickens', kind: 'pigeon', n: 6, at: [gx - 6, gz + 14], y: 0, seed: 31 }, { t: 'chickens', kind: 'pigeon', n: 5, at: [gx + 14, gz + 11], y: 0, seed: 32 });
+  }
   { const f = frontElements(); E.push(...f.E, ...esplanadeElements()); for (const p of f.P) man(p.at, p.y, p.rot, { pose: p.pose, over: 'none' }); }
   // ── the khan: camels couched in the court with their loads, donkeys at the back, merchants and a driver; the hammam's bathers; the workshops' keepers ──
   {

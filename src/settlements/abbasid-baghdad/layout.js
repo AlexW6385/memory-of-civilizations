@@ -138,7 +138,7 @@ export function streets() {
   for (const r of [...AVENUES, ...ROADS_IN, ...ROADS_OUT]) out.push({ r, weight: 1.4, market: 0.4, kind: 'street' });
   for (const s of ALL_SUQS) out.push({ r: s.rect, weight: 3, market: 1.5, kind: 'street' });
   // the esplanade: a loop of open ground round the palace (the guards, officials, scribes crossing)
-  out.push({ r: rc(C[0] - 150, C[1] + 42, C[0] + 150, C[1] + 56), weight: 0.8, market: 0.1, kind: 'street' }, { r: rc(C[0] + 42, C[1] - 150, C[0] + 56, C[1] + 150), weight: 0.8, market: 0.1, kind: 'street' }, { r: rc(C[0] - 150, C[1] - 56, C[0] + 150, C[1] - 42), weight: 0.8, market: 0.1, kind: 'street' }, { r: rc(C[0] - 56, C[1] - 150, C[0] - 42, C[1] + 150), weight: 0.8, market: 0.1, kind: 'street' });
+  out.push({ r: rc(C[0] - 150, C[1] + 42, C[0] + 150, C[1] + 56), weight: 2.4, market: 0.5, kind: 'street' }, { r: rc(C[0] + 42, C[1] - 150, C[0] + 56, C[1] + 150), weight: 0.8, market: 0.1, kind: 'street' }, { r: rc(C[0] - 150, C[1] - 56, C[0] + 150, C[1] - 42), weight: 0.8, market: 0.1, kind: 'street' }, { r: rc(C[0] - 56, C[1] - 150, C[0] - 42, C[1] + 150), weight: 0.8, market: 0.1, kind: 'street' });
   // the quay street along the north bank of the canal and the road along the Tigris's west bank
   out.push({ r: rc(-330, CANAL.z - 14, canalEnd() - 4, CANAL.z - 8), weight: 1.0, market: 0.8, kind: 'street' });
   out.push({ r: rc(-330, CANAL.z + 8, canalEnd() - 4, CANAL.z + 14), weight: 0.8, market: 0.8, kind: 'street' });
