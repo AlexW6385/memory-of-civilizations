@@ -23,6 +23,7 @@ E.push({ t: 'giparu', rect: GIPARU, door: 'w' });
 E.push({ t: 'ur_hall', rect: PALACE, h: 5.4, ring: 12, door: 'w', kind: 'palace', seed: 31 });
 E.push({ t: 'ur_hall', rect: STORES, h: 4.4, ring: 9, door: 'e', kind: 'stores', seed: 32 });
 E.push({ t: 'ur_court', rect: COURT });
+E.push({ t: 'ur_terrace', rect: TERRACE.rect, y: ty });
 // palms flanking the avenue between the north gate and the Edublalmah
 for (const [px, pz, s] of [[-15, -163, 1], [15, -163, 2], [-15, -147, 3], [15, -147, 4]]) E.push({ t: 'ur_palm', at: [px, pz], y: 0, h: 8.5 + (s % 3), seed: 200 + s });
 const [px0, pz0, px1, pz1] = TEMENOS;

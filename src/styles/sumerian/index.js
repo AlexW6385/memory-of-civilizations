@@ -11,7 +11,7 @@ import '../qing/index.js';
 import { urHouseOpen, scribeKit, quayGoods } from './house.js';
 import { giparu, urChapel } from './temple.js';
 import { dressFront, roofLife, urPen } from './dress.js';
-import { courtDress } from './court.js';
+import { courtDress, terraceDress } from './court.js';
 import { urHall } from './hall.js';
 import { palm } from '../egyptian/objects.js';
 
@@ -540,6 +540,6 @@ function reedBoat(el, { bag }) {
 
 registerStyle('sumerian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ziggurat, precinct_wall: precinctWall, courtyard_block: courtyardBlock, ur_house: urHouse, giparu, ur_chapel: urChapel, reed_boat: reedBoat, terrace, gate_tower: gateTower, stairs, scribe_kit: scribeKit, ur_court: courtDress, ur_pen: urPen, ur_hall: urHall, ur_palm: palm, quay_goods: quayGoods },
+  elements: { ...STYLES.qing.elements, ziggurat, precinct_wall: precinctWall, courtyard_block: courtyardBlock, ur_house: urHouse, giparu, ur_chapel: urChapel, reed_boat: reedBoat, terrace, gate_tower: gateTower, stairs, scribe_kit: scribeKit, ur_court: courtDress, ur_terrace: terraceDress, ur_pen: urPen, ur_hall: urHall, ur_palm: palm, quay_goods: quayGoods },
   objects: {},
 });
