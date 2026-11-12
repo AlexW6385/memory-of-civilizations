@@ -3,13 +3,13 @@
 // terrace's walls, the Court of Nanna, the Giparu, the palace E-hursag, storehouses, the precinct
 // wall; the harbour's quay and boats.
 
-import { TEMENOS, TERRACE, COURT, GIPARU, PALACE, STORES, HARBOUR, RADIUS, BOATS } from './layout.js';
+import { TEMENOS, TERRACE, COURT, GIPARU, PALACE, STORES, HARBOUR, RADIUS, BOATS, ZIG } from './layout.js';
 
 const E = [];
 const [tx0, tz0, tx1, tz1] = TERRACE.rect, ty = TERRACE.y;
 E.push({ t: 'terrace', rect: TERRACE.rect, h: ty, batter: 0.6, gap: [-7, 7] });
 E.push({ t: 'stairs', rect: [-7, COURT[3], 7, tz0 + 0.6], y0: 0, y1: ty, dir: 's', mat: 'brick_baked' });
-E.push({ t: 'ziggurat', c: [0, 0], y: ty, stages: [{ w: 64, d: 46, h: 15, batter: 3 }, { w: 38, d: 28, h: 7, batter: 1.5, dz: 5 }, { w: 24, d: 18, h: 5, batter: 1, dz: 8 }], shrine: { w: 14, d: 11, h: 5 } });
+E.push({ t: 'ziggurat', c: ZIG.c, y: ty, stages: ZIG.stages, shrine: ZIG.shrine });
 // the terrace's enclosure (walls of rooms standing on it, back from its sloping face), the Court of Nanna with the
 // Edublalmah, the gate tower, at its entrance, the precinct wall and its north gate
 const w = (a, b, h, th, y, mat) => E.push({ t: 'precinct_wall', a, b, h, th, y, mat });

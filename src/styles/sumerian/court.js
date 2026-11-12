@@ -91,6 +91,7 @@ export function courtDress(el, { bag, col, lights }) {
   { const px0 = x0 + 1.25, px1 = x1 - 1.25, pz0 = z0 + 1.25, wy = 0.05;
     B(BB, px0, y - 0.03, pz0, px1, y + tp, z1); col.floor([px0, pz0, px1, z1], y + tp);
     B('brick_buff', -5.5, y + tp, pz0, 5.5, y + wy, z1); col.floor([-5.5, pz0, 5.5, z1], y + wy);
+    B('reed_mat', 4.1, wy, z0 + 35.4, 5.45, wy + 0.008, z0 + 40.2);                                                  // the musicians' mat at the way's east edge
     for (const sx of [-1, 1]) B('limestone', sx * 5.5 - (sx > 0 ? 0 : 0.28), y + tp, pz0, sx * 5.5 + (sx > 0 ? 0.28 : 0), y + 0.13, z1);
     for (const [ax, az, r] of [[-17, z0 + 40, 2.9], [17, z0 + 40, 2.2], [-7, z0 + 20, 1.1], [7, z0 + 44, 1.1]]) bag.add('pottery_dark', lathe([[0.001, y + tp + 0.002], [r, y + tp + 0.002], [r * 0.97, y + tp]], 18, null, ax, 0, az)); }
   // ---- the standards of the gods along the way: palm-trunk poles on brick plinths bearing the gilded crescent of Nanna, a pennant under each

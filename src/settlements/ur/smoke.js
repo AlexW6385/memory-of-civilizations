@@ -28,7 +28,10 @@ export function emitters() {
   const [gx, gz] = [GIPARU[0], GIPARU[1]];
   E.push({ p: [gx + 13.2, 1.5, gz + 60.9], kind: 'kitchen', thr: 0, seed: 11 });               // the Giparu's cooking range (its kitchen court)
   E.push({ p: [gx + 42.6, 1.3, gz + 51.9], kind: 'incense', thr: 0, seed: 21 });              // before the altar in the great court
-  E.push({ p: [0, 1.2, -138], kind: 'incense', thr: 0.1, seed: 22 });                         // at the Edublalmah
+  E.push({ p: [0, 1.2, -138], kind: 'incense', thr: 0.1, seed: 22 });
+  // the fires of the libation altars at the stairs' foot, and the incense burning before the house of Nanna on the summit (docs/settlements/ur.md §4.4a)
+  E.push({ p: [-9.5, 1.75, COURT[3] - 7.5], kind: 'incense', thr: 0, seed: 44 }, { p: [9.5, 1.75, COURT[3] - 7.5], kind: 'incense', thr: 0.2, seed: 45 });
+  E.push({ p: [0, 31.2, 1.6], kind: 'incense', thr: 0, seed: 46 });                         // at the Edublalmah
   return E;
 }
 

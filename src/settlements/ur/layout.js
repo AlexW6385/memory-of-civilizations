@@ -7,6 +7,19 @@ export const RADIUS = 380;
 export const TEMENOS = [-140, -170, 130, 120];
 export const TERRACE = { rect: [-62, -72, 62, 50], y: 2.5 };
 export const COURT = [-50, -140, 50, -78];
+/** The ziggurat on its terrace (docs/settlements/ur.md §2, §4.1a): the three stages (the upper two set back by dz) and the house of Nanna. */
+export const ZIG = { c: [0, 0], y: TERRACE.y, stages: [{ w: 64, d: 46, h: 15, batter: 3 }, { w: 38, d: 28, h: 7, batter: 1.5, dz: 5 }, { w: 24, d: 18, h: 5, batter: 1, dz: 8 }], shrine: { w: 14, d: 11, h: 5 } };
+/**
+ * The height of the tread under (x, z) on the central stair of the lowest stage (stairs() of src/styles/sumerian: steps of about 0.16 m
+ * from the terrace to the first stage's top, the run from 1.9 times the stage's height out from its face to just past its batter),
+ * for placing the figures that climb it; null off the stair.
+ */
+export function stairY(x, z) {
+  const S = ZIG.stages[0], fz = ZIG.c[1] + (S.dz ?? 0) - S.d / 2, run = S.h, z0 = fz - run * 1.9, z1 = fz + S.batter + 0.5;
+  if (Math.abs(x - ZIG.c[0]) > 4 || z < z0 || z > z1) return null;
+  const n = Math.max(1, Math.round(S.h / 0.16)), tr = (z1 - z0) / n, i = Math.min(n - 1, Math.floor((z - z0) / tr));
+  return ZIG.y + (i + 1) * S.h / n;
+}
 export const GIPARU = [60, 40, 122, 104];
 export const PALACE = [70, -158, 122, -64];
 export const STORES = [-130, 40, -82, 108];
