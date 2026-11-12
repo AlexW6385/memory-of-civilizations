@@ -12,10 +12,11 @@ import { stadtbahnPavilion } from './pavilion.js';
 import { opera, karlskirche } from './landmarks.js';
 import { tram, litfass, fiaker, wienChannel, wienBridge, tramRails } from './street.js';
 import { naschmarktStall, gaslamp, bench } from './market.js';
+import { hofWing, hofYard } from './hof.js';
 import { FURNITURE } from '../modernisme/furniture.js';
 
 registerStyle('viennese', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, mietshaus, secession, cafe_house: cafeHouse, stadtbahn_pavilion: stadtbahnPavilion, opera, karlskirche, tram, litfass, fiaker, wien_channel: wienChannel, wien_bridge: wienBridge, tram_rails: tramRails, naschmarkt_stall: naschmarktStall, gaslamp, park_bench: bench, kiosk: FURNITURE.kiosk, terrace_set: FURNITURE.terrace_set },
+  elements: { ...STYLES.qing.elements, mietshaus, hof_wing: hofWing, hof_yard: hofYard, secession, cafe_house: cafeHouse, stadtbahn_pavilion: stadtbahnPavilion, opera, karlskirche, tram, litfass, fiaker, wien_channel: wienChannel, wien_bridge: wienBridge, tram_rails: tramRails, naschmarkt_stall: naschmarktStall, gaslamp, park_bench: bench, kiosk: FURNITURE.kiosk, terrace_set: FURNITURE.terrace_set },
   objects: {},
 });

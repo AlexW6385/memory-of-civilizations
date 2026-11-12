@@ -5,7 +5,7 @@
 import { lodTiles } from '../lod.js';
 import { subtractRects } from '../../core/build.js';
 import '../../styles/viennese/index.js';
-import { RADIUS, EW, NS, WIEN, LEDGE, BRIDGES, OPERA, KARLSKIRCHE, PAVILIONS, PATHS, SQUARE, NASCH, PROMENADE, RING_TRACKS, CAFE, SEC, lots, paving, inRect, onStreet, inLot } from './layout.js';
+import { RADIUS, EW, NS, WIEN, LEDGE, BRIDGES, OPERA, KARLSKIRCHE, PAVILIONS, PATHS, SQUARE, NASCH, PROMENADE, RING_TRACKS, CAFE, SEC, WING, lots, yards, paving, inRect, onStreet, inLot } from './layout.js';
 
 const base = (id, elements, extra = {}) => ({ id, style: 'viennese', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -64], facing: 's' }, ...extra });
 const cut = (rs, holes) => rs.flatMap((r) => subtractRects(r, holes)).filter((r) => r[2] - r[0] > 0.3 && r[3] - r[1] > 0.3);
@@ -115,9 +115,30 @@ function karlsplatz() {
   return base('vienna-karlsplatz', E, { rooms });
 }
 
+/** The yards behind the street houses, their paving and common life, and the rear wings along their long sides (gapped at the passages' mouths). */
+function hofs() {
+  const out = [], rand = rng(1115);
+  for (const yd of yards()) {
+    const [x0, z0, x1, z1] = yd.rect, lod = Math.hypot((x0 + x1) / 2, (z0 + z1) / 2) > 170 ? 1 : 0;
+    out.push({ t: 'hof_yard', rect: yd.rect, seed: 100 + yd.i, mouths: yd.mouths, y: 0, wing: WING + 2, lod });
+    for (const [nz0, nz1, front] of [[z0 + 2, z0 + 2 + WING, 's'], [z1 - 2 - WING, z1 - 2, 'n']]) {
+      let x = x0 + 2;
+      while (x < x1 - 4.5) {
+        const w = Math.min(x1 - 2 - x, 8 + Math.floor(rand() * 5) + rand());
+        const rect = [x, nz0, x + w, nz1];
+        const hit = yd.mouths.some((q) => !(rect[2] <= q[0] - 1.2 || rect[0] >= q[2] + 1.2 || rect[3] <= q[1] - 1.2 || rect[1] >= q[3] + 1.2));
+        if (!hit && w > 4) out.push({ t: 'hof_wing', rect, front, seed: Math.floor(rand() * 1e6), storeys: 2 + (rand() < 0.5 ? 1 : 0), y: 0, lod });
+        x += w;
+      }
+    }
+  }
+  return out;
+}
+
 export async function town() {
   const plans = [streets(), wien(), ...furniture(), naschmarkt(), karlsplatz()];
-  const els = lots().map((l) => ({ t: 'mietshaus', rect: l.rect, front: l.front, kind: l.kind, storeys: l.storeys, seed: l.seed, y: 0, side: l.side, lod: l.lod, faience: l.faience, medallions: l.medallions, mat: l.mat }));
+  const els = lots().map((l) => ({ t: 'mietshaus', rect: l.rect, front: l.front, kind: l.kind, storeys: l.storeys, seed: l.seed, y: 0, side: l.side, lod: l.lod, faience: l.faience, medallions: l.medallions, mat: l.mat, passage: l.passage, yardAt: l.yardAt, open: l.open }));
+  els.push(...hofs());
   plans.push(...lodTiles('vienna-houses', 'viennese', els, { R: RADIUS }));
   void CAFE; void SEC;
   return plans;
