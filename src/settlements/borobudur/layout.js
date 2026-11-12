@@ -17,6 +17,8 @@ export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >=
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
+/** The pilgrims' lodgings by the way: [x, z, front, W, D]. */
+export const WAYHOUSES = [[122, -13.5, 's', 7, 5.4], [147, 15, 'n', 7.4, 5.6], [176, -14.5, 's', 7, 5.4], [96, 14, 'n', 6.4, 5], [112, -15, 's', 6.2, 5]];
 let HOUSES = null;
 const FRONT_OF = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
 /**
@@ -44,6 +46,11 @@ export function houses() {
       n++;
     }
   });
+  // the lodgings of the pilgrims' way (§17): furnished houses on posts set back from the way, fronts to it, hamlet -1
+  for (const [i, [x, z, front, W, D]] of WAYHOUSES.entries()) {
+    const ew = front === 'e' || front === 'w', hx2 = (ew ? D : W) / 2, hz2 = (ew ? W : D) / 2;
+    HOUSES.push({ rect: [x - hx2, z - hz2, x + hx2, z + hz2], seed: 7000 + i * 131, kind: 'house', front, W, D, hamlet: -1, interior: true, variant: i % 3 });
+  }
   return HOUSES;
 }
 /** The floor height of a house (the style draws it from the seed's first number). */
@@ -62,6 +69,10 @@ export const wellAt = (hi) => [HAMLETS[hi][0] + 7.5, HAMLETS[hi][1] + 5.5];
  * (food and drink), 'pasar' (offerings: flowers, lamps, incense), 'rest' (an open hall for the weary), 'jars' (water) }.
  */
 export const WAY = { x0: 72, x1: 262, gate: 98 };
+/** Where the visitor arrives (src/planet/arrivals.js): nothing stands within a few metres of the view down the way from here. */
+export const ARRIVAL_X = 110;
+/** True for a point on the way's floor close to the arrival and ahead of it, where no figure or object may stand. */
+export const nearArrival = (x, z, m = 0) => Math.abs(z) < 4.2 + m && x > ARRIVAL_X - 10 - m && x < ARRIVAL_X + 4 + m;
 const RESTS = [[134, -1], [158, 1], [205, -1]];
 let STALLS = null;
 export function wayStalls() {
@@ -71,7 +82,7 @@ export function wayStalls() {
   let x = WAY.x0 + 6, i = 0;
   while (x < WAY.x1) {
     for (const side of [-1, 1]) {
-      if (rand() < 0.12 + (x - WAY.x0) / 420 || Math.abs(x - WAY.gate) < 7 || RESTS.some(([rx]) => Math.abs(x - rx) < 8.5)) continue;
+      if (rand() < 0.12 + (x - WAY.x0) / 420 || Math.abs(x - WAY.gate) < 7 || Math.abs(x - ARRIVAL_X) < 9 || RESTS.some(([rx]) => Math.abs(x - rx) < 8.5)) continue;
       const kind = x < WAY.gate + 26 ? 'pasar' : rand() < 0.5 ? 'warung' : rand() < 0.5 ? 'pasar' : 'warung';
       STALLS.push({ at: [x + (rand() - 0.5) * 1.6, side * (4.2 + rand() * 0.8)], side, kind, seed: Math.floor(rand() * 1e6), w: 3.6 + rand() * 1.4 });
     }
