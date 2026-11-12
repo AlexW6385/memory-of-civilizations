@@ -50,13 +50,24 @@ export function compounds() {
   if (COMP) return COMP;
   COMP = [];
   const rand = rng(1350), R = 9;
+  // the homesteads inside the Great Enclosure, in the open western and southern parts (clear of the passage, the tower's court and the entrance path)
+  const mk = (x, z, open) => {
+    const n = 3, a0 = rand() * 6.28, gap = a0 + Math.PI * 2 / n, huts = [];
+    for (let i = 0; i < n; i++) {
+      const a = a0 + (i + 0.5) * Math.PI * 2 / n, hx = x + Math.cos(a) * 5.4, hz = z + Math.sin(a) * 5.4, toC = Math.atan2(z - hz, x - hx);
+      huts.push({ c: [hx, hz], r: 2.35 + rand() * 0.6, y: 0, seed: (Math.round(toC * 100) % 628 + 628) % 628, open: open && i < 2 });
+    }
+    return { c: [x, z], r: R, gap, y: 0, huts, granary: [x + Math.cos(a0) * 6.2, z + Math.sin(a0) * 6.2], seed: Math.floor(rand() * 1e6), inner: true };
+  };
+  const [ex, ez] = ENCLOSURE.c;
+  for (const [dx, dz, o] of [[-27, -12, true], [-26, 8, false], [-8, 20, true], [-9, -14, false]]) COMP.push(mk(ex + dx, ez + dz, o));
   const ok = (x, z) => {
     if (Math.hypot(x, z) > RADIUS - 56 || inEnclosure(x, z, 14) || inWalled(x, z, R + 6)) return false;
     if (KRAAL_AT.some(([kx, kz, kr]) => Math.hypot(kx - x, kz - z) < kr + R + 4)) return false;
     for (let a = 0; a < 6.3; a += 0.9) if (height(x + Math.cos(a) * R, z + Math.sin(a) * R) > 4 || onAscent(x + Math.cos(a) * R, z + Math.sin(a) * R, 3)) return false;
     return height(x, z) < 3.5 && !COMP.some((k) => Math.hypot(k.c[0] - x, k.c[1] - z) < 2 * R + 5);
   };
-  for (let k = 0; k < 6000 && COMP.length < 78; k++) {
+  for (let k = 0; k < 6000 && COMP.length < 82; k++) {
     const x = (rand() * 2 - 1) * (RADIUS - 56), z = (rand() * 2 - 1) * (RADIUS - 56);
     if (!ok(x, z)) continue;
     const n = 2 + Math.floor(rand() * 3), a0 = rand() * 6.28, gap = a0 + Math.PI * 2 / n, y = height(x, z), huts = [];
@@ -70,17 +81,10 @@ export function compounds() {
   }
   return COMP;
 }
-/** The houses of the homesteads (flattened), and a few standing free inside the Great Enclosure. */
+/** The houses of the homesteads (flattened), those inside the Great Enclosure included. */
 export function huts() {
   if (HUTS) return HUTS;
   HUTS = compounds().flatMap((k) => k.huts);
-  const rand = rng(1351);
-  for (let t = 0; t < 400 && HUTS.length < compounds().reduce((s, k) => s + k.huts.length, 0) + 7; t++) {
-    const x = ENCLOSURE.c[0] + (rand() * 2 - 1) * (ENCLOSURE.r[0] - 12), z = ENCLOSURE.c[1] + (rand() * 2 - 1) * (ENCLOSURE.r[1] - 12);
-    if (!inEnclosure(x, z, -12) || Math.hypot(x - ENCLOSURE.c[0] - 25, z - ENCLOSURE.c[1] + 5) < 20 || Math.abs(x - ENCLOSURE.c[0] - 6) < 5 && z < ENCLOSURE.c[1] - 10) continue;
-    if (HUTS.some((h) => Math.hypot(h.c[0] - x, h.c[1] - z) < 10)) continue;
-    HUTS.push({ c: [x, z], r: 2.6 + rand() * 0.5, y: 0, seed: Math.floor(rand() * 628), open: false });
-  }
   return HUTS;
 }
 void hash2;
