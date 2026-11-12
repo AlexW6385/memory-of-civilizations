@@ -23,6 +23,14 @@ export function summitAltar() {
   for (const [x, z] of [[x0 - 0.1, z0 - 0.1], [x1 + 0.1, z0 - 0.1], [x0 - 0.1, z1 + 0.1], [x1 + 0.1, z1 + 0.1]]) E.push({ t: 'block', rect: [x - 0.14, z - 0.14, x + 0.14, z + 0.14], y0: Y + 1.64, y1: Y + 1.9, mat: 'marble', collide: false });
   for (const [x, z, h, yaw] of [[58.5, 2.2, 2.6, Math.PI / 2], [58.5, 3.8, 1.9, Math.PI / 2], [58.5, 33.6, 2.8, Math.PI / 2], [58.5, 35.2, 2.0, Math.PI / 2], [64, 38.6, 1.7, 0], [80.5, 11.6, 2.3, Math.PI / 2], [82.5, 12.4, 1.6, Math.PI / 2]]) E.push({ t: 'votive', kind: 'stele', at: [x, z], y: Y, yaw, h, w: h > 2.2 ? 0.8 : 0.6 });
   for (const [x, z] of [[62, 5.5], [79.5, 27.5], [66, 30.4]]) E.push({ t: 'votive', kind: 'tripod', at: [x, z], y: Y });
+  // the Erechtheion's cella (docs/settlements/athens.md §4g): the old olive-wood image of Athena Polias in her peplos on its base, facing the east door, Kallimachos' golden lamp on its
+  // stand with the bronze palm that carried its smoke to the roof, the small altars of the cella (Poseidon-Erechtheus, Butes, Hephaistos) at its west end; the floor at 0.9 m
+  { const fy = T + 0.9;
+    E.push({ t: 'xoanon', at: [36.4, -46], y: fy, yaw: Math.PI / 2, h: 1.9, god: 'artemis', gifts: 0 });
+    E.push({ t: 'block', rect: [38.4, -44.2, 38.9, -43.7], y0: fy, y1: fy + 0.25, mat: 'marble', collide: true }); E.push({ t: 'block', rect: [38.58, -44.02, 38.72, -43.88], y0: fy + 0.25, y1: fy + 1.5, mat: 'bronze', collide: false });
+    E.push({ t: 'block', rect: [38.4, -44.25, 38.9, -43.65], y0: fy + 1.5, y1: fy + 1.6, mat: 'bronze', collide: false }); E.push({ t: 'block', rect: [38.64, -44.06, 38.66, -44.04], y0: fy + 1.6, y1: fy + 4.3, mat: 'bronze', collide: false });
+    for (const [z, h] of [[-48.2, 0.9], [-46.0, 1.1], [-43.8, 0.9]]) { E.push({ t: 'block', rect: [27.2, z - 0.45, 28.2, z + 0.45], y0: fy, y1: fy + h, mat: 'marble' }); E.push({ t: 'block', rect: [27.1, z - 0.55, 28.3, z + 0.55], y0: fy + h, y1: fy + h + 0.1, mat: 'marble', collide: false }); }
+  }
   for (const [x, z] of STATUES) { E.push({ t: 'block', rect: [x - 0.62, z - 0.62, x + 0.62, z + 0.62], y0: Y - 0.1, y1: Y + 0.18, mat: 'limestone' }); E.push({ t: 'block', rect: [x - 0.48, z - 0.48, x + 0.48, z + 0.48], y0: Y + 0.18, y1: Y + 1.25, mat: 'marble' }); E.push({ t: 'block', rect: [x - 0.56, z - 0.56, x + 0.56, z + 0.56], y0: Y + 1.25, y1: Y + 1.34, mat: 'marble', collide: false }); }
   return E;
 }
@@ -57,6 +65,10 @@ export function summitLife() {
     else slave([x, z], r + (rand() - 0.5) * 0.7, { carry: rand() < 0.5 ? 'sack' : 'basket' });
     if (k % 3 === 0) man([x + 1.1, z + 0.35], r + 2.8, { pose: 'talk', cloth: 'cloth_grey' });
   });
+  // in the Erechtheion's cella: the priestess of Athena Polias with an attendant before the image, a man at the altars, a girl bringing the oil for the lamp (floor 0.9 m up)
+  { const fy = T + 0.9, at = (x, z, r, f, o) => { f([x, z], r, o); L[L.length - 1].y = fy; };
+    at(39.4, -47.2, -Math.PI / 2, woman, { pose: 'pray', cloth: 'cloth_white', cloth2: 'cloth_white', hat: 'veil' }); at(40.6, -44.8, -Math.PI / 2 - 0.4, woman, { carry: 'pot', arms: 'head', cloth: 'cloth_ochre' });
+    at(30.6, -44.2, -Math.PI / 2, man, { pose: 'pray' }); at(33.2, -48.9, Math.PI / 2 + 0.2, boy, {}); }
   // on the east steps and in the pteron before the great door: visitors sitting on the second step in the sun, others waiting under the colonnade for the priest, a woman with her jar
   for (const z of [21.2, 23.0, 28.6, 31.4]) { man([53.05, z], E, { pose: 'sit_low', cloth: pick(['cloth_white', 'linen', 'cloth_ochre']) }); L[L.length - 1].y = T + 1.04; if (z > 28) L[L.length - 1].dress = 'robe'; }
   woman([53.05, 25.4], E, { pose: 'sit_low' }); L[L.length - 1].y = T + 1.04; boy([52.95, 26.3], E + 0.3, {}); L[L.length - 1].y = T + 1.04;
