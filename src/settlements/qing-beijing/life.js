@@ -76,6 +76,12 @@ export async function lifePlans() {
     court.push({ t: 'bench', at: [bx, z], y: 0.03, rot: Math.PI / 2, len: 2.2, seed: Math.floor(rand() * 1e6) });
     for (const q of [-0.55, 0.55]) if (rand() < 0.8) off([bx, z + q], face([-sx, 0]), { pose: 'sit' });
   }
+  // on the terrace: attendants at the gilt vats and the censers (the vats stand at (±44, 2)), the hall's guards at the top of the stairs, a lamp-keeper
+  for (const sx of [-1, 1]) {
+    figs.push(man([sx * 42.6, 4.2], face([sx, 0]), { y: TIERS[2].y, pose: 'stand', cloth: 'cloth_grey', cloth2: 'cloth_black', carry: 'basket', dress: 'trousers', over: 'none' }));
+    figs.push(man([sx * 15.5, 15.5], face([0, 1]), { y: TIERS[2].y, carry: 'staff', pose: 'staff', len: 2.2, staffMat: 'timber', cloth: 'cloth_red', cloth2: 'cloth_black' }));
+    figs.push(man([sx * 36, 26.5], face([0, 1]), { y: TIERS[1].y, carry: 'staff', pose: 'staff', len: 2.2, staffMat: 'timber', cloth: 'cloth_maroon', cloth2: 'cloth_black' }));
+  }
   // the approach (§32): before the Meridian Gate's forecourt the officials' mounts and sedan chairs wait for their masters, the grooms squatting
   // by them; a knot of petitioners and the gate's own guards under the wall
   for (const sx of [-1, 1]) {
