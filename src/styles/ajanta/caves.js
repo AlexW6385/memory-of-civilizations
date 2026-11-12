@@ -16,6 +16,16 @@ export function lamp(ctx, x, y, z, h = 1.0, intensity = 2.2, distance = 9) {
   lights?.push({ at: [x, y + h + 0.1, z], color: '#ffb46b', intensity, distance });
   ctx.col.circle(x, z, 0.19, y, y + h);
 }
+
+/** A monk's things: a folded robe and his alms bowl on the bed (bed top at yb, centre bx, bz), a water pot and a palm-leaf manuscript on a cloth by it. */
+function monkKit(ctx, bx, yb, bz, px, pz, y, k = 0) {
+  const { bag } = ctx;
+  bag.add(k % 2 ? 'cloth_maroon' : 'cloth_ochre', box(bx - 0.25, yb, bz - 0.2, bx + 0.25, yb + 0.07, bz + 0.2));
+  bag.add('pottery_dark', lathe([[0.001, 0], [0.09, 0.0], [0.13, 0.07], [0.12, 0.1], [0.001, 0.07]], 8, null, bx + 0.45, yb, bz));
+  bag.add('terracotta', lathe([[0.001, 0], [0.1, 0.02], [0.18, 0.2], [0.13, 0.4], [0.08, 0.46], [0.1, 0.5], [0.001, 0.5]], 10, null, px, y, pz));
+  bag.add('cloth_white', box(px + 0.3, y, pz - 0.2, px + 0.8, y + 0.015, pz + 0.3));
+  bag.add('timber', box(px + 0.38, y + 0.015, pz - 0.12, px + 0.7, y + 0.06, pz + 0.18));
+}
 const slab = (ctx, mat, x0, y0, z0, x1, y1, z1) => ctx.bag.add(mat, box(x0, y0, z0, x1, y1, z1));
 function floorOf(ctx, x0, z0, x1, z1, y, mat = FLOORM) { slab(ctx, mat, Math.min(x0, x1), y - 0.12, Math.min(z0, z1), Math.max(x0, x1), y, Math.max(z0, z1)); ctx.col.floor([x0, z0, x1, z1], y); }
 /** A thin plaster lining on the plane x = at (axis 'x') or z = at ('z'), on the side n (±1), spanning [a0, a1] × [y0, y1] minus holes ([a0, y0, a1, y1] rects). */
@@ -163,12 +173,14 @@ export function vihara(ctx, xf, zc, y) {
       slab(ctx, STONE, c.x - 1.0, y, Math.min(zb, zb - c.nz * 2.1), c.x - 0.2, y + 0.45, Math.max(zb, zb - c.nz * 2.1)); col.rect([c.x - 1.0, Math.min(zb, zb - c.nz * 2.1), c.x - 0.2, Math.max(zb, zb - c.nz * 2.1)], y, y + 0.45);
       slab(ctx, STONE, c.x - 1.0, y + 0.45, Math.min(zb, zb - c.nz * 0.5), c.x - 0.2, y + 0.62, Math.max(zb, zb - c.nz * 0.5));
       // the carved doorframe at the hall wall: two jambs and a lintel with a roundel
+      monkKit(ctx, c.x - 0.6, y + 0.62, zb - c.nz * 1.3, c.x + 0.1, zb - c.nz * 0.5, y, c.x * 7);
       const zf = c.z; for (const sx of [-1, 1]) slab(ctx, STONE, c.x + sx * 0.62 - 0.08, y, zf - 0.12 + (c.nz > 0 ? 0 : -0.1), c.x + sx * 0.62 + 0.08, y + 2.3, zf + 0.12 + (c.nz > 0 ? 0.0 : -0.1));
     } else {
       plane(ctx, 'z', c.z - 1.1, 1, c.x - 3.6, c.x, y, y + 2.6); plane(ctx, 'z', c.z + 1.1, -1, c.x - 3.6, c.x, y, y + 2.6); plane(ctx, 'x', c.x - 3.6, 1, c.z - 1.1, c.z + 1.1, y, y + 2.6);
       slab(ctx, PLASTER, c.x - 3.6, y + 2.56, c.z - 1.1, c.x, y + 2.6, c.z + 1.1);
       slab(ctx, STONE, c.x - 3.6, y, c.z - 1.0, c.x - 1.5, y + 0.45, c.z - 0.2); col.rect([c.x - 3.6, c.z - 1.0, c.x - 1.5, c.z - 0.2], y, y + 0.45);
       slab(ctx, STONE, c.x - 3.6, y + 0.45, c.z - 1.0, c.x - 3.1, y + 0.62, c.z - 0.2);
+      monkKit(ctx, c.x - 2.6, y + 0.45, c.z - 0.6, c.x - 1.4, c.z + 0.6, y, c.z);
     }
   }
   lamp(ctx, xc - 3.0, y, zc - 8.6, 1.1, 1.8, 11); lamp(ctx, xc + 3.0, y, zc + 8.6, 1.1, 1.8, 11); lamp(ctx, xh0 + 1.0, y, zc - 3.3, 1.1, 1.8, 11); lamp(ctx, xh0 + 1.0, y, zc + 3.3, 1.1, 1.8, 11);
@@ -277,6 +289,7 @@ export function cellHall(ctx, xf, zc, y) {
     col.rect([x0 + 0.3, z0, x0 + 2.4, z1], y, y + 0.45);
     slab(ctx, STONE, x0 + 3.2, y, z0, x0 + 5.3, y + 0.45, z1); slab(ctx, STONE, x0 + 3.2, y + 0.45, z0, x0 + 3.7, y + 0.62, z1);
     col.rect([x0 + 3.2, z0, x0 + 5.3, z1], y, y + 0.45);
+    monkKit(ctx, x0 + 1.5, y + 0.45, (z0 + z1) / 2, x0 + 2.7, zb - s * 1.4, y, s); monkKit(ctx, x0 + 4.3, y + 0.45, (z0 + z1) / 2, x0 + 4.2, zb - s * 1.5, y, s + 1);
   }
   const P = wall(bag, x0, zc + 2.9, [1, 0], y, 5.8);
   lotusBand(P, 0, 5.8, 2.5, 2.9, 1, 0); buddhaM(P, 2.9, 0.4, 2.0, {}, 2); P.flush();
