@@ -172,9 +172,9 @@ let V = null;
  */
 export function village() {
   if (V) return V;
-  const rand = rng(1300), out = { houses: [], cooks: [], paths: [], works: [], yards: [] };
+  const rand = rng(1300), out = { houses: [], cooks: [], paths: [], works: [], yards: [], plants: [], taro: [] };
   for (const s of ISLETS) {
-    if (s.kind === 'landmark' || s.kind === 'seawall') continue;
+    if (s.kind === 'landmark' || s.kind === 'seawall' || s.kind === 'tomb') continue;
     const [x0, z0, x1, z1] = s.rect, w = x1 - x0, d = z1 - z0, alongX = w >= d;
     const pc = alongX ? (z0 + z1) / 2 : (x0 + x1) / 2;                     // the path's centre line
     const lo = (alongX ? x0 : z0) + 3, hi = (alongX ? x1 : z1) - 3;
@@ -182,6 +182,15 @@ export function village() {
     out.paths.push({ islet: s.id, a: alongX ? [x0 + 2, pc] : [pc, z0 + 2], b: alongX ? [x1 - 2, pc] : [pc, z1 - 2] });
     const mid = (lo + hi) / 2;
     out.paths.push({ islet: s.id, a: alongX ? [mid, z0 + 2] : [x0 + 2, mid], b: alongX ? [mid, z1 - 2] : [x1 - 2, mid] });
+    // the works of the special islets stand on the +side east/south of the cross path; the houses give way there
+    const WK = { canoe: ['shipyard', 7], oil: ['oilworks', 6], kitchen: ['cookshed', 5.5], landing: ['landing', 5.5], palace: ['hall', 7.5] }[s.kind];
+    let zone = null;
+    if (WK) {
+      const z0w = mid + 3.2, z1w = hi - 0.6, Lw = Math.min(WK[0] === 'hall' || WK[0] === 'landing' ? 12 : 18, z1w - z0w), cu = (z0w + z1w) / 2, off = 1.9 + WK[1] / 2 + 0.9;
+      zone = [z0w, z1w];
+      const c = alongX ? [cu, pc + off] : [pc + off, cu];
+      out.works.push({ kind: WK[0], c, yaw: alongX ? 0 : Math.PI / 2, l: Lw, w: WK[1], islet: s.id, seed: 600 + out.works.length });
+    }
     const grand = s.kind === 'palace', kinds = { commoner: [4.2, 5.4], priest: [4.6, 6.2], palace: [6.2, 9], canoe: [5, 6.5], oil: [4.5, 6], kitchen: [4, 5], landing: [5, 7.5], tomb: [4.4, 5.6] }[s.kind] ?? [4.2, 5.4];
     for (const side of [-1, 1]) {
       let u = lo + 1;
@@ -196,9 +205,22 @@ export function village() {
         const yaw = Math.atan2(-dir[0], -dir[1]);
         // not on the ford landings, nor the cross path, nor the landings
         const near = FORDS.some((f) => Math.hypot(f.c[0] - c[0], f.c[1] - c[1]) < f.len / 2 + 4.5 + ll / 2) || Math.abs(cu - mid) < ww / 2 + 1.8;
-        if (!near && rand() < (s.kind === 'commoner' ? 0.82 : 0.9)) {
+        const inZone = zone && side === 1 && cu > zone[0] - ww / 2 && cu < zone[1] + ww / 2;
+        if (!near && !inZone && rand() < (s.kind === 'commoner' ? 0.9 : 0.94)) {
           const house = { c, yaw, w: alongX ? ww : ww, l: ll, islet: s.id, rank: grand && rand() < 0.5 ? 2 : s.kind === 'priest' ? 1 : 0, seed: Math.floor(rand() * 1e6), side };
+          const half = (alongX ? d : w) / 2;
+          house.depth = Math.max(0, half - (Math.abs(cv - pc) + ll / 2) - 1.0);
           out.houses.push(house);
+          // a second row behind, its open end toward the first house's back yard, where the islet is deep enough
+          if (house.depth >= 9.2) {
+            const l2 = Math.max(3.6, Math.min(ll, house.depth - 3.0 - 1.5)), back = alongX ? [0, side] : [side, 0], gap = ll / 2 + 3.0 + l2 / 2;
+            const c2 = [c[0] + back[0] * gap, c[1] + back[1] * gap];
+            if (!FORDS.some((f) => Math.hypot(f.c[0] - c2[0], f.c[1] - c2[1]) < f.len / 2 + 4 + l2 / 2)) {
+              const w2 = Math.max(3.8, ww * (0.85 + rand() * 0.2));
+              out.houses.push({ c: c2, yaw, w: w2, l: l2, islet: s.id, rank: 0, seed: Math.floor(rand() * 1e6), side, back: true, depth: Math.max(0, house.depth - 3.0 - l2 - 0.2) });
+              house.depth = 3.0;
+            }
+          }
         }
         u += ww + 1.2 + rand() * 1.6;
       }
@@ -206,6 +228,10 @@ export function village() {
   }
   return (V = out);
 }
+export const TOMB_COURT = { rect: [35, -64, 69, -20], gate: [-39.6, -36.4] };       // the walls' centre lines on the tomb islet; the gap in the west wall (z)
+/** A tomb platform with its crypt, the Nandauwas plan with its south-west corner at (x0, z0). */
+export const tombAt = (x0, z0) => ({ rect: [x0, z0, x0 + 14, z0 + 18], h: 2.4, pit: [x0 + 4.8, z0 + 5, x0 + 9.2, z0 + 12.4], roofZ: z0 + 7.6, ramp: [x0 + 4.8, z0 + 9, x0 + 9.2, z0 + 12.4], stair: [x0 + 6, z0 + 18, x0 + 8, z0 + 21.4] });
+export const LESSER_TOMB = tombAt(45, -53);
 export const housesOf = (id) => village().houses.filter((h) => h.islet === id);
 
 /** The visitor's ways, as rectangles and links for the walkers (movers.js). */
@@ -232,6 +258,8 @@ export function cooks() {
     const ca = Math.cos(h.yaw), sa = Math.sin(h.yaw), u = h.w / 2 + 2.3, v = h.l / 2 - 0.4;
     const c = [h.c[0] + u * ca + v * sa, h.c[1] - u * sa + v * ca];
     if (!inRect(ISLET[h.islet].rect, c[0], c[1], -2.2)) return;
+    // not on the islet's paths, nor in a causeway's way
+    if (village().paths.some((q) => { const dx = q.b[0] - q.a[0], dz = q.b[1] - q.a[1], t = Math.max(0, Math.min(1, ((c[0] - q.a[0]) * dx + (c[1] - q.a[1]) * dz) / (dx * dx + dz * dz))); return Math.hypot(c[0] - q.a[0] - dx * t, c[1] - q.a[1] - dz * t) < 3.4; })) return;
     CK.push({ c, yaw: h.yaw, islet: h.islet, seed: h.seed });
   });
   return CK;

@@ -6,7 +6,7 @@
     "en": ["Nan Madol, on the reef flat off Pohnpei in the eastern Caroline Islands, is a city of about ninety artificial islets of basalt and coral fill divided by tidal canals, built from about AD 1200 under the Saudeleur dynasty as the seat of chiefs and priests. Everything it needed, water and food, came by canoe from the island. This view is c. 1300.", "Nandauwas — the royal mortuary: an outer wall of laid basalt columns 5.8 m high rising to 8.1 m at its corners, an inner enclosure and the tomb of a chief, with the sakau stone in the outer court.", "The islets — rectangular platforms with retaining walls of crib-laid columns, the nahs of priests and commoners with thatched hip roofs, cook-houses with earth ovens, the canoe builders' islet.", "The canals and shore — outrigger canoes on the tidal canals, causeways of columns, the sea wall on the reef, mangroves on the mud flat of Temwen island."],
     "zh": ["南马都尔位于密克罗尼西亚东加罗林群岛波纳佩岛外的礁坪上，由约九十座玄武岩与珊瑚填筑的人工小岛和潮汐水道组成，约自公元1200年起由绍德勒王朝兴建，为首领与祭司之所；水和食物都要靠独木舟从岛上运来。此处所见为约1300年。", "南达瓦斯——王室陵庙：以玄武岩石柱层叠砌成的外墙，高5.8米，四角翘起至8.1米；内院与首领之墓，外院设有萨考石。", "诸小岛——以石柱叠砌挡墙的长方形平台，上有祭司与平民的茅草四坡顶住屋、带地炉的厨房和造独木舟的小岛。", "水道与海岸——潮汐水道上的舷外浮架独木舟、石柱铺成的堤道、礁上的海墙，以及滕文岛泥滩上的红树林。"]
   },
-  "soundscape": "T(NEAR, { animals: { pig: 0.3, rooster: 0.4, tern: 0.5 }, roof: 'thatch' })",
+  "soundscape": "T(TROP, { cicadas: 0.4, frogs: 0.5, animals: withLife({ pig: 0.4, rooster: 0.5, dog: 0.2 }, { canal: 0.9, oar: 0.5, eaves: 0.9 }), roof: 'thatch' })",
   "lifeRegion": "pacific",
   "crop": null
 }

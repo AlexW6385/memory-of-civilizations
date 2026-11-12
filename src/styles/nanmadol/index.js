@@ -10,6 +10,9 @@ import { Matrix4 } from '../../core/three.js';
 import { subtractRects } from '../../core/build.js';
 import { cribWall, cribCollide, laid, rng, R, C, ROCK } from './crib.js';
 import { canoe } from './canoe.js';
+import { yard, works, tomb_court, wall_dress, post, weir } from './dress.js';
+import { plants, taro_bed } from './plants.js';
+import { court } from './court.js';
 
 const TH = 'thatch_palm', ROPE = 'rope_fibre', WOOD = 'palm_trunk';
 const dirOf = (yaw) => { const dx = Math.round(Math.sin(yaw)), dz = Math.round(Math.cos(yaw)); return dz > 0 ? 's' : dz < 0 ? 'n' : dx > 0 ? 'e' : 'w'; };
@@ -139,6 +142,24 @@ function nah(el, { bag, col }) {
   put('reed_mat', box(-w / 2 + 0.7, ph + 0.025, -0.4, w / 2 - 0.9, ph + 0.05, 0.9));
   put('palm_trunk', lathe([[0.07, 0], [0.07, 0.6]], 6).rotateZ(Math.PI / 2).translate(-0.3, ph + 0.12, l / 2 - 0.5));
   if (rank) put('timber', box(-w / 2 + 0.3, ph, l / 2 - 1.2, w / 2 - 0.3, ph + 0.22, l / 2 - 0.3));
+  // the frame under the roof, seen from the platform: ridge pole, tie beams, rafters lashed to them
+  { const rr = eave + rise - 0.06;
+    put('timber', rod([0, rr, -l / 2 + 0.3], [0, rr, l / 2 - 0.3], 0.045, 6));
+    for (const z of [-l / 2 + 0.2, 0, l / 2 - 0.2]) put('timber', rod([-w / 2 + 0.15, eave + 0.02, z], [w / 2 - 0.15, eave + 0.02, z], 0.04, 5));
+    for (const s of [-1, 1]) for (let k = 0; k < 6; k++) { const z = -l / 2 + 0.3 + k * (l - 0.6) / 5; put('timber', rod([s * (w / 2 - 0.1), eave + 0.02, z], [s * 0.05, rr, z * 0.8], 0.022, 4)); }
+    put(ROPE, lathe([[0.07, 0], [0.07, 0.07]], 6, null, 0, rr - 0.04, l / 2 - 1.2)); }
+  // the household's things on the platform and hung from the beams: a second mat, a mat roll, bowls and cups, a hung basket, bananas, strung fish, a lamp
+  { const bk = l / 2 - 0.35, u0 = -w / 2 + 0.45;
+    put('reed_mat', box(u0, ph + 0.05, 0.9, w / 2 - 0.45, ph + 0.07, bk - 0.3));
+    put('reed_mat', lathe([[0.09, 0], [0.09, 0.9]], 8).rotateZ(Math.PI / 2).translate(u0, ph + 0.1, bk - 0.1));
+    put('palm_trunk', lathe([[0.06, 0], [0.06, 0.5]], 6).rotateZ(Math.PI / 2).translate(0.2, ph + 0.1, l / 2 - 0.5));
+    for (let i = 0; i < 3; i++) put(i % 2 ? 'bark_dark' : 'timber', lathe([[0.001, 0], [0.1, 0.01], [0.13, 0.09], [0.001, 0.09]], 7, null, w / 2 - 0.7 - i * 0.28, ph + 0.07, bk - 0.2 - (i % 2) * 0.2));
+    if (rand() < 0.7) { const x = -w / 4 + rand() * w / 2; put(ROPE, rod([x, eave, 0.3], [x, eave - 0.6, 0.3], 0.008, 3)); put('wicker', lathe([[0.001, 0], [0.15, 0.05], [0.17, 0.25], [0.001, 0.3]], 7, null, x, eave - 0.9, 0.3)); }
+    if (rand() < 0.6) { const x = w / 4 + rand() * 0.3; put(ROPE, rod([x, eave, -0.4], [x, eave - 0.4, -0.4], 0.008, 3)); for (let k = 0; k < 7; k++) put('glaze_yellow', lathe([[0.001, 0], [0.04, 0.08], [0.036, 0.18], [0.001, 0.22]], 5, null, x + Math.cos(k) * 0.09, eave - 0.85 + (k % 3) * 0.06, -0.4 + Math.sin(k) * 0.09)); }
+    if (rand() < 0.5) { const x = -w / 4; put(ROPE, rod([x, eave, -0.2], [x, eave - 0.5, -0.2], 0.006, 3)); for (let k = 0; k < 4; k++) put('hide_grey', box(x - 0.03, eave - 0.6 - k * 0.1, -0.21, x + 0.03, eave - 0.52 - k * 0.1, -0.19)); }
+    if (rand() < 0.5) { put('bark_dark', lathe([[0.001, 0], [0.07, 0.01], [0.08, 0.06], [0.001, 0.06]], 6, null, -w / 2 + 0.7, ph + 0.07, 0.3)); put('flame', lathe([[0.001, 0.06], [0.015, 0.075], [0.001, 0.13]], 5, null, -w / 2 + 0.7, ph + 0.07, 0.3)); }
+    for (const u of [-w / 2 + 0.3, w / 2 - 0.3]) put('timber', rod([u, ph + 0.9, l / 2 - 0.9], [u + 0.04, ph + 1.8, l / 2 - 0.9], 0.015, 4)); // spears in the corner
+  }
   // colliders: the three half walls, the platform's floor, a ramp up at the front for a high platform
   const S = (u0, v0, u1, v1) => col.segment(F.W(u0, v0), F.W(u1, v1), 0.12, 0, ph + 0.95);
   S(-w / 2 + 0.16, -l / 2 + 0.5, -w / 2 + 0.16, l / 2 - 0.12); S(w / 2 - 0.16, -l / 2 + 0.5, w / 2 - 0.16, l / 2 - 0.12); S(-w / 2 + 0.2, l / 2 - 0.16, w / 2 - 0.2, l / 2 - 0.16);
@@ -195,7 +216,7 @@ function pile(el, { bag }) {
 
 registerStyle('nanmadol', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { crib_wall, islet_wall, steps, ford, tomb, nah, cookhouse, canoe, mangrove, sakau, pile },
+  elements: { crib_wall, islet_wall, steps, ford, tomb, nah, cookhouse, canoe, mangrove, sakau, pile, yard, works, tomb_court, wall_dress, post, weir, plants, taro_bed, court },
   objects: {},
 });
 export { canoe };

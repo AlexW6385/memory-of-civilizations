@@ -16,9 +16,11 @@ for (const c of CANALS.slice(0, 6)) {
 const flights = [
   { kind: 'swallow', n: 6, loop: { c: [0, 30], a: [90, 60], rot: 0 }, y: [1.5, 9], speed: 9 },
   { kind: 'swallow', n: 5, loop: { c: [60, -40], a: [60, 40], rot: 0.5 }, y: [3, 14], speed: 9 },
+  { kind: 'swallow', n: 4, loop: { c: [-10, 70], a: [30, 24], rot: 0.2 }, y: [3, 8], speed: 8 },
   { kind: 'crow', n: 4, loop: { c: [0, 0], a: [140, 100], rot: 0.3 }, y: [25, 50], speed: 8 },
 ];
 const perches = [];
-for (const [x, z] of [[-30, 30], [10, 40], [-60, -40], [-65, 30], [50, 30], [55, -90], [-20, -100], [-60, 90]]) perches.push({ kind: 'sparrow', x, z, y: ground.height(x, z) + 0.05, rot: (x * 7) % 3, range: [1.8, 1.6] });
+for (const [x, z] of [[-30, 30], [10, 40], [-60, -40], [-65, 30], [50, 30], [55, -90], [-20, -100], [-60, 90], [-16, 70], [-4, 76], [-18, 84], [-3, 88], [-25, 20], [8, 20], [-14, 40], [20, -80], [-70, -90], [-100, -10], [-100, 50], [40, 60]]) if (ground.height(x, z) > -0.3) perches.push({ kind: 'sparrow', x, z, y: ground.height(x, z) + 0.05, rot: (x * 7) % 3, range: [1.8, 1.6] });
+for (const [x, z, r] of [[-130, -100, 0.4], [-160, -40, 2.1], [-172, 10, 1.0]]) perches.push({ kind: 'egret', x, z, y: ground.height(x, z), rot: r, stay: [60, 200], gone: [60, 160], alert: 10 });
 { const x = -150, z = -75; perches.push({ kind: 'egret', x, z, y: ground.height(x, z), rot: Math.PI / 2, stay: [60, 200], gone: [60, 160], alert: 10 }); }
 export default { fish, flights, perches };
