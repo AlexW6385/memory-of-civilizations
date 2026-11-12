@@ -46,6 +46,7 @@ function being(add, type, y0, len, r, wood, rand) {
       // folded wings: long boards down the sides, the ends curled out, red-edged
       add(BLK, board([s * r * 1.02, y0 + len * 0.86], [s * r * 1.12, y0 + len * 0.1], r * 0.55, -r * 0.5, r * 0.45).translate(0, 0, 0));
       add(RED, board([s * r * 1.1, y0 + len * 0.78], [s * r * 1.16, y0 + len * 0.2], r * 0.2, -r * 0.46, r * 0.36));
+      for (let k = 0; k < 5; k++) add(RED, board([s * r * 0.8, y0 + len * (0.72 - k * 0.13)], [s * r * 1.35, y0 + len * (0.66 - k * 0.13)], 0.03, -r * 0.54, -r * 0.48));
     }
   } else if (type === 'bear') {
     add(wood, box(-r * 0.4, y0 + len * 0.36, -r * 1.55, r * 0.4, y0 + len * 0.58, zf + 0.1));
@@ -62,6 +63,19 @@ function being(add, type, y0, len, r, wood, rand) {
     add(BLK, sideprism([[-r * 0.1, y0 + len * 0.96], [-r * 0.28, y0 + len * 1.42], [r * 0.45, y0 + len * 0.96]], -0.07, 0.07));   // the tall fin
     add(RED, ellipse(0, y0 + len * 0.88, r * 0.1, r * 0.06, -r * 0.1, r * 0.05));
     for (const s of [-1, 1]) add(BLK, board([s * r * 1.0, y0 + len * 0.55], [s * r * 1.5, y0 + len * 0.2], r * 0.38, -r * 0.4, -r * 0.05));   // the flippers
+  } else if (type === 'frog') {
+    // a very wide flat mouth, the eyes standing up on top of the head, the hands with spread fingers on the chest
+    add(RED, board([-r * 0.95, my], [r * 0.95, my], len * 0.1, zf - t - 0.04, zf + 0.03));
+    for (const s of [-1, 1]) {
+      add(wood, ellipse(s * ex, ey + ry * 1.5, rx * 0.9, ry * 1.0, zf - 0.16, zf + 0.04)); add(BLK, ellipse(s * ex, ey + ry * 1.5, rx * 0.45, ry * 0.5, zf - 0.19, zf + 0.04));
+      for (let k = 0; k < 3; k++) add(BLK, board([s * (r * 0.5 + k * r * 0.14), y0 + len * 0.2], [s * (r * 0.58 + k * r * 0.22), y0 + len * 0.06], 0.05, zf - 0.08, zf + 0.03));
+    }
+  } else if (type === 'beaver') {
+    // the two great incisors under the nose, the scaled tail hanging down the chest
+    add(wood, box(-r * 0.3, y0 + len * 0.45, -r * 1.3, r * 0.3, y0 + len * 0.6, zf + 0.1));
+    for (const s of [-1, 1]) add(WHT, box(s * r * 0.02 + (s > 0 ? 0 : -r * 0.2), y0 + len * 0.12, zf - 0.14, s * r * 0.02 + (s > 0 ? r * 0.2 : 0), y0 + len * 0.31, zf - 0.04));
+    add(BLK, board([0, y0 + len * 0.02], [0, y0 + len * 0.12], r * 0.9, zf - 0.1, zf - 0.02));
+    for (let k = 0; k < 4; k++) add(RED, board([-r * 0.4, y0 + len * (0.025 + k * 0.025)], [r * 0.4, y0 + len * (0.025 + k * 0.025)], 0.02, zf - 0.11, zf - 0.02));
   } else {
     add(wood, box(-r * 0.13, y0 + len * 0.42, -r * 1.25, r * 0.13, y0 + len * 0.66, zf + 0.1));                 // the nose
     for (const s of [-1, 1]) {
@@ -73,10 +87,16 @@ function being(add, type, y0, len, r, wood, rand) {
       for (let k = 0; k < 5; k++) add(k % 2 ? BLK : 'planks_grey', lathe([[r * (0.5 - k * 0.04), 0], [r * (0.62 - k * 0.04), 0.05], [r * (0.5 - k * 0.04), 0.3]], 12, null, 0, y0 + len + k * 0.28, 0));
     }
   }
-  void rand;
+  // weathering: dark cracks down the back and sides of the log, a collar of moss at the foot of some beings
+  const rr = rand;
+  for (let k = 0; k < 3; k++) {
+    const a = 1.0 + rr() * 1.7, sg = rr() < 0.5 ? -1 : 1, x = Math.sin(a) * r * 0.98 * sg, z = -Math.cos(a) * r * 0.98, ya = y0 + len * (0.05 + rr() * 0.4);
+    add('wood_dark', box(x - 0.012, ya, z - 0.012, x + 0.012, ya + len * (0.25 + rr() * 0.3), z + 0.012));
+  }
+  if (rr() < 0.35) add('sod', lathe([[r * 1.07, y0], [r * 1.07, y0 + 0.1], [r * 0.99, y0 + 0.14], [r * 0.99, y0]], 12));
 }
 
-const KINDS = ['bear', 'bird', 'whale', 'human', 'bird', 'bear'];
+const KINDS = ['bear', 'bird', 'whale', 'human', 'bird', 'bear', 'frog', 'beaver'];
 /** The pole's beings from y0 up to y0 + total, the sequence from the seed; the top one the watchman or a bird. */
 function carved(add, y0, total, r0, r1, wood, seed, topHat = true) {
   const rand = rng(seed), n = Math.max(2, Math.round(total / 1.9)), len = total / n;
@@ -124,7 +144,7 @@ function house(el, ctx) {
   }
   // the roof: long planks laid up the slope, the front and back eaves reaching 0.9 m past the walls;
   // over the hearth the smoke hole is cut in the landmark's (1.4 m across the ridge by 2.6 m along it)
-  const vF = -hd - 0.9, vB = hd + 0.9, hole = el.landmark ? { u: 1.5, v: 1.3 } : null;
+  const vF = -hd - 0.9, vB = hd + 0.9, hole = el.tiers ? { u: 1.5, v: 1.3 } : null;
   const slab = (s, u0, u1, v0, v1, m) => add(m, prism([[s * u0, yAt(u0) + 0.04], [s * u1, yAt(u1) + 0.04], [s * u1, yAt(u1) - 0.1], [s * u0, yAt(u0) - 0.1]], v0, v1));
   for (const s of [-1, 1]) {
     const m = woodOf(el.age, rand());
@@ -162,14 +182,15 @@ function house(el, ctx) {
   padd(BLK, board([-0.7, 2.5], [0.7, 2.5], 0.2, -0.86, -0.78)); padd(RED, board([-0.5, 2.5], [0.5, 2.5], 0.09, -0.9, -0.78));
   carved(padd, top, el.landmark ? 7.6 : (el.pole ?? 5.8) , 0.72, 0.55, wood, el.seed * 7 + 3);
   for (const s of [-1, 1]) rectL(s > 0 ? dw : -pw, pz - 0.8, s > 0 ? pw : -dw, pz + 0.8, g, g + top);
+  houseFront(el, { bag, add, col, W, segL, rectL, rand, hw, hd, g, yTop, ridgeY, eaveY, R, vF, vB, yAt, hole, pz, dw, pw });
   // the doorway's floor board and the dark board that shuts it in the other houses
-  if (!el.landmark) { add('lacquer_black', box(-dw, 0, -hd, dw, doorTop, -hd + 0.12)); segL([-dw, -hd + 0.05], [dw, -hd + 0.05], 0.1, -0.3, doorTop); }
+  if (!el.tiers) { add('lacquer_black', box(-dw, 0, -hd, dw, doorTop, -hd + 0.12)); segL([-dw, -hd + 0.05], [dw, -hd + 0.05], 0.1, -0.3, doorTop); }
   // the walls' colliders (the doorway left open in the landmark)
   const wl = (a, b) => segL(a, b, wt, -0.3, yTop);
   wl([-hw + wt / 2, -hd], [-hw + wt / 2, hd]); wl([hw - wt / 2, -hd], [hw - wt / 2, hd]);
   wl([-hw, hd - wt / 2], [hw, hd - wt / 2]);
   wl([-hw, -hd + wt / 2], [-dw, -hd + wt / 2]); wl([dw, -hd + wt / 2], [hw, -hd + wt / 2]);
-  if (!el.landmark || !el.tiers) return;
+  if (!el.tiers) return;
 
   // ── the landmark's inside ────────────────────────────────────────────────────────────────
   const T = el.tiers, yL = g - 0.4, yLo = g - 0.8, yP = g - 1.2;
@@ -183,7 +204,8 @@ function house(el, ctx) {
   for (let k = 0; k < 8; k++) add('log_pine', rod([-hs - 0.9 + (k % 2) * 0.05, yP + 0.14 + Math.floor(k / 2) * 0.14, -hs + 0.3 * k * 0.3 - 0.3], [-hs - 0.9 + (k % 2) * 0.05, yP + 0.14 + Math.floor(k / 2) * 0.14, -hs + 0.3 * k * 0.3 + 0.8], 0.06, 6));
   if (lights) { const [lx, lz] = W(0, 0); lights.push({ at: [lx, yP + 0.7, lz], color: '#ff9a4a', intensity: 3.4, distance: 9 }); const [hx, hz] = W(2.2, 0); lights.push({ at: [hx, g + 3.6, hz], color: '#d9e4f2', intensity: 1.0, distance: 7 }); }
   // the four house posts, each carved with a being facing the fire, under the two beams along the house
-  const pu = 3.5, pv = 3.25, bY = yAt(pu) - 0.45;
+  const hwI = hw - 0.4, hdI = hd - 0.4;
+  const pu = el.landmark ? 3.5 : hwI * 0.47, pv = el.landmark ? 3.25 : hdI * 0.5, bY = yAt(pu) - 0.45;
   for (const [su, sv] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
     const Q = sub(M, su * pu, 0, sv * pv, 0);
     placer(bag, Q)(woodOf(el.age, 0.5), lathe([[0.46, yP], [0.43, bY - 0.2], [0.001, bY - 0.2]], 12));
@@ -192,13 +214,13 @@ function house(el, ctx) {
   }
   for (const s of [-1, 1]) {
     add('timber', rod([s * pu, bY, -hd + 0.3], [s * pu, bY, hd - 0.3], 0.3, 8));
-    add('timber', rod([s * (pu + 2.7), yAt(pu + 2.7) - 0.3, -hd + 0.3], [s * (pu + 2.7), yAt(pu + 2.7) - 0.3, hd - 0.3], 0.17, 7));
+    const pp = Math.min(pu + 2.7, hw - 0.9);
+    add('timber', rod([s * pp, yAt(pp) - 0.3, -hd + 0.3], [s * pp, yAt(pp) - 0.3, hd - 0.3], 0.17, 7));
   }
   add('timber', rod([0, ridgeY - 0.35, -hd + 0.3], [0, ridgeY - 0.35, hd - 0.3], 0.16, 7));
   for (const v of [-pv, pv]) add('timber', rod([-pu, bY, v], [pu, bY, v], 0.2, 7));
   // the sleeping places: platforms on the ledge along the left, right and back, divided by upright plank screens;
   // mats and hides on them; the chief's quarter behind the painted screen at the back
-  const hwI = hw - 0.4, hdI = hd - 0.4;
   const beds = [[-hwI, -hdI + 1.5, -hwI + 1.5, hdI - 2.0], [hwI - 1.5, -hdI + 1.5, hwI, hdI - 2.0]];
   for (const [u0, v0, u1, v1] of beds) {
     add('timber', box(u0, yL, v0, u1, yL + 0.3, v1)); rectL(u0, v0, u1, v1, yL, yL + 0.3);
@@ -218,10 +240,21 @@ function house(el, ctx) {
   add('cedar', box(door[0], yL + 2.1, sv - 0.06, door[1], yL + sh, sv + 0.06));
   rectL(-hwI + 1.5, sv - 0.06, door[0], sv + 0.06, yL, yL + sh); rectL(door[1], sv - 0.06, hwI - 1.5, sv + 0.06, yL, yL + sh);
   // the painted front of the screen (toward −v): two black eyes of the formline with red, and a red band
+  const spw = hwI - 1.5, sr = rng(el.seed + 5), design = el.landmark ? 0 : Math.floor(sr() * 3);
   for (const s of [-1, 1]) {
-    const cx = s * 3.0, face = (m, e) => add(m, e.translate(0, 0, 0));
-    face(BLK, ellipse(cx, yL + 1.9, 0.8, 0.5, sv - 0.09, sv - 0.055)); face(RED, ellipse(cx, yL + 1.9, 0.5, 0.3, sv - 0.1, sv - 0.055)); face(BLK, ellipse(cx, yL + 1.9, 0.18, 0.18, sv - 0.11, sv - 0.055));
-    face(RED, board([s * 1.0, yL + 0.6], [s * 4.8, yL + 0.6], 0.5, sv - 0.09, sv - 0.055));
+    const cx = s * spw * 0.55, face = (m, e) => add(m, e.translate(0, 0, 0));
+    if (design === 0) {
+      face(BLK, ellipse(cx, yL + 1.9, 0.8, 0.5, sv - 0.09, sv - 0.055)); face(RED, ellipse(cx, yL + 1.9, 0.5, 0.3, sv - 0.1, sv - 0.055)); face(BLK, ellipse(cx, yL + 1.9, 0.18, 0.18, sv - 0.11, sv - 0.055));
+      face(RED, board([s * spw * 0.1, yL + 0.6], [s * spw * 0.97, yL + 0.6], 0.5, sv - 0.09, sv - 0.055));
+    } else if (design === 1) {
+      // a pair of broad ovoids with a red field between them, the lower band black
+      face(RED, ellipse(cx, yL + 1.7, 0.95, 0.75, sv - 0.09, sv - 0.055)); face(BLK, ellipse(cx, yL + 1.7, 0.6, 0.42, sv - 0.1, sv - 0.055)); face(RED, ellipse(cx, yL + 1.7, 0.22, 0.2, sv - 0.11, sv - 0.055));
+      face(BLK, board([s * spw * 0.1, yL + 0.5], [s * spw * 0.97, yL + 0.5], 0.4, sv - 0.09, sv - 0.055));
+    } else {
+      // a black field with a red crescent-brow and two small eyes
+      face(BLK, box(cx - 1.0, yL + 0.9, sv - 0.09, cx + 1.0, yL + 2.5, sv - 0.055)); face(RED, board([cx - 0.8, yL + 2.1], [cx + 0.8, yL + 2.1], 0.2, sv - 0.1, sv - 0.055));
+      face(RED, ellipse(cx - 0.35, yL + 1.6, 0.2, 0.15, sv - 0.1, sv - 0.055)); face(RED, ellipse(cx + 0.35, yL + 1.6, 0.2, 0.15, sv - 0.1, sv - 0.055));
+    }
   }
   add('timber', box(-hwI + 1.5, yL, sv + 0.2, hwI - 1.5, yL + 0.3, hdI)); rectL(-hwI + 1.5, sv + 0.2, hwI - 1.5, hdI, yL, yL + 0.3);
   add('hide_brown', box(-hwI + 1.9, yL + 0.3, sv + 0.4, 0, yL + 0.4, hdI - 0.2));
@@ -240,10 +273,10 @@ function house(el, ctx) {
     if (k % 3 === 0) boxAt(u, v, yy + 0.6, 0.65, 0.45, 0.45, side > 0 ? Math.PI / 2 : -Math.PI / 2);
     rectL(u - 0.3, v - 0.4, u + 0.3, v + 0.4, yy, yy + 0.6);
   }
-  for (const u of [-2.2, 1.6, 3.4]) boxAt(u, hdI - 0.45, yL + 0.3, 0.9, 0.55, 0.6, Math.PI);
+  for (const u of el.landmark ? [-2.2, 1.6, 3.4] : [-2.2, 1.6]) boxAt(u, hdI - 0.45, yL + 0.3, 0.9, 0.55, 0.6, Math.PI);
   // baskets, a carved dish, floats, hats on pegs; and the store hung under the roof: strings of dried halibut and salmon
-  for (const [u, v] of [[-hwI + 0.7, -hdI + 1.7], [hwI - 0.7, hdI - 3.3], [0, 4.2]]) add('wicker', lathe([[0.2, 0], [0.28, 0.2], [0.26, 0.4], [0.001, 0.4]], 9, null, u, yL, v));
-  for (const [u, v] of [[-3.1, 3.7], [3.0, -3.5], [-3.2, 0.2]]) {
+  for (const [u, v] of [[-hwI + 0.7, -hdI + 1.7], [hwI - 0.7, hdI - 3.3], [hwI - 0.75, -hdI + 0.5]]) add('wicker', lathe([[0.2, 0], [0.28, 0.2], [0.26, 0.4], [0.001, 0.4]], 9, null, u, yL, v));
+  for (const [u, v] of [[-pu * 0.9, pv * 1.15], [pu * 0.86, -pv * 1.08], [-pu * 0.92, 0.2]]) {
     for (let k = 0; k < 7; k++) {
       const fy = bY - 0.2 - rand() * 0.4, fu = u + (k - 3) * 0.17, fv = v + (rand() - 0.5) * 0.3;
       add('rope_fibre', rod([fu, bY - 0.05, fv], [fu, fy + 0.25, fv], 0.012, 3));
@@ -251,17 +284,185 @@ function house(el, ctx) {
     }
   }
   for (const s of [-1, 1]) add('rope_fibre', rod([s * 2.0, bY, -1.3], [s * 2.0, bY - 0.5, -1.3], 0.012, 3));
+  houseLife(el, { bag, col, add, M, W, rectL, rand, hwI, hdI, yL, yLo, yP, bY, yAt, hole, hw, hd, g });
   void yLo; void yP;
 }
+
+// ── the house's front and its weathering: paint, bench, moss, stains, the pole's stones ───────────────────────
+/** The outside of a house in the rain: moss at the foot of the walls and in patches on the roof planks (the damper, the older), dark drips
+ * under the eaves and from the roof edge, a painted formline panel on some fronts (generic ovoids and bands), a plank bench by the door
+ * with the things hung over it, stones about the frontal pole's foot. [inferred: the wet climate; the dossier §5] */
+function houseFront(el, { bag, add, col, W, segL, rectL, rand, hw, hd, g, yTop, ridgeY, eaveY, R, vF, vB, yAt, hole, pz, dw, pw }) {
+  const fr = rng(el.seed * 13 + 5), age = el.age ?? 0.5;
+  // moss and mud at the foot of the walls: patches, thicker at the older houses
+  const foot = (u0, v0, u1, v1) => add('sod', box(u0, g - 0.08, v0, u1, g + 0.22 + 0.2 * fr() * age, v1));
+  for (let k = 0; k < 6; k++) {
+    const u = -hw + 0.8 + fr() * (el.w - 2.2), l = 0.8 + fr() * 1.6;
+    if (fr() < 0.55 + age * 0.3) { if (Math.abs(u) > dw + 0.3) foot(Math.max(-hw, u), -hd - 0.045, Math.min(hw, u + l), -hd - 0.025); }
+    if (fr() < 0.7) foot(Math.max(-hw, u), hd + 0.025, Math.min(hw, u + l), hd + 0.045);
+  }
+  for (const s of [-1, 1]) for (let k = 0; k < 5; k++) { const v = -hd + 0.6 + fr() * (el.d - 2), l = 1 + fr() * 1.8; if (fr() < 0.7) foot(...(s > 0 ? [hw + 0.025, v, hw + 0.045, Math.min(hd, v + l)] : [-hw - 0.045, v, -hw - 0.025, Math.min(hd, v + l)])); }
+  // the stains: dark drips down the boards under the eave and the gable's edge
+  for (let k = 0; k < 9; k++) {
+    const u = (fr() - 0.5) * (el.w - 1), l = 0.5 + fr() * 1.5, y1 = g + 2.55 - fr() * 0.3;
+    if (Math.abs(u) < pw + 0.1) continue;
+    add('wood_dark', box(u - 0.04, y1 - l, -hd - 0.07, u + 0.04, y1, -hd - 0.04));
+    if (k < 5) add('wood_dark', box(u - 0.05, y1 - l, hd + 0.04, u + 0.05, y1, hd + 0.07));
+  }
+  for (const s of [-1, 1]) for (let k = 0; k < 5; k++) { const v = -hd + 0.8 + fr() * (el.d - 1.6), l = 0.5 + fr() * 1.2, y1 = g + 2.6; add('wood_dark', box(s > 0 ? hw + 0.04 : -hw - 0.07, y1 - l, v - 0.05, s > 0 ? hw + 0.07 : -hw - 0.04, y1, v + 0.05)); }
+  // moss on the roof planks, in patches (not about the smoke hole)
+  const nm = 3 + Math.round(age * 4 + fr() * 3);
+  for (const s of [-1, 1]) for (let k = 0; k < nm; k++) {
+    const u0 = 0.8 + fr() * (R - 2.6), u1 = u0 + 0.6 + fr() * 1.2, v0 = vF + 0.3 + fr() * (vB - vF - 2), v1 = v0 + 0.5 + fr() * 1.3;
+    if (hole && v1 > -hole.v - 0.3 && v0 < hole.v + 0.3) continue;
+    add('sod', prism([[s * u0, yAt(u0) + 0.045], [s * Math.min(u1, R - 0.1), yAt(Math.min(u1, R - 0.1)) + 0.045], [s * Math.min(u1, R - 0.1), yAt(Math.min(u1, R - 0.1)) + 0.085], [s * u0, yAt(u0) + 0.085]], v0, Math.min(v1, vB - 0.05)));
+  }
+  // the painted front on most houses: formline ovoids and bands each side of the pole, generic and different in each
+  const ptype = Math.floor(fr() * 5);
+  if (ptype < 3) {
+    const yc = g + 1.7, zf = -hd - 0.075, zb = -hd - 0.04, ux = Math.min(hw - 1.6, 2.2 + fr() * 1.2);
+    for (const s of [-1, 1]) {
+      const cx = s * ux;
+      if (ptype === 0) { add(BLK, ellipse(cx, yc, 0.7, 0.45, zf, zb)); add(RED, ellipse(cx, yc, 0.44, 0.27, zf - 0.015, zb)); add(BLK, ellipse(cx, yc, 0.15, 0.15, zf - 0.03, zb)); add(RED, board([s * 1.3, yc - 0.85], [s * (ux + 1.0), yc - 0.85], 0.28, zf, zb)); }
+      else if (ptype === 1) { add(RED, box(cx - 0.8, yc - 0.6, zf, cx + 0.8, yc + 0.6, zb)); add(BLK, ellipse(cx, yc, 0.5, 0.36, zf - 0.015, zb)); add(RED, ellipse(cx, yc, 0.18, 0.16, zf - 0.03, zb)); }
+      else { add(BLK, board([s * 1.3, yc + 0.5], [s * (ux + 0.9), yc + 0.8], 0.3, zf, zb)); add(RED, ellipse(cx, yc - 0.1, 0.4, 0.3, zf, zb)); add(BLK, ellipse(cx, yc - 0.1, 0.17, 0.17, zf - 0.015, zb)); }
+    }
+  }
+  // the bench: a thick plank on two blocks, either side of the door, a cape or a mat over it, a basket under it
+  for (const s of [-1, 1]) {
+    if (fr() < 0.35) continue;
+    const u0 = s * (2.3 + fr() * 0.6), L = 1.5 + fr() * 0.7, ua = Math.min(u0, u0 + s * L), ub = Math.max(u0, u0 + s * L), vb = -hd - 0.5;
+    add('cedar', box(ua, g + 0.45, vb - 0.17, ub, g + 0.5, vb + 0.17)); add('timber', box(ua + 0.1, g, vb - 0.12, ua + 0.3, g + 0.45, vb + 0.12)); add('timber', box(ub - 0.3, g, vb - 0.12, ub - 0.1, g + 0.45, vb + 0.12));
+    if (fr() < 0.6) add(fr() < 0.5 ? 'roof_bark' : 'cloth_brown', box(ua + 0.2, g + 0.455, vb - 0.15, ub - 0.2, g + 0.47, vb + 0.15));
+    if (fr() < 0.5) add('wicker', lathe([[0.15, 0], [0.2, 0.14], [0.18, 0.26], [0.001, 0.26]], 8, null, (ua + ub) / 2, g, vb));
+    const a = W(ua, vb - 0.2), b = W(ub, vb + 0.2); col.rect([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], g, g + 0.5);
+  }
+  // pegs on the front wall with a cape, a net, a pair of paddles
+  for (const s of [-1, 1]) if (fr() < 0.6) {
+    const u = s * (hw * 0.62 + fr() * 0.6), kind = Math.floor(fr() * 3);
+    if (kind === 0) add('roof_bark', box(u - 0.28, g + 1.0, -hd - 0.1, u + 0.28, g + 1.9, -hd - 0.06));
+    else if (kind === 1) { add('rope_fibre', ellipse(u, g + 1.5, 0.4, 0.55, -hd - 0.09, -hd - 0.06, 8)); add('timber', rod([u - 0.5, g + 2.05, -hd - 0.1], [u + 0.5, g + 2.05, -hd - 0.1], 0.02, 4)); }
+    else for (const d of [-0.12, 0.12]) { add('timber', rod([u + d, g + 0.1, -hd - 0.1], [u + d * 2, g + 2.0, -hd - 0.1], 0.025, 5)); add('cedar', box(u + d - 0.07, g + 0.1, -hd - 0.12, u + d + 0.07, g + 0.7, -hd - 0.09)); }
+  }
+  // stones about the frontal pole's foot, moss between them
+  for (let k = 0; k < 6; k++) {
+    const a = k * 1.05 + fr() * 0.4, rr = 0.95 + fr() * 0.2;
+    add('rock_boulder', lathe([[0.3, 0], [0.26, 0.15], [0.001, 0.26]], 6, null, Math.cos(a) * rr * 0.9, g, pz + Math.sin(a) * rr));
+  }
+  add('sod', lathe([[1.1, 0], [1.0, 0.05], [0.001, 0.07]], 12, null, 0, g, pz));
+  void segL; void rectL; void rand; void ridgeY; void eaveY; void yTop;
+}
+
+// ── what the house holds: the work of its families, by seed ──────────────────────────────────────
+/**
+ * The goods and tools of a winter house in the places the floor leaves free (the low platform along the sides, the landing by the
+ * door, the front corners of the ledge), a different set in each house: looms, cooking boxes with their hot stones, drums, paddles,
+ * bark, hides on frames, baskets, a cradle, a dog's bed, the speaker's staff and hat (the landmark's); mats hung on the walls and the
+ * soot that darkens the roof boards over the fire. [inferred: the work done in the houses (weaving, steaming, carving, hide work)]
+ */
+function houseLife(el, { bag, col, add, M, W, rectL, rand, hwI, hdI, yL, yLo, yP, bY, yAt, hole, hw, hd, g }) {
+  const kr = rng(el.seed * 3 + 11), S = (u, v, y, yaw = 0) => placer(bag, sub(M, u, y, v, yaw));
+  const bowl = (B, x, y, z, r, m = 'cedar') => B(m, lathe([[r, 0], [r * 1.05, r * 0.5], [r * 0.9, r * 0.55], [0.001, r * 0.2]], 9, null, x, y, z));
+  const loom = (u, v, s) => {
+    const B = S(u, v, yLo, s > 0 ? Math.PI / 2 : -Math.PI / 2);
+    for (const dx of [-0.5, 0.5]) B('cedar', rod([dx, 0, 0], [dx, 1.5, 0], 0.035, 5));
+    B('cedar', rod([-0.55, 1.5, 0], [0.55, 1.5, 0], 0.03, 5)); B('cedar', rod([-0.55, 0.45, 0], [0.55, 0.45, 0], 0.03, 5));
+    for (let k = 0; k < 11; k++) { const x = -0.45 + k * 0.09; B('rope_fibre', rod([x, 1.48, 0], [x, 0.5 - (k % 3) * 0.1, 0], 0.006, 3)); }
+    B('wicker', box(-0.45, 0.55, -0.01, 0.45, 1.0, 0.012)); B('cloth_brown', box(-0.45, 0.55, -0.011, 0.45, 0.62, 0.013));
+    B('reed_mat', box(-0.5, 0.0, -0.7, 0.5, 0.04, -0.3)); bowl(B, 0.55, 0, -0.5, 0.14, 'wicker');
+  };
+  const steam = (u, v, s) => {
+    const B = S(u, v, yLo, kr() * 3);
+    B('cedar', box(-0.4, 0, -0.3, 0.4, 0.5, 0.3)); B('bitumen', box(-0.34, 0.5, -0.24, 0.34, 0.505, 0.24));
+    B(BLK, box(-0.36, 0.12, -0.31, 0.36, 0.34, -0.3)); B(RED, ellipse(0, 0.23, 0.14, 0.07, -0.32, -0.3));
+    for (let k = 0; k < 4; k++) B('rock_boulder', lathe([[0.15, 0], [0.12, 0.08], [0.001, 0.13]], 6, null, 0.65 + (k % 2) * 0.22, 0, -0.2 + (k >> 1) * 0.3));
+    B('wood_dark', rod([-0.3, 0.52, 0.2], [-0.9, 0.9, 0.5], 0.02, 4)); B('wood_dark', rod([-0.34, 0.52, 0.16], [-0.9, 0.86, 0.46], 0.02, 4));
+    const [bx, bz] = W(u, v); col.circle(bx, bz, 0.5, yLo, yLo + 0.5);
+  };
+  const drum = (u, v, y, yaw) => {
+    const B = S(u, v, y, yaw);
+    B('cedar', box(-0.45, 0, -0.35, 0.45, 0.7, 0.35)); B(BLK, box(-0.4, 0.15, -0.36, 0.4, 0.6, -0.35)); B(RED, ellipse(0, 0.38, 0.22, 0.14, -0.37, -0.35)); B(BLK, ellipse(0, 0.38, 0.08, 0.07, -0.38, -0.35));
+    B('timber', rod([0.6, 0, -0.1], [0.5, 0.75, -0.1], 0.015, 4)); B('timber', rod([0.55, 0.78, -0.1], [0.7, 0.62, 0.15], 0.02, 4));     // the beater
+  };
+  const paddles = (s, v) => {
+    for (let k = 0; k < 3; k++) {
+      const u = s * (hw - 0.8), B = S(u, v + k * 0.22, yL, 0);
+      B('timber', rod([0, 0, 0], [-s * 0.18, 1.9, 0], 0.025, 5)); B('cedar', ellipse(-s * 0.02, 0.35, 0.07, 0.3, -0.012, 0.012, 7).translate(0, 0, 0));
+      B(BLK, box(-s * 0.02 - 0.05, 0.5, -0.014, -s * 0.02 + 0.05, 0.6, 0.014));
+    }
+  };
+  const bark = (u, v, y) => { for (let k = 0; k < 3; k++) S(u + k * 0.28, v + (k % 2) * 0.1, y)('rope_fibre', lathe([[0.13, 0], [0.13, 0.9], [0.1, 0.9], [0.1, 0.0]], 8, null, 0, 0, 0)); };
+  const hideFrame = (u, v, s) => {
+    const B = S(u, v, yLo, s > 0 ? Math.PI / 2 : -Math.PI / 2);
+    for (const dx of [-0.6, 0.6]) B('log_pine', rod([dx, 0, 0], [dx, 1.6, 0], 0.04, 5));
+    B('log_pine', rod([-0.65, 1.55, 0], [0.65, 1.55, 0], 0.03, 5)); B('log_pine', rod([-0.65, 0.15, 0], [0.65, 0.15, 0], 0.03, 5));
+    B(kr() < 0.5 ? 'hide_tan' : 'hide_white', ellipse(0, 0.85, 0.52, 0.66, -0.012, 0.012, 9)); for (const [x, y] of [[-0.55, 1.5], [0.55, 1.5], [-0.55, 0.2], [0.55, 0.2], [0, 1.52], [0, 0.18]]) B('rope_fibre', rod([x, y, 0], [x * 0.9, 0.85 + (y - 0.85) * 0.8, 0], 0.006, 3));
+  };
+  const cradle = (u, v, y) => {
+    const B = S(u, v, y, kr());
+    B('cedar', box(-0.22, 0.08, -0.4, 0.22, 0.3, 0.4)); B('timber', rod([-0.25, 0.04, -0.4], [-0.25, 0.04, 0.4], 0.04, 5)); B('timber', rod([0.25, 0.04, -0.4], [0.25, 0.04, 0.4], 0.04, 5));
+    B('hide_white', box(-0.18, 0.28, -0.35, 0.18, 0.33, 0.3)); B(RED, box(-0.22, 0.2, -0.42, 0.22, 0.26, -0.4));
+  };
+  const dog = (u, v, y) => { const B = S(u, v, y, kr() * 6); B('hide_grey', ellipse(0, 0.04, 0.4, 0.3, -0.04, 0.04, 8).translate(0, 0, 0)); B('hide_brown', box(-0.2, 0.0, -0.1, 0.2, 0.2, 0.25)); };
+  const baskets = (u, v, y) => { const B = S(u, v, y); for (let k = 0; k < 4; k++) B('wicker', lathe([[0.2 - k * 0.01, 0], [0.28, 0.2], [0.26, 0.38], [0.001, 0.38]], 9, null, (k % 2) * 0.55 - 0.1, k > 1 ? 0.38 : 0, (k >> 1) * 0.1 + (k > 1 ? 0.05 : 0.5))); bowl(B, 0.9, 0, 0.1, 0.16); };
+  const wood = (u, v, y, yaw) => { const B = S(u, v, y, yaw); for (let r = 0; r < 3; r++) for (let k = 0; k < 5 - r; k++) B('log_pine', rod([-0.55 + k * 0.24 + r * 0.12, 0.1 + r * 0.2, -0.3], [-0.55 + k * 0.24 + r * 0.12, 0.1 + r * 0.2, 0.3], 0.09, 5)); };
+  const sideV = (k, lo = 2.2) => -hdI + lo + k * 2.2;
+  const maxK = Math.max(1, Math.floor((hdI * 2 - 5.8) / 2.2));
+  // the low platform: work places along both sides, a different trade on each side of the fire
+  const work = [loom, steam, hideFrame];
+  for (const s of [-1, 1]) {
+    let a = Math.floor(kr() * 3);
+    for (let k = 0; k <= maxK; k++) {
+      const v = sideV(k), u = s * (hwI - 2.7);
+      if (v > hdI - 4.0) break;
+      if (el.landmark ? false : kr() < 0.25) continue;
+      work[(a + k) % 3](u, v, s);
+    }
+  }
+  // the landing and the front corners
+  const corner = [(s) => paddles(s, -hdI + 0.4), (s) => bark(s * (hwI - 0.9), -hdI + 0.6, yL), (s) => baskets(s * (hwI - 1.3), -hdI + 0.6, yL), (s) => drum(s * (hwI - 0.9), -hdI + 0.7, yL, s > 0 ? -Math.PI / 2 : Math.PI / 2), (s) => cradle(s * (hwI - 1.0), -hdI + 0.8, yL), (s) => dog(s * (hwI - 1.4), -hdI + 0.8, yL)];
+  const cs = Math.floor(kr() * 6);
+  corner[cs % 6](-1); corner[(cs + 2 + Math.floor(kr() * 3)) % 6](1);
+  wood(-(hwI - 3.0), -hdI + 0.8, yL, Math.PI / 2); if (kr() < 0.6) wood(hwI - 3.0, -hdI + 0.8, yL, Math.PI / 2);
+  // mats hung on the walls, one or two between the beds' screens
+  for (const s of [-1, 1]) for (let k = 0; k < 2; k++) if (kr() < 0.7) add(kr() < 0.5 ? 'reed_mat' : 'cloth_brown', box(s > 0 ? hw - wtI - 0.03 : -hw + wtI, yL + 1.9, -hdI + 3.2 + k * 3.6, s > 0 ? hw - wtI : -hw + wtI + 0.03, yL + 3.0, -hdI + 4.7 + k * 3.6));
+  // the soot over the fire: the roof boards and the beams blackened
+  if (hole) for (const s of [-1, 1]) add('wood_dark', prism([[s * (hole.u + 0.05), yAt(hole.u + 0.05) - 0.12], [s * (hole.u + 2.6), yAt(hole.u + 2.6) - 0.12], [s * (hole.u + 2.6), yAt(hole.u + 2.6) - 0.125], [s * (hole.u + 0.05), yAt(hole.u + 0.05) - 0.125]], -hole.v - 1.0, hole.v + 1.0));
+  if (el.landmark) {
+    // the speaker's staff against the screen, and a hat of stacked rings on a peg (generic)
+    const B = S(-2.4, hdI - 2.6, yL + 0.3);
+    B('tar_wood', rod([0, 0, 0], [0.12, 2.2, 0], 0.035, 6)); B(RED, ellipse(0.12, 2.1, 0.06, 0.1, -0.04, 0.04, 8));
+    for (let k = 0; k < 4; k++) S(2.6, hdI - 2.55, yL + 1.9)(k % 2 ? BLK : 'planks_grey', lathe([[0.2 - k * 0.025, 0], [0.26 - k * 0.025, 0.04], [0.2 - k * 0.025, 0.12]], 10, null, 0, k * 0.1, 0));
+  }
+  void yP; void bY; void g; void hd; void col; void rand;
+}
+const wtI = 0.65;
 
 // ── poles standing alone ───────────────────────────────────────────────────────────────────
 /** haida_pole: { kind: 'memorial' | 'mortuary', c, yaw, h, r, seed, y (the ground), age }. */
 function pole(el, ctx) {
-  const { bag, col } = ctx, rand = rng(el.seed), M = frame(el.c[0], el.y, el.c[1], el.yaw), add = placer(bag, M), wood = woodOf(el.age ?? 0.7, rand());
-  const r = el.r, h = el.h;
+  const { bag, col } = ctx, rand = rng(el.seed), age = el.age ?? 0.7;
+  // the old poles lean a little, the way the ground has taken them
+  const lean = (rand() - 0.5) * 0.07 * age, lean2 = (rand() - 0.5) * 0.05 * age;
+  const M = frame(el.c[0], el.y, el.c[1], el.yaw).multiply(new Matrix4().makeRotationZ(lean).multiply(new Matrix4().makeRotationX(lean2)));
+  const add = placer(bag, M), wood = woodOf(age, rand());
+  const r = el.r, h = el.h, base = placer(bag, frame(el.c[0], el.y, el.c[1], el.yaw));
   if (el.kind === 'memorial') {
-    carved(add, 0, h - 0.2, r * 1.1, r * 0.8, wood, el.seed * 3 + 1, true);
+    const wings = el.seed % 3 === 0;
+    carved(add, 0, h - 0.2, r * 1.1, r * 0.8, wood, el.seed * 3 + 1, !wings);
     add(wood, lathe([[r * 1.1, -0.4], [r * 1.15, 0], [0.001, 0]], 10));
+    if (wings) {
+      // a bird at the head, its wings spread wide: boards raised either side, black with red feather lines
+      const yt = h - 0.2, rt = r * 0.8 * 0.95;
+      for (const sg of [-1, 1]) {
+        add(BLK, board([sg * rt * 0.7, yt + 0.05], [sg * rt * 4.2, yt + 1.5], 0.55, -0.1, 0.1));
+        add(RED, board([sg * rt * 0.9, yt + 0.0], [sg * rt * 4.3, yt + 1.35], 0.14, -0.12, 0.11));
+        for (let k = 0; k < 5; k++) add(RED, board([sg * (rt * 1.5 + k * rt * 0.55), yt + 0.2 + k * 0.28], [sg * (rt * 1.6 + k * rt * 0.55), yt + 0.55 + k * 0.28], 0.04, -0.13, 0.12));
+      }
+    }
+    // the foot: a mound of earth and moss, stones set to hold it, fern at the edge
+    base('sod', lathe([[r * 2.0, 0], [r * 1.5, 0.22], [r * 1.05, 0.34], [0.001, 0.36]], 12));
+    for (let k = 0; k < 5; k++) { const a = k * 1.3 + rand(), d = r * (1.6 + rand() * 0.5); base('rock_boulder', lathe([[0.26, 0], [0.22, 0.13], [0.001, 0.22]], 6, null, Math.cos(a) * d, 0, Math.sin(a) * d)); }
   } else {
     // the mortuary pole: a post, a carved length of two beings, and the chest on top that holds the dead
     add(wood, lathe([[r * 1.15, -0.4], [r, h * 0.3], [0.001, h * 0.3]], 10));
@@ -271,6 +472,13 @@ function pole(el, ctx) {
     add('cedar', box(-r * 1.8, y1 + 0.18, -r * 1.4, r * 1.8, y1 + 0.18 + r * 2.1, r * 1.4));
     add(BLK, box(-r * 1.5, y1 + 0.18 + r * 0.5, -r * 1.45, r * 1.5, y1 + 0.18 + r * 1.7, -r * 1.38)); add(RED, ellipse(0, y1 + 0.18 + r * 1.1, r * 0.7, r * 0.4, -r * 1.5, -r * 1.38));
     add('planks_grey', prism([[-r * 1.95, y1 + 0.18 + r * 2.1], [r * 1.95, y1 + 0.18 + r * 2.1], [0, y1 + 0.18 + r * 3.0]], -r * 1.6, r * 1.6));
+    // the lashings round the chest, the moss on its lid, the overhang's drip stains
+    for (const dy of [0.35, 1.45]) add('rope_fibre', box(-r * 1.83, y1 + 0.18 + r * dy, -r * 1.43, r * 1.83, y1 + 0.18 + r * dy + 0.05, r * 1.43));
+    add('sod', box(-r * 1.2, y1 + 0.18 + r * 2.1 + r * 0.55, -r * 0.8, r * 0.2, y1 + 0.18 + r * 2.1 + r * 0.7, r * 0.9));
+    add('wood_dark', box(-r * 1.2 - 0.02, y1 - 0.5, -r * 1.55, -r * 1.2 + 0.03, y1, -r * 1.5));
+    // at the foot: a small heap of stones, a shell dish, a bundle of cedar bark (what the family leaves)
+    for (let k = 0; k < 3; k++) { const a = k * 2.2 + rand(), d = r * (1.4 + rand() * 0.4); base('rock_boulder', lathe([[0.2, 0], [0.17, 0.1], [0.001, 0.17]], 6, null, Math.cos(a) * d, 0, Math.sin(a) * d)); }
+    base('coral', lathe([[0.16, 0], [0.19, 0.04], [0.001, 0.05]], 8, null, -r * 1.7, 0, -r * 0.8));
   }
   col.circle(el.c[0], el.c[1], r * 1.1, el.y, el.y + Math.min(h, 3));
 }
