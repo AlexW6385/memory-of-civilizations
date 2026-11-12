@@ -11,7 +11,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 42, night: 8, rain: 0.6, reach: 160, spawnMin: 26, far: 44 },
+  walkers: { day: 60, night: 8, rain: 0.6, reach: 160, spawnMin: 14, far: 44 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -4,
 };
@@ -37,7 +37,7 @@ export function walkways() {
     const passeig = Math.abs(c - GRACIA_X) < 1, marina = Math.abs(c - 230) < 1;
     for (const [a, b] of cuts(c, -LIM, LIM, true)) for (const sg of [-1, 1]) {
       const x0 = c + sg * P0, x1 = c + sg * P1;
-      rects.push({ r: [Math.min(x0, x1), a, Math.max(x0, x1), b], weight: passeig ? 3.2 : marina ? 1.4 : 1, market: passeig ? 2 : 1, kind: 'street' });
+      rects.push({ r: [Math.min(x0, x1), a, Math.max(x0, x1), b], weight: passeig ? 3.2 : marina ? 2.4 : 1, market: passeig ? 2 : 1, kind: 'street' });
     }
   }
   for (let k = -5; k <= 4; k++) {

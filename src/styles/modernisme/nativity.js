@@ -12,7 +12,11 @@
 import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { tube, folded, ball } from '../../objects/kit.js';
 
+// the stone of the façade, told apart so that the sculpture reads in shade as well as in the sun: the walls and towers pale ashlar (S),
+// the sculpted masses darker honey rock (MASS), the porches' orders grey and deep (PORCH), the figures, drips and flowers pale (FIG), the
+// foliage a grey-green (LEAF); the palm columns and the turtles stay smooth dressed sandstone (SC)
 const S = 'limestone_yellow', SC = 'sandstone_dressed', W = 'timber';
+const MASS = 'sandstone_relief', PORCH = 'sandstone_carved', FIG = 'limestone_carved', LEAF = 'sandstone_green';
 const quad = (T, A, B, C, D) => T.push(...A, ...B, ...C, ...A, ...C, ...D);
 const both = (t) => { const o = [...t]; for (let i = 0; i < t.length; i += 9) o.push(...t.slice(i, i + 3), ...t.slice(i + 6, i + 9), ...t.slice(i + 3, i + 6)); return o; };
 /** Turn the triangles of T from i0 on toward the point ref (or away from it). */
@@ -51,17 +55,17 @@ export function scaffold(bag, [x0, z0, x1, z1], y0, y1) {
  */
 function statue(bag, p, h, o = {}) {
   const [x, y, z] = p, k = o.kneel ? 0.68 : o.seated ? 0.78 : 1, H = h * k, seed = Math.floor(x * 7 + z * 13 + y * 3) >>> 0;
-  if (o.seated) bag.add(SC, box(x - 0.28 * h, y, z - 0.24 * h, x + 0.12 * h, y + 0.3 * h, z + 0.24 * h));
+  if (o.seated) bag.add(FIG, box(x - 0.28 * h, y, z - 0.24 * h, x + 0.12 * h, y + 0.3 * h, z + 0.24 * h));
   const prof = [[0.17, 0], [0.19, 0.05], [0.17, 0.3], [0.14, 0.55], [0.15, 0.7], [0.12, 0.8], [0.065, 0.84], [0.001, 0.85]].map(([r, v]) => [r * h, v * H]);
-  bag.add(SC, folded(prof, 14, 7, 0.16, seed).translate(x, y, z));
+  bag.add(FIG, folded(prof, 14, 7, 0.16, seed).translate(x, y, z));
   // the mantle falling from the shoulders behind, a second fold
-  bag.add(SC, folded([[0.13, 0], [0.16, 0.25], [0.15, 0.55], [0.11, 0.74], [0.001, 0.78]].map(([r, v]) => [r * h, v * H]), 12, 5, 0.22, seed + 1).scale(1, 1, 1.12).translate(x - 0.05 * h, y + 0.04 * H, z));
-  bag.add(SC, ball(0.068 * h, 10, 7).translate(x + 0.01 * h, y + 0.84 * H, z));
-  if (o.veil) bag.add(SC, lathe([[0.08 * h, 0], [0.085 * h, 0.06 * h], [0.06 * h, 0.13 * h], [0.001, 0.15 * h]], 10).translate(x - 0.01 * h, y + 0.83 * H, z));
+  bag.add(FIG, folded([[0.13, 0], [0.16, 0.25], [0.15, 0.55], [0.11, 0.74], [0.001, 0.78]].map(([r, v]) => [r * h, v * H]), 12, 5, 0.22, seed + 1).scale(1, 1, 1.12).translate(x - 0.05 * h, y + 0.04 * H, z));
+  bag.add(FIG, ball(0.068 * h, 10, 7).translate(x + 0.01 * h, y + 0.84 * H, z));
+  if (o.veil) bag.add(FIG, lathe([[0.08 * h, 0], [0.085 * h, 0.06 * h], [0.06 * h, 0.13 * h], [0.001, 0.15 * h]], 10).translate(x - 0.01 * h, y + 0.83 * H, z));
   if (o.crown) bag.add('gilt_bronze', lathe([[0.06 * h, 0], [0.065 * h, 0.035 * h], [0.05 * h, 0.035 * h], [0.05 * h, 0.001]], 10).translate(x, y + 0.97 * H, z));
   if (o.arms) for (const s of [-1, 1]) {
     const sh = [x + 0.03 * h, y + 0.74 * H, z + s * 0.12 * h], el = [x + 0.12 * h, y + 0.6 * H, z + s * 0.13 * h], hd = o.arms === 'up' ? [x + 0.2 * h, y + 0.92 * H, z + s * 0.1 * h] : [x + 0.24 * h, y + 0.66 * H, z + s * 0.035 * h];
-    bag.add(SC, tube([[...sh, 0.04 * h], [...el, 0.036 * h], [...hd, 0.028 * h]], 6));
+    bag.add(FIG, tube([[...sh, 0.04 * h], [...el, 0.036 * h], [...hd, 0.028 * h]], 6));
   }
   if (o.wings) {
     const T = [];
@@ -70,19 +74,19 @@ function statue(bag, p, h, o = {}) {
       const rim = [[0, 0.02], [0.3, 0.16], [0.65, 0.3], [1, 0.42], [0.95, 0.25], [0.85, 0.08], [0.75, -0.08], [0.6, -0.22], [0.45, -0.34], [0.25, -0.42], [0.1, -0.3], [0, -0.1]];
       for (let i = 0; i + 1 < rim.length; i++) T.push(...R(0.05, 0), ...R(...rim[i]), ...R(...rim[i + 1]));
     }
-    bag.add(SC, fromTriangles(both(T)));
+    bag.add(FIG, fromTriangles(both(T)));
   }
 }
 /** A corbel under a group: a flat shelf over a drooping, leafy cone, its back in the wall. */
 function corbel(bag, x, y, z, r) {
-  bag.add(SC, lathe([[0.001, -r * 1.3], [r * 0.45, -r * 0.95], [r * 0.8, -r * 0.45], [r, -0.12], [r, 0], [0.001, 0]], 12, (th, i) => (i === 2 ? 1 + 0.12 * Math.cos(th * 5) : 1)).scale(0.7, 0.65, 1).translate(x, y, z));
+  bag.add(MASS, lathe([[0.001, -r * 1.3], [r * 0.45, -r * 0.95], [r * 0.8, -r * 0.45], [r, -0.12], [r, 0], [0.001, 0]], 12, (th, i) => (i === 2 ? 1 + 0.12 * Math.cos(th * 5) : 1)).scale(0.7, 0.65, 1).translate(x, y, z));
 }
 /** Stalactites hanging from a point: a cluster of two or three drips of ice in stone. */
 function drips(bag, x, y, z, L, rand) {
   const n = 1 + Math.floor(rand() * 3);
   for (let i = 0; i < n; i++) {
     const l = L * (0.5 + rand() * 0.6), r = 0.07 + l * 0.09, dx = (rand() - 0.5) * 0.25, dz = (rand() - 0.5) * 0.35;
-    bag.add(SC, lathe([[r, 0], [r * 0.85, 0.12], [r * 0.55, l * 0.45], [0.001, l]], 5).rotateX(Math.PI).translate(x + dx, y + 0.1, z + dz));
+    bag.add(FIG, lathe([[r, 0], [r * 0.85, 0.12], [r * 0.55, l * 0.45], [0.001, l]], 5).rotateX(Math.PI).translate(x + dx, y + 0.1, z + dz));
   }
 }
 
@@ -123,8 +127,31 @@ function turtleColumn(bag, col, x, y, z, sea) {
 }
 
 // ── The bell towers ──────────────────────────────────────────────────────────────────────────
+/**
+ * The louvre stage of a bell tower: a ring of slender posts and, between them, courses of louvre blades sloping down and out
+ * (the bells' sound sent down to the street), each course turned a third of a bay from the one below so that the blades climb
+ * the tube in a spiral; the dark of the hollow shows through. y0 its foot, h its height, r the shaft's radius.
+ */
+function louvres(bag, xc, zc, y0, h, r) {
+  const N = 14, step = Math.PI * 2 / N, ri = r - 0.78, ro = r - 0.1, pitch = 0.62, nj = Math.floor((h - 0.7) / pitch);
+  bag.add('opening', lathe([[r - 0.55, 0], [r - 0.55, h]], 20).translate(xc, y0, zc));
+  for (let i = 0; i < N; i++) { const a = i * step, px = xc + Math.cos(a) * (r - 0.4), pz = zc + Math.sin(a) * (r - 0.4); bag.add(S, rod([px, y0, pz], [px, y0 + h, pz], 0.27, 5)); }
+  const T = [], P = (a, rr, yy) => [xc + Math.cos(a) * rr, yy, zc + Math.sin(a) * rr];
+  for (let j = 0; j < nj; j++) {
+    const yy = y0 + 0.55 + j * pitch, off = (j % 3) / 3 * step;
+    for (let i = 0; i < N; i++) {
+      const a0 = i * step + 0.2 * step + off, a1 = (i + 1) * step - 0.2 * step + off;
+      const A = P(a0, ri, yy + 0.34), B = P(a1, ri, yy + 0.34), C = P(a1, ro, yy), D = P(a0, ro, yy);
+      quad(T, A, B, C, D);
+    }
+  }
+  bag.add(S, fromTriangles(both(T)));
+  // a collar at the stage's foot and head
+  for (const v of [0, h - 0.3]) bag.add('limestone', lathe([[r + 0.18, 0], [r + 0.18, 0.3], [r - 0.7, 0.3], [r - 0.7, 0]], 20).translate(xc, y0 + v, zc));
+}
+
 /** A tower: the square base to bv, a collar turning it round, the round hollow shaft to its 1910 height in scaffolding. */
-function tower(bag, col, xc, zc, y, hq, r, bv, top, rand) {
+function tower(bag, col, xc, zc, y, hq, r, bv, top, rand, lv = 0) {
   bag.add(S, box(xc - hq, y - 1.2, zc - hq, xc + hq, y + bv, zc + hq)); col.rect([xc - hq, zc - hq, xc + hq, zc + hq], y - 1.2, y + top);
   for (const v of [7.5, 15]) bag.add('limestone', box(xc - hq - 0.12, y + v, zc - hq - 0.12, xc + hq + 0.12, y + v + 0.35, zc + hq + 0.12));
   bag.add('limestone', box(xc - hq - 0.2, y + bv - 0.45, zc - hq - 0.2, xc + hq + 0.2, y + bv, zc + hq + 0.2));
@@ -139,8 +166,9 @@ function tower(bag, col, xc, zc, y, hq, r, bv, top, rand) {
   const rc = r + 0.6;
   bag.add(S, lathe([[rc, 0], [rc, 0.5], [r + 0.3, 1.4], [r, 2.6]], 16, (th, i) => (i < 2 ? 1 + (sq(th) - 1) * 0.55 : 1)).translate(xc, y + bv - 0.01, zc));
   // the shaft, a hollow ring of ashlar, its last course broken off unevenly
-  const sh = top - 0.5;
-  bag.add(S, lathe([[r, 0], [r, sh - bv], [r - 0.85, sh - bv], [r - 0.85, 0]], 24).translate(xc, y + bv, zc));
+  const sh = top - 0.5, lo = sh - lv;               // (the louvre stage, lv tall, fills the shaft's top)
+  bag.add(S, lathe([[r, 0], [r, lo - bv], [r - 0.85, lo - bv], [r - 0.85, 0]], 24).translate(xc, y + bv, zc));
+  if (lv > 0) louvres(bag, xc, zc, y + lo, lv, r);
   const N = 18;
   for (let i = 0; i < N; i++) {
     if (rand() < 0.3) continue;
@@ -157,7 +185,7 @@ function tower(bag, col, xc, zc, y, hq, r, bv, top, rand) {
   }
   // tall narrow openings round the shaft, staggered as the stair climbs inside
   for (let k = 0; k < 8; k++) {
-    const a = k / 8 * Math.PI * 2 + 0.2, v0 = bv + 3.5 + (k % 4) * 1.6; if (v0 + 2.6 > sh - 0.6) continue;
+    const a = k / 8 * Math.PI * 2 + 0.2, v0 = bv + 3.5 + (k % 4) * 1.6; if (v0 + 2.6 > lo - 0.6) continue;
     const t = [-Math.sin(a), Math.cos(a)], c = [xc + Math.cos(a) * (r + 0.02), zc + Math.sin(a) * (r + 0.02)];
     const i0 = O.length;
     quad(O, [c[0] - t[0] * 0.22, y + v0, c[1] - t[1] * 0.22], [c[0] + t[0] * 0.22, y + v0, c[1] + t[1] * 0.22], [c[0] + t[0] * 0.22, y + v0 + 2.6, c[1] + t[1] * 0.22], [c[0] - t[0] * 0.22, y + v0 + 2.6, c[1] - t[1] * 0.22]);
@@ -198,7 +226,7 @@ function portal(bag, col, P, cz, y, { uc, hw, ht, gt, ft, Xw, Xf, Xb, ho, kb = 0
     orient(G, j0, P((Xb + Xf) / 2, uc, Math.min(ft, gt) * 0.45), true);
     const k0 = G.length; G.push(...P(Xb, uc, -1.2), ...P(Xb, u0, v0), ...P(Xb, u1, v1)); orient(G, k0, P(Xb - 5, uc, 10));
   }
-  bag.add(SC, fromTriangles(G));
+  bag.add(MASS, fromTriangles(G));
   // the porch: the mouth splayed back to the doorway in three stepped orders, rough as ice and rock
   const st = (s) => { const i = Math.min(2, Math.floor(s * 3)), f = s * 3 - i, t = Math.max(0, Math.min(1, (f - 0.62) / 0.38)); return (i + t * t * (3 - 2 * t)) / 3; };
   const ip = (a, s) => {
@@ -214,7 +242,7 @@ function portal(bag, col, P, cz, y, { uc, hw, ht, gt, ft, Xw, Xf, Xb, ho, kb = 0
     const [xm, um, vm] = ip((a0 + a1) / 2, (s0 + s1) / 2);
     orient(I, j0, P(xm, uc, vm * 0.3 - 1));
   }
-  bag.add(SC, fromTriangles(I));
+  bag.add(PORCH, fromTriangles(I));
   // the doorway's darkness at the back
   const D = [];
   for (let i = 0; i < NA; i++) {
@@ -236,6 +264,7 @@ function portal(bag, col, P, cz, y, { uc, hw, ht, gt, ft, Xw, Xf, Xb, ho, kb = 0
 
 /** A group on a corbel set into the face at (a, b): figures across u, h tall, each with its options. */
 function group(bag, pr, cz, y, a, b, figs, h = 2.6, sp = 0.46) {
+  h *= 1.2;                                                   // (the figures of the façade are larger than life)
   const [x, v, u] = pr.face(a, b), half = (figs.length - 1) / 2 * sp * h;
   corbel(bag, x + 0.15, y + v, cz + u, Math.max(0.6, half + 0.22 * h));
   figs.forEach((o, i) => { const du = (i - (figs.length - 1) / 2) * sp * h; statue(bag, [x + 0.15 + (o.dx ?? 0), y + v + (o.dv ?? 0), cz + u + du], o.h ?? h, o); });
@@ -249,39 +278,39 @@ function foliage(bag, pr, cz, y, n, rand, avoid) {
     if (rand() < 0.6) {
       // a knot of leaves and buds swelling out of the stone
       const m = 2 + Math.floor(rand() * 3);
-      for (let i = 0; i < m; i++) { const rr = r * (0.55 + rand() * 0.6), ang = rand() * Math.PI * 2, d = r * 0.7 * rand(); bag.add(SC, ball(rr, 7, 5).scale(0.65, 1, 1).translate(x - rr * 0.4, y + v + Math.sin(ang) * d - rr, cz + u + Math.cos(ang) * d)); }
+      for (let i = 0; i < m; i++) { const rr = r * (0.55 + rand() * 0.6), ang = rand() * Math.PI * 2, d = r * 0.7 * rand(); bag.add(LEAF, ball(rr, 7, 5).scale(0.65, 1, 1).translate(x - rr * 0.4, y + v + Math.sin(ang) * d - rr, cz + u + Math.cos(ang) * d)); }
     } else {
       // a flower: a cup of petals turned to the street
       const rf = r * 1.1;
-      bag.add(SC, lathe([[0.001, 0], [rf * 0.6, rf * 0.25], [rf, rf * 0.5], [rf * 0.9, rf * 0.62], [rf * 0.55, rf * 0.45], [rf * 0.25, rf * 0.3], [0.001, rf * 0.38]], 10, (th, i) => 1 + (i >= 2 ? 0.09 : 0.04) * Math.cos(th * 6)).rotateZ(-Math.PI / 2).translate(x - 0.1, y + v, cz + u));
+      bag.add(FIG, lathe([[0.001, 0], [rf * 0.6, rf * 0.25], [rf, rf * 0.5], [rf * 0.9, rf * 0.62], [rf * 0.55, rf * 0.45], [rf * 0.25, rf * 0.3], [0.001, rf * 0.38]], 10, (th, i) => 1 + (i >= 2 ? 0.09 : 0.04) * Math.cos(th * 6)).rotateZ(-Math.PI / 2).translate(x - 0.1, y + v, cz + u));
     }
   }
 }
 
 /** The Charity portal's trumeau: the column of Jesus' genealogy, the serpent coiled round it, its capital carrying the Nativity. */
 function trumeau(bag, x, y, z, hc) {
-  bag.add(SC, lathe([[0.62, 0], [0.62, 0.35], [0.5, 0.5], [0.42, 0.8], [0.4, hc - 0.9], [0.5, hc - 0.6], [0.72, hc - 0.25], [0.98, hc - 0.05], [0.98, hc]], 14, (th, i) => (i >= 3 && i <= 4 ? 1 + 0.05 * Math.cos(th * 8) : 1), x, y, z));
+  bag.add(FIG, lathe([[0.62, 0], [0.62, 0.35], [0.5, 0.5], [0.42, 0.8], [0.4, hc - 0.9], [0.5, hc - 0.6], [0.72, hc - 0.25], [0.98, hc - 0.05], [0.98, hc]], 14, (th, i) => (i >= 3 && i <= 4 ? 1 + 0.05 * Math.cos(th * 8) : 1), x, y, z));
   // bands of the genealogy's names
-  for (let v = 1.4; v < hc - 1.2; v += 0.75) bag.add(SC, lathe([[0.43, 0], [0.45, 0.05], [0.45, 0.12], [0.43, 0.17]], 14, null, x, y + v, z));
+  for (let v = 1.4; v < hc - 1.2; v += 0.75) bag.add(FIG, lathe([[0.43, 0], [0.45, 0.05], [0.45, 0.12], [0.43, 0.17]], 14, null, x, y + v, z));
   // the serpent, its coils climbing with the apple in its mouth
   const pts = [];
   for (let t = 0; t <= 1.0001; t += 1 / 40) { const a = t * Math.PI * 2 * 2.6, r = 0.5; pts.push([x + Math.cos(a) * r, y + 0.5 + t * (hc - 2.2), z + Math.sin(a) * r, 0.11 - 0.05 * t]); }
-  bag.add(SC, tube(pts, 6));
-  const e = pts[pts.length - 1]; bag.add(SC, ball(0.11, 8, 6).scale(1.5, 0.9, 1).translate(e[0] + 0.08, e[1] - 0.05, e[2]));
+  bag.add(FIG, tube(pts, 6));
+  const e = pts[pts.length - 1]; bag.add(FIG, ball(0.11, 8, 6).scale(1.5, 0.9, 1).translate(e[0] + 0.08, e[1] - 0.05, e[2]));
   bag.add('glaze_red', ball(0.08, 8, 6).translate(e[0] + 0.22, e[1] - 0.08, e[2]));
 }
 
 /** The star of Bethlehem: rays of stone round a boss, its trail of light flowing up and back. */
 function star(bag, x, y, z) {
-  bag.add(SC, ball(0.38, 12, 8).translate(x, y - 0.38, z));
-  for (let k = 0; k < 10; k++) { const a = k / 10 * Math.PI * 2, L = k % 2 ? 0.9 : 1.6; bag.add(SC, lathe([[0.16, 0], [0.001, L]], 6).rotateX(a).translate(x, y, z)); }
-  bag.add(SC, tube([[x - 0.1, y + 0.2, z - 0.25, 0.32, 0.2], [x - 0.25, y + 1.2, z - 1.0, 0.26, 0.15], [x - 0.35, y + 2.2, z - 1.5, 0.18, 0.1], [x - 0.45, y + 3.2, z - 1.7, 0.05, 0.04]], 8));
+  bag.add(FIG, ball(0.38, 12, 8).translate(x, y - 0.38, z));
+  for (let k = 0; k < 10; k++) { const a = k / 10 * Math.PI * 2, L = k % 2 ? 0.9 : 1.6; bag.add(FIG, lathe([[0.16, 0], [0.001, L]], 6).rotateX(a).translate(x, y, z)); }
+  bag.add(FIG, tube([[x - 0.1, y + 0.2, z - 0.25, 0.32, 0.2], [x - 0.25, y + 1.2, z - 1.0, 0.26, 0.15], [x - 0.35, y + 2.2, z - 1.5, 0.18, 0.1], [x - 0.45, y + 3.2, z - 1.7, 0.05, 0.04]], 8));
 }
 
 /** A small boat (Joseph sailing, at the top of the Hope portal). */
 function boat(bag, x, y, z) {
-  bag.add(SC, lathe([[0.001, 0], [0.4, 0.06], [0.6, 0.35], [0.62, 0.55]], 12, (th) => 1 / Math.sqrt(Math.cos(th) ** 2 + (Math.sin(th) / 3) ** 2) * 0.33).translate(x, y, z));
-  bag.add(SC, rod([x - 0.1, y + 0.4, z], [x - 0.1, y + 3.4, z], 0.06, 6));
+  bag.add(FIG, lathe([[0.001, 0], [0.4, 0.06], [0.6, 0.35], [0.62, 0.55]], 12, (th) => 1 / Math.sqrt(Math.cos(th) ** 2 + (Math.sin(th) / 3) ** 2) * 0.33).translate(x, y, z));
+  bag.add(FIG, rod([x - 0.1, y + 0.4, z], [x - 0.1, y + 3.4, z], 0.06, 6));
   const T = []; T.push(x - 0.12, y + 3.3, z, x - 0.12, y + 1.0, z, x - 0.12, y + 1.1, z + 1.4); bag.add('limestone', fromTriangles(both(T)));
 }
 
@@ -295,7 +324,7 @@ export function nativity(bag, col, fx, y, cz) {
   bag.add(S, box(fx - 2.4, y - 1.2, cz - 21, fx + 0.6, y + 19, cz + 21)); col.rect([fx - 2.4, cz - 21, fx + 0.6, cz + 21], y - 1.2, y + 19);
   bag.add('limestone', box(fx - 2.55, y + 18.6, cz - 21, fx + 0.75, y + 19.1, cz + 21));
   // the four towers (Faith's side north, Hope's south), at the heights reached about 1910
-  for (const [u, top] of [[-21, 30.5], [-7.5, 37.5], [7.5, 40], [21, 32.5]]) tower(bag, col, xc, cz + u, y, hq, r, 24, top, rand);
+  for (const [u, top, lv] of [[-21, 34.5, 8], [-7.5, 43, 12], [7.5, 46, 12], [21, 37, 9]]) tower(bag, col, xc, cz + u, y, hq, r, 24, top, rand, lv);
   // the three portals
   const X = { Xw: fx + 0.6, Xf: fx + 5.2, Xb: fx - 1.6 };
   const faith = portal(bag, col, P, cz, y, { uc: -14.25, hw: 3.4, ht: 17, gt: 31, ft: 28.5, ho: 3.35, ...X }, rand);
@@ -307,8 +336,8 @@ export function nativity(bag, col, fx, y, cz) {
   trumeau(bag, tx, y, cz, hc);
   statue(bag, [tx - 0.15, y + hc, cz - 0.55], 1.9, { veil: true, seated: true });                    // Mary
   statue(bag, [tx - 0.25, y + hc, cz + 0.6], 2.05, { arms: true });                                 // Joseph
-  bag.add(SC, box(tx + 0.05, y + hc, cz - 0.3, tx + 0.55, y + hc + 0.35, cz + 0.3)); bag.add(SC, ball(0.16, 8, 6).scale(1.6, 0.8, 1).translate(tx + 0.3, y + hc + 0.35, cz));   // the manger and the child
-  for (const s of [-1, 1]) bag.add(SC, tube([[tx - 0.55, y + hc + 0.9, cz + s * 0.25, 0.22, 0.2], [tx - 0.3, y + hc + 1.05, cz + s * 0.2, 0.17, 0.15], [tx - 0.05, y + hc + 0.95, cz + s * 0.15, 0.13, 0.12]], 8));   // the ox and the mule
+  bag.add(FIG, box(tx + 0.05, y + hc, cz - 0.3, tx + 0.55, y + hc + 0.35, cz + 0.3)); bag.add(FIG, ball(0.16, 8, 6).scale(1.6, 0.8, 1).translate(tx + 0.3, y + hc + 0.35, cz));   // the manger and the child
+  for (const s of [-1, 1]) bag.add(FIG, tube([[tx - 0.55, y + hc + 0.9, cz + s * 0.25, 0.22, 0.2], [tx - 0.3, y + hc + 1.05, cz + s * 0.2, 0.17, 0.15], [tx - 0.05, y + hc + 0.95, cz + s * 0.15, 0.13, 0.12]], 8));   // the ox and the mule
   group(bag, charity, cz, y, -0.8, 0.45, [{ arms: true }, { kneel: true }], 2.3, 0.36);       // the shepherds
   group(bag, charity, cz, y, 0.8, 0.45, [{ crown: true, kneel: true }, { crown: true, arms: true }], 2.3, 0.36);   // the kings
   for (const [a, b] of [[-0.5, 0.3], [0.5, 0.3], [-0.62, 0.62], [0.62, 0.62], [-0.38, 0.55], [0.38, 0.55]]) group(bag, charity, cz, y, a, b, [{ wings: true, arms: 'up' }], 1.6);
@@ -326,14 +355,20 @@ export function nativity(bag, col, fx, y, cz) {
   group(bag, faith, cz, y, -0.72, 0.45, [{ veil: true }, { veil: true, arms: true }], 2.2, 0.36);
   { const [x, v, u] = faith.face(0.72, 0.45); corbel(bag, x + 0.15, y + v, cz + u, 1.0); statue(bag, [x + 0.05, y + v, cz + u - 0.4], 1.9, { arms: true }); bag.add('wood_dark', box(x + 0.15, y + v, cz + u + 0.05, x + 0.75, y + v + 0.8, cz + u + 0.95)); }
   group(bag, faith, cz, y, 0, 0.3, [{ arms: true }, { veil: true }, { arms: true }], 2.4);
-  { const [x, v, u] = faith.face(0, 0.72); corbel(bag, x + 0.15, y + v, cz + u, 0.8); bag.add(SC, lathe([[0.9, 0], [0.95, 0.12], [0.001, 0.2]], 12, (th) => 1 + 0.5 * Math.cos(th)).translate(x + 0.15, y + v, cz + u)); statue(bag, [x + 0.15, y + v + 0.15, cz + u], 2.2, { veil: true, arms: 'up' }); }
+  { const [x, v, u] = faith.face(0, 0.72); corbel(bag, x + 0.15, y + v, cz + u, 0.8); bag.add(FIG, lathe([[0.9, 0], [0.95, 0.12], [0.001, 0.2]], 12, (th) => 1 + 0.5 * Math.cos(th)).translate(x + 0.15, y + v, cz + u)); statue(bag, [x + 0.15, y + v + 0.15, cz + u], 2.2, { veil: true, arms: 'up' }); }
   foliage(bag, faith, cz, y, 130, rand, [[-0.72, 0.45], [0.72, 0.45], [0, 0.3], [0, 0.72]]);
   // the columns between the portals: a sea turtle at the sea (south) end, a tortoise at the mountain (north)
   turtleColumn(bag, col, fx + 6.3, y, cz + 7.5, true);
   turtleColumn(bag, col, fx + 6.3, y, cz - 7.5, false);
-  // the unfinished tops: the Charity portal's flat crown in scaffolding with blocks waiting where the cypress would go;
-  // the side portals' crowns capped, their pinnacles to come
-  scaffold(bag, [fx - 0.8, cz - 1.6, fx + 4.6, cz + 1.6], y + 36, y + 42.5);
-  for (let k = 0; k < 5; k++) { const bx = fx + 0.2 + rand() * 3, bz = cz - 1.2 + rand() * 2; bag.add(S, box(bx, y + 36 - 0.05, bz, bx + 0.9, y + 36.5, bz + 0.6)); }
-  for (const uc of [-14.25, 14.25]) bag.add(S, box(fx - 1, y + 28.4, cz + uc - 1.1, fx + 2.6, y + 29.6, cz + uc + 1.1));
+  // the unfinished tops: the Charity portal's crown carries the first stage of the cypress (a flame of stone in lobes, a broken
+  // top) in timber scaffolding; the side portals' crowns capped, with the stumps of their pinnacles in scaffolding
+  const cxx = fx + 1.9;
+  bag.add(MASS, lathe([[2.95, 0], [3.05, 0.9], [2.75, 3], [2.25, 5.6], [1.75, 8.2], [1.2, 8.2], [0.001, 8.2]], 28, (th, k) => 1 + (k > 0 ? 0.09 * Math.cos(th * 9 + k * 0.6) : 0)).translate(cxx, y + 36, cz));
+  for (let k = 0; k < 6; k++) { const a = rand() * Math.PI * 2, rr = 1.2 + rand() * 0.5; bag.add(S, box(cxx + Math.cos(a) * rr - 0.45, y + 44.1, cz + Math.sin(a) * rr - 0.35, cxx + Math.cos(a) * rr + 0.45, y + 44.1 + 0.3 + rand() * 0.4, cz + Math.sin(a) * rr + 0.35)); }
+  scaffold(bag, [fx - 1.0, cz - 3.4, fx + 4.8, cz + 3.4], y + 36, y + 49);
+  for (const uc of [-14.25, 14.25]) {
+    bag.add(S, box(fx - 1, y + 28.4, cz + uc - 1.1, fx + 2.6, y + 29.6, cz + uc + 1.1));
+    bag.add(S, lathe([[1.15, 0], [1.05, 1.2], [0.95, 3.4], [0.001, 3.4]], 8, null, fx + 0.8, y + 29.6, cz + uc));
+    scaffold(bag, [fx - 1.2, cz + uc - 1.9, fx + 3.0, cz + uc + 1.9], y + 28.5, y + 35.5);
+  }
 }
