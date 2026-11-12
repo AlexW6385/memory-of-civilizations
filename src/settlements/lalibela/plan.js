@@ -72,8 +72,8 @@ function carve(r, holes) {
 }
 // ---- the churches
 const G = PITS.giyorgis, gc = [(G.rect[0] + G.rect[2]) / 2, (G.rect[1] + G.rect[3]) / 2];
-// its roof level with the ground round the pit: the body stops 0.42 m below it, the three stepped crosses carved up to it
-E.push({ t: 'giyorgis', c: gc, y0: -G.depth + 0.15, h: G.depth - 0.15 - 0.42, a: 12, w: 4.6 });
+// its roof level with the ground round the pit: the body stops 1.22 m below it, the roof plate and the three stepped crosses (0.38 m each) carved up to it
+E.push({ t: 'giyorgis', c: gc, y0: -G.depth + 0.15, h: G.depth - 0.15 - 1.22, a: 12, w: 4.6 });
 // inside (docs §13): the sanctuary's curtain across the east arm before the altar, rush mats down the west arm
 const GY = -G.depth + 0.15 + 1.8;
 E.push({ t: 'curtain', a: [gc[0] + 6.6, gc[1] - 2.95], b: [gc[0] + 6.6, gc[1] + 2.95], y: GY, h: 4.2, mat: 'cloth_red' });

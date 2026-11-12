@@ -167,12 +167,15 @@ function giyorgis(el, { bag, col }) {
     solid(bag, col, TH, [x - 2.6, cz - 0.9, x - 1.1, cz + 0.9], yf, yf + 1.05);
     bag.add('cloth_white', box(x - 2.68, yf + 1.05, cz - 0.98, x - 1.02, yf + 1.09, cz + 0.98));
     bag.add('bronze', box(x - 1.9, yf + 1.09, cz - 0.02, x - 1.82, yf + 1.5, cz + 0.02)); bag.add('bronze', box(x - 1.96, yf + 1.34, cz - 0.14, x - 1.76, yf + 1.4, cz + 0.14)); }
-  // the roof, level with the ground round the pit: three Greek crosses nested one within another,
-  // each stepped up from the last (the triple cross carved on the roof)
-  let yr = top;
-  for (const [sA, sW, hgt] of [[0.86, 0.8, 0.14], [0.6, 0.55, 0.14], [0.34, 0.3, 0.14]]) {
+  // the roof, level with the ground round the pit: a dark weathered plate over the whole cross, on it three Greek crosses
+  // nested one within another, each stepped up from the last and of another tone (dark, hewn, lichen-grey, dark), so that
+  // seen from above the triple cross reads as rings of light and shade; the last stands level with the ground
+  { const A = a, Wd = w, yp = top;
+    for (const r of [[cx - Wd, cz - Wd, cx + Wd, cz + Wd], [cx - A, cz - Wd, cx - Wd, cz + Wd], [cx + Wd, cz - Wd, cx + A, cz + Wd], [cx - Wd, cz - A, cx + Wd, cz - Wd], [cx - Wd, cz + Wd, cx + Wd, cz + A]]) bag.add('scoria_red', box(r[0], yp, r[1], r[2], yp + 0.06, r[3])); }
+  let yr = top + 0.06;
+  for (const [sA, sW, hgt, mat] of [[0.86, 0.8, 0.38, TH], [0.6, 0.55, 0.38, 'plaster_damp'], [0.34, 0.3, 0.38, 'scoria_red']]) {
     const A = a * sA, Wd = w * sW;
-    for (const r of [[cx - Wd, cz - Wd, cx + Wd, cz + Wd], [cx - A, cz - Wd, cx - Wd, cz + Wd], [cx + Wd, cz - Wd, cx + A, cz + Wd], [cx - Wd, cz - A, cx + Wd, cz - Wd], [cx - Wd, cz + Wd, cx + Wd, cz + A]]) bag.add(TH, box(r[0], yr, r[1], r[2], yr + hgt, r[3]));
+    for (const r of [[cx - Wd, cz - Wd, cx + Wd, cz + Wd], [cx - A, cz - Wd, cx - Wd, cz + Wd], [cx + Wd, cz - Wd, cx + A, cz + Wd], [cx - Wd, cz - A, cx + Wd, cz - Wd], [cx - Wd, cz + Wd, cx + Wd, cz + A]]) bag.add(mat, box(r[0], yr, r[1], r[2], yr + hgt, r[3]));
     yr += hgt;
   }
 }

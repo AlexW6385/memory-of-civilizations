@@ -59,7 +59,17 @@ function profile(r) {
   return (TERR.r0 - PRECINCT) * 0.16 + n * TERR.rise + TERR.rise * smooth(0.72, 1, f);
 }
 const aMod = (x, z) => 0.8 + 0.2 * Math.sin(Math.atan2(z, x) * 3);
-export function slope(x, z) { return profile(Math.hypot(x, z)) * aMod(x, z); }
+// The shoulder of the hill south-west of Bete Giyorgis: the pilgrims' viewing place, from which the cross on the church's roof
+// (level with the ground round the pit) is seen from above. A broad swell on the terraced slope, flat to 6 m from the pit's edge
+// and the trench's, so the cuts keep their levels; no houses on it (the build() below clears them).
+export const KNOLL = { c: [-236, 176], h: 9, R: 30, clear: 36 };
+const cutDist = (x, z) => Math.min(rectDist(PITS.giyorgis.rect, x, z), rectDist(TRENCHES[0].rect, x, z));
+function knoll(x, z) {
+  const dx = x - KNOLL.c[0], dz = z - KNOLL.c[1], q = (dx * dx + dz * dz) / (KNOLL.R * KNOLL.R);
+  if (q > 5) return 0;
+  return KNOLL.h * Math.exp(-q) * smooth(6, 26, cutDist(x, z));
+}
+export function slope(x, z) { return profile(Math.hypot(x, z)) * aMod(x, z) + knoll(x, z); }
 /** The terrace risers: the ring radius of the wall n (its foot's ground and its top's). */
 export const riserR = (n) => TERR.r0 + TERR.P * (n + 0.86);
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -123,6 +133,9 @@ function build() {
     if (!free(x, z, r + 2) || taken(x, z, r + 2) || HOUSES.some((h) => Math.hypot(h.c[0] - x, h.c[1] - z) < h.r + r + 4)) continue;
     HOUSES.push({ c: [x, z], r, storeys: rand() < 0.3 ? 2 : 1, seed: Math.floor(rand() * 1e6), kind: 'lone', door: rand() * 6.28 });
   }
+  // the knoll is left open: no compound, house or lane on it
+  { const off = (p) => Math.hypot(p[0] - KNOLL.c[0], p[1] - KNOLL.c[1]) < KNOLL.clear;
+    CMP = CMP.filter((q) => !off(q.c)); HOUSES = HOUSES.filter((h) => !off(h.c)); LAN = LAN.filter((l) => !off(l.a) && !off(l.b)); }
   // the enterable houses: the main houses nearest the arrival, a good way apart
   ENTER = [];
   const mains = HOUSES.filter((h) => h.kind === 'main' && h.r > 3.0).sort((p, q) => Math.hypot(p.c[0] - ARRIVAL[0], p.c[1] - ARRIVAL[1]) - Math.hypot(q.c[0] - ARRIVAL[0], q.c[1] - ARRIVAL[1]));
