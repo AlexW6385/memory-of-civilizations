@@ -4,7 +4,7 @@
 
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { lots, WIEN, RADIUS } from './layout.js';
+import { lots, WIEN, RADIUS, TRAIN } from './layout.js';
 
 const ID = 'vienna';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -17,7 +17,9 @@ function emitters() {
     E.push({ p: [x0 + (x1 - x0) * (0.25 + 0.5 * rand()), (l.y ?? 0) + (l.kind === 'biedermeier' ? n * 3.3 + 3.2 : n * 3.9 + 4.6), z0 + (z1 - z0) * (0.3 + 0.4 * rand())], kind: 'kitchen', seed: (l.seed ?? 1) + 1 });
   }
   // the chestnut roaster at the Karlsplatz's main walk
-  E.push({ p: [118, 1.3, -4.2], kind: 'kitchen', thr: 0.1, seed: 77 });
+  E.push({ p: [118.2, 1.5, -3.6], kind: 'kitchen', thr: 0.1, seed: 77 });
+  // the Stadtbahn engine standing on the viaduct
+  E.push({ p: [TRAIN.x0 + 1.1, 3.0, TRAIN.z], kind: 'kitchen', thr: 0, seed: 1898 });
   // the mist on the Wien at dawn
   for (let x = -260; x <= 260; x += 40) if (Math.hypot(x, 70) < RADIUS - 40) E.push({ p: [x, WIEN.water + 0.45, 70], kind: 'mist', thr: 0, seed: Math.floor(x) + 99 });
   return E;

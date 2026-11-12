@@ -1,7 +1,7 @@
 // Vienna in spring 1902 — the animals (src/engine/fauna.js; docs/settlements/vienna.md §9): swallows and swifts over the Ring and the
 // Wien, crows round the Karlskirche's dome and the Opera's roof, sparrows and pigeons on the paving and the Karlsplatz's lawns, a
 // grey heron on the Wien's wall (carp lie in the channel).
-import { WIEN, KARLSKIRCHE, OPERA, GROUND } from './layout.js';
+import { WIEN, KARLSKIRCHE, OPERA, GROUND, yards } from './layout.js';
 
 const inWater = (x, z) => (x > WIEN.x0 + 3 && x < WIEN.x1 - 3 ? Math.max(WIEN.z0 - z, z - WIEN.z1) : 20);
 const fish = [];
@@ -15,5 +15,7 @@ const flights = [
 ];
 const perches = [];
 for (const [x, z] of [[-30, -57], [30, -57], [-10, -37], [10, 6], [-20, 8], [90, -12], [140, -2], [170, 14], [-80, 52], [-160, 52], [0, -212], [60, -244]]) perches.push({ kind: 'sparrow', x, z, y: GROUND + 0.1, rot: x * 0.07, range: [1.5, 1.3] });
+for (const y of yards().slice(0, 9)) perches.push({ kind: 'sparrow', x: (y.rect[0] + y.rect[2]) / 2 + 2, z: (y.rect[1] + y.rect[3]) / 2 + 1.5, y: GROUND + 0.1, rot: y.rect[0] * 0.05, range: [2, 1.6] });
+flights.push({ kind: 'swallow', n: 3, lane: { a: [-200, -100], b: [200, -100] }, y: [8, 22], speed: 9, half: 12 });
 perches.push({ kind: 'heron', x: -120, z: WIEN.z0 - 1.3, y: GROUND + 0.2, rot: Math.PI / 2, stay: [80, 240], gone: [40, 150], alert: 10 });
 export default { fish, flights, perches };

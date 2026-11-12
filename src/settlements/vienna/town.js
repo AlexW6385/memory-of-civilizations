@@ -2,6 +2,7 @@
 // the tenements of the Gründerzeit and the Biedermeier houses between, Wagner's two houses on the Wienzeile, the Naschmarkt over the
 // walled Wien with its bridges and the Stadtbahn's ledge, the Karlsplatz with Wagner's pavilions and the Karlskirche, the Opera, the
 // trams, Fiakers, gas lamps and advertising columns; houses in two levels of detail (src/settlements/lod.js).
+import { life as stillLife } from './life.js';
 import { lodTiles } from '../lod.js';
 import { subtractRects } from '../../core/build.js';
 import '../../styles/viennese/index.js';
@@ -174,7 +175,7 @@ function extras() {
 }
 
 export async function town() {
-  const plans = [streets(), wien(), ...furniture(), naschmarkt(), karlsplatz(), houseRooms(), extras()];
+  const plans = [streets(), wien(), ...furniture(), naschmarkt(), karlsplatz(), houseRooms(), extras(), base('vienna-life', stillLife(), { style: 'life' })];
   const els = lots().map((l) => ({ t: 'mietshaus', rect: l.rect, front: l.front, kind: l.kind, storeys: l.storeys, seed: l.seed, y: 0, side: l.side, lod: l.lod, faience: l.faience, medallions: l.medallions, mat: l.mat, passage: l.passage, yardAt: l.yardAt, open: l.open }));
   els.push(...hofs());
   plans.push(...lodTiles('vienna-houses', 'viennese', els, { R: RADIUS }));

@@ -4,7 +4,7 @@
 // porters. Data for the engine's movers (src/engine/movers.js), read in its worker; the format is Suzhou's; the ways come from
 // layout.js. No boats (the Wien is a walled channel).
 
-import { RADIUS, EW, NS, WIEN, NASCH, PATHS, SQUARE, SEC_COURT, SEC, KARLSPLATZ, CAFE, paving } from './layout.js';
+import { RADIUS, EW, NS, WIEN, NASCH, PATHS, SQUARE, SEC_COURT, SEC, KARLSPLATZ, CAFE, paving, yards, WING } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
@@ -34,6 +34,8 @@ export function walkways() {
   for (const { w, pts } of PATHS) for (let i = 0; i + 1 < pts.length; i++) { const [ax, az] = pts[i], [bx, bz] = pts[i + 1]; rects.push({ r: [Math.min(ax, bx) - w / 2 + 0.3, Math.min(az, bz) - w / 2 + 0.3, Math.max(ax, bx) + w / 2 - 0.3, Math.max(az, bz) + w / 2 - 0.3], weight: 1.5, market: 0.5, kind: 'street' }); }
   rects.push({ r: [SEC_COURT[0] + 3, SEC_COURT[1] + 2, SEC_COURT[2] - 3, SEC[1] - 5.5], weight: 2.2, market: 0.8, kind: 'street' });
   rects.push({ r: [CAFE[0] + 2, CAFE[3] + 0.5, CAFE[2] - 2, CAFE[3] + 2.2], weight: 1.6, market: 1.6, kind: 'street' });
+  // the courtyards behind the Durchhäuser: a few people crossing them, women with baskets, children
+  for (const y of yards()) { const r = [y.rect[0] + 3, y.rect[1] + WING + 3.5, y.rect[2] - 3, y.rect[3] - WING - 3.5]; if (r[2] - r[0] > 4 && r[3] - r[1] > 4) rects.push({ r, weight: 0.45, market: 0.5, kind: 'lane' }); }
   void SQUARE; void KARLSPLATZ; void paving;
   return { rects, links: [], clip: RADIUS - 40 };
 }
