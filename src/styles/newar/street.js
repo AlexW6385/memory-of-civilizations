@@ -57,3 +57,15 @@ export function makeCourt({ dhara, pati, tree }) {
     void lathe; void rod;
   };
 }
+
+/** newar_yard { c, seed }: the potters' yard by a kiln — two ricks of straw for the firing, a heap of the black clay (dyo cha), a plank rack of drying bowls, a stack of firewood [inferred from the kiln's fuel]. */
+export function yard(el, { bag, col }) {
+  const [cx, cz] = el.c, rand = rng(el.seed ?? 4);
+  for (const [dx, dz, r, h] of [[-1.5, -0.4, 1.1, 1.9], [1.1, 0.6, 0.9, 1.5]]) { bag.add('thatch', lathe([[r, 0], [r * 0.95, h * 0.35], [r * 0.7, h * 0.7], [r * 0.3, h * 0.92], [0.001, h]], 9, null, cx + dx, 0, cz + dz)); col.circle(cx + dx, cz + dz, r * 0.9, 0, h); }
+  bag.add('mud_plaster', lathe([[1.0, 0], [0.8, 0.25], [0.45, 0.5], [0.001, 0.62]], 9, null, cx + 0.2, 0, cz - 1.7)); col.circle(cx + 0.2, cz - 1.7, 0.9, 0, 0.5);
+  bag.add('wood_ochre', bx(cx - 2.4, 0.5, cz + 1.6, cx - 0.4, 0.55, cz + 2.2)); for (const x of [-2.3, -0.5]) for (const z of [1.7, 2.1]) bag.add('wood_dark', bx(cx + x - 0.03, 0, cz + z - 0.03, cx + x + 0.03, 0.5, cz + z + 0.03));
+  for (let k = 0; k < 8; k++) pot(bag, cx - 2.2 + k * 0.24, 0.55, cz + 1.9 + (k % 2) * 0.12, 'bowl', 0.8, k % 3 === 0);
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) bag.add('timber', rod([cx + 1.8 + i * 0.17, 0.1 + j * 0.15, cz - 0.9], [cx + 1.8 + i * 0.17, 0.1 + j * 0.15, cz - 1.7], 0.065, 5));
+  col.rect([cx + 1.7, cz - 1.75, cx + 2.55, cz - 0.85], 0, 0.5);
+  void rand;
+}

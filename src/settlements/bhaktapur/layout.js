@@ -17,7 +17,7 @@ export const CHAITYA = { c: [2, 13] };
 export const TREES = [[-22, -30], [37, 15]];
 /** The enterable house on the square's south side (its front toward the square, north). */
 export const HOUSE = { rect: [14, 24, 24.5, 32.5], front: 'n', n: 3 };
-export const STALLS = [[-8, 5, 0, 'pots'], [-2, 6.6, 0, 'fruit'], [3, 5.6, 0, 'grain'], [-14, 3, 0, 'cloth'], [26, 5, 0, 'pots'], [36, 8, 0, 'fruit']];
+export const STALLS = [[-8, 5, 0, 'pots'], [-2, 6.6, 0, 'fruit'], [3, 5.6, 0, 'grain'], [-14, 3, 0, 'cloth'], [26, 5, 0, 'pots'], [36, 8, 0, 'fruit'], [-19, 5.2, 0, 'cloth'], [9, 5.4, 0, 'fruit'], [14.5, 5.6, 0, 'pots'], [20.5, 5, 0, 'grain'], [31, 5.4, 0, 'cloth']];
 
 /** The pagoda of Nyatapola and the Bhairabnath in the style's terms (src/styles/newar/temples.js). */
 export const NYATAPOLA = {
@@ -26,7 +26,7 @@ export const NYATAPOLA = {
   bells: [80, 68, 56, 44, 32],
 };
 export const BHAIRAB = {
-  c: BHA.c, front: 'w', plinth: { hw: [5.4, 4.6, 3.8], h: 0.9, tread: 1.8, top: 1.2, stair: 3.6 }, guard: [],
+  c: BHA.c, front: 'w', chamber: true, plinth: { hw: [5.4, 4.6, 3.8], h: 0.9, tread: 1.8, top: 1.2, stair: 3.6 }, guard: [],
   roofs: [{ hw: 5.6, core: 3.3, wall: 2.4, rise: 1.7 }, { hw: 4.6, core: 2.5, wall: 2.4, rise: 1.7 }, { hw: 3.6, core: 1.7, wall: 2.4, rise: 1.5 }],
   bells: [40, 32, 24],
 };

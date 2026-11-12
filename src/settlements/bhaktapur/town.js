@@ -97,6 +97,10 @@ export async function town() {
   const A = [];
   for (let k = 0; k < 16; k++) { const s = PAVED[Math.floor(rand() * PAVED.length)], x = s[0] + 1 + rand() * Math.max(0.1, s[2] - s[0] - 2), z = s[1] + 1 + rand() * Math.max(0.1, s[3] - s[1] - 2); if (Math.hypot(x, z) < 110 && free(x, z, 0.5)) A.push({ t: 'animal', kind: 'dog', at: [x, z], y: 0, rot: rand() * 6.28, seed: k + 3 }); }
   for (const [x, z] of [[-18, -2], [30, 30], [-60, -70]]) A.push({ t: 'animal', kind: 'zebu', at: [x, z], y: 0, rot: rand() * 6.28, seed: Math.round(x) });
+  // water buffalo in two lanes, a cat on a pidha here and there, dogs sleeping before the shops
+  for (const [x, z] of [[-24, 5], [70, -40]]) A.push({ t: 'animal', kind: 'buffalo', at: [x, z], y: 0, rot: rand() * 6.28, seed: Math.round(x) + 9 });
+  for (const l of L) if (!l.use && !l.open && l.pid && rand() < 0.22 && Math.hypot(...fp(l, 2, 0)) < 100) { const q = fp(l, 3.2, -0.45); A.push({ t: 'animal', kind: 'cat', at: q, y: 0.46, rot: rand() * 6.28, seed: l.seed % 97 }); }
+  for (const l of L) if (l.open && rand() < 0.35) { const q = fp(l, (l.rect[2] - l.rect[0] > 0 ? 1.0 : 1.0) + rand() * 2, -1.2); A.push({ t: 'animal', kind: 'dog', at: q, y: 0.05, rot: rand() * 6.28, seed: l.seed % 53 }); }
   for (const [x, z] of [[8, 60], [-70, -30]]) A.push({ t: 'animal', kind: 'goat', at: [x, z], y: 0, rot: rand() * 6.28, seed: Math.round(z) });
   void STREETS;
   out.push({ ...base('bhaktapur-people', 'life', [...P, ...A]), feature: true });
