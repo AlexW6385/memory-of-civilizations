@@ -1,7 +1,7 @@
 // The Hakka tulou — the animals (src/engine/fauna.js draws them; docs/settlements/hakka-tulou.md §5): swallows over the
 // paddy and the stream, egrets standing in the stream and over the paddy, crows over the hill, sparrows on the
 // court's cobbles and the roof ridge, small carp in the stream [inferred: a hill stream of the valley].
-import { STREAM, streamZ, T, RADIUS } from './layout.js';
+import { STREAM, streamZ, T, RADIUS, HOUSES } from './layout.js';
 import { ground } from './ground.js';
 
 const dist = (x, z) => Math.abs(z - streamZ(x)) - STREAM.w / 2;
@@ -19,5 +19,13 @@ const perches = [];
 for (const [x, z] of [[-14, 8], [10, 12], [-8, -9], [17, 3], [-22, 14], [22, -12], [-3, 21], [0, 36], [-10, 44], [9, 53]]) perches.push({ kind: 'sparrow', x, z, y: ground.height(x, z) + 0.05, rot: (x * 7) % 3, range: [1.8, 1.6] });
 // egrets by the stream, facing the water
 for (const x of [-40, 25, 70]) { const z = streamZ(x) - 3.3; perches.push({ kind: 'egret', x, z, y: ground.height(x, z), rot: Math.PI / 2, stay: [60, 200], gone: [60, 160], alert: 10 }); }
+// sparrows on the porch beams and ridges of the hamlet, one pair to every other house; swallows nesting under the eaves flying over the rows
+HOUSES.forEach((h, k) => {
+  if (k % 2) return;
+  const e = Math.sin(h.yaw) > 0, x = h.c[0] + (e ? 1 : -1) * (h.d / 2 + 1.4), z = h.c[1] + (k % 3 - 1) * 1.5;
+  perches.push({ kind: 'sparrow', x, z, y: ground.height(x, z) + 0.1, rot: e ? 1.57 : -1.57, range: [1.4, 1.2] });
+});
+flights.push({ kind: 'swallow', n: 5, loop: { c: [0, 45], a: [30, 18], rot: 0 }, y: [1.5, 7], speed: 9 });
+flights.push({ kind: 'swallow', n: 4, loop: { c: [0, 108], a: [20, 24], rot: 0 }, y: [1.5, 7], speed: 9 });
 void T; void RADIUS;
 export default { fish, flights, perches };

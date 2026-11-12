@@ -72,3 +72,15 @@ Hakka mountain songs (客家山歌) [stated: DESIGN §7]; a pentatonic voice, a 
 - National Geographic, "China's Massive Earthen Fortresses Once Housed Up to 800 People" (2015) — https://www.nationalgeographic.com/travel/article/150102-hakka-china-tulou-fujian-world-heritage
 - Travel China Guide, "Earthen Buildings of Hakkas" — https://www.travelchinaguide.com/intro/architecture/styles/earth-building.htm
 - Nomadic Backpacker, "Hakka Tulou, Yongding" — https://www.nomadicbackpacker.com/hakka-tulou-yongding-china.html
+
+## 4.4 The hamlet and the water-works (deepening pass)
+
+- **Ordinary houses** [inferred: the valley's villages held tulou and, round them, lower houses of the same earth and tile]: two storeys of rammed earth on a granite foot, a tiled gable roof with a deep front eave carried on two posts, three bays — a hall in front, the ancestors' altar on the back wall of the middle bay, a kitchen and a second room (bedroom, tool room, loom or sitting room) behind partitions; the loft above is closed. Sixteen are built, in rows facing the yard (west and east) and the road (north and south of the stream). Eave 4.5 m, 7.8 × 8.6 m.
+- **Ancestor altar in the hall** [stated: Hakka houses keep the ancestral tablets on the back wall of the main hall; same as the tulou hall of §4.1].
+- **Earth-god shrine (伯公 *bakgung* in Hakka)** [stated: a small stone shrine at the village entrance, bridge head or under a tree is the Hakka village's tutelary; offerings of incense and fruit]. Three are built: at the bridge head, at the south-west road, and east of the yard.
+- **Bamboo noria (筒车)** [stated: bamboo water-lifting wheels turning in the stream are a feature of Fujian's hill streams, lifting water to terrace channels]. One, 6.4 m across, with an axle across the stream on stone piers and a bamboo trough on trestles to the bank.
+- **Washing steps** [inferred: granite steps down to the stream, as at every Fujian village; women washing and beating clothes on them].
+- **Kitchen gardens** behind the rows: raised beds, greens, beans on bamboo tripods, a bamboo fence [inferred].
+- **Rooms of the great ring** [inferred from §4.1: each family owned a vertical slice]: every one of the 262 rooms outside the stair bays and the gate passages is furnished — kitchen (stove, pots, vat), pigsty or tool room on the ground floor; grain store, loom or tool room on the second; bedroom, loom or sitting room with household altar above; red paper couplets by every door, lanterns and washing poles on the galleries.
+- **Weathering of the earth wall**: splash-darkened foot, lichen, pale rain tails under the sills, lime patches where it was mended, bare earth in places [inferred].
+- **Neighbouring round tulou** are enterable on every floor (stairs in two bays), furnished like the great ring; the square tulou's courts have well, trays, washing, hens and people but their rooms are shut.

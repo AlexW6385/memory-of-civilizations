@@ -3,7 +3,7 @@
 // second ring, the neighbouring tulou, and the farm buildings. The engine part is src/engine/smoke.js.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { T, NEIGHBOURS, RADIUS, FARMS } from './layout.js';
+import { T, NEIGHBOURS, RADIUS, FARMS, HOUSES } from './layout.js';
 
 const ID = 'hakka-tulou';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -14,6 +14,8 @@ export function emitters() {
   ring(T.c, (T.ring2.r0 + T.ring2.r1) / 2 + 0.2, 8.6, 10, 0.2);                            // the second ring's ridge
   for (const n of NEIGHBOURS) { const R = n.kind === 'square' ? n.half - 4 : n.R - 3, y = n.floors * 3.3 + 1.3; ring(n.c, R, y, n.kind === 'square' ? 8 : 6, 0.2); }
   for (const [x, z] of FARMS) E.push({ p: [x, 4.4, z], kind: 'kitchen', thr: 0.4, seed: Math.round(x) });
+  // the hamlet's kitchens: the smoke seeps out of the tiles over the left-hand room of each house (local x -2.3, z -1.8, the roof 5.9 m up)
+  HOUSES.forEach((h, k) => { const cs = Math.cos(h.yaw), sn = Math.sin(h.yaw); E.push({ p: [h.c[0] + -2.3 * cs + -1.8 * sn, 5.9, h.c[1] - -2.3 * sn + -1.8 * cs], kind: 'kitchen', thr: 0.15 + 0.5 * r(), seed: k * 7 + 3 }); });
   return E;
 }
 const ATT = [];

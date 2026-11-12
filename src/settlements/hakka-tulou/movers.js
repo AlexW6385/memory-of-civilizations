@@ -3,13 +3,13 @@
 // trousers with the broad straw hat, men in black or indigo with a cap or a straw hat, a water-bearer with two
 // pails on a pole, a farmer with the hoe, boys, an elder with a staff. No boats. Data for the engine's movers
 // (src/engine/movers.js, read in its worker); the ways come from layout.js.
-import { RADIUS, T, NEIGHBOURS, STREAM, streamZ, YARD } from './layout.js';
+import { RADIUS, T, NEIGHBOURS, STREAM, streamZ, YARD, HOUSES, WASH_STEPS } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 34, night: 4, rain: 0.5, reach: 150, spawnMin: 28, far: 44 },
+  walkers: { day: 46, night: 4, rain: 0.5, reach: 150, spawnMin: 28, far: 44 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: STREAM.water,
 };
@@ -44,6 +44,13 @@ export function walkways() {
   for (const x of BRIDGES) { const z = streamZ(x); links.push({ a: [x, z - 4.6], b: [x, z + 4.6], w: 0.5, kind: 'bridge', weight: 1.0 }); }
   road(BRIDGES[1] - 1.2, streamZ(BRIDGES[1]) - 20, BRIDGES[1] + 1.2, streamZ(BRIDGES[1]) - 4.3, 0.4, 'lane', 0.1);
   road(BRIDGES[1] - 1.2, streamZ(BRIDGES[1]) + 4.3, BRIDGES[1] + 1.2, 105, 0.4, 'lane', 0.1);
+  // the hamlet: the flagged aprons in front of each house, the lane of each row, the paths down to the washing steps
+  for (const h of HOUSES) {
+    const e = Math.sin(h.yaw) > 0, hh = h.w / 2, fx = h.c[0] + (e ? 1 : -1) * (h.d / 2 + 1.3);
+    road(Math.min(fx, fx + (e ? 1.8 : -1.8)), h.c[1] - hh, Math.max(fx, fx + (e ? 1.8 : -1.8)), h.c[1] + hh, 0.8, 'street', 1.0);
+  }
+  road(-17.9, YARD[1], -14, 57.6, 0.8, 'street', 1.0); road(14, YARD[1], 17.9, 57.6, 0.8, 'street', 1.0);
+  for (const [x] of WASH_STEPS) road(x - 0.8, streamZ(x) - 14, x + 0.8, streamZ(x) - 3.4, 0.4, 'lane', 0.3);
   return { rects, links, clip: RADIUS - 24 };
 }
 export function waterways() { return { rects: [], bridges: [], clip: RADIUS - 18 }; }
