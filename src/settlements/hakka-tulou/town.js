@@ -108,6 +108,8 @@ export async function town() {
     for (let k = 0; k < 5; k++) { const a = rr() * 6.28, d = S * (0.35 + rr() * 0.6), at = [cc[0] + Math.cos(a) * d, cc[1] + Math.sin(a) * d]; if (Math.abs(at[0] - cc[0]) < 1.6 && at[1] > cc[1]) continue; const t = k % 4; P.push(t === 0 ? { t: 'drying_tray', at, y: 0.03, rot: rr() * 3, seed: q * 7 + k } : t === 1 ? { t: 'chickens', n: 4, kind: 'hen', at, y: 0.03, seed: q + k } : t === 2 ? { t: 'laundry', at, y: 0.03, rot: rr() * 3, len: 3.2, seed: q * 5 + k } : { t: 'basket', n: 2, at, y: 0.03, seed: q + k }); }
     for (let k = 0; k < (n.kind === 'square' ? 7 : 5); k++) { const a = rr() * 6.28, d = S * (0.2 + rr() * 0.7), at = [cc[0] + Math.cos(a) * d, cc[1] + Math.sin(a) * d]; if (Math.abs(at[0] - cc[0]) < 1.6 && at[1] > cc[1]) continue; (k % 2 ? woman : man)(at, 0.03, rr() * 6.28, k % 3 === 0 ? { carry: 'basket' } : k % 3 === 1 ? { pose: 'talk' } : {}); }
   });
+  // a wayside rest pavilion by the bridge's near end, with its bench
+  V.push({ t: 'ming_pavilion', c: [9.6, 75.4], shape: 'rect', w: 4.4, d: 3.4, y: 0.05, H: 3.1, bench: true, rect: [7, 73.2, 12.4, 77.8] });
   // ── the lane and the drying ground at the arrival: a roadside tea stand with its drinkers, firewood and a straw stack by the lane's end,
   // a buffalo with a herd boy, ploughing in the paddy, sacks of rice and mats of dried vegetables on the yard, an old man mending a basket
   {
