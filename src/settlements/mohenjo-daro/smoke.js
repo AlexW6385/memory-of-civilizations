@@ -17,6 +17,7 @@ export function emitters() {
   }
   for (const [dx, dz] of [[-14, -10], [16, 12], [-6, 20]]) E.push({ p: [(PLAZA[0] + PLAZA[2]) / 2 + dx, 2.0, (PLAZA[1] + PLAZA[3]) / 2 + dz], kind: 'kitchen', thr: 0.1, seed: 40 + dx });
   E.push({ p: [BATH.outer[2] - 2.5, PLAT + 1.4, BATH.outer[1] + 14], kind: 'incense', thr: 0.2, seed: 5 });
+  for (const z of [-52.5, -35.5]) E.push({ p: [-66.2, PLAT + 1.1, z], kind: 'incense', thr: 0.1, seed: 70 + z });   // the braziers at the stair's head
   return E;
 }
 

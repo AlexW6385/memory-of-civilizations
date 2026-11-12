@@ -52,6 +52,7 @@ function people() {
     man([wx - 1.8, wz - 1.6], f(wx - 1.8, wz - 1.6), { y: PLAT, pose: 'stand' });
   }
   for (const [px, pz, n] of [[-121, -97, 4], [-178, -80, 2]]) for (let k = 0; k < n; k++) { const a = 0.6 + k * (6.28 / n), x = px + Math.cos(a) * 1.9, z = pz + Math.sin(a) * 1.9; (k % 3 === 2 ? woman : man)([x, z], Math.atan2(px - x, -(pz - z)), { y: PLAT + 0.58, pose: 'cross', hair: k % 2 ? 'shaven' : 'bun', beard: k % 2 ? 0 : 1 }); }
+  man([-102, -116], Math.PI, { y: PLAT, pose: 'cross', cloth: 'cloth_white', beard: 1 });
   man([-188, -66.3], 0, { y: PLAT + 0.44, pose: 'sit', cloth: 'cloth_white' }); woman([-187.2, -68.4], Math.PI, { y: PLAT, carry: 'pot', arms: 'head' });
   for (const [x, z, r] of [[-176, -61, 0], [-146, -63.5, Math.PI], [-134, -61, Math.PI / 2]]) man([x, z], r, { y: PLAT, arms: 'sack', carry: 'sack', cloth: 'cloth_ochre', beard: 0 });
   // the market place: sellers on their mats, buyers, a water-carrier at the well
