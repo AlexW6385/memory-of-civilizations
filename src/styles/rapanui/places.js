@@ -144,4 +144,46 @@ function pora(el, { bag }) {
   const a = W(0.4, 0.5), b = W(1.2, 0.9); bag.add('timber', rod([a[0], y + 0.25, a[1]], [b[0], y + 0.2, b[1]], 0.018, 5));
 }
 
-export const PLACES = { plaza_dress: plazaDress, shore_works: shoreWorks, pora };
+/**
+ * approach_dress: the village's yards on the way up to the plaza { ground, seed } — where the visitor arrives: a woman's tapa yard (a flat basalt slab
+ * to beat the bark on, the beater, a stack of the sheets, a line of them hung to dry between two poles), baskets of sweet potato on a mat, a rack of gourds
+ * for water on its stakes, a small cooking hearth ringed with stones with a heap of wood, flat stones to sit on [stated: bark cloth (mahute) was made on the
+ * island from the paper mulberry, as the gardens show; inferred: the yards and their places].
+ */
+function approachDress(el, { bag, col }) {
+  const G = el.ground, rand = rng(el.seed ?? 12);
+  const gy = (x, z) => G(x, z);
+  // the paved way's edge: dressed basalt kerbs, a stone missing here and there
+  for (const sd of [-1, 1]) for (let z = 42.2; z < 60; z += 1.0) { if (rand() < 0.12) continue; const y0 = gy(sd * 2.75, z); bag.add(B, box(sd * 2.75 - 0.14, y0 - 0.02, z, sd * 2.75 + 0.14, y0 + 0.1 + rand() * 0.04, z + 0.9)); }
+  // the tapa yard
+  { const [cx, cz] = [-12.5, 54], y = gy(cx, cz);
+    for (const d of [-0.45, 0.45]) bag.add(B, box(cx + d - 0.15, y, cz - 0.28, cx + d + 0.15, y + 0.26, cz + 0.28));
+    bag.add(B, box(cx - 0.8, y + 0.26, cz - 0.4, cx + 0.8, y + 0.36, cz + 0.4)); col.circle(cx, cz, 0.9, y, y + 0.4);
+    bag.add('wood_dark', rod([cx - 0.5, y + 0.4, cz + 0.1], [cx + 0.1, y + 0.4, cz + 0.2], 0.03, 5)); bag.add('wood_dark', rod([cx + 0.1, y + 0.4, cz + 0.2], [cx + 0.35, y + 0.4, cz + 0.2], 0.05, 5));
+    for (let k = 0; k < 6; k++) bag.add(k % 3 ? 'hide_white' : 'cloth_ochre', box(cx - 0.45 + (k % 2) * 0.05, y + 0.36 + k * 0.012, cz - 0.3, cx + 0.45, y + 0.372 + k * 0.012, cz + 0.05 - (k % 2) * 0.03));
+    const pa = [cx - 4.2, cz + 2.4], pb = [cx - 4.2, cz + 9.0], ya = gy(...pa), yb = gy(...pb);
+    for (const [p, yy] of [[pa, ya], [pb, yb]]) { bag.add('timber', rod([p[0], yy - 0.1, p[1]], [p[0], yy + 2.3, p[1]], 0.06, 6)); col.circle(p[0], p[1], 0.12, yy, yy + 2.3); stoneAt(bag, B, p[0], yy, p[1], 0.26, p[1]); }
+    bag.add('rope_fibre', rod([pa[0], ya + 2.15, pa[1]], [pb[0], yb + 2.1, pb[1]], 0.012, 4));
+    for (let k = 0; k < 5; k++) { const z0 = pa[1] + 0.35 + k * 1.2, y0 = ya + (yb - ya) * (z0 - pa[1]) / (pb[1] - pa[1]); bag.add(k % 2 ? 'cloth_ochre' : 'hide_white', box(pa[0] - 0.02, y0 + 0.95 - (k % 3) * 0.12, z0, pa[0] + 0.02, y0 + 2.1, z0 + 0.95)); }
+  }
+  // sweet potato in baskets on a mat, a gourd rack beside
+  { const [mx, mz] = [11.5, 52.5], y = gy(mx, mz);
+    bag.add('reed_mat', box(mx - 1.5, y, mz - 1.0, mx + 1.5, y + 0.03, mz + 1.0));
+    for (let q = 0; q < 5; q++) { const [b0, b1] = basket(0.27, 0.34), bx = mx - 1.1 + q * 0.55, bz = mz - 0.35 + (q % 2) * 0.6; bag.add('wicker', b0.translate(bx, y + 0.03, bz)); if (q % 2) bag.add('wicker', b1.translate(bx, y + 0.03, bz)); else for (let t = 0; t < 7; t++) bag.add('hide_tan', lump().rotateY(t * 1.9).translate(bx + Math.cos(t * 2.3) * 0.1, y + 0.36 + (t > 4 ? 0.07 : 0), bz + Math.sin(t * 2.3) * 0.1)); }
+    col.rect([mx - 1.5, mz - 1.0, mx + 1.5, mz + 1.0], y, y + 0.5);
+    const rx = mx + 3.6, rz = mz + 0.4, ry = gy(rx, rz);
+    for (let k = 0; k < 4; k++) { bag.add('timber', rod([rx + k * 0.5, ry - 0.1, rz], [rx + k * 0.5, ry + 1.2, rz], 0.03, 5)); bag.add('pottery_dark', GOURD().translate(rx + k * 0.5, ry + 1.2, rz)); }
+    col.rect([rx - 0.1, rz - 0.1, rx + 1.6, rz + 0.1], ry, ry + 1.5);
+  }
+  // a cooking hearth ringed with stones, wood heaped beside, flat stones to sit on
+  { const [hx, hz] = [8.0, 60], y = gy(hx, hz);
+    for (let k = 0; k < 10; k++) { const a = k / 10 * 6.283; stoneAt(bag, B, hx + Math.cos(a) * 0.7, y - 0.02, hz + Math.sin(a) * 0.7, 0.17 + rand() * 0.05, k + 3); }
+    bag.add('opening', lathe([[0.55, y + 0.015], [0.001, y + 0.02]], 10, null, hx, 0, hz));
+    for (let k = 0; k < 5; k++) stoneAt(bag, 'scoria_red', hx + (rand() - 0.5) * 0.7, y + 0.03, hz + (rand() - 0.5) * 0.7, 0.07, k);
+    for (let r = 0; r < 3; r++) for (let q = 0; q < 4 - r; q++) bag.add('timber', rod([hx + 1.5 + q * 0.2 + r * 0.1, y + 0.07 + r * 0.11, hz - 0.5], [hx + 1.5 + q * 0.2 + r * 0.1, y + 0.07 + r * 0.11, hz + 0.6], 0.045, 5));
+    col.circle(hx, hz, 0.85, y, y + 0.3); col.rect([hx + 1.3, hz - 0.6, hx + 2.4, hz + 0.7], y, y + 0.45);
+    for (const [sx2, sz2, yy] of [[hx - 1.9, hz + 0.3, 0.4], [hx - 0.6, hz + 1.9, 2.1]]) { const y2 = gy(sx2, sz2); bag.add(B, box(sx2 - 0.45, y2 + 0.18, sz2 - 0.3, sx2 + 0.45, y2 + 0.28, sz2 + 0.3)); bag.add(B, box(sx2 - 0.3, y2, sz2 - 0.2, sx2 + 0.3, y2 + 0.18, sz2 + 0.2)); col.circle(sx2, sz2, 0.5, y2, y2 + 0.28); void yy; }
+  }
+}
+
+export const PLACES = { plaza_dress: plazaDress, shore_works: shoreWorks, pora, approach_dress: approachDress };

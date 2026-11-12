@@ -30,8 +30,9 @@ export function walkways() {
   rects.push({ r: [-3, -134, 3, -99], weight: 1.0, market: 1.0, kind: 'street' }, { r: [-3, 99, 3, 130], weight: 1.0, market: 1.0, kind: 'street' });
   rects.push({ r: [-172, -3, -133, 3], weight: 1.0, market: 1.0, kind: 'street' }, { r: [133, -3, 168, 3], weight: 1.0, market: 1.0, kind: 'street' });
   // the palace court: the way from the gate to the hall's steps, and the open court to the west
-  rects.push({ r: [66, -38, 74, -12], weight: 0.9, market: 0.2, kind: 'street' }, { r: [14, -36, 46, -12], weight: 0.4, market: 0.1, kind: 'lane' });
-  rects.push({ r: [66, -14, 74, -4], weight: 0.9, market: 0.2, kind: 'street' });
+  // (the court's way keeps to its two flanks, 2.4 m off the axis: the visitor arrives on the axis at the gate, and nobody walks through the view)
+  for (const [a, b] of [[66, 67.6], [72.4, 74]]) { rects.push({ r: [a, -38, b, -12], weight: 0.45, market: 0.1, kind: 'street' }); rects.push({ r: [a, -14, b, -4], weight: 0.45, market: 0.1, kind: 'street' }); }
+  rects.push({ r: [14, -36, 46, -12], weight: 0.4, market: 0.1, kind: 'lane' });
   // the ger camps outside the south wall: the lanes between the rows of gers
   for (const c of [CAMPS.sw, CAMPS.se]) {
     rects.push({ r: [c[0] - 30, c[1] - 8.6, c[0] + 30, c[1] - 3.4], weight: 0.5, market: 0.2, kind: 'lane' });

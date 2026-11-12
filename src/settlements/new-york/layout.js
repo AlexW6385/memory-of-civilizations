@@ -87,12 +87,13 @@ export function lots() {
 /** The shops one can enter, in the order the lots nearest the arrival get them (the style's shoprooms.js KINDS). */
 export const ROOM_KINDS = ['drug', 'deli', 'barber', 'cigar', 'hat', 'bakery', 'shoe', 'tailor', 'haber', 'lunch'];
 function assignRooms(all) {
-  const E = [4, 176], mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
+  const E = [4, 110], mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
   const cand = all.filter((l) => !l.row && l.h >= 14 && l.h < 70 && (l.front === 'n' || l.front === 's') && l.rect[2] - l.rect[0] >= 10 && l.rect[3] - l.rect[1] >= 12 && !inRect(l.rect, DINER_AT[0], DINER_AT[1]) && !inRect(l.rect, WALKUP_AT[0], WALKUP_AT[1]) && !onElStair(...mid(l.rect), 4))
     .map((l) => ({ l, d: Math.hypot(mid(l.rect)[0] - E[0], mid(l.rect)[1] - E[1]) })).filter((c) => c.d < 260).sort((a, b) => a.d - b.d);
   const chosen = [];
-  for (const c of cand) { if (chosen.length >= ROOM_KINDS.length) break; const m = mid(c.l.rect); if (chosen.some((o) => Math.hypot(mid(o.l.rect)[0] - m[0], mid(o.l.rect)[1] - m[1]) < 45)) continue; chosen.push(c); }
-  chosen.forEach((c, i) => { c.l.room = { kind: ROOM_KINDS[i], depth: Math.min(9, c.l.rect[3] - c.l.rect[1] - 3), door: i % 2 }; });
+  // (the first ten, one of each kind, 45 m apart as before; then six more of the same kinds, 34 m apart, farther out along the avenues)
+  for (const c of cand) { if (chosen.length >= ROOM_KINDS.length + 6) break; const m = mid(c.l.rect), gap = chosen.length < ROOM_KINDS.length ? 45 : 34; if (chosen.some((o) => Math.hypot(mid(o.l.rect)[0] - m[0], mid(o.l.rect)[1] - m[1]) < gap)) continue; chosen.push(c); }
+  chosen.forEach((c, i) => { c.l.room = { kind: ROOM_KINDS[(i + (i >= ROOM_KINDS.length ? 3 : 0)) % ROOM_KINDS.length], depth: Math.min(9, c.l.rect[3] - c.l.rect[1] - 3), door: i % 2 }; });
 }
 /** The shops' own lots (those with a `room`). */
 export const roomLots = () => lots().filter((l) => l.room);

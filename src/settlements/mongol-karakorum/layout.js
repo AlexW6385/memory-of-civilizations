@@ -23,6 +23,8 @@ export const PALACE_GATE = { c: [70, -10], y: 0.9 };
 export const STORES = [[112, -82, 124, -52], [112, -46, 124, -16], [16, -82, 34, -62], [16, -56, 34, -36]];
 export const COURT_GER = { c: [104, -24], r: 4.4 };            // the khan's great ger, opened
 export const COURT_CART = { c: [36, -26], r: 3.0 };
+/** The khan's household behind the great hall: the gers of his wives and servants [inferred: a court lived in gers; the great ger stands in the court]: { c, r, door (yaw), rich }. */
+export const HOUSEHOLD = [{ c: [44, -86], r: 3.3, door: Math.PI / 2, rich: true }, { c: [53, -80], r: 3.5, door: -Math.PI / 2, rich: true }, { c: [49, -69], r: 3.0, door: Math.PI / 2, rich: false }, { c: [57, -91], r: 3.0, door: Math.PI / 2, rich: false }, { c: [104.5, -56], r: 3.2, door: -Math.PI / 2, rich: false }, { c: [108, -67], r: 3.0, door: -Math.PI / 2, rich: false }];
 export const BANNERS = [[58, -22], [82, -22]];
 export const TORTOISE = [51, -18];
 

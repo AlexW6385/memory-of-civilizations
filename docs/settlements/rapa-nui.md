@@ -137,3 +137,11 @@ Chant (riu) with hand-clapping and a stamping stone; voices and a drone stand in
 - [Orongo — Wikipedia](https://en.wikipedia.org/wiki/Orongo)
 - [Moai carving — EISP](https://www.eisp.org/544/)
 - [Features and sites (manavai, hare moa, umu pae) — Vernian Era](https://vernianera.com/Archaeology/RapaNui/features.html)
+
+### 4h. The approach and the first view (2026-11-12)
+
+- **The way from the village to the plaza:** a paved way 5.2 m wide from z 42 to the plaza's edge, of beach cobbles (the plaza's pebbles) edged with dressed basalt kerbs, a stone missing here and there; the arrival stands on it. Hare paenga stood on curbs of dressed basalt with paved forecourts [stated: Wikipedia "Hare paenga"]; the paved way and its kerbs are [inferred] from them.
+- **The yards beside it** (`approach_dress`): a woman's bark-cloth yard (a basalt slab to beat the bark on, the beater, a stack of the sheets, a line of them hung to dry between two poles), sweet potato in baskets on a mat with a rack of water gourds, a cooking hearth ringed with stones with wood heaped beside and flat stones to sit on [inferred: bark cloth (mahute) was made from the paper mulberry that the gardens show; the yards' places are ours]. Their people: the woman beating the bark, another by the drying line, a man standing by, at the mat a woman and an old man, two at the hearth, two children at a string game (kai-kai, the island's string-figure tradition [inferred]); chickens about.
+- **Terns** (drawn as the small perching bird) resting on the heads of some of the ahu's statues, along the platform's back, on the shore's stones and the canoes' sterns.
+- **The turf:** patches of drier, yellower and redder grass with the soil showing and stones in the thin places, in a broad low-frequency pattern, instead of an even cover.
+- **A hamlet east of the plaza:** six more boat-shaped houses with their yards, three chicken houses and four garden walls on the plain east of the plaza (x 78–127), so that the plain to the right of the arrival is not bare [inferred: the villages lay along the coast between the ahu].

@@ -106,11 +106,25 @@ export function village() {
     if (out.houses.some((o) => !apart(h, o))) continue;
     out.houses.push(h);
   }
+  // a hamlet east of the plaza, in the right of the view from the arrival (its own random stream: the others' places are unchanged)
+  { const r2 = rng(1503), hm = [102, 74, 20, Math.PI];
+    for (let k = 0, n = 0; k < 900 && n < 6; k++) {
+      const a = r2() * 6.283, d = Math.sqrt(r2()) * hm[2], x = hm[0] + Math.cos(a) * d * 1.4, z = hm[1] + Math.sin(a) * d * 0.8;
+      if (!free(x, z, 6)) continue;
+      const h = { c: [x, z], len: 11 + r2() * 6, w: 3.0 + r2() * 0.45, h: 2.8 + r2() * 0.4, yaw: hm[3] + (r2() - 0.5) * 0.36, seed: Math.floor(r2() * 1e6), hamlet: HAMLETS.length };
+      if (out.houses.some((o) => !apart(h, o))) continue;
+      out.houses.push(h); n++;
+    }
+  }
   const plain = out.houses.filter((h) => !h.chief).sort((p, q) => Math.hypot(p.c[0], p.c[1] - 50) - Math.hypot(q.c[0], q.c[1] - 50));
   plain.forEach((h, i) => { h.strip = i === 0; h.inside = i < ENTER_N && i !== 0; h.kind = KINDS[(h.seed >> 3) % KINDS.length]; });   // the nearest, being thatched, stays open and unfurnished
   const clear = (x, z, m) => out.houses.every((o) => Math.hypot(o.c[0] - x, o.c[1] - z) > (o.len ?? 6) / 2 + m + (o.chief ? 6 : 3));
   for (let k = 0; k < 2500 && out.moa.length < 22; k++) { const hm = HAMLETS[k % HAMLETS.length], a = rand() * 6.283, d = hm[2] * (0.5 + rand() * 0.8), x = hm[0] + Math.cos(a) * d * 1.5, z = hm[1] + Math.sin(a) * d * 0.8; if (free(x, z, 3) && clear(x, z, 3)) out.moa.push({ c: [x, z] }); }
   for (let k = 0; k < 3000 && out.gardens.length < 44; k++) { const hm = HAMLETS[k % HAMLETS.length], a = rand() * 6.283, d = hm[2] * (0.4 + rand() * 1.1), x = hm[0] + Math.cos(a) * d * 1.5, z = hm[1] + Math.sin(a) * d * 0.9; if (free(x, z, 3) && clear(x, z, 4)) out.gardens.push({ c: [x, z], r: 2 + rand() * 2.5 }); }
+  { const r2 = rng(1504), hm = [102, 74, 20];
+    for (let k = 0, n = 0; k < 600 && n < 3; k++) { const a = r2() * 6.283, d = hm[2] * (0.5 + r2() * 0.8), x = hm[0] + Math.cos(a) * d * 1.4, z = hm[1] + Math.sin(a) * d * 0.8; if (free(x, z, 3) && clear(x, z, 3)) { out.moa.push({ c: [x, z] }); n++; } }
+    for (let k = 0, n = 0; k < 600 && n < 4; k++) { const a = r2() * 6.283, d = hm[2] * (0.4 + r2() * 1.0), x = hm[0] + Math.cos(a) * d * 1.4, z = hm[1] + Math.sin(a) * d * 0.9; if (free(x, z, 3) && clear(x, z, 4)) { out.gardens.push({ c: [x, z], r: 2 + r2() * 2.5 }); n++; } }
+  }
   return (HOUSES = out);
 }
 

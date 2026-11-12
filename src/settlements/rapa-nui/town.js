@@ -91,6 +91,21 @@ export async function town() {
     if (h.chief || h === strip || k % 5 > 2) return;
     const at = L2W(h, (rand() - 0.5) * 4, -h.w / 2 - 3.2); P.push({ t: 'chickens', at, y: y(at), n: 2 + Math.floor(rand() * 3), rot: rand() * 6.28, seed: Math.floor(rand() * 1e6) });
   });
+  // the yards on the way up from the arrival to the plaza (approach_dress): a woman beating bark cloth at her slab, another by the drying line, sweet potato on a mat,
+  // two at the hearth, children playing a string game (kai-kai) — the first people the visitor meets, ten to twenty metres off
+  E.push({ t: 'approach_dress', ground: height, seed: 12 });
+  { const at = (x, z, o) => fig({ at: [x, z], y: y([x, z]), ...o });
+    at(-12.5, 55.2, { rot: face([-12.5, 55.2], [-12.5, 54]), pose: 'squat', man: false });
+    at(-15.4, 57.4, { rot: face([-15.4, 57.4], [-12.5, 54]) + 0.4, pose: 'sit_ground', man: false });
+    at(-8.6, 53.2, { rot: face([-8.6, 53.2], [-12.5, 54]), pose: 'stand', man: true });
+    at(11.4, 51.0, { rot: face([11.4, 51.0], [11.5, 52.5]), pose: 'squat', man: false });
+    at(14.6, 53.6, { rot: face([14.6, 53.6], [11.5, 52.5]), pose: 'sit_ground', man: true });
+    at(6.0, 60.4, { rot: face([6.0, 60.4], [8.0, 60]), pose: 'sit_ground', man: true });
+    at(7.6, 62.0, { rot: face([7.6, 62.0], [8.0, 60]), pose: 'sit_ground', man: false });
+    at(10.9, 63.6, { rot: face([10.9, 63.6], [12.0, 64.4]), pose: 'squat', man: true, h: 1.05 });
+    at(12.9, 65.0, { rot: face([12.9, 65.0], [10.9, 63.6]), pose: 'squat', man: false, h: 1.0 });
+    for (const [cx, cz] of [[14, 57.5], [-5.5, 61], [-18, 50]]) P.push({ t: 'chickens', at: [cx, cz], y: y([cx, cz]), n: 4, rot: rand() * 6.28, seed: Math.floor(rand() * 1e6) });
+  }
   // the shore: a woman splitting fish at the racks, a man mending a net
   for (const [x, z, pose] of [[62, 146.4, 'squat'], [100, 145.6, 'stand'], [84, 137.4, 'stand']]) { const at = [x, z]; fig({ at, y: y(at), rot: face(at, [x, z - 1]), pose, man: pose === 'stand' }); }
   // the statue walked down the road

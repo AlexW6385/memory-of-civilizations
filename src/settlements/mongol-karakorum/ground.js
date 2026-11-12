@@ -7,7 +7,12 @@ function cover(x, z) {
   if (inTown(x, z, -2)) {
     c.road = 0.55; c.grass = 0.05; c.dry = 0.4; c.soil = 0.7;
     if (Math.abs(z - MAIN.z) < MAIN.w / 2 + 1 || Math.abs(x - CROSS.x) < CROSS.w / 2 + 1) c.road = 1.0;
-    if (inPalace(x, z)) { c.road = 0.85; }
+    if (inPalace(x, z)) {
+      // the court: the trodden axis from the gate to the hall's steps, the margins scuffed and patched with dry grass and dung, the foot of the walls and storehouses grassy
+      const n = Math.sin(x * 0.91 + z * 0.37) * Math.sin(z * 1.13 - x * 0.29), axis = Math.abs(x - 70) < 5.2 && z > -44;
+      c.road = axis ? 0.95 : 0.55 + 0.25 * n; c.soil = 0.6 + 0.2 * n; c.grass = axis ? 0 : 0.12 + 0.12 * Math.max(0, -n); c.dry = 0.55;
+      if (!axis && (x < PALACE[0] + 3 || x > PALACE[2] - 3 || z < PALACE[1] + 3)) { c.grass += 0.15; c.road -= 0.2; }
+    }
     return c;
   }
   if (x > WALL[2] + 6 && x < RADIUS - 14 && Math.abs(z) < 70 && Math.hypot(x, z) < RADIUS - 24) { c.fields = 0.6; c.grass = 0.2; return c; }      // the millet at the east gate
@@ -23,6 +28,8 @@ function planting(x, z) {
     for (const [wx, wz] of WELLS) { const d = Math.hypot(x - wx, z - wz); if (d > 2.2 && d < 5.2) return { willow: 1.6, grass_dry: 4 }; }
     for (const c of COURTS) if (inRect(c.rect, x, z) && Math.abs((x - c.gu)) > 2.6) return { poplar: 0.55, grass_dry: 2 };
     if (inRect([14, -36, 46, -14], x, z)) return { poplar: 0.3, grass_dry: 3 };      // the palace's western court
+    // the palace court's margins: poplars along the walls' feet, tufts of dry grass in the corners (clear of the buildings, the gers, the axis)
+    if (inPalace(x, z, -1) && !inBuilt(x, z, 2) && Math.abs(x - 70) > 9 && Math.hypot(x - 104, z + 24) > 8 && Math.hypot(x - 36, z + 26) > 6 && (x < PALACE[0] + 7 || x > PALACE[2] - 7 || z < PALACE[1] + 7)) return { poplar: 0.14, grass_dry: 3 };
     return null;
   }
   if (inBuilt(x, z, 2) || (x > WALL[2] && x < WALL[2] + 8 && Math.abs(z) < 14) || Math.abs(x) < 10 && r < 140) return null;

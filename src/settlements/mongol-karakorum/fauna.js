@@ -22,5 +22,10 @@ for (let z = -88; z < 90; z += 22) if (Math.abs(z) > 12) perches.push({ kind: 's
 for (const [x, z] of [[-100, -9.4], [-60, -9.4], [-30, 10], [30, 10], [60, 10], [-7.4, -40], [7.4, -70], [7.4, 40], [-7.4, 70]]) perches.push({ kind: 'sparrow', x, z, y: 3.5 + 0.9, rot: 0.3, range: [1.6, 0.4], alert: 6 });
 for (const m of MOSQUES) perches.push({ kind: 'sparrow', x: (m[0] + m[2]) / 2, z: m[1] + 8, y: 6.5, rot: 0.2, range: [2.2, 0.6], alert: 7 });
 flights.push({ kind: 'swallow', n: 5, lane: { a: [-130, 0], b: [130, 0] }, y: [2, 6], speed: 9 }, { kind: 'swallow', n: 4, loop: { c: [-70, 30], a: [40, 20], rot: 0.3 }, y: [3, 9], speed: 9 }, { kind: 'crow', n: 5, loop: { c: [60, -50], a: [50, 40], rot: 0.2 }, y: [12, 30], speed: 8 }, { kind: 'crow', n: 4, loop: { c: [-80, 60], a: [50, 30], rot: 1.1 }, y: [10, 26], speed: 8 });
+// ravens on the tops of the nine-tailed banners' staves and the great hall's ridge, a falcon and a kite working over the court, doves round the gate hall
+for (const [x, z] of [[58, -22], [82, -22]]) perches.push({ kind: 'raven', x, z, y: 7.7, rot: 0.9, range: [0.1, 0.1], alert: 7 });
+for (const z of [-62, -53]) perches.push({ kind: 'raven', x: 70, z, y: 12.55, rot: 0.2, range: [0.1, 3.0], alert: 9 });
+for (const [x, z] of [[63.5, -6.4], [76.2, -6.2], [70, -6.0]]) perches.push({ kind: 'dove', x, z, y: 6.5, rot: 0.4, range: [1.2, 0.3], alert: 6 });
+flights.push({ kind: 'falcon', n: 1, loop: { c: [70, -34], a: [38, 22], rot: 0.2 }, y: [18, 36], speed: 11 }, { kind: 'kite', n: 2, loop: { c: [60, 10], a: [70, 40], rot: 0.7 }, y: [24, 46], speed: 9 }, { kind: 'swallow', n: 5, loop: { c: [70, -20], a: [24, 14], rot: 0 }, y: [2, 7], speed: 9 });
 void WALL; void PALACE;
 export default { fish, flights, perches };

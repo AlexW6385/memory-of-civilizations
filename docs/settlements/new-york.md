@@ -168,3 +168,16 @@ Jazz, Gershwin, the big bands on the radio; horns and the El. [stated: Wikipedia
 - [IRT Sixth Avenue Line — Wikipedia](https://en.wikipedia.org/wiki/IRT_Sixth_Avenue_Line)
 - [Commissioners' Plan of 1811 — Wikipedia](https://en.wikipedia.org/wiki/Commissioners%27_Plan_of_1811)
 - [How Far from True North are the Avenues of Manhattan? — Charles Petzold](https://ftp.charlespetzold.com/etc/AvenuesOfManhattan)
+
+### 1m. The street's slow life, the vehicles and the shops (2026-11-12)
+
+- **Double-deck buses:** the Fifth Avenue Coach Company ran Fifth Avenue's buses from 1896 and had its own coachworks that assembled double-deckers; in the 1920s it began buying from the Yellow Coach Corporation, whose last double-deckers (1934–53) were 35 ft long, 96 in wide and almost 13 ft tall [stated: Curbside Classic, "1934-38 Yellow Coach Model 720/735"]. The 1931 buses themselves are not described in the source: built (`bus`, pavement-item kind in `pave.js`) as a green saloon under a cream upper deck with the engine in front, 9.6 m by 2.4 m and 4.2 m high, standing at the far-side stops of Fifth and Madison Avenues in the kerb lane [inferred: livery, form and the stops; the Madison line is inferred]. Cars keep clear of them.
+- **Delivery vans** (`van`): box trucks with a black cab at the cross streets' kerbs, more of them west of Fifth (the garment district's deliveries) [inferred].
+- **Horse wagons:** ten two-wheeled carts with their horse and carter on the cross streets: milk, ice and coal still came by horse in 1931 [inferred].
+- **Pushcarts** (`pushcart`): peddlers' hot-dog and chestnut carts under an umbrella on some avenue corners, the peddler behind, a customer at some [inferred].
+- **Apple sellers:** "Up to 6,000 people sold apples in New York every day"; the scheme was proposed in 1929 by Joseph Sicker of the International Apple Shippers' Association, and vendors were "on what seemed like every street corner in New York" by 1930; boxes cost the vendors $1.75 and the apples sold at five cents [stated: History.com, "How Apples Became a Weapon in the Great Depression"]. Built: a crate of apples on the kerb side of an avenue's pavement with a man in a worn coat behind it, about one per 70 to 130 m of Fifth, Madison, Park and Sixth.
+- **Newsstand keepers:** a keeper inside each newsstand under its roof, and a newsboy hawking papers at a third of them.
+- **Traffic keeps right on the cross streets** too (the cars on them had been turned the other way about), the parked row on the south kerb heading east and on the north kerb west.
+- **Shops:** sixteen lots now have an enterable shop (the ten kinds once each, then six more of the same kinds farther out along the avenues, 34 m apart).
+- **Pigeons** on the pavements of Fifth and Madison Avenues in twos and threes, and a flock over the avenue.
+- **Wall advertisements:** painted brand panels with block letters on the bare side walls of the mid-rise buildings that stand 8 m or more over a lower neighbour (eighteen near the arrival: Coca-Cola, Camels, Lucky Strike, Wrigley's and the like, as the roof boards) [inferred from the photographs of the period; the brands from §1i].

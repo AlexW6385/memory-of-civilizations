@@ -113,6 +113,41 @@ export function curb(el, { bag, col }) {
         bag.add('lamp_glass', lathe([[0.001, 0], [0.2, 0.08], [0.24, 0.35], [0.14, 0.58], [0.001, 0.64]], 10, null, x, y + 3.6, z));
         col.circle(x, z, 0.2, y, y + 4); break;
       }
+      case 'bus': {                                                        // a Fifth Avenue Coach double-decker, c. 1931: a green saloon under a cream upper deck, the engine in front (−z) [inferred: the fleet's livery and form]
+        const GR = 'shutter_green', CR = 'paint_white', wheel = (sx, zz) => { P.push(['car_black', lathe([[0.001, -0.14], [0.52, -0.14], [0.52, 0.14], [0.001, 0.14]], 12, null, 0, 0, 0).rotateZ(Math.PI / 2).translate(sx, 0.52, zz)]); P.push(['iron_galv', lathe([[0.001, -0.16], [0.2, -0.16], [0.2, 0.16], [0.001, 0.16]], 8, null, 0, 0, 0).rotateZ(Math.PI / 2).translate(sx, 0.52, zz)]); };
+        B(GR, -1.2, 0.5, -3.6, 1.2, 2.35, 4.8); B(GR, -0.95, 0.55, -4.8, 0.95, 1.75, -3.6); B('iron_galv', -0.7, 0.62, -4.84, 0.7, 1.55, -4.8);
+        for (const sx of [-1, 1]) { B('car_black', sx * 1.25 - 0.14, 0.95, -4.7, sx * 1.25 + 0.14, 1.05, -3.8); B('lamp_glass', sx * 0.8 - 0.12, 1.3, -4.9, sx * 0.8 + 0.12, 1.55, -4.84); }
+        for (let k = 0; k < 6; k++) for (const sx of [-1, 1]) B('glass_lamp', sx * 1.2 - (sx > 0 ? 0 : 0.014), 1.25, -3.3 + k * 1.3, sx * 1.2 + (sx > 0 ? 0.014 : 0), 2.15, -3.3 + k * 1.3 + 1.05);
+        B(CR, -1.21, 2.3, -3.6, 1.21, 2.42, 4.82);
+        B(CR, -1.15, 2.42, -3.3, 1.15, 4.05, 4.7); B(CR, -1.2, 4.05, -3.4, 1.2, 4.17, 4.82);
+        for (let k = 0; k < 7; k++) for (const sx of [-1, 1]) B('glass_lamp', sx * 1.15 - (sx > 0 ? 0 : 0.014), 2.85, -3.0 + k * 1.1, sx * 1.15 + (sx > 0 ? 0.014 : 0), 3.75, -3.0 + k * 1.1 + 0.9);
+        B('glass_lamp', -1.0, 2.85, -3.34, 1.0, 3.75, -3.3); B('lamp_glass', -0.7, 3.8, -3.36, 0.7, 4.0, -3.32);
+        B(GR, -1.22, 2.42, -3.3, -1.16, 2.8, 4.7); B(GR, 1.16, 2.42, -3.3, 1.22, 2.8, 4.7);
+        B('cloth_red', -0.8, 2.5, 4.83, 0.8, 3.4, 4.86); B('paint_white', -0.7, 2.6, 4.86, 0.7, 3.0, 4.87);
+        for (const [sx, zz] of [[-1.1, -3.2], [1.1, -3.2], [-1.1, 3.0], [1.1, 3.0]]) wheel(sx, zz);
+        for (const sx of [-1.38, 1.38]) wheel(sx, 3.0);
+        const sw = Math.abs(Math.sin(rot)) > 0.7; col.rect(sw ? [x - 4.9, z - 1.4, x + 4.9, z + 1.4] : [x - 1.4, z - 4.9, x + 1.4, z + 4.9], y, y + 4.2); break;
+      }
+      case 'van': {                                                        // a box delivery truck of 1931: a black cab, a painted box with a gilt band and lettering board
+        const BX = it.body ?? 'paint_white', wheel = (sx, zz) => { P.push(['car_black', lathe([[0.001, -0.11], [0.42, -0.11], [0.42, 0.11], [0.001, 0.11]], 12, null, 0, 0, 0).rotateZ(Math.PI / 2).translate(sx, 0.42, zz)]); P.push(['iron_galv', lathe([[0.001, -0.13], [0.14, -0.13], [0.14, 0.13], [0.001, 0.13]], 8, null, 0, 0, 0).rotateZ(Math.PI / 2).translate(sx, 0.42, zz)]); };
+        B('iron', -0.8, 0.42, -2.9, 0.8, 0.6, 2.9);
+        B('car_black', -0.95, 0.5, -2.9, 0.95, 1.2, -1.2); B('car_black', -0.92, 1.2, -2.0, 0.92, 2.15, -1.25); B('glass_lamp', -0.9, 1.45, -2.04, 0.9, 2.05, -2.0);
+        B('iron_galv', -0.55, 0.62, -2.94, 0.55, 1.1, -2.9); B('lamp_glass', -0.85, 1.0, -2.93, -0.55, 1.2, -2.9); B('lamp_glass', 0.55, 1.0, -2.93, 0.85, 1.2, -2.9);
+        B(BX, -1.0, 0.7, -1.1, 1.0, 2.9, 2.9); B('gold', -1.02, 1.45, -1.1, 1.02, 1.55, 2.9); B('car_black', -1.0, 2.9, -1.12, 1.0, 2.98, 2.92);
+        B('paint_white', -1.015, 1.75, -0.2, -1.0, 2.5, 2.2); B('paint_white', 1.0, 1.75, -0.2, 1.015, 2.5, 2.2);
+        B('car_black', -0.9, 0.7, 2.9, 0.9, 2.8, 2.94); B('iron', -0.02, 0.8, 2.94, 0.02, 2.7, 2.96);
+        for (const sx of [-0.95, 0.95]) { wheel(sx, -1.8); wheel(sx - 0.0, 1.7); wheel(sx * 1.0, 2.15); }
+        const sw = Math.abs(Math.sin(rot)) > 0.7; col.rect(sw ? [x - 3.0, z - 1.1, x + 3.0, z + 1.1] : [x - 1.1, z - 3.0, x + 1.1, z + 3.0], y, y + 3.0); break;
+      }
+      case 'pushcart': {                                                   // a peddler's cart under its umbrella: hot dogs and roasted chestnuts, the steam rising from the box
+        const top = it.top ?? 'cloth_red', wheel = (sx) => P.push(['car_black', lathe([[0.001, -0.04], [0.3, -0.04], [0.3, 0.04], [0.001, 0.04]], 12, null, 0, 0, 0).rotateZ(Math.PI / 2).translate(sx, 0.3, 0.15)]);
+        B('shutter_green', -0.55, 0.5, -0.4, 0.55, 1.0, 0.4); B('iron_galv', -0.55, 1.0, -0.4, 0.55, 1.04, 0.4); B('iron_galv', -0.34, 1.04, -0.22, 0.12, 1.32, 0.22); B('iron', 0.26, 1.04, -0.08, 0.36, 1.5, 0.02);
+        B('paint_white', -0.4, 0.62, 0.4, 0.4, 0.86, 0.42); B('iron', -0.55, 0.3, -1.1, -0.5, 0.4, -0.3); B('iron', 0.5, 0.3, -1.1, 0.55, 0.4, -0.3); B('iron', -0.55, 0.37, -1.1, 0.55, 0.42, -1.05);
+        B('iron', -0.02, 1.0, 0.3, 0.02, 2.25, 0.34);
+        P.push([top, lathe([[1.25, 0], [0.9, 0.14], [0.001, 0.42]], 10, null, 0, 2.15, 0.32)]); P.push(['paint_white', lathe([[1.27, -0.04], [1.25, 0], [1.2, -0.06]], 10, null, 0, 2.15, 0.32)]);
+        wheel(-0.62); wheel(0.62);
+        col.circle(x, z, 0.85, y, y + 1.3); break;
+      }
       default: break;
     }
     for (const [m, g] of PARTS(P, rot, x, y, z)) bag.add(m, g);
