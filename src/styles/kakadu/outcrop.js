@@ -5,7 +5,7 @@
 // Every piece is a hexahedron with jittered corners whose faces are separate displaced grids (hard edges, smooth within a face); all of it
 // goes into one geometry per material.
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
-import { BLOCKS, MAIN, SMALL, rng, smooth, height } from '../../settlements/kakadu/layout.js';
+import { BLOCKS, MAIN, SMALL, FLIGHTS, rng, smooth, height } from '../../settlements/kakadu/layout.js';
 
 const hash = (i, j, k, s) => { let h = Math.imul(i, 374761393) ^ Math.imul(j, 668265263) ^ Math.imul(k, 2147483647) ^ Math.imul(s | 0, 1274126177); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296 * 2 - 1; };
 export function noise3(x, y, z, s = 0) {
@@ -155,104 +155,204 @@ const SHELTER_OF = { 1: MAIN, 6: SMALL };
 const inBox = (C, x, y, z) => x > C.r[0] && x < C.r[2] && z > C.r[1] && z < C.r[3] && y > C.y[0] && y < C.y[1];
 const buried = (B, x, y, z) => BLOCKS.some((C) => C !== B && inBox(C, x, y, z));
 
-/** One block of the outcrop as beds, columns and joints. res: the south faces' grid. */
+// ── rounded blocks in columns ───────────────────────────────────────────────────────────────────────────────
+// Each column between two joints is a stack of slices; a slice is a rounded block (a superellipse in plan, its edges rolled over a quarter
+// circle), hard slices standing out over soft ones that have weathered back, every column with its own bed heights, depth and width, so no
+// bedding line runs on from one column to the next. The sides of the columns are the joints; the wide ones are clefts, dark inside.
+const TAU = Math.PI * 2;
+const sgnPow = (v, e) => Math.sign(v) * Math.abs(v) ** e;
+/** Ring angles: dense across the front (+z), sparse behind (the back is buried in the mass). */
+function ringAngles(nf, nb) {
+  const a0 = 0.05 * Math.PI, a1 = 0.95 * Math.PI, out = [];
+  for (let i = 0; i <= nf; i++) out.push(a0 + (a1 - a0) * i / nf);
+  for (let i = 1; i < nb; i++) out.push(a1 + (TAU - (a1 - a0)) * i / nb);
+  return out;
+}
+/** The heights of a slice's rings with the metres by which each is drawn in: a quarter circle at each rounded end, then every ~0.7 m. */
+function sliceRings(ya, yb, rb, rt, step) {
+  const out = [];
+  if (rb > 0.01) for (let k = 0; k <= 3; k++) { const f = k / 3 * Math.PI / 2; out.push([ya + rb * (1 - Math.cos(f)), rb * (1 - Math.sin(f))]); } else out.push([ya, 0]);
+  const m0 = ya + rb, m1 = yb - rt, nm = Math.max(0, Math.round((m1 - m0) / step) - 1);
+  for (let k = 1; k <= nm; k++) out.push([m0 + (m1 - m0) * k / (nm + 1), 0]);
+  if (rt > 0.01) for (let k = 3; k >= 0; k--) { const f = k / 3 * Math.PI / 2; out.push([yb - rt * (1 - Math.cos(f)), rt * (1 - Math.sin(f))]); } else out.push([yb, 0]);
+  return out;
+}
+/** A grid of rings → triangles with welded normals, oriented outward (side) or up/down (annulus, cap), each triangle's material from matOf. */
+function emitGrid(acc, V, aux, tris, orient, matOf, quads = true) {
+  if (acc.dry) return;
+  const nor = new Float32Array(V.length * 3);
+  const tn = [];
+  let score = 0;
+  for (let q = 0; q < tris.length; q += 3) {
+    const a = V[tris[q]], b = V[tris[q + 1]], c = V[tris[q + 2]];
+    const n = cross(sub(b, a), sub(c, a)); tn.push(n);
+    const m = [(a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3, (a[2] + b[2] + c[2]) / 3];
+    if (orient.axis) score += n[0] * (m[0] - orient.axis[0]) + n[2] * (m[2] - orient.axis[1]);
+    else score += n[1] * orient.y;
+  }
+  const flip = score < 0;
+  for (let q = 0, t = 0; q < tris.length; q += 3, t++) for (let r = 0; r < 3; r++) { const v = tris[q + r] * 3, n = tn[t]; nor[v] += n[0]; nor[v + 1] += n[1]; nor[v + 2] += n[2]; }
+  for (let q = 0; q < tris.length; q += 3) {
+    const a = V[tris[q]], b = V[tris[q + 1]], c = V[tris[q + 2]];
+    // the material is chosen per quad (two triangles), so that streak edges run along the grid and not along its diagonals
+    const q0 = q - (q % 6), quad = quads ? [tris[q0], tris[q0 + 1], tris[q0 + 2], tris[q0 + 5]] : [tris[q], tris[q + 1], tris[q + 2]];
+    const cen = [0, 0, 0]; let pit = 0;
+    for (const i of quad) { cen[0] += V[i][0] / quad.length; cen[1] += V[i][1] / quad.length; cen[2] += V[i][2] / quad.length; pit += aux[i] / quad.length; }
+    const gn = cross(sub(b, a), sub(c, a)), gl = len(gn) || 1, fn = flip ? [-gn[0] / gl, -gn[1] / gl, -gn[2] / gl] : [gn[0] / gl, gn[1] / gl, gn[2] / gl];
+    const T = acc.of(matOf(cen, fn, pit));
+    for (let r = 0; r < 3; r++) {
+      const i = tris[flip ? q + (r ? 3 - r : 0) : q + r], v = i * 3, l = Math.hypot(nor[v], nor[v + 1], nor[v + 2]) || 1, s = flip ? -1 : 1;
+      T.p.push(V[i][0], V[i][1], V[i][2]); T.n.push(s * nor[v] / l, s * nor[v + 1] / l, s * nor[v + 2] / l);
+    }
+    acc.tris++;
+  }
+}
+const GREY = 'rock_boulder', BLACK = 'pottery_dark', IRON = 'scoria_red';
+/**
+ * One column: o = { xa, xb, zf, deep, slices: [{ya, yb, mat, set, inx, dx, n, rb, rt, soft, honey, pit}], seed, res, flatTop, darkL, darkR, bridge }.
+ * Everything is in the settlement's frame; the front is at z = zf − set.
+ */
+export function columnMass(acc, o) {
+  if (acc.dry) return;
+  const w = o.xb - o.xa, cx0 = (o.xa + o.xb) / 2, res = o.res ?? 0.55, seed = o.seed;
+  const rnd = rng(seed * 31 + 7), scars = [];
+  const yLo = o.slices[0].ya, yHi = o.slices[o.slices.length - 1].yb;
+  for (let q = 0, nq = Math.round(w * (yHi - yLo) / 14 * (0.6 + rnd())); q < nq; q++) { const sw = 0.5 + rnd() * 1.6, sh = 0.4 + rnd() * 1.0, x0 = o.xa + rnd() * Math.max(0.1, w - sw), y0 = yLo + rnd() * Math.max(0.1, yHi - yLo - sh); scars.push({ x0, x1: x0 + sw, y0, y1: y0 + sh, d: 0.1 + rnd() * 0.22 }); }
+  const grooves = [];
+  for (let q = 0, nq = 1 + Math.floor(w / 3.2 * rnd()); q < nq; q++) { const y0 = yLo + rnd() * (yHi - yLo) * 0.4; grooves.push({ x: o.xa + 0.6 + rnd() * Math.max(0.1, w - 1.2), w: 0.3 + rnd() * 0.3, d: 0.3 + rnd() * 0.35, y0, y1: y0 + (yHi - y0) * (0.4 + rnd() * 0.6) }); }
+  let prev = null;
+  const nS = o.slices.length, anyFine = o.slices.some((s) => s.honey > 0);
+  const nf = Math.max(10, Math.min(120, Math.round((w + o.deep * 0.5) / (anyFine ? (o.fine ?? 0.4) : res * 1.25)))), th = ringAngles(nf, 12);
+  o.slices.forEach((s, si) => {
+    const wb = o.bridge && si === 0 ? o.bridge : 0, hx = w / 2 - s.inx + wb, hz = (o.deep - s.set) / 2, cz = o.zf - s.set - hz, cx = cx0 + s.dx;
+    const fine = s.honey > 0;
+    const rows = sliceRings(s.ya, s.yb, s.rb, s.rt, fine ? Math.min(0.3, (o.fine ?? 0.4) * 0.8) : 0.75), top = si === nS - 1;
+    const V = [], aux = [], R = [];
+    const ringsOut = [];
+    for (const [y, ins] of rows) {
+      const ring = [];
+      for (const t of th) {
+        const c = Math.cos(t), sn = Math.sin(t), e = 2 / s.n, fw = top && y > s.yb - s.rt - 0.01 ? smooth(-0.25, 0.4, sn) : 1;
+        const prof = 1 + 0.1 * noise3(y * 0.37, seed * 0.013, 0.5, seed + 2), sxs = 0.3 * noise3(y * 0.3, 1.5, 0.5, seed + 4), lz = s.lean * (y - s.ya) / Math.max(0.5, s.yb - s.ya);
+        const hxx = Math.max(0.3, (hx - ins * fw) * prof), hzz = Math.max(0.3, (hz - ins * fw) * prof);
+        let x = cx + sxs + hxx * sgnPow(c, e), z = cz + lz + hzz * sgnPow(sn, e);
+        const gx = sgnPow(c, 2 - e) / hxx, gz = sgnPow(sn, 2 - e) / hzz, gl = Math.hypot(gx, gz) || 1, nx = gx / gl, nz = gz / gl;
+        let d = o.amp * (0.62 * noise3(x * 0.4, y * 0.4, z * 0.4, seed) + 0.38 * noise3(x * 1.1, y * 1.1, z * 1.1, seed + 5)) + 0.3 * noise3(x * 0.16, y * 0.2, z * 0.16, seed + 9);
+        let pd = 0;
+        const front = nz > 0.3 ? 1 : 0;
+        if (front) for (const g of grooves) d -= g.d * (1 - smooth(g.w * 0.5, g.w * 0.5 + 0.2, Math.abs(x - g.x))) * smooth(g.y0, g.y0 + 0.5, y) * smooth(g.y1, g.y1 - 0.5, y);
+        if (front) for (const sc of scars) { const k = smooth(sc.x0, sc.x0 + 0.12, x) * smooth(sc.x1, sc.x1 - 0.12, x) * smooth(sc.y0, sc.y0 + 0.12, y) * smooth(sc.y1, sc.y1 - 0.12, y); if (k > 0) d -= sc.d * k; }
+        if (s.honey > 0) {
+          const m = smooth(0.05, 0.5, noise3(x * 0.33, y * 0.4, z * 0.33, seed + 3) * 0.8 + 0.2 * s.honey - 0.05) * smooth(s.ya + 0.1, s.ya + 0.45, y) * smooth(s.yb - 0.1, s.yb - 0.45, y);
+          if (m > 0.01) pd = s.pit * m * honeycomb(x + z, y, 0.42 + 0.25 * (noise3(x, y, z, seed) * 0.5 + 0.5), seed + 3);
+          d -= pd;
+        }
+        x += nx * d; z += nz * d;
+        ring.push(V.length); V.push([x, y, z]); aux.push(pd);
+      }
+      R.push(ring);
+    }
+    const tris = [], M = th.length;
+    for (let r = 0; r + 1 < R.length; r++) for (let j = 0; j < M; j++) { const a = R[r][j], b = R[r][(j + 1) % M], c = R[r + 1][(j + 1) % M], d = R[r + 1][j]; tris.push(a, b, c, a, c, d); }
+    const matBase = s.mat, pitMat = s.pitMat;
+    const matOf = (cen, n, pit) => {
+      if (pit > s.pit * 0.45) return pitMat;
+      if (n[1] > 0.5) return matBase;
+      if (n[2] > 0.25 || Math.abs(n[0]) > 0.5) {
+        if (n[0] < -0.55 && o.darkL || n[0] > 0.55 && o.darkR) return BLACK;
+        const st = noise3(cen[0] * 0.9 + cen[2] * 0.6, cen[1] * 0.045, 0.5, seed + 17);
+        if (!s.soft) { if (st > 0.55) return BLACK; if (st > 0.38) return GREY; if (st < -0.42) return IRON; }
+        else if (st > 0.5) return GREY;
+      }
+      return matBase;
+    };
+    emitGrid(acc, V, aux, tris, { axis: [cx, cz] }, matOf);
+    // the ledge or soffit between this slice and the next (separate vertices: a hard edge)
+    const last = R[R.length - 1].map((i) => V[i]);
+    if (prev) {
+      const A = prev.ring, B = R[0].map((i) => V[i]), W = [], X = [], Tt = [], Mm = Math.min(A.length, B.length);
+      for (let j = 0; j < Mm; j++) { W.push(A[j]); }
+      for (let j = 0; j < Mm; j++) { W.push(B[j]); }
+      for (let j = 0; j < Mm; j++) { const a = j, b = (j + 1) % Mm, c = Mm + (j + 1) % Mm, d = Mm + j; Tt.push(a, b, c, a, c, d); }
+      const area = (P) => { let s2 = 0; for (let j = 0; j < P.length; j++) { const p = P[j], q = P[(j + 1) % P.length]; s2 += p[0] * q[2] - q[0] * p[2]; } return Math.abs(s2); };
+      void X;
+      emitGrid(acc, W, W.map(() => 0), Tt, { y: area(B) > area(A) ? -1 : 1 }, (cen, n) => (n[1] < 0 ? (s.soft ? matBase : prev.mat) : prev.mat));
+    }
+    prev = { ring: last, mat: s.mat };
+    if (top) {
+      const cap = R[R.length - 1].map((i) => V[i]), W = [...cap, [cx, cap[0][1] + 0.01, cz - hz * 0.0]], Tt = [], Mm = cap.length;
+      for (let j = 0; j < Mm; j++) Tt.push(Mm, j, (j + 1) % Mm);
+      emitGrid(acc, W, W.map(() => 0), Tt, { y: 1 }, () => s.mat, false);
+    }
+  });
+}
+
+/** One block of the outcrop as columns of rounded blocks split by joints. res: the south faces' grid. */
 export function outcropBlock(acc, B, o = {}) {
-  const rnd = rng(B.seed * 131 + 17), [x0, z0, x1, z1] = B.r, [y0, y1] = B.y, H = y1 - y0, slab = !!B.slab;
+  const rnd = rng(B.seed * 131 + 17), [x0, z0, x1, z1] = B.r, [y0, y1] = B.y, slab = !!B.slab;
   const bands = BANDS[B.m] ?? [B.m], S = B.panel ? SHELTER_OF[B.seed] : null, res = o.res ?? 0.55;
-  const D = z1 - z0, deepMax = Math.min(D - 0.6, 6.5);
-  // ── the mass behind: its north face (seen from the lookout), the dark back of the clefts, nothing else shows
+  const D = z1 - z0, deepC = slab ? D - 0.3 : Math.min(D - 0.3, 7.0);
+  const onFlight = (xa, xb) => FLIGHTS.some((F) => F.rect[0] < xb + 1.5 && F.rect[2] > xa - 1.5 && F.rect[1] < z1 + 14 && F.rect[3] > z0);
+  // ── the plateau behind the columns: the top walked on, the north face seen from the lookout
   {
-    const C = corners(x0, x1, y0, y1, z0, z1, uniformJit(0), rnd);
-    const mass = { res: 1.6, relief: relief(B.seed, 0.35, 0.12) };
-    // the south face of the mass 3 m in from the beds' fronts: the back wall of the clefts (dark)
-    const inset = (k, v) => k.map((a, i) => a.map((b, j) => b.map((c, q) => (q === 1 ? c.map((p, w) => (w === 2 ? p - 3.0 : p)) : c))));
-    void inset;
-    hex(acc, B.m, C, { N: mass });
-    const Cs = corners(x0 + 0.4, x1 - 0.4, y0, y1 - 0.5, z0, z1 - 3.0, uniformJit(0), rnd);
-    hex(acc, 'pottery_dark', Cs, { S: { res: 2.5 } });
+    const C = corners(x0, x1, y0, y1, z0, z1 - deepC + 1.2, uniformJit(0), rnd);
+    hex(acc, B.m, C, { S: { res: 2.5, mat: BLACK }, N: { res: 1.6, relief: relief(B.seed, 0.35, 0.12) }, T: { res: 1.2, edge: 0.5, relief: relief(B.seed + 4, 0.04, 0.5) } });
+    // the dark back of the clefts, inside the columns' depth
+    if (!slab) { const Cs = corners(x0 + 0.4, x1 - 0.4, y0, y1 - 0.5, z1 - 3.9, z1 - 3.8, uniformJit(0), rnd); hex(acc, BLACK, Cs, { S: { res: 2.5 } }); }
   }
   // the roof's soffit, one flat face (the walker's shell test needs an underside to see the roof as a roof)
-  if (slab) {
+  if (slab && !acc.dry) {
     const A = acc.of(BANDS[B.m]?.[0] ?? B.m), yS = y0 - 0.02, pts = [[x0 + 0.1, z1 - 0.05], [x1 - 0.1, z1 - 0.05], [x1 - 0.1, z0 + 0.1], [x0 + 0.1, z0 + 0.1]];
     for (const q of [[0, 2, 1], [0, 3, 2]]) for (const i of q) { A.p.push(pts[i][0], yS, pts[i][1]); A.n.push(0, -1, 0); }
   }
-  // ── the beds
-  const nb = Math.max(2, Math.round(H / (slab ? 2.0 : 1.9)));
-  const wts = Array.from({ length: nb }, () => 0.7 + rnd() * 0.75), ws = wts.reduce((a, b) => a + b, 0), beds = [];
-  let yy = y0, prevSoft = false;
-  for (let i = 0; i < nb; i++) {
-    const th = H * wts[i] / ws, top = i === nb - 1;
-    const soft = top ? 0 : prevSoft ? rnd() * 0.2 : rnd() < 0.42 ? 0.45 + rnd() * 1.05 : rnd() * 0.25;
-    prevSoft = soft > 0.4;
-    beds.push({ ya: yy, yb: yy + th, soft, mat: bands[(i + (B.seed % 3)) % bands.length], honey: soft > 0.4 ? (rnd() < 0.7 ? 1 : 0.5) : rnd() < 0.1 ? 0.55 : 0, top });
-    yy += th;
-  }
-  // the joints: master positions, shared by all the beds (a joint runs through several), a few open wide as clefts
+  // ── the joints: positions shared by the columns; a few open wide as clefts
   const joints = [];
-  if (S) for (const x of [S.x0 - 1.2, S.x1 + 1.2]) joints.push({ x, g: 0.32, forced: true });
-  for (let x = x0 + 2.2 + rnd() * 3; x < x1 - 2.5; x += 4.6 + rnd() * 4.6) if (!joints.some((j) => Math.abs(j.x - x) < 2.2)) joints.push({ x, g: 0.3 + rnd() * 0.4, cleft: rnd() < 0.14 });
-  for (const j of joints) if (j.cleft) j.g = 1.1 + rnd() * 1.0;
+  if (S) for (const x of [S.x0 - 1.2, S.x1 + 1.2]) joints.push({ x, g: 0.4, forced: true });
+  for (let x = x0 + 2.6 + rnd() * 2.5; x < x1 - 2.8; x += 2.8 + rnd() * 3.2) if (!joints.some((j) => Math.abs(j.x - x) < 2.4)) joints.push({ x, g: 0.3 + rnd() * 0.45, cleft: !slab && rnd() < 0.2 });
+  for (const j of joints) if (j.cleft) j.g = 1.1 + rnd() * 1.1;
   joints.sort((a, b) => a.x - b.x);
-  const colOff = joints.map(() => -rnd() * 0.85 * (rnd() < 0.6 ? 1 : 0.3));
-  colOff.push(-rnd() * 0.6);
-  // ── the lower beds: columns of segments
-  for (let i = 0; i < nb - 1; i++) {
-    const b = beds[i];
-    const behind = S && b.ya < S.yc0 + 0.35;     // the painted wall's surface stands before these beds
-    let xa = x0 + (i % 2 ? 0 : rnd() * 0.3);
-    const cuts = [];
-    if (!(slab && i === 0)) joints.forEach((j, k) => { if (j.forced || j.cleft || rnd() < 0.8) cuts.push({ x: j.x, g: j.g * (j.cleft ? 1 : 0.75 + rnd() * 0.55), k }); });
-    cuts.push({ x: x1 - (i % 3 ? 0 : rnd() * 0.3), g: 0, k: joints.length, end: true });
-    for (const c of cuts) {
-      const xb = c.end ? c.x : c.x - c.g / 2;
-      const w = xb - xa;
-      if (w > 1.4) {
-        const col = colOff[Math.min(c.k, colOff.length - 1)], zf = Math.min(z1, z1 - b.soft + col + (rnd() - 0.5) * 0.3 - (behind ? 1.0 : 0));
-        const deep = slab && i === 0 ? D - 0.3 : Math.min(deepMax, 4 + rnd() * 2.5), seed = B.seed * 53 + i * 11 + Math.floor(xa);
-        const inWall = S && xa > S.x0 - 1.2 && xb < S.x1 + 1.2 && b.yb < S.yc0 + 0.5;
-        const ya = b.ya - 0.05, yb = b.yb + 0.1;
-        if (!inWall) {
-          const cx = xa + w / 2;
-          // the faces seen: the front, the sides of the clefts and of the block's ends, the ledge on top where the bed above stands back
-          const nextSoft = beds[i + 1].soft, nextZf = z1 - nextSoft + colOff[Math.min(c.k, colOff.length - 1)];
-          const ledge = zf - nextZf;     // > 0: the bed above stands back, the top shows
-          const scars = [], nsc = Math.round(w * (yb - ya) / 7 * (0.5 + rnd()));
-          for (let q = 0; q < nsc; q++) { const sw = 0.5 + rnd() * 1.4, sh = 0.3 + rnd() * 0.8, a0 = rnd() * Math.max(0.1, w - sw), b0 = rnd() * Math.max(0.1, yb - ya - sh); scars.push({ a0, a1: a0 + sw, b0, b1: b0 + sh, d: 0.12 + rnd() * 0.3 }); }
-          const hon = b.honey ? { k: 1, cell: 0.42 + rnd() * 0.25, depth: 0.16 + rnd() * 0.1, seed: seed + 3, patch: (x, y, z) => noise3(x * 0.33, y * 0.4, z * 0.33, seed) * 0.8 + 0.2 * b.honey - 0.05, lo: 0.05, hi: 0.5 } : null;
-          const C = corners(xa, xb, ya, yb, zf - deep, zf, [[[[0, 0, 0], [0.1, 0.12, 0.14]], [[0, 0.14, 0], [0.1, 0.16, 0.14]]], [[[0, 0, 0], [0.1, 0.12, 0.14]], [[0, 0.14, 0], [0.1, 0.16, 0.14]]]].map((p) => p), rnd);
-          const sOpt = { res: hon ? 0.2 : res, relief: relief(seed, 0.2, 0.3, scars), honey: hon, pitMat: hon ? PIT[b.mat] ?? 'tuff_red' : null, pitThr: 0.45, edge: 0.3 };
-          const faces = { S: sOpt, T: ledge > 0.15 && !buried(B, cx, yb + 0.3, zf - 0.3) ? { res: 0.7, relief: relief(seed + 1, 0.05, 0.6), edge: 0.2 } : null };
-          const ex = { res: 0.9, relief: relief(seed + 2, 0.12, 0.35) };
-          if (!(c.end && buried(B, x1 + 0.25, (ya + yb) / 2, zf - 1))) faces.E = ex;
-          else if (!c.end) faces.E = ex;
-          if (!(xa === x0 + 0 && buried(B, x0 - 0.25, (ya + yb) / 2, zf - 1)) && (xa - x0 < 0.5 ? !buried(B, x0 - 0.25, (ya + yb) / 2, zf - 1) : true)) faces.W = ex;
-          if (!buried(B, cx, (ya + yb) / 2, zf - 1)) hex(acc, b.mat, C, faces);
-          const rs = [rnd(), rnd(), rnd()];
-          if (o.spots && ledge > 0.2 && !buried(B, cx, yb + 0.3, zf - 0.3) && rs[0] < 0.85) o.spots.push({ x: xa + 0.6 + rs[1] * Math.max(0.1, w - 1.2), y: yb - 0.02, z: nextZf + ledge * (0.3 + rs[2] * 0.4), w: ledge, kind: 'ledge' });
-          if (o.spots && i === 0 && c.k < joints.length && joints[c.k].cleft) o.spots.push({ x: c.x, y: height(c.x, z1 - 1.2), z: z1 - 1.2, w: 1, kind: 'cleft' });
-        }
-      }
-      xa = c.x + c.g / 2;
+  const edges = [{ x: x0, g: 0 }, ...joints, { x: x1, g: 0 }];
+  for (let c = 0; c + 1 < edges.length; c++) {
+    const xa = edges[c].x + edges[c].g / 2, xb = edges[c + 1].x - edges[c + 1].g / 2, w = xb - xa, seed = B.seed * 53 + c * 7;
+    if (w < 1.2) continue;
+    const wall = S && xa > S.x0 - 1.3 && xb < S.x1 + 1.3, flat = onFlight(xa, xb);
+    const yBase = wall ? S.yc0 + 0.4 : y0, colOff = flat ? 0 : (rnd() < 0.3 ? -0.5 : rnd() * 1.7);
+    const covered = BLOCKS.some((C) => C !== B && C.y[0] < y1 + 0.5 && C.y[1] > y1 + 0.5 && C.r[0] < xb && C.r[2] > xa && C.r[3] > z1 - 8 && C.r[1] < z1);
+    const yTop = y1 + 0.03 + (flat ? 0 : slab ? rnd() * 1.3 : covered ? rnd() * 0.3 : rnd() < 0.4 ? 0.8 + rnd() * 2.4 : rnd() * 0.4);
+    // beds of this column's own: thickness 0.9–2.8 m, hard and soft by turns
+    const colMat = bands[Math.floor(rnd() * 99) % bands.length] === 'sandstone_white' && rnd() < 0.6 ? B.m : bands[Math.floor(rnd() * 99) % bands.length];
+    const slices = [], H = yTop - yBase;
+    let y = yBase, prevSoft = false, i = 0;
+    while (y < yTop - 0.4) {
+      let th = (prevSoft ? 1.8 : 1.0) + rnd() * (prevSoft ? 2.6 : 1.8) + (i === 0 ? 1.0 : 0);
+      if (yTop - (y + th) < 1.2) th = yTop - y;
+      const topS = y + th >= yTop - 1e-6, first = i === 0;
+      const soft = !topS && !first && !prevSoft && !flat && rnd() < 0.55;
+      prevSoft = soft;
+      const mat = colMat;
+      let set = colOff + (soft ? 0.5 + rnd() * 1.3 : (rnd() - 0.6) * 0.7);
+      if (first || flat) set = Math.min(set, flat ? 0 : 0.7);
+      if (slab && first) set = 0;
+      set = Math.max(-0.5, Math.min(3.3, set));
+      const inx = soft ? 0.15 + rnd() * 0.4 : rnd() * 0.25;
+      slices.push({ ya: y, yb: y + th, mat, set, inx, dx: (rnd() - 0.5) * 2 * Math.min(inx, 0.25), n: soft ? 3.0 + rnd() * 1.2 : 4.5 + rnd() * 3.5, rb: first ? 0 : soft ? 0.1 + rnd() * 0.1 : 0.2 + rnd() * 0.25, rt: topS ? (flat ? 0.2 : 0.3 + rnd() * 0.25) : soft ? 0.1 : 0.2 + rnd() * 0.2, soft, lean: (rnd() - 0.5) * 0.9, honey: soft ? (rnd() < 0.75 ? 1 : 0.5) : rnd() < 0.3 ? 0.35 : 0, pit: 0.14 + rnd() * 0.12, pitMat: PIT[mat] ?? 'tuff_red' });
+      y += th; i++;
+    }
+    if (!slices.length) continue;
+    if (slab) slices[0].rb = 0;
+    void H;
+    const gapL = edges[c].g, gapR = edges[c + 1].g;
+    columnMass(acc, { fine: z1 > -31 ? 0.4 : z1 > -40 ? 0.55 : 0.8, xa, xb, zf: z1, deep: deepC, slices, seed, res, amp: 0.2 + rnd() * 0.12, darkL: gapL > 0.9, darkR: gapR > 0.9, bridge: slab ? 0.2 : 0 });
+    // plants: the ledges where a slice stands back from the one under it, the feet of the clefts
+    if (o.spots) {
+      slices.forEach((s, k) => {
+        if (!k) return;
+        const p = slices[k - 1], led = s.set - p.set;
+        if (led > 0.4 && !flat && rnd() < 0.85) o.spots.push({ x: xa + 0.6 + rnd() * Math.max(0.1, w - 1.2), y: p.yb - 0.02, z: z1 - s.set + led * (0.25 + rnd() * 0.4), w: led, kind: 'ledge' });
+      });
     }
   }
-  // ── the top bed: one piece across the block (its top is walked on and must not break), the joints running on as notches in its face
-  {
-    const b = beds[nb - 1], zf = z1 - rnd() * 0.12, seed = B.seed * 53 + 977;
-    const notches = joints.map((j) => ({ a: j.x - x0, w: Math.min(0.9, j.g * 1.1 + 0.1), d: 0.35 + rnd() * 0.55, b0: rnd() * (b.yb - b.ya) * 0.5 })).filter(() => rnd() < 0.85);
-    const scars = [];
-    const nsc = Math.round((x1 - x0) * (b.yb - b.ya) / 9 * (0.5 + rnd()));
-    for (let q = 0; q < nsc; q++) { const sw = 0.6 + rnd() * 1.8, sh = 0.3 + rnd() * 0.9, a0 = rnd() * Math.max(0.1, x1 - x0 - sw), b0 = rnd() * Math.max(0.1, b.yb - b.ya - sh); scars.push({ a0, a1: a0 + sw, b0, b1: b0 + sh, d: 0.12 + rnd() * 0.28 }); }
-    const C = corners(x0, x1, b.ya - 0.1, y1, z0, zf, [[[[0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0]]], [[[0, 0, 0], [0, 0, 0]], [[0, 0, 0], [0, 0, 0]]]], rnd);
-    const hon = b.honey ? { k: 1, cell: 0.5, depth: 0.2, seed: seed + 3, patch: (x, y, z) => noise3(x * 0.3, y * 0.4, z * 0.3, seed) * 0.8 - 0.05, lo: 0.1, hi: 0.5 } : null;
-    const crack = joints.map((j) => ({ a: j.x - x0, w: 0.22 + j.g * 0.2, d: B.walkTop || slab ? 0.06 : 0.14, b0: 0 }));
-    const ends = (xe) => !buried(B, xe, (b.ya + y1) / 2, (z0 + zf) / 2);
-    hex(acc, b.mat, C, {
-      S: { res: hon ? 0.25 : res, relief: relief(seed, 0.18, 0.28, scars, notches), honey: hon, pitMat: PIT[b.mat] ?? 'tuff_red', pitThr: 0.45 },
-      T: { res: 1.1, relief: (x, y, z, a, bb) => relief(seed + 4, 0.04, 0.5)(x, y, z, a, bb) - crack.reduce((s, c) => s + c.d * (1 - smooth(c.w * 0.5, c.w * 0.5 + 0.1, Math.abs(a - c.a))), 0), edge: 0.5 },
-      E: ends(x1 + 0.25) ? { res: 1.0, relief: relief(seed + 2, 0.15, 0.3) } : null,
-      W: ends(x0 - 0.25) ? { res: 1.0, relief: relief(seed + 6, 0.15, 0.3) } : null,
-    });
-  }
+  if (o.spots) for (const j of joints) if (j.cleft) o.spots.push({ x: j.x, y: height(j.x, z1 - 1.2), z: z1 - 1.2, w: 1, kind: 'cleft' });
 }
 
 /** An angular block lying on the ground: base centre (cx, cy, cz), size (sx, sy, sz), turned by yaw and leaning by tilt (about its x axis). */
