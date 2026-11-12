@@ -100,7 +100,7 @@ export function life() {
       else if (q < 0.36) L.push({ t: 'barrel', at: P(uc - 1.3, -0.7), y: 0, rot, seed: seed(), n: 2 });
       else if (q < 0.48) L.push({ t: 'crates', at: P(uc + 1.4, -0.7), y: 0, rot, seed: seed(), n: 2 });
       else if (q < 0.58) L.push({ t: 'firewood', at: P(uc - 1.4, -0.8), y: 0, rot, seed: seed(), len: 1.2 });
-      else if (q < 0.66) L.push({ t: 'basket', at: P(uc + 1.4, -0.7), y: 0, rot, n: 2, seed: seed(), goods: 'greens' });
+      else if (q < 0.66) L.push({ t: 'basket', at: P(uc + 1.4, -0.7), y: 0, rot, n: 2, seed: seed(), goods: 'cloth_green' });
     }
   }
   // the stadium: spectators on the tiers (the games are not on; a few hundred would be too many: forty about the near end), runners on the track
