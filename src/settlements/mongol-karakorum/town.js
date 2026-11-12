@@ -4,7 +4,7 @@
 // (the walkers are in movers.js).
 import {
   RADIUS, WALL, WALL_TH, WALL_H, GATES, GATE_W, MAIN, CROSS, PALACE, HALL, HALL_RECT, TREE, GREAT_HALL, KILNS, FORGES, TEMPLES, TEMPLES_NW, WORKSHOPS, MOSQUES, CHURCH,
-  SECRETARIES, SHOPS, shopRect, WELLS, LOTS, CAMPS, PENS, OUTSIDE_WAGONS, COURT_GER, STORES, height, inBuilt, inTown, inPalace, onStreet,
+  SECRETARIES, SHOPS, shopRect, WELLS, LOTS, CAMPS, PENS, OUTSIDE_WAGONS, COURT_GER, COURT_CART, STORES, height, inBuilt, inTown, inPalace, onStreet,
 } from './layout.js';
 import { campElements } from './camp.js';
 import { frontFrame } from '../../styles/mongol/local.js';
@@ -207,6 +207,18 @@ export async function town() {
   };
   open.forEach((l, i) => { const [x0, z0, , z1] = l.rect; yard(x0 + 4.2, (z0 + z1) / 2, 3.0, i); });
   for (const [i, c] of [CAMPS.sw, CAMPS.se].entries()) campElements(c, i ? 4242 : 1254, -1, i ? 8 : 9).G.forEach((g, k) => yard(g.c[0], g.c[1], g.r, k));
+  // ── the khan's court at eye level: the yards of the great ger and of the wagon-house, the gate guards' fire and their gear, dogs asleep in the sun, children at knucklebones by the banners ──
+  yard(COURT_GER.c[0], COURT_GER.c[1], COURT_GER.r, 2); yard(COURT_CART.c[0], COURT_CART.c[1], COURT_CART.r, 1);
+  for (const [x, z, rot] of [[63.4, -6.4, 0.4], [76.6, -6.4, -0.4]]) {
+    T.push({ t: 'bench', at: [x, z], y: 0.9, rot: 1.57, seed: seed(), len: 1.6 }); T.push({ t: 'firewood', at: [x + (x < 70 ? -1.2 : 1.2), z + 0.6], y: 0.9, rot, seed: seed() });
+    T.push({ t: 'barrel', at: [x + (x < 70 ? -1.0 : 1.0), z - 1.0], y: 0.9, rot: 0, seed: seed(), n: 2 });
+  }
+  for (const [x, z] of [[62.5, -17.5], [78.4, -19.5], [55, -26], [86.5, -25.5]]) E_animal(T, 'dog', [x, z], 0, rand() * 6.28, seed());
+  for (const [x, z, a] of [[60.2, -23.6, 0.6], [61.4, -24.4, 2.2], [59.6, -25.0, 4.0]]) fig([x, z], 0, a, { dress: 'robe', cloth: pick([col.red, col.ochre, col.green]), cloth2: col.white, over: 'sash', child: true, h: 1.05, hat: 'cap', hatMat: 'cloth_red', feet: 'shod', hair: 'bun', pose: 'squat' });
+  // a felt-maker's yard by the west storehouses: the rolled felts, the wool, the beating frame; the aaruul (dried curd) on trays; mare's-milk skins hung from a pole
+  T.push({ t: 'goods_mat', at: [28.4, -28.4], y: 0, rot: 0.2, seed: seed(), goods: ['bolts'] }); T.push({ t: 'goods_mat', at: [31.0, -30.0], y: 0, rot: 1.1, seed: seed(), goods: ['bolts'] });
+  T.push({ t: 'sacks', at: [26.4, -27.2], y: 0, rot: 0.6, seed: seed(), n: 4 }); mwoman([29.6, -26.4], 0, 3.4, { pose: 'kneel' }); cathay([32.8, -28.8], 0, 2.6, { pose: 'stand', over: 'apron', cloth: col.brown });
+  for (const [x, z] of [[24, -23], [26.2, -22.4], [112, -33], [114.2, -33.6]]) T.push({ t: 'drying_tray', at: [x, z], y: 0, rot: rand() * 3, seed: seed(), h: 0.9 });
   // lone herd-boys, a woman milking mares at the horse lines, tethers
   for (const c of [CAMPS.sw, CAMPS.se]) { mwoman([c[0] + 28, c[1] - 6], height(c[0], c[1]), 1.0, { pose: 'kneel' }); for (let k = 0; k < 4; k++) E_animal(T, 'horse', [c[0] + 30 + (k % 2) * 1.6, c[1] - 4 + k * 1.6], height(c[0], c[1]), 1.57, seed()); }
   // ── the markets at the gates [stated: Rubruck]: horses at the north, sheep and goats at the west, oxen and carts at the south, grain at the east ──
