@@ -43,6 +43,9 @@ const rooms = [
 ];
 const walks = [[[12, 6], [4, 14], [19, 22], [19, 28], [10, 6], [14, 9], [22, 9.5], [28, 8], [10, 22]]];
 walks[0].y0 = 0;
+// up the stair of the enterable house to its first floor and about it
+walks.push([[19, 22], [17.5, 25.4], [17.5, 28.2], [20, 29.6], [22, 27], [20, 26.2]]);
+walks[1].y0 = 0;
 
 export const taumadhi = {
   id: 'bhaktapur-taumadhi',
