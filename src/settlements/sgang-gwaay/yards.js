@@ -11,7 +11,7 @@ const frontOf = (z) => { const slope = 0.0036 * z, fl = Math.hypot(1, slope); re
 export function yards() {
   if (FIT) return FIT;
   const rand = rng(1851), H = houses(), V = village();
-  const props = [], sit = [], folk = [], boats = [];
+  const props = [], sit = [], folk = [], boats = [], racks = [];
   const taken = [...V.poles.map((p) => [p.c[0], p.c[1], 1.6]), ...V.racks.map((r) => [r.c[0], r.c[1], r.w / 2 + 1.2]), ...V.stacks.map((s) => [s.c[0], s.c[1], 2.2]),
     ...V.canoes.filter((c) => !c.moored).map((c) => [c.c[0], c.c[1], c.l / 2 + 1.6]), [V.hollow.c[0], V.hollow.c[1], V.hollow.l / 2 + 2.5]];
   const free = (x, z, r) => !inHouse(x, z, -(r + 1.2)) && !taken.some(([a, b, q]) => Math.hypot(a - x, b - z) < q + r);
@@ -48,10 +48,19 @@ export function yards() {
       if (p && kind === 'logbench' && rand() < 0.8) sit.push({ at: [x, z], y: p.y, rot: h.yaw + (rand() - 0.5) * 0.6, pose: 'sit', who: rand() < 0.5 ? 'elder' : rand() < 0.5 ? 'woman' : 'man' });
       if (p && kind === 'hideframe') sit.push({ at: [x, z - 1.0], y: height(x, z - 1.0), rot: Math.PI, pose: 'kneel', who: 'woman' });
     }
+    // between this house and the next: a drying rack running toward the sea, and the plank screen of a smoking frame behind it
+    if (k < H.length - 1) {
+      const nz = Math.hypot(H[k + 1].c[0] - h.c[0], H[k + 1].c[1] - h.c[1]), gap = nz - (h.w + H[k + 1].w) / 2;
+      for (const dv of [-hd + 2.4, -hd + 7.4]) {
+        if (gap < 2.6 || rand() < 0.2) continue;
+        const [x, z] = at(h, hw + gap / 2, dv);
+        if (!inHouse(x, z, -0.9) && height(x, z) > 0.6 && !taken.some(([a, b, q]) => Math.hypot(a - x, b - z) < q + 1.2)) { racks.push({ c: [x, z], yaw: h.yaw - Math.PI / 2, w: Math.min(2.6, gap - 0.5), seed: 1200 + k * 7 + (dv > -hd + 5 ? 1 : 0) }); taken.push([x, z, 1.3]); }
+      }
+    }
     // the people inside: round the fire on the pit's floor, one or two on the beds
     const n = h.landmark ? 5 : 2 + Math.floor(rand() * 3);
     for (let j = 0; j < n; j++) {
-      const a = rand() * 6.28 + j * 1.9, uu = Math.cos(a) * 1.55, vv = Math.sin(a) * 1.75, [x, z] = at(h, uu, vv);
+      const a = (j % 2 ? 0 : Math.PI) + (rand() - 0.5) * 1.1 + (j >> 1) * 0.35, uu = Math.cos(a) * 1.55, vv = Math.sin(a) * 1.75, [x, z] = at(h, uu, vv);
       folk.push({ house: k, at: [x, z], y: G - 1.2, rot: Math.atan2(-(h.c[0] - x), -(h.c[1] - z)), pose: j % 3 === 2 ? 'cross' : 'sit_ground', who: j === 0 ? 'elder' : rand() < 0.5 ? 'woman' : rand() < 0.5 ? 'man' : 'child' });
     }
     const bu = (rand() < 0.5 ? -1 : 1) * (hw - 0.4 - 0.75), [bx, bz] = at(h, bu, -hd + 2.6 + rand() * 2);
@@ -71,6 +80,6 @@ export function yards() {
     if (!inSea(x, z) || !inSea(x + 4, z)) continue;
     boats.push({ c: [x, z], yaw: Math.PI / 2 + (rand() - 0.5) * 0.5, l, seed: 800 + z, crew: 2 + (rand() < 0.5 ? 1 : 0) });
   }
-  return (FIT = { props, sit, folk, boats });
+  return (FIT = { props, sit, folk, boats, racks });
 }
 export const footprintsY = () => yards().props.map((p) => p.c);

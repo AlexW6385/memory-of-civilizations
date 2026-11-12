@@ -10,17 +10,21 @@ const plan = (id, style, elements, bounds = [-RADIUS, -RADIUS, RADIUS, RADIUS]) 
 
 export async function town() {
   const H = houses(), v = village(), rand = rng(1850), plans = [], E = [], P = [];
-  // each house its own plan (culled by its own bounds)
-  for (const h of H) {
-    if (h.landmark) continue;
-    const r = Math.max(h.w, h.d) / 2 + 6;
-    // every house is open and furnished (the pit is dug in layout.js's ground; tiers are its floors)
-    plans.push(plan('sgang-house-' + h.i, 'haida', [{ t: 'haida_house', c: h.c, yaw: h.yaw, w: h.w, d: h.d, age: h.age, ridge: h.ridge, eave: h.eave, seed: h.seed, g: G, landmark: false, tiers: tiers(h), pole: 5.2 + (h.w - 11) * 0.5 }], [h.c[0] - r, h.c[1] - r, h.c[0] + r, h.c[1] + r]));
-  }
   // the yards: what stands before each house, on the beach and in the shallows; who sits there and inside
   const Y = yards(), grp = H.map(() => ({ E: [], P: [], pts: [] }));
+  const bnd = (g, pad = 4) => { const xs = g.pts.map((q) => q[0]), zs = g.pts.map((q) => q[1]); return [Math.min(...xs) - pad, Math.min(...zs) - pad, Math.max(...xs) + pad, Math.max(...zs) + pad]; };
   const nearest = (x, z) => { let b = 0, bd = 1e9; H.forEach((h, k) => { const d = Math.hypot(h.c[1] - z, (h.c[0] - x) * 0.3); if (d < bd) { bd = d; b = k; } }); return b; };
   for (const p of Y.props) { const g = grp[nearest(...p.c)]; g.E.push({ t: 'haida_prop', kind: p.kind, c: p.c, yaw: p.yaw, y: p.y, w: p.w, seed: p.seed }); g.pts.push(p.c, [p.c[0] + 5, p.c[1] + 5], [p.c[0] - 5, p.c[1] - 5]); }
+  for (const r of Y.racks) { const g = grp[nearest(...r.c)]; g.E.push({ t: 'haida_rack', c: r.c, yaw: r.yaw, w: r.w, seed: r.seed, y: height(...r.c) }); g.pts.push(r.c); }
+  // each house its own plan with its yard (culled by its own bounds); every house is open and furnished (the pit is dug in
+  // layout.js's ground; tiers are its floors)
+  const landYard = [];
+  H.forEach((h, k) => {
+    if (h.landmark) { landYard.push(...grp[k].E); return; }
+    const r = Math.max(h.w, h.d) / 2 + 6;
+    plans.push(plan('sgang-house-' + h.i, 'haida', [{ t: 'haida_house', c: h.c, yaw: h.yaw, w: h.w, d: h.d, age: h.age, ridge: h.ridge, eave: h.eave, seed: h.seed, g: G, landmark: false, tiers: tiers(h), pole: 5.2 + (h.w - 11) * 0.5 }, ...grp[k].E],
+      bnd({ pts: [...grp[k].pts, [h.c[0] - r, h.c[1] - r], [h.c[0] + r, h.c[1] + r]] }, 2)));
+  });
   // the poles of the street, the graveyard at the south end
   for (const p of v.poles) E.push({ t: 'haida_pole', kind: p.kind, c: p.c, yaw: p.yaw, h: p.h, r: p.r, seed: p.seed, y: height(...p.c), age: 0.45 + rand() * 0.5 });
   for (const c of v.canoes) E.push({ t: 'haida_canoe', c: c.c, yaw: c.yaw, l: c.l, moored: c.moored, seed: c.seed, y: c.moored ? SEA - 0.3 : height(...c.c) + 0.38 });
@@ -30,8 +34,8 @@ export async function town() {
   E.push({ t: 'haida_hollow', c: v.hollow.c, yaw: v.hollow.yaw, l: v.hollow.l, y: height(...v.hollow.c) });
   // sheds behind the houses
   H.forEach((h, k) => { if (k % 2 === 1) { const p = toWorld(h, (rand() - 0.5) * h.w * 0.5, h.d / 2 + 5.5); if (!inHouse(p[0], p[1], -3)) E.push({ t: 'haida_shed', c: p, yaw: h.yaw, seed: 900 + k, y: height(...p) }); } });
+  E.push(...landYard);
   plans.push(plan('sgang-fittings', 'haida', E));
-  const bnd = (g, pad = 4) => { const xs = g.pts.map((q) => q[0]), zs = g.pts.map((q) => q[1]); return [Math.min(...xs) - pad, Math.min(...zs) - pad, Math.max(...xs) + pad, Math.max(...zs) + pad]; };
 
   // ---- the people ----
   const skin = () => (rand() < 0.7 ? 'skin_medium' : 'skin_light');
@@ -53,7 +57,6 @@ export async function town() {
     const r = Math.max(h.w, h.d) / 2 + 3, pp = [...inFolk[k]];
     const sitters = Y.sit.filter((f) => nearest(...f.at) === k).length;
     void sitters;
-    if (grp[k].E.length) plans.push(plan('sgang-yard-' + h.i, 'haida', grp[k].E, bnd({ pts: [...grp[k].pts, [h.c[0] - r, h.c[1] - r], [h.c[0] + r, h.c[1] + r]] })));
     if (pp.length) plans.push(plan('sgang-folk-' + h.i, 'life', pp, [h.c[0] - r, h.c[1] - r, h.c[0] + r, h.c[1] + r]));
   });
   // the boats in the bay: a canoe at its mooring, two paddlers and a fisher
