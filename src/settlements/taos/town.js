@@ -2,7 +2,7 @@
 // §5). This adds the life of the plaza and the roofs (§4.2): women grinding at the mealing bins, the
 // grinder inside the furnished room, people on the terraces and the plaza, firewood, jars and baskets
 // on the roofs, dogs and turkeys about the plaza.
-import { NORTH, SOUTH, CELL, RADIUS, ROOMS, YARDS, PENS, nearYard, creekZ, inCreek, isRoom, roomsOf } from './layout.js';
+import { NORTH, SOUTH, CELL, RADIUS, ROOMS, YARDS, PENS, ARRIVE, nearYard, creekZ, inCreek, isRoom, roomsOf } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const ST = 2.7;
@@ -10,7 +10,7 @@ const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));  
 const plan = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 30], facing: 'n' } });
 
 export async function town() {
-  const rand = rng(1500), P = [], T = [];
+  const rand = rng(1500), P = [], T = [], E0 = [];
   // women in the manta of cotton or deerskin, tied over one shoulder, and moccasins; men in deerskin
   // shirt and leggings, some with a blanket of rabbit fur over the shoulders; the hair long [inferred]
   const skin = () => (rand() < 0.7 ? 'skin_medium' : 'skin_dark');
@@ -44,10 +44,29 @@ export async function town() {
     woman([x + 0.9, z + 1.3], 0, 0, { pose: 'kneel', over: 'none' });
     man([x + 3.1, z - 0.6], 0, 2.0, { h: 0.7 });
   }
+  // the arrival's view (layout.js ARRIVE): the plaza's life in the cone before the visitor, 6 to 21 m off, none nearer than 6 m;
+  // water-bearers, a mother with a child, elders in rabbit-fur blankets, men talking, boys with a dog, pots and baskets set down, a flock of turkeys
+  const AF = [-Math.sin(ARRIVE.yaw), -Math.cos(ARRIVE.yaw)], AR = [-AF[1], AF[0]];
+  const ap = (d, s) => [ARRIVE.at[0] + AF[0] * d + AR[0] * s, ARRIVE.at[1] + AF[1] * d + AR[1] * s];
+  const toward = (p) => face(p, ARRIVE.at);
+  const cl = (d, s, f) => { const p = ap(d, s); if (!inCreek(p[0], p[1], 2) && !nearYard(p[0], p[1], 1.5)) f(p); };
+  cl(7, -4, (p) => woman(p, 0, toward(p) + 0.5, { carry: 'pot' }));
+  cl(9, 3.5, (p) => { man(p, 0, toward(p) + 2.4, { pose: 'talk' }); const b = [p[0] + 1.1, p[1] + 0.3]; man(b, 0, face(b, p)); });
+  cl(12, -7, (p) => { woman(p, 0, toward(p) - 0.4); const c = [p[0] + 0.6, p[1] + 0.5]; woman(c, 0, face(c, p), { child: true, h: 1.15 }); });
+  cl(14, 7, (p) => man(p, 0, toward(p) + 0.8, { over: 'cloak', cloth2: 'hide_white' }));
+  cl(16, -2, (p) => woman(p, 0, toward(p) + 3.0, { carry: 'pot' }));
+  cl(19, 9, (p) => { woman(p, 0, toward(p) + 2.6, { pose: 'talk' }); const b = [p[0] - 1.0, p[1] + 0.4]; woman(b, 0, face(b, p)); });
+  cl(11, 0.5, (p) => man(p, 0, toward(p) + 1.4, { h: 0.7 }));
+  cl(13, -3.5, (p) => E0.push({ t: 'animal', kind: 'dog', at: p, y: 0, rot: 1.8, seed: 41 }));
+  cl(20, -9, (p) => woman(p, 0, toward(p) + 1.0, { pose: 'kneel', over: 'none' }));
+  cl(8, 6, (p) => E0.push({ t: 'pot', kind: 'water_pot', n: 2, at: p, y: 0, seed: 17 }));
+  cl(10, -8, (p) => E0.push({ t: 'basket', n: 2, at: p, y: 0, seed: 23, goods: 'cloth_ochre' }));
+  cl(17, 3, (p) => E0.push({ t: 'animal', kind: 'dog', at: p, y: 0, rot: 4.0, seed: 43 }));
+  for (let k = 0; k < 5; k++) cl(15 + (k % 2) * 1.6, -6 + k * 0.9, (p) => T.push({ t: 'turkey', at: p, y: 0, rot: 0.8 + k, tom: k === 0 }));
   // the plaza: people talking, carrying water from the creek, children
   for (let k = 0; k < 26; k++) {
     const x = -60 + rand() * 120, z = -38 + rand() * 70;
-    if (inCreek(x, z, 2) || nearYard(x, z, 1.5) || P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 1.5)) continue;
+    if (inCreek(x, z, 2) || nearYard(x, z, 1.5) || Math.hypot(x - ARRIVE.at[0], z - ARRIVE.at[1]) < 6 || P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 1.5)) continue;
     const r = rand(), at = [x, z], rot = rand() * 6.28;
     if (r < 0.3) woman(at, 0, rot, { carry: 'pot' });
     else if (r < 0.45) woman(at, 0, rot, { child: true, h: 1.15 });
@@ -76,5 +95,5 @@ export async function town() {
   // the pens' turkeys
   for (const [px, pz] of PENS) for (let k = 0; k < 5; k++) { const a = rand() * 6.28, r = 0.4 + rand() * 0.9; T.push({ t: 'turkey', at: [px + Math.cos(a) * r - 0.2, pz + Math.sin(a) * r], y: 0, rot: rand() * 6.28, tom: k === 0 }); }
   void creekZ;
-  return [plan('taos-people', 'life', [...P, ...E]), plan('taos-turkeys', 'pueblo', T)];
+  return [plan('taos-people', 'life', [...P, ...E0, ...E]), plan('taos-turkeys', 'pueblo', T)];
 }

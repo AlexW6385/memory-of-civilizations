@@ -1,6 +1,6 @@
 // Taos Pueblo — the dress of the houses' feet, the plaza, the creek and the fields (docs/settlements/taos.md §4.5): the list of
 // `pueblo_dress` items (styles/pueblo/dress.js) derived from layout.js — nothing hard-coded to a coordinate but the pens.
-import { NORTH, SOUTH, CELL, KIVAS, WALL, CREEK, RADIUS, YARDS, PENS, PLAZA, RACKS, nearYard, creekZ, inCreek, inRect, isRoom, roomsOf, nearRoom, onKeep, bankY } from './layout.js';
+import { NORTH, SOUTH, CELL, KIVAS, WALL, CREEK, RADIUS, YARDS, PENS, PLAZA, RACKS, ARRIVE, nearYard, creekZ, inCreek, inRect, isRoom, roomsOf, nearRoom, onKeep, bankY } from './layout.js';
 import { ground } from './ground.js';
 
 const ST = 2.7;
@@ -76,7 +76,7 @@ export function dressItems() {
   const placed = [];
   const free = (x, z, r) => !(inCreek(x, z, 3 + r) || nearYard(x, z, 2 + r) || inRect([NORTH.x0 - 3, NORTH.z0 - 3, NORTH.x0 + NORTH.heights[0].length * CELL + 3, NORTH.z0 + NORTH.heights.length * CELL + 3 + r], x, z)
     || inRect([SOUTH.x0 - 3, SOUTH.z0 - 3 - r, SOUTH.x0 + SOUTH.heights[0].length * CELL + 3, SOUTH.z0 + SOUTH.heights.length * CELL + 3], x, z)
-    || KIVAS.some(([kx, kz, kr]) => Math.hypot(x - kx, z - kz) < kr + 4.5 + r) || (z < -39 + r && RACKS.some(([a, b]) => x > a - 3 - r && x < b + 3 + r)) || onKeep(x, z, 3 + r)
+    || KIVAS.some(([kx, kz, kr]) => Math.hypot(x - kx, z - kz) < kr + 4.5 + r) || (z < -39 + r && RACKS.some(([a, b]) => x > a - 3 - r && x < b + 3 + r)) || onKeep(x, z, 3 + r) || Math.hypot(x - ARRIVE.at[0], z - ARRIVE.at[1]) < 4.5 + r
     || PENS.some(([px, pz]) => Math.hypot(x - px, z - pz) < 3 + r) || placed.some(([px, pz, pr]) => Math.hypot(x - px, z - pz) < pr + r + 0.8));
   const place = (kind, r, tries = 60, region = [-66, -42, 66, 38]) => {
     for (let t = 0; t < tries; t++) {

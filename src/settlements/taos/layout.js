@@ -77,6 +77,8 @@ export const PENS = [[-30, 26], [56, -12], [-58, -30]];
 export const PLAZA = [-70, -45, 70, 40];
 /** The racks' footprints (x0, x1 at z −44: poles and bins), kept clear of the plaza's scatter. */
 export const RACKS = [[-62, -34], [-27, -1], [8, 36]];
+/** Where the visitor arrives (planet/arrivals.js): on the plaza's north bank, facing the North House's tall middle across the racks and the plaza's work. */
+export const ARRIVE = { at: [-30, -20], yaw: -0.35 };
 /** The ways kept open for the visitor: the arrival and the route to the log bridge and the north house, the road out of the south gap. */
 export const KEEP_ROUTE = [[0, 200], [0, 141], [0, 92], [12.5, 92], [12.5, 40], [0, 30], [-35, 10], [-35, -40]];
 export const KEEP = KEEP_ROUTE.slice(1).map((p, k) => [KEEP_ROUTE[k], p]);
