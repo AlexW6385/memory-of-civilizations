@@ -3,7 +3,7 @@
 // the Pantheon with an attendant walking before it, citizens in the toga and people in tunics in the street and the
 // forecourt; the keeper behind his counter in the thermopolium of the house by the forecourt, a customer at it.
 
-import { VIA_LATA, INN, FULLER, height, riverEdge, riverX, rows, STADIUM, SAEPTA, BATHS, FORUM } from './layout.js';
+import { VIA_LATA, INN, inn2, FULLER, height, riverEdge, riverX, rows, STADIUM, SAEPTA, BATHS, FORUM } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 export const DOMUS = [-36, -208, -17.9, -189.4];
@@ -135,18 +135,18 @@ export function life() {
     L.push({ t: 'animal', kind: 'dog', at: [fx0 + 50, my + 5], y: 0, rot: 1.0, seed: seed() });
   }
   // the inn: the keeper behind the counter, drinkers at the tables, the groom with a donkey in the stable, a guest in the court
-  {
+  for (const IR of [INN, inn2()?.rect]) if (IR) {
     const W = (r, u, d) => [r[0] + u, r[3] - d], A = (r, u, d, rot, o = {}) => ({ at: W(r, u, d), rot, y: 0, ...o });
     const t = (o, f = tunic) => f(o.at, o.rot, o);
-    t(A(INN, 2.4, 4.2, -Math.PI / 2, { cloth: 'cloth_brown', arms: 'hang' }));
-    t(A(INN, 5.9, 5.0, Math.PI, { pose: 'sit' })); t(A(INN, 4.1, 5.0, 0, { pose: 'sit' }));
-    t(A(INN, 6.9, 7.0, Math.PI, { pose: 'sit' })); t(A(INN, 4.4, 7.7, Math.PI / 2, { pose: 'sit' }), woman);
-    t(A(INN, 7.9, 3.3, Math.PI / 2, { pose: 'talk' }), togate); t(A(INN, 6.1, 3.3, -Math.PI / 2, { pose: 'sit' }));
-    L.push({ t: 'animal', kind: 'donkey', at: W(INN, 13.4, 1.8), y: 0, rot: Math.PI / 2, seed: seed(), gear: true });
-    L.push({ t: 'animal', kind: 'donkey', at: W(INN, 13.4, 5.6), y: 0, rot: Math.PI / 2, seed: seed(), gear: false });
-    t(A(INN, 15.5, 3.4, 0, { carry: 'basket', arms: 'hang', cloth: 'cloth_grey' }));
-    t(A(INN, 8.8, 11.0, 0, { pose: 'talk' }), woman); t(A(INN, 10.8, 12.2, Math.PI, { pose: 'stand' }));
-    L.push({ t: 'chickens', at: W(INN, 5.0, 11.4), y: 0, rot: 0, seed: seed() });
+    t(A(IR, 2.4, 4.2, -Math.PI / 2, { cloth: 'cloth_brown', arms: 'hang' }));
+    t(A(IR, 5.9, 5.0, Math.PI, { pose: 'sit' })); t(A(IR, 4.1, 5.0, 0, { pose: 'sit' }));
+    t(A(IR, 6.9, 7.0, Math.PI, { pose: 'sit' })); t(A(IR, 4.4, 7.7, Math.PI / 2, { pose: 'sit' }), woman);
+    t(A(IR, 7.9, 3.3, Math.PI / 2, { pose: 'talk' }), togate); t(A(IR, 6.1, 3.3, -Math.PI / 2, { pose: 'sit' }));
+    L.push({ t: 'animal', kind: 'donkey', at: W(IR, 13.4, 1.8), y: 0, rot: Math.PI / 2, seed: seed(), gear: true });
+    L.push({ t: 'animal', kind: 'donkey', at: W(IR, 13.4, 5.6), y: 0, rot: Math.PI / 2, seed: seed(), gear: false });
+    t(A(IR, 15.5, 3.4, 0, { carry: 'basket', arms: 'hang', cloth: 'cloth_grey' }));
+    t(A(IR, 8.8, 11.0, 0, { pose: 'talk' }), woman); t(A(IR, 10.8, 12.2, Math.PI, { pose: 'stand' }));
+    L.push({ t: 'chickens', at: W(IR, 5.0, 11.4), y: 0, rot: 0, seed: seed() });
   }
   // the fuller's: the workmen treading cloth in the vats (hitched up tunics, hands on the rim), the master at the counter, a boy with the cloth
   {
