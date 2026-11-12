@@ -134,6 +134,42 @@ function people() {
     const [x0, z0, x1, z1] = s.rect, sw = (z1 - z0) / s.n, west = s.front === 'w';
     for (let i = 0; i < s.n; i++) if (rand() < 0.7) fig([west ? x0 + 1.5 : x1 - 1.5, z0 + (i + 0.5) * sw], west ? -Math.PI / 2 : Math.PI / 2, { y: 0.18, cloth: pick(['cloth_indigo', 'cloth_brown', 'cloth_grey']), over: 'sash' });
   }
+  // the hawkers at their stalls: the seller on his stool, a customer or two before the table
+  const SI = streetItems(), CL = ['cloth_indigo', 'cloth_brown', 'cloth_grey', 'cloth_ochre', 'cloth_blue', 'cloth_white'];
+  for (const a of SI.stalls) {
+    const c = Math.cos(a.rot), sn = Math.sin(a.rot), P = (u, w) => [a.at[0] + u * c + w * sn, a.at[1] - u * sn + w * c];
+    fig(P(0.8, 0.9), face(P(0.8, 0.9), a.at), { pose: 'sit', y: 0, cloth: pick(CL), over: 'sash' });
+    for (let k = 0; k < 1 + Math.floor(rand() * 2.4); k++) { const q = P(-0.9 + k * 1.1, 1.6 + rand() * 0.5); fig(q, face(q, a.at), { cloth: pick(CL), pose: rand() < 0.3 ? 'talk' : 'stand', carry: rand() < 0.2 ? 'basket' : 'none' }); }
+  }
+  // the street: pilgrims and townsfolk in twos and threes along Queli Street, the square and the lanes
+  for (let k = 0; k < 46; k++) {
+    const sq = k < 14, at = sq ? [-30 + rand() * 60, 122 + rand() * 44] : [-7.5 + rand() * 15, 172 + rand() * 86];
+    if (Math.abs(at[0]) < 3.5 && at[1] > 130 && at[1] < 160) continue;
+    fig(at, rand() * 6.28, { cloth: pick(CL), pose: rand() < 0.4 ? 'talk' : 'stand', carry: rand() < 0.12 ? 'basket' : 'none', hat: rand() < 0.15 ? 'straw' : 'cap' });
+    if (rand() < 0.5) fig([at[0] + 0.8, at[1] + 0.3], rand() * 6.28, { cloth: pick(CL), pose: 'talk' });
+  }
+  for (const s of streets()) {
+    const w = Math.min(s[2] - s[0], s[3] - s[1]), len = Math.max(s[2] - s[0], s[3] - s[1]);
+    if (w > 14 || Math.hypot((s[0] + s[2]) / 2, (s[1] + s[3]) / 2) > 190 || len < 12) continue;
+    const n = Math.min(3, Math.floor(len / 40));
+    for (let k = 0; k < n; k++) {
+      const at = s[2] - s[0] > s[3] - s[1] ? [s[0] + 3 + rand() * (len - 6), s[1] + rand() * w] : [s[0] + rand() * w, s[1] + 3 + rand() * (len - 6)];
+      fig(at, rand() * 6.28, { cloth: pick(CL), pose: ['stand', 'talk', 'squat'][Math.floor(rand() * 3)], dress: rand() < 0.3 ? 'trousers' : 'robe' });
+    }
+  }
+  // the temple: pilgrims kneeling at the burners and the altar, scholars before the Kuiwen Pavilion, the guides
+  for (const [x, z] of [[-9.5, -44], [9.5, -44], [0, ALTAR.c[1] + 7]]) fig([x + 1.6, z + 0.2], Math.PI / 2, { pose: 'kneel', arms: 'pray', cloth: pick(CL) });
+  for (let k = 0; k < 18; k++) { const at = [-50 + rand() * 100, -96 + rand() * 40]; if (Math.hypot(at[0], at[1] - ALTAR.c[1]) < 10) continue; fig(at, rand() * 6.28, { cloth: pick(['cloth_blue', 'cloth_white', 'cloth_indigo']), pose: rand() < 0.4 ? 'talk' : 'stand' }); }
+  for (let k = 0; k < 12; k++) { const at = [-14 + rand() * 28, -16 + rand() * 40]; fig(at, rand() * 6.28, { cloth: pick(CL), pose: 'stand', carry: rand() < 0.2 ? 'staff' : 'none' }); }
+  // the Duke's household: guards at the mansion's gate, the Duke at his table in the great hall, clerks at their desks, servants in the court
+  for (const sx of [-1, 1]) fig([MX + sx * 4.5, 114], Math.PI, { pose: 'staff', carry: 'staff', len: 2.0, cloth: 'cloth_red', over: 'sash' });
+  const dt = MANSION_HALLS[3];
+  fig([MX, dt.rect[1] + 1.9], Math.PI, { y: 0.85, pose: 'sit', cloth: 'cloth_maroon', cloth2: 'cloth_black', beard: 1 });
+  for (const sx of [-1, 1]) for (let k = 0; k < 3; k++) fig([MX + sx * (5 + k * 1.2), dt.rect[1] + 7.5], -sx * Math.PI / 2, { y: 0.45, cloth: pick(['cloth_blue', 'cloth_indigo']), pose: 'stand' });
+  for (let k = 0; k < 14; k++) { const at = [MX - 12 + rand() * 24, -146 + rand() * 250]; if (MANSION_HALLS.some((h) => at[0] > h.rect[0] - 1 && at[0] < h.rect[2] + 1 && at[1] > h.rect[1] - 1 && at[1] < h.rect[3] + 1)) continue; fig(at, rand() * 6.28, { cloth: pick(CL), pose: rand() < 0.3 ? 'talk' : 'stand', carry: rand() < 0.25 ? 'basket' : 'none' }); }
+  // the Drum Tower's keeper on the platform, and a gossiping group under it
+  fig([DRUM.x + 5, DRUM.z + 4.5], Math.PI, { y: DRUM.h, cloth: 'cloth_red', pose: 'staff', carry: 'staff', len: 1.9, over: 'sash' });
+  for (let k = 0; k < 3; k++) fig([DRUM.x + 6.5 + k * 0.9, DRUM.z - 8], rand() * 6, { cloth: pick(CL), pose: 'talk' });
   return { ...base('qufu-people', L), style: 'life' };
 }
 

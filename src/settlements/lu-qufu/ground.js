@@ -55,10 +55,10 @@ function planting(x, z) {
     return { cypress: 0.22 * (0.6 + 0.4 * n), chinese_pine: 0.2, arborvitae: 0.1, grass_dry: 4 };
   }
   if (inMansion(x, z, 0)) return z < -134 && !rects().some((q) => inRect(q, x, z, 1)) ? { pagoda_tree: 0.12, jujube: 0.15, grass: 5 } : (Math.abs(x - 156) > 20 && !onStreet(x, z) && hash2(x * 0.2, z * 0.2) < 0.05 ? { persimmon: 0.2, jujube: 0.15 } : null);
-  if (onStreet(x, z, 0.3) || inShop(x, z, 0.5)) return Math.abs(Math.abs(x) - 9) < 0.7 && z > 130 && z < 260 ? { pagoda_tree: 0.5 } : null;
+  if (onStreet(x, z, 0.3) || inShop(x, z, 0.5)) return Math.abs(Math.abs(x) - 24) < 0.7 && z > 126 && z < 168 && !inShop(x, z, 2) ? { pagoda_tree: 0.5 } : null;
   if (inLot(x, z, 0.5)) {
     const l = lots().find((q) => inRect(q.rect, x, z));
-    if (l) { const [x0, z0, x1, z1] = l.rect, u = x - x0, v = z - z0; if (v > 6 && v < z1 - z0 - 9 && u > 3 && u < x1 - x0 - 3) return { jujube: 0.6, persimmon: 0.4, grass: 3 }; }
+    if (l) { const [x0, z0, x1, z1] = l.rect, u = x - x0, v = z - z0; if (v > 10.5 && v < z1 - z0 - 8.5 && u > 6.2 && u < x1 - x0 - 6.2 && Math.abs(u - (x1 - x0) / 2) > 1.6) return { jujube: 0.6, persimmon: 0.4, grass: 3 }; }
     return null;
   }
   if (z > CITY_WALL.z + 4) {
@@ -68,7 +68,7 @@ function planting(x, z) {
   if (rects().some((q) => inRect(q, x, z, 1))) return null;
   return { pagoda_tree: 0.1, elm: 0.1, jujube: 0.1, grass: 4 };
 }
-void HALL;
+void HALL; void DRUM;
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
   maxDensity: { cypress: 3.6, chinese_pine: 0.25, arborvitae: 0.12, apple: 2.4, pagoda_tree: 0.5, elm: 0.1, jujube: 0.6, persimmon: 0.4, wheat: 90 },

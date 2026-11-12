@@ -2,7 +2,7 @@
 // before the throne and at the gates. The engine part is src/engine/smoke.js (one draw call); positions from the layout.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, MX, HALL, ALTAR, shopRuns, lots as townLots } from './layout.js';
+import { RADIUS, MX, HALL, ALTAR, shopRuns, lots as townLots, streetItems } from './layout.js';
 
 const ID = 'lu-qufu';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -11,15 +11,17 @@ export function emitters() {
   const E = [], r = rng(1730);
   // the hearths of the courtyard houses at the meals: the kitchen's chimney behind the main house
   for (const l of townLots()) {
-    if (r() > 0.5) continue;
-    const [x0, z0, x1] = l.rect;
-    E.push({ p: [x0 + (x1 - x0) * (0.25 + 0.5 * r()), 5.6, z0 + 3.2], kind: 'kitchen', thr: 0.2 + 0.7 * r(), seed: l.seed + 3 });
+    if (r() > 0.7) continue;
+    const [x0, z0, x1, z1] = l.rect;
+    E.push({ p: [x0 + 1.55, 5.0, z0 + 0.6 + Math.min(7.6, (z1 - z0) * 0.28) + 2.4], kind: 'kitchen', thr: 0.2 + 0.7 * r(), seed: l.seed + 3 });
   }
   // the shops of Queli Street: the cake-sellers' and the noodle-cooks' stoves
   for (const s of shopRuns()) {
     const [x0, z0, x1, z1] = s.rect;
     for (let i = 0; i < s.n; i++) if (r() < 0.25) E.push({ p: [(x0 + x1) / 2, 4.2, z0 + (i + 0.5) * (z1 - z0) / s.n], kind: 'kitchen', thr: 0, seed: i * 11 + Math.round(z0) });
   }
+  // the noodle and bun stalls of the street
+  for (const a of streetItems().stalls) if (a.kind === 'noodle' || a.kind === 'buns') E.push({ p: [a.at[0], 1.0, a.at[1]], kind: 'kitchen', thr: 0, seed: a.seed % 997 });
   // the mansion's kitchens, behind the great halls
   for (const dz of [-80, -112, 20]) E.push({ p: [MX + 22, 5.4, dz], kind: 'kitchen', thr: 0.1, seed: dz + 400 });
   // incense: before the shrine of Confucius, at the bronze burners of the hall, the Apricot Altar, the Resting Hall, the Kuiwen gate
