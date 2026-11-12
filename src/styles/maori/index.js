@@ -17,6 +17,8 @@ import { sculpt, rows, smooth, bump, blob } from '../rapanui/sculpt.js';
 import '../qing/index.js';
 import { SCENES } from './scenes.js';
 import { YARDS } from './yards.js';
+import { koru, manaia } from './spirals.js';
+import { WORKS } from './works.js';
 
 const K = 'kokowai', P = 'palisade', TH = 'raupo', PAUA = 'shell_inlay';
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -222,6 +224,7 @@ function whare(el, ctx) {
   const ca = Math.cos(yaw), sa = Math.sin(yaw);
   const W2 = (x, z) => [cx + x * ca + z * sa, cz - x * sa + z * ca];
   const fig = (kind, x, y, z, hh, ry = 0) => { const [wx, wz] = W2(x, z); figure(bag, kind, wx, y0 + y, wz, hh, yaw + ry); };
+  const spiral = (x, y, z, size, flip) => { const [wx, wz] = W2(x, z); koru(bag, K, wx, y, wz, size, yaw, flip, 90); };
   const zf = -l / 2 + pr, ov = 0.4, e = h - 0.1, ridge = h + rise, t = 0.25;
   const under = (x) => e + (ridge - e) * (1 - Math.abs(x) / (w / 2 + ov)) - 0.07;   // just under the roof at x
   // the side walls, carried forward to the porch's mouth, their tops cut to the roof's slope
@@ -271,7 +274,10 @@ function whare(el, ctx) {
     for (const s of [-1, 1]) {
       const A = [0, ridge + 0.12], Bp = [s * (w / 2 + ov + 0.1), e - 0.12], dx = Bp[0] - A[0], dy = Bp[1] - A[1], L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L;
       add(K, board(A, Bp, mw, zm0, zm1));
-      for (const g of rauponga([A[0] + ux * 0.45, A[1] + uy * 0.45], [Bp[0] - ux * 0.1, Bp[1] - uy * 0.1], mw * 0.86, zm0, 2)) add(K, g);   // the face carved in rauponga
+      const cut = 0.45 + (L - 0.55) * 0.58;                          // the upper part of the face in rauponga, the lower in a run of pītau
+      for (const g of rauponga([A[0] + ux * 0.45, A[1] + uy * 0.45], [A[0] + ux * cut, A[1] + uy * cut], mw * 0.86, zm0, 2)) add(K, g);
+      const nk = Math.max(2, Math.floor((L - cut - 0.2) / (mw * 0.9)));
+      for (let k = 0; k < nk; k++) { const u = cut + 0.1 + (k + 0.5) * (L - cut - 0.2) / nk, [qx, qy] = [A[0] + ux * u, A[1] + uy * u]; spiral(qx, qy - 0.0, zm0 - 0.005, mw * 0.86, (k + (s > 0 ? 1 : 0)) % 2 === 0); }
       for (let k = 0; k < 3; k++) {                                     // the raparapa
         const off = (k - 1) * mw * 0.33, px = -uy * off, py = ux * off, len = 0.32 + 0.08 * (1 - Math.abs(k - 1));
         add(K, board([Bp[0] + px, Bp[1] + py], [Bp[0] + px + ux * len, Bp[1] + py + uy * len], mw * 0.22, zm0 + 0.01, zm1 - 0.01));
@@ -279,6 +285,13 @@ function whare(el, ctx) {
     }
     fig('face', 0, ridge - 0.62, zm0 - 0.02, 0.62);
     if (rank > 1) fig('post', 0, ridge + 0.1, (zm0 + zm1) / 2, 1.1);
+    // the chief's house: a manaia either side of the door on the front wall, pītau down the wall's right end
+    if (rank > 1) {
+      const wx0 = -w / 2 + t + 0.05, wx1 = dl - 0.12;
+      if (wx1 - wx0 > 0.5) for (const [cxm, fl] of [[(wx0 + wx1) / 2, false]]) { const [qx, qz] = W2(cxm, zf); manaia(bag, K, PAUA, qx, y0 + 0.85, qz, Math.min(0.9, wx1 - wx0), yaw, fl, 90); }
+      const rx0 = wr + 0.12, rx1 = w / 2 - t - 0.05;
+      if (rx1 - rx0 > 0.4) { const [qx, qz] = W2((rx0 + rx1) / 2, zf); manaia(bag, K, PAUA, qx, y0 + 0.85, qz, Math.min(0.9, rx1 - rx0), yaw, true, 90); }
+    }
     // the pare over the door, with its face; the jambs
     const ph = Math.min(0.42, h - dh - 0.02);
     add(K, box(dl - 0.2, dh, zf - 0.1, dr + 0.2, dh + ph, zf));
@@ -377,6 +390,12 @@ function waharoa(el, { bag, col }) {
   }
   add(K, box(-w / 2 - 0.4, h, -0.2, w / 2 + 0.4, h + 0.55, 0.3));
   fig('face', 0, h + 0.02, -0.23, 0.52); fig('face', 0, h + 0.02, 0.33, 0.52, Math.PI);
+  for (const sd of [-1, 1]) for (const px of [0.6, 1.1, 1.6]) {     // pītau along the lintel, both faces
+    const xx = sd * px;
+    if (Math.abs(xx) > w / 2 + 0.3) continue;
+    koru(bag, K, x + xx * ca - 0.2 * sa, y0 + h + 0.28, z - xx * sa - 0.2 * ca, 0.4, yaw, sd > 0, 100);
+    koru(bag, K, x + xx * ca + 0.3 * sa, y0 + h + 0.28, z - xx * sa + 0.3 * ca, 0.4, yaw + Math.PI, sd < 0, 100);
+  }
   fig('post', 0, h + 0.55, 0.05, 1.3);
 }
 
@@ -453,6 +472,9 @@ function pou(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0, h = el.h ?? 2.4;
   post(bag, x, y - 0.4, z, 0.14, h, K);
   figure(bag, 'post', x, y + h - 0.1, z, 1.2, el.yaw ?? 0, 260);
+  const py = el.yaw ?? 0;                                           // a pair of pītau and a manaia down the shaft's front
+  koru(bag, K, x - Math.sin(py) * 0.15, y + h * 0.5, z - Math.cos(py) * 0.15, 0.3, py, false, 100);
+  manaia(bag, K, PAUA, x - Math.sin(py) * 0.15, y + h * 0.22, z - Math.cos(py) * 0.15, 0.3, py, true, 100);
   col.circle(x, z, 0.2, y, y + h + 1);
 }
 
@@ -493,6 +515,6 @@ function mara(el, { bag }) {
 
 registerStyle('maori', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, palisade, whare, pataka, stage, waharoa, rua, waka, mara, pou, ...SCENES, ...YARDS },
+  elements: { ...STYLES.qing.elements, palisade, whare, pataka, stage, waharoa, rua, waka, mara, pou, ...SCENES, ...YARDS, ...WORKS },
   objects: {},
 });
