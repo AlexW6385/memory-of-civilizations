@@ -4,7 +4,10 @@
 // its colonnades, porticoes and shops; the Church of the Holy Sepulchre on the Cardo's west side;
 // and the markets: stalls, people and beasts in the Cardo and in the street to the Haram.
 
-import { RADIUS, HARAM, SEPULCHRE, SEP_Y, SEP_STAIR, CARDO, CARDO_Y, WALL, GATES, PALACES, height } from './layout.js';
+import { gardenWalls, gardenLife, laneArchElements, laneLife } from './lanes.js';
+import { sepulchreFurnish, sepulchreLife } from './sepulchre-detail.js';
+import { haramFurnish, haramLife } from './haram-detail.js';
+import { STREET, RADIUS, HARAM, SEPULCHRE, SEP_Y, SEP_STAIR, CARDO, CARDO_Y, WALL, GATES, PALACES, height } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const plan = (id, style, elements, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-180, 0], facing: 'e' }, ...extra });
@@ -173,6 +176,26 @@ function palaces() {
   return E;
 }
 
+// ── the bazaar: the shop rows either side of the street from the west gate to the Haram (§4e) ────────────────
+/** One plan per span: a colonnade of one shop each (so that each floor follows the slope's steps), a row on either side of the roadway. */
+function bazaar(span) {
+  const E = [], [xa, xb] = span, n = Math.floor((xb - xa) / STREET.shopW);
+  for (const side of [-1, 1]) for (let k = 0; k < n; k++) {
+    const x0 = xa + k * STREET.shopW, xm = x0 + STREET.shopW / 2;
+    E.push({ t: 'colonnade', a: [x0, side * STREET.road], b: [x0 + STREET.shopW, side * STREET.road], y: height(xm, side * (STREET.road + 1)), side, depth: STREET.portico, shops: STREET.shops, h: 4.2, spacing: STREET.shopW, noEnd: k < n - 1 });
+  }
+  return E;
+}
+
+// ── the rock-cut tombs of the Kidron valley, across from the Haram's east wall (§1f) ─────────────────────
+function kidron() {
+  const at = (x, z) => height(x, z);
+  return [
+    { t: 'kidron_tomb', kind: 'absalom', at: [288, 58], y: at(288, 58) },
+    { t: 'kidron_tomb', kind: 'zechariah', at: [292, 80], y: at(292, 80) },
+  ];
+}
+
 // ── the markets and the people ───────────────────────────────────────────────────────────────────
 function markets() {
   const rand = rng(691), L = [], X = CARDO.x, hr = CARDO.road / 2;
@@ -202,7 +225,7 @@ function markets() {
   for (let x = -365; x < HARAM.rect[0] - 30; x += 8 + rand() * 10) {
     if (Math.abs(x - X) < 20) continue;
     for (const s of [-1, 1]) {
-      if (rand() < 0.5) continue;
+      if (rand() < 0.5 || x > STREET.x0 + 1 && x < STREET.x1 + 3) continue;
       const z = s * 3.6, g = GOODS[Math.floor(rand() * GOODS.length)][1];
       L.push({ t: 'stall', at: [x, z], y: height(x, z), rot: s > 0 ? Math.PI : 0, seed: Math.floor(rand() * 1e9), w: 2.4, d: 1.1, awning: AW[Math.floor(rand() * AW.length)], goods: g });
       fig([x + (rand() - 0.5), z + s * 0.9], s > 0 ? Math.PI : 0, { pose: rand() < 0.5 ? 'sit' : 'stand' });
@@ -232,7 +255,15 @@ export function city() {
     plan('jerusalem-walls', 'islamic', walls()),
     plan('jerusalem-cardo', 'islamic', cardo()),
     plan('jerusalem-sepulchre', 'islamic', sepulchre(), { entrance: { at: [CARDO.x, (SEPULCHRE[1] + SEPULCHRE[3]) / 2], facing: 'w' }, bounds: [SEPULCHRE[0] - 2, SEPULCHRE[1] - 2, CARDO.x, SEPULCHRE[3] + 2] }),
+    plan('jerusalem-sepulchre-furnish', 'islamic', sepulchreFurnish(), { entrance: { at: [CARDO.x, (SEPULCHRE[1] + SEPULCHRE[3]) / 2], facing: 'w' }, bounds: [SEPULCHRE[0] - 2, SEPULCHRE[1] - 2, CARDO.x, SEPULCHRE[3] + 2] }),
+    plan('jerusalem-sepulchre-life', 'life', sepulchreLife(), { bounds: [SEPULCHRE[0] - 2, SEPULCHRE[1] - 2, CARDO.x, SEPULCHRE[3] + 2] }),
+    plan('jerusalem-gardens', 'islamic', [...gardenWalls(), ...laneArchElements()]),
+    plan('jerusalem-garden-life', 'life', [...gardenLife(), ...laneLife()]),
+    plan('jerusalem-kidron', 'islamic', kidron()),
     plan('jerusalem-palaces', 'islamic', palaces()),
+    ...STREET.spans.map((sp, i) => plan(`jerusalem-bazaar-${i}`, 'islamic', bazaar(sp), { bounds: [sp[0] - 4, -STREET.half - 2, sp[1] + 4, STREET.half + 2] })),
     plan('jerusalem-markets', 'life', markets()),
+    plan('jerusalem-haram-furnish', 'islamic', haramFurnish(), { bounds: [HARAM.rect[0] - 6, HARAM.rect[1] - 6, HARAM.rect[2] + 6, HARAM.rect[3] + 6] }),
+    plan('jerusalem-haram-life', 'life', haramLife(), { bounds: [HARAM.rect[0] - 6, HARAM.rect[1] - 6, HARAM.rect[2] + 6, HARAM.rect[3] + 6] }),
   ];
 }

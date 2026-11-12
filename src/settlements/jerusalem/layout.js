@@ -24,6 +24,8 @@ export const GATES = [
   { id: 'west', at: [-WALL.r, 0], kind: 'single' },
   { id: 'south', at: [CARDO.x, Math.sqrt(WALL.r ** 2 - CARDO.x ** 2)], kind: 'single' },
 ];
+/** The market street from the west gate to the Haram's stair (§4e): its roadway, and the shop rows either side of it (x ranges clear of the Cardo's own shops). */
+export const STREET = { road: 4.6, portico: 2.6, shops: 5.5, shopW: 4.5, spans: [[-362, -248], [-212.5, -180]], half: 14.5, x0: -366, x1: -176 };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 const west = (x) => 6 + 18 * smooth(-170, -390, x);
@@ -46,21 +48,58 @@ export function height(x, z) {
   return h * (1 - smooth(RADIUS - 60, RADIUS - 5, Math.hypot(x, z)));
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-let LOTS = null;
-/** Courtyard houses west and south of the Haram. */
+let LOTS = null, GARDENS = null, GRID = null, GGRID = null, ARCHES = null;
+const key = (i, j) => i + ',' + j;
+/** Courtyard houses west and south of the Haram; the cells the dice or the slope left are gardens (gardens()). */
 export function lots() {
   if (LOTS) return LOTS;
-  LOTS = [];
+  LOTS = []; GARDENS = []; GRID = new Map(); GGRID = new Map();
   const rand = rng(700);
-  for (let x = -RADIUS + 20; x < 150; x += 17) for (let z = -RADIUS + 20; z < RADIUS - 20; z += 16) {
-    const w = 12 + rand() * 4, d = 12 + rand() * 3, cx = x + w / 2, cz = z + d / 2;
-    const corners = [[x, z], [x + w, z], [x, z + d], [x + w, z + d]];
-    if (corners.some(([a, b]) => Math.hypot(a, b) > WALL.r - 5) || x + w > WALL.east - 6 || inRect(HARAM.rect, cx, cz, 16) || inRect(SEPULCHRE, cx, cz, 14) || PALACES.some((p) => inRect(p.rect, cx, cz, 14))
-      || (z < 5 && z + d > -5) || (x < CARDO.x + CARDO_HALF + 1 && x + w > CARDO.x - CARDO_HALF - 1) || GATES.some((g) => Math.hypot(g.at[0] - cx, g.at[1] - cz) < 28) || rand() < 0.15) continue;
-    const ys = [[x, z], [x + w, z], [x, z + d], [x + w, z + d]].map(([a, b]) => height(a, b));
-    if (Math.max(...ys) - Math.min(...ys) > 2.5) continue;
-    LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: Math.min(...ys) });
+  let i = 0;
+  for (let x = -RADIUS + 20; x < 150; x += 17, i++) {
+    let j = 0;
+    for (let z = -RADIUS + 20; z < RADIUS - 20; z += 16, j++) {
+      const w = 12 + rand() * 4, d = 12 + rand() * 3, cx = x + w / 2, cz = z + d / 2;
+      const corners = [[x, z], [x + w, z], [x, z + d], [x + w, z + d]];
+      if (corners.some(([a, b]) => Math.hypot(a, b) > WALL.r - 5) || x + w > WALL.east - 6 || inRect(HARAM.rect, cx, cz, 16) || inRect(SEPULCHRE, cx, cz, 14) || PALACES.some((p) => inRect(p.rect, cx, cz, 14))
+        || (z < STREET.half && z + d > -STREET.half && x + w > STREET.x0 && x < STREET.x1) || (z < 5 && z + d > -5) || (x < CARDO.x + CARDO_HALF + 1 && x + w > CARDO.x - CARDO_HALF - 1) || GATES.some((g) => Math.hypot(g.at[0] - cx, g.at[1] - cz) < 28)) continue;
+      const skip = rand() < 0.15, kind = rand(), seed = Math.floor(rand() * 1e6);
+      const ys = corners.map(([a, b]) => height(a, b)), steep = Math.max(...ys) - Math.min(...ys) > 2.5;
+      if (skip || steep) {
+        // a garden: terraced olives on a slope, else an orchard, a yard with its beasts, or a fallen house
+        const g = { rect: [x, z, x + w, z + d], seed, y: Math.min(...ys), kind: steep ? 'terrace' : kind < 0.45 ? 'orchard' : kind < 0.8 ? 'yard' : 'ruin' };
+        GARDENS.push(g); GGRID.set(key(i, j), g); continue;
+      }
+      const lot = { rect: [x, z, x + w, z + d], seed, y: Math.min(...ys), cell: [i, j] };
+      LOTS.push(lot); GRID.set(key(i, j), lot);
+    }
+  }
+  // the lanes: the gap to the next lot south (gs) and east (gx), for the doors' lanes and the arches over them
+  for (const l of LOTS) {
+    const [i, j] = l.cell, s = GRID.get(key(i, j + 1)), e = GRID.get(key(i + 1, j));
+    l.gs = s ? s.rect[1] - l.rect[3] : 99; l.gx = e ? e.rect[0] - l.rect[2] : 99;
   }
   return LOTS;
 }
-export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+export function gardens() { lots(); return GARDENS; }
+const near = (map, x, z, m) => {
+  const i = Math.floor((x + RADIUS - 20) / 17), j = Math.floor((z + RADIUS - 20) / 16);
+  for (const [a, b] of m > 0 ? [[i, j], [i - 1, j], [i, j - 1], [i - 1, j - 1], [i + 1, j], [i, j + 1]] : [[i, j]]) { const l = map.get(key(a, b)); if (l && inRect(l.rect, x, z, m)) return l; }
+  return null;
+};
+export const lotAt = (x, z, m = 0) => { lots(); return near(GRID, x, z, m); };
+export const gardenAt = (x, z, m = 0) => { lots(); return near(GGRID, x, z, m); };
+export const inLot = (x, z, m = 0) => !!lotAt(x, z, m);
+/** The lanes worth an arch: between two lots side by side (gap 1.8 … 4.4 m), every third one, with the z of the arch's middle. */
+export function laneArches() {
+  if (ARCHES) return ARCHES;
+  ARCHES = [];
+  let n = 0;
+  for (const l of lots()) {
+    if (l.gx < 1.8 || l.gx > 4.4) continue;
+    const [i, j] = l.cell, e = GRID.get(key(i + 1, j)), z0 = Math.max(l.rect[1], e.rect[1]), z1 = Math.min(l.rect[3], e.rect[3]);
+    if (z1 - z0 < 6 || Math.abs(l.rect[2] - CARDO.x) < 40 || (l.rect[2] > -190 && Math.abs((z0 + z1) / 2) < 30) || (n++ % 3)) continue;
+    ARCHES.push({ x0: l.rect[2], x1: e.rect[0], z: (z0 + z1) / 2 });
+  }
+  return ARCHES;
+}

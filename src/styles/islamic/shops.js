@@ -24,6 +24,7 @@ const PROF = {
   heap: [[0.24, 0], [0.15, 0.12], [0.001, 0.2]],
 };
 const CLOTH = ['cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_indigo', 'cloth_green', 'cloth_brown', 'cloth_maroon', 'cloth_grey'];
+const cloth = (a, b) => [a, b];
 const TRADES = ['pottery', 'pottery', 'cloth', 'cloth', 'grain', 'produce', 'oil', 'copper', 'glass', 'bread', 'spice'];
 
 /** Triangles turned to face the point p (the room's inside): for a ceiling seen from below. */
@@ -88,6 +89,32 @@ export function shopUnit(F, s0, s1, rand) {
   // the lamp hook and a sign board: a plank over the door with the trade's mark (a coloured band)
   if (!closed) { const m = { pottery: 'cloth_ochre', cloth: 'cloth_red', grain: 'cloth_brown', produce: 'cloth_green', oil: 'cloth_ochre', copper: 'bronze', glass: 'glaze_blue', bread: 'cloth_ochre', spice: 'cloth_maroon' }[trade];
     fb('timber', sc - 0.5, sc + 0.5, f0 - 0.2, f0 - 0.14, y + 3.5, y + 3.75); fb(m, sc - 0.42, sc + 0.42, f0 - 0.215, f0 - 0.2, y + 3.55, y + 3.7); }
+  // ── outside, in the portico: a bracket lamp on the pier, an awning of striped cloth over the door, the wares on the piers
+  { const [lx, lz] = P(s0, f0 - 0.5);
+    fb('iron', s0 - 0.012, s0 + 0.012, f0 - 0.5, f0, y + 3.08, y + 3.11);
+    bag.add('iron', lathe([[0.001, 0], [0.09, 0], [0.11, 0.04], [0.001, 0.04]], 8, null, lx, y + 2.74, lz));
+    bag.add('lamp_glass', lathe([[0.001, 0], [0.06, 0.01], [0.09, 0.1], [0.07, 0.2], [0.001, 0.2]], 8, null, lx, y + 2.78, lz)); }
+  if (!closed && rand() < 0.6) {
+    const a = [cloth('cloth_ochre', 'cloth_white'), cloth('cloth_red', 'cloth_white'), cloth('cloth_indigo', 'cloth_white'), cloth('cloth_green', 'cloth_ochre')][Math.floor(rand() * 4)], aw0 = d0 - 0.3, aw1 = d1 + 0.3, ns = 6;
+    for (let k = 0; k < ns; k++) { const sa = aw0 + (aw1 - aw0) * k / ns, sb = aw0 + (aw1 - aw0) * (k + 1) / ns, A = [...P(sa, f0 - 0.06), y + 3.3], B = [...P(sb, f0 - 0.06), y + 3.3], C = [...P(sb, f0 - 1.5), y + 2.55], Dd = [...P(sa, f0 - 1.5), y + 2.55];
+      // (the points are [x, z, y]: reorder to [x, y, z], both windings so that it shows from above and from below)
+      const pts = [A, B, C, Dd].map(([x, z, yy]) => [x, yy, z]);
+      const T = [...pts[0], ...pts[1], ...pts[2], ...pts[0], ...pts[2], ...pts[3], ...pts[0], ...pts[2], ...pts[1], ...pts[0], ...pts[3], ...pts[2]];
+      bag.add(k % 2 ? a[1] : a[0], fromTriangles(T)); }
+    fb(a[0], d0 - 0.3, d1 + 0.3, f0 - 1.56, f0 - 1.5, y + 2.4, y + 2.57);
+  }
+  if (!closed) {
+    const lp = s0 + 0.42, rp = s1 - 0.42, tt0 = f0 - 0.42, put0 = (m, pr, s, yy, sx) => { put(m, pr, s, tt0, yy, 8, sx); const [x, z] = P(s, tt0); col.circle(x, z, 0.26 * sx + 0.04, y, y + 0.8 * sx); };
+    const pick0 = (arr) => arr[Math.floor(rand() * arr.length)], yp = y + 0.18;
+    if (trade === 'pottery' || trade === 'oil') { put0(MATS.ceramic, PROF.pithos, lp, yp, 0.62); put0(MATS.ceramic, PROF.amphora, rp, yp, 1.0); }
+    else if (trade === 'cloth') { for (let q = 0; q < 4; q++) fb(pick0(CLOTH), lp - 0.22, lp + 0.22, tt0 - 0.2, tt0 + 0.2, yp + q * 0.1, yp + 0.1 + q * 0.1); for (let q = 0; q < 3; q++) fb(pick0(CLOTH), rp - 0.22, rp + 0.22, tt0 - 0.2, tt0 + 0.2, yp + q * 0.1, yp + 0.1 + q * 0.1); }
+    else if (trade === 'grain') { put0('sacking', PROF.sack, lp, yp, 1.0); put0('wicker', PROF.basket, rp, yp, 1.0); { const [x, z] = P(rp, tt0); bag.add('cloth_ochre', lathe(PROF.heap, 8, null, x, yp + 0.26, z)); } }
+    else if (trade === 'produce') { for (const s2 of [lp, rp]) { put0('wicker', PROF.basket, s2, yp, 1.1); const [x, z] = P(s2, tt0); bag.add(pick0(['cloth_green', 'cloth_red', 'cloth_ochre']), lathe(PROF.heap, 8, null, x, yp + 0.27, z)); } }
+    else if (trade === 'copper') { put0('bronze', PROF.jar, lp, yp, 0.7); put0('bronze', PROF.ewer, rp, yp, 1.3); }
+    else if (trade === 'bread') { put0('wicker', PROF.basket, rp, yp, 1.0); const [x, z] = P(rp, tt0); bag.add('hide_tan', lathe(PROF.heap, 8, null, x, yp + 0.25, z)); put0('terracotta', PROF.pot, lp, yp, 1.0); }
+    else if (trade === 'spice') { put0('sacking', PROF.sack, lp, yp, 0.9); put0(MATS.ceramic, PROF.pithos, rp, yp, 0.5); }
+    else if (trade === 'glass') { put0(MATS.blue, PROF.jar, lp, yp, 0.8); put0(MATS.green, PROF.amphora, rp, yp, 0.9); }
+  }
   if (closed) return;
   // ── inside
   // the floor of flags, walkable
