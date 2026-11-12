@@ -163,6 +163,10 @@ function life() {
   // offerings of jars and maize at the foot of the first gate, dogs lying about the corridor between the games
   for (const [x, z] of [[-31.5, -39.5], [-18.5, -39.5], [-27, -44.5], [-23, -44.5]]) E.push({ t: 'pot', kind: 'dark_pot', n: 2 + Math.floor(rand() * 2), at: [x, z], y: height(x, z), seed: Math.floor(x * 7 + z) });
   for (const [x, z] of [[-31, -26], [-17, -31], [-35, -14], [-14, -12]]) E.push({ t: 'animal', kind: 'dog', at: [x, z], y: 0, rot: rand() * 6.28, seed: Math.floor(x + z * 3) + 400 });
+  // a few people close to the stair's foot, walking up to it or waiting: a woman with a basket, two men talking, an elder with his staff
+  { const w1 = [-29.5, -26], m1 = [-20.6, -27], m2 = [-19.2, -27.8], el = [-31.5, -31];
+    woman(w1, 0, face(w1, [-25, -60]), { carry: 'basket' }); man(m1, 0, face(m1, m2), { pose: 'talk', over: 'none' }); man(m2, 0, face(m2, m1), { pose: 'talk', over: 'cape' });
+    man(el, 0, face(el, [-25, -60]), { carry: 'staff', len: 1.6, pose: 'stand', over: 'cape', cloth: 'cloth_white', cloth2: 'hide_white', hair: 'bun' }); }
   // the first terrace: the households of the chief's kin and the priests at their doors, men at the lip looking over the plaza
   for (let k = 0; k < 16; k++) {
     const x = -52 + rand() * 104, z = -118 + rand() * 38, at = [x, z];

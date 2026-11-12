@@ -64,7 +64,8 @@ export function mounds(x, z) {
 export const onMound = (x, z) => mounds(x, z) > 0.8;
 export function height(x, z) {
   const d = Math.abs(z - creekZ(x)), fade = 1 - smooth(RADIUS - 60, RADIUS - 30, Math.hypot(x, z));
-  const plaza = inRect(PLAZA, x, z) ? 0 : 0.6 * Math.sin(x / 37) * Math.sin(z / 29) * (1 - smooth(0.05, 1.5, mounds(x, z)));                 // the plaza levelled, the rest gently uneven
+  const pdx = Math.max(PLAZA[0] - x, x - PLAZA[2], 0), pdz = Math.max(PLAZA[1] - z, z - PLAZA[3], 0);
+  const plaza = 0.6 * Math.sin(x / 37) * Math.sin(z / 29) * smooth(0, 14, Math.hypot(pdx, pdz)) * (1 - smooth(0.05, 1.5, mounds(x, z)));                 // the plaza levelled, the rest gently uneven, the unevenness coming in over 14 m (no step at the plaza's edge)
   let base = mounds(x, z) + plaza;
   base += (CREEK.bed - base) * smooth(CREEK.w / 2 + 5, CREEK.w / 2 - 4, d);
   for (const p of PONDS) base += (CREEK.bed + 0.3 - base) * smooth(1.45, 0.6, pondE(x, z, p));
