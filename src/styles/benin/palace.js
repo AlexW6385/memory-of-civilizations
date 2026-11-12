@@ -28,7 +28,7 @@ function impluvium(ctx, cx, cz, pw, pd) {
  */
 function court(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, rand = rng(el.seed ?? 1), gd = el.gd ?? 4.4, S = { n: 1, e: 1, s: 1, w: 1, ...el.sides };
-  const wm = wallMat(rand), WH = 5.7, pitch = 3.2;
+  const wm = wallMat(rand), WH = 6.5, pitch = 3.2;
   bag.add('tuff_red', box(x0, -0.3, z0, x1, 0.03, z1)); col.floor(el.rect, 0.03);
   const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
   if (el.impluvium !== false) impluvium(ctx, cx, cz, 5.6, 4.2);
@@ -98,13 +98,13 @@ function court(el, ctx) {
     for (let i = 0; i < 4; i++) stool(ctx, cx - 2.4 + i * 1.6, 0.03, cz + 4.0 + (i % 2) * 0.5);
   }
   // brass birds on little spired towers at the roof corners
-  for (const [px, pz] of [[x0 + 0.8, z0 + 0.8], [x1 - 0.8, z0 + 0.8], [x0 + 0.8, z1 - 0.8], [x1 - 0.8, z1 - 0.8]]) spire(ctx, px, pz, WH + 1.5, 2.6, rand);
+  for (const [px, pz] of [[x0 + 0.8, z0 + 0.8], [x1 - 0.8, z0 + 0.8], [x0 + 0.8, z1 - 0.8], [x1 - 0.8, z1 - 0.8]]) spire(ctx, px, pz, WH + 0.1, 3.6, rand);
 }
 /** A little spired tower on a roof with its brass bird. */
 function spire(ctx, x, z, y, h, rand) {
   ctx.bag.add('timber', frustum([x - 0.28, z - 0.28, x + 0.28, z + 0.28], y, y + h * 0.55, 0.06, 0.06, 0.06, 0.06));
   ctx.bag.add(SHINGLE, frustum([x - 0.5, z - 0.5, x + 0.5, z + 0.5], y + h * 0.55, y + h, 0.46, 0.46, 0.46, 0.46));
-  bird(ctx, x, y + h, z, 0.9, rand() * 6);
+  bird(ctx, x, y + h, z, h > 3 ? 1.3 : 0.9, rand() * 6, 'gilt_bronze');
 }
 
 /**
@@ -112,14 +112,16 @@ function spire(ctx, x, z, y, h, rand) {
  * brass-sheathed pillars with plaques, the back wall hung with plaques, the dais with the Oba's stool, a high roof of shingle.
  */
 function hall(el, ctx) {
-  const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, rand = rng(el.seed ?? 3), wm = wallMat(rand), cx = (x0 + x1) / 2, Y = 0.35, T = 4.7;
+  const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, rand = rng(el.seed ?? 3), wm = wallMat(rand), cx = (x0 + x1) / 2, Y = 0.35, T = 6.0, RISE = 8.2;
   bag.add('tuff_red', box(x0, 0, z0, x1, Y, z1)); col.floor(el.rect, Y);
   clayWall(ctx, [x0, z0 + 0.3], [x1, z0 + 0.3], 0.6, Y, T + 0.3, wm, (el.doors ?? [cx]).map((at) => ({ at: at - x0, w: 3, h: 3.1 })));
   if (el.near !== false) for (const x of [x0 + 0.3, x1 - 0.3]) wear(ctx, [x, z0], [x, z1], 0.6, Y, T + 0.3, Math.round(x));
   for (const x of [x0 + 0.3, x1 - 0.3]) clayWall(ctx, [x, z0], [x, z1], 0.6, Y, T + 0.3, wm, [{ at: (z1 - z0) / 2, w: 3, h: 3.1 }]);
   bag.add('timber', box(x0 - 0.9, T, z0 - 0.9, x1 + 0.9, T + 0.1, z1 + 0.9));
-  gable(ctx, el.rect, T + 0.1, 5.2, SHINGLE, 'x', 0.9);
-  bag.add(SHINGLE, box(x0 - 0.9, T + 5.2, cx * 0 + (z0 + z1) / 2 - 0.15, x1 + 0.9, T + 5.45, (z0 + z1) / 2 + 0.15));
+  gable(ctx, el.rect, T + 0.1, RISE, SHINGLE, 'x', 0.9);
+  bag.add('roof_ridge', box(x0 - 0.9, T + 0.1 + RISE - 0.08, (z0 + z1) / 2 - 0.3, x1 + 0.9, T + 0.1 + RISE + 0.26, (z0 + z1) / 2 + 0.3));
+  // the small spired towers along the ridge with their brass birds (Dapper: every roof is adorned with one)
+  for (let i = 0; i < 6; i++) spire(ctx, x0 + 3 + i * (x1 - x0 - 6) / 5, (z0 + z1) / 2, T + 0.1 + RISE, i % 5 === 2 ? 4.4 : 2.8, rand);
   // the pillars: the front row and one a third of the way in
   const rows = [z1 - 0.5, z0 + 6.5];
   rows.forEach((z, k) => {
@@ -127,7 +129,7 @@ function hall(el, ctx) {
     for (let i = 0; i <= n; i++) {
       const x = x0 + 1 + i * (x1 - x0 - 2) / n;
       pillar(ctx, x, z, Y, T - Y);
-      if (el.near !== false) for (const y of [Y + 1.3, Y + 2.1, Y + 2.9]) { plaque(ctx, x, y, z + 0.22, 's', Math.floor(rand() * 1e6)); if (k === 1) plaque(ctx, x, y, z - 0.22, 'n', Math.floor(rand() * 1e6)); }
+      if (el.near !== false) for (const y of [Y + 1.3, Y + 2.1, Y + 2.9, Y + 3.7]) { plaque(ctx, x, y, z + 0.22, 's', Math.floor(rand() * 1e6)); if (k === 1) plaque(ctx, x, y, z - 0.22, 'n', Math.floor(rand() * 1e6)); }
     }
   });
   bag.add('wood_dark', box(x0, T - 0.25, z1 - 0.65, x1, T, z1 - 0.35)); bag.add('wood_dark', box(x0, T - 0.25, z0 + 6.35, x1, T, z0 + 6.65));
@@ -155,6 +157,62 @@ function hall(el, ctx) {
   for (let i = 0; i < 2; i++) B(ctx, 'tuff_red', [cx - 5 - i * 0.4, z1 + i * 0.3, cx + 5 + i * 0.4, z1 + 0.3 + i * 0.3], 0, 0.2 - i * 0.1);
 }
 
+
+
+/**
+ * benin_frontrange: { xs: [x0, x1], seed } — the long gallery behind the south wall of the palace, open to the outer court on a row of brass-sheathed
+ * pillars hung with plaques, with a very steep roof of shingle (Dapper: "fair and long galleries ... all supported on pillars of wood", "every
+ * roof adorned with a small spired tower on which cast copper birds stand"). Its roof rises over the wall and is what the square sees of the palace.
+ */
+function frontRange(el, ctx) {
+  const { bag, col } = ctx, rand = rng(el.seed ?? 4), [x0, x1] = el.xs, z0 = -9.6, z1 = -0.1, EY = 4.1, RISE = 6.4, Y = GY, zm = (z0 + z1) / 2;
+  bag.add('tuff_red', box(x0, 0, z0, x1, Y, z1 - 1.0)); col.floor([x0, z0, x1, z1 - 1.0], Y);
+  // the roof, its tie beams, the ridge cap and the little spired towers along it
+  bag.add('timber', box(x0 - 0.5, EY - 0.12, z0 - 0.5, x1 + 0.5, EY, z1 + 0.5));
+  gable(ctx, [x0, z0, x1, z1], EY, RISE, SHINGLE, 'x', 0.6);
+  bag.add('roof_ridge', box(x0 - 0.6, EY + RISE - 0.08, zm - 0.28, x1 + 0.6, EY + RISE + 0.24, zm + 0.28));
+  for (const q of [0.3, 0.62]) for (const sg of [-1, 1]) bag.add('wood_dark', box(x0 - 0.6, EY + RISE * (1 - q) - 0.03, zm + sg * q * (z1 - z0 + 1.2) / 2 - 0.06, x1 + 0.6, EY + RISE * (1 - q) + 0.1, zm + sg * q * (z1 - z0 + 1.2) / 2 + 0.06));
+  const n = Math.max(3, Math.round((x1 - x0) / 11));
+  for (let i = 0; i < n; i++) spire(ctx, x0 + (i + 0.5) * (x1 - x0) / n, zm, EY + RISE, i % 3 === 1 ? 4.2 : 2.8, rand);
+  // the colonnade on the court side, a second row of pillars in the middle, plaques on both
+  const pitch = 3.2, m = Math.round((x1 - x0 - 1) / pitch);
+  for (const [pz, plaq] of [[z0 + 0.4, true], [zm, false]]) for (let i = 0; i <= m; i++) {
+    const x = x0 + 0.5 + i * (x1 - x0 - 1) / m;
+    pillar(ctx, x, pz, Y, EY - 0.12 - Y, 0.22, 'gilt_bronze');
+    if (plaq) for (const y of [Y + 1.3, Y + 2.05, Y + 2.8]) plaque(ctx, x, y, pz - 0.24, 'n', Math.floor(rand() * 1e6), 0.46, 0.58);
+  }
+  bag.add('wood_dark', box(x0, EY - 0.45, z0 + 0.1, x1, EY - 0.12, z0 + 0.7)); bag.add('wood_dark', box(x0, EY - 0.4, zm - 0.3, x1, EY - 0.12, zm + 0.3));
+  // the back wall's inner face hung with plaques; clay seats under them, stools and mats on the floor
+  for (let x = x0 + 1.6; x < x1 - 1; x += 2.4) for (const y of [Y + 1.7, Y + 2.5]) plaque(ctx, x, y, z1 - 1.0, 'n', Math.floor(rand() * 1e6), 0.42, 0.52);
+  for (let x = x0 + 2; x < x1 - 4; x += 8.4) claySeat(ctx, [x, z1 - 1.6, x + 5.6, z1 - 1.1], Y, Math.round(x));
+  for (let x = x0 + 3; x < x1 - 3; x += 5.6) { bag.add('reed_mat', box(x, Y, zm + 0.6, x + 2.6, Y + 0.02, zm + 2.8)); stool(ctx, x + 3.4, Y, zm + 1.7); }
+  for (const px of [x0 + 1.2, x1 - 1.2]) pots(ctx, px, Y, z1 - 2.0, Math.round(px), 3);
+  if (el.altar) altar(ctx, [x0 + (x1 - x0) / 2 - 2.8, z1 - 3.9, x0 + (x1 - x0) / 2 + 2.8, z1 - 1.5], 'n', 111, 5);
+}
+
+/**
+ * benin_audience: { axis (x), z0, z1 (the court's south and north ends), seed } — the outer court as the court of audience: a way of polished clay
+ * edged in white chalk from the gate to the steps of the great gallery, long clay benches in two ranks either side where the chiefs wait in their
+ * order (the people are placed by town.js from the same numbers: AUD in layout.js), two slit log drums on forked posts and a staff of bells, big jars
+ * of water at the gate end, mats [inferred: the accounts speak of the chiefs attending the Oba in order; the furnishing is the type].
+ */
+function audience(el, ctx) {
+  const { bag, col } = ctx, ax = el.axis, rand = rng(el.seed ?? 8), z0 = el.z0, z1 = el.z1;
+  bag.add('stucco_red', box(ax - 3.0, 0.03, z1, ax + 3.0, 0.07, z0));
+  for (const s of [-1, 1]) bag.add('chalk', box(ax + s * 3.0 - 0.09, 0.03, z1, ax + s * 3.0 + 0.09, 0.075, z0));
+  for (const b of el.benches) claySeat(ctx, b, 0.03, Math.round(b[0] * 3 + b[1]));
+  // two log drums, one each side, on forked posts, with a staff of bells at one
+  for (const s of [-1, 1]) {
+    const dx = ax + s * 13.5, dz = el.drumZ ?? -36;
+    for (const t of [-1, 1]) { bag.add('wood_dark', rod([dx, 0.03, dz + t * 1.2], [dx, 1.0, dz + t * 1.2], 0.09, 6)); col.circle(dx, dz + t * 1.2, 0.13, 0.03, 1.0); }
+    bag.add('timber', rod([dx, 1.08, dz - 1.45], [dx, 1.08, dz + 1.45], 0.3, 9)); bag.add('wood_dark', box(dx - 0.07, 1.2, dz - 1.1, dx + 0.07, 1.42, dz + 1.1));
+    col.rect([dx - 0.4, dz - 1.5, dx + 0.4, dz + 1.5], 0.03, 1.4);
+  }
+  { const bx = ax + 13.5, bz = el.drumZ ?? -36; bag.add('timber', lathe([[0.08, 0], [0.07, 2.6]], 6, null, bx + 2.6, 0.03, bz)); col.circle(bx + 2.6, bz, 0.1, 0.03, 2.6); for (let i = 0; i < 3; i++) bag.add('gilt_bronze', lathe([[0.001, 0], [0.12, 0.02], [0.1, 0.2], [0.04, 0.28], [0.001, 0.3]], 7, null, bx + 2.6 + (i - 1) * 0.2, 2.0 - Math.abs(i - 1) * 0.15, bz)); }
+  // the great jars of water beside the passage's mouth, mats before each bench
+  for (const s of [-1, 1]) pots(ctx, ax + s * 8.0, 0.03, z0 - 6.0, Math.round(s * 7 + 20), 3);
+  for (const b of el.benches) if (rand() < 0.5) { const west = b[2] < ax; bag.add('reed_mat', box(west ? b[2] : b[0] - 1.3, 0.03, b[1] + 0.5, west ? b[2] + 1.3 : b[0], 0.05, b[3] - 0.5)); }
+}
 
 /** A cast brass leopard, standing, at (x, y, z), facing +z (s = ±1 turns it to look across): the guardian of the Oba's steps. */
 function leopard(ctx, x, y, z, s = 1) {
@@ -200,46 +258,101 @@ function range(el, ctx) {
   }
 }
 
-/** benin_tower: { c, h, snake (face 'n' | 's' | 'e' | 'w'), seed } — a turret: a battered clay body, an open lantern, a steep spire of shingle with its brass bird. */
+/**
+ * benin_tower: { c, h, snake (face 'n' | 's' | 'e' | 'w'), r, bh, big, seed } — a turret: a battered clay body, an open lantern, a steep spire of shingle
+ * with its brass bird. The great turrets (big): a python of new bright brass winding down the clay body, a second down the spire's edge,
+ * and a large bird on the point (Dapper: "every corner a turret rising high with a spire"; van Nyendael: roofs adorned with brass snakes;
+ * the 1897 photographs' python tower; the size of the bird is exaggerated to be read from the square [inferred]).
+ */
 function tower(el, ctx) {
-  const { bag, col } = ctx, [cx, cz] = el.c, h = el.h ?? 14, wm = wallMat(rng(el.seed ?? 5)), r = 1.7, bh = Math.min(7, h * 0.45);
+  const { bag, col } = ctx, [cx, cz] = el.c, h = el.h ?? 14, wm = wallMat(rng(el.seed ?? 5)), r = el.r ?? 1.7, bh = el.bh ?? Math.min(7, h * 0.45), big = !!el.big;
   bag.add(wm, frustum([cx - r, cz - r, cx + r, cz + r], 0, bh, 0.28, 0.28, 0.28, 0.28));
   for (let y = 0.8; y < bh - 0.4; y += 0.62) { const k = 0.28 * y / bh; bag.add(wm, frustum([cx - r + k - 0.06, cz - r + k - 0.06, cx + r - k + 0.06, cz + r - k + 0.06], y, y + 0.12, 0, 0, 0, 0)); }
   col.rect([cx - r, cz - r, cx + r, cz + r], 0, bh);
-  bag.add('timber', box(cx - r, bh, cz - r, cx + r, bh + 0.14, cz + r));
-  const ly = bh + 0.14, lh = Math.min(2.8, h * 0.18);
+  bag.add('timber', box(cx - r - 0.15, bh, cz - r - 0.15, cx + r + 0.15, bh + 0.14, cz + r + 0.15));
+  const ly = bh + 0.14, lh = Math.min(big ? 3.4 : 2.8, h * 0.18);
   for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) pillar(ctx, cx + dx * (r - 0.3), cz + dz * (r - 0.3), ly, lh, 0.13);
   bag.add('wood_dark', box(cx - r, ly + lh, cz - r, cx + r, ly + lh + 0.14, cz + r));
-  const sy = ly + lh + 0.14;
-  bag.add(SHINGLE, frustum([cx - r - 0.5, cz - r - 0.5, cx + r + 0.5, cz + r + 0.5], sy, sy + (h - sy) * 0.82, r + 0.3, r + 0.3, r + 0.3, r + 0.3, { noBottom: true }));
-  bag.add('timber', lathe([[0.1, 0], [0.1, (h - sy) * 0.2 + 0.01]], 6, null, cx, sy + (h - sy) * 0.82, cz));
-  bird(ctx, cx, h + 0.0, cz, 1.3, (el.seed ?? 5) * 0.7);
+  // the lantern: the brass bell hung in it, a bead of plaques on the beams
+  bag.add('bronze', lathe([[0.001, 0], [0.22, 0.04], [0.28, 0.3], [0.2, 0.46], [0.001, 0.5]], 8, null, cx, ly + lh - 0.55, cz));
+  const sy = ly + lh + 0.14, span = h - sy, SM = big ? 'gilt_bronze' : 'bronze';
+  // the spire of shingle in two tiers: a wide skirt, then the steep upper roof
+  bag.add(SHINGLE, frustum([cx - r - 0.7, cz - r - 0.7, cx + r + 0.7, cz + r + 0.7], sy, sy + span * 0.3, 0.5, 0.5, 0.5, 0.5, { noBottom: true }));
+  bag.add('roof_ridge', frustum([cx - r - 0.78, cz - r - 0.78, cx + r + 0.78, cz + r + 0.78], sy, sy + 0.16, 0, 0, 0, 0));
+  // the upper roof is a truncated pyramid, flat on top, not a needle (the brass plaque of a palace in the British Museum's and the Art Institute's
+  // collections shows a pyramid on the turret, a snake down its front head first, the bird above with outstretched wings)
+  const u0 = sy + span * 0.28, u1 = sy + span * 0.82, hw0 = r + 0.1, hw1 = 0.5;
+  bag.add(SHINGLE, frustum([cx - hw0, cz - hw0, cx + hw0, cz + hw0], u0, u1, hw0 - hw1, hw0 - hw1, hw0 - hw1, hw0 - hw1, { noBottom: true }));
+  bag.add('timber', box(cx - hw1 - 0.15, u1, cz - hw1 - 0.15, cx + hw1 + 0.15, u1 + 0.12, cz + hw1 + 0.15));
+  bag.add('timber', lathe([[0.1, 0], [0.1, Math.max(0.3, h - u1 - 0.1)]], 6, null, cx, u1 + 0.12, cz));
+  bird(ctx, cx, h + 0.0, cz, big ? 2.4 : 1.3, (el.seed ?? 5) * 0.7, SM);
   if (el.snake) {
     const f = el.snake, dir = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[f], al = [-dir[1], dir[0]];
-    snake(ctx, cx + dir[0] * (r - 0.15), bh - 0.3, cz + dir[1] * (r - 0.15), bh - 1.0, al, dir, 0.55, 0.12);
-    snake(ctx, cx + dir[0] * (r + 0.4), sy + (h - sy) * 0.55, cz + dir[1] * (r + 0.4), (h - sy) * 0.4, al, dir, 0.2, 0.07);
+    if (big) {
+      // the python down the front of the pyramid, head first, following the slope of the face
+      const pts = [], n = 18, wob = 0.34;
+      for (let i = 0; i <= n; i++) {
+        const t = i / n, y = u1 - 0.1 - t * (u1 - u0 - 0.3), hw = hw1 + (hw0 - hw1) * ((u1 - y) / (u1 - u0)), off = Math.sin(t * Math.PI * 3.5) * wob;
+        pts.push([cx + dir[0] * (hw + 0.14) + al[0] * off, y, cz + dir[1] * (hw + 0.14) + al[1] * off]);
+      }
+      for (let i = 0; i < n; i++) bag.add(SM, rod(pts[i], pts[i + 1], 0.14 * (1 - 0.4 * i / n), 6));
+      const hd = pts[n]; bag.add(SM, lathe([[0.001, 0], [0.2, 0.05], [0.2, 0.3], [0.1, 0.42], [0.001, 0.46]], 6, null, hd[0], hd[1] - 0.4, hd[2]));
+      // the heads of cast brass hung over the clay body below the lantern, two to each turret, and a python winding on the body
+      for (const sg of [-1, 1]) { const bx = cx + dir[0] * (r + 0.05) + al[0] * sg * r * 0.5, bz = cz + dir[1] * (r + 0.05) + al[1] * sg * r * 0.5; bag.add(SM, rod([bx, bh - 0.1, bz], [bx + dir[0] * 0.4, bh - 0.55, bz + dir[1] * 0.4], 0.12, 6)); bag.add(SM, lathe([[0.001, 0], [0.17, 0.05], [0.17, 0.3], [0.09, 0.42], [0.001, 0.46]], 6, null, bx + dir[0] * 0.4, bh - 1.0, bz + dir[1] * 0.4)); }
+      snake(ctx, cx + dir[0] * (r - 0.2), bh - 1.2, cz + dir[1] * (r - 0.2), bh - 2.4, al, dir, r * 0.35, 0.13, SM, 3);
+    } else {
+      snake(ctx, cx + dir[0] * (r - 0.15), bh - 0.3, cz + dir[1] * (r - 0.15), bh - 1.0, al, dir, 0.55, 0.12);
+      snake(ctx, cx + dir[0] * (r + 0.4), sy + (h - sy) * 0.55, cz + dir[1] * (r + 0.4), (h - sy) * 0.4, al, dir, 0.2, 0.07);
+    }
   }
 }
 
-/** benin_gatehouse: { c: [x, z of the passage on the wall's outer face], front 's', seed } — a gabled gatehouse over a 5 m passage, posts with plaques at its mouth. */
+/**
+ * benin_gatehouse: { c: [x, z of the passage on the wall's outer face], seed } — the gate of the palace: two wings of red clay with a steep two-tier
+ * roof of shingle over a 5 m passage, a small spired tower on its ridge with the brass bird, and before it a portico of six pillars sheathed in
+ * new brass and hung with plaques, under a skirt roof, on a clay plinth with steps ([inferred] from Dapper's galleries on cast pillars; the
+ * gate itself is not described). Guards' seats, the rack of staves and a bench in each wing.
+ */
 function gatehouse(el, ctx) {
-  const { bag, col } = ctx, [cx, cz] = el.c, rand = rng(el.seed ?? 9), wm = wallMat(rand), W = 9.5, D = 11, Y = 0.3, T = 4.9, pw = 2.6;
+  const { bag, col } = ctx, [cx, cz] = el.c, rand = rng(el.seed ?? 9), wm = wallMat(rand), W = 10.5, D = 11, Y = 0.3, T = 6.4, pw = 2.6, RISE = 6.4, PD = 3.4;
   for (const s of [-1, 1]) {
     const r = s < 0 ? [cx - W, cz - D, cx - pw, cz] : [cx + pw, cz - D, cx + W, cz];
     bag.add('tuff_red', box(r[0], 0, r[1], r[2], Y, r[3]));
     clayWall(ctx, [r[0] + 0.3, r[1]], [r[0] + 0.3, r[3]], 0.6, Y, T, wm, []); clayWall(ctx, [r[2] - 0.3, r[1]], [r[2] - 0.3, r[3]], 0.6, Y, T, wm, []);
     wear(ctx, [r[0] + 0.3, r[1]], [r[0] + 0.3, r[3]], 0.6, Y, T, Math.round(r[0])); wear(ctx, [r[2] - 0.3, r[1]], [r[2] - 0.3, r[3]], 0.6, Y, T, Math.round(r[2]) + 3); wear(ctx, [r[0], r[3] - 0.3], [r[2], r[3] - 0.3], 0.6, Y, T, Math.round(r[0]) + 5);
     clayWall(ctx, [r[0], r[1] + 0.3], [r[2], r[1] + 0.3], 0.6, Y, T, wm, []); clayWall(ctx, [r[0], r[3] - 0.3], [r[2], r[3] - 0.3], 0.6, Y, T, wm, [{ at: (r[2] - r[0]) / 2, w: 1.6, h: 2.5 }]);
+    // the wing's room: a clay bed and a chest, the guards' bench, a stool, a jar of water
+    const ox = s * (pw + (W - pw) / 2);
+    bed(ctx, [cx + ox - 1.2, cz - D + 0.9, cx + ox + 1.2, cz - D + 2.9], Y, 70 + s, true);
+    chest(ctx, cx + ox + s * 2.5, Y, cz - D + 1.2, 0.9, 0.5);
+    claySeat(ctx, [cx + ox - 2.4, cz - 1.9, cx + ox + 0.6, cz - 1.4], Y, 3 + s);
+    stool(ctx, cx + ox + 1.9, Y, cz - 2.4); pots(ctx, cx + ox - 3.3, Y, cz - D + 1.1, 90 + s, 2);
   }
   bag.add('tuff_red', box(cx - pw, 0, cz - D, cx + pw, 0.12, cz)); col.floor([cx - pw, cz - D, cx + pw, cz], 0.12);
+  // the roof: tie beams, the steep upper roof, a ridge cap, a spired tower on the ridge with the great bird
   bag.add('timber', box(cx - W - 0.9, T, cz - D - 0.9, cx + W + 0.9, T + 0.12, cz + 0.9));
-  gable(ctx, [cx - W, cz - D, cx + W, cz], T + 0.12, 4.4, SHINGLE, 'x', 0.9);
-  for (const s of [-1, 1]) { bird(ctx, cx + s * (W - 0.4), T + 4.5, cz - D / 2, 1.1, s); }
-  // the guards' seats of clay along the passage, their stools and a rack of staves
+  gable(ctx, [cx - W, cz - D, cx + W, cz], T + 0.12, RISE, SHINGLE, 'x', 0.9);
+  const ry = T + 0.12 + RISE;
+  bag.add('roof_ridge', box(cx - W - 0.9, ry - 0.06, cz - D / 2 - 0.3, cx + W + 0.9, ry + 0.26, cz - D / 2 + 0.3));
+  for (const q of [-0.62, -0.3, 0.3, 0.62]) bag.add('wood_dark', box(cx - W - 0.9, T + 0.12 + RISE * (1 - Math.abs(q) * 1.2) - 0.02, cz - D / 2 + q * (D / 2 + 0.9) - 0.07, cx + W + 0.9, T + 0.12 + RISE * (1 - Math.abs(q) * 1.2) + 0.1, cz - D / 2 + q * (D / 2 + 0.9) + 0.07));
+  spire(ctx, cx, cz - D / 2, ry, 5.2, rand);
+  for (const s of [-1, 1]) { for (const t of [0.45, 0.8]) spire(ctx, cx + s * W * t, cz - D / 2, ry - 0.05, 2.4, rand); bird(ctx, cx + s * (W + 0.5), ry - 0.1, cz - D / 2, 1.5, s, 'gilt_bronze'); }
+  // the guards' seats of clay along the passage, a rack of staves
   for (const sd of [-1, 1]) { claySeat(ctx, sd < 0 ? [cx - pw + 0.1, cz - 8, cx - pw + 0.65, cz - 4.5] : [cx + pw - 0.65, cz - 8, cx + pw - 0.1, cz - 4.5], 0.12, sd + 3); for (let i = 0; i < 4; i++) bag.add('timber', rod([cx + sd * (pw - 0.25), 0.12, cz - 9.0 + i * 0.12], [cx + sd * (pw - 0.5), 2.0, cz - 9.0 + i * 0.12], 0.03, 5)); }
-  // the beam across the mouth and the two posts with plaques
   bag.add('wood_dark', box(cx - pw - 0.3, 3.7, cz - 0.9, cx + pw + 0.3, 4.2, cz - 0.4));
-  for (const s of [-1, 1]) { pillar(ctx, cx + s * (pw - 0.2), cz + 0.35, 0.12, 4.0, 0.24); for (const y of [1.3, 2.1, 2.9]) plaque(ctx, cx + s * (pw - 0.2), y, cz + 0.6, 's', Math.floor(rand() * 1e6)); }
+  // the portico: a plinth with steps, six pillars of bright brass with plaques on a beam, a skirt roof of shingle sloping to the front
+  const PY = 0.22, pz = cz + PD - 0.5, px = [-8.6, -5.6, -2.6, 2.6, 5.6, 8.6];
+  bag.add('tuff_red', box(cx - W - 0.4, 0, cz, cx + W + 0.4, PY, cz + PD)); col.floor([cx - W - 0.4, cz, cx + W + 0.4, cz + PD], PY);
+  for (let i = 0; i < 2; i++) { bag.add('tuff_red', box(cx - W - 0.4 - i * 0.3, 0, cz + PD + i * 0.3, cx + W + 0.4 + i * 0.3, 0.14 - i * 0.06, cz + PD + 0.3 + i * 0.3)); }
+  for (const u of px) {
+    pillar(ctx, cx + u, pz, PY, 4.6, 0.26, 'gilt_bronze');
+    for (const y of [PY + 1.2, PY + 1.95, PY + 2.7, PY + 3.45]) { plaque(ctx, cx + u, y, pz + 0.3, 's', Math.floor(rand() * 1e6), 0.5, 0.62); plaque(ctx, cx + u, y, pz - 0.3, 'n', Math.floor(rand() * 1e6), 0.5, 0.62); }
+  }
+  bag.add('wood_dark', box(cx - W - 0.5, PY + 4.55, pz - 0.2, cx + W + 0.5, PY + 5.0, pz + 0.2));
+  lean(ctx, [cx - W - 0.4, cz - 0.3, cx + W + 0.4, cz + PD + 0.3], 'zp', PY + 4.9, T + 0.5, SHINGLE, 0.5);
+  // the plaques on the wings' front walls, a clay seat under the porch at each end
+  for (const s of [-1, 1]) for (const u of [3.8, 5.0, 8.0, 9.2]) for (const y of [1.8, 2.7]) plaque(ctx, cx + s * u, y, cz, 's', Math.floor(rand() * 1e6), 0.4, 0.5);
+  for (const s of [-1, 1]) claySeat(ctx, [cx + s * 9.0 - 1.2, cz + 0.5, cx + s * 9.0 + 1.2, cz + 1.0], PY, 6 + s);
 }
 
 /** benin_wall: { a, b, th, h, openings, near } — a wall of red clay in ridged bands with a coping of shingle. */
@@ -253,6 +366,22 @@ function pwall(el, ctx) {
     if (o[0] - s > 0.05) ctx.bag.add(SHINGLE, orientedBox([el.a[0] + ux * s, el.a[1] + uz * s], [el.a[0] + ux * o[0], el.a[1] + uz * o[0]], th + 0.5, h, h + 0.22));
     s = o[1];
   }
+  // buttresses (pilasters) with a stepped cap every few metres, a frieze of plaques between them (the south front on the king's square)
+  if (el.pilasters) {
+    const step = el.pilasters, skip = el.skip ?? [], inSkip = (x) => skip.some(([a, b]) => x > a && x < b);
+    for (let u = step; u < Ln - step * 0.6; u += step) {
+      const x = el.a[0] + ux * u, z = el.a[1] + uz * u;
+      if (inSkip(x)) continue;
+      ctx.bag.add(mat, orientedBox([x - ux * 0.35, z - uz * 0.35], [x + ux * 0.35, z + uz * 0.35], th + 0.5, 0, h - 0.18));
+      ctx.bag.add('stucco_red', orientedBox([x - ux * 0.5, z - uz * 0.5], [x + ux * 0.5, z + uz * 0.5], th + 0.64, h - 0.18, h + 0.02));
+      for (let y = 0.7; y < h - 0.4; y += 0.62) ctx.bag.add(mat, orientedBox([x - ux * 0.38, z - uz * 0.38], [x + ux * 0.38, z + uz * 0.38], th + 0.6, y, y + 0.12));
+      if (!el.frieze) continue;
+      const mx = x + ux * step / 2;
+      if (mx > el.a[0] + ux * Ln - 3 || inSkip(mx)) continue;
+      const f = el.frieze, nz = f.face === 's' ? 1 : -1, pz = z + uz * step / 2 + nz * (th / 2 + 0.02);
+      for (const y of f.ys) plaque(ctx, mx, y, pz, f.face, Math.floor(rng(Math.round(mx * 13))() * 1e6), 0.5, 0.62);
+    }
+  }
 }
-export const PALACE_EL = { benin_court: court, benin_hall: hall, benin_tower: tower, benin_gatehouse: gatehouse, benin_wall: pwall, benin_range: range, benin_leopard: (el, ctx) => leopard(ctx, el.at[0], el.y ?? 0, el.at[1], el.s ?? 1) };
+export const PALACE_EL = { benin_audience: audience, benin_frontrange: frontRange, benin_court: court, benin_hall: hall, benin_tower: tower, benin_gatehouse: gatehouse, benin_wall: pwall, benin_range: range, benin_leopard: (el, ctx) => { if (el.plinth) { B(ctx, 'stucco_red', [el.at[0] - 0.75, el.at[1] - 1.3, el.at[0] + 0.75, el.at[1] + 1.4], 0, el.y ?? 0, true); } leopard(ctx, el.at[0], el.y ?? 0, el.at[1], el.s ?? 1); } };
 void hip;
