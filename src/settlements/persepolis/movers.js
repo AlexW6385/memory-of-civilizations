@@ -29,6 +29,9 @@ export function walkways() {
   // through the Gate of All Nations, then the terrace's avenue before the Apadana's north stairway
   up([-140, z], [-84, z]);
   rects.push({ r: [-90, -150, 38, -121], weight: 1.8, market: 1, kind: 'street' });
+  // the royal way from the Gate's south door to the Apadana's west stair, between the guards' ranks, and the court's cross way
+  rects.push({ r: [-146, -61.4, -88, -58.6], weight: 2.4, market: 1, kind: 'street' });
+  rects.push({ r: [-123.4, -130, -120.6, -58.6], weight: 1.6, market: 1, kind: 'street' });
   void TERRACE;
   return { rects, links, clip: RADIUS - 14 };
 }
