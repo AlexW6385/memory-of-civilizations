@@ -1,7 +1,7 @@
 // Benin City about 1600 — the animals (src/engine/fauna.js; docs/settlements/benin-city.md §8): swallows and swifts over the great
 // street and the market, dark kites (the engine's dark birds) circling over the palace and the Iya, small birds on the red earth and
 // the thatch (sparrow stand-ins for weaverbirds), an egret at the ditch.
-import { PALACE, MARKET, GATES, crest, lots, GREAT } from './layout.js';
+import { PALACE, MARKET, GATES, crest, lots, GREAT, GATE_X, SHEDS, BAYS } from './layout.js';
 import { frame } from '../../styles/greek/agora.js';
 
 const flights = [
@@ -23,5 +23,9 @@ for (const [x, z] of [[-65, 20], [-30, 52], [40, 60], [98, 20], [98, -60], [160,
   for (const x of [-120, -95, -40, -15]) perches.push({ kind: 'sparrow', x, z: PALACE[3] - 0.6, y: 3.8 + 0.22, rot: 0, range: [4, 0], alert: 5 });
   for (const x of [-130, -20, 40]) perches.push({ kind: 'sparrow', x, z: GREAT[1] + 3, y: 0.05, rot: x, range: [2.5, 1.5] });
 }
+// on the new roofs: the ridges of the waiting sheds, the eaves of the bays on the palace wall, the porch beam and the gate's ridge
+for (const sh of SHEDS) { const [x0, z0, x1, z1] = sh.rect; perches.push({ kind: 'sparrow', x: (x0 + x1) / 2, z: (z0 + z1) / 2, y: 4.62, rot: x0, range: [(x1 - x0) * 0.35, 0], alert: 5 }); perches.push({ kind: 'sparrow', x: x1 + 0.3, z: z1 + 0.4, y: 0.12, rot: x1, range: [1.8, 1.4], alert: 4 }); }
+BAYS.forEach((b, i) => { if (i % 3 === 0) perches.push({ kind: 'sparrow', x: b.rect[0] + 2.5, z: 3.2, y: 2.62, rot: i, range: [2, 0], alert: 4 }); });
+for (const s of [-1, 1]) { perches.push({ kind: 'sparrow', x: GATE_X + s * 6.5, z: 2.9, y: 5.28, rot: s, range: [2.4, 0], alert: 6 }); perches.push({ kind: 'sparrow', x: GATE_X + s * 6, z: -5.5, y: 13.0, rot: s, range: [3, 0], alert: 8 }); }
 { const g = GATES[2], th = Math.atan2(g.at[1], g.at[0]), r = crest(th) + 16; perches.push({ kind: 'egret', x: Math.cos(th) * r + 12, z: Math.sin(th) * r, y: -3.4, rot: 0, stay: [60, 200], gone: [60, 160], alert: 10 }); }
 export default { fish: [], flights, perches };

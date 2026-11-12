@@ -1,7 +1,7 @@
 // Street furniture of Benin (docs/settlements/benin-city.md §10): the tall lamps of the great street, the clay seats and the drums of
 // the king's square, the shrine posts at the crossing, the heaps of firewood and the pots at the lane mouths.
 import { box, lathe, rod, rng, frustum, gable, lean } from './kit.js';
-import { pots, wood, claySeat, stool, pot } from './props.js';
+import { pots, wood, claySeat, stool, pot, hearth } from './props.js';
 
 /** benin_lamp: { at: [x, z], y, seed } — a post of timber on a clay foot, a bronze bowl of palm oil on top (street lamps of the great street, [inferred] from the accounts). */
 function lamp(el, ctx) {
@@ -61,8 +61,18 @@ function shelter(el, ctx) {
   claySeat(ctx, [back[0], back[1], back[0] + gap, back[3]], Y, 3); if (L > 6.5) claySeat(ctx, [back[2] - gap, back[1], back[2], back[3]], Y, 6);
   for (let u = x0 + 0.7; u + 1.7 < x1 - 0.4; u += 2.2) bag.add('reed_mat', box(u, Y, z0 + 1.5 + (kind === 'lean' ? 0 : 0.5), u + 1.7, Y + 0.02, z0 + 2.8 + (kind === 'lean' ? 0 : 0.8)));
   pots(ctx, x1 - 0.8, Y, z1 - 0.9, Math.round(x0 * 7 + z0), 2);
-  const [cx, cz] = [x0 + L * 0.5, (z0 + z1) / 2];
-  void cx; void cz; void pot; void rand;
+  // a cooking fire beside it: the three-stone hearth with a black pot, firewood, a mat, a basket
+  if (el.fire) { const [fx, fz] = el.fire; hearth(ctx, fx, 0, fz, Math.round(fx)); wood(ctx, fx - 1.2, 0, fz + 0.5, [0, 1], 1.1, Math.round(fz) + 2); bag.add('reed_mat', box(fx + 0.5, 0, fz - 0.9, fx + 1.8, 0.02, fz + 0.4)); }
+  void pot; void rand;
+}
+/** benin_brazier: { at: [x, z], y } — a bronze bowl of embers on three legs, where incense is burnt before the gate. */
+function brazier(el, ctx) {
+  const { bag, col } = ctx, [x, z] = el.at, y = el.y ?? 0;
+  if (el.simple) return;
+  for (let i = 0; i < 3; i++) { const a = i * 2.09 + 0.5; bag.add('iron', rod([x + Math.cos(a) * 0.32, y, z + Math.sin(a) * 0.32], [x + Math.cos(a) * 0.16, y + 0.82, z + Math.sin(a) * 0.16], 0.03, 5)); }
+  bag.add('bronze', lathe([[0.001, 0], [0.2, 0.02], [0.4, 0.2], [0.36, 0.24], [0.001, 0.16]], 10, null, x, y + 0.8, z));
+  bag.add('obsidian', lathe([[0.001, 0.2], [0.3, 0.2], [0.001, 0.24]], 8, null, x, y + 0.8, z));
+  col.circle(x, z, 0.4, y, y + 1.0);
 }
 /** benin_mouth: { at, along, seed } — a lane's mouth on a street: a pile of firewood, a cluster of big pots, a clay seat. */
 function mouth(el, ctx) {
@@ -71,4 +81,4 @@ function mouth(el, ctx) {
   wood(ctx, x + a[0] * 2.0, 0, z + a[1] * 2.0, a, 1.5, el.seed ?? 3);
   pots(ctx, x - a[0] * 2.2, 0, z - a[1] * 2.2, (el.seed ?? 3) + 1, 3);
 }
-export const STREET_EL = { benin_lamp: lamp, benin_square: square, benin_mouth: mouth, benin_shelter: shelter };
+export const STREET_EL = { benin_lamp: lamp, benin_square: square, benin_mouth: mouth, benin_shelter: shelter, benin_brazier: brazier };

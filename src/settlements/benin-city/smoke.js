@@ -4,7 +4,7 @@
 
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { lots, YARDS, RADIUS, crest } from './layout.js';
+import { lots, YARDS, RADIUS, crest, SHEDS, BRAZIERS } from './layout.js';
 
 const ID = 'benin-city';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -23,6 +23,11 @@ function emitters() {
   }
   // the incense in the altar court
   E.push({ p: [-66, 1.8, -120], kind: 'kitchen', thr: 0.2, seed: 78 });
+  // the sellers' cooking fires by the waiting sheds before the gate (yam, plantain), the braziers of incense on the gate's porch
+  for (const sh of SHEDS) if (sh.fire) E.push({ p: [sh.fire[0], 1.1, sh.fire[1]], kind: 'kitchen', thr: 0.02, seed: sh.seed + 3 });
+  for (const b of BRAZIERS) E.push({ p: [b[0], 1.9, b[1]], kind: 'incense', thr: 0, seed: Math.round(b[0]) + 9 });
+  // the cooks of the palace's kitchens behind the outer court
+  for (const [x, z] of [[4, -104], [4, -44], [-135.5, -76], [-135.5, -20]]) E.push({ p: [x, 4.4, z], kind: 'kitchen', thr: 0.1, seed: Math.round(z) + 31 });
   // the mist over the ditch at dawn
   for (let a = 0; a < Math.PI * 2; a += 0.3) { const r = crest(a) + 16; E.push({ p: [Math.cos(a) * r, -2.6, Math.sin(a) * r], kind: 'mist', thr: 0, seed: Math.floor(a * 100) + 7 }); }
   return E;

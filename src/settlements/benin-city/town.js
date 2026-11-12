@@ -3,7 +3,7 @@
 // in rows along the streets.
 import { lodTiles } from '../lod.js';
 import { frame } from '../../styles/greek/agora.js';
-import { RADIUS, GATES, GATE_W, MARKET, YARDS, GATE_X, GREAT, CROSS, SQUARE, ALLEYS_X, SHEDS, BAYS, crest, height, lots, depth, inRect, onStreet } from './layout.js';
+import { RADIUS, GATES, GATE_W, MARKET, YARDS, GATE_X, GREAT, CROSS, SQUARE, ALLEYS_X, SHEDS, BAYS, BRAZIERS, crest, height, lots, depth, inRect, onStreet } from './layout.js';
 
 const base = (id, elements, extra = {}) => ({ id, style: 'benin', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [GATE_X, 12], facing: 'n' }, ...extra });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -178,6 +178,7 @@ function arrivalLife(F, out) {
     out.push({ t: 'animal', kind: 'goat', at: [x0 - 0.9, (z0 + z1) / 2], y: 0, rot: rand() * 6.28, seed: seed() });
     out.push({ t: 'chickens', at: [x1 + 1.3, z1 + 0.6], y: 0, rot: rand() * 6.28, n: 4, seed: seed() });
     man([x0 - 1.6, z1 + 1.4], 0, 0.6, { dress: 'loincloth', h: 0.64, pose: 'stand', carry: 'none' });
+    if (sh.fire) woman([sh.fire[0] + 0.4, sh.fire[1] - 1.1], 0, 0.3, { pose: 'sit_ground', dress: 'wrap', carry: 'none' });
   }
   // the bays on the palace wall: a person on the seat in two of three, one on the mat in some, pots; the rest empty, as a bay would stand
   BAYS.forEach((b, i) => {
@@ -253,6 +254,7 @@ export async function town() {
     for (const x of [CROSS[0] + 2, CROSS[2] - 2]) for (let z = -230; z < 230; z += 40) if (ok(x, z) && !(z > GREAT[1] - 8 && z < GREAT[3] + 8)) st.push({ t: 'benin_lamp', at: [x, z + 12], y: 0, seed: z });
     st.push({ t: 'benin_square', rect: SQUARE, seed: 5 });
     for (const sh of [...SHEDS, ...BAYS]) st.push({ t: 'benin_shelter', ...sh });
+    for (const b of BRAZIERS) st.push({ t: 'benin_brazier', at: b, y: 0.22 });
     for (const a of ALLEYS_X) for (const [z, dz] of [[GREAT[3] - 1.2, 1], [GREAT[1] + 1.2, -1]]) if (ok(a, z) && depth(a, z) > 26) st.push({ t: 'benin_mouth', at: [a + 5.6, z], along: [1, 0], seed: Math.round(a + z) });
     plans.push(...lodTiles('benin-street', 'benin', st, { R: RADIUS }));
   }

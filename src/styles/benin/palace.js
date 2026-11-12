@@ -255,14 +255,27 @@ function tower(el, ctx) {
   // the spire of shingle in two tiers: a wide skirt, then the steep upper roof
   bag.add(SHINGLE, frustum([cx - r - 0.7, cz - r - 0.7, cx + r + 0.7, cz + r + 0.7], sy, sy + span * 0.3, 0.5, 0.5, 0.5, 0.5, { noBottom: true }));
   bag.add('roof_ridge', frustum([cx - r - 0.78, cz - r - 0.78, cx + r + 0.78, cz + r + 0.78], sy, sy + 0.16, 0, 0, 0, 0));
-  bag.add(SHINGLE, frustum([cx - r - 0.1, cz - r - 0.1, cx + r + 0.1, cz + r + 0.1], sy + span * 0.28, sy + span * 0.82, r + 0.05, r + 0.05, r + 0.05, r + 0.05, { noBottom: true }));
-  bag.add('timber', lathe([[0.1, 0], [0.1, span * 0.2 + 0.01]], 6, null, cx, sy + span * 0.82, cz));
+  // the upper roof is a truncated pyramid, flat on top, not a needle (the brass plaque of a palace in the British Museum's and the Art Institute's
+  // collections shows a pyramid on the turret, a snake down its front head first, the bird above with outstretched wings)
+  const u0 = sy + span * 0.28, u1 = sy + span * 0.82, hw0 = r + 0.1, hw1 = 0.5;
+  bag.add(SHINGLE, frustum([cx - hw0, cz - hw0, cx + hw0, cz + hw0], u0, u1, hw0 - hw1, hw0 - hw1, hw0 - hw1, hw0 - hw1, { noBottom: true }));
+  bag.add('timber', box(cx - hw1 - 0.15, u1, cz - hw1 - 0.15, cx + hw1 + 0.15, u1 + 0.12, cz + hw1 + 0.15));
+  bag.add('timber', lathe([[0.1, 0], [0.1, Math.max(0.3, h - u1 - 0.1)]], 6, null, cx, u1 + 0.12, cz));
   bird(ctx, cx, h + 0.0, cz, big ? 2.4 : 1.3, (el.seed ?? 5) * 0.7, SM);
   if (el.snake) {
     const f = el.snake, dir = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[f], al = [-dir[1], dir[0]];
     if (big) {
-      snake(ctx, cx + dir[0] * (r - 0.2), bh - 0.2, cz + dir[1] * (r - 0.2), bh - 1.2, al, dir, r * 0.42, 0.2, SM, 3.5);
-      snake(ctx, cx + dir[0] * (r + 0.55), sy + span * 0.62, cz + dir[1] * (r + 0.55), span * 0.34, al, dir, 0.3, 0.1, SM, 3);
+      // the python down the front of the pyramid, head first, following the slope of the face
+      const pts = [], n = 18, wob = 0.34;
+      for (let i = 0; i <= n; i++) {
+        const t = i / n, y = u1 - 0.1 - t * (u1 - u0 - 0.3), hw = hw1 + (hw0 - hw1) * ((u1 - y) / (u1 - u0)), off = Math.sin(t * Math.PI * 3.5) * wob;
+        pts.push([cx + dir[0] * (hw + 0.14) + al[0] * off, y, cz + dir[1] * (hw + 0.14) + al[1] * off]);
+      }
+      for (let i = 0; i < n; i++) bag.add(SM, rod(pts[i], pts[i + 1], 0.14 * (1 - 0.4 * i / n), 6));
+      const hd = pts[n]; bag.add(SM, lathe([[0.001, 0], [0.2, 0.05], [0.2, 0.3], [0.1, 0.42], [0.001, 0.46]], 6, null, hd[0], hd[1] - 0.4, hd[2]));
+      // the heads of cast brass hung over the clay body below the lantern, two to each turret, and a python winding on the body
+      for (const sg of [-1, 1]) { const bx = cx + dir[0] * (r + 0.05) + al[0] * sg * r * 0.5, bz = cz + dir[1] * (r + 0.05) + al[1] * sg * r * 0.5; bag.add(SM, rod([bx, bh - 0.1, bz], [bx + dir[0] * 0.4, bh - 0.55, bz + dir[1] * 0.4], 0.12, 6)); bag.add(SM, lathe([[0.001, 0], [0.17, 0.05], [0.17, 0.3], [0.09, 0.42], [0.001, 0.46]], 6, null, bx + dir[0] * 0.4, bh - 1.0, bz + dir[1] * 0.4)); }
+      snake(ctx, cx + dir[0] * (r - 0.2), bh - 1.2, cz + dir[1] * (r - 0.2), bh - 2.4, al, dir, r * 0.35, 0.13, SM, 3);
     } else {
       snake(ctx, cx + dir[0] * (r - 0.15), bh - 0.3, cz + dir[1] * (r - 0.15), bh - 1.0, al, dir, 0.55, 0.12);
       snake(ctx, cx + dir[0] * (r + 0.4), sy + (h - sy) * 0.55, cz + dir[1] * (r + 0.4), (h - sy) * 0.4, al, dir, 0.2, 0.07);
@@ -328,6 +341,22 @@ function pwall(el, ctx) {
   for (const o of [...(el.openings ?? []).map((q) => [q.at - q.w / 2, q.at + q.w / 2]).sort((p, q) => p[0] - q[0]), [Ln, Ln]]) {
     if (o[0] - s > 0.05) ctx.bag.add(SHINGLE, orientedBox([el.a[0] + ux * s, el.a[1] + uz * s], [el.a[0] + ux * o[0], el.a[1] + uz * o[0]], th + 0.5, h, h + 0.22));
     s = o[1];
+  }
+  // buttresses (pilasters) with a stepped cap every few metres, a frieze of plaques between them (the south front on the king's square)
+  if (el.pilasters) {
+    const step = el.pilasters, skip = el.skip ?? [], inSkip = (x) => skip.some(([a, b]) => x > a && x < b);
+    for (let u = step; u < Ln - step * 0.6; u += step) {
+      const x = el.a[0] + ux * u, z = el.a[1] + uz * u;
+      if (inSkip(x)) continue;
+      ctx.bag.add(mat, orientedBox([x - ux * 0.35, z - uz * 0.35], [x + ux * 0.35, z + uz * 0.35], th + 0.5, 0, h - 0.18));
+      ctx.bag.add('stucco_red', orientedBox([x - ux * 0.5, z - uz * 0.5], [x + ux * 0.5, z + uz * 0.5], th + 0.64, h - 0.18, h + 0.02));
+      for (let y = 0.7; y < h - 0.4; y += 0.62) ctx.bag.add(mat, orientedBox([x - ux * 0.38, z - uz * 0.38], [x + ux * 0.38, z + uz * 0.38], th + 0.6, y, y + 0.12));
+      if (!el.frieze) continue;
+      const mx = x + ux * step / 2;
+      if (mx > el.a[0] + ux * Ln - 3 || inSkip(mx)) continue;
+      const f = el.frieze, nz = f.face === 's' ? 1 : -1, pz = z + uz * step / 2 + nz * (th / 2 + 0.02);
+      for (const y of f.ys) plaque(ctx, mx, y, pz, f.face, Math.floor(rng(Math.round(mx * 13))() * 1e6), 0.5, 0.62);
+    }
   }
 }
 export const PALACE_EL = { benin_frontrange: frontRange, benin_court: court, benin_hall: hall, benin_tower: tower, benin_gatehouse: gatehouse, benin_wall: pwall, benin_range: range, benin_leopard: (el, ctx) => { if (el.plinth) { B(ctx, 'stucco_red', [el.at[0] - 0.75, el.at[1] - 1.3, el.at[0] + 0.75, el.at[1] + 1.4], 0, el.y ?? 0, true); } leopard(ctx, el.at[0], el.y ?? 0, el.at[1], el.s ?? 1); } };

@@ -10,7 +10,7 @@ const COURTS = [[-130, -123.8, -90, -82], [-86, -123.8, -46, -82], [-42, -123.8,
 const E = [];
 // the wall round the palace, with the gate in the south side
 const WALL = { th: 1.0, h: 3.8 };
-E.push({ t: 'benin_wall', a: [X0 + 0.5, Z1 - 0.6], b: [X1 - 0.5, Z1 - 0.6], ...WALL, openings: [{ at: GATE_X - X0 - 0.5, w: 5.4, h: 4.2 }], seed: 1 });
+E.push({ t: 'benin_wall', a: [X0 + 0.5, Z1 - 0.6], b: [X1 - 0.5, Z1 - 0.6], ...WALL, openings: [{ at: GATE_X - X0 - 0.5, w: 5.4, h: 4.2 }], seed: 1, pilasters: 7.5, skip: [[GATE_X - 12, GATE_X + 12]], frieze: { face: 's', ys: [2.45] } });
 E.push({ t: 'benin_wall', a: [X0 + 0.5, Z0 + 0.6], b: [X1 - 0.5, Z0 + 0.6], ...WALL, seed: 2 });
 E.push({ t: 'benin_wall', a: [X0 + 0.5, Z0 + 0.6], b: [X0 + 0.5, Z1 - 0.6], ...WALL, seed: 3 });
 E.push({ t: 'benin_wall', a: [X1 - 0.5, Z0 + 0.6], b: [X1 - 0.5, Z1 - 0.6], ...WALL, seed: 4 });
