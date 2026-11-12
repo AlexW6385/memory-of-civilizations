@@ -55,13 +55,15 @@ function height(x, z) {
   // the canyon's far walls: the Urubamba loops round the saddle, and across it the mountains rise again on every side
   // (Putucusi to the east, the ridges of the Salkantay's foothills to the west, Machu Picchu mountain's long spur): long
   // ridges standing off the saddle with the canyon floor between, their crests running along the river
-  for (const R of RIDGES) {
+  // (down to the canyon floor again before the rim, so the disc joins the open country without a step)
+  const fade = 1 - sm(RADIUS - 110, RADIUS - 32, r);
+  if (fade > 0) for (const R of RIDGES) {
     const q = Math.hypot((x - R.c[0]) / R.rx, (z - R.c[1]) / R.rz);
     if (q < 1) {
       const a = Math.atan2(z - R.c[1], x - R.c[0]), qs = Math.sqrt(q * q + 0.02);
       const prof = (1 - Math.pow(qs, 1.6)) / (1 - Math.pow(0.14, 1.6));
       const rib = 1 + 0.16 * fbm(x * 0.035 + R.c[0], z * 0.035) + 0.07 * Math.sin(a * 9 + R.c[1]);
-      h = Math.max(h, RIM + (R.h - RIM) * prof * rib - 5 * Math.max(0, fbm(x * 0.07, z * 0.07)) * q);
+      h = Math.max(h, RIM + ((R.h - RIM) * prof * rib - 5 * Math.max(0, fbm(x * 0.07, z * 0.07)) * q) * fade);
     }
   }
   return RIM + (h - RIM) * (1 - sm(RADIUS - 25, RADIUS, r));
