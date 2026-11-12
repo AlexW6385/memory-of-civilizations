@@ -142,6 +142,16 @@ function roofSign(bag, rect, front, yr, r) {
   letters(Q.t(lm), name, cell, (h, v) => F.P(mid - rs * tl / 2 + rs * h, -dd + 0.13, yr + lift + (hh - 5 * cell) / 2 + v), 0, 0);
   Q.flush(bag);
 }
+/** A painted wall advertisement on a side wall that stands bare above a lower neighbour (docs §1m): a brand's name in big block letters on a panel of its colour, between the neighbour's roof and the cornice; `f` the side ('w' | 'e'), `y0` the neighbour's height. */
+function wallAd(bag, rect, f, y, y0, h, r) {
+  const F = face(rect, f), vis = h - y0;
+  if (vis < 8.5 || F.L < 9) return;
+  const [name, bm, lm] = ADS[Math.floor(r() * ADS.length)], w = Math.min(14, F.L - 3), u0 = (F.L - w) / 2 + (r() - 0.5) * 1.5, cell = fitCell(name, w - 1.2, 0.3), tl = textLen(name, cell), hh = Math.min(vis - 4.2, 5 * cell + 2.4), yb = y + h - 2.6 - hh;
+  const rs = readDir(f), Q = new Quads(), d = 0.07, mid = u0 + w / 2;
+  bag.add(bm, F.R(u0, u0 + w, yb, yb + hh, 0.0, d)); bag.add('paint_white', F.R(u0 - 0.12, u0 + w + 0.12, yb - 0.12, yb, 0.0, d + 0.01)); bag.add('paint_white', F.R(u0 - 0.12, u0 + w + 0.12, yb + hh, yb + hh + 0.12, 0.0, d + 0.01));
+  letters(Q.t(lm), name, cell, (hu, v) => F.P(mid - rs * tl / 2 + rs * hu, d + 0.01, yb + (hh - 5 * cell) / 2 + v), 0, 0);
+  Q.flush(bag);
+}
 /** skyscraper: { rect, y, h, mat, seed } — a block that steps back as it rises when tall; a cornice or a crown; a tank on lower roofs. */
 function skyscraper(el, { bag, col, lights }) {
   const rand = rng(el.seed || 1), y = el.y ?? 0, h = el.h ?? 40, mat = el.mat ?? LS;
@@ -162,6 +172,7 @@ function skyscraper(el, { bag, col, lights }) {
     block(bag, PLAIN, inset(r, -0.2), y + h - 1.6, y + h - 0.2);                // the frieze under the cornice
     if (h > 20) block(bag, PLAIN, inset(r, -0.25), y + 12.2, y + 12.8);              // a belt course over the base
     if (el.front) soot(bag, r, el.front, y, h, mat, rand);
+    if (el.ads) for (const a of el.ads) wallAd(bag, r, a.f, y, a.y0, h, rng2((el.seed || 1) ^ (a.f === 'e' ? 0x1357 : 0x2b3d)));
     if (el.front && !el.iron && h > 14 && rand() < 0.55) { const r = el.rect, f = el.front, along = f === 'n' || f === 's', L = along ? r[2] - r[0] : r[3] - r[1], a0 = along ? r[0] : r[1], w = Math.min(7, L - 2), u0 = a0 + (L - w) / 2 + (rand() - 0.5) * (L - w - 1); fireEscape(bag, along, f === 'n' ? r[1] : f === 's' ? r[3] : f === 'w' ? r[0] : r[2], f === 'n' || f === 'w' ? -1 : 1, u0, u0 + w, y + 7.6, y + h); }
     if (el.iron && el.front && h > 14) castIronFront(bag, r, el.front, y, h - 1.2, rand);
     if (el.chimney) chimney(bag, el.chimney[0], y + h + 0.04, el.chimney[1], rand);

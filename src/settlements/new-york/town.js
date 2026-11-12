@@ -3,6 +3,7 @@
 // motor cars — people on the pavements, lamp posts along the avenues.
 import { RADIUS, AVENUES, STREETS, GCT, BRYANT, LIBRARY, lots, chimneyAt, DINER_AT, WALKUP_AT, height, onBroadway, inLot, onElStair, inSpecial, streetZ, inRect, GRID, toCity, frontPoint, pavements, roomLots } from './layout.js';
 import { entranceOf } from './plan.js';
+import { nearEntrance } from '../../styles/artdeco/dress.js';
 import { concoursePeople } from '../../styles/artdeco/concourse.js';
 import { libraryPeople } from '../../styles/artdeco/library.js';
 // (all laid out in the grid's frame (layout.js); the buildings and the yards turned into the
@@ -315,7 +316,17 @@ function libraryLife() {
 }
 export async function buildings() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 50) plans.push(base(`new-york-blocks-${i / 50}`, all.slice(i, i + 50).flatMap((l) => special(l) ?? [{ t: 'skyscraper', ...l, chimney: chimneyAt(l) }])));
+  // the painted advertisements on the bare side walls: a side that stands 8 m or more above its neighbour's roof (the block's ends are the streets' fronts and keep their shops), one side in three
+  const adsOf = (l) => {
+    if (l.h >= 70 || l.row || l.h < 24 || !nearEntrance(...l.rect.slice(0, 2))) return undefined;
+    const out = [], r = rng(l.seed ^ 0xad5);
+    for (const [f, edge, key] of [['e', l.rect[2], 0], ['w', l.rect[0], 2]]) {
+      const n = all.find((o) => o !== l && o.front === l.front && Math.abs((key ? o.rect[2] : o.rect[0]) - edge) < 1.2 && o.rect[1] < l.rect[3] - 1 && o.rect[3] > l.rect[1] + 1);
+      if (n && l.h - n.h >= 8 && r() < 0.34) out.push({ f, y0: n.h });
+    }
+    return out.length ? out : undefined;
+  };
+  for (let i = 0; i < all.length; i += 50) plans.push(base(`new-york-blocks-${i / 50}`, all.slice(i, i + 50).flatMap((l) => special(l) ?? [{ t: 'skyscraper', ...l, chimney: chimneyAt(l), ads: adsOf(l) }])));
   const dl = dinerLife(), c = toCity(...DINER_AT);
   return [...plans, ...streetLife(), ...yards(), ...pavePlans(), ...parkPlans(), ...shopLife(), gctLife(), libraryLife(), { ...base('new-york-diner-life', []), elements: dl, style: 'life', center: c, near: 200 }];
 }

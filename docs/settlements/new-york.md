@@ -180,3 +180,4 @@ Jazz, Gershwin, the big bands on the radio; horns and the El. [stated: Wikipedia
 - **Traffic keeps right on the cross streets** too (the cars on them had been turned the other way about), the parked row on the south kerb heading east and on the north kerb west.
 - **Shops:** sixteen lots now have an enterable shop (the ten kinds once each, then six more of the same kinds farther out along the avenues, 34 m apart).
 - **Pigeons** on the pavements of Fifth and Madison Avenues in twos and threes, and a flock over the avenue.
+- **Wall advertisements:** painted brand panels with block letters on the bare side walls of the mid-rise buildings that stand 8 m or more over a lower neighbour (eighteen near the arrival: Coca-Cola, Camels, Lucky Strike, Wrigley's and the like, as the roof boards) [inferred from the photographs of the period; the brands from §1i].
