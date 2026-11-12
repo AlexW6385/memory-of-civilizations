@@ -7,6 +7,7 @@
 import { gardenWalls, gardenLife, laneArchElements, laneLife } from './lanes.js';
 import { sepulchreFurnish, sepulchreLife } from './sepulchre-detail.js';
 import { haramFurnish, haramLife } from './haram-detail.js';
+import { platformFurnish, platformLife } from './platform-detail.js';
 import { STREET, RADIUS, HARAM, SEPULCHRE, SEP_Y, SEP_STAIR, CARDO, CARDO_Y, WALL, GATES, PALACES, height } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -263,7 +264,7 @@ export function city() {
     plan('jerusalem-palaces', 'islamic', palaces()),
     ...STREET.spans.map((sp, i) => plan(`jerusalem-bazaar-${i}`, 'islamic', bazaar(sp), { bounds: [sp[0] - 4, -STREET.half - 2, sp[1] + 4, STREET.half + 2] })),
     plan('jerusalem-markets', 'life', markets()),
-    plan('jerusalem-haram-furnish', 'islamic', haramFurnish(), { bounds: [HARAM.rect[0] - 6, HARAM.rect[1] - 6, HARAM.rect[2] + 6, HARAM.rect[3] + 6] }),
-    plan('jerusalem-haram-life', 'life', haramLife(), { bounds: [HARAM.rect[0] - 6, HARAM.rect[1] - 6, HARAM.rect[2] + 6, HARAM.rect[3] + 6] }),
+    plan('jerusalem-haram-furnish', 'islamic', [...haramFurnish(), ...platformFurnish()], { bounds: [HARAM.rect[0] - 6, HARAM.rect[1] - 6, HARAM.rect[2] + 6, HARAM.rect[3] + 6] }),
+    plan('jerusalem-haram-life', 'life', [...haramLife(), ...platformLife()], { bounds: [HARAM.rect[0] - 6, HARAM.rect[1] - 6, HARAM.rect[2] + 6, HARAM.rect[3] + 6] }),
   ];
 }
