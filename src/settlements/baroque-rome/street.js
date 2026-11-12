@@ -4,6 +4,8 @@
 // by the colonnade; a seller of rosaries and medals. Pure data: the coaches are the baroque style's, the rest the
 // shared objects (life).
 
+import { feast } from './feast.js';
+import { ARRIVALS } from '../../planet/arrivals.js';
 import { OVAL, FRONT_X, FLOOR, BORGO, GARDEN, TIBER, rows, frontPt, lots, tiberX, height, CROSSING } from './layout.js';
 
 const plan = (id, style, elements, bounds, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, 0], facing: 'n' }, bounds, rooms: [], elements, ...extra });
@@ -151,6 +153,7 @@ export function streetPlans() {
   PLAN_EXTRA.push(plan('baroque-rome-nave', 'life', LN, [-285, -70, -75, 70], { center: [-170, 0], near: 160 }));
   PLAN_EXTRA.push(plan('baroque-rome-gardens', 'life', LG, [GARDEN[0] - 30, GARDEN[1] - 30, GARDEN[2] + 30, GARDEN[3] + 30], { center: [gx, gz], near: 160 }),
     plan('baroque-rome-tiber-life', 'life', LR, [tiberX(0) - 50, -240, tiberX(0) + 50, 240], { center: [tiberX(0), 0], near: 300 }));
+  feast({ L, C, coachAt, arrival: [ARRIVALS['baroque-rome'][0], ARRIVALS['baroque-rome'][2]] });
   L.push({ t: 'chickens', kind: 'pigeon', n: 12, at: [OVAL.c[0] + 18, 22], seed: 9 });
   L.push({ t: 'animal', kind: 'dog', at: [OVAL.c[0] + 60, -30], rot: 1.2, seed: 5 });
   return [

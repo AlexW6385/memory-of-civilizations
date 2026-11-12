@@ -10,6 +10,7 @@ import '../qing/index.js';
 import '../renaissance/index.js';
 import { obelisk, fountain, saint, ponteAngeli, palaceRoman } from './piazza.js';
 import { coach, sedanChair } from './street.js';
+import { procCross, gonfalone, baldachin } from './feast.js';
 import { merge, ext } from '../renaissance/face.js';
 import { stPeterFacade, entrances } from './facade.js';
 import { stPeterInterior } from './interior.js';
@@ -119,9 +120,9 @@ function colonnade(el, { bag, col }) {
         const [sx, sz] = pt(a, -1.05), [tx, tz] = pt(b, -1.05), yt = y + h + 3.2;
         bag.add(T, orientedBox([sx, sz], [tx, tz], 0.45, yt, yt + 0.2, 0.02)); bag.add(T, orientedBox([sx, sz], [tx, tz], 0.4, yt + 1.0, yt + 1.15, 0.02));
         for (let j = 1; j < 8; j++) { const t = j / 8; bag.add(T, lathe([[0.09, 0], [0.15, 0.3], [0.08, 0.6], [0.11, 0.78], [0.1, 0.8]], 6, null, sx + (tx - sx) * t, yt + 0.2, sz + (tz - sz) * t)); }
-        bag.add(T, box(sx - 0.45, yt, sz - 0.45, sx + 0.45, yt + 1.3, sz + 0.45));
+        bag.add(T, box(sx - 0.55, yt, sz - 0.55, sx + 0.55, yt + 1.55, sz + 0.55));   // (the saints a fifth over life size, on a taller plinth, so that the line against the sky reads from the oval's mouth)
         const yaw = Math.atan2(ox - sx, oz - sz), k = (i * 7 + (a0 < 0 ? 3 : 0)) % 20;
-        const fig = merge(saint(k)); fig.rotateY(yaw); fig.translate(sx, yt + 1.3, sz); bag.add('limestone_carved', fig);   // travertine, carved from one block
+        const fig = merge(saint(k)); fig.scale(1.2, 1.2, 1.2); fig.rotateY(yaw); fig.translate(sx, yt + 1.55, sz); bag.add('limestone_carved', fig);   // travertine, carved from one block
       }
     }
     // the end pavilions
@@ -133,6 +134,6 @@ function colonnade(el, { bag, col }) {
 function paving(el, { bag }) { const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0; bag.add('flagstone', box(x0, y - 0.4, z0, x1, y + 0.02, z1)); }
 registerStyle('baroque', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.renaissance.elements, st_peter: stPeter, colonnade, obelisk, fountain, castel: castelRich, piazza_lines: piazzaLines, nave_dress: naveDress, ship_mill: shipMill, tiber_landing: tiberLanding, parterre, passetto, paving, ponte_angeli: ponteAngeli, palace_roman: palaceRoman, coach, sedan_chair: sedanChair, borgo_row: borgoRow },
+  elements: { ...STYLES.qing.elements, ...STYLES.renaissance.elements, st_peter: stPeter, colonnade, obelisk, fountain, castel: castelRich, piazza_lines: piazzaLines, nave_dress: naveDress, ship_mill: shipMill, tiber_landing: tiberLanding, parterre, passetto, paving, ponte_angeli: ponteAngeli, palace_roman: palaceRoman, coach, sedan_chair: sedanChair, proc_cross: procCross, gonfalone, baldachin, borgo_row: borgoRow },
   objects: {},
 });
