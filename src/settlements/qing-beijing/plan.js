@@ -52,7 +52,10 @@ for (const s of [-1, 1]) E.push({ t: 'palace_wall', a: [s * 53.5, wz1 - 9], b: [
 E.push({ t: 'block', walk: true, rect: [-63, wz1 - 9, -43.9, ARM], y0: 11.9, y1: 12.2, mat: 'brick_paving' });
 E.push({ t: 'block', walk: true, rect: [43.9, wz1 - 9, 63, ARM], y0: 11.9, y1: 12.2, mat: 'brick_paving' });
 E.push({ t: 'block', walk: true, rect: [-44, wz1 - 9, 44, MZ + 6], y0: 11.9, y1: 12.2, mat: 'brick_paving' });
-E.push({ t: 'qing_hall', rect: [-30, wz1 - 7.8, 30, wz1 + 1.8], y: 12.6, H: 7.5, double: 6, roof: 'hip', bays: [9, 5], front: 's', four: true, plat: 0.4, orn: { figures: 9 } });
+E.push({ t: 'qing_hall', rect: [-30, wz1 - 7.8, 30, wz1 + 1.8], y: 12.6, H: 7.5, double: 6, roof: 'hip', bays: [9, 5], front: 's', four: true, plat: 0.4, doors: ['n'], orn: { figures: 9 } });
+// inside (§31): the seat, the drum and the bell; the deck is climbed by a flight each side on the court's face of the arms
+E.push({ t: 'wumen_fittings', rect: [-30, wz1 - 7.8, 30, wz1 + 1.8], y: 12.6 });
+for (const s of [-1, 1]) E.push({ t: 'stairs', rect: [s * 49 - 3, wz1 - 27, s * 49 + 3, wz1 - 9], y0: 0.03, y1: 12.2, dir: 's', rakes: true });
 for (const s of [-1, 1]) {
   const r = (a, b) => (s < 0 ? [-b, 0, -a, 0] : [a, 0, b, 0]);
   const [lx0, , lx1] = r(31, 49.5), [px0, , px1] = r(49.5, 57.5);
