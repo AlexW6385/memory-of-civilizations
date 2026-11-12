@@ -94,7 +94,7 @@ export async function town() {
     for (const x of [WALL.x0 + 14, WALL.x1 - 14, -40, 160]) E.push({ t: 'indus_tower', c: [x, WALL_Z], a: 2.6, y: 0, h: 7 });
     plans.push(base('md-wall', E));
   }
-  for (let i = 0; i < LT.length; i += 60) plans.push(base(`md-houses-${i / 60}`, LT.slice(i, i + 60).map((l) => ({ t: 'indus_house', rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, open: l.open, y: l.y }))));
+  for (let i = 0; i < LT.length; i += 60) plans.push(base(`md-houses-${i / 60}`, LT.slice(i, i + 60).map((l) => ({ t: 'indus_house', rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, open: l.open, y: l.y, street: l.street, ends: l.ends }))));
   plans.push({ ...base('md-life', life()), style: 'life' });
   plans.push({ ...base('md-people', people()), style: 'life' });
   return (CACHE = plans);
