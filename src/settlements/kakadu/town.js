@@ -22,7 +22,7 @@ export async function town() {
     const [fx, fz] = C.fire, y = height(fx, fz);
     K.push({ t: 'ka_fire', at: [fx, fz], y, seed: i + 3, turtle: C.turtle, trough: C.trough, grind: C.grind, fish: C.fish });
     if (C.hut) K.push({ t: 'ka_hut', at: [C.hut[0], C.hut[1]], y: height(C.hut[0], C.hut[1]), rot: C.hut[2], seed: 1 });
-    K.push({ t: 'ka_leanto', at: [C.lean[0], C.lean[1]], y: height(C.lean[0], C.lean[1]), rot: C.lean[2], seed: 2 });
+    if (C.lean) K.push({ t: 'ka_leanto', at: [C.lean[0], C.lean[1]], y: height(C.lean[0], C.lean[1]), rot: C.lean[2], seed: 2 });
     K.push({ t: 'ka_rack', at: [C.rack[0], C.rack[1]], y: height(C.rack[0], C.rack[1]), rot: 0.2, len: 2.2 });
     woman([fx + 1.0, fz + 0.9], y, -2.3, { pose: 'sit_ground' });
     man([fx - 1.1, fz - 0.6], y, 1.0, { pose: 'sit_ground' });

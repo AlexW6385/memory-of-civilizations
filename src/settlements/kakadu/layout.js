@@ -85,7 +85,8 @@ export const CAMPS = [
   { c: [-34, -7], hut: [-38, -9, 0.4], lean: [-29, -4, 0], fire: [-33, -5], rack: [-27, -9], trough: true, grind: true },
   { c: [-11, 14], hut: null, lean: [-16, 16, 0.2], fire: [-11, 14], rack: [-6, 17], fish: true, turtle: true },
   { c: [-54, -25], hut: [-59, -26, 0.2], lean: [-49, -27, 0.1], fire: [-54, -25], rack: [-47, -23], grind: true },      // under the small shelter's apron
-  { c: [19, -9], hut: null, lean: [14, -10, 0.1], fire: [19, -9], rack: [24, -7], trough: true, turtle: true },          // on the apron, east of the arrival (out of its way)
+  { c: [7.5, -19], hut: null, lean: [3.8, -21.5, 0.15], fire: [7.5, -19], rack: [11.8, -18, -0.1], trough: true, turtle: true },   // on the apron, right of the arrival's view: the lean-to, the fire and the turtle in its coals, ten metres off
+  { c: [-10.5, -21], hut: [-14.8, -23.2, 0.3], lean: null, fire: [-10.5, -21], rack: [-6.6, -20, 0.25], grind: true, fish: true },   // on the apron, left of the arrival's view: a bark hut, a grindstone, fish on a rack
   { c: [-30, 26], hut: [-34, 28, 0.5], lean: [-26, 30, -0.2], fire: [-30, 26], rack: [-24, 25], fish: true },          // the billabong's west bank
   { c: [57, 10], hut: [61, 13, -0.3], lean: [52, 12, 0.3], fire: [57, 10], rack: [62, 8], grind: true, fish: true },   // by the east hollow
 ];
@@ -105,7 +106,7 @@ export function woodland() {
   const r = rng(88), gum = [], cyc = [], log = [];
   const ok = (x, z, m) => Math.hypot(x, z) < RADIUS - 5 && !inPool(x, z, 0.12) && !inHollow(x, z, 1.5) && !CAMPS.some((k) => Math.hypot(x - k.c[0], z - k.c[1]) < 7 + m)
     && !inRect([MAIN.x0 - 6, MAIN.zb, MAIN.x1 + 6, MAIN.zl + 14], x, z) && !inRect([SMALL.x0 - 5, SMALL.zb, SMALL.x1 + 5, SMALL.zl + 12], x, z)
-    && !FLIGHTS.some((F) => inRect(F.rect, x, z, 6)) && !BLOCKS.some((B) => inRect(B.r, x, z, 2.5 + m)) && Math.hypot(x + 4, z + 2) > 9 && !onWay(x, z, 3.2);
+    && !FLIGHTS.some((F) => inRect(F.rect, x, z, 6)) && !BLOCKS.some((B) => inRect(B.r, x, z, 2.5 + m)) && !inRect([-34, -40, 34, -4], x, z) && !onWay(x, z, 3.2);
   for (let k = 0; k < 2500 && gum.length < 70; k++) { const x = -86 + r() * 172, z = -34 + r() * 120; const dry = poolD(x, z) > 1.5; if (ok(x, z, 1) && (dry || r() < 0.2) && (z < -18 || r() < 0.7) && !gum.some((g) => Math.hypot(g[0] - x, g[1] - z) < 5)) gum.push([x, z, 7 + r() * 7]); }
   for (let k = 0; k < 1500 && cyc.length < 36; k++) { const x = -86 + r() * 172, z = -34 + r() * 120; if (ok(x, z, 0) && poolD(x, z) > 1.45 && !cyc.some((g) => Math.hypot(g[0] - x, g[1] - z) < 2.5)) cyc.push([x, z, 0.4 + r() * 1.1]); }
   for (let k = 0; k < 800 && log.length < 14; k++) { const x = -80 + r() * 160, z = -30 + r() * 100; if (ok(x, z, 0) && poolD(x, z) > 1.3) log.push([x, z, 1.8 + r() * 2.4, r() * 3.14]); }
@@ -115,7 +116,7 @@ export function woodland() {
 export function tuftSpots() {
   const r = rng(91), out = [];
   const ok = (x, z) => Math.hypot(x, z) < RADIUS - 6 && !inPool(x, z, -0.02) && !inHollow(x, z, 0.2) && !BLOCKS.some((B) => inRect(B.r, x, z, 0.8)) && !inRect([MAIN.x0 - 3, MAIN.zb, MAIN.x1 + 3, MAIN.zl + 4], x, z) && !inRect([SMALL.x0 - 3, SMALL.zb, SMALL.x1 + 3, SMALL.zl + 4], x, z)
-    && !onWay(x, z, 1.8) && !CAMPS.some((k) => Math.hypot(x - k.c[0], z - k.c[1]) < 3.4) && Math.hypot(x + 4, z + 2) > 3;
+    && !onWay(x, z, 1.8) && !CAMPS.some((k) => Math.hypot(x - k.c[0], z - k.c[1]) < 3.4) && !inRect([-6, -30, 6, -8], x, z);
   for (let k = 0; k < 6000 && out.length < 700; k++) {
     const x = -88 + r() * 176, z = -40 + r() * 128, foot = z < -16 ? 1 : 0, edge = poolD(x, z) < 1.5 ? 1 : 0;
     if (r() > 0.18 + 0.5 * foot + 0.35 * edge) continue;
