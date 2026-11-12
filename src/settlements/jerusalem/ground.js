@@ -18,7 +18,7 @@ const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 haramFurnish();       // (fills WALKS)
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inLot(x, z, 1) || inRect(SEPULCHRE, x, z, 4) || Math.abs(z) < 6 || Math.abs(x - CARDO.x) < CARDO_HALF + 1) return null;
-  if (inRect(HARAM.rect, x, z, 2)) return inRect(PLATFORM, x, z, 9) || inRect([-50, 92, 50, 200], x, z) || WALKS.some((r) => inRect(r, x, z, 2)) ? null : { cypress: 0.02, olive: 0.014 };
+  if (inRect(HARAM.rect, x, z, 2)) return inRect(PLATFORM, x, z, 9) || inRect([-50, 92, 50, 200], x, z) || WALKS.some((r) => inRect(r, x, z, 2)) ? null : { cypress: 0.07, olive: 0.05, grass_dry: 3 };
   { const g = gardenAt(x, z, -0.9); if (g) return g.kind === 'orchard' ? { fig: 1.6, olive: 1.0, date_palm: 0.25, grass: 16 } : g.kind === 'terrace' ? { olive: 1.4, grass_dry: 12 } : null; }
   if (gardenAt(x, z, 0.3) || (Math.hypot(x, z) < WALL.r && x < WALL.east)) return null;     // inside the walls: the lanes and the gardens' walls stay clear
   if (x > 150) return { olive: 0.18, grass_dry: 10 };
@@ -26,7 +26,7 @@ function planting(x, z) {
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { olive: 1.4, cypress: 0.02, fig: 1.6, date_palm: 0.25 },
+  maxDensity: { olive: 1.4, cypress: 0.07, fig: 1.6, date_palm: 0.25 },
   climate: {
     sun: { az: 140, el: 55, color: [1.0, 0.96, 0.88], intensity: 3.6, lat: 32, dec: 10, hour: 10 },
     sky: { turbidity: 2.6, rayleigh: 1.0, mie: 0.004, mieG: 0.78, zenith: [0.07, 0.15, 0.42], horizon: [0.62, 0.66, 0.7] },
