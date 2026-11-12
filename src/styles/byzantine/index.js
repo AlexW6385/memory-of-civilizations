@@ -213,7 +213,24 @@ function sphereEl(el, { bag }) {
   if (el.outer) {
     const R = el.R + el.outer.t;
     bag.add(el.outer.mat, spherePatch({ ...el, R, clips: el.outerClips || el.clips, inward: false }));
+    if (el.outer.ribs) outerRibs(el, R, bag);
   }
+}
+/** The lead roof's raised seams on a semidome: meridians from near its foot to the crown, kept where the roof is not cut by an arch or an exedra. */
+function outerRibs(el, R, bag) {
+  const [cx, cy, cz] = el.c, n = el.outer.ribs, a0 = el.a0 ?? 0, a1 = el.a1 ?? 360, clips = el.outerClips || el.clips || [], tris = [];
+  const full = a1 - a0 >= 359.9, count = full ? n : n + 1, w = 0.28 / R, e0 = 14, e1 = 88, steps = 18;
+  const P = (r, e, a) => [cx + r * Math.cos(e) * Math.cos(a), cy + r * Math.sin(e), cz + r * Math.cos(e) * Math.sin(a)];
+  const inside = (q) => clips.every(([nx, ny, nz, d]) => nx * q[0] + ny * q[1] + nz * q[2] <= d + 1e-6);
+  for (let i = 0; i < count; i++) {
+    const a = (a0 + (a1 - a0) * (full ? i / n : (i === 0 ? 0.5 : i === n ? n - 0.5 : i) / n)) * D2R;
+    for (let j = 0; j < steps; j++) {
+      const ea = (e0 + (e1 - e0) * j / steps) * D2R, eb = (e0 + (e1 - e0) * (j + 1) / steps) * D2R, h = 0.15;
+      if (![P(R, ea, a - w), P(R, ea, a + w), P(R, eb, a - w), P(R, eb, a + w)].every(inside)) continue;
+      hexa(tris, [P(R - 0.03, ea, a - w), P(R + h, ea, a - w * 0.8), P(R + h, ea, a + w * 0.8), P(R - 0.03, ea, a + w)], [P(R - 0.03, eb, a - w), P(R + h, eb, a - w * 0.8), P(R + h, eb, a + w * 0.8), P(R - 0.03, eb, a + w)]);
+    }
+  }
+  if (tris.length) bag.add(el.outer.mat, fromTriangles(tris));
 }
 
 /**
@@ -313,6 +330,22 @@ function ribbedDome(el, { bag }) {
   // the roof: lead over a shell
   const Ro = Rc + t, eo = Math.asin(Math.min(1, (yw1 - yc) / Ro)) / D2R;
   bag.add(el.outMat, spherePatch({ c: [cx, yc, cz], R: Ro, e0: eo, e1: 90, segA: 120, segE: 30, inward: false }));
+  // the roof's lead ribs: forty raised seams from the window zone to the crown, on the line of the piers between the windows,
+  // so that from outside the dome reads as the ribbed shell it is (docs/buildings/hagia-sophia.md §4); a cross over the crown
+  for (let k = 0; k < n; k++) {
+    const a = (k * 360 / n + 360 / n / 2) * D2R, w = 0.3 / Ro, tris = [], steps = 22, eTop = eo + (90 - eo) * 0.97;
+    for (let j = 0; j < steps; j++) {
+      const ea = (eo + (eTop - eo) * j / steps) * D2R, eb = (eo + (eTop - eo) * (j + 1) / steps) * D2R;
+      const p = (R, e, aa) => [cx + R * Math.cos(e) * Math.cos(aa), yc + R * Math.sin(e), cz + R * Math.cos(e) * Math.sin(aa)];
+      const hi = 0.16 * (1 - 0.6 * j / steps), hj = 0.16 * (1 - 0.6 * (j + 1) / steps);
+      const b = [p(Ro - 0.02, ea, a - w), p(Ro + hi, ea, a - w * 0.8), p(Ro + hi, ea, a + w * 0.8), p(Ro - 0.02, ea, a + w)];
+      const tt = [p(Ro - 0.02, eb, a - w), p(Ro + hj, eb, a - w * 0.8), p(Ro + hj, eb, a + w * 0.8), p(Ro - 0.02, eb, a + w)];
+      hexa(tris, b, tt);
+    }
+    bag.add(el.outMat, fromTriangles(tris));
+  }
+  bag.add('gilt_bronze', box(cx - 0.12, el.crown + Ro - Rc - 0.1, cz - 0.12, cx + 0.12, el.crown + 3.1, cz + 0.12));
+  bag.add('gilt_bronze', box(cx - 1.0, el.crown + 1.9, cz - 0.1, cx + 1.0, el.crown + 2.2, cz + 0.1));
   bag.add(el.outMat, arcSolid(cx, cz, r - 0.05, Math.sqrt(Ro * Ro - (yw1 - yc) ** 2) + 0.05, 0, 360, yw1, yw1 + 0.35, 3));
 }
 
