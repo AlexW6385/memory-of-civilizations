@@ -94,6 +94,13 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 - **Planting** thickened to what the terraces would carry: olive groves with figs between the walls about the lanes, cypress by the tombs, kermes-oak maquis, aleppo and stone pine on the slopes, plots of wheat at the edge of the disc. [inferred: the Argolid's flora; the carbonised wheat is stated]
 - **Sound.** Cicadas, goat and sheep bells, donkeys, dogs, cocks and cattle; smoke rises over the hearth of every workshop and about half the houses at the meals.
 
+## 12. The approach road's halt and the spring (deepening pass, 2026-11-12)
+
+- **Arrival.** The arrival stands at (−136, 0) on the road; no still figure is placed within 8 m of it (`town.js` people(), a filter after the road's traffic is laid out) so that nobody stands in the lens [fix after the browser review].
+- **The caravan halt** [inferred]: a great house's gate drew trains of pack-animals, so the last 25 m of the approach road widen into a halt: tethered donkeys with their packs off, sacks and crates, a trough and a stack of fodder, drovers resting and talking round a cooking fire (its smoke rises in `smoke.js`), a stall of pots and cloth under an ochre awning and another under a white one, a row of jars, goods on mats, drying trays, a boy's basket; the lane walls are opened along the halt so that it stands on the road's edge, not behind a wall. Mycenaean stirrup jars and storage jars for oil and wine are among the commonest finds, which is why the jar-seller's row is the stall's neighbour [inferred].
+- **The spring's basin** [inferred]: the basin of `hillside()` (south of the road at x ≈ −126) now has women filling jars at it, one carrying hers away, a child.
+- **Still below Suzhou:** the Cyclopean wall and the Lion Gate carry no weathering (lichen, soot, damp at the foot); the lower town's houses repeat one plan with seeds; no boats and no water in the town.
+
 ## Sources
 - Wikipedia, "Mycenae" — https://en.wikipedia.org/wiki/Mycenae
 - Wikipedia, "Lion Gate" — https://en.wikipedia.org/wiki/Lion_Gate
