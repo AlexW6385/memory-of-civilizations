@@ -136,6 +136,14 @@ function hojo(el, ctx) {
     // the abbot's room (right front): a writing desk and a cushion; the left front room: an empty room with a brazier
     B('lacquer_black', cx[2] + 0.5, y1, hd - 1.4, cx[2] + 1.6, y1 + 0.35, hd - 0.8); B('cloth_maroon', cx[2] + 0.6, y1, hd - 2.1, cx[2] + 1.4, y1 + 0.06, hd - 1.6);
     L('pottery_dark', [[0.001, 0], [0.22, 0], [0.26, 0.3], [0.001, 0.3]], 12, cx[0] + 2.5, y1, hd - 2.5);
+    // the abbot's room: the alcove (tokonoma) in the east wall with its hanging scroll and a vase of flowers, a book-chest; the left room: the brazier with its kettle, cushions about it
+    B(WD, hw - 1.0, y1, 1.5, hw - 0.14, y1 + 0.12, 4.5); B('cloth_indigo', hw - 0.15, y1 + 0.78, 2.1, hw - 0.13, y1 + 2.3, 3.1); B('paint_white', hw - 0.17, y1 + 0.85, 2.2, hw - 0.15, y1 + 2.2, 3.0); B('lacquer_black', hw - 0.171, y1 + 1.2, 2.5, hw - 0.169, y1 + 1.9, 2.7);
+    L('glaze_blue', [[0.001, 0], [0.08, 0], [0.12, 0.12], [0.07, 0.24], [0.05, 0.32], [0.001, 0.32]], 10, hw - 0.6, y1 + 0.12, 3.6); for (let k = 0; k < 4; k++) B('cloth_green', hw - 0.62 + k * 0.03, y1 + 0.44, 3.58 + k * 0.03, hw - 0.6 + k * 0.03, y1 + 0.9 + k * 0.1, 3.6 + k * 0.03);
+    B('lacquer_black', cx[2] + 3.2, y1, hd - 1.0, cx[2] + 4.4, y1 + 0.5, hd - 0.3); for (let k = 0; k < 4; k++) B('paint_white', cx[2] + 3.25, y1 + 0.5 + k * 0.05, hd - 0.95, cx[2] + 4.3, y1 + 0.55 + k * 0.05, hd - 0.35);
+    L('iron', [[0.001, 0], [0.14, 0.03], [0.18, 0.14], [0.11, 0.24], [0.001, 0.26]], 10, cx[0] + 2.5, y1 + 0.3, hd - 2.5);
+    for (const [dx, dz] of [[-1.2, 0.2], [1.2, -0.1], [0, 1.2]]) B('cloth_maroon', cx[0] + 2.5 + dx - 0.35, y1, hd - 2.5 + dz - 0.35, cx[0] + 2.5 + dx + 0.35, y1 + 0.07, hd - 2.5 + dz + 0.35);
+    // the Buddha room: the incense burner and offering stand before the altar
+    { const x = (cx[1] + cx[2]) / 2; B('lacquer_black', x - 0.45, y1, -hd + 1.7, x + 0.45, y1 + 0.5, -hd + 2.2); L('bronze', [[0.001, 0], [0.13, 0], [0.15, 0.06], [0.001, 0.08]], 10, x, y1 + 0.5, -hd + 1.95); }
     STYLES.japanese.elements.irimoya({ c: [0, 0.8], A: hw + 1.4, B: hd + 2.0, y: yc + 0.4, rise: 4.3, lift: 0.7, gable: 0.35, mat: BARK, soffit: TM }, { bag, col });
   });
 }

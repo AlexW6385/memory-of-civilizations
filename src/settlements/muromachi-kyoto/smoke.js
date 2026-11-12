@@ -3,6 +3,7 @@
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
 import { lots, isOpen, RADIUS, RYOAN, GINKAKU } from './layout.js';
+import { dims } from '../../styles/muromachi/machiya.js';
 
 const ID = 'muromachi-kyoto';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -11,7 +12,7 @@ export function emitters() {
   for (const l of lots()) {
     if (!(isOpen(l) || l.seed % 4 === 1)) continue;
     const [x0, z0, x1, z1] = l.rect;
-    E.push({ p: [(x0 + x1) / 2 + (r() - 0.5) * 1.5, 3.5 + 1.6 + 0.5, (z0 + z1) / 2 + (r() - 0.5) * 1.5], kind: 'kitchen', thr: 0.1 + 0.8 * r(), seed: l.seed % 977 });
+    E.push({ p: [(x0 + x1) / 2 + (r() - 0.5) * 1.5, (() => { const D = dims(l.seed); return D.top + D.rise + 0.4; })(), (z0 + z1) / 2 + (r() - 0.5) * 1.5], kind: 'kitchen', thr: 0.1 + 0.8 * r(), seed: l.seed % 977 });
   }
   E.push({ p: [RYOAN.hojo[0] + 7, 5.4, RYOAN.hojo[1] + 4], kind: 'kitchen', thr: 0.2, seed: 11 });
   E.push({ p: [GINKAKU.togudo[0] - 1.5, 7.2, GINKAKU.togudo[1] - 1], kind: 'kitchen', thr: 0.05, seed: 12 });

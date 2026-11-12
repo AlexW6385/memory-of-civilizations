@@ -1,7 +1,8 @@
 // Muromachi Kyoto — the animals (src/engine/fauna.js; docs/settlements/muromachi-kyoto.md §6): carp in the pond of Ginkaku-ji and
 // in Ryōan-ji's Kyōyōchi, in the stream small fish; swallows over the streets and the stream, crows over the hills, sparrows on
 // the gravel and the roofs' ridges, a heron standing at the stream.
-import { STREAM, GINKAKU, RYOAN, RADIUS } from './layout.js';
+import { STREAM, GINKAKU, RYOAN, RADIUS, NS, EW, lots } from './layout.js';
+import { dims } from '../../styles/muromachi/machiya.js';
 
 const pondDist = (P) => (x, z) => (Math.hypot((x - P.c[0]) / P.r[0], (z - P.c[1]) / P.r[1]) - 1) * Math.min(P.r[0], P.r[1]);
 const streamDist = (x) => Math.min(x - STREAM.x0, STREAM.x1 - x);
@@ -17,9 +18,16 @@ const flights = [
   { kind: 'crow', n: 6, loop: { c: [250, 0], a: [70, 70], rot: 0.4 }, y: [30, 60], speed: 8 },
   { kind: 'crow', n: 4, loop: { c: [-170, -170], a: [50, 40], rot: -0.3 }, y: [24, 44], speed: 8 },
 ];
+// swallows low along the main streets, black kites high over the basin (the kite of the Kamo)
+for (const z of [EW[2], EW[4]]) flights.push({ kind: 'swallow', n: 3, lane: { a: [-230, z], b: [80, z] }, y: [2.5, 6], speed: 9, a: [26, 3] });
+for (const x of [NS[2], NS[4]]) flights.push({ kind: 'swallow', n: 2, lane: { a: [x, -150], b: [x, 220] }, y: [2.5, 6], speed: 9, a: [26, 3] });
+flights.push({ kind: 'kite', n: 2, loop: { c: [60, -30], a: [150, 120], rot: 0.2 }, y: [60, 90], speed: 9 });
 flights[2].a = [26, 3];
 const perches = [];
 for (const [x, z] of [[-165, -128], [-170, -108], [-160, -112], [190, 70], [175, 74], [160, 20], [-6, 175], [4, 205], [-45, 100], [10, -30], [-110, 60], [-180, -20], [60, 170]]) perches.push({ kind: 'sparrow', x, z, y: 0.05, rot: (x * 7) % 3, range: [1.6, 1.4] });
-{ const x = 99.2, z = 60; perches.push({ kind: 'egret', x: STREAM.x0 - 1.1, z, y: 0.15, rot: Math.PI / 2, stay: [60, 200], gone: [60, 160], alert: 10 }); }
+// sparrows on the ridges of the houses (a ridge is at the roof's top) and hopping in the streets
+{ let k = 0; for (const l of lots()) { if (l.seed % 17 !== 0) continue; const D = dims(l.seed), hx = (l.rect[0] + l.rect[2]) / 2, hz = (l.rect[1] + l.rect[3]) / 2; perches.push({ kind: k++ % 3 ? 'sparrow' : 'crow', x: hx, z: hz, y: D.top + D.rise + 0.1, rot: l.facing === 'n' || l.facing === 's' ? 0 : Math.PI / 2, range: [1.4, 0], alert: 6 }); } }
+for (const z of EW.slice(1, 6)) for (const x of [-190, -120, -50, 10, 60]) perches.push({ kind: 'sparrow', x, z, y: 0.05, rot: (x * 7 + z) % 3, range: [1.8, 1.2] });
+{ const x = 99.2, z = 60; perches.push({ kind: 'heron', x: STREAM.x1 + 1.1, z: -120, y: 0.15, rot: -Math.PI / 2, stay: [60, 200], gone: [60, 160], alert: 10 }); perches.push({ kind: 'egret', x: STREAM.x0 - 1.1, z, y: 0.15, rot: Math.PI / 2, stay: [60, 200], gone: [60, 160], alert: 10 }); }
 void RADIUS;
 export default { fish, flights, perches };

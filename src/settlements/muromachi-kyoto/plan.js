@@ -24,9 +24,12 @@ for (const [x, z] of [[120, 50], [276, 60], [276, -60], [120, -60]]) E.push({ t:
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const [tx, tz] = GINKAKU.togudo;
-const rooms = [room('togudo', [tx - 3.5, tz - 3.5, tx + 3.5, tz + 3.5], 0.7, 'hall'), room('ginkaku', GINKAKU.rect, 0, 'open')];
+const [kx, kz] = GINKAKU.kannon;
+const rooms = [room('togudo', [tx - 3.5, tz - 3.5, tx + 3.5, tz + 3.5], 0.7, 'hall'), room('kannon-den', [kx - 4.9, kz - 3.9, kx + 4.9, kz + 3.7], 0.9, 'hall'), room('chounkaku', [kx - 3.0, kz - 1.95, kx + 3.0, kz + 1.95], 4.3, 'hall'), room('ginkaku', GINKAKU.rect, 0, 'open')];
 const walks = [[[gx, z1 + 10], [gx, z1 - 6], [gx, 56], [P.c[0] - P.r[0] - 4.5, 56], [P.c[0] - P.r[0] - 4.2, 14], [tx + 7, tz + 4], [tx + 7, tz], [tx + 3.5, tz], [tx + 2.2, tz - 2.0], [tx, tz - 2.0]]];
 walks[0].y0 = 0;
+walks.push([[kx, kz + 14], [kx, kz + 9], [kx, kz + 6.6], [kx, kz + 4.6], [kx, kz + 2.5], [kx + 4.5, kz + 1.1], [kx + 2.0, kz + 1.1], [kx - 0.3, kz + 1.1], [kx - 1.6, kz + 1.0], [kx - 1.8, kz - 0.6]]);
+walks[1].y0 = 0;
 
 export const ginkaku = {
   id: 'muromachi-ginkaku',

@@ -45,7 +45,7 @@ let LOTS = null;
 export function lots() {
   if (LOTS) return LOTS;
   LOTS = [];
-  const rand = rng(1490), TR = ['cloth', 'sake', 'pottery', 'rice', 'tea', 'lacquer'];
+  const rand = rng(1490), TR = ['cloth', 'sake', 'pottery', 'rice', 'tea', 'lacquer', 'smith', 'dye', 'paper', 'sandals', 'food', 'doso', 'wood'];
   for (let i = 0; i < NS.length - 1; i++) for (let j = 0; j < EW.length - 1; j++) {
     const bx0 = NS[i] + SW, bx1 = NS[i + 1] - SW, bz0 = EW[j] + SW, bz1 = EW[j + 1] - SW, block = [bx0, bz0, bx1, bz1];
     if (inPrecinct(block, -0.5) || farRect(block, 30)) continue;
@@ -82,6 +82,6 @@ export function onStreet(x, z, m = 0) {
   return !!l && l.some((r) => inRect(r, x, z, m));
 }
 export const inPrecinctAt = (x, z, m = 0) => PRECINCTS.some((p) => inRect(p, x, z, m));
-/** Which houses are open inside: one in four (a shop), the trades of sake and tea always. */
-export const isOpen = (l) => l.seed % 4 === 0 || l.trade === 'tea';
+/** Which houses are open inside: nearly half (the shops), the tea-sellers' and eating-houses always. */
+export const isOpen = (l) => l.seed % 20 < 9 || l.trade === 'tea' || l.trade === 'food';
 export { far };

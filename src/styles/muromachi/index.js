@@ -9,9 +9,10 @@ import { ginkakuElements } from './ginkaku.js';
 import { zenElements } from './zen.js';
 import { houseElements } from './houses.js';
 import { sacredElements } from './sacred.js';
+import { streetElements } from './street.js';
 
 registerStyle('muromachi', {
   column: () => {}, trim: () => {}, opening: () => {},
-  elements: { ...STYLES.edo.elements, ...STYLES.japanese.elements, ...ginkakuElements, ...zenElements, ...houseElements, ...sacredElements },
+  elements: { ...STYLES.edo.elements, ...STYLES.japanese.elements, ...ginkakuElements, ...zenElements, ...houseElements, ...sacredElements, ...streetElements },
   objects: {},
 });

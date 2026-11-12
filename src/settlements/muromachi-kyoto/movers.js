@@ -8,7 +8,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 34, night: 4, rain: 0.6, reach: 150, spawnMin: 28, far: 42 },
+  walkers: { day: 40, night: 5, rain: 0.6, reach: 150, spawnMin: 28, far: 42 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: 0,
 };
@@ -38,6 +38,10 @@ export const WALKERS = [
     c1: [CL.indigo, CL.grey, CL.brown], c2: [CL.white, CL.indigo], c3: [CL.black], speed: [1.0, 1.25], stride: 1.1, pole: true },
   { id: 'porter', weight: 0.7, market: 0.7, el: { dress: 'trousers', hair: 'topknot', hat: 'straw', carry: 'sack', arms: 'sack', feet: 'bare' }, wet: 'cape',
     c1: [CL.brown, CL.grey, CL.indigo], c2: [CL.indigo, CL.grey], c3: [CL.black], speed: [1.15, 1.4], stride: 1.4 },
+  { id: 'oharame', weight: 0.55, market: 0.9, el: { dress: 'robe', hair: 'long', hairMat: 'hair_dark', hat: 'none', over: 'apron', carry: 'wood_head', arms: 'head', feet: 'shod' }, wet: 'cape', swing: 0.4,
+    c1: [CL.indigo, CL.brown, CL.grey], c2: [CL.white, CL.grey], c3: [CL.black], speed: [0.95, 1.2], stride: 1.15, h: [0.9, 0.96] },
+  { id: 'pilgrim', weight: 0.4, market: 0.3, el: { dress: 'robe', hair: 'topknot', hairMat: 'hair_dark', hat: 'straw', over: 'cape', arms: 'staff', carry: 'staff', feet: 'shod' }, wet: 'cape',
+    c1: [CL.white, CL.grey, CL.brown], c2: [CL.grey, CL.white], c3: [CL.black], speed: [1.0, 1.3], stride: 1.3 },
   { id: 'child', weight: 0.35, market: 0.3, el: { dress: 'robe', hair: 'long', arms: 'hang' }, c1: [CL.ochre, CL.indigo, CL.red], c2: [CL.white], c3: [CL.black], speed: [1.2, 1.7], stride: 1.0, h: [0.55, 0.7], swing: 1.1 },
 ];
 export const CREW = {};
