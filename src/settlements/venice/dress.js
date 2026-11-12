@@ -176,6 +176,28 @@ function piazzaMore() {
   return plan('venice-piazza-more', E, [(x0 + x1) / 2, (z0 + z1) / 2], 300, [x0 - 18, z0 - 20, x1 + 2, z1 + 16]);
 }
 
+// ── the Merceria ───────────────────────────────────────────────────────────────────────────────────────────────────────────────
+/** The Merceria behind the Clock Tower (§5b): Venice's shopping street — booths of the haberdashers, mercers and spicers along both sides, signs and lanterns over them, the crowd going through. */
+function merceria() {
+  const r = rng(1496), E = [], [x0, z0, x1, z1] = MERCERIA, zA = z0 + 6, zB = z1 - 12;
+  const aw = ['cloth_red', 'cloth_white', 'cloth_ochre', 'cloth_indigo', 'cloth_green'], gd = [['bolts', 'bolts', 'baskets'], ['spice', 'baskets', 'pottery'], ['bolts', 'pottery'], ['spice', 'spice', 'baskets'], ['bread', 'baskets']];
+  for (let z = zA, k = 0; z < zB; z += 6.4, k++) {
+    if (k % 6 === 5) continue;
+    E.push({ t: 'stall', at: [x0 + 1.9, z], rot: -Math.PI / 2, seed: 800 + k, awning: pick(r, aw), goods: pick(r, gd), w: 2.8, d: 1.2 });
+    E.push(person(r, [x0 + 1.4, z], Math.PI / 2, { hat: 'cap' }));
+    E.push({ t: 'stall', at: [x1 - 1.9, z + 3.1], rot: Math.PI / 2, seed: 850 + k, awning: pick(r, aw), goods: pick(r, gd), w: 2.8, d: 1.2 });
+    E.push(person(r, [x1 - 1.4, z + 3.1], -Math.PI / 2, { hat: 'veil' }));
+    if (r() < 0.55) E.push(person(r, [x0 + 4.4 + (r() - 0.5), z + (r() - 0.5) * 2], -Math.PI / 2 + (r() - 0.5), { pose: r() < 0.5 ? 'talk' : 'stand', carry: r() < 0.3 ? 'basket' : 'none' }));
+    if (r() < 0.55) E.push(person(r, [x1 - 4.4 + (r() - 0.5), z + 3.1 + (r() - 0.5) * 2], Math.PI / 2 + (r() - 0.5), { pose: r() < 0.5 ? 'talk' : 'stand', carry: r() < 0.3 ? 'sack' : 'none' }));
+    if (k % 2 === 0) E.push({ t: 'shop_sign', board: true, at: [x0 + 0.05, z + 1.5], y: GROUND + 0.2, rot: -Math.PI / 2, h: 3.1, seed: 900 + k });
+    if (k % 2 === 1) E.push({ t: 'shop_sign', board: true, at: [x1 - 0.05, z + 4.6], y: GROUND + 0.2, rot: Math.PI / 2, h: 3.1, seed: 950 + k });
+  }
+  for (let z = zA + 3; z < zB; z += 19) E.push({ t: 'lantern', kind: 'iron', at: [x0 + 0.12, z], y: GROUND, rot: -Math.PI / 2, h: 2.7 }, { t: 'lantern', kind: 'iron', at: [x1 - 0.12, z + 9], y: GROUND, rot: Math.PI / 2, h: 2.7 });
+  for (let i = 0; i < 14; i++) E.push(person(r, [x0 + 5 + r() * (x1 - x0 - 10), zA + r() * (zB - zA)], r() * 6.28, { carry: pick(r, ['none', 'none', 'basket', 'sack', 'pails']), pose: r() < 0.3 ? 'talk' : 'stand' }));
+  E.push({ t: 'animal', kind: 'dog', at: [x0 + 7, zA + 22], y: GROUND, rot: 2, seed: 41 }, { t: 'animal', kind: 'cat', at: [x1 - 1, zA + 11], y: GROUND, rot: 4, seed: 42 });
+  return plan('venice-merceria', E, [(x0 + x1) / 2, (z0 + z1) / 2], 200, [x0 - 2, z0 - 2, x1 + 2, z1 + 2]);
+}
+
 // ── the calli: washing across the streets ───────────────────────────────────────────────────────────────────────────────────────
 /** A line of washing hung from window to window across each street between the houses, about every 17 m along its run (Venice, Naples). */
 function calli() {
@@ -201,7 +223,7 @@ export function dressPlans() {
     const [i, j] = k.split(',').map(Number), E = list.flatMap(frontsOf);
     if (E.length) out.push(plan(`venice-fronts-${k}`, E, [i * 100 + 50, j * 100 + 50], 190));
   }
-  out.push(piazza(), piazzaMore(), piazzetta(), moored(), ...calli());
+  out.push(piazza(), piazzaMore(), merceria(), piazzetta(), moored(), ...calli());
   return out;
 }
 void MERCERIA; void PIAZZA;

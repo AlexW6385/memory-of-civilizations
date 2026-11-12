@@ -1,7 +1,7 @@
 import { lodTiles, openLots } from '../lod.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
 // The houses of the islands (docs/settlements/venice.md §5).
-import { RADIUS, lots, PIAZZA, PIAZZETTA, GROUND } from './layout.js';
+import { RADIUS, lots, PIAZZA, PIAZZETTA, GROUND, MERCERIA } from './layout.js';
 import { molo, doge, iconostasis, masts } from './plan.js';
 import { canalPlans } from './rialto.js';
 import { dressPlans } from './dress.js';
@@ -18,6 +18,8 @@ export async function town() {
     pave.push({ t: 'floor', rect: r, y: GROUND + 0.03, th: 0.1, mat: 'brick_paving' });
     for (let x = r[0] + 5; x < r[2] - 2; x += 10) pave.push({ t: 'floor', rect: [x - 0.25, r[1], x + 0.25, r[3]], y: GROUND + 0.035, th: 0.1, mat: 'limestone' });
   }
+  pave.push({ t: 'floor', rect: [MERCERIA[0], MERCERIA[1], MERCERIA[2], MERCERIA[3] - 2.5], y: GROUND + 0.03, th: 0.1, mat: 'brick_paving' });
+  pave.push({ t: 'floor', rect: [(MERCERIA[0] + MERCERIA[2]) / 2 - 0.25, MERCERIA[1], (MERCERIA[0] + MERCERIA[2]) / 2 + 0.25, MERCERIA[3] - 2.5], y: GROUND + 0.035, th: 0.1, mat: 'bluestone' });
   plans.push(base('venice-piazza-paving', pave));
   // (the water of the canals, the basin and the lagoon is the planet's sea: ground.js, sea)
   return plans;
