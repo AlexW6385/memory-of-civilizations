@@ -35,7 +35,7 @@ const houseRooms = (c, tag) => {
     room(`${tag}hall`, [ix0 + 0.2, iz0 + 2.9, ix0 + 2.9, iz1 - 0.2], f, 'hall'),
     room(`${tag}store`, [ix0 + 3.3, iz0 + 2.9, ix1 - 0.2, iz1 - 0.2], f, 'hall'),
     room(`${tag}central room`, [ix0 + 0.2, iz0 + 0.2, ix1 - 0.2, iz0 + 2.3], f, 'hall'),
-    room(`${tag}kitchen`, [ix0 + 5.45 - 0.8, hz0 - 1.55 - 0.6, ix0 + 5.45 + 0.8, hz0 - 1.55 + 0.6], f, 'hall'),
+    room(`${tag}kitchen`, [ix0 + 5.45 - 0.7, hz0 - 1.55 + 0.9, ix0 + 5.45 + 0.7, hz0 - 1.55 + 1.3], f, 'hall'),   // the kitchen's floor by its door (the ladder's ramp takes the middle)
   ];
 };
 const rooms = [room('place', [-24, 22, 22, 32], 1.2, 'open'), ...houseRooms(LANDMARK, '')];
@@ -43,7 +43,7 @@ let nOpen = 1;
 for (const c of COMPOUNDS) if (c.open && !c.landmark) rooms.push(...houseRooms(c, `house ${++nOpen}: `));
 const [lx0] = houseOf(LANDMARK).rect, hz1L = houseOf(LANDMARK).rect[3], hz0L = hz1L - 5.4, iz0L = hz0L + 0.45;
 const doorX = lx0 + 0.45 + 1.5;
-const walks = [Object.assign([[0, 36], [0, 26], [0, 14], [0, 12.6], [doorX - 4, 12.6], [doorX, 12.6], [doorX, hz1L - 1.2], [doorX, iz0L + 1.2]], { y0: 1.2 })];
+const walks = [Object.assign([[-1.0, 36], [-1.0, 26], [-1.0, 14], [-1.0, 12.6], [doorX - 4, 12.6], [doorX, 12.6], [doorX, hz1L - 1.2], [doorX, iz0L + 1.2]], { y0: 1.2 })];
 void F;
 
 export const dogon = {

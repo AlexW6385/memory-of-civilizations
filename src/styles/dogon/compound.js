@@ -90,7 +90,7 @@ export function house(el, { bag, col, lights }) {
   // outer walls: the south with its two door openings, the others plain; north with the kitchen's doorway
   const doorU = [1.5, 4.9];
   wallRun(bag, col, WALL, [x0, z1 - T / 2], [x1, z1 - T / 2], T, y - 0.5, y + FH, doorU.map((u) => ({ at: T + u, w: DOORW, h: DOORH + 0.5 })));
-  wallRun(bag, col, WALL, [x0, z0 + T / 2], [x1, z0 + T / 2], T, y - 0.5, y + 2.9, [{ at: T + 5.45, w: 0.95, h: DOORH + 0.5 }]);
+  wallRun(bag, col, WALL, [x0, z0 + T / 2], [x1, z0 + T / 2], T, y - 0.5, y + 2.9, [{ at: T + 5.45, w: 1.3, h: DOORH + 0.5 }]);
   wallRun(bag, col, WALL, [x0 + T / 2, z0], [x0 + T / 2, z1], T, y - 0.5, y + 2.9);
   wallRun(bag, col, WALL, [x1 - T / 2, z0], [x1 - T / 2, z1], T, y - 0.5, y + 2.9);
   // the interior partitions (plastered smooth): the north wall of the hall and store with doorways, the wall between them

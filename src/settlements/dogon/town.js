@@ -18,7 +18,7 @@ export async function town() {
   man([cx - 2.4, cz + 1.6], F + 0.26, 0.5, { pose: 'sit' });
   man([cx - 0.9, cz + 0.8], F, 0.3, { pose: 'sit_ground', dress: 'robe', cloth: 'cloth_white', over: 'none' });
   // the place: women with jars, men talking in twos, children
-  const at = (x, z) => P.every((p) => Math.hypot(p.at[0] - x, p.at[1] - z) > 1.6) && Math.hypot(x - cx, z - cz) > TOGUNA.w / 2 + 2.2;
+  const at = (x, z) => !(Math.abs(x) < 1.8 && z > 12) && P.every((p) => Math.hypot(p.at[0] - x, p.at[1] - z) > 1.6) && Math.hypot(x - cx, z - cz) > TOGUNA.w / 2 + 2.2;
   for (let k = 0; k < 18; k++) {
     const x = PLACE[0] + 2 + rand() * (PLACE[2] - PLACE[0] - 4), z = 22 + rand() * 10;
     if (!at(x, z)) continue;
@@ -75,7 +75,7 @@ export async function town() {
     if (r() < 0.35) L.push({ t: 'sacks', n: 3, at: [f.x1 - 0.8, f.zf + 0.9], y: f.y, rot: 0, seed: n * 7 + 4 });
     // someone sitting at the door on a low stool: a woman sorting millet, a man mending, with a child by her
     if (r() < 0.6) {
-      const x = d + (r() < 0.5 ? -1.9 : 1.9), z = f.zf + 1.5;
+      const x = d + (r() < 0.5 ? -1.9 : 1.9), z = f.zf + (c.landmark ? 3.2 : 1.5);   // (the first compound's lane is the visitor's walk)
       if (x > f.x0 && x < f.x1) {
         seat(x, z, f.y, 0, { m: r() < 0.35, f: {} });
         if (r() < 0.5) P.push({ t: 'figure', at: [x + 0.8, z + 0.3], y: f.y, rot: 0.6, seed: n * 91 + 5, dress: 'tunic', legs: 'bare', cloth: cl(['cloth_white', 'cloth_ochre']), over: 'none', hat: 'none', feet: 'bare', hair: 'short', beard: false, child: true, h: 1.1, pose: 'sit_ground', ...SK() });
