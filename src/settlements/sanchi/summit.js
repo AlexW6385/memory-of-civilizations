@@ -11,6 +11,7 @@ export const SUMMIT_STALLS = [
   [-11, 63, 'e', 'water'], [11, 63, 'w', 'bowls'], [-11, 70, 'e', 'robes'], [11, 70, 'w', 'flowers'],
   [-11, 77, 'e', 'incense'], [11, 77, 'w', 'lamps'], [-11, 84, 'e', 'flowers'], [11, 84, 'w', 'water'],
 ];
+export const BOWL = [27, 25];
 export const HALL2 = [-36, 74, -21, 83];
 
 export function summitElements() {
@@ -23,6 +24,8 @@ export function summitElements() {
   for (const z of [52.5, 66.5, 80.5, 90]) for (const sx of [-1, 1]) E.push({ t: 'block', rect: [sx * 5.6 - 0.3, z - 0.9, sx * 5.6 + 0.3, z + 0.9], y0: TOP, y1: TOP + 0.45, mat: 'sandstone', walk: true });
   // the second rest hall west of the way
   E.push({ t: 'pilgrim_hall', rect: HALL2.map((v, i) => v), plinth: 0.5, h: 3.0, y: TOP });
+  // the Great Bowl before the monastery's door, cut from one boulder, food heaped in it for the monks
+  E.push({ t: 'great_bowl', c: BOWL, y: TOP, r: 1.3 });
   // lamp pillars at the way's head by the stair
   for (const sx of [-1, 1]) E.push({ t: 'block', rect: [sx * 4.2 - 0.25, 91.5, sx * 4.2 + 0.25, 92], y0: TOP, y1: TOP + 1.7, mat: 'sandstone_dressed' });
   // Temple 40: an altar at the hall's west end with lamps, an offering and a bell; garlands between the front pillars

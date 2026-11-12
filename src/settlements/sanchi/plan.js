@@ -5,7 +5,7 @@
 import { TOP, STUPA2, TEMPLE40, VOTIVE, height } from './layout.js';
 import stupaPlan from '../../buildings/sanchi-great-stupa/plan.js';
 import './style.js';
-import { summitElements, SUMMIT_STALLS, HALL2 } from './summit.js';
+import { summitElements, SUMMIT_STALLS, HALL2, BOWL } from './summit.js';
 export const stupa = { ...stupaPlan, origin: [0, 0], base: TOP, district: undefined, view: [-32, -32, 32, 32], viewY: TOP };
 
 // Stupa 2: turned so that its double stairway faces east, toward the hill [stated: the stairway faces east]
@@ -111,6 +111,8 @@ function people() {
   monk([vx, vz - 2.0], vy + 0.4, [0, 1], { pose: 'cross', arms: 'pray' });
   for (const [dx, dz] of [[-1.7, 0.9], [0, 1.5], [1.7, 0.9], [-0.8, 2.4], [0.9, 2.4]]) monk([vx + dx, vz + dz], vy, [0, -1], { pose: 'cross' });
   monk([vx - 5.5 + 1.4, vz + 4], TOP, [-1, 0], { carry: 'pot' });
+  // at the Great Bowl: a monk ladling the food, monks with their alms bowls coming for it, a lay donor
+  monk([BOWL[0] + 1.9, BOWL[1] + 0.4], TOP, [-1, 0], { carry: 'pot' }); monk([BOWL[0] - 1.9, BOWL[1] - 0.6], TOP, [1, 0.2], { carry: 'basket' }); monk([BOWL[0] - 0.8, BOWL[1] + 2.3], TOP, [0.3, -1]); man([BOWL[0] + 0.8, BOWL[1] - 2.4], TOP, [-0.2, 1], { carry: 'basket' });
   // Temple 40: a monk and a pilgrim before the altar
   { const [tx, tz] = TEMPLE40.c, ty = TOP + 3.35; monk([tx - 14.8, tz - 1.0], ty, [-1, 0], { pose: 'kneel', arms: 'pray' }); woman([tx - 14.6, tz + 1.3], ty, [-1, 0], { pose: 'kneel', arms: 'pray' }); monk([tx + 8, tz + 5.4], ty, [0, 1], { pose: 'cross' }); }
   return { id: 'sanchi-people', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: L, rooms: [], bounds: [-300, -300, 300, 300], entrance: { at: [0, -180], facing: 's' } };

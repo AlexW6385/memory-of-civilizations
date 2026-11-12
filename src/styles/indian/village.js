@@ -329,4 +329,13 @@ function treeShrine(el, { bag, col }) {
   void sq;
 }
 
-export const villageElements = { village_house: building, yard_wall: yardWall, pilgrim_hall: pilgrimHall, stall, tree_shrine: treeShrine };
+/** great_bowl: the monastery's alms bowl cut from a single boulder, a wide shallow basin on a rough stone, food heaped in it for the monks. { c, y, r } */
+function greatBowl(el, { bag, col }) {
+  const [cx, cz] = el.c, y = el.y ?? 0, r = el.r ?? 1.3;
+  bag.add('granite_grey', lathe([[r * 0.75, -0.4], [r * 0.95, 0.15], [r * 1.0, 0.5], [r * 1.0, 0.9], [r * 0.9, 0.95], [r * 0.82, 0.9], [r * 0.78, 0.6], [r * 0.4, 0.5], [0.001, 0.48]], 22, (th, i) => 1 + 0.03 * Math.sin(th * 3 + i), cx, y, cz));
+  col.circle(cx, cz, r, y - 0.4, y + 0.95);
+  bag.add('cloth_white', lathe([[0.001, 0.5], [r * 0.6, 0.5], [r * 0.7, 0.58], [r * 0.5, 0.78], [0.001, 0.86]], 14, (th) => 1 + 0.08 * Math.sin(th * 5), cx, y, cz));
+  for (let k = 0; k < 4; k++) { const a = k * 1.7 + 0.4; bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.02], [0.17, 0.12], [0.15, 0.22], [0.09, 0.26], [0.001, 0.26]], 8, null, cx + Math.cos(a) * (r + 0.7), y, cz + Math.sin(a) * (r + 0.7))); }
+}
+
+export const villageElements = { village_house: building, yard_wall: yardWall, pilgrim_hall: pilgrimHall, stall, tree_shrine: treeShrine, great_bowl: greatBowl };

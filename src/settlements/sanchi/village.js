@@ -16,13 +16,12 @@ const faceDir = ([dx, dz]) => Math.atan2(-dx, -dz), awayDir = ([dx, dz]) => Math
 export const stairY = (z) => TOP * Math.max(0, Math.min(1, (STAIR.z1 - z) / (STAIR.z1 - STAIR.z0)));
 
 export function village() {
-  return lodTiles('sanchi-houses', 'indian', lots().map((l) => ({ t: 'village_house', rect: l.rect, front: l.front, y: 0, foot: -0.2, seed: l.seed, kind: l.kind, open: l.open, trade: l.trade })), { near: 150, R: RADIUS, entrance: { at: [0, -180], facing: 's' } });
+  return lodTiles('sanchi-houses', 'indian', lots().map((l) => ({ t: 'village_house', rect: l.rect, front: l.front, y: 0, foot: -0.2, seed: l.seed, kind: l.kind, open: l.open, trade: l.trade })), { near: 125, R: RADIUS, entrance: { at: [0, -180], facing: 's' } });
 }
 
-/** The stalls round the plaza and along the pilgrims' road: [centre x, z, front, trade]. */
+/** The stalls round the plaza at the stair's foot: [centre x, z, front, trade]. */
 export const STALLS = [
-  [-9.5, 129.5, 'e', 'flowers'], [9.5, 129.5, 'w', 'lamps'], [-9.5, 134.5, 'e', 'incense'], [9.5, 134.5, 'w', 'flowers'],
-  [-6.5, 139.5, 'e', 'water'], [6.5, 141.5, 'w', 'bowls'], [13.5, 147, 'w', 'robes'], [-13.5, 147, 'e', 'flowers'],
+  [-9.5, 124.5, 'e', 'water'], [9.5, 124.5, 'w', 'water'], [-9.5, 129.5, 'e', 'flowers'], [9.5, 129.5, 'w', 'lamps'], [-9.5, 134.5, 'e', 'incense'], [9.5, 134.5, 'w', 'flowers'],
 ];
 
 /** Yard walls, the rest house, the tree shrine, the plaza, the stair with its cheek walls, the stalls, the tank's ghat. */
@@ -203,7 +202,7 @@ export function dressing() {
   return L;
 }
 
-export const villageLife = { id: 'sanchi-village-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: [], rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -180], facing: 's' }, center: [0, 175], near: 130 };
+export const villageLife = { id: 'sanchi-village-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: [], rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -180], facing: 's' }, center: [0, 180], near: 110 };
 export async function houses() {
   return [...village(), { id: 'sanchi-village-extras', style: 'indian', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: extras(), rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -180], facing: 's' } }, { ...villageLife, elements: dressing() }];
 }
