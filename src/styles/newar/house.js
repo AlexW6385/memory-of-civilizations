@@ -110,6 +110,16 @@ export function houseParts(el, ctx, { hipRoof }) {
       lattice(cx - 0.9, y0 + 0.55, 0.8, 1.15, det); lattice(cx + 0.1, y0 + 0.55, 0.8, 1.15, det);
     }
   }
+  // a balcony along the third storey of the taller houses: a plank slab on struts, a railing of turned balusters, a cloth thrown over it [inferred]
+  if (n > 3 && W >= 6.5 && ((el.seed || 1) * 69069 >>> 0) % 100 < 30) {
+    const by = Y[2], x0b = 0.5, x1b = W - 0.5;
+    B(x0b, by + 0.02, -0.65, x1b, by + 0.14, 0.0, 'wood_dark');
+    for (let x = x0b + 0.3; x < x1b - 0.2; x += 1.4) RODL([x, by - 0.7, -0.02], [x, by + 0.02, -0.6], 0.045, 'wood_painted');
+    B(x0b, by + 0.14, -0.67, x1b, by + 0.2, -0.6, 'wood_dark'); B(x0b, by + 1.0, -0.67, x1b, by + 1.07, -0.6, 'wood_dark');
+    for (let x = x0b; x <= x1b; x += 0.32) B(x, by + 0.2, -0.655, x + 0.04, by + 1.0, -0.615, 'wood_dark');
+    B(x0b, by + 0.14, -0.67, x0b + 0.05, by + 1.07, 0.0, 'wood_dark'); B(x1b - 0.05, by + 0.14, -0.67, x1b, by + 1.07, 0.0, 'wood_dark');
+    if (((el.seed || 1) * 7) % 3 === 0) B(x0b + 1.0, by + 0.45, -0.7, x0b + 2.1, by + 1.05, -0.64, ['cloth_red', 'cloth_indigo', 'cloth_ochre'][(el.seed || 0) % 3]);
+  }
   // ── weathering (the monsoon's damp, the plaster's loss) and the eye-level dressing of the front ──
   if (det > 0) {
     // the damp at the foot (green-grey, broken), a patch of lime wash or mud plaster come away from the brick, rain streaks under the sills
@@ -213,7 +223,7 @@ export function houseParts(el, ctx, { hipRoof }) {
     if (det > 1) for (let k = 1; k < 4; k++) B(x0b, y + h * k / 4 - 0.015, -o - 0.07, x1b, y + h * k / 4 + 0.015, -o - 0.03, 'wood_dark');
     for (const x of [x0b, x1b - 0.03]) { B(x, y, -o, x + 0.03, y + h, -0.0, 'wood_dark'); B(x, y + h * 0.2, -o + 0.05, x + 0.03, y + h * 0.8, -0.02, 'opening'); }
     const a = toW(x0b - 0.12, -o - 0.12), b = toW(x1b + 0.12, 0.0);
-    hipRoof(bag, [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], y + h + 0.1, 0.5, [0.04, 0.04, 0.04, 0.04], 'roof_tile', ns);
+    hipRoof(bag, [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], y + h + 0.1, 0.28, [0.04, 0.04, 0.04, 0.04], 'roof_tile', ns);
   }
 
   /** A lattice window at (lx, y) of width w and height h: the dark recess, a carved frame, the screen of bars. */
