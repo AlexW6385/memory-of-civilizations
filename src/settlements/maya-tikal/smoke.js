@@ -3,7 +3,7 @@
 // summits and before the shrines all day. The engine part is src/engine/smoke.js; positions come from layout.js and the plan.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, groups, T1, T2, NA, CA } from './layout.js';
+import { RADIUS, PLAZA, groups, T1, T2, NA, CA } from './layout.js';
 import { ground } from './ground.js';
 
 const ID = 'maya-tikal';
@@ -17,11 +17,16 @@ export function emitters() {
       E.push({ p: [x, 0.42 + 3.6, z], kind: 'kitchen', thr: 0.2 + 0.6 * r(), seed: h.seed + 1 });
     }
   }
+  // each group's kitchen shed (in the north-east corner of the court, plan: town.js), at the meals
+  for (const g of groups()) E.push({ p: [g.rect[2] - 4.4, 0.2 + 3.3, g.rect[1] + 3.4], kind: 'kitchen', thr: 0.1 + 0.6 * r(), seed: g.seed + 7 });
+  // the censers of the plaza, in the Central Acropolis' courts
+  for (const [x, z] of [[-31, -4], [31, 4], [-6, 34.6], [6, 34.6]]) E.push({ p: [x, 0.04 + 0.95, z], kind: 'incense', thr: 0, seed: 40 + Math.round(x) });
+  for (const [x, z] of [[-29, 77], [-23, 83]]) E.push({ p: [x, CA.H + 0.8 + 0.95, z], kind: 'incense', thr: 0, seed: 50 + Math.round(x) });
   E.push({ p: [T1.c[0] - T1.top[0] + 1.2, T1.H + 0.6, 2.4], kind: 'incense', thr: 0, seed: 31 });             // Temple I's terrace
   E.push({ p: [T2.c[0] + T2.top[0] - 1.2, T2.H + 0.6, -2.4], kind: 'incense', thr: 0, seed: 32 });            // Temple II's terrace
   E.push({ p: [-24, 0.9, -37.5 + 1.2], kind: 'incense', thr: 0, seed: 33 });                                // before the stelae of the North Acropolis
   E.push({ p: [24, 0.9, -37.5 + 1.2], kind: 'incense', thr: 0, seed: 34 });
-  void NA; void CA; void ground;
+  void NA; void ground; void PLAZA;
   return E;
 }
 

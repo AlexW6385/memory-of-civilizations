@@ -3,7 +3,7 @@
 // south range opened and furnished, the stepped palace of five levels), the small ball court. Buildings at their true sizes
 // (the stairs of the temples are as steep as a walker can climb, 60°).
 
-import { PLAZA, T1, T2, T3, NA, NA_TEMPLE, NA_SMALL, CA, BALL } from './layout.js';
+import { PLAZA, T1, T2, NA, NA_TEMPLE, NA_SMALL, CA, BALL } from './layout.js';
 import { frame } from '../../styles/tikal/kit.js';
 
 const E = [];
@@ -20,10 +20,6 @@ E.push({ t: 'k_platform', rect: NA.rect, H: NA.H, stairs: [{ face: 's', at: 0, w
 E.push({ t: 'k_pyramid', ...NA_TEMPLE, y0: NA.H, masks: true, shrine: { chambers: 3, len: 6, comb: 7 } });
 for (const [x, z, face] of NA_SMALL) E.push({ t: 'k_pyramid', c: [x, z], base: [7, 7], top: [4.8, 4.8], H: 8, tiers: 3, face, stairW: 3.5, y0: NA.H, shrine: { chambers: 1, len: 4, comb: 5 } });
 for (const sg of [-1, 1]) E.push({ t: 'k_mask', c: [sg * 17.5, NA.rect[3] + 0.05], face: 's', y: 0.3, s: 2.3 });     // the masks flanking the great stair
-// the temple of the Jaguar Priest (Temple III), west of Temple II, its own small court before it
-E.push({ t: 'k_pyramid', ...T3, masks: true, shrine: { chambers: 2, len: 6, comb: 10 } });
-E.push({ t: 'lane', rect: [-96, -78, -80, -46], y: 0.04, mat: 'lime_plaster' });
-for (const z of [-70, -54]) E.push({ t: 'k_brazier', at: [-90, z], y: 0.04, rot: z });
 // the lower ranges on the North Acropolis' terrace, either side of the great temple: vaulted rooms with benches, one opening on each court
 E.push({ t: 'k_range', c: [-24, -76], face: 'e', y: NA.H, n: 3, furn: true, seed: 21 });
 E.push({ t: 'k_range', c: [24, -76], face: 'w', y: NA.H, n: 3, furn: true, seed: 22 });
@@ -108,7 +104,7 @@ export const plaza = {
   style: 'tikal',
   origin: [0, 0], base: 0, yaw: 0,
   entrance: { at: [-18, 28], facing: 'n' },
-  bounds: [-130, -126, 150, 135],
+  bounds: [-80, -126, 150, 135],
   bakeBounds: [-70, -60, 100, 60],
   view: [-60, -60, 90, 60],
   bakeTop: 60,

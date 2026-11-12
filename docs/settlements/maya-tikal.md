@@ -77,3 +77,15 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 ## 10. Living systems
 
 - movers.js: people by trade and hour on the plaza, the causeways and the lanes between groups; fauna.js: swallows, vultures as crows, parrot-like doves, small birds on the plaza, a heron-like egret at the reservoirs and fish in them; smoke.js: kitchen smoke from the houses at meals and copal incense at the temple summits.
+
+## 11. Deepening pass (Suzhou standard)
+
+- Weathering [inferred from the humid lowland climate, §8]: rain runnels (`plaster_damp`), lost paint showing the limestone, moss at the foot of tiers, platform walls and palace fronts; damp and moss in the plaza's plaster joints.
+- Stucco masks flank the stairs of Temple II, the North Acropolis temple, Temple IV and the great stair of the North Acropolis: giant masks of the Sun God and earth gods in painted stucco are the Classic Maya way of dressing stairs and tiers [stated: Maya architecture, general; Tikal's own masks are mostly later-lost, so the pairing is [inferred]].
+- Chambers and palace rooms: plastered walls painted with bands of ochre and glyph panels in red and Maya blue, mats hung at the doors [inferred: painted interiors and perishable door hangings, general Maya archaeology]; benches along the back walls [stated: Tikal palaces, Wikipedia].
+- The East Plaza market hall: a long colonnaded range of rooms on the east side of the market; Tikal's marketplace is identified in the East Plaza by the Penn excavations (Tikal Report 16, Jones 1996) [stated: excavation report; the hall's form is [inferred]].
+- Temple III is NOT built: it dates from 810 (Stela 24) [stated: Wikipedia, Tikal Temple III], after the moment shown (c. 750).
+- Patio groups: each court has a kitchen shed (open thatched roof on posts, hearth, metate), a maize crib on posts, a chultun (bell-shaped cistern whose mouth is a kerb with a stone lid; Tikal's households dug many) [stated: chultuns, Wikipedia, Tikal; forms [inferred]], a low dry-stone wall (albarrada) with a gate on the east, hammocks in the sleeping houses, strings of maize and chiles under the eaves, turkeys and dogs (the only domestic animals; no chickens or pigs before 1492) [stated: Domestic turkey, Wikipedia].
+- Milpas: maize plots in the gaps about the groups; ramón and fruit trees in the courts [stated: §5].
+- The reservoirs' rim: women kneeling to fill jars and wash, a fisher in a dugout canoe, ducks [inferred; dugout canoes: Maya sources, general].
+- Market: sellers under palm-thatch awnings on poles, on mats; about thirty buyers in the aisles [inferred].

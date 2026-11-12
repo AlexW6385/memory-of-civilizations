@@ -140,8 +140,8 @@ export function stains(el, { bag }) {
     if (el.skip && el.skip(x, z)) continue;
     const r = rand();
     if (r < 0.5) patch(bag, 'plaster_damp', [x, y, z], [0, 1, 0], 1.2 + rand() * 2.6, 0.8 + rand() * 1.6, Math.floor(rand() * 1e6), 0.004);
-    else if (r < 0.85) for (let k = 0; k < 3; k++) patch(bag, 'stucco_leaf', [x + (rand() - 0.5) * 0.9, y, z + (rand() - 0.5) * 0.9], [0, 1, 0], 0.25 + rand() * 0.4, 0.2 + rand() * 0.3, Math.floor(rand() * 1e6), 0.006, 0, 8);
-    else patch(bag, 'rubble', [x, y, z], [0, 1, 0], 0.4 + rand() * 0.6, 0.3 + rand() * 0.4, Math.floor(rand() * 1e6), 0.005, 0, 8);
+    else if (r < 0.85) for (let k = 0; k < 3; k++) patch(bag, 'stucco_leaf', [x + (rand() - 0.5) * 0.9, y, z + (rand() - 0.5) * 0.9], [0, 1, 0], 0.25 + rand() * 0.4, 0.2 + rand() * 0.3, Math.floor(rand() * 1e6), 0.012, 0, 8);
+    else patch(bag, 'rubble', [x, y, z], [0, 1, 0], 0.4 + rand() * 0.6, 0.3 + rand() * 0.4, Math.floor(rand() * 1e6), 0.02, 0, 8);
   }
 }
 

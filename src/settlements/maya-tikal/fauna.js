@@ -1,7 +1,7 @@
 // Classic Maya Tikal — the animals (src/engine/fauna.js draws them; docs/settlements/maya-tikal.md §10): swallows over the plaza and the
 // reservoirs, vultures (the crow stands in) high over the temples, small birds on the plaza's plaster and the causeways, an egret on
 // a reservoir's rim, small fish in the reservoirs [inferred: the plastered quarry reservoirs held water through the dry season].
-import { RESERVOIRS, resDist } from './layout.js';
+import { RESERVOIRS, resDist, groups } from './layout.js';
 import { ground } from './ground.js';
 
 const fish = [];
@@ -10,11 +10,15 @@ const flights = [
   { kind: 'swallow', n: 6, loop: { c: [0, 0], a: [60, 50], rot: 0 }, y: [3, 40], speed: 10 },
   { kind: 'swallow', n: 5, loop: { c: [-5, 205], a: [50, 34], rot: 0.2 }, y: [0.6, 8], speed: 9 },
   { kind: 'swallow', n: 4, loop: { c: [180, 20], a: [40, 30], rot: -0.3 }, y: [0.6, 8], speed: 9 },
+  { kind: 'swallow', n: 5, loop: { c: [110, 42], a: [34, 24], rot: 0 }, y: [2, 14], speed: 9 },
   { kind: 'crow', n: 7, loop: { c: [10, -20], a: [130, 100], rot: 0.5 }, y: [60, 110], speed: 8 },
   { kind: 'crow', n: 4, loop: { c: [-140, 20], a: [100, 70], rot: 0 }, y: [50, 90], speed: 7 },
 ];
 const perches = [];
 const spots = [[-12, 30], [14, 26], [-26, -10], [26, 12], [0, -30], [-20, 40], [22, -28], [-60, 33], [-120, 33], [-190, 33], [100, -80], [100, -160], [120, 30], [96, 50], [-80, 80], [40, 60], [-30, 110], [30, 140]];
 for (const [x, z] of spots) perches.push({ kind: 'sparrow', x, z, y: ground.height(x, z) + 0.05, rot: (x * 7) % 3, range: [1.8, 1.6] });
+for (const g of groups().filter((_, i) => i % 3 === 0).slice(0, 18)) { const x = g.shrine[0] + 2.5, z = g.shrine[1] + 1.5; perches.push({ kind: 'sparrow', x, z, y: ground.height(x, z) + 0.05, rot: g.seed % 3, range: [1.6, 1.4] }); }   // on the groups' courts
+for (const [x, z] of [[-70, -48], [112, 40], [120, 52], [100, 36]]) perches.push({ kind: 'sparrow', x, z, y: ground.height(x, z) + 0.05, rot: x % 3, range: [1.8, 1.6] });     // the market
+{ const R = RESERVOIRS[1], x = R.c[0] - R.a * 0.9, z = R.c[1] + 4; perches.push({ kind: 'egret', x, z, y: ground.height(x, z), rot: 0.5, stay: [80, 240], gone: [40, 150], alert: 10 }); }
 { const R = RESERVOIRS[0], x = R.c[0] + R.a * 0.9, z = R.c[1] - 2; perches.push({ kind: 'egret', x, z, y: ground.height(x, z), rot: Math.PI, stay: [80, 240], gone: [40, 150], alert: 10 }); }
 export default { fish, flights, perches };
