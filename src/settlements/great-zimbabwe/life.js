@@ -109,3 +109,22 @@ export function courtAt(i) {
   return { at: [V.c[0] + Math.cos(gm) * V.r[0] * 0.3, V.c[1] + Math.sin(gm) * V.r[1] * 0.3], y: height(V.c[0], V.c[1]) + 0.06, rot: gm + Math.PI / 2, gm };
 }
 export function goodsAt() { const { at, y, rot } = courtAt(0); return { at, y, rot }; }
+
+/**
+ * The termite mounds of the savanna: { c, r, h, y, seed } — tall red-earth cones standing in the grass, a metre or two high, a
+ * few dozen in the open ground of the valley (the hills of Zimbabwe are full of them; inferred), kept clear of the houses, the
+ * kraals, the ways, the enclosures and the hill.
+ */
+let MOUNDS = null;
+export function mounds() {
+  if (MOUNDS) return MOUNDS;
+  MOUNDS = [];
+  const rand = rng(1352);
+  for (let t = 0; t < 4000 && MOUNDS.length < 46; t++) {
+    const x = (rand() * 2 - 1) * 230, z = (rand() * 2 - 1) * 230;
+    if (!clear(x, z, 3) || pathDist(x, z) < 4 || compounds().some((c) => Math.hypot(c.c[0] - x, c.c[1] - z) < c.r + 3) || KRAAL_AT.some(([kx, kz, kr]) => Math.hypot(kx - x, kz - z) < kr + 4)) continue;
+    if (MOUNDS.some((m) => Math.hypot(m.c[0] - x, m.c[1] - z) < 10)) continue;
+    MOUNDS.push({ c: [x, z], r: 0.7 + rand() * 0.9, h: 0.9 + rand() * 1.5, y: height(x, z), seed: Math.floor(rand() * 1e6) });
+  }
+  return MOUNDS;
+}

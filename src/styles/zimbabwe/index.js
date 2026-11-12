@@ -94,6 +94,36 @@ function dryWall(el, { bag, col }) {
       bag.add(hash(j, 37) < 0.25 ? 'granite_rough' : G, orientedBox([cx - ux * w / 2, cz - uz * w / 2], [cx + ux * w / 2, cz + uz * w / 2], d, y - 0.08, y + 0.14 + hash(j, 38) * 0.26, 0.04));
     }
   }
+  // what grows on and under the walls: tufts of dry grass on the wall top and at the foot, here and there an aloe rosette on the
+  // top (aloes grow out of the granite of the plateau; inferred), each leaf a flat blade; sparse, a cluster every few metres
+  if (h >= 3.5) {
+    const dry = [], green = [], total2 = len[n - 1];
+    const blade = (arr, x, y, z, ang, lean, L, w) => {
+      const c = Math.cos(ang), s2 = Math.sin(ang), tx = -s2, tz = c, tip = [x + c * lean * L, y + L * Math.sqrt(Math.max(0.05, 1 - lean * lean)), z + s2 * lean * L];
+      const a = [x - tx * w, y, z - tz * w], b = [x + tx * w, y, z + tz * w];
+      arr.push(...a, ...b, ...tip, ...a, ...tip, ...b);
+    };
+    for (let j = 0, N = Math.floor(total2 / 5.2); j < N; j++) {
+      const d = (j + hash(j, 61)) * 5.2, i = Math.min(n - 2, Math.max(0, len.findIndex((l) => l >= d)));
+      const [x, z] = path[i], [nx, nz] = fr[i], r = hash(j, 62);
+      if (r < 0.62) {
+        // dry grass on the top, a little to one side of the middle
+        const u = (hash(j, 63) - 0.5) * th * 0.55, y = yOf(path[i]) + top(i) - 0.04, bx = x + nx * u, bz = z + nz * u;
+        for (let k = 0; k < 11; k++) blade(dry, bx + (hash(j * 11 + k, 64) - 0.5) * 0.25, y, bz + (hash(j * 11 + k, 65) - 0.5) * 0.25, hash(j * 11 + k, 66) * 6.28, 0.35 + hash(j * 11 + k, 67) * 0.4, 0.35 + hash(j * 11 + k, 68) * 0.4, 0.022);
+      } else if (r < 0.74) {
+        // an aloe rosette on the top: eight thick leaves, curving up and out
+        const u = (hash(j, 63) - 0.5) * th * 0.4, y = yOf(path[i]) + top(i) - 0.03, bx = x + nx * u, bz = z + nz * u;
+        for (let k = 0; k < 9; k++) blade(green, bx, y, bz, k / 9 * 6.28 + hash(j, 69), 0.6, 0.5 + 0.1 * (k % 2), 0.07);
+      }
+      // at the foot of either face, grass in the lee of the stone
+      if (hash(j, 70) < 0.55) {
+        const side = hash(j, 71) > 0.5 ? 1 : -1, u = side * (th / 2 + 0.25 + hash(j, 72) * 0.4), y = yOf(path[i]) - 0.02, bx = x + nx * u, bz = z + nz * u;
+        for (let k = 0; k < 13; k++) blade(dry, bx + (hash(j * 13 + k, 73) - 0.5) * 0.4, y, bz + (hash(j * 13 + k, 74) - 0.5) * 0.4, hash(j * 13 + k, 75) * 6.28, 0.3 + hash(j * 13 + k, 76) * 0.45, 0.45 + hash(j * 13 + k, 77) * 0.55, 0.025);
+      }
+    }
+    if (dry.length) bag.add('reed_mat', fromTriangles(dry));
+    if (green.length) bag.add('flax_leaf', fromTriangles(green));
+  }
   // the rounded ends of an open wall
   if (!closed) for (const i of [0, n - 1]) {
     const [x, z] = path[i], y = yOf(path[i]);
@@ -261,6 +291,18 @@ function soapstoneBird(el, { bag, col }) {
   ell([[0.001, 0], [0.032, 0.015], [0.038, 0.045], [0.03, 0.075], [0.001, 0.085]], 0.9, W(0.015 * s, 0, yb + 0.36 * s));
   ell([[0.001, 0], [0.024, 0.01], [0.022, 0.05], [0.012, 0.085], [0.001, 0.09]], 0.8, W(0.03 * s, 0, yb + 0.395 * s), 0.1, true);
   col.circle(x, z, 0.3, y, y + H + 0.5);
+}
+/**
+ * termite_mound: a termite hill of the savanna { c, r, h, y, seed }: a lumpy cone of red earth, a ragged top with a chimney or
+ * two, a darker skirt of loose soil at its foot, a few stems of dry grass round it.
+ */
+function termiteMound(el, { bag, col }) {
+  const [x, z] = el.c, r = el.r ?? 1, h = el.h ?? 1.5, y = el.y ?? 0, seed = el.seed ?? 1;
+  const n = (th, i) => 1 + 0.18 * Math.sin(th * 3 + seed) + 0.1 * Math.sin(th * 7 + seed * 1.3 + i * 0.9);
+  bag.add('banco', lathe([[r * 1.25, -0.2], [r * 1.18, 0.05], [r * 0.85, h * 0.3], [r * 0.6, h * 0.6], [r * 0.38, h * 0.85], [r * 0.2, h * 0.97], [0.001, h]], 10, n, x, y, z));
+  for (let k = 0; k < 2; k++) { const a = seed * 0.7 + k * 2.4, cx = x + Math.cos(a) * r * 0.35, cz = z + Math.sin(a) * r * 0.35; bag.add('banco', lathe([[r * 0.2, 0], [r * 0.13, h * 0.2], [r * 0.07, h * 0.3], [0.001, h * 0.32]], 6, null, cx, y + h * 0.78, cz)); }
+  bag.add('silt', lathe([[r * 1.9, 0], [r * 1.3, 0.12], [0.001, 0.14]], 10, (th) => 1 + 0.15 * Math.sin(th * 4 + seed), x, y - 0.02, z));
+  col.circle(x, z, r * 0.9, y, y + h);
 }
 /** monolith: a tall natural slab of granite standing in a socket { at, rot, h, y }. */
 function monolith(el, { bag, col }) {
@@ -655,6 +697,6 @@ function stoneCarver(el, { bag, col }) {
 }
 registerStyle('zimbabwe', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, dry_wall: dryWall, cone_tower: coneTower, daga_hut: hut, platform, soapstone_bird: soapstoneBird, monolith, boulder, stone_steps: stoneSteps, daga_yard: dagaYard, thatch_roof: thatchRoof, kraal, trade_goods: tradeGoods, granary, compound, homestead_goods: homesteadGoods, millet_plot: milletPlot, smithy, stone_carver: stoneCarver },
+  elements: { ...STYLES.qing.elements, dry_wall: dryWall, cone_tower: coneTower, daga_hut: hut, platform, soapstone_bird: soapstoneBird, monolith, boulder, stone_steps: stoneSteps, daga_yard: dagaYard, thatch_roof: thatchRoof, kraal, trade_goods: tradeGoods, granary, compound, homestead_goods: homesteadGoods, millet_plot: milletPlot, smithy, stone_carver: stoneCarver, termite_mound: termiteMound },
   objects: {},
 });
