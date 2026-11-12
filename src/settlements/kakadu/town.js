@@ -47,7 +47,7 @@ export async function town() {
     woman([wx + 0.9, wz + 0.4], height(wx, wz), -1.9, { pose: 'sit_ground' }); kid(wx - 0.4, wz + 1.2, 0.4, 814);
   }
   // a hunter at the billabong's edge with a goose spear; people on the way along the foot
-  for (let k = 0; k < 8; k++) { const x = -60 + rand() * 100, z = -18 + rand() * 5; (rand() < 0.5 ? man : woman)([x, z], height(x, z), rand() * 6.28, rand() < 0.4 ? { pose: 'talk' } : {}); }
+  for (let k = 0; k < 8; k++) { const x = -60 + rand() * 100, z = -18 + rand() * 5, f = rand() < 0.5 ? man : woman, rot = rand() * 6.28, o = rand() < 0.4 ? { pose: 'talk' } : {}; if (Math.hypot(x + 1, z + 13) < 9) continue; f([x, z], height(x, z), rot, o); }   // (none within 9 m of the arrival)
   man([POOL.c[0] - POOL.a * 1.08, POOL.c[1] - 5], 0, -1.2, { pose: 'staff' });
   // magpie geese crowded on the shrunken water and on its margin
   for (let k = 0; k < 12; k++) {

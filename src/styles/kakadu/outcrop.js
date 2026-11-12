@@ -106,7 +106,7 @@ function corners(x0, x1, y0, y1, z0, z1, jit, rnd) {
   }
   return C;
 }
-const uniformJit = (j) => [[[j, j], [j, j]], [[j, j], [j, j]]];
+const uniformJit = (j) => [[[[j, j, j], [j, j, j]], [[j, j, j], [j, j, j]]], [[[j, j, j], [j, j, j]], [[j, j, j], [j, j, j]]]];
 export function hexP(C) {
   return (u, v, w) => {
     const out = [0, 0, 0];
