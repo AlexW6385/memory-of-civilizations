@@ -1,11 +1,10 @@
 // The Citadel and the public buildings (docs/settlements/mohenjo-daro.md §2, §4): the mound with its baked-brick facing, buttresses, towers and
 // parapet; the Great Bath with its court, pool, stairs, gallery of stepped piers, doors and the row of cells with the well; the granary on its
 // 27 brick blocks; the Pillared Hall; the College of Priests; the town wall and its gate tower. Coordinates are the settlement's (absolute).
-import { box, lathe, frustum, fromTriangles } from '../../core/geom.js';
+import { box, lathe, frustum } from '../../core/geom.js';
 import { Fr, rng, wellAt } from './kit.js';
 import { dressWall, furnishRoom } from './dress.js';
 
-const quadY = (r, y) => fromTriangles([r[0], y, r[1], r[0], y, r[3], r[2], y, r[3], r[0], y, r[1], r[2], y, r[3], r[2], y, r[1]]);
 const jar = (bag, mat, x, y, z, s = 1) => bag.add(mat, lathe([[0.07 * s, 0], [0.2 * s, 0.12 * s], [0.24 * s, 0.3 * s], [0.19 * s, 0.5 * s], [0.1 * s, 0.6 * s], [0.12 * s, 0.66 * s], [0.001, 0.66 * s]], 8, null, x, y, z));
 /** The weathering of the four outer faces of a rectangle of walls from y: `gaps` are the doors' spans per side ('n' | 's' | 'w' | 'e') along each face. */
 function outer(ctx, rect, y, H, lowH, seed, gaps = {}, sides = 'nswe', plain = false) {
@@ -122,7 +121,7 @@ export function bath(el, ctx) {
   bag.add('bitumen', box(px0, yb, pz0, px0 + 0.06, y - 0.05, pz1)); bag.add('bitumen', box(px1 - 0.06, yb, pz0, px1, y - 0.05, pz1));
   bag.add('brick', box(px0 - 0.35, y, pz0 - 0.35, px1 + 0.35, y + 0.14, pz0), false); bag.add('brick', box(px0 - 0.35, y, pz1, px1 + 0.35, y + 0.14, pz1 + 0.35), false);
   bag.add('brick', box(px0 - 0.35, y, pz0, px0, y + 0.14, pz1), false); bag.add('brick', box(px1, y, pz0, px1 + 0.35, y + 0.14, pz1), false);
-  bag.add('water', quadY([px0 + 0.06, pz0, px1 - 0.06, pz1], y - 0.35));
+  bag.add('water', box(px0 + 0.06, y - 0.5, pz0, px1 - 0.06, y - 0.3, pz1), false);   // a slab, as the Roman baths' pools: a bare quad did not show
   // the stairs at both short ends, 3.4 m long, down to the bed
   W.stairs(px0 + 0.06, pz0, px1 - 0.06, pz0 + 3.4, yb, y, -1, 'brick', 0.2);
   W.stairs(px0 + 0.06, pz1 - 3.4, px1 - 0.06, pz1, yb, y, 1, 'brick', 0.2);
