@@ -121,11 +121,11 @@ export function laneItem(f, kind, rand, bag, col, H) {
         const hub = lathe([[0.001, -0.04], [0.14, -0.04], [0.14, 0.11], [0.001, 0.11]], 10); hub.rotateX(Math.PI / 2); hub.translate(0, 0.9, 0.035);
         bag.add('timber', place(hub, wp[0], 0, wp[1], yaw));
       }
-      bag.add('timber', place(box(-0.55, 0.9, -1.1, 0.55, 0.98, 1.1), c[0], 0, c[1], ay + Math.PI / 2));
-      for (const sgn of [-1, 1]) bag.add('wood_dark', place(box(-0.55, 0.98, sgn * 1.1 - 0.03, 0.55, 1.35, sgn * 1.1 + 0.03), c[0], 0, c[1], ay + Math.PI / 2));
-      for (const sgn of [-1, 1]) bag.add('wood_dark', place(box(sgn * 0.5 - 0.03, 0.98, -1.1, sgn * 0.5 + 0.03, 1.35, 1.1), c[0], 0, c[1], ay + Math.PI / 2));
-      for (const sgn of [-1, 1]) bag.add('timber', place(box(sgn * 0.3 - 0.04, 0.55, -2.9, sgn * 0.3 + 0.04, 0.62, -1.0), c[0], 0, c[1], ay + Math.PI / 2));
-      F.spiceSacks(bag, c[0], 0.98, c[1], ay + Math.PI / 2, 3, ['cloth_ochre', 'cloth_red']); F.bale(bag, c[0] + ax[0] * 0.5, 0.98, c[1] + ax[1] * 0.5, 0.7, 0.4, 0.5, ay, 'thatch');
+      bag.add('timber', place(box(-0.55, 0.9, -1.1, 0.55, 0.98, 1.1), c[0], 0, c[1], ay));
+      for (const sgn of [-1, 1]) bag.add('wood_dark', place(box(-0.55, 0.98, sgn * 1.1 - 0.03, 0.55, 1.35, sgn * 1.1 + 0.03), c[0], 0, c[1], ay));
+      for (const sgn of [-1, 1]) bag.add('wood_dark', place(box(sgn * 0.5 - 0.03, 0.98, -1.1, sgn * 0.5 + 0.03, 1.35, 1.1), c[0], 0, c[1], ay));
+      for (const sgn of [-1, 1]) bag.add('timber', place(box(sgn * 0.3 - 0.04, 0.55, -2.9, sgn * 0.3 + 0.04, 0.62, -1.0), c[0], 0, c[1], ay));
+      F.spiceSacks(bag, c[0], 0.98, c[1], ay, 3, ['cloth_ochre', 'cloth_red']); F.bale(bag, c[0] + ax[0] * 0.5, 0.98, c[1] + ax[1] * 0.5, 0.7, 0.4, 0.5, ay, 'thatch');
       const e0 = f.p(f.s - 1.2, 0.0), e1 = f.p(f.s + 2.3, 1.8); col.rect([Math.min(e0[0], e1[0]), Math.min(e0[1], e1[1]), Math.max(e0[0], e1[0]), Math.max(e0[1], e1[1])], 0, 1.0);
       break;
     }

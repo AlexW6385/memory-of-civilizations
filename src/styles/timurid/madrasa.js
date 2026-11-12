@@ -90,7 +90,26 @@ export function madrasa(el, ctx) {
   // ---- the east wing (the entrance's range) beside the pishtaq's passage: the corner halls, the lecture room
   const classroom = [cx1 + 1.0, Z0 + 2.4, X1 - 2.4, cz0 - 0.5];                              // x −58 … −47.4, z −25.6 … −18.5
   // the rest of the east range: solid; the classroom (north) and the south corner hall hollow only for the north one
-  solid(bag, col, B, [cx1, cz1 + 0.5, X1 - 2.4, Z1 - 2.4], 0, TOP - 1.0);
+  {
+    // the south-east corner hall (the library): mirrored on the classroom, its door on the south gallery's east end, shelves of manuscripts on the outer wall
+    const rx0 = cx1 + 1.0, rz0 = cz1 + 0.5, rx1 = X1 - 2.4, rz1 = Z1 - 2.4, th = 0.6;
+    wallRun(bag, col, 'plaster_persian', 'z', rz0, rz1, rx0 - th / 2, th, 0, 5.8, [[rz0 + 1.4, 1.5, 2.8]]);
+    solid(bag, col, B, [rx1, rz0, rx1 + 1.2, rz1 + 0.2], 0, 5.8);
+    solid(bag, col, B, [rx0 - th, rz1, rx1 + 1.2, rz1 + 2.4], 0, TOP - 1.0);
+    bag.add('ceiling_painted', box(rx0, 5.8, rz0, rx1, 6.1, rz1));
+    solid(bag, null, B, [rx0 - th, rz0 - th, rx1 + 1.2, rz1 + 2.4], 6.1, TOP - 1.0); col.rect([rx0 - th, rz0, rx1 + 1.2, rz1 + 2.4], 5.8, TOP - 1.0);
+    bag.add('brick_paving', box(rx0, 0, rz0, rx1, 0.06, rz1));
+    F.carpet(bag, (rx0 + rx1) / 2, 0.06, (rz0 + rz1) / 2 - 0.5, (rx1 - rx0) - 2.0, (rz1 - rz0) - 2.6, Math.PI / 2, 'persian');
+    for (let i = 0; i < 5; i++) {
+      const sx = rx0 + 0.5 + i * 2.1;
+      bag.add('wood_dark', box(sx, 0.06, rz1 - 0.55, sx + 1.7, 2.3, rz1));
+      for (let r = 0; r < 4; r++) { bag.add('wood_painted', box(sx + 0.05, 0.4 + r * 0.55, rz1 - 0.6, sx + 1.65, 0.45 + r * 0.55, rz1 - 0.04)); for (let b = 0; b < 8; b++) bag.add(b % 3 === 1 ? 'hide_brown' : b % 3 === 2 ? 'linen' : 'hide_tan', box(sx + 0.12 + b * 0.19, 0.45 + r * 0.55, rz1 - 0.5, sx + 0.28 + b * 0.19, 0.45 + r * 0.55 + 0.22 + (b % 2) * 0.05, rz1 - 0.12)); }
+    }
+    col.rect([rx0 + 0.5, rz1 - 0.55, rx0 + 0.5 + 4 * 2.1 + 1.7, rz1], 0, 2.3);
+    for (let i = 0; i < 6; i++) { F.rahle(bag, rx0 + 1.6 + (i % 3) * 2.8, 0.08, rz0 + 1.8 + Math.floor(i / 3) * 1.9, Math.PI / 2); F.cushion(bag, rx0 + 1.0 + (i % 3) * 2.8, 0.08, rz0 + 1.8 + Math.floor(i / 3) * 1.9, 0.7, 0.5, 0.12, 0.2 * i, i % 2 ? 'cloth_indigo' : 'cloth_red'); }
+    for (const [x, z] of [[rx0 + 2, rz0 + 0.5], [rx0 + 6, rz0 + 0.5], [rx0 + 10, rz0 + 0.5]]) F.oilLamp(bag, lights, x, 1.5, z, 'bronze', 1.2);
+    F.mosqueLamp(bag, lights, (rx0 + rx1) / 2, 3.3, (rz0 + rz1) / 2, 5.8, { k: 1.2, glow: 4, reach: 10 });
+  }
   solid(bag, col, B, [cx1 - 0.5, cz1 - 0.1, X1 - 2.4, cz1 + 0.5], 0, TOP - 1.0);
   {
     // the classroom: walls (the door on the court's gallery side at its west), a painted ceiling, the furnishings

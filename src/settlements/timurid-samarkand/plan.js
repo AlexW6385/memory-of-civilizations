@@ -21,6 +21,9 @@ const rooms = [
   room('registan', SQUARE, 0, 'open'),
   room('madrasa court', [-107, -18, -59, 18], 0, 'open'),
   room('classroom', [-58, -25.6, -47.4, -18.5], 0, 'hall'),
+  room('khanqah hall', [KHANQAH.rect[2] - 17, -6, KHANQAH.rect[2] - 5, 6], 0, 'hall'),
+  room('library', [-58, 18.5, -47.4, 25.6], 0, 'hall'),
+  room('mosque', [-117.4, -17.4, -114, 17.4], 0, 'hall'),
   room('pishtaq passage', [-59, zm - 6, -45, zm + 6], 0, 'hall'),
 ];
 const walks = [[[40, 0], [0, 0], [-40, 0], [-52, 0], [-66, 0], [-83, 0]]];
