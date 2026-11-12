@@ -105,6 +105,17 @@ Sources added:
 Sources added:
 - [Typologies of the Djenné house — Heritage Science (Springer, 2021)](https://link.springer.com/10.1186/s43238-021-00040-y)
 
+## 16. Deepening pass: enterable houses and a fuller town (2026-11-11)
+
+- **Enterable houses** (`src/styles/sahel/homes.js`, `sahel_home`): the 64 houses nearest the market and the mosque can be entered. After the Sudanese house of the Springer typology study (§15: the vestibule between street and court, "a Qur'anic school for marabouts, a workshop for artisans, and a meeting place for traditional chiefs"; wood for floors, ceilings and roofs) [stated]: behind the plank door the skifa with banco benches either side; where the front is wide enough (8 m and more) a room each side of it, furnished by trade (loom of indigo strips, store jars and sacks, Qur'anic boards on a mat, potter's clay and shelf of pots, grain sacks, a sleeping bench); behind it the court with the stair along its west wall, a hearth, granary, mortar, water jars on a stand or firewood, in a different order house by house; a back block (sleeping room and store, kitchen vent and jars on its roof); in two-storey houses the stair ends at a door into the upper room (mat beds, chest, shelf of calabashes). The plan (vestibule, court, back rooms, stair, roof terraces) is [inferred] from §5 and §15; dimensions ours.
+- **Lanes:** 3.4–4.5 m between the blocks (were 4–6 m), so the fronts stand closer; the others keep the solid sahel_house with the facade, benches and the generic door goods of the life layer.
+- **Market's east edge:** a row of ten houses fronting west on the market, continuous but for the cross lane at the north; a 3 m strip between the market and the row is walked.
+- **On the benches:** elders, women with children (and a boy standing by) sit on the facade benches (tintin) of a third of the fronts within 135 m. [inferred]
+- **Market ground:** heaps of pots and baskets, sacks and hens between the stalls and mats (Caillié's list of wares, §11).
+- **The mosque inside and round it:** worshippers kneeling or cross-legged in the aisles facing the qibla, men talking between the piers, a teacher with five pupils on a mat in the west gallery (the vestibule/school use above [stated], the gallery as place [inferred]); sandals in rows before and inside the north door, water jars on banco stands beside it, Qur'an stands (X-shaped rehal) and rolled mats in the aisles. Masons' yards on the open ground round the platform with drying banco bricks hand-shaped as cylinders (djenné ferey, §15 [stated]), a stack, a clay heap and mixing hollow, a mason and a donkey with clay.
+- **The water and the plain:** at the landing cloths on lines along the bank, women squatting at the water's edge washing, children; across the channel Fulani herders with zebu herds, egrets beside the beasts, field workers with hoes (§14: Fulani herders, rice and grass). [inferred]
+- **Route:** the mosque's walking route now climbs the platform by its north stair (the east side, the qibla wall, has no stair).
+
 ## Sources
 
 - [Great Mosque of Djenne — Designing Buildings Wiki](https://designingbuildings.co.uk/wiki/Great_Mosque_of_Djenne)

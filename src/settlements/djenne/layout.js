@@ -30,8 +30,11 @@ export function houses() {
   if (HOUSES) return HOUSES;
   HOUSES = [];
   const rand = rng(1300);
+  // the row of houses along the market's east edge, their fronts to the west on the market, a gap for the cross lane at the north
+  { const r2 = rng(5150); let z = -39.5;
+    while (z < 39) { const w = 6.5 + r2() * 3; if (z + w > 40) break; HOUSES.push({ rect: [MARKET[2] + 4.5, z, MARKET[2] + 13.4, z + w - 0.2], front: 'w', storeys: r2() < 0.7 ? 2 : 1, seed: Math.floor(r2() * 1e6) }); z += w; } }
   for (let gx = -240; gx < 240; gx += 26) for (let gz = -240; gz < 240; gz += 26) {
-    const lane = 4 + rand() * 2, x0 = gx + lane / 2 + (rand() - 0.5) * 1.2, z0 = gz + lane / 2 + (rand() - 0.5) * 1.2, x1 = gx + 26 - lane / 2, z1 = gz + 26 - lane / 2;
+    const lane = 3.4 + rand() * 1.1, x0 = gx + lane / 2 + (rand() - 0.5) * 1.2, z0 = gz + lane / 2 + (rand() - 0.5) * 1.2, x1 = gx + 26 - lane / 2, z1 = gz + 26 - lane / 2;
     const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
     if (shore(cx, cz) > -16 || inRect([-58, -58, 58, 58], cx, cz) || inRect(MARKET, cx, cz, 8)) continue;
     // cut the block into houses: two rows facing north and south lanes, two or three along each

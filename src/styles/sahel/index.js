@@ -10,6 +10,7 @@ import { box, lathe, fromTriangles, frustum } from '../../core/geom.js';
 import '../qing/index.js';
 import { beamTris } from '../ming/index.js';
 import { shopRow, courtHouse } from './interiors.js';
+import { home, mosqueFittings } from './homes.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const B = 'banco_rough';      // hand-smeared at each year's crépissage: lumpy, runnelled
@@ -466,7 +467,7 @@ function sahelHouse(el, { bag, col }) {
   for (const [ea, eb] of [[[x0, z1], [x1, z1]], [[x1, z0], [x0, z0]], [[x1, z1], [x1, z0]], [[x0, z0], [x0, z1]]]) {
     const EL = Math.hypot(eb[0] - ea[0], eb[1] - ea[1]), ex = (eb[0] - ea[0]) / EL, ez = (eb[1] - ea[1]) / EL, front = ea[0] === a[0] && ea[1] === a[1] && eb[0] === b[0] && eb[1] === b[1];
     const ok = front ? (q, m) => q > 0.85 + m && q < EL - 0.85 - m && Math.abs(q - mid) > hw + 0.65 + m : (q, m) => q > 0.25 + m && q < EL - 0.25 - m;
-    erode(bag, (q, d) => [ea[0] + ex * q - ez * d, ea[1] + ez * q + ex * d], EL, Math.max(1, Math.round(EL / (front ? 1.1 : 1.8))), 0, H, 0, ok, rng((el.seed || 1) * 13 + EL * 7), front ? 0.62 : 0.02);   // (on the front above the benches)
+    erode(bag, (q, d) => [ea[0] + ex * q - ez * d, ea[1] + ez * q + ex * d], EL, Math.max(1, Math.round(EL / (front ? 1.1 : 1.8))), 0, hollow && !front ? Math.min(H, 3.1) : H, 0, ok, rng((el.seed || 1) * 13 + EL * 7), front ? 0.62 : 0.02);   // (on the front above the benches)
   }
   if (!hollow) { const [rx, rz] = P(mid + dw * 0.55, 0.09); bag.add('iron', lathe([[0.06, -0.06], [0.07, 0], [0.06, 0.06], [0.05, 0], [0.06, -0.06]], 8, null, 0, 0, 0).rotateX(Math.PI / 2).rotateY(Math.atan2(nx, nz)).translate(rx, 1.05, rz)); }
   // the facade bench (tintin) along the foot, either side of the entrance
@@ -519,6 +520,19 @@ function sahelHouse(el, { bag, col }) {
   if (tt.length) bag.add('timber', fromTriangles(tt));
   // fired clay spouts through the parapet throwing the rain off the roof, one either side of the panel
   for (const s of [mid - hw - 0.9, mid + hw + 0.9]) if (s > 0.9 && s < L - 0.9) { const [sx, sz] = P(s, -0.15); bag.add('terracotta', fromTriangles(halfPipe([sx, H + 0.25, sz], [nx, 0, nz], 0.95, 0.09))); }
+}
+/**
+ * brick_yard: the masons' yard { c, rot, n, seed }: rows of hand-shaped banco bricks (djenné ferey, cylinders about 30 cm long, 14th c.)
+ * laid out to dry in the sun, a stack of them built up beside, and a heap of clay with a mixing hollow.
+ */
+function brickYard(el, { bag, col }) {
+  const rand = rng(el.seed || 3), [cx, cz] = el.c, a = el.rot || 0, ca = Math.cos(a), sa = Math.sin(a), n = el.n ?? 5;
+  const P = (u, v) => [cx + ca * u - sa * v, cz + sa * u + ca * v];
+  const brick = (u, v, y, ang) => { const p = P(u, v), q = P(u + Math.cos(ang) * 0.15, v + Math.sin(ang) * 0.15), r = P(u - Math.cos(ang) * 0.15, v - Math.sin(ang) * 0.15), t = []; beamTris(t, [r[0], y, r[1]], [q[0], y, q[1]], 0.07, 0.14); bag.add('mudbrick', fromTriangles(t)); void p; };
+  for (let row = 0; row < n; row++) for (let k = 0; k < 12; k++) brick(-3 + k * 0.36, row * 0.4 - 1, 0, (rand() - 0.5) * 0.15);
+  for (let l = 0; l < 4; l++) for (let k = 0; k < 8 - l; k++) brick(2.5 + k * 0.34 + l * 0.17, 2.2, l * 0.14, 0);
+  const p = P(0, 3.2); bag.add('mud_plaster', lathe([[1.1, 0], [0.7, 0.4], [0.001, 0.55]], 9, null, p[0], 0, p[1])); col.circle(p[0], p[1], 1.0, 0, 0.5);
+  const h = P(-2.6, 3.2); bag.add('mud_plaster', lathe([[0.9, 0.03], [0.8, 0.0], [0.001, 0.0]], 9, null, h[0], 0, h[1]));
 }
 /** sahel_wall: a plain banco wall (courts, the market) { a, b, h }. */
 function sahelWall(el, { bag, col }) { bancoWall(bag, col, el.a, el.b, el.y ?? 0, el.h ?? 2.6, 0.45, { step: 4, ph: 0.6, toron: false, pw: 0.4, pd: 0.3 }); }
@@ -681,6 +695,6 @@ function mudPit(el, { bag, col }) {
 
 registerStyle('sahel', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, great_mosque: greatMosque, sahel_house: sahelHouse, sahel_shops: shopRow, sahel_court_house: (el, c) => { sahelHouse({ ...el, hollow: true, front: 's', storeys: 2, kind: 'tukulor', dw: 0.65 }, c); courtHouse(el, c); }, sahel_wall: sahelWall, market_stall: marketStall, market_mat: marketMat, net_rack: netRack, mud_pit: mudPit },
+  elements: { ...STYLES.qing.elements, great_mosque: greatMosque, sahel_house: sahelHouse, sahel_shops: shopRow, sahel_court_house: (el, c) => { sahelHouse({ ...el, hollow: true, front: 's', storeys: 2, kind: 'tukulor', dw: 0.65 }, c); courtHouse(el, c); }, sahel_home: (el, c) => { sahelHouse({ ...el, hollow: true, dw: 0.62 }, c); home(el, c); }, mosque_fittings: mosqueFittings, brick_yard: brickYard, sahel_wall: sahelWall, market_stall: marketStall, market_mat: marketMat, net_rack: netRack, mud_pit: mudPit },
   objects: {},
 });

@@ -77,6 +77,18 @@ function market() {
     if (inView(at[0], at[1])) continue;
     P.push({ t: 'animal', kind: k % 3 === 2 ? 'goat' : 'donkey', at, y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), gear: k % 3 !== 2 });
   }
+  // goods on the ground between the stalls and mats: pots and baskets in heaps, sacks, a few hens and a goat tethered at a post
+  const kin = ['pot', 'pot', 'basket', 'basket', 'sacks', 'pot', 'basket'];
+  for (let k = 0, tries = 0; k < 110 && tries < 600; tries++) {
+    const x = pick([52, 59, 66, 73, 80, 87, 94, 101]) + (rand() - 0.5) * 4.5, z = MARKET[1] + 4 + rand() * (MARKET[3] - MARKET[1] - 8), at = [x, z];
+    if (inView(x, z, 2) || x > MARKET[2] - 5) continue;
+    if (E.some((e) => (e.c || e.at) && Math.hypot((e.c || e.at)[0] - x, (e.c || e.at)[1] - z) < 1.7) || P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 1.1)) continue;
+    const t = pick(kin), seed = Math.floor(rand() * 1e6);
+    P.push(t === 'sacks' ? { t, at, y: 0, rot: rand() * 6, seed } : { t, at, y: 0, seed });
+    if (t !== 'sacks' && rand() < 0.5) P.push({ t, at: [x + 0.45, z + 0.2], y: 0, seed: seed + 1 });
+    k++;
+  }
+  for (let k = 0; k < 7; k++) { const at = [48 + rand() * 62, MARKET[1] + 6 + rand() * 80]; if (!inView(at[0], at[1]) && !E.some((e) => e.c && Math.hypot(e.c[0] - at[0], e.c[1] - at[1]) < 2)) P.push({ t: 'chickens', at, y: 0, rot: rand() * 6, n: 3 + Math.floor(rand() * 3), kind: 'hen', seed: k }); }
   return { E, P };
 }
 
@@ -120,6 +132,10 @@ function landing() {
     else if (k < 0.8) P.push({ t: 'sacks', at: p, y: 0, rot: rand() * 6, seed: Math.floor(rand() * 1e6) });
     else P.push({ t: 'pot', at: p, y: 0, seed: Math.floor(rand() * 1e6) });
   }
+  // washing: cloths spread on lines along the bank's top, women squatting at the water's edge beating and rinsing, children wading
+  for (let a = A0 + 0.02; a < A1 - 0.02; a += 0.085) { const p = at(a, -9 - rand() * 2); if (!inHouse(p[0], p[1], 2)) P.push({ t: 'laundry', at: p, y: 0, rot: -a + Math.PI / 2, len: 3 + rand() * 1.5, seed: Math.floor(rand() * 1e6) }); }
+  for (let k = 0; k < 9; k++) { const a = A0 + 0.01 + rand() * (A1 - A0 - 0.02), p = at(a, 1.2 + rand() * 2.5); fig(p, ground.height(p[0], p[1]), -a - Math.PI / 2 + (rand() - 0.5) * 0.6, { dress: 'wrap', feet: 'bare', hat: 'turban', pose: 'squat' }); if (rand() < 0.6) P.push({ t: 'basket', at: [p[0] - Math.cos(a) * 0.7, p[1] - Math.sin(a) * 0.7], y: 0, seed: k }); }
+  for (let k = 0; k < 4; k++) { const a = A0 + rand() * (A1 - A0), p = at(a, 3.5 + rand()); fig(p, ground.height(p[0], p[1]), rand() * 6, { dress: 'tunic', legs: 'bare', feet: 'bare', hat: 'none', pose: 'stand', h: 1.1 }); }
   // people: porters carrying loads up, women come for fish and water, boatmen talking
   for (let k = 0; k < 18; k++) {
     const a = A0 + rand() * (A1 - A0), s = -1 - rand() * 6, p = at(a, s), rot = rand() * 6.28;
@@ -163,12 +179,91 @@ function crepissage() {
   return { E, P };
 }
 
+
+/** The houses nearest the market and the mosque are enterable (docs §16): deep enough for the vestibule, court and back block. */
+function enterable(all) {
+  const ok = all.filter((h) => h.rect[2] - h.rect[0] >= 7 && h.rect[3] - h.rect[1] >= 10);
+  const d = (h) => Math.hypot((h.rect[0] + h.rect[2]) / 2 - 30, (h.rect[1] + h.rect[3]) / 2);
+  return new Set(ok.sort((a, b) => d(a) - d(b)).slice(0, 64));
+}
+/** An elder on the vestibule's bench in half of the enterable houses, a woman on a mat in the court of some. */
+function homeLife(homes) {
+  const rand = rng(404), P = [], W = ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_brown'];
+  const pick = (a) => a[Math.floor(rand() * a.length)];
+  for (const h of homes) {
+    const [x0, z0, x1, z1] = h.rect, south = h.front === 's', Wd = x1 - x0, mid = Wd / 2;
+    const pt = (u, v) => (south ? [x0 + u, z1 - v] : [x1 - u, z0 + v]);
+    if (mid - 1.8 - 0.45 < 1.65) continue;
+    if (rand() < 0.5) {
+      const at = pt(mid - 1.2, 2.0), to = pt(mid + 1, 2.0);
+      P.push({ t: 'figure', at, y: 0.45, rot: face(at, to), seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: pick(['cloth_white', 'cloth_indigo']), cloth2: pick(W), skin: 'skin_dark', hat: 'cap', hatMat: 'cloth_white', feet: 'shod', pose: 'sit', beard: rand() < 0.6 });
+    }
+  }
+  return P;
+}
+
+/** Elders, women with children and a few boys on the benches (tintin) of the fronts about the market and the mosque. */
+function frontsLife(all) {
+  const rand = rng(6001), P = [], W = ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_red'];
+  const pick = (a) => a[Math.floor(rand() * a.length)];
+  for (const h of all) {
+    const [x0, z0, x1, z1] = h.rect, f = h.front;
+    if (Math.hypot((x0 + x1) / 2 - 40, (z0 + z1) / 2) > 135 || rand() < 0.62) continue;
+    const L = f === 'w' ? z1 - z0 : x1 - x0, hw = Math.min(1.35, L / 2 - 1.2), mid = L / 2;
+    const side = rand() < 0.5 ? 0 : 1, s = side ? L - 0.8 - (L - 0.8 - (mid + hw + 0.55)) / 2 : 0.8 + (mid - hw - 0.55 - 0.8) / 2;
+    if (mid - hw - 0.55 - 0.8 < 0.8) continue;
+    const p = f === 's' ? [x0 + s, z1 + 0.25] : f === 'n' ? [x1 - s, z0 - 0.25] : [x0 - 0.25, z0 + s], out = f === 's' ? [p[0], p[1] + 1] : f === 'n' ? [p[0], p[1] - 1] : [p[0] - 1, p[1]];
+    const man = rand() < 0.5;
+    P.push({ t: 'figure', at: p, y: 0.45, rot: face(p, out), seed: Math.floor(rand() * 1e9), dress: man ? 'robe' : 'wrap', cloth: pick(man ? ['cloth_white', 'cloth_indigo', 'cloth_brown'] : W), cloth2: pick(W), skin: 'skin_dark', hat: man ? pick(['cap', 'turban']) : 'turban', hatMat: pick(['cloth_white', 'cloth_indigo']), feet: man ? 'shod' : 'bare', pose: 'sit', beard: man && rand() < 0.5, carry: !man && rand() < 0.3 ? 'child' : 'none' });
+    if (rand() < 0.35) { const q = f === 's' ? [p[0] + 1.3, p[1] + 1.2] : f === 'n' ? [p[0] - 1.3, p[1] - 1.2] : [p[0] - 1.2, p[1] + 1.3]; P.push({ t: 'figure', at: q, y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), dress: 'tunic', legs: 'bare', cloth: pick(W), skin: 'skin_dark', hat: 'none', feet: 'bare', pose: 'stand', h: 1.15 }); }
+  }
+  return P;
+}
+
+/** The faithful at prayer in the hall, in the aisles of matting facing the qibla, a teacher with his pupils in the court's gallery, men resting between the piers. */
+function mosqueLife() {
+  const rand = rng(1907 + 3), P = [], xm = MOSQUE.c[0] + 2, x1 = MOSQUE.c[0] + MOSQUE.a - 4, z0 = MOSQUE.c[1] - MOSQUE.a + 8, z1 = MOSQUE.c[1] + MOSQUE.a - 8, py = MOSQUE.py;
+  const rowX = (i) => xm + 0.45 + (x1 - xm - 0.9) * (i + 0.5) / 9, aisle = (i) => (rowX(i) + rowX(i + 1)) / 2;
+  const man = (at, rot, o = {}) => P.push({ t: 'figure', at, y: py, rot, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: ['cloth_white', 'cloth_white', 'cloth_indigo', 'cloth_brown'][Math.floor(rand() * 4)], cloth2: 'cloth_white', skin: 'skin_dark', hat: ['cap', 'turban', 'cap'][Math.floor(rand() * 3)], hatMat: 'cloth_white', feet: 'bare', beard: rand() < 0.5, ...o });
+  for (const i of [5, 6, 7]) for (let z = z0 + 6; z < z1 - 4; z += 3.2 + rand() * 2.4) { if (rand() < 0.35) continue; man([aisle(i), z], -Math.PI / 2, { legs: rand() < 0.5 ? 'cross' : 'kneel', pose: 'pray' }); }
+  for (const [i, z] of [[2, -8], [3, 6], [1, 14], [4, -18]]) man([aisle(i), z], rand() * 6.28, { legs: 'cross', pose: 'talk' });
+  // the teacher and the pupils cross-legged on a mat in the west gallery
+  const gx = MOSQUE.c[0] - MOSQUE.a + 6.5, gz = 6;
+  man([gx, gz], Math.PI / 2, { legs: 'cross', pose: 'talk', beard: true, cloth: 'cloth_white', hat: 'turban', y: py });
+  for (let k = 0; k < 5; k++) man([gx + 1.6, gz - 2.2 + k * 1.1], -Math.PI / 2, { legs: 'cross', pose: 'sit', dress: 'tunic', hat: 'cap', cloth: 'cloth_white' });
+  return P;
+}
+
+/** Fulani herders with their zebu cattle on the floodplain north of the channel, workers in the rice fields, an egret by each beast. */
+function plain() {
+  const rand = rng(8801), P = [], W = ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_brown'];
+  const R = (a) => ISLAND + 14 * Math.sin(a * 3 + 1) + 8 * Math.sin(a * 7 + 2);
+  const at = (a, d) => [Math.cos(a) * (R(a) + d), Math.sin(a) * (R(a) + d)];
+  for (const a0 of [-Math.PI / 2 + 0.2, -Math.PI / 2 - 0.5, Math.PI + 0.3]) {
+    const c = at(a0, 62);
+    for (let k = 0; k < 7; k++) P.push({ t: 'animal', kind: 'zebu', at: [c[0] + (rand() - 0.5) * 14, c[1] + (rand() - 0.5) * 14], y: ground.height(c[0], c[1]), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
+    P.push({ t: 'figure', at: [c[0] + 8, c[1] - 6], y: ground.height(c[0], c[1]), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), dress: 'tunic', legs: 'bare', cloth: pick(W, rand), skin: 'skin_dark', hat: 'cap', hatMat: 'cloth_ochre', feet: 'bare', carry: 'staff', len: 1.7, pose: 'stand' });
+  }
+  for (const a0 of [0.5, 1.9, 3.6, 5.1]) for (let k = 0; k < 4; k++) {
+    const c = at(a0 + k * 0.012, 58 + (k % 2) * 6);
+    P.push({ t: 'figure', at: c, y: ground.height(c[0], c[1]), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), dress: rand() < 0.5 ? 'wrap' : 'tunic', legs: 'bare', cloth: pick(W, rand), cloth2: pick(W, rand), skin: 'skin_dark', hat: 'turban', hatMat: pick(W, rand), feet: 'bare', carry: 'hoe', pose: 'stand' });
+  }
+  return P;
+}
+const pick = (a, r) => a[Math.floor(r() * a.length)];
+
 export async function town() {
   const { E, P } = market(), lnd = landing(), cr = crepissage();
   // (the channel's water is the planet's sea: ground.js, sea)
   const plans = [base('djenne-market', E), { ...base('djenne-market-people', P), style: 'life' }, base('djenne-landing', lnd.E.filter((e) => e.t !== 'boat')), { ...base('djenne-landing-life', [...lnd.P, ...lnd.E.filter((e) => e.t === 'boat')]), style: 'life' }, base('djenne-crepissage', cr.E), { ...base('djenne-crepissage-life', cr.P), style: 'life' }];
+  // the masons' yards on the open ground round the platform, with their masons and a donkey with clay
+  { const Y = [[-48, -48, 0.1], [-30, 48.5, 3.2], [-50, 18, 1.6], [20, -49, 0], [-50, -22, 1.5]].map(([x, z, r], i) => ({ t: 'brick_yard', c: [x, z], rot: r, n: 5, seed: i + 3 }));
+    plans.push(base('djenne-yards', Y)); const rr = rng(77); const Pm = [];
+    for (const y of Y) { Pm.push({ t: 'figure', at: [y.c[0] + 1, y.c[1] - 2], y: 0, rot: rr() * 6, seed: Math.floor(rr() * 1e9), dress: 'tunic', legs: 'bare', top: 'bare', skin: 'skin_dark', hat: 'none', feet: 'bare', carry: 'hoe' }); Pm.push({ t: 'animal', kind: 'donkey', at: [y.c[0] + 4, y.c[1] + 3], y: 0, rot: rr() * 6, seed: Math.floor(rr() * 1e9), gear: true }); }
+    plans.push({ ...base('djenne-yards-life', Pm), style: 'life' }); }
   plans.push(base('djenne-shops', [{ t: 'sahel_shops', rect: SHOPS, n: 8, seed: 3 }, { t: 'sahel_court_house', rect: COURT, seed: 9 }]));
-  const all = houses();
-  for (let i = 0; i < all.length; i += 110) plans.push(base(`djenne-houses-${i / 110}`, all.slice(i, i + 110).map((h) => ({ t: 'sahel_house', ...h }))));
+  const all = houses(), homes = enterable(all);
+  for (let i = 0; i < all.length; i += 110) plans.push(base(`djenne-houses-${i / 110}`, all.slice(i, i + 110).map((h) => ({ t: homes.has(h) ? 'sahel_home' : 'sahel_house', ...h }))));
+  plans.push({ ...base('djenne-home-life', [...homeLife(homes), ...frontsLife(all), ...mosqueLife(), ...plain()]), style: 'life' });
   return plans;
 }
