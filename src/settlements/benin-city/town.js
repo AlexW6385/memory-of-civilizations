@@ -88,7 +88,7 @@ export async function town() {
   }
   plans.push(...lodTiles('benin-market', 'benin', st, { R: RADIUS }));
   plans.push({ ...base('benin-people', F.P), style: 'life' });
-  const els = lots().map((l) => ({ t: 'benin_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front, chief: l.chief }));
+  const els = lots().map((l) => ({ t: 'benin_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front, chief: l.chief, kind: l.kind, du: l.du }));
   plans.push(...lodTiles('benin-houses', 'benin', els, { R: RADIUS }));
   return plans;
 }

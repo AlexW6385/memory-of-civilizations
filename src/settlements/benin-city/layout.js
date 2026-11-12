@@ -58,25 +58,40 @@ export function onStreet(x, z, m = 0) {
   if (depth(x, z) < 12) return false;
   return STREETS_Z.some((s) => Math.abs(z - s) < 5 + m) || ALLEYS_X.some((a) => Math.abs(x - a) < 4 + m);
 }
-const ZONES = [[PALACE[0] - 6, PALACE[1] - 6, PALACE[2] + 6, PALACE[3] + 4], GUILD, SQUARE, GREAT, CROSS, MARKET];
+const ZONES = [[PALACE[0] - 3, PALACE[1] - 1.2, PALACE[2] + 3, PALACE[3] + 4], GUILD, SQUARE, GREAT, CROSS, MARKET];
 let LOTS = null;
-/** The compounds, in rows between the streets, each facing a street: { rect, seed, y, front ('n' | 's'), chief, w, d }. */
+/**
+ * The compounds, in rows between the streets, each facing a street: { rect, seed, y, front ('n' | 's'), chief, w, d, row }.
+ * Each row is cut by the lanes and the zones (palace, guild, square, market, great streets) into free runs, and each run is filled
+ * with compounds of 15–25 m side by side (a run keeps no gap but the party walls), so that the city is built up between its lanes.
+ */
 export function lots() {
   if (LOTS) return LOTS;
   LOTS = [];
-  const rand = rng(1600);
+  const rand = rng(1600), lanes = [...ALLEYS_X].sort((a, b) => a - b);
   for (const [za, zb] of BANDS) {
     const mid = (za + zb) / 2;
     for (const [z0, z1, face] of [[za, mid - 0.5, 'n'], [mid + 0.5, zb, 's']]) {
-      for (let x = -300; x < 300;) {
-        const w = 16 + Math.floor(rand() * 9), cx = x + w / 2, cz = (z0 + z1) / 2, rect = [x, z0, x + w, z1];
-        x += w + (rand() < 0.2 ? 2.5 : 0.8);
-        if (ALLEYS_X.some((a) => Math.abs(cx - a) < w / 2 + 4)) continue;
-        if (ZONES.some((r) => inRect(r, cx, cz, 0) || (rect[0] < r[2] && rect[2] > r[0] && rect[1] < r[3] && rect[3] > r[1]))) continue;
-        if ([[rect[0], z0], [rect[2], z0], [rect[0], z1], [rect[2], z1]].some(([a, b]) => depth(a, b) < 20)) continue;
-        if (rand() < 0.06) continue;
-        const chief = (z1 - z0) > 20 && rand() < 0.22;
-        LOTS.push({ rect, seed: Math.floor(rand() * 1e6), y: 0, front: face, chief, w, d: z1 - z0 });
+      // the free runs along x
+      let cuts = [[-300, 300]];
+      const cut = (a, b) => { const out = []; for (const [p, q] of cuts) { if (b <= p || a >= q) { out.push([p, q]); continue; } if (a > p) out.push([p, a]); if (b < q) out.push([b, q]); } cuts = out; };
+      for (const a of lanes) cut(a - 4.6, a + 4.6);
+      for (const r of ZONES) if (r[1] < z1 && r[3] > z0) cut(r[0], r[2]);
+      for (const [p, q] of cuts) {
+        const len = q - p;
+        if (len < 14) continue;
+        const n = Math.max(1, Math.round(len / 20.5)), w = len / n;
+        for (let i = 0; i < n; i++) {
+          const x = p + i * w, rect = [x + 0.15, z0, x + w - 0.15, z1], cz = (z0 + z1) / 2;
+          if ([[rect[0], z0], [rect[2], z0], [rect[0], z1], [rect[2], z1], [x + w / 2, cz]].some(([a, b]) => depth(a, b) < 17)) continue;
+          if (rand() < 0.03) continue;
+          const chief = (z1 - z0) > 20 && rand() < 0.2, r = rand();
+          // the kind of front: a chief's with an upper storey; a verandah on posts over the street; a trading front (the front room open
+          // to the street behind a clay counter); the plain gabled front with its one door
+          const onGreat = z1 > GREAT[1] - 12 && z0 < GREAT[3] + 12 && Math.abs(x - 98) > 4;
+          const kind = chief ? 'chief' : r < (onGreat ? 0.34 : 0.22) ? 'trade' : r < 0.55 ? 'porch' : 'plain';
+          LOTS.push({ rect, seed: Math.floor(rand() * 1e6), y: 0, front: face, chief, kind, w: w - 0.3, d: z1 - z0, row: za, du: chief ? Math.min(w - 0.3 - 3.3, 9.7 + rand() * 1.5) : (w - 0.3) * (0.3 + 0.4 * rand()) });
+        }
       }
     }
   }
