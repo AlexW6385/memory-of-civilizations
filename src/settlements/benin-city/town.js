@@ -193,10 +193,10 @@ function arrivalLife(F, out) {
     if (rand() < 0.5) (rand() < 0.5 ? man : woman)([x0 + 2.4, 2.35], 0.12, rand() * 6.28, { pose: 'sit_ground', carry: 'none' });
     if (rand() < 0.3) out.push({ t: 'animal', kind: rand() < 0.7 ? 'goat' : 'dog', at: [x0 + 4.3, 3.4], y: 0, rot: rand() * 6.28, seed: seed() });
   });
-  // the mat sellers before the sheds, two ranks, with the way to the gate left free
-  for (const [z, x0, x1, step] of [[16.6, -112, -22, 8.2], [20.2, -108, -26, 10]]) {
-    for (let x = x0; x < x1; x += step * (0.85 + rand() * 0.4)) {
-      if (Math.abs(x - GATE_X) < 6.5) continue;
+  // the mat sellers before the sheds, two ranks at fixed spacing, with the way to the gate left free (nothing within 3 m of the arrival, which stands behind them)
+  for (const [z, offs] of [[16.6, [-50, -40, -30, -20, -10, 10, 20, 30, 40]], [[20.6], [-45, -35, -25, -15, 15, 25, 35]]].map(([a, o]) => [Array.isArray(a) ? a[0] : a, o])) {
+    for (const o of offs) {
+      const x = GATE_X + o + (rand() - 0.5) * 1.6;
       const g = pick([['pottery', 'baskets'], ['bolts', 'baskets'], ['spice', 'heap'], ['melons', 'greens'], ['fish', 'baskets'], ['heap', 'pottery']]);
       out.push({ t: 'goods_mat', at: [x, z], y: 0, rot: 0, goods: g, seed: seed(), produce: ['cloth_red', 'cloth_ochre', 'cloth_green'], spices: ['cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_brown'] });
       woman([x, z - 0.8], 0, Math.PI, { pose: 'sit_ground', dress: 'wrap' });
@@ -204,13 +204,20 @@ function arrivalLife(F, out) {
       else if (rand() < 0.3) out.push({ t: 'animal', kind: 'goat', at: [x - 1.7, z - 0.4], y: 0, rot: rand() * 6.28, seed: seed() });
     }
   }
-  // in the open between: two chiefs in talk with a page, women with pots going to the sheds, a mother and child, a petitioner kneeling at the gate path
-  chief([GATE_X - 9, 22.5], 0, Math.PI * 0.8, { pose: 'talk' }); man([GATE_X - 7.9, 21.8], 0, -Math.PI * 0.3, { pose: 'talk', cloth: 'cloth_white' });
-  chief([GATE_X + 11, 20.6], 0, -Math.PI * 0.8, { pose: 'talk' }); woman([GATE_X + 12.1, 21.4], 0, Math.PI * 0.4, { pose: 'talk', carry: 'basket' });
+  // in the open between the ranks and the sheds: two chiefs in talk with a page and a woman with a basket, women with pots going to the sheds, a petitioner kneeling on the way to the gate, children
+  chief([GATE_X - 7.2, 18.4], 0, Math.PI * 0.8, { pose: 'talk' }); man([GATE_X - 8.4, 18.9], 0, -Math.PI * 0.3, { pose: 'talk', cloth: 'cloth_white' });
+  chief([GATE_X + 7.6, 18.4], 0, -Math.PI * 0.8, { pose: 'talk' }); woman([GATE_X + 8.7, 18.0], 0, Math.PI * 0.4, { pose: 'talk', carry: 'basket' });
   woman([GATE_X - 13.5, 13.8], 0, 0.5, { pose: 'stand', carry: 'pot' }); woman([GATE_X + 8, 14.4], 0, -0.4, { pose: 'stand', carry: 'basket' });
   man([GATE_X + 3.5, 11.5], 0, Math.PI, { pose: 'kneel', carry: 'none', cloth: 'cloth_white' });
-  man([GATE_X - 16, 17.4], 0, 1.2, { dress: 'loincloth', h: 0.66, pose: 'stand' }); man([GATE_X - 15.2, 18.4], 0, 2.6, { dress: 'loincloth', h: 0.6, pose: 'stand' });
-  out.push({ t: 'animal', kind: 'dog', at: [GATE_X + 4.5, 17.5], y: 0, rot: 2.2, seed: seed() });
+  man([GATE_X - 16, 18.4], 0, 1.2, { dress: 'loincloth', h: 0.66, pose: 'stand' }); man([GATE_X - 15.2, 17.6], 0, 2.6, { dress: 'loincloth', h: 0.6, pose: 'stand' });
+  // close by the way (4–9 m from the arrival, off its line): a woman with baskets on her mat, a child with a goat, children at play, a pair in talk, a porter resting his load
+  out.push({ t: 'goods_mat', at: [GATE_X - 5.6, 20.3], y: 0, rot: 0, goods: ['baskets', 'heap'], seed: seed(), produce: ['cloth_red', 'cloth_ochre', 'cloth_green'], spices: ['cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_brown'] });
+  woman([GATE_X - 5.6, 19.5], 0, Math.PI, { pose: 'sit_ground', dress: 'wrap' });
+  out.push({ t: 'animal', kind: 'goat', at: [GATE_X + 5.8, 19.4], y: 0, rot: 2.4, seed: seed() }); man([GATE_X + 6.9, 19.0], 0, 3.6, { dress: 'loincloth', h: 0.62, pose: 'stand' });
+  man([GATE_X - 4.6, 15.4], 0, 0.8, { dress: 'loincloth', h: 0.66, pose: 'stand' }); man([GATE_X - 3.8, 16.4], 0, -2.2, { dress: 'loincloth', h: 0.6, pose: 'stand' });
+  woman([GATE_X + 4.6, 14.2], 0, 0.5, { pose: 'talk', carry: 'pot' }); woman([GATE_X + 5.8, 14.6], 0, -2.6, { pose: 'talk', carry: 'basket' });
+  man([GATE_X + 4.4, 17.6], 0, 2.9, { dress: 'loincloth', pose: 'stand', carry: 'headload' });
+  out.push({ t: 'animal', kind: 'dog', at: [GATE_X + 7.9, 16.3], y: 0, rot: 2.2, seed: seed() });
 }
 const P2 = [];
 /** The gates of the Iya: two guards with staves, travellers with loads waiting to be let in. */

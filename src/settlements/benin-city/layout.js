@@ -23,7 +23,6 @@ export const BRAZIERS = [[GATE_X - 4.1, 1.5], [GATE_X + 4.1, 1.5]];
 export const AUD = (() => {
   const out = [];
   for (const s of [-1, 1]) for (const rank of [0, 1]) for (let z = -16; z > -60; z -= 6.4) {
-    if (Math.abs(z + 36) < 2.5 && rank === 1) continue;                 // the drums stand there
     const x = GATE_X + s * (5.2 + rank * 3.6);
     out.push([x - 0.35, z - 2.2, x + 0.35, z + 2.2]);
   }

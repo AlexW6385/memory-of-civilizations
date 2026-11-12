@@ -211,7 +211,7 @@ function audience(el, ctx) {
   { const bx = ax + 13.5, bz = el.drumZ ?? -36; bag.add('timber', lathe([[0.08, 0], [0.07, 2.6]], 6, null, bx + 2.6, 0.03, bz)); col.circle(bx + 2.6, bz, 0.1, 0.03, 2.6); for (let i = 0; i < 3; i++) bag.add('gilt_bronze', lathe([[0.001, 0], [0.12, 0.02], [0.1, 0.2], [0.04, 0.28], [0.001, 0.3]], 7, null, bx + 2.6 + (i - 1) * 0.2, 2.0 - Math.abs(i - 1) * 0.15, bz)); }
   // the great jars of water beside the passage's mouth, mats before each bench
   for (const s of [-1, 1]) pots(ctx, ax + s * 8.0, 0.03, z0 - 6.0, Math.round(s * 7 + 20), 3);
-  for (const b of el.benches) if (rand() < 0.5) bag.add('reed_mat', box(b[0] + 0.3, 0.03, b[1] + (b[1] < (z0 + z1) / 2 ? 0.8 : -1.9), b[2] - 0.3, 0.05, b[1] + (b[1] < (z0 + z1) / 2 ? 1.8 : -0.8)));
+  for (const b of el.benches) if (rand() < 0.5) { const west = b[2] < ax; bag.add('reed_mat', box(west ? b[2] : b[0] - 1.3, 0.03, b[1] + 0.5, west ? b[2] + 1.3 : b[0], 0.05, b[3] - 0.5)); }
 }
 
 /** A cast brass leopard, standing, at (x, y, z), facing +z (s = ±1 turns it to look across): the guardian of the Oba's steps. */
