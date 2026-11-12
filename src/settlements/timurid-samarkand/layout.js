@@ -62,29 +62,65 @@ export function onAryk(x, z, m = 0) {
 function blocked(x, z, m) { return inBibi(x, z, m) || inBazaar(x, z, m) || onHill(x, z) || monumentRects().some((r) => inRect(r, x, z, m)); }
 
 let HOUSES = null;
-/** The town: courtyard houses on lots between lanes of 4 m (the aryk runs in some of them), round the monuments. */
+const touchesRect = (r, q) => r[0] < q[2] && r[2] > q[0] && r[1] < q[3] && r[3] > q[1];
+/** Does a lot (rect) run into a monument, the bazaar or the hill? Tested at 25 points and against the monuments' rectangles. */
+function lotBlocked(r) {
+  for (const fx of [0, 0.25, 0.5, 0.75, 1]) for (const fz of [0, 0.25, 0.5, 0.75, 1]) {
+    const x = r[0] + (r[2] - r[0]) * fx, z = r[1] + (r[3] - r[1]) * fz;
+    if (inBibi(x, z, 3.5) || inBazaar(x, z, 1.5) || onHill(x, z)) return true;
+  }
+  return monumentRects().some((q) => touchesRect(r, q));
+}
+/** The town's centres: the Registan and the chorsu (houses near them are furnished in full). */
+const CORES = [[0, 0], [100, 58], [-150, 150], [140, -110]];
+const nearCore = (x, z) => Math.min(...CORES.map(([a, b]) => Math.hypot(x - a, z - b)));
+/**
+ * The town: courtyard houses filling the lots between the lanes (a 4 m lane every 24 m, so that the house fronts run on
+ * unbroken from lane to lane), round the monuments. Each { rect, seed, k (the street door's side: 0 south, 1 east, 2 north,
+ * 3 west), xd (its offset along that wall), garden (a walled orchard with a pavilion instead of a house), full (furnished
+ * rooms, a roof stair), rich (two storeys on the street), trade }. Lots touching a monument are left out.
+ */
 export function houses() {
   if (HOUSES) return HOUSES;
   HOUSES = [];
   const rand = rng(1420), S = 24;
   for (let x = -RADIUS; x < RADIUS; x += S) for (let z = -RADIUS; z < RADIUS; z += S) {
-    const w = 15 + rand() * 4, d = 15 + rand() * 4;
-    const r = [x + 4.5, z + 4.5, x + 4.5 + w, z + 4.5 + d], cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2, skip = rand() < 0.08, seed = Math.floor(rand() * 1e6);
+    const j = [rand(), rand(), rand(), rand()], skip = rand() < 0.09, seed = Math.floor(rand() * 1e6), kr = rand(), xr = rand(), tr = rand(), rr = rand();
+    const r = [x + 4.2 + j[0] * 0.6, z + 4.2 + j[1] * 0.6, x + 23.8 - j[2] * 0.6, z + 23.8 - j[3] * 0.6], cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
     const far = Math.max(...[[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].map(([a, b]) => Math.hypot(a, b)));
-    if (far > RADIUS - 70 || skip) continue;                                   // the outer ring is orchards
-    if (inBibi(cx, cz, 14) || inBibi(r[0], r[1], 6) || inBibi(r[2], r[3], 6) || inBibi(r[0], r[3], 6) || inBibi(r[2], r[1], 6)) continue;
-    if (monumentRects().some((q) => inRect(q, cx, cz, w / 2 + 2)) || inBazaar(cx, cz, w / 2 + 3) || onHill(cx, cz)) continue;
-    HOUSES.push({ rect: r, seed });
+    if (far > RADIUS - 70 || lotBlocked(r)) continue;                          // the outer ring is orchards
+    const k = kr < 0.45 ? 0 : kr < 0.7 ? 1 : kr < 0.9 ? 3 : 2, nc = nearCore(cx, cz);
+    HOUSES.push({ rect: r, seed, k, xd: (xr - 0.5) * 6, garden: skip, full: nc < 135, rich: nc < 120 && rr < 0.45, trade: ['potter', 'baker', 'smith', 'weaver', 'carpenter', 'grocer'][Math.floor(tr * 6)] });
   }
   return HOUSES;
 }
-/** The house open to walk into: the one nearest (120, 120). */
-export const OPEN_HOUSE = () => houses().reduce((b, h) => (Math.hypot((h.rect[0] + h.rect[2]) / 2 - 20, (h.rect[1] + h.rect[3]) / 2 - 95) < Math.hypot((b.rect[0] + b.rect[2]) / 2 - 20, (b.rect[1] + b.rect[3]) / 2 - 95) ? h : b));
+/** The house whose court is the one the visitor is led to first (the nearest full house to the bazaar's north street). */
 let GRID = null;
-export function inHouse(x, z, m = 0) {
+export function houseAt(x, z, m = 0) {
   if (!GRID) { GRID = new Map(); for (const h of houses()) for (let i = Math.floor((h.rect[0] - 3) / 24); i <= Math.floor((h.rect[2] + 3) / 24); i++) for (let j = Math.floor((h.rect[1] - 3) / 24); j <= Math.floor((h.rect[3] + 3) / 24); j++) { const k = i + ',' + j; if (!GRID.has(k)) GRID.set(k, []); GRID.get(k).push(h); } }
   const l = GRID.get(Math.floor(x / 24) + ',' + Math.floor(z / 24));
-  return !!l && l.some((h) => inRect(h.rect, x, z, m));
+  return l ? l.find((h) => inRect(h.rect, x, z, m)) : undefined;
+}
+export const inHouse = (x, z, m = 0) => !!houseAt(x, z, m);
+/** A house's local frame: the court's middle, and the point of its tree (planting) — the court lies away from the street door. */
+export function houseGeom(h) {
+  const [x0, z0, x1, z1] = h.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, W = x1 - x0, D = z1 - z0;
+  const sw = h.k % 2 === 0, lw = sw ? W : D, ld = sw ? D : W;      // the local width and depth
+  const th = h.k * Math.PI / 2, c = Math.round(Math.cos(th)), s = Math.round(Math.sin(th));
+  const toWorld = (u, v) => [cx + u * c + v * s, cz - u * s + v * c];
+  const SP = ['mulberry', 'apple', 'fig', 'mulberry', 'jujube'], sp = (i) => SP[(h.seed + i) % SP.length];
+  const trees = h.garden
+    ? [[-7, -6.5], [0, -7], [7, -6.5], [-7.5, 5], [7.5, 5], [-7.5, 0], [7.5, 0]].map(([u, v], i) => ({ at: toWorld(u, v), kind: sp(i) }))
+    : [{ at: toWorld(0, -ld / 2 + 6.5), kind: sp(0) }];
+  return { cx, cz, W: lw, D: ld, toWorld, trees };
 }
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 export const built = (x, z, m = 0) => blocked(x, z, m) || inHouse(x, z, m);
+
+/** The Registan's market: stalls [x, z, yaw (the front's direction), kind] in two rows under the shops, goods spread on mats between. */
+export function marketLayout() {
+  const kinds = ['melon', 'pots', 'cloth', 'bread', 'copper', 'carpets', 'fruit'], stalls = [], spreads = [], sk = ['melon', 'pots', 'grain', 'fruit', 'melon'];
+  for (let i = 0; i < 16; i++) stalls.push([-34 + i * 3.9, -34, 0, kinds[(i * 3) % 7]], [-34 + i * 3.9 + 1.2, 34, Math.PI, kinds[(i * 5 + 2) % 7]]);
+  for (let i = 0; i < 10; i++) spreads.push([-33 + i * 5.2, -26.5, (i % 3) * 0.2, sk[i % 5]], [-31 + i * 5.2, 26.5, Math.PI + (i % 3) * 0.2, sk[(i + 2) % 5]]);
+  return { stalls, spreads };
+}

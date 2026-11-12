@@ -2,7 +2,7 @@
 // madrasa's court and its classroom, merchants and their camels and donkeys at the Registan's east side and the
 // bazaar, shopkeepers sitting on the sills of the shops, water carriers at the aryk. (The walkers are in movers.js.)
 
-import { RADIUS, SQUARE, MADRASA, SHOPS_N, SHOPS_S, BAZAAR, CHORSU, OPEN_HOUSE } from './layout.js';
+import { RADIUS, SQUARE, MADRASA, SHOPS_N, SHOPS_S, BAZAAR, CHORSU, marketLayout, houses, houseGeom } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -18,7 +18,7 @@ export function life() {
   };
   const [sx0, sz0, sx1, sz1] = SQUARE;
   // the Registan: scholars crossing to the madrasa's pishtaq, merchants talking, a few standing in groups
-  for (let k = 0; k < 14; k++) person([sx0 + 6 + rand() * 40, -30 + rand() * 60], rand() * 6.28);
+  for (let k = 0; k < 14; k++) person([sx0 + 6 + rand() * 40, -21 + rand() * 42], rand() * 6.28);
   for (const z of [-20, -8, 6, 18]) person([-40, z], Math.PI / 2, { man: true, pose: 'stand', cloth: 'cloth_white', cloth2: 'cloth_white' });
   // a caravan resting at the east side: camels kneeling and standing with their bales, the cameleers, donkeys
   for (let k = 0; k < 5; k++) L.push({ t: 'animal', kind: 'camel', at: [32 + (k % 2) * 3, -26 + k * 5.5], y: 0.04, rot: Math.PI / 2 + (rand() - 0.5) * 0.4, seed: Math.floor(rand() * 1e9), gear: k !== 2 });
@@ -42,6 +42,25 @@ export function life() {
   { const rx0 = -58, rz0 = -25.6, rx1 = -47.4, rz1 = -18.5;
     person([rx1 - 1.4, (rz0 + rz1) / 2], -Math.PI / 2, { man: true, pose: 'cross', y: 0.47, cloth: 'cloth_green', cloth2: 'cloth_white' });
     for (let i = 0; i < 4; i++) person([rx0 + 2.5 + i * 2.0, (rz0 + rz1) / 2 + 1.5], Math.PI, { man: true, pose: 'cross', y: 0.1, cloth: pick(['cloth_white', 'cloth_ochre', 'cloth_grey']) }); }
+  // the market: a seller behind each stall's table, a buyer at every third; the sellers of the mats sit behind them
+  { const { stalls, spreads } = marketLayout();
+    stalls.forEach(([x, z, yaw], i) => {
+      const c = Math.cos(yaw), s = Math.sin(yaw), P = (u, v) => [x + u * c + v * s, z - u * s + v * c];
+      person(P(0, -0.75), yaw, { man: true, pose: i % 3 === 0 ? 'talk' : 'stand' });
+      if (i % 3 === 1) person(P((rand() - 0.5) * 2, 1.6), yaw + Math.PI + (rand() - 0.5) * 0.6, {});
+    });
+    spreads.forEach(([x, z, yaw], i) => { if (i % 2) return; const c = Math.cos(yaw), s = Math.sin(yaw); person([x - 1.5 * s * 0.0 + (-1.25) * s, z + (-1.25) * c], yaw, { man: true, pose: 'cross', y: 0.03 }); }); }
+  // the lanes: someone at the street door of about every second furnished house (a woman with a jar, an old man on the bench, a boy), a dog or a donkey now and then
+  { let k = 0;
+    for (const h of houses()) {
+      if (h.garden || !h.full || (k++ % 2)) continue;
+      const G = houseGeom(h), [px, pz] = G.toWorld(h.xd + (rand() < 0.5 ? -2.6 : 2.6), G.D / 2 + 1.4), face = Math.atan2(G.toWorld(0, G.D / 2 + 2)[0] - G.cx, G.toWorld(0, G.D / 2 + 2)[1] - G.cz);
+      const r = rand();
+      if (r < 0.4) person([px, pz], face + Math.PI * 0.5, { man: true, pose: rand() < 0.5 ? 'talk' : 'stand' });
+      else if (r < 0.7) person([px, pz], face + Math.PI, { pose: 'stand' });
+      else if (r < 0.85) L.push({ t: 'animal', kind: 'donkey', at: [px, pz], y: 0.04, rot: face + Math.PI / 2, seed: Math.floor(rand() * 1e9), gear: rand() < 0.5 });
+      else L.push({ t: 'animal', kind: 'dog', at: [px, pz], y: 0.04, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
+    } }
   // the bazaar: porters with loads, a donkey led through, buyers
   for (const { a, b } of BAZAAR) {
     const len = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / len, uz = (b[1] - a[1]) / len;
@@ -51,8 +70,6 @@ export function life() {
     }
   }
   for (const [x, z] of [[100, 25], [96, 100]]) { L.push({ t: 'animal', kind: 'donkey', at: [x, z], y: 0.04, rot: 0, seed: Math.floor(rand() * 1e9), gear: true }); person([x + 0.6, z - 1.4], 0, { man: true, pose: 'stand', cloth: 'cloth_brown' }); }
-  // the open house: the master on the carpet of the talar, a servant in the court
-  { const [x0, z0, x1, z1] = OPEN_HOUSE().rect, hx = (x0 + 3.6 + x1 - 3.8) / 2; person([hx - 1.4, z0 + 1.9], Math.PI, { man: true, pose: 'cross', y: 0.47, cloth: 'cloth_green', cloth2: 'cloth_white' }); person([x1 - 4.6, z1 - 4.4], Math.PI / 2, { man: true, cloth: 'cloth_white' }); }
   void CHORSU;
   return L;
 }

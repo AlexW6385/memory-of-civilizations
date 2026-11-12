@@ -2,7 +2,7 @@
 // Beg's madrasa on its west side with its pishtaq, minarets, court and cells (the north-east corner hall a furnished
 // classroom), the khanqah on the east, the rows of shops on the north and south. The other monuments are in town.js.
 
-import { SQUARE, MADRASA, KHANQAH, SHOPS_N, SHOPS_S } from './layout.js';
+import { SQUARE, MADRASA, KHANQAH, SHOPS_N, SHOPS_S, marketLayout } from './layout.js';
 
 const E = [];
 E.push({ t: 'tim_madrasa', rect: MADRASA });
@@ -10,12 +10,20 @@ E.push({ t: 'khanqah', rect: KHANQAH.rect });
 E.push({ t: 'shop_row', rect: SHOPS_N, front: 's', unit: 3.6, enter: 8, seed: 14 });
 E.push({ t: 'shop_row', rect: SHOPS_S, front: 'n', unit: 3.6, enter: 17, seed: 15 });
 
+// the market on the square: two rows of stalls under awnings, goods spread on mats between them and the shops
+{
+  const { stalls, spreads } = marketLayout();
+  E.push({ t: 'tim_market', rect: SQUARE, seed: 5, stalls, spreads });
+}
 const [mx0, mz0, mx1, mz1] = MADRASA, zm = (mz0 + mz1) / 2;
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
   room('registan', SQUARE, 0, 'open'),
   room('madrasa court', [-107, -18, -59, 18], 0, 'open'),
   room('classroom', [-58, -25.6, -47.4, -18.5], 0, 'hall'),
+  room('khanqah hall', [KHANQAH.rect[2] - 17, -6, KHANQAH.rect[2] - 5, 6], 0, 'hall'),
+  room('library', [-58, 18.5, -47.4, 25.6], 0, 'hall'),
+  room('mosque', [-117.4, -17.4, -114, 17.4], 0, 'hall'),
   room('pishtaq passage', [-59, zm - 6, -45, zm + 6], 0, 'hall'),
 ];
 const walks = [[[40, 0], [0, 0], [-40, 0], [-52, 0], [-66, 0], [-83, 0]]];

@@ -10,6 +10,8 @@ import { arcadeWall } from '../mughal/index.js';
 import * as F from '../mughal/furnish.js';
 import { B, LAP, TUR, CRE, WHI, solid, wallRun, bannai, tiledMinaret, pishtaqOf } from './kit.js';
 import { nicheWall, domeBlock } from './monuments.js';
+import { frame } from './frame.js';
+import { prayerHall } from './interiors.js';
 
 const H1 = 6.5, TOP = 14.5, FLOOR2 = 7.0;
 
@@ -88,7 +90,26 @@ export function madrasa(el, ctx) {
   // ---- the east wing (the entrance's range) beside the pishtaq's passage: the corner halls, the lecture room
   const classroom = [cx1 + 1.0, Z0 + 2.4, X1 - 2.4, cz0 - 0.5];                              // x −58 … −47.4, z −25.6 … −18.5
   // the rest of the east range: solid; the classroom (north) and the south corner hall hollow only for the north one
-  solid(bag, col, B, [cx1, cz1 + 0.5, X1 - 2.4, Z1 - 2.4], 0, TOP - 1.0);
+  {
+    // the south-east corner hall (the library): mirrored on the classroom, its door on the south gallery's east end, shelves of manuscripts on the outer wall
+    const rx0 = cx1 + 1.0, rz0 = cz1 + 0.5, rx1 = X1 - 2.4, rz1 = Z1 - 2.4, th = 0.6;
+    wallRun(bag, col, 'plaster_persian', 'z', rz0, rz1, rx0 - th / 2, th, 0, 5.8, [[rz0 + 1.4, 1.5, 2.8]]);
+    solid(bag, col, B, [rx1, rz0, rx1 + 1.2, rz1 + 0.2], 0, 5.8);
+    solid(bag, col, B, [rx0 - th, rz1, rx1 + 1.2, rz1 + 2.4], 0, TOP - 1.0);
+    bag.add('ceiling_painted', box(rx0, 5.8, rz0, rx1, 6.1, rz1));
+    solid(bag, null, B, [rx0 - th, rz0 - th, rx1 + 1.2, rz1 + 2.4], 6.1, TOP - 1.0); col.rect([rx0 - th, rz0, rx1 + 1.2, rz1 + 2.4], 5.8, TOP - 1.0);
+    bag.add('brick_paving', box(rx0, 0, rz0, rx1, 0.06, rz1));
+    F.carpet(bag, (rx0 + rx1) / 2, 0.06, (rz0 + rz1) / 2 - 0.5, (rx1 - rx0) - 2.0, (rz1 - rz0) - 2.6, Math.PI / 2, 'persian');
+    for (let i = 0; i < 5; i++) {
+      const sx = rx0 + 0.5 + i * 2.1;
+      bag.add('wood_dark', box(sx, 0.06, rz1 - 0.55, sx + 1.7, 2.3, rz1));
+      for (let r = 0; r < 4; r++) { bag.add('wood_painted', box(sx + 0.05, 0.4 + r * 0.55, rz1 - 0.6, sx + 1.65, 0.45 + r * 0.55, rz1 - 0.04)); for (let b = 0; b < 8; b++) bag.add(b % 3 === 1 ? 'hide_brown' : b % 3 === 2 ? 'linen' : 'hide_tan', box(sx + 0.12 + b * 0.19, 0.45 + r * 0.55, rz1 - 0.5, sx + 0.28 + b * 0.19, 0.45 + r * 0.55 + 0.22 + (b % 2) * 0.05, rz1 - 0.12)); }
+    }
+    col.rect([rx0 + 0.5, rz1 - 0.55, rx0 + 0.5 + 4 * 2.1 + 1.7, rz1], 0, 2.3);
+    for (let i = 0; i < 6; i++) { F.rahle(bag, rx0 + 1.6 + (i % 3) * 2.8, 0.08, rz0 + 1.8 + Math.floor(i / 3) * 1.9, Math.PI / 2); F.cushion(bag, rx0 + 1.0 + (i % 3) * 2.8, 0.08, rz0 + 1.8 + Math.floor(i / 3) * 1.9, 0.7, 0.5, 0.12, 0.2 * i, i % 2 ? 'cloth_indigo' : 'cloth_red'); }
+    for (const [x, z] of [[rx0 + 2, rz0 + 0.5], [rx0 + 6, rz0 + 0.5], [rx0 + 10, rz0 + 0.5]]) F.oilLamp(bag, lights, x, 1.5, z, 'bronze', 1.2);
+    F.mosqueLamp(bag, lights, (rx0 + rx1) / 2, 3.3, (rz0 + rz1) / 2, 5.8, { k: 1.2, glow: 4, reach: 10 });
+  }
   solid(bag, col, B, [cx1 - 0.5, cz1 - 0.1, X1 - 2.4, cz1 + 0.5], 0, TOP - 1.0);
   {
     // the classroom: walls (the door on the court's gallery side at its west), a painted ceiling, the furnishings
@@ -120,10 +141,24 @@ export function madrasa(el, ctx) {
   domeBlock({ c: [cx1 + 5.6, cz1 + 4.2], half: 4.6, y: TOP - 1.5, walls: false, wallH: 1.0, trans: 1.4, drum: { r: 3.8, h: 4.6 }, dome: { r: 4.6, h: 5.8, ribs: 20 } }, ctx);
   domeBlock({ c: [cx0 - 5.6, cz0 - 4.5], half: 4.6, y: TOP - 1.5, walls: false, wallH: 1.0, trans: 1.4, drum: { r: 3.8, h: 4.6 }, dome: { r: 4.6, h: 5.8, ribs: 20 } }, ctx);
   domeBlock({ c: [cx0 - 5.6, cz1 + 4.5], half: 4.6, y: TOP - 1.5, walls: false, wallH: 1.0, trans: 1.4, drum: { r: 3.8, h: 4.6 }, dome: { r: 4.6, h: 5.8, ribs: 20 } }, ctx);
-  // ---- the west range: the mosque's iwan on the court and the dome behind it, the wing's solid mass
-  solid(bag, col, B, [X0 + 2.4, cz0 - 0.1, cx0, zm - 5.9], 0, TOP - 1.0); solid(bag, col, B, [X0 + 2.4, zm + 5.9, cx0, cz1 + 0.1], 0, TOP - 1.0);
-  solid(bag, col, B, [X0 + 2.4, zm - 5.9, X0 + 5.2, zm + 5.9], 0, TOP - 1.0);
-  pishtaqOf({ a: [cx0, zm - 11], b: [cx0, zm + 11], facing: centre, y: 0, h: 21, depth: W - 1.8, th: 1.2, iwan: { w: 10, h: 16, depth: 6, doorH: 5 } }, ctx);
+  // ---- the west range: the mosque, a long hall (3.4 × 34.8 m) behind the west iwan, whose door leads into its middle bay; the mihrab on the west wall
+  const hx0 = X0 + 3.6, hx1 = cx0 - 0.6 - 6.4, hz = 17.4;
+  solid(bag, col, B, [hx1, cz0 - 0.1, cx0, zm - 11], 0, TOP - 1.0); solid(bag, col, B, [hx1, zm + 11, cx0, cz1 + 0.1], 0, TOP - 1.0);
+  solid(bag, col, B, [hx0, zm - hz - 0.6, hx1, zm - hz], 0, TOP - 1.0); solid(bag, col, B, [hx0, zm + hz, hx1, zm + hz + 0.6], 0, TOP - 1.0);
+  solid(bag, col, B, [X0 + 2.4, cz0 - 0.1, hx0, zm - hz - 0.6], 0, TOP - 1.0); solid(bag, col, B, [X0 + 2.4, zm + hz + 0.6, hx0, cz1 + 0.1], 0, TOP - 1.0);
+  bag.add('ceiling_painted', box(hx0, 5.5, zm - hz, hx1 + 0.2, 5.6, zm + hz)); solid(bag, null, B, [hx0, zm - hz - 0.6, hx1 + 0.2, zm + hz + 0.6], 5.6, TOP - 1.0); col.rect([hx0, zm - hz, hx1, zm + hz], 5.6, TOP - 1.0);
+  bag.add('brick_paving', box(hx0, 0, zm - hz, hx1 + 0.2, 0.06, zm + hz));
+  pishtaqOf({ a: [cx0, zm - 11], b: [cx0, zm + 11], facing: centre, y: 0, h: 21, depth: 6.6, th: 1.2, iwan: { w: 10, h: 16, depth: 6, pass: true, doorH: 5 } }, ctx);
+  {
+    // the mosque's finish: tile dado, a lapis band and a Kufic frieze on the long walls, the mihrab on the west wall, rugs in a row facing it, lamps
+    const fr = frame(ctx, 0, 0, 3), HM = zm;                                   // local (x, z) = world (z, −x): the hall's long axis is local x, the qibla local +z
+    const zq = -hx0, zin = -hx1, xa = HM - hz, xb = HM + hz;
+    const put = (m, x0_, y0_, x1_, y1_, zz, d) => fr.bag.add(m, box(x0_, y0_, Math.min(zz, zz + d), x1_, y1_, Math.max(zz, zz + d)));
+    put('tile_turquoise', xa, 0.06, xb, 1.3, zq, -0.04); put('mosaic_gold', xa, 1.3, xb, 1.38, zq, -0.05); put('tile_lapis', xa, 1.38, xb, 1.9, zq, -0.045);
+    put('tile_turquoise', xa, 0.06, xb, 1.3, zin, 0.04); put('mosaic_gold', xa, 1.3, xb, 1.38, zin, 0.05); put('tile_lapis', xa, 1.38, xb, 1.9, zin, 0.045);
+    bannai(fr.bag, { a: [xa, zq], b: [xb, zq], n: [0, -1], d: 0.02, y: 0, s0: 0.2, s1: xb - xa - 0.2, v0: 4.2, v1: 5.2, kind: 'kufic', base: LAP, ink: WHI, alt: CRE, ink2: TUR, cell: 0.5, seed: 91 });
+    prayerHall(fr, { c: [HM, (zq + zin) / 2], hx: hz, hz: (zq - zin) / 2, single: true, mh: 4.3, steps: 3, lampY: 3.7, lampTop: 5.5 }, fr.lights);
+  }
   domeBlock({ c: [X0 + 9, zm], half: 8.5, y: TOP - 1.5, walls: false, wallH: 1.0, trans: 2.2, drum: { r: 6.2, h: 7 }, dome: { r: 7.4, h: 9, ribs: 24 } }, ctx);
   void orientedBox;
 }

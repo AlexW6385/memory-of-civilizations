@@ -2,8 +2,12 @@
 // Bibi-Khanym mosque, the Gur-e Amir complex, Ulugh Beg's observatory, the chorsu (the bazaar's domed crossing)
 // and the rows of shops, with the wall and dome helpers they share.
 
-import { box, lathe, fromTriangles } from '../../core/geom.js';
+import { box, lathe, fromTriangles, clothBox, addCloth, place, rod } from '../../core/geom.js';
+import { hungCarpet } from './market.js';
+import { frame } from './frame.js';
+import { chamber, cenotaph, prayerHall } from './interiors.js';
 import { orientedBox } from '../../core/build.js';
+import { Shape, Path, ExtrudeGeometry } from '../../core/three.js';
 import { arcadeWall } from '../mughal/index.js';
 import * as F from '../mughal/furnish.js';
 import { B, LAP, TUR, CRE, WHI, rng, boxR, unit, away, solid, wallRun, bannai, ribbedDome, tiledMinaret, bar, pishtaqOf } from './kit.js';
@@ -39,7 +43,12 @@ export function domeBlock(el, { bag, col }) {
   const [cx, cz] = el.c, y = el.y ?? 0, A = el.half, H = el.wallH, dr = el.drum.r, tr = el.trans ?? A * 0.26;
   if (el.walls !== false) solid(bag, col, el.wallMat ?? B, [cx - A, cz - A, cx + A, cz + A], y, y + H);
   // the roof's edge as a band of tile, then the octagon rising to the drum
-  bag.add(LAP, box(cx - A - 0.1, y + H - 0.5, cz - A - 0.1, cx + A + 0.1, y + H, cz + A + 0.1));
+  if (el.hole) {
+    // a roof slab with a round opening onto the inner drum (a chamber below)
+    const sh = new Shape(), q = A + 0.1; sh.moveTo(-q, -q); sh.lineTo(q, -q); sh.lineTo(q, q); sh.lineTo(-q, q); sh.lineTo(-q, -q);
+    const hole = new Path(); hole.absarc(0, 0, el.hole, 0, Math.PI * 2, true); sh.holes.push(hole);
+    const g = new ExtrudeGeometry(sh, { depth: 0.5, bevelEnabled: false, curveSegments: 24 }); g.rotateX(Math.PI / 2); g.translate(cx, y + H, cz); bag.add(LAP, g);
+  } else bag.add(LAP, box(cx - A - 0.1, y + H - 0.5, cz - A - 0.1, cx + A + 0.1, y + H, cz + A + 0.1));
   bag.add(B, lathe([[A * 1.04 / Math.cos(Math.PI / 8) * 0.92, 0], [dr * 1.1, tr]], 8, (th) => 1, cx, y + H, cz));
   ribbedDome(bag, col, { c: [cx, cz], y: y + H + tr, r: el.dome.r, h: el.dome.h, drum: el.drum, ribs: el.dome.ribs ?? 24, mat: el.mat ?? TUR });
 }
@@ -64,7 +73,7 @@ export function bibiKhanym(el, ctx) {
   pishtaqOf({ a: M(18, -HL + o), b: M(-18, -HL + o), facing: M(0, -HL - 50), y: 0, h: 35, depth: 16, iwan: { w: 15, h: 28, depth: 9, pass: true, doorH: 8 } }, ctx);
   // the end belts: solid ranges of rooms (the entrance's, the sanctuary's), the passage left open between
   UV(-HW + 2, -HL + 16.5, -9, -CV, 0, WH); UV(9, -HL + 16.5, HW - 2, -CV, 0, WH);
-  UV(-HW + 2, CV, HW - 2, HL - 2, 0, WH);
+  UV(-HW + 2, CV, -13, HL - 2, 0, WH); UV(13, CV, HW - 2, HL - 2, 0, WH); UV(-13, 75, 13, HL - 2, 0, WH);        // (the sanctuary's hall and the iwan's way are left open between)
   // the court's faces: the end arcades, the gallery arcades with their bays (pass arches into the covered galleries)
   const gal = (u, v0, v1, ins) => {
     const a = M(u, v0), b = M(u, v1), L = v1 - v0, n = Math.round(L / 4.5), w = L / n, ar = [];
@@ -101,8 +110,18 @@ export function bibiKhanym(el, ctx) {
     for (const [p, q] of [[a, b], [b2, c2]]) { const L = Math.hypot(q[0] - p[0], q[1] - p[1]), n = 4, w = L / n, aa = []; for (let i = 0; i < n; i++) aa.push({ at: (i + 0.5) * w, w: 2.8, h: 7.5, depth: 0.2, back: 'tile_lapis' }); arcadeWall(bag, col, p, q, 0, WH, 0.8, B, aa, M(0, CV + 100)); }
     void ar; }
   // the sanctuary: the iwan on the court, the great dome behind it (about 40 m outside), 13 m square walls
-  pishtaqOf({ a: M(-17, CV + 0.6), b: M(17, CV + 0.6), facing: M(0, 0), y: 0, h: 30, depth: 8, iwan: { w: 14, h: 24, depth: 7 } }, ctx);
-  domeBlock({ c: M(0, 62), half: 13, y: 0, wallH: 16, trans: 3.5, drum: { r: 8.6, h: 8 }, dome: { r: 10.2, h: 12.5, ribs: 32 } }, ctx);
+  pishtaqOf({ a: M(-17, CV + 0.6), b: M(17, CV + 0.6), facing: M(0, 0), y: 0, h: 30, depth: 8, iwan: { w: 14, h: 24, depth: 7, pass: true, doorH: 7 } }, ctx);
+  { // the prayer hall under the great dome: 22 × 22 m inside, walls 2 m (3.4 m at the entrance), the passage behind the iwan; built in the enclosure's own frame
+    const fr = frame(ctx, C[0], C[1], -0.5), sol = (x0, z0, x1, z1, y0, y1, m = B) => { fr.bag.add(m, box(x0, y0, z0, x1, y1, z1)); fr.col.rect([x0, z0, x1, z1], y0, y1); };
+    sol(-13, 47.6, -11, 75, 0, 16); sol(11, 47.6, 13, 75, 0, 16); sol(-11, 73, 11, 75, 0, 16);
+    sol(-11, 47.6, -2.3, 51, 0, 16); sol(2.3, 47.6, 11, 51, 0, 16);
+    fr.bag.add(B, box(-2.3, 7, 47.6, 2.3, 16, 51)); fr.col.rect([-2.3, 47.6, 2.3, 51], 7, 16);
+    fr.bag.add('marble_floor', box(-2.3, 0, 47.4, 2.3, 0.06, 51));
+    for (const sgn of [-1, 1]) bannai(fr.bag, { a: [sgn * 13, 60], b: [sgn * 13, 74], n: [sgn, 0], d: 0.02, y: 0, s0: 0.2, s1: 13.8, v0: 13.2, v1: 14.8, kind: 'kufic', base: LAP, ink: WHI, alt: CRE, ink2: TUR, cell: 0.55, seed: 77 + sgn });
+    domeBlock({ c: [0, 62], half: 13, y: 0, hole: 8.1, walls: false, wallH: 16, trans: 3.5, drum: { r: 8.6, h: 8 }, dome: { r: 10.2, h: 12.5, ribs: 32 } }, { bag: fr.bag, col: fr.col });
+    chamber(fr, { c: [0, 62], hx: 11, hz: 11, h: 16, innerR: 8.1, drumH: 12, domeH: 10, ribs: 32, dado: 2.6, doorWall: 2, door: [8.7, 13.3] });
+    prayerHall(fr, { c: [0, 62], hx: 11, hz: 11, lampY: 10.5, lampTop: 16 }, fr.lights);
+  }
   // the two lesser domes at the middles of the long sides, behind a pishtaq each
   for (const s of [-1, 1]) {
     pishtaqOf({ a: M(s * (CU + 0.6), -11), b: M(s * (CU + 0.6), 11), facing: M(0, 0), y: 0, h: 18, depth: 21, iwan: { w: 10, h: 14, depth: 6 } }, ctx);
@@ -149,9 +168,23 @@ export function gurEAmir(el, ctx) {
   void south;
   // the mausoleum: a square block 26 m across, the pishtaq on the court, the octagon, the tall drum, the ribbed dome
   const A = 13;
-  solid(bag, col, B, [cx - A, mz - A, cx + A, mz + A], 0, 12);
-  pishtaqOf({ a: [cx - 10, mz - A + 0.6], b: [cx + 10, mz - A + 0.6], facing: [cx, mz - 80], y: 0, h: 16, depth: 4, iwan: { w: 9, h: 12, depth: 3.4 } }, ctx);
-  domeBlock({ c: [cx, mz], half: A, y: 0, wallH: 12, walls: false, trans: 3.2, drum: { r: 7.6, h: 11 }, dome: { r: 9, h: 12.5, ribs: 32 } }, ctx);
+  // the walls round the tomb chamber (12 × 12 inside): the entrance through the portal's iwan, a passage in the thick north wall
+  solid(bag, col, B, [cx - A, mz - 11.8, cx - 6, mz + A], 0, 12); solid(bag, col, B, [cx + 6, mz - 11.8, cx + A, mz + A], 0, 12);
+  solid(bag, col, B, [cx - 6, mz + 6, cx + 6, mz + A], 0, 12);
+  solid(bag, col, B, [cx - 6, mz - 11.8, cx - 4.5, mz - 8.2], 0, 12); solid(bag, col, B, [cx + 4.5, mz - 11.8, cx + 6, mz - 8.2], 0, 12);
+  solid(bag, col, B, [cx - 6, mz - 8.2, cx - 2.03, mz - 6], 0, 12); solid(bag, col, B, [cx + 2.03, mz - 8.2, cx + 6, mz - 6], 0, 12);
+  bag.add(B, box(cx - 2.03, 5.2, mz - 8.2, cx + 2.03, 12, mz - 6)); col.rect([cx - 2.03, mz - 8.2, cx + 2.03, mz - 6], 5.2, 12);
+  bag.add('marble_floor', box(cx - 2.03, 0, mz - 8.2, cx + 2.03, 0.06, mz - 6));
+  pishtaqOf({ a: [cx - 10, mz - A + 0.6], b: [cx + 10, mz - A + 0.6], facing: [cx, mz - 80], y: 0, h: 16, depth: 4, iwan: { w: 9, h: 12, depth: 3.4, pass: true, doorH: 5.2 } }, ctx);
+  { // inside: the finish of the chamber, the cenotaphs, the lamps
+    const fr = frame(ctx, 0, 0, 0);
+    chamber(fr, { c: [cx, mz], hx: 6, hz: 6, h: 12, innerR: 5.9, drumH: 11, domeH: 8, ribs: 32, doorWall: 2, door: [3.97, 8.03] });
+    cenotaph(bag, col, cx, mz, Math.PI / 2, true, 1.0);
+    for (const [dx, dz] of [[-3.5, 0.3], [3.5, 0.3], [-1.7, 3.5], [1.7, 3.5], [-3.7, -3.4]]) cenotaph(bag, col, cx + dx, mz + dz, Math.PI / 2, false, 0.92);
+    for (const [dx, dz] of [[-3.5, -3.5], [3.5, -3.5], [-3.5, 3.5], [3.5, 3.5]]) F.mosqueLamp(bag, ctx.lights, cx + dx, 8.2, mz + dz, 12, { k: 1.5, enamel: true, glow: 4, reach: 16 });
+    F.mosqueLamp(bag, ctx.lights, cx, 7.0, mz, 12, { k: 1.9, enamel: true, glow: 5, reach: 20 });
+  }
+  domeBlock({ c: [cx, mz], half: A, y: 0, wallH: 12, hole: 5.9, walls: false, trans: 3.2, drum: { r: 7.6, h: 11 }, dome: { r: 9, h: 12.5, ribs: 32 } }, ctx);
   // four minarets: two on the portal's flanks, two at the mausoleum's front corners
   for (const [x, z] of [[cx - 7.5, z0 + 1], [cx + 7.5, z0 + 1], [cx - A + 0.5, mz - A + 0.5], [cx + A - 0.5, mz - A + 0.5]]) tiledMinaret(bag, col, { c: [x, z], y: 0, h: 30, r: 2.1 });
 }
@@ -164,14 +197,51 @@ export function gurEAmir(el, ctx) {
 export function observatory(el, ctx) {
   const { bag, col } = ctx, [cx, cz] = el.c, y = el.y ?? 0, R = el.r ?? 23, H = el.h ?? 31, N = 32;
   const poly = Array.from({ length: N }, (_, k) => { const a = k / N * Math.PI * 2; return [cx + Math.cos(a) * R, cz + Math.sin(a) * R]; });
-  bag.add(B, lathe([[R - 2.6, 0], [R - 2.6, H]], N, null, cx, y, cz));
-  col.circle(cx, cz, R - 1.5, y, y + H);
+  // the drum's mass is a ring of bars round the ground-floor hall (15 m radius), open at the south door (face 8)
+  const DOOR = 8, HR = 15, RO = R - 1.1, rc = (HR + RO) / 2, chord = 2 * RO * Math.tan(Math.PI / N) + 0.15;
+  for (let j = 0; j < N; j++) {
+    const th = (j + 0.5) / N * Math.PI * 2, t = [-Math.sin(th), Math.cos(th)], c = [cx + Math.cos(th) * rc, cz + Math.sin(th) * rc];
+    const a = [c[0] - t[0] * chord / 2, c[1] - t[1] * chord / 2], b = [c[0] + t[0] * chord / 2, c[1] + t[1] * chord / 2];
+    if (j === DOOR) { bar(bag, col, B, a, b, RO - HR, y + 6.8, y + H); continue; }
+    bar(bag, col, B, a, b, RO - HR, y, y + H);
+  }
+  bag.add('brick_buff', lathe([[R - 1.2, H], [0.001, H]], N, null, cx, y, cz));
+  { // the hall: a marble floor, a painted ceiling under the first floor, a central pier with the armillary sphere, tables with astrolabes, star charts
+    bag.add('marble_floor', lathe([[HR, 0.06], [0.001, 0.06]], 40, null, cx, y, cz));
+    bag.add('ceiling_painted', lathe([[0.001, 9.6], [HR, 9.6]], 40, null, cx, y, cz));
+    bag.add('tile_lapis', lathe([[HR - 0.02, 9.6], [HR - 0.02, 8.9]], 40, null, cx, y, cz));
+    bag.add('mosaic_gold', lathe([[HR - 0.03, 8.9], [HR - 0.03, 8.8]], 40, null, cx, y, cz));
+    bag.add('marble', lathe([[HR - 0.03, 1.6], [HR - 0.03, 0.06]], 40, null, cx, y, cz));
+    // pier and armillary sphere: three rings of rods on a bronze stand
+    bag.add('brick_buff', lathe([[2.4, 0], [2.4, 0.4], [1.9, 0.5], [1.9, 1.0]], 24, null, cx, y, cz)); col.circle(cx, cz, 2.4, y, y + 1.0);
+    bag.add('bronze', lathe([[0.4, 0], [0.4, 0.1], [0.1, 0.2], [0.1, 0.9]], 12, null, cx, y + 1.0, cz));
+    const ring = (rad, tilt, spin) => { const P = []; for (let i = 0; i < 28; i++) { const a = i / 28 * Math.PI * 2; let px = Math.cos(a) * rad, py = Math.sin(a) * rad, pz = 0; const y1 = py * Math.cos(tilt) - pz * Math.sin(tilt), z1 = py * Math.sin(tilt) + pz * Math.cos(tilt); py = y1; pz = z1; const x2 = px * Math.cos(spin) + pz * Math.sin(spin), z2 = -px * Math.sin(spin) + pz * Math.cos(spin); P.push([cx + x2, y + 2.2 + py, cz + z2]); } for (let i = 0; i < 28; i++) bag.add('bronze', rod(P[i], P[(i + 1) % 28], 0.025, 4)); };
+    ring(0.9, 0, 0); ring(0.9, Math.PI / 2, 0); ring(0.9, Math.PI / 2, Math.PI / 2); ring(0.7, 0.41, 0.6);
+    bag.add('gilt_bronze', lathe([[0.001, -0.12], [0.12, 0], [0.001, 0.12]], 10, null, cx, y + 2.2, cz));
+    bag.add('bronze', rod([cx, y + 1.9, cz], [cx, y + 2.5, cz], 0.02, 4));
+    for (let i = 0; i < 6; i++) {
+      const a = (i + 0.5) / 6 * Math.PI * 2 + 0.3, tx = cx + Math.cos(a) * 9, tz = cz + Math.sin(a) * 9;
+      bag.add('wood_dark', box(tx - 0.9, y + 0.74, tz - 0.5, tx + 0.9, y + 0.8, tz + 0.5));
+      for (const [dx, dz] of [[-0.85, -0.45], [0.85, -0.45], [-0.85, 0.45], [0.85, 0.45]]) bag.add('wood_dark', box(tx + dx - 0.035, y, tz + dz - 0.035, tx + dx + 0.035, y + 0.74, tz + dz + 0.035));
+      col.rect([tx - 0.9, tz - 0.5, tx + 0.9, tz + 0.5], y, y + 0.8);
+      F.rahle(bag, tx - 0.4, y + 0.8, tz, a); bag.add('bronze', lathe([[0.001, 0], [0.15, 0], [0.16, 0.015], [0.001, 0.02]], 14, null, tx + 0.35, y + 0.8, tz)); bag.add('bronze', lathe([[0.001, 0.02], [0.13, 0.02], [0.001, 0.05]], 14, null, tx + 0.35, y + 0.8, tz));
+      F.cushion(bag, tx, y + 0.07, tz + (a > 3 ? 0.9 : -0.9), 0.7, 0.55, 0.12, a, 'cloth_indigo');
+    }
+    // star charts on the wall: a lapis disc ringed with gold, gilt stars
+    for (const a0 of [0.2, 1.4, 2.6, 3.9, 5.1]) {
+      const wx = cx + Math.cos(a0) * (HR - 0.05), wz = cz + Math.sin(a0) * (HR - 0.05), yaw = -a0 - Math.PI / 2;
+      const d1 = lathe([[0.001, 0], [1.3, 0], [1.3, 0.04], [0.001, 0.04]], 24); d1.rotateX(Math.PI / 2); bag.add('tile_lapis', place(d1, wx - Math.cos(a0) * 0.05, y + 3.2, wz - Math.sin(a0) * 0.05, yaw));
+      const d2 = lathe([[1.3, 0.06], [1.45, 0.06], [1.45, 0], [1.3, 0]], 24); d2.rotateX(Math.PI / 2); bag.add('mosaic_gold', place(d2, wx - Math.cos(a0) * 0.05, y + 3.2, wz - Math.sin(a0) * 0.05, yaw));
+      for (let i = 0; i < 14; i++) { const q = i * 2.4, rr = 0.2 + (i % 5) * 0.2; bag.add('mosaic_gold', place(box(-0.04, -0.04, 0.045, 0.04, 0.04, 0.06), wx - Math.cos(a0) * 0.05 + Math.cos(q) * rr * -Math.sin(a0) * -1, y + 3.2 + Math.sin(q) * rr, wz - Math.sin(a0) * 0.05 + Math.cos(q) * rr * Math.cos(a0), yaw)); }
+    }
+    for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2 + 0.8; F.mosqueLamp(bag, ctx.lights, cx + Math.cos(a) * 6, y + 6.2, cz + Math.sin(a) * 6, y + 9.6, { k: 1.4, enamel: true, glow: 4, reach: 14 }); }
+  }
   // the plinth: two steps of marble
   bag.add('marble', lathe([[R + 3.2, 0], [R + 3.2, 0.3], [R + 1.8, 0.3], [R + 1.8, 0.6], [R + 0.5, 0.6]], 48, null, cx, y, cz));
-  col.circle(cx, cz, R + 3.2, y, y + 0.6);
+  col.circle(cx, cz, R + 3.2, y, y + 0.3); col.circle(cx, cz, R + 1.8, y, y + 0.6);
   for (let k = 0; k < N; k++) {
     const p = poly[k], q = poly[(k + 1) % N], ar = [], L = Math.hypot(q[0] - p[0], q[1] - p[1]);
-    ar.push({ at: L / 2, w: L * 0.5, h: 7.5, sill: 0.6, depth: 0.3, back: 'tile_lapis' }, { at: L / 2, w: L * 0.46, h: 6.8, sill: 9.8, depth: 0.3, back: 'kahgel' }, { at: L / 2, w: L * 0.44, h: 6.5, sill: 18.8, depth: 0.3, back: 'kahgel' });
+    ar.push(k === DOOR ? { at: L / 2, w: L * 0.42, h: 6.6, pass: true } : { at: L / 2, w: L * 0.5, h: 7.5, sill: 0.6, depth: 0.3, back: 'tile_lapis' }, { at: L / 2, w: L * 0.46, h: 6.8, sill: 9.8, depth: 0.3, back: 'kahgel' }, { at: L / 2, w: L * 0.44, h: 6.5, sill: 18.8, depth: 0.3, back: 'kahgel' });
     arcadeWall(bag, col, p, q, y, H, 2.2, B, ar, [cx, cz], undefined);
     const mx = (p[0] + q[0]) / 2 - cx, mz = (p[1] + q[1]) / 2 - cz, ml = Math.hypot(mx, mz);
     bannai(bag, { a: p, b: q, n: [mx / ml, mz / ml], d: 1.1, y, s0: 0.3, s1: L - 0.3, v0: H - 1.7, v1: H - 0.6, kind: 'kufic', base: LAP, ink: WHI, alt: CRE, ink2: TUR, cell: 0.55, seed: k + 1 });
@@ -252,6 +322,21 @@ export function shopRow(el, { bag, col, lights }) {
     else if (kind === 'copper') { F.copperware(bag, xc, 1.16, Z(0.8), yaw, i, 5); F.copperware(bag, xc, 2.06, Z(0.8), yaw, i + 3, 4); F.copperware(bag, ia + 0.5, 0, gz, yaw, i + 7, 3); }
     else if (kind === 'pots') { F.pots(bag, xc, 1.16, Z(0.8), yaw, 5); F.pots(bag, ia + 0.6, 0, gz, yaw, 4); F.pots(bag, ib - 0.6, 0, gz, yaw, 3); }
     else { F.spiceSacks(bag, ia + 0.7, 0, gz, yaw, 4); F.pots(bag, xc, 1.16, Z(0.8), yaw, 4, ['terracotta', 'glaze_white', 'terracotta']); }
+    // the awning over the sill (cloth in the wind with a valance) on posts, the goods hung from the lintel, a basket at the foot
+    {
+      const AW = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green', 'cloth_maroon', 'cloth_white'][Math.floor(rand() * 6)], xa = x0 + i * w + 0.1, xb = x0 + (i + 1) * w - 0.1;
+      const za = Math.min(fz, fz + sg * 1.8), zb = Math.max(fz, fz + sg * 1.8);
+      addCloth(bag, AW, clothBox(xa, 2.72, za, xb, 2.77, zb, 0.3), 2.77);
+      addCloth(bag, AW, clothBox(xa, 2.38, fz + sg * 1.8 - 0.03, xb, 2.72, fz + sg * 1.8 + 0.03, 0.17), 2.72);
+      if (i % 2 === 0) for (const px of [xa + 0.05, xb - 0.05]) { const pz = fz + sg * 1.75; bag.add('timber', box(px - 0.04, 0, pz - 0.04, px + 0.04, 2.76, pz + 0.04)); col.circle(px, pz, 0.06, 0, 2.7); }
+      const hz = fz - sg * 0.12, hx = (kind === 'carpets' ? 0.3 : 0.45);
+      if (kind === 'carpets') hungCarpet(bag, ia + hx + 0.3, 2.95, hz, 1.0, 1.5, front === 's' ? 0 : Math.PI, rand);
+      else if (kind === 'cloth') for (let k2 = 0; k2 < 3; k2++) addCloth(bag, ['cloth_red', 'cloth_ochre', 'cloth_indigo', 'cloth_white'][(i + k2) % 4], clothBox(ia + 0.15 + k2 * 0.34, 1.7, hz - 0.03, ia + 0.4 + k2 * 0.34, 2.95, hz + 0.03), 2.95);
+      else if (kind === 'copper') for (let k2 = 0; k2 < 4; k2++) bag.add('bronze', place(lathe([[0.001, 0], [0.2, 0], [0.22, 0.03], [0.001, 0.012]], 14, null, 0, 0, 0), ia + 0.4 + k2 * 0.6 * (w - 0.9) / 2.1 * 0.5, 2.1 + (k2 % 2) * 0.45, hz + sg * 0.03));
+      else if (kind === 'spice') for (let k2 = 0; k2 < 5; k2++) addCloth(bag, k2 % 2 ? 'cloth_red' : 'cloth_ochre', clothBox(ia + 0.2 + k2 * 0.55 * (w - 0.9) / 2.7, 2.2, hz - 0.04, ia + 0.34 + k2 * 0.55 * (w - 0.9) / 2.7, 2.95, hz + 0.04), 2.95);
+      else for (let k2 = 0; k2 < 4; k2++) bag.add('terracotta', lathe([[0.001, 0], [0.1, 0.04], [0.14, 0.15], [0.1, 0.24], [0.001, 0.26]], 8, null, ia + 0.35 + k2 * 0.45 * (w - 0.9) / 2.0, 2.5 - 0.05 * (k2 % 2), hz + sg * 0.06));
+      if (i % 2 === 1) { const bxp = xa + 0.35, bzp = fz + sg * 0.6; bag.add('wicker', lathe([[0.001, 0], [0.2, 0], [0.27, 0.2], [0.26, 0.26], [0.22, 0.24], [0.001, 0.2]], 10, null, bxp, 0, bzp)); bag.add(['cloth_red', 'cloth_ochre', 'cloth_green'][i % 3], lathe([[0.22, 0.22], [0.15, 0.32], [0.001, 0.36]], 10, null, bxp, 0, bzp)); }
+    }
     if (i === (el.enter ?? 3)) {
       // the entered shop: a balance on the sill, a kettle on a brazier, a lamp, a chest
       F.trayTable(bag, xc + 0.4, 0.5, Z(D - 0.8), { seed: i });
@@ -267,9 +352,18 @@ export function khanqah(el, ctx) {
   const nw = (p, q, tiers = 2, bk = 0) => nicheWall({ a: p, b: q, facing: c, h, th: 1.2, bay: 4.4, backing: bk, tiers }, ctx);
   nw([x0 + 0.6, z0], [x0 + 0.6, zm - 7]); nw([x0 + 0.6, zm + 7], [x0 + 0.6, z1]);
   nw([x0, z0 + 0.6], [x1, z0 + 0.6]); nw([x0, z1 - 0.6], [x1, z1 - 0.6]); nw([x1 - 0.6, z0], [x1 - 0.6, z1]);
-  pishtaqOf({ a: [x0 + 0.6, zm + 7], b: [x0 + 0.6, zm - 7], facing: [x0 - 50, zm], y: 0, h: 19, depth: 9, iwan: { w: 8, h: 13, depth: 5 } }, ctx);
+  pishtaqOf({ a: [x0 + 0.6, zm + 7], b: [x0 + 0.6, zm - 7], facing: [x0 - 50, zm], y: 0, h: 19, depth: 9, iwan: { w: 8, h: 13, depth: 5, pass: true, doorH: 5 } }, ctx);
   solid(bag, col, B, [x0 + 1.2, z0 + 1.2, x0 + 9.6, zm - 7.6], 0, h); solid(bag, col, B, [x0 + 1.2, zm + 7.6, x0 + 9.6, z1 - 1.2], 0, h);
-  solid(bag, col, B, [x0 + 9.6, z0 + 1.2, x1 - 1.2, z1 - 1.2], 0, h);
-  domeBlock({ c: [x1 - 11, zm], half: 8, y: h - 1, walls: false, wallH: 1, trans: 2, drum: { r: 6, h: 7 }, dome: { r: 7.4, h: 9.5, ribs: 24 } }, ctx);
+  // the lodge's hall (12 × 12 m inside, under the dome) entered by a passage through the thick west wall
+  const hx = x1 - 11, hw = 6, w0 = hx - hw;
+  solid(bag, col, B, [x0 + 9.6, z0 + 1.2, w0, zm - 1.8], 0, h); solid(bag, col, B, [x0 + 9.6, zm + 1.8, w0, z1 - 1.2], 0, h);
+  solid(bag, col, B, [w0, z0 + 1.2, x1 - 1.2, zm - hw], 0, h); solid(bag, col, B, [w0, zm + hw, x1 - 1.2, z1 - 1.2], 0, h); solid(bag, col, B, [hx + hw, zm - hw, x1 - 1.2, zm + hw], 0, h);
+  bag.add(B, box(x0 + 9.6, 5, zm - 1.8, w0, h, zm + 1.8)); col.rect([x0 + 9.6, zm - 1.8, w0, zm + 1.8], 5, h);
+  bag.add('marble_floor', box(x0 + 5.8, 0, zm - 1.8, w0, 0.06, zm + 1.8));
+  { const fr = frame(ctx, 0, 0, 0);
+    chamber(fr, { c: [hx, zm], hx: hw, hz: hw, h: h - 1, innerR: 5.2, drumH: 9, domeH: 7, ribs: 20, dado: 1.8, doorWall: 0, door: [4.2, 7.8], floor: 'brick_paving', dadoMat: 'marble' });
+    prayerHall(fr, { c: [hx, zm], hx: hw, hz: hw, mh: 6, steps: 5, lampY: 8.5, lampTop: h - 1 }, ctx.lights);
+    F.carpet(bag, hx, 0.06, zm - 1.0, 7, 5, 0, 'persian'); }
+  domeBlock({ c: [hx, zm], half: 8, y: h - 1, hole: 5.2, walls: false, wallH: 1, trans: 2, drum: { r: 6, h: 7 }, dome: { r: 7.4, h: 9.5, ribs: 24 } }, ctx);
   for (const z of [z0, z1]) tiledMinaret(bag, col, { c: [x0, z], y: 0, h: 26, r: 1.8 });
 }
