@@ -96,6 +96,58 @@ export async function town() {
   // the street: a donkey with panniers at a lane's mouth, a dog, a cart of fodder; people along it are the movers'
   L.push({ t: 'animal', kind: 'donkey', at: [22, 7.6], y: 0, rot: 1.2, seed: 11, gear: true });
   for (let k = 0; k < 6; k++) { const x = -20 + rand() * 150, z = (rand() < 0.5 ? -1 : 1) * (6 + rand() * 40); if (L.every((p) => !p.at || Math.hypot(p.at[0] - x, p.at[1] - z) > 3) && !lots().some((l) => inRect(l.rect, x, z, 0.5))) L.push({ t: 'animal', kind: 'dog', at: [x, z], y: 0, rot: rand() * 6.28, seed: k + 3 }); }
+  // ── the street at eye level: idlers at the shops, wells and troughs at the lane mouths, carts, fowl, flocks, guards at the gate
+  {
+    const LT = lots(), isFree = (x, z, m = 0.6) => !LT.some((l) => inRect(l.rect, x, z, m)) && !inRect([SERAI.x0, SERAI.z0, SERAI.x1, SERAI.z1], x, z, 1.0);
+    const put = (o) => L.push(o);
+    const pickc = (a) => a[Math.floor(rand() * a.length)];
+    // the shop-front idlers: a shopkeeper's boy or a customer beside the door, an old man on a bench, a donkey tied at the post
+    for (const l of LT) {
+      if (!l.trade) continue;
+      const W = l.rect[2] - l.rect[0], dx = l.rect[0] + doorU(W, true, rng(l.seed * 7 + 3)()), side = l.front === 's' ? 1 : -1, ze = l.front === 's' ? l.rect[3] : l.rect[1];
+      const z = ze + side * 1.9, k = rand();
+      if (Math.abs(dx - 100) > 70) continue;
+      if (k < 0.4) { const f = k < 0.2 ? sogdian : man; f([dx + 2.4, z], 0, side > 0 ? Math.PI : 0, { pose: 'talk' }); f([dx + 3.4, z + side * 0.2], 0, side > 0 ? 0 : Math.PI, { pose: 'talk' }); }
+      else if (k < 0.62 && !(dx > 28 && dx < 70)) { put({ t: 'bench', at: [dx - 3.4, ze + side * 0.45], y: 0, rot: 0, len: 1.7, mat: 'banco' }); man([dx - 3.4, ze + side * 0.45], 0.47, side > 0 ? Math.PI : 0, { pose: 'cross', hat: 'cap' }); }
+      else if (k < 0.78) put({ t: 'animal', kind: 'donkey', at: [dx + 3.4, ze + side * 1.4], y: 0, rot: side > 0 ? 0.3 : Math.PI - 0.3, seed: l.seed, gear: true });
+      if (rand() < 0.35) put({ t: 'chickens', at: [dx + 5, ze + side * 1.0], rot: rand() * 6, n: 3, seed: l.seed });
+    }
+    // the lane mouths: a draw-well with its trough (the lanes are watered from the Daquan's channels), a parked cart, firewood and ladders along the lane walls
+    CROSS.forEach((c, i) => {
+      for (const sd of [-1, 1]) {
+        const x = c + LANE_W / 2 + 2.6, z = sd * 5.0;
+        if (i === 1 && sd < 0) continue;
+        if (isFree(x, z, 0.3) && i !== 1) { put({ t: 'well', kind: i === 0 ? 'pulley' : 'open', at: [x, z], y: 0, rot: 0, mat: 'banco', roof: false }); put({ t: 'trough', at: [x + 1.6, z + sd * 0.3], y: 0, rot: 0, mat: 'banco' }); man([x - 0.2, z + sd * 1.3], 0, 0.5, { carry: 'pot', arms: 'head', dress: 'tunic', cloth: pickc(['cloth_red', 'cloth_green', 'cloth_ochre']), hair: 'bun', hat: 'none' }); }
+      }
+      for (let z = -52; z <= 52; z += 9 + Math.floor(rand() * 5)) {
+        if (Math.abs(z) < 8) continue;
+        const sdx = rand() < 0.5 ? -1 : 1, x = c + sdx * (LANE_W / 2 - 0.55), r = rand();
+        if (r < 0.35) put({ t: 'firewood', at: [x, z], y: 0, rot: Math.PI / 2, len: 1.5, seed: Math.round(z) });
+        else if (r < 0.55) put({ t: 'ladder', at: [x + sdx * 0.3, z], y: 0, rot: sdx > 0 ? Math.PI / 2 : -Math.PI / 2, len: 3.4 });
+        else if (r < 0.75) put({ t: 'pot', kind: 'water_pot', n: 3, at: [x, z], y: 0, seed: Math.round(z) });
+        else if (r < 0.9) put({ t: 'chickens', at: [c, z], rot: rand() * 6, n: 4, seed: Math.round(z) });
+        else put({ t: 'animal', kind: pickc(['goat', 'dog', 'donkey']), at: [c + sdx * 0.8, z], y: 0, rot: rand() * 6.28, seed: Math.round(z) });
+      }
+    });
+    // the market's edge: mats with sellers on the ground beyond the stalls, a barrow, a cart of fodder, porters
+    for (const [x, z] of [[33, 3.4], [47, -3.2], [60, 3.6], [41, -3.6], [56, -3.1]]) { put({ t: 'goods_mat', at: [x, z], y: 0, rot: z > 0 ? Math.PI : 0, goods: [['basket', 'produce', 'heap'], ['pot', 'basket']][Math.abs(Math.round(x)) % 2], seed: Math.round(x) }); sogdian([x, z + (z > 0 ? -0.9 : 0.9)], 0, z > 0 ? 0 : Math.PI, { pose: 'cross' }); }
+    put({ t: 'barrow', at: [72, 3.9], y: 0, rot: 0.2, seed: 3 }); put({ t: 'cart', at: [96, 4.0], y: 0, rot: Math.PI / 2 + 0.1, seed: 9, load: 'hay', beast: 'donkey' });
+    // the gate: two guards with staves, a dog in the shade, a flock of sheep and goats driven in, a toll table
+    for (const s of [-1, 1]) man([GATE.x - 3, s * 3.6], 0, s > 0 ? Math.PI : 0, { dress: 'tunic', legs: 'hose', cloth: 'cloth_brown', cloth2: 'cloth_red', hat: 'cap', over: 'belt', carry: 'staff', pose: 'stand' });
+    put({ t: 'animal', kind: 'dog', at: [GATE.x - 5, 3.9], y: 0, rot: 2, seed: 21 });
+    for (let k = 0; k < 9; k++) put({ t: 'animal', kind: k % 3 === 0 ? 'goat' : 'sheep', at: [GATE.x + 8 + (k % 3) * 1.4 + rand(), -1.6 + Math.floor(k / 3) * 1.6 + rand() * 0.5], y: 0, rot: Math.PI + (rand() - 0.5), seed: 70 + k });
+    man([GATE.x + 15, 0.8], 0, Math.PI, { carry: 'staff', dress: 'tunic', legs: 'hose', hat: 'straw', cloth: 'cloth_white' });
+    // the fields east of the town: hay ricks at the field edges, a shaduf at a channel, farmers with hoes, an ox cart on the road
+    for (const [x, z] of [[160, -34], [166, -30], [172, 40], [158, 46], [178, -12], [165, 22], [-10, 80], [10, 86], [36, 96]]) put({ t: 'haystack', kind: 'rick', at: [x, z], y: 0, rot: rand() * 6, seed: Math.round(x + z) });
+    for (const [x, z] of [[163, -18], [172, 12], [156, 30]]) { put({ t: 'well', kind: 'shaduf', at: [x, z], y: 0, rot: Math.PI / 2, mat: 'banco' }); man([x + 1.4, z + 0.4], 0, 0, { dress: 'tunic', legs: 'hose', cloth: 'cloth_white', hat: 'straw', feet: 'bare', pose: 'stand' }); }
+    for (let k = 0; k < 7; k++) { const x = 154 + rand() * 30, z = -40 + rand() * 90; if (Math.hypot(x, z) < RADIUS - 30) man([x, z], 0, rand() * 6.28, { dress: 'tunic', legs: 'hose', cloth: pickc(['cloth_white', 'cloth_grey', 'cloth_brown']), hat: 'straw', carry: 'hoe', arms: 'hoe', feet: 'bare', pose: 'stand' }); }
+    put({ t: 'cart', at: [150, 14], y: 0, rot: 0.3, seed: 4, load: 'sacks' });
+    // the stream: women washing on the stones, a ford of flat stones, a camel at the water
+    const rx = (z) => riverX(z);
+    for (const z of [-30, 22, 58]) { for (let j = 0; j < 2; j++) man([rx(z) + 2.5 + j * 0.8, z + j * 1.2], -0.1, -Math.PI / 2, { dress: 'tunic', cloth: pickc(['cloth_red', 'cloth_green', 'cloth_ochre']), hair: 'bun', hat: 'none', pose: 'cross' }); put({ t: 'laundry', at: [rx(z) + 4.2, z + 1.5], y: 0, rot: 0.4, len: 2.6, seed: z }); put({ t: 'basket', at: [rx(z) + 3.4, z - 0.8], y: 0, rot: 0.3, seed: z }); }
+    put({ t: 'animal', kind: 'camel', at: [rx(-60) + 3.5, -60], y: 0, rot: -Math.PI / 2, seed: 5, gear: false, graze: true });
+    put({ t: 'animal', kind: 'donkey', at: [rx(96) + 3.3, 96], y: 0, rot: -Math.PI / 2, seed: 15, gear: false, graze: true });
+  }
   void face; void CAVES; void FLOOR; void STREET; void riverX;
   return [base('dunhuang-town', 'dunhuang', E), base('dunhuang-people', 'life', L)];
 }
