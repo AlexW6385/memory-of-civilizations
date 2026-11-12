@@ -3,6 +3,7 @@
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
 import { lots, RADIUS } from './layout.js';
+import { houseSpec } from '../../styles/bauhaus/tenement.js';
 
 const ID = 'bauhaus-dessau';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -10,11 +11,12 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1
 export function emitters() {
   const E = [], r = rng(1927);
   for (const l of lots()) {
-    if (l.modern || l.roof === 'flat' || r() > 0.55) continue;
-    const [x0, z0, x1, z1] = l.rect, top = 0.5 + l.storeys * 3.3;
-    // the chimney stands at the same place as the house builder puts it (houses.js: its seed's third draw is unknown here, so near the centre)
-    E.push({ p: [(x0 + x1) / 2, top + (Math.min(x1 - x0, z1 - z0) / 2 + 0.25) * (l.roof === 'mansard' ? 0.75 : 0.6) + 1.1, (z0 + z1) / 2], kind: 'kitchen', thr: 0.1 + 0.8 * r(), seed: l.seed % 1000 });
+    if (l.modern || l.roof === 'flat') continue;
+    const sp = houseSpec(l);
+    // a house burns coal in the stove of the shop or the kitchen; two chimneys, either or both in use
+    for (const c of sp.chimneys) if (r() < 0.62) E.push({ p: [c.x, c.y + 0.4, c.z], kind: 'kitchen', thr: 0.1 + 0.8 * r(), seed: (l.seed + Math.floor(c.x)) % 1000 });
   }
+  // the school's boiler chimney (central heating) behind the Prellerhaus, the Törten houses' stoves
   E.push({ p: [44, 17, 40], kind: 'kitchen', thr: 0, seed: 7 });
   return E;
 }

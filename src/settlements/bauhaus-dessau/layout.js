@@ -36,7 +36,9 @@ export const MASTERS = [
 ];
 export const PINES = [30, 38, 188, 72];                        // the grove
 /** Törten's rows (docs §4): rows of two-storey flat-roofed houses, south-west. */
-export const TORTEN = [[-170, 118, -96, 128], [-170, 138, -96, 148], [-170, 158, -96, 168]];
+export const TORTEN = [[-12, 118, 62, 128], [-12, 138, 62, 148], [-12, 162, 62, 172]];
+export const TORTEN_FRONT = ['s', 'n', 's'];                   // rows 1 and 2 face each other across a lane; row 3 faces south
+export const KONSUM = [66, 118, 81.5, 130];                   // Gropius's cooperative shop and tower, at the end of the first row (1928)
 
 /** The building lots of the town: tenements along the streets (rect, front, storeys, shop, roof, seed). */
 let LOTS = null;
@@ -52,7 +54,7 @@ export function lots() {
     let z = za;
     while (z < zb - 10) {
       const w = 12 + Math.floor(rand() * 5) * 2, ze = Math.min(z + w, zb);
-      const rect = [x0, z, x1, ze - 0.4];
+      const rect = [x0, z, x1, ze];
       if (ze - z >= 10 && fits(rect) && !skip.some((s) => !(rect[3] < s[0] || rect[1] > s[1]))) push(rect, front);
       z = ze;
     }
@@ -60,7 +62,7 @@ export function lots() {
   const rowX = (z0, z1, xa, xb, front) => {
     let x = xa;
     while (x < xb - 10) {
-      const w = 12 + Math.floor(rand() * 5) * 2, xe = Math.min(x + w, xb), rect = [x, z0, xe - 0.4, z1];
+      const w = 12 + Math.floor(rand() * 5) * 2, xe = Math.min(x + w, xb), rect = [x, z0, xe, z1];
       if (xe - x >= 10 && fits(rect)) push(rect, front);
       x = xe;
     }
@@ -81,15 +83,17 @@ export function lots() {
   rowX(ROAD_K[1] - F - 20, ROAD_K[1] - F, 40, 186, 's');
   rowX(ROAD_K[3] + F, ROAD_K[3] + F + 18, 66, 186, 'n');
   // the cross streets' sides in the west
-  rowX(ROAD_C1[1] - F - 20, ROAD_C1[1] - F, -186, -102, 's');
-  rowX(ROAD_C2[3] + F, ROAD_C2[3] + F + 20, -186, -102, 'n');
+  rowX(ROAD_C1[1] - F - 20, ROAD_C1[1] - F, -186, ROAD_KV[0] - F - 24, 's');
+  rowX(ROAD_C2[3] + F, ROAD_C2[3] + F + 20, -186, ROAD_KV[0] - F - 24, 'n');
   // Ebertallee's south side: villas
   rowX(ROAD_E[3] + F + 3, ROAD_E[3] + F + 17, -15, 186, 'n');
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+/** The Törten rows' own footprints and the Konsum (no planting there). */
+export const inTortenHouses = (x, z, m = 0) => TORTEN.some((r) => inRect(r, x, z, m)) || inRect(KONSUM, x, z, m);
 export const inMasters = (x, z, m = 0) => MASTERS.some((h) => inRect(h.rect, x, z, m));
-export const inTorten = (x, z, m = 0) => TORTEN.some((r) => inRect([r[0] - 4, r[1] - 3, r[2] + 4, r[3] + 18], x, z, m));
+export const inTorten = (x, z, m = 0) => TORTEN.some((r, i) => inRect([r[0] - 3, r[1] - (TORTEN_FRONT[i] === 's' ? 8 : 3), r[2] + 3, r[3] + (TORTEN_FRONT[i] === 's' ? 3 : 8)], x, z, m)) || inRect(KONSUM, x, z, m);
 export const inSchool = (x, z, m = 0) => [B.ww, B.bridge, B.nw, B.fest, B.pre].some((b) => inRect(b, x, z, m));
 
 /** Walking rectangles for the townspeople (movers.js): { r, weight, kind }. */
