@@ -292,7 +292,8 @@ function gableRoof(bag, walls, rect, y, h, th, mat) {
     pegs(bag, F, y + h, list, -o, -1, 0.26, 0.07);
   }
   const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
-  rectRoof({ c: [cx, cz], A: A + th / 2 + 0.35, B: B + th / 2 + 0.55, y: y + h - 0.12, rise: rise + 0.5, kind: 'gable', sweep: 0, p: 1, curl: false, alongZ: !along, mat: 'ichu', soffit: 'ichu' }, bag);
+  // the roof's thatch weathered dark, the eaves short (an Inca roof stops at the wall's head), a stone-weighted ridge line
+  rectRoof({ c: [cx, cz], A: A + th / 2 + 0.3, B: B + th / 2 + 0.35, y: y + h - 0.12, rise: rise + 0.35, kind: 'gable', sweep: 0, p: 1, curl: false, alongZ: !along, mat: 'thatch', soffit: 'thatch' }, bag);
 }
 
 /**
