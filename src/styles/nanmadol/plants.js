@@ -11,7 +11,8 @@ function blade(len, wid, rise, droop, n = 4, taper = 0.7) {
   const t = [], row = (k) => { const s = k / n, w = wid * Math.pow(Math.sin(Math.PI * Math.min(0.97, s * 0.9 + 0.08)), taper) * (k === n ? 0.05 : 1), y = rise * s - droop * s * s; return [[-w / 2, y, len * s], [w / 2, y, len * s]]; };
   for (let k = 0; k < n; k++) {
     const [a0, a1] = row(k), [b0, b1] = row(k + 1);
-    t.push(...a0, ...a1, ...b1, ...a0, ...b1, ...b0, ...a0, ...b1, ...a1, ...a0, ...b0, ...b1);
+    const lo = (q) => [q[0], q[1] - 0.12, q[2]];
+    t.push(...a0, ...a1, ...b1, ...a0, ...b1, ...b0, ...lo(a0), ...lo(b1), ...lo(a1), ...lo(a0), ...lo(b0), ...lo(b1));
   }
   return t;
 }
@@ -65,24 +66,24 @@ function proto(kind, v) {
   } else if (kind === 'banana') {
     const n = 2 + (v % 2);
     for (let s = 0; s < n; s++) {
-      const a = s * 2.3 + rand(), d = s ? 0.5 + rand() * 0.3 : 0, h = 2.0 + rand() * 1.1, x = Math.cos(a) * d, z = Math.sin(a) * d;
+      const a = s * 2.3 + rand(), d = s ? 0.5 + rand() * 0.3 : 0, h = 2.6 + rand() * 1.0, x = Math.cos(a) * d, z = Math.sin(a) * d;
       P.push(['bark_grey', lathe([[0.12, 0], [0.09, h * 0.6], [0.07, h]], 7, null, x, 0, z)]);
-      const f = crown(x, h, z, 6 + (s % 2), 1.9, 0.5, 0.5, 1.4, rand);
+      const f = crown(x, h, z, 6 + (s % 2), 1.9, 0.5, 0.8, 0.8, rand);
       P.push(['palm_leaf', fromTriangles(merge(f.map((g) => Array.from(g.attributes.position.array))))]);
       if (s === 0) { P.push(['bark_dark', rod([x, h - 0.1, z], [x + 0.15, h - 0.7, z], 0.02, 4)]); for (let i = 0; i < 6; i++) P.push(['glaze_yellow', lathe([[0.001, 0], [0.045, 0.1], [0.04, 0.2], [0.001, 0.24]], 5, null, x + 0.15 + Math.cos(i) * 0.1, h - 1.0 + (i % 3) * 0.08, z + Math.sin(i) * 0.1)]); }
     }
   } else if (kind === 'hibiscus') {
     const R = 1.4 + rand() * 0.6;
     for (let i = 0; i < 4; i++) { const a = i * 1.6 + rand(); P.push(['bark_grey', rod([Math.cos(a) * 0.2, 0, Math.sin(a) * 0.2], [Math.cos(a) * 0.9, 1.9 + rand() * 0.6, Math.sin(a) * 0.9], 0.05, 5)]); }
-    for (let i = 0; i < 5; i++) { const a = i * 1.3 + rand(); P.push(['palm_leaf', lathe([[0.001, 0], [R * 0.6, R * 0.2], [R * 0.7, R * 0.5], [R * 0.4, R * 0.8], [0.001, R * 0.95]], 7, null, Math.cos(a) * 0.7, 1.6 + rand() * 0.6, Math.sin(a) * 0.7)]); }
-    for (let i = 0; i < 5; i++) { const a = rand() * 6.28, d = 0.8 + rand() * 0.8; P.push(['glaze_yellow', lathe([[0.001, 0], [0.09, 0.02], [0.001, 0.07]], 6, null, Math.cos(a) * d, 2.2 + rand() * 1.0, Math.sin(a) * d)]); }
+    for (let i = 0; i < 5; i++) { const a = i * 1.3 + rand(); P.push(['palm_leaf', lathe([[0.001, 0], [R * 0.6, R * 0.2], [R * 0.7, R * 0.5], [R * 0.4, R * 0.8], [0.001, R * 0.95]], 7, null, Math.cos(a) * 0.7, 2.1 + rand() * 0.5, Math.sin(a) * 0.7)]); }
+    for (let i = 0; i < 5; i++) { const a = rand() * 6.28, d = 0.8 + rand() * 0.8; P.push(['glaze_yellow', lathe([[0.001, 0], [0.09, 0.02], [0.001, 0.07]], 6, null, Math.cos(a) * d, 2.8 + rand() * 1.0, Math.sin(a) * d)]); }
   } else if (kind === 'pandanus') {
     const h = 2.6 + rand() * 1.2;
     P.push(['bark_grey', lathe([[0.14, 0], [0.12, h]], 7)]);
     for (let i = 0; i < 7; i++) { const a = i / 7 * 6.28 + rand() * 0.3; P.push(['bark_dark', rod([Math.cos(a) * 0.1, h * 0.55, Math.sin(a) * 0.1], [Math.cos(a) * 0.9, 0, Math.sin(a) * 0.9], 0.035, 4)]); }
     for (let c = 0; c < 3; c++) {
       const a = c * 2.1 + rand(), cx = Math.cos(a) * 0.7, cz = Math.sin(a) * 0.7, cy = h + c * 0.3 - 0.3;
-      P.push(['flax_leaf', fromTriangles(merge(crown(cx, cy, cz, 9, 1.9, 0.2, 0.9, 1.9, rand).map((g) => Array.from(g.attributes.position.array))))]);
+      P.push(['flax_leaf', fromTriangles(merge(crown(cx, cy, cz, 9, 1.9, 0.2, 0.9, 1.0, rand).map((g) => Array.from(g.attributes.position.array))))]);
       P.push(['bark_dark', rod([0, h * 0.8, 0], [cx, cy, cz], 0.05, 4)]);
     }
   } else if (kind === 'taro') {

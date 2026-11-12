@@ -258,6 +258,8 @@ export function cooks() {
     const ca = Math.cos(h.yaw), sa = Math.sin(h.yaw), u = h.w / 2 + 2.3, v = h.l / 2 - 0.4;
     const c = [h.c[0] + u * ca + v * sa, h.c[1] - u * sa + v * ca];
     if (!inRect(ISLET[h.islet].rect, c[0], c[1], -2.2)) return;
+    // not on the islet's paths, nor in a causeway's way
+    if (village().paths.some((q) => { const dx = q.b[0] - q.a[0], dz = q.b[1] - q.a[1], t = Math.max(0, Math.min(1, ((c[0] - q.a[0]) * dx + (c[1] - q.a[1]) * dz) / (dx * dx + dz * dz))); return Math.hypot(c[0] - q.a[0] - dx * t, c[1] - q.a[1] - dz * t) < 3.4; })) return;
     CK.push({ c, yaw: h.yaw, islet: h.islet, seed: h.seed });
   });
   return CK;

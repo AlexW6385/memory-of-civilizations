@@ -9,7 +9,8 @@ const coconut = (r = 0.12) => lathe([[0.001, 0], [r * 0.8, r * 0.3], [r, r * 0.9
 const frameOf = (c, yaw) => { const ca = Math.cos(yaw), sa = Math.sin(yaw); return { W: (u, v) => [c[0] + u * ca + v * sa, c[1] - u * sa + v * ca], M: new Matrix4().makeRotationY(yaw).setPosition(c[0], 0, c[1]) }; };
 const frond = (len, wid, rise, droop, n = 4) => {
   const t = [], row = (k) => { const s = k / n, w = wid * Math.sin(Math.PI * Math.min(0.97, s * 0.9 + 0.08)) * (k === n ? 0.05 : 1), y = rise * s - droop * s * s; return [[-w / 2, y, len * s], [w / 2, y, len * s]]; };
-  for (let k = 0; k < n; k++) { const [a0, a1] = row(k), [b0, b1] = row(k + 1); t.push(...a0, ...a1, ...b1, ...a0, ...b1, ...b0, ...a0, ...b1, ...a1, ...a0, ...b0, ...b1); }
+  for (let k = 0; k < n; k++) { const [a0, a1] = row(k), [b0, b1] = row(k + 1); const lo = (q) => [q[0], q[1] - 0.12, q[2]];
+    t.push(...a0, ...a1, ...b1, ...a0, ...b1, ...b0, ...lo(a0), ...lo(b1), ...lo(a1), ...lo(a0), ...lo(b0), ...lo(b1)); }
   return fromTriangles(t);
 };
 
