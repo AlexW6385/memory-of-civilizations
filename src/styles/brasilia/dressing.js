@@ -2,7 +2,7 @@
 // the bronze plaque, paving joints, red dust), the jets of the two pools, the ministries' verge (name slab, guard's hut, bicycle
 // rack, bins), kerbside furniture along the Esplanade, and the candangos' camp (docs/settlements/brasilia.md §10).
 import { box, lathe, rod } from '../../core/geom.js';
-import { RAMP, POOLS, DECK, MINISTRIES, CAMP, CAMP_FIRES } from '../../settlements/brasilia/layout.js';
+import { RAMP, POOLS, DECK, PLATFORM, TOWERS, MINISTRIES, CAMP, CAMP_FIRES } from '../../settlements/brasilia/layout.js';
 import { wedgeX } from './util.js';
 import { rngOf, solidBox, shrub, smallTree, letters } from './kit.js';
 
@@ -196,4 +196,19 @@ export function camp(el, { bag, col, lights }) {
   // the scrub's edge: a few young trees (cerrado's shrubs) round the camp, planted where the planting function leaves a gap
   for (const [x, z] of [[cx0 + 1.5, cz0 + 2], [cx0 + 1.2, cz1 - 3], [cx1 - 1.5, cz1 - 2], [cx0 + 2, (cz0 + cz1) / 2 + 12]]) smallTree(bag, x, z, 0, 3.4 + rand() * 1.5, 'palm_leaf');
   void MINISTRIES;
+}
+
+/** The Congress in ten years of weather: dust-and-rain streaks down the towers' long faces and the platform's fascia, rust-red splash at the foot, dark waterlines on the pools' curbs. */
+export function congressWeather(bag) {
+  const rand = rngOf(1960), y = DECK, [tx0, tx1] = TOWERS.x;
+  for (const [ta, tb] of TOWERS.z) for (const [xf, dir] of [[tx0, -1], [tx1, 1]]) {
+    for (let k = 0; k < 16; k++) {
+      const z = ta + 0.6 + rand() * (tb - ta - 1.2), len = 5 + rand() * 24, top = TOWERS.h - 3.4 - rand() * 18, w = 0.25 + rand() * 0.5;
+      bag.add(rand() < 0.8 ? 'plaster_streak' : 'laterite', box(dir < 0 ? xf - 0.02 - 0.012 : xf + 0.02, Math.max(y + 1, top - len), z, dir < 0 ? xf - 0.02 : xf + 0.032, top, z + w));
+    }
+  }
+  const [x0, z0, , z1] = PLATFORM;
+  for (let z = z0 + 3; z < z1 - 3; z += 5 + rand() * 4) { if (z > RAMP.z0 - 5 && z < RAMP.z1 + 1) continue; bag.add('plaster_streak', box(x0 - 0.42, y - 2.2 - rand() * 1.4, z, x0 - 0.4, y - 1.0, z + 0.3 + rand() * 0.5)); }
+  for (const [za, zb] of [[RAMP.z0 - 0.5, RAMP.z0], [RAMP.z1, RAMP.z1 + 0.5]]) for (let x = RAMP.x0 + 3; x < RAMP.x1 - 6; x += 6 + rand() * 8) bag.add('plaster_streak', box(x, 0.0, za - (za < 0 ? 0.01 : -0.0), x + 1 + rand() * 2.5, 0.02 + (x - RAMP.x0) / (RAMP.x1 - RAMP.x0) * y * 0.5, zb + (za < 0 ? 0.0 : 0.01)));
+  for (const p of POOLS) for (const [a, b, c, d] of [[p[0], p[1] - 0.405, p[2], p[1] - 0.395], [p[0], p[3] + 0.395, p[2], p[3] + 0.405]]) bag.add('plaster_streak', box(a - 0.4, 0.22, b, c + 0.4, 0.32, d));
 }

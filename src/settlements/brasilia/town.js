@@ -75,6 +75,9 @@ export async function town() {
   for (let x = -420; x < -120; x += 52) for (const z of [-104, 104]) L.push({ t: 'bench', at: [x, z], y: 0, rot: z < 0 ? Math.PI : 0, len: 1.9, back: true });
   for (let x = SQ[0] + 14; x < SQ[2] - 10; x += 34) for (let z = SQ[1] + 14; z < SQ[3] - 8; z += 38) if (!inBuilding(x, z, 4) && !inBuilding(x, z + 2, 2)) L.push({ t: 'bench', at: [x, z], y: 0, rot: rand() * 6.28, len: 1.9, back: true });
   for (const z of [-28, -17, 17, 28]) L.push({ t: 'street_lamp', at: [-100.5, z], y: 0, h: 6.5 });
+  // the roof deck: lamp posts along the parapets and benches facing the towers
+  for (const x of [0, 22, 60]) for (const z of [-104, 104]) L.push({ t: 'street_lamp', at: [x, z], y: 6.5, h: 6 });
+  for (const z of [-88, -62, 62, 88]) L.push({ t: 'bench', at: [2, z], y: 6.5, rot: Math.PI / 2, len: 1.9, back: true });
   const [cx, cz] = CATH.c;
   for (let a = 0; a < 6.28; a += 0.42) { const x = cx + Math.cos(a) * (CATH.pool + 8), z = cz + Math.sin(a) * (CATH.pool + 8); if (Math.abs(x - cx) < 14 && z < cz) continue; L.push({ t: 'bench', at: [x, z], y: 0, rot: a + Math.PI / 2, len: 1.9, back: true }); }
 

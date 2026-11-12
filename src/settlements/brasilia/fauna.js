@@ -28,6 +28,11 @@ for (let k = 0; k < 3; k++) sp(CHAPEL[0] + 4 + rand() * 10, CHAPEL[3] + 3.5);
 for (let k = 0; k < 4; k++) sp(MUSEU[0] + rand() * 26, MUSEU[3] + 4);
 for (let k = 0; k < 6; k++) sp(46 + rand() * 4, 295 + rand() * 75);
 for (let k = 0; k < 4; k++) sp(PITCH_AT[0] + rand() * 36, PITCH_AT[3] + 1.5);
+// pigeons on the apron, the Square and the Cathedral's plaza, where the people feed them; burrowing owls' stand-ins (sparrows) on the lawn's turf
+for (let k = 0; k < 9; k++) perches.push({ kind: 'pigeon', x: -111 + rand() * 14, z: -26 + rand() * 52, y: 0.03, rot: rand() * 3, range: [2.5, 2], alert: 3.5 });
+for (let k = 0; k < 12; k++) perches.push({ kind: 'pigeon', x: PRACA[0] + 20 + rand() * 200, z: -40 + rand() * 80, y: 0.03, rot: rand() * 3, range: [2.5, 2], alert: 3.5 });
+for (let k = 0; k < 8; k++) perches.push({ kind: 'pigeon', x: CATH.c[0] - 20 + rand() * 40, z: CATH.c[1] + 45 + rand() * 12, y: 0.03, rot: rand() * 3, range: [2.5, 2], alert: 3.5 });
+for (let k = 0; k < 8; k++) sp(-300 + rand() * 180, (rand() < 0.5 ? -1 : 1) * (4 + rand() * 90));
 // egrets at the congress pools' lawn edge and the Itamaraty's and the Cathedral's pools
 for (const [i, p] of POOLS.entries()) perches.push({ kind: 'egret', x: p[0] - 3, z: (p[1] + p[3]) / 2, y: 0, rot: 0, stay: [60, 200], gone: [60, 160], alert: 10 + i });
 perches.push({ kind: 'egret', x: CATH.c[0] + CATH.pool + 5, z: CATH.c[1] + 10, y: 0, rot: Math.PI / 2, stay: [60, 200], gone: [60, 160], alert: 10 });

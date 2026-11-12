@@ -12,12 +12,14 @@ function cover(x, z) {
   if (inPark(x, z, 0.2)) { c.road = 0.97; c.grass = 0; c.red = 0.05; c.soil = 0.1; return c; }
   if (onRoad(x, z, 0.5)) { c.road = 0.97; c.grass = 0; c.red = 0.05; c.soil = 0.1; return c; }
   if (inRect(PRACA, x, z)) { c.road = 0.9; c.grass = 0; c.red = 0.05; return c; }
+  if (x > LAWN[0] + 30 && x < RAMP_X0 && Math.abs(z) < 1.6) { c.road = 0.55; c.grass = 0.1; c.red = 0.4; c.soil = 0.4; return c; }     // the lawn's central path, a strip of pale paving
   if (inRect(LAWN, x, z) || inSQ(x, z)) { c.grass = 0.85; c.soil = 0.2; c.red = 0.3; c.dry = 0.35; return c; }
   if (Math.hypot(x - CATH.c[0], z - CATH.c[1]) < CATH.pool + 14) { c.road = 0.6; c.grass = 0.2; c.red = 0.1; return c; }
   // the Esplanade's outer lawns round the ministries, the verges of the avenue and the shops' forecourt
   if ((Math.abs(z) > 140 && Math.abs(z) < 262 && x < -100 && x > -470) || (x > 44 && x < 68 && z > 140 && z < 505)) { c.grass = 0.55; c.dry = 0.5; c.soil = 0.4; c.red = 0.5; return c; }
   return c;
 }
+const RAMP_X0 = -112;
 const water = () => false, waterLevel = () => -Infinity, fromWater = () => 1e4;
 /** Plants per 100 m²: palms in rows by the carriageways, the lawn's few trees, the superquadra's belt and its lawns' trees, cerrado outside. */
 function planting(x, z) {

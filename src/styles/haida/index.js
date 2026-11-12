@@ -676,6 +676,56 @@ function prop(el, ctx) {
       add('cedar', lathe([[0.35, 0], [0.4, 0.3], [0.38, 0.5], [0.33, 0.5], [0.001, 0.05]], 10)); add('bitumen', lathe([[0.3, 0.44], [0.001, 0.45]], 9));
       circ(0.45, 0.5); break;
     }
+    case 'wrack': {
+      // the tide's line on the beach: bull kelp and eel-grass in long ropes and tangles, a few shells and crab shells in it, a driftwood stick or two
+      for (let k = 0; k < 12; k++) { const a = rand() * 6.28, d = rand() * w * 0.5, l = 0.5 + rand() * 1.1; add(k % 3 ? 'flax_leaf' : 'bark_dark', ellipse(0, 0, 0.05 + rand() * 0.05, l * 0.5, -0.012, 0.012, 6).rotateX(Math.PI / 2).rotateY(a).translate(Math.cos(a) * d * 1.6, 0.025, Math.sin(a) * d * 0.5)); }
+      for (let k = 0; k < 3; k++) add('bark_dark', lathe([[0.001, 0], [0.12, 0.03], [0.08, 0.1], [0.001, 0.14]], 6, null, (rand() - 0.5) * w * 0.7, 0, (rand() - 0.5) * 0.6));
+      for (let k = 0; k < 7; k++) add(k % 2 ? 'chalk' : 'coral', lathe([[0.05, 0], [0.001, 0.035]], 5, null, (rand() - 0.5) * w * 0.9, 0.0, (rand() - 0.5) * 0.9));
+      add('log_pine', rod([-0.6, 0.04, 0.2], [0.7, 0.07, 0.35], 0.03, 4)); break;
+    }
+    case 'chopblock': {
+      // a cedar block for splitting, wedges of yew in its cracks, a stone maul beside it, split billets and chips about, a pile of cut shakes
+      add('cedar', lathe([[0.3, 0], [0.28, 0.42], [0.001, 0.43]], 9)); add('wood_dark', box(-0.05, 0.43, -0.03, 0.05, 0.62, 0.03)); add('wood_dark', box(-0.2, 0.43, 0.06, -0.12, 0.54, 0.1));
+      add('rock_boulder', lathe([[0.001, 0], [0.09, 0.03], [0.07, 0.14], [0.001, 0.16]], 6, null, 0.55, 0, 0.1)); add('wood_dark', rod([0.55, 0.12, 0.1], [0.95, 0.04, 0.24], 0.018, 4));
+      for (let k = 0; k < 6; k++) { const a = rand() * 6.28, d = 0.4 + rand() * 0.8; add('cedar', box(Math.cos(a) * d - 0.04, 0, Math.sin(a) * d - 0.1, Math.cos(a) * d + 0.04, 0.3 + rand() * 0.2, Math.sin(a) * d + 0.1)); }
+      for (let k = 0; k < 14; k++) add('timber', box(-1.2 + rand() * 2.4, 0.0, -1.0 + rand() * 2.0, -1.1 + rand() * 2.4, 0.03, -0.95 + rand() * 2.0));
+      for (let k = 0; k < 5; k++) add('cedar', box(-1.3, k * 0.04, 0.9, -0.2, k * 0.04 + 0.04, 1.2));
+      circ(0.5, 0.5); break;
+    }
+    case 'matframe': {
+      // a frame of two uprights and a cross-bar on which a cedar-bark mat is plaited: the strips hanging down, those woven across, a basket of strips at its foot
+      for (const dx of [-0.9, 0.9]) add('log_pine', rod([dx, -0.1, 0], [dx, 1.7, 0], 0.04, 5));
+      add('log_pine', rod([-0.95, 1.65, 0], [0.95, 1.65, 0], 0.03, 5));
+      for (let u = -0.8; u < 0.8; u += 0.1) add(u > 0.2 ? 'cedar' : 'roof_bark', box(u, 0.6, -0.01, u + 0.07, 1.62, 0.01));
+      for (let k = 0; k < 6; k++) { const v = 0.62 + k * 0.09; if (-0.8 + (k + 1) * 0.28 < 0.2) add(k % 2 ? 'rope_fibre' : 'cedar', box(-0.8, v, -0.02, -0.8 + (k + 1) * 0.28, v + 0.045, 0.02)); }
+      add('wicker', lathe([[0.2, 0], [0.28, 0.2], [0.26, 0.34], [0.001, 0.34]], 9, null, 1.2, 0, 0.3));
+      for (let k = 0; k < 4; k++) add('roof_bark', rod([1.0 + k * 0.05, 0.3, 0.3], [1.5 + k * 0.05, 0.05, 0.9 + k * 0.1], 0.015, 4));
+      circ(1.0, 1.7); break;
+    }
+    case 'puddle': {
+      // standing water in the beaten street, edged with dark mud; dead ripples are not drawn
+      add('bitumen', ellipse(0, 0, w * 0.5 + 0.12, w * 0.32 + 0.1, -0.003, 0.004, 12).rotateX(Math.PI / 2).translate(0, 0.012, 0));
+      add('water', ellipse(0, 0, w * 0.5, w * 0.32, -0.003, 0.004, 12).rotateX(Math.PI / 2).translate(0, 0.02, 0)); break;
+    }
+    case 'ferns': {
+      // sword fern and salal at a house corner: fronds in fans, a few salmonberry canes
+      for (let k = 0; k < 9; k++) { const a = rand() * 6.28, d = rand() * 0.4; for (let j = 0; j < 5; j++) { const b = j / 5 * 6.28 + a; add('palm_leaf', rod([Math.cos(a) * d, 0, Math.sin(a) * d], [Math.cos(a) * d + Math.cos(b) * (0.7 + rand() * 0.35), 0.45 + rand() * 0.35, Math.sin(a) * d + Math.sin(b) * (0.7 + rand() * 0.35)], 0.014, 3)); } }
+      for (let k = 0; k < 4; k++) { const a = rand() * 6.28; add('bark_dark', rod([Math.cos(a) * 0.3, 0, Math.sin(a) * 0.3], [Math.cos(a) * 0.4, 1.3 + rand() * 0.4, Math.sin(a) * 0.4], 0.012, 3)); add('palm_leaf', lathe([[0.001, 0], [0.2, 0.06], [0.001, 0.14]], 6, null, Math.cos(a) * 0.4, 1.3, Math.sin(a) * 0.4)); }
+      break;
+    }
+    case 'roots': {
+      // spruce-root work in the open: coils of split root hung on a peg-rail, a half-woven hat on a block, a basket on its side
+      add('log_pine', box(-0.9, 1.4, -0.03, 0.9, 1.5, 0.03)); for (const dx of [-0.85, 0.85]) add('log_pine', rod([dx, 0, 0], [dx, 1.45, 0], 0.035, 5));
+      for (let k = 0; k < 5; k++) add('rope_fibre', lathe([[0.1, 0], [0.12, 0.05], [0.1, 0.1], [0.07, 0.05]], 8, null, -0.7 + k * 0.35, 1.0 - rand() * 0.1, 0.06).rotateX(0.0));
+      add('wicker', lathe([[0.001, 0], [0.3, 0.02], [0.24, 0.16], [0.08, 0.26], [0.001, 0.27]], 10, null, 1.1, 0, 0.5));
+      add('wicker', lathe([[0.25, 0.0], [0.28, 0.25], [0.001, 0.26]], 9, null, -0.6, 0, 0.7)); circ(1.0, 1.5); break;
+    }
+    case 'toy': {
+      // the children's play: a toy canoe of cedar bark with a paddle, a ring of small stones, a doll of rushes
+      add('cedar', ellipse(0, 0.04, 0.45, 0.07, -0.09, 0.09, 8).rotateY(0)); add('roof_bark', box(-0.4, 0.05, -0.06, 0.4, 0.14, 0.06)); add('wood_dark', rod([0.1, 0.1, 0.1], [0.5, 0.18, 0.6], 0.012, 4));
+      for (let k = 0; k < 7; k++) { const a = k / 7 * 6.28; add('rock_boulder', lathe([[0.04, 0], [0.001, 0.05]], 5, null, 0.9 + Math.cos(a) * 0.35, 0, 0.1 + Math.sin(a) * 0.35)); }
+      add('reed_mat', lathe([[0.001, 0], [0.04, 0.05], [0.05, 0.2], [0.001, 0.26]], 6, null, 1.8, 0, 0.0)); break;
+    }
     default: break;
   }
 }

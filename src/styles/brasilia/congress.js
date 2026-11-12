@@ -2,6 +2,7 @@
 // pools, the twin 28-storey towers joined by a bridge, the Senate's dome and the Chamber's bowl — each hollow, a plenary of
 // tiered seats round the presiding table, entered by a door on the deck.
 import { box, lathe, rod, fromTriangles, frustum } from '../../core/geom.js';
+import { congressWeather } from './dressing.js';
 import { revSurf, ring, wedgeX, turnedBox, ringSegments, dAng, tri2, TAU, quad2 } from './util.js';
 import { DECK, PLATFORM, RAMP, POOLS, DOME, BOWL, TOWERS } from '../../settlements/brasilia/layout.js';
 
@@ -80,6 +81,7 @@ function salaoNegro(bag, col, lights, H, hy) {
 function solidB(bag, col, mat, x0, y0, z0, x1, y1, z1) { bag.add(mat, box(x0, y0, z0, x1, y1, z1)); col.rect([x0, z0, x1, z1], y0, y1); }
 export function congress(el, { bag, col, lights }) {
   const [x0, z0, x1, z1] = PLATFORM, y = DECK;
+  congressWeather(bag);
   // ── the platform: a mass of white concrete, the marble roof deck, a parapet, the glazed band of the Salão Negro along its front ──
   // the mass is cut for the Salão Negro, the black hall under the deck north of the pool (36 × 26 m, 4.8 m high), entered by a glazed door in the west face
   const HALL = [x0, -106, x0 + 36, -80], hy = 4.8;

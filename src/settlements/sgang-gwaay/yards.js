@@ -5,6 +5,7 @@
 import { G, SEA, LANDMARK, houses, village, height, shoreX, arc, toWorld, inHouse, inSea } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+export const ARRIVAL = [43, 5];                                           // arrivals.js: the beach top before the landmark house
 let FIT = null;
 const frontOf = (z) => { const slope = 0.0036 * z, fl = Math.hypot(1, slope); return [1 / fl, -slope / fl]; };
 
@@ -13,7 +14,8 @@ export function yards() {
   const rand = rng(1851), H = houses(), V = village();
   const props = [], sit = [], folk = [], boats = [], racks = [];
   const taken = [...V.poles.map((p) => [p.c[0], p.c[1], 1.6]), ...V.racks.map((r) => [r.c[0], r.c[1], r.w / 2 + 1.2]), ...V.stacks.map((s) => [s.c[0], s.c[1], 2.2]),
-    ...V.canoes.filter((c) => !c.moored).map((c) => [c.c[0], c.c[1], c.l / 2 + 1.6]), [V.hollow.c[0], V.hollow.c[1], V.hollow.l / 2 + 2.5]];
+    ...V.canoes.filter((c) => !c.moored).map((c) => [c.c[0], c.c[1], c.l / 2 + 1.6]), [V.hollow.c[0], V.hollow.c[1], V.hollow.l / 2 + 2.5],
+    [ARRIVAL[0], ARRIVAL[1], 6.5]];                                    // the arrival's own ground: no bench, fire or sitter within 6 m of the visitor
   const free = (x, z, r) => !inHouse(x, z, -(r + 1.2)) && !taken.some(([a, b, q]) => Math.hypot(a - x, b - z) < q + r);
   const put = (kind, x, z, yaw, o = {}) => {
     const r = o.r ?? 1.1;
