@@ -83,7 +83,8 @@ export function lots() {
         const ys = [[rect[0], z0], [rect[2], z0], [rect[0], z1], [rect[2], z1]].map(([a, b]) => height(a, b));
         if (Math.max(...ys) - Math.min(...ys) > 2.2) continue;
         const quarter = cx < EGYPTIAN[2] ? 'egyptian' : cx > JEWISH[0] && cz > JEWISH[1] ? 'jewish' : 'greek';
-        LOTS.push({ rect, seed: Math.floor(rand() * 1e6), y: Math.min(...ys), front: face, quarter, w, d });
+        const warehouse = z0 === -82 && face === 'n' && cx > -215 && cx < 90 && d > 14;      // the horrea along the emporium's quay
+        LOTS.push({ rect, seed: Math.floor(rand() * 1e6), y: Math.min(...ys), front: face, quarter, w, d, warehouse });
       }
     }
   }

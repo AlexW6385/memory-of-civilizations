@@ -13,7 +13,8 @@ import { PHAROS_EL } from './pharos.js';
 import { MUSEION_EL } from './museion.js';
 import { HOUSES } from './house.js';
 import { SERAPEUM } from './serapeum.js';
+import { QUAY_EL } from './quay.js';
 
 const g = STYLES.greek;
-export const ptolemaic = { ...g, elements: { ...g.elements, ...HARBOUR, ...PHAROS_EL, ...MUSEION_EL, ...HOUSES, ...SERAPEUM } };
+export const ptolemaic = { ...g, elements: { ...g.elements, ...HARBOUR, ...PHAROS_EL, ...MUSEION_EL, ...HOUSES, ...SERAPEUM, ...QUAY_EL } };
 registerStyle('ptolemaic', ptolemaic);

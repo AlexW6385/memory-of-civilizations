@@ -4,6 +4,7 @@
 import { lodTiles } from '../lod.js';
 import { frame } from '../../styles/greek/agora.js';
 import { TRADES } from '../../styles/greek/shops.js';
+import { streetPlans } from './streets.js';
 import { houseRooms } from '../../styles/ptolemaic/house.js';
 import { RADIUS, GROUND, SEA, QUAYS, CHANNELS, SHIPS, CANOPIC, QUAY, SOMA, AGORA, GYM, SEROUTE, HILL, JEWISH, OPEN_HOUSE, ROYAL, MOLE, inRect, wet, lots } from './layout.js';
 
@@ -89,7 +90,7 @@ function houses() {
   const L = lots(), ARR = [100, -86];
   const byD = [...L].sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 - ARR[0], (a.rect[1] + a.rect[3]) / 2 - ARR[1]) - Math.hypot((b.rect[0] + b.rect[2]) / 2 - ARR[0], (b.rect[1] + b.rect[3]) / 2 - ARR[1]));
   const lamp = new Set(byD.slice(0, 10));
-  const els = L.map((l) => (l.quarter === 'egyptian'
+  const els = L.map((l) => (l.warehouse ? { t: 'horreum', rect: l.rect, front: 'n', y: l.y, seed: l.seed } : l.quarter === 'egyptian'
     ? { t: 'egyptian_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front }
     : { t: 'ptol_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front, quarter: l.quarter, lamp: lamp.has(l) }));
   const plans = lodTiles('alexandria-houses', 'ptolemaic', els, { R: RADIUS, near: 150 });
@@ -101,7 +102,7 @@ function houses() {
   return plans;
 }
 export async function town() {
-  const plans = [harbour(), ...shopStoas(), civic(), serapeum(), ...houses()];
+  const plans = [harbour(), ...shopStoas(), civic(), serapeum(), ...houses(), ...streetPlans()];
   void HILL; void JEWISH;
   return plans;
 }
