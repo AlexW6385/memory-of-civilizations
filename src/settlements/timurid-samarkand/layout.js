@@ -121,6 +121,12 @@ export const built = (x, z, m = 0) => blocked(x, z, m) || inHouse(x, z, m);
 export function marketLayout() {
   const kinds = ['melon', 'pots', 'cloth', 'bread', 'copper', 'carpets', 'fruit'], stalls = [], spreads = [], sk = ['melon', 'pots', 'grain', 'fruit', 'melon'];
   for (let i = 0; i < 16; i++) stalls.push([-34 + i * 3.9, -34, 0, kinds[(i * 3) % 7]], [-34 + i * 3.9 + 1.2, 34, Math.PI, kinds[(i * 5 + 2) % 7]]);
+  // two more rows across the square, facing a clear aisle down its middle (the way to the pishtaq): booths of the trades under awnings, 13 on each hand
+  const k2 = ['carpets', 'cloth', 'pots', 'copper', 'bread', 'melon', 'fruit'];
+  for (let i = 0; i < 13; i++) stalls.push([-37 + i * 4.7, -16, 0, k2[(i * 2) % 7]], [-35.5 + i * 4.7, 16, Math.PI, k2[(i * 3 + 1) % 7]]);
   for (let i = 0; i < 10; i++) spreads.push([-33 + i * 5.2, -26.5, (i % 3) * 0.2, sk[i % 5]], [-31 + i * 5.2, 26.5, Math.PI + (i % 3) * 0.2, sk[(i + 2) % 5]]);
   return { stalls, spreads };
 }
+
+/** The tea-house platforms (tapchan) of the Registan: [x, z, yaw (the open side)], on the shade side of the shop rows, clear of the stalls' rows and the aisle. */
+export const TAPCHANS = [[-27, -23.4, 0], [-9, -23.4, 0], [10, -23.4, 0], [-22, 23.4, Math.PI], [-2, 23.4, Math.PI], [18, 23.4, Math.PI]];

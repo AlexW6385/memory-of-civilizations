@@ -2,7 +2,7 @@
 // madrasa's court and its classroom, merchants and their camels and donkeys at the Registan's east side and the
 // bazaar, shopkeepers sitting on the sills of the shops, water carriers at the aryk. (The walkers are in movers.js.)
 
-import { RADIUS, SQUARE, MADRASA, SHOPS_N, SHOPS_S, BAZAAR, CHORSU, marketLayout, houses, houseGeom } from './layout.js';
+import { RADIUS, SQUARE, MADRASA, SHOPS_N, SHOPS_S, BAZAAR, CHORSU, TAPCHANS, marketLayout, houses, houseGeom } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -70,6 +70,30 @@ export function life() {
     }
   }
   for (const [x, z] of [[100, 25], [96, 100]]) { L.push({ t: 'animal', kind: 'donkey', at: [x, z], y: 0.04, rot: 0, seed: Math.floor(rand() * 1e9), gear: true }); person([x + 0.6, z - 1.4], 0, { man: true, pose: 'stand', cloth: 'cloth_brown' }); }
+  // ---- the Registan, deepened (§15): the tea-houses' platforms with their guests, the aisle to the pishtaq lined with people, groups, the carriers ----
+  // tea-drinkers on the carpets (four to a platform, one pouring), a boy with the kettle
+  for (const [x, z, yaw] of TAPCHANS) {
+    const c = Math.cos(yaw), s = Math.sin(yaw), P = (u, v) => [x + u * c + v * s, z - u * s + v * c], n = 3 + Math.floor(rand() * 2);
+    for (let k = 0; k < n; k++) { const [u, v] = [[-1.0, -0.7], [0.9, -0.75], [-0.9, 0.8], [1.1, 0.75]][k]; person(P(u, v), yaw + Math.atan2(-u * 0.5, -v) * 0.0 + (v < 0 ? 0 : Math.PI) + (rand() - 0.5) * 0.5, { man: true, pose: 'cross', y: 0.66, cloth: pick(['cloth_green', 'cloth_ochre', 'cloth_indigo', 'cloth_brown', 'cloth_white']) }); }
+    person(P(0.3, 2.2), yaw + Math.PI, { man: true, pose: 'stand', carry: 'pot', cloth: 'cloth_white' });
+  }
+  // the aisle's two sides: a buyer at nearly every booth of the middle rows, pairs talking at the booths' ends, porters with their loads crossing
+  for (let i = 0; i < 13; i++) for (const [z, yaw, dz] of [[-16, 0, 2.6], [16, Math.PI, -2.6]]) {
+    if (rand() < 0.45) continue;
+    const x = -37 + i * 4.7 + (z > 0 ? 1.5 : 0) + (rand() - 0.5) * 1.6;
+    person([x, z + dz + (rand() - 0.5) * 0.6], yaw + Math.PI + (rand() - 0.5) * 0.6, { pose: rand() < 0.35 ? 'talk' : 'stand', carry: rand() < 0.3 ? 'bundle' : 'none', loadCloth: pick(['cloth_brown', 'cloth_indigo', 'sacking']) });
+  }
+  for (let k = 0; k < 9; k++) { const sg = k % 2 ? 1 : -1; person([-30 + k * 6.2 + rand() * 2, sg * (4 + rand() * 4)], Math.PI / 2 * (rand() < 0.6 ? 1 : -1) + (rand() - 0.5) * 0.4, { man: true, carry: pick(['sack', 'bundle', 'pot']), loadCloth: pick(['sacking', 'cloth_brown']) }); }
+  // students in a knot on their way into the madrasa, a dervish with his bowl and staff, a blind beggar led by a boy, the water-carrier with his skin, children at a game of knucklebones
+  for (let k = 0; k < 6; k++) person([-37 + (k % 3) * 1.1, -3 + Math.floor(k / 3) * 1.3 + rand() * 0.5], -Math.PI / 2 + (rand() - 0.5) * 0.5, { man: true, hatMat: 'cloth_white', cloth: pick(['cloth_white', 'cloth_grey', 'cloth_ochre']), pose: k < 2 ? 'talk' : 'stand' });
+  person([-8, 6.6], Math.PI / 2, { man: true, pose: 'staff', carry: 'staff', cloth: 'cloth_brown', cloth2: 'cloth_green', hatMat: 'cloth_green' });
+  person([-18, -6.4], 0, { man: true, pose: 'cross', y: 0.03, cloth: 'cloth_grey', cloth2: 'cloth_grey' });
+  person([2.2, 7.0], Math.PI, { man: true, pose: 'stand', carry: 'pot', cloth: 'cloth_brown' });
+  for (const [x, z] of [[-24, 8.2], [-23.2, 8.9], [-24.6, 9.4]]) L.push({ t: 'figure', at: [x, z], y: 0.04, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), skin: 'skin_medium', dress: 'robe', cloth: pick(['cloth_ochre', 'cloth_indigo', 'cloth_red']), cloth2: 'cloth_white', hat: 'cap', hair: 'short', pose: 'squat', child: true });
+  for (const [x, z] of [[-30, 9], [8, -8.6]]) L.push({ t: 'animal', kind: 'dog', at: [x, z], y: 0.04, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
+  // nothing within a few metres of the arrival (x 14, z 0, looking west)
+  const keep = L.filter((e) => !(e.at && Math.abs(e.at[1]) < 3.6 && e.at[0] > 4 && e.at[0] < 20));
+  L.length = 0; L.push(...keep);
   void CHORSU;
   return L;
 }
