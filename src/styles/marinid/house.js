@@ -188,4 +188,12 @@ export function mass(el, { bag, col }) {
   const r = el.rect, y = el.y, rand = rng(el.seed || 7), n = el.storeys ?? 2, H = FLOOR + UPPER * (n - 1);
   const mat = WALLS[Math.floor(rand() * WALLS.length)];
   bag.add(mat, box(r[0], (el.foot ?? y - 1) - 0.0, r[1], r[2], y + H + 0.8, r[3])); col.rect(r, y, y + H + 0.8);
+  if (el.simple) return;
+  // the blank wall's own life: its foot, the patches, beam ends, a few small shuttered windows high up, a spout
+  for (const [f, u0, u1] of [[face('z', r[3], 1), r[0], r[2]], [face('z', r[1], -1), r[0], r[2]], [face('x', r[2], 1), r[1], r[3]], [face('x', r[0], -1), r[1], r[3]]]) {
+    if (u1 - u0 < 1.2) continue;
+    weather(bag, f, u0, u1, y, H, rand, { seed: el.seed % 5 });
+    if (n > 1) beamEnds(bag, f, u0, u1, y + FLOOR - 0.4, [], 1.1);
+    for (let k = 1; k < n; k++) for (let u = u0 + 1.0 + rand() * 1.5; u < u1 - 0.8; u += 2.6 + rand() * 3) { const yk = y + FLOOR + UPPER * (k - 1) + 1.2, q = f.R(0, 0.04, u - 0.25, u + 0.25); bag.add('opening', box(q[0], yk, q[1], q[2], yk + 0.85, q[3])); const g = f.R(0.04, 0.09, u - 0.3, u + 0.3); bag.add('lattice', box(g[0], yk - 0.04, g[1], g[2], yk + 0.9, g[3])); if (rand() < 0.6) shutters(bag, f, u, yk, 0.5); }
+  }
 }

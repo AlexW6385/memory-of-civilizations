@@ -249,7 +249,7 @@ export const quayY = (x, side) => bank(x, riverZ(x) + side * (RIVER.w / 2 + 1.0)
 export function fountains() {
   const out = [], { lots: L } = fabric(), rand = rng(77);
   for (const l of L) {
-    if (rand() > 0.045 || Math.hypot(l.rect[0], l.rect[1]) > 250) continue;
+    if (rand() > 0.1 || Math.hypot(l.rect[0], l.rect[1]) > 290) continue;
     const e = l.door, r = l.rect;
     // on the wall beside the door, 2 m off its corner
     const f = e === 's' ? [r[0] + 1.6, r[3], 's'] : e === 'n' ? [r[0] + 1.6, r[1], 'n'] : e === 'e' ? [r[2], r[1] + 1.6, 'e'] : [r[0], r[1] + 1.6, 'w'];
