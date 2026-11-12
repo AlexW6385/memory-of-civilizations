@@ -1,8 +1,8 @@
 {
   "site": { "id": "bauhaus-dessau", "name": { "en": "Bauhaus Dessau", "zh": "包豪斯德绍" }, "era": "c. 1927", "region": "germany", "lat": 51.84, "lon": 12.23, "radius": 190 },
   "cls": "S",
-  "arrival": [-27, null, 62, -0.384, 0.12],
-  "arrivalNote": "from Mauerstrasse at the south-west corner, looking north-east along the workshop wing's glass curtain wall to the bridge over Kothener Strasse and the north wing beyond, the Prellerhaus's balconies rising at the right",
+  "arrival": [-33, null, 46, -0.66, 0.1],
+  "arrivalNote": "from Mauerstrasse's west kerb south of the school, looking north-east: the workshop wing's glass curtain wall with its workshops, the bridge over Kothener Strasse beyond it, the festive block and the Prellerhaus rising behind, the school garden and students in the street",
   "card": {
     "en": [
       "Dessau, in Saxony-Anhalt on the Mulde near the Elbe, is shown about 1927, the school's first full year in its new building. The Bauhaus, founded by Walter Gropius in Weimar in 1919, moved here in 1925 at the invitation of the town's young Social-Democratic administration. The architecture is the New Building: reinforced-concrete frames, white rendered walls, flat asphalt roofs, steel windows, set among the rendered tenement blocks of the older town.",
