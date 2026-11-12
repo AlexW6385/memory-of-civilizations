@@ -64,7 +64,7 @@ export const ARRIVALS = {
   'cahokia':          [-25, 0.1, 20, 0, 0.25],           // Monks Mound across the Grand Plaza
   'shaolin':          [0, 0.1, 160, 0, 0.07],            // from the village road north up the axis to the Shanmen, red walls and grey roofs, Mount Song behind
   'hakka-tulou':      [0, 0.1, 72, 0, 0.1],             // from the stream's near bank, north to the round tulou whole on its plinth
-  'taos':             [0, 0.1, 25, 0.3, 0.12],           // the north house across the plaza
+  'taos':             [-30, 0.1, -20, -0.35, 0.14],       // the North House's tall middle close across the racks and the plaza's life
   'bhaktapur':        [19, 0.1, 21, 0.66, 0.3],          // the Nyatapola whole on its plinth across Taumadhi square
   'new-york':         [-14.15, 0.1, 37.89, 2.282, 0.55], // the Empire State whole over Fifth Avenue's towers (the grid turned 29°: Fifth at 38th, looking down the avenue)
   'rapa-nui':         [0, 0.3, 46, 3.1416, 0.12],        // the row of moai on their platform, whole
