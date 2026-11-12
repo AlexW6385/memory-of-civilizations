@@ -4,6 +4,7 @@
 // Passeig de Gràcia and on a line that turns off it round the cut corners, east along a cross street
 // and up the Carrer de la Marina past the Nativity façade; hackney carriages at the kerbs.
 import { blockShops } from '../../styles/modernisme/index.js';
+import { worksElements, arrivalLife, arrivalStreet } from './arrival.js';
 import { RADIUS, PITCH, BLOCK, BATLLO, CASA, GRACIA_X, MERCAT, SAGRADA, shopCore, blocks, height, onDiagonal, bancsFanals } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -218,6 +219,9 @@ export async function town() {
     { t: 'kiosk', at: [GRACIA_X + 9.5, -45], y: ty(GRACIA_X + 9.5, -45), rot: 0.2, seed: 2 },
     { t: 'kiosk', at: [GRACIA_X - 9.2, 160], y: ty(GRACIA_X - 9.2, 160), rot: 0, seed: 3 },
   ]));
+  // the street at the arrival (§12): the works' hoarding and gate, the kiosk, visitors, cabs, a tram standing, the masons on the scaffolds
+  plans.push(base('barcelona-works-front', [...worksElements(), ...arrivalStreet()]));
+  plans.push({ ...base('barcelona-arrival-life', arrivalLife()), style: 'life' });
   plans.push(base('barcelona-passeig', bancsFanals().map(([x, z], i) => ({ t: 'banc_fanal', at: [x, z], y: Y(x, z), rect: [x - 0.9, z - 2.3, x + 0.9, z + 2.3], seed: 1906 + i }))));
   return plans;
 }

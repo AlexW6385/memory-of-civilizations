@@ -20,6 +20,7 @@ import { nativity } from './nativity.js';
 import { STREET } from './street.js';
 import { casaCafe } from './interior.js';
 import { FURNITURE } from './furniture.js';
+import { worksFence } from './works.js';
 import { schoolRooms, workshopRooms } from './school.js';
 import { makeShops, plotShops, shopPeople } from './shops.js';
 
@@ -862,6 +863,6 @@ function batllo(el, { bag, col }) {
 }
 registerStyle('modernisme', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, mercat, casa_cafe: (el, ctx) => casaCafe(el, ctx, { frame, streetFront, courtFront, roofTop, rng }), eixample_block: block, sagrada, pedrera, batllo, ...STREET, ...FURNITURE, banc_fanal: bancFanal },
+  elements: { ...STYLES.qing.elements, mercat, casa_cafe: (el, ctx) => casaCafe(el, ctx, { frame, streetFront, courtFront, roofTop, rng }), eixample_block: block, sagrada, pedrera, batllo, ...STREET, ...FURNITURE, banc_fanal: bancFanal, works_fence: worksFence },
   objects: {},
 });
