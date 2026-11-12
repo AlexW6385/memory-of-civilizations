@@ -46,6 +46,14 @@ export function yard() {
     L.push({ t: 'stool', at: [tx - 1.1, tz - 0.4], y: my + 0.07, rot: 0, seed: 12 });
     for (const [dx, dz] of [[2.3, 0.4], [2.9, 0.9]]) fig([mx0 + 4.615 * 7.5 + dx, mz0 + 5 * 3.5 + dz], my + 0.08, [mx0 + 4.615 * 7.5, mz0 + 5 * 3.5], { pose: 'sit_ground', over: 'none', hat: 'cap' });
     fig([-9.2, mz1 - 3.4], my + 0.05, [-8.4, mz1 - 1.3], { pose: 'stand', over: 'none', hat: 'turban', carry: 'none' }); }
+  // the Qur'an school in the shade of the palms at the mosque's south-east corner: the teacher with his board, the boys on a mat reciting; a water-seller with his jar at the north door
+  { const cx = 23.6, cz = 31.5, y = height(cx, cz);
+    L.push({ t: 'goods_mat', goods: ['baskets'], at: [cx, cz], y, rot: 0, seed: 313 });
+    fig([cx - 2.1, cz], y, [cx, cz], { pose: 'cross', over: 'none', hat: 'turban', beard: true });
+    for (let k = 0; k < 6; k++) child([cx + (k % 3) * 0.9 - 0.2, cz - 0.9 + Math.floor(k / 3) * 1.8], y, [cx - 2.1, cz], { pose: 'cross' });
+    const wz = mz0 - 2.2, wy = height(-18.6, wz);
+    fig([-18.6, wz], wy, [-17, mz0 - 9], { pose: 'stand', carry: 'pot', arms: 'head', over: 'none', hat: 'cap' });
+    L.push({ t: 'pot', kind: 'water_pot', n: 3, at: [-16.8, wz + 0.4], y: wy, seed: 31 }); }
   // ---- the graveyard east of the mosque
   for (let k = 0; k < 9; k++) { const x = mx1 + 3.2 + (k % 2) * 2.0 + rand() * 0.6, z = mz0 + 4 + k * 3.6; S.push({ t: 'swahili_tomb', at: [x, z], y: height(x, z), rot: 0, kind: k === 2 || k === 6 ? 'pillar' : 'slab', seed: k }); }
   // ---- benches against the lane walls (the lots' blank flanks), jars at their feet
