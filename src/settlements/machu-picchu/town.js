@@ -1,5 +1,5 @@
 // The houses of Machu Picchu in their kanchas (docs/settlements/machu-picchu.md §5).
-import { STORES, RADIUS, TERRACE, SITE, TOWN_WALL, CONDOR, houses, kanchas, kanchaWalls, outside } from './layout.js';
+import { laneLevel, STAIRS, STORES, RADIUS, TERRACE, SITE, TOWN_WALL, CONDOR, houses, kanchas, kanchaWalls, outside } from './layout.js';
 import { ground } from './ground.js';
 import { people } from './people.js';
 
@@ -33,8 +33,12 @@ export async function town() {
     plans.push(base('machu-picchu-condor', E)); }
   // the kanchas' walls, battered, of rough stones, each with its gateway
   const walls = kanchaWalls().map(({ a, b, y1, door, w = 0.35 }) => {
-    const y0 = Math.min(ground.height(...a), ground.height(...b)) - 0.3;
-    return { t: 'stone_block', a, b, w, y0, y1: y0 + 0.3 + y1, door };
+    // the wall stands on its platform and holds it up: down past the lane's ground beside it, the stones facing the drop
+    const yp = Math.min(ground.height(...a), ground.height(...b)), mx = (a[0] + b[0]) / 2, mz = (a[1] + b[1]) / 2, dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz) || 1;
+    let yl = yp;
+    for (const sg of [-1, 1]) for (const t of [0, 1]) yl = Math.min(yl, ground.height(a[0] + dx * t * 0.5 + dx * 0.25 - (dz / L) * 1.3 * sg, a[1] + dz * t * 0.5 + dz * 0.25 + (dx / L) * 1.3 * sg));
+    const y0 = Math.min(yp, yl) - 0.3;
+    return { t: 'stone_block', a, b, w, y0, y1: yp + y1, door: door && { ...door, h: door.h + (yp - 0.3 - y0) } };
   });
   // the people and their animals (style 'life'), their tools and looms (style 'inca')
   const P = people();
@@ -55,11 +59,14 @@ export async function town() {
     E.push({ t: 'inca_feast', c: [4, -24], y: ground.height(4, -24), seed: 12 });
     plans.push(base('machu-picchu-goods', E)); }
   // the flagged road in from the gate to the plaza and the paved gates of the kanchas
-  { const E = [{ t: 'lane', rect: [0.4, 8.5, 3.6, TOWN_WALL.z - 0.4], y: 0.025, mat: 'granite_rough' }, { t: 'lane', rect: [0.4, 93.4, 3.6, 120], y: 0.025, mat: 'granite_rough' }];
+  { const E = STAIRS.map((S) => ({ t: 'stairs', rect: S.rect, y0: S.y0, y1: S.y1, dir: S.dir, mat: 'granite_rough' }));
+    E.push({ t: 'lane', rect: [0.4, 8.5, 3.6, TOWN_WALL.z - 0.4], y: 0.025, mat: 'granite_rough' }, { t: 'lane', rect: [0.4, 93.4, 3.6, 120], y: 0.025, mat: 'granite_rough' });
     for (const K of kanchas()) {
-      const r = K.rect, gateE = K.inward[0] < 0, lane = gateE ? [r[2] + 0.25, r[1] + 1, r[2] + 1.75, r[3] - 1] : [r[0] - 1.75, r[1] + 1, r[0] - 0.25, r[3] - 1];
-      const ok = [[lane[0], lane[1]], [lane[2], lane[1]], [lane[0], lane[3]], [lane[2], lane[3]], [(lane[0] + lane[2]) / 2, (lane[1] + lane[3]) / 2]].every(([x, z]) => !all.some((h) => x > h.rect[0] - 0.3 && x < h.rect[2] + 0.3 && z > h.rect[1] - 0.3 && z < h.rect[3] + 0.3) && outside(x, z) < -2 && ground.height(x, z) === 0);
-      if (ok) E.push({ t: 'lane', rect: lane, y: 0.025, mat: 'granite_rough' });
+      const r = K.rect, gateE = K.inward[0] < 0, gx = gateE ? r[2] : r[0], gz = (r[1] + r[3]) / 2, ox = gateE ? 1 : -1, lane = gateE ? [r[2] + 0.25, r[1] + 1, r[2] + 1.75, r[3] - 1] : [r[0] - 1.75, r[1] + 1, r[0] - 0.25, r[3] - 1];
+      const yl = laneLevel(gx + ox * 2.8, gz), up = K.lv - yl;
+      // the stair from the lane up to the gate's sill (the platform stands RAISE and the bands' fall above the lane): in layout's STAIRS, the ground under it following the flight
+      const ok = [[lane[0], lane[1]], [lane[2], lane[1]], [lane[0], lane[3]], [lane[2], lane[3]], [(lane[0] + lane[2]) / 2, (lane[1] + lane[3]) / 2]].every(([x, z]) => !all.some((h) => x > h.rect[0] - 0.3 && x < h.rect[2] + 0.3 && z > h.rect[1] - 0.3 && z < h.rect[3] + 0.3) && outside(x, z) < -2 && Math.abs(ground.height(x, z) - yl) < 0.08);
+      if (ok && up <= 0.1) E.push({ t: 'lane', rect: lane, y: yl + 0.025, mat: 'granite_rough' });
     }
     plans.push(base('machu-picchu-lanes', E)); }
   for (let i = 0; i < walls.length; i += 120) plans.push(base(`machu-picchu-kancha-walls-${i / 120}`, walls.slice(i, i + 120)));

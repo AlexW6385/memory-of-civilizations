@@ -185,3 +185,7 @@ Panpipes and the quena flute, drums, the conch (a flute, a reed and a struck sou
 - [The Temple of the Condor — imachupicchu](https://imachupicchu.com/?p=220)
 - [Temple of the Condor — Lonely Planet](https://www.lonelyplanet.com/peru/machu-picchu/attractions/temple-of-the-condor/a/poi-sig/1378638/363402)
 - [Ferns, Heliconia & Bromeliads — Inkaterra Asociación](https://inkaterra.com/inkaterra-asociacion-org/en/research/cloud-forest/ferns-heliconia-bromeliads)
+
+## Terraces of the town (fix pass, Nov 2026)
+- [inferred] The urban sector stands on levelled platforms stepping down the saddle's flanks, not on one flat field: round the core (Sacred sector, Main Plaza, kallanka, the way in) the lanes fall 1 m a band of 13 m, three bands to the first terrace of the ring; each kancha stands on its own platform raised 0.5 m over the lane, held by its battered wall, with a stair up from the lane at its gate (layout.js: laneLevel, platformAt, STAIRS).
+- [stated: general] The Main Plaza is sunk below its surroundings; here 3 m in two walled tiers, with flights down at the road, the west side and the kallanka's middle door. The dry ditch before the town wall is now cut (2 m), its banks matching the stairs.
