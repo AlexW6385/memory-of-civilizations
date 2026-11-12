@@ -144,7 +144,18 @@ function people() {
   // the grave circle's visitors and the dromos of the Treasury: a procession of mourners with offerings, a priest
   for (let k = 0; k < 4; k++) woman([TREAS.x0 + 10 + k * 3.4, TREAS.z + (k % 2 ? 1.2 : -1.2)], TREAS.y + 0.3 + 0.0, Math.PI / 2, { carry: k % 2 ? 'pot' : 'basket', cloth: 'cloth_white', cloth2: 'cloth_indigo' });
   void GCA;
-  return T;
+  // the caravan halt and the stalls on the verges (see verge()): drovers resting, the sellers, a pair of buyers, a child with the donkeys
+  {
+    const rz = roadZ;
+    man([-126.3, rz(-126.3) - 4.0], h(-126.3, rz(-126.3) - 4.0), 0.8, { pose: 'squat', dress: 'loincloth', cloth: 'cloth_brown' });
+    man([-120.4, rz(-120.4) - 4.1], h(-120.4, rz(-120.4) - 4.1), -2.2, { pose: 'sit_ground', dress: 'tunic' });
+    man([-123.2, rz(-123.2) - 3.9], h(-123.2, rz(-123.2) - 3.9), 2.9, { pose: 'talk' }); man([-122.0, rz(-122.0) - 3.8], h(-122.0, rz(-122.0) - 3.8), 0.2, { pose: 'talk', cloth: 'cloth_indigo' });
+    woman([-126.5, rz(-126.5) + 4.8], h(-126.5, rz(-126.5) + 4.8), Math.PI, { pose: 'stand' }); man([-118.5, rz(-118.5) + 5.0], h(-118.5, rz(-118.5) + 5.0), Math.PI, { pose: 'sit_low' });
+    woman([-122.6, rz(-122.6) + 3.9], h(-122.6, rz(-122.6) + 3.9), 3.6, { pose: 'kneel' }); woman([-130, rz(-130) + 3.6], h(-130, rz(-130) + 3.6), -1.0, { child: true, h: 1.1 });
+    man([-115.5, rz(-115.5) + 3.5], h(-115.5, rz(-115.5) + 3.5), 1.5, { pose: 'talk' }); woman([-114.4, rz(-114.4) + 3.6], h(-114.4, rz(-114.4) + 3.6), -1.6, { pose: 'talk', carry: 'basket' });
+  }
+  // nobody within a few metres of the arrival (-136, 0), none straddling the lens
+  return T.filter((f) => !(f.t === 'figure' && f.at[0] > -150 && f.at[0] < -118 && Math.hypot(f.at[0] + 136, f.at[1]) < 8));
 }
 function beasts() {
   const rand = rng(1252), L = [];
@@ -160,6 +171,29 @@ function beasts() {
   for (const [x, z] of [[-182, -1.4], [-180, -2.4], [-178.6, -1.2]]) L.push({ t: 'animal', kind: 'donkey', at: [x, z], y: h(x, z), rot: -Math.PI / 2, seed: Math.floor(x), gear: true });
   void TREAS; void LANES; void terrain;
   return L;
+}
+
+/** The approach road's centre line z at x (layout LANES[0]). */
+function roadZ(x) { const road = LANES[0]; for (let i = 0; i < road.length - 1; i++) { const [ax, az] = road[i], [bx, bz] = road[i + 1]; if (x >= Math.min(ax, bx) && x <= Math.max(ax, bx)) return az + (bz - az) * (x - ax) / (bx - ax || 1); } return -2; }
+/** The caravan halt and the wayside stalls on the verges of the last 80 m before the gate: tethered pack-asses with their loads and a trough, a stall of pots and
+ *  cloth, goods on mats, wood and straw, a jar-seller's row; the people at them are in people(). */
+function verge() {
+  const E = [], rand = rng(5150), put = (t, x, dz, rot, o = {}) => { const z = roadZ(x) + dz; E.push({ t, at: [x, z], y: h(x, z), rot, seed: Math.floor(rand() * 1e9), ...o }); };
+  // north verge: the halt (donkeys tethered nose to the wall, packs off, a trough and a stack of fodder)
+  for (const [x, dz] of [[-128, -5.3], [-125.4, -6.0], [-122.6, -5.4], [-119.6, -6.2]]) put('animal', x, dz, Math.PI + (rand() - 0.5) * 0.8, { kind: 'donkey', gear: rand() < 0.5, seed: Math.floor(x * 7) });
+  put('sacks', -126.6, -4.7, 0.4, { n: 4 }); put('sacks', -121, -4.8, -0.3, { n: 3 }); put('crates', -123.8, -4.6, 0.1, { n: 2 });
+  put('trough', -123.9, -7.6, 0, {}); put('haystack', -116, -8.6, 0, {}); put('firewood', -128.2, -7.4, 0, { len: 1.4 });
+  put('barrel', -118.4, -4.7, 0, { n: 2 });
+  // south verge: the stall of the potter and the cloth-seller, the jar-seller's row, goods on mats, a boy's basket of figs
+  put('stall', -126.5, 5.9, Math.PI, { w: 2.8, d: 1.5, awning: 'cloth_ochre', stripe: 'cloth_red' });
+  put('stall', -118.5, 6.1, Math.PI, { w: 2.6, d: 1.4, awning: 'cloth_white', stripe: 'cloth_indigo' });
+  for (let k = 0; k < 6; k++) put('pot', -131 + k * 0.62, 4.4 + (k % 2) * 0.35, 0, { kind: ['pithos', 'amphora', 'water_pot', 'dark_pot', 'amphora', 'water_pot'][k], n: 1 + (k % 3) });
+  put('goods_mat', -122.5, 4.9, 0.1, { goods: ['basket', 'heap', 'basket'] }); put('goods_mat', -113.4, 5.2, -0.1, { goods: ['basket'] });
+  put('basket', -121.4, 5.7, 0, { n: 3 }); put('stool', -125.6, 4.6, 0, {}); put('stool', -117.4, 4.9, 0, {});
+  put('drying_tray', -129.2, 6.9, 0.5, {}); put('drying_tray', -115.2, 7.2, 1.1, {});
+  // a drystone terrace wall's gaps filled with piled stone and a stack of cut wood at the foot of the bastion's ramp-side
+  put('firewood', -112.6, -6.3, 0.1, { len: 1.6 }); put('sacks', -112.0, 6.4, 0.2, { n: 3 });
+  return E;
 }
 
 /** The dry-stone walls that edge the lanes where no house does (terraces and fields), broken at the cross lanes, at houses and by gates now and then. */
@@ -239,7 +273,7 @@ export async function town() {
   plans.push(base('mycenae-yards', 'mycenaean', yards()));
   plans.push(base('mycenae-walls', 'mycenaean', laneWalls()));
   plans.push(base('mycenae-hillside', 'mycenaean', hillside()));
-  plans.push(base('mycenae-dress', 'life', dress()));
+  plans.push(base('mycenae-dress', 'life', [...dress(), ...verge()]));
   plans.push(base('mycenae-people', 'life', people()));
   plans.push(base('mycenae-beasts', 'life', beasts()));
   return plans;
