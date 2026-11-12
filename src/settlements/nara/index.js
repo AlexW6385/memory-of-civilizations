@@ -155,6 +155,9 @@ const courtLife = { id: 'nara-court-life', style: 'life', origin: [0, 0], base: 
   const fig = (x, z, dir, o) => L.push({ t: 'figure', at: [x, z], y: 0, rot: faceTo(dir) + (r() - 0.5) * 0.4, seed: sd(), dress: 'robe', skin: 'skin_light', hat: 'none', carry: 'none', over: 'sash', cloth: CLS[Math.floor(r() * 6)], cloth2: CLS[Math.floor(r() * 6)], ...o });
   // lit fire-baskets either side of the flagged way (6 m clear of the arrival and beyond)
   for (const z of [10, -2, -14]) for (const s of [-1, 1]) L.push({ t: 'lantern', kind: 'iron', at: [s * 3.4, z], y: 0, h: 2.3 });
+  // lanterns of white paper on posts in a row across the court before the hall, lit at dusk, and two rows along the way's edge
+  for (let x = -38; x <= 38; x += 6.4) if (Math.abs(x) > 10) L.push({ t: 'lantern', kind: 'white', at: [x, -27], y: 0, h: 2.1 });
+  for (const s of [-1, 1]) for (const z of [24, 6, -8, -20]) L.push({ t: 'lantern', kind: 'white', at: [s * 7.4, z], y: 0, h: 2.1 });
   // offering sellers at the court's south end, facing the Middle Gate's pilgrims
   for (const [x, z, aw, goods] of [[-19, 31, 'cloth_white', ['basket', 'produce']], [19, 31, 'cloth_ochre', ['cloth', 'basket']], [-31, 25, 'cloth_indigo', ['produce', 'produce', 'basket']], [32, 26, 'cloth_white', ['basket', 'cloth']]]) {
     L.push({ t: 'stall', at: [x, z], y: 0, rot: faceTo([0, 1]), seed: sd(), w: 3.2, d: 1.3, awning: aw, stripe: null, goods });
