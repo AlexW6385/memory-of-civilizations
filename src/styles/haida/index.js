@@ -54,7 +54,7 @@ function being(add, type, y0, len, r, wood, rand) {
     for (let k = -3; k <= 3; k++) add(WHT, box(k * r * 0.1 - 0.03, y0 + len * 0.3, -r * 1.5, k * r * 0.1 + 0.03, y0 + len * 0.37, -r * 1.42));
     for (const s of [-1, 1]) {
       add(wood, ellipse(s * r * 0.62, y0 + len * 0.93, r * 0.2, r * 0.2, -r * 0.45, -r * 0.1));
-      add(BLK, ellipse(s * r * 0.62, y0 + len * 0.93, r * 0.11, r * 0.11, -r * 0.5, -r * 0.1));
+      add(BLK, ellipse(s * r * 0.62, y0 + len * 0.93, r * 0.11, r * 0.11, -r * 0.5, -r * 0.12));
       add(BLK, board([s * r * 0.98, y0 + len * 0.3], [s * r * 1.15, y0 + len * 0.1], r * 0.4, -r * 0.8, -r * 0.3));   // the paws
     }
   } else if (type === 'whale') {
@@ -67,7 +67,7 @@ function being(add, type, y0, len, r, wood, rand) {
     // a very wide flat mouth, the eyes standing up on top of the head, the hands with spread fingers on the chest
     add(RED, board([-r * 0.95, my], [r * 0.95, my], len * 0.1, zf - t - 0.04, zf + 0.03));
     for (const s of [-1, 1]) {
-      add(wood, ellipse(s * ex, ey + ry * 1.5, rx * 0.9, ry * 1.0, zf - 0.16, zf + 0.04)); add(BLK, ellipse(s * ex, ey + ry * 1.5, rx * 0.45, ry * 0.5, zf - 0.19, zf + 0.04));
+      add(wood, ellipse(s * ex, ey + ry * 1.5, rx * 0.9, ry * 1.0, zf - 0.16, zf + 0.04)); add(BLK, ellipse(s * ex, ey + ry * 1.5, rx * 0.45, ry * 0.5, zf - 0.19, zf + 0.0));
       for (let k = 0; k < 3; k++) add(BLK, board([s * (r * 0.5 + k * r * 0.14), y0 + len * 0.2], [s * (r * 0.58 + k * r * 0.22), y0 + len * 0.06], 0.05, zf - 0.08, zf + 0.03));
     }
   } else if (type === 'beaver') {
@@ -374,21 +374,21 @@ function houseLife(el, { bag, col, add, M, W, rectL, rand, hwI, hdI, yL, yLo, yP
   const steam = (u, v, s) => {
     const B = S(u, v, yLo, kr() * 3);
     B('cedar', box(-0.4, 0, -0.3, 0.4, 0.5, 0.3)); B('bitumen', box(-0.34, 0.5, -0.24, 0.34, 0.505, 0.24));
-    B(BLK, box(-0.36, 0.12, -0.31, 0.36, 0.34, -0.3)); B(RED, ellipse(0, 0.23, 0.14, 0.07, -0.32, -0.3));
+    B(BLK, box(-0.36, 0.12, -0.34, 0.36, 0.34, -0.29)); B(RED, ellipse(0, 0.23, 0.14, 0.07, -0.36, -0.28));
     for (let k = 0; k < 4; k++) B('rock_boulder', lathe([[0.15, 0], [0.12, 0.08], [0.001, 0.13]], 6, null, 0.65 + (k % 2) * 0.22, 0, -0.2 + (k >> 1) * 0.3));
     B('wood_dark', rod([-0.3, 0.52, 0.2], [-0.9, 0.9, 0.5], 0.02, 4)); B('wood_dark', rod([-0.34, 0.52, 0.16], [-0.9, 0.86, 0.46], 0.02, 4));
     const [bx, bz] = W(u, v); col.circle(bx, bz, 0.5, yLo, yLo + 0.5);
   };
   const drum = (u, v, y, yaw) => {
     const B = S(u, v, y, yaw);
-    B('cedar', box(-0.45, 0, -0.35, 0.45, 0.7, 0.35)); B(BLK, box(-0.4, 0.15, -0.36, 0.4, 0.6, -0.35)); B(RED, ellipse(0, 0.38, 0.22, 0.14, -0.37, -0.35)); B(BLK, ellipse(0, 0.38, 0.08, 0.07, -0.38, -0.35));
+    B('cedar', box(-0.45, 0, -0.35, 0.45, 0.7, 0.35)); B(BLK, box(-0.4, 0.15, -0.38, 0.4, 0.6, -0.34)); B(RED, ellipse(0, 0.38, 0.22, 0.14, -0.41, -0.33)); B(BLK, ellipse(0, 0.38, 0.08, 0.07, -0.44, -0.32));
     B('timber', rod([0.6, 0, -0.1], [0.5, 0.75, -0.1], 0.015, 4)); B('timber', rod([0.55, 0.78, -0.1], [0.7, 0.62, 0.15], 0.02, 4));     // the beater
   };
   const paddles = (s, v) => {
     for (let k = 0; k < 3; k++) {
       const u = s * (hw - 0.8), B = S(u, v + k * 0.22, yL, 0);
       B('timber', rod([0, 0, 0], [-s * 0.18, 1.9, 0], 0.025, 5)); B('cedar', ellipse(-s * 0.02, 0.35, 0.07, 0.3, -0.012, 0.012, 7).translate(0, 0, 0));
-      B(BLK, box(-s * 0.02 - 0.05, 0.5, -0.014, -s * 0.02 + 0.05, 0.6, 0.014));
+      B(BLK, box(-s * 0.02 - 0.05, 0.5, -0.03, -s * 0.02 + 0.05, 0.6, 0.03));
     }
   };
   const bark = (u, v, y) => { for (let k = 0; k < 3; k++) S(u + k * 0.28, v + (k % 2) * 0.1, y)('rope_fibre', lathe([[0.13, 0], [0.13, 0.9], [0.1, 0.9], [0.1, 0.0]], 8, null, 0, 0, 0)); };
@@ -401,7 +401,7 @@ function houseLife(el, { bag, col, add, M, W, rectL, rand, hwI, hdI, yL, yLo, yP
   const cradle = (u, v, y) => {
     const B = S(u, v, y, kr());
     B('cedar', box(-0.22, 0.08, -0.4, 0.22, 0.3, 0.4)); B('timber', rod([-0.25, 0.04, -0.4], [-0.25, 0.04, 0.4], 0.04, 5)); B('timber', rod([0.25, 0.04, -0.4], [0.25, 0.04, 0.4], 0.04, 5));
-    B('hide_white', box(-0.18, 0.28, -0.35, 0.18, 0.33, 0.3)); B(RED, box(-0.22, 0.2, -0.42, 0.22, 0.26, -0.4));
+    B('hide_white', box(-0.18, 0.28, -0.35, 0.18, 0.33, 0.3)); B(RED, box(-0.22, 0.2, -0.42, 0.22, 0.26, -0.39));
   };
   const dog = (u, v, y) => { const B = S(u, v, y, kr() * 6); B('hide_grey', ellipse(0, 0.04, 0.4, 0.3, -0.04, 0.04, 8).translate(0, 0, 0)); B('hide_brown', box(-0.2, 0.0, -0.1, 0.2, 0.2, 0.25)); };
   const baskets = (u, v, y) => { const B = S(u, v, y); for (let k = 0; k < 4; k++) B('wicker', lathe([[0.2 - k * 0.01, 0], [0.28, 0.2], [0.26, 0.38], [0.001, 0.38]], 9, null, (k % 2) * 0.55 - 0.1, k > 1 ? 0.38 : 0, (k >> 1) * 0.1 + (k > 1 ? 0.05 : 0.5))); bowl(B, 0.9, 0, 0.1, 0.16); };
@@ -643,7 +643,7 @@ function prop(el, ctx) {
       circ(0.1, 2); col.circle(el.c[0] + w / 2 * Math.cos(el.yaw), el.c[1] - w / 2 * Math.sin(el.yaw), 0.1, el.y, el.y + 2); break;
     }
     case 'boxes': {
-      for (let k = 0; k < 3; k++) { const x = (k - 1) * 0.95, hh = 0.5 + rand() * 0.15; add('cedar', box(x - 0.4, 0, -0.3, x + 0.4, hh, 0.3)); add(BLK, box(x - 0.34, hh * 0.3, -0.31, x + 0.34, hh * 0.8, -0.3)); add(RED, ellipse(x, hh * 0.55, 0.13, hh * 0.15, -0.33, -0.3)); if (k === 1) add('bitumen', box(x - 0.34, hh, -0.24, x + 0.34, hh + 0.01, 0.24)); }
+      for (let k = 0; k < 3; k++) { const x = (k - 1) * 0.95, hh = 0.5 + rand() * 0.15; add('cedar', box(x - 0.4, 0, -0.3, x + 0.4, hh, 0.3)); add(BLK, box(x - 0.34, hh * 0.3, -0.34, x + 0.34, hh * 0.8, -0.29)); add(RED, ellipse(x, hh * 0.55, 0.13, hh * 0.15, -0.37, -0.28)); if (k === 1) add('bitumen', box(x - 0.34, hh, -0.24, x + 0.34, hh + 0.01, 0.24)); }
       for (let k = 0; k < 6; k++) add('rock_boulder', lathe([[0.14, 0], [0.11, 0.08], [0.001, 0.12]], 6, null, -0.5 + (k % 3) * 0.3, 0, 0.7 + (k >> 1) * 0.2));
       circ(1.4, 0.7); break;
     }
