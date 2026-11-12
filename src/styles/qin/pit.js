@@ -3,7 +3,7 @@
 // logs over the partitions, the earth heaped over its western part and not yet over the east, three ramps down the east end
 // into the front gallery; the army inside (qin_army): three ranks of archers, the infantry in two files a corridor, the
 // chariots with their four horses; torches. The plan's frame is the settlement's.
-import { box, fromTriangles, frustum, lathe } from '../../core/geom.js';
+import { box, fromTriangles, frustum, lathe, rod } from '../../core/geom.js';
 import { animal } from '../../objects/animals.js';
 import { rng } from '../../objects/kit.js';
 import { PIT, CORR, GALLERY, ROOF, RAMP, ARCHERS, FILES, FILE_STEP, CHARIOTS, corrZ, rampZ } from '../../settlements/qin-xianyang/layout.js';
@@ -70,6 +70,18 @@ export function qinPit(el, { bag, col, lights }) {
   };
   for (const k of RAMP.zs) for (const x of [96, 64, 32, 0, -32, -64, -92]) lamp(x, PT - 0.5, corrZ(k));
   for (const i of [0, 1, 2]) for (const x of [118, 125]) lamp(x, PT - 0.5, rampZ(i) + (i === 1 ? 0 : 0) + (x === 118 ? 2.5 : -2.5));
+  // the gallery's ends: racks of spare spears and halberds, chests of bundled bolts, a water jar and a dipper; mats of reed on the walls above the floor
+  for (const zz of [z0 + wall + 0.5, z1 - wall - 0.5]) {
+    const sg = zz < (z0 + z1) / 2 ? 1 : -1;
+    for (const x of [117.8, 125.6]) bag.add('timber', box(x - 0.08, FL, zz - 0.08, x + 0.08, FL + 1.4, zz + 0.08));
+    bag.add('timber', box(117.8, FL + 0.55, zz - 0.05, 125.6, FL + 0.62, zz + 0.05)); bag.add('timber', box(117.8, FL + 1.2, zz - 0.05, 125.6, FL + 1.27, zz + 0.05));
+    for (let k = 0; k < 9; k++) { const x = 118.2 + k * 0.8; bag.add('timber', rod([x, FL, zz + sg * 0.55], [x + 0.04, FL + 2.5, zz + sg * 0.1], 0.016, 5)); bag.add('bronze', rod([x + 0.04, FL + 2.5, zz + sg * 0.1], [x + 0.045, FL + 2.8, zz + sg * 0.07], 0.022, 4)); }
+    col.rect([117.7, zz - 0.3, 125.7, zz + 0.3], FL, FL + 1.4);
+    for (let k = 0; k < 3; k++) { const x = 118.5 + k * 2.4; bag.add('timber', box(x, FL, zz + sg * 1.0, x + 1.0, FL + 0.5, zz + sg * 1.6)); bag.add('timber_red', box(x - 0.02, FL + 0.5, zz + sg * 0.98, x + 1.02, FL + 0.55, zz + sg * 1.62)); col.rect([x, Math.min(zz + sg, zz + sg * 1.6), x + 1.0, Math.max(zz + sg, zz + sg * 1.6)], FL, FL + 0.55); }
+    bag.add('terracotta', lathe([[0.001, 0], [0.2, 0.03], [0.35, 0.4], [0.3, 0.8], [0.18, 0.95], [0.001, 0.95]], 10, null, GALLERY[1] - 0.6, FL, zz + sg * 0.9)); col.circle(GALLERY[1] - 0.6, zz + sg * 0.9, 0.35, FL, FL + 1.0);
+  }
+  // the corridors: the partitions' timber posts carry a lintel of squared logs at every second post, a plank wall-shelf with a lamp and its oil jar at the mouths
+  for (let k = 0; k < CORR.n; k++) for (let x = CORR.x0 + 3; x < CORR.x1; x += 14) bag.add('timber', box(x - 0.2, PT - 0.25, corrZ(k) - CORR.w / 2, x + 0.2, PT - 0.05, corrZ(k) + CORR.w / 2));
 }
 
 /** One chariot: four horses abreast, the pole, the carriage, its wheels and its crew. */

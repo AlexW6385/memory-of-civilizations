@@ -33,12 +33,12 @@ function people() {
   const guard = (at, rot, o = {}, y = 0) => fig(at, rot, { cloth: 'cloth_red', cloth2: 'cloth_brown', hat: 'cap', pose: 'staff', carry: 'staff', len: 2.2, ...o }, y);
   // the palace: guards at the stair's foot and head, in the hall's doors; officials on the terrace and in the hall, seated on their mats
   for (const s of [-1, 1]) { guard([STAIR.x + s * 7.5, TERRACE.z1 + STAIR.run + 0.8], Math.PI); guard([STAIR.x + s * 7.5, TERRACE.z1 - 2.5], 0, {}, TERRACE.h); guard([STAIR.x + s * 3.4, HALL.z1 - 5.5], Math.PI, {}, TERRACE.h + 0.08); }
-  for (const [x, z, r] of [[-232, -78, 1], [-205, -78, 4], [-219, -70, 3], [-250, -100, 1.5]]) official([x, z], r, { pose: rand() < 0.5 ? 'talk' : 'stand' }, TERRACE.h);
+  for (const [x, z, r] of [[-232, -78, 1], [-205, -78, 4], [-210, -79, 3], [-250, -100, 1.5]]) official([x, z], r, { pose: rand() < 0.5 ? 'talk' : 'stand' }, TERRACE.h);
   const cx = (HALL.x0 + HALL.x1) / 2, dz1 = HALL.z0 + 3.4 + 8.0;
   for (let i = 0; i < 6; i++) for (const s of [-1, 1]) if (rand() < 0.75) official([cx + s * 13, dz1 + 3 + i * 2.6], s < 0 ? -Math.PI / 2 : Math.PI / 2, { pose: 'seiza' }, TERRACE.h + 0.11);
   for (const [x, z] of [[-228, -100], [-210, -96], [-226, -91]]) official([x, z], rand() * 6, { pose: 'talk' }, TERRACE.h + 0.08);
   // the forecourt: officials and petitioners, a clerk with tablets
-  for (let k = 0; k < 14; k++) { const x = -270 + rand() * 110, z = -62 + rand() * 36; (rand() < 0.5 ? official : fig)([x, z], rand() * 6.28, rand() < 0.3 ? { pose: 'talk' } : {}); }
+  for (let k = 0; k < 14; k++) { let x = -270 + rand() * 110; const z = -62 + rand() * 36; if (Math.abs(x - STAIR.x) < 4) x += 8; (rand() < 0.5 ? official : fig)([x, z], rand() * 6.28, rand() < 0.3 ? { pose: 'talk' } : {}); }
   // the pit's bare roof: labourers with baskets of earth and shovels, an overseer, women with water; the ramps' tops
   for (let k = 0; k < 16; k++) { const x = ROOF.bareX + 22 + rand() * 38, z = PIT.z0 + 4 + rand() * (PIT.z1 - PIT.z0 - 8); fig([x, z], rand() * 6.28, { cloth: 'cloth_grey', hair: 'shaven', beard: false, carry: pick(rand, ['sack', 'sack', 'pole', 'none']), over: 'belt' }, ROOF.top); }
   for (const [x, z] of [[ROOF.bareX + 30, -121], [ROOF.bareX + 52, -105]]) guard([x, z], rand() * 6, {}, ROOF.top);
