@@ -26,7 +26,7 @@ export function drains(el, ctx) {
     }
     // the salt that rises from the wet brick along the kerb: pale crust in patches
     for (let s = a + 1; s < b - 1; s += 2.5 + rand() * 4) R(s, -w / 2 - 0.2, s + 0.8 + rand() * 1.4, -w / 2 - 0.1, 0.0, 0.012, 'plaster_streak');
-    if (b - a > 20) { const s = a + (b - a) * (0.3 + rand() * 0.4), side = rand() < 0.5 ? -1 : 1; jar(bag, 'terracotta', alongX ? s : c + side * (w / 2 + 0.5), y, alongX ? c + side * (w / 2 + 0.5) : s, 1.1); }
+    if (b - a > 20) { const s = a + (b - a) * (0.3 + rand() * 0.4), side = -1; jar(bag, 'terracotta', alongX ? s : c + side * (w / 2 + 0.5), y, alongX ? c + side * (w / 2 + 0.5) : s, 1.1); }
   }
 }
 
