@@ -26,6 +26,11 @@ function geom(rect, seed) {
   const kx = T + (L - 2 * T) * 0.36, sx = T + (L - 2 * T) * 0.68;
   return { F, G, L, D, room, pa, pb, ss, kx, sx, mirror, v1: FR - TI / 2, v2: D - BK + TI / 2 };
 }
+/** Where the doors are, in the plain (unmirrored) front frame: the passage's centre and the shop's opening. */
+export function houseDoors(rect, seed) {
+  const g = geom(rect, seed), m = (u) => (g.mirror ? g.L - u : u), so = [Math.min(m(T + 0.7), m(Math.min(T + 3.1, g.ss - 0.6))), Math.max(m(T + 0.7), m(Math.min(T + 3.1, g.ss - 0.6)))];
+  return { du: m((g.pa + g.pb) / 2), shop: false, two: false, shopU: -1, so };
+}
 /** The rooms the plan registers (world rectangles). */
 export function houseRooms(rect, seed, y, trade) {
   const g = geom(rect, seed), { G, D, room, ss, pb, kx, sx, L } = g;

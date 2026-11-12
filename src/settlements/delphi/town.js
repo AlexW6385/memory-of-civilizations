@@ -1,6 +1,7 @@
 // The town of Delphi (docs/settlements/delphi.md §4.5, §8): the houses of the Delphians on their terraces west and east of the
 // sanctuary, and the people of the oracle: pilgrims and consultants on the Sacred Way, the priests and the Pythia's escort at the
 // temple, the goat for the sacrifice, the washers at the Castalian spring, the sellers at the gate, athletes in the stadium.
+import { fronts, openLife } from './fronts.js';
 import { houseRooms } from '../../styles/delphi/house.js';
 import { retain } from './buildings.js';
 import { wayPoints } from './layout.js';
@@ -33,6 +34,7 @@ export async function town() {
       E.push({ t: 'ribbon', pts: [[(q.x0 + q.x1) / 2, q.up.z + 5.5], [(q.x0 + q.x1) / 2, q.dn.z - 0.5]], ys: [yD, yD], w: 1.8, mat: 'rubble', kerb: false, lift: 0.03 });
     }
     plans.push(base('delphi-lanes', 'delphi', E)); void ROW_PITCH; void wayPoints; }
+  plans.push({ ...base('delphi-fronts', 'life', [...fronts(), ...openLife()]), rooms: [] });
   const rand = rng(400), L = [], seed = () => Math.floor(rand() * 1e9);
   const citizen = (at, rot, o = {}) => L.push({ t: 'figure', at, y: o.y ?? height(at[0], at[1]), rot, seed: seed(), skin: 'skin_medium', dress: 'robe', cloth: ['cloth_white', 'linen', 'cloth_ochre'][Math.floor(rand() * 3)], cloth2: ['cloth_white', 'cloth_brown', 'cloth_indigo', 'cloth_red'][Math.floor(rand() * 4)], over: 'cloak', hair: 'short', beard: 1, hat: rand() < 0.25 ? 'brim' : 'none', pose: 'stand', ...o });
   const worker = (at, rot, o = {}) => L.push({ t: 'figure', at, y: o.y ?? height(at[0], at[1]), rot, seed: seed(), skin: 'skin_medium', dress: 'tunic', legs: 'bare', cloth: ['cloth_brown', 'cloth_grey', 'linen', 'cloth_ochre'][Math.floor(rand() * 4)], over: 'belt', hair: 'short', beard: 0.5, hat: rand() < 0.2 ? 'cap' : 'none', feet: 'bare', pose: 'stand', ...o });
