@@ -22,6 +22,8 @@ const fromWater = (x, z) => (inRiver(x, z) || inLake(x, z) ? -3 : Math.max(-5, M
 /** Plants per 100 m²: papyrus and reeds on the river's unwalled banks, palms in the gardens, along the lanes' ends and on the plain. */
 function planting(x, z, p) {
   if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z)) return null;
+  // the avenue and the open way to the gateway (the paved way 17 m wide, the gateway's forecourt before it) are kept clear: no tree stands in the view down the rams to the pylon
+  if (x > AVENUE.x0 - 6 && x < ENCL[0] + 1 && Math.abs(z) < 14.5 && !(Math.abs(z) > 9.4 && x < ENCL[0] - 9)) return null;
   // the temple's gardens: a grove of date palms round the sacred lake, a row along the quay's promenade
   if (inRect(LAKE, x, z, 11) && !inRect(LAKE, x, z, 6.5)) return { date_palm: 1.4, tamarisk: 0.1 };
   // the avenue's borders: a row of date palms and tamarisks outside the rams, the grove round the great wall

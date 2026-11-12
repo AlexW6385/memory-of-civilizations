@@ -7,7 +7,7 @@
 // frame u runs along the street and v from the street into the lot.
 import { box, lathe, fromTriangles, clothBox, addCloth } from '../../core/geom.js';
 import { rng } from './kit.js';
-import { palm } from '../egyptian/objects.js';
+import { nkPalm } from './palm.js';
 import { facade, cabin, dovecote, shopGoods } from './dress.js';
 
 export function frame(rect, front, bag, col) {
@@ -35,7 +35,7 @@ export function smallColumn(F, u, v, h, r, y = 0) {
   F.col.circle(x, z, r * 1.2, y, y + h + 0.16);
 }
 /** Shared by the houses: the roof terrace of beams and mud with its parapet, a shade of mats and the things kept up there. */
-export function roof(F, rand, H, hole, open, rect = [0, 0, F.W, F.D]) {
+export function roof(F, rand, H, hole, open, rect = [0, 0, F.W, F.D], simple = false) {
   const [u0, v0, u1, v1] = rect, T = H + 0.28;
   const parts = hole ? [[u0 - 0.2, v0 - 0.2, u1 + 0.2, hole[1]], [hole[2], hole[1], u1 + 0.2, v1 + 0.2], [u0 - 0.2, hole[1], hole[0], v1 + 0.2], [hole[0], hole[3], hole[2], v1 + 0.2]] : [[u0 - 0.2, v0 - 0.2, u1 + 0.2, v1 + 0.2]];
   for (const r of parts) if (r[2] - r[0] > 0.05 && r[3] - r[1] > 0.05) {
@@ -46,6 +46,7 @@ export function roof(F, rand, H, hole, open, rect = [0, 0, F.W, F.D]) {
   const pa = 0.26;                                                                     // the parapet round the terrace
   F.b('mud_plaster', u0 - 0.2, T, v0 - 0.2, u1 + 0.2, T + pa, v0 - 0.2 + 0.22); F.b('mud_plaster', u0 - 0.2, T, v1 - 0.02, u1 + 0.2, T + pa, v1 + 0.2);
   F.b('mud_plaster', u0 - 0.2, T, v0 - 0.2, u0 + 0.02, T + pa, v1 + 0.2); F.b('mud_plaster', u1 - 0.02, T, v0 - 0.2, u1 + 0.2, T + pa, v1 + 0.2);
+  if (simple) return;
   // the shade of reed mats on four posts, jars, a basket, linen laid to dry
   const r = rand();
   if (r < 0.55 && u1 - u0 > 3.5 && v1 - v0 > 3.5) {
@@ -69,10 +70,19 @@ export function door(F, wallMat, u, w, h, v0, v1, open, H) {
 }
 export const slit = (F, u, y, v, w = 0.5, h = 0.32) => F.b('opening', u - w / 2, y, v - 0.01, u + w / 2, y + h, v + 0.03, false);
 
+/** The far version of a house (lod.js): the door, the walls, the street's slit and the roof's parapet; nothing inside or on the front. */
+function shell(F, wm, uD, dw, dh, th, H, D, kind) {
+  F.b(wm, 0, 0, 0, uD - dw / 2, H, th); F.b(wm, uD + dw / 2, 0, 0, F.W, H, th); F.b(wm, uD - dw / 2, dh, 0, uD + dw / 2, H, th);
+  F.b('cedar', uD - dw / 2, 0, 0.1, uD + dw / 2, dh, 0.2, false);
+  F.b(wm, 0, 0, th, th, H, D); F.b(wm, F.W - th, 0, th, F.W, H, D); F.b(wm, 0, 0, D - th, F.W, H, D);
+  F.b(wm, th, 0, th, F.W - th, kind === 'row' ? 1.0 : 2.2, D - th);
+}
+
 /** nk_row_house: { rect, front, seed, open } — the workman's house. */
 export function rowHouse(el, ctx) {
-  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D, th = 0.4, H = 3.1 + rand() * 0.3, wm = WALLS[Math.floor(rand() * WALLS.length)], open = !!el.open;
+  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D, th = 0.4, H = 3.1 + rand() * 0.3, wm = WALLS[Math.floor(rand() * WALLS.length)], simple = !!el.simple, open = !!el.open && !simple;
   const uD = W * (0.3 + rand() * 0.4);
+  if (simple) { shell(F, wm, uD, 0.9, 1.95, th, H, D, 'row'); roof(F, rand, H, null, false, undefined, true); return; }
   door(F, wm, uD, 0.9, 1.95, 0, th, open, H);
   facade(F, rng(el.seed + 99), { W, H, wm, uD, dw: 0.9, lod: el.lod ?? 1, open, shop: !!el.shop });
   F.b(wm, 0, 0, th, th, H, D); F.b(wm, W - th, 0, th, W, H, D); F.b(wm, 0, 0, D - th, W, H, D);
@@ -115,8 +125,13 @@ export function rowHouse(el, ctx) {
 
 /** nk_court_house: { rect, front, seed, open } — a court at the front with its oven, granary and palm, the roofed rooms behind, the roof terrace. */
 export function courtHouse(el, ctx) {
-  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D, th = 0.4, H = 3.0 + rand() * 0.4, wm = WALLS[Math.floor(rand() * WALLS.length)], open = !!el.open;
+  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D, th = 0.4, H = 3.0 + rand() * 0.4, wm = WALLS[Math.floor(rand() * WALLS.length)], simple = !!el.simple, open = !!el.open && !simple;
   const cv = 5.5 + rand() * 1.5, uD = W * (0.25 + rand() * 0.5);
+  if (simple) {
+    F.b(wm, 0, 0, 0, uD - 0.5, 2.7, th); F.b(wm, uD + 0.5, 0, 0, W, 2.7, th); F.b(wm, uD - 0.5, 2.0, 0, uD + 0.5, 2.7, th);
+    F.b(wm, 0, 0, th, th, 2.7, cv); F.b(wm, W - th, 0, th, W, 2.7, cv);
+    F.b(wm, 0, 0, cv, W, H, D); roof(F, rand, H, null, false, [0, cv, W, D], true); return;
+  }
   door(F, wm, uD, 1.0, 2.0, 0, th, open, 2.7);
   facade(F, rng(el.seed + 99), { W, H: 2.7, wm, uD, dw: 1.0, doorH: 2.0, lod: el.lod ?? 1, open });
   F.b(wm, 0, 0, th, th, 2.7, cv); F.b(wm, W - th, 0, th, W, 2.7, cv);                                // the court's walls
@@ -146,7 +161,7 @@ export function courtHouse(el, ctx) {
   F.lathe('limestone_core', [[0.001, 0], [0.13, 0], [0.12, 0.06], [0.001, 0.08]], W - th - 0.8, 1.5, cv - 1.0, 8);
   const qv = th + 1.2 + rand() * 1.5; F.b('mud_plaster', W / 2 - 0.4, 0, qv, W / 2 + 0.4, 0.18, qv + 0.6, false); F.b('granite_red', W / 2 - 0.3, 0.18, qv + 0.1, W / 2 + 0.3, 0.26, qv + 0.5, false);
   F.lathe('terracotta', JAR(0.3), W - th - 0.5, 0, th + 0.5, 10); F.lathe('terracotta', JAR(0.22), W - th - 1.2, 0, th + 0.45, 10);
-  if (rand() < 0.7) palm({ at: [F.X(th + 1.1 + rand() * (W - 2.5)), F.Z(cv * 0.62)], y: 0, h: 5 + rand() * 3, lean: (rand() - 0.5) * 0.15, seed: Math.floor(rand() * 9999) }, ctx);
+  { const pu = th + 1.1 + rand() * (W - 2.5), pl = (rand() - 0.5) * 0.15, ph = 5 + rand() * 3, ps = Math.floor(rand() * 9999); if (rand() < 0.7) nkPalm({ at: [F.X(pu), F.Z(cv * 0.62)], y: 0, h: ph, lean: pl, seed: ps }, ctx, (el.lod ?? 1) >= 2 ? 2 : 1); }
   roof(F, rand, H, hole, open, [0, cv, W, D]);
   const dr = rng(el.seed + 17), q = dr();
   if (!open && (el.lod ?? 1) >= 1 && W > 7.5) { if (q < 0.5) cabin(F, dr, H, wm, [0.4, cv + 0.6, Math.min(W - 0.4, 4.2), cv + 4.2]); else if (q < 0.7) dovecote(F, W - 1.6, D - 1.8, 3.6, 1.1); }
@@ -154,8 +169,13 @@ export function courtHouse(el, ctx) {
 
 /** nk_villa: { rect, front, seed, open } — the house of an official: the walled garden with its pool and trees, the porch, the hall of columns. */
 export function villa(el, ctx) {
-  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D, th = 0.45, H = 3.6, wm = rand() < 0.6 ? 'limewash_white' : 'mud_plaster', open = !!el.open;
+  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D, th = 0.45, H = 3.6, wm = rand() < 0.6 ? 'limewash_white' : 'mud_plaster', simple = !!el.simple, open = !!el.open && !simple;
   const gv = 6.2;                                                                               // the garden's depth
+  if (simple) {
+    F.b(wm, 0, 0, 0, W / 2 - 0.75, 3.4, th); F.b(wm, W / 2 + 0.75, 0, 0, W, 3.4, th); F.b(wm, W / 2 - 0.75, 2.6, 0, W / 2 + 0.75, 3.4, th);
+    F.b(wm, 0, 0, th, th, 3.4, gv); F.b(wm, W - th, 0, th, W, 3.4, gv); F.b(wm, 0, 0, gv, W, H, D);
+    roof(F, rand, H, null, false, [0, gv, W, D], true); return;
+  }
   door(F, wm, W / 2, 1.5, 2.6, 0, th, open, 3.4);
   facade(F, rng(el.seed + 99), { W, H: 3.0, wm, uD: W / 2, dw: 1.5, doorH: 2.6, lod: Math.max(1, el.lod ?? 1), open });
   F.b(wm, 0, 0, th, th, 3.4, gv); F.b(wm, W - th, 0, th, W, 3.4, gv);
@@ -168,7 +188,7 @@ export function villa(el, ctx) {
   const r = F.R(pu - pw / 2, pv - pd / 2, pu + pw / 2, pv + pd / 2), wy = 0.3;
   bag.add('water', fromTriangles([r[0], wy, r[1], r[0], wy, r[3], r[2], wy, r[3], r[0], wy, r[1], r[2], wy, r[3], r[2], wy, r[1]]));
   for (let i = 0; i < 4; i++) F.lathe('lotus_leaf', [[0.001, 0], [0.3, 0.01], [0.001, 0.02]], pu - pw / 2 + 0.7 + i * pw / 4.5, wy, pv + (i % 2 - 0.5) * 1.2, 8);
-  for (const [pxu, pxv, k] of [[0.2, 0.5, 0], [W - 0.2, 0.5, 1], [0.5, gv - 0.4, 2], [W - 0.5, gv - 0.4, 3]]) palm({ at: [F.X(pxu + (k % 2 ? -0.5 : 0.5)), F.Z(pxv)], y: 0, h: 6 + rand() * 3, lean: (rand() - 0.5) * 0.14, seed: Math.floor(rand() * 9999) }, ctx);
+  for (const [pxu, pxv, k] of [[0.2, 0.5, 0], [W - 0.2, 0.5, 1], [0.5, gv - 0.4, 2], [W - 0.5, gv - 0.4, 3]]) { const ph = 6 + rand() * 3, pl = (rand() - 0.5) * 0.14, ps = Math.floor(rand() * 9999); if ((el.lod ?? 1) >= 2 || k < 2) nkPalm({ at: [F.X(pxu + (k % 2 ? -0.5 : 0.5)), F.Z(pxv)], y: 0, h: ph, lean: pl, seed: ps }, ctx, (el.lod ?? 1) >= 2 ? 2 : 1); }
   F.b('mud_plaster', 1.2, 0, 1.0, 1.9, 0.18, 5.6, false); F.b('mud_plaster', W - 1.9, 0, 1.0, W - 1.2, 0.18, 5.6, false);        // the beds
   // the house across the garden's end: the porch of two painted columns, the long front hall, the central hall
   const hv = gv, hd = D - th - hv;
@@ -201,17 +221,19 @@ export function villa(el, ctx) {
 
 /** nk_granary: { rect, front, seed } — a walled yard with its beehive silos, loading holes at their tops, a stair. */
 export function granary(el, ctx) {
-  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D, th = 0.4, wm = 'mud_plaster';
+  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D, th = 0.4, wm = 'mud_plaster', simple = !!el.simple;
   F.b(wm, 0, 0, 0, W, 1.8, th); F.b(wm, 0, 0, 0, th, 1.8, D); F.b(wm, W - th, 0, 0, W, 1.8, D); F.b(wm, 0, 0, D - th, W, 1.8, D);
   F.b('opening', W / 2 - 0.5, 0, -0.01, W / 2 + 0.5, 1.5, 0.05, false);
   const n = Math.max(2, Math.floor((W - 1) / 2.9));
   for (let i = 0; i < n; i++) for (const v of [D * 0.38, D * 0.78]) {
     const u = 0.6 + (i + 0.5) * (W - 1.2) / n, h = 3.0 + rand() * 0.7, r = 1.1;
-    F.lathe('mud_plaster', [[r, 0], [r * 1.04, 0.3], [r * 0.95, h * 0.6], [r * 0.6, h * 0.92], [r * 0.2, h], [0.001, h]], u, 0, v, 14);
+    F.lathe('mud_plaster', [[r, 0], [r * 1.04, 0.3], [r * 0.95, h * 0.6], [r * 0.6, h * 0.92], [r * 0.2, h], [0.001, h]], u, 0, v, simple ? 8 : 14);
+    if (simple) { col.circle(F.X(u), F.Z(v), r * 1.02, 0, h); continue; }
     F.lathe('limestone_core', [[0.001, 0], [r * 0.26, 0], [r * 0.24, 0.1], [0.001, 0.12]], u, h, v, 8);
     F.b('mud_plaster', u - 0.2, 0.9, v - r - 0.05, u + 0.2, 1.3, v - r + 0.1, false);
     col.circle(F.X(u), F.Z(v), r * 1.02, 0, h);
   }
+  if (simple) return;
   const st = 8, run = 3.2 / st; for (let i = 0; i < st; i++) F.b('mud_plaster', 0.4, 0, D - 3.6 + i * run, 1.2, 0.4 * (i + 1), D - 0.4, false);
   col.ramp(F.R(0.4, D - 3.6, 1.2, D - 0.4), 0, 3.2, F.rise);
 }
@@ -220,6 +242,7 @@ export function granary(el, ctx) {
 export function garden(el, ctx) {
   const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D;
   F.b('mud_plaster', 0, 0, 0, W, 0.9, 0.3); F.b('mud_plaster', 0, 0, 0, 0.3, 0.9, D); F.b('mud_plaster', W - 0.3, 0, 0, W, 0.9, D); F.b('mud_plaster', 0, 0, D - 0.3, W, 0.9, D);
+  if (el.simple) return;
   F.b('opening', W / 2 - 0.5, 0, -0.01, W / 2 + 0.5, 0.9, 0.04, false);
   for (let u = 1.0; u < W - 1.2; u += 1.7) F.b('mud_plaster', u, 0, 1.2, u + 0.9, 0.12, D - 1.5, false);
   const su = W - 1.6, sv = D - 1.5;
