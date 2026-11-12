@@ -13,6 +13,7 @@ import { RADIUS, RIVER, BRIDGE, WALL_X, FIELDS_X, GATE, STREETS, LANES, STONE_BA
 import { tradeOf } from './trades.js';
 import { shopElements } from './shops.js';
 import { doorOf } from './houses.js';
+import { nearDoor, SEDANS, OXCARTS, BARROWS, DRAY } from './doors.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const FR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
@@ -47,7 +48,7 @@ export function streetPlans(base) {
   for (const e of shopElements()) { const c = Math.cos(e.rot), s = Math.sin(e.rot); poles.push([e.at[0] + e.poleX * c + e.poleZ * s, e.at[1] - e.poleX * s + e.poleZ * c]); }
   const nearPole = (x, z, r) => poles.some(([px, pz]) => Math.abs(px - x) < r && Math.abs(pz - z) < r);
   /** Is a disc of radius r at (x, z) free: on a way, off the houses and the river, clear of the poles? */
-  const free = (x, z, r) => Math.hypot(x, z) < RADIUS - 32 && !inRiverStrip(x, z) && onWay(x, z, -r * 0.5) && !inLot(x, z, r) && !nearPole(x, z, r + 0.35) && !(x > GATE.rect[0] - 3 && x < GATE.rect[2] + 3 && z > GATE.rect[1] && z < GATE.rect[3]);
+  const free = (x, z, r) => Math.hypot(x, z) < RADIUS - 32 && !inRiverStrip(x, z) && onWay(x, z, -r * 0.5) && !inLot(x, z, r) && !nearPole(x, z, r + 0.35) && !nearDoor(x, z, r) && !(x > GATE.rect[0] - 3 && x < GATE.rect[2] + 3 && z > GATE.rect[1] && z < GATE.rect[3]);
   const taken = [];
   const clear = (x, z, r) => !taken.some(([a, b, q]) => (a - x) ** 2 + (b - z) ** 2 < (q + r) ** 2);
   const claim = (x, z, r) => taken.push([x, z, r]);
@@ -55,7 +56,7 @@ export function streetPlans(base) {
   const special = new Set(lots().filter((l) => l.kind === 'wine' || l.kind === 'tea'));
   for (const l of special) { const [x0, z0, x1, z1] = l.rect; claim((x0 + x1) / 2, (z0 + z1) / 2, Math.hypot(x1 - x0, z1 - z0) / 2 + 3); }
   // the town.js sedan chairs, oxcarts, barrows, the physician's boards and the fortune tellers
-  for (const [x, z, r] of [[-3.5, -30, 4], [3.2, 8, 4], [-3, 40, 4], [3.5, 130, 4], [-3.2, 170, 4], [-176, -81.5, 7], [3.6, 162, 7], [-118, 51.5, 4], [-3.8, 124, 4], [60, 199, 5], [-236, -77.9, 4], [5.3, 22, 4], [-282, -84, 6], [-268, -81, 4]]) claim(x, z, r);
+  for (const [x, z, r] of [...SEDANS.map(([x, z]) => [x, z, 4]), ...OXCARTS.map(([x, z]) => [x, z, 7]), ...BARROWS.map(([x, z]) => [x, z, 4]), [DRAY[0], DRAY[1], 5], [-236, -77.9, 4], [5.3, 22, 4], [-282, -84, 6], [-268, -81, 4]]) claim(x, z, r);
   const spot = (x, z, r) => free(x, z, r) && clear(x, z, r);
   const add = (el, r = 0.5) => { L.push(el); claim(el.at[0], el.at[1], r); };
 
@@ -66,7 +67,7 @@ export function streetPlans(base) {
     if (Math.hypot(...F.P(0.5, 0)) > RADIUS - 40) continue;
     const near = d < 260, along = (t, o) => F.P(t, o);
     const door = (l.kind === 'house' || l.shop) && l.kind !== 'warehouse' ? doorOf(l) : null;      // the door stays clear: nothing stands before it
-    const tryAdd = (el, rad, t, off) => { const p = along(t, off); if (door && Math.hypot(p[0] - door.at[0], p[1] - door.at[1]) < rad + door.hw + 0.5) return false; if (!spot(p[0], p[1], rad)) return false; add({ ...el, at: p }, rad); return true; };
+    const tryAdd = (el, rad, t, off) => { const p = along(t, off); if (door) { const dx = p[0] - door.at[0], dz = p[1] - door.at[1], depth = dx * F.n[0] + dz * F.n[1], lat = -dx * F.n[1] + dz * F.n[0]; if (depth > -rad && depth < 4 + rad && Math.abs(lat) < Math.min(door.hw, 0.9) + rad + 0.1) return false; } if (!spot(p[0], p[1], rad)) return false; add({ ...el, at: p }, rad); return true; };
     if (l.shop && trade && l.kind !== 'warehouse') {
       // slots along the front, each with one of the trade's things; a bench with sitters at some, a hawker's stand on the wide streets
       const slots = Math.max(1, Math.min(4, Math.floor(F.L / 3.4))), out = Math.min(lim, 1.35 + (l.storeys === 2 ? 0.1 : 0.4));

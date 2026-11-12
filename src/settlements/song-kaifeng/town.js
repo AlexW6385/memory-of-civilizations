@@ -13,6 +13,8 @@ import { ground } from './ground.js';
 import { tradeOf } from './trades.js';
 import { shopElements } from './shops.js';
 import { interiorElements, interiorLife, furnishedLots } from './interiors.js';
+import { SEDANS, OXCARTS, BARROWS, DRAY } from './doors.js';
+import { doorOf } from './houses.js';
 const base = (id, elements, style = 'song') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [160, -130], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const FR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
@@ -38,7 +40,8 @@ function scroll() {
   wineShops().forEach((l, i) => {
     const F = frontLine(l), w = Math.hypot(F.b[0] - F.a[0], F.b[1] - F.a[1]);
     const dep = Math.min(1.2, 9.5 / Math.max(w, 1)), xs = [F.a[0], F.b[0], F.a[0] + F.out[0] * dep, F.b[0] + F.out[0] * dep], zs = [F.a[1], F.b[1], F.a[1] + F.out[1] * dep, F.b[1] + F.out[1] * dep];
-    S.push({ t: 'caimen', a: F.a, b: F.b, out: F.out, y: 0.04, h: i === 0 ? 8.6 : 7.2 + rand() * 0.8, boxes: i === 0 ? 3 : 1, lamps: i === 0, seed: i, rect: [Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)] });
+    const dr = doorOf(l), doorU = ((dr.at[0] - F.a[0]) * (F.b[0] - F.a[0]) + (dr.at[1] - F.a[1]) * (F.b[1] - F.a[1])) / w;
+    S.push({ t: 'caimen', a: F.a, b: F.b, out: F.out, y: 0.04, h: i === 0 ? 8.6 : 7.2 + rand() * 0.8, boxes: i === 0 ? 3 : 1, lamps: i === 0, seed: i, doorU, rect: [Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)] });
     // the customers at the door, the host under the gate
     const mid = [(F.a[0] + F.b[0]) / 2 + F.out[0] * 0.6, (F.a[1] + F.b[1]) / 2 + F.out[1] * 0.6];
     person(mid, 0, faceTo(F.out), { pose: 'talk', dress: 'robe', cloth: 'cloth_white', hat: 'cap' });
@@ -99,7 +102,7 @@ function scroll() {
   // ---- on the bank, watchers at the river's edge by the bridge
   for (let k = 0; k < 8; k++) { const x = -26 + k * 2.6 + rand(), z = RIVER.z0 - 1.2 - rand() * 0.8; person([x, z], 0.04, faceTo([0.3, 1]), { pose: k % 3 ? 'stand' : 'talk' }); }
   // ---- sedan chairs on the street, a bearer at each end of the poles
-  for (const [x, z, d] of [[-3.5, -30, 1], [3.2, 8, -1], [-3, 40, 1], [3.5, 130, -1], [-3.2, 170, 1]]) {
+  for (const [x, z, d] of SEDANS) {
     const rot = d > 0 ? Math.PI : 0;
     S.push({ t: 'sedan', at: [x, z], y: 0.04, rot });
     for (const s of [-1, 1]) person([x, z + s * 1.75], 0.04, faceTo([0, d]), { dress: 'trousers', cloth: pick(['cloth_indigo', 'cloth_grey', 'cloth_brown']), hat: pick(['cap', 'none']), h: 1.62 });
@@ -172,14 +175,14 @@ function more(S, L, rand, person, pick) {
     for (let k = 0; k < 5; k++) { const a = -0.9 + k * 0.45, q2 = P(x, z, rot, Math.sin(a) * 1.3, -1.0 - Math.cos(a) * 0.6); person(q2, 0.04, rot + Math.PI + a * 0.5, { dress: 'robe', cloth: pick(['cloth_white', 'cloth_white', 'cloth_indigo', 'cloth_grey']), hat: 'cap', beard: false, pose: k % 2 ? 'talk' : 'stand', h: 1.62 + rand() * 0.1 }); }
   }
   // ---- the ox carts: under their mat covers, an ox in the shafts and two more ahead, the drover walking by
-  for (const [x, z, rot] of [[-176, -81.5, -Math.PI / 2], [3.6, 162, 0]]) {
+  for (const [x, z, rot] of OXCARTS) {
     S.push({ t: 'song_oxcart', at: [x, z], y: 0.04, rot, traces: 0.9, seed: Math.floor(rand() * 1e6) });
     animal('ox', P(x, z, rot, 0, -3.05), rot, { gear: false });
     for (const s of [-1, 1]) animal('ox', P(x, z, rot, s * 0.62, -5.35), rot + s * 0.04, { gear: false });
     person(P(x, z, rot, 1.35, -4.2), 0.04, rot, { dress: 'trousers', cloth: pick(['cloth_brown', 'cloth_grey']), hat: 'straw', carry: 'none' });
   }
   // ---- the one-wheeled barrow (chuan che): a donkey pulling ahead, a man steering at the front, one pushing at the handles
-  for (const [x, z, rot] of [[-118, 51.5, -Math.PI / 2], [-3.8, 124, Math.PI]]) {
+  for (const [x, z, rot] of BARROWS) {
     L.push({ t: 'barrow', at: [x, z], y: 0.04, rot, seed: Math.floor(rand() * 1e6) });
     animal('donkey', P(x, z, rot, 0, -1.75), rot, { gear: false });
     for (const sx of [-0.2, 0.2]) { const a = P(x, z, rot, sx * 1.3, -0.62), b = P(x, z, rot, sx, -1.25); S.push({ t: 'tow_line', pts: [[a[0], 0.6, a[1]], [b[0], 0.78, b[1]]], sag: 0.02, r: 0.012 }); }
@@ -188,7 +191,7 @@ function more(S, L, rand, person, pick) {
   }
   // ---- a dray with two wine casks (ping tou che): a donkey in the shafts, a second ahead, the driver at the shafts
   {
-    const x = 60, z = 199, rot = Math.PI / 2;
+    const [x, z] = DRAY, rot = Math.PI / 2;
     L.push({ t: 'cart', kind: 'two', beast: 'donkey', load: 'barrels', at: [x, z], y: 0.04, rot, seed: 5 });
     animal('donkey', P(x, z, rot, 0, -3.25), rot, { gear: false });
     person(P(x, z, rot, 0.75, -1.6), 0.04, rot, { dress: 'trousers', cloth: 'cloth_brown', hat: 'straw' });

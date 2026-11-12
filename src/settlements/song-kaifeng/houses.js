@@ -84,7 +84,8 @@ export function houseSong(el, { bag, col }) {
     const A = arr(mat);
     const quad = (a, b, c, d) => A.push(...a, ...b, ...c, ...a, ...c, ...d);
     quad([X0, yb, Z0], [X0, yb, Z1], [X1, yb, Z1], [X1, yb, Z0]);
-    if (!noB) quad([X0, ya, Z0], [X1, ya, Z0], [X1, ya, Z1], [X0, ya, Z1]);
+    // (a thing hung above head height gets its underside: without one the walker's collision field takes it for a solid mass down to the ground and one cannot walk under it)
+    if (!noB || (ya > 1.2 && yb - ya < 1.6)) quad([X0, ya, Z0], [X1, ya, Z0], [X1, ya, Z1], [X0, ya, Z1]);
     quad([X0, ya, Z0], [X0, yb, Z0], [X1, yb, Z0], [X1, ya, Z0]);
     quad([X1, ya, Z0], [X1, yb, Z0], [X1, yb, Z1], [X1, ya, Z1]);
     quad([X1, ya, Z1], [X1, yb, Z1], [X0, yb, Z1], [X0, ya, Z1]);
@@ -362,10 +363,10 @@ export function houseSong(el, { bag, col }) {
         const sa2 = poleA(el.seed || 1, L) < L / 2 ? L - 0.13 : 0.13, bm = pick(rand, ['wood_dark', 'lacquer_chestnut', 'timber_red']);
         B('timber', sa2 - 0.03, -0.62, sa2 + 0.03, fb - 0.12, yF - 0.66, yF - 0.58);
         B('iron', sa2 - 0.015, -0.62, sa2 + 0.015, -0.56, yF - 0.58, yF - 0.5);
-        B(bm, sa2 - 0.21, -0.6, sa2 + 0.21, -0.54, yF - 1.18, yF - 0.58); B('paint_ochre', sa2 - 0.06, -0.615, sa2 + 0.06, -0.6, yF - 1.1, yF - 0.7);
+        B(bm, sa2 - 0.21, -0.6, sa2 + 0.21, -0.54, yF - 1.18, yF - 0.58, false); B('paint_ochre', sa2 - 0.06, -0.615, sa2 + 0.06, -0.6, yF - 1.1, yF - 0.7);
         // the rafters' ends under the front eave
         const ne = Math.round((L + 2 * soh) / 0.42);
-        for (let k = 0; k <= ne; k++) { const a = -soh + 0.1 + (L + 2 * soh - 0.2) * k / ne; B('timber', a - 0.04, t0 - 0.1, a + 0.04, t0 + 0.45, yE - th - 0.1, yE - th - 0.005); }
+        for (let k = 0; k <= ne; k++) { const a = -soh + 0.1 + (L + 2 * soh - 0.2) * k / ne; B('timber', a - 0.04, t0 + 0.02, a + 0.04, t0 + 0.45, yE - th - 0.1, yE - th - 0.005); }
       }
       // (the trade's sign — the wine flag, the gourd, the measure — stands on its pole in the street: shops.js)
       // the mat awning over the street in front of the door bays
@@ -380,8 +381,9 @@ export function houseSong(el, { bag, col }) {
         const vc = pick(rand, ['cloth_white', 'cloth_indigo', 'cloth_ochre']);
         const pa = W(aw0, -reach, 0), pb = W(a1, -reach, 0);
         addCloth(bag, vc, clothBox(Math.min(pa[0], pb[0]), y1 - 0.42, Math.min(pa[2], pb[2]) - 0.015, Math.max(pa[0], pb[0]), y1 - 0.04, Math.max(pa[2], pb[2]) + 0.015, 0.21), y1 - 0.04);
-        for (const a of [aw0 + 0.1, a1 - 0.1]) { B('bamboo_culm', a - 0.04, -reach - 0.04, a + 0.04, -reach + 0.04, 0, y1 - 0.04); cCircle(a, -reach, 0.1, 0, y1); }
-        if (a1 - aw0 > 6) { const am = (aw0 + a1) / 2; B('bamboo_culm', am - 0.04, -reach - 0.04, am + 0.04, -reach + 0.04, 0, y1 - 0.04); cCircle(am, -reach, 0.1, 0, y1); }
+        const dcA = (doorBay + 0.5) * bayW, awFree = (a) => !(enter || el.furnished) || Math.abs(a - dcA) > 1.05;     // (a post never stands before the way in)
+        for (const a of [aw0 + 0.1, a1 - 0.1]) { if (!awFree(a)) continue; B('bamboo_culm', a - 0.04, -reach - 0.04, a + 0.04, -reach + 0.04, 0, y1 - 0.04); cCircle(a, -reach, 0.1, 0, y1); }
+        if (a1 - aw0 > 6 && awFree((aw0 + a1) / 2)) { const am = (aw0 + a1) / 2; B('bamboo_culm', am - 0.04, -reach - 0.04, am + 0.04, -reach + 0.04, 0, y1 - 0.04); cCircle(am, -reach, 0.1, 0, y1); }
         }
       }
     }
@@ -439,7 +441,7 @@ export function houseSong(el, { bag, col }) {
           const a0 = bayA(k) + 0.2, a1 = bayA(k + 1) - 0.2, len = 0.7 + rand() * 1.3, yt = yTop - 0.36, bb = b0 - 0.2;
           if (a1 - a0 < 0.8) continue;
           B('bamboo_culm', a0 - 0.04, bb - 0.07, a1 + 0.04, bb + 0.05, yt, yt + 0.12);
-          B('reed_mat', a0, bb - 0.012, a1, bb + 0.012, yt - len, yt);
+          B('reed_mat', a0, bb - 0.012, a1, bb + 0.012, yt - len, yt, false);     // (with its underside: a thing hung over the street is not a solid mass to the walker's collision field)
           for (let y = yt - 0.14; y > yt - len; y -= 0.2) B('wood_dark', a0, bb - 0.019, a1, bb - 0.012, y, y + 0.014);
           B('wood_dark', a0, bb - 0.03, a1, bb + 0.02, yt - len - 0.03, yt - len);
           for (const a of [a0 + 0.04, a1 - 0.04]) B('rope_fibre', a - 0.012, bb - 0.03, a + 0.012, bb - 0.012, yt - len, yt);

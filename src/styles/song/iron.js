@@ -66,7 +66,7 @@ function put(bag, mat, list, px, y, pz, ux, uz, nx, nz) {
  * on the four faces to the compass points, a window on the diagonals); the opening's glazed-brick
  * surround (jambs and a round arch) and its dark depth. `top`: the height (above y) the bricks stop.
  */
-export function ironSkin(bag, mat, cx, cz, r, y, h, top, i) {
+export function ironSkin(bag, mat, cx, cz, r, y, h, top, i, open = null) {
   const P = protos(), G = [];
   for (let k = 0; k < 8; k++) { const a = Math.PI / 8 + k / 8 * Math.PI * 2; G.push([cx + Math.cos(a) * r, cz + Math.sin(a) * r]); }
   const dark = [], frame = [];
@@ -77,8 +77,12 @@ export function ironSkin(bag, mat, cx, cz, r, y, h, top, i) {
     if ((mx - cx) * nx + (mz - cz) * nz < 0) { nx = -nx; nz = -nz; }
     const ux = nz, uz = -nx;   // along the face, so that u × up = n
     // the opening: half-width wo, from ys up the jambs to yj, the round arch over them
-    const door = k % 2 === 0, wo = door ? (i === 0 ? 0.62 : 0.5) : 0.34;
-    const ys = door ? y + 0.02 : y + Math.max(0.9, h * 0.3), yj = door ? y + Math.min(2.4, h * 0.4) : ys + 0.7, ya = yj + wo;
+    const door = k % 2 === 1;     // doors on the four faces to the compass points (k = 1 south, 3 west, 5 north, 7 east), windows on the diagonals [stated: doors on four sides]
+    const op = open && open[k];   // an opening cut through the wall (the pagoda's inside is walkable): [sill, top, half-width] above y
+    let wo = door ? (i === 0 ? 0.75 : 0.55) : 0.34;
+    let ys = door ? y + 0.02 : y + Math.max(0.9, h * 0.3), yj = door ? y + Math.min(2.4, h * 0.4) : ys + 0.7;
+    if (op) { wo = op[2]; ys = y + op[0]; yj = y + op[1] - wo * 0.0; }
+    const ya = yj + wo;
     const fw = 0.13;
     // the bricks: columns across the face between the corner columns, rows up to the frieze
     const per = Math.floor((L - 0.4) / S), u0 = -per * S / 2;
@@ -103,8 +107,10 @@ export function ironSkin(bag, mat, cx, cz, r, y, h, top, i) {
     const Q = (u, yy, d) => [mx + ux * u + nx * d, yy, mz + uz * u + nz * d];
     const quad = (out, p0, p1, p2, p3) => out.push(...p0, ...p1, ...p2, ...p0, ...p2, ...p3);
     const N = 10, arc = (t, rr) => [Math.cos(Math.PI * (1 - t)) * rr, yj + Math.sin(Math.PI * t) * rr];
+    if (!op) {
     quad(dark, Q(-wo, ys, 0.012), Q(wo, ys, 0.012), Q(wo, yj, 0.012), Q(-wo, yj, 0.012));
     for (let s = 0; s < N; s++) { const p = arc(s / N, wo), q = arc((s + 1) / N, wo); dark.push(...Q(0, yj, 0.012), ...Q(q[0], q[1], 0.012), ...Q(p[0], p[1], 0.012)); }
+    }
     const slabT = (out, pts) => {   // a solid between the wall (d = -0.03) and d = 0.09 over the plan quad pts [[u, y] ×4]
       const f = pts.map(([u, yy]) => Q(u, yy, 0.09)), bk = pts.map(([u, yy]) => Q(u, yy, -0.03)), t = [];
       quad(t, f[0], f[1], f[2], f[3]); quad(t, bk[0], bk[3], bk[2], bk[1]);
