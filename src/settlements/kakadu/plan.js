@@ -8,12 +8,12 @@ E.push({ t: 'ka_rock' }, { t: 'ka_gallery' }, { t: 'ka_steps' });
 // boulders fallen at the foot of the south faces, clear of the shelters' mouths, the steps and the way along the foot
 {
   const rand = rng(404), list = [];
-  for (let k = 0; k < 400 && list.length < 34; k++) {
-    const x = -78 + rand() * 160, z = -34 + rand() * 20, s = 0.5 + rand() ** 2 * 1.5;
+  for (let k = 0; k < 1600 && list.length < 64; k++) {
+    const x = -80 + rand() * 164, z = -36 + rand() * 14, s = 0.5 + rand() ** 2 * 1.9;
     const onRock = BLOCKS.some((B) => inRect(B.r, x, z, s + 0.5));
     const mouth = inRect([MAIN.x0 - 5, MAIN.zb, MAIN.x1 + 5, MAIN.zl + 12], x, z) || inRect([SMALL.x0 - 4, SMALL.zb, SMALL.x1 + 4, SMALL.zl + 10], x, z);
     const way = FLIGHTS.some((F) => inRect(F.rect, x, z, 5)) || z > -23;
-    if (onRock || mouth || way || list.some((b) => Math.hypot(b[0] - x, b[1] - z) < 5)) continue;
+    if (onRock || mouth || way || list.some((b) => Math.hypot(b[0] - x, b[1] - z) < 3.6 + (b[2] + s) * 0.6)) continue;
     list.push([x, z, s]);
   }
   E.push({ t: 'ka_boulders', list });

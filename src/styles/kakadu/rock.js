@@ -2,6 +2,7 @@
 // grooves and vertical joints, stacked into the outlier; the painted wall and the painted ceiling as separate smooth surfaces under the
 // roof slab; the rock steps up to the lookout; boulders at the foot. Everything stands on the ground and collides with its box.
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
+import { Acc, outcropBlock, shedBlocks, chunk } from './outcrop.js';
 import { BLOCKS, MAIN, SMALL, FLIGHTS, height, rng, smooth } from '../../settlements/kakadu/layout.js';
 
 // smooth value noise in 3D, about −1…1, features about one unit
@@ -121,27 +122,15 @@ function bedded(B, bag, res) {
     }
   }
 }
-/** The block list of the plan as geometry and colliders. res: finer on the faces seen from the south. */
+/** The block list of the plan as geometry and colliders: beds, joints, clefts, scars and honeycomb (outcrop.js). */
 export function rockMass(el, { bag, col }) {
+  const acc = new Acc();
   for (const B of BLOCKS) {
-    const south = B.r[3] > -50, res = el.res ?? (south ? 0.85 : 1.1);
-    if (B.bedded && south) {
-      // the core, drawn behind the beds, its top a hand below theirs
-      bag.add(B.m, blockGeometry(B.r, [B.y[0], B.y[1] - 0.45], B.n, { seed: B.seed, res: 1.6, amp: 0.2, slab: !!B.slab, shrinkS: 7, groove: 0.3 }));
-      bedded(B, bag, res);
-    } else {
-      const g = blockGeometry(B.r, B.y, B.n, { seed: B.seed, res, amp: B.slab ? 0.14 : 0.3, slab: !!B.slab, shrinkS: B.panel ? 0.45 : 0 });
-      bag.add(B.m, g);
-    }
+    outcropBlock(acc, B, { res: B.r[3] > -50 ? 0.55 : 0.9 });
     col.rect(B.r, B.slab ? B.y[0] - 0.55 : B.y[0], B.y[1]);
   }
-  // blocks and slabs shed on the broken top of the back mass, above the gallery's roof: the skyline of the outlier is jagged, not a
-  // smooth swell (nothing walks there)
-  const r2 = rng(909);
-  for (let k = 0; k < 22; k++) {
-    const sz = 0.9 + r2() ** 2 * 2.6, x = -34 + r2() * 68, z = -47 + r2() * 10.5, seed = Math.floor(r2() * 1e6), flat = r2() < 0.4;
-    bag.add(k % 3 ? 'sandstone_rose' : k % 3 === 0 && k % 2 ? 'sandstone_yellow' : 'tuff_red', blockGeometry([x - sz * (flat ? 1.5 : 1), z - sz * 0.8, x + sz * (flat ? 1.6 : 0.9), z + sz * 0.7], [13.6, 14 + sz * (flat ? 0.45 : 0.5 + r2() * 0.7)], flat ? 4 : 3.2, { seed, amp: 0.12 * sz, res: Math.max(0.5, sz * 0.4), groove: 0.6 }));
-  }
+  shedBlocks(acc);
+  acc.flush(bag);
 }
 
 // ── the painted surfaces ────────────────────────────────────────────────────────────────────────────────────
@@ -183,14 +172,16 @@ export function rockSteps(el, { bag, col }) {
   }
 }
 
-/** Fallen boulders at the foot of the rock, round and weathered; each blocks its footprint. */
+/** Fallen blocks at the foot of the rock: angular, some leaning slabs; each blocks its footprint. */
 export function boulders(el, { bag, col }) {
-  const rand = rng(31);
+  const rand = rng(31), acc = new Acc();
   for (const b of el.list) {
-    const [x, z, s] = b, y = height(x, z), seed = Math.floor(rand() * 1e6);
-    const g = blockGeometry([x - s, z - s * (0.7 + rand() * 0.4), x + s * (0.8 + rand() * 0.4), z + s * 0.8], [y - 0.4, y + s * (0.7 + rand() * 0.5)], 3.2, { seed, amp: 0.12 * s, res: Math.max(0.35, s * 0.4), groove: 0.4 });
-    bag.add(rand() < 0.6 ? 'sandstone_rose' : 'rock_boulder', g);
+    const [x, z, s] = b, y = height(x, z), seed = Math.floor(rand() * 1e6), q = rand();
+    const mat = q < 0.45 ? 'sandstone_rose' : q < 0.7 ? 'tuff_red' : q < 0.88 ? 'sandstone_yellow' : 'rock_boulder';
+    const slab = rand() < 0.3;
+    chunk(acc, mat, x, y - 0.25, z, s * (slab ? 2.0 : 1.5), s * (slab ? 0.5 : 1.0 + rand() * 0.4), s * (slab ? 1.5 : 1.3), rand() * 3.14, slab && rand() < 0.5 ? 0.3 : 0, seed);
     col.circle(x, z, s * 0.85, y - 0.4, y + s * 0.7);
   }
+  acc.flush(bag);
 }
 export { MAIN, SMALL };
