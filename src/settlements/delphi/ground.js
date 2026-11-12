@@ -24,14 +24,14 @@ function planting(x, z) {
   if (inRect(SPRING, x, z, 16)) return Math.hypot(x - 122, z + 2) < 4 ? { plane_tree: 0.5 } : { oleander: 0.4, maquis: 0.3, grass_dry: 3 };
   if (z < -118) return n < 0.3 ? { aleppo_pine: 0.06, maquis: 0.3, grass_dry: 2 } : null;
   if (x > 150) return { maquis: 0.15 };
-  if (z > 112) return { olive: 0.35, grass_dry: 6 };
-  if (x < -76 || x > 106) return { olive: 0.22, cypress: 0.03, grass_dry: 7, maquis: 0.08 };
-  if (z > 60) return { olive: 0.08, cypress: 0.05, holm_oak: 0.03, grass_dry: 7 };
-  return { cypress: 0.07, holm_oak: 0.04, oleander: 0.1, aleppo_pine: 0.03, grass_dry: 5, maquis: 0.12 };
+  if (z > 112) return { olive: 0.5, cypress: 0.04, grass_dry: 6 };
+  if (x < -76 || x > 106) return { olive: 0.4, cypress: 0.06, holm_oak: 0.03, grass_dry: 7, maquis: 0.12, oleander: 0.05 };
+  if (z > 60) return { olive: 0.16, cypress: 0.1, holm_oak: 0.06, grass_dry: 7, oleander: 0.05 };
+  return { cypress: 0.16, holm_oak: 0.09, oleander: 0.22, aleppo_pine: 0.06, grass_dry: 5, maquis: 0.22 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { olive: 0.35, cypress: 0.07, holm_oak: 0.04, oleander: 0.4, aleppo_pine: 0.06, maquis: 0.3, plane_tree: 0.5 },
+  maxDensity: { olive: 0.5, cypress: 0.16, holm_oak: 0.09, oleander: 0.4, aleppo_pine: 0.06, maquis: 0.3, plane_tree: 0.5 },
   climate: {
     sun: { az: 150, el: 52, color: [1.0, 0.95, 0.86], intensity: 3.6, lat: 38.5, dec: 12, hour: 10 },
     sky: { turbidity: 2.2, rayleigh: 1.0, mie: 0.004, mieG: 0.78, zenith: [0.07, 0.16, 0.42], horizon: [0.6, 0.66, 0.72] },

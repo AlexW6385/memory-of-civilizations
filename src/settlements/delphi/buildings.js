@@ -105,6 +105,12 @@ export function temple(E) {
       E.push({ t: 'block', rect: [x - 1.3, s > 0 ? z1 : z0 - 0.03, x + 1.3, s > 0 ? z1 + 0.03 : z0], y0: FL + 1.7, y1: FL + 3.4, mat: m, collide: false });
     }
   });
+  // the consultants' benches along the long walls, the tables of gifts, the iron chair of Pindar by the hearth, braziers, wreaths
+  for (const x of [-13, -7, 6, 12]) { E.push({ t: 'stone_bench', at: [x, WZ0 + 1.25], y: FL, yaw: 0, len: 2.4 }); E.push({ t: 'stone_bench', at: [x + 2, WZ1 - 1.25], y: FL, yaw: 0, len: 2.4 }); }
+  E.push({ t: 'offering_table', at: [3, cz - 1.4], y: FL, yaw: PI / 2, seed: 2 }, { t: 'offering_table', at: [3, cz + 1.4], y: FL, yaw: PI / 2, seed: 12 }, { t: 'offering_table', at: [-9, cz], y: FL, yaw: PI / 2, seed: 16 });
+  E.push({ t: 'brazier', at: [15.5, cz - 4.2], y: FL }, { t: 'brazier', at: [15.5, cz + 3.2], y: FL });
+  { const [qx, qz] = [-4.9, cz + 2.0], I = (a, b, c, d, e, f) => E.push({ t: 'block', rect: [a, b, c, d], y0: FL + e, y1: FL + f, mat: 'iron' });
+    I(qx - 0.28, qz - 0.28, qx + 0.28, qz + 0.28, 0.42, 0.5); I(qx - 0.28, qz - 0.28, qx - 0.2, qz - 0.2, 0, 0.42); I(qx + 0.2, qz - 0.28, qx + 0.28, qz - 0.2, 0, 0.42); I(qx - 0.28, qz + 0.2, qx - 0.2, qz + 0.28, 0, 0.42); I(qx + 0.2, qz + 0.2, qx + 0.28, qz + 0.28, 0, 0.42); I(qx - 0.28, qz - 0.28, qx - 0.2, qz + 0.28, 0.5, 1.1); }
   E.push({ t: 'ex_voto', at: [8.5, cz - 4.5], yaw: PI, kind: 'man', h: 2.0, y: FL });
   E.push({ t: 'ex_voto', at: [8.5, cz + 2.5], yaw: 0, kind: 'man', h: 2.0, y: FL });
   E.push({ t: 'votive', kind: 'tripod', at: [-10.5, cz - 4.5], y: FL });
@@ -148,7 +154,8 @@ export function treasury(E, t) {
   // the base's dedication cut along the front, the paintings and the offerings inside
   const cut = []; for (let i = 0; i < 9; i++) cut.push(KR[0] + 0.5 + i * (KR[2] - KR[0] - 1.0) / 9);
   for (const u of cut) E.push({ t: 'block', rect: [u, KR[3] + 0.3, u + (KR[2] - KR[0] - 1.0) / 13, KR[3] + 0.338], y0: y + 0.1, y1: y + 0.17, mat: 'marble_dark', collide: false });
-  E.push({ t: 'ex_voto', at: [(xl + xr) / 2, zb + 1.1], yaw: PI, kind: 'man', h: 1.8, y: FLR });
+  E.push({ t: 'ex_voto', at: [(xl + xr) / 2 + 1.4, zb + 1.75], yaw: PI, kind: 'man', h: 1.8, y: FLR });
+  E.push({ t: 'treasure_room', rect: [xl + 0.35, zb + 0.35, xr - 0.35, zc - 0.35], y: FLR, seed: Math.round(x0 * 7 + z0) });
   E.push({ t: 'lamp', at: [(xl + xr) / 2, FLR + 2.6, (zb + zc) / 2], color: '#ffc27a', intensity: 5, distance: 9 });
   if (ath) E.push({ t: 'block', rect: [xl + 0.4, zb + 0.3 + 1.2, xl + 0.46, zc - 0.5], y0: FLR + 1.4, y1: FLR + 2.9, mat: 'wall_red', collide: false });
   return { id: `treasury ${t.id}`, rect: [xl + 0.35, zb + 0.35, xr - 0.35, zc - 0.35], y: FLR, kind: 'inner' };
@@ -171,6 +178,11 @@ export function stoa(E) {
   for (const x of [x0 + 0.15, x1 - 0.15]) E.push({ t: 'wall', a: [x, z0 + 0.1], b: [x, zc], th: 0.4, y0: yF, y1: ENT + 0.5, mat: 'limestone' });
   E.push({ t: 'armoury', rect: [x0 + 1.0, z0 + 0.3, x1 - 1.0, z0 + 0.9], y: yF, seed: 31 });
   E.push({ t: 'ex_voto', at: [(x0 + x1) / 2 - 4, (z0 + zc) / 2 + 0.3], yaw: PI, kind: 'man', h: 1.9, y: yF });
+  // the trophies of the sea fights, benches along the wall, the day's offerings
+  E.push({ t: 'tropaion', at: [x0 + 1.5, z0 + 2.4], y: yF, yaw: PI }, { t: 'tropaion', at: [x1 - 1.5, z0 + 2.4], y: yF, yaw: PI });
+  for (const x of [x0 + 6, (x0 + x1) / 2 + 3, x1 - 7]) E.push({ t: 'stone_bench', at: [x, z0 + 1.6], y: yF, yaw: 0, len: 2.0 });
+  E.push({ t: 'offering_table', at: [(x0 + x1) / 2 + 9, z0 + 2.7], y: yF, yaw: 0, seed: 21 }, { t: 'brazier', at: [x0 + 8.5, z0 + 3.1], y: yF });
+  E.push({ t: 'lamp', at: [(x0 + x1) / 2, yF + 2.8, z0 + 1.6], color: '#ffc27a', intensity: 4, distance: 9 });
   return { id: 'Athenian stoa', rect: [x0 + 0.4, z0 + 0.3, x1 - 0.4, zc - 0.4], y: yF, kind: 'inner' };
 }
 

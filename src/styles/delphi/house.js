@@ -128,7 +128,7 @@ function delphiHouse(el, ctx) {
     bag.add('rubble', lathe([[0.7, 0], [0.7, 0.55], [0.55, 0.6], [0.001, 0.6]], 12, null, hx, y, hz)); bag.add('lacquer_black', lathe([[0.5, 0.58], [0.001, 0.62]], 10, null, hx, y, hz));
     bag.add('flame', lathe([[0.001, 0], [0.2, 0.02], [0.05, 0.22], [0.001, 0.3]], 6, null, hx, y + 0.62, hz)); bag.add('pottery_dark', lathe([[0.001, 0], [0.18, 0.04], [0.22, 0.2], [0.17, 0.32], [0.001, 0.32]], 12, null, hx, y + 0.62, hz));
     lights.push({ at: [hx, y + 1.0, hz], color: '#ff8030', intensity: 1.6, distance: 5 }); col.circle(hx, hz, 0.7, y, y + 0.62);
-    for (let k = 0; k < 5; k++) { const p = P(ia + 1.9 + k * 0.4, va + 0.7); bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.01], [0.13, 0.05], [0.001, 0.06]], 8, null, p[0], y + 0.95, p[1])); bag.add('wheat_straw', lathe([[0.001, 0.05], [0.1, 0.06], [0.05, 0.1], [0.001, 0.11]], 8, null, p[0], y + 0.95, p[1])); }
+    for (let k = 0; k < 5; k++) { const p = P(ia + 1.9 + k * 0.4, va + 0.7); bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.01], [0.13, 0.05], [0.001, 0.06]], 8, null, p[0], y + 0.95, p[1])); bag.add('thatch', lathe([[0.001, 0.05], [0.1, 0.06], [0.05, 0.1], [0.001, 0.11]], 8, null, p[0], y + 0.95, p[1])); }
     for (let k = 0; k < 3; k++) { const p = P(ia + 0.5, vb - 1.4 - k * 0.6); vase(bag, 'amphora', p[0], y, p[1], { s: 1.0, dark: false, seg: 8 }); }
   }
   // ── the room beside the passage: the andron in small, two couches and a table, a lamp
@@ -148,7 +148,7 @@ function delphiHouse(el, ctx) {
     const [tx, tz] = P(L - 2.4, v2 - 1.2); if (rand() < 0.8) fig(bag, tx, y, tz, 4.2 + rand() * 1.4, rand);
     for (const [u, v, hh] of [[1.2, v2 - 0.5, 0.9], [L - 1.4, v2 - 0.5, 1.1]]) { const p = P(u, v); bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.02], [0.2, 0.2], [0.2, hh * 0.5], [0.001, hh * 0.5]], 8, null, p[0], y, p[1])); }
     // a line of washing across the court
-    const l0 = P(T + 0.2, cv + 0.8), l1 = P(L - T - 0.2, cv + 0.8); bag.add('rope', rod([l0[0], y + 2.2, l0[1]], [l1[0], y + 2.1, l1[1]], 0.01, 3));
+    const l0 = P(T + 0.2, cv + 0.8), l1 = P(L - T - 0.2, cv + 0.8); bag.add('rope_fibre', rod([l0[0], y + 2.2, l0[1]], [l1[0], y + 2.1, l1[1]], 0.01, 3));
     for (let k = 0; k < 3; k++) { const f = 0.2 + k * 0.27, px = l0[0] + (l1[0] - l0[0]) * f, pz = l0[1] + (l1[1] - l0[1]) * f; bag.add(['cloth_white', 'cloth_ochre', 'linen'][k], box(px - 0.3, y + 1.5, pz - 0.02, px + 0.3, y + 2.15, pz + 0.02)); }
   }
   // ── the kitchen: the hearth on the floor (ring of stones, ash, the pot), soot above; the store: amphorae, a pithos; the loom room
