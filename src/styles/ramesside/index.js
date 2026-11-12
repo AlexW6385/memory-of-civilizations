@@ -16,6 +16,7 @@ registerStyle('ramesside', {
     // the houses and bakeries of the workmen's quarter are the Old Kingdom's mudbrick ones (a courtyard house, furnished, and the bakery)
     mud_house: (el, c) => STYLES.oldkingdom.elements.mud_house(el, c), bakery: (el, c) => STYLES.oldkingdom.elements.bakery(el, c),
     // the lanes' houses turned to either lane, the shops of the market street, and the dressing of terrace, lanes, quay, masons' yard, bank and halls
+    way_reserve: () => {},       // (nothing built: it marks a way of the plan as taken, so that the life pass keeps its figures off it)
     ram_house: ramHouse, ram_shop: ramShop, terrace_dress: terraceDress, talus, cliff_wear: cliffWear, way_dress: wayDress, cliffWear, wayDress, lane_dress: laneDress, quay_dress: quayDress, masons_yard: masonsYard, shaduf, temple_furnish: templeFurnish },
   objects: {},
 });

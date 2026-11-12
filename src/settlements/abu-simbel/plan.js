@@ -29,6 +29,7 @@ const rooms = [
 ];
 const walks = [[[FX + 44, 0], [FX + 20, 0], [FX + 2, 0], [FX - 4, 0], [FX - 17, 0], [FX - 27, 0], [FX - 36, 0], [FX - 47, 0], [FX - 56, 0]]];
 walks[0].y0 = FLOOR;
+E.push({ t: 'way_reserve', pts: walks[0] });
 
 export const great = {
   id: 'abu-simbel-great-temple',
@@ -58,6 +59,8 @@ const smallRoomsList = [
 ];
 const swalks = [[[FXS + 24, ZS], [FXS + 4, ZS], [FXS - 6, ZS], [FXS - 18, ZS], [FXS - 21, ZS]]];
 swalks[0].y0 = FLOOR;
+S.push({ t: 'way_reserve', pts: swalks[0] });
+E.push({ t: 'way_reserve', pts: walks[0] });
 export const small = {
   id: 'abu-simbel-small-temple',
   name: { en: 'The Small Temple of Nefertari and Hathor', zh: '奈费尔塔利与哈托尔小神庙' },
