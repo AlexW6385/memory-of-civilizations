@@ -9,6 +9,14 @@ const clash = (r, o, m = 0.5) => !(r[2] + m <= o[0] || r[0] - m >= o[2] || r[3] 
 const SERAI_R = [SERAI.x0, SERAI.z0, SERAI.x1, SERAI.z1];
 /** The segments of the town along the street between the cross lanes: [x0, x1]. */
 const SEG = (() => { const xs = [TOWN[0], ...CROSS.flatMap((c) => [c - LANE_W / 2, c + LANE_W / 2]), TOWN[2]], out = []; for (let i = 0; i < xs.length; i += 2) out.push([xs[i], xs[i + 1]]); return out; })();
+const TRADE_LIST = ['cloth', 'grain', 'pottery', 'smith', 'bake', 'wine', 'scribe', 'saddler', 'drugs'];
+/** The trade of a lot on the main street (a home elsewhere): by place along the street, deterministic and apart from the lot rng. */
+function shopTrade(r, row) {
+  if (Math.abs(row.z0) > 30 || row.z0 < -20 && row.z0 > -22) return null;
+  const h = Math.abs(Math.imul(Math.round(r[0] * 31 + r[1] * 17), 2654435761) >>> 0);
+  const near = r[0] > 20 && r[0] < 130;
+  return near || h % 3 === 0 ? TRADE_LIST[h % TRADE_LIST.length] : null;
+}
 /** Every lot: { rect, front, left }, exported for the movers and the smoke. */
 export function lots() {
   const rand = rng(850), out = [];
@@ -24,7 +32,7 @@ export function lots() {
       const r = [x, row.z0, x + W, row.z1];
       x += W;
       if (clash(r, SERAI_R, 1.5) || (row.back && rand() < 0.25)) { first = false; continue; }
-      out.push({ rect: r, front: row.front, left: first, seed: Math.round(r[0] * 13 + r[1] * 7), rich: Math.abs((r[0] + r[2]) / 2 - 60) < 55 && Math.abs(row.z0) < 30 && rand() < 0.38, two: rand() < 0.16 && Math.abs(row.z0) < 30 });
+      out.push({ rect: r, front: row.front, left: first, seed: Math.round(r[0] * 13 + r[1] * 7), rich: Math.abs((r[0] + r[2]) / 2 - 60) < 55 && Math.abs(row.z0) < 30 && rand() < 0.38, two: rand() < 0.16 && Math.abs(row.z0) < 30, trade: shopTrade(r, row) });
       first = false;
     }
   }
@@ -33,7 +41,7 @@ export function lots() {
 
 export async function town() {
   const E = [], L = [], rand = rng(851);
-  for (const lot of lots()) E.push({ t: 'dh_house', rect: lot.rect, front: lot.front, seed: lot.seed, tiled: lot.rich, storeys: lot.two ? 2 : 1, left: lot.left });
+  for (const lot of lots()) E.push({ t: 'dh_house', rect: lot.rect, front: lot.front, seed: lot.seed, trade: lot.trade, tiled: lot.rich, storeys: lot.two ? 2 : 1, left: lot.left });
   // the wall round the town: the east side with the gate, the north and south sides pierced by the lanes
   const [wx0, wz0, wx1, wz1] = TOWN;
   const w = (a, b) => E.push({ t: 'dh_wall', a, b, h: 3.6, th: 0.9 });

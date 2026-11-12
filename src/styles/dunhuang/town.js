@@ -6,6 +6,7 @@ import { box, lathe, fromTriangles, quad, rod } from '../../core/geom.js';
 import { figure } from '../../objects/figures.js';
 import { RIVER, riverX, ZEND, crescent, SPRING, rng } from '../../settlements/dunhuang/layout.js';
 import { oilLamp } from './caves.js';
+import { makeHouse } from './homes.js';
 
 const WALL = 'earth_wall', FOOT = 'banco_rough';
 
@@ -324,5 +325,6 @@ function scaffold(el, { bag, col }) {
   for (let j = 0; j < n; j++) { const z = az - w / 2 + 0.4 + (j % 2) * 1.0; bag.add('log_pine', rod([ax + out + 0.6, j * lv, z], [ax + out + 0.1, (j + 1) * lv + 0.4, z], 0.04, 5)); }
   for (let j = 1; j < n * 3; j++) for (const z of [az - w / 2 + 0.2]) bag.add('rope_fibre', box(ax + out - 0.07, j * lv / 3, z - 0.07, ax + out + 0.07, j * lv / 3 + 0.04, z + 0.07));
 }
-export const TOWN_ELEMENTS = { dh_scaffold: scaffold, dh_serai: serai, dh_house: house, dh_wall: wallEl, dh_gate: gate, dh_bridge: bridge, dh_stream: stream, dh_spring: spring, dh_awning: awning };
+const house2 = makeHouse({ frame, gable });
+export const TOWN_ELEMENTS = { dh_scaffold: scaffold, dh_serai: serai, dh_house: house2, dh_wall: wallEl, dh_gate: gate, dh_bridge: bridge, dh_stream: stream, dh_spring: spring, dh_awning: awning };
 export { frame, slab, gable, door, window, hip, oilLamp, figure };
