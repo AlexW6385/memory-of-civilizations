@@ -9,7 +9,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 44, night: 5, rain: 0.8, reach: 150, spawnMin: 24, far: 42 },
+  walkers: { day: 52, night: 5, rain: 0.8, reach: 150, spawnMin: 24, far: 42 },
   boats: { count: 0, reach: 250, spawnMin: 60, far: 95, speed: [1.0, 1.45], bridgeSpeed: 0.7 },
   water: -100,
 };
@@ -61,6 +61,12 @@ export const WALKERS = [
   { id: 'porter', weight: 0.8, market: 0.9, el: { dress: 'tunic', hair: 'short', beard: true, hat: 'cap', carry: 'basket', legs: 'bare', arms: 'hang' },
     c1: [CL.brown, CL.grey, CL.ochre], c2: [CL.white], c3: [CL.white], speed: [1.0, 1.25], stride: 1.3 },
 ];
+WALKERS.push(
+  { id: 'boy', weight: 0.7, market: 0.5, el: { dress: 'tunic', hair: 'short', hat: 'cap', arms: 'hang', legs: 'bare' },
+    c1: [CL.ochre, CL.brown, CL.white], c2: [CL.white], c3: [CL.white], speed: [1.1, 1.5], stride: 1.1, h: [0.66, 0.76] },
+  { id: 'student', weight: 0.9, market: 0.2, el: { dress: 'robe', hair: 'short', beard: false, hat: 'cap', over: 'cloak', carry: 'bundle', arms: 'hang' },
+    c1: [CL.white, CL.white, CL.grey], c2: [CL.white], c3: [CL.white], speed: [0.95, 1.2], stride: 1.35 },
+);
 export const CREW = {
   boatman: { el: { dress: 'tunic', hair: 'short', hat: 'cap', arms: 'pull' }, c1: [CL.brown], c2: [CL.white], c3: [CL.white] },
   passenger: { el: { dress: 'robe', hair: 'short', hat: 'turban', pose: 'cross' }, c1: [CL.white], c2: [CL.white], c3: [CL.white] },
