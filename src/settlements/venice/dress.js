@@ -70,8 +70,7 @@ function piazza() {
   // the three tall masts before San Marco (the banners of the Republic: Cyprus, Candia, the Morea hung from them on feast days) with their stepped bases of stone
   const bx = BASILICA.c[0] - BASILICA.s - 13 - 12;
   for (const dz of [-14, 0, 14]) {
-    E.push({ t: 'lantern', kind: 'iron', at: [bx, BASILICA.c[1] + dz], y: GROUND, rot: Math.PI / 2, h: 3.2 });
-    E.push({ t: 'sacks', at: [bx + 1.2, BASILICA.c[1] + dz + 1.2], y: GROUND, rot: r() * 6, n: 2, seed: 11 + dz });
+    E.push({ t: 'sacks', at: [bx + 2.6, BASILICA.c[1] + dz + 1.4], y: GROUND, rot: r() * 6, n: 2, seed: 11 + dz });
   }
   // people across the square: gentlemen in pairs, a friar and a merchant, women with baskets, porters crossing, a boy with a dog nearby
   const arr = [-60, -5];
