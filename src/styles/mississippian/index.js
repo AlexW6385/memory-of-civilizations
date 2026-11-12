@@ -50,11 +50,16 @@ function house(el, ctx) {
     if (along) { const hz = (z1 - z0) / 2 + o; bag.add(TH, frustum(r, y + wh, y + wh + rise, 0, 0, hz, hz, { noTop: true })); bag.add(TH, rod([x0 - o - 0.1, y + wh + rise + 0.04, (z0 + z1) / 2], [x1 + o + 0.1, y + wh + rise + 0.04, (z0 + z1) / 2], 0.2, 7)); }
     else { const hx = (x1 - x0) / 2 + o; bag.add(TH, frustum(r, y + wh, y + wh + rise, hx, hx, 0, 0, { noTop: true })); bag.add(TH, rod([(x0 + x1) / 2, y + wh + rise + 0.04, z0 - o - 0.1], [(x0 + x1) / 2, y + wh + rise + 0.04, z1 + o + 0.1], 0.2, 7)); }
   }
+  // the ridge's ends finished with crossed poles on some of the gabled houses [inferred]
+  if (!hipped && (el.lod ?? 0) < 2 && rand() < 0.4) {
+    const ry = y + wh + rise + 0.05, cr = (a, b) => { for (const s2 of [-1, 1]) bag.add('timber', rod([a - (along ? 0.35 * s2 : 0), ry - 0.1, b - (along ? 0 : 0.35 * s2)], [a + (along ? 0.35 * s2 : 0), ry + 0.8, b + (along ? 0 : 0.35 * s2)], 0.03, 5)); };
+    if (along) { cr(x0 - o - 0.1, (z0 + z1) / 2); cr(x1 + o + 0.1, (z0 + z1) / 2); } else { cr((x0 + x1) / 2, z0 - o - 0.1); cr((x0 + x1) / 2, z1 + o + 0.1); }
+  }
   const f = el.door ? (el.door === 'n' ? z0 : z1) : rand() < 0.5 ? z0 : z1, sg = f === z0 ? -1 : 1, mx = (x0 + x1) / 2;
   bag.add('opening', box(mx - 0.4, y, f + sg * 0.01, mx + 0.4, y + 1.5, f + sg * 0.05));
   // the door posts and the lintel pole across them
   const z0d = Math.min(f, f + sg * 0.16), z1d = Math.max(f, f + sg * 0.16);
-  for (const sd of [-1, 1]) bag.add('timber', box(mx + sd * 0.48 - 0.07, foot, z0d, mx + sd * 0.48 + 0.07, y + 1.72, z1d));
+  for (const sd of [-1, 1]) bag.add(el.seed % 7 === 0 ? 'timber_red' : 'timber', box(mx + sd * 0.48 - 0.07, foot, z0d, mx + sd * 0.48 + 0.07, y + 1.72, z1d));
   bag.add('timber', box(mx - 0.68, y + 1.58, z0d - 0.005, mx + 0.68, y + 1.74, z1d + 0.005));
   // eye-level dressing, weathering, a lean-to store at one end (docs §5.7)
   const lod = el.lod ?? 0, w = x1 - x0;
