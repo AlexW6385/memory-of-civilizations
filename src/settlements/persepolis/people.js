@@ -46,6 +46,44 @@ export function people() {
     figures.push({ t: 'figure', at: [ax + 0.2, z - 0.1], y: T, rot: E, h: 1.68, seed: seed(), dress: d.dress, top: d.top, cloth: d.cloth[1], cloth2: d.cloth[0], hat: d.hat, hatMat: d.cloth[0], beard: true, skin: d.skin ?? 'skin_medium', feet: d.dress === 'wrap' ? 'bare' : 'shod', pose: 'staff', len: 1.3, staffMat: 'wood_dark' });
     x -= 10.5;
   }
+  // the court day in the court before the Apadana's west stair (the visitor's side): three more delegations walking east to be received,
+  // each an usher, three bearers with their vessels and an animal led behind; guards at the stair's foot; scribes at their mats; grooms
+  // holding the horses of the nobles; courtiers talking in the shade of the stair [inferred from the reliefs and Herodotus/Xenophon's court]
+  const delegation = (d, xh, zl) => {
+    const u = { at: [xh, zl - 0.4], y: T, rot: E, h: 1.75, seed: seed(), len: 1.2 };
+    figures.push({ t: 'figure', ...u, dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_red', over: 'sash', hair: 'short', beard: true, hat: 'none', feet: 'shod', skin: 'skin_medium', carry: 'staff', staffMat: 'wood_dark' });
+    gear.push({ t: 'guard_gear', ...u, hatMat: 'cloth_white', courtier: true });
+    for (let k = 0; k < 3; k++) {
+      const b = { at: [xh - 1.3 - k * 1.25, zl + (k % 2 ? 0.35 : -0.25)], y: T, rot: E + (rand() - 0.5) * 0.1, h: 1.66 + rand() * 0.1, seed: seed() };
+      figures.push({ t: 'figure', ...b, dress: d.dress, top: d.top, cloth: d.cloth[k % 2], cloth2: d.cloth[(k + 1) % 2], over: d.over ?? (d.dress === 'robe' ? 'sash' : 'none'), hat: d.hat, hatMat: d.cloth[1], beard: true, hair: d.hat === 'none' ? 'long' : 'short', skin: d.skin ?? 'skin_medium', feet: d.dress === 'wrap' ? 'bare' : 'shod', arms: 'clasp', carry: 'none' });
+      gear.push({ t: 'gift', ...b, kind: d.gift[0], mat: d.gift[1] });
+    }
+    const ax = xh - 5.6;
+    figures.push({ t: 'animal', kind: d.beast, at: [ax - 0.6, zl + 1.3], y: T, rot: E, seed: seed(), gear: true });
+    figures.push({ t: 'figure', at: [ax + 0.2, zl - 0.1], y: T, rot: E, h: 1.68, seed: seed(), dress: d.dress, top: d.top, cloth: d.cloth[1], cloth2: d.cloth[0], hat: d.hat, hatMat: d.cloth[0], beard: true, skin: d.skin ?? 'skin_medium', feet: d.dress === 'wrap' ? 'bare' : 'shod', pose: 'staff', len: 1.3, staffMat: 'wood_dark' });
+  };
+  delegation({ dress: 'robe', hat: 'cap', cloth: ['cloth_indigo', 'cloth_ochre'], gift: ['bowl', 'gold'], beast: 'horse' }, -96, -72);                       // Lydians
+  delegation({ dress: 'trousers', hat: 'cap', cloth: ['cloth_red', 'cloth_brown'], gift: ['jar', 'silver'], beast: 'horse' }, -92, -52);                 // Scythians
+  delegation({ dress: 'robe', hat: 'turban', cloth: ['cloth_white', 'linen'], gift: ['phial', 'gold'], beast: 'camel' }, -99, -92);                      // Bactrians
+  // the guards at the foot of the stair, facing the court, and two at the head of the file
+  [[-89, -78.5], [-89, -41.5], [-89, -77], [-89, -43]].forEach(([x, gz], i) => guard([x, gz], W, i));
+  // the scribes at their mats (plan.js: the scribe kits), each with a petitioner standing before him
+  [[-100.5, -45.5], [-100.5, -43.5]].forEach(([x, sz], i) => figures.push({ t: 'figure', at: [x - 0.15, sz], y: T + 0.012, rot: E, h: 1.66, seed: seed(), dress: 'robe', cloth: i ? 'cloth_ochre' : 'cloth_white', cloth2: 'cloth_brown', over: 'sash', hair: 'short', beard: true, hat: 'cap', hatMat: 'cloth_white', skin: 'skin_medium', feet: 'shod', pose: 'cross' }));
+  figures.push({ t: 'figure', at: [-97.2, -44.5], y: T, rot: W, h: 1.7, seed: seed(), dress: 'trousers', cloth: 'cloth_green', cloth2: 'cloth_brown', over: 'belt', hat: 'cap', hatMat: 'cloth_brown', beard: true, skin: 'skin_medium', feet: 'shod', pose: 'talk' });
+  figures.push({ t: 'figure', at: [-107 - 0.15, -104], y: T + 0.012, rot: E, h: 1.66, seed: seed(), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'sash', hair: 'short', beard: true, hat: 'none', skin: 'skin_medium', feet: 'shod', pose: 'cross' });
+  // grooms with the nobles' horses, tethered in a line along the north of the court, their saddlecloths on
+  for (let k = 0; k < 4; k++) {
+    const hx = -121 + k * 5.2, hz = -112 + (k % 2) * 0.8;
+    figures.push({ t: 'animal', kind: 'horse', at: [hx, hz], y: T, rot: k % 2 ? S : N, seed: seed(), gear: true });
+    figures.push({ t: 'figure', at: [hx + 0.9, hz + 0.3], y: T, rot: k % 2 ? E : W, h: 1.66, seed: seed(), dress: 'trousers', cloth: ['cloth_brown', 'cloth_green', 'cloth_ochre', 'cloth_red'][k], cloth2: 'cloth_brown', over: 'belt', hat: 'cap', hatMat: 'cloth_brown', beard: k % 2 === 0, skin: 'skin_medium', feet: 'shod', pose: 'staff', carry: 'staff', len: 1.5, staffMat: 'wood_dark' });
+  }
+  // courtiers in conversation, waiting to be called: groups of three and four before the stair and between the lanes
+  [[-104, -62], [-110, -83], [-95, -33], [-118, -60], [-102, -100]].forEach(([gx, gz], gi) => {
+    for (let k = 0; k < 3 + (gi % 2); k++) {
+      const a = k * 2.1 + gi, at = [gx + Math.cos(a) * 1.0, gz + Math.sin(a) * 1.0];
+      figures.push({ t: 'figure', at, y: T, rot: a + 3.1 + (rand() - 0.5) * 0.4, h: 1.7 + rand() * 0.08, seed: seed(), dress: 'robe', cloth: ['cloth_white', 'cloth_ochre', 'cloth_indigo', 'cloth_maroon'][(gi + k) % 4], cloth2: 'cloth_red', over: 'sash', hat: 'cap', hatMat: 'cloth_white', beard: true, skin: 'skin_medium', feet: 'shod', pose: k % 2 ? 'talk' : 'stand' });
+    }
+  });
   // servants and courtiers of the terrace: courtiers in groups on the Hundred Columns' platform and before the Hadish, cup-bearers and food-bearers crossing the courts
   const GROUPS = [[75, -95], [60, -75], [90, -110], [-10, 100], [20, 95], [-45, 20], [-52, 40], [90, 130], [70, 160]];
   GROUPS.forEach(([gx, gz], gi) => {
