@@ -3,7 +3,7 @@
 // in rows along the streets.
 import { lodTiles } from '../lod.js';
 import { frame } from '../../styles/greek/agora.js';
-import { RADIUS, GATES, GATE_W, MARKET, YARDS, GATE_X, crest, height, lots } from './layout.js';
+import { RADIUS, GATES, GATE_W, MARKET, YARDS, GATE_X, GREAT, CROSS, SQUARE, ALLEYS_X, crest, height, lots, depth, inRect, onStreet } from './layout.js';
 
 const base = (id, elements, extra = {}) => ({ id, style: 'benin', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [GATE_X, 12], facing: 'n' }, ...extra });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -73,9 +73,78 @@ function palaceFolk(F) {
   for (const s of [-1, 1]) chief([-65 + s * 4.5, -74.5], 0.9, 0, { pose: 'stand', carry: 'staff', len: 1.7 });
   chief([-65, -72.2], 1.45 - 0.55, 0, { pose: 'sit', cloth: 'cloth_white', cloth2: 'cloth_red', hat: 'cap' });
 }
+
+// ── the life of the streets (docs/settlements/benin-city.md §10): near the arrival and the great street at full strength, thinner beyond ──
+const ARR = [-65, 80];
+const lookOut = (F) => Math.atan2(-F.out[0], -F.out[1]);
+/** The clay seat under a verandah or beside a trading front, if the house has one: { at: [x, z], y of the floor, rot (to the street) }. */
+function seatOf(l) {
+  if (l.kind !== 'porch' && l.kind !== 'trade') return null;
+  const F = frame(l.rect, l.front), L = F.L, dw = 2.4, wide = l.kind === 'trade' ? Math.min(L - 3, 6.4) : dw, dc = l.kind === 'trade' ? L / 2 : l.du + dw / 2;
+  const a = 0.9, b = dc - wide / 2 - 0.5;
+  if (b - a <= 2.2) return null;
+  const u = (a + 0.3 + Math.min(b - 0.3, a + 3.6)) / 2;
+  return { at: F.P(u, -0.52), y: 0.12, rot: lookOut(F), F, door: F.P(l.kind === 'trade' ? L / 2 : l.du + dw / 2, -1.8) };
+}
+function streetLife(F) {
+  const { P, woman, man, pick } = F, rand = rng(1604), L = [];
+  const Y = (x, z) => height(x, z);
+  const near = (x, z, d) => Math.hypot(x - ARR[0], z - ARR[1]) < d;
+  // the great street's verges: goods on mats with the seller behind, a basket of fowls, a goat tethered
+  const mats = (z, rot, x0, x1, step) => {
+    for (let x = x0; x < x1; x += step * (0.8 + rand() * 0.5)) {
+      if (inRect(SQUARE, x, z, 2) || depth(x, z) < 22 || Math.abs(x - 98) < 16) continue;
+      const g = pick([['heap', 'baskets'], ['pottery', 'baskets'], ['bolts', 'baskets'], ['spice', 'heap'], ['heap', 'pottery'], ['fish', 'heap']]);
+      L.push({ t: 'goods_mat', at: [x, z], y: 0, rot, goods: g, seed: Math.floor(rand() * 1e9), produce: ['cloth_red', 'cloth_ochre', 'cloth_green'], spices: ['cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_brown'] });
+      const sx = x + Math.sin(rot) * 0.0, sz = z + (rot ? 0.75 : -0.75);
+      woman([sx, sz], 0, rot ? 0 : Math.PI, { pose: 'sit_ground', dress: 'wrap', carry: 'none' });
+      if (rand() < 0.35) L.push({ t: 'chickens', at: [x + 1.3, z + (rot ? 0.3 : -0.3)], y: 0, rot: rand() * 6.28, n: 3, seed: Math.floor(rand() * 1e9) });
+    }
+  };
+  mats(GREAT[3] - 1.6, Math.PI, -250, 250, 15);
+  mats(GREAT[1] + 1.8, 0, -250, 250, 17);
+  // the verandahs and the clay seats: someone sits there, a woman sells at the door, the hens in the lane
+  for (const l of lots()) {
+    const c = [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2];
+    if (!near(c[0], c[1], 200) && rand() > 0.35) continue;
+    const st = seatOf(l);
+    if (st && rand() < 0.75) (rand() < 0.55 ? man : woman)(st.at, st.y, st.rot, { pose: 'sit', carry: 'none' });
+    const Fr = frame(l.rect, l.front), dc = l.du + 1.2;
+    if (rand() < 0.5) { const p = Fr.P(dc + (rand() < 0.5 ? -2.6 : 2.6), -2.3 - rand() * 2.2); L.push({ t: 'chickens', at: p, y: 0, rot: rand() * 6.28, n: 3 + Math.floor(rand() * 3), seed: Math.floor(rand() * 1e9) }); }
+    if (rand() < 0.28) { const p = Fr.P(dc + (rand() < 0.5 ? -4 : 4), -2.6); L.push({ t: 'animal', kind: 'goat', at: p, y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) }); }
+    if (rand() < 0.12) { const p = Fr.P(dc, -2.0); L.push({ t: 'animal', kind: 'dog', at: p, y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) }); }
+    if (rand() < 0.3) { const p = Fr.P(dc + 1.4, -1.6); woman(p, 0, lookOut(Fr) + Math.PI, { pose: 'talk', carry: pick(['basket', 'pot', 'none']) }); const q = Fr.P(dc + 2.4, -1.9); man(q, 0, lookOut(Fr) + 2.6, { pose: 'talk', carry: 'none' }); }
+    if (rand() < 0.3) { const p = Fr.P(dc - 1.5, -2.4); P2.push({ t: 'figure', at: p, y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), skin: 'skin_dark', hair: 'short', hairMat: 'hair_dark', feet: 'bare', dress: 'loincloth', top: 'bare', cloth: pick(CL), cloth2: pick(CL), hat: 'none', over: 'none', pose: 'squat', h: 0.62 }); }
+  }
+  return L;
+}
+const P2 = [];
+/** The gates of the Iya: two guards with staves, travellers with loads waiting to be let in. */
+function gateFolk(F) {
+  const { man, woman, pick } = F, rand = rng(881);
+  for (const g of GATES) {
+    const [dx, dz] = g.dir, lx = -dz, lz = dx, at = (a, b) => [g.at[0] - dx * a + lx * b, g.at[1] - dz * a + lz * b];
+    for (const s of [-1, 1]) { const p = at(2.2, s * 3.2), y = height(p[0], p[1]); man(p, y, Math.atan2(-dx, -dz), { carry: 'staff', len: 1.9, over: 'collar', cloth: 'cloth_red', cloth2: 'cloth_white', pose: 'stand' }); }
+    for (let k = 0; k < 3; k++) { const p = at(-3 - k * 1.8, (k % 2 ? -1 : 1) * (1 + rand() * 1.4)), y = height(p[0], p[1]); (k === 1 ? woman : man)(p, y, Math.atan2(dx, dz) + (rand() - 0.5) * 0.8, { carry: pick(['headload', 'basket', 'pole']), pose: 'stand' }); }
+  }
+}
 export async function town() {
+  P2.length = 0;
   const F = folk(rng(1600));
-  yardPeople(F); marketFolk(F); palaceFolk(F);
+  yardPeople(F); marketFolk(F); palaceFolk(F); gateFolk(F);
+  const lifeEls = streetLife(F);
+  { // the open floor of the Oba market south of the stalls: sellers on their mats, fowls and goats, a shade of baskets
+    const rand = rng(404), { woman, man, pick } = F;
+    for (const z of [17, 22.5, 28, 32.5]) for (let x = MARKET[0] + 6; x < MARKET[2] - 5; x += 4.3 + rand() * 1.4) {
+      if (rand() < 0.3) continue;
+      const g = pick([['heap', 'baskets'], ['pottery', 'baskets'], ['bolts', 'heap'], ['spice', 'heap'], ['melons', 'greens'], ['fish', 'baskets']]);
+      lifeEls.push({ t: 'goods_mat', at: [x, z], y: 0, rot: Math.PI, goods: g, seed: Math.floor(rand() * 1e9), produce: ['cloth_red', 'cloth_ochre', 'cloth_green'], spices: ['cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_brown'] });
+      (rand() < 0.75 ? woman : man)([x, z + 0.8], 0, 0, { pose: 'sit_ground', dress: 'wrap' });
+      const r = rand();
+      if (r < 0.3) lifeEls.push({ t: 'chickens', at: [x + 1.5, z + 0.3], y: 0, rot: rand() * 6.28, n: 4, seed: Math.floor(rand() * 1e9) });
+      else if (r < 0.45) lifeEls.push({ t: 'animal', kind: 'goat', at: [x + 1.5, z + 0.4], y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
+    }
+  }
   const plans = [...iya()];
   // the guild yards
   const ye = YARDS.map((y) => ({ t: 'caster_yard', ...y }));
@@ -87,7 +156,18 @@ export async function town() {
     st.push({ t: 'benin_stall', rect: [x, z0, x + 3, z0 + 2.4], front, seed: Math.floor(rand() * 1e6) });
   }
   plans.push(...lodTiles('benin-market', 'benin', st, { R: RADIUS }));
-  plans.push({ ...base('benin-people', F.P), style: 'life' });
+
+  // the street furniture: lamps along the great and the cross streets, the king's square, the firewood and pots at the lane mouths
+  {
+    const st = [], ok = (x, z) => depth(x, z) > 20 && !inRect(SQUARE, x, z, 3) && !inRect(MARKET, x, z, 2);
+    for (const z of [GREAT[1] + 2.0, GREAT[3] - 2.0]) for (let x = -250; x < 250; x += 36) if (ok(x, z) && !ALLEYS_X.some((a) => Math.abs(x - a) < 6) && Math.abs(x - CROSS[0] - 12) > 14) st.push({ t: 'benin_lamp', at: [x + (z < 57 ? 0 : 18), z], y: 0, seed: Math.round(x) });
+    for (const x of [CROSS[0] + 2, CROSS[2] - 2]) for (let z = -230; z < 230; z += 40) if (ok(x, z) && !(z > GREAT[1] - 8 && z < GREAT[3] + 8)) st.push({ t: 'benin_lamp', at: [x, z + 12], y: 0, seed: z });
+    st.push({ t: 'benin_square', rect: SQUARE, seed: 5 });
+    for (const a of ALLEYS_X) for (const [z, dz] of [[GREAT[3] - 1.2, 1], [GREAT[1] + 1.2, -1]]) if (ok(a, z) && depth(a, z) > 26) st.push({ t: 'benin_mouth', at: [a + 5.6, z], along: [1, 0], seed: Math.round(a + z) });
+    plans.push(...lodTiles('benin-street', 'benin', st, { R: RADIUS }));
+  }
+  plans.push({ ...base('benin-people', [...F.P, ...P2]), style: 'life' });
+  plans.push({ ...base('benin-street-life', lifeEls), style: 'life' });
   const els = lots().map((l) => ({ t: 'benin_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front, chief: l.chief, kind: l.kind, du: l.du }));
   plans.push(...lodTiles('benin-houses', 'benin', els, { R: RADIUS }));
   return plans;
