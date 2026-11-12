@@ -111,3 +111,10 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 - Wikipedia, "Deir el-Medina": https://en.wikipedia.org/wiki/Deir_el-Medina
 - Student Handouts, "Ancient Egyptian Market Scenes": https://studenthandouts.com/world-history/ancient-egypt/pictures/ancient-egyptian-market-scenes.htm
 - Giza workers' town and Deir el-Medina, for the camp: Lehner, M., *The Complete Pyramids* (1997); Bruyère, B., *Deir el Médineh*
+
+## 15. The colossi and the arrival (fix pass, 2026-11-12)
+
+The review found the four seated colossi illegible at the arrival (a flat grey panel, the camera facing the cliff). They did exist as models; they were the same pale stone as the façade, built of blocks, and seen from 44 m at a pitch that filled the frame with cliff.
+- **Painted, as such statues were** [inferred: colossal royal statues were painted; traces of paint remain at Abu Simbel, which is why the Osiride statues inside are painted here too]: the skin red-brown, the kilt white with its pleated apron edged in gold, the nemes in bands of blue and gold with striped lappets, the broad collar, belt, arm- and wristbands in gold, the face with white eyes, black irises and brows, red lips, the false beard blue and gold, the red and white crowns; the throne's sides panelled with the sema-tawy; a darker panel leaning back with the façade behind each figure as its ground, so that each reads as a statue standing out of the rock.
+- **Modelled**: rounded thighs, knees, shins with calves, feet with five toes, forearms and hands on the lap, pectorals, ears; about 6 700 triangles each (was fewer, in blocks).
+- **Arrival** moved to (−4, 12) looking north-west (yaw 1.22, pitch 0.12): 41 m from the façade, 24° off its axis so the thrones' sides show, the colossi filling about half the width and 44% of the height, the façade's top in frame, the cliff above out of it. A procession of priests and bearers crosses the terrace to the door in the view.
