@@ -16,7 +16,7 @@ import { figure } from '../../objects/figures.js';
 function rider(el, ctx, e) { if (el.collect) el.collect.push(e); else if (el.riders !== false) (e.t === 'animal' ? animal : figure)(e, ctx); }
 const NULL_CTX = { bag: { add() {} }, col: { circle() {}, rect() {}, floor() {}, segment() {} } };
 export function ridersOf(el) {
-  const out = [], f = { hansom_cab: hansomCab, omnibus, paddle_steamer: paddleSteamer, lighter }[el.t];
+  const out = [], f = { hansom_cab: hansomCab, omnibus, paddle_steamer: paddleSteamer, lighter, sailing_barge: sailingBarge, wherry }[el.t];
   if (f) f({ ...el, collect: out }, NULL_CTX);
   return out;
 }
@@ -210,4 +210,50 @@ export function steamboatPier(el, { bag, col }) {
   // the mooring posts
   for (const zz of [z0 + 1, z1 - 1]) bag.add('iron', lathe([[0.16, 0], [0.13, 0.5], [0.18, 0.6], [0.001, 0.65]], 8, null, x1 - 0.3, y, zz));
 }
+/** sailing_barge: { at, y (water), rot, seed, len } — the Thames spritsail barge: a flat-floored hull with a hatch coaming, leeboards, a stumpy mast with its sprit, the tan mainsail, topsail and mizzen, the bargeman at the wheel */
+export function sailingBarge(el, ctx) {
+  const { bag } = ctx, F = frame(el, bag), put = F.put, L = el.len ?? 22, Bm = 5.2, sail = el.sail ?? 'cloth_ochre';
+  const H = hull(L, Bm, 1.4, 0.2); H.translate(0, 0.55, 0); put('tar_wood', H);
+  for (const s of [-1, 1]) put('timber', box(s * Bm / 2 - 0.1, 0.55, -L * 0.4, s * Bm / 2 + 0.03, 0.78, L * 0.42));
+  put('timber', box(-Bm / 2 + 0.1, 0.55, L * 0.42 - 0.1, Bm / 2 - 0.1, 0.8, L * 0.42 + 0.05));
+  put('wood_dark', box(-1.4, 0.55, -L * 0.2, 1.4, 1.3, L * 0.12)); put('planks_grey', box(-1.5, 1.3, -L * 0.2 - 0.05, 1.5, 1.35, L * 0.12 + 0.05));           // the main hatch
+  for (const s of [-1, 1]) put('timber', box(s * (Bm / 2 + 0.25) - 0.05, 0.6, -L * 0.06, s * (Bm / 2 + 0.25) + 0.05, 3.4, L * 0.1));                // the leeboards
+  const mz = -L * 0.14;
+  put('timber', rod([0, 0.6, mz], [0, 6.2, mz], 0.2, 8)); put('timber', rod([0, 6.2, mz], [0, 11.5, mz], 0.14, 7));                                   // the mast and its topmast
+  put('timber', rod([0, 1.6, mz + 0.2], [0, 13.6, mz + L * 0.52], 0.07, 6));                                                                          // the sprit
+  put('timber', rod([0, 2.2, mz + 0.1], [0, 2.4, mz + L * 0.5], 0.08, 6));                                                                              // the boom
+  const q = (a, b, c, d, m, t = 0.03) => put(m, hexa([[t, a[0], a[1]], [t, b[0], b[1]], [t, c[0], c[1]], [t, d[0], d[1]]].map(([x, y2, z]) => [x, y2, z]), [[-t, a[0], a[1]], [-t, b[0], b[1]], [-t, c[0], c[1]], [-t, d[0], d[1]]].map(([x, y2, z]) => [x, y2, z])));
+  q([2.3, mz + 0.3], [2.5, mz + L * 0.5], [13.1, mz + L * 0.5 - 0.4], [10.4, mz + 0.3], sail);                                                          // the mainsail, a quadrilateral between mast, boom and sprit
+  q([10.6, mz + 0.2], [11.0, mz + 1.6], [11.4, mz + 0.2], [11.4, mz + 0.2], sail);                                                                      // the topsail's tip above the mast
+  const z2 = L * 0.4; put('timber', rod([0, 0.8, z2], [0, 6.5, z2], 0.08, 6)); q([1.4, z2 + 0.1], [1.5, z2 + 2.2], [5.4, z2 + 1.9], [5.8, z2 + 0.1], sail);   // the mizzen
+  put('iron', rod([0, 11.5, mz], [0, 12.2, mz], 0.03, 4)); put('cloth_red', box(-0.01, 12.1, mz, 0.01, 12.6, mz + 0.9));
+  for (const [dz, dy] of [[-L * 0.45, 0.85], [L * 0.3, 0.8]]) put('iron', rod([0, 0.6, dz], [0, dy + 0.6, dz], 0.06, 5));
+  const [px, pz] = F.P(0, L * 0.36);
+  rider(el, ctx, { ...gent((el.seed ?? 4) * 17, 'cloth_brown', 'stand', { hat: 'cap', hatMat: 'cloth_brown' }), at: [px, pz], y: F.y + 0.8, rot: F.r + Math.PI }, ctx);
+}
+/** wherry: { at, y (water), rot, seed } — the waterman's wherry: a light clinker boat with a waterman rowing, a passenger astern, the oars out */
+export function wherry(el, ctx) {
+  const { bag } = ctx, F = frame(el, bag), put = F.put, L = el.len ?? 5.4, Bm = 1.3;
+  const H = hull(L, Bm, 0.5, 0.45); H.translate(0, 0.3, 0); put(el.mat ?? 'wood_dark', H);
+  for (const z of [-0.6, 0.5, 1.4]) put('timber', box(-Bm / 2 + 0.06, 0.45, z - 0.12, Bm / 2 - 0.06, 0.5, z + 0.12));
+  put('timber', box(-Bm / 2 + 0.1, 0.45, L * 0.27, Bm / 2 - 0.1, 0.8, L * 0.4));
+  for (const s of [-1, 1]) { put('timber', rod([s * Bm / 2, 0.62, -0.5], [s * 2.2, 0.35, -0.2], 0.03, 5)); put('timber', box(s * 2.2 - 0.04, 0.3, -0.5, s * 2.2 + 0.04, 0.38, 0.1)); }
+  const [wx, wz] = F.P(0, -0.1), [qx, qz] = F.P(0, L * 0.31);
+  rider(el, ctx, { ...gent((el.seed ?? 3) * 19, 'cloth_blue', 'row', { hat: 'cap', hatMat: 'cloth_red' }), at: [wx, wz], y: F.y + 0.45, rot: F.r, carry: 'oars', len: 2.7 }, ctx);
+  rider(el, ctx, { ...gent((el.seed ?? 3) * 23, 'cloth_black', 'sit', { hat: 'brim', hatMat: 'cloth_black', over: 'cloak' }), at: [qx, qz], y: F.y + 0.62, rot: F.r + Math.PI }, ctx);
+}
+/** river_stairs: { x, z, dir (+1 east / −1 west into the water), y (the promenade), water, w } — the watermen's stairs of granite down the embankment's face to the foreshore: a flight of steps on a solid mass, an iron rail, a mooring post */
+export function riverStairs(el, { bag, col }) {
+  const x0 = el.x, z = el.z, dir = el.dir ?? 1, top = el.y ?? 0, bot = (el.water ?? -2.5) + 0.25, w = el.w ?? 2.6, step = 0.34, n = Math.ceil((top - bot) / step), run = 0.42;
+  for (let k = 0; k < n; k++) {
+    const a = x0 + dir * k * run, b = a + dir * run, h = top - (k + 1) * step * (top - bot) / (n * step);
+    bag.add('granite_block', box(Math.min(a, b) - (dir < 0 ? 0 : 0), bot - 3.0, z - w / 2, Math.max(a, b), h, z + w / 2));
+  }
+  const xl = x0 + dir * n * run;
+  col.floor([Math.min(xl, x0 + dir * 0.0), z - w / 2, Math.max(xl, x0), z + w / 2], bot);
+  for (const sd of [-1, 1]) { const zz = z + sd * (w / 2 + 0.05); for (let k = 0; k <= n; k += 3) { const a = x0 + dir * k * run, h = top - k * (top - bot) / n; bag.add('iron', rod([a, h, zz], [a, h + 1.0, zz], 0.025, 5)); } bag.add('iron', rod([x0, top + 1.0, zz], [xl, bot + 1.0, zz], 0.025, 5)); }
+  bag.add('iron', lathe([[0.16, 0], [0.13, 0.5], [0.18, 0.6], [0.001, 0.65]], 8, null, xl + dir * 0.3, bot, z + w / 2 - 0.3));
+  bag.add('granite_grey', box(Math.min(xl, xl + dir * 1.6), bot - 0.3, z - w / 2, Math.max(xl, xl + dir * 1.6), bot, z + w / 2));
+}
+
 export { hexa, tri };
