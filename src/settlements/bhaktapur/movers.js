@@ -9,7 +9,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 34, night: 3, rain: 0.4, reach: 150, spawnMin: 26, far: 44 },
+  walkers: { day: 72, night: 5, rain: 0.5, reach: 135, spawnMin: 22, far: 44 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -50,
 };
@@ -46,6 +46,10 @@ export const WALKERS = [
     c1: [CL.black, CL.red, CL.indigo], c2: [CL.red, CL.ochre], c3: [CL.black], speed: [0.75, 1.0], stride: 1.15, h: [0.9, 0.97] },
   { id: 'porter', weight: 1.1, market: 0.6, el: { dress: 'trousers', hat: 'cap', over: 'belt', carry: 'sack', arms: 'sack', hair: 'short', beard: false, feet: 'bare' },
     c1: [CL.ochre, CL.grey, CL.white], c2: [CL.grey, CL.black], c3: [CL.black], speed: [0.85, 1.1], stride: 1.3 },
+  { id: 'bearer', weight: 0.9, market: 1.0, el: { dress: 'trousers', hat: 'cap', over: 'belt', carry: 'pole', arms: 'pole', hair: 'short', beard: false, feet: 'bare' },
+    c1: [CL.ochre, CL.white, CL.grey], c2: [CL.grey, CL.black], c3: [CL.black], speed: [0.8, 1.05], stride: 1.25 },
+  { id: 'sweeper', weight: 0.5, market: 0.5, el: { dress: 'wrap', hat: 'none', over: 'shawl', carry: 'broom', arms: 'sweep', hair: 'bun', feet: 'bare' }, swing: 0.4,
+    c1: [CL.maroon, CL.black, CL.indigo], c2: [CL.red, CL.ochre], c3: [CL.black], speed: [0.6, 0.8], stride: 1.0, h: [0.9, 0.97] },
   { id: 'elder', weight: 0.8, market: 0.8, el: { dress: 'trousers', hat: 'cap', over: 'cloak', arms: 'hang', hair: 'short', beard: false, feet: 'bare' },
     c1: [CL.white, CL.ochre], c2: [CL.white, CL.grey], c3: [CL.black], speed: [0.7, 0.9], stride: 1.1 },
   { id: 'boy', weight: 0.7, market: 0.8, el: { dress: 'trousers', hat: 'cap', over: 'none', arms: 'hang', hair: 'short', beard: false, feet: 'bare' },
