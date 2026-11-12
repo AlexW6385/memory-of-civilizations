@@ -273,9 +273,29 @@ function houseIn(F, l, spec, r) {
   }
 }
 
-/** dessau_house: { rect, front, storeys, shop, roof, modern, seed } (docs §11). */
+/** The palette names a house folds together (near-alike colours: fewer materials, fewer draw calls per plan). */
+const HOUSE_MAP = {
+  cloth_blue: 'cloth_grey', cloth_indigo: 'cloth_grey', cloth_black: 'cloth_grey', cloth_brown: 'cloth_red', cloth_maroon: 'cloth_red', cloth_ochre: 'paint_ochre',
+  car_black: 'iron', car_blue: 'paint_blue', car_red: 'cloth_red', car_cream: 'stucco_cream', shutter_brown: 'shutter_green', shutter_grey: 'shutter_green',
+  plaster_damp: 'plaster_grey', plaster_streak: 'plaster_grey', tile_cream: 'tile_white', tile_dark: 'slate', wood_ochre: 'timber', wood_painted: 'timber',
+  steel_chrome: 'iron', steel_grey: 'iron', iron_galv: 'iron', paint_cab_yellow: 'paint_ochre', pottery_dark: 'terracotta', brick_buff: 'brick', brick_grey: 'brick',
+  glaze_white: 'glaze_green',
+};
+
+/** dessau_house: { rect, front, storeys, shop, roof, modern, seed, simple } (docs §11); `simple`: the far view (walls, window dots, roof, chimneys). */
 export function dessauHouse(el, ctx) {
-  const sk = new S(ctx), spec = houseSpec(el), r = rng(el.seed || 1), F = new Fr(sk, el.rect, el.front);
-  houseIn(F, el, spec, r);
-  for (const c of spec.chimneys) { sk.b('brick', c.x - 0.3, c.y - 2.4 > 0 ? c.y - 2.4 : 0, c.z - 0.3, c.x + 0.3, c.y, c.z + 0.3); sk.b('iron', c.x - 0.36, c.y, c.z - 0.36, c.x + 0.36, c.y + 0.1, c.z + 0.36); sk.cyl('terracotta', c.x, c.y + 0.1, c.z, 0.13, 0.3, 8); }
+  const sk = new S(ctx, HOUSE_MAP), spec = houseSpec(el), r = rng(el.seed || 1), F = new Fr(sk, el.rect, el.front);
+  if (el.simple) { farHouse(F, el, spec, r); } else houseIn(F, el, spec, r);
+  for (const c of spec.chimneys) { sk.b('brick', c.x - 0.3, c.y - 2.4 > 0 ? c.y - 2.4 : 0, c.z - 0.3, c.x + 0.3, c.y, c.z + 0.3); if (!el.simple) { sk.b('iron', c.x - 0.36, c.y, c.z - 0.36, c.x + 0.36, c.y + 0.1, c.z + 0.36); sk.cyl('terracotta', c.x, c.y + 0.1, c.z, 0.13, 0.3, 8); } }
+}
+
+/** The far house: one mass, a row of dark window boxes on each storey, the roof. */
+function farHouse(F, l, spec, r) {
+  const { n, SH, yb, top, manner, modern } = spec, W = F.W, D = F.D;
+  const mat = modern ? 'plaster_white' : manner === 'brick' ? 'brick_buff' : WALLS[Math.floor(r() * WALLS.length)];
+  F.b(mat, 0, W, 0, top, 0, D);
+  const cols = Math.max(3, Math.floor(W / (modern ? 3.4 : 3.0))), pitch = (W - 0.6) / cols;
+  for (let s = 1; s < n; s++) { const sb = yb + (s - 1) * SH; for (let c = 0; c < cols; c++) { const u = 0.3 + pitch * (c + 0.5); F.b('wood_dark', u - 0.45, u + 0.45, sb + 0.9, sb + SH - 0.6, -0.04, 0.0); } }
+  if (modern || l.roof === 'flat') F.b('concrete_light', -0.05, W + 0.05, top, top + 0.3, -0.05, D + 0.05);
+  else hip(F.sk, F.rect, top + 0.05, 'roof_tile', l.roof === 'mansard' ? 0.75 : 0.6);
 }

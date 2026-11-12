@@ -8,20 +8,22 @@ export const TAU = Math.PI * 2;
 
 /** The builder context with the short forms used everywhere. */
 export class S {
-  constructor(ctx) { this.bag = ctx.bag; this.col = ctx.col; this.lights = ctx.lights; }
+  constructor(ctx, map = null) { this.bag = ctx.bag; this.col = ctx.col; this.lights = ctx.lights; this.map = map; }
+  /** The material to draw with (a house folds its many near-alike palette names into fewer: one draw call each, per plan). */
+  m(mat) { return this.map?.[mat] ?? mat; }
   /** A box (no collider). */
   b(mat, x0, y0, z0, x1, y1, z1) {
     if (x1 - x0 < 1e-4 || z1 - z0 < 1e-4 || y1 - y0 < 1e-4) return;
-    this.bag.add(mat, box(Math.min(x0, x1), y0, Math.min(z0, z1), Math.max(x0, x1), y1, Math.max(z0, z1)));
+    this.bag.add(this.m(mat), box(Math.min(x0, x1), y0, Math.min(z0, z1), Math.max(x0, x1), y1, Math.max(z0, z1)));
   }
   /** A solid box: drawn and blocking. */
   s(mat, x0, y0, z0, x1, y1, z1) { this.b(mat, x0, y0, z0, x1, y1, z1); this.col.rect([x0, z0, x1, z1], y0, y1); }
   /** A blocking volume only. */
   k(x0, y0, z0, x1, y1, z1) { this.col.rect([x0, z0, x1, z1], y0, y1); }
   fl(rect, y) { this.col.floor(rect, y); }
-  cyl(mat, x, y, z, r, h, seg = 10) { this.bag.add(mat, lathe([[r, 0], [r, h], [0.001, h]], seg, null, x, y, z)); }
-  rod(mat, a, b, r, seg = 5) { this.bag.add(mat, rod(a, b, r, seg)); }
-  lathe(mat, prof, x, y, z, seg = 12) { this.bag.add(mat, lathe(prof, seg, null, x, y, z)); }
+  cyl(mat, x, y, z, r, h, seg = 10) { this.bag.add(this.m(mat), lathe([[r, 0], [r, h], [0.001, h]], seg, null, x, y, z)); }
+  rod(mat, a, b, r, seg = 5) { this.bag.add(this.m(mat), rod(a, b, r, seg)); }
+  lathe(mat, prof, x, y, z, seg = 12) { this.bag.add(this.m(mat), lathe(prof, seg, null, x, y, z)); }
   light(x, y, z, color = '#ffe2b0', intensity = 2.2, distance = 8) { this.lights.push({ at: [x, y, z], color, intensity, distance }); }
   /** A single-sided pane in a vertical plane (x = const or z = const), facing the normal (nx or nz sign). */
   pane(mat, o) {
@@ -36,7 +38,7 @@ export class S {
     void cr;
     const flip = nn[0] * nrm[0] + nn[1] * nrm[1] + nn[2] * nrm[2] < 0;
     if (!flip) out.push(...a, ...b, ...c, ...a, ...c, ...d); else out.push(...a, ...c, ...b, ...a, ...d, ...c);
-    this.bag.add(mat, fromTriangles(out));
+    this.bag.add(this.m(mat), fromTriangles(out));
   }
 }
 

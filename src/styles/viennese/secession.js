@@ -106,7 +106,7 @@ export function secession(el, ctx) {
   solid(WALL, -2.7, DB - 2.7, 2.7, DB + 2.7, WH, DT + 5.0, false); bx('stucco_pale', -3.0, DB - 3.0, 3.0, DB + 3.0, DT + 5.0, DT + 5.3);
   for (const s of [-1, 1]) for (const t of [-1, 1]) bx('stucco_pale', s * 2.7 - 0.2 + (s > 0 ? -0.0 : 0), DB + t * 2.7 - 0.2, s * 2.7 + 0.2, DB + t * 2.7 + 0.2, WH, DT + 5.0);
   const cyBall = DT + 5.3 + 3.6, Rb = 4.25;
-  bag.add('iron', lathe([[0.001, -Rb * 0.8], [Rb * 0.6, -Rb * 0.78], [Rb * 0.92, -Rb * 0.3], [Rb * 0.98, 0.1], [Rb * 0.88, Rb * 0.55], [Rb * 0.55, Rb * 0.88], [0.001, Rb * 0.98]], 16, null, X(0), y + cyBall, Z(DB)));
+  bag.add('glaze_yellow', lathe([[0.001, -Rb * 0.8], [Rb * 0.6, -Rb * 0.78], [Rb * 0.92, -Rb * 0.3], [Rb * 0.98, 0.1], [Rb * 0.88, Rb * 0.55], [Rb * 0.55, Rb * 0.88], [0.001, Rb * 0.98]], 16, null, X(0), y + cyBall, Z(DB)));
   {
     const tris = [], rr = rng(1898);
     const rings = 11;
@@ -117,7 +117,7 @@ export function secession(el, ctx) {
         const th = (k + (i % 2) * 0.5) / n * Math.PI * 2 + rr() * 0.05;
         const nx = Math.cos(th) * cphi, ny = Math.sin(lat0), nz = Math.sin(th) * cphi, R = Rb;
         const ex = [-Math.sin(th), 0, Math.cos(th)], ey = [-Math.cos(th) * Math.sin(lat0), cphi, -Math.sin(th) * Math.sin(lat0)];
-        const L = 0.95, Wd = 0.5, p = [nx * R, ny * R, nz * R];
+        const L = 1.2, Wd = 0.66, p = [nx * R, ny * R, nz * R];
         const pt = (u, v, out = 0) => [X(0) + p[0] + ex[0] * u + ey[0] * v + nx * out, y + cyBall + p[1] + ex[1] * u + ey[1] * v + ny * out, Z(DB) + p[2] + ex[2] * u + ey[2] * v + nz * out];
         const top = pt(0, L / 2, 0.02), bot = pt(0, -L / 2, 0.02), l = pt(-Wd / 2, 0, 0.03), r = pt(Wd / 2, 0, 0.03), c = pt(0, 0, 0.11);
         for (const [a, b] of [[top, r], [r, bot], [bot, l], [l, top]]) {

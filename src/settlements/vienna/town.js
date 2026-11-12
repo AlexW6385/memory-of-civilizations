@@ -124,8 +124,9 @@ function karlsplatz() {
 function hofs() {
   const out = [], rand = rng(1115);
   for (const yd of yards()) {
-    const [x0, z0, x1, z1] = yd.rect, lod = Math.hypot((x0 + x1) / 2, (z0 + z1) / 2) > 170 ? 1 : 0;
+    const [x0, z0, x1, z1] = yd.rect, lod = Math.hypot((x0 + x1) / 2, (z0 + z1) / 2) > 110 ? 1 : 0;
     out.push({ t: 'hof_yard', rect: yd.rect, seed: 100 + yd.i, mouths: yd.mouths, y: 0, wing: WING + 2, lod });
+    if (lod && Math.hypot((x0 + x1) / 2, (z0 + z1) / 2) > 200) continue;
     for (const [nz0, nz1, front] of [[z0 + 2, z0 + 2 + WING, 's'], [z1 - 2 - WING, z1 - 2, 'n']]) {
       let x = x0 + 2;
       while (x < x1 - 4.5) {
@@ -178,7 +179,7 @@ export async function town() {
   const plans = [streets(), wien(), ...furniture(), naschmarkt(), karlsplatz(), houseRooms(), extras(), base('vienna-life', stillLife(), { style: 'life' })];
   const els = lots().map((l) => ({ t: 'mietshaus', rect: l.rect, front: l.front, kind: l.kind, storeys: l.storeys, seed: l.seed, y: 0, side: l.side, lod: l.lod, faience: l.faience, medallions: l.medallions, mat: l.mat, passage: l.passage, yardAt: l.yardAt, open: l.open }));
   els.push(...hofs());
-  plans.push(...lodTiles('vienna-houses', 'viennese', els, { R: RADIUS }));
+  plans.push(...lodTiles('vienna-houses', 'viennese', els, { R: RADIUS, near: 150 }));
   void CAFE; void SEC;
   return plans;
 }

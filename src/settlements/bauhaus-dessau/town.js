@@ -10,6 +10,7 @@ const plan = (id, style, elements, rects, o = {}) => ({ id, style, origin: [0, 0
 const pick = (r, a) => a[Math.floor(r() * a.length) % a.length];
 const quad = (x, z) => (x < 0 ? 0 : 1) + (z < 0 ? 0 : 2);
 const RK = RADIUS - 10;
+const NEAR = 150;     // m from a quarter's middle: the town's houses in full inside, simple beyond
 
 /** The kerbs of every street along both its edges (cut where another street crosses), as thin rectangles, split at the quarter axes. */
 function kerbs() {
@@ -70,8 +71,8 @@ function streetStuff() {
 }
 
 function buildings() {
-  const L = lots(), groups = [[], [], [], []], rects = [[], [], [], []];
-  for (const l of L) { const q = quad((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2); groups[q].push({ t: 'dessau_house', rect: l.rect, front: l.front, storeys: l.storeys, shop: l.shop, roof: l.roof, modern: l.modern, seed: l.seed }); rects[q].push(l.rect); }
+  const L = lots(), groups = [[], [], [], []], rects = [[], [], [], []], houses = [[], [], [], []];
+  for (const l of L) { const q = quad((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2); const h = { t: 'dessau_house', rect: l.rect, front: l.front, storeys: l.storeys, shop: l.shop, roof: l.roof, modern: l.modern, seed: l.seed }; groups[q].push(h); houses[q].push(h); rects[q].push(l.rect); }
   // the street's kerbs and furniture, divided by quarter
   const K = kerbs(), S = streetStuff(), by = [{ kerbs: [], drains: [], manholes: [], items: [] }, { kerbs: [], drains: [], manholes: [], items: [] }, { kerbs: [], drains: [], manholes: [], items: [] }, { kerbs: [], drains: [], manholes: [], items: [] }];
   for (const k of K) { const q = quad((k[0] + k[2]) / 2, (k[1] + k[3]) / 2); by[q].kerbs.push(k); rects[q].push(k); }
@@ -90,7 +91,10 @@ function buildings() {
   for (let q = 0; q < 4; q++) {
     groups[q].push({ t: 'dessau_street', seed: 7 + q, ...by[q], field: q === 3 ? [52, 4, 140, 40] : null });
     if (q === 3) rects[q].push([52, 4, 140, 40]);
-    plans.push(plan(`dessau-town-${q}`, 'bauhaus', groups[q], rects[q]));
+    // each quarter twice (DESIGN §3.3): in full for when the visitor is within NEAR of its middle, and as the far view (houses simple, no street furniture) beyond
+    const b = bboxOf(rects[q], 0), center = [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2];
+    plans.push(plan(`dessau-town-${q}`, 'bauhaus', groups[q], rects[q], { near: NEAR, center }));
+    plans.push(plan(`dessau-town-${q}-far`, 'bauhaus', houses[q].map((h) => ({ ...h, simple: true })), rects[q], { far: NEAR, center, nocollide: true }));
   }
   // the Masters' Houses in the pines; Törten's rows and the Konsum
   plans.push(plan('dessau-masters', 'bauhaus', MASTERS.map((h) => ({ t: 'bauhaus_master', rect: h.rect, kind: h.kind, id: h.id, seed: h.seed })), MASTERS.map((h) => h.rect)));
@@ -108,7 +112,7 @@ function life() {
   for (let z = -170; z <= 170; z += 32) { lamp(ROAD_M[0] - FOOT + 0.3, z); lamp(ROAD_M[2] + FOOT - 0.3, z + 16); lamp(ROAD_KV[0] - FOOT + 0.3, z + 8); lamp(ROAD_KV[2] + FOOT - 0.3, z + 24); }
   for (let x = -170; x <= 180; x += 32) { lamp(x, ROAD_K[1] - FOOT + 0.3); lamp(x + 16, ROAD_K[3] + FOOT - 0.3); lamp(x + 8, ROAD_E[3] + FOOT - 0.3); }
   // parked cars of 1927 (a Dixi, an Opel, a delivery van) at the kerbs, and a horse and cart
-  const park = [[ROAD_M[0] + 1.3, -120, 0], [ROAD_M[2] - 1.3, 60, 0], [ROAD_M[0] + 1.3, 110, 0], [90, ROAD_K[1] + 1.3, Math.PI / 2], [150, ROAD_K[3] - 1.3, Math.PI / 2], [ROAD_KV[2] - 1.3, -60, 0], [20, ROAD_E[1] + 1.3, Math.PI / 2], [110, ROAD_E[3] - 1.3, Math.PI / 2], [57, MASTERS[0].rect[3] + 6.5, 0.3]];
+  const park = [[ROAD_M[0] + 1.3, -120, 0], [ROAD_M[2] - 1.3, 92, 0], [ROAD_M[0] + 1.3, 110, 0], [90, ROAD_K[1] + 1.3, Math.PI / 2], [150, ROAD_K[3] - 1.3, Math.PI / 2], [ROAD_KV[2] - 1.3, -60, 0], [20, ROAD_E[1] + 1.3, Math.PI / 2], [110, ROAD_E[3] - 1.3, Math.PI / 2], [57, MASTERS[0].rect[3] + 6.5, 0.3]];
   park.forEach(([x, z, r], i) => { if (!inSchool(x, z, 3)) P.push({ t: 'car', at: [x, z], y: 0, rot: r + (i % 2 ? Math.PI : 0), seed: i + 5, era: 1930 }); });
   P.push({ t: 'handcart', at: [ROAD_M[0] + 1.6, -60], y: 0, rot: 0, seed: 3 }, { t: 'cart', at: [ROAD_KV[0] + 1.8, 40], y: 0, rot: 0, seed: 4, kind: 'two', beast: 'horse', load: 'sacks' });
   P.push({ t: 'handcart', at: [ROAD_M[2] - 1.6, -110], y: 0, rot: 3.14, seed: 8 }, { t: 'cart', at: [ROAD_K[1] + 1.8, 120], y: 0, rot: 1.57, seed: 5, kind: 'two', beast: 'horse', load: 'barrels' });

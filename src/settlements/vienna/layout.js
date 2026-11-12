@@ -85,11 +85,11 @@ export function lots() {
         u += w;
         if (hit(rect)) continue;
         const cx = (rect[0] + rect[2]) / 2, cz = (rect[1] + rect[3]) / 2, r = Math.hypot(cx, cz);
-        if (r > RADIUS - 42) continue;
+        if (r > RADIUS - 50) continue;
         const ring = ringFront(e), far = Math.max(0, r - 170) / 120 + (cz > 100 || cx < -200 ? 0.25 : 0);
         const kind = ring ? 'ring' : rand() < far * 0.55 + 0.04 ? 'biedermeier' : 'gruender';
         const storeys = kind === 'ring' ? 5 + (rand() < 0.4 ? 1 : 0) : kind === 'biedermeier' ? 2 + (rand() < 0.4 ? 1 : 0) : 4 + (rand() < 0.45 ? 1 : 0) + (r < 160 && rand() < 0.2 ? 1 : 0);
-        const o = { rect, front: e, kind, storeys, seed: Math.floor(rand() * 1e6), lod: r > 170 ? 1 : 0 };
+        const o = { rect, front: e, kind, storeys, seed: Math.floor(rand() * 1e6), lod: r > 110 ? 1 : 0 };
         // corner lots turn a second face to the cross street
         if ((e === 'n' || e === 's') && Math.abs(rect[0] - x0) < 0.01) o.side = 'w';
         else if ((e === 'n' || e === 's') && Math.abs(rect[2] - x1) < 0.01) o.side = 'e';
