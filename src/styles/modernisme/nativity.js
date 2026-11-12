@@ -9,7 +9,7 @@
 // Nativity; above the arch the star, the Annunciation and the Coronation; its top still flat and in
 // scaffolding where the cypress would rise in the 1930s.
 
-import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
+import { box, lathe, fromTriangles, rod, frustum } from '../../core/geom.js';
 import { tube, folded, ball } from '../../objects/kit.js';
 
 // the stone of the façade, told apart so that the sculpture reads in shade as well as in the sun: the walls and towers pale ashlar (S),
@@ -32,19 +32,18 @@ function orient(T, i0, ref, away = false) {
 const nz = (p, q) => Math.sin(p * 1.7 + q * 2.3) * 0.5 + Math.sin(p * 4.1 - q * 3.7 + 1.3) * 0.3 + Math.sin(p * 9.3 + q * 8.1 + 0.7) * 0.2;
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
-/** Timber scaffolding round a rect: standards at the corners and between, ledgers every 2 m, boards every 4 m, braces. */
+/** Light timber scaffolding round a rect (the stone must show through it): slender standards at the corners, ledgers every 4 m on the street and side faces, a board every 8 m, a brace every 8 m on the street face. */
 export function scaffold(bag, [x0, z0, x1, z1], y0, y1) {
-  const xs = [x0, (x0 + x1) / 2, x1], zs = [z0, (z0 + z1) / 2, z1];
-  for (const x of xs) for (const z of zs) if (x !== xs[1] || z !== zs[1]) bag.add(W, box(x - 0.09, y0, z - 0.09, x + 0.09, y1, z + 0.09));
-  for (let yy = y0 + 2; yy < y1 - 0.2; yy += 2) {
-    bag.add(W, box(x0 - 0.07, yy - 0.07, z0 - 0.2, x0 + 0.07, yy + 0.07, z1 + 0.2)); bag.add(W, box(x1 - 0.07, yy - 0.07, z0 - 0.2, x1 + 0.07, yy + 0.07, z1 + 0.2));
-    bag.add(W, box(x0 - 0.2, yy + 0.07, z0 - 0.07, x1 + 0.2, yy + 0.21, z0 + 0.07)); bag.add(W, box(x0 - 0.2, yy + 0.07, z1 - 0.07, x1 + 0.2, yy + 0.21, z1 + 0.07));
-    if (Math.round(yy - y0) % 4 === 0) {
-      bag.add('planks_grey', box(x0 - 0.9, yy + 0.21, z0 + 0.2, x0 - 0.1, yy + 0.26, z1 - 0.2)); bag.add('planks_grey', box(x1 + 0.1, yy + 0.21, z0 + 0.2, x1 + 0.9, yy + 0.26, z1 - 0.2));
-      for (const x of [x0 - 0.9, x1 + 0.1]) bag.add(W, box(x, yy - 0.07, z0 + 0.2, x + 0.8, yy + 0.07, z0 + 0.34));
-    }
+  const xs = [x0, x1], zs = [z0, z1], zm = (z0 + z1) / 2;
+  for (const x of xs) for (const z of zs) bag.add(W, box(x - 0.06, y0, z - 0.06, x + 0.06, y1, z + 0.06));
+  for (let yy = y0 + 4; yy < y1 - 0.2; yy += 4) {
+    bag.add(W, box(x1 - 0.05, yy - 0.05, z0 - 0.1, x1 + 0.05, yy + 0.05, z1 + 0.1));
+    for (const z of zs) bag.add(W, box(x0 - 0.1, yy - 0.05, z - 0.05, x1 + 0.1, yy + 0.05, z + 0.05));
+    bag.add('planks_grey', box(x1 + 0.1, yy + 0.21, z0 + 0.2, x1 + 0.9, yy + 0.26, z1 - 0.2));      // (the masons stand on these: arrival.js)
+    for (const z of [z0 + 0.3, z1 - 0.3]) bag.add(W, box(x1, yy + 0.05, z - 0.05, x1 + 0.9, yy + 0.21, z + 0.05));
+    if (Math.round(yy - y0) % 8 === 0) bag.add(W, rod([x1 + 0.03, yy - 4, z0], [x1 + 0.03, yy, z1], 0.04, 4));
   }
-  for (let yy = y0; yy + 4 <= y1; yy += 4) { bag.add(W, rod([x0 - 0.1, yy, z0], [x0 - 0.1, yy + 4, zs[1]], 0.06, 4)); bag.add(W, rod([x1 + 0.1, yy, zs[1]], [x1 + 0.1, yy + 4, z1], 0.06, 4)); bag.add(W, rod([x0, yy, z1 + 0.1], [xs[1], yy + 4, z1 + 0.1], 0.06, 4)); bag.add(W, rod([xs[1], yy, z0 - 0.1], [x1, yy + 4, z0 - 0.1], 0.06, 4)); }
+  void zm;
 }
 
 // ── Statues ──────────────────────────────────────────────────────────────────────────────────
@@ -150,29 +149,39 @@ function louvres(bag, xc, zc, y0, h, r) {
   for (const v of [0, h - 0.3]) bag.add('limestone', lathe([[r + 0.18, 0], [r + 0.18, 0.3], [r - 0.7, 0.3], [r - 0.7, 0]], 20).translate(xc, y0 + v, zc));
 }
 
-/** A tower: the square base to bv, a collar turning it round, the round hollow shaft to its 1910 height in scaffolding. */
+const TAPER = 0.85;                                           // the square base leans in by this much on each face between its foot and its top
+const hxAt = (hq, bv, v) => hq - TAPER * Math.max(0, Math.min(1, v / bv));
+/** A tower: the square base to bv (tapering, pierced with tall lancets), a collar turning it round, the round hollow shaft (tapering, pierced) to its 1910 height in scaffolding. */
 function tower(bag, col, xc, zc, y, hq, r, bv, top, rand, lv = 0) {
-  bag.add(S, box(xc - hq, y - 1.2, zc - hq, xc + hq, y + bv, zc + hq)); col.rect([xc - hq, zc - hq, xc + hq, zc + hq], y - 1.2, y + top);
-  for (const v of [7.5, 15]) bag.add('limestone', box(xc - hq - 0.12, y + v, zc - hq - 0.12, xc + hq + 0.12, y + v + 0.35, zc + hq + 0.12));
-  bag.add('limestone', box(xc - hq - 0.2, y + bv - 0.45, zc - hq - 0.2, xc + hq + 0.2, y + bv, zc + hq + 0.2));
-  // slits in the base's street face and its sides
-  const O = [];
-  for (const v of [9.5, 17]) {
-    quad(O, [xc + hq + 0.02, y + v, zc - 0.25], [xc + hq + 0.02, y + v, zc + 0.25], [xc + hq + 0.02, y + v + 3.2, zc + 0.25], [xc + hq + 0.02, y + v + 3.2, zc - 0.25]);
-    for (const s of [-1, 1]) quad(O, [xc + 1.2, y + v, zc + s * (hq + 0.02)], [xc + 0.7, y + v, zc + s * (hq + 0.02)], [xc + 0.7, y + v + 3.2, zc + s * (hq + 0.02)], [xc + 1.2, y + v + 3.2, zc + s * (hq + 0.02)]);
+  const hx = (v) => hxAt(hq, bv, v);
+  bag.add(S, frustum([xc - hq, zc - hq, xc + hq, zc + hq], y - 1.2, y + bv, TAPER, TAPER, TAPER, TAPER)); col.rect([xc - hq, zc - hq, xc + hq, zc + hq], y - 1.2, y + top);
+  for (const v of [6, 12, 18]) { const h = hx(v) + 0.14; bag.add('limestone', box(xc - h, y + v, zc - h, xc + h, y + v + 0.4, zc + h)); }
+  bag.add('limestone', box(xc - hq - 0.2, y + bv - 0.55, zc - hq - 0.2, xc + hq + 0.2, y + bv, zc + hq + 0.2));     // the corbelled cornice the scaffold stands on
+  // the lancets of the base: two tall pairs in each course on the street face, one on each side, deep dark
+  const O = [], vs = [[2.6, 5.7], [7.0, 11.4], [12.6, 17.4], [19, 22.4]];
+  for (const [v0, v1] of vs) {
+    let i0 = O.length;
+    for (const zz of [-1.05, 1.05]) { const f = (v) => xc + hx(v) + 0.03; quad(O, [f(v0), y + v0, zc + zz - 0.3], [f(v0), y + v0, zc + zz + 0.3], [f(v1), y + v1, zc + zz + 0.3], [f(v1), y + v1, zc + zz - 0.3]); }
+    orient(O, i0, [xc, y + (v0 + v1) / 2, zc], true);
+    for (const s2 of [-1, 1]) {
+      i0 = O.length; const f = (v) => zc + s2 * (hx(v) + 0.03);
+      quad(O, [xc + 1.5, y + v0, f(v0)], [xc + 0.7, y + v0, f(v0)], [xc + 0.7, y + v1, f(v1)], [xc + 1.5, y + v1, f(v1)]);
+      orient(O, i0, [xc + 1.1, y + (v0 + v1) / 2, zc], true);
+    }
   }
   // the collar from the square to the round
   const sq = (th) => 1 / Math.max(Math.abs(Math.cos(th)), Math.abs(Math.sin(th)));
   const rc = r + 0.6;
   bag.add(S, lathe([[rc, 0], [rc, 0.5], [r + 0.3, 1.4], [r, 2.6]], 16, (th, i) => (i < 2 ? 1 + (sq(th) - 1) * 0.55 : 1)).translate(xc, y + bv - 0.01, zc));
-  // the shaft, a hollow ring of ashlar, its last course broken off unevenly
-  const sh = top - 0.5, lo = sh - lv;               // (the louvre stage, lv tall, fills the shaft's top)
-  bag.add(S, lathe([[r, 0], [r, lo - bv], [r - 0.85, lo - bv], [r - 0.85, 0]], 24).translate(xc, y + bv, zc));
-  if (lv > 0) louvres(bag, xc, zc, y + lo, lv, r);
+  // the shaft, a hollow ring of ashlar leaning in toward the top, its last course broken off unevenly
+  const sh = top - 0.5, lo = sh - lv, rt = r * 0.9;               // (the louvre stage, lv tall, fills the shaft's top)
+  const rAt = (v) => r + (rt - r) * Math.max(0, Math.min(1, (v - bv) / Math.max(1, lo - bv)));
+  bag.add(S, lathe([[r, 0], [rt, lo - bv], [rt - 0.85, lo - bv], [r - 0.85, 0]], 24).translate(xc, y + bv, zc));
+  if (lv > 0) louvres(bag, xc, zc, y + lo, lv, rt);
   const N = 18;
   for (let i = 0; i < N; i++) {
     if (rand() < 0.3) continue;
-    const a0 = i / N * Math.PI * 2 + 0.02, a1 = (i + 1) / N * Math.PI * 2 - 0.02, rm = r - 0.42;
+    const a0 = i / N * Math.PI * 2 + 0.02, a1 = (i + 1) / N * Math.PI * 2 - 0.02, rm = rt - 0.42;
     const p = [xc + Math.cos(a0) * rm, zc + Math.sin(a0) * rm], q = [xc + Math.cos(a1) * rm, zc + Math.sin(a1) * rm];
     const T = [], hh = 0.38 + rand() * 0.15, d = 0.78;
     const nrm = [(Math.cos(a0) + Math.cos(a1)) / 2, (Math.sin(a0) + Math.sin(a1)) / 2];
@@ -180,20 +189,22 @@ function tower(bag, col, xc, zc, y, hq, r, bv, top, rand, lv = 0) {
     const A = c(p, -d / 2), B = c(q, -d / 2), C = c(q, d / 2), D = c(p, d / 2), Y0 = y + sh, Y1 = y + sh + hh;
     quad(T, [A[0], Y1, A[1]], [B[0], Y1, B[1]], [C[0], Y1, C[1]], [D[0], Y1, D[1]]);
     for (const [E, F] of [[A, B], [B, C], [C, D], [D, A]]) quad(T, [E[0], Y0, E[1]], [F[0], Y0, F[1]], [F[0], Y1, F[1]], [E[0], Y1, E[1]]);
-    const i0 = 0; orient(T, i0, [xc + Math.cos((a0 + a1) / 2) * rm, Y0 + hh / 2, zc + Math.sin((a0 + a1) / 2) * rm], true);
+    orient(T, 0, [xc + Math.cos((a0 + a1) / 2) * rm, Y0 + hh / 2, zc + Math.sin((a0 + a1) / 2) * rm], true);
     bag.add(S, fromTriangles(T));
   }
-  // tall narrow openings round the shaft, staggered as the stair climbs inside
-  for (let k = 0; k < 8; k++) {
-    const a = k / 8 * Math.PI * 2 + 0.2, v0 = bv + 3.5 + (k % 4) * 1.6; if (v0 + 2.6 > lo - 0.6) continue;
-    const t = [-Math.sin(a), Math.cos(a)], c = [xc + Math.cos(a) * (r + 0.02), zc + Math.sin(a) * (r + 0.02)];
-    const i0 = O.length;
-    quad(O, [c[0] - t[0] * 0.22, y + v0, c[1] - t[1] * 0.22], [c[0] + t[0] * 0.22, y + v0, c[1] + t[1] * 0.22], [c[0] + t[0] * 0.22, y + v0 + 2.6, c[1] + t[1] * 0.22], [c[0] - t[0] * 0.22, y + v0 + 2.6, c[1] - t[1] * 0.22]);
-    orient(O, i0, [xc, y + v0, zc], true);
+  // tall openings round the shaft in rings, each ring turned half a bay from the one below (the stair climbs inside)
+  for (let k = 0, v0 = bv + 1.4; v0 + 3.2 < lo - 0.4; k++, v0 += 4.2) {
+    const M = 10;
+    for (let m = 0; m < M; m++) {
+      const a = (m + (k % 2) * 0.5) / M * Math.PI * 2 + 0.2, t = [-Math.sin(a), Math.cos(a)], w = 0.3, v1 = v0 + 3.2;
+      const c0 = [xc + Math.cos(a) * (rAt(v0) + 0.03), zc + Math.sin(a) * (rAt(v0) + 0.03)], c1 = [xc + Math.cos(a) * (rAt(v1) + 0.03), zc + Math.sin(a) * (rAt(v1) + 0.03)];
+      const i0 = O.length;
+      quad(O, [c0[0] - t[0] * w, y + v0, c0[1] - t[1] * w], [c0[0] + t[0] * w, y + v0, c0[1] + t[1] * w], [c1[0] + t[0] * w, y + v1, c1[1] + t[1] * w], [c1[0] - t[0] * w, y + v1, c1[1] - t[1] * w]);
+      orient(O, i0, [xc, y + v0, zc], true);
+    }
   }
-  orient(O, 0, [xc, y + 10, zc], true);
   bag.add('opening', fromTriangles(O));
-  // the scaffolding stands on the base's top, round the shaft
+  // the scaffolding stands on the cornice, round the shaft
   const e = hq - 0.25;
   scaffold(bag, [xc - e, zc - e, xc + e, zc + e], y + bv, y + top + 3.2);
 }
@@ -254,8 +265,31 @@ function portal(bag, col, P, cz, y, { uc, hw, ht, gt, ft, Xw, Xf, Xb, ho, kb = 0
   // stalactites hanging inside the mouth's rim, and along the orders
   for (let i = 1; i < 44; i++) {
     const a = -1 + 2 * i / 44; if (Math.abs(a) > 0.9) continue;
-    const [x, u, v] = ip(a, 0.97); drips(bag, x - 0.25, y + v - 0.05, cz + u - Math.sign(a) * 0.1 * Math.abs(a), 0.5 + 0.9 * (1 - Math.abs(a)) * rand() + 0.3, rand);
-    if (i % 2 === 0) { const [x2, u2, v2] = ip(a, 0.64); drips(bag, x2 - 0.2, y + v2 - 0.05, cz + u2, 0.4 + 0.5 * rand(), rand); }
+    const [x, u, v] = ip(a, 0.97); drips(bag, x - 0.25, y + v - 0.05, cz + u - Math.sign(a) * 0.1 * Math.abs(a), (0.5 + 0.9 * (1 - Math.abs(a)) * rand() + 0.3) * 1.7, rand);
+    if (i % 2 === 0) { const [x2, u2, v2] = ip(a, 0.64); drips(bag, x2 - 0.2, y + v2 - 0.05, cz + u2, (0.4 + 0.5 * rand()) * 1.6, rand); }
+  }
+  // the archivolts: two stepped rings of pale stone standing out of the mass round the mouth, so that the porch reads as deep from afar
+  const ring = (k0, kv0, k1, kv1, xf, back) => {
+    const R = [], N = 44, q = (a, k, kvv, x) => { const [u, v] = arch(a, k, kvv); return P(x, u, v); }, c = P(back, uc, ht * 0.35);
+    for (let i = 0; i < N; i++) {
+      const a0 = -1 + 2 * i / N, a1 = -1 + 2 * (i + 1) / N;
+      let j = R.length; quad(R, q(a0, k0, kv0, xf), q(a1, k0, kv0, xf), q(a1, k1, kv1, xf), q(a0, k1, kv1, xf)); orient(R, j, P(xf + 30, uc, ht * 0.5));
+      j = R.length; quad(R, q(a0, k0, kv0, back), q(a1, k0, kv0, back), q(a1, k0, kv0, xf), q(a0, k0, kv0, xf)); orient(R, j, c);
+      j = R.length; quad(R, q(a0, k1, kv1, back), q(a1, k1, kv1, back), q(a1, k1, kv1, xf), q(a0, k1, kv1, xf)); orient(R, j, c, true);
+    }
+    bag.add(FIG, fromTriangles(R));
+  };
+  ring(1.0, 1.0, 1.2, 1.1, Xf + 2.4, Xf + 0.2);
+  ring(1.2, 1.1, 1.42, 1.2, Xf + 1.9, Xf + 0.6);
+  // the mass broken into rock and foliage: heavy lumps over its face and along its edge, so its outline is not a smooth curve
+  for (let k = 0; k < 20; k++) {
+    const a = -0.92 + rand() * 1.84, b = 0.5 + rand() * 0.5, [x, v, u] = face(a, b), rr = 0.9 + rand() * 1.1;
+    bag.add(rand() < 0.35 ? LEAF : MASS, ball(rr, 8, 6).scale(0.9, 0.85, 1.1).translate(x + 0.1, y + v + (b > 0.9 ? rr * 0.5 : 0), cz + u));
+  }
+  for (let k = 0; k < 9; k++) {
+    const a = -0.75 + k / 8 * 1.5, [uo, vo] = outline(a), rr = 1.0 + rand() * 0.9;
+    bag.add(MASS, ball(rr, 8, 6).scale(1.5, 1.1, 1).translate((Xb + Xf) / 2 + 0.4, y + vo + rr * 0.2, cz + uo));
+    if (k % 2 === 0) bag.add(FIG, lathe([[0.55, 0], [0.4, 1.2], [0.25, 2.4], [0.001, 3.6 + rand() * 2.5]], 7, (th, i) => 1 + 0.12 * Math.cos(th * 5 + i)).translate((Xb + Xf) / 2 + 0.4, y + vo + rr * 0.6, cz + uo));
   }
   // the colliders: the mass either side of the mouth, the doorway's wall
   for (const s of [-1, 1]) { const u0 = uc + s * hw * 0.98, u1 = uc + s * how; col.rect([Xb, cz + Math.min(u0, u1), Xf + 1.6, cz + Math.max(u0, u1)], y - 1.2, y + gt); }
@@ -264,7 +298,7 @@ function portal(bag, col, P, cz, y, { uc, hw, ht, gt, ft, Xw, Xf, Xb, ho, kb = 0
 
 /** A group on a corbel set into the face at (a, b): figures across u, h tall, each with its options. */
 function group(bag, pr, cz, y, a, b, figs, h = 2.6, sp = 0.46) {
-  h *= 1.2;                                                   // (the figures of the façade are larger than life)
+  h *= 1.9;                                                   // (the figures of the façade are larger than life; here they must read from 50 m)
   const [x, v, u] = pr.face(a, b), half = (figs.length - 1) / 2 * sp * h;
   corbel(bag, x + 0.15, y + v, cz + u, Math.max(0.6, half + 0.22 * h));
   figs.forEach((o, i) => { const du = (i - (figs.length - 1) / 2) * sp * h; statue(bag, [x + 0.15 + (o.dx ?? 0), y + v + (o.dv ?? 0), cz + u + du], o.h ?? h, o); });
@@ -274,7 +308,7 @@ function foliage(bag, pr, cz, y, n, rand, avoid) {
   for (let k = 0; k < n; k++) {
     const a = -0.95 + rand() * 1.9, b = 0.08 + rand() * 0.86;
     if (avoid.some(([aa, bb]) => Math.abs(a - aa) < 0.22 && Math.abs(b - bb) < 0.16)) continue;
-    const [x, v, u] = pr.face(a, b), r = 0.22 + rand() * 0.3;
+    const [x, v, u] = pr.face(a, b), r = 0.4 + rand() * 0.5;
     if (rand() < 0.6) {
       // a knot of leaves and buds swelling out of the stone
       const m = 2 + Math.floor(rand() * 3);
@@ -344,19 +378,19 @@ export function nativity(bag, col, fx, y, cz) {
   { const [x, v, u] = charity.face(0, 0.1); star(bag, x + 0.6, y + v + 0.3, cz + u); }
   group(bag, charity, cz, y, 0, 0.42, [{ wings: true, arms: true }, { veil: true, kneel: true }], 2.9);        // the Annunciation
   group(bag, charity, cz, y, 0, 0.8, [{ arms: true }, { veil: true, seated: true, crown: true }, { arms: 'up', crown: true }], 2.8);   // the Coronation
-  foliage(bag, charity, cz, y, 190, rand, [[0, 0.1], [0, 0.42], [0, 0.8], [-0.8, 0.45], [0.8, 0.45], [-0.5, 0.3], [0.5, 0.3], [-0.62, 0.62], [0.62, 0.62], [-0.38, 0.55], [0.38, 0.55]]);
+  foliage(bag, charity, cz, y, 120, rand, [[0, 0.1], [0, 0.42], [0, 0.8], [-0.8, 0.45], [0.8, 0.45], [-0.5, 0.3], [0.5, 0.3], [-0.62, 0.62], [0.62, 0.62], [-0.38, 0.55], [0.38, 0.55]]);
   // Hope: the flight into Egypt, the Innocents, the wedding of Mary and Joseph, Joseph at the helm of his boat
   group(bag, hope, cz, y, -0.72, 0.45, [{ veil: true, seated: true }, { arms: true }], 2.2, 0.36);
   group(bag, hope, cz, y, 0.72, 0.45, [{ arms: 'up' }, { kneel: true, veil: true }], 2.2, 0.36);
   group(bag, hope, cz, y, 0, 0.3, [{ veil: true }, { arms: true }], 2.5);
   { const [x, v, u] = hope.face(0, 0.72); corbel(bag, x + 0.15, y + v, cz + u, 1.2); boat(bag, x + 0.3, y + v, cz + u); statue(bag, [x + 0.25, y + v + 0.45, cz + u - 0.2], 1.8, { arms: true }); }
-  foliage(bag, hope, cz, y, 130, rand, [[-0.72, 0.45], [0.72, 0.45], [0, 0.3], [0, 0.72]]);
+  foliage(bag, hope, cz, y, 80, rand, [[-0.72, 0.45], [0.72, 0.45], [0, 0.3], [0, 0.72]]);
   // Faith: the Visitation, Jesus at the carpenter's bench, the Presentation, the Immaculate Conception
   group(bag, faith, cz, y, -0.72, 0.45, [{ veil: true }, { veil: true, arms: true }], 2.2, 0.36);
   { const [x, v, u] = faith.face(0.72, 0.45); corbel(bag, x + 0.15, y + v, cz + u, 1.0); statue(bag, [x + 0.05, y + v, cz + u - 0.4], 1.9, { arms: true }); bag.add('wood_dark', box(x + 0.15, y + v, cz + u + 0.05, x + 0.75, y + v + 0.8, cz + u + 0.95)); }
   group(bag, faith, cz, y, 0, 0.3, [{ arms: true }, { veil: true }, { arms: true }], 2.4);
   { const [x, v, u] = faith.face(0, 0.72); corbel(bag, x + 0.15, y + v, cz + u, 0.8); bag.add(FIG, lathe([[0.9, 0], [0.95, 0.12], [0.001, 0.2]], 12, (th) => 1 + 0.5 * Math.cos(th)).translate(x + 0.15, y + v, cz + u)); statue(bag, [x + 0.15, y + v + 0.15, cz + u], 2.2, { veil: true, arms: 'up' }); }
-  foliage(bag, faith, cz, y, 130, rand, [[-0.72, 0.45], [0.72, 0.45], [0, 0.3], [0, 0.72]]);
+  foliage(bag, faith, cz, y, 80, rand, [[-0.72, 0.45], [0.72, 0.45], [0, 0.3], [0, 0.72]]);
   // the columns between the portals: a sea turtle at the sea (south) end, a tortoise at the mountain (north)
   turtleColumn(bag, col, fx + 6.3, y, cz + 7.5, true);
   turtleColumn(bag, col, fx + 6.3, y, cz - 7.5, false);
@@ -368,7 +402,7 @@ export function nativity(bag, col, fx, y, cz) {
   scaffold(bag, [fx - 1.0, cz - 3.4, fx + 4.8, cz + 3.4], y + 36, y + 49);
   for (const uc of [-14.25, 14.25]) {
     bag.add(S, box(fx - 1, y + 28.4, cz + uc - 1.1, fx + 2.6, y + 29.6, cz + uc + 1.1));
-    bag.add(S, lathe([[1.15, 0], [1.05, 1.2], [0.95, 3.4], [0.001, 3.4]], 8, null, fx + 0.8, y + 29.6, cz + uc));
-    scaffold(bag, [fx - 1.2, cz + uc - 1.9, fx + 3.0, cz + uc + 1.9], y + 28.5, y + 35.5);
+    bag.add(S, lathe([[1.6, 0], [1.4, 2.4], [1.1, 5.2], [0.8, 7.4], [0.001, 7.4]], 12, (th, i) => 1 + 0.1 * Math.cos(th * 6 + i), fx + 0.8, y + 29.6, cz + uc));
+    scaffold(bag, [fx - 1.2, cz + uc - 1.9, fx + 3.0, cz + uc + 1.9], y + 28.5, y + 39.5);
   }
 }
