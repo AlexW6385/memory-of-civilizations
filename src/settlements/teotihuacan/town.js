@@ -48,8 +48,13 @@ function plants() {
 }
 export async function town() {
   const all = compounds(), plans = [];
-  // the compounds in 100 m tiles, each in full near (rooms, furniture, fronts) and as blocks beyond 130 m (src/settlements/lod.js)
-  plans.push(...lodTiles('teotihuacan-compounds', 'teotihuacano', all.map((c) => ({ t: 'compound', ...c })), { near: 130, R: RADIUS, entrance: { at: [0, -80], facing: 'e' } }));
+  // the compounds within 210 m of the arrival in 100 m tiles, each in full near (rooms, furniture, fronts) and as blocks beyond 130 m
+  // (src/settlements/lod.js); the outer ring only as the simple version (walls and blocks), in 220 m tiles drawn from 1 m
+  const ent = { at: [0, -80], facing: 'e' }, A = [0, 70], near = all.filter((c) => Math.hypot((c.rect[0] + c.rect[2]) / 2 - A[0], (c.rect[1] + c.rect[3]) / 2 - A[1]) < 210);
+  plans.push(...lodTiles('teotihuacan-compounds', 'teotihuacano', near.map((c) => ({ t: 'compound', ...c })), { near: 130, R: RADIUS, entrance: ent }));
+  const outer = new Map();
+  for (const c of all) if (!near.includes(c)) { const k = `${Math.floor((c.rect[0] + c.rect[2]) / 440)},${Math.floor((c.rect[1] + c.rect[3]) / 440)}`; if (!outer.has(k)) outer.set(k, []); outer.get(k).push({ t: 'compound', ...c, simple: true }); }
+  for (const [k, els] of outer) { const [i, j] = k.split(',').map(Number); plans.push({ ...base(`teotihuacan-outer-${k}`, els), far: 1, center: [i * 220 + 110, j * 220 + 110], nocollide: false }); }
   // the Great Compound's market and its central platform with a small temple
   plans.push(base('teotihuacan-market', [{ t: 'tt_market', rect: MARKET, seed: 450, hole: MARKET_PLATFORM },
     { t: 'tt_pyramid', c: [(MARKET_PLATFORM[0] + MARKET_PLATFORM[2]) / 2, (MARKET_PLATFORM[1] + MARKET_PLATFORM[3]) / 2], y: 0.04, w: 24, d: 24, tw: 14, td: 14, h: 3.6, levels: 2, tablero: 0.5, stair: 'n', stairW: 5, talud: 'stucco_red', temple: { w: 6, d: 6, h: 3 } }]));

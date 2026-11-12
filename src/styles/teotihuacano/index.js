@@ -277,6 +277,7 @@ function compound(el, ctx) {
       if (i === 1 && j === 1) continue;
       const r = [x0 + 1 + i * cw + 0.6, z0 + 1 + j * cd + 0.6, x0 + 1 + (i + 1) * cw - 0.6, z0 + 1 + (j + 1) * cd - 0.6];
       bag.add(S, box(r[0], 0, r[1], r[2], i === 1 && j === 0 ? h + 0.4 : h - 0.2, r[3]));
+      col.rect(r, 0, h);
     }
     return;
   }
