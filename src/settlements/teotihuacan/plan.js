@@ -10,16 +10,17 @@ const E = [], LP = MOON.rise;
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const rand = rng(4000);
 // the Sun "finished … with lime plaster" (Wikipedia), its temple's chamber within thick walls
-E.push({ t: 'tt_pyramid', c: SUN.c, w: SUN.w, d: SUN.d, tw: SUN.tw, td: SUN.td, h: SUN.h, levels: 5, tablero: 0, stair: 'w', stairW: 14, weather: 1.4, talud: 'lime_plaster_rough', temple: { w: 16, d: 16, h: 5, inner: true, wall: 3, seed: 65 } });
-// pilgrims and priests on the Sun's stair, going up and coming down; priests and a censer-bearer before the temple
+E.push({ t: 'tt_pyramid', c: SUN.c, w: SUN.w, d: SUN.d, tw: SUN.tw, td: SUN.td, h: SUN.h, levels: 5, tablero: 0, band: 0.22, staged: true, stair: 'w', stairW: 14, weather: 2.4, talud: 'lime_plaster_rough', temple: { w: 16, d: 16, h: 5, inner: true, wall: 3, seed: 65 } });
+// pilgrims and priests on the Sun's stair, going up and coming down (the flights on each stage's face, from the Adosada's roof up); priests and a censer-bearer before the temple
 {
-  const run = SUN.h * 1.05 - 0.15 * (SUN.w - SUN.tw) / 10, x0 = SUN.c[0] - SUN.tw / 2 - SUN.h * 1.05, n = Math.round(SUN.h / 0.2), up = -Math.PI / 2, down = Math.PI / 2, zc = SUN.c[1];
-  const at = (k, dz, rot, who, seed) => [x0 + run * (k + 0.5) / n, zc + dz, SUN.h * (k + 1) / n, rot, who, seed];
-  E.push({ t: 'tt_people', people: [at(14, -2.5, up, 'pilgrim', 1), at(18, 1.5, up, 'bearer', 2), at(22, 3.6, down, 'pilgrim', 3), at(60, -1, up, 'priest', 4), at(64, 1.2, up, 'pilgrim', 5),
-    at(120, -3.5, up, 'bearer', 6), at(126, 2.8, down, 'pilgrim', 7), at(190, 0.5, up, 'pilgrim', 8), at(196, -1.8, up, 'pilgrim', 9), at(250, 3, down, 'priest', 10), at(300, -2, up, 'bearer', 11),
+  const n = 5, sx = (SUN.w - SUN.tw) / 2 / n, ht = SUN.h / n, up = -Math.PI / 2, down = Math.PI / 2, zc = SUN.c[1];
+  const at = (y, dz, rot, who, seed) => { const k = Math.min(n - 1, Math.floor(y / ht)); return [SUN.c[0] - (SUN.w / 2 - sx * k) - 0.3 + (y - k * ht) / ht * 0.85 * sx, zc + dz, y, rot, who, seed]; };
+  E.push({ t: 'tt_people', people: [at(14.2, -2.5, up, 'pilgrim', 1), at(15.6, 1.5, up, 'bearer', 2), at(18.4, 3.6, down, 'pilgrim', 3), at(20.6, -1, up, 'priest', 4), at(23.0, 1.2, up, 'pilgrim', 5),
+    at(28.4, -3.5, up, 'bearer', 6), at(31.0, 2.8, down, 'pilgrim', 7), at(36.4, 0.5, up, 'pilgrim', 8), at(40.6, -1.8, up, 'pilgrim', 9), at(46.2, 3, down, 'priest', 10), at(55.6, -2, up, 'bearer', 11),
     [SUN.c[0] - 12, zc - 3, SUN.h, down, 'priest', 12], [SUN.c[0] - 11.5, zc + 3.4, SUN.h, Math.PI * 0.75, 'pilgrim', 13], [SUN.c[0] - 13.5, zc + 1, SUN.h, up, 'kneel', 14]] });
 }
-E.push({ t: 'tt_pyramid', c: [SUN.c[0] - SUN.w / 2 - 22, SUN.c[1]], w: 44, d: 70, tw: 32, td: 58, h: 12, levels: 2, tablero: 0.4, stair: 'w', stairW: 12, stairFoot: LEVELS[1] + 0.03, weather: 1, talud: 'lime_plaster_rough' });
+// the Adosada, the platform built against the Sun's west face, its roof the landing from which the great stair starts (level with the Sun's first stage)
+E.push({ t: 'tt_pyramid', c: [SUN.c[0] - SUN.w / 2 - 12, SUN.c[1]], w: 60, d: 70, tw: 54, td: 58, h: SUN.h / 5, levels: 2, tablero: 0.4, stair: 'w', stairW: 12, stairFoot: LEVELS[1] + 0.03, weather: 1, talud: 'lime_plaster_rough' });
 // the Moon and its front platform on the plaza's terrace
 E.push({ t: 'tt_pyramid', c: MOON.c, y: LP, w: MOON.w, d: MOON.d, tw: MOON.tw, td: MOON.td, h: MOON.h, levels: 4, tablero: 0.3, stair: 's', stairW: 12, weather: 1.2, talud: 'lime_plaster_rough', temple: { w: 14, d: 12, h: 4.5 } });
 E.push({ t: 'tt_pyramid', c: [0, MOON.c[1] + MOON.d / 2 + 14], y: LP, w: 46, d: 30, tw: 36, td: 22, h: 10, levels: 3, tablero: 0.45, stair: 's', stairW: 10 });
@@ -133,7 +134,7 @@ export const city = {
   entrance: { at: [0, -80], facing: 'e' },
   bounds: [-90, -400, 300, 400],
   bakeBounds: [-80, -400, 300, 360],
-  view: [62, -140, 200, -20],
+  view: [40, -110, 190, 40],
   bakeTop: 72,
   elements: E,
   rooms,

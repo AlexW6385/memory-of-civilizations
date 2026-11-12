@@ -138,3 +138,5 @@ Dress: commoners barefoot in a loincloth, a cloak of ixtle (agave fibre); thousa
 - [Teotihuacán, a City of Life — Popular Archaeology](https://popular-archaeology.com/article/teotihuacan-a-city-of-life/)
 - [Teotihuacan — The Met, Heilbrunn Timeline of Art History](https://www.metmuseum.org/essays/teotihuacan)
 - [Daily life in Teotihuacan during the 5th century CE — dailylifehistory](https://dailylifehistory.pages.dev/ancient/teotihuacan/5th-century-ce/)
+
+**Fix pass (2026-11-12).** The Pyramid of the Sun: each of its five stages now carries a band of red paint under its ledge above the plastered slope, with more weathering [inferred: painted cornices; the Sun was "finished with lime plaster" and painted, Wikipedia]; the great stair is a flight on each stage's face with a landing on each ledge, starting from the Adosada's roof, which is enlarged to meet the Sun's first stage (before, the stair ran inside the body and could not be seen). Frame budget: maguey and nopal in two levels (full within 90 m, a coarse form to 190 m); compounds within 210 m of the arrival in near/far tiles (src/settlements/lod.js), the outer ring only as walls and blocks.

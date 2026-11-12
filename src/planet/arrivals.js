@@ -56,7 +56,7 @@ export const ARRIVALS = {
   'barcelona':        [240, null, -52, 0.695, 0.4],  // from the Marina's east kerb at the cross street, 47 m back: the whole Nativity façade, its four towers and the scaffolding on the Charity crown in the frame
   'norse-borgund':    [-30, null, -28, -1.509, 0.27],     // the stave church in its valley, across the churchyard wall (8 m off)
   'muscovy':          [40, 0.1, 40, 3.0, 0.22],          // St Basil's and the Kremlin wall across Red Square
-  'teotihuacan':      [0, 0.1, 60, 0, 0.1],              // up the Avenue of the Dead
+  'teotihuacan':      [0, 0.1, 70, -0.85, 0.2],          // from the avenue's plaza, the Pyramid of the Sun whole to the north-east, its Adosada and stair
   'chichen-itza':     [30, 0.1, 75, 0.38, 0.17],         // El Castillo
   'maya-tikal':       [-18, 0.1, 28, -1.2, 0.3],         // Temple I across the Great Plaza
   'tenochtitlan':     [-10, 0.1, 30, -1.293, 0.25],      // the Templo Mayor's twin shrines
