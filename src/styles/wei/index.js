@@ -7,9 +7,10 @@ import '../han/index.js';
 import { terrace, tower, skyway, river } from './terrace.js';
 import { prop } from './props.js';
 import { boat } from './boats.js';
+import { house, office, shopRow } from './houses.js';
 
 registerStyle('wei', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.han.elements, wei_terrace: terrace, wei_tower: tower, wei_skyway: skyway, wei_river: river, wei_prop: prop, wei_boat: boat },
+  elements: { ...STYLES.han.elements, wei_terrace: terrace, wei_tower: tower, wei_skyway: skyway, wei_river: river, wei_prop: prop, wei_boat: boat, wei_house: house, wei_office: office, wei_shop_row: shopRow },
   objects: {},
 });

@@ -81,7 +81,7 @@ export function lots() {
         const rect = [x, z0 + WARD_WALL + v0, xe, z0 + WARD_WALL + v1 - 0.4], r = rand();
         const kind = ri === 0 || ri === 3 ? (r < 0.62 ? 'court' : r < 0.82 ? 'tower' : 'row') : (r < 0.45 ? 'court' : r < 0.6 ? 'tower' : 'row');
         const lot = { rect, front, kind, seed: Math.floor(rand() * 1e6), open: false, ward: wi };
-        if (xe - x > 9 && kind !== 'tower' && furnished++ % 4 === 0) lot.open = true;
+        if (xe - x > 9 && furnished++ % 2 === 0) lot.open = true;
         LOTS.push(lot);
         x = xe + 0.6;
       }

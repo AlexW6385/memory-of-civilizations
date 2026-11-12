@@ -62,7 +62,7 @@ function marketRows(rect, seedBase) {
   let seed = seedBase;
   for (const [qx0, qz0, qx1, qz1] of quads) {
     const nShops = Math.max(2, Math.floor((qx1 - qx0) / 5.2));
-    for (let zz = qz0; zz + 12 <= qz1 + 0.01; zz += 16) E.push({ t: 'han_shop_row', rect: [qx0, zz, qx0 + nShops * 5.2, zz + 6], front: 'n', n: nShops, seed: seed++ }, { t: 'han_shop_row', rect: [qx0, zz + 6, qx0 + nShops * 5.2, zz + 12], front: 's', n: nShops, seed: seed++ });
+    for (let zz = qz0; zz + 12 <= qz1 + 0.01; zz += 16) E.push({ t: 'wei_shop_row', rect: [qx0, zz, qx0 + nShops * 5.2, zz + 6], front: 'n', n: nShops, seed: seed++ }, { t: 'wei_shop_row', rect: [qx0, zz + 6, qx0 + nShops * 5.2, zz + 12], front: 's', n: nShops, seed: seed++ });
   }
   return E;
 }
@@ -135,7 +135,7 @@ export async function town() {
   // ── the offices along the avenue ──
   {
     const E = [];
-    for (const l of lots()) if (l.kind === 'office') E.push({ t: 'han_office', rect: l.rect, seed: l.seed, open: l.seed % 3 === 0 });
+    for (const l of lots()) if (l.kind === 'office') E.push({ t: 'wei_office', rect: l.rect, seed: l.seed, open: l.seed % 2 === 0 });
     if (E.length) plans.push(base('wei-offices', E));
   }
   // ── wards: walls and gates, the houses ──
@@ -147,7 +147,7 @@ export async function town() {
     }
     plans.push(base('wei-wards', E));
     const H = lots().filter((l) => l.kind !== 'office');
-    for (let i = 0; i < H.length; i += 40) plans.push(base(`wei-houses-${i / 40}`, H.slice(i, i + 40).map((l) => ({ t: 'han_house', rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, open: l.open }))));
+    for (let i = 0; i < H.length; i += 40) plans.push(base(`wei-houses-${i / 40}`, H.slice(i, i + 40).map((l) => ({ t: 'wei_house', rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, open: l.open }))));
   }
   // ── the market ──
   {
