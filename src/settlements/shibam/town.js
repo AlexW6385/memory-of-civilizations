@@ -51,6 +51,11 @@ function square() {
   for (const x of [-24, 24]) E.push({ t: 'bench', at: [x, -26.4], y: 0, rot: 0, len: 2.2 });
   for (let k = 0; k < 8; k++) E.push({ t: 'sacks', at: [-26 + k * 7, -27.6 - (k % 2) * 0.3], y: 0, rot: 0, n: 3, seed: k + 2 });
   E.push({ t: 'firewood', at: [-29, -20], y: 0, rot: 1.57 }); E.push({ t: 'firewood', at: [-29, -12], y: 0, rot: 1.57 });
+  // before the merchant's tower house (the landmark, door on its west face at z -21.7): a bench with an elder, water jars, firewood and sacks put down by the porters, the way to the door left open
+  E.push({ t: 'bench', at: [32.1, -26.4], y: 0, rot: Math.PI / 2, len: 2.2 });
+  E.push({ t: 'pot', kind: 'water_pot', at: [32.3, -20.6], y: 0, n: 2, seed: 61 });
+  E.push({ t: 'firewood', at: [32.2, -19.4], y: 0, rot: Math.PI / 2, len: 1.4, seed: 7 });
+  E.push({ t: 'sacks', at: [32.3, -28.0], y: 0, rot: 1.57, n: 3, seed: 9 });
   // the street door's stone and the gate's trough outside the wall
   E.push({ t: 'trough', at: [GATE.x + 5.5, WALL[3] + 6], y: h(GATE.x + 5.5, WALL[3] + 6), rot: 0 });
   return E;
@@ -99,6 +104,9 @@ function people() {
   for (const [x, z, r] of [[15.5, -4.6, 3.1], [-21, -4.2, 0.4]]) woman([x, z], r, { carry: 'bundle', pose: 'stand' });
   // a man sharpening at his stone, a porter resting against the sacks along the palace front
   man([-8.2, -26.6], 1.57, { pose: 'sit_low', cloth: 'cloth_brown' }); man([12.4, -26.7], 4.7, { carry: 'sack', pose: 'stand' });
+  // the elder on the bench before the tower house, a woman with her jar at its door
+  man([31.9, -26.4], face([31.9, -26.4], [20, -26.4]), { pose: 'sit', beard: true, cloth: 'cloth_white' });
+  woman([30.4, -24.2], face([30.4, -24.2], [34, -21.7]), { carry: 'pot' });
   // at the gate: a guard and a man with camels
   man([GATE.x + 3.4, 99.5], Math.PI, { pose: 'staff', carry: 'staff', len: 1.6 });
   man([GATE.x - 3.4, 99.5], Math.PI, { pose: 'sit_low', beard: true });
