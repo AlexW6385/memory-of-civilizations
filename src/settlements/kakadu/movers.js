@@ -23,7 +23,8 @@ export function walkways() {
   for (const C of CAMPS) rects.push({ r: [C.c[0] - 5, C.c[1] - 4, C.c[0] + 5, C.c[1] + 4], weight: 0.8, market: 0.3, kind: 'lane' });
   rects.push({ r: [-36, -19, -30, -4], weight: 0.8, market: 0.2, kind: 'lane' });
   rects.push({ r: [-56, -27, -52, -19], weight: 0.6, market: 0.2, kind: 'lane' });     // the small shelter's camp to the way
-  rects.push({ r: [5, -19, 11, -8], weight: 0.9, market: 0.3, kind: 'lane' });         // the apron camp
+  rects.push({ r: [2, -24, 14, -15], weight: 0.9, market: 0.3, kind: 'lane' });        // the apron camp, right of the arrival
+  rects.push({ r: [-15, -24, -5, -17], weight: 0.9, market: 0.3, kind: 'lane' });      // the apron camp, left of it
   rects.push({ r: [-32, -19, -26, 26], weight: 0.5, market: 0.2, kind: 'lane' });      // down to the west bank
   rects.push({ r: [28, -17, 34, 12], weight: 0.9, market: 0.3, kind: 'lane' });
   rects.push({ r: [30, 8, 58, 14], weight: 0.5, market: 0.2, kind: 'lane' });          // across to the east hollow

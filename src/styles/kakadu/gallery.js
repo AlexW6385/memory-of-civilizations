@@ -61,7 +61,7 @@ function ceiling(bag, S, seed) {
 export function gallery(el, { bag, col }) {
   shelterSurfaces(MAIN, 'sandstone_rose', { bag });
   shelterSurfaces(SMALL, 'sandstone_yellow', { bag });
-  wall(bag, MAIN, 501, { hands: 3, tone: 'sandstone_rose', flakes: 14, great: [[-13, 2.35, 2.9, 'fish', 1, 1], [-4.5, 1.45, 2.4, 'fish', -1, 0], [3.5, 2.4, 2.7, 'fish', 1, 1], [11, 1.5, 1.9, 'turtle', 1, 0], [16.5, 2.5, 2.4, 'fish', -1, 1], [-19, 1.8, 1.9, 'wallaby', 1, 0], [-1, 0.9, 1.4, 'turtle', -1, 1]] });
+  wall(bag, MAIN, 501, { hands: 3, tone: 'sandstone_rose', flakes: 14, great: [[-13, 2.35, 3.6, 'fish', 1, 1], [-4.5, 1.5, 3.0, 'fish', -1, 0], [3.5, 2.4, 3.4, 'fish', 1, 1], [11, 1.6, 2.4, 'turtle', 1, 0], [16.5, 2.5, 3.0, 'fish', -1, 1], [-19, 1.9, 2.4, 'wallaby', 1, 0], [-1, 0.95, 1.7, 'turtle', -1, 1], [-8.5, 0.9, 2.0, 'turtle', 1, 1], [8, 0.95, 1.9, 'wallaby', -1, 1], [20.5, 1.7, 2.2, 'fish', 1, 0], [-21.3, 2.7, 1.7, 'fish', -1, 1]] });
   wall(bag, SMALL, 502, { hands: 9, tone: 'sandstone_yellow', flakes: 9 });
   ceiling(bag, MAIN, 503);
   ceiling(bag, SMALL, 504);

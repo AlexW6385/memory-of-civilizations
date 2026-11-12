@@ -1,6 +1,7 @@
 // Ubirr's country and its family camp (docs/settlements/kakadu.md §4, §5): paperbark and pandanus round the billabong, termite mounds on
 // the dry edge, lilies on the water; the bark hut, the lean-to, the fires with their trough, grindstone and turtle, the racks of geese;
 // the people at the camp (bare, with fibre belts, ochre and white clay), dingoes, and magpie geese crowded on the water [docs §5].
+import { faceSpots } from '../../styles/kakadu/outcrop.js';
 import { RADIUS, POOL, CAMPS, height, groves, inPool, poolD, rng, inRect, MAIN, SMALL, woodland, tuftSpots, screeSpots, shelterSpots, topSpots } from './layout.js';
 
 const plan = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -14], facing: 's' } });
@@ -22,7 +23,7 @@ export async function town() {
     const [fx, fz] = C.fire, y = height(fx, fz);
     K.push({ t: 'ka_fire', at: [fx, fz], y, seed: i + 3, turtle: C.turtle, trough: C.trough, grind: C.grind, fish: C.fish });
     if (C.hut) K.push({ t: 'ka_hut', at: [C.hut[0], C.hut[1]], y: height(C.hut[0], C.hut[1]), rot: C.hut[2], seed: 1 });
-    K.push({ t: 'ka_leanto', at: [C.lean[0], C.lean[1]], y: height(C.lean[0], C.lean[1]), rot: C.lean[2], seed: 2 });
+    if (C.lean) K.push({ t: 'ka_leanto', at: [C.lean[0], C.lean[1]], y: height(C.lean[0], C.lean[1]), rot: C.lean[2], seed: 2 });
     K.push({ t: 'ka_rack', at: [C.rack[0], C.rack[1]], y: height(C.rack[0], C.rack[1]), rot: 0.2, len: 2.2 });
     woman([fx + 1.0, fz + 0.9], y, -2.3, { pose: 'sit_ground' });
     man([fx - 1.1, fz - 0.6], y, 1.0, { pose: 'sit_ground' });
@@ -36,8 +37,17 @@ export async function town() {
     const x = S.x0 + 5 + rand() * (S.x1 - S.x0 - 10), z = S.zl - 2.5 - rand() * 1.2;
     (k % 2 ? woman : man)([x, z], height(x, z), Math.PI, { pose: k === 0 ? 'stand' : 'talk' });
   }
+  // an old man teaching the children before the great panel, a woman and a girl weaving a pandanus mat in the shade at its east end
+  {
+    const zt = MAIN.zl - 3.3, kid = (x, z, rot, seed) => L.push({ t: 'figure', at: [x, z], y: height(x, z), rot, seed, dress: 'loincloth', cloth: 'cloth_brown', skin: 'skin_dark', child: true, h: 0.95 + (seed % 3) * 0.05, pose: 'sit_ground', hair: 'short', feet: 'bare', over: 'none' });
+    man([-4.6, zt], height(-4.6, zt), Math.PI, { pose: 'stand', beard: true, hair: 'long' });
+    kid(-5.6, zt + 1.3, Math.PI, 811); kid(-4.3, zt + 1.5, Math.PI, 812); kid(-3.1, zt + 1.2, Math.PI, 813);
+    const wx = MAIN.x1 - 5, wz = MAIN.zl - 2.6;
+    K.push({ t: 'ka_item', kind: 'mat', at: [wx, wz], y: height(wx, wz), rot: 0.1, seed: 9 });
+    woman([wx + 0.9, wz + 0.4], height(wx, wz), -1.9, { pose: 'sit_ground' }); kid(wx - 0.4, wz + 1.2, 0.4, 814);
+  }
   // a hunter at the billabong's edge with a goose spear; people on the way along the foot
-  for (let k = 0; k < 8; k++) { const x = -60 + rand() * 100, z = -18 + rand() * 5; (rand() < 0.5 ? man : woman)([x, z], height(x, z), rand() * 6.28, rand() < 0.4 ? { pose: 'talk' } : {}); }
+  for (let k = 0; k < 8; k++) { const x = -60 + rand() * 100, z = -18 + rand() * 5, f = rand() < 0.5 ? man : woman, rot = rand() * 6.28, o = rand() < 0.4 ? { pose: 'talk' } : {}; if (Math.hypot(x + 1, z + 13) < 9) continue; f([x, z], height(x, z), rot, o); }   // (none within 9 m of the arrival)
   man([POOL.c[0] - POOL.a * 1.08, POOL.c[1] - 5], 0, -1.2, { pose: 'staff' });
   // magpie geese crowded on the shrunken water and on its margin
   for (let k = 0; k < 12; k++) {
@@ -59,6 +69,14 @@ export async function town() {
     else if (q < 0.5) K.push({ t: 'ka_cycad', at: [x, z], y: yy, rot: R2() * 6.28, h: 0.4 + Math.floor(R2() * 3) * 0.25, seed: k });
     else if (q < 0.65) K.push({ t: 'ka_pandanus', at: [x, z], y: yy, rot: R2() * 6.28, h: 2 + Math.floor(R2() * 3) * 0.5, seed: k % 3 });
     else K.push({ t: 'ka_tufts', list: [[x, z, yy, 1.1, R2() * 6.28, 'bark_olive'], [x + 0.7, z + 0.4, yy, 0.8, R2() * 6.28, 'ichu'], [x - 0.5, z + 0.9, yy, 0.9, R2() * 6.28, 'ichu']] });
+  });
+  // the rock's face: gums and cycads rooted on the ledges of the soft beds, pandanus and cycads at the feet of the open clefts, tufts between
+  faceSpots().forEach(({ x, y, z, w, kind }, k) => {
+    const q = R2();
+    if (kind === 'cleft') { K.push({ t: 'ka_pandanus', at: [x, z], y, rot: R2() * 6.28, h: 2.5 + Math.floor(R2() * 3) * 0.5, seed: k % 3 }); K.push({ t: 'ka_cycad', at: [x + 1.1, z + 0.5], y, rot: R2() * 6.28, h: 0.6 + Math.floor(R2() * 3) * 0.25, seed: k }); return; }
+    if (q < 0.4 && w > 0.5) K.push({ t: 'ka_gum', at: [x, z], y, rot: R2() * 6.28, h: 2.5 + Math.floor(R2() * 4) * 0.5, seed: k });
+    else if (q < 0.65) K.push({ t: 'ka_cycad', at: [x, z], y, rot: R2() * 6.28, h: 0.4 + Math.floor(R2() * 3) * 0.25, seed: k });
+    K.push({ t: 'ka_tufts', list: [[x + 0.5, z, y, 0.9, R2() * 6.28, 'bark_olive'], [x - 0.6, z + 0.1, y, 0.8, R2() * 6.28, 'ichu'], [x + 1.4, z - 0.1, y, 0.7, R2() * 6.28, 'ichu']] });
   });
   // the shelters furnished
   const sp = shelterSpots();

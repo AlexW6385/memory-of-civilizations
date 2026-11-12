@@ -12,6 +12,9 @@ const flights = [
   { kind: 'swallow', n: 5, loop: { c: [10, 35], a: [50, 25], rot: 0.2 }, y: [3, 14], speed: 9 },
   { kind: 'swallow', n: 5, loop: { c: [-30, 5], a: [30, 14], rot: 0.5 }, y: [2, 9], speed: 9 },
   { kind: 'swallow', n: 4, loop: { c: [50, 30], a: [26, 18], rot: -0.3 }, y: [3, 10], speed: 9 },
+  { kind: 'goose', n: 9, loop: { c: [20, 30], a: [55, 22], rot: 0.1 }, y: [9, 22], speed: 11 },
+  { kind: 'goose', n: 6, loop: { c: [-40, 40], a: [40, 20], rot: -0.4 }, y: [6, 16], speed: 10 },
+  { kind: 'parrot', n: 4, loop: { c: [0, -24], a: [24, 8], rot: 0 }, y: [2, 8], speed: 8 },
   { kind: 'crow', n: 3, loop: { c: [0, -55], a: [70, 25], rot: 0 }, y: [28, 45], speed: 8 },
 ];
 flights[0].a = [28, 6];
