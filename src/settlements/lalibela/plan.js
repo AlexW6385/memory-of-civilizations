@@ -2,7 +2,7 @@
 // on the floor of its pit, the pits' and trenches' rock walls (open where a trench joins), Bete
 // Giyorgis alone to the south-west.
 
-import { PITS, TRENCHES, EDGE, OUTER, HUT, POOL, inRect, slope } from './layout.js';
+import { PITS, TRENCHES, EDGE, OUTER, HUT, POOL, inRect, slope, cutDepth } from './layout.js';
 
 const E = [];
 // ---- the walls of the cuts: each pit edge and trench side, broken where another cut opens onto it
@@ -35,7 +35,7 @@ for (const c of cuts) {
         const s0 = p + (q - p) * i / n, s1 = p + (q - p) * (i + 1) / n, m = (s0 + s1) / 2, [mx, mz] = k === 'z' ? [m, v] : [v, m];
         const vo = v + (v < (k === 'z' ? (z0 + z1) / 2 : (x0 + x1) / 2) ? -OUTER / 2 : OUTER / 2);   // widened outward, under the ground
         const inn = v < (k === 'z' ? (z0 + z1) / 2 : (x0 + x1) / 2) ? 1 : -1;                     // the unit into the cut
-        E.push({ t: 'rock_cut', a: k === 'z' ? [s0, vo] : [vo, s0], b: k === 'z' ? [s1, vo] : [vo, s1], y0: -c.depth - 0.2, th: EDGE + OUTER, top: slope(mx, mz) + 0.12, n: k === 'z' ? [0, inn] : [inn, 0] });   // a hewn kerb a hand proud of the ground (its top flush with the ground had flickered with it)
+        E.push({ t: 'rock_cut', a: k === 'z' ? [s0, vo] : [vo, s0], b: k === 'z' ? [s1, vo] : [vo, s1], y0: -c.depth - 0.2, th: EDGE + OUTER, top: Math.max(slope(mx, mz), slope(...(k === 'z' ? [s0, v] : [v, s0])), slope(...(k === 'z' ? [s1, v] : [v, s1]))) + 0.12, n: k === 'z' ? [0, inn] : [inn, 0] });   // a hewn kerb a hand proud of the ground (its top flush with the ground had flickered with it)
       }
     }
   }
@@ -86,6 +86,8 @@ for (const [a, b] of [[-10.0, -5.6], [-5.2, -1.0]]) E.push({ t: 'floor_mat', rec
   const zc = (tz0 + tz1) / 2, wT = tz1 - tz0 - 2 * EDGE;
   E.push({ t: 'rock_cut', a: [x1 - 8, zc], b: [x1, zc], y0: -7.4, th: wT, top: 0.12 });
   E.push({ t: 'block', walk: true, rect: [x1 - 8, tz0 + EDGE, x1, tz1 - EDGE], y0: -0.3, y1: 0, mat: 'tuff_red', collide: false });
+  // the tunnel's floor from the trench's end to the court's (the terrain stops at the trench's end, the court's floor starts a little inside the pit)
+  E.push({ t: 'block', walk: true, rect: [-216.05, tz0 + EDGE, x1 + 0.1, tz1 - EDGE], y0: -13, y1: -G.depth + 0.15, mat: 'tuff_red' });
   // the tunnel's mouths, each under a hewn band standing a little proud of the rock face
   for (const x of [x1 - 8 - 0.06, x1 + 0.06]) E.push({ t: 'rock_cut', a: [x, tz0 + EDGE - 0.2], b: [x, tz1 - EDGE + 0.2], y0: -7.75, th: 0.12, top: -7.1 });
 }
@@ -118,15 +120,14 @@ E.push({ t: 'hut', c: HUT.c, r: HUT.r, y: 0, door: HUT.door, seed: 1220 });
 // each tread level with the ground at its upper end, its riser standing proud of the ramp below it
 for (const [ti, from, to] of [[0, -262, -226], [1, -146, -114], [2, -130, -106], [4, -150, -121], [6, 181, 211]]) {
   const T = TRENCHES[ti], [x0, z0, x1, z1] = T.rect, ax = T.axis === 'x', a0 = ax ? x0 : z0, a1 = ax ? x1 : z1, run = 0.9;
-  const depth = (u) => T.d0 + (T.d1 - T.d0) * (u - a0) / (a1 - a0), dir = Math.sign(T.d1 - T.d0) || 1;
+  const hAt = (u) => { const c = (ax ? (z0 + z1) : (x0 + x1)) / 2; return ax ? slope(u, c) - cutDepth(u, c) : slope(c, u) - cutDepth(c, u); };
   const w0 = (ax ? z0 : x0) + EDGE - 0.1, w1 = (ax ? z1 : x1) - EDGE + 0.1;
   for (let u = from; u < to - 1e-6; u += run) {
-    const ue = Math.min(to, u + run), hi = Math.min(depth(u), depth(ue)), lo = Math.max(depth(u), depth(ue));
-    if (lo < 0.12) continue;
+    const ue = Math.min(to, u + run), hi = Math.max(hAt(u), hAt(ue)), lo = Math.min(hAt(u), hAt(ue));
+    if (hi > -0.1) continue;
     const r = ax ? [u, w0, ue, w1] : [w0, u, w1, ue];
-    E.push({ t: 'block', walk: true, rect: r, y0: -lo - 0.4, y1: -hi + 0.01, mat: 'tuff_hewn' });
+    E.push({ t: 'block', walk: true, rect: r, y0: lo - 0.4, y1: hi + 0.01, mat: 'tuff_hewn' });
   }
-  void dir;
 }
 // ---- the pool of the Jordan: a basin cut in the river-bed's floor (the Jordan is where the baptisms are done; docs §16), its kerb a
 // hand and a half above the floor, water standing in it
@@ -173,8 +174,8 @@ for (const [ti, from, to] of [[0, -262, -226], [1, -146, -114], [2, -130, -106],
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 // (the halls first: a position is given to the first room that holds it, and the pits' open rooms hold the halls)
 const rooms = [room('hut', [HUT.c[0] - 3.3, HUT.c[1] - 3.3, HUT.c[0] + 3.3, HUT.c[1] + 3.3], 0, 'hut'), room('giyorgis-in-x', [gc[0] - 10.4, gc[1] - 3, gc[0] + 10.4, gc[1] + 3], GY, 'hall'), room('giyorgis-in-z', [gc[0] - 3, gc[1] - 10.4, gc[0] + 3, gc[1] + 10.4], GY, 'hall'), room('medhane-in', [mc[0] - 13.15, mc[1] - 8.15, mc[0] + 13.15, mc[1] + 8.15], -M.depth + 0.95, 'hall'), room('maryam-in', [62.8, -93.6, 77.2, -86.4], -PITS.maryam.depth + 0.75, 'hall'), ...Object.entries(AKS).map(([id, a]) => room(id + '-in', [a.rect[0] + 1.3, a.rect[1] + 1.3, a.rect[2] - 1.3, a.rect[3] - 1.3], a.y + 0.9, 'hall')), room('giyorgis', G.rect, -G.depth, 'open'), room('medhane', M.rect, -M.depth, 'open')];
-const walks = [[[-280, 128], [-262, 128], [-216, 128], [-210, 130]]];
-walks[0].y0 = 0;
+const walks = [[[-280, 128], [-262, 128], [-216, 128], [-211, 128]]];
+walks[0].y0 = slope(-280, 128);
 
 export const churches = {
   id: 'lalibela-churches',

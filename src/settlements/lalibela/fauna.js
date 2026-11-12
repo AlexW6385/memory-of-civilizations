@@ -1,7 +1,7 @@
 // Lalibela — the animals (src/engine/fauna.js; docs/settlements/lalibela.md §14): swallows hawking over the
 // pits and the village (they nest in the hewn rock), thick-billed ravens high over the plateau, house
 // sparrows on the rims of the pits and the roofs of the churches. All places come from layout.js.
-import { PITS, PRECINCT } from './layout.js';
+import { PITS, PRECINCT, compounds, slope } from './layout.js';
 
 const c = (p) => [(p.rect[0] + p.rect[2]) / 2, (p.rect[1] + p.rect[3]) / 2];
 const fish = [];
@@ -20,4 +20,12 @@ for (const [id, k] of [['giyorgis', 0.3], ['medhane', 0.25], ['maryam', 0.4], ['
 for (const [x, z] of [[-4, -90], [24, -92], [8, -100]]) perches.push({ kind: 'sparrow', x, z, y: -0.35, rot: 0.4, range: [1.2, 0.8] });
 // in the village, by the houses at the edge of the level ground
 for (const [x, z] of [[-250, 40], [250, -60], [150, 200], [-120, -210], [60, 215], [-180, -150]]) perches.push({ kind: 'sparrow', x, z, y: 0.05 + Math.max(0, Math.hypot(x, z) - PRECINCT) * 0.16, rot: x % 3, range: [1.6, 1.4] });
+// sparrows on the walls of the compounds (every fourth yard), doves on the granaries' thatch
+compounds().forEach((q, i) => {
+  if (i % 4) return;
+  const a = q.gate + 2.2 + (i % 5) * 0.4, x = q.c[0] + Math.cos(a) * q.R, z = q.c[1] + Math.sin(a) * q.R;
+  perches.push({ kind: 'sparrow', x, z, y: slope(x, z) + 0.9, rot: a, range: [1.4, 1.2] });
+  if (q.granary && i % 8 === 0) perches.push({ kind: 'sparrow', x: q.granary[0], z: q.granary[1], y: slope(q.granary[0], q.granary[1]) + 2.5, rot: a, range: [0.5, 0.4] });
+});
+flights.push({ kind: 'swallow', n: 4, loop: { c: [-120, -60], a: [70, 50], rot: 0.7 }, y: [3, 14], speed: 9 }, { kind: 'swallow', n: 4, loop: { c: [120, 90], a: [70, 50], rot: 0.2 }, y: [3, 14], speed: 9 }, { kind: 'crow', n: 3, loop: { c: [-210, 30], a: [60, 50], rot: 0.4 }, y: [20, 40], speed: 7 });
 export default { fish, flights, perches };

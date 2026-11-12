@@ -4,7 +4,7 @@
 // (one draw call); the places come from the layout.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, PITS, HUT, houses, slope } from './layout.js';
+import { RADIUS, PITS, HUT, houses, enterable, slope } from './layout.js';
 
 const ID = 'lalibela';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -13,10 +13,11 @@ export function emitters() {
   const E = [], rand = rng(1220);
   // a house's smoke leaves through the thatch a little below its apex (wall 2.7 or 5.4 m, the cone 1.05 r + 0.7 over it)
   for (const h of houses()) {
-    if (rand() > 0.42) continue;
+    if (h.kind === 'store' || (h.kind !== 'kitchen' && rand() > 0.3)) continue;
     const H = h.storeys === 2 ? 5.4 : 2.7, hc = h.r * 1.05 + 0.7, y = slope(h.c[0], h.c[1]);
-    E.push({ p: [h.c[0], y + H - 0.25 + hc * 0.72, h.c[1]], kind: 'kitchen', thr: 0.1 + 0.8 * rand(), seed: h.seed + 1 });
+    E.push({ p: [h.c[0], y + H - 0.25 + hc * 0.72, h.c[1]], kind: 'kitchen', thr: h.kind === 'kitchen' ? 0.05 + 0.4 * rand() : 0.1 + 0.8 * rand(), seed: h.seed + 1 });
   }
+  for (const h of enterable()) E.push({ p: [h.c[0], slope(h.c[0], h.c[1]) + 2.8 + 3.2, h.c[1]], kind: 'kitchen', thr: 0, seed: h.seed + 7 });
   // the house one can enter: its hearth always lit at the meals
   E.push({ p: [HUT.c[0], 2.8 + 3.2, HUT.c[1]], kind: 'kitchen', thr: 0, seed: 5 });
   // incense in the doors of the churches: Giyorgis' west door, Medhane Alem's west door, Maryam's court
