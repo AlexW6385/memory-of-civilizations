@@ -41,13 +41,16 @@ function wallRect(ctx, rect, y0, y1, openings = [], mat = 'brick', lintel = true
   piece(s, b, y0, y1);
 }
 
-/** indus_mound: { rect, y, batter: [−x, +x, −z, +z], gaps: [rect] (the stairs' and the ramp's feet, kept free of the buttresses), seed } */
+/** indus_mound: { rect, y, batter: [−x, +x, −z, +z], gaps: [rect] (the stairs' and the ramp's feet, kept free of the buttresses), hole: [rect] (open in the top: the Great Bath's pool), seed } */
 export function mound(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y, b = el.batter ?? [0, 0, 0, 0], gaps = el.gaps ?? [];
   bag.add('mudbrick', frustum(el.rect, -0.3, y, b[0], b[1], b[2], b[3], { noBottom: true, noTop: true }));
   col.rect(el.rect, -0.3, y);
   const top = [x0 + b[0], z0 + b[2], x1 - b[1], z1 - b[3]];
-  bag.add('brick_buff', box(top[0], y - 0.06, top[1], top[2], y, top[3]));
+  // the top's skin, open over the pool (a whole slab hid the water under a floor of brick)
+  const h = el.hole;
+  const skin = h ? [[top[0], top[1], top[2], h[1]], [top[0], h[3], top[2], top[3]], [top[0], h[1], h[0], h[3]], [h[2], h[1], top[2], h[3]]] : [top];
+  for (const r of skin) if (r[2] - r[0] > 0.01 && r[3] - r[1] > 0.01) bag.add('brick_buff', box(r[0], y - 0.06, r[1], r[2], y, r[3]));
   col.floor(top, y);
   const inGap = (px, pz, m) => gaps.some((g) => px > g[0] - m && px < g[2] + m && pz > g[1] - m && pz < g[3] + m);
   // the baked-brick facing of the foot, in courses, and the buttresses along each face

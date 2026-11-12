@@ -5,7 +5,7 @@
 import { PLAT, MOUND, MOUND_BATTER, EAST_STAIR, SOUTH_RAMP, BATH, GRANARY, PILLARED, COLLEGE, TOP, lanes, inRect } from './layout.js';
 
 const E = [];
-E.push({ t: 'indus_mound', rect: MOUND, y: PLAT, batter: MOUND_BATTER, gaps: [EAST_STAIR.rect, SOUTH_RAMP.rect] });
+E.push({ t: 'indus_mound', rect: MOUND, y: PLAT, batter: MOUND_BATTER, gaps: [EAST_STAIR.rect, SOUTH_RAMP.rect], hole: BATH.pool });
 // the east stair, 12 m wide, from the town up to the platform; the south ramp for the carts
 {
   const [x0, z0, x1, z1] = EAST_STAIR.rect;
