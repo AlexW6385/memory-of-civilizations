@@ -8,6 +8,7 @@
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, rod, fromTriangles, orientOutward, place } from '../../core/geom.js';
 import '../khmer/index.js';
+import { thaiHouse } from './houses.js';
 
 import { hull } from '../ptolemaic/harbour.js';
 import { wallSeg } from '../ptolemaic/util.js';
@@ -397,15 +398,5 @@ function floatingHouse(el, { bag, col }) {
 /** mooring_post: { at, y } a bamboo or timber pile a few boats are tied to. */
 function pile(el, { bag, col }) { bag.add('timber', lathe([[0.12, 0], [0.1, 3.6]], 6, null, el.at[0], el.y ?? -2.3, el.at[1])); col.circle(el.at[0], el.at[1], 0.14, el.y ?? -2.3, 1.2); }
 
-/** thai_house: { rect, front, seed, kind, simple } — the stilt house of the Khmer style in full; far off a plain box on posts under a thatched gable. */
-function thaiHouse(el, ctx) {
-  if (!el.simple) return kh.elements.stilt_house(el, ctx);
-  const { bag } = ctx, [x0, z0, x1, z1] = norm(el.rect), up = 2.2, h = 2.2, alongX = (x1 - x0) >= (z1 - z0);
-  bag.add('timber', box(x0, up - 0.2, z0, x1, up, z1));
-  bag.add(el.seed % 2 ? 'reed_mat' : 'timber', box(x0 + 0.1, up, z0 + 0.1, x1 - 0.1, up + h, z1 - 0.1));
-  for (const [x, z] of [[x0 + 0.3, z0 + 0.3], [x1 - 0.3, z0 + 0.3], [x0 + 0.3, z1 - 0.3], [x1 - 0.3, z1 - 0.3]]) bag.add('timber', box(x - 0.1, 0, z - 0.1, x + 0.1, up, z + 0.1));
-  const rise = Math.min(x1 - x0, z1 - z0) * 0.55 + 0.4;
-  gable(bag, 'thatch_palm', [x0, z0, x1, z1], up + h, rise, 0.5, alongX ? 'x' : 'z');
-}
 const SIAMESE = { thai_house: thaiHouse, chedi, buddha, wihan, mandapa, prasat, bell_tower: bellTower, cloister, canal_bank: canalBank, thai_bridge: thaiBridge, landing, boat, floating_house: floatingHouse, pile };
 registerStyle('siamese', { ...kh, elements: { ...kh.elements, ...SIAMESE } });
