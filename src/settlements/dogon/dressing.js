@@ -60,6 +60,14 @@ export function dressing() {
   { const bx = -44, bz = -20, by = height(bx, bz);
     for (let k = 0; k < 5; k++) E.push({ t: 'animal', kind: k % 4 === 3 ? 'sheep' : 'goat', at: [bx + rand() * 5, bz + rand() * 4], y: height(bx + 2.5, bz + 2), rot: rand() * 6.28, seed: 500 + k });
     child([bx + 5.5, bz + 1], by, 2.4, { carry: 'staff', arms: 'staff', h: 1.2 }); }
+  // the lane crossings: a bench of logs where two lanes meet, the old men on it with their staffs, talking
+  for (const [bx, bz] of [[3.9, -3.2], [-3.9, -3.2], [3.9, -19.6], [-3.9, -19.6]]) {
+    const by = height(bx, bz);
+    E.push({ t: 'bench', at: [bx, bz], y: by, rot: 0, len: 1.9, mat: 'timber', seed: Math.round(bx * 3 + bz) });
+    man([bx - 0.4, bz + 0.02], by + 0.47, 0, { pose: 'sit', dress: 'robe', cloth: 'cloth_white', over: 'none', carry: 'staff' });
+    if (rand() < 0.8) man([bx + 0.45, bz + 0.02], by + 0.47, 0.2, { pose: 'sit' });
+    if (rand() < 0.5) child([bx + 1.5, bz + 0.9], by, 3.4, { pose: 'sit_ground' });
+  }
   void PLACE; void TOGUNA; void inCompound;
   return E;
 }
