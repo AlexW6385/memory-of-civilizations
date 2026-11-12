@@ -1,8 +1,8 @@
 {
   "site": { "id": "qin-xianyang", "name": { "en": "Qin Xianyang", "zh": "秦咸阳" }, "era": "c. 210 BC", "region": "china", "lat": 34.38, "lon": 109.25, "radius": 330 },
   "cls": "M",
-  "arrival": [146, null, -121, 1.5708, -0.1],
-  "arrivalNote": "on the middle ramp, down its earthen channel into the front gallery of Pit 1: the archers across the gallery and the long files of painted soldiers in the corridor beyond",
+  "arrival": [126.5, null, -121, 1.5708, -0.02],
+  "arrivalNote": "inside the front gallery of Pit 1, just within the middle ramp's door: three ranks of painted archers at ten metres and the long files of soldiers in the corridor beyond",
   "card": {
     "en": [
       "Qin Xianyang stands on the loess plain of Guanzhong in Shaanxi, shown in the autumn of 210 BC, weeks after the death of Qin Shi Huang, the First Emperor of a unified China. The plain draws two places together: the mausoleum on the slope of Mount Li, where the emperor's army of clay is being roofed in its pits, and Xianyang, the capital on the Wei river, with its palace terraces, market and imperial road. The architecture is the Qin's: rammed earth beaten in layers, timber halls on high terraces under grey tile, painted black and vermilion.",

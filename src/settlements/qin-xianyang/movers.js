@@ -4,7 +4,7 @@
 // imperial road, the market's aisles, the forecourt of the palace, the figure-makers' street. No boats.
 // Data for the engine's movers (src/engine/movers.js, read in its worker); the ways come from layout.js.
 
-import { RADIUS, YARD, HAUL, PIT, RAMP, ROAD, MARKET, FORECOURT, WS_Z, WS_X, MWALL, streets } from './layout.js';
+import { RADIUS, YARD, HAUL, PIT, RAMP, rampZ, ROAD, MARKET, FORECOURT, WS_Z, WS_X, MWALL, streets } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
@@ -28,6 +28,9 @@ export function walkways() {
   r([MARKET[0] - 2, 54.5, MARKET[0] + 3, 61.5], 2.0, 1.0); r([MARKET[2] - 3, 54.5, MARKET[2] + 2, 61.5], 2.0, 1.0);
   r([YARD[0] + 1, YARD[1] + 6, YARD[2] - 4, YARD[3] - 6], 2.2, 0.2, 'street');                                      // the building yard at the ramps
   r([HAUL.x0, HAUL.z - HAUL.w / 2 + 1, HAUL.x1, HAUL.z + HAUL.w / 2 - 1], 1.8, 0.2);                       // the haul road
+  // inside the pit: the front gallery's floor between the archers and the doors, and the ramps up to the yard (gangs, lamp-tenders)
+  r([PIT.x1 - 11, PIT.z0 + 6, PIT.x1 - 2.5, PIT.z1 - 6], 1.2, 0.2);
+  RAMP.zs.forEach((_, i) => r([PIT.x1 - 4, rampZ(i) - 1.3, PIT.x1 + RAMP.len + 3, rampZ(i) + 1.3], 1.6, 0.2));
   void MWALL; void PIT; void RAMP;
   return { rects, links: [], clip: RADIUS - 20 };
 }

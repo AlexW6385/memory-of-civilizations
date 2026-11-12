@@ -97,6 +97,44 @@ export function qinYard(el, { bag, col }) {
   }
 }
 
+/** qin_sledges: {} — finished soldiers wrapped in reed mats on sledges at the apron, and the ramming ground with its stone rammers. */
+export function qinSledges(el, { bag, col }) {
+  const r = rng(515);
+  const sledge = (sx, sz, n) => {
+    for (const s of [-1, 1]) {
+      bag.add('timber', box(sx - 1.7, 0.02, sz + s * 0.62 - 0.07, sx + 1.7, 0.17, sz + s * 0.62 + 0.07));
+      bag.add('timber', box(sx + 1.7, 0.1, sz + s * 0.62 - 0.07, sx + 2.0, 0.2, sz + s * 0.62 + 0.07));              // the turned-up toe
+    }
+    for (const dx of [-1.2, 0, 1.2]) bag.add('timber', box(sx + dx - 0.08, 0.17, sz - 0.75, sx + dx + 0.08, 0.27, sz + 0.75));
+    bag.add('planks_grey', box(sx - 1.6, 0.27, sz - 0.7, sx + 1.6, 0.34, sz + 0.7));
+    for (let k = 0; k < n; k++) {
+      const x = sx + (n === 1 ? 0 : (k - (n - 1) / 2) * 1.5);
+      bag.add('reed_mat', lathe([[0.34, 0.34], [0.36, 0.9], [0.3, 1.5], [0.22, 1.72], [0.001, 1.74]], 8, null, x, 0, sz));                 // the wrapped body
+      bag.add('terracotta', lathe([[0.001, 1.7], [0.09, 1.74], [0.1, 1.86], [0.075, 1.98], [0.001, 2.04]], 8, null, x, 0.08, sz));        // the head, bare
+      bag.add('hair_dark', lathe([[0.09, 1.96], [0.07, 2.04], [0.001, 2.1]], 6, null, x + 0.02, 0.08, sz));
+      for (const y of [0.7, 1.1, 1.45]) bag.add('rope_fibre', lathe([[0.37, y], [0.37, y + 0.04]], 8, null, x, 0, sz));              // the lashings
+      bag.add('rope_fibre', rod([x, 1.5, sz - 0.3], [sx - 1.6, 0.34, sz - 0.78], 0.018, 4)); bag.add('rope_fibre', rod([x, 1.5, sz + 0.3], [sx + 1.6, 0.34, sz + 0.78], 0.018, 4));
+    }
+    bag.add('rope_fibre', rod([sx + 2.0, 0.2, sz - 0.62], [sx + 5.5, 0.1, sz - 0.3], 0.03, 4)); bag.add('rope_fibre', rod([sx + 2.0, 0.2, sz + 0.62], [sx + 5.5, 0.1, sz + 0.3], 0.03, 4));   // the tow
+    col.rect([sx - 1.9, sz - 0.9, sx + 2.0, sz + 0.9], 0, 0.4);
+  };
+  const X = PIT.x1 + RAMP.len, z1 = rampZ(1);
+  // the ruts of the sledges and carts out from the apron along each ramp's line, one gauge (1.39 m) apart
+  for (let i = 0; i < 3; i++) for (const q of [-1, 1]) bag.add('mud_plaster', box(X + 7, 0.012, rampZ(i) + q * 0.695 - 0.1, X + 48 - i * 9, 0.024, rampZ(i) + q * 0.695 + 0.1));
+  sledge(X + 9, z1 - 7.5, 2); sledge(X + 17, z1 + 8.5, 1); sledge(X + 31, rampZ(2) + 18, 2);
+  // the ramming ground: a patch of trodden earth, three stone rammers with four ropes each, a heap of loose earth beside it
+  const gx = X + 26, gz = z1 + 15;
+  bag.add('earth_wall', box(gx - 7, 0, gz - 5, gx + 7, 0.04, gz + 5));
+  [[-4, -1.5], [0, 2], [4, -1]].forEach(([dx, dz]) => {
+    const x = gx + dx, z = gz + dz;
+    bag.add('granite_grey', lathe([[0.001, 0.2], [0.3, 0.22], [0.27, 0.55], [0.1, 0.68], [0.001, 0.7]], 8, null, x, 0, z));
+    bag.add('timber', rod([x, 0.6, z], [x, 2.0, z], 0.05, 5)); bag.add('timber', rod([x - 0.45, 1.6, z], [x + 0.45, 1.6, z], 0.04, 4)); bag.add('timber', rod([x, 1.6, z - 0.45], [x, 1.6, z + 0.45], 0.04, 4));
+    for (const a of [0, 1.57, 3.14, 4.71]) bag.add('rope_fibre', rod([x, 1.6, z], [x + Math.cos(a + 0.4) * 1.1, 0.95, z + Math.sin(a + 0.4) * 1.1], 0.016, 4));
+    col.circle(x, z, 0.35, 0, 1.0);
+  });
+  for (let k = 0; k < 3; k++) { const s = 1.0 + r() * 0.5, hx = gx + 8 + k * 2.4, hz = gz - 4 + r() * 2; bag.add('earth_wall', frustum([hx - s * 1.5, hz - s * 1.2, hx + s * 1.5, hz + s * 1.2], 0, s * 0.8, 0.5, 0.5, 0.4, 0.4, { noBottom: true })); col.rect([hx - s * 1.2, hz - s, hx + s * 1.2, hz + s], 0, s * 0.7); }
+}
+
 /** qin_haulroad: {} — the road east from the ramps' apron: two ruts of one gauge, low earth banks, culvert logs, a milestone. */
 export function qinHaulRoad(el, { bag }) {
   const { z, x0, x1, w } = HAUL;
