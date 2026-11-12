@@ -123,3 +123,16 @@ Clay flutes, the slit drum and turtle-shell drums (a flute and a struck wooden s
 - [Joya de Cerén — Wikipedia](https://en.wikipedia.org/wiki/Joya_de_Cer%C3%A9n)
 - [Mesoamerican ballgame — Wikipedia](https://en.wikipedia.org/wiki/Mesoamerican_ballgame)
 - [Golden Kingdoms: the Sacred Cenote of Chichén Itzá — The Met](https://www.metmuseum.org/perspectives/golden-kingdoms-sacred-cenote-chichen-itza)
+
+## 16. The deepening pass of November 2026
+
+Sources: the plazas' plaster floors renewed and painted in the Maya cities [inferred: Maya building practice; the Great Plaza is described in §4]; pilgrimage to the cenote and the Castillo [stated: §12]; lime plaster made by burning limestone and slaking it in pits [stated: Maya building practice, general].
+
+Built:
+- **Markets in view of the arrival:** two more markets on the plaza beside the one by the Thousand Columns, one east of the arrival (x 50–90, z 54–68) and one west (x −36…−12, z 58–72), each with palm mats, thatched awnings, sellers and buyers, baskets and jars [inferred: the market's size was shortened in §2].
+- **Upkeep of the Castillo:** masons dressing blocks on mats at the south stair's foot with a basket of lime and sacks of chips, two lime pits with women kneeling at the pots and others carrying baskets, a priest and four pilgrims kneeling with copal at the stair's foot (smoke) [inferred].
+- **Pilgrims' camp:** seven mats with baskets, jars and people sitting along the plaza's south edge, four with a small fire (smoke) [inferred].
+- **Rest under the ceibas:** three people on mats with jars about each of four ceibas, a turkey and a dog [inferred].
+- **Plaza floor:** a red band 0.55 m wide round the Castillo's apron with a thin blue-green line 1.2 m outside it, and a worn way (a darker, trodden strip) from the south to the stair [inferred: the floors were painted and renewed].
+
+Still below Suzhou: the ranges and houses are one plan family with variation; the markets' goods are baskets and pots only (no cloth, feathers or cacao rows as at Tenochtitlan); no interiors in the Thousand Columns.
