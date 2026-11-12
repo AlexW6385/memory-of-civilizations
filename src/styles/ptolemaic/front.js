@@ -84,4 +84,21 @@ function customsPost(el, ctx) {
   lampBracket(bag, x1 - 0.1, y + 2.4, z0 + 0.1, 0, -1);
   bag.add('limestone', box(x1 + 0.7, y, z - 0.3, x1 + 1.5, y + 0.3, z + 0.3)); bag.add('marble_smooth', box(x1 + 0.8, y + 0.3, z - 0.1, x1 + 1.4, y + 2.1, z + 0.1)); col.rect([x1 + 0.7, z - 0.3, x1 + 1.5, z + 0.3], y, y + 2.1);
 }
-export const FRONT_EL = { harbour_gate: harbourGate, wall_front: wallFront, customs_post: customsPost };
+/** quay_steps: { at [x, z] (the quay wall's water face), w, y (the paving), yw (the water) } — a flight of steps down the wall's face to the water: for boats' landings and the washers. */
+function quaySteps(el, ctx) {
+  const { bag, col } = ctx, [x, z] = el.at, w = el.w ?? 3, y = el.y ?? 1.24, yw = el.yw ?? -2.5, n = 12, tread = 0.3, rise = (y - yw + 0.5) / n;
+  for (let i = 0; i < n; i++) {
+    const top = yw - 0.5 + rise * (i + 1), r = [x - w / 2, z - n * tread + i * tread, x + w / 2, z + 0.01];
+    bag.add(i % 4 === 3 ? 'travertine' : 'limestone', box(r[0], yw - 2.2, r[1], r[2], top, r[3])); col.floor(r, top);
+  }
+  for (const sx of [-1, 1]) { bag.add('limestone', box(x + sx * (w / 2 + 0.2) - 0.2, yw - 2.2, z - n * tread, x + sx * (w / 2 + 0.2) + 0.2, y - 0.3, z)); }
+  for (const sx of [-1, 1]) bag.add('granite_grey', lathe([[0.2, 0], [0.17, 0.4], [0.24, 0.46], [0.001, 0.48]], 8, null, x + sx * (w / 2 + 0.6), y, z + 1.4));
+}
+/** obelisk: { at [x, z], y, h (the shaft, 11) } — of red Aswan granite on a stepped plinth, the pyramidion gilded, Ptolemy II set one up at Alexandria (Pliny, NH 36.67). */
+function obelisk(el, ctx) {
+  const { bag, col } = ctx, [x, z] = el.at, y = el.y ?? 0, h = el.h ?? 11, b0 = 0.8, b1 = 0.52;
+  bag.add('limestone', box(x - 1.7, y, z - 1.7, x + 1.7, y + 0.5, z + 1.7)); bag.add('granite_grey', box(x - 1.3, y + 0.5, z - 1.3, x + 1.3, y + 1.3, z + 1.3)); col.rect([x - 1.7, z - 1.7, x + 1.7, z + 1.7], y, y + 1.3);
+  bag.add('granite_red', frustum([x - b0, z - b0, x + b0, z + b0], y + 1.3, y + 1.3 + h, b0 - b1, b0 - b1, b0 - b1, b0 - b1));
+  bag.add('gold', frustum([x - b1, z - b1, x + b1, z + b1], y + 1.3 + h, y + 1.3 + h + 1.0, b1, b1, b1, b1));
+}
+export const FRONT_EL = { obelisk, quay_steps: quaySteps, harbour_gate: harbourGate, wall_front: wallFront, customs_post: customsPost };

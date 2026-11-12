@@ -152,6 +152,9 @@ export function streetLife() {
     if (rand() < 0.14) L.push({ t: 'animal', kind: 'cat', at: pt(F.L * rand(), 0.7), y, rot: rand() * 6, seed: Math.floor(rand() * 1e9) });
     if (rand() < 0.1) L.push({ t: 'chickens', n: 3, at: pt(F.L * rand(), 1.2), y, rot: rand() * 6, seed: Math.floor(rand() * 1e9) });
   }
+  // beasts at the quay's work: donkeys under their loads by the piles, carts with a donkey in the shafts, a pair of camels resting
+  for (const [x, z, k, r] of [[68, -83.6, 'donkey', 0.2], [-30, -83.8, 'donkey', 3.3], [-120, -83.6, 'donkey', 0.1], [-176, -83.8, 'donkey', 3.0], [210, -84, 'donkey', 0.3], [258, -83.8, 'camel', 1.57], [264, -83.5, 'camel', 1.4]]) if (dry(x, z, 1)) L.push({ t: 'animal', kind: k, at: [x, z], y: g + 0.04, rot: r, seed: Math.round(x * 7), gear: k === 'donkey' });
+  for (const [x, z] of [[-90, -85.2], [128, -85.4], [-190, -84.8]]) if (dry(x, z, 1)) L.push({ t: 'cart', at: [x, z], y: g + 0.04, rot: Math.PI / 2, beast: 'donkey', seed: Math.round(x * 5) });
   for (const f of FIG) L.push({ t: 'figure', y: g + 0.04, ...f });
   const tiles = new Map();
   for (const e of L) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }

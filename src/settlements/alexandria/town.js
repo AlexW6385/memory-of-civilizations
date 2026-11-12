@@ -16,6 +16,8 @@ function harbour() {
   QUAYS.forEach((r, i) => E.push({ t: 'quay', rect: r, y0: SEA - 2.2, y1: g + 0.05, bollards: i < 2, side: 0.5 }));
   for (const c of CHANNELS) E.push({ t: 'mole_bridge', rect: c, y: g });
   for (const s of SHIPS) E.push({ t: 'ship', ...s, y: SEA });
+  for (const x of [-128, -35, 114, 190, 298]) E.push({ t: 'quay_steps', at: [x, QUAYS[0][1]], w: 3, y: g + 0.05, yw: SEA });
+  for (const x of [SOMA[0] - 3.5, SOMA[2] + 3.5]) E.push({ t: 'obelisk', at: [x, -85.6], y: g + 0.05, h: 11 });
   E.push({ t: 'harbour_gate', c: [(SOMA[0] + SOMA[2]) / 2, -77], y: g, face: 'n', gw: 12, tower: 6, h: 13 });
   // the promenade and the great streets paved in slabs of limestone
   E.push({ t: 'floor', rect: [QUAY[0], QUAY[1], QUAY[2], QUAY[3]], y: g + 0.04, th: 0.2, mat: 'travertine' });
@@ -97,7 +99,7 @@ function houses() {
   const L = lots(), ARR = [100, -86];
   const byD = [...L].sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 - ARR[0], (a.rect[1] + a.rect[3]) / 2 - ARR[1]) - Math.hypot((b.rect[0] + b.rect[2]) / 2 - ARR[0], (b.rect[1] + b.rect[3]) / 2 - ARR[1]));
   const lamp = new Set(byD.slice(0, 10));
-  const els = L.map((l) => (l.warehouse ? { t: 'horreum', rect: l.rect, front: 'n', y: l.y, seed: l.seed } : l.quarter === 'egyptian'
+  const els = L.map((l) => (l.warehouse ? { t: 'horreum', rect: l.rect, front: 'n', y: l.y, seed: l.seed, tint: ['plaster_white', 'limewash_yellow', 'plaster_ochre', 'stucco_cream', 'plaster_white', 'stucco_warm'][l.seed % 6] } : l.quarter === 'egyptian'
     ? { t: 'egyptian_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front }
     : { t: 'ptol_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front, quarter: l.quarter, lamp: lamp.has(l) }));
   const plans = lodTiles('alexandria-houses', 'ptolemaic', els, { R: RADIUS, near: 150 });
