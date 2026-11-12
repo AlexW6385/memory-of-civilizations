@@ -29,7 +29,10 @@ export function quay(el, ctx) {
     col.circle(x0 - 0.35, z, 0.3, 0.02, 0.64);
   }
   // a low parapet of mudbrick with gaps behind the walk's inner edge, and the street's kerb
-  bag.add('mudbrick', box(x1 - 0.5, 0, el.z0, x1, 0.45, el.z1));
+  // (broken where the avenue and the market's way leave the quay)
+  let zc = el.z0;
+  for (const [a, b] of [[-9, 9], [14, 66]]) { if (a > zc) bag.add('mudbrick', box(x1 - 0.5, 0, zc, x1, 0.45, a)); zc = Math.max(zc, b); }
+  if (el.z1 > zc) bag.add('mudbrick', box(x1 - 0.5, 0, zc, x1, 0.45, el.z1));
 }
 
 /** nk_lake: { rect, y (water), bed, stairs } — the sacred lake's stone lining: the coping and the walls down into the water, the stairs. */

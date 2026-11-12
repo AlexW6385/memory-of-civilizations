@@ -72,7 +72,7 @@ export function lots() {
   LOTS = [];
   const rand = rng(1250);
   const trades = ['potter', 'weaver', 'carpenter', 'mason', 'baker', 'smith', 'leather'];
-  let wsi = 0, furnished = 0;
+  let wsi = 0, furnished = 0, shops = 0;
   for (const zs of STREET_ZS) for (const side of [-1, 1]) {
     const z0 = side < 0 ? zs - STREET_W / 2 - ROW_D : zs + STREET_W / 2, z1 = z0 + ROW_D, front = side < 0 ? 's' : 'n';
     let x = X0;
@@ -101,12 +101,51 @@ export function lots() {
       LOTS.push(lot);
     }
   }
+  templeLots(LOTS);
   return LOTS;
+}
+const SHOPS = ['bread', 'pots', 'beer', 'fruit', 'cloth', 'leather'];
+/** How much detail a lot at c gets: 2 round the quay, the avenue and the hall, 1 in the middle town, 0 in the outskirts. */
+const lodOf = (c) => { const d = Math.hypot(c[0] + 120, c[1]); return d < 150 ? 2 : d < 240 ? 1 : 0; };
+
+/** The blocks inside the enclosure (the priests' houses, the temple's bakeries and gardens, docs/settlements/thebes.md §2): zones with their own rows. */
+export const TEMPLE_ZONES = [[-161, -141, -90, -64], [-161, 64, -96, 166], [-92, 64, 10, 166], [64, -141, 206, -36], [138, 8, 206, 60], [173, 64, 206, 166]];
+export const TEMPLE_STREETS = [];
+function templeLots(out) {
+  const rand = rng(1296);
+  TEMPLE_STREETS.length = 0;
+  TEMPLE_ZONES.forEach((z, zi) => {
+    const [zx0, zz0, zx1, zz1] = z, n = Math.floor((zz1 - zz0) / PERIOD);
+    const rows = [];
+    for (let k = 0; k < n; k++) {
+      const zs = zz0 + PERIOD * k + ROW_D + STREET_W / 2;
+      TEMPLE_STREETS.push([zx0, zs - STREET_W / 2, zx1, zs + STREET_W / 2]);
+      rows.push([zs - STREET_W / 2 - ROW_D, 's'], [zs + STREET_W / 2, 'n']);
+    }
+    if (zz1 - (zz0 + PERIOD * n) >= ROW_D) rows.push([zz0 + PERIOD * n, 'g']);
+    for (const [r0, front] of rows) {
+      let x = zx0;
+      while (x < zx1 - 4) {
+        const q = rand();
+        let w = front === 'g' ? 8 + rand() * 6 : q < 0.35 ? 5.6 + rand() * 1.2 : q < 0.8 ? 9 + rand() * 3 : 12 + rand() * 3;
+        if (x + w > zx1) w = zx1 - x;
+        if (w < 5) break;
+        const kind = front === 'g' ? 'garden' : q < 0.35 ? 'row' : q < 0.8 ? 'court' : q < 0.88 ? 'villa' : q < 0.94 ? 'granary' : 'garden';
+        const rect = [x, r0, x + w, r0 + ROW_D], c = [x + w / 2, r0 + ROW_D / 2];
+        x += w;
+        if (kind === 'villa' && w < 12) continue;
+        const open = kind !== 'garden' && kind !== 'granary' && (kind === 'villa' || out.length % 2 === 0);
+        out.push({ rect, front: front === 'g' ? 's' : front, kind, seed: Math.floor(rand() * 1e6), open, row: zi, lod: 2, temple: true, shop: open && kind === 'row' && rand() < 0.3 ? 'bread' : undefined });
+        void c;
+      }
+    }
+  });
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
 
 /** The streets (rectangles, free of houses): the east–west streets and the lanes, outside the enclosure. */
 export function streets() {
+  lots();
   const out = [];
   for (const zs of STREET_ZS) {
     const r = [X0 - 4, zs - STREET_W / 2, X1, zs + STREET_W / 2];
@@ -119,6 +158,7 @@ export function streets() {
     if (lx > ENCL[0] - 6 && lx < ENCL[2] + 6) out.push([r0[0], r0[1], r0[2], ENCL[1] - 8], [r0[0], ENCL[3] + 8, r0[2], r0[3]]);
     else out.push(r0);
   }
+  out.push(...TEMPLE_STREETS);
   // the promenade behind the quay, the market's lanes
   out.push([QUAY.x + 0.8, QUAY.z0 + 4, QUAY.x + 5.5, QUAY.z1 - 4]);
   return out.filter((r) => r[2] - r[0] > 2 && r[3] - r[1] > 2);

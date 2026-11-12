@@ -3,7 +3,7 @@
 // palms in the gardens and along the water; the hot dry sky of Upper Egypt (docs/settlements/thebes.md §3, §10).
 // Pure (used by the relief, the collision and the plant workers).
 
-import { RADIUS, RIVER, ENCL, LAKE, LAKE_Y, QUAY, MARKET, height, inRiver, inLake, inRect, inLot, lots } from './layout.js';
+import { RADIUS, RIVER, AVENUE, ENCL, LAKE, LAKE_Y, QUAY, MARKET, height, inRiver, inLake, inRect, inLot, lots } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 function cover(x, z, h, ny) {
@@ -24,8 +24,12 @@ function planting(x, z, p) {
   if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z)) return null;
   // the temple's gardens: a grove of date palms round the sacred lake, a row along the quay's promenade
   if (inRect(LAKE, x, z, 11) && !inRect(LAKE, x, z, 6.5)) return { date_palm: 1.4, tamarisk: 0.1 };
+  // the avenue's borders: a row of date palms and tamarisks outside the rams, the grove round the great wall
+  if (x > AVENUE.x0 - 4 && x < ENCL[0] - 2 && Math.abs(z) > 9.4 && Math.abs(z) < 14) return { date_palm: 1.5, tamarisk: 0.25 };
+  if (inRect(ENCL, x, z, 11) && !inRect(ENCL, x, z, 4.5)) return { date_palm: 1.3, sycamore_fig: 0.15, tamarisk: 0.2 };
   const qx = x - (QUAY.x + QUAY.top);
   if (qx > -0.5 && qx < 2.2 && z > QUAY.z0 + 6 && z < QUAY.z1 - 6) return { date_palm: 1.0 };
+  if (inRect(ENCL, x, z, 0) && inLot(x, z, 0)) { const l = lots().find((q) => inRect(q.rect, x, z)); return l && l.kind === 'garden' ? { date_palm: 2.0, sycamore_fig: 0.2, tamarisk: 0.3 } : null; }
   if (inLake(x, z, 3) || inRect(ENCL, x, z, 4)) return null;
   const bank = Math.abs(x - RIVER.x) - RIVER.w / 2;
   if (bank > -6 && bank < 8 && (z < QUAY.z0 - 6 || z > QUAY.z1 + 6)) return { papyrus: 8, reeds: 10, tamarisk: 0.1 };
