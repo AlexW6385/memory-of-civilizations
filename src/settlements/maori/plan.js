@@ -2,7 +2,7 @@
 // edge, with gateways where the path climbs through; fighting stages at the palisades; the
 // chief's carved house and pātaka on the summit; the outer palisade beyond the ditch.
 
-import { HILL, PATH, village } from './layout.js';
+import { HILL, PATH, village, height } from './layout.js';
 
 const E = [], [hx, hz] = HILL.c;
 /** A ring of palisade at radius r on height y, with a gap (and a gateway) where the path crosses. */
@@ -17,7 +17,7 @@ function ring(r, y, h, gate = true) {
     E.push({ t: 'palisade', a: [hx + Math.cos(a0) * r, hz + Math.sin(a0) * r], b: [hx + Math.cos(a1) * r, hz + Math.sin(a1) * r], y, h, center: [hx, hz] });
     if (i % 7 === 3) E.push({ t: 'stage', c: [hx + Math.cos((a0 + a1) / 2) * (r - 2.5), hz + Math.sin((a0 + a1) / 2) * (r - 2.5)], y, h: h + 1.5 });
   }
-  if (gate) E.push({ t: 'waharoa', c: [hx, hz + r], yaw: Math.PI, y, h: 4.4 });
+  if (gate) E.push({ t: 'waharoa', c: [hx, hz + r], yaw: Math.PI, y: Math.max(y, height(PATH.x, hz + r) - 0.15), h: 4.4 });   // the gate stands on the path's ramp, which climbs through the terrace's edge
 }
 ring(HILL.tihi - 1.5, HILL.top, 3.6);
 for (const [, r1, y] of HILL.rings) ring(r1 - 2, y, 3.8);

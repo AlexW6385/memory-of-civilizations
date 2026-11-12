@@ -200,8 +200,8 @@ export async function town() {
     (rand() < 0.65 ? woman : man)(at, gy(at), Math.PI / 2 * toPlot + (rand() - 0.5) * 0.5, { pose: rand() < 0.6 ? 'squat' : 'stand', over: 'none' });
   }
   // by the path as one arrives: two boys with a kurī, a man with a kete of kūmara resting
-  for (const [px, pz, o] of [[2.6, 156, { pose: 'stand' }], [-2.8, 163, { pose: 'squat' }], [3.1, 172, { pose: 'sit' }]]) { const at = [px, pz]; man(at, gy(at), face(at, [0, 150]) + 0.4, o); }
-  P.push({ t: 'animal', kind: 'dog', at: [1.9, 157.5], y: gy([1.9, 157.5]), rot: 1.2, mat: 'hide_white', seed: 990 });
+  for (const [px, pz, o] of [[5.2, 156, { pose: 'stand' }], [-5.4, 163, { pose: 'squat' }], [5.6, 172, { pose: 'sit' }]]) { const at = [px, pz]; man(at, gy(at), face(at, [0, 150]) + 0.4, o); }
+  P.push({ t: 'animal', kind: 'dog', at: [4.2, 158.5], y: gy([4.2, 158.5]), rot: 1.2, mat: 'hide_white', seed: 990 });
   // ---- the gardens' corridor (the clear way through the plots, x −11 … 10): the gardeners' huts facing the path, a rack, a store, cabbage trees lining the way ----
   [[-8.2, 186, -Math.PI / 2], [8.2, 211, Math.PI / 2], [-8.4, 243, -Math.PI / 2], [8.4, 276, Math.PI / 2]].forEach(([x, z, yaw], k) => {
     E.push({ t: 'whare', carved: false, c: [x, z], yaw, w: 2.9 + (k % 2) * 0.4, l: 4.2, h: 1.1, y: height(x, z), rank: 0 });
@@ -236,5 +236,11 @@ export async function town() {
       P.push({ t: 'figure', at, y: LAKE.level - 0.05, rot: yw + (q === 3 ? 0 : (i % 2 ? 0.5 : -0.5)), seed: Math.floor(rand() * 1e9), dress: 'tunic', cloth: sk, cloth2: 'cloth_brown', over: 'belt', skin: sk, hat: 'none', feet: 'bare', hair: 'bun', beard: false, pose: 'sit' });
     }
   });
+  // the shared street life (src/objects/life.js) keeps its figures off what it sees as footprints — a `c` with a radius `r`,
+  // a rectangle or a line: give every house, store, oven, tree and post one, and mark the way in and the marae ātea as kept clear
+  const RAD = { whare: (e) => e.l / 2 + 0.7, pataka: () => 2.2, rua: () => 2.4, hangi: () => 2.8, waka_build: () => 5, waka: (e) => (e.l ?? 10) / 2, harakeke: () => 0.5, hinaki: () => 0.4, tikouka: () => 0.6, ponga: () => 0.5, pou: () => 0.4, yard: () => 1.4, weaving: () => 1.2 };
+  for (const e of E) if (RAD[e.t] && !e.r) { const at = e.c ?? e.at; if (!at) continue; e.r = RAD[e.t](e); if (!e.c) e.c = at; }
+  E.push({ t: 'trim', rect: [-2.6, HILL.c[1] + HILL.ditch, 2.6, RADIUS - 20] });
+  E.push({ t: 'trim', rect: [hxm - 10, 11, hxm + 10, 33] });
   return [plan('maori-kainga', 'maori', E), plan('maori-people', 'life', P)];
 }
