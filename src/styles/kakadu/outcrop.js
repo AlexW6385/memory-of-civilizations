@@ -170,6 +170,11 @@ export function outcropBlock(acc, B, o = {}) {
     const Cs = corners(x0 + 0.4, x1 - 0.4, y0, y1 - 0.5, z0, z1 - 3.0, uniformJit(0), rnd);
     hex(acc, 'pottery_dark', Cs, { S: { res: 2.5 } });
   }
+  // the roof's soffit, one flat face (the walker's shell test needs an underside to see the roof as a roof)
+  if (slab) {
+    const A = acc.of(BANDS[B.m]?.[0] ?? B.m), yS = y0 - 0.02, pts = [[x0 + 0.1, z1 - 0.05], [x1 - 0.1, z1 - 0.05], [x1 - 0.1, z0 + 0.1], [x0 + 0.1, z0 + 0.1]];
+    for (const q of [[0, 2, 1], [0, 3, 2]]) for (const i of q) { A.p.push(pts[i][0], yS, pts[i][1]); A.n.push(0, -1, 0); }
+  }
   // ── the beds
   const nb = Math.max(2, Math.round(H / (slab ? 2.0 : 1.9)));
   const wts = Array.from({ length: nb }, () => 0.7 + rnd() * 0.75), ws = wts.reduce((a, b) => a + b, 0), beds = [];
@@ -195,14 +200,14 @@ export function outcropBlock(acc, B, o = {}) {
     const behind = S && b.ya < S.yc0 + 0.35;     // the painted wall's surface stands before these beds
     let xa = x0 + (i % 2 ? 0 : rnd() * 0.3);
     const cuts = [];
-    joints.forEach((j, k) => { if (j.forced || j.cleft || rnd() < 0.8) cuts.push({ x: j.x, g: j.g * (j.cleft ? 1 : 0.75 + rnd() * 0.55), k }); });
+    if (!(slab && i === 0)) joints.forEach((j, k) => { if (j.forced || j.cleft || rnd() < 0.8) cuts.push({ x: j.x, g: j.g * (j.cleft ? 1 : 0.75 + rnd() * 0.55), k }); });
     cuts.push({ x: x1 - (i % 3 ? 0 : rnd() * 0.3), g: 0, k: joints.length, end: true });
     for (const c of cuts) {
       const xb = c.end ? c.x : c.x - c.g / 2;
       const w = xb - xa;
       if (w > 1.4) {
         const col = colOff[Math.min(c.k, colOff.length - 1)], zf = Math.min(z1, z1 - b.soft + col + (rnd() - 0.5) * 0.3 - (behind ? 1.0 : 0));
-        const deep = Math.min(deepMax, 4 + rnd() * 2.5), seed = B.seed * 53 + i * 11 + Math.floor(xa);
+        const deep = slab && i === 0 ? D - 0.3 : Math.min(deepMax, 4 + rnd() * 2.5), seed = B.seed * 53 + i * 11 + Math.floor(xa);
         const inWall = S && xa > S.x0 - 1.2 && xb < S.x1 + 1.2 && b.yb < S.yc0 + 0.5;
         const ya = b.ya - 0.05, yb = b.yb + 0.1;
         if (!inWall) {
