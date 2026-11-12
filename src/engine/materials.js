@@ -869,7 +869,7 @@ function make(spec) {
       const rv = reflect(v, wn);
       // (the reflection near the horizon is mostly of banks, walls and trees, not of the open sky: a pool in a court
       // or a canal between houses mirrored the pale haze of the horizon and read as paving; darker toward a grazing ray)
-      const low = mix(float(0.45), float(1), smoothstep(0.02, 0.3, r.y));
+      const low = mix(float(0.35), float(1), smoothstep(0.05, 0.6, r.y));
       m.emissiveNode = waterSky(r).mul(fres).mul(open).mul(low).add(moonGlint(rv).mul(smoothstep(0.6, 0.9, normalLocal.y)));
       break;
     }
