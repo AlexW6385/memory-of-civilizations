@@ -24,18 +24,21 @@ export function houseParts(el, ctx, { hipRoof }) {
   const RODL = (p, q, r, mat, seg = 5) => { const a = toW(p[0], p[2]), b = toW(q[0], q[2]); bag.add(mat, rod([a[0], p[1], a[1]], [b[0], q[1], b[1]], r, seg)); };
   const Y = [0]; for (let i = 0; i < n; i++) Y.push(Y[i] + HS[i]);
   const H = Y[n], open = !!el.open;
+  // the brick of this house: mostly the red, some darker-baked, an old one greyed [inferred]; the plan's own door place and kinds (layout.js lots())
+  const wm = el.wall ?? ['brick', 'brick', 'brick', 'brick_baked', 'brick', 'brick_grey'][Math.floor(rand() * 6)];
+  const damp = el.damp ?? rand();
   const OW = Math.min(4.6, W - 2.4), ox = (W - OW) / 2, T = 0.55;
 
   // the walls
-  if (!open) { B(0, 0, 0, W, H, D, 'brick'); RC(0, 0, 0, W, H, D); }
+  if (!open) { B(0, 0, 0, W, H, D, wm); RC(0, 0, 0, W, H, D); }
   else {
     const h0 = Y[1];
-    B(0, 0, D - T, W, H, D, 'brick'); RC(0, 0, D - T, W, h0, D);
-    B(0, 0, 0, T, H, D, 'brick'); RC(0, 0, 0, T, h0, D);
-    B(W - T, 0, 0, W, H, D, 'brick'); RC(W - T, 0, 0, W, h0, D);
-    B(0, 0, 0, ox, H, T, 'brick'); RC(0, 0, 0, ox, h0, T);
-    B(ox + OW, 0, 0, W, H, T, 'brick'); RC(ox + OW, 0, 0, W, h0, T);
-    B(ox, 2.5, 0, ox + OW, H, T, 'brick');                                                // over the opening
+    B(0, 0, D - T, W, H, D, wm); RC(0, 0, D - T, W, h0, D);
+    B(0, 0, 0, T, H, D, wm); RC(0, 0, 0, T, h0, D);
+    B(W - T, 0, 0, W, H, D, wm); RC(W - T, 0, 0, W, h0, D);
+    B(0, 0, 0, ox, H, T, wm); RC(0, 0, 0, ox, h0, T);
+    B(ox + OW, 0, 0, W, H, T, wm); RC(ox + OW, 0, 0, W, h0, T);
+    B(ox, 2.5, 0, ox + OW, H, T, wm);                                                // over the opening
     B(ox - 0.02, 2.2, -0.14, ox + OW + 0.02, 2.5, T + 0.02, 'timber');                      // its lintel beam
     for (const x of [ox - 0.12, ox + OW - 0.1]) { B(x, 0, -0.14, x + 0.22, 2.5, 0.2, 'timber'); RC(x, 0, -0.14, x + 0.22, 2.5, 0.2); }
     // the floor, the ceiling of joists and planks (the upper storeys solid above it)
@@ -45,14 +48,14 @@ export function houseParts(el, ctx, { hipRoof }) {
     for (let x = T + 0.25; x < W - T; x += 0.55) RODL([x, 2.5, T], [x, 2.5, D - T], 0.09, 'timber', 5);
     B(T, 2.58, T, W - T, 2.9, D - T, 'wood_ochre');
     for (const x of [W * 0.3, W * 0.7]) { B(x - 0.13, 0.1, D * 0.5 - 0.13, x + 0.13, 2.58, D * 0.5 + 0.13, 'timber'); B(x - 0.3, 2.3, D * 0.5 - 0.3, x + 0.3, 2.58, D * 0.5 + 0.3, 'wood_painted'); const c = toW(x, D * 0.5); col.circle(c[0], c[1], 0.17, 0, 2.6); }
-    furnish();
+    furnish(el.trade || 'home');
   }
 
   // the facade: a timber band at every floor, the plinth wash, the ground storey, the windows above
   for (let i = 1; i <= n; i++) B(-0.04, Y[i] - 0.1, -0.09, W + 0.04, Y[i] + 0.08, 0.0, 'timber');
   if (!open) {
     const wash = rand() < 0.5;
-    if (wash) B(0, 0, -0.04, W, 0.95, 0, 'plaster_ochre');
+    if (wash) B(0, 0, -0.04, W, 0.95, 0, rand() < 0.5 ? 'plaster_ochre' : 'mud_plaster');
     const shop = el.shop ?? rand() < 0.3;
     if (shop) {
       const sw = 2.0 + rand() * 0.6, sxl = 0.7 + rand() * Math.max(0.1, W - sw - 1.6);
@@ -67,7 +70,7 @@ export function houseParts(el, ctx, { hipRoof }) {
         else bag.add(['cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_indigo'][k], lathe([[0.001, 0.68], [0.1, 0.7], [0.11, 0.8], [0.05, 0.86], [0.001, 0.86]], 6, null, p[0], 0, p[1]));
       }
     } else {
-      const dx = rand() < 0.5 ? W / 2 - 0.6 : 0.7 + rand() * Math.max(0.1, W - 2.4);
+      const dx0 = rand() < 0.5 ? W / 2 - 0.6 : 0.7 + rand() * Math.max(0.1, W - 2.4), dx = el.dx ?? dx0;
       B(dx, 0, -0.06, dx + 1.2, 2.0, 0.0, 'opening');
       B(dx - 0.12, 0, -0.12, dx, 2.15, 0.05, 'timber'); B(dx + 1.2, 0, -0.12, dx + 1.32, 2.15, 0.05, 'timber'); B(dx - 0.14, 2.0, -0.14, dx + 1.34, 2.2, 0.05, 'timber');
       B(dx - 0.1, 2.2, -0.12, dx + 1.3, 2.5, -0.02, 'wood_painted');                        // the carved lintel board over the door
@@ -93,10 +96,58 @@ export function houseParts(el, ctx, { hipRoof }) {
       lattice(cx - 0.9, y0 + 0.55, 0.8, 1.15, det); lattice(cx + 0.1, y0 + 0.55, 0.8, 1.15, det);
     }
   }
+  // ── weathering (the monsoon's damp, the plaster's loss) and the eye-level dressing of the front ──
+  if (det > 0) {
+    // the damp at the foot (green-grey, broken), a patch of lime wash or mud plaster come away from the brick, rain streaks under the sills
+    if (damp < 0.7) for (let x = 0, k = 0; x < W - 0.3; k++) { const w = 0.6 + ((k * 7 + (el.seed || 0)) % 5) * 0.35; B(x, 0, -0.025, Math.min(W, x + w), 0.28 + ((k * 3) % 4) * 0.1, 0.0, 'plaster_damp'); x += w + 0.4 + ((k * 5) % 3) * 0.5; }
+    if (rand() < 0.45) { const px = 0.3 + rand() * Math.max(0.2, W - 2.2), py = Y[1] + 0.3 + rand() * (Y[Math.min(n, 2)] - Y[1] - 1.6); B(px, py, -0.02, px + 0.9 + rand() * 0.9, py + 0.7 + rand() * 0.7, 0.0, rand() < 0.5 ? 'mud_plaster' : 'limewash_white'); }
+    if (rand() < 0.5 && n > 2) for (let k = 0; k < 3; k++) { const px = 0.5 + rand() * (W - 1.0); B(px, Y[1] + 0.2, -0.018, px + 0.07, Y[1] + 1.4 + rand() * 0.8, 0.0, 'plaster_streak'); }
+    // the front's dressing at the street
+    const dx = el.dx ?? W * 0.5, onL = dx < W * 0.5;
+    const pid = el.pid && !open && !el.shop;
+    if (pid) {
+      // the pidha: a raised seat of brick with a plank top along the front on either side of the door
+      for (const [a, b] of [[0.1, dx - 0.2], [dx + 1.5, W - 0.1]]) if (b - a > 0.9) { B(a, 0, -0.78, b, 0.4, -0.02, 'brick'); B(a - 0.04, 0.4, -0.82, b + 0.04, 0.46, -0.0, 'wood_ochre'); RC(a - 0.04, 0, -0.82, b + 0.04, 0.46, 0); if (det > 1) B(a + 0.1, 0.46, -0.45, a + 0.65, 0.5, -0.1, 'cloth_red'); }
+    }
+    if (!open && rand() < 0.55) {
+      // firewood stacked end-out beside the door (or a stack of straw), and water pots on a stand
+      const fx = onL ? dx + 1.55 : dx - 0.7;
+      if (fx > 0.1 && fx + 0.7 < W && !pid) { if (rand() < 0.65) { for (let i = 0; i < 4; i++) for (let j = 0; j < 4 - (i > 1 ? 1 : 0); j++) RODL([fx + 0.09 + i * 0.16, 0.1 + j * 0.15, -0.04], [fx + 0.09 + i * 0.16, 0.1 + j * 0.15, -0.5], 0.062, 'timber', 5); RC(fx, 0, -0.52, fx + 0.7, 0.65, 0); } else { const p = toW(fx + 0.35, -0.3); bag.add('thatch', lathe([[0.4, 0], [0.38, 0.5], [0.3, 0.9], [0.001, 1.15]], 7, null, p[0], 0, p[1])); col.circle(p[0], p[1], 0.4, 0, 1.0); } }
+    }
+    if (!open && rand() < 0.5) { const p = toW(onL ? dx - 0.3 : dx + 1.6, -0.25); pot(bag, p[0], 0, p[1], 'jar', 1); pot(bag, p[0] + 0.0, 0.5, p[1] + 0.0, 'round', 0.8); }
+    if (!open && rand() < 0.3) { for (let k = 0; k < 3; k++) { const p = toW(0.5 + k * 0.45, -0.3); bag.add('wicker', lathe([[0.2, 0], [0.26, 0.2], [0.3, 0.32], [0.26, 0.32], [0.001, 0.05]], 7, null, p[0], k % 2 ? 0.0 : 0.0, p[1])); } }
+    // the grain, the chillies and the marigolds laid to dry on a mat before the house [inferred: a sunny morning's task in the lanes]
+    if (!open && !pid && rand() < 0.4) {
+      const mx = Math.max(0.2, Math.min(W - 1.9, dx + (onL ? 1.6 : -2.2))), p0 = toW(mx, -1.0), p1 = toW(mx + 1.7, -0.1);
+      bag.add('reed_mat', bx(p0[0], 0.05, p0[1], p1[0], 0.065, p1[1]));
+      const c = toW(mx + 0.85, -0.55), heap = ['cloth_red', 'cloth_ochre', 'cloth_ochre', 'cloth_white'][Math.floor(rand() * 4)];
+      bag.add(heap, lathe([[0.62, 0.0], [0.5, 0.05], [0.3, 0.1], [0.001, 0.14]], 7, null, c[0], 0.065, c[1]));
+      if (rand() < 0.6) { const c2 = toW(mx + 0.3, -0.5); bag.add(heap === 'cloth_red' ? 'cloth_ochre' : 'cloth_red', lathe([[0.2, 0.0], [0.1, 0.05], [0.001, 0.08]], 6, null, c2[0], 0.065, c2[1])); }
+    }
+    // the carved lintel's gilt ornaments, the oil-lamp niche by the door, marigold garlands strung on the door
+    if (!open && !el.shop) {
+      B(dx + 0.45, 2.52, -0.13, dx + 0.75, 2.8, -0.04, 'gilt_bronze');
+      if (det > 1) { B(dx + 1.38, 1.2, -0.08, dx + 1.62, 1.55, 0.0, 'wood_dark'); B(dx + 1.42, 1.25, -0.1, dx + 1.58, 1.45, -0.04, 'opening'); const p = toW(dx + 1.5, -0.08); bag.add('flame', lathe([[0.02, 0], [0.001, 0.06]], 5, null, p[0], 1.28, p[1])); }
+      if (det > 0 && rand() < 0.6) for (let k = 0; k < 5; k++) B(dx + 0.1 + k * 0.2, 1.5 - 0.1 * Math.sin(k * 0.8), -0.1, dx + 0.2 + k * 0.2, 1.62 - 0.1 * Math.sin(k * 0.8), -0.04, 'cloth_ochre');
+    }
+    // washing on a line along an upper storey, a flower pot on a sill
+    if (n > 2 && rand() < 0.4) {
+      const ly = Y[2] - 0.45, lx0 = 0.5 + rand() * 0.6, lx1 = W - 0.5 - rand() * 0.6;
+      RODL([lx0, ly, -0.42], [lx1, ly, -0.42], 0.012, 'rope_fibre', 4);
+      for (let x = lx0 + 0.2, k = 0; x < lx1 - 0.5; x += 0.55 + rand() * 0.3, k++) B(x, ly - 0.7 - (k % 3) * 0.12, -0.44, x + 0.38 + (k % 2) * 0.12, ly, -0.40, ['cloth_white', 'cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white'][Math.floor(rand() * 5)]);
+    }
+    if (det > 1 && n > 2 && rand() < 0.5) for (let k = 0; k < 2; k++) { const px = W / 2 - 0.6 + k * 1.2, p = toW(px, -0.14); pot(bag, p[0], Y[1] + 0.48, p[1], 'round', 0.7); bag.add('cloth_ochre', lathe([[0.001, 0], [0.1, 0.06], [0.1, 0.14], [0.001, 0.2]], 6, null, p[0], Y[1] + 0.48 + 0.3, p[1])); }
+  }
   // the roof: low, hipped, its ridge along the front; the eaves deeper on the street side and held by struts
   const fo = 1.15, bo = 0.6, so = 0.08, r = [x0, z0, x1, z1];
   const ovl = [so, so, so, so]; ovl[{ s: 3, n: 1, e: 2, w: 0 }[f]] = fo; ovl[{ s: 1, n: 3, e: 0, w: 2 }[f]] = bo;
-  hipRoof(bag, r, H, Math.min(2.6, 0.22 * Math.max(D, 6) + 0.5), ovl, 'roof_tile', ns);
+  const rise = Math.min(2.6, 0.22 * Math.max(D, 6) + 0.5), tile = rand() < 0.2 ? 'tile_dark' : 'roof_tile';
+  hipRoof(bag, r, H, rise, ovl, tile, ns);
+  if (det > 0) {
+    // a gilt finial on the ridge of a rich house, or the flag-pole of the completed roof
+    if (n > 3 && det > 1) { const p = toW(W / 2, D / 2); bag.add('gilt_bronze', lathe([[0.16, 0], [0.1, 0.12], [0.14, 0.28], [0.05, 0.5], [0.001, 0.8]], 6, null, p[0], H + rise - 0.05, p[1])); }
+    else if (rand() < 0.2) { const p = toW(W / 2 + 0.6, D / 2); bag.add('timber', rod([p[0], H + rise - 0.3, p[1]], [p[0], H + rise + 1.6, p[1]], 0.03, 4)); bag.add('cloth_red', bx(p[0], H + rise + 1.0, p[1] - 0.01, p[0] + 0.5, H + rise + 1.55, p[1] + 0.01)); }
+  }
   if (det > 0) for (let x = 0.7; x < W - 0.5; x += 1.5) {
     RODL([x, H - 1.25, 0], [x, H - 0.1, -fo + 0.12], 0.06, 'wood_painted');
     if (det > 1) B(x - 0.04, H - 0.85, -0.5, x + 0.04, H - 0.35, -0.42, 'gilt_bronze');
@@ -114,29 +165,65 @@ export function houseParts(el, ctx, { hipRoof }) {
     if (d > 1) for (let k = 1; k < 4; k++) B(lx, y + h * k / 4 - 0.015, -0.085, lx + w, y + h * k / 4 + 0.015, -0.045, 'wood_dark');
   }
 
-  /** The ground storey's furnishing: what a house of the town kept below — jars, grain, a bench, the stair to the rooms above, a small shrine, a lamp. */
-  function furnish() {
+  /** The ground storey's furnishing by trade: 'home' (jars, grain, a bench, a shrine), 'curd' (the clay pots of juju dhau), 'cloth', 'brass', 'carver', 'grain', 'pots'. The stair and a side shrine in all. */
+  function furnish(kind) {
     const bk = D - T;
-    // the storage jars along the back wall, a few of the dark clay
-    for (let k = 0; k < 5; k++) { const p = toW(T + 0.6 + k * 0.85, bk - 0.45); pot(bag, p[0], 0.1, p[1], 'jar', 1.5 + (k % 2) * 0.2, k === 3); col.circle(p[0], p[1], 0.38, 0.1, 1.0); }
-    // the grain bin of boards with its heap
-    B(W - T - 1.7, 0.1, bk - 1.5, W - T - 0.1, 0.95, bk - 0.1, 'wood_ochre'); RC(W - T - 1.7, 0.1, bk - 1.5, W - T - 0.1, 0.95, bk - 0.1);
-    { const p = toW(W - T - 0.9, bk - 0.8); bag.add('cloth_ochre', lathe([[0.001, 0.95], [0.6, 0.95], [0.5, 1.05], [0.001, 1.2]], 8, null, p[0], 0, p[1])); }
-    // the low bench along the side wall with a red cushion, a mat on the floor, a stack of sacks
-    B(T + 0.02, 0.1, 1.0, T + 0.62, 0.5, 3.4, 'wood_ochre'); RC(T + 0.02, 0.1, 1.0, T + 0.62, 0.5, 3.4);
-    B(T + 0.05, 0.5, 1.2, T + 0.58, 0.58, 2.2, 'cloth_red');
-    B(W * 0.38, 0.1, D * 0.62, W * 0.38 + 1.7, 0.12, D * 0.62 + 1.1, 'reed_mat');
-    for (let k = 0; k < 3; k++) B(T + 0.1, 0.1 + k * 0.28, bk - 0.9, T + 0.8, 0.38 + k * 0.28, bk - 0.1, k % 2 ? 'sacking' : 'cloth_white');
-    RC(T + 0.1, 0.1, bk - 0.9, T + 0.8, 1.0, bk - 0.1);
-    // the steep wooden stair to the rooms above, at the back corner by the grain: 9 boards, a hole closed by a trap
+    // the steep wooden stair to the rooms above, in the back corner: 9 boards, a hole closed by a trap
     for (let k = 0; k < 9; k++) B(W - T - 3.4 - 0.0, 0.1 + k * 0.28, 1.0 + k * 0.1, W - T - 2.5, 0.38 + k * 0.28, 1.45 + k * 0.1, 'wood_ochre');
     RC(W - T - 3.4, 0.1, 1.0, W - T - 2.5, 2.5, 2.4);
-    // the shrine in the back wall: a framed niche, a gilt image, an oil lamp lit
-    B(W * 0.5 - 0.45, 1.0, bk - 0.2, W * 0.5 + 0.45, 1.9, bk, 'wood_painted'); B(W * 0.5 - 0.35, 1.08, bk - 0.12, W * 0.5 + 0.35, 1.82, bk - 0.1, 'opening');
-    { const p = toW(W * 0.5, bk - 0.3); bag.add('gilt_bronze', lathe([[0.001, 0], [0.1, 0], [0.08, 0.2], [0.05, 0.3], [0.001, 0.36]], 6, null, p[0], 1.1, p[1])); bag.add('flame', lathe([[0.03, 0], [0.001, 0.09]], 5, null, p[0], 1.02, p[1])); }
-    B(W * 0.5 - 0.5, 0.95, bk - 0.35, W * 0.5 + 0.5, 1.0, bk - 0.2, 'wood_dark');
-    for (let k = 0; k < 4; k++) { const p = toW(T + 0.6 + k * 0.4, 2.2); bag.add('bronze', lathe([[0.001, 0], [0.12, 0], [0.14, 0.12], [0.11, 0.18], [0.001, 0.18]], 7, null, p[0], 0.5, p[1])); }
-    B(T + 0.05, 0.5, 3.6, T + 0.4, 0.55, 5.2, 'wood_ochre');
-    if (lights) { const p = toW(W / 2, D / 2); lights.push({ at: [p[0], 2.2, p[1]], color: '#ffd9a0', intensity: 2.2, distance: 10 }); }
+    // the side shrine: a framed niche in the left wall with a gilt image and a lit lamp
+    { const z = Math.min(D * 0.55, bk - 1.2); B(T - 0.01, 1.0, z - 0.45, T + 0.12, 1.9, z + 0.45, 'wood_painted'); B(T + 0.1, 1.08, z - 0.35, T + 0.13, 1.82, z + 0.35, 'opening');
+      const p = toW(T + 0.3, z); bag.add('gilt_bronze', lathe([[0.001, 0], [0.1, 0], [0.08, 0.2], [0.05, 0.3], [0.001, 0.36]], 6, null, p[0], 1.1, p[1])); bag.add('flame', lathe([[0.03, 0], [0.001, 0.09]], 5, null, p[0], 1.02, p[1])); B(T, 0.95, z - 0.5, T + 0.4, 1.0, z + 0.5, 'wood_dark'); }
+    const shelf = (y, a, b, d = 0.45) => { B(a, y, bk - d, b, y + 0.05, bk - 0.02, 'wood_ochre'); };
+    const rowPots = (y, a, b, kindp, dz, dark) => { for (let x = a; x < b; x += kindp === 'cup' ? 0.26 : 0.4) { const p = toW(x, bk - dz); pot(bag, p[0], y + 0.05, p[1], kindp, kindp === 'cup' ? 1 : 1.0, dark && ((x * 7) % 3 < 1)); } };
+    if (kind === 'curd') {
+      // the counter across the shop with its cups, tiers of curd pots on the back wall, the great jars of milk and curd on the floor
+      B(T + 1.0, 0.1, 1.5, W - T - 1.0, 0.95, 2.1, 'wood_ochre'); B(T + 0.9, 0.95, 1.4, W - T - 0.9, 1.0, 2.2, 'wood_dark'); RC(T + 1.0, 0.1, 1.5, W - T - 1.0, 1.0, 2.1);
+      for (let x = T + 1.2; x < W - T - 1.2; x += 0.3) { const p = toW(x, 1.8); pot(bag, p[0], 1.0, p[1], 'cup', 1); if ((x * 10) % 3 < 1.5) pot(bag, p[0], 1.13, p[1], 'cup', 1); }
+      for (const y of [0.6, 1.2, 1.8]) { shelf(y, T + 0.2, W - T - 2.7); rowPots(y, T + 0.5, W - T - 2.8, 'cup', 0.25, false); rowPots(y, T + 0.5, W - T - 2.8, 'cup', 0.5, false); }
+      for (let k = 0; k < 4; k++) { const p = toW(T + 0.7 + k * 0.8, bk - 0.55); pot(bag, p[0], 0.1, p[1], 'jar', 1.6, k % 2 === 0); col.circle(p[0], p[1], 0.4, 0.1, 1.0); }
+    } else if (kind === 'cloth') {
+      // bolts of cloth in cubbies on the back wall, lengths hung from a pole, a counter with a folded stack, the weaver's frame loom at the side
+      B(T + 0.1, 0.1, bk - 0.5, W - T - 2.7, 2.2, bk - 0.04, 'wood_ochre'); RC(T + 0.1, 0.1, bk - 0.5, W - T - 2.7, 2.2, bk);
+      const cols = ['cloth_red', 'cloth_black', 'cloth_indigo', 'cloth_ochre', 'cloth_white', 'cloth_maroon', 'cloth_green'];
+      for (let r = 0; r < 4; r++) for (let x = T + 0.2, k = 0; x < W - T - 2.9; x += 0.42, k++) B(x, 0.25 + r * 0.5, bk - 0.46, x + 0.38, 0.65 + r * 0.5, bk - 0.1, cols[(r * 3 + k) % cols.length]);
+      RODL([T + 0.5, 2.3, 2.6], [W - T - 2.9, 2.3, 2.6], 0.03, 'timber', 5);
+      for (let x = T + 0.8, k = 0; x < W - T - 3.2; x += 0.5, k++) B(x, 1.3 - (k % 2) * 0.15, 2.57, x + 0.34, 2.3, 2.63, cols[(k * 2) % cols.length]);
+      B(T + 1.0, 0.1, 1.5, W - T - 3.4, 0.9, 2.0, 'wood_ochre'); RC(T + 1.0, 0.1, 1.5, W - T - 3.4, 0.9, 2.0);
+      for (let k = 0; k < 4; k++) B(T + 1.2 + k * 0.5, 0.9, 1.6, T + 1.6 + k * 0.5, 0.97 + (k % 2) * 0.06, 1.9, cols[k]);
+      B(W - T - 1.5, 0.1, 3.4, W - T - 1.4, 1.6, 4.9, 'timber'); B(W - T - 0.5, 0.1, 3.4, W - T - 0.4, 1.6, 4.9, 'timber'); B(W - T - 1.5, 1.6, 3.4, W - T - 0.4, 1.66, 4.9, 'timber');
+      B(W - T - 1.45, 0.6, 3.5, W - T - 0.45, 1.5, 3.55, 'cloth_red'); B(W - T - 1.0, 0.45, 3.5, W - T - 0.9, 0.7, 4.0, 'wood_dark');
+    } else if (kind === 'brass') {
+      // tiers of beaten vessels, great cauldrons and water jugs on the floor, the anvil block and hammer by the door
+      for (const y of [0.6, 1.2, 1.8]) { shelf(y, T + 0.2, W - T - 2.7); for (let x = T + 0.5, k = 0; x < W - T - 2.8; x += 0.38, k++) { const p = toW(x, bk - 0.25); bag.add(k % 3 === 0 ? 'gilt_bronze' : 'bronze', lathe(k % 2 ? [[0.001, 0], [0.1, 0], [0.16, 0.12], [0.1, 0.24], [0.06, 0.3], [0.09, 0.34], [0.001, 0.33]] : [[0.001, 0], [0.12, 0], [0.17, 0.05], [0.16, 0.1], [0.001, 0.1]], 8, null, p[0], y + 0.05, p[1])); } }
+      for (let k = 0; k < 3; k++) { const p = toW(T + 0.9 + k * 1.1, bk - 0.7); bag.add('bronze', lathe([[0.001, 0], [0.3, 0.02], [0.45, 0.3], [0.36, 0.55], [0.4, 0.62], [0.001, 0.58]], 10, null, p[0], 0.1, p[1])); col.circle(p[0], p[1], 0.42, 0.1, 0.7); }
+      B(T + 0.6, 0.1, 2.4, T + 1.0, 0.5, 2.8, 'iron'); RC(T + 0.6, 0.1, 2.4, T + 1.0, 0.5, 2.8); { const a = toW(T + 0.8, 2.6); bag.add('iron', rod([a[0], 0.5, a[1]], [a[0] + 0.1, 0.52, a[1] + 0.3], 0.025, 5)); }
+      B(T + 1.3, 0.1, 1.5, W - T - 3.4, 0.9, 2.0, 'wood_ochre'); RC(T + 1.3, 0.1, 1.5, W - T - 3.4, 0.9, 2.0);
+      for (let k = 0; k < 4; k++) { const p = toW(T + 1.6 + k * 0.45, 1.75); bag.add('bronze', lathe([[0.001, 0.9], [0.14, 0.9], [0.17, 1.02], [0.12, 1.06], [0.001, 1.05]], 8, null, p[0], 0, p[1])); }
+    } else if (kind === 'carver') {
+      // the carver's bench with chisels and a half-carved strut, finished struts and panels leaning on the wall, window frames stood up, shavings on the floor
+      B(T + 0.6, 0.78, 1.8, W - T - 3.5, 0.86, 2.7, 'wood_ochre'); for (const x of [T + 0.7, W - T - 3.6]) for (const z of [1.9, 2.6]) B(x, 0.1, z - 0.05, x + 0.1, 0.78, z + 0.05, 'wood_dark'); RC(T + 0.6, 0.1, 1.8, W - T - 3.5, 0.9, 2.7);
+      B(T + 1.0, 0.86, 2.0, T + 2.2, 0.98, 2.4, 'wood_painted'); for (let k = 0; k < 5; k++) { const a = toW(T + 2.6 + k * 0.1, 2.0 + k * 0.1); bag.add('iron', rod([a[0], 0.86, a[1]], [a[0] + 0.12, 0.88, a[1] + 0.02], 0.012, 4)); }
+      for (let k = 0; k < 7; k++) { const x = T + 0.5 + k * 0.45; RODL([x, 0.1, bk - 0.25], [x + 0.25, 2.3, bk - 0.1], 0.08, k % 2 ? 'wood_painted' : 'wood_dark'); B(x + 0.05 + 0.1 * (k % 3), 1.1, bk - 0.3, x + 0.2, 1.5, bk - 0.2, 'gilt_bronze'); }
+      for (let k = 0; k < 3; k++) { const x = W - T - 3.3 + k * 0.0; B(x - 0.6 + k * 0.0, 0.1, bk - 0.9 - k * 0.1, x - 0.5, 1.9, bk - 0.3 - k * 0.1, 'wood_painted'); }
+      for (let k = 0; k < 9; k++) { const p = toW(T + 0.8 + (k * 0.37) % 3, 2.9 + (k * 0.61) % 1.4); B(p[0] - 0.12, 0.1, p[1] - 0.04, p[0] + 0.12, 0.13, p[1] + 0.04, 'thatch'); }
+    } else if (kind === 'pots') {
+      // the potter's shop: ranks of pots on the floor and on tiers, the largest jars at the back
+      for (const y of [0.6, 1.2]) { shelf(y, T + 0.2, W - T - 2.7, 0.55); rowPots(y, T + 0.5, W - T - 2.8, y > 0.9 ? 'bowl' : 'round', 0.3, true); }
+      for (let r = 0; r < 3; r++) for (let x = T + 0.6; x < W - T - 3.0; x += 0.55) { const p = toW(x + (r % 2) * 0.27, 2.2 + r * 0.55); pot(bag, p[0], 0.1, p[1], r === 0 ? 'jar' : r === 1 ? 'round' : 'cup', r === 0 ? 1.2 : 1.3, (x * 5) % 3 < 1); }
+      for (let k = 0; k < 3; k++) { const p = toW(T + 0.7 + k * 0.9, bk - 0.55); pot(bag, p[0], 0.1, p[1], 'jar', 1.8, k === 1); col.circle(p[0], p[1], 0.5, 0.1, 1.0); }
+    } else {
+      // 'home' and 'grain': jars along the back, the grain bin with its heap, sacks, a bench and a mat
+      for (let k = 0; k < 5; k++) { const p = toW(T + 0.6 + k * 0.85, bk - 0.45); pot(bag, p[0], 0.1, p[1], 'jar', 1.5 + (k % 2) * 0.2, k === 3); col.circle(p[0], p[1], 0.38, 0.1, 1.0); }
+      B(W - T - 1.7, 0.1, bk - 1.5, W - T - 0.1, 0.95, bk - 0.1, 'wood_ochre'); RC(W - T - 1.7, 0.1, bk - 1.5, W - T - 0.1, 0.95, bk - 0.1);
+      { const p = toW(W - T - 0.9, bk - 0.8); bag.add('cloth_ochre', lathe([[0.001, 0.95], [0.6, 0.95], [0.5, 1.05], [0.001, 1.2]], 8, null, p[0], 0, p[1])); }
+      B(T + 0.02, 0.1, 1.0, T + 0.62, 0.5, 3.4, 'wood_ochre'); RC(T + 0.02, 0.1, 1.0, T + 0.62, 0.5, 3.4);
+      B(T + 0.05, 0.5, 1.2, T + 0.58, 0.58, 2.2, 'cloth_red');
+      B(W * 0.38, 0.1, D * 0.62, W * 0.38 + 1.7, 0.12, D * 0.62 + 1.1, 'reed_mat');
+      for (let k = 0; k < 3; k++) B(T + 0.1, 0.1 + k * 0.28, bk - 0.9, T + 0.8, 0.38 + k * 0.28, bk - 0.1, k % 2 ? 'sacking' : 'cloth_white');
+      RC(T + 0.1, 0.1, bk - 0.9, T + 0.8, 1.0, bk - 0.1);
+      if (kind === 'grain') { for (let k = 0; k < 5; k++) { const p = toW(T + 1.4 + k * 0.6, 1.8 + (k % 2) * 0.3); bag.add(k % 2 ? 'sacking' : 'cloth_ochre', lathe([[0.001, 0.1], [0.24, 0.1], [0.28, 0.4], [0.18, 0.62], [0.001, 0.66]], 8, null, p[0], 0, p[1])); col.circle(p[0], p[1], 0.28, 0.1, 0.7); } { const a = toW(W * 0.5, 2.9); bag.add('bronze', rod([a[0], 0.1, a[1]], [a[0], 1.4, a[1]], 0.02, 5)); bag.add('bronze', rod([a[0] - 0.4, 1.35, a[1]], [a[0] + 0.4, 1.35, a[1]], 0.015, 4)); for (const s of [-0.4, 0.4]) bag.add('bronze', lathe([[0.001, 0], [0.12, 0.02], [0.14, 0.04]], 8, null, a[0] + s, 0.95, a[1])); } }
+    }
+    if (lights && el.light) { const p = toW(W / 2, D / 2); lights.push({ at: [p[0], 2.2, p[1]], color: '#ffd9a0', intensity: 2.2, distance: 10 }); }
   }
 }

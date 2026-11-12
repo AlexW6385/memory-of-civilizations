@@ -14,7 +14,7 @@ E.push({ t: 'newar_pati', rect: PATI });
 E.push({ t: 'newar_dhara', ...DHARA });
 E.push({ t: 'newar_chaitya', c: CHAITYA.c, s: 1 });
 TREES.forEach(([x, z], i) => E.push({ t: 'newar_tree', at: [x, z], h: 9.5 + i, seed: i * 2 }));
-E.push({ t: 'newar_house', ...HOUSE, open: true, detail: 2, seed: 77 });
+E.push({ t: 'newar_house', ...HOUSE, open: true, detail: 2, seed: 77, light: true, trade: 'home', shop: false, dx: 4.5, pid: false });
 STALLS.forEach(([x, z, yaw, kind], i) => E.push({ t: 'newar_stall', at: [x, z], yaw, kind, seed: i + 5 }));
 
 // Pottery Square: the drying ground, the wheels along its north edge, the kilns behind them (the south-west)

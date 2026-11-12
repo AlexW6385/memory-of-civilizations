@@ -103,8 +103,38 @@ export function lots() {
       if (!done) t += 0.25;
     }
   }
+  // the plan's second stream (a separate rng, so the lots stay as they were): the shop-houses that stand open, the courts kept for a spout, a rest-house, a pipal or a shrine, the doors, seats and trades
+  const r2 = rng(8800), ctr = (l) => [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2], dist = (l) => Math.hypot(...ctr(l));
+  const wOf = (l) => (l.front === 'n' || l.front === 's' ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1]), dOf = (l) => (l.front === 'n' || l.front === 's' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0]);
+  const COURTS = ['dhara', 'tree', 'pati', 'shrine'], cs = [];
+  let ci = 0;
+  for (const l of out) {
+    if (l.shop !== undefined || wOf(l) < 6 || dOf(l) < 6.5 || dist(l) < 30 || dist(l) > 112 || r2() > 0.1) continue;
+    if (cs.some((q) => Math.hypot(ctr(q)[0] - ctr(l)[0], ctr(q)[1] - ctr(l)[1]) < 30)) continue;
+    l.use = COURTS[ci++ % COURTS.length]; cs.push(l);
+  }
+  const TR = ['curd', 'cloth', 'brass', 'carver', 'grain', 'pots', 'curd', 'cloth'];
+  const byD = out.filter((l) => !l.use).sort((a, b) => dist(a) - dist(b));
+  let nOpen = 0, ti = 0;
+  for (const l of byD) {
+    const d = dist(l), W = wOf(l);
+    if (nOpen < 40 && W >= 6.4 && dOf(l) >= 6.5 && d < 100 && r2() < (d < 40 ? 0.55 : d < 70 ? 0.4 : 0.22)) {
+      l.open = true; l.shop = false; l.trade = l.rect[1] >= POT[1] - 0.5 && l.rect[3] <= POT[3] + 12 && l.rect[0] < POT[2] + 6 && l.rect[2] > POT[0] - 6 ? 'pots' : TR[(ti++ + Math.floor(r2() * 3)) % TR.length]; l.light = nOpen < 14; nOpen++;
+      continue;
+    }
+    l.shop = l.shop ?? r2() < 0.3;
+    l.dx = r2() < 0.5 ? W / 2 - 0.6 : 0.7 + r2() * Math.max(0.1, W - 2.4);
+    l.pid = !l.shop && r2() < 0.35;
+  }
   return (_lots = out);
 }
+/** A point (lx along the facade, lz into the house) of a lot in world coordinates (house.js's frame). */
+export function fp(l, lx, lz) {
+  const [x0, z0, x1, z1] = l.rect, f = l.front;
+  return f === 's' ? [x0 + lx, z1 - lz] : f === 'n' ? [x1 - lx, z0 + lz] : f === 'e' ? [x1 - lz, z1 - lx] : [x0 + lz, z0 + lx];
+}
+/** The facing of a lot toward the street, as the figure rotation the engine uses (rot 0 faces −z). */
+export const frontRot = (f) => ({ s: Math.PI, n: 0, e: -Math.PI / 2, w: Math.PI / 2 }[f]);
 export const inLot = (x, z, m = 0) => inRect(HOUSE.rect, x, z, m) || lots().some((l) => inRect(l.rect, x, z, m));
 /** Footprints of the temples, for keeping ground cover and walkers off them. */
 export const KEEP = [
