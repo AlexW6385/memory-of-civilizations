@@ -2,7 +2,7 @@
 // §5). This adds the life of the plaza and the roofs (§4.2): women grinding at the mealing bins, the
 // grinder inside the furnished room, people on the terraces and the plaza, firewood, jars and baskets
 // on the roofs, dogs and turkeys about the plaza.
-import { NORTH, SOUTH, CELL, RADIUS, ROOMS, YARDS, nearYard, creekZ, inCreek } from './layout.js';
+import { NORTH, SOUTH, CELL, RADIUS, ROOMS, YARDS, PENS, nearYard, creekZ, inCreek, isRoom, roomsOf } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const ST = 2.7;
@@ -21,6 +21,18 @@ export async function town() {
   // and inside the room, at its first bin
   const ROOM = ROOMS[0], ix0 = NORTH.x0 + ROOM.j * CELL + 0.5, iz0 = NORTH.z0 + ROOM.i * CELL + 0.5, cx = ix0 + 2;
   woman([cx - 0.1 - 0.62, iz0 + 0.025 + 0.48 + 0.78], 0.06, 0, { pose: 'kneel', over: 'none' });
+  // and in the other rooms (pueblo_room's furniture, §4.5): the weaver seated at her loom, the potter kneeling at the drying jars, the man
+  // at the knapping pad, a woman by the fire in the sleeping rooms and the second homes at their bins
+  for (const B of [NORTH, SOUTH]) for (const r of roomsOf(B)) {
+    if (r === ROOM) continue;
+    const x0 = B.x0 + r.j * CELL + 0.5, z0 = B.z0 + r.i * CELL + 0.5, x1 = x0 + 4, z1 = z0 + 4, mx = x0 + 2, mz = z0 + 2, south = r.door === 's', sg = south ? -1 : 1;
+    const Z = (d) => (south ? z0 + 0.025 + d : z1 - 0.025 - d), D = (d) => (south ? z1 - 0.025 - d : z0 + 0.025 + d);
+    if (r.kind === 'weave') woman([x1 - 0.025 - 0.85, mz + sg * 0.7], 0.06, face([x1, 0], [x1 + 1, 0]) + Math.PI, { pose: 'sit_ground', over: 'none' });
+    else if (r.kind === 'pottery') woman([x0 + 1.15, Z(1.95)], 0.06, south ? 0 : Math.PI, { pose: 'kneel', over: 'none' });
+    else if (r.kind === 'work') man([x0 + 1.4, D(1.65)], 0.06, south ? 0 : Math.PI, { pose: 'sit_ground' });
+    else if (r.kind === 'sleep') woman([mx - 0.2, mz + 0.95 * (south ? 1 : -1)], 0.06, face([mx - 0.2, 0], [mx + 0.3, 0]) + Math.PI, { pose: 'sit_ground', over: 'none' });
+    else if (r.kind === 'home') woman([mx - 0.1 - 0.62, Z(0.48 + 0.78 + 0.03)], 0.06, south ? 0 : Math.PI, { pose: 'kneel', over: 'none' });
+  }
   // the cook yards: a woman kneeling at the griddle turning the thin bread, one tending the steaming pit; at the mud yards a man
   // treading and mixing the mud, a woman smoothing the new course of the wall with her hands, a boy carrying a basket of mud
   for (const [x, z] of YARDS.cook) {
@@ -47,7 +59,7 @@ export async function town() {
   for (const B of [NORTH, SOUTH]) {
     const H = B.heights, back = B.front === 's' ? -1 : 1;
     for (let i = 0; i < H.length; i++) for (let j = 0; j < H[0].length; j++) {
-      const n = H[i][j]; if (!n || (B === NORTH && ROOMS.some((r) => r.i === i && r.j === j))) continue;
+      const n = H[i][j]; if (!n || isRoom(B, i, j)) continue;
       const x0 = B.x0 + j * CELL, z0 = B.z0 + i * CELL, y = n * ST, zb = back < 0 ? z0 + 0.75 : z0 + CELL - 0.75, r = rand();
       if (r < 0.12) E.push({ t: 'firewood', at: [x0 + 0.75, zb], y, rot: Math.PI / 2, len: 1.5, seed: i * 31 + j });
       else if (r < 0.2) E.push({ t: 'pot', kind: rand() < 0.5 ? 'water_pot' : 'dark_pot', n: 2 + Math.floor(rand() * 2), at: [x0 + 0.8, zb], y, seed: i * 7 + j });
@@ -61,6 +73,8 @@ export async function town() {
     const x = fx + (rand() - 0.5) * 6, z = fz + (rand() - 0.5) * 5;
     if (!inCreek(x, z, 1.5) && !nearYard(x, z, 1)) T.push({ t: 'turkey', at: [x, z], y: 0, rot: rand() * 6.28, tom: k === 0 });
   }
+  // the pens' turkeys
+  for (const [px, pz] of PENS) for (let k = 0; k < 5; k++) { const a = rand() * 6.28, r = 0.4 + rand() * 0.9; T.push({ t: 'turkey', at: [px + Math.cos(a) * r - 0.2, pz + Math.sin(a) * r], y: 0, rot: rand() * 6.28, tom: k === 0 }); }
   void creekZ;
   return [plan('taos-people', 'life', [...P, ...E]), plan('taos-turkeys', 'pueblo', T)];
 }

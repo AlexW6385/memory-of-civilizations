@@ -27,15 +27,42 @@ function block(cols, rows, top, back, seed, alleys) {
     }
     H.push(row);
   }
+  // no bare lots in the block: a gap with two built neighbours is built over (a one-storey room), and the plaza face is a
+  // continuous ground storey but for the alleys and the ragged ends (the pueblo's rooms are added to one another, not strewn)
+  for (let pass = 0; pass < 2; pass++) {
+    const src = H.map((r) => r.slice());
+    for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) {
+      if (src[i][j] || alleys.includes(j)) continue;
+      let n = 0;
+      for (let di = -1; di <= 1; di++) for (let dj = -1; dj <= 1; dj++) if ((di || dj) && (src[i + di]?.[j + dj] ?? 0) > 0) n++;
+      if (n >= 2) H[i][j] = 1;
+    }
+  }
+  const fr = back === 'n' ? rows - 1 : 0;
+  for (let j = 2; j < cols - 2; j++) if (!alleys.includes(j) && !H[fr][j]) H[fr][j] = 1;
   return H;
 }
 export const NORTH = { x0: -75, z0: -98, heights: block(24, 9, 5, 'n', 1450, [8, 16]), front: 's' };
 export const SOUTH = { x0: -35, z0: 46, heights: block(19, 8, 4, 's', 1000, [9]), front: 'n' };
 /** The room opened and furnished (docs/settlements/taos.md §4.2): a ground-storey cell of the North House on the plaza, its doorway south. */
-export const ROOM = { i: 8, j: 11, door: 's' };
+export const ROOM = { b: 'N', i: 8, j: 11, door: 's', kind: 'home' };
 /** The storeroom beside it (§4.3): the next ground-storey cell but one, its doorway also on the plaza. */
-export const STORE = { i: 8, j: 14, door: 's', store: true };
-export const ROOMS = [ROOM, STORE];
+export const STORE = { b: 'N', i: 8, j: 14, door: 's', kind: 'store', store: true };
+/**
+ * The rooms opened and furnished (§4.5): ground-storey cells on the plaza face of each house, each with its doorway on the plaza —
+ * homes, storerooms, weaving rooms, sleeping rooms, workrooms (hunting and hide work), potters' rooms.
+ */
+export const ROOMS = [
+  ROOM, STORE,
+  { b: 'N', i: 8, j: 3, door: 's', kind: 'weave' }, { b: 'N', i: 8, j: 5, door: 's', kind: 'sleep' }, { b: 'N', i: 8, j: 7, door: 's', kind: 'work' },
+  { b: 'N', i: 8, j: 10, door: 's', kind: 'pottery' }, { b: 'N', i: 8, j: 18, door: 's', kind: 'sleep' }, { b: 'N', i: 8, j: 20, door: 's', kind: 'weave' }, { b: 'N', i: 8, j: 17, door: 's', kind: 'home' },
+  { b: 'S', i: 0, j: 3, door: 'n', kind: 'home' }, { b: 'S', i: 0, j: 5, door: 'n', kind: 'pottery' }, { b: 'S', i: 0, j: 7, door: 'n', kind: 'work' },
+  { b: 'S', i: 0, j: 11, door: 'n', kind: 'weave' }, { b: 'S', i: 0, j: 13, door: 'n', kind: 'store', store: true }, { b: 'S', i: 0, j: 15, door: 'n', kind: 'sleep' },
+];
+/** The rooms of one house block, and whether a cell is one. */
+export const roomsOf = (B) => ROOMS.filter((r) => r.b === (B === NORTH ? 'N' : 'S'));
+export const isRoom = (B, i, j) => roomsOf(B).some((r) => r.i === i && r.j === j);
+export const nearRoom = (B, i, j) => roomsOf(B).some((r) => r.i === i && Math.abs(r.j - j) <= 1);
 const rectOf = (b) => [b.x0, b.z0, b.x0 + b.heights[0].length * CELL, b.z0 + b.heights.length * CELL];
 export const NORTH_RECT = rectOf(NORTH), SOUTH_RECT = rectOf(SOUTH);
 export const inHouses = (x, z, m = 0) => inRect(NORTH_RECT, x, z, m) || inRect(SOUTH_RECT, x, z, m);
@@ -44,3 +71,14 @@ export const YARDS = { cook: [[-8, -30], [24, 36]], mud: [[-52, -17], [46, 17]],
 export const nearYard = (x, z, m = 0) => [...YARDS.cook.map(([a, b]) => [a - 3.2, b - 1.8, a + 4.2, b + 1.8]), ...YARDS.mud.map(([a, b]) => [a - 3.2, b - 3.4, a + 3.4, b + 1.4]), ...YARDS.vigas.map(([a, b]) => [a - 3, b - 2, a + 3, b + 2])].some((r) => inRect(r, x, z, m));
 /** The ground's height at a creek bank (as ground.js): the bed at CREEK.bed, rising to the plain over a smoothstep from 2 m to 4.5 m off the middle line. */
 export const bankY = (dz) => (dz < CREEK.w / 2 + 2 ? CREEK.bed * smooth(CREEK.w / 2 + 2, CREEK.w / 2 - 0.5, dz) : 0);
+/** The turkey pens of the plaza (§4.5), each a ring of stakes 2 m in radius with a gap toward +x, the flock inside. */
+export const PENS = [[-30, 26], [56, -12], [-58, -30]];
+/** The plaza proper, between the two house blocks. */
+export const PLAZA = [-70, -45, 70, 40];
+/** The racks' footprints (x0, x1 at z −44: poles and bins), kept clear of the plaza's scatter. */
+export const RACKS = [[-62, -34], [-27, -1], [8, 36]];
+/** The ways kept open for the visitor: the arrival and the route to the log bridge and the north house, the road out of the south gap. */
+export const KEEP_ROUTE = [[0, 200], [0, 141], [0, 92], [12.5, 92], [12.5, 40], [0, 30], [-35, 10], [-35, -40]];
+export const KEEP = KEEP_ROUTE.slice(1).map((p, k) => [KEEP_ROUTE[k], p]);
+export const distSeg = (x, z, [[ax, az], [bx, bz]]) => { const dx = bx - ax, dz = bz - az, t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz))); return Math.hypot(x - ax - dx * t, z - az - dz * t); };
+export const onKeep = (x, z, m = 0) => KEEP.some((s) => distSeg(x, z, s) < m);
