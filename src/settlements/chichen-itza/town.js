@@ -94,6 +94,11 @@ function worksite() {
     fig(x, z - 0.2, Y, Math.PI * 0.8, { pose: 'sit_ground', woman: rand() < 0.5 });
     if (rand() < 0.7) fig(x + 0.9, z + 1.2, Y, Math.PI + 0.6, { pose: 'sit_ground', woman: rand() < 0.5 });
   }
+  // the shade of the Thousand Columns (platform 0.6 m up; the aisles between the columns' rows lie at z 32.5, 37, 41.5): people resting and talking, a few with their wares
+  for (const [x, z, pose] of [[88, 37, 'sit_ground'], [100, 41.5, 'talk'], [104, 37, 'sit_ground'], [112, 32.5, 'sit_ground'], [120, 41.5, 'sit_ground'], [124, 37, 'talk'], [132, 32.5, 'sit_ground'], [140, 41.5, 'talk'], [148, 37, 'sit_ground'], [156, 32.5, 'sit_ground']]) {
+    fig(x, z, 0.64, rand() * 6.28, { pose, woman: rand() < 0.5, carry: pose === 'talk' ? pick(['none', 'basket', 'pot']) : 'none' });
+    if (pose === 'sit_ground' && rand() < 0.6) { O.push({ t: 'petate', at: [x, z], y: 0.62, w: 1.7, d: 1.3, rot: rand() }); L.push({ t: 'pot', kind: 'water_pot', at: [x + 1.0, z + 0.4], y: 0.64, seed: Math.floor(rand() * 1e6) }); }
+  }
   // the rest in the ceibas' shade: people sitting on mats with their jars and bundles, a turkey and a dog about them
   for (const [cx, cz] of [[62, 102], [-8, 106], [-122, 62], [160, 100]]) {
     for (let k = 0; k < 3; k++) {

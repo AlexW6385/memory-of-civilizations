@@ -37,6 +37,20 @@ function precinct() {
     P.push([x, z, Y, rand() * 6.28, ['man', 'woman', 'bearer', 'noble', 'man', 'priest', 'woman', 'child'][i % 8], 560 + i]);
     if (i % 4 === 0) P.push([x + 1.3, z + 0.8, Y, rand() * 6.28, i % 8 ? 'woman' : 'man', 600 + i]);
   }
+  // a game of tlachtli in the ballcourt (c −50, −65; the alley 60 × 9 m along x): two teams of three in hip-guards of hide with the rubber ball
+  // between them, and the lords and the people watching from the tops of the side platforms (4 m; the flat top 3.5 m wide from the alley's edge)
+  {
+    const cx = -50, cz = -65, Yb = 0.05, ball = [cx + 1.5, cz + 0.8];
+    for (const [side, c2] of [[-1, 'cloth_red'], [1, 'cloth_indigo']]) for (let i = 0; i < 3; i++) {
+      const x = cx + side * (6 + i * 7 + rand() * 3), z = cz + (rand() - 0.5) * 6;
+      L.push({ t: 'figure', at: [x, z], y: Yb, rot: side < 0 ? -Math.PI / 2 : Math.PI / 2, seed: Math.floor(rand() * 1e9), h: 1.62, dress: 'loincloth', top: 'bare', cloth: 'cloth_white', cloth2: c2, over: 'belt', skin: pick(['skin_medium', 'skin_dark']), hair: 'short', hairMat: 'hide_black', feet: 'bare', legs: 'bare', pose: i === 1 ? 'kneel' : 'stand' });
+    }
+    E.push({ t: 'm_ball', at: ball, y: Yb });
+    for (const s of [-1, 1]) for (let i = 0; i < 9; i++) {
+      const x = cx - 27 + i * 6.4 + rand() * 2, z = cz + s * (4.5 + 1.3 + rand() * 0.9);
+      P.push([x, z, 4.0, s < 0 ? Math.PI : 0, i % 4 === 0 ? 'noble' : pick(['man', 'woman', 'man', 'child']), 700 + i + (s > 0 ? 20 : 0), { pose: i % 3 === 0 ? 'sit_ground' : 'stand' }]);
+    }
+  }
   // the braziers at the stair's foot and the offerings left about them and at the foot of the momoztli
   const D = [['brazier', 35, -16.5], ['brazier', 35, 16.5], ['brazier', 35, -10], ['brazier', 35, 10]];
   for (const [x, z] of [[33, -14], [32.6, -17.5], [33, 14], [32.4, 17.8], [32, 9], [32, -9]]) D.push([rand() < 0.6 ? 'flowers' : 'roses', x, z, rand() * 6.28]);
