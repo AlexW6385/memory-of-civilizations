@@ -5,7 +5,7 @@
 
 import { frame } from '../../styles/greek/agora.js';
 import { houseLayout } from '../../styles/ptolemaic/house.js';
-import { RADIUS, GROUND, SEA, QUAY, PIER, CANOPIC, SOMA, AGORA, STREETS_Z, ALLEYS_X, ROYAL, GYMZONE, MOLE, lots, wet, inRect, inLot } from './layout.js';
+import { RADIUS, GROUND, SEA, QUAY, PIER, CANOPIC, SOMA, AGORA, STREETS_Z, ALLEYS_X, ROYAL, GYMZONE, MOLE, PHAROS, lots, isle, wet, inRect, inLot } from './layout.js';
 
 const g = GROUND;
 const FIG = [];            // the figures at the quay's work (filled by quayLife, drawn by streetLife)
@@ -53,6 +53,17 @@ function quayLife() {
   E.push({ t: 'cargo_pile', at: [-300, -85], y, rot: 0, kind: 'logs', n: 3, seed: 3 });
   // the mole: nets and baskets along its sides
   for (const z of [-240, -190, -120]) E.push({ t: 'net_rack', at: [MOLE[0] + 1.6, z], y, rot: Math.PI / 2, len: 3.0, seed: z });
+  // the island of Pharos: palms along its quay, nets and the fishermen at them, the fuel for the fire stacked by its store, a shrine at the court
+  { const I = isle();
+    for (const [x, z] of I.palms) E.push({ t: 'ptol_tree', at: [x, z], y, kind: 'palm', h: 5.5 + rand() * 2.5, seed: Math.floor(rand() * 1e6) });
+    for (const [x, z] of I.nets) { E.push({ t: 'net_rack', at: [x, z], y, rot: 0, len: 3.4, seed: Math.round(x) }); FIG.push({ at: [x + 0.8, z + 1.4], rot: 0, pose: 'sit_ground', dress: 'loincloth', cloth: 'linen', hair: 'shaven', skin: 'skin_dark', seed: Math.round(x * 3) }); }
+    const [sx0, sz0, sx1] = I.store;
+    E.push({ t: 'cargo_pile', at: [sx1 + 4, -257], y, rot: 0.1, kind: 'logs', n: 3, seed: 611 }, { t: 'cargo_pile', at: [sx0 - 4, -257], y, rot: -0.1, kind: 'logs', n: 3, seed: 612 }, { t: 'cargo_pile', at: [(sx0 + sx1) / 2 + 6, -256.5], y, rot: 0, kind: 'amphorae', n: 2, seed: 613 });
+    E.push({ t: 'shrine', at: [PHAROS.c[0] - 39, -257], y, rot: 0 }, { t: 'shrine', at: [PHAROS.c[0] + 33, -257], y, rot: 0 });
+    FIG.push({ at: [sx1 + 4, -254.8], rot: 3.0, pose: 'stand', dress: 'tunic', cloth: 'cloth_brown', hat: 'cap', carry: 'sack', skin: 'skin_medium', hair: 'short', seed: 614 });
+    FIG.push({ at: [PHAROS.c[0] - 37, -255.5], rot: 0.5, pose: 'talk', dress: 'robe', cloth: 'cloth_white', over: 'cape', beard: true, hat: 'brim', skin: 'skin_medium', seed: 615 });
+    FIG.push({ at: [PHAROS.c[0] - 36, -254.2], rot: -2.6, pose: 'talk', dress: 'tunic', cloth: 'cloth_red', over: 'belt', hat: 'cap', skin: 'skin_medium', hair: 'short', seed: 616 });
+    void sz0; }
   // street shrines of Isis at the great crossing and the cross streets
   for (const [x, z, rot] of [[SOMA[0] - 1.6, CANOPIC[1] - 1.2, 0], [SOMA[2] + 1.6, CANOPIC[3] + 1.2, Math.PI], [-300, CANOPIC[1] - 1.2, 0], [330, CANOPIC[3] + 1.2, Math.PI], [AGORA[0] + 4, AGORA[3] + 1, Math.PI]]) E.push({ t: 'shrine', at: [x, z], y: g + 0.04, rot });
   // the agora: the fountain house, stelae with decrees, a herm already built (town.js); goods heaped about

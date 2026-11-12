@@ -6,7 +6,7 @@ import { frame } from '../../styles/greek/agora.js';
 import { TRADES } from '../../styles/greek/shops.js';
 import { streetPlans } from './streets.js';
 import { houseRooms } from '../../styles/ptolemaic/house.js';
-import { RADIUS, GROUND, SEA, QUAYS, CHANNELS, SHIPS, CANOPIC, QUAY, SOMA, AGORA, GYM, SEROUTE, HILL, JEWISH, OPEN_HOUSE, ROYAL, MOLE, inRect, wet, height, lots } from './layout.js';
+import { RADIUS, GROUND, SEA, QUAYS, CHANNELS, SHIPS, CANOPIC, QUAY, SOMA, AGORA, GYM, SEROUTE, HILL, JEWISH, OPEN_HOUSE, ROYAL, MOLE, PHAROS, ISLAND, inRect, wet, height, lots, isle } from './layout.js';
 
 const base = (id, elements, extra = {}) => ({ id, style: 'ptolemaic', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [100, -86], facing: 'e' }, ...extra });
 const g = GROUND;
@@ -16,6 +16,7 @@ function harbour() {
   QUAYS.forEach((r, i) => E.push({ t: 'quay', rect: r, y0: SEA - 2.2, y1: g + 0.05, bollards: i < 2, side: 0.5 }));
   for (const c of CHANNELS) E.push({ t: 'mole_bridge', rect: c, y: g });
   for (const s of SHIPS) E.push({ t: 'ship', ...s, y: SEA });
+  E.push({ t: 'harbour_gate', c: [(SOMA[0] + SOMA[2]) / 2, -77], y: g, face: 'n', gw: 12, tower: 6, h: 13 });
   // the promenade and the great streets paved in slabs of limestone
   E.push({ t: 'floor', rect: [QUAY[0], QUAY[1], QUAY[2], QUAY[3]], y: g + 0.04, th: 0.2, mat: 'travertine' });
   E.push({ t: 'floor', rect: [-440, CANOPIC[1], 440, CANOPIC[3]], y: g + 0.04, th: 0.2, mat: 'travertine' });
@@ -107,8 +108,17 @@ function houses() {
   }
   return plans;
 }
+/** The village on the island of Pharos under the tower: houses of the fishermen and the keepers along the quay, the fuel store, the quay's paving. */
+function isleTown() {
+  const I = isle(), E = [];
+  E.push({ t: 'floor', rect: [-228, -259, 44, -251.2], y: g + 0.04, th: 0.2, mat: 'sandstone_floor' });
+  for (const h of I.houses) E.push({ t: 'egyptian_house', rect: h.rect, seed: h.seed, y: h.y, front: 's' });
+  E.push({ t: 'horreum', rect: I.store, front: 's', y: g, seed: 61 });
+  const plans = lodTiles('alexandria-isle', 'ptolemaic', E, { R: RADIUS, near: 150 });
+  return plans;
+}
 export async function town() {
-  const plans = [harbour(), ...shopStoas(), civic(), serapeum(), ...houses(), ...streetPlans()];
-  void HILL; void JEWISH;
+  const plans = [harbour(), ...isleTown(), ...shopStoas(), civic(), serapeum(), ...houses(), ...streetPlans()];
+  void HILL; void JEWISH; void ISLAND; void PHAROS;
   return plans;
 }

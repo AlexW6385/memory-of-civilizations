@@ -38,8 +38,12 @@ const E = [
   { t: 'exedra', c: [206, -51], r: 5, y: g, face: -Math.PI / 2 },
   ...halls.map((r, i) => ({ t: 'library_hall', rect: r, front: 'n', y: g, seed: 20 + i })),
   // the royal quarter's fronts on the harbour: long colonnades, the palace on the Lochias
-  { t: 'palace_front', rect: [128, -80, 168, -64], front: 's', y: g, seed: 31 },
-  { t: 'palace_front', rect: [330, -80, 436, -64], front: 's', y: g, seed: 32 },
+  { t: 'palace_front', rect: [128, -80, 168, -64], front: 'n', y: g, seed: 31 },
+  { t: 'palace_front', rect: [168, -80, 190, -64], front: 'n', y: g, seed: 34 },
+  { t: 'palace_front', rect: [302, -80, 330, -67], front: 'n', y: g, seed: 35 },
+  { t: 'palace_front', rect: [330, -80, 436, -64], front: 'n', y: g, seed: 32 },
+  // the royal enclosure's long wall over the Museion's north colonnade, seen from the harbour: pilasters, painted relief, a gateway
+  { t: 'wall_front', x0: 190, x1: 302, z: -80.6, face: 'n', y: g, h: 8.4, gate: 246 },
   { t: 'palace_front', rect: [LOCHIAS[0] + 10, -150, LOCHIAS[2] - 10, -134], front: 's', y: g, seed: 33 },
 ];
 export const museion = {

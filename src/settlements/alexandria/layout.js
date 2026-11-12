@@ -111,8 +111,35 @@ export const SHIPS = [
   { kind: 'merchant', at: [-60, -257.5], rot: Math.PI / 2, len: 26, seed: 17 },
   // the pier before the arrival and the ships lying off it, in the view to the Pharos (the arrival looks north-west)
   { kind: 'merchant', at: [72.6, -108], rot: 0, len: 26, seed: 18 }, { kind: 'lighter', at: [84.9, -112], rot: 0.04, len: 9, seed: 19 },
-  { kind: 'merchant', at: [40, -170], rot: 1.1, len: 24, seed: 20 }, { kind: 'galley', at: [112, -190], rot: 1.9, len: 34, seed: 21 },
+  // the island's quay: the fishermen's and the keepers' lighters, and a merchantman standing in from the open sea
+  { kind: 'lighter', at: [-46, -246.5], rot: Math.PI / 2, len: 9, seed: 24 }, { kind: 'lighter', at: [-110, -246.5], rot: Math.PI / 2 + 0.03, len: 9, seed: 25 },
+  { kind: 'lighter', at: [-168, -246.5], rot: Math.PI / 2, len: 9, seed: 26 }, { kind: 'merchant', at: [140, -262], rot: 2.6, len: 25, seed: 27 },
+  { kind: 'galley', at: [230, -200], rot: 2.0, len: 34, seed: 28 },
+    { kind: 'merchant', at: [40, -170], rot: 1.1, len: 24, seed: 20 }, { kind: 'galley', at: [112, -190], rot: 1.9, len: 34, seed: 21 },
   { kind: 'lighter', at: [96, -140], rot: 0.5, len: 9, seed: 22 }, { kind: 'merchant', at: [10, -215], rot: 2.2, len: 26, seed: 23 },
 ];
 /** The pier running out into the Great Harbour before the arrival (x0, z0, x1, z1): its deck is the quay's level, ships on both sides, a crane at its head. */
 export const PIER = [77, -126, 83, -90];
+
+let ISLE = null;
+/**
+ * The village of the island of Pharos (docs/settlements/alexandria.md §12): a row of fishermen's and keepers' houses on the island's
+ * south side facing the quay, east and west of the tower's court, and the fuel store for the fire. { houses: [{ rect, seed, y }], store: rect, palms, nets }
+ */
+export function isle() {
+  if (ISLE) return ISLE;
+  const rand = rng(331), houses = [], zs = [-274, -260], STORE = [-84, -274, -62, -260];
+  for (let x = -212; x < 40;) {
+    const w = 11 + Math.floor(rand() * 4), rect = [x, zs[0], x + w, zs[1]];
+    x += w + 0.8 + (rand() < 0.2 ? 2.5 : 0);
+    if (rect[2] > PHAROS.c[0] - 40 && rect[0] < PHAROS.c[0] + 40) continue;                                       // the tower's court
+    if (rect[2] > STORE[0] - 1 && rect[0] < STORE[2] + 1) continue;
+    if ([rect[0], rect[2]].some((px) => zs.some((pz) => wet(px, pz) < 3))) continue;
+    houses.push({ rect, seed: Math.floor(rand() * 1e6), y: height((rect[0] + rect[2]) / 2, (zs[0] + zs[1]) / 2) });
+  }
+  const palms = [], nets = [];
+  for (let x = -200; x < 30; x += 22 + rand() * 8) if (wet(x, -255) > 2 && Math.abs(x - PHAROS.c[0]) > 36) palms.push([x, -254.6]);
+  for (let x = -190; x < 30; x += 38 + rand() * 12) if (wet(x, -254) > 2 && Math.abs(x - PHAROS.c[0]) > 36) nets.push([x, -255.4]);
+  ISLE = { houses, store: STORE, palms, nets };
+  return ISLE;
+}

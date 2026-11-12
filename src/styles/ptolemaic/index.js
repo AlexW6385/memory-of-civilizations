@@ -14,7 +14,8 @@ import { MUSEION_EL } from './museion.js';
 import { HOUSES } from './house.js';
 import { SERAPEUM } from './serapeum.js';
 import { QUAY_EL } from './quay.js';
+import { FRONT_EL } from './front.js';
 
 const g = STYLES.greek;
-export const ptolemaic = { ...g, elements: { ...g.elements, ...HARBOUR, ...PHAROS_EL, ...MUSEION_EL, ...HOUSES, ...SERAPEUM, ...QUAY_EL } };
+export const ptolemaic = { ...g, elements: { ...g.elements, ...HARBOUR, ...PHAROS_EL, ...MUSEION_EL, ...HOUSES, ...SERAPEUM, ...QUAY_EL, ...FRONT_EL } };
 registerStyle('ptolemaic', ptolemaic);
