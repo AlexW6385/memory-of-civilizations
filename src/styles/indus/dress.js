@@ -20,7 +20,8 @@ export const faceMap = (F, face) => {
 /** The weathering and the roofline of a blank outer wall of length `len`: baked brick to `lowH`, mud brick above to `H`. */
 export function dressWall(F, rand, face, len, H, lowH, o = {}) {
   const gap = o.gap ?? [-9, -9], clear = (s0, s1) => s1 < gap[0] || s0 > gap[1];
-  const m = faceMap(F, face), b = (mat, s0, y0, d0, s1, y1, d1) => { const r = m(s0, d0, s1, d1); F.b(mat, r[0], y0, r[1], r[2], y1, r[3], false); };
+  let cnt = 0;
+  const m = faceMap(F, face), b = (mat, s0, y0, d0, s1, y1, d1) => { const r = m(s0, d0, s1, d1 + (cnt++ % 7) * 0.0023); F.b(mat, r[0], y0, r[1], r[2], y1, r[3], false); };
   // the string course where the baked brick gives way to mud brick, and the rafter ends under the parapet
   b('brick', 0, lowH - 0.12, 0, len, lowH + 0.04, 0.07);
   for (let s = 0.5 + rand() * 0.4; s < len - 0.3; s += 0.85 + rand() * 0.15) b('timber', s - 0.07, H - 0.42, 0, s + 0.07, H - 0.28, 0.3);
@@ -88,7 +89,7 @@ export function dressRoof(F, rand, rooms, W, D, H, T) {
       F.b('reed_mat', u - 0.2, H + 1.7, v - 0.2, u + 2.0, H + 1.78, v + 1.8, false);
     } else if (kind === 'cot') {
       for (const [a, b] of [[0, 0], [1.6, 0], [0, 0.8], [1.6, 0.8]]) F.b('timber', u + a - 0.03, H, v + b - 0.03, u + a + 0.03, H + 0.34, v + b + 0.03, false);
-      F.b('timber', u - 0.05, H + 0.32, v - 0.05, u + 1.65, H + 0.37, v + 0.85, false); F.b('rope_fibre', u, H + 0.37, v, u + 1.6, H + 0.4, v + 0.8, false);
+      F.b('timber', u - 0.05, H + 0.32, v - 0.05, u + 1.65, H + 0.37, v + 0.85, false); F.b('rope_fibre', u, H + 0.35, v, u + 1.6, H + 0.415, v + 0.8, false);
       if (rand() < 0.5) F.b(rand() < 0.5 ? 'cloth_white' : 'cloth_ochre', u + 0.2, H + 0.4, v + 0.1, u + 1.2, H + 0.46, v + 0.7, false);
     } else if (kind === 'grain') {
       F.b('reed_mat', u, H, v, u + 2.2, H + 0.03, v + 1.8, false);
@@ -122,7 +123,7 @@ export function furnishRoom(F, r, door, kind, rand, lights, lit = false) {
   if (kind === 'sleep') {
     const a = rand() < 0.5 ? 0.3 : A - 2.1;                                // the bed against a side wall, a rope net on a timber frame
     k('timber', a, 0.26, wall - 1.5, a + 1.8, 0.33, wall - 0.35); for (const [x, z] of [[0, 0], [1.7, 0], [0, 1.1], [1.7, 1.1]]) k('timber', a + x, 0, wall - 1.5 + z, a + x + 0.1, 0.26, wall - 1.4 + z);
-    k('rope_fibre', a + 0.05, 0.33, wall - 1.45, a + 1.75, 0.36, wall - 0.4); k(rand() < 0.5 ? 'cloth_white' : 'cloth_ochre', a + 0.1, 0.36, wall - 1.4, a + 1.0, 0.43, wall - 0.5);
+    k('rope_fibre', a + 0.05, 0.325, wall - 1.45, a + 1.75, 0.36, wall - 0.4); k(rand() < 0.5 ? 'cloth_white' : 'cloth_ochre', a + 0.1, 0.36, wall - 1.4, a + 1.0, 0.43, wall - 0.5);
     k('reed_mat', a < 1 ? A - 1.9 : 0.4, 0, 0.8, a < 1 ? A - 0.4 : 1.9, 0.03, 2.2);
     jl('terracotta', m + (a < 1 ? 0.7 : -0.7), wall, 1.5); jl('pottery_dark', m + (a < 1 ? 1.1 : -1.1), wall - 0.2, 1.1);
     k('brick', A - 0.55, 0, 0.2, A - 0.3, 0.55, 0.45);                      // a niche shelf with a lamp
