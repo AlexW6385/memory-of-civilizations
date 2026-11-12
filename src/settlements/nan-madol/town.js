@@ -111,13 +111,13 @@ export async function town() {
   v.houses.forEach((h, k) => { if (!taroOf(h, k)) return; const F = frameW(h.c, h.yaw), c = F(0, h.l / 2 + 4.6); E.push({ t: 'taro_bed', c, yaw: h.yaw, w: 2.4, l: 3.2, seed: k }); });
   // ── the mangroves: the mud flat of the shore, their roots in the water ──
   const mud = [];
-  for (let x = -RADIUS + 10; x < RADIUS - 10; x += 3.2) for (let z = -RADIUS + 10; z < RADIUS - 10; z += 3.2) {
+  for (let x = -RADIUS + 10; x < RADIUS - 10; x += 2.6) for (let z = -RADIUS + 10; z < RADIUS - 10; z += 2.6) {
     const px = x + rand() * 2.4, pz = z + rand() * 2.4, q = inland(px, pz), h = height(px, pz);
     if (q < -17 || q > 0.5 || Math.hypot(px, pz) > RADIUS - 12 || h < -1.28 || h > -0.8) continue;
-    if (rand() < 0.55 + 0.4 * Math.max(0, -q - 8) / 10) continue;
+    if (rand() < 0.3 + 0.4 * Math.max(0, -q - 8) / 10) continue;
     mud.push([px, pz, h]);
   }
-  for (const [px, pz, h] of mud.slice(0, 260)) E.push({ t: 'mangrove', at: [px, pz], y: h, h: 3.5 + rand() * 3.5, seed: Math.floor(rand() * 1e6) });
+  for (const [px, pz, h] of mud.slice(0, 420)) E.push({ t: 'mangrove', at: [px, pz], y: h, h: 3.5 + rand() * 3.5, seed: Math.floor(rand() * 1e6) });
 
   // ── the people ──
   const skin = () => (rand() < 0.65 ? 'skin_medium' : 'skin_dark');
@@ -154,15 +154,39 @@ export async function town() {
     if (i % 2 === 0) { const b = F(-1.2, -1.7); woman(b, 0, face(b, k.c), { carry: 'basket' }); }
     P.push({ t: 'firewood', at: F(-1.3, 1.0), y: 0, rot: k.yaw, len: 1.2, seed: 40 + i });
   });
-  // Dapahu: the canoe builders, adzes at the hulls
-  const dap2 = ISLET.n1.rect;
-  for (let i = 0; i < 6; i++) { const at = [dap2[0] + 10 + i * 6.5, (dap2[1] + dap2[3]) / 2 + (i % 2 ? 2.6 : -2.6)]; man(at, 0, face(at, [at[0], (dap2[1] + dap2[3]) / 2]), { pose: i % 3 === 0 ? 'squat' : 'stand' }); }
   // Peiniot, the landing: food brought in baskets from the canoes to the houses of the chief
   const pe = ISLET.s4.rect;
   for (let i = 0; i < 9; i++) { const at = [pe[0] + 6 + rand() * (pe[2] - pe[0] - 12), pe[1] + 6 + rand() * (pe[3] - pe[1] - 12)]; if (v.houses.some((h) => Math.hypot(h.c[0] - at[0], h.c[1] - at[1]) < 4.5) || Math.abs(at[0] + 10) < 3) continue; (i % 3 ? woman : man)(at, 0, rand() * 6.28, { carry: i % 2 ? 'basket' : 'pole' }); }
   for (const [lx, lz] of [[pe[2] - 3, pe[1] + 14], [pe[0] + 18, pe[3] - 3]]) P.push({ t: 'basket', n: 4, at: [lx, lz], y: 0, seed: Math.round(lx), goods: 'cloth_green' });
   // dogs and a few pigs on the larger islets' paths
   for (let i = 0; i < 12; i++) { const s = ISLETS[Math.floor(rand() * 12)], at = [s.rect[0] + 3 + rand() * (s.rect[2] - s.rect[0] - 6), s.rect[1] + 3 + rand() * (s.rect[3] - s.rect[1] - 6)]; if (s.kind === 'landmark' || v.houses.some((h) => Math.hypot(h.c[0] - at[0], h.c[1] - at[1]) < 4)) continue; P.push({ t: 'animal', kind: i % 3 ? 'pig' : 'dog', at, y: 0, rot: rand() * 6.28, seed: 900 + i }); }
+  // the works: crews at the shipyard, the oil works, the cook-shed, the chief's hall and the landing's store
+  for (const k of v.works) {
+    const F = frameW(k.c, k.yaw), at = (u, w) => F(u, w), hr = rng(k.seed + 11);
+    if (k.kind === 'shipyard') {
+      for (let i = 0; i < 6; i++) { const p0 = at(-k.l / 2 + 2.5 + i * (k.l - 5) / 5, i % 2 ? 0.25 : -2.7), tgt = at(p0 && -k.l / 2 + 2.5 + i * (k.l - 5) / 5, i % 2 ? 1.5 : -1.3); man(p0, 0, face(p0, tgt), { pose: i % 3 === 0 ? 'squat' : i % 3 === 1 ? 'kneel' : 'stand' }); }
+      for (let i = 0; i < 2; i++) { const p0 = at(-k.l / 2 + 1 + i * 3, k.w / 2 + 3.2); man(p0, 0, hr() * 6.28, { carry: 'pole' }); }
+    } else if (k.kind === 'oilworks') {
+      for (let i = 0; i < 3; i++) { const p0 = at(-1.0 + i * 1.0, -k.w / 2 + 1.4); woman(p0, 0, face(p0, at(-1.0 + i * 1.0, -k.w / 2 + 0.65)), { pose: 'kneel' }); }
+      for (const x of [-k.l / 4, k.l / 4]) { const p0 = at(x + 0.4, 1.3); man(p0, 0, face(p0, at(x + 0.4, 0)), { pose: 'stand' }); }
+      for (const x of [-k.l / 4, k.l / 4]) { const p0 = at(x, k.w / 2 + 3.4); woman(p0, 0, face(p0, at(x, k.w / 2 + 2.0)), { pose: 'kneel' }); }
+    } else if (k.kind === 'cookshed') {
+      const n = Math.max(3, Math.floor(k.l / 4));
+      for (let i = 0; i < n; i++) { const x = -k.l / 2 + (i + 0.5) * k.l / n, p0 = at(x + 0.2, 1.35); woman(p0, 0, face(p0, at(x, 0)), { pose: 'kneel' }); if (i % 2) { const q = at(x - 1.6, -1.5); man(q, 0, face(q, at(x, 0)), { carry: 'basket' }); } }
+      for (let i = 0; i < 2; i++) { const p0 = at(-k.l / 2 + 1.2 + i * 2, -k.w / 2 - 1.5); woman(p0, 0, face(p0, at(-k.l / 2 + 1.2 + i * 2, -k.w / 2 - 1.2 + 0.1)), { pose: 'kneel' }); }
+    } else if (k.kind === 'hall') {
+      for (const [u, w2] of [[-k.l / 4, -1.4], [-k.l / 4, 1.4], [0, -1.4], [0, 1.4], [k.l / 4 - 0.5, 0]]) { const p0 = at(u, w2); man(p0, 0.9, face(p0, at(k.l / 2 - 1.5, 0)), { pose: 'cross', cloth: 'cloth_white', beard: true }); }
+      const ch = at(k.l / 2 - 1.1, 0); man(ch, 1.15, face(ch, at(0, 0)), { pose: 'cross', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'cloak', beard: true, hair: 'bun' });
+      for (let i = 0; i < 3; i++) { const p0 = at(-k.l / 2 + 2 + i * 2.5, -k.w / 2 - 2.2); (i % 2 ? woman : man)(p0, 0, hr() * 6.28, { carry: 'basket' }); }
+    } else if (k.kind === 'landing') {
+      for (let i = 0; i < 5; i++) { const p0 = at(-k.l / 2 + 1.0 + i * (k.l - 2) / 4, -k.w / 2 - 1.6 - (i % 2) * 1.2); (i % 2 ? woman : man)(p0, 0, face(p0, at(p0 && 0, 0)), { carry: i % 2 ? 'basket' : 'pole' }); }
+    }
+  }
+  // children about the houses, a few
+  v.houses.forEach((h, k) => { if (k % 6 !== 3) return; const F = frameW(h.c, h.yaw); for (let i = 0; i < 2; i++) { const at = F(-1.5 + i * 2.2, -h.l / 2 - 1.5 - i * 0.7); man(at, 0, rand() * 6.28, { h: 0.62, pose: 'stand', beard: false, hair: 'long' }); } });
+  // the arrival: families on Peiniot by the cross path and the canoes at its landings, someone aboard half the moored canoes
+  for (const [x, z, k] of [[-13.2, 66, 0], [-6.8, 70, 1], [-6.6, 84, 2], [-13.4, 86, 3], [-12.8, 77, 4], [-7.0, 77, 5]]) { const at = [x, z]; (k % 2 ? man : woman)(at, 0, face(at, [-10, z + (k % 3 - 1) * 3]), { pose: k < 2 ? 'talk' : k < 4 ? 'sit_ground' : 'stand' }); }
+  moored().forEach((m, i) => { if (i % 2) return; const at = [m.at[0], m.at[1]]; man(at, m.y + 0.18, m.yaw + Math.PI, { pose: 'cross', hat: 'none' }); });
   void INNER; void OUTER; void OUTER_GATE; void INNER_GATE; void TOMB; void inRect;
   return [plan('nan-madol-islets', 'nanmadol', E), plan('nan-madol-people', 'life', P)];
 }
