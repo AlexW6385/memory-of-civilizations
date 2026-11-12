@@ -7,8 +7,8 @@ import { XF, ROCK, ZW, ZOUT, WX1, FLOOR, LEDGE, STAIR, FACES, CAVES, C1, rng } f
 import { vihara, viharaGeo, chaitya, chaityaGeo, cellHall, cellGeo, hole } from './caves.js';
 import { Panel, PAL, wall, buddhaM, figM, lotusBand } from './paint.js';
 
-const MATS = ['sandstone_carved', 'granite_rough', 'sandstone_green', 'sandstone_carved'];
-const STONE = 'sandstone_carved', PLASTER = 'plaster_ochre';
+const MATS = ['sandstone_relief', 'sandstone_carved', 'sandstone_relief', 'rubble'];   // the basalt's warm brown-grey, not a grey wall
+const STONE = 'sandstone_dressed', PLASTER = 'plaster_ochre';
 
 /** The rock of one face, in slabs between the holes ([d0, d1, s0, s1, y0, y1], d into the rock): a box per piece. */
 function faceRock(ctx, F, holes, seed) {
