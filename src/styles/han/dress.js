@@ -14,7 +14,7 @@ export function frontDress(F, W, D, gateU, gateW, h, seed, kind) {
     if (g0 > 1.2) { const [a, b] = seg(0, g0 - 0.15); weather(bag, o[0], o[1], q, a, b, h, seed + 1); }
     if (W - g1 > 1.2) { const [a, b] = seg(g1 + 0.15, W); weather(bag, o[0], o[1], q, a, b, h, seed + 2); }
     // the doorstep and the strings under the gate's eave
-    F.b('bluestone', g0 - 0.1, 0, -0.55, g1 + 0.1, 0.12, 0.02, false);
+    F.b('bluestone', g0 - 0.1, 0.03, -0.55, g1 + 0.1, 0.12, 0.02, false);
     const p = F.pt(gateU, -0.18);
     strings(bag, p[0], h + 0.28, p[1], q, 3, seed + 4);
     // the vine pads on the coping

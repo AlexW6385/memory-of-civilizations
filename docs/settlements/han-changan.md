@@ -3,7 +3,7 @@
 Settlement id: `han-changan` · Styles: `han` (own) and `life` · Region: east Asia (the Wei River plain, Shaanxi) · Code: `src/settlements/han-changan/`, `src/styles/han/`
 Status: built from nothing in this batch: the Weiyang Palace front hall on its stepped rammed-earth terrace (enterable, with the throne dais), the palace walls and the que gate towers, a city gate with three passageways, the walled lǐ wards with their houses, the West and East Markets with their market towers, the Changle Palace, the Kunming Lake, the Imperial Academy, people in Han dress, Silk Road caravans, sound.
 
-Not built (left for later): the moat outside the wall, the city's east and north gates (outside or at the edge of the disc), the interiors of the Changle Palace's side halls beyond the furnished halls, the Stone Ditch and Heavenly Fortune pavilions' interiors, wooden bracket-arm cascades (the Han dougong is shown as a cap block and a straight arm).
+Deepening pass (Suzhou standard): see §5b, §6b, §9b. Still not built: the city's east and north gates (outside or at the edge of the disc), upper floors of the ward watch-tower houses, the interiors of the Changle Palace's side halls beyond the furnished halls, the Stone Ditch and Heavenly Fortune pavilions' interiors, wooden bracket-arm cascades (the Han dougong is shown as a cap block and a straight arm).
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -49,12 +49,31 @@ Flat loess plain of the Wei, a pale yellow-brown soil (dust, packed earth in the
 - **Roofs:** grey ceramic tiles, round-ended cover tiles; hipped roofs for halls and gate towers, hip-and-gable (xuanshan) and gable roofs for houses. [inferred]
 - **Houses:** rammed-earth walls plastered, timber frames, tiled roofs; the courtyard house with a gate and a tower-like gatehouse; the "L"-plan house; the watch-tower house of several storeys known from tomb models. [stated: "ceramic tomb models show courtyards, towers, wells, and grain-processing equipment" — ancient-history-sites.com; the forms inferred]
 
+## 5b. Furniture and small things (src/styles/han/props.js, court.js)
+
+- **Bronze ding, drums, lamp trees, banners, steles** in pairs along the paved axis of the forecourt; the drum on a post under a feather canopy (jiangu) and the bronze lamp tree (lianzhi deng) are Han court furniture known from reliefs and tomb finds. [inferred, general; the Han "construction drum" and "branch lamp" are standard Han objects]
+- **Chariots and carriages (che)** in rows in the courts, a canopy on some, two horses abreast under a yoke: the Han carriage had a single central pole with a yoke across it. [inferred from Han reliefs and the Qin bronze chariots of the generation before]
+- **Interiors:** the low couch (ta) with a folding screen, the low lacquer table (an), reed mats (xi) for sitting, chests, bundles of bamboo slips, the bronze lamp, the earthen stove (zao) with an iron pot and a steamer, the foot-treadle pounder (dui) over a stone mortar, the upright loom, grain vats, a smith's hearth with bellows and anvil — all objects of the Han tomb models and reliefs (stoves, pounders, granaries and wells are among the models of the Han tombs). [stated: "ceramic tomb models show courtyards, towers, wells, and grain-processing equipment" — ancient-history-sites.com; the forms inferred]
+- **Orchestra:** a rack of bronze bells (bianzhong) over a row of stone chimes (bianqing) and the great drum, with a zither, flute and drum players, at the foot of the aisle in the Front Hall. [inferred: the Han court's ritual music (yayue); gong mode on D]
+- **Strings of dried corn, gourds and jujubes** under the eaves; vine pads on the coping; woodpiles and water vats at the doors. [inferred; no paper lanterns and no glazed jars imported from the later kits are placed by us — but the generic street life (src/objects/life.js, kit east_asia) still adds its own door things]
+
 ## 6. The town
 
 - **Wards (lǐ):** the wall round each ward, one or two gates with a gatehouse and the gate keeper; inside, lanes and courtyard houses; no shops in the wards (trade is in the markets). [stated: "enclosed neighbourhood units overseen by minor officials", "walls and gates set them apart from an open street grid"; the market-only rule — general, [inferred]]
 - **Streets:** avenues 45 m wide, three lanes (the middle for the emperor), planted with trees, side ditches. [stated for the width; the rest inferred]
 - **The markets:** walled, with gates and officials' offices; a market tower (qiting) with the flag and the drum from which the market officer watches; shops in long rows (liesi), each with its counter; goods: silk, hemp, lacquer, bronze, iron tools, salt, grain, pottery, horses, the imports of the Western Regions (grape, alfalfa, glass, horses). [inferred from the Han market reliefs and the Shiji / Hanshu goods lists]
 - **The Silk Road:** the Bactrian two-humped camels with loads of silk and goods, the Hu merchants (Sogdians and Central Asians) in caps and long coats leading them in at the west gate; the Han envoys. [inferred; Emperor Wu's western policy]
+
+## 6b. Added in the deepening pass
+
+- **House interiors:** every hall of the wards, the palace quarters and the avenue's offices is furnished (dwelling, kitchen, weaver's room, scholar's room, granary, workshop, by the household's seed); the ward watch-tower house (lou) has its ground floor as a room (granary); lights only in some rooms. [inferred]
+- **Shops:** the rows of the markets are enterable: the counter leaves the opening of the flap, behind it shelves of the trade's goods, a stool and the ledger table, a vat, strings from the tie-beam; blade signs in the trade's colour hang over the lane; a banner at some corners. [inferred from the Han market-relief scenes and the Shiji/Hanshu goods lists]
+- **The market tower (qiting):** enterable; an open ground floor with the officer's table and mat, a stair up the east side to the upper floor with the great drum, a skirt roof between the floors, the flag on its pole. [inferred; the market tower with its flag and drum is attested from Han reliefs and Hanshu notes]
+- **City wall:** ramps (madao) up the inner face every ~120 m, sentries' sheds on the top, the inner parapet broken at the ramps; the moat 6.1 m wide with a berm of 3 m (§2) crossed by timber bridges at the west and south gates, willows on its banks. [stated: the 6.13 m moat — Wikipedia "Chang'an"; the bridges and the berm inferred]
+- **Avenue:** a raised paved middle way (the emperor's lane), stone kerbs, pagoda trees and elms in rows along both sides at about 8 m. [inferred; §3]
+- **Palace garden:** an island of rockwork with a small pavilion in the imperial pond (the Han imperial lakes carried islands of rock for the Isles of the Immortals), lotus pads. [inferred: the Han Jianzhang Palace's Taiye Pool with Penglai, Fangzhang and Yingzhou is attested; here a single island]
+- **Kunming Lake:** sampans with boatmen, a barge, washing women at the landing stage, an angler; the tower-ship (louchuan) with deck rails, lattice windows in its cabins, oars, pennants and an anchor stone. [inferred; the Han tower-ship (louchuan) of the Kunming Lake navy is attested]
+- **Life:** harnessed teams at the chariots, groups of waiting officials, guards down the axis; sellers and customers at the shops; stalls in the cross lanes; ox-carts at the market gates and on the avenue; keepers and benches at the ward gates; the quarters' lanes with benches, wells, woodpiles; the academy's master and pupils. [inferred]
 
 ## 7. People (dress, bearing)
 
@@ -67,6 +86,10 @@ Wind in the eaves, drums and gongs from the market tower, the calls of vendors, 
 ## 9. Weathering
 
 Dust, the loess's yellow on every foot of wall, rain-gullied rammed earth, moss on the north faces of tile in the damp months, soot over the kitchen doors, whitewash (limewash) flaking. `damp` low; `waterline` at the lake level. [inferred]
+
+## 9b. Weathering added
+
+Rain streaks (plaster_streak) down the earth walls from the coping and patches of fallen plaster at their feet on every ward front; vine pads on the copings; the soot above shop doors; the sparrows on the copings; dust is the ground's own loess. [inferred]
 
 ## 10. Sources
 

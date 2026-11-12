@@ -162,7 +162,7 @@ export function weather(bag, x, z, q, u0, u1, h, seed, base = 0.0, side = -1) {
   }
   for (let k = 0; k < 2; k++) {
     const u = u0 + (u1 - u0) * (0.1 + r() * 0.8), w = 0.5 + r() * 0.9, hh = 0.4 + r() * 0.7;
-    qbox(bag, r() < 0.5 ? 'plaster_damp' : 'lime_plaster', x, z, q, u, base + 0.02, side * 0.0, Math.min(u1, u + w), base + 0.02 + hh, side * 0.04);
+    qbox(bag, r() < 0.5 ? 'mud_plaster' : 'lime_plaster', x, z, q, u, base + 0.02, side * 0.012, Math.min(u1, u + w), base + 0.02 + hh, side * 0.06);
   }
 }
 void T;
