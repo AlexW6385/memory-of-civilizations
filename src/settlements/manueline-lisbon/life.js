@@ -9,6 +9,7 @@ const CL = ['cloth_indigo', 'cloth_brown', 'cloth_ochre', 'cloth_red', 'cloth_gr
 const DARK = ['cloth_black', 'cloth_maroon', 'cloth_indigo', 'cloth_brown', 'cloth_green', 'cloth_grey'];
 const FR = { n: [0, -1], s: [0, 1] };
 const g = GROUND;
+const ARR = [-206, 117];                  // the arrival (arrivals.js): nobody stands within 8 m of it
 
 export function lifeElements() {
   const L = [], rand = rng(1521), pick = (a) => a[Math.floor(rand() * a.length)], seed = () => Math.floor(rand() * 1e9);
@@ -22,7 +23,7 @@ export function lifeElements() {
   const child = (at, y, rot, e = {}) => person(at, y, rot, { dress: 'tunic', child: true, hat: 'none', over: 'none', ...e });
   const faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
   const ok = ([x, z]) => Math.hypot(x, z) < RADIUS - 40 && wet(x, z) > 2;
-  const crowd = (n, rect, y, mix) => { for (let k = 0; k < n; k++) { const p = [rect[0] + rand() * (rect[2] - rect[0]), rect[1] + rand() * (rect[3] - rect[1])]; if (!ok(p) || inLot(p[0], p[1], 0.3)) continue; mix(p, y, rand() * 6.28); } };
+  const crowd = (n, rect, y, mix) => { for (let k = 0; k < n; k++) { const p = [rect[0] + rand() * (rect[2] - rect[0]), rect[1] + rand() * (rect[3] - rect[1])]; if (!ok(p) || inLot(p[0], p[1], 0.3)) continue; if (Math.hypot(p[0] - ARR[0], p[1] - ARR[1]) < 8) p[1] -= 12; mix(p, y, rand() * 6.28); } };
 
   // ── the house fronts
   for (const l of lots()) {
@@ -93,6 +94,12 @@ export function lifeElements() {
   for (let k = 0; k < 8; k++) { const p = [px - 16 + k * 4 + rand() * 2, 62 + rand() * 4]; (k % 2 ? woman : merchant)(p, g + 0.05, faceTo([0, -1]) + (rand() - 0.5), { pose: 'stand' }); }   // pilgrims facing the portal
   crowd(26, [PLAZA[0] + 8, 46, PLAZA[2] - 8, 112], g + 0.05, (p, y, r) => { const k = rand(); if (k < 0.2) merchant(p, y, r); else if (k < 0.4) woman(p, y, r, { carry: pick(['basket', 'none', 'none']) }); else if (k < 0.5) noble(p, y, r); else if (k < 0.62) labourer(p, y, r); else if (k < 0.74) child(p, y, r); else if (k < 0.82) friar(p, y, r); else person(p, y, r, { dress: 'robe', hat: 'veil', cloth: 'cloth_black', over: 'shawl', hair: 'bun', pose: 'talk' }); });
   for (const [dx, dz, c] of [[-26, 66, 'cloth_white'], [-12, 76, 'cloth_ochre'], [14, 72, 'cloth_red'], [28, 64, 'cloth_white'], [-40, 82, 'cloth_green'], [34, 84, 'cloth_ochre']]) { L.push({ t: 'stall', at: [px + dx, dz], y: g + 0.04, rot: 0, awning: c, stripe: 'cloth_white', goods: pick([['produce'], ['basket'], ['blue_jar', 'glazed_jar']]), seed: seed() }); person([px + dx, dz - 1.4], g + 0.04, 0, { dress: 'robe', hat: 'veil', over: 'apron', cloth: pick(CL), hair: 'bun' }); }
+  // the masons' lodge at the church's west end (civic.js masons_yard): masons at the bankers, a pair at the hoist, a donkey with its panniers
+  for (const [x, z, pose] of [[-255.4, 51.2, 'stand'], [-252.1, 51.2, 'stand'], [-254.0, 53.6, 'squat'], [-246.4, 52.4, 'stand'], [-243.8, 51.8, 'talk']]) labourer([x, z], g + 0.04, faceTo([0, -1]) + (rand() - 0.5) * 0.4, { pose, hat: 'cap', cloth: pick(['cloth_grey', 'cloth_white', 'cloth_brown']), carry: 'none' });
+  L.push({ t: 'animal', kind: 'donkey', at: [-249, 56.5], y: g + 0.04, rot: 1.2, seed: seed() }, { t: 'sacks', at: [-246, 55.8], y: g + 0.04, rot: 0.3, n: 3, seed: seed(), mat: 'limewash_white' });
+  // iron lanterns on posts before the church's south front and about the plaza (lit at night), a bench against the front for the friars
+  for (const [dx, dz] of [[-9, 46], [9, 46], [-24, 47], [24, 47], [-40, 60], [40, 60], [-14, 100], [14, 100]]) L.push({ t: 'lantern', kind: 'iron', at: [px + dx, dz], y: g + 0.04, rot: dx < 0 ? 1.57 : -1.57, h: 3.0, seed: seed() });
+  for (const dx of [-16, 17]) { L.push({ t: 'bench', at: [px + dx, 44.6], y: g + 0.04, rot: 0, len: 2.4, seed: seed() }); friar([px + dx - 0.5, 44.4], g + 0.04, 0, { pose: 'sit' }); }
   L.push({ t: 'well', at: [px - 30, 96], y: g + 0.04, kind: 'windlass', roof: true, mat: 'limestone', square: false });
   for (const [dx, dz] of [[-8, 100], [12, 98]]) { L.push({ t: 'bench', at: [px + dx, dz], y: g + 0.04, rot: 0, len: 2.2, seed: seed() }); woman([px + dx, dz - 0.2], g + 0.04, 0, { pose: 'sit' }); merchant([px + dx + 0.7, dz - 0.2], g + 0.04, 0.3, { pose: 'sit' }); }
   for (const p of [[px - 36, 90], [px + 38, 100], [px - 4, 88]]) L.push({ t: 'chickens', kind: 'pigeon', at: p, y: g + 0.04, rot: rand() * 6, seed: seed(), n: 7 });

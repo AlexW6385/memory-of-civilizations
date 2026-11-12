@@ -28,6 +28,7 @@ function civic() {
     { t: 'palace', rect: PALACE, y, seed: 7 },
     { t: 'se', rect: SE, y: yS },
     { t: 'castle', rect: CASTLE, y: yC, seed: 3 },
+    { t: 'masons_yard', rect: [-258, 44, -242, 58], y: g + 0.04, seed: 5 },
     { t: 'pelourinho', at: [(SQUARE[0] + SQUARE[2]) / 2 + 8, (SQUARE[1] + SQUARE[3]) / 2], y: g },
     { t: 'fountain', at: [(SQUARE[0] + SQUARE[2]) / 2 - 8, (SQUARE[1] + SQUARE[3]) / 2], y: g },
     { t: 'fountain', at: [(TERREIRO[0] + TERREIRO[2]) / 2 + 10, 60], y },

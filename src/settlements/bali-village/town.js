@@ -203,6 +203,16 @@ function people() {
       man([x - Math.sin(rot) * -2.4, z - Math.cos(rot) * -2.4], y, rot, { carry: 'hoe', hat: 'straw', top: 'bare' }); nb++;
     }
   }
+  // the street before the gates: hens and ducks scratching, a dog asleep, firewood stacked against the wall, a basket of fruit; a bullock cart parked on the east edge
+  for (const l of lots()) {
+    const [ox, oz] = outward(l), [gx, gz] = l.gate, tx = -oz, tz = ox, side = rand() < 0.5 ? -1 : 1, r = rand();
+    if (r < 0.35) E.push({ t: 'chickens', at: [gx + ox * 2.0 + tx * side * 2.4, gz + oz * 2.0 + tz * side * 2.4], n: 3, kind: 'hen', seed: Math.floor(rand() * 1e6), rot: rand() * 6 });
+    else if (r < 0.5) E.push({ t: 'animal', kind: 'dog', at: [gx + ox * 1.6 - tx * side * 2.0, gz + oz * 1.6 - tz * side * 2.0], y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e6) });
+    if (rand() < 0.28) E.push({ t: 'firewood', at: [gx + ox * 0.7 + tx * side * 3.4, gz + oz * 0.7 + tz * side * 3.4], y: 0, rot: Math.atan2(tx, tz), len: 1.2, seed: Math.floor(rand() * 1e6) });
+  }
+  E.push({ t: 'cart', kind: 'two', at: [2.1, 58], y: 0, rot: Math.PI, beast: 'ox', load: 'sacks', seed: 77 }); man([0.7, 55.2], 0, 1.2, { pose: 'talk' }); man([-0.4, 56], 0, -1.5, { pose: 'talk' });
+  // pilgrims bringing their offerings up the street to the temple: the towers of fruit and flowers on their heads
+  [[-2.5, -33], [2.4, -36.5], [-2.6, -40], [2.5, -31.6]].forEach(([x, z], k) => (k % 2 ? woman : man)([x, z], 0, 0, k % 2 ? { carry: 'basket', arms: 'head', cloth: 'cloth_red' } : { carry: 'pole', pose: 'stand' }));
   void TREAD; void KULKUL; void BANYAN;
   return base('bali-people', 'life', [...P, ...E]);
 }

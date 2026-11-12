@@ -161,4 +161,34 @@ export function crane(el, { bag, col }) {
   bag.add('iron', box(x + 6.2 * (el.dir ?? 1), y + 1.9, z - 0.2, x + 6.6 * (el.dir ?? 1), y + 2.3, z + 0.2));
   bag.add('wood_dark', lathe([[1.3, 0], [1.3, 1.0]], 10, null, x + 2.5, y, z + 1.6));
 }
+/**
+ * masons_yard: { rect: [x0, z0, x1, z1], y, seed } — the lodge of the masons at the church's west end, where the works of the Jerónimos
+ * went on for decades (docs/settlements/manueline-lisbon.md §3): blocks of lioz in ranked stacks and single ones squared on trestles,
+ * chips of stone on the ground, an open shed of posts and planks over the banker benches, a tripod hoist with a block slung under it,
+ * a ladder and a heap of lime.
+ */
+export function masonsYard(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, rand = rng(el.seed ?? 1), M = 'limestone_yellow';
+  // the stacks of rough blocks along the north side, in ranks of different heights
+  for (let k = 0, x = x0 + 0.5; x < x1 - 3; k++) {
+    const w = 1.8 + rand() * 1.4, h = 0.5 + Math.floor(rand() * 3) * 0.5, d = 1.1 + rand() * 0.4;
+    for (let r = 0; r < Math.round(h / 0.5); r++) bag.add(r % 2 ? 'limestone' : M, box(x + r * 0.05, y + r * 0.5, z0 + 0.4, x + w - r * 0.05, y + r * 0.5 + 0.48, z0 + 0.4 + d));
+    col.rect([x, z0 + 0.4, x + w, z0 + 0.4 + d], y, y + h);
+    x += w + 0.35 + rand() * 0.5;
+  }
+  // the open shed: four posts, a pent roof of planks, the bankers (working benches) with a block each
+  const sx0 = x0 + 1.0, sz0 = z0 + 3.6, sx1 = sx0 + 6.5, sz1 = sz0 + 4.2;
+  for (const [px, pz, h] of [[sx0, sz0, 3.2], [sx1, sz0, 3.2], [sx0, sz1, 2.6], [sx1, sz1, 2.6]]) { bag.add('timber', box(px - 0.1, y, pz - 0.1, px + 0.1, y + h, pz + 0.1)); col.rect([px - 0.12, pz - 0.12, px + 0.12, pz + 0.12], y, y + h); }
+  bag.add('timber', frustum([sx0 - 0.5, sz0 - 0.4, sx1 + 0.5, sz1 + 0.5], y + 2.6, y + 3.35, 0, 0, 0, 0, { noBottom: true }));
+  for (const bx of [sx0 + 1.6, sx0 + 4.9]) { bag.add('timber', box(bx - 0.9, y, sz0 + 1.6, bx + 0.9, y + 0.8, sz0 + 2.4)); bag.add(M, box(bx - 0.65, y + 0.8, sz0 + 1.7, bx + 0.65, y + 1.25, sz0 + 2.3)); col.rect([bx - 0.9, sz0 + 1.6, bx + 0.9, sz0 + 2.4], y, y + 1.25); }
+  // chips and dust on the ground under the shed
+  for (let k = 0; k < 16; k++) { const cx = sx0 + 0.6 + rand() * 5.4, cz = sz0 + 0.8 + rand() * 3, s = 0.08 + rand() * 0.1; bag.add('limestone', box(cx, y, cz, cx + s * 1.6, y + s, cz + s)); }
+  // the tripod hoist, a block slung under it by a rope, and a ladder against the stacks
+  const hx = x1 - 3.0, hz = z0 + 6.8;
+  for (const [dx, dz] of [[-1.5, -1.1], [1.5, -1.1], [0, 1.6]]) bag.add('timber', rod([hx + dx, y, hz + dz], [hx, y + 5.2, hz], 0.09, 5));
+  bag.add('iron', box(hx - 0.2, y + 5.1, hz - 0.1, hx + 0.2, y + 5.3, hz + 0.1)); bag.add('rope_fibre', rod([hx, y + 5.1, hz], [hx, y + 1.7, hz], 0.03, 4)); bag.add(M, box(hx - 0.55, y + 1.05, hz - 0.4, hx + 0.55, y + 1.7, hz + 0.4));
+  col.circle(hx, hz, 1.8, y, y + 1.2);
+  bag.add('timber', rod([x0 + 4.0, y, z0 + 1.6], [x0 + 3.7, y + 2.8, z0 + 0.5], 0.04, 4)); bag.add('timber', rod([x0 + 4.3, y, z0 + 1.6], [x0 + 4.0, y + 2.8, z0 + 0.5], 0.04, 4));
+  bag.add('limewash_white', lathe([[0.9, 0], [0.7, 0.3], [0.001, 0.6]], 8, null, x1 - 1.2, y, z1 - 1.2));
+}
 void prism;

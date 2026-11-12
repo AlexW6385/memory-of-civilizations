@@ -83,7 +83,7 @@ function people() {
   bth.forEach(([x, z, f, kind], i) => {
     const d = SD[f], sx = x - d[0] * 1.45, sz = z - d[1] * 1.45;
     (kind === 'pots' || kind === 'grain' ? lay : woman)([sx, sz], 0.03, d, { pose: 'sit_ground', carry: 'none' });
-    if (i % 2 === 0) (r() < 0.5 ? lay : monk)([x + d[0] * 1.3, z + d[1] * 1.3 + (d[0] ? 0.4 : 0)], 0, [-d[0], -d[1]], { pose: 'stand' });
+    if (i % 2 === 0) { const nearArr = Math.hypot(x - ARRIVALS['nalanda'][0], z - ARRIVALS['nalanda'][2]) < 14; (r() < 0.5 ? lay : monk)([x + d[0] * 1.3, z + d[1] * 1.3 + (d[0] ? 0.4 : 0) + (nearArr ? 16 : 0)], 0, [-d[0], -d[1]], { pose: 'stand' }); }
   });
   // the water-sheds: an attendant at the pots, a monk drinking
   for (const [x, z, f] of JALS) { const d = SD[f]; lay([x - d[0] * 0.9, z - d[1] * 0.9 - 0.2], 0, d, { pose: 'stand', hat: 'none' }); monk([x + d[0] * 1.2, z + d[1] * 1.2 + 0.6], 0, [-d[0], -d[1]], { pose: 'stand' }); }
@@ -126,6 +126,47 @@ function people() {
   yards().forEach((y, i) => { const [a0, b0, a1, b1] = y.rect; if (i % 3 === 2) return; P.push({ t: 'animal', kind: 'zebu', at: [(a0 + a1) / 2 - 1, (b0 + b1) / 2], y: 0, rot: r() * 6, seed: 300 + i }, { t: 'animal', kind: i % 2 ? 'goat' : 'zebu', at: [(a0 + a1) / 2 + 1.5, (b0 + b1) / 2 + 1], y: 0, rot: r() * 6, seed: 400 + i }); });
   void LEVEL;
   return base('nalanda-people', 'life', P);
+}
+
+/** The sacred way and the road to the gate seen from the arrival and the first hundred metres: carts of the pilgrims with their zebu, mats of
+ *  the flower- and lamp-sellers, water pots at the sheds, sacks and firewood at the monasteries' flanks, pilgrims in files, children, a sweeper. */
+function wayLife() {
+  const r = rng(421), E = [], P = [];
+  let seed = 900;
+  const cart = (x, z, rot, beast, load) => E.push({ t: 'cart', kind: 'two', at: [x, z], y: 0, rot, beast, load, seed: seed++ });
+  // carts standing at the way's margins, their zebu in the shafts, loaded
+  cart(-4.7, 48, 0.08, 'zebu', 'sacks'); cart(4.0, 30, Math.PI - 0.1, 'zebu', 'hay'); cart(-4.4, 14, -0.05, 'ox', 'barrels'); cart(3.6, 92, 3.2, 'zebu', 'sacks');
+  // mats of the small sellers along the margins (the flower-sellers' heaps of marigold, lamps, pots) with the seller on her heels
+  const mats = [[-3.4, 57.2, 'e', ['heap', 'heap', 'baskets']], [3.1, 50, 'w', ['heap', 'baskets']], [-3.2, 36, 'e', ['amphora', 'water_pot', 'heap']], [3.4, 22.5, 'w', ['baskets', 'heap']], [-3.0, 8, 'e', ['heap', 'heap', 'baskets']], [3.2, 78, 'w', ['water_pot', 'baskets']]];
+  for (const [x, z, f, goods] of mats) {
+    const d = f === 'e' ? [1, 0] : [-1, 0];
+    E.push({ t: 'goods_mat', at: [x, z], y: 0, rot: face([-d[0], 0]), seed: seed++, goods, produce: ['cloth_red', 'cloth_ochre', 'cloth_white'] });
+    P.push({ t: 'figure', at: [x - d[0] * 1.15, z + 0.2], y: 0, rot: face(d), seed: seed++ * 7919, dress: 'wrap', cloth: ['cloth_red', 'cloth_indigo', 'cloth_ochre'][Math.floor(r() * 3)], cloth2: 'cloth_white', over: 'shawl', hair: 'bun', feet: 'bare', skin: r() < 0.6 ? 'skin_medium' : 'skin_dark', hat: 'none', carry: 'none', pose: 'sit_ground' });
+  }
+  // water pots, sacks and firewood where the sheds and the booths are, a trough for the zebu by the carts
+  for (const [x, z] of [[-3.6, 44.4], [-3.7, 24], [3.8, 56], [3.9, 44]]) E.push({ t: 'pot', at: [x, z], y: 0, kind: 'matka', n: 3, seed: seed++ });
+  E.push({ t: 'trough', at: [-5.2, 52.5], y: 0, rot: 1.5708, mat: 'brick_baked' }, { t: 'trough', at: [5.3, 32], y: 0, rot: 1.5708, mat: 'brick_baked' });
+  for (const [x, z, k] of [[7.9, 47, 'sacks'], [7.9, 100, 'firewood'], [7.9, 14, 'sacks'], [-7.9, 66, 'firewood'], [7.9, 74, 'basket'], [-7.9, 20, 'basket']]) E.push({ t: k, at: [x, z], y: 0, rot: 1.5708, seed: seed++, n: 3, ...(k === 'basket' ? { n: 3 } : {}) });
+  // pilgrims in files on the way, walkers with bundles, a family, children at play, a sweeper at the temple's stair
+  const lay = (x, z, d, o = {}) => P.push({ t: 'figure', at: [x, z], y: o.y ?? 0, rot: face(d), seed: seed++ * 7919, dress: 'wrap', cloth: 'cloth_white', cloth2: 'cloth_white', over: 'shawl', hair: 'short', feet: 'bare', skin: r() < 0.6 ? 'skin_medium' : 'skin_dark', hat: r() < 0.4 ? 'turban' : 'none', carry: 'none', pose: 'stand', ...o });
+  const wom = (x, z, d, o = {}) => lay(x, z, d, { cloth: ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_blue'][Math.floor(r() * 4)], hair: 'bun', hat: 'none', h: 0.95, ...o });
+  const mk = (x, z, d, o = {}) => lay(x, z, d, { dress: 'robe', cloth: r() < 0.6 ? 'cloth_ochre' : 'cloth_maroon', cloth2: 'cloth_ochre', over: 'sash', hair: 'shaven', hat: 'none', ...o });
+  const N = [0, -1];
+  for (const [x, z] of [[1.6, 33], [2.3, 35.5], [1.5, 37.4]]) (r() < 0.5 ? lay : wom)(x, z, N, { carry: r() < 0.5 ? 'bundle' : 'basket', pose: 'stand' });
+  wom(2.7, 24, [0.2, 1], { carry: 'child' }); lay(1.9, 24.4, [0.2, 1], { pose: 'talk' }); lay(1.4, 25.4, [0.5, 1], { h: 0.62, top: 'bare', hat: 'none' });
+  mk(-2.9, 20, N, { carry: 'staff' }); mk(-3.7, 18.6, N); mk(-3.1, 17.6, [0.3, -1]);
+  lay(3.2, 41, [-1, 0.3], { pose: 'talk' }); lay(2.2, 41.6, [1, -0.2], { pose: 'talk' });
+  lay(-2.9, 12, [0.3, 1], { h: 0.6, top: 'bare', hat: 'none' }); lay(-2.3, 11.2, [-0.2, 1], { h: 0.66, top: 'bare', hat: 'none' });
+  wom(-5.6, 6, [0, 1], { pose: 'squat', carry: 'none' });
+  // on the great temple's lowest stair, at its edges: monks and pilgrims climbing to the first terrace, one coming down (the stair rises west from its foot)
+  { const xs = T3.c[0] + T3.half + T3.tierH * 1.04, yAt = (x) => Math.max(0, (xs - x) / (T3.tierH * 1.04) * T3.tierH);
+    for (const [x, z, dir, kind] of [[xs - 0.8, -2.8, -1, 'm'], [xs - 1.9, 2.8, -1, 'm'], [xs - 2.6, -2.9, -1, 'l'], [xs - 3.7, 2.7, 1, 'm'], [xs - 4.3, -2.7, -1, 'w']]) {
+      (kind === 'm' ? mk : kind === 'w' ? wom : lay)(x, z, [dir, 0], { pose: 'stand', carry: kind === 'w' ? 'basket' : 'none', y: yAt(x) + 0.05 });
+    } }
+  // the carters, standing by their beasts
+  lay(-5.9, 46, [0.8, 0.6], { pose: 'stand', hat: 'turban', cloth: 'cloth_ochre' }); lay(4.5, 33.2, [-0.8, -0.6], { pose: 'talk', hat: 'turban' });
+  mk(-6.4, 16, [1, 0.3], { pose: 'talk' }); lay(-5.4, 16.8, [-1, -0.2], { pose: 'talk' });
+  return [base('nalanda-way', 'life', [...E, ...P])];
 }
 
 /** The bazaar of the village: booths along the road to it, south of the way's end, facing the road. */
@@ -184,5 +225,5 @@ export async function town() {
   const all = lots(), houses = [], open = openLots(all, [ARRIVALS['nalanda'][0], ARRIVALS['nalanda'][2]], 16);
   const hl = all.map((l) => ({ t: 'house_india', ...l, ...(open.has(l) ? { open: true } : {}) }));
   houses.push(...lodTiles('nalanda-houses', 'vernacular', hl, { near: 130, R: RADIUS, entrance: { at: [0, 40], facing: 'n' } }));
-  return [base('nalanda-town', 'nalanda', E), people(), ...houses];
+  return [base('nalanda-town', 'nalanda', E), people(), ...wayLife(), ...houses];
 }
