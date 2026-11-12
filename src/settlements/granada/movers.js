@@ -9,6 +9,7 @@ import { soukPlan } from '../../styles/nasrid/medina.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
+import { COURT_WAYS } from './court.js';
 
 export const PARAMS = {
   walkers: { day: 36, night: 4, rain: 0.8, reach: 150, spawnMin: 24, far: 42 },
@@ -42,6 +43,7 @@ export function walkways() {
     const o = 16;
     lane(g.side === 'w' ? [sx0 - o, g.at - 1.1, sx0 + 0.6, g.at + 1.1] : g.side === 'e' ? [sx1 - 0.6, g.at - 1.1, sx1 + o, g.at + 1.1] : g.side === 'n' ? [g.at - 1.1, sz0 - o, g.at + 1.1, sz0 + 0.6] : [g.at - 1.1, sz1 - 0.6, g.at + 1.1, sz1 + o], 1.4, 0.8);
   }
+  rects.push(...COURT_WAYS);
   return { rects: rects.filter((r) => r.r), links, clip: RADIUS - 12 };
 }
 export function waterways() { return { rects: [], bridges: [], clip: 0 }; }

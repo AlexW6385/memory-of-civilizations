@@ -2,6 +2,7 @@ import { lodTiles } from '../lod.js';
 // The Albaicín and the town (docs/settlements/granada.md §5): whitewashed houses under tiled roofs.
 import { RADIUS, HILL, gardens, lots, height, hillE, DARRO, DARRO_BRIDGES, SITES, siteY, SOUK, GREAT_MOSQUE } from './layout.js';
 import { lifePlan, aljibeLife } from './life.js';
+import { courtLife } from './court.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [20, 30], facing: 'n' } });
 export async function town() {
   const all = lots(), plans = [], open = new Map();
@@ -32,7 +33,7 @@ export async function town() {
     { t: 'darro_dress', z: DARRO.z, w: DARRO.w, y: DARRO.y, x0: -140, x1: 230, seed: 7, gaps: DARRO_BRIDGES },
   ]), style: 'nasrid' });
   plans.push({ ...base('granada-aljibe-life', aljibeLife(cis)), style: 'life' });
-  return [...plans, lifePlan()];
+  return [...plans, lifePlan(), courtLife()];
 }
 
 /** The larger lots of the Albaicín across the Darro (z < -124), on gentle ground: about two in three become houses round a patio. */
