@@ -6,6 +6,8 @@
 import { ACRO } from './layout.js';
 
 const T = ACRO.top, Y = T + 0.04;
+/** The bronze dedications on their marble bases (Pausanias 1.24–28: the summit was crowded with statues): [x, z, facing, pose kind]. */
+export const STATUES = [[60.5, 26.5, Math.PI / 2, 'robe'], [60.5, 10.2, Math.PI / 2, 'nude'], [78, 36.6, Math.PI, 'robe'], [90.4, 21.4, Math.PI / 2, 'nude'], [93.6, 13.4, 3.6, 'robe'], [101.5, 27.6, Math.PI / 2, 'nude'], [108.6, 15.2, 2.2, 'robe'], [111.4, 35.4, 4.4, 'nude'], [124, 24, Math.PI / 2, 'robe']];
 export const ALTAR = { x0: 70, z0: 16.4, x1: 76, z1: 19.6 };
 
 /** The altar: two low steps, the block of marble, the slab with its burnt top; a kerb of limestone paving about it. */
@@ -21,6 +23,7 @@ export function summitAltar() {
   for (const [x, z] of [[x0 - 0.1, z0 - 0.1], [x1 + 0.1, z0 - 0.1], [x0 - 0.1, z1 + 0.1], [x1 + 0.1, z1 + 0.1]]) E.push({ t: 'block', rect: [x - 0.14, z - 0.14, x + 0.14, z + 0.14], y0: Y + 1.64, y1: Y + 1.9, mat: 'marble', collide: false });
   for (const [x, z, h, yaw] of [[58.5, 2.2, 2.6, Math.PI / 2], [58.5, 3.8, 1.9, Math.PI / 2], [58.5, 33.6, 2.8, Math.PI / 2], [58.5, 35.2, 2.0, Math.PI / 2], [64, 38.6, 1.7, 0], [80.5, 11.6, 2.3, Math.PI / 2], [82.5, 12.4, 1.6, Math.PI / 2]]) E.push({ t: 'votive', kind: 'stele', at: [x, z], y: Y, yaw, h, w: h > 2.2 ? 0.8 : 0.6 });
   for (const [x, z] of [[62, 5.5], [79.5, 27.5], [66, 30.4]]) E.push({ t: 'votive', kind: 'tripod', at: [x, z], y: Y });
+  for (const [x, z] of STATUES) { E.push({ t: 'block', rect: [x - 0.62, z - 0.62, x + 0.62, z + 0.62], y0: Y - 0.1, y1: Y + 0.18, mat: 'limestone' }); E.push({ t: 'block', rect: [x - 0.48, z - 0.48, x + 0.48, z + 0.48], y0: Y + 0.18, y1: Y + 1.25, mat: 'marble' }); E.push({ t: 'block', rect: [x - 0.56, z - 0.56, x + 0.56, z + 0.56], y0: Y + 1.25, y1: Y + 1.34, mat: 'marble', collide: false }); }
   return E;
 }
 
@@ -54,6 +57,19 @@ export function summitLife() {
     else slave([x, z], r + (rand() - 0.5) * 0.7, { carry: rand() < 0.5 ? 'sack' : 'basket' });
     if (k % 3 === 0) man([x + 1.1, z + 0.35], r + 2.8, { pose: 'talk', cloth: 'cloth_grey' });
   });
+  // the bronzes: dedications on their bases, cast figures in the cloak or bare, one hand a little out
+  STATUES.forEach(([x, z, r, kind], k) => L.push({ t: 'figure', at: [x, z], y: Y + 1.34, rot: r, seed: seed(), skin: 'bronze', hairMat: 'bronze', hairShade: 1, dress: kind === 'robe' ? 'robe' : 'loincloth', top: kind === 'robe' ? undefined : 'bare', cloth: 'bronze', cloth2: 'bronze', over: kind === 'robe' ? 'cloak' : 'none', hair: 'short', beard: k % 3 === 0 ? 1 : 0, hat: 'none', feet: 'bare', pose: k % 2 ? 'stand' : 'staff', carry: k % 2 ? 'none' : 'staff', len: 1.9 }));
+  // in the Parthenon's cella (local x 8..21 of the temple at (18, 18), its floor 2.26 m up): the priestess and a kneeling woman before the basin, men standing in awe, a child held by the hand,
+  // the temple warden with his staff by the door, a bench with offerings of cakes and oil
+  { const NY = T + 2.26, ox = 18, oz = 18, F = (lx, lz, f) => ({ at: [ox + lx, oz + lz], rot: f });
+    const inside = (kind, lx, lz, f, o = {}) => { const q = F(lx, lz, f), fn = { man, woman, boy }[kind]; fn(q.at, q.rot, o); L[L.length - 1].y = NY; };
+    inside('woman', 10.6, -3.9, -Math.PI / 2, { pose: 'pray', cloth: 'cloth_white', cloth2: 'cloth_white', hat: 'veil' }); inside('woman', 9.4, 3.9, -Math.PI / 2 + 0.3, { pose: 'kneel', arms: 'pray', cloth: 'cloth_ochre' });
+    inside('man', 12.6, -1.4, -Math.PI / 2 + 0.2, {}); inside('man', 13.4, 1.0, -Math.PI / 2 - 0.3, { pose: 'talk', cloth: 'cloth_grey' }); inside('man', 14.5, 0.2, Math.PI / 2 - 0.4, { pose: 'talk' });
+    inside('boy', 15.8, 3.2, -Math.PI / 2 + 0.5, {}); inside('woman', 16.6, 3.0, -Math.PI / 2 + 0.2, { cloth: 'cloth_indigo' });
+    inside('man', 20.3, -4.8, Math.PI, { carry: 'staff', pose: 'staff', len: 1.9, cloth: 'cloth_white' }); inside('man', 19.0, 3.6, Math.PI / 2 + 0.4, { pose: 'sit_low' });
+    for (const [lx, lz, kind, n] of [[8.6, -5.4, 'amphora', 2], [9.6, -5.5, 'water_pot', 3], [8.4, 5.3, 'pithos', 1]]) L.push({ t: 'pot', at: [ox + lx, oz + lz], y: NY, rot: 0, seed: seed(), kind, n });
+    L.push({ t: 'bench', at: [ox + 14.6, oz - 5.3], y: NY, rot: 0, seed: seed(), len: 2.2, mat: 'marble' }); L.push({ t: 'basket', at: [ox + 14.0, oz - 5.2], y: NY + 0.47, rot: 0, seed: seed(), n: 2 });
+    L.push({ t: 'stool', at: [ox + 19.0, oz + 3.5], y: NY, rot: 0, seed: seed() }); }
   // the stelae's readers, two men before the treasurers' lists
   man([60.2, 3.0], W, { pose: 'talk' }); man([60.4, 4.5], W, { pose: 'talk', cloth: 'cloth_grey' });
   // the feast day's goods: a table for the offerings by the altar's west step, wood for the fire, the lustral basin, jars and baskets, barley sacks, pigeons on the paving
