@@ -171,6 +171,12 @@ function ziggurat(el, ctx) {
       for (const dz of [-11, -3.5, 4.5, 12.5]) pal(cx + sx * ((A.r[2] - cx) - A.b - 4.6), A.r[1] + A.b + 18 + dz, A.y1, 5.2 + pr() * 1.6, k++);
       for (const dz of [-1.5, 6.5]) pal(cx + sx * ((Bs.r[2] - cx) - Bs.b - 2.0), (Bs.r[1] + Bs.r[3]) / 2 + dz, Bs.y1, 4.8 + pr() * 1.4, k++);
     } }
+  // two tall banner poles at the gatehouse's flanks, a blue and a red cloth in the wind: the colour that marks the meeting of the stairs from the court
+  if (LIT) for (const sx of [-1, 1]) {
+    const px = cx + sx * 8.2, pz = gz + 1.4, py = S0.y1, top = py + 8.5, T = [], a = [px, top, pz], b = [px - sx * 1.5, top - 0.15, pz], c = [px - sx * 1.5, top - 3.6, pz], d = [px, top - 3.4, pz];
+    bag.add('palm_trunk', lathe([[0.16, 0], [0.11, 4], [0.07, 8.5]], 8, null, px, py, pz)); col.circle(px, pz, 0.18, py, top);
+    T.push(...a, ...b, ...c, ...a, ...c, ...d, ...a, ...c, ...b, ...a, ...d, ...c); bag.add((sx < 0 ? 'cloth_blue' : 'cloth_red') + '+wind', fromTriangles(T));
+  }
   // the shrine of Nanna on the top stage (§4.2)
   const tz = (tops[tops.length - 1].r[1] + tops[tops.length - 1].r[3]) / 2;
   shrine({ ...el.shrine, c: [cx, tz + 1], y: tops[tops.length - 1].y1, lit: LIT }, ctx);
