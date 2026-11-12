@@ -91,3 +91,7 @@ Chanting from the shrines, the tap of a wooden gong, the debate's claps, doves a
 - shunya.net site pages (https://shunya.net/Pictures/NorthIndia/Nalanda/Nalanda.htm)
 - Lion's Roar, "The Dharma Was Built on These Bricks" (https://www.lionsroar.com/the-dharma-was-built-on-these-bricks/)
 - UNESCO World Heritage dossier, Nalanda Mahavihara (https://whc.unesco.org/document/180055)
+
+## Fix pass: the sacred way's margins
+
+Bullock carts with zebu and ox in the shafts, mats of flower- and lamp-sellers, water pots, sacks, firewood and baskets along the margins of the way, pilgrims in files and a family, monks climbing the great temple's lowest stair, grass tufts between the lamp pillars and the votive stupas; the central lane is kept clear for walkers [inferred: the trades and carriers are those of a pilgrimage centre of the region; nothing here is sourced to Nalanda itself].
