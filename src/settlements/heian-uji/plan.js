@@ -98,7 +98,7 @@ function worship() {
     }
   }
   // the monk who leads them, standing at the water's edge with his staff; a servant standing behind
-  person(41.2, 0.8, W, { cloth: 'cloth_black', cloth2: 'cloth_ochre', hair: 'shaven', carry: 'staff', over: 'sash' });
+  person(41.2, 3.0, W, { cloth: 'cloth_black', cloth2: 'cloth_ochre', hair: 'shaven', carry: 'staff', over: 'sash' });
   person(46.4, 1.5, W, { cloth: 'cloth_white', cloth2: 'cloth_white', hat: 'cap', hatMat: 'lacquer_black', dress: 'trousers' });
   // in the hall: two monks kneeling before the dais, chanting
   for (const sz of [-1, 1]) person(hx + 2.3, sz * 0.75, W, { y: HF, pose: 'seiza', arms: 'pray', cloth: 'cloth_black', cloth2: 'cloth_ochre', hair: 'shaven', over: 'sash' });

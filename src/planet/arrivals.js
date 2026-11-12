@@ -15,7 +15,7 @@ export const ARRIVALS = {
   'lhasa':            [0, 0.1, 134, 0, 0.3],             // the Potala rising over the Shöl street, from the lane crossing in the open middle (no stall pole or awning at the shoulder)
   'muromachi-kyoto':  [200, 0.1, 17, 0, 0.16],           // the Kannon-den of Ginkaku-ji across the narrowed pond, the wooded hill behind
   'nara':             [0, 0.1, 20, 0, 0.25],             // the Great Buddha Hall from its court
-  'heian-uji':        [40, null, 0, 1.5708, 0.06],       // the Phoenix Hall across its pond, wings spread
+  'heian-uji':        [6.5, 0.1, 0, 1.5708, 0.06],       // the Phoenix Hall across its pond, wings spread, from the end of the viewing pier (37 m from the steps)
   'edo-himeji':       [-25, 37.1, -3, 0, 0.36],          // the keep cluster whole on its stone base, from the Honmaru's south edge (from 9 m nearer the top roof was cut)
   'joseon-seoul':     [0, 0.1, 80, 0, 0.15],             // the throne hall across its court and rank stones
   'sanchi':           [0, 22.1, 60, 0, 0.15],            // the Great Stupa, its gateway and Ashoka's pillar
