@@ -2,8 +2,9 @@
 // goods and boats, the priests' lanes, the camp's rows of houses back to back with the market street and its shops, the bakeries and granaries, the masons' yard,
 // the fields and shadufs of the bank, the people of terrace, market, lanes, quay and yard.
 
-import { RADIUS, FX, FXS, ZS, WATER, BANK_X, QUAY, QUAY_Y, TERRACE, GATE, SGATE, ALTAR, MARKET, FIELDS, GRAN_YARD, cliffFace, lots, lanes, granaries as granaryList } from './layout.js';
+import { RADIUS, FX, FXS, ZS, WATER, BANK_X, QUAY, QUAY_Y, TERRACE, GATE, SGATE, ALTAR, MARKET, FIELDS, GRAN_YARD, WAY, cliffFace, lots, lanes, granaries as granaryList } from './layout.js';
 import { ground } from './ground.js';
+import { cliffTop } from '../../styles/ramesside/dims.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements, y = 0, rooms = []) => ({ id, style: 'ramesside', origin: [0, 0], base: y, yaw: 0, feature: true, elements, rooms, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [FX + 44, 0], facing: 'w' } });
@@ -33,7 +34,7 @@ function craftsman(l) {
 /** Priests, pilgrims, vendors, craftsmen, bearers, workmen, women and children (docs/settlements/abu-simbel.md §9). */
 function people() {
   const rand = rng(1256), T = [];
-  const fig = (at, y, rot, o) => T.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: 'shendyt', top: 'bare', cloth: 'cloth_white', skin: 'skin_dark', hat: 'none', hair: 'shaven', hairMat: 'hair_dark', feet: 'bare', carry: 'none', pose: 'stand', ...o });
+  const fig = (at, y, rot, o) => T.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: 'shendyt', top: 'bare', cloth: 'cloth_white', skin: rand() < 0.65 ? 'skin_dark' : 'skin_medium', hat: 'none', hair: 'shaven', hairMat: 'hair_dark', feet: 'bare', carry: 'none', pose: 'stand', ...o });
   const man = (at, y, rot, o = {}) => fig(at, y, rot, { dress: 'shendyt', over: 'belt', hair: rand() < 0.5 ? 'short' : 'wig', cloth: ['cloth_white', 'linen', 'cloth_white', 'cloth_ochre'][Math.floor(rand() * 4)], ...o });
   const woman = (at, y, rot, o = {}) => fig(at, y, rot, { dress: 'sheath', hair: 'long', cloth: ['cloth_white', 'linen', 'cloth_white'][Math.floor(rand() * 3)], over: rand() < 0.4 ? 'wesekh' : 'none', ...o });
   const kid = (at, y, rot, o = {}) => fig(at, y, rot, { child: true, dress: 'loincloth', over: 'none', hair: 'short', ...o });
@@ -62,7 +63,7 @@ function people() {
   priest([FX - 15, 2.2], F, Math.PI / 2);
   man([FX - 14.8, 7.9], F + 0.45, Math.PI, { pose: 'sit', hair: 'shaven' });
   // the Small Temple's priestess at the door and a chanter before the Hathor pillars
-  woman([FXS + 6, ZS - 3.7], F, Math.PI / 2, { dress: 'sheath', over: 'wesekh', hair: 'wig' }); priest([FXS + 12, ZS], F, Math.PI / 2, { pose: 'kneel' });
+  woman([FXS + 6, ZS - 3.7], F, Math.PI / 2, { dress: 'sheath', over: 'wesekh', hair: 'wig' }); priest([FXS + 12, ZS + 2.0], F, Math.PI / 2, { pose: 'kneel' });
   // the way north: a donkey-driver is the life pass's; a priest walking with offerings
   woman([-18, -60], F, 0.3, { carry: 'basket' }); man([-17.5, -90], F, 0, { carry: 'pot' });
   // ── the market street: at every shop the vendor behind the counter's window, a customer at it, the craftsman in his room
@@ -142,11 +143,27 @@ function crews() {
   return T;
 }
 
+/** The cliff's slices exactly as the style cuts them (shore.js cliff: its dice are replayed), for the weathering of the face: [[x of the face, z, height]]. */
+function cliffPts() {
+  const r = rng(1255), skip = [[-20, 20], [ZS - 16, ZS + 16]], out = [];
+  for (let z = -200; z < 200; z += 4) {
+    const zm = z + 2;
+    if (skip.some(([a, b]) => zm > a && zm < b)) continue;
+    const near = skip.some(([a, b]) => zm > a - 12 && zm < b + 12), top = cliffTop(zm) + (near ? 0 : (r() - 0.5) * 2.4);
+    if (top < 0.8) continue;
+    const xf = cliffFace(zm) + (near ? 0 : (r() - 0.5) * 0.8);
+    if (zm > -150 && zm < 150 && top > 8) out.push([xf, zm, top]);
+  }
+  return out;
+}
+
 export async function town() {
   const plans = [];
   // the cliff along the bank: slices of the rock, the two temples left out of them (they are cut in it); its talus
-  plans.push(base('abu-simbel-cliff', [{ t: 'cliff', z0: -200, z1: 200, skip: [[-20, 20], [ZS - 16, ZS + 16]], seed: 1255 }]));
+  plans.push(base('abu-simbel-cliff', [{ t: 'cliff', z0: -200, z1: 200, skip: [[-20, 20], [ZS - 16, ZS + 16]], seed: 1255 }, { t: 'cliff_wear', pts: cliffPts(), seed: 29 }]));
   { const pts = [], r = rng(77); for (let z = -190; z < 190; z += 3.2 + r() * 3.4) { if ((z > -22 && z < 22) || (z > ZS - 18 && z < ZS + 18)) continue; pts.push([cliffFace(z), z]); } plans.push(base('abu-simbel-talus', [{ t: 'talus', pts, seed: 17 }])); }
+  // the way to the Small Temple: low walls, standards; gaps where the priests' lanes open on it
+  plans.push(base('abu-simbel-way', [{ t: 'way_dress', x0: WAY[0], x1: WAY[2], z0: WAY[1] + 0.5, z1: -31.4, gaps: [[-41.4, -35], [-61.4, -56.4], [-81.4, -76.4]], y: 0.04, seed: 37 }]));
   // the terrace: benches, offering tables, braziers, basins, shades, sand against the walls
   plans.push(base('abu-simbel-terrace', [{ t: 'terrace_dress', x0: TERRACE[0], x1: TERRACE[2], z0: TERRACE[1], z1: TERRACE[3], y: 0.04, gates: [GATE.x, SGATE.x], seed: 31 }]));
   // the ramp from the terrace's end down the bank to the quay (the ground's own height, kerbs either side), the quay with its bollards, its goods and its store
@@ -171,7 +188,7 @@ export async function town() {
   }
   // the houses of the priests' lanes (whitewashed fronts), the camp's rows back to back
   const L = lots();
-  const house = (l) => ({ t: 'ram_house', rect: l.rect, seed: l.seed, furnish: l.furnish, front: l.front, wash: l.quarter === 'priests' });
+  const house = (l) => ({ t: 'ram_house', rect: l.rect, seed: l.seed, furnish: l.furnish, front: l.front, wash: l.quarter === 'priests' || l.seed % 5 < 2 });
   plans.push(base('abu-simbel-priests', L.filter((l) => l.quarter === 'priests').map(house)));
   const camp = L.filter((l) => l.quarter === 'camp'), market = camp.filter((l) => l.kind !== 'house' || l.rect[1] < 55), rest = camp.filter((l) => !market.includes(l));
   // the market: the shops and bakeries on the street, the lanes' washing and the shades over the street

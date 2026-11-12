@@ -87,6 +87,20 @@ export function terraceDress(el, { bag, col }) {
   for (const zs of [-9.8, 9.8]) { bag.add('sandstone_dressed', box(x0 + 33, y, zs - 0.5, x0 + 34, y + 0.5, zs + 0.5)); bag.add('sandstone_dressed', box(x0 + 33.2, y + 0.5, zs - 0.3, x0 + 33.8, y + 2.4, zs + 0.3)); bag.add('sandstone_relief', box(x0 + 33.15, y + 0.9, zs - 0.22, x0 + 33.2, y + 2.1, zs + 0.22)); col.rect([x0 + 33, zs - 0.5, x0 + 34, zs + 0.5], y, y + 2.4); }
   // sand banked along both walls' feet, drifted over the paving at the gates and corners; flakes of fallen stone
   for (const zw of [z0 + 0.3, z1 - 0.3]) for (let x = x0 + 1; x < x1 - 1; x += 2.2 + rand() * 2.5) mound(bag, 'sandstone_yellow', x, y - 0.02, zw + (zw < 0 ? 0.4 : -0.4), 1.2 + rand() * 1.4, 0.1 + rand() * 0.22, 0.6 + rand() * 0.5);
+  // the processional ways of dressed slabs laid over the paving (2.2 m slabs, seams between): along the axis from the façade to the ramp, from the north gate and
+  // from the south gate to it
+  const slabs = (ax, az, bx, bz) => {
+    const alongX = Math.abs(bx - ax) > Math.abs(bz - az), len = alongX ? Math.abs(bx - ax) : Math.abs(bz - az), w = alongX ? Math.abs(bz - az) : Math.abs(bx - ax), n = Math.floor(len / 2.2), m = Math.max(1, Math.round(w / 2.2));
+    for (let i = 0; i < n; i++) for (let j = 0; j < m; j++) {
+      const u0 = i * (len / n) + 0.03, u1 = (i + 1) * (len / n) - 0.03, v0 = j * (w / m) + 0.03, v1 = (j + 1) * (w / m) - 0.03;
+      const [xa, xb, za, zb] = alongX ? [Math.min(ax, bx) + u0, Math.min(ax, bx) + u1, Math.min(az, bz) + v0, Math.min(az, bz) + v1] : [Math.min(ax, bx) + v0, Math.min(ax, bx) + v1, Math.min(az, bz) + u0, Math.min(az, bz) + u1];
+      bag.add((i + j) % 5 === 0 ? 'sandstone_white' : 'sandstone_dressed', box(xa, y, za, xb, y + 0.035 + ((i * 7 + j * 3) % 4) * 0.004, zb));
+    }
+  };
+  slabs(x0 + 11, -3, x1 - 1, 3);
+  for (const g of gates) { if (g < -10) slabs(g - 1.5, z0 + 2, g + 1.5, -3.2); else slabs(g - 1.5, 3.2, g + 1.5, z1 - 2); }
+  // sand banked at the façade's foot between the colossi's feet
+  for (let z = -18; z <= 18; z += 2.3 + rand() * 1.4) mound(bag, 'sandstone_yellow', x0 + 0.3 + rand() * 0.5, y - 0.02, z, 0.9 + rand() * 0.7, 0.1 + rand() * 0.14, 0.9 + rand() * 0.9);
   for (let k = 0; k < 22; k++) mound(bag, 'sandstone_yellow', x0 + 2 + rand() * (x1 - x0 - 6), y - 0.02, z0 + 3 + rand() * (z1 - z0 - 6), 0.5 + rand() * 1.1, 0.025 + rand() * 0.05, 0.4 + rand() * 0.7);
   for (let k = 0; k < 14; k++) turned(bag, 'sandstone_dressed', x0 + 1 + rand() * (x1 - x0 - 4), z0 + 1 + rand() * (z1 - z0 - 2), 0.08 + rand() * 0.14, 0.05 + rand() * 0.1, y, y + 0.04 + rand() * 0.07, rand() * 3);
 }
@@ -98,6 +112,42 @@ export function talus(el, { bag }) {
     const x = px + 0.6 + rand() * 0.6;
     mound(bag, 'sandstone_yellow', x, -0.05, z, 1.4 + rand() * 1.2, 0.5 + rand() * 1.2, 1.5 + rand() * 1.6);
     if (rand() < 0.5) turned(bag, 'sandstone_yellow', x + 1.0 + rand() * 0.8, z + (rand() - 0.5) * 2, 0.3 + rand() * 0.4, 0.25 + rand() * 0.3, -0.05, 0.3 + rand() * 0.5, rand() * 3);
+  }
+}
+
+/**
+ * The way to the Small Temple { x0, x1 (the paved edges), z0, z1, gaps: [[za, zb]] (lanes opening on it), y, seed }: a low wall of mudbrick on each side with a stone cap,
+ * and every 12 m a standard (a mast of cedar with a red-and-white pennant), a stela at the Small Temple's end.
+ */
+export function wayDress(el, { bag, col }) {
+  const { x0, x1, z0, z1, y } = el, gaps = el.gaps ?? [], rand = rng(el.seed || 37);
+  for (const [xa, xb] of [[x0 - 0.5, x0], [x1, x1 + 0.5]]) {
+    let z = z0;
+    const cuts = (xa < x0 ? [] : gaps).slice().sort((p, q) => p[0] - q[0]);
+    const runs = []; for (const [ga, gb] of cuts) { if (ga > z) runs.push([z, ga]); z = Math.max(z, gb); } if (z < z1) runs.push([z, z1]);
+    for (const [za, zb] of runs) {
+      bag.add('mudbrick', box(xa, y, za, xb, y + 0.95, zb)); bag.add('sandstone_dressed', box(xa - 0.06, y + 0.95, za, xb + 0.06, y + 1.05, zb)); col.rect([xa, za, xb, zb], y, y + 1.05);
+      for (let q = za + 3; q < zb - 2; q += 5 + rand() * 4) if (rand() < 0.6) mound(bag, 'sandstone_yellow', xa < x0 ? xa - 0.3 : xb + 0.3, y - 0.02, q, 0.8 + rand() * 0.8, 0.12 + rand() * 0.2, 0.7 + rand() * 0.9);
+    }
+  }
+  for (let z = z0 + 8; z < z1 - 4; z += 12) {
+    const sx = x0 - 0.25;
+    bag.add('sandstone_dressed', box(sx - 0.3, y, z - 0.3, sx + 0.3, y + 0.35, z + 0.3));
+    bag.add('cedar', lathe([[0.1, 0.35], [0.075, 5.2], [0.001, 5.35]], 8, null, sx, y, z)); col.circle(sx, z, 0.3, y, y + 1.2);
+    for (let k = 0; k < 2; k++) addCloth(bag, k ? 'cloth_white' : 'cloth_red', clothBox(sx + 0.08, y + 4.2 - k * 0.4, z - 0.01, sx + 0.12, y + 4.6 - k * 0.4, z + 1.0), y + 4.6 - k * 0.4);
+  }
+}
+
+/**
+ * The weathering of the cliff's face { pts: [[x, z, h]] (the foot's x, the slice's z, the top's height), seed }: strata of paler and redder sandstone, dark fissures
+ * from the top down, ledges with fallen stone on them. (Thin pieces proud of the slices' face.)
+ */
+export function cliffWear(el, { bag }) {
+  const rand = rng(el.seed || 29);
+  for (const [x, z, top] of el.pts) {
+    for (let k = 0; k < 3; k++) { const y0 = 2 + rand() * (top - 6), hh = 0.3 + rand() * 1.1; bag.add(rand() < 0.5 ? 'sandstone_white' : 'sandstone_red', box(x - 0.1 - rand() * 0.15, y0, z - 1.9 + rand() * 0.4, x + 0.02, y0 + hh, z + 1.9 - rand() * 0.4)); }
+    if (rand() < 0.7) { const zz = z + (rand() - 0.5) * 3, y0 = top * (0.3 + rand() * 0.4); bag.add('schist_rubble', box(x - 0.4, y0, zz - 0.08, x + 0.1, top - 0.1, zz + 0.08)); }
+    if (rand() < 0.5) { const y0 = top * (0.25 + rand() * 0.35), zz = z + (rand() - 0.5) * 2; bag.add('sandstone_dressed', box(x - 1.0, y0, zz - 1.0, x + 0.16, y0 + 0.25, zz + 1.0)); mound(bag, 'sandstone_yellow', x - 0.5, y0 + 0.25, zz, 0.6, 0.3, 0.7); }
   }
 }
 
@@ -244,9 +294,10 @@ export function templeFurnish(el, { bag, col, lights }) {
     for (let k = 0; k < 4; k++) { const z = zc + [1.5, 0.5, -0.5, -1.5][k]; bag.add('cloth_green', lathe([[0.001, 0], [0.1, 0.02], [0.08, 0.2], [0.001, 0.25]], 7, null, X(60.4), R[7].y0, z)); bag.add('papyrus', lathe([[0.02, 0], [0.02, 0.4], [0.001, 0.42]], 5, null, X(60.4), R[7].y0 + 0.2, z)); }
   } else {
     const y = FLOOR;
-    for (const d of [9.6]) offering(bag, col, X(d), zc, y, rand);
+    // (clear of the axis and the pillars' rows)
+    offering(bag, col, X(13.0), zc - 3.3, y, rand);
     for (const s of [-1, 1]) brazier(bag, col, X(7.4), zc + s * 3.4, y);
-    for (const d of [7.4, 9.8]) for (const s of [-1, 1]) bench(bag, col, X(d), zc + s * 3.7, 1.8, y, s);
+    bench(bag, col, X(13.0), zc + 3.55, 1.8, y, 1);
   }
   void lights; void frustum;
 }

@@ -72,7 +72,7 @@ export function lots() {
   row('priests', -56.4, 7.2, 'n', PS, 7.4);
   row('priests', -68.6, 7.2, 's', PS, 7.4);
   row('priests', -76.4, 7.2, 'n', PS, 7.4);
-  LANES.push({ r: [-12, -41.4, 11, -35], w: 6.4, kind: 'lane' }, { r: [-12, -61.4, 11, -56.4], w: 5, kind: 'lane' }, { r: [-12, -81.4, 11, -76.4], w: 5, kind: 'lane' }, { r: [-0.6, -81.4, 2.2, -41.4], w: 2.8, kind: 'cross' });
+  LANES.push({ r: [-16, -41.4, 11, -35], w: 6.4, kind: 'lane' }, { r: [-16, -61.4, 11, -56.4], w: 5, kind: 'lane' }, { r: [-16, -81.4, 11, -76.4], w: 5, kind: 'lane' }, { r: [-0.6, -81.4, 2.2, -41.4], w: 2.8, kind: 'cross' });
   // ── the camp: the market rows, then the pairs of rows
   const CS = [[-36, -17], [-14, -6.6], [-2.6, 10.4]];
   const shopN = (si, k, x0, x1) => ({ kind: 'shop', trade: TRADES_N[(si * 3 + k) % TRADES_N.length] });
