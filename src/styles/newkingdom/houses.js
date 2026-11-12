@@ -8,6 +8,7 @@
 import { box, lathe, fromTriangles, clothBox, addCloth } from '../../core/geom.js';
 import { rng } from './kit.js';
 import { palm } from '../egyptian/objects.js';
+import { facade, cabin, dovecote, shopGoods } from './dress.js';
 
 export function frame(rect, front, bag, col) {
   const [x0, z0, x1, z1] = rect, zs = front === 's' ? z1 : z0, sg = front === 's' ? -1 : 1, Z = (v) => zs + sg * v;
@@ -73,6 +74,7 @@ export function rowHouse(el, ctx) {
   const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D, th = 0.4, H = 3.1 + rand() * 0.3, wm = WALLS[Math.floor(rand() * WALLS.length)], open = !!el.open;
   const uD = W * (0.3 + rand() * 0.4);
   door(F, wm, uD, 0.9, 1.95, 0, th, open, H);
+  facade(F, rng(el.seed + 99), { W, H, wm, uD, dw: 0.9, lod: el.lod ?? 1, open, shop: !!el.shop });
   F.b(wm, 0, 0, th, th, H, D); F.b(wm, W - th, 0, th, W, H, D); F.b(wm, 0, 0, D - th, W, H, D);
   slit(F, W * 0.5 + (uD < W / 2 ? 1.2 : -1.2), 2.45, -0.0); slit(F, uD, H - 0.5, 0, 0.5, 0.26);
   F.b('limewash_white', 0, 0, -0.02, W, 0.5, 0.0, false);                               // the whitewash's edge at the foot (the street's dust on it)
@@ -91,6 +93,7 @@ export function rowHouse(el, ctx) {
     for (const [a, b, c, d] of [[th, 3.75, W - th, 3.8], [th, 8.65, W - th, 8.7]]) F.b('limewash_white', a, 0.03, b, c, 1.0, d, false);
     // the front room: a bench along the wall, jars
     F.b('mud_plaster', W - th - 0.5, 0, th, W - th, 0.4, 3.0); F.b('reed_mat', W - th - 0.45, 0.4, th + 0.1, W - th - 0.05, 0.42, 2.9, false);
+    if (el.shop) shopGoods(F, rng(el.seed + 5), uD, th, el.shop);
     F.lathe('terracotta', JAR(0.22), th + 0.35, 0, th + 0.4, 10); F.lathe('terracotta', JAR(0.18), th + 0.35, 0, th + 1.0, 10);
     // the main room: the platform with its steps, the niche with a little altar, a stool and a chest, a mat
     F.b('mud_plaster', W - th - 1.9, 0, 4.1, W - th, 0.5, 6.2); F.b('mud_plaster', W - th - 2.5, 0, 4.9, W - th - 1.9, 0.25, 5.5);
@@ -115,6 +118,7 @@ export function courtHouse(el, ctx) {
   const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D, th = 0.4, H = 3.0 + rand() * 0.4, wm = WALLS[Math.floor(rand() * WALLS.length)], open = !!el.open;
   const cv = 5.5 + rand() * 1.5, uD = W * (0.25 + rand() * 0.5);
   door(F, wm, uD, 1.0, 2.0, 0, th, open, 2.7);
+  facade(F, rng(el.seed + 99), { W, H: 2.7, wm, uD, dw: 1.0, doorH: 2.0, lod: el.lod ?? 1, open });
   F.b(wm, 0, 0, th, th, 2.7, cv); F.b(wm, W - th, 0, th, W, 2.7, cv);                                // the court's walls
   F.b(wm, 0, 0, cv, th, H, D); F.b(wm, W - th, 0, cv, W, H, D); F.b(wm, 0, 0, D - th, W, H, D);      // the house's
   slit(F, W / 2, 2.5, 0, 0.45, 0.3);
@@ -144,6 +148,8 @@ export function courtHouse(el, ctx) {
   F.lathe('terracotta', JAR(0.3), W - th - 0.5, 0, th + 0.5, 10); F.lathe('terracotta', JAR(0.22), W - th - 1.2, 0, th + 0.45, 10);
   if (rand() < 0.7) palm({ at: [F.X(th + 1.1 + rand() * (W - 2.5)), F.Z(cv * 0.62)], y: 0, h: 5 + rand() * 3, lean: (rand() - 0.5) * 0.15, seed: Math.floor(rand() * 9999) }, ctx);
   roof(F, rand, H, hole, open, [0, cv, W, D]);
+  const dr = rng(el.seed + 17), q = dr();
+  if (!open && (el.lod ?? 1) >= 1 && W > 7.5) { if (q < 0.5) cabin(F, dr, H, wm, [0.4, cv + 0.6, Math.min(W - 0.4, 4.2), cv + 4.2]); else if (q < 0.7) dovecote(F, W - 1.6, D - 1.8, 3.6, 1.1); }
 }
 
 /** nk_villa: { rect, front, seed, open } — the house of an official: the walled garden with its pool and trees, the porch, the hall of columns. */
@@ -151,6 +157,7 @@ export function villa(el, ctx) {
   const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D, th = 0.45, H = 3.6, wm = rand() < 0.6 ? 'limewash_white' : 'mud_plaster', open = !!el.open;
   const gv = 6.2;                                                                               // the garden's depth
   door(F, wm, W / 2, 1.5, 2.6, 0, th, open, 3.4);
+  facade(F, rng(el.seed + 99), { W, H: 3.0, wm, uD: W / 2, dw: 1.5, doorH: 2.6, lod: Math.max(1, el.lod ?? 1), open });
   F.b(wm, 0, 0, th, th, 3.4, gv); F.b(wm, W - th, 0, th, W, 3.4, gv);
   F.b('timber', W / 2 - 1.05, 2.6, -0.1, W / 2 + 1.05, 2.8, 0.18, false);
   for (const s of [-1, 1]) F.b('sandstone_dressed', W / 2 + s * 0.95 - 0.16, 0, -0.14, W / 2 + s * 0.95 + 0.16, 3.0, 0.14, false);        // the gate's posts

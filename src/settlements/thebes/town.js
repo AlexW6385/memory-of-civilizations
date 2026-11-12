@@ -4,6 +4,7 @@
 
 import { RADIUS, RIVER, QUAY, QUAY_STAIRS, ENCL, ENCL_TH, LAKE, LAKE_Y, LAKE_BED, SANCT, FESTIVAL, MAGAZINES, AVENUE, MARKET, TEMPLE_GATE, PYLON2, lots, sphinxes } from './layout.js';
 import { boatFloat } from '../../objects/index.js';
+import { propPlans } from './props.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements, o = {}) => ({ id, style: 'newkingdom', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-200, 0], facing: 'e' }, ...o });
@@ -81,7 +82,8 @@ export async function town() {
   plans.push({ ...base('thebes-people', people()), style: 'life' });
   // the town
   const LOTS = lots(), K = { row: 'nk_row_house', court: 'nk_court_house', villa: 'nk_villa', granary: 'nk_granary', garden: 'nk_garden', workshop: 'nk_workshop' };
-  for (let i = 0; i < LOTS.length; i += 70) plans.push(base(`thebes-town-${i / 70}`, LOTS.slice(i, i + 70).map((l) => ({ t: K[l.kind], rect: l.rect, front: l.front, seed: l.seed, open: l.open, trade: l.trade }))));
+  for (let i = 0; i < LOTS.length; i += 70) plans.push(base(`thebes-town-${i / 70}`, LOTS.slice(i, i + 70).map((l) => ({ t: K[l.kind], rect: l.rect, front: l.front, seed: l.seed, open: l.open, trade: l.trade, lod: l.lod, shop: l.shop }))));
+  for (const p of propPlans()) plans.push(base(p.id, [{ t: 'nk_props', items: p.items }]));
   void ez0; void ez1; void ex1;
   return (CACHE = plans);
 }

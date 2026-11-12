@@ -26,6 +26,7 @@ function planting(x, z, p) {
   if (inRect(LAKE, x, z, 11) && !inRect(LAKE, x, z, 6.5)) return { date_palm: 1.4, tamarisk: 0.1 };
   const qx = x - (QUAY.x + QUAY.top);
   if (qx > -0.5 && qx < 2.2 && z > QUAY.z0 + 6 && z < QUAY.z1 - 6) return { date_palm: 1.0 };
+  if (inRect(ENCL, x, z, 0) && inLot(x, z, 0)) { const l = lots().find((q) => inRect(q.rect, x, z)); return l && l.kind === 'garden' ? { date_palm: 2.0, sycamore_fig: 0.2, tamarisk: 0.3 } : null; }
   if (inLake(x, z, 3) || inRect(ENCL, x, z, 4)) return null;
   const bank = Math.abs(x - RIVER.x) - RIVER.w / 2;
   if (bank > -6 && bank < 8 && (z < QUAY.z0 - 6 || z > QUAY.z1 + 6)) return { papyrus: 8, reeds: 10, tamarisk: 0.1 };
