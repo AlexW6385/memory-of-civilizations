@@ -17,6 +17,29 @@ const heap = (bag, mat, x, y, z, r, h) => bag.add(mat, lathe([[r, 0], [r * 0.7, 
 const bolt = (bag, mat, x, y, z, len, r = 0.09) => bag.add(mat, lathe([[r, 0], [r, len]], 8, null, 0, 0, 0).rotateZ(Math.PI / 2).translate(x - len / 2, y + r, z));
 const vase = (bag, mat, x, y, z, r, h) => bag.add(mat, lathe([[0.001, 0], [r * 0.7, 0.01], [r, h * 0.35], [r * 0.85, h * 0.7], [r * 0.5, h * 0.9], [r * 0.6, h], [0.001, h * 0.97]], 10, null, x, y, z));
 
+
+/** The dressing of a bay's front at eye level: a painted board over the lintel, an oil lamp on a bracket, a threshold stone, wares on the pavement, a hanging bundle. */
+function frontDress(bag, col, xa, xb, zf, s, rand, y, trade, k) {
+  const cx = (xa + xb) / 2, Z = (v) => zf + s * v, zlo = (a, b) => [Math.min(Z(a), Z(b)), Math.max(Z(a), Z(b))];
+  // the board: a painted sign over the lintel with a border and a few black strokes standing for the writing
+  let [a, b] = zlo(-0.02, 0.04);
+  bag.add('cedar', box(xa + 0.35, y + 3.66, a, xb - 0.35, y + 4.12, b)); [a, b] = zlo(0.04, 0.06);
+  bag.add(rand() < 0.5 ? 'plaster_white' : 'cloth_ochre', box(xa + 0.42, y + 3.72, a, xb - 0.42, y + 4.06, b));
+  const n = 3 + Math.floor(rand() * 3), sw = (xb - xa - 1.1) / (n * 2);
+  for (let i = 0; i < n; i++) bag.add('lacquer_black', box(xa + 0.55 + i * sw * 2, y + 3.8 + rand() * 0.06, a, xa + 0.55 + i * sw * 2 + sw, y + 3.9 + rand() * 0.1, b + 0.005));
+  // an oil lamp on an iron bracket by the pier
+  if (k % 2 === 0) { const x = xa - 0.02; [a, b] = zlo(-0.05, -0.55); bag.add('iron', box(x - 0.015, y + 2.25, a, x + 0.015, y + 2.28, b)); const lz = Z(-0.5); bag.add('lamp_glass', lathe([[0.001, 0], [0.07, 0.03], [0.08, 0.15], [0.001, 0.22]], 8, null, x, y + 2.03, lz)); bag.add('iron', box(x - 0.01, y + 2.25, lz - 0.01, x + 0.01, y + 2.3, lz + 0.01)); }
+  // a threshold of limestone and wares on the pavement before the counter, by trade
+  [a, b] = zlo(-0.1, -0.5); bag.add('limestone', box(xa + 0.1, y, a, xb - 0.1, y + 0.1, b)); col.rect([xa + 0.1, a, xb - 0.1, b], y, y + 0.1);
+  const px = xa + 0.5 + rand() * (xb - xa - 1.0), pz = Z(-1.0);
+  if (trade === 'pottery' || trade === 'grain') { for (let i = 0; i < 2; i++) bag.add('terracotta', lathe([[0.001, 0], [0.16, 0.02], [0.28, 0.3], [0.3, 0.55], [0.2, 0.75], [0.22, 0.8], [0.001, 0.8]], 10, null, px + i * 0.6 - 0.3, y, pz - s * 0.2 * i)); }
+  else if (trade === 'fruit' || trade === 'spice') { bag.add('wicker', lathe([[0.3, 0], [0.38, 0.3], [0.001, 0.3]], 10, null, px, y, pz)); heap(bag, ['cloth_red', 'cloth_ochre', 'cloth_green'][Math.floor(rand() * 3)], px, y + 0.28, pz, 0.32, 0.2); }
+  else if (trade === 'cloth' || trade === 'paper') { bag.add('reed_mat', box(px - 0.7, y, pz - 0.5, px + 0.7, y + 0.012, pz + 0.5)); for (let i = 0; i < 3; i++) bolt(bag, BOLT[Math.floor(rand() * BOLT.length)], px, y + i * 0.17, pz - 0.2 + i * 0.1, 0.9, 0.08); }
+  else { bag.add('bronze', lathe([[0.001, 0], [0.3, 0.01], [0.42, 0.3], [0.38, 0.5], [0.45, 0.52]], 12, null, px, y, pz)); }
+  // a bundle hung from the lintel (a string of onions, dates, sandals)
+  if (rand() < 0.5) { const hx = xa + 0.4 + rand() * (xb - xa - 0.8); bag.add('iron', box(hx - 0.006, y + 2.1, Z(-0.04) - 0.006, hx + 0.006, y + 2.9, Z(-0.04) + 0.006)); for (let i = 0; i < 4; i++) bag.add(['cloth_ochre', 'cloth_brown', 'cloth_red', 'hide_tan'][i], lathe([[0.001, 0], [0.07, 0.07], [0.001, 0.15]], 6, null, hx + (i % 2) * 0.02, y + 2.12 + i * 0.16, Z(-0.04))); }
+}
+
 /** The goods of one bay: the bay's counter along its front; xa..xb across, zf the front's z, `s` the side (+1: the bay lies at larger z, its front toward −z). */
 function goods(bag, col, trade, xa, xb, zf, s, rand, y) {
   const w = xb - xa, cx = (xa + xb) / 2, Z = (v) => zf + s * v, sd = 3.4;
@@ -102,6 +125,7 @@ function suqRow(el, ctx) {
       for (let k = 0; k < nb; k++) {
         const xa = x0 + k * bw + 0.22, xb = x0 + (k + 1) * bw - 0.22, trade = trades[(k + (s > 0 ? 3 : 0) + Math.floor(rand() * 2)) % trades.length];
         goods(bag, col, el.trade || trade, xa, xb, zf, s, rand, y);
+        frontDress(bag, col, xa, xb, zf, s, rand, y, el.trade || trade, k);
         // the shutter folded up as an awning (0.9 m out, sloping), in a coloured cloth; the bay's ceiling beam
         const cl = BOLT[Math.floor(rand() * BOLT.length)];
         bag.add(cl, fromTriangles([xa, y + 2.9, zf, xb, y + 2.9, zf, xb, y + 2.55, zf - s * 0.95, xa, y + 2.9, zf, xb, y + 2.55, zf - s * 0.95, xa, y + 2.55, zf - s * 0.95, xa, y + 2.9, zf, xb, y + 2.55, zf - s * 0.95, xb, y + 2.9, zf, xa, y + 2.9, zf, xa, y + 2.55, zf - s * 0.95, xb, y + 2.55, zf - s * 0.95]));

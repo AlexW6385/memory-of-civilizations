@@ -153,3 +153,11 @@ export function local(ctx, [ox, oz], yaw, fn) {
   const lights = { push: (l) => { const q = P(l.at[0], l.at[2]); ctx.lights.push({ ...l, at: [q[0], l.at[1], q[1]] }); }, get length() { return ctx.lights.length; } };
   return fn({ ...ctx, bag, col, lights });
 }
+
+/** An orange or pomegranate tree of a garden bed: trunk and a rounded crown (the courts' and the palace garden's), at (x, z) on y, height about h. */
+export function gardenTree(bag, col, x, z, y, h = 2.4, r = 1.0, fruit = true) {
+  bag.add('bark_olive', lathe([[0.1, 0], [0.07, h * 0.55], [0.001, h * 0.6]], 6, null, x, y, z));
+  bag.add('palm_leaf', lathe(Array.from({ length: 8 }, (_, i) => { const t = i / 7 * Math.PI; return [Math.max(0.001, Math.sin(t) * r), h * 0.42 + (1 - Math.cos(t)) * h * 0.3]; }), 9, null, x, y, z));
+  if (fruit) for (let k = 0; k < 5; k++) { const a = k * 1.3 + x, rr = r * 0.8; bag.add(k % 2 ? 'cloth_ochre' : 'cloth_red', lathe([[0.001, 0], [0.06, 0.06], [0.001, 0.12]], 5, null, x + Math.cos(a) * rr, y + h * 0.5 + (k % 3) * 0.2, z + Math.sin(a) * rr)); }
+  col.circle(x, z, 0.12, y, y + h * 0.6);
+}

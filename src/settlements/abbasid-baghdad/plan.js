@@ -3,6 +3,8 @@
 // river are the townscape (town.js).
 
 import { C, PALACE, MOSQUE, LIBRARY } from './layout.js';
+import { palaceRooms } from '../../styles/abbasid/palace.js';
+import '../../styles/abbasid/index.js';
 
 const E = [
   { t: 'golden_palace', rect: PALACE, face: 's', y: 0, seed: 762 },
@@ -20,6 +22,7 @@ const rooms = [
   room('house of wisdom hall', [lx - 19, lz - 16.5, lx + 19, lz - 5.8], 0.03, 'hall'),
   room('house of wisdom court', [lx - 12, lz - 4.6, lx + 12, lz + 12.8], 0, 'open'),
 ];
+for (const r of palaceRooms((PALACE[2] - PALACE[0]) / 2)) rooms.push(room(`palace ${r.id}`, [px + r.rect[0], pz + r.rect[1], px + r.rect[2], pz + r.rect[3]], 0.03, 'hall'));
 const walks = [[[px, pz + 150], [px, pz + 40], [px, pz + 35], [px + 8.5, pz + 31], [px + 8.5, pz + 21], [px, pz + 17], [px, pz - 2], [px, pz - 12]]];
 walks[0].y0 = 0;
 export const baghdad = {

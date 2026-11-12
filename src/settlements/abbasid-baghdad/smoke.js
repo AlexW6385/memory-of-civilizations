@@ -3,7 +3,7 @@
 // part is src/engine/smoke.js (one draw call); positions come from layout.js.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, MOSQUE, SUQS, lots } from './layout.js';
+import { RADIUS, MOSQUE, ALL_SUQS as SUQS, HAMMAM_RECT, KHAN_RECT, WORKSHOPS, lots } from './layout.js';
 
 const ID = 'abbasid-baghdad';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -16,6 +16,10 @@ export function emitters() {
     if (r() < 0.16) E.push({ p: [x0 + (x1 - x0) * (0.2 + 0.6 * r()), top, z0 + (z1 - z0) * (0.2 + 0.6 * r())], kind: 'kitchen', thr: 0.3 + 0.5 * r(), seed: l.seed + 1 });
   }
   for (const s of SUQS) { E.push({ p: [s.rect[0] + 2, 4.6, s.rect[1] + 1.5], kind: 'kitchen', thr: 0.05, seed: Math.round(s.rect[0]) }); E.push({ p: [s.rect[2] - 2, 4.6, s.rect[3] - 1.5], kind: 'steam', thr: 0.2, seed: Math.round(s.rect[3]) }); }
+  // the hammam's furnace chimney and steam, the bakers' and smiths' fires, the khan's cooking
+  E.push({ p: [(HAMMAM_RECT[0] + HAMMAM_RECT[2]) / 2 + 2, 6.4, HAMMAM_RECT[1] + 3], kind: 'steam', thr: 0.1, seed: 41 }, { p: [(HAMMAM_RECT[0] + HAMMAM_RECT[2]) / 2 - 3, 6.2, HAMMAM_RECT[3] - 3], kind: 'kitchen', thr: 0.05, seed: 42 });
+  for (const w of WORKSHOPS) if (w.kind !== 'perfumer') E.push({ p: [(w.rect[0] + w.rect[2]) / 2 + 1, 6.0, (w.rect[1] + w.rect[3]) / 2 + 2], kind: 'kitchen', thr: 0, seed: Math.round(w.rect[0]) });
+  E.push({ p: [(KHAN_RECT[0] + KHAN_RECT[2]) / 2 - 12, 7.0, KHAN_RECT[1] + 8], kind: 'kitchen', thr: 0.2, seed: 43 });
   E.push({ p: [(MOSQUE[0] + MOSQUE[2]) / 2 + 6, 1.4, (MOSQUE[1] + MOSQUE[3]) / 2 - 12], kind: 'incense', thr: 0.1, seed: 31 });
   return E;
 }
