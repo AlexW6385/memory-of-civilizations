@@ -7,7 +7,7 @@
 // Local frame of a house: u along the street, v from the street into the lot (v < 0 is the street); F is houses.js's frame().
 import { box, lathe, fromTriangles, addCloth, clothBox, place } from '../../core/geom.js';
 import { rng } from './kit.js';
-import { palm } from '../egyptian/objects.js';
+import { nkPalm } from './palm.js';
 
 const POT = (r, k = 1) => [[0.001, 0], [r * 0.45, 0.02], [r, r * k], [r * 0.9, r * 1.8 * k], [r * 0.5, r * 2.3 * k], [r * 0.56, r * 2.45 * k], [0.001, r * 2.45 * k]];
 const WALL_MATS = ['mud_plaster', 'limewash_white', 'mudbrick'];
@@ -213,7 +213,7 @@ export function props(el, ctx) {
         break;
       case 'palm':                                                                                               // a date palm in its ring of mud brick
         B('mud_plaster', -0.9, 0, -0.9, 0.9, 0.3, -0.7); B('mud_plaster', -0.9, 0, 0.7, 0.9, 0.3, 0.9); B('mud_plaster', -0.9, 0, -0.7, -0.7, 0.3, 0.7); B('mud_plaster', 0.7, 0, -0.7, 0.9, 0.3, 0.7);
-        palm({ at: [x, z], y, h: it.h ?? 7, lean: 0.05, seed: it.seed ?? 3 }, ctx);
+        nkPalm({ at: [x, z], y, h: it.h ?? 7, lean: 0.05, seed: it.seed ?? 3 }, ctx, 2);
         break;
       default: break;
     }

@@ -76,6 +76,11 @@ const PROPS = {
 export function workshop(el, ctx) {
   const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D, th = 0.4, H = 3.2, wm = WALLS[Math.floor(rand() * WALLS.length)];
   const yardV = 7.6;
+  if (el.simple) {                                                                  // the far version: the yard's walls, the rear block, the roof
+    F.b(wm, 0, 0, 0, W / 2 - 1.2, 1.1, th); F.b(wm, W / 2 + 1.2, 0, 0, W, 1.1, th); F.b(wm, 0, 0, th, th, 2.4, yardV); F.b(wm, W - th, 0, th, W, 2.4, yardV);
+    F.b(wm, 0, 0, yardV, W, H, D); F.b('reed_mat', 0.5, 2.4, 1.0, Math.min(W - 0.5, 5.7), 2.47, 3.8, false);
+    roof(F, rand, H, null, false, [0, yardV, W, D], true); return;
+  }
   // the yard: open to the street through a wide gate between two stout posts; low walls at the sides, the street front a low wall with the gap
   F.b(wm, 0, 0, 0, W / 2 - 1.2, 1.1, th); F.b(wm, W / 2 + 1.2, 0, 0, W, 1.1, th); F.b(wm, 0, 0, th, th, 2.4, yardV); F.b(wm, W - th, 0, th, W, 2.4, yardV);
   for (const s of [-1, 1]) F.b('palm_trunk', W / 2 + s * 1.3 - 0.15, 0, -0.08, W / 2 + s * 1.3 + 0.15, 2.6, 0.2, false);
