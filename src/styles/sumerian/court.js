@@ -5,7 +5,7 @@
 // for the beasts of the offering, stacks of fuel, jars of water on their stands, date palms in brick-edged pits.
 // el.rect = the court. All small things are detail; the colliders are for the large ones.
 
-import { box, lathe, fromTriangles } from '../../core/geom.js';
+import { box, lathe, fromTriangles, frustum } from '../../core/geom.js';
 import { beamTris } from '../ming/index.js';
 import { palm } from '../egyptian/objects.js';
 import { crescent } from './index.js';
@@ -120,6 +120,13 @@ export function courtDress(el, { bag, col, lights }) {
       for (let i = 0; i < n; i++) { const zc = z0 + (i + 0.5) * run; B('opening', sx < 0 ? fx : fx - 0.03, 1.15, zc - 0.7, sx < 0 ? fx + 0.03 : fx, 3.9, zc + 0.7); B('brick_buff', sx < 0 ? fx : fx - 0.05, 3.9, zc - 0.85, sx < 0 ? fx + 0.05 : fx, 4.1, zc + 0.85); }
     }
     B('brick_buff', x0 - 1.4, 5.0, z0 - 1.4, x1 + 1.4, 5.32, z0 + 1.4); }
+  // ---- the dust: drifts of wind-blown silt banked at the feet of the walls and in the corners, bare of benches (the sand storms of the south)
+  { const dr = rng(8801);
+    for (const sx of [-1, 1]) for (let k = 0; k < 9; k++) {
+      const fx = sx < 0 ? x0 + 1.25 : x1 - 1.25, za = z0 + 3 + dr() * (z1 - z0 - 12), len = 1.6 + dr() * 3.4, dep = 0.6 + dr() * 0.5, hh = 0.14 + dr() * 0.14;
+      const r = sx < 0 ? [fx + 0.55, za, fx + 0.55 + dep, za + len] : [fx - 0.55 - dep, za, fx - 0.55, za + len];
+      bag.add('silt', frustum(r, y + tp - 0.01, y + tp + hh, 0.1, 0.1, 0.35, 0.35, { noBottom: true }));
+    } }
   // ---- the donkeys' loads set down by the fuel stack: sacks of grain, a rack of beer jars
   for (let k = 0; k < 9; k++) { const sx0 = -26.2 + (k % 3) * 0.62, sz0 = z0 + 24 + Math.floor(k / 3) * 0.5 + (k % 2) * 0.1, lay = k > 5 ? 1 : 0;
     B('sacking', sx0 - 0.28, y + tp + lay * 0.26, sz0 - 0.2, sx0 + 0.28, y + tp + lay * 0.26 + 0.3, sz0 + 0.2); }

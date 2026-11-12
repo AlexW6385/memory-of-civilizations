@@ -104,14 +104,14 @@ function skinDetail(bag, col, r, b, y0, h, i, cx, rand) {
  */
 function ziggurat(el, ctx) {
   if (el.front === 's') return ziggurat({ ...el, front: 'n' }, mirrored(ctx, el.c[1]));
-  const { bag, col } = ctx, [cx, cz] = el.c;
+  const { bag, col } = ctx, [cx, cz] = el.c, LIT = !!el.lit;       // lit: the Ur reading of the ziggurat (§4.1b) — deep buttresses, weathering, a white crown, gardens on the stages
   let y = el.y ?? 0;
   const tops = [];
   el.stages.forEach((s, i) => {
     const r = [cx - s.w / 2, cz + (s.dz ?? 0) - s.d / 2, cx + s.w / 2, cz + (s.dz ?? 0) + s.d / 2], b = s.batter ?? s.h * 0.12;   // dz: the upper stages set back
     const SK = ZIG_SKIN[i] || BB;                                          // the stage's facing: pale baked brick below, red above (lit well even against the low sun)
     bag.add(SK, frustum(r, y, y + s.h, b, b, b, b, { noBottom: true }));
-    buttresses(bag, r, y, s.h, b, 3.2, (px) => Math.abs(px - cx) < 5, SK, 0.9, 0.62);        // broad, deep buttresses: the recesses between them throw shadow and read from afar
+    buttresses(bag, r, y, s.h, b, 3.2, (px) => Math.abs(px - cx) < 5, SK, LIT ? 0.9 : 0.55, LIT ? 0.62 : 0.35);        // broad, deep buttresses: the recesses between them throw shadow and read from afar
     col.rect([r[0] + b * 0.4, r[1] + b * 0.4, r[2] - b * 0.4, r[3] - b * 0.4], y, y + s.h);
     col.floor([r[0] + b, r[1] + b, r[2] - b, r[3] - b], y + s.h);
     tops.push({ r, b, y0: y, y1: y + s.h });
@@ -133,7 +133,7 @@ function ziggurat(el, ctx) {
       }
     }
     if (stains.length) bag.add('plaster_streak', fromTriangles(stains));
-    skinDetail(bag, col, r, b, y0s, s.h, i, cx, rng(900 + i * 17));
+    if (LIT) skinDetail(bag, col, r, b, y0s, s.h, i, cx, rng(900 + i * 17));
     y += s.h;
   });
   const S0 = tops[0], fz = S0.r[1];                          // the front face (north)
@@ -153,18 +153,27 @@ function ziggurat(el, ctx) {
   }
   // the gatehouse at the head of the stairs, its way 5 m wide and 4.8 m high, the single stair going on up through it
   const gz = fz + S0.b + 1, GH = 6.2, gw = 2.6;
-  for (const sx of [-1, 1]) { const q = [Math.min(cx + sx * gw, cx + sx * 6.5), gz, Math.max(cx + sx * gw, cx + sx * 6.5), gz + 4]; bag.add(WH, box(q[0], S0.y1, q[1], q[2], S0.y1 + GH, q[3])); col.rect(q, S0.y1, S0.y1 + GH); col.floor(q, S0.y1 + GH); }
-  bag.add(WH, box(cx - gw, S0.y1 + 4.8, gz, cx + gw, S0.y1 + GH, gz + 4));
-  for (const sx of [-1, 1]) bag.add('glaze_lapis', box(Math.min(cx + sx * 2.6, cx + sx * 6.5) - 0.04, S0.y1 + GH - 0.9, gz - 0.04, Math.max(cx + sx * 2.6, cx + sx * 6.5) + 0.04, S0.y1 + GH - 0.3, gz));   // a band of blue glaze under the gatehouse's top col.floor([cx - gw, gz, cx + gw, gz + 4], S0.y1 + GH);
+  for (const sx of [-1, 1]) { const q = [Math.min(cx + sx * gw, cx + sx * 6.5), gz, Math.max(cx + sx * gw, cx + sx * 6.5), gz + 4]; bag.add(LIT ? WH : MP, box(q[0], S0.y1, q[1], q[2], S0.y1 + GH, q[3])); col.rect(q, S0.y1, S0.y1 + GH); col.floor(q, S0.y1 + GH); }
+  bag.add(LIT ? WH : MP, box(cx - gw, S0.y1 + 4.8, gz, cx + gw, S0.y1 + GH, gz + 4));
+  if (LIT) for (const sx of [-1, 1]) bag.add('glaze_lapis', box(Math.min(cx + sx * 2.6, cx + sx * 6.5) - 0.04, S0.y1 + GH - 0.9, gz - 0.04, Math.max(cx + sx * 2.6, cx + sx * 6.5) + 0.04, S0.y1 + GH - 0.3, gz));   // a band of blue glaze under the gatehouse's top col.floor([cx - gw, gz, cx + gw, gz + 4], S0.y1 + GH);
   bag.add('palm_trunk', box(cx - gw - 0.2, S0.y1 + 4.62, gz - 0.12, cx + gw + 0.2, S0.y1 + 4.8, gz + 0.3));
   // the stairs on up the second and third stages, each from the front edge of the stage below
   for (let i = 1; i < tops.length; i++) {
     const T = tops[i], P = tops[i - 1], foot = Math.max(P.r[1] + P.b + 0.6, i === 1 ? gz - 0.4 : -Infinity);
     stairs({ rect: [cx - 2.5, foot, cx + 2.5, T.r[1] + T.b + 0.3], y0: T.y0, y1: T.y1, dir: 's', mat: ZIG_SKIN[i] || BB }, { bag, col });
   }
+  // the gardens of the stages (§4.1b): Woolley suggested that trees and gardens were planted along the top; date palms in brick pits along the
+  // sides of the first two stages' tops, clear of the stairs, the gatehouse and the way to the shrine
+  if (LIT) { const pr = rng(777), pal = (px, pz, py, h, k) => { bag.add(BB, lathe([[0.95, 0], [0.95, 0.18], [0.78, 0.18], [0.78, 0]], 14, null, px, py, pz)); bag.add('silt', lathe([[0.001, 0.11], [0.78, 0.11], [0.78, 0.14], [0.001, 0.14]], 12, null, px, py, pz)); palm({ at: [px, pz], y: py, h, lean: (pr() - 0.5) * 0.014, seed: 400 + k }, { bag, col }); col.circle(px, pz, 0.45, py, py + 5); };
+    const [A, Bs] = [tops[0], tops[1]];
+    let k = 0;
+    for (const sx of [-1, 1]) {
+      for (const dz of [-11, -3.5, 4.5, 12.5]) pal(cx + sx * ((A.r[2] - cx) - A.b - 4.6), A.r[1] + A.b + 18 + dz, A.y1, 5.2 + pr() * 1.6, k++);
+      for (const dz of [-1.5, 6.5]) pal(cx + sx * ((Bs.r[2] - cx) - Bs.b - 2.0), (Bs.r[1] + Bs.r[3]) / 2 + dz, Bs.y1, 4.8 + pr() * 1.4, k++);
+    } }
   // the shrine of Nanna on the top stage (§4.2)
   const tz = (tops[tops.length - 1].r[1] + tops[tops.length - 1].r[3]) / 2;
-  shrine({ ...el.shrine, c: [cx, tz + 1], y: tops[tops.length - 1].y1 }, ctx);
+  shrine({ ...el.shrine, c: [cx, tz + 1], y: tops[tops.length - 1].y1, lit: LIT }, ctx);
 }
 
 /** The crescent of Nanna, horns up, a band from radius r1 to r0 and `depth` thick, its front at z, centred on (cx, cy). */
@@ -191,7 +200,7 @@ export function crescent(bag, cx, cy, z, r0, r1, depth, mat = 'gold', n = 14) {
  * mud on reed matting over palm-trunk beams. Front to the north (−z).
  */
 function shrine(el, { bag, col, lights }) {
-  const [cx, cz] = el.c, y = el.y, W = el.w ?? 14, D = el.d ?? 11, H = el.h ?? 5, t = 1.3, ti = 1.0;
+  const [cx, cz] = el.c, LIT = !!el.lit, WH = LIT ? 'limewash_white' : MP, y = el.y, W = el.w ?? 14, D = el.d ?? 11, H = el.h ?? 5, t = 1.3, ti = 1.0;
   const x0 = cx - W / 2, x1 = cx + W / 2, z0 = cz - D / 2, z1 = cz + D / 2, dw = 1.6, dh = 2.9;
   const zA = z0 + t + 3.0, zC = zA + ti;                                   // the cross wall between antecella and cella
   const wall = (r, y0 = y, y1 = y + H, m = WH) => { bag.add(m, box(r[0], y0, r[1], r[2], y1, r[3])); col.rect(r, y0, y1); };
@@ -205,7 +214,7 @@ function shrine(el, { bag, col, lights }) {
   for (const s of [-1, 1]) {
     const a = cx + s * dw / 2, b = cx + s * (dw / 2 + 2.0), r = [Math.min(a, b), z0 - 1.1, Math.max(a, b), z0];
     wall(r, y, y + TH); col.floor(r, y + TH);
-    bag.add('glaze_lapis', box(r[0] - 0.06, y + TH - 0.75, r[1] - 0.06, r[2] + 0.06, y + TH - 0.2, r[3]));            // a band of blue glazed brick under the tower's top
+    bag.add(LIT ? 'glaze_lapis' : MP, box(r[0] - 0.06, y + TH - (LIT ? 0.75 : 0.35), r[1] - 0.06, r[2] + 0.06, y + TH - 0.2, r[3]));            // a band under the tower's top (blue glazed brick in Ur's reading)
   }
   // the lintel of palm trunk over the doorway, deep in its reveal between the towers; the cedar doors, open
   const lt = []; beamTris(lt, [cx - dw / 2 - 0.25, y + dh, z0 - 0.5], [cx + dw / 2 + 0.25, y + dh, z0 - 0.5], 0.14, 0.24); bag.add('palm_trunk', fromTriangles(lt));
@@ -219,10 +228,10 @@ function shrine(el, { bag, col, lights }) {
   buttresses(bag, [x0, z0, x1, z1], y, H, 0, 2.2, (px, pz) => pz < z0 + 0.01 && Math.abs(px - cx) < dw / 2 + 2.6, WH, 0.4);
   // the blue glazed brick (docs/settlements/ur.md §4.2): a frieze under the parapet all round, a panel on each tower's face, and
   // above the roof the standard of Nanna, a pole bearing the gilded crescent, so that the house of the god reads from the court
-  for (const [a, b, c, d] of [[x0, z1, x1, z1 + 0.05], [x0 - 0.05, z0, x0, z1], [x1, z0, x1 + 0.05, z1], [x0, z0 - 0.05, cx - dw / 2 - 2.0, z0], [cx + dw / 2 + 2.0, z0 - 0.05, x1, z0]])
+  if (LIT) for (const [a, b, c, d] of [[x0, z1, x1, z1 + 0.05], [x0 - 0.05, z0, x0, z1], [x1, z0, x1 + 0.05, z1], [x0, z0 - 0.05, cx - dw / 2 - 2.0, z0], [cx + dw / 2 + 2.0, z0 - 0.05, x1, z0]])
     bag.add('glaze_lapis', box(a, y + H - 1.15, b, c, y + H - 0.55, d));
-  for (const s of [-1, 1]) { const a = cx + s * (dw / 2 + 0.4), b = cx + s * (dw / 2 + 1.6); bag.add('glaze_lapis', box(Math.min(a, b), y + 1.4, z0 - 1.14, Math.max(a, b), y + TH - 1.0, z0 - 1.1)); }
-  { const px = cx, pz = z0 + 0.9, top = y + H + 4.0;
+  if (LIT) for (const s of [-1, 1]) { const a = cx + s * (dw / 2 + 0.4), b = cx + s * (dw / 2 + 1.6); bag.add('glaze_lapis', box(Math.min(a, b), y + 1.4, z0 - 1.14, Math.max(a, b), y + TH - 1.0, z0 - 1.1)); }
+  if (LIT) { const px = cx, pz = z0 + 0.9, top = y + H + 4.0;
     bag.add('bronze', lathe([[0.08, 0], [0.06, 0.3], [0.035, 4.4]], 8, null, px, y + H, pz));
     crescent(bag, px, top + 1.2, pz - 0.1, 1.2, 0.85, 0.2); }
   // the parapet round the roof, the roof itself: mud over reed mats over palm trunks
@@ -470,6 +479,12 @@ function gateTower(el, { bag, col }) {
   bag.add(m, box(over[0], dh, over[1], over[2], h, over[3])); col.rect(over, dh, h); col.floor(over, h);
   bag.add(BB, frustum(over, -0.3, 0.1, 0, 0, 0, 0, { noBottom: true })); col.floor(over, 0.1);
   buttresses(bag, [x0, z0, x1, z1], -0.3, h + 0.3, 0, 2.6, (px, pz) => (ns ? Math.abs(px - c) < w / 2 + 0.8 : Math.abs(pz - c) < w / 2 + 0.8));
+  // a frieze of blue glazed brick under the coping on the faces with the doors, above the doorways' heads (§4.1b), and the coping itself
+  if (el.glaze) {
+    bag.add('brick_buff', box(x0 - 0.12, h - 0.1, z0 - 0.12, x1 + 0.12, h + 0.3, z1 + 0.12));
+    for (const [fz0, fz1] of ns ? [[z0 - 0.04, z0], [z1, z1 + 0.04]] : [[z0, z1]]) if (ns) { bag.add('glaze_lapis', box(x0 + 0.5, h - 1.5, fz0, x1 - 0.5, h - 0.7, fz1)); }
+    if (!ns) for (const [fx0, fx1] of [[x0 - 0.04, x0], [x1, x1 + 0.04]]) bag.add('glaze_lapis', box(fx0, h - 1.5, z0 + 0.5, fx1, h - 0.7, z1 - 0.5));
+  }
   // the doors, standing open against the passage walls a little way in
   const e = ns ? z0 : x0;
   for (const sx of [-1, 1]) {
