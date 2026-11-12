@@ -4,6 +4,7 @@ import { bx, steps, canang, rng, pick } from './kit.js';
 import { wall, gate, shrine, padmasana, guardian } from './stone.js';
 import { bale, house, paon, lumbung } from './bale.js';
 import { shop } from './shops.js';
+import { banana } from './plants.js';
 import { lathe } from '../../core/geom.js';
 import { shrine as shrineOf } from './stone.js';
 
@@ -123,6 +124,16 @@ export function compound(el, ctx) {
     if (ju > 1.0 && ju < W - 1.0 && free(ju, 0.6)) { const p = P(ju, -0.45); ctx.bag.add('terracotta', lathe([[0.001, 0], [0.18, 0.02], [0.26, 0.22], [0.2, 0.44], [0.14, 0.5]], 8, null, p[0], y, p[1])); }
     const tu = gateU + side * 3.6, tp = P(tu, 1.5);
     if (el.penjor !== false && tu > 1.2 && tu < W - 1.2 && free(tu, 0.8) && !el.shop) shrineOf({ c: [tp[0], tp[1]], y, kind: 'small' }, ctx);
+  }
+  // banana clumps in the front strip of the natah, their leaves showing over the street wall (two on a rich compound, one on the others); clear of the gate, the shrine by it and the shop
+  {
+    const spots = [], want = rich ? 2 : 1;
+    for (let k = 0; k < 12 && spots.length < want; k++) {
+      const u = 1.6 + rand() * (W - 3.2);
+      if (Math.abs(u - gateU) < 4.8 || (el.shop && u > el.shop.u0 - 1.8 && u < el.shop.u1 + 1.8) || spots.some((q) => Math.abs(q - u) < 3.2)) continue;
+      spots.push(u);
+    }
+    spots.forEach((u, i) => { const p = P(u, 1.4 + rand() * 0.7); banana({ at: p, y, seed: el.seed + 17 * i, n: 3 + (i % 2), h: 2.7 + rand() * 0.8 }, ctx); });
   }
   // the lamak, a strip of palm-leaf and cloth hung from the gate's lintel on the street side
   { const lp = P(gateU, -0.2), lr = P(gateU + 0.22, -0.17); bx(ctx, 'cloth_ochre', Math.min(lp[0], lr[0]) - 0.01, y + 1.6, Math.min(lp[1], lr[1]) - 0.01, Math.max(lp[0], lr[0]) + 0.01, y + 2.55, Math.max(lp[1], lr[1]) + 0.01); }
