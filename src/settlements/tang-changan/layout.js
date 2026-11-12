@@ -226,3 +226,11 @@ export const GALLERIES = [
   ...[-1, 1].map((s) => ({ c: [DAO_AX + s * 62, -66], w: 62, face: s < 0 ? 'e' : 'w' })),
   ...[-1, 1].map((s) => ({ c: [DAO_AX + s * 62, -145], w: 36, face: s < 0 ? 'e' : 'w' })),
 ];
+
+/** Where one arrives (the pagoda court, west of the main hall): the sight line from there to the pagoda must stay clear of crowns. */
+export const ARRIVE = [DACI_AX - 35, DACI.rect[1] + 87];
+/** The distance from (x, z) to the sight line from the arrival to the pagoda's foot (0 if on it). */
+export const sightDist = (x, z) => {
+  const [ax, az] = ARRIVE, vx = PAGODA[0] - ax, vz = PAGODA[1] - az, t = Math.max(0, Math.min(1, ((x - ax) * vx + (z - az) * vz) / (vx * vx + vz * vz)));
+  return Math.hypot(x - (ax + vx * t), z - (az + vz * t));
+};

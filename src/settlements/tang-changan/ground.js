@@ -2,7 +2,7 @@
 // locusts planted along them, the wards' lanes of earth, the temples' brick courts, the market's lanes; locusts, elms and jujubes in
 // the courts of the houses, cypresses and pines in the temples, peach trees in the Daoist temple's court; wheat beyond the wards.
 
-import { RADIUS, AVE, DITCH, STREETS, WARDS, DACI, DAOIST, MARKET, MARKET_BLOCKS, OFFICE, DACI_AX, DAO_AX, inRect, inDitch, onStreet, onLane, onMarketLane, lotAt, smooth as sm, inWard, TREE_ROWS, marketYards } from './layout.js';
+import { RADIUS, AVE, DITCH, STREETS, WARDS, DACI, DAOIST, MARKET, MARKET_BLOCKS, OFFICE, DACI_AX, DAO_AX, inRect, inDitch, onStreet, onLane, onMarketLane, lotAt, smooth as sm, inWard, TREE_ROWS, marketYards, DACI_MAIN, sightDist } from './layout.js';
 
 function height(x, z) {
   const r = Math.hypot(x, z);
@@ -59,6 +59,9 @@ function planting(x, z) {
     if (Math.abs(x - DACI_AX) < 10) return null;
     if (inRect([DACI_AX - 26, z0, DACI_AX + 26, z0 + 80], x, z)) return null;                       // the pagoda's platform
     if (z < z0 + 4 || z > z1 - 4 || x < x0 + 4 || x > x1 - 4) return null;
+    // the sight line from the arrival to the pagoda is kept clear of crowns; a file of cypresses stands by the sutra hall's court as a frame at its left
+    if (sightDist(x, z) < 13) return { grass: 4 };
+    if (x > DACI_AX - 45 && x < DACI_AX - 36 && z > DACI_MAIN[1] - 22 && z < DACI_MAIN[1] - 6) return { cypress: 0.5, grass: 4 };
     return { cypress: 0.09, chinese_pine: 0.09, pagoda_tree: 0.06, grass: 4 };
   }
   if (ward.kind === 'daoist') {
@@ -77,7 +80,7 @@ void MARKET; void MARKET_BLOCKS; void OFFICE; void DACI; void DAOIST; void TREE_
 
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { willow: 0.6, pagoda_tree: 3.2, jujube: 0.14, persimmon: 0.1, elm: 0.06, cypress: 0.09, chinese_pine: 0.1, apple: 0.7, wheat: 100 },
+  maxDensity: { willow: 0.6, pagoda_tree: 3.2, jujube: 0.14, persimmon: 0.1, elm: 0.06, cypress: 0.5, chinese_pine: 0.1, apple: 0.7, wheat: 100 },
   climate: {
     sun: { az: 160, el: 50, color: [1.0, 0.95, 0.86], intensity: 3.1, lat: 34.3, dec: 5, hour: 10.5 },
     sky: { turbidity: 5.0, rayleigh: 1.1, mie: 0.008, mieG: 0.82, zenith: [0.12, 0.19, 0.34], horizon: [0.72, 0.69, 0.62] },
