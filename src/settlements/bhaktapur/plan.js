@@ -37,7 +37,7 @@ const rooms = [
   room('taumadhi', SQ, 0.05, 'open'),
   room('pottery', POT, 0, 'open'),
 ];
-const walks = [[[12, 6], [4, 14], [19, 22], [19, 28], [10, 6], [28, 8], [10, 22]]];
+const walks = [[[12, 6], [4, 14], [19, 22], [19, 28], [10, 6], [14, 9], [22, 9.5], [28, 8], [10, 22]]];
 walks[0].y0 = 0;
 
 export const taumadhi = {

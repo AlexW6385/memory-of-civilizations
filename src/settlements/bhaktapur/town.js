@@ -3,7 +3,7 @@
 // the potters at their wheels, the market's sellers and buyers, women with water pots and baskets, children, dogs, a cow or two.
 
 import { RADIUS, lots, PAVED, SQ, POT, KEEP, HOUSE, STALLS, inRect, onStreet, inLot, STREETS, fp, frontRot, NYA } from './layout.js';
-import { POT_WHEELS, POT_KILNS } from './plan.js';
+import taumadhi, { POT_WHEELS, POT_KILNS } from './plan.js';
 import './../../styles/newar/index.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -33,7 +33,9 @@ export async function town() {
   out.push(base('bhaktapur-courts', 'newar', courts));
   // the people
   const { man, woman } = newar(rand), P = [];
-  const free = (x, z, m = 1.3) => !KEEP.some((k) => inRect(k, x, z, m)) && !inLot(x, z, 0.6) && !inRect(HOUSE.rect, x, z, 0.6) && !STALLS.some(([sx, sz]) => Math.hypot(x - sx, z - sz) < 2) && !P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 1.3) && !POT_KILNS.some(([kx, kz]) => Math.hypot(x - kx, z - kz) < 5);
+  // the walk-check's routes are kept clear of figures (they stand as obstacles)
+  const nearRoute = (x, z) => taumadhi.walks.some((w) => w.some((a, i) => { if (!i) return false; const b = w[i - 1], dx = a[0] - b[0], dz = a[1] - b[1], t = Math.max(0, Math.min(1, ((x - b[0]) * dx + (z - b[1]) * dz) / (dx * dx + dz * dz || 1))); return Math.hypot(x - b[0] - dx * t, z - b[1] - dz * t) < 1.4; }));
+  const free = (x, z, m = 1.3) => !nearRoute(x, z) && !KEEP.some((k) => inRect(k, x, z, m)) && !inLot(x, z, 0.6) && !inRect(HOUSE.rect, x, z, 0.6) && !STALLS.some(([sx, sz]) => Math.hypot(x - sx, z - sz) < 2) && !P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 1.3) && !POT_KILNS.some(([kx, kz]) => Math.hypot(x - kx, z - kz) < 5);
   const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));
   // the potters at their wheels (seated north of each wheel, facing it), and the pot-sellers by the drying ground
   for (const [x, z] of POT_WHEELS) P.push(man([x + 0.1, z - 0.55], 0, Math.PI, { pose: 'sit_low', hat: 'cap', hatMat: 'cloth_ochre', hair: 'short' }));

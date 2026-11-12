@@ -86,7 +86,7 @@ export function pagoda(el, { bag, col, lights }) {
       const t = 0.7, dw = 0.75, ch = el.chamber, c = q.core, y0 = yb;
       const wl = (u0, v0, u1, v1, y1 = ye) => { const r = rect(u0, v0, u1, v1); bag.add('brick', box(r[0], y0, r[1], r[2], y1, r[3])); col.rect(r, y0 - 1, y1); };
       wl(-c, -c, -c + t, c); wl(-c, -c, c, -c + t); wl(-c, c - t, c, c);
-      wl(c - t, -c, c, -dw); wl(c - t, dw, c, c); wl(c - t, -dw, c, dw, ye);
+      wl(c - t, -c, c, -dw); wl(c - t, dw, c, c);
       { const r = rect(c - t, -dw, c, dw); bag.add('brick', box(r[0], y0 + 2.1, r[1], r[2], ye, r[3])); }
       { const r = rect(-c + t, -c + t, c - t, c - t); bag.add('wood_dark', box(r[0], ye - 0.25, r[1], r[2], ye, r[3])); }
       // within: the image of Bhairab on a stone seat (a gilt head with a crown, great eyes, a garland), a lamp, a bell, offerings
