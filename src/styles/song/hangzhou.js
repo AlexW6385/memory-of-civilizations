@@ -1123,6 +1123,8 @@ function hzTree(el, { bag, col }) {
   const cr = spec.cr * h, centre = [cx, cy + cr * 0.1, cz];
   const lobes = [...limbEnds.map((e) => [e[0], e[1], e[2]]), ...limbEnds.map((e) => [fx + (e[0] - fx) * 0.5, fy + (e[1] - fy) * 0.62, fz + (e[2] - fz) * 0.5]), [cx, cy + cr * 0.6, cz]];
   const coreMat = kind === 'ginkgo' ? 'palm_leaf' : 'flax_leaf';
+  // the lobe over the fork stands on a leader carried up from the fork through the crown, so that no lobe of the crown hangs free of the wood
+  if (kind !== 'willow') bag.add('bark_grey', rod([fx, fy - 0.1, fz], [cx, cy + cr * 0.45, cz], trunkR * 0.32, 5));
   const R = cr * (kind === 'willow' ? 0.75 : 0.9), per = Math.round(kind === 'peach' ? 60 : kind === 'willow' ? 90 : 200 * (R / 3) ** 2 + 60);
   for (const [lx, ly, lz] of lobes) {
     const ry = R * (kind === 'willow' ? 0.8 : 0.85);
