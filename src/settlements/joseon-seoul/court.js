@@ -50,6 +50,9 @@ export function courtPlans() {
     fig(x + Math.sin(rot) * -1.7, z - Math.cos(rot) * -0.6, rot + Math.PI, { dress: 'trousers', cloth: 'cloth_white', cloth2: 'linen', hair: 'topknot', hat: k % 2 ? 'none' : 'straw', hatMat: 'thatch', carry: 'staff', pose: 'staff', len: 1.2, staffMat: 'timber', h: 1.6, over: 'none' });
   });
   for (const [x, z] of [[-34, 114], [-33, 115.2], [36, 112], [37, 113.3]]) fig(x, z, x < 0 ? 1.6 : -1.6, { dress: 'trousers', cloth: 'cloth_white', cloth2: 'linen', hair: 'topknot', hat: 'none', pose: 'squat', over: 'none' });
+  // the gate guards, two by two, spears grounded: before Geunjeongmun, facing south, and before Gwanghwamun, facing the avenue
+  const gd = (x, z) => fig(x, z, Math.PI, { cloth: 'cloth_indigo', cloth2: 'cloth_red', hat: 'brim', hatMat: 'cloth_black', pose: 'staff', carry: 'staff', len: 2.6, staffMat: 'timber', h: 1.66 + rand() * 0.08 });
+  for (const sx of [-1, 1]) { gd(sx * 4.2, 97.5); gd(sx * 6.0, 97.5); gd(sx * 10.5, 246); gd(sx * 5.2, 246); }
   // the guards at the Heungnyemun gate, outside it, facing the stream
   for (const sx of [-1, 1]) for (const dx of [3.6, 6.4]) fig(sx * dx, 165, 0, { cloth: 'cloth_indigo', cloth2: 'cloth_red', hat: 'brim', hatMat: 'cloth_black', pose: 'staff', carry: 'staff', len: 2.6, staffMat: 'timber', h: 1.7 + rand() * 0.06 });
   // the Geumcheon below Yeongjegyo: ducks on the water
