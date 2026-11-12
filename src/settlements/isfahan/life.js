@@ -49,6 +49,60 @@ export function life() {
   for (const [x, z] of [[9, BAZAAR.z1 - 6], [10.5, BAZAAR.z1 - 8]]) L.push({ t: 'animal', kind: 'donkey', at: [x, z], y: 0.04, rot: Math.PI * 0.9, seed: Math.floor(rand() * 1e9), gear: true });
   // water carriers (saqqa) at the canal, the waterskin on the back; a porter crossing the square
   for (const [x, z] of [[sx0 + CANAL + 2.2, -120], [sx1 - CANAL - 2.2, 40], [sx0 + CANAL + 2.2, 150]]) person([x, z], x < 0 ? -Math.PI / 2 : Math.PI / 2, { man: true, carry: 'bundle', loadCloth: 'hide_brown', cloth: 'cloth_brown', cloth2: 'cloth_white' });
+  // the maidan on a market day (docs/settlements/isfahan.md §5; Chardin, Della Valle, Kaempfer: stalls, tents and mats spread over the
+  // square, hawkers, storytellers, horses and carts, the polo ground cleared for the match): three rows of awninged stalls across the field
+  // before the Shah Mosque's portal with an aisle left down its axis, the sellers behind them and buyers before, goods mats between the
+  // rows, carts and laden animals standing at the sides, groups strolling the whole length
+  const WARES = [['heap', 'baskets'], ['bread', 'heap'], ['greens', 'melons'], ['pottery', 'pottery'], ['bolts', 'baskets'], ['spice', 'heap'], ['melons', 'greens'], ['bolts', 'bolts']];
+  const AWN = ['cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_indigo', 'cloth_green'], sd = () => Math.floor(rand() * 1e9);
+  let wi = 0;
+  for (const [zr, dx] of [[188, 0], [203, 4.5], [219, 0], [234, 4.5]]) for (let x = -56 + dx; x <= 56; x += 9) {
+    if (Math.abs(x) < 7.5 || rand() < 0.14) continue;
+    const g = WARES[wi++ % WARES.length], xx = x + (rand() - 0.5) * 1.2;
+    L.push({ t: 'stall', at: [xx, zr], y: 0.04, rot: Math.PI, seed: sd(), awning: pick(AWN), goods: g, w: 2.6, d: 1.3 });
+    person([xx + 0.2, zr + 1.2], 0, { man: true, pose: rand() < 0.5 ? 'talk' : 'stand' });
+    for (let k = rand() < 0.35 ? 0 : 1; k < 2 + (rand() < 0.5 ? 1 : 0); k++) person([xx + (k - 1.4) * 1.1 + (rand() - 0.5) * 0.6, zr - 1.8 - rand() * 1.2], Math.PI + (rand() - 0.5) * 0.8, { pose: rand() < 0.5 ? 'talk' : 'stand' });
+  }
+  // goods mats on the ground in the lanes between the rows: a seller seated, the wares before him, a buyer crouched or standing
+  for (const zr of [196, 211, 226]) for (let x = -50; x <= 50; x += 12.5) {
+    if (Math.abs(x) < 8 || rand() < 0.3) continue;
+    const xx = x + (rand() - 0.5) * 3;
+    L.push({ t: 'goods_mat', at: [xx, zr], y: 0.04, rot: Math.PI, seed: sd(), goods: pick(WARES), mat: 'reed_mat' });
+    person([xx, zr + 0.95], 0, { man: true, pose: 'sit_ground' });
+    if (rand() < 0.6) person([xx + (rand() - 0.5), zr - 1.5], Math.PI + (rand() - 0.5) * 0.6, { pose: 'stand' });
+  }
+  // carts, laden donkeys and camels waiting at the sides of the market, their drivers beside them
+  for (const [x, z, k] of [[-61, 196, 'ox'], [60, 212, 'donkey'], [-60, 228, 'donkey'], [62, 192, 'ox']]) {
+    L.push({ t: 'cart', kind: 'two', load: 'sacks', beast: k, at: [x, z], y: 0.04, rot: x < 0 ? Math.PI / 2 : -Math.PI / 2, seed: sd() });
+    person([x + (x < 0 ? 3.4 : -3.4), z + 1.4], rand() * 6.28, { man: true, pose: 'stand', cloth: 'cloth_brown' });
+  }
+  for (const [x, z] of [[-63, 207], [-63, 209.2], [63, 222], [64.5, 224], [-62, 238]]) L.push({ t: 'animal', kind: 'donkey', at: [x, z], y: 0.04, rot: x < 0 ? Math.PI / 2 : -Math.PI / 2, seed: sd(), gear: true });
+  for (let k = 0; k < 3; k++) L.push({ t: 'animal', kind: 'camel', at: [-58 + k * 3.4, 242 + (k % 2) * 2], y: 0.04, rot: Math.PI + (rand() - 0.5) * 0.5, seed: sd(), gear: k !== 1 });
+  // horses with their riders' grooms on the aisle's edge, a few more held at the south end before the portal
+  for (let k = 0; k < 5; k++) { const x = (k % 2 ? 1 : -1) * (9 + k * 0.7), z = 183 + k * 12; L.push({ t: 'animal', kind: 'horse', at: [x, z], y: 0.04, rot: rand() * 6.28, seed: sd(), gear: true }); person([x + 1.0, z + 0.4], rand() * 6.28, { man: true, pose: 'stand', cloth: 'cloth_red', hatMat: 'cloth_red' }); }
+  // strollers, in pairs and threes, from the arrival down the field and along the walks: not on the aisle's axis within 6 m of the visitor
+  for (let k = 0; k < 34; k++) {
+    const x = (rand() - 0.5) * 120, z = 150 + rand() * 98;
+    if (Math.hypot(x, z - 170) < 6) continue;
+    person([x, z], rand() < 0.5 ? 0 : Math.PI, { pose: rand() < 0.4 ? 'talk' : 'stand' });
+  }
+  // the near ground: a storyteller (naqqal) with his circle of listeners seated, goods mats at the two sides, a water seller with his skin
+  { const cx = 11, cz = 181; person([cx, cz], -Math.PI / 2, { man: true, pose: 'talk', cloth: 'cloth_indigo', cloth2: 'cloth_white' }); for (let k = 0; k < 7; k++) { const a = 1.8 + k * 0.62; person([cx + 3.2 * Math.cos(a) + 1.5, cz + 2.6 * Math.sin(a)], a + Math.PI, { pose: k % 3 === 0 ? 'cross' : 'sit_ground' }); } }
+  for (const [x, z] of [[-9, 183], [-13.5, 179]]) { L.push({ t: 'goods_mat', at: [x, z], y: 0.04, rot: Math.PI, seed: sd(), goods: pick(WARES), mat: 'reed_mat' }); person([x, z + 0.95], 0, { man: true, pose: 'sit_ground' }); }
+  person([-5.2, 176], 0.6, { man: true, carry: 'bundle', loadCloth: 'hide_brown', cloth: 'cloth_brown', cloth2: 'cloth_white' });
+  // the arcades' fronts, bay by bay from the mosque's end to the Qeysarieh's side of the gap at z 117–123: the shopkeepers' goods spilling onto
+  // the walk (bales, jars, carpets hung on lines, baskets, copper), a seller on his mat, a customer, a stall awning here and there
+  const nab = Math.round((sz1 - 123) / 7), bw2 = (sz1 - 123) / nab;
+  for (const sdx of [-1, 1]) for (let i = 0; i < nab; i++) {
+    const zc = 123 + (i + 0.5) * bw2, xw = sdx * (-sx0 - 2.3), face = sdx < 0 ? -Math.PI / 2 : Math.PI / 2, u = rand();
+    if (zc > sz1 - 14) continue;
+    if (u < 0.3) L.push({ t: 'stall', at: [sdx * (-sx0 - 5.6), zc], y: 0.04, rot: sdx < 0 ? Math.PI / 2 * -1 + Math.PI : Math.PI / 2 * -1, seed: sd(), awning: pick(AWN), goods: pick(WARES), w: 2.6, d: 1.3 });
+    else if (u < 0.5) L.push({ t: 'laundry', len: 3.4, at: [xw + sdx * 0.2, zc], y: 0.1, rot: face + Math.PI / 2, seed: sd() });
+    else if (u < 0.7) { L.push({ t: 'pot', kind: pick(['pithos', 'water_pot']), n: 3, at: [xw, zc - 1.6], rot: 0, seed: sd() }); L.push({ t: 'basket', n: 2, at: [xw, zc + 1.6], rot: 0, seed: sd() }); }
+    else if (u < 0.85) L.push({ t: 'sacks', n: 3, at: [xw, zc + 1.4], rot: face, seed: sd() });
+    else L.push({ t: 'crates', n: 2, at: [xw, zc - 1.4], rot: face, seed: sd() });
+    if (rand() < 0.55) person([sdx * (-sx0 - 4.4), zc + (rand() - 0.5) * 2.4], face + Math.PI + (rand() - 0.5), { pose: rand() < 0.5 ? 'talk' : 'stand' });
+  }
   // the open house: the master of the house on the talar's carpet, a servant in the court
   { const [x0, z0, x1, z1] = OPEN_HOUSE().rect, cx = (x0 + 3.6 + x1 - 3.8) / 2; person([cx - 1.4, z0 + 1.9], Math.PI, { man: true, pose: 'cross', y: 0.47, cloth: 'cloth_green', cloth2: 'cloth_white' }); person([x1 - 4.6, z1 - 4.4], Math.PI / 2, { man: true, cloth: 'cloth_white' }); }
   return L;

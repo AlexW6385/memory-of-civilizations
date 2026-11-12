@@ -10,6 +10,7 @@ import { box, frustum, lathe, fromTriangles, rod, orientOutward } from '../../co
 import { relief, strip, rosette } from './reliefs.js';
 import { jambScene } from './throne.js';
 import { fortification, guardGear, gift } from './fort.js';
+import { terracePaving, towerDress } from './court.js';
 import { house, workshops, streetChannel, flagApron, gardenPlot } from './town.js';
 import '../qing/index.js';
 import { scribeKit } from '../sumerian/house.js';
@@ -279,6 +280,7 @@ function hall(el, { bag, col }) {
     const t = el.towers, q = [cx - t / 2, cz - t / 2, cx + t / 2, cz + t / 2];
     bag.add(W, box(q[0], el.y ?? 0, q[1], q[2], y + h + 3, q[3])); col.rect(q, el.y ?? 0, y + h + 3);         // from the terrace: they stand out past the plinth
     if (!el.simple) merlons(bag, [q[0], q[1]], [q[2], q[1]], y + h + 3, 1.6, 1.2, W), merlons(bag, [q[0], q[3]], [q[2], q[3]], y + h + 3, 1.6, 1.2, W);
+    if (!el.simple) towerDress({ q, y0: el.y ?? 0, y1: y + h + 3 }, { bag });
   }
   // the main beams lying in the capitals' saddles (across the bulls), then the cedar ceiling and a flat earth roof over all, porticoes included
   if (!el.simple) {
@@ -789,6 +791,6 @@ function audience(el, { bag, col }) {
 
 registerStyle('achaemenid', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, terrace, hall, lamassu_gate: gate, audience, persian_house: house, street_channel: streetChannel, flag_apron: flagApron, garden_plot: gardenPlot, royal_workshops: workshops, apadana_stair: apadanaStair, treasury, fortification, guard_gear: guardGear, gift },
+  elements: { ...STYLES.qing.elements, terrace, hall, lamassu_gate: gate, audience, persian_house: house, street_channel: streetChannel, flag_apron: flagApron, garden_plot: gardenPlot, royal_workshops: workshops, apadana_stair: apadanaStair, treasury, fortification, guard_gear: guardGear, gift, terrace_paving: terracePaving, tower_dress: towerDress, scribe_kit: scribeKit },
   objects: {},
 });

@@ -152,3 +152,6 @@ Sources added:
 - [The Throne Hall — ISAC, University of Chicago](https://isac.uchicago.edu/node/2900)
 - [Persepolis, Hall of 100 Columns — Livius](https://livius.org/articles/place/persepolis/persepolis-photos/persepolis-hall-of-100-columns)
 - [An Achaemenid God in Color — Heritage (MDPI) 7(1):1](https://www.mdpi.com/2571-9408/7/1/1/html)
+
+## 17. A court day before the Apadana (fix pass)
+- [stated] The Apadana's reliefs show the delegations of the empire led by ushers, bearing vessels and leading animals, and Persian guards stand along the stairways; the court received tribute at the Nowruz festival. [inferred] The court west of the Apadana (the visitor's side) is shown in use: three delegations walking east to be received, guards at the stair's foot, scribes at mats (clay tablets for Elamite, leather scrolls for Aramaic), grooms holding horses, courtiers waiting. [inferred] A west stair with relief wings (the visitor's approach to the west porch), slab joints and stone-cut drains in the terrace paving, and a stone socle with a painted band and cornice on the Apadana's corner towers dress the plain surfaces.

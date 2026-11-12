@@ -23,10 +23,15 @@ E.push({ t: 'terrace', rect: TERRACE.rect, y0: -1, y1: T, gaps: [[tx0 - 2, STAIR
   }
   E.push({ t: 'block', rect: [x0 + w, z - 4, tx0, z + 4], y0: 0, y1: T, mat: 'limestone_persian', walk: true });
 }
+// the paving of the court between the stair and the Apadana: slabs, and the stone drains that carried the rain off the terrace
+E.push({ t: 'terrace_paving', rect: [-148, -140, -86, -20], y: T, drains: [[-148, -81.4, -86, -81.2], [-114, -140, -113.8, -20]] });
+// the scribes of the court seated at their mats by the stair, tablets drying beside them (the Aramaic scribes: leather scrolls)
+for (const [x, z, rot, scroll] of [[-100.5, -45.5, -Math.PI / 2, false], [-100.5, -43.5, -Math.PI / 2, true], [-107, -104, Math.PI / 2, true]]) E.push({ t: 'scribe_kit', at: [x, z], y: T, rot, scroll });
 // the Gate of All Nations
 E.push({ t: 'lamassu_gate', c: [-112, STAIR.z], s: 25, h: 17, y: T });
 // the Apadana on its 2.6 m plinth: 6 × 6 columns in the hall, porticoes north, west and east
-E.push({ t: 'hall', rect: [-60, -90, 0, -30], y: T, plinth: 2.6, h: 20, grid: [6, 6], porticoes: 'nwe', portDepth: 17, walls: 5, towers: 20, doors: 'nwe' });
+E.push({ t: 'hall', rect: [-60, -90, 0, -30], y: T, plinth: 2.6, h: 20, grid: [6, 6], porticoes: 'nwe', portDepth: 17, walls: 5, towers: 20, doors: 'nwe',
+  stairs: [{ face: 'w', W: 26, flight: 9, D: 6, wings: ['nobles', 'nobles'], c: -60 }] });   // the west porch's stair (the visitor's side) [inferred]
 E.push({ t: 'audience', c: [-30, -40], y: T + 2.75, dir: [0, -1], aisle: 44 });
 // its two stairways, north and east, with their reliefs: the nobles on the north, the delegations on the east stair's south wing
 E.push({ t: 'apadana_stair', face: 'n', line: -110, span: [-67, 7], c: -30, W: 32, D: 7.5, y: T, h: 2.6, wings: ['nobles', 'nobles'] });
