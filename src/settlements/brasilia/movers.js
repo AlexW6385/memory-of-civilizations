@@ -8,7 +8,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 52, night: 4, rain: 0.5, reach: 160, spawnMin: 26, far: 46 },
+  walkers: { day: 60, night: 4, rain: 0.5, reach: 160, spawnMin: 26, far: 46 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -4,
 };
@@ -69,6 +69,10 @@ export const WALKERS = [
     c1: [CL.white], c2: [CL.blue], c3: [CL.white, CL.black], speed: [1.2, 1.7], stride: 1.2, h: [0.78, 0.88] },
   { id: 'candango', weight: 1.2, market: 0.6, el: { dress: 'trousers', hair: 'short', hat: 'straw', over: 'belt', arms: 'hang' },
     c1: [CL.ochre, CL.brown, CL.grey, CL.green], c2: [CL.brown, CL.indigo], c3: [CL.brown, CL.black], speed: [1.0, 1.35], stride: 1.5 },
+  { id: 'sweeper', weight: 0.5, market: 0.3, el: { dress: 'trousers', hair: 'short', hat: 'cap', over: 'collar', carry: 'broom', arms: 'sweep' },
+    c1: [CL.ochre, CL.green], c2: [CL.grey, CL.brown], c3: [CL.black], speed: [0.6, 0.85], stride: 1.3 },
+  { id: 'vendor', weight: 0.6, market: 1.4, el: { dress: 'trousers', hair: 'short', hat: 'straw', over: 'apron', carry: 'basket', arms: 'hang' },
+    c1: [CL.white, CL.ochre], c2: [CL.brown, CL.indigo], c3: [CL.black, CL.brown], speed: [0.8, 1.1], stride: 1.3 },
   { id: 'nun', weight: 0.35, market: 0.5, el: { dress: 'robe', hair: 'short', hat: 'veil', over: 'none', arms: 'hang' },
     c1: [CL.white], c2: [CL.black], c3: [CL.black], speed: [0.9, 1.1], stride: 1.2, h: [0.9, 0.95] },
   { id: 'priest', weight: 0.3, market: 0.4, el: { dress: 'robe', hair: 'short', hat: 'none', over: 'none', arms: 'hang' },

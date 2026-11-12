@@ -2,11 +2,12 @@
 // the axis and the avenue, the Praça's paving, the superquadra's belt of trees and lawns; the Cathedral's sunken nave. The
 // dry season's hard blue light, high sun at latitude 16° S.
 
-import { RADIUS, LAWN, PRACA, SQ, SQS, inSQ, BELT, CATH, POOLS, MINISTRIES, PARKS, SHOPS, AVENUE, pitDepth, inRect, onRoad, inBuilding, inMedian, inPark, smooth as sm } from './layout.js';
+import { RADIUS, LAWN, PRACA, SQ, SQS, inSQ, BELT, CATH, POOLS, MINISTRIES, CAMP, PARKS, SHOPS, AVENUE, pitDepth, inRect, onRoad, inBuilding, inMedian, inPark, smooth as sm } from './layout.js';
 
 function height(x, z) { return Math.hypot(x, z) > RADIUS ? 0 : pitDepth(x, z); }
 function cover(x, z) {
   const c = { sand: 0.05, grass: 0.35, rock: 0, soil: 0.55, fields: 0, dry: 0.55, warmth: 0.7, red: 0.75, road: 0, snow: 0, forest: 0 };
+  if (inRect(CAMP, x, z, 3)) { c.grass = 0.04; c.soil = 0.8; c.red = 0.95; c.dry = 0.7; return c; }
   if (inMedian(x, z)) { c.road = 0; c.grass = 0.9; c.soil = 0.15; c.red = 0.15; c.dry = 0.3; return c; }
   if (inPark(x, z, 0.2)) { c.road = 0.97; c.grass = 0; c.red = 0.05; c.soil = 0.1; return c; }
   if (onRoad(x, z, 0.5)) { c.road = 0.97; c.grass = 0; c.red = 0.05; c.soil = 0.1; return c; }

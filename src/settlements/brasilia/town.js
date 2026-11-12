@@ -2,7 +2,7 @@
 // and the Justice palaces at the Congress end, the superquadra's eight blocks on pilotis with the commercial strip, the carriageways'
 // and the avenue's traffic of cars and buses, the lamps and benches, and the people of the lawn, the pavements, the square and the
 // plaza. Everything is placed from layout.js.
-import { RADIUS, LAWN, ROAD_N, ROAD_S, AVENUE, SQ, SQ2, SQS, RING, MINISTRIES, ITAMARATY, JUSTICE, ALL_BLOCKS, SHOPS, CATH, PRACA, TUNNEL, POOLS, RAMP, PLATFORM, PARKS, CHAPEL, MUSEU, PLAYS, PITCH_AT, KIOSKS, CARTS, inRect, inBuilding, rng } from './layout.js';
+import { RADIUS, LAWN, ROAD_N, ROAD_S, AVENUE, SQ, SQ2, SQS, RING, MINISTRIES, ITAMARATY, JUSTICE, ALL_BLOCKS, SHOPS, CATH, PRACA, TUNNEL, POOLS, RAMP, PLATFORM, PARKS, CHAPEL, MUSEU, PLAYS, PITCH_AT, CAMP, CAMP_FIRES, KIOSKS, CARTS, inRect, inBuilding, rng } from './layout.js';
 
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-110, 0], facing: 'e' } });
 const N = -Math.PI / 2, S = Math.PI / 2;   // heading east (rot −π/2) and west (π/2); north 0, south π
@@ -18,7 +18,12 @@ export async function town() {
   B.push({ t: 'arcade_palace', rect: JUSTICE, variant: 'curtain', front: 's' });
   for (const b of ALL_BLOCKS) B.push({ t: 'superblock', rect: b.rect, h: 21.6, pilotis: 3.6, seed: b.seed, tile: b.tile });
   B.push({ t: 'shops_row', rect: SHOPS, floors: 2, seed: 5 });
-  B.push({ t: 'chapel' }, { t: 'museu' }, { t: 'roadmarks' });
+  B.push({ t: 'chapel' }, { t: 'museu' }, { t: 'roadmarks' }, { t: 'apron' }, { t: 'camp' });
+  // the Esplanade's kerbside furniture: a litter bin at every second lamp, a drinking fountain and a street-name plate at the bus stops
+  { const items = [];
+    for (let x = -450, k = 0; x < -20; x += 36, k++) for (const z of [-116.2, 116.2]) { if (k % 2 === 0) items.push({ k: 'bin', at: [x + 1.2, z] }); if (k % 5 === 1) items.push({ k: 'sign', at: [x + 4, z] }); }
+    for (const x of [-405, -310, -215, -130, -40]) items.push({ k: 'fountain', at: [x + 5, -103.5] }, { k: 'fountain', at: [x - 25, 103.5] }, { k: 'seat', at: [x + 9, -104.5], r: 1 }, { k: 'seat', at: [x - 21, 104.5], r: 1 });
+    B.push({ t: 'lawn_kit', items, seed: 71 }); }
   for (const pk of PARKS) B.push({ t: 'parking', rect: pk.rect, side: pk.side });
   for (const r of PLAYS) B.push({ t: 'playground', rect: r });
   B.push({ t: 'pitch', rect: PITCH_AT });
@@ -69,6 +74,7 @@ export async function town() {
   for (let x = PRACA[0] + 12; x < PRACA[2] - 8; x += 40) for (const z of [-132, 132]) L.push({ t: 'street_lamp', at: [x, z], y: 0, h: 7 });
   for (let x = -420; x < -120; x += 52) for (const z of [-104, 104]) L.push({ t: 'bench', at: [x, z], y: 0, rot: z < 0 ? Math.PI : 0, len: 1.9, back: true });
   for (let x = SQ[0] + 14; x < SQ[2] - 10; x += 34) for (let z = SQ[1] + 14; z < SQ[3] - 8; z += 38) if (!inBuilding(x, z, 4) && !inBuilding(x, z + 2, 2)) L.push({ t: 'bench', at: [x, z], y: 0, rot: rand() * 6.28, len: 1.9, back: true });
+  for (const z of [-28, -17, 17, 28]) L.push({ t: 'street_lamp', at: [-100.5, z], y: 0, h: 6.5 });
   const [cx, cz] = CATH.c;
   for (let a = 0; a < 6.28; a += 0.42) { const x = cx + Math.cos(a) * (CATH.pool + 8), z = cz + Math.sin(a) * (CATH.pool + 8); if (Math.abs(x - cx) < 14 && z < cz) continue; L.push({ t: 'bench', at: [x, z], y: 0, rot: a + Math.PI / 2, len: 1.9, back: true }); }
 
@@ -77,6 +83,8 @@ export async function town() {
   const DRESS = ['cloth_white', 'cloth_blue', 'cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_maroon', 'cloth_indigo'];
   const SK = ['skin_light', 'skin_medium', 'skin_medium', 'skin_dark', 'skin_dark'];
   const person = (x, z, rot, o = {}) => {
+    if (!o.camp && ((x + 120) ** 2 + z * z < 81 || (Math.abs(z) < 2.8 && x > -122 && x < -96))) return;     // nobody within 9 m of the arrival or in its line of sight to the ramp
+    if (!o.camp && x > -125 && x < -92 && Math.abs(z) < 62 && Math.abs(x - (-110 + 6 * Math.abs(z) / 60)) < 2.2) return;     // the visitors' routes up the apron keep clear
     if ((!o.inside && !clear(x, z, 0.8)) || (Math.abs(z) < 3.5 && x > -140 && x < 80) || P.some((q) => Math.hypot(q.at[0] - x, q.at[1] - z) < 1.3)) return;
     const w = o.w ?? woman(), t = rand();
     const o2 = o.kind === 'student' ? { dress: w ? 'robe' : 'trousers', cloth: 'cloth_white', cloth2: 'cloth_blue', hat: 'none', hair: w ? 'bun' : 'short', h: 0.8 }
@@ -124,6 +132,16 @@ export async function town() {
   for (const b of B.filter((q) => q.t === 'kiosk')) { const r = b.r % 4; person(b.at[0] + [0, 1.8, 0, -1.8][r], b.at[1] + [1.8, 0, -1.8, 0][r], [0, Math.PI / 2, Math.PI, -Math.PI / 2][r], { inside: true }); }
   // the candangos: a gang of workers at the verge, the Presidential Guard before the Planalto
   for (let k = 0; k < 6; k++) person(-60 + k * 1.6, 144.5, S, { kind: 'worker', w: false });
+  // the candangos' camp: men at the fires, a woman at the wash line, children, hens and dogs about the yard, a wheelbarrow of earth
+  { const [cx0, cz0, cx1, cz1] = CAMP;
+    for (const [fx, fz] of CAMP_FIRES) for (let k = 0; k < 3; k++) { const a = k * 2.1 + rand(), x = fx + Math.cos(a) * 1.5, z = fz + Math.sin(a) * 1.5; person(x, z, Math.atan2(-(fx - x), -(fz - z)), { camp: true, inside: true, kind: k < 2 ? 'worker' : 'student', w: k === 2 ? false : undefined, pose: k === 0 ? 'sit_ground' : k === 1 ? 'talk' : undefined }); }
+    for (let k = 0; k < 9; k++) person(cx0 + 4 + rand() * (cx1 - cx0 - 8), cz0 + 17 + rand() * (cz1 - cz0 - 34), rand() * 6.28, { camp: true, inside: true, kind: k < 5 ? 'worker' : undefined });
+    for (let k = 0; k < 4; k++) { const a = k; L.push({ t: 'chickens', at: [cx0 + 8 + k * 6, (cz0 + cz1) / 2 + (k % 2 ? 4 : -5)], y: 0, rot: a, n: 4, kind: 'hen' }); }
+    for (let k = 0; k < 3; k++) P.push({ t: 'animal', kind: 'dog', at: [cx0 + 10 + k * 8, (cz0 + cz1) / 2 + 2 + k], y: 0, rot: rand() * 6.28, seed: 31 + k });
+    L.push({ t: 'barrow', at: [cx1 - 14, (cz0 + cz1) / 2 + 1], y: 0, rot: 0.6 }); }
+  // the apron and the squares: pigeons, and dogs asleep in the shade of the pilotis and by the kiosks
+  L.push({ t: 'chickens', at: [-104, -13], y: 0, rot: 0.3, n: 7, kind: 'pigeon' }, { t: 'chickens', at: [-103, 14], y: 0, rot: 1.4, n: 6, kind: 'pigeon' }, { t: 'chickens', at: [PRACA[0] + 60, 6], y: 0, rot: 0.5, n: 8, kind: 'pigeon' }, { t: 'chickens', at: [PRACA[0] + 130, -12], y: 0, rot: 2.0, n: 8, kind: 'pigeon' }, { t: 'chickens', at: [PRACA[0] + 130, 20], y: 0, rot: 3.0, n: 7, kind: 'pigeon' });
+  for (const b of ALL_BLOCKS.slice(0, 5)) P.push({ t: 'animal', kind: 'dog', at: [b.rect[0] + 12 + rand() * 20, (b.rect[1] + b.rect[3]) / 2 + 3], y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 999) });
   // the vehicles' fronts are not in the way: the people stand clear of the roadways (the carriageways are not walked by the still figures)
   void inRect; void POOLS; void RAMP; void PLATFORM; void TUNNEL; void LAWN;
   return [base('brasilia-buildings', 'brasilia', B), base('brasilia-life', 'life', [...L, ...P])];
