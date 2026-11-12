@@ -119,7 +119,7 @@ export function waterworks(height) {
  * lane's ground and kept level, with a stair up from the lane at its gate [inferred: Machu Picchu's urban sector is built on platforms
  * stepping down the saddle's flanks, the kanchas on their own levelled terraces — Wright & Valencia, "Machu Picchu: A Civil Engineering Marvel"].
  */
-export const STEP = 0.85, BAND = 14, LEVELS = 3, RAISE = 0.4;
+export const STEP = 1.0, BAND = 13, LEVELS = 3, RAISE = 0.5;
 const rectDist = (r, x, z) => Math.hypot(Math.max(r[0] - x, 0, x - r[2]), Math.max(r[1] - z, 0, z - r[3]));
 const CORE = [[-62, -66, -10, 50], PLAZA, KALLANKA, ROCK_COURT, [-5, -140, 7, 8], [-3, 6, 7, TOWN_WALL.z + 8]];
 /** Distance (m) from the core of the town. */
@@ -127,7 +127,7 @@ export function coreDist(x, z) { let d = Math.hypot(x - HILL.c[0], z - HILL.c[1]
 /** The lanes' ground level at (x, z) inside the saddle (before the kancha platforms): a stair of bands, its ramps 25% of a band, rising again to the town wall. */
 export function laneLevel(x, z) {
   const s = coreDist(x, z) / BAND, k = Math.floor(s), f = s - k, t = Math.min(LEVELS, k + smooth(0.75, 1, f));
-  return -STEP * t * (1 - smooth(TOWN_WALL.z - 22, TOWN_WALL.z - 4, z));
+  return -Math.min(STEP * t, TERRACE.h) * (1 - smooth(TOWN_WALL.z - 22, TOWN_WALL.z - 4, z));
 }
 let PGRID = null;
 /** A stair's rect { rect, dir (the way up), y0, y1 }: the ground under it follows the flight's line, so the steps (the stairs element) stand on it and the way is walkable. */
@@ -166,7 +166,7 @@ export function houses() {
     return !taken.some((t) => r[0] < t[2] + 2 && r[2] > t[0] - 2 && r[1] < t[3] + 2 && r[3] > t[1] - 2);
   };
   const th = 0.7, MG = 0.9;
-  const platform = (r) => { const lv = Math.round(laneLevel((r[0] + r[2]) / 2, (r[1] + r[3]) / 2) / STEP) * STEP + RAISE; PLATS.push({ r: [r[0] - MG, r[1] - MG, r[2] + MG, r[3] + MG], lv }); return lv; };
+  const platform = (r, raise = RAISE) => { const lv = Math.round(laneLevel((r[0] + r[2]) / 2, (r[1] + r[3]) / 2) / STEP) * STEP + raise; PLATS.push({ r: [r[0] - MG, r[1] - MG, r[2] + MG, r[3] + MG], lv }); return lv; };
   // one kancha in the rectangle r (A across the gate side, D deep), its gate on side `gate` ('e' | 'w')
   const kancha = (r, gate, A, D) => {
     taken.push(r);
@@ -179,7 +179,7 @@ export function houses() {
     const sl0 = 7 + rand() * 2, sd = 5 + rand() * 0.8, sv1 = D - bd - 1 - rand() * 1.5, sv0 = sv1 - Math.min(sl0, sv1 - 1.1);
     const seed = () => Math.floor(rand() * 1e6);
     {
-      const gz = (r[1] + r[3]) / 2, ox = gate === 'e' ? 1 : -1, yl = laneLevel(gx + ox * 2.8, gz), len = Math.max(2.3, (lv - yl) * 2.4);
+      const gz = (r[1] + r[3]) / 2, ox = gate === 'e' ? 1 : -1, yl = laneLevel(gx + ox * 2.8, gz), len = Math.max(2.3, Math.min(2.6, (lv - yl) * 2.4));
       if (lv - yl > 0.1) STAIRS.push({ rect: gate === 'e' ? [gx + 0.05, gz - 0.65, gx + 0.05 + len, gz + 0.65] : [gx - 0.05 - len, gz - 0.65, gx - 0.05, gz + 0.65], dir: gate === 'e' ? 'w' : 'e', y0: yl, y1: lv });
     }
     KANCHAS.push({ rect: r, lv, at: P, inward: [sv, 0], A, D, sd, sv0, sv1, bd });
@@ -221,7 +221,7 @@ export function houses() {
       const w = 6 + rand() * 3, d = 9 + rand() * 3, r = [x, z, x + w, z + d];
       if (!clear(r, 6) || rand() < 0.25) continue;
       taken.push(r);
-      platform(r);
+      platform(r, 0.25);
       HOUSES.push({ rect: r, front: rand() < 0.7 ? front : (rand() < 0.5 ? 'n' : 's'), seed: Math.floor(rand() * 1e6) });
     }
   }

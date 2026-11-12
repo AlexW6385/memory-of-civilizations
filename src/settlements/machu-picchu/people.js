@@ -63,6 +63,16 @@ export function people() {
     gear.push({ t: 'backstrap_loom', a: [waist[0], waist[1], waist[2]], b: [far[0], yk + 0.8, far[1]], cloth: ['cloth_red', 'cloth_ochre', 'cloth_black'][Math.floor(rand() * 3)], seed: seed() });
   }
 
+  // on the lanes below the platforms, in the south half of the town (what the arrival looks over): a woman with a pot or a man with his load coming down a gate's stair, now and then a llama string-boy resting on it
+  { let n = 0;
+    for (const [ki, K] of kanchas().entries()) {
+      if (K.rect[1] < 10 || n >= 14 || ki % 2) continue;
+      const gateE = K.inward[0] < 0, gz = K.rect[1] + K.A / 2 + (ki % 4 ? 2.4 : -2.4), gx = gateE ? K.rect[2] : K.rect[0], ox = gateE ? 1 : -1, at = [gx + ox * 2.0, gz], rot = facing([-ox, 0.15]);
+      if (Math.abs(at[0] - 2) < 4) continue;                 // not on the road
+      const y = ground.height(...at);
+      figures.push((n % 2 ? woman : man)({ at, y, rot, carry: n % 3 === 0 ? 'pot' : n % 3 === 1 ? 'bundle' : 'basket', h: 1.5 + rand() * 0.12 }));
+      n++;
+    } }
   // the quarrymen dressing the blocks lined up on the quarry's east side
   for (const [x, z, rot] of [[-27.3, -17.6, E + 0.2], [-26.9, -13.5, E - 0.3]]) figures.push(man({ at: [x, z], y: 0, rot, pose: 'squat', over: 'belt', cloth: 'cloth_brown' }));
   figures.push(man({ at: [-31, -10], y: 0, rot: S - 0.4, pose: 'stand' }));
