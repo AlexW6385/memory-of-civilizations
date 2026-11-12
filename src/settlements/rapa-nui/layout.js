@@ -83,19 +83,34 @@ export const TUPA = [[74, 124, 2.7, 3.2, 0.4], [-78, 128, 2.5, 3.0, 1.1], [118, 
 /** Slabs of basalt with carvings (docs/settlements/rapa-nui.md §4d): [x, z, yaw, motifs]. */
 export const PETRO = [[104, 118, 0.2, ['canoe', 'hook', 'tuna']], [92, 134, -0.4, ['turtle', 'octopus', 'hook']], [-96, 118, 0.7, ['tuna', 'canoe']]];
 let HOUSES = null;
-/** The village: boat-shaped houses (long axis roughly east–west), chicken houses and garden walls among them. */
+/** The hamlets (kainga) of the village: [centre x, z, radius, door side facing (yaw)] — round the chief's house, either side of the road's end, and out on the plain. */
+export const HAMLETS = [[-88, 28, 34, Math.PI], [64, 28, 36, Math.PI], [-34, -14, 24, 0.1], [-170, 6, 38, Math.PI], [140, 44, 34, Math.PI], [24, -52, 30, 0.1], [-120, 80, 20, Math.PI], [196, 10, 30, Math.PI]];
+/** What goes on inside a house: sleeping and daily life, the cook's, the net-maker's, the bark-cloth maker's, the carver's. */
+export const KINDS = ['sleep', 'cook', 'net', 'tapa', 'carver', 'sleep', 'cook', 'net', 'tapa', 'sleep'];
+/** The nearest this many houses to the arrival are built to be entered; further ones are solid. */
+export const ENTER_N = 22;
+/** The village: boat-shaped houses (long axis roughly east–west) in hamlets, chicken houses and garden walls among them. */
 export function village() {
   if (HOUSES) return HOUSES;
   const rand = rng(1500), out = { houses: [CHIEF], moa: [], gardens: [] };
+  // two houses stand clear when apart along the axis by their lengths, or across it by the forecourt and oven (about 9.5 m)
+  const apart = (a, b) => { const c = Math.cos(a.yaw), s = Math.sin(a.yaw), dx = b.c[0] - a.c[0], dz = b.c[1] - a.c[1], u = dx * c - dz * s, v = dx * s + dz * c; return Math.abs(u) > (a.len + b.len) / 2 + 3.2 || Math.abs(v) > 9.5 + (a.chief || b.chief ? 3 : 0); };
   const free = (x, z, m) => !inRect(PLAZA, x, z, m + 6) && !inRect(AHU.rect, x, z, m + 16) && Math.hypot(x - RARAKU.c[0], z - RARAKU.c[1]) > RARAKU.r + m && z < coastZ(x) - 20 && Math.hypot(x, z) < RADIUS - 30 && roadDist(x, z) > m + ROAD_W / 2 + 4
-    && ![...out.houses, ...out.moa, ...out.gardens].some((o) => Math.hypot(o.c[0] - x, o.c[1] - z) < m + 7 + (o.chief ? 16 : 0))
+    && ![...out.moa, ...out.gardens].some((o) => Math.hypot(o.c[0] - x, o.c[1] - z) < m + 7)
     && !TUPA.concat(PETRO).some((o) => Math.hypot(o[0] - x, o[1] - z) < m + 6);
-  for (let k = 0; k < 2500 && out.houses.length < 40; k++) {
-    const x = -260 + rand() * 520, z = -60 + rand() * 180;
-    if (free(x, z, 6)) out.houses.push({ c: [x, z], len: 10 + rand() * 7, w: 1.9 + rand() * 0.5, h: 2.2 + rand() * 0.5, yaw: (rand() - 0.5) * 0.5, seed: Math.floor(rand() * 1e6) });
+  for (let k = 0; k < 6000 && out.houses.length < 56; k++) {
+    const hm = HAMLETS[k % HAMLETS.length], a = rand() * 6.283, d = Math.sqrt(rand()) * hm[2], x = hm[0] + Math.cos(a) * d * 1.5, z = hm[1] + Math.sin(a) * d * 0.7;
+    if (!free(x, z, 6)) continue;
+    const near = Math.hypot(x, z - 50) < 190;
+    const h = { c: [x, z], len: 11 + rand() * 6, w: near ? 3.0 + rand() * 0.45 : 2.2 + rand() * 0.4, h: near ? 2.8 + rand() * 0.4 : 2.3 + rand() * 0.4, yaw: hm[3] + (rand() - 0.5) * 0.36, seed: Math.floor(rand() * 1e6), hamlet: k % HAMLETS.length };
+    if (out.houses.some((o) => !apart(h, o))) continue;
+    out.houses.push(h);
   }
-  for (let k = 0; k < 1500 && out.moa.length < 18; k++) { const x = -260 + rand() * 520, z = -100 + rand() * 220; if (free(x, z, 3)) out.moa.push({ c: [x, z] }); }
-  for (let k = 0; k < 1500 && out.gardens.length < 40; k++) { const x = -280 + rand() * 560, z = -200 + rand() * 330; if (free(x, z, 3)) out.gardens.push({ c: [x, z], r: 2 + rand() * 2.5 }); }
+  const plain = out.houses.filter((h) => !h.chief).sort((p, q) => Math.hypot(p.c[0], p.c[1] - 50) - Math.hypot(q.c[0], q.c[1] - 50));
+  plain.forEach((h, i) => { h.strip = i === 0; h.inside = i < ENTER_N && i !== 0; h.kind = KINDS[(h.seed >> 3) % KINDS.length]; });   // the nearest, being thatched, stays open and unfurnished
+  const clear = (x, z, m) => out.houses.every((o) => Math.hypot(o.c[0] - x, o.c[1] - z) > (o.len ?? 6) / 2 + m + (o.chief ? 6 : 3));
+  for (let k = 0; k < 2500 && out.moa.length < 22; k++) { const hm = HAMLETS[k % HAMLETS.length], a = rand() * 6.283, d = hm[2] * (0.5 + rand() * 0.8), x = hm[0] + Math.cos(a) * d * 1.5, z = hm[1] + Math.sin(a) * d * 0.8; if (free(x, z, 3) && clear(x, z, 3)) out.moa.push({ c: [x, z] }); }
+  for (let k = 0; k < 3000 && out.gardens.length < 44; k++) { const hm = HAMLETS[k % HAMLETS.length], a = rand() * 6.283, d = hm[2] * (0.4 + rand() * 1.1), x = hm[0] + Math.cos(a) * d * 1.5, z = hm[1] + Math.sin(a) * d * 0.9; if (free(x, z, 3) && clear(x, z, 4)) out.gardens.push({ c: [x, z], r: 2 + rand() * 2.5 }); }
   return (HOUSES = out);
 }
 

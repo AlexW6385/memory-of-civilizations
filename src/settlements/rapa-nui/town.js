@@ -2,7 +2,7 @@
 // earth ovens, chicken houses and garden walls with bananas in them, each set on the ground where it
 // stands; and the people (§4b): a gathering on the plaza before the ahu, a statue walked down the
 // road by three rope teams, canoes drawn up on the shore with their fishermen.
-import { RADIUS, ROAD, SEA, RARAKU, BAYS, CHIEF, TUPA, PETRO, village, height, fields } from './layout.js';
+import { RADIUS, ROAD, SEA, PLAZA, RARAKU, BAYS, CHIEF, TUPA, PETRO, village, height, fields } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));     // a figure faces −z when rot = 0
@@ -40,12 +40,20 @@ export async function town() {
   const v = village(), E = [], P = [], rand = rng(1722), y = (c) => height(c[0], c[1]);
   // the house nearest the plaza being thatched anew (docs/settlements/rapa-nui.md §4c)
   const plain = v.houses.filter((h) => !h.chief);
-  const strip = plain.reduce((b, h) => (Math.hypot(h.c[0], h.c[1] - 40) < Math.hypot(b.c[0], b.c[1] - 40) ? h : b), plain[0]);
-  for (const h of plain) E.push({ t: 'hare_paenga', ...h, y: y(h.c), strip: h === strip });
+  const strip = plain.find((h) => h.strip);
+  for (const h of plain) {
+    E.push({ t: h.inside ? 'hare_house' : 'hare_paenga', ...h, y: y(h.c), strip: h === strip });
+    E.push({ t: 'house_yard', ...h, y: y(h.c) });
+    if (h !== strip) E.push({ t: 'thatch_wear', ...h, y: y(h.c) });
+  }
   E.push({ t: 'hare_paenga_long', ...CHIEF, y: y(CHIEF.c) });
   for (const [tx, tz, r, h, yaw] of TUPA) E.push({ t: 'tupa', c: [tx, tz], y: height(tx, tz), r, h, yaw, seed: Math.floor(tx * 3 + tz) });
   PETRO.forEach(([px, pz, , motifs], k) => E.push({ t: 'carved_rock', c: [px, pz], y: height(px, pz), motifs, seed: 9 + k }));
   BAYS.forEach((b, k) => { if (k % 2 === 0 || k === 5) E.push({ t: 'quarry_camp', at: b.at, facing: b.facing, hw: 0.19 * b.h, ground: height, side: k % 4 === 0 ? 1 : -1, seed: 6 + k }); });
+  // the plaza's feast ovens and offerings, the working shore, reed rafts on the crater lake (§4g)
+  E.push({ t: 'plaza_dress', rect: PLAZA, y: 0.12, seed: 8 });
+  E.push({ t: 'shore_works', c: [80, 150], ground: height, seed: 31 });
+  for (const [dx, dz, ya] of [[10, 8, 0.5], [-14, -12, 2.1]]) E.push({ t: 'pora', c: [RARAKU.c[0] + dx, RARAKU.c[1] + dz], y: RARAKU.lake - 0.04, yaw: ya, seed: 5 });
   // the sweet potato gardens under their mulch of stones
   fields().forEach((r, k) => E.push({ t: 'mulch_garden', rect: r, ground: height, seed: 40 + k }));
   for (const m of v.moa) E.push({ t: 'hare_moa', ...m, y: y(m.c), yaw: (m.c[0] * 0.37) % 1, len: 5 + Math.abs(m.c[1] * 0.13) % 3 });
@@ -73,6 +81,18 @@ export async function town() {
     if (rand() < 0.5) { const ou = h.len * 0.3 * (h.seed % 2 ? -1 : 1), b = L2W(h, ou + 0.95, -h.w / 2 - 2.4); fig({ at: b, y: y(b), rot: face(b, L2W(h, ou, -h.w / 2 - 2.4)), pose: 'squat', man: false }); }
   });
   for (const m of v.moa) for (const s of [-1, 1]) if (rand() < 0.7) { const at = [m.c[0] + s * 2.4, m.c[1] + (rand() - 0.5) * 2]; P.push({ t: 'chickens', at, y: y(at), n: 3 + Math.floor(rand() * 3), rot: rand() * 6.28, seed: Math.floor(rand() * 1e6) }); }
+  // inside the houses, someone at the work of each; chickens in the yards (§4f)
+  v.houses.forEach((h) => {
+    if (!h.inside) return;
+    const [u, vv, pose, tu, tv] = { sleep: [-1.9, 0.85, 'squat', -1.9, 0], cook: [4.0, 1.4, 'squat', 4.0, 0.3], net: [3.9, 0.55, 'sit_ground', 3.9, 1.05], tapa: [3.75, -0.8, 'squat', 3.75, -0.1], carver: [4.3, -0.6, 'sit_ground', 3.4, 0.05] }[h.kind];
+    const at = L2W(h, u, vv); fig({ at, y: y(at) + 0.07, rot: face(at, L2W(h, tu, tv)), pose, man: h.kind === 'net' || h.kind === 'carver' });
+  });
+  v.houses.forEach((h, k) => {
+    if (h.chief || h === strip || k % 5 > 2) return;
+    const at = L2W(h, (rand() - 0.5) * 4, -h.w / 2 - 3.2); P.push({ t: 'chickens', at, y: y(at), n: 2 + Math.floor(rand() * 3), rot: rand() * 6.28, seed: Math.floor(rand() * 1e6) });
+  });
+  // the shore: a woman splitting fish at the racks, a man mending a net
+  for (const [x, z, pose] of [[62, 146.4, 'squat'], [100, 145.6, 'stand'], [84, 137.4, 'stand']]) { const at = [x, z]; fig({ at, y: y(at), rot: face(at, [x, z - 1]), pose, man: pose === 'stand' }); }
   // the statue walked down the road
   const w = walking(rand);
   E.push(w.statue);
@@ -80,7 +100,7 @@ export async function town() {
   // the gathering on the plaza, facing the statues; the walk up the middle left clear
   for (let k = 0; k < 44; k++) {
     const x = (rand() < 0.5 ? -1 : 1) * (4 + rand() * 40), z = 64 + rand() * 20, at = [x, z];
-    if (P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 0.9)) continue;
+    if (P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 0.9) || [[-34, 71], [37, 69], [-16, 94], [-37, 71], [34, 69]].some(([a, b]) => Math.hypot(a - x, b - z) < 3.6) || (z > 82.4 && z < 86.6) || Math.abs(Math.abs(x) - 6.5) < 0.7) continue;
     const r = rand();
     fig({ at, y: 0.12, rot: face(at, [x * 0.6, 103]) + (rand() - 0.5) * 0.4, pose: r < 0.3 ? 'squat' : r < 0.45 ? 'talk' : 'stand' });
   }
@@ -94,7 +114,7 @@ export async function town() {
   });
   { const at = [CHIEF.c[0] + 6, CHIEF.c[1] + 4.5]; fig({ at, y: y(at), rot: face(at, [CHIEF.c[0] + 6, CHIEF.c[1] + 2]), pose: 'stand', man: true }); }
   // canoes drawn up above the shore east of the ahu, bow to the sea; a fisherman or two by each
-  for (const [x, z] of [[66, 150], [74, 151], [86, 152]]) {
+  for (const [x, z] of [[58, 148], [66, 150], [74, 151], [86, 152], [106, 149]]) {
     const yaw = Math.PI + (rand() - 0.5) * 0.3;
     E.push({ t: 'vaka', c: [x, z], y: y([x, z]) - 0.02, yaw, l: 3.3 + rand() * 0.7 });
     const a = [x + 1.1, z - 0.6 + rand()];
