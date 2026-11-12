@@ -83,6 +83,11 @@ export const WAREHOUSES = [[166, 96, 196, 124], [200, 96, 230, 124]];
 export const TAFANG = [[166, -199, 196, -166], [166, -114, 196, -81], [94, -199, 124, -166]];   // 塌房, the storehouses by the canal inside the wall
 export const TAFANG_FRONT = ['w', 'w', 'e'];
 export const WATCH_TOWERS = [[38.5, -188, 45, -181.5], [38.5, -98, 45, -91.5], [11, -142, 17.5, -135.5]];   // 望火楼, a tower to each ward
+/**
+ * 瓦子 (wazi): the walled entertainment ground of the lane quarter, with its theatres (勾栏) — a block between two lanes east of the Way (§24).
+ * `gates`: the openings of its fence: side 's' (onto the lane south of it) at x, side 'e' (onto the lane running north-south) at z.
+ */
+export const WAZI = { rect: [58.4, -155, 86, -125], gates: [{ side: 's', at: 72.5 }, { side: 'e', at: -130 }] };
 /** Wells in the lanes: [x, z] on a lane's edge. */
 export function wells() {
   const out = [];
@@ -109,7 +114,7 @@ export function lots() {
   const hit = (r, o, m = 0.3) => r[0] < o[2] + m && r[2] > o[0] - m && r[1] < o[3] + m && r[3] > o[1] - m;
   const S = STREET_RECTS();
   const wall = [[CITY.xw - 8, CITY.zn - 6, CITY.xw + 8, CITY.zs + CITY.th / 2 + 6], [CITY.xw - 8, CITY.zn - CITY.th / 2 - 6, CITY.x1 + 40, CITY.zn + CITY.th / 2 + 6], [CITY.xw - 8, CITY.zs - CITY.th / 2 - 6, CITY.x1 + 40, CITY.zs + CITY.th / 2 + 6]];
-  const fixed = [...CANAL_STREETS, ...S, ...wall, ...WAREHOUSES, ...TAFANG, ...WATCH_TOWERS, [CANAL.x0 - 1, CANAL.z0, CANAL.x1 + 1, CANAL.z1], [-150, -20, -70, 110], [-70, 100, -40, 130]];
+  const fixed = [...CANAL_STREETS, ...S, ...wall, ...WAREHOUSES, ...TAFANG, ...WATCH_TOWERS, WAZI.rect, [CANAL.x0 - 1, CANAL.z0, CANAL.x1 + 1, CANAL.z1], [-150, -20, -70, 110], [-70, 100, -40, 130]];
   const detailAt = (r) => { const d = Math.hypot((r[0] + r[2]) / 2 - 28, (r[1] + r[3]) / 2 + 120); return d < 150 ? 2 : d < 300 ? 1 : 0; };
   const add = (r, front, storeys, shop, extra = {}) => {
     if (!fits(r, 24) || hill((r[0] + r[2]) / 2, (r[1] + r[3]) / 2) > 1.5) return false;
@@ -224,4 +229,33 @@ export function onStreet(x, z, m = 0) {
 }
 export function onWall(x, z, m = 0) {
   return inRect([CITY.xw - 9, CITY.zn - 9, CITY.xw + 9, CITY.zs + 9], x, z, m) || inRect([CITY.xw - 9, CITY.zs - 9, CITY.x1, CITY.zs + 9], x, z, m) || inRect([CITY.xw - 9, CITY.zn - 9, CITY.x1, CITY.zn + 9], x, z, m);
+}
+
+/**
+ * Where the Imperial Way is spanned (§24): sunshades of cloth and strings of lanterns on poles at the aprons' edge, one every ~34 m, not at a lane's
+ * mouth or beside a fire-watch tower. [{ z, kind: 'shade' | 'lamps' }] (the poles stand at x = IMPERIAL[0] + 2.2 and IMPERIAL[2] − 2.2).
+ */
+let SPANS = null;
+export function spans() {
+  if (SPANS) return SPANS;
+  SPANS = [];
+  const lanes = [...EW_IN, ...EW_OUT], towers = WATCH_TOWERS.map((t) => (t[1] + t[3]) / 2);
+  const gz0 = CITY.zs - CITY.th / 2 - 8, gz1 = CITY.zs + CITY.th / 2 + 8, ng = CITY.zn + CITY.th / 2 + 8;
+  const ok = (z) => !lanes.some((l) => Math.abs(l - z) < LANE / 2 + 1.2) && !towers.some((t) => Math.abs(t - z) < 7);
+  for (const [a, b] of [[ng, gz0], [gz1, ROAD.z0 - 22]]) for (let z = a + 10; z < b - 4; z += 28) {
+    const zz = [0, 4, -4, 8, -8, 12].map((d) => z + d).find((q) => ok(q) && q < b - 4 && q > a);
+    if (zz !== undefined) SPANS.push({ z: zz, kind: SPANS.length % 2 ? 'shade' : 'lamps' });
+  }
+  return SPANS;
+}
+/** The gates (坊门) across the lanes where they meet the Way: [{ at: [x, z], axis: 'z' (the lane runs east–west; the posts stand either side of it) }]. */
+let FANG = null;
+export function fangGates() {
+  if (FANG) return FANG;
+  FANG = [];
+  for (const z of [...EW_IN, ...EW_OUT]) for (const x of [IMPERIAL[0] - 5.5, IMPERIAL[2] + 5.5]) {
+    if (!streets().some((s) => s.kind === 'lane' && x > s.r[0] + 1 && x < s.r[2] - 1 && Math.abs((s.r[1] + s.r[3]) / 2 - z) < 0.1)) continue;
+    FANG.push({ at: [x, z], axis: 'z' });
+  }
+  return FANG;
 }

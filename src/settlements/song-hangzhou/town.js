@@ -200,6 +200,7 @@ function fabric() {
 }
 
 import { streetPlans } from './street.js';
+import { wazisStatic, waziLife } from './wazi.js';
 
 export async function town() {
   const chosen = interiorLots(), tea = new Set(teaHouses()), inter = new Set(Object.values(chosen).flat());
@@ -214,5 +215,8 @@ export async function town() {
   plans.push(base('song-hangzhou-shells', shells));
   plans.push(fabric(), ...tideDay(), boatPeople(), ...lifePlans(base));
   plans.push(...streetPlans(base));
+  // the entertainment ground, the Way's sunshades and the ward gates (§24)
+  plans.push(base('song-hangzhou-wazi', wazisStatic(LEVEL.street)));
+  plans.push({ ...base('song-hangzhou-wazi-life', waziLife(LEVEL.street), 'life'), center: [72, -140], near: 200, rooms: [{ id: 'hz-wazi', rect: [66, -153, 78, -127], y: LEVEL.street, kind: 'winehouse' }] });
   return plans;
 }
