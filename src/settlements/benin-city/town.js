@@ -75,7 +75,7 @@ function palaceFolk(F) {
 }
 
 // ── the life of the streets (docs/settlements/benin-city.md §10): near the arrival and the great street at full strength, thinner beyond ──
-const ARR = [-65, 80];
+const ARR = [-65, 24];
 const lookOut = (F) => Math.atan2(-F.out[0], -F.out[1]);
 /** The clay seat under a verandah or beside a trading front, if the house has one: { at: [x, z], y of the floor, rot (to the street) }. */
 function seatOf(l) {
@@ -118,6 +118,45 @@ function streetLife(F) {
   }
   return L;
 }
+/** The king's square at the arrival: petitioners and chiefs on the clay seats, the drummer at the log drum, groups in talk, women with pots, children, fowls and goats, sellers on mats along the street side. */
+function squareFolk(F, out) {
+  const { man, woman, chief, pick } = F, rand = rng(2024), [x0, z0, x1, z1] = SQUARE, cx = (x0 + x1) / 2;
+  const clear = (x, z) => Math.hypot(x - ARR[0], z - ARR[1]) > 4 && !(Math.abs(x - ARR[0]) < 4 && z > ARR[1] - 8 && z < ARR[1] + 1);
+  const put = (f, at, rot, o) => { if (clear(at[0], at[1])) f(at, 0, rot, o); };
+  // the north row of seats faces the middle (south), the south row faces north; two or three sit on each
+  for (let k = 0; k < 5; k++) {
+    const x = x0 + 12 + k * (x1 - x0 - 24) / 4;
+    for (let j = 0; j < 2 + (k % 2); j++) {
+      const at = [x - 1.3 + j * 1.3 + (rand() - 0.5) * 0.2, z0 + 3.55];
+      put(j === 0 && k % 2 === 0 ? chief : rand() < 0.4 ? woman : man, at, Math.PI + (rand() - 0.5) * 0.3, { pose: 'sit', carry: 'none' });
+    }
+  }
+  for (let k = 0; k < 4; k++) {
+    const x = x0 + 18 + k * (x1 - x0 - 36) / 3;
+    for (let j = 0; j < 2; j++) put(rand() < 0.5 ? woman : man, [x - 0.8 + j * 1.6, z1 - 3.65], (rand() - 0.5) * 0.3, { pose: 'sit', carry: 'none' });
+  }
+  // the drummer at the log drum, a boy at the bells
+  put(man, [cx + 12, z0 + 13.4], 0, { pose: 'stand', cloth: 'cloth_red', over: 'collar' });
+  put(man, [cx + 16.6, z0 + 13.0], -Math.PI / 2, { dress: 'loincloth', h: 0.7, pose: 'stand' });
+  // groups in talk, strollers and women with pots on the open ground, at 6–30 m from the gate-side arrival
+  for (let k = 0; k < 26; k++) {
+    const x = x0 + 8 + rand() * (x1 - x0 - 16), z = z0 + 8 + rand() * (z1 - z0 - 16), r = rand();
+    if (r < 0.4) put(woman, [x, z], rand() * 6.28, { pose: rand() < 0.4 ? 'talk' : 'stand', carry: pick(['pot', 'basket', 'none']) });
+    else if (r < 0.85) { put(man, [x, z], rand() * 6.28, { pose: rand() < 0.5 ? 'talk' : 'stand' }); put(man, [x + 1.1, z - 0.7], rand() * 6.28, { pose: 'talk', cloth: pick(CL) }); }
+    else put(chief, [x, z], rand() * 6.28, { pose: 'stand' });
+  }
+  for (let k = 0; k < 4; k++) { const x = x0 + 14 + rand() * (x1 - x0 - 28), z = z0 + 14 + rand() * 16; put(man, [x, z], rand() * 6.28, { dress: 'loincloth', h: 0.64, pose: 'stand', carry: 'none' }); }
+  // fowls and goats, a dog by the seats
+  for (let k = 0; k < 7; k++) { const at = [x0 + 10 + rand() * (x1 - x0 - 20), z0 + 7 + rand() * 26]; if (clear(at[0], at[1])) out.push({ t: 'chickens', at, y: 0, rot: rand() * 6.28, n: 3 + Math.floor(rand() * 3), seed: Math.floor(rand() * 1e9) }); }
+  for (let k = 0; k < 4; k++) { const at = [x0 + 15 + rand() * (x1 - x0 - 30), z0 + 10 + rand() * 24]; if (clear(at[0], at[1])) out.push({ t: 'animal', kind: pick(['goat', 'goat', 'dog']), at, y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) }); }
+  // sellers on mats on the street side of the square, goods before them
+  for (let x = x0 + 10; x < x1 - 8; x += 9 + rand() * 4) {
+    if (!clear(x, z1 - 7)) continue;
+    const g = pick([['pottery', 'baskets'], ['bolts', 'baskets'], ['spice', 'heap'], ['melons', 'greens'], ['fish', 'baskets']]);
+    out.push({ t: 'goods_mat', at: [x, z1 - 7.5], y: 0, rot: 0, goods: g, seed: Math.floor(rand() * 1e9), produce: ['cloth_red', 'cloth_ochre', 'cloth_green'], spices: ['cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_brown'] });
+    woman([x, z1 - 8.3], 0, 0, { pose: 'sit_ground', dress: 'wrap' });
+  }
+}
 const P2 = [];
 /** The gates of the Iya: two guards with staves, travellers with loads waiting to be let in. */
 function gateFolk(F) {
@@ -133,6 +172,7 @@ export async function town() {
   const F = folk(rng(1600));
   yardPeople(F); marketFolk(F); palaceFolk(F); gateFolk(F);
   const lifeEls = streetLife(F);
+  squareFolk(F, lifeEls);
   { // the open floor of the Oba market south of the stalls: sellers on their mats, fowls and goats, a shade of baskets
     const rand = rng(404), { woman, man, pick } = F;
     for (const z of [17, 22.5, 28, 32.5]) for (let x = MARKET[0] + 6; x < MARKET[2] - 5; x += 4.3 + rand() * 1.4) {
