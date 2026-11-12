@@ -3,7 +3,7 @@
 // hall of an official's house near the avenue, with its dais, screen and zither — walkable from its court; the temple's halls are
 // the plan's. The rooms give the music its zones.
 import { YAW, rng } from '../../styles/tang/kit.js';
-import { lots, WINE } from './layout.js';
+import { lots, WINE, DACI_AX, DACI_MAIN, OFFICE } from './layout.js';
 
 const mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
 const ext = (rect, f) => { const w = rect[2] - rect[0], d = rect[3] - rect[1]; return f === 'n' || f === 's' ? [w, d] : [d, w]; };
@@ -72,5 +72,17 @@ export function interiorLife() {
     per([1.6, 0.9], h.plat, [0, bz2], { pose: 'sit', cloth: 'cloth_indigo', hat: 'cap', hair: 'topknot' });
     per([-1.5, 2.3], h.plat, [0, bz2], { pose: 'stand', cloth: 'cloth_grey', hair: 'topknot' });
   }
+  // the translation hall of Daci'en: the monks at their desks, the master (Xuanzang) at the middle, a scribe standing with a scroll
+  { const tc = [DACI_AX + 52, DACI_MAIN[1]], tw = 22, td = 9.6, ty = 0.7, fr3 = frameOf(tc, 'w'), z0 = -td / 2 + 0.3, hx3 = tw / 2 - 0.45, n = Math.max(4, Math.floor((tw - 4) / 2.4));
+    const per = (at, y2, toward, o = {}) => { const p = fr3.P(at), q = fr3.P(toward); out.push({ t: 'figure', at: p, y: y2, rot: face([q[0] - p[0], q[1] - p[1]]), seed: Math.floor(rand() * 1e9), dress: 'robe', skin: 'skin_light', hat: 'none', hair: 'shaven', over: 'shawl', ...o }); };
+    for (let k = 0; k < n; k++) { const x = -hx3 + 2.0 + k * ((2 * hx3 - 4.0) / (n - 1)); if (Math.abs(x) < 0.4 || rand() < 0.15) continue; per([x, z0 + 2.9], ty + 0.25, [x, z0 + 2.2], { pose: 'cross', cloth: ['cloth_ochre', 'cloth_grey', 'cloth_brown'][k % 3], cloth2: 'cloth_maroon' }); }
+    per([0, z0 + 2.75], ty + 0.45, [0, z0 + 2.0], { pose: 'cross', cloth: 'cloth_ochre', cloth2: 'cloth_maroon', beard: false });
+    per([3.4, 1.0], ty, [0, z0 + 2], { pose: 'stand', cloth: 'cloth_grey', cloth2: 'cloth_ochre' }); }
+  // the market office: the director (shi) on his dais, clerks at the side, a merchant with his weights waiting
+  { const oc = [(OFFICE[0] + OFFICE[2]) / 2, OFFICE[1] + 17], fr4 = frameOf(oc, 's'), bz4 = -9 / 2 + 0.4, y4 = 0.7;
+    const per = (at, y2, toward, o = {}) => { const p = fr4.P(at), q = fr4.P(toward); out.push({ t: 'figure', at: p, y: y2, rot: face([q[0] - p[0], q[1] - p[1]]), seed: Math.floor(rand() * 1e9), dress: 'robe', skin: 'skin_light', hat: 'cap', hatMat: 'cloth_black', hair: 'topknot', ...o }); };
+    per([0, bz4 + 1.35], y4 + 0.37, [0, 5], { pose: 'cross', cloth: 'cloth_maroon', cloth2: 'cloth_white', over: 'sash', beard: true });
+    per([-7.5, 0.4], y4, [0, bz4], { pose: 'stand', cloth: 'cloth_green', cloth2: 'cloth_white', over: 'sash' }); per([7.4, 0.8], y4, [0, bz4], { pose: 'stand', cloth: 'cloth_green', cloth2: 'cloth_white', over: 'sash', beard: true });
+    per([2.5, 2.4], y4, [0, bz4], { pose: 'stand', cloth: 'cloth_indigo', cloth2: 'cloth_white', over: 'belt', hat: 'brim', skin: 'skin_medium', beard: true, hair: 'short' }); }
   return out;
 }

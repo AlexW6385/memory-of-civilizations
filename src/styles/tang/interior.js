@@ -74,6 +74,32 @@ function house(L, el) {
   void col;
 }
 
+
+/** The translation hall of Daci'en (Xuanzang's scriptorium): shelves of sutra scrolls along the back wall, a long dais with a row of low desks, ink and brushes, the master's higher seat in the middle, braziers, lamps. */
+function scriptorium(L, el) {
+  const { bag, col, lights } = L, { w, d, y } = el, rand = rng(el.seed || 11), hx = w / 2 - 0.45, z0 = -d / 2 + 0.3;
+  bag.add('wood_dark', box(-hx, y, z0, hx, y + 2.3, z0 + 0.5)); col.rect([-hx, z0, hx, z0 + 0.5], y, y + 2.3);
+  for (const yy of [0.45, 1.05, 1.65]) for (let x = -hx + 0.2; x < hx - 0.3; x += 0.42) {
+    bag.add(rand() < 0.5 ? 'paint_white' : 'paint_ochre', box(x, y + yy, z0 + 0.5, x + 0.3, y + yy + 0.2, z0 + 0.62)); bag.add('cloth_indigo', box(x + 0.02, y + yy + 0.2, z0 + 0.5, x + 0.28, y + yy + 0.24, z0 + 0.62));
+  }
+  dais(L, -hx + 0.3, z0 + 1.0, hx - 0.3, z0 + 4.3, y, 0.25);
+  const n = Math.max(4, Math.floor((w - 4) / 2.4));
+  for (let k = 0; k < n; k++) {
+    const x = -hx + 2.0 + k * ((2 * hx - 4.0) / (n - 1)), mid = Math.abs(x) < 0.4;
+    if (mid) continue;
+    table(L, x, z0 + 2.2, y + 0.25, 1.3, 0.62, 0.4, 'lacquer_black');
+    bag.add('paint_white', box(x - 0.45, y + 0.67, z0 + 2.05, x - 0.05, y + 0.672, z0 + 2.4)); bag.add('slate', box(x + 0.25, y + 0.65, z0 + 2.0, x + 0.45, y + 0.68, z0 + 2.2));
+    bag.add('bamboo_culm', lathe([[0.04, 0], [0.045, 0.14], [0.001, 0.14]], 8, null, x + 0.5, y + 0.65, z0 + 2.45));
+    bag.add(['cloth_ochre', 'cloth_maroon', 'cloth_grey'][k % 3], box(x - 0.3, y + 0.25, z0 + 2.9, x + 0.3, y + 0.31, z0 + 3.5));
+  }
+  // the master's seat: a higher dais with a larger desk, a screen behind
+  dais(L, -1.6, z0 + 1.0, 1.6, z0 + 3.6, y + 0.25, 0.2, 'cloth_maroon');
+  table(L, 0, z0 + 2.0, y + 0.45, 1.5, 0.7, 0.42, 'lacquer_red'); bag.add('paint_white', box(-0.5, y + 0.89, z0 + 1.85, 0.0, y + 0.892, z0 + 2.2));
+  bag.add('lacquer_red', box(-1.5, y + 0.45, z0 + 0.75, 1.5, y + 2.1, z0 + 0.85)); bag.add('paint_ochre', box(-1.35, y + 0.6, z0 + 0.85, 1.35, y + 1.95, z0 + 0.87));
+  for (const s2 of [-1, 1]) { bag.add('bronze', lathe([[0.001, 0], [0.22, 0.0], [0.28, 0.2], [0.001, 0.22]], 10, null, s2 * (hx - 1.2), y, z0 + 4.8)); lights.push({ at: [s2 * (hx - 2.6), y + 2.2, z0 + 4.2], color: '#ffb46b', intensity: 2.4, distance: 9 }); lamp(L, s2 * (hx - 0.2), y, z0 + 5.4); }
+}
+const lamp = (L, x, y, z) => { L.bag.add('wood_dark', box(x - 0.03, y, z - 0.03, x + 0.03, y + 1.3, z + 0.03)); L.bag.add('lamp_paper', box(x - 0.11, y + 1.3, z - 0.11, x + 0.11, y + 1.56, z + 0.11)); };
+
 /** tang_jars { at: [x, z], n, y, dir: [dx, dz], mat }: a row of wine jars with red cloth stoppers standing on the ground, as before a wine shop. */
 function jars(el, { bag, col }) {
   const [x, z] = el.at, d = el.dir || [1, 0], rand = rng(el.seed || 3);
@@ -84,6 +110,6 @@ function jars(el, { bag, col }) {
 }
 export { wine as furnishWine, house as furnishHouse };
 export function tangInterior(el, ctx) {
-  inFrame(ctx, el.c, YAW[el.face || 's'], (L) => (el.kind === 'wine' ? wine(L, el) : house(L, el)));
+  inFrame(ctx, el.c, YAW[el.face || 's'], (L) => (el.kind === 'wine' ? wine(L, el) : el.kind === 'scriptorium' ? scriptorium(L, el) : house(L, el)));
 }
 export const INTERIOR_ELEMENTS = { tang_interior: tangInterior, tang_jars: jars };

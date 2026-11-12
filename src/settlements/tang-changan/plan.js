@@ -3,7 +3,7 @@
 // on its high platform (furnished), the sutra hall and Xuanzang's translation hall at its sides, and behind it the pagoda on its
 // stepped platform with the two tablets at its stair. The ward's wall and gate are the shared ward pieces.
 
-import { DACI, DACI_AX, PAGODA, DACI_MAIN, wallRuns, gates } from './layout.js';
+import { DACI, DACI_AX, PAGODA, DACI_MAIN, wallRuns, gates, DAO_HALLS, GALLERIES } from './layout.js';
 import { interiorRooms } from './interiors.js';
 
 const E = [];
@@ -31,7 +31,8 @@ E.push({ t: 'temple_interior', rect: [KH.c[0] - KH.w / 2, KH.c[1] - KH.d / 2, KH
 for (const [s, kind] of [[-1, 'sutra'], [1, 'guanyin']]) {
   const c = [ax + s * 52, DACI_MAIN[1]], w = 22, d = 9.6, face = s < 0 ? 'e' : 'w';
   E.push({ t: 'tang_hall', c, w, d, face, y: 0, plat: 0.7, H: 4.4, nb: 5, kind: 'hall', roof: 'gable', over: 2.3, bh: 1.4, doorW: 2.6, interior: true, det: 2, chi: 1.3 });
-  E.push({ t: 'temple_interior', rect: [c[0] - d / 2, c[1] - w / 2, c[0] + d / 2, c[1] + w / 2], y: 0.7, H: 4.4, front: face, kind });
+  if (s > 0) E.push({ t: 'tang_interior', c, face, w, d, y: 0.7, kind: 'scriptorium', seed: 21 });
+  else E.push({ t: 'temple_interior', rect: [c[0] - d / 2, c[1] - w / 2, c[0] + d / 2, c[1] + w / 2], y: 0.7, H: 4.4, front: face, kind });
 }
 // the bell and drum pavilions of the first court
 E.push({ t: 'drum_tower', c: [ax - 27, 172], face: 'e' }, { t: 'drum_tower', c: [ax + 27, 172], face: 'w' });
@@ -41,6 +42,14 @@ for (const s of [-1, 1]) {
   for (const z of [142, 176]) E.push({ t: 'stone_lamp', at: [ax + s * 8, z], y: 0.04 });
 }
 E.push({ t: 'incense_ding', at: [ax, 128.4], y: 0.04, s: 1.5 });
+// the covered galleries (cloisters) round the courts, their back walls to the ward wall, their fronts to the court; benches under them
+for (const g of GALLERIES.filter((q) => q.c[1] > 0)) {
+  const nb = Math.round(g.w / 3.4);
+  E.push({ t: 'tang_hall', c: g.c, w: g.w, d: 4.4, face: g.face, y: 0, plat: 0.3, H: 3.4, nb, kind: 'open', roof: 'gable', over: 1.7, bh: 0.9, det: 1, steps: false, chi: 0.8 });
+}
+// a second censer at the pagoda's court, the stone lamps along the axis, the great bronze bell under the bell pavilion's roof
+E.push({ t: 'incense_ding', at: [ax, 100.0], y: 0.04, s: 1.1 });
+for (const z of [188, 100]) for (const s of [-1, 1]) E.push({ t: 'stone_lamp', at: [ax + s * 6, z], y: 0.04 });
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
   room('main-hall', MAIN, 1.2, 'hall'),
@@ -48,9 +57,10 @@ const rooms = [
   room('sutra-hall', [ax - 52 - 4.8, DACI_MAIN[1] - 11, ax - 52 + 4.8, DACI_MAIN[1] + 11], 0.7, 'hall'),
   room('translation-hall', [ax + 52 - 4.8, DACI_MAIN[1] - 11, ax + 52 + 4.8, DACI_MAIN[1] + 11], 0.7, 'hall'),
   room('daci-en', DACI.rect, 0, 'open'),
+  ...[DAO_HALLS.main, DAO_HALLS.rear, ...DAO_HALLS.side].map((h, i) => { const al = !h.face || h.face === 's'; const hw = al ? h.w : h.d, hd = al ? h.d : h.w; return room('dao-hall-' + i, [h.c[0] - hw / 2, h.c[1] - hd / 2, h.c[0] + hw / 2, h.c[1] + hd / 2], h.y, 'hall'); }),
   ...interiorRooms(),
 ];
-const walks = [[[28, 20], [28, 210], [ax, 210], [ax, 172], [ax - 15, 172], [ax - 15, 128], [ax - 2.5, 128], [ax - 1.8, 123.5]]];
+const walks = [[[28, 20], [28, 210], [ax, 210], [ax, 172], [ax - 17, 172], [ax - 17, 128], [ax - 2.5, 128], [ax - 1.8, 123.5]]];
 walks[0].y0 = 0;
 
 export const temple = {

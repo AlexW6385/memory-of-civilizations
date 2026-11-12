@@ -132,6 +132,33 @@ function goods(bag, trade, x0, x1, z, y, rand) {
   }
 }
 
+
+/** The frontage of a shop by its trade, outside the platform (z from zf, +z the street): racks, stacks, the stove, the lanterns and the signboard; x0…x1 the unit. */
+function frontage(L, trade, x0, x1, zf, rand, det) {
+  const { bag, col } = L, mx = (x0 + x1) / 2, bolts = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white', 'cloth_green', 'cloth_maroon', 'cloth_blue'];
+  const sack = (x, z, h = 0.6) => bag.add('sacking', lathe([[0.001, 0], [0.26, 0.04], [0.3, 0.2], [0.17, h * 0.85], [0.001, h]], 8, null, x, 0, z));
+  const pot = (x, z, r, h, m) => { jar(bag, x, 0, z, r, h, m); col.circle(x, z, r, 0, h); };
+  // the lanterns at the unit's ends and the signboard hung from the architrave
+  for (const x of [x0 + 0.5, x1 - 0.5]) { bag.add('wood_dark', box(x - 0.006, 3.0, zf - 0.55, x + 0.006, 3.3, zf - 0.54)); bag.add('lamp_paper', box(x - 0.13, 2.62, zf - 0.68, x + 0.13, 3.02, zf - 0.42)); }
+  bag.add('lacquer_black', box(mx - 0.45, 2.5, zf - 0.6, mx + 0.45, 3.0, zf - 0.55)); bag.add('gilt_bronze', box(mx - 0.38, 2.57, zf - 0.57, mx + 0.38, 2.93, zf - 0.52)); bag.add('cloth_red', box(mx - 0.03, 2.1, zf - 0.6, mx + 0.03, 2.5, zf - 0.57));
+  if (det < 1) return;
+  const rackAt = (a, b, hmin, hmax, mats) => {
+    for (const x of [a, b]) { bag.add('bamboo_culm', box(x - 0.04, 0, zf + 0.5, x + 0.04, hmax + 0.15, zf + 0.58)); col.circle(x, zf + 0.54, 0.08, 0, hmax); }
+    bag.add('bamboo_culm', box(a, hmax + 0.05, zf + 0.5, b, hmax + 0.12, zf + 0.58));
+    for (let x = a + 0.15, k = 0; x < b - 0.4; x += 0.42, k++) bag.add(mats[(k + Math.floor(rand() * 3)) % mats.length], box(x, hmin + rand() * 0.2, zf + 0.52, x + 0.34, hmax + 0.05, zf + 0.57));
+  };
+  if (trade === 'cloth' || trade === 'silk' || trade === 'dye') rackAt(mx - 1.4, mx + 1.4, 1.0, 2.3, trade === 'dye' ? ['cloth_indigo', 'cloth_red', 'cloth_ochre', 'cloth_green'] : bolts);
+  else if (trade === 'carpet') { rackAt(mx - 1.5, mx + 1.5, 0.9, 2.2, ['cloth_red', 'cloth_indigo', 'cloth_maroon', 'cloth_ochre']); bag.add('cloth_red', box(mx - 1.0, 0, zf + 1.4, mx + 1.0, 0.03, zf + 2.4)); bag.add('cloth_indigo', box(mx - 0.8, 0.03, zf + 1.55, mx + 0.8, 0.045, zf + 2.25)); }
+  else if (trade === 'pottery' || trade === 'jade' || trade === 'lacquer') { for (let r = 0; r < 3; r++) for (let k = 0; k < 4 - r; k++) pot(mx - 1.0 + r * 0.3 + k * 0.62, zf + 0.9 + r * 0.45, 0.25, 0.5 + r * 0.04, trade === 'pottery' ? ['terracotta', 'pottery_dark', 'glaze_green'][k % 3] : ['glaze_green', 'glaze_white', 'lacquer_red'][k % 3]); }
+  else if (trade === 'grain') { for (let k = 0; k < 6; k++) sack(mx - 1.0 + (k % 3) * 0.62, zf + 0.9 + Math.floor(k / 3) * 0.5); col.rect([mx - 1.3, zf + 0.6, mx + 1.0, zf + 1.6], 0, 0.6); bag.add('timber', box(mx + 1.2, 0, zf + 0.9, mx + 1.7, 0.3, zf + 1.4)); }
+  else if (trade === 'iron') { bag.add('bark_pine', box(mx - 0.3, 0, zf + 1.0, mx + 0.3, 0.55, zf + 1.6)); bag.add('iron', box(mx - 0.28, 0.55, zf + 1.1, mx + 0.28, 0.72, zf + 1.5)); col.rect([mx - 0.3, zf + 1.0, mx + 0.3, zf + 1.6], 0, 0.72); for (let k = 0; k < 5; k++) bag.add('iron', box(mx + 0.9 + k * 0.1, 0.2, zf + 1.0, mx + 0.94 + k * 0.1, 1.2 + (k % 2) * 0.3, zf + 1.04)); bag.add('wood_dark', box(mx + 0.8, 0, zf + 0.95, mx + 1.5, 0.3, zf + 1.1)); }
+  else if (trade === 'saddlery') { bag.add('wood_dark', box(mx - 0.4, 0, zf + 1.0, mx + 0.4, 0.6, zf + 1.1)); bag.add('hide_brown', box(mx - 0.45, 0.6, zf + 0.85, mx + 0.45, 0.8, zf + 1.3)); bag.add('hide_black', box(mx - 0.1, 0.8, zf + 0.9, mx + 0.1, 0.95, zf + 1.25)); rackAt(mx + 0.9, mx + 2.0, 1.0, 2.0, ['hide_brown', 'hide_tan', 'hide_black']); }
+  else if (trade === 'spice' || trade === 'medicine') { for (let k = 0; k < 5; k++) { const x = mx - 1.2 + k * 0.6; bag.add('wicker', lathe([[0.22, 0], [0.28, 0.22], [0.001, 0.22]], 9, null, x, 0, zf + 1.0)); bag.add(['cloth_ochre', 'cloth_red', 'cloth_brown', 'cloth_green', 'cloth_ochre'][k], lathe([[0.2, 0], [0.12, 0.1], [0.001, 0.14]], 8, null, x, 0.2, zf + 1.0)); col.circle(x, zf + 1.0, 0.28, 0, 0.3); } if (trade === 'medicine') bag.add('glaze_yellow', lathe([[0.001, 0], [0.1, 0.06], [0.1, 0.2], [0.05, 0.3], [0.001, 0.36]], 8, null, mx, 2.2, zf - 0.5)); }
+  else if (trade === 'books' || trade === 'paper') { bag.add('lacquer_red', box(mx - 0.6, 0.55, zf + 1.0, mx + 0.6, 0.6, zf + 1.6)); for (const dx of [-0.5, 0.5]) bag.add('wood_dark', box(mx + dx - 0.03, 0, zf + 1.05, mx + dx + 0.03, 0.55, zf + 1.55)); col.rect([mx - 0.6, zf + 1.0, mx + 0.6, zf + 1.6], 0, 0.6); bag.add('paint_white', box(mx - 0.4, 0.6, zf + 1.1, mx + 0.1, 0.72, zf + 1.5)); }
+  else if (trade === 'food') { bag.add('mud_plaster', box(mx - 0.8, 0, zf + 0.9, mx + 0.0, 0.8, zf + 1.6)); bag.add('iron', lathe([[0.001, 0], [0.3, 0.04], [0.36, 0.2], [0.001, 0.24]], 10, null, mx - 0.4, 0.8, zf + 1.25)); col.rect([mx - 0.8, zf + 0.9, mx, zf + 1.6], 0, 1.0); bag.add('bark_pine', box(mx - 0.8, 0, zf + 1.65, mx - 0.2, 0.3, zf + 1.95)); for (const dx of [0.5, 1.2]) { bag.add('wood_dark', box(mx + dx - 0.22, 0.4, zf + 1.4, mx + dx + 0.22, 0.44, zf + 1.8)); for (const sx of [-1, 1]) bag.add('wood_dark', box(mx + dx + sx * 0.18 - 0.02, 0, zf + 1.42, mx + dx + sx * 0.18 + 0.02, 0.4, zf + 1.78)); } }
+  else if (trade === 'wine') { for (const dx of [-0.2, 1.0]) { bag.add('wood_dark', box(mx + dx - 0.22, 0.4, zf + 1.4, mx + dx + 0.22, 0.44, zf + 1.8)); for (const sx of [-1, 1]) bag.add('wood_dark', box(mx + dx + sx * 0.18 - 0.02, 0, zf + 1.42, mx + dx + sx * 0.18 + 0.02, 0.4, zf + 1.78)); } bag.add('lacquer_red', box(mx + 0.2, 0.0, zf + 1.45, mx + 0.6, 0.55, zf + 1.75)); col.rect([mx + 0.2, zf + 1.45, mx + 0.6, zf + 1.75], 0, 0.55); }
+}
+
 /**
  * tang_shop_row { foot, front, units: [{ nb, trade }], seed, det }: a run of shops under one roof — the front open between posts, a counter
  * in the outer bays and the door in the middle one, party walls between the units, the goods, a sign pole at each unit's end.
@@ -161,7 +188,10 @@ export function tangShopRow(el, ctx) {
         const px = x0 + 0.5, pz = hd / 2 + 1.35;
         bag.add('bamboo_culm', box(px - 0.05, 0, pz - 0.05, px + 0.05, 5.2, pz + 0.05)); col.circle(px, pz, 0.1, 0, 5.2);
         bag.add(u.trade === 'wine' ? 'cloth_ochre' : (['cloth_indigo', 'cloth_red', 'cloth_white'][(ui + (el.seed | 0)) % 3]), box(px + 0.05, 3.6, pz - 0.02, px + 0.6, 5.0, pz + 0.02));
-        if (u.trade === 'wine') for (let j = 0; j < 3; j++) jar(bag, x0 + 1.0 + j * 0.8, 0, hd / 2 + 1.0, 0.2, 0.55, 'pottery_dark');
+        if (u.trade === 'wine') for (let j = 0; j < 3; j++) jar(bag, x0 + 1.0 + j * 0.8, 0, hd / 2 + 1.0 + 1.4 * 0, 0.2, 0.55, 'pottery_dark');
+        frontage(L, u.trade, x0 + 0.7, x1 - 0.2, hd / 2 + 0.9, rand, el.det ?? 1);
+        // inside: a table with two stools by the back, a scale on the counter's end
+        { const tx = x1 - 1.3, tz = -hd / 2 + 2.6; bag.add('lacquer_red', box(tx - 0.5, 0.3 + 0.7, tz - 0.3, tx + 0.5, 0.3 + 0.75, tz + 0.3)); for (const sx of [-1, 1]) for (const sz of [-1, 1]) bag.add('wood_dark', box(tx + sx * 0.44 - 0.025, 0.3, tz + sz * 0.24 - 0.025, tx + sx * 0.44 + 0.025, 1.0, tz + sz * 0.24 + 0.025)); col.rect([tx - 0.5, tz - 0.3, tx + 0.5, tz + 0.3], 0.3, 1.05); bag.add('hide_tan', box(tx - 0.2, 0.3, tz + 0.55, tx + 0.2, 0.7, tz + 0.95)); }
       }
       k += u.nb;
     });

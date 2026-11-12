@@ -211,3 +211,18 @@ export const inDitch = (x, z) => {
 /** Zone: 'city' inside the walls' region, 'country' beyond. */
 export const zoneOf = (x, z) => (Math.abs(x) > 2 * (WARD + STREET) + AVE - STREET + 20 || Math.abs(z) > 2 * (WARD + STREET) + CROSS - STREET + 20 ? 'country' : 'city');
 export const TREE_ROWS = [-49.5, -41.5, 41.5, 49.5];
+
+/** The Daoist temple's halls (c, w along the hall's front, d), for the town (shell) and the plan's rooms (music zones). */
+export const DAO_HALLS = {
+  main: { c: [DAO_AX, -112], w: 25, d: 11, H: 4.8, y: 1.0 },
+  rear: { c: [DAO_AX, -164], w: 18, d: 8.4, H: 4.2, y: 0.8 },
+  side: [-1, 1].map((s) => ({ c: [DAO_AX + s * 42, -112], w: 18, d: 8, H: 3.8, y: 0.6, face: s < 0 ? 'e' : 'w' })),
+};
+/** Covered galleries (cloisters) of the two temples: { c, w (length), face }. */
+export const GALLERIES = [
+  ...[-1, 1].map((s) => ({ c: [DACI_AX + s * 40, 172], w: 42, face: s < 0 ? 'e' : 'w' })),
+  ...[-1, 1].map((s) => ({ c: [DACI_AX + s * 40, 134], w: 28, face: s < 0 ? 'e' : 'w' })),
+  ...[-1, 1].map((s) => ({ c: [DACI_AX + s * 40, 66], w: 52, face: s < 0 ? 'e' : 'w' })),
+  ...[-1, 1].map((s) => ({ c: [DAO_AX + s * 62, -66], w: 62, face: s < 0 ? 'e' : 'w' })),
+  ...[-1, 1].map((s) => ({ c: [DAO_AX + s * 62, -145], w: 36, face: s < 0 ? 'e' : 'w' })),
+];

@@ -74,9 +74,16 @@ export function fangGate(el, ctx) {
     // the piers' damp skirts; the ward headman's guard hut beside the gate on the +z side (door to the street), a notice board on the pier
     for (const sg of [-1, 1]) { const r = [sg > 0 ? w / 2 : -w / 2 - P, -D / 2, sg > 0 ? w / 2 + P : -w / 2, D / 2]; bag.add('plaster_damp', frustum([r[0] - 0.03, r[1] - 0.03, r[2] + 0.03, r[3] + 0.03], 0, 0.6, 0, 0, 0, 0, { noBottom: true })); }
     if (el.guard !== false) {
-      const hx = w / 2 + P + 3.4, hz = D / 2 + 2.0;
-      inFrame(L, [hx, hz], 0, (H) => buildHall(H, { w: 4.4, d: 3.0, y: 0, plat: 0.25, H: 2.7, nb: 2, kind: 'hall', det: 1, bh: 0.6, over: 1.1, roof: 'gable', steps: false, doorW: 1.3, pal: { plinth: 'brick_grey' } }));
+      const hx = w / 2 + P + 3.4, hz = -(D / 2 + 2.0);
+      inFrame(L, [hx, hz], Math.PI, (H) => buildHall(H, { w: 4.4, d: 3.0, y: 0, plat: 0.25, H: 2.7, nb: 2, kind: 'hall', det: 1, bh: 0.6, over: 1.1, roof: 'gable', steps: false, doorW: 1.3, pal: { plinth: 'brick_grey' } }));
       bag.add('wood_dark', box(-w / 2 - 0.9, 1.2, D / 2, -w / 2 - 0.1, 2.5, D / 2 + 0.06)); bag.add('paint_white', box(-w / 2 - 0.8, 1.35, D / 2 + 0.06, -w / 2 - 0.2, 2.3, D / 2 + 0.08));
+    }
+    // the stair up to the gate building's deck: a flight along the wall's face on the +z side beside the east pier (steps of brick, a rail)
+    if (el.stair !== false) {
+      const x0 = w / 2 + P, x1 = x0 + 6.6, z0 = D / 2, z1 = D / 2 + 1.5, top = ph + 0.5, n = 18;
+      for (let k = 0; k < n; k++) { const xa = x1 - (x1 - x0) * (k + 1) / n, xb = x1 - (x1 - x0) * k / n; bag.add('brick_grey', box(xa, 0, z0, xb, top * (k + 1) / n, z1)); }
+      for (let k = 1; k < n; k += 3) { const xm = x1 - (x1 - x0) * (k + 0.5) / n; bag.add('timber_red', box(xm - 0.04, top * (k + 1) / n, z1, xm + 0.04, top * (k + 1) / n + 0.9, z1 + 0.08)); }
+      col.ramp([x0, z0, x1, z1], 0, top, 'w');
     }
     // the door leaves, swung back against the piers (open), with their iron studs
     for (const s of [-1, 1]) bag.add('wood_dark', box(s * (w / 2 - 0.02) - 0.07, 0, -D / 2 + 0.1, s * (w / 2 - 0.02) + 0.07, ph - 0.5, -D / 2 + 1.55));

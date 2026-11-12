@@ -5,8 +5,9 @@
 import './style.js';
 import {
   RADIUS, AVE, DITCH, WARDS, DACI, DAOIST, MARKET, MARKET_BLOCKS, MARKET_LANES, MARKET_INNER, OFFICE, DAO_AX, DACI_AX, PAGODA,
-  wallRuns, gates, lots, marketRows, marketYards, inDitch, inRect,
+  wallRuns, gates, lots, marketRows, marketYards, inDitch, inRect, DAO_HALLS, GALLERIES,
 } from './layout.js';
+import { dressLife } from './dress.js';
 import { interiorElements, interiorLife, furnishedLot } from './interiors.js';
 
 const base = (id, elements, style = 'tang') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [28, 20], facing: 'n' } });
@@ -42,8 +43,17 @@ function daoist() {
   pave([ax - 20, -130, ax + 20, -100]);
   E.push({ t: 'tang_hall', c: [ax, -112], w: 25, d: 11, face: 's', y: 0, plat: 1.0, H: 4.8, nb: 5, kind: 'hall', roof: 'hip', over: 2.8, bh: 1.6, big: true, doorW: 3.0, interior: true, det: 2, chi: 1.6 });
   E.push({ t: 'temple_interior', rect: [ax - 12.5, -112 - 5.5, ax + 12.5, -112 + 5.5], y: 1.0, H: 4.8, front: 's', kind: 'guanyin' });
-  for (const s of [-1, 1]) E.push({ t: 'tang_hall', c: [ax + s * 42, -112], w: 18, d: 8, face: s < 0 ? 'e' : 'w', y: 0, plat: 0.6, H: 3.8, nb: 3, kind: 'hall', roof: 'gable', over: 2.0, bh: 1.2, doorW: 2.4, det: 2 });
-  E.push({ t: 'tang_hall', c: [ax, -164], w: 18, d: 8.4, face: 's', y: 0, plat: 0.8, H: 4.2, nb: 3, kind: 'hall', roof: 'hip', over: 2.2, bh: 1.4, doorW: 2.6, det: 2 });
+  for (const h of DAO_HALLS.side) {
+    E.push({ t: 'tang_hall', c: h.c, w: h.w, d: h.d, face: h.face, y: 0, plat: 0.6, H: 3.8, nb: 3, kind: 'hall', roof: 'gable', over: 2.0, bh: 1.2, doorW: 2.4, det: 2, interior: true });
+    const al = h.face === 'e' || h.face === 'w';
+    E.push({ t: 'temple_interior', rect: al ? [h.c[0] - h.d / 2, h.c[1] - h.w / 2, h.c[0] + h.d / 2, h.c[1] + h.w / 2] : [h.c[0] - h.w / 2, h.c[1] - h.d / 2, h.c[0] + h.w / 2, h.c[1] + h.d / 2], y: 0.6, H: 3.8, front: h.face, kind: 'sutra' });
+  }
+  { const h = DAO_HALLS.rear;
+    E.push({ t: 'tang_hall', c: h.c, w: h.w, d: h.d, face: 's', y: 0, plat: 0.8, H: 4.2, nb: 3, kind: 'hall', roof: 'hip', over: 2.2, bh: 1.4, doorW: 2.6, det: 2, interior: true });
+    E.push({ t: 'temple_interior', rect: [h.c[0] - h.w / 2, h.c[1] - h.d / 2, h.c[0] + h.w / 2, h.c[1] + h.d / 2], y: 0.8, H: 4.2, front: 's', kind: 'guanyin' }); }
+  // the cloisters round the peach court and the rear court, the steles, the bell and drum towers flanking the court
+  for (const g of GALLERIES.filter((q) => q.c[1] < 0)) E.push({ t: 'tang_hall', c: g.c, w: g.w, d: 4.4, face: g.face, y: 0, plat: 0.3, H: 3.4, nb: Math.round(g.w / 3.4), kind: 'open', roof: 'gable', over: 1.7, bh: 0.9, det: 1, steps: false, chi: 0.8 });
+  for (const s of [-1, 1]) { E.push({ t: 'stele_pavilion', at: [ax + s * 9, -78], y: 0, face: [-s, 0] }); E.push({ t: 'drum_tower', c: [ax + s * 30, -52], face: s < 0 ? 'e' : 'w' }); E.push({ t: 'stone_lamp', at: [ax + s * 4, -118], y: 0.04 }); }
   E.push({ t: 'incense_ding', at: [ax, -86], y: 0.04, s: 1.3 });
   for (const s of [-1, 1]) for (const z of [-60, -90]) E.push({ t: 'stone_lamp', at: [ax + s * 6, z], y: 0.04 });
   void x0; void x1;
@@ -58,7 +68,8 @@ function market() {
   // the market office (the Shi shu) in the middle block: a walled yard, its hall, the drum tower of the market drum, the price board
   const w = (a, b, gaps = []) => E.push({ t: 'fang_wall', a, b, gaps, h: 2.8, th: 1.0 });
   w([ox0, oz0 + 0.5], [ox1, oz0 + 0.5]); w([ox0, oz1 - 0.5], [ox1, oz1 - 0.5], [[(ox1 - ox0) / 2 - 3, (ox1 - ox0) / 2 + 3]]); w([ox0 + 0.5, oz0], [ox0 + 0.5, oz1]); w([ox1 - 0.5, oz0], [ox1 - 0.5, oz1]);
-  E.push({ t: 'tang_hall', c: [oc[0], oz0 + 17], w: 20, d: 9, face: 's', y: 0, plat: 0.7, H: 4.2, nb: 5, kind: 'hall', roof: 'hip', over: 2.2, bh: 1.4, doorW: 2.6, det: 2 });
+  E.push({ t: 'tang_hall', c: [oc[0], oz0 + 17], w: 20, d: 9, face: 's', y: 0, plat: 0.7, H: 4.2, nb: 5, kind: 'hall', roof: 'hip', over: 2.2, bh: 1.4, doorW: 2.6, det: 2, interior: true });
+  E.push({ t: 'tang_interior', c: [oc[0], oz0 + 17], face: 's', w: 20, d: 9, y: 0.7, kind: 'house', seed: 4 });
   E.push({ t: 'drum_tower', c: [oc[0] + 15, oc[1] + 8], face: 's' });
   E.push({ t: 'paving', rect: [oc[0] - 3, oc[1] - 2, oc[0] + 3, oz1 - 0.6], y: 0.04, th: 0.3 });
   // the caravanserai yards: a wall with a gate on the lane side, stables along the west, wells, the goods stacked
@@ -71,7 +82,7 @@ function market() {
   }
   // the market's lanes: hawkers' stalls under awnings at the shop platforms' edge on the lanes, parasols, a few
   const rand = rng(760), kinds = ['fruit', 'cloth', 'pots', 'cakes'], aw = ['reed_mat', 'cloth_ochre', 'cloth_white', 'cloth_indigo', 'cloth_red'];
-  for (const lx of MARKET_LANES.x) for (let z = MARKET_INNER[1] + 20; z < MARKET_INNER[3] - 12; z += 14 + rand() * 12) {
+  for (const lx of MARKET_LANES.x) for (let z = MARKET_INNER[1] + 20; z < MARKET_INNER[3] - 12; z += 8 + rand() * 7) {
     if (Math.abs(z - MARKET_LANES.z[0]) < 8 || Math.abs(z - MARKET_LANES.z[1]) < 8) continue;
     E.push({ t: 'hawker_stall', at: [lx + (rand() < 0.5 ? -1.2 : 1.2), z], y: 0, rot: rand() < 0.5 ? Math.PI / 2 : -Math.PI / 2, kind: kinds[Math.floor(rand() * 4)], w: 2 + rand() * 0.6, awning: aw[Math.floor(rand() * 5)] });
   }
@@ -155,6 +166,8 @@ export async function town() {
   for (const l of lots()) { if (!by.has(l.ward)) by.set(l.ward, []); by.get(l.ward).push(l); }
   for (const [ward, ls] of [...by].sort()) for (let i = 0; i < ls.length; i += 40) plans.push(base(`tang-changan-houses-${ward}-${i / 40}`, ls.slice(i, i + 40).map((l) => ({ t: 'tang_house', ...l, furnished: l === fl }))));
   plans.push(base('tang-changan-life', [...life(), ...LO], 'life'), base('tang-changan-interior-life', interiorLife(), 'life'));
+  const dr = dressLife();
+  for (let i = 0; i < dr.length; i += 500) plans.push(base(`tang-changan-dress-${i / 500}`, dr.slice(i, i + 500), 'life'));
   return plans;
 }
 void DITCH; void AVE; void MARKET_BLOCKS;
