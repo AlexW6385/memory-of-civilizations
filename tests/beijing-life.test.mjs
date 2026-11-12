@@ -16,11 +16,12 @@ test('walker shapes: at most 36 variants, every kind has a dry variant near and 
   assert.ok(tris < 400000, `${tris} triangles`);
 });
 
-test('ways: connected, none in the palace, the moat or the temple court', () => {
+test('ways: connected, none in the palace (but its great court), the moat or the temple court', () => {
   const ww = D.walkways(), G = graphFromRects(ww.rects, ww.links, ww.clip);
   assert.ok(G.edges.length > 100);
   for (const [x, z] of G.nodes) {
-    assert.ok(!L.inRect(L.WALL.rect, x, z, 2), `node in palace ${x},${z}`);
+    // (the great court of the Hall of Supreme Harmony has its officials' and servants' ways: movers.js)
+    if (!L.inRect([-86, 46, 86, 100], x, z, 0)) assert.ok(!L.inRect(L.WALL.rect, x, z, 2), `node in palace ${x},${z}`);
     assert.ok(!L.inMoat(x, z), `node in moat ${x},${z}`);
     assert.ok(!L.inTemple(x, z), `node in temple ${x},${z}`);
   }
