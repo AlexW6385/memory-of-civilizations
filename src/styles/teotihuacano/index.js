@@ -9,7 +9,7 @@ import '../qing/index.js';
 import { carved, Kit } from '../maya/meso.js';
 import { porticoRooms } from './rooms.js';
 import { patch } from '../maya/household.js';
-import { mesoPlants } from '../maya/plants.js';
+import { ttPlants } from './plants.js';
 import { ttMarket } from './market.js';
 import { midden } from './market.js';
 import { kiln, dyeYard } from './craft.js';
@@ -126,7 +126,19 @@ export function ttPyramid(el, ctx) {
     const yt = ya + ht * (1 - tb), sx = a[0] - b[0], sz = a[1] - b[1];
     // the next stage stands on this one within `inner` (its foot, a little in): faces hidden under it are left out
     const last = k === n - 1, inner = last ? null : [cx - b[0] + 0.3, cz - b[1] + 0.3, cx + b[0] - 0.3, cz + b[1] - 0.3];
+    if (el.band && tb === 0) {
+      // a plain stage with its painted cornice: the plastered slope below, a band of red paint under the ledge
+      const lo = 1 - el.band, yl = ya + ht * lo, kx = sx * 0.85, kz = sz * 0.85;
+      bag.add(el.talud ?? RB, frustum([cx - a[0], cz - a[1], cx + a[0], cz + a[1]], ya, yl, kx * lo, kx * lo, kz * lo, kz * lo, { noBottom: true, noTop: true }));
+      bag.add(RD, frustum([cx - a[0] + kx * lo, cz - a[1] + kz * lo, cx + a[0] - kx * lo, cz + a[1] - kz * lo], yl, yt, kx * el.band, kx * el.band, kz * el.band, kz * el.band, { noBottom: true, noTop: !last }));
+    } else
     bag.add(el.talud ?? RB, frustum([cx - a[0], cz - a[1], cx + a[0], cz + a[1]], ya, yt, sx * 0.85, sx * 0.85, sz * 0.85, sz * 0.85, { noBottom: true, noTop: tb > 0 || !last }));
+    if (el.staged && el.stair === 'w' && tb === 0) {
+      // the stair climbs stage by stage, a flight on each face and a landing on each ledge (the first stage's flight is hidden behind the Adosada)
+      const sw = (el.stairW ?? 12) / 2, xo = cx - a[0], xi = cx - (a[0] - sx * 0.85);
+      if (k > 0) ttStair({ rect: [xo - 0.3, cz - sw, xi - 0.3, cz + sw], y0: ya, y1: yb, dir: 'e', mat: S }, { bag, col });
+      if (!last) col.floor([xi - 0.3, cz - sw, cx - b[0] + 0.3, cz + sw], yb);
+    }
     if (tb === 0 && !last) {
       // a plain stage: only the ledge round the next stage's foot
       const q = [a[0] - sx * 0.85, a[1] - sz * 0.85], m = el.talud ?? RB, [i0, j0, i1, j1] = inner;
@@ -171,7 +183,7 @@ export function ttPyramid(el, ctx) {
   // (`stairFoot`: the stair starts higher than the pyramid's base, on a plaza laid above it)
   const sw = (el.stairW ?? 12) / 2, sy0 = el.stairFoot ?? y0b, run = (y0b + H - sy0) * 1.05, f = el.stair || 'w', ov = tb === 0 && el.talud ? -0.15 * (el.w - el.tw) / 2 / n : 0.5;   // the stair's head laid over the top's edge (on a plastered top, ending at its edge)
   const r = f === 'w' ? [cx - el.tw / 2 - run, cz - sw, cx - el.tw / 2 + ov, cz + sw] : f === 'e' ? [cx + el.tw / 2 - ov, cz - sw, cx + el.tw / 2 + run, cz + sw] : f === 's' ? [cx - sw, cz + el.td / 2 - ov, cx + sw, cz + el.td / 2 + run] : [cx - sw, cz - el.td / 2 - run, cx + sw, cz - el.td / 2 + ov];
-  ttStair({ rect: r, y0: sy0, y1: y0b + H, dir: { w: 'e', e: 'w', s: 'n', n: 's' }[f], mat: S }, { bag, col });
+  if (!el.staged) ttStair({ rect: r, y0: sy0, y1: y0b + H, dir: { w: 'e', e: 'w', s: 'n', n: 's' }[f], mat: S }, { bag, col });
   if (el.temple) {
     // the temple: plastered walls, its doorway over the stair, a red cornice and a crest of almenas
     const T = el.temple, ty = y0b + H, [w, d] = [T.w / 2, T.d / 2], top = ty + T.h;
@@ -257,6 +269,17 @@ function compound(el, ctx) {
       patch(bag, spall ? RB : rand() < 0.5 ? 'lime_plaster' : 'stucco_pale', nx ? [c, y, u] : [u, y, c], [nx, 0, nz], w, hh, Math.floor(rand() * 1e6), spall ? 0.004 : 0.01);
     }
   }
+  if (el.simple) {
+    // the far tile: the wall, the rooms as blocks on their platforms and the patio's floor; no fronts, rooms or furniture
+    const cw = (x1 - x0 - 2) / 3, cd = (z1 - z0 - 2) / 3;
+    bag.add('stucco_pale', frustum([x0 + 1 + cw + 0.5, z0 + 1 + cd + 0.5, x0 + 1 + 2 * cw - 0.5, z0 + 1 + 2 * cd - 0.5], -0.2, 0.06, 0, 0, 0, 0, { noBottom: true }));
+    for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) {
+      if (i === 1 && j === 1) continue;
+      const r = [x0 + 1 + i * cw + 0.6, z0 + 1 + j * cd + 0.6, x0 + 1 + (i + 1) * cw - 0.6, z0 + 1 + (j + 1) * cd - 0.6];
+      bag.add(S, box(r[0], 0, r[1], r[2], i === 1 && j === 0 ? h + 0.4 : h - 0.2, r[3]));
+    }
+    return;
+  }
   streetFront(ctx, el.rect, gate, h, el.seed || 1, el.rich ?? 0.6);
   // rooms: a grid of blocks, the middle cell the main patio, another the second patio
   const nx = 3, nz = 3, cw = (x1 - x0 - 2) / nx, cd = (z1 - z0 - 2) / nz, second = [0, 2, 6, 8][Math.floor(rand() * 4)];
@@ -315,6 +338,6 @@ function compound(el, ctx) {
 
 registerStyle('teotihuacano', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, tt_pyramid: ttPyramid, tt_wall: ttWall, tt_stair: ttStair, tt_floor: ttFloor, compound, tt_palace: ttPalace, tt_jaguars: ttJaguars, tt_plaza_altars: ttPlazaAltars, tt_cross_altar: ttCrossAltar, tt_goddess: ttGoddess, tt_people: ttPeople, tt_market: ttMarket, meso_plants: mesoPlants, tt_avenue: ttAvenue, tt_puma: ttPuma },
+  elements: { ...STYLES.qing.elements, tt_pyramid: ttPyramid, tt_wall: ttWall, tt_stair: ttStair, tt_floor: ttFloor, compound, tt_palace: ttPalace, tt_jaguars: ttJaguars, tt_plaza_altars: ttPlazaAltars, tt_cross_altar: ttCrossAltar, tt_goddess: ttGoddess, tt_people: ttPeople, tt_market: ttMarket, meso_plants: ttPlants, tt_avenue: ttAvenue, tt_puma: ttPuma },
   objects: {},
 });

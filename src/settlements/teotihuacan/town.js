@@ -2,6 +2,7 @@
 // nopal grown in the open ground between them (§12).
 import { RADIUS, AVENUE, KEEP_CLEAR, PALACE_CLEAR, MARKET, MARKET_PLATFORM, compounds, emptyLots, inCompound, inRect } from './layout.js';
 import { ground } from './ground.js';
+import { lodTiles } from '../lod.js';
 const base = (id, elements) => ({ id, style: 'teotihuacano', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -80], facing: 'e' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /**
@@ -47,7 +48,8 @@ function plants() {
 }
 export async function town() {
   const all = compounds(), plans = [];
-  for (let i = 0; i < all.length; i += 40) plans.push(base(`teotihuacan-compounds-${i / 40}`, all.slice(i, i + 40).map((c) => ({ t: 'compound', ...c }))));
+  // the compounds in 100 m tiles, each in full near (rooms, furniture, fronts) and as blocks beyond 130 m (src/settlements/lod.js)
+  plans.push(...lodTiles('teotihuacan-compounds', 'teotihuacano', all.map((c) => ({ t: 'compound', ...c })), { near: 130, R: RADIUS, entrance: { at: [0, -80], facing: 'e' } }));
   // the Great Compound's market and its central platform with a small temple
   plans.push(base('teotihuacan-market', [{ t: 'tt_market', rect: MARKET, seed: 450, hole: MARKET_PLATFORM },
     { t: 'tt_pyramid', c: [(MARKET_PLATFORM[0] + MARKET_PLATFORM[2]) / 2, (MARKET_PLATFORM[1] + MARKET_PLATFORM[3]) / 2], y: 0.04, w: 24, d: 24, tw: 14, td: 14, h: 3.6, levels: 2, tablero: 0.5, stair: 'n', stairW: 5, talud: 'stucco_red', temple: { w: 6, d: 6, h: 3 } }]));
