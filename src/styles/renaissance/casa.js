@@ -13,7 +13,8 @@
 // { rect, front, storeys, kind, trade, plaster, seed, exposed, y, foot, simple }
 
 import { box, lathe, fromTriangles } from '../../core/geom.js';
-import { faceFrame, Local, ext, archOutline, archRise, voussoirs, wrect } from './face.js';
+import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
+import { faceFrame, Local, ext, archOutline, archRise, voussoirs, wrect, dropBack } from './face.js';
 import { rusticate } from './signoria.js';
 import { openGround, openUpper, doorAt } from './casa-open.js';
 
@@ -22,6 +23,30 @@ const WALLS = ['stucco_pale', 'stucco_siena', 'stucco_ochre', 'stucco_cream', 's
 const SHUT = ['shutter_brown', 'shutter_brown', 'wood_dark', 'shutter_grey'];
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const pick = (rand, l) => l[Math.floor(rand() * l.length)];
+
+// ── the budget (DESIGN §8): what no one can see is not built. A dark opening is only its front face (the
+// reveal is inside the wall's thickness and the stone ring round it); a stone ring has no back against the wall;
+// a piece standing on the wall has no face toward it.
+/** An outline as one flat face at depth d (the front cap of an extrusion). */
+function fl(pts, d) {
+  const g = ext(pts, [], d - 0.01, d), P = g.attributes.position.array, N = g.attributes.normal.array, kp = [], kn = [];
+  for (let i = 0; i < P.length; i += 9) { if (N[i + 2] < 0.99 || N[i + 5] < 0.99 || N[i + 8] < 0.99) continue; for (let k = 0; k < 9; k++) { kp.push(P[i + k]); kn.push(N[i + k]); } }
+  const m = new BufferGeometry();
+  m.setAttribute('position', new Float32BufferAttribute(kp, 3)); m.setAttribute('normal', new Float32BufferAttribute(kn, 3));
+  return m;
+}
+/** A rectangle u0..u1 × y0..y1 as a flat face at depth d. */
+const flr = (u0, y0, u1, y1, d) => fl([[u0, y0], [u1, y0], [u1, y1], [u0, y1]], d);
+/** An extrusion without its back cap (it ends against the wall). */
+const xr = (pts, holes, d0, d1) => dropBack(ext(pts, holes, d0, d1));
+/** A Local whose boxes lose the face toward the wall when they stand within a hand of it. */
+class Fl extends Local {
+  box(mat, u0, y0, d0, u1, y1, d1) {
+    const a = Math.min(d0, d1), g = box(Math.min(u0, u1), Math.min(y0, y1), a, Math.max(u0, u1), Math.max(y0, y1), Math.max(d0, d1));
+    const inside = this.L === undefined || (Math.min(u0, u1) >= -1e-6 && Math.max(u0, u1) <= this.L + 1e-6);
+    return this.add(mat, this.noBack && inside && a >= -0.06 && a <= 0.12 ? dropBack(g) : g);
+  }
+}
 
 /** A hipped roof over R from height ye, the slopes at `pitch` degrees, overhang o; returns its rise. */
 function hip(bag, mat, R, ye, pitch, o) {
@@ -105,26 +130,26 @@ function win(Lc, uc, s, w, hs, rand, shut, lite, shape = 'round') {
   const ys = s + hs, n = lite ? 3 : 4;
   if (shape === 'rect') {
     // a plain rectangular window in a stone architrave under a flat lintel (the later quattrocento houses)
-    Lc.box(O, uc - w / 2, s, -0.03, uc + w / 2, ys, 0.02);
+    Lc.add(O, flr(uc - w / 2, s, uc + w / 2, ys, 0.02));
     for (const sg of [-1, 1]) Lc.box(SER, uc + sg * (w / 2 + 0.09) - 0.09, s - 0.1, -0.03, uc + sg * (w / 2 + 0.09) + 0.09, ys + 0.12, 0.1);
     Lc.box(SER, uc - w / 2 - 0.2, ys, -0.03, uc + w / 2 + 0.2, ys + 0.2, 0.14); Lc.box(SER, uc - w / 2 - 0.2, s - 0.2, -0.03, uc + w / 2 + 0.2, s - 0.1, 0.2);
   } else {
     // a round arch or, in the older Gothic houses, a pointed one
-    Lc.box(O, uc - w / 2, s, -0.03, uc + w / 2, ys, 0.02);
-    Lc.add(SER, ext(archOutline(uc, s - 0.12, w + 0.34, ys, shape, 2), [archOutline(uc, s - 0.12 + 0.0, w, ys, shape, 2)], -0.03, 0.1));
+    Lc.add(O, flr(uc - w / 2, s, uc + w / 2, ys, 0.02));
+    Lc.add(SER, xr(archOutline(uc, s - 0.12, w + 0.34, ys, shape, 2), [archOutline(uc, s - 0.12 + 0.0, w, ys, shape, 2)], -0.03, 0.1));
   }
   if (shape !== 'rect') Lc.box(SER, uc - w / 2 - 0.22, s - 0.2, -0.03, uc + w / 2 + 0.22, s - 0.1, 0.2);
   if (rand() < 0.28) { Lc.box(shut, uc - w / 2, s, 0.03, uc + w / 2, ys, 0.07); return; }               // the shutters closed
   if (!lite) {
-    Lc.box(W, uc - 0.025, s, 0.03, uc + 0.025, ys + 0.1, 0.06); Lc.box(W, uc - w / 2, s + hs * 0.62, 0.03, uc + w / 2, s + hs * 0.62 + 0.05, 0.06);      // the casement's mullion and transom
-    for (const sg of [-1, 1]) Lc.box(shut, uc + sg * (w / 2 + 0.17), s, 0.04, uc + sg * (w / 2 + 0.17 + 0.42), ys - 0.1, 0.075);
+    Lc.add(W, flr(uc - 0.025, s, uc + 0.025, ys + 0.1, 0.06)); Lc.add(W, flr(uc - w / 2, s + hs * 0.62, uc + w / 2, s + hs * 0.62 + 0.05, 0.06));      // the casement's mullion and transom
+    for (const sg of [-1, 1]) Lc.add(shut, flr(uc + sg * (w / 2 + 0.17), s, uc + sg * (w / 2 + 0.17 + 0.42), ys - 0.1, 0.075));
   }
 }
 /** A pair of windows under one round arch (a bifora), the colonnette between: for the palace. */
 function bif(Lc, uc, s, w, hs, lite) {
-  const ys = s + hs, n = lite ? 4 : 6, lw = (w - 0.3) / 2;
-  Lc.add(O, ext(archOutline(uc, s, w, ys, 'round', n), [], -0.03, 0.02));
-  Lc.add(SER, ext(archOutline(uc, s - 0.12, w + 0.44, ys + 0.12, 'round', n), [archOutline(uc, s - 0.12, w, ys, 'round', n)], -0.03, 0.14));
+  const ys = s + hs, n = lite ? 3 : 4, lw = (w - 0.3) / 2;
+  Lc.add(O, fl(archOutline(uc, s, w, ys, 'round', n), 0.02));
+  Lc.add(SER, xr(archOutline(uc, s - 0.12, w + 0.44, ys + 0.12, 'round', n), [archOutline(uc, s - 0.12, w, ys, 'round', n)], -0.03, 0.14));
   void lw;
   Lc.box(SER, uc - 0.06, s, 0.0, uc + 0.06, ys - 0.45, 0.14);
   Lc.box(SER, uc - w / 2 - 0.25, s - 0.2, -0.03, uc + w / 2 + 0.25, s - 0.1, 0.3);
@@ -172,16 +197,16 @@ export function casa(el, { bag, col }) {
     const main = face === f;
     const Rg = el.rect, Ru = jet && !tow ? R : el.rect;
     const { M: FMg, L: Lg } = faceFrame(Rg, face, y), { M: FMu, L: Lu } = faceFrame(Ru, face, y);
-    const Lc = new Local(); Lc.noBack = true; Lc.L = Lg;
+    const Lc = new Fl(); Lc.noBack = true; Lc.L = Lg;
     Lc.put = (u0, y0, d0, u1, y1, d1) => Lc.box(PF, u0, y0, d0, u1, y1, d1);
-    const Lu2 = new Local(); Lu2.noBack = true; Lu2.L = Lu;
+    const Lu2 = new Fl(); Lu2.noBack = true; Lu2.L = Lu;
     // upper floors: windows on every exposed face
     const nbU = Math.max(0, Math.round((Lu - 0.8) / (pal ? 4.4 : tow ? 4 : 3.1)));
     const bu = (i) => (i + 0.5) * Lu / nbU;
     for (let s = 1; s < top && nbU > 0; s++) {
       if (!main && rand() < 0.2) continue;
       for (let i = 0; i < nbU; i++) {
-        if (tow) { if (rand() < 0.45) continue; const u = bu(i); Lu2.add(O, ext(archOutline(u, ys[s] + 1.2, 0.34, ys[s] + 2.3, 'round', 3), [], -0.03, 0.02)); Lu2.box(PF, u - 0.3, ys[s] + 1.1, -0.03, u + 0.3, ys[s] + 1.2, 0.12); continue; }
+        if (tow) { if (rand() < 0.45) continue; const u = bu(i); Lu2.add(O, fl(archOutline(u, ys[s] + 1.2, 0.34, ys[s] + 2.3, 'round', 3), 0.02)); Lu2.box(PF, u - 0.3, ys[s] + 1.1, -0.03, u + 0.3, ys[s] + 1.2, 0.12); continue; }
         if (pal) { bif(Lu2, bu(i), ys[s] + 1.0, 2.0, s === 1 ? 2.4 : 1.9, simple); continue; }
         const wdt = s === 1 ? 1.05 : 0.95, sill = ys[s] + (s === 1 ? 0.95 : 0.9), hsw = s === 1 ? 1.55 : 1.35;
         if (manner === 'quatt' && s === 1 && Lu > 4.5 && !simple) { bif(Lu2, bu(i), ys[s] + 0.9, 1.75, 1.95, false); continue; }
@@ -204,7 +229,7 @@ export function casa(el, { bag, col }) {
         // the portal with its voussoirs, the barred windows high in the wall, the bench, the rings and the torch-holder
         const pw = 3.0, pu = L * (0.3 + rand() * 0.4), pys = 3.6;
         holes.push({ u0: pu - pw / 2 - 0.85, u1: pu + pw / 2 + 0.85, y0: 0.2, y1: pys + pw / 2 + 0.87, hw: (yy) => (yy <= pys ? pw / 2 + 0.04 : Math.sqrt(Math.max(0, (pw / 2 + 0.85) ** 2 - (yy - pys) ** 2)) + 0.02) });
-        Lc.add(O, ext(archOutline(pu, 0.15, pw, pys, 'round', 5), [], -0.03, 0.01));
+        Lc.add(O, fl(archOutline(pu, 0.15, pw, pys, 'round', 5), 0.01));
         for (const sg of [-1, 1]) Lc.box(W, pu + sg * 0.02, 0.15, 0, pu + sg * pw / 2 + (sg < 0 ? 0.04 : -0.04), pys - 0.1, 0.1);
         voussoirs(Lc, PF, pu, pys, pw / 2, pw / 2 + 0.85, -0.04, 0.34, 9, 0.06);
         Lc.box(PF, pu - pw / 2 - 1.0, -0.1, 0.1, pu + pw / 2 + 1.0, 0.12, 1.0); col.rect(wrect(FMg, pu - pw / 2 - 1.0, 0.1, pu + pw / 2 + 1.0, 1.0), y, y + 0.12);
@@ -212,7 +237,7 @@ export function casa(el, { bag, col }) {
         for (let i = 0; i < nw; i++) {
           const u = (i + 0.5) * L / nw; if (Math.abs(u - pu) < pw / 2 + 1.6) continue;
           holes.push({ u0: u - 0.55, u1: u + 0.55, y0: 2.3, y1: 3.5 });
-          Lc.add(O, ext([[u - 0.5, 2.35], [u + 0.5, 2.35], [u + 0.5, 3.45], [u - 0.5, 3.45]], [], -0.03, 0.01));
+          Lc.add(O, fl([[u - 0.5, 2.35], [u + 0.5, 2.35], [u + 0.5, 3.45], [u - 0.5, 3.45]], 0.01));
           Lc.box(PF, u - 0.62, 2.15, -0.04, u + 0.62, 2.35, 0.3);
           for (let k = -1; k <= 1; k++) Lc.box(IR, u + k * 0.3 - 0.02, 2.35, 0.02, u + k * 0.3 + 0.02, 3.45, 0.06);
           // the stone bench under it
@@ -237,15 +262,15 @@ export function casa(el, { bag, col }) {
         for (const it of items) {
           if (it === 'door') {
             const c = u + doorW / 2, dh = 2.2;
-            Lc.add(O, ext(archOutline(c, 0.15, doorW, dh, 'round', 4), [], -0.03, 0.01));
-            Lc.add(SER, ext(archOutline(c, 0.0, doorW + 0.4, dh, 'round', 4), [archOutline(c, 0.15, doorW, dh, 'round', 4)], -0.03, 0.12));
+            Lc.add(O, fl(archOutline(c, 0.15, doorW, dh, 'round', 4), 0.01));
+            Lc.add(SER, xr(archOutline(c, 0.0, doorW + 0.4, dh, 'round', 4), [archOutline(c, 0.15, doorW, dh, 'round', 4)], -0.03, 0.12));
             Lc.box(W, c - doorW / 2, 0.15, 0.0, c - doorW / 2 + 0.06, dh, 0.7 * doorW); Lc.box(SER, c - doorW / 2 - 0.3, -0.08, 0.1, c + doorW / 2 + 0.3, 0.1, 0.7);
             u += doorW + pier; continue;
           }
           const c = u + aw / 2, bot = 0.1;
-          Lc.add(O, ext(archOutline(c, bot, aw, ysp, pt, 5), [], -0.03, 0.01));
+          Lc.add(O, fl(archOutline(c, bot, aw, ysp, pt, 5), 0.01));
           // the arch's stone ring, its two jambs, the counter (the shutter let down) on its legs, the awning (the other shutter propped up)
-          Lc.add(PF, ext(archOutline(c, 0.0, aw + 0.5, ysp, pt, 5), [archOutline(c, bot, aw, ysp, pt, 5)], -0.03, 0.2));
+          Lc.add(PF, xr(archOutline(c, 0.0, aw + 0.5, ysp, pt, 5), [archOutline(c, bot, aw, ysp, pt, 5)], -0.03, 0.2));
           Lc.box(W, c - aw / 2, 0.92, -0.03, c + aw / 2, 1.0, 0.7); Lc.box(W, c - aw / 2 + 0.05, 0.0, 0.5, c - aw / 2 + 0.1, 0.92, 0.55); Lc.box(W, c + aw / 2 - 0.1, 0.0, 0.5, c + aw / 2 - 0.05, 0.92, 0.55);
           Lc.box(W, c - aw / 2, 0.1, -0.02, c + aw / 2, 0.92, 0.04);
           col.rect(wrect(FMg, c - aw / 2, 0, c + aw / 2, 0.7), y, y + 1.0);
@@ -258,13 +283,13 @@ export function casa(el, { bag, col }) {
       } else {
         // a house: the door, a small barred window or two, sometimes the stone bench
         const doorW = 1.35, du0 = L * (0.2 + rand() * 0.6), du = open ? doorAt(L) : du0, dh = 2.25;
-        if (!open) Lc.add(O, ext(archOutline(du, 0.15, doorW, dh, 'round', 4), [], -0.03, 0.01));
-        Lc.add(SER, ext(archOutline(du, 0.0, doorW + 0.4, dh, 'round', 4), [archOutline(du, 0.15, doorW, dh, 'round', 4)], -0.03, 0.12));
+        if (!open) Lc.add(O, fl(archOutline(du, 0.15, doorW, dh, 'round', 4), 0.01));
+        Lc.add(SER, xr(archOutline(du, 0.0, doorW + 0.4, dh, 'round', 4), [archOutline(du, 0.15, doorW, dh, 'round', 4)], -0.03, 0.12));
         if (!open) Lc.box(W, du - doorW / 2, 0.15, 0.0, du - doorW / 2 + 0.06, dh, 0.7 * doorW); Lc.box(SER, du - doorW / 2 - 0.3, -0.08, 0.1, du + doorW / 2 + 0.3, 0.1, 0.7);
         const nw = Math.max(0, Math.round((L - 3) / 3.1));
         for (let i = 0; i < nw; i++) {
           const u = (i + 0.5) * L / nw; if (Math.abs(u - du) < 1.6) continue;
-          Lc.add(O, ext([[u - 0.35, 1.6], [u + 0.35, 1.6], [u + 0.35, 2.5], [u - 0.35, 2.5]], [], -0.03, 0.01)); Lc.box(SER, u - 0.45, 1.45, -0.03, u + 0.45, 1.6, 0.16);
+          Lc.add(O, fl([[u - 0.35, 1.6], [u + 0.35, 1.6], [u + 0.35, 2.5], [u - 0.35, 2.5]], 0.01)); Lc.box(SER, u - 0.45, 1.45, -0.03, u + 0.45, 1.6, 0.16);
           for (let k = -1; k <= 1; k++) Lc.box(IR, u + k * 0.22 - 0.015, 1.6, 0.02, u + k * 0.22 + 0.015, 2.5, 0.05);
           if (rand() < 0.35) { Lc.box(PF, u - 1.0 > 0 ? u - 1.0 : 0.1, -0.2, 0.3, Math.min(L - 0.1, u + 1.0), 0.45, 0.75); col.rect(wrect(FMg, Math.max(0.1, u - 1.0), 0.3, Math.min(L - 0.1, u + 1.0), 0.75), y, y + 0.45); }
         }
@@ -281,8 +306,8 @@ export function casa(el, { bag, col }) {
     if (main && !simple) {
       const L = Lg, wet = !pal && !tow;
       if (wet) {
-        for (let k = 0, n = 2 + Math.floor(L / 3); k < n; k++) { const u = rand() * (L - 1.5), w = 0.8 + rand() * 1.6; Lc.box(el.plaster ? 'plaster_damp' : 'plaster_damp', u, 0.0, 0.0, Math.min(L, u + w), 0.5 + rand() * 0.7, 0.025); }
-        if (el.plaster) for (let k = 0, n = 1 + Math.floor(L / 2.5); k < n; k++) { const u = 0.3 + rand() * (L - 0.9), h0 = ys[Math.min(top, 2)] - rand() * 2.5; Lu2.box('plaster_streak', u, h0 - 1.2 - rand() * 1.5, 0.0, u + 0.2 + rand() * 0.3, h0, 0.022); }
+        for (let k = 0, n = 2 + Math.floor(L / 3); k < n; k++) { const u = rand() * (L - 1.5), w = 0.8 + rand() * 1.6; Lc.add('plaster_damp', flr(u, 0.0, Math.min(L, u + w), 0.5 + rand() * 0.7, 0.025)); }
+        if (el.plaster) for (let k = 0, n = 1 + Math.floor(L / 2.5); k < n; k++) { const u = 0.3 + rand() * (L - 0.9), h0 = ys[Math.min(top, 2)] - rand() * 2.5; Lu2.add('plaster_streak', flr(u, h0 - 1.2 - rand() * 1.5, u + 0.2 + rand() * 0.3, h0, 0.022)); }
       }
       if (!pal && !tow && rand() < 0.38) { const u = Math.min(L - 0.5, Math.max(0.5, L / 2 + (rand() < 0.5 ? -1 : 1) * (0.2 + rand()))); Lc.box(SER, u - 0.28, gh - 0.95, 0.0, u + 0.28, gh - 0.35, 0.09); Lc.box(['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_green'][Math.floor(rand() * 4)], u - 0.2, gh - 0.88, 0.09, u + 0.2, gh - 0.5, 0.11); Lc.box('cloth_white', u - 0.2, gh - 0.73, 0.1, u + 0.2, gh - 0.65, 0.12); }
       if (!tow && rand() < 0.3) { const u = rand() < 0.5 ? 0.35 : L - 0.35; Lc.box(IR, u - 0.02, 3.3, 0.0, u + 0.02, 3.5, 0.75); Lc.box(IR, u - 0.015, 3.5, 0.7, u + 0.015, 4.0, 0.74); Lc.add('lamp_glass', lathe([[0.001, 0], [0.1, 0.05], [0.12, 0.2], [0.001, 0.28]], 6, null, u, 3.1, 0.72)); }
@@ -294,7 +319,7 @@ export function casa(el, { bag, col }) {
     }
     // the cornice / eave: on the upper rectangle (its brackets along the front and sides)
     if (!pal) {
-      for (let u = 0.3; u < Lu - 0.2; u += 0.95) Lu2.box(W, u, H - 0.5, -0.03, u + 0.11, H - 0.1, 0.8 + (tow ? 0 : 0.0));
+      for (let u = 0.3; u < Lu - 0.2; u += 1.25) Lu2.box(W, u, H - 0.5, -0.03, u + 0.11, H - 0.1, 0.8 + (tow ? 0 : 0.0));
     } else {
       const long = face === 'e' || face === 'w', ring = (a, b, d) => Lu2.box(PF, long ? -d : 0, H + a, -0.04, long ? Lu + d : Lu, H + b, d);
       ring(-0.55, 0, 0.3); ring(0, 0.2, 0.55);
@@ -305,7 +330,7 @@ export function casa(el, { bag, col }) {
   }
   if (simple) {
     // the far view: the shop arches and the windows as dark rectangles
-    const { M, L } = faceFrame(el.rect, f, y), Ls = new Local(); Ls.noBack = true; Ls.L = L;
+    const { M, L } = faceFrame(el.rect, f, y), Ls = new Fl(); Ls.noBack = true; Ls.L = L;
     const nb = Math.max(1, Math.round(L / 3.4));
     for (let i = 0; i < nb; i++) { const u = (i + 0.5) * L / nb; if (shop || pal) Ls.box(O, u - 1.0, 0.1, -0.03, u + 1.0, Math.min(3.4, gh - 0.8), 0.02); for (let s = 1; s < top; s++) Ls.box(O, u - 0.5, ys[s] + 0.9, -0.03, u + 0.5, ys[s] + 2.4, 0.02); }
     Ls.emit(bag, M);
