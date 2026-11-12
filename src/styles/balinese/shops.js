@@ -81,8 +81,8 @@ export function shop(el, ctx) {
     for (let k = 0; k < 5; k++) hang(['cloth_red', 'cloth_black', 'cloth_ochre', 'cloth_indigo', 'cloth_red'][k], u0 + 0.4 + k * (sw - 1.2) / 4, D - 0.5, 1.3, 0.55);
   } else if (kind === 'offerings') {
     // the seller of offerings: a low table of trays of canang and flowers (marigold and frangipani in baskets), strips of young coconut leaf (janur) hung to dry, rolled leaf
-    B('wood_dark', u0 + 0.2, 0.4, u1 - 0.9, 1.1, fl, fl + 0.7, true); B('reed_mat', u0 + 0.15, 0.35, u1 - 0.85, 1.15, fl + 0.7, fl + 0.73);
-    for (let i = 0; i < Math.floor((sw - 1.3) / 0.33); i++) { const p = P(u0 + 0.45 + i * 0.33, 0.75); canang(ctx, p[0], fl + 0.73, p[1], i); const q = P(u0 + 0.45 + i * 0.33, 0.55); canang(ctx, q[0], fl + 0.73, q[1], i + 1); }
+    B('wood_dark', u0 + 0.2, 0.4, u1 - 1.6, 1.1, fl, fl + 0.7, true); B('reed_mat', u0 + 0.15, 0.35, u1 - 1.55, 1.15, fl + 0.7, fl + 0.73);
+    for (let i = 0; i < Math.floor((sw - 2.3) / 0.33); i++) { const p = P(u0 + 0.45 + i * 0.33, 0.75); canang(ctx, p[0], fl + 0.73, p[1], i); const q = P(u0 + 0.45 + i * 0.33, 0.55); canang(ctx, q[0], fl + 0.73, q[1], i + 1); }
     for (let k = 0; k < 3; k++) { pt('wicker', u1 - 0.7, D - 0.7 + (k - 1) * 0.3, fl, 0.22, 0.28); B(['cloth_ochre', 'cloth_white', 'cloth_red'][k], u1 - 0.8, D - 0.8 + (k - 1) * 0.3, u1 - 0.6, D - 0.6 + (k - 1) * 0.3, fl + 0.24, fl + 0.3); }
     for (let k = 0; k < 8; k++) { const u = u0 + 0.35 + k * (sw - 0.8) / 7; B('paint_ochre', u, D - 0.5, u + 0.05, D - 0.46, fl + 1.1 - (k % 3) * 0.15, fl + 2.0); }
     B('bamboo_culm', u0 + 0.25, D - 0.52, u1 - 0.25, D - 0.46, fl + 2.0, fl + 2.06);
@@ -99,7 +99,7 @@ export function shop(el, ctx) {
     for (let k = 0; k < 6; k++) pt('terracotta', u0 + 0.5 + (k % 3) * 0.4, -0.45 - Math.floor(k / 3) * 0.4, y, 0.14, 0.3);
   } else if (kind === 'cloth') {
     // the cloth seller: bolts hung from the beam in bright dyes, stacks folded on the counter, a shelf of folded kain behind, a scale
-    counter(u0 + 0.2, u1 - 0.3, 0.5, 1.0);
+    counter(u0 + 0.2, u0 + 3.1, 0.5, 1.0);
     for (let k = 0; k < 6; k++) B(['cloth_red', 'cloth_white', 'cloth_indigo', 'cloth_ochre', 'cloth_black', 'cloth_brown'][k], u0 + 0.35 + k * 0.28, 0.55, u0 + 0.6 + k * 0.28, 0.95, fl + 0.88, fl + 0.88 + 0.1 + (k % 3) * 0.06);
     for (let k = 0; k < 6; k++) hang(['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green', 'cloth_white', 'cloth_red'][k], u0 + 0.3 + k * (sw - 0.9) / 5, 1.6, 1.4, 0.5);
     B('wood_dark', u0 + 0.2, D - 0.5, u1 - 0.2, D - 0.2, fl + 0.6, fl + 0.66); B('wood_dark', u0 + 0.2, D - 0.5, u1 - 0.2, D - 0.2, fl + 1.3, fl + 1.36);

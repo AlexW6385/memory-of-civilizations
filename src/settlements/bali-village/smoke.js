@@ -3,7 +3,7 @@
 // come from layout.js. Emitters in the settlement's frame.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, PURA, BANYAN, lots } from './layout.js';
+import { RADIUS, PURA, BANYAN, DALEM_C, lots, lotFrame } from './layout.js';
 
 const ID = 'bali-village';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -17,6 +17,15 @@ function emitters() {
     const a = l.front === 'e' ? [x1 - 4.4, cz - 4] : l.front === 'w' ? [x0 + 4.4, cz - 4] : l.front === 'n' ? [cx - 4, z0 + 4.4] : [cx - 4, z1 - 4.4];
     E.push({ p: [a[0] + (rand() - 0.5) * 3, 3.4, a[1] + (rand() - 0.5) * 3], kind: 'kitchen', thr: rand(), seed: l.seed + 1 });
   }
+  // the trades: steam from the warung's pot and the smith's forge through the thatch by day, incense at the offering sellers'; the pura dalem's incense (its frame turned: local (dx, dz) is world (cx − dz, cz + dx))
+  for (const l of lots()) {
+    if (!l.shop) continue;
+    const F = lotFrame(l), { kind, u0, u1 } = l.shop;
+    if (kind === 'warung') { const p = F(u1 - 0.8, 2.3); E.push({ p: [p[0], 3.5, p[1]], kind: 'steam', thr: 0.1, seed: l.seed + 3 }); }
+    else if (kind === 'pande') { const p = F(u0 + 1.1, 2.2); E.push({ p: [p[0], 3.6, p[1]], kind: 'steam', thr: 0.0, seed: l.seed + 4 }); E.push({ p: [p[0], 3.4, p[1]], kind: 'kitchen', thr: 0.0, seed: l.seed + 5 }); }
+    else if (kind === 'offerings') { const p = F(u0 + 0.3, 0.5); E.push({ p: [p[0], 1.5, p[1]], kind: 'incense', thr: 0.3, seed: l.seed + 6 }); }
+  }
+  { const [cx, cz] = DALEM_C, W2 = (dx, dz) => [cx - dz, cz + dx]; for (const [dx, dz, y, sd] of [[0, -7.8, 1.5, 11], [-5.4, -3.0, 1.4, 12], [5.6, -9.2, 1.3, 13]]) { const q = W2(dx, dz); E.push({ p: [q[0], y, q[1]], kind: 'incense', thr: 0, seed: sd }); } }
   // incense at the temple: before the padmasana and the meru, at the banyan's shrine
   E.push({ p: [26, PURA.y2 + 1.2, -143], kind: 'incense', thr: 0, seed: 7 });
   E.push({ p: [0, PURA.y2 + 1.0, -138], kind: 'incense', thr: 0, seed: 8 });
@@ -56,7 +65,7 @@ registerSystem({
       smoke.mesh.visible = true;
       const h = solarHour();
       const kitchen = Math.max(bump(h, 6.0, 0.8, 0.6), bump(h, 17.5, 1.0, 0.9));
-      smoke.setLevels(kitchen, 1, 0, Math.max(bump(h, 5.6, 1.4, 1.0), bump(h, 6.5, 1.0, 0.7)), h < 9 ? 0 : h < 15 ? 1 : 2);
+      smoke.setLevels(kitchen, 1, h > 6.2 && h < 17.2 ? 0.7 : 0, Math.max(bump(h, 5.6, 1.4, 1.0), bump(h, 6.5, 1.0, 0.7)), h < 9 ? 0 : h < 15 ? 1 : 2);
     }
   },
 });

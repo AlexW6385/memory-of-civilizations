@@ -2,13 +2,13 @@
 // flooded, packed earth in the streets and the temple's courts, groves of coconut (the date palm stands in), bamboo and banyan about the compounds, the humid sky of the
 // tropics at 8° S.
 
-import { RADIUS, CORE, PURA, BANYAN, WANTILAN, height, flooded, lots, inRect, inLot, inPura, streets, smooth as sm } from './layout.js';
+import { RADIUS, CORE, PURA, BANYAN, WANTILAN, DALEM, DALEM_C, inDalem, height, flooded, lots, inRect, inLot, inPura, streets, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 const inCore = (x, z) => inRect(CORE, x, z);
 function cover(x, z, h) {
   const c = { sand: 0, grass: 0.5, rock: 0, soil: 0.4, fields: 0, dry: 0.05, warmth: 0.5, red: 0.2, road: 0, snow: 0, forest: 0 };
-  if (inPura(x, z, 0.5)) { c.grass = 0.1; c.soil = 0.5; c.road = 0.7; return c; }
+  if (inPura(x, z, 0.5) || inDalem(x, z, 0.3)) { c.grass = 0.1; c.soil = 0.5; c.road = 0.7; return c; }
   if (streets().some((r) => inRect(r, x, z))) { c.road = 0.8; c.soil = 0.5; c.grass = 0.1; return c; }
   if (inCore(x, z)) { if (inLot(x, z, 0.3)) { c.road = 0.6; c.soil = 0.5; c.grass = 0.15; } return c; }
   c.fields = flooded(x, z, h ?? height(x, z)) ? 0.1 : 0.85; c.grass = 0.3; c.soil = 0.5;
@@ -23,6 +23,11 @@ function planting(x, z, p) {
   if (r > RADIUS - 6) return null;
   if (Math.hypot(x - BANYAN[0], z - BANYAN[1]) < 2.2) return { banyan: 8 };
   if (Math.hypot(x - BANYAN[0], z - BANYAN[1]) < 3.4) return null;
+  // the pura dalem: its own banyan (local (−5, 6.5) of the temple turned to face the street), a frangipani at each side of the gate, nothing else in the court
+  if (inDalem(x, z, 1.5)) {
+    if (Math.hypot(x - (DALEM_C[0] - 6.5), z - (DALEM_C[1] - 5)) < 2.2) return { banyan: 8 };
+    return null;
+  }
   if (inPura(x, z, 1.5) || streets().some((q) => inRect(q, x, z, 0.4)) || inRect(WANTILAN, x, z, 3)) return null;
   if (inLot(x, z, 0.3)) {
     // in a compound only the occasional frangipani (a fig stands in) or coconut in the natah's corner
@@ -56,4 +61,4 @@ export const ground = {
     ],
   },
 };
-void sm;
+void sm; void DALEM;
