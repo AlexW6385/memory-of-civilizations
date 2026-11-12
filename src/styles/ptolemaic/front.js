@@ -4,6 +4,7 @@
 // north colonnade. Both [inferred] in form from Ptolemaic temple gateways and Hellenistic palace walls. Registered into `ptolemaic`.
 
 import { box, frustum, lathe, rod } from '../../core/geom.js';
+import { rng, sack, amphora, awning, crate, lampBracket } from './dress.js';
 
 function cavetto(bag, mat, [x0, z0, x1, z1], y, h = 0.7, out = 0.45) {
   for (let k = 0; k < 4; k++) { const f = k / 4, o = out * (1 - Math.cos(f * Math.PI / 2)); bag.add(mat, box(x0 - o - 0.02, y - h + f * h, z0 - o - 0.02, x1 + o + 0.02, y - h + (k + 1) / 4 * h, z1 + o + 0.02)); }
@@ -57,4 +58,30 @@ function wallFront(el, ctx) {
     cavetto(bag, 'sandstone', [a[0] - 0.7, zc - 0.4, a[1] + 0.7, zc + 0.4], y + 6.9, 0.7, 0.45);
   }
 }
-export const FRONT_EL = { harbour_gate: harbourGate, wall_front: wallFront };
+/**
+ * customs_post: { at [x, z], y, seed } — the harbour's tax post on the promenade (the telonion): four posts under a striped awning, the
+ * clerk's table with the ledger and a pair of scales, a tally board with its red marks, sacks and sealed jars waiting to be assessed, a stool,
+ * a lamp on its bracket, the tariff stele beside it. 5 × 3.4 m, axis-aligned. [inferred: the Ptolemaic harbour dues, Wikipedia "Ptolemaic Kingdom"]
+ */
+function customsPost(el, ctx) {
+  const { bag, col } = ctx, [x, z] = el.at, y = el.y ?? 0, rand = rng(el.seed ?? 5), x0 = x - 2.5, x1 = x + 2.5, z0 = z - 1.7, z1 = z + 1.7;
+  for (const [px, pz] of [[x0 + 0.1, z0 + 0.1], [x1 - 0.1, z0 + 0.1], [x0 + 0.1, z1 - 0.1], [x1 - 0.1, z1 - 0.1]]) { bag.add('timber', box(px - 0.07, y, pz - 0.07, px + 0.07, y + 2.9, pz + 0.07)); col.circle(px, pz, 0.1, y, y + 2.9); }
+  bag.add('timber', box(x0, y + 2.75, z0 + 0.05, x1, y + 2.9, z0 + 0.15)); bag.add('timber', box(x0, y + 2.75, z1 - 0.15, x1, y + 2.9, z1 - 0.05));
+  awning(bag, [x0, z0 - 0.3, x - 0.01, z1 + 0.3], 'z0', y + 3.0, y + 2.7, 'cloth_red'); awning(bag, [x + 0.01, z0 - 0.3, x1, z1 + 0.3], 'z0', y + 3.0, y + 2.7, 'cloth_white');
+  bag.add('wood_dark', box(x - 1.2, y + 0.72, z - 0.35, x + 1.2, y + 0.8, z + 0.35)); for (const sx of [-1, 1]) for (const sz of [-1, 1]) bag.add('wood_dark', box(x + sx * 1.1 - 0.04, y, z + sz * 0.28 - 0.04, x + sx * 1.1 + 0.04, y + 0.72, z + sz * 0.28 + 0.04));
+  col.rect([x - 1.2, z - 0.35, x + 1.2, z + 0.35], y, y + 0.8);
+  bag.add('ivory', box(x - 0.9, y + 0.8, z - 0.2, x - 0.3, y + 0.83, z + 0.2)); bag.add('linen', box(x - 0.85, y + 0.83, z - 0.15, x - 0.35, y + 0.85, z + 0.15));
+  const bx = x + 0.6;                                                                    // the balance: a post, the beam, two pans on cords
+  bag.add('bronze', rod([bx, y + 0.8, z], [bx, y + 1.35, z], 0.03, 5)); bag.add('bronze', rod([bx - 0.4, y + 1.35, z], [bx + 0.4, y + 1.35, z], 0.02, 5));
+  for (const d of [-0.4, 0.4]) { bag.add('rope_fibre', rod([bx + d, y + 1.35, z], [bx + d, y + 0.95, z], 0.008, 3)); bag.add('bronze', lathe([[0.001, 0], [0.14, 0.03], [0.12, 0.06], [0.001, 0.04]], 8, null, bx + d, y + 0.9, z)); }
+  bag.add('timber', box(x + 0.4, y, z + 0.9, x + 0.9, y + 0.42, z + 1.3)); col.circle(x + 0.65, z + 1.1, 0.3, y, y + 0.42);        // the stool
+  bag.add('plaster_white', box(x1 - 0.55, y + 0.3, z0 - 0.02, x1 - 0.05, y + 1.9, z0 + 0.04)); bag.add('timber', box(x1 - 0.6, y, z0 - 0.04, x1 - 0.5, y + 2.0, z0 + 0.06));
+  for (let k = 0; k < 6; k++) bag.add('cloth_red', box(x1 - 0.5, y + 0.45 + k * 0.22, z0 - 0.04, x1 - 0.1 - rand() * 0.15, y + 0.5 + k * 0.22, z0 - 0.02));
+  for (let k = 0; k < 6; k++) sack(bag, x - 2.3 + (k % 3) * 0.5, y + Math.floor(k / 3) * 0.34, z1 - 0.55, rand() * 3, 'sacking');
+  col.rect([x - 2.45, z1 - 0.85, x - 0.9, z1 - 0.25], y, y + 0.9);
+  for (let k = 0; k < 4; k++) amphora(bag, x1 - 0.5 - k * 0.38, y, z1 - 0.5, { s: 1, seg: 6, mat: k % 2 ? 'terracotta' : 'stucco_siena' });
+  crate(bag, col, x - 1.7, y, z0 + 0.5, 0.7, 0.5, 0.5);
+  lampBracket(bag, x1 - 0.1, y + 2.4, z0 + 0.1, 0, -1);
+  bag.add('limestone', box(x1 + 0.7, y, z - 0.3, x1 + 1.5, y + 0.3, z + 0.3)); bag.add('marble_smooth', box(x1 + 0.8, y + 0.3, z - 0.1, x1 + 1.4, y + 2.1, z + 0.1)); col.rect([x1 + 0.7, z - 0.3, x1 + 1.5, z + 0.3], y, y + 2.1);
+}
+export const FRONT_EL = { harbour_gate: harbourGate, wall_front: wallFront, customs_post: customsPost };

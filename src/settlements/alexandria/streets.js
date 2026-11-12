@@ -53,6 +53,14 @@ function quayLife() {
   E.push({ t: 'cargo_pile', at: [-300, -85], y, rot: 0, kind: 'logs', n: 3, seed: 3 });
   // the mole: nets and baskets along its sides
   for (const z of [-240, -190, -120]) E.push({ t: 'net_rack', at: [MOLE[0] + 1.6, z], y, rot: Math.PI / 2, len: 3.0, seed: z });
+  // the customs post on the promenade west of the pier, its clerk, its guard and the merchant with his bales waiting to be assessed
+  { const cx = 91, cz = -86.2, fq = (x, z) => Math.atan2(cx - x, cz - z);
+    E.push({ t: 'customs_post', at: [cx, cz], y, seed: 641 });
+    FIG.push({ at: [cx - 0.2, cz - 0.9], rot: Math.PI, pose: 'stand', dress: 'robe', over: 'cape', cloth: 'cloth_white', hat: 'brim', beard: true, skin: 'skin_medium', seed: 642 });
+    FIG.push({ at: [cx + 3.6, cz + 1.4], rot: 1.6, pose: 'stand', dress: 'tunic', over: 'cape', cloth: 'cloth_maroon', hat: 'brim', carry: 'staff', skin: 'skin_medium', hair: 'short', seed: 643 });
+    FIG.push({ at: [cx - 4.2, cz - 1.8], rot: fq(cx - 4.2, cz - 1.8), pose: 'talk', dress: 'robe', over: 'cape', cloth: 'cloth_indigo', beard: true, skin: 'skin_medium', seed: 644 });
+    FIG.push({ at: [cx - 4.9, cz - 0.9], rot: 1.1, pose: 'talk', dress: 'tunic', cloth: 'cloth_brown', hat: 'cap', skin: 'skin_dark', hair: 'short', seed: 645 });
+    E.push({ t: 'cargo_pile', at: [cx - 7.5, cz - 1.2], y, rot: 0.1, kind: 'bales', n: 2, seed: 646 }); }
   // the island of Pharos: palms along its quay, nets and the fishermen at them, the fuel for the fire stacked by its store, a shrine at the court
   { const I = isle();
     for (const [x, z] of I.palms) E.push({ t: 'ptol_tree', at: [x, z], y, kind: 'palm', h: 5.5 + rand() * 2.5, seed: Math.floor(rand() * 1e6) });

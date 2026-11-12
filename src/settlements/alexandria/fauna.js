@@ -18,7 +18,13 @@ const flights = [
   { kind: 'swallow', n: 4, lane: { a: [-420, 150], b: [-130, 150] }, y: [3, 12], speed: 8, half: 14 },
   { kind: 'swallow', n: 4, lane: { a: [90, 120], b: [90, 250] }, y: [3, 12], speed: 8, half: 10 },
 ];
+flights.push(
+  { kind: 'gull', n: 5, loop: { c: [60, -150], a: [70, 45], rot: 0.2 }, y: [16, 7], speed: 7 },
+  { kind: 'gull', n: 4, lane: { a: [-200, -112], b: [380, -112] }, y: [3, 14], speed: 8, half: 22 },
+  { kind: 'gull', n: 4, loop: { c: [-120, -232], a: [90, 20], rot: 0.1 }, y: [10, 5], speed: 7 },
+  { kind: 'kite', n: 2, loop: { c: [150, -85], a: [40, 20], rot: 0.4 }, y: [30, 18], speed: 8 });
 const perches = [];
+for (const [x, z] of [[60, -78], [43, -79], [77, -78], [116, -83.5], [-60, -83.5]]) perches.push({ kind: 'pigeon', x, z, y: GROUND + 0.1, rot: x * 0.11, range: [1.5, 1.3] });
 for (const [x, z] of [[30, -86], [110, -85], [200, -85], [-60, -86], [60, 70], [20, 70], [100, 112], [240, -50]]) perches.push({ kind: 'sparrow', x, z, y: GROUND + 0.1, rot: x * 0.07, range: [1.5, 1.3] });
 // sparrows on the paving at the house fronts and about the agora's booths, near the visitor's usual ways
 { let k = 0; for (const l of lots()) { if (k++ % 9) continue; const [x0, z0, x1, z1] = l.rect; perches.push({ kind: 'sparrow', x: (x0 + x1) / 2, z: l.front === 'n' ? z0 - 0.6 : z1 + 0.6, y: GROUND + 0.1, rot: x0 * 0.05, range: [1.4, 1.2], alert: 4 }); } }
