@@ -2,10 +2,11 @@
 // the tenements of the Gründerzeit and the Biedermeier houses between, Wagner's two houses on the Wienzeile, the Naschmarkt over the
 // walled Wien with its bridges and the Stadtbahn's ledge, the Karlsplatz with Wagner's pavilions and the Karlskirche, the Opera, the
 // trams, Fiakers, gas lamps and advertising columns; houses in two levels of detail (src/settlements/lod.js).
+import { life as stillLife } from './life.js';
 import { lodTiles } from '../lod.js';
 import { subtractRects } from '../../core/build.js';
 import '../../styles/viennese/index.js';
-import { RADIUS, EW, NS, WIEN, LEDGE, BRIDGES, OPERA, KARLSKIRCHE, PAVILIONS, PATHS, SQUARE, NASCH, PROMENADE, RING_TRACKS, CAFE, SEC, lots, paving, inRect, onStreet, inLot } from './layout.js';
+import { RADIUS, EW, NS, WIEN, LEDGE, BRIDGES, OPERA, KARLSKIRCHE, PAVILIONS, PATHS, SQUARE, NASCH, PROMENADE, RING_TRACKS, CAFE, SEC, WING, lots, yards, shopRoomRect, passageRect, TRAIN, NASCH_KINDS, paving, inRect, onStreet, inLot } from './layout.js';
 
 const base = (id, elements, extra = {}) => ({ id, style: 'viennese', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -64], facing: 's' }, ...extra });
 const cut = (rs, holes) => rs.flatMap((r) => subtractRects(r, holes)).filter((r) => r[2] - r[0] > 0.3 && r[3] - r[1] > 0.3);
@@ -90,6 +91,7 @@ function furniture() {
 }
 
 /** The Naschmarkt: two rows of stalls across the aisle, cross-passages every few stalls, a Marktamt hut at the east end. */
+const HUT = [-112.5, 56.8, -107.2, 60.0];
 function naschmarkt() {
   const E = [], rand = rng(77);
   for (const row of NASCH.rows) {
@@ -97,10 +99,13 @@ function naschmarkt() {
     while (x < NASCH.x1 - 3) {
       const w = 3.0 + Math.floor(rand() * 3) * 0.5;
       if (NS.some((s) => x + w > s.x - s.w / 2 - 1 && x < s.x + s.w / 2 + 1) || i % 6 === 5) { x += i % 6 === 5 ? 2.4 : w; i++; continue; }
-      E.push({ t: 'naschmarkt_stall', rect: [x, row.z0, x + w, row.z1], front: row.front, y: 0.11, seed: Math.floor(rand() * 1e5) });
+      if (row.front === 'n' && x + w > HUT[0] - 0.4 && x < HUT[2] + 0.4) { x += w + 0.3; i++; continue; }
+      E.push({ t: 'naschmarkt_stall', rect: [x, row.z0, x + w, row.z1], front: row.front, y: 0.11, seed: Math.floor(rand() * 1e5), kind: NASCH_KINDS[(i + (row.front === 'n' ? 3 : 0)) % NASCH_KINDS.length] });
       x += w + 0.3; i++;
     }
   }
+  // the drinking fountain in the aisle at the middle, the Marktamt at the east end
+  E.push({ t: 'fountain', at: [-157, 55.6], y: 0.11 }, { t: 'marktamt', rect: HUT, y: 0.11, front: 'n' });
   return base('vienna-naschmarkt', E, { rooms: [{ id: 'Naschmarkt', rect: [NASCH.x0, 54.5, NASCH.x1, 56.7], y: 0.11, kind: 'open', market: true }] });
 }
 
@@ -115,9 +120,64 @@ function karlsplatz() {
   return base('vienna-karlsplatz', E, { rooms });
 }
 
+/** The yards behind the street houses, their paving and common life, and the rear wings along their long sides (gapped at the passages' mouths). */
+function hofs() {
+  const out = [], rand = rng(1115);
+  for (const yd of yards()) {
+    const [x0, z0, x1, z1] = yd.rect, lod = Math.hypot((x0 + x1) / 2, (z0 + z1) / 2) > 170 ? 1 : 0;
+    out.push({ t: 'hof_yard', rect: yd.rect, seed: 100 + yd.i, mouths: yd.mouths, y: 0, wing: WING + 2, lod });
+    for (const [nz0, nz1, front] of [[z0 + 2, z0 + 2 + WING, 's'], [z1 - 2 - WING, z1 - 2, 'n']]) {
+      let x = x0 + 2;
+      while (x < x1 - 4.5) {
+        const w = Math.min(x1 - 2 - x, 8 + Math.floor(rand() * 5) + rand());
+        const rect = [x, nz0, x + w, nz1];
+        const hit = yd.mouths.some((q) => !(rect[2] <= q[0] - 1.2 || rect[0] >= q[2] + 1.2 || rect[3] <= q[1] - 1.2 || rect[1] >= q[3] + 1.2));
+        if (!hit && w > 4) out.push({ t: 'hof_wing', rect, front, seed: Math.floor(rand() * 1e6), storeys: 2 + (rand() < 0.5 ? 1 : 0), y: 0, lod });
+        x += w;
+      }
+    }
+  }
+  return out;
+}
+
+/** The rooms of the shops, the Durchhäuser and the yards (the music and the ambience change at their doors). */
+function houseRooms() {
+  const rooms = [];
+  for (const l of lots()) if (l.open) rooms.push({ id: `shop ${l.open}`, rect: shopRoomRect(l), y: 0.12, kind: 'inner' });
+  for (const l of lots()) if (l.passage !== undefined) rooms.push({ id: 'Durchhaus', rect: passageRect(l), y: 0, kind: 'inner' });
+  for (const yd of yards()) if (yd.entry) rooms.push({ id: 'Hof', rect: yd.rect, y: 0.05, kind: 'open', market: false });
+  return base('vienna-houserooms', [], { rooms });
+}
+
+/** Wires and poles of the tram, manholes and hydrants, the chestnut roaster, the cab troughs, the gardens' beds and hedges, the monument, the Stadtbahn train. */
+function extras() {
+  const E = [], rand = rng(2203);
+  E.push({ t: 'tram_wire', z: -230, x0: -326, x1: 326, tracks: RING_TRACKS, poles: [-248.4, -211.6], y: 0.03 });
+  const manh = [];
+  const crossing = (x, z) => NS.some((s) => Math.abs(x - s.x) < s.w / 2 + 2 && z >= s.z0 && z <= s.z1) && EW.some((e) => Math.abs(z - e.z) < e.w / 2 + 1);
+  for (const s of EW) { if (s.name === 'ring') continue; for (let x = s.x0 + 30 + rand() * 20; x < s.x1 - 20; x += 46 + rand() * 20) { const z = s.z + (rand() < 0.5 ? -1 : 1) * (1 + rand() * 2); if (Math.hypot(x, z) < RADIUS - 60 && !crossing(x, z) && !(z > 55 && z < 92) && !inRect([62, -53, 246, 30], x, z)) manh.push([x, z]); } }
+  for (const s of NS) { for (let z = s.z0 + 30 + rand() * 20; z < s.z1 - 20; z += 50 + rand() * 20) { const x = s.x + (rand() < 0.5 ? -1 : 1) * (1 + rand() * 1.5); if (Math.hypot(x, z) < RADIUS - 60 && !crossing(x, z) && !(z > 50 && z < 95) && !inRect([62, -53, 246, 30], x, z) && z > -204) manh.push([x, z]); } }
+  E.push({ t: 'manholes', pts: manh, y: 0.03 });
+  // hydrants on the pavement corners of the middle of the town
+  for (const e of EW) for (const n of NS) {
+    if (e.name === 'ring' || n.z0 > e.z || n.z1 < e.z || Math.hypot(n.x, e.z) > 150) continue;
+    const x = n.x - n.w / 2 + 1.2, z = e.z - e.w / 2 + 1.2;
+    if (!inLot(x, z, 0.4) && !crossing(x, z) && !(z > 50 && z < 95)) E.push({ t: 'hydrant', at: [x, z], y: 0.11 });
+  }
+  E.push({ t: 'maroni', at: [118, -3.6], y: 0.03, rot: 0 });
+  E.push({ t: 'trough', at: [-3, -213.4], y: 0.11, rot: 0 }, { t: 'trough', at: [-48, -62.6], y: 0.11, rot: 0 });
+  // the beds and hedges of the Karlsplatz and of the garden behind the Secession; the Ressel monument
+  [[76, -46, 96, -41], [76, -36, 96, -31], [118, -46, 146, -41], [118, -36, 146, -31], [118, 12, 146, 17], [118, 20, 146, 25], [-24, 5.5, -14, 9.5], [12, 5.5, 20, 9.5], [-18, -10, -8, -6], [8, -10, 18, -6]].forEach((rect, i) => E.push({ t: 'flowerbed', rect, y: 0.03, seed: 31 + i }));
+  for (const rect of [[109.3, -52, 109.7, -12], [114.3, -52, 114.7, -44], [114.3, -36, 114.7, -12], [109.3, 12, 109.7, 29], [114.3, 12, 114.7, 29]]) E.push({ t: 'hedge', rect, y: 0.03, h: 0.9 });
+  E.push({ t: 'monument', at: [78, -24], y: 0.03 });
+  E.push({ t: 'stadtbahn_train', x0: TRAIN.x0, z: TRAIN.z, y: LEDGE.y + 0.14, dir: TRAIN.dir, cars: TRAIN.cars });
+  return base('vienna-extras', E.filter((e) => !e.at || Math.hypot(e.at[0], e.at[1]) < RADIUS - 8));
+}
+
 export async function town() {
-  const plans = [streets(), wien(), ...furniture(), naschmarkt(), karlsplatz()];
-  const els = lots().map((l) => ({ t: 'mietshaus', rect: l.rect, front: l.front, kind: l.kind, storeys: l.storeys, seed: l.seed, y: 0, side: l.side, lod: l.lod, faience: l.faience, medallions: l.medallions, mat: l.mat }));
+  const plans = [streets(), wien(), ...furniture(), naschmarkt(), karlsplatz(), houseRooms(), extras(), base('vienna-life', stillLife(), { style: 'life' })];
+  const els = lots().map((l) => ({ t: 'mietshaus', rect: l.rect, front: l.front, kind: l.kind, storeys: l.storeys, seed: l.seed, y: 0, side: l.side, lod: l.lod, faience: l.faience, medallions: l.medallions, mat: l.mat, passage: l.passage, yardAt: l.yardAt, open: l.open }));
+  els.push(...hofs());
   plans.push(...lodTiles('vienna-houses', 'viennese', els, { R: RADIUS }));
   void CAFE; void SEC;
   return plans;

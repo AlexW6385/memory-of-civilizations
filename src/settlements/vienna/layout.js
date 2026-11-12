@@ -103,7 +103,60 @@ export function lots() {
     }
   }
   for (const s of SPECIAL) LOTS.push({ ...s, lod: 0 });
+  YARDS = findYards(hit, rand);
+  assignUses(rand);
   return LOTS;
+}
+
+// ── the courtyards (Höfe) inside the blocks: a paved yard behind every ring of lots, with rear wings along its long sides; ─────
+// ── some lots carry a Durchhaus (a carriage passage from the street to the yard) and the lots nearest the arrival are shops ──
+export const WING = 5.6;
+let YARDS = null;
+export const yards = () => { lots(); return YARDS; };
+function findYards(hit) {
+  const out = [];
+  for (const [x0, z0, x1, z1] of cells()) {
+    if (z0 === 50 || (inRect(KARLSPLATZ, (x0 + x1) / 2, (z0 + z1) / 2) && x0 >= 60) || z1 <= -254) continue;
+    if (hit([x0, z0, x1, z1]) || x1 - x0 < 2 * DEPTH + 10 || z1 - z0 < 2 * DEPTH + 10) continue;
+    if (Math.hypot((x0 + x1) / 2, (z0 + z1) / 2) > RADIUS - 70 || Math.hypot(x0 + DEPTH, z0 + DEPTH) > RADIUS - 42 || Math.hypot(x1 - DEPTH, z1 - DEPTH) > RADIUS - 42) continue;
+    out.push({ rect: [x0 + DEPTH, z0 + DEPTH, x1 - DEPTH, z1 - DEPTH], cell: [x0, z0, x1, z1], mouths: [], i: out.length });
+  }
+  return out;
+}
+/** Which lots have a Durchhaus (one for each yard), which are shops (the n nearest the arrival), and the trade of each. */
+export const TRADES = ['kaffeehaus', 'baeckerei', 'tabak', 'apotheke', 'greissler', 'fleischhauer', 'buchhandlung', 'huetemacher', 'weinstube', 'schneider', 'konditorei', 'uhrmacher', 'schuster', 'blumen'];
+function assignUses(rand) {
+  const touch = (l, y) => {
+    const [a, b, c, d] = l.rect, [p, q, r, s] = y.rect, e = 0.02;
+    if (l.front === 's') return Math.abs(d - q) < e && !(c <= p || a >= r) ? 's' : null;
+    if (l.front === 'n') return Math.abs(b - s) < e && !(c <= p || a >= r) ? 'n' : null;
+    if (l.front === 'e') return Math.abs(a - r) < e && !(d <= q || b >= s) ? 'e' : null;
+    return Math.abs(c - p) < e && !(d <= q || b >= s) ? 'w' : null;
+  };
+  // (lots whose back is turned to a yard: they get a rear face)
+  for (const y of YARDS) {
+    const cand = LOTS.filter((l) => l.kind !== 'biedermeier' && !l.side && !l.faience && !l.medallions && touch(l, y) && Math.min(l.rect[2] - l.rect[0], l.rect[3] - l.rect[1]) > 0 && (l.front === 'n' || l.front === 's' ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1]) >= 8.5);
+    if (!cand.length) continue;
+    const cx = (y.rect[0] + y.rect[2]) / 2, cz = (y.rect[1] + y.rect[3]) / 2;
+    cand.sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 - cx, (a.rect[1] + a.rect[3]) / 2 - cz) * (a.front === 'n' || a.front === 's' ? 1 : 1.2) - Math.hypot((b.rect[0] + b.rect[2]) / 2 - cx, (b.rect[1] + b.rect[3]) / 2 - cz) * (b.front === 'n' || b.front === 's' ? 1 : 1.2));
+    const l = cand[Math.floor(rand() * Math.min(3, cand.length))];
+    l.passage = y.i; const m = l.rect;
+    // the mouth of the passage on the yard's edge (a rect 3.4 m wide)
+    const c = l.front === 'n' || l.front === 's' ? (m[0] + m[2]) / 2 : (m[1] + m[3]) / 2;
+    y.mouths.push(l.front === 'n' || l.front === 's' ? [c - 1.7, y.rect[1] - 0.1, c + 1.7, y.rect[3] + 0.1] : [y.rect[0] - 0.1, c - 1.7, y.rect[2] + 0.1, c + 1.7]);
+    y.entry = l;
+  }
+  // every lot gets the yard it backs onto (for the rear face)
+  for (const l of LOTS) { l.yardAt = null; for (const y of YARDS) { const t = touch(l, y); if (t) { l.yardAt = y.i; break; } } }
+  // the shops: the nearest lots of the three older kinds to the arrival, not the Durchhäuser
+  const ok = LOTS.filter((l) => l.kind !== 'biedermeier' && !l.side && l.passage === undefined && !l.faience && !l.medallions && (l.front === 'n' || l.front === 's' ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1]) >= 8.5 && Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 + 40) < 175);
+  ok.sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2, (a.rect[1] + a.rect[3]) / 2 + 40) - Math.hypot((b.rect[0] + b.rect[2]) / 2, (b.rect[1] + b.rect[3]) / 2 + 40));
+  let n = 0; const taken = [];
+  for (const l of ok) {
+    // not two shops side by side (one lot between), so that the street keeps its rhythm
+    if (taken.some((t) => Math.hypot((t.rect[0] + t.rect[2]) / 2 - (l.rect[0] + l.rect[2]) / 2, (t.rect[1] + t.rect[3]) / 2 - (l.rect[1] + l.rect[3]) / 2) < 12)) continue;
+    l.open = TRADES[n % TRADES.length]; taken.push(l); n++; if (n >= 28) break;
+  }
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m)) || inRect(CAFE, x, z, m);
 
@@ -143,3 +196,20 @@ export function paving() {
   for (const st of strips) for (const r of cut([st], have)) { walk.push(r); have = [...have, r]; }
   return { drive, walk };
 }
+
+/** The room of a shop that can be walked into (wall 0.5 m, room 8 m deep: styles/viennese/shopint.js) and the passage of a Durchhaus. */
+export function shopRoomRect(l) {
+  const [x0, z0, x1, z1] = l.rect, T = 0.5, RD = Math.min(8, (l.front === 'n' || l.front === 's' ? z1 - z0 : x1 - x0) - 4);
+  return l.front === 's' ? [x0 + T, z1 - T - RD, x1 - T, z1 - T] : l.front === 'n' ? [x0 + T, z0 + T, x1 - T, z0 + T + RD] : l.front === 'e' ? [x1 - T - RD, z0 + T, x1 - T, z1 - T] : [x0 + T, z0 + T, x0 + T + RD, z1 - T];
+}
+export function passageRect(l) {
+  const [x0, z0, x1, z1] = l.rect, along = l.front === 'n' || l.front === 's', c = along ? (x0 + x1) / 2 : (z0 + z1) / 2;
+  return along ? [c - 1.45, z0, c + 1.45, z1] : [x0, c - 1.45, x1, c + 1.45];
+}
+export const inYard = (x, z, m = 0) => yards().some((y) => inRect(y.rect, x, z, m));
+/** The free middle of a yard, between its rear wings (where the trees stand). */
+export const yardHeart = (x, z) => yards().some((y) => x > y.rect[0] + 3 && x < y.rect[2] - 3 && z > y.rect[1] + WING + 3.5 && z < y.rect[3] - WING - 3.5);
+
+/** The Stadtbahn train standing on the ledge: where its buffers are, the track's z, the way it faces (+1: toward +x). */
+export const TRAIN = { x0: -114, z: LEDGE.z0 + 2.6 + 0.0, dir: 1, cars: 4 };
+export const NASCH_KINDS = ['greens', 'barrels', 'cheese', 'greens', 'fish', 'flowers', 'meat', 'greens', 'barrels', 'flowers'];
