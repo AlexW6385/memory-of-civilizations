@@ -47,7 +47,15 @@ export function life() {
     if (Math.abs(x - LITTER.at[0]) < 6) continue;
     (rand() < 0.35 ? togate : rand() < 0.5 ? woman : tunic)([x, z], rand() < 0.5 ? Math.PI / 2 : -Math.PI / 2, { pose: rand() < 0.3 ? 'talk' : 'stand' });
   }
-  for (let k = 0; k < 8; k++) togate([-30 + rand() * 60, -140 + rand() * 70], rand() * 6.28, { pose: rand() < 0.5 ? 'talk' : 'stand' });
+  // the forecourt: knots of citizens and a few passers-by at 12-60 m from where the visitor arrives (0, -120), none within 12 m
+  for (let k = 0, n = 0; n < 16 && k < 200; k++) {
+    const x = -34 + rand() * 68, z = -146 + rand() * 80, d = Math.hypot(x, z + 120);
+    if (d < 12) continue;
+    n++;
+    const f = rand();
+    (f < 0.5 ? togate : f < 0.75 ? woman : tunic)([x, z], rand() * 6.28, { pose: rand() < 0.5 ? 'talk' : 'stand' });
+    if (rand() < 0.5) togate([x + 1.1, z + 0.4], rand() * 6.28, { pose: 'talk' });
+  }
   // the thermopolium: the keeper behind the counter, a customer before it with a cup
   const [X0, , , Z1] = DOMUS;
   tunic([X0 + 0.6 + 1.6, Z1 - 0.6 - 2.3], Math.PI, { y: 0, cloth: 'cloth_brown' });
@@ -62,6 +70,37 @@ export function life() {
       if (q < 0.34) { const p = P(uc + (rand() - 0.5) * 1.2, -1.25); tunic(p, rot, { pose: 'stand', cloth: 'cloth_brown' }); const p2 = P(uc + (rand() < 0.5 ? -0.9 : 0.9), -1.9); (rand() < 0.5 ? woman : rand() < 0.5 ? togate : tunic)(p2, rot + Math.PI + (rand() - 0.5) * 0.8, { pose: 'talk' }); }
       else if (q < 0.5) { const p = P(uc + 1.0, -0.9); L.push({ t: 'animal', kind: rand() < 0.6 ? 'dog' : 'cat', at: p, y: 0, rot: rot + (rand() - 0.5), seed: seed() }); }
       else if (q < 0.6) { const p = P(uc - 1.0, -1.6); tunic(p, rot + 1.0 + rand(), { h: 1.2, pose: 'stand', cloth: 'linen' }); }
+    }
+  }
+  // the forecourt's dressing: benches between the columns of the side porticoes, pigeons on the paving, a garland seller and a
+  // votive stall near the steps, a water seller's cart; all 14 m or more from the arrival (0, -120) and clear of its view
+  {
+    for (const sx of [-1, 1]) for (let z = -138; z < -60; z += 11.5) {
+      L.push({ t: 'bench', at: [sx * 37.4, z], y: 0, rot: sx > 0 ? -Math.PI / 2 : Math.PI / 2, seed: seed(), len: 1.8 });
+      if (rand() < 0.45) tunic([sx * 36.4, z + 1.6], sx > 0 ? Math.PI / 2 : -Math.PI / 2, { pose: 'sit' });
+      if (rand() < 0.35) L.push({ t: 'pot', kind: 'amphora', at: [sx * 38.4, z + 4], y: 0, rot: 0, n: 2, seed: seed() });
+    }
+    for (const [x, z] of [[-9, -96], [12, -84], [-18, -112], [24, -104], [-26, -78], [6, -134]]) L.push({ t: 'chickens', kind: 'pigeon', n: 5, at: [x, z], y: 0, rot: rand() * 6.28, seed: seed() });
+    for (const [x, z, g, aw] of [[-27, -72, ['heap', 'greens'], 'cloth_green'], [27, -72, ['baskets', 'bread'], 'cloth_ochre'], [-30, -122, ['pottery', 'pot:amphora'], 'cloth_red']]) {
+      L.push({ t: 'stall', at: [x, z], y: 0, rot: x < 0 ? Math.PI / 2 : -Math.PI / 2, seed: seed(), w: 2.2, d: 0.9, awning: aw, goods: g });
+      tunic([x + (x < 0 ? 1.0 : -1.0), z], x < 0 ? -Math.PI / 2 : Math.PI / 2, { pose: 'stand' });
+      woman([x + (x < 0 ? -1.4 : 1.4), z + 0.6], x < 0 ? Math.PI / 2 : -Math.PI / 2, { pose: 'talk', carry: 'basket' });
+    }
+    L.push({ t: 'handcart', at: [21, -128], y: 0, rot: 0.4, seed: seed() }); tunic([22.8, -126.8], -2, { carry: 'staff' });
+    L.push({ t: 'barrel', at: [-23, -132], y: 0, rot: 0, seed: seed(), n: 3 });
+  }
+  // before the shops of the rows: amphorae, barrels, crates and firewood at the doors, a lamp in the street at each second row
+  for (const r of rows()) {
+    const [x0, z0, x1, z1] = r.rect, f = r.front, W = f === 'e' || f === 'w' ? z1 - z0 : x1 - x0, nb = Math.max(2, Math.round(W / 4.4)), bw = W / nb;
+    const rot = f === 'e' ? -Math.PI / 2 : f === 'w' ? Math.PI / 2 : f === 's' ? Math.PI : 0;
+    const P = (u, d) => f === 'e' ? [x1 - d, z0 + u] : f === 'w' ? [x0 + d, z0 + u] : f === 's' ? [x0 + u, z1 - d] : [x0 + u, z0 + d];
+    for (let i = 0; i < nb; i++) {
+      const q = rand(), uc = (i + 0.5) * bw;
+      if (q < 0.22) L.push({ t: 'pot', kind: 'amphora', at: P(uc - 1.4, -0.7), y: 0, rot: 0, n: 3, seed: seed() });
+      else if (q < 0.36) L.push({ t: 'barrel', at: P(uc - 1.3, -0.7), y: 0, rot, seed: seed(), n: 2 });
+      else if (q < 0.48) L.push({ t: 'crates', at: P(uc + 1.4, -0.7), y: 0, rot, seed: seed(), n: 2 });
+      else if (q < 0.58) L.push({ t: 'firewood', at: P(uc - 1.4, -0.8), y: 0, rot, seed: seed(), len: 1.2 });
+      else if (q < 0.66) L.push({ t: 'basket', at: P(uc + 1.4, -0.7), y: 0, rot, n: 2, seed: seed(), goods: 'greens' });
     }
   }
   // the stadium: spectators on the tiers (the games are not on; a few hundred would be too many: forty about the near end), runners on the track
