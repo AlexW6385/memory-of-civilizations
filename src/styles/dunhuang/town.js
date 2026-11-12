@@ -247,7 +247,7 @@ function serai(el, ctx) {
   for (let k = 0; k < 6; k++) {
     const za = zs + k * rw, zb = za + rw;
     if (zb > z1 - T - 1) break;
-    const furnished = k === 2, zm = (za + zb) / 2;
+    const furnished = k !== 4, zm = (za + zb) / 2;
     slab(ctx, WALL, [x0 + T, za, rx1, za + 0.4], 0, 3.6);                 // the partition (on the north side of each room)
     if (furnished) { slab(ctx, WALL, [rx1 - 0.4, za, rx1, zm - 0.7], 0, 3.6); slab(ctx, WALL, [rx1 - 0.4, zm + 0.7, rx1, zb], 0, 3.6); slab(ctx, WALL, [rx1 - 0.4, zm - 0.7, rx1, zm + 0.7], 2.1, 3.6, false); col.rect([rx1 - 0.4, zm - 0.7, rx1, zm + 0.7], 2.1, 3.6); }
     else slab(ctx, WALL, [rx1 - 0.4, za, rx1, zb], 0, 3.6);
@@ -286,20 +286,21 @@ function rooms(ctx, el, zs, rw, wx0, rx1) {
     const za = zs + k * rw, zb = za + rw, zm = (za + zb) / 2;
     if (zb > z1 - 0.7 - 1) break;
     // (the plain front wall of the previous loop is replaced here for the furnished room's door: the wall pieces beside the opening)
-    const furnished = k === 2;
+    const furnished = k !== 4;
     // the roof: flat, with a parapet; the beams' ends along the yard side
     slab(ctx, FOOT, [wx0, za, rx1, zb], 3.6, 3.85, false);
     bag.add(WALL, box(rx1 - 0.3, 3.85, za, rx1, 4.3, zb));
     bag.add('timber', box(rx1 - 0.2, 3.3, za + 0.3, rx1 + 0.35, 3.45, za + 0.45)); bag.add('timber', box(rx1 - 0.2, 3.3, zb - 0.45, rx1 + 0.35, 3.45, zb - 0.3));
     bag.add('timber_red', box(rx1 - 0.06, 0, zm - 0.7 - 0.12, rx1 + 0.12, 2.1, zm - 0.7)); bag.add('timber_red', box(rx1 - 0.06, 0, zm + 0.7, rx1 + 0.12, 2.1, zm + 0.82)); bag.add('timber_red', box(rx1 - 0.06, 2.1, zm - 0.82, rx1 + 0.12, 2.24, zm + 0.82));
     if (!furnished) bag.add('wood_dark', box(rx1 - 0.02, 0, zm - 0.7, rx1 + 0.06, 2.1, zm + 0.7));
-    else furnish(ctx, wx0, za, rx1, zb, zm);
+    else furnish(ctx, wx0, za, rx1, zb, zm, k);
     // the door opening in this room's front: the wall pieces beside it
     void col;
   }
 }
-function furnish(ctx, x0, za, x1, zb, zm) {
+function furnish(ctx, x0, za, x1, zb, zm, k = 2) {
   const { bag, col } = ctx;
+  if (k !== 2) return furnishOther(ctx, x0, za, x1, zb, zm, k);
   bag.add('reed_mat', box(x0 + 1.9, 0.0, za + 0.6, x1 - 0.5, 0.03, zb - 0.6));
   bag.add('cloth_red', box(x0 + 2.4, 0.03, zm - 1.0, x1 - 1.2, 0.05, zm + 1.0));
   slab(ctx, 'mudbrick', [x0, za + 0.4, x0 + 2.0, zb], 0, 0.55); col.floor([x0, za + 0.4, x0 + 2.0, zb], 0.55);
@@ -311,6 +312,42 @@ function furnish(ctx, x0, za, x1, zb, zm) {
   ctx.lights?.push({ at: [x0 + 2.6, 2.3, zm], color: '#ffc27a', intensity: 1.8, distance: 7 });
   bag.add('timber', box(x0, 3.4, za, x1, 3.55, za + 0.15)); for (let k = 0; k < 5; k++) bag.add('timber', box(x0 + 0.5 + k * 1.0, 3.3, za, x0 + 0.62 + k * 1.0, 3.45, zb));
   figure({ at: [x0 + 1.0, zm + 0.4], y: 0.6, rot: -Math.PI / 2, seed: 33, dress: 'tunic', legs: 'hose', cloth: 'cloth_blue', cloth2: 'cloth_red', pose: 'cross', hat: 'cap', over: 'belt', skin: 'skin_medium', beard: true, feet: 'shod' }, ctx);
+}
+
+/** The other guest rooms of the caravanserai (the doors open on the yard at x1): bales of a merchant, a kitchen, sleepers, the toll clerk's room. */
+function furnishOther(ctx, x0, za, x1, zb, zm, k) {
+  const { bag, col } = ctx, rand = rng(900 + k);
+  bag.add('reed_mat', box(x0 + 1.0, 0.0, za + 0.6, x1 - 0.5, 0.03, zb - 0.6));
+  const sack = (x, z, c = 'sacking') => { bag.add(c, lathe([[0.001, 0], [0.3, 0.02], [0.34, 0.3], [0.22, 0.58], [0.001, 0.62]], 8, null, x, 0.03, z)); col.circle(x, z, 0.32, 0.03, 0.6); };
+  const jar = (x, z, r = 0.28, h = 0.8) => { bag.add('pottery_dark', lathe([[0.001, 0], [r * 0.6, 0.01], [r, h * 0.4], [r * 0.8, h * 0.85], [r * 0.5, h], [0.001, h]], 9, null, x, 0.03, z)); col.circle(x, z, r, 0.03, h); };
+  const kangAt = (za0, zb0) => { slab(ctx, 'mudbrick', [x0, za0, x0 + 1.9, zb0], 0, 0.55); bag.add('reed_mat', box(x0 + 0.05, 0.55, za0 + 0.05, x0 + 1.85, 0.58, zb0 - 0.05)); };
+  if (k === 0) {            // a Sogdian's room: bales of silk, chests, a rug, a lamp, the merchant at his accounts
+    for (let j = 0; j < 8; j++) { const bx = x0 + 0.5 + (j % 4) * 0.75, bz = zb - 1.0 - Math.floor(j / 4) * 0.7; slab(ctx, j % 3 ? 'cloth_ochre' : 'cloth_red', [bx - 0.3, bz - 0.25, bx + 0.3, bz + 0.25], 0, 0.5 + 0.1 * (j % 2)); }
+    slab(ctx, 'timber_red', [x0 + 2.4, za + 0.5, x0 + 3.6, za + 1.2], 0, 0.7); bag.add('cloth_blue', box(x0 + 2.8, 0.7, za + 0.6, x0 + 3.5, 0.72, za + 1.1));
+    bag.add('cloth_red', box(x0 + 2.4, 0.03, zm - 0.9, x0 + 4.4, 0.05, zm + 0.9)); slab(ctx, 'timber', [x0 + 3.6, zm - 0.4, x0 + 4.4, zm + 0.4], 0, 0.42);
+    oilLamp(ctx, x0 + 4.0, 0.42, zm, 0.3, 1.8, 6.5);
+    figure({ at: [x0 + 3.0, zm + 0.1], y: 0.03, rot: Math.PI / 2, seed: 41, dress: 'tunic', legs: 'hose', cloth: 'cloth_green', cloth2: 'cloth_white', pose: 'cross', hat: 'cap', over: 'belt', skin: 'skin_light', beard: true, feet: 'shod' }, ctx);
+  } else if (k === 1) {     // the kitchen: a hearth, big pots, a table, firewood, a woman at the fire
+    slab(ctx, 'banco', [x0 + 0.2, zm - 0.9, x0 + 1.8, zm + 0.9], 0, 0.8); bag.add('pottery_dark', lathe([[0.001, 0], [0.4, 0], [0.45, 0.2], [0.001, 0.2]], 10, null, x0 + 1.0, 0.8, zm - 0.4)); bag.add('pottery_dark', lathe([[0.001, 0], [0.4, 0], [0.45, 0.2], [0.001, 0.2]], 10, null, x0 + 1.0, 0.8, zm + 0.4));
+    for (let j = 0; j < 5; j++) jar(x0 + 2.5 + (j % 3) * 0.7, za + 0.7 + Math.floor(j / 3) * 0.7, 0.26, 0.7);
+    slab(ctx, 'timber', [x0 + 2.6, zm + 0.5, x0 + 4.2, zm + 1.4], 0, 0.8); for (let j = 0; j < 4; j++) bag.add('hide_tan', lathe([[0.001, 0], [0.14, 0], [0.14, 0.04], [0.001, 0.04]], 8, null, x0 + 2.9 + j * 0.3, 0.8, zm + 0.95));
+    for (let j = 0; j < 8; j++) bag.add('log_pine', lathe([[0.07, 0], [0.07, 1.2], [0.001, 1.2]], 6, null, x0 + 3.0 + (j % 4) * 0.2, 0.0, zb - 0.5)), col.circle(x0 + 3.0 + (j % 4) * 0.2, zb - 0.5, 0.08, 0, 1.2);
+    ctx.lights?.push({ at: [x0 + 1.0, 1.2, zm], color: '#ff9a4a', intensity: 2.5, distance: 6 });
+    figure({ at: [x0 + 2.2, zm - 0.9], y: 0.03, rot: -Math.PI / 2, seed: 42, dress: 'tunic', cloth: 'cloth_red', hair: 'bun', hat: 'none', over: 'apron', skin: 'skin_medium', pose: 'stand', feet: 'shod' }, ctx);
+  } else if (k === 3) {     // the drivers' room: two kangs with blankets, boots, a saddle and a staff, two sleepers
+    kangAt(za + 0.4, zm - 0.1); kangAt(zm + 0.1, zb - 0.4);
+    for (const z of [za + 1.0, zb - 1.6]) { bag.add('cloth_brown', box(x0 + 0.2, 0.58, z, x0 + 1.7, 0.66, z + 0.7)); bag.add('cloth_white', box(x0 + 0.15, 0.58, z + 0.05, x0 + 0.5, 0.7, z + 0.65)); }
+    slab(ctx, 'hide_brown', [x0 + 2.4, zm - 0.3, x0 + 3.2, zm + 0.3], 0, 0.5); bag.add('timber', rod([x0 + 3.8, 0, zb - 0.6], [x0 + 3.8, 1.8, zb - 0.6], 0.03, 5));
+    jar(x0 + 4.0, za + 0.6, 0.22, 0.6); oilLamp(ctx, x0 + 3.0, 0.0, zm - 0.9, 0.5, 1.4, 6);
+    figure({ at: [x0 + 1.0, za + 1.3], y: 0.58, rot: -Math.PI / 2, seed: 43, dress: 'tunic', legs: 'hose', cloth: 'cloth_grey', pose: 'cross', hat: 'none', over: 'belt', skin: 'skin_medium', feet: 'bare' }, ctx);
+  } else {                  // the clerk's room: a low desk, ledgers of paper, a brazier, a steelyard on the wall
+    slab(ctx, 'timber', [x0 + 2.4, zm - 0.7, x0 + 3.6, zm + 0.7], 0, 0.5); bag.add('cloth_white', box(x0 + 2.6, 0.5, zm - 0.4, x0 + 3.1, 0.52, zm + 0.1)); bag.add('wood_dark', box(x0 + 3.2, 0.5, zm - 0.1, x0 + 3.35, 0.62, zm + 0.1));
+    for (let j = 0; j < 3; j++) slab(ctx, 'sacking', [x0 + 0.4 + j * 0.8, zb - 1.2, x0 + 1.0 + j * 0.8, zb - 0.5], 0, 0.55);
+    bag.add('iron', lathe([[0.001, 0], [0.3, 0], [0.34, 0.15], [0.001, 0.15]], 8, null, x0 + 1.4, 0.0, za + 1.0)); col.circle(x0 + 1.4, za + 1.0, 0.34, 0, 0.3);
+    bag.add('iron', box(x0 + 0.04, 1.4, zm - 0.5, x0 + 0.1, 1.45, zm + 0.5)); oilLamp(ctx, x0 + 3.4, 0.5, zm + 0.55, 0.3, 1.8, 6.5);
+    figure({ at: [x0 + 2.0, zm], y: 0.03, rot: Math.PI / 2, seed: 44, dress: 'robe', cloth: 'cloth_indigo', pose: 'cross', hat: 'cap', over: 'sash', skin: 'skin_medium', feet: 'shod' }, ctx);
+  }
+  bag.add('timber', box(x0, 3.4, za, x1, 3.55, za + 0.15)); for (let j = 0; j < 5; j++) bag.add('timber', box(x0 + 0.5 + j * 1.0, 3.3, za, x0 + 0.62 + j * 1.0, 3.45, zb));
 }
 
 /** dh_scaffold { at, w, h, levels }: poles lashed with rope, plank platforms at each level, ladders; against the face (x < at.x). */

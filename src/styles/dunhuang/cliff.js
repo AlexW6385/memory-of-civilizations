@@ -93,7 +93,7 @@ export function cliff(el, ctx) {
     const off = here.length ? 0 : [0, 0.4, 0.35, 0.9, 0.2][Math.floor(rand() * 5)];
     const rects = subtractRects([XF - ROCK, 0, XF + off, top], here.map((h) => [h.x0, h.y0, h.x1, h.y1]));
     for (const [x0, y0, x1, y1] of rects) {
-      bag.add(MATS[Math.floor(Math.abs(Math.sin(zm * 12.9898)) * 43758) % 3], box(x0, y0, za, x1, y1, zb));
+      bag.add(here.length ? ROCKM : MATS[Math.floor(Math.abs(Math.sin(zm * 12.9898)) * 43758) % 3], box(x0, y0, za, x1, y1, zb));
       col.rect([x0, za, x1, zb], y0, y1);
     }
     // a stepped, broken crest: boulders on the top of the cliff in the slabs without a hole
