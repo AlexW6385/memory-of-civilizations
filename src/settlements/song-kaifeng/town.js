@@ -158,6 +158,30 @@ function more(S, L, rand, person, pick) {
       for (let k = 0; k < 2; k++) person([x - sx * (1.4 + k * 0.7), z + (k ? 0.8 : -0.5)], 0.04, faceTo([sx, 0]), { pose: k ? 'talk' : 'stand', carry: k ? 'basket' : 'none' });
     }
   }
+  // ---- the temple fair of the Kaibao monastery (the great temples of the capital held markets in their courts: Mengliang lu / Dongjing menghua lu [inferred for
+  // the Kaibao]): two double rows of hawkers' stalls on the court's earth either side of the flagstone field, a lane between each pair, buyers and sellers,
+  // a few seated vendors on mats with their wares, a bird-seller with his cages. Clear of the beds (ax ± 12…22), the stele pavilions (ax ± 26) and the side halls.
+  {
+    const ax = LY.PAGODA[0], kinds = ['cakes', 'fruit', 'pots', 'cloth'], awn = ['reed_mat', 'cloth_ochre', 'cloth_white', 'cloth_indigo', 'reed_mat', 'cloth_red'];
+    let n = 0;
+    for (const sx of [-1, 1]) for (const [dx, face, zs] of [[37, 1, [-126, -135, -144, -153, -162]], [48, -1, [-129, -138, -147, -156]]]) for (const z of zs) {
+      const x = ax + sx * dx, rot = face * sx * Math.PI / 2, lane = [-sx * face * -1, 0], out = [Math.sin(rot), Math.cos(rot)];
+      void lane;
+      S.push({ t: 'hawker_stall', at: [x, z], y: 0.04, rot, kind: kinds[n % 4], w: 2.0 + (n % 3) * 0.25, awning: awn[n % awn.length] });
+      person([x - out[0] * 0.45, z - out[1] * 0.45], 0.04, faceTo(out), { pose: n % 3 === 0 ? 'talk' : 'stand', dress: 'robe', hat: pick(['cap', 'none', 'straw']) });
+      if (n % 2 === 0) for (let k = 0; k < 1 + (n % 3); k++) person([x + out[0] * (1.4 + k * 0.7) + (rand() - 0.5) * 0.8, z + out[1] * (1.4 + k * 0.7) + (rand() - 0.5) * 1.2], 0.04, faceTo([-out[0], -out[1]]) + (rand() - 0.5) * 0.8, { pose: k === 1 ? 'talk' : 'stand', dress: rand() < 0.75 ? 'robe' : 'trousers', hat: pick(['cap', 'none']), carry: rand() < 0.2 ? 'basket' : 'none' });
+      n++;
+    }
+    // seated vendors with wares on mats along the cloister's foot, the bird-seller and the fortune-teller by the lane's end
+    for (const sx of [-1, 1]) {
+      for (let k = 0; k < 3; k++) {
+        const x = ax + sx * (66 + k * 3.2), z = -138 - k * 2.4;
+        person([x, z], 0.04, faceTo([-sx, 0.2]), { pose: 'cross', dress: 'trousers', hat: 'straw', cloth: pick(['cloth_brown', 'cloth_grey']) });
+        L.push({ t: 'goods_mat', at: [x - sx * 0.55, z], y: 0.04, rot: -sx * Math.PI / 2, goods: ['pottery', 'basket', 'heap'], seed: Math.floor(rand() * 1e6) });
+      }
+      for (const dz of [0, 1.1]) person([ax + sx * 63.5, -131 + dz], 0.04, faceTo([sx, 0]), { pose: 'stand', dress: 'robe', hat: 'cap', carry: dz ? 'none' : 'pole' });
+    }
+  }
   // ---- the Sun Yang main shop: the great standing sign at its corner, the wine jars heaped in the yard behind
   {
     const l = wineShops()[0], F = frontLine(l), back = l.front === 'e' ? [-1, 0] : l.front === 'w' ? [1, 0] : l.front === 's' ? [0, -1] : [0, 1];
