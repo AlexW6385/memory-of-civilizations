@@ -3,7 +3,7 @@
 // portico, a gardener clipping the myrtle hedges, servants crossing with trays, pairs of tall glazed jars at the portico's piers, doves
 // on the kerb. Everything placed from layout.js (the court's rectangle); walkers' ways for the movers.
 
-import { HILL, MYRTLES, RADIUS } from './layout.js';
+import { HILL, MYRTLES, LIONS, RADIUS } from './layout.js';
 
 const T = HILL.top + 0.05;
 const rot = { n: 0, s: Math.PI, w: Math.PI / 2, e: -Math.PI / 2 };
@@ -38,5 +38,15 @@ export function courtLife() {
   // doves on the kerb and the tiles, a cat asleep in the sun by the south fountain, sparrows at the water
   L.push({ t: 'chickens', kind: 'pigeon', at: [cx + 4.9, mz0 + 14], y: T, n: 5, seed: 51 }, { t: 'chickens', kind: 'pigeon', at: [cx - 5.3, mz0 + 26], y: T, n: 4, seed: 53 });
   L.push({ t: 'animal', kind: 'cat', at: [cx + 5.0, mz1 - 6], y: T, rot: 2.1, seed: 57, pose: 'lie' });
+  // the Court of the Lions (§4.1): scribes of the chancery on rugs in the south gallery with their ink and reed pens, a servant crossing with a tray of tea-
+  // things, two boys at the fountain's lip, a cat in the shade of the pavilion, doves on the channels' kerbs
+  { const [lx0, lz0, lx1, lz1] = LIONS, lcx = (lx0 + lx1) / 2, lcz = (lz0 + lz1) / 2;
+    for (const [dx, c] of [[-7.0, 'cloth_red'], [6.2, 'cloth_indigo']]) { rug(lcx + dx, lz1 - 1.9, c); man([lcx + dx, lz1 - 1.9], 'n', { pose: 'cross', cloth: 'cloth_white', hat: 'turban' }); }
+    fig([lcx - 9.0, lcz + 3.9], 'e', { dress: 'tunic', cloth: 'cloth_white', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_white', carry: 'pot', hair: 'short', beard: true });
+    for (const dx of [-1.4, 1.2]) fig([lcx + dx, lcz + 3.1], dx < 0 ? 'e' : 'w', { child: true, h: 1.1, dress: 'tunic', cloth: dx < 0 ? 'cloth_white' : 'cloth_ochre', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_white', hair: 'short', legs: 'bare', pose: dx < 0 ? 'squat' : 'stand' });
+    L.push({ t: 'animal', kind: 'cat', at: [lx0 + 3.2, lcz + 2.0], y: T, rot: 0.8, seed: 71, pose: 'lie' });
+    L.push({ t: 'chickens', kind: 'pigeon', at: [lcx + 3.4, lcz - 4.4], y: T, n: 5, seed: 73 });
+    for (const x of [lx0 + 1.2, lx1 - 1.2]) L.push({ t: 'pot', kind: 'glazed_jar', at: [x, lz0 + 1.2], y: T, rot: 0, n: 1, seed: seed++ });
+  }
   return { id: 'granada-court-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: L, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 's' } };
 }

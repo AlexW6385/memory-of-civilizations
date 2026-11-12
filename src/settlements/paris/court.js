@@ -82,8 +82,8 @@ export function courtLife() {
   // before the tribune of the relics. Chapel-local coordinates (x along the nave from the porch, z across) turned to the world.
   const C = (lx, lz) => [OX + lx, OZ + lz], LY = y0 + 0.15, UY = y0 + 7.6;
   const at = (lx, lz, y, to, o) => { const a = C(lx, lz); L.push({ t: 'figure', at: a, y, rot: face(a, C(to[0], to[1])), h: 1.56 + rand() * 0.14, seed: Math.floor(rand() * 1e9), dress: 'robe', skin: 'skin_light', cloth: pick(CL), cloth2: 'cloth_white', hat: 'none', hair: 'short', ...o }); };
-  at(21.6, 0, LY, [0, 0], { cloth: 'cloth_white', cloth2: 'cloth_white', over: 'cape', hair: 'shaven', pose: 'stand' });
-  for (const [lx, lz] of [[10.0, 1.1], [12.4, -1.3], [16.2, 0.9]]) at(lx, lz, LY, [22, 0], { pose: 'kneel', arms: 'pray', hat: 'veil', hatMat: 'cloth_white', cloth: pick(['cloth_indigo', 'cloth_brown', 'cloth_grey']) });
+  at(22.0, 2.1, LY, [0, 0], { cloth: 'cloth_white', cloth2: 'cloth_white', over: 'cape', hair: 'shaven', pose: 'stand' });
+  for (const [lx, lz] of [[10.0, 1.9], [12.4, -1.9], [16.2, 1.8]]) at(lx, lz, LY, [22, 0], { pose: 'kneel', arms: 'pray', hat: 'veil', hatMat: 'cloth_white', cloth: pick(['cloth_indigo', 'cloth_brown', 'cloth_grey']) });
   at(7.4, 4.1, LY, [14, 4.1], { pose: 'talk', cloth: 'cloth_black', hat: 'cap', hatMat: 'cloth_black' }); at(8.6, 4.1, LY, [7.4, 4.1], { pose: 'talk', cloth: 'cloth_brown', hat: 'cap' });
   at(25.0, 0.2, UY, [0, 0], { cloth: 'cloth_white', cloth2: 'cloth_black', over: 'cape', hair: 'shaven', hat: 'none', pose: 'stand' });
   for (const [lx, lz, to] of [[8.5, 3.6, [8.5, 9]], [10.0, -3.8, [10.0, -9]], [14.8, 3.7, [14.8, 9]], [17.0, 3.6, [17, 9]]]) at(lx, lz, UY, to, { pose: 'stand', hat: pick(['cap', 'brim', 'none']), over: pick(['sash', 'cape']) });
