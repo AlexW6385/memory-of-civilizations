@@ -27,6 +27,12 @@ export const HUT = [6.5, 118.6, 10.9, 123.2];
 export const STORES = Array.from({ length: 5 }, (_, i) => [-50 + i * 7.6, 96, -44.6 + i * 7.6, 100.2]);
 /** The kallanka on the Main Plaza's east side, 47.5 × 6.5 m, its seven doors to the plaza [stated: 47.5 × 6.5 m, the largest building of Machu Picchu — Wikipedia, "Kallanka"; inferred: the place]. */
 export const KALLANKA = [24.5, -49, 31, -1.5];
+/** The Main Plaza's three flights down into it (3 m): at the road, at the west and at the kallanka's middle door. */
+export const PLAZA_STAIRS = [
+  { rect: [0.9, PLAZA[3] - 6.2, 3.1, PLAZA[3] + 0.3], dir: 's', y0: -3, y1: 0 },
+  { rect: [PLAZA[0] - 0.3, -25.1, PLAZA[0] + 6.2, -22.9], dir: 'w', y0: -3, y1: 0 },
+  { rect: [PLAZA[2] - 6.2, -26.1, PLAZA[2] + 0.3, -23.9], dir: 'e', y0: -3, y1: 0 },
+];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 
 /**
@@ -124,6 +130,11 @@ export function laneLevel(x, z) {
   return -STEP * t * (1 - smooth(TOWN_WALL.z - 22, TOWN_WALL.z - 4, z));
 }
 let PGRID = null;
+/** A stair's rect { rect, dir (the way up), y0, y1 }: the ground under it follows the flight's line, so the steps (the stairs element) stand on it and the way is walkable. */
+export const STAIRS = [];
+export const stairH = (S, x, z) => { const [a, b, c, d] = S.rect, t = S.dir === 'w' ? (c - x) / (c - a) : S.dir === 'e' ? (x - a) / (c - a) : S.dir === 'n' ? (d - z) / (d - b) : (z - b) / (d - b); return S.y0 + (S.y1 - S.y0) * Math.max(0, Math.min(1, t)); };
+/** The ground the stairs make at (x, z), or null. */
+export function stairAt(x, z) { if (!PGRID) houses(); for (const S of STAIRS) if (inRect(S.rect, x, z)) return stairH(S, x, z); return null; }
 /** The platform at (x, z) (its margin included), or null: the level of the kancha or house standing there. */
 export function platformAt(x, z) {
   if (!PGRID) { houses(); }
@@ -167,6 +178,10 @@ export function houses() {
     const bd = 5.6 + rand() * 1, bu0 = 2 + rand() * 2, bu1 = A - 2 - rand() * 2;
     const sl0 = 7 + rand() * 2, sd = 5 + rand() * 0.8, sv1 = D - bd - 1 - rand() * 1.5, sv0 = sv1 - Math.min(sl0, sv1 - 1.1);
     const seed = () => Math.floor(rand() * 1e6);
+    {
+      const gz = (r[1] + r[3]) / 2, ox = gate === 'e' ? 1 : -1, yl = laneLevel(gx + ox * 2.8, gz), len = Math.max(2.3, (lv - yl) * 2.4);
+      if (lv - yl > 0.1) STAIRS.push({ rect: gate === 'e' ? [gx + 0.05, gz - 0.65, gx + 0.05 + len, gz + 0.65] : [gx - 0.05 - len, gz - 0.65, gx - 0.05, gz + 0.65], dir: gate === 'e' ? 'w' : 'e', y0: yl, y1: lv });
+    }
     KANCHAS.push({ rect: r, lv, at: P, inward: [sv, 0], A, D, sd, sv0, sv1, bd });
     HOUSES.push({ rect: R(bu0, D - bd, bu1, D), front: gate, seed: seed() });
     HOUSES.push({ rect: R(0, sv0, sd, sv1), front: 's', seed: seed() });

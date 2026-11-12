@@ -1,5 +1,5 @@
 // The houses of Machu Picchu in their kanchas (docs/settlements/machu-picchu.md §5).
-import { laneLevel, STORES, RADIUS, TERRACE, SITE, TOWN_WALL, CONDOR, houses, kanchas, kanchaWalls, outside } from './layout.js';
+import { laneLevel, STAIRS, STORES, RADIUS, TERRACE, SITE, TOWN_WALL, CONDOR, houses, kanchas, kanchaWalls, outside } from './layout.js';
 import { ground } from './ground.js';
 import { people } from './people.js';
 
@@ -59,12 +59,12 @@ export async function town() {
     E.push({ t: 'inca_feast', c: [4, -24], y: ground.height(4, -24), seed: 12 });
     plans.push(base('machu-picchu-goods', E)); }
   // the flagged road in from the gate to the plaza and the paved gates of the kanchas
-  { const E = [{ t: 'lane', rect: [0.4, 8.5, 3.6, TOWN_WALL.z - 0.4], y: 0.025, mat: 'granite_rough' }, { t: 'lane', rect: [0.4, 93.4, 3.6, 120], y: 0.025, mat: 'granite_rough' }];
+  { const E = STAIRS.map((S) => ({ t: 'stairs', rect: S.rect, y0: S.y0, y1: S.y1, dir: S.dir, mat: 'granite_rough' }));
+    E.push({ t: 'lane', rect: [0.4, 8.5, 3.6, TOWN_WALL.z - 0.4], y: 0.025, mat: 'granite_rough' }, { t: 'lane', rect: [0.4, 93.4, 3.6, 120], y: 0.025, mat: 'granite_rough' });
     for (const K of kanchas()) {
       const r = K.rect, gateE = K.inward[0] < 0, gx = gateE ? r[2] : r[0], gz = (r[1] + r[3]) / 2, ox = gateE ? 1 : -1, lane = gateE ? [r[2] + 0.25, r[1] + 1, r[2] + 1.75, r[3] - 1] : [r[0] - 1.75, r[1] + 1, r[0] - 0.25, r[3] - 1];
-      const yl = laneLevel(gx + ox * 2.4, gz), up = K.lv - yl;
-      // the stair from the lane up to the gate's sill (the platform stands RAISE and the bands' fall above the lane), 1.3 m wide, the lane's flagstones beside it
-      if (up > 0.1) E.push({ t: 'stairs', rect: gateE ? [gx + 0.05, gz - 0.65, gx + 2.3, gz + 0.65] : [gx - 2.3, gz - 0.65, gx - 0.05, gz + 0.65], y0: yl, y1: K.lv, dir: gateE ? 'w' : 'e', mat: 'granite_rough' });
+      const yl = laneLevel(gx + ox * 2.8, gz), up = K.lv - yl;
+      // the stair from the lane up to the gate's sill (the platform stands RAISE and the bands' fall above the lane): in layout's STAIRS, the ground under it following the flight
       const ok = [[lane[0], lane[1]], [lane[2], lane[1]], [lane[0], lane[3]], [lane[2], lane[3]], [(lane[0] + lane[2]) / 2, (lane[1] + lane[3]) / 2]].every(([x, z]) => !all.some((h) => x > h.rect[0] - 0.3 && x < h.rect[2] + 0.3 && z > h.rect[1] - 0.3 && z < h.rect[3] + 0.3) && outside(x, z) < -2 && Math.abs(ground.height(x, z) - yl) < 0.08);
       if (ok && up <= 0.1) E.push({ t: 'lane', rect: lane, y: yl + 0.025, mat: 'granite_rough' });
     }

@@ -3,7 +3,7 @@
 // Temple of the Three Windows, the Intihuatana on its terraced hill, the Main Plaza; the terraces'
 // walls round the saddle, with stairs down them.
 
-import { SITE, NECK, TERRACE, HILL, KNOLL, hillRing, PLAZA, TOWN_WALL, DITCH, STORES, KALLANKA, SACRED_ROCK, waterworks } from './layout.js';
+import { SITE, NECK, TERRACE, HILL, KNOLL, hillRing, PLAZA, TOWN_WALL, DITCH, STORES, KALLANKA, SACRED_ROCK, PLAZA_STAIRS, waterworks } from './layout.js';
 import { ground } from './ground.js';
 
 const E = [];
@@ -132,9 +132,7 @@ E.push({ t: 'inca_house', rect: KALLANKA, y: 0, h: 3.3, th: 0.8, front: 'w', doo
     run(Z0 + c, Z1 - c, X0 + c, 'z', gaps.w, y0, y1);
     run(Z0 + c, Z1 - c, X1 - c, 'z', gaps.e, y0, y1);
   }
-  E.push({ t: 'stairs', rect: [gaps.s[0], Z1 - 3.2, gaps.s[1], Z1 + 0.2], y0: -3, y1: 0, dir: 's', mat: 'granite_rough' });
-  E.push({ t: 'stairs', rect: [X0 - 0.2, gaps.w[0], X0 + 3.2, gaps.w[1]], y0: -3, y1: 0, dir: 'w', mat: 'granite_rough' });
-  E.push({ t: 'stairs', rect: [X1 - 3.2, gaps.e[0], X1 + 0.2, gaps.e[1]], y0: -3, y1: 0, dir: 'e', mat: 'granite_rough' });
+  for (const S of PLAZA_STAIRS) E.push({ t: 'stairs', rect: S.rect, y0: S.y0, y1: S.y1, dir: S.dir, mat: 'granite_rough' });
 }
 // the Main Plaza's edge: a low wall with stairs down into it
 E.push({ t: 'lane', rect: [PLAZA[0] - 4, PLAZA[1] - 4, PLAZA[0] - 1, PLAZA[3] + 4], y: 0.02, mat: 'granite_rough' });
@@ -148,8 +146,8 @@ for (const [r, open] of SACRED_ROCK.wayronas) E.push({ t: 'inca_temple', rect: r
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('sacred-plaza', [-52, -62, -18, -24], 0.6, 'open'), room('town', [-95, -175, 95, 175], 0, 'open')];
-const walks = [[[2, 110], [2, 80], [2, 14], [-12, 12], [-21, 15.5]]];
-walks[0].y0 = 0;
+const walks = [[[2, 110], [2, 80], [2, 14], [-12, 12], [-21, 15.5]], [[2, 14], [2, 2], [2, -20], [-14, -24], [-22, -24]]];
+walks[0].y0 = 0; walks[1].y0 = 0;
 
 export const town = {
   id: 'machu-picchu-town',

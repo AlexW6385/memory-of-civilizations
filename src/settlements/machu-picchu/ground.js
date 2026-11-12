@@ -4,7 +4,7 @@
 // on the terraces, cloud forest on the slopes; mist and cloud of the eastern Andes.
 // Pure (used by the relief, the collision and the plant workers).
 
-import { RADIUS, SITE, TERRACE, PLAZA, PEAKS, DITCH, FIELDS, STORES, HUT, HILL, KNOLL, hillHeight, laneLevel, platformAt, inRect, outside, terraceAt, inHouse, paved, ploughed, smooth as sm } from './layout.js';
+import { RADIUS, SITE, TERRACE, PLAZA, PEAKS, DITCH, FIELDS, STORES, HUT, HILL, KNOLL, hillHeight, laneLevel, platformAt, stairAt, stairH, PLAZA_STAIRS, inRect, outside, terraceAt, inHouse, paved, ploughed, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 function vnoise(x, z) {
@@ -29,8 +29,9 @@ function height(x, z) {
     { const pl = platformAt(x, z); if (pl !== null) h = pl; }
     // the Main Plaza sunk in two tiers of 1.5 m, each with its wall (plan.js), the stairs down at the road, the west and the kallanka
     if (inRect(PLAZA, x, z)) { const i = Math.min(x - PLAZA[0], PLAZA[2] - x, z - PLAZA[1], PLAZA[3] - z); h = -PLAZA_DEPTH / 2 * (sm(0, 0.7, i) + sm(2.4, 3.1, i)); }
+    { const st = stairAt(x, z); if (st !== null) h = st; else for (const S of PLAZA_STAIRS) if (inRect(S.rect, x, z)) h = stairH(S, x, z); }
     // the dry ditch across the saddle before the town wall, its west end closed
-    { const q = Math.abs(z - DITCH.z); if (q < DITCH.top) h = Math.min(h, -DITCH.depth * (1 - sm(DITCH.bottom, DITCH.top, q)) * sm(DITCH.x0, DITCH.x0 + 5, x)); }
+    { const q = Math.abs(z - DITCH.z); if (q < DITCH.top + 0.3) h = Math.min(h, -DITCH.depth * Math.max(0, Math.min(1, (DITCH.top + 0.3 - q) / (DITCH.top + 0.3 - DITCH.bottom + 0.4))) * sm(DITCH.x0, DITCH.x0 + 5, x)); /* its banks run with the stairs' slope */ }
     // the Intihuatana's hill and the Guardhouse's knoll, in terraces
     { const hh = Math.max(hillHeight(HILL, x, z), hillHeight(KNOLL, x, z)); if (hh > 0) h = Math.max(h, hh); }
   } else {
