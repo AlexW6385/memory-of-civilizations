@@ -197,9 +197,9 @@ function people() {
       const d = 51.2 + k * 1.5, lat = (k % 2 ? 1 : -1) * (1.2 + (k >> 1) * 1.8), x = ax + dx * d + (dz ? lat : 0), z = az + dz * d + (dx ? lat : 0);
       lay([x, z], face(x, z, ax, az), { pose: 'kneel', arms: 'pray' });
     }
-    const x = ax + dx * 14.8, z = az + dz * 14.8;
-    P.push({ t: 'figure', at: [x + (dz ? 0.2 : 0), z + (dx ? 0.2 : 0)], y: 1.2, rot: face(x, z, ax, az), seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: 'cloth_white', cloth2: 'cloth_red', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: 'bun', beard: false, pose: 'kneel', arms: 'pray' });
-    const mx = ax + dx * 21.4, mz = az + dz * 21.4;
+    const x = ax + dx * 14.0, z = az + dz * 14.0;
+    P.push({ t: 'figure', at: [x, z], y: 1.2, rot: face(x, z, ax, az), seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: 'cloth_white', cloth2: 'cloth_red', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: 'bun', beard: false, pose: 'kneel', arms: 'pray' });
+    const mx = ax + dx * 21.4 + (dz ? 1.7 : 0), mz = az + dz * 21.4 + (dx ? 1.7 : 0);
     P.push({ t: 'figure', at: [mx, mz], y: 1.2, rot: face(mx, mz, ax, az), seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: 'cloth_red', cloth2: 'cloth_red', over: 'shawl', skin: skin(), hat: 'none', feet: 'bare', hair: 'shaven', beard: false, pose: 'cross' });
   }
   for (const [x, z, tx, tz] of [[GATE.x + 2.6, -2.4, GATE.x + 2.6, 5], [GATE.x + 2.6, 2.4, GATE.x + 2.6, -5], [-198 - 3, -30 + 2, -198, -20], [-198 + 3, -30 + 2, -198, -20], [-146 - 2, 82 - 4, -156, 82], [-146 - 2, 82 + 4, -156, 82]]) {

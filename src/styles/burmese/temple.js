@@ -141,7 +141,7 @@ export function ananda(el, ctx) {
     }
     // before each standing Buddha: offering tables beside the passage, lamp pillars, and the monks' mats on the passage floor
     offering(F, -1.7, f, 17.6, 1.1); offering(F, 1.7, f, 17.6, 1.1);
-    F.b('reed_mat', -1.0, f, 14.2, 1.0, f + 0.03, 15.4, false);
+    F.b('reed_mat', -1.0, f, 13.7, 1.0, f + 0.03, 14.7, false);
 
   }
   // the Buddhas: Kakusandha north, Konagamana east, Kassapa south, Gautama west
@@ -249,6 +249,17 @@ export function tower(el, ctx) {
   FF.light(0, f + 7 * k, hallV + 4, '#ffd9a0', 8, 18);
   FF.light(0, f + 7 * k, Hc - 1, '#ffd9a0', 5, 14);
   FF.b('limewash_white', -sl - 0.1, f, hallV, -sl, f + 0.01, Hc, false);
+  // the hall's walls carry painted panels in gilt frames (the Jataka, the life of the Buddha), offering tables flank the aisle, a mat of the monks
+  {
+    const pm = ['paint_ochre', 'paint_blue', 'fresco_green', 'stucco_ochre'], v0 = hallV + 5.2 * k, v1 = Hc - 1.2 * k, nq = Math.max(2, Math.floor((v1 - v0) / (3.4 * k)));
+    for (const sg of [-1, 1]) for (let q = 0; q < nq; q++) {
+      const a = v0 + (q * (v1 - v0)) / nq + 0.3, b = v0 + ((q + 1) * (v1 - v0)) / nq - 0.3, u = sg * sl;
+      FF.b('gilt_bronze', Math.min(u, u - sg * 0.06), f + 2.4 * k, a - 0.06, Math.max(u, u - sg * 0.06), f + 6.4 * k, b + 0.06, false);
+      FF.b(pm[(q + (sg > 0 ? 1 : 0)) % 4], Math.min(u - sg * 0.06, u - sg * 0.075), f + 2.55 * k, a, Math.max(u - sg * 0.06, u - sg * 0.075), f + 6.25 * k, b, false);
+    }
+    offering(FF, -2.6, f, hallV + 6.2 * k, 1.2); offering(FF, 2.6, f, hallV + 6.2 * k, 1.2);
+    FF.b('reed_mat', -1.1, f, hallV + 4.4 * k, 1.1, f + 0.03, hallV + 5.6 * k, false);
+  }
   // the entry hall projecting on `facing`: 9.8 wide, 11.6 long, a gabled roof in steps, an end arch
   const pw = (sl + 1.6 * k), pl = 11.6 * k;
   for (const sg of [-1, 1]) FF.b(WHITE, sg < 0 ? -pw : sl, f, H, sg < 0 ? -sl : pw, f + 9.5 * k, H + pl);
