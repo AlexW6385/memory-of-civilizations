@@ -24,6 +24,8 @@ export function walkways() {
   rects.push({ r: [mx0 + 1, cz - 3.2, mx1 - 1, cz + 3.2], weight: 4.5, market: 1, kind: 'street' });          // the market's aisle
   rects.push({ r: [mx0 + 1, mz0 + 0.5, mx0 + 4, mz1 - 0.5], weight: 1.2, market: 1, kind: 'lane' });
   rects.push({ r: [COURT[0] + 8, COURT[1] + 6, COURT[2] - 8, -38], weight: 0.6, market: 0, kind: 'street', temple: true });   // before the hall (the ceremony's rows stand on it)
+  rects.push({ r: [-1.6, -33, 1.6, 38], weight: 2.8, market: 0, kind: 'street' });                                    // the flagged way up the court to the hall's stairs: pilgrims, monks, officials
+  rects.push({ r: [COURT[0] + 8, 12, COURT[2] - 8, 36], weight: 1.4, market: 0, kind: 'street' });                  // the court's south end between the Middle Gate and the sellers
   return { rects, links: [], clip: RADIUS - 14 };
 }
 export function waterways() { return { rects: [], bridges: [], clip: 0 }; }

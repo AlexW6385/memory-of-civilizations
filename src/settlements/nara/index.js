@@ -138,9 +138,48 @@ const ceremonyPeople = { id: 'nara-ceremony', style: 'life', origin: [0, 0], bas
   const fig = (x, z, dir, o) => P.push({ t: 'figure', at: [x, z], y: 0, rot: faceTo(dir) + (r() - 0.5) * 0.3, seed: Math.floor(r() * 1e9), dress: 'robe', skin: 'skin_light', hat: 'none', carry: 'none', ...o });
   const MC = ['cloth_ochre', 'cloth_brown', 'cloth_grey'];
   for (const [x, z] of [[-14, 18], [16, 24], [-26, 4], [38, -14], [-40, 30], [46, 28]]) fig(x, z, [r() - 0.5, r() - 0.5], { hair: 'shaven', carry: 'broom', cloth: MC[Math.floor(r() * 3)], cloth2: 'cloth_ochre', over: 'sash' });
-  for (const [x, z] of [[-3.5, 20], [3.5, 12], [-1.5, 3], [2, -4], [-4, -12], [4.5, -14]]) fig(x, z, [0, -1], { pose: 'pray', hair: r() < 0.5 ? 'topknot' : 'bun', cloth: ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_green'][Math.floor(r() * 4)], cloth2: 'cloth_white', over: 'sash' });
+  for (const [x, z] of [[-4.5, 9], [3.5, 12], [-1.5, 3], [2, -4], [-4, -12], [4.5, -14]]) fig(x, z, [0, -1], { pose: 'pray', hair: r() < 0.5 ? 'topknot' : 'bun', cloth: ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_green'][Math.floor(r() * 4)], cloth2: 'cloth_white', over: 'sash' });
   for (const x of [-7, 7]) fig(x, 146, [-Math.sign(x) * 0.3, 1], { hat: 'cap', hatMat: 'lacquer_black', carry: 'staff', cloth: 'cloth_maroon', cloth2: 'cloth_white', over: 'collar', beard: true });
   for (const [x, z, d] of [[-1.5, 162, [0, -1]], [2, 172, [0, -1]], [-2, 185, [0, 1]], [1.5, 198, [0, -1]], [-2.5, 210, [0, -1]], [2, 224, [0, 1]]]) fig(x, z, d, { dress: r() < 0.5 ? 'trousers' : 'robe', hair: 'topknot', hat: r() < 0.5 ? 'straw' : 'none', carry: ['bundle', 'basket', 'staff', 'pole'][Math.floor(r() * 4)], cloth: ['cloth_indigo', 'cloth_brown', 'cloth_grey'][Math.floor(r() * 3)], cloth2: 'cloth_indigo', over: 'sash' });
+}
+
+// the court at the hour of the lamps: iron fire-baskets on posts either side of the way, sellers of incense, lotus and
+// offering cakes at the court's south end, pilgrim families in groups, deer at the court's edges, a pilgrims' rest under cloth
+const courtLife = { id: 'nara-court-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-340, -340, 340, 340], entrance: { at: [0, 20], facing: 'n' }, elements: [] };
+{
+  const L = courtLife.elements, faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
+  let seed = 7611;
+  const r = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const sd = () => Math.floor(r() * 1e9);
+  const CLS = ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_green', 'cloth_brown', 'cloth_grey'];
+  const fig = (x, z, dir, o) => L.push({ t: 'figure', at: [x, z], y: 0, rot: faceTo(dir) + (r() - 0.5) * 0.4, seed: sd(), dress: 'robe', skin: 'skin_light', hat: 'none', carry: 'none', over: 'sash', cloth: CLS[Math.floor(r() * 6)], cloth2: CLS[Math.floor(r() * 6)], ...o });
+  // lit fire-baskets either side of the flagged way (6 m clear of the arrival and beyond)
+  for (const z of [10, -2, -14]) for (const s of [-1, 1]) L.push({ t: 'lantern', kind: 'iron', at: [s * 3.4, z], y: 0, h: 2.3 });
+  // lanterns of white paper on posts in a row across the court before the hall, lit at dusk, and two rows along the way's edge
+  for (let x = -38; x <= 38; x += 6.4) if (Math.abs(x) > 10) L.push({ t: 'lantern', kind: 'white', at: [x, -27], y: 0, h: 2.1 });
+  for (const s of [-1, 1]) for (const z of [24, 6, -8, -20]) L.push({ t: 'lantern', kind: 'white', at: [s * 7.4, z], y: 0, h: 2.1 });
+  // offering sellers at the court's south end, facing the Middle Gate's pilgrims
+  for (const [x, z, aw, goods] of [[-19, 31, 'cloth_white', ['basket', 'produce']], [19, 31, 'cloth_ochre', ['cloth', 'basket']], [-31, 25, 'cloth_indigo', ['produce', 'produce', 'basket']], [32, 26, 'cloth_white', ['basket', 'cloth']]]) {
+    L.push({ t: 'stall', at: [x, z], y: 0, rot: faceTo([0, 1]), seed: sd(), w: 3.2, d: 1.3, awning: aw, stripe: null, goods });
+    fig(x, z - 1.4, [0, 1], { pose: r() < 0.5 ? 'sit' : 'stand' });
+    fig(x + (r() - 0.5) * 2, z + 2.4, [0, -1], { pose: 'stand', hair: r() < 0.5 ? 'bun' : 'topknot' });
+  }
+  for (const [x, z] of [[-12, 36], [12, 36], [-40, 33], [41, 34]]) { L.push({ t: 'goods_mat', at: [x, z], y: 0, rot: faceTo([0, 1]), seed: sd(), goods: ['heap', 'baskets'], produce: ['cloth_white', 'cloth_ochre', 'cloth_green'] }); fig(x, z - 1.1, [0, 1], { pose: 'sit_ground', hair: 'bun' }); }
+  // a pilgrims' rest: a tea table under an awning, bench, bundles and sacks, a carter's ox resting
+  L.push({ t: 'stall', at: [-58, 14], y: 0, rot: faceTo([1, 0]), seed: sd(), w: 3.4, d: 1.3, awning: 'cloth_white', stripe: null, goods: ['basket', 'basket'] });
+  L.push({ t: 'tea_table', at: [-53, 12], y: 0, rot: 0 }, { t: 'bench', at: [-53, 17], y: 0, rot: 0 }, { t: 'sacks', at: [-61, 20], y: 0, rot: 0.5, seed: sd() }, { t: 'sacks', at: [62, 18], y: 0, rot: 2, seed: sd() });
+  L.push({ t: 'cart', kind: 'two', beast: 'ox', load: 'baskets', at: [64, 22], y: 0, rot: 1.2, seed: sd() });
+  // pilgrim groups: family clusters, a monk guiding, children, a few kneeling facing the hall
+  const groups = [[-24, 14], [26, 15], [-46, 22], [48, 10], [-34, -22], [36, -24], [-52, -8], [54, -12], [-18, 24], [22, 22], [-68, 4], [70, 2]];
+  for (const [gx, gz] of groups) {
+    const n = 3 + Math.floor(r() * 3), d = [r() - 0.5, -1];
+    for (let i = 0; i < n; i++) {
+      const kid = i === n - 1 && r() < 0.5;
+      fig(gx + (i - n / 2) * 1.2 + (r() - 0.5) * 0.6, gz + (r() - 0.5) * 1.6, d, { pose: r() < 0.3 ? 'pray' : r() < 0.4 ? 'talk' : 'stand', hair: r() < 0.5 ? 'bun' : 'topknot', hat: r() < 0.3 ? 'straw' : 'none', carry: r() < 0.25 ? 'bundle' : 'none', ...(kid ? { child: true } : {}) });
+    }
+  }
+  // two monks of the Tōdai-ji with a pilgrim procession toward the hall, one bearing a staff
+  for (let i = 0; i < 6; i++) fig((i % 2 ? 2.7 : -2.7) + (r() - 0.5) * 0.4, 2 - i * 3.4, [0, -1], { hair: i < 2 ? 'shaven' : 'topknot', carry: i === 0 ? 'staff' : 'none', cloth: i < 2 ? 'cloth_ochre' : CLS[i % 6], cloth2: i < 2 ? 'cloth_maroon' : 'cloth_white' });
 }
 
 // the deer of the hills: a few small herds on the lawns outside the temple's courts and up the
@@ -148,7 +187,7 @@ const ceremonyPeople = { id: 'nara-ceremony', style: 'life', origin: [0, 0], bas
 const deer = { id: 'nara-deer', style: 'nara', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-340, -340, 340, 340], entrance: { at: [0, 180], facing: 'n' }, elements: [] };
 {
   let s = 7520; const r = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
-  for (const [hx, hz, n] of [[34, 72, 4], [-42, 102, 5], [58, 128, 3], [-24, 64, 2], [196, -24, 5], [232, 40, 4], [205, 96, 3], [182, -96, 4], [-70, 150, 3]]) {
+  for (const [hx, hz, n] of [[34, 72, 4], [-42, 102, 5], [58, 128, 3], [-24, 64, 2], [196, -24, 5], [232, 40, 4], [205, 96, 3], [182, -96, 4], [-70, 150, 3], [-70, 36, 3], [72, 40, 3], [-76, -20, 2]]) {
     for (let i = 0; i < n; i++) {
       const x = hx + (r() - 0.5) * 12, z = hz + (r() - 0.5) * 12;
       deer.elements.push({ t: 'obj', kind: 'shika', at: [x, z], y: height(x, z), rot: r() * Math.PI * 2, seed: Math.floor(r() * 1e6) });
@@ -175,4 +214,4 @@ const shrineFigures = { id: 'nara-shrine-figures', style: 'nara', origin: [0, 0]
     shrineFigures.elements.push({ t: 'nara_altar_set', at: [hx, bz + 7.6], y: h.y + 0.86, w: 3 });
   }
 }
-export async function town() { return [shrineStone, shrineFigures, daibutsu, rushana, deer, ceremonySet, ceremonyPeople, ...(await houses())]; }
+export async function town() { return [shrineStone, shrineFigures, daibutsu, rushana, deer, ceremonySet, ceremonyPeople, courtLife, ...(await houses())]; }

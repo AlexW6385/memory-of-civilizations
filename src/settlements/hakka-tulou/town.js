@@ -108,6 +108,27 @@ export async function town() {
     for (let k = 0; k < 5; k++) { const a = rr() * 6.28, d = S * (0.35 + rr() * 0.6), at = [cc[0] + Math.cos(a) * d, cc[1] + Math.sin(a) * d]; if (Math.abs(at[0] - cc[0]) < 1.6 && at[1] > cc[1]) continue; const t = k % 4; P.push(t === 0 ? { t: 'drying_tray', at, y: 0.03, rot: rr() * 3, seed: q * 7 + k } : t === 1 ? { t: 'chickens', n: 4, kind: 'hen', at, y: 0.03, seed: q + k } : t === 2 ? { t: 'laundry', at, y: 0.03, rot: rr() * 3, len: 3.2, seed: q * 5 + k } : { t: 'basket', n: 2, at, y: 0.03, seed: q + k }); }
     for (let k = 0; k < (n.kind === 'square' ? 7 : 5); k++) { const a = rr() * 6.28, d = S * (0.2 + rr() * 0.7), at = [cc[0] + Math.cos(a) * d, cc[1] + Math.sin(a) * d]; if (Math.abs(at[0] - cc[0]) < 1.6 && at[1] > cc[1]) continue; (k % 2 ? woman : man)(at, 0.03, rr() * 6.28, k % 3 === 0 ? { carry: 'basket' } : k % 3 === 1 ? { pose: 'talk' } : {}); }
   });
+  // a wayside rest pavilion by the bridge's near end, with its bench
+  V.push({ t: 'ming_pavilion', c: [9.6, 75.4], shape: 'rect', w: 4.4, d: 3.4, y: 0.05, H: 3.1, bench: true, rect: [7, 73.2, 12.4, 77.8] });
+  // ── the lane and the drying ground at the arrival: a roadside tea stand with its drinkers, firewood and a straw stack by the lane's end,
+  // a buffalo with a herd boy, ploughing in the paddy, sacks of rice and mats of dried vegetables on the yard, an old man mending a basket
+  {
+    P.push({ t: 'stall', at: [7.8, 69.2], y: 0.05, rot: Math.PI / 2, seed: 61, w: 2.6, d: 1.3, awning: 'cloth_indigo', stripe: null, goods: ['pot:dark_pot', 'basket'] });
+    P.push({ t: 'tea_table', at: [5.6, 68.0], y: 0.05, rot: 0.3 }, { t: 'bench', at: [7.2, 66.2], y: 0.05, rot: 1.57, len: 1.6 });
+    man([7.8, 70.6], 0.05, Math.PI / 2, { pose: 'stand', hat: 'straw', cloth: 'cloth_indigo' });
+    man([5.2, 66.9], 0.05, face([5.2, 66.9], [5.6, 68]), { pose: 'sit_low', hat: 'cap', cloth: 'cloth_black' }); woman([6.2, 69.2], 0.05, face([6.2, 69.2], [5.6, 68]), { pose: 'sit_low', carry: 'none' });
+    P.push({ t: 'firewood', at: [-7.4, 66.4], y: 0.05, rot: 1.57, len: 1.8, seed: 8 }, { t: 'haystack', kind: 'pole', at: [-9.6, 69.5], y: 0.05, seed: 9 }, { t: 'sacks', at: [8.6, 60.2], y: 0.05, rot: 0.4, n: 4, seed: 12 });
+    F.push({ t: 'animal', kind: 'buffalo', at: [-9.2, 63.4], y: 0.05, rot: 1.9, seed: 71, graze: true });
+    L.push({ t: 'figure', at: [-7.8, 62.4], y: 0.05, rot: 1.2, seed: 7101, dress: 'trousers', cloth: 'cloth_red', cloth2: 'cloth_indigo', over: 'none', skin: 'skin_medium', hat: 'straw', hair: 'short', child: true, carry: 'staff', feet: 'bare' });
+    for (const [x, z, r] of [[-26, 101, 1.2], [30, 108, -1.8], [-2, 103, 0.4]]) {
+      F.push({ t: 'animal', kind: 'buffalo', at: [x, z], y: ground.height(x, z), rot: r, seed: Math.round(x) + 72, gear: true });
+      man([x - Math.sin(r) * 2.8, z - Math.cos(r) * 2.8], ground.height(x, z), r, { pose: 'stand', hat: 'straw', carry: 'rope', cloth: 'cloth_indigo' });
+    }
+    for (let k = 0; k < 4; k++) P.push({ t: 'goods_mat', at: [YARD[0] + 4 + k * 6.4, YARD[3] - 2.2], y: 0.05, rot: Math.PI, goods: ['heap', 'baskets'], produce: ['cloth_ochre', 'cloth_red'], seed: k + 30 });
+    P.push({ t: 'sacks', at: [-12.6, 47.6], y: 0.05, rot: 0.3, n: 5, seed: 33 }, { t: 'sacks', at: [12.6, 52.4], y: 0.05, rot: 2.2, n: 4, seed: 34 }, { t: 'barrel', at: [13, 40.5], y: 0.05, seed: 35, n: 2 });
+    man([-13, 43.6], 0.05, 0.4, { pose: 'sit_low', hat: 'straw', cloth: 'cloth_grey', carry: 'none' }); P.push({ t: 'basket', at: [-12.1, 43.0], y: 0.05, n: 2, seed: 36 });
+    woman([12.4, 46.4], 0.05, 3.6, { pose: 'talk' }); woman([11.5, 47.0], 0.05, 0.4, { pose: 'talk', carry: 'basket' });
+  }
   // the apron round the landmark's foot: women at the wall's foot washing and sorting, the pigs' swill, the old men in the shade
   for (let k = 0; k < 16; k++) { const a = k * 22.5 + rand() * 10, at = polar(T.R + 1.3 + rand() * 1.0, a); if (a % 360 > 70 && a % 360 < 110) continue; (k % 3 ? woman : man)(at, 0, (a + 180) * Math.PI / 180 + rand(), k % 4 === 0 ? { pose: 'squat', carry: 'none' } : { carry: k % 4 === 1 ? 'basket' : 'none' }); }
   return [base('hakka-village', 'tulou', V), base('hakka-props', 'life', [...P, ...F, ...L])];

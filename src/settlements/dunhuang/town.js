@@ -148,6 +148,50 @@ export async function town() {
     put({ t: 'animal', kind: 'camel', at: [rx(-60) + 3.5, -60], y: 0, rot: -Math.PI / 2, seed: 5, gear: false, graze: true });
     put({ t: 'animal', kind: 'donkey', at: [rx(96) + 3.3, 96], y: 0, rot: -Math.PI / 2, seed: 15, gear: false, graze: true });
   }
+  // ── the street at the arrival (x -34..14): a storyteller with his audience, a noodle seller's stove, tethered horses and a trough,
+  // children at play, a fodder cart, a fortune-teller on his mat, drying trays of apricots at a door (all kept off the street's axis and the doors)
+  {
+    const put = (o) => L.push(o), pickc = (a) => a[Math.floor(rand() * a.length)], ONE = Math.PI;
+    // the storyteller on a stool at the bridge approach, six listeners squatting and sitting round him, facing him
+    man([-26, 3.6], 0, 0.5, { pose: 'stand', hat: 'cap', cloth: 'cloth_blue', carry: 'staff' }); put({ t: 'stool', at: [-26.9, 3.9], y: 0, rot: 0 });
+    for (let k = 0; k < 6; k++) { const a = -0.3 + k * 0.62, x = -26 + Math.cos(a) * 2.2, z = 3.6 - Math.sin(a) * 2.2 * 0.8 - 0.5; if (Math.abs(z) > 4.6) continue; man([x, z], 0, face([x, z], [-26, 3.6]), { pose: k % 2 ? 'sit_ground' : 'cross', hat: k % 3 ? 'cap' : 'none', cloth: pickc(['cloth_brown', 'cloth_grey', 'cloth_ochre', 'cloth_blue']) }); }
+    // the noodle seller: a stove with a great pot, stools and a table, a customer eating, the seller ladling
+    put({ t: 'tea_table', at: [-12, -3.9], y: 0, rot: 0.2 }); put({ t: 'pot', kind: 'vat', at: [-14.2, -4.3], y: 0, seed: 3 }); put({ t: 'firewood', at: [-15.4, -4.8], y: 0, rot: 0.1, len: 1.2, seed: 4 });
+    man([-13.2, -3.3], 0, face([-13.2, -3.3], [-12, -3.9]), { pose: 'stand', hat: 'cap', cloth: 'cloth_white', over: 'apron' }); man([-11.2, -3.2], 0, face([-11.2, -3.2], [-12, -3.9]), { pose: 'sit_low', cloth: 'cloth_brown' });
+    // horses tied at a rail before a shop, a trough, a boy with a bucket
+    put({ t: 'trough', at: [-20, 4.5], y: 0, rot: 0, mat: 'banco' });
+    for (const [x, r] of [[-22.2, 0.4], [-17.8, ONE - 0.3]]) put({ t: 'animal', kind: 'horse', at: [x, 3.9], y: 0, rot: r, seed: Math.round(x * 3), gear: true });
+    man([-20, 3.2], 0, ONE, { dress: 'tunic', legs: 'hose', hat: 'none', cloth: 'cloth_white', carry: 'pails', feet: 'bare', child: true });
+    // children playing in the dust near the lane mouth: a ring of four, two chasing
+    for (let k = 0; k < 4; k++) { const a = k * 1.57, x = -5 + Math.cos(a) * 1.0, z = -2.8 + Math.sin(a) * 1.0; man([x, z], 0, a + 1.57, { dress: 'tunic', legs: 'hose', hat: 'none', cloth: pickc(['cloth_ochre', 'cloth_white', 'cloth_red']), child: true, feet: 'bare', pose: 'stand' }); }
+    // a cart of fodder with its ox, unharnessed at the roadside, a carter asleep on the load's end
+    put({ t: 'cart', beast: 'donkey', load: 'hay', at: [-30, -4.0], y: 0, rot: 0.1, seed: 7 });
+    // a fortune-teller with his mat and a client; a seller of apricots and melons on a mat
+    put({ t: 'goods_mat', at: [-1, 4.1], y: 0, rot: ONE, goods: ['melons', 'heap'], seed: 12 }); man([-1, 5.2], 0, 0, { pose: 'sit_ground', hat: 'straw', cloth: 'cloth_grey' }); man([-2.1, 3.0], 0, 3.6, { pose: 'stand', cloth: 'cloth_ochre', hair: 'bun' });
+    for (const [x, z] of [[6, -5.2], [-8, 5.3], [-28, -5.2]]) put({ t: 'drying_tray', at: [x, z], y: 0, rot: 0.3, seed: Math.round(x) });
+    // two guards of the town's ward walking with staves are the movers'; a dog and cat at the doors
+    put({ t: 'animal', kind: 'dog', at: [4, 3.8], y: 0, rot: 2.4, seed: 31 }); put({ t: 'animal', kind: 'cat', at: [-9.5, 5.4], y: 0.0, rot: 0.8, seed: 32 });
+  }
+  // ── the street from the market to the gate (x 70..118): a smith at his anvil, a tandoor baker, drying trays of apricots and grapes at the walls,
+  // porters resting in the shade with their loads, a dyer's cloths on a line across a lane's mouth, a wedding or pilgrim party with a banner
+  {
+    const put = (o) => L.push(o), ONE = Math.PI;
+    const clear = (d, x) => !nearDoor(d, x + 0.0);
+    // the smith (a forge of earth with bellows is the shop's; outside: the anvil on its stump, the tongs, a customer with a horse to be shod)
+    for (const [x, side] of [[78, 1], [104, -1]]) {
+      const z = side * 4.3; if (!clear(side > 0 ? dN : dS, x)) continue;
+      put({ t: 'trough', at: [x + 1.6, z], y: 0, rot: 0, mat: 'banco' }); put({ t: 'pot', kind: 'vat', at: [x - 0.4, z], y: 0, seed: x });
+      man([x + 0.5, z - side * 1.0], 0, side > 0 ? 0 : ONE, { pose: 'stand', hat: 'cap', cloth: 'cloth_brown', over: 'apron', carry: 'staff' });
+    }
+    // trays of apricots and grapes laid to dry on trestles against the house walls, melons and gourds stacked
+    for (const x of [74, 82, 90, 96, 108, 114]) for (const side of [-1, 1]) { if (!clear(side > 0 ? dN : dS, x) || rand() < 0.35) continue; put({ t: 'drying_tray', at: [x, side * 5.0], y: 0, rot: rand() * 3, seed: Math.round(x * 3 + side) }); }
+    for (const [x, side] of [[86, 1], [100, -1], [112, 1]]) if (clear(side > 0 ? dN : dS, x)) { put({ t: 'goods_mat', at: [x, side * 4.2], y: 0, rot: side > 0 ? ONE : 0, goods: ['melons', 'heap'], seed: x }); man([x, side * 5.3], 0, side > 0 ? 0 : ONE, { pose: 'sit_ground', hat: 'straw', cloth: 'cloth_grey' }); }
+    // porters resting in the lee of a wall: sacks, a pole laid down, two sitting and one asleep against the load
+    for (const [x, side] of [[92, -1], [110, 1]]) { const z = side * 4.6; put({ t: 'sacks', at: [x, z], y: 0, rot: 0.3, n: 5, seed: x }); man([x + 1.4, z], 0, side > 0 ? ONE + 0.5 : 0.5, { pose: 'sit_ground', hat: 'straw', cloth: 'cloth_white', feet: 'bare', dress: 'tunic', legs: 'hose' }); man([x + 2.4, z + 0.1], 0, side > 0 ? ONE - 0.4 : -0.4, { pose: 'cross', hat: 'cap', cloth: 'cloth_brown' }); }
+    // a pilgrim party coming from the oasis to the caves: a monk with a banner pole, six lay pilgrims with bundles, a donkey with the baggage
+    for (let k = 0; k < 7; k++) man([68 + k * 1.5 + (rand() - 0.5) * 0.4, -1.4 + (k % 2) * 2.2 + (rand() - 0.5) * 0.3], 0, ONE - 0.1 + (rand() - 0.5) * 0.25, k === 0 ? { dress: 'robe', cloth: 'cloth_ochre', cloth2: 'cloth_brown', over: 'shawl', hair: 'shaven', hat: 'none', carry: 'staff' } : { carry: k % 3 ? 'bundle' : 'staff', hat: k % 2 ? 'straw' : 'cap' });
+    put({ t: 'animal', kind: 'donkey', at: [79, 0.3], y: 0, rot: ONE + 0.1, seed: 77, gear: true });
+  }
   void face; void CAVES; void FLOOR; void STREET; void riverX;
   return [base('dunhuang-town', 'dunhuang', E), base('dunhuang-people', 'life', L)];
 }
