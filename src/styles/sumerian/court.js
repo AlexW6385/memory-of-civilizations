@@ -8,6 +8,7 @@
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { beamTris } from '../ming/index.js';
 import { palm } from '../egyptian/objects.js';
+import { crescent } from './index.js';
 
 const BB = 'brick_baked', MP = 'mud_plaster';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -79,9 +80,37 @@ export function courtDress(el, { bag, col, lights }) {
   for (const [fx, fz] of [[-24, z0 + 33], [-24, z0 + 36.5]]) for (let r = 0; r < 4; r++) for (let k = 0; k < 4 - (r >> 1); k++) beam('palm_trunk', [fx - 1.0, y + 0.1 + r * 0.2, fz + (k - 2 + (r & 1) * 0.5) * 0.0], [fx + 1.0, y + 0.1 + r * 0.2, fz], 0.1, 0.18);
   for (let k = 0; k < 5; k++) { const jx = (k < 3 ? -9 - k * 1.8 : 9 + (k - 3) * 1.8), jz = z0 + 7; L(BB, [[0.28, 0], [0.28, 0.12], [0.18, 0.12]], jx, y, jz, 10); L('terracotta', jarP(1.25), jx, y + 0.12, jz, 12); col.circle(jx, jz, 0.3, y, y + 1.1); }
   // ---- date palms in brick-edged pits (the temple's grove)
-  const palms = [[-40, z0 + 14], [40, z0 + 14], [-42, z0 + 40], [42, z0 + 38], [-24, z0 + 58], [24, z0 + 58]];
+  const palms = [[-40, z0 + 14], [40, z0 + 14], [-42, z0 + 40], [42, z0 + 38], [-24, z0 + 58], [24, z0 + 58], [-15, z0 + 33], [15, z0 + 33], [-15, z0 + 50], [15, z0 + 50]];   // (the last four line the way to the stairs)
   palms.forEach(([px, pz], i) => {
     bag.add(BB, lathe([[1.05, 0], [1.05, 0.2], [0.85, 0.2], [0.85, 0]], 16, null, px, y, pz)); bag.add('silt', lathe([[0.001, 0.12], [0.85, 0.12], [0.85, 0.15], [0.001, 0.15]], 14, null, px, y, pz));
     palm({ at: [px, pz], y, h: 8 + rand() * 3, lean: (rand() - 0.5) * 0.012, seed: 100 + i }, { bag, col }); col.circle(px, pz, 0.5, y, y + 6);
   });
+  // ---- the pavement (docs/settlements/ur.md §4.4a): the court was paved in baked brick set in bitumen; down its axis the sacred way of
+  // pale buff brick, 11 m wide, kerbed in limestone; the ash of the altar's fires blackening the bricks round it
+  const tp = 0.035;
+  { const px0 = x0 + 1.25, px1 = x1 - 1.25, pz0 = z0 + 1.25, wy = 0.05;
+    B(BB, px0, y - 0.03, pz0, px1, y + tp, z1); col.floor([px0, pz0, px1, z1], y + tp);
+    B('brick_buff', -5.5, y + tp, pz0, 5.5, y + wy, z1); col.floor([-5.5, pz0, 5.5, z1], y + wy);
+    for (const sx of [-1, 1]) B('limestone', sx * 5.5 - (sx > 0 ? 0 : 0.28), y + tp, pz0, sx * 5.5 + (sx > 0 ? 0.28 : 0), y + 0.13, z1);
+    for (const [ax, az, r] of [[-17, z0 + 40, 2.9], [17, z0 + 40, 2.2], [-7, z0 + 20, 1.1], [7, z0 + 44, 1.1]]) bag.add('pottery_dark', lathe([[0.001, y + tp + 0.002], [r, y + tp + 0.002], [r * 0.97, y + tp]], 18, null, ax, 0, az)); }
+  // ---- the standards of the gods along the way: palm-trunk poles on brick plinths bearing the gilded crescent of Nanna, a pennant under each
+  const flag = (x, yt, z, dir, mat, len = 1.7, w = 0.85) => {
+    const T = [], a = [x, yt, z], b = [x + dir * w, yt - 0.1, z], c = [x + dir * w, yt - len, z], d = [x, yt - len + 0.1, z];
+    T.push(...a, ...b, ...c, ...a, ...c, ...d, ...a, ...c, ...b, ...a, ...d, ...c); bag.add(mat + '+wind', fromTriangles(T));
+  };
+  for (const sx of [-1, 1]) for (const [k, dz] of [[0, 33], [1, 41.5], [2, 50]]) {
+    const px = sx * 10.5, pz = z0 + dz, top = y + 6.2;
+    B(BB, px - 0.5, y, pz - 0.5, px + 0.5, y + 0.55, pz + 0.5); col.rect([px - 0.5, pz - 0.5, px + 0.5, pz + 0.5], y, y + 0.55);
+    L('palm_trunk', [[0.12, 0.55], [0.09, 3], [0.065, 6.2]], px, y, pz, 8); col.circle(px, pz, 0.14, y, top);
+    crescent(bag, px, top + 0.62, pz - 0.07, 0.62, 0.42, 0.14);
+    flag(px, top - 0.35, pz - 0.1, -sx, ['cloth_red', 'cloth_white', 'cloth_blue'][(k + (sx > 0 ? 1 : 0)) % 3]);
+  }
+  // ---- two altars of libation flanking the foot of the stairs, bowls of fire on them
+  for (const sx of [-1, 1]) { const ax = sx * 9.5, az = z1 - 7.5;
+    B(BB, ax - 1.0, y, az - 0.65, ax + 1.0, y + 1.05, az + 0.65); B(MP, ax - 1.1, y + 1.05, az - 0.75, ax + 1.1, y + 1.12, az + 0.75); col.rect([ax - 1.1, az - 0.75, ax + 1.1, az + 0.75], y, y + 1.12);
+    L('pottery_dark', [[0.001, 0], [0.3, 0], [0.34, 0.12], [0.001, 0.12]], ax, y + 1.12, az, 12); B('flame', ax - 0.12, y + 1.24, az - 0.12, ax + 0.12, y + 1.62, az + 0.12);
+    for (const dx of [-0.6, 0.6]) bowl(ax + dx, y + 1.12, az, 0.12); }
+  // ---- the donkeys' loads set down by the fuel stack: sacks of grain, a rack of beer jars
+  for (let k = 0; k < 9; k++) { const sx0 = -26.2 + (k % 3) * 0.62, sz0 = z0 + 24 + Math.floor(k / 3) * 0.5 + (k % 2) * 0.1, lay = k > 5 ? 1 : 0;
+    B('sacking', sx0 - 0.28, y + tp + lay * 0.26, sz0 - 0.2, sx0 + 0.28, y + tp + lay * 0.26 + 0.3, sz0 + 0.2); }
 }

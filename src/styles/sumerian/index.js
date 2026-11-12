@@ -16,7 +16,7 @@ import { urHall } from './hall.js';
 import { palm } from '../egyptian/objects.js';
 
 const ZIG_SKIN = ['brick_buff', 'brick', 'brick_buff'];
-const BB = 'brick_baked', MB = 'mudbrick', MP = 'mud_plaster';
+const BB = 'brick_baked', MB = 'mudbrick', MP = 'mud_plaster', WH = 'limewash_white';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /**
  * A straight flight of brick steps rect, rising y0 → y1 toward dir: each step a slab half a metre deep under its
@@ -41,14 +41,57 @@ export function stairs(el, { bag, col }) {
   col.ramp([x0, z0, x1, z1], y0, y1, dir);
 }
 /** Shallow buttresses along the faces of a sloping stage [x0, z0, x1, z1] from y to y + h (inset at the top by b). */
-export function buttresses(bag, [x0, z0, x1, z1], y, h, b, step = 3.2, skip = null, mat = BB, hw = 0.55) {
+export function buttresses(bag, [x0, z0, x1, z1], y, h, b, step = 3.2, skip = null, mat = BB, hw = 0.55, dp = 0.35) {
   for (const [ax, az, bx, bz, nx, nz] of [[x0, z0, x1, z0, 0, -1], [x0, z1, x1, z1, 0, 1], [x0, z0, x0, z1, -1, 0], [x1, z0, x1, z1, 1, 0]]) {
     const L = Math.hypot(bx - ax, bz - az), n = Math.floor(L / step);
     for (let i = 1; i < n; i++) {
       const s = i * L / n, px = ax + (bx - ax) * s / L, pz = az + (bz - az) * s / L;
       if (skip && skip(px, pz)) continue;
-      const tx = nz !== 0 ? hw : 0.35, tz = nx !== 0 ? hw : 0.35;
+      const tx = nz !== 0 ? hw : dp, tz = nx !== 0 ? hw : dp;
       bag.add(mat, frustum([px - tx + nx * 0.2, pz - tz + nz * 0.2, px + tx + nx * 0.2, pz + tz + nz * 0.2], y, y + h * 0.97, nx > 0 ? 0 : nx < 0 ? b : 0, nx > 0 ? b : 0, nz < 0 ? b : 0, nz > 0 ? b : 0));
+    }
+  }
+}
+
+/**
+ * The weathering of a stage's skin (docs/settlements/ur.md §4.1b): the bitumen of the joints showing as dark seams every
+ * 2.4 m (the courses laid in bitumen set in bands of reed matting), patches where the baked-brick facing has spalled and
+ * the mud-brick core shows, fallen brick and rubble heaped at the foot of the lowest stage. Everything sits 2–4 cm proud of
+ * the sloping face (r its base rect, b its batter), and not on the north face of the lowest stage, where the stairs lean.
+ */
+function skinDetail(bag, col, r, b, y0, h, i, cx, rand) {
+  const FACES = [['n', r[0], r[2]], ['s', r[0], r[2]], ['w', r[1], r[3]], ['e', r[1], r[3]]];
+  const pt = (f, u, yy, off) => { const o = b * (yy - y0) / h; return f === 'n' ? [u, yy, r[1] + o - off] : f === 's' ? [u, yy, r[3] - o + off] : f === 'w' ? [r[0] + o - off, yy, u] : [r[2] - o + off, yy, u]; };
+  const quad = (T, f, u0, u1, ya, yb, off) => { const q = [pt(f, u0, ya, off), pt(f, u1, ya, off), pt(f, u1, yb, off), pt(f, u0, yb, off)]; T.push(...q[0], ...q[1], ...q[2], ...q[0], ...q[2], ...q[3], ...q[0], ...q[2], ...q[1], ...q[0], ...q[3], ...q[2]); };
+  const seams = [], cores = [], salts = [];
+  for (const [f, a0, a1] of FACES) {
+    if (f === 'n' && i === 0) continue;
+    const gap = f === 'n' ? 3.6 : 0, lo = a0 + 1.2, hi = a1 - 1.2;
+    for (let yy = y0 + 1.6; yy < y0 + h - 0.9; yy += 2.4) {
+      if (gap) { quad(seams, f, lo, cx - gap, yy, yy + 0.12, 0.02); quad(seams, f, cx + gap, hi, yy, yy + 0.12, 0.02); } else quad(seams, f, lo, hi, yy, yy + 0.12, 0.02);
+    }
+    const n = Math.floor((a1 - a0) / 7);
+    for (let k = 0; k < n; k++) {
+      const u = a0 + 2 + rand() * (a1 - a0 - 4);
+      if (gap && Math.abs(u - cx) < gap + 1.5) continue;
+      const w = 1.0 + rand() * 2.0, hh = 0.8 + rand() * 1.5, yy = y0 + 1.4 + rand() * Math.max(0.1, h - hh - 2.6);
+      quad(cores, f, u - w / 2, u + w / 2, yy, yy + hh, 0.035);
+      quad(salts, f, u - w * 0.35, u + w * 0.35, yy - 1.3 - rand() * 1.2, yy, 0.03);                      // the salt bloom running down from it
+    }
+  }
+  if (seams.length) bag.add('bitumen', fromTriangles(seams));
+  if (cores.length) bag.add('mudbrick', fromTriangles(cores));
+  if (salts.length) bag.add('sandstone_white', fromTriangles(salts));
+  if (i !== 0) return;
+  // fallen brick and rubble banked at the foot of the lowest stage (not before the stairs)
+  for (const [f, a0, a1] of FACES) {
+    if (f === 'n') continue;
+    const n = Math.floor((a1 - a0) / 8);
+    for (let k = 0; k < n; k++) {
+      const u = a0 + 3 + (k + 0.15 + rand() * 0.7) * (a1 - a0 - 6) / n, w = 1.1 + rand() * 0.9, d = 1.0 + rand() * 0.7, hh = 0.55 + rand() * 0.5, y = y0 - 0.05;
+      const rect = f === 'n' ? [u - w, r[1] - d, u + w, r[1] + 0.2] : f === 's' ? [u - w, r[3] - 0.2, u + w, r[3] + d] : f === 'w' ? [r[0] - d, u - w, r[0] + 0.2, u + w] : [r[2] - 0.2, u - w, r[2] + d, u + w];
+      const ins = f === 's' ? [0.4, 0.4, 0, d * 0.8] : f === 'w' ? [d * 0.8, 0, 0.4, 0.4] : [0, d * 0.8, 0.4, 0.4];
+      bag.add(rand() < 0.5 ? 'mudbrick' : 'brick_baked', frustum(rect, y, y + hh, ins[0], ins[1], ins[2], ins[3], { noBottom: true })); col.rect(rect, y, y + hh * 0.8);
     }
   }
 }
@@ -68,7 +111,7 @@ function ziggurat(el, ctx) {
     const r = [cx - s.w / 2, cz + (s.dz ?? 0) - s.d / 2, cx + s.w / 2, cz + (s.dz ?? 0) + s.d / 2], b = s.batter ?? s.h * 0.12;   // dz: the upper stages set back
     const SK = ZIG_SKIN[i] || BB;                                          // the stage's facing: pale baked brick below, red above (lit well even against the low sun)
     bag.add(SK, frustum(r, y, y + s.h, b, b, b, b, { noBottom: true }));
-    buttresses(bag, r, y, s.h, b, 3.2, (px) => Math.abs(px - cx) < 5, SK);
+    buttresses(bag, r, y, s.h, b, 3.2, (px) => Math.abs(px - cx) < 5, SK, 0.9, 0.62);        // broad, deep buttresses: the recesses between them throw shadow and read from afar
     col.rect([r[0] + b * 0.4, r[1] + b * 0.4, r[2] - b * 0.4, r[3] - b * 0.4], y, y + s.h);
     col.floor([r[0] + b, r[1] + b, r[2] - b, r[3] - b], y + s.h);
     tops.push({ r, b, y0: y, y1: y + s.h });
@@ -90,6 +133,7 @@ function ziggurat(el, ctx) {
       }
     }
     if (stains.length) bag.add('plaster_streak', fromTriangles(stains));
+    skinDetail(bag, col, r, b, y0s, s.h, i, cx, rng(900 + i * 17));
     y += s.h;
   });
   const S0 = tops[0], fz = S0.r[1];                          // the front face (north)
@@ -109,8 +153,9 @@ function ziggurat(el, ctx) {
   }
   // the gatehouse at the head of the stairs, its way 5 m wide and 4.8 m high, the single stair going on up through it
   const gz = fz + S0.b + 1, GH = 6.2, gw = 2.6;
-  for (const sx of [-1, 1]) { const q = [Math.min(cx + sx * gw, cx + sx * 6.5), gz, Math.max(cx + sx * gw, cx + sx * 6.5), gz + 4]; bag.add(MP, box(q[0], S0.y1, q[1], q[2], S0.y1 + GH, q[3])); col.rect(q, S0.y1, S0.y1 + GH); col.floor(q, S0.y1 + GH); }
-  bag.add(MP, box(cx - gw, S0.y1 + 4.8, gz, cx + gw, S0.y1 + GH, gz + 4)); col.floor([cx - gw, gz, cx + gw, gz + 4], S0.y1 + GH);
+  for (const sx of [-1, 1]) { const q = [Math.min(cx + sx * gw, cx + sx * 6.5), gz, Math.max(cx + sx * gw, cx + sx * 6.5), gz + 4]; bag.add(WH, box(q[0], S0.y1, q[1], q[2], S0.y1 + GH, q[3])); col.rect(q, S0.y1, S0.y1 + GH); col.floor(q, S0.y1 + GH); }
+  bag.add(WH, box(cx - gw, S0.y1 + 4.8, gz, cx + gw, S0.y1 + GH, gz + 4));
+  for (const sx of [-1, 1]) bag.add('glaze_lapis', box(Math.min(cx + sx * 2.6, cx + sx * 6.5) - 0.04, S0.y1 + GH - 0.9, gz - 0.04, Math.max(cx + sx * 2.6, cx + sx * 6.5) + 0.04, S0.y1 + GH - 0.3, gz));   // a band of blue glaze under the gatehouse's top col.floor([cx - gw, gz, cx + gw, gz + 4], S0.y1 + GH);
   bag.add('palm_trunk', box(cx - gw - 0.2, S0.y1 + 4.62, gz - 0.12, cx + gw + 0.2, S0.y1 + 4.8, gz + 0.3));
   // the stairs on up the second and third stages, each from the front edge of the stage below
   for (let i = 1; i < tops.length; i++) {
@@ -120,6 +165,22 @@ function ziggurat(el, ctx) {
   // the shrine of Nanna on the top stage (§4.2)
   const tz = (tops[tops.length - 1].r[1] + tops[tops.length - 1].r[3]) / 2;
   shrine({ ...el.shrine, c: [cx, tz + 1], y: tops[tops.length - 1].y1 }, ctx);
+}
+
+/** The crescent of Nanna, horns up, a band from radius r1 to r0 and `depth` thick, its front at z, centred on (cx, cy). */
+export function crescent(bag, cx, cy, z, r0, r1, depth, mat = 'gold', n = 14) {
+  const T = [];
+  for (let i = 0; i < n; i++) {
+    const a0 = Math.PI * (0.08 + 0.84 * i / n), a1 = Math.PI * (0.08 + 0.84 * (i + 1) / n), P = (a, r, zz) => [cx + Math.cos(a) * r, cy - Math.sin(a) * r, zz];
+    const zz = [z, z + depth], S = [];
+    S.push(...P(a0, r0, zz[0]), ...P(a1, r0, zz[0]), ...P(a1, r1, zz[0]), ...P(a0, r0, zz[0]), ...P(a1, r1, zz[0]), ...P(a0, r1, zz[0]));
+    S.push(...P(a0, r0, zz[1]), ...P(a1, r1, zz[1]), ...P(a1, r0, zz[1]), ...P(a0, r0, zz[1]), ...P(a0, r1, zz[1]), ...P(a1, r1, zz[1]));
+    S.push(...P(a0, r0, zz[0]), ...P(a0, r0, zz[1]), ...P(a1, r0, zz[1]), ...P(a0, r0, zz[0]), ...P(a1, r0, zz[1]), ...P(a1, r0, zz[0]));
+    S.push(...P(a0, r1, zz[0]), ...P(a1, r1, zz[1]), ...P(a0, r1, zz[1]), ...P(a0, r1, zz[0]), ...P(a1, r1, zz[0]), ...P(a1, r1, zz[1]));
+    if (i === 0 || i === n - 1) { const a = i === 0 ? a0 : a1; S.push(...P(a, r0, zz[0]), ...P(a, r1, zz[0]), ...P(a, r1, zz[1]), ...P(a, r0, zz[0]), ...P(a, r1, zz[1]), ...P(a, r0, zz[1])); }
+    T.push(...orientOutward(S));
+  }
+  bag.add(mat, fromTriangles(T));
 }
 
 /**
@@ -133,7 +194,7 @@ function shrine(el, { bag, col, lights }) {
   const [cx, cz] = el.c, y = el.y, W = el.w ?? 14, D = el.d ?? 11, H = el.h ?? 5, t = 1.3, ti = 1.0;
   const x0 = cx - W / 2, x1 = cx + W / 2, z0 = cz - D / 2, z1 = cz + D / 2, dw = 1.6, dh = 2.9;
   const zA = z0 + t + 3.0, zC = zA + ti;                                   // the cross wall between antecella and cella
-  const wall = (r, y0 = y, y1 = y + H, m = MP) => { bag.add(m, box(r[0], y0, r[1], r[2], y1, r[3])); col.rect(r, y0, y1); };
+  const wall = (r, y0 = y, y1 = y + H, m = WH) => { bag.add(m, box(r[0], y0, r[1], r[2], y1, r[3])); col.rect(r, y0, y1); };
   // the outer walls; the front and the cross wall pierced on the axis
   wall([x0, z0, cx - dw / 2, z0 + t]); wall([cx + dw / 2, z0, x1, z0 + t]); wall([cx - dw / 2, z0, cx + dw / 2, z0 + t], y + dh, y + H);
   wall([x0, z1 - t, x1, z1]); wall([x0, z0 + t, x0 + t, z1 - t]); wall([x1 - t, z0 + t, x1, z1 - t]);
@@ -144,7 +205,7 @@ function shrine(el, { bag, col, lights }) {
   for (const s of [-1, 1]) {
     const a = cx + s * dw / 2, b = cx + s * (dw / 2 + 2.0), r = [Math.min(a, b), z0 - 1.1, Math.max(a, b), z0];
     wall(r, y, y + TH); col.floor(r, y + TH);
-    bag.add(MP, box(r[0] - 0.06, y + TH - 0.35, r[1] - 0.06, r[2] + 0.06, y + TH - 0.2, r[3]));            // a band under the tower's top
+    bag.add('glaze_lapis', box(r[0] - 0.06, y + TH - 0.75, r[1] - 0.06, r[2] + 0.06, y + TH - 0.2, r[3]));            // a band of blue glazed brick under the tower's top
   }
   // the lintel of palm trunk over the doorway, deep in its reveal between the towers; the cedar doors, open
   const lt = []; beamTris(lt, [cx - dw / 2 - 0.25, y + dh, z0 - 0.5], [cx + dw / 2 + 0.25, y + dh, z0 - 0.5], 0.14, 0.24); bag.add('palm_trunk', fromTriangles(lt));
@@ -155,9 +216,17 @@ function shrine(el, { bag, col, lights }) {
   }
   bag.add(BB, box(cx - dw / 2, y, z0 - 1.1, cx + dw / 2, y + 0.06, z0 + t));                            // the threshold
   // buttresses and recesses round the outside, clear of the towers
-  buttresses(bag, [x0, z0, x1, z1], y, H, 0, 2.2, (px, pz) => pz < z0 + 0.01 && Math.abs(px - cx) < dw / 2 + 2.6, MP, 0.4);
+  buttresses(bag, [x0, z0, x1, z1], y, H, 0, 2.2, (px, pz) => pz < z0 + 0.01 && Math.abs(px - cx) < dw / 2 + 2.6, WH, 0.4);
+  // the blue glazed brick (docs/settlements/ur.md §4.2): a frieze under the parapet all round, a panel on each tower's face, and
+  // above the roof the standard of Nanna, a pole bearing the gilded crescent, so that the house of the god reads from the court
+  for (const [a, b, c, d] of [[x0, z1, x1, z1 + 0.05], [x0 - 0.05, z0, x0, z1], [x1, z0, x1 + 0.05, z1], [x0, z0 - 0.05, cx - dw / 2 - 2.0, z0], [cx + dw / 2 + 2.0, z0 - 0.05, x1, z0]])
+    bag.add('glaze_lapis', box(a, y + H - 1.15, b, c, y + H - 0.55, d));
+  for (const s of [-1, 1]) { const a = cx + s * (dw / 2 + 0.4), b = cx + s * (dw / 2 + 1.6); bag.add('glaze_lapis', box(Math.min(a, b), y + 1.4, z0 - 1.14, Math.max(a, b), y + TH - 1.0, z0 - 1.1)); }
+  { const px = cx, pz = z0 + 0.9, top = y + H + 4.0;
+    bag.add('bronze', lathe([[0.08, 0], [0.06, 0.3], [0.035, 4.4]], 8, null, px, y + H, pz));
+    crescent(bag, px, top + 1.2, pz - 0.1, 1.2, 0.85, 0.2); }
   // the parapet round the roof, the roof itself: mud over reed mats over palm trunks
-  for (const r of [[x0, z0, x1, z0 + 0.35], [x0, z1 - 0.35, x1, z1], [x0, z0, x0 + 0.35, z1], [x1 - 0.35, z0, x1, z1]]) bag.add(MP, box(r[0], y + H, r[1], r[2], y + H + 0.5, r[3]));
+  for (const r of [[x0, z0, x1, z0 + 0.35], [x0, z1 - 0.35, x1, z1], [x0, z0, x0 + 0.35, z1], [x1 - 0.35, z0, x1, z1]]) bag.add(WH, box(r[0], y + H, r[1], r[2], y + H + 0.5, r[3]));
   bag.add(MP, box(x0 + 0.35, y + H - 0.25, z0 + 0.35, x1 - 0.35, y + H, z1 - 0.35)); col.floor([x0, z0, x1, z1], y + H);
   for (const [a, b] of [[z0 + t, zA], [zC, z1 - t]]) {
     bag.add('reed_mat', box(x0 + t, y + H - 0.31, a, x1 - t, y + H - 0.25, b));
@@ -171,15 +240,7 @@ function shrine(el, { bag, col, lights }) {
   for (let k = 0; k < 3; k++) { const h0 = y + 0.06 + k * 0.31, d = 0.32 * (3 - k); bag.add(BB, box(cx - 1.0, h0, pz0 - d, cx + 1.0, h0 + 0.31, pz0)); }
   bag.add(MP, box(cx - pw - 0.1, py, pz1 - 0.5, cx + pw + 0.1, y + 3.2, pz1));                                  // the niche's back, raised behind the podium
   bag.add('bronze', lathe([[0.06, 0], [0.05, 0.25], [0.025, 0.3], [0.025, 1.9]], 8, null, cx, py, pz1 - 0.75));
-  { const T = []; for (let i = 0; i < 14; i++) { const a0 = Math.PI * (0.08 + 0.84 * i / 14), a1 = Math.PI * (0.08 + 0.84 * (i + 1) / 14), r0 = 0.42, r1 = 0.3, P = (a, r, z) => [cx + Math.cos(a) * r, py + 1.9 + 0.38 - Math.sin(a) * r, z];
-    const zz = [pz1 - 0.79, pz1 - 0.71], S = [];
-    S.push(...P(a0, r0, zz[0]), ...P(a1, r0, zz[0]), ...P(a1, r1, zz[0]), ...P(a0, r0, zz[0]), ...P(a1, r1, zz[0]), ...P(a0, r1, zz[0]));
-    S.push(...P(a0, r0, zz[1]), ...P(a1, r1, zz[1]), ...P(a1, r0, zz[1]), ...P(a0, r0, zz[1]), ...P(a0, r1, zz[1]), ...P(a1, r1, zz[1]));
-    S.push(...P(a0, r0, zz[0]), ...P(a0, r0, zz[1]), ...P(a1, r0, zz[1]), ...P(a0, r0, zz[0]), ...P(a1, r0, zz[1]), ...P(a1, r0, zz[0]));
-    S.push(...P(a0, r1, zz[0]), ...P(a1, r1, zz[1]), ...P(a0, r1, zz[1]), ...P(a0, r1, zz[0]), ...P(a1, r1, zz[0]), ...P(a1, r1, zz[1]));
-    if (i === 0 || i === 13) { const a = i === 0 ? a0 : a1; S.push(...P(a, r0, zz[0]), ...P(a, r1, zz[0]), ...P(a, r1, zz[1]), ...P(a, r0, zz[0]), ...P(a, r1, zz[1]), ...P(a, r0, zz[1])); }
-    T.push(...orientOutward(S)); }
-    bag.add('gold', fromTriangles(T)); }
+  crescent(bag, cx, py + 1.9 + 0.38, pz1 - 0.79, 0.42, 0.3, 0.08);
   const oz = pz0 - 1.6;
   bag.add(MP, box(cx - 0.55, y + 0.06, oz - 0.35, cx + 0.55, y + 0.9, oz + 0.35)); col.rect([cx - 0.55, oz - 0.35, cx + 0.55, oz + 0.35], y, y + 0.9);
   for (const dx of [-0.3, 0, 0.3]) bag.add('terracotta', lathe([[0.001, 0], [0.08, 0.01], [0.12, 0.06], [0.11, 0.07], [0.001, 0.03]], 10, null, cx + dx, y + 0.9, oz));

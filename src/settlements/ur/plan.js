@@ -12,9 +12,9 @@ E.push({ t: 'stairs', rect: [-7, COURT[3], 7, tz0 + 0.6], y0: 0, y1: ty, dir: 's
 E.push({ t: 'ziggurat', c: [0, 0], y: ty, stages: [{ w: 64, d: 46, h: 15, batter: 3 }, { w: 38, d: 28, h: 7, batter: 1.5, dz: 5 }, { w: 24, d: 18, h: 5, batter: 1, dz: 8 }], shrine: { w: 14, d: 11, h: 5 } });
 // the terrace's enclosure (walls of rooms standing on it, back from its sloping face), the Court of Nanna with the
 // Edublalmah, the gate tower, at its entrance, the precinct wall and its north gate
-const w = (a, b, h, th, y) => E.push({ t: 'precinct_wall', a, b, h, th, y });
+const w = (a, b, h, th, y, mat) => E.push({ t: 'precinct_wall', a, b, h, th, y, mat });
 const [ex0, ez0, ex1, ez1] = [tx0 + 2.5, tz0 + 2.5, tx1 - 2.5, tz1 - 2.5];
-w([ex0, ez0], [-9, ez0], 3.5, 2.5, ty); w([9, ez0], [ex1, ez0], 3.5, 2.5, ty); w([ex0, ez1], [ex1, ez1], 3.5, 2.5, ty); w([ex0, ez0], [ex0, ez1], 3.5, 2.5, ty); w([ex1, ez0], [ex1, ez1], 3.5, 2.5, ty);
+w([ex0, ez0], [-9, ez0], 1.2, 1.6, ty, 'brick_buff'); w([9, ez0], [ex1, ez0], 1.2, 1.6, ty, 'brick_buff'); w([ex0, ez1], [ex1, ez1], 3.5, 2.5, ty); w([ex0, ez0], [ex0, ez1], 3.5, 2.5, ty); w([ex1, ez0], [ex1, ez1], 3.5, 2.5, ty);   // (the front of the enclosure a low parapet of pale baked brick: a 3.5 m wall on the 2.5 m terrace hid the lower stage and its three stairways from the court)
 E.push({ t: 'gate_tower', rect: [-8, -146, 8, -134], door: 'n', w: 3, h: 9, dh: 4.2 });
 E.push({ t: 'gate_tower', rect: [-10, -176, 10, -164], door: 'n', w: 4, h: 10, dh: 5, mat: 'mudbrick' });
 const [cx0, cz0, cx1, cz1] = COURT;
