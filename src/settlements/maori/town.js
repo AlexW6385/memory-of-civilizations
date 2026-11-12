@@ -15,7 +15,7 @@ const CHIEF = ['hide_white', 'hide_brown'];
 
 export async function town() {
   const v = village(), E = [], P = [], rand = rng(1769);
-  for (const h of v.houses.slice(1)) E.push({ t: 'whare', carved: false, walls: (h.c[0] * 7 + h.c[1] * 3) % 5 < 2 ? 'reed_mat' : 'raupo', ...h, ...(Math.hypot(h.c[0], h.c[1]) > 250 ? { furnished: false } : {}) });
+  for (const h of v.houses.slice(1)) E.push({ t: 'whare', carved: false, walls: (h.c[0] * 7 + h.c[1] * 3) % 5 < 2 ? 'reed_mat' : 'raupo', roof: (h.c[0] * 3 + h.c[1] * 11) % 7 < 2 ? 'thatch' : 'raupo', ...h, ...(Math.hypot(h.c[0], h.c[1]) > 250 ? { furnished: false } : {}) });
   for (const p of v.pataka.slice(1)) E.push({ t: 'pataka', ...p });
   for (const p of v.pits) E.push({ t: 'rua', ...p });
   for (const w of v.waka) E.push({ t: 'waka', ...w });
@@ -236,9 +236,50 @@ export async function town() {
       P.push({ t: 'figure', at, y: LAKE.level - 0.05, rot: yw + (q === 3 ? 0 : (i % 2 ? 0.5 : -0.5)), seed: Math.floor(rand() * 1e9), dress: 'tunic', cloth: sk, cloth2: 'cloth_brown', over: 'belt', skin: sk, hat: 'none', feet: 'bare', hair: 'bun', beard: false, pose: 'sit' });
     }
   });
+  // ---- the summit made busy (docs/settlements/maori.md §4f): a carver at his pou, cloaks airing, children at play, a second pātaka, trees at the rim, throwing stones and spears at every gate ----
+  { // the carver's place east of the chief's pātaka: the log, a man kneeling at the head with his adze, an old man watching, a boy with the chips
+    const c = [hx + 17, hz - 2];
+    E.push({ t: 'whakairo', c, y: top, yaw: 0.35, seed: 41 });
+    const hd = [c[0] + Math.sin(0.35) * 1.6 + 0.9, c[1] + Math.cos(0.35) * 1.6];
+    man(hd, top, face(hd, [c[0] + Math.sin(0.35) * 1.4, c[1] + Math.cos(0.35) * 1.4]), { pose: 'squat', over: 'none' });
+    const w2 = [c[0] - 1.8, c[1] + 2.6]; man(w2, top, face(w2, c), { pose: 'stand', beard: true, cloth: 'hide_brown' });
+    const b = [c[0] + 2.4, c[1] - 1.2]; person(b, top, face(b, c), { hair: 'short', h: 1.05, over: 'none', pose: 'squat' });
+  }
+  E.push({ t: 'kakahu', a: [hx - 19.5, hz - 4], b: [hx - 16.2, hz - 4.6], y: top });                    // cloaks airing on the west
+  { const a = [hx - 17.8, hz - 2.4]; woman(a, top, face(a, [hx - 17.8, hz - 4.3]), { pose: 'stand', over: 'none' }); }
+  // children at play between the marae and the cooking place: a ring squatting at a string game, two running, a girl with a kete
+  for (let k = 0; k < 5; k++) { const a = k / 5 * 6.28, at = [hx + 5.5 + Math.cos(a) * 0.8, hz + 14 + Math.sin(a) * 0.8]; person(at, top, a + Math.PI + 0.3, { hair: k % 2 ? 'short' : 'long', h: 0.95 + 0.1 * (k % 3) * 0.5, over: 'none', pose: 'squat', beard: false }); }
+  for (const [px, pz, r] of [[hx + 12, hz + 17, 2.2], [hx + 9.5, hz + 8, -1.0]]) person([px, pz], top, r, { hair: 'short', h: 1.0, over: 'none', pose: 'stand', cloth: 'cloth_ochre' });
+  // a second and a third store, a rack for the chief's cloaks; the second pātaka carved like the first
+  for (const [x, z, yaw] of [[hx - 17, hz - 11, Math.PI], [hx + 16, hz - 12, Math.PI]]) E.push({ t: 'pataka', c: [x, z], y: top, yaw });
+  // cabbage trees and tree ferns at the summit's rim, inside the palisade, and a pair at the gate
+  for (const [a, t] of [[-0.9, 'tikouka'], [0.15, 'ponga'], [0.9, 'tikouka'], [2.2, 'ponga'], [3.0, 'tikouka'], [4.1, 'ponga'], [5.1, 'tikouka']]) {
+    const at = [hx + Math.cos(a) * 20.5, hz + Math.sin(a) * 20.5];
+    if (Math.abs(at[0]) < 5 && at[1] > hz) continue;
+    E.push({ t, at, y: top, h: t === 'tikouka' ? 3.6 + rand() * 1.4 : 2 + rand() * 1.2, seed: Math.floor(rand() * 1e5) });
+  }
+  // at each gate of the climbing path: heaps of throwing stones and a rack of spears on the inner side, a sentry at the upper gates
+  [HILL.tihi - 1.5, ...HILL.rings.map(([, r1]) => r1 - 2), HILL.ditch + 5].forEach((r, k) => {
+    const gz = hz + r, gyv = height(PATH.x, gz);
+    for (const sx of [-1, 1]) { const at = [sx * 3.4, gz + (k === 0 ? 2.6 : -2.4)]; E.push({ t: 'kamaka', at, y: height(at[0], at[1]), r: 0.8, yaw: sx * 0.5, spears: sx > 0 ? 5 : 0 }); }
+    if (k < 4) { const at = [-2.9, gz + 3.2]; warrior(at, height(at[0], at[1]), face(at, [0, gz + 9])); }
+    void gyv;
+    if (k > 0 && k < 4) {                                              // by each terrace's gate: an old man at his ease with a kurī, a woman with her kete
+      const a = [4.6, gz - 3.4], b = [-4.4, gz - 4.2];
+      man(a, height(a[0], a[1]), face(a, [0, gz - 1]), { pose: 'sit', beard: true, cloth: 'hide_brown' });
+      P.push({ t: 'animal', kind: 'dog', at: [a[0] + 0.9, a[1] + 0.5], y: height(a[0], a[1]), rot: 2 + k, mat: KURI[k % 5], seed: 1100 + k });
+      woman(b, height(b[0], b[1]), face(b, [0, gz - 3]) + 0.4, { pose: 'stand' });
+    }
+  });
+  // before each storehouse on the summit its yard: firewood, kete, gourds, a mat
+  [...v.pataka.slice(0, 1), { c: [hx - 17, hz - 11], yaw: Math.PI }, { c: [hx + 16, hz - 12], yaw: Math.PI }].forEach((p, k) => {
+    const d = [p.c[0] - Math.sin(p.yaw) * 2.2, p.c[1] - Math.cos(p.yaw) * 2.2];
+    E.push({ t: 'yard', c: d, y: top, yaw: p.yaw, w: 2.6, seed: 800 + k, items: 2 });
+  });
+  E.push({ t: 'pahu', c: [hx + 8, hz + 17], y: top, yaw: 0.5 });                      // the alarm gong on the summit
   // the shared street life (src/objects/life.js) keeps its figures off what it sees as footprints — a `c` with a radius `r`,
   // a rectangle or a line: give every house, store, oven, tree and post one, and mark the way in and the marae ātea as kept clear
-  const RAD = { whare: (e) => e.l / 2 + 0.7, pataka: () => 2.2, rua: () => 2.4, hangi: () => 2.8, waka_build: () => 5, waka: (e) => (e.l ?? 10) / 2, harakeke: () => 0.5, hinaki: () => 0.4, tikouka: () => 0.6, ponga: () => 0.5, pou: () => 0.4, yard: () => 1.4, weaving: () => 1.2 };
+  const RAD = { whare: (e) => e.l / 2 + 0.7, pataka: () => 2.2, rua: () => 2.4, hangi: () => 2.8, waka_build: () => 5, waka: (e) => (e.l ?? 10) / 2, harakeke: () => 0.5, hinaki: () => 0.4, tikouka: () => 0.6, ponga: () => 0.5, pou: () => 0.4, yard: () => 1.4, weaving: () => 1.2, whakairo: () => 2.4, pahu: () => 1.6, kamaka: (e) => (e.r ?? 0.9) + 0.4 };
   for (const e of E) if (RAD[e.t] && !e.r) { const at = e.c ?? e.at; if (!at) continue; e.r = RAD[e.t](e); if (!e.c) e.c = at; }
   E.push({ t: 'trim', rect: [-2.6, HILL.c[1] + HILL.ditch, 2.6, RADIUS - 20] });
   E.push({ t: 'trim', rect: [hxm - 10, 11, hxm + 10, 33] });

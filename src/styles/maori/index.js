@@ -17,11 +17,17 @@ import { sculpt, rows, smooth, bump, blob } from '../rapanui/sculpt.js';
 import '../qing/index.js';
 import { SCENES } from './scenes.js';
 import { YARDS } from './yards.js';
+import { koru, manaia } from './spirals.js';
+import { WORKS } from './works.js';
 
 const K = 'kokowai', P = 'palisade', TH = 'raupo', PAUA = 'shell_inlay';
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-const post = (bag, x, y, z, r, h, mat = P) => bag.add(mat, lathe([[r, 0], [r * 0.9, h], [0.001, h + r]], 7, null, x, y, z));
+const POST = lathe([[1, 0], [0.9, 1], [0.001, 1.07]], 7);       // one post at unit size, instanced at each place (the palisade has some five thousand)
+const post = (bag, x, y, z, r, h, mat = P) => {
+  if (!bag.addInstance) return bag.add(mat, lathe([[r, 0], [r * 0.9, h], [0.001, h + r]], 7, null, x, y, z));
+  bag.addInstance(mat, POST, new Matrix4().makeTranslation(x, y, z).multiply(new Matrix4().makeScale(r, h, r)), { reach: 300 });
+};
 /** A convex solid from its corner points, as triangles faced outward. */
 function hull(pts) {
   const n = pts.length / 2, t = [];
@@ -160,6 +166,7 @@ function palisade(el, { bag, col }) {
     if (big && !el.simple) {
       post(bag, x, y - 0.5, z, 0.22, h + 0.8, K);
       figure(bag, 'post', x, y + h + 0.25, z, 1.3, out);
+      for (const yy of [y + 1.0, y + h - 0.6]) bag.add('rope_fibre', lathe([[0.235, 0], [0.235, 0.08]], 6, null, x, yy - 0.02, z));   // the rails' lashings
     } else post(bag, x, y - 0.5, z, big ? 0.22 : 0.12, (big ? h + 1.4 : h) + 0.5 + ((i * 37) % 5) * 0.06, big ? K : P);
   }
   for (const yy of [y + 1.0, y + h - 0.6]) bag.add(P, orientedBox(el.a, el.b, 0.12, yy, yy + 0.12));
@@ -222,6 +229,7 @@ function whare(el, ctx) {
   const ca = Math.cos(yaw), sa = Math.sin(yaw);
   const W2 = (x, z) => [cx + x * ca + z * sa, cz - x * sa + z * ca];
   const fig = (kind, x, y, z, hh, ry = 0) => { const [wx, wz] = W2(x, z); figure(bag, kind, wx, y0 + y, wz, hh, yaw + ry); };
+  const spiral = (x, y, z, size, flip) => { const [wx, wz] = W2(x, z); koru(bag, K, wx, y, wz, size, yaw, flip, 90); };
   const zf = -l / 2 + pr, ov = 0.4, e = h - 0.1, ridge = h + rise, t = 0.25;
   const under = (x) => e + (ridge - e) * (1 - Math.abs(x) / (w / 2 + ov)) - 0.07;   // just under the roof at x
   // the side walls, carried forward to the porch's mouth, their tops cut to the roof's slope
@@ -242,18 +250,25 @@ function whare(el, ctx) {
     const a = [s * (w / 2 + ov), e, -l / 2 - 0.1], b = [s * (w / 2 + ov), e, l / 2 + 0.2], c = [0, ridge, l / 2 + 0.2], d = [0, ridge, -l / 2 - 0.1];
     tr.push(...a, ...b, ...c, ...a, ...c, ...d, ...a, ...c, ...b, ...a, ...d, ...c);
   }
-  add(TH, fromTriangles(tr));
+  const RM = el.roof ?? TH;
+  add(RM, fromTriangles(tr));
   // the thatch's lashings: battens tied down the slopes at intervals, and the ridge capped with a roll of raupō [inferred: after museum models of thatched whare]
   if (!small && rank < 2) {
     const sl = (x) => e + (ridge - e) * (1 - Math.abs(x) / (w / 2 + ov));
     for (const s of [-1, 1]) for (let zz = -l / 2 + 0.5; zz < l / 2 - 0.2; zz += 1.1) add('rope_fibre', rod([s * (w / 2 + ov - 0.05), sl(w / 2 + ov - 0.05) + 0.03, zz], [s * 0.1, sl(0.1) + 0.04, zz], 0.022, 4));
-    add(TH, rod([0, ridge + 0.04, -l / 2 - 0.1], [0, ridge + 0.04, l / 2 + 0.2], 0.1, 6));
+    add(RM, rod([0, ridge + 0.04, -l / 2 - 0.1], [0, ridge + 0.04, l / 2 + 0.2], 0.1, 6));
   }
   // the underside of the thatch, smoke-darkened (rafters and the inner layer of reed): a ceiling under the roof, so that one may walk in
   if (!small) { const tu = tr.slice(); for (let q = 1; q < tu.length; q += 3) tu[q] -= 0.1; add('wood_dark', fromTriangles(tu)); }
   // the ridge beam (tāhuhu) under the ridge, the rafters (heke) of the porch
   add(carved ? K : 'timber', box(-0.1, ridge - 0.32, -l / 2 - 0.05, 0.1, under(0.1) - 0.005, l / 2 - t));
   for (const s of [-1, 1]) for (let zz = -l / 2 + 0.2; zz < zf - 0.1; zz += 0.45) add(carved ? K : 'timber', board([s * (w / 2 - 0.05), under(w / 2 - 0.05) - 0.06], [s * 0.12, under(0.12) - 0.06], 0.1, zz - 0.04, zz + 0.04));
+  // a common house's plain bargeboards (maihi) at the porch's gable and the ridge-board's end standing out over it [inferred: the plain form of the carved maihi]
+  if (!carved && !small && rank < 2) {
+    const zb0 = -l / 2 - 0.2, zb1 = -l / 2 - 0.1;
+    for (const s of [-1, 1]) add('timber', board([0, ridge + 0.1], [s * (w / 2 + ov + 0.05), e - 0.08], 0.2, zb0, zb1));
+    add('timber', rod([0, ridge + 0.05, -l / 2 - 0.45], [0, ridge + 0.1, -l / 2 + 0.2], 0.05, 5));
+  }
   // door and window frames
   add('timber', box(dl - 0.1, -0.2, zf - 0.04, dl, dh, zf)); add('timber', box(dr, -0.2, zf - 0.04, dr + 0.1, dh, zf));
   if (!small) { add('timber', box(wl - 0.08, wb - 0.08, zf - 0.04, wr + 0.08, wb, zf)); add('timber', box(wl - 0.08, wt, zf - 0.04, wr + 0.08, wt + 0.08, zf)); }
@@ -271,7 +286,10 @@ function whare(el, ctx) {
     for (const s of [-1, 1]) {
       const A = [0, ridge + 0.12], Bp = [s * (w / 2 + ov + 0.1), e - 0.12], dx = Bp[0] - A[0], dy = Bp[1] - A[1], L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L;
       add(K, board(A, Bp, mw, zm0, zm1));
-      for (const g of rauponga([A[0] + ux * 0.45, A[1] + uy * 0.45], [Bp[0] - ux * 0.1, Bp[1] - uy * 0.1], mw * 0.86, zm0, 2)) add(K, g);   // the face carved in rauponga
+      const cut = 0.45 + (L - 0.55) * 0.58;                          // the upper part of the face in rauponga, the lower in a run of pītau
+      for (const g of rauponga([A[0] + ux * 0.45, A[1] + uy * 0.45], [A[0] + ux * cut, A[1] + uy * cut], mw * 0.86, zm0, 2)) add(K, g);
+      const nk = Math.max(2, Math.floor((L - cut - 0.2) / (mw * 0.9)));
+      for (let k = 0; k < nk; k++) { const u = cut + 0.1 + (k + 0.5) * (L - cut - 0.2) / nk, [qx, qy] = [A[0] + ux * u, A[1] + uy * u]; spiral(qx, qy - 0.0, zm0 - 0.005, mw * 0.86, (k + (s > 0 ? 1 : 0)) % 2 === 0); }
       for (let k = 0; k < 3; k++) {                                     // the raparapa
         const off = (k - 1) * mw * 0.33, px = -uy * off, py = ux * off, len = 0.32 + 0.08 * (1 - Math.abs(k - 1));
         add(K, board([Bp[0] + px, Bp[1] + py], [Bp[0] + px + ux * len, Bp[1] + py + uy * len], mw * 0.22, zm0 + 0.01, zm1 - 0.01));
@@ -279,6 +297,13 @@ function whare(el, ctx) {
     }
     fig('face', 0, ridge - 0.62, zm0 - 0.02, 0.62);
     if (rank > 1) fig('post', 0, ridge + 0.1, (zm0 + zm1) / 2, 1.1);
+    // the chief's house: a manaia either side of the door on the front wall, pītau down the wall's right end
+    if (rank > 1) {
+      const wx0 = -w / 2 + t + 0.05, wx1 = dl - 0.12;
+      if (wx1 - wx0 > 0.5) for (const [cxm, fl] of [[(wx0 + wx1) / 2, false]]) { const [qx, qz] = W2(cxm, zf); manaia(bag, K, PAUA, qx, y0 + 0.85, qz, Math.min(0.9, wx1 - wx0), yaw, fl, 90); }
+      const rx0 = wr + 0.12, rx1 = w / 2 - t - 0.05;
+      if (rx1 - rx0 > 0.4) { const [qx, qz] = W2((rx0 + rx1) / 2, zf); manaia(bag, K, PAUA, qx, y0 + 0.85, qz, Math.min(0.9, rx1 - rx0), yaw, true, 90); }
+    }
     // the pare over the door, with its face; the jambs
     const ph = Math.min(0.42, h - dh - 0.02);
     add(K, box(dl - 0.2, dh, zf - 0.1, dr + 0.2, dh + ph, zf));
@@ -358,6 +383,9 @@ function stage(el, { bag, col }) {
   for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { post(bag, x + dx * s / 2, y0 - 0.5, z + dz * s / 2, 0.15, h + 1.6); col.circle(x + dx * s / 2, z + dz * s / 2, 0.16, y0, y0 + h); }
   bag.add('timber', box(x - s / 2 - 0.3, y0 + h - 0.15, z - s / 2 - 0.3, x + s / 2 + 0.3, y0 + h, z + s / 2 + 0.3));
   for (const [a, b] of [[[x - s / 2, z - s / 2], [x + s / 2, z - s / 2]], [[x - s / 2, z + s / 2], [x + s / 2, z + s / 2]]]) bag.add(P, orientedBox(a, b, 0.1, y0 + h, y0 + h + 0.9));
+  // a heap of throwing stones on the platform and spears (tao) leaning at the breastwork [inferred]
+  for (let k = 0; k < 7; k++) bag.add('basalt', box(x - 0.8 + (k % 4) * 0.22 + (k > 3 ? 0.1 : 0), y0 + h, z + 0.1 + Math.floor(k / 4) * 0.2, x - 0.62 + (k % 4) * 0.22 + (k > 3 ? 0.1 : 0), y0 + h + 0.14 + (k > 3 ? 0.1 : 0), z + 0.27 + Math.floor(k / 4) * 0.2));
+  for (const u of [0.3, 0.45, 0.6]) bag.add('wood_dark', rod([x + u, y0 + h, z + s / 2 - 0.1], [x + u + 0.08, y0 + h + 1.9, z + s / 2 - 0.05], 0.018, 5));
   // the ladder up one side
   bag.add('timber', rod([x - s / 2 - 0.9, y0, z], [x - s / 2 - 0.05, y0 + h, z], 0.07, 6));
   for (let k = 1; k < 9; k++) { const t = k / 9; bag.add('timber', box(x - s / 2 - 0.9 + 0.85 * t - 0.03, y0 + h * t, z - 0.1, x - s / 2 - 0.9 + 0.85 * t + 0.05, y0 + h * t + 0.04, z + 0.1)); }
@@ -377,6 +405,12 @@ function waharoa(el, { bag, col }) {
   }
   add(K, box(-w / 2 - 0.4, h, -0.2, w / 2 + 0.4, h + 0.55, 0.3));
   fig('face', 0, h + 0.02, -0.23, 0.52); fig('face', 0, h + 0.02, 0.33, 0.52, Math.PI);
+  for (const sd of [-1, 1]) for (const px of [0.6, 1.1, 1.6]) {     // pītau along the lintel, both faces
+    const xx = sd * px;
+    if (Math.abs(xx) > w / 2 + 0.3) continue;
+    koru(bag, K, x + xx * ca - 0.2 * sa, y0 + h + 0.28, z - xx * sa - 0.2 * ca, 0.4, yaw, sd > 0, 100);
+    koru(bag, K, x + xx * ca + 0.3 * sa, y0 + h + 0.28, z - xx * sa + 0.3 * ca, 0.4, yaw + Math.PI, sd < 0, 100);
+  }
   fig('post', 0, h + 0.55, 0.05, 1.3);
 }
 
@@ -453,6 +487,9 @@ function pou(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0, h = el.h ?? 2.4;
   post(bag, x, y - 0.4, z, 0.14, h, K);
   figure(bag, 'post', x, y + h - 0.1, z, 1.2, el.yaw ?? 0, 260);
+  const py = el.yaw ?? 0;                                           // a pair of pītau and a manaia down the shaft's front
+  koru(bag, K, x - Math.sin(py) * 0.15, y + h * 0.5, z - Math.cos(py) * 0.15, 0.3, py, false, 100);
+  manaia(bag, K, PAUA, x - Math.sin(py) * 0.15, y + h * 0.22, z - Math.cos(py) * 0.15, 0.3, py, true, 100);
   col.circle(x, z, 0.2, y, y + h + 1);
 }
 
@@ -493,6 +530,6 @@ function mara(el, { bag }) {
 
 registerStyle('maori', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, palisade, whare, pataka, stage, waharoa, rua, waka, mara, pou, ...SCENES, ...YARDS },
+  elements: { ...STYLES.qing.elements, palisade, whare, pataka, stage, waharoa, rua, waka, mara, pou, ...SCENES, ...YARDS, ...WORKS },
   objects: {},
 });

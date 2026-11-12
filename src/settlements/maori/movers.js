@@ -35,7 +35,7 @@ export function walkways() {
   // each ring joins the path where the path crosses it
   for (const r of LANES) { L([PATH.x - 3.2, hz + r], [PATH.x, hz + r], 1.2, 1.0); L([PATH.x, hz + r], [PATH.x + 3.2, hz + r], 1.2, 1.0); }
   // the summit: the marae ātea before the chief's house, the cooking place, the weavers
-  L([PATH.x, hz + HILL.tihi - 3], [-5, 28], 1.6, 2.0); L([-5, 28], [-5, 14], 1.6, 1.8); L([-5, 28], [hx + 13, hz + 12], 1.4, 1.2); L([-5, 28], [hx - 15, hz + 10], 1.4, 1.2);
+  L([PATH.x, hz + HILL.tihi - 3], [-5, 28], 1.6, 2.0); L([-5, 28], [-5, 14], 1.6, 1.8); L([-5, 28], [hx + 8, hz + 21], 1.4, 1.2); L([hx + 8, hz + 21], [hx + 13, hz + 12], 1.4, 1.2); L([hx + 13, hz + 12], [hx + 15, hz - 2], 1.3, 0.9); L([-5, 28], [hx - 15, hz + 18], 1.3, 0.8); L([hx - 15, hz + 18], [hx - 17, hz - 2], 1.3, 0.8); L([-5, 28], [hx - 15, hz + 10], 1.4, 1.2);
   // the way round the foot of the hill (outside the ditch) and across the kāinga, east and west
   const rf = HILL.ditch + 16, nf = 60;
   for (let i = 0; i < nf; i++) {
