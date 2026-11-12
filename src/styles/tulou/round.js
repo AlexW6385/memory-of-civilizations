@@ -50,7 +50,7 @@ export function tulouRound(el, ctx) {
   const wi = el.windowsFrom ?? 2;
   const idx = (i) => ((i % n) + n) % n;
   const isGate = (i) => gates.includes(idx(i));
-  const bays = full ? (el.bays ?? [0, 180]).map((g) => Math.round(g * DEG / da)) : [];
+  const bays = (full || el.stairs) ? (el.bays ?? [0, 180]).map((g) => Math.round(g * DEG / da)) : [];
   const isBay = (i) => bays.some((b) => Math.abs(((i - b + n * 1.5) % n) - n / 2) <= 1);
   const jambs = [];
 
@@ -191,34 +191,35 @@ export function tulouRound(el, ctx) {
   }
 
   // ── the stair bays: three straight flights, alternating, in the bay against the wall ──
-  if (full) for (const b of bays) {
-    const s = Math.cos(b * da) > 0 ? 1 : -1, hz = 2.85, X0 = s > 0 ? wallIn - 2.2 : -wallIn + 0.3, X1 = X0 + 1.9;
+  const cx = c[0], cz = c[1];
+  for (const b of bays) {
+    const s = Math.cos(b * da) > 0 ? 1 : -1, hz = Math.min(2.85, front * 0.3), X0 = s > 0 ? wallIn - 2.2 : -wallIn + 0.3, X1 = X0 + 1.9, hl = hz + 1.05;
     for (let k = 0; k < K - 1; k++) {
       const yA = fl[k], yB = fl[k + 1], N = Math.round((yB - yA) / 0.185), rise = (yB - yA) / N, run = 2 * hz / N, up = k % 2 === 0 ? -1 : 1;    // -1: ascending toward the north
       for (let q = 0; q < N; q++) {
         const zA = up < 0 ? hz - q * run : -hz + q * run, zB = up < 0 ? zA - run : zA + run, ty = yA + (q + 1) * rise;
-        bag.add(TIMBER, box(X0, ty - 0.05, Math.min(zA, zB) - 0.02, X1, ty, Math.max(zA, zB) + 0.02));
-        bag.add('wood_dark', box(X0, ty - rise, Math.min(zA, zB) - 0.02, X1, ty - 0.05, Math.min(zA, zB) + 0.01));
+        bag.add(TIMBER, box(cx + X0, ty - 0.05, cz + Math.min(zA, zB) - 0.02, cx + X1, ty, cz + Math.max(zA, zB) + 0.02));
+        bag.add('wood_dark', box(cx + X0, ty - rise, cz + Math.min(zA, zB) - 0.02, cx + X1, ty - 0.05, cz + Math.min(zA, zB) + 0.01));
       }
-      for (const xs of [X0, X1 - 0.07]) bag.add(TIMBER, rod([xs + 0.035, yA - 0.1, up < 0 ? hz : -hz], [xs + 0.035, yB - 0.1, up < 0 ? -hz : hz], 0.05, 5));
-      col.ramp([X0, -hz, X1, hz], yA, yB, up < 0 ? 'n' : 's');
-      const xr = s > 0 ? X0 : X1, za = up < 0 ? hz : -hz, zb = -za;
+      for (const xs of [X0, X1 - 0.07]) bag.add(TIMBER, rod([cx + xs + 0.035, yA - 0.1, cz + (up < 0 ? hz : -hz)], [cx + xs + 0.035, yB - 0.1, cz + (up < 0 ? -hz : hz)], 0.05, 5));
+      col.ramp([cx + X0, cz - hz, cx + X1, cz + hz], yA, yB, up < 0 ? 'n' : 's');
+      const xr = cx + (s > 0 ? X0 : X1), za = cz + (up < 0 ? hz : -hz), zb = cz + (up < 0 ? -hz : hz);
       bag.add(TIMBER, rod([xr, yA + 0.95, za], [xr, yB + 0.95, zb], 0.03, 5));
       for (let q = 0; q <= 4; q++) { const f = q / 4, yy = yA + (yB - yA) * f, zz = za + (zb - za) * f; bag.add(TIMBER, rod([xr, yy, zz], [xr, yy + 0.95, zz], 0.02, 4)); }
     }
     // the floors round the stairwell: the lobby in front of it and the strips at the hole's two ends
     for (let k = 1; k < K; k++) {
       const y = fl[k];
-      const A = s > 0 ? [rail, -3.9, X0 - 0.1, 3.9] : [X1 + 0.1, -3.9, -rail, 3.9];
-      const B1 = s > 0 ? [X0 - 0.1, -3.9, wallIn + 0.3, -hz] : [-wallIn - 0.3, -3.9, X1 + 0.1, -hz];
-      const B2 = s > 0 ? [X0 - 0.1, hz, wallIn + 0.3, 3.9] : [-wallIn - 0.3, hz, X1 + 0.1, 3.9];
-      for (const r of [A, B1, B2]) { bag.add(TIMBER, box(r[0], y - 0.26, r[1], r[2], y, r[3])); col.floor(r, y); }
-      const xr = s > 0 ? rail : -rail;
-      bag.add(TIMBER, rod([xr, y + 1.05, -3.9], [xr, y + 1.05, 3.9], 0.035, 5));
-      bag.add(TIMBER, rod([xr, y + 0.55, -3.9], [xr, y + 0.55, 3.9], 0.025, 4));
-      col.segment([xr, -3.9], [xr, 3.9], 0.12, y, y + 1.1);
+      const A = s > 0 ? [rail, -hl, X0 - 0.1, hl] : [X1 + 0.1, -hl, -rail, hl];
+      const B1 = s > 0 ? [X0 - 0.1, -hl, wallIn + 0.3, -hz] : [-wallIn - 0.3, -hl, X1 + 0.1, -hz];
+      const B2 = s > 0 ? [X0 - 0.1, hz, wallIn + 0.3, hl] : [-wallIn - 0.3, hz, X1 + 0.1, hl];
+      for (const r of [A, B1, B2]) { bag.add(TIMBER, box(cx + r[0], y - 0.26, cz + r[1], cx + r[2], y, cz + r[3])); col.floor([cx + r[0], cz + r[1], cx + r[2], cz + r[3]], y); }
+      const xr = cx + (s > 0 ? rail : -rail);
+      bag.add(TIMBER, rod([xr, y + 1.05, cz - hl], [xr, y + 1.05, cz + hl], 0.035, 5));
+      bag.add(TIMBER, rod([xr, y + 0.55, cz - hl], [xr, y + 0.55, cz + hl], 0.025, 4));
+      col.segment([xr, cz - hl], [xr, cz + hl], 0.12, y, y + 1.1);
     }
-    bag.add('ground', box(s > 0 ? front : -wallIn - 0.05, 0, -3.9, s > 0 ? wallIn + 0.05 : -front, 0.025, 3.9));
+    bag.add('ground', box(cx + (s > 0 ? front : -wallIn - 0.05), 0, cz - hl, cx + (s > 0 ? wallIn + 0.05 : -front), 0.025, cz + hl));
   }
 
   // ── the ring roof, the second ring, the furnished rooms ──

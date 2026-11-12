@@ -45,11 +45,38 @@ export const bankY = (dz) => (dz < STREAM.w / 2 + 2 ? STREAM.bed * sm(STREAM.w /
 /** The road from the south gate to the bridge, and on over the stream to the south. */
 export const ROAD = [-2, 52, 2, 140];
 
+/**
+ * The hamlet of ordinary houses (docs §4.4): two storeys of rammed earth on a granite foot, a tiled roof with a deep front
+ * eave, three bays (hall in the middle, a kitchen and a bedroom beside it), a loft over the back. Rows face the yard
+ * and the road; yaw is a quarter turn: PI/2 faces east, -PI/2 faces west. [x of the front line, z start, count, yaw].
+ */
+export const HOUSE = { w: 7.4, d: 8.6, gap: 0.1 };
+const ROWS = [
+  { front: -16.0, z0: 33.8, n: 3, yaw: Math.PI / 2 }, { front: 16.0, z0: 33.8, n: 3, yaw: -Math.PI / 2 },
+  { front: -2.9, z0: 57.4, n: 1, yaw: Math.PI / 2, off: 0 }, { front: 2.9, z0: 57.4, n: 1, yaw: -Math.PI / 2, off: 0 },
+  { front: -2.9, z0: 91.6, n: 4, yaw: Math.PI / 2 }, { front: 2.9, z0: 91.6, n: 4, yaw: -Math.PI / 2 },
+];
+export const HOUSES = [];
+for (const r of ROWS) for (let q = 0; q < r.n; q++) {
+  const east = Math.sin(r.yaw) > 0, cx = r.front + (east ? -1 : 1) * (HOUSE.d / 2 + 1.3), cz = r.z0 + HOUSE.w / 2 + q * (HOUSE.w + HOUSE.gap);
+  HOUSES.push({ c: [cx, cz], yaw: r.yaw, w: HOUSE.w, d: HOUSE.d, seed: HOUSES.length + 3 });
+}
+/** The mill-less water works: a bamboo noria (筒车) turning in the stream, a pair of washing steps, the earth-god shrines. */
+export const NORIA = { x: -14, r: 3.2, axle: 2.3 };
+export const WASH_STEPS = [[10.5, -1], [-31, -1], [46, -1]];
+export const SHRINES = [[-4.3, 70.5, Math.PI / 2], [-70.2, 100, 0], [33, 33, Math.PI]];
+/** Kitchen gardens behind the rows: [x0, z0, x1, z1]. */
+export const PLOTS = [[-33, 33.8, -26.6, 56.2], [26.6, 33.8, 33, 56.2], [-18, 91.6, -12.6, 121.6], [12.6, 91.6, 18, 121.6]];
+
 /** The solid footprints (tulou, farm buildings) for planting and walkers: [x0, z0, x1, z1]. */
 export function footprints() {
   const out = [[-T.R - 3, -T.R - 3, T.R + 3, T.R + 3]];
   for (const n of NEIGHBOURS) { const h = n.kind === 'square' ? n.half : n.R; out.push([n.c[0] - h - 2.5, n.c[1] - h - 2.5, n.c[0] + h + 2.5, n.c[1] + h + 2.5]); }
   for (const [x, z, w, d] of FARMS) out.push([x - w / 2 - 1, z - d / 2 - 1, x + w / 2 + 1, z + d / 2 + 1]);
+  for (const h of HOUSES) { const q = Math.abs(Math.sin(h.yaw)) > 0.5, hx = (q ? h.d : h.w) / 2 + 1.4, hz = (q ? h.w : h.d) / 2 + 1.4; out.push([h.c[0] - hx, h.c[1] - hz, h.c[0] + hx, h.c[1] + hz]); }
+  for (const r of PLOTS) out.push([r[0], r[1], r[2], r[3]]);
+  for (const [x, z] of SHRINES) out.push([x - 1.4, z - 1.4, x + 1.4, z + 1.4]);
+  out.push([NORIA.x - 3.5, streamZ(NORIA.x) - 6, NORIA.x + 3.5, streamZ(NORIA.x) + 6]);
   return out;
 }
 const FOOT = footprints();
@@ -70,13 +97,34 @@ export function terrace(h) {
 /** Where the ground is terraced (the hills), 0…1. */
 export const terraced = (x, z) => sm(0.4, 2.0, hill(x, z));
 
-/** The furnished rooms of the landmark: kind by floor index k and room index i (docs §4.1: kitchens below, grain store, bedrooms). */
-export const FURNISH = [
+/** The fully furnished rooms of the landmark: kind by floor index k and room index i (docs §4.1: kitchens below, grain store, bedrooms). */
+export const FURNISH_FULL = [
   ...[14, 15, 16, 17, 19, 20, 21, 23, 26, 29, 32].map((i) => ({ k: 0, i, kind: 'kitchen' })),
   ...[14, 15, 20, 24, 28].map((i) => ({ k: 1, i, kind: 'granary' })),
   ...[15, 17, 19, 22, 27, 31].map((i) => ({ k: 2, i, kind: 'bedroom' })),
   ...[16, 21, 25].map((i) => ({ k: 3, i, kind: 'bedroom' })),
 ];
+/**
+ * Every room of a ring is furnished (docs §4.1: a family owned a vertical slice, kitchen below to bedroom above); the rooms
+ * not in `full` get the light version of their floor's kind (fewer pieces, one obstacle). Bays (stairs) and the gate
+ * passages on the ground floor stay empty. Kinds vary by room: tools, loom, tea and the household altar among them.
+ */
+export function furnishRing(n, K, { gates = [], bays = [], full = [] } = {}) {
+  const out = [], da = 360 / n, idx = (g) => Math.round(g / da), G = gates.map(idx), Bs = bays.map(idx);
+  const near = (list, i) => list.some((b) => Math.abs((((i - b) % n) + n * 1.5) % n - n / 2) <= 1);
+  for (let k = 0; k < K; k++) for (let i = 0; i < n; i++) {
+    if (near(Bs, i) || (k === 0 && G.includes(i))) continue;
+    const f = full.find((q) => q.k === k && q.i === i), h = ((i * 2654435761 + k * 40503) >>> 0) % 100;
+    if (f) { out.push({ ...f, light: false }); continue; }
+    let kind;
+    if (k === 0) kind = h < 14 ? 'tools' : h < 24 ? 'pen' : 'kitchen';
+    else if (k === 1) kind = h < 20 ? 'loom' : h < 34 ? 'tools' : 'granary';
+    else kind = h < 22 ? 'tea' : h < 30 ? 'loom' : 'bedroom';
+    out.push({ k, i, kind, light: true });
+  }
+  return out;
+}
+export const FURNISH = furnishRing(T.n, T.floors.length, { gates: [90, 270], bays: [0, 180], full: FURNISH_FULL });
 /** A point of the landmark in polar form (r, angle in degrees from +x toward +z). */
 export const polar = (r, deg) => [T.c[0] + r * Math.cos(deg * Math.PI / 180), T.c[1] + r * Math.sin(deg * Math.PI / 180)];
 /** The outer lane of the court (between the two rings) and the inner court. */
