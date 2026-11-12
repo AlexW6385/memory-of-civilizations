@@ -2,6 +2,7 @@
 // women with jars on the place and the lanes, men talking, children, goats on the terraces and dogs about; people on the middle lane.
 import { TOGUNA, PLACE, PLACE_Y, COMPOUNDS, FORGE, DYE, THRESH, PENS, SHADE, height, inCompound, nearBaobab } from './layout.js';
 import { frontOf } from '../../styles/dogon/compound.js';
+import { dressing } from './dressing.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const plan = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-90, -90, 90, 90], entrance: { at: [0, 30], facing: 'n' } });
@@ -102,5 +103,5 @@ export async function town() {
   }
   A.push({ t: 'animal', kind: 'donkey', at: [-39, 28.4], y: PLACE_Y, rot: 1.7, seed: 99 }, { t: 'animal', kind: 'donkey', at: [22.5, 22], y: PLACE_Y, rot: 3.5, seed: 98 });
   void COMPOUNDS;
-  return [plan('dogon-people', 'life', [...P, ...A, ...L])];
+  return [plan('dogon-people', 'life', [...P, ...A, ...L]), plan('dogon-dressing', 'life', dressing())];
 }
