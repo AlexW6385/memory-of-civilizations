@@ -1,13 +1,13 @@
 // The village round the churches (docs/settlements/lalibela.md §5): round stone houses with conical thatch;
 // and the people of the churches (§10): pilgrims wrapped in white in the pits, the trenches and on
 // the rims looking down, priests among them holding their hand crosses.
-import { RADIUS, POOL, PITS, PRECINCT, TERR, cutDepth, houses, compounds, slope, inRect } from './layout.js';
+import { RADIUS, POOL, PITS, PRECINCT, TERR, KNOLL, riserR, cutDepth, houses, compounds, slope, inRect } from './layout.js';
 const base = (id, elements, style = 'zagwe') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-240, 100], facing: 's' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 function people() {
   const rand = rng(1221), L = [], Z = [];
-  const yAt = (x, z) => { const d = cutDepth(x, z), pit = Object.values(PITS).some((p) => inRect(p.rect, x, z, -3)); return -d + (pit ? 0.15 : 0); };
+  const yAt = (x, z) => { const d = cutDepth(x, z), pit = Object.values(PITS).some((p) => inRect(p.rect, x, z, -3)); return pit ? -d + 0.15 : slope(x, z) - d; };   // (a pit's floor is level; a trench's follows the slope it is cut in)
   const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));       // a figure faces −z when rot = 0
   const pilgrim = (at, rot, pose = 'stand') => L.push({ t: 'figure', at, y: yAt(...at), rot, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_white', hat: rand() < 0.75 ? 'veil' : 'none', hatMat: 'cloth_white', skin: 'skin_dark', pose });
   const priestAt = (at, y, rot) => {
@@ -27,8 +27,20 @@ function people() {
   priest([gc[0] - 9.2, gc[1] - 6.5], face([gc[0] - 9.2, gc[1] - 6.5], [gc[0] - 11, gc[1] + 2]));
   // on the rim to the north, pilgrims sitting and looking down into the pit
   for (let k = 0; k < 6; k++) { const p = [G.rect[0] + 4 + k * 4.5 + rand(), G.rect[1] - 2.8]; pilgrim(p, face(p, [p[0], p[1] + 5]), rand() < 0.6 ? 'sit_ground' : 'stand'); }
-  // in the trench leading down, a file of pilgrims going in
-  for (let k = 0; k < 5; k++) { const p = [-255 + k * 7 + rand() * 2, 128 + (rand() - 0.5) * 1.5]; pilgrim(p, face(p, [p[0] + 5, p[1]])); }
+  // in the trench leading down, a file of pilgrims going in, a priest with his cross at their head
+  for (let k = 0; k < 9; k++) { const p = [-258 + k * 4.2 + rand() * 1.6, 128 + (k % 2 ? 1 : -1) * (1.0 + rand() * 0.4)]; pilgrim(p, face(p, [p[0] + 5, p[1]]), k === 3 ? 'sit_ground' : 'stand'); }
+  priest([-221.5, 129.3], face([-221.5, 129.3], [-216, 129.3]));
+  // along the trench's lips, pilgrims who have come to look down into it and at the church
+  for (let k = 0; k < 6; k++) { const p = [-262 + k * 7.5 + rand() * 2, 122.0 - 0.3 + rand() * 0.4 + (k % 2) * 13.6], ph = k % 2 ? 'sit_ground' : 'stand'; pilgrim(p, face(p, [p[0] + 3, 128]), ph); }
+  // on the shoulder of the hill beyond, where the pilgrims come to see the cross on the roof whole: a few sitting at its edge
+  // looking down, a priest with his hand cross among them, others coming up the path from the village
+  { const K = KNOLL.c, to = [-195, 135], dir = face(K, to);
+    const ring = [[-4.0, 9.5, 'sit_ground'], [-1.2, 11.0, 'stand'], [2.3, 10.2, 'sit_ground'], [5.2, 12.4, 'sit_ground'], [-7.4, 13.2, 'stand'], [8.6, 9.0, 'stand'], [-3.0, 16.8, 'sit_ground'], [1.5, 18.2, 'stand']];
+    // off the terrace walls: a point within two metres of a riser is moved to the nearer tread
+    const tread = ([x, z]) => { const r = Math.hypot(x, z); for (let n = 0; n < TERR.n; n++) { const rr = riserR(n); if (Math.abs(r - rr) < 2.4) { const k = (r < rr ? rr - 2.7 : rr + 2.9) / r; return [x * k, z * k]; } } return [x, z]; };
+    for (const [side, fwd, pose] of ring) { const dx = to[0] - K[0], dz = to[1] - K[1], L = Math.hypot(dx, dz), u = [dx / L, dz / L], v = [-u[1], u[0]];
+      const p = [K[0] + 3 + u[0] * fwd + v[0] * side + (rand() - 0.5) * 0.8, K[1] - 3 + u[1] * fwd + v[1] * side + (rand() - 0.5) * 0.8]; pilgrim(tread(p), dir + (rand() - 0.5) * 0.5, pose); }
+    priest(tread([K[0] + 3 + (to[0] - K[0]) / 61 * 8.2 + 2.6, K[1] - 3 + (to[1] - K[1]) / 61 * 8.2 + 1.2]), dir + 0.3); }
   // Bete Medhane Alem: pilgrims in the court along its south side and at the trench from the north, two priests
   const M = PITS.medhane, mc = [(M.rect[0] + M.rect[2]) / 2, (M.rect[1] + M.rect[3]) / 2];
   for (let k = 0; k < 9; k++) { const p = [M.rect[0] + 5 + k * 4.6 + rand(), M.rect[3] - 5.2 + rand() * 1.5]; pilgrim(p, face(p, mc) + (rand() - 0.5) * 0.5, k % 4 === 1 ? 'sit_ground' : 'stand'); }

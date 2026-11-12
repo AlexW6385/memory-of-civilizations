@@ -87,3 +87,9 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 - **Woodland:** stringybark gums (grey fibrous trunk, sparse crown) on the dry ground and the rock's tops, cycads (Cycas, short trunk and crown of arching fronds), spinifex and dry-grass tufts thick at the rock's foot, fallen logs, scree of sandstone fragments at the foot of the faces [inferred: Top End woodland; §4].
 - **Six camps** (was two): under the small shelter's apron, on the apron before the arrival, on the billabong's west bank, by the east hollow; each with its goods, a dog, a woman at work, trodden ground [inferred]. Smoke from every hearth. People sit on the ledges and the summit over the plain.
 - **Still below the standard:** no photographed reference for the rock's drip streaks and lichen (left to the damp of the climate); the paintings stay generic by design.
+
+## 9. The rock as built (fix pass)
+
+- The outlier's big blocks are built as beds of sandstone, each a rounded block, banded pink, buff, pale and iron-stained dark red; soft beds set back so the hard bed above hangs over them; jointed into segments of 4–8 m standing at different depths; the roof slab's lip broken the same way and its underside irregular; shed blocks and slabs on the broken top of the back mass [inferred: Arnhem Land sandstone weathers along bedding planes and vertical joints into stepped, overhanging faces; see §3].
+- The Main Gallery's wall is a warm pink-brown with a "great panel" of large fresh white and yellow fish, a turtle and a wallaby over the red, so the paintings read from the apron [inferred: scale of the figures only; the layering is §2].
+- The camp in front of the arrival moved east, out of its sight line.

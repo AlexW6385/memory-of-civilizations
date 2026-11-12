@@ -15,22 +15,22 @@ export const SMALL = { x0: -60, x1: -47, zb: -36.3, zl: -29.5, yc0: 3.1, yc1: 2.
 /** Rock blocks: [x0, z0, x1, z1, y0, y1, material, roundness n]. Their tops are walkable; colliders follow the boxes. */
 export const BLOCKS = [
   // the Main Gallery: back mass, upper rim, piers, roof slab (its bottom at 3.6, the ceiling panel just under it)
-  { r: [-36, -70, 36, MAIN.zb], y: [-1, 14], m: 'sandstone_rose', n: 6, seed: 1, panel: true },
-  { r: [-30, -70, 30, -48], y: [13, 17.5], m: 'sandstone_yellow', n: 5, seed: 2 },
+  { r: [-36, -70, 36, MAIN.zb], y: [-1, 14], m: 'sandstone_rose', n: 6, seed: 1, panel: true, bedded: true },
+  { r: [-30, -70, 30, -48], y: [13, 17.5], m: 'sandstone_yellow', n: 5, seed: 2, bedded: true },
   { r: [-24, -62, 8, -52], y: [17, 19], m: 'sandstone_white', n: 4, seed: 21 },
-  { r: [-34, -39, -22.6, -27.5], y: [-1, 6.4], m: 'tuff_red', n: 4, seed: 3 },
-  { r: [21.6, -39, 33, -27.5], y: [-1, 6.4], m: 'tuff_red', n: 4, seed: 4 },
-  { r: [MAIN.x0 - 1.5, -41, MAIN.x1 + 1.5, MAIN.zl], y: [3.6, 10], m: 'sandstone_yellow', n: 7, seed: 5, slab: true, walkTop: true },
+  { r: [-34, -39, -22.6, -27.5], y: [-1, 6.4], m: 'tuff_red', n: 4, seed: 3, bedded: true },
+  { r: [21.6, -39, 33, -27.5], y: [-1, 6.4], m: 'tuff_red', n: 4, seed: 4, bedded: true },
+  { r: [MAIN.x0 - 1.5, -41, MAIN.x1 + 1.5, MAIN.zl], y: [3.6, 10], m: 'sandstone_yellow', n: 7, seed: 5, slab: true, bedded: true, walkTop: true },
   // the small shelter
-  { r: [-76, -70, -36, SMALL.zb], y: [-1, 10], m: 'sandstone_rose', n: 5, seed: 6, panel: true },
-  { r: [-70, -41, -60.2, -30], y: [-1, 5.4], m: 'tuff_red', n: 4, seed: 7 },
-  { r: [-46.8, -41, -37, -30.5], y: [-1, 5.4], m: 'tuff_red', n: 4, seed: 8 },
-  { r: [SMALL.x0 - 1.5, -42, SMALL.x1 + 1.5, SMALL.zl], y: [3.2, 7.6], m: 'sandstone_yellow', n: 7, seed: 9, slab: true, walkTop: true },
+  { r: [-76, -70, -36, SMALL.zb], y: [-1, 10], m: 'sandstone_rose', n: 5, seed: 6, panel: true, bedded: true },
+  { r: [-70, -41, -60.2, -30], y: [-1, 5.4], m: 'tuff_red', n: 4, seed: 7, bedded: true },
+  { r: [-46.8, -41, -37, -30.5], y: [-1, 5.4], m: 'tuff_red', n: 4, seed: 8, bedded: true },
+  { r: [SMALL.x0 - 1.5, -42, SMALL.x1 + 1.5, SMALL.zl], y: [3.2, 7.6], m: 'sandstone_yellow', n: 7, seed: 9, slab: true, bedded: true, walkTop: true },
   // the east: ledges to the lookout
-  { r: [34, -38, 52, -20], y: [-1, 4.6], m: 'sandstone_rose', n: 5, seed: 10 },
-  { r: [38, -56, 64, -37], y: [-1, 11.2], m: 'tuff_red', n: 5, seed: 11 },
-  { r: [44, -72, 74, -50], y: [-1, 21], m: 'sandstone_yellow', n: 6, seed: 12 },
-  { r: [58, -52, 80, -34], y: [-1, 8], m: 'sandstone_white', n: 4, seed: 13 },
+  { r: [34, -38, 52, -20], y: [-1, 4.6], m: 'sandstone_rose', n: 5, seed: 10, bedded: true },
+  { r: [38, -56, 64, -37], y: [-1, 11.2], m: 'tuff_red', n: 5, seed: 11, bedded: true },
+  { r: [44, -72, 74, -50], y: [-1, 21], m: 'sandstone_yellow', n: 6, seed: 12, bedded: true },
+  { r: [58, -52, 80, -34], y: [-1, 8], m: 'sandstone_white', n: 4, seed: 13, bedded: true },
 ];
 export const PEAK = { x: 59, z: -61, y: 21 };
 /** The ground's floor in each shelter (a raised platform of beaten earth, falling away to the plain before it). */
@@ -85,7 +85,7 @@ export const CAMPS = [
   { c: [-34, -7], hut: [-38, -9, 0.4], lean: [-29, -4, 0], fire: [-33, -5], rack: [-27, -9], trough: true, grind: true },
   { c: [-11, 14], hut: null, lean: [-16, 16, 0.2], fire: [-11, 14], rack: [-6, 17], fish: true, turtle: true },
   { c: [-54, -25], hut: [-59, -26, 0.2], lean: [-49, -27, 0.1], fire: [-54, -25], rack: [-47, -23], grind: true },      // under the small shelter's apron
-  { c: [8, -9], hut: null, lean: [3, -10, 0.1], fire: [8, -9], rack: [13, -7], trough: true, turtle: true },            // on the apron, in front of the arrival
+  { c: [19, -9], hut: null, lean: [14, -10, 0.1], fire: [19, -9], rack: [24, -7], trough: true, turtle: true },          // on the apron, east of the arrival (out of its way)
   { c: [-30, 26], hut: [-34, 28, 0.5], lean: [-26, 30, -0.2], fire: [-30, 26], rack: [-24, 25], fish: true },          // the billabong's west bank
   { c: [57, 10], hut: [61, 13, -0.3], lean: [52, 12, 0.3], fire: [57, 10], rack: [62, 8], grind: true, fish: true },   // by the east hollow
 ];

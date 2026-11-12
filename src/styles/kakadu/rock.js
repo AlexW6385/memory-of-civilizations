@@ -89,13 +89,58 @@ export function blockGeometry(r, ys, n, o = {}) {
 }
 export const outwardFix = (g) => g;
 
+/** The tones of the beds, by the block's own stone: the pink and buff sandstone is banded with iron-stained dark red and pale beds. */
+const BANDS = {
+  sandstone_rose: ['sandstone_rose', 'sandstone_rose', 'tuff_red', 'sandstone_yellow', 'sandstone_rose', 'sandstone_white'],
+  sandstone_yellow: ['sandstone_yellow', 'sandstone_yellow', 'sandstone_rose', 'sandstone_white', 'sandstone_yellow', 'tuff_red'],
+  sandstone_white: ['sandstone_white', 'sandstone_yellow', 'sandstone_white', 'sandstone_rose'],
+  tuff_red: ['tuff_red', 'sandstone_rose', 'tuff_red', 'sandstone_rose', 'tuff_red'],
+};
+/**
+ * A big block built as the real outcrop is: not one rounded loaf but beds of sandstone, each its own rounded block, some set back (the soft
+ * beds weather in, so the hard bed above hangs over them), broken along the joints into segments of a few metres whose faces stand at
+ * different depths, the topmost bed with a broken skyline; the bands of tone follow the beds. Only the south faces and the lip are made
+ * fine; the mass behind is left to the block's own (coarse) core.
+ */
+function bedded(B, bag, res) {
+  const rand = rng(B.seed * 31 + 7), [x0, z0, x1, z1] = B.r, [y0, y1] = B.y, H = y1 - y0, bands = BANDS[B.m] ?? [B.m];
+  const nb = B.beds ?? Math.max(2, Math.round(H / (B.slab ? 2.2 : 1.9))), deep = Math.min(z1 - z0, B.slab ? 14 : 15);
+  const soft = Array.from({ length: nb }, (_, i) => (i === 0 && B.panel ? 0.75 : rand() < 0.4 ? 0.5 + rand() * 1.1 : rand() * 0.25));
+  const shift = rand() * 3;
+  for (let i = 0; i < nb; i++) {
+    const yA = y0 + H * i / nb - (i ? 0.3 : 0), yB = y0 + H * (i + 1) / nb + (i < nb - 1 ? 0.12 : 0);
+    const mat = bands[(i + (B.seed % 3)) % bands.length], top = i === nb - 1, low = !!B.panel && yA < 4.4;   // (low beds stay well behind the painted wall's surface)
+    // the joints: segment edges a few metres apart, the bed's own offset from the block's ends
+    let x = x0 + (i % 2 ? 0 : rand() * 0.8);
+    const xe = x1 - (i % 3 ? 0 : rand() * 0.8);
+    while (x < xe - 1) {
+      const w = Math.min(xe - x, 4 + rand() * 4.5 + shift * 0.2), zf = z1 - (low ? Math.max(soft[i], 0.9) : soft[i]) - rand() * (low ? 0.15 : 0.55), hy = top ? (rand() - 0.5) * 0.3 : 0;
+      const xs1 = xe - x - w < 2 ? xe : x + w;
+      bag.add(mat, blockGeometry([x, zf - deep, xs1, zf], [yA, yB + hy], B.slab ? 4.2 : 4.6, { seed: B.seed * 13 + i * 7 + Math.floor(x), amp: low ? 0.1 : B.slab ? 0.16 : 0.22, res, slab: i > 0 || !!B.slab, groove: low ? 0.3 : 0.7 }));
+      x = xs1;
+    }
+  }
+}
 /** The block list of the plan as geometry and colliders. res: finer on the faces seen from the south. */
 export function rockMass(el, { bag, col }) {
   for (const B of BLOCKS) {
-    const south = B.r[3] > -50;
-    const g = blockGeometry(B.r, B.y, B.n, { seed: B.seed, res: el.res ?? (south ? 0.8 : 1.1), amp: B.slab ? 0.14 : 0.3, slab: !!B.slab, shrinkS: B.panel ? 0.45 : 0 });
-    bag.add(B.m, g);
+    const south = B.r[3] > -50, res = el.res ?? (south ? 0.85 : 1.1);
+    if (B.bedded && south) {
+      // the core, drawn behind the beds, its top a hand below theirs
+      bag.add(B.m, blockGeometry(B.r, [B.y[0], B.y[1] - 0.45], B.n, { seed: B.seed, res: 1.6, amp: 0.2, slab: !!B.slab, shrinkS: 7, groove: 0.3 }));
+      bedded(B, bag, res);
+    } else {
+      const g = blockGeometry(B.r, B.y, B.n, { seed: B.seed, res, amp: B.slab ? 0.14 : 0.3, slab: !!B.slab, shrinkS: B.panel ? 0.45 : 0 });
+      bag.add(B.m, g);
+    }
     col.rect(B.r, B.slab ? B.y[0] - 0.55 : B.y[0], B.y[1]);
+  }
+  // blocks and slabs shed on the broken top of the back mass, above the gallery's roof: the skyline of the outlier is jagged, not a
+  // smooth swell (nothing walks there)
+  const r2 = rng(909);
+  for (let k = 0; k < 22; k++) {
+    const sz = 0.9 + r2() ** 2 * 2.6, x = -34 + r2() * 68, z = -47 + r2() * 10.5, seed = Math.floor(r2() * 1e6), flat = r2() < 0.4;
+    bag.add(k % 3 ? 'sandstone_rose' : k % 3 === 0 && k % 2 ? 'sandstone_yellow' : 'tuff_red', blockGeometry([x - sz * (flat ? 1.5 : 1), z - sz * 0.8, x + sz * (flat ? 1.6 : 0.9), z + sz * 0.7], [13.6, 14 + sz * (flat ? 0.45 : 0.5 + r2() * 0.7)], flat ? 4 : 3.2, { seed, amp: 0.12 * sz, res: Math.max(0.5, sz * 0.4), groove: 0.6 }));
   }
 }
 
