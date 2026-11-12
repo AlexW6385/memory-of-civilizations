@@ -11,7 +11,7 @@ import '../qing/index.js';
 import { villageElements } from './village.js';
 import { rite, diya, lampStand, garland, kalasha, flowerPlate } from '../indian/rites.js';
 
-const S = 'sandstone_dressed', RELIEF = 'sandstone_relief';
+const S = 'sandstone_rail', RELIEF = 'sandstone_relief';
 
 /** The stepped plan of a tower course (one quadrant mirrored round): the central offset (bhadra),
  *  the intermediate one (pratiratha), the corner (karna) — half-extent s. Star-shaped about the centre. */
