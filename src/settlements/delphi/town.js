@@ -71,21 +71,6 @@ export async function town() {
     // in the adyton: the Pythia on her tripod? no: she is shown standing at the omphalos, veiled, a laurel bough in her hand
     woman([-18.9, TEMPLE.cz - 3.4], -Math.PI / 2, { y: TT_Y + 0.45, cloth: 'cloth_maroon', cloth2: 'cloth_maroon', hat: 'veil' });
   }
-  // the consultants' line from the altar to the temple's steps: each with his cake (the pelanos) in a basket and his fee, a servant behind with the goat's cord, the herald
-  // calling them in their order (the Delphians first, then the cities of the council, then the other Greeks)
-  { const y = TT_Y + 0.03, zq = 5.6;
-    for (let k = 0; k < 6; k++) { const x = 36.5 + k * 1.55 + (k % 2) * 0.2, zz = zq + (k % 2 ? 0.45 : -0.2);
-      (k % 3 === 1 ? woman : citizen)([x, zz], -Math.PI / 2 + (k % 2 ? 0.12 : -0.1), { y, carry: k % 2 ? 'basket' : 'none', pose: 'stand' }); }
-    priest([TEMPLE.X + 7.6, zq - 1.6], -Math.PI / 2 + 0.3, { y, pose: 'talk' }); }
-  // the mason's yard: the carver at the stele, his boy with the water, a second mason at the block; the pen: the animals for the sacrifice and the boy who watches them
-  { const [yx, yz] = YARD.at, c = Math.cos(YARD.yaw), s = Math.sin(YARD.yaw), at = (u, v) => [yx + u * c + v * s, yz - u * s + v * c], y = TT_Y + 0.03;
-    worker(at(-1.6, 1.9), face(0, -1) + YARD.yaw, { y, pose: 'squat', cloth: 'cloth_grey', hat: 'none' });
-    worker(at(0.4, -0.1), YARD.yaw + 2.2, { y, cloth: 'linen', hat: 'none' });
-    worker(at(2.2, 1.6), YARD.yaw + Math.PI, { y, hat: 'none', cloth: 'cloth_ochre', h: 1.2 });
-    worker(at(1.4, 0.2), YARD.yaw + 0.5, { y, hat: 'none', cloth: 'cloth_brown', pose: 'squat' }); }
-  { const [x0, z0, x1, z1] = PEN, y = TT_Y + 0.03;
-    for (let k = 0; k < 3; k++) L.push({ t: 'animal', kind: k % 2 ? 'goat' : 'sheep', at: [x0 + 1.4 + k * 0.9, z0 + 1.6 + (k % 2) * 0.5], y, rot: 1 + k * 1.3, seed: 300 + k });
-    worker([x1 + 0.9, (z0 + z1) / 2], Math.PI / 2, { y, carry: 'staff', cloth: 'cloth_brown', h: 1.25 }); }
   // the spring: women and men washing and drinking at the basin, a girl with a hydria going up
   { const [x0, z0, x1, z1] = SPRING;
     for (let k = 0; k < 6; k++) woman([x0 - 1.0, z0 + 2 + k * 2.6], Math.PI / 2 * 1, { y: height(x0 - 1, z0 + 3), carry: k === 2 ? 'pot' : 'none' });
@@ -115,6 +100,22 @@ export async function town() {
   // goats on the slope above the village, a goatherd
   for (let k = 0; k < 14; k++) { const x = -165 + rand() * 80, z = 20 + rand() * 90; if (inLot(x, z, 3) || inLane(x, z, 3)) continue; L.push({ t: 'animal', kind: 'goat', at: [x, z], y: height(x, z), rot: rand() * 6.28, seed: 40 + k }); }
   worker([-140, 50], 1, { carry: 'staff' });
+  // (the additions below come last: the earlier figures keep the places the scatter's sequence gave them)
+  // the consultants' line from the altar to the temple's steps: each with his cake (the pelanos) in a basket and his fee, a servant behind with the goat's cord, the herald
+  // calling them in their order (the Delphians first, then the cities of the council, then the other Greeks)
+  { const y = TT_Y + 0.03, zq = 5.6;
+    for (let k = 0; k < 6; k++) { const x = 36.5 + k * 1.55 + (k % 2) * 0.2, zz = zq + (k % 2 ? 0.45 : -0.2);
+      (k % 3 === 1 ? woman : citizen)([x, zz], -Math.PI / 2 + (k % 2 ? 0.12 : -0.1), { y, carry: k % 2 ? 'basket' : 'none', pose: 'stand' }); }
+    priest([TEMPLE.X + 7.6, zq - 1.6], -Math.PI / 2 + 0.3, { y, pose: 'talk' }); }
+  // the mason's yard: the carver at the stele, his boy with the water, a second mason at the block; the pen: the animals for the sacrifice and the boy who watches them
+  { const [yx, yz] = YARD.at, c = Math.cos(YARD.yaw), s = Math.sin(YARD.yaw), at = (u, v) => [yx + u * c + v * s, yz - u * s + v * c], y = TT_Y + 0.03;
+    worker(at(-1.6, 1.9), face(0, -1) + YARD.yaw, { y, pose: 'squat', cloth: 'cloth_grey', hat: 'none' });
+    worker(at(0.4, -0.1), YARD.yaw + 2.2, { y, cloth: 'linen', hat: 'none' });
+    worker(at(2.2, 1.6), YARD.yaw + Math.PI, { y, hat: 'none', cloth: 'cloth_ochre', h: 1.2 });
+    worker(at(1.4, 0.2), YARD.yaw + 0.5, { y, hat: 'none', cloth: 'cloth_brown', pose: 'squat' }); }
+  { const [x0, z0, x1, z1] = PEN, y = TT_Y + 0.03;
+    for (let k = 0; k < 3; k++) L.push({ t: 'animal', kind: k % 2 ? 'goat' : 'sheep', at: [x0 + 1.4 + k * 0.9, z0 + 1.6 + (k % 2) * 0.5], y, rot: 1 + k * 1.3, seed: 300 + k });
+    worker([x1 + 0.9, (z0 + z1) / 2], Math.PI / 2, { y, carry: 'staff', cloth: 'cloth_brown', h: 1.25 }); }
   plans.push({ ...base('delphi-life', 'life', L), rooms: [] });
   void WAY2;
   return plans;
