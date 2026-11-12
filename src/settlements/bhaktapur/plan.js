@@ -2,7 +2,7 @@
 // five pairs of guardians, the Bhairabnath, the Siddhi Lakshmi shikhara, a dabali, a pati, a stone spout, a chaitya and two pipals on the
 // brick-paved square, the stalls of the market, the enterable Newar house on its south side; Pottery Square with its drying ground, wheels and kilns.
 
-import { SQ, POT, NYATAPOLA, BHAIRAB, SHI, DABALI, PATI, DHARA, CHAITYA, TREES, HOUSE, STALLS } from './layout.js';
+import { lots, SQ, POT, NYATAPOLA, BHAIRAB, SHI, DABALI, PATI, DHARA, CHAITYA, TREES, HOUSE, STALLS } from './layout.js';
 
 const E = [];
 const KEEP_RINGS = [[NYATAPOLA.c[0] - 8.5, NYATAPOLA.c[1] - 8.5, NYATAPOLA.c[0] + 15.5, NYATAPOLA.c[1] + 8.5], [BHAIRAB.c[0] - 11, BHAIRAB.c[1] - 6, BHAIRAB.c[0] + 6, BHAIRAB.c[1] + 6]];
@@ -38,6 +38,8 @@ const h = HOUSE.rect;
 const rooms = [
   room('house', [h[0] + 0.6, h[1] + 0.6, h[2] - 0.6, h[3] - 0.6], 0.1, 'hall'),
   room('bhairabnath', [BHAIRAB.c[0] - 2.6, BHAIRAB.c[1] - 2.6, BHAIRAB.c[0] + 2.6, BHAIRAB.c[1] + 2.6], 2.7, 'hall'),
+  // the lit shop-houses: a hushed room within (their ground floor and the first floor above)
+  ...lots().filter((l) => l.open && l.light).map((l, i) => room('shop-' + i, [l.rect[0] + 0.6, l.rect[1] + 0.6, l.rect[2] - 0.6, l.rect[3] - 0.6], 0.1, 'hall')),
   room('taumadhi', SQ, 0.05, 'open'),
   room('pottery', POT, 0, 'open'),
 ];

@@ -38,12 +38,12 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
  * baskets of maize, beans and chile, cloth, and dark cooking pots; buyers walking between, some carrying baskets or
  * water jars on their heads. Men in loincloth and cape, women in the long cotton dress (the wrap stands in).
  */
-function market() {
-  const rand = rng(1000), L = [], M = [], Y = 0.04, pick = (a) => a[Math.floor(rand() * a.length)];
+function market(id = 'chichen-itza-market', X0 = 96, Z0 = 56, rows = 4, cols = 6, seed = 1000, buyers = 14) {
+  const rand = rng(seed), L = [], M = [], Y = 0.04, pick = (a) => a[Math.floor(rand() * a.length)];
   const skin = () => pick(['skin_dark', 'skin_dark', 'skin_medium']);
-  for (let r = 0; r < 4; r++) for (let c = 0; c < 6; c++) {
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
     if (rand() < 0.15) continue;
-    const x = 96 + c * 10 + (rand() - 0.5) * 2, z = 56 + r * 7 + (rand() - 0.5) * 1.2, woman = rand() < 0.55;
+    const x = X0 + c * 10 + (rand() - 0.5) * 2, z = Z0 + r * 7 + (rand() - 0.5) * 1.2, woman = rand() < 0.55;
     M.push({ t: 'petate', at: [x, z + 0.4], y: Y, w: 1.8, d: 1.2, rot: (rand() - 0.5) * 0.2 });
     if (rand() < 0.85) M.push({ t: 'maya_awning', rect: [x - 1.9, z - 1.2, x + 1.9, z + 1.2], y: Y, h: 2.15 });
     L.push({ t: 'figure', at: [x, z - 0.55], y: Y, rot: Math.PI, h: woman ? 1.5 : 1.6, seed: Math.floor(rand() * 1e9), dress: woman ? 'robe' : 'wrap', cloth: woman ? 'cloth_white' : pick(['cloth_white', 'cloth_ochre']), cloth2: pick(['cloth_red', 'cloth_white', 'cloth_ochre']), skin: skin(), hat: 'none', hair: woman ? pick(['long', 'bun']) : 'long', hairMat: 'hair_dark', feet: 'bare', legs: 'bare', over: woman ? 'none' : 'cape', pose: rand() < 0.6 ? 'squat' : 'sit_ground' });
@@ -55,11 +55,46 @@ function market() {
     }
   }
   // buyers between the rows
-  for (let k = 0; k < 14; k++) {
-    const woman = rand() < 0.5, at = [94 + rand() * 54, 59.5 + Math.floor(rand() * 3) * 7 + (rand() - 0.5) * 1.5];
+  for (let k = 0; k < buyers; k++) {
+    const woman = rand() < 0.5, at = [X0 - 2 + rand() * cols * 9, Z0 + 3.5 + Math.floor(rand() * Math.max(1, rows - 1)) * 7 + (rand() - 0.5) * 1.5];
     L.push({ t: 'figure', at, y: Y, rot: rand() * 6.28, h: woman ? 1.52 : 1.62, seed: Math.floor(rand() * 1e9), dress: woman ? 'robe' : 'wrap', cloth: 'cloth_white', cloth2: pick(['cloth_red', 'cloth_ochre', 'cloth_white']), skin: skin(), hat: 'none', hair: pick(['long', 'bun', 'short']), hairMat: 'hair_dark', feet: 'bare', legs: 'bare', over: woman ? 'none' : pick(['cape', 'sash']), carry: pick(['basket', 'pot', 'none', 'none']), pose: rand() < 0.3 ? 'talk' : 'stand' });
   }
-  return [{ ...base('chichen-itza-market', L), style: 'life' }, base('chichen-itza-market-mats', M)];
+  return [{ ...base(id, L), style: 'life' }, base(id + '-mats', M)];
+}
+
+/**
+ * The upkeep of the Castillo (§12): the lime-plaster of the terraces is renewed — masons dressing blocks at the south stair's foot, a
+ * pit where the lime is slaked, women carrying baskets of it up the stair, a stack of the dressed stones and a coil of rope; pilgrims
+ * kneeling with offerings at the stair's foot and a camp of those who came for the equinox along the plaza's south edge.
+ */
+function worksite() {
+  const rand = rng(1300), L = [], O = [], pick = (a) => a[Math.floor(rand() * a.length)], Y = 0.04;
+  const fig = (x, z, y, rot, o = {}) => {
+    const woman = o.woman ?? rand() < 0.4;
+    L.push({ t: 'figure', at: [x, z], y, rot, h: woman ? 1.5 : 1.6, seed: Math.floor(rand() * 1e9), dress: woman ? 'robe' : 'wrap', cloth: 'cloth_white', cloth2: pick(['cloth_red', 'cloth_ochre', 'cloth_white']), skin: pick(['skin_dark', 'skin_dark', 'skin_medium']), hat: 'none', hair: woman ? pick(['long', 'bun']) : 'long', hairMat: 'hair_dark', feet: 'bare', legs: 'bare', over: woman ? 'none' : pick(['cape', 'sash']), pose: 'stand', ...o });
+  };
+  // the masons at the stair's foot (west of the stair, 35-44 m south of the pyramid's middle): a block on a mat, two men dressing it, a heap of chips
+  for (const [x, z] of [[-17, 47], [-24, 45]]) {
+    O.push({ t: 'petate', at: [x, z], y: Y, w: 2.4, d: 1.8, rot: rand() * 0.4 });
+    L.push({ t: 'basket', at: [x + 1.2, z + 0.6], y: Y + 0.015, seed: Math.floor(rand() * 1e6), goods: 'stucco_pale' });
+    fig(x - 0.2, z - 0.8, Y, 0, { woman: false, pose: 'sit_ground', dress: 'loincloth', top: 'bare', over: 'belt' });
+    fig(x + 0.9, z - 0.2, Y, -1.2, { woman: false, pose: 'sit_ground', dress: 'loincloth', top: 'bare', over: 'belt' });
+    L.push({ t: 'sacks', at: [x + 1.8, z - 0.6], y: Y, seed: Math.floor(rand() * 1e6), n: 3 });
+  }
+  // the lime pit and the women who carry its plaster up
+  O.push({ t: 'petate', at: [14, 47], y: Y, w: 2.2, d: 1.6, rot: 0.1 }, { t: 'petate', at: [21, 45], y: Y, w: 2.2, d: 1.6, rot: -0.2 });
+  for (const [x, z] of [[14, 47], [21, 45]]) { L.push({ t: 'pot', kind: 'water_pot', at: [x + 1.1, z + 0.4], y: Y + 0.015, seed: x * 7 }, { t: 'pot', kind: 'dark_pot', at: [x - 1.0, z + 0.5], y: Y + 0.015, seed: x * 3 }); fig(x, z - 0.9, Y, Math.PI, { woman: true, pose: 'kneel', carry: 'none' }); fig(x + 1.4, z + 1.4, Y, Math.PI * 1.3, { woman: true, carry: 'basket' }); }
+  // pilgrims at the stair's foot with copal and flowers
+  for (const [x, z] of [[-5.0, 41.5], [-3.0, 42.0], [3.0, 41.6], [5.0, 42.2]]) fig(x, z, Y, 0, { pose: 'kneel', arms: 'pray', woman: rand() < 0.5 });
+  fig(4.6, 45.5, Y, Math.PI, { woman: false, over: 'cloak', hat: 'cap', hatMat: 'stucco_leaf', cloth2: 'cloth_red', pose: 'talk' });
+  // the pilgrims' camp along the south edge: mats, bundles, jars, a few sitting
+  for (const [x, z] of [[-14, 98], [-3, 103], [8, 97], [36, 101], [62, 96], [-68, 96], [74, 108]]) {
+    O.push({ t: 'petate', at: [x, z], y: Y, w: 2.2, d: 1.7, rot: rand() * 0.6 });
+    L.push({ t: 'basket', at: [x + 1.0, z + 0.3], y: Y + 0.015, seed: Math.floor(rand() * 1e6), goods: pick(['cloth_ochre', 'cloth_red']) }, { t: 'pot', kind: 'water_pot', at: [x - 1.1, z + 0.4], y: Y + 0.015, seed: Math.floor(rand() * 1e6) });
+    fig(x, z - 0.2, Y, Math.PI * 0.8, { pose: 'sit_ground', woman: rand() < 0.5 });
+    if (rand() < 0.7) fig(x + 0.9, z + 1.2, Y, Math.PI + 0.6, { pose: 'sit_ground', woman: rand() < 0.5 });
+  }
+  return [{ ...base('chichen-itza-worksite', L), style: 'life' }, base('chichen-itza-worksite-mats', O)];
 }
 
 /**
@@ -120,6 +155,7 @@ function ballgame() {
 /** The plaza's own dressing and the cenote's: wear of the paving, stelae and altars, the ceibas, the cenote's roots and nests, the sweat bath. */
 function dressing() {
   const E = [{ t: 'plaza_wear', rect: PLAZA, seed: 77, skip: WEAR_SKIP, n: 260, y: 0.04 }];
+  E.push({ t: 'plaza_marks', rect: PLAZA, ring: [-43, -43, 43, 43], skip: WEAR_SKIP.slice(1), y: 0.04 });
   for (const [x, z, rot] of PLAZA_STELAE) E.push({ t: 'maya_stela', at: [x, z], y: 0.04, rot, v: Math.abs(x * 7 + z) % 2 });
   for (const [x, z, rot] of PLAZA_SHRINES) E.push({ t: 'maya_shrine', at: [x, z], y: 0.04, rot });
   E.push({ t: 'sacbe_edge', a: SACBE_A, b: SACBE_B, w: 6, seed: 5 });
@@ -140,5 +176,5 @@ export async function town() {
   // the water in the Sacred Cenote, 20 m below the rim (docs/settlements/chichen-itza.md)
   const [cx, cz] = CENOTE.c, r = CENOTE.r;
   plans.push({ ...base('chichen-itza-cenote-water', [{ t: 'water_cells', rect: [cx - r, cz - r, cx + r, cz + r], y: CENOTE.water, cell: 0.75, inside: (x, z) => cenoteDist(x, z) < 0 && ground.height(x, z) < CENOTE.water }]), style: 'ming' });
-  return [...plans, ...market(), rites(), riteObjects(), ...ballgame(), ...dressing()];
+  return [...plans, ...market(), ...market('chichen-itza-market-e', 50, 54, 2, 4, 2001, 8), ...market('chichen-itza-market-w', -36, 58, 2, 3, 2002, 6), ...worksite(), rites(), riteObjects(), ...ballgame(), ...dressing()];
 }
