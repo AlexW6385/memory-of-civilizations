@@ -10,6 +10,7 @@ import { Parts, T, ball, limb, torus } from '../../styles/qing/carving.js';
 import { figure } from '../../objects/figures.js';
 import { animal } from '../../objects/animals.js';
 import { goods as boothGoods } from './shops.js';
+import { shape, put } from './proto.js';
 
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const pick = (r, l) => l[Math.floor(r() * l.length)];
@@ -156,7 +157,13 @@ export function bjWatercart(el, ctx) {
  * hipped cloth roof, the two long carrying poles, the bearers squatting by it. A blue one for an official, a green one for the rank of the next.
  */
 export function bjSedan(el, ctx) {
-  const { bag, col } = ctx, r = rng(el.seed || 1), P = new Parts(), cloth = el.tone ?? pick(r, ['cloth_indigo', 'cloth_green', 'cloth_blue']);
+  const { bag, col } = ctx, r = rng(el.seed || 1), cloth = el.tone ?? pick(r, ['cloth_indigo', 'cloth_green', 'cloth_blue']);
+  put(bag, shape(`sedan|${cloth}`, (P) => sedanParts(P, cloth)), el.at[0], el.y ?? 0.03, el.at[1], el.rot ?? 0, 170);
+  for (const [lx, lz, f] of [[-0.8, -2.1, 0], [0.9, 2.2, Math.PI]]) person(el, ctx, lx, lz, { pose: 'squat', dress: 'trousers', cloth: 'cloth_brown', hat: 'none' }, f);
+  col?.circle?.(...placeAt(el, ctx, 0, 0), 0.9, el.y ?? 0, (el.y ?? 0) + 1.8);
+}
+/** The sedan chair's parts (bjSedan), built once for each cloth. */
+function sedanParts(P, cloth) {
   const y0 = 0.62;
   for (const sz of [-0.8, 0.8]) { P.add('wood_dark', box(-0.62, 0, sz - 0.04, 0.62, 0.06, sz + 0.04)); for (const sx of [-0.5, 0.5]) { P.add('wood_dark', limb([sx, 0.05, sz], [sx * 0.55, y0 - 0.06, sz], 0.03, 0.025, 5)); } P.add('wood_dark', box(-0.4, y0 - 0.08, sz - 0.05, 0.4, y0 - 0.02, sz + 0.05)); }
   for (const sx of [-0.36, 0.36]) P.add('timber', rod([sx, y0, -1.7], [sx, y0, 1.7], 0.04, 6));
@@ -173,9 +180,6 @@ export function bjSedan(el, ctx) {
   t.push(...a, ...b, ...c, ...a, ...c, ...dd);
   P.add(cloth, fromTriangles(t));
   P.add('gilt_bronze', ball(0.05, 0.07, 0.05, 6, 4).translate(0, yt + 0.32, 0));
-  P.emit(bag, el.at[0], el.y ?? 0.03, el.at[1], el.rot ?? 0);
-  for (const [lx, lz, f] of [[-0.8, -2.1, 0], [0.9, 2.2, Math.PI]]) person(el, ctx, lx, lz, { pose: 'squat', dress: 'trousers', cloth: 'cloth_brown', hat: 'none' }, f);
-  col?.circle?.(...placeAt(el, ctx, 0, 0), 0.9, el.y ?? 0, (el.y ?? 0) + 1.8);
 }
 
 // ── at the gates of the hutong ────────────────────────────────────────────────────
@@ -230,23 +234,37 @@ function toys(P, x, z, r) {
  * along the foot of the wall west of the gate. Local frame: +x east, +z out into the lane.
  */
 export function bjLane(el, { bag, col }) {
-  const r = rng(el.seed || 1), P = new Parts();
+  const r = rng(el.seed || 1);
   const slots = []; for (let k = 0; k < 6; k++) slots.push(-3.4 - k * 2.2);
   const kinds = ['coal', 'cabbage', 'wood', 'vat', 'cage', 'toys', 'coal', 'cabbage'];
   const n = el.lod >= 2 ? 2 : 3 + Math.floor(r() * 3);
+  const X = el.at[0], Z = el.at[1], V = (k) => Math.floor(r() * k);
+  // (each kind in a few variants, each built once and put as an instance: laneShape)
   let used = 0;
   for (let k = 0; k < slots.length && used < n; k++) {
     if (r() < 0.12) continue;
     const x = slots[k] + (r() - 0.5) * 0.3, kind = kinds[Math.floor(r() * kinds.length)];
     used++;
-    if (kind === 'coal') { coalStack(P, x, 0.62, 0.9 + r() * 0.4, r); if (r() < 0.5) coalStack(P, x + 1.0, 0.55, 0.7, r); col?.circle?.(el.at[0] + x, el.at[1] + 0.62, 0.55, 0, 0.7); }
-    else if (kind === 'cabbage') { cabbages(P, x, 0.4, r, 3); col?.rect?.([el.at[0] + x - 0.9, el.at[1] + 0.1, el.at[0] + x + 0.9, el.at[1] + 0.9], 0, 0.65); }
-    else if (kind === 'wood') { firewood(P, x, 0.32, 1.6, r); col?.rect?.([el.at[0] + x - 0.8, el.at[1], el.at[0] + x + 0.8, el.at[1] + 0.85], 0, 0.6); }
-    else if (kind === 'vat') { vat(P, x, 0.55); if (r() < 0.6) vat(P, x + 0.85, 0.5, 0.85); col?.circle?.(el.at[0] + x, el.at[1] + 0.55, 0.38, 0, 0.7); }
-    else if (kind === 'cage') birdcage(P, x, 0.46, r);
-    else toys(P, x, 0.55, r);
+    if (kind === 'coal') { put(bag, laneShape('coal', V(4)), X + x, 0.03, Z + 0.62, V(4) * 1.6, 110); if (r() < 0.5) put(bag, laneShape('coal2', V(3)), X + x + 1.0, 0.03, Z + 0.55, 0, 110); col?.circle?.(X + x, Z + 0.62, 0.55, 0, 0.7); }
+    else if (kind === 'cabbage') { put(bag, laneShape('cabbage', V(4)), X + x, 0.03, Z + 0.4, 0, 110); col?.rect?.([X + x - 0.9, Z + 0.1, X + x + 0.9, Z + 0.9], 0, 0.65); }
+    else if (kind === 'wood') { put(bag, laneShape('wood', V(3)), X + x, 0.03, Z + 0.32, 0, 110); col?.rect?.([X + x - 0.8, Z, X + x + 0.8, Z + 0.85], 0, 0.6); }
+    else if (kind === 'vat') { put(bag, laneShape('vat', 0), X + x, 0.03, Z + 0.55, 0, 110); if (r() < 0.6) put(bag, laneShape('vat', 1), X + x + 0.85, 0.03, Z + 0.5, 0, 110); col?.circle?.(X + x, Z + 0.55, 0.38, 0, 0.7); }
+    else if (kind === 'cage') put(bag, laneShape('cage', V(2)), X + x, 0.03, Z, 0, 90);
+    else put(bag, laneShape('toys', V(3)), X + x, 0.03, Z + 0.55, 0, 90);
   }
-  P.emit(bag, el.at[0], 0.03, el.at[1], 0);
+}
+/** One variant of what a household puts out, built at its own origin (x = 0, z = 0 the wall's foot), once. */
+function laneShape(kind, v) {
+  return shape(`lane|${kind}|${v}`, (P) => {
+    const r = rng(1000 + v * 37 + kind.length);
+    if (kind === 'coal') coalStack(P, 0, 0, 0.9 + (v % 4) * 0.13, r);
+    else if (kind === 'coal2') coalStack(P, 0, 0, 0.7, r);
+    else if (kind === 'cabbage') cabbages(P, 0, 0, r, 3);
+    else if (kind === 'wood') firewood(P, 0, 0, 1.6, r);
+    else if (kind === 'vat') vat(P, 0, 0, v ? 0.85 : 1);
+    else if (kind === 'cage') birdcage(P, 0, 0.46, r);
+    else toys(P, 0, 0, r);
+  });
 }
 
 /** bj_lane_cat: a cat sitting on the wall's coping, or a dog by the gate, for lane gates; drawn by the engine's animal. */
@@ -292,21 +310,23 @@ export function bjBenchtree(el, { bag, col }) {
 }
 /** bj_coalcart: the coal seller's cart: a two-wheeled flatbed loaded with sacks and coal balls, its shafts to the left for the donkey (set by the life plan at +x). */
 export function bjCoalcart(el, { bag, col }) {
-  const r = rng(el.seed || 1), P = new Parts(), zc = 1.5, y = 0.62;
-  P.add('timber', box(-0.95, y, zc - 0.5, 0.95, y + 0.07, zc + 0.5));
-  for (const sz of [-1, 1]) P.add('timber', box(-0.95, y + 0.07, zc + sz * 0.5 - 0.02, 0.95, y + 0.3, zc + sz * 0.5 + 0.02));
-  P.add('timber', box(-0.95, y - 0.1, zc - 0.05, 0.95, y, zc + 0.05));                                      // the axle beam
-  P.add('timber', limb([0.95, y + 0.1, zc - 0.3], [2.6, y - 0.05, zc - 0.3], 0.035, 0.03, 5)); P.add('timber', limb([0.95, y + 0.1, zc + 0.3], [2.6, y - 0.05, zc + 0.3], 0.035, 0.03, 5));
-  for (const sz of [-1, 1]) {
-    const w = new Parts(); wheelY(w, 'timber', 0.5, 0, 0.5, 12); w.emit(bag, el.at[0] + 0.0 + 0, 0.03, el.at[1] + zc + sz * 0.62, Math.PI / 2);
-  }
-  // the load: sacks of coal dust and a pile of coal balls
-  for (let k = 0; k < 6; k++) { const x = -0.7 + (k % 3) * 0.55, z = zc + (k < 3 ? -0.22 : 0.22); P.add('hide_black', ball(0.26, 0.15, 0.2, 7, 4).translate(x, y + 0.2, z)); }
-  for (let k = 0; k < 3; k++) P.add('hide_black', ball(0.24, 0.14, 0.19, 7, 4).translate(-0.5 + k * 0.5, y + 0.36, zc + (r() - 0.5) * 0.1));
+  const zc = 1.5, X = el.at[0], Z = el.at[1];
+  // (built once: the cart, a wheel, the stack beside it; put in each place as instances)
+  put(bag, shape('coalcart|body', (P) => {
+    const r = rng(77), y = 0.62;
+    P.add('timber', box(-0.95, y, zc - 0.5, 0.95, y + 0.07, zc + 0.5));
+    for (const sz of [-1, 1]) P.add('timber', box(-0.95, y + 0.07, zc + sz * 0.5 - 0.02, 0.95, y + 0.3, zc + sz * 0.5 + 0.02));
+    P.add('timber', box(-0.95, y - 0.1, zc - 0.05, 0.95, y, zc + 0.05));                                      // the axle beam
+    P.add('timber', limb([0.95, y + 0.1, zc - 0.3], [2.6, y - 0.05, zc - 0.3], 0.035, 0.03, 5)); P.add('timber', limb([0.95, y + 0.1, zc + 0.3], [2.6, y - 0.05, zc + 0.3], 0.035, 0.03, 5));
+    // the load: sacks of coal dust and a pile of coal balls
+    for (let k = 0; k < 6; k++) { const x = -0.7 + (k % 3) * 0.55, z = zc + (k < 3 ? -0.22 : 0.22); P.add('hide_black', ball(0.26, 0.15, 0.2, 7, 4).translate(x, y + 0.2, z)); }
+    for (let k = 0; k < 3; k++) P.add('hide_black', ball(0.24, 0.14, 0.19, 7, 4).translate(-0.5 + k * 0.5, y + 0.36, zc + (r() - 0.5) * 0.1));
+  }), X, 0.03, Z, 0, 150);
+  const wheel = shape('coalcart|wheel', (P) => wheelY(P, 'timber', 0.5, 0, 0.5, 12));
+  for (const sz of [-1, 1]) put(bag, wheel, X, 0.03, Z + zc + sz * 0.62, Math.PI / 2, 150);
   // coal balls stacked on the ground beside it
-  const Q = new Parts(); coalStack(Q, 0, 0, 0.9, r); Q.emit(bag, el.at[0] - 1.9, 0.03, el.at[1] + 0.9, 0);
-  col?.rect?.([el.at[0] - 1.0, el.at[1] + zc - 0.6, el.at[0] + 2.6, el.at[1] + zc + 0.6], 0, 0.8);
-  P.emit(bag, el.at[0], 0.03, el.at[1], 0);
+  put(bag, laneShape('coal2', 1), X - 1.9, 0.03, Z + 0.9, 0, 150);
+  col?.rect?.([X - 1.0, Z + zc - 0.6, X + 2.6, Z + zc + 0.6], 0, 0.8);
 }
 
 /**
@@ -315,22 +335,23 @@ export function bjCoalcart(el, { bag, col }) {
  * the lane, z out from the wall, y up; el.at the rack's foot.
  */
 export function bjDrying(el, { bag, col }) {
-  const r = rng(el.seed || 1), P = new Parts(), L = 1.9 + r() * 0.6;
-  for (const s of [-1, 1]) P.add('wood_dark', limb([s * L / 2, 0, -0.2], [s * L / 2 + s * 0.05, 2.05, 0], 0.045, 0.04, 5));
-  P.add('wood_dark', limb([-L / 2 - 0.1, 2.0, 0], [L / 2 + 0.1, 2.0, 0], 0.035, 0.035, 5));
-  const n = Math.floor(L / 0.28);
-  for (let i = 0; i < n; i++) {
-    const x = -L / 2 + 0.2 + i * (L - 0.4) / Math.max(1, n - 1), corn = (i + (r() * 2 | 0)) % 2 === 0, len = 0.7 + r() * 0.5;
-    P.add('timber', limb([x, 2.0, 0], [x, 2.0 - len, 0], 0.008, 0.008, 3));
-    if (corn) for (let k = 0; k < 4; k++) P.add('cloth_ochre', lathe([[0.001, 0], [0.04, 0.03], [0.045, 0.14], [0.02, 0.22], [0.001, 0.24]], 6, null, x + (k % 2 ? 0.03 : -0.03), 2.0 - len + k * 0.15, (k % 2 ? 0.04 : -0.04)));
-    else for (let k = 0; k < 7; k++) P.add('cloth_red', lathe([[0.001, 0], [0.025, 0.04], [0.02, 0.14], [0.001, 0.2]], 5, null, x + (k % 2 ? 0.025 : -0.025), 2.0 - len + k * 0.1, 0));
-  }
-  // the tray of persimmons and jujubes on its trestle
-  const tx = L / 2 + 0.9;
-  P.add('wood_dark', box(tx - 0.5, 0.0, -0.3, tx - 0.44, 0.7, 0.3)); P.add('wood_dark', box(tx + 0.44, 0.0, -0.3, tx + 0.5, 0.7, 0.3));
-  P.add('wicker', lathe([[0.001, 0.7], [0.5, 0.7], [0.55, 0.76], [0.5, 0.78], [0.001, 0.74]], 12, null, tx, 0, 0));
-  for (let k = 0; k < 14; k++) { const a = r() * Math.PI * 2, d = Math.sqrt(r()) * 0.42; P.add(k % 3 ? 'cloth_ochre' : 'cloth_maroon', lathe([[0.001, 0], [0.045, 0.03], [0.05, 0.06], [0.001, 0.1]], 5, null, tx + Math.cos(a) * d, 0.76, Math.sin(a) * d)); }
-  P.emit(bag, el.at[0], 0.03, el.at[1], el.rot ?? 0);
+  const v = (el.seed || 1) % 4, L = 1.9 + v * 0.15 + 0.1, tx = L / 2 + 0.9;
+  put(bag, shape(`drying|${v}`, (P) => {
+    const r = rng(500 + v * 13);
+    for (const s of [-1, 1]) P.add('wood_dark', limb([s * L / 2, 0, -0.2], [s * L / 2 + s * 0.05, 2.05, 0], 0.045, 0.04, 5));
+    P.add('wood_dark', limb([-L / 2 - 0.1, 2.0, 0], [L / 2 + 0.1, 2.0, 0], 0.035, 0.035, 5));
+    const n = Math.floor(L / 0.28);
+    for (let i = 0; i < n; i++) {
+      const x = -L / 2 + 0.2 + i * (L - 0.4) / Math.max(1, n - 1), corn = (i + (r() * 2 | 0)) % 2 === 0, len = 0.7 + r() * 0.5;
+      P.add('timber', limb([x, 2.0, 0], [x, 2.0 - len, 0], 0.008, 0.008, 3));
+      if (corn) for (let k = 0; k < 4; k++) P.add('cloth_ochre', lathe([[0.001, 0], [0.04, 0.03], [0.045, 0.14], [0.02, 0.22], [0.001, 0.24]], 6, null, x + (k % 2 ? 0.03 : -0.03), 2.0 - len + k * 0.15, (k % 2 ? 0.04 : -0.04)));
+      else for (let k = 0; k < 7; k++) P.add('cloth_red', lathe([[0.001, 0], [0.025, 0.04], [0.02, 0.14], [0.001, 0.2]], 5, null, x + (k % 2 ? 0.025 : -0.025), 2.0 - len + k * 0.1, 0));
+    }
+    // the tray of persimmons and jujubes on its trestle
+    P.add('wood_dark', box(tx - 0.5, 0.0, -0.3, tx - 0.44, 0.7, 0.3)); P.add('wood_dark', box(tx + 0.44, 0.0, -0.3, tx + 0.5, 0.7, 0.3));
+    P.add('wicker', lathe([[0.001, 0.7], [0.5, 0.7], [0.55, 0.76], [0.5, 0.78], [0.001, 0.74]], 12, null, tx, 0, 0));
+    for (let k = 0; k < 14; k++) { const a = r() * Math.PI * 2, d = Math.sqrt(r()) * 0.42; P.add(k % 3 ? 'cloth_ochre' : 'cloth_maroon', lathe([[0.001, 0], [0.045, 0.03], [0.05, 0.06], [0.001, 0.1]], 5, null, tx + Math.cos(a) * d, 0.76, Math.sin(a) * d)); }
+  }), el.at[0], 0.03, el.at[1], el.rot ?? 0, 120);
   col?.rect?.([el.at[0] - L / 2 - 0.1, el.at[1] - 0.25, el.at[0] + L / 2 + 0.1, el.at[1] + 0.25], 0, 2.1);
   col?.circle?.(el.at[0] + tx, el.at[1], 0.6, 0, 0.8);
 }
