@@ -2,13 +2,13 @@
 // between the monasteries, the temples and the library; novices and lay students in white; teachers; porters
 // with poles, women with water pots to the tanks, villagers. Data for the engine's movers (src/engine/movers.js, read in its
 // worker); the ways come from layout.js. No boats.
-import { RADIUS, WAY, MONASTERIES, TEMPLES, TANKS, T3, LIBRARY, lots, mgate } from './layout.js';
+import { RADIUS, WAY, MONASTERIES, TEMPLES, TANKS, T3, LIBRARY, lots, mgate, ANNEXES } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 34, night: 3, rain: 0.5, reach: 160, spawnMin: 26, far: 44 },
+  walkers: { day: 46, night: 3, rain: 0.5, reach: 160, spawnMin: 26, far: 44 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -4,
 };
@@ -32,6 +32,12 @@ export function walkways() {
   R([124, -105, 128, 150], 0.8, 'street', 0.3);
   for (let z = 92; z < 152; z += 13) R([72, z + 8.6, 176, z + 11.6], 0.7, 'lane', 0.3);
   for (let x = 134; x < 180; x += 13) R([x + 10.2, -105, x + 12.8, 90], 0.5);
+  R([-6, -147, 6, -135], 0.8);                                                // round the great stupa at the way's north end
+  R([-5, 114, 5, 124], 1.8, 'street', 0.3);                                  // through the gate
+  R([40, 126, 125, 130.5], 1.4, 'street', 1.6);                              // the bazaar on the road to the village
+  R([128, -92, 134, 88], 1.2, 'street', 1.6);                                // and along the village's main street
+  R([LIBRARY.yard[0] + 2, -93.5, LIBRARY.yard[2] - 1, -90.5], 0.8);          // between the library's halls
+  for (const a of ANNEXES) R([a.rect[0] - 2, a.rect[3] + 0.5, a.rect[2] + 2, a.rect[3] + 3], 0.7);
   void lots;
   return { rects, links: [], clip: RADIUS - 14 };
 }

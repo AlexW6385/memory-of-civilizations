@@ -175,7 +175,8 @@ export async function town() {
   E.push({ t: 'lamps', at: [...WAY_LAMPS, [foot(T3), -5.4], [foot(T3), 5.4], ...TEMPLES.slice(1).flatMap((t) => [[foot(t), t.c[1] - 4.6], [foot(t), t.c[1] + 4.6]]), [LIBRARY.yard[2] - 3, -88.6], [LIBRARY.yard[2] - 3, -95.4], [HALL.c[0] + HALL.half[0] + 2.2, HALL.c[1] - 3], [HALL.c[0] + HALL.half[0] + 2.2, HALL.c[1] + 3]] });
   E.push({ t: 'booth', at: BOOTHS }, { t: 'booth', at: bazaar() });
   E.push({ t: 'jal', at: [...JALS, [LIBRARY.yard[2] - 6, -80, 'e']] });
-  E.push({ t: 'otla', runs: OTLAS });
+  const [yx0, yz0, yx1, yz1] = LIBRARY.yard;
+  E.push({ t: 'otla', runs: [...OTLAS, [yx0 + 4, yz0 + 1.2, yx0 + 22, yz0 + 1.2, 1.0], [yx1 - 22, yz0 + 1.2, yx1 - 4, yz0 + 1.2, 1.0], [yx0 + 4, yz1 - 1.2, yx0 + 22, yz1 - 1.2, 1.0], [yx1 - 22, yz1 - 1.2, yx1 - 4, yz1 - 1.2, 1.0]] });
   for (const a of ANNEXES) E.push({ t: 'annex', ...a });
   E.push({ t: 'gate', ...GATE, c: GATE.c });
   E.push({ t: 'village', items: villageItems() });

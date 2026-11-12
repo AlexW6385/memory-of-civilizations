@@ -2,7 +2,7 @@
 // before the shrines of Monastery 1 and the great temple. The engine part is src/engine/smoke.js (one draw call); positions come from the layout.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, M1, T3, lots, height } from './layout.js';
+import { RADIUS, M1, T3, lots, height, ANNEXES, WAY_LAMPS, BOOTHS } from './layout.js';
 
 const ID = 'nalanda';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -18,7 +18,10 @@ export function emitters() {
   const [x0, z0, x1, z1] = M1.rect, zc = (z0 + z1) / 2, sx = x1 - 7.6 - 8;
   E.push({ p: [sx - 3.2, 0.5, zc - 1.2], kind: 'incense', thr: 0, seed: 31 }, { p: [sx - 3.2, 0.5, zc + 1.2], kind: 'incense', thr: 0.2, seed: 32 });
   E.push({ p: [T3.c[0] + T3.half + 8, 0.5, -3], kind: 'incense', thr: 0.1, seed: 33 }, { p: [T3.c[0] + T3.half + 8, 0.5, 3], kind: 'incense', thr: 0.3, seed: 34 });
-  void x0; void z1;
+  // the monasteries' kitchens: the chimneys of the hearths in the annexes; incense at the booths of the lamp-sellers
+  for (const a of ANNEXES) if (a.kind === 'kitchen') for (let i = 0; i < 3; i++) E.push({ p: [a.rect[0] + 2.5 + i * ((a.rect[2] - a.rect[0] - 5) / 2), 5.4, a.rect[1] + 0.9], kind: 'kitchen', thr: i * 0.1, seed: 60 + i });
+  for (const b of BOOTHS) if (b[3] === 'lamps') E.push({ p: [b[0] + 0.5, 1.4, b[1]], kind: 'incense', thr: 0.2, seed: 70 + Math.round(b[1]) });
+  void x0; void z1; void WAY_LAMPS;
   return E;
 }
 

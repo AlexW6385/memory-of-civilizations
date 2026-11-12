@@ -40,6 +40,7 @@ export function nearCore(x, z, m = 0) {
   if (inRect([WAY.x0, -150, WAY.x1, 128], x, z, m)) return true;
   if (MONASTERIES.some((q) => inRect([q.rect[0] - 3, q.rect[1], q.rect[2], q.rect[3]], x, z, m))) return true;
   if (TEMPLES.some((t) => inRect([t.c[0] - t.half - 1, t.c[1] - t.half - 1, t.c[0] + t.half + t.tierH * 1.04 + 1, t.c[1] + t.half + 1], x, z, m))) return true;
+  if (ANNEXES.some((a) => inRect(a.rect, x, z, m + 1)) || inRect([-12.5, GATE.c[1] - 5, 12.5, GATE.c[1] + 5], x, z, m) || inRect([-GATE.ww - 12, GATE.c[1] - 1, -10, GATE.c[1] + 1], x, z, m)) return true;
   return inRect(LIBRARY.yard, x, z, m);
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -93,4 +94,5 @@ export const OTLAS = gz().flatMap((g) => [[13.1, g - 21, 13.1, g - 5, 1.0], [13.
 export const ANNEXES = MONASTERIES.map((m, i) => { const zc = (m.rect[1] + m.rect[3]) / 2; return { rect: [70, zc + 10, 88, zc + 22], door: 's', kind: ['refectory', 'kitchen', 'granary', 'infirmary', 'kitchen'][i], seed: 100 + i }; });
 export const GATE = { c: [0, 118], half: 5, ww: 22 };
 export const STUPA_END = [0, -141, 3.2];
-export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m)) || YARDS_IN(x, z, m);
+const YARDS_IN = (x, z, m) => yards().some((l) => inRect(l.rect, x, z, m));
