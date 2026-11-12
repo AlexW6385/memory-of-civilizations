@@ -121,6 +121,12 @@ E.push({ t: 'tripartite_front', x: -19, z0: 0, z1: 12, y: 0 });
 { const r = ((1664525 * 11 + 1013904223) >>> 0) / 4294967296; const S = 1.15 * (0.92 + r * 0.16); E.push({ t: 'bull_leaper', at: [1.6, -3.2], rot: -Math.PI / 2, s: S, y: 0.05 }); }
 E.push({ t: 'offering_table', at: [-16.7, 4.2], rot: Math.PI / 2, y: 0.05 });
 
+// shrubs in the tubs: the Central Court's four, the West Court's seven
+E.push({ t: 'court_shrubs', at: [[-11.5, -23.5], [11.5, -23.5], [11.5, 23.5], [-11.5, 23.5]], y: 0.05, seed: 7 }, { t: 'court_shrubs', at: [[-92, -30], [-92, -10], [-92, 10], [-92, 30], [-93, 37], [-87.5, 37], [-100, 36.5]], y: 0.05, seed: 8 });
+// the passage of the North Entrance: the wings' walls on it dressed like the court's
+E.push({ t: 'court_front', face: 'e', p: -3, u0: -61, u1: -29, y: 0, seed: 8, doors: [{ u: -57, n: 1 }, { u: -40, n: 2, w: 1.1 }, { u: -32, n: 1 }], panels: [{ u: -52.6, kind: 'shields', w: 3.2 }, { u: -36, kind: 'lilies', w: 2.4 }, { u: -44, kind: 'grandstand', w: 2.6 }], jars: [[-50, 0.7, 0.95]] });
+E.push({ t: 'court_front', face: 'w', p: 3, u0: -61, u1: -29, y: 0, seed: 9, doors: [{ u: -57, n: 1 }, { u: -40, n: 1 }, { u: -32, n: 2, w: 1.1 }], panels: [{ u: -52.6, kind: 'lilies', w: 3.2 }, { u: -36, kind: 'shields', w: 2.4, flip: true }, { u: -44, kind: 'grandstand', w: 2.6 }], jars: [[-34.6, 0.7, 1]] });
+
 const room = (id, rect, y, kind, extra = {}) => ({ id, rect, y, kind, ...extra });
 const rooms = [room('central court', COURT, 0.05, 'open'), room('west court', [-120, -50, -64, 50], 0.05, 'open', { market: true }), room('throne room antechamber', [-19, -20, -14, -8], 0, 'hall'),
   room('throne room', TR, 0, 'inner'), room('long corridor', CORR, 0, 'inner'), room('grand staircase light well', LW, 0, 'open'), room("queen's megaron", QM, 0, 'inner'), room('south propylaeum', [-3, 28, 3, 63], 0, 'hall'),

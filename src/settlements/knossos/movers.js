@@ -31,7 +31,7 @@ export function walkways() {
   for (const Ln of lanes()) if (Ln.k !== 0 && Math.hypot((Ln.x0 + Ln.x1) / 2, Ln.z) < 210 && Ln.x1 - Ln.x0 > 8) L([Ln.x0 + 1, Ln.z], [Ln.x1 - 1, Ln.z], LANE.w - 0.8, 1.0);
   for (const c of streets()) L([c.x, c.z0], [c.x, c.z1], LANE.cross - 0.6, 0.9);
   rects.push({ r: [-118, -48, -66, 48], weight: 1.4, market: 1.5, kind: 'street' });  // the West Court
-  rects.push({ r: [COURT[0] + 2, COURT[1] + 2, COURT[2] - 2, COURT[3] - 2], weight: 1.0, market: 0.8, kind: 'street' });
+  rects.push({ r: [COURT[0] + 2, COURT[1] + 2, COURT[2] - 2, COURT[3] - 2], weight: 2.2, market: 1.6, kind: 'street' });
   rects.push({ r: [-99, -91, -87, -83], weight: 1.2, market: 0.6, kind: 'street' }); // the theatral court
   return { rects, links, clip: RADIUS - 14 };
 }

@@ -170,4 +170,14 @@ function bullLeaper(el, { bag }) {
   bag.add('silver', T([[0, hp[1] - 0.05, hp[2] - 0.15, 0.158, 0.026], [0, hp[1] - 0.04, hp[2] - 0.08, 0.158, 0.026]], 8));
 }
 
-Object.assign(STYLES.minoan.elements, { court_front: courtFront, tripartite_front: tripartite, court_paving: courtPaving, offering_table: offeringTable, bull_leaper: bullLeaper });
+/** court_shrubs: myrtle and oleander grown in the tubs { at: [[x, z]…], y (the tub's rim), seed }: a bark stem, three clipped balls of leaf. */
+function courtShrubs(el, { bag }) {
+  const rand = rng(el.seed || 2), y = (el.y ?? 0.05) + 0.4;
+  for (const [x, z] of el.at) {
+    const h = 0.9 + rand() * 0.6;
+    bag.add('bark_olive', tube([[x, y, z, 0.035], [x + (rand() - 0.5) * 0.1, y + h * 0.6, z, 0.03], [x, y + h, z, 0.02]], 5));
+    for (let i = 0; i < 3; i++) { const r = 0.26 + rand() * 0.16, a = rand() * 6.28, d = i ? 0.22 : 0; bag.add('fresco_green', ball(r, 7, 5).translate(x + Math.cos(a) * d, y + h * (0.75 + 0.18 * i) - r, z + Math.sin(a) * d)); }
+  }
+}
+
+Object.assign(STYLES.minoan.elements, { court_shrubs: courtShrubs, court_front: courtFront, tripartite_front: tripartite, court_paving: courtPaving, offering_table: offeringTable, bull_leaper: bullLeaper });
