@@ -143,4 +143,46 @@ export function stencil(P, u, v, s, rot, mat, layer = 0, rand = Math.random) {
     P.disc(mat, u + (x * c - y * sn) * s, v + (x * sn + y * c) * s, (0.005 + rand() * 0.006) * s, layer, 5);
   }
 }
+
+/** An old slender figure of the faded first layer (dynamic stick figures, generic): long thin limbs, a head-dress, one arm out. Always old red. */
+export function slender(P, u, v, s, dir = 1, pal = {}, layer = 1) {
+  const line = pal.line ?? PAL.old, w = Math.max(0.01, s * 0.018), X = (x, y) => [u + dir * x * s, v + y * s];
+  P.ribbon(line, [X(0, 0.55), X(0.02, 0.8), X(0, 0.95)], w * 1.8, layer);                      // the body
+  P.disc(line, ...X(0.0, 1.0), 0.035 * s, layer, 7);
+  P.ribbon(line, [X(0, 1.04), X(-0.03, 1.14), X(0.0, 1.2), X(0.04, 1.13)], w, layer);            // the head-dress
+  P.ribbon(line, [X(0, 0.55), X(0.12, 0.28), X(0.08, 0.0)], w * 1.3, layer);                     // the legs, mid-stride
+  P.ribbon(line, [X(0, 0.55), X(-0.16, 0.38), X(-0.3, 0.2)], w * 1.3, layer);
+  P.ribbon(line, [X(0.01, 0.88), X(0.2, 0.92), X(0.34, 0.84)], w, layer);                         // the arms
+  P.ribbon(line, [X(0.01, 0.88), X(-0.14, 0.78), X(-0.2, 0.66)], w, layer);
+}
+/** A long yam (the food plant): a tapering tuber with its vine, and a smaller one beside. */
+export function yam(P, u, v, s, dir = 1, pal = {}, layer = 1) {
+  const line = pal.line ?? PAL.red, w = Math.max(0.012, s * 0.025), X = (x, y) => [u + dir * x * s, v + y * s];
+  const body = [X(-0.5, 0.02), X(-0.3, 0.07), X(0.0, 0.08), X(0.3, 0.05), X(0.52, 0.0), X(0.3, -0.04), X(0.0, -0.05), X(-0.3, -0.03)];
+  if (pal.fresh) P.poly(pal.fill ?? PAL.white, body, layer);
+  P.ribbon(line, [...body, body[0]], w, layer + 1);
+  P.ribbon(line, [X(-0.5, 0.02), X(-0.62, 0.14), X(-0.55, 0.3), X(-0.66, 0.42)], w, layer + 1);
+  for (let k = 0; k < 4; k++) P.line(line, X(-0.3 + k * 0.2, 0.0)[0], X(-0.3 + k * 0.2, 0.0)[1], X(-0.27 + k * 0.2, 0.06)[0], X(-0.27 + k * 0.2, 0.06)[1], w * 0.6, layer + 1);
+}
+/** An echidna seen from the side: a domed body of spines, a long snout. */
+export function echidna(P, u, v, s, dir = 1, pal = {}, layer = 1) {
+  const line = pal.line ?? PAL.red, w = Math.max(0.012, s * 0.025), X = (x, y) => [u + dir * x * s, v + y * s];
+  if (pal.fresh) P.ell(pal.fill ?? PAL.white, ...X(0, 0.12), 0.3 * s, 0.14 * s, layer, 12);
+  P.ribbon(line, Array.from({ length: 14 }, (_, k) => { const a = k / 14 * Math.PI * 2; return X(Math.cos(a) * 0.3, 0.12 + Math.sin(a) * 0.14); }), w, layer + 1, true);
+  for (let k = 0; k < 9; k++) { const x = -0.22 + k * 0.055; P.line(line, ...X(x, 0.2), ...X(x - 0.03, 0.34 + 0.02 * Math.sin(k * 2)), w * 0.7, layer + 1); }
+  P.line(line, ...X(0.3, 0.14), ...X(0.52, 0.12), w * 1.3, layer + 1);
+  P.line(line, ...X(0.1, -0.02), ...X(0.12, -0.14), w, layer + 1); P.line(line, ...X(-0.15, -0.02), ...X(-0.17, -0.14), w, layer + 1);
+  P.ell(pal.fresh ? PAL.yellow : line, ...X(0.0, 0.1), 0.08 * s, 0.04 * s, layer + 2, 7);
+}
+/** Rows of tally dots and short strokes (counted, or only made). */
+export function tally(P, u, v, s, dir = 1, pal = {}, layer = 1, rand = Math.random) {
+  const m = pal.fresh ? PAL.white : pal.line ?? PAL.red;
+  for (let row = 0; row < 3; row++) for (let k = 0; k < 6 + Math.floor(rand() * 4); k++) P.disc(m, u + dir * k * 0.09 * s, v - row * 0.1 * s + (rand() - 0.5) * 0.015, 0.018 * s, layer, 5);
+}
+/** Flaked rock: patches where the surface has scaled off and taken the paint with it (the wall's own colour, laid over). */
+export function flake(P, u, v, s, mat, layer = 14, rand = Math.random) {
+  const n = 7 + Math.floor(rand() * 3), pts = [];
+  for (let k = 0; k < n; k++) { const a = k / n * Math.PI * 2, r = (0.5 + rand() * 0.6) * s; pts.push([u + Math.cos(a) * r * 1.3, v + Math.sin(a) * r * 0.7]); }
+  P.poly(mat, pts, layer);
+}
 export { rng, rot2 };

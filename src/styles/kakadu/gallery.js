@@ -1,30 +1,38 @@
 // The painted shelters (docs/settlements/kakadu.md §0–§2): each shelter's wall and ceiling surface, and the paintings laid over them in
 // layers: faded old red first, then red outlines, then fresh white and yellow infill over and across the older ones. All motifs are
 // generic and drawn by us (paint.js); a palette stone and lumps of pigment lie on the floor.
-import { MAIN, SMALL, height, rng } from '../../settlements/kakadu/layout.js';
+import { MAIN, SMALL, height, rng, shelterSpots } from '../../settlements/kakadu/layout.js';
 import { shelterSurfaces, wallZ, ceilY } from './rock.js';
-import { Panel, PAL, fish, turtle, wallaby, goanna, person, goose, stencil } from './paint.js';
+import { Panel, PAL, fish, turtle, wallaby, goanna, person, goose, stencil, slender, yam, echidna, tally, flake } from './paint.js';
 import { lathe } from '../../core/geom.js';
 
 function wall(bag, S, seed, o = {}) {
+  S = { ...S, tone: o.tone };
   const rand = rng(seed), P = new Panel(bag, (u, v) => ({ p: [u, v, wallZ(S, u, v)], n: [0, 0, 1] }));
   const motif = (x, v, layer, tone) => {
     const dir = rand() < 0.5 ? 1 : -1, r = rand();
     const pal = tone === 0 ? { line: PAL.old } : tone === 1 ? { line: PAL.red } : rand() < 0.5 ? { line: PAL.red, fill: PAL.white, band: PAL.yellow, fresh: true } : { line: PAL.red, fill: PAL.yellow, band: PAL.white, fresh: true };
-    if (r < 0.4) fish(P, x, v, 0.7 + rand() * 1.1, dir, pal, layer, rand);
-    else if (r < 0.56) turtle(P, x, v, 0.7 + rand() * 0.5, dir, pal, layer);
-    else if (r < 0.7) wallaby(P, x, v, 0.8 + rand() * 0.7, dir, pal, layer);
-    else if (r < 0.84) person(P, x, v - 0.5, 0.9 + rand() * 0.5, dir, pal, layer, { spear: rand() < 0.45, bag: rand() < 0.35, fan: rand() < 0.2 });
-    else if (r < 0.92) goanna(P, x, v, 0.9 + rand() * 0.6, dir, pal, layer);
+    if (r < 0.3) fish(P, x, v, 0.7 + rand() * 1.1, dir, pal, layer, rand);
+    else if (r < 0.44) turtle(P, x, v, 0.7 + rand() * 0.5, dir, pal, layer);
+    else if (r < 0.56) wallaby(P, x, v, 0.8 + rand() * 0.7, dir, pal, layer);
+    else if (r < 0.68) person(P, x, v - 0.5, 0.9 + rand() * 0.5, dir, pal, layer, { spear: rand() < 0.45, bag: rand() < 0.35, fan: rand() < 0.2 });
+    else if (r < 0.76) goanna(P, x, v, 0.9 + rand() * 0.6, dir, pal, layer);
+    else if (r < 0.83) yam(P, x, v, 0.8 + rand() * 0.6, dir, pal, layer);
+    else if (r < 0.89) echidna(P, x, v, 0.7 + rand() * 0.5, dir, pal, layer);
+    else if (r < 0.94) tally(P, x, v, 0.9 + rand() * 0.5, dir, pal, layer, rand);
     else goose(P, x, v, 0.6 + rand() * 0.4, dir, pal, layer);
   };
   const W = S.x1 - S.x0;
   // the oldest layer: faded dull red, large, sparse
   for (let x = S.x0 + 1.5; x < S.x1 - 1; x += 3.4 + rand() * 2) motif(x + (rand() - 0.5) * 1.5, 1.0 + rand() * 1.7, 1, 0);
+  // the oldest of all: slender figures in faded red, high and low, in small processions
+  for (let c = S.x0 + 2; c < S.x1 - 2; c += 9 + rand() * 6) for (let k = 0, n = 2 + Math.floor(rand() * 3); k < n; k++) slender(P, c + k * (0.7 + rand() * 0.3), 0.6 + rand() * 1.9, 0.8 + rand() * 0.5, rand() < 0.8 ? 1 : -1, { line: PAL.old }, 0);
   // red outline paintings
   for (let x = S.x0 + 1; x < S.x1 - 1; x += 2.2 + rand() * 1.6) motif(x + (rand() - 0.5) * 1.2, 0.8 + rand() * 1.8, 3, 1);
   // the newest: white and yellow over red, in clusters (a "panel" every ~8 m)
   for (let c = S.x0 + 3; c < S.x1 - 2; c += 7 + rand() * 4) for (let k = 0; k < 3; k++) motif(c + (rand() - 0.5) * 3, 0.7 + rand() * 1.9, 6 + k * 2, 2);
+  // the wall's age: patches where the surface has scaled away, over the paint (the wall's own tone)
+  for (let k = 0; k < (o.flakes ?? 9); k++) flake(P, S.x0 + 1 + rand() * (W - 2), 0.4 + rand() * 2.8, 0.1 + rand() * 0.22, S.tone, 15, rand);
   // hand stencils, mostly in the low shelter
   const hands = o.hands ?? 4;
   for (let k = 0; k < hands; k++) {
@@ -39,13 +47,16 @@ function ceiling(bag, S, seed) {
     const z = S.zb + 1.2 + rand() * (S.zl - S.zb - 3.4), dir = rand() < 0.5 ? 1 : -1, pal = rand() < 0.5 ? { line: PAL.red } : { line: PAL.red, fill: PAL.white, band: PAL.yellow, fresh: true };
     if (rand() < 0.55) fish(P, x, z, 0.8 + rand() * 0.9, dir, pal, 3, rand); else turtle(P, x, z, 0.7 + rand() * 0.4, dir, pal, 3);
   }
+  for (let k = 0; k < 4; k++) stencil(P, S.x0 + 3 + rand() * (S.x1 - S.x0 - 6), S.zb + 1 + rand() * (S.zl - S.zb - 3), 1, rand() * 6.28, rand() < 0.5 ? PAL.white : PAL.red, 12, rand);
+  // soot over each hearth (the smoke of generations blackening the roof)
+  for (const [kind, hx, hz] of shelterSpots()) if (kind === 'hearth' && hx > S.x0 && hx < S.x1 && hz > S.zb && hz < S.zl) { P.ell(PAL.black, hx, hz - 0.3, 1.5, 1.0, 11, 12); P.ell(PAL.black, hx - 0.2, hz - 0.5, 0.9, 0.6, 12, 10); }
   P.flush();
 }
 export function gallery(el, { bag, col }) {
   shelterSurfaces(MAIN, 'sandstone_white', { bag });
   shelterSurfaces(SMALL, 'sandstone_yellow', { bag });
-  wall(bag, MAIN, 501, { hands: 3 });
-  wall(bag, SMALL, 502, { hands: 7 });
+  wall(bag, MAIN, 501, { hands: 3, tone: 'sandstone_white', flakes: 14 });
+  wall(bag, SMALL, 502, { hands: 9, tone: 'sandstone_yellow', flakes: 9 });
   ceiling(bag, MAIN, 503);
   ceiling(bag, SMALL, 504);
   // floor finds: a flat palette stone with its red smear, lumps of ochre and white clay

@@ -1,6 +1,6 @@
 // Ubirr about AD 1000 (docs/settlements/kakadu.md §1–§6): the outlier's blocks, the Main Gallery and the small shelter with their painted
 // walls and ceilings, the rock steps to the lookout, boulders at the foot.
-import { MAIN, SMALL, BLOCKS, FLIGHTS, height, rng, inRect, TRACKS } from './layout.js';
+import { MAIN, SMALL, BLOCKS, FLIGHTS, height, rng, inRect, TRACKS, ROUTE } from './layout.js';
 import '../../styles/kakadu/index.js';
 
 const E = [];
@@ -25,7 +25,7 @@ const rooms = [
   room('floodplain', [-85, -22, 85, 85], 0, 'open'),
 ];
 const mx = (MAIN.x0 + MAIN.x1) / 2;
-const walks = [Object.assign([[mx, -14], [mx, -27], [mx - 10, -31], [mx + 10, -31], [30, -17], [34, -6], [41.2, -5], [41.2, -23], [47.2, -23], [47.2, -36], [47.2, -38], [59.2, -38], [59.2, -49], [59, -58]], { y0: height(mx, -14) })];
+const walks = [Object.assign(ROUTE.map((p) => [...p]), { y0: height(mx, -14) })];
 
 export const ubirr = {
   id: 'kakadu-ubirr',
