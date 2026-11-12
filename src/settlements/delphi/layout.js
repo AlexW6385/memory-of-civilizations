@@ -191,3 +191,7 @@ export const onWay = (x, z, m = 0) => pathAt(x, z, WAY)[0] < 3 + m || pathAt(x, 
 export function built(x, z, m = 0) {
   return inRect(TT, x, z, m) || inRect(FC, x, z, m) || inRect(STADIUM, x, z, m + 2) || theatreD(x, z) > T_FRONT - m && theatreD(x, z) < T_BACK + m && theatreOut(x, z) < m + 1 || inRect(SPRING, x, z, m + 8) || inLot(x, z, m + 1) || inLane(x, z, m + 1) || onWay(x, z, m + 1.5) || PADS.some(([q]) => inRect(q, x, z, m)) || (z > WALL_S - 1 && x > -70 && x < WALL_E && z < WALL_S + 1.4);
 }
+
+/** The votive sellers' stalls of the forecourt: [x0, z0, x1, z1] each, in rows; the gate's own five first. */
+export const STALLS = [[100.2, 112, 103.6, 114.4], [100.2, 119, 103.6, 121.4], [88.5, 116, 92, 118.4], [88.5, 123, 92, 125.4], [106, 124, 109.4, 126.4],
+  ...Array.from({ length: 6 }, (_, k) => [108.6 + k * 6.6, 108.6, 112.0 + k * 6.6, 111.0]), ...Array.from({ length: 5 }, (_, k) => [110 + k * 7, 125.6, 113.4 + k * 7, 128.0])];

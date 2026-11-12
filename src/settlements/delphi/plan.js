@@ -2,7 +2,7 @@
 // Column, the Naxian sphinx and the offerings), and the sanctuary below and above it: the Sacred Way with its treasuries (the Athenian
 // among them) and the Athenian Stoa under the polygonal wall, the theatre and the stadium above, the Castalian spring, the gate and
 // the forecourt. Elements; the heights come from layout.js.
-import { STAIR, TT, TT_Y, TREASURIES, STOA, THEATRE, STADIUM, STADIUM_Y, SPRING, SPRING_Y, WAY, WAY2, wayY, way2Y, wayPoints, FC, FC_Y, height, WALL_S } from './layout.js';
+import { STALLS, STAIR, TT, TT_Y, TREASURIES, STOA, THEATRE, STADIUM, STADIUM_Y, SPRING, SPRING_Y, WAY, WAY2, wayY, way2Y, wayPoints, FC, FC_Y, height, WALL_S } from './layout.js';
 import { terraceDedications, wayDedications } from './votives.js';
 import { temple, treasury, stoa, terraceMonuments, terraceWalls, retain } from './buildings.js';
 
@@ -75,13 +75,12 @@ retain(S, [THEATRE.c[0] - 24, THEATRE.c[1] + 9], [THEATRE.c[0] + 24, THEATRE.c[1
 }
 // the gate's forecourt: stalls of the votive sellers beside the way in
 {
-  [[100.2, 112, 103.6, 114.4], [100.2, 119, 103.6, 121.4], [88.5, 116, 92, 118.4], [88.5, 123, 92, 125.4], [106, 124, 109.4, 126.4]].forEach((r, i) => S.push({ t: 'stall', rect: r, y: FC_Y, seed: i }));
+  STALLS.slice(0, 5).forEach((r, i) => S.push({ t: 'stall', rect: r, y: FC_Y, seed: i }));
 }
 // the forecourt as a market: two more rows of stalls, the water trough, benches in the shade of the planes, a herm at the gate, braziers
 {
   const y = FC_Y;
-  for (let k = 0; k < 6; k++) S.push({ t: 'stall', rect: [108.6 + k * 6.6, 108.6, 112.0 + k * 6.6, 111.0], y, seed: 20 + k });
-  for (let k = 0; k < 5; k++) S.push({ t: 'stall', rect: [110 + k * 7, 125.6, 113.4 + k * 7, 128.0], y, seed: 40 + k });
+  STALLS.slice(5).forEach((r, k) => S.push({ t: 'stall', rect: r, y, seed: 20 + k }));
   for (const [x, z] of [[104.5, 118], [123, 119.5], [146, 118.5]]) S.push({ t: 'tree', kind: 'plane', at: [x, z], y, seed: Math.round(x) });
   for (const [x, z, yw] of [[106.2, 121.5, 0], [125.5, 116.5, 0], [141, 121, Math.PI]]) S.push({ t: 'stone_bench', at: [x, z], y, yaw: yw, len: 2.4 });
   S.push({ t: 'block', rect: [116, 119.6, 119.4, 120.4], y0: y, y1: y + 0.6, mat: 'limestone' }, { t: 'block', rect: [116.1, 119.7, 119.3, 120.3], y0: y + 0.5, y1: y + 0.52, mat: 'water', collide: false });

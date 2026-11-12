@@ -4,13 +4,13 @@
 // going up to the stadium. Data for the engine's movers (src/engine/movers.js, read in its worker); the ways come from layout.js.
 // No boats.
 
-import { RADIUS, WAY, WAY2, TT, FC, SPRING, STADIUM, STOA } from './layout.js';
+import { RADIUS, WAY, WAY2, TT, FC, SPRING, STADIUM, STOA, lanes, alleys } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 50, night: 4, rain: 0.6, reach: 170, spawnMin: 24, far: 46 },
+  walkers: { day: 85, night: 5, rain: 0.6, reach: 170, spawnMin: 20, far: 46 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -40,
 };
@@ -20,6 +20,9 @@ export function walkways() {
   const rects = [], links = [];
   for (let i = 0; i < WAY.length - 1; i++) links.push({ a: WAY[i], b: WAY[i + 1], w: 3.0, kind: 'street', weight: 3.4 });
   for (let i = 0; i < WAY2.length - 1; i++) links.push({ a: WAY2[i], b: WAY2[i + 1], w: 2.0, kind: 'street', weight: 1.4 });
+  // the village: along each lane, and down the alleys' stairs
+  for (const r of lanes()) links.push({ a: [r.x0, r.z - 0.3], b: [r.x1, r.z - 0.3], w: 2.2, kind: 'lane', weight: 0.9 });
+  for (const q of alleys()) if (q.up && q.dn) links.push({ a: [(q.x0 + q.x1) / 2, q.up.z + 1.4], b: [(q.x0 + q.x1) / 2, q.dn.z - 0.3], w: 1.6, kind: 'lane', weight: 0.5 });
   rects.push({ r: [33, -20, 90, 24], weight: 2.2, market: 1.2, kind: 'street' });
   rects.push({ r: [-34, 13.6, 33, 24], weight: 1.0, market: 0.6, kind: 'street' });
   rects.push({ r: [-34, -21, 33, -13.8], weight: 0.6, market: 0.3, kind: 'street' });
@@ -59,6 +62,12 @@ export const WALKERS = [
     c1: [CL.brown, CL.grey, CL.ochre], c2: [CL.brown], c3: [CL.brown], speed: [0.8, 1.05], stride: 1.3 },
   { id: 'sacker', weight: 0.8, market: 1.3, el: { dress: 'tunic', legs: 'bare', hat: 'none', over: 'belt', arms: 'sack', carry: 'sack', hair: 'short', beard: 0.5, feet: 'bare' },
     c1: [CL.brown, CL.linen, CL.grey], c2: [CL.brown], c3: [CL.brown], speed: [0.85, 1.1], stride: 1.3 },
+  // the athlete: the loincloth, oiled bare skin, going up to the stadium or back from it
+  { id: 'athlete', weight: 0.7, market: 0.2, el: { dress: 'loincloth', hat: 'none', arms: 'hang', hair: 'short', beard: 0, feet: 'bare' },
+    c1: [CL.linen, CL.white], c2: [CL.white], c3: [CL.brown], speed: [1.3, 1.9], stride: 1.6 },
+  // the goatherd with his staff and the old woman at the lane's door
+  { id: 'goatherd', weight: 0.6, market: 0.3, el: { dress: 'tunic', legs: 'bare', hat: 'brim', over: 'cloak', arms: 'hang', carry: 'staff', hair: 'short', beard: 0.8, feet: 'bare' },
+    c1: [CL.brown, CL.grey, CL.ochre], c2: [CL.brown, CL.grey], c3: [CL.brown], speed: [0.7, 0.95], stride: 1.3 },
   { id: 'boy', weight: 0.6, market: 0.7, el: { dress: 'tunic', legs: 'bare', hat: 'none', arms: 'hang', hair: 'short', beard: 0, feet: 'bare' },
     c1: [CL.white, CL.linen, CL.ochre], c2: [CL.brown], c3: [CL.brown], speed: [1.1, 1.5], stride: 1.0, h: [0.6, 0.72], swing: 1.1 },
 ];

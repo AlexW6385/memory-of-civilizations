@@ -1,11 +1,12 @@
 // The town of Delphi (docs/settlements/delphi.md §4.5, §8): the houses of the Delphians on their terraces west and east of the
 // sanctuary, and the people of the oracle: pilgrims and consultants on the Sacred Way, the priests and the Pythia's escort at the
 // temple, the goat for the sacrifice, the washers at the Castalian spring, the sellers at the gate, athletes in the stadium.
+import { STALLS } from './layout.js';
 import { fronts, openLife } from './fronts.js';
 import { houseRooms } from '../../styles/delphi/house.js';
 import { retain } from './buildings.js';
 import { wayPoints } from './layout.js';
-import { lanes, alleys, ROW_PITCH, RADIUS, lots, height, pathAt, WAY, WAY2, TT_Y, TEMPLE, ALTAR, SPRING, STADIUM, STADIUM_Y, FC, FC_Y, THEATRE, TREASURIES, STOA, TT, inRect } from './layout.js';
+import { inLot, inLane, lanes, alleys, ROW_PITCH, RADIUS, lots, height, pathAt, WAY, WAY2, TT_Y, TEMPLE, ALTAR, SPRING, STADIUM, STADIUM_Y, FC, FC_Y, THEATRE, TREASURIES, STOA, TT, inRect } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [98, 134], facing: 'n' } });
@@ -42,7 +43,7 @@ export async function town() {
   const priest = (at, rot, o = {}) => L.push({ t: 'figure', at, y: o.y ?? height(at[0], at[1]), rot, seed: seed(), skin: 'skin_medium', dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_white', over: 'cloak', hair: 'short', beard: 1, hat: 'none', pose: 'stand', ...o });
   // pilgrims climbing the Sacred Way in twos and threes, some with a goat on a cord, one leading a donkey with the gifts
   const WL = 464;
-  for (let k = 0; k < 40; k++) {
+  for (let k = 0; k < 85; k++) {
     const s = 12 + rand() * 330, [x, z, yaw] = wayAt(WAY, s), off = (rand() < 0.5 ? -1 : 1) * (2.6 + rand() * 0.8), nx = Math.cos(yaw), nz = -Math.sin(yaw);
     const at = [x + nx * off, z + nz * off], r = rand(), rot = yaw + Math.PI + (rand() - 0.5) * 0.5;
     if (pathAt(at[0], at[1], WAY)[0] < 2.4 || TREASURIES.some((t) => inRect(t.rect, at[0], at[1], 2.5)) || inRect(STOA, at[0], at[1], 2.5) || inRect(TT, at[0], at[1], 1)) continue;
@@ -59,7 +60,7 @@ export async function town() {
     priest([ax - 4.2, az + 1.2], -Math.PI / 2, { y: TT_Y, pose: 'talk' });
     L.push({ t: 'animal', kind: 'goat', at: [ax - 5.4, az + 0.2], y: TT_Y, rot: Math.PI / 2, seed: 77 });
     citizen([ax - 6.3, az - 1.3], -Math.PI / 2, { y: TT_Y, pose: 'pray', cloth: 'cloth_ochre' });
-    for (let k = 0; k < 7; k++) citizen([ax + 5 + rand() * 7, az - 6 + rand() * 12], face(-1, 0) + (rand() - 0.5), { y: TT_Y, pose: rand() < 0.5 ? 'talk' : 'stand' });
+    for (let k = 0; k < 26; k++) citizen([ax + 5 + rand() * 38, az - 14 + rand() * 30], face(-1, 0) + (rand() - 0.5), { y: TT_Y, pose: rand() < 0.5 ? 'talk' : 'stand' });
     // the Pythia's escort at the temple's steps: a veiled woman in purple between two priests
     woman([TEMPLE.X + 5.8, TEMPLE.cz + 4.5], Math.PI / 2, { y: TT_Y, cloth: 'cloth_maroon', cloth2: 'cloth_maroon', hat: 'veil' });
     priest([TEMPLE.X + 5.8, TEMPLE.cz + 3.3], Math.PI / 2, { y: TT_Y }); priest([TEMPLE.X + 5.8, TEMPLE.cz + 5.7], Math.PI / 2, { y: TT_Y });
@@ -71,25 +72,32 @@ export async function town() {
   }
   // the spring: women and men washing and drinking at the basin, a girl with a hydria going up
   { const [x0, z0, x1, z1] = SPRING;
-    for (let k = 0; k < 4; k++) woman([x0 - 1.0, z0 + 3 + k * 3.2], Math.PI / 2 * 1, { y: height(x0 - 1, z0 + 3), carry: k === 2 ? 'pot' : 'none' });
+    for (let k = 0; k < 6; k++) woman([x0 - 1.0, z0 + 2 + k * 2.6], Math.PI / 2 * 1, { y: height(x0 - 1, z0 + 3), carry: k === 2 ? 'pot' : 'none' });
     citizen([x0 - 4, 0], Math.PI / 2, { pose: 'talk' }); citizen([x0 - 5.2, 0.8], -Math.PI / 2, { pose: 'talk' });
     worker([x0 - 7, -5], 0, { carry: 'pot' });
     void x1; void z1; }
   // the gate: the sellers at their stalls, buyers, a boy
   [[101.9, 113.2], [101.9, 120.2], [90.2, 117.2], [90.2, 124.2], [107.7, 125.2]].forEach(([x, z], i) => { worker([x, z + 1.0], face(0, 1), { y: FC_Y, beard: 0.9 }); if (i < 4) citizen([x + (i % 2 ? -1.2 : 1.2), z + 2.6], face(0, -1), { y: FC_Y, pose: 'talk' }); });
-  for (let k = 0; k < 6; k++) citizen([100 + rand() * 40, 112 + rand() * 18], rand() * 6.28, { y: FC_Y });
+  for (let k = 0; k < 22; k++) { const at = [96 + rand() * 54, 112 + rand() * 16]; if (STALLS.some((r) => inRect(r, at[0], at[1], 1.2))) continue; (k % 3 ? citizen : k % 2 ? woman : worker)(at, rand() * 6.28, { y: FC_Y, pose: rand() < 0.3 ? 'talk' : 'stand' }); }
+  // the stalls: the seller behind, goods heaped before: jars, baskets, sacks; a handcart or two with a donkey at the rows' ends
+  STALLS.slice(5).forEach((r, i) => { const cx = (r[0] + r[2]) / 2, back = r[1] < 120;
+    worker([cx, back ? r[1] - 0.35 : r[3] + 0.35], face(0, back ? 1 : -1), { y: FC_Y, beard: 0.9 });
+    L.push({ t: 'pot', at: [r[0] + 0.2, back ? r[3] + 0.9 : r[1] - 0.9], y: FC_Y, rot: 0, kind: ['amphora', 'water_pot', 'dark_pot', 'pithos'][i % 4], n: 3, s: 0.9, seed: seed() });
+    L.push({ t: i % 2 ? 'basket' : 'sacks', at: [r[2] - 0.2, back ? r[3] + 1.0 : r[1] - 1.0], y: FC_Y, rot: 0.3, n: 2, seed: seed() });
+    if (i % 3 === 0) citizen([cx + 0.6, back ? r[3] + 2.0 : r[1] - 2.0], face(0, back ? -1 : 1), { y: FC_Y, pose: 'talk' }); });
+  L.push({ t: 'handcart', at: [145, 118], y: FC_Y, rot: 0.4, load: 'sacks', seed: seed() }, { t: 'handcart', at: [112, 119], y: FC_Y, rot: 1.2, load: 'baskets', seed: seed() }, { t: 'animal', kind: 'dog', at: [118, 118], y: FC_Y, rot: 1, seed: 3 }, { t: 'animal', kind: 'dog', at: [96, 124], y: FC_Y, rot: 2, seed: 6 }, { t: 'chickens', at: [130, 122], y: FC_Y, kind: 'hen', n: 4, seed: 4 }, { t: 'animal', kind: 'donkey', at: [143, 122], y: FC_Y, rot: 3, seed: 15, gear: true });
   L.push({ t: 'animal', kind: 'donkey', at: [118, 124], y: FC_Y, rot: 1.0, seed: 9, gear: true });
   // the stadium: runners on the track, a trainer with his staff, the judge on his stone seat
   { const [x0, z0, x1, z1] = STADIUM;
-    for (let k = 0; k < 4; k++) L.push({ t: 'figure', at: [x1 - 4 - k * 0.3, z0 + 4 + k * 4.5], y: STADIUM_Y, rot: face(-1, 0), seed: seed(), skin: 'skin_medium', dress: 'loincloth', cloth: 'linen', hair: 'short', beard: 0, hat: 'none', feet: 'bare', pose: 'stand' });
+    for (let k = 0; k < 6; k++) L.push({ t: 'figure', at: [x1 - 4 - k * 0.3, z0 + 3 + k * 3.8], y: STADIUM_Y, rot: face(-1, 0), seed: seed(), skin: 'skin_medium', dress: 'loincloth', cloth: 'linen', hair: 'short', beard: 0, hat: 'none', feet: 'bare', pose: 'stand' });
     citizen([x1 - 12, (z0 + z1) / 2 - 5], face(1, 0), { y: STADIUM_Y, carry: 'staff', cloth: 'cloth_white' });
     citizen([x1 - 40.5, z0 + 0.1], face(0, 1), { y: STADIUM_Y + 0.9, pose: 'sit', cloth: 'cloth_white' });
-    for (let k = 0; k < 5; k++) citizen([x0 + 10 + rand() * 90, z0 - 1.5 - rand() * 3], face(0, 1), { pose: rand() < 0.5 ? 'sit_ground' : 'stand' }); }
+    for (let k = 0; k < 14; k++) citizen([x0 + 10 + rand() * 90, z0 - 1.5 - rand() * 3], face(0, 1), { pose: rand() < 0.5 ? 'sit_ground' : 'stand' }); }
   // the theatre's benches: a few on the earth bank
   { const [cx, cz] = THEATRE.c;
     for (let k = 0; k < 6; k++) { const d = 8 + rand() * 12, a = (rand() - 0.5) * 1.8, x = cx + Math.sin(a) * d, z = cz - Math.cos(a) * d; citizen([x, z], face(cx - x, cz - z), { y: height(x, z) + 0.4, pose: 'sit_low' }); } }
   // goats on the slope above the village, a goatherd
-  for (let k = 0; k < 6; k++) { const x = -150 + rand() * 40, z = 20 + rand() * 60; L.push({ t: 'animal', kind: 'goat', at: [x, z], y: height(x, z), rot: rand() * 6.28, seed: 40 + k }); }
+  for (let k = 0; k < 14; k++) { const x = -165 + rand() * 80, z = 20 + rand() * 90; if (inLot(x, z, 3) || inLane(x, z, 3)) continue; L.push({ t: 'animal', kind: 'goat', at: [x, z], y: height(x, z), rot: rand() * 6.28, seed: 40 + k }); }
   worker([-140, 50], 1, { carry: 'staff' });
   plans.push({ ...base('delphi-life', 'life', L), rooms: [] });
   void WAY2;
