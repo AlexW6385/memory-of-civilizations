@@ -5,7 +5,7 @@
 // few officials at the foot of the terrace: no crowds), pigeons in the lanes. Positions come from
 // layout.js; nothing is hard-coded but the buildings' places on the avenue (shops.js).
 import './style.js';
-import { betweenGates, RADIUS, AVENUE, HALLS, TIERS, RING, TEMPLE, DANBI, SHOP_APRONS, CARRIAGE, WALK_UP, interiorShops, furnishedHouses, shopRows, houses, lanes } from './layout.js';
+import { betweenGates, RADIUS, AVENUE, HALLS, TIERS, RING, MOAT, LEVEL, TEMPLE, DANBI, SHOP_APRONS, CARRIAGE, WALK_UP, interiorShops, furnishedHouses, shopRows, houses, lanes } from './layout.js';
 import { SHOP_SITES } from './shops.js';
 
 const base = (id, style, elements, center = [0, 0]) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 215], facing: 'n' }, center, near: 230 });
@@ -20,9 +20,22 @@ export async function lifePlans() {
   // the tea house and the pharmacy: furnished inside shops of the shop street (shopfront.js qing_shop with `enter`, picked by layout.js interiorShops);
   // the room's frame runs from the shop's back wall to its counter line, the floor at the shop's plinth (0.3)
   const ins = interiorShops().filter((s) => s.side === 'w');
-  out.push(base('qing-beijing-interiors-shops', 'life', ins.map((s) => ({ t: s.kind === 'teahouse' ? 'bj_teahouse' : 'bj_pharmacy', rect: [s.front - s.depth, s.z0, s.front - 0.1, s.z1], y: 0.3, front: 'e', H: 3.4, seed: s.seed })), ins.length ? [ins[0].front - 4, (ins[0].z0 + ins[0].z1) / 2] : [0, 295]));
+  out.push(base('qing-beijing-interiors-shops', 'life', ins.map((s) => ({ t: s.kind === 'teahouse' ? 'bj_teahouse' : s.kind === 'pharmacy' ? 'bj_pharmacy' : 'bj_shop_' + s.kind, rect: [s.front - s.depth, s.z0, s.front - 0.1, s.z1], y: 0.3, front: 'e', H: 3.4, seed: s.seed })), ins.length ? [ins[0].front - 4, (ins[0].z0 + ins[0].z1) / 2] : [0, 295]));
+  // the people in the shops (§30): the shopman at his counter, a customer or two, the storyteller on his platform; `a` across (towards −z), `b` from the back wall
+  {
+    const P2 = [], Fg = (s, a, b, dx, extra = {}) => P2.push({ t: 'figure', at: [s.front - s.depth + b, (s.z0 + s.z1) / 2 - a], y: 0.34 + (extra.up ?? 0), rot: face([dx, 0]), seed: Math.floor(rand() * 1e9), ...FIG, cloth: CL[Math.floor(rand() * CL.length)], pose: 'stand', ...extra });
+    for (const s of ins) {
+      const Dp = s.depth - 0.1, hw = (s.z1 - s.z0) / 2 - 0.5;
+      if (s.kind === 'teahouse') { Fg(s, -(hw - 0.5), 1.6, 1, { up: 0.25, carry: 'staff', pose: 'staff', len: 0.6, staffMat: 'timber' }); Fg(s, hw - 0.4, 2.8, 1); continue; }
+      if (s.kind === 'pharmacy') { Fg(s, 0.6, 1.8, 1, { cloth: 'cloth_white' }); continue; }
+      if (s.kind === 'pawn') { Fg(s, 0.2, Math.max(3.4, Dp * 0.46) - 1.0, 1, { hat: 'cap' }); Fg(s, -hw + 0.5, Dp - 1.7, 1); continue; }
+      Fg(s, hw - 1.2, Dp - 1.4, 1);
+      if (s.kind !== 'lantern') Fg(s, -(hw - 1.0), Dp * 0.45, -1);
+    }
+    out.push({ ...base('qing-beijing-shop-people', 'life', P2), center: [-16, 280], near: 150 });
+  }
   // courtyard houses furnished inside, fitted to the shells (houses.js houseParts): the five lod-0 houses nearest the avenue's mouth
-  const near = furnishedHouses(5);
+  const near = furnishedHouses(10);
   out.push(base('qing-beijing-interiors-houses', 'life', near.map((h) => ({ t: 'bj_rooms', rect: h.rect, seed: h.seed, courts: h.courts, gate: h.gate, lod: h.lod })), [-40, 235]));
   // pigeons on the paving and the roofs' feet of a few lanes
   const pig = [[-22, 230], [30, 225], [-120, 118], [120, 118], [-60, 60], [60, 62], [-8, 266], [8, 318]].map(([x, z]) => ({ t: 'chickens', kind: 'pigeon', at: [x, z], y: 0.04, n: 6 + Math.floor(rand() * 4), seed: Math.floor(rand() * 1e6) }));
@@ -34,6 +47,13 @@ export async function lifePlans() {
   }
   const y0 = TIERS[0].rect[3] + 6;
   for (const [x, z, dir] of [[-16, y0, [1, 0]], [-14, y0 + 1.5, [1, 0]], [18, y0 + 2, [-1, 0]]]) figs.push(man([x, z], face(dir), { pose: 'stand', cloth: 'cloth_indigo', cloth2: 'cloth_red' }));
+  // (§32) more of the palace's own people: sentries of the banner guard in pairs at the gates of the courts and before the three halls' stairs,
+  // two files of officials waiting in the great courtyard either side of the stone way, attendants with brooms (a staff stands for the broom)
+  for (const [x, z, dir] of [[-6, 128, [0, 1]], [6, 128, [0, 1]], [-80, 120, [0, 1]], [-68, 120, [0, 1]], [68, 120, [0, 1]], [80, 120, [0, 1]], [-8, 36, [0, 1]], [8, 36, [0, 1]],
+    [-93, -6, [1, 0]], [93, -6, [-1, 0]], [-28, 168.5, [0, -1]], [28, 168.5, [0, -1]], [-40, -168, [0, 1]], [40, -168, [0, 1]]])
+    figs.push(man([x, z], face(dir), { carry: 'staff', pose: 'staff', len: 2.2, staffMat: 'timber', cloth: 'cloth_maroon', cloth2: 'cloth_black' }));
+  for (const sx of [-1, 1]) for (let i = 0; i < 6; i++) figs.push(man([sx * (9 + (i % 2) * 1.6), 62 - i * 3.4], face([-sx, 0]), { pose: 'stand', cloth: ['cloth_blue', 'cloth_indigo', 'cloth_green'][i % 3], cloth2: 'cloth_black' }));
+  for (const [x, z, dir] of [[-40, 58, [1, 1]], [50, 80, [-1, 0]], [-52, 96, [0, -1]], [30, 20, [0, 1]]]) figs.push(man([x, z], face(dir), { carry: 'staff', pose: 'staff', len: 1.6, staffMat: 'timber', cloth: 'cloth_grey', cloth2: 'cloth_black' }));
   void HALLS; void AVENUE;
   // the visitors of the Danbi way and its plaza (the Temple of Heaven): small parties walking up and standing, an old man with his bird cage, pigeons
   {
@@ -43,6 +63,13 @@ export async function lifePlans() {
     for (const [x, z, dir] of spots) T.push(man([x, z], face(dir), { pose: 'stand', y: z < dz1 - 1 ? DANBI.y : 0.03, cloth: CLOTH[Math.floor(rand() * CLOTH.length)], cloth2: rand() < 0.5 ? 'cloth_black' : 'cloth_indigo', ...(rand() < 0.3 ? { hair: 'bun', hat: undefined } : {}) }));
     for (const [x, z] of [[xm + 12, dz1 + 6], [xm - 14, dz1 + 4]]) T.push({ t: 'chickens', kind: 'pigeon', at: [x, z], y: 0.04, n: 7, seed: Math.floor(rand() * 1e6) });
     out.push({ ...base('qing-beijing-temple-life', 'life', T), center: [xm, dz1 - 10] });
+  }
+  // the moat (§32): rowboats tied along the outer bank, and a fisherman's seat on the coping; the carp are in fauna.js
+  {
+    const [a0, b0, a1, b1] = MOAT.outer, E2 = [];
+    for (const [x, z, rot] of [[a0 + 1.6, -120, 0], [a0 + 1.6, 40, 0.1], [a1 - 1.6, -60, 0], [a1 - 1.6, 110, -0.1], [-100, b0 + 1.6, Math.PI / 2], [90, b0 + 1.6, Math.PI / 2], [-100, b1 - 1.6, Math.PI / 2], [-110, b1 - 1.6 + 0.1, Math.PI / 2]])
+      E2.push({ t: 'boat', kind: 'rowboat', at: [x, z], y: LEVEL.moat, rot, seed: Math.floor(rand() * 1e9) });
+    out.push({ ...base('qing-beijing-moat-life', 'life', E2), center: [0, 0], near: 300 });
   }
   out.push(...streetPlans(rand));
   out.push(base('qing-beijing-people-life', 'life', [...pig, ...figs], [0, 120]));
@@ -111,6 +138,7 @@ function streetPlans(rand) {
     if (Math.hypot(gx, z1) > RADIUS - 40) continue;
     H.push({ t: 'bj_lane', at: [gx, z1], seed: h.seed, lod: h.lod });
     if (h.lod < 2 && rand() < 0.3) H.push({ t: 'bj_pet', kind: rand() < 0.45 ? 'cat' : 'dog', at: [gx - 1.2 - rand() * 6, z1 + 1.0 + rand() * 2], y: 0.03, rot: rand() * 6.28, seed: seed() });
+    if (h.lod < 2 && rand() < 0.4) H.push({ t: 'bj_drying', at: [gx - 14 - rand() * 3, z1 + 1.5], y: 0.03, rot: 0, seed: seed() });
     if (h.lod === 0 && rand() < 0.22) H.push({ t: 'laundry', at: [gx - 6 - rand() * 6, z1 + 1.1], y: 0.03, rot: 0, len: 3, seed: seed() });
     if (h.lod === 0 && rand() < 0.35) H.push({ t: 'figure', at: [gx - 4 - rand() * 8, z1 + 1.6 + rand() * 2], y: 0.03, rot: rand() * 6.28, seed: seed(), ...FIG, cloth: 'cloth_red', child: true, pose: 'squat', dress: 'trousers', hat: 'none' });
     void x0;

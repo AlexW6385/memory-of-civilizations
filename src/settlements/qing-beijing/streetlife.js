@@ -308,3 +308,29 @@ export function bjCoalcart(el, { bag, col }) {
   col?.rect?.([el.at[0] - 1.0, el.at[1] + zc - 0.6, el.at[0] + 2.6, el.at[1] + zc + 0.6], 0, 0.8);
   P.emit(bag, el.at[0], 0.03, el.at[1], 0);
 }
+
+/**
+ * bj_drying: the autumn stores of a Beijing household set out by the lane (§33): a rack of two posts and a cross-pole from which hang
+ * strings of corn cobs and of red chilies, and beside it a round bamboo tray on a trestle of persimmons and jujubes. Local frame: x along
+ * the lane, z out from the wall, y up; el.at the rack's foot.
+ */
+export function bjDrying(el, { bag, col }) {
+  const r = rng(el.seed || 1), P = new Parts(), L = 1.9 + r() * 0.6;
+  for (const s of [-1, 1]) P.add('wood_dark', limb([s * L / 2, 0, -0.2], [s * L / 2 + s * 0.05, 2.05, 0], 0.045, 0.04, 5));
+  P.add('wood_dark', limb([-L / 2 - 0.1, 2.0, 0], [L / 2 + 0.1, 2.0, 0], 0.035, 0.035, 5));
+  const n = Math.floor(L / 0.28);
+  for (let i = 0; i < n; i++) {
+    const x = -L / 2 + 0.2 + i * (L - 0.4) / Math.max(1, n - 1), corn = (i + (r() * 2 | 0)) % 2 === 0, len = 0.7 + r() * 0.5;
+    P.add('timber', limb([x, 2.0, 0], [x, 2.0 - len, 0], 0.008, 0.008, 3));
+    if (corn) for (let k = 0; k < 4; k++) P.add('cloth_ochre', lathe([[0.001, 0], [0.04, 0.03], [0.045, 0.14], [0.02, 0.22], [0.001, 0.24]], 6, null, x + (k % 2 ? 0.03 : -0.03), 2.0 - len + k * 0.15, (k % 2 ? 0.04 : -0.04)));
+    else for (let k = 0; k < 7; k++) P.add('cloth_red', lathe([[0.001, 0], [0.025, 0.04], [0.02, 0.14], [0.001, 0.2]], 5, null, x + (k % 2 ? 0.025 : -0.025), 2.0 - len + k * 0.1, 0));
+  }
+  // the tray of persimmons and jujubes on its trestle
+  const tx = L / 2 + 0.9;
+  P.add('wood_dark', box(tx - 0.5, 0.0, -0.3, tx - 0.44, 0.7, 0.3)); P.add('wood_dark', box(tx + 0.44, 0.0, -0.3, tx + 0.5, 0.7, 0.3));
+  P.add('wicker', lathe([[0.001, 0.7], [0.5, 0.7], [0.55, 0.76], [0.5, 0.78], [0.001, 0.74]], 12, null, tx, 0, 0));
+  for (let k = 0; k < 14; k++) { const a = r() * Math.PI * 2, d = Math.sqrt(r()) * 0.42; P.add(k % 3 ? 'cloth_ochre' : 'cloth_maroon', lathe([[0.001, 0], [0.045, 0.03], [0.05, 0.06], [0.001, 0.1]], 5, null, tx + Math.cos(a) * d, 0.76, Math.sin(a) * d)); }
+  P.emit(bag, el.at[0], 0.03, el.at[1], el.rot ?? 0);
+  col?.rect?.([el.at[0] - L / 2 - 0.1, el.at[1] - 0.25, el.at[0] + L / 2 + 0.1, el.at[1] + 0.25], 0, 2.1);
+  col?.circle?.(el.at[0] + tx, el.at[1], 0.6, 0, 0.8);
+}
