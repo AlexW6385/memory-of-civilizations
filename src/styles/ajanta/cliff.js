@@ -68,6 +68,13 @@ function recess(ctx, F, c) {
   const [lx0, , lz0] = P(-0.12, c.s - w / 2 - 0.1, 0), [lx1, , lz1] = P(0.2, c.s + w / 2 + 0.1, 0);
   bag.add(STONE, box(Math.min(lx0, lx1), y + h - 0.05, Math.min(lz0, lz1), Math.max(lx0, lx1), y + h + 0.35, Math.max(lz0, lz1)));
   for (let k = 0; k < Math.floor(w / 0.5); k++) { const [ax, , az] = P(-0.1, c.s - w / 2 + 0.25 + k * 0.5, 0), [bx, , bz] = P(-0.18, c.s - w / 2 + 0.45 + k * 0.5, 0); bag.add(k % 2 ? PLASTER : PAL.ground, box(Math.min(ax, bx), y + h + 0.06, Math.min(az, bz), Math.max(ax, bx), y + h + 0.3, Math.max(az, bz))); }
+  if (c.tier < 2) {
+    // a clay lamp and a leaf of offerings on the cell's floor before the painted Buddha
+    const [lx, , lz] = P(dep - 0.5, c.s + w * 0.28, 0);
+    bag.add('bronze', lathe([[0.001, 0], [0.07, 0.0], [0.09, 0.04], [0.001, 0.05]], 8, null, lx, y, lz)); bag.add('flame', lathe([[0.01, 0], [0.014, 0.02], [0.001, 0.05]], 5, null, lx, y + 0.05, lz));
+    const [ox, , oz] = P(dep - 0.5, c.s - w * 0.28, 0);
+    for (let k = 0; k < 5; k++) bag.add(k % 2 ? 'paint_ochre' : 'cloth_red', lathe([[0.001, 0], [0.07, 0.0], [0.05, 0.05], [0.001, 0.06]], 6, null, ox + (k - 2) * 0.05, y, oz + (k % 2) * 0.06));
+  }
   if (c.tier < 2) { const [fx0, , fz0] = P(0, c.s - w / 2, 0), [fx1, , fz1] = P(dep, c.s + w / 2, 0); col.floor([fx0, fz0, fx1, fz1], y); }
   return lh;
 }

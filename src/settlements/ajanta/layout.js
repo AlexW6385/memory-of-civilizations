@@ -59,8 +59,13 @@ export const PATHS = [
   [[-48, 14], [-15, 14], [20, 20], [40, 30]],
 ];
 export const PATH_W = 2.2;
-export const VILLAGE = [XF + 98, 4, XF + 160, 70];   // x0 z0 x1 z1 (the huts east of the river, south of the ford)
+export const VILLAGE = [XF + 98, 4, XF + 160, 84];   // x0 z0 x1 z1 (the huts east of the river, south of the ford)
 export const WELL = [XF + 120, 30];
+export const PEN = [XF + 135, 36, XF + 144, 43];       // the cattle pen, its gate to the north
+export const THRESH = [XF + 146, 28];                   // the threshing floor
+export const VSHRINE = [XF + 106, 23];                  // the village deity's platform
+export const GRANARIES = [[XF + 110, 45], [XF + 112.5, 46], [XF + 148, 47]];
+export const GHATS = [-30, 34];                         // the washing places on the river's west bank (z)
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export function onPath(x, z, m = 0) {
   for (const P of PATHS) for (let i = 0; i < P.length - 1; i++) {

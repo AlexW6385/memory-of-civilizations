@@ -1,7 +1,7 @@
 // The gorge floor's life and the workers' village (docs/settlements/ajanta.md §6, §7): mud-walled huts with thatch
 // round a yard with its well on the east bank, a pilgrims' shelter at the stair's foot, the monks, painters, masons and
 // worshippers at the caves, goats, zebu and fowl.
-import { RADIUS, EAST, XF, ZW, FLOOR, VILLAGE, WELL, C1, C19, C12, PATHS, rng, inRect, riverX } from './layout.js';
+import { RADIUS, EAST, XF, ZW, FLOOR, VILLAGE, WELL, PEN, THRESH, VSHRINE, GRANARIES, GHATS, C1, C19, C12, PATHS, rng, inRect, riverX } from './layout.js';
 import '../../styles/ajanta/index.js';
 
 const base = (id, style, elements, b = 0) => ({ id, style, origin: [0, 0], base: b, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-20, 14], facing: 'w' } });
@@ -9,19 +9,39 @@ const base = (id, style, elements, b = 0) => ({ id, style, origin: [0, 0], base:
 /** Every hut: { rect, front, seed }, exported for the movers and the smoke. */
 export function lots() {
   const r = rng(480), out = [], [vx0, , vx1] = VILLAGE;
-  const rows = [{ zc: 12, front: 's' }, { zc: 52, front: 'n' }, { zc: 64, front: 's' }];
-  for (const row of rows) for (let x = vx0 + 6; x < vx1 - 6; x += 8.5 + r() * 3) {
-    const w = 4.6 + r() * 1.8, d = 3.8 + r() * 1.4, cx = x + w / 2, cz = row.zc + (r() - 0.5) * 2;
-    const rect = [cx - w / 2, cz - d / 2, cx + w / 2, cz + d / 2];
-    if (r() < 0.12 || Math.abs(rect[0] - WELL[0]) < 3 && Math.abs(rect[1] - WELL[1]) < 3) continue;
-    out.push({ rect, front: row.front, seed: Math.round(x * 13 + row.zc * 7), mud: r() < 0.3 ? 'earth_wall' : 'mud_plaster' });
-  }
+  const rows = [{ zc: 12, front: 's' }, { zc: 52, front: 'n' }, { zc: 64, front: 's' }, { zc: 76, front: 'n' }];
+  rows.forEach((row, ri) => {
+    for (let x = vx0 + 6; x < vx1 - 6; x += 8.5 + r() * 3) {
+      const w = 4.6 + r() * 1.8, d = 3.8 + r() * 1.4, cx = x + w / 2, cz = row.zc + (r() - 0.5) * 2;
+      const rect = [cx - w / 2, cz - d / 2, cx + w / 2, cz + d / 2];
+      const k = r(), skip = r() < 0.12 || Math.abs(rect[0] - WELL[0]) < 3 && Math.abs(rect[1] - WELL[1]) < 3;
+      if (skip) continue;
+      let variant = k < 0.3 ? 0 : k < 0.55 ? 1 : k < 0.8 ? 2 : 3;
+      if (variant === 2 && row.front === 'n') variant = 1;
+      out.push({ rect, front: row.front, row: ri, variant, seed: Math.round(x * 13 + row.zc * 7), mud: r() < 0.3 ? 'earth_wall' : 'mud_plaster' });
+    }
+  });
   return out;
 }
 
 export async function town() {
   const E = [], L = [], V = [], rand = rng(481), seed = () => Math.floor(rand() * 1e9);
-  for (const l of lots()) E.push({ t: 'aj_hut', rect: l.rect, front: l.front, mud: l.mud });
+  const LOTS = lots();
+  for (const l of LOTS) E.push({ t: 'aj_house', rect: l.rect, front: l.front, mud: l.mud, variant: l.variant, seed: l.seed });
+  // low mud walls close the street front between the houses (a gap left to pass)
+  for (let i = 0; i < LOTS.length - 1; i++) {
+    const a = LOTS[i], b = LOTS[i + 1];
+    if (a.row !== b.row || a.variant === 2 || b.variant === 2) continue;
+    const gap = b.rect[0] - a.rect[2];
+    if (gap < 1.5 || gap > 7) continue;
+    const z = a.front === 's' ? (a.rect[3] + b.rect[3]) / 2 - 0.3 : (a.rect[1] + b.rect[1]) / 2 + 0.3, mid = (a.rect[2] + b.rect[0]) / 2;
+    if (gap > 3) { E.push({ t: 'aj_mudwall', pts: [[a.rect[2], z], [mid - 0.6, z]] }); E.push({ t: 'aj_mudwall', pts: [[mid + 0.6, z], [b.rect[0], z]] }); }
+    else E.push({ t: 'aj_mudwall', pts: [[a.rect[2], z], [b.rect[0], z]] });
+  }
+  for (const [gx, gz] of GRANARIES) E.push({ t: 'aj_granary', at: [gx, gz], y: 0 });
+  E.push({ t: 'aj_pen', rect: PEN, gate: 'n', seed: 5 });
+  E.push({ t: 'aj_thresh', at: THRESH, r: 4.2 });
+  E.push({ t: 'aj_vshrine', at: VSHRINE });
   // ── the life
   let T = L;
   const CL = ['cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_indigo', 'cloth_brown'];
@@ -65,6 +85,26 @@ export async function town() {
   // the river: women washing, a man at the ford, an egret is the fauna's
   woman([riverX(-30) - 4.8, -30], 0, Math.PI / 2, { pose: 'squat' }); woman([riverX(-28) - 5.2, -27], 0, Math.PI / 2, { pose: 'stand', carry: 'pot', arms: 'head' });
   worker([riverX(14) + 6.2, 14.5], 0, -Math.PI / 2, { pose: 'stand', carry: 'staff' });
+  // the flower and lamp-oil sellers' stalls along the path to the stair, a basket seller on a mat
+  for (const [x, goods, aw] of [[-32, ['produce', 'basket'], 'cloth_ochre'], [-27, ['water_pot', 'cloth'], 'cloth_red'], [-22, ['basket', 'produce'], 'cloth_white']]) {
+    T.push({ t: 'stall', at: [x, -46.9], y: 0, rot: 0, awning: aw, goods, seed: seed() });
+    (rand() < 0.5 ? woman : worker)([x, -48.0], 0, 0, { pose: 'stand' });
+  }
+  lay([-29.5, -43.3], 0, Math.PI, { pose: 'talk' }); lay([-24.6, -43.5], 0, 3.6, { pose: 'stand' }); monk([-18.5, -44.6], 0, Math.PI / 2, { pose: 'stand', carry: 'staff' });
+  // the masons' and painters' yard: the grinder of colours, the lime-stirrer, the chiseller at the pillar
+  woman([XF + 22.7, -ZW + 9.9], 0, 0, { pose: 'squat', cloth: 'cloth_ochre' });
+  worker([XF + 25.0, -ZW + 9.9], 0, Math.PI, { pose: 'squat', cloth: 'cloth_brown' });
+  worker([XF + 29.5, -ZW + 11.2], 0, Math.PI / 2, { pose: 'stand', carry: 'staff' });
+  worker([XF + 24.5, -ZW + 6.5], 0, Math.PI, { pose: 'squat', cloth: 'cloth_white' });
+  worker([XF + 27.0, -ZW + 3.0], 0, 2.2, { pose: 'talk', cloth: 'cloth_brown' });
+  // the washing places: the women kneeling at the stones, a buffalo and her herdboy in the shallows
+  for (const gz of GHATS) {
+    for (const k of [-1.8, 0.2, 2.2]) woman([riverX(gz + k) - 5.4, gz + k], 0.12, Math.PI / 2, { pose: k > 0 ? 'squat' : 'stand', carry: k > 1 ? 'basket' : 'none' });
+  }
+  T.push({ t: 'animal', kind: 'buffalo', at: [riverX(34) + 3.2, 38], y: -0.3, rot: 1.0, seed: 71 }); T.push({ t: 'animal', kind: 'buffalo', at: [riverX(34) + 2.5, 41], y: -0.3, rot: 2.0, seed: 72 });
+  worker([riverX(34) + 6.2, 39], 0, -Math.PI / 2, { pose: 'stand', carry: 'staff' });
+  // pigeons on the ledge before the painted caves
+  T.push({ t: 'chickens', kind: 'pigeon', at: [XF + 3.0, -12], y: FLOOR[1], seed: 5 }); T.push({ t: 'chickens', kind: 'pigeon', at: [XF + 3.0, 28], y: FLOOR[1], seed: 6 });
   T = V;
   // the village: the well and its women, hearths, grain, wood, fowl, goats and a zebu with a cart
   const [wx, wz] = WELL;
@@ -72,12 +112,28 @@ export async function town() {
   woman([wx + 1.8, wz + 0.5], 0, Math.PI / 2, { pose: 'stand', carry: 'pot', arms: 'head' }); woman([wx - 1.8, wz - 0.6], 0, -Math.PI / 2, { pose: 'talk' });
   woman([wx + 0.8, wz + 2.0], 0, Math.PI, { pose: 'squat' });
   T.push({ t: 'pot', kind: 'water_pot', n: 3, at: [wx + 2.6, wz + 1.6], y: 0, seed: 7 });
-  for (const l of lots()) {
+  for (const l of LOTS) {
     const [x0, z0, x1, z1] = l.rect, cx = (x0 + x1) / 2, front = l.front === 's' ? z1 + 1.4 : z0 - 1.4;
     if (rand() < 0.5) T.push({ t: 'drying_tray', at: [cx + 1.2, front], y: 0, rot: 0, seed: seed() });
     if (rand() < 0.5) T.push({ t: 'firewood', at: [x1 + 0.6, (z0 + z1) / 2], y: 0, rot: 0, seed: seed() });
     if (rand() < 0.45) T.push({ t: 'pot', kind: 'water_pot', n: 2, at: [x0 - 0.5, front], y: 0, seed: seed() });
     if (rand() < 0.5) (rand() < 0.5 ? woman : worker)([cx - 1.4, front + (l.front === 's' ? 1.0 : -1.0)], 0, l.front === 's' ? 0 : Math.PI, { pose: rand() < 0.4 ? 'squat' : 'stand' });
+  }
+  // the pen: two zebu and a calf-sized goat herd inside, the herdsman at the gate; the threshing floor at work; the shrine's keeper
+  T.push({ t: 'animal', kind: 'zebu', at: [(PEN[0] + PEN[2]) / 2 - 1.5, (PEN[1] + PEN[3]) / 2 + 1], y: 0, rot: 0.6, seed: 61 });
+  T.push({ t: 'animal', kind: 'buffalo', at: [(PEN[0] + PEN[2]) / 2 + 1.6, (PEN[1] + PEN[3]) / 2 + 0.8], y: 0, rot: 2.4, seed: 62, graze: true });
+  T.push({ t: 'animal', kind: 'goat', at: [PEN[0] + 1.2, PEN[3] - 1.2], y: 0, rot: 1.0, seed: 63 });
+  worker([(PEN[0] + PEN[2]) / 2 + 2.6, PEN[1] - 1.0], 0, 0.3, { pose: 'stand', carry: 'staff' });
+  worker([THRESH[0] - 1.6, THRESH[1] + 0.8], 0, 1.0, { pose: 'stand', carry: 'staff' }); woman([THRESH[0] + 1.8, THRESH[1] + 2.4], 0, -2.0, { pose: 'squat' }); woman([THRESH[0] - 2.2, THRESH[1] + 1.6], 0, 0.8, { pose: 'talk' });
+  T.push({ t: 'sacks', at: [THRESH[0] + 3.2, THRESH[1] + 3.3], y: 0, seed: 3 });
+  monk([VSHRINE[0] + 1.6, VSHRINE[1] + 2.0], 0, Math.PI, { pose: 'kneel', arms: 'pray', cloth: 'cloth_white', hair: 'long', dress: 'wrap' });
+  T.push({ t: 'pot', kind: 'water_pot', n: 2, at: [VSHRINE[0] - 1.6, VSHRINE[1] + 1.5], y: 0, seed: 11 });
+  for (const l of LOTS) {
+    const [x0, z0, x1, z1] = l.rect, cx = (x0 + x1) / 2, front = l.front === 's' ? z1 + (l.variant === 2 ? 3.7 : l.variant === 1 ? 2.2 : 1.4) : z0 - (l.variant === 1 ? 2.2 : 1.4);
+    if (rand() < 0.3) { T.push({ t: 'stool', at: [cx + 1.3, front + (l.front === 's' ? 0.5 : -0.5)], y: 0, rot: 0, seed: seed() }); woman([cx + 1.3, front + (l.front === 's' ? 0.5 : -0.5)], 0.0, l.front === 's' ? 0 : Math.PI, { pose: 'sit_low' }); }
+    if (rand() < 0.3) T.push({ t: 'animal', kind: rand() < 0.5 ? 'goat' : 'dog', at: [x0 - 1.2, front], y: 0, rot: rand() * 6.28, seed: seed(), graze: rand() < 0.5 });
+    if (rand() < 0.25) T.push({ t: 'chickens', at: [x1 + 1.8, front], y: 0, seed: seed() });
+    if (rand() < 0.3) T.push({ t: 'basket', at: [x1 + 0.6, front], y: 0, rot: rand() * 6, seed: seed() });
   }
   T.push({ t: 'chickens', at: [wx - 6, wz + 4], y: 0, seed: 3 }); T.push({ t: 'chickens', at: [wx + 9, wz - 5], y: 0, seed: 4 });
   for (let k = 0; k < 4; k++) T.push({ t: 'animal', kind: 'goat', at: [wx - 10 + k * 1.6, wz + 7 + (k % 2)], y: 0, rot: rand() * 6.28, seed: 40 + k, graze: k % 2 === 0 });
