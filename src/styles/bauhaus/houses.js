@@ -5,6 +5,7 @@ import { dessauHouse } from './tenement.js';
 import { masterHouse } from './masters.js';
 import { tortenRow, konsum } from './torten.js';
 import { dessauStreet } from './street.js';
+import { bauhausGarden } from './garden.js';
 
 /** bicycle: a 1920s roadster standing at `at` turned by rot. */
 function bicycle(el, ctx) {
@@ -14,4 +15,4 @@ function bicycle(el, ctx) {
   sk.rod('iron', W(0.5, 0.65), W(0.46, 0.92), 0.015, 4); sk.rod('iron', W(0.36, 0.95), W(0.56, 0.95), 0.012, 4); sk.b('iron', W(-0.05, 0.64)[0] - 0.12, y + 0.64, W(-0.05, 0.64)[2] - 0.05, W(-0.05, 0.64)[0] + 0.12, y + 0.68, W(-0.05, 0.64)[2] + 0.05);
 }
 
-export const HOUSE_ELEMENTS = { dessau_house: dessauHouse, bauhaus_master: masterHouse, torten_row: tortenRow, konsum, dessau_street: dessauStreet, bicycle };
+export const HOUSE_ELEMENTS = { dessau_house: dessauHouse, bauhaus_master: masterHouse, torten_row: tortenRow, konsum, dessau_street: dessauStreet, bauhaus_garden: bauhausGarden, bicycle };

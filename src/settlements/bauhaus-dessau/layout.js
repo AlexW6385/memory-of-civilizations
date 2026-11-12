@@ -34,6 +34,13 @@ export const MASTERS = [
   { id: 'muche', rect: [112, 48, 134, 70], kind: 'double', turn: 1, seed: 3 },
   { id: 'kandinsky', rect: [144, 48, 168, 68], kind: 'double', turn: 0, seed: 4 },
 ];
+/** The school's garden south of the workshop wing (docs §12): a clipped hedge along Mauerstrasse with a gate, two gravel-and-flag paths, vegetable and flower beds, benches, the bicycle shed. */
+export const GARDEN = [-17, 36, 30, 71];
+export const GARDEN_GATE = [50.2, 52.3];                       // the hedge's gap (z) where the main path meets the pavement
+export const GARDEN_PATHS = [[-17.5, 50.2, 30, 52.3], [9, 37, 11, 70.4]];
+export const GARDEN_BEDS = Array.from({ length: 10 }, (_, i) => [-14.2 + i * 2.2, 55, -13.1 + i * 2.2, 68]);
+export const GARDEN_SHED = [-14, 38.4, -3, 42.4];              // the bicycle shed: open to the south
+export const inGarden = (x, z, m = 0) => inRect(GARDEN, x, z, m);
 export const PINES = [30, 38, 188, 72];                        // the grove
 /** Törten's rows (docs §4): rows of two-storey flat-roofed houses, south-west. */
 export const TORTEN = [[-12, 118, 62, 128], [-12, 138, 62, 148], [-12, 162, 62, 172]];
