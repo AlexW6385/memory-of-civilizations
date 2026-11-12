@@ -27,7 +27,7 @@ export const ARRIVALS = {
   'abbasid-baghdad':  [-110, 0.1, 16, 0, 0.2],               // the Palace of the Golden Gate and its Green Dome across the esplanade, now busy with petitioners, horses, a caravan and mat-sellers
   'ur':               [0, 0.1, -118, 3.1416, 0.22],      // the ziggurat across its court
   'babylon':          [-40, 0.1, -360, 3.1416, 0.2],     // the Processional Way's lions to the Ishtar Gate
-  'persepolis':       [-135, 14.05, -75, -1.571, 0.16],  // on the terrace, the Apadana's porch
+  'persepolis':       [-122, 14.05, -60, -1.571, 0.16],  // at the head of the royal way, the guards' ranks leading to the Apadana's stair
   'isfahan':          [0, 0.1, 170, 3.1416, 0.17],       // the mosque's portal and minarets over the square, its dome rising beside them (from 44 m the court's wall hid the dome)
   'timurid-samarkand': [14, 0.1, 0, 1.5708, 0.32],      // the Registan: Ulugh Beg's madrasa, its pishtaq and four minarets across the square
   'petra':            [146, 0.1, -160, 1.5708, 0.36],    // the Treasury close at the Siq's mouth, 36 m off: columns, pediment and tholos each legible

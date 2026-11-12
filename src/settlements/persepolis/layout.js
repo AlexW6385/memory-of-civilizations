@@ -77,3 +77,6 @@ export function wells() {
   out.push({ at: [(MARKET[0] + MARKET[2]) / 2, (MARKET[1] + MARKET[3]) / 2], y: 0 });
   return out;
 }
+
+/** The court before the Apadana's west stair (the visitor's side): the royal way's centre line, the guards' ranks either side, the incense stands. */
+export const COURT = { wayZ: -60, ranks: [-64.5, -55.5], x0: -114, x1: -93, stands: [[-109, -62.6], [-109, -57.4]] };

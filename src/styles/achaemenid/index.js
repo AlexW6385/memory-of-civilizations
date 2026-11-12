@@ -10,7 +10,8 @@ import { box, frustum, lathe, fromTriangles, rod, orientOutward } from '../../co
 import { relief, strip, rosette } from './reliefs.js';
 import { jambScene } from './throne.js';
 import { fortification, guardGear, gift } from './fort.js';
-import { terracePaving, towerDress } from './court.js';
+import { terracePaving, towerDress, porchDress } from './court.js';
+import { incenseStand, courtAwning, courtWear, parasol } from './set.js';
 import { house, workshops, streetChannel, flagApron, gardenPlot } from './town.js';
 import '../qing/index.js';
 import { scribeKit } from '../sumerian/house.js';
@@ -56,8 +57,8 @@ function column(bag, col, x, z, y, h, d, beam = 'x', simple = false) {
       for (const vy of [yV + 0.33 * s, yP - 0.33 * s]) for (const o of [-0.33 * s, 0.33 * s]) {
         const c = [x + fx * q + lx * o, vy, z + fz * q + lz * o], out = (k) => [c[0] + fx * k, c[1], c[2] + fz * k];
         bag.add(C, rod(out(-0.05), out(0.1 * s), 0.31 * s, 14));
-        bag.add(C, rod(out(0.09 * s), out(0.16 * s), 0.2 * s, 12));
-        bag.add(C, rod(out(0.15 * s), out(0.21 * s), 0.08 * s, 8));
+        bag.add('egyptian_blue', rod(out(0.09 * s), out(0.16 * s), 0.2 * s, 12));   // the volutes' eyes carried paint [inferred from the traces of colour]
+        bag.add('stucco_red', rod(out(0.15 * s), out(0.21 * s), 0.08 * s, 8));
       }
     }
   }
@@ -268,6 +269,13 @@ function hall(el, { bag, col }) {
     wallSeg([x0 - th, z0, x0, z1], doors.includes('w'), 'w');
     wallSeg([x1, z0, x1 + th, z1], doors.includes('e'), 'e');
   }
+  // the plastered walls under the porticoes, dressed with niches and a glazed frieze (el.dress)
+  if (el.dress && th > 0 && !el.simple) {
+    const dd = dw0 / 2 + jw + 1.4, mz = (z0 + z1) / 2, mx = (x0 + x1) / 2, yy = y + 0.15;
+    if (port.includes('w')) porchDress({ face: 'w', r: [x0 - th, z0, x0, z1], y: yy, h, skip: [[mz - dd, mz + dd]] }, { bag });
+    if (port.includes('e')) porchDress({ face: 'e', r: [x1, z0, x1 + th, z1], y: yy, h, skip: [[mz - dd, mz + dd]] }, { bag });
+    if (port.includes('n')) porchDress({ face: 'n', r: [x0 - th, z0 - th, x1 + th, z0], y: yy, h, skip: [[mx - dd, mx + dd]] }, { bag });
+  }
   // the colossal bulls flanking the north portico on its antae (the Hundred-Column Hall), painted blue
   if (el.bulls && port.includes('n') && th > 0 && !el.simple) for (const xc of [x0 - th / 2, x1 + th / 2]) {
     const zc = P[1] + 2.9;
@@ -280,7 +288,7 @@ function hall(el, { bag, col }) {
     const t = el.towers, q = [cx - t / 2, cz - t / 2, cx + t / 2, cz + t / 2];
     bag.add(W, box(q[0], el.y ?? 0, q[1], q[2], y + h + 3, q[3])); col.rect(q, el.y ?? 0, y + h + 3);         // from the terrace: they stand out past the plinth
     if (!el.simple) merlons(bag, [q[0], q[1]], [q[2], q[1]], y + h + 3, 1.6, 1.2, W), merlons(bag, [q[0], q[3]], [q[2], q[3]], y + h + 3, 1.6, 1.2, W);
-    if (!el.simple) towerDress({ q, y0: el.y ?? 0, y1: y + h + 3 }, { bag });
+    if (!el.simple) towerDress({ q, y0: el.y ?? 0, y1: y + h + 3, c: [(P[0] + P[2]) / 2, (P[1] + P[3]) / 2] }, { bag });
   }
   // the main beams lying in the capitals' saddles (across the bulls), then the cedar ceiling and a flat earth roof over all, porticoes included
   if (!el.simple) {
@@ -791,6 +799,6 @@ function audience(el, { bag, col }) {
 
 registerStyle('achaemenid', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, terrace, hall, lamassu_gate: gate, audience, persian_house: house, street_channel: streetChannel, flag_apron: flagApron, garden_plot: gardenPlot, royal_workshops: workshops, apadana_stair: apadanaStair, treasury, fortification, guard_gear: guardGear, gift, terrace_paving: terracePaving, tower_dress: towerDress, scribe_kit: scribeKit },
+  elements: { ...STYLES.qing.elements, terrace, hall, lamassu_gate: gate, audience, persian_house: house, street_channel: streetChannel, flag_apron: flagApron, garden_plot: gardenPlot, royal_workshops: workshops, apadana_stair: apadanaStair, treasury, fortification, guard_gear: guardGear, gift, terrace_paving: terracePaving, tower_dress: towerDress, incense_stand: incenseStand, court_awning: courtAwning, court_wear: courtWear, parasol, scribe_kit: scribeKit },
   objects: {},
 });

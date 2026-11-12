@@ -18,7 +18,7 @@ const spots = [[-340, rz + 3], [-300, rz - 4], [-260, rz + 3], [-215, rz - 3], [
   [-350, -30], [-350, 70], [-304, 100], [-248, -20], [-248, 200], [-190, 20], [-190, 130]];
 for (const [x, z] of spots) perches.push({ kind: 'sparrow', x, z, y: ground.height(x, z), rot: (x * 7) % 3, range: [1.6, 1.4] });
 // on the terrace: sparrows on the paving before the Apadana's stairway and at the gate
-for (const [x, z] of [[-70, -128], [-20, -126], [10, -132], [-130, -128]]) perches.push({ kind: 'sparrow', x, z, y: TERRACE.h, rot: (x * 5) % 3, range: [1.8, 1.4] });
+for (const [x, z] of [[-70, -128], [-20, -126], [10, -132], [-130, -128], [-116, -66.8], [-108, -53.2], [-100, -66.5], [-96, -53.5], [-118, -61], [-104, -96.8], [-125, -50]]) perches.push({ kind: 'sparrow', x, z, y: TERRACE.h, rot: (x * 5) % 3, range: [1.8, 1.4] });
 // more of them, on every street near the arrival (at the doors, by the wells), on the roofs' parapets and along the workshops' wall top
 {
   let k = 0;
@@ -34,6 +34,7 @@ for (const [x, z] of [[-70, -128], [-20, -126], [10, -132], [-130, -128]]) perch
   void STREETS;
 }
 // swallows low over the streets, following the visitor along the road and the cross streets
+flights.push({ kind: 'swallow', n: 4, loop: { c: [-110, -60], a: [40, 30], rot: 0.1 }, y: [6, 16], speed: 9 });
 flights.push({ kind: 'swallow', n: 4, loop: { c: [-290, -140], a: [60, 16], rot: 0, y: [3, 8] }, y: [3, 9], speed: 9 });
 flights.push({ kind: 'swallow', n: 3, loop: { c: [-250, 20], a: [14, 90], rot: 0.1 }, y: [4, 11], speed: 8 });
 export default { fish, flights, perches };

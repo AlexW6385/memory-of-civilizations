@@ -4,7 +4,7 @@
 // src/engine/smoke.js (one draw call); positions come from the layout and the style's own vents.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, WORKSHOPS, TERRACE, lots } from './layout.js';
+import { RADIUS, WORKSHOPS, TERRACE, COURT, lots } from './layout.js';
 import { houseVent, workshopVents } from '../../styles/achaemenid/town.js';
 
 const ID = 'persepolis';
@@ -17,6 +17,8 @@ export function emitters() {
   workshopVents(WORKSHOPS).forEach((p, i) => E.push({ p, kind: 'kitchen', thr: 0, seed: 30 + i }));
   // the incense burners before the throne in the Apadana (audience: c [-30, -40] facing north, 2.75 m plinth, stands 2.1 m)
   for (const x of [-33.6, -26.4]) E.push({ p: [x, TERRACE.h + 2.75 + 2.15, -43.2], kind: 'incense', thr: 0, seed: Math.floor(x) + 90 });
+  // the stands at the head of the royal way, burning all day
+  COURT.stands.forEach(([x, z], i) => E.push({ p: [x, TERRACE.h + 1.25, z], kind: 'incense', thr: 0, seed: 120 + i }));
   return E;
 }
 

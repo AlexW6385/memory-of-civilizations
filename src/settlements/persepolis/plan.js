@@ -3,7 +3,7 @@
 // on its plinth (36 columns of 20 m and three porticoes, corner towers), the Hall of a Hundred
 // Columns, the Tachara and the Hadish, the Treasury, the mudbrick wall along the mountain.
 
-import { TERRACE, STAIR, mountain } from './layout.js';
+import { TERRACE, STAIR, COURT, mountain } from './layout.js';
 import { people } from './people.js';
 
 const E = [], T = TERRACE.h, [tx0, tz0, tx1, tz1] = TERRACE.rect;
@@ -25,12 +25,18 @@ E.push({ t: 'terrace', rect: TERRACE.rect, y0: -1, y1: T, gaps: [[tx0 - 2, STAIR
 }
 // the paving of the court between the stair and the Apadana: slabs, and the stone drains that carried the rain off the terrace
 E.push({ t: 'terrace_paving', rect: [-148, -140, -86, -20], y: T, drains: [[-148, -81.4, -86, -81.2], [-114, -140, -113.8, -20]] });
+// the wear of the paving, the incense stands at the head of the royal way, the awnings over the scribes and over the grooms' horses
+E.push({ t: 'court_wear', rect: [-148, -140, -86, -20], y: T, way: [-64.5, -55.5], seed: 480, dust: [[-145, -138, 6, 4], [-145, -142, 5, 5], [-88, -60, 3, 18], [-122, -122, 14, 3], [-108, -27, 16, 3]] });
+for (const [x, z] of COURT.stands) E.push({ t: 'incense_stand', at: [x, z], y: T });
+E.push({ t: 'parasol', at: [-110.3, -69.5], y: T, cloth: 'cloth_red' }, { t: 'parasol', at: [-110.1, -49.7], y: T, cloth: 'cloth_indigo' });
+E.push({ t: 'court_awning', rect: [-104.5, -38, -95, -29.5], y: T, h: 2.9, cloth: 'cloth_white', trim: 'cloth_red' });
+E.push({ t: 'court_awning', rect: [-119, -99, -98, -93.5], y: T, h: 2.9, cloth: 'cloth_ochre', trim: 'cloth_indigo' });
 // the scribes of the court seated at their mats by the stair, tablets drying beside them (the Aramaic scribes: leather scrolls)
-for (const [x, z, rot, scroll] of [[-100.5, -45.5, -Math.PI / 2, false], [-100.5, -43.5, -Math.PI / 2, true], [-107, -104, Math.PI / 2, true]]) E.push({ t: 'scribe_kit', at: [x, z], y: T, rot, scroll });
+for (const [x, z, rot, scroll] of [[-100.5, -34.5, -Math.PI / 2, false], [-100.5, -32.5, -Math.PI / 2, true], [-107, -104, Math.PI / 2, true]]) E.push({ t: 'scribe_kit', at: [x, z], y: T, rot, scroll });
 // the Gate of All Nations
 E.push({ t: 'lamassu_gate', c: [-112, STAIR.z], s: 25, h: 17, y: T });
 // the Apadana on its 2.6 m plinth: 6 × 6 columns in the hall, porticoes north, west and east
-E.push({ t: 'hall', rect: [-60, -90, 0, -30], y: T, plinth: 2.6, h: 20, grid: [6, 6], porticoes: 'nwe', portDepth: 17, walls: 5, towers: 20, doors: 'nwe',
+E.push({ t: 'hall', rect: [-60, -90, 0, -30], y: T, plinth: 2.6, h: 20, grid: [6, 6], porticoes: 'nwe', portDepth: 17, walls: 5, towers: 20, doors: 'nwe', dress: true,
   stairs: [{ face: 'w', W: 26, flight: 9, D: 6, wings: ['nobles', 'nobles'], c: -60 }] });   // the west porch's stair (the visitor's side) [inferred]
 E.push({ t: 'audience', c: [-30, -40], y: T + 2.75, dir: [0, -1], aisle: 44 });
 // its two stairways, north and east, with their reliefs: the nobles on the north, the delegations on the east stair's south wing
