@@ -152,15 +152,18 @@ function square() {
   for (const [x, z] of [[-45, -190], [-45, -172], [30, -196], [30, -164], [-10, -199], [-10, -161], [8, -174], [-30, -186]]) L.push({ t: 'gas_lamp', at: [x, z], y: GROUND });
   return L;
 }
-/** Which buildings stand open (DESIGN §4.3): two pubs, ten shops of different trades and five houses, nearest the arrival and along Bridge Street
- *  toward the bridge, and two houses at the Lambeth end of the bridge (§5a). */
+/** Which buildings stand open (DESIGN §4.3): round the arrival on the bridge (ARRIVAL) the two pubs, nine shops of different trades and five
+ *  houses nearest it, within 120 m on the Westminster side of the river and in Lambeth (§5a); and, along Bridge Street toward the square, a pub,
+ *  three shops and two houses (the way on to Parliament Square). */
+const ARRIVAL = [200, -170];
 function openSet(all) {
   const out = new Set(), cx = (l) => (l.rect[0] + l.rect[2]) / 2, cz = (l) => (l.rect[1] + l.rect[3]) / 2;
   const d = (l, p) => Math.hypot(cx(l) - p[0], cz(l) - p[1]), ok = (l) => l.rect[3] - l.rect[1] >= 8 && l.rect[2] - l.rect[0] >= 5;
-  const near = (p, f, n, per = 99) => { const seen = {}; for (const l of all.filter((q) => ok(q) && f(q) && !out.has(q)).sort((a, b) => d(a, p) - d(b, p))) { const k = l.trade ?? 'x'; if ((seen[k] = (seen[k] ?? 0) + 1) > per) continue; out.add(l); if (--n === 0) break; } };
+  const near = (p, f, n, per = 99, rmax = 1e9) => { const seen = {}; for (const l of all.filter((q) => ok(q) && f(q) && !out.has(q) && d(q, p) < rmax).sort((a, b) => d(a, p) - d(b, p))) { const k = l.trade ?? 'x'; if ((seen[k] = (seen[k] ?? 0) + 1) > per) continue; out.add(l); if (--n === 0) break; } };
+  near(ARRIVAL, (l) => l.pub, 2, 99, 118); near(ARRIVAL, (l) => l.shop, 9, 1, 118); near(ARRIVAL, (l) => !l.shop && !l.pub, 5, 99, 118);
   const A = [60, BRIDGE.z];
-  near(A, (l) => l.pub, 2); near(A, (l) => l.shop, 14, 2);
-  near([30, BRIDGE.z - 40], (l) => !l.shop && !l.pub, 5); near([272, BRIDGE.z + 14], (l) => !l.shop && !l.pub, 2);
+  near(A, (l) => l.pub, 1); near(A, (l) => l.shop, 3, 1);
+  near([30, BRIDGE.z - 40], (l) => !l.shop && !l.pub, 2);
   return out;
 }
 /** The terraces cut into TILE-metre tiles, each built in full (near) and simple (far) like ../lod.js lodTiles, but larger: a plan costs one mesh
