@@ -2,7 +2,8 @@
 // the south side; the hills rising north, east and west, cut into terraces — paddy on the lower ones,
 // tea on the upper — and fir and bamboo on the slopes beyond; the damp humid-subtropical sky of the
 // Fujian hills. docs/settlements/hakka-tulou.md §2, §4.3.
-import { RADIUS, STREAM, streamZ, inStream, inFoot, hill, terrace, terraced, sm, inRect, YARD, ROAD, T } from './layout.js';
+import { RADIUS, STREAM, streamZ, inStream, inFoot, hill, terrace, terraced, sm, inRect, YARD, ROAD, T, HOUSES, PLOTS, inRect as _ir } from './layout.js';
+const nearHouse = (x, z, m) => HOUSES.some((h) => { const q = Math.abs(Math.sin(h.yaw)) > 0.5; return Math.abs(x - h.c[0]) < (q ? h.d : h.w) / 2 + m && Math.abs(z - h.c[1]) < (q ? h.w : h.d) / 2 + m; });
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 function vnoise(x, z) {
@@ -30,6 +31,7 @@ function cover(x, z, h) {
   const r = Math.hypot(x, z), n = vnoise(x * 0.09, z * 0.09);
   const c = { sand: 0, grass: 0.35, rock: 0, soil: 0.5, fields: 0, dry: 0.12, warmth: 0.45, red: 0.35, road: 0, snow: 0, forest: 0 };
   if (inStream(x, z, 1.2)) { c.sand = 0.4; c.soil = 0.3; c.rock = 0.3; c.grass = 0; return c; }
+  if (PLOTS.some((p) => _ir(p, x, z, 0))) { c.soil = 0.9; c.grass = 0.05; c.fields = 0.1; return c; }
   if (r < T.R + 2 || inFoot(x, z, 0)) { c.soil = 0.8; c.grass = 0.05; c.road = 0.4; return c; }
   if (inRect(YARD, x, z, 1) || inRect(ROAD, x, z, 0.5) && z > 30) { c.road = 1; c.soil = 1; c.grass = 0; return c; }
   if (z > 58 && z < streamZ(x) - 4 && Math.abs(x) < 118) { c.fields = 0.8; c.grass = 0.2; c.soil = 0.1; return c; }
@@ -54,6 +56,7 @@ function planting(x, z) {
   if (r > RADIUS - 6 || inStream(x, z, 0.6) || inFoot(x, z, 1.5)) return null;
   if (inRect(YARD, x, z, 1) || inRect(ROAD, x, z, 1.2)) return null;
   const s = slopeH(x, z), n = vnoise(x * 0.06 + 3, z * 0.06 - 5), g = vnoise(x * 0.15, z * 0.15 + 9);
+  if (nearHouse(x, z, 11)) return { bamboo: 1.6 * sm(-0.3, 0.3, g), persimmon: 0.05, camphor: 0.03, grass: 6 };
   if (z > 58 && z < streamZ(x) - 4.5 && Math.abs(x) < 118) return { rice: 90 };
   if (Math.abs(z - streamZ(x)) < 8) return { bamboo: 1.2 * sm(0.0, 0.5, n), willow: 0.15, grass: 8 };
   if (s > 15) return { chinese_fir: 0.35, masson_pine: 0.15, bamboo: 0.6 * sm(-0.2, 0.4, g), grass: 3 };
@@ -61,13 +64,14 @@ function planting(x, z) {
   if (s > 0.6) return { rice: 70 };
   if (z > streamZ(x) + 5 && z < 150) return { rice: 90 };
   if (Math.abs(x) > 100 && Math.abs(x) < 125 || (z < -55 && z > -105)) return { rice: 90 };
+  // behind the hamlet's rows: bamboo, persimmon and a camphor or two
   // by the tulou: camphor and a banyan at the front, bamboo clumps at the back, fruit trees about the yards
   if (z < -34 && Math.hypot(x, z + 55) < 30) return { bamboo: 3.0 * sm(-0.1, 0.4, g), camphor: 0.05, grass: 4 };
   return { camphor: 0.05, banyan: 0.008, grass: 5 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { bamboo: 3, willow: 0.15, chinese_fir: 0.35, masson_pine: 0.15, tea: 22, rice: 90, camphor: 0.05, banyan: 0.008, grass: 8 },
+  maxDensity: { bamboo: 3, willow: 0.15, chinese_fir: 0.35, masson_pine: 0.15, tea: 22, rice: 90, camphor: 0.05, banyan: 0.008, grass: 8, persimmon: 0.06 },
   climate: {
     waterline: STREAM.water,
     sun: { az: 150, el: 45, color: [1.0, 0.94, 0.84], intensity: 3.0, lat: 24.7, dec: 12, hour: 10 },
