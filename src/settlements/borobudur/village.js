@@ -73,6 +73,9 @@ function way() {
   L.push(person(rand, [WAY.gate - 2.4, 3.1], 0, faceTo([1, 0]), { pose: 'stand', man: true, hat: 'none' }));
   // people on the way: pairs walking up with offerings (the movers add the rest)
   for (let k = 0; k < 10; k++) L.push(person(rand, [100 + rand() * 120, (rand() < 0.5 ? -1 : 1) * (0.6 + rand() * 0.9)], 0, faceTo([-1, 0]), { carry: pick(rand, ['basket', 'pot', 'pole', 'none']) }));
+  // the precinct's low wall running off from the gate's two pylons, and a kerb of andesite along the paved way's edges (the way is 4 m wide)
+  for (const sd of [-1, 1]) E.push({ t: 'pagar', a: [WAY.gate, sd * 5.9], b: [WAY.gate, sd * 44], h: 1.7 });
+  for (const sd of [-1, 1]) E.push({ t: 'block', walk: true, rect: [66, sd < 0 ? -2.28 : 2.0, 150, sd < 0 ? -2.0 : 2.28], y0: 0, y1: 0.11, mat: 'andesite' });
   // pennant poles (umbul-umbul) down both sides of the way, a pair at the gate; none in the visitor's view at the arrival
   for (let x = WAY.gate - 4, k = 0; x < WAY.x1 - 20; x += 8.5 + rand() * 3, k++) {
     const side = k % 2 ? 1 : -1;

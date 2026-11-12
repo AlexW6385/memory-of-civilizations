@@ -44,7 +44,7 @@ function fromWater() { return 1e4; }
 function planting(x, z) {
   const r = Math.hypot(x, z);
   if (x > 60 && Math.abs(z) < 3.5) return null;      // the paved way from the east
-  if (nearWay(x, z) && x < WAY.x1 + 6) return Math.abs(z) < 9 ? { grass: 14 } : inHouse(x, z, 2.2) ? null : { banyan: 0.14, teak: 0.3, date_palm: 0.7, bamboo: 0.3, grass: 20 };   // (the lodgings' lots are clear)   // bare verges, then shade trees along the way
+  if (nearWay(x, z) && x < WAY.x1 + 6) return Math.abs(z) < 9 ? { grass: 14 } : inHouse(x, z, 2.2) || Math.abs(x - WAY.gate) < 2.6 ? null : { banyan: 0.14, teak: 0.3, date_palm: 0.7, bamboo: 0.3, grass: 20 };   // (the lodgings' lots are clear)   // bare verges, then shade trees along the way
   if (r > RADIUS - 6 || r < 100) return r < 100 && r > 75 ? { grass: 30 } : null;
   if (inHouse(x, z, 1.5) || inRect(MONASTERY, x, z, 1)) return null;
   if (nearHamlet(x, z)) return { date_palm: 1.0, bamboo: 0.8, banyan: 0.08, teak: 0.25, grass: 25 };

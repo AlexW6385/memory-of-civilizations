@@ -138,6 +138,19 @@ Still not built: the volcanoes on the horizon; water (the Progo and the Elo, the
 Sources added:
 - [Ancient Musical Instruments in Sound of Borobudur — injourneydestination.id](https://injourneydestination.id/ancient-musical-instruments-in-sound-of-borobudur/)
 
+## 17. Seventh pass: the arrival and the first hundred metres (2026-11-12)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| The arrival kept clear | Nothing stands in the view down the way from the arrival (x 110): no figure, stall or pole within 4 m of the way's floor between x 100 and 114; the stalls keep 9 m clear of it | tour review: a porter 2 m from the camera and a stall's roof at the screen's edge [stated: coordinator's review]; the rule is ours |
+| Pennant poles (umbul-umbul) | Bamboo poles 4.6–6 m with a crossbar and three long tapering streamers of red, white, ochre or indigo cloth, a bronze finial, on a small andesite footing, every 8–12 m down both sides of the way, a pair at the gate | banners, parasols and standards are carried and raised in the Borobudur reliefs' processions and are a living Javanese festival form [inferred from the reliefs and the continuing umbul-umbul]; the cloth and their number [inferred] |
+| Stalls hung and furnished | A bamboo rail under each stall's front eave with bunches of bananas and hanging baskets (food), strings of flower garlands (offerings); firewood and sacks behind the food stalls, baskets, drying trays and a child at the counter | bananas and the plaited basket in the reliefs' market and meal scenes [inferred]; the rest [inferred] |
+| The forecourt before the gate | Pilgrims gathering, washing at the jars, pausing, monks with alms bowls, sellers of flowers, dogs | the pilgrim's approach and the ritual washing before the circumambulation [inferred] |
+| Lodgings by the way | Five furnished houses on posts 11–15 m off the way (hearth, loom or shrine variants), the household's pots, bench, hens, firewood, a goat or a wash line before each, someone on the bench | pilgrims were lodged near the monument [inferred]; the house type as §14 [inferred from the reliefs] |
+| The precinct wall and the way's kerb | A low brick wall with an andesite coping running 38 m off each side of the gate's pylons; a kerb of andesite along both edges of the paved way | a bounded precinct round the monument [inferred]; the kerb and the wall [inferred] |
+| Incense and mist | Incense before the offering stalls and at the gate; the morning mist and shower fog lighter so that the monument stays legible from the arrival | [inferred] |
+
+
 ## Sources
 
 - [Borobudur — Studio Matrx](https://www.studiomatrx.org/architecture-canon/borobudur)

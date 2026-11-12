@@ -4,7 +4,7 @@
 // src/engine/smoke.js; positions come from layout.js. Emitters in the settlement's frame.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, MONUMENT, MONASTERY, CELLS, houses, floorOf, wayStalls } from './layout.js';
+import { RADIUS, MONUMENT, MONASTERY, CELLS, WAY, houses, floorOf, wayStalls } from './layout.js';
 
 const ID = 'borobudur';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -19,6 +19,9 @@ function emitters() {
   }
   // the hearths of the way's food stalls (steam and smoke through the thatch), the monks' kitchen houses
   for (const st of wayStalls()) if (st.kind === 'warung' && rand() > 0.3) E.push({ p: [st.at[0], 3.1, st.at[1]], kind: 'kitchen', seed: st.seed + 1 });
+  // incense before the offering stalls and at the precinct's gate, where the pilgrims light it
+  for (const st of wayStalls()) if (st.kind === 'pasar' && rand() > 0.4) E.push({ p: [st.at[0] + 0.4, 1.5, st.at[1] - st.side * 0.3], kind: 'incense', thr: 0.05, seed: st.seed + 2 });
+  for (const sd of [-1, 1]) E.push({ p: [WAY.gate - 2, 0.9, sd * 3.2], kind: 'incense', thr: 0.05, seed: 60 + sd });
   for (const [x, z, , f] of CELLS) if (f && rand() < 0.5) E.push({ p: [x, floorOf(x * 7 + z) + 4.6, z], kind: 'kitchen', seed: Math.floor(x * 3 - z) });
   // incense in the great hall, before the Buddha, and at the monument's east stair
   E.push({ p: [MONASTERY[0] + 4.6, 2.0, -141], kind: 'incense', thr: 0, seed: 7 });
