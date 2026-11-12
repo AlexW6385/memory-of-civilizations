@@ -2,7 +2,7 @@
 // mosquitoes; thin by day, a little more at the evening meal. Engine part: src/engine/smoke.js; positions from layout.js.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { CAMPS, RADIUS, height } from './layout.js';
+import { CAMPS, RADIUS, height, shelterSpots } from './layout.js';
 
 const ID = 'kakadu';
 export function emitters() {
@@ -12,6 +12,7 @@ export function emitters() {
     E.push({ p: [x, height(x, z) + 0.45, z], kind: 'kitchen', thr: 0.02, seed: 11 + i });
     if (C.turtle) E.push({ p: [x + 0.55, height(x, z) + 0.2, z + 0.2], kind: 'steam', thr: 0.1, seed: 21 + i });
   });
+  shelterSpots().forEach(([kind, x, z], i) => { if (kind === 'hearth') E.push({ p: [x, height(x, z) + 0.45, z], kind: 'kitchen', thr: 0.05, seed: 41 + i }); });
   return E;
 }
 const ATT = [];

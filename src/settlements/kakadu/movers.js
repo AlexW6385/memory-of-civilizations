@@ -7,7 +7,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 14, night: 1, rain: 0.4, reach: 130, spawnMin: 24, far: 40 },
+  walkers: { day: 26, night: 2, rain: 0.4, reach: 150, spawnMin: 20, far: 40 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -0.4,
 };
@@ -22,6 +22,11 @@ export function walkways() {
   rects.push({ r: [SMALL.x0, SMALL.zl - 4, SMALL.x1, -20], weight: 0.6, market: 0.2, kind: 'lane' });
   for (const C of CAMPS) rects.push({ r: [C.c[0] - 5, C.c[1] - 4, C.c[0] + 5, C.c[1] + 4], weight: 0.8, market: 0.3, kind: 'lane' });
   rects.push({ r: [-36, -19, -30, -4], weight: 0.8, market: 0.2, kind: 'lane' });
+  rects.push({ r: [-56, -27, -52, -19], weight: 0.6, market: 0.2, kind: 'lane' });     // the small shelter's camp to the way
+  rects.push({ r: [5, -19, 11, -8], weight: 0.9, market: 0.3, kind: 'lane' });         // the apron camp
+  rects.push({ r: [-32, -19, -26, 26], weight: 0.5, market: 0.2, kind: 'lane' });      // down to the west bank
+  rects.push({ r: [28, -17, 34, 12], weight: 0.9, market: 0.3, kind: 'lane' });
+  rects.push({ r: [30, 8, 58, 14], weight: 0.5, market: 0.2, kind: 'lane' });          // across to the east hollow
   rects.push({ r: [-14, -19, -8, 14], weight: 0.7, market: 0.2, kind: 'lane' });
   return { rects, links: [], clip: RADIUS - 14 };
 }
@@ -36,6 +41,10 @@ export const WALKERS = [
     c1: [CL.brown, CL.ochre], c2: [CL.ochre, CL.white], c3: [CL.black], speed: [0.85, 1.1], stride: 1.2, h: [0.9, 0.97] },
   { id: 'bag', weight: 1.0, market: 0.8, el: { dress: 'strands', hat: 'none', over: 'none', carry: 'basket', arms: 'head', hair: 'short', feet: 'bare' }, swing: 0.5,
     c1: [CL.brown], c2: [CL.ochre], c3: [CL.black], speed: [0.75, 1.0], stride: 1.15, h: [0.9, 0.97] },
+  { id: 'digger', weight: 1.0, market: 0.8, el: { dress: 'strands', hat: 'none', over: 'none', carry: 'staff', arms: 'hang', hair: 'short', feet: 'bare' }, swing: 0.6,
+    c1: [CL.brown, CL.ochre], c2: [CL.ochre], c3: [CL.black], speed: [0.8, 1.05], stride: 1.2, h: [0.9, 0.97] },
+  { id: 'spear', weight: 0.9, market: 0.9, el: { dress: 'loincloth', hat: 'none', over: 'none', carry: 'staff', arms: 'hang', hair: 'long', beard: true, feet: 'bare' },
+    c1: [CL.brown, CL.white], c2: [CL.ochre], c3: [CL.black], speed: [0.95, 1.3], stride: 1.4 },
   { id: 'boy', weight: 0.8, market: 0.8, el: { dress: 'loincloth', hat: 'none', over: 'none', arms: 'hang', hair: 'short', feet: 'bare' },
     c1: [CL.brown], c2: [CL.ochre], c3: [CL.black], speed: [1.1, 1.5], stride: 1.0, h: [0.6, 0.72], swing: 1.1 },
 ];
