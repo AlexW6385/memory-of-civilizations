@@ -92,6 +92,24 @@ export async function town() {
     if (Math.abs(at[0]) < 36 && Math.abs(at[1] + 8) < 30) continue;
     (rand() < 0.5 ? woman : man)(at, 0, rand() * 6.28, { carry: rand() < 0.5 ? 'pole' : 'basket' });
   }
+  // south of the opened house, in the trodden yard before the town: a potter's drying ground with pots on a mat and firewood, a woman grinding
+  // grain at a saddle quern with a child at her knee, a man mending a basket, children at play with clay balls, a dog asleep, a hearth fire's ash
+  {
+    const cxm = (LANDMARK.rect[0] + LANDMARK.rect[2]) / 2, zs = LANDMARK.rect[3];
+    const A = [cxm - 8.5, zs + 9], B = [cxm + 8.5, zs + 8];
+    E.push({ t: 'goods_mat', at: A, y: 0.02, rot: 0.3, goods: 'pottery', seed: 11 });
+    E.push({ t: 'pot', kind: 'water_pot', n: 3, at: [A[0] + 1.6, A[1] + 0.4], y: 0.02, seed: 12 });
+    E.push({ t: 'firewood', at: [A[0] - 1.8, A[1] - 0.4], y: 0.02, rot: 0.2, len: 1.0, seed: 13 });
+    woman([A[0] + 0.2, A[1] + 1.3], 0.02, Math.PI + 0.3, { pose: 'squat', over: 'none' });
+    E.push({ t: 'goods_mat', at: B, y: 0.02, rot: -0.2, goods: 'produce', seed: 14 });
+    woman([B[0] + 0.2, B[1] + 1.2], 0.02, Math.PI, { pose: 'kneel', over: 'none' });
+    woman([B[0] - 0.9, B[1] + 1.0], 0.02, 0.5, { child: true, h: 0.7, pose: 'sit_ground' });
+    E.push({ t: 'basket', n: 3, at: [B[0] + 1.8, B[1] - 0.3], y: 0.02, seed: 15 });
+    man([B[0] + 2.6, B[1] + 1.6], 0.02, 2.4, { pose: 'sit_ground' });
+    for (let q = 0; q < 3; q++) woman([cxm - 2.5 + q * 1.1, zs + 12.5 + (q % 2) * 0.8], 0.02, rand() * 6, { child: true, h: 0.8 + q * 0.05 });
+    E.push({ t: 'animal', kind: 'dog', at: [cxm + 4.2, zs + 11], y: 0, rot: 2, seed: 61 });
+    man([cxm - 13, zs + 14], 0.02, -1.2, { carry: 'basket' }); woman([cxm + 12, zs + 16], 0.02, 3, { carry: 'pole' });
+  }
   // the pens: sheep and goats in one, cattle (the great aurochs' kin, dark and long-horned) in the other
   PENS.forEach((p, n) => {
     const [x0, z0, x1, z1] = p.rect;
