@@ -39,13 +39,13 @@ export function yard() {
     for (let k = 0; k < 6; k++) { const x = mx0 + 3 + k * 2.2, z = mz1 - 1.6; fig([x, z], my + 0.05, [x, z - 3], { pose: 'cross', over: 'none', hat: 'cap' }); } }
   // readers at the Qur'an stands (the stands are the style's: mosqueStands), a teacher with his boys on mats in a side bay, two men resting against a pillar, one at the water jar by the door
   { const stands = mosqueStands(MOSQUE, 4.6);
-    stands.forEach((p, k) => { if (k % 5 === 4) return; fig([p.x - 0.35, p.z + 0.82], my + 0.1, [p.x - 0.35, p.z - 6], { pose: 'cross', over: 'none', hat: pick(['cap', 'cap', 'turban']), beard: rand() < 0.6 }); });
+    stands.forEach((p, k) => { if (k % 5 === 4 || Math.hypot(p.x - 0.3 + 9.95, p.z + 0.82 - 32.5) < 7) return; fig([p.x - 0.35, p.z + 0.82], my + 0.1, [p.x - 0.35, p.z - 6], { pose: 'cross', over: 'none', hat: pick(['cap', 'cap', 'turban']), beard: rand() < 0.6 }); });
     const tx = mx0 + 4.615 * 5.5, tz = mz0 + 5 * 6.5;
     fig([tx, tz], my + 0.08, [tx + 1.2, tz + 2.4], { pose: 'cross', over: 'none', hat: 'turban', beard: true, cloth: 'cloth_white' });
     for (let k = 0; k < 5; k++) { const a = -0.9 + k * 0.45; child([tx + Math.sin(a) * 2.0 + 0.3, tz + 2.4 + Math.cos(a) * 0.9], my + 0.08, [tx, tz], { pose: 'cross' }); }
     L.push({ t: 'stool', at: [tx - 1.1, tz - 0.4], y: my + 0.07, rot: 0, seed: 12 });
     for (const [dx, dz] of [[2.3, 0.4], [2.9, 0.9]]) fig([mx0 + 4.615 * 7.5 + dx, mz0 + 5 * 3.5 + dz], my + 0.08, [mx0 + 4.615 * 7.5, mz0 + 5 * 3.5], { pose: 'sit_ground', over: 'none', hat: 'cap' });
-    fig([-9.2, mz1 - 3.4], my + 0.05, [-8.4, mz1 - 1.3], { pose: 'stand', over: 'none', hat: 'turban', carry: 'none' }); }
+    fig([-12.2, mz1 - 3.0], my + 0.05, [-13.6, mz1 - 1.2], { pose: 'stand', over: 'none', hat: 'turban', carry: 'none' }); }
   // the Qur'an school in the shade of the palms at the mosque's south-east corner: the teacher with his board, the boys on a mat reciting; a water-seller with his jar at the north door
   { const cx = 23.6, cz = 31.5, y = height(cx, cz);
     L.push({ t: 'goods_mat', goods: ['baskets'], at: [cx, cz], y, rot: 0, seed: 313 });
