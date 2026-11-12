@@ -3,7 +3,7 @@
 // Temple of the Three Windows, the Intihuatana on its terraced hill, the Main Plaza; the terraces'
 // walls round the saddle, with stairs down them.
 
-import { SITE, TERRACE, HILL, KNOLL, hillRing, PLAZA, TOWN_WALL, DITCH, STORES, KALLANKA, SACRED_ROCK, waterworks } from './layout.js';
+import { SITE, NECK, TERRACE, HILL, KNOLL, hillRing, PLAZA, TOWN_WALL, DITCH, STORES, KALLANKA, SACRED_ROCK, waterworks } from './layout.js';
 import { ground } from './ground.js';
 
 const E = [];
@@ -14,20 +14,37 @@ for (let k = 0; k < TERRACE.n; k++) {
   // the wall runs on to the very sides of the stairs (they are 2.2 m wide), not leaving banks of earth beside them
   const cut = 1.12, tz = Math.asin(cut / b), tx = Math.asin(cut / a);
   const inGap = (p) => (Math.abs(p[1]) < cut - 1e-6 && Math.abs(p[0]) > a * 0.5) || (p[1] > b * 0.5 && Math.abs(p[0]) < cut - 1e-6);
+  // the saddle's shape: the ellipse cut to the neck, so the ellipse's ring stands only where this holds
+  const zc = NECK.z0 + s, wn = NECK.w + s, keep = (p) => p[1] <= zc + 1e-6 || Math.abs(p[0] - NECK.xc) <= wn + 1e-6;
   const n = 96, ts = [];
   for (let i = 0; i <= n; i++) ts.push(-Math.PI + 2 * Math.PI * i / n);
   ts.push(tz, -tz, Math.PI - tz, -Math.PI + tz, Math.PI / 2 - tx, Math.PI / 2 + tx);
+  // the exact places the ring meets the shoulder line and the neck's edges
+  { const q = Math.asin(Math.min(1, zc / b)); ts.push(q, Math.PI - q);
+    for (const sg of [-1, 1]) { const c = (NECK.xc + sg * wn) / a; if (Math.abs(c) <= 1) ts.push(Math.acos(c)); } }
   ts.sort((p, q) => p - q);
   let pts = [];
   ts.forEach((t, i) => {
     const p = [Math.cos(t) * a, Math.sin(t) * b], buried = ground.height(p[0], p[1]) > y1 + 1;     // under a peak's slope
-    if (inGap(p) || buried) { if (pts.length > 1) E.push({ t: 'ring_wall', pts, y0, y1 }); pts = []; return; }
+    if (inGap(p) || buried || !keep(p)) { if (pts.length > 1) E.push({ t: 'ring_wall', pts, y0, y1 }); pts = []; return; }
     if (pts.length && Math.hypot(p[0] - pts[pts.length - 1][0], p[1] - pts[pts.length - 1][1]) < 0.05) return;
     pts.push(p);
     // now and then a flight of stones standing out of the wall, climbing across its face
     if (pts.length > 1 && (i + k * 7) % 19 === 3 && Math.hypot(p[0] - pts[pts.length - 2][0], p[1] - pts[pts.length - 2][1]) > 4) E.push({ t: 'flying_stair', a: pts[pts.length - 2], b: p, from: 0.9, y0, y1, dir: 1 });
   });
   if (pts.length > 1) E.push({ t: 'ring_wall', pts, y0, y1 });
+  // the shoulders' walls, straight across (z = z0 + s) from the neck's edge to the ellipse, and the neck's own, down its edges to the ellipse again
+  const ez = (x) => b * Math.sqrt(Math.max(0, 1 - (x / a) ** 2)), ex = (z) => a * Math.sqrt(Math.max(0, 1 - (z / b) ** 2));
+  const line = (P, Q, side) => { const L = Math.hypot(Q[0] - P[0], Q[1] - P[1]), m = Math.max(2, Math.ceil(L / 6)); if (L < 0.5) return; E.push({ t: 'ring_wall', pts: Array.from({ length: m + 1 }, (_, i) => [P[0] + (Q[0] - P[0]) * i / m, P[1] + (Q[1] - P[1]) * i / m]), y0, y1, side }); };
+  if (zc < b) {
+    const xe = ex(zc);
+    if (NECK.xc - wn > -xe) line([-xe, zc], [NECK.xc - wn, zc], 1);          // west shoulder, going east: its outside is the south
+    if (NECK.xc + wn < xe) line([NECK.xc + wn, zc], [xe, zc], 1);             // east shoulder
+  }
+  for (const sg of [-1, 1]) {
+    const x = NECK.xc + sg * wn;
+    if (Math.abs(x) < a) { const ze = ez(x); if (ze > zc) line(sg < 0 ? [x, zc] : [x, ze], sg < 0 ? [x, ze] : [x, zc], 1); }
+  }
   // the stairs down through the gaps
   for (const g of [0, Math.PI, Math.PI / 2]) {
     const x = Math.round(Math.cos(g)), z = Math.round(Math.sin(g)), r0 = [x * a, z * b], r1 = [x * (a + TERRACE.w), z * (b + TERRACE.w)];

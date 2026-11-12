@@ -14,7 +14,7 @@ function vnoise(x, z) {
 }
 const TOP = -TERRACE.h * TERRACE.n;
 /** The far walls of the canyon: { c, rx, rz, h } ellipses of mountain, east and west of the saddle (crests at 60–120 m above the town). */
-const RIDGES = [{ c: [262, -20], rx: 78, rz: 190, h: 120 }, { c: [-262, 30], rx: 78, rz: 180, h: 95 }, { c: [235, 170], rx: 70, rz: 90, h: 70 }, { c: [-240, -175], rx: 70, rz: 90, h: 80 }, { c: [-25, -268], rx: 60, rz: 55, h: 125 }];
+const RIDGES = [{ c: [212, -15], rx: 66, rz: 200, h: 160 }, { c: [-214, 20], rx: 66, rz: 190, h: 140 }, { c: [200, 150], rx: 60, rz: 80, h: 100 }, { c: [-210, 140], rx: 60, rz: 70, h: 90 }, { c: [150, -215], rx: 55, rz: 70, h: 135 }, { c: [-155, -210], rx: 55, rz: 70, h: 130 }, { c: [-10, -262], rx: 70, rz: 50, h: 150 }];
 /** The ridge stands 130 m above the open country: its canyon floor comes down to -130 by the rim. */
 export const LIFT = 130, RIM = -130;
 function fbm(x, z) { return vnoise(x, z) * 0.6 + vnoise(x * 2.1 + 5, z * 2.1) * 0.3 + vnoise(x * 4.3, z * 4.3 + 9) * 0.1; }
@@ -60,9 +60,9 @@ function height(x, z) {
   if (fade > 0) for (const R of RIDGES) {
     const q = Math.hypot((x - R.c[0]) / R.rx, (z - R.c[1]) / R.rz);
     if (q < 1) {
-      const a = Math.atan2(z - R.c[1], x - R.c[0]), qs = Math.sqrt(q * q + 0.02);
-      const prof = (1 - Math.pow(qs, 1.6)) / (1 - Math.pow(0.14, 1.6));
-      const rib = 1 + 0.16 * fbm(x * 0.035 + R.c[0], z * 0.035) + 0.07 * Math.sin(a * 9 + R.c[1]);
+      const a = Math.atan2(z - R.c[1], x - R.c[0]), qs = Math.sqrt(q * q + 0.09), fl = sm(0.15, 0.7, q);
+      const prof = (1 - Math.pow(qs, 1.6)) / (1 - Math.pow(0.3, 1.6));
+      const rib = 1 + (0.16 * fbm(x * 0.035 + R.c[0], z * 0.035) + 0.07 * Math.sin(a * 9 + R.c[1])) * fl;
       h = Math.max(h, RIM + ((R.h - RIM) * prof * rib - 5 * Math.max(0, fbm(x * 0.07, z * 0.07)) * q) * fade);
     }
   }

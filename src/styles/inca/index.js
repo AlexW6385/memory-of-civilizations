@@ -482,7 +482,8 @@ function ringWall(el, { bag, col }) {
   const nor = pts.map((p, i) => {
     const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)], dx = b[0] - a[0], dz = b[1] - a[1], l = Math.hypot(dx, dz) || 1;
     let nx = -dz / l, nz = dx / l;
-    if (nx * (p[0] - cx) + nz * (p[1] - cz) < 0) { nx = -nx; nz = -nz; }
+    // el.side: the outside is the normal (−dz, dx) of the way the polyline runs (+1) or its opposite (−1) (for straight walls, whose mean lies on them)
+    if (el.side) { if (el.side < 0) { nx = -nx; nz = -nz; } } else if (nx * (p[0] - cx) + nz * (p[1] - cz) < 0) { nx = -nx; nz = -nz; }
     return [nx, nz];
   });
   const at = (i, k, yy) => [pts[i][0] + nor[i][0] * k, yy, pts[i][1] + nor[i][1] * k], t = [];

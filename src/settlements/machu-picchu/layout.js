@@ -10,8 +10,8 @@ export const TERRACE = { w: 3, h: 2.6, n: 15 };           // terraces round it: 
 export const PLAZA = [-18, -52, 22, 8];
 export const PEAKS = [{ c: [0, -208], r: 88, h: 175 }, { c: [-14, 208], r: 88, h: 205 }];   // Huayna Picchu (north), Machu Picchu mountain (south)
 export const HILL = { c: [-45, -82], r: 16, n: 5 };       // the Intihuatana's hill, north-west of the Main Plaza: five terraces of 2.2 m
-/** The knoll at the saddle's south end, under Machu Picchu mountain, with the Guardhouse on top: six terraces of 2.2 m. */
-export const KNOLL = { c: [-20, 138], r: 19.5, n: 6 };
+/** The knoll at the saddle's south end, under Machu Picchu mountain, with the Guardhouse on top: eight terraces of 2.2 m (17.6 m: the view over the town and the gorge). */
+export const KNOLL = { c: [-24, 138], r: 23.5, n: 8 };
 /** A terraced hill's height at (x, z): 2.2 m a terrace, each ring 2.4 m in from the one below (the ring walls stand on these radii). */
 export const hillRing = (H, k) => H.r + 6 - 2.4 * (k + 1);
 export function hillHeight(H, x, z) { const d = Math.hypot(x - H.c[0], z - H.c[1]); return 2.2 * Math.max(0, Math.min(H.n, Math.floor((H.r + 6 - d) / 2.4))); }
@@ -20,19 +20,30 @@ export function hillHeight(H, x, z) { const d = Math.hypot(x - H.c[0], z - H.c[1
  * a fault line that parts the urban sector from the agricultural [stated: peru-explorer]; south of it the fields
  * and the five storehouses [stated: "five storerooms" in the agricultural sector — peru-explorer].
  */
-export const TOWN_WALL = { z: 84, gate: 2 }, DITCH = { z: 89, top: 3, bottom: 1, depth: 2, x0: -80 };
+export const TOWN_WALL = { z: 84, gate: 2 }, DITCH = { z: 89, top: 3, bottom: 1, depth: 2, x0: -50 };
 export const FIELDS = [-90, 93, 90, 116];
-export const STORES = Array.from({ length: 5 }, (_, i) => [16 + i * 7.6, 96, 21.4 + i * 7.6, 100.2]);
+export const STORES = Array.from({ length: 5 }, (_, i) => [-50 + i * 7.6, 96, -44.6 + i * 7.6, 100.2]);
 /** The kallanka on the Main Plaza's east side, 47.5 × 6.5 m, its seven doors to the plaza [stated: 47.5 × 6.5 m, the largest building of Machu Picchu — Wikipedia, "Kallanka"; inferred: the place]. */
 export const KALLANKA = [24.5, -49, 31, -1.5];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 
-/** Distance (m) outside the saddle's ellipse, measured as the growth s of the half-axes that brings (x, z) on to it (negative inside). */
+/**
+ * The neck: south of the shoulders (z > z0) the saddle is only 2 w wide, centred on xc: the ridge narrows to the strip the
+ * way in runs along, with the terraces falling away on both sides and the shoulders cut straight across (the town wall
+ * stands on the edge of the first, the Guardhouse's knoll at the neck's end) [inferred: the saddle at Machu Picchu is a
+ * narrow spine; the agricultural sector and the way in follow its crest — peru-explorer].
+ */
+export const NECK = { xc: -20, w: 34, z0: 79 };
+/** Distance (m) outside the saddle's shape (the ellipse cut to the neck), measured as the growth s that brings (x, z) on to it (negative inside). */
 export function outside(x, z) {
   const f = (s) => (x / (SITE.a + s)) ** 2 + (z / (SITE.b + s)) ** 2 - 1;
-  if (f(0) <= 0) { let lo = -SITE.a + 1, hi = 0; for (let i = 0; i < 18; i++) { const m = (lo + hi) / 2; if (f(m) > 0) lo = m; else hi = m; } return hi; }
-  let lo = 0, hi = 600; for (let i = 0; i < 22; i++) { const m = (lo + hi) / 2; if (f(m) > 0) lo = m; else hi = m; } return hi;
+  let dE;
+  if (f(0) <= 0) { let lo = -SITE.a + 1, hi = 0; for (let i = 0; i < 18; i++) { const m = (lo + hi) / 2; if (f(m) > 0) lo = m; else hi = m; } dE = hi; }
+  else { let lo = 0, hi = 600; for (let i = 0; i < 22; i++) { const m = (lo + hi) / 2; if (f(m) > 0) lo = m; else hi = m; } dE = hi; }
+  return Math.max(dE, Math.min(z - NECK.z0, Math.abs(x - NECK.xc) - NECK.w));
 }
+/** The saddle's west edge at z (x), the neck's strip or the ellipse, whichever is the nearer. */
+export const westEdge = (z, d = 0) => Math.max(z > NECK.z0 - d ? NECK.xc - NECK.w - d : -1e9, -(SITE.a + d) * Math.sqrt(Math.max(0, 1 - (z / (SITE.b + d)) ** 2)));
 /** The terrace level (0, 1, …) at distance d outside the ellipse, or -1 past the terraces. */
 export const terraceAt = (d) => (d < 0 ? 0 : d < TERRACE.w * TERRACE.n ? Math.floor(d / TERRACE.w) + 1 : -1);
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -55,8 +66,12 @@ export function fountains() {
 let CANAL = null;
 export function canal() {
   if (CANAL) return CANAL;
-  const pts = [];
-  for (let z = 158.2; z >= -2.6; z -= 1.5) pts.push([xAt(-1.2, z), z]);
+  const pts = [], zc = NECK.z0, xn = NECK.xc - NECK.w + 1.2;
+  // down the neck's west edge from the foot of the mountain (where the ellipse is the narrower, along it), round the corner of the shoulder and along the shoulder's edge to the ellipse
+  for (let z = 158.2; z > zc; z -= 1.5) pts.push([Math.max(xn, xAt(-1.2, z)), z]);
+  for (let i = 0; i <= 6; i++) { const a = i / 6 * Math.PI / 2; pts.push([NECK.xc - NECK.w + 1.2 * Math.cos(a), zc - 1.2 * Math.sin(a)]); }
+  { const xe = xAt(-1.2, zc - 1.2); for (let x = NECK.xc - NECK.w - 1.5; x > xe; x -= 1.5) pts.push([x, zc - 1.2]); pts.push([xe, zc - 1.2]); }
+  for (let z = zc - 1.2 - 1.5; z >= -2.6; z -= 1.5) pts.push([xAt(-1.2, z), z]);
   pts.push([xAt(-1.2, -2.6), -2.6], [xAt(-0.6, -2.6), -2.6], [xAt(0.25, -2.6), -2.6]);
   CANAL = pts;
   return pts;
@@ -152,7 +167,7 @@ export function houses() {
     }
   }
   // the town wall from the canal to the saddle's east edge, its gateway double-jambed, the stone ring over the lintel
-  { const z = TOWN_WALL.z, xe = SITE.a * Math.sqrt(1 - (z / SITE.b) ** 2), x0 = xAt(-1.2, z) + 1.4;
+  { const z = TOWN_WALL.z, xe = NECK.xc + NECK.w, x0 = NECK.xc - NECK.w + 2.6;
     KWALLS.push({ a: [x0, z], b: [xe - 0.3, z], y1: 3.0, w: 0.45, door: { at: TOWN_WALL.gate - x0, w: 1.5, h: 2.5, jamb: true, ring: true } }); }
   // single houses where no kancha fits, as before
   for (const [X0, X1, front] of [[-84, -24, 'e'], [28, 86, 'w']]) {

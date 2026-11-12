@@ -93,6 +93,7 @@ export function people() {
   // llamas grazing on the terraces' grass, in twos
   for (const [t, j] of [[0.6, 4], [0.75, 4], [2.5, 6], [2.62, 6], [-1.0, 8], [-1.12, 8], [3.9, 10], [-2.3, 5], [-2.2, 5], [1.5, 7]]) {
     const d = TERRACE.w * j - 1.5, at = ring(t, d), y = -TERRACE.h * j;
+    if (Math.abs(ground.height(at[0], at[1]) - y) > 0.3) continue;       // not on a terrace now (the neck's cut, a peak's slope)
     figures.push({ t: 'animal', kind: 'llama', at, y, rot: rand() * 6.28, seed: seed(), graze: true });
   }
   // the feast on the Main Plaza: four seated round the jars, a woman serving, two men talking before the kallanka
