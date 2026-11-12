@@ -86,3 +86,14 @@ Hot, dry, dust-laden: bleached and sand-scoured sandstone, soot above doorways, 
 - https://en.wikipedia.org/wiki/Pylon_(architecture)
 - https://exploration.marinersmuseum.org/watercraft/egyptian-ships/
 - https://egypt-museum.com/leopard-skin-priesthood/
+
+
+## 12. Deepening pass (fronts, shops, temple blocks, street furniture)
+
+- **Fronts:** mudbrick houses plastered with mud and whitewashed, with the ends of palm-log roof beams showing under the roof edge, a mastaba bench of mud brick beside the door, water jars on a stand, dung cakes and palm ribs stacked for the oven; flaking plaster, patches of new whitewash, salt and splash at the foot. [stated: Deir el-Medina — "mudbrick on stone foundations", walls plastered with mud, exteriors painted white (Wikipedia); roofs of beams, palm ribs or reeds under mud (ancient-history-sites.com)] Door frames painted blue with a red lintel band, soot over the door. [inferred: from the painted stone doorframes of Deir el-Medina houses]
+- **Roof rooms and dovecotes:** upper rooms and shaded terraces on roofs; dovecote towers of mud brick with rows of pot holes. [inferred: Amarna and Deir el-Medina roof terraces; pigeon towers are attested from the Late Period, used here as a skyline accent]
+- **Shops:** a counter in the front room, the wares on it (bread, pots, beer jars, fruit, cloth, leather), a mat awning on poles over the street; sellers of Deir el-Medina's market type. [inferred]
+- **Temple blocks:** priests' houses (courtyard houses and villas), bakeries and gardens inside the great enclosure, away from the axis: the temple of Amun employed thousands and housed its staff and stores within the walls. [inferred: Wikipedia "Karnak"; digitalkarnak.ucsc.edu on administrative buildings east of the sacred lake]
+- **Street furniture:** shaduf wells, stands of water jars in the shade, mudbricks stacked to dry, straw heaps, tethering posts with troughs, small roadside chapels. [inferred]
+- **Quay cargo:** grain sacks, palm logs, a dressed block on its sledge and rollers, rope coils, nets drying on poles. [inferred: stone and timber were shipped on the Nile to Karnak]
+- **Avenue and forecourt:** braziers and stone offering tables at the edges of the sphinx avenue, stelae at the gate, statues before the colonnades, basins of purification, date palms in mud-brick rings. [inferred]
