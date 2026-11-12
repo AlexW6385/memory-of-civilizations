@@ -43,5 +43,8 @@ for (const [x, z] of [[-60, 202], [-20, 201], [40, 202], [100, 203], [-180, 118]
 // ...and on the red wall's yellow coping, 8.5 m up, hopping along it
 for (const [x, z, rot] of [[-40, WALL.rect[3], 0], [60, WALL.rect[3], 0], [WALL.rect[0], 20, Math.PI / 2], [WALL.rect[2], -80, Math.PI / 2], [-60, WALL.rect[1], 0]])
   perches.push({ kind: 'sparrow', x, z, y: WALL.h + 0.9, rot, range: [2.6, 0], alert: 5 });
+// herons standing at the moat's edge (the coping of the walls is 0.05 above the street), watching for the carp
+for (const [x, z, rot] of [[a0 - 0.6, -60, 0], [a1 + 0.6, 30, 0], [-50, b0 - 0.6, 1.5], [60, b1 + 0.6, 1.5]])
+  perches.push({ kind: 'heron', x, z, y: 0.05, rot, range: [1.0, 0.5], stay: [60, 150], gone: [40, 120] });
 void RING; void AVENUE;
 export default { fish, flights, perches };

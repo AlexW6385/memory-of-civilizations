@@ -5,7 +5,7 @@
 // few officials at the foot of the terrace: no crowds), pigeons in the lanes. Positions come from
 // layout.js; nothing is hard-coded but the buildings' places on the avenue (shops.js).
 import './style.js';
-import { betweenGates, RADIUS, AVENUE, HALLS, TIERS, RING, TEMPLE, DANBI, SHOP_APRONS, CARRIAGE, WALK_UP, interiorShops, furnishedHouses, shopRows, houses, lanes } from './layout.js';
+import { betweenGates, RADIUS, AVENUE, HALLS, TIERS, RING, MOAT, LEVEL, TEMPLE, DANBI, SHOP_APRONS, CARRIAGE, WALK_UP, interiorShops, furnishedHouses, shopRows, houses, lanes } from './layout.js';
 import { SHOP_SITES } from './shops.js';
 
 const base = (id, style, elements, center = [0, 0]) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 215], facing: 'n' }, center, near: 230 });
@@ -34,6 +34,13 @@ export async function lifePlans() {
   }
   const y0 = TIERS[0].rect[3] + 6;
   for (const [x, z, dir] of [[-16, y0, [1, 0]], [-14, y0 + 1.5, [1, 0]], [18, y0 + 2, [-1, 0]]]) figs.push(man([x, z], face(dir), { pose: 'stand', cloth: 'cloth_indigo', cloth2: 'cloth_red' }));
+  // (§32) more of the palace's own people: sentries of the banner guard in pairs at the gates of the courts and before the three halls' stairs,
+  // two files of officials waiting in the great courtyard either side of the stone way, attendants with brooms (a staff stands for the broom)
+  for (const [x, z, dir] of [[-6, 128, [0, 1]], [6, 128, [0, 1]], [-80, 120, [0, 1]], [-68, 120, [0, 1]], [68, 120, [0, 1]], [80, 120, [0, 1]], [-8, 36, [0, 1]], [8, 36, [0, 1]],
+    [-93, -6, [1, 0]], [93, -6, [-1, 0]], [-28, 168.5, [0, -1]], [28, 168.5, [0, -1]], [-40, -168, [0, 1]], [40, -168, [0, 1]]])
+    figs.push(man([x, z], face(dir), { carry: 'staff', pose: 'staff', len: 2.2, staffMat: 'timber', cloth: 'cloth_maroon', cloth2: 'cloth_black' }));
+  for (const sx of [-1, 1]) for (let i = 0; i < 6; i++) figs.push(man([sx * (9 + (i % 2) * 1.6), 62 - i * 3.4], face([-sx, 0]), { pose: 'stand', cloth: ['cloth_blue', 'cloth_indigo', 'cloth_green'][i % 3], cloth2: 'cloth_black' }));
+  for (const [x, z, dir] of [[-40, 58, [1, 1]], [50, 80, [-1, 0]], [-52, 96, [0, -1]], [30, 20, [0, 1]]]) figs.push(man([x, z], face(dir), { carry: 'staff', pose: 'staff', len: 1.6, staffMat: 'timber', cloth: 'cloth_grey', cloth2: 'cloth_black' }));
   void HALLS; void AVENUE;
   // the visitors of the Danbi way and its plaza (the Temple of Heaven): small parties walking up and standing, an old man with his bird cage, pigeons
   {
@@ -43,6 +50,13 @@ export async function lifePlans() {
     for (const [x, z, dir] of spots) T.push(man([x, z], face(dir), { pose: 'stand', y: z < dz1 - 1 ? DANBI.y : 0.03, cloth: CLOTH[Math.floor(rand() * CLOTH.length)], cloth2: rand() < 0.5 ? 'cloth_black' : 'cloth_indigo', ...(rand() < 0.3 ? { hair: 'bun', hat: undefined } : {}) }));
     for (const [x, z] of [[xm + 12, dz1 + 6], [xm - 14, dz1 + 4]]) T.push({ t: 'chickens', kind: 'pigeon', at: [x, z], y: 0.04, n: 7, seed: Math.floor(rand() * 1e6) });
     out.push({ ...base('qing-beijing-temple-life', 'life', T), center: [xm, dz1 - 10] });
+  }
+  // the moat (§32): rowboats tied along the outer bank, and a fisherman's seat on the coping; the carp are in fauna.js
+  {
+    const [a0, b0, a1, b1] = MOAT.outer, E2 = [];
+    for (const [x, z, rot] of [[a0 + 1.6, -120, 0], [a0 + 1.6, 40, 0.1], [a1 - 1.6, -60, 0], [a1 - 1.6, 110, -0.1], [-100, b0 + 1.6, Math.PI / 2], [90, b0 + 1.6, Math.PI / 2], [-100, b1 - 1.6, Math.PI / 2], [-110, b1 - 1.6 + 0.1, Math.PI / 2]])
+      E2.push({ t: 'boat', kind: 'rowboat', at: [x, z], y: LEVEL.moat, rot, seed: Math.floor(rand() * 1e9) });
+    out.push({ ...base('qing-beijing-moat-life', 'life', E2), center: [0, 0], near: 300 });
   }
   out.push(...streetPlans(rand));
   out.push(base('qing-beijing-people-life', 'life', [...pig, ...figs], [0, 120]));
