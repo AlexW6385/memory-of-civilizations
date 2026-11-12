@@ -17,8 +17,8 @@ function waterLevel(x, z) { return inWater(x, z) ? LEVEL : -Infinity; }
 function fromWater(x, z) { return inWater(x, z) ? -3 : Math.max(-5, Math.min(40, height(x, z) - LEVEL)); }
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inWater(x, z) || shore(x, z) < 5 || inLot(x, z, 1) || inRect(BENNELONG, x, z, 2)) return null;
-  if (inRect(MACQUARIE, x, z)) return { grass: 22 };                                             // the point's open lawn
-  if (inRect(GARDEN, x, z)) return { fig: 0.011, banyan: 0.005, date_palm: 0.006, grass: 22 };
+  if (inRect(MACQUARIE, x, z)) return { fig: 0.003, stone_pine: 0.0014, date_palm: 0.0015, grass: 22 };      // the point's open lawn with its figs and tall pines (Norfolk Island pines: the stone pine stands in)
+  if (inRect(GARDEN, x, z)) return { fig: 0.011, banyan: 0.005, date_palm: 0.006, stone_pine: 0.0022, plane_tree: 0.0015, grass: 22 };
   // Macquarie Street's side, the open ground east of the cove and Dawes Point's park: figs and palms among the lawns
   if (x > 44 && x < 156 && Math.abs(x - 100) > 12 && z > -98 && z < 44 || inRect(DAWES, x, z)) return { fig: 0.004, date_palm: 0.006, grass: 12 };   // the Moreton Bay figs (stand-ins) and palms
   return null;
@@ -26,7 +26,7 @@ function planting(x, z) {
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
   sea: LEVEL,   // the planet's sea is this water, at this level (src/planet/relief.js)
-  maxDensity: { fig: 0.011, banyan: 0.005, date_palm: 0.006 },
+  maxDensity: { fig: 0.011, banyan: 0.005, date_palm: 0.006, stone_pine: 0.0022, plane_tree: 0.0015 },
   climate: {
     sun: { az: 20, el: 55, color: [1.0, 0.97, 0.9], intensity: 3.6, lat: -34, dec: -15, hour: 11.5 },
     sky: { turbidity: 2.2, rayleigh: 1.1, mie: 0.004, mieG: 0.78, zenith: [0.06, 0.16, 0.45], horizon: [0.6, 0.68, 0.76] },

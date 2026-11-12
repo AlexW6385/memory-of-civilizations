@@ -23,7 +23,10 @@ export const opera = {
     ],
   }],
   // (the forecourt and the walk at the ground's height there, not at the plan's base)
-  rooms: [{ id: 'forecourt', rect: [ox0, oz1, ox1, oz1 + OPERA.stair + 12], y: height(100, oz1 + OPERA.stair + 6), kind: 'open' }],
+  rooms: [{ id: 'forecourt', rect: [ox0, oz1, ox1, oz1 + OPERA.stair + 12], y: height(100, oz1 + OPERA.stair + 6), kind: 'open' },
+    // the two halls' rooms (the enclosures' insides, hall.js and theatre.js: from the north wall to the south wall, inside the side walls)
+    { id: 'concert-hall', rect: [cw - 9.8, oz1 - 91, cw + 9.8, oz1 - 33], y: height(100, -190) + OPERA.h, kind: 'hall' },
+    { id: 'opera-theatre', rect: [ce - 8.7, oz1 - 85, ce + 8.7, oz1 - 37], y: height(100, -190) + OPERA.h, kind: 'hall' }],
   walks: [Object.assign([[100, -96], [100, oz1 + OPERA.stair + 2]], { y0: height(100, -96) }),
     // up the stair, in at the Concert Hall's east door and down its aisle to the stage
     Object.assign([[100, oz1 - 4], [100, oz1 - 34], [cw + 8, oz1 - 34], [cw, oz1 - 34], [cw, oz1 - 45], [cw, oz1 - 55]], { y0: height(100, -190) + OPERA.h }),

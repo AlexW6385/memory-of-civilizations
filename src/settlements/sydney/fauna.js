@@ -2,7 +2,7 @@
 // cove and Farm Cove, welcome swallows low over the water, Australian ravens (crows) over the Garden and the Rocks at dusk, white
 // birds (the silver gull's stand-in: the egret) on the quay's bollards and the wharves' rails, and pigeons (the sparrow's
 // stand-in) on the promenade, the Opera House's stair and the Garden's paths.
-import { LEVEL, QUAY, OPERA, GARDEN, shore, height } from './layout.js';
+import { LEVEL, QUAY, OPERA, GARDEN, MACQUARIE, shore, height, streetCells } from './layout.js';
 
 const dist = (x, z) => -shore(x, z);
 const fish = [];
@@ -25,4 +25,12 @@ const put = (x, z, range = [1.8, 1.4]) => perches.push({ kind: 'sparrow', x, z, 
 for (let i = 0; i < 10; i++) put(QUAY[0] + rand() * (QUAY[2] - QUAY[0]), -3.5 + rand() * 2.5);
 for (let i = 0; i < 8; i++) put(66 + rand() * 68, OPERA.rect[3] + 6 + rand() * 14, [2, 1.6]);
 for (let i = 0; i < 12; i++) put(GARDEN[0] + 20 + rand() * 220, GARDEN[1] + 30 + rand() * 120, [2.6, 2.0]);
+// pigeons at the city's crossings and in the Rocks' lanes' ends, gulls along the Point's wall and on the Farm Cove's walk
+{
+  const { xs, zs } = streetCells();
+  for (const [a, b] of xs) for (const [c, d] of zs) { if (shore((a + b) / 2, (c + d) / 2) < 10) continue; for (let i = 0; i < 2; i++) put(a - 3 + rand() * (b - a + 6), c - 3 + rand() * (d - c + 6), [2.2, 1.6]); }
+  for (let x = 224; x < 332; x += 18) { for (let z = -170; z < -60; z += 0.5) if (shore(x, z) > 1.8) { perches.push({ kind: 'egret', x: x + rand() * 6, z: z + 1.2, y: height(x, z + 1.2), rot: rand() * 6, stay: [60, 200], gone: [30, 120], alert: 7 }); break; } }
+  flights.push({ kind: 'crow', n: 4, loop: { c: [60, 140], a: [60, 40], rot: 0.2 }, y: [28, 14], speed: 9 }, { kind: 'swallow', n: 5, loop: { c: [270, -118], a: [40, 14], rot: 0, dist, margin: 3 }, y: [0.8, 3], speed: 8 });
+}
+void MACQUARIE;
 export default { fish, flights, perches };
