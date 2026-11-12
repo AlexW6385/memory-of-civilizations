@@ -8,6 +8,8 @@ import { MESE_STOAS } from './plan.js';
 import { nearProcession } from './procession.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+// where the visitor arrives (src/planet/arrivals.js): the street's mouth by the Augustaion, looking at Hagia Sophia
+const ARRIVAL = [-70, 110];
 const fp = (o, u, s, t) => [o[0] + s * u[0] - t * u[1], o[1] + s * u[1] + t * u[0]];
 
 export function life() {
@@ -15,6 +17,7 @@ export function life() {
   const BRIGHT = ['cloth_red', 'cloth_green', 'cloth_ochre', 'cloth_indigo', 'cloth_white', 'cloth_brown'], DULL = ['cloth_brown', 'cloth_grey', 'cloth_white', 'linen', 'cloth_ochre'];
   /** A man in a knee-length belted tunic with hose, or an ankle-length one with a cloak; a woman in a long robe, her hair veiled. */
   const person = (at, rot, o = {}) => {
+    if (Math.hypot(at[0] - ARRIVAL[0], at[1] - ARRIVAL[1]) < 9) return;                  // nobody stands in the arrival's face (src/planet/arrivals.js)
     const woman = rand() < 0.35, rich = rand() < 0.25, c = woman ? pick(BRIGHT) : rich ? pick(['cloth_white', 'cloth_indigo', 'cloth_green']) : pick(DULL);
     L.push({ t: 'figure', at, y: height(at[0], at[1]) + (o.dy ?? 0), rot, seed: Math.floor(rand() * 1e9), skin: rand() < 0.8 ? 'skin_light' : 'skin_medium',
       ...(woman ? { dress: 'robe', cloth: c, cloth2: pick(BRIGHT), hat: 'veil' } : rich ? { dress: 'robe', cloth: c, cloth2: 'cloth_white', over: 'collar', hat: 'none' } : { dress: 'tunic', legs: 'hose', cloth: c, cloth2: pick(DULL), hat: rand() < 0.15 ? 'cap' : 'none' }),

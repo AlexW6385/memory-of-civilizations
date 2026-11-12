@@ -188,10 +188,47 @@ function outerWall(o, u, L, inSide, holes, y1 = GR) {
   const n = [-u[1], u[0]];
   pwall({ o: [o[0] + n[0] * inSide * 0.78, o[1] + n[1] * inSide * 0.78], u, th: 0.06, u0: 0, u1: L, y0: 0, y1: y1 - 0.6, holes, mat: 'revetment_byz', collide: false });
 }
+/**
+ * The outer face of the north and south walls (docs/buildings/hagia-sophia.md §4): the brick and stucco of the aisles with the
+ * stone cornices at the springing of the galleries and under the eaves, brick courses between, the stone frames of every
+ * window, and, on the lines of the four great piers, the stepped buttresses that carry the dome's thrust out over the aisle
+ * roofs. From a hundred metres these give the south front its shadows and its rhythm.
+ */
+function exterior(sz, holes) {
+  const F = ZO + 1.5, x0 = -43.5, x1 = 35;                      // the wall's outer face (|z| = 36) and its run
+  const zr = (d0, d1) => (sz > 0 ? [F + d0, F + d1] : [-F - d1, -F - d0]);
+  const run = (xa, xb, y0, y1, d1, mat, gaps = []) => {
+    let a = xa;
+    for (const [g0, g1] of [...gaps, [xb + 1, xb + 2]].sort((p, q) => p[0] - q[0])) {
+      if (g0 > a) { const [za, zb] = zr(-0.2, d1); block([a, za, Math.min(g0, xb), zb], y0, y1, mat, { collide: false }); }
+      a = Math.max(a, g1);
+    }
+  };
+  const doors = sz < 0 ? [[-42.6, -39.9]] : [[-11.8, -8.2]];
+  run(x0, x1, 0, 0.8, 0.3, 'limestone', doors);                                   // the plinth
+  for (const [y0, y1] of [[9.3, 9.9], [11.1, 11.7], [12.9, 13.5]]) run(x0, x1, y0, y1, 0.12, 'brick');   // the brick courses
+  run(x0, x1, 8.25, 8.85, 0.4, 'limestone');                                       // the cornice over the aisle windows
+  run(x0, x1, 14.5, 15.15, 0.42, 'limestone', sz < 0 ? [[-42.6, -39.9]] : []);    // the cornice at the gallery floor
+  run(x0, x1, 21.35, 22.5, 0.55, 'limestone');                                     // the eaves
+  for (const h of holes) {
+    if (h.y0 < 1) continue;
+    const a = h.u0 - 43.5, b = h.u1 - 43.5, w = b - a;
+    if (w > 2.4) continue;
+    for (const [ja, jb] of [[a - 0.3, a], [b, b + 0.3]]) { const [za, zb] = zr(-0.15, 0.25); block([ja, za, jb, zb], h.y0 - 0.2, h.y1 + 0.1, 'limestone', { collide: false }); }
+    { const [za, zb] = zr(-0.2, 0.32); block([a - 0.45, za, b + 0.45, zb], h.y1, h.y1 + 0.55, 'limestone', { collide: false }); block([a - 0.35, za, b + 0.35, zb], h.y0 - 0.3, h.y0, 'limestone', { collide: false }); }
+  }
+  // the buttresses on the piers' lines: three steps, each narrower and taller, the lowest 9.5 m out from the wall
+  for (const sx of [-1, 1]) for (const [hw, d, top, y0] of [[3.4, 9.5, 16.8, 0], [3.4, 6.6, 24.2, 16.8], [3.0, 3.8, 32.5, 24.2]]) {
+    const xc = sx * 18.75, [za, zb] = zr(-0.2, d + 0.35);
+    block([xc - hw, za, xc + hw, zb], y0, top, 'brick');
+    if (top > 30) { const [ba, bb] = zr(-1.8, 0.5); block([xc - 3.0, ba, xc + 3.0, bb], GR, top, 'brick'); }   // joined to the pier above the roof
+    const [ca, cb] = zr(0.35, d + 0.6); block([xc - hw - 0.25, ca, xc + hw + 0.25, cb], top, top + 0.45, 'limestone', { collide: false });
+  }
+}
 // north (z = −35.25) and south walls, from the narthex's west wall to the east wall
 for (const sz of [-1, 1]) {
   const holes = [];
-  for (let x = -26; x <= 30; x += 7) if (Math.abs(x - 18.75) > 4.5 && Math.abs(x + 18.75) > 4.5 && !(sz > 0 && Math.abs(x + 10) < 3)) { holes.push({ u0: x + 43.5 - 1.0, u1: x + 43.5 + 1.0, y0: 3.5, y1: 8.0 }); holes.push({ u0: x + 43.5 - 1.0, u1: x + 43.5 + 1.0, y0: 16.0, y1: 20.5 }); }
+  for (let x = -26; x <= 30; x += 3.5) if (Math.abs(x - 18.75) > 4.5 && Math.abs(x + 18.75) > 4.5 && !(sz > 0 && Math.abs(x + 10) < 3)) { holes.push({ u0: x + 43.5 - 0.9, u1: x + 43.5 + 0.9, y0: 3.5, y1: 8.0 }); holes.push({ u0: x + 43.5 - 0.9, u1: x + 43.5 + 0.9, y0: 16.0, y1: 20.5 }); }
   for (const x of [-38, -35]) holes.push({ u0: x + 43.5 - 0.8, u1: x + 43.5 + 0.8, y0: 16.0, y1: 20.0 });
   if (sz < 0) {
     // the door to the ramp tower, at the floor and at the gallery
@@ -202,6 +239,7 @@ for (const sz of [-1, 1]) {
   }
   // the wall runs west → east on the north side, and the frame keeps x = −43.5 + u
   outerWall([-43.5, sz * (ZO + 0.75)], [1, 0], 78.5, sz < 0 ? 1 : -1, holes);
+  exterior(sz, holes);
 }
 floor([-41.25 - 1.1, -36, -41.25 + 1.1, -ZO], 0, 'proconnesian', { th: 0.6 });
 floor([-41.25 - 1.1, -36, -41.25 + 1.1, -ZO], GF, 'proconnesian', { th: 0.6 });
