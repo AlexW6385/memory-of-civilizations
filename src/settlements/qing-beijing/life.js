@@ -70,6 +70,10 @@ export async function lifePlans() {
   // the court servants sweeping with the long brooms, and a pair carrying a covered box on a pole between them
   for (const [x, z, r] of [[-55, 68, 0.6], [-37, 94, 2.2], [53, 61, -0.5], [38, 82, 1.0], [-18, 104, 3.0], [20, 44.5, 1.5]]) figs.push(man([x, z], r, { carry: 'broom', dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_indigo', hat: 'cap', over: 'none' }));
   for (const [x, z, r] of [[-66, 44.5, 1.57], [64, 99, -1.57]]) figs.push(man([x, z], r, { carry: 'pole', dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_black', hat: 'brim', over: 'none' }));
+  // the court's near life, fourteen to twenty-three metres from the arrival and within 35° of its axis (the way the visitor first looks along is the emperor's, kept clear):
+  // a servant at his broom either side, and two officials turned to one another beside the markers' files
+  for (const [x, z, r] of [[-6.8, 58.0, 0.9], [6.8, 57.5, -2.1]]) figs.push(man([x, z], r, { carry: 'broom', dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_indigo', hat: 'cap', over: 'none' }));
+  for (const [x, z, a] of [[-12.5, 54.5, 0.4], [11.0, 54.5, 3.5]]) for (let j = 0; j < 2; j++) off([x + Math.cos(a + j * Math.PI) * 0.45, z + Math.sin(a + j * Math.PI) * 0.45], a + j * Math.PI + Math.PI, { pose: 'talk' });
   // officials waiting on the benches under the galleries' eaves
   for (const sx of [-1, 1]) for (const z of [74, 92]) {
     const bx = sx * 92.2;
