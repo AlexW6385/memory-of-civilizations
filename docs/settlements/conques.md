@@ -145,3 +145,7 @@ As for the church (`docs/buildings/sainte-foy-conques.md` §9).
 - [The tympanum of the Last Judgment — Conques tourist office](https://tourisme-conques.fr/en/en-conques/the-tympanum)
 - [The West Tympanum at Conques — christianiconography.info](https://www.christianiconography.info/conques/tympanum.htm)
 - [The structure of the tympanum — art-roman-conques.fr](https://www.art-roman-conques.fr/english/structure.html)
+
+## 1j. The parvis (deepening pass 3)
+- The terrace before the west front is the pilgrims' ground. Built (`parvis_ground`): a flagged way of schist from the terrace's west edge to the great portal, cobbled and trodden patches, mud, moss in the joints, grave slabs with incised crosses [inferred: lay burials by the church], scallop shells dropped by pilgrims [stated: the badge of Santiago pilgrims], a worn kerb with weeds at the edge. A candle-seller's trestle, a beggar and a blind pilgrim at the portal, the pilgrims' packs set down, a pilgrim bathing his feet at the Plo [inferred]. Benches along the terrace's edge now face the church.
+- Still below Suzhou: no planting on the terrace; the tribunes stay shut; shop goods inside are boxes and pots.
