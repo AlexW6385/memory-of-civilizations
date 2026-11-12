@@ -3,7 +3,7 @@
 // old men, water jars, firewood, hens and dogs, the family at the counter and in the doma; at the stream the women washing and
 // the punts. Elements of the shared `life` style, placed from layout.js; tiles of 100 m as at Suzhou so that the viewer draws
 // them by distance.
-import { lots, isOpen, yards, STREAM, BRIDGES, RADIUS, streets, inRect, onBridge } from './layout.js';
+import { lots, isOpen, yards, STREAM, BRIDGES, RADIUS, streets, inRect, onBridge, GINKAKU, RYOAN, SHRINE } from './layout.js';
 import { dims } from '../../styles/muromachi/machiya.js';
 
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -148,9 +148,33 @@ export function yardLife() {
   return L;
 }
 
+/** The temples and the shrine: visitors on the south bank and in the court of Ginkaku-ji, a monk sweeping the gravel, a gardener at the pond with a boat; the worshippers at the shrine, the seated guests on the hōjō's veranda. */
+export function templeLife() {
+  const L = [], rand = rng(1553), P = GINKAKU.pond, k = GINKAKU.kannon;
+  // the south bank of the pond, where the way arrives: three standing to look at the pavilion, a woman and a child, two sitting
+  for (const [x, z, w] of [[186, 23, 0], [189.5, 23.6, 1], [211, 23, 0], [215, 23.4, 1], [220, 22.6, 0]]) L.push(person(rand, [x, z], 0, (rand() - 0.5) * 0.5, { woman: !!w || rand() < 0.3, pose: rand() < 0.2 ? 'talk' : 'stand' }));
+  L.push(person(rand, [212.4, 24.2], 0, 0.1, { woman: false, child: true, h: 1.05, hat: 'none' }));
+  for (const x of [181, 224]) L.push(person(rand, [x, 24.6], 0, 0.2, { pose: 'sit_ground', woman: x > 200, hat: 'none' }));
+  // the court before the pavilion: visitors, a monk sweeping the gravel with a besom
+  for (const [dx, dz] of [[-6, 10.5], [-2, 12], [4, 11], [9, 10.5]]) L.push(person(rand, [k[0] + dx, k[1] + dz], 0, rand() * 0.6 - 0.3, { woman: rand() < 0.4, pose: rand() < 0.25 ? 'talk' : 'stand' }));
+  L.push(person(rand, [k[0] - 11, k[1] + 12.5], 0, 1.2, { cloth: 'cloth_black', cloth2: 'cloth_grey', hair: 'shaven', over: 'collar', hat: 'none', carry: 'broom', woman: false }));
+  // the pond: a gardener in a punt, fishing nets spread on the bank
+  L.push({ t: 'boat', kind: 'rowboat', at: [P.c[0] + 24, P.c[1] + 4], y: P.level - 0.05, rot: 1.2, len: 4.0, seed: 7 }); L.push(person(rand, [P.c[0] + 24.4, P.c[1] + 4.6], P.level + 0.1, 1.2 + Math.PI / 2, { pose: 'sit', woman: false, hat: 'straw', feet: 'bare' }));
+  // the shrine: worshippers before the hall, a woman and child at the torii, a priest at the Noh stage's steps
+  const h = SHRINE.hall;
+  for (const [dx, dz, w] of [[-2.5, -6.5, 0], [0.3, -7.2, 1], [2.4, -6.4, 0]]) L.push(person(rand, [h[0] + dx, h[1] + dz], 0, Math.PI, { pose: 'stand', woman: !!w, hat: 'none' }));
+  L.push(person(rand, [SHRINE.torii[0] + 1.2, SHRINE.torii[1] + 5], 0, Math.PI, { woman: true, hat: 'none' })); L.push(person(rand, [SHRINE.torii[0] + 1.9, SHRINE.torii[1] + 5.3], 0, Math.PI, { child: true, h: 1.0, hat: 'none' }));
+  L.push(person(rand, [SHRINE.noh[0] - 6.5, SHRINE.noh[1] + 1], 0, -Math.PI / 2, { cloth: 'cloth_white', cloth2: 'cloth_red', hat: 'cap', over: 'collar', woman: false }));
+  // Ryōan-ji: guests seated on the veranda before the garden, a lay woman and a boy at the gate
+  const hj = RYOAN.hojo;
+  for (const [dx, w] of [[-9, 0], [-7.8, 1], [2.5, 0], [5.4, 1], [8.4, 0]]) L.push(person(rand, [hj[0] + dx, hj[1] - 7.1], 0.85, 0, { pose: 'seiza', woman: !!w, hat: 'none' }));
+  L.push(person(rand, [RYOAN.gate[0] + 2.5, RYOAN.gate[1] - 3], 0, 0.3, { woman: true, hat: 'none' })); L.push(person(rand, [RYOAN.gate[0] + 3.2, RYOAN.gate[1] - 3.2], 0, 0.2, { child: true, h: 1.1, hat: 'none' }));
+  return L;
+}
+
 /** All of it in tiles of 100 m: [{ id, elements, center }]. */
 export function lifeTiles() {
-  const all = [...fronts(), ...inside(), ...waterLife(), ...streetLife(), ...yardLife()];
+  const all = [...fronts(), ...inside(), ...waterLife(), ...streetLife(), ...yardLife(), ...templeLife()];
   const tiles = new Map();
   for (const e of all) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   return [...tiles].map(([k, elements]) => { const [i, j] = k.split(',').map(Number); return { id: `muromachi-life-${k}`, elements, center: [i * 100 + 50, j * 100 + 50] }; });

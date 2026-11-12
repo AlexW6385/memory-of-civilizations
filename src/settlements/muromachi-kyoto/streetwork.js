@@ -89,6 +89,9 @@ export function templeWork() {
   for (const [dx, dz, k] of [[-18, -2, 1.5], [14, 3, 1.2], [34, -3, 1.0]]) { E.push({ t: 'stone_group', at: [G.c[0] + dx, G.c[1] + dz], y: G.bed + 0.2, seed: 5 + dx, n: 4, k }); }
   E.push({ t: 'niwaki', at: [G.c[0] - 18, G.c[1] - 2.5], y: -0.9, h: 3.8, seed: 12 });
   for (const [dx, dz] of [[-30, 11], [-6, 12], [22, -10], [30, 8]]) E.push({ t: 'stone_group', at: [P.c[0] + dx, P.c[1] + dz], y: P.bed + 0.4, seed: 9 + dx, n: 3, k: 1.1 });
+  // pines trimmed in the manner of the garden, in pairs along the way from the gate of Ginkaku-ji to the pond; maples at the Tōgu-dō
+  for (const z of [62, 74, 86]) for (const sx of [-1, 1]) E.push({ t: 'niwaki', at: [GINKAKU.gate[0] + sx * 7.5, z], y: 0, h: 5.2 + (z % 3) * 0.6, seed: z * 3 + sx });
+  for (const [x, z] of [[GINKAKU.togudo[0] - 8, GINKAKU.togudo[1] - 7], [GINKAKU.togudo[0] - 9, GINKAKU.togudo[1] + 9]]) E.push({ t: 'niwaki', at: [x, z], y: 0, h: 4.6, seed: Math.round(x + z) });
   // the kitchen (kuri) of Ryōan-ji, by the gate, open
   E.push({ t: 'machiya_m', at: [-199, -111], facing: 's', w: 9, d: 12, seed: 4242, trade: 'food', open: true, y: 0 });
   E.push({ t: 'woodshed', at: [-188, -112], y: 0, rot: Math.PI });

@@ -39,6 +39,8 @@ function waterLevel(x, z) { if (inStream(x, z, -0.3)) return STREAM.level; if (i
 const fromWater = (x, z) => Math.min(inStream(x, z) ? 0 : Math.max(0, Math.min(x - STREAM.x1, STREAM.x0 - x)), 99);
 const yardList = yards();
 const inYard = (x, z) => yardList.some((y) => inRect(y, x, z));
+/** Where in a yard trees may stand: the middle of its west side (the storehouses, beds, rack, shed, wash line and well have the other sectors). */
+const treeSpot = (x, z) => { const y = yardList.find((q) => inRect(q, x, z)); return !!y && x < y[0] + (y[2] - y[0]) / 3 && z > y[1] + (y[3] - y[1]) / 3 && z < y[1] + 2 * (y[3] - y[1]) / 3; };
 function planting(x, z, p) {
   if (Math.hypot(x, z) > RADIUS - 6 || inStream(x, z, 1) || inPond(x, z, 1) || onStreet(x, z, 1) || inLot(x, z, 1)) return null;
   if (inRect(RYOAN.garden, x, z, 3) || inRect([RYOAN.hojo[0] - 15, RYOAN.hojo[1] - 8, RYOAN.hojo[0] + 15, RYOAN.hojo[1] + 12], x, z) || Math.hypot(x - GINKAKU.kannon[0], z - GINKAKU.kannon[1]) < 12 || inRect([GINKAKU.togudo[0] - 7, GINKAKU.togudo[1] - 8, GINKAKU.togudo[0] + 10, GINKAKU.togudo[1] + 8], x, z)) return null;
@@ -51,9 +53,9 @@ function planting(x, z, p) {
   }
   if (inRect(RYOAN.rect, x, z)) return { grass: 14, red_pine: 0.03, maple: 0.06, sugi: 0.02, boulder: 0.01 };
   if (p.h > 3) return { sugi: 0.3 * sm(2, 10, p.h), red_pine: 0.15, maple: 0.1, grass: 8 };
-  if (inYard(x, z)) return { persimmon: 0.05, maple: 0.04, bamboo: 0.4 * sm(0.3, 0.8, vnoise(x * 0.1, z * 0.1)), grass: 3 };
+  if (inYard(x, z)) return treeSpot(x, z) ? { persimmon: 0.06, maple: 0.04, bamboo: 0.3 * sm(0.3, 0.8, vnoise(x * 0.1, z * 0.1)), grass: 2 } : { grass: 1 };
   if (inPrecinctAt(x, z)) return null;
-  return { grass: 3, willow: x > STREAM.x1 && x < STREAM.x1 + 4 ? 0.12 : 0 };
+  return { grass: 3, willow: (x > STREAM.x1 && x < STREAM.x1 + 4) || (x < STREAM.x0 && x > STREAM.x0 - 2) ? 0.14 : 0 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
