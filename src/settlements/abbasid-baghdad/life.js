@@ -4,6 +4,7 @@
 // of use (src/objects); the walkers are the movers'.
 import { lodTiles } from '../lod.js';
 import { ALL_SUQS, C, PALACE, MOSQUE, LIBRARY, SUQS, RC, RIVER, CANAL, JETTIES, jettyAt, riverX, lots, inRect } from './layout.js';
+import { frontElements, esplanadeElements } from './fronts.js';
 import { suqKeepers } from '../../styles/abbasid/market.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -100,6 +101,7 @@ export async function lifePlan() {
   for (const j of JETTIES.slice(0, 7)) { const J = jettyAt(j); E.push({ t: 'sacks', at: [J.a[0] - J.dir * 2.6, j.z + 2.5], y: 0, rot: 0.3, n: 4, seed: Math.round(j.z) }); potAt(J.a[0] - J.dir * 2.4, j.z - 2.6, 'water_pot', 2); E.push({ t: 'barrel', at: [J.a[0] - J.dir * 3.6, j.z + 3.4], y: 0, seed: Math.round(j.z) + 1 }); }
   E.push({ t: 'well', kind: 'shaduf', at: [riverX(20) + RIVER.w / 2 + 12, 20], y: 0, rot: 3.14 }, { t: 'well', kind: 'shaduf', at: [riverX(-180) + RIVER.w / 2 + 12, -180], y: 0, rot: 3.14 }, { t: 'well', kind: 'open', at: [C[0] + 30, C[1] + 80], y: 0 }, { t: 'well', kind: 'open', at: [C[0] - 90, C[1] + 90], y: 0 });
   E.push({ t: 'handcart', at: [-98, 330], y: 0, rot: 0.2, seed: 1 }, { t: 'handcart', at: [-98, 460], y: 0, rot: -0.1, seed: 2 });
+  { const f = frontElements(); E.push(...f.E, ...esplanadeElements()); for (const p of f.P) man(p.at, p.y, p.rot, { pose: p.pose, over: 'none' }); }
   const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-520, -520, 520, 520], entrance: { at: [C[0], C[1] + 60], facing: 'n' } });
   plans.push(base('abbasid-baghdad-people', 'life', [...P, ...E]));
   void lodTiles; void CANAL;

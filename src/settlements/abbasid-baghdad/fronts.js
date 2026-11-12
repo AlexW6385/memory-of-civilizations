@@ -1,0 +1,57 @@
+// Abbasid Baghdad — the fronts of the houses at eye level, the street furniture of the lanes and the esplanade (docs/settlements/abbasid-baghdad.md §12):
+// by the door of each house a water jar, a stack of palm-rib fuel, a pile of sacks, a mat of goods, hens, a stool with a man sitting; an oil
+// lamp on its post; on the flat roofs washing on poles; at the esplanade's roads the shade stalls of the water-sellers. Placed from the lots'
+// own door (the same rule as the house style: the door's offset from the seed), so nothing floats and nothing stands in a doorway.
+import { rng } from '../../styles/abbasid/kit.js';
+import { C, RC, lots, AVENUES, ROADS_IN, inRect } from './layout.js';
+import { houseToWorld } from './town.js';
+
+const YAW = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 };
+const CL = ['cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_indigo', 'cloth_green', 'cloth_grey', 'cloth_maroon'];
+
+/** A lot's door in local frame: offset along the front, depth to the front wall, width. */
+export function doorOf(l) {
+  const turned = l.face === 's' || l.face === 'n', w = turned ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1], d = turned ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0];
+  const r = rng(l.seed); r();
+  return { ox: (r() < 0.5 ? -1 : 1) * Math.min(w / 4, 3.2), w, d, hw: w / 2, hd: d / 2 };
+}
+
+export function frontElements() {
+  const E = [], P = [], rand = (() => { let s = 4242; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); })();
+  const pick = (a) => a[Math.floor(rand() * a.length)];
+  for (const l of lots()) {
+    if (l.plot < 0) continue;
+    const { ox, w, hw, hd } = doorOf(l), rot = YAW[l.face], st = l.storeys ?? 1, H = st * 3.5 + 0.2;
+    const at = (x, z) => houseToWorld(l, x, hd + z), seed = l.seed;
+    const side = rand() < 0.5 ? -1 : 1, free = (x) => Math.abs(x) < hw - 0.7;
+    // beside the door: a water jar or two, a stack of fuel, sacks
+    const xj = ox + side * 1.6;
+    if (free(xj) && rand() < 0.75) E.push({ t: 'pot', kind: pick(['zir', 'water_pot', 'pithos', 'vat']), n: 1 + Math.floor(rand() * 2), at: at(xj, 0.5), y: 0, seed: seed + 1 });
+    const xf = ox - side * 2.6;
+    if (free(xf) && rand() < 0.5) E.push({ t: 'firewood', at: at(xf, 0.35), y: 0, rot: rot + Math.PI / 2, len: 1.5, seed });
+    else if (free(xf) && rand() < 0.5) E.push({ t: 'sacks', at: at(xf, 0.4), y: 0, rot, n: 2 + Math.floor(rand() * 3), seed });
+    // an oil lamp on a post beside the door of one house in three, a mat of goods or hens before others
+    if (rand() < 0.33 && free(ox - side * 1.4)) E.push({ t: 'lantern', kind: 'oil', h: 2.2, at: at(ox - side * 1.4, 0.05), y: 0, rot, seed });
+    const q = rand();
+    if (q < 0.18 && free(ox + side * 3)) E.push({ t: 'chickens', kind: pick(['hen', 'hen', 'duck', 'pigeon']), n: 4, at: at(ox + side * 3, 1.3), y: 0, seed });
+    else if (q < 0.34 && free(ox + side * 3.2)) E.push({ t: 'goods_mat', at: at(ox + side * 3.2, 0.8), y: 0, rot, goods: ['heap', 'basket'], seed });
+    else if (q < 0.44 && free(ox + side * 2.8)) { const [x, z] = at(ox + side * 2.8, 0.7); E.push({ t: 'stool', at: [x, z], y: 0, rot: rot + Math.PI }); P.push({ at: [x, z], y: 0, rot: rot, pose: 'sit_low' }); }
+    else if (q < 0.5) { const [x, z] = at(ox + side * 2.4, 1.2); E.push({ t: 'animal', kind: 'donkey', at: [x, z], y: 0, rot: rot + 1.57, seed, gear: true }); }
+    // washing on poles over the flat roof, a few houses in the ring and in Karkh
+    if (w >= 10 && rand() < 0.3) E.push({ t: 'wash_line', at: houseToWorld(l, (rand() - 0.5) * 3, 0), y: H + 0.14, rot, len: 4, pole: true, seed });
+  }
+  return { E, P };
+}
+
+/** Street furniture of the esplanade and the avenues: shade stalls of the water-sellers at the roads, benches of brick at the palace's wall, wells. */
+export function esplanadeElements() {
+  const E = [], rand = (() => { let s = 99; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); })();
+  for (const [dx, dz, rot] of [[-12, 70, 0], [12, 70, 0], [-12, -75, Math.PI], [12, -75, Math.PI], [95, 12, -Math.PI / 2], [-95, 12, Math.PI / 2], [95, -12, -Math.PI / 2], [-95, -12, Math.PI / 2], [140, 12, -Math.PI / 2], [-140, 12, Math.PI / 2]])
+    E.push({ t: 'stall', at: [C[0] + dx, C[1] + dz], y: 0, rot, w: 2.6, d: 1.4, awning: pick2(rand), goods: ['zir', 'water_pot'], seed: Math.round(dx * 3 + dz) });
+  // benches under the palace wall and along the roads, brick-built resting places
+  for (const sx of [-1, 1]) for (const z of [48, 70, 100]) E.push({ t: 'bench', at: [C[0] + sx * 10.5, C[1] + z], y: 0, rot: sx * Math.PI / 2, len: 2.0, mat: 'brick_buff' });
+  for (const s of AVENUES) { void s; }
+  void RC; void ROADS_IN; void inRect;
+  return E;
+}
+const pick2 = (r) => ['cloth_white', 'cloth_ochre', 'cloth_indigo', 'cloth_green'][Math.floor(r() * 4)];
