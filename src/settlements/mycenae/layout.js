@@ -65,9 +65,10 @@ const MOUND_R = 40, MOUND_H = 15.4;
 // the dromos' floor is the ground at its open end
 TREAS.y = Math.round(background(TREAS.x0 - 3, TREAS.z) * 10) / 10;
 
-let LOTS_CACHE = null;
+let LOTS_CACHE = null, LOT_IDX = null;
+const PAD_LOTS = [];
 /** The terrain's height (before the disc's edge is faded to 0 by ground.js). */
-export function terrain(x, z) {
+export function terrain(x, z, pads = true) {
   const d = sdCircuit(x, z), yi = yIn(x);
   let h;
   if (d <= -TH / 2 - 0.5) h = yi;
@@ -82,9 +83,12 @@ export function terrain(x, z) {
     const dd = P.circle ? Math.hypot(x - P.circle[0], z - P.circle[1]) - P.circle[2] : -Math.min(x - P.rect[0], P.rect[2] - x, z - P.rect[1], P.rect[3] - z);
     if (dd < P.m) h = lerp(P.y, h, sm(0, P.m, Math.max(0, dd)));
   }
-  for (const L of lotsInside()) {
-    const dd = -Math.min(x - L.rect[0], L.rect[2] - x, z - L.rect[1], L.rect[3] - z);
-    if (dd < 2) h = lerp(L.y - 0.1, h, sm(0, 2, Math.max(0, dd)));
+  if (pads && LOT_IDX) {
+    const list = LOT_IDX.get(Math.floor(x / 8) + ',' + Math.floor(z / 8));
+    if (list) for (const L of list) {
+      const dd = -Math.min(x - L.rect[0], L.rect[2] - x, z - L.rect[1], L.rect[3] - z);
+      if (dd < 2) h = lerp(L.y - 0.1, h, sm(0, 2, Math.max(0, dd)));
+    }
   }
   // the Treasury: the mound over the dome, the dromos cut with its floor and the ground rising to the walls' tops
   const r = Math.hypot(x - TREAS.x, z - TREAS.z);
@@ -99,58 +103,80 @@ export function terrain(x, z) {
   }
   return h;
 }
-function lotsInside() { return LOTS_CACHE ? LOTS_CACHE.filter((l) => l.inside) : []; }
-/** The terrain a house's floor must clear: the highest of the footprint's corners and centre. */
-const high = (r) => Math.max(terrain(r[0], r[1]), terrain(r[2], r[1]), terrain(r[0], r[3]), terrain(r[2], r[3]), terrain((r[0] + r[2]) / 2, (r[1] + r[3]) / 2));
+const ground0 = (x, z) => terrain(x, z, false);
 
 // ── the houses ─────────────────────────────────────────────────────────────────────────
 // inside the walls: set by hand along the road (north and south of it) and round the palace; their floors are set from the interior ground
 const INSIDE = [
-  [-78, -29, -66, -19, 'house'], [-62, -26, -50, -14, 'house'], [-46, -32, -34, -20, 'house'], [-30, -30, -18, -16, 'house'], [-14, -33, -2, -20, 'house'], [2, -36, 24, -22, 'store'],
+  [-78, -29, -66, -19, 'house'], [-62, -26, -50, -14, 'workshop'], [-46, -32, -34, -20, 'house'], [-30, -30, -18, -16, 'workshop'], [-14, -33, -2, -20, 'house'], [2, -36, 24, -22, 'store'],
   [-48, 11, -38, 22, 'house'], [-34, 12, -22, 26, 'cult'], [-20, 10, -8, 24, 'cult'], [-46, 28, -32, 42, 'house'], [-28, 30, -14, 44, 'house'], [-10, 28, 6, 44, 'house'], [8, 30, 22, 46, 'house'],
   [88, -30, 102, -14, 'house'], [90, 0, 106, 14, 'store'], [86, 22, 100, 36, 'house'],
+  [28, 38, 42, 50, 'workshop'], [46, 38, 60, 49, 'store'], [62, 37, 74, 44, 'house'], [-84, -13, -75, -5.2, 'guard'],
 ];
 /** The granary just inside the gate, to the right of the way, against the wall. */
 export const GRANARY = [-84, 4.5, -74, 12.5];
 export const PALACE = { court: [30, -10, 56, 16], megaron: { x0: 56, x1: 80.9, z0: -2.9, z1: 8.9, th: 0.9, ax: 3 }, propylon: [24, 0.2, 29.2, 5.8] };
-/** The lots of houses: { rect, kind, y (floor), seed, inside, face } — inside the walls and on the slopes of the lower town. */
+export const TRADES = ['potter', 'smith', 'weaver', 'oil', 'ivory', 'perfume'];
+const FACE_DIR = { n: [0, -1], s: [0, 1], w: [-1, 0], e: [1, 0] };
+/** The lots of houses: { rect, kind, y (floor), seed, inside, face (the door's side), storeys, trade, court } — inside the walls and on the slopes of the lower town. */
 export function lots() {
   if (LOTS_CACHE) return LOTS_CACHE;
   LOTS_CACHE = [];
   const rand = rng(1250);
   for (const [x0, z0, x1, z1, kind] of INSIDE) {
     const cx = (x0 + x1) / 2, y = Math.round((yIn(cx) + 0.05) * 4) / 4;
-    LOTS_CACHE.push({ rect: [x0, z0, x1, z1], kind, y, seed: Math.floor(rand() * 1e6), inside: true, face: z0 < 0 ? 's' : 'n', storeys: kind === 'store' ? 1 : (rand() < 0.45 ? 2 : 1) });
+    LOTS_CACHE.push({ rect: [x0, z0, x1, z1], kind, y, seed: Math.floor(rand() * 1e6), inside: true, face: z0 < 0 ? 's' : 'n', storeys: kind === 'store' || kind === 'workshop' ? 1 : (rand() < 0.45 ? 2 : 1), trade: kind === 'workshop' ? TRADES[Math.floor(rand() * TRADES.length)] : undefined, lit: true });
   }
   LOTS_CACHE.push({ rect: GRANARY, kind: 'granary', y: GATE_Y + 0.1, seed: 7, inside: true, face: 'n', storeys: 1 });
-  // the lower town: along lanes, houses facing the lane
+  // the lower town: along lanes, houses facing the lane, shoulder to shoulder (a party wall between neighbours), a gap now and then for a stair or a yard
   const placed = [];
-  const clear = (r) => !(sdCircuit((r[0] + r[2]) / 2, (r[1] + r[3]) / 2) < 22 || inTreasury(r) || placed.some((p) => !(r[2] + 1.5 < p[0] || r[0] - 1.5 > p[2] || r[3] + 1.5 < p[1] || r[1] - 1.5 > p[3]))
-    || Math.hypot((r[0] + r[2]) / 2, (r[1] + r[3]) / 2) > RADIUS - 28 || onLane(...[(r[0] + r[2]) / 2, (r[1] + r[3]) / 2], 2.6) || inRect(BASTION, (r[0] + r[2]) / 2, (r[1] + r[3]) / 2, 22) || inRect(STUB, (r[0] + r[2]) / 2, (r[1] + r[3]) / 2, 14)
-    || (Math.abs((r[1] + r[3]) / 2) < 6 && (r[0] + r[2]) / 2 > -170));
+  const clear = (r) => {
+    const cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
+    return !(sdCircuit(cx, cz) < 22 || inTreasury(r) || placed.some((p) => !(r[2] + 0.05 < p[0] || r[0] - 0.05 > p[2] || r[3] + 0.05 < p[1] || r[1] - 0.05 > p[3]))
+      || Math.hypot(cx, cz) > RADIUS - 28 || onLane(cx, cz, 2.6) || [[(r[0] + r[2]) / 2, r[1]], [(r[0] + r[2]) / 2, r[3]], [r[0], (r[1] + r[3]) / 2], [r[2], (r[1] + r[3]) / 2]].some(([x, z]) => onLane(x, z, 1.9))
+      || inRect(BASTION, cx, cz, 22) || inRect(STUB, cx, cz, 14));
+  };
   for (const lane of LANES) {
     for (let i = 0; i < lane.length - 1; i++) {
       const [ax, az] = lane[i], [bx, bz] = lane[i + 1], L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L;
       for (const side of [-1, 1]) {
-        let s = 3 + rand() * 4;
-        while (s < L - 6) {
-          const w = 7 + rand() * 5, d = 6 + rand() * 4, off = 2.6 + rand() * 1.2;
+        let s = 2 + rand() * 3;
+        while (s < L - 5) {
+          const shop = rand() < 0.17, w = 7 + rand() * 5, d = 6 + rand() * 4, off = (lane === LANES[0] ? 3.7 : 2.75) + (shop ? 3.8 : 0);
           const c = [ax + ux * (s + w / 2) - uz * side * (off + d / 2), az + uz * (s + w / 2) + ux * side * (off + d / 2)];
           const alongX = Math.abs(ux) > Math.abs(uz), r = alongX ? [c[0] - w / 2, c[1] - d / 2, c[0] + w / 2, c[1] + d / 2] : [c[0] - d / 2, c[1] - w / 2, c[0] + d / 2, c[1] + w / 2];
-          s += w + 1 + rand() * 2.5;
-          if (rand() < 0.1 || !clear(r)) continue;
+          s += w + (rand() < 0.14 ? 1.6 + rand() * 1.6 : 0);
+          if (rand() < 0.04 || !clear(r)) continue;
           placed.push(r);
-          const face = alongX ? (side > 0 ? 'n' : 's') : (side > 0 ? 'w' : 'e');
-          const kind = rand() < 0.14 ? 'workshop' : 'house';
-          LOTS_CACHE.push({ rect: r, kind, y: Math.round((high(r) + 0.15) * 4) / 4, seed: Math.floor(rand() * 1e6), inside: false, face: (face === 'n' ? 's' : face === 's' ? 'n' : face === 'w' ? 'e' : 'w'), storeys: rand() < 0.35 ? 2 : 1 });
+          const dir = [side * uz, -side * ux], face = Math.abs(dir[0]) > Math.abs(dir[1]) ? (dir[0] > 0 ? 'e' : 'w') : (dir[1] > 0 ? 's' : 'n');
+          const f = FACE_DIR[face], mx = (r[0] + r[2]) / 2, mz = (r[1] + r[3]) / 2, hx = (r[2] - r[0]) / 2, hz = (r[3] - r[1]) / 2;
+          const door = [mx + f[0] * (hx + 1.3), mz + f[1] * (hz + 1.3)];
+          const y = Math.round((ground0(...door) + 0.22) * 4) / 4;
+          const court = !shop ? null : (face === 'n' ? [r[0], r[1] - 3.7, r[2], r[1]] : face === 's' ? [r[0], r[3], r[2], r[3] + 3.7] : face === 'w' ? [r[0] - 3.7, r[1], r[0], r[3]] : [r[2], r[1], r[2] + 3.7, r[3]]);
+          LOTS_CACHE.push({ rect: r, kind: shop ? 'workshop' : 'house', y, seed: Math.floor(rand() * 1e6), inside: false, face, storeys: rand() < 0.35 ? 2 : 1, trade: shop ? TRADES[Math.floor(rand() * TRADES.length)] : undefined, court, lit: Math.hypot(mx, mz) < 150 });
+          const lt = LOTS_CACHE[LOTS_CACHE.length - 1];
+          if (court) PAD_LOTS.push({ rect: court, y: lt.y });
         }
       }
+    }
+  }
+  // every lot gets its door's place along the front (the house builder uses it), then the pads are indexed
+  for (const l of LOTS_CACHE) {
+    const alongX = l.face === 'n' || l.face === 's', W = alongX ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1], wide = l.kind === 'workshop' || l.kind === 'store', dw = wide ? 1.5 : 1.05;
+    l.W = W; l.dw = dw; l.du = Math.max(dw / 2 + 0.75, Math.min(W - dw / 2 - 0.75, W * (rand() < 0.5 ? 0.3 : 0.7) + (rand() - 0.5) * 0.8));
+  }
+  LOT_IDX = new Map();
+  for (const l of [...LOTS_CACHE, ...PAD_LOTS]) {
+    const r = l.rect;
+    for (let i = Math.floor((r[0] - 2) / 8); i <= Math.floor((r[2] + 2) / 8); i++) for (let j = Math.floor((r[1] - 2) / 8); j <= Math.floor((r[3] + 2) / 8); j++) {
+      const k = i + ',' + j;
+      if (!LOT_IDX.has(k)) LOT_IDX.set(k, []);
+      LOT_IDX.get(k).push(l);
     }
   }
   return LOTS_CACHE;
 }
 const inTreasury = (r) => { const cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2; return Math.hypot(cx - TREAS.x, cz - TREAS.z) < MOUND_R + 6 || (cx < TREAS.xf + 4 && cx > TREAS.x0 - 8 && Math.abs(cz - TREAS.z) < 14); };
-/** Lanes of the lower town: from the approach road west of the Lion Gate, to the Treasury, round the south and the west slope. Polylines [x, z]. */
 export const LANES = [
   [[-190, 0], [-160, -2], [-130, -2], [-107, 0]],                           // the approach (the main road)
   [[-165, -2], [-168, -40], [-150, -75]],                                   // north-west up the slope
@@ -158,6 +184,22 @@ export const LANES = [
   [[-150, 35], [-118, 50], [-98, 62]],                                      // the south-west terraces
   [[-20, 84], [20, 92], [60, 100], [100, 98]],                              // along the south ravine's far side
   [[20, 92], [30, 120], [60, 140]],
+  [[-130, -2], [-128, -30], [-116, -52], [-96, -62]],                       // up to the north-west terraces under the wall
+  [[-168, -40], [-142, -50], [-122, -64]],                                  // the upper north-west lane
+  [[-160, 35], [-186, 30]],                                                 // out to the west
+  [[-150, 70], [-122, 78], [-98, 86]],                                      // the south-west cross lane
+  [[-130, -2], [-134, 20], [-150, 35]],                                     // a short way from the approach down to the terraces
+  [[100, 98], [128, 92], [148, 70]],                                        // the south-east
+  [[60, 100], [88, 120], [118, 128]],
+  [[-98, 62], [-80, 78], [-58, 62]],                                        // under the circle's slope
+  [[-190, -24], [-168, -26]],                                               // across the north-west slope
+  [[-190, -62], [-170, -50], [-168, -40]],
+  [[-186, 30], [-184, 62], [-170, 86], [-150, 70]],                         // the loop of the south-west quarter
+  [[-155, 52], [-130, 66], [-110, 80]],
+  [[100, 98], [112, 70], [124, 52]],                                        // east of the south ravine
+  [[-60, 84], [-40, 100]],
+  [[-100, -60], [-70, -72], [-40, -76]],                                    // the lane under the north ravine's wall
+  [[20, 92], [-10, 110], [-30, 130]],
 ];
 /** Is (x, z) within m of a lane's centre line? */
 export function onLane(x, z, m = 1.6) {
@@ -202,4 +244,18 @@ export function wallRuns() {
   }
   if (gate) { const m = gate.at; gate.y = yIn(m[0]); gate.y0 = terrain(m[0] + gate.n[0] * 3.3, m[1] + gate.n[1] * 3.3) - 0.9; gate.y1 = gate.y + 2.2; }
   return { runs, gate };
+}
+
+/** A point of a lot in its own frame: u along the front from the left end, v inward from the door wall. */
+export function lotPoint(l, u, v) {
+  const [x0, z0, x1, z1] = l.rect, f = l.face;
+  return f === 'n' ? [x0 + u, z0 + v] : f === 's' ? [x0 + u, z1 - v] : f === 'w' ? [x0 + v, z0 + u] : [x1 - v, z0 + u];
+}
+/** Where a lot's smoke rises: over the hearth's hole in the roof (a house's front room, a workshop's middle, the palace suites). */
+export function hearthAt(l) {
+  const alongX = l.face === 'n' || l.face === 's', W = alongX ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1], D = alongX ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0];
+  const two = l.kind === 'house' && D >= 6.6 && W >= 6.8, Vp = two ? Math.round(D * 0.55 * 2) / 2 : -1;
+  const st = l.kind === 'house' ? l.storeys : 1;
+  const p = lotPoint(l, W / 2, Vp > 0 ? Vp / 2 : D / 2);
+  return { at: p, top: l.y + st * 2.95 + 0.3 };
 }
