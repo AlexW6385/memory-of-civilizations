@@ -6,6 +6,7 @@ import { box, lathe } from '../../core/geom.js';
 import { inFrame, YAW, rng, wallRun, tangRoof } from './kit.js';
 import { buildHall } from './hall.js';
 import { furnishHouse } from './interior.js';
+import { furnishRoom, furnishHut, courtDress } from './court.js';
 
 const ext = (rect, front) => { const w = rect[2] - rect[0], d = rect[3] - rect[1], al = front === 'n' || front === 's'; return al ? [w, d] : [d, w]; };
 const mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
@@ -18,6 +19,34 @@ function plainGate(L, gx, z, rich) {
   tangRoof(L.bag, { cx: gx, cz: z, A: 2.5, B: 1.6, y: 3.05, rise: 0.75, gable: !rich, thick: 0.18, chi: 0.5 });
   bag.add('wood_dark', box(gx - 1.2, 0, z + 0.22, gx - 0.15, 2.65, z + 0.3));      // one door leaf open against the post
   void col;
+}
+
+
+/** The weathering of a lot's wall of rammed earth on its outer faces: the damp skirt, blotches, rain streaks, a patch of repair; the gate's gap kept clear. */
+function weatherFront(L, W, D, wh, th, gx, gw, rand) {
+  const { bag } = L, p = 0.03;
+  const run = (x0, z0, x1, z1, nx, nz, gate) => {   // an outer face from (x0,z0) to (x1,z1), pushed out along (nx,nz)
+    const Lw = Math.hypot(x1 - x0, z1 - z0), ux = (x1 - x0) / Lw, uz = (z1 - z0) / Lw;
+    const seg = (s0, s1, a, b, mat) => {
+      if (s1 - s0 < 0.2) return;
+      const px0 = x0 + ux * s0, pz0 = z0 + uz * s0, px1 = x0 + ux * s1, pz1 = z0 + uz * s1;
+      const xr = nx ? [Math.min(px0 - nx * 0.15, px0 + nx * p), Math.max(px0 - nx * 0.15, px0 + nx * p)] : [Math.min(px0, px1), Math.max(px0, px1)];
+      const zr = nz ? [Math.min(pz0 - nz * 0.15, pz0 + nz * p), Math.max(pz0 - nz * 0.15, pz0 + nz * p)] : [Math.min(pz0, pz1), Math.max(pz0, pz1)];
+      bag.add(mat, box(xr[0], a, zr[0], xr[1], b, zr[1]));
+    };
+    const gaps = gate == null ? [] : [[gate - gw / 2 - 0.2, gate + gw / 2 + 0.2]];
+    const spans = []; let s = 0; for (const [g0, g1] of gaps) { spans.push([s, g0]); s = g1; } spans.push([s, Lw]);
+    for (const [s0, s1] of spans) {
+      seg(s0, s1, 0, Math.min(0.5, wh * 0.5), 'plaster_damp');
+      for (let t = s0 + 1 + rand() * 3; t < s1 - 2; t += 4 + rand() * 6) {
+        const w = 0.7 + rand() * 1.8, r = rand();
+        if (r < 0.4) seg(t, t + w, 0.5, 0.8 + rand() * 0.5, 'plaster_damp'); else if (r < 0.7) seg(t, t + w, 0.9 + rand() * 0.4, Math.min(wh - 0.3, 1.8 + rand() * 0.4), 'mud_plaster'); else seg(t, t + 0.3, Math.max(0.5, wh - 1.3), wh - 0.05, 'plaster_streak');
+      }
+    }
+  };
+  const ox = W / 2 + th / 2, oz = D / 2 + th / 2;
+  run(-W / 2, oz, W / 2, oz, 0, 1, gx + W / 2); run(-W / 2, -oz, W / 2, -oz, 0, -1, null);
+  run(-ox, -D / 2, -ox, D / 2, -1, 0, null); run(ox, -D / 2, ox, D / 2, 1, 0, null);
 }
 
 /** tang_house { rect, front, kind: 'mansion' | 'house' | 'hut', seed, det }. */
@@ -37,14 +66,22 @@ export function tangHouse(el, ctx) {
       cap(ring[0][0], ring[0][1], []); cap(ring[1][0], ring[1][1], []); cap(ring[2][0], ring[2][1], []);
       cap([-W / 2, D / 2], [W / 2, D / 2], [{ s0: W / 2 + gx - 1.5, s1: W / 2 + gx + 1.5 }]);
     }
-    void op;
+    weatherFront(L, W, D, wh, th, gx, 2.5, rand);
     if (kind === 'hut') {
-      // a hut of earth: walls of rammed earth, a door and a small window, a low thatched gable roof; a fenced yard before it
-      const hw = Math.min(W - 3, 6.4), hd = 4.4, hz = -D / 2 + hd / 2 + 1.5;
-      bag.add('mud_plaster', box(-hw / 2, 0, hz - hd / 2, hw / 2, 2.3, hz + hd / 2)); col.rect([-hw / 2, hz - hd / 2, hw / 2, hz + hd / 2], 0, 2.3);
-      bag.add('wood_dark', box(-0.5, 0, hz + hd / 2 - 0.04, 0.5, 1.8, hz + hd / 2 + 0.04));
-      bag.add('lattice_red', box(1.2, 1.0, hz + hd / 2 - 0.03, 2.0, 1.7, hz + hd / 2 + 0.04));
+      // a hut of earth: walls of rammed earth with a doorway and a window, a low thatched gable roof, a bed platform and a stove inside; a yard before it
+      const hw = Math.min(W - 3, 6.4), hd = 4.4, hz = -D / 2 + hd / 2 + 1.5, y = 0.12;
+      const doorAt = hw / 2 + (rand() - 0.5) * 2;
+      wallRun(L, 'mud_plaster', [-hw / 2, hz - hd / 2], [hw / 2, hz - hd / 2], 0.4, 0, 2.3);
+      wallRun(L, 'mud_plaster', [-hw / 2, hz - hd / 2], [-hw / 2, hz + hd / 2], 0.4, 0, 2.3); wallRun(L, 'mud_plaster', [hw / 2, hz - hd / 2], [hw / 2, hz + hd / 2], 0.4, 0, 2.3);
+      wallRun(L, 'mud_plaster', [-hw / 2, hz + hd / 2], [hw / 2, hz + hd / 2], 0.4, 0, 2.3, [{ at: doorAt, w: 1.1, h: 1.85, y0: 0 }, { at: doorAt < hw / 2 ? hw - 0.9 : 0.9, w: 0.7, h: 0.6, y0: 1.1 }]);
+      bag.add('wood_dark', box(doorAt - hw / 2 - 0.62, 0, hz + hd / 2 - 0.25, doorAt - hw / 2 - 0.56, 1.85, hz + hd / 2 + 0.2)); bag.add('timber', box(doorAt - hw / 2 - 0.62, 1.85, hz + hd / 2 - 0.25, doorAt - hw / 2 + 0.62, 1.95, hz + hd / 2 + 0.2));
+      bag.add('earth_wall', box(-hw / 2 - 0.2, 0, hz - hd / 2 - 0.2, hw / 2 + 0.2, 0.12, hz + hd / 2 + 0.2));
+      col.floor([-hw / 2, hz - hd / 2, hw / 2, hz + hd / 2], y);
+      if (det >= 1) inFrame(L, [0, hz], 0, (H) => furnishHut(H, { w: hw - 0.8, d: hd - 0.8, y, seed: el.seed || 1 })); col.floor([-hw / 2 - 0.2, hz + hd / 2 - 0.1, hw / 2 + 0.2, hz + hd / 2 + 0.2], 0.1);
       tangRoof(bag, { cx: 0, cz: hz, A: hw / 2 + 0.5, B: hd / 2 + 0.6, y: 2.25, rise: 1.35, gable: true, tile: 'thatch', soffit: 'thatch', ridge: 'thatch', chiwei: false, thick: 0.3, gableMat: 'mud_plaster' });
+      // the yard: a hurdle fence, a drying mat with grain, a stack of firewood, a pot
+      bag.add('wicker', box(-W / 2 + 1.0, 0, hz + hd / 2 + 2.5, -W / 2 + 4.5, 0.8, hz + hd / 2 + 2.62)); bag.add('reed_mat', box(W / 2 - 4.2, 0, hz + hd / 2 + 1.6, W / 2 - 1.6, 0.02, hz + hd / 2 + 3.4)); bag.add('cloth_ochre', box(W / 2 - 4.0, 0.02, hz + hd / 2 + 1.8, W / 2 - 1.8, 0.05, hz + hd / 2 + 3.2));
+      bag.add('bark_pine', box(-hw / 2 - 1.3, 0, hz - 0.8, -hw / 2 - 0.5, 0.9, hz + 1.2)); bag.add('pottery_dark', lathe([[0.2, 0], [0.34, 0.12], [0.4, 0.34], [0.36, 0.6], [0.001, 0.62]], 10, null, hw / 2 + 1.0, 0, hz + hd / 2 + 0.6));
       return;
     }
     // the gate
@@ -52,18 +89,22 @@ export function tangHouse(el, ctx) {
     if (kind !== 'mansion') plainGate(L, gx, D / 2, false);
     // the main hall at the back, facing the gate; the wings on both sides of the court
     const hw = Math.min(W - 5.5, kind === 'mansion' ? 17.5 : 11.5), hd = kind === 'mansion' ? 7.4 : 5.8, nb = hw > 15 ? 5 : 3, hz = -D / 2 + hd / 2 + 2.0;
+    const rr = rng((el.seed || 1) + 99), variant = el.furnished ? 'dais' : (kind === 'mansion' && rr() < 0.35 ? 'dais2' : ['study', 'bedroom', 'dining', 'weaver', 'store'][Math.floor(rr() * 5)]);
     inFrame(L, [0, hz], 0, (H) => {
       const plat = kind === 'mansion' ? 0.55 : 0.4;
-      buildHall(H, { w: hw, d: hd, y: 0, plat, H: kind === 'mansion' ? 4.0 : 3.3, nb, kind: 'hall', det, bh: kind === 'mansion' ? 1.2 : 0.9, over: kind === 'mansion' ? 2.2 : 1.8, roof: 'hip', doorW: 2.4, steps: true, bq: det >= 2 ? 'med' : 'low', interior: !!el.furnished });
-      if (el.furnished) furnishHouse(H, { w: hw, d: hd, y: plat });
+      buildHall(H, { w: hw, d: hd, y: 0, plat, H: kind === 'mansion' ? 4.0 : 3.3, nb, kind: 'hall', det, bh: kind === 'mansion' ? 1.2 : 0.9, over: kind === 'mansion' ? 2.2 : 1.8, roof: rr() < 0.5 || kind === 'mansion' ? 'hip' : 'gable', doorW: 2.4, steps: true, bq: det >= 2 ? 'med' : 'low', interior: true });
+      if (variant === 'dais' || variant === 'dais2') furnishHouse(H, { w: hw, d: hd, y: plat });
+      else furnishRoom(H, variant, { w: hw, d: hd, y: plat, seed: el.seed, light: det >= 2 });
     });
     if (D > 24 && W > 20) for (const s of [-1, 1]) {
       const wl = Math.min(D * 0.36, 11.6), wx = s * (W / 2 - 3.6), wz = hz + hd / 2 + 1.4 + wl / 2 + 1.5;
       if (wz + wl / 2 > D / 2 - 5) continue;
-      inFrame(L, [wx, wz], s > 0 ? Math.PI / 2 * -1 : Math.PI / 2, (H) => buildHall(H, { w: wl, d: 4.2, y: 0, plat: 0.3, H: 2.9, nb: 3, kind: 'hall', det: Math.min(det, 1), bh: 0.75, over: 1.4, roof: 'gable', steps: false, doorW: 1.8 }));
+      inFrame(L, [wx, wz], s > 0 ? Math.PI / 2 * -1 : Math.PI / 2, (H) => {
+        buildHall(H, { w: wl, d: 4.2, y: 0, plat: 0.3, H: 2.9, nb: 3, kind: 'hall', det: Math.min(det, 1), bh: 0.75, over: 1.4, roof: 'gable', steps: false, doorW: 1.8, interior: true });
+        furnishRoom(H, s < 0 ? 'kitchen' : 'store', { w: wl, d: 4.2, y: 0.3, seed: (el.seed || 1) + s, light: false });
+      });
     }
-    // the path of brick from the gate to the hall steps
-    bag.add('brick_grey', box(gx - 0.8, 0, hz + hd / 2 + 1.0, gx + 0.8, 0.025, D / 2 - 0.2));
+    courtDress(L, { W, D, gx, hz, hd, kind, det, seed: el.seed });
   });
 }
 
