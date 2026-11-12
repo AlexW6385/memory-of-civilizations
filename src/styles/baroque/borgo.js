@@ -412,7 +412,7 @@ function laundry(bag, a, b, y, rand) {
  * borgo_row: { rect, face ('n'|'s'|'e'|'w': the street side), units: [{ u0, w, kind: 'palazzo' | 'casa' | 'lane', storeys, H, mat, seed, trade, open, fountain, madonna, flip, altana }], back (the face opposite, if it is
  * on a lane: 'plain' draws its windows), laundry: [{ a, b, y }], y, simple }.
  */
-export function borgoRow(el, { bag, col }) {
+export function borgoRow(el, { bag, col, lights }) {
   const y = el.y ?? 0, f = el.face, rect = el.rect, simple = !!el.simple;
   const { M } = faceFrame(rect, f, y);
   const D = f === 'n' || f === 's' ? rect[3] - rect[1] : rect[2] - rect[0];
@@ -425,7 +425,7 @@ export function borgoRow(el, { bag, col }) {
     const r = wrect(M, un.u0, -D, un.u0 + un.w, 0);
     const wall = un.mat ?? WALLS[Math.floor(rand() * WALLS.length)];
     o.mat = wall;
-    if (un.open) openBody(bag, col, M, o, wall);
+    if (un.open) openBody(bag, col, M, o, wall, lights);
     else { bag.add(wall, box(r[0], y - 0.5, r[1], r[2], y + un.H, r[3])); col.rect(r, y, y + un.H); }
     (un.kind === 'palazzo' ? palazzo : casa)(bag, col, M, o);
     // the wall on the other side of the row (on the alley): plain, a few windows
@@ -442,7 +442,7 @@ export function borgoRow(el, { bag, col }) {
  * wall solid. Furnished in the style of the trade: the counter with scales, shelves of jars and
  * bottles, barrels, sacks, hams and sausages hung from a rail, a lantern.
  */
-function openBody(bag, col, M, o, wall) {
+function openBody(bag, col, M, o, wall, lights) {
   const { u0, w, D, H, rand } = o, y = 0, T0 = 0.5, SD = Math.min(D - 0.5, 6.2), dw = 1.1;
   const sw = Math.min(2.8, w - dw - 1.6), shopU = u0 + 0.7 + sw / 2 + (o.flip ? dw + 0.4 : 0), doorU = o.flip ? u0 + 0.7 + dw / 2 : u0 + w - 0.7 - dw / 2;
   const Bx = (mat, a0, d0, a1, d1, ya, yb, c = false) => { const r = wrect(M, a0, d0, a1, d1); bag.add(mat, box(r[0], ya, r[1], r[2], yb, r[3])); if (c) col.rect(r, Math.max(ya, 0) + (ya < 0 ? 0 : 0), yb); };
@@ -470,6 +470,8 @@ function openBody(bag, col, M, o, wall) {
   L.emit(bag, M);
   col.floor(fr, y + 0.05);
   furnish(bag, col, M, { u0: u0 + T0, u1: u0 + w - T0, d0: -T0, d1: -SD, y: y + 0.05, trade: o.trade, rand, vy });
+  // the lantern is lit: one warm light under the vault
+  if (lights && !o.simple) { const q = wrect(M, shopU, -(T0 + SD) / 2, shopU, -(T0 + SD) / 2); lights.push({ at: [q[0], y + 2.6, q[1]], color: '#ffc27a', intensity: 3, distance: 7 }); }
 }
 
 function furnish(bag, col, M, { u0, u1, d0, d1, y, trade, rand, vy }) {

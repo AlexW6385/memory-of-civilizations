@@ -6,6 +6,7 @@
 
 import { feast } from './feast.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
+import { openLots } from '../lod.js';
 import { OVAL, FRONT_X, FLOOR, BORGO, GARDEN, TIBER, rows, frontPt, lots, tiberX, height, CROSSING } from './layout.js';
 
 const plan = (id, style, elements, bounds, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, 0], facing: 'n' }, bounds, rooms: [], elements, ...extra });
@@ -100,6 +101,21 @@ export function streetPlans() {
     if (rr() < 0.65) prop(KINDS[Math.floor(rr() * 5)], P(0.8 + rr() * (w - 1.6), -0.8), rr() * 6.28, l.seed + 3);
     if (rr() < 0.2) L.push({ t: 'animal', kind: 'cat', at: P(w * 0.5, -0.5), y: 0, rot: out + 1, seed: l.seed + 4 });
     if (rr() < 0.18) L.push(sc({ at: P(w * 0.4, -1.6), rot: out + 2.4, seed: l.seed + 6, pose: 'talk', dress: 'robe', cloth: 'cloth_brown', cloth2: 'cloth_white', hat: 'veil', over: 'shawl' }));
+  }
+  // the open houses nearest the arrival: the innkeeper and his guests at the benches, the household at its table and hearth (the frame of vernacular's openGround)
+  for (const [l, use] of openLots(lots(), [ARRIVALS['baroque-rome'][0], ARRIVALS['baroque-rome'][2]], 5)) {
+    const [x0, z0, x1, z1] = l.rect, f = l.front, W = x1 - x0, D = z1 - z0, fy = (l.y ?? 0) + 0.6, rr = rng(l.seed + 41);
+    const P = (u, v) => (f === 's' ? [x1 - u, z1 - v] : [x0 + u, z0 + v]);
+    const face = (a, b) => Math.atan2(-(b[0] - a[0]), -(b[1] - a[1]));
+    const put = (u, v, tu, tv, o) => { const a = P(u, v); L.push(sc({ at: a, y: fy, rot: face(a, P(tu, tv)), seed: Math.floor(rr() * 1e6), dress: 'tunic', legs: 'hose', cloth: ['cloth_brown', 'cloth_grey', 'cloth_ochre'][Math.floor(rr() * 3)], cloth2: 'cloth_white', hat: 'cap', hair: 'short', pose: 'stand', ...o })); };
+    if (use === 'inn') {
+      put(W - 1.6, D * 0.5, W, D * 0.5, { over: 'apron', cloth: 'cloth_white' });
+      put(1.6, D * 0.38 + 0.55, 1.6, D * 0.38, { pose: 'sit' }); put(1.0, D * 0.62 - 0.55, 1.0, D * 0.62, { pose: 'sit', cloth: 'cloth_green' });
+      put(2.0, D * 0.5, 1.8, D * 0.62, { pose: 'talk' });
+    } else {
+      put(W / 2 + 0.9, D * 0.45, W / 2, D * 0.45, { pose: 'sit', dress: 'robe', cloth: 'cloth_maroon', hat: 'veil', over: 'shawl', hair: 'bun' });
+      if (rr() < 0.7) put(W - 1.6, D - 1.4, W - 1.6, D, { dress: 'robe', cloth: 'cloth_indigo', hat: 'veil', over: 'apron', hair: 'bun' });
+    }
   }
   // Swiss guards in the slashed doublets with their halberds at the colonnade's two mouths and on the sagrato
   const guard = (x, z, rot, y = 0) => L.push(sc({ at: [x, z], y, rot, seed: Math.floor(x * 5 + z), pose: 'stand', dress: 'tunic', legs: 'hose', cloth: 'cloth_red', cloth2: 'cloth_ochre', hat: 'cap', over: 'cape', carry: 'staff', len: 2.3 }));

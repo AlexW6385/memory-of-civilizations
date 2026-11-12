@@ -54,10 +54,10 @@ export function rows() {
         units.push(un); cur += w;
       }
     }
-    // a wall fountain in one house of the north and the south-Vecchio rows; every third house with a shop can be entered
+    // a wall fountain in one house of the north and the south-Vecchio rows; two houses in three with a shop can be entered
     const casas = units.filter((u) => u.kind === 'casa' && u.w >= 7.2);
     if (def.id !== 'S' && casas[1]) { casas[1].fountain = true; casas[1].madonna = false; }
-    casas.forEach((u, i) => { if (!u.fountain && i % 3 === 0) u.open = true; });
+    casas.forEach((u, i) => { if (!u.fountain && i % 3 !== 2) u.open = true; });
     ROWS.push({ ...def, units });
   }
   return ROWS;

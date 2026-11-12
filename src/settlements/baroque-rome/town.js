@@ -6,7 +6,7 @@ const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base:
 const TRADES = ['grocer', 'baker', 'cloth', 'wine', 'apothecary', 'osteria', 'cobbler'];
 const CAS_H = [3.9, 3.4, 3.2, 2.9];
 export async function houses() {
-  const all = lots(), plans = [], arrival = ARRIVALS['baroque-rome'], homes = openLots(all, [arrival[0], arrival[2]]);
+  const all = lots(), plans = [], arrival = ARRIVALS['baroque-rome'], homes = openLots(all, [arrival[0], arrival[2]], 5);
   // the lots about the Borgo and the oval's mouth are fronted like the Borgo's own houses (shops, madonnelle, awnings, notices);
   // the farther ones, and the three homes that can be entered, are the shared Roman house
   const fronted = all.filter((l) => l.fronted && !homes.has(l) && l.rect[2] - l.rect[0] >= 8.4);
