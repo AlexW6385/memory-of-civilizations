@@ -21,7 +21,7 @@ export const ARRIVALS = {
   'sanchi':           [0, 22.1, 60, 0, 0.15],            // the Great Stupa, its gateway and Ashoka's pillar
   'khajuraho':        [-14, null, -60, 1.5708, 0.22],    // up the pilgrims' approach lane between the shops of flowers and sweets to the stair of Kandariya Mahadeva's terrace, the porch and the climbing spires over the roofs
   'madurai':          [-20, 0.1, 170, 0, 0.3],           // the painted gopuram over the street
-  'mughal-agra':      [0, 0.4, 60, 0, 0.1],              // the Taj Mahal down the garden's water channel
+  'mughal-agra':      [0, 0.4, -62, 0, 0.2],             // the Taj Mahal down the garden's water channel, nearer: dome and minarets large
   'angkor':           [-178, 1.05, 1.5, -1.5708, 0.08],  // Angkor Wat's towers at the end of the causeway
   'borobudur':        [110, 0.1, 0, 1.5708, 0.18],       // the monument up the east way
   'abbasid-baghdad':  [-110, 0.1, 16, 0, 0.2],               // the Palace of the Golden Gate and its Green Dome across the esplanade, now busy with petitioners, horses, a caravan and mat-sellers
