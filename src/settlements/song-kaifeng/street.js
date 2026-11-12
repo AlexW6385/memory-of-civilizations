@@ -12,6 +12,7 @@
 import { RADIUS, RIVER, BRIDGE, WALL_X, FIELDS_X, GATE, STREETS, LANES, STONE_BANK, WHARVES, STEPS, lots, inLot, inRect, bridgeDeck } from './layout.js';
 import { tradeOf } from './trades.js';
 import { shopElements } from './shops.js';
+import { doorOf } from './houses.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const FR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
@@ -64,7 +65,8 @@ export function streetPlans(base) {
     const F = frontOf(l), d = dBridge(...F.P(0.5, 0)), trade = tradeOf(l), lim = reach(l), r = rng(l.seed * 7 + 3), rp = (a) => a[Math.floor(r() * a.length)];
     if (Math.hypot(...F.P(0.5, 0)) > RADIUS - 40) continue;
     const near = d < 260, along = (t, o) => F.P(t, o);
-    const tryAdd = (el, rad, t, off) => { const p = along(t, off); if (!spot(p[0], p[1], rad)) return false; add({ ...el, at: p }, rad); return true; };
+    const door = (l.kind === 'house' || l.shop) && l.kind !== 'warehouse' ? doorOf(l) : null;      // the door stays clear: nothing stands before it
+    const tryAdd = (el, rad, t, off) => { const p = along(t, off); if (door && Math.hypot(p[0] - door.at[0], p[1] - door.at[1]) < rad + door.hw + 0.5) return false; if (!spot(p[0], p[1], rad)) return false; add({ ...el, at: p }, rad); return true; };
     if (l.shop && trade && l.kind !== 'warehouse') {
       // slots along the front, each with one of the trade's things; a bench with sitters at some, a hawker's stand on the wide streets
       const slots = Math.max(1, Math.min(4, Math.floor(F.L / 3.4))), out = Math.min(lim, 1.35 + (l.storeys === 2 ? 0.1 : 0.4));

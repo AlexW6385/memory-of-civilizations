@@ -124,17 +124,17 @@ function picks() {
   for (const l of L) {
     const t = tradeOf(l), w = l.foot[2] - l.foot[0], d = l.foot[3] - l.foot[1], dd = Math.min(w, d), big = Math.max(w, d);
     if (skip.has(l) || dd < 5 || big < 7 || l.zone !== 'city') continue;
-    if (t === 'wine') out.push({ l, kind: 'tavern', trade: t, furnish: l.kind === 'wine' || l.kind === 'shop' });
+    if (t === 'wine') out.push({ l, kind: 'tavern', trade: t, furnish: (l.kind === 'wine' || l.kind === 'shop') && l.bays > 1 });
     else if (t === 'inn') out.push({ l, kind: 'inn', trade: t, furnish: false });
-    else if (t === 'tea' && dist(l) < 160) out.push({ l, kind: 'tea', trade: t, furnish: l.kind === 'shop' });
-    else if (t && l.kind === 'shop' && dist(l) < 110) out.push({ l, kind: 'shop', trade: t, furnish: true });
-    else if (!t && l.kind === 'house' && dist(l) < 90) out.push({ l, kind: 'house', trade: null, furnish: false });
+    else if (t === 'tea' && dist(l) < 160) out.push({ l, kind: 'tea', trade: t, furnish: l.kind === 'shop' && l.bays > 1 });
+    else if (t && l.kind === 'shop' && dist(l) < 140) out.push({ l, kind: 'shop', trade: t, furnish: l.bays > 1 });
+    else if (!t && l.kind === 'house' && dist(l) < 120) out.push({ l, kind: 'house', trade: null, furnish: true });
   }
   return (PICK = out);
 }
 /** The lots whose back shelves the interiors replace (houses.js: el.furnished). */
 export const furnishedLots = () => new Set(picks().filter((p) => p.furnish).map((p) => p.l));
-const ceilOf = (l, kind) => (kind === 'tavern' || l.kind === 'wine' ? 3.2 : l.storeys === 2 ? 2.95 : 2.7);
+const ceilOf = (l, kind) => (l.kind === 'wine' ? 3.2 : l.storeys === 2 ? 2.95 : 2.7);
 /** The furniture elements (style song) of the furnished lots. */
 export function interiorElements() {
   return picks().filter((p) => p.furnish).map(({ l, kind, trade }) => ({ t: 'kf_interior', rect: l.foot, front: l.front, y: FLOOR, kind, trade, seed: l.seed + 3, ceil: ceilOf(l, kind) }));
