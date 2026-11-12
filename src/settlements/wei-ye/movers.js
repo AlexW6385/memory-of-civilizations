@@ -22,7 +22,7 @@ export function walkways() {
   r([ROAD[0] + 2, ROAD[1], ROAD[2] - 2, ROAD[3] - 6], 2.2, 0.8);
   // the palace's forecourt and the garden before the Sparrow's stair
   r([-45, -37, 45, -10], 1.3, 0.3);
-  r([-141, zOf(SPARROW) - 5, -100, zOf(SPARROW) + 5], 1.2, 0.2);
+  r([-141, zOf(SPARROW) + 1, -100, zOf(SPARROW) + 8.5], 1.2, 0.2);   // (the south half of the paving: the arrival's lawn side stays free of walkers' lines)
   // the garden's paths, the stairs' feet of the three terraces, the pond's landing, the poets' hall, the compound's lane, the piers
   r([-114, -135, -108, -37], 1.0, 0.1, 'lane'); r([-136, -37.5, -98, -33], 0.9, 0.1, 'lane');
   for (const t of [ICE, TIGER]) r([stairRect(t)[2], zOf(t) - 6, stairRect(t)[2] + 24, zOf(t) + 6], 0.7, 0.1);
