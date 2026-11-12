@@ -9,6 +9,7 @@ const CL = ['cloth_indigo', 'cloth_brown', 'cloth_ochre', 'cloth_red', 'cloth_gr
 const DARK = ['cloth_black', 'cloth_maroon', 'cloth_indigo', 'cloth_brown', 'cloth_green', 'cloth_grey'];
 const FR = { n: [0, -1], s: [0, 1] };
 const g = GROUND;
+const ARR = [-206, 117];                  // the arrival (arrivals.js): nobody stands within 8 m of it
 
 export function lifeElements() {
   const L = [], rand = rng(1521), pick = (a) => a[Math.floor(rand() * a.length)], seed = () => Math.floor(rand() * 1e9);
@@ -22,7 +23,7 @@ export function lifeElements() {
   const child = (at, y, rot, e = {}) => person(at, y, rot, { dress: 'tunic', child: true, hat: 'none', over: 'none', ...e });
   const faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
   const ok = ([x, z]) => Math.hypot(x, z) < RADIUS - 40 && wet(x, z) > 2;
-  const crowd = (n, rect, y, mix) => { for (let k = 0; k < n; k++) { const p = [rect[0] + rand() * (rect[2] - rect[0]), rect[1] + rand() * (rect[3] - rect[1])]; if (!ok(p) || inLot(p[0], p[1], 0.3)) continue; mix(p, y, rand() * 6.28); } };
+  const crowd = (n, rect, y, mix) => { for (let k = 0; k < n; k++) { const p = [rect[0] + rand() * (rect[2] - rect[0]), rect[1] + rand() * (rect[3] - rect[1])]; if (!ok(p) || inLot(p[0], p[1], 0.3)) continue; if (Math.hypot(p[0] - ARR[0], p[1] - ARR[1]) < 8) p[1] -= 12; mix(p, y, rand() * 6.28); } };
 
   // ── the house fronts
   for (const l of lots()) {
