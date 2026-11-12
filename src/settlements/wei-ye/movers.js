@@ -2,13 +2,14 @@
 // clerks and scholars, merchants, women in the curved-hem robe with the hair in a bun, porters with the carrying pole and sacks, soldiers with the halberd,
 // Hu merchants of the Western Regions in pointed hats and long coats, camel-drivers, boys; on the avenue, the ward lanes, the market streets and
 // the palace's forecourt, the road to the west gate. Data for the engine's movers (src/engine/movers.js, read in its worker); the ways come from layout.js.
-import { RADIUS, PALACE, AVENUE, MARKET, WALL, AVENUE_Z, ROAD, SPARROW, stairRect, zOf, streets } from './layout.js';
+import { RADIUS, PALACE, AVENUE, MARKET, WALL, AVENUE_Z, ROAD, SPARROW, TIGER, ICE, stairRect, zOf, streets, POND, GATES_N, riverZ } from './layout.js';
+import { COMPOUND } from './dressing.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 56, night: 5, rain: 0.35, reach: 160, spawnMin: 26, far: 46 },
+  walkers: { day: 84, night: 7, rain: 0.35, reach: 170, spawnMin: 24, far: 46 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -1.6,
 };
@@ -22,6 +23,13 @@ export function walkways() {
   // the palace's forecourt and the garden before the Sparrow's stair
   r([-45, -37, 45, -10], 1.3, 0.3);
   r([-141, zOf(SPARROW) - 5, -100, zOf(SPARROW) + 5], 1.2, 0.2);
+  // the garden's paths, the stairs' feet of the three terraces, the pond's landing, the poets' hall, the compound's lane, the piers
+  r([-114, -135, -108, -37], 1.0, 0.1, 'lane'); r([-136, -37.5, -98, -33], 0.9, 0.1, 'lane');
+  for (const t of [ICE, TIGER]) r([stairRect(t)[2], zOf(t) - 6, stairRect(t)[2] + 24, zOf(t) + 6], 0.7, 0.1);
+  r([COMPOUND[0] + 3, -38.5, COMPOUND[2] - 3, -36], 1.0, 0.2, 'lane');
+  r([75, -160, 96, -14], 1.0, 0.2, 'lane');
+  for (const x of [-60, 90, -170]) r([x - 2, riverZ(x) + 6, x + 2, riverZ(x) + 22], 0.9, 0.2, 'lane');
+  void POND; void GATES_N;
   // inside the market: the cross lanes
   { const [x0, z0, x1, z1] = MARKET, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2; r([x0 + 4, cz - 7, x1 - 4, cz + 7], 3, 3); r([cx - 7, z0 + 4, cx + 7, z1 - 4], 3, 3); }
   void PALACE; void WALL; void AVENUE_Z; void stairRect;
@@ -56,6 +64,11 @@ export const WALKERS = [
     c1: [CL.green, CL.red, CL.blue, CL.indigo], c2: [CL.white, CL.ochre], c3: [CL.black], speed: [0.9, 1.2], stride: 1.3 },
   { id: 'driver', weight: 0.7, market: 0.8, el: { dress: 'tunic', legs: 'hose', hat: 'brim', over: 'belt', carry: 'staff', arms: 'staff', hair: 'short', beard: true, feet: 'shod' },
     c1: [CL.brown, CL.grey, CL.ochre], c2: [CL.brown], c3: [CL.black], speed: [0.9, 1.2], stride: 1.35 },
+  // the poets of the Jian'an circle, in white and blue with the cap and the staff; the clerk with a bundle of bamboo slips; the groom leading a horse's worth of silence
+  { id: 'poet', weight: 0.7, market: 0.2, el: { dress: 'robe', hat: 'cap', over: 'sash', arms: 'staff', carry: 'staff', hair: 'topknot', feet: 'shod', beard: true },
+    c1: [CL.white, CL.blue, CL.indigo], c2: [CL.white], c3: [CL.black], speed: [0.7, 0.95], stride: 1.2 },
+  { id: 'clerk', weight: 0.8, market: 0.5, el: { dress: 'robe', hat: 'cap', over: 'belt', carry: 'bundle', arms: 'straps', hair: 'topknot', feet: 'shod' },
+    c1: [CL.grey, CL.brown, CL.green], c2: [CL.white], c3: [CL.black], speed: [1.0, 1.3], stride: 1.35 },
   { id: 'boy', weight: 0.6, market: 0.8, el: { dress: 'tunic', legs: 'hose', hat: 'none', over: 'none', arms: 'hang', hair: 'topknot', feet: 'bare' },
     c1: [CL.white, CL.ochre, CL.green], c2: [CL.brown], c3: [CL.black], speed: [1.1, 1.5], stride: 1.0, h: [0.6, 0.72], swing: 1.1 },
 ];
