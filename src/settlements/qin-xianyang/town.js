@@ -52,6 +52,13 @@ function people() {
   for (let k = 0; k < 14; k++) { const x = -90 + rand() * 240; fig([x, WS_Z + (rand() - 0.5) * 3], rand() * 6.28, rand() < 0.5 ? { carry: pick(rand, ['sack', 'pole']) } : {}); }
   // the road and the lanes: travellers, soldiers, women with jars
   for (let k = 0; k < 30; k++) { const x = -300 + rand() * 600, z = (rand() - 0.5) * 36; (rand() < 0.2 ? woman : rand() < 0.2 ? official : fig)([x, z], rand() > 0.5 ? 0 : Math.PI / 2 * 3, rand() < 0.3 ? { carry: pick(rand, ['sack', 'pole', 'basket']) } : {}); }
+  // the middle ramp, seen at the arrival: two guards at its foot, facing up it; gangs carrying earth up and down its sides (kept clear of its axis)
+  {
+    const zc = rampZ(1), rampY = (x) => PIT.floor * (1 - (x - PIT.x1) / RAMP.len);
+    for (const s of [-1, 1]) guard([PIT.x1 - 2.4, zc + s * 2.1], -Math.PI / 2, {}, PIT.floor + 0.02);
+    [[PIT.x1 + 7, 1, -Math.PI / 2, 'basket'], [PIT.x1 + 10.5, -1, Math.PI / 2, 'sack'], [PIT.x1 + 14, 1, Math.PI / 2, 'pole'], [PIT.x1 + 4.2, -1, -Math.PI / 2, 'basket']]
+      .forEach(([x, s, rot, carry], i) => fig([x, zc + s * 1.75], rot, { cloth: i % 2 ? 'cloth_grey' : 'cloth_brown', hair: 'shaven', beard: false, carry, over: 'belt' }, rampY(x)));
+  }
   return L;
 }
 
@@ -138,6 +145,7 @@ export async function town() {
   plans.push(base('qin-shops', shopLots().map((l) => ({ t: 'qin_shop', ...l }))));
   plans.push(base('qin-market', [{ t: 'qin_market' }, ...Q]));
   plans.push({ ...base('qin-stalls', S), style: 'life' });
+  plans.push({ ...base('qin-army', [{ t: 'qin_army' }]), style: 'life', nocollide: true });          // Pit 1's soldiers: drawn each within its own reach
   plans.push({ ...base('qin-people', people()), style: 'life' });
   plans.push({ ...base('qin-carts', carts()), style: 'life' });
   const LOTS = lots(), K = { row: 'qin_row_house', court: 'qin_court_house', official: 'qin_official', granary: 'qin_granary', garden: 'qin_garden', workshop: 'qin_workshop' };

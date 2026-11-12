@@ -3,7 +3,7 @@
 // terracotta army with its painted soldiers; the walled market with the standard weights; rammed-earth houses; the figure-makers'
 // workshops; the imperial road. Generic elements (floor, stair, wall) come from the core.
 import '../../objects/index.js';
-import { registerStyle } from '../../core/build.js';
+import { registerStyle, STYLES } from '../../core/build.js';
 import { qinPit, qinArmy } from './pit.js';
 import { qinTerrace, qinHall, qinQue, qinCourt } from './palace.js';
 import { rowHouse, courtHouse, official, granary, garden } from './houses.js';
@@ -20,3 +20,6 @@ registerStyle('qin', {
   },
   objects: {},
 });
+
+// the army is built by a plan of the street life (the viewer draws each copy within its own reach; settlement town.js 'qin-army')
+STYLES.life.elements.qin_army = qinArmy;

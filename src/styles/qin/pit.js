@@ -85,7 +85,8 @@ export function qinPit(el, { bag, col, lights }) {
 }
 
 /** One chariot: four horses abreast, the pole, the carriage, its wheels and its crew. */
-function chariot(bag, col, ctx, x, zc, seed) {
+function chariot(bag, col, ctx, x, zc, seed, colOnly = false) {
+  if (colOnly) { col.rect([x - 5.9 - 0.9, zc - 1.5, x + 0.6, zc + 1.5], FL, FL + 2.2); return; }
   const r = rng(seed), y = FL + 0.05;
   const rot = -Math.PI / 2;
   for (let h = 0; h < 4; h++) {
@@ -121,11 +122,16 @@ function boxAxisSpoke(cx, cy, cz, dx, dy) {
   return g;
 }
 
-/** qin_army: {} — everyone in Pit 1. */
+/**
+ * qin_army: { colOnly? } — everyone in Pit 1. The army is placed in a plan of the street life (town.js 'qin-army', no colliders of
+ * its own): the viewer gathers the life's copies settlement-wide and draws each within its own reach, where the same pieces in the
+ * landmark's plan were fine detail drawn whole (and expanded, every copy, for the collision's upper surfaces at load). The landmark's
+ * plan carries the figures' colliders alone (colOnly: the same rectangles, no geometry).
+ */
 export function qinArmy(el, ctx) {
-  const { bag, col } = ctx, rot = -Math.PI / 2, y = FL + 0.02, r = rng(2100);
+  const { bag, col } = ctx, rot = -Math.PI / 2, y = FL + 0.02, r = rng(2100), colOnly = !!el.colOnly;
   const zones = new Map();                                                       // corridor k → [[xa, xb]] kept for the chariots
-  for (const c of CHARIOTS) { const l = zones.get(c.k) ?? []; l.push([c.x - 8.0, c.x + 1.0]); zones.set(c.k, l); chariot(bag, col, ctx, c.x, corrZ(c.k), c.k * 31 + Math.round(c.x)); }
+  for (const c of CHARIOTS) { const l = zones.get(c.k) ?? []; l.push([c.x - 8.0, c.x + 1.0]); zones.set(c.k, l); chariot(bag, col, ctx, c.x, corrZ(c.k), c.k * 31 + Math.round(c.x), colOnly); }
   const inZone = (k, x) => (zones.get(k) ?? []).some(([a, b]) => x > a && x < b);
   for (let k = 0; k < CORR.n; k++) for (const f of FILES) {
     const z = corrZ(k) + f;
@@ -135,7 +141,7 @@ export function qinArmy(el, ctx) {
       if (run === null) run = x - 0.3;
       const q = r();
       const kind = n % 17 === 6 && f > 0 ? 'officer' : q < 0.3 ? 'arm' : q < 0.5 ? 'arm_spear' : q < 0.62 ? 'arm_halberd' : q < 0.82 ? 'inf' : 'inf_spear';
-      soldier(bag, { at: [x, z], y, rot, kind, seed: k * 4093 + n * 7 + (f > 0 ? 1 : 0) });
+      if (!colOnly) soldier(bag, { at: [x, z], y, rot, kind, seed: k * 4093 + n * 7 + (f > 0 ? 1 : 0) });
     }
     if (run !== null) col.rect([run, z - 0.3, CORR.x1, z + 0.3], FL, FL + 2);
   }
@@ -148,11 +154,11 @@ export function qinArmy(el, ctx) {
     for (const [za, zb] of segs) {
       for (let z = za + 0.55, n = 0; z < zb - 0.3; z += ARCHERS.spacing, n++) {
         const kind = ri === 1 && n % 2 ? 'kneel' : ri === 2 ? 'archer_light' : 'archer';
-        soldier(bag, { at: [x + (kind === 'kneel' ? -0.1 : 0), z], y, rot, kind, seed: 900 + ri * 211 + n * 13 + Math.round(za) });
+        if (!colOnly) soldier(bag, { at: [x + (kind === 'kneel' ? -0.1 : 0), z], y, rot, kind, seed: 900 + ri * 211 + n * 13 + Math.round(za) });
       }
     }
   });
   for (const [za, zb] of segs) col.rect([ARCHERS.rows[0] - 0.4, za, ARCHERS.rows[2] + 0.4, zb], FL, FL + 2);
   // the generals: three in the front gallery's ends of the corridors' second rank
-  for (const k of [3, 7]) soldier(bag, { at: [111, corrZ(k)], y, rot, kind: 'general', seed: 5000 + k });
+  if (!colOnly) for (const k of [3, 7]) soldier(bag, { at: [111, corrZ(k)], y, rot, kind: 'general', seed: 5000 + k });
 }
