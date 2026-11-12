@@ -17,7 +17,7 @@ export const ARRIVALS = {
   'nara':             [0, 0.1, 20, 0, 0.25],             // the Great Buddha Hall from its court
   'heian-uji':        [6.5, 0.1, 0, 1.5708, 0.06],       // the Phoenix Hall across its pond, wings spread, from the end of the viewing pier (37 m from the steps)
   'edo-himeji':       [-25, 37.1, -3, 0, 0.36],          // the keep cluster whole on its stone base, from the Honmaru's south edge (from 9 m nearer the top roof was cut)
-  'joseon-seoul':     [0, 0.1, 80, 0, 0.15],             // the throne hall across its court and rank stones
+  'joseon-seoul':     [0, 0.1, 83.5, 0, 0.13],           // the throne hall across its court, the standards and the officials at their rank stones (the lower ranks' files stop short of the screen's edge)
   'sanchi':           [0, 22.1, 60, 0, 0.15],            // the Great Stupa, its gateway and Ashoka's pillar
   'khajuraho':        [-14, null, -60, 1.5708, 0.22],    // up the pilgrims' approach lane between the shops of flowers and sweets to the stair of Kandariya Mahadeva's terrace, the porch and the climbing spires over the roofs
   'madurai':          [-20, 0.1, 170, 0, 0.3],           // the painted gopuram over the street
