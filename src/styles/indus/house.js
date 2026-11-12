@@ -4,6 +4,7 @@
 // coppersmiths and shell-workers. Frame: u along the lane, v from the lane into the lot.
 import { lathe } from './kit.js';
 import { rng, pick, lotFrame, wellAt } from './kit.js';
+import { dressWall, dressDoor, dressRoof, dressCourt, furnishRoom } from './dress.js';
 
 const T = 0.7, H0 = 3.3, PAR = 0.35;
 
@@ -75,19 +76,6 @@ function trade(F, kind, u0, v0, u1, v1, rand, lights) {
   lights.push({ at: [F.pt(mu, v0 + 3)[0], F.y + 2.0, F.pt(mu, v0 + 3)[1]], color: '#ffd9a0', intensity: 2.5, distance: 9 });
 }
 
-/** The room furnished: a sleeping bed (a frame of timber with a rope net), a quern, jars, a lamp, a hearth. */
-function furnish(F, r, rand, lights) {
-  const [u0, v0, u1, v1] = r, mu = (u0 + u1) / 2, mv = (v0 + v1) / 2;
-  F.b('reed_mat', u0 + 0.7, 0, v0 + 0.7, u0 + 2.3, 0.04, v0 + 2.3, false);
-  F.b('timber', u1 - 2.0, 0.28, v1 - 1.3, u1 - 0.7, 0.34, v1 - 0.6, false); for (const [a, b] of [[0, 0], [1, 0], [0, 1], [1, 1]]) F.b('timber', u1 - 2.0 + a * 1.25, 0, v1 - 1.3 + b * 0.62, u1 - 1.9 + a * 1.25, 0.28, v1 - 1.2 + b * 0.62, false);
-  F.b('rope_fibre', u1 - 1.95, 0.34, v1 - 1.25, u1 - 0.75, 0.37, v1 - 0.65, false);
-  F.b('granite_grey', u0 + 0.6, 0, v1 - 1.2, u0 + 1.5, 0.22, v1 - 0.6, false); F.b('granite_grey', u0 + 0.85, 0.22, v1 - 1.05, u0 + 1.25, 0.34, v1 - 0.75, false);   // the saddle quern
-  jar(F, 'terracotta', mu, v1 - 0.8, 1.6); jar(F, 'pottery_dark', mu + 0.6, v1 - 0.8, 1.2); jar(F, 'terracotta', u0 + 0.6, mv, 1.3);
-  F.b('brick', mu - 0.95, 0.02, mv - 0.2, mu - 0.05, 0.2, mv + 0.4, false); F.b('bitumen', mu - 0.8, 0.2, mv - 0.05, mu - 0.2, 0.24, mv + 0.25, false);
-  const p = F.pt(mu - 0.5, mv - 0.5); lights.push({ at: [p[0], F.y + 1.6, p[1]], color: '#ffc98a', intensity: 3, distance: 8 });
-  void rand;
-}
-
 /** indus_house: { rect, front, kind ('house' | 'small' | trade), seed, open, y } */
 export function house(el, ctx) {
   const rand = rng(el.seed), H = 3.0 + rand() * 0.8, F = lotFrame(ctx, el.rect, el.front, el.y ?? 0), W = F.W, D = F.D, kind = el.kind, small = kind === 'small', isTrade = !['house', 'small'].includes(kind);
@@ -107,8 +95,12 @@ export function house(el, ctx) {
   for (const u of [W * 0.3, W * 0.72]) F.b('brick', u - 0.12, H - 0.5, -0.35, u + 0.12, H - 0.38, 0.2, false);
   const dm = (du < W / 2 ? W - 1.4 : 1.4);
   F.b('brick', dm - 0.16, 0.2, -0.45, dm + 0.16, 0.34, 0.1, false); F.b('bitumen', dm - 0.08, 0.2, -0.46, dm + 0.08, 0.3, -0.3, false);
-  // a small high window of brick lattice
-  if (rand() < 0.6) { const wu = du < W / 2 ? W * 0.72 : W * 0.28; F.b('brick', wu - 0.3, 2.45, -0.05, wu + 0.3, 2.85, T + 0.05, false); F.b('wood_dark', wu - 0.22, 2.5, -0.06, wu + 0.22, 2.8, 0.06, false); }
+  // the door's frame, leaf, step, bench and shade, the windows; the weathering and the roofline of the street fronts
+  dressDoor(F, rand, du, W, H, T);
+  dressWall(F, rand, 'front', W, H, lowH, { gap: [du - 1.0, du + 1.0] });
+  if (el.street) dressWall(F, rand, 'back', W, H, lowH);
+  if (el.ends?.[0]) dressWall(F, rand, 'endA', D, H, lowH, { life: false });
+  if (el.ends?.[1]) dressWall(F, rand, 'endB', D, H, lowH, { life: false });
   // the court floor
   F.b('brick_buff', T, 0.04, T, W - T, 0.08, D - T, false);
   // the baffle behind the door, the court's rooms
@@ -117,23 +109,32 @@ export function house(el, ctx) {
   const lw = 3.4;
   // the back range, in two or three rooms
   const nb = W > 15 ? 3 : 2, bw = (W - 2 * T) / nb;
-  const roomsOpen = [];
+  const roomsOpen = [], doors = [];
+  let stor = false;
   for (let i = 0; i < nb; i++) {
     const r = [T + i * bw, D - T - rb, T + (i + 1) * bw, D - T];
-    room(F, r, 'v0', (r[0] + r[2]) / 2, { noRoof: false, t: 0.4, parapet: false, h: H }); roomsOpen.push(r);
+    room(F, r, 'v0', (r[0] + r[2]) / 2, { noRoof: false, t: 0.4, parapet: false, h: H }); roomsOpen.push(r); doors.push('v0');
   }
-  if (ls) { const r = [T, T + 2.6, T + lw, D - T - rb]; if (r[3] - r[1] > 3) { room(F, r, 'u1', (r[1] + r[3]) / 2, { t: 0.4, parapet: false, h: H }); roomsOpen.push(r); } }
-  if (rs) { const r = [W - T - lw, T + 2.6, W - T, D - T - rb]; if (r[3] - r[1] > 3) { room(F, r, 'u0', (r[1] + r[3]) / 2, { t: 0.4, parapet: false, h: H }); roomsOpen.push(r); } }
+  if (ls) { const r = [T, T + 2.6, T + lw, D - T - rb]; if (r[3] - r[1] > 3) { room(F, r, 'u1', (r[1] + r[3]) / 2, { t: 0.4, parapet: false, h: H }); roomsOpen.push(r); doors.push('u1'); } }
+  if (rs) { const r = [W - T - lw, T + 2.6, W - T, D - T - rb]; if (r[3] - r[1] > 3) { room(F, r, 'u0', (r[1] + r[3]) / 2, { t: 0.4, parapet: false, h: H }); roomsOpen.push(r); doors.push('u0'); } }
   // the stair to the roof, in the court against the back range's front wall
   const sx = W - T - (rs ? lw + 0.1 : 0) - 1.1, sv1 = D - T - rb;
   if (sv1 - (T + 3.2) > 3.6) F.stairs(sx - 0.45, sv1 - 3.8, sx + 0.45, sv1, 0.05, H, 1);
-  // a second storey over one of the back rooms in some houses
-  if (!small && !isTrade && rand() < 0.2) { const r = roomsOpen[0]; F.b('mudbrick', r[0], H, r[1], r[2], H + 2.7, r[3]); F.b('mudbrick', r[0] - 0.05, H + 2.7, r[1] - 0.05, r[2] + 0.05, H + 3.0, r[3] + 0.05, false); F.b('wood_dark', (r[0] + r[2]) / 2 - 0.3, H + 1.5, r[1] - 0.05, (r[0] + r[2]) / 2 + 0.3, H + 2.2, r[1] + 0.05, false); }
+  // a second storey over the first back room, its doorway on the roof of the next room (the roofs are one level), furnished
+  if (!small && !isTrade && rand() < 0.34) {
+    const r = roomsOpen[0], F2 = lotFrame(ctx, el.rect, el.front, (el.y ?? 0) + H);
+    room(F2, r, 'u1', (r[1] + r[3]) / 2, { t: 0.4, h: 2.8, parapet: false });
+    furnishRoom(F2, [r[0] + 0.4, r[1] + 0.4, r[2] - 0.4, r[3] - 0.4], 'u1', rand() < 0.6 ? 'sleep' : 'work', rand, ctx.lights);
+    stor = true;
+  }
   // the well, in the court's front corner, a quern or jars at the wall
   if (isTrade) { trade(F, kind, T + (ls ? lw : 0) + 0.3, T + 2.2, W - T - (rs ? lw : 0) - 0.3, D - T - rb - 0.2, rand, ctx.lights); }
   else if (rand() < 0.36 || el.open) { const p = F.pt(W - T - 1.6, T + 3.2); wellAt(ctx.bag, ctx.col, p[0], F.y, p[1], 0.55); }
   if (!isTrade && rand() < 0.5) for (let k = 0; k < 2; k++) jar(F, 'terracotta', T + 0.8 + k * 0.5, D - T - rb - 0.5, 1.2);
-  if (el.open && roomsOpen[0]) furnish(F, roomsOpen[0], rand, ctx.lights);
-  if (el.open && roomsOpen[1]) furnish(F, roomsOpen[1], rand, ctx.lights);
+  // every room furnished by use; light only in the open houses
+  const uses = ['sleep', 'kitchen', 'store', 'bath', 'work', 'sleep', 'store'], off = Math.floor(rand() * uses.length);
+  roomsOpen.forEach((r, i) => furnishRoom(F, [r[0] + 0.4, r[1] + 0.4, r[2] - 0.4, r[3] - 0.4], doors[i], uses[(off + i * 2) % uses.length], rand, ctx.lights, !!el.open && i < 2));
+  dressCourt(F, rand, T + (ls ? lw : 0) + 0.3, T + 2.4, W - T - (rs ? lw : 0) - 0.3, D - T - rb - 0.1);
+  dressRoof(F, rand, stor ? roomsOpen.slice(1) : roomsOpen, W, D, H, T);
   void pick; void lathe;
 }

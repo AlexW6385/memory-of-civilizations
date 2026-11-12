@@ -93,11 +93,17 @@ export function lots() {
     const cross = H > 60 ? [(z0 + z1) / 2 - 1.25, (z0 + z1) / 2 + 1.25] : null;
     if (cross) LANES.push([x0, cross[0], x1, cross[1]]);
     const segs = cross ? [[z0, cross[0]], [cross[1], z1]] : [[z0, z1]];
-    for (const [cx0, cx1, front] of cols) for (const [s0, s1] of segs) for (const [a, b] of split(s0, s1, rand)) {
-      const rect = [cx0, a, cx1, b - 0.25];
-      if (!free(rect) && tag === 'town') continue;
-      LOTS.push({ rect, front, kind: 'house', seed: Math.floor(rand() * 1e6), open: false, y, tag });
-    }
+    cols.forEach(([cx0, cx1, front], ci) => {
+      const outer = ncol === 2 || ci === 0 || ci === 3;                                // the back wall of an outer column is a street's wall
+      for (const [s0, s1] of segs) {
+        const parts = split(s0, s1, rand);
+        parts.forEach(([a, b], pi) => {
+          const rect = [cx0, a, cx1, b - 0.25];
+          if (!free(rect) && tag === 'town') return;
+          LOTS.push({ rect, front, kind: 'house', seed: Math.floor(rand() * 1e6), open: false, y, tag, street: outer, ends: [pi === 0, pi === parts.length - 1] });
+        });
+      }
+    });
   };
   for (let i = 0; i < XS.length - 1; i++) for (let j = 0; j < ZS.length - 1; j++) {
     const r = [XS[i] + (i === 3 ? 5 : 4.5), ZS[j] + 4, XS[i + 1] - (i + 1 === 3 ? 5 : 4.5), ZS[j + 1] - 4];
@@ -113,7 +119,7 @@ export function lots() {
   let t = 0, k = 0;
   for (const l of near) {
     if (t < trades.length && l.rect[3] - l.rect[1] >= 12 && k % 7 === 3) { l.kind = trades[t++]; l.open = t <= 5; }
-    else if (k % 9 === 5 && l.rect[3] - l.rect[1] >= 11) l.open = true;
+    else if (k % 5 === 2 && l.rect[3] - l.rect[1] >= 11) l.open = true;
     k++;
   }
   // a few small, poor houses (a single row of rooms), and the open ones on the platform

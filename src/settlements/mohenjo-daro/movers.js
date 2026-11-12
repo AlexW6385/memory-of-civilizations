@@ -21,7 +21,7 @@ export function walkways() {
   for (const s of streets()) { const w = Math.min(s[2] - s[0], s[3] - s[1]); r([s[0] + 0.8, s[1] + 0.8, s[2] - 0.8, s[3] - 0.8], w > 9.5 ? 2.2 : 1.5, 0.8, 'street'); }
   for (const l of lanes()) { const w = Math.min(l[2] - l[0], l[3] - l[1]); r([l[0] + 0.6, l[1] + 0.6, l[2] - 0.6, l[3] - 0.6], 0.8, 0.3, w < 3.4 ? 'lane' : 'street'); }
   r([PLAZA[0] + 1, PLAZA[1] + 1, PLAZA[2] - 1, PLAZA[3] - 1], 3, 3);
-  r([QUAY.x0 + 1, QUAY.z0 + 4, QUAY.x1 - 2, QUAY.z1 - 4], 2.4, 1.4);
+  r([QUAY.x0 + 9, QUAY.z0 + 4, QUAY.x1 - 2, QUAY.z1 - 4], 2.4, 1.4);   // the apron: the warehouse sheds stand along the back
   void EAST_STAIR; void BATH; void PILLARED; void COLLEGE;
   return { rects, links: [], clip: RADIUS - 20 };
 }

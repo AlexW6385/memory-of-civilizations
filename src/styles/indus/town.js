@@ -25,6 +25,15 @@ export function streets(el, ctx) {
   }
 }
 
+/** The stalls of a market place: along its four sides, a stall every 7 m; goods by turn. { x, z, goods, along (true when the stall's long side runs along x) } */
+export function stallSpots(rect) {
+  const [x0, z0, x1, z1] = rect, kinds = ['grain', 'pots', 'beads', 'cloth', 'baskets', 'fish', 'dates'], out = [];
+  let i = 0;
+  for (let x = x0 + 5; x < x1 - 4; x += 7) { out.push({ x, z: z0 + 2.2, goods: kinds[i++ % 7], along: true, face: 1 }); out.push({ x, z: z1 - 2.2, goods: kinds[i++ % 7], along: true, face: -1 }); }
+  for (let z = z0 + 9; z < z1 - 8; z += 7) { out.push({ x: x0 + 2.2, z, goods: kinds[i++ % 7], along: false, face: 1 }); out.push({ x: x1 - 2.2, z, goods: kinds[i++ % 7], along: false, face: -1 }); }
+  return out;
+}
+
 /** indus_market: { rect, well: [x, z] } — the market place: paved in brick, the great well with its troughs, a ring of stone weights, the posts of the stalls. */
 export function market(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, [wx, wz] = el.well, rand = rng(3);
@@ -33,25 +42,27 @@ export function market(el, ctx) {
   bag.add('brick_buff', lathe([[4.6, 0], [4.6, 0.06], [2.4, 0.08], [2.4, 0]], 24, null, wx, 0.03, wz));
   col.circle(wx, wz, 2.5, 0, 0.75);
   for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + 0.4, tx = wx + Math.cos(a) * 3.8, tz = wz + Math.sin(a) * 3.8; bag.add('mudbrick', box(tx - 0.9, 0.03, tz - 0.35, tx + 0.9, 0.5, tz + 0.35)); bag.add('water', box(tx - 0.8, 0.45, tz - 0.25, tx + 0.8, 0.47, tz + 0.25)); col.rect([tx - 0.9, tz - 0.35, tx + 0.9, tz + 0.35], 0.03, 0.5); }
-  // the stalls: four posts and a reed-mat shade each, goods on the ground mats, ranged along the sides
-  const stall = (x, z, rot, goods) => {
-    for (const dx of [-1.3, 1.3]) for (const dz of [-0.8, 0.8]) { bag.add('timber', box(x + dx - 0.06, 0, z + dz - 0.06, x + dx + 0.06, 2.3, z + dz + 0.06)); }
-    bag.add('reed_mat', box(x - 1.5, 2.3, z - 1.0, x + 1.5, 2.36, z + 1.0));
-    bag.add('reed_mat', box(x - 1.2, 0.03, z - 0.6, x + 1.2, 0.07, z + 0.6));
-    for (let k = 0; k < 5; k++) {
-      const gx = x - 1.0 + k * 0.5, gz = z + (k % 2 ? 0.2 : -0.2);
-      if (goods === 'grain') bag.add('sacking', lathe([[0.3, 0], [0.32, 0.2], [0.15, 0.3], [0.001, 0.32]], 8, null, gx, 0.07, gz));
-      else if (goods === 'pots') jar(bag, k % 2 ? 'terracotta' : 'pottery_dark', gx, 0.07, gz, 1.2);
-      else if (goods === 'beads') bag.add('inlay_carnelian', box(gx - 0.08, 0.07, gz - 0.08, gx + 0.08, 0.12, gz + 0.08));
-      else if (goods === 'cloth') bag.add(['cloth_white', 'cloth_indigo', 'cloth_red', 'cloth_ochre', 'cloth_white'][k], box(gx - 0.2, 0.07, gz - 0.2, gx + 0.2, 0.2 + 0.05 * k, gz + 0.2));
-      else bag.add('wicker', lathe([[0.2, 0], [0.26, 0.15], [0.001, 0.15]], 8, null, gx, 0.07, gz));
+  // the stalls: posts and a reed-mat shade each, goods on the ground mats and on shelves, a valance, a jar of water, ranged along the sides (the spots: see stallSpots)
+  for (const sp of stallSpots(el.rect)) {
+    const { x, z, goods, along } = sp, R = rng(Math.floor(x * 31 + z * 17)), H = 2.1 + R() * 0.5, f = -sp.face;
+    const L = (a, b, c, d) => { const r = along ? [x + a, z + b, x + c, z + d] : [x + b, z + a, x + d, z + c]; return [Math.min(r[0], r[2]), Math.min(r[1], r[3]), Math.max(r[0], r[2]), Math.max(r[1], r[3])]; };
+    for (const dx of [-1.3, 1.3]) for (const dz of [-0.8, 0.8]) { const r = L(dx - 0.06, dz - 0.06, dx + 0.06, dz + 0.06); bag.add('timber', box(r[0], 0, r[1], r[2], H, r[3])); }
+    for (const [a1, b1, c1, d1, m] of [[-1.5, -1.0, 1.5, 1.0, 'reed_mat']]) { const r = L(a1, b1, c1, d1); bag.add(m, box(r[0], H, r[1], r[2], H + 0.07, r[3])); }
+    { const r = L(-1.5, 1.0 * -f, 1.5, 0.96 * -f); bag.add(['cloth_red', 'cloth_ochre', 'cloth_indigo', 'cloth_white'][Math.floor(R() * 4)], box(r[0], H - 0.35, r[1], r[2], H, r[3]), false); }
+    { const r = L(-1.2, -0.6, 1.2, 0.6); bag.add('reed_mat', box(r[0], 0.03, r[1], r[2], 0.07, r[3]), false); }
+    { const r = L(-1.3, 0.76 * f, 1.3, 0.8 * f); bag.add('timber', box(r[0], 1.0, r[1], r[2], 1.05, r[3]), false); }          // the shelf along the back
+    for (let k = 0; k < 6; k++) {
+      const gx = -1.0 + k * 0.4, gz = k % 2 ? 0.25 : -0.2, p = L(gx, gz, gx, gz), sx = p[0], sz = p[1];
+      if (goods === 'grain') { bag.add('sacking', lathe([[0.3, 0], [0.32, 0.2], [0.15, 0.3], [0.001, 0.32]], 8, null, sx, 0.07, sz)); if (k % 2) { bag.add('wicker', lathe([[0.001, 0], [0.34, 0.01], [0.3, 0.12], [0.001, 0.2]], 8, null, sx, 0.07, sz + 0.1), false); } }
+      else if (goods === 'pots') { jar(bag, k % 2 ? 'terracotta' : 'pottery_dark', sx, 0.07, sz, 1.2); if (k < 4) { const q = L(gx, 0.78 * f, gx, 0.78 * f); jar(bag, k % 2 ? 'pottery_dark' : 'terracotta', q[0], 1.05, q[1], 0.9); } }
+      else if (goods === 'beads') { bag.add('inlay_carnelian', box(sx - 0.08, 0.07, sz - 0.08, sx + 0.08, 0.12, sz + 0.08), false); const q = L(gx, 0.7 * f, gx, 0.7 * f); bag.add(k % 2 ? 'inlay_carnelian' : 'inlay_lapis', box(q[0] - 0.01, 1.4, q[1] - 0.01, q[0] + 0.01, 2.0, q[1] + 0.01), false); }
+      else if (goods === 'cloth') bag.add(['cloth_white', 'cloth_indigo', 'cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_red'][k], box(sx - 0.2, 0.07, sz - 0.2, sx + 0.2, 0.2 + 0.05 * k, sz + 0.2), false);
+      else if (goods === 'fish') { bag.add('wicker', lathe([[0.3, 0], [0.38, 0.2], [0.001, 0.2]], 8, null, sx, 0.07, sz), false); for (let f = 0; f < 3; f++) bag.add('silver', box(sx - 0.15 + f * 0.1, 0.27, sz - 0.04, sx - 0.09 + f * 0.1, 0.3, sz + 0.16), false); }
+      else if (goods === 'dates') { bag.add('wicker', lathe([[0.3, 0], [0.34, 0.16], [0.28, 0.2], [0.001, 0.2]], 8, null, sx, 0.07, sz), false); bag.add('wood_dark', lathe([[0.001, 0.2], [0.24, 0.2], [0.2, 0.3], [0.001, 0.34]], 8, null, sx, 0.07, sz), false); }
+      else bag.add('wicker', lathe([[0.2, 0], [0.26, 0.15], [0.001, 0.15]], 8, null, sx, 0.07, sz), false);
     }
-    void rot;
-  };
-  const kinds = ['grain', 'pots', 'beads', 'cloth', 'baskets', 'grain', 'pots'];
-  let i = 0;
-  for (let x = x0 + 5; x < x1 - 4; x += 7) { stall(x, z0 + 2.2, 0, kinds[i++ % 7]); stall(x, z1 - 2.2, 0, kinds[i++ % 7]); }
-  for (let z = z0 + 9; z < z1 - 8; z += 7) { stall(x0 + 2.2, z, 0, kinds[i++ % 7]); stall(x1 - 2.2, z, 0, kinds[i++ % 7]); }
+    { const q = L(1.45, 0.9 * f, 1.45, 0.9 * f); jar(bag, 'pottery_dark', q[0], 0, q[1], 1.5); }
+  }
   void rand;
 }
 
