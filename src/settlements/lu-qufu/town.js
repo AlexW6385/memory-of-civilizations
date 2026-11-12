@@ -2,8 +2,9 @@
 // gate, the Jinsheng Yuzhen archway, Queli Street and its shops, the courtyard houses of the town, the edge of the Kong Forest with
 // Confucius's tomb, and the people: the sacrificing officials and the guards of the temple, students in the court, the shopkeepers.
 
-import { RADIUS, TEMPLE, MANSION, MX, MANSION_HALLS, MANSION_RANGES, CITY_WALL, WANREN, JINSHENG, QUELI, SQUARE, HALL, GATE_HALLS, ALTAR, KONG_FOREST, streets, lots, shopRuns } from './layout.js';
+import { RADIUS, TEMPLE, MANSION, MX, MANSION_HALLS, MANSION_RANGES, CITY_WALL, WANREN, JINSHENG, QUELI, SQUARE, HALL, GATE_HALLS, ALTAR, KONG_FOREST, DRUM, OLD, streets, lots, shopRuns, streetItems, laneZs, LANES_X, STREET_W } from './layout.js';
 import { HOUSE } from '../../styles/qing/index.js';
+void [laneZs, LANES_X, STREET_W];
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements, style = 'lu') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -60], facing: 'n' } });
@@ -46,6 +47,8 @@ function mansion() {
   for (const h of [cg, nz]) { const z = zc(h); wall([x0, z], [MX - hw(h), z]); wall([MX + hw(h), z], [x1, z]); }
   wall([x0, -146], [MX - 4, -146]); wall([MX + 4, -146], [x1, -146]);
   for (const h of MANSION_HALLS) E.push({ t: 'qing_hall', rect: h.rect, y: 0.45, H: h.H, ...(h.double ? { double: h.double } : {}), roof: 'xieshan', bays: h.bays, front: 's', doors: h.doors, four: false, plat: 0.45, platMargin: 1.2, pal: HOUSE });
+  const KIND = { chongguang: ['yamen'], datang: ['yamen', 1], ertang: ['yamen'], santang: ['yamen'], neizhai: ['parlor'], qianshang: ['parlor'], qiantang: ['parlor'], houtang: ['parlor'], flower: ['study'] };
+  for (const h of MANSION_HALLS) if (KIND[h.id]) E.push({ t: 'lu_inside', kind: KIND[h.id][0], grand: !!KIND[h.id][1], rect: h.rect, y: 0.45, seed: Math.abs(Math.round(h.rect[1])) + 11 });
   for (const r of MANSION_RANGES) E.push({ t: 'qing_hall', rect: r.rect, y: 0.4, H: 4.0, roof: 'gable', bays: [11, 2], front: r.front, four: false, plat: 0.4, pal: HOUSE });
   E.push({ t: 'lane', rect: [MX - 3.5, -146, MX + 3.5, 112], y: 0.04, mat: 'bluestone' });
   E.push({ t: 'lane', rect: [x0 + 2, 36, x1 - 2, 108], y: 0.03, mat: 'brick_paving' });
@@ -56,9 +59,36 @@ function mansion() {
   return base('qufu-mansion', E);
 }
 
+/** The Drum Tower on its brick platform across the west street, the passage through it, the stair up the east side. */
+function drumTower() {
+  const E = [], { x, z, w, d, h, pass, stair } = DRUM;
+  for (const [a, b, y0] of [[x - w / 2, x - pass / 2, 0], [x + pass / 2, x + w / 2, 0], [x - pass / 2, x + pass / 2, 4.6]]) E.push({ t: 'block', rect: [a, z - d / 2, b, z + d / 2], y0, y1: h, mat: 'brick_grey', walk: true, batter: [0, 0, 0, 0] });
+  for (const sx of [-1, 1]) E.push({ t: 'block', rect: [x + sx * w / 2 - 0.4, z - d / 2 - 0.3, x + sx * w / 2 + 0.4, z + d / 2 + 0.3], y0: h, y1: h + 0.9, mat: 'granite_grey', collide: true });
+  E.push({ t: 'qing_hall', rect: [x - w / 2 + 2, z - d / 2 + 2, x + w / 2 - 2, z + d / 2 - 2], y: h, H: 4.4, double: 3.4, roof: 'xieshan', bays: [5, 2], front: 's', four: true, plat: 0.3, pal: HOUSE });
+  E.push({ t: 'lu_inside', kind: 'drum', rect: [x - w / 2 + 2, z - d / 2 + 2, x + w / 2 - 2, z + d / 2 - 2], y: h });
+  E.push({ t: 'stairs', rect: stair, y0: 0.03, y1: h, dir: 'w' });
+  E.push({ t: 'lane', rect: [x - pass / 2, z - d / 2 - 0.5, x + pass / 2, z + d / 2 + 0.5], y: 0.04, mat: 'bluestone' });
+  return base('qufu-drum', E);
+}
+
+/** The street furniture and the carts and animals of the lanes. */
+function streetLife() {
+  const S = streetItems(), E = [], L = [];
+  for (const a of S.stalls) E.push({ t: 'lu_stall', ...a });
+  for (const a of S.wells) E.push({ t: 'lu_well', ...a });
+  for (const a of S.lamps) E.push({ t: 'lu_lamp', ...a });
+  for (const a of S.hitches) E.push({ t: 'lu_hitch', ...a });
+  for (const a of S.carts) E.push({ t: 'lu_handcart', ...a });
+  for (const [px, pz] of OLD) if (Math.abs(px) < 90 && pz > -232 && pz < 118) E.push({ t: 'lu_treeguard', at: [px, pz], w: 1.4, bench: pz > -60 });
+  let k = 1;
+  for (const a of S.hitches) L.push({ t: 'animal', kind: 'donkey', at: [a.at[0], a.at[1] + 1.8], y: 0, rot: 0, gear: true, graze: false, seed: k++ });
+  for (const a of S.carts.slice(0, 6)) L.push({ t: 'animal', kind: 'donkey', at: [a.at[0] + 2.2, a.at[1]], y: 0, rot: a.seed % 6, gear: false, graze: true, seed: k++ });
+  return [base('qufu-street', E), { ...base('qufu-street-animals', L), style: 'life' }];
+}
+
 function houses() {
   const L = lots(), out = [];
-  for (let i = 0; i < L.length; i += 20) out.push(base(`qufu-houses-${i / 20}`, L.slice(i, i + 20).map((l) => ({ t: 'siheyuan', rect: l.rect, seed: l.seed, furnish: l.seed % 5 === 0 }))));
+  for (let i = 0; i < L.length; i += 20) out.push(base(`qufu-houses-${i / 20}`, L.slice(i, i + 20).map((l) => ({ t: 'lu_house', rect: l.rect, seed: l.seed, wealth: l.wealth, lod: l.lod, shop: l.wealth > 0.3 && l.seed % 3 === 0, trade: l.seed % 4 }))));
   return out;
 }
 
@@ -104,6 +134,42 @@ function people() {
     const [x0, z0, x1, z1] = s.rect, sw = (z1 - z0) / s.n, west = s.front === 'w';
     for (let i = 0; i < s.n; i++) if (rand() < 0.7) fig([west ? x0 + 1.5 : x1 - 1.5, z0 + (i + 0.5) * sw], west ? -Math.PI / 2 : Math.PI / 2, { y: 0.18, cloth: pick(['cloth_indigo', 'cloth_brown', 'cloth_grey']), over: 'sash' });
   }
+  // the hawkers at their stalls: the seller on his stool, a customer or two before the table
+  const SI = streetItems(), CL = ['cloth_indigo', 'cloth_brown', 'cloth_grey', 'cloth_ochre', 'cloth_blue', 'cloth_white'];
+  for (const a of SI.stalls) {
+    const c = Math.cos(a.rot), sn = Math.sin(a.rot), P = (u, w) => [a.at[0] + u * c + w * sn, a.at[1] - u * sn + w * c];
+    fig(P(0.8, 0.9), face(P(0.8, 0.9), a.at), { pose: 'sit', y: 0, cloth: pick(CL), over: 'sash' });
+    for (let k = 0; k < 1 + Math.floor(rand() * 2.4); k++) { const q = P(-0.9 + k * 1.1, 1.6 + rand() * 0.5); fig(q, face(q, a.at), { cloth: pick(CL), pose: rand() < 0.3 ? 'talk' : 'stand', carry: rand() < 0.2 ? 'basket' : 'none' }); }
+  }
+  // the street: pilgrims and townsfolk in twos and threes along Queli Street, the square and the lanes
+  for (let k = 0; k < 46; k++) {
+    const sq = k < 14, at = sq ? [-30 + rand() * 60, 122 + rand() * 44] : [-7.5 + rand() * 15, 172 + rand() * 86];
+    if (Math.abs(at[0]) < 3.5 && at[1] > 130 && at[1] < 160) continue;
+    fig(at, rand() * 6.28, { cloth: pick(CL), pose: rand() < 0.4 ? 'talk' : 'stand', carry: rand() < 0.12 ? 'basket' : 'none', hat: rand() < 0.15 ? 'straw' : 'cap' });
+    if (rand() < 0.5) fig([at[0] + 0.8, at[1] + 0.3], rand() * 6.28, { cloth: pick(CL), pose: 'talk' });
+  }
+  for (const s of streets()) {
+    const w = Math.min(s[2] - s[0], s[3] - s[1]), len = Math.max(s[2] - s[0], s[3] - s[1]);
+    if (w > 14 || Math.hypot((s[0] + s[2]) / 2, (s[1] + s[3]) / 2) > 190 || len < 12) continue;
+    const n = Math.min(3, Math.floor(len / 40));
+    for (let k = 0; k < n; k++) {
+      const at = s[2] - s[0] > s[3] - s[1] ? [s[0] + 3 + rand() * (len - 6), s[1] + rand() * w] : [s[0] + rand() * w, s[1] + 3 + rand() * (len - 6)];
+      fig(at, rand() * 6.28, { cloth: pick(CL), pose: ['stand', 'talk', 'squat'][Math.floor(rand() * 3)], dress: rand() < 0.3 ? 'trousers' : 'robe' });
+    }
+  }
+  // the temple: pilgrims kneeling at the burners and the altar, scholars before the Kuiwen Pavilion, the guides
+  for (const [x, z] of [[-9.5, -44], [9.5, -44], [0, ALTAR.c[1] + 7]]) fig([x + 1.6, z + 0.2], Math.PI / 2, { pose: 'kneel', arms: 'pray', cloth: pick(CL) });
+  for (let k = 0; k < 18; k++) { const at = [-50 + rand() * 100, -96 + rand() * 40]; if (Math.hypot(at[0], at[1] - ALTAR.c[1]) < 10 || Math.abs(at[0]) < 4.5) continue; fig(at, rand() * 6.28, { cloth: pick(['cloth_blue', 'cloth_white', 'cloth_indigo']), pose: rand() < 0.4 ? 'talk' : 'stand' }); }
+  for (let k = 0; k < 12; k++) { const at = [-14 + rand() * 28, -16 + rand() * 40]; if (Math.abs(at[0]) < 4.5) continue; fig(at, rand() * 6.28, { cloth: pick(CL), pose: 'stand', carry: rand() < 0.2 ? 'staff' : 'none' }); }
+  // the Duke's household: guards at the mansion's gate, the Duke at his table in the great hall, clerks at their desks, servants in the court
+  for (const sx of [-1, 1]) fig([MX + sx * 4.5, 114], Math.PI, { pose: 'staff', carry: 'staff', len: 2.0, cloth: 'cloth_red', over: 'sash' });
+  const dt = MANSION_HALLS[3];
+  fig([MX, dt.rect[1] + 1.9], Math.PI, { y: 0.85, pose: 'sit', cloth: 'cloth_maroon', cloth2: 'cloth_black', beard: 1 });
+  for (const sx of [-1, 1]) for (let k = 0; k < 3; k++) fig([MX + sx * (5 + k * 1.2), dt.rect[1] + 7.5], -sx * Math.PI / 2, { y: 0.45, cloth: pick(['cloth_blue', 'cloth_indigo']), pose: 'stand' });
+  for (let k = 0; k < 14; k++) { const at = [MX - 12 + rand() * 24, -146 + rand() * 250]; if (MANSION_HALLS.some((h) => at[0] > h.rect[0] - 1 && at[0] < h.rect[2] + 1 && at[1] > h.rect[1] - 1 && at[1] < h.rect[3] + 1)) continue; fig(at, rand() * 6.28, { cloth: pick(CL), pose: rand() < 0.3 ? 'talk' : 'stand', carry: rand() < 0.25 ? 'basket' : 'none' }); }
+  // the Drum Tower's keeper on the platform, and a gossiping group under it
+  fig([DRUM.x + 5, DRUM.z + 4.5], Math.PI, { y: DRUM.h, cloth: 'cloth_red', pose: 'staff', carry: 'staff', len: 1.9, over: 'sash' });
+  for (let k = 0; k < 3; k++) fig([DRUM.x + 6.5 + k * 0.9, DRUM.z - 8], rand() * 6, { cloth: pick(CL), pose: 'talk' });
   return { ...base('qufu-people', L), style: 'life' };
 }
 
@@ -111,5 +177,5 @@ let CACHE = null;
 export async function town() {
   if (CACHE) return CACHE;
   void TEMPLE; void MANSION_RANGES;
-  return (CACHE = [paving(), cityWall(), mansion(), ...houses(), shops(), forest(), people()]);
+  return (CACHE = [paving(), cityWall(), drumTower(), mansion(), ...houses(), shops(), ...streetLife(), forest(), people()]);
 }

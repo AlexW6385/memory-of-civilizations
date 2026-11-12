@@ -9,7 +9,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure, factor, flat, SLOT } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 40, night: 5, rain: 0.5, reach: 150, spawnMin: 26, far: 44 },
+  walkers: { day: 58, night: 6, rain: 0.5, reach: 150, spawnMin: 24, far: 44 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -1.4,
 };
@@ -22,6 +22,7 @@ export function walkways() {
   push([QUELI[0] - 1, QUELI[1], QUELI[2] + 1, QUELI[3]], 1.5, 1.2, 'street');
   push(SQUARE, 1.6, 0.8, 'street');
   push([-40, 28, 40, 118], 1.4, 0.2, 'street');                        // the temple's first courts
+  push([-110 - 4, 100, -110 + 4, 122], 1.2, 0.8, 'street');            // under the Drum Tower
   push([MX - 6, 80, MX + 6, 125], 0.8, 0.2, 'street');
   void TEMPLE;
   return { rects, links: [], clip: RADIUS - 24 };

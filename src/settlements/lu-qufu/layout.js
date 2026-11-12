@@ -75,6 +75,10 @@ export const SHOP_X = 12;                                            // depth of
 export const LANES_X = [-110, -200, -290, 101, 211];                 // the north–south streets (their centres), 8 m wide (the two by the temple 12 m)
 export const STREET_W = { '-110': 12, '101': 12 };
 export const KONG_FOREST = [-70, -330, 70, -252];
+// the Drum Tower: a brick platform across the west street (x −110) with the passage through it, the hall on top, its stair on the east side
+export const DRUM = { x: -110, z: 111, w: 20, d: 12, h: 6, pass: 6, stair: [-100, 107, -85, 110.5] };
+// the old cypresses and arborvitae of the temple's courts (each in its stone guard)
+export const OLD = [[-34, -66], [34, -66], [-34, -90], [34, -90], [-36, -112], [36, -112], [-36, -134], [36, -134], [-30, -160], [30, -160], [-16, -158], [16, -158], [-30, -200], [30, -200], [-16, -200], [16, -200], [-54, -214], [54, -214], [-22, 10], [22, 10], [-62, -20], [62, -20], [-62, 50], [62, 50], [-70, 90], [70, 90]];
 
 export const inPool = (x, z, m = 0) => inRect(POOL, x, z, m);
 export function height(x, z) {
@@ -92,6 +96,7 @@ export function buildRects() {
   for (const g of GATE_HALLS) o.push([-g.w / 2 - 2, g.z - GATE_D / 2 - 2, g.w / 2 + 2, g.z + GATE_D / 2 + 2]);
   for (const p of STELE_PAV) o.push([p.c[0] - p.w / 2 - 1, p.c[1] - p.w / 2 - 1, p.c[0] + p.w / 2 + 1, p.c[1] + p.w / 2 + 1]);
   o.push([ALTAR.c[0] - 7, ALTAR.c[1] - 7, ALTAR.c[0] + 7, ALTAR.c[1] + 7]);
+  o.push([DRUM.x - DRUM.w / 2 - 2, DRUM.z - DRUM.d / 2 - 2, DRUM.stair[2] + 2, DRUM.z + DRUM.d / 2 + 2]);
   return o;
 }
 
@@ -144,6 +149,8 @@ export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m)
 export function shopRuns() {
   const out = [], rand = rng(918);
   const runs = [[168, 201], [213, 239], [251, 260]];
+  // the square's two sides: the pilgrims' shops facing the Lingxing Gate
+  for (const [rect, front] of [[[-40, 128, -28, 166], 'e'], [[28, 128, 40, 166], 'w']]) out.push({ rect, front, n: 7, seed: Math.floor(rand() * 1e6), storeys: rand() < 0.35 ? 2 : 1 });
   for (const [za, zb] of runs) for (const side of [-1, 1]) {
     const rect = side < 0 ? [-9 - SHOP_X, za, -9, zb] : [9, za, 9 + SHOP_X, zb];
     out.push({ rect, front: side < 0 ? 'e' : 'w', n: Math.max(2, Math.round((zb - za) / 5.8)), seed: Math.floor(rand() * 1e6), storeys: rand() < 0.35 ? 2 : 1 });
@@ -151,3 +158,20 @@ export function shopRuns() {
   return out;
 }
 export const SHOP_RECTS = () => shopRuns().map((s) => s.rect);
+
+/** The furniture of the streets, from the layout: stalls (kind, rot toward the street's axis), wells, stone lamps, hitching posts, handcarts. Pure data. */
+export function streetItems() {
+  const r = rng(33), out = { stalls: [], wells: [], lamps: [], hitches: [], carts: [] };
+  const KINDS = ['fruit', 'buns', 'noodle', 'cloth', 'books', 'pots'];
+  // Queli Street: a stall every 14 m on each side near the shop fronts, a lamp every 22 m, hitching posts at the cross lanes
+  for (let z = 176; z < 256; z += 14) for (const s of [-1, 1]) if (r() < 0.8) out.stalls.push({ at: [s * (5.4 + r() * 1.2), z + r() * 4], rot: s < 0 ? Math.PI / 2 : -Math.PI / 2, kind: KINDS[Math.floor(r() * KINDS.length)], seed: Math.floor(r() * 1e6) });
+  for (let z = 125; z < 258; z += 22) for (const s of [-1, 1]) out.lamps.push({ at: [s * 7.6, z] });
+  // the square before the Lingxing Gate: the pilgrims' stalls in two rows either side of the axis
+  for (let z = 126; z < 152; z += 8) for (const s of [-1, 1]) { out.stalls.push({ at: [s * 17, z + r() * 2], rot: s < 0 ? Math.PI / 2 : -Math.PI / 2, kind: ['buns', 'noodle', 'books', 'fruit'][Math.floor(r() * 4)], seed: Math.floor(r() * 1e6) }); }
+  for (const s of [-1, 1]) out.hitches.push({ at: [s * 24, 168], rot: 0 });
+  // the wells at some crossings of the north–south streets and the lanes
+  const zs = laneZs();
+  LANES_X.forEach((x, xi) => zs.forEach((z, zi) => { if ((xi + zi) % 3 === 0 && Math.hypot(x, z) < RADIUS - 50) { const hw = (STREET_W[x] ?? 8) / 2; out.wells.push({ at: [x + hw - 1.5, z + 1.6] }); } }));
+  for (let i = 0; i < zs.length; i += 2) for (const x of LANES_X) if (Math.hypot(x, zs[i]) < RADIUS - 60 && r() < 0.5) out.carts.push({ at: [x - ((STREET_W[x] ?? 8) / 2 - 1.2), zs[i] + 12 + r() * 6], rot: 0, seed: Math.floor(r() * 1e6) });
+  return out;
+}
