@@ -49,6 +49,13 @@ White plaster walls (hence "White Heron Castle") [stated: Wikipedia]; grey tiled
 
 **Turrets (yagura, built).** Turrets, gate buildings and plastered earthen walls surround the keeps "positioned according to strategic defensive planning" [stated: Agency for Cultural Affairs]; more than sixteen survive [stated: ermakvagus]. Ours: each turret's ground storey has one stone-drop bay (ishi-otoshi) on every face, set between its first and second windows; the lower roofs carry a triangular gable (chidori-hafu) on their north and south faces against the storey above; the top ridge has a pair of shachi [inferred: from the keep's own vocabulary as it stands].
 
+### 4.1 The arrival yard (deepening pass, 2026-11-12)
+
+- **Ramparts:** the walls are laid in courses (ishigaki of fitted granite, the corners in long-and-short sangi-zumi), the faces curving steeply at the top and spreading at the foot (ōgi-no-kōbai, "fan slope") [stated: Wikipedia "Ishigaki"; MLIT]. Ours: the Honmaru's and the keep base's ramparts coursed 0.6 m in three tones (grey, lighter and darker granite) with dressed blocks standing a hand out of the face so the courses read from 30 m; the Ninomaru's and Nishinomaru's the same in their upper 9 m [inferred: the tones and sizes].
+- **The wall on the keep base:** the keep cluster is ringed by plastered earthen walls with loopholes on the edge of its stone base [stated: Agency for Cultural Affairs, nomination text: turrets, gates and walls surround the keeps]. Ours: a white dobei with its loopholes round the base's edge, broken on the south by a plain kabuki gate — two stout posts, a head beam with a gilt crest, banded leaves open inward, a tiled gable [inferred: the gate's form] — at the head of the stair from the Honmaru.
+- **The Honmaru's south yard:** raked pale gravel with flagstone paths, pines, stone lanterns, a notice board, a hall for the guards and the lord's reception (west of the stair) and two storehouses; guards at the stair's foot, a servant sweeping, two retainers in talk, a gardener pruning, a porter with pails, a groom with his horse; kites over the keep, swallows and sparrows in the yard. [inferred: the people and the furnishing, from the castle's functions]
+- **The climate:** drier weights (clear 4, cloudy 2, drizzle 0.7) and damp 0.2, the whitewash being renewed (the castle was replastered as needed) [inferred].
+
 ## 5. The town
 
 Samurai residences: walled compounds with a gate-house (nagaya-mon), a main house under an irimoya roof, a storehouse. Merchants' machiya: two storeys, narrow fronts of wooden lattice, a pent roof between the storeys, tiled gable roofs with the ridge along the street. [inferred from Edo practice; All About Japan for proportions]

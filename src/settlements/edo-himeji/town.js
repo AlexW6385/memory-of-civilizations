@@ -2,17 +2,40 @@
 // beyond the middle moat; some houses open inside (§5.1); the life of the street and the avenue (§5.2): a palanquin
 // and its bearers, samurai with their two swords, pedlars with their carrying poles, the shopkeepers at their counters.
 import { props } from './props.js';
-import { RADIUS, STREET, OUTER, MIDDLE, LEVEL, lots, furniture } from './layout.js';
+import { RADIUS, STREET, OUTER, MIDDLE, LEVEL, HON, DAI, NINO, lots, furniture } from './layout.js';
 const base = (id, elements, style = 'edo') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 240], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** Which houses are open inside: a machiya in three (its shop), a samurai house in six (its reception room). */
 export const isOpen = (l) => (l.t === 'machiya' ? l.seed % 2 === 0 || l.trade === 'sake' || l.trade === 'tea' : l.seed % 3 === 0);
 
+/**
+ * The Honmaru's life as the visitor arrives (docs §5.2): the gate guards at the foot of the stair up to the keeps, a
+ * servant sweeping the flagstones, two retainers in talk, a gardener at the pines, a porter with his pails crossing,
+ * a groom with a horse at the wall; and in the Ninomaru a maid and a retainer. Static; all 7–45 m from the arrival at (-25, -3).
+ */
+function castleLife(fig, samurai, rand) {
+  const y = HON.top, y2 = NINO.top, S = Math.PI;
+  void DAI;
+  samurai([-36.4, -21.2], S, y, { pose: 'stand' }); samurai([-25.6, -21.2], S, y);
+  fig([-12, -14.5], 0.9, { y, carry: 'broom', dress: 'wrap', cloth: 'cloth_grey', hat: 'straw', feet: 'bare' });
+  samurai([-6.5, -17], 0.6, y, { pose: 'talk' }); samurai([-5.3, -16.3], S + 0.6 + 0.2, y, { pose: 'talk' });
+  fig([-44.2, -9.2], 0.4, { y, pose: 'squat', dress: 'wrap', cloth: 'cloth_indigo', hat: 'straw', feet: 'bare' });
+  fig([5, -4.2], -Math.PI / 2, { y, carry: 'pails', dress: 'wrap', cloth: 'cloth_indigo', hat: 'straw', feet: 'bare' });
+  fig([-16, -26], 2.4, { y, dress: 'robe', hair: 'bun', cloth: 'cloth_maroon', over: 'sash', cloth2: 'cloth_ochre', carry: 'basket' });
+  fig([21.2, -10.6], S * 0.5, { y, dress: 'wrap', cloth: 'cloth_brown', hat: 'straw', feet: 'bare', h: 1.62 });
+  // the Ninomaru, seen from the Hishi gate's stair
+  fig([-14, 14.5], 0.2, { y: y2, dress: 'robe', hair: 'bun', cloth: 'cloth_indigo', over: 'sash', cloth2: 'cloth_white', feet: 'shod' });
+  samurai([6, 9], -1.2, y2);
+  // the Hishi gate's guards at the head of the long stair, facing down it
+  samurai([-3.4, 28.2], S, y2 - 0.9); samurai([3.4, 28.2], S, y2 - 0.9);
+  void rand;
+}
+
 function life() {
   const rand = rng(1620), P = [], E = [];
   const fig = (at, rot, o = {}) => P.push({ t: 'figure', at, y: o.y ?? 0, rot, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: ['cloth_indigo', 'cloth_brown', 'cloth_grey', 'cloth_black'][Math.floor(rand() * 4)], cloth2: 'cloth_grey', skin: 'skin_light', hat: 'none', hair: 'topknot', hairMat: 'hair_dark', beard: 0, feet: 'shod', over: 'collar', ...o });
   // samurai on duty with the long and the short sword (the edict of 1629): on the avenue from the main gate and in the street
-  const samurai = (at, rot) => { const h = 1.6 + rand() * 0.08; fig(at, rot, { h, cloth: rand() < 0.5 ? 'cloth_black' : 'cloth_indigo', cloth2: 'cloth_grey', over: 'collar' }); E.push({ t: 'daisho', at, y: 0, rot, h }); };
+  const samurai = (at, rot, y = 0, o = {}) => { const h = 1.6 + rand() * 0.08; fig(at, rot, { h, y, cloth: rand() < 0.5 ? 'cloth_black' : 'cloth_indigo', cloth2: 'cloth_grey', over: 'collar', ...o }); E.push({ t: 'daisho', at, y, rot, h }); };
   for (const [x, z, r] of [[-6, OUTER[3] + 22, Math.PI], [-5.2, OUTER[3] + 23.2, Math.PI], [7, OUTER[3] + 48, 0.2], [5, 286, Math.PI * 0.9], [-30, 336.5, Math.PI / 2], [44, 335, -Math.PI / 2], [45.1, 336.1, -Math.PI / 2 + 0.3]]) samurai([x, z], r);
   // the palanquin on the avenue: the passenger seated in it, a bearer at each end of the pole, a retainer walking after
   { const x = 5, z = OUTER[3] + 36, rot = 0, ph = 1.44;
@@ -32,6 +55,7 @@ function life() {
   // the moat's life: a fisherman sitting in every other moored boat, a woman kneeling at each landing washing greens
   furniture().filter((f) => f.t === 'moat_boat').forEach((f, i) => { if (i % 2 === 0) fig([f.at[0] + 0.4, f.at[1]], Math.PI / 2, { y: LEVEL.water - 0.08 + 0.08, pose: 'sit', hat: 'straw', dress: 'wrap', cloth: 'cloth_indigo', feet: 'bare' }); });
   furniture().filter((f) => f.t === 'landing').forEach((f, i) => fig([f.x + (i % 2 ? 1 : -1) * 0.6, f.z0 - 0.35], 0, { y: 0.3, pose: 'seiza', hair: 'bun', cloth: i % 2 ? 'cloth_maroon' : 'cloth_indigo', over: 'apron', cloth2: 'cloth_white' }));
+  castleLife(fig, samurai, rand);
   return [base('edo-himeji-street', E), base('edo-himeji-people', P, 'life')];
 }
 

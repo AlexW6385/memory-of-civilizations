@@ -21,6 +21,8 @@ function cover(x, z, h) {
   if (wet(x, z)) { c.soil = 0.6; c.rock = 0.4; return c; }
   if (inRect(INNER, x, z)) {
     if (h > BANK + 3 && !onPlatform(x, z)) { c.forest = 0.6; c.grass = 0.4; c.soil = 0; return c; }
+    // the baileys' yards are raked pale gravel (the flagstones laid on it), the enclosure's open ground beaten earth
+    if (onPlatform(x, z)) { c.sand = 0.8; c.soil = 0.1; c.grass = 0.06; c.road = 0.12; return c; }
     c.sand = 0.5; c.soil = 0.4; c.grass = 0.1; c.road = 0.3; return c;
   }
   if (Math.hypot(x, z) > RADIUS - 26) { c.fields = 0.7; c.grass = 0.3; return c; }
@@ -71,12 +73,12 @@ export const ground = {
     sky: { turbidity: 3.2, rayleigh: 1.2, mie: 0.005, mieG: 0.8, zenith: [0.11, 0.19, 0.36], horizon: [0.64, 0.67, 0.7] },
     fog: { color: [0.76, 0.78, 0.8], density: 0.0005, height: 0.012 },
     exposure: 0.5,
-    damp: 0.3,      // the Inland Sea's wet summers: moss on the north faces of the walls and roofs, rain streaks down the plaster (DESIGN §5)
+    damp: 0.2,      // the Inland Sea: moss on the north faces of the walls, a little rain streaking on the plaster — which the castle keeps whitewashed (DESIGN §5)
     wind: [0.3, 0.2],
     weather: [
-      { id: 'clear', weight: 3, clouds: 0.2, cloudDensity: 0.35, sun: 1.0, fog: 1 },
+      { id: 'clear', weight: 4, clouds: 0.2, cloudDensity: 0.35, sun: 1.0, fog: 1 },
       { id: 'cloudy', weight: 2, clouds: 0.65, cloudDensity: 0.55, sun: 0.7, fog: 1.3 },
-      { id: 'drizzle', weight: 1, clouds: 0.95, cloudDensity: 0.8, sun: 0.35, fog: 2.2, rain: 0.5 },
+      { id: 'drizzle', weight: 0.7, clouds: 0.95, cloudDensity: 0.8, sun: 0.35, fog: 2.2, rain: 0.5 },
     ],
   },
 };
