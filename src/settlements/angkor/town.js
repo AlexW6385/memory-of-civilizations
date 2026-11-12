@@ -157,7 +157,24 @@ function templeLife() {
   [[CX - 110.5, -8.5, 'harp'], [CX - 109, -9.6, 'drum'], [CX - 110.5, 8.5, 'flute'], [CX - 109, 9.6, 'drum']].forEach(([x, z, pose]) => fig([x, z], ty, [0, -Math.sign(z)], { dress: 'wrap', top: 'bare', cloth: 'cloth_white', cloth2: 'cloth_brown', hair: 'short', feet: 'bare', pose }));
   // devotees on the causeway, walking in to the temple with their offerings
   const carries = ['basket', 'pot', 'pole', 'basket', 'none', 'pot', 'basket'];
-  carries.forEach((carry, i) => fig([CAUSEWAY.outer[0] + 6 + i * 6.1, (i % 2 ? 1 : -1) * 1.6], 1.0, [1, 0], { dress: 'wrap', top: i % 3 ? 'bare' : '', cloth: ['cloth_red', 'cloth_ochre', 'cloth_brown', 'cloth_white'][i % 4], cloth2: 'cloth_white', hair: i % 2 ? 'bun' : 'short', feet: 'bare', carry }));
+  // (none within 6 m of the arrival at x -178 on the causeway: the first stands 7 m ahead and well to the side)
+  const devX = [-190, -185, -171, -167.5, -162, -156, -152];
+  carries.forEach((carry, i) => fig([devX[i], [-1, 1, -2.5, 1.6, -1.4, 2.2, -1.2][i]], 1.0, [1, 0], { dress: 'wrap', top: i % 3 ? 'bare' : '', cloth: ['cloth_red', 'cloth_ochre', 'cloth_brown', 'cloth_white'][i % 4], cloth2: 'cloth_white', hair: i % 2 ? 'bun' : 'short', feet: 'bare', carry }));
+  // offering-sellers on the causeway's shoulders between the walkway and the serpent rail: a woman sitting behind her mat of lotus
+  // buds and incense, a basket and a jar by her, set 7 m or more from the arrival's stand (x -178)
+  [[-165, 3.0, -1, ['greens', 'heap']], [-158.5, -3.0, 1, ['heap', 'baskets']], [-189, -3.0, 1, ['greens', 'heap']], [-193, 3.0, -1, ['baskets', 'pottery']]].forEach(([x, z, d, goods], i) => {
+    L.push({ t: 'goods_mat', at: [x, z], y: 1.0, rot: d > 0 ? 0 : Math.PI, seed: 5100 + i, goods, mat: 'reed_mat', produce: ['cloth_red', 'cloth_ochre', 'glaze_yellow', 'cloth_white'], pottery: 'pottery_dark' });
+    fig([x, z + d * 0.9], 1.0, [0, d], { dress: 'wrap', top: 'bare', cloth: ['cloth_ochre', 'cloth_red', 'cloth_brown', 'cloth_indigo'][i], cloth2: 'cloth_white', hair: 'bun', over: i % 2 ? 'shawl' : 'none', feet: 'bare', pose: 'cross' });
+    L.push({ t: i % 2 ? 'basket' : 'pot', at: [x + 1.1, z], y: 1.0, seed: 5200 + i, n: 2, ...(i % 2 ? { goods: 'cloth_white' } : { kind: 'water_pot' }) });
+  });
+  // before the western gate (the enclosure's wall at x −150): the gate-keepers either side of the passage with their staves, two
+  // pilgrims kneeling in worship before the towers with an offering of flowers set down, a mother with a child by the rail
+  for (const z of [-3.3, 3.3]) fig([-154.5, z], 1.0, [1, 0], { dress: 'wrap', top: 'bare', cloth: 'cloth_red', cloth2: 'cloth_white', hair: 'bun', over: 'sash', feet: 'bare', pose: 'staff', carry: 'staff', len: 3.2, staffMat: 'lacquer_red', h: 1.66 });
+  fig([-159.2, -0.9], 1.0, [1, 0], { dress: 'wrap', top: 'bare', cloth: 'cloth_white', cloth2: 'cloth_white', hair: 'bun', feet: 'bare', pose: 'kneel', arms: 'pray' });
+  fig([-159.6, 1.3], 1.0, [1, 0], { dress: 'wrap', top: 'bare', cloth: 'cloth_ochre', cloth2: 'cloth_white', hair: 'bun', over: 'shawl', feet: 'bare', pose: 'kneel', arms: 'pray' });
+  L.push({ t: 'basket', at: [-157.6, 0.2], y: 1.0, seed: 5301, n: 2, goods: 'cloth_white' });
+  fig([-157.2, 3.4], 1.0, [1, -0.4], { dress: 'wrap', top: 'bare', cloth: 'cloth_brown', cloth2: 'cloth_white', hair: 'bun', over: 'shawl', feet: 'bare', pose: 'stand' });
+  fig([-156.3, 3.9], 1.0, [1, -0.4], { dress: 'wrap', top: 'bare', cloth: 'cloth_red', cloth2: 'cloth_white', hair: 'short', feet: 'bare', pose: 'stand', child: true, h: 0.95 });
   // teaching in the court of the third gallery: a Brahmin teacher seated on his mat before four pupils in a half circle
   const by = T.base.y;
   for (const [tx, tz, d] of [[CX + 12, -84, 1], [CX + 62, 84, -1], [CX - 22, 84, -1], [CX + 70, -84, 1]]) {

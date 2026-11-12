@@ -2,6 +2,7 @@
 // and tiled roofs in the blocks between the ring streets.
 import { RADIUS, TANK, WALL, GATES, PUDHU, SUNDARA, MEENAKSHI, HALL, lots, lotMap, outside } from './layout.js';
 import { pudhuMandapam } from './plan.js';
+import { frontage } from './frontage.js';
 const base = (id, elements) => ({ id, style: 'dravidian', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-20, 200], facing: 'n' } });
 /** How far from the temple wall the houses and shops are hollow and furnished (the first four streets' rows). */
 export const RICH = 125;
@@ -15,7 +16,7 @@ export async function town() {
     tiles.get(k).push({ t: l.kind === 'court' ? 'court_house' : 'tamil_house', ...l, rich: l.kind !== 'court' && outside(cx, cz) < RICH });
   }
   for (const [k, list] of tiles) plans.push({ ...base(`madurai-houses-${k}`, list) });
-  plans.push(...shopLife());
+  plans.push(...shopLife(), ...frontage());
   plans.push(festival(), pudhuMandapam, { ...street(), style: 'life', center: [0, 60], near: 260 });
   return plans;
 }

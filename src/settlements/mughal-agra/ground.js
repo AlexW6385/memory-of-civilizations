@@ -35,7 +35,8 @@ function planting(x, z, p) {
     // trees (life) in the beds behind them, grass and flowers; nothing on the walks, the channels or the terrace's foot
     const ax = Math.abs(x), az = Math.abs(z), d = walkDist(x, z);
     if (ax < 12 || az < 12 || inRect([-150, -148, 150, -138], x, z) || d < 0.3) return null;
-    if (d < 1.6) return { cypress: 14, grass: 40 };
+    // (thinner within the axes' view, where the near-black crowns closed the Taj off: a cypress every ~12 m, flowering shrubs between)
+    if (d < 1.6) return ax < 60 ? { cypress: 6, oleander: 0.45, grass: 40 } : { cypress: 14, grass: 40 };
     // fruit trees of the beds (mango, lemon, pomegranate, plantain by the sources; carob stands for the dark mango, jujube
     // and fig for the lemon and the pomegranate), flowering shrubs and grass between; none within the reach of the axes' view
     if (d > 4) return { carob: 0.22, jujube: 0.2, fig: 0.1, oleander: 0.45, grass: 45 };

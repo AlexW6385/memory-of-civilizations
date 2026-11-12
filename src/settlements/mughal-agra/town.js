@@ -1,5 +1,5 @@
 // Taj Ganj and the riverside (docs/settlements/mughal-agra.md §6): the town's houses with their balconies.
-import { RADIUS, RIVER_Z, STREETS, houses, KATRAS, HAVELI_OPEN, WORKSHOP } from './layout.js';
+import { RADIUS, RIVER_Z, STREETS, houses, KATRAS, HAVELI_OPEN, WORKSHOP, GWALKS, GW } from './layout.js';
 import { lifePlan } from './life.js';
 import { ground, LEVEL } from './ground.js';
 const base = (id, elements) => ({ id, style: 'mughal', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 245], facing: 'n' } });
@@ -19,6 +19,19 @@ export async function town() {
       }
     }
     plans.push(base('mughal-agra-verges', els)); }
+  // the flower beds of the garden's two northern quarters nearest the axes (§13): the sunken beds between the raised walks planted in
+  // rows of marigold, rose and jasmine parallel to the channel, a path's width clear at the walks (the beds' trees and shrubs stand among them)
+  { const els = [], cols = [[12.15, GWALKS[0] - GW], [GWALKS[0] + GW, GWALKS[1] - GW], [GWALKS[1] + GW, GWALKS[2] - GW]], rows = [[-12.15, -(GWALKS[0] - GW)], [-(GWALKS[0] + GW), -(GWALKS[1] - GW)], [-(GWALKS[1] + GW), -(GWALKS[2] - GW)], [-(GWALKS[2] + GW), -143]];
+    const FL = ['cloth_ochre', 'cloth_red', 'cloth_white', 'cloth_ochre', 'cloth_maroon'];
+    let n = 0;
+    for (const sx of [-1, 1]) for (const [c0, c1] of cols.slice(0, 2)) for (const [r1, r0] of rows) {
+      const z0 = Math.min(r0, r1) + 1.6, z1 = Math.max(r0, r1) - 1.6;
+      for (let x = c0 + 1.8; x < c1 - 1.8; x += 2.6) {
+        const xa = sx < 0 ? -(x + 0.7) : x, xb = sx < 0 ? -x : x + 0.7;
+        els.push({ t: 'block', rect: [xa, z0, xb, z1], y0: -0.02, y1: 0.1 + (n % 3) * 0.03, mat: FL[n++ % FL.length], collide: false });
+      }
+    }
+    plans.push(base('mughal-agra-parterres', els)); }
   // the houses' fronts dressed at eye level (instanced pieces of the street life)
   for (let i = 0; i < all.length; i += 140) plans.push({ ...base(`mughal-agra-fronts-${i / 140}`, all.slice(i, i + 140).map((h) => ({ t: 'mughal_front', ...h }))), style: 'life' });
   // the caravanserais and the open house (docs/settlements/mughal-agra.md §11)
