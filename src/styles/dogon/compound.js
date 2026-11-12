@@ -234,3 +234,13 @@ export function ginnaOf(el) {
   const gx0 = west ? x0 + 0.4 : x1 - 0.4 - gw, gz1 = z1 - 0.2;
   return { rect: [gx0, gz1 - dep, gx0 + gw, gz1], H, west };
 }
+
+/** The facade of a compound's ginna, as built: { x0, x1, zf (its south face), y, doors: [x…] } — open or solid, the same as the building code places it. */
+export function frontOf(c) {
+  if (c.open) {
+    const r = houseOf(c).rect;
+    return { x0: r[0], x1: r[2], zf: r[3], y: c.y, doors: [r[0] + 0.45 + 1.5, r[0] + 0.45 + 4.9] };
+  }
+  const g = ginnaOf(c), [gx0, , gx1, gz1] = g.rect, gw = gx1 - gx0;
+  return { x0: gx0, x1: gx1, zf: gz1, y: c.y, doors: [gx0 + gw * 0.3, gx0 + gw * 0.7] };
+}

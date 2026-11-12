@@ -1,7 +1,7 @@
 // A Dogon village — the ground: the red-brown sandstone of the escarpment and its boulder-strewn talus, beaten earth in the village and
 // on the place, sandy fields of millet on the plain to the south, thorn scrub and baobabs; the Sahel's dry bright sky at the end of the rains.
 
-import { RADIUS, height, inVillage, inCompound, inFields, nearBaobab, TOGUNA, PUNULU, ALTARS, CLIFF_Z, cliffFoot, smooth as sm } from './layout.js';
+import { RADIUS, height, inVillage, inCompound, inFields, nearBaobab, TOGUNA, PUNULU, ALTARS, CLIFF_Z, cliffFoot, wallFace, SHADE, smooth as sm } from './layout.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0.3, grass: 0.25, rock: 0, soil: 0.45, fields: 0, dry: 0.7, warmth: 0.65, red: 0.6, road: 0, snow: 0, forest: 0 };
@@ -18,16 +18,19 @@ function planting(x, z) {
   const r = Math.hypot(x, z);
   if (r > RADIUS - 5 || inVillage(x, z, 1.5) || inCompound(x, z, 1) || nearBaobab(x, z, 2.5) || Math.hypot(x - TOGUNA.c[0], z - TOGUNA.c[1]) < 7) return null;
   if (PUNULU.some(([px, pz]) => Math.hypot(x - px, z - pz) < 3.5) || ALTARS.some((a) => Math.hypot(x - a.at[0], z - a.at[1]) < 1.6)) return null;
+  if (z < wallFace(x) + 2.2 || SHADE.some((t) => Math.hypot(x - t.at[0], z - t.at[1]) < 4)) return null;
   const d = cliffFoot(x) - z;
-  if (d > 1) return { boulder: 0.05, grass_dry: 3 };
-  if (z < CLIFF_Z + 10) return { boulder: 0.35, grass_dry: 8, acacia: 0.02 };
-  if (inFields(x, z) && z < 76) return { wheat: 55, grass_dry: 3 };
-  if (z >= 76) return { acacia: 0.05, grass_dry: 20 };
-  return { boulder: 0.12, grass_dry: 9, acacia: 0.03 };
+  // the plateau at the cliff's foot: red rock, boulders fallen from the face, thorn scrub, a fig rooted in a crack
+  if (d > 1) return { boulder: 0.5, grass_dry: 4, halfa: 1.2, sycamore_fig: 0.012, acacia: 0.01 };
+  if (z < CLIFF_Z + 10) return { boulder: 0.5, grass_dry: 8, acacia: 0.025, halfa: 1.5, sycamore_fig: 0.01 };
+  // the millet standing on the plain, a few maize stalks tall among it, the fallow between; trees of the Sahel round the fields
+  if (inFields(x, z) && z < 76) return { wheat: 34, maize: 14, grass_dry: 3, acacia: 0.01 };
+  if (z >= 76) return { acacia: 0.06, grass_dry: 20, halfa: 1 };
+  return { boulder: 0.2, grass_dry: 9, acacia: 0.04, halfa: 0.8, sycamore_fig: 0.004 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { boulder: 0.35, acacia: 0.05, wheat: 55 },
+  maxDensity: { boulder: 0.5, acacia: 0.06, wheat: 55, maize: 14, halfa: 1.5, sycamore_fig: 0.012 },
   climate: {
     sun: { az: 150, el: 50, color: [1.0, 0.94, 0.84], intensity: 3.6, lat: 14.4, dec: -12, hour: 9.5 },
     sky: { turbidity: 2.8, rayleigh: 1.0, mie: 0.005, mieG: 0.78, zenith: [0.1, 0.18, 0.4], horizon: [0.72, 0.72, 0.7] },
