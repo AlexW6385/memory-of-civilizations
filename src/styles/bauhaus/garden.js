@@ -4,6 +4,9 @@
 import { S, rng, table, chair } from './kit.js';
 import { GARDEN, GARDEN_GATE, GARDEN_PATHS, GARDEN_BEDS, GARDEN_SHED } from '../../settlements/bauhaus-dessau/layout.js';
 
+/** Near-alike palette names folded into fewer materials: the garden's ~30 names cost ten draws. */
+const FOLD = { plaster_grey: 'concrete_light', plaster_damp: 'concrete_light', wood_ochre: 'timber', wood_painted: 'timber', wood_dark: 'timber', iron_galv: 'iron', steel_grey: 'iron', steel_chrome: 'iron',
+  paint_white: 'plaster_white', car_cream: 'plaster_white', cloth_white: 'plaster_white', flax_leaf: 'sod', cloth_green: 'sod', tile_dark: 'asphalt', cloth_ochre: 'paint_cab_yellow', cloth_red: 'car_red', paint_blue: 'car_red' };
 const BLOOM = ['car_red', 'paint_cab_yellow', 'cloth_ochre', 'paint_white', 'cloth_red', 'paint_cab_yellow'];
 
 /** A clipped hedge from a to b along an axis, 0.62 thick, its top a little uneven, as a solid. */
@@ -25,7 +28,7 @@ function bench(sk, x, z, rot) {
 }
 /** bauhaus_garden: the garden of the school. */
 export function bauhausGarden(el, ctx) {
-  const sk = new S(ctx), r = rng(el.seed || 12), [x0, z0, x1, z1] = GARDEN;
+  const sk = new S(ctx, FOLD), r = rng(el.seed || 12), [x0, z0, x1, z1] = GARDEN;
   // the hedge: Mauerstrasse's side with the gate's gap, the south side along Ebertallee's pavement
   hedge(sk, r, false, x0 + 0.3, z0 + 0.6, GARDEN_GATE[0]); hedge(sk, r, false, x0 + 0.3, GARDEN_GATE[1], z1 - 0.6);
   hedge(sk, r, true, z1 - 0.3, x0 + 0.6, x1);
