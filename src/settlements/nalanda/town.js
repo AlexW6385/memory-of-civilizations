@@ -1,8 +1,8 @@
 // The row of monasteries and temples, the tanks, the votive stupas, the village and the people of Nalanda (docs/settlements/nalanda.md §3, §9).
-import { openLots } from '../lod.js';
+import { openLots, lodTiles } from '../lod.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
-import { RADIUS, MONASTERIES, TEMPLES, TANKS, LEVEL, WAY, T3, M1, mgate, lots, tankD } from './layout.js';
-import { HALL } from './plan.js';
+import { RADIUS, MONASTERIES, TEMPLES, TANKS, LEVEL, WAY, T3, M1, LIBRARY, mgate, lots, yards, tankD, WAY_LAMPS, BOOTHS, JALS, OTLAS, ANNEXES, GATE, STUPA_END } from './layout.js';
+import { HALL, TOWERS } from './plan.js';
 import '../../styles/nalanda/index.js';
 import '../../styles/vernacular/index.js';
 import '../../objects/index.js';
@@ -28,7 +28,7 @@ function votives() {
     }
   };
   ring(T3, 7); for (const t of TEMPLES.slice(1)) ring(t, 5);
-  return { t: 'votives', at: at.filter(([x, z]) => !(x > WAY.x0 - 1 && x < WAY.x1 + 1)).map(([x, z, s]) => [x, z, s]) };
+  return { t: 'votives', at: [...at.filter(([x, z]) => !(x > WAY.x0 - 1 && x < WAY.x1 + 1)).map(([x, z, s]) => [x, z, s]), STUPA_END] };
 }
 
 /** Monks, teachers, students, lay people, a few animals. */
@@ -77,17 +77,110 @@ function people() {
     else if (t < 0.7) lay([x, z], 0, f === 'w' ? [1, 0] : [0, 1], { pose: 'talk' });
     else P.push({ t: 'animal', kind: r() < 0.7 ? 'zebu' : 'dog', at: [x + 2, z + 0.5], y: 0, rot: r() * 6.28, seed: i + 3 });
   }
+  // the booths: the seller on her mat behind the counter, a buyer before it
+  const SD = { w: [-1, 0], e: [1, 0], n: [0, -1], s: [0, 1] };
+  const bth = [...BOOTHS, ...bazaar()];
+  bth.forEach(([x, z, f, kind], i) => {
+    const d = SD[f], sx = x - d[0] * 1.45, sz = z - d[1] * 1.45;
+    (kind === 'pots' || kind === 'grain' ? lay : woman)([sx, sz], 0.03, d, { pose: 'sit_ground', carry: 'none' });
+    if (i % 2 === 0) (r() < 0.5 ? lay : monk)([x + d[0] * 1.3, z + d[1] * 1.3 + (d[0] ? 0.4 : 0)], 0, [-d[0], -d[1]], { pose: 'stand' });
+  });
+  // the water-sheds: an attendant at the pots, a monk drinking
+  for (const [x, z, f] of JALS) { const d = SD[f]; lay([x - d[0] * 0.9, z - d[1] * 0.9 - 0.2], 0, d, { pose: 'stand', hat: 'none' }); monk([x + d[0] * 1.2, z + d[1] * 1.2 + 0.6], 0, [-d[0], -d[1]], { pose: 'stand' }); }
+  // monks on the benches against the monasteries' fronts, looking out on the way
+  OTLAS.forEach((o, i) => { if (i % 2 === 0 || r() < 0.5) monk([o[0] - 0.1, (o[1] + o[3]) / 2 + (r() - 0.5) * 6], 0.5, [-1, 0], { pose: r() < 0.6 ? 'cross' : 'talk' }); });
+  // the other monasteries: devotees in the stupa courts, a teacher with students under the pavilion
+  for (const m of MONASTERIES) {
+    if (m === M1) continue;
+    const [a0, b0, a1, b1] = m.rect, cz = (b0 + b1) / 2, cxm = (a0 + 7.6 + a1 - 7.6) / 2;
+    if (m.court === 'stupa') {
+      for (let k = 0; k < 4; k++) monk([cxm - 4.6 + k * 2.2, cz + 2.6], 0.03, [0, 1], { pose: 'cross' });
+      monk([cxm - 2, cz + 3.9], 0.03, [0, 1], { pose: 'kneel', arms: 'pray' }); monk([cxm + 4, cz - 8], 0, [-1, 0.3], { pose: 'talk' }); monk([cxm + 5.4, cz - 7.6], 0, [-1, -0.3], { pose: 'talk' });
+    } else {
+      const bx = cxm - 3.75, bz = cz + 8.2;
+      monk([bx - 2.6, bz], 0.43, [1, 0], { pose: 'cross', cloth: 'cloth_maroon' }); monk([bx + 2.5, bz], 0.43, [-1, 0], { pose: 'cross' }); monk([bx, bz + 2.7], 0.43, [0, -1], { pose: 'cross' });
+      monk([cxm + 6, cz + 6], 0, [-1, 0], { pose: 'stand' });
+    }
+    // a monk reading in a cell, one on each floor, as in the first
+    const pitch = (a1 - a0) / 15;
+    monk([a0 + 4.5 * pitch - 0.98, b0 + 2.0], 0.45, [0, 1], { pose: 'cross' }); monk([a0 + 9.5 * pitch - 0.98, b0 + 2.0], 3.7 + 0.45, [0, 1], { pose: 'cross' });
+  }
+  // the annexes: cooks at the hearths, monks at their meal, a porter in the granary, the physician and his patients
+  for (const a of ANNEXES) {
+    const [x0, z0, x1, z1] = a.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+    if (a.kind === 'kitchen') { lay([cx - 3, z0 + 3], 0, [0, -1], { pose: 'stand', hat: 'none' }); woman([cx + 3, z0 + 3], 0, [0, -1], { pose: 'stand', carry: 'none' }); lay([cx, cz], 0, [1, 0], { pose: 'talk', hat: 'none' }); }
+    else if (a.kind === 'refectory') for (let k = 0; k < 6; k++) monk([x0 + 4.6 + k * 1.8, z0 + 2.2 + 1.2 + (k % 2) * 3.1], 0.03, [0, k % 2 ? -1 : 1], { pose: 'cross' });
+    else if (a.kind === 'granary') { lay([cx, cz + 0.6], 0, [1, 0], { pose: 'stand', hat: 'none', carry: 'sack' }); lay([cx + 2.4, cz + 1.2], 0, [-1, 0], { pose: 'talk' }); }
+    else { monk([x0 + 3.8, z0 + 1.7], 0.48, [0, 1], { pose: 'cross' }); lay([cx, cz + 1.3], 0, [0, -1], { pose: 'stand', hat: 'none' }); monk([x0 + 9.6, z1 - 1.7], 0.48, [0, -1], { pose: 'cross' }); }
+  }
+  // the library: readers in the upper hall and in the other two halls, a guard at the yard's gate
+  { const [hx0, hz0] = HALL.c, SY = 4.1;
+    for (let i = 0; i < 3; i++) for (const sz of [-1, 1]) if (r() < 0.6) monk([hx0 - 4 + i * 3.4, hz0 + sz * 2.4 + sz * 0.8], SY + 0.03, [0, -sz], { pose: 'cross', cloth: 'cloth_ochre' });
+    for (const t of TOWERS.slice(0, 2)) monk([t.c[0] - 1, t.c[1] + 1.8], 0.03, [0, -1], { pose: 'cross' });
+    lay([LIBRARY.yard[2] - 1.5, (LIBRARY.yard[1] + LIBRARY.yard[3]) / 2 + 3.2], 0, [-1, 0], { pose: 'stand', hat: 'none' }); monk([LIBRARY.yard[2] - 4, -92 - 6], 0, [-1, 0.4], { pose: 'talk' }); monk([LIBRARY.yard[2] - 5.2, -92 - 5.6], 0, [1, 0], { pose: 'talk' }); }
+  // the gate: two guards, pilgrims coming in with their bundles
+  lay([-6.2, GATE.c[1] + 5.2], 0, [0, -1], { pose: 'stand', hat: 'none' }); lay([6.2, GATE.c[1] + 5.2], 0, [0, -1], { pose: 'stand', hat: 'none' });
+  lay([-1.5, GATE.c[1] + 9], 0, [0, -1], { pose: 'stand', carry: 'bundle' }); woman([1.8, GATE.c[1] + 11], 0, [0, -1], { pose: 'stand', carry: 'basket' });
+  // the yards: zebu and goats in the pens, hay
+  yards().forEach((y, i) => { const [a0, b0, a1, b1] = y.rect; if (i % 3 === 2) return; P.push({ t: 'animal', kind: 'zebu', at: [(a0 + a1) / 2 - 1, (b0 + b1) / 2], y: 0, rot: r() * 6, seed: 300 + i }, { t: 'animal', kind: i % 2 ? 'goat' : 'zebu', at: [(a0 + a1) / 2 + 1.5, (b0 + b1) / 2 + 1], y: 0, rot: r() * 6, seed: 400 + i }); });
   void LEVEL;
   return base('nalanda-people', 'life', P);
 }
 
+/** The bazaar of the village: booths along the road to it, south of the way's end, facing the road. */
+function bazaar() {
+  const B = [], kinds = ['grain', 'veg', 'pots', 'cloth', 'flowers', 'veg', 'grain'];
+  for (let i = 0; i < 7; i++) B.push([52 + i * 10, 128.2, 'n', kinds[i], 700 + i]);
+  for (let z = -84; z < 80; z += 15) B.push([130.2, z, 'w', kinds[Math.floor((z + 84) / 15) % 7], 800 + z]);
+  return B.filter(([x, z]) => tankD(x, z) > 8);
+}
+/** What stands behind the houses and in the yards: dung-cake stacks, clay bins, charpoys, hay, the pens and the potter's yard. */
+function villageItems() {
+  const r = rng(77), I = [];
+  for (const l of lots()) {
+    const [x0, z0, x1, z1] = l.rect, south = l.front === 'n', strip = south ? z0 + 8.6 - z1 : x0 + 10.2 - x1;
+    if (strip < 1.5 || r() < 0.25) continue;
+    const t = r(), at = (u) => (south ? [x0 + u * (x1 - x0), z1 + 0.85] : [x1 + 0.85, z0 + u * (z1 - z0)]), [px, pz] = at(0.2 + r() * 0.6);
+    if (t < 0.4) I.push({ k: 'dung', x: px, z: pz, s: 0.8 + r() * 0.3 });
+    else if (t < 0.65) I.push({ k: 'kothi', x: px, z: pz, s: 0.8 + r() * 0.2 });
+    else if (t < 0.85 && strip >= 1.9) I.push({ k: 'charpoy', x: px, z: pz, rot: south ? 0 : 1, cloth: r() < 0.5 ? 'cloth_white' : 'cloth_red' });
+    else I.push({ k: 'haypile', x: px, z: pz, s: 0.6 });
+    if (r() < 0.3) { const [qx, qz] = at(r() < 0.5 ? 0.08 : 0.92); I.push({ k: 'dung', x: qx, z: qz, s: 0.7 }); }
+  }
+  yards().forEach((y, i) => {
+    const [x0, z0, x1, z1] = y.rect, f = (a, b) => ({ k: 'fence', seg: [...a, ...b] }), cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+    if (i % 4 === 0) { I.push({ k: 'kiln', x: cx - 1.5, z: cz - 0.5 }, { k: 'potstack', x: cx + 2.6, z: z1 - 1.2 }, { k: 'dung', x: x0 + 0.9, z: z1 - 0.9, s: 1 }); return; }
+    const fr = y.back === 's' ? 'n' : 'w';       // the open side: the yard's front
+    const m = 0.3, X0 = x0 + m, X1 = x1 - m, Z0 = z0 + m, Z1 = z1 - m;
+    if (fr !== 'n') { I.push(f([X0, Z0], [X1, Z0])); } else { I.push(f([X0, Z0], [cx - 1.2, Z0]), f([cx + 1.2, Z0], [X1, Z0])); }
+    I.push(f([X0, Z1], [X1, Z1]), f([X1, Z0], [X1, Z1]));
+    if (fr === 'w') I.push(f([X0, Z0], [X0, cz - 1.2]), f([X0, cz + 1.2], [X0, Z1])); else I.push(f([X0, Z0], [X0, Z1]));
+    I.push({ k: 'haypile', x: X1 - 1.2, z: Z1 - 1.2, s: 0.9 });
+  });
+  return I;
+}
+
 export async function town() {
   const E = [];
-  for (const m of MONASTERIES) if (!m.enter) E.push({ t: 'monastery', rect: m.rect, enter: false, seed: m.seed });
+  for (const m of MONASTERIES) if (m !== M1) E.push({ t: 'monastery', rect: m.rect, enter: true, court: m.court, seed: m.seed });
   for (const t of TEMPLES.slice(1)) E.push({ t: 'temple', ...t, y: 0, niches: true });
   for (const t of TANKS) E.push({ t: 'tank', rect: t.rect, level: LEVEL, ghats: t.ghats });
+  TANKS.forEach((t, i) => {
+    const [x0, z0, x1, z1] = t.rect, avoid = t.ghats.map((g) => (g.side === 'w' ? [x0, g.at - 5, x0 + 5, g.at + 5] : g.side === 'e' ? [x1 - 5, g.at - 5, x1, g.at + 5] : g.side === 'n' ? [g.at - 5, z0, g.at + 5, z0 + 5] : [g.at - 5, z1 - 5, g.at + 5, z1]));
+    E.push({ t: 'lotus', rect: t.rect, level: LEVEL, n: [150, 70, 40][i], seed: 31 + i, avoid });
+  });
+  E.push({ t: 'pavilion', at: TANKS[0].ghats.map((g) => [TANKS[0].rect[0] - 4.4, g.at + 5.5, 'e']) });
   E.push(votives());
-  const all = lots(), houses = [], open = openLots(all, [ARRIVALS['nalanda'][0], ARRIVALS['nalanda'][2]]);
-  for (let i = 0; i < all.length; i += 160) houses.push(base(`nalanda-houses-${i / 160}`, 'vernacular', all.slice(i, i + 160).map((l) => ({ t: 'house_india', ...l, ...(open.has(l) ? { open: true } : {}) }))));
+  const foot = (t) => t.c[0] + t.half + t.tierH * 1.04 + 1.5;
+  E.push({ t: 'lamps', at: [...WAY_LAMPS, [foot(T3), -5.4], [foot(T3), 5.4], ...TEMPLES.slice(1).flatMap((t) => [[foot(t), t.c[1] - 4.6], [foot(t), t.c[1] + 4.6]]), [LIBRARY.yard[2] - 3, -88.6], [LIBRARY.yard[2] - 3, -95.4], [HALL.c[0] + HALL.half[0] + 2.2, HALL.c[1] - 3], [HALL.c[0] + HALL.half[0] + 2.2, HALL.c[1] + 3]] });
+  E.push({ t: 'booth', at: BOOTHS }, { t: 'booth', at: bazaar() });
+  E.push({ t: 'jal', at: [...JALS, [LIBRARY.yard[2] - 6, -80, 'e']] });
+  E.push({ t: 'otla', runs: OTLAS });
+  for (const a of ANNEXES) E.push({ t: 'annex', ...a });
+  E.push({ t: 'gate', ...GATE, c: GATE.c });
+  E.push({ t: 'village', items: villageItems() });
+  const all = lots(), houses = [], open = openLots(all, [ARRIVALS['nalanda'][0], ARRIVALS['nalanda'][2]], 16);
+  const hl = all.map((l) => ({ t: 'house_india', ...l, ...(open.has(l) ? { open: true } : {}) }));
+  houses.push(...lodTiles('nalanda-houses', 'vernacular', hl, { near: 130, R: RADIUS, entrance: { at: [0, 40], facing: 'n' } }));
   return [base('nalanda-town', 'nalanda', E), people(), ...houses];
 }

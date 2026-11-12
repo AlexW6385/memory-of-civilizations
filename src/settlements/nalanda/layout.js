@@ -7,14 +7,14 @@ export const RADIUS = 190;
 export const WAY = { x0: -7, x1: 7 };
 export const LEVEL = -1.0;                                   // the tanks' water
 /** The monasteries: 52 × 46 m, gates west on the way. The third (index 2) is the landmark, Monastery 1. */
-export const MONASTERIES = [0, 1, 2, 3, 4].map((i) => ({ rect: [14, -123 + i * 50, 66, -77 + i * 50], enter: i === 2, seed: 11 + i }));
+export const MONASTERIES = [0, 1, 2, 3, 4].map((i) => ({ rect: [14, -123 + i * 50, 66, -77 + i * 50], enter: true, court: ['stupa', 'pavilion', 'teach', 'stupa', 'pavilion'][i], seed: 11 + i }));
 export const M1 = MONASTERIES[2];
 export const mgate = (m) => [m.rect[0], (m.rect[1] + m.rect[3]) / 2];
 /** The temples west of the way: the great temple (Śāriputra's, Temple 3) and others in the line. */
 export const TEMPLES = [
   { id: 't3', c: [-44, 0], half: 25, tiers: 4, tierH: 5, shrine: true, shrineH: 5.2, seed: 3 },
-  { id: 't2', c: [-44, 66], half: 13, tiers: 3, tierH: 3.5, seed: 4 },
-  { id: 't12', c: [-44, -66], half: 13, tiers: 3, tierH: 3.5, seed: 5 },
+  { id: 't2', c: [-44, 66], half: 13, tiers: 3, tierH: 3.5, shrine: true, shrineH: 4.4, seed: 4 },
+  { id: 't12', c: [-44, -66], half: 13, tiers: 3, tierH: 3.5, shrine: true, shrineH: 4.4, seed: 5 },
   { id: 't13', c: [-44, 104], half: 11, tiers: 3, tierH: 3.2, seed: 6 },
 ];
 export const T3 = TEMPLES[0];
@@ -43,22 +43,54 @@ export function nearCore(x, z, m = 0) {
   return inRect(LIBRARY.yard, x, z, m);
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-let LOTS = null;
-/** The village houses: south-east of the south tank and east of the east tank. */
+let LOTS = null, YARDS = null;
+/** The village houses: rows in continuous runs, south-east of the south tank and east of the east tank; the gaps are yards (pens, the potter's). */
 export function lots() {
   if (LOTS) return LOTS;
-  LOTS = [];
-  const rand = rng(640);
-  for (let x = 76; x < 175; x += 14) for (let z = 92; z < 152; z += 13) {
-    const w = 8 + rand() * 3, d = 6 + rand() * 2, cx = x + w / 2, cz = z + d / 2;
-    if (Math.hypot(cx, cz) > RADIUS - 24 || tankD(cx, cz) < 10 || (x + w > 120 && x < 130) || rand() < 0.3) continue;
-    LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: 0, foot: -0.2, front: 'n' });
+  LOTS = []; YARDS = [];
+  const rand = rng(640), ok = (cx, cz) => Math.hypot(cx, cz) <= RADIUS - 24 && tankD(cx, cz) >= 10;
+  for (let z = 92; z < 152; z += 13) {
+    for (let x = 76; x < 176;) {
+      const w = 8 + rand() * 3, d = Math.min(6 + rand() * 2, 124 - z > 5 ? 124 - z : 8), cx = x + w / 2, cz = z + d / 2;
+      if (!ok(cx, cz) || (x + w > 121 && x < 131)) { x += w + 0.4; continue; }
+      if (rand() < 0.07) YARDS.push({ rect: [x, z, x + w, z + 7], back: 's' });
+      else LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: 0, foot: -0.2, front: 'n' });
+      x += w + 0.4;
+    }
   }
-  for (let x = 134; x < 180; x += 13) for (let z = -100; z < 86; z += 13) {
-    const w = 7 + rand() * 3, d = 7 + rand() * 2, cx = x + w / 2, cz = z + d / 2;
-    if (Math.hypot(cx, cz) > RADIUS - 24 || tankD(cx, cz) < 10 || rand() < 0.45) continue;
-    LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: 0, foot: -0.2, front: 'w' });
+  for (let x = 134; x < 180; x += 13) {
+    for (let z = -100; z < 88;) {
+      const w = 7 + rand() * 3, d = 7 + rand() * 2, cx = x + w / 2, cz = z + d / 2;
+      if (!ok(cx, cz)) { z += d + 0.4; continue; }
+      if (rand() < 0.07) YARDS.push({ rect: [x, z, x + w, z + d], back: 'e' });
+      else LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: 0, foot: -0.2, front: 'w' });
+      z += d + 0.4;
+    }
   }
   return LOTS;
 }
+export function yards() { lots(); return YARDS; }
+/** The way's furniture (§12): lamp pillars both sides between the gates, booths on the east margin, water-sheds on the west, benches against the monasteries' fronts. */
+const gz = () => MONASTERIES.map((m) => mgate(m)[1]);
+export const WAY_LAMPS = (() => {
+  const L = [], g = gz(), blocked = [0, 66, -66, 104, -92];
+  for (let z = -134; z <= 114; z += 16) {
+    if (blocked.some((b) => Math.abs(z - b) < 7)) continue;
+    L.push([-6.3, z]);
+    if (!g.some((q) => Math.abs(q - z) < 6)) L.push([6.3, z]);
+  }
+  return L;
+})();
+export const BOOTHS = (() => {
+  const B = [], kinds = ['flowers', 'lamps', 'pots', 'grain', 'cloth', 'veg'];
+  gz().forEach((g, i) => { B.push([5.0, g + 11, 'w', kinds[(i * 2) % 6], 40 + i], [5.0, g - 11, 'w', kinds[(i * 2 + 1) % 6], 50 + i]); });
+  for (const z of [-30, 30, 90]) B.push([-5.4, z, 'e', z === 30 ? 'flowers' : 'lamps', 60 + z]);
+  return B;
+})();
+export const JALS = [[-5.6, -88, 'e'], [-5.6, -36, 'e'], [-5.6, 44, 'e'], [-5.6, 82, 'e']];
+export const OTLAS = gz().flatMap((g) => [[13.1, g - 21, 13.1, g - 5, 1.0], [13.1, g + 5, 13.1, g + 21, 1.0]]);
+/** The annexes east of the monasteries, door on the lane to the south (§13). */
+export const ANNEXES = MONASTERIES.map((m, i) => { const zc = (m.rect[1] + m.rect[3]) / 2; return { rect: [70, zc + 10, 88, zc + 22], door: 's', kind: ['refectory', 'kitchen', 'granary', 'infirmary', 'kitchen'][i], seed: 100 + i }; });
+export const GATE = { c: [0, 118], half: 5, ww: 22 };
+export const STUPA_END = [0, -141, 3.2];
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
