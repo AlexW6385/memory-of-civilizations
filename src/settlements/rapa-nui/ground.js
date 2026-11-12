@@ -5,7 +5,9 @@
 import { TUPA, PETRO, RADIUS, SEA, RIM, RARAKU, PLAZA, AHU, ROAD_W, height, inLake, inSea, inRect, village, roadDist, fields } from './layout.js';
 
 function cover(x, z, h, ny) {
-  const c = { sand: 0, grass: 0.75, rock: 0, soil: 0.25, fields: 0, dry: 0.35, warmth: 0.55, red: 0.45, road: 0, snow: 0, forest: 0 };
+  // (the broad unevenness of the turf: drier, yellower and redder in patches, the soil showing between, stones in the thin places)
+  const n = Math.sin(x * 0.043 + 1.3) * Math.sin(z * 0.051 - 0.6) + 0.5 * Math.sin(x * 0.17 + z * 0.13) * Math.sin(z * 0.11 - x * 0.09), m = Math.max(0, n);
+  const c = { sand: 0, grass: 0.75 - 0.25 * m, rock: 0.12 * m, soil: 0.25 + 0.22 * m, fields: 0, dry: 0.35 + 0.3 * n, warmth: 0.55, red: 0.45 + 0.15 * n, road: 0, snow: 0, forest: 0 };
   if (inRect(PLAZA, x, z)) { c.grass = 0.4; c.soil = 0.6; return c; }
   if (fields().some((r) => inRect(r, x, z))) { c.grass = 0.2; c.soil = 0.8; c.rock = 0.25; return c; }
   const rd = roadDist(x, z);

@@ -153,6 +153,8 @@ function pora(el, { bag }) {
 function approachDress(el, { bag, col }) {
   const G = el.ground, rand = rng(el.seed ?? 12);
   const gy = (x, z) => G(x, z);
+  // the paved way's edge: dressed basalt kerbs, a stone missing here and there
+  for (const sd of [-1, 1]) for (let z = 42.2; z < 60; z += 1.0) { if (rand() < 0.12) continue; const y0 = gy(sd * 2.75, z); bag.add(B, box(sd * 2.75 - 0.14, y0 - 0.02, z, sd * 2.75 + 0.14, y0 + 0.1 + rand() * 0.04, z + 0.9)); }
   // the tapa yard
   { const [cx, cz] = [-12.5, 54], y = gy(cx, cz);
     for (const d of [-0.45, 0.45]) bag.add(B, box(cx + d - 0.15, y, cz - 0.28, cx + d + 0.15, y + 0.26, cz + 0.28));

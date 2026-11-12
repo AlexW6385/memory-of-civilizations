@@ -12,6 +12,8 @@ for (let i = 0; i < 15; i++) {
   E.push({ t: 'moai', at: [x, (AHU.rect[1] + AHU.rect[3]) / 2 + (rand() - 0.5) * 0.4], y: AHU.h, h, facing: (rand() - 0.5) * 0.06, pukao: rand() < 0.45, kind: 'ahu' });
 }
 E.push({ t: 'floor', rect: PLAZA, y: 0.12, th: 0.4, mat: 'pebbles', walk: true });
+// the way up from the village to the plaza, paved with beach cobbles and edged with dressed basalt (the arrival stands on it): three flats stepping down to the plaza's level
+for (const [z0, z1, yy] of [[42, 48, 0.17], [48, 54, 0.14], [54, 60.4, 0.12]]) E.push({ t: 'floor', rect: [-2.6, z0, 2.6, z1], y: yy, th: 0.4, mat: 'pebbles', walk: true });
 // the quarry: on the cone's south and east outer slopes, finished statues standing in their pits,
 // buried to the shoulders by the soil washed down since, leaning a little this way and that
 const [rx, rz] = RARAKU.c;
