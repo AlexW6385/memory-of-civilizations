@@ -25,7 +25,7 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 | Oracle-bone archive | x 96…126, z −96…−66 (east of the palace) | the large pit of 1936 (YH127) held a store of tens of thousands of turtle plastrons [inferred] |
 | Bronze foundry | x −132…−42, z 100…168, south of the moat | foundries lay in industrial zones: Miaopu North in the south, Xiaomintun in the west "the largest bronze industrial zone yet found", Xuejiazhuang with a pottery and a bone workshop [stated: UCSD thesis "Reexamine Bronze Foundries in Anyang"]; "Workshops in the industrial zones are generally within 400 m of one another" [stated: same] |
 | Bone, jade and pottery workshops | in the lineage quarters | "several imperial jade-making workshops"; jade and bone workshops [stated: chiculture.org.hk] |
-| Lineage compounds | the cells round the palace zone, x −330…330, z −130…330 | "More than 60 house foundations were found [Dasikong], ranging from several square meters to several tens of square meters, more than 50 of rammed earth" [stated: chiculture.org.hk]; "Yinxu I was a small settlement for most of its period" [stated: Wikipedia] — clans lived in clusters with their own cemeteries [inferred] |
+| Lineage compounds | the cells (34 × 32 m, lanes 5 m, lots 28 × 26 m) round the palace zone, x −330…330, z −170…300 | "More than 60 house foundations were found [Dasikong], ranging from several square meters to several tens of square meters, more than 50 of rammed earth" [stated: chiculture.org.hk]; "Yinxu I was a small settlement for most of its period" [stated: Wikipedia] — clans lived in clusters with their own cemeteries [inferred] |
 | Fields | beyond r 230 | millet (stood in for by the wheat stand-in), hemp [inferred] |
 
 ## 3. Ground and climate
@@ -54,11 +54,31 @@ Kings, diviners (*zhen* men), officials, soldiers, bronze-casters, potters, bone
 
 Oxen, horses (two-horse chariots), pigs, dogs, chickens; swallows, crows, kites; fish in the Huan river; elephants and rhinoceros are in the records but not shown [inferred]. Sound: bronze bells and the stone chime in the halls, drums, the ocarina (*xun*) in a pentatonic mode; in the foundry quarter hammering and the bellows; the river; cicadas in summer [inferred]. Music: tonic 50, scale 0 3 5 7 10 (gong, zhi, yu), the drone of the bells, a harp stand-in for the stone chime.
 
+## 5a. Deepening pass: the dressed town (second pass)
+
+- **Lots fill their cells.** The lineage compounds now run to the lane's edge (28 × 26 m lots in 34 × 32 m cells, lanes 5 m), so the fronts are continuous: wattle fences with posts and thatch caps, gateways of two tall posts with a hood, or the wattle house fronts themselves on the lane. [inferred: "above-ground courtyard houses stood among storage or refuse pits, wells, drainage features, streets, and cemeteries" — dailylifehistory.pages.dev, Anyang c. 1200 BCE; the packing is ours]
+- **House types by lot.** `court`: main house on a rammed foundation at the back with a porch of posts on stone bases, two wing houses facing the yard, pit houses by the gate, granary, well, hearth, garden, pen, a tree; `pits`: pit houses round a hearth yard; `row`: three wattle houses on the lane with an alley to a yard behind; `workshop`: a shed over benches of the craft. [inferred from the excavated plans]
+- **Pit houses.** "Semi-subterranean (pit) houses had one to five rooms, and one-room houses were most common … roofed areas ranged from about 5 to 25 square meters … earthen benches, hearths, wall niches, and pottery were found inside." [stated: dailylifehistory.pages.dev, on Xiaomintun] One pit house in each pit yard (and one of the casters') is enterable: earth bench to sleep on, hearth, jars, bundles hung from the rafters.
+- **Crops and animals.** "Foxtail and broomcorn millet formed the dietary base"; pigs, cattle, sheep or goats, dogs and deer are in the bone record; horses in chariot burials only. [stated: same] So: ridged beds of millet, hemp and beans (hemp is our addition from the textile traces, [inferred]); shocks of millet; pigs in the pens, dogs and hens in the yards, oxen, horses only with the chariots.
+- **Crafts in the dwelling quarter.** "Some residential areas doubled as workspaces, with craft debris linked to bronze, bone, pottery, stone, or shell working"; the Tiesanlu bone workshop made standardized pins, awls and arrowheads; spindle whorls and needles attest textile work. [stated: same] Hence looms in the houses, grindstones, bone blanks leaned on the workshop fences.
+- **Weathering.** Plaster walls with a splashed foot of earth and rain streaks under the eaves; the ridge of the thatch as a dark bound bundle; soot and ash about the furnaces; wet mud at the water troughs. [inferred]
+- **Court of the ancestral halls.** Braziers with plastrons before the diviners, two great dings on rammed plinths, standards with pennants, drums on stands, tripod lamps along the axis, the two chariots parked at the court's sides with their teams (horses attested in chariot burials), stone bases of a vanished colonnade, a stone drain. [inferred; the ding and the chariot team from the finds]
+- **Hall interior.** Cinnabar dado, a frieze of red and black squares, tie-beams and a ridge-beam in the roof, tablets of the ancestors on the altar, rows of mats for the officials, tables of food vessels, wine jars on the walls, banners on the posts. [inferred]
+
+## 5b. The Huan with its people
+
+Landings of planks on piles at intervals along both reaches, each with a net hung to dry, a rack of split carp, wicker traps, a washing stone, stakes of a weir; dugout canoes and reed rafts moored at them and one hauled up on the bank; women washing, fishers, ducks, egrets. Boats and fishing are not described in the sources read (the text names the Huan only as organising movement through the settlement); they are [inferred] from the river itself, the carp of the oracle inscriptions and the dugout tradition.
+
+## 5c. The foundry dressed
+
+Soot and ash about the furnaces and the pit; water troughs; a mound kiln for baking the mould sections (smoke); a drying shed over the field's far rows; fettling benches with finished vessels and stone files; broken mould sections; baskets of ore; tally posts; one of the casters' pit houses enterable. [inferred; "furnaces, crucibles, models, cores, and section-mold fragments" — dailylifehistory.pages.dev]
+
 ## 8. Sources
 
 - Wikipedia, "Yinxu" — https://en.wikipedia.org/wiki/Yinxu
 - Ancient History Sites, "Yinxu: the archaeological site of the Shang dynasty's final capital" — https://www.ancient-history-sites.com/?p=169851
 - Henan government, "Hello, Yinxu 7: China's earliest imperial palace and ancestral temple complex" — https://english.henan.gov.cn/2023/11-01/2839628.html
 - Chiculture (Hong Kong), "China, five thousand years: Yinxu" — https://chiculture.org.hk/en/china-five-thousand-years/3330
+- Daily life in Anyang c. 1200 BCE — https://dailylifehistory.pages.dev/ancient/china/anyang/c-1200-bce
 - CSSN, on the clan temples of Yinxu — https://www.cssn.cn/lsx/lsx_kgx/202210/t20221024_5552711.shtml
 - Y. Zhou, "Reexamine Bronze Foundries in Anyang", UC San Diego — https://history.ucsd.edu/_files/undergraduate/honors-theses/Yuwei-Zhou---Reexamine-Bronze-Foundries-in-Anyang.pdf

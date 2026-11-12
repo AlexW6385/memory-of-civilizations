@@ -3,7 +3,7 @@
 // fires of the court and the archive's shed. The engine part is src/engine/smoke.js (one draw call); positions come from layout.js.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, AXIS, HALL, ARCHIVE, FURNACES, lots as townLots } from './layout.js';
+import { RADIUS, AXIS, HALL, ARCHIVE, FURNACES, lots as townLots, lotPoint, spots } from './layout.js';
 import { ground } from './ground.js';
 
 const ID = 'shang-yinxu';
@@ -12,11 +12,12 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1
 export function emitters() {
   const E = [], r = rng(1200);
   for (const l of townLots()) {
-    const [x0, z0, x1, z1] = l.rect, mx = (x0 + x1) / 2, mz = (z0 + z1) / 2, y = ground.height(mx, mz);
-    if (l.trade === 'pottery') E.push({ p: [mx, y + 1.9, l.front === 'n' ? z0 + 5 : z1 - 5], kind: 'kitchen', thr: 0, seed: l.seed + 1 }, { p: [mx + 0.3, y + 1.9, l.front === 'n' ? z0 + 5.2 : z1 - 5.2], kind: 'steam', thr: 0.05, seed: l.seed + 2 });
-    else if (l.kind === 'court' && r() < 0.6) E.push({ p: [mx + (r() - 0.5) * 2, y + 4.6, l.front === 'n' ? z1 - 5 : z0 + 5], kind: 'kitchen', thr: 0.2 + 0.7 * r(), seed: l.seed + 3 });
-    else if (l.kind === 'pits' && r() < 0.5) E.push({ p: [mx, y + 0.8, mz + 1], kind: 'kitchen', thr: 0.1 + 0.8 * r(), seed: l.seed + 4 });
+    const W = l.rect[2] - l.rect[0], D = l.rect[3] - l.rect[1], S = spots(l.kind, W, D), h = lotPoint(l, S.hearth[0], S.hearth[1]), y = ground.height(h[0], h[1]);
+    if (l.trade === 'pottery') { const k = lotPoint(l, W / 2, 6); E.push({ p: [k[0], y + 1.95, k[1]], kind: 'kitchen', thr: 0, seed: l.seed + 1 }, { p: [k[0] + 0.3, y + 1.95, k[1] + 0.2], kind: 'steam', thr: 0.05, seed: l.seed + 2 }); }
+    else if (l.kind === 'workshop') { if (l.trade === 'oracle') { const k = lotPoint(l, W / 2, D / 2 - 2); E.push({ p: [k[0], y + 0.7, k[1]], kind: 'incense', thr: 0.1, seed: l.seed + 5 }); } }
+    else if (r() < 0.75) E.push({ p: [h[0], y + 0.9, h[1]], kind: 'kitchen', thr: l.kind === 'court' ? 0.2 + 0.5 * r() : 0.1 + 0.8 * r(), seed: l.seed + 3 });
   }
+  { const kiln = [-62, 1.75, 136]; E.push({ p: [kiln[0], kiln[1], kiln[2]], kind: 'kitchen', thr: 0.1, seed: 33 }, { p: [kiln[0] + 1.2, kiln[1], kiln[2]], kind: 'steam', thr: 0.3, seed: 34 }); }
   for (const [x, z] of FURNACES) { E.push({ p: [x, 1.7, z], kind: 'kitchen', thr: 0, seed: Math.round(x) + 1 }); }
   E.push({ p: [FURNACES[1][0], 1.9, FURNACES[1][1]], kind: 'steam', thr: 0.1, seed: 31 });
   for (const s of [-1, 1]) E.push({ p: [AXIS + s * 6, HALL.h + 0.9, -90.5], kind: 'incense', thr: 0, seed: 40 + s });

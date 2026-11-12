@@ -130,7 +130,7 @@ export function shangArchive(el, { bag, col, lights }) {
     bag.add('earth_wall', box(x0 - 0.62, 0, z1 - 0.02, x1 + 0.62, 0.45, z1 + 0.62)); for (let k = 0; k < 6; k++) bag.add('plaster_streak', box(x0 + 1.5 + k * 4.4, y + wh - 0.8, z1 + 0.0, x0 + 1.7 + k * 4.4, y + wh, z1 + 0.04));
     bag.add('roof_ridge', box(x0 - 1.3, y + wh + 2.6 - 0.1, (z0 + z1) / 2 - 0.17, x1 + 1.3, y + wh + 2.6 + 0.16, (z0 + z1) / 2 + 0.17));
     // inside
-    const ix = cx, iz = z0 + 12; bag.add('timber', box(ix - 1.5, 0.62 + y, iz, ix + 1.5, 0.7 + y, iz + 1.0)); for (const dx of [0.1, 2.8]) bag.add('timber', box(ix - 1.5 + dx, y, iz + 0.4, ix - 1.4 + dx, y + 0.62, iz + 0.5)); col.rect([ix - 1.5, iz, ix + 1.5, iz + 1.0], y, y + 0.7);
+    const ix = cx + 7, iz = z0 + 12; bag.add('timber', box(ix - 1.5, 0.62 + y, iz, ix + 1.5, 0.7 + y, iz + 1.0)); for (const dx of [0.1, 2.8]) bag.add('timber', box(ix - 1.5 + dx, y, iz + 0.4, ix - 1.4 + dx, y + 0.62, iz + 0.5)); col.rect([ix - 1.5, iz, ix + 1.5, iz + 1.0], y, y + 0.7);
     for (let k = 0; k < 4; k++) bag.add('ivory', box(ix - 1.2 + k * 0.7, y + 0.7, iz + 0.2, ix - 0.8 + k * 0.7, y + 0.74, iz + 0.8)); bag.add('bronze', lathe([[0.001, 0], [0.12, 0.02], [0.04, 0.2], [0.001, 0.26]], 8, null, ix + 1.1, y + 0.7, iz + 0.5)); bag.add('flame', lathe([[0.001, 0], [0.05, 0.03], [0.001, 0.18]], 6, null, ix + 1.1, y + 0.96, iz + 0.5));
     bag.add('reed_mat', box(ix - 2, y + 0.04, iz + 1.3, ix + 2, y + 0.07, iz + 2.9));
     for (let k = 0; k < 8; k++) bag.add('hide_tan', box(x0 + tw + 1.3 + k * 0.12, y + 0.8, z0 + tw + 1.0 - 0.02, x0 + tw + 1.38 + k * 0.12, y + 1.3, z0 + tw + 0.99));

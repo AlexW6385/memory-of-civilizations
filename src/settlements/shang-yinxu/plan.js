@@ -29,6 +29,7 @@ export const hall = {
   rooms: [
     room('court', COURT, 0, 'open'),
     room('hall', hallRoom, HALL.h, 'hall'),
+    ...FLANKS.map((f) => room(f.name, [f.plat[0] + 3, f.plat[1] + 3, f.plat[2] - 3, f.plat[3] - 3], f.h, 'hall')),
   ],
   walks: walk([[AXIS, 44], [AXIS, 20], [AXIS, -40], [AXIS, -70], [AXIS, -76 + 0.01], [AXIS, -88]]),
 };

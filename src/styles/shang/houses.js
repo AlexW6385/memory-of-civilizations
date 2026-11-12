@@ -5,7 +5,7 @@
 import { box, lathe, frustum } from '../../core/geom.js';
 import { rng } from '../../objects/kit.js';
 import { frame, steps, vessel } from './geo.js';
-import { JAR, jars, heap, skirt, streaks, ridge, fence, fenceRun, rack, pitStore, granary, well, garden, shock, woodpile, pen, hearth, grind, loom, bench, stool, washline, grainMat, dogHouse } from './dress.js';
+import { JAR, jars, heap, skirt, streaks, ridge, fence, fenceRun, rack, pitStore, granary, well, garden, shock, woodpile, pen, hearth, grind, loom, bench, stool, washline, grainMat, dogHouse, tree } from './dress.js';
 
 export { JAR };
 const WALLS = ['mud_plaster', 'mud_plaster', 'earth_wall', 'mud_plaster'];
@@ -128,6 +128,7 @@ export function courtHouse(el, ctx) {
   pitStore(F, W / 2 - 2.5, 4.2, 0.8); pitStore(F, W / 2 + 2.5, 5.6, 0.7);
   pen(F, W - 6.6, D - 8.0, W - 1.2, D - 2.6, [W - 4.4, W - 3.3]);
   garden(F, 1.4, 14.6, 7.8, D - 6.0 < 15.4 ? 15.4 : D - 6.0, rand() < 0.5 ? 'millet' : 'hemp', rand, lod);
+  tree(F, W / 2 + 7.2, 5.2, 4.4, rand() < 0.5 ? 'mulberry' : 'jujube');
   if (!lod) {
     rack(F, W / 2 + 3, 2.2, 3.4); rack(F, W / 2 - 7, 2.2, 3.0); jars(F, 1.2, 2.2, 3); woodpile(F, W / 2 + 7.2, 2.0, 2.4); grind(F, W / 2 - 8.5, 13.4);
     shock(F, 2.4, 11.4); shock(F, 3.4, 11.9); heap(F, 'hide_tan', W / 2 + 9, 11.5, 0.8); washline(F, W - 9.6, 5.8, 3.4, rand); bench(F, W / 2 + 1.5, 9.0, 1.8);
@@ -146,6 +147,7 @@ export function pitYard(el, ctx) {
   pitStore(F, W / 2 - 4.4, 5.6, 0.8); pitStore(F, W / 2 + 3.4, 5.2, 0.75);
   pen(F, W - 7.0, 6.6, W - 1.2, 11.4, [W - 4.8, W - 3.7]);
   garden(F, 1.4, D / 2 + 2.6, 8.2, D / 2 + 6.4 > rv - 0.8 ? rv - 0.8 : D / 2 + 6.4, rand() < 0.5 ? 'millet' : 'beans', rand, lod);
+  tree(F, W / 2 + 8.8, D / 2 + 4.6, 4.2, rand() < 0.5 ? 'mulberry' : 'jujube');
   if (!lod) { rack(F, W / 2 - 2.5, D / 2 + 3.6, 3); jars(F, W - 7.5, D / 2 + 3.4, 4); woodpile(F, W - 9.0, D - 1.0 > rv + 5 ? rv + 5.2 : D - 1.0, 2.2); grainMat(F, W / 2 + 3.2, D / 2 + 2.6); shock(F, W - 3, D / 2 + 3); shock(F, W - 3.9, D / 2 + 3.5); dogHouse(F, 2.4, 6.4); }
 }
 
@@ -180,6 +182,7 @@ export function rowHouse(el, ctx) {
   well(F, W / 2 - 5, 12.4); pitStore(F, W / 2 + 0.5, 10.6, 0.75); hearth(F, W / 2 + 3, 11, lod);
   pen(F, W - 6.5, 8.4, W - 1.2, 13.0, [W - 4.4, W - 3.3]);
   garden(F, 1.4, 14.6, W / 2 + 4, D - 1.4, rand() < 0.5 ? 'millet' : 'hemp', rand, lod);
+  tree(F, 3.2, 10.6, 4.0, rand() < 0.5 ? 'mulberry' : 'jujube');
   if (!lod) { rack(F, W / 2 + 5, 15.2, 3.4); jars(F, W - 7.2, 15.4, 4); woodpile(F, W - 8.2, D - 1.7, 2.4); grainMat(F, 2, 8.4, 2.6, 2.2); shock(F, W - 3, 19); shock(F, W - 3.9, 19.6); washline(F, W / 2 + 4.6, 20.4, 3.4, rand); }
 }
 
@@ -217,7 +220,7 @@ export function workshop(el, ctx) {
     F.lathe('bronze', [[0.001, 0.3], [0.28, 0.33], [0.32, 0.46], [0.001, 0.46]], W / 2, 0, D / 2 - 2, 10); F.lathe('flame', [[0.001, 0.46], [0.1, 0.5], [0.001, 0.7]], W / 2, 0, D / 2 - 2, 6);
     heap(F, 'hide_grey', W / 2 - 4, 6, 1.0); heap(F, 'ivory', W / 2 + 4, 5.5, 0.8); rack(F, 2.5, 6.6, 3);
   }
-  jars(F, su0 + 0.2, sv1 - 0.9, 3); if (!lod) { woodpile(F, 1.6, 2.2, 2.2); stool(F, su0 + 3, sv0 + 3.8); stool(F, su1 - 6, sv0 + 3.8); }
+  jars(F, su0 + 0.2, sv1 - 0.9, 3); tree(F, W - 2.8, 4.2, 3.8, 'jujube'); if (!lod) { woodpile(F, 1.6, 2.2, 2.2); stool(F, su0 + 3, sv0 + 3.8); stool(F, su1 - 6, sv0 + 3.8); }
 }
 export const KINDS_H = WALLS;
 void mainEave;

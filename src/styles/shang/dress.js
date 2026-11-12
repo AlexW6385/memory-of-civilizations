@@ -135,4 +135,11 @@ export function grainMat(F, a, b, w = 2.4, d = 1.8) { F.b('reed_mat', a, 0.01, b
 /** A fish rack at the river: poles with split carp hung to dry. */
 export function fishRack(F, a, b, len = 2.4) { for (const s of [0, len]) F.b('timber', a + s - 0.04, 0, b, a + s + 0.04, 1.5, b + 0.08, false); F.b('timber', a, 1.45, b, a + len, 1.5, b + 0.08, false); for (let k = 0; k < len * 2.5; k++) F.b('hide_grey', a + 0.15 + k * 0.4, 0.9, b + 0.02, a + 0.27 + k * 0.4, 1.45, b + 0.06, false); }
 export function dogHouse(F, a, b) { F.b('wicker', a, 0, b, a + 0.9, 0.6, b + 0.7); F.roof(a, b, a + 0.9, b + 0.7, 0.6, 0.35, 0.12, false); F.b('opening', a + 0.25, 0, b - 0.01, a + 0.65, 0.42, b + 0.03, false); }
-void rod; void lathe;
+/** A yard tree: a mulberry or a jujube, trunk and three blobs of leaf, at true height (4–5 m). */
+export function tree(F, a, b, h = 4.4, kind = 'mulberry') {
+  const p = F.P(a, b), k = h / 4.4, blob = (r, y, dx, dz) => F.bag.add(kind === 'jujube' ? 'sod' : 'flax_leaf', lathe([[0.001, y - r * 0.7], [r * 0.8, y - r * 0.3], [r, y], [r * 0.75, y + r * 0.55], [0.001, y + r * 0.9]], 9, null, p[0] + dx, 0, p[1] + dz));
+  F.bag.add('bark_dark', lathe([[0.2 * k, 0], [0.14 * k, h * 0.5], [0.09 * k, h * 0.8]], 8, null, p[0], 0, p[1])); F.col.circle(p[0], p[1], 0.22 * k, 0, h);
+  F.bag.add('bark_dark', rod([p[0], h * 0.5, p[1]], [p[0] + 0.7 * k, h * 0.8, p[1] + 0.2 * k], 0.05 * k, 5));
+  blob(1.7 * k, h * 0.86, 0, 0); blob(1.2 * k, h * 0.74, 1.0 * k, 0.5 * k); blob(1.1 * k, h * 0.78, -0.9 * k, -0.6 * k);
+}
+void lathe;
