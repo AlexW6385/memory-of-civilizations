@@ -190,6 +190,30 @@ function frontRange(el, ctx) {
   if (el.altar) altar(ctx, [x0 + (x1 - x0) / 2 - 2.8, z1 - 3.9, x0 + (x1 - x0) / 2 + 2.8, z1 - 1.5], 'n', 111, 5);
 }
 
+/**
+ * benin_audience: { axis (x), z0, z1 (the court's south and north ends), seed } — the outer court as the court of audience: a way of polished clay
+ * edged in white chalk from the gate to the steps of the great gallery, long clay benches in two ranks either side where the chiefs wait in their
+ * order (the people are placed by town.js from the same numbers: AUD in layout.js), two slit log drums on forked posts and a staff of bells, big jars
+ * of water at the gate end, mats [inferred: the accounts speak of the chiefs attending the Oba in order; the furnishing is the type].
+ */
+function audience(el, ctx) {
+  const { bag, col } = ctx, ax = el.axis, rand = rng(el.seed ?? 8), z0 = el.z0, z1 = el.z1;
+  bag.add('stucco_red', box(ax - 3.0, 0.03, z1, ax + 3.0, 0.07, z0));
+  for (const s of [-1, 1]) bag.add('chalk', box(ax + s * 3.0 - 0.09, 0.03, z1, ax + s * 3.0 + 0.09, 0.075, z0));
+  for (const b of el.benches) claySeat(ctx, b, 0.03, Math.round(b[0] * 3 + b[1]));
+  // two log drums, one each side, on forked posts, with a staff of bells at one
+  for (const s of [-1, 1]) {
+    const dx = ax + s * 13.5, dz = el.drumZ ?? -36;
+    for (const t of [-1, 1]) { bag.add('wood_dark', rod([dx, 0.03, dz + t * 1.2], [dx, 1.0, dz + t * 1.2], 0.09, 6)); col.circle(dx, dz + t * 1.2, 0.13, 0.03, 1.0); }
+    bag.add('timber', rod([dx, 1.08, dz - 1.45], [dx, 1.08, dz + 1.45], 0.3, 9)); bag.add('wood_dark', box(dx - 0.07, 1.2, dz - 1.1, dx + 0.07, 1.42, dz + 1.1));
+    col.rect([dx - 0.4, dz - 1.5, dx + 0.4, dz + 1.5], 0.03, 1.4);
+  }
+  { const bx = ax + 13.5, bz = el.drumZ ?? -36; bag.add('timber', lathe([[0.08, 0], [0.07, 2.6]], 6, null, bx + 2.6, 0.03, bz)); col.circle(bx + 2.6, bz, 0.1, 0.03, 2.6); for (let i = 0; i < 3; i++) bag.add('gilt_bronze', lathe([[0.001, 0], [0.12, 0.02], [0.1, 0.2], [0.04, 0.28], [0.001, 0.3]], 7, null, bx + 2.6 + (i - 1) * 0.2, 2.0 - Math.abs(i - 1) * 0.15, bz)); }
+  // the great jars of water beside the passage's mouth, mats before each bench
+  for (const s of [-1, 1]) pots(ctx, ax + s * 8.0, 0.03, z0 - 6.0, Math.round(s * 7 + 20), 3);
+  for (const b of el.benches) if (rand() < 0.5) bag.add('reed_mat', box(b[0] + 0.3, 0.03, b[1] + (b[1] < (z0 + z1) / 2 ? 0.8 : -1.9), b[2] - 0.3, 0.05, b[1] + (b[1] < (z0 + z1) / 2 ? 1.8 : -0.8)));
+}
+
 /** A cast brass leopard, standing, at (x, y, z), facing +z (s = ±1 turns it to look across): the guardian of the Oba's steps. */
 function leopard(ctx, x, y, z, s = 1) {
   const { bag, col } = ctx, g = (m, b) => { b.rotateY(s > 0 ? 0.25 : -0.25); b.translate(x, y, z); bag.add(m, b); };
@@ -359,5 +383,5 @@ function pwall(el, ctx) {
     }
   }
 }
-export const PALACE_EL = { benin_frontrange: frontRange, benin_court: court, benin_hall: hall, benin_tower: tower, benin_gatehouse: gatehouse, benin_wall: pwall, benin_range: range, benin_leopard: (el, ctx) => { if (el.plinth) { B(ctx, 'stucco_red', [el.at[0] - 0.75, el.at[1] - 1.3, el.at[0] + 0.75, el.at[1] + 1.4], 0, el.y ?? 0, true); } leopard(ctx, el.at[0], el.y ?? 0, el.at[1], el.s ?? 1); } };
+export const PALACE_EL = { benin_audience: audience, benin_frontrange: frontRange, benin_court: court, benin_hall: hall, benin_tower: tower, benin_gatehouse: gatehouse, benin_wall: pwall, benin_range: range, benin_leopard: (el, ctx) => { if (el.plinth) { B(ctx, 'stucco_red', [el.at[0] - 0.75, el.at[1] - 1.3, el.at[0] + 0.75, el.at[1] + 1.4], 0, el.y ?? 0, true); } leopard(ctx, el.at[0], el.y ?? 0, el.at[1], el.s ?? 1); } };
 void hip;

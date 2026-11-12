@@ -3,7 +3,7 @@
 // in rows along the streets.
 import { lodTiles } from '../lod.js';
 import { frame } from '../../styles/greek/agora.js';
-import { RADIUS, GATES, GATE_W, MARKET, YARDS, GATE_X, GREAT, CROSS, SQUARE, ALLEYS_X, SHEDS, BAYS, BRAZIERS, crest, height, lots, depth, inRect, onStreet } from './layout.js';
+import { RADIUS, GATES, GATE_W, MARKET, YARDS, GATE_X, GREAT, CROSS, SQUARE, ALLEYS_X, SHEDS, BAYS, BRAZIERS, AUD, crest, height, lots, depth, inRect, onStreet } from './layout.js';
 
 const base = (id, elements, extra = {}) => ({ id, style: 'benin', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [GATE_X, 12], facing: 'n' }, ...extra });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -71,7 +71,13 @@ function palaceFolk(F) {
   // the two guards with staves at the porch of the gate, standing between the pillars; the courtiers wait on the clay seats at its ends
   for (const s of [-1, 1]) man([GATE_X + s * 7.1, 1.7], 0.22, Math.PI, { dress: 'wrap', cloth: 'cloth_red', cloth2: 'cloth_white', carry: 'staff', len: 1.9, over: 'collar', pose: 'stand' });
   for (const s of [-1, 1]) for (const j of [-0.6, 0.6]) { const at = [GATE_X + s * 9.0 + j, 0.78]; (j < 0 ? chief : man)(at, 0.22, Math.PI + (rand() - 0.5) * 0.3, { pose: 'sit', carry: 'none', ...(j < 0 ? {} : { cloth: pick(['cloth_white', 'cloth_red']), over: 'collar' }) }); }
-  for (let k = 0; k < 7; k++) { const at = [-120 + rand() * 108, -10 - rand() * 50]; man(at, 0.03, rand() * 6.28, { cloth: pick(['cloth_white', 'cloth_red']), pose: rand() < 0.4 ? 'talk' : 'stand', over: 'collar' }); }
+  // the chiefs on the benches of the court of audience, in two ranks either side of the way, facing it; pages with staves at the ends of the ranks
+  AUD.forEach((b, i) => {
+    const cx = (b[0] + b[2]) / 2, cz = (b[1] + b[3]) / 2, to = [GATE_X, cz], rank = Math.abs(cx - GATE_X) > 7 ? 1 : 0;
+    for (const dz of [-1.2, 1.2]) if (rand() < (rank ? 0.7 : 0.9)) (rand() < (rank ? 0.35 : 0.6) ? chief : man)([cx, cz + dz], 0.03, face([cx, cz + dz], to) + (rand() - 0.5) * 0.3, { pose: 'sit', carry: 'none', cloth: pick(['cloth_white', 'cloth_white', 'cloth_red', 'cloth_indigo']), over: 'collar' });
+    void i;
+  });
+  for (const s of [-1, 1]) for (const z of [-16, -61]) man([GATE_X + s * 3.4, z], 0.07, face([GATE_X + s * 3.4, z], [GATE_X, z]), { dress: 'wrap', cloth: 'cloth_red', cloth2: 'cloth_white', carry: 'staff', len: 1.7, over: 'collar', pose: 'stand' });
   for (const s of [-1, 1]) chief([-65 + s * 4.5, -74.5], 0.9, 0, { pose: 'stand', carry: 'staff', len: 1.7 });
   chief([-65, -72.2], 1.45 - 0.55, 0, { pose: 'sit', cloth: 'cloth_white', cloth2: 'cloth_red', hat: 'cap' });
 }

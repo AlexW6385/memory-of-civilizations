@@ -2,7 +2,7 @@
 // between two long galleries, the great gallery of the Oba on brass pillars with its dais, the three inner courts behind with their
 // impluvia and the ancestral altars, the turrets with spires, brass snakes and birds, the red clay wall round all.
 // Authored in world coordinates (origin 0, yaw 0); the front faces south on the king's square.
-import { PALACE, GATE_X } from './layout.js';
+import { PALACE, GATE_X, AUD } from './layout.js';
 
 const [X0, Z0, X1, Z1] = PALACE;
 const HALL = [-112, -76, -18, -64], OC = [-130, -64, -6, -2];
@@ -34,6 +34,7 @@ for (const [z0, z1] of [[-118, -90], [-88, -60], [-58, -30], [-26, -10]]) {
   E.push({ t: 'benin_range', rect: [-1.5, z0, 8.7, z1], front: 'w', seed: Math.round(-z0), kinds: ['store', 'kitchen', 'sleep', 'brass', 'sleep', 'store'] });
   E.push({ t: 'benin_range', rect: [-138.6, z0, -133.0, z1], front: 'e', seed: Math.round(-z0) + 50, kinds: ['sleep', 'store', 'kitchen', 'sleep', 'brass', 'kitchen'] });
 }
+E.push({ t: 'benin_audience', axis: GATE_X, z0: -12, z1: -62, benches: AUD, drumZ: -36, seed: 8 });
 // the cast leopards at the gate
 for (const s of [-1, 1]) E.push({ t: 'benin_leopard', at: [GATE_X + s * 3.6, 6.2], y: 0.45, s, plinth: true });
 

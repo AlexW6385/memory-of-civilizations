@@ -19,6 +19,16 @@ export const SHEDS = [{ rect: [-87, 8, -76.5, 13.5], kind: 'gable', seed: 71, fi
 export const BAYS = [-117, -112, -107, -100, -95, -90, -85, -50, -45, -40, -33, -28, -23, -16, -11].map((x, i) => ({ rect: [x, 0.2, x + 5, 3.0], kind: 'lean', seed: 80 + i }));
 /** The braziers of the gate's porch (incense, the Oba's offerings [inferred]). */
 export const BRAZIERS = [[GATE_X - 4.1, 1.5], [GATE_X + 4.1, 1.5]];
+/** The benches of the chiefs in the outer court of audience: two ranks either side of the way, from the gate's vestibule to the great gallery's steps. */
+export const AUD = (() => {
+  const out = [];
+  for (const s of [-1, 1]) for (const rank of [0, 1]) for (let z = -16; z > -60; z -= 6.4) {
+    if (Math.abs(z + 36) < 2.5 && rank === 1) continue;                 // the drums stand there
+    const x = GATE_X + s * (5.2 + rank * 3.6);
+    out.push([x - 0.35, z - 2.2, x + 0.35, z + 2.2]);
+  }
+  return out;
+})();
 export const GUILD = [18, -126, 86, 2];                     // the guild quarters
 export const LANE = [48, -124, 56, 0];                      // the guild lane
 export const MARKET = [114, -100, 214, 36];                 // the Oba market
