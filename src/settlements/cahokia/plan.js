@@ -29,6 +29,8 @@ export const monks = {
     { t: 'yard_fire', c: [8, -176], y: height, seed: 24 },
     { t: 'terrace_fence', from: [-50, -150], to: [-30, -150], y: height }, { t: 'terrace_fence', from: [-18, -150], to: [50, -150], y: height },
     { t: 'plaza_pole', c: [0, 55], y: 0, h: 14 },
+    // standards along the plaza's north edge and at its corners
+    ...[[-108, -34], [-70, -37], [20, -37], [60, -37], [108, -34], [-108, 144], [108, 144]].map(([x, z], i) => ({ t: 'standard', c: [x, z], y: 0, h: 7 + (i % 2), seed: 20 + i })),
     // the first terrace's back court: the stores and the work of the chief's kin and the priests
     { t: 'granary', c: [-46, -117], y: height, s: 2.8, seed: 41 }, { t: 'granary', c: [-40, -113], y: height, s: 2.5, seed: 42 }, { t: 'granary', c: [41, -117], y: height, s: 2.8, seed: 43 }, { t: 'granary', c: [47, -112], y: height, s: 2.5, seed: 44 },
     { t: 'yard_fire', c: [-6, -116], y: height, seed: 45 }, { t: 'yard_fire', c: [14, -112], y: height, seed: 46 },
