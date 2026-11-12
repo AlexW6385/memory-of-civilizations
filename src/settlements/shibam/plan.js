@@ -1,7 +1,7 @@
 // Shibam's two landmarks (docs/settlements/shibam.md §2, §4): the tower house that can be entered — street door, stair, store and stable, the
 // women's floors, the majlis, the upper rooms, the roof terrace — and the Friday mosque, a court and a hall of piers with its minaret.
 
-import { LM, LMD } from './layout.js';
+import { LM, LMD, shops, HALL } from './layout.js';
 import { fl, topOf, T } from '../../styles/hadhrami/dims.js';
 
 const [X0, Z0, X1, Z1] = LM.rect, top = topOf(LM.storeys), dz = LMD.doorZ;
@@ -13,6 +13,8 @@ E.push({ t: 'block', rect: [X0 - 0.08, dz + 0.75, X0, Z1], y0: -0.6, y1: 1.1, ma
 const room = (id, rect, y, kind, extra = {}) => ({ id, rect, y, kind, ...extra });
 const NAMES = ['the store and stable', 'the women\'s floor', 'the family room', 'the bedroom', 'the majlis', 'the upper room', 'the room under the roof'];
 const rooms = NAMES.map((n, s) => room(n, LMD.room, fl(s), 'hall'));
+for (const l of shops()) rooms.push(room(`the ${l.shop.trade} room`, l.shop.rect, 0.06, l.shop.trade === 'qahwa' ? 'hall' : 'shop'));
+rooms.push(room("the sultan's hall", HALL.rect, 0.06, 'hall'));
 rooms.push(room('the stair lobby', LMD.lobby, fl(0), 'hall'), room('the roof terrace', [X0 + 1.5, Z0 + 1.5, X1 - 1.5, Z1 - 1.5], top, 'open'));
 const walks = [[[X0 - 2.5, dz], [X0 - 0.3, dz], [LMD.I[0] + 1.2, dz], [LMD.xp + 0.15, dz], [LMD.room[0] + 2, dz]]];
 walks[0].y0 = 0;
