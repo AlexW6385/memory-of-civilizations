@@ -15,6 +15,8 @@ function height(x, z) {
   let h = 0;
   // the hills of Higashiyama behind Ginkaku-ji (east), the western edge of the northern hills behind Ryōan-ji
   h += 30 * sm(282, 322, x) * (0.75 + 0.25 * vnoise(x * 0.03, z * 0.03));
+  // the wooded hill of Higashiyama close behind the Kannon-den: steep from the foot of the pavilion's terrace northward
+  h += 24 * sm(-40, -95, z) * sm(105, 135, x) * (0.8 + 0.2 * vnoise(x * 0.04 + 9, z * 0.04));
   // the ponds: the bed, rising to the bank
   const p = pondOf(x, z);
   if (p) { const d = Math.hypot((x - p.c[0]) / p.r[0], (z - p.c[1]) / p.r[1]); h = Math.min(h, p.bed + (0 - p.bed) * sm(0.78, 1.08, d)); }
@@ -48,7 +50,10 @@ function planting(x, z, p) {
   if (inRect(GINKAKU.rect, x, z)) {
     const n = vnoise(x * 0.05 + 3, z * 0.05), pd = Math.hypot((x - GINKAKU.pond.c[0]) / GINKAKU.pond.r[0], (z - GINKAKU.pond.c[1]) / GINKAKU.pond.r[1]);
     if (Math.hypot(x - GINKAKU.kannon[0], z - GINKAKU.kannon[1] - 12) < 20 && x > 160 && x < 240) return { grass: 1 };       // the court before the pavilion
-    if (pd < 1.35) return { red_pine: 0.12 * sm(0, 0.5, n), boulder: 0.03, grass: 10 };
+    if (inRect([150, -31, 183, -15], x, z, 4)) return { grass: 1 };                                                              // the sand platform
+    if (Math.abs(x - 200) < 16 && z > -26 && z < 40) return { grass: 6 };                                                      // the view from the arrival stays open
+    if (p.h > 1.5) return { sugi: 0.32 * sm(1.5, 8, p.h), red_pine: 0.2, maple: 0.16, bamboo: 0.15 * sm(0.3, 0.8, -n), grass: 8, boulder: 0.02 };
+    if (pd < 1.35) return { red_pine: 0.14, maple: 0.1 * sm(-0.4, 0.3, n), boulder: 0.04, grass: 10 };
     return { red_pine: 0.07, maple: 0.12 * sm(-0.2, 0.3, n), sugi: 0.05 * sm(0.1, 0.5, p.h / 20), bamboo: 0.6 * sm(0.3, 0.7, -n), grass: 12, boulder: 0.01 };
   }
   if (inRect(RYOAN.rect, x, z)) return { grass: 14, red_pine: 0.03, maple: 0.06, sugi: 0.02, boulder: 0.01 };
@@ -59,7 +64,7 @@ function planting(x, z, p) {
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { sugi: 0.3, red_pine: 0.15, maple: 0.12, bamboo: 0.6, persimmon: 0.05, willow: 0.12, boulder: 0.03, grass: 40 },
+  maxDensity: { sugi: 0.32, red_pine: 0.2, maple: 0.16, bamboo: 0.6, persimmon: 0.05, willow: 0.12, boulder: 0.03, grass: 40 },
   climate: {
     waterline: STREAM.level,
     sun: { az: 150, el: 45, color: [1.0, 0.95, 0.88], intensity: 3.1, lat: 35, dec: 8, hour: 10 },

@@ -72,7 +72,7 @@ wall([nx0 + 7, nz0 + 1], [nx1 - 1, nz0 + 1], NISHI.top); wall([nx0 + 7, nz1 - 1]
 // ---- the keep cluster on its base: the main keep (46 m above the Honmaru), three small keeps, the passages
 // the main keep is hollow: its stone base a ring round the basement, entered by a door on the west from the
 // courtyard between the keeps; inside, the floors, the great pillars and the stairs to the top
-E.push({ t: 'ishigaki', rect: [KEEP.c[0] - 12, KEEP.c[1] - 11, KEEP.c[0] + 12, KEEP.c[1] + 11], y0: DAI.top, y1: KEEP.base, batter: 1.4, ring: 2.5, door: { at: KEEP.c[1] - 7.4, w: 1.8, h: 2.8 } });
+E.push({ t: 'ishigaki', rect: [KEEP.c[0] - 12, KEEP.c[1] - 11, KEEP.c[0] + 12, KEEP.c[1] + 11], y0: DAI.top, y1: KEEP.base, batter: 2.4, coursed: true, course: 0.5, ring: 2.5, door: { at: KEEP.c[1] - 7.4, w: 1.8, h: 2.8 } });
 E.push({ t: 'tenshu', c: KEEP.c, base: KEEP.base, hollow: true, below: DAI.top, basementRect: [KEEP.c[0] - 9.5, KEEP.c[1] - 8.5, KEEP.c[0] + 9.5, KEEP.c[1] + 8.5], basementHd: 8.5, chidori: [0, 2], kara: { 1: ['s', 'n'] }, ishiOtoshi: true, tiers: KEEP_TIERS });
 for (const k of SMALL) E.push({ t: 'tenshu', c: k.c, base: DAI.top, chidori: [0], tiers: [{ hw: 6, hd: 5.5, h: 5 }, { hw: 5, hd: 4.5, h: 4.5 }, { hw: 4, hd: 3.6, h: 4.2 }] });
 // the four passages (i, ro, ha, ni) close the courtyard between the keeps; the way in is a gate through
