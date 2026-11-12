@@ -19,8 +19,8 @@ function planting(x, z) {
   if (inCemetery(x, z)) return nearGrave(x, z, 1.2) ? null : { cypress: 0.05, grass: 22 };
   // the outer court: plane trees and cypresses in the side yards and the forecourt, the central way and the mosque left clear
   if (inRect(PRECINCT, x, z)) {
-    if (Math.abs(x) < 9 || !inRect(PRECINCT, x, z, -5) || inRect([-34, -50, 34, 52], x, z) || inKulliye(x, z, 1.5) || Math.hypot(x, z + 91) < 7) return null;
-    return { plane_tree: 0.0045, cypress: 0.004 };
+    if (Math.abs(x) < 14 || !inRect(PRECINCT, x, z, -5) || inRect([-34, -50, 34, 52], x, z) || inKulliye(x, z, 1.5) || Math.hypot(x, z + 91) < 7) return null;
+    return { plane_tree: 0.011, cypress: 0.009 };
   }
   if (inYard(x, z) && inRect([90, 118, 116, 146], x, z)) return null;
   if (inYard(x, z)) return { fig: 0.02, cypress: 0.012, stone_pine: 0.004, grass: 20 };
@@ -31,7 +31,7 @@ function planting(x, z) {
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { cypress: 0.06, plane_tree: 0.008, fig: 0.025, stone_pine: 0.01 },
+  maxDensity: { cypress: 0.06, plane_tree: 0.014, fig: 0.025, stone_pine: 0.01 },
   climate: {
     sun: { az: 155, el: 52, color: [1.0, 0.96, 0.9], intensity: 3.5, lat: 41, dec: 10, hour: 11 },
     sky: { turbidity: 2.6, rayleigh: 1.05, mie: 0.005, mieG: 0.78, zenith: [0.07, 0.15, 0.4], horizon: [0.62, 0.66, 0.72] },

@@ -3,6 +3,7 @@ import { ARRIVALS } from '../../planet/arrivals.js';
 // terrace by the Tiryaki shops (§10); the street life (§10, life.js).
 import { RADIUS, lots, COFFEE } from './layout.js';
 import { lifePlan } from './life.js';
+import { courtPaving } from './court-life.js';
 /** The houses and shops that can be entered (many): the nearest to four points round the terrace, the shops by preference. */
 function openSet(all) {
   const out = new Set(), ok = all.filter((l) => l.rect[2] - l.rect[0] >= 4.5 && l.rect[3] - l.rect[1] >= 4.5);
@@ -37,6 +38,7 @@ export async function town() {
   const [x0, z0, x1, z1] = coffee.rect;
   plans.push({ ...base('ottoman-istanbul-kahvehane', [{ t: 'kahvehane', rect: coffee.rect, y: coffee.y, foot: coffee.foot, front: 'e', seed: coffee.seed }]), style: 'ottoman', bounds: [x0 - 2, z0 - 2, x1 + 2, z1 + 2],
     rooms: [{ id: 'coffee house', rect: [x0 + 0.4, z0 + 0.4, x1 - 0.4, z1 - 0.4], y: coffee.y + 0.45, kind: 'hall' }] });
+  plans.push({ ...base('ottoman-istanbul-court-paving', courtPaving()), style: 'ottoman', bounds: [-80, -100, 80, 95] });
   plans.push(lifePlan());
   return plans;
 }

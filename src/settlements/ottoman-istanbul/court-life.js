@@ -41,7 +41,7 @@ export function courtLife() {
   }
   // students (softa) of the medreses in their white turbans and dark robes, in knots, one with a book
   for (const [cx, cz] of [[-24, -70], [26, -64], [-30, -58], [22, -80], [-18, -84], [34, -86]]) {
-    for (let k = 0; k < 3 + Math.floor(rand() * 2); k++) man(cx + (rand() - 0.5) * 3.4, cz + (rand() - 0.5) * 3, rand() * 6.28, { cloth: pick(['cloth_brown', 'cloth_indigo', 'cloth_black']), cloth2: 'cloth_white', pose: k % 3 === 0 ? 'talk' : 'stand', carry: k === 1 ? 'book' : 'none' });
+    for (let k = 0; k < 3 + Math.floor(rand() * 2); k++) man(cx + (rand() - 0.5) * 3.4, cz + (rand() - 0.5) * 3, rand() * 6.28, { cloth: pick(['cloth_brown', 'cloth_indigo', 'cloth_black']), cloth2: 'cloth_white', pose: k % 3 === 0 ? 'talk' : 'stand', carry: 'none' });
   }
   // the sherbet sellers' stalls at the court's sides, the seller behind, buyers before
   for (const sx of [-1, 1]) {
@@ -53,6 +53,8 @@ export function courtLife() {
   // the water-carriers (saka) with a brass-fitted skin and cups, a porter with his saddle (semer) at the gate
   for (const [x, z] of [[-8, -86], [9, -66]]) man(x, z, rand() * 6.28, { carry: 'bundle', loadCloth: 'hide_brown', cloth: 'cloth_brown', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_red' });
   man(6.6, -92.5, S, { carry: 'bundle', loadCloth: 'cloth_indigo', cloth: 'cloth_brown', hat: 'cap' });
+  // two gatekeepers (kapıcı) at the north gate, staff in hand, a third on the step
+  for (const sx of [-1, 1]) man(sx * 7.0, q0 + 1.6, S, { pose: 'staff', carry: 'staff', cloth: 'cloth_blue', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_white' });
   // a woman feeding the pigeons with children about her; flocks on the flags
   woman(-14, -66, 0.4, { pose: 'stand' }); kid(-13.0, -64.8, 3.4); kid(-15.2, -65.0, 2.8);
   for (const [x, z, n] of [[-14.3, -64.0, 12], [-9, -62, 9], [16, -72, 10], [3, -57, 8], [-21, -52, 8], [24, -52, 9], [11, -88, 7], [-30, -82, 7], [38, -66, 8]]) L.push({ t: 'chickens', kind: 'pigeon', n, at: [x, z], y: TOP + 0.04, seed: Math.floor(x * 9 + z) });
