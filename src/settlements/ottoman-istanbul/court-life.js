@@ -3,7 +3,7 @@
 // (worshippers going in, students in their robes, porters, sherbet sellers, a pigeon-feeder with her flocks, children);
 // and the goods before the arasta's shops. Pure data: `courtPaving()` for the 'ottoman' style plan, `courtLife()` for the life plan.
 
-import { PRECINCT, ARASTA, TOP, MEDRESES } from './layout.js';
+import { PRECINCT, ARASTA, TOP, MEDRESES, CARSI, TERRACE, RADIUS, lanes, height } from './layout.js';
 import { subtractRects } from '../../core/build.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -82,6 +82,43 @@ export function courtLife() {
     }
     // a donkey with its panniers and a porter in the avenue
     L.push({ t: 'animal', kind: 'donkey', at: [f + out * 4.5, -36], y: TOP, rot: 0, seed: 90 + sg, gear: true }); man(f + out * 5.5, -35, 0, { carry: 'staff', pose: 'staff', cloth: 'cloth_brown' });
+  }
+  return L;
+}
+
+/**
+ * The lanes of the timber quarter dressed at the doors, and the covered market's crowd: a water jar by a door, firewood stacked
+ * against a wall, baskets, a stool with an old man or a grandmother and a child at her knee, a cat; shoppers and porters in each
+ * trade's lane of the carsi. Nearest the terrace first (the first hundred metres of every way in).
+ */
+export function laneLife() {
+  const L = [], rand = rng(1561), pick = (a) => a[Math.floor(rand() * a.length)], Y = (x, z) => height(x, z) + 0.04;
+  const man = (at, rot, o = {}) => L.push({ t: 'figure', at, y: Y(at[0], at[1]), rot, seed: Math.floor(rand() * 1e9), skin: 'skin_light', dress: 'robe', cloth: pick(ROBE), cloth2: 'cloth_white', over: 'sash', hat: 'turban', hatMat: 'cloth_white', hair: 'short', beard: rand() < 0.7, feet: 'shod', ...o });
+  const wom = (at, rot, o = {}) => L.push({ t: 'figure', at, y: Y(at[0], at[1]), rot, seed: Math.floor(rand() * 1e9), skin: 'skin_light', dress: 'robe', cloth: pick(['cloth_black', 'cloth_indigo', 'cloth_brown']), cloth2: 'cloth_white', hat: 'veil', hair: 'long', feet: 'shod', ...o });
+  const ln = lanes().filter((l) => (l.vert ? Math.abs((l.r[0] + l.r[2]) / 2) < 270 : Math.abs((l.r[1] + l.r[3]) / 2) < 250));
+  for (let k = 0; k < 130; k++) {
+    const l = pick(ln), [x0, z0, x1, z1] = l.r, s = rand() < 0.5 ? -1 : 1;
+    const u = l.vert ? z0 + 30 + rand() * (z1 - z0 - 60) : x0 + 30 + rand() * (x1 - x0 - 60);
+    const px = l.vert ? (x0 + x1) / 2 + s * 1.15 : u, pz = l.vert ? u : (z0 + z1) / 2 + s * 1.15;
+    if (px > TERRACE[0] - 8 && px < TERRACE[2] + 8 && pz > TERRACE[1] - 8 && pz < TERRACE[3] + 8) continue;
+    if (Math.hypot(px, pz) > RADIUS - 70) continue;
+    const toLane = l.vert ? (s > 0 ? -Math.PI / 2 : Math.PI / 2) : (s > 0 ? Math.PI : 0), r = rand(), y = Y(px, pz);
+    if (r < 0.2) L.push({ t: 'pot', kind: pick(['water_pot', 'zir', 'glazed_jar']), n: 1 + (rand() < 0.4 ? 1 : 0), at: [px, pz], y, seed: k });
+    else if (r < 0.36) L.push({ t: 'firewood', at: [px, pz], y, rot: l.vert ? 0 : Math.PI / 2, len: 1.1, seed: k });
+    else if (r < 0.5) L.push({ t: 'basket', n: 2, at: [px, pz], y, seed: k });
+    else if (r < 0.74) { L.push({ t: 'stool', at: [px, pz], y, rot: toLane, seed: k }); if (rand() < 0.6) man([px, pz], toLane, { pose: 'sit_low', cloth: pick(['cloth_brown', 'cloth_grey']), beard: true }); else wom([px, pz], toLane, { pose: 'sit_low' }); if (rand() < 0.5) L.push({ t: 'figure', at: [px + (l.vert ? -s * 0.5 : 0.4), pz + (l.vert ? 0.4 : -s * 0.5)], y, rot: toLane, seed: k * 7, child: true, skin: 'skin_light', dress: 'robe', cloth: pick(ROBE), cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_red', hair: 'short' }); }
+    else if (r < 0.86) L.push({ t: 'animal', kind: 'cat', at: [px, pz], y, rot: rand() * 6.28, seed: k });
+    else { wom([px, pz], toLane, { pose: 'talk', carry: rand() < 0.4 ? 'pot' : 'none' }); wom([px + (l.vert ? -s * 0.5 : 0.6), pz + (l.vert ? 0.6 : -s * 0.5)], toLane + 2.8, { pose: 'talk' }); }
+  }
+  // the covered market: shoppers, porters and sellers in each trade's lane
+  for (const t of CARSI.lanes) {
+    const n = t.horiz ? Math.floor(Math.abs(t.b - t.a) / 14) : 3;
+    for (let q = 0; q < n; q++) {
+      const a = t.a + (t.b - t.a) * (0.12 + 0.76 * (q + rand() * 0.6) / n), off = (rand() - 0.5) * 2.2, at = t.horiz ? [a, t.c + off] : [t.c + off, a], rot = t.horiz ? (rand() < 0.5 ? Math.PI / 2 : -Math.PI / 2) : (rand() < 0.5 ? 0 : Math.PI);
+      const r = rand();
+      if (r < 0.4) man(at, rot, { pose: 'talk' }); else if (r < 0.65) wom(at, rot, {}); else if (r < 0.85) man(at, rot, { carry: 'bundle', loadCloth: pick(['sacking', 'cloth_brown', 'cloth_indigo']), cloth: 'cloth_brown', hat: 'cap' }); else man(at, rot, { pose: 'stand' });
+      if (rand() < 0.5) man([at[0] + (t.horiz ? 0.6 : 0.7), at[1] + (t.horiz ? 0.7 : 0.4)], rot + 2.9, { pose: 'talk' });
+    }
   }
   return L;
 }

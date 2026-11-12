@@ -3,7 +3,7 @@
 // serving; porters (hamal) with their loads on their backs in the avenues by the shops; water carriers (saka) with
 // the waterskin; donkeys bringing firewood to the soup kitchen; horses held at the outer court's gate.
 
-import { courtLife } from './court-life.js';
+import { courtLife, laneLife } from './court-life.js';
 import { RADIUS, TOP, height, COFFEE, IMARET, ARASTA, PRECINCT, lanes, TERRACE, MESCIT } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -61,4 +61,4 @@ export function life() {
   }
   return L;
 }
-export const lifePlan = () => ({ id: 'ottoman-istanbul-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: [...life(), ...courtLife()], rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -100], facing: 's' } });
+export const lifePlan = () => ({ id: 'ottoman-istanbul-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: [...life(), ...courtLife(), ...laneLife()], rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -100], facing: 's' } });
