@@ -5,7 +5,7 @@ import { XF, ROCK, ZEND, FLOOR, CAVES, RIVER, riverX, STAIR, GALLERY } from './l
 
 const E = [];
 E.push({ t: 'dh_cliff' });
-E.push({ t: 'dh_stream' });
+E.push({ t: 'dh_stream' }); E.push({ t: 'dh_talus' });
 E.push({ t: 'dh_bridge', z: 0, w: 4.4 });
 // the monks' halls and cells at the foot, facing the cliff over the apron: tiled halls and earth cells
 const mk = (rect, tiled, seed, extra = {}) => E.push({ t: 'dh_house', rect, front: 'w', seed, tiled, ...extra });

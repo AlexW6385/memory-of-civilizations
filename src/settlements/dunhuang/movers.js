@@ -9,7 +9,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 30, night: 3, rain: 0.4, reach: 150, spawnMin: 24, far: 44 },
+  walkers: { day: 38, night: 3, rain: 0.4, reach: 150, spawnMin: 24, far: 44 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: RIVER.water,
 };
@@ -56,6 +56,15 @@ export const WALKERS = [
   // the farmer with a bundle of fodder or a hoe, in undyed hemp
   { id: 'farmer', weight: 1.0, market: 0.3, el: { dress: 'tunic', legs: 'hose', hat: 'straw', over: 'belt', carry: 'hoe', arms: 'hoe', hair: 'short', feet: 'bare' },
     c1: [CL.white, CL.grey, CL.brown], c2: [CL.brown], c3: [CL.black], speed: [0.8, 1.1], stride: 1.3 },
+  // the porter: a pole across the shoulders with a load at each end (water jars, fodder, goods for the market)
+  { id: 'porter', weight: 0.9, market: 1.2, el: { dress: 'tunic', legs: 'hose', hat: 'straw', over: 'belt', carry: 'pole', arms: 'pole', hair: 'short', feet: 'bare' },
+    c1: [CL.white, CL.grey, CL.brown], c2: [CL.brown], c3: [CL.black], speed: [0.8, 1.05], stride: 1.2 },
+  // the woman with a basket on her head (bread, fruit, washing)
+  { id: 'basket', weight: 0.9, market: 1.1, el: { dress: 'robe', hat: 'none', over: 'none', carry: 'basket', arms: 'head', hair: 'bun', feet: 'shod' },
+    c1: [CL.green, CL.ochre, CL.red, CL.indigo], c2: [CL.white], c3: [CL.black], speed: [0.75, 1.0], stride: 1.15, h: [0.9, 0.97] },
+  // the pilgrim: a long robe, a shawl, a staff, a bundle (come to the caves from the oases along the road)
+  { id: 'pilgrim', weight: 0.7, market: 0.3, el: { dress: 'robe', hat: 'none', over: 'shawl', carry: 'staff', arms: 'staff', hair: 'short', feet: 'shod' },
+    c1: [CL.white, CL.grey, CL.ochre], c2: [CL.brown], c3: [CL.black], speed: [0.7, 0.95], stride: 1.1 },
   { id: 'boy', weight: 0.5, market: 0.8, el: { dress: 'tunic', legs: 'hose', hat: 'none', over: 'none', arms: 'hang', hair: 'short', feet: 'bare' },
     c1: [CL.white, CL.ochre], c2: [CL.brown], c3: [CL.black], speed: [1.1, 1.5], stride: 1.0, h: [0.6, 0.72], swing: 1.1 },
 ];

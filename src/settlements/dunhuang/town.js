@@ -54,7 +54,7 @@ export async function town() {
   }
   E.push({ t: 'dh_gate', at: [GATE.x, GATE.z] });
   E.push({ t: 'dh_serai', ...SERAI });
-  E.push({ t: 'dh_spring' });
+  E.push({ t: 'dh_spring' }); E.push({ t: 'dh_streetwear', seed: 5 });
   // the market: awnings on both sides of the street between the first two cross lanes
   const cl = ['cloth_ochre', 'cloth_red', 'cloth_blue', 'cloth_white', 'cloth_green'];
   // the doors along the main street (the market keeps off them)

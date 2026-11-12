@@ -9,9 +9,16 @@ const ID = 'dunhuang';
 export function emitters() {
   const E = [], r = rng(850);
   for (const l of lots()) {
-    if (r() > 0.45) continue;
-    const [x0, z0, x1, z1] = l.rect, u = 0.3 + 0.4 * r(), v = 0.3 + 0.4 * r();
-    E.push({ p: [x0 + (x1 - x0) * u, (l.rich ? 5.4 : l.two ? 7.2 : 4.4), z0 + (z1 - z0) * v], kind: 'kitchen', thr: 0.1 + 0.7 * r(), seed: Math.round(x0 * 3 + z0) });
+    const hot = l.trade === 'bake' || l.trade === 'smith';
+    if (!hot && r() > 0.7) continue;
+    const [x0, z0, x1, z1] = l.rect, W = x1 - x0;
+    if (!l.rich && !l.two) {            // from the chimney pot of the flat roof: 0.8 W along the front, 0.7 of the house's depth back
+      const v = 4.2, z = l.front === 's' ? z1 - v : z0 + v;
+      E.push({ p: [x0 + W * 0.8, 4.4, z], kind: 'kitchen', thr: hot ? 0.0 : 0.1 + 0.7 * r(), seed: Math.round(x0 * 3 + z0) });
+      continue;
+    }
+    const u = 0.3 + 0.4 * r(), v = 0.3 + 0.4 * r();
+    E.push({ p: [x0 + (x1 - x0) * u, (l.rich ? 5.4 : 7.2), z0 + (z1 - z0) * v], kind: 'kitchen', thr: 0.1 + 0.7 * r(), seed: Math.round(x0 * 3 + z0) });
   }
   for (const k of [0, 1, 3]) E.push({ p: [SERAI.x0 + 6 + k * 6, 4.6, SERAI.z0 + 14 + k * 5], kind: 'kitchen', thr: 0.2, seed: 7 + k });
   const cell = CAVES.find((c) => c.kind === 'cell'); E.push({ p: [XF - 4, FLOOR[0] + 3.2, cell.z], kind: 'kitchen', thr: 0.1, seed: 3 });
