@@ -6,7 +6,8 @@ import { lodTiles } from '../lod.js';
 import '../../styles/abbasid/index.js';
 import '../../objects/index.js';
 import { suqKeepers } from '../../styles/abbasid/market.js';
-import { ALL_SUQS, RADIUS, RC, GATE, C, PALACE, MOSQUE, LIBRARY, SUQS, SHOP, RIVER, CANAL, CANAL_BRIDGES, BRIDGES, WATER, JETTIES, lots, moored, jettyAt, riverX, canalEnd, inRect } from './layout.js';
+import { khanRooms, hammamRooms, worldRect, KHAN, HAMMAM } from '../../styles/abbasid/khan.js';
+import { KHAN_RECT, HAMMAM_RECT, WORKSHOPS, ALL_SUQS, RADIUS, RC, GATE, C, PALACE, MOSQUE, LIBRARY, SUQS, SHOP, RIVER, CANAL, CANAL_BRIDGES, BRIDGES, WATER, JETTIES, lots, moored, jettyAt, riverX, canalEnd, inRect } from './layout.js';
 import { lifePlan } from './life.js';
 
 const base = (id, elements, style = 'abbasid') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [C[0], C[1] + 60], facing: 'n' } });
@@ -61,6 +62,15 @@ export async function town() {
   // ── the markets: the suq rows, the bookseller's shop ──
   ALL_SUQS.forEach((s, i) => plans.push({ ...base(`abbasid-baghdad-suq${i}`, [{ t: 'suq_row', rect: s.rect, trades: s.trades, seed: 773 + i * 17, axis: s.rect[2] - s.rect[0] > s.rect[3] - s.rect[1] ? 'x' : 'z' }]), bounds: [s.rect[0] - 3, s.rect[1] - 3, s.rect[2] + 3, s.rect[3] + 3] }));
   plans.push({ ...base('abbasid-baghdad-shop', [{ t: 'abbasid_shop', rect: SHOP, face: 'e', y: 0, seed: 799 }]), bounds: [SHOP[0] - 3, SHOP[1] - 3, SHOP[2] + 3, SHOP[3] + 3], rooms: [{ id: 'bookshop', rect: [SHOP[0] + 0.6, SHOP[1] + 0.6, SHOP[2] - 0.6, SHOP[3] - 0.6], y: 0.02, kind: 'hall' }] });
+  // ── the khan, the hammam, the workshops of the quay street ──
+  {
+    const ctr = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2], bnd = (r) => [r[0] - 3, r[1] - 3, r[2] + 3, r[3] + 3];
+    const kc = ctr(KHAN_RECT), hc = ctr(HAMMAM_RECT);
+    plans.push({ ...base('abbasid-baghdad-khan', [{ t: 'abbasid_khan', rect: KHAN_RECT, face: 'n', y: 0, seed: 71 }]), bounds: bnd(KHAN_RECT),
+      rooms: [{ id: 'khan court', rect: worldRect('n', kc, [-KHAN.W / 2 + 6, -KHAN.D / 2 + 6, KHAN.W / 2 - 6, KHAN.D / 2 - 6]), y: 0, kind: 'open' }, ...khanRooms().map((r) => ({ id: r.id, rect: worldRect('n', kc, r.rect), y: 0, kind: 'hall' }))] });
+    plans.push({ ...base('abbasid-baghdad-hammam', [{ t: 'abbasid_hammam', rect: HAMMAM_RECT, face: 'n', y: 0, seed: 88 }]), bounds: bnd(HAMMAM_RECT), rooms: hammamRooms().map((r) => ({ id: r.id, rect: worldRect('n', hc, r.rect), y: 0, kind: 'hall' })) });
+    WORKSHOPS.forEach((w, i) => plans.push({ ...base(`abbasid-baghdad-work${i}`, [{ t: 'abbasid_workshop', rect: w.rect, face: 'n', kind: w.kind, y: 0, seed: 90 + i }]), bounds: bnd(w.rect), rooms: [{ id: `${w.kind} workshop`, rect: [w.rect[0] + 0.6, w.rect[1] + 0.6, w.rect[2] - 0.6, w.rect[3] - 0.6], y: 0, kind: 'hall' }] }));
+  }
   // ── the water: the river, the canal, the bridges, the jetties and the boats ──
   const pts = []; for (let z = -540; z <= 540; z += 30) pts.push([riverX(z), z]);
   const river = [{ t: 'tigris', pts, w: RIVER.w + 3, y: WATER }, { t: 'canal', rect: [CANAL.x0, CANAL.z - CANAL.w / 2, canalEnd() + 2, CANAL.z + CANAL.w / 2], y: CANAL.water, bed: CANAL.bed, along: 'x' }];

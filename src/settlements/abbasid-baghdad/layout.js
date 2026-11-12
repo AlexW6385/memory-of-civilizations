@@ -48,6 +48,11 @@ export const AVENUE_SUQS = [
   { rect: [C[0] - 7, C[1] + 216, C[0] + 7, C[1] + 262], trades: ['fruit', 'cloth', 'pottery', 'grain'], name: 'south avenue' },
 ];
 export const ALL_SUQS = [...SUQS, ...AVENUE_SUQS];
+// more to enter in Karkh, on the canal's quay street (their fronts to the north): the khan, the hammam and four workshops (docs §12)
+export const KHAN_RECT = [-66, 314, -30, 354];
+export const HAMMAM_RECT = [-14, 314, 0, 340];
+export const WORKSHOPS = [{ rect: [14, 314, 24, 326], kind: 'bakery' }, { rect: [28, 314, 38, 326], kind: 'coppersmith' }, { rect: [42, 314, 52, 326], kind: 'perfumer' }, { rect: [-96, 314, -86, 326], kind: 'potter' }];
+export const ENTERABLE = [KHAN_RECT, HAMMAM_RECT, ...WORKSHOPS.map((w) => w.rect)];
 export const SHOP = [-148, 318, -138, 336];           // the bookseller's shop you can enter (a house-like room beside the paper suq)
 // streets (rects) the walkers use and the lots keep clear of
 const rc = (x0, z0, x1, z1) => [x0, z0, x1, z1];
@@ -97,7 +102,7 @@ let LOTS = null;
 /** The houses of the whole settlement. */
 export function lots() {
   if (LOTS) return LOTS;
-  const keepOut = [PALACE, MOSQUE, LIBRARY, ...SERVICE.map((s) => s.rect), ...AVENUES, ...ROADS_IN, ...ROADS_OUT, ...SUQS.map((s) => s.rect), SHOP];
+  const keepOut = [PALACE, MOSQUE, LIBRARY, ...SERVICE.map((s) => s.rect), ...AVENUES, ...ROADS_IN, ...ROADS_OUT, ...SUQS.map((s) => s.rect), SHOP, ...ENTERABLE];
   const ringOk = (r) => corners(r).every(([x, z]) => { const q = rad(x, z); return q > RC.ringIn - 1.5 && q < RC.ringOut + 0.8; }) && !keepOut.some((k) => rectsOverlap(r, k, 1));
   const all = [];
   // the ring: north half going north from the avenue, south half going south (x spans the whole ring)

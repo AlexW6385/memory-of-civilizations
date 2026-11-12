@@ -4,6 +4,7 @@
 // of use (src/objects); the walkers are the movers'.
 import { lodTiles } from '../lod.js';
 import { ALL_SUQS, C, PALACE, MOSQUE, LIBRARY, SUQS, RC, RIVER, CANAL, JETTIES, jettyAt, riverX, lots, inRect } from './layout.js';
+import { KHAN_RECT, HAMMAM_RECT, WORKSHOPS, CANAL_BRIDGES, moored } from './layout.js';
 import { frontElements, esplanadeElements } from './fronts.js';
 import { suqKeepers } from '../../styles/abbasid/market.js';
 
@@ -102,6 +103,27 @@ export async function lifePlan() {
   E.push({ t: 'well', kind: 'shaduf', at: [riverX(20) + RIVER.w / 2 + 12, 20], y: 0, rot: 3.14 }, { t: 'well', kind: 'shaduf', at: [riverX(-180) + RIVER.w / 2 + 12, -180], y: 0, rot: 3.14 }, { t: 'well', kind: 'open', at: [C[0] + 30, C[1] + 80], y: 0 }, { t: 'well', kind: 'open', at: [C[0] - 90, C[1] + 90], y: 0 });
   E.push({ t: 'handcart', at: [-98, 330], y: 0, rot: 0.2, seed: 1 }, { t: 'handcart', at: [-98, 460], y: 0, rot: -0.1, seed: 2 });
   { const f = frontElements(); E.push(...f.E, ...esplanadeElements()); for (const p of f.P) man(p.at, p.y, p.rot, { pose: p.pose, over: 'none' }); }
+  // ── the khan: camels couched in the court with their loads, donkeys at the back, merchants and a driver; the hammam's bathers; the workshops' keepers ──
+  {
+    const kx = (KHAN_RECT[0] + KHAN_RECT[2]) / 2, kz = (KHAN_RECT[1] + KHAN_RECT[3]) / 2;
+    for (const [dx, dz, rot, k] of [[-5, -4.5, 1.2, 1], [5.5, 5.0, -1.3, 2], [-5.5, 6.5, 1.9, 3], [6, -6, 0.4, 4]]) E.push({ t: 'animal', kind: 'camel', at: [kx + dx, kz + dz], y: 0, rot, seed: 300 + k, gear: true });
+    for (let k = 0; k < 3; k++) E.push({ t: 'animal', kind: 'donkey', at: [kx - 6 + k * 6, kz + 16.2], y: 0, rot: 0, seed: 310 + k, gear: true });
+    for (const [dx, dz] of [[-9, 2], [9, -3], [-2.5, 7], [3, -8]]) { E.push({ t: 'sacks', at: [kx + dx, kz + dz], y: 0, rot: rand() * 3, n: 5, seed: Math.round(dx * 7 + dz) }); }
+    E.push({ t: 'barrel', at: [kx + 10, kz + 9], y: 0, seed: 5 }, { t: 'barrel', at: [kx - 10.5, kz - 8], y: 0, seed: 6 });
+    man([kx - 2.6, kz - 5.5], 0, 0.6, { pose: 'talk', cloth: 'cloth_green' }); man([kx - 3.8, kz - 4.6], 0, -1.0, { pose: 'talk', cloth: 'cloth_maroon' }); porter([kx + 4.2, kz + 4.4], 0, 2.5, { carry: 'sack', arms: 'sack' });
+    man([kx + 7.5, kz + 1], 0, -1.57, { pose: 'cross', cloth: 'cloth_indigo' });
+    const hx = (HAMMAM_RECT[0] + HAMMAM_RECT[2]) / 2, hz = (HAMMAM_RECT[1] + HAMMAM_RECT[3]) / 2;
+    for (const [dx, dz] of [[-3, 9], [2.5, 8], [-1, 4]]) P.push({ t: 'figure', at: [hx + dx, hz + dz], y: 0, rot: rand() * 6, seed: Math.floor(rand() * 1e9), dress: 'tunic', legs: 'bare', cloth: 'cloth_white', cloth2: 'cloth_white', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: 'short', beard: rand() < 0.6, pose: 'sit_ground' });
+    for (const w of WORKSHOPS) { const wx = (w.rect[0] + w.rect[2]) / 2, wz = (w.rect[1] + w.rect[3]) / 2; man([wx + 1.2, wz + 1.0], 0, 0, { pose: w.kind === 'perfumer' ? 'cross' : 'stand', cloth: pick(CL), over: 'sash' }); if (w.kind !== 'coppersmith') porter([wx - 1.5, wz + 2.2], 0, 3.14, { pose: 'stand' }); }
+    for (const x of [-110]) void x;
+  }
+  // ── the water's edge: fishermen in the moored quffas, ducks and geese on the banks and the canal's quay, a boat yard's fire and fuel at the canal's end ──
+  for (const b of moored()) if (b.kind === 'quffa' && rand() < 0.45) man([b.at[0], b.at[1]], -1.5 + 0.28, rand() * 6.28, { pose: 'cross', cloth: pick(['cloth_brown', 'cloth_grey', 'cloth_ochre']), hat: 'cap', over: 'none' });
+  for (const z of [-170, -40, 100, 215, 280, 420]) { const x = riverX(z) - RIVER.w / 2 - 3.5; E.push({ t: 'chickens', kind: z % 2 ? 'duck' : 'goose', n: 5, at: [x, z + 3], y: 0, seed: z }); }
+  for (const x of [-330, -200, -60, 80]) E.push({ t: 'chickens', kind: 'duck', n: 4, at: [x, CANAL.z - 9.2], y: 0, seed: x });
+  E.push({ t: 'firewood', at: [-342, CANAL.z - 11], y: 0, rot: 0, len: 1.6, seed: 3 }, { t: 'firewood', at: [-342, CANAL.z - 12.6], y: 0, rot: 0, len: 1.6, seed: 4 }, { t: 'barrel', at: [-338, CANAL.z - 11], y: 0, seed: 8 }, { t: 'barrel', at: [-337, CANAL.z - 12.4], y: 0, seed: 9 });
+  porter([-340, CANAL.z - 9.8], 0, 1.0, { pose: 'squat' }); porter([-336, CANAL.z - 10.4], 0, -2.0, { pose: 'stand' });
+  void CANAL_BRIDGES;
   const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-520, -520, 520, 520], entrance: { at: [C[0], C[1] + 60], facing: 'n' } });
   plans.push(base('abbasid-baghdad-people', 'life', [...P, ...E]));
   void lodTiles; void CANAL;

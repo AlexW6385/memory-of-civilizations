@@ -86,6 +86,22 @@ A true Round City has a radius of about 1 km [stated: Wikipedia, Round City] (so
 
 Interiors of more houses; the Karkh's baths and caravanserais; the Khuld palace by the Khurasan Gate; the east-bank Rusafa; the paper mill; the hospital (bimaristan, founded in Harun's time); the moat's water life; more courtyard gardens.
 
+## 12. Deepening pass (Suzhou standard): what was added and on what ground
+
+Sources for this pass are general (History of Baghdad, Wikipedia; Daily Life in the Abbasid World, ancient-history-sites.com; Daily life in Baghdad during the Abbasid period): they give the trades, the public baths, the inns for merchants and the markets as part of the city, not plans; every plan below is therefore [inferred] from the Samarra houses and from the general Mesopotamian courtyard and caravanserai types, and kept modest in size.
+
+- **Houses at eye level** [inferred]: a timber door frame with a palm-trunk lintel and an iron-studded leaf standing open against the jamb; a brick bench (mastaba) beside the door on seven houses in ten; one lattice-grilled window (high in a one-storey house, upstairs in two); the ends of palm-trunk rafters under the parapet every 0.75 m; a clay spout at a corner; a band of bitumen at the foot of the wall (damp course; bitumen is the plain Mesopotamian waterproofing [stated: Mesopotamian practice, see §3]); patches of fallen plaster showing the brick under it. By each door: a water jar, a stack of fuel, sacks, a mat of goods, hens, an oil lamp on a post, a seated man on a stool; washing on poles on some flat roofs.
+- **Eight open houses** (north and both side ranges hollow): reception room (maqʿad: divans along the walls, carpet, brazier, shelf of jars), bedroom (mattresses on mats, chest, jar), store (storage jars, sacks, baskets), kitchen (clay oven tannur, hearth with cauldron, fuel, jar) [inferred from the Samarra house plan: a central space with adjoining rooms; ancient-history-sites].
+- **The shop rows of the ring avenues**: the four avenues between the inner wall and the main wall are suq rows of shops, as the "arcaded street of the inner ring" of §2 [stated: arcaded street, amusingplanet; inferred: shops]. Every bay has a painted board over the lintel, an oil lamp, a threshold and wares on the pavement by its trade.
+- **The palace's rooms**: the east and west ranges of the court and the north range behind the tower are rooms, not blocks: guards' room, diwan (offices with scribes' desks), treasury (banded chests, scales), kitchens, stores, barracks, reception rooms, stables; two rooms of the gate guard flank the forecourt [inferred from the descriptions of the palace as a compound of courts and offices]. Orange and pomegranate beds in the forecourt and trees along the long court, a water channel from the pool to the iwan.
+- **The khan** (caravanserai, 36 × 40 m): one gate to the quay street, doorman's rooms, a court with a pool and four trees, cells of two kinds on both sides, stables at the back; camels, donkeys, bales and merchants [inferred; inns for merchants and their goods are a standing feature of the markets].
+- **The hammam** (14 × 26 m): changing hall with divans, warm room, hot room with the central marble platform, basins, domes on the roof; the furnace smoke and steam [inferred; public baths were part of the city of the age].
+- **Four workshops on the quay street**: baker (two clay ovens, dough table, racks of loaves), coppersmith (hearth, anvil, hanging pots), perfumer (shelves of glass flasks, scales), potter [stated: trades of Karkh, §7; inferred: fittings].
+- **Planting**: palms in rows along the esplanade's four roads, gardens of palm and fig in its quarters; courts with trees in the open houses and the khan. [inferred]
+- **Water's edge**: fishermen in moored quffas, ducks and geese on the banks and the canal's quay, fuel and a fire at the canal's west end for the boat yard.
+
+Still not built: upper storeys (rooms above the ground ranges, roofs to walk on), the cellar rooms (sardab), the bimaristan, the paper mill, the Khuld palace.
+
 ## Sources
 
 - Wikipedia, *Round City of Baghdad* — https://en.wikipedia.org/wiki/Round_City_of_Baghdad (founding 762–766; gates; centre; materials; wooden columns of the mosque).
@@ -96,3 +112,4 @@ Interiors of more houses; the Karkh's baths and caravanserais; the Khuld palace 
 - Amusing Planet, *The Round City of Baghdad* — https://www.amusingplanet.com/2016/07/the-round-city-of-baghdad.html (arcaded street, esplanade, moat, two streets).
 - Muslim Heritage, *The House of Wisdom* — https://muslimheritage.com/house-of-wisdom/ (Khizanat al-Hikma, translators, languages).
 - Ancient History Sites, *Towns, Houses and Water in the Abbasid World* — https://www.ancient-history-sites.com/?p=139127 (Samarra houses).
+- History of Baghdad — https://en.wikipedia.org/wiki/History_of_Baghdad ; Daily Life in the Abbasid World — https://www.ancient-history-sites.com/?p=139107 ; Daily life in Baghdad during the Abbasid period — https://dailylifehistory.pages.dev/medieval/baghdad/abbasid-period/ (trades, baths, inns, markets in general).

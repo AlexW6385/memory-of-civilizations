@@ -12,7 +12,7 @@ import { addFigure, factor, flat, SLOT } from '../../engine/movers-kit.js';
 import { box, beam, lathe, quad, tri, norm, cross, smoothstep } from './bits.js';
 
 export const PARAMS = {
-  walkers: { day: 44, night: 6, rain: 0.5, reach: 170, spawnMin: 26, far: 46 },
+  walkers: { day: 54, night: 6, rain: 0.5, reach: 170, spawnMin: 26, far: 46 },
   boats: { count: 9, reach: 280, spawnMin: 60, far: 100, speed: [0.8, 1.3], bridgeSpeed: 0.7 },
   water: RIVER.water,
 };
