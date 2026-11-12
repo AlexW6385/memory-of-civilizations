@@ -267,7 +267,11 @@ function ringMaterial() {
 //   id (y low, y rise, lane (−1: none), size)
 //   ie (flew off at, comes back at, away x, away z) — set by the CPU
 //   icol (back rgb, tail length), icol2 (belly rgb, stance: how far the feet are below the centre / size), ig (leg and beak rgb)
-const KIND = { swallow: 0, crow: 1, sparrow: 2, egret: 3, heron: 3 };
+const KIND = { swallow: 0, crow: 1, sparrow: 2, egret: 3, heron: 3, pigeon: 2, raven: 1, kite: 1, gull: 1, vulture: 1, stork: 3, ibis: 3 };
+// (the kinds the settlements name beyond these: drawn as the nearest look)
+const BIRD_ALIAS = { dove: 'pigeon', rock_dove: 'pigeon', jackdaw: 'crow', chough: 'crow', rook: 'crow', magpie: 'crow', myna: 'sparrow', finch: 'sparrow', martin: 'swallow', swift: 'swallow',
+  hawk: 'kite', falcon: 'kite', eagle: 'kite', buzzard: 'kite', tern: 'gull', duck: 'egret', goose: 'egret', crane: 'heron', flamingo: 'heron', parrot: 'sparrow' };
+const birdKind = (k) => (KIND[k] !== undefined ? k : KIND[BIRD_ALIAS[k]] !== undefined ? BIRD_ALIAS[k] : 'sparrow');
 const BIRD_ATTRS = [['ia', 4], ['ib', 4], ['ic', 4], ['id', 4], ['ie', 4], ['icol', 4], ['icol2', 4], ['ig', 4]];
 
 function birdMaterial() {
@@ -480,13 +484,22 @@ const BIRD_LOOK = {
   sparrow: { back: [0.4, 0.27, 0.17], belly: [0.72, 0.67, 0.58], leg: [0.5, 0.38, 0.32], size: 0.14, span: 0.72, hz: [10, 13], tail: 1.0 },
   egret: { back: [0.93, 0.94, 0.92], belly: [0.95, 0.95, 0.93], leg: [0.1, 0.1, 0.08], size: 0.55, span: 0.85, hz: [2.0, 2.6], tail: 1.0 },
   heron: { back: [0.5, 0.54, 0.6], belly: [0.82, 0.83, 0.82], leg: [0.3, 0.27, 0.15], size: 0.62, span: 0.9, hz: [1.8, 2.3], tail: 1.0 },
+  pigeon: { back: [0.42, 0.44, 0.5], belly: [0.55, 0.56, 0.6], leg: [0.6, 0.3, 0.3], size: 0.24, span: 0.85, hz: [6, 8], tail: 1.0 },
+  raven: { back: [0.03, 0.03, 0.04], belly: [0.06, 0.06, 0.07], leg: [0.04, 0.04, 0.04], size: 0.58, span: 1.1, hz: [2.2, 3.0], tail: 1.1 },
+  kite: { back: [0.36, 0.24, 0.15], belly: [0.62, 0.48, 0.34], leg: [0.7, 0.6, 0.2], size: 0.55, span: 1.25, hz: [1.4, 2.0], tail: 1.5 },
+  gull: { back: [0.7, 0.73, 0.77], belly: [0.95, 0.95, 0.95], leg: [0.85, 0.6, 0.3], size: 0.44, span: 1.2, hz: [2.4, 3.2], tail: 1.0 },
+  vulture: { back: [0.2, 0.16, 0.12], belly: [0.32, 0.26, 0.2], leg: [0.4, 0.38, 0.35], size: 0.75, span: 1.35, hz: [1.2, 1.6], tail: 1.0 },
+  stork: { back: [0.93, 0.93, 0.92], belly: [0.95, 0.95, 0.94], leg: [0.8, 0.3, 0.2], size: 0.7, span: 0.95, hz: [1.6, 2.1], tail: 1.0 },
+  ibis: { back: [0.85, 0.85, 0.83], belly: [0.9, 0.9, 0.88], leg: [0.1, 0.1, 0.1], size: 0.5, span: 0.85, hz: [2.0, 2.6], tail: 1.0 },
 };
 
 function buildBirds(flights, perches, site) {
+  flights = flights.map((f) => ({ ...f, kind: birdKind(f.kind) }));
+  perches = perches.map((p) => ({ ...p, kind: birdKind(p.kind) }));
   const rand = rng(2203 + site.id.length), small = [], big = [], lanes = [];
   const rec = (kind, o) => {
     const L = BIRD_LOOK[kind];
-    return { ia: [KIND[kind], rand(), L.hz[0] + (L.hz[1] - L.hz[0]) * rand(), L.span], icol: [...L.back, L.tail], icol2: [...L.belly, kind === 'sparrow' ? 0.27 : 0], ig: [...L.leg, 0], ...o, kind, size: L.size * (0.92 + 0.16 * rand()) };
+    return { ia: [KIND[kind], rand(), L.hz[0] + (L.hz[1] - L.hz[0]) * rand(), L.span], icol: [...L.back, L.tail], icol2: [...L.belly, KIND[kind] === 2 ? 0.27 : 0], ig: [...L.leg, 0], ...o, kind, size: L.size * (0.92 + 0.16 * rand()) };
   };
   for (const fl of flights) {
     const L = BIRD_LOOK[fl.kind];
@@ -500,7 +513,7 @@ function buildBirds(flights, perches, site) {
       if (fl.loop.dist) { const f = fitLoop(fl.loop.dist, [fl.loop.c[0] - 3, fl.loop.c[1] - 3, fl.loop.c[0] + 3, fl.loop.c[1] + 3], fl.loop.a, fl.loop.ratio ?? 0.35, fl.k ?? 2, rot, fl.loop.margin ?? 1.5, rand, 3); if (!f) continue; loop = f; }
       else loop = [fl.loop.c[0], fl.loop.c[1], fl.loop.a[0], fl.loop.a[1]];
     }
-    const ax = loop ? loop[2] : fl.a[0], az = loop ? loop[3] : fl.a[1], k = fl.k ?? (fl.kind === 'crow' ? 1 : 2);
+    const ax = loop ? loop[2] : fl.a[0], az = loop ? loop[3] : fl.a[1], k = fl.k ?? (KIND[fl.kind] === 1 ? 1 : 2);
     const mean = Math.max(ax, az) * 0.64;
     for (let i = 0; i < fl.n; i++) {
       const sp = fl.speed * (0.85 + 0.3 * rand()), w = (sp / Math.max(mean, 4)) * (rand() < 0.5 ? 1 : -1);

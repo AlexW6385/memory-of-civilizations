@@ -61,6 +61,11 @@ export class LifeInstances {
     const shapes = new Map();
     for (const { rec, list } of parts) {
       for (const p of list) {
+        // (a shape instanced by the bag itself, not placed: its own material, the default reach)
+        const k = p.matrices.length / 16;
+        if (!p.reals) p.reals = new Array(k).fill(p.mat);
+        if (!p.reach) p.reach = new Float32Array(k).fill(230);
+        if (p.key == null) p.key = `auto:${p.mat}:${p.geometry.attributes.position.count}`;
         let alts = shapes.get(p.key);
         if (!alts) shapes.set(p.key, (alts = []));
         let s = alts.find((x) => x.mat === p.mat && samePrototype(x.geometry, p.geometry));
