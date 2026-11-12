@@ -4,7 +4,8 @@
 // (front to +z, the south), turned by `face`.
 
 import { box, fromTriangles, lathe } from '../../core/geom.js';
-import { local, wallRun, barrel, domeShell, archBand, spandrel, stuccoPanel, merlons, lineFrame, rng, archCurve, orientedBox, polyGeo, D2R } from './kit.js';
+import { furnish } from './dress.js';
+import { gardenTree, local, wallRun, barrel, domeShell, archBand, spandrel, stuccoPanel, merlons, lineFrame, rng, archCurve, orientedBox, polyGeo, D2R } from './kit.js';
 
 const YAW = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 };
 const mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
@@ -89,6 +90,21 @@ function greenDome({ bag, col }, y, S = 7.6, hole = 6.0) {
   bag.add('gilt_bronze', fromTriangles([0, hy + 0.7, -2.7, -0.07, hy + 0.7, -2.4, 0.07, hy + 0.7, -2.4, 0, hy + 0.7, -2.7, 0.07, hy + 0.7, -2.4, -0.07, hy + 0.7, -2.4]));
 }
 
+
+/** The ranges of rooms round the palace's court (local frame, w the compound's half-width): rects with the side their door is on and their use. */
+export function palaceRooms(w) {
+  const out = [];
+  const add = (name, [x0, z0, x1, z1], door, kinds) => {
+    const alongZ = door === '+x' || door === '-x', len = alongZ ? z1 - z0 : x1 - x0, n = Math.max(1, Math.floor(len / 6.4)), rl = len / n;
+    for (let k = 0; k < n; k++) out.push({ id: `${name} ${k + 1}`, door, kind: kinds[k % kinds.length], band: [x0, z0, x1, z1], k, n, rect: alongZ ? [x0, z0 + k * rl, x1, z0 + (k + 1) * rl] : [x0 + k * rl, z0, x0 + (k + 1) * rl, z1] });
+  };
+  add('diwan range', [-w + 1.2, -w + 4, -w + 11, 6], '+x', ['guard', 'diwan', 'diwan', 'store', 'kitchen', 'barracks']);
+  add('household range', [w - 11, -w + 4, w - 1.2, 6], '-x', ['reception', 'bedroom', 'bedroom', 'treasury', 'reception', 'store']);
+  add('north range', [-26, -w + 1.2, 26, -w + 11], '+z', ['reception', 'treasury', 'diwan', 'kitchen', 'store', 'bedroom', 'reception', 'stable']);
+  add('gate guard west', [-18, w - 7.2, -6.8, w - 1.2], '-z', ['guard']); add('gate guard east', [6.8, w - 7.2, 18, w - 1.2], '-z', ['guard']);
+  return out;
+}
+
 /** palace: the compound (the walls, the Golden Gate on the south, the forecourt with its pool, the iwan front, the ranges round the court, the tower). */
 function palace(el, ctx) {
   const [cx, cz] = mid(el.rect), W = (el.rect[2] - el.rect[0]) / 2, y = el.y ?? 0, rand = rng(el.seed ?? 762);
@@ -147,20 +163,46 @@ function palace(el, ctx) {
       furnishChamber(t, y + 0.4);
     });
     // the ranges round the court: east and west (rooms with an arcade on the court), the north range behind the tower
-    const range = (x0, z0, x1, z1, h, face) => {
-      bag.add('brick_buff', box(x0, y - 0.5, z0, x1, y + h, z1)); col.rect([x0, z0, x1, z1], y, y + h);
-      bag.add('plaster_white', box(x0 - 0.05, y + h - 0.35, z0 - 0.05, x1 + 0.05, y + h, z1 + 0.05));
-      const fr = face === 'w' ? { O: [x1 + 0.0, z0], U: [0, 1], N: [1, 0] } : { O: [x0, z0], U: [0, 1], N: [-1, 0] };
-      const L = z1 - z0, nb = Math.max(2, Math.floor(L / 4.2)), bwid = L / nb;
-      for (let k = 0; k < nb; k++) {
-        const u0 = k * bwid + 0.7, w2 = bwid - 1.4;
-        bag.add('opening', polyGeo(fr, [[u0, y], [u0 + w2, y], [u0 + w2, y + 3.2], [u0, y + 3.2]], 0, 0.08));
-        archBand(bag, fr, u0, y + 0.0, w2, h - 1.8, 0.3, 0.0, 0.14, ['brick_baked', 'brick_buff']);
-        void u0;
+    const RH = 6.4, TOP = 8.0;
+    for (const rm of palaceRooms(w)) {
+      const [x0, z0, x1, z1] = rm.rect, door = rm.door, ax = door === '+x' || door === '-x', rl = ax ? z1 - z0 : x1 - x0;
+      const xw = door === '+x' ? x1 - 0.4 : door === '-x' ? x0 + 0.4 : null, zw = door === '+z' ? z1 - 0.4 : door === '-z' ? z0 + 0.4 : null;
+      const dd = rl / 2, win = (at) => ({ at, w: 0.9, h: 1.3, y0: y + 1.7, flat: true });
+      const ops = [{ at: dd, w: 1.9, h: 3.5 }, ...(rl > 5.4 ? [win(dd - 2.2), win(dd + 2.2)] : [])];
+      if (ax) {
+        wallRun(c, { a: [xw, z0], b: [xw, z1], th: 0.8, y0: y, y1: y + TOP, mat: 'brick_buff', ops });
+        if (rm.k > 0) wallRun(c, { a: [x0, z0], b: [x1 - 0.8, z0], th: 0.6, y0: y, y1: y + RH, mat: 'brick_buff' });
+        if (rm.k === rm.n - 1) wallRun(c, { a: [x0, z1], b: [x1 - 0.8, z1], th: 0.6, y0: y, y1: y + RH, mat: 'brick_buff' });
+        if (rm.k === 0) wallRun(c, { a: [x0, z0], b: [x1 - 0.8, z0], th: 0.6, y0: y, y1: y + RH, mat: 'brick_buff' });
+        for (const at of rl > 5.4 ? [dd - 2.2, dd + 2.2] : []) bag.add('lattice', box(xw - 0.05, y + 1.7, z0 + at - 0.45, xw + 0.05, y + 3.0, z0 + at + 0.45));
+      } else {
+        wallRun(c, { a: [x0, zw], b: [x1, zw], th: 0.8, y0: y, y1: y + TOP, mat: 'brick_buff', ops });
+        if (rm.k === 0) wallRun(c, { a: [x0, z0], b: [x0, zw - 0.4], th: 0.6, y0: y, y1: y + RH, mat: 'brick_buff' });
+        wallRun(c, { a: [x1, z0], b: [x1, zw - 0.4], th: 0.6, y0: y, y1: y + RH, mat: 'brick_buff' });
+        for (const at of rl > 5.4 ? [dd - 2.2, dd + 2.2] : []) bag.add('lattice', box(x0 + at - 0.45, y + 1.7, zw - 0.05, x0 + at + 0.45, y + 3.0, zw + 0.05));
       }
-    };
-    range(-w + 1.2, -w + 4, -w + 11, 6, 8, 'e'); range(w - 11, -w + 4, w - 1.2, 6, 8, 'w');
-    range(-26, -w + 1.2, 26, -w + 11, 9, 's');
+      bag.add('timber', box(x0, y + 4.8, z0, x1, y + 4.96, z1)); bag.add('mud_plaster', box(x0, y + RH, z0, x1, y + RH + 0.14, z1)); bag.add('marble_floor', box(x0, y - 0.2, z0, x1, y + 0.03, z1));
+      const fr = ax ? { O: [xw + (door === '+x' ? 0.4 : -0.4), z0], U: [0, 1], N: [door === '+x' ? 1 : -1, 0] } : { O: [x0, zw + (door === '+z' ? 0.4 : -0.4)], U: [1, 0], N: [0, door === '+z' ? 1 : -1] };
+      void fr;
+      bag.add('plaster_white', ax ? box(Math.min(xw, xw) - 0.45, y + TOP - 0.3, z0, xw + 0.45, y + TOP, z1) : box(x0, y + TOP - 0.3, zw - 0.45, x1, y + TOP, zw + 0.45));
+      const clear = door === '+x' ? [x0 + 0.1, z0 + 0.3, x1 - 0.8, z1 - 0.3] : door === '-x' ? [x0 + 0.8, z0 + 0.3, x1 - 0.1, z1 - 0.3] : door === '+z' ? [x0 + 0.3, z0 + 0.1, x1 - 0.3, z1 - 0.8] : [x0 + 0.3, z0 + 0.8, x1 - 0.3, z1 - 0.1];
+      furnish(c, rm.kind, clear, door, y + 0.03, 4.8, rand, { light: rm.k % 2 === 0 });
+    }
+    // the court's gardens: beds of orange and pomegranate under the walls of the iwan block, the long court between the ranges, the forecourt's four beds
+    for (const sx of [-1, 1]) {
+      for (let z = -30; z <= 12; z += 6) gardenTree(bag, col, sx * 22.6, z, y, 2.6 + (Math.abs(z) % 7) * 0.08, 1.1);
+      bag.add('brick_paving', box(sx * 20.6 - 0.6, y, -32, sx * 20.6 + 0.6, y + 0.02, 14));
+      for (let k = 0; k < 4; k++) for (const sz of [-1, 1]) {
+        const bx = sx * (14 + k * 6), bz = 27 + sz * 0 + (k % 2) * 0;
+        void bx; void bz;
+      }
+      for (const [bx, bz] of [[sx * 14, 20.5], [sx * 21, 20.5], [sx * 28, 20.5], [sx * 14, 25], [sx * 21, 25], [sx * 28, 25]]) {
+        bag.add('silt', box(bx - 1.8, y, bz - 1.8, bx + 1.8, y + 0.14, bz + 1.8)); gardenTree(bag, col, bx, bz, y + 0.14, 2.3, 1.0, true);
+        for (let q = 0; q < 4; q++) bag.add(['cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_maroon'][q], lathe([[0.001, 0], [0.12, 0.02], [0.16, 0.12], [0.001, 0.2]], 6, null, bx - 1.2 + (q % 2) * 2.4, y + 0.14, bz - 1.2 + Math.floor(q / 2) * 2.4));
+      }
+    }
+    // a channel of water (nahr) running from the pool to the iwan's steps
+    bag.add('limestone', box(-0.5, y, 17.4, 0.5, y + 0.12, 24.4)); bag.add('water', fromTriangles([-0.32, y + 0.08, 17.5, -0.32, y + 0.08, 24.4, 0.32, y + 0.08, 24.4, -0.32, y + 0.08, 17.5, 0.32, y + 0.08, 24.4, 0.32, y + 0.08, 17.5]));
     // the stairs of the iwan's front: three steps of marble
     for (let k = 0; k < 3; k++) bag.add('marble', box(-5.2 - k * 0.3, y, FZ + 0.2 + k * 0.4 - 0.2, 5.2 + k * 0.3, y + 0.45 - k * 0.15, FZ + 0.6 + k * 0.4));
     void rand;
