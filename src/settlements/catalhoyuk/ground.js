@@ -2,7 +2,7 @@
 // channel round it, dry steppe grass, small fields of wheat and barley at the plain's edge (docs/settlements/catalhoyuk.md §2, §8);
 // a high dry continental sky, the double cone of Mount Hasan far in the north-east (not drawn).
 
-import { RADIUS, MARSH, POOLS, inPool, nearTown, CLUSTER, height, smooth as sm, inRect } from './layout.js';
+import { nearLanding, RADIUS, MARSH, POOLS, inPool, nearTown, CLUSTER, height, smooth as sm, inRect } from './layout.js';
 
 const FIELDS = [[-86, -28, -52, 20], [48, -70, 80, -34]];
 const inFields = (x, z, m = 0) => FIELDS.some((r) => inRect(r, x, z, m));
@@ -23,16 +23,19 @@ function fromWater(x, z) {
 /** Plants per 100 m²: reeds thick round the pools and standing in the shallows, willow on the old channel, steppe grass, wheat in the plots. */
 function planting(x, z) {
   const r = Math.hypot(x, z);
-  if (r > RADIUS - 5 || nearTown(x, z, 2)) return null;
+  if (r > RADIUS - 5 || nearTown(x, z, 2) || nearLanding(x, z, 0)) return null;
   if (inPool(x, z, -3)) return { reeds: 2.4 };
   const w = fromWater(x, z);
   if (w < 7) return { reeds: 3.2, willow: 0.05, grass: 20 };
-  if (inFields(x, z)) return { wheat: 90 };
+  if (inFields(x, z)) return { wheat: 90, fig: 0.01 };
+  if (w < 16) return { reeds: 0.8, willow: 0.12, tamarisk: 0.1, grass_dry: 20, grass: 12 };      // the channel's bank: willow and tamarisk behind the reed
+  if (!nearTown(x, z, 40)) return { grass_dry: 22, grass: 8, tamarisk: 0.02, fig: 0.008 };
+  if (nearTown(x, z, 14)) return { grass_dry: 10, tamarisk: 0.05, fig: 0.03 };                      // round the town: fig and tamarisk by the pens and the middens, the trodden steppe
   return { grass_dry: 24, grass: 8 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { reeds: 3.2, willow: 0.05, wheat: 90 },
+  maxDensity: { reeds: 3.2, willow: 0.12, wheat: 90, tamarisk: 0.1, fig: 0.03 },
   climate: {
     sun: { az: 160, el: 52, color: [1.0, 0.95, 0.86], intensity: 3.6, lat: 37.7, dec: 20, hour: 9.5 },
     sky: { turbidity: 2.4, rayleigh: 1.0, mie: 0.004, mieG: 0.8, zenith: [0.1, 0.18, 0.42], horizon: [0.66, 0.7, 0.74] },

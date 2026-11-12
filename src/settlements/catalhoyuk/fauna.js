@@ -14,9 +14,14 @@ const flights = [
 flights[1].a = [26, 3];
 const perches = [];
 for (const [cx, cz, a, b] of POOLS.slice(0, 4)) perches.push({ kind: 'egret', x: cx + a * 0.8, z: cz, y: ground.height(cx + a * 0.8, cz), rot: 1.2, stay: [60, 200], gone: [60, 160], alert: 10 });
-for (let i = 0; i < KIND.length; i += 2) for (let j = 1; j < KIND[0].length; j += 3) {
+for (let i = 0; i < KIND.length; i++) for (let j = 0; j < KIND[0].length; j++) {
+  if ((i * 3 + j * 5) % 3 !== 0) continue;
   if (KIND[i][j] !== 'h') continue;
   perches.push({ kind: 'sparrow', x: colX(j) + CW[j] * 0.7, z: rowZ(i) + CD[i] * 0.2, y: TOP[i][j] + 0.3, rot: 0, range: [1.2, 0], alert: 5 });
 }
+// herons in the shallows of the further pools, swallows hawking over the pens and the marsh, a loop of crows over the middens
+for (const [cx, cz, a, b] of POOLS.slice(4, 7)) perches.push({ kind: 'heron', x: cx + a * 0.6, z: cz - b * 0.4, y: ground.height(cx + a * 0.6, cz - b * 0.4), rot: 2.2, stay: [80, 240], gone: [60, 160], alert: 12 });
+for (const [cx, cz, a, b] of POOLS.slice(0, 4)) flights.push({ kind: 'swallow', n: 3, loop: { c: [cx, cz], a: [a * 0.9, b * 0.9], rot: 0.3 }, y: [0.6, 2.2], speed: 8 });
+flights.push({ kind: 'crow', n: 3, loop: { c: [0, 0], a: [34, 28], rot: 1.2 }, y: [9, 18], speed: 7 });
 void CLUSTER;
 export default { fish, flights, perches };

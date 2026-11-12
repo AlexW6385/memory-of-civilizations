@@ -44,7 +44,7 @@ function quarter(el, { bag, col, lights }) {
       const t = 0.18; onFace(bag, MUD, a, b, -nx, -nz, 0, L, top + 0.05, top + 0.2, t);
       onFace(bag, 'banco_rough', a, b, nx, nz, 0, L, -0.3, 0.3 + rand() * 0.25, 0.05);                       // eroded and re-mudded foot
       for (let u = 0.35 + rand() * 0.3; u < L - 0.2; u += 0.78 + rand() * 0.1) onFace(bag, LOG, a, b, nx, nz, u, u + 0.09, top - 0.25, top - 0.16, 0.26);        // the beam ends standing out under the roof's edge
-      for (let g = 0; g < 2; g++) { const u = rand() * (L - 0.2); onFace(bag, 'banco_rough', a, b, nx, nz, u, u + 0.07 + rand() * 0.06, top - 0.3 - rand() * 1.1, top - 0.05, 0.012); }   // rain gullies
+      for (let g = 0; g < 2; g++) { const u = rand() * (L - 0.2); onFace(bag, 'silt', a, b, nx, nz, u, u + 0.07 + rand() * 0.06, top - 0.3 - rand() * 1.1, top - 0.05, 0.04); }   // rain gullies
       if (rand() < 0.7) { const u0 = rand() * L * 0.6, u1 = Math.min(L, u0 + 0.8 + rand() * 1.6), y0 = 0.5 + rand() * (top - 1.5); onFace(bag, rand() < 0.6 ? WALL : 'earth_wall', a, b, nx, nz, u0, u1, y0, Math.min(top - 0.1, y0 + 0.5 + rand() * 0.9), 0.014); }
       if (rand() < 0.3) { const u0 = rand() * (L - 0.3); onFace(bag, 'pottery_dark', a, b, nx, nz, u0, u0 + 0.25, top - 1.2 - rand() * 0.6, top - 0.02, 0.012); }   // soot streak from a roof vent
       if (m === 0 && rand() < 0.35) {                                                                       // fallen mud brick at the foot
@@ -101,19 +101,6 @@ function midden(bag, x0, z0, x1, z1, rand) {
     else bag.add(rand() < 0.5 ? 'terracotta' : 'obsidian', box(x, y, z, x + 0.1, y + 0.03, z + 0.07));
   }
 }
-/** A court: open ground between houses with a domed baking oven on the ground, a mud bench, baskets, a grinding stone. */
-function court(bag, col, x0, z0, x1, z1, rand) {
-  const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
-  bag.add('banco_smooth', box(x0 + 0.2, -0.3, z0 + 0.2, x1 - 0.2, 0.03, z1 - 0.2));          // trodden, plastered earth
-  dome(bag, MUD, cx - 1.1, 0.02, cz - 0.6, 0.8, 0.85, 1.25, 1, 0.4); bag.add('opening', box(cx - 1.3, 0.14, cz - 0.05, cx - 0.9, 0.45, cz + 0.08));
-  col.circle(cx - 1.1, cz - 0.6, 0.85, 0, 0.8);
-  bag.add(MUD, box(x1 - 1.6, 0, cz - 1.5, x1 - 0.9, 0.42, cz + 0.6)); col.rect([x1 - 1.6, cz - 1.5, x1 - 0.9, cz + 0.6], 0, 0.42);
-  basket(bag, cx + 0.8, 0.03, cz + 1.0, 0.25, 'cloth_ochre'); basket(bag, cx + 1.3, 0.03, cz + 0.6, 0.2);
-  bag.add('granite_rough', box(cx - 0.4, 0.03, cz + 1.2, cx + 0.3, 0.12, cz + 1.7));
-  bag.add('granite_rough', lathe([[0.001, 0], [0.12, 0.01], [0.1, 0.07], [0.001, 0.08]], 8, null, cx - 0.1, 0.12, cz + 1.45));
-  for (let q = 0; q < 3; q++) jar(bag, x0 + 0.7 + q * 0.5, 0.03, z0 + 0.7 + rand() * 0.2, 1 - q * 0.1, q ? 'pottery_dark' : 'terracotta');
-}
-
 /**
  * catal_pen: a hurdle pen for sheep and cattle { rect, gate ('n'|'s'|'e'|'w': the side with the gap) }: posts of poplar every 1.3 m, wattle
  * woven between them to 1.2 m, the ground inside trodden and dark with dung, a mud trough [inferred: Wikipedia states penned animals].

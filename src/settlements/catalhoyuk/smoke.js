@@ -3,7 +3,8 @@
 // opened house's hatch; the ovens of the courts. The engine part is src/engine/smoke.js; positions come from layout.js.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { KIND, TOP, CW, CD, colX, rowZ, LANDMARK, RADIUS } from './layout.js';
+import { KIND, TOP, CW, CD, colX, rowZ, LANDMARK, RADIUS, ENTER } from './layout.js';
+import { cellGeom } from '../../styles/catal/cell.js';
 
 const ID = 'catalhoyuk';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -12,7 +13,9 @@ export function emitters() {
   const E = [], r = rng(6500);
   for (let i = 0; i < KIND.length; i++) for (let j = 0; j < KIND[0].length; j++) {
     const k = KIND[i][j], x0 = colX(j), z0 = rowZ(i);
-    if (k === 'h') { if (r() < 0.55) E.push({ p: [x0 + CW[j] * (0.3 + r() * 0.35), TOP[i][j] + 0.75, z0 + CD[i] * (0.3 + r() * 0.35)], kind: 'kitchen', thr: 0.1 + 0.7 * r(), seed: i * 41 + j }); }
+    const en = ENTER.find((e) => e.i === i && e.j === j);
+    if (en) { const g = cellGeom([x0, z0, x0 + CW[j], z0 + CD[i]], en.mirror); r(); r(); r(); E.push({ p: [(g.hole[0] + g.hole[2]) / 2, TOP[i][j] + 0.9, (g.hole[1] + g.hole[3]) / 2 - 0.3], kind: 'kitchen', thr: 0.02 + 0.3 * r(), seed: i * 41 + j }); }
+    else if (k === 'h') { if (r() < 0.55) E.push({ p: [x0 + CW[j] * (0.3 + r() * 0.35), TOP[i][j] + 0.75, z0 + CD[i] * (0.3 + r() * 0.35)], kind: 'kitchen', thr: 0.1 + 0.7 * r(), seed: i * 41 + j }); }
     else if (k === 'c') E.push({ p: [x0 + CW[j] / 2 - 1.1, 1.1, z0 + CD[i] / 2 - 0.6], kind: 'kitchen', thr: 0.05, seed: i * 13 + j });
     else if (k === 'm') E.push({ p: [x0 + CW[j] / 2, 0.8, z0 + CD[i] / 2], kind: 'steam', thr: 0.6, seed: i * 7 + j });
   }

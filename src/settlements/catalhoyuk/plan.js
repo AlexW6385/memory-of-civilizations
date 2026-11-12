@@ -1,7 +1,7 @@
 // Çatalhöyük, c. 6500 BC (docs/settlements/catalhoyuk.md §4–§5): the packed town of mudbrick houses, the one house opened
 // (the landmark, reached by its ladder up the south wall and through the roof hatch), the hurdle pens at the edge.
 
-import { CW, CD, X0, Z0, KIND, TOP, LANDMARK, PENS, CLUSTER, RADIUS, ST, ENTER, TRADE, height, POOLS, MARSH } from './layout.js';
+import { CW, CD, X0, Z0, KIND, TOP, LANDMARK, PENS, CLUSTER, RADIUS, ST, ENTER, TRADE, LANDINGS, height, POOLS, MARSH } from './layout.js';
 import '../../styles/catal/index.js';
 import { cellGeom } from '../../styles/catal/cell.js';
 import { colX, rowZ } from './layout.js';
@@ -16,9 +16,9 @@ for (const p of PENS) { const my = (p.rect[1] + p.rect[3]) / 2, ex = p.gate === 
 E.push({ t: 'catal_edge', rect: CLUSTER, seed: 6501, keep });
 // landings on the marsh pools nearest the town: shore point toward the town, the water ahead
 const landings = [];
-for (const k of [0, 1, 3]) {
-  const [pcx, pcz, a, b] = POOLS[k], th = Math.atan2(-pcz / b, -pcx / a), x = pcx + a * 1.12 * Math.cos(th), z = pcz + b * 1.12 * Math.sin(th);
-  const e = { t: 'catal_landing', at: [x, z], y: Math.max(height(x, z), MARSH.water + 0.1), toward: Math.atan2(pcz - z, pcx - x), water: MARSH.water, seed: 40 + k };
+for (const L of LANDINGS) {
+  const [x, z] = L.at;
+  const e = { t: 'catal_landing', at: L.at, y: Math.max(height(x, z), MARSH.water + 0.1), toward: L.toward, water: MARSH.water, seed: 40 + L.k };
   landings.push(e); E.push(e);
 }
 export { landings };

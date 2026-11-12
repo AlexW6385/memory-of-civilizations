@@ -83,3 +83,10 @@ export function height(x, z) {
 }
 /** The ground's height near the town (the mound is level under it). */
 export const baseY = () => 0;
+
+/** The reed landings on the pools nearest the town: the shore point toward the town (1.12 radii out) and the angle into the water. */
+export const LANDINGS = [0, 1, 3].map((k) => {
+  const [pcx, pcz, a, b] = POOLS[k], th = Math.atan2(-pcz / b, -pcx / a), x = pcx + a * 1.12 * Math.cos(th), z = pcz + b * 1.12 * Math.sin(th);
+  return { at: [x, z], toward: Math.atan2(pcz - z, pcx - x), k };
+});
+export const nearLanding = (x, z, m) => LANDINGS.some((L) => { const dx = x - L.at[0], dz = z - L.at[1], s = dx * Math.cos(L.toward) + dz * Math.sin(L.toward), t = -dx * Math.sin(L.toward) + dz * Math.cos(L.toward); return s > -m - 4 && s < m + 11 && Math.abs(t) < m + 4; });
