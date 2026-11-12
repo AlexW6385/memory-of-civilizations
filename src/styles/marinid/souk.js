@@ -15,13 +15,16 @@ export function shop(bag, col, r, f, y, trade, rand, o = {}) {
   const fr = frame(r, f), [x0, z0, x1, z1] = r, al = f === 'n' || f === 's';
   const L = al ? x1 - x0 : z1 - z0, D = al ? z1 - z0 : x1 - x0;
   const I = (u0, u1, y0, y1, d0, d1) => fr.B(u0, u1, y0, y1, -d1, -d0);
-  const mat = o.mat ?? WALL[Math.floor(rand() * WALL.length)], pier = 0.2, fy = y + 0.55, Hs = 2.65, yU = y + Hs + 0.25, yT = y + (o.top ?? 7.0);
+  const mat = o.mat ?? WALL[Math.floor(rand() * WALL.length)], pier = 0.2, fy = y + 0.45, Hs = 2.65, yU = y + Hs + 0.25, yT = y + (o.top ?? 7.0);
   const P = (u, d) => fr.P(u, -d);
   // piers and partitions, the back wall, the raised floor, the lintel beam, the upper floors
   bag.add(mat, I(0, pier, y - 0.3, y + Hs, 0, D)); bag.add(mat, I(L - pier, L, y - 0.3, y + Hs, 0, D)); bag.add(mat, I(pier, L - pier, y - 0.3, y + Hs, D - 0.25, D));
   bag.add('wood_dark', I(pier, L - pier, y, fy, 0.05, D - 0.25)); bag.add('timber', I(pier - 0.02, L - pier + 0.02, fy - 0.03, fy + 0.04, 0, 0.12));
   bag.add('cedar', I(pier, L - pier, y + Hs, y + Hs + 0.25, 0, 0.35));
-  bag.add(mat, I(0, L, y + Hs + 0.25, yT, 0, D)); col.rect(r, y, yT);
+  bag.add(mat, I(0, L, y + Hs + 0.25, yT, 0, D));
+  // the cell can be entered: piers and the back wall are solid, the raised floor walkable, the rooms above a block over the head
+  col.rect(fr.rect(0, pier, -D, 0), y, y + Hs); col.rect(fr.rect(L - pier, L, -D, 0), y, y + Hs); col.rect(fr.rect(pier, L - pier, -D, -(D - 0.25)), y, y + Hs);
+  col.rect(r, y + Hs - 0.05, yT); col.floor(fr.rect(pier, L - pier, -(D - 0.25), 0), fy);
   bag.add('plaster_white', I(-0.02, L + 0.02, yT, yT + 0.2, 0, D)); bag.add(mat, I(0, L, yT, yT + 0.8, 0, 0.3));
   // the ceiling of the cell: dark boards; the upper floor's windows over the lane, lattice-closed, and cedar corbels carrying the floor
   bag.add('wood_dark', I(pier, L - pier, y + Hs - 0.05, y + Hs, 0.35, D - 0.25));
@@ -125,6 +128,12 @@ export function square(el, { bag, col }) {
   basin(bag, col, (x0 + x1) / 2, (z0 + z1) / 2, y, 1.1);
   const sw = 2.7, depth = 3.4;
   for (let z = z0 + 3; z + sw < z1 - 0.2; z += sw) { shop(bag, col, [x0 - depth, z, x0, z + sw], 'e', y, 'brass', rand, { top: 6.8 }); shop(bag, col, [x1, z, x1 + depth, z + sw], 'w', y, 'brass', rand, { top: 6.8 }); }
+  // the coppersmiths' anvils on stumps before the shops, braziers of charcoal, hammers lying by
+  for (let z = z0 + 4.2; z + sw < z1 - 1; z += sw * 2) for (const [x, dir] of [[x0 + 1.0, 1], [x1 - 1.0, -1]]) {
+    bag.add('log_pine', lathe([[0.2, 0], [0.22, 0.2], [0.2, 0.4], [0.001, 0.4]], 8, null, x + dir * 0.3, y, z));
+    bag.add('granite_black', box(x + dir * 0.3 - 0.1, y + 0.4, z - 0.07, x + dir * 0.3 + 0.1, y + 0.5, z + 0.07)); bag.add('iron', box(x + dir * 0.3 + dir * 0.4, y, z - 0.01, x + dir * 0.3 + dir * 0.4 + 0.3, y + 0.03, z + 0.01));
+    F.brazier(bag, [], x + dir * 1.0, y, z + 0.9, 0.22);
+  }
   // the great tree and the beaten copper left to cool on the paving
   for (let i = 0; i < 9; i++) { const x = x0 + 3 + rand() * (x1 - x0 - 6), z = z0 + 3 + rand() * (z1 - z0 - 6); if (Math.hypot(x - (x0 + x1) / 2, z - (z0 + z1) / 2) < 2.5) continue; F.copperware(bag, x, y, z, rand() * 6, i, 3); }
 }

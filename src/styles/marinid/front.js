@@ -26,7 +26,7 @@ export function dukkan(bag, col, rr, e, y, trade, rand, o = {}) {
   // the shutter folded up under the lintel
   bag.add('wood_dark', I(0.05, L - 0.05, y + 2.5, y + 2.72, 0.02, 0.07));
   // the awning: striped cloth from the wall above the lintel out over the lane, held on two poles
-  const [c1, c2] = AWN[Math.floor(rand() * AWN.length)], ext = Math.min(1.5, (o.laneW ?? 3) * 0.4), n = Math.max(3, Math.round((L + 0.4) / 0.28));
+  const [c1, c2] = AWN[Math.floor(rand() * AWN.length)], ext = Math.min(1.2, Math.max(0.25, ((o.laneW ?? 3) - 1.6) / 2)), n = Math.max(3, Math.round((L + 0.4) / 0.28));
   const yTop = y + 3.35, yLow = y + 2.45, T = [[], []];
   for (let i = 0; i < n; i++) {
     const u0 = -0.2 + (L + 0.4) * i / n, u1 = -0.2 + (L + 0.4) * (i + 1) / n;

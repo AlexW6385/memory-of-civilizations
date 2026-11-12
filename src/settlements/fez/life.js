@@ -41,7 +41,7 @@ export function life() {
   for (const s of SOUKS) for (const [i, sh] of soukShops(s).entries()) {
     if (i % 2 === 0 && s.covered) { const alongX = Math.abs(s.a[1] - s.b[1]) < 0.1, c = alongX ? s.a[1] : s.a[0], side = Math.sign((alongX ? sh.z : sh.x) - c) || 1, e = c + side * (s.w / 2 - 0.5); L.push({ t: 'hang_lantern', at: alongX ? [sh.x, e] : [e, sh.z], y: sh.y + 4.55, rot: 0, kind: 'white', drop: 0.2, seed: i }); }
     if (rand() < 0.35) continue;
-    const dir = sh.dir; man([sh.x, sh.z], sh.y + 0.55, dir, { pose: 'cross', cloth: CL[i % CL.length], hat: i % 3 ? 'turban' : 'cap' });
+    const dir = sh.dir; man([sh.x, sh.z], sh.y + 0.5, dir, { pose: 'cross', cloth: CL[i % CL.length], hat: i % 3 ? 'turban' : 'cap' });
   }
   for (const s of SOUKS) {
     const [ax, az] = s.a, [bx, bz] = s.b, alongX = Math.abs(az - bz) < 0.1, L0 = alongX ? Math.abs(bx - ax) : Math.abs(bz - az), u0 = alongX ? Math.min(ax, bx) : Math.min(az, bz), n = Math.floor(L0 / 9);
@@ -75,13 +75,7 @@ export function life() {
     for (let k = 0; k < 4; k++) L.push({ t: 'chickens', kind: 'pigeon', at: [cx + 3 + rand() * 4, cz + 3 + rand() * 4], y: yq, rot: rand() * 6.28, seed: 120 + k });
     man([cx + 4.5, cz - 3.2], yq, 0.6, { dress: 'tunic', carry: 'pot', hat: 'cap', cloth: 'cloth_brown' });
     for (let k = 0; k < 3; k++) man([cx - 5 + k * 5, cz - 4.4], yq, 3.1, { pose: 'cross', hat: 'turban' }); }
-  // the lanes: a water-carrier, women with baskets, a muleteer with his donkey in some of the longer lanes
-  for (let k = 0; k < 40; k++) {
-    const a = rand() * Math.PI * 2, r = 30 + rand() * 230, x = Math.cos(a) * r, z = Math.sin(a) * r * 0.9 - 20;
-    if (Math.abs(z - -21) < 2 && x < 40) { if (rand() < 0.7) man([x, -21 + (rand() - 0.5) * 1.6], ground0(x, -21), rand() * 6.28); }
-  }
-  for (let k = 0; k < 26; k++) { const x = -280 + k * 8.2 + rand() * 3, z = -21 + (rand() - 0.5) * 1.8; if ((x > 40 && x < 130) || (x > -150 && x < -112)) continue; const y = ground0(x, z); if (k % 5 === 0) { L.push({ t: 'animal', kind: 'donkey', at: [x, z], y, rot: Math.PI / 2 + (rand() < 0.5 ? Math.PI : 0), seed: 60 + k }); man([x + 1.6, z + 0.3], y, 1.6, { dress: 'tunic', hat: 'cap', cloth: 'cloth_brown', legs: 'bare', hatMat: 'cloth_white' }); } else if (k % 3 === 0) woman([x, z], y, rand() * 6.28, { carry: k % 2 ? 'basket' : 'pot' }); else man([x, z], y, rand() * 6.28, { pose: k % 4 === 1 ? 'talk' : 'stand' }); }
-  for (let k = 0; k < 10; k++) { const x = -200 + rand() * 330, z = -21 + (rand() - 0.5) * 1.4; L.push({ t: 'animal', kind: 'cat', at: [x, z + (rand() < 0.5 ? 1.3 : -1.3)], y: ground0(x, z), rot: rand() * 6.28, seed: 9 + k }); }
+  // (the people of the lanes: street.js)
   return L;
 }
 const base = (id, elements) => ({ id, style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 's' } });

@@ -217,3 +217,4 @@ export function wash(el, { bag }) {
   const cls = ['cloth_white', 'cloth_indigo', 'cloth_ochre', 'cloth_white', 'cloth_red'];
   for (let k = 0; k < 4; k++) { const cx = x - 1.8 - k * 1.1, [a, b] = zs(hw + 1.2, hw + 2.0); bag.add(cls[(k + (Math.abs(Math.round(x)) % 5)) % 5], box(cx - 0.45, y + 0.025, a, cx + 0.45, y + 0.04, b)); }
 }
+

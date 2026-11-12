@@ -28,9 +28,9 @@ export function streetLife() {
     const P = planOf(h), fr = frame(h.rect, h.door), [nx, nz] = fr.N, cx = (h.rect[0] + h.rect[2]) / 2, cz = (h.rect[1] + h.rect[3]) / 2;
     if (!near(cx, cz, 290)) continue;
     for (const b of P.bays) {
-      const um = (b.u0 + b.u1) / 2, k = fr.P(um, -1.0), lane = fr.P(um, 1.3 + rand() * 0.5);
+      const um = (b.u0 + b.u1) / 2, k = fr.P(um, -1.0), lane = fr.P(um, Math.min(1.3 + rand() * 0.5, h.laneW / 2 - 0.1)), roomy = h.laneW >= 2.2;
       if (rand() < 0.88) man(k, h.y + 0.38, faceTo([nx, nz]), { pose: 'cross', hat: rand() < 0.5 ? 'turban' : 'cap' });
-      if (rand() < 0.55) { const c = [lane[0] + (rand() - 0.5) * 0.8, lane[1] + (rand() - 0.5) * 0.3]; (rand() < 0.35 ? woman : man)(c, h.y - 0.1, faceTo([-nx, -nz]), { carry: rand() < 0.3 ? 'basket' : undefined }); }
+      if (roomy && rand() < 0.55) { const c = [lane[0] + (rand() - 0.5) * 0.8, lane[1] + (rand() - 0.5) * 0.3]; (rand() < 0.35 ? woman : man)(c, h.y - 0.1, faceTo([-nx, -nz]), { carry: rand() < 0.3 ? 'basket' : undefined }); }
     }
     // masonry bench by the door of a house without dukkans: two old men sitting
     if (!P.bays.length && h.laneW >= 2.6 && (h.seed % 5) < 2 && P.Lw - (P.ud + P.dw / 2) > 2.4 && near(cx, cz, 220)) {
@@ -42,8 +42,10 @@ export function streetLife() {
   for (const q of lanes()) {
     const horiz = q.axis === 'x', len = horiz ? q.r[2] - q.r[0] : q.r[3] - q.r[1], c = horiz ? (q.r[1] + q.r[3]) / 2 : (q.r[0] + q.r[2]) / 2, u0 = horiz ? q.r[0] : q.r[1], w = q.w;
     const step = q.kind === 'street' ? 5.5 : q.kind === 'lane' ? 10 : 15, R = q.kind === 'street' ? 290 : q.kind === 'lane' ? 230 : 150;
+    let last = { u: -1e9, s: 1 };
     for (let u = u0 + 3 + rand() * step; u < u0 + len - 3; u += step * (0.7 + rand() * 0.6)) {
-      const off = (rand() - 0.5) * Math.max(0, w - 1.0), at = horiz ? [u, c + off] : [c + off, u], y = ground0(at[0], at[1]);
+      let sd = rand() < 0.5 ? -1 : 1; if (u - last.u < 4.5) sd = last.s; last = { u, s: sd };
+      const off = sd * Math.max(0, w / 2 - 0.4), at = horiz ? [u, c + off] : [c + off, u], y = ground0(at[0], at[1]);
       if (!near(at[0], at[1], R)) continue;
       const along = horiz ? [rand() < 0.5 ? 1 : -1, 0] : [0, rand() < 0.5 ? 1 : -1], k = rand();
       if (k < 0.3) man(at, y, faceTo(along), { carry: rand() < 0.2 ? 'basket' : undefined });
@@ -62,19 +64,20 @@ export function streetLife() {
   for (const f of fountains()) {
     if (!near(f.at[0], f.at[1], 260)) continue;
     const out = f.face === 's' ? [0, 1] : f.face === 'n' ? [0, -1] : f.face === 'e' ? [1, 0] : [-1, 0], y = ground0(f.at[0] + out[0], f.at[1] + out[1]);
-    const p = [f.at[0] + out[0] * 0.95, f.at[1] + out[1] * 0.95];
+    const p = [f.at[0] + out[0] * 0.95, f.at[1] + out[1] * 0.95], lq = lanes().find((q) => p[0] > q.r[0] && p[0] < q.r[2] && p[1] > q.r[1] && p[1] < q.r[3]);
+    if (!lq || lq.w < 2.6) continue;
     (rand() < 0.6 ? woman : man)(p, y, faceTo([-out[0], -out[1]]), { carry: 'pot', pose: 'stand' });
-    if (rand() < 0.6) woman([p[0] + out[1] * 0.9 + out[0] * 0.7, p[1] + out[0] * 0.9 + out[1] * 0.7], y, faceTo([-out[0], -out[1]]), { carry: 'basket' });
-    if (rand() < 0.5) boy([p[0] - out[1] * 0.8 + out[0] * 0.5, p[1] - out[0] * 0.8 + out[1] * 0.5], y, rand() * 6.28);
+    if (rand() < 0.6) woman([p[0] + Math.abs(out[1]) * 0.9, p[1] + Math.abs(out[0]) * 0.9], y, faceTo([-out[0], -out[1]]), { carry: 'basket' });
+    if (rand() < 0.5) boy([p[0] - Math.abs(out[1]) * 0.8, p[1] - Math.abs(out[0]) * 0.8], y, rand() * 6.28);
   }
   // street sellers on mats along the Talaa Kebira and the Talaa Seghira: herbs, mint, bread, eggs
   for (const [zc, x0, x1] of [[K.z, -295, 40], [S.z, -295, 80]]) {
     for (let x = x0 + 8; x < x1; x += 22 + rand() * 20) {
       if (!near(x, zc, 280) || (x > -156 && x < -108)) continue;
-      const side = rand() < 0.5 ? -1 : 1, z = zc + side * (K.w / 2 - 0.75), y = ground0(x, z);
+      const side = rand() < 0.5 ? -1 : 1, z = zc + side * (K.w / 2 - 1.3), y = ground0(x, z);
       L.push({ t: 'goods_mat', at: [x, z], y, rot: side > 0 ? Math.PI : 0, goods: pick([['greens', 'baskets'], ['bread', 'baskets'], ['greens', 'heap'], ['melons', 'heap']]), produce: ['cloth_green', 'cloth_ochre', 'cloth_red'], seed: Math.floor(rand() * 1e9) });
-      woman([x + 0.0, z - side * 0.8], y + 0.0, side > 0 ? 0 : Math.PI, { pose: 'sit_ground' });
-      if (rand() < 0.5) woman([x + 0.5, z + side * 1.1], y, side > 0 ? 0 : Math.PI, { carry: 'basket' });
+      woman([x + 0.0, z + side * 0.75], y + 0.0, side > 0 ? 0 : Math.PI, { pose: 'sit_ground' });
+      if (rand() < 0.5) woman([x + 0.5, z - side * 1.1], y, side > 0 ? 0 : Math.PI, { carry: 'basket' });
     }
   }
   // washing across the derbs: a line from window to window, now and then a second

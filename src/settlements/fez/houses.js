@@ -1,5 +1,5 @@
 // The houses of the medina as elements (docs/settlements/fez.md §5): which lot carries dukkans, which is open, which is rich.
-import { lots, lanes, ground0, inLot, riverZ, RIVER, quayY, RADIUS, BRIDGES } from './layout.js';
+import { lots, lanes, ground0, inLot, riverZ, RIVER, quayY, RADIUS, BRIDGES, K, S } from './layout.js';
 
 /** The lane a lot's door opens on: { w, kind } of the lane touching the door's side, or null. */
 export function doorLane(l) {
