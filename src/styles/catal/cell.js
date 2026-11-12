@@ -12,11 +12,11 @@ export function cellGeom(rect, mirror = false) {
   const T = 0.4, [x0, z0, x1, z1] = rect, ix0 = x0 + T, iz0 = z0 + T, ix1 = x1 - T, iz1 = z1 - T, W = ix1 - ix0, D = iz1 - iz0, S = mirror ? -1 : 1, XO = mirror ? ix1 : ix0;
   const lx = (u) => XO + S * u, lz = (v) => iz0 + v;
   const ur = (u0, v0, u1, v1) => [Math.min(lx(u0), lx(u1)), lz(v0), Math.max(lx(u0), lx(u1)), lz(v1)];
-  return { T, x0, z0, x1, z1, ix0, iz0, ix1, iz1, W, D, S, XO, lx, lz, ur, PH: 0.45, hole: ur(1.2, D - 2.35, 2.5, D - 0.45), hearth: [lx(1.1), lz(D - 1.5)], oven: [lx(0.75), lz(D - 0.6)], room: [ix0 + 0.3, iz0 + 0.3, ix1 - 0.3, iz1 - 0.3] };
+  return { T, x0, z0, x1, z1, ix0, iz0, ix1, iz1, W, D, S, XO, lx, lz, ur, PH: 0.45, hole: ur(0.8, D - 2.35, 2.5, D - 0.45), hearth: [lx(1.1), lz(D - 1.6)], oven: [lx(0.7), lz(D - 0.6)], room: [ix0 + 0.3, iz0 + 0.3, ix1 - 0.3, iz1 - 0.3] };
 }
 
 /** A leopard in plaster relief on a wall (local +z out of it), the head toward +x·s. */
-function leopard(bag, x, y, z, yaw, s, k = 1) {
+export function leopard(bag, x, y, z, yaw, s, k = 1) {
   const P = (g) => place(g, x, y, z, yaw);
   bag.add(PLS, P(lathe([[0.001, -1], [0.7, -0.75], [1, 0], [0.7, 0.75], [0.001, 1]], 10).rotateZ(Math.PI / 2).scale(0.46 * k, 0.17 * k, 0.07 * k)));
   bag.add(PLS, P(lathe([[0.001, -1], [0.8, -0.5], [1, 0], [0.7, 0.6], [0.001, 1]], 9).scale(0.11 * k, 0.12 * k, 0.07 * k).translate(s * 0.5 * k, 0.1 * k, 0)));
@@ -26,7 +26,7 @@ function leopard(bag, x, y, z, yaw, s, k = 1) {
   for (const [a, b] of [[-0.25, 0.06], [-0.1, -0.04], [0.05, 0.08], [0.2, -0.02], [0.3, 0.08], [-0.35, -0.05]]) bag.add(BLK, P(lathe([[0.03 * k, 0], [0.001, 0.012]], 5).rotateX(Math.PI / 2).translate(s * a * k, b * k, 0.075 * k)));
 }
 /** The seated woman of the figurines: clay, ochre, a hand on each of the two cats that flank her; 0.2 m high. */
-function seated(bag, x, y, z, yaw) {
+export function seated(bag, x, y, z, yaw) {
   const P = (g) => place(g, x, y, z, yaw);
   bag.add('terracotta', P(lathe([[0.001, 0], [0.1, 0.01], [0.12, 0.06], [0.09, 0.15], [0.07, 0.2], [0.05, 0.26], [0.001, 0.27]], 9)));
   bag.add('terracotta', P(lathe([[0.001, 0.26], [0.04, 0.27], [0.04, 0.31], [0.001, 0.33]], 7)));
@@ -38,7 +38,7 @@ function seated(bag, x, y, z, yaw) {
   bag.add('paint_ochre', P(lathe([[0.121, 0.03], [0.121, 0.05], [0.115, 0.05], [0.115, 0.03]], 9)));
 }
 /** The knapper's place: an anvil stone, a core, flakes and blades, bone points, a few finished arrowheads on a hide. */
-function knapper(bag, x, y, z, rand) {
+export function knapper(bag, x, y, z, rand) {
   bag.add('granite_rough', lathe([[0.001, 0], [0.17, 0.01], [0.15, 0.1], [0.001, 0.12]], 8, null, x, y, z));
   bag.add('obsidian', lathe([[0.001, 0.12], [0.06, 0.12], [0.045, 0.2], [0.001, 0.22]], 6, null, x, y, z));
   bag.add('hide_tan', box(x + 0.35, y, z - 0.3, x + 1.0, y + 0.012, z + 0.3));

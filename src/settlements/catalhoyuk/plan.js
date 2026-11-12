@@ -10,6 +10,18 @@ const E = [];
 E.push({ t: 'catal_quarter', x0: X0, z0: Z0, cols: CW, rows: CD, kind: KIND, tops: TOP, seed: 6500, enter: ENTER });
 E.push({ t: 'catal_house', rect: LANDMARK.rect, top: ST, seed: 77 });
 for (const p of PENS) E.push({ t: 'catal_pen', rect: p.rect, gate: p.gate });
+// the trodden ring and its outwork, clear of the arrival, the ladder, the lanes to the pens and the south lane
+const keep = [[(LANDMARK.rect[0] + LANDMARK.rect[2]) / 2, LANDMARK.rect[3] + 3.5, 5], [0, CLUSTER[3] + 8, 3], [0, CLUSTER[1] - 8, 3]];
+for (const p of PENS) { const my = (p.rect[1] + p.rect[3]) / 2, ex = p.gate === 'w' ? CLUSTER[2] : CLUSTER[0], px = p.gate === 'w' ? p.rect[0] : p.rect[2]; for (let t = 0; t <= 1; t += 0.2) keep.push([ex + (px - ex) * t, my, 3.2]); }
+E.push({ t: 'catal_edge', rect: CLUSTER, seed: 6501, keep });
+// landings on the marsh pools nearest the town: shore point toward the town, the water ahead
+const landings = [];
+for (const k of [0, 1, 3]) {
+  const [pcx, pcz, a, b] = POOLS[k], th = Math.atan2(-pcz / b, -pcx / a), x = pcx + a * 1.12 * Math.cos(th), z = pcz + b * 1.12 * Math.sin(th);
+  const e = { t: 'catal_landing', at: [x, z], y: Math.max(height(x, z), MARSH.water + 0.1), toward: Math.atan2(pcz - z, pcx - x), water: MARSH.water, seed: 40 + k };
+  landings.push(e); E.push(e);
+}
+export { landings };
 
 const [lx0, lz0, lx1, lz1] = LANDMARK.rect, T = 0.45;
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
@@ -29,7 +41,7 @@ export const catal = {
   style: 'catal',
   origin: [0, 0], base: 0, yaw: 0,
   entrance: { at: [cx, lz1 + 6], facing: 'n' },
-  bounds: [CLUSTER[0] - 30, CLUSTER[1] - 12, CLUSTER[2] + 30, CLUSTER[3] + 14],
+  bounds: [CLUSTER[0] - 42, CLUSTER[1] - 14, CLUSTER[2] + 42, CLUSTER[3] + 45],
   bakeBounds: [CLUSTER[0] - 5, CLUSTER[1] - 5, CLUSTER[2] + 5, CLUSTER[3] + 5],
   view: CLUSTER,
   bakeTop: 8,

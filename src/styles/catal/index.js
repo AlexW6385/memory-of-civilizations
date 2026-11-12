@@ -7,7 +7,8 @@
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, rod } from '../../core/geom.js';
 import '../qing/index.js';
-import { cell, cellGeom } from './cell.js';
+import { cell, cellGeom, leopard, seated, knapper } from './cell.js';
+import { court2, yard, edge, landing } from './yard.js';
 import { WALL, MUD, PLS, LIME, RED, BLK, LOG, REED, BONE, HORN, ASH, rng, flip, ladder, dome, basket, jar, frame, flat, ellipse, aurochs, zigzag, diamonds, hands, bucranium, hatch, onFace } from './kit.js';
 
 /**
@@ -23,10 +24,11 @@ function quarter(el, { bag, col, lights }) {
   const topAt = (i, j) => (K[i]?.[j] === 'h' || K[i]?.[j] === 'L' ? T[i][j] : 0);
   for (let i = 0; i < R.length; i++) for (let j = 0; j < C.length; j++) {
     const k = K[i][j];
-    if (k === '.' || k === 'L') continue;
+    if (k === 'L') continue;
+    if (k === '.') { yard(bag, col, X(j), Z(i), X(j) + C[j], Z(i) + R[i], rand); continue; }
     const x0 = X(j), z0 = Z(i), x1 = x0 + C[j], z1 = z0 + R[i], cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
     if (k === 'm') { midden(bag, x0, z0, x1, z1, rand); continue; }
-    if (k === 'c') { court(bag, col, x0, z0, x1, z1, rand); continue; }
+    if (k === 'c') { court2(bag, col, x0, z0, x1, z1, rand, Math.floor(rand() * 5)); continue; }
     const top = T[i][j], en = ENTER.get(i + ',' + j);
     if (en) cell({ rect: [x0, z0, x1, z1], top, seed: i * 31 + j * 7 + 3, variant: en.variant, mirror: en.mirror }, { bag, col, lights });
     else {
@@ -205,7 +207,14 @@ function house(el, { bag, col, lights }) {
   // the south wall: white plaster, a red panel over the oven
   const FS = frame([ix0, iz1], [1, 0], [0, -1]);
   flat(bag, RED, FS, [[0.1, 0.9], [1.5, 0.9], [1.5, 1.7], [0.1, 1.7]], 0.008);
-  bucranium(bag, lx(3.9), 1.3, iz1 - PL, Math.PI, 0.85);
+  bucranium(bag, lx(4.3), 1.3, iz1 - PL, Math.PI, 0.8);
+  // a pair of leopards in plaster relief on the south wall, facing each other across a red band (the facing lionesses of the shrines)
+  flat(bag, RED, FS, [[1.7, 0.55], [3.5, 0.55], [3.5, 1.7], [1.7, 1.7]], 0.008);
+  leopard(bag, lx(2.1), 1.1, iz1 - PL, Math.PI, -1, 1.0); leopard(bag, lx(3.1), 1.1, iz1 - PL, Math.PI, 1, 1.0);
+  zigzag(bag, BLK, FS, 0.1, 4.8, 1.76, 2.04, 20);
+  // the seated woman between her cats, on the east platform at the north end; a knapper's kit on the floor by the pillar
+  seated(bag, lx(4.45), PH + 0.005, lz(0.35), 0);
+  knapper(bag, lx(2.9), F, lz(4.9), rand);
   // hearth under the hatch (a ring of plaster, ash, a small fire), the oven in the south wall's corner, a mat of reeds before them
   const hx = lx(1.1), hz = lz(4.4);
   bag.add(LIME, lathe([[0.4, 0], [0.4, 0.1], [0.3, 0.1], [0.3, 0.04], [0.001, 0.04]], 14, null, hx, F, hz));
@@ -245,6 +254,6 @@ function house(el, { bag, col, lights }) {
 
 registerStyle('catal', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, catal_quarter: quarter, catal_house: house, catal_pen: pen },
+  elements: { ...STYLES.qing.elements, catal_quarter: quarter, catal_house: house, catal_pen: pen, catal_edge: edge, catal_landing: landing },
   objects: {},
 });
