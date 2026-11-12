@@ -588,8 +588,100 @@ function shed(el, { bag, col }) {
   col.rect([el.c[0] - 1.4, el.c[1] - 1.1, el.c[0] + 1.4, el.c[1] + 1.1], el.y, el.y + 1.7);
 }
 
+/**
+ * haida_prop: the small things of the street and the beach: { kind, c, yaw, y, seed, w? }. kind: midden (a heap of clam and mussel shell),
+ * hideframe (a hide stretched on a frame), fire (an open cooking fire, split salmon on stakes about it), logbench (a squared log to sit on),
+ * clams (baskets of clams and a digging stick), bark (cedar bark in rolls and sheets), net (a dip net or a drying net between two poles),
+ * boxes (bentwood boxes for steaming, stones heaped), weir (the stakes of a fish trap in the shallows), kelp (floating kelp), floats
+ * (fishing floats and a coil of line), cradle (the cradle of poles a canoe is built on), ladder (a notched log), tub (a bark tub of water).
+ * [inferred: the work of the shore; the dossier §5]
+ */
+function prop(el, ctx) {
+  const { bag, col } = ctx, rand = rng(el.seed), add = placer(bag, frame(el.c[0], el.y, el.c[1], el.yaw)), w = el.w ?? 3;
+  const circ = (r, h = 0.6) => col.circle(el.c[0], el.c[1], r, el.y, el.y + h);
+  switch (el.kind) {
+    case 'midden': {
+      add('coral', lathe([[w * 0.5, 0], [w * 0.38, 0.22], [w * 0.15, 0.36], [0.001, 0.38]], 10));
+      for (let k = 0; k < 10; k++) { const a = rand() * 6.28, d = rand() * w * 0.42; add(k % 3 ? 'chalk' : 'pebbles', lathe([[0.07, 0], [0.001, 0.05]], 5, null, Math.cos(a) * d, 0.3 - d * 0.5, Math.sin(a) * d)); }
+      add('sod', lathe([[w * 0.55, 0], [w * 0.48, 0.05], [w * 0.38, 0.1], [0.001, 0.1]], 10));
+      break;
+    }
+    case 'hideframe': {
+      for (const dx of [-0.8, 0.8]) add('log_pine', rod([dx, -0.2, 0], [dx, 1.9, 0], 0.045, 5));
+      add('log_pine', rod([-0.85, 1.85, 0], [0.85, 1.85, 0], 0.035, 5)); add('log_pine', rod([-0.85, 0.2, 0], [0.85, 0.2, 0], 0.035, 5));
+      add(rand() < 0.5 ? 'hide_tan' : 'hide_brown', ellipse(0, 1.05, 0.72, 0.8, -0.015, 0.015, 10));
+      for (const [x, y] of [[-0.8, 1.8], [0.8, 1.8], [-0.8, 0.25], [0.8, 0.25], [0, 1.85], [0, 0.2], [-0.8, 1.0], [0.8, 1.0]]) add('rope_fibre', rod([x, y, 0], [x * 0.88, 1.05 + (y - 1.05) * 0.82, 0], 0.007, 3));
+      circ(0.9, 1.9); break;
+    }
+    case 'fire': {
+      for (let k = 0; k < 9; k++) { const a = k / 9 * 6.28; add('rock_boulder', lathe([[0.17, 0], [0.14, 0.09], [0.001, 0.15]], 6, null, Math.cos(a) * 0.62, 0, Math.sin(a) * 0.62)); }
+      add('bitumen', lathe([[0.5, 0], [0.4, 0.05], [0.001, 0.06]], 9)); add('flame', lathe([[0.2, 0.04], [0.15, 0.2], [0.001, 0.4]], 7));
+      for (let k = 0; k < 6; k++) { const a = k / 6 * 6.28 + 0.3; add('wood_dark', rod([Math.cos(a) * 1.1, 0, Math.sin(a) * 1.1], [Math.cos(a) * 0.45, 0.85, Math.sin(a) * 0.45], 0.012, 4)); add(k % 2 ? 'hide_tan' : 'cedar', ellipse(Math.cos(a) * 0.72, 0.55, 0.05, 0.22, -0.01, 0.01, 6).translate(0, 0, 0)); }
+      for (const dx of [-1.6, 1.4]) add('log_pine', rod([dx - 0.7, 0.17, 0.2], [dx + 0.7, 0.17, 0.2], 0.17, 6));
+      circ(0.8, 0.5); break;
+    }
+    case 'logbench': {
+      add('log_pine', box(-0.9, 0.18, -0.22, 0.9, 0.46, 0.22)); for (const dx of [-0.65, 0.65]) add('timber', box(dx - 0.1, 0, -0.18, dx + 0.1, 0.18, 0.18));
+      circ(0.9, 0.5); break;
+    }
+    case 'clams': {
+      for (let k = 0; k < 4; k++) add('wicker', lathe([[0.17, 0], [0.26, 0.17], [0.24, 0.32], [0.001, 0.32]], 9, null, (k % 2) * 0.5 - 0.2, 0, (k >> 1) * 0.45));
+      for (let k = 0; k < 6; k++) add('chalk', lathe([[0.05, 0], [0.001, 0.04]], 5, null, (rand() - 0.5) * 1.4, 0, 0.9 + rand() * 0.5));
+      add('timber', rod([0.9, 0, 0.1], [1.35, 0.9, 0.1], 0.02, 4)); break;
+    }
+    case 'bark': {
+      for (let k = 0; k < 5; k++) add(k % 2 ? 'rope_fibre' : 'cedar', lathe([[0.15, 0], [0.15, 1.0], [0.1, 1.0], [0.1, 0]], 8, null, (k % 3) * 0.32, 0, (k >> 1) * 0.3));
+      for (let k = 0; k < 4; k++) add('roof_bark', box(-0.4, 0.04 + k * 0.05, 0.9, 0.7, 0.08 + k * 0.05, 1.5 + (k % 2) * 0.1));
+      circ(1.0, 1.0); break;
+    }
+    case 'net': {
+      for (const dx of [-w / 2, w / 2]) add('log_pine', rod([dx, -0.3, 0], [dx, 2.2, 0], 0.06, 5));
+      add('log_pine', rod([-w / 2, 2.1, 0], [w / 2, 2.1, 0], 0.035, 5));
+      for (let u = -w / 2 + 0.1; u < w / 2; u += 0.14) { const l = 0.9 + 0.35 * Math.sin(u * 2 + rand()); add('rope_fibre', rod([u, 2.1, 0], [u, 2.1 - l, 0], 0.006, 3)); }
+      for (let k = 0; k < 5; k++) add('rope_fibre', rod([-w / 2, 2.0 - k * 0.2, 0], [w / 2, 2.0 - k * 0.2 - 0.12, 0], 0.005, 3));
+      for (let k = 0; k < 4; k++) add('log_pine', ellipse(-w / 2 + (k + 0.5) * w / 4, 1.1, 0.05, 0.09, -0.04, 0.04, 6));
+      circ(0.1, 2); col.circle(el.c[0] + w / 2 * Math.cos(el.yaw), el.c[1] - w / 2 * Math.sin(el.yaw), 0.1, el.y, el.y + 2); break;
+    }
+    case 'boxes': {
+      for (let k = 0; k < 3; k++) { const x = (k - 1) * 0.95, hh = 0.5 + rand() * 0.15; add('cedar', box(x - 0.4, 0, -0.3, x + 0.4, hh, 0.3)); add(BLK, box(x - 0.34, hh * 0.3, -0.31, x + 0.34, hh * 0.8, -0.3)); add(RED, ellipse(x, hh * 0.55, 0.13, hh * 0.15, -0.33, -0.3)); if (k === 1) add('bitumen', box(x - 0.34, hh, -0.24, x + 0.34, hh + 0.01, 0.24)); }
+      for (let k = 0; k < 6; k++) add('rock_boulder', lathe([[0.14, 0], [0.11, 0.08], [0.001, 0.12]], 6, null, -0.5 + (k % 3) * 0.3, 0, 0.7 + (k >> 1) * 0.2));
+      circ(1.4, 0.7); break;
+    }
+    case 'weir': {
+      // two rows of stakes in a V, the point to the sea, brush woven between them
+      for (let k = 0; k < 12; k++) for (const sg of [-1, 1]) { const t = k / 11; add('log_pine', rod([sg * (3.2 - t * 3.0), -0.6, t * 6.0], [sg * (3.2 - t * 3.0), 1.1 + rand() * 0.3, t * 6.0], 0.035, 4)); }
+      for (let k = 0; k < 11; k++) for (const sg of [-1, 1]) { const t0 = k / 11, t1 = (k + 1) / 11; add('bark_dark', rod([sg * (3.2 - t0 * 3.0), 0.25, t0 * 6.0], [sg * (3.2 - t1 * 3.0), 0.25, t1 * 6.0], 0.02, 3)); }
+      break;
+    }
+    case 'kelp': {
+      for (let k = 0; k < 14; k++) { const a = rand() * 6.28, d = rand() * w * 0.5, l = 0.6 + rand() * 0.9; add('flax_leaf', ellipse(0, 0, 0.06, l * 0.5, -0.01, 0.01, 6).rotateX(Math.PI / 2).rotateY(rand() * 6.28).translate(Math.cos(a) * d, 0.03, Math.sin(a) * d)); }
+      add('bark_dark', lathe([[0.18, 0], [0.12, 0.06], [0.001, 0.1]], 6, null, 0, 0.02, 0)); break;
+    }
+    case 'floats': {
+      for (let k = 0; k < 6; k++) add('hide_white', lathe([[0.001, 0], [0.16, 0.1], [0.14, 0.24], [0.001, 0.32]], 8, null, (k % 3) * 0.34 - 0.3, 0, (k >> 1) * 0.3));
+      add('rope_fibre', lathe([[0.3, 0], [0.3, 0.1], [0.18, 0.1], [0.18, 0]], 10, null, 0.9, 0, 0.1)); break;
+    }
+    case 'cradle': {
+      // the log of a canoe being finished, held off the ground on forked posts; chips below it
+      const l = w;
+      for (const dz of [-l * 0.3, l * 0.3]) for (const sg of [-1, 1]) { add('log_pine', rod([sg * 0.55, 0, dz], [sg * 0.28, 0.75, dz], 0.06, 5)); }
+      add('cedar', rod([0, 0.95, -l / 2], [0, 0.95, l / 2], 0.5, 9)); add('wood_dark', box(-0.26, 1.28, -l / 2 + 0.7, 0.26, 1.34, l / 2 - 0.7));
+      for (let k = 0; k < 16; k++) add('cedar', box(-1.2 + rand() * 2.4, 0.01, -l / 2 + rand() * l, -1.1 + rand() * 2.4, 0.05, -l / 2 + rand() * l + 0.1));
+      col.rect([el.c[0] - 0.7, el.c[1] - l / 2, el.c[0] + 0.7, el.c[1] + l / 2], el.y, el.y + 1.4); break;
+    }
+    case 'ladder': {
+      add('log_pine', rod([0, 0, 0], [0.15, 3.4, 0.9], 0.14, 6)); for (let k = 0; k < 7; k++) add('wood_dark', box(-0.17, 0.4 + k * 0.45, 0.04 * k - 0.1 + 0.02, 0.17 + 0.15 * 0, 0.46 + k * 0.45, 0.13 + 0.12 * k)); break;
+    }
+    case 'tub': {
+      add('cedar', lathe([[0.35, 0], [0.4, 0.3], [0.38, 0.5], [0.33, 0.5], [0.001, 0.05]], 10)); add('bitumen', lathe([[0.3, 0.44], [0.001, 0.45]], 9));
+      circ(0.45, 0.5); break;
+    }
+    default: break;
+  }
+}
+
 registerStyle('haida', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, haida_house: house, haida_pole: pole, haida_canoe: canoe, haida_rack: rack, haida_stack: stack, haida_log: log, haida_hollow: hollow, haida_shed: shed },
+  elements: { ...STYLES.qing.elements, haida_house: house, haida_pole: pole, haida_canoe: canoe, haida_rack: rack, haida_stack: stack, haida_log: log, haida_hollow: hollow, haida_shed: shed, haida_prop: prop },
   objects: {},
 });
