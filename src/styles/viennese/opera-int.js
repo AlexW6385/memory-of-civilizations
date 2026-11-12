@@ -125,3 +125,15 @@ export function operaInside(ctx, y, rect) {
     bag.add('lamp_glass', lathe([[0.001, -0.9], [0.5, -0.3], [0.5, 0.0], [0.001, 0.2]], 12, null, C[0], cy - 0.2, C[1]));
     for (const [dx, dz] of [[0, 0], [0, 0]]) lights?.push({ at: [C[0] + dx, cy + 0.5, C[1] + dz], color: '#ffd9a0', intensity: 14, distance: 26 }); }
 }
+
+/** The seats of the stalls as (s, t) in the opera's frame (s across from the middle, t from the front wall), and where the stage and the pit lie. */
+export function operaSeats() {
+  const out = [];
+  for (let t = TC - 9.6; t < STAGE.t0 - 6.5; t += 1.1) {
+    const d = t - TC, ch = Math.sqrt(Math.max(0, (RH - 1.0) ** 2 - d * d)) - 0.8;
+    if (ch < 3) continue;
+    for (const sg of [-1, 1]) { const a = sg * 1.3, b = sg * Math.min(ch, 8.5); for (let s = Math.min(a, b) + 0.1; s < Math.max(a, b) - 0.3; s += 0.56) out.push([s + 0.25, t + 0.2]); }
+  }
+  return out;
+}
+export const OPERA_STAGE = { t0: STAGE.t0, t1: STAGE.t1, floor: FL };

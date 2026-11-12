@@ -20,6 +20,13 @@ export const NAMES = {
 const SIGNC = { kaffeehaus: 'lacquer_black', baeckerei: 'shutter_green', tabak: 'lacquer_black', apotheke: 'paint_white', greissler: 'cloth_green', fleischhauer: 'cloth_maroon', buchhandlung: 'lacquer_black', huetemacher: 'paint_blue', weinstube: 'cloth_maroon', schneider: 'lacquer_black', konditorei: 'paint_white', uhrmacher: 'lacquer_black', schuster: 'cloth_maroon', blumen: 'shutter_green' };
 const LETTERC = { paint_white: 'lacquer_black', paint_blue: 'gold' };
 
+/** The tables of a Kaffeehaus or a Konditorei in frame coordinates (u along the front, d inward-negative): [[u, d]…], as shopRoom sets them. */
+export function tables(trade, w) {
+  const T = SHOP_T, db = -(T + SHOP_RD), out = [];
+  if (trade === 'konditorei') { for (let a = T + 1.3; a < w - T - 1; a += 2.6) for (const dd of [db + 4.2, db + 6.2]) out.push([a, dd]); }
+  else if (trade === 'kaffeehaus') { let n = 0; for (let a = T + 1.3; a < w - T - 1; a += 2.3) for (const dd of [db + 3.6, db + 5.4, db + 7.2]) { if (n % 5 === 4) { n++; continue; } out.push([a, dd]); n++; } }
+  return out;
+}
 /** The ground floor's front of a shop house: piers, window frames, door, name board with its lettering, awning, goods in the windows. */
 export function shopFront(bag, F, y, { w, g, bays, trade, seed, lod }) {
   const r = rng(seed * 3 + 1), A = (m, ...q) => bag.add(m, fbox(F, y, ...q)), bw = w / bays, top = Math.min(g - 0.9, 3.3), sill = 0.65, doorB = Math.floor(bays / 2);
@@ -169,7 +176,7 @@ export function shopRoom(ctx, F, y, { w, D, g, H, mat, bays, trade, seed }) {
     case 'konditorei':
       for (let k = 0; k < 4; k++) { const u = c0 + 0.4 + k * (c1 - c0 - 0.8) / 3; B('glass_outer', u - 0.45, u + 0.45, 1.07, 1.6, cb + 0.05, ce - 0.05); B('marble', u - 0.45, u + 0.45, 1.3, 1.33, cb + 0.05, ce - 0.05); for (let q = 0; q < 4; q++) { const p = F.at(u - 0.32 + q * 0.21, (cb + ce) / 2); bag.add(['paint_white', 'wood_dark', 'cloth_red', 'paint_ochre'][(q + k) % 4], lathe([[0.001, 0], [0.1, 0], [0.1, 0.1], [0.001, 0.12]], 10, null, p[0], y + 1.07, p[1])); } }
       shelf(...wall, [0.9, 1.5, 2.1], ['paint_white', 'wood_dark', 'cloth_red', 'paint_ochre', 'glaze_white'], [0.15, 0.2]);
-      for (let a = T + 1.3; a < w - T - 1; a += 2.6) for (const dd of [db + 4.2, db + 6.2]) FURNITURE.terrace_set({ at: [...F.at(a, dd)], y: y + 0.12, seed: Math.floor(a * 7) }, ctx);
+      tables('konditorei', w).forEach(([a, dd]) => FURNITURE.terrace_set({ at: [...F.at(a, dd)], y: y + 0.12, seed: Math.floor(a * 7) }, ctx));
       break;
     case 'uhrmacher':
       for (let k = 0; k < 7; k++) { const u = T + 0.7 + k * (w - 2 * T - 1.4) / 6, p = F.at(u, db + 0.06), rot = Math.atan2(F.at(0, 1)[0] - F.at(0, 0)[0], F.at(0, 1)[1] - F.at(0, 0)[1]); bag.add('wood_dark', lathe([[0.001, 0], [0.26, 0], [0.28, 0.03], [0.001, 0.05]], 14, null, 0, 0, 0).rotateX(Math.PI / 2).rotateY(rot).translate(p[0], y + 1.9 + (k % 2) * 0.35, p[1])); bag.add('paint_white', lathe([[0.001, 0.04], [0.22, 0.04], [0.22, 0.06], [0.001, 0.06]], 14, null, 0, 0, 0).rotateX(Math.PI / 2).rotateY(rot).translate(p[0] + Math.sin(rot) * 0.02, y + 1.9 + (k % 2) * 0.35, p[1] + Math.cos(rot) * 0.02)); }
@@ -186,8 +193,7 @@ export function shopRoom(ctx, F, y, { w, D, g, H, mat, bays, trade, seed }) {
       break;
     default: {  // the Kaffeehaus: marble tables with bentwood chairs in rows, newspapers on their holders, mirrors, the billiard table
       for (let k = 0; k < 5; k++) { const u = T + 1.2 + k * (w - 2 * T - 2.4) / 4; B('wood_dark', u - 0.02, u + 0.02, 1.2, 2.1, db + 0.06, db + 0.09); B('paint_white', u - 0.28, u + 0.28, 1.3, 2.0, db + 0.09, db + 0.12); B('mirror_tin', u - 0.5, u + 0.5, 2.2, 3.0, db + 0.01, db + 0.04); }
-      let n = 0;
-      for (let a = T + 1.3; a < w - T - 1; a += 2.3) for (const dd of [db + 3.6, db + 5.4, db + 7.2]) { if (n % 5 === 4) { n++; continue; } FURNITURE.terrace_set({ at: [...F.at(a, dd)], y: y + 0.12, seed: n++ }, ctx); }
+      tables('kaffeehaus', w).forEach(([a, dd], n) => FURNITURE.terrace_set({ at: [...F.at(a, dd)], y: y + 0.12, seed: n }, ctx));
       B('wood_dark', T + 0.1, w - T - 0.1, 0.12, 1.5, db, db + 0.05);
     }
   }

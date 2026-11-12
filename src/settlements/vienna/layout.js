@@ -209,3 +209,7 @@ export function passageRect(l) {
 export const inYard = (x, z, m = 0) => yards().some((y) => inRect(y.rect, x, z, m));
 /** The free middle of a yard, between its rear wings (where the trees stand). */
 export const yardHeart = (x, z) => yards().some((y) => x > y.rect[0] + 3 && x < y.rect[2] - 3 && z > y.rect[1] + WING + 3.5 && z < y.rect[3] - WING - 3.5);
+
+/** The Stadtbahn train standing on the ledge: where its buffers are, the track's z, the way it faces (+1: toward +x). */
+export const TRAIN = { x0: -114, z: LEDGE.z0 + 2.6 + 0.0, dir: 1, cars: 4 };
+export const NASCH_KINDS = ['greens', 'barrels', 'cheese', 'greens', 'fish', 'flowers', 'meat', 'greens', 'barrels', 'flowers'];
