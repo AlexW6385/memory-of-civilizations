@@ -119,7 +119,7 @@ function people() {
   const road = LANES[0];
   const onRoad = (x, off) => { let z = -2; for (let i = 0; i < road.length - 1; i++) { const [ax, az] = road[i], [bx, bz] = road[i + 1]; if (x >= Math.min(ax, bx) && x <= Math.max(ax, bx)) { z = az + (bz - az) * (x - ax) / (bx - ax || 1); break; } } return [x, z + off]; };
   for (let x = -186; x < -112; x += 3.4 + rand() * 3) {
-    const [px, pz] = onRoad(x, (rand() < 0.5 ? -1 : 1) * (0.9 + rand() * 1.5)), east = rand() < 0.55, rot = east ? Math.PI / 2 : -Math.PI / 2, k = rand();
+    let [px, pz] = onRoad(x, (rand() < 0.5 ? -1 : 1) * (0.9 + rand() * 1.5)); if (Math.abs(pz) < 1.9) pz = pz >= 0 ? 2.0 : -2.0; const east = rand() < 0.55, rot = east ? Math.PI / 2 : -Math.PI / 2, k = rand();
     if (k < 0.3) (rand() < 0.5 ? man : woman)([px, pz], h(px, pz), rot, { carry: ['sack', 'pot', 'basket'][Math.floor(rand() * 3)] });
     else if (k < 0.5) woman([px, pz], h(px, pz), rot, { carry: 'pot' });
     else if (k < 0.65) { man([px, pz], h(px, pz), rot + 0.4, { pose: 'talk' }); man([px + 1.0, pz + 0.2], h(px + 1, pz), rot + 2.9, { pose: 'talk' }); }
@@ -160,9 +160,19 @@ function beasts() {
 }
 
 /** The dry-stone walls that edge the lanes where no house does (terraces and fields), broken at the cross lanes, at houses and by gates now and then. */
+function nearLane(x, z) {
+  for (let li = 0; li < LANES.length; li++) {
+    const lane = LANES[li], m = li === 0 ? 3.5 : 2.0;
+    for (let i = 0; i < lane.length - 1; i++) {
+      const [ax, az] = lane[i], [bx, bz] = lane[i + 1], vx = bx - ax, vz = bz - az, t = Math.max(0, Math.min(1, ((x - ax) * vx + (z - az) * vz) / (vx * vx + vz * vz)));
+      if (Math.hypot(x - ax - vx * t, z - az - vz * t) < m) return true;
+    }
+  }
+  return false;
+}
 function laneWalls() {
   const E = [], rand = rng(606), courts = lots().filter((l) => l.court).map((l) => l.court);
-  const free = (x, z) => !(inHouse(x, z, 1.1) || courts.some((c) => x > c[0] - 1.2 && x < c[2] + 1.2 && z > c[1] - 1.2 && z < c[3] + 1.2) || onLane(x, z, 1.8) || sdCircuit(x, z) < 8
+  const free = (x, z) => !(inHouse(x, z, 1.1) || courts.some((c) => x > c[0] - 1.2 && x < c[2] + 1.2 && z > c[1] - 1.2 && z < c[3] + 1.2) || nearLane(x, z) || sdCircuit(x, z) < 8
     || Math.hypot(x, z) > RADIUS - 24 || (x > TREAS.x0 - 10 && x < TREAS.xf + 6 && Math.abs(z - TREAS.z) < 16) || Math.hypot(x - TREAS.x, z - TREAS.z) < 30);
   LANES.forEach((lane, li) => {
     for (let i = 0; i < lane.length - 1; i++) {
@@ -221,6 +231,8 @@ export async function town() {
     }
     plans.push({ ...base(`mycenae-houses-${k}`, 'mycenaean', els), rooms });
   }
+  // places kept free of the engine's street life: the Treasury's dromos and façade, the approach road's walking line
+  plans.push(base('mycenae-keep', 'mycenaean', [{ t: 'precinct', rect: [TREAS.x0 - 3, TREAS.z - 7, TREAS.xf + 6, TREAS.z + 7] }, { t: 'precinct', rect: [-190, -3.2, -107, 2.2] }, { t: 'precinct', rect: [-107, -3.4, -84, 3.4] }, { t: 'precinct', rect: [24, 1.0, 80, 5.2] }, ...RAMP.slice(0, -1).map(([ax, az], i) => { const [bx, bz] = RAMP[i + 1]; return { t: 'precinct', rect: [Math.min(ax, bx) - 2.3, Math.min(az, bz) - 2.3, Math.max(ax, bx) + 2.3, Math.max(az, bz) + 2.3] }; })]));
   plans.push(base('mycenae-yards', 'mycenaean', yards()));
   plans.push(base('mycenae-walls', 'mycenaean', laneWalls()));
   plans.push(base('mycenae-hillside', 'mycenaean', hillside()));

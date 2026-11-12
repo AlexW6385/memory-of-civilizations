@@ -11,6 +11,6 @@ import { dryWall, chamberTomb, basin } from './land.js';
 
 registerStyle('mycenaean', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { wall_run: wallRun, north_gate: northGate, lion_gate: lionGate, palace_wing: palaceWing, court, propylon, megaron, treasury, grave_circle: graveCircle, house, granary, yard, forecourt, dry_wall: dryWall, chamber_tomb: chamberTomb, basin },
+  elements: { wall_run: wallRun, north_gate: northGate, lion_gate: lionGate, palace_wing: palaceWing, court, propylon, megaron, treasury, grave_circle: graveCircle, house, granary, yard, forecourt, precinct: () => {}, dry_wall: dryWall, chamber_tomb: chamberTomb, basin },
   objects: {},
 });
