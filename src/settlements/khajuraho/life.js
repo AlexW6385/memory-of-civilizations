@@ -71,7 +71,7 @@ export function people() {
     for (const [k, [at, dir]] of ring.entries()) {
       if (rand() < 0.3) continue;
       if (k % 2) man(at, J, dir, { carry: rand() < 0.3 ? 'basket' : 'none' }); else woman(at, J, dir, { carry: rand() < 0.5 ? 'pot' : 'none' });
-      if (rand() < 0.4) woman([at[0] + dir[1] * 0.7 + dir[0] * -0.6, at[1] - dir[0] * 0.7 + dir[1] * -0.6], J, dir, { child: rand() < 0.5 });
+      if (rand() < 0.4) woman([at[0] + dir[1] * 0.7 + dir[0] * -0.6, at[1] - dir[0] * 0.7 + dir[1] * -0.6], J, dir, { carry: rand() < 0.5 ? 'child' : 'none' });
     }
     // at the foot of the terrace's stair: flower sellers on the ground behind their mats of jasmine and oleander
     const sx = T[2] + J * 2.2 + 2.2, sw = t.w * 0.14 + 2.4;

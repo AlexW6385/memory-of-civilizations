@@ -210,4 +210,20 @@ function chhatri(el, { bag, col }) {
   bag.add(S, lathe([[0.06, 0], [0.1, 0.1], [0.04, 0.3], [0.001, 0.4]], 8, null, cx, y + 0.35 + h + 1.2, cz));
 }
 
-export const villageElements = { bazaar_house: building, yard_wall: yardWall, rest_house: restHouse, chhatri };
+/** lamp_pillar: a stone lamp column (dīpastambha) at a temple's approach: a moulded base, a slender shaft with rings, and at its head a ring of
+ *  little cups for oil lamps (lit at evening) under a bell-shaped cap. { c, h, y } */
+function lampPillar(el, { bag, col }) {
+  const [cx, cz] = el.c, y = el.y ?? 0, h = el.h ?? 3.4, S = 'sandstone';
+  bag.add(S, box(cx - 0.42, y - 0.4, cz - 0.42, cx + 0.42, y + 0.3, cz + 0.42));
+  bag.add('sandstone_dressed', box(cx - 0.32, y + 0.3, cz - 0.32, cx + 0.32, y + 0.45, cz + 0.32));
+  col.rect([cx - 0.42, cz - 0.42, cx + 0.42, cz + 0.42], y - 0.4, y + 0.45);
+  bag.add(S, lathe([[0.22, 0], [0.17, 0.12], [0.15, h * 0.2], [0.19, h * 0.22], [0.15, h * 0.26], [0.13, h * 0.7], [0.18, h * 0.72], [0.12, h * 0.75], [0.001, h * 0.75]], 10, null, cx, y + 0.45, cz));
+  col.rect([cx - 0.17, cz - 0.17, cx + 0.17, cz + 0.17], y + 0.45, y + 0.45 + h);
+  const yt = y + 0.45 + h * 0.75;
+  bag.add('sandstone_dressed', box(cx - 0.34, yt, cz - 0.34, cx + 0.34, yt + 0.1, cz + 0.34));
+  for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, px = cx + Math.cos(a) * 0.3, pz = cz + Math.sin(a) * 0.3; bag.add('terracotta', lathe([[0.001, 0], [0.06, 0.01], [0.07, 0.05], [0.05, 0.06], [0.001, 0.05]], 6, null, px, yt + 0.1, pz)); bag.add('flame', box(px - 0.012, yt + 0.15, pz - 0.012, px + 0.012, yt + 0.19, pz + 0.012)); }
+  bag.add('sandstone_dressed', lathe([[0.3, 0], [0.22, 0.12], [0.1, 0.28], [0.001, 0.42]], 10, null, cx, yt + 0.2, cz));
+  bag.add('bronze', lathe([[0.001, 0], [0.04, 0.03], [0.001, 0.14]], 6, null, cx, yt + 0.62, cz));
+}
+
+export const villageElements = { bazaar_house: building, yard_wall: yardWall, rest_house: restHouse, chhatri, lamp_pillar: lampPillar };

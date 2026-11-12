@@ -35,7 +35,7 @@ const LX = [88, 136, 184, 232, 280], LZ = [-86, -38, 58];
 export const STREETS = [
   { id: 'road', axis: 'x', c: 10, w: 8, a: -30, b: 316, kind: 'main', from: -26 },
   // the pilgrims' approach: a lane along Kandariya's axis from the road's bend to the stair of its terrace, shops of flowers, ghee and sweets on both sides
-  { id: 'approach', axis: 'x', c: -60, w: 5, a: -30, b: 22, kind: 'main', from: -22, lotsTo: -2 },
+  { id: 'approach', axis: 'x', c: -60, w: 5, a: -30, b: 22, kind: 'main', from: -26, lotsTo: 24 },
   { id: 'ns14', axis: 'z', c: 26, w: 4, a: -62, b: 6, kind: 'lane' },
   { id: 'tankway', axis: 'z', c: 40, w: 4, a: 14, b: 104, kind: 'lane', from: 20 },
   ...LX.map((c) => ({ id: 'ns' + c, axis: 'z', c, w: c === 88 ? 5 : 4, a: -134, b: 106, kind: 'lane' })),
@@ -45,6 +45,8 @@ export const STREETS = [
 export const streetRect = (s, m = 0) => (s.axis === 'x' ? [s.a, s.c - s.w / 2 - m, s.b, s.c + s.w / 2 + m] : [s.c - s.w / 2 - m, s.a, s.c + s.w / 2 + m, s.b]);
 export const onStreet = (x, z, m = 0) => STREETS.some((s) => inRect(streetRect(s), x, z, m));
 const CORE = [160, 10];
+/** The pilgrims' lane sells what is carried up to the god: flowers, ghee and oil for the lamps, sweets (prasad), lamps and pots, cloth. */
+const APPROACH_TRADES = ['flowers', 'sweets', 'oil', 'flowers', 'potter', 'sweets', 'cloth', 'flowers'];
 const hash = (a) => { let s = Math.imul(a | 0, 2654435761) >>> 0; s ^= s >>> 15; s = Math.imul(s, 2246822519) >>> 0; return (s >>> 0) / 4294967296; };
 const BLOCKED = () => [...TEMPLES.map((t) => { const T = t.terrace || [t.c[0] - t.w * 0.85, t.c[1] - t.w * 0.95, t.c[0] + t.len + 4, t.c[1] + t.w * 0.95]; return [T[0] - 4, T[1] - 4, T[2] + t.jagati * 2.2 + 6, T[3] + 4]; }), [VARAHA[0] - 5, VARAHA[1] - 5, VARAHA[2] + 5, VARAHA[3] + 5]];
 const overlap = (a, b, m = 0) => a[0] < b[2] + m && a[2] > b[0] - m && a[1] < b[3] + m && a[3] > b[1] - m;
@@ -67,7 +69,7 @@ export function lots() {
       let t = Math.max(s.a, s.from ?? s.a) + 1 + rand() * 2;
       while (t < (s.lotsTo ?? s.b) - 4) {
         const main = s.kind === 'main', r0 = rand();
-        const kind = main ? (r0 < 0.58 ? 'shop' : r0 < 0.76 ? 'haveli' : r0 < 0.9 ? 'home' : 'mud') : (r0 < 0.4 ? 'home' : r0 < 0.7 ? 'mud' : r0 < 0.78 ? 'haveli' : r0 < 0.88 ? 'hut' : r0 < 0.95 ? 'shed' : 'shop');
+        const kind = s.id === 'approach' ? (r0 < 0.86 ? 'shop' : 'haveli') : main ? (r0 < 0.58 ? 'shop' : r0 < 0.76 ? 'haveli' : r0 < 0.9 ? 'home' : 'mud') : (r0 < 0.4 ? 'home' : r0 < 0.7 ? 'mud' : r0 < 0.78 ? 'haveli' : r0 < 0.88 ? 'hut' : r0 < 0.95 ? 'shed' : 'shop');
         const w = kind === 'shop' ? 3.6 + rand() * 1.6 : kind === 'haveli' ? 6.5 + rand() * 1.5 : kind === 'shed' ? 5 + rand() * 2 : 4.4 + rand() * 2.4;
         const d = kind === 'haveli' ? 8 + rand() * 1.5 : 6.2 + rand() * 1.6, off = s.w / 2 + 1.2;
         const u0 = t, u1 = t + w;
@@ -80,8 +82,8 @@ export function lots() {
           placed.push(r);
           if (keep) {
             const seed = Math.floor(rand() * 1e6), dTemple = Math.hypot(cx - 30, cz - 10);
-            const open = (kind === 'shop' || kind === 'home' || kind === 'haveli') && dTemple < 150 && rand() < (kind === 'shop' ? 0.8 : 0.45);
-            LOTS.push({ rect: r, seed, y: 0, foot: -0.2, front, kind, open, street: s.id, main, trade: ['grain', 'potter', 'cloth', 'oil', 'sweets', 'smith', 'flowers', 'grain', 'potter', 'cloth'][seed % 10] });
+            const open = s.id === 'approach' ? kind === 'shop' : (kind === 'shop' || kind === 'home' || kind === 'haveli') && dTemple < 150 && rand() < (kind === 'shop' ? 0.8 : 0.45);
+            LOTS.push({ rect: r, seed, y: 0, foot: -0.2, front, kind, open, street: s.id, main, trade: s.id === 'approach' ? APPROACH_TRADES[seed % 8] : ['grain', 'potter', 'cloth', 'oil', 'sweets', 'smith', 'flowers', 'grain', 'potter', 'cloth'][seed % 10] });
           }
         }
         t = ok ? u1 + 0.15 + (rand() < 0.08 ? 2.5 : 0) : t + 0.8;
