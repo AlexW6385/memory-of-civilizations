@@ -2,7 +2,7 @@
 // at the edges; packed earth in the streets; millet and wheat fields beyond the town; elms, jujubes and mulberries in the yards;
 // the earth mound over Pit 1; the dry continental sky of the Wei valley (docs/settlements/qin-xianyang.md §3).
 // Pure (used by the relief, the collision and the plant workers).
-import { RADIUS, PIT, ROOF, RAMP, ROAD, PINE_Z, MARKET, FORECOURT, TERRACE, WS_Z, WS_X, height, inRect, inLot, lots, streets } from './layout.js';
+import { RADIUS, YARD, HAUL, PIT, ROOF, RAMP, ROAD, PINE_Z, MARKET, FORECOURT, TERRACE, WS_Z, WS_X, height, inRect, inLot, lots, streets } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 const onRoad = (x, z) => z > ROAD.z0 - 1 && z < ROAD.z1 + 1;
@@ -10,6 +10,8 @@ const onStreet = (x, z) => streets().some((r) => inRect(r, x, z));
 function cover(x, z) {
   const c = { sand: 0.35, grass: 0.1, rock: 0, soil: 0.55, fields: 0, dry: 0.8, warmth: 0.8, red: 0.2, road: 0, snow: 0, forest: 0 };
   if (inRect([PIT.x0 - 8, PIT.z0 - 8, PIT.x1 + RAMP.len + 8, PIT.z1 + 8], x, z)) { c.road = 0.5; c.soil = 0.8; c.sand = 0.2; return c; }
+  if (inRect(YARD, x, z)) { c.road = 0.62; c.soil = 0.75; c.sand = 0.2; return c; }
+  if (Math.abs(z - HAUL.z) < HAUL.w / 2 + 2 && x > HAUL.x0 - 2 && x < HAUL.x1 + 4) { c.road = 0.9; c.sand = 0.3; c.soil = 0.2; return c; }
   if (onRoad(x, z) || inRect(FORECOURT, x, z, 2) || inRect(MARKET, x, z, 3)) { c.road = 0.9; c.sand = 0.3; c.soil = 0.2; return c; }
   if (inRect([TERRACE.x0 - TERRACE.rim - 6, TERRACE.z0 - TERRACE.rim - 6, TERRACE.x1 + TERRACE.rim + 6, TERRACE.z1 + TERRACE.rim + 6], x, z) || onStreet(x, z) || inLot(x, z, 0.5)) { c.road = 0.8; c.sand = 0.25; return c; }
   if (inRect([WS_X[0] - 6, WS_Z - 40, WS_X[1] + 6, WS_Z + 40], x, z)) { c.road = 0.6; c.soil = 0.7; return c; }
@@ -27,6 +29,9 @@ function planting(x, z) {
   if (r > RADIUS - 6) return null;
   const dz = Math.abs(Math.abs(z) - PINE_Z);
   if (dz < 1.4 && !inRect(MARKET, x, z, 4)) return { chinese_pine: 5, grass_dry: 6 };
+  // the haul road's two rows of poplars, 4 m off its edges; the yard bare
+  if (x > HAUL.x0 && x < HAUL.x1 + 8 && Math.abs(Math.abs(z - HAUL.z) - (HAUL.w / 2 + 4)) < 1.5) return { poplar: 3.2, grass_dry: 6 };
+  if (inRect(YARD, x, z, 2) || (Math.abs(z - HAUL.z) < HAUL.w / 2 + 2 && x > HAUL.x0 - 2)) return null;
   if (onRoad(x, z) || onStreet(x, z) || inRect(FORECOURT, x, z, 3) || inRect(MARKET, x, z, 4)) return null;
   if (inRect([PIT.x0 - 8, PIT.z0 - 8, PIT.x1 + RAMP.len + 8, PIT.z1 + 8], x, z)) return inRect([PIT.x0 - 6, PIT.z0 - 6, ROOF.bareX + 16, PIT.z1 + 6], x, z) ? { grass_dry: 14 } : null;
   if (inRect([TERRACE.x0 - TERRACE.rim - 6, TERRACE.z0 - TERRACE.rim - 6, TERRACE.x1 + TERRACE.rim + 6, TERRACE.z1 + TERRACE.rim + 6], x, z)) return null;
@@ -38,7 +43,7 @@ function planting(x, z) {
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { chinese_pine: 5, mulberry: 1.4, jujube: 0.9, elm: 0.06, poplar: 0.05 },
+  maxDensity: { chinese_pine: 5, mulberry: 1.4, jujube: 0.9, elm: 0.06, poplar: 3.2 },
   climate: {
     sun: { az: 150, el: 56, color: [1.0, 0.95, 0.85], intensity: 3.7, lat: 34.4, dec: 5, hour: 10 },
     sky: { turbidity: 3.0, rayleigh: 1.0, mie: 0.005, mieG: 0.8, zenith: [0.1, 0.18, 0.4], horizon: [0.7, 0.68, 0.6] },

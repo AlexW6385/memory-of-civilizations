@@ -24,6 +24,10 @@ export const CHARIOTS = [
   ...[0, 4, 6, 10].map((k) => ({ k, x: 15 - k * 5 })),
 ];
 
+/** The haul road east from the ramps' apron, on the line of the middle ramp (the visitor's arrival looks along it). */
+export const HAUL = { z: -121, x0: 158, x1: 288, w: 9 };
+export const YARD = [PIT.x1 + RAMP.len - 1, -178, PIT.x1 + RAMP.len + 66, -78];   // the building yard at the ramps' head
+
 // ── the palace ──
 export const TERRACE = { x0: -258, z0: -128, x1: -180, z1: -74, h: 7.0, h1: 3.5, rim: 6 };  // two tiers: the lower 3.5 m reaches 6 m wider
 export const STAIR = { x: -219, w: 12, run: 22 };                                           // the great stair on the south face, its axis

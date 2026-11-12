@@ -67,6 +67,7 @@ export async function town() {
   if (CACHE) return CACHE;
   const plans = [], { S, Q } = market();
   plans.push(base('qin-road', [{ t: 'qin_road', x0: -RADIUS + 14, x1: RADIUS - 14 }, { t: 'qin_pavilion', at: [-150, ROAD.z0 - 6] }, { t: 'qin_pavilion', at: [170, ROAD.z1 + 6] }]));
+  plans.push(base('qin-yard', [{ t: 'qin_yard' }, { t: 'qin_haul' }]));
   plans.push(base('qin-market', [{ t: 'qin_market' }, ...Q]));
   plans.push({ ...base('qin-stalls', S), style: 'life' });
   plans.push({ ...base('qin-people', people()), style: 'life' });
