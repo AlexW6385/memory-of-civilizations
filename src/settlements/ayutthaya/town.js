@@ -27,6 +27,12 @@ export function waterElements() {
     if (E.some((e) => e.t === 'boat' && Math.hypot(e.at[0] - x, e.at[1] - z) < 4.2) || Math.hypot(x, z) > RADIUS - 44) continue;
     E.push({ t: 'boat', at: [x, z], rot: (rand() < 0.5 ? 0 : Math.PI) + (rand() - 0.5) * 0.5, y: WATER, kind: rand() < 0.75 ? 'vendor' : 'sampan', load: loads[k % loads.length], awning: rand() < 0.65 ? (rand() < 0.5 ? 'cloth' : 'atap') : false, seed: Math.floor(rand() * 1e6), vendor: true });
   }
+  // the floating shops: rafts with an open counter, goods and a hung sign, moored along the market's east edge among the boats
+  for (let k = 0; k < 7; k++) {
+    const z = MARKET[1] + 16 + k * ((MARKET[3] - MARKET[1] - 32) / 6), x = MARKET[2] - 7 + (k % 2) * -1.5;
+    if (Math.hypot(x, z) > RADIUS - 44) continue;
+    E.push({ t: 'floating_shop', c: [x, z], rot: Math.PI / 2 + (rand() - 0.5) * 0.05, y: WATER, w: 4.0 + rand() * 0.8, d: 5 + rand() * 0.8, seed: Math.floor(rand() * 1e6) });
+  }
   // moored along the canals at the landings
   for (const c of CANALS) {
     const [a, b, c1, d] = c.rect, ew = c1 - a > d - b;
@@ -71,6 +77,18 @@ function garden() {
     if (!inRect(ISLAND, x, z, -8) || Math.hypot(x, z) > RADIUS - 44 || wet(x, z) < 6 || inLot(x, z, 3) || onPath(x, z, 1.5) || onBridge(x, z, 5) || inRect(WAT.wall, x, z, 5) || inRect(PALACE.wall, x, z, 5) || wetRiver(x, z) < 14) continue;
     E.push(k % 3 ? { t: 'k_granary', at: [x, z], seed: k } : { t: 'k_sala', rect: [x, z, x + 5, z + 4], front: 's', seed: k });
   }
+  // the back yards of the lots: bananas and areca, a rack of drying fish, a granary, a hammock, water jars; the yard's bamboo fence
+  const yr = rng(515), FR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
+  for (const l of lots()) {
+    const [x0, z0, x1, z1] = l.rect, f = FR[l.front], cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, hb = Math.abs(f[0]) ? (x1 - x0) / 2 : (z1 - z0) / 2;
+    const at = (u, v) => [cx - f[0] * (hb + v) + -f[1] * u, cz - f[1] * (hb + v) + f[0] * u];
+    const ok = (p) => wet(p[0], p[1]) > 3 && !inLot(p[0], p[1], 0.8) && !onPath(p[0], p[1], 0.6) && !onBridge(p[0], p[1], 3) && !inRect(WAT.wall, p[0], p[1], 3) && !inRect(PALACE.wall, p[0], p[1], 3) && wetRiver(p[0], p[1]) > 8 && Math.hypot(p[0], p[1]) < RADIUS - 46;
+    const r = yr();
+    if (r < 0.5) { const p = at((yr() - 0.5) * 3, 1.6 + yr()); if (ok(p)) E.push({ t: 'k_banana', at: p, y: 0, s: 0.9 + yr() * 0.3, seed: l.seed }); }
+    if (r < 0.3) { const p = at((yr() - 0.5) * 2, 3.4); if (ok(p)) E.push({ t: 'k_areca', at: p, y: 0, s: 0.9 + yr() * 0.2, seed: l.seed + 1 }); }
+    if (r > 0.55 && r < 0.7) { const p = at(1.2, 2.2); if (ok(p)) E.push({ t: 'k_rack', at: p, y: 0, rot: Math.atan2(f[0], f[1]), kind: yr() < 0.6 ? 'fish' : 'cloth', seed: l.seed }); }
+    if (r > 0.7 && r < 0.8) { const p = at(-1.0, 2.4); if (ok(p)) E.push({ t: 'k_granary', at: p, seed: l.seed }); }
+  }
   return plan('ayutthaya-garden', 'siamese', E);
 }
 /** The people standing about: monks at the wat, vendors sitting in the market's boats, villagers on the banks. */
@@ -102,6 +120,16 @@ function people() {
     if (r < 0.25) fig([x, z], 0, rot, { carry: 'basket' }); else if (r < 0.45) fig([x, z], 0, rot, { carry: 'pot' }); else if (r < 0.6) fig([x, z], 0, rot, { pose: 'sit_ground', legs: 'cross', hat: 'straw' });
     else if (r < 0.7) fig([x, z], 0, rot, { child: true, h: 0.7 }); else if (r < 0.8) { fig([x, z], 0, rot, { pose: 'talk' }); const b = [x + Math.sin(rot) * -1.1, z + Math.cos(rot) * -1.1]; fig(b, 0, face(b, [x, z])); } else fig([x, z], 0, rot, { hat: 'straw', carry: 'pole' });
   }
+  // the forecourt of the wat: women kneeling with offerings at the tables, children, a woman giving alms to a monk, guards at the palace gate
+  for (const [x, z] of [[WAT.gate[0] - 4.5, -128], [WAT.gate[0] + 4.5, -128]]) { fig([x, z + 1.2], 0, 0, { pose: 'sit_ground', legs: 'kneel', hair: 'bun', top: '', over: 'shawl' }); }
+  fig([WAT.gate[0] + 14, -104], 0, 1.2, { pose: 'sit_ground', legs: 'cross', hair: 'bun', top: '', over: 'shawl' }); monk([WAT.gate[0] + 15.5, -104], 0, -1.9);
+  for (const [x, z, r] of [[WAT.gate[0] + 3, -104, 2.0], [WAT.gate[0] - 3, -107, -1.0], [WAT.gate[0] + 1, -112, 0.4]]) fig([x, z], 0, r, { child: true, h: 0.62 });
+  for (const z of [-143.2, -136.8]) fig([PALACE.wall[2] + 2.5, z], 0, -Math.PI / 2, { hat: 'cap', top: 'bare', over: 'sash', carry: 'pole' });
+  // washing at the landings: a woman squatting at the water's edge with her cloth and pot, a man casting a net from the bank
+  { const lr = rng(77); for (const c of CANALS) { const [a, b, c1, d] = c.rect, ew = c1 - a > d - b; for (let k = 0; k < 3; k++) { const t = lr(), x = ew ? a + 24 + t * (c1 - a - 60) : (lr() < 0.5 ? a - 1.6 : c1 + 1.6), z = ew ? (lr() < 0.5 ? b - 1.6 : d + 1.6) : b + 24 + t * (d - b - 60);
+    if (!inRect(ISLAND, x, z, -8) || onBridge(x, z, 6) || Math.hypot(x, z) > RADIUS - 52 || P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 3)) continue;
+    const rot = ew ? (z < (b + d) / 2 ? Math.PI : 0) : (x < (a + c1) / 2 ? -Math.PI / 2 : Math.PI / 2);
+    if (k < 2) fig([x, z], 0.08, rot, { pose: 'sit_ground', legs: 'cross', hair: 'bun', hat: 'straw', carry: k ? 'pot' : undefined }); else fig([x, z], 0.1, rot, { hat: 'straw', pose: 'talk' }); } } }
   void face;
   return plan('ayutthaya-people', 'life', P);
 }

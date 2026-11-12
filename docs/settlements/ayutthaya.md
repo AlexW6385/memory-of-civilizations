@@ -80,6 +80,23 @@ The temple bell and the gong; the chant of monks; the long-necked fiddle (saw sa
 ## 10. Climate
 Tropical monsoon: hot and humid, the sky hazy; rainy season May–October, floods in September–November [stated: Wikipedia: flooded each year]; algae and black mildew on plaster [inferred].
 
+## 11. Deepening pass: the houses and the temple's furnishing (facts and what the model does with them)
+
+### 11.1 Houses [inferred from the Thai house tradition and the plates of La Loubère and Kaempfer unless marked]
+- The timber house on posts: floor 1.9–2.5 m up against the floods [stated: flooded each year, §10], a terrace (chan) open before the door at the floor's level, walls of plank or woven bamboo, a steep gable roof of palm thatch or terracotta tile with crossed bargeboard horns (kalae) at the ends. Model: `thai_house` in `src/styles/siamese/houses.js`, four wall finishes, tile on the larger houses, one room (two in the large house) entered by the stair and the terrace.
+- The household altar: a shelf on the wall with a Buddha image, flowers and a candle; the spirit house (san phra phum) on a post at the corner of the yard, with its offerings [inferred: widespread Thai custom; its antiquity in the 17th c. is not documented in the sources read]. Model: both are built at every house.
+- The space under the house in use [inferred]: boat drawn up, loom, fish drying, net, mortar and pestle, hammock, water jars at the stair, firewood.
+- Chinese shophouses: brick on the ground floor with the front open to the lane, a counter, shelves of goods; timber upper floor; Chinese merchants settled along the canals and kept shops [inferred from the Chinese community's weight in the trade, see Wikipedia "Ayutthaya Kingdom"]. Model: `kind: 'shop'`, about a third of the houses fronting a canal or the river road; stair inside to a sleeping floor with a balcony, a vertical sign board, red lanterns, wares hung from the lintel.
+- Floating shops: the shop is the boat or the raft [stated, §5.1]; the model's `floating_shop` is a raft with an open counter, goods, hung wares and a hipped roof, moored among the market's boats.
+
+### 11.2 The temple and the palace [inferred unless marked]
+- The compound's wall had battlements [stated: ayutthaya-history.com, §4.3]; the model crowns it with a row of leaf-shaped merlons and a coping.
+- Boundary stones (sema) stand round the ordination hall, eight in little plastered bases [stated in general: a Thai ubosot is bounded by eight sema and a ninth buried in the floor]; pennants of white cloth (tung) on tall bamboo before the halls; offering tables with lotus and incense; candle stands.
+- Inside the halls: a painted band on the walls, hanging lamps, mats before the dais, the preacher's seat, rows of small gilded images given as merit; the cloister's Buddhas face the platform on three sides and outward on the south.
+- The throne in the palace hall under the multi-tiered umbrella (nine tiers is the king's) [stated for the Thai court in general; inferred for this hall].
+- The palace gate: a pair of brick pylons with a three-tiered tiled roof over the way, a gilt finial [inferred]; the court's brick way, rows of palms and the stands of the royal umbrellas.
+- The bell tower: stair to the bell's floor [inferred; Ayutthayan bell towers were of brick with a wooden floor, §4.3].
+
 ## Sources
 - Wikipedia, "Wat Phra Si Sanphet": https://en.wikipedia.org/wiki/Wat_Phra_Si_Sanphet
 - Ayutthaya Historical Research, "The architecture of Wat Phra Sri Sanphet": https://ayutthaya-history.com/Temples_Ruins_PhraSisanphet_Architecture.html

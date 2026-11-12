@@ -93,10 +93,12 @@ export function lots() {
     return true;
   };
   const place = (rect, front, row) => {
-    if (!keep(rect) || (row && rand() < 0.5)) return;
-    if (LOTS.some((l) => l.rect[0] < rect[2] + 1.2 && l.rect[2] > rect[0] - 1.2 && l.rect[1] < rect[3] + 1.2 && l.rect[3] > rect[1] - 1.2)) return;
+    if (!keep(rect) || (row && rand() < 0.2)) return;
+    if (LOTS.some((l) => l.rect[0] < rect[2] + 0.9 && l.rect[2] > rect[0] - 0.9 && l.rect[1] < rect[3] + 0.9 && l.rect[3] > rect[1] - 0.9)) return;
     const w = rect[2] - rect[0], d = rect[3] - rect[1];
-    LOTS.push({ rect, front, seed: Math.floor(rand() * 1e6), kind: w * d > 60 ? 'big' : w * d < 36 ? 'small' : 'plain', row });
+    const depth = front === 'n' || front === 's' ? d : w, across = front === 'n' || front === 's' ? w : d;
+    const shop = !row && depth >= 6 && across >= 5 && rand() < 0.34;
+    LOTS.push({ rect, front, seed: Math.floor(rand() * 1e6), kind: shop ? 'shop' : w * d >= 42 ? 'big' : w * d < 33 ? 'small' : 'plain', row });
   };
   // rows beside the E–W canals (the houses' fronts to the south or north: toward the canal)
   for (const c of CANALS) {
@@ -105,7 +107,7 @@ export function lots() {
       if (ew) {
         const off = 7 + row * 17;
         for (let x = a + 4; x < c1 - 8;) {
-          const w = 5 + Math.floor(rand() * 4), dp = 5 + Math.floor(rand() * 3), step = w + 2.4 + (rand() < 0.2 ? 5 : 0);
+          const w = 5 + Math.floor(rand() * 4), dp = 5 + Math.floor(rand() * 3), step = w + 1.6 + (rand() < 0.08 ? 4 : 0);
           const z = side < 0 ? b - off - dp : d + off;
           place([x, z, x + w, z + dp], side < 0 ? 's' : 'n', row);
           x += step;
@@ -113,7 +115,7 @@ export function lots() {
       } else {
         const off = 7 + row * 17;
         for (let z = b + 4; z < d - 8;) {
-          const w = 5 + Math.floor(rand() * 3), dp = 5 + Math.floor(rand() * 4), step = dp + 2.4 + (rand() < 0.2 ? 5 : 0);
+          const w = 5 + Math.floor(rand() * 3), dp = 5 + Math.floor(rand() * 4), step = dp + 1.6 + (rand() < 0.08 ? 4 : 0);
           const x = side < 0 ? a - off - w : c1 + off;
           place([x, z, x + w, z + dp], side < 0 ? 'e' : 'w', row);
           z += step;
@@ -122,8 +124,8 @@ export function lots() {
     }
   }
   // along the river's east bank (the bank road runs between them and the water) and the south bank
-  for (let z = -230; z < 215;) { const w = 5 + Math.floor(rand() * 3), dp = 5 + Math.floor(rand() * 3); place([-235 + 12, z, -235 + 12 + w, z + dp], 'w', 0); z += dp + 2.2 + (rand() < 0.25 ? 5 : 0); }
-  for (let x = -220; x < 290;) { const w = 5 + Math.floor(rand() * 4), dp = 5 + Math.floor(rand() * 3); place([x, 225 - 12 - dp, x + w, 225 - 12], 's', 0); x += w + 2.2 + (rand() < 0.25 ? 5 : 0); }
+  for (let z = -230; z < 215;) { const w = 5 + Math.floor(rand() * 3), dp = 5 + Math.floor(rand() * 3); place([-235 + 12, z, -235 + 12 + w, z + dp], 'w', 0); z += dp + 1.4 + (rand() < 0.1 ? 4 : 0); }
+  for (let x = -220; x < 290;) { const w = 5 + Math.floor(rand() * 4), dp = 5 + Math.floor(rand() * 3); place([x, 225 - 12 - dp, x + w, 225 - 12], 's', 0); x += w + 1.4 + (rand() < 0.1 ? 4 : 0); }
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
