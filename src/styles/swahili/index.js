@@ -129,6 +129,13 @@ function mosque(el, { bag, col }) {
     let u = a + 0.02;
     for (const [c0, c1] of [...cuts, [b2 - 0.02, b2]]) { if (c0 - u > 0.2) band('plaster_damp', u, c0, -0.3, 0.85 + 0.1 * Math.sin(u), 0.012); u = c1; }
     for (let i = 0; i < n; i++) { const um = a + (i + 1) * L / n - L / n * 0.25, hs = 1.4 + 0.9 * ((i * 7) % 5) / 5; band('plaster_streak', um - 0.14, um + 0.14, h + 0.6 - hs, h + 0.6, 0.008); }
+    // the rag showing where the render has fallen (ragged courses), and salt-bloomed grey patches low down
+    for (let i = 0; i < n; i++) {
+      const k = (i * 5 + Math.round(zz * 3)) % 7; if (k > 3) continue;
+      const um = a + (i + 0.5) * L / n + (k - 1.5) * 0.35, w = 0.5 + 0.25 * k, v0 = 1.3 + 0.7 * ((i * 3) % 4), uu = um - w / 2;
+      for (let j = 0; j < 3; j++) band(R, uu + 0.07 * ((j + i) % 2), uu + w - 0.09 * ((j + k) % 2), v0 + j * 0.17, v0 + (j + 1) * 0.17, 0.006);
+      band('plaster_grey', um + 0.9, um + 1.6, 0.9, 1.25 + 0.2 * (i % 3), 0.007);
+    }
   }
   // a stepped merlon cresting along the roof's edge
   for (let x = x0 + 0.6; x < x1 - 0.4; x += 1.4) for (const zz of [z0 + 0.1, z1 - 0.7]) bag.add(C, box(x, y + h + 0.6, zz, x + 0.7, y + h + 1.3, zz + 0.6));

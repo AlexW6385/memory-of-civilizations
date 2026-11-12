@@ -32,6 +32,10 @@ export function yard() {
     fig([cx + 1.4, cz + 0.6], y, [cx + 3, cz], { pose: 'flute', over: 'none', hat: 'turban' });
     for (let k = 0; k < 4; k++) fig([cx + 3.2 + (k % 2) * 0.9, cz - 0.9 + k * 0.7], y, [cx, cz], { pose: 'cross', over: 'none' });
     L.push({ t: 'goods_mat', goods: ['baskets'], at: [cx + 3.7, cz], y, rot: 0, seed: 77 }); }
+  // ---- inside the hall: rows of worshippers kneeling toward the qibla (north), men reciting on the mats by the walls
+  { const nx = Math.floor((mx1 - mx0) / 4.6), nz = Math.floor((mz1 - mz0) / 4.6), sx = (mx1 - mx0) / nx, sz = (mz1 - mz0) / nz;
+    for (let k = 1; k < 6; k++) for (let i = 2; i < nx - 1; i += 2) { if (rand() < 0.25) continue; const x = mx0 + (i + 0.5) * sx + (rand() - 0.5) * 0.8, z = mz0 + (k + 0.5) * sz; fig([x, z], my + 0.05, [x, z - 5], { pose: 'kneel', arms: 'pray', over: 'none', hat: pick(['cap', 'cap', 'turban']) }); }
+    for (let k = 0; k < 6; k++) { const x = mx0 + 3 + k * 2.2, z = mz1 - 1.6; fig([x, z], my + 0.05, [x, z - 3], { pose: 'cross', over: 'none', hat: 'cap' }); } }
   // ---- the graveyard east of the mosque
   for (let k = 0; k < 9; k++) { const x = mx1 + 3.2 + (k % 2) * 2.0 + rand() * 0.6, z = mz0 + 4 + k * 3.6; S.push({ t: 'swahili_tomb', at: [x, z], y: height(x, z), rot: 0, kind: k === 2 || k === 6 ? 'pillar' : 'slab', seed: k }); }
   // ---- benches against the lane walls (the lots' blank flanks), jars at their feet
