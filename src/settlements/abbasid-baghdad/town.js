@@ -2,7 +2,6 @@
 // houses (courtyard houses by rule, in 100 m tiles near and far), the esplanade's service courts, the markets of Karkh as suq rows with the
 // bookseller's shop to enter, the Isa canal with its bridges and barges, the Tigris with its bridges of boats, jetties and boats,
 // and the people and goods of the streets (a life plan).
-import { lodTiles } from '../lod.js';
 import '../../styles/abbasid/index.js';
 import '../../objects/index.js';
 import { suqKeepers } from '../../styles/abbasid/market.js';
@@ -16,6 +15,23 @@ const YAW = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 };
 export function houseToWorld(l, x, z) {
   const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, a = YAW[l.face], c = Math.round(Math.cos(a)), s = Math.round(Math.sin(a));
   return [cx + x * c + z * s, cz - x * s + z * c];
+}
+/** The houses in 200 m tiles, each built near and far (like ../lod.js, whose tiles are 100 m): the plans share their materials, so fewer meshes. */
+function bigTiles(id, style, elements, { near = 270, R = 460, entrance, size = 200 } = {}) {
+  const tiles = new Map();
+  for (const e of elements) {
+    const x = (e.rect[0] + e.rect[2]) / 2, z = (e.rect[1] + e.rect[3]) / 2, k = `${Math.floor(x / size)},${Math.floor(z / size)}`;
+    if (!tiles.has(k)) tiles.set(k, []);
+    tiles.get(k).push(e);
+  }
+  const plans = [];
+  for (const [k, list] of tiles) {
+    const [i, j] = k.split(',').map(Number), center = [i * size + size / 2, j * size + size / 2];
+    const b = { style, origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-R, -R, R, R], entrance, center };
+    plans.push({ ...b, id: `${id}-${k}`, near, elements: list });
+    plans.push({ ...b, id: `${id}-${k}-far`, far: near, elements: list.map((e) => ({ ...e, simple: true })), nocollide: true });
+  }
+  return plans;
 }
 const norm = (a, b) => [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])];
 
@@ -49,7 +65,7 @@ export async function town() {
   plans.push({ ...base('abbasid-baghdad-walls', walls), bounds: [C[0] - 330, C[1] - 330, C[0] + 330, C[1] + 330] });
   // ── the houses, near and far ──
   const houses = all.filter((l) => !opens.includes(l)).map((l) => ({ t: 'abbasid_house', ...l }));
-  plans.push(...lodTiles('abbasid-baghdad-houses', 'abbasid', houses, { R: RADIUS, entrance: { at: [C[0], C[1] + 60], facing: 'n' } }));
+  plans.push(...bigTiles('abbasid-baghdad-houses', 'abbasid', houses, { R: RADIUS, entrance: { at: [C[0], C[1] + 60], facing: 'n' } }));
   // the open houses: court, north range and the side ranges, furnished
   opens.forEach((open, i) => {
     const w = (a, b) => houseToWorld(open, a, b), turned = open.face === 's' || open.face === 'n', sw = turned ? open.rect[2] - open.rect[0] : open.rect[3] - open.rect[1], sd = turned ? open.rect[3] - open.rect[1] : open.rect[2] - open.rect[0];
