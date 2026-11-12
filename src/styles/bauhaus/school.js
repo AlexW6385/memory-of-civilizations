@@ -310,6 +310,12 @@ function prellerhaus(sk) {
         slab(sk, [XB, b0, x1, b1], y, [], { mat: 'concrete_light', th: 0.2 });
         rail(sk, [x1 - 0.05, b0], [x1 - 0.05, b1], y); rail(sk, [XB, b0 + 0.05], [x1 - 0.05, b0 + 0.05], y); rail(sk, [XB, b1 - 0.05], [x1 - 0.05, b1 - 0.05], y);
         sk.b('car_red', x1 - 0.1, y + 0.4, b0, x1, y + 0.9, b1);
+        // the balcony's furnishing: tubular chairs and a little table, a window box of geraniums on the rail, a rug or a blanket aired over it, a bicycle against the wall
+        const q = rng(k * 31 + i * 7 + 5);
+        if (q() < 0.55) { chair(sk, x1 - 0.55, y, zm - 0.35, 1); if (q() < 0.5) chair(sk, x1 - 0.55, y, zm + 0.45, 1); }
+        if (q() < 0.4) { sk.b('wood_painted', x1 - 0.7, y + 0.36, zm - 0.2, x1 - 0.3, y + 0.4, zm + 0.2); sk.rod('steel_chrome', [x1 - 0.5, y, zm], [x1 - 0.5, y + 0.36, zm], 0.02, 4); }
+        if (q() < 0.6) { sk.b('wood_dark', x1 - 0.32, y + 1.0, b0 + 0.3, x1 - 0.06, y + 1.2, b1 - 0.3); sk.b('cloth_green', x1 - 0.3, y + 1.2, b0 + 0.34, x1 - 0.08, y + 1.45, b1 - 0.34); for (let u = b0 + 0.45; u < b1 - 0.4; u += 0.45) sk.b(q() < 0.6 ? 'car_red' : 'paint_white', x1 - 0.26, y + 1.45, u, x1 - 0.12, y + 1.58, u + 0.2); }
+        else if (q() < 0.7) sk.b(['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_white'][Math.floor(q() * 4)], x1 - 0.12, y + 0.45, b0 + 0.25, x1 - 0.04, y + 1.12, b1 - 0.25);
       }
     } else {
       part(sk, 'z', 22, CX + 0.1, XB - 0.15, y, y1 - y, [[CX + 0.2, CX + 1.4]]);
