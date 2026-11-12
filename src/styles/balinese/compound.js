@@ -124,6 +124,8 @@ export function compound(el, ctx) {
     const tu = gateU + side * 3.6, tp = P(tu, 1.5);
     if (el.penjor !== false && tu > 1.2 && tu < W - 1.2 && free(tu, 0.8) && !el.shop) shrineOf({ c: [tp[0], tp[1]], y, kind: 'small' }, ctx);
   }
+  // the lamak, a strip of palm-leaf and cloth hung from the gate's lintel on the street side
+  { const lp = P(gateU, -0.2), lr = P(gateU + 0.22, -0.17); bx(ctx, 'cloth_ochre', Math.min(lp[0], lr[0]) - 0.01, y + 1.6, Math.min(lp[1], lr[1]) - 0.01, Math.max(lp[0], lr[0]) + 0.01, y + 2.55, Math.max(lp[1], lr[1]) + 0.01); }
   // the natah: a few offerings by the gate's foot and before the sleeping house
   const g1 = RM(gateU, 0.6, gateU, 0.6);
   canang(ctx, g1[0], y + 0.01, g1[1], 1);

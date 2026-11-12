@@ -28,6 +28,8 @@ function planting(x, z, p) {
     if (Math.hypot(x - (DALEM_C[0] - 6.5), z - (DALEM_C[1] - 5)) < 2.2) return { banyan: 8 };
     return null;
   }
+  // the temple's frangipani (a fig stands in) in the middle court's open corners (the inner court's floor is raised past what a planting can follow)
+  if (inPura(x, z, 0.5) && [[-9, -82], [9, -82], [-9, -100], [-30, -75], [28.5, -74.5]].some(([px, pz]) => Math.hypot(x - px, z - pz) < 1.8)) return { fig: 10 };
   if (inPura(x, z, 1.5) || streets().some((q) => inRect(q, x, z, 0.4)) || inRect(WANTILAN, x, z, 3)) return null;
   if (inLot(x, z, 0.3)) {
     // in a compound only the occasional frangipani (a fig stands in) or coconut in the natah's corner

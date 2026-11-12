@@ -58,6 +58,8 @@ export function shop(el, ctx) {
     for (let k = 0; k < 6; k++) B('iron', u0 + 0.45 + k * 0.35, D - 0.3, u0 + 0.5 + k * 0.35, D - 0.26, fl + 1.1, fl + 1.1 + 0.35 + (k % 3) * 0.1);
     B('wood_dark', u0 + 0.3, D - 0.34, u1 - 0.3, D - 0.26, fl + 1.5, fl + 1.56);
     B('bitumen', u1 - 0.9, D - 0.9, u1 - 0.3, D - 0.35, fl, fl + 0.4);
+    // the little shrine of Brahma over the forge, marked with red cloth (the prapen's pelinggih)
+    B('tuff_hewn', u0 + 0.3, D - 0.55, u0 + 0.85, D - 0.2, fl + 1.7, fl + 1.78); B('cloth_red', u0 + 0.38, D - 0.5, u0 + 0.78, D - 0.46, fl + 1.78, fl + 2.15); canang(ctx, ...P(u0 + 0.57, D - 0.35).slice(0, 1), fl + 1.78, ...P(u0 + 0.57, D - 0.35).slice(1), 2);
     for (let k = 0; k < 3; k++) B('iron', u0 + 0.2 + k * 0.5, 0.4, u0 + 0.5 + k * 0.5, 0.5, fl + 0.02, fl + 0.06 + k * 0.01);
   } else if (kind === 'carver') {
     // the stone carver: a block of paras and a half-carved guardian on a trestle, chisels and a mallet, the finished figures out on the plinth, a log of wood to carve
