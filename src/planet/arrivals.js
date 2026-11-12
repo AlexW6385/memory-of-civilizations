@@ -53,7 +53,7 @@ export const ARRIVALS = {
   'amsterdam':        [20, 1.1, -210, 1.5708, 0.2],      // the Town Hall on the Dam
   'versailles':       [-60, 6.1, 0, -1.5708, 0.15],      // the garden front over the water parterre
   'london':           [200, 2.5, -170, 1.9, 0.2],        // the Clock Tower and Westminster from the bridge
-  'barcelona':        [239.5, null, -101, 1.712, 0.45],  // the Nativity façade's portals, from the far pavement of the Carrer de la Marina (south of the tram standing at the façade)
+  'barcelona':        [240, null, -52, 0.695, 0.4],  // from the Marina's east kerb at the cross street, 47 m back: the whole Nativity façade, its four towers and the scaffolding on the Charity crown in the frame
   'norse-borgund':    [-30, null, -28, -1.509, 0.27],     // the stave church in its valley, across the churchyard wall (8 m off)
   'muscovy':          [40, 0.1, 40, 3.0, 0.22],          // St Basil's and the Kremlin wall across Red Square
   'teotihuacan':      [0, 0.1, 60, 0, 0.1],              // up the Avenue of the Dead
