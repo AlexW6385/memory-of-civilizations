@@ -83,9 +83,19 @@ export function houseSong(el, { bag, col }) {
     const p = W(a0, b0, 0), q = W(a1, b1, 0), X0 = Math.min(p[0], q[0]), X1 = Math.max(p[0], q[0]), Z0 = Math.min(p[2], q[2]), Z1 = Math.max(p[2], q[2]);
     const A = arr(mat);
     const quad = (a, b, c, d) => A.push(...a, ...b, ...c, ...a, ...c, ...d);
+    const under = !noB || (ya > 1.2 && yb - ya < 1.6);
+    // (vertex budget: a plate under 7 cm thick — the damp and rain streaks, the patches, the lattices, the painted strokes, the blinds — is its two broad faces only; the
+    // edges are a few centimetres and the face against the wall is the one that is hidden anyway.)
+    const tx = X1 - X0 < 0.07, tz = Z1 - Z0 < 0.07;
+    if (tx !== tz && (tx ? Z1 - Z0 : X1 - X0) > 0.1) {
+      if (under) quad([X0, ya, Z0], [X1, ya, Z0], [X1, ya, Z1], [X0, ya, Z1]);
+      if (tx) { quad([X1, ya, Z0], [X1, yb, Z0], [X1, yb, Z1], [X1, ya, Z1]); quad([X0, ya, Z1], [X0, yb, Z1], [X0, yb, Z0], [X0, ya, Z0]); }
+      else { quad([X0, ya, Z0], [X0, yb, Z0], [X1, yb, Z0], [X1, ya, Z0]); quad([X1, ya, Z1], [X1, yb, Z1], [X0, yb, Z1], [X0, ya, Z1]); }
+      return;
+    }
     quad([X0, yb, Z0], [X0, yb, Z1], [X1, yb, Z1], [X1, yb, Z0]);
     // (a thing hung above head height gets its underside: without one the walker's collision field takes it for a solid mass down to the ground and one cannot walk under it)
-    if (!noB || (ya > 1.2 && yb - ya < 1.6)) quad([X0, ya, Z0], [X1, ya, Z0], [X1, ya, Z1], [X0, ya, Z1]);
+    if (under) quad([X0, ya, Z0], [X1, ya, Z0], [X1, ya, Z1], [X0, ya, Z1]);
     quad([X0, ya, Z0], [X0, yb, Z0], [X1, yb, Z0], [X1, ya, Z0]);
     quad([X1, ya, Z0], [X1, yb, Z0], [X1, yb, Z1], [X1, ya, Z1]);
     quad([X1, ya, Z1], [X1, yb, Z1], [X0, yb, Z1], [X0, ya, Z1]);
@@ -365,7 +375,7 @@ export function houseSong(el, { bag, col }) {
         B('iron', sa2 - 0.015, -0.62, sa2 + 0.015, -0.56, yF - 0.58, yF - 0.5);
         B(bm, sa2 - 0.21, -0.6, sa2 + 0.21, -0.54, yF - 1.18, yF - 0.58, false); B('paint_ochre', sa2 - 0.06, -0.615, sa2 + 0.06, -0.6, yF - 1.1, yF - 0.7);
         // the rafters' ends under the front eave
-        const ne = Math.round((L + 2 * soh) / 0.42);
+        const ne = Math.round((L + 2 * soh) / 0.56);
         for (let k = 0; k <= ne; k++) { const a = -soh + 0.1 + (L + 2 * soh - 0.2) * k / ne; B('timber', a - 0.04, t0 + 0.02, a + 0.04, t0 + 0.45, yE - th - 0.1, yE - th - 0.005); }
       }
       // (the trade's sign — the wine flag, the gourd, the measure — stands on its pole in the street: shops.js)

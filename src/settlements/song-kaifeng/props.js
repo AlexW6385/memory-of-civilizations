@@ -2,11 +2,13 @@
 // by the shop fronts (shops.js) and the room builders (interiors.js): geometry helpers, the furniture
 // of the period (high furniture was usual by the Northern Song: tables, benches and stools, chairs
 // with backs, the folding chair, couches and screens, lacquered and plain), and vessels.
-import { box, lathe, rod } from '../../core/geom.js';
+import { box as coreBox, frustum, lathe, rod } from '../../core/geom.js';
 import { Shape, ExtrudeGeometry } from '../../core/three.js';
 import { ball, limb, T, Parts } from '../../styles/qing/carving.js';
 export { box, lathe, rod, ball, limb, T, Parts };
 
+/** A box; one standing on its base plane (y0 = 0: on the floor, on a shelf, on a table) has no underside. */
+const box = (x0, y0, z0, x1, y1, z1) => (y0 < 0.01 && y0 > -0.01 ? frustum([x0, z0, x1, z1], y0, y1, 0, 0, 0, 0, { noBottom: true }) : coreBox(x0, y0, z0, x1, y1, z1));
 export const WD = 'timber', LQ = 'lacquer_chestnut', DK = 'wood_dark';
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** A polygon [[u, y], …] extruded by depth along z, centred on z = 0. */
@@ -18,10 +20,11 @@ export function prism(pts, depth) {
 }
 /** A profile [[z, y], …] extruded along x from x0 to x1. */
 export function prismX(pts, x0, x1) { const g = prism(pts, x1 - x0); g.rotateY(-Math.PI / 2); g.translate((x0 + x1) / 2, 0, 0); return g; }
-export const ly = (prof, seg = 10, x = 0, y = 0, z = 0) => lathe(prof, seg, null, x, y, z);
-export const drum = (r0, r1, h, seg, x, y, z) => ly([[0.001, 0], [r0, 0], [r1, h], [0.001, h]], Math.round(seg * 1.5), x, y, z);
-export const bowl = (x, y, z, k = 1) => ly([[0.001, 0], [0.036 * k, 0], [0.07 * k, 0.026 * k], [0.088 * k, 0.07 * k], [0.082 * k, 0.072 * k], [0.064 * k, 0.034 * k], [0.001, 0.014 * k]], 8, x, y, z);
-export const jar = (r, h, x, y, z) => ly([[0.001, 0], [r * 0.5, 0], [r, h * 0.22], [r * 1.12, h * 0.5], [r * 0.9, h * 0.78], [r * 0.55, h * 0.93], [r * 0.6, h], [0.001, h]], 10, x, y, z);
+// (vertex budget: small turned things get about two thirds of the segments they were drawn with; nothing here is seen closer than arm's length)
+export const ly = (prof, seg = 10, x = 0, y = 0, z = 0) => lathe(prof, Math.max(5, Math.round(seg * 0.7)), null, x, y, z);
+export const drum = (r0, r1, h, seg, x, y, z) => lathe([[0.001, 0], [r0, 0], [r1, h], [0.001, h]], Math.max(5, seg), null, x, y, z);
+export const bowl = (x, y, z, k = 1) => lathe([[0.001, 0], [0.036 * k, 0], [0.088 * k, 0.07 * k], [0.082 * k, 0.072 * k], [0.064 * k, 0.034 * k], [0.001, 0.014 * k]], 6, null, x, y, z);
+export const jar = (r, h, x, y, z) => lathe([[0.001, 0], [r * 0.5, 0], [r * 1.12, h * 0.45], [r * 0.9, h * 0.78], [r * 0.6, h * 0.95], [0.001, h]], 7, null, x, y, z);
 
 // ── furniture (P: a Parts; faces −z) ───────────────────────────────────────────
 /** A table w × d, h high: top, apron, square legs with stretchers (the Song table: plain, the legs set in from the corners). */
