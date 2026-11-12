@@ -1,7 +1,7 @@
 // The painted shelters (docs/settlements/kakadu.md §0–§2): each shelter's wall and ceiling surface, and the paintings laid over them in
 // layers: faded old red first, then red outlines, then fresh white and yellow infill over and across the older ones. All motifs are
 // generic and drawn by us (paint.js); a palette stone and lumps of pigment lie on the floor.
-import { MAIN, SMALL, height, rng } from '../../settlements/kakadu/layout.js';
+import { MAIN, SMALL, height, rng, shelterSpots } from '../../settlements/kakadu/layout.js';
 import { shelterSurfaces, wallZ, ceilY } from './rock.js';
 import { Panel, PAL, fish, turtle, wallaby, goanna, person, goose, stencil, slender, yam, echidna, tally, flake } from './paint.js';
 import { lathe } from '../../core/geom.js';
@@ -48,6 +48,8 @@ function ceiling(bag, S, seed) {
     if (rand() < 0.55) fish(P, x, z, 0.8 + rand() * 0.9, dir, pal, 3, rand); else turtle(P, x, z, 0.7 + rand() * 0.4, dir, pal, 3);
   }
   for (let k = 0; k < 4; k++) stencil(P, S.x0 + 3 + rand() * (S.x1 - S.x0 - 6), S.zb + 1 + rand() * (S.zl - S.zb - 3), 1, rand() * 6.28, rand() < 0.5 ? PAL.white : PAL.red, 12, rand);
+  // soot over each hearth (the smoke of generations blackening the roof)
+  for (const [kind, hx, hz] of shelterSpots()) if (kind === 'hearth' && hx > S.x0 && hx < S.x1 && hz > S.zb && hz < S.zl) { P.ell(PAL.black, hx, hz - 0.3, 1.5, 1.0, 11, 12); P.ell(PAL.black, hx - 0.2, hz - 0.5, 0.9, 0.6, 12, 10); }
   P.flush();
 }
 export function gallery(el, { bag, col }) {

@@ -70,6 +70,16 @@ export const FLIGHTS = [
   { rect: [58, -50, 60.4, -38.5], dir: 'n', y0: 11.2, y1: 21 },
 ];
 
+/** The route a visitor walks (arrival to lookout), as waypoints; nothing tall is planted within a few metres of it. */
+export const ROUTE = [[0, -14], [0, -27], [-10, -31], [10, -31], [30, -17], [34, -6], [41.2, -5], [41.2, -23], [47.2, -23], [47.2, -36], [47.2, -38], [59.2, -38], [59.2, -49], [59, -58]];
+const segD = (x, z, [ax, az], [bx, bz]) => { const dx = bx - ax, dz = bz - az, k = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz || 1))); return Math.hypot(x - ax - dx * k, z - az - dz * k); };
+/** Is (x, z) within w of a beaten track or of the visitor's route? */
+export function onWay(x, z, w) {
+  for (const t of TRACKS) for (let i = 0; i < t.length - 1; i++) if (segD(x, z, t[i], t[i + 1]) < w) return true;
+  for (let i = 0; i < ROUTE.length - 1; i++) if (segD(x, z, ROUTE[i], ROUTE[i + 1]) < w) return true;
+  return false;
+}
+
 /** The family's camp at the west end of the Main Gallery's apron, and the second fire on the billabong's north bank (docs §5). */
 export const CAMPS = [
   { c: [-34, -7], hut: [-38, -9, 0.4], lean: [-29, -4, 0], fire: [-33, -5], rack: [-27, -9], trough: true, grind: true },
@@ -95,7 +105,7 @@ export function woodland() {
   const r = rng(88), gum = [], cyc = [], log = [];
   const ok = (x, z, m) => Math.hypot(x, z) < RADIUS - 5 && !inPool(x, z, 0.12) && !inHollow(x, z, 1.5) && !CAMPS.some((k) => Math.hypot(x - k.c[0], z - k.c[1]) < 7 + m)
     && !inRect([MAIN.x0 - 6, MAIN.zb, MAIN.x1 + 6, MAIN.zl + 14], x, z) && !inRect([SMALL.x0 - 5, SMALL.zb, SMALL.x1 + 5, SMALL.zl + 12], x, z)
-    && !FLIGHTS.some((F) => inRect(F.rect, x, z, 6)) && !BLOCKS.some((B) => inRect(B.r, x, z, 2.5 + m)) && Math.hypot(x + 4, z + 2) > 9 && !TRACKS.some((t) => t.some(([a, b], i) => i && Math.hypot(x - a, z - b) < 3));
+    && !FLIGHTS.some((F) => inRect(F.rect, x, z, 6)) && !BLOCKS.some((B) => inRect(B.r, x, z, 2.5 + m)) && Math.hypot(x + 4, z + 2) > 9 && !onWay(x, z, 3.2);
   for (let k = 0; k < 2500 && gum.length < 70; k++) { const x = -86 + r() * 172, z = -34 + r() * 120; const dry = poolD(x, z) > 1.5; if (ok(x, z, 1) && (dry || r() < 0.2) && (z < -18 || r() < 0.7) && !gum.some((g) => Math.hypot(g[0] - x, g[1] - z) < 5)) gum.push([x, z, 7 + r() * 7]); }
   for (let k = 0; k < 1500 && cyc.length < 36; k++) { const x = -86 + r() * 172, z = -34 + r() * 120; if (ok(x, z, 0) && poolD(x, z) > 1.45 && !cyc.some((g) => Math.hypot(g[0] - x, g[1] - z) < 2.5)) cyc.push([x, z, 0.4 + r() * 1.1]); }
   for (let k = 0; k < 800 && log.length < 14; k++) { const x = -80 + r() * 160, z = -30 + r() * 100; if (ok(x, z, 0) && poolD(x, z) > 1.3) log.push([x, z, 1.8 + r() * 2.4, r() * 3.14]); }
@@ -105,7 +115,7 @@ export function woodland() {
 export function tuftSpots() {
   const r = rng(91), out = [];
   const ok = (x, z) => Math.hypot(x, z) < RADIUS - 6 && !inPool(x, z, -0.02) && !inHollow(x, z, 0.2) && !BLOCKS.some((B) => inRect(B.r, x, z, 0.8)) && !inRect([MAIN.x0 - 3, MAIN.zb, MAIN.x1 + 3, MAIN.zl + 4], x, z) && !inRect([SMALL.x0 - 3, SMALL.zb, SMALL.x1 + 3, SMALL.zl + 4], x, z)
-    && !TRACKS.some((t) => t.some(([a, b], i) => i && Math.hypot(x - a, z - b) < 1.6)) && !CAMPS.some((k) => Math.hypot(x - k.c[0], z - k.c[1]) < 3.4) && Math.hypot(x + 4, z + 2) > 3;
+    && !onWay(x, z, 1.8) && !CAMPS.some((k) => Math.hypot(x - k.c[0], z - k.c[1]) < 3.4) && Math.hypot(x + 4, z + 2) > 3;
   for (let k = 0; k < 6000 && out.length < 700; k++) {
     const x = -88 + r() * 176, z = -40 + r() * 128, foot = z < -16 ? 1 : 0, edge = poolD(x, z) < 1.5 ? 1 : 0;
     if (r() > 0.18 + 0.5 * foot + 0.35 * edge) continue;
@@ -144,7 +154,7 @@ export function topSpots() {
     for (let k = 0; k < n; k++) {
       const x = x0 + 1.5 + r() * (x1 - x0 - 3), z = z0 + 1.5 + r() * (z1 - z0 - 3);
       if (BLOCKS.some((C) => C !== B && C.y[1] > B.y[1] - 0.3 && inRect(C.r, x, z, 1.2))) continue;
-      if (FLIGHTS.some((F) => inRect(F.rect, x, z, 1.5))) continue;
+      if (FLIGHTS.some((F) => inRect(F.rect, x, z, 1.5)) || onWay(x, z, 3.2)) continue;
       out.push([x, z, B.y[1], B.m]);
     }
   }
