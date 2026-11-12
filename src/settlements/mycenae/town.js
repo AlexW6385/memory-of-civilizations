@@ -1,22 +1,66 @@
 // Mycenae — the townscape (docs/settlements/mycenae.md §5, §9): the houses of the citadel and the lower town, the workshops with their yards,
 // the people at the gate, on the ramp, in the Great Court and the megaron, in the lanes; the herds and the donkeys.
 
-import { RADIUS, LANES, RAMP, lots, PALACE, PAL_Y, GATE_Y, GCA, TREAS, rng, terrain, onLane } from './layout.js';
+import { RADIUS, LANES, RAMP, lots, PALACE, PAL_Y, GATE_Y, GCA, TREAS, rng, terrain, onLane, BASTION, STUB } from './layout.js';
 import { ground } from './ground.js';
 
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-107, 0], facing: 'e' } });
 const h = (x, z) => ground.height(x, z);
 const CL = ['cloth_white', 'cloth_red', 'cloth_ochre', 'cloth_indigo', 'cloth_brown'];
 
+/** The frame of a lot: (u along the front from its left end, v out from the door wall, negative outside) in the plan. */
+function frame(l) {
+  const [x0, z0, x1, z1] = l.rect, f = l.face;
+  const P = (u, v) => (f === 'n' ? [x0 + u, z0 + v] : f === 's' ? [x0 + u, z1 - v] : f === 'w' ? [x0 + v, z0 + u] : [x1 - v, z0 + u]);
+  const rot = f === 'n' || f === 's' ? 0 : Math.PI / 2;
+  const face = { n: Math.PI, s: 0, w: -Math.PI / 2, e: Math.PI / 2 }[f];     // a figure's turn to look out of the door (+z is its front at rot 0)
+  return { P, rot, face, W: l.W };
+}
+
 function yards() {
-  const Y = [], rand = rng(77);
+  const Y = [], rand = rng(77), K = { potter: 'kiln', smith: 'pithoi', weaver: 'loom', oil: 'press', ivory: 'pithoi', perfume: 'pithoi' };
   for (const l of lots()) {
-    if (l.kind !== 'workshop') continue;
-    const [x0, z0, x1, z1] = l.rect, k = ['kiln', 'pithoi', 'loom', 'press'][Math.floor(rand() * 4)];
-    const out = { n: [(x0 + x1) / 2, z0 - 2.6], s: [(x0 + x1) / 2, z1 + 2.4], w: [x0 - 2.6, (z0 + z1) / 2], e: [x1 + 2.4, (z0 + z1) / 2] }[l.face === 'n' ? 'n' : l.face === 's' ? 's' : l.face === 'w' ? 'w' : 'e'];
-    Y.push({ t: 'yard', kind: k, at: out, y: h(...out) + 0.02, seed: l.seed });
+    if (l.kind !== 'workshop' || !l.court) continue;
+    const c = l.court, at = [(c[0] + c[2]) / 2, (c[1] + c[3]) / 2];
+    const fr = frame(l), u = l.du < l.W / 2 ? l.W * 0.72 : l.W * 0.28, p = fr.P(u, -1.9);
+    void at; void rand;
+    Y.push({ t: 'yard', kind: K[l.trade] ?? 'pithoi', at: p, y: l.y - 0.02, seed: l.seed });
   }
   return Y;
+}
+
+/** The dress of every front at eye level: the pots, benches, fuel, laundry and baskets of each house, the goods of each trade (instanced street life). */
+function dress() {
+  const E = [], rand = rng(4242), put = (t, at, rot, o = {}) => E.push({ t, at, y: h(...at), rot, seed: Math.floor(rand() * 1e9), ...o });
+  for (const l of lots()) {
+    if (l.kind === 'granary') continue;
+    const fr = frame(l), W = l.W, du = l.du, dw = l.dw, side = du < W / 2 ? 1 : -1, P = fr.P, c = l.court ? 3.4 : 0;
+    const near = (uu) => Math.abs(uu - du) > dw / 2 + 0.7 && uu > 0.6 && uu < W - 0.6;
+    const at = (uu, v) => P(uu, v - c * 0);
+    const v0 = l.court ? -0.55 : -0.62;
+    // pots by the door
+    const kinds = ['pithos', 'amphora', 'water_pot', 'dark_pot'];
+    if (l.kind !== 'cult') put('pot', at(du + side * (dw / 2 + 0.75), v0), 0, { kind: kinds[Math.floor(rand() * 4)], n: 1 + Math.floor(rand() * 3) });
+    if (rand() < 0.55) put('pot', at(du - side * (dw / 2 + 0.7), v0 - 0.1), 0, { kind: rand() < 0.5 ? 'water_pot' : 'amphora', n: 2 });
+    if (rand() < 0.55) { const uu = du - side * (dw / 2 + 1.9); if (near(uu)) put('bench', at(uu, v0 - 0.1), fr.rot, { len: 1.5, mat: 'mudbrick' }); }
+    if (rand() < 0.5) { const uu = side > 0 ? W - 1.1 : 1.1; if (near(uu)) put('firewood', at(uu, v0 + 0.1), fr.rot, { len: 1.2 }); }
+    if (rand() < 0.5) { const uu = du + side * (dw / 2 + 2.0); if (near(uu)) put(rand() < 0.5 ? 'basket' : 'sacks', at(uu, v0), fr.rot, { n: 2 }); }
+    if (W > 7 && rand() < 0.3) put('laundry', at(W / 2 + (rand() - 0.5), -1.25), fr.rot, { len: 3 });
+    if (rand() < 0.28) { const uu = du + side * (dw / 2 + 3.0); if (near(uu)) put('chickens', at(uu, -1.0), rand() * 6, { kind: 'hen' }); }
+    if (rand() < 0.2) { const uu = du - side * (dw / 2 + 2.9); if (near(uu)) put('drying_tray', at(uu, -0.9), rand() * 6); }
+    // the trade's goods before the shop
+    if (l.kind === 'workshop') {
+      const g = { potter: () => { for (let k = 0; k < 5; k++) put('pot', at(du + (k - 2) * 0.7, -1.5 - (k % 2) * 0.45), 0, { kind: ['water_pot', 'amphora', 'dark_pot', 'water_pot', 'pithos'][k], n: 2 }); },
+        smith: () => { put('crates', at(du - 1.3, -1.2), fr.rot, { n: 2 }); put('barrel', at(du + 1.4, -1.1), 0, { n: 1 }); },
+        weaver: () => { put('laundry', at(W / 2, -1.5), fr.rot, { len: 3.5 }); put('basket', at(du + 1.3, -1.0), 0, { n: 3 }); },
+        oil: () => { for (let k = 0; k < 3; k++) put('pot', at(du + (k - 1) * 1.0, -1.4), 0, { kind: 'pithos', n: 1 }); put('sacks', at(du + 2.2, -1.1), fr.rot, { n: 3 }); },
+        ivory: () => { put('crates', at(du - 1.2, -1.1), fr.rot, { n: 1 }); put('basket', at(du + 1.2, -1.0), 0, { n: 1 }); },
+        perfume: () => { for (let k = 0; k < 4; k++) put('pot', at(du + (k - 1.5) * 0.6, -1.3 - (k % 2) * 0.3), 0, { kind: 'water_pot', n: 1 }); } }[l.trade];
+      g?.();
+    }
+    if (l.kind === 'store') put('sacks', at(du + 1.4, v0), fr.rot, { n: 4 });
+  }
+  return E;
 }
 
 /** The people at their places: warriors at the gate, a priestess at the circle, the wanax's household in the court and the hall, scribes, porters, women at the houses. */
@@ -60,6 +104,32 @@ function people() {
     else if (r < 0.75) man(o, h(...o), rand() * 6.28, { carry: rand() < 0.5 ? 'sack' : 'none', pose: rand() < 0.4 ? 'talk' : 'stand' });
     else woman(o, h(...o), rand() * 6.28, { child: true, h: 1.1 });
   }
+  // ── the approach road: the traffic of a great house's gate, the road's whole length in the arrival's view ──
+  const road = LANES[0];
+  const onRoad = (x, off) => { let z = -2; for (let i = 0; i < road.length - 1; i++) { const [ax, az] = road[i], [bx, bz] = road[i + 1]; if (x >= Math.min(ax, bx) && x <= Math.max(ax, bx)) { z = az + (bz - az) * (x - ax) / (bx - ax || 1); break; } } return [x, z + off]; };
+  for (let x = -186; x < -112; x += 3.4 + rand() * 3) {
+    const [px, pz] = onRoad(x, (rand() < 0.5 ? -1 : 1) * (0.9 + rand() * 1.5)), east = rand() < 0.55, rot = east ? Math.PI / 2 : -Math.PI / 2, k = rand();
+    if (k < 0.3) (rand() < 0.5 ? man : woman)([px, pz], h(px, pz), rot, { carry: ['sack', 'pot', 'basket'][Math.floor(rand() * 3)] });
+    else if (k < 0.5) woman([px, pz], h(px, pz), rot, { carry: 'pot' });
+    else if (k < 0.65) { man([px, pz], h(px, pz), rot + 0.4, { pose: 'talk' }); man([px + 1.0, pz + 0.2], h(px + 1, pz), rot + 2.9, { pose: 'talk' }); }
+    else if (k < 0.8) man([px, pz], h(px, pz), rot, { dress: 'loincloth', cloth: 'cloth_brown', carry: 'staff', pose: 'staff', len: 1.7 });
+    else woman([px, pz], h(px, pz), rot, { child: true, h: 1.05 });
+  }
+  // sentries on the bastion and on the end of the wall, spears upright, looking down the road
+  for (const [x, z, y] of [[-102, 6, GATE_Y + 6.2], [-97, 8.5, GATE_Y + 6.2], [-100, -8, GATE_Y + 7.0], [-95, -6, GATE_Y + 7.0]]) man([x, z], y, -Math.PI / 2 + (rand() - 0.5) * 0.5, { carry: 'staff', pose: 'staff', len: 1.9, dress: 'tunic', cloth: 'cloth_red', beard: true });
+  void BASTION; void STUB;
+  // the workers at the shops: the potter at his kiln, the weaver at the loom, the smith at the door, the oil-presser with his sacks
+  for (const l of lots()) {
+    if (l.kind !== 'workshop' || rand() < 0.15) continue;
+    const fr = frame(l), du = l.du, W = l.W, o = { potter: ['squat', 0.0], smith: ['stand', 0.6], weaver: ['sit_ground', 0.0], oil: ['stand', 0.0], ivory: ['sit_low', 0.0], perfume: ['stand', 0.0] }[l.trade] ?? ['stand', 0];
+    const u = l.du < W / 2 ? W * 0.72 - 0.9 : W * 0.28 + 0.9, p = fr.P(u, l.court ? -2.2 : -1.0);
+    man(p, h(...p), fr.face + (rand() - 0.5), { pose: o[0], dress: l.trade === 'smith' ? 'loincloth' : 'shendyt', cloth: 'cloth_brown' });
+    if (rand() < 0.6) { const q = fr.P(du + 1.1, -1.2); woman(q, h(...q), fr.face + 0.4, rand() < 0.5 ? { carry: 'pot' } : { pose: 'talk' }); }
+    void o; void W;
+  }
+  // the grave circle's visitors and the dromos of the Treasury: a procession of mourners with offerings, a priest
+  for (let k = 0; k < 4; k++) woman([TREAS.x0 + 10 + k * 3.4, TREAS.z + (k % 2 ? 1.2 : -1.2)], TREAS.y + 0.3 + 0.0, Math.PI / 2, { carry: k % 2 ? 'pot' : 'basket', cloth: 'cloth_white', cloth2: 'cloth_indigo' });
+  void GCA;
   return T;
 }
 function beasts() {
@@ -73,11 +143,25 @@ function beasts() {
 }
 
 export async function town() {
-  const plans = [], L = lots();
-  const kindEl = (l) => (l.kind === 'granary' ? null : { t: 'house', rect: l.rect, y: l.y, face: l.face, storeys: l.storeys, seed: l.seed, kind: l.kind, ...(l.inside ? { low: l.y - 2.5 } : {}) });
-  const els = L.map(kindEl).filter(Boolean);
-  for (let i = 0; i < els.length; i += 16) plans.push(base(`mycenae-houses-${i / 16}`, 'mycenaean', els.slice(i, i + 16)));
+  const plans = [], L = lots().filter((l) => l.kind !== 'granary');
+  // houses in tiles of 64 m (each tile a few merged draws, culled together)
+  const tiles = new Map();
+  for (const l of L) { const k = Math.floor(((l.rect[0] + l.rect[2]) / 2 + 256) / 96) + '_' + Math.floor(((l.rect[1] + l.rect[3]) / 2 + 256) / 96); if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(l); }
+  for (const [k, list] of tiles) {
+    const els = [], rooms = [];
+    for (const l of list) {
+      const fr = frame(l), door = fr.P(l.du, -1.3), gd = ground.height(...door);
+      els.push({ t: 'house', rect: l.rect, y: l.y, face: l.face, storeys: l.storeys, seed: l.seed, kind: l.kind, trade: l.trade, du: l.du, gd, lit: l.lit, ...(l.inside ? { low: l.y - 2.5 } : {}) });
+      if (l.court) els.push({ t: 'forecourt', rect: l.court, face: l.face, y: l.y, du: l.du, seed: l.seed });
+      const [x0, z0, x1, z1] = l.rect, st = l.kind === 'house' ? l.storeys : 1;
+      const name = l.kind === 'store' ? 'a storehouse' : l.kind === 'workshop' ? `a ${l.trade}'s workshop` : l.kind === 'cult' ? 'a shrine' : 'a house';
+      rooms.push({ id: name, rect: [x0 + 0.5, z0 + 0.5, x1 - 0.5, z1 - 0.5], y: l.y, kind: 'inner' });
+      if (st > 1) rooms.push({ id: 'the loft', rect: [x0 + 0.5, z0 + 0.5, x1 - 0.5, z1 - 0.5], y: l.y + 2.95, kind: 'inner' });
+    }
+    plans.push({ ...base(`mycenae-houses-${k}`, 'mycenaean', els), rooms });
+  }
   plans.push(base('mycenae-yards', 'mycenaean', yards()));
+  plans.push(base('mycenae-dress', 'life', dress()));
   plans.push(base('mycenae-people', 'life', people()));
   plans.push(base('mycenae-beasts', 'life', beasts()));
   return plans;
