@@ -37,7 +37,7 @@ export const ARRIVALS = {
   'giza':             [160, 0.1, -285, 2.563, 0.2],      // the Great Pyramid whole from the north-east across the plateau, two faces (the enclosure's corner had stood in front)
   'mamluk-cairo':     [110, null, 120, 1.03, 0.22],      // Sultan Hasan's walls, dome and minarets from the square
   'djenne':           [95, 0.1, 30, 1.25, 0.13],         // the Great Mosque over the market
-  'lalibela':         [-217, 0.1, 113, -2.356, -0.42],   // at the pit's north-west corner, down its diagonal onto the cross
+  'lalibela':         [-236, null, 176, -0.45, -0.27],   // on the hill's shoulder south-west of Bete Giyorgis, the triple cross on its roof seen whole from above, the pilgrims' trench going down on the left, pilgrims sitting at the edge below
   'kilwa':            [-9.95, null, 32.5, 0, 0.12],      // in the Great Mosque, down an aisle between its pillars to the great dome
   'great-zimbabwe':   [46, 0.1, 60, 3.1416, 0.1],        // the Great Enclosure's curved walls
   'knossos':          [0, 0.2, 22, 0, 0.05],             // the central court between its red columns
