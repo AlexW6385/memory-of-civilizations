@@ -33,5 +33,23 @@ export function shangCourt(el, { bag, col }) {
   // a drain of stones across the court's southern end, a line of stone bases where the old colonnade stood
   bag.add('granite_grey', box(COURT[0] + 4, 0.0, 30, COURT[2] - 4, 0.05, 30.5));
   for (let k = 0; k < 9; k++) { const x = AXIS - 20 + k * 5; bag.add('granite_grey', lathe([[0.3, 0], [0.26, 0.12], [0.001, 0.14]], 8, null, x, 0, 26)); }
+  // the offering tables before the stair: low tables of black lacquer with the bronze sets, a plinth of jars of grain wine beside each
+  for (const s of [-1, 1]) { const x = AXIS + s * 5.2, z = -64.5;
+    bag.add('lacquer_black', box(x - 1.3, 0.34, z - 0.5, x + 1.3, 0.4, z + 0.5)); for (const a of [-1.15, 1.15]) for (const b of [-0.35, 0.35]) bag.add('lacquer_black', box(x + a - 0.05, 0, z + b - 0.05, x + a + 0.05, 0.34, z + b + 0.05)); col.rect([x - 1.3, z - 0.5, x + 1.3, z + 0.5], 0, 0.4);
+    vessel('ding', bag, x - 0.8, 0.4, z, 0.9); vessel('gui', bag, x - 0.1, 0.4, z + 0.1, 0.9); vessel('zun', bag, x + 0.55, 0.4, z, 1.1); vessel('jue', bag, x + 1.0, 0.4, z - 0.1, 1); vessel('gu', bag, x + 1.0, 0.4, z + 0.25, 1);
+    bag.add('reed_mat', box(x - 1.7, 0.01, z + 0.7, x + 1.7, 0.04, z + 2.2));
+    for (let k = 0; k < 5; k++) bag.add(k % 2 ? 'pottery_dark' : 'terracotta', lathe([[0.001, 0], [0.2, 0.02], [0.3, 0.3], [0.22, 0.55], [0.12, 0.62], [0.001, 0.62]], 9, null, x + s * 2.4 + (k % 3) * 0.7 * s, 0, z - 0.4 + Math.floor(k / 3) * 0.8)); }
+  // the drying frames of the divination craft at the court's flanks: shells and scapulae hung to cure, a cleaning bench with a mortar and basket
+  for (const [x, z, s] of [[-3.4, -46, 1], [43.4, -46, -1], [-3.4, -36, 1], [43.4, -36, -1]]) {
+    for (const a of [0, 3.2]) bag.add('timber', box(x - 0.06, 0, z + a - 0.06, x + 0.06, 2.0, z + a + 0.06)); bag.add('timber', box(x - 0.06, 1.9, z, x + 0.06, 2.0, z + 3.2)); col.rect([x - 0.1, z - 0.1, x + 0.1, z + 3.3], 0, 2);
+    for (let k = 0; k < 8; k++) { const zz = z + 0.2 + k * 0.38; bag.add('rope_fibre', rod([x, 1.9, zz], [x, 1.45, zz], 0.008, 3)); bag.add(k % 3 ? 'ivory' : 'hide_tan', box(x - 0.1 + s * 0.02, 1.0, zz - 0.14, x + 0.1 + s * 0.02, 1.45, zz + 0.14)); }
+    bag.add('timber', box(x + s * 1.2, 0.5, z + 0.8, x + s * 2.6, 0.58, z + 1.6)); for (const a of [0.1, 1.3]) for (const b of [0.9, 1.5]) bag.add('timber', box(x + s * (1.2 + a), 0, z + b - 0.05, x + s * (1.2 + a) + 0.1, 0.5, z + b + 0.05));
+    col.rect([x + Math.min(s * 1.2, s * 2.6), z + 0.8, x + Math.max(s * 1.2, s * 2.6), z + 1.6], 0, 0.58);
+    for (let k = 0; k < 5; k++) bag.add('ivory', box(x + s * (1.4 + k * 0.22), 0.58, z + 1.0, x + s * (1.4 + k * 0.22) + 0.15, 0.62, z + 1.4));
+    bag.add('granite_grey', lathe([[0.001, 0.58], [0.2, 0.58], [0.16, 0.76], [0.001, 0.76]], 8, null, x + s * 2.2, 0, z + 1.2)); bag.add('wicker', lathe([[0.001, 0], [0.3, 0.02], [0.34, 0.3], [0.001, 0.3]], 8, null, x + s * 1.2, 0, z + 2.4)); }
+  // stacks of wood for the burnt offerings (liao), split billets in crossed layers, beside the pits' ends
+  for (const [x, z] of [[-0.6, -57], [40.6, -57]]) for (let l = 0; l < 5; l++) bag.add(l % 2 ? 'bark_grey' : 'timber', l % 2 ? box(x - 0.9, 0.15 + l * 0.18, z - 0.7, x + 0.9, 0.3 + l * 0.18, z + 0.7) : box(x - 0.7, 0.15 + l * 0.18, z - 0.9, x + 0.7, 0.3 + l * 0.18, z + 0.9));
+  // tether posts for the beasts led to the sacrifice, between the two rows of pits (the beasts are in town.js)
+  for (const x of [6, 12.5, 27.5, 34]) { bag.add('timber', lathe([[0.1, 0], [0.08, 1.3]], 6, null, x, 0, -49)); bag.add('bronze', lathe([[0.001, 1.3], [0.1, 1.34], [0.001, 1.42]], 6, null, x, 0, -49)); col.circle(x, -49, 0.14, 0, 1.3); }
   void HALL; void wheel;
 }
