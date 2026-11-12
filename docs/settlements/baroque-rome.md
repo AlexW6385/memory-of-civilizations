@@ -83,6 +83,23 @@ Arrival is in the oval, looking west at the church; the walk runs past the obeli
 
 The Cappella Sistina's polyphony (Palestrina, Allegri's Miserere), the organ, and Corelli's strings in the palaces. [stated: Wikipedia "Miserere (Allegri)"; "Arcangelo Corelli"]
 
+## 5b. Deepening pass (the Suzhou standard)
+
+Gaps found against Ming Suzhou, and what closed them (`src/styles/baroque/{borgo,dress,index}.js`, `src/settlements/baroque-rome/`):
+
+- **Few houses with life, plain walls.** The lots about the Borgo and the oval's mouth (within 115 m of (175, 0)) are no longer the shared house: they take the Borgo's own casa fronts (bottega, madonnella, sign, shutters) — about a hundred more houses; eight of them, and every third shop-house of the three rows, can be entered. [inferred: the Borgo's fabric continued the same type beyond the spina]
+- **Weathering.** Damp at the foot of the wall, patches where the stucco has fallen and shows brick, rain-streaks under the sills, travertine paracarri at jambs and corners, notices pasted on the walls (edicts, pasquinades), iron rings to tie a mule, stone seats by the door, hanging wicker birdcages, striped canvas awnings (tende) over shops. [inferred from period views; paracarri: stated, Roman usage]
+- **Trades.** The shops sold only five things; now also an apothecary (jars, herbs hung to dry), an osteria (casks, a bench and table, the bush hung out for wine) and a cobbler (lasts, boots hung up); the baker's room has its brick oven with the fire in it. [inferred]
+- **Street life at every front.** Barrels, crates, firewood, sacks, baskets, stools, a cat on the step, women talking, the cobbler at his stool, men on the osteria's bench, a baker's boy; a market at the Borgo's mouth (six stalls with sellers and buyers, a water-seller with his yoke, a handcart, two carts); Swiss guards at the colonnade's mouths and on the sagrato [stated: the Swiss Guard has served the pope since 1506]; pilgrims resting on the steps. Walkers added: water-seller, basket-woman, guard (42 near the visitor by day).
+- **The piazza's pavement.** Rays and bands of travertine in the oval's dark setts, a ring of granite about the obelisk, and the two focal stones set in the pavement between the obelisk and the fountains, from which each colonnade's four rows of columns appear as one [stated: Wikipedia "St. Peter's Square"]; the retta crossed by travertine bands.
+- **Castel Sant'Angelo and the Passetto.** The fortress: battered brick base with machicolated parapet and merlons, four round bastions with merlons, the drum with 36 pilasters, string courses and windows, the papal apartments with framed windows under a hipped roof, the angel on top. The Passetto: a plastered rubble wall with buttresses, a blind arcade, the gallery's small windows, corbels and merlons [stated: a raised wall-walk; Wikipedia "Passetto di Borgo"; its length compressed here].
+- **Inside St Peter's.** The Confessio before the papal altar: a balustrade of coloured marble round a sunk floor with ninety-five gilt lamps burning on it [stated: stpetersbasilica.info, Confessio]; twelve wooden confessionals against the arms' sides with their curtains and kneeling boards; stands of votive candles; kneeling benches at the arms' ends; about fifty people: pilgrims kneeling at the rail, standing in the nave, penitents at the confessionals, a canon, priests, guards. [inferred: positions; the confessionals of the penitentiaries stood in the church from the 16th c.]
+- **The Tiber.** Floating ship-mills moored in the stream, each two hulls with the wheel between and a plank hut [stated: the Tiber's ship-mills in use into the 19th century; Wikipedia "Ship mill", Turismo Roma "The ancient mills on the Tiber"]; stone landings cut into the unembanked bank with a timber jetty and posts; rowboats with fishermen, a barge with its crew, washerwomen with their lines on the bank. [inferred: the places]
+- **Vatican gardens.** A formal parterre south-west of the church: gravel paths, lawn compartments edged in clipped box with a cone at the middle, a fountain where the paths cross, lemon trees in pots, clipped cypresses round the edge, a low wall; gardeners and two friars. [inferred: the form of a 17th-century giardino segreto]
+- **Ground and planting.** The Borgo's streets and the lanes of the quarter are cobbled and dusty (the ground's cover), no trees grow in them; the cardinal's pilgrims no longer stand in the line of the walk.
+
+Still below Suzhou: the upper storeys of the shops cannot be entered (the stair door is shut); the outer ring beyond 115 m is still the shared Roman house with little eye-level detail; no music zone for the Borgo streets (the engine keys zones to the landmark's rooms; a non-open room would also add indoor reverb).
+
 ## Sources
 
 - [St. Peter's Basilica — Wikipedia](https://en.wikipedia.org/wiki/St._Peter%27s_Basilica)
@@ -108,6 +125,10 @@ The Cappella Sistina's polyphony (Palestrina, Allegri's Miserere), the organ, an
 - [Bronze statue of St Peter — stpetersbasilica.info](https://stpetersbasilica.info/Statues/StPeter/StPeter.htm)
 - [Tomb of Urban VIII — stpetersbasilica.info](https://mail.stpetersbasilica.info/Monuments/UrbanVIII/UrbanVIII.htm)
 - [Tomb of Paul III — stpetersbasilica.info](https://stpetersbasilica.info/Monuments/PaulIII/PaulIII.htm)
+- [Ship mill — Wikipedia](https://en.wikipedia.org/wiki/Ship_mill)
+- [The ancient mills on the Tiber — Turismo Roma](https://turismoroma.it/en/page/ancient-mills-tiber)
+- [The Passetto di Borgo — Turismo Roma](https://turismoroma.it/en/places/passetto-di-borgo)
+- [The Confessio — stpetersbasilica.info](https://stpetersbasilica.info/Confessio/Confessio.htm)
 - [Statue of St Peter in the square — stpetersbasilica.info](https://stpetersbasilica.info/Exterior/StPeterStatue/StPeterStatue.htm)
 - [Edicola sacra / Madonnella — Wikipedia](https://it.wikipedia.org/wiki/Edicola_sacra)
 - [Fountains in Rome — Wikipedia](https://en.wikipedia.org/wiki/List_of_fountains_in_Rome)

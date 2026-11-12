@@ -3,10 +3,10 @@ import '../../styles/vernacular/houses-med.js';
 import '../../styles/baroque/index.js';
 import '../../styles/vernacular/index.js';
 import '../../styles/ming/index.js';
-import { stpeter, vatican, passetto, bridge, river } from './plan.js';
+import { stpeter, vatican, passetto, bridge, river, tiberworks } from './plan.js';
 import music from './music.js';
 import { houses } from './town.js';
 import { streetPlans } from './street.js';
 export { music };
 export const landmarks = [{ plan: stpeter, music }];
-export async function town() { return [vatican, passetto, bridge, river, ...streetPlans(), ...(await houses())]; }
+export async function town() { return [vatican, passetto, bridge, river, tiberworks, ...streetPlans(), ...(await houses())]; }
