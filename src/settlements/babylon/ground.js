@@ -1,7 +1,7 @@
 // Babylon — the ground: the flat alluvium, the baked-brick paving of the Processional Way, dusty
 // lanes, date palms in gardens and along the Euphrates, reeds on its banks; the hard, hazy light.
 
-import { RADIUS, PALACE, PRECINCT, ESAGILA, RIVER, BRIDGE, MARKET, riverX, height, inRiver, onWay, inRect, inLot, inQuay, onLane, yards, lots } from './layout.js';
+import { RADIUS, WAY, WALL_Z, PALACE, PRECINCT, ESAGILA, RIVER, BRIDGE, MARKET, riverX, height, inRiver, onWay, inRect, inLot, inQuay, onLane, yards, lots } from './layout.js';
 
 function cover(x, z, h) {
   const c = { sand: 0.5, grass: 0.05, rock: 0, soil: 0.45, fields: 0, dry: 0.9, warmth: 0.85, red: 0.2, road: 0, snow: 0, forest: 0 };
@@ -26,6 +26,8 @@ function planting(x, z) {
   // the banks: Euphrates poplar and tamarisk at the water, date orchards behind them (Psalm 137's willows are Populus euphratica)
   if (Math.abs(dr) < 70) return { poplar: 0.35, tamarisk: 0.55, date_palm: dr < 0 ? 1.0 : 0.7, grass_dry: 8 };
   if (x < -200) return { date_palm: 1.1, tamarisk: 0.2, grass_dry: 8 };
+  // the approach outside the inner wall: date palms and tamarisk in groves on either hand of the Way, their crowns rising over the glazed walls
+  if (z < WALL_Z - 18 && Math.abs(x - WAY.x) < 46) return Math.abs(x - WAY.x) > 14 ? { date_palm: 0.9, tamarisk: 0.35, grass_dry: 6 } : null;
   return { date_palm: 0.12, tamarisk: 0.06 };
 }
 export const ground = {

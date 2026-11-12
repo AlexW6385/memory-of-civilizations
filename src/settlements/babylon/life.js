@@ -107,6 +107,38 @@ export function lifeElements() {
     (k % 3 === 0 ? man : woman)([x + (east ? 1.0 : -1.0), z], 0.12, rot + Math.PI, { pose: 'sit_ground' });
     if (k % 2 === 1) man([x + (east ? -2.2 : 2.2), z + 0.8], 0.12, rot, { pose: 'talk', carry: 'none' });
   }
+  // ---- the Way before the gate (§13.6): where the visitor arrives — pilgrims and sellers between the glazed walls, a file of
+  // priests going down to the gate with incense, a loaded ass, children at their games, water carriers, dogs. Nothing within ~4 m
+  // of the arrival (x −40, z −360) or in the view down the middle for the first few metres.
+  {
+    const ok = ([x, z]) => !(Math.abs(x - WAY.x) < 4.2 && z > -366 && z < -350);
+    const put = (fn, at, ...rest) => { if (ok(at)) fn(at, ...rest); };
+    // sellers on mats along both walls, a buyer or two before each
+    const NW = [['heap', 'baskets'], ['bread', 'baskets'], ['pottery', 'pottery'], ['heap', 'melons'], ['greens', 'heap'], ['bolts', 'bolts']];
+    for (let k = 0, z = -376; z < -322; k++, z += 8.6 + rand() * 2) {
+      const east = k % 2 === 0, x = WAY.x + (east ? 6.6 : -6.6), rot = east ? -Math.PI / 2 : Math.PI / 2;
+      if (!ok([x, z])) continue;
+      L.push({ t: 'goods_mat', at: [x, z], y: 0.12, rot, seed: Math.floor(rand() * 1e9), goods: NW[k % NW.length], mat: 'reed_mat' });
+      (k % 3 === 1 ? man : woman)([x + (east ? 1.1 : -1.1), z + 0.2], 0.12, rot + Math.PI, { pose: 'sit_ground' });
+      if (rand() < 0.7) put(rand() < 0.5 ? man : woman, [x + (east ? -1.6 : 1.6), z + (rand() - 0.5) * 1.2], 0.12, rot, { pose: rand() < 0.5 ? 'stand' : 'talk', carry: rand() < 0.4 ? 'basket' : 'none' });
+    }
+    // the file of Marduk's priests going down to the gate with incense, the foremost with the staff of the god
+    for (let k = 0; k < 7; k++) {
+      const at = [WAY.x - 5.2 + (k % 2) * 1.3, -343 + k * 2.3];
+      man(at, 0.12, 0, { cloth: 'linen', cloth2: 'cloth_white', over: 'sash', hair: 'shaven', beard: false, pose: k === 0 ? 'staff' : 'stand', carry: k === 0 ? 'staff' : k === 3 || k === 5 ? 'pot' : 'none', len: 2.0 });
+    }
+    // a loaded ass with its driver by the east wall, and a second beast tethered at a trough's post
+    animal('donkey', [WAY.x + 8.4, -336], 0.12, Math.PI, { gear: true });
+    worker([WAY.x + 7.4, -333.6], 0.12, Math.PI * 1.1, { carry: 'staff', len: 1.4, pose: 'staff' });
+    // water carried from the Euphrates: women with jars on their heads walking along the walls
+    for (const [dx, z] of [[-8.0, -352], [7.8, -372], [-7.4, -318]]) woman([WAY.x + dx, z], 0.12, dx < 0 ? Math.PI : 0, { carry: 'pot' });
+    // pilgrims in twos and threes, a family with children, boys at a game of knucklebones in the dust, dogs
+    for (const [dx, z, n] of [[3.4, -354, 2], [-2.6, -372, 3], [5.0, -318, 2], [-6.0, -341, 2]]) for (let i = 0; i < n; i++) put(rand() < 0.65 ? man : woman, [WAY.x + dx + i * 0.8, z + (rand() - 0.5) * 0.8], 0.12, rand() < 0.5 ? 0 : Math.PI, { pose: i === 1 && n === 2 ? 'talk' : 'stand' });
+    for (const [dx, z] of [[-4.0, -330], [4.6, -347]]) put(boy, [WAY.x + dx, z], 0.12, rand() * 6.28, { pose: 'squat' });
+    put(boy, [WAY.x + 5.4, -346.6], 0.12, rand() * 6.28, { pose: 'squat' });
+    put(boy, [WAY.x - 3.2, -329.4], 0.12, rand() * 6.28, { pose: 'stand' });
+    for (const [dx, z] of [[-6.2, -362], [7.0, -326]]) put((at, y, rot) => animal('dog', at, y, rot), [WAY.x + dx, z], 0.12, rand() * 6.28);
+  }
   // the precinct gate: priests of Marduk in white linen with the staff, two at each side of the way
   for (const [dx, dz] of [[-7, -64], [7, -64], [-7.8, -68], [7.8, -68]]) man([WAY.x + dx, dz], 0.12, Math.PI / 2 * (dx < 0 ? -1 : 1) + Math.PI, { cloth: 'linen', cloth2: 'cloth_white', over: 'sash', pose: 'staff', carry: 'staff', len: 1.7, hair: 'shaven', beard: false });
   void RADIUS; void PALACE; void WALL_Z; void RIVER; void MARKET;
