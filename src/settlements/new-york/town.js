@@ -30,6 +30,58 @@ const SUBWAYS = (() => {
   return out;
 })();
 const nearStand = (x, z, m) => [...NEWSSTANDS, ...SUBWAYS].some((e) => Math.hypot(e.at[0] - x, e.at[1] - z) < m);
+/**
+ * What stands in the street besides the cars (grid frame; docs/settlements/new-york.md §1m): Fifth Avenue Coach double-deckers at their stops on Fifth and Madison
+ * Avenues (the stop on the far side of the cross street, at the kerb), delivery vans at the kerbs of the cross streets (the garment district's thickest), the
+ * peddlers' pushcarts under their umbrellas on the corners, and the unemployed men selling apples from a crate on the avenues' pavements (autumn 1931: the
+ * apple sellers of the Depression, from the winter of 1930). `box` is the half-extent [x, z] kept clear of cars.
+ */
+const EXTRA = (() => {
+  const rand = rng0(1941), vehicles = [], carts = [], apples = [];
+  const within = (x, z) => Math.hypot(x, z) < RADIUS - 60;
+  const free = (x, z, hx, hz) => [[-1, -1], [1, -1], [-1, 1], [1, 1], [0, 0]].every(([a, b]) => { const px = x + a * hx, pz = z + b * hz; return within(px, pz) && !inLot(px, pz, 0.8) && !inSpecial(px, pz, 1.0) && !onBroadway(px, pz, 2) && !onElStair(px, pz, 1.5); });
+  const apart = (x, z, hx, hz) => !vehicles.some((v) => Math.abs(v.at[0] - x) < v.box[0] + hx + 0.5 && Math.abs(v.at[1] - z) < v.box[1] + hz + 0.5);
+  // the buses: Fifth (the near-side lanes ±5.9) and Madison (±5.6); northbound (rot 0, toward −z) stops beyond the crossing to the north, southbound (rot π) beyond it to the south
+  for (const [ax, w, name] of AVENUES) {
+    if (name !== '5th' && name !== 'Madison') continue;
+    const lane = name === '5th' ? 5.9 : 5.6;
+    for (const n of [31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43]) for (const rot of [0, Math.PI]) {
+      const forced = name === '5th' && ((n === 37 && rot === Math.PI) || (n === 36 && rot === 0));
+      if (!forced && rand() > (name === '5th' ? 0.3 : 0.16)) continue;
+      const sz = streetZ(n), x = ax + (rot === 0 ? lane : -lane), z = sz + (rot === 0 ? -1 : 1) * (6 + 2.5 + 4.8);
+      if (!free(x, z, 1.4, 5.2) || STREETS.some(([s2, sw]) => Math.abs(z - s2) < sw / 2 + 5.4) || !apart(x, z, 2.6, 5.2)) continue;
+      vehicles.push({ k: 'bus', at: [x, z], rot, box: [2.6, 7.2], seed: Math.floor(rand() * 1e6) });
+    }
+  }
+  // the vans: along the cross streets at the kerb (the south kerb heading east, the north kerb heading west: traffic keeps right), more of them west of Fifth
+  const BODY = ['car_cream', 'shutter_green', 'car_blue', 'car_red', 'paint_white', 'paint_cab_yellow', 'car_cream'];
+  for (const [sz] of STREETS) for (let x = -RADIUS + 20 + rand() * 30; x < RADIUS - 70; x += (x < -10 ? 66 : 130) + rand() * 70) {
+    const south = rand() < 0.5, z = sz + (south ? 4.6 : -4.6);
+    if (AVENUES.some(([ax, w]) => Math.abs(x - ax) < w / 2 + 4.5) || !free(x, z, 3.2, 1.3) || !apart(x, z, 3.2, 1.3)) continue;
+    vehicles.push({ k: 'van', at: [x, z], rot: south ? -Math.PI / 2 : Math.PI / 2, box: [5.4, 2.4], seed: Math.floor(rand() * 1e6), body: BODY[Math.floor(rand() * BODY.length)] });
+  }
+  // the pushcarts, one corner in six on the avenues' pavements beyond the crossing (clear of the newsstands and the signal posts)
+  for (const [ax, w] of AVENUES) for (const [sz, sw] of STREETS) for (const sx of [-1, 1]) for (const szs of [-1, 1]) {
+    if (rand() > 0.3) continue;
+    const x = ax + sx * (w / 2 + 1.55), z = sz + szs * (sw / 2 + 5.2), rot = szs > 0 ? 0 : Math.PI;
+    if (!free(x, z, 1.3, 1.0) || nearStand(x, z, 3.2) || carts.some((c) => Math.hypot(c.at[0] - x, c.at[1] - z) < 8)) continue;
+    carts.push({ at: [x, z], rot, seed: Math.floor(rand() * 1e6), top: rand() < 0.5 ? 'cloth_red' : 'cloth_ochre' });
+  }
+  // the apple sellers: a crate of apples on the kerb side of the pavement, the man behind it in a worn coat
+  for (const [ax, w, name] of AVENUES) {
+    if (name === '3rd') continue;
+    for (let z = -RADIUS + 60 + rand() * 30; z < RADIUS - 60; z += (name === '5th' ? 70 : 120) + rand() * 60) {
+      const sg = rand() < 0.5 ? -1 : 1, x = ax + sg * (w / 2 + 1.0), zz = z;
+      if (!free(x, zz, 0.9, 0.6) || !free(x + sg * 1.0, zz, 0.4, 0.4) || nearStand(x, zz, 2.4) || STREETS.some(([s2, sw]) => Math.abs(zz - s2) < sw / 2 + 2.5) || carts.some((c) => Math.hypot(c.at[0] - x, c.at[1] - zz) < 4)) continue;
+      apples.push({ at: [x, zz], sg, seed: Math.floor(rand() * 1e9) });
+    }
+  }
+  return { vehicles, carts, apples };
+})();
+/** A car's place is taken by a standing bus or van. */
+const nearVehicle = (x, z) => EXTRA.vehicles.some((v) => Math.abs(v.at[0] - x) < v.box[0] && Math.abs(v.at[1] - z) < v.box[1]);
+/** A point at (lx, lz) of a thing placed at `at` turned by `rot` (as Matrix4.makeRotationY). */
+const loc = (at, rot, lx, lz) => [at[0] + lx * Math.cos(rot) + lz * Math.sin(rot), at[1] - lx * Math.sin(rot) + lz * Math.cos(rot)];
 const base = (id, elements) => ({ id, style: 'artdeco', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: [{ t: 'turned', angle: GRID, elements }], rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: entranceOf() });
 /** A placed thing of the grid's frame in the settlement's: its place and its turn. */
 const placed = (e) => ({ ...e, at: toCity(...e.at), rot: (e.rot ?? 0) + GRID });
@@ -38,7 +90,7 @@ function streetLife() {
   const rand = rng(1931), L = [], inside = (x, z) => Math.hypot(x, z) < RADIUS - 45;
   const crossing = (x, z, m) => AVENUES.some(([ax, w]) => Math.abs(x - ax) < w / 2 + m) && STREETS.some(([sz, w]) => Math.abs(z - sz) < w / 2 + m);
   const car = (x, z, rot) => {
-    if (!inside(x, z) || crossing(x, z, 2) || onBroadway(x, z, 2) || inLot(x, z, 1.5) || inSpecial(x, z, 1.4)) return;
+    if (!inside(x, z) || crossing(x, z, 2) || onBroadway(x, z, 2) || inLot(x, z, 1.5) || inSpecial(x, z, 1.4) || nearVehicle(x, z)) return;
     // no two cars in one place (a car 4.4 m long: keep 5.2 m between centres)
     if (L.some((c) => c.t === 'car' && Math.hypot(c.at[0] - x, c.at[1] - z) < 5.2)) return;
     const cab = rand() < 0.38;
@@ -50,7 +102,7 @@ function streetLife() {
     for (const [dx, rot] of lanes) { let z = -RADIUS + rand() * 20; while (z < RADIUS) { car(ax + dx, z, rot); z += 9 + rand() * (Math.abs(dx) > 5 ? 40 : 22); } }
   }
   // the cross streets, narrower, a car now and then and one parked at the kerb
-  for (const [sz] of STREETS) for (const [dz, rot] of [[2, Math.PI / 2], [-2, -Math.PI / 2], [4.6, Math.PI / 2]]) { let x = -RADIUS + rand() * 30; while (x < RADIUS) { car(x, sz + dz, rot); x += 18 + rand() * 50; } }
+  for (const [sz] of STREETS) for (const [dz, rot] of [[2, -Math.PI / 2], [-2, Math.PI / 2], [4.6, -Math.PI / 2]]) { let x = -RADIUS + rand() * 30; while (x < RADIUS) { car(x, sz + dz, rot); x += 18 + rand() * 50; } }
   // people on the pavements, hats on; lamp posts along the avenues
   const DRESS = ['cloth_black', 'cloth_grey', 'cloth_brown', 'cloth_indigo', 'cloth_grey'];
   const pick = (a) => a[Math.floor(rand() * a.length)];
@@ -76,6 +128,26 @@ function streetLife() {
       L.push({ t: 'figure', at: [x, z], y: height(x, z), rot: across ? (szs > 0 ? 0 : Math.PI) + (rand() - 0.5) * 0.4 : (sx > 0 ? -Math.PI / 2 : Math.PI / 2) + (rand() - 0.5) * 0.4, seed: Math.floor(rand() * 1e9), dress: woman ? 'robe' : 'trousers', cloth: pick(DRESS), cloth2: pick(['cloth_white', 'cloth_grey', 'cloth_black']), skin: pick(['skin_light', 'skin_light', 'skin_medium', 'skin_dark']), hat: woman ? pick(['cap', 'none']) : 'brim', hatMat: pick(['cloth_black', 'cloth_grey', 'cloth_brown']) });
     }
     if (name === '5th' && rand() < 0.35) L.push({ t: 'figure', at: [cx - sx * 0.6, cz - szs * 0.6], y: height(cx, cz), rot: rand() * 6, seed: Math.floor(rand() * 1e9), dress: 'trousers', cloth: 'cloth_indigo', cloth2: 'cloth_indigo', skin: 'skin_light', hat: 'cap', hatMat: 'cloth_indigo', over: 'belt' });
+  }
+  // ── the street's slow life (EXTRA above): the peddlers behind their pushcarts with a customer at some, the apple sellers on the avenues' pavements, the carters at the heads of their horse wagons (milk, ice and coal still came by horse in 1931 [inferred]) ──
+  for (const c of EXTRA.carts) {
+    L.push({ t: 'figure', at: loc(c.at, c.rot, 0, -1.5), y: height(...c.at), rot: c.rot + Math.PI, seed: Math.floor(rand() * 1e9), dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_black', over: 'apron', skin: pick(['skin_light', 'skin_medium', 'skin_medium']) });
+    if (rand() < 0.5) L.push({ t: 'figure', at: loc(c.at, c.rot, 0.2, 1.7), y: height(...c.at), rot: c.rot, seed: Math.floor(rand() * 1e9), dress: rand() < 0.4 ? 'robe' : 'trousers', cloth: pick(DRESS), cloth2: 'cloth_white', hat: 'brim', hatMat: pick(['cloth_black', 'cloth_grey', 'cloth_brown']), skin: 'skin_light' });
+  }
+  // the newsstands' keepers inside under the roof, and a newsboy hawking at the corner of some
+  for (const n of NEWSSTANDS) {
+    L.push({ t: 'figure', at: loc(n.at, n.rot, 0, -0.05), y: n.y, rot: n.rot + Math.PI, seed: n.seed, dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_grey', over: 'apron', skin: 'skin_light', pose: 'stand' });
+    if (n.seed % 3 === 0) L.push({ t: 'figure', at: loc(n.at, n.rot, 1.9, 1.3), y: n.y, rot: n.rot + 0.5, seed: n.seed + 7, dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_grey', hat: 'cap', hatMat: 'cloth_red', carry: 'bundle', h: 0.74, skin: 'skin_light', pose: 'stand' });
+  }
+  for (const a of EXTRA.apples) L.push({ t: 'figure', at: [a.at[0] + a.sg * 1.05, a.at[1]], y: height(...a.at), rot: a.sg > 0 ? Math.PI / 2 : -Math.PI / 2, seed: a.seed, dress: 'trousers', cloth: pick(['cloth_grey', 'cloth_brown', 'cloth_brown']), cloth2: 'cloth_grey', hat: 'brim', hatMat: pick(['cloth_black', 'cloth_brown', 'cloth_grey']), skin: pick(['skin_light', 'skin_light', 'skin_medium']), pose: 'stand' });
+  { let placedW = 0;
+    for (let k = 0; k < 400 && placedW < 10; k++) {
+      const [sz] = STREETS[Math.floor(rand() * STREETS.length)], south = rand() < 0.5, x = -RADIUS + 50 + rand() * (2 * RADIUS - 150), z = sz + (south ? 2 : -2), rot = south ? -Math.PI / 2 : Math.PI / 2;
+      if (!inside(x, z) || AVENUES.some(([ax, w]) => Math.abs(x - ax) < w / 2 + 9) || onBroadway(x, z, 8) || inLot(x, z, 1.5) || nearVehicle(x, z) || nearVehicle(x + 3 * Math.sign(-Math.sin(rot)), z) || L.some((c) => c.t === 'car' && Math.hypot(c.at[0] - x, c.at[1] - z) < 8.5)) continue;
+      L.push({ t: 'cart', at: [x, z], y: height(x, z), rot, seed: Math.floor(rand() * 1e9), kind: 'two', load: pick(['barrels', 'sacks', 'hay', 'barrels']), beast: 'horse' });
+      L.push({ t: 'figure', at: loc([x, z], rot, 1.0, -3.0), y: height(x, z), rot, seed: Math.floor(rand() * 1e9), dress: 'trousers', cloth: pick(['cloth_brown', 'cloth_grey', 'cloth_ochre']), cloth2: 'cloth_brown', hat: 'cap', hatMat: pick(['cloth_black', 'cloth_brown']), skin: 'skin_light', pose: 'stand' });
+      placedW++;
+    }
   }
   const tiles = new Map();
   for (const e of L) { const k = `${Math.floor(e.at[0] / 150)},${Math.floor(e.at[1] / 150)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
@@ -132,6 +204,10 @@ function pavePlans() {
       else if (roll < 0.22) put('asign', px, pz, (f === 'n' ? Math.PI / 2 : -Math.PI / 2) + (rand() - 0.5) * 0.3, { text: SPECIALS[Math.floor(rand() * SPECIALS.length)] }); else if (roll < 0.36) put('ashcan', px, pz, 0);
     }
   }
+  // the standing vehicles, the pushcarts and the apple crates (EXTRA: their own place, after the rest)
+  for (const v of EXTRA.vehicles) items.push({ k: v.k, at: v.at, y: height(...v.at), rot: v.rot, seed: v.seed, ...(v.body ? { body: v.body } : {}) });
+  for (const c of EXTRA.carts) items.push({ k: 'pushcart', at: c.at, y: height(...c.at), rot: c.rot, seed: c.seed, top: c.top });
+  for (const a of EXTRA.apples) items.push({ k: 'crates', at: a.at, y: height(...a.at), rot: Math.PI / 2, seed: a.seed % 1e6 });
   const { segs, curbs } = pavements(), tiles = new Map(), slot = (p) => `${Math.floor(p[0] / 150)},${Math.floor(p[1] / 150)}`;
   const tile = (k) => { if (!tiles.has(k)) tiles.set(k, { segs: [], curbs: [], items: [] }); return tiles.get(k); };
   for (const s of segs) tile(slot([(s[0] + s[2]) / 2, (s[1] + s[3]) / 2])).segs.push(s);

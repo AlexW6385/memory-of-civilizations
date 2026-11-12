@@ -21,4 +21,7 @@ for (let i = 0; i < 14; i++) put(BRYANT[0] + 6 + rand() * (BRYANT[2] - BRYANT[0]
 // the pavements: at some of the corners and along the avenues, where the crumbs and the horses' oats (a few carts still) fall
 for (const [ax, w] of AVENUES) for (const sg of [-1, 1]) for (let z = -300 + rand() * 50; z < 300; z += 45 + rand() * 55) put(ax + sg * (w / 2 + 1.6), z);
 for (const [sz] of STREETS) for (let x = -300 + rand() * 60; x < 300; x += 70 + rand() * 70) put(x, sz + (rand() < 0.5 ? -1 : 1) * 7.2);
+// pigeons about Fifth and Madison Avenues' pavements near the Empire State, round the newsstands' corners and the apple sellers' crates, in twos and threes
+for (const [ax, w] of AVENUES.slice(1, 3)) for (let z = -40 + rand() * 20; z < 260; z += 22 + rand() * 20) { const sg = rand() < 0.5 ? -1 : 1; for (let k = 0; k < 2; k++) { const x = ax + sg * (w / 2 + 1.5 + rand() * 1.2), zz = z + k * (0.8 + rand()); if (Math.hypot(x, zz) > RADIUS - 60 || inLot(x, zz, 0.5) || inSpecial(x, zz, 0.5)) continue; const [X, Z] = toCity(x, zz); perches.push({ kind: 'pigeon', x: X, z: Z, y: height(x, zz), rot: rand() * 6, range: [1.8, 1.2], alert: 3.2 }); } }
+flights.push({ kind: 'pigeon', n: 6, loop: { c: toCity(0, 120), a: [60, 40], rot: 0.3 }, y: [14, 40], speed: 8 });
 export default { fish: [], flights, perches };
