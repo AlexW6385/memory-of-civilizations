@@ -12,7 +12,7 @@
 import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { tube, folded, ball } from '../../objects/kit.js';
 
-const S = 'limestone_yellow', SC = 'sandstone_relief', W = 'timber';
+const S = 'limestone_yellow', SC = 'sandstone_dressed', W = 'timber';
 const quad = (T, A, B, C, D) => T.push(...A, ...B, ...C, ...A, ...C, ...D);
 const both = (t) => { const o = [...t]; for (let i = 0; i < t.length; i += 9) o.push(...t.slice(i, i + 3), ...t.slice(i + 6, i + 9), ...t.slice(i + 3, i + 6)); return o; };
 /** Turn the triangles of T from i0 on toward the point ref (or away from it). */
