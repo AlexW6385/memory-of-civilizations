@@ -38,15 +38,15 @@ function column(bag, col, x, z, y, h, d, beam = 'x', simple = false) {
   }
   // the base: a square plinth, the bell with its hanging petals, the torus
   bag.add(C, box(x - r * 1.95, y, z - r * 1.95, x + r * 1.95, y + 0.3 * s, z + r * 1.95));
-  bag.add(C, lathe([[r * 1.78, 0], [r * 1.72, 0.1 * s], [r * 1.48, 0.42 * s], [r * 1.28, 0.72 * s], [r * 1.2, 0.86 * s]], 96, (th, i) => (i >= 1 && i <= 3 ? 1 + 0.09 * Math.abs(Math.cos(th * 16)) ** 3 : 1), x, y + 0.3 * s, z));
+  bag.add(C, lathe([[r * 1.78, 0], [r * 1.72, 0.1 * s], [r * 1.48, 0.42 * s], [r * 1.28, 0.72 * s], [r * 1.2, 0.86 * s]], 64, (th, i) => (i >= 1 && i <= 3 ? 1 + 0.09 * Math.abs(Math.cos(th * 16)) ** 3 : 1), x, y + 0.3 * s, z));
   bag.add(C, lathe([[r * 1.2, 0], [r * 1.31, 0.08 * s], [r * 1.34, 0.16 * s], [r * 1.26, 0.26 * s], [r * 0.98, 0.3 * s]], 24, null, x, y + 1.16 * s, z));
   const tall = h >= 16, yS = y + h - 0.7 * s, yP = yS - 1.55 * s, yV = tall ? yP - 2.6 * s : yP, yB = yV - 1.8 * s, y0 = y + 1.46 * s;
   // the fluted shaft (flutes of a nearly constant width: more on the thicker shafts)
   const N = d > 1.4 ? 48 : 40;
   bag.add(C, lathe([[r, 0], [r * 0.93, yB - y0]], N * 2, (th) => 1 - 0.035 * Math.abs(Math.sin(th * N / 2)), x, y0, z));
   // the bell of drooping leaves, then the palm crown spreading upward
-  bag.add(C, lathe([[r * 0.93, 0], [r * 1.32, 0.14 * s], [r * 1.28, 0.5 * s], [r * 1.02, 0.84 * s], [r * 0.86, 0.9 * s]], 72, (th, i) => (i === 1 || i === 2 ? 1 + 0.1 * Math.abs(Math.cos(th * 12)) ** 3 : 1), x, yB, z));
-  bag.add(C, lathe([[r * 0.86, 0], [r * 0.96, 0.3 * s], [r * 1.28, 0.68 * s], [r * 1.5, 0.86 * s], [r * 1.36, 0.9 * s], [r * 0.7, 0.9 * s], [0.001, 0.9 * s]], 72, (th, i) => (i >= 2 && i <= 4 ? 1 + (i === 4 ? 0.16 : 0.11) * Math.abs(Math.cos(th * 12)) ** 3 : 1), x, yB + 0.9 * s, z));
+  bag.add(C, lathe([[r * 0.93, 0], [r * 1.32, 0.14 * s], [r * 1.28, 0.5 * s], [r * 1.02, 0.84 * s], [r * 0.86, 0.9 * s]], 48, (th, i) => (i === 1 || i === 2 ? 1 + 0.1 * Math.abs(Math.cos(th * 12)) ** 3 : 1), x, yB, z));
+  bag.add(C, lathe([[r * 0.86, 0], [r * 0.96, 0.3 * s], [r * 1.28, 0.68 * s], [r * 1.5, 0.86 * s], [r * 1.36, 0.9 * s], [r * 0.7, 0.9 * s], [0.001, 0.9 * s]], 48, (th, i) => (i >= 2 && i <= 4 ? 1 + (i === 4 ? 0.16 : 0.11) * Math.abs(Math.cos(th * 12)) ** 3 : 1), x, yB + 0.9 * s, z));
   if (tall) {
     // the tall square zone: fluted faces, a pair of volutes at the top of each face and an inverted pair at its foot
     const q = 0.66 * s;
@@ -93,9 +93,9 @@ function bullProtomes(bag, x, z, yS, s, axisX) {
     const surf = (a, t, o = 0) => { const [, v, w, hu, hd] = bullAt(a), k = (Math.abs(Math.cos(t)) ** 2.5 + Math.abs(Math.sin(t)) ** 2.5) ** (-1 / 2.5); return [Math.cos(t) * (w * k + o), v + Math.sin(t) * ((Math.sin(t) > 0 ? hu : hd) * k + o)]; };
     // the body
     const rings = [];
-    for (let i = 0; i <= 18; i++) {
-      const a = 0.42 + (2.58 - 0.42) * i / 18, R = [];
-      for (let j = 0; j < 16; j++) { const [b, v] = surf(a, j / 16 * Math.PI * 2); R.push(P(a, b, v)); }
+    for (let i = 0; i <= 13; i++) {
+      const a = 0.42 + (2.58 - 0.42) * i / 13, R = [];
+      for (let j = 0; j < 12; j++) { const [b, v] = surf(a, j / 12 * Math.PI * 2); R.push(P(a, b, v)); }
       rings.push(R);
     }
     bag.add(C, loft(rings));
@@ -633,7 +633,10 @@ const ELLS = {};
 const ellProfile = (p) => (ELLS[p] ??= Array.from({ length: 13 }, (_, i) => { const a = -Math.PI / 2 + i * Math.PI / 12, c = Math.cos(a), sn = Math.sin(a); return [Math.max(0.001, Math.abs(c) ** p), Math.sign(sn) * Math.abs(sn) ** p]; }));
 function ell(c, f, l, rf, ry, rl, seg = 12, p = 1) {
   if (f[0] * l[1] - f[1] * l[0] < 0) l = [-l[0], -l[1]];             // keep the frame right-handed (the faces wound outward)
-  const n = 2 / p, g = lathe(ellProfile(p), seg, p < 1 ? (th) => (Math.abs(Math.cos(th)) ** n + Math.abs(Math.sin(th)) ** n) ** (-1 / n) : null);
+  // small blobs (curls, eyes, ears, hooves: under 14 or 35 cm across) with fewer rings and sides: thousands of them stand on the capitals
+  const m = Math.max(rf, ry, rl), full = ellProfile(p), prof = m < 0.14 ? [0, 3, 6, 9, 12].map((i) => full[i]) : m < 0.35 ? [0, 2, 4, 6, 8, 10, 12].map((i) => full[i]) : full;
+  if (m < 0.14) seg = Math.min(seg, 5); else if (m < 0.35) seg = Math.min(seg, 8);
+  const n = 2 / p, g = lathe(prof, seg, p < 1 ? (th) => (Math.abs(Math.cos(th)) ** n + Math.abs(Math.sin(th)) ** n) ** (-1 / n) : null);
   g.scale(rf, ry, rl);
   // the lathe's x is along f, its z along l
   g.applyMatrix4(new Matrix4().fromArray([f[0], 0, f[1], 0, 0, 1, 0, 0, l[0], 0, l[1], 0, c[0], c[1], c[2], 1]));
