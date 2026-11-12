@@ -83,7 +83,10 @@ function duomo(el, { bag, col }) {
     const z0 = nave[1] - (mat === M ? 0.4 : 0), z1 = nave[3] + (mat === M ? 0.4 : 0);
     bag.add(mat, box(x0, y - 0.5, z0, x1, y1, cz - pw / 2)); bag.add(mat, box(x0, y - 0.5, cz + pw / 2, x1, y1, z1)); bag.add(mat, box(x0, y + ph, cz - pw / 2, x1, y1, cz + pw / 2));
   };
-  cut(nave[0] - 1.5, nave[0], 'rubble', y + H * 1.05);
+  // the unfinished upper front of 1480: rough courses of stone and brick with the putlog holes of the old scaffolding, the nave's gable
+  // stepped and ragged at its top, a corner strip of pietra serena at each edge; the aisles' part stops at the aisle roof
+  cut(nave[0] - 1.5, nave[0], 'sandstone', y + H * 0.74);
+  roughFront(bag, nave, cz, y, H, W);
   cut(nave[0] - 1.9, nave[0] - 1.45, M, y + H * 0.38);
   inlay(bag, [nave[0] - 1.9, nave[3] + 0.4], [nave[0] - 1.9, nave[1] - 0.4], y, y + H * 0.38, { pitch: 4.6, bands: 2, pink: true });
   for (const [k, w] of [[-W * 0.3, 3.2], [0, pw], [W * 0.3, 3.2]]) {
@@ -99,7 +102,6 @@ function duomo(el, { bag, col }) {
     bag.add(G, box(nave[0] - 2.8, y + w * 2.1 + 0.2, cz + k - w / 2 - 0.6, nave[0] - 2.65, y + w * 2.1 + 0.6, cz + k + w / 2 + 0.6));
   }
   for (let i = 0; i < 6; i++) { const zz = cz - W * 0.45 + i * W * 0.18; if (Math.abs(zz - cz) < 4 || Math.abs(Math.abs(zz - cz) - W * 0.3) < 2.6) continue; bag.add(M, box(nave[0] - 2.4, y + H * 0.2, zz - 0.9, nave[0] - 1.85, y + H * 0.33, zz + 0.9)); bag.add('opening', box(nave[0] - 2.45, y + H * 0.21, zz - 0.6, nave[0] - 2.38, y + H * 0.32, zz + 0.6)); bag.add('marble', lathe([[0.35, 0], [0.3, 1.4], [0.18, 1.6], [0.001, 1.9]], 8, null, nave[0] - 2.1, y + H * 0.21, zz)); }
-  bag.add('stained_glass', box(nave[0] - 1.6, y + H * 0.66, cz - 3.5, nave[0] - 1.5, y + H * 0.86, cz + 3.5));   // the west rose
   // the crossing: the octagon and three apses with their small domes
   const apses = [[cx + R0 + 9, cz, 0], [cx, cz - R0 - 9, -Math.PI / 2], [cx, cz + R0 + 9, Math.PI / 2]];
   if (!IN) { oct(TB, M, cx, y - 0.5, cz, R0 + 2, H + 0.5); col.circle(cx, cz, R0 + 2, y, y + H); }
@@ -120,6 +122,33 @@ function duomo(el, { bag, col }) {
   oct(TB, M, cx, ly, cz, R0 * 0.18, 9); TB.add(M, lathe([[R0 * 0.2, 0], [0.4, 7], [0.001, 8]], 8, null, cx, ly + 9, cz));
   bag.add('gilt_bronze', lathe([[0.9, 0], [0.9, 0.3], [0.001, 1.8]], 12, null, cx, ly + 17, cz));
   if (IN) crossingHollow(bag, col, cx, cz, y, H, R0, apses);
+}
+
+/** The cathedral's unfinished west front above Arnolfo's marble (1480): the nave's wall in rough stone, brick patches, putlog holes and timber stubs, a ragged top, the round window framed. */
+function roughFront(bag, nave, cz, y, H, W) {
+  const xf = nave[0] - 1.5, hw = W * 0.25, top = y + H * 1.05;
+  const rng = (s) => () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296), r = rng(1296);
+  // the nave's gable wall above the aisle roofs
+  bag.add('sandstone', box(xf - 0.12, y + H * 0.74, cz - hw, nave[0], top - 3, cz + hw));
+  for (let i = 0; i < 9; i++) { const z0 = cz - hw + i * (2 * hw / 9), h = 1 + Math.floor(r() * 4) * 0.9; bag.add('sandstone', box(xf - 0.12, top - 3, z0, nave[0], top - 3 + h, z0 + 2 * hw / 9 - 0.05 + r() * 0.1)); }
+  // brick patches where the facing was begun, then left (rough brick, not yet clad)
+  for (let i = 0; i < 7; i++) { const w = 2.5 + r() * 3.5, h = 1.8 + r() * 3.2, z = cz - hw + 0.8 + r() * (2 * hw - w - 1.6), yy = y + H * 0.4 + r() * (H * 0.55 - h); bag.add('brick', box(xf - 0.2, yy, z, xf - 0.1, yy + h, z + w)); }
+  // putlog holes and the stubs of beams, in rows; the holes dark, a stub in some
+  for (let row = 0; row < 8; row++) for (let k = 0; k < 8; k++) {
+    const yy = y + H * 0.42 + row * 2.6 + (k % 2) * 1.3, z = cz - hw + 1.4 + k * ((2 * hw - 2.8) / 7) + (r() - 0.5) * 0.8;
+    if (yy > top - 2.2) continue;
+    if (r() < 0.35) bag.add('timber', box(xf - 0.75, yy, z, xf - 0.1, yy + 0.22, z + 0.22)); else bag.add('opening', box(xf - 0.2, yy, z, xf - 0.05, yy + 0.26, z + 0.26));
+  }
+  // the edges and the sloping lines of the gable in dressed stone; the string above the marble
+  for (const s of [-1, 1]) bag.add('pietra_serena', box(xf - 0.3, y + H * 0.38, cz + s * hw - (s > 0 ? 0.7 : 0), nave[0], top, cz + s * hw + (s < 0 ? 0.7 : 0)));
+  bag.add('pietra_serena', box(xf - 0.35, y + H * 0.38 - 0.1, nave[1], nave[0], y + H * 0.38 + 0.5, nave[3]));
+  bag.add('pietra_serena', box(xf - 0.3, top - 0.1, cz - hw, nave[0], top + 0.4, cz + hw));
+  // the great round window: glass lit inside, ringed in marble with eight spokes, set in the wall's middle
+  const wy = y + H * 0.74 - 2, rr = 3.6, wx = xf - 0.2;
+  const g = disc(rr, 0, 24); g.rotateZ(-Math.PI / 2); bag.add('opening', g.translate(wx + 0.05, wy, cz));
+  const g2 = disc(rr - 0.5, 0, 24); g2.rotateZ(Math.PI / 2); bag.add('stained_glass', g2.translate(wx - 0.02, wy, cz));
+  for (let k = 0; k < 24; k++) { const a0 = k / 24 * Math.PI * 2, a1 = (k + 1) / 24 * Math.PI * 2; bag.add('marble', rod([wx - 0.05, wy + Math.cos(a0) * rr, cz + Math.sin(a0) * rr], [wx - 0.05, wy + Math.cos(a1) * rr, cz + Math.sin(a1) * rr], 0.3, 5)); }
+  for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; bag.add('marble', rod([wx - 0.05, wy, cz], [wx - 0.05, wy + Math.cos(a) * rr, cz + Math.sin(a) * rr], 0.12, 4)); }
 }
 
 /** A wall a→b of thickness th from y0 to y1, with a pointed arch { w, spring, rise, pass } cut in its middle (pass: open; else a niche `depth` deep, closed by `back`). */
