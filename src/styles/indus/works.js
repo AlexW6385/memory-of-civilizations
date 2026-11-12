@@ -135,3 +135,29 @@ export function pshade(el, ctx) {
   bag.add('mudbrick', box(x - 1.5, y, z + 0.9, x + 1.5, y + 0.44, z + 1.4)); col.rect([x - 1.5, z + 0.9, x + 1.5, z + 1.4], y, y + 0.44);
   bag.add('reed_mat', box(x - 1.4, y + 0.44, z + 0.95, x + 1.4, y + 0.47, z + 1.35), false);
 }
+
+/**
+ * indus_topdress: { y, B (BATH), college: rect, pillared: rect, granary: rect, stair: rect } — what stands in the platform's streets: benches of mud brick along the College's
+ * north face, heaps of sacks and jars at the granary's loading ramp, a stack of brick, tripod braziers at the stair's head, a scribe's mat with its clay blanks, and the
+ * rolled reed curtains over the Bath's doors.
+ */
+export function topdress(el, ctx) {
+  const { bag, col } = ctx, y = el.y, rand = rng(el.seed ?? 8), [gx0, gz0, gx1, gz1] = el.granary, [kx0, kz0, kx1] = el.college;
+  const B = (x0, z0, x1, z1, y0, y1, m, solid = false) => { bag.add(m, box(x0, y + y0, z0, x1, y + y1, z1), solid ? undefined : false); if (solid) col.rect([x0, z0, x1, z1], y + y0, y + y1); };
+  for (let x = kx0 + 8; x < kx1 - 10; x += 12) { B(x, kz0 - 0.62, x + 2.4, kz0 - 0.1, 0, 0.44, 'mudbrick', true); B(x + 0.1, kz0 - 0.55, x + 2.3, kz0 - 0.15, 0.44, 0.47, 'reed_mat'); if (rand() < 0.5) jar(bag, 'terracotta', x + 2.9, y, kz0 - 0.5, 1.3); }
+  // heaps of sacks and jars by the loading ramp (the ramp rises on the granary's south, x0 + 23.6 .. 27.4)
+  for (const [cx, cz, s] of [[gx0 + 17.5, gz1 + 3.4, -1], [gx0 + 33.4, gz1 + 3.0, 1], [gx0 + 14.5, gz1 + 8.0, -1]]) {
+    for (let k = 0; k < 7; k++) { const a = (k % 3) * 0.8, b = Math.floor(k / 3) * 0.55; B(cx + s * a - 0.45, cz + b - 0.3, cx + s * a + 0.45, cz + b + 0.3, (k > 4 ? 0.38 : 0), (k > 4 ? 0.76 : 0.38), k % 2 ? 'sacking' : 'wicker'); }
+    for (let k = 0; k < 3; k++) jar(bag, k % 2 ? 'pottery_dark' : 'terracotta', cx + s * (2.4 + k * 0.5), y, cz + 0.5 + rand() * 0.6, 1.7);
+  }
+  // a stack of baked brick, mortar mud in a trough: the mending of the facing
+  { const x = -128, z = -86; for (let c = 0; c < 9; c++) for (let k = 0; k < 7 - Math.floor(c / 3) * 2; k++) B(x + k * 0.3 - 1, z + (c % 3) * 0.16 - 0.2, x + k * 0.3 - 0.72, z + (c % 3) * 0.16 - 0.04, Math.floor(c / 3) * 0.1, Math.floor(c / 3) * 0.1 + 0.095, 'brick'); B(x + 1.6, z - 0.4, x + 2.8, z + 0.4, 0, 0.3, 'wood_dark'); B(x + 1.7, z - 0.3, x + 2.7, z + 0.3, 0.2, 0.28, 'mudbrick'); }
+  // tripod braziers with embers at the stair's head, either side of the way; a rail of timber along each side of the first steps
+  { const [sx0, sz0, , sz1] = el.stair; for (const z of [sz0 - 2.5, sz1 + 2.5]) { const x = sx0 - 2.2; for (let a = 0; a < 3; a++) B(x + Math.cos(a * 2.09) * 0.32 - 0.03, z + Math.sin(a * 2.09) * 0.32 - 0.03, x + Math.cos(a * 2.09) * 0.32 + 0.03, z + Math.sin(a * 2.09) * 0.32 + 0.03, 0, 0.8, 'timber'); bag.add('bronze', lathe([[0.001, 0], [0.34, 0.05], [0.42, 0.22], [0.3, 0.25], [0.001, 0.2]], 10, null, x, y + 0.8, z), false); bag.add('wood_dark', lathe([[0.001, 0.2], [0.3, 0.2], [0.001, 0.22]], 10, null, x, y + 0.8, z), false); } }
+  // the scribe's mat: a reed mat, blanks of clay in rows, a bowl of water, a copper tool; beside the Pillared Hall's south stair
+  { const x = el.pillared[0] + 8, z = el.pillared[1] - 3.2; B(x - 1.1, z - 0.8, x + 1.1, z + 0.8, 0, 0.03, 'reed_mat'); for (let k = 0; k < 8; k++) B(x - 0.9 + (k % 4) * 0.28, z - 0.3 + Math.floor(k / 4) * 0.28, x - 0.7 + (k % 4) * 0.28, z - 0.1 + Math.floor(k / 4) * 0.28, 0.03, 0.06, 'earth_wall'); bag.add('terracotta', lathe([[0.001, 0], [0.14, 0.01], [0.16, 0.08], [0.001, 0.08]], 8, null, x + 0.6, y + 0.03, z + 0.5), false); }
+  // the rolled reed curtains over the Bath's doors on the inner face, and a stone threshold in each
+  { const [ox0, oz0, ox1, oz1] = el.B.outer, wt = el.B.wall, [cx0, , cx1] = el.B.court, xs = Array.from({ length: 9 }, (_, i) => cx0 + 0.55 + (cx1 - cx0 - 1.1) * i / 8);
+    for (const d of [(xs[1] + xs[2]) / 2, (xs[6] + xs[7]) / 2]) { B(d - 1.3, oz1 - wt - 0.22, d + 1.3, oz1 - wt - 0.02, 2.62, 2.9, 'reed_mat'); B(d - 1.2, oz1 - wt, d + 1.2, oz1 + 0.18, 0, 0.1, 'brick_buff'); }
+    { const d = (xs[3] + xs[4]) / 2; B(d - 1.3, oz0 + wt + 0.02, d + 1.3, oz0 + wt + 0.22, 2.4, 2.7, 'reed_mat'); B(d - 1.2, oz0 - 0.18, d + 1.2, oz0 + wt, 0, 0.1, 'brick_buff'); } }
+}

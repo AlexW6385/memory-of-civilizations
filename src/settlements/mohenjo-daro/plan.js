@@ -33,6 +33,7 @@ E.push({ t: 'indus_college', rect: COLLEGE, y: PLAT });
   E.push({ t: 'indus_pshade', c: [-188, -67], y: PLAT });
   [[TOP[0] + 3, TOP[1] + 3], [TOP[2] - 3, TOP[1] + 3], [TOP[0] + 3, TOP[3] - 3], [TOP[2] - 3, TOP[3] - 3]].forEach(([x, z], i) => E.push({ t: 'indus_banner', c: [x, z], y: PLAT + 4.85, h: 3.4, seed: i }));
   E.push({ t: 'indus_bathdress', B: BATH, y: PLAT, seed: 5 });
+  E.push({ t: 'indus_topdress', y: PLAT, B: BATH, college: COLLEGE, pillared: PILLARED, granary: GRANARY, stair: EAST_STAIR.rect, seed: 8 });
 }
 
 const room = (id, rect, y, kind, o = {}) => ({ id, rect, y, kind, ...o });
