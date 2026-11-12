@@ -16,6 +16,8 @@ E.push({ t: 'ka_rock' }, { t: 'ka_gallery' }, { t: 'ka_steps' });
     if (onRock || mouth || way || list.some((b) => Math.hypot(b[0] - x, b[1] - z) < 3.6 + (b[2] + s) * 0.6)) continue;
     list.push([x, z, s]);
   }
+  // slabs shed from the roof's lip and the piers, lying on the apron where people sit by the camps
+  for (const q of [[-5.8, -24.2, 0.8], [5.6, -24.6, 0.75], [-19.5, -23.6, 0.9], [18.5, -24.2, 0.8], [-29.5, -24.5, 1.1], [29.5, -24, 1.0]]) list.push(q);
   E.push({ t: 'ka_boulders', list });
 }
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });

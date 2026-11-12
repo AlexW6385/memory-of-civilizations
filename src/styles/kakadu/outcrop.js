@@ -5,7 +5,7 @@
 // Every piece is a hexahedron with jittered corners whose faces are separate displaced grids (hard edges, smooth within a face); all of it
 // goes into one geometry per material.
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
-import { BLOCKS, MAIN, SMALL, rng, smooth } from '../../settlements/kakadu/layout.js';
+import { BLOCKS, MAIN, SMALL, rng, smooth, height } from '../../settlements/kakadu/layout.js';
 
 const hash = (i, j, k, s) => { let h = Math.imul(i, 374761393) ^ Math.imul(j, 668265263) ^ Math.imul(k, 2147483647) ^ Math.imul(s | 0, 1274126177); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296 * 2 - 1; };
 export function noise3(x, y, z, s = 0) {
@@ -124,6 +124,7 @@ const FACES = {
 };
 /** A hexahedron from its corners; faces: { S: opts, E: opts, … } (only those given are built). */
 export function hex(acc, mat, C, faces) {
+  if (acc.dry) return;
   const H = hexP(C), mid = H(0.5, 0.5, 0.5);
   for (const [k, o] of Object.entries(faces)) if (o) face(acc, o.mat ?? mat, FACES[k](H), mid, o);
 }
@@ -226,7 +227,9 @@ export function outcropBlock(acc, B, o = {}) {
           else if (!c.end) faces.E = ex;
           if (!(xa === x0 + 0 && buried(B, x0 - 0.25, (ya + yb) / 2, zf - 1)) && (xa - x0 < 0.5 ? !buried(B, x0 - 0.25, (ya + yb) / 2, zf - 1) : true)) faces.W = ex;
           if (!buried(B, cx, (ya + yb) / 2, zf - 1)) hex(acc, b.mat, C, faces);
-          void ledge;
+          const rs = [rnd(), rnd(), rnd()];
+          if (o.spots && ledge > 0.2 && !buried(B, cx, yb + 0.3, zf - 0.3) && rs[0] < 0.85) o.spots.push({ x: xa + 0.6 + rs[1] * Math.max(0.1, w - 1.2), y: yb - 0.02, z: nextZf + ledge * (0.3 + rs[2] * 0.4), w: ledge, kind: 'ledge' });
+          if (o.spots && i === 0 && c.k < joints.length && joints[c.k].cleft) o.spots.push({ x: c.x, y: height(c.x, z1 - 1.2), z: z1 - 1.2, w: 1, kind: 'cleft' });
         }
       }
       xa = c.x + c.g / 2;
@@ -275,4 +278,12 @@ export function shedBlocks(acc) {
     const mat = k % 3 ? 'sandstone_rose' : k % 2 ? 'sandstone_yellow' : 'tuff_red';
     chunk(acc, mat, x, 13.9, z, sz * (flat ? 2.4 : 1.4), sz * (flat ? 0.55 : 0.8 + r2() * 0.6), sz * (flat ? 1.8 : 1.1), r2() * 3.14, lean ? 0.25 + r2() * 0.2 : 0, Math.floor(r2() * 1e6));
   }
+}
+
+/** Where plants root in the face: the ledges of the soft beds' setbacks and the feet of the open clefts (the same seeded build, drawn to nothing). */
+export function faceSpots() {
+  const acc = new Acc(), spots = [];
+  acc.dry = true;
+  for (const B of BLOCKS) outcropBlock(acc, B, { spots });
+  return spots;
 }
