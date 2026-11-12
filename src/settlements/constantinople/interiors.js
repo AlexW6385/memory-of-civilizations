@@ -3,7 +3,7 @@
 // layout's special lots and the stoas of plan.js (MESE_STOAS); the builders are the style's
 // (src/styles/byzantine/interiors.js).
 import '../../styles/byzantine/interiors.js';
-import { height, special } from './layout.js';
+import { height, special, EIRENE } from './layout.js';
 import { MESE_STOAS } from './plan.js';
 import { shopFrame, TRADES } from '../../styles/byzantine/interiors.js';
 
@@ -32,6 +32,7 @@ export function interiorPlan() {
     ...HOUSES.filter((k) => S[k]).map((k) => ({ id: k === 'home' ? 'house' : k, rect: S[k].rect, y: S[k].y + 0.2, kind: 'house' })),
     { id: 'chapel', rect: S.chapel.rect, y: S.chapel.y + 0.25, kind: 'hall' },
     { id: 'bath', rect: S.bath.rect, y: S.bath.y + 0.2, kind: 'hall' },
+    { id: 'eirene', rect: [EIRENE[0] + 24.5, EIRENE[1] + 11.5, EIRENE[2] - 7.5, EIRENE[1] + 43.5], y: 0.1, kind: 'hall' },
   ];
   for (const st of MESE_STOAS) if (st.shops) {
     const [ax, az] = st.a, [bx, bz] = st.b, L = Math.hypot(bx - ax, bz - az), u = [(bx - ax) / L, (bz - az) / L], s = st.side, y = height(ax, az) + 0.18;
@@ -66,6 +67,10 @@ export function interiorLife() {
   const [cx0, cz0, cx1, cz1] = S.chapel.rect, Yc = S.chapel.y + 0.25, ccz = (cz0 + cz1) / 2;
   fig([cx1 - 5.2, ccz], Yc, Math.PI / 2, { dress: 'robe', cloth: 'cloth_black', cloth2: 'cloth_black', over: 'none' });
   for (let k = 0; k < 6; k++) { const x = cx0 + 3 + rand() * 6, z = ccz + (rand() - 0.5) * 7, woman = rand() < 0.5; fig([x, z], Yc, Math.PI / 2 + (rand() - 0.5) * 0.4, woman ? { dress: 'robe', hat: 'veil', cloth: pick(CL) } : { pose: rand() < 0.5 ? 'pray' : 'stand' }); }
+  // Hagia Eirene: a priest at the altar, a deacon with the censer's smoke elsewhere (smoke.js), worshippers in the nave and aisles
+  { const zc = EIRENE[1] + 27.5, xa = EIRENE[2] - 6.8, ax = xa - 6.2 * 0.55;
+    fig([ax - 2.6, zc], 0.1, -Math.PI / 2, { dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'cape', arms: 'clasp', hair: 'long' });
+    for (let k = 0; k < 9; k++) { const x = xa - 24 + rand() * 11, z = zc + (rand() - 0.5) * 12, woman = z < zc - 6 || z > zc + 6 || rand() < 0.4; fig([x, z], 0.1, -Math.PI / 2 + (rand() - 0.5) * 0.5, woman ? { dress: 'robe', hat: 'veil', cloth: pick(CL), pose: rand() < 0.4 ? 'pray' : 'stand' } : { pose: rand() < 0.5 ? 'pray' : 'stand' }); } }
   const [bx0, bz0, bx1, bz1] = S.bath.rect, Yb = S.bath.y + 0.2;
   for (let k = 0; k < 4; k++) fig([bx0 + 1.5 + rand() * (bx1 - bx0 - 3), bz1 - 2.5 - rand() * 3], Yb, rand() * 6.28, { dress: 'wrap', cloth: 'cloth_white', pose: rand() < 0.4 ? 'sit' : 'stand' });
   return out;

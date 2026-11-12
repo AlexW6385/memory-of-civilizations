@@ -357,7 +357,7 @@ function domedBasilica(el, ctx) {
   }
   const doorsU = [zc - z0 - 5.5, zc - z0, zc - z0 + 5.5];
   BZ.planar_wall({ o: [x0 + wallTh / 2, z0], u: [0, 1], th: wallTh, u0: 0, u1: W, y0: y - 0.3, y1: y + GH, mat, arches: [...doorsU.map((u, i) => ({ uc: u, r: i === 1 ? 1.6 : 1.2, spring: y + (i === 1 ? 3.6 : 2.8) })), ...win(1, W - 1, 6, y + 8.8, 3.8, 0.9)] }, ctx);
-  for (const [i, u] of doorsU.entries()) { const r = i === 1 ? 1.6 : 1.2; bag.add('timber', box(x0 + 0.35, y, z0 + u - r, x0 + 0.5, y + (i === 1 ? 3.6 : 2.8) + r * 0.6, z0 + u + r)); }
+  for (const [i, u] of doorsU.entries()) { if (i === 1) continue; const r = i === 1 ? 1.6 : 1.2; bag.add('timber', box(x0 + 0.35, y, z0 + u - r, x0 + 0.5, y + (i === 1 ? 3.6 : 2.8) + r * 0.6, z0 + u + r)); }
   // the east wall either side of the apse
   for (const [a, b] of [[z0, zc - apseR - 0.6], [zc + apseR + 0.6, z1]]) BZ.planar_wall({ o: [xa + wallTh / 2, a], u: [0, 1], th: wallTh, u0: 0, u1: b - a, y0: y - 0.3, y1: y + GH, mat, arches: win(1, b - a - 1, 2, y + 8.8, 3.8, 0.9) }, ctx);
   // the aisle and gallery roofs (lead, a low pitch outward)
@@ -371,6 +371,7 @@ function domedBasilica(el, ctx) {
     BZ.planar_wall({ o: [x0 + 6, zz], u: [1, 0], th: 1.2, u0: 0, u1: xb - x0 - 6, y0: y + GH, y1: yv, mat, arches: win(0.5, xb - x0 - 6.5, 4, y + GH + 0.4, 2.0, 0.8) }, ctx);
   }
   bag.add('lead', fromTriangles(vaultTris(x0 + 6, xb + 0.4, zc, nave / 2 + 0.6, yv, 24)));
+  bag.add('stucco_warm', fromTriangles(vaultTris(x0 + 6, xb + 0.4, zc, nave / 2 + 0.55, yv, 24, true)));            // its inside, plastered
   BZ.planar_wall({ o: [x0 + 6, nz0 - 0.6], u: [0, 1], th: 1.2, u0: 0, u1: nave + 1.2, y0: y + GH, y1: yv + nave / 2 + 0.6, outline: { uc: nave / 2 + 0.6, r: nave / 2 + 0.6, spring: yv }, mat, arches: [{ uc: nave / 2 + 0.6, r: 2.2, spring: yv + 1.0, sill: yv - 2 }] }, ctx);
   // the dome bay: a square block to the dome's base, a great arch drawn on each face with its tympanum windows
   const yd = yv + nave / 2 + 2.2, s = nave / 2 + 0.6;
@@ -400,17 +401,73 @@ function domedBasilica(el, ctx) {
   // the apse: a half-drum with three windows and its half-dome under lead
   const yA = y + GH - 3;
   BZ.arc_wall({ c: [xa, zc], r0: apseR, r1: apseR + 1.2, a0: -90, a1: 90, y0: y - 0.3, y1: yA, mat, gaps: [-45, 0, 45].map((a) => ({ a, w: 1.6, y0: y + 4.5, y1: y + 9.5 })) }, ctx);
-  bag.add('stucco_warm', spherePatch({ c: [xa, yA, zc], R: apseR, a0: -90, a1: 90, segA: 48, segE: 12, inward: true }));
+  bag.add('mosaic_gold', spherePatch({ c: [xa, yA, zc], R: apseR, a0: -90, a1: 90, segA: 48, segE: 12, inward: true }));
   bag.add('lead', spherePatch({ c: [xa, yA, zc], R: apseR + 1.25, a0: -90, a1: 90, segA: 48, segE: 12, inward: false }));
   bag.add('brick', box(xa - 0.6, y + GH, zc - apseR - 1.2, xa + 0.6, yd, zc + apseR + 1.2));
   // the floor inside
   bag.add('marble_floor', box(x0 + wallTh, y - 0.3, z0 + wallTh, xa, y + 0.02, z1 - wallTh));
+  eireneInterior(ctx, { x0, z0, z1, y, zc, nave, nz0, nz1, xa, dx, s, GH, yv, apseR, wallTh });
   // the atrium: porticoes round a court before the narthex
   if (el.atrium) STYLES.roman.elements.porticus({ rect: [x0 - el.atrium, z0 + 2, x0 - 0.7, z1 - 2], y, h: 6, depth: 5 }, ctx);
   void col;
 }
+
+/**
+ * The inside of Hagia Eirene (docs/settlements/constantinople.md §4.2): the nave's arcades of verde antico columns on either side with the
+ * galleries over the aisles (a floor, a parapet, a second order of smaller columns), the four brick piers of the dome bay, the chancel
+ * screen across the nave, the altar under its ciborium, the bishop's seat on the steps of the synthronon in the apse, hanging lamps.
+ */
+function eireneInterior(ctx, g) {
+  const { bag, col } = ctx, BZ = STYLES.byzantine, { x0, z0, z1, y, zc, nave, nz0, nz1, xa, dx, s, GH, apseR, wallTh } = g;
+  const fy = y + 0.02, gy = y + 7.4, xs = x0 + wallTh + 2.2, xe = dx - s - 1.3, n = Math.max(2, Math.round((xe - xs) / 3.3)), step = (xe - xs) / n;
+  for (const zz of [nz0, nz1]) {
+    for (let k = 0; k <= n; k++) {
+      const x = xs + k * step;
+      BZ.column({ at: [x, zz], y: fy, h: 6.6, d: 0.78, shaftMat: 'verde_antico', capMat: 'marble_smooth' }, ctx);
+      BZ.column({ at: [x, zz], y: gy + 0.4, h: 5.0, d: 0.55, shaftMat: k % 2 ? 'verde_antico' : 'proconnesian', capMat: 'marble_smooth' }, ctx);
+    }
+    const a = Math.min(zz - 0.5, zz + 0.5);
+    bag.add('marble', box(xs - 0.5, y + 6.62, a, xe + 0.5, gy, a + 1.0));                                   // the architrave under the gallery floor
+    bag.add('marble', box(xs - 0.5, gy + 5.4, a, xe + 0.5, gy + 5.9, a + 1.0));                             // and the cornice over the upper order
+    bag.add('marble_smooth', box(xs - 0.4, gy + 0.4, zz - 0.08, xe + 0.4, gy + 1.45, zz + 0.08));           // the gallery's parapet
+  }
+  // the galleries' floors over the aisles, and the west gallery over the narthex (reached by a stair not built: the floors seal the aisles' ceilings)
+  for (const [a, b] of [[z0 + wallTh, nz0 - 0.4], [nz1 + 0.4, z1 - wallTh]]) bag.add('timber', box(x0 + wallTh, gy - 0.4, a, xa, gy, b));
+  bag.add('timber', box(x0 + wallTh, gy - 0.4, nz0 - 0.4, x0 + 6, gy, nz1 + 0.4));
+  // the four piers of the dome bay
+  for (const px of [dx - s, dx + s]) for (const pz of [nz0 - 0.6, nz1 + 0.6]) {
+    bag.add('brick', box(px - 1.2, y - 0.2, pz - 1.2, px + 1.2, y + GH + 0.2, pz + 1.2)); col.rect([px - 1.2, pz - 1.2, px + 1.2, pz + 1.2], y, y + GH);
+    bag.add('limestone', box(px - 1.32, y + 6.7, pz - 1.32, px + 1.32, y + 7.0, pz + 1.32));
+  }
+  // the chancel: a low screen of marble with two posts across the nave east of the dome's centre, a gate in the middle
+  const cx = dx + s - 1.6;
+  for (const [a, b] of [[nz0 + 0.8, zc - 1.3], [zc + 1.3, nz1 - 0.8]]) bag.add('marble_smooth', box(cx - 0.1, fy, a, cx + 0.1, y + 1.3, b));
+  for (const zz of [zc - 1.3, zc + 1.3]) bag.add('porphyry', box(cx - 0.18, fy, zz - 0.18, cx + 0.18, y + 2.4, zz + 0.18));
+  bag.add('silver', box(cx - 0.2, y + 2.3, zc - 1.5, cx + 0.2, y + 2.4, zc + 1.5));
+  bag.add('gold', box(cx - 0.22, y + 2.4, zc - 0.08, cx + 0.22, y + 3.0, zc + 0.08)); bag.add('gold', box(cx - 0.22, y + 2.65, zc - 0.4, cx + 0.22, y + 2.78, zc + 0.4));
+  // the altar under its ciborium, before the apse
+  const ax = xa - apseR * 0.55, q = 1.5;
+  bag.add('marble', box(ax - q, fy, zc - q, ax + q, y + 1.05, zc + q)); bag.add('cloth_red', box(ax - q - 0.03, y + 0.75, zc - q - 0.03, ax + q + 0.03, y + 1.08, zc + q + 0.03));
+  bag.add('silver', box(ax - q - 0.1, y + 1.05, zc - q - 0.1, ax + q + 0.1, y + 1.12, zc + q + 0.1));
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) BZ.column({ at: [ax + sx * (q + 0.35), zc + sz * (q + 0.35)], y: fy, h: 3.6, d: 0.3, shaftMat: 'verde_antico', capMat: 'silver' }, { bag, col: NONE });
+  bag.add('silver', box(ax - q - 0.55, y + 3.7, zc - q - 0.55, ax + q + 0.55, y + 3.85, zc + q + 0.55));
+  bag.add('lead', frustum([ax - q - 0.5, zc - q - 0.5, ax + q + 0.5, zc + q + 0.5], y + 3.85, y + 4.9, q * 0.8, q * 0.8, q * 0.8, q * 0.8));
+  bag.add('gold', box(ax - 0.05, y + 4.9, zc - 0.05, ax + 0.05, y + 5.5, zc + 0.05)); bag.add('gold', box(ax - 0.05, y + 5.2, zc - 0.25, ax + 0.05, y + 5.3, zc + 0.25));
+  col.rect([ax - q, zc - q, ax + q, zc + q], y, y + 1.1);
+  // the synthronon: three tiers of marble steps round the apse's wall, the bishop's seat in the middle
+  bag.add('marble_floor', arcSolid(xa, zc, 0.01, apseR, -90, 90, y - 0.3, y + 0.02, 8));
+  for (let i = 0; i < 3; i++) { bag.add('marble', arcSolid(xa, zc, apseR - 1.5 + i * 0.5, apseR, -80, 80, fy, y + 0.45 * (i + 1), 6)); col.floor([xa + apseR - 1.5 + i * 0.5, zc - 3.5, xa + apseR - 0.2, zc + 3.5], y + 0.45 * (i + 1)); }
+  bag.add('marble_smooth', box(xa + apseR - 2.3, y + 1.35, zc - 0.5, xa + apseR - 1.7, y + 2.4, zc + 0.5));
+  // hanging lamps over the nave and the chancel
+  for (const [lx, lz] of [[dx, zc], [dx - 6.5, zc], [dx + 5.5, zc - 3], [dx + 5.5, zc + 3], [x0 + 11, zc]]) {
+    bag.add('bronze', box(lx - 0.01, y + 9.6, lz - 0.01, lx + 0.01, y + 14.0, lz + 0.01));
+    bag.add('gold', lathe([[0.55, 0], [0.5, 0.12], [0.001, 0.14]], 14, null, lx, y + 9.3, lz));
+    for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; bag.add('flame', lathe([[0.01, 0], [0.001, 0.1]], 5, null, lx + Math.cos(a) * 0.45, y + 9.45, lz + Math.sin(a) * 0.45)); }
+    ctx.lights?.push({ at: [lx, y + 9.1, lz], color: '#ffb46b', intensity: 1.6, distance: 13 });
+  }
+}
 /** A barrel vault's lead roof from xa to xb, over the axis z = zc, radius r, springing at y. */
-function vaultTris(xa, xb, zc, r, y, n) {
+function vaultTris(xa, xb, zc, r, y, n, inward = false) {
   const t = [];
   for (let i = 0; i < n; i++) {
     const a = Math.PI * i / n, b = Math.PI * (i + 1) / n;
@@ -420,7 +477,7 @@ function vaultTris(xa, xb, zc, r, y, n) {
   for (let i = 0; i < t.length; i += 9) {
     const ux = t[i + 3] - t[i], uy = t[i + 4] - t[i + 1], uz = t[i + 5] - t[i + 2], vx = t[i + 6] - t[i], vy = t[i + 7] - t[i + 1], vz = t[i + 8] - t[i + 2];
     const ny = uz * vx - ux * vz, nz = ux * vy - uy * vx, my = (t[i + 1] + t[i + 4] + t[i + 7]) / 3 - y, mz = (t[i + 2] + t[i + 5] + t[i + 8]) / 3 - zc;
-    if (ny * my + nz * mz < 0) for (let k = 0; k < 3; k++) { const q = t[i + 3 + k]; t[i + 3 + k] = t[i + 6 + k]; t[i + 6 + k] = q; }
+    if ((ny * my + nz * mz < 0) !== inward) for (let k = 0; k < 3; k++) { const q = t[i + 3 + k]; t[i + 3 + k] = t[i + 6 + k]; t[i + 6 + k] = q; }
   }
   return t;
 }
