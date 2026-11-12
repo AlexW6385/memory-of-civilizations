@@ -7,9 +7,10 @@ import { wallRun, northGate, lionGate } from './wall.js';
 import { palaceWing, court, propylon, megaron } from './palace.js';
 import { treasury, graveCircle } from './tomb.js';
 import { house, granary, yard, forecourt } from './house.js';
+import { dryWall, chamberTomb, basin } from './land.js';
 
 registerStyle('mycenaean', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { wall_run: wallRun, north_gate: northGate, lion_gate: lionGate, palace_wing: palaceWing, court, propylon, megaron, treasury, grave_circle: graveCircle, house, granary, yard, forecourt },
+  elements: { wall_run: wallRun, north_gate: northGate, lion_gate: lionGate, palace_wing: palaceWing, court, propylon, megaron, treasury, grave_circle: graveCircle, house, granary, yard, forecourt, dry_wall: dryWall, chamber_tomb: chamberTomb, basin },
   objects: {},
 });

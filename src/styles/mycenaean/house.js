@@ -75,6 +75,7 @@ export function house(el, ctx) {
   const floorMat = kind === 'cult' ? 'lime_plaster' : (kind === 'workshop' || kind === 'store' ? 'mud_plaster' : 'plaster_ochre');
   add(floorMat, B(T, y - 0.05, T, W - T, y, D - T));
   col.floor(R(T, T, W - T, D - T), y);
+  col.floor(R(du - dw / 2, -0.45, du + dw / 2, T + 0.05), y);                     // the threshold
   // ── the walls, ground floor ──
   const sideWins = (len) => wins('v', len, y);
   wall('u', 0, T, 0, W, y, y + SH - 0.4, [...front, ...fwin.map((o) => ({ ...o }))]);

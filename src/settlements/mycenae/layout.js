@@ -245,3 +245,17 @@ export function wallRuns() {
   if (gate) { const m = gate.at; gate.y = yIn(m[0]); gate.y0 = terrain(m[0] + gate.n[0] * 3.3, m[1] + gate.n[1] * 3.3) - 0.9; gate.y1 = gate.y + 2.2; }
   return { runs, gate };
 }
+
+/** A point of a lot in its own frame: u along the front from the left end, v inward from the door wall. */
+export function lotPoint(l, u, v) {
+  const [x0, z0, x1, z1] = l.rect, f = l.face;
+  return f === 'n' ? [x0 + u, z0 + v] : f === 's' ? [x0 + u, z1 - v] : f === 'w' ? [x0 + v, z0 + u] : [x1 - v, z0 + u];
+}
+/** Where a lot's smoke rises: over the hearth's hole in the roof (a house's front room, a workshop's middle, the palace suites). */
+export function hearthAt(l) {
+  const alongX = l.face === 'n' || l.face === 's', W = alongX ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1], D = alongX ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0];
+  const two = l.kind === 'house' && D >= 6.6 && W >= 6.8, Vp = two ? Math.round(D * 0.55 * 2) / 2 : -1;
+  const st = l.kind === 'house' ? l.storeys : 1;
+  const p = lotPoint(l, W / 2, Vp > 0 ? Vp / 2 : D / 2);
+  return { at: p, top: l.y + st * 2.95 + 0.3 };
+}

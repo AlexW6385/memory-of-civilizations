@@ -2,7 +2,7 @@
 // the altar of the court. The engine part is src/engine/smoke.js (one draw call); positions from the layout.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, lots, PALACE, PAL_Y } from './layout.js';
+import { RADIUS, lots, PALACE, PAL_Y, hearthAt } from './layout.js';
 import { ground } from './ground.js';
 
 const ID = 'mycenae';
@@ -11,10 +11,15 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1
 export function emitters() {
   const E = [], r = rng(1250);
   for (const l of lots()) {
-    const [x0, z0, x1, z1] = l.rect, x = x0 + (x1 - x0) * (0.3 + 0.4 * r()), z = z0 + (z1 - z0) * (0.3 + 0.4 * r());
-    if (l.kind === 'workshop') E.push({ p: [x, l.y + l.storeys * 2.7 + 1.2, z], kind: 'kitchen', thr: 0, seed: l.seed + 1 });
-    else if (l.kind === 'house' && r() < 0.4) E.push({ p: [x, l.y + l.storeys * 2.7 + 1.0, z], kind: 'kitchen', thr: 0.3 + 0.6 * r(), seed: l.seed + 3 });
+    if (l.kind === 'granary' || l.kind === 'store' || l.kind === 'guard') continue;
+    const { at, top } = hearthAt(l);
+    // every workshop, the forges and kilns above all, and about half the houses keep a fire at the meals; the shrines burn incense
+    if (l.kind === 'cult') E.push({ p: [at[0], top, at[1]], kind: 'incense', thr: 0.2, seed: l.seed + 5 });
+    else if (l.kind === 'workshop') E.push({ p: [at[0], top, at[1]], kind: 'kitchen', thr: 0, seed: l.seed + 1 });
+    else if (r() < 0.55) E.push({ p: [at[0], top, at[1]], kind: 'kitchen', thr: 0.3 * r() + (l.inside ? 0 : 0.2), seed: l.seed + 3 });
   }
+  // the palace's suites and the magazines' courts
+  for (const [x, z] of [[43, -19], [70, 19]]) E.push({ p: [x, PAL_Y + 7.6, z], kind: 'kitchen', thr: 0.1, seed: Math.floor(x) });
   const M = PALACE.megaron;
   E.push({ p: [M.x0 + 6.4 + 0.9 + 3.7 + 0.9 + 6, PAL_Y + 7.6, M.ax], kind: 'incense', thr: 0, seed: 21 });
   E.push({ p: [43.5, PAL_Y + 0.8, 3], kind: 'incense', thr: 0.1, seed: 22 });

@@ -31,13 +31,16 @@ function planting(x, z) {
   if (x < -86 && x > -195 && Math.abs(z) < 8) return null;                                               // the approach road and its court
   if (inMound(x, z)) return { grass_dry: 14, maquis: 0.1 };
   if (inCitadel(x, z, -2)) return { maquis: 0.15, grass_dry: 6 };                                           // the footing of the wall
-  const k = hash2(x * 0.2, z * 0.2);
-  if (r < 135) return k < 0.4 ? { olive: 0.2, fig: 0.05, grass_dry: 12 } : { maquis: 0.5, stone_pine: 0.03, cypress: 0.03, grass_dry: 14 };
-  return { olive: 0.12, maquis: 0.3, stone_pine: 0.04, grass_dry: 14 };
+  const k = hash2(x * 0.2, z * 0.2), kc = hash2(Math.floor(x / 40), Math.floor(z / 40));
+  // the terraces about the lanes: olive groves with figs between the walls, cypress by the tombs and the shrines
+  if (onLane(x, z, 16) && r < 160) return kc < 0.6 ? { olive: 0.9, fig: 0.3, grass_dry: 10 } : { fig: 0.5, olive: 0.4, cypress: 0.05, grass_dry: 12 };
+  if (r > 128 && Math.abs(z) > 24 && kc < 0.5) return { wheat: 90 };
+  if (r < 135) return k < 0.4 ? { olive: 0.3, fig: 0.08, grass_dry: 12 } : { maquis: 0.6, aleppo_pine: 0.05, stone_pine: 0.03, cypress: 0.04, grass_dry: 14 };
+  return { olive: 0.15, maquis: 0.4, aleppo_pine: 0.05, stone_pine: 0.04, grass_dry: 14 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { olive: 0.2, fig: 0.05, maquis: 0.5, stone_pine: 0.04, cypress: 0.03 },
+  maxDensity: { olive: 0.9, fig: 0.5, maquis: 0.6, stone_pine: 0.04, aleppo_pine: 0.05, cypress: 0.05, wheat: 90 },
   climate: {
     sun: { az: 150, el: 58, color: [1.0, 0.96, 0.88], intensity: 3.6, lat: 37.7, dec: 15, hour: 10.5 },
     sky: { turbidity: 2.4, rayleigh: 1.0, mie: 0.004, mieG: 0.78, zenith: [0.07, 0.16, 0.42], horizon: [0.6, 0.66, 0.72] },
