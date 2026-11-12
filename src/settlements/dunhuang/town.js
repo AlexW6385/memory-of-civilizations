@@ -172,6 +172,26 @@ export async function town() {
     // two guards of the town's ward walking with staves are the movers'; a dog and cat at the doors
     put({ t: 'animal', kind: 'dog', at: [4, 3.8], y: 0, rot: 2.4, seed: 31 }); put({ t: 'animal', kind: 'cat', at: [-9.5, 5.4], y: 0.0, rot: 0.8, seed: 32 });
   }
+  // ── the street from the market to the gate (x 70..118): a smith at his anvil, a tandoor baker, drying trays of apricots and grapes at the walls,
+  // porters resting in the shade with their loads, a dyer's cloths on a line across a lane's mouth, a wedding or pilgrim party with a banner
+  {
+    const put = (o) => L.push(o), ONE = Math.PI;
+    const clear = (d, x) => !nearDoor(d, x + 0.0);
+    // the smith (a forge of earth with bellows is the shop's; outside: the anvil on its stump, the tongs, a customer with a horse to be shod)
+    for (const [x, side] of [[78, 1], [104, -1]]) {
+      const z = side * 4.3; if (!clear(side > 0 ? dN : dS, x)) continue;
+      put({ t: 'trough', at: [x + 1.6, z], y: 0, rot: 0, mat: 'banco' }); put({ t: 'pot', kind: 'vat', at: [x - 0.4, z], y: 0, seed: x });
+      man([x + 0.5, z - side * 1.0], 0, side > 0 ? 0 : ONE, { pose: 'stand', hat: 'cap', cloth: 'cloth_brown', over: 'apron', carry: 'staff' });
+    }
+    // trays of apricots and grapes laid to dry on trestles against the house walls, melons and gourds stacked
+    for (const x of [74, 82, 90, 96, 108, 114]) for (const side of [-1, 1]) { if (!clear(side > 0 ? dN : dS, x) || rand() < 0.35) continue; put({ t: 'drying_tray', at: [x, side * 5.0], y: 0, rot: rand() * 3, seed: Math.round(x * 3 + side) }); }
+    for (const [x, side] of [[86, 1], [100, -1], [112, 1]]) if (clear(side > 0 ? dN : dS, x)) { put({ t: 'goods_mat', at: [x, side * 4.2], y: 0, rot: side > 0 ? ONE : 0, goods: ['melons', 'heap'], seed: x }); man([x, side * 5.3], 0, side > 0 ? 0 : ONE, { pose: 'sit_ground', hat: 'straw', cloth: 'cloth_grey' }); }
+    // porters resting in the lee of a wall: sacks, a pole laid down, two sitting and one asleep against the load
+    for (const [x, side] of [[92, -1], [110, 1]]) { const z = side * 4.6; put({ t: 'sacks', at: [x, z], y: 0, rot: 0.3, n: 5, seed: x }); man([x + 1.4, z], 0, side > 0 ? ONE + 0.5 : 0.5, { pose: 'sit_ground', hat: 'straw', cloth: 'cloth_white', feet: 'bare', dress: 'tunic', legs: 'hose' }); man([x + 2.4, z + 0.1], 0, side > 0 ? ONE - 0.4 : -0.4, { pose: 'cross', hat: 'cap', cloth: 'cloth_brown' }); }
+    // a pilgrim party coming from the oasis to the caves: a monk with a banner pole, six lay pilgrims with bundles, a donkey with the baggage
+    for (let k = 0; k < 7; k++) man([68 + k * 1.5 + (rand() - 0.5) * 0.4, -1.4 + (k % 2) * 2.2 + (rand() - 0.5) * 0.3], 0, ONE - 0.1 + (rand() - 0.5) * 0.25, k === 0 ? { dress: 'robe', cloth: 'cloth_ochre', cloth2: 'cloth_brown', over: 'shawl', hair: 'shaven', hat: 'none', carry: 'staff' } : { carry: k % 3 ? 'bundle' : 'staff', hat: k % 2 ? 'straw' : 'cap' });
+    put({ t: 'animal', kind: 'donkey', at: [79, 0.3], y: 0, rot: ONE + 0.1, seed: 77, gear: true });
+  }
   void face; void CAVES; void FLOOR; void STREET; void riverX;
   return [base('dunhuang-town', 'dunhuang', E), base('dunhuang-people', 'life', L)];
 }
