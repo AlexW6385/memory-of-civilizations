@@ -51,6 +51,11 @@ export const WALKERS = [
     c1: [CL.red, CL.linen, CL.green, CL.indigo], c2: [CL.white, CL.linen], c3: [CL.black], speed: [0.85, 1.05], stride: 1.15, h: [0.9, 0.97] },
   { id: 'porter', weight: 0.7, market: 1.0, el: { dress: 'trousers', hair: 'short', beard: 1, hat: 'cap', hatMat: 'hide_brown', carry: 'pole', arms: 'pole' }, swing: 0.75, pole: true,
     c1: [CL.linen, CL.brown, CL.grey], c2: [CL.brown, CL.grey], c3: [CL.black], speed: [1.0, 1.25], stride: 1.1 },
+  // boys running errands and the pedlar with his pack of ribbons, needles and prints (the pack on the back)
+  { id: 'boy', weight: 0.6, market: 1.2, el: { dress: 'robe', hair: 'short', hat: 'cap', hatMat: 'hide_tan', arms: 'hang' }, swing: 1.0,
+    c1: [CL.linen, CL.brown, CL.grey, CL.red], c2: [CL.white, CL.brown], c3: [CL.brown], speed: [1.3, 1.7], stride: 1.0, h: [0.62, 0.74] },
+  { id: 'pedlar', weight: 0.5, market: 1.5, el: { dress: 'robe', hair: 'short', beard: 1, hat: 'cap', hatMat: 'hide_black', over: 'sash', carry: 'sack', arms: 'sack' },
+    c1: [CL.indigo, CL.brown, CL.green], c2: [CL.white, CL.brown], c3: [CL.black, CL.brown], speed: [0.9, 1.15], stride: 1.3 },
 ];
 export const CREW = {
   boatman: { el: { dress: 'trousers', hair: 'short', arms: 'hang' }, c1: [CL.linen], c2: [CL.brown], c3: [CL.black] },

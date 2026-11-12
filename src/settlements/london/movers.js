@@ -27,7 +27,9 @@ const shopShare = (() => {
 /** The streets, Bridge Street, the squares and the embankments (layout.js walkRects) with the crowd by the shops along them. */
 export function walkways() {
   const rects = walkRects().map((w) => { const m = shopShare(w.r); return { r: w.r, weight: w.weight * (0.5 + 3 * m), market: w.kind === 'main' ? 1 : m, kind: w.kind === 'main' ? 'street' : 'lane' }; });
-  return { rects, links: [], clip: RADIUS - 14 };
+  // Westminster Bridge: the deck joins Bridge Street's two stretches (the rects stop at the river's roads), so that the pavements of the bridge are walked
+  const links = [{ a: [94, BRIDGE.z], b: [262, BRIDGE.z], w: 7.4, weight: 2.2, kind: 'bridge' }];
+  return { rects, links, clip: RADIUS - 14 };
 }
 /** The Thames: two lanes (downstream on the east side of the channel, upstream on the west), broken at the bridge and short of the banks. */
 export function waterways() {

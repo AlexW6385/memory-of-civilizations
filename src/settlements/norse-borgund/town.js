@@ -56,6 +56,16 @@ export function life() {
   const S = 0.85, cy = height(...CHURCH) + 0.35 * S;
   fig([CHURCH[0] + 8.0 * S, CHURCH[1]], Math.PI / 2 + Math.PI, { y: cy, dress: 'robe', cloth: 'linen', cloth2: 'cloth_white', over: 'cape', hat: 'none', hair: 'shaven', beard: 0, pose: 'stand' });
   for (const [x, z, pose] of [[-8, -12, 'talk'], [-6.6, -11.2, 'talk'], [9, -42, 'stand'], [-1.2, -4.5, 'stand'], [1.0, -3.6, 'talk']]) fig([x, z], Math.atan2(-(CHURCH[0] - x), -(CHURCH[1] - z)), { pose });
+  // outside the churchyard's gate: the parishioners' horses tied at the wall, a sledge, a boy minding them, an old woman with her stick;
+  // west of the wall, in the first view from the arrival, a flock of sheep with its herder and a woman with a milk-pail yoke on the track
+  for (const [x, z, rot] of [[-6.5, YARD[3] + 3.4, 1.1], [5.8, YARD[3] + 4.2, -1.3], [9.2, YARD[3] + 3.0, 1.9]]) if (free(x, z, 0.5)) beast('horse', [x, z], rot);
+  if (free(-8.5, YARD[3] + 5.5, 1)) put('sledge', [-8.5, YARD[3] + 5.5], { load: 'bales', rot: 0.4 });
+  if (free(2.8, YARD[3] + 5.5, 1)) fig([2.8, YARD[3] + 5.5], 2.6, { pose: 'stand', h: 1.15, dress: 'tunic', hat: 'cap', beard: 0 });
+  if (free(-3.8, YARD[3] + 6.8, 1)) fig([-3.8, YARD[3] + 6.8], 0.4, { pose: 'talk', carry: 'staff', dress: 'robe', hair: 'long', beard: 0, cloth: 'cloth_grey', cloth2: 'cloth_white' });
+  { const c = [-44, -40]; if (free(c[0], c[1], 3)) { for (let k = 0; k < 7; k++) { const p = near(c, 8); if (p) beast('sheep', p, 0.6 + (rand() - 0.5) * 1.6); } const h = near(c, 6); if (h) fig(h, 2.4, { carry: 'pole', dress: 'tunic', pose: 'stand' }); } }
+  for (const [x, z] of [[-38, -10], [-40, 6]]) if (free(x, z, 2)) fig([x, z], rand() * 6.28, { carry: 'yoke', dress: 'robe', hair: 'long', beard: 0, cloth: 'cloth_indigo' });
+  if (free(-36, -22, 1)) put('haystack', [-36, -22]);
+  if (free(-33, -44, 1)) put('firewood', [-33, -44], { rot: 0.3, len: 2.2 });
   // inside the houses: the housewife squatting at the hearth, an old man on the bench of the dwellings; the smith at his anvil;
   // in the barns the beasts in their stalls (the plan of styles/norse/farm.js barnInside); pigs and geese in the yards, cats and dogs at the doors
   B.forEach((b) => {

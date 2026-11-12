@@ -10,6 +10,8 @@ const flights = [
   { kind: 'swallow', n: 5, lane: { a: [mid(-250), -250], b: [mid(250), 250] }, y: [-0.5, 5], speed: 9 },
   { kind: 'swallow', n: 4, lane: { a: [mid(-60) + 25, -60], b: [mid(160) + 25, 160] }, y: [-0.5, 5], speed: 9 },
 ];
+// gulls over the Thames above the bridge and the palace's river front (the river's winter gulls followed the barges' refuse)
+flights.push({ kind: 'gull', n: 6, loop: { c: [mid(-110) + 5, -110], a: [38, 22], rot: 0.2 }, y: [4, 10], speed: 7 }, { kind: 'gull', n: 4, lane: { a: [mid(-250), -250], b: [mid(-60), -60] }, y: [0.5, 5], speed: 6 });
 flights[2].a = flights[3].a = [30, 4];
 const perches = [];
 // house sparrows hopping on the paving along the streets near the arrival: a place at the kerb of each of some streets
@@ -22,6 +24,8 @@ for (const zc of streetsZ()) {
     perches.push({ kind: 'sparrow', x, z, y: GROUND, rot: rand() * 3, range: [1.4, 1.3] });
   }
 }
+// pigeons on the bridge's parapet and the pavement of Bridge Street, sparrows by the lamp-posts of the deck
+for (const [x, z] of [[205, BRIDGE.z - 6.8], [196, BRIDGE.z + 6.9], [170, BRIDGE.z - 6.7], [120, BRIDGE.z + 6.8], [75, BRIDGE.z - 6.9]]) perches.push({ kind: 'pigeon', x, z, y: GROUND + 0.4, rot: x, range: [1.8, 0.6] });
 for (const [x, z] of [[-30, -190], [10, -160], [-45, -170], [20, -200]]) perches.push({ kind: 'sparrow', x, z, y: GROUND, rot: x, range: [1.6, 1.4] });
 // the grey heron on the Thames mud under the Lambeth embankment, facing the water
 { const z = 40, x = bank(z)[1] - 3.4; perches.push({ kind: 'heron', x, z, y: Math.max(height(x, z), RIVER.level + 0.05), rot: Math.PI, stay: [80, 240], gone: [60, 180], alert: 12 }); }

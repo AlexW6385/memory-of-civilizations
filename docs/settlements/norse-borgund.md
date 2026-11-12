@@ -98,3 +98,7 @@ The farm work of a summer (haymaking, wood, the yards), the herds at pasture wit
 - [Borgund Stave Church — kringom.no](https://kringom.no/en/laerdal/borgund-stave-church)
 - [Borgund Stave Church — ArchEyes](https://archeyes.com/borgund-stave-church/)
 - [Loft (building) — Wikipedia](https://en.wikipedia.org/wiki/Loft_(building))
+
+## Deepening pass (2026-11) — the churchyard gate and the west meadow
+- At Sunday service the parishioners' horses stand tied outside the churchyard's south gate, a sledge drawn up, a boy minding them. [inferred: Lærdal parishes were reached on foot, horseback and by boat; sledges serve in summer too on the farms]
+- West of the churchyard wall, in the first view: a flock of sheep with a herder, milkmaids with yokes on the track, a haystack and a woodpile; sparrows on the wall's coping. [inferred from the dossier's §10 farm work]

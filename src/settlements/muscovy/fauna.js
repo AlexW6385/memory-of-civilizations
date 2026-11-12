@@ -21,6 +21,8 @@ flights.push({ kind: 'swallow', n: 4, loop: { c: [150, 60], a: [90, 60], rot: 0.
 flights[2].a = [30, 3];
 const perches = [];
 for (const [x, z] of [[40, -100], [38, -30], [44, 40], [36, 90], [-90, 230 - 0], [120, 35], [-60, -120], [150, -35]]) perches.push({ kind: 'sparrow', x, z, y: height(x, z), rot: (x * 7) % 3, range: [1.5, 1.3] });
+// pigeons on the beaten earth of Red Square, about St Basil's steps and before the Spassky bridge, drawn to the crumbs of the market
+for (const [x, z] of [[30, 60], [20, 100], [44, 112], [8, 110], [38, 70], [14, 30], [48, 6], [-4, -20]]) perches.push({ kind: 'pigeon', x, z, y: height(x, z), rot: x * 0.7, range: [2.2, 1.8] });
 // sparrows on the fence tops and the log paving of the streets, near the middle first; herons standing in the river's shallows
 { const S = streetSegments(); for (let i = 0; i < S.length; i += 3) { const { a, b } = S[i], t = 0.3 + ((i * 37) % 40) / 100, x = a[0] + (b[0] - a[0]) * t + 3.2, z = a[1] + (b[1] - a[1]) * t + 2; if (Math.hypot(x, z) < 300) perches.push({ kind: 'sparrow', x, z, y: height(x, z), rot: (i * 5) % 6, range: [1.5, 1.3] }); } }
 for (const x of [-210, -60, 90, 200]) perches.push({ kind: 'heron', x, z: riverZ(x) - RIVER.w / 2 + 4.5, y: RIVER.level - 0.4, rot: 1.6, range: [0.4, 0.4] });

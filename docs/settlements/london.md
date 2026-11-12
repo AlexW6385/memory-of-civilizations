@@ -189,3 +189,8 @@ Sources added:
 - [Statue of George Canning, Parliament Square — Wikipedia](https://en.wikipedia.org/wiki/Statue_of_George_Canning,_Parliament_Square)
 - [The High Altar — Westminster Abbey](https://www.westminster-abbey.org/history/explore-our-history/high-altar/)
 - [Mudlark — Wikipedia](https://en.wikipedia.org/wiki/Mudlark)
+
+## Deepening pass (2026-11) — what the arrival and the first 100 m now hold
+- Westminster Bridge's pavements are walked: the deck is a link in the walkers' graph from Bridge Street's end to the Lambeth stretch, and a few still folk (strollers at the parapet, a basket-woman, clerks in talk, a dog) stand on it. [inferred: the bridge, the busiest crossing of the 1860s, carried pedestrians as well as cabs]
+- Parliament Square's edges carry six costers' trestle stalls with a seller behind each; the cab traffic on the bridge is thickened toward the Clock Tower's view; a coal cart, a dray and a barrow stand at the kerbs. [inferred from the dossier's §5a–§5b street trades]
+- Pigeons and sparrows on the bridge parapet and pavement; winter gulls over the river reach above the bridge. [inferred: Thames gulls and town pigeons are usual in 19th-century views]
