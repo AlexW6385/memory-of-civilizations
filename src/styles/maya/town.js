@@ -384,7 +384,12 @@ function plazaMarks(el, { bag }) {
     for (let z = r[1]; z < r[3]; z += 6) { band(mat, r[0], z, r[0] + w, Math.min(r[3], z + 6)); band(mat, r[2] - w, z, r[2], Math.min(r[3], z + 6)); }
   };
   ring('stucco_red', 0, 0.55); ring('maya_blue', 1.2, 0.18);
-  for (let z = b1 + 2; z < (el.rect ? el.rect[3] - 4 : b1 + 70); z += 5) band('plaster_grey', -1.8 + 0.3 * Math.sin(z * 0.2), z, 1.8 + 0.3 * Math.sin(z * 0.2), z + 5.2);
+  if (!el.noWay) for (let z = b1 + 2; z < (el.rect ? el.rect[3] - 4 : b1 + 70); z += 5) band('plaster_grey', -1.8 + 0.3 * Math.sin(z * 0.2), z, 1.8 + 0.3 * Math.sin(z * 0.2), z + 5.2);
+  // trodden ways [[x0, z0, x1, z1]] (the long side runs along the way): a darker strip worn in the plaster
+  for (const [x0, z0, x1, z1] of el.ways ?? []) {
+    if (x1 - x0 > z1 - z0) for (let x = x0; x < x1; x += 5) band('plaster_grey', x, z0 + 0.3 * Math.sin(x * 0.2), Math.min(x1, x + 5.2), z1 + 0.3 * Math.sin(x * 0.2));
+    else for (let z = z0; z < z1; z += 5) band('plaster_grey', x0 + 0.3 * Math.sin(z * 0.2), z, x1 + 0.3 * Math.sin(z * 0.2), Math.min(z1, z + 5.2));
+  }
 }
 
 export const mayaTownElements = { plaza_marks: plazaMarks, maya_yard: mayaYard, maya_range: mayaRange, maya_awning: mayaAwning, plaza_wear: plazaWear, maya_stela: mayaStela, maya_shrine: mayaShrine, maya_ceiba: mayaCeiba, maya_cenote_life: cenoteLife, maya_sweatbath: mayaSweatbath, maya_weather: mayaWeather, sacbe_edge: sacbeEdge };

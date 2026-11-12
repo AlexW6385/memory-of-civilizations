@@ -94,6 +94,16 @@ function worksite() {
     fig(x, z - 0.2, Y, Math.PI * 0.8, { pose: 'sit_ground', woman: rand() < 0.5 });
     if (rand() < 0.7) fig(x + 0.9, z + 1.2, Y, Math.PI + 0.6, { pose: 'sit_ground', woman: rand() < 0.5 });
   }
+  // the rest in the ceibas' shade: people sitting on mats with their jars and bundles, a turkey and a dog about them
+  for (const [cx, cz] of [[62, 102], [-8, 106], [-122, 62], [160, 100]]) {
+    for (let k = 0; k < 3; k++) {
+      const a = 0.6 + k * 2.1 + cx * 0.1, x = cx + Math.cos(a) * 4.2, z = cz + Math.sin(a) * 4.2;
+      O.push({ t: 'petate', at: [x, z], y: Y, w: 1.7, d: 1.3, rot: a });
+      fig(x, z, Y, a + Math.PI, { pose: k === 1 ? 'talk' : 'sit_ground', woman: rand() < 0.5 });
+      L.push({ t: 'pot', kind: 'water_pot', at: [x + 1.0, z + 0.3], y: Y + 0.015, seed: Math.floor(rand() * 1e6) });
+    }
+    L.push({ t: 'chickens', kind: 'turkey', at: [cx + 3.2, cz - 3.4], y: Y, n: 3, rot: rand() * 6.28, seed: Math.floor(cx) }, { t: 'animal', kind: 'dog', at: [cx - 3.6, cz + 2.0], y: Y, rot: rand() * 6.28, seed: Math.floor(cz) });
+  }
   return [{ ...base('chichen-itza-worksite', L), style: 'life' }, base('chichen-itza-worksite-mats', O)];
 }
 
