@@ -21,6 +21,8 @@ function height(x, z) {
   if (onCauseway(x, z, 2)) h *= 0.15;
   return h * (1 - sm(RADIUS - 30, RADIUS, r));
 }
+/** The milpas: maize plots in the gaps about the patio groups, in 10 m cells (about half of them). */
+const milpa = (x, z) => { const gd = groupDist(x, z); return gd > 1.4 && gd < 9 && hash2(Math.floor(x / 10) + 7, Math.floor(z / 10) - 3) < 0.5; };
 function cover(x, z) {
   const c = { sand: 0, grass: 0, rock: 0, soil: 0, fields: 0, dry: 0.15, warmth: 0.75, red: 0.35, road: 0, snow: 0, forest: 0 };
   if (inRect(PLAZA, x, z)) { c.road = 1; c.soil = 1; c.dry = 0.5; return c; }
@@ -29,6 +31,7 @@ function cover(x, z) {
   if (inGroup(x, z)) { c.soil = 0.65; c.grass = 0.35; c.red = 0.5; return c; }
   if (onCauseway(x, z)) { c.road = 1; c.soil = 1; c.dry = 0.4; return c; }
   if (inCore(x, z)) { c.grass = 0.6 + 0.2 * n; c.soil = 0.3; c.red = 0.45; return c; }
+  if (milpa(x, z)) { c.fields = 0.8; c.soil = 0.55; c.grass = 0.25; c.forest = 0.2; return c; }
   c.grass = 0.55 + 0.25 * n; c.soil = 0.35; c.forest = 0.9; return c;
 }
 const wetOf = (x, z) => { let m = 1e9; for (const R of RESERVOIRS) m = Math.min(m, resDist(R, x, z)); return m; };
@@ -40,13 +43,14 @@ function planting(x, z, p) {
   if (Math.hypot(x, z) > RADIUS - 6 || wetOf(x, z) < 1.5) return null;
   if (inRect(PLAZA, x, z, 3) || onCauseway(x, z, 2.5)) return null;
   if (inRect([-62, -126, 148, 134], x, z) || inRect([-128, -80, -92, -44], x, z) || inRect([-296, -36, -232, 36], x, z) || nearHouse(x, z, 1.8)) return null;       // the acropolises, the temples, Temple IV
-  if (inGroup(x, z, 0.5)) return { grass: 20, fig: 0.1, neem: 0.05 };
+  if (inGroup(x, z, 0.5)) return { grass: 14, fig: 0.22, neem: 0.05, sycamore_fig: 0.05 };
+  if (milpa(x, z)) return { grass: 5, fig: 0.03 };
   const f = sm(70, 190, Math.hypot(x, z));
   return { grass: 25, banyan: 0.04 + 0.1 * f, teak: 0.1 + 0.4 * f, sycamore_fig: 0.05 + 0.2 * f, neem: 0.1 * f, fig: 0.15 };
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { banyan: 0.14, teak: 0.5, sycamore_fig: 0.25, neem: 0.1, fig: 0.15 },
+  maxDensity: { banyan: 0.14, teak: 0.5, sycamore_fig: 0.25, neem: 0.1, fig: 0.25 },
   // the humid lowlands in the rainy season: hot, hazy, towering clouds and showers
   climate: {
     sun: { az: 150, el: 62, color: [1.0, 0.95, 0.85], intensity: 3.3, lat: 17.2, dec: 15, hour: 10.5 },

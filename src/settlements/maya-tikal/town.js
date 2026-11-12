@@ -7,6 +7,7 @@ import { RADIUS, PLAZA, groups, CAUSEWAYS, CW_H, RESERVOIRS, resDist, T1, T2, T4
 import { ground } from './ground.js';
 import { SOUTH_RANGE, STEP_PALACE } from './plan.js';
 import { frame } from '../../styles/tikal/kit.js';
+import { boatFloat } from '../../objects/index.js';
 
 const base = (id, elements, style = 'tikal') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-18, 28], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -20,6 +21,15 @@ function groupElements(g) {
   const [sx, sz] = g.shrine;
   E.push({ t: 'block', rect: [sx - 2.2, sz - 2.2, sx + 2.2, sz + 2.2], y0: 0, y1: 1.3, batter: [1.4, 1.4, 1.4, 1.4], mat: 'lime_plaster', collide: false, walk: true });
   E.push({ t: 'block', rect: [sx - 0.9, sz - 0.9, sx + 0.9, sz + 0.9], y0: 1.3, y1: 1.9, batter: [0.2, 0.2, 0.2, 0.2], mat: 'stucco_red', collide: true });
+  // the court's furnishing: the kitchen shed in the north-east corner, the granary in the south-east, a cistern in the middle, the damp
+  const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  E.push({ t: 'k_shed', c: [x1 - 4.4, z0 + 3.4], w: 3.4, d: 2.8, seed: g.seed });
+  E.push({ t: 'k_granary', c: [x1 - 3.6, z1 - 3.4], seed: g.seed + 1 });
+  E.push({ t: 'k_chultun', at: [cx + 2, cz - 3.2], y: 0.1, seed: g.seed + 2 });
+  E.push({ t: 'k_stains', rect: [x0 + 7, z0 + 6, x1 - 7, z1 - 6], y: 0.11, n: 3, seed: g.seed + 3 });
+  // the low wall of dry stone round the group, a gate in the middle of the east side and the corners left open
+  const r0 = x0 - 0.6, r1 = z0 - 0.6, r2 = x1 + 0.6, r3 = z1 + 0.6;
+  for (const pts of [[[r0 + 3, r1], [r2, r1], [r2, cz - 1.6]], [[r2, cz + 1.6], [r2, r3], [r0 + 3, r3]], [[r0, r1 + 3], [r0, cz - 1.6]], [[r0, cz + 1.6], [r0, r3 - 3]]]) E.push({ t: 'albarrada', pts, h: 0.7 });
   return E;
 }
 function groupLife(g, rand, L, P) {
@@ -32,12 +42,20 @@ function groupLife(g, rand, L, P) {
     if (r < 0.3) L.push({ t: 'pot', kind: rand() < 0.5 ? 'water_pot' : 'dark_pot', n: 1 + Math.floor(rand() * 2), at: [px, pz], y: 0.42, seed: h.seed });
     else if (r < 0.55) L.push({ t: 'basket', n: 1, at: [px, pz], y: 0.42, seed: h.seed, goods: 'cloth_ochre' });
     else if (r < 0.7) L.push({ t: 'firewood', at: [px, pz], y: 0.42, rot: s[0] ? 0 : Math.PI / 2, len: 1.2, seed: h.seed });
+    // water pots, a dog or a few turkeys by the platform
+    if (rand() < 0.4) L.push({ t: 'animal', kind: 'dog', at: [px + s[0] * 1.2 + (rand() - 0.5), pz + s[1] * 1.2 + (rand() - 0.5)], y: 0.1, rot: rand() * 6.28, seed: h.seed });
+    else if (rand() < 0.4) L.push({ t: 'chickens', kind: 'turkey', n: 2 + Math.floor(rand() * 3), at: [px + s[0] * 2 + (rand() - 0.5) * 2, pz + s[1] * 2 + (rand() - 0.5) * 2], y: 0.1, seed: h.seed });
     // a person in the patio, by trade
     if (rand() < 0.45) {
       const q = [h.c[0] + s[0] * (hw + 1.8 + rand()) , h.c[1] + s[1] * (hd + 1.8 + rand())];
       P.push(person(rand, q[0], q[1], 0.1, face(-s[0], -s[1]), rand() < 0.65 ? { woman: true, pose: rand() < 0.4 ? 'kneel' : 'stand', over: 'none' } : {}));
     }
   }
+  // the cook at the metate under her shed, firewood stacked at its post, jars in the court
+  { const sx = g.rect[2] - 4.4, sz = g.rect[1] + 3.4;
+    if (rand() < 0.7) P.push(person(rand, sx + 0.7, sz + 1.05, 0.2, 0, { woman: true, pose: 'kneel', over: 'none' }));
+    L.push({ t: 'firewood', at: [sx - 2.4, sz + 1.0], y: 0.1, rot: 0, len: 1.1, seed: g.seed });
+    L.push({ t: 'pot', kind: 'water_pot', n: 2, at: [g.rect[2] - 1.4, sz + 2.4], y: 0.1, seed: g.seed }); }
   void x0; void z0;
 }
 function person(rand, x, z, y, rot, o = {}) {
@@ -54,6 +72,7 @@ function market() {
   for (let r = 0; r < 4; r++) for (let c = 0; c < 6; c++) {
     if (rand() < 0.12) continue;
     const x = X0 + c * 8.6 + (rand() - 0.5) * 1.4, z = Z0 + r * 9 + (rand() - 0.5) * 1;
+    if (rand() < 0.6) M.push({ t: 'k_awning', at: [x, z + 0.1], y: Y, w: 2.8, d: 2.4, rot: (rand() - 0.5) * 0.12 });
     M.push({ t: 'petate', at: [x, z + 0.4], y: Y, w: 1.9, d: 1.2, rot: (rand() - 0.5) * 0.2 });
     L.push(person(rand, x, z - 0.55, Y, Math.PI, { pose: rand() < 0.6 ? 'squat' : 'sit_ground' }));
     for (let k = 0; k < 3; k++) {
@@ -62,7 +81,7 @@ function market() {
       else L.push({ t: 'pot', kind: pick(['dark_pot', 'water_pot']), at, y: Y + 0.015, seed: Math.floor(rand() * 1e6) });
     }
   }
-  for (let k = 0; k < 16; k++) L.push(person(rand, 86 + rand() * 52, 28.5 + Math.floor(rand() * 4) * 9 + (rand() - 0.5) * 2, Y, rand() * 6.28, { carry: pick(['basket', 'pot', 'none', 'none']), pose: rand() < 0.3 ? 'talk' : 'stand' }));
+  for (let k = 0; k < 30; k++) L.push(person(rand, 86 + rand() * 52, 30.5 + Math.floor(rand() * 4) * 9 + (rand() - 0.5) * 2, Y, rand() * 6.28, { carry: pick(['basket', 'pot', 'none', 'none']), pose: rand() < 0.3 ? 'talk' : 'stand' }));
   return [{ ...base('maya-tikal-market', L), style: 'life' }, base('maya-tikal-market-mats', M)];
 }
 
@@ -101,6 +120,31 @@ function people() {
   return [{ ...base('maya-tikal-people', L), style: 'life' }, base('maya-tikal-ball', B)];
 }
 
+/** The life at the reservoirs: women with jars and washing at the rim, a fisher in a dugout canoe, ducks. */
+function reservoirLife() {
+  const rand = rng(2210), L = [], out = [];
+  for (const R of RESERVOIRS) {
+    const rim = (ang, d) => { const ux = Math.cos(ang), uz = Math.sin(ang); let t = 0; while (resDist(R, R.c[0] + ux * t, R.c[1] + uz * t) < d && t < 200) t += 0.2; return [R.c[0] + ux * t, R.c[1] + uz * t, ux, uz]; };
+    const angs = R.id === 'palace' ? [-1.5, -1.1, -2.0, 3.4, 0.4] : [3.1, 3.6, 2.6, 0.3];
+    angs.forEach((a, i) => {
+      const [x, z, ux, uz] = rim(a, 2.2), y = ground.height(x, z), rot = Math.atan2(ux, uz) + Math.PI;     // faces the water
+      const here = (k, o) => [x + uz * o + ux * k, z - ux * o + uz * k];
+      const q = here(0, 0);
+      L.push(person(rand, q[0], q[1], y, rot, { woman: true, pose: 'kneel', over: 'none' }));
+      const p1 = here(0.5, 0.9); L.push({ t: 'pot', kind: 'water_pot', n: 2, at: p1, y: ground.height(p1[0], p1[1]), seed: i + 5 });
+      const p2 = here(-0.2, -1.0); L.push({ t: 'basket', n: 1, at: p2, y: ground.height(p2[0], p2[1]), seed: i + 9, goods: 'cloth_white' });
+      if (i % 2 === 0) { const w = here(-1.8, 2.2); L.push(person(rand, w[0], w[1], ground.height(w[0], w[1]), rot + 0.6, { woman: true, carry: 'pot' })); }
+      if (i === 1) { const d = here(1.6, -2.0); L.push({ t: 'chickens', kind: 'duck', n: 4, at: d, y: ground.height(d[0], d[1]), seed: 3 }); }
+    });
+    // the fisher in the dugout, off the rim
+    const [bx, bz, ux, uz] = rim(R.id === 'palace' ? -1.3 : 3.3, -5), W = R.water + boatFloat('canoe');
+    L.push({ t: 'boat', kind: 'canoe', len: 5, at: [bx, bz], y: W, rot: Math.atan2(uz, ux) + 1.2, seed: 4 });
+    L.push(person(rand, bx, bz, W + 0.18, 1.2, { woman: false, pose: 'sit', carry: 'none' }));
+  }
+  out.push({ ...base('maya-tikal-reservoir-life', L), style: 'life' });
+  return out;
+}
+
 export async function town() {
   const plans = [], all = groups();
   const rand = rng(77);
@@ -112,13 +156,17 @@ export async function town() {
   }
   // the causeways, Temple IV at the end of Tozzer
   plans.push(base('maya-tikal-causeways', [...CAUSEWAYS.map((c) => ({ t: 'k_causeway', pts: c.pts, w: c.w, h: CW_H })),
-    { t: 'k_pyramid', ...T4, shrine: { chambers: 3, len: 8, comb: 20 } }]));
+    { t: 'k_pyramid', ...T4, masks: true, shrine: { chambers: 3, len: 8, comb: 20 } }]));
+  plans.push(base('maya-tikal-causeway-wear', [
+    { t: 'k_stains', rect: [-222, 27, -38, 39], y: CW_H + 0.02, n: 34, seed: 11 },
+    { t: 'k_stains', rect: [96.5, -298, 103.5, -32], y: CW_H + 0.02, n: 30, seed: 12 },
+  ]));
   // the reservoirs' water
   for (const R of RESERVOIRS) {
     const [cx, cz] = R.c, r = Math.max(R.a, R.b) + 2;
     plans.push({ ...base(`maya-tikal-water-${R.id}`, [{ t: 'water_cells', rect: [cx - r, cz - r, cx + r, cz + r], y: R.water, cell: 1, inside: (x, z) => resDist(R, x, z) < -0.3 && ground.height(x, z) < R.water + 0.3 }]), style: 'ming' });
   }
-  plans.push(...market(), ...people());
+  plans.push(...market(), ...people(), ...reservoirLife());
   void PLAZA;
   return plans;
 }
