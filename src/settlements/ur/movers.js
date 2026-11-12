@@ -28,7 +28,7 @@ export function walkways() {
   L([qx, qz0], [qx, qz1], 2.4, 2.4);                                             // the quay's top
   const rects = [
     { r: [MARKET[0] + 2, MARKET[1] + 2, MARKET[2] - 2, MARKET[3] - 2], weight: 1.6, market: 1.8, kind: 'street' },
-    { r: [COURT[0] + 2, COURT[1] + 2, COURT[2] - 2, COURT[3] - 2], weight: 1.0, market: 0.4, kind: 'street' },
+    { r: [COURT[0] + 2, COURT[1] + 2, COURT[2] - 2, COURT[3] - 2], weight: 2.6, market: 0.6, kind: 'street' },
   ];
   return { rects, links, clip: RADIUS - 24 };
 }

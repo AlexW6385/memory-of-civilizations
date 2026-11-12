@@ -15,6 +15,7 @@ import { courtDress } from './court.js';
 import { urHall } from './hall.js';
 import { palm } from '../egyptian/objects.js';
 
+const ZIG_SKIN = ['brick_buff', 'brick', 'brick_buff'];
 const BB = 'brick_baked', MB = 'mudbrick', MP = 'mud_plaster';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /**
@@ -65,8 +66,9 @@ function ziggurat(el, ctx) {
   const tops = [];
   el.stages.forEach((s, i) => {
     const r = [cx - s.w / 2, cz + (s.dz ?? 0) - s.d / 2, cx + s.w / 2, cz + (s.dz ?? 0) + s.d / 2], b = s.batter ?? s.h * 0.12;   // dz: the upper stages set back
-    bag.add(BB, frustum(r, y, y + s.h, b, b, b, b, { noBottom: true }));
-    buttresses(bag, r, y, s.h, b, 3.2, (px) => Math.abs(px - cx) < 5);
+    const SK = ZIG_SKIN[i] || BB;                                          // the stage's facing: pale baked brick below, red above (lit well even against the low sun)
+    bag.add(SK, frustum(r, y, y + s.h, b, b, b, b, { noBottom: true }));
+    buttresses(bag, r, y, s.h, b, 3.2, (px) => Math.abs(px - cx) < 5, SK);
     col.rect([r[0] + b * 0.4, r[1] + b * 0.4, r[2] - b * 0.4, r[3] - b * 0.4], y, y + s.h);
     col.floor([r[0] + b, r[1] + b, r[2] - b, r[3] - b], y + s.h);
     tops.push({ r, b, y0: y, y1: y + s.h });
@@ -93,17 +95,17 @@ function ziggurat(el, ctx) {
   const S0 = tops[0], fz = S0.r[1];                          // the front face (north)
   // the central stair, out from the face to the first stage's top; the two leaning stairs
   const run = S0.y1 - S0.y0;
-  stairs({ rect: [cx - 4, fz - run * 1.9, cx + 4, fz + S0.b + 0.5], y0: S0.y0, y1: S0.y1, dir: 's', mat: BB }, { bag, col });
+  stairs({ rect: [cx - 4, fz - run * 1.9, cx + 4, fz + S0.b + 0.5], y0: S0.y0, y1: S0.y1, dir: 's', mat: ZIG_SKIN[0] }, { bag, col });
   // the central stair's parapets: low walls rising with it
   for (const sx of [-1, 1]) {
     const t = [], za = fz - run * 1.9, zb = fz + S0.b + 0.5;
     beamTris(t, [cx + sx * 4.3, S0.y0, za], [cx + sx * 4.3, S0.y1, zb], 0.3, 1.0);
-    bag.add(BB, fromTriangles(t)); col.segment([cx + sx * 4.3, za], [cx + sx * 4.3, zb], 0.6, S0.y0, S0.y1 + 1);
+    bag.add(ZIG_SKIN[0], fromTriangles(t)); col.segment([cx + sx * 4.3, za], [cx + sx * 4.3, zb], 0.6, S0.y0, S0.y1 + 1);
   }
   for (const s of [-1, 1]) {
     const x0 = cx + s * (S0.r[2] - cx - 3), x1 = cx + s * 5;
-    stairs({ rect: [Math.min(x0, x1), fz - 1, Math.max(x0, x1), fz + 4], y0: S0.y0, y1: S0.y1, dir: s < 0 ? 'e' : 'w', mat: BB }, { bag, col });
-    bag.add(BB, frustum([Math.min(x0, x1), fz - 1.4, Math.max(x0, x1), fz - 1], S0.y0, S0.y1 + 0.8, 0, 0, 0, 0));
+    stairs({ rect: [Math.min(x0, x1), fz - 1, Math.max(x0, x1), fz + 4], y0: S0.y0, y1: S0.y1, dir: s < 0 ? 'e' : 'w', mat: ZIG_SKIN[0] }, { bag, col });
+    bag.add(ZIG_SKIN[0], frustum([Math.min(x0, x1), fz - 1.4, Math.max(x0, x1), fz - 1], S0.y0, S0.y1 + 0.8, 0, 0, 0, 0));
   }
   // the gatehouse at the head of the stairs, its way 5 m wide and 4.8 m high, the single stair going on up through it
   const gz = fz + S0.b + 1, GH = 6.2, gw = 2.6;
@@ -113,7 +115,7 @@ function ziggurat(el, ctx) {
   // the stairs on up the second and third stages, each from the front edge of the stage below
   for (let i = 1; i < tops.length; i++) {
     const T = tops[i], P = tops[i - 1], foot = Math.max(P.r[1] + P.b + 0.6, i === 1 ? gz - 0.4 : -Infinity);
-    stairs({ rect: [cx - 2.5, foot, cx + 2.5, T.r[1] + T.b + 0.3], y0: T.y0, y1: T.y1, dir: 's', mat: BB }, { bag, col });
+    stairs({ rect: [cx - 2.5, foot, cx + 2.5, T.r[1] + T.b + 0.3], y0: T.y0, y1: T.y1, dir: 's', mat: ZIG_SKIN[i] || BB }, { bag, col });
   }
   // the shrine of Nanna on the top stage (§4.2)
   const tz = (tops[tops.length - 1].r[1] + tops[tops.length - 1].r[3]) / 2;
@@ -371,10 +373,10 @@ function urHouse(el, ctx) {
  */
 function terrace(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, h = el.h ?? 2.5, b = el.batter ?? 0.6, y = el.y ?? 0;
-  bag.add(MB, frustum([x0, z0, x1, z1], y - 0.3, y + h, b, b, b, b, { noBottom: true }));
+  bag.add('brick_buff', frustum([x0, z0, x1, z1], y - 0.3, y + h, b, b, b, b, { noBottom: true }));
   col.rect([x0, z0, x1, z1], y, y + h); col.floor([x0 + b, z0 + b, x1 - b, z1 - b], y + h);
   const gap = el.gap, inGap = (px, pz) => gap && pz < z0 + 0.1 && px > gap[0] - 1 && px < gap[1] + 1;
-  buttresses(bag, [x0, z0, x1, z1], y - 0.3, h + 0.3, b, 4, inGap);
+  buttresses(bag, [x0, z0, x1, z1], y - 0.3, h + 0.3, b, 4, inGap, 'brick_buff');
   // the cones: two rows of round heads near the top of each face, following its slope
   const head = lathe([[0.06, 0], [0.055, 0.03], [0.03, 0.05], [0.001, 0.055]], 8);
   for (const [f, a0, a1] of [['n', x0, x1], ['s', x0, x1], ['w', z0, z1], ['e', z0, z1]]) {
