@@ -109,6 +109,9 @@ const BLOCKS = [
 ];
 // south of the mosque street: pairs with an alley between each
 for (let z = -23.9; z < 125; z += 2 * ROW_D + ALLEY) BLOCKS.push([z, z + ROW_D, false], [z + ROW_D, z + 2 * ROW_D, true]);
+/** The alleys between the pairs of rows (the fronts face each other across them): rectangles [x0, z0, x1, z1]. */
+export const ALLEYS = [];
+for (let i = 1; i < BLOCKS.length; i++) if (Math.abs(BLOCKS[i][0] - BLOCKS[i - 1][1] - ALLEY) < 1e-6) { const z0 = BLOCKS[i - 1][1], z1 = BLOCKS[i][0]; if (z1 > MOSQUE[1] - 7 && z0 < MOSQUE[3] + 7) ALLEYS.push([-222, z0, MOSQUE[0] - 7, z1], [MOSQUE[2] + 7, z0, 124, z1]); else ALLEYS.push([-222, z0, 124, z1]); }
 const heart = (cx, cz) => Math.hypot(cx + 45, cz - 10);
 let LOTS = null;
 export function lots() {
