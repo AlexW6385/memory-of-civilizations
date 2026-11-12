@@ -3,7 +3,7 @@
 // life (the booths of the cloth and spice merchants under the Procuratie, the banner masts before San Marco, groups of people, pigeons),
 // the boats tied along the fondamente with their cargo. Pure data, derived from layout.js; the builders are the shared `life` style's.
 
-import { GROUND, SEA, RADIUS, PIAZZA, PIAZZETTA, BASILICA, CLOCK, MERCERIA, BASIN_Z, RIALTO, lots, inLot, inRect, wet, rivePieces, wells } from './layout.js';
+import { GROUND, SEA, RADIUS, PIAZZA, PIAZZETTA, BASILICA, CLOCK, MERCERIA, BASIN_Z, RIALTO, lots, inLot, inRect, wet, rivePieces, wells, bands } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const plan = (id, elements, center, near, bounds = [-RADIUS, -RADIUS, RADIUS, RADIUS]) => ({ id, style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, 0], facing: 'n' }, bounds, rooms: [], elements, center, near });
@@ -70,8 +70,7 @@ function piazza() {
   // the three tall masts before San Marco (the banners of the Republic: Cyprus, Candia, the Morea hung from them on feast days) with their stepped bases of stone
   const bx = BASILICA.c[0] - BASILICA.s - 13 - 12;
   for (const dz of [-14, 0, 14]) {
-    E.push({ t: 'lantern', kind: 'iron', at: [bx, BASILICA.c[1] + dz], y: GROUND, rot: Math.PI / 2, h: 3.2 });
-    E.push({ t: 'sacks', at: [bx + 1.2, BASILICA.c[1] + dz + 1.2], y: GROUND, rot: r() * 6, n: 2, seed: 11 + dz });
+    E.push({ t: 'sacks', at: [bx + 2.6, BASILICA.c[1] + dz + 1.4], y: GROUND, rot: r() * 6, n: 2, seed: 11 + dz });
   }
   // people across the square: gentlemen in pairs, a friar and a merchant, women with baskets, porters crossing, a boy with a dog nearby
   const arr = [-60, -5];
@@ -109,7 +108,7 @@ function piazzetta() {
 function moored() {
   const r = rng(1521), E = [], used = [], pcs = rivePieces();
   for (const [px, pz, wx, wz] of pcs) {
-    if (r() > 0.075 || Math.hypot(px, pz) > RADIUS - 85) continue;
+    if (r() > (Math.hypot(px + 60, pz + 5) < 160 ? 0.16 : 0.09) || Math.hypot(px, pz) > RADIUS - 85) continue;
     if (used.some(([a, b]) => Math.hypot(a - px, b - pz) < 22)) continue;
     if (Math.abs(px - RIALTO.x) < 40 && Math.abs(pz - RIALTO.z) < 45) continue;                    // the market has its own
     const k = r(), kind = k < 0.4 ? 'barge' : k < 0.8 ? 'rowboat' : 'sampan', len = kind === 'barge' ? 11 : kind === 'rowboat' ? 5.2 : 7.5;
@@ -126,6 +125,91 @@ function moored() {
   return plan('venice-moored', E, [0, 0], 300);
 }
 
+
+// ── more of the piazza, within sight of the arrival (docs/settlements/venice.md §5b) ─────────────────────────────────────────
+/**
+ * The square as Gentile Bellini painted it (the Procession of the Relic, 1496): hawkers sitting on their mats at the foot of the arcades
+ * with their wares spread, a mountebank on his bench with his audience (the charlatans of the piazza sold their elixirs from a bench; the
+ * Procuratie's arcades sheltered the money-changers), water-carriers with the yoke, friars and beggars, children, dogs and cats, men
+ * feeding the pigeons. Kept clear of the arrival's first 8 m.
+ */
+function piazzaMore() {
+  const r = rng(1511), E = [], [x0, z0, x1, z1] = PIAZZA, arr = [-60, -5];
+  const ok = (x, z, m = 8) => Math.hypot(x - arr[0], z - arr[1]) > m && inRect(PIAZZA, x, z, -3) && !wells().some((w) => Math.hypot(w.at[0] - x, w.at[1] - z) < 1.6) && !inRect([BASILICA.c[0] - BASILICA.s - 13, z0, x1, z1], x, z, 0) && !inRect([CLOCK[0] - 1, CLOCK[1] - 2, CLOCK[2] + 1, CLOCK[3] + 8], x, z, 0);
+  const add = (e) => { if (ok(e.at[0], e.at[1], e.t === 'figure' || e.t === 'animal' ? 8 : 9)) E.push(e); };
+  // hawkers on their mats at the foot of the arcades, north and south sides, their backs to the columns
+  for (const [zz, rot, front] of [[z0 + 1.7, Math.PI, 1], [z1 - 1.7, 0, -1]]) for (let x = x0 + 6, k = 0; x < x1 - 40; x += 5.2 + r() * 3, k++) {
+    if (k % 3 === 2) continue;
+    add({ t: 'goods_mat', at: [x, zz + front * 1.1], y: GROUND, rot: 0, seed: Math.floor(r() * 1e6), goods: pick(r, [['bread', 'heap'], ['pottery', 'baskets'], ['greens', 'basket'], ['bolts', 'basket'], ['fish', 'heap']]) });
+    add(person(r, [x + (r() - 0.5), zz + front * 1.1 - 0.9 * front * 0.0], rot, { pose: 'sit_ground', hat: pick(r, ['cap', 'veil', 'none']), cloth: pick(r, ['cloth_brown', 'cloth_ochre', 'cloth_indigo', 'cloth_red']) }));
+  }
+  // the benches under the arcades, an old man or two on them; iron lanterns on the corners of the Procuratie
+  for (const [zz, rot] of [[z0 + 0.6, Math.PI], [z1 - 0.6, 0]]) for (let x = x0 + 12; x < x1 - 40; x += 21 + r() * 6) {
+    add({ t: 'bench', at: [x, zz], y: GROUND, rot, len: 1.8, back: true });
+    if (r() < 0.6) add(person(r, [x, zz], rot, { pose: 'sit', hat: 'cap', cloth: 'cloth_black' }));
+  }
+  // the mountebank on his bench, the crowd about him
+  { const sx = -33, sz = 12;
+    add({ t: 'bench', at: [sx, sz], y: GROUND, rot: Math.PI / 2, len: 1.6 });
+    add(person(r, [sx, sz], Math.PI / 2, { pose: 'talk', y: GROUND + 0.45, hat: 'cap', cloth: 'cloth_red', cloth2: 'cloth_ochre', over: 'cape', beard: true }));
+    for (let k = 0; k < 9; k++) { const a = -Math.PI * 0.8 + k / 8 * Math.PI * 1.6, d = 2.4 + (k % 3) * 0.8, px = sx + Math.cos(a) * d, pz = sz + Math.sin(a) * d; add(person(r, [px, pz], Math.atan2(sx - px, sz - pz) + Math.PI, { pose: k % 4 === 1 ? 'talk' : 'stand', hat: pick(r, ['cap', 'cap', 'none', 'veil']) })); }
+  }
+  // a second knot of listeners about a friar preaching on the steps of a cart, nearer the campanile
+  { const sx = -8, sz = 16;
+    add(person(r, [sx, sz], Math.PI * 0.5, { hat: 'none', hair: 'shaven', cloth: 'cloth_brown', cloth2: 'cloth_brown', carry: 'staff', pose: 'talk' }));
+    for (let k = 0; k < 6; k++) { const a = r() * 6.28, d = 1.8 + r() * 2, px = sx + Math.cos(a) * d, pz = sz + Math.sin(a) * d; add(person(r, [px, pz], Math.atan2(sx - px, sz - pz) + Math.PI, { pose: 'stand', hat: pick(r, ['cap', 'veil']) })); }
+  }
+  // water-carriers, porters with sacks, women with baskets, children in the open middle of the square
+  for (let i = 0; i < 46; i++) {
+    const x = x0 + 14 + r() * (x1 - x0 - 50), z = z0 + 8 + r() * (z1 - z0 - 18), k = r();
+    if (k < 0.12) add(person(r, [x, z], r() * 6.28, { carry: 'pails', hat: 'cap', cloth: 'cloth_brown' }));
+    else if (k < 0.24) add(person(r, [x, z], r() * 6.28, { carry: 'sack', hat: 'cap', dress: 'tunic' }));
+    else if (k < 0.38) add(person(r, [x, z], r() * 6.28, { carry: 'basket', hat: 'veil', cloth: pick(r, ['cloth_red', 'cloth_indigo', 'cloth_green']), over: 'shawl', hair: 'bun' }));
+    else if (k < 0.5) add(person(r, [x, z], r() * 6.28, { child: true, hat: 'cap', dress: 'tunic' }));
+    else if (k < 0.58) add({ t: 'animal', kind: 'dog', at: [x, z], y: GROUND, rot: r() * 6, seed: Math.floor(r() * 1e6) });
+    else if (k < 0.62) add({ t: 'animal', kind: 'cat', at: [x, z], y: GROUND, rot: r() * 6, seed: Math.floor(r() * 1e6) });
+    else add(person(r, [x, z], r() * 6.28, { pose: r() < 0.5 ? 'talk' : 'stand', cloth: 'cloth_black', hat: 'cap', over: 'cape' }));
+  }
+  // the pigeon-feeders: a woman scattering grain, birds crowding about her, and more across the paving
+  for (const [x, z] of [[-110, 18], [-85, -22], [-20, -20]]) { add(person(r, [x, z], r() * 6.28, { hat: 'veil', cloth: 'cloth_ochre', over: 'shawl', hair: 'bun' })); add({ t: 'chickens', kind: 'pigeon', n: 14, at: [x + 0.8, z - 0.6], y: GROUND, seed: Math.floor(x * 3 + z) }); }
+  for (let i = 0; i < 8; i++) add({ t: 'chickens', kind: 'pigeon', n: 8 + Math.floor(r() * 8), at: [x0 + 10 + r() * (x1 - x0 - 50), z0 + 6 + r() * (z1 - z0 - 12)], y: GROUND, seed: 600 + i });
+  return plan('venice-piazza-more', E, [(x0 + x1) / 2, (z0 + z1) / 2], 300, [x0 - 18, z0 - 20, x1 + 2, z1 + 16]);
+}
+
+// ── the Merceria ───────────────────────────────────────────────────────────────────────────────────────────────────────────────
+/** The Merceria behind the Clock Tower (§5b): Venice's shopping street — booths of the haberdashers, mercers and spicers along both sides, signs and lanterns over them, the crowd going through. */
+function merceria() {
+  const r = rng(1496), E = [], [x0, z0, x1, z1] = MERCERIA, zA = z0 + 6, zB = z1 - 12;
+  const aw = ['cloth_red', 'cloth_white', 'cloth_ochre', 'cloth_indigo', 'cloth_green'], gd = [['bolts', 'bolts', 'baskets'], ['spice', 'baskets', 'pottery'], ['bolts', 'pottery'], ['spice', 'spice', 'baskets'], ['bread', 'baskets']];
+  for (let z = zA, k = 0; z < zB; z += 6.4, k++) {
+    if (k % 6 === 5) continue;
+    E.push({ t: 'stall', at: [x0 + 1.9, z], rot: -Math.PI / 2, seed: 800 + k, awning: pick(r, aw), goods: pick(r, gd), w: 2.8, d: 1.2 });
+    E.push(person(r, [x0 + 1.4, z], Math.PI / 2, { hat: 'cap' }));
+    E.push({ t: 'stall', at: [x1 - 1.9, z + 3.1], rot: Math.PI / 2, seed: 850 + k, awning: pick(r, aw), goods: pick(r, gd), w: 2.8, d: 1.2 });
+    E.push(person(r, [x1 - 1.4, z + 3.1], -Math.PI / 2, { hat: 'veil' }));
+    if (r() < 0.55) E.push(person(r, [x0 + 4.4 + (r() - 0.5), z + (r() - 0.5) * 2], -Math.PI / 2 + (r() - 0.5), { pose: r() < 0.5 ? 'talk' : 'stand', carry: r() < 0.3 ? 'basket' : 'none' }));
+    if (r() < 0.55) E.push(person(r, [x1 - 4.4 + (r() - 0.5), z + 3.1 + (r() - 0.5) * 2], Math.PI / 2 + (r() - 0.5), { pose: r() < 0.5 ? 'talk' : 'stand', carry: r() < 0.3 ? 'sack' : 'none' }));
+    if (k % 2 === 0) E.push({ t: 'shop_sign', board: true, at: [x0 + 0.05, z + 1.5], y: GROUND + 0.2, rot: -Math.PI / 2, h: 3.1, seed: 900 + k });
+    if (k % 2 === 1) E.push({ t: 'shop_sign', board: true, at: [x1 - 0.05, z + 4.6], y: GROUND + 0.2, rot: Math.PI / 2, h: 3.1, seed: 950 + k });
+  }
+  for (let z = zA + 3; z < zB; z += 19) E.push({ t: 'lantern', kind: 'iron', at: [x0 + 0.12, z], y: GROUND, rot: -Math.PI / 2, h: 2.7 }, { t: 'lantern', kind: 'iron', at: [x1 - 0.12, z + 9], y: GROUND, rot: Math.PI / 2, h: 2.7 });
+  for (let i = 0; i < 14; i++) E.push(person(r, [x0 + 5 + r() * (x1 - x0 - 10), zA + r() * (zB - zA)], r() * 6.28, { carry: pick(r, ['none', 'none', 'basket', 'sack', 'pails']), pose: r() < 0.3 ? 'talk' : 'stand' }));
+  E.push({ t: 'animal', kind: 'dog', at: [x0 + 7, zA + 22], y: GROUND, rot: 2, seed: 41 }, { t: 'animal', kind: 'cat', at: [x1 - 1, zA + 11], y: GROUND, rot: 4, seed: 42 });
+  return plan('venice-merceria', E, [(x0 + x1) / 2, (z0 + z1) / 2], 200, [x0 - 2, z0 - 2, x1 + 2, z1 + 2]);
+}
+
+// ── the calli: washing across the streets ───────────────────────────────────────────────────────────────────────────────────────
+/** A line of washing hung from window to window across each street between the houses, about every 17 m along its run (Venice, Naples). */
+function calli() {
+  const r = rng(1522), tiles = new Map();
+  for (const b of bands()) for (const [z0, z1] of b.runs) for (let z = z0 + 9 + r() * 6; z < z1 - 8; z += 15 + r() * 5) {
+    const xm = (b.x0 + b.x1) / 2, k = `${Math.floor(xm / 100)},${Math.floor(z / 100)}`;
+    if (!tiles.has(k)) tiles.set(k, []);
+    tiles.get(k).push({ t: 'wash_line', at: [xm, z], y: GROUND + 5.0 + r() * 1.8, rot: 0, len: +(b.x1 - b.x0 + 0.8).toFixed(2), emb: [0.25, 0.25], seed: Math.floor(r() * 1e6) });
+  }
+  return [...tiles].map(([k, E]) => { const [i, j] = k.split(',').map(Number); return plan(`venice-calli-${k}`, E, [i * 100 + 50, j * 100 + 50], 150); });
+}
+
 /** Dressing plans: the fronts in 100 m tiles (near 180 m), the piazza, the Piazzetta, the boats. */
 export function dressPlans() {
   const tiles = new Map();
@@ -139,7 +223,7 @@ export function dressPlans() {
     const [i, j] = k.split(',').map(Number), E = list.flatMap(frontsOf);
     if (E.length) out.push(plan(`venice-fronts-${k}`, E, [i * 100 + 50, j * 100 + 50], 190));
   }
-  out.push(piazza(), piazzetta(), moored());
+  out.push(piazza(), piazzaMore(), merceria(), piazzetta(), moored(), ...calli());
   return out;
 }
 void MERCERIA; void PIAZZA;

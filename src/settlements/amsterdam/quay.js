@@ -60,7 +60,7 @@ export function quayLife() {
     for (const [dx, dz] of [[-1.3, 1.2], [0, 1.8], [1.4, 1.1], [2.3, 0.2]]) P(rand() < 0.5 ? 'wife' : rand() < 0.5 ? 'worker' : 'lady', x + dx, z + dz, Math.atan2(-(-dx), -(-dz)) + Math.PI, { pose: 'stand' }); }
   P('wife', 29, -236, 1.0, { carry: 'pails' }); P('worker', 4.5, -222, 0.4, { carry: 'sack' });
   for (const [x, z] of [[7, -219], [15, -231], [-8, -214]]) P('worker', x, z, rand() * 6.28, { child: true });
-  put({ t: 'animal', kind: 'dog', at: [18, -212], y: Y, rot: 2.1, seed: 78 }); put({ t: 'animal', kind: 'dog', at: [-12, -240], y: Y, rot: 0.3, seed: 79 });
+  put({ t: 'animal', kind: 'dog', at: [27, -227], y: Y, rot: 2.1, seed: 78 }); put({ t: 'animal', kind: 'dog', at: [-12, -240], y: Y, rot: 0.3, seed: 79 });
   for (const [x, z] of [[12, -214], [-20, -214.5], [33, -243]]) put({ t: 'handcart', at: [x, z], y: Y, rot: rand() * 3, seed: Math.floor(rand() * 1e6) });
   // rowing boats mid-canal near the centre, a rower in each
   let k = 0;

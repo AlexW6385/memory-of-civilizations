@@ -36,6 +36,13 @@ export const molo = {
   id: 'venice-molo', style: 'venetian', origin: [0, 0], base: 0, yaw: 0, feature: true,
   entrance: { at: [0, 0], facing: 'n' }, bounds: [24, BASIN_Z, 152, BASIN_Z + 13], rooms: [], elements: boats,
 };
+// the three banner masts before San Marco (venetian/masts.js), their yards across the piazza so that the banners show their faces from the square
+const MX = BASILICA.c[0] - BASILICA.s - 13 - 12;
+export const masts = {
+  id: 'venice-masts', style: 'venetian', origin: [0, 0], base: 0, yaw: 0, feature: true,
+  entrance: { at: [0, 0], facing: 'n' }, bounds: [MX - 3, BASILICA.c[1] - 18, MX + 3, BASILICA.c[1] + 18], rooms: [],
+  elements: [-14, 0, 14].map((dz, i) => ({ t: 'pennone', at: [MX, BASILICA.c[1] + dz], y: g, h: 20, rot: Math.PI / 2, cloth: ['cloth_red', 'cloth_red', 'cloth_red'][i] })),
+};
 // Doge Agostino Barbarigo (doge 1486–1501) kneeling before the lion of St Mark over the Clock Tower's
 // gallery, as he was until the French took the figure down in 1797 (docs/settlements/venice.md §2, Clock
 // Tower) [stated: Wikipedia "St Mark's Clocktower"]: on the cornice before the gilt lion (which strides east,

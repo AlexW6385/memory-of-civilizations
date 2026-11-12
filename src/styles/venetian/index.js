@@ -9,6 +9,7 @@ import { box, frustum, lathe, rod } from '../../core/geom.js';
 import '../qing/index.js';
 import { dogesPalace } from './palace.js';
 import { gondola, palo } from './boats.js';
+import { pennone } from './masts.js';
 import { clockTower, procuratieOld, columnStatue } from './piazza.js';
 import { horse, limb } from '../greek/sculpture.js';
 import { basilicaInterior, vestibule } from './interior.js';
@@ -112,6 +113,6 @@ function bellTower(el, { bag, col }) {
 }
 registerStyle('venetian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, basilica, bell_tower: bellTower, doges_palace: dogesPalace, procuratie: procuratieOld, clock_tower: clockTower, column_statue: columnStatue, gondola, palo, rive, rialto, palazzo, ponte, pozzo, squero },
+  elements: { ...STYLES.qing.elements, basilica, bell_tower: bellTower, doges_palace: dogesPalace, procuratie: procuratieOld, clock_tower: clockTower, column_statue: columnStatue, gondola, palo, pennone, rive, rialto, palazzo, ponte, pozzo, squero },
   objects: {},
 });

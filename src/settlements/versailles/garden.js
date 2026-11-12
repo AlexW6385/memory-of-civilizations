@@ -17,6 +17,31 @@ export function gardenPlans() {
   for (const [x, z, carry, rot] of [[-40, -64, 'hoe', 0.4], [-22, 64, 'broom', -2.6], [-58, 63, 'none', 1.2], [-10, -63, 'broom', 2.0]])
     fig({ at: [x, z], y: height(x, z), rot, seed: Math.floor(x * 7 - z), carry, pose: carry === 'none' ? 'squat' : 'stand', cloth: 'cloth_grey', cloth2: 'cloth_brown', hat: 'brim', hatMat: 'thatch' });
   L.push({ t: 'barrow', at: [-56, 61.5], y: height(-56, 61.5), rot: 0.3, seed: 3 });
+
+  // ── the court in the garden (§5a): couples and knots of courtiers on the gravel of the central walk and the side walks, kept off the axis
+  // (|z| > 3.2 on the walk; the arrival stands at x = −60) and 10 m from the arrival; Cent-Suisses at the garden front's doors, gardeners
+  // watering the orange trees, a nursemaid with her charge, spaniels at their masters' heels
+  { let sd = 1693; const rnd = () => ((sd = (Math.imul(sd, 1664525) + 1013904223) >>> 0) / 4294967296), pk = (a) => a[Math.floor(rnd() * a.length)];
+    const COATS = ['cloth_red', 'cloth_indigo', 'cloth_brown', 'cloth_green', 'cloth_grey', 'cloth_black', 'cloth_maroon'], GOWNS = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green', 'cloth_white', 'cloth_grey', 'cloth_blue'];
+    const far = (x, z) => Math.hypot(x + 60, z) > 10;
+    const man = (x, z, rot, pose = 'stand', o = {}) => far(x, z) && fig({ at: [x, z], y: height(x, z), rot, h: 1.66 + rnd() * 0.12, seed: Math.floor(rnd() * 1e9), dress: 'tunic', cloth: pk(COATS), cloth2: pk(['cloth_white', 'cloth_ochre']), hat: 'brim', hatMat: 'cloth_black', hair: 'wig', pose, over: pk(['cape', 'sash', 'none']), ...o });
+    const lady = (x, z, rot, pose = 'stand', o = {}) => far(x, z) && fig({ at: [x, z], y: height(x, z), rot, h: 1.55 + rnd() * 0.1, seed: Math.floor(rnd() * 1e9), dress: 'robe', cloth: pk(GOWNS), cloth2: pk(['cloth_white', 'cloth_ochre']), hat: 'none', hair: 'bun', pose, over: pk(['shawl', 'none']), ...o });
+    // couples walking and knots in talk down the walk (to Latona, and back toward the château)
+    for (let x = -66, k = 0; x < -8; x += 5.5 + rnd() * 3, k++) {
+      const side = k % 2 ? 1 : -1, z = side * (4.2 + rnd() * 2.2), rot = k % 3 ? (side > 0 ? Math.PI / 2 : -Math.PI / 2) * 0 + (rnd() < 0.5 ? Math.PI / 2 : -Math.PI / 2) : rnd() * 6.28;
+      man(x, z, rot, 'stand'); lady(x + Math.sin(rot - Math.PI / 2) * 0.8, z + Math.cos(rot - Math.PI / 2) * 0.8, rot, rnd() < 0.3 ? 'talk' : 'stand');
+      if (rnd() < 0.25) L.push({ t: 'animal', kind: 'dog', at: [x - Math.sin(rot) * 1.4, z - Math.cos(rot) * 1.4], y: height(x, z), rot: rot + 0.3, seed: Math.floor(rnd() * 1e6), mat: pk(['hide_white', 'hide_brown', 'hide_black']) });
+    }
+    // the side walks along the broderie parterres
+    for (const sz of [-1, 1]) for (let x = -66, k = 0; x < -10; x += 7 + rnd() * 4, k++) { const z = sz * (59 + rnd() * 3.5), rot = rnd() < 0.5 ? 0 : Math.PI; man(x, z, rot + Math.PI / 2); if (rnd() < 0.6) lady(x + 0.9, z + 0.2, rot + Math.PI / 2, rnd() < 0.4 ? 'talk' : 'stand'); }
+    // before the garden front: groups on the terrace between the vases, the Cent-Suisses of the guard at the doors (halberds, in red, blue and white)
+    for (const z of [-30, -13, 13, 30]) for (const dz of [-0.7, 0.7]) fig({ at: [-2.6, z + dz], y: height(-2.6, z), rot: -Math.PI / 2, h: 1.78, seed: 5000 + z + dz * 4, dress: 'tunic', cloth: 'cloth_red', cloth2: 'cloth_white', hat: 'brim', hatMat: 'cloth_black', carry: 'staff', legs: 'hose', pose: 'stand' });
+    // gardeners: two with watering pails and a boy with a barrow among the orange trees; a nursemaid with her charge, a boy with a hoop
+    for (const [x, z, r] of [[-30, -62, 0.6], [-50, 62, -1.0], [-18, 62, 2.2]]) fig({ at: [x, z], y: height(x, z), rot: r, seed: Math.floor(x * 5 - z), carry: 'pails', pose: 'stand', cloth: 'cloth_grey', cloth2: 'cloth_brown', hat: 'brim', hatMat: 'thatch', dress: 'tunic' });
+    for (const [x, z] of [[-24, 61.5], [-44, -61.5]]) L.push({ t: 'barrel', at: [x, z], y: height(x, z), n: 1, seed: Math.floor(x), rot: 0.4 });
+    fig({ at: [-34, -8.6], y: height(-34, -8.6), rot: 2.0, seed: 61, h: 1.6, dress: 'robe', cloth: 'cloth_brown', cloth2: 'cloth_white', hat: 'veil', carry: 'child', pose: 'stand' });
+    fig({ at: [-28, 8.6], y: height(-28, 8.6), rot: 4.0, seed: 62, child: true, dress: 'tunic', cloth: 'cloth_indigo', cloth2: 'cloth_white', hat: 'brim', pose: 'stand' });
+  }
   // a courtier's own chair, gilt and with his arms, set down on the terrace; its bearers in his livery
   const cx = -2, cz = -48, cr = Math.PI;
   G.push({ t: 'sedan_chair', at: [cx, cz], rot: cr, y: height(cx, cz), body: 'gilt_bronze', cloth: 'cloth_red' });
