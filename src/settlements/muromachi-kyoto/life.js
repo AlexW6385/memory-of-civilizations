@@ -152,9 +152,9 @@ export function yardLife() {
 export function templeLife() {
   const L = [], rand = rng(1553), P = GINKAKU.pond, k = GINKAKU.kannon;
   // the south bank of the pond, where the way arrives: three standing to look at the pavilion, a woman and a child, two sitting
-  for (const [x, z, w] of [[186, 23, 0], [189.5, 23.6, 1], [211, 23, 0], [215, 23.4, 1], [220, 22.6, 0]]) L.push(person(rand, [x, z], 0, (rand() - 0.5) * 0.5, { woman: !!w || rand() < 0.3, pose: rand() < 0.2 ? 'talk' : 'stand' }));
-  L.push(person(rand, [212.4, 24.2], 0, 0.1, { woman: false, child: true, h: 1.05, hat: 'none' }));
-  for (const x of [181, 224]) L.push(person(rand, [x, 24.6], 0, 0.2, { pose: 'sit_ground', woman: x > 200, hat: 'none' }));
+  for (const [x, z, w] of [[186, 11.2, 0], [189.5, 11.6, 1], [211, 11.2, 0], [215, 11.5, 1], [220, 10.9, 0]]) L.push(person(rand, [x, z], 0, (rand() - 0.5) * 0.5, { woman: !!w || rand() < 0.3, pose: rand() < 0.2 ? 'talk' : 'stand' }));
+  L.push(person(rand, [212.4, 11.9], 0, 0.1, { woman: false, child: true, h: 1.05, hat: 'none' }));
+  for (const x of [181, 224]) L.push(person(rand, [x, 11.8], 0, 0.2, { pose: 'sit_ground', woman: x > 200, hat: 'none' }));
   // the court before the pavilion: visitors, a monk sweeping the gravel with a besom
   for (const [dx, dz] of [[-6, 10.5], [-2, 12], [4, 11], [9, 10.5]]) L.push(person(rand, [k[0] + dx, k[1] + dz], 0, rand() * 0.6 - 0.3, { woman: rand() < 0.4, pose: rand() < 0.25 ? 'talk' : 'stand' }));
   L.push(person(rand, [k[0] - 11, k[1] + 12.5], 0, 1.2, { cloth: 'cloth_black', cloth2: 'cloth_grey', hair: 'shaven', over: 'collar', hat: 'none', carry: 'broom', woman: false }));

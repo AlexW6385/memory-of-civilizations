@@ -3,6 +3,7 @@
 import { GINKAKU, RADIUS } from './layout.js';
 
 const E = [];
+const kx0 = GINKAKU.kannon[0] - 14;
 const [x0, z0, x1, z1] = GINKAKU.rect, [gx, gz] = GINKAKU.gate, P = GINKAKU.pond;
 // the walls: north, east, west, south with the gate's gap
 const wall = (a, b) => E.push({ t: 'tsuijibei', a, b, y: 0, h: 2.4 });
@@ -21,6 +22,14 @@ E.push({ t: 'togudo', at: GINKAKU.togudo, y: 0, facing: 'e' });
 E.push({ t: 'lane', rect: [GINKAKU.kannon[0] - 14, GINKAKU.kannon[1] + 7.6, GINKAKU.kannon[0] + 14, GINKAKU.kannon[1] + 11], y: 0.02, mat: 'flagstone' });
 for (const [x, z, s] of [[170, -16, 1], [232, -16, 1], [150, 38, 0.9], [244, 30, 0.9], [GINKAKU.togudo[0] + 9, GINKAKU.togudo[1] + 6, 0.8]]) E.push({ t: 'ishidoro', at: [x, z], y: 0, s });
 for (const [x, z] of [[120, 50], [276, 60], [276, -60], [120, -60]]) E.push({ t: 'niwaki', at: [x, z], y: 0, h: 5.5, seed: Math.round(x + z) });
+
+// the garden (docs §3): the sand platform Ginshadan and its cone Kogetsudai west of the pavilion's court, moss under the trees,
+// stepping stones to the pavilion, pines and a maple on the bank. (The Ginshadan and Kogetsudai are Edo-period additions in the record;
+// shown here at the brief's request as the garden's signature.)
+E.push({ t: 'ginshadan', rect: [150, -31, 183, -15], y: 0, seed: 3, kogetsudai: [167, -23] });
+E.push({ t: 'stepping_stones', a: [kx0 - 2, -12.8], b: [148, -12.8], y: 0, seed: 4 });
+for (const [x, z, r, n] of [[165, -40, 11, 16], [232, -38, 12, 16], [214, -14, 5, 6], [186, -34, 6, 8], [250, -10, 9, 10], [150, 22, 8, 8], [250, 22, 8, 8], [200, 36, 14, 14]]) E.push({ t: 'moss_bed', at: [x, z], r, n, y: 0, seed: Math.round(x * 3 + z) });
+for (const [x, z, h] of [[154, -33, 6.5], [176, -35, 6], [226, -33, 7], [246, -26, 6.5], [150, -10, 5.5], [252, 4, 6], [156, 14, 5.5], [244, 14, 5.5], [232, 14, 5]]) E.push({ t: 'niwaki', at: [x, z], y: 0, h, seed: Math.round(x * 5 + z) });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const [tx, tz] = GINKAKU.togudo;
