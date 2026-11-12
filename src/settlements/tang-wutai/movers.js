@@ -9,7 +9,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 40, night: 4, rain: 0.7, reach: 150, spawnMin: 22, far: 42 },
+  walkers: { day: 52, night: 4, rain: 0.7, reach: 150, spawnMin: 22, far: 42 },
   boats: { count: 0, reach: 250, spawnMin: 60, far: 95, speed: [1.0, 1.45], bridgeSpeed: 0.7 },
   water: -100,
 };
@@ -24,6 +24,11 @@ export function walkways() {
     { r: [12.8, -34, 15.2, 34], weight: 1.0, market: 0.6, kind: 'lane' },          // the middle terrace's
     { r: [32.8, -34, 35.2, 34], weight: 0.8, market: 0.6, kind: 'lane' },          // the upper terrace's, before the pillar
     ...LANES.slice(1).map((r) => ({ r, weight: 0.8, market: 0, kind: 'lane' })),
+    // the hill path from the upper terrace's south-east corner to the hermit's cell (dress.js), in short axis-aligned stretches
+    { r: [95, 33.8, 114, 41.8], weight: 0.25, market: 1.0, kind: 'lane' }, { r: [113, 38, 131, 51.5], weight: 0.25, market: 1.0, kind: 'lane' },
+    { r: [129, 46.5, 147, 51.5], weight: 0.25, market: 1.0, kind: 'lane' }, { r: [145, 46.5, 163, 59.5], weight: 0.25, market: 1.0, kind: 'lane' },
+    // the market's pitch before the shops on the main lane
+    { r: [-150, -9, -100, -3], weight: 0.6, market: 0, kind: 'lane' }, { r: [-150, 3, -100, 9], weight: 0.6, market: 0, kind: 'lane' },
   ];
   return { rects, links: [], clip: RADIUS - 14 };
 }
@@ -45,6 +50,10 @@ export const WALKERS = [
     c1: [CL.indigo, CL.white, CL.grey, CL.green, CL.ochre], c2: [CL.white, CL.indigo, CL.black], c3: [CL.black], speed: [0.95, 1.2], stride: 1.25, h: [0.9, 0.97] },
   { id: 'farmer', weight: 1.1, market: 0.1, el: { dress: 'trousers', hair: 'topknot', hat: 'straw', arms: 'hang' },
     c1: [CL.indigo, CL.grey, CL.brown, CL.white, CL.ochre], c2: [CL.indigo, CL.black, CL.grey, CL.brown], c3: [CL.black], speed: [1.1, 1.4], stride: 1.4 },
+  { id: 'child', weight: 0.45, market: 0.1, el: { dress: 'robe', hair: 'bun', hat: 'none', over: 'sash', arms: 'hang' },
+    c1: [CL.indigo, CL.ochre, CL.green, CL.brown], c2: [CL.white, CL.grey], c3: [CL.black], speed: [1.2, 1.6], stride: 1.1, h: [0.55, 0.7] },
+  { id: 'elder', weight: 0.35, market: 0.3, el: { dress: 'robe', hair: 'topknot', hat: 'cap', over: 'sash', arms: 'hang', beard: true },
+    c1: [CL.grey, CL.brown, CL.white], c2: [CL.white, CL.grey], c3: [CL.black], speed: [0.65, 0.85], stride: 1.0 },
   { id: 'porter', weight: 0.7, market: 0.2, el: { dress: 'trousers', hair: 'topknot', hat: 'straw', carry: 'pole', arms: 'pole' }, swing: 0.75, pole: true,
     c1: [CL.indigo, CL.grey, CL.brown, CL.white], c2: [CL.indigo, CL.black, CL.brown], c3: [CL.black], speed: [1.0, 1.25], stride: 1.1 },
 ];

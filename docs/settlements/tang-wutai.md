@@ -126,3 +126,15 @@ Sources added: Liang Sicheng and Lin Huiyin's 1944 survey [thepaper 10143234 and
 - [Practical conservation guidelines for traditional courtyard houses … Pingyao — UNESCO](https://unesdoc.unesco.org/ark:/48223/pf0000234621)
 - [Shanxi and Shaanxi dwellings — artron](https://wangqijun.artron.net/news_detail_132800)
 - [Buddhism on the ground: Buddhist art and practice — British Library IDP](https://idp.bl.uk/exhibition/buddhism-on-the-silk-roads/articles/buddhism-on-the-ground/buddhist-art-and-practice)
+
+## 13. Deepening pass (towards the Suzhou standard)
+
+All of this section is [inferred]: no source describes 857 Wutai's village trades or its hillside; forms follow the village's own vernacular (§5, §11) and Tang monastery custom.
+
+- **Trades on the main lane (shops.js).** The four plots nearest the gate on the main lane, after the three first open houses, take a pilgrims' inn (a hall with counter, wine jars, four tea tables and a stove, a partition, and a long communal kang with a row of quilts behind; hitching rail with donkey and ox, a red-lantern eave, a wine banner), a smithy (open front, brick hearth with hood and a stack through the roof, bellows, anvil on a log, quench trough, tools on the wall, a smith and apprentice, a donkey being shod), a shop of incense, candles and lamp oil for pilgrims (shopfront with a counter, shelves of incense bundles, red candles, oil jars, a hanging scale, shutter boards stacked aside), and a hostel of four cells under one roof with a veranda (each cell a kang, quilt, low table with lamp, chest, staff). Pilgrim traffic is attested by the monastery's cult; the trades are our reading of what the lane would serve.
+- **More houses to enter.** Up to thirteen flat-roofed houses nearest the lane are open (kang, stove, jars; as the first three).
+- **Trees.** Jujube, poplar and willow in the yards' front corners (a cheap tree of our own; the old huai on the green is unchanged).
+- **The fields.** Rows of millet along the flat of each terrace, found from the ground (the stretches where it does not slope), some bands left in stubble with stooks; scarecrows, cairns of cleared stones, mud-brick field huts, farmers bent at work, a cart and an ox (fields.js).
+- **The gate and the levels (dress.js).** Stone drums flanking the way into the monastery, a dismount stele, hitching posts, lanterns; stone lamp pillars (shi deng) and benches on all three levels; fire vats at the halls; the monks' well, washing and rack in the courtyard.
+- **The hill.** A path of bluestone slabs from the upper terrace's south-east corner up Foguang Hill past cairns and a wayside shrine to a hermit's stone cell under old pines, a hermit, a pilgrim and a farmer on the path.
+- **Life.** Two more walker types (children, elders), a market pitch of walkers before the shops, 52 walkers by day; sparrows at the shop doors and along the lanes; swallows over the fields and crows over the hill path; the inn's kitchen, the smithy's forge and the shops' hearths smoke all day.

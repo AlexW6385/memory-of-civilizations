@@ -14,7 +14,7 @@ function emitters() {
   CENSERS.forEach(([x, z, y], i) => E.push({ p: [x, y + 0.35 + 1.22, z], kind: 'incense', thr: 0, seed: 7 + i }));
   // the monks' kitchen: the east end of the south range's roof (quarters at x −43…−16, z 35…43)
   E.push({ p: [-20, 8.4, 39], kind: 'kitchen', thr: 0, seed: 31 });
-  for (const s of village().smoke) E.push({ p: [s.p[0], s.y + 1.7, s.p[1]], kind: 'kitchen', seed: s.r + 1 });
+  for (const s of village().smoke) E.push({ p: [s.p[0], s.y + 1.7, s.p[1]], kind: 'kitchen', seed: s.r + 1, ...(s.trade ? { thr: 0 } : {}) });
   return E;
 }
 const ATT = [];
