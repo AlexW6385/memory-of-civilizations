@@ -87,7 +87,7 @@ export function lots() {
 /** The shops one can enter, in the order the lots nearest the arrival get them (the style's shoprooms.js KINDS). */
 export const ROOM_KINDS = ['drug', 'deli', 'barber', 'cigar', 'hat', 'bakery', 'shoe', 'tailor', 'haber', 'lunch'];
 function assignRooms(all) {
-  const E = [4, 176], mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
+  const E = [4, 110], mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
   const cand = all.filter((l) => !l.row && l.h >= 14 && l.h < 70 && (l.front === 'n' || l.front === 's') && l.rect[2] - l.rect[0] >= 10 && l.rect[3] - l.rect[1] >= 12 && !inRect(l.rect, DINER_AT[0], DINER_AT[1]) && !inRect(l.rect, WALKUP_AT[0], WALKUP_AT[1]) && !onElStair(...mid(l.rect), 4))
     .map((l) => ({ l, d: Math.hypot(mid(l.rect)[0] - E[0], mid(l.rect)[1] - E[1]) })).filter((c) => c.d < 260).sort((a, b) => a.d - b.d);
   const chosen = [];
