@@ -41,6 +41,7 @@ function rowHouse(F, i, r, fit) {
   F.b('steel_grey', 0.5, 0.56, YB + 0.0, YB + 0.75, -0.02, 0);                              // the cellar-light grating
   // the front garden: a fence, a gate, a path, a hedge and a rose; the kitchen garden behind: beds, bean poles, a shed with hens, the washing, a barrel
   for (let u = 0; u <= W; u += 0.9) F.b('timber', u, u + 0.05, 0, 0.95, -2.7, -2.65);
+  F.k(0, du - 0.45, 0, 0.95, -2.72, -2.62); F.k(du + 0.45, W, 0, 0.95, -2.72, -2.62); F.k(0, 0.12, 0, 0.95, -2.7, 0); F.k(W - 0.12, W, 0, 0.95, -2.7, 0);
   F.b('timber', 0, W, 0.55, 0.6, -2.7, -2.65); F.b('timber', 0, W, 0.85, 0.9, -2.7, -2.65);
   for (let v = -2.6; v < -0.1; v += 0.55) F.b('flagstone', du - 0.4, du + 0.4, 0, 0.03, v, v + 0.5);
   F.b('cloth_green', 0.1, du - 0.7, 0, 0.6, -2.3, -1.8); F.b('car_red', 0.3, 0.5, 0.6, 0.75, -2.2, -2.0);

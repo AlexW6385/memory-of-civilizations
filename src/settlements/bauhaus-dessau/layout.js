@@ -90,6 +90,8 @@ export function lots() {
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+/** The Törten rows' own footprints and the Konsum (no planting there). */
+export const inTortenHouses = (x, z, m = 0) => TORTEN.some((r) => inRect(r, x, z, m)) || inRect(KONSUM, x, z, m);
 export const inMasters = (x, z, m = 0) => MASTERS.some((h) => inRect(h.rect, x, z, m));
 export const inTorten = (x, z, m = 0) => TORTEN.some((r, i) => inRect([r[0] - 3, r[1] - (TORTEN_FRONT[i] === 's' ? 8 : 3), r[2] + 3, r[3] + (TORTEN_FRONT[i] === 's' ? 3 : 8)], x, z, m)) || inRect(KONSUM, x, z, m);
 export const inSchool = (x, z, m = 0) => [B.ww, B.bridge, B.nw, B.fest, B.pre].some((b) => inRect(b, x, z, m));
