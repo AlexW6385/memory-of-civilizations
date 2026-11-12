@@ -22,7 +22,7 @@ const perches = [];
 // sparrows on the barn doorsteps and the yards' woodpiles
 buildings().filter((b) => b.kind === 'barn' && b.farm % 2 === 1).forEach((b) => { const x = (b.rect[0] + b.rect[2]) / 2, z = b.rect[3] + 1.4; perches.push({ kind: 'sparrow', x, z, y: height(x, z) + 0.04, rot: b.seed % 3, range: [1.6, 1.4] }); });
 for (const [fx, fz] of FARMS) perches.push({ kind: 'sparrow', x: fx + 4, z: fz + 14, y: height(fx + 4, fz + 14) + 0.04, rot: (fx * 7) % 3, range: [1.6, 1.4] });
-for (const [x, z] of [[-10, YARD[3] + 3], [10, YARD[3] + 2], [0, YARD[1] - 3]]) perches.push({ kind: 'sparrow', x, z, y: height(x, z) + 0.04, rot: x % 3, range: [1.6, 1.4] });
+for (const [x, z] of [[-24.2, -30], [-24.3, -14], [-23.8, -44], [-10, YARD[3] + 3], [10, YARD[3] + 2], [0, YARD[1] - 3]]) perches.push({ kind: 'sparrow', x, z, y: height(x, z) + 0.04, rot: x % 3, range: [1.6, 1.4] });
 // a grey heron on the stony bank east of the quay
 { const x = LANDING.x + 22, z = riverZ(x) - 12.5; perches.push({ kind: 'heron', x, z, y: height(x, z), rot: Math.PI / 2, stay: [80, 240], gone: [40, 150], alert: 10 }); }
 { const x = LANDING.x - 40, z = riverZ(x) - 12.5; perches.push({ kind: 'heron', x, z, y: height(x, z), rot: 1.2, stay: [60, 200], gone: [60, 180], alert: 10 }); }
