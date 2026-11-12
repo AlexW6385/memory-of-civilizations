@@ -109,7 +109,7 @@ export function dressing() {
       if (rand() < 0.3) F(at(u2, -2.4), 0, [out[1] * 0.5 - out[0] * 0.2, out[0] * 0.5], { carry: pickOf(['basket', 'none']), cloth: pickOf(['cloth_white', 'cloth_ochre']) });
       // an open shop: the keeper sits inside behind his counter (counters at 0.9–2.2 m in, by trade), looking out at the lane
       if (l.open) {
-        const kv = { flowers: 2.1, sweets: 2.4, cloth: 2.9, oil: 1.4, potter: 1.5, grain: 2.2, smith: 1.2 }[trade] ?? 2.0, ku = trade === 'oil' ? Lw * 0.2 : trade === 'potter' ? Lw * 0.15 : Lw * (0.35 + rand() * 0.3);
+        const kv = { flowers: 2.1, sweets: 2.4, cloth: 2.9, oil: 1.4, potter: 2.2, grain: 2.2, smith: 1.2 }[trade] ?? 2.0, ku = trade === 'oil' ? Lw * 0.2 : trade === 'potter' ? Lw - 0.9 : Lw / 2;   // (the seat in the style's furnish: styles/nagara/village.js)
         F(at(ku, kv), yPl, out, { pose: 'cross', top: rand() < 0.5 ? 'bare' : undefined, hat: pickOf(['turban', 'none']), arms: 'hang', cloth: pickOf(['cloth_white', 'cloth_ochre']) });
       }
       // on the pilgrims' lane a buyer stands before the shop, his basket on the arm, facing it

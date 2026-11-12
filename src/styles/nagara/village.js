@@ -51,6 +51,16 @@ function building(el, ctx) {
     B('earth_wall', T, T, L - T, D - T, fy - 0.1, fy + 0.012); B('timber', T, T, L - T, D - T, top - 0.06, top - 0.02);
     for (let u = T + 0.6; u < L - T; u += 1.0) B('wood_dark', u - 0.07, T, u + 0.07, D - T, top - 0.24, top - 0.06);
     furnish(el.trade && kind === 'shop' ? el.trade : kind === 'haveli' ? 'home' : 'home');
+    if (kind === 'shop') {
+      // the keeper's seat: a white cotton mattress (gaddi) and bolster on the floor behind the counter (the keeper sits there: town.js, dressing());
+      // the potter's keeper sits on a plain mat by the door; on the back wall the picture of the household god with its garland and lamp on a shelf
+      const kv = { flowers: 2.1, sweets: 2.4, cloth: 2.9, oil: 1.4, grain: 2.2 }[el.trade], ku = el.trade === 'oil' ? L * 0.2 : L / 2;
+      if (kv && L > 3.4) { B('cloth_white', ku - 0.75, kv - 0.55, ku + 0.75, kv + 0.55, fy, fy + 0.07); B('cloth_ochre', ku + 0.4, kv - 0.45, ku + 0.7, kv + 0.45, fy + 0.07, fy + 0.2); }
+      const nu = L * 0.5, nb = D - T;
+      B('wood_dark', nu - 0.3, nb - 0.07, nu + 0.3, nb - 0.02, fy + 1.45, fy + 2.1); B('cloth_red', nu - 0.25, nb - 0.09, nu + 0.25, nb - 0.07, fy + 1.5, fy + 2.05);
+      B('cloth_white', nu - 0.32, nb - 0.12, nu + 0.32, nb - 0.07, fy + 1.4, fy + 1.46);
+      B('timber', nu - 0.3, nb - 0.28, nu + 0.3, nb - 0.02, fy + 1.28, fy + 1.32); pot('bronze', nu - 0.12, nb - 0.16, 0.05, 0.08, fy + 1.32); B('flame', nu + 0.1, nb - 0.17, nu + 0.14, nb - 0.13, fy + 1.32, fy + 1.4);
+    }
     // the door leaf standing open inside
     if (!open0) B('timber', du - dw / 2 - 0.02, T, du - dw / 2 + 0.05, T + dw, fy, fy + 2.05);
   }
