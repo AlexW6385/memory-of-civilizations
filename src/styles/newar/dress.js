@@ -70,3 +70,21 @@ export function trisul(el, { bag, col }) {
   garland(bag, x, 1.2 * s, z, 0.09 * s); garland(bag, x, 1.5 * s, z, 0.08 * s, 'cloth_red');
   void col;
 }
+
+/**
+ * newar_bunting { strings: [[x0, z0, x1, z1, y, sag]] }: strings of small pennants hung across a lane from house to house [stated: Newar
+ * festivals dress the lanes with strings of coloured flags (patakas)] — a fibre rope sagging by `sag` at its middle, a flag every 0.55 m in red,
+ * yellow, white and green hanging 0.38 m; high above the walker (the ends 4.6 m up).
+ */
+export function bunting(el, { bag }) {
+  const cols = ['cloth_red', 'cloth_ochre', 'cloth_white', 'clay_green', 'cloth_red', 'cloth_ochre'];
+  for (const [x0, z0, x1, z1, y, sag] of el.strings) {
+    const L = Math.hypot(x1 - x0, z1 - z0), n = Math.max(4, Math.round(L / 0.55)), ang = Math.atan2(x1 - x0, z1 - z0);
+    const P = (t) => [x0 + (x1 - x0) * t, y - sag * 4 * t * (1 - t), z0 + (z1 - z0) * t];
+    for (let i = 0; i < 6; i++) { const a = P(i / 6), b = P((i + 1) / 6); bag.add('rope_fibre', rod(a, b, 0.012, 3)); }
+    for (let i = 0; i < n; i++) {
+      const t = (i + 0.5) / n, p = P(t), g = box(-0.14, -0.38, -0.006, 0.14, 0, 0.006);
+      bag.add(cols[(((i + Math.round(x0 + z0)) % cols.length) + cols.length) % cols.length], g.rotateY(ang + Math.PI / 2).translate(p[0], p[1] - 0.01, p[2]));
+    }
+  }
+}

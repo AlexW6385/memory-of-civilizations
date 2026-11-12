@@ -31,6 +31,22 @@ export async function town() {
   for (const l of L) { if (l.use) { courts.push({ t: 'newar_court', rect: l.rect, front: l.front, use: l.use, seed: l.seed }); continue; } const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2; Q[(cx < 0 ? 0 : 1) + (cz < 0 ? 0 : 2)].push({ t: 'newar_house', ...l }); }
   Q.forEach((els, i) => out.push(base('bhaktapur-houses-' + i, 'newar', els)));
   out.push(base('bhaktapur-courts', 'newar', courts));
+  // the strings of festival pennants across the lanes, from house to house where both sides stand (the first 110 m)
+  {
+    const strings = [], br = rng(2710);
+    const stand = (x, z) => inLot(x, z, 0.1);
+    for (const [c, w] of [[0, 7], [-106, 5], [44, 5], [-72, 5], [78, 5]]) for (let x = -105; x < 105; x += 9 + br() * 6) {
+      const a = c - w / 2, b = c + w / 2;
+      if (!stand(x, a - 0.8) || !stand(x, b + 0.8) || Math.hypot(x, c) > 105 || inRect(SQ, x, c, 2)) continue;
+      strings.push([x, a - 0.05, x, b + 0.05, 5.0 + br() * 0.5, 0.45 + br() * 0.3]);
+    }
+    for (const [c, w] of [[8, 6], [-52, 5], [60, 6], [-82, 5], [94, 5]]) for (let z = -105; z < 105; z += 9 + br() * 6) {
+      const a = c - w / 2, b = c + w / 2;
+      if (!stand(a - 0.8, z) || !stand(b + 0.8, z) || Math.hypot(c, z) > 105 || inRect(SQ, c, z, 2)) continue;
+      strings.push([a - 0.05, z, b + 0.05, z, 5.0 + br() * 0.5, 0.45 + br() * 0.3]);
+    }
+    out.push(base('bhaktapur-bunting', 'newar', [{ t: 'newar_bunting', strings }]));
+  }
   // the people
   const { man, woman } = newar(rand), P = [];
   // the walk-check's routes are kept clear of figures (they stand as obstacles)
