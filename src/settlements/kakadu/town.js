@@ -120,6 +120,24 @@ export async function town() {
     const a = R2() * 6.28, d = 0.6 + R2() * 0.4, x = POOL.c[0] + Math.cos(a) * POOL.a * d, z = POOL.c[1] + Math.sin(a) * POOL.b * d;
     if (inPool(x, z, -0.1)) L.push({ t: 'chickens', kind: 'goose', at: [x, z], y: POOL.water - 0.02, rot: R2() * 6.28, n: 3 + Math.floor(R2() * 5), seed: k + 51 });
   }
+  // the apron between the camps, seen whole from the arrival (12-30 m off, none in the lane of the way): work groups at their mats and goods, a dog beside each
+  {
+    const kid = (x, z, rot, seed, pose = 'sit_ground') => L.push({ t: 'figure', at: [x, z], y: height(x, z), rot, seed, dress: 'loincloth', cloth: 'cloth_brown', skin: 'skin_dark', child: true, h: 0.95 + (seed % 3) * 0.05, pose, hair: 'short', feet: 'bare', over: 'none' });
+    const at = (kind, x, z, rot, sd) => K.push({ t: 'ka_item', kind, at: [x, z], y: height(x, z), rot, seed: sd });
+    const dog = (x, z, sd) => L.push({ t: 'animal', kind: 'dog', at: [x, z], y: height(x, z), rot: R2() * 6.28, seed: sd });
+    const at2 = (f, x, z, rot, o) => f([x, z], height(x, z), rot, o);
+    // west of the lane: a man shaping a spear shaft over a heap of shavings, a woman and a girl splitting pandanus leaf for the mat
+    at('spears', -9.8, -26.0, 0.4, 61); at2(man, -8.4, -25.4, -0.6, { pose: 'sit_ground', beard: true }); at('wood', -7.6, -24.6, 0.9, 62);
+    at2(woman, -11.4, -24.2, 0.5, { pose: 'sit_ground' }); kid(-12.4, -23.6, 0.9, 821); at('mat', -11.0, -25.3, 0.2, 63);
+    // east of the lane: three women at a long mat with yams and a bark dish, a boy fetching water in a bark trough
+    at('mat', 9.6, -26.0, -0.1, 64); at2(woman, 8.2, -25.1, 0.2, { pose: 'sit_ground' }); at2(woman, 11.0, -25.0, -0.4, { pose: 'sit_ground' }); at2(woman, 9.8, -23.9, 3.3, { pose: 'kneel' });
+    at('yams', 10.6, -26.4, 0.3, 65); at('bark', 12.6, -23.8, 0.7, 66); kid(7.0, -23.8, 4.2, 822, 'stand'); dog(13.6, -25.4, 91);
+    // far to either side, along the foot: pairs talking, a man with a goose spear going to the water, a heap of bark and of firewood stacked for the wet
+    at2(man, -19.6, -25.6, 0.7, { pose: 'talk' }); at2(woman, -18.2, -25.2, 3.9, { pose: 'talk' }); at('wood', -21.4, -24.6, 0.3, 67); at('bark', -20.0, -23.0, 1.1, 68);
+    at2(man, 18.8, -24.4, 2.5, { pose: 'staff' }); at2(woman, 20.6, -24.8, 3.5, { pose: 'stand', carry: 'basket' }); at('bags', 22.0, -23.2, 0.5, 69); dog(-17.2, -26.4, 92);
+    // the lane's two edges: a bundle of spears leaned on a rock, a sleeping dog in the shade of the apron's gum
+    at('spears', -4.4, -22.4, 0.2, 70); at('yams', 4.6, -22.6, 0.4, 71); dog(3.8, -24.6, 93);
+  }
   void poolD; void inRect;
   // the country in four quarters (so that the far ones cull apart)
   const quad = [[], [], [], []];
