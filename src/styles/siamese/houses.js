@@ -186,7 +186,7 @@ function stilt(el, ctx) {
     L('gold', [[0.001, 0], [0.12, 0.01], [0.1, 0.12], [0.07, 0.24], [0.05, 0.34], [0.001, 0.4]], au, iv0 + 0.15, up + 1.5, 8); L('lotus_leaf', [[0.001, 0], [0.06, 0.02], [0.04, 0.1], [0.001, 0.14]], au - 0.3, iv0 + 0.15, up + 1.5, 6); L('flame', [[0.001, 0], [0.012, 0.1], [0.001, 0.14]], au + 0.3, iv0 + 0.15, up + 1.5, 4); }
   for (let n = 0; n < 3; n++) L('wicker', [[0.001, 0], [0.18, 0.0], [0.24, 0.2], [0.26, 0.3], [0.001, 0.3]], iu0 + 0.55 + n * 0.55, iv1 - 0.1, up + 1.5, 8);
   B('timber', iu0, iu1, iv1 - 0.4, iv1, up + 1.45, up + 1.5);
-  if (hS > 1.9) { const cu = (rand() < 0.5 ? -1 : 1) * (hS - 0.4); BC('timber_red', cu - 0.4, cu + 0.4, -hF * 0.1 - 0.3, -hF * 0.1 + 0.3, up, up + 0.55); B('clay_gilt', cu - 0.42, cu + 0.42, -hF * 0.1 - 0.32, -hF * 0.1 - 0.28, up + 0.3, up + 0.38); }
+  if (hS > 1.9) { const cu = (rand() < 0.5 ? -1 : 1) * (hS - 0.55); BC('timber_red', cu - 0.4, cu + 0.4, -hF * 0.1 - 0.3, -hF * 0.1 + 0.3, up, up + 0.55); B('clay_gilt', cu - 0.42, cu + 0.42, -hF * 0.1 - 0.32, -hF * 0.1 - 0.28, up + 0.3, up + 0.38); }
   // the yard: the spirit house at the lot's corner, a bamboo fence at the lane's edge
   spiritHouse(k, -hS - 0.55, hF + 1.1, 0);
   if (rand() < 0.6) { const t = []; for (let u = -hS - 0.6; u <= hS + 0.6; u += 1.0) { const [x, z] = W(u, hF + 1.9); if (Math.abs(u) > 0.7) bag.add('timber', lathe([[0.04, 0], [0.04, 1.05]], 5, null, x, 0, z)); } void t; const g0 = [-hS - 0.6, hF + 1.9], g1 = [-0.75, hF + 1.9], h0 = [0.75, hF + 1.9], h1 = [hS + 0.6, hF + 1.9]; for (const [p, q] of [[g0, g1], [h0, h1]]) { B('reed_mat', p[0], q[0], p[1] - 0.02, p[1] + 0.02, 0.1, 0.95); k.col.segment(W(p[0], p[1]), W(q[0], q[1]), 0.08, 0, 1.0); } }
@@ -207,9 +207,9 @@ function shop(el, ctx) {
   BC(pl, -hS, -hS + th + 0.45, hF - 0.45, hF, y0, y1); BC(pl, hS - th - 0.45, hS, hF - 0.45, hF, y0, y1);
   B('timber_red', -hS, hS, hF - 0.3, hF + 0.05, y0 + gh - 0.5, y0 + gh); B('clay_gilt', -hS, hS, hF - 0.02, hF + 0.06, y0 + gh - 0.12, y0 + gh - 0.07);
   const side = rand() < 0.5 ? -1 : 1;
-  for (let n = 0; n < 7; n++) B('planks_grey', side * (hS - th - 0.5) - 0.02 - (side > 0 ? 0.0 : -0.0) * 0, side * (hS - th - 0.5) + 0.02, hF - 0.25 + n * 0.0, hF - 0.1, y0, y0 + gh - 0.5);   // the shutter boards stacked in their slot
+  for (let n = 0; n < 7; n++) B('planks_grey', side * (hS - th - 0.5) - 0.02 - (side > 0 ? 0.0 : -0.0) * 0, side * (hS - th - 0.5) + 0.02, hF - 0.25 + n * 0.0, hF - 0.1, y0 - 0.02, y0 + gh - 0.53);   // the shutter boards stacked in their slot
   const cu0 = side > 0 ? -pu : -pu + 1.2, cu1 = side > 0 ? pu - 1.2 : pu;
-  BC('timber', Math.min(cu0, cu1), Math.max(cu0, cu1), hF - 0.95, hF - 0.45, y0, y0 + 0.95); B('planks_grey', Math.min(cu0, cu1) - 0.05, Math.max(cu0, cu1) + 0.05, hF - 1.0, hF - 0.4, y0 + 0.95, y0 + 1.02);
+  BC('timber', Math.min(cu0, cu1), Math.max(cu0, cu1), hF - 0.95, hF - 0.45, y0 - 0.02, y0 + 0.95); B('planks_grey', Math.min(cu0, cu1) - 0.05, Math.max(cu0, cu1) + 0.05, hF - 1.0, hF - 0.4, y0 + 0.95, y0 + 1.02);
   // goods on the counter: bowls and baskets, a balance, rolls of cloth; and hung from the lintel: strings of dried fish, baskets, gourds, a lantern
   const gl = Math.min(cu0, cu1) + 0.3, gr = Math.max(cu0, cu1) - 0.3;
   for (let u = gl; u < gr; u += 0.5) { const r = rand(); if (r < 0.35) L('terracotta', [[0.001, 0], [0.13, 0], [0.19, 0.18], [0.001, 0.2]], u, hF - 0.7, y0 + 1.02, 8); else if (r < 0.65) L('wicker', [[0.001, 0], [0.16, 0], [0.2, 0.14], [0.001, 0.15]], u, hF - 0.7, y0 + 1.02, 8); else if (r < 0.85) { const p = W(u - 0.2, hF - 0.7), q = W(u + 0.2, hF - 0.7); bag.add(CLOTH[Math.floor(rand() * CLOTH.length)], rod([p[0], y0 + 1.12, p[1]], [q[0], y0 + 1.12, q[1]], 0.07, 6)); } }
@@ -223,28 +223,28 @@ function shop(el, ctx) {
   // the stair along the right wall rising toward the front to the sleeping floor
   const ns = 14, rise = (y1 - y0) / ns, run = 0.25, sv0 = -hF + 0.7, su0 = -side * (hS - th - 0.45), sv1 = sv0 + ns * run;
   if (sv1 < hF - 1.3) {
-    for (let n = 0; n < ns; n++) B('timber', su0 - 0.45, su0 + 0.45, sv0 + n * run, sv0 + n * run + run + 0.01, y0, y0 + rise * (n + 1));
+    for (let n = 0; n < ns; n++) B('timber', su0 - 0.45, su0 + 0.45, sv0 + n * run, sv0 + n * run + run + 0.01, y0 - 0.02, y0 + rise * (n + 1) - 0.035);
     col.ramp(R(su0 - 0.45, su0 + 0.45, sv0, sv1), y0, y1, DIRW[`${k.F[0]},${k.F[1]}`]);
     // the floor of the upper room, with the stair's well open
     const wl = su0 - 0.45, wr = su0 + 0.45, ul = Math.min(wl, wr), ur = Math.max(wl, wr);
-    B('timber', -hS, hS, -hF, hF + 0.1, y1 - 0.2, y1); // overwritten below by the pieces that leave the well open
+    B('timber', -hS + th, hS - th, -hF + th, hF - 0.1, y1 - 0.22, y1 - 0.04);
     void ul; void ur;
     F(-hS, side > 0 ? ul : hS, -hF, hF, y1);
     const [fa, fb] = side > 0 ? [ur, hS] : [-hS, ul]; F(Math.min(fa, fb), Math.max(fa, fb), sv1, hF, y1); F(Math.min(fa, fb), Math.max(fa, fb), -hF, sv0, y1);
     if (side > 0) F(-hS, ul, -hF, hF, y1);
     else F(ur, hS, -hF, hF, y1);
-  } else { B('timber', -hS, hS, -hF, hF + 0.1, y1 - 0.2, y1); F(-hS, hS, -hF, hF, y1); }
+  } else { B('timber', -hS + th, hS - th, -hF + th, hF - 0.1, y1 - 0.22, y1 - 0.04); F(-hS, hS, -hF, hF, y1); }
   // ── the upper storey: timber walls, shuttered windows to the lane, a balcony with a rail, the sleeping place behind
-  const uy = y1, ut = y1 + uh;
-  for (const s of [-1, 1]) wallV(up, -hF, hF, s * (hS - th / 2), th - 0.1, uy, ut, [{ a: -0.4, b: 0.4, sill: uy + 0.9, head: uy + 1.75 }]);
-  wallU(up, -hS, hS, -hF + 0.1, 0.12, uy, ut, [{ a: -0.4, b: 0.4, sill: uy + 0.9, head: uy + 1.75 }]);
-  const fw = [{ a: -hS + 0.7, b: -hS + 1.7, sill: uy + 0.2, head: uy + 2.0 }, { a: hS - 1.7, b: hS - 0.7, sill: uy + 0.2, head: uy + 2.0 }];
-  wallU(up, -hS, hS, hF - 0.1, 0.12, uy, ut, fw);
+  const uy = y1, ut = y1 + uh, uw = uy - 0.03;
+  for (const s of [-1, 1]) wallV(up, -hF + 0.04, hF - 0.04, s * (hS - th / 2), th - 0.1, uw, ut, [{ a: -0.4, b: 0.4, sill: uy + 0.9, head: uy + 1.75 }]);
+  wallU(up, -hS + 0.04, hS - 0.04, -hF + 0.1, 0.12, uw, ut, [{ a: -0.4, b: 0.4, sill: uy + 0.9, head: uy + 1.75 }]);
+  const fw = [{ a: -0.5, b: 0.5, sill: uy, head: uy + 1.9 }, { a: -hS + 0.7, b: -hS + 1.7, sill: uy + 0.2, head: uy + 2.0 }, { a: hS - 1.7, b: hS - 0.7, sill: uy + 0.2, head: uy + 2.0 }];
+  wallU(up, -hS + 0.04, hS - 0.04, hF - 0.1, 0.12, uw, ut, fw);
   for (const o of fw) { const m = (o.a + o.b) / 2; B('timber', m - 0.52, m + 0.52, hF - 0.14, hF + 0.2, uy + 0.2, uy + 0.26); for (const s of [-1, 1]) B('shutter_green', m + s * 0.55 - 0.02, m + s * 0.55 + 0.02, hF + 0.02, hF + 0.62, uy + 0.3, uy + 1.95); for (const s of [-1, 1]) B('timber', m + s * 0.42 - 0.025, m + s * 0.42 + 0.025, hF + 0.1, hF + 0.18, uy + 0.26, uy + 0.95); B('timber', m - 0.5, m + 0.5, hF + 0.15, hF + 0.19, uy + 0.9, uy + 0.95); }
   const [x, z] = W(0, hF + 0.9); void x; void z;
-  B('timber', -0.8, 0.8, hF - 0.05, hF + 0.85, uy - 0.12, uy); col.rect(R(-0.8, 0.8, hF - 0.05, hF + 0.85), uy - 1.0, uy - 0.1);
+  B('timber', -0.8, 0.8, hF - 0.05, hF + 0.85, uy - 0.14, uy - 0.03); col.rect(R(-0.8, 0.8, hF - 0.05, hF + 0.85), uy - 1.0, uy - 0.1);
   // balcony via the middle window? the door: a leaf opening at the centre
-  wallU(up, -1.0, 1.0, hF - 0.1, 0.12, uy, ut, []);
+  
   B('timber', -0.78, 0.78, hF + 0.8, hF + 0.86, uy + 0.88, uy + 0.96); for (const s of [-1, 1]) B('timber', s * 0.78 - 0.03, s * 0.78 + 0.03, hF - 0.05, hF + 0.86, uy + 0.88, uy + 0.96);
   F(-0.8, 0.8, hF - 0.05, hF + 0.85, uy);
   // inside upstairs: mats, a chest, an altar shelf, a hung net

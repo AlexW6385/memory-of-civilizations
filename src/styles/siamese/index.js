@@ -9,6 +9,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, rod, fromTriangles, orientOutward, place } from '../../core/geom.js';
 import '../khmer/index.js';
 import { thaiHouse } from './houses.js';
+import { WAT_ELEMENTS, wihanInterior, lite } from './wat.js';
 
 import { hull } from '../ptolemaic/harbour.js';
 import { wallSeg } from '../ptolemaic/util.js';
@@ -217,6 +218,7 @@ function wihan(el, ctx) {
   bag.add('cotto_floor', box(cx0, f - 0.02, cz0, cx1, f + 0.02, cz1));
   const lights = ctx.lights;
   if (lights && !el.open) for (const t of [0.25, 0.6]) lights.push({ at: [cx0 + (cx1 - cx0) * (east ? t : 1 - t) + 0.01, f + 4.2, dzm], color: '#ffb860', intensity: 8, distance: 14 });
+  if (!el.open) wihanInterior(ctx, { cx0, cx1, cz0, cz1, f, wallH, east, dxm, dzm, throne: !!el.throne && !el.image, seed: el.seed });
   // the apron's drum of the bell and the offering stands along the front are left to the town's furnishing
   void rand;
 }
@@ -257,6 +259,15 @@ function bellTower(el, { bag, col }) {
   bag.add('brick_baked', box(x0, y, z0, x1, y + 1.0, z1)); col.rect([x0, z0, x1, z1], y, y + 1.0);
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) { bag.add('brick', box(cx + sx * (a - 0.4) - 0.4, y + 1.0, cz + sz * (a - 0.4) - 0.4, cx + sx * (a - 0.4) + 0.4, y + 7.0, cz + sz * (a - 0.4) + 0.4)); }
   bag.add('timber', box(x0 + 0.1, y + 4.0, z0 + 0.1, x1 - 0.1, y + 4.25, z1 - 0.1));
+  // the stair up the north side to the bell's floor (rising eastward), the deck round the stair's head, the rail, the bell's rope
+  col.floor([x0, z0, x1, z1], y + 1.0);
+  { const n = 16, sx0 = x0 + 0.7, sx1 = x1 - 1.4, run = (sx1 - sx0) / n;
+    for (let i = 0; i < n; i++) bag.add('timber', box(sx0 + i * run, y + 1.0, z0 + 0.6, sx0 + (i + 1) * run + 0.01, y + 1.0 + 3.25 * (i + 1) / n, z0 + 1.7));
+    col.ramp([sx0, z0 + 0.6, sx1, z0 + 1.7], y + 1.0, y + 4.25, 'e');
+    col.floor([x0 + 0.1, z0 + 1.7, x1 - 0.1, z1 - 0.1], y + 4.25); col.floor([sx1, z0 + 0.1, x1 - 0.1, z0 + 1.7], y + 4.25);
+    bag.add('timber', box(x0 + 0.1, y + 4.25, z1 - 0.15, x1 - 0.1, y + 5.2, z1 - 0.1)); bag.add('timber', box(x0 + 0.1, y + 4.25, z0 + 1.65, sx1, y + 5.2, z0 + 1.7));
+    col.rect([x0 + 0.1, z1 - 0.15, x1 - 0.1, z1 - 0.1], y + 4.25, y + 5.2);
+    bag.add('cloth_white', rod([cx, y + 5.2, cz], [cx, y + 4.3, cz + 0.4], 0.03, 4)); }
   bag.add('bronze', lathe([[0.1, 0], [0.5, -0.2], [0.8, -1.1], [0.88, -1.4], [0.001, -1.4]], 10, null, cx, y + 6.6, cz));
   let r = a + 0.9, yy = y + 7.0;
   for (let i = 0; i < 5; i++) { const h = 1.0 - i * 0.08; bag.add('roof_tile', lathe([[r * 1.414, 0], [r * 0.7 * 1.414, h]], 4, null, cx, yy, cz).rotateY(Math.PI / 4)); yy += h * 0.8; r *= 0.74; }
@@ -274,8 +285,11 @@ function cloister(el, ctx) {
   // the coping and the lean-to roof inside
   for (const [a, b] of [[[x0, z0, x1, z0 + 0.4]], [[x0, z0, x0 + 0.4, z1]], [[x1 - 0.4, z0, x1, z1]]].map((r) => [r[0]])) bag.add('lime_plaster', box(a[0] - 0.1, y + h, a[1] - 0.1, a[2] + 0.1, y + h + 0.2, a[3] + 0.1));
   bag.add('lime_plaster', box(x0 - 0.1, y + h, z1 - 0.5, gx - gw, y + h + 0.2, z1 + 0.5)); bag.add('lime_plaster', box(gx + gw, y + h, z1 - 0.5, x1 + 0.1, y + h + 0.2, z1 + 0.5));
-  // the images facing outward on the south wall, seven each side of the gate, under a lean-to
-  for (let i = 0; i < 6; i++) for (const s of [-1, 1]) { const x = gx + s * (gw + 2.5 + i * 3.2); if (x > x0 + 1.5 && x < x1 - 1.5) buddha({ at: [x, z1 + 1.2], y, h: 1.9, face: 's' }, ctx); }
+  // the images: facing outward on the south wall under its lean-to, and facing in along the other three walls of the gallery
+  for (let i = 0; i < 7; i++) for (const s of [-1, 1]) { const x = gx + s * (gw + 2.5 + i * 3.2); if (x > x0 + 1.5 && x < x1 - 1.5) lite(bag, x, y, z1 + 1.2, Math.PI, 1.3); }
+  const pf0 = el.platform ?? 0.8;
+  for (let x = x0 + 2.5; x < x1 - 2; x += 2.6) lite(bag, x, y + pf0, z0 + 1.1, 0, 1.2);
+  for (let z = z0 + 3; z < z1 - 2; z += 2.8) { lite(bag, x0 + 1.1, y + pf0, z, -Math.PI / 2, 1.2); lite(bag, x1 - 1.1, y + pf0, z, Math.PI / 2, 1.2); }
   bag.add('roof_tile', box(x0 - 0.4, y + 2.3, z1 + 0.5, gx - gw, y + 2.45, z1 + 2.3)); bag.add('roof_tile', box(gx + gw, y + 2.3, z1 + 0.5, x1 + 0.4, y + 2.45, z1 + 2.3));
   // the platform inside, with the stair up from the gate
   const pf = el.platform ?? 0.8, ix0 = x0 + 0.4, ix1 = x1 - 0.4, iz0 = z0 + 0.4, iz1 = z1 - 0.4;
@@ -398,5 +412,5 @@ function floatingHouse(el, { bag, col }) {
 /** mooring_post: { at, y } a bamboo or timber pile a few boats are tied to. */
 function pile(el, { bag, col }) { bag.add('timber', lathe([[0.12, 0], [0.1, 3.6]], 6, null, el.at[0], el.y ?? -2.3, el.at[1])); col.circle(el.at[0], el.at[1], 0.14, el.y ?? -2.3, 1.2); }
 
-const SIAMESE = { thai_house: thaiHouse, chedi, buddha, wihan, mandapa, prasat, bell_tower: bellTower, cloister, canal_bank: canalBank, thai_bridge: thaiBridge, landing, boat, floating_house: floatingHouse, pile };
+const SIAMESE = { ...WAT_ELEMENTS, thai_house: thaiHouse, chedi, buddha, wihan, mandapa, prasat, bell_tower: bellTower, cloister, canal_bank: canalBank, thai_bridge: thaiBridge, landing, boat, floating_house: floatingHouse, pile };
 registerStyle('siamese', { ...kh, elements: { ...kh.elements, ...SIAMESE } });
