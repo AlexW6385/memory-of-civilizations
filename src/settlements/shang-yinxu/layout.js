@@ -117,6 +117,16 @@ export function lots() {
       LOTS.push(lot);
     }
   }
+  // round the court, within 125 m of the arrival (20, -34): every lot is open, and the quarter shows all four fronts, not two
+  // (the lots' kinds are drawn above; only the pit-house yards left closed are re-cast, as wattle rows and as the diviners' and the potters' workshops)
+  { const wk = [['oracle', 'workshop'], ['jade', 'workshop']];
+    let k = 0;
+    for (const l of LOTS) {
+      if (Math.hypot((l.rect[0] + l.rect[2]) / 2 - AXIS, (l.rect[1] + l.rect[3]) / 2 + 34) > 125) continue;
+      if (l.kind === 'pits' && !l.open) { const m = k++ % 5; if (m === 1 || m === 3) { l.kind = 'workshop'; l.trade = wk[m === 1 ? 0 : 1][0]; } else l.kind = 'row'; }
+      l.open = true;
+    }
+  }
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
