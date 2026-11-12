@@ -28,18 +28,27 @@ function planting(x, z) {
   if (inRect(MOUND, x, z, 5) || inRect(PLAZA, x, z, 2) || inRect([QUAY.x0 - 2, QUAY.z0 - 2, QUAY.x1 + 4, QUAY.z1 + 2], x, z)) return null;
   const bank = Math.abs(x - riverX(z)) - RIVER.hw;
   if (bank > -4 && bank < 6) return { reeds: 7, tamarisk: 0.15, grass_dry: 5 };
+  // the outskirts of the town: groves of neem and jujube among the fields, date palms at the field edges, tamarisk along the ditches
+  const out = Math.hypot(x, z) > RADIUS - 95;
+  if (out && !inRect(TOWN, x, z)) {
+    const h = hash2(x * 0.11, z * 0.13);
+    if (h < 0.22) return { neem: 0.1, jujube: 0.08, acacia: 0.05, grass_dry: 5 };
+    if (h < 0.34) return { date_palm: 0.35, grass_dry: 4 };
+  }
   if (!inRect(TOWN, x, z)) {
-    if (hash2(x * 0.3, z * 0.3) < 0.07) return { acacia: 0.12, jujube: 0.1, grass_dry: 6 };
+    if (hash2(x * 0.3, z * 0.3) < 0.07) return { acacia: 0.12, jujube: 0.1, neem: 0.05, grass_dry: 6 };
     const e = (x + 1000) % 24;
     return e < 1 ? { grass_dry: 12 } : { wheat: 90, grass_dry: 4 };
   }
   if (inLot(x, z, 0.8) || onStreet(x, z, 0.6)) return null;
   if (x > QUAY.x1 - 20 && x < QUAY.x0) return { date_palm: 0.5 };
-  return hash2(x * 0.2, z * 0.2) < 0.03 ? { acacia: 0.15, grass_dry: 3 } : null;
+  // the vacant ground between the blocks and the Citadel's foot, the town's edge: neem and jujube, date palms and thorn
+  const h2 = hash2(x * 0.2, z * 0.2);
+  return h2 < 0.05 ? { neem: 0.12, acacia: 0.1, grass_dry: 3 } : h2 < 0.08 ? { jujube: 0.1, date_palm: 0.15, grass_dry: 3 } : null;
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { date_palm: 0.5, tamarisk: 0.15, acacia: 0.15, jujube: 0.1, reeds: 7, wheat: 90 },
+  maxDensity: { date_palm: 0.5, tamarisk: 0.15, acacia: 0.15, jujube: 0.1, neem: 0.12, reeds: 7, wheat: 90 },
   climate: {
     sun: { az: 150, el: 60, color: [1.0, 0.94, 0.82], intensity: 3.8, lat: 27.3, dec: 8, hour: 10 },
     sky: { turbidity: 4.4, rayleigh: 1.05, mie: 0.008, mieG: 0.8, zenith: [0.13, 0.2, 0.36], horizon: [0.72, 0.66, 0.56] },

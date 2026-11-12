@@ -3,6 +3,12 @@
 // harbour office, and the people — priests at the Bath, craftsmen, merchants, porters, carts with zebu.
 import { RADIUS, PLAT, XS, STREET_W, PLAZA, WELL_BIG, WALL, WALL_Z, RIVER, QUAY, CUSTOMS, BATH, GRANARY, PILLARED, COLLEGE, EAST_STAIR, riverX, streets, lanes, lots, inRect } from './layout.js';
 import { boatFloat } from '../../objects/index.js';
+import { stallSpots } from '../../styles/indus/town.js';
+
+/** The quay's apron: sheds along its back (west), net frames and washing on its front. */
+export const SHEDS = [-98, -50, -8, 22].map((z) => [QUAY.x0 + 1.4, z - 6, QUAY.x0 + 8.4, z + 6]);
+export const FISH = [[261, -68], [261, 2], [261, 54]];
+export const WEIRS = [[286, -125], [288, 128], [284, -35]];
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const pick = (rand, a) => a[Math.floor(rand() * a.length) % a.length];
@@ -13,6 +19,7 @@ const facing = (l) => ({ w: -Math.PI / 2, e: Math.PI / 2, n: Math.PI, s: 0 })[l.
 
 function people() {
   const rand = rng(2500), L = [];
+  let k0 = 0;
   const fig = (at, rot, o = {}) => L.push({ t: 'figure', at, y: 0, rot, seed: Math.floor(rand() * 1e9), dress: 'wrap', top: 'bare', over: 'none', cloth: 'cloth_white', cloth2: 'cloth_white', skin: pick(rand, ['skin_medium', 'skin_dark', 'skin_medium']), hat: 'none', hair: pick(rand, ['bun', 'short']), hairMat: 'hair_dark', feet: 'bare', carry: 'none', pose: 'stand', ...o });
   const man = (at, rot, o = {}) => fig(at, rot, { over: pick(rand, ['shawl', 'shawl', 'none']), cloth: pick(rand, ['cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_red']), cloth2: 'cloth_red', beard: rand() < 0.5 ? 1 : 0, ...o });
   const woman = (at, rot, o = {}) => fig(at, rot, { top: '', over: 'shawl', hair: 'bun', cloth: pick(rand, ['cloth_ochre', 'cloth_red', 'cloth_indigo', 'cloth_white']), cloth2: 'cloth_ochre', beard: 0, ...o });
@@ -20,6 +27,16 @@ function people() {
   const [cx0, cz0, cx1, cz1] = BATH.court, [px0, pz0, px1, pz1] = BATH.pool;
   for (const [x, z, r] of [[px0 - 2, (pz0 + pz1) / 2 - 2, Math.PI / 2], [px1 + 2.2, (pz0 + pz1) / 2 + 1, -Math.PI / 2], [(px0 + px1) / 2 + 1, pz0 - 1.6, 0], [px0 - 3.5, pz1 + 0.5, Math.PI]]) man([x, z], r, { y: PLAT, hair: 'shaven', beard: 0, cloth: 'cloth_white', over: 'shawl' });
   man([px1 + 4.5, pz0 + 3], -Math.PI / 2, { y: PLAT, pose: 'cross', cloth: 'cloth_white' });
+  // bathers on the pool's steps (the water stands at the coping less 0.35 m; the steps rise 0.2 m each, 0.283 m deep), attendants on the benches of the court's west wall
+  {
+    const yb = PLAT - BATH.depth, stepY = (s) => yb + 0.2 * (Math.floor(s / 0.2833) + 1);
+    for (const [s, x, south] of [[1.7, px0 + 1.3, false], [2.3, px0 + 3.4, false], [1.9, px1 - 1.3, false], [1.8, px0 + 2.2, true], [2.4, px1 - 2.4, true]]) {
+      const z = south ? pz1 - 3.4 + s : pz0 + 3.4 - s;
+      man([x, z], south ? 0 : Math.PI, { y: stepY(s), dress: 'loincloth', over: 'none', cloth: 'cloth_white', hair: 'shaven', beard: 0 });
+    }
+    for (let k = 0; k < 4; k++) man([BATH.outer[0] + 1.2 + 0.3, cz0 + 3 + k * 4.5 + 0.0], Math.PI / 2, { y: PLAT + 0.45, pose: 'cross', cloth: 'cloth_white', hair: 'shaven', beard: 0 });
+    for (const [x, z] of [[cx0 + 2, cz0 + 4], [cx1 - 2.5, cz1 - 3], [cx1 - 2, cz0 + 8]]) woman([x, z], rand() * 6.28, { y: PLAT, carry: 'pot', arms: 'head' });
+  }
   // the priests at the College's court, the gate's keepers, the Pillared Hall's assembly
   for (let k = 0; k < 5; k++) man([COLLEGE[0] + 14 + k * 9, COLLEGE[1] + 13.5], 0, { y: PLAT, pose: k % 2 ? 'cross' : 'stand', cloth: 'cloth_white', hair: 'shaven', beard: 0 });
   for (const [x, z] of [[-157, COLLEGE[1] - 1], [-153, COLLEGE[1] - 1]]) man([x, z], Math.PI, { y: PLAT, pose: 'staff', carry: 'staff', len: 2.0 });
@@ -28,6 +45,11 @@ function people() {
   for (let k = 0; k < 4; k++) man([GRANARY[0] + 24 + k * 0.5, GRANARY[3] + 3 + k * 2.2], Math.PI, { y: PLAT, arms: 'sack', carry: 'sack', cloth: 'cloth_ochre', beard: 0 });
   man([GRANARY[0] + 12, GRANARY[1] + 3.5], Math.PI, { y: PLAT + 1.78, pose: 'cross', cloth: 'cloth_white' });
   // the market place: sellers on their mats, buyers, a water-carrier at the well
+  for (const sp of stallSpots(PLAZA)) {
+    const dx = sp.along ? 0 : sp.face, dz = sp.along ? sp.face : 0, r = Math.atan2(dx, -dz), kind = sp.goods;
+    (kind === 'cloth' || kind === 'beads' ? man : (k0++ % 2 ? woman : man))([sp.x - dx * 0.25, sp.z - dz * 0.25], r, { y: 0.07, pose: 'cross', carry: 'none', cloth: 'cloth_white' });
+    if (rand() < 0.6) (rand() < 0.5 ? woman : man)([sp.x + dx * 2.1 + (rand() - 0.5), sp.z + dz * 2.1 + (rand() - 0.5)], r + Math.PI + (rand() - 0.5) * 0.5, { pose: 'stand', carry: rand() < 0.4 ? 'pot' : 'none' });
+  }
   for (let k = 0; k < 14; k++) {
     const a = rand() * 6.28, r = 7 + rand() * 12, x = WELL_BIG[0] + Math.cos(a) * r * 1.2, z = WELL_BIG[1] + Math.sin(a) * r;
     if (!inRect(PLAZA, x, z, -1)) continue;
@@ -36,6 +58,13 @@ function people() {
   woman([WELL_BIG[0] + 3.3, WELL_BIG[1] + 0.5], Math.PI / 2, { carry: 'pot', arms: 'head' });
   // the workshops: the master at his bench in the court, seated on the ground
   for (const l of lots()) if (!['house', 'small'].includes(l.kind)) { const p = P(l, l.rect[3] - l.rect[1] > 0 ? Math.min(l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], 99) / 2 : 6, 6.0); man(p, facing(l) + Math.PI, { y: l.y, pose: 'cross', cloth: 'cloth_ochre', beard: 1 }); }
+  // an apprentice at each workshop, the mistress of each furnished house at her hearth in the court
+  for (const l of lots()) {
+    if (!['house', 'small'].includes(l.kind)) { const p = P(l, 3.5, 6.0); man(p, facing(l) + Math.PI + 0.6, { y: l.y, pose: 'stand', hair: 'short', cloth: 'cloth_white', beard: 0 }); }
+    else if (l.open && l.kind === 'house') { const p = P(l, (l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0]) * 0.45, 4.6); woman(p, rand() * 6.28, { y: l.y, pose: 'cross', carry: 'none' }); }
+  }
+  // the quay: washing and net-mending on the apron; fishermen and boatmen are set on the boats (life)
+  for (const [x, z] of FISH) { woman([x + 3.6, z + 1.2], Math.PI / 2, { y: QUAY.top + 0.02, pose: 'squat', carry: 'none' }); woman([x + 3.6, z + 3.2], -Math.PI / 2, { y: QUAY.top + 0.02, pose: 'squat', carry: 'none' }); man([x + 5, z - 1.6], 0, { y: QUAY.top + 0.02, pose: 'cross', cloth: 'cloth_ochre', beard: 1 }); }
   // the quay: boatmen and porters at the stairs, the harbour clerk at his office
   for (const z of QUAY.stairs) for (let k = 0; k < 2; k++) man([QUAY.x1 - 2.5, z + (k ? 4 : -4)], Math.PI / 2, { y: QUAY.top + 0.02, arms: k ? 'sack' : undefined, carry: k ? 'sack' : 'none' });
   man([CUSTOMS[0] + 2.4, (CUSTOMS[1] + CUSTOMS[3]) / 2], Math.PI / 2, { y: 0.04, pose: 'cross', cloth: 'cloth_white', beard: 1 });
@@ -67,10 +96,14 @@ function life() {
     L.push({ t: 'boat', kind: 'barge', len, at: [x, z], y: RIVER.level + bf, rot: 0, seed: Math.round(z * 3) });
   }
   for (const [z, d] of [[-70, 12], [-20, 14], [30, 10], [80, 13]]) L.push({ t: 'boat', kind: 'reed', len: 6.4, at: [riverX(z) - 6 + d * 0.3, z], y: RIVER.level + rf, rot: 0.1, seed: Math.round(z) });
+  // the crews: a fisherman poling each reed boat, a steersman sitting at the stern of each cargo barge, one more reed boat among the weirs
+  for (const [z, d] of [[-70, 12], [-20, 14], [30, 10], [80, 13]]) { const x = riverX(z) - 6 + d * 0.3, rot = 0.1; L.push({ t: 'figure', at: [x - Math.sin(rot) * 2.5, z - Math.cos(rot) * 2.5], y: RIVER.level + rf + 0.28, rot, seed: z + 5, dress: 'loincloth', top: 'bare', over: 'none', cloth: 'cloth_white', skin: 'skin_dark', hair: 'short', feet: 'bare', carry: 'none', pose: 'punt', poleMat: 'timber' }); }
+  for (const [z, len] of [[-92, 12], [-46, 10], [10, 12], [58, 11]]) { const x = riverX(z) - RIVER.hw + 3.8; L.push({ t: 'figure', at: [x, z + len * 0.36], y: RIVER.level + bf + 0.15, rot: 0, seed: z + 99, dress: 'loincloth', top: 'bare', over: 'none', cloth: 'cloth_ochre', skin: 'skin_medium', hair: 'short', feet: 'bare', carry: 'none', pose: 'sit' }); }
+  for (const [x, z] of WEIRS) { L.push({ t: 'boat', kind: 'reed', len: 6.4, at: [x - 4, z + 7], y: RIVER.level + rf, rot: 1.2, seed: Math.round(z) }); L.push({ t: 'figure', at: [x - 4 - Math.sin(1.2) * 2.5, z + 7 - Math.cos(1.2) * 2.5], y: RIVER.level + rf + 0.28, rot: 1.2, seed: Math.round(z) + 3, dress: 'loincloth', top: 'bare', over: 'none', cloth: 'cloth_brown', skin: 'skin_dark', hair: 'bun', feet: 'bare', carry: 'none', pose: 'punt', poleMat: 'timber' }); }
   for (let k = 0; k < 14; k++) { const z = QUAY.z0 + 8 + rand() * (QUAY.z1 - QUAY.z0 - 16); if (QUAY.stairs.some((s) => Math.abs(s - z) < 6)) continue; L.push({ t: k % 3 ? 'sacks' : 'pot', kind: 'water_pot', n: 3, at: [QUAY.x1 - 2.6 - rand() * 3, z], y: QUAY.top + 0.02, rot: rand() * 6.28, seed: k * 7 + 1 }); }
   // at the house doors: jars, baskets, firewood, a hearth's pots
   for (const l of lots()) {
-    if (rand() > 0.34) continue;
+    if (rand() > 0.55) continue;
     const du = P(l, 1.2 + rand() * (Math.max(l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], 3) - 2.4), -0.5);
     L.push({ t: pick(rand, ['pot', 'basket', 'firewood']), kind: pick(rand, ['water_pot', 'dark_pot', 'matka']), at: du, y: l.y, rot: rand() * 6.28, n: 2, seed: Math.floor(rand() * 1e9) });
   }
@@ -82,9 +115,11 @@ export async function town() {
   if (CACHE) return CACHE;
   const plans = [], LT = lots();
   plans.push(base('md-streets', [{ t: 'indus_streets', streets: streets(), lanes: lanes() }]));
-  plans.push(base('md-market', [{ t: 'indus_market', rect: PLAZA, well: WELL_BIG }], { rooms: [{ id: 'market place', rect: PLAZA, y: 0, kind: 'open', market: true }] }));
+  { const ST = streets(); for (let i = 0; i < ST.length; i += 3) plans.push(base(`md-streetwork-${i / 3}`, [{ t: 'indus_streetwork', streets: ST.slice(i, i + 3), seed: 40 + i, avoid: [PLAZA, [QUAY.x0, QUAY.z0, QUAY.x1, QUAY.z1], CUSTOMS] }])); }
+  plans.push(base('md-market', [{ t: 'indus_market', rect: PLAZA, well: WELL_BIG }, ...[[12, 12], [36, 12], [12, 36], [36, 36]].map(([a, b]) => ({ t: 'indus_shade', c: [PLAZA[0] + a, PLAZA[1] + b] }))], { rooms: [{ id: 'market place', rect: PLAZA, y: 0, kind: 'open', market: true }] }));
   // the river in strips of 30 m, each its own plan, so that each one's bounds stay inside the disc
   for (let x = QUAY.x1, k = 0; x < 439; x += 30, k++) plans.push(base('md-river-' + k, [{ t: 'indus_river', x0: x, x1: x + 30, level: RIVER.level }]));
+  plans.push(base('md-landing', [...SHEDS.map((r, i) => ({ t: 'indus_shed', rect: r, front: 'e', seed: 20 + i })), ...FISH.map(([x, z], i) => ({ t: 'indus_fishery', x, z, seed: 30 + i })), ...WEIRS.map(([x, z], i) => ({ t: 'indus_weir', x, z, level: RIVER.level, seed: 50 + i }))]));
   plans.push(base('md-quay', [{ t: 'indus_quay', ...QUAY, bed: RIVER.bed, level: RIVER.level }, { t: 'indus_office', rect: CUSTOMS }]));
   // the wall on the south with its gate and towers
   {

@@ -5,6 +5,8 @@ Status: built from nothing in this batch: the Citadel mound with the Great Bath 
 
 Not built (left for later): the flood-defence platforms of the Lower Town's west edge, the second row of towers on the west wall, the DK and VS areas' individual layouts (the grid is one pattern, compressed), the Stupa mound (a later, Kushan, addition: not in the moment), an upper storey on more than a few houses.
 
+Deepening pass (Suzhou standard): house fronts and back walls dressed at eye level (door frames and leaves, benches, mat shades, lamp niches, lattice windows, salt crust at the foot, mud-plaster patches, spalled brick, rafter ends, string course), every room furnished by use, roof clutter, upper rooms, street work (jars, brick stacks, dust drifts, ruts, water-stands), rebuilt market stalls and four mat pavilions, warehouse sheds, net frames, washing and fish weirs at the landing, bathers on the Great Bath's steps, College cells and shrine, granary hall interior, Pillared Hall benches and dais, Bath gallery screens and benches, fallen-brick heaps at the platform foot, groves in the outskirts. See §11.
+
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
 ## 1. The moment and the real place
@@ -68,6 +70,19 @@ The river and its birds, the creak of ox-cart axles on solid wheels, the hiss of
 ## 9. Weathering
 
 Dust and the salt that rises in the baked brick (efflorescence at the foot), mud plaster cracked and flaking in patches, the bitumen black at the Bath's waterline, soot over the kilns, brick spalled at the corners. `damp` very low; the waterline at the Bath's level and the river's. [inferred; "groundwater salinity" [stated: Wikipedia] is the real site's enemy]
+
+## 11. The deepening pass: what was added and on what grounds
+
+- **House fronts [inferred]:** the street faces are blank walls of baked brick under mud brick [stated: anantamias.com]; the dressing is what the climate does to them (efflorescence at the foot of baked brick, "groundwater salinity" [stated: Wikipedia]; flaking mud plaster) and what clay models and later South Asian practice suggest (timber door frames and leaves, projecting rafter ends under a flat mud roof, small lattice windows [clay models show windows], sitting benches of mud brick beside the door, mat shades, lamp niches blackened by soot).
+- **Rooms by use [inferred]:** sleeping rooms (rope-net beds, mats, lamps), kitchens (hearth, saddle quern, firewood), stores (jars, sacks, shelves), bathrooms of baked brick with a drain channel [stated: baked bricks for bathrooms and drains, anantamias.com], work rooms (loom frame, baskets: cotton is among the crops [stated: Wikipedia "Indus Valley Civilisation"]); an upper room over one back room in about a third of the houses ("some had two stories" [stated: Wikipedia]).
+- **Roofs [inferred]:** flat mud roofs used in the heat: reed shades, rope cots, grain mats, jars, fuel.
+- **The street [inferred]:** soak jars and brick stacks at the walls, dust drifts, ruts of solid-wheeled carts, dung cakes (fuel), water-stands with jars; covered drains and soakage jars at junctions are [stated: anantamias.com].
+- **The market [inferred]:** stalls of grain, pots, beads, cloth, baskets, fish and dates ("peas, sesame, dates" [stated: Wikipedia "Indus Valley Civilisation"]); mat pavilions for shade.
+- **The landing [inferred]:** warehouse sheds with balances and stone weights (chert weights in a 5:2:1 ratio, one unit about 28 g [stated: Wikipedia]), seals pressed at the harbour office, nets drying, fish in baskets, washing; fish stakes in the shallows; reed boats poled by fishermen, plank boats with a steersman.
+- **The Great Bath [stated + inferred]:** wooden screens in alternate bays of the gallery ("stepped edges that may have held wooden screens" [stated: Wikipedia "Great Bath"]); bathers on the steps are [inferred] (ritual bathing is the usual reading, not proven).
+- **The College [stated + inferred]:** "78 rooms, thought to be a priestly residence" [stated: Wikipedia]; the cells, stores, work room and the shrine with a seated stone figure are [inferred] (the "priest-king" is soapstone [stated]).
+- **The granary hall [inferred]:** whether granary or great hall is argued [stated]; ours shows the sacks, jars, a balance, a tally board and a ladder, which fit either reading.
+- **Not built:** the flood-defence platforms and the west wall's second tower row; the Stupa; individual DK and VS layouts.
 
 ## 10. Sources
 

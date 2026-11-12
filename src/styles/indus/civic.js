@@ -106,6 +106,7 @@ export function wall(el, ctx) {
     bag.add('brick', box(r[0] - 0.06, y + h, r[1] - 0.06, r[2] + 0.06, y + h + 0.22, r[3] + 0.06)); col.rect(r, y - 0.3, y + h + 0.22);
   };
   let s = 0; for (const [g0, g1] of gaps) { piece(s, g0); s = g1; } piece(s, L);
+  if (alongX) outer(ctx, [ax, az - th / 2, bx, az + th / 2], y, h, h * 0.55, 51, { n: gaps.map(([g0, g1]) => [ax + g0, ax + g1]), s: gaps.map(([g0, g1]) => [ax + g0, ax + g1]) }, 'ns', true);
 }
 
 /** indus_bath: { c? } — the Great Bath: at the layout's BATH (passed in): { court, pool, depth, outer, gal, wall, h }, y = the platform. */
