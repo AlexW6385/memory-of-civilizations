@@ -7,7 +7,7 @@ import { STYLES } from '../../core/build.js';
 import { box, lathe, rod } from '../../core/geom.js';
 import { frame } from '../greek/agora.js';
 import { kit } from '../greek/quarter.js';
-import { rng, pick, amphora, pithos, sack, basket, crate, ropeCoil, washLine } from './dress.js';
+import { rng, pick, amphora, pithos, sack, basket, crate, ropeCoil, washLine, palm, fig } from './dress.js';
 
 /** cargo_pile: { at [x, z], y, rot, kind ('amphorae' | 'sacks' | 'bales' | 'logs' | 'crates' | 'ingots'), n (rows), seed }. */
 function cargoPile({ at: [x, z], y = 0, rot = 0, kind = 'sacks', n = 3, seed = 1 }, { bag, col }) {
@@ -108,4 +108,6 @@ function wash({ a, b, y = 4.6, seed = 1 }, { bag }) { washLine(bag, a, b, y, rng
 function mooring({ at: [x, z], y = 0, rot = 0, seed = 1 }, { bag, col }) {
   const rand = rng(seed); ropeCoil(bag, x, y, z, 0.3 + rand() * 0.1); basket(bag, x + Math.cos(rot) * 0.9, y, z - Math.sin(rot) * 0.9, 0.27, 0.3, 'steel_grey'); void col; void STYLES;
 }
-export const QUAY_EL = { cargo_pile: cargoPile, crane, net_rack: netRack, horreum, nymphaeum: fountain, shrine, stele, ptol_wash: wash, mooring };
+/** ptol_tree: { at, y, kind ('palm' | 'fig'), h, seed }. */
+function tree({ at: [x, z], y = 0, kind = 'palm', h = 6, seed = 1 }, { bag, col }) { (kind === 'fig' ? fig : palm)(bag, col, x, y, z, h, seed); }
+export const QUAY_EL = { cargo_pile: cargoPile, crane, net_rack: netRack, horreum, nymphaeum: fountain, shrine, stele, ptol_wash: wash, mooring, ptol_tree: tree };
