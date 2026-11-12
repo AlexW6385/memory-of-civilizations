@@ -3,7 +3,7 @@
 // painters (blocks and an unfinished pillar on rollers, a lime pit, the colour shed with its pigment pots), the washing
 // place on the river bank (stones, cloths spread to dry, a coracle, a fish trap) and the growth on the cliff (creepers,
 // shrubs on the tiers, fallen boulders, a bees' comb under an overhang).
-import { box, lathe, rod, frustum, disc } from '../../core/geom.js';
+import { box, lathe, rod, frustum, disc, clothBox, addCloth } from '../../core/geom.js';
 import { XF, ZW, FLOOR, LEDGE, RIVER, riverX, rng } from '../../settlements/ajanta/layout.js';
 
 const oil = (bag, x, y, z, h = 0.7) => {
@@ -24,7 +24,7 @@ function stupa(bag, col, x, y, z, h) {
 export function ledge(el, { bag, col }) {
   const y = FLOOR[1], { x0, x1, z0, z1 } = LEDGE, r = rng(77), kx = x1 - 0.45;
   // the kerb at the drop: a low rubble wall in runs, gaps before each stupa and at the stair's head
-  for (let z = -41; z < z1 - 0.5; z += 5.2 + r() * 2) { const L = 3.2 + r() * 1.4, a = z, b = Math.min(z1, z + L); bag.add('rubble', box(kx, y, a, kx + 0.4, y + 0.4 + r() * 0.12, b)); col.rect([kx, a, kx + 0.4, b], y, y + 0.5); z += 0; }
+  for (let z = -41; z < z1 - 0.5; z += 5.2 + r() * 2) { const L = 3.2 + r() * 1.4, a = z, b = Math.min(z1, z + L); if (b > 38.5 && a < 43.5) { z += 0; continue; } bag.add('rubble', box(kx, y, a, kx + 0.4, y + 0.4 + r() * 0.12, b)); col.rect([kx, a, kx + 0.4, b], y, y + 0.5); z += 0; }
   // rock-cut benches against the face between the caves, a stone lamp stand beside each, pigeons' droppings are the weather's
   for (const z of [-45, -11.5, 7.5, 31, 40]) {
     bag.add('sandstone_carved', box(x0 + 0.02, y, z - 1.1, x0 + 0.55, y + 0.42, z + 1.1)); col.rect([x0 + 0.02, z - 1.1, x0 + 0.55, z + 1.1], y, y + 0.42);
@@ -37,6 +37,14 @@ export function ledge(el, { bag, col }) {
   { const cx0 = x0 + 2.4, cz0 = 53.2, cx1 = x0 + 5.4, cz1 = 56.4;
     bag.add('sandstone_carved', box(cx0, y, cz0, cx1, y + 0.55, cz0 + 0.3)); bag.add('sandstone_carved', box(cx0, y, cz1 - 0.3, cx1, y + 0.55, cz1)); bag.add('sandstone_carved', box(cx0, y, cz0, cx0 + 0.3, y + 0.55, cz1)); bag.add('sandstone_carved', box(cx1 - 0.3, y, cz0, cx1, y + 0.55, cz1));
     bag.add('water', box(cx0 + 0.3, y + 0.38, cz0 + 0.3, cx1 - 0.3, y + 0.4, cz1 - 0.3)); col.rect([cx0, cz0, cx1, cz1], y, y + 0.55); }
+  // pennants (dhvaja) on poles at the lip, flying over the drop: ochre, red, white and indigo cloth, a bronze finial
+  { const CL = ['cloth_ochre', 'cloth_red', 'cloth_white', 'cloth_indigo']; let i = 0;
+    for (const z of [-39.5, -22.5, -12.5, 4.5, 15.5, 27.0, 36.0, 47.5]) {
+      const px = kx + 0.2;
+      bag.add('timber', rod([px, y, z], [px, y + 5.2, z], 0.045, 5)); col.circle(px, z, 0.07, y, y + 5.2);
+      bag.add('bronze', lathe([[0.001, 0], [0.06, 0.04], [0.04, 0.12], [0.001, 0.22]], 6, null, px, y + 5.2, z));
+      addCloth(bag, CL[i++ % 4], clothBox(px + 0.05, y + 3.9, z - 0.02, px + 1.7, y + 4.9, z + 0.02), y + 4.9);
+    } }
   // marigold garlands and offerings of rice laid on the benches' ends
   for (const z of [-45, 7.5, 31]) for (let k = 0; k < 6; k++) bag.add(k % 2 ? 'paint_ochre' : 'cloth_red', lathe([[0.001, 0], [0.09, 0.01], [0.07, 0.06], [0.001, 0.08]], 6, null, x0 + 0.28 + (k % 3) * 0.08, y + 0.42, z - 0.35 + k * 0.14));
 }
