@@ -2,8 +2,8 @@
 // rising from the flat roofs, the opened ginna's own fire and kitchen. The engine part is src/engine/smoke.js; positions from layout.js.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { COMPOUNDS, LANDMARK, RADIUS } from './layout.js';
-import { ginnaOf } from '../../styles/dogon/compound.js';
+import { COMPOUNDS, LANDMARK, RADIUS, FORGE, height } from './layout.js';
+import { ginnaOf, houseOf } from '../../styles/dogon/compound.js';
 
 const ID = 'dogon';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -11,16 +11,17 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1
 export function emitters() {
   const E = [], r = rng(1930);
   for (const c of COMPOUNDS) {
-    if (c.landmark) {
-      // the opened ginna's kitchen hatch (compound.js house(): kitchen at ix0 + 5.45, hz0 − 1.55, roof at y + 2.25)
-      const hz1 = c.rect[3] - 0.2, hz0 = hz1 - 5.4, ix0 = c.rect[0] + 0.95;
-      E.push({ p: [ix0 + 5.45, c.y + 2.9, hz0 - 1.55], kind: 'kitchen', thr: 0, seed: 7 });
+    if (c.open) {
+      // an opened ginna's kitchen hatch (compound.js house(): kitchen at ix0 + 5.45, hz0 − 1.55, roof at y + 2.25)
+      const hr = houseOf(c).rect, hz0 = hr[3] - 5.4, ix0 = hr[0] + 0.45;
+      E.push({ p: [ix0 + 5.45, c.y + 2.9, hz0 - 1.55], kind: 'kitchen', thr: c.landmark ? 0 : 0.05 + 0.6 * r(), seed: c.seed % 997 });
+      if (!c.landmark && r() < 0.5) E.push({ p: [c.rect[0] + (c.rect[2] - c.rect[0]) * (c.hw ? 0.8 : 0.2), c.y + 1.9, c.rect[1] + 2.5], kind: 'kitchen', thr: 0.2 + 0.7 * r(), seed: c.seed % 991 });
       continue;
     }
-    if (r() > 0.55) continue;
     const g = ginnaOf(c), [x0, z0, x1, z1] = g.rect;
-    E.push({ p: [x0 + (x1 - x0) * (0.3 + 0.4 * r()), c.y + g.H + 0.8, z0 + (z1 - z0) * 0.3], kind: 'kitchen', thr: 0.1 + 0.7 * r(), seed: c.seed % 997 });
+    E.push({ p: [x0 + (x1 - x0) * (0.3 + 0.4 * r()), c.y + g.H + 0.8, z0 + (z1 - z0) * 0.3], kind: 'kitchen', thr: 0.05 + 0.7 * r(), seed: c.seed % 997 });
   }
+  E.push({ p: [FORGE.at[0] + 1.6, height(FORGE.at[0], FORGE.at[1] - 1.9) + 3.3, FORGE.at[1] - 2.85], kind: 'kitchen', thr: 0, seed: 77 });
   void LANDMARK;
   return E;
 }

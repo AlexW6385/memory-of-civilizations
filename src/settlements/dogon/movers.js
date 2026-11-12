@@ -19,9 +19,13 @@ export const PARAMS = {
  */
 export function walkways() {
   const rects = [];
-  rects.push({ r: [-2, -34, 2, 34], weight: 1.6, market: 1.2, kind: 'lane' });
+  // the middle lane in two strips, the middle left clear: people stand and walk along its sides, the visitor's own route (plan.js walks) goes up the middle
+  rects.push({ r: [-2, -34, -0.95, 34], weight: 0.8, market: 0.6, kind: 'lane' }, { r: [0.95, -34, 2, 34], weight: 0.8, market: 0.6, kind: 'lane' });
   for (const [z0, z1] of [[-5.8, -0.6], [-21.8, -17.6], [11.8, 16.5]]) rects.push({ r: [-60, z0, 60, z1], weight: 1.0, market: 0.9, kind: 'lane' });
-  rects.push({ r: [PLACE[0] + 2, PLACE[1] + 8, PLACE[2] - 2, PLACE[3] - 1], weight: 1.4, market: 1.6, kind: 'street' });
+  // the place: the band along its south edge and the one along its north edge, clear of the trees, the pits, the threshing floors and the toguna
+  rects.push({ r: [PLACE[0] + 1, 30.7, PLACE[2] - 1, 33], weight: 1.4, market: 1.6, kind: 'street' });
+  rects.push({ r: [PLACE[0] + 4, PLACE[1] + 6.8, PLACE[2] - 3, PLACE[1] + 8], weight: 0.8, market: 1.0, kind: 'lane' });
+  rects.push({ r: [-46, 31, -26, 34], weight: 0.6, market: 0.4, kind: 'lane' });
   rects.push({ r: [-5, 32, 5, RADIUS - 14], weight: 0.9, market: 0.3, kind: 'lane' });
   rects.push({ r: [-60, 33, 60, 37], weight: 0.5, market: 0.2, kind: 'lane' });
   return { rects, links: [], clip: RADIUS - 12 };

@@ -4,6 +4,7 @@
 
 import { box, lathe, rod, place } from '../../core/geom.js';
 import { orientedBox } from '../../core/build.js';
+import { frontDress, weatherFront, wallDress, roofRack, innerNiches, hangings } from './dress.js';
 import { rng, wallRun, WALL, PLASTER, SMOOTH, MUD, STONE, STONE2, DARK, LOG, HOLE, STALK, THATCH, RED, granary, kitchen, nicheFacade, carvedDoor, roofTop, mortar, milletStack, firewood, jar, basket, notchedLadder } from './props.js';
 
 const POOL = 'pottery_dark';
@@ -17,6 +18,8 @@ function courtyard(bag, col, r, y, rand, o) {
   if (o.side === 'w') { W([x1, z0], [x1, z1]); W([x0, z0], [x0, z1 - 4.2]); }
   else { W([x0, z0], [x0, z1]); W([x1, z0], [x1, z1 - 4.2]); }
   W([x0, z1], [x1, z1], o.south ? gateAt(x1 - x0) : []);                    // the south wall (with the gate)
+  wallDress(bag, [x0, z1], [x1, z1], y + h + 0.1, rand, [0, 1], t);
+  wallDress(bag, o.side === 'w' ? [x0, z0] : [x1, z0], o.side === 'w' ? [x0, z1 - 4.2] : [x1, z1 - 4.2], y + h + 0.1, rand, [o.side === 'w' ? -1 : 1, 0], t);
 }
 
 /** Granaries, kitchen and props placed inside the courtyard rect, clear of one another. */
@@ -59,6 +62,8 @@ export function compound(el, ctx) {
   const doors = [gx0 + gw * 0.3, gx0 + gw * 0.7];
   nicheFacade(bag, gx0 + 0.3, gx1 - 0.3, gz1, y, H, rand, { plain: el.ginna === 'plain', doors });
   for (const u of doors) carvedDoor(bag, u, y, gz1, 0.9, 1.45, rand);
+  weatherFront(bag, gx0 + 0.3, gx1 - 0.3, gz1, y, H, rand, doors);
+  frontDress(bag, col, { x0: gx0, x1: gx1, zf: gz1, y, doors, seed: el.seed });
   // the other three faces: a band of the smooth plaster at the cornice, the beam-ends of the roof
   for (let i = 0; i < 6; i++) bag.add(LOG, rod([gx0 - 0.15, y + H - 0.12, gz0 + 0.5 + i * dep / 6.5], [gx0, y + H - 0.12, gz0 + 0.5 + i * dep / 6.5], 0.05, 5));
   // the courtyard
@@ -85,7 +90,7 @@ export function house(el, { bag, col, lights }) {
   // outer walls: the south with its two door openings, the others plain; north with the kitchen's doorway
   const doorU = [1.5, 4.9];
   wallRun(bag, col, WALL, [x0, z1 - T / 2], [x1, z1 - T / 2], T, y - 0.5, y + FH, doorU.map((u) => ({ at: T + u, w: DOORW, h: DOORH + 0.5 })));
-  wallRun(bag, col, WALL, [x0, z0 + T / 2], [x1, z0 + T / 2], T, y - 0.5, y + 2.9, [{ at: T + 5.45, w: 0.95, h: DOORH + 0.5 }]);
+  wallRun(bag, col, WALL, [x0, z0 + T / 2], [x1, z0 + T / 2], T, y - 0.5, y + 2.9, [{ at: T + 5.45, w: 1.3, h: DOORH + 0.5 }]);
   wallRun(bag, col, WALL, [x0 + T / 2, z0], [x0 + T / 2, z1], T, y - 0.5, y + 2.9);
   wallRun(bag, col, WALL, [x1 - T / 2, z0], [x1 - T / 2, z1], T, y - 0.5, y + 2.9);
   // the interior partitions (plastered smooth): the north wall of the hall and store with doorways, the wall between them
@@ -95,8 +100,9 @@ export function house(el, { bag, col, lights }) {
   // the lintels over the doorways: a beam
   for (const u of [1.5, 4.9]) { bag.add(DARK, box(lx(u) - 0.65, F + DOORH, lz(2.6) - 0.2, lx(u) + 0.65, F + DOORH + 0.12, lz(2.6) + 0.2)); }
   // the facade
-  nicheFacade(bag, x0 + 0.3, x1 - 0.3, z1, y, FH, rand, { doors: doorU.map((u) => x0 + T + u) });
+  nicheFacade(bag, x0 + 0.3, x1 - 0.3, z1, y, FH, rand, { plain: el.plain, doors: doorU.map((u) => x0 + T + u) });
   for (const u of doorU) carvedDoor(bag, x0 + T + u, y, z1, DOORW, DOORH, rand, true);
+  weatherFront(bag, x0 + 0.3, x1 - 0.3, z1, y, FH, rand, doorU.map((u) => x0 + T + u));
   // the roof: beams under (logs across, from the south to the north wall), a mat of reeds, the mud over; a parapet; the facade above it
   for (let u = 0.25; u < 6.5; u += 0.5) bag.add(LOG, rod([lx(u), CH - 0.08, iz0 - 0.1], [lx(u) + (rand() - 0.5) * 0.03, CH - 0.08, iz1 + 0.1], 0.08 + rand() * 0.02, 7));
   bag.add(STALK, box(x0, CH, z0, x1, CH + 0.06, z1));
@@ -172,8 +178,28 @@ export function house(el, { bag, col, lights }) {
   jar(bag, kx + 0.8, F, kz - 0.7, 1.3); col.circle(kx + 0.8, kz - 0.7, 0.3, F, F + 0.7);
   basket(bag, kx + 0.2, F, kz - 1.05, 0.22);
   bag.add('wicker', box(kx + 0.1, F, kz - 1.0, kx + 1.1, F + 0.01, kz - 0.4));
+  // ---- what the house has of its own (by its seed): niches with small pots, pegs with gourds and bundles, the ancestors' shelf, a hung cloth, grain sacks, firewood by the kitchen hearth, a rack on the roof
+  const rr = rng((el.seed || 9) * 7 + 3);
+  innerNiches(bag, [[lx(0.45), iz0], [lx(1.25), iz0], [lx(2.05), iz0], [lx(3.0), iz0], [lx(4.35), iz0]], 'n', F, rr);
+  innerNiches(bag, [[ix1, lz(0.7)], [ix1, lz(1.6)], [ix1, lz(3.1)]], 'e', F, rr);
+  innerNiches(bag, [[ix0, lz(3.4)], [ix0, lz(1.2)]], 'w', F, rr);
+  hangings(bag, [lx(0.25), lx(2.8), lx(6.25)], iz0, F, rr);
+  // the ancestors' shelf: a mud ledge along the north wall of the central room's west with the small vessels of the offerings
+  bag.add(WALL, box(lx(0.15), F + 0.55, iz0, lx(2.3), F + 0.66, iz0 + 0.22));
+  for (let k = 0; k < 5; k++) { const px2 = lx(0.35 + k * 0.4 + rr() * 0.08); bag.add(k % 2 ? POOL : MUD, lathe([[0.001, 0], [0.05, 0.01], [0.075, 0.07], [0.05, 0.12], [0.001, 0.125]], 8, null, px2, F + 0.66, iz0 + 0.12)); }
+  // a cloth hung to dry on a cord under the beams of the central room, grain sacks in its north-east corner
+  bag.add(LOG, rod([lx(4.1), CH - 0.3, lz(1.9)], [lx(6.3), CH - 0.3, lz(1.9)], 0.012, 4));
+  bag.add(rr() < 0.5 ? 'cloth_indigo' : 'cloth_white', box(lx(4.4), CH - 1.05, lz(1.9) - 0.01, lx(5.3), CH - 0.3, lz(1.9) + 0.01));
+  for (const v of [0.4, 1.0]) { bag.add('sacking', lathe([[0.001, 0], [0.22, 0.04], [0.26, 0.28], [0.17, 0.52], [0.09, 0.58], [0.001, 0.56]], 9, (t, i) => 1 + 0.05 * Math.sin(t * 4 + i + v * 3), lx(6.2), F, lz(v))); col.circle(lx(6.2), lz(v), 0.27, F, F + 0.58); }
+  // firewood stacked against the kitchen's wall and the day's pounded millet
+  for (let k = 0; k < 4; k++) bag.add('bark_dark', rod([kx + 0.55, F + 0.04 + (k >> 1) * 0.08, kz + 0.2 + k * 0.1], [kx + 1.0, F + 0.05 + (k >> 1) * 0.08, kz + 0.2 + k * 0.1], 0.04, 5));
+  roofRack(bag, col, [x0 + 0.9, z1 - 1.9, x0 + 3.5, z1 - 0.5], ST + 0.02, rr);
   // light: the fire, the day through the doors, the kitchen
-  if (lights) {
+  if (lights && el.lite) {
+    lights.push({ at: [hx, F + 0.6, hz], color: '#ff9a4a', intensity: 2.2, distance: 5 });
+    lights.push({ at: [lx(3.2), F + 1.8, lz(2.2)], color: '#fff1d6', intensity: 1.5, distance: 6 });
+    lights.push({ at: [kx - 0.7, F + 0.7, kz - 0.3], color: '#ff9a4a', intensity: 1.8, distance: 4 });
+  } else if (lights) {
     lights.push({ at: [hx, F + 0.6, hz], color: '#ff9a4a', intensity: 2.6, distance: 6 });
     lights.push({ at: [lx(1.5), F + 1.7, lz(3.6)], color: '#fff1d6', intensity: 1.6, distance: 5 });
     lights.push({ at: [lx(4.9), F + 1.7, lz(3.6)], color: '#fff1d6', intensity: 1.4, distance: 5 });
@@ -183,15 +209,21 @@ export function house(el, { bag, col, lights }) {
   }
 }
 
-/** compound_landmark: the landmark compound: the opened ginna on the pad's west part and the courtyard east of it. */
+/** The house of an opened compound (c: { rect, y, hw }): its 7.4 × 5.4 m rect, on the pad's west part (hw) or east part, and the courtyard beside it. */
+export function houseOf(c) {
+  const [x0, z0, x1, z1] = c.rect, hx0 = c.hw ? x0 + 0.5 : x1 - 0.5 - 7.4, hz1 = z1 - 0.2;
+  return { rect: [hx0, hz1 - 5.4, hx0 + 7.4, hz1], court: c.hw ? [hx0 + 7.6, z0, x1, z1] : [x0, z0, hx0 - 0.2, z1], side: c.hw ? 'e' : 'w' };
+}
+
+/** dogon_landmark / dogon_open: a pad with its ginna opened (the house, its rooms and the round kitchen) and the courtyard beside it, furnished. */
 export function landmarkCompound(el, ctx) {
-  const { bag, col } = ctx, rand = rng(el.seed || 5), [x0, z0, x1, z1] = el.rect, y = el.y;
-  const hx0 = x0 + 0.5, hz1 = z1 - 0.2, rect = [hx0, hz1 - 5.4, hx0 + 7.4, hz1];
-  house({ rect, y, seed: el.seed }, ctx);
-  const cr = [rect[2] + 0.2, z0, x1, z1];
-  courtyard(bag, col, cr, y, rand, { side: 'e', gate: true, south: true });
-  furnish(bag, col, [cr[0] + 0.4, cr[1] + 0.4, cr[2] - 0.4, cr[3] - 0.4], y, rand, {});
-  return rect;
+  const { bag, col } = ctx, rand = rng(el.seed || 5), y = el.y;
+  const h = houseOf({ rect: el.rect, hw: el.hw ?? true });
+  house({ rect: h.rect, y, seed: el.seed, plain: el.plain, lite: el.lite }, ctx);
+  courtyard(bag, col, h.court, y, rand, { side: h.side, gate: true, south: true });
+  furnish(bag, col, [h.court[0] + 0.4, h.court[1] + 0.4, h.court[2] - 0.4, h.court[3] - 0.4], y, rand, {});
+  frontDress(bag, col, { x0: h.rect[0], x1: h.rect[2], zf: h.rect[3], y, doors: [h.rect[0] + 0.45 + 1.5, h.rect[0] + 0.45 + 4.9], seed: el.seed });
+  return h.rect;
 }
 export const HOUSE_RECT = (r) => [r[0] + 0.5, r[3] - 0.2 - 5.4, r[0] + 0.5 + 7.4, r[3] - 0.2];
 
@@ -201,4 +233,14 @@ export function ginnaOf(el) {
   const gw = Math.min(7.6, wid * 0.58) + (rand() - 0.5) * 0.4, dep = 4.2 + rand() * 0.4, west = rand() < 0.5, H = 3.0 + rand() * 0.5;
   const gx0 = west ? x0 + 0.4 : x1 - 0.4 - gw, gz1 = z1 - 0.2;
   return { rect: [gx0, gz1 - dep, gx0 + gw, gz1], H, west };
+}
+
+/** The facade of a compound's ginna, as built: { x0, x1, zf (its south face), y, doors: [x…] } — open or solid, the same as the building code places it. */
+export function frontOf(c) {
+  if (c.open) {
+    const r = houseOf(c).rect;
+    return { x0: r[0], x1: r[2], zf: r[3], y: c.y, doors: [r[0] + 0.45 + 1.5, r[0] + 0.45 + 4.9] };
+  }
+  const g = ginnaOf(c), [gx0, , gx1, gz1] = g.rect, gw = gx1 - gx0;
+  return { x0: gx0, x1: gx1, zf: gz1, y: c.y, doors: [gx0 + gw * 0.3, gx0 + gw * 0.7] };
 }

@@ -86,4 +86,17 @@ export function toguna(el, { bag, col }) {
   bag.add(LOG, rod([cx - 0.8, yb - 0.02, cz + V[1]], [cx - 0.8, yb - 0.5, cz + V[1] - 0.05], 0.012, 4));
   bag.add('iron', box(cx - 0.84, yb - 0.62, cz + V[1] - 0.12, cx - 0.76, yb - 0.46, cz + V[1] - 0.04));
   bag.add(RED, box(cx - W / 2 + 0.6, F + 0.4, bz + 0.3, cx + W / 2 - 0.6, F + 0.43, bz + 0.34));
+  // the men's strip loom: two posts and a beam with the heddles, the warp running away west along the ground to its stone weight, a narrow
+  // strip of indigo and white already woven; the weaver sits on a low stool at its east end (town.js)
+  const lx = cx + 1.2, lz = cz - 1.35;
+  for (const s of [-1, 1]) bag.add(DARK, rod([lx, F, lz + s * 0.35], [lx + 0.05, F + 1.35, lz + s * 0.35], 0.03, 5));
+  bag.add(DARK, rod([lx + 0.05, F + 1.3, lz - 0.4], [lx + 0.05, F + 1.3, lz + 0.4], 0.025, 5));
+  bag.add(LOG, rod([lx - 0.15, F + 1.0, lz - 0.38], [lx - 0.15, F + 1.0, lz + 0.38], 0.018, 4));
+  for (let k = -3; k <= 3; k++) bag.add(THATCH, rod([lx - 0.15, F + 1.0, lz + k * 0.045], [lx - 2.6, F + 0.05, lz + k * 0.045], 0.004, 3));
+  bag.add('cloth_indigo', box(lx - 0.5, F + 0.55, lz - 0.1, lx - 0.15, F + 0.57, lz + 0.1));
+  bag.add('cloth_white', box(lx - 0.5, F + 0.57, lz - 0.1, lx - 0.4, F + 0.575, lz + 0.1));
+  bag.add(STONE2, lathe([[0.2, 0], [0.16, 0.1], [0.001, 0.14]], 6, null, lx - 2.65, F, lz));
+  col.circle(lx, lz - 0.35, 0.05, F, F + 1.4); col.circle(lx, lz + 0.35, 0.05, F, F + 1.4);
+  bag.add(DARK, lathe([[0.17, 0], [0.12, 0.02], [0.1, 0.12], [0.16, 0.2], [0.17, 0.26], [0.001, 0.26]], 8, null, lx + 0.55, F, lz));
+  col.circle(lx + 0.55, lz, 0.2, F, F + 0.26);
 }
