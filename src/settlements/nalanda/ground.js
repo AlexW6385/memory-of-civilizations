@@ -4,7 +4,7 @@ import { RADIUS, TANKS, LEVEL, height, tankD, inTankWater, inTank, nearCore, inL
 
 function cover(x, z, h) {
   const c = { sand: 0.15, grass: 0.35, rock: 0, soil: 0.5, fields: 0, dry: 0.5, warmth: 0.8, red: 0.45, road: 0, snow: 0, forest: 0 };
-  if (nearCore(x, z, 0.5)) { c.road = 0.7; c.grass = 0.1; return c; }
+  if (nearCore(x, z, 0.5)) { c.road = 0.7; c.grass = Math.abs(x) > 5.2 && Math.abs(x) < 9 ? 0.3 : 0.1; if (Math.abs(x) < 3.5) c.soil = 0.65; return c; }
   if (h < -0.5) { c.soil = 0.7; c.grass = 0.3; return c; }
   if (inLot(x, z, 3)) { c.road = 0.4; c.soil = 0.6; return c; }
   if (Math.hypot(x, z) > 150) { c.fields = 0.7; c.grass = 0.25; return c; }
@@ -25,6 +25,8 @@ function onLane(x, z) {
   return z > 123 && z < 129 && x > 0;
 }
 function planting(x, z) {
+  // tufts of dry grass along the margins of the sacred way, between the lamp pillars and the votive stupas
+  if (Math.abs(x) > 6.7 && Math.abs(x) < 8.8 && z > -130 && z < 112 && !MONASTERIES.some((m) => Math.abs((m.rect[1] + m.rect[3]) / 2 - z) < 5) && !TEMPLES.some((t) => Math.abs(t.c[1] - z) < t.half && x < 0)) return { grass_dry: 3 };
   if (Math.hypot(x, z) > RADIUS - 6 || inTank(x, z, 1) || nearCore(x, z, 2) || inLot(x, z, 1) || onLane(x, z)) return null;
   if (inView(x, z)) return { grass: 9 };
   if (tankD(x, z) < 6) return { reeds: 3, grass: 10 };
