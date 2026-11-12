@@ -1,6 +1,6 @@
 {
   "site": { "id": "abu-simbel", "name": { "en": "Abu Simbel", "zh": "阿布辛贝" }, "era": "13th c. BC", "region": "nubia", "lat": 22.34, "lon": 31.63, "radius": 190 },
-  "arrival": [-4, null, 12, 1.22, 0.12],
+  "arrival": [-4, null, 17, 1.22, 0.12],
   "arrivalNote": "the Great Temple's façade whole across the terrace: four seated colossi of Ramesses II cut in the cliff, the baboon frieze above the door, the Nile below",
   "card": {
     "en": [

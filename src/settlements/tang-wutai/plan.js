@@ -125,7 +125,7 @@ function monks() {
   // before the Manjusri hall's stair, a monk and a pilgrim; in the bell pavilion's shade one waiting for the hour; at the censer one lighting incense
   monk([-47.5, -31.5], 6.5, [0, -1]); lay([-45.6, -30.6], 6.5, [0, -1], { carry: 'basket' });
   monk([-46, 33.2], 6.5, [0, 1], { pose: 'talk' }); monk([-45.2, 33.8], 6.5, [-0.4, -1]);
-  monk([-19.5, 1.9], T, [1, 0]);
+  monk([-14.6, -3.8], T, [1, 0.3]);   // (clear of the arrival, which stands 5 m behind the old spot)
   // the portraits in painted clay of the hall's two founders, life size and seated cross-legged (§10): the donor Ning
   // Gongyu at the altar platform's south end beside the heavenly king, hands in her sleeves, a cloak over her robe;
   // the monk Yuancheng under the south end bay's window, facing the platform

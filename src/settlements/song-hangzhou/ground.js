@@ -44,7 +44,7 @@ function planting(x, z) {
   if (inRect(WAZI.rect, x, z, 3)) return null;
   // the approach to the pagoda from the river road (the arrival's view): its old camphors and ginkgos are placed trees (plan.js); no scattered flora here, whose crown clumps hang
   // as bare clumps in the sky of that view
-  if (x > -170 && x < -50 && z > 84 && z < 132) return null;
+  if ((x > -170 && x < -50 && z > 84 && z < 132) || Math.hypot(x + 110, z - 138) < 22) return null;   // (the pagoda approach and round the arrival: no crown overhead or at the lens)
   const d = lakeDepth(x, z);
   // the lake's shallows and its shore: reeds in the shallows, willows on the bank with peach trees behind them
   if (d > WEST_LAKE.waterDepth) return null;
