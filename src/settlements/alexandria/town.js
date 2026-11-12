@@ -101,7 +101,7 @@ function houses() {
   const L = lots(), ARR = [100, -86];
   const byD = [...L].sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 - ARR[0], (a.rect[1] + a.rect[3]) / 2 - ARR[1]) - Math.hypot((b.rect[0] + b.rect[2]) / 2 - ARR[0], (b.rect[1] + b.rect[3]) / 2 - ARR[1]));
   const lamp = new Set(byD.slice(0, 10));
-  const els = L.map((l) => (l.warehouse ? { t: 'horreum', rect: l.rect, front: 'n', y: l.y, seed: l.seed, tint: ['plaster_white', 'limewash_yellow', 'plaster_ochre', 'stucco_cream', 'plaster_white', 'stucco_warm'][l.seed % 6] } : l.quarter === 'egyptian'
+  const els = L.map((l) => (l.warehouse ? { t: 'horreum', rect: l.rect, front: 'n', y: l.y, seed: l.seed, tint: ['plaster_white', 'limewash_yellow', 'plaster_ochre'][l.seed % 3] } : l.quarter === 'egyptian'
     ? { t: 'egyptian_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front }
     : { t: 'ptol_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front, quarter: l.quarter, lamp: lamp.has(l) }));
   const plans = lodTiles('alexandria-houses', 'ptolemaic', els, { R: RADIUS, near: 150 });
@@ -118,8 +118,8 @@ function isleTown() {
   E.push({ t: 'floor', rect: [-228, -259, 44, -251.2], y: g + 0.04, th: 0.2, mat: 'sandstone_floor' });
   for (const h of I.houses) E.push({ t: 'egyptian_house', rect: h.rect, seed: h.seed, y: h.y, front: 's' });
   E.push({ t: 'horreum', rect: I.store, front: 's', y: g, seed: 61 });
-  const plans = lodTiles('alexandria-isle', 'ptolemaic', E, { R: RADIUS, near: 150 });
-  return plans;
+  // one plan, built simple (walls and roofs; no house here is entered): the island's fronts at a fraction of the meshes
+  return [base('alexandria-isle', E.map((e) => (e.t === 'egyptian_house' || e.t === 'horreum' ? { ...e, simple: true } : e)))];
 }
 export async function town() {
   const plans = [harbour(), ...isleTown(), ...shopStoas(), civic(), serapeum(), ...houses(), ...streetPlans()];
