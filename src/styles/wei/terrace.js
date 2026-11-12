@@ -32,6 +32,25 @@ export function terrace(el, ctx) {
     bag.add('mud_plaster', box(r[0] - 0.04, yb - 0.22, r[1] - 0.04, r[2] + 0.04, yb - 0.02, r[3] + 0.04));
     void a;
   }
+  // weathering of the earthen face: rain streaks running down each lift from its band, the damp stain at the foot, the plaster's patches fallen away
+  {
+    const rr = rng((Math.round(x0) * 31 + Math.round(z0) * 17) | 0 || 5);
+    for (let i = 0; i < n; i++) {
+      const b = B * (i + 1) / n, yb = (i + 1) * lh, r = [x0 + b, z0 + b, x1 - b, z1 - b];
+      for (let z = r[1] + 1.5; z < r[3] - 1.5; z += 3.5 + rr() * 5) {
+        const w = 0.3 + rr() * 0.5, h = lh * (0.35 + rr() * 0.6);
+        bag.add('plaster_streak', box(r[2] - 0.01, yb - 0.24 - h, z, r[2] + 0.03, yb - 0.24, z + w));
+        if (rr() < 0.3) bag.add('plaster_damp', box(r[2] - 0.01, yb - lh + 0.2, z + w + 0.4, r[2] + 0.05, yb - lh + 0.2 + lh * 0.3, z + w + 0.4 + w * 2.5));
+      }
+      for (let x = r[0] + 3; x < r[2] - 3; x += 7 + rr() * 7) {
+        const w = 0.3 + rr() * 0.5, h = lh * (0.35 + rr() * 0.6);
+        bag.add('plaster_streak', box(x, yb - 0.24 - h, r[3] - 0.01, x + w, yb - 0.24, r[3] + 0.03));
+        if (rr() < 0.5) bag.add('plaster_streak', box(x + 2, yb - 0.24 - h, r[1] - 0.03, x + 2 + w, yb - 0.24, r[1] + 0.01));
+      }
+    }
+    // the foot: a course of dressed stone against the splash, and the weeds of the damp
+    bag.add('bluestone', box(x0 + B * 0.25 - 0.05, -0.4, z0 + B * 0.25 - 0.05, x0 + B * 0.25, 0.01, z1 - B * 0.25 + 0.05));
+  }
   const c = [x0 + B, z0 + B, x1 - B, z1 - B];
   bag.add('brick_paving', box(c[0], T - 0.02, c[1], c[2], T + 0.02, c[3]));
   col.floor(c, T);

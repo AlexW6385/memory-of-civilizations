@@ -3,7 +3,8 @@
 // the courtyards and the Tongque Garden, willows at the water, millet and wheat in the country; the dry haze of the North China plain.
 // Pure (used by the relief, the collision and the plant workers).
 
-import { GATES_S, GATES_N, inFarm, RADIUS, PALACE, W_TERRACE, TERRACES, POND, POND_Y, AVENUE, MARKET, WARDS, RIVER, riverZ, height, inPond, inRiver, inRect, inLot, lots, streets, inCity } from './layout.js';
+import { KEEP } from './forecourt.js';
+import { GATES_S, GATES_N, inFarm, RADIUS, PALACE, W_TERRACE, TERRACES, SPARROW, zOf, POND, POND_Y, AVENUE, MARKET, WARDS, RIVER, riverZ, height, inPond, inRiver, inRect, inLot, lots, streets, inCity } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 const inWard = (x, z) => WARDS.some((w) => inRect(w, x, z));
@@ -51,6 +52,9 @@ function planting(x, z) {
   if (inRect(MARKET, x, z, 1) || inWard(x, z)) return null;
   if (inRect(GARDEN, x, z)) {
     if (GARDEN_WAYS.some((r) => inRect(r, x, z, 1.5))) return null;
+    if (KEEP.some(([kx, kz, kr]) => Math.hypot(x - kx, z - kz) < kr)) return { grass: 6 };
+    // the approach to the Sparrow's stair: two files of arborvitae and pine either side of the forecourt, the royal way and the lawns before it open
+    if (x > -166 && x < -126 && Math.abs(z - zOf(SPARROW)) > 10.5 && Math.abs(z - zOf(SPARROW)) < 14) return { arborvitae: 1.5, chinese_pine: 0.4, grass: 6 };
     // the Tongque Garden: clumps of pines, arborvitae, elms and persimmons in the lawns, the paths and the arrival's lawn left open
     const cell = hash2(Math.floor(x / 11), Math.floor(z / 11));
     if (inRect([-160, -112, -100, -64], x, z)) return cell < 0.25 ? { arborvitae: 0.18, chinese_pine: 0.1, grass: 6 } : { grass: 7 };
@@ -71,7 +75,7 @@ function planting(x, z) {
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { pagoda_tree: 0.7, elm: 0.6, willow: 1.4, jujube: 0.8, mulberry: 0.5, wheat: 90, arborvitae: 0.5, chinese_pine: 0.3, persimmon: 0.1, reeds: 4 },
+  maxDensity: { pagoda_tree: 0.7, elm: 0.6, willow: 1.4, jujube: 0.8, mulberry: 0.5, wheat: 90, arborvitae: 1.6, chinese_pine: 0.45, persimmon: 0.1, reeds: 4 },
   climate: {
     sun: { az: 160, el: 50, color: [1.0, 0.95, 0.87], intensity: 3.3, lat: 36.3, dec: 8, hour: 10.5 },
     sky: { turbidity: 4.0, rayleigh: 1.12, mie: 0.007, mieG: 0.82, zenith: [0.12, 0.2, 0.36], horizon: [0.7, 0.68, 0.64] },
