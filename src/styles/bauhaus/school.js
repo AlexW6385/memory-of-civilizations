@@ -344,7 +344,7 @@ function boilerHouse(sk) {
   sk.b('car_red', 43.3, 15.0, 39.3, 44.7, 15.4, 40.7);
   sk.k(43.1, 0, 39.1, 44.9, 17, 40.9); sk.b('plaster_streak', 40.6, 0.7, 36.14, 41.6, 3.9, 36.2); sk.b('plaster_damp', 40.6, 0.0, 36.14, 47.4, 0.6, 36.2);
   for (const x of [41.6, 46.4]) sk.b('iron_galv', x - 0.04, 0.2, 36.1, x + 0.04, 4.0, 36.16);
-  sk.b('wood_ochre', 41.0, 0, 41.5, 47, 0.9, 42.0); for (let i = 0; i < 6; i++) sk.b('soil', 41.2 + i, 0.9, 41.55, 41.9 + i, 1.1, 41.95);   // coke heap, a stack of coal
+  sk.b('wood_ochre', 41.0, 0, 41.5, 47, 0.9, 42.0); for (let i = 0; i < 6; i++) sk.b('pottery_dark', 41.2 + i, 0.9, 41.55, 41.9 + i, 1.1, 41.95);   // coke heap, a stack of coal
 }
 function curtains(sk) {
   // summer curtains drawn behind the glass wall on some panes (docs §2: "curtains needed against summer sun")

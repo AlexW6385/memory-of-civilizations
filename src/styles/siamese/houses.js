@@ -159,7 +159,7 @@ function stilt(el, ctx) {
   const use = rand();
   const un = (u, v) => W(u, v);
   if (use < 0.25) { // a small boat drawn up (a sampan on its side) and an oar
-    const [x, z] = un(-hS * 0.4, -hF * 0.2); bag.add('wood_ochre', lathe([[0.001, 0], [0.45, 0.05], [0.5, 0.35], [0.001, 0.3]], 8, null, x, 0.0, z).scale(0.9, 1, 3.3)); bag.add('timber', rod([x - 0.5, 0.1, z - 1.9], [x + 0.2, 1.6, z + 1.2], 0.03, 4));
+    const [x, z] = un(-hS * 0.4, -hF * 0.2); bag.add('wood_ochre', lathe([[0.001, 0], [0.45, 0.05], [0.5, 0.35], [0.001, 0.3]], 8, null, 0, 0.0, 0).scale(0.9, 1, 3.3).translate(x, 0, z)); bag.add('timber', rod([x - 0.5, 0.1, z - 1.9], [x + 0.2, 1.6, z + 1.2], 0.03, 4));
     col.circle(x, z, 0.5, 0, 0.5);
   } else if (use < 0.5) { // a loom with its warp
     const [x, z] = un(hS * 0.2, -hF * 0.3); for (const s of [-1, 1]) bag.add('timber', box(x + s * 0.55 - 0.04, 0.0, z - 0.4, x + s * 0.55 + 0.04, 1.1, z - 0.32)); bag.add('timber', box(x - 0.55, 1.05, z - 0.4, x + 0.55, 1.12, z - 0.32)); bag.add('cloth_indigo', box(x - 0.5, 0.4, z - 0.37, x + 0.5, 1.05, z - 0.35)); bag.add('timber', box(x - 0.5, 0.35, z - 0.4, x + 0.5, 0.4, z - 0.32));

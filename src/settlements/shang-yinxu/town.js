@@ -146,7 +146,8 @@ let CACHE = null;
 export async function town() {
   if (CACHE) return CACHE;
   const plans = [];
-  plans.push(base('yinxu-river', [{ t: 'shang_river', pts: RIVER.pts }, ...BRIDGES.map((b) => ({ t: 'shang_bridge', a: b.a, b: b.b })), ...landings().map((g, i) => ({ t: 'shang_landing', ...g, seed: i }))]));
+  for (let i = 0; i < RIVER.pts.length - 1; i++) plans.push(base('yinxu-river-' + i, [{ t: 'shang_river', pts: RIVER.pts, seg: i }]));   // one plan per reach, so each one's bounds stay inside the disc
+  plans.push(base('yinxu-banks', [...BRIDGES.map((b) => ({ t: 'shang_bridge', a: b.a, b: b.b })), ...landings().map((g, i) => ({ t: 'shang_landing', ...g, seed: i }))]));
   plans.push(base('yinxu-foundry', [{ t: 'shang_foundry' }]));
   plans.push({ ...base('yinxu-people', people()), style: 'life' });
   plans.push({ ...base('yinxu-animals', animals()), style: 'life' });

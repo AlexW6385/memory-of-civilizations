@@ -241,7 +241,7 @@ function houseIn(F, l, spec, r) {
         F.b('plaster_streak', u - w + 0.05, u + w - 0.05, wy0 - 0.75 - r() * 0.5, wy0 - 0.12, -0.03, 0.01);   // rain streaks under the sill
         if (manner === 'plain' || (manner === 'reform' && c % 2 === 0)) { const o = 0.2; F.b(shut, u - w - o, u - w, wy0, wy1b, -0.08, 0.0); F.b(shut, u + w, u + w + o, wy0, wy1b, -0.08, 0.0); }
         if (!balc && r() < 0.42) {                                                                           // a window box with geraniums
-          F.b('wood_painted', u - w, u + w, wy0 - 0.28, wy0 - 0.08, -0.34, -0.1); F.b('soil', u - w + 0.02, u + w - 0.02, wy0 - 0.1, wy0 - 0.06, -0.32, -0.12);
+          F.b('wood_painted', u - w, u + w, wy0 - 0.28, wy0 - 0.08, -0.34, -0.1); F.b('pottery_dark', u - w + 0.02, u + w - 0.02, wy0 - 0.1, wy0 - 0.06, -0.32, -0.12);
           for (let k = 0; k < 3; k++) { const uu = u - w + 0.2 + k * (2 * w - 0.4) / 2; F.b('cloth_green', uu - 0.16, uu + 0.16, wy0 - 0.06, wy0 + 0.14, -0.3, -0.16); F.b(['car_red', 'cloth_red', 'paint_white'][(k + c) % 3], uu - 0.08, uu + 0.08, wy0 + 0.14, wy0 + 0.22, -0.26, -0.2); }
         }
       }

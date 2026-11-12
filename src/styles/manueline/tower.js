@@ -57,7 +57,7 @@ export function towerShell(ctx, { cx, cz, y, top }) {
     for (let k = 0; k < nS; k++) { const t1 = (k + 1) / nS, z0 = za + (zb - za) * k / nS, z1 = za + (zb - za) * t1; B(MAT, wx0, y + f0 - 0.4, Math.min(z0, z1), wx1, y + f0 + (f1 - f0) * t1, Math.max(z0, z1)); }
     col.ramp([wx0, zb, wx1, za], y + f0, y + f1, 'n'); }
   // ── the rooms
-  const R = (i) => kit(ctx, frame([ix0, iz0, ix1, iz1], 'n'), y + FLOORS[i], rand);
+  const R = (i) => kit(ctx, frame([0, 0, 1, 1], 'n'), y + FLOORS[i], rand);   // identity frame: the calls below pass world coordinates
   const light = (i, x, z, c = '#ffc27a', k = 5) => lights.push({ at: [x, y + FLOORS[i] + 4.2, z], color: c, intensity: k, distance: 11 });
   const ux = wx3 + 0.3, mx = (wx3 + ix1) / 2, mz = (iz0 + iz1) / 2;
   // ground: the cistern and the magazine — a curb with water, shot in pyramids, powder barrels, coils, torches

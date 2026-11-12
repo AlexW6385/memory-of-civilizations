@@ -54,12 +54,17 @@ function city() {
   E.push({ t: 'bgn_zayat', c: [-164, -112], A: 5, B: 3.5, y: 0.2, seed: 5 });
   // the Irrawaddy, the ghat at the main road's end, boats moored along the bank
   const edge = []; for (let z = -RADIUS; z <= RADIUS; z += 8) edge.push([z, bankX(z) - 3]);
-  E.push({ t: 'bgn_river', edge, y: RIVER_Y, x0: -RADIUS - 4 });
+  // the water in reaches of 14 edge points, each its own plan, so that each one's bounds stay inside the disc
+  const RIV = [];
+  for (let i = 0; i < edge.length - 1; i += 14) {
+    const part = edge.slice(i, i + 15), zm = Math.max(...part.map((q) => Math.abs(q[0])));
+    RIV.push(base('bagan-river-' + RIV.length, [{ t: 'bgn_river', edge: part, y: RIVER_Y, x0: -Math.min(RADIUS + 4, Math.floor(Math.sqrt(460 * 460 - zm * zm))) }]));
+  }
   E.push({ t: 'bgn_ghat', at: [bankX(0) - 1, 0], y: RIVER_Y, w: 7 });
   for (const b of moored()) E.push({ t: 'bgn_boat', ...b });
   E.push({ t: 'bgn_tank', rect: TANK, y: TANK_Y });
   KILNS.forEach(([x, z], i) => E.push({ t: 'bgn_kiln', c: [x, z], seed: i + 4 }));
-  return base('bagan-city', E);
+  return [base('bagan-city', E), ...RIV];
 }
 
 /** The stilt houses in their strips. */
@@ -238,6 +243,6 @@ function people() {
 }
 
 export async function town() {
-  return [city(), houses(), temples(), people()];
+  return [...city(), houses(), temples(), people()];
 }
 void MAIN_ROAD; void PRECINCT;

@@ -141,8 +141,9 @@ export function shangArchive(el, { bag, col, lights }) {
 /** shang_river: { pts } — the Huan: a ribbon of water along the polyline. */
 export function shangRiver(el, { bag }) {
   const T = [], hw = RIVER.half - 1.2, y = RIVER.water;
-  const P = el.pts;
+  const P = el.pts, only = el.seg;   // seg: build just segment `only` (plans split along the river keep their bounds inside the disc)
   for (let i = 0; i < P.length - 1; i++) {
+    if (only !== undefined && i !== only) continue;
     const a = P[i], b = P[i + 1], dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz), nx = -dz / L * hw, nz = dx / L * hw;
     const n = Math.max(1, Math.round(L / 40));
     for (let k = 0; k < n; k++) {
