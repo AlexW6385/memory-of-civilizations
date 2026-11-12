@@ -71,6 +71,20 @@ export function cathedral(el, { bag, col, lights }) {
       col.rect([lo, zz - 0.5, hi, zz + 0.62], F, F + 1.05);
     }
   }
+  // the nave's furnishing: the ambo and the celebrant's chair beside the altar, candle stands on the steps, the font by the entrance, votive candles,
+  // two confessionals, the fourteen Stations of the Cross in a ring of small panels on the wall, hymn boards
+  bag.add('timber', box(ax + 5.5, F + 0.66, az + 0.5, ax + 6.7, F + 1.6, az + 1.1)); bag.add('marble', box(ax + 5.4, F + 1.6, az + 0.4, ax + 6.8, F + 1.68, az + 1.2)); col.rect([ax + 5.4, az + 0.4, ax + 6.8, az + 1.2], F + 0.66, F + 1.7);
+  bag.add('timber', box(ax - 7.0, F + 0.66, az + 0.8, ax - 6.2, F + 1.1, az + 1.6)); bag.add('timber', box(ax - 7.0, F + 1.1, az + 1.5, ax - 6.2, F + 2.0, az + 1.6)); col.rect([ax - 7.0, az + 0.8, ax - 6.2, az + 1.6], F + 0.66, F + 2.0);
+  for (const dx of [-3.4, 3.4]) { bag.add('bronze', lathe([[0.25, 0], [0.06, 0.1], [0.05, 1.4], [0.12, 1.5], [0.001, 1.5]], 8, null, ax + dx, F + 0.66, az - 0.6)); bag.add('flame', lathe([[0.001, 0], [0.04, 0.05], [0.001, 0.2]], 6, null, ax + dx, F + 0.66 + 1.5, az - 0.6)); col.circle(ax + dx, az - 0.6, 0.3, F + 0.66, F + 2.2); }
+  bag.add('marble', lathe([[0.3, 0], [0.12, 0.5], [0.35, 1.0], [0.001, 1.0]], 10, null, cx + 4.0, F, cz - 27)); bag.add('water', lathe([[0.001, 0], [0.3, 0], [0.001, 0]], 8, null, cx + 4.0, F + 1.0, cz - 27)); col.circle(cx + 4.0, cz - 27, 0.4, F, F + 1.1);
+  bag.add('iron', box(cx - 7.6, F, cz - 26.4, cx - 5.2, F + 0.9, cz - 25.8)); col.rect([cx - 7.6, cz - 26.4, cx - 5.2, cz - 25.8], F, F + 0.9);
+  for (let k = 0; k < 14; k++) bag.add('flame', lathe([[0.001, 0], [0.025, 0.04], [0.001, 0.12]], 5, null, cx - 7.4 + (k % 7) * 0.33, F + 0.9, cz - 26.1 + Math.floor(k / 7) * 0.3));
+  for (const sx of [-1, 1]) { const bx = cx + sx * 25.4, bz = cz + 3; bag.add('timber', box(bx - 0.6, F, bz - 1.0, bx + 0.6, F + 2.5, bz + 1.0)); bag.add('cloth_maroon', box(bx - 0.62 * -sx * 0 - 0.62, F + 0.1, bz - 0.9, bx + 0.62, F + 2.1, bz - 0.86)); col.rect([bx - 0.6, bz - 1.0, bx + 0.6, bz + 1.0], F, F + 2.5); }
+  for (let k = 0; k < 14; k++) {
+    const a = tunnelAng + 0.5 + k * ((TAU - 1.0) / 13), r = wallR - 0.12, px = cx + Math.cos(a) * r, pz = cz + Math.sin(a) * r;
+    bag.add('granite_grey', turnedBox(px, pz, 0.55, 0.06, F + 1.9, F + 2.6, a + Math.PI / 2)); bag.add('gilt_bronze', turnedBox(px - Math.cos(a) * 0.03, pz - Math.sin(a) * 0.03, 0.12, 0.03, F + 2.2, F + 2.3, a + Math.PI / 2));
+    if (k % 4 === 0) bag.add('wood_painted', turnedBox(px - Math.cos(a) * 0.1, pz - Math.sin(a) * 0.1, 0.9, 0.04, F + 3.0, F + 3.7, a + Math.PI / 2));
+  }
   // the three angels, hung from the crown on steel cables at three heights over the nave
   const hang = [[cx - 4.5, cz + 3, 2.22, 0.2], [cx + 3.5, cz - 4, 3.4, 1.3], [cx + 2.5, cz + 9, 4.25, 2.4]];
   hang.forEach(([x, z, h, yaw], i) => { const y0 = [16, 19.5, 14][i], s = h / 2.05; angel(bag, x, y0, z, s, yaw); for (const dx of [-0.25, 0.25]) bag.add('steel_chrome', rod([x + dx * 0.5, y0 + 2.1 * s, z], [x + dx * 3, CATH.top - 3, z + (i - 1) * 2], 0.012, 4)); });

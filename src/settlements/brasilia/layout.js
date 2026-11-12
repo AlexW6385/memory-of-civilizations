@@ -56,6 +56,33 @@ export const BLOCKS = (() => {
   return out;
 })();
 export const SHOPS = [50, 290, 62, 372];                                  // the commercial strip east of the avenue
+// the second superquadra, east of the shops' strip: the same plan, the blocks' tiles turned (the avenue's other side, §1d)
+export const SQ2 = [80, 268, 260, 448];
+export const SQS = [SQ, SQ2];
+export const BLOCKS2 = BLOCKS.map((b, i) => ({ rect: [b.rect[0] + 270, b.rect[1], b.rect[2] + 270, b.rect[3]], seed: b.seed + 31, tile: (b.tile + 1 + (i >> 1)) % 2 }));
+export const ALL_BLOCKS = [...BLOCKS, ...BLOCKS2];
+export const inSQ = (x, z, m = 0) => SQS.some((q) => inRect(q, x, z, m));
+// the little church (Igrejinha, 1958) on the lawn south of the first superquadra's blocks, and the City Museum on the Square
+export const CHAPEL = [-152, 420, -134, 436];
+export const MUSEU = [136, -56, 162, -30];
+export const PLAYS = [[-124, 418, -106, 434], [190, 418, 208, 434]];
+export const PITCH_AT = [118, 418, 154, 436];
+// car parks: in the gaps between the ministries on the Esplanade's two sides (bays of 2.5 × 5 m), and before the shops
+export const PARKS = (() => {
+  const out = [], ms = MINISTRIES;
+  for (const m of ms) {
+    const [x0, z0, x1, z1] = m.rect, gx0 = x0 - (PITCH - MIN_W) + 2, gx1 = x0 - 2;
+    const r = m.side === 'n' ? [gx0, z0 + 6, gx1, z1 - 2] : [gx0, z0 + 2, gx1, z1 - 6];
+    if (Math.hypot(r[0], r[1]) > 470 || ms.some((o) => o !== m && inRect(o.rect, (r[0] + r[2]) / 2, (r[1] + r[3]) / 2, 8))) continue;
+    if (Math.hypot((r[0] + r[2]) / 2 - CATH.c[0], (r[1] + r[3]) / 2 - CATH.c[1]) < CATH.pool + 10) continue;
+    out.push({ rect: r, side: m.side });
+  }
+  return out;
+})();
+export const inPark = (x, z, m = 0) => PARKS.some((p) => inRect(p.rect, x, z, m));
+// the carriageways' median strips (a kerbed refuge between the two directions)
+export const MEDIANS = [[ROAD_N[0], ROAD_N[1] + 7.3, ROAD_N[2], ROAD_N[1] + 12.9], [ROAD_S[0], ROAD_S[1] + 7.3, ROAD_S[2], ROAD_S[1] + 12.9]];
+export const inMedian = (x, z) => MEDIANS.some((r) => inRect(r, x, z));
 
 export const inCathPit = (x, z) => Math.hypot(x - CATH.c[0], z - CATH.c[1]) < CATH.R + 1.2;
 /** The cathedral's sunken ground: the nave (flat), the tunnel under the pool, the ramp rising to the road. */
@@ -70,10 +97,14 @@ export function pitDepth(x, z) {
   if (z < TUNNEL.z0 && z > TUNNEL.zR - 0.2) { const t = (z - TUNNEL.zR) / (TUNNEL.z0 - TUNNEL.zR), w = 1 - smooth(5.6, 6.2, ax); h = Math.min(h, (CATH.floor - 0.12) * t * w); }
   return h;
 }
-export const onRoad = (x, z, m = 0) => inRect(ROAD_N, x, z, m) || inRect(ROAD_S, x, z, m) || inRect(AVENUE, x, z, m)
-  || (inRect([SQ[0] - RING, SQ[1] - RING, SQ[2] + RING, SQ[3] + RING], x, z, m) && !inRect(SQ, x, z, -m));
+export const onRoad = (x, z, m = 0) => inRect(ROAD_N, x, z, m) || inRect(ROAD_S, x, z, m) || inRect(AVENUE, x, z, m) || inPark(x, z, m)
+  || SQS.some((q) => inRect([q[0] - RING, q[1] - RING, q[2] + RING, q[3] + RING], x, z, m) && !inRect(q, x, z, -m));
 export const inPraca = (x, z, m = 0) => inRect(PRACA, x, z, m);
 export const inBuilding = (x, z, m = 0) => inRect(PLATFORM, x, z, m) || inRect(PLANALTO, x, z, m) || inRect(STF, x, z, m) || inRect(ITAMARATY, x, z, m) || inRect(JUSTICE, x, z, m)
-  || MINISTRIES.some((b) => inRect(b.rect, x, z, m)) || BLOCKS.some((b) => inRect(b.rect, x, z, m)) || inRect(SHOPS, x, z, m)
+  || MINISTRIES.some((b) => inRect(b.rect, x, z, m)) || ALL_BLOCKS.some((b) => inRect(b.rect, x, z, m)) || inRect(SHOPS, x, z, m) || inRect(CHAPEL, x, z, m) || inRect(MUSEU, x, z, m) || PLAYS.some((r) => inRect(r, x, z, m)) || inRect(PITCH_AT, x, z, m)
   || Math.hypot(x - CATH.c[0], z - CATH.c[1]) < CATH.pool + m || inRect(TUNNEL_BOX(), x, z, m) || inRect([RAMP.x0, RAMP.z0, RAMP.x1, RAMP.z1], x, z, m) || POOLS.some((p) => inRect(p, x, z, m));
 function TUNNEL_BOX() { return [TUNNEL.x0, TUNNEL.zR, TUNNEL.x1, TUNNEL.z0]; }
+
+// the kiosks (x, z, quarter turns toward the front, trade) and vendors' carts (x, z, trade): on the lawn, the Square, the Cathedral's plaza, the avenue
+export const KIOSKS = [[-420, -104, 0, 'lanchonete'], [-345, 104, 2, 'banca'], [-270, -104, 0, 'coco'], [-185, 104, 2, 'lanchonete'], [-100, -104, 0, 'banca'], [-60, 104, 2, 'coco'], [120, 60, 2, 'banca'], [120, -70, 0, 'coco'], [250, 100, 2, 'lanchonete'], [-130, 230, 0, 'coco'], [-132, 150, 2, 'sorvete'], [38.5, 300, 3, 'banca']];
+export const CARTS = [[110, 20, 'pipoca'], [118, -22, 'picole'], [180, 40, 'churro'], [260, -60, 'pipoca'], [200, -110, 'picole'], [-120, -40, 'pipoca'], [-118, 40, 'picole'], [-100, 18, 'churro'], [-170, 142, 'pipoca'], [-150, 255, 'picole'], [-175, 262, 'churro'], [47, 330, 'pipoca'], [-20, 288, 'picole'], [92, 300, 'pipoca']];

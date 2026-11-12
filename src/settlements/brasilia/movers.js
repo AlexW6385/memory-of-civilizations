@@ -2,13 +2,13 @@
 // of the sixties, students in their school uniform, workers (candangos) in hats and work shirts, nuns and priests near the
 // Cathedral, the soldiers of the guard. Data for the engine's movers (src/engine/movers.js, read in its worker), in Suzhou's
 // format; the ways come from layout.js. No boats; the cars and buses stand as placed things (town.js).
-import { RADIUS, LAWN, SQ, AVENUE, SHOPS, CATH, PRACA, BLOCKS, RAMP, TUNNEL } from './layout.js';
+import { RADIUS, LAWN, SQ, SQ2, SQS, AVENUE, SHOPS, CATH, PRACA, ALL_BLOCKS, RAMP, TUNNEL, ROAD_N, ROAD_S, MINISTRIES, MUSEU } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 44, night: 4, rain: 0.5, reach: 160, spawnMin: 26, far: 46 },
+  walkers: { day: 52, night: 4, rain: 0.5, reach: 160, spawnMin: 26, far: 46 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -4,
 };
@@ -35,11 +35,16 @@ export function walkways() {
   R([AVENUE[0] - 5, AVENUE[1] + 10, AVENUE[0] - 1, AVENUE[3] - 20], 1.0, 0.8); R([AVENUE[2] + 1, AVENUE[1] + 10, AVENUE[2] + 5, AVENUE[3] - 20], 1.0, 0.8);
   R([SHOPS[0] - 3.3, SHOPS[1], SHOPS[0], SHOPS[3]], 1.6, 2.0);
   // the superquadra: the lanes between the block rows, the strips beyond the blocks' ends, the lawns' diagonals
-  const rows = BLOCKS.map((b) => (b.rect[1] + b.rect[3]) / 2).filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b);
-  for (let i = 0; i + 1 < rows.length; i++) R([SQ[0] + 6, (rows[i] + rows[i + 1]) / 2 - 1.5, SQ[2] - 6, (rows[i] + rows[i + 1]) / 2 + 1.5], 0.9, 0.4, 'lane');
-  for (const x of [-101, -22, -181]) R([x - 1.5, SQ[1] + 6, x + 1.5, SQ[3] - 6], 0.8, 0.4, 'lane');
-  R([SQ[0] + 6, SQ[1] + 6, SQ[2] - 6, SQ[1] + 9], 0.6, 0.2, 'lane');
-  void TUNNEL;
+  // the ministries' pavements along the carriageways' outer kerbs, and the bus-stop strips on the lawn side
+  R([LAWN[0] + 30, ROAD_N[1] - 3.2, LAWN[2] - 70, ROAD_N[1] - 0.3], 0.8, 0.3); R([LAWN[0] + 30, ROAD_S[3] + 0.3, LAWN[2] - 70, ROAD_S[3] + 3.2], 0.8, 0.3);
+  R([MUSEU[0] - 6, MUSEU[3] + 1, MUSEU[2] + 6, MUSEU[3] + 6], 0.9, 0.5, 'court');
+  const rows = ALL_BLOCKS.map((b) => (b.rect[1] + b.rect[3]) / 2).filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b);
+  for (const q of SQS) {
+    for (let i = 0; i + 1 < rows.length; i++) R([q[0] + 6, (rows[i] + rows[i + 1]) / 2 - 1.5, q[2] - 6, (rows[i] + rows[i + 1]) / 2 + 1.5], 0.9, 0.4, 'lane');
+    for (const x of [q[0] + 89, q[0] + 168, q[0] + 9]) R([x - 1.5, q[1] + 6, x + 1.5, q[3] - 6], 0.8, 0.4, 'lane');
+    R([q[0] + 6, q[1] + 6, q[2] - 6, q[1] + 9], 0.6, 0.2, 'lane');
+  }
+  void TUNNEL; void SQ; void SQ2; void MINISTRIES;
   return { rects, links, clip: RADIUS - 20 };
 }
 export function waterways() { return { rects: [], bridges: [], clip: RADIUS - 18 }; }
