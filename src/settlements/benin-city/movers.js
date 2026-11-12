@@ -4,7 +4,7 @@
 // in the loincloth, palace pages with a staff, children. No boats. Data for the engine's movers (src/engine/movers.js, read in its
 // worker); the format is Suzhou's and Taos's.
 
-import { RADIUS, GREAT, CROSS, SQUARE, LANE, MARKET, STREETS_Z, ALLEYS_X, depth, inLot, inRect, lots } from './layout.js';
+import { RADIUS, GREAT, CROSS, SQUARE, LANE, MARKET, STREETS_Z, ALLEYS_X, GATE_X, depth, inLot, inRect, lots } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure, factor, SLOT, LIMB, bounds } from '../../engine/movers-kit.js';
@@ -31,6 +31,8 @@ export function walkways() {
     { r: [-RADIUS + 70, GREAT[1] + 5, RADIUS - 70, GREAT[3] - 5], weight: 3.4, market: 1.2, kind: 'street' },
     { r: [CROSS[0] + 4, -RADIUS + 70, CROSS[2] - 4, RADIUS - 70], weight: 2.6, market: 1.0, kind: 'street' },
     { r: [SQUARE[0] + 6, SQUARE[1] + 4, SQUARE[2] - 4, SQUARE[3] - 3], weight: 2.2, market: 1.0, kind: 'street' },
+    // the way through the palace gate along the chalked road of the court of audience: pages, chiefs and petitioners go in and out
+    { r: [GATE_X - 1.8, -60, GATE_X + 1.8, 8], weight: 1.5, market: 0.3, kind: 'lane' },
     { r: [LANE[0] + 1, LANE[1] + 2, LANE[2] - 1, LANE[3] + 36], weight: 1.6, market: 0.5, kind: 'lane' },
     { r: [MARKET[0] + 3, MARKET[1] + 3, MARKET[2] - 3, MARKET[3] - 3], weight: 1.8, market: 3.2, kind: 'street' },
   ];
