@@ -97,6 +97,9 @@ export function lifeElements() {
   // the masons' lodge at the church's west end (civic.js masons_yard): masons at the bankers, a pair at the hoist, a donkey with its panniers
   for (const [x, z, pose] of [[-255.4, 51.2, 'stand'], [-252.1, 51.2, 'stand'], [-254.0, 53.6, 'squat'], [-246.4, 52.4, 'stand'], [-243.8, 51.8, 'talk']]) labourer([x, z], g + 0.04, faceTo([0, -1]) + (rand() - 0.5) * 0.4, { pose, hat: 'cap', cloth: pick(['cloth_grey', 'cloth_white', 'cloth_brown']), carry: 'none' });
   L.push({ t: 'animal', kind: 'donkey', at: [-249, 56.5], y: g + 0.04, rot: 1.2, seed: seed() }, { t: 'sacks', at: [-246, 55.8], y: g + 0.04, rot: 0.3, n: 3, seed: seed(), mat: 'limewash_white' });
+  // iron lanterns on posts before the church's south front and about the plaza (lit at night), a bench against the front for the friars
+  for (const [dx, dz] of [[-9, 46], [9, 46], [-24, 47], [24, 47], [-40, 60], [40, 60], [-14, 100], [14, 100]]) L.push({ t: 'lantern', kind: 'iron', at: [px + dx, dz], y: g + 0.04, rot: dx < 0 ? 1.57 : -1.57, h: 3.0, seed: seed() });
+  for (const dx of [-16, 17]) { L.push({ t: 'bench', at: [px + dx, 44.6], y: g + 0.04, rot: 0, len: 2.4, seed: seed() }); friar([px + dx - 0.5, 44.4], g + 0.04, 0, { pose: 'sit' }); }
   L.push({ t: 'well', at: [px - 30, 96], y: g + 0.04, kind: 'windlass', roof: true, mat: 'limestone', square: false });
   for (const [dx, dz] of [[-8, 100], [12, 98]]) { L.push({ t: 'bench', at: [px + dx, dz], y: g + 0.04, rot: 0, len: 2.2, seed: seed() }); woman([px + dx, dz - 0.2], g + 0.04, 0, { pose: 'sit' }); merchant([px + dx + 0.7, dz - 0.2], g + 0.04, 0.3, { pose: 'sit' }); }
   for (const p of [[px - 36, 90], [px + 38, 100], [px - 4, 88]]) L.push({ t: 'chickens', kind: 'pigeon', at: p, y: g + 0.04, rot: rand() * 6, seed: seed(), n: 7 });
