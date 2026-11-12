@@ -84,6 +84,7 @@ export function square() {
   buy([wx + 2.4, 36], [wx, 36], { child: true, hat: 'none', hair: 'short', pose: 'stand', h: 1.1, cloth: 'cloth_ochre' });
   // the cross, on its steps, and the benches along the terrace's edge with pilgrims resting
   R.push({ t: 'croix', at: [-37, 29], y: 0, h: 3.4 });
+  R.push({ t: 'parvis_ground', rect: [-49.5, -27, -20.8, 24], y: 0, seed: 1120, way: [-48.5, -2.2, -20.9, 2.2], shells: 18, skip: [[-49.5, -24.5, -46.5, -19.5], [-49.5, -18.5, -46, -15.5], [-49.5, -5.5, -46, -2.5], [-49.5, 18, -44.2, 24], [-38.5, 27.5, -35.5, 30.5]], edge: [[-49.2, -26, -49.2, 20]] });
   for (const z of [-17, -4, 41, 52]) {
     L.push({ t: 'bench', at: [T[0] + 2.0, z], y: 0, rot: Math.PI / 2, len: 2.0, back: true });
     if (z === -4 || z === 41) L.push({ t: 'figure', at: [T[0] + 2.2, z + 0.5], y: 0, rot: face([0, 0], [1, 0]), h: 1.6, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_brown', cloth2: 'cloth_grey', skin: 'skin_light', hat: 'brim', hatMat: 'cloth_brown', pose: 'sit', carry: 'none' });
@@ -98,6 +99,15 @@ export function square() {
   L.push({ t: 'chickens', kind: 'pigeon', at: [O[0] - 16, -6], y: 0, n: 6, seed: 3 }); L.push({ t: 'chickens', kind: 'pigeon', at: [-40, 46], y: 0, n: 5, seed: 5 });
   // two children playing with a hoop and a ball of rags before the church; a mule with its panniers waiting by the west wall
   for (const [at, to] of [[[-33, 8], [-31, 9.5]], [[-31, 9.5], [-33, 8]]]) L.push({ t: 'figure', at, y: 0, rot: face(at, to), h: 1.15, child: true, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_red', cloth2: 'cloth_white', skin: 'skin_light', hat: 'none', hair: 'short', pose: 'stand' });
+  // the candle-seller's trestle at the church's south corner of the front (wax for the saint, ex-votos of wax and wood), a beggar and a blind pilgrim at the portal's steps
+  L.push({ t: 'stall', at: [O[0] - 6.5, -12.4], y: 0, rot: 0, awning: 'cloth_white', goods: ['basket', 'produce'], w: 2.2, d: 1.2, seed: 91 });
+  L.push({ t: 'figure', at: [O[0] - 6.5, -13.5], y: 0, rot: 0, h: 1.6, seed: 9101, dress: 'robe', cloth: 'cloth_black', cloth2: 'cloth_black', skin: 'skin_light', hat: 'veil', hatMat: 'cloth_black', hair: 'shaven', over: 'cape', pose: 'stand' });
+  L.push({ t: 'figure', at: [O[0] - 3.3, 4.6], y: 0, rot: face([0, 0], [-1, -0.4]), h: 1.5, seed: 9102, dress: 'robe', cloth: 'cloth_grey', cloth2: 'cloth_brown', skin: 'skin_light', hat: 'none', hair: 'long', beard: true, pose: 'sit_low' });
+  L.push({ t: 'figure', at: [O[0] - 4.8, -4.6], y: 0, rot: face([0, 0], [1, 0.3]), h: 1.66, seed: 9103, dress: 'robe', cloth: 'cloth_brown', cloth2: 'cloth_grey', skin: 'skin_light', hat: 'brim', hatMat: 'cloth_brown', pose: 'staff', carry: 'staff', len: 1.8 });
+  // the packs and staffs of the pilgrims who sit on the terrace's edge, set down against the wall of the first house-row: sacks, a blanket roll, a staff leaning
+  for (const [px, pz, n] of [[-31.2, -8.6, 2], [-31.6, 8.0, 3], [-36.4, 13.5, 2]]) L.push({ t: 'sacks', at: [px, pz], y: 0, rot: rand() * 6, n, seed: Math.floor(px * 7) });
+  // a pilgrim bathing his feet at the Plò, his shoes beside him; a mule-driver leading his animal in from the west stair
+  { const at = [fx + 0.8, fz - 3.6]; L.push({ t: 'figure', at, y: 0, rot: face(at, [fp[2], fz]), h: 1.58, seed: 9104, dress: 'robe', cloth: 'cloth_ochre', cloth2: 'cloth_grey', skin: 'skin_light', hat: 'brim', hatMat: 'cloth_brown', pose: 'sit_low' }); }
   L.push({ t: 'animal', kind: 'donkey', at: [T[0] + 1.6, 3], y: 0, rot: Math.PI / 2, seed: 11, gear: true });
   L.push({ t: 'sacks', at: [T[0] + 2.8, 3.6], y: 0, rot: 0, n: 3, seed: 8 });
   return [base('conques-square', L), base('conques-square-works', R, 'romanesque')];
