@@ -328,5 +328,7 @@ export async function buildings() {
   };
   for (let i = 0; i < all.length; i += 50) plans.push(base(`new-york-blocks-${i / 50}`, all.slice(i, i + 50).flatMap((l) => special(l) ?? [{ t: 'skyscraper', ...l, chimney: chimneyAt(l), ads: adsOf(l) }])));
   const dl = dinerLife(), c = toCity(...DINER_AT);
-  return [...plans, ...streetLife(), ...yards(), ...pavePlans(), ...parkPlans(), ...shopLife(), gctLife(), libraryLife(), { ...base('new-york-diner-life', []), elements: dl, style: 'life', center: c, near: 200 }];
+  // the walk from the entrance down Fifth Avenue to the Empire State's doors (plan.js walks) kept clear of the landmarks' stroll-about figures: an element with a rect and no items marks it for the life placer and draws nothing
+  const route = base('new-york-route', [{ t: 'curb', items: [], rect: [2.2, 172, 5.8, 232] }]);
+  return [...plans, route, ...streetLife(), ...yards(), ...pavePlans(), ...parkPlans(), ...shopLife(), gctLife(), libraryLife(), { ...base('new-york-diner-life', []), elements: dl, style: 'life', center: c, near: 200 }];
 }
