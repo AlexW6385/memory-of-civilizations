@@ -15,6 +15,7 @@ import { paintChapel } from './chapel.js';
 import { khafreTemple, statue } from './khafre.js';
 import { houseFront, houseRoof, mastabaWear, galleryOutside, bakeryShade, yard, lane, cemetery, magazines, quay } from './dress.js';
 import { quarry, track, tools } from './quarry.js';
+import { ramp, shade, casingStones } from './works.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** A frustum over a rectangle centred at (cx, cz): half-sizes (a0, b0) at y0 to (a1, b1) at y1. */
@@ -660,7 +661,7 @@ registerStyle('oldkingdom', {
     ok_pyramid: okPyramid, mastaba, ok_temple: okTemple, causeway, mud_house: mudHouse, gallery_hall: galleryHall, crow_wall: crowWall,
     boat_pit: boatPit, royal_ship: royalShip, bakery, ok_pyramid_interior: pyramidInterior, stone_sledge: stoneSledge,
     ok_yard: yard, ok_lane: lane, ok_cemetery: cemetery, ok_magazines: magazines, ok_quay: quay,
-    ok_sphinx: sphinx, ok_khafre_temple: khafreTemple, ok_quarry: quarry, ok_track: track, ok_tools: tools,
+    ok_sphinx: sphinx, ok_khafre_temple: khafreTemple, ok_quarry: quarry, ok_track: track, ok_tools: tools, ok_ramp: ramp, ok_shade: shade, ok_casing: casingStones,
   },
   objects: {},
 });
