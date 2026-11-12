@@ -52,14 +52,16 @@ function amalaka(bag, x, y, z, r, mat = S, segs = 24) {
 }
 /** The crown: the shoulder, the neck, the amalaka, a second small amalaka, the pot (kalasha) with its citron finial. */
 function crown(bag, cx, top, cz, s, mat = S, rich = true) {
-  bag.add(mat, lathe([[s * 0.62, 0], [s * 0.5, s * 0.1], [s * 0.4, s * 0.16], [s * 0.4, s * 0.24], [0.001, s * 0.24]], 16, null, cx, top, cz));
+  // the segment counts follow the crown's size (the small ones climbing the tower are seen from afar: few sides do)
+  const big = s > 1.2, mid = s > 0.6;
+  bag.add(mat, lathe([[s * 0.62, 0], [s * 0.5, s * 0.1], [s * 0.4, s * 0.16], [s * 0.4, s * 0.24], [0.001, s * 0.24]], big ? 16 : mid ? 10 : 8, null, cx, top, cz));
   const ra = s * 0.86, ya = top + s * 0.24;
-  amalaka(bag, cx, ya, cz, ra, mat, rich ? 28 : 16);
+  amalaka(bag, cx, ya, cz, ra, mat, rich ? (big ? 28 : mid ? 16 : 12) : (mid ? 12 : 8));
   if (rich) {
-    amalaka(bag, cx, ya + ra * 0.4, cz, ra * 0.42, mat, 16);
+    amalaka(bag, cx, ya + ra * 0.4, cz, ra * 0.42, mat, big ? 16 : 8);
     const yk = ya + ra * 0.4 + ra * 0.17;
-    bag.add(mat, lathe([[ra * 0.16, 0], [ra * 0.3, ra * 0.12], [ra * 0.32, ra * 0.3], [ra * 0.15, ra * 0.46], [ra * 0.1, ra * 0.5], [ra * 0.18, ra * 0.56], [ra * 0.08, ra * 0.62], [ra * 0.1, ra * 0.72], [0.001, ra * 0.95]], 12, null, cx, yk, cz));
-  } else bag.add(mat, lathe([[ra * 0.2, 0], [ra * 0.32, ra * 0.2], [ra * 0.14, ra * 0.42], [0.001, ra * 0.7]], 10, null, cx, ya + ra * 0.4, cz));
+    bag.add(mat, lathe([[ra * 0.16, 0], [ra * 0.3, ra * 0.12], [ra * 0.32, ra * 0.3], [ra * 0.15, ra * 0.46], [ra * 0.1, ra * 0.5], [ra * 0.18, ra * 0.56], [ra * 0.08, ra * 0.62], [ra * 0.1, ra * 0.72], [0.001, ra * 0.95]], big ? 12 : 8, null, cx, yk, cz));
+  } else bag.add(mat, lathe([[ra * 0.2, 0], [ra * 0.32, ra * 0.2], [ra * 0.14, ra * 0.42], [0.001, ra * 0.7]], mid ? 10 : 6, null, cx, ya + ra * 0.4, cz));
 }
 /** A horseshoe dormer (gavaksha) motif on a face whose outward normal is (nx, nz), at (x, y, z), width w:
  *  the jambs' block and the pointed hood over it, in shallow relief. */

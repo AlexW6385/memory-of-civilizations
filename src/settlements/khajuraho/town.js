@@ -158,7 +158,7 @@ export function dressing() {
   // nobody within 5 m of it along the lane. Pilgrims bound for the temple with baskets of flowers and ghee, a family, others coming
   // down with the temple's flowers, a porter, a boy with his goat, the lane's dogs, the cows of the forecourt
   {
-    const P = (x, z, o) => F([x, z], 0, [-1, 0.05], o), W = (c1, c2) => ({ dress: 'wrap', cloth: c1, cloth2: c2, hair: 'bun', over: 'shawl', h: 1.5 });
+    const zc0 = -60, P = (x, z, o) => F([x, z], 0, [-1, 0.05], o), W = (c1, c2) => ({ dress: 'wrap', cloth: c1, cloth2: c2, hair: 'bun', over: 'shawl', h: 1.5 });
     P(-19.4, -60.8, { carry: 'basket', cloth: 'cloth_white', hat: 'turban' });
     P(-20.7, -59.3, { ...W('cloth_red', 'cloth_ochre'), carry: 'pot' });
     P(-23.1, -60.6, { dress: 'wrap', top: 'bare', hair: 'topknot', over: 'sash', cloth: 'cloth_white', carry: 'none' });
@@ -169,13 +169,18 @@ export function dressing() {
     F([-24.6, -58.9], 0, [1, 0], { dress: 'wrap', top: 'bare', hair: 'short', hat: 'turban', cloth: 'cloth_white', carry: 'pole', arms: 'pole' });
     F([-28.0, -61.2], 0, [1, 0.1], { carry: 'basket', cloth: 'cloth_white', hat: 'turban' });
     F([-31.0, -58.7], 0, [1, 0.05], { ...W('cloth_red', 'cloth_white'), carry: 'basket' });
+    // the forecourt's flower stalls: an awning on four poles, the table laid with jasmine, oleander and lotus buds, the seller behind it
+    for (const [x, z, rot, aw] of [[-27.8, -65.4, 0, 'cloth_white'], [-27.8, -54.6, Math.PI, 'cloth_ochre']]) {
+      L.push({ t: 'stall', at: [x, z], y: 0, rot, seed: seed++, w: 2.6, d: 1.4, awning: aw, goods: ['basket', 'produce'] });
+      F([x, z + (z < zc0 ? -0.9 : 0.9)], 0, [0, z < zc0 ? 1 : -1], { pose: 'sit_ground', dress: 'wrap', cloth: pickOf(['cloth_red', 'cloth_green', 'cloth_indigo']), cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5 });
+    }
     // a boy with his goat, the dogs asleep in the lane's dust
     F([-21.2, -62.0], 0, [0.4, 1], { dress: 'wrap', top: 'bare', hair: 'short', cloth: 'cloth_white', child: true, h: 1.15 });
     L.push({ t: 'animal', kind: 'goat', at: [-21.8, -61.5], y: 0, rot: 2.0, seed: seed++, graze: false, mat: 'hide_white' });
     L.push({ t: 'animal', kind: 'dog', at: [-17.6, -57.8], y: 0, rot: 1.2, seed: seed++ });
     L.push({ t: 'animal', kind: 'dog', at: [-26.0, -62.0], y: 0, rot: 5.1, seed: seed++ });
-    L.push({ t: 'animal', kind: 'zebu', at: [-26.5, -56.5], y: 0, rot: 1.9, seed: seed++, graze: false, mat: 'hide_white' });
-    L.push({ t: 'animal', kind: 'zebu', at: [-28.5, -64.5], y: 0, rot: 4.8, seed: seed++, graze: true, mat: 'hide_tan' });
+    L.push({ t: 'animal', kind: 'zebu', at: [-35.5, -53.5], y: 0, rot: 1.9, seed: seed++, graze: false, mat: 'hide_white' });
+    L.push({ t: 'animal', kind: 'zebu', at: [-35.8, -67.0], y: 0, rot: 4.8, seed: seed++, graze: true, mat: 'hide_tan' });
   }
   return L;
 }
