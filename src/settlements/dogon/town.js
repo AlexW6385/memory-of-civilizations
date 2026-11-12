@@ -18,7 +18,7 @@ export async function town() {
   man([cx - 2.4, cz + 1.6], F + 0.26, 0.5, { pose: 'sit' });
   man([cx - 0.9, cz + 0.8], F, 0.3, { pose: 'sit_ground', dress: 'robe', cloth: 'cloth_white', over: 'none' });
   // the place: women with jars, men talking in twos, children
-  const at = (x, z) => !(Math.abs(x) < 1.8 && z > 12) && P.every((p) => Math.hypot(p.at[0] - x, p.at[1] - z) > 1.6) && Math.hypot(x - cx, z - cz) > TOGUNA.w / 2 + 2.2;
+  const at = (x, z) => !(Math.abs(x) < 1.8 && z > 12) && Math.hypot(x - 4.5, z - 27.5) > 7 && P.every((p) => Math.hypot(p.at[0] - x, p.at[1] - z) > 1.6) && Math.hypot(x - cx, z - cz) > TOGUNA.w / 2 + 2.2;
   for (let k = 0; k < 18; k++) {
     const x = PLACE[0] + 2 + rand() * (PLACE[2] - PLACE[0] - 4), z = 22 + rand() * 10;
     if (!at(x, z)) continue;
@@ -30,7 +30,7 @@ export async function town() {
   }
   // on the middle lane and the lanes between the rows
   for (let k = 0; k < 12; k++) {
-    const x = (rand() < 0.5 ? -1 : 1) * (1.0 + rand() * 0.9), z = -30 + rand() * 54, y = height(x, z);
+    const x = (rand() < 0.5 ? -1 : 1) * (1.0 + rand() * 0.9), z = -30 + rand() * 44, y = height(x, z);
     if (!at(x, z)) continue;
     (rand() < 0.6 ? woman : man)([x, z], y, rand() < 0.5 ? 0 : Math.PI, rand() < 0.5 ? { carry: 'basket' } : {});
   }
@@ -38,7 +38,7 @@ export async function town() {
   const A = [];
   for (let k = 0; k < 14; k++) {
     const x = -50 + rand() * 100, z = -8 + rand() * 50;
-    if (inCompound(x, z, 1.5) || nearBaobab(x, z, 3) || Math.hypot(x - cx, z - cz) < 7) continue;
+    if (inCompound(x, z, 1.5) || nearBaobab(x, z, 3) || Math.hypot(x - cx, z - cz) < 7 || Math.hypot(x - 4.5, z - 27.5) < 6) continue;
     A.push({ t: 'animal', kind: k % 5 === 0 ? 'dog' : 'goat', at: [x, z], y: height(x, z), rot: rand() * 6.28, seed: k + 3 });
   }
   for (let k = 0; k < 4; k++) { const x = -30 + rand() * 60, z = 50 + rand() * 20; A.push({ t: 'animal', kind: 'zebu', at: [x, z], y: height(x, z), rot: rand() * 6.28, seed: 40 + k }); }
