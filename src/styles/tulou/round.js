@@ -12,6 +12,19 @@ import { furnishRooms } from './rooms.js';
 const EARTH = 'mud_plaster', INNER = 'earth_wall', TIMBER = 'timber', TILE = 'tile_grey';
 const GATE_H = 3.4;
 
+const hash = (i, s) => { let h = Math.imul(i + 1, 374761393) ^ Math.imul(s + 7, 668265263); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+
+/** Weathering of one wall sector by damp and rain: the splashed foot, lichen, pale rain tails under the sills, lime patches where it was mended. */
+function weather(bag, c, ro, a0, a1, i, sills) {
+  const da = a1 - a0, patch = (m, y0, y1, f0, f1) => bag.add(m, sector(c, ro(y0) + 0.04, ro(y0) - 0.04, ro(y1) + 0.04, ro(y1) - 0.04, y0, y1, a0 + da * f0, a0 + da * f1));
+  const r1 = hash(i, 1), r2 = hash(i, 2), r3 = hash(i, 3), r4 = hash(i, 4);
+  patch('banco_rough', 1.3, 1.65 + 0.7 * r1, 0, 1);                         // the foot, darkened by splash
+  if (r2 < 0.4) patch('plaster_damp', 1.7 + r1 * 0.5, 2.2 + r2 * 1.5, 0.15 + r3 * 0.3, 0.45 + r3 * 0.4);      // lichen
+  if (r4 < 0.14) patch('lime_plaster_rough', 1.9 + r3, 2.9 + r3, 0.2, 0.8);          // a mended patch
+  else if (r4 < 0.2) patch('banco_rough', 2.6, 3.6 + r3, 0.3, 0.55);             // earth laid bare
+  for (const [s0] of sills) if (hash(i, Math.round(s0 * 10)) < 0.55) patch('plaster_streak', s0 - 1.7, s0, 0.4, 0.6);   // the rain tail under a window
+}
+
 export function roofer(R, o) {
   const ro = o.ro, ye = o.ye, rr = o.rr, yr = o.yr, ri = o.ri, yi = o.yi;
   return (r) => (r >= rr ? yr - (yr - ye) * Math.min(1, (r - rr) / (ro - rr)) : yr - (yr - yi) * Math.min(1, (rr - r) / (rr - ri)));
@@ -37,7 +50,7 @@ export function ringRoof(bag, c, n, o) {
 }
 
 export function tulouRound(el, ctx) {
-  const { bag, col } = ctx;
+  const { bag, col } = ctx, LF = STYLES.life.elements;
   const c = el.c, R = el.R, n = el.n, da = 2 * Math.PI / n, fl = el.floors, K = fl.length, full = !!el.full;
   const wallIn = el.wallIn ?? R - 1.5, front = el.front ?? wallIn - 4.0, rail = el.rail ?? front - 1.7, lean = el.lean ?? 0.38;
   const topFl = fl[K - 1], ceil = topFl + 3.0;
@@ -80,6 +93,7 @@ export function tulouRound(el, ctx) {
       if (sills.some(([s0, s1]) => yy + 0.1 > s0 - 0.02 && yy < s1 + 0.02)) continue;
       bag.add('banco_rough', sector(c, ro(yy) + 0.03, ro(yy) - 0.05, ro(yy + 0.09) + 0.03, ro(yy + 0.09) - 0.05, yy, yy + 0.09, a0, a1));
     }
+    if (full || el.windows) weather(bag, c, ro, a0, a1, i, sills);
     // the wall as an obstacle (the chord of its middle line)
     const rm = (ro(0) + wallIn) / 2, [p0, p1] = [P(c, rm, a0), P(c, rm, a1)];
     col.segment(p0, p1, ro(0) - wallIn + 0.1, 0, topFl + 4);
@@ -101,11 +115,18 @@ export function tulouRound(el, ctx) {
       col.segment(q0, q1, 0.3, 0, GATE_H);
     }
     void small;
+    // red couplets on the granite jambs, a strip of red paper over the lintel, two lanterns under the hood, the worn threshold
+    for (const sg of [-1, 1]) bag.add('lacquer_red', lbox(c[0], c[1], phi, sg > 0 ? hw + 0.05 : -hw - 0.25, 0.9, R + 0.2, sg > 0 ? hw + 0.25 : -hw - 0.05, 3.0, R + 0.235));
+    bag.add('cloth_red', lbox(c[0], c[1], phi, -hw, GATE_H - 0.5, R + 0.2, hw, GATE_H - 0.2, R + 0.225));
+    bag.add('granite_block', lbox(c[0], c[1], phi, -hw - 0.3, 0, R - 0.3, hw + 0.3, 0.14, R + 1.4));
+    for (const sg of [-1, 1]) { const q = W(sg * (hw + 0.1), R + 0.7); LF.hang_lantern({ t: 'hang_lantern', at: q, y: GATE_H + 0.88, rot: 0, seed: g }, ctx); }
     // the rules of conduct, a board beside the gate [stated: NatGeo]
     bag.add('lacquer_black', lbox(c[0], c[1], phi, hw + 0.5, 1.5, R - lean * 0.12, hw + 1.2, 2.4, R + 0.04));
     bag.add('cloth_white', lbox(c[0], c[1], phi, hw + 0.58, 1.58, R + 0.03, hw + 1.12, 2.32, R + 0.05));
   }
 
+  // the apron of cobbles round the foot, on which the lane's life stands
+  if (full || el.windows) for (let i = 0; i < n; i++) { const a0 = (i - 0.5) * da, a1 = (i + 0.5) * da; bag.add('pebbles', sector(c, R + (full ? 2.2 : 1.4), R - 0.1, R + (full ? 2.2 : 1.4), R - 0.1, 0, 0.05, a0, a1)); }
   // ── the court: cobbles to the room fronts, a bluestone way from the gate to the hall ──
   bag.add('pebbles', disc(front, 0.02, 72, c[0], c[1]));
   if (full) {
@@ -171,6 +192,16 @@ export function tulouRound(el, ctx) {
       bag.add(TIMBER, plank(q0, at(d0), y, hTop, 0.08)); bag.add(TIMBER, plank(at(d1), q1, y, hTop, 0.08)); bag.add(TIMBER, plank(at(d0), at(d1), y + 2.1, hTop, 0.08));
       col.segment(q0, at(d0), 0.08, y, hTop); col.segment(at(d1), q1, 0.08, y, hTop);
       for (const q of [at(d0), at(d1)]) bag.add('wood_dark', box(q[0] - 0.045, y, q[1] - 0.045, q[0] + 0.045, y + 2.1, q[1] + 0.045));
+      {
+        // red couplets either side of the door and a paper strip over it; on some rooms a lantern or a pole of washing over the gallery
+        const ph = Math.PI / 2 - i * da, mid = P(c, front, i * da), hz = hash(i * 5 + k, 9), W2 = frameOf(mid[0], mid[1], ph);
+        if (L > 2.0) for (const sg of [-1, 1]) bag.add('lacquer_red', lbox(mid[0], mid[1], ph, sg > 0 ? 0.74 : -0.88, y + 0.9, -0.075, sg > 0 ? 0.88 : -0.74, y + 2.0, -0.035));
+        if (L > 2.0) bag.add('cloth_red', lbox(mid[0], mid[1], ph, -0.5, y + 2.18, -0.075, 0.5, y + 2.3, -0.035));
+        const ceilY = k < K - 1 ? fl[k + 1] - 0.3 : hTop + 0.05;
+        if (hz < 0.2) LF.hang_lantern({ t: 'hang_lantern', at: W2(0, -0.8), y: ceilY, rot: 0, seed: i }, ctx);
+        else if (hz < 0.36 && k > 0 && k < K - 1) LF.laundry_pole({ t: 'laundry_pole', at: W2(1.1, 0), y: y + 3.0, rot: ph + Math.PI, len: 1.4, seed: i * 3 + k }, ctx);
+        else if (hz < 0.44 && k > 0) LF.basket({ t: 'basket', at: W2(-1.0, -0.65), y, rot: ph, n: 2, seed: i + k }, ctx);
+      }
       if (k === K - 1) {
         bag.add(TIMBER, prism(wedge(a0, a1, front, front + 0.08), hTop, roofY(front) - 0.16));
         bag.add(TIMBER, prism(wedge(a0, a1, front, wallIn), hTop, hTop + 0.1));

@@ -50,7 +50,7 @@ export const ROAD = [-2, 52, 2, 140];
  * eave, three bays (hall in the middle, a kitchen and a bedroom beside it), a loft over the back. Rows face the yard
  * and the road; yaw is a quarter turn: PI/2 faces east, -PI/2 faces west. [x of the front line, z start, count, yaw].
  */
-export const HOUSE = { w: 7.4, d: 8.6, gap: 0.1 };
+export const HOUSE = { w: 7.8, d: 8.6, gap: 0.1 };
 const ROWS = [
   { front: -16.0, z0: 33.8, n: 3, yaw: Math.PI / 2 }, { front: 16.0, z0: 33.8, n: 3, yaw: -Math.PI / 2 },
   { front: -2.9, z0: 57.4, n: 1, yaw: Math.PI / 2, off: 0 }, { front: 2.9, z0: 57.4, n: 1, yaw: -Math.PI / 2, off: 0 },
