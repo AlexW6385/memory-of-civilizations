@@ -25,22 +25,50 @@ export const inLake = (x, z) => Math.hypot(x, z) > ISLAND && !(x < 0 && z > CAUS
 export const inLakeWater = (x, z, h) => h < LEVEL.water && (inLake(x, z) || Math.hypot(x, z) > 300 && !(inCanal(x, z) && Math.hypot(x, z) < ISLAND - 6));
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
-let HOUSES = null;
-/** Calpulli houses round patios, 10–16 m, on blocks between streets 5 m wide, clear of the precinct, the palace, the canals and the causeway. */
+let HOUSES = null, YARDS = null;
+/**
+ * Calpulli houses round patios, 12.4–14.4 m, on blocks between streets 4.6–6.6 m wide (the compounds' walls make continuous
+ * fronts along the lanes), clear of the precinct, the palace, the canals and the causeway. The cells left empty
+ * (one in sixteen) are the orchard-yards: yards().
+ */
 export function houses() {
   if (HOUSES) return HOUSES;
-  HOUSES = [];
+  HOUSES = []; YARDS = [];
   const rand = rng(1519), S = 19;
   for (let x = -RADIUS; x < RADIUS; x += S) for (let z = -RADIUS; z < RADIUS; z += S) {
-    const w = 10 + rand() * 5, d = 10 + rand() * 5, r = [x + 2, z + 2, x + 2 + w, z + 2 + d], cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
+    const w = 12.4 + rand() * 2, d = 12.4 + rand() * 2, r = [x + 2, z + 2, x + 2 + w, z + 2 + d], cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
     if (Math.max(...[[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].map(([a, b]) => Math.hypot(a, b))) > 300) continue;
     if (inRect(PRECINCT, cx, cz, w / 2 + 10) || inRect(PALACE, cx, cz, w / 2 + 6) || inRect(MARKET, cx, cz, w / 2 + 3) || CANALS.some((c) => inRect(c, cx, cz, w / 2 + 4))) continue;
     if (Math.abs(cz) < 12 + d / 2 && cx < -150) continue;
     if (Math.abs(cx) < 8 + w / 2 || Math.abs(cz) < 8 + d / 2) continue;           // the avenues to the gates
-    if (rand() < 0.06) continue;
+    if (rand() < 0.06) { YARDS.push({ rect: r, seed: Math.floor(rand() * 1e6) }); continue; }
     HOUSES.push({ rect: r, seed: Math.floor(rand() * 1e6) });
   }
   return HOUSES;
+}
+/** The orchard-yards (huerto) in the cells left between compounds: { rect, seed }. */
+export function yards() { houses(); return YARDS; }
+const hash1 = (n) => { let h = Math.imul(n | 0, 2654435761) ^ 0x9e3779b9; h = Math.imul(h ^ (h >>> 15), 2246822519); return ((h ^ (h >>> 13)) >>> 0) / 4294967296; };
+/** The side of a calli's compound its gate is on (the first draw of its own sequence in src/styles/aztec/houses.js). */
+export function houseGate(h) { let s = h.seed >>> 0 || 1; s = (s * 1664525 + 1013904223) >>> 0; return ['n', 's', 'w', 'e'][Math.floor(s / 4294967296 * 4)]; }
+/** How far (x, z) is from the nearest canal's bank (negative inside the canal). */
+export const canalDistance = (x, z) => Math.min(...CANALS.map((c) => { const dx = Math.max(c[0] - x, 0, x - c[2]), dz = Math.max(c[1] - z, 0, z - c[3]); return Math.hypot(dx, dz); }));
+/**
+ * The trade of a compound, if it has a notable one (docs/settlements/tenochtitlan.md §15): by the canals the fishers and
+ * the reed-gatherers, near the market the potters and weavers, near the precinct the featherworkers and lapidaries, the
+ * stonecutters and the tamale sellers in between; about one compound in three works a trade the lane can see.
+ */
+export function houseTrade(h) {
+  const [x0, z0, x1, z1] = h.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, u = hash1(h.seed), c = canalDistance(cx, cz);
+  if (c < 22 && u < 0.5) return u < 0.3 ? 'fisher' : 'reeds';
+  const p = Math.hypot(cx, cz);
+  if (p < 170 && u < 0.2) return u < 0.1 ? 'feather' : 'lapidary';
+  if (Math.hypot(cx + 190, cz - 57) < 120 && u < 0.4) return u < 0.2 ? 'potter' : 'weaver';
+  if (u < 0.12) return 'potter';
+  if (u < 0.22) return 'weaver';
+  if (u < 0.28) return 'mason';
+  if (u < 0.34) return 'cook';
+  return null;
 }
 let GRID = null;
 export function inHouse(x, z, m = 0) {
