@@ -2,7 +2,7 @@
 // grooves and vertical joints, stacked into the outlier; the painted wall and the painted ceiling as separate smooth surfaces under the
 // roof slab; the rock steps up to the lookout; boulders at the foot. Everything stands on the ground and collides with its box.
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
-import { Acc, outcropBlock, shedBlocks, chunk } from './outcrop.js';
+import { Acc, outcropBlock, shedBlocks, chunk, hex } from './outcrop.js';
 import { BLOCKS, MAIN, SMALL, FLIGHTS, height, rng, smooth } from '../../settlements/kakadu/layout.js';
 
 // smooth value noise in 3D, about −1…1, features about one unit
@@ -157,19 +157,21 @@ export function shelterSurfaces(S, mat, { bag }) {
 
 // ── the way up ──────────────────────────────────────────────────────────────────────────────────────────────
 export function rockSteps(el, { bag, col }) {
-  const rand = rng(77);
+  const rand = rng(77), acc = new Acc();
   for (const F of FLIGHTS) {
     const [x0, z0, x1, z1] = F.rect, rise = F.y1 - F.y0, n = Math.max(2, Math.round(rise / 0.2)), L = z1 - z0;
     for (let k = 0; k < n; k++) {
       const top = F.y0 + rise * (k + 1) / n;
-      // ascent to the north: the first step at the south end (z1), the last at the north (z0)
+      // ascent to the north: the first step at the south end (z1), the last at the north (z0): flat slabs, broken edges, each a little crooked
       const za = z1 - L * (k + 1) / n, zb = z1 - L * k / n;
-      const j = (rand() - 0.5) * 0.3, w = 0.12 + rand() * 0.2;
-      const g = blockGeometry([x0 - w + j, za - 0.05, x1 + w + j * 0.5, zb + 0.28], [top - 0.7, top], 4, { seed: 100 + k, amp: 0.04, res: 0.9, groove: 0 });
-      bag.add(k % 3 ? 'tuff_red' : 'sandstone_rose', g);
+      const j = (rand() - 0.5) * 0.3, w = 0.12 + rand() * 0.2, c = (rand() - 0.5) * 0.05;
+      const C = [[[], []], [[], []]];
+      for (let i = 0; i < 2; i++) for (let jj = 0; jj < 2; jj++) for (let kk = 0; kk < 2; kk++) C[i][jj][kk] = [(i ? x1 + w + j * 0.5 : x0 - w + j) + (rand() - 0.5) * 0.08, jj ? top + (jj && i ? c : 0) : top - 0.7, kk ? zb + 0.28 : za - 0.05];
+      hex(acc, k % 3 ? 'tuff_red' : 'sandstone_rose', C, { S: { res: 0.5, relief: (x, y, z) => 0.05 * noise3(x * 1.3, y * 1.3, z * 1.3, 100 + k) }, T: { res: 0.6, edge: 0.15, relief: (x, y, z) => 0.012 * noise3(x * 2.1, 0, z * 2.1, 300 + k) }, E: { res: 0.5 }, W: { res: 0.5 } });
     }
     col.ramp(F.rect, F.y0, F.y1, 'n');
   }
+  acc.flush(bag);
 }
 
 /** Fallen blocks at the foot of the rock: angular, some leaning slabs; each blocks its footprint. */

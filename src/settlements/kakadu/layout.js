@@ -128,7 +128,7 @@ export function tuftSpots() {
 export function screeSpots() {
   const r = rng(93), out = [];
   for (const S of [MAIN, SMALL]) for (let k = 0; k < 26; k++) out.push([S.x0 + 1.5 + r() * (S.x1 - S.x0 - 3), S.zb + 0.5 + r() * (S.zl - S.zb - 2.2), 0.12 + r() * 0.2, 1]);
-  for (let k = 0; k < 260 && out.length < 120; k++) {
+  for (let k = 0; k < 900 && out.length < 280; k++) {
     const x = -80 + r() * 160, z = -34 + r() * 20;
     if (BLOCKS.some((B) => inRect(B.r, x, z, 0.4)) || inRect([MAIN.x0 - 4, MAIN.zb, MAIN.x1 + 4, MAIN.zl + 3], x, z) || inRect([SMALL.x0 - 3, SMALL.zb, SMALL.x1 + 3, SMALL.zl + 3], x, z) || FLIGHTS.some((F) => inRect(F.rect, x, z, 2))) continue;
     if (!BLOCKS.some((B) => inRect(B.r, x, z, 6))) continue;
