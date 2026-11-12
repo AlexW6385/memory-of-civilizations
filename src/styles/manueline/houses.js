@@ -30,7 +30,7 @@ export function manuHouse(el, ctx) {
   // ── body
   const body = F.R(0, 0, L, D);
   if (open) col.rect(body, y - plinth, y + 0.3); else col.rect(body, y - plinth, y + H + 1);
-  bag.add('limestone', box(body[0], y - plinth, body[1], body[2], y + (open ? 0.3 : 0.7), body[3]));
+  if (open) bag.add('limestone', box(body[0] - 0.04, y - plinth, body[1] - 0.04, body[2] + 0.04, y + 0.36, body[3] + 0.04)); else bag.add('limestone', box(body[0], y - plinth, body[1], body[2], y + 0.7, body[3]));
   // the ground storey's shop arches / door (merchants), windows
   const shopF = kind !== 'fisher' && (kind === 'merchant' ? rand() < 0.9 : rand() < 0.3);
   const ops = [];
@@ -82,7 +82,7 @@ export function manuHouse(el, ctx) {
       // between storeys over each window to the next sill
       const next = hh.t + (hs - WH);
       R(hh.u0, 0, hh.u1, T, hh.t, Math.min(next, H), wall);
-      R(hh.u0, 0, hh.u1, 0.08, hh.b, hh.t, 'opening'); R(hh.u0, T - 0.06, hh.u1, T, hh.b, hh.t, 'daylight_plain');
+      R(hh.u0, 0, hh.u1, 0.08, hh.b, hh.t, 'opening'); R(hh.u0, T - 0.1, hh.u1, T - 0.03, hh.b, hh.t, 'daylight_plain');
     }
     col.rect(F.R(0, 0, L, T), y + h0, y + H + 1);
     u = 0; void u;
@@ -131,19 +131,19 @@ export function manuHouse(el, ctx) {
     for (const hh of [0.6, 1.1, 1.6]) K.A('timber', T, D - T - 1.0, T + 0.5, D - T - 0.1, hh - 0.02, hh + 0.02);
     if (D > 14) { K.crate(T + 1.0, kv0 + 0.3, 0); K.crate(T + 1.0, kv0 + 0.3, 0.5, 0.5); K.coil(T + 1.3, kv0 + 1.4, 0); }
     // the rear window and the light of the hall
-    R(L * 0.25, D - T - 0.02, L * 0.25 + 1.0, D - T, 1.1, 2.4, 'daylight_plain'); R(L * 0.7, D - T - 0.02, L * 0.7 + 1.0, D - T, 1.1, 2.4, 'daylight_plain');
+    R(L * 0.25, D - T - 0.1, L * 0.25 + 1.0, D - T - 0.04, 1.1, 2.4, 'daylight_plain'); R(L * 0.7, D - T - 0.1, L * 0.7 + 1.0, D - T - 0.04, 1.1, 2.4, 'daylight_plain');
     const p1 = F.P(L / 2, 3.2), p2 = F.P(L / 2, vp + 4);
     lights.push({ at: [p1[0], fy + 2.3, p1[1]], color: '#ffc27a', intensity: 5, distance: 9 }, { at: [p2[0], fy + 2.3, p2[1]], color: '#ffb866', intensity: 4, distance: 9 });
     // the shop's own lamp hung inside the arch
   }
   // ── the street front: quoins, cornice, damp, streaks, patches
-  for (const [u0, u1] of [[0, 0.45], [L - 0.45, L]]) R(u0 - 0.03, -0.03, u1 + 0.03, 0.4, 0, H, cap);
+  for (const [u0, u1] of [[0, 0.45], [L - 0.45, L]]) R(u0 - 0.03, -0.03, u1 + 0.03, 0.4, 0, H - 0.3, cap);
   R(-0.08, -0.4, L + 0.08, D + 0.08, H - 0.28, H + 0.12, 'limestone');
   if (!simple) {
-    R(0.45, -0.012, L - 0.45, 0.0, 0.7, 1.5 + rand() * 0.4, 'plaster_damp');
-    for (let s = 1; s < n; s++) if (rand() < 0.6) { const k = Math.floor(rand() * wn); R(wu(k) + 0.1, -0.014, wu(k) + 0.1 + 0.3, 0.0, sillAt(s) - 1.7, sillAt(s) - 0.2, 'plaster_streak'); }
-    if (rand() < 0.4) { const u0 = 0.7 + rand() * Math.max(0.1, L - 2.4); R(u0, -0.013, u0 + 0.9, 0.0, 0.8, 1.5, rand() < 0.5 ? 'brick' : 'rubble'); }
-    if (rand() < 0.4) R(L * rand(), -0.014, L * rand() + 0.2, 0.0, H - 2.5, H - 0.3, 'plaster_streak');
+    R(0.45, -0.03, L - 0.45, 0.03, 0.8, 1.5 + rand() * 0.4, 'plaster_damp');
+    for (let s = 1; s < n; s++) if (rand() < 0.6) { const k = Math.floor(rand() * wn); R(wu(k) + 0.1, -0.045, wu(k) + 0.1 + 0.3, 0.06, sillAt(s) - 1.7, sillAt(s) - 0.2, 'plaster_streak'); }
+    if (rand() < 0.4) { const u0 = 0.7 + rand() * Math.max(0.1, L - 2.4); R(u0, -0.06, u0 + 0.9, 0.09, 0.9, 1.5, rand() < 0.5 ? 'brick' : 'rubble'); }
+    if (rand() < 0.4) { const u0 = L * rand(); R(u0, -0.045, u0 + 0.2, 0.12, H - 2.5, H - 0.4, 'plaster_streak'); }
   }
   // the door: stone frame, leaf set back (shut, or open on its own step in open houses)
   { const dw2 = 1.1, du2 = doorU;
@@ -151,7 +151,7 @@ export function manuHouse(el, ctx) {
       R(du2 - dw2 / 2 - 0.2, -0.12, du2 + dw2 / 2 + 0.2, 0.15, 0.0, 2.55, 'limestone'); R(du2 - dw2 / 2 - 0.25, -0.15, du2 + dw2 / 2 + 0.25, 0.15, 2.4, 2.75, 'limestone');
       R(du2 - dw2 / 2, -0.02, du2 + dw2 / 2, 0.2, 0.0, 2.4, 'wood_dark');
       if (!simple) for (let k = 0; k < 3; k++) for (let j = 0; j < 4; j++) R(du2 - 0.4 + k * 0.4, -0.04, du2 - 0.34 + k * 0.4, -0.02, 0.5 + j * 0.5, 0.56 + j * 0.5, 'iron');
-    } else { R(doorU - 1.55, -0.12, doorU - 1.3, 0.15, 0.3, 3.4, 'limestone'); R(doorU + 1.3, -0.12, doorU + 1.55, 0.15, 0.3, 3.4, 'limestone'); R(doorU - 1.6, -0.15, doorU + 1.6, 0.15, 3.4, 3.7, 'limestone'); }
+    } else { R(doorU - 1.55, -0.12, doorU - 1.3, 0.0, 0.0, 3.4, 'limestone'); R(doorU + 1.3, -0.12, doorU + 1.55, 0.0, 0.0, 3.4, 'limestone'); R(doorU - 1.6, -0.15, doorU + 1.6, 0.0, 3.4, 3.7, 'limestone'); }
   }
   if (simple) { roofOver(); return; }
   // upper windows: stone frame, hood, mullion, shutters; an iron balcony or a lattice rótula on the first floor of merchants
