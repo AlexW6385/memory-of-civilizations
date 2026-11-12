@@ -7,6 +7,7 @@
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, rod, disc, fromTriangles, orientOutward, place } from '../../core/geom.js';
 import '../qing/index.js';
+import { houseMamluk } from '../vernacular/house-mamluk.js';
 import { cairoQaa } from './qaa.js';
 import { baynFront, baynBed } from './bayn.js';
 import { cairoWikala, cairoHammam } from './khan.js';
@@ -589,6 +590,6 @@ function sabilKuttab(el, { bag, col }) {
 
 registerStyle('mamluk', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, mamluk_minaret: minaret, mamluk_dome: dome, madrasa_block: block, citadel_wall: citadelWall, road_wall: roadWall, nasir_minaret: nasirMinaret, suq_covered: suqCovered, cairo_front: cairoFront, sabil_kuttab: sabilKuttab, cairo_qaa: cairoQaa, bayn_front: baynFront, bayn_bed: baynBed, cairo_wikala: cairoWikala, cairo_hammam: cairoHammam, cairo_shop: cairoShop, sharbat_stall: sharbatStall, cairo_dress: cairoDress, cairo_shopfront: cairoShopfront, cairo_sabat: cairoSabat, cairo_yard: cairoYard, cairo_square: cairoSquare },
+  elements: { ...STYLES.qing.elements, house_mamluk: houseMamluk, mamluk_minaret: minaret, mamluk_dome: dome, madrasa_block: block, citadel_wall: citadelWall, road_wall: roadWall, nasir_minaret: nasirMinaret, suq_covered: suqCovered, cairo_front: cairoFront, sabil_kuttab: sabilKuttab, cairo_qaa: cairoQaa, bayn_front: baynFront, bayn_bed: baynBed, cairo_wikala: cairoWikala, cairo_hammam: cairoHammam, cairo_shop: cairoShop, sharbat_stall: sharbatStall, cairo_dress: cairoDress, cairo_shopfront: cairoShopfront, cairo_sabat: cairoSabat, cairo_yard: cairoYard, cairo_square: cairoSquare },
   objects: {},
 });

@@ -1,10 +1,10 @@
-import { lodTiles } from '../lod.js';
 // The city's houses (docs/settlements/mamluk-cairo.md §5): Cairene town houses (house_mamluk, style
 // vernacular) — and sabil-kuttabs on three street corners in place of a house.
 import { RADIUS, lots, yards, sabats, shops, tradeOf, SQUARE, SABILS, SUQ, QAA, BAYN, QALAWUN, NASIR, BARQUQ, KHAN, SUQ2, SUQ3, HAMMAM, SHOP, STALLS } from './layout.js';
 import { lifePlan } from './life.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-37, -30], facing: 's' } });
 const dist = (l, [x, z]) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - x, (l.rect[1] + l.rect[3]) / 2 - z);
+const TILE = 160;
 export async function town() {
   const all = lots(), plans = [];
   // the corner lot nearest each sabil's place becomes the sabil-kuttab, its corner the one nearest the crossing
@@ -18,15 +18,35 @@ export async function town() {
   // the bent entrance, malqafs), in 100 m tiles, near and far; the shop fronts of the market streets (cairo_shopfront);
   // the dressing of the faces and roofs (cairo_dress), near only
   const NEAR = 150, ent = { at: [-37, -30], facing: 's' };
-  plans.push(...lodTiles('mamluk-cairo-houses', 'vernacular', houses.map((l) => ({ t: 'house_mamluk', ...l })), { R: RADIUS, near: NEAR, entrance: ent }));
-  plans.push(...lodTiles('mamluk-cairo-fronts', 'mamluk', [...frontSet].map((l) => ({ t: 'cairo_shopfront', ...l, trade: tradeOf(l) })), { R: RADIUS, near: NEAR, entrance: ent }));
-  plans.push(...lodTiles('mamluk-cairo-dress', 'mamluk', houses.map((l) => ({ t: 'cairo_dress', ...l })), { R: RADIUS, near: 100, entrance: ent }).filter((p) => !p.id.endsWith('-far')));
-  plans.push(...lodTiles('mamluk-cairo-yards', 'mamluk', [...rest.filter((l) => l.yard).map((l) => ({ t: 'cairo_yard', rect: l.rect, front: l.front, seed: l.seed })), ...yards().filter((r) => !rest.some((l) => l.yard && l.rect === r)).map((r, i) => ({ t: 'cairo_yard', rect: r, front: 's', seed: 900 + i }))], { R: RADIUS, near: 120, entrance: ent }).filter((p) => !p.id.endsWith('-far')));
+  const yardEls = [...rest.filter((l) => l.yard).map((l) => ({ t: 'cairo_yard', rect: l.rect, front: l.front, seed: l.seed })), ...yards().filter((r) => !rest.some((l) => l.yard && l.rect === r)).map((r, i) => ({ t: 'cairo_yard', rect: r, front: 's', seed: 900 + i }))];
+  // one plan per TILE-metre tile for houses, shop fronts and yards together (their materials shared, so one mesh per material
+  // and tile), its simple twin for the far; the dressing apart, near only. The world shows a tile by its distance to its
+  // centre, so the near range is widened by what a larger tile adds to its half-diagonal.
+  const grow = (TILE - 100) * 0.707;
+  const tiles = (id, style, els, near, withFar) => {
+    const m = new Map();
+    for (const e of els) { const [x, z] = e.rect ? [(e.rect[0] + e.rect[2]) / 2, (e.rect[1] + e.rect[3]) / 2] : e.at; const k = Math.floor(x / TILE) + ',' + Math.floor(z / TILE); if (!m.has(k)) m.set(k, []); m.get(k).push(e); }
+    const out = [];
+    for (const [k, list] of m) {
+      const [i, j] = k.split(',').map(Number), center = [i * TILE + TILE / 2, j * TILE + TILE / 2];
+      const b = { style, origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: ent, center };
+      out.push({ ...b, id: `${id}-${k}`, near: near + grow, elements: list });
+      if (withFar) out.push({ ...b, id: `${id}-${k}-far`, far: near + grow, elements: list.filter((e) => e.t !== 'cairo_yard').map((e) => ({ ...e, simple: true })), nocollide: true });
+    }
+    return out;
+  };
+  plans.push(...tiles('mamluk-cairo-blocks', 'mamluk', [...houses.map((l) => ({ t: 'house_mamluk', ...l })), ...[...frontSet].map((l) => ({ t: 'cairo_shopfront', ...l, trade: tradeOf(l) })), ...yardEls], NEAR, true));
+  plans.push(...tiles('mamluk-cairo-dress', 'mamluk', houses.map((l) => ({ t: 'cairo_dress', ...l })), 100, false));
   // the shops that can be entered, one in each stretch of the market streets: a trade each, furnished
-  open.forEach((l) => {
-    const r = l.rect, trade = tradeOf(l), id = 'mamluk-cairo-shop-' + Math.round(r[0]) + '_' + Math.round(r[1]);
-    plans.push({ ...base(id, [{ t: 'cairo_shop', rect: r, face: l.front, y: 0, seed: l.seed, trade }]), style: 'mamluk', bounds: [r[0] - 2, r[1] - 2, r[2] + 2, r[3] + 2], rooms: [{ id: 'shop ' + trade, rect: [r[0] + 0.5, r[1] + 0.5, r[2] - 0.5, r[3] - 0.5], y: 0.2, kind: 'hall' }] });
-  });
+  // (grouped in 200 m cells, one plan and one set of meshes for each)
+  const cells = new Map();
+  open.forEach((l) => { const k = Math.floor(l.rect[0] / 200) + ',' + Math.floor(l.rect[1] / 200); if (!cells.has(k)) cells.set(k, []); cells.get(k).push(l); });
+  for (const [k, group] of cells) {
+    const xs = group.flatMap((l) => [l.rect[0], l.rect[2]]), zs = group.flatMap((l) => [l.rect[1], l.rect[3]]);
+    plans.push({ ...base('mamluk-cairo-shops-' + k, group.map((l) => ({ t: 'cairo_shop', rect: l.rect, face: l.front, y: 0, seed: l.seed, trade: tradeOf(l) }))), style: 'mamluk',
+      bounds: [Math.min(...xs) - 2, Math.min(...zs) - 2, Math.max(...xs) + 2, Math.max(...zs) + 2],
+      rooms: group.map((l) => { const r = l.rect; return { id: 'shop ' + tradeOf(l), rect: [r[0] + 0.5, r[1] + 0.5, r[2] - 0.5, r[3] - 0.5], y: 0.2, kind: 'hall' }; }) });
+  }
   plans.push({ ...base('mamluk-cairo-sabats', sabats().map((b) => ({ t: 'cairo_sabat', ...b, along: 'z' }))), style: 'mamluk' });
   plans.push({ ...base('mamluk-cairo-square', [{ t: 'cairo_square', rect: SQUARE, y: 0, seed: 1363,
     troughs: [[130, -52, 0], [150, 72, 0], [106, -62, 0]], tents: [[140, -30], [124, 8], [152, 42]], fodder: [[160, -62], [163, -22], [100, 98]],
