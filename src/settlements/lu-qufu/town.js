@@ -58,7 +58,7 @@ function mansion() {
 
 function houses() {
   const L = lots(), out = [];
-  for (let i = 0; i < L.length; i += 20) out.push(base(`qufu-houses-${i / 20}`, L.slice(i, i + 20).map((l) => ({ t: 'siheyuan', rect: l.rect, seed: l.seed, furnish: l.seed % 5 === 0 }))));
+  for (let i = 0; i < L.length; i += 20) out.push(base(`qufu-houses-${i / 20}`, L.slice(i, i + 20).map((l) => ({ t: 'lu_house', rect: l.rect, seed: l.seed, wealth: l.wealth, lod: l.lod, shop: l.wealth > 0.3 && l.seed % 3 === 0, trade: l.seed % 4 }))));
   return out;
 }
 

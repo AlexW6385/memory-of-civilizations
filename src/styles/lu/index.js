@@ -6,9 +6,10 @@ import '../qing/index.js';
 import { dacheng } from './dacheng.js';
 import { pailou, stele, stelePavilion, altar, tomb } from './ritual.js';
 import { shopRow } from './shops.js';
+import { luHouse } from './house.js';
 
 const base = STYLES.qing;
 registerStyle('lu', {
   ...base,
-  elements: { ...base.elements, lu_dacheng: dacheng, lu_pailou: pailou, lu_stele: stele, lu_stele_pavilion: stelePavilion, lu_altar: altar, lu_tomb: tomb, lu_shop_row: shopRow },
+  elements: { ...base.elements, lu_dacheng: dacheng, lu_pailou: pailou, lu_stele: stele, lu_stele_pavilion: stelePavilion, lu_altar: altar, lu_tomb: tomb, lu_shop_row: shopRow, lu_house: luHouse },
 });
