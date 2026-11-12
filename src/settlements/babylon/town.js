@@ -80,7 +80,7 @@ function wayProps() {
   for (const [dx, z] of [[-5, -64], [5, -64], [-5, -266], [5, -266], [-5, -322], [5, -322]]) P.push({ kind: 'brazier', at: [WAY.x + dx, z], rot: 0, y: 0.12, seed: 2 });
   // at the glazed walls' foot before the gate (§13.6): offering tables with bread, dates and a lamp, water stands, brick seats, a heap of bricks; between the standards, clear of the sellers' mats
   const wayKinds = ['offering', 'zir', 'bench', 'offering', 'bricks', 'zir'];
-  [[-1, -374], [-1, -356], [-1, -332], [-1, -308], [1, -350], [1, -326], [1, -372], [1, -304], [-1, -282], [1, -282]].forEach(([s, z], i) => P.push({ kind: wayKinds[i % wayKinds.length], at: [WAY.x + s * 9.5, z], rot: s > 0 ? -Math.PI / 2 : Math.PI / 2, y: 0.12, seed: 300 + i }));
+  [[-1, -374], [-1, -356], [-1, -332], [1, -350], [1, -326], [1, -372]].forEach(([s, z], i) => P.push({ kind: wayKinds[i % wayKinds.length], at: [WAY.x + s * 9.5, z], rot: s > 0 ? -Math.PI / 2 : Math.PI / 2, y: 0.12, seed: 300 + i }));
   return P;
 }
 /** Shadufs on the west bank, lifting the river to the gardens. */

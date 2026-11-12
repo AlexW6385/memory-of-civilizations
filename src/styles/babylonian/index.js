@@ -205,6 +205,19 @@ function wayPaving(el, { bag, col }) {
   lane(c0, c1, 1.05, el.slab ?? 'limestone');
   if (c0 > x0 + 0.3) lane(x0, c0, 0.66, el.side ?? 'breccia_red');
   if (x1 > c1 + 0.3) lane(c1, x1, 0.66, el.side ?? 'breccia_red');
+  // what a street collects (§13.6): drifts of dust at the walls' foot, straw dropped from the loads, potsherds, dung — flat, low and cheap
+  const dr = rng((el.seed ?? 575) * 31 + 7), len = z1 - z0;
+  for (let z = z0 + 0.6; z < z1 - 0.6; z += 1.2 + dr() * 1.4) {
+    const w = 0.25 + dr() * 0.85, h = 0.012 + dr() * 0.022, d = 0.5 + dr() * 0.9;
+    bag.add('sacking', box(x0, y, z, x0 + w, y + h, z + d)); if (dr() < 0.85) bag.add('sacking', box(x1 - 0.25 - dr() * 0.85, y, z + dr(), x1, y + h, z + dr() + d));
+  }
+  const n = Math.round(len * 0.9);
+  for (let k = 0; k < n; k++) {
+    const e = dr() < 0.6, x = e ? (dr() < 0.5 ? x0 + 0.5 + dr() * 2.6 : x1 - 0.5 - dr() * 2.6) : x0 + dr() * (x1 - x0), z = z0 + dr() * len, q = dr();
+    if (q < 0.55) { const a = dr() < 0.5; bag.add('thatch', box(x, y, z, x + (a ? 0.4 : 0.03), y + 0.012, z + (a ? 0.03 : 0.4))); }
+    else if (q < 0.85) bag.add('pebbles', box(x, y, z, x + 0.07 + dr() * 0.05, y + 0.025, z + 0.06 + dr() * 0.05));
+    else bag.add('bark_dark', box(x, y, z, x + 0.16, y + 0.05, z + 0.14));
+  }
   col.floor(el.rect, y);
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
