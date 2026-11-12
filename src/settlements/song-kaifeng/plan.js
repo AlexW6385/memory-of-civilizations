@@ -11,7 +11,9 @@ const RW = RADIUS - 26, half = (z) => Math.sqrt(Math.max(0, RW * RW - z * z));
 // ---- the Iron Pagoda: base side 4.16 m (circumradius 5.4), thirteen storeys narrowing to the top
 const tiers = [];
 for (let i = 0; i < 13; i++) tiers.push({ r: 5.4 - i * 0.19, h: i === 0 ? 5.6 : 3.75 - i * 0.06 });
-E.push({ t: 'pagoda_oct', c: PAGODA, y: 0, base: { r: 7.2, h: 1.2 }, tiers, galleries: false, core: 'tile_iron', eave: 'tile_iron', frame: 'tile_iron', spire: 3.6, relief: true, bells: 'bronze' });
+E.push({ t: 'pagoda_oct', c: PAGODA, y: 0, base: { r: 7.2, h: 1.2 }, tiers, galleries: false, core: 'tile_iron', eave: 'tile_iron', frame: 'tile_iron', spire: 3.6, relief: true, bells: 'bronze', interior: true });
+// the way up onto the base on the south, to the pagoda's door (the inside is walkable: a spiral stair in the shaft, a window to the west on every storey)
+E.push({ t: 'stairs', rect: [PAGODA[0] - 1.9, PAGODA[1] + 6.5, PAGODA[0] + 1.9, PAGODA[1] + 9.9], y0: 0.04, y1: 1.2, dir: 'n', mat: 'granite_block' });
 // the monastery: its wall, the gate hall standing in the south wall's line (the way in through its
 // middle bay), the main hall behind the pagoda, side halls
 const [mx0, mz0, mx1, mz1] = MONASTERY, w = (a, b) => E.push({ t: 'ming_wall', a, b, y: 0, h: 3.6, th: 0.8 });
@@ -48,6 +50,17 @@ for (const s of [-1, 1]) {
 }
 // the paved axis from the gate hall to the pagoda's apron, the paths to the side halls and the stele pavilions, the beds of pines and cypresses
 E.push({ t: 'song_court', ax: PAGODA[0], c: PAGODA, z1: SHANMEN.c[1] - 5.2, apron: 13, cross: -150, pav: 20.5, north: MAIN[3] + 0.9 + 0.25, halls: [[mx0 + 14 + 6, -185], [mx1 - 14 - 6, -185]] });
+// the cloisters (lang) along the inside of the precinct's four walls (the south wall's two runs stop at the gate hall)
+{
+  const k = 0.4 + 0.02, N = Math.round, sd = (a, b, side, seed) => E.push({ t: 'cloister', a, b, side, depth: 3.8, post: 2.45, wall: 3.6, seed });
+  sd([mx0 + k, mz0 + 4.1 + 0.4 + 0.4], [mx0 + k, mz1 - 4.2 - 0.4], [1, 0], 3);
+  sd([mx1 - k, mz0 + 4.1 + 0.8], [mx1 - k, mz1 - 4.2 - 0.4], [-1, 0], 4);
+  sd([mx0 + 4.4, mz1 - k], [PAGODA[0] - smW / 2 - 2.5, mz1 - k], [0, -1], 5);
+  sd([PAGODA[0] + smW / 2 + 2.5, mz1 - k], [mx1 - 4.4, mz1 - k], [0, -1], 6);
+  sd([mx0 + 4.4, mz0 + k], [PAGODA[0] - 18 - 3, mz0 + k], [0, 1], 7);
+  sd([PAGODA[0] + 18 + 3, mz0 + k], [mx1 - 4.4, mz0 + k], [0, 1], 8);
+  void N;
+}
 E.push({ t: 'incense_ding', at: [PAGODA[0], -158], y: 0.075, s: 1.5 });
 E.push({ t: 'incense_ding', at: [PAGODA[0], -219], y: 0, s: 1.4 });
 // ---- the river: water, stone landings near the bridge, the Rainbow Bridge, boats

@@ -108,13 +108,21 @@ function pagodaOct(el, { bag, col }) {
   let y = el.y;
   const B = el.base;
   prism(bag, 'granite_block', ngon(cx, cz, B.r + 0.6), ngon(cx, cz, B.r), y, y + B.h);
+  if (el.interior && !el.galleries && el.relief) {
+    // the Iron Pagoda's base is walkable (a stair comes up on the south): a floor over a cross inside the base's faces, the base's wall low enough to step over at the top
+    col.circle(cx, cz, B.r * Math.cos(Math.PI / 8) - 0.4, y, y + B.h - 0.1);
+    const q = B.r * 0.82, c2 = B.r * 0.39;
+    for (const r4 of [[-q, -c2, q, c2], [-c2, -q, c2, q], [-B.r * 0.62, -B.r * 0.62, B.r * 0.62, B.r * 0.62]]) col.floor([cx + r4[0], cz + r4[1], cx + r4[2], cz + r4[3]], y + B.h);
+  } else
   col.circle(cx, cz, B.r * Math.cos(Math.PI / 8) - 0.4, y, y + B.h);   // (inside its faces: a stair can come up onto it)
   y += B.h;
   el.tiers.forEach((t, i) => {
     const last = i === el.tiers.length - 1, r = t.r, h = t.h, gal = el.galleries !== false, g = gal ? r + 2.4 : r + 0.6, coreMat = el.core || 'plaster_white';
     // the core, its doors and windows (doors on the four sides facing the compass, windows on the diagonals)
     const inside = el.interior && gal;
+    const ironIn = !!el.interior && !gal && !!el.relief;
     if (inside) interiorStorey(bag, col, el, cx, cz, i, y, coreMat);
+    else if (ironIn) ironStorey(bag, col, el, cx, cz, i, y, h, r, coreMat, last);
     else { prism(bag, coreMat, ngon(cx, cz, r), ngon(cx, cz, r), y, y + h); col.circle(cx, cz, r * 0.95, y, y + h); }
     const F = ngon(cx, cz, r + 0.03);
     for (let k = 0; k < 8; k++) {
@@ -128,7 +136,7 @@ function pagodaOct(el, { bag, col }) {
       // the glazed brick skin (iron.js): moulded bricks in rows, the arched openings in their surrounds;
       // engaged columns at the corners; under the eave a row of bracket sets in glazed brick, smaller
       // than a timber pagoda's
-      const top = h - 0.68 - 0.45 * 0.7 - 0.04, sk = ironSkin(bag, coreMat, cx, cz, r, y, h, top, i);
+      const top = h - 0.68 - 0.45 * 0.7 - 0.04, sk = ironSkin(bag, coreMat, cx, cz, r, y, h, top, i, ironIn ? ironOpenings(i) : null);
       bag.add('lacquer_black', fromTriangles(sk.dark)); bag.add(coreMat, fromTriangles(sk.frame));
       const G = ngon(cx, cz, r);
       for (let k = 0; k < 8; k++) bag.add(coreMat, lathe([[0.17, 0], [0.17, 0.12], [0.14, 0.2], [0.14, top - 0.12], [0.18, top], [0.001, top]], 8, null, G[k][0], y, G[k][1]));
@@ -318,6 +326,65 @@ function interiorStorey(bag, col, el, cx, cz, i, y, coreMat) {
     for (const sx of [-1, 1]) bag.add('bronze', lathe([[0.001, 0], [0.06, 0], [0.05, 0.03], [0.015, 0.06], [0.012, 0.26], [0.04, 0.28], [0.04, 0.3], [0.001, 0.3]], 10, null, cx + sx * 0.36, y + 0.84, zc));
     for (const sx of [-1, 1]) bag.add('linen', lathe([[0.016, 0], [0.016, 0.12], [0.001, 0.13]], 8, null, cx + sx * 0.36, y + 1.14, zc));
     col.rect([cx - 0.6, cz + tz, cx + 0.6, cz + tz + 0.5], y, y + 0.82);
+  }
+}
+// ── the walkable inside of the Iron Pagoda (pagoda_oct with interior, relief and no galleries) ────────
+// The Iron Pagoda is a solid-cored brick tower with a spiral stair inside its wall, entered by a door on the south [stated: the
+// stair; doors on four sides, docs/settlements/song-kaifeng.md §10]. Ours: a round shaft (apothem IRON_A) up the whole height inside
+// the thickening wall, a pier in its middle, a stair of wedge treads (0.22 m rise) turning once a storey about the pier — from the
+// south door on the ground floor round to the top — with a window through the wall on the west side of every storey (and the
+// south door on the ground floor); the treads' walkable surface is overlapping squares, so a step is never more than the rise.
+const IRON_A = 1.85, IRON_RISE = 0.22, IRON_PIER = 0.5, IRON_R0 = 0.6, IRON_R1 = 1.8, IRON_TH0 = Math.PI;
+/** The openings of the walls of storey i for ironSkin: the faces the skin cuts through (3 = west, and the south door on the ground floor), with the heights. */
+function ironOpenings(i) { return i === 0 ? { 1: [0, 2.3, 0.75], 3: [0.9, 2.3, 0.5] } : { 3: [0.9, 2.3, 0.5] }; }
+/** A wall ring (apothems a0…a1, y0…y1) with openings { face: [sill, top, half-width] } (heights above y0): its pieces into `out`, and its obstacles (if col). */
+function ironRing(out, col, cx, cz, a0, a1, y0, y1, open) {
+  const solid = (poly, ya, yb) => col && col.obstacles.push({ poly, y0: ya, y1: yb });
+  for (let k = 0; k < 8; k++) {
+    const o = open[k];
+    if (!o) { solid(ringPiece(out, cx, cz, k, a0, a1, y0, y1, -99, 99), y0, y1); continue; }
+    const [sill, top, dw] = o;
+    solid(ringPiece(out, cx, cz, k, a0, a1, y0, y1, -99, -dw), y0, y1); solid(ringPiece(out, cx, cz, k, a0, a1, y0, y1, dw, 99), y0, y1);
+    if (sill > 0.01) solid(ringPiece(out, cx, cz, k, a0, a1, y0, y0 + sill, -dw, dw), y0, y0 + sill);
+    solid(ringPiece(out, cx, cz, k, a0, a1, y0 + top, y1, -dw, dw), y0 + top, y1);
+  }
+}
+function ironStorey(bag, col, el, cx, cz, i, y, h, r, coreMat, last) {
+  const a = r * C8, open = ironOpenings(i), op = {};
+  for (const k of Object.keys(open)) op[k] = open[k];
+  // the wall: tile outside, a lining of grey brick inside; the pier of the stair
+  const wall = [], lin = [];
+  ironRing(wall, col, cx, cz, IRON_A, a, y, y + h, op);
+  ironRing(lin, null, cx, cz, IRON_A - 0.05, IRON_A, y, y + h, op);
+  bag.add(coreMat, fromTriangles(wall)); bag.add('brick_grey', fromTriangles(lin));
+  bag.add('brick_grey', lathe([[IRON_PIER + 0.12, 0], [IRON_PIER, 0.15], [IRON_PIER, h - 0.1], [IRON_PIER + 0.1, h]], 12, null, cx, y, cz));
+  col.circle(cx, cz, IRON_PIER, y, y + h);
+  // the doorway's frame, the window's sill and splay are the skin's; the passage floor on the ground storey (platform → door → shaft)
+  const floor = [];
+  if (i === 0) {
+    slab(floor, ngon(cx, cz, IRON_A / C8 + 0.01), y - 0.3, y); col.floor([cx - 1.3, cz - 1.3, cx + 1.3, cz + 1.3], y);
+    col.floor([cx - 0.75, cz + IRON_A - 0.2, cx + 0.75, cz + a + 0.4], y); col.floor([cx - IRON_A + 0.3, cz - IRON_A + 0.3, cx + IRON_A - 0.3, cz + IRON_A - 0.3], y);
+    slab(floor, [[cx - 0.75, cz + IRON_A - 0.2], [cx + 0.75, cz + IRON_A - 0.2], [cx + 0.75, cz + a + 0.1], [cx - 0.75, cz + a + 0.1]], y - 0.3, y);
+    bag.add('brick_paving', fromTriangles(floor));
+    // (the last storey's floor over the shaft's bottom is the platform's; the pier stands on it)
+  }
+  // the treads: one turn a storey about the pier, from the west; on the last storey they stop two metres under the ceiling
+  const n = Math.max(6, Math.round(h / IRON_RISE)), rise = h / n, steps = [];
+  const ymax = last ? y + h - 2.15 : y + h + 0.001;
+  for (let j = 0; j < n; j++) {
+    const top = y + (j + 1) * rise;
+    if (top > ymax) break;
+    const th0 = IRON_TH0 + (j / n) * Math.PI * 2, th1 = IRON_TH0 + ((j + 1) / n) * Math.PI * 2 + 0.07;
+    const P = (rr, th) => [cx + Math.cos(th) * rr, cz + Math.sin(th) * rr];
+    slab(steps, [P(IRON_R0, th0), P(IRON_R1, th0), P(IRON_R1, th1), P(IRON_R0, th1)], top - rise - 0.1, top);
+    const tm = (th0 + th1) / 2, rm = (IRON_R0 + IRON_R1) / 2, [px, pz] = P(rm, tm);
+    col.floor([px - 0.42, pz - 0.42, px + 0.42, pz + 0.42], top);
+  }
+  bag.add('granite_block', fromTriangles(steps));
+  if (last) {
+    const cl = []; slab(cl, ngon(cx, cz, (IRON_A + 0.05) / C8), y + h - 0.35, y + h - 0.02); bag.add('timber_red', fromTriangles(cl));
+    // under the ceiling, the lamp of the stair's top and the caisson of the shaft
+    bag.add('lacquer_red', lathe([[0.001, 0], [0.2, 0.05], [0.28, 0.3], [0.2, 0.55], [0.001, 0.6]], 8, null, cx, y + h - 1.0, cz));
   }
 }
 /** The plan of the sill through a diagonal doorway (the outer wall's thickness, the door's width). */

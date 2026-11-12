@@ -15,7 +15,7 @@ import '../../objects/index.js';
 import { placer, assembly } from '../../objects/kit.js';
 import { box, rod, ly, drum, bowl, jar, prismX, rng, limb } from './props.js';
 import { lots } from './layout.js';
-import { poleA } from './houses.js';
+import { poleA, doorOf } from './houses.js';
 import { tradeOf, wineShops, teaHouses } from './trades.js';
 
 // ── the writing: strokes [kind, x0, y0, x1, y1] on a 100 grid (as the other brush-stroke signs) ──
@@ -217,7 +217,9 @@ function kaifengShop(el, { bag, col }) {
     const list = GOODS[trade] || GOODS.cloth, free0 = -L / 2 + 0.75, free1 = L / 2 - 0.75;
     let x = side > 0 ? free0 : free1; const dir = side > 0 ? 1 : -1; let first = true;
     for (const [name, m, top] of list) {
-      const w = top ? 1.35 : WIDE.has(name) ? 1.4 : 1.2, xc = x + dir * w / 2;
+      const w = top ? 1.35 : WIDE.has(name) ? 1.4 : 1.2;
+      let xc = x + dir * w / 2;
+      if (el.doorX !== undefined && Math.abs(xc - el.doorX) < w / 2 + el.doorHw + 0.3) { x = el.doorX + dir * (el.doorHw + 0.3); xc = x + dir * w / 2; }
       if (!first && (xc - w / 2 < free0 - 0.25 || xc + w / 2 > free1 + 0.25)) break;
       first = false;
       const mats = { ...m }; if (mats.c === 'cloth') mats.c = pick(CLOTHS); else if (mats.c === 'book') mats.c = pick(['cloth_white', 'cloth_indigo', 'cloth_brown']);
@@ -255,7 +257,8 @@ export function shopElements() {
     const f = l.front, [x0, z0, x1, z1] = l.foot, o = f === 's' ? [x1, z1] : f === 'n' ? [x0, z0] : f === 'e' ? [x1, z0] : [x0, z1], u = f === 's' ? [-1, 0] : f === 'n' ? [1, 0] : f === 'e' ? [0, 1] : [0, -1];
     const wx = o[0] + u[0] * a, wz = o[1] + u[1] * a, lx = (wx - at[0]) * c - (wz - at[1]) * s;
     const two = l.storeys === 2 || l.kind === 'wine' || l.kind === 'inn';
-    out.push({ t: 'kaifeng_shop', at, y: 0.04, rot, L: w, trade, seed: l.seed + 7, poleX: lx, poleZ: two ? (l.kind === 'wine' || l.kind === 'inn' ? 1.7 : 1.35) : 1.8, signOnly: l.kind === 'tea', noBoard: l.kind === 'wine' || frontPhysician(l) });
+    const dr = l.bays > 1 ? doorOf(l) : null, dx = dr ? (dr.at[0] - at[0]) * c - (dr.at[1] - at[1]) * s : undefined;
+    out.push({ t: 'kaifeng_shop', at, y: 0.04, rot, L: w, trade, seed: l.seed + 7, doorX: dx, doorHw: dr ? dr.hw : 0, poleX: lx, poleZ: two ? (l.kind === 'wine' || l.kind === 'inn' ? 1.7 : 1.35) : 1.8, signOnly: l.kind === 'tea', noBoard: l.kind === 'wine' || frontPhysician(l) });
     void pole;
   }
   return out;

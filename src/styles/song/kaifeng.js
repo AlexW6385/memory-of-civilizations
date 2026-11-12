@@ -366,7 +366,10 @@ function caimen(el, { bag, col }) {
   // the lantern boxes before the door: a stand, paper sides, a little roof, characters in black
   const nb = el.boxes ?? 2;
   for (let i = 0; i < nb; i++) {
-    const u = nb === 1 ? L / 2 - 1.4 : nb === 3 ? [(us[0] + us[1]) / 2, us[1] + 0.6, us[2] - 0.6][i] : (i ? us[2] - 0.6 : us[1] + 0.6), c = P(u, front + 0.9, 0), s = 0.33;
+    let u = nb === 1 ? L / 2 - 1.4 : nb === 3 ? [(us[0] + us[1]) / 2, us[1] + 0.6, us[2] - 0.6][i] : (i ? us[2] - 0.6 : us[1] + 0.6);
+    // (the way in to the shop is `doorU` along the front: the boxes stand to either side of it, not in it)
+    if (el.doorU !== undefined) { const side = i % 2 ? 1 : -1, dd = 1.75 + Math.floor(i / 2) * 1.3; u = el.doorU + side * dd; if (u < 0.4 || u > L - 0.4) u = el.doorU - side * dd; if (u < 0.4 || u > L - 0.4) continue; }
+    const c = P(u, front + 0.9, 0), s = 0.33;
     bag.add('wood_dark', box(c[0] - s - 0.04, y, c[2] - s - 0.04, c[0] + s + 0.04, y + 0.5, c[2] + s + 0.04));
     bag.add('lamp_paper', box(c[0] - s, y + 0.5, c[2] - s, c[0] + s, y + 1.75, c[2] + s));
     bag.add('wood_dark', box(c[0] - s - 0.06, y + 1.75, c[2] - s - 0.06, c[0] + s + 0.06, y + 1.83, c[2] + s + 0.06));

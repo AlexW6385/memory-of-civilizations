@@ -40,5 +40,10 @@ const edge = (x, north) => { for (let d = 0; d < 8; d += 0.1) { const z = north 
 for (const [x, north, kind] of [[-150, true, 'egret'], [-180, false, 'egret'], [STONE_BANK + 50, false, 'heron'], [190, true, 'egret']]) {
   const e = edge(x, north); if (e) perches.push({ kind, x, z: e[0], y: e[1], rot: north ? Math.PI / 2 : -Math.PI / 2, stay: [80, 240], gone: [40, 150], alert: 10 });
 }
-void BRIDGE; void STREETS; void PAGODA;
+// tree sparrows on the monastery's court (the way in, the cross way, the pagoda's apron, the steps of the main hall) and on the pagoda's base, near where one arrives
+for (const [dx, z] of [[-6, -128], [7, -136], [-14, -148], [14, -152], [-3, -165], [4, -172], [-9, -182], [10, -178], [-2, -208], [6, -214], [-12, -226], [12, -230]]) perches.push({ kind: 'sparrow', x: PAGODA[0] + dx, z, y: 0.05, rot: 0.7 + dx * 0.31, range: [1.6, 1.4], alert: 4 });
+for (const dx of [-3.5, 3.5]) perches.push({ kind: 'sparrow', x: PAGODA[0] + dx, z: PAGODA[1] + 5.4, y: 1.25, rot: dx * 0.4, range: [1.2, 0.4], alert: 4 });
+// doves (pigeons stand in as the sparrows' larger kin) are not drawn by the engine: crows on the roof ridges of the halls, at the day's end
+for (const [x, z, rot] of [[MONASTERY[0] + 14, -185, Math.PI / 2], [MONASTERY[2] - 14, -185, Math.PI / 2]]) perches.push({ kind: 'crow', x, z, y: 5.9, rot, range: [0.8, 0], stay: [60, 200], gone: [60, 160], alert: 12 });
+void BRIDGE; void STREETS;
 export default { fish, flights, perches };

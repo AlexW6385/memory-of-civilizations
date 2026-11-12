@@ -43,6 +43,30 @@ export const poleA = (seed, L) => ((seed >> 2) & 1 ? 0.25 : L - 0.25);
 const WALLS = ['plaster_white', 'plaster_white', 'plaster_grey', 'lime_plaster', 'plaster_damp'];
 const FLAGS = ['cloth_indigo', 'cloth_white', 'cloth_indigo', 'cloth_red'];
 
+/**
+ * Where a lot's door is (the same draws as houseSong's, so the street's things can keep clear of it): the world point at the middle of the
+ * door on the front line, and the door's clear half-width. Shops: the door bay (3 m or so); houses: the door (1.15 m).
+ */
+export function doorOf(l) {
+  const [x0, z0, x1, z1] = l.foot, f = l.front, along = f === 'n' || f === 's', L = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0;
+  const ox = f === 's' ? x1 : f === 'n' ? x0 : f === 'e' ? x1 : x0, oz = f === 's' ? z1 : f === 'n' ? z0 : f === 'e' ? z0 : z1;
+  const u = f === 's' ? [-1, 0] : f === 'n' ? [1, 0] : f === 'e' ? [0, 1] : [0, -1];
+  const r = rng(l.seed || 1);
+  r(); r();
+  let a, hw;
+  if (l.kind === 'house' || l.kind === 'thatch' || l.kind === 'farm') {
+    const thatch = l.kind !== 'house';
+    r(); if (thatch) r(); if (!(L >= D * 0.9)) r(); r();
+    const nbays = Math.max(2, Math.round(L / 3.1));
+    a = nbays % 2 ? L / 2 : L / 2 + (r() < 0.5 ? -1 : 1) * L * 0.2; hw = 0.6; void thatch;
+  } else {
+    const nb = Math.max(1, l.bays || Math.round(L / 3.3)), bw = L / nb;
+    const db = nb === 1 ? 0 : (nb % 2 ? (nb - 1) / 2 : (r() < 0.5 ? nb / 2 - 1 : nb / 2));
+    a = (db + 0.5) * bw; hw = Math.max(0.6, bw / 2 - 0.15);
+  }
+  return { at: [ox + u[0] * a, oz + u[1] * a], hw };
+}
+
 export function houseSong(el, { bag, col }) {
   const rand = rng(el.seed || 1);
   const [x0, z0, x1, z1] = el.foot, f = el.front || 's', kind = el.kind || 'house', det = el.det ?? 2;
@@ -60,7 +84,8 @@ export function houseSong(el, { bag, col }) {
     const A = arr(mat);
     const quad = (a, b, c, d) => A.push(...a, ...b, ...c, ...a, ...c, ...d);
     quad([X0, yb, Z0], [X0, yb, Z1], [X1, yb, Z1], [X1, yb, Z0]);
-    if (!noB) quad([X0, ya, Z0], [X1, ya, Z0], [X1, ya, Z1], [X0, ya, Z1]);
+    // (a thing hung above head height gets its underside: without one the walker's collision field takes it for a solid mass down to the ground and one cannot walk under it)
+    if (!noB || (ya > 1.2 && yb - ya < 1.6)) quad([X0, ya, Z0], [X1, ya, Z0], [X1, ya, Z1], [X0, ya, Z1]);
     quad([X0, ya, Z0], [X0, yb, Z0], [X1, yb, Z0], [X1, ya, Z0]);
     quad([X1, ya, Z0], [X1, yb, Z0], [X1, yb, Z1], [X1, ya, Z1]);
     quad([X1, ya, Z1], [X1, yb, Z1], [X0, yb, Z1], [X0, ya, Z1]);
@@ -82,6 +107,15 @@ export function houseSong(el, { bag, col }) {
   // ---- colliders (world rectangles from local ones)
   const cRect = (a0, b0, a1, b1, ya, yb) => { const p = W(a0, b0, 0), q = W(a1, b1, 0); col.rect([Math.min(p[0], q[0]), Math.min(p[2], q[2]), Math.max(p[0], q[0]), Math.max(p[2], q[2])], ya, yb); };
   const cCircle = (a, b, r, ya, yb) => { const p = W(a, b, 0); col.circle(p[0], p[2], r, ya, yb); };
+  /** A walkable floor at height y over a local rectangle (the room's floor, the plinth's top). */
+  const cFloor = (a0, b0, a1, b1, y) => { const p = W(a0, b0, 0), q = W(a1, b1, 0); col.floor([Math.min(p[0], q[0]), Math.min(p[2], q[2]), Math.max(p[0], q[0]), Math.max(p[2], q[2])], y); };
+  /** The room's ceiling: a slab of boards with its underside at yc, with joists across it (a0..a1 along the front, b0..b1 inward). */
+  const ceiling = (a0, b0, a1, b1, yc) => {
+    B('timber', a0, b0, a1, b1, yc, yc + 0.1, false);
+    const n = Math.max(2, Math.round((a1 - a0) / 1.1));
+    for (let k = 0; k <= n; k++) { const a = a0 + 0.12 + (a1 - a0 - 0.24) * k / n; B('wood_dark', a - 0.07, b0, a + 0.07, b1, yc - 0.16, yc, false); }
+    B('wood_dark', a0, b0, a1, b0 + 0.14, yc - 0.2, yc, false);
+  };
 
   // ---- a roof over an eave rectangle (s0..s1 along the ridge, t0..t1 across it), mapped by M(s, t, y)
   /** opts: yE (eave height), rise, p (profile exponent: >1 concave), th (thickness), mat, soffit, hip (ridge shortened by `hip` m at each end),
@@ -247,6 +281,7 @@ export function houseSong(el, { bag, col }) {
     // the foundation: a plinth of dressed stone, with the floor of the shop
     B('granite_block', -0.05, -0.05, L + 0.05, D + 0.05, -0.4, P0, false);
     const inn = kind === 'inn';
+    const enter = !!el.furnished && (kind === 'shop' || kind === 'wine') && nb > 1;
     const frontD = inn ? 7.6 : D;           // the inn: the front range only is two storeys
     // ---- the walls: back, sides, plastered over a timber frame
     const wm = kind === 'warehouse' ? 'plaster_grey' : wall;
@@ -301,7 +336,13 @@ export function houseSong(el, { bag, col }) {
           }
         }
       }
-      cRect(0, fb + 0.45, L, D, 0, yTop);
+      if (enter) {
+        // a shop you can walk into: the back and side walls solid, the counters in every bay but the door's, the room's floor and ceiling
+        cRect(0, D - 0.3, L, D, 0, yTop); cRect(0, 0, 0.3, D, 0, yTop); cRect(L - 0.3, 0, L, D, 0, yTop);
+        for (let k = 0; k < nb; k++) if (k !== doorBay) cRect(bayA(k) + 0.1, fb + 0.45, bayA(k + 1) - 0.1, fb + 1.15, 0, P0 + 1.0);
+        cFloor(0.3, fb + 0.0, L - 0.3, D - 0.3, P0); cFloor(bayA(doorBay) + 0.15, -0.35, bayA(doorBay + 1) - 0.15, fb + 0.1, P0);
+        ceiling(0.3, fb + 0.12, L - 0.3, D - 0.3, P0 + (kind === 'wine' ? 3.2 : two ? 2.95 : 2.7) - 0.0);
+      } else cRect(0, fb + 0.45, L, D, 0, yTop);
       // the shop's inside, seen through the open front: the back wall's shelves with goods
       if (det >= 2 && !el.furnished) {
         const bk = D - 0.3;
@@ -322,10 +363,10 @@ export function houseSong(el, { bag, col }) {
         const sa2 = poleA(el.seed || 1, L) < L / 2 ? L - 0.13 : 0.13, bm = pick(rand, ['wood_dark', 'lacquer_chestnut', 'timber_red']);
         B('timber', sa2 - 0.03, -0.62, sa2 + 0.03, fb - 0.12, yF - 0.66, yF - 0.58);
         B('iron', sa2 - 0.015, -0.62, sa2 + 0.015, -0.56, yF - 0.58, yF - 0.5);
-        B(bm, sa2 - 0.21, -0.6, sa2 + 0.21, -0.54, yF - 1.18, yF - 0.58); B('paint_ochre', sa2 - 0.06, -0.615, sa2 + 0.06, -0.6, yF - 1.1, yF - 0.7);
+        B(bm, sa2 - 0.21, -0.6, sa2 + 0.21, -0.54, yF - 1.18, yF - 0.58, false); B('paint_ochre', sa2 - 0.06, -0.615, sa2 + 0.06, -0.6, yF - 1.1, yF - 0.7);
         // the rafters' ends under the front eave
         const ne = Math.round((L + 2 * soh) / 0.42);
-        for (let k = 0; k <= ne; k++) { const a = -soh + 0.1 + (L + 2 * soh - 0.2) * k / ne; B('timber', a - 0.04, t0 - 0.1, a + 0.04, t0 + 0.45, yE - th - 0.1, yE - th - 0.005); }
+        for (let k = 0; k <= ne; k++) { const a = -soh + 0.1 + (L + 2 * soh - 0.2) * k / ne; B('timber', a - 0.04, t0 + 0.02, a + 0.04, t0 + 0.45, yE - th - 0.1, yE - th - 0.005); }
       }
       // (the trade's sign — the wine flag, the gourd, the measure — stands on its pole in the street: shops.js)
       // the mat awning over the street in front of the door bays
@@ -340,8 +381,9 @@ export function houseSong(el, { bag, col }) {
         const vc = pick(rand, ['cloth_white', 'cloth_indigo', 'cloth_ochre']);
         const pa = W(aw0, -reach, 0), pb = W(a1, -reach, 0);
         addCloth(bag, vc, clothBox(Math.min(pa[0], pb[0]), y1 - 0.42, Math.min(pa[2], pb[2]) - 0.015, Math.max(pa[0], pb[0]), y1 - 0.04, Math.max(pa[2], pb[2]) + 0.015, 0.21), y1 - 0.04);
-        for (const a of [aw0 + 0.1, a1 - 0.1]) { B('bamboo_culm', a - 0.04, -reach - 0.04, a + 0.04, -reach + 0.04, 0, y1 - 0.04); cCircle(a, -reach, 0.1, 0, y1); }
-        if (a1 - aw0 > 6) { const am = (aw0 + a1) / 2; B('bamboo_culm', am - 0.04, -reach - 0.04, am + 0.04, -reach + 0.04, 0, y1 - 0.04); cCircle(am, -reach, 0.1, 0, y1); }
+        const dcA = (doorBay + 0.5) * bayW, awFree = (a) => !(enter || el.furnished) || Math.abs(a - dcA) > 1.05;     // (a post never stands before the way in)
+        for (const a of [aw0 + 0.1, a1 - 0.1]) { if (!awFree(a)) continue; B('bamboo_culm', a - 0.04, -reach - 0.04, a + 0.04, -reach + 0.04, 0, y1 - 0.04); cCircle(a, -reach, 0.1, 0, y1); }
+        if (a1 - aw0 > 6 && awFree((aw0 + a1) / 2)) { const am = (aw0 + a1) / 2; B('bamboo_culm', am - 0.04, -reach - 0.04, am + 0.04, -reach + 0.04, 0, y1 - 0.04); cCircle(am, -reach, 0.1, 0, y1); }
         }
       }
     }
@@ -368,11 +410,11 @@ export function houseSong(el, { bag, col }) {
           if (open && q < 0.6) { B('wood_dark', a0, fb + 0.4, a1, fb + 0.48, yF, yTop - 0.3); if (det >= 2) B('timber', a0 + 0.2, fb + 0.9, a0 + 0.8, fb + 1.5, yF, yF + 0.78); }
           else if (q < 0.75) {
             B(wall, a0, fb - 0.05, a1, fb + 0.08, yF, yF + 0.85);
-            if (det >= 1) { B('plaster_damp', a0, fb - 0.062, a1, fb - 0.05, yF, yF + 0.22); for (const f of [0.2, 0.75]) if (rand() < 0.8) B('plaster_streak', a0 + (a1 - a0) * f, fb - 0.07, a0 + (a1 - a0) * f + 0.1 + rand() * 0.06, fb - 0.05, yF + 0.2, yF + 0.85); }
+            if (det >= 1) { B('plaster_damp', a0, fb - 0.062, a1, fb - 0.05, yF, yF + 0.22); for (const f of [0.2, 0.75]) if (rand() < 0.8) B('plaster_streak', a0 + (a1 - a0) * f, fb - 0.07, a0 + (a1 - a0) * f + 0.1 + rand() * 0.06, fb - 0.05, yF + 0.25, yF + 0.85); }
             B('lattice', a0 + 0.05, fb - 0.045, a1 - 0.05, fb + 0.02, yF + 0.85, yTop - 0.5); B('timber', a0, fb - 0.06, a1, fb + 0.06, yF + 0.82, yF + 0.88); B('timber', a0, fb - 0.06, a1, fb + 0.06, yTop - 0.52, yTop - 0.46);
             B(wall, a0, fb - 0.05, a1, fb + 0.08, yTop - 0.46, yTop - 0.3);
           } else if (q < 0.88) { B('shutter_brown', a0, fb - 0.05, a1, fb + 0.07, yF, yTop - 0.3); }
-          else { B(wall, a0, fb - 0.05, a1, fb + 0.08, yF, yTop - 0.3); if (det >= 1) { B('plaster_damp', a0, fb - 0.062, a1, fb - 0.05, yF, yF + 0.3); for (const f of [0.15, 0.5, 0.82]) if (rand() < 0.75) { const sa = a0 + (a1 - a0) * f; B('plaster_streak', sa, fb - 0.062, sa + 0.08 + rand() * 0.07, fb - 0.05, yTop - 0.3 - (0.7 + rand() * 1.1), yTop - 0.3); } } B('lattice_ice', a0 + (a1 - a0) / 2 - 0.4, fb - 0.04, a0 + (a1 - a0) / 2 + 0.4, fb + 0.03, yF + 0.9, yF + 1.9); }
+          else { B(wall, a0, fb - 0.05, a1, fb + 0.08, yF, yTop - 0.3); if (det >= 1) { B('plaster_damp', a0, fb - 0.062, a1, fb - 0.05, yF, yF + 0.3); for (const f of [0.15, 0.5, 0.82]) if (rand() < 0.75) { const sa = a0 + (a1 - a0) * f; B('plaster_streak', sa, fb - 0.068, sa + 0.08 + rand() * 0.07, fb - 0.05, yTop - 0.3 - (0.7 + rand() * 1.1), yTop - 0.3); } } B('lattice_ice', a0 + (a1 - a0) / 2 - 0.4, fb - 0.04, a0 + (a1 - a0) / 2 + 0.4, fb + 0.03, yF + 0.9, yF + 1.9); }
         }
         if (det >= 2) {
           // the eave's brackets: a block over each post and an arm out under the eave
@@ -399,7 +441,7 @@ export function houseSong(el, { bag, col }) {
           const a0 = bayA(k) + 0.2, a1 = bayA(k + 1) - 0.2, len = 0.7 + rand() * 1.3, yt = yTop - 0.36, bb = b0 - 0.2;
           if (a1 - a0 < 0.8) continue;
           B('bamboo_culm', a0 - 0.04, bb - 0.07, a1 + 0.04, bb + 0.05, yt, yt + 0.12);
-          B('reed_mat', a0, bb - 0.012, a1, bb + 0.012, yt - len, yt);
+          B('reed_mat', a0, bb - 0.012, a1, bb + 0.012, yt - len, yt, false);     // (with its underside: a thing hung over the street is not a solid mass to the walker's collision field)
           for (let y = yt - 0.14; y > yt - len; y -= 0.2) B('wood_dark', a0, bb - 0.019, a1, bb - 0.012, y, y + 0.014);
           B('wood_dark', a0, bb - 0.03, a1, bb + 0.02, yt - len - 0.03, yt - len);
           for (const a of [a0 + 0.04, a1 - 0.04]) B('rope_fibre', a - 0.012, bb - 0.03, a + 0.012, bb - 0.012, yt - len, yt);
@@ -560,6 +602,7 @@ export function houseSong(el, { bag, col }) {
   }
 
   if (kind === 'house' || kind === 'thatch' || kind === 'farm') {
+    const enter = !!el.furnished && kind === 'house';
     const th = kind === 'house' ? 0.15 : 0.36, thatch = kind !== 'house', Hw = thatch ? 2.1 + rand() * 0.25 : 2.9 + rand() * 0.3;
     const wm = thatch ? (rand() < 0.6 ? 'mud_plaster' : 'earth_wall') : wall;
     const oh = thatch ? 0.7 : 1.15, soh = thatch ? 0.5 : 0.5;
@@ -586,13 +629,14 @@ export function houseSong(el, { bag, col }) {
     B(wm, 0, D - 0.3, L, D, P0, yw); B(wm, 0, 0.3, 0.3, D - 0.3, P0, yw); B(wm, L - 0.3, 0.3, L, D - 0.3, P0, yw);
     B(wm, 0, 0, dc - dw / 2, 0.3, P0, yw); B(wm, dc + dw / 2, 0, L, 0.3, P0, yw);
     const dh = 2.1; B(wm, dc - dw / 2, 0, dc + dw / 2, 0.3, P0 + dh, yw);
-    B('wood_dark', dc - dw / 2 + 0.06, 0.1, dc + dw / 2 - 0.06, 0.2, P0, P0 + dh - 0.04);     // the door leaf, a little back
+    if (enter) for (const sg of [-1, 1]) { const j = dc + sg * (dw / 2 - 0.1); B('wood_dark', j - 0.03, 0.3, j + 0.03, 0.3 + dw / 2 - 0.08, P0, P0 + dh - 0.04); B('timber', j - 0.045, 0.3 + 0.1, j + 0.045, 0.3 + 0.2, P0 + 0.35, P0 + 0.48); B('timber', j - 0.045, 0.3 + 0.1, j + 0.045, 0.3 + 0.2, P0 + 1.5, P0 + 1.63); B('iron', j - 0.05, 0.3 + dw / 2 - 0.22, j + 0.05, 0.3 + dw / 2 - 0.16, P0 + 1.0, P0 + 1.07); }   // the two leaves folded open inward against the jambs
+    else B('wood_dark', dc - dw / 2 + 0.06, 0.1, dc + dw / 2 - 0.06, 0.2, P0, P0 + dh - 0.04);     // the door leaf, a little back
     B('timber', dc - dw / 2, 0.0, dc - dw / 2 + 0.09, 0.32, P0, P0 + dh + 0.08); B('timber', dc + dw / 2 - 0.09, 0.0, dc + dw / 2, 0.32, P0, P0 + dh + 0.08); B('timber', dc - dw / 2, 0.0, dc + dw / 2, 0.32, P0 + dh, P0 + dh + 0.1);
     B('granite_block', dc - dw / 2 - 0.1, -0.5, dc + dw / 2 + 0.1, 0.3, P0 - 0.05, P0 + 0.05);          // the step
     // the door of boards (banmen): battens across the leaf, an iron ring on each side of the meeting stile, the stile a dark line
-    for (const y of [0.35, 1.0, 1.75]) B('timber', dc - dw / 2 + 0.07, 0.07, dc + dw / 2 - 0.07, 0.1, P0 + y, P0 + y + 0.13);
+    if (!enter) { for (const y of [0.35, 1.0, 1.75]) B('timber', dc - dw / 2 + 0.07, 0.07, dc + dw / 2 - 0.07, 0.1, P0 + y, P0 + y + 0.13);
     B('iron', dc - 0.01, 0.07, dc + 0.01, 0.1, P0 + 0.05, P0 + dh - 0.1);
-    for (const a of [dc - 0.12, dc + 0.12]) B('iron', a - 0.035, 0.05, a + 0.035, 0.1, P0 + 1.0, P0 + 1.07);
+    for (const a of [dc - 0.12, dc + 0.12]) B('iron', a - 0.035, 0.05, a + 0.035, 0.1, P0 + 1.0, P0 + 1.07); }
     B('granite_grey', dc - dw / 2 + 0.02, -0.14, dc + dw / 2 - 0.02, 0.3, P0 + 0.05, P0 + 0.09);          // the worn threshold, a grey slab
     // windows: lattice in a frame, either side of the door, in the front of the better houses
     if (!thatch || det >= 1) for (const a of [dc < L / 2 ? dc + dw / 2 + (L - dc - dw / 2) / 2 : dc / 2 - dw / 4]) if (a > 0.6 && a < L - 0.6) {
@@ -618,7 +662,13 @@ export function houseSong(el, { bag, col }) {
       const sa = dc > L / 2 ? 0.4 : L - 1.9;
       for (let r = 0; r < 4; r++) for (let j = 0; j < 5 - (r > 2 ? 1 : 0); j++) B('timber', sa + j * 0.28, 0.35, sa + j * 0.28 + 0.22, 0.58, P0 + r * 0.22, P0 + r * 0.22 + 0.2);
     }
-    cRect(0, 0.0, L, D, 0, yw + 1);
+    if (enter) {
+      // a house you can walk into: walls solid but for the door, the room's floor, a dark ceiling of joisted boards
+      cRect(0, D - 0.3, L, D, 0, yw + 1); cRect(0, 0, 0.3, D, 0, yw + 1); cRect(L - 0.3, 0, L, D, 0, yw + 1);
+      cRect(0, 0, dc - dw / 2, 0.3, 0, yw + 1); cRect(dc + dw / 2, 0, L, 0.3, 0, yw + 1);
+      cFloor(0.3, 0.3, L - 0.3, D - 0.3, P0); cFloor(dc - dw / 2 + 0.05, -0.45, dc + dw / 2 - 0.05, 0.35, P0);
+      ceiling(0.3, 0.3, L - 0.3, D - 0.3, P0 + 2.7);
+    } else cRect(0, 0.0, L, D, 0, yw + 1);
     roof(M, s0, s1, t0, t1, { yE, rise, p, th, mat: thatch ? 'thatch' : tile, soffit: thatch ? 'thatch' : 'timber', w: alongRidge ? [0, 0, L, D] : [0, 0, D, L], ridge: thatch ? 'thatch' : 'tile', hip: thatch ? (alongRidge ? Math.min((t1 - t0) / 2 - 0.2, (s1 - s0) / 2 - 0.3) : Math.min((t1 - t0) / 2 - 0.2, (s1 - s0) / 2 - 0.3)) : 0, ridgeMat: thatch ? 'thatch' : tile });
     // the gable ends of the tiled house: plaster to the roof, the hanging fish
     if (!thatch) {

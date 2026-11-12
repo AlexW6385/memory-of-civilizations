@@ -5,6 +5,7 @@
 
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
+import { hexa } from './kaifeng.js';
 
 const KERB = 0.16, PAVE = 0.06;
 const mulberry = (s) => () => { s = (s + 0x6D2B79F5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
@@ -141,4 +142,63 @@ function stelePavilion(el, { bag, col }) {
   STYLES.song.elements.stele({ at: [x, z], y: y + 0.38, face: el.face }, { bag, col });
 }
 
-export const COURT_ELEMENTS = { song_court: songCourt, stele_pavilion: stelePavilion };
+/**
+ * cloister { a, b (the run's ends on the wall's inner face), side ([nx, nz] into the court), depth, post (post height), wall (the wall's height), seed }:
+ * a covered gallery (lang) along the inside of the monastery's wall, as the Song monasteries had round their courts [inferred from the later
+ * temples and the Song paintings of monasteries]: a brick floor, red posts on stone bases every 3.4 m, a beam with bracket blocks, a lean-to
+ * roof of dark tile from the wall's top down to the eave, a ceiling of painted coffers under it, benches, paper lanterns on the beam, and on the wall
+ * framed mural panels in each bay.
+ */
+function cloister(el, { bag, col }) {
+  const [ax, az] = el.a, [bx, bz] = el.b, [nx, nz] = el.side, D = el.depth ?? 3.8, ph = el.post ?? 2.45, wallH = el.wall ?? 3.6, rnd = mulberry(el.seed ?? 3);
+  const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, n = Math.max(1, Math.round(L / 3.4));
+  const P = (u, d, y) => [ax + ux * u + nx * d, y, az + uz * u + nz * d];
+  const wallBox = (m, u0, u1, d0, d1, y0, y1) => { const o = []; hexa(o, [P(u0, d0, y0), P(u1, d0, y0), P(u1, d1, y0), P(u0, d1, y0), P(u0, d0, y1), P(u1, d0, y1), P(u1, d1, y1), P(u0, d1, y1)]); bag.add(m, fromTriangles(o)); };
+  const rect = (u0, u1, d0, d1) => { const p = [P(u0, d0, 0), P(u1, d1, 0), P(u0, d1, 0), P(u1, d0, 0)]; return [Math.min(...p.map((q) => q[0])), Math.min(...p.map((q) => q[2])), Math.max(...p.map((q) => q[0])), Math.max(...p.map((q) => q[2]))]; };
+  // the floor, a step above the court's flagstones
+  wallBox('brick_paving', 0, L, 0, D, -0.3, 0.1); col.floor(rect(0, L, 0, D), 0.1);
+  wallBox('granite_block', 0, L, D - 0.05, D + 0.2, -0.3, 0.16);
+  const pd = D - 0.35, yb = 0.1 + ph;
+  // the roof: a lean-to from the wall's top (yw) down to the eave beyond the posts (ye), tile above, a coffered ceiling below
+  const yw = wallH - 0.15, ye = yb + 0.42, ov = 0.5;
+  for (let k = 0; k < n; k++) {
+    const u0 = L * k / n, u1 = L * (k + 1) / n;
+    // the sloping slab, 0.2 thick: its top at the wall yw, at the eave ye
+    const o = []; hexa(o, [P(u0, 0, yw - 0.22), P(u1, 0, yw - 0.22), P(u1, D + ov, ye - 0.22), P(u0, D + ov, ye - 0.22), P(u0, 0, yw), P(u1, 0, yw), P(u1, D + ov, ye), P(u0, D + ov, ye)]);
+    bag.add('tile_dark', fromTriangles(o));
+    // the ceiling under it: flat coffers at the beam's height, between the beam and the wall
+    wallBox('ceiling_coffer', u0 + 0.05, u1 - 0.05, 0.1, pd, yb - 0.02, yb + 0.1);
+  }
+  // the ridge-side flashing along the wall and a row of tiles' ends at the eave
+  wallBox('tile_dark', 0, L, 0, 0.35, yw, yw + 0.2); wallBox('tile_dark', 0, L, D + ov - 0.05, D + ov + 0.05, ye - 0.3, ye + 0.04);
+  for (let k = 0; k <= n; k++) {
+    const u = L * k / n, uu = Math.min(L - 0.17, Math.max(0.17, u)), c = P(uu, pd, 0);
+    bag.add('granite_grey', lathe([[0.3, 0], [0.3, 0.1], [0.21, 0.16], [0.21, 0.3]], 8, null, c[0], 0.1, c[2]));
+    bag.add('lacquer_red', lathe([[0.17, 0], [0.15, ph - 0.28]], 8, null, c[0], 0.4, c[2]));
+    col.circle(c[0], c[2], 0.19, 0.1, 0.1 + ph);
+    wallBox('paint_ochre', uu - 0.24, uu + 0.24, pd - 0.24, pd + 0.24, yb - 0.3, yb - 0.1);        // the bracket block
+  }
+  wallBox('lacquer_red', 0, L, pd - 0.17, pd + 0.17, yb - 0.1, yb + 0.12);                        // the beam on the posts
+  wallBox('lacquer_red', 0, L, 0.35, 0.65, yb - 0.1, yb + 0.12);                                  // the plate against the wall
+  for (let k = 0; k < n; k++) {                                                                    // the tie beams across, and a bay's lantern, bench and mural
+    const u0 = L * k / n, u1 = L * (k + 1) / n, um = (u0 + u1) / 2;
+    wallBox('lacquer_red', um - 0.1, um + 0.1, 0.35, pd, yb - 0.12, yb + 0.08);
+    if (k % 2 === 0) { const c = P(um, pd - 0.9, 0); bag.add('lamp_paper', lathe([[0.001, 0], [0.12, 0.05], [0.2, 0.22], [0.13, 0.4], [0.001, 0.44]], 8, null, c[0], yb - 0.66, c[2])); bag.add('wood_dark', rod([c[0], yb - 0.12, c[2]], [c[0], yb - 0.22, c[2]], 0.01, 3)); }
+    if (k % 3 === 1) { wallBox('wood_dark', um - 0.9, um + 0.9, 0.55, 1.0, 0.1, 0.5); { const r = rect(um - 0.9, um + 0.9, 0.55, 1.0); col.rect(r, 0.1, 0.5); } }
+    // the mural: a framed panel on the wall, a field of colour with a band of hills, a figure's block, a sun
+    const w = Math.min(2.2, (u1 - u0) - 1.0), c0 = ['cloth_indigo', 'cloth_green', 'paint_ochre'][k % 3];
+    wallBox('lacquer_black', um - w / 2 - 0.07, um + w / 2 + 0.07, 0.0, 0.07, 1.0, 2.25);
+    wallBox('plaster_white', um - w / 2, um + w / 2, 0.0, 0.1, 1.07, 2.18);
+    wallBox(c0, um - w / 2 + 0.05, um + w / 2 - 0.05, 0.0, 0.12, 1.12, 1.35);
+    wallBox('cloth_green', um - w / 2 + 0.05, um + w / 2 - 0.05, 0.0, 0.12, 1.35, 1.6);
+    wallBox('paint_caihua', um - w * 0.1, um + w * 0.1, 0.0, 0.13, 1.4, 2.05);
+    wallBox('cloth_red', um + w * 0.28 - 0.14, um + w * 0.28 + 0.14, 0.0, 0.13, 1.72, 2.0);
+    wallBox('lacquer_black', um - w / 2 - 0.07, um + w / 2 + 0.07, 0.0, 0.07, 1.0, 1.07);
+    void rnd;
+  }
+  // the wall's foot: a dado of grey brick behind the bays
+  wallBox('brick_grey', 0, L, 0.0, 0.07, 0.1, 0.9);
+}
+
+/** The court's trees: old cypresses and pines (beds of the court's own) are court.js's; these are the groves' ground planting (ground.js GROVES). */
+export const COURT_ELEMENTS = { song_court: songCourt, stele_pavilion: stelePavilion, cloister };
