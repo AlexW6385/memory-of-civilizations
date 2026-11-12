@@ -137,12 +137,19 @@ function wing(el, { bag, col }) {
 /** portico: a row of red columns { a, b, y, h, n, depth, side (+1/−1: which way the roof runs back) } with a lintel and a roof. */
 function portico(el, { bag, col }) {
   const [ax, az] = el.a, [bx, bz] = el.b, y = el.y ?? 0, h = el.h ?? 3.4, n = el.n ?? 4, dp = el.depth ?? 3, s = el.side ?? 1;
-  const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, nx = -uz * s, nz = ux * s;
+  const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, nx = -uz * s, nz = ux * s, alongX0 = Math.abs(ux) > 0.5;
   bag.add(G, box(Math.min(ax, bx, ax + nx * dp, bx + nx * dp) - 0.3, y - 0.4, Math.min(az, bz, az + nz * dp, bz + nz * dp) - 0.3, Math.max(ax, bx, ax + nx * dp, bx + nx * dp) + 0.3, y, Math.max(az, bz, az + nz * dp, bz + nz * dp) + 0.3));
   for (let i = 0; i < n; i++) { const t = (i + 0.5) / n; column(bag, col, ax + ux * L * t, az + uz * L * t, y, h); }
   const r = [Math.min(ax, bx, ax + nx * dp, bx + nx * dp), Math.min(az, bz, az + nz * dp, bz + nz * dp), Math.max(ax, bx, ax + nx * dp, bx + nx * dp), Math.max(az, bz, az + nz * dp, bz + nz * dp)];
   bag.add('timber', box(r[0] - 0.2, y + h + 0.25, r[1] - 0.2, r[2] + 0.2, y + h + 0.7, r[3] + 0.2));
   bag.add('plaster', box(r[0] - 0.3, y + h + 0.7, r[1] - 0.3, r[2] + 0.3, y + h + 1.0, r[3] + 0.3)); col.floor(r, y + h + 1.0);
+  // a valance of dyed cloth hung from the beam between the columns on the open side
+  { const vm = ['cloth_red', 'cloth_indigo', 'cloth_white', 'cloth_ochre'], eo = alongX0 ? (nz > 0 ? az - 0.12 : az + 0.12) : (nx > 0 ? ax - 0.12 : ax + 0.12);
+    for (let i = 0; i < n; i++) { const t0 = i / n, t1 = (i + 1) / n, p0 = [ax + ux * L * t0, az + uz * L * t0], p1 = [ax + ux * L * t1, az + uz * L * t1], m = vm[(i + (el.seed ?? 0)) % 4], pad = 0.5 * L / n * 0.12;
+      if (alongX0) bag.add(m, box(Math.min(p0[0], p1[0]) + pad, y + h - 0.55, eo - 0.02, Math.max(p0[0], p1[0]) - pad, y + h + 0.2, eo + 0.02)); else bag.add(m, box(eo - 0.02, y + h - 0.55, Math.min(p0[1], p1[1]) + pad, eo + 0.02, y + h + 0.2, Math.max(p0[1], p1[1]) - pad)); } }
+  // horns of consecration on the roof's edge, one over each bay, on the side away from the wall
+  const alongX = Math.abs(ux) > 0.5, edge = alongX ? (nz > 0 ? r[1] + 0.15 : r[3] - 0.15) : (nx > 0 ? r[0] + 0.15 : r[2] - 0.15);
+  for (let i = 0; i < n; i++) { const t = (i + 0.5) / n, px = ax + ux * L * t, pz = az + uz * L * t; if (alongX) horns(bag, px, y + h + 1.0, edge, 0.8, true); else horns(bag, edge, y + h + 1.0, pz, 0.8, false); }
 }
 
 /** steps: a stepped area { rect, y0, n, rise, dir ('n'|'s'|'e'|'w': which way they climb) } of gypsum. */
