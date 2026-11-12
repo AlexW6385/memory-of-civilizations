@@ -3,7 +3,7 @@
 // traders with their loads on the way to the Great Enclosure. Data for the engine's movers (src/engine/movers.js, read in
 // its worker); the ways come from layout.js: paths from each homestead's gate to the nearest hub. No boats.
 
-import { ENCLOSURE, VALLEY, ASCENT, RADIUS, compounds } from './layout.js';
+import { ENCLOSURE, VALLEY, ASCENT, RADIUS, GATE, compounds } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
@@ -17,7 +17,7 @@ export const PARAMS = {
 /** The ways: from each homestead's gate to the nearest hub (the Great Enclosure's north entrance, the Valley courts, the foot of the Ancient Ascent), the hubs joined. */
 export function walkways() {
   const links = [], L = (a, b, w = 0.9, weight = 1) => links.push({ a, b, w, kind: 'street', weight });
-  const [ex, ez] = ENCLOSURE.c, gate = [ex + 6, ez - ENCLOSURE.r[1] - 2];
+  const [ex, ez] = ENCLOSURE.c, gate = GATE;
   const hubs = [gate, ...VALLEY.map((V) => [V.c[0] + V.r[0] + 3, V.c[1]]), [ASCENT.x, ASCENT.z0 + 6]];
   L(gate, [ex + 6, ez - 4], 1.6, 2.2);
   for (let i = 1; i < hubs.length; i++) L(hubs[0], hubs[i], 1.0, 1.4);

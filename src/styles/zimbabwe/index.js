@@ -294,7 +294,10 @@ function hut(el, ctx) {
   const a = ((seed % 628) / 100), ux = Math.cos(a), uz = Math.sin(a), tx = -uz, tz = ux;
   if (el.open) hutInside(el, ctx, { x, z, r, y, h, a, seed });
   else {
-    bag.add('mud_plaster', lathe([[r + 0.06, 0], [r - 0.06, h], [0.001, h]], 16, null, x, y + 0.2, z));
+    // each house's daga is its own earth: the walls differ a little in tone from house to house (Shona houses were replastered by hand each season)
+    bag.add(['mud_plaster', 'banco_smooth', 'adobe_taos', 'kahgel'][seed % 4], lathe([[r + 0.06, 0], [r - 0.06, h], [0.001, h]], 16, null, x, y + 0.2, z));
+    // a screen of woven reed leaning against the wall at one side of the door, a water stain streaking the daga below the eave
+    if (seed % 2 === 1) bag.add('reed_mat', orientedBox([x + ux * (r + 0.1) + tx * 0.62, z + uz * (r + 0.1) + tz * 0.62], [x + ux * (r + 0.1) + tx * 1.02, z + uz * (r + 0.1) + tz * 1.02], 0.07, y + 0.22, y + 1.55));
     if (seed % 3 === 0) {
       // a band painted in ochre and white round the wall, hanging triangles under it (the patterns painted and cut into Shona daga walls; inferred)
       const rb = r + 0.06 - 0.12 * (1.45 / h) + 0.012, T = [], W2 = [], N = 18;
@@ -311,7 +314,7 @@ function hut(el, ctx) {
   const yl = el.open ? 2.05 : 1.85;
   bag.add('timber', orientedBox([x + ux * (r + 0.07) - tx * 0.55, z + uz * (r + 0.07) - tz * 0.55], [x + ux * (r + 0.07) + tx * 0.55, z + uz * (r + 0.07) + tz * 0.55], 0.14, y + yl, y + yl + 0.12));
   const ye = y + 0.2 + h - 0.15, eave = ver ? fr + 0.15 : r + 0.75;
-  bag.add('thatch', lathe([[eave, -0.08], [eave - 0.05, 0.06], [(eave + r * 0.5) / 2 + 0.12, eave * 0.36], [(eave + r * 0.5) / 2, eave * 0.36 + 0.05], [r * 0.32, r * 1.0], [0.06, r * 1.22], [0.001, r * 1.3]], 16, (th, i) => (i < 2 ? 1 + 0.025 * Math.sin(th * 11 + seed) : 1), x, ye, z));
+  bag.add(seed % 5 < 2 ? 'thatch_palm' : 'thatch', lathe([[eave, -0.08], [eave - 0.05, 0.06], [(eave + r * 0.5) / 2 + 0.12, eave * 0.36], [(eave + r * 0.5) / 2, eave * 0.36 + 0.05], [r * 0.32, r * 1.0], [0.06, r * 1.22], [0.001, r * 1.3]], 16, (th, i) => (i < 2 ? 1 + 0.025 * Math.sin(th * 11 + seed) : 1), x, ye, z));
   // the thatch bound down with rings of withy: two bands round the cone, standing a finger's breadth out of it
   for (const [rr, vv] of [[0.78, 0.5], [0.52, 0.8]]) {
     const E0 = [(eave + r * 0.5) / 2, eave * 0.36 + 0.05], T0 = [r * 0.32, r * 1.0], P0 = [0.06, r * 1.22];
@@ -319,6 +322,8 @@ function hut(el, ctx) {
     bag.add('wicker', lathe([[rc + 0.045, -0.03], [rc + 0.05, 0.0], [rc + 0.045, 0.03], [rc + 0.01, 0.03], [rc + 0.01, -0.03]], 20, null, x, ye + hc, z));
     void rr;
   }
+  // a clay pot set over the apex of some roofs, to shed the rain from the point
+  if (seed % 4 === 1) bag.add('terracotta', lathe(potProf(0.7).map(([rr, vv]) => [rr, -vv + 0.22]).reverse(), 8, null, x, ye + r * 1.3 - 0.06, z));
   if (ver) for (let k = 0; k < 8; k++) { const b = a + Math.PI / 8 + k * Math.PI / 4; bag.add('timber', lathe([[0.06, 0], [0.055, ye - y - 0.2 + 0.1], [0.001, ye - y - 0.15]], 6, null, x + Math.cos(b) * (fr - 0.2), y + 0.2, z + Math.sin(b) * (fr - 0.2))); }
   if (el.open) {
     // the thatch seen from within: a cone a little under the outer one, blackened by the hearth's smoke, the

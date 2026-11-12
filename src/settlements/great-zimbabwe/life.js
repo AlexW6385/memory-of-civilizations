@@ -3,7 +3,7 @@
 // sticks; women grinding and carrying water in the courts of the Valley Ruins; a trader with the goods of the
 // coast; a few people in the Great Enclosure. Kept few and quiet. Pure data.
 
-import { ENCLOSURE, VALLEY, WEST, RADIUS, KRAAL_AT, height, huts, compounds, inWalled, inEnclosure } from './layout.js';
+import { ENCLOSURE, VALLEY, WEST, RADIUS, KRAAL_AT, height, huts, compounds, inWalled, inEnclosure, pathDist } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));     // a figure faces −z when rot = 0
@@ -75,15 +75,26 @@ export function people() {
       const y = height(p[0], p[1]), r = face(p, [46, 82]) + (rand() - 0.5) * 0.6;
       if (kind === 'jar') woman(p, y, r, { carry: 'pot' }); else if (kind === 'basket') woman(p, y, r, { carry: 'basket' }); else man(p, y, r, { over: 'cape', cloth: 'hide_tan' });
     }
-    const hx = 72, hz = 66;
-    let k = 0;
-    for (let t = 0; t < 40 && k < 4; t++) {
-      const x = hx + (rand() - 0.5) * 14, z = hz + (rand() - 0.5) * 10;
-      if (!clear(x, z, 2) || compounds().some((c) => Math.hypot(c.c[0] - x, c.c[1] - z) < c.r + 3) || L.some((o) => o.t === 'animal' && Math.hypot(o.at[0] - x, o.at[1] - z) < 3.2)) continue;
-      cow(x, z, rand() * 6.28, { graze: true }); k++;
-    }
-    const bx = hx - 7, bz = hz + 6;
-    if (clear(bx, bz, 1)) man([bx, bz], height(bx, bz), face([bx, bz], [hx, hz]), { carry: 'staff', len: 1.5, pose: 'staff', h: 1.4 });
+    // the cattle, the wealth of the state (Met), grazing the grass in sight of the arrival on both sides of the path: a herd of six
+    // to the east with its herd boy, a smaller one and a few goats to the west; a dog by the walkers
+    const herd = (hx, hz, n, spread, graze = true) => {
+      let k = 0;
+      for (let t = 0; t < 60 && k < n; t++) {
+        const x = hx + (rand() - 0.5) * spread[0], z = hz + (rand() - 0.5) * spread[1];
+        if (!clear(x, z, 2) || pathDist(x, z) < 2.5 || L.some((o) => o.t === 'figure' && Math.hypot(o.at[0] - x, o.at[1] - z) < 3) || compounds().some((c) => Math.hypot(c.c[0] - x, c.c[1] - z) < c.r + 3) || L.some((o) => o.t === 'animal' && Math.hypot(o.at[0] - x, o.at[1] - z) < 3.4)) continue;
+        cow(x, z, rand() * 6.28, { graze }); k++;
+      }
+    };
+    herd(55, 75, 6, [11, 6]);
+    herd(28, 75, 4, [12, 6]);
+    for (const [gx, gz] of [[36, 71], [33.5, 73.5], [38.5, 75.5]]) if (clear(gx, gz, 1)) L.push({ t: 'animal', kind: 'goat', at: [gx, gz], y: height(gx, gz), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), graze: rand() < 0.6 });
+    L.push({ t: 'animal', kind: 'dog', at: [42, 73.5], y: height(42, 73.5), rot: 2.4, seed: 8113 });
+    { const bx = 62, bz = 71; if (clear(bx, bz, 1)) man([bx, bz], height(bx, bz), face([bx, bz], [55, 75]), { carry: 'staff', len: 1.5, pose: 'staff', h: 1.4 }); }
+    // two men sitting in the shade of the wall's end by the gate, talking; a woman with a bundle of firewood coming in
+    { const y = height(57, 79.5);
+      man([57.5, 79.5], y, face([57.5, 79.5], [55.6, 79.9]), { pose: 'cross', over: 'cape', cloth: 'hide_tan' });
+      man([55.2, 80.2], y, face([55.2, 80.2], [57.5, 79.5]), { pose: 'cross' });
+      const w = [47.8, 77.5]; woman(w, height(w[0], w[1]), face(w, [44, 90]), { carry: 'basket' }); }
   }
   // in the Western Enclosure on the hill and in the Great Enclosure
   man([WEST.c[0] + 2, WEST.c[1] + 9], WEST.y, 0.4, { over: 'cape', cloth: 'hide_brown' });
