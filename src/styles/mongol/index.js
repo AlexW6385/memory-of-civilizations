@@ -8,7 +8,9 @@ import '../qing/index.js';
 import { ger } from './ger.js';
 import { palaceHall, tileHall, greatHall } from './hall.js';
 import { silverTree, tug, tortoise, kiln, tileStack, forge, pen, cofferCart } from './craft.js';
-import { earthWall, townGate, cornerTower, brickWall, gateHall, mudCompound, mosque, church, shopRow } from './walls.js';
+import { earthWall, townGate, cornerTower, brickWall, gateHall, mosque, church } from './walls.js';
+import { mudCompound } from './house.js';
+import { shopRow } from './shops.js';
 
 registerStyle('mongol', {
   trim: () => {}, opening: () => {}, column: () => {},

@@ -40,10 +40,17 @@ export const MOSQUES = [[-62, -93, -36, -68], [-112, 20, -88, 44]];
 export const CHURCH = [-129, 72, -115, 80];
 export const SECRETARIES = [[-24, -34, -8, -20], [-24, 12, -8, 28]];       // "large palaces" of the court secretaries [stated: Rubruck]: big courtyard houses by the cross-street
 
-/** The shop rows of the main street: { a, n, face }. */
+/** Depth of a shop bay and its width (m). */
+export const SHOP_D = 5.0, SHOP_W = 3.6;
+/**
+ * The shop rows: { a (min corner), n (bays), face ('s'|'n'|'e'|'w': the way the fronts look), seed, d }. The main street's rows stand with their fronts 7.6 m from its axis
+ * (the awnings reach 5.8 m, the paving 4 m); the cross-street's rows (the lanes between them are 1.6 m) face it from both sides.
+ */
 export const SHOPS = [];
-for (const [x, n] of [[-126, 8], [-90, 8], [-54, 8], [-22, 4]]) { SHOPS.push({ a: [x, -14], n, face: 's', seed: x }); SHOPS.push({ a: [x, 9.6], n, face: 'n', seed: x + 1 }); }
-for (const [x, n] of [[8, 8], [40, 8], [72, 8], [104, 6]]) SHOPS.push({ a: [x, 9.6], n, face: 'n', seed: x + 3, east: true });
+for (const [x, n] of [[-126, 8], [-90, 8], [-54, 8], [-22, 4]]) { SHOPS.push({ a: [x, -12.6], n, face: 's', seed: x, d: SHOP_D }); SHOPS.push({ a: [x, 7.6], n, face: 'n', seed: x + 1, d: SHOP_D }); }
+for (const [x, n] of [[8, 8], [40, 8], [72, 8], [104, 6]]) SHOPS.push({ a: [x, 7.6], n, face: 'n', seed: x + 3, east: true, d: SHOP_D });
+// the cross-street (x ±3.5): fronts at x = ∓5.2, bays 4.6 deep
+for (const [z, n] of [[-92, 7], [-64, 7], [32, 7], [59, 7]]) { SHOPS.push({ a: [-5.2 - 4.6, z], n, face: 'e', seed: z * 3 + 1, d: 4.6 }); SHOPS.push({ a: [5.2, z], n, face: 'w', seed: z * 3 + 2, east: z > 0, d: 4.6 }); }
 
 /** The courtyard lots of the Saracen quarter and the open ground between: { rect, gate, kind: 'house' | 'open', seed }. */
 export const LOTS = (() => {
@@ -66,10 +73,12 @@ export const LOTS = (() => {
   return out;
 })();
 
+/** The footprint of a shop row. */
+export const shopRect = (s) => (s.face === 'e' || s.face === 'w' ? [s.a[0], s.a[1], s.a[0] + s.d, s.a[1] + s.n * SHOP_W] : [s.a[0], s.a[1], s.a[0] + s.n * SHOP_W, s.a[1] + s.d]);
 /** Everything built in the town that a person cannot walk through (rects, with a margin test): for placing life. */
 export const BUILT = [
   ...LOTS.filter((l) => l.kind === 'house').map((l) => l.rect), ...MOSQUES, CHURCH, ...SECRETARIES, ...TEMPLES, ...TEMPLES_NW, ...WORKSHOPS,
-  ...SHOPS.map((s) => [s.a[0], Math.min(s.a[1], s.a[1] + (s.face === 's' ? 0 : 0)) - 0, s.a[0] + s.n * 3.6, s.a[1] + 4.4]), ...STORES, GREAT_RECT,
+  ...SHOPS.map((s) => shopRect(s)), ...STORES, GREAT_RECT,
   [HALL_RECT[0] - 2.7, HALL_RECT[1] - 2.7, HALL_RECT[2] + 2.7, HALL_RECT[3] + 2.7], ...FORGES,
 ];
 export const inBuilt = (x, z, m = 0) => BUILT.some((r) => inRect(r, x, z, m));

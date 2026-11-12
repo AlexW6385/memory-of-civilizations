@@ -117,53 +117,6 @@ export function gateHall(el, { bag, col }) {
   rectRoof({ c: [cx, zc], A: W / 2 + 1.8, B: D / 2 + 1.8, y: Y + H + 0.2, rise: 3.4, kind: 'xieshan', sweep: 0.9, mat: 'tile_green', soffit: 'lacquer_red' }, bag);
 }
 
-/**
- * mud_compound: a courtyard house of sun-dried brick [stated: Hyperallergic: collapsed mud-brick compounds; inferred: the form]: a wall round the court (gate
- * in the side `gate`), the house along the back with a flat roof on beams, a parapet, a few small windows; some with a dome over the kitchen or the iwan,
- * an oven and a heap of fuel in the court. { rect, gate ('s'|'n'|'e'|'w'), seed, floors, dome }
- */
-export function mudCompound(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, rand = rng(el.seed || 5), gate = el.gate ?? 's', T = 0.45, WH = 2.9, floors = el.floors ?? 1, mat = rand() < 0.5 ? 'mudbrick' : 'mud_plaster';
-  const gu = (gate === 's' || gate === 'n') ? (x0 + x1) / 2 + (rand() - 0.5) * (x1 - x0) * 0.3 : (z0 + z1) / 2 + (rand() - 0.5) * (z1 - z0) * 0.3;
-  const gw = 2.2, gh = 2.5;
-  const run = (a, b, side) => { const along = side === 's' || side === 'n'; const pos = along ? a[0] : a[1]; const ops = side === gate ? [{ at: gu - pos, w: gw, h: gh }] : []; wallRun(bag, col, a, b, T, 0, WH, mat, ops); };
-  run([x0, z0], [x1, z0], 'n'); run([x0, z1], [x1, z1], 's'); run([x0, z0], [x0, z1], 'w'); run([x1, z0], [x1, z1], 'e');
-  // the gate's lintel beam and its low roofed hood
-  { const o = gate === 's' ? [gu - 1.4, z1 - 0.3, gu + 1.4, z1 + 0.5] : gate === 'n' ? [gu - 1.4, z0 - 0.5, gu + 1.4, z0 + 0.3] : gate === 'e' ? [x1 - 0.3, gu - 1.4, x1 + 0.5, gu + 1.4] : [x0 - 0.5, gu - 1.4, x0 + 0.3, gu + 1.4]; bag.add('timber', box(o[0], gh, o[1], o[2], gh + 0.2, o[3])); bag.add('wood_dark', box(o[0] - 0.1, gh + 0.2, o[1] - 0.1, o[2] + 0.1, gh + 0.3, o[3] + 0.1)); }
-  // coping of the court wall: a course of laid brick
-  for (const [a, b] of [[[x0, z0], [x1, z0]], [[x0, z1], [x1, z1]], [[x0, z0], [x0, z1]], [[x1, z0], [x1, z1]]]) bag.add('brick_buff', obox(a, b, T + 0.12, WH, WH + 0.1));
-  // the house: along the side opposite the gate, depth 40 % of the compound
-  const d = gate === 's' ? [x0 + T, z0 + T, x1 - T, z0 + (z1 - z0) * 0.42] : gate === 'n' ? [x0 + T, z1 - (z1 - z0) * 0.42, x1 - T, z1 - T] : gate === 'e' ? [x0 + T, z0 + T, x0 + (x1 - x0) * 0.42, z1 - T] : [x1 - (x1 - x0) * 0.42, z0 + T, x1 - T, z1 - T];
-  const hh = floors > 1 ? 6.2 : 3.6;
-  bag.add(mat, box(d[0], 0, d[1], d[2], hh, d[3])); col.rect(d, 0, hh);
-  bag.add('brick_buff', box(d[0] - 0.05, hh, d[1] - 0.05, d[2] + 0.05, hh + 0.12, d[3] + 0.05));
-  bag.add('mud_plaster', box(d[0], hh + 0.12, d[1], d[2], hh + 0.7, d[1] + 0.35)); bag.add('mud_plaster', box(d[0], hh + 0.12, d[3] - 0.35, d[2], hh + 0.7, d[3])); bag.add('mud_plaster', box(d[0], hh + 0.12, d[1] + 0.35, d[0] + 0.35, hh + 0.7, d[3] - 0.35)); bag.add('mud_plaster', box(d[2] - 0.35, hh + 0.12, d[1] + 0.35, d[2], hh + 0.7, d[3] - 0.35));
-  // the ends of the roof beams (poplar poles) through the face toward the court
-  const face = gate === 's' ? [d[0], d[3], d[2], d[3], 0, 1] : gate === 'n' ? [d[0], d[1], d[2], d[1], 0, -1] : gate === 'e' ? [d[2], d[1], d[2], d[3], 1, 0] : [d[0], d[1], d[0], d[3], -1, 0];
-  const Lf = Math.hypot(face[2] - face[0], face[3] - face[1]);
-  for (let s = 0.6; s < Lf - 0.3; s += 0.7) { const px = face[0] + (face[2] - face[0]) * s / Lf, pz = face[1] + (face[3] - face[1]) * s / Lf; bag.add('cedar', rod([px, hh - 0.25, pz], [px + face[4] * 0.35, hh - 0.25, pz + face[5] * 0.35], 0.07, 5)); }
-  // the doors and windows on the court face: dark recesses with lattice and a timber door
-  const nw = Math.max(2, Math.floor(Lf / 3.2));
-  for (let i = 0; i < nw; i++) {
-    const s = (i + 0.5) * Lf / nw, px = face[0] + (face[2] - face[0]) * s / Lf, pz = face[1] + (face[3] - face[1]) * s / Lf, nx = face[4], nz = face[5], isDoor = i === Math.floor(nw / 2);
-    const w = isDoor ? 1.0 : 0.8, y0 = isDoor ? 0 : 1.3, y1 = isDoor ? 2.3 : 2.2;
-    const tx = nz ? 1 : 0, tz = nx ? 1 : 0;
-    const a = [px - tx * w / 2 + nx * 0.015, pz - tz * w / 2 + nz * 0.015], b = [px + tx * w / 2 + nx * 0.015, pz + tz * w / 2 + nz * 0.015];
-    bag.add(isDoor ? 'wood_dark' : 'opening', obox(a, b, 0.03, y0, y1)); if (!isDoor) bag.add('lattice', obox([a[0] + nx * 0.02, a[1] + nz * 0.02], [b[0] + nx * 0.02, b[1] + nz * 0.02], 0.02, y0 + 0.05, y1 - 0.05));
-    if (floors > 1 && !isDoor) bag.add('opening', obox([a[0], a[1]], [b[0], b[1]], 0.03, 4.2, 5.3));
-  }
-  if (el.dome) {
-    const cx = (d[0] + d[2]) / 2 + (rand() - 0.5), cz = (d[1] + d[3]) / 2, r = Math.min(2.6, Math.min(d[2] - d[0], d[3] - d[1]) * 0.35);
-    bag.add('brick_buff', lathe([[r, 0], [r, 0.5], [r * 0.9, 1.0], [r * 0.62, 1.7], [r * 0.2, 2.15], [0.001, 2.2]], 14, null, cx, hh + 0.12, cz));
-    bag.add('gilt_bronze', lathe([[0.001, 0], [0.1, 0.04], [0.02, 0.5]], 6, null, cx, hh + 2.3, cz));
-  }
-  // in the court: a tandoor-like oven and a heap of dung fuel, a felt-roofed store, a trough
-  const ox = gate === 's' || gate === 'n' ? x0 + 1.6 : (gate === 'e' ? x1 - 1.4 : x0 + 1.4), oz = gate === 's' ? z1 - 1.6 : gate === 'n' ? z0 + 1.6 : z0 + 1.6;
-  bag.add('mudbrick', lathe([[0.6, 0], [0.5, 0.5], [0.42, 0.85], [0.28, 1.0], [0.001, 1.02]], 10, null, ox, 0, oz)); col.circle(ox, oz, 0.62, 0, 1.0);
-  bag.add('bark_dark', lathe([[0.7, 0], [0.45, 0.4], [0.001, 0.55]], 8, null, ox + 1.6, 0, oz + 0.3)); col.circle(ox + 1.6, oz + 0.3, 0.6, 0, 0.4);
-  void TAU;
-}
-
 /** mosque: a brick mosque of the Saracen quarter: a court with an ablution pool, the prayer hall with a dome and a pishtaq of turquoise tile, a square minaret. { rect, seed } faces south. */
 export function mosque(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, cx = (x0 + x1) / 2, T = 0.6, WH = 3.4, hz1 = z0 + (z1 - z0) * 0.55;
@@ -215,34 +168,5 @@ export function church(el, { bag, col }) {
   bag.add('gilt_bronze', box(x1 - 1.62, 1.03, cz - 0.03, x1 - 1.58, 1.6, cz + 0.03)); bag.add('gilt_bronze', box(x1 - 1.62, 1.35, cz - 0.22, x1 - 1.58, 1.4, cz + 0.22));
   for (const dz of [-0.6, 0.6]) bag.add('bronze', lathe([[0.001, 0], [0.05, 0.02], [0.04, 0.2], [0.001, 0.22]], 6, null, x1 - 1.5, 1.03, cz + dz));
   for (let k = 0; k < 3; k++) for (const s of [-1, 1]) { bag.add('timber', box(x0 + 2.2 + k * 2.2, 0.03, cz + s * 1.0 - 0.18, x0 + 3.5 + k * 2.2, 0.45, cz + s * 1.0 + 0.18)); col.rect([x0 + 2.2 + k * 2.2, cz + s * 1.0 - 0.18, x0 + 3.5 + k * 2.2, cz + s * 1.0 + 0.18], 0.03, 0.45); }
-}
-/**
- * shop_row: a row of open-fronted shops [inferred] of sun-dried brick with flat roofs: n bays of w m along x from a, depth d, the front to the south (face 's') or north; a
- * counter, a cloth awning in the wind, goods and rolled felts or carpets on shelves. { a, n, w, d, face, seed }
- */
-export function shopRow(el, { bag, col }) {
-  const [ax, az] = el.a, n = el.n ?? 4, w = el.w ?? 3.6, d = el.d ?? 4.4, rand = rng(el.seed || 9), face = el.face ?? 's', H = 3.2, y = el.y ?? 0, f = face === 's' ? 1 : -1;
-  const zf = face === 's' ? az + d : az, zb = face === 's' ? az : az + d;
-  const x1 = ax + n * w;
-  bag.add('mudbrick', box(ax, y, Math.min(zb, zb + f * -0.4), x1, y + H, Math.max(zb, zb - f * 0.4))); col.rect([ax, Math.min(zb, zb - f * 0.4), x1, Math.max(zb, zb - f * 0.4)], y, y + H);
-  bag.add('mud_plaster', box(ax, y + H, Math.min(az, zf), x1, y + H + 0.14, Math.max(az, zf)));
-  bag.add('mud_plaster', box(ax, y + H + 0.14, Math.min(zf, zf - f * 0.3), x1, y + H + 0.8, Math.max(zf, zf - f * 0.3)));
-  const goods = ['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_green', 'hide_tan', 'cloth_white', 'cloth_maroon'], awn = ['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_white', 'cloth_green'];
-  for (let i = 0; i <= n; i++) { const x = ax + i * w, xa = Math.min(x - 0.2, ax), xb = x; void xa; bag.add('mudbrick', box(x - 0.2 + (i === n ? -0.0 : 0), y, Math.min(az, zf), x + 0.2, y + H, Math.max(az, zf))); col.rect([x - 0.2, Math.min(az, zf), x + 0.2, Math.max(az, zf)], y, y + H); void xb; }
-  for (let i = 0; i < n; i++) {
-    const xa = ax + i * w + 0.2, xb = ax + (i + 1) * w - 0.2, mx = (xa + xb) / 2, zc = zf - f * 0.6;
-    // the counter at the front, a shelf at the back with goods
-    bag.add('timber', box(xa, y, Math.min(zc, zc - f * 0.5), xb, y + 0.95, Math.max(zc, zc - f * 0.5))); col.rect([xa, Math.min(zc, zc - f * 0.5), xb, Math.max(zc, zc - f * 0.5)], y, y + 0.95);
-    bag.add('wood_dark', box(xa, y + 0.95, Math.min(zc, zc - f * 0.5), xb, y + 1.0, Math.max(zc, zc - f * 0.5)));
-    const gm = goods[Math.floor(rand() * goods.length)];
-    for (let k = 0; k < 4; k++) { const gx = xa + 0.25 + k * (xb - xa - 0.5) / 3; bag.add(goods[Math.floor(rand() * goods.length)], lathe([[0.001, 0], [0.16, 0.02], [0.2, 0.12], [0.1, 0.22], [0.001, 0.23]], 8, null, gx, y + 1.0, zc - f * 0.25)); }
-    for (const sy of [1.2, 1.9]) { bag.add('timber', box(xa + 0.05, y + sy, Math.min(zb, zb - f * 0.5) , xb - 0.05, y + sy + 0.05, Math.max(zb, zb - f * 0.5))); for (let k = 0; k < 4; k++) bag.add(goods[Math.floor(rand() * goods.length)], box(xa + 0.15 + k * 0.7, y + sy + 0.05, zb - f * 0.45, xa + 0.7 + k * 0.7, y + sy + 0.45, zb - f * 0.05)); }
-    bag.add(gm, box(mx - 0.8, y + 0.0, zc + f * 0.4, mx + 0.8, y + 0.03, zc + f * 1.3));
-    // the awning: cloth sloping from the roof edge down and out, in the wind
-    const am = awn[Math.floor(rand() * awn.length)];
-    const g = clothBox(xa - 0.05, y + H - 0.5, Math.min(zf, zf + f * 1.7), xb + 0.05, y + H - 0.43, Math.max(zf, zf + f * 1.7), 0.35);
-    addCloth(bag, am, g, y + H);
-    for (const x of [xa, xb]) { bag.add('timber', rod([x, y, zf + f * 1.7], [x, y + H - 0.4, zf + f * 1.7], 0.05, 5)); col.circle(x, zf + f * 1.7, 0.06, y, y + H); }
-  }
 }
 void rectRoof;
