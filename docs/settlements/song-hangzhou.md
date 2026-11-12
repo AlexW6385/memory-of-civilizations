@@ -83,7 +83,7 @@ The disc grows to 520 m (large class). It is a **compressed composite** of Lin'a
 - **The West Lake.** The lake fills the north-west (z < −250, x < 100) at the canal's level; the causeway and what stands in it are the landmark's (§14). The Su Causeway: about 2.8 km long, Su Shi's (1089), peach trees and willows along it [stated: theworldofchinese.com]; the ten scenes of the lake date from the Southern Song, the lotus of Quyuan, once a Southern Song wine brewery, and the orioles in the willows [stated: same]. Ours (`ground.js`, `town.js`): the shore with willows (banks), peach trees behind them (apple stands in for the peach), reeds in the shallows, four fields of lotus in the water; the lake is exported as `WEST_LAKE`, `inWestLake`, `lakeDepth`, `shoreZ`, `shoreX` in `layout.js`.
 - **Planting at true heights.** Hills: masson pine and Chinese fir above, Chinese pine, camphor and bamboo on the lower slopes, tea on the middle, maples; the willow (11 m), camphor (16 m), mulberry (5 m) and peach stand-in (5 m) of the species table [inferred: the plants' distribution].
 - **Weathering.** `damp` 0.75 and the `waterline` at the canal's level (−1.4 m), the lake at the same level.
-- **Not built:** the palace on Phoenix Hill, the Imperial Way's drains and railings, the markets' stalls on the Way, hill temples [recorded for later].
+- **Not built:** the palace on Phoenix Hill, the Imperial Way's drains and railings (the markets' stalls on the Way and a hill path are built since, §24, §26) [recorded for later].
 
 ## 13. Temple court, side halls, ceiling, spire and niches (landmark, L3)
 
@@ -180,6 +180,26 @@ Marks as elsewhere: [stated] has a source in the dossier; [inferred] is our read
 - **The Imperial Way's wear** (`hz_imperial_way`): patches of wet dark gravel, cobbles and flints worked up through the bed, horse dung, straw and the sweepings of the stalls, and places where a slab was lifted and relaid in gravel [inferred; the stalls and the paving are [stated], §12 and §18].
 - **The canal streets' paving** (`hz_slabs`): worn stone slabs in staggered rows (darker down the middle), an iron-slotted granite grating near the canal edge every 18 m and brick patches where a slab was lifted [inferred: "paved with stone or brick" is Marco Polo's, in §15].
 - Boats moored at the causeway's landing moved 0.2–1.2 m so that none touches the bank.
+
+## 24. Fourth pass: the wazi, the Way's market, the wards' gates (deepening, B2)
+
+- **The entertainment ground (瓦子, wazi).** Lin'an had five walled-in wazi within the city, 17 in all at the peak and 23 by the late Southern Song; the North Wazi alone had 13 theatres (勾栏, goulan); almost all stood on busy commercial streets or main routes; itinerant performers (路岐人) staged acts wherever crowds gathered; vendors cried toys, stationery and flowers along the streets [stated: aisixiang 121268, https://www.aisixiang.com/data/121268.html]. Ours (`wazi.js`, `hz_wazi`; `layout.js` `WAZI`): a block of 27.6 × 30 m between two lanes east of the Way, a plank fence 2.7 m high with a gate on the south lane and one on the east lane under a red beam with a black board; the stage (14 × 8 m, 1.15 m up, three steps, a red railing round it — 勾栏 means "railings" [stated by the name; the form inferred]) under a tiled gable on six red posts, the back wall with two curtained doors (出将入相, the usual Song–Yuan stage arrangement [inferred]), banner poles; five rows of plank benches before it, two-tier bleachers under lean-to roofs on both sides (腰棚 [inferred]); the puppeteer's booth, the storyteller's table with its block (醒木) and fan and his ring of listeners, four stalls along the south fence; players on the stage (a dancer, a speaker, a drummer, a flautist, a lutenist) and about 90 people. The music zone of the room is the wine house's (pipa and voice).
+- **The Way's sunshades and lamp strings** (`hz_span`): bamboo poles at the aprons' edge and between them either a sunshade of cloth in bands of two colours or a rope of paper lanterns, one every ~28 m, not at lane mouths [inferred; night markets run through the night, §15; shop awnings and lamps after the Mengliang lu's descriptions of the Way's shops].
+- **Gates of the wards** (`hz_fanggate`, 14): a timber gate with hood and name board over each lane's mouth on the Way [inferred: wards (坊) kept their names on gate boards although the old walled wards were gone].
+- **The Way's market** (`wayMarket`): two rows of stalls inside the shop aprons facing the middle, a 4 m way kept free [stated: "hundreds of stalls" in the Way's central part, §12; the layout inferred]. Street stalls in `street.js` now face the street (they faced the shop).
+- **Courts' trees** (`trees.js`): one old camphor, ginkgo or peach in the court of each deep court house of the core [inferred].
+
+## 25. Life at the water and at the posts
+
+- **Canal landings** (`layout.js` `canalLandings`): washers squatting at the head of the steps with baskets of cloth and tubs, anglers on stools with rod, creel and bucket (`hz_fishing`), porters, sacks [inferred: Jiangnan canal life; Lin'an's fish ponds and fishermen, §16].
+- **Bridgeheads**: stalls either side of each canal bridge's approach, goods on mats, a handcart, hawkers, a crowd [inferred; Zhong'an Bridge a busiest spot, §15].
+- **River**: granite stairs down the flood wall (`riverStairs`), anglers along the wall east of the canal.
+- **Fire-watch towers**: two soldiers in the room, a duty soldier at the door, water jars, a tub and a ladder at the foot [inferred from the towers' soldiers on watch, §12]. **Storehouses**: porters with sacks and poles, clerks squatting with their tally, on the platforms.
+- **Furnished interiors**: 43 (5 wine houses, 9 tea houses, 17 shops, 12 houses), spread over the Way, the canal streets and the lanes (was 15).
+
+## 26. Yuelun Hill's temple path
+
+From the upper terrace of Kaihua Temple a stair of granite treads (2.4 m wide, kerbs both sides, landings at the three turns, every tread within 0.22 m of the last) zigzags 230 treads up the hill's face to a hexagonal pavilion on the summit shoulder; a square rest pavilion on a levelled shelf at the second turn; pilgrims, monks and a woman with her basket on it (`hill.js`, `hillpath.js`; the pads are in `layout.js` `hill()`). The woods keep clear of the path [inferred: hill temples and their stairs are recorded for later in §12; no Song source for this one's layout].
 
 ## Sources
 

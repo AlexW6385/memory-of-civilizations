@@ -4,7 +4,8 @@
 // pines, fir, camphor, bamboo and tea; willows on the canal, the lake and the causeway, peach trees on
 // the causeway; the humid sky of Jiangnan (docs/settlements/song-hangzhou.md §6, §7, §12).
 
-import { RADIUS, LEVEL, WALL, ROAD, T1, T2, CANAL_STREETS, WEST_LAKE, LAKE_GATE, TAFANG, WAREHOUSES, WATCH_TOWERS, inRect, hill, inRiver, inCanal, inLot, inWestLake, lakeDepth, onStreet, onWall, smooth as sm } from './layout.js';
+import { pathDist } from './hillpath.js';
+import { WAZI, spans, RADIUS, LEVEL, WALL, ROAD, T1, T2, CANAL_STREETS, WEST_LAKE, LAKE_GATE, TAFANG, WAREHOUSES, WATCH_TOWERS, inRect, hill, inRiver, inCanal, inLot, inWestLake, lakeDepth, onStreet, onWall, smooth as sm } from './layout.js';
 
 function height(x, z) {
   const r = Math.hypot(x, z);
@@ -24,6 +25,7 @@ function cover(x, z, h) {
   if (h > 2.5) { c.forest = 0.7; c.grass = 0.3; c.soil = 0; c.rock = h > 40 ? 0.2 : 0; return c; }
   if (Math.hypot(x, z) > RADIUS - 26) { c.fields = 0.8; c.grass = 0.2; return c; }
   c.road = inLot(x, z, 0.2) ? 0 : 0.45;
+  if (inRect(WAZI.rect, x, z, 0)) c.road = 1;
   if (onStreet(x, z)) c.road = 1;
   return c;
 }
@@ -39,6 +41,7 @@ const NOGO = () => [...TAFANG, ...WAREHOUSES, ...WATCH_TOWERS];
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z) || inCanal(x, z)) return null;
   if (inRect(T1.rect, x, z, 3) || inRect(T2.rect, x, z, 3) || (Math.abs(x + 110) < 8 && z > 30 && z < 135)) return null;
+  if (inRect(WAZI.rect, x, z, 3)) return null;
   const d = lakeDepth(x, z);
   // the lake's shallows and its shore: reeds in the shallows, willows on the bank with peach trees behind them
   if (d > WEST_LAKE.waterDepth) return null;
@@ -50,6 +53,7 @@ function planting(x, z) {
     // willows on the canal streets' edges, over the water
     if (CANAL_STREETS.some((r) => inRect(r, x, z, 0)) && (x < 138 ? x > 136.4 : x < 151.6 && x > 150)) return { willow: 0.9 };
     // street trees: willows and camphors at the Imperial Way's kerbs (inferred from the shaded streets of Lin'an's accounts)
+    if (spans().some((s) => Math.abs(s.z - z) < 1.5)) return null;
     if (x > 20.4 && x < 21.6 && z < -20 && z > -215 && !onWall(x, z, 14)) return { willow: 0.45 };
     if (x > 34.4 && x < 35.6 && z < -20 && z > -215 && !onWall(x, z, 14)) return { camphor: 0.3 };
     return null;
@@ -57,6 +61,7 @@ function planting(x, z) {
   if (inLot(x, z, 0.5) || z > ROAD.z0 - 0.5) return null;
   if (NOGO().some((r) => inRect(r, x, z, 3))) return null;
   const h = hill(x, z);
+  if (h > 2 && pathDist(x, z) < 3.2) return { grass: 14 };
   if (h > 2) {
     const up = sm(18, 40, h);
     return { masson_pine: 0.5 * up, chinese_fir: 0.35 * up, chinese_pine: 0.3 * (1 - up), camphor: 0.25 * (1 - up), bamboo: 1.0 * (1 - up), tea: 0.6 * sm(0.2, 0.7, 1 - up) * (1 - sm(28, 38, h)), maple: 0.3, grass: 25 };

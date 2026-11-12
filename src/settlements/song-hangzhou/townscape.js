@@ -52,7 +52,7 @@ function well(el, { bag, col }) {
 }
 
 /** A gable roof (ridge along `ridgeX` ? x : z) over [x0, z0, x1, z1] at y (the wall top), the eaves o beyond, rise: tile above, timber soffit below, the gable ends filled in `wall`. */
-function gableRoof(bag, [x0, z0, x1, z1], y, rise, o, ridgeX, wall) {
+export function gableRoof(bag, [x0, z0, x1, z1], y, rise, o, ridgeX, wall) {
   const t = [], u = [], g = [];
   const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, yr = y + rise + 0.12;
   const tri = (a, b, c2, arr) => arr.push(...a, ...b, ...c2);

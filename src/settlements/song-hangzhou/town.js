@@ -3,7 +3,7 @@
 // wall below the pagoda, the crowd on the wall looking out for the bore, tea tables on the road; the
 // peddlers come to the riverbank for the crowd: stalls along the foot of the flood wall, hawkers with
 // their shoulder poles, a fruit seller under a parasol.
-import { RADIUS, LEVEL, WALL, ROAD, PAGODA, CANAL, CANAL_BRIDGES, CITY, GATE, LAKE_GATE, WATER_GATE, WEST_LAKE, lakeDepth, TAFANG, TAFANG_FRONT, WATCH_TOWERS, lots, streets, wells, riverTeaHouses } from './layout.js';
+import { RADIUS, LEVEL, WALL, ROAD, PAGODA, CANAL, CANAL_BRIDGES, CITY, GATE, LAKE_GATE, WATER_GATE, WEST_LAKE, lakeDepth, canalLandings, TAFANG, TAFANG_FRONT, WATCH_TOWERS, lots, streets, wells, riverTeaHouses } from './layout.js';
 import { lifePlans, interiorLots } from './life.js';
 import './townscape.js';
 import './houses.js';
@@ -185,12 +185,9 @@ function fabric() {
     for (let z = r[1] + 5; z < r[3] - 6; z += 14) E.push(rand() < 0.5 ? { t: 'sack_pile', at: [px, z], y: LEVEL.street + 0.38, rot, rows: [3, 2] } : { t: 'jar_heap', at: [px, z], y: LEVEL.street + 0.38, rot, n: 4, rows: 2 });
   });
   // ---- landings down to the canal on both banks: granite steps
-  for (const west of [true, false]) {
-    for (let z = -420; z < 120; z += 31 + rand() * 12) {
-      if (CANAL_BRIDGES.some((bz) => Math.abs(bz - z) < 12) || Math.abs(z - zs) < 18 || Math.abs(z - zn) < 18) continue;
-      const fx = west ? CANAL.x0 + 0.35 : CANAL.x1 - 0.35, dir = [west ? 1 : -1, 0], hl = rand() < 0.4 ? 2.2 : 1.1;
-      E.push({ t: 'water_steps', a: [fx, z - hl], b: [fx, z + hl], dir, y: LEVEL.street, water: LEVEL.canal, double: hl > 2, moor: true });
-    }
+  for (const { z, west, hl } of canalLandings()) {
+    const fx = west ? CANAL.x0 + 0.35 : CANAL.x1 - 0.35, dir = [west ? 1 : -1, 0];
+    E.push({ t: 'water_steps', a: [fx, z - hl], b: [fx, z + hl], dir, y: LEVEL.street, water: LEVEL.canal, double: hl > 2, moor: true });
   }
   // ---- the West Lake: its water over the bowl the ground makes (the causeway, pavilion and jetty are the landmark's), lotus in the shallows
   E.push({ t: 'water_rect', rect: WEST_LAKE.rect, y: WEST_LAKE.level });
@@ -200,6 +197,10 @@ function fabric() {
 }
 
 import { streetPlans } from './street.js';
+import { wazisStatic, waziLife, wayMarket } from './wazi.js';
+import { watersideLife, riverStairs } from './waterside.js';
+import { courtTrees } from './trees.js';
+import { hillStatic, hillLife } from './hill.js';
 
 export async function town() {
   const chosen = interiorLots(), tea = new Set(teaHouses()), inter = new Set(Object.values(chosen).flat());
@@ -214,5 +215,16 @@ export async function town() {
   plans.push(base('song-hangzhou-shells', shells));
   plans.push(fabric(), ...tideDay(), boatPeople(), ...lifePlans(base));
   plans.push(...streetPlans(base));
+  // life at the water and at the city's posts (§25), in 100 m tiles of the street life; the river's stairs
+  const tiles = new Map();
+  for (const e of [...watersideLife(LEVEL.street), ...wayMarket(LEVEL.street)]) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
+  for (const [k, list] of tiles) { const [i, j] = k.split(',').map(Number); plans.push({ ...base(`song-hangzhou-waterside-${k}`, list, 'life'), center: [i * 100 + 50, j * 100 + 50], near: 230 }); }
+  plans.push(base('song-hangzhou-river-stairs', riverStairs()));
+  plans.push(base('song-hangzhou-court-trees', courtTrees()));
+  plans.push(base('song-hangzhou-hill', hillStatic()));
+  plans.push({ ...base('song-hangzhou-hill-life', hillLife(), 'life'), center: [-165, -90], near: 200 });
+  // the entertainment ground, the Way's sunshades and the ward gates (§24)
+  plans.push(base('song-hangzhou-wazi', wazisStatic(LEVEL.street)));
+  plans.push({ ...base('song-hangzhou-wazi-life', waziLife(LEVEL.street), 'life'), center: [72, -140], near: 200, rooms: [{ id: 'hz-wazi', rect: [66, -153, 78, -127], y: LEVEL.street, kind: 'winehouse' }] });
   return plans;
 }

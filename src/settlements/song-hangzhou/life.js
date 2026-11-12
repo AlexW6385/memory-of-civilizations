@@ -39,12 +39,22 @@ export function interiorLots() {
   const take = (pred, n, sort) => { const c = all.filter((l) => !used.has(l) && inDisc(l) && pred(l)); c.sort(sort); const out = c.slice(0, n); out.forEach((l) => used.add(l)); return out; };
   const w = (l) => frontOf(l).L, d = (l) => frontOf(l).D;
   const iw = (a, b) => (nearIW(b) ? 1 : 0) - (nearIW(a) ? 1 : 0) || w(b) - w(a);
+  // Suzhou's standard: many fronts open to walk into. Spread over the city: the Imperial Way first (sorted by richness), then the canal streets and the lanes,
+  // never two chosen lots abutting (so that the street keeps its rhythm of open and closed fronts)
+  const cx = (l) => (l.rect[0] + l.rect[2]) / 2, cz = (l) => (l.rect[1] + l.rect[3]) / 2;
+  const apart = (l, m) => ![...used].some((o) => Math.hypot(cx(o) - cx(l), cz(o) - cz(l)) < m);
+  const takeSpread = (pred, n, sort, gap) => { const c = all.filter((l) => !used.has(l) && inDisc(l) && pred(l)); c.sort(sort); const out = []; for (const l of c) { if (out.length >= n) break; if (!apart(l, gap)) continue; out.push(l); used.add(l); } return out; };
+  const core = (l) => Math.hypot(cx(l) - 28, cz(l) + 120);
+  const near = (a, b) => core(a) - core(b);
   CHOSEN = {
-    winehouse: take((l) => l.shop && w(l) >= 8.5 && d(l) >= 14 && nearIW(l), 2, iw),
-    teahouse: take((l) => l.shop && w(l) >= 8 && d(l) >= 8, 4, iw),
-    shop: take((l) => l.shop && w(l) >= 6 && d(l) >= 6.5 && nearIW(l), 6, iw),
-    house: take((l) => !l.shop && w(l) >= 6.5 && d(l) >= 7, 3, (a, b) => (b.storeys || 1) - (a.storeys || 1)),
+    winehouse: take((l) => l.shop && w(l) >= 8.5 && d(l) >= 14 && nearIW(l), 5, iw),
+    teahouse: take((l) => l.shop && w(l) >= 8 && d(l) >= 8, 9, iw),
+    shop: takeSpread((l) => l.shop && w(l) >= 6 && d(l) >= 6.5 && nearIW(l), 14, iw, 24),
+    house: [],
   };
+  // shops off the Way: the canal streets' and lanes' (trade by the layout's mix), nearest the core first
+  CHOSEN.shop.push(...takeSpread((l) => l.shop && w(l) >= 6 && d(l) >= 6.5 && !nearIW(l) && core(l) < 330, 12, near, 30));
+  CHOSEN.house = takeSpread((l) => !l.shop && w(l) >= 6.5 && d(l) >= 7 && core(l) < 300, 12, (a, b) => (b.storeys || 1) - (a.storeys || 1) || near(a, b), 34);
   void rand;
   for (const l of [...CHOSEN.winehouse, ...CHOSEN.teahouse, ...CHOSEN.shop]) l.trade = l.trade || tradeOf(l);
   CHOSEN.winehouse.forEach((l) => { l.trade = 'wine'; });
