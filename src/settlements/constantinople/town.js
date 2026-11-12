@@ -1,7 +1,6 @@
 // The houses of the first hill (docs/settlements/constantinople.md §11, §14): rows of tenements of the Roman kind sharing
 // their side walls along the lanes, balconies frequent (Zeno's law regulated them), walled gardens filling some blocks,
 // house-bridges, awnings and wall shrines in the lanes; in 100 m tiles, full near and in outline far.
-import { lodTiles } from '../lod.js';
 import { RADIUS, lots, gardens, special, height, xl, zl, PX, PZ } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -42,7 +41,23 @@ export function townElements() {
   E.push(...laneKit());
   return E;
 }
+/** The houses in 160 m tiles (the geometry budget counts a mesh per tile × material), each in full near and simple far (as src/settlements/lod.js). */
+const TILE = 160, NEAR = 230;
 export async function houses() {
-  return lodTiles('constantinople-houses', 'roman', townElements(), { R: RADIUS, near: 180, entrance: { at: [-150, 110], facing: 'e' } });
+  const tiles = new Map(), entrance = { at: [-150, 110], facing: 'e' };
+  for (const e of townElements()) {
+    const [x, z] = e.rect ? [(e.rect[0] + e.rect[2]) / 2, (e.rect[1] + e.rect[3]) / 2] : (e.at ?? e.c);
+    const k = `${Math.floor(x / TILE)},${Math.floor(z / TILE)}`;
+    if (!tiles.has(k)) tiles.set(k, []);
+    tiles.get(k).push(e);
+  }
+  const plans = [];
+  for (const [k, list] of tiles) {
+    const [i, j] = k.split(',').map(Number), center = [(i + 0.5) * TILE, (j + 0.5) * TILE];
+    const base = { style: 'roman', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance, center };
+    plans.push({ ...base, id: `constantinople-houses-${k}`, near: NEAR, elements: list });
+    plans.push({ ...base, id: `constantinople-houses-${k}-far`, far: NEAR, elements: list.map((e) => ({ ...e, simple: true })), nocollide: true });
+  }
+  return plans;
 }
 export { PX, PZ, xl, zl };
