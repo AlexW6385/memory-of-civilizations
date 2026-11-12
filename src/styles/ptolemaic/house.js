@@ -14,8 +14,8 @@ import { kline, trapeza, krater, lampstand } from '../greek/house-interior.js';
 import '../../objects/index.js';
 import { rng, pick, amphora, pithos, basket, sack, crate, bench, firewood, reedBundle, awning, lampBracket, oven, quern, palm, fig, washLine } from './dress.js';
 
-const WALLS = ['plaster_white', 'plaster_white', 'stucco_warm', 'limewash_yellow', 'plaster_ochre', 'plaster_grey', 'stucco_cream'];
-const DADO = ['wall_red', 'paint_ochre', 'egyptian_blue', 'wall_red', 'fresco_green'];
+const WALLS = ['plaster_white', 'plaster_white', 'limewash_yellow', 'plaster_ochre'];
+const DADO = ['wall_red', 'egyptian_blue', 'wall_red'];
 export const SHOP_TRADES = ['bronze', 'perfume', 'cloth', 'wine', 'carpenter', 'oil', 'grain', 'fish', 'pottery', 'papyrus', 'bread', 'sandals'];
 const SIGN = { bronze: 'bronze', perfume: 'cloth_indigo', cloth: 'cloth_red', wine: 'wall_red', carpenter: 'timber', oil: 'paint_ochre', grain: 'cloth_ochre', fish: 'egyptian_blue', pottery: 'terracotta', papyrus: 'ivory', bread: 'stucco_siena', sandals: 'hide_brown' };
 
@@ -316,4 +316,7 @@ function egyptianHouse(el, ctx) {
     }
   }
 }
-export const HOUSES = { ptol_house: house, egyptian_house: egyptianHouse };
+// Near-alike materials folded into one (the plan's meshes are plan × material: the houses are the bulk of the settlement's count).
+const FOLD = { cloth_indigo: 'egyptian_blue', cloth_green: 'cloth_ochre', cloth_brown: 'cloth_ochre', hide_black: 'granite_black', skin_dark: 'skin_medium', plaster_streak: 'plaster_damp', shutter_grey: 'shutter_brown', mud_plaster: 'mudbrick', steel_grey: 'iron', glaze_blue: 'egyptian_blue', hide_brown: 'timber', pottery_dark: 'terracotta', paint_ochre: 'plaster_ochre', sacking: 'wicker', cedar: 'timber', rope_fibre: 'wicker', reed_mat: 'wicker', bark_dark: 'palm_trunk', flagstone: 'limestone', cotto_floor: 'terracotta', rubble: 'mudbrick', sandstone: 'limestone', pebbles: 'limestone', ivory: 'linen' };
+const folded = (fn) => (el, ctx) => fn(el, { ...ctx, bag: new Proxy(ctx.bag, { get: (t, k) => (k === 'add' ? (m, ...r) => t.add(FOLD[m] ?? m, ...r) : typeof t[k] === 'function' ? t[k].bind(t) : t[k]) }) });
+export const HOUSES = { ptol_house: folded(house), egyptian_house: folded(egyptianHouse) };

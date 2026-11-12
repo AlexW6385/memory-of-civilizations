@@ -21,7 +21,7 @@ export const pharos = {
     { t: 'floor', rect: [PH[0] - 36, PH[1] - 36, PH[0] + 36, PH[1] + 36], y: g + 0.05, th: 0.2, mat: 'travertine' },
   ],
   rooms: [{ id: 'island court', rect: [PH[0] - 36, PH[1] - 36, PH[0] + 36, PH[1] + 36], y: g, kind: 'open' }],
-  walks: [Object.assign([[PH[0] - 60, PH[1] + 30], [PH[0], PH[1] + 28], [PH[0] + 20, PH[1] + 24]], { y0: g })],
+  walks: [Object.assign([[PH[0] - 60, -252.6], [PH[0], -252.6], [PH[0] + 20, PH[1] + 24]], { y0: g })],
 };
 
 // ── the Museion and the Library ──
@@ -38,8 +38,11 @@ const E = [
   { t: 'exedra', c: [206, -51], r: 5, y: g, face: -Math.PI / 2 },
   ...halls.map((r, i) => ({ t: 'library_hall', rect: r, front: 'n', y: g, seed: 20 + i })),
   // the royal quarter's fronts on the harbour: long colonnades, the palace on the Lochias
-  { t: 'palace_front', rect: [128, -80, 168, -64], front: 's', y: g, seed: 31 },
-  { t: 'palace_front', rect: [330, -80, 436, -64], front: 's', y: g, seed: 32 },
+  { t: 'palace_front', rect: [128, -80, 168, -64], front: 'n', y: g, seed: 31 },
+  { t: 'palace_front', rect: [302, -80, 330, -67], front: 'n', y: g, seed: 35 },
+  { t: 'palace_front', rect: [330, -80, 436, -64], front: 'n', y: g, seed: 32 },
+  // the royal enclosure's long wall over the Museion's north colonnade, seen from the harbour: pilasters, painted relief, a gateway
+  { t: 'wall_front', x0: 190, x1: 302, z: -80.6, face: 'n', y: g, h: 8.4, gate: 246 },
   { t: 'palace_front', rect: [LOCHIAS[0] + 10, -150, LOCHIAS[2] - 10, -134], front: 's', y: g, seed: 33 },
 ];
 export const museion = {

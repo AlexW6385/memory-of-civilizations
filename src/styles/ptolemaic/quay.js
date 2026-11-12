@@ -62,13 +62,29 @@ function netRack({ at: [x, z], y = 0, rot = 0, len = 3.2, seed = 1 }, { bag, col
 function horreum(el, ctx) {
   const { bag, col } = ctx, y = el.y ?? 0, rand = rng(el.seed ?? 1), K = kit(ctx, el.rect, el.front ?? 's', y), { F, R } = K, { L, D } = F;
   const H = 4.6, wall = 'limestone', n = Math.max(3, Math.round(L / 3.6)), bw = (L - 0.8) / n;
-  if (el.simple) { R(0, 0, L, D, -0.4, H, wall, false); R(-0.1, -0.1, L + 0.1, D + 0.1, H, H + 0.4, 'mud_plaster', false); return; }
+  const LOFT = 3.4, HT = H + LOFT;
+  // the grain loft over the bays: a plastered storey with a row of small windows, a painted band and the cavetto cornice, flat roof with a parapet
+  const loft = (full) => {
+    R(0, 0, L, D, H, HT, el.tint ?? 'plaster_white', false);
+    R(-0.05, -0.05, L + 0.05, D + 0.05, H + 0.0, H + 0.45, 'limestone', false);
+    R(-0.1, -0.1, L + 0.1, D + 0.1, HT - 0.9, HT - 0.55, 'egyptian_blue', false);
+    for (let k = 0; k < 4; k++) R(-0.12 - 0.07 * k, -0.12 - 0.07 * k, L + 0.12 + 0.07 * k, D + 0.12 + 0.07 * k, HT - 0.55 + k * 0.14, HT - 0.55 + (k + 1) * 0.14, 'limestone', false);
+    R(-0.1, -0.1, L + 0.1, 0.3, HT + 0.02, HT + 0.6, 'limestone', false);
+    if (!full) return;
+    for (let k = 0; k < n; k++) { const u = 0.4 + (k + 0.5) * bw; R(u - 0.45, -0.1, u + 0.45, 0.05, H + 0.9, H + 2.0, 'opening', false); R(u - 0.6, -0.12, u + 0.6, 0.0, H + 2.0, H + 2.2, 'limestone', false); R(u - 0.55, -0.2, u + 0.55, 0.0, H + 0.75, H + 0.9, 'limestone', false); }
+    // the hoist: a beam out over the quay from the loft door with its pulley, rope and a sack on the hook
+    const u = L / 2, [bx, bz] = F.P(u, 0.0), [ex, ez] = F.P(u, -1.9);
+    R(u - 0.5, -0.1, u + 0.5, 0.05, H + 0.3, H + 2.2, 'wood_dark', false);
+    bag.add('timber', rod([bx, y + H + 2.5, bz], [ex, y + H + 2.5, ez], 0.09, 5)); bag.add('timber', rod([bx, y + H + 0.9, bz], [ex, y + H + 2.45, ez], 0.06, 4));
+    bag.add('rope_fibre', rod([ex, y + H + 2.45, ez], [ex, y + H + 0.9, ez], 0.02, 3)); sack(bag, ex, y + H + 0.45, ez, 0.3);
+  };
+  if (el.simple) { R(0, 0, L, D, -0.4, H, wall, false); loft(false); R(-0.1, -0.1, L + 0.1, D + 0.1, HT + 0.02, HT + 0.3, 'mud_plaster', false); return; }
   R(0, 0, L, D, -0.5, 0.25, 'limestone', false); col.floor(F.R(0.3, 0.3, L - 0.3, D - 0.3), y + 0.25);
   R(0, D - 0.7, L, D, 0.25, H, wall, true); R(0, 0, 0.7, D, 0.25, H, wall, true); R(L - 0.7, 0, L, D, 0.25, H, wall, true);
   for (let k = 1; k < n; k++) R(0.4 + k * bw - 0.35, 0.0, 0.4 + k * bw + 0.35, 0.7, 0.25, H, wall, true);
   R(0, 0, L, 0.7, 3.4, H, wall, false);
   for (let k = 0; k < n; k++) { R(0.4 + k * bw + 0.35, 0.05, 0.4 + (k + 1) * bw - 0.35, 0.15, 3.35, 3.4, 'limestone', false); }
-  R(-0.1, -0.2, L + 0.1, D + 0.1, H, H + 0.3, 'limestone', false); R(0.1, 0.1, L - 0.1, D - 0.1, H - 0.2, H, 'timber', false); R(0, 0, L, D, H + 0.3, H + 0.4, 'mud_plaster', false);
+  R(0.1, 0.1, L - 0.1, D - 0.1, H - 0.2, H, 'timber', false); loft(true); R(0, 0, L, D, HT + 0.6, HT + 0.7, 'mud_plaster', false);
   // the goods inside, in each bay
   for (let k = 0; k < n; k++) {
     const u = 0.4 + (k + 0.5) * bw, v = D - 1.7, t = (k + Math.floor(rand() * 3)) % 3;

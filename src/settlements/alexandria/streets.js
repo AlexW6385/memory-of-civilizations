@@ -5,7 +5,7 @@
 
 import { frame } from '../../styles/greek/agora.js';
 import { houseLayout } from '../../styles/ptolemaic/house.js';
-import { RADIUS, GROUND, SEA, QUAY, PIER, CANOPIC, SOMA, AGORA, STREETS_Z, ALLEYS_X, ROYAL, GYMZONE, MOLE, lots, wet, inRect, inLot } from './layout.js';
+import { RADIUS, GROUND, SEA, QUAY, PIER, CANOPIC, SOMA, AGORA, STREETS_Z, ALLEYS_X, ROYAL, GYMZONE, MOLE, PHAROS, lots, isle, wet, inRect, inLot } from './layout.js';
 
 const g = GROUND;
 const FIG = [];            // the figures at the quay's work (filled by quayLife, drawn by streetLife)
@@ -53,6 +53,30 @@ function quayLife() {
   E.push({ t: 'cargo_pile', at: [-300, -85], y, rot: 0, kind: 'logs', n: 3, seed: 3 });
   // the mole: nets and baskets along its sides
   for (const z of [-240, -190, -120]) E.push({ t: 'net_rack', at: [MOLE[0] + 1.6, z], y, rot: Math.PI / 2, len: 3.0, seed: z });
+  // the customs post on the promenade west of the pier, its clerk, its guard and the merchant with his bales waiting to be assessed
+  { const cx = 91, cz = -86.2, fq = (x, z) => Math.atan2(cx - x, cz - z);
+    E.push({ t: 'customs_post', at: [cx, cz], y, seed: 641 });
+    FIG.push({ at: [cx - 0.2, cz - 0.9], rot: Math.PI, pose: 'stand', dress: 'robe', over: 'cape', cloth: 'cloth_white', hat: 'brim', beard: true, skin: 'skin_medium', seed: 642 });
+    FIG.push({ at: [cx + 3.6, cz + 1.4], rot: 1.6, pose: 'stand', dress: 'tunic', over: 'cape', cloth: 'cloth_maroon', hat: 'brim', carry: 'staff', skin: 'skin_medium', hair: 'short', seed: 643 });
+    FIG.push({ at: [cx - 4.2, cz - 1.8], rot: fq(cx - 4.2, cz - 1.8), pose: 'talk', dress: 'robe', over: 'cape', cloth: 'cloth_indigo', beard: true, skin: 'skin_medium', seed: 644 });
+    FIG.push({ at: [cx - 4.9, cz - 0.9], rot: 1.1, pose: 'talk', dress: 'tunic', cloth: 'cloth_brown', hat: 'cap', skin: 'skin_dark', hair: 'short', seed: 645 });
+    E.push({ t: 'cargo_pile', at: [cx - 7.5, cz - 1.2], y, rot: 0.1, kind: 'bales', n: 2, seed: 646 }); }
+  // at the water stairs: boys fishing with a line from the top step, a washerwoman with her jar, a boatman waiting
+  for (const sx of [114, 190, -35]) {
+    FIG.push({ at: [sx - 1.0, -90.3], rot: Math.PI, pose: 'sit_ground', dress: 'loincloth', cloth: 'linen', hair: 'shaven', skin: 'skin_dark', seed: sx * 3 });
+    FIG.push({ at: [sx + 1.5, -89.6], rot: Math.PI * 0.8, pose: 'stand', dress: 'sheath', cloth: 'cloth_white', hair: 'long', carry: 'pot', skin: 'skin_medium', seed: sx * 5 });
+  }
+  // the island of Pharos: palms along its quay, nets and the fishermen at them, the fuel for the fire stacked by its store, a shrine at the court
+  { const I = isle();
+    for (const [x, z] of I.palms) E.push({ t: 'ptol_tree', at: [x, z], y, kind: 'palm', h: 5.5 + rand() * 2.5, seed: Math.floor(rand() * 1e6) });
+    for (const [x, z] of I.nets) { E.push({ t: 'net_rack', at: [x, z], y, rot: 0, len: 3.4, seed: Math.round(x) }); FIG.push({ at: [x + 0.8, z + 1.4], rot: 0, pose: 'sit_ground', dress: 'loincloth', cloth: 'linen', hair: 'shaven', skin: 'skin_dark', seed: Math.round(x * 3) }); }
+    const [sx0, sz0, sx1] = I.store;
+    E.push({ t: 'cargo_pile', at: [sx1 + 4, -257], y, rot: 0.1, kind: 'logs', n: 3, seed: 611 }, { t: 'cargo_pile', at: [sx0 - 4, -257], y, rot: -0.1, kind: 'logs', n: 3, seed: 612 }, { t: 'cargo_pile', at: [(sx0 + sx1) / 2 + 6, -256.5], y, rot: 0, kind: 'amphorae', n: 2, seed: 613 });
+    E.push({ t: 'shrine', at: [PHAROS.c[0] - 39, -257], y, rot: 0 }, { t: 'shrine', at: [PHAROS.c[0] + 33, -257], y, rot: 0 });
+    FIG.push({ at: [sx1 + 4, -254.8], rot: 3.0, pose: 'stand', dress: 'tunic', cloth: 'cloth_brown', hat: 'cap', carry: 'sack', skin: 'skin_medium', hair: 'short', seed: 614 });
+    FIG.push({ at: [PHAROS.c[0] - 37, -255.5], rot: 0.5, pose: 'talk', dress: 'robe', cloth: 'cloth_white', over: 'cape', beard: true, hat: 'brim', skin: 'skin_medium', seed: 615 });
+    FIG.push({ at: [PHAROS.c[0] - 36, -254.2], rot: -2.6, pose: 'talk', dress: 'tunic', cloth: 'cloth_red', over: 'belt', hat: 'cap', skin: 'skin_medium', hair: 'short', seed: 616 });
+    void sz0; }
   // street shrines of Isis at the great crossing and the cross streets
   for (const [x, z, rot] of [[SOMA[0] - 1.6, CANOPIC[1] - 1.2, 0], [SOMA[2] + 1.6, CANOPIC[3] + 1.2, Math.PI], [-300, CANOPIC[1] - 1.2, 0], [330, CANOPIC[3] + 1.2, Math.PI], [AGORA[0] + 4, AGORA[3] + 1, Math.PI]]) E.push({ t: 'shrine', at: [x, z], y: g + 0.04, rot });
   // the agora: the fountain house, stelae with decrees, a herm already built (town.js); goods heaped about
@@ -133,6 +157,9 @@ export function streetLife() {
     if (rand() < 0.14) L.push({ t: 'animal', kind: 'cat', at: pt(F.L * rand(), 0.7), y, rot: rand() * 6, seed: Math.floor(rand() * 1e9) });
     if (rand() < 0.1) L.push({ t: 'chickens', n: 3, at: pt(F.L * rand(), 1.2), y, rot: rand() * 6, seed: Math.floor(rand() * 1e9) });
   }
+  // beasts at the quay's work: donkeys under their loads by the piles, carts with a donkey in the shafts, a pair of camels resting
+  for (const [x, z, k, r] of [[68, -83.6, 'donkey', 0.2], [-30, -83.8, 'donkey', 3.3], [-120, -83.6, 'donkey', 0.1], [-176, -83.8, 'donkey', 3.0], [210, -84, 'donkey', 0.3], [258, -83.8, 'camel', 1.57], [264, -83.5, 'camel', 1.4]]) if (dry(x, z, 1)) L.push({ t: 'animal', kind: k, at: [x, z], y: g + 0.04, rot: r, seed: Math.round(x * 7), gear: k === 'donkey' });
+  for (const [x, z] of [[-90, -83.5], [124, -83.5], [-190, -83.5]]) if (dry(x, z, 1)) L.push({ t: 'cart', at: [x, z], y: g + 0.04, rot: Math.PI / 2, beast: 'donkey', seed: Math.round(x * 5) });
   for (const f of FIG) L.push({ t: 'figure', y: g + 0.04, ...f });
   const tiles = new Map();
   for (const e of L) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
