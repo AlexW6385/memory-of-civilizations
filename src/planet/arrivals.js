@@ -70,7 +70,7 @@ export const ARRIVALS = {
   'rapa-nui':         [0, 0.3, 46, 3.1416, 0.12],        // the row of moai on their platform, whole
   'fez':              [-132.5, null, -7.2, 3.1416, 0.1],   // the Bou Inania's court from its north gallery: the basin, the prayer hall beyond
   'nan-madol':        [-10, null, 80, 0, 0.12],          // Nandauwas whole across the canal from the landing islet
-  'maori':            [0, 0.2, 150, 0, 0.2],             // the pā's palisade and carved gateway
+  'maori':            [0, null, 33, 0.27, 0.05],         // inside the summit's gateway: the chief's carved house across the marae atea, the pōwhiri under way, the hangi and the weavers at the sides
   'ayutthaya':        [10, 0.1, -100, 0, 0.3],      // the three chedis of Wat Phra Si Sanphet in their row, from the forecourt in line with the gate
   'alexandria':       [100, null, -86, 0.62, 0.15],      // the Pharos across the Great Harbour, from the quay before the Museion
   'sydney':           [222, null, -116, 1.02, 0.06],        // at the sea wall of Mrs Macquarie's Point: the Opera House across the water, the Harbour Bridge behind
