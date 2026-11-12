@@ -242,6 +242,17 @@ export function shopRows() {
   if (tea) { tea.s.trade = 'tea'; tea.s.storeys = 1; tea.s.interior = 'teahouse'; }
   const med = all.find(({ s, r }) => s !== tea?.s && s.z1 - s.z0 >= 5.6 && r !== tea?.r && s.z0 > (tea?.s.z1 ?? 0) + 6 && s.trade === 'medicine') || all.find(({ s, r }) => s !== tea?.s && s.z1 - s.z0 >= 5.6 && r !== tea?.r && s.z0 > (tea?.s.z1 ?? 0) + 6);
   if (med) { med.s.trade = 'medicine'; med.s.storeys = 1; med.s.interior = 'pharmacy'; }
+  // more enterable shops (§30): in each of the first nine west rows the widest shop not yet taken, and in the first four rows a second,
+  // their trade one of the six furnished ones in turn; the rule picks from whatever shops there are
+  const kinds = ['cloth', 'grain', 'pawn', 'wine', 'lantern', 'shoes'];
+  let ki = 0;
+  for (const pass of [0, 1]) {
+    for (const row of west.slice(0, pass ? 4 : 9)) {
+      const c = row.shops.filter((s) => !s.interior && s.z1 - s.z0 >= 5.6).sort((a, b) => (b.z1 - b.z0) - (a.z1 - a.z0))[pass ? 1 : 0] ?? null;
+      if (!c || row.shops.some((s) => s.interior && pass === 0)) continue;
+      const k = kinds[ki++ % kinds.length]; c.trade = k; c.storeys = 1; c.interior = k;
+    }
+  }
   return SHOPS;
 }
 /** The shops with a furnished interior: { kind, side, front, z0, z1, depth }. */

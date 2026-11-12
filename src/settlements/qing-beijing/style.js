@@ -6,11 +6,18 @@ import { bjBooth } from './shops.js';
 import { bjShopgoods, bjBarber, bjTeastall, bjWatercart, bjSedan, bjLane, bjPet, bjShrine, bjBenchtree, bjCoalcart } from './streetlife.js';
 import { pekingCart, camelString } from '../../styles/qing/street.js';
 import { bjRooms, bjTeahouse, bjPharmacy } from './interiors.js';
+import { bjClothShop, bjGrainShop, bjPawnShop, bjWineShop, bjLanternShop, bjShoeShop } from './shoprooms.js';
 
 STYLES.life.elements.bj_booth = bjBooth;
 STYLES.life.elements.bj_rooms = bjRooms;
 STYLES.life.elements.bj_teahouse = bjTeahouse;
 STYLES.life.elements.bj_pharmacy = bjPharmacy;
+STYLES.life.elements.bj_shop_cloth = bjClothShop;
+STYLES.life.elements.bj_shop_grain = bjGrainShop;
+STYLES.life.elements.bj_shop_pawn = bjPawnShop;
+STYLES.life.elements.bj_shop_wine = bjWineShop;
+STYLES.life.elements.bj_shop_lantern = bjLanternShop;
+STYLES.life.elements.bj_shop_shoes = bjShoeShop;
 STYLES.life.elements.bj_shopgoods = bjShopgoods;
 STYLES.life.elements.bj_barber = bjBarber;
 STYLES.life.elements.bj_teastall = bjTeastall;
