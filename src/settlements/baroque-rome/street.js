@@ -39,7 +39,23 @@ export function streetPlans() {
       pilgrim(x, z, kneel ? Math.PI / 2 : Math.atan2(x - gx, z - gz) + Math.PI, kneel ? { pose: 'kneel', arms: 'pray', carry: 'none' } : { pose: rand() < 0.5 ? 'talk' : 'stand' });
     }
   }
-  for (let i = 0; i < 9; i++) pilgrim(OVAL.c[0] + 110 - i * 9 + rand() * 2, (i % 2 ? 1 : -1) * (1.6 + rand() * 2.6), Math.PI / 2 + (rand() - 0.5) * 0.4, { pose: 'stand' });   // walking in from the Borgo toward the church
+  for (let i = 0; i < 9; i++) { const xw = OVAL.c[0] + 110 - i * 9 + rand() * 2; pilgrim(xw, (i % 2 ? 1 : -1) * (xw < 118 && xw > 78 ? 5.5 + rand() * 3 : 1.6 + rand() * 2.6), Math.PI / 2 + (rand() - 0.5) * 0.4, { pose: 'stand' }); }   // walking in from the Borgo toward the church
+  // the piazza lived in: more parties of pilgrims and townsfolk strung across the oval at 15-90 m from the arrival (110, 0) and
+  // none within 10 m of it, a boy chasing pigeons, a chestnut and a water seller, friars walking in pairs, a dog at the fountain
+  for (const [gx, gz, n] of [[62, -24, 3], [50, 28, 4], [28, -30, 3], [20, 20, 5], [8, -8, 3], [-14, 30, 4], [-22, -26, 3], [-34, 6, 5], [76, 6, 3], [96, -30, 4], [92, 32, 3]]) {
+    for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2 + rand(), r = 0.8 + rand() * 0.7; pilgrim(gx + Math.cos(a) * r, gz + Math.sin(a) * r, Math.atan2(Math.cos(a), Math.sin(a)) + Math.PI + rand() * 0.6, { pose: rand() < 0.55 ? 'talk' : 'stand' }); }
+  }
+  for (const [x, z, rot] of [[64, 8, Math.PI / 2 + 0.3], [34, -8, -Math.PI / 2], [-6, 20, 0.4], [-28, -10, Math.PI / 2]]) {
+    for (const k of [0, 1]) L.push({ t: 'figure', at: [x + k * 1.0, z + k * 0.5], y: 0, rot, seed: Math.floor(rand() * 1e9), pose: 'stand', dress: 'robe', legs: 'hose', skin: 'skin_light', cloth: k ? 'cloth_black' : 'cloth_brown', cloth2: 'cloth_white', hat: 'brim', over: 'sash', hair: 'shaven', carry: 'staff' });
+  }
+  L.push({ t: 'figure', at: [52, 14], y: 0, rot: 2.2, seed: 811, pose: 'stand', dress: 'tunic', legs: 'hose', skin: 'skin_light', cloth: 'cloth_ochre', cloth2: 'cloth_brown', hat: 'cap', over: 'none', h: 1.15 });
+  L.push({ t: 'chickens', kind: 'pigeon', n: 14, at: [51, 15.5], y: 0, rot: 1, seed: 812 }, { t: 'chickens', kind: 'pigeon', n: 9, at: [72, -20], y: 0, rot: 2, seed: 813 }, { t: 'chickens', kind: 'pigeon', n: 8, at: [96, 12], y: 0, rot: 3, seed: 814 });
+  L.push({ t: 'stall', at: [76, -38], rot: Math.PI / 2, seed: 815, awning: 'cloth_ochre', goods: ['bread', 'heap'], w: 2.0, d: 1.0 });
+  L.push({ t: 'figure', y: 0, skin: 'skin_light', at: at(76, -38, Math.PI / 2, 0, -1.2), rot: -Math.PI / 2, seed: 816, pose: 'stand', dress: 'tunic', legs: 'hose', cloth: 'cloth_brown', cloth2: 'cloth_white', hat: 'cap', over: 'apron' });
+  L.push({ t: 'stall', at: [76, 40], rot: Math.PI / 2, seed: 817, awning: 'cloth_red', goods: ['basket', 'cloth', 'basket'], w: 2.0, d: 1.0 });
+  L.push({ t: 'figure', y: 0, skin: 'skin_light', at: at(76, 40, Math.PI / 2, 0, -1.2), rot: -Math.PI / 2, seed: 818, pose: 'stand', dress: 'robe', cloth: 'cloth_maroon', cloth2: 'cloth_white', hat: 'veil', over: 'shawl' });
+  L.push({ t: 'animal', kind: 'dog', at: [OVAL.c[0] + 4, -42], y: 0, rot: 0.5, seed: 819 }, { t: 'animal', kind: 'dog', at: [OVAL.c[0] - 14, 40], y: 0, rot: 2.5, seed: 820 });
+  L.push({ t: 'barrel', at: [100, 22], y: 0, rot: 0.3, seed: 821, n: 2 }, { t: 'sacks', at: [101, -24], y: 0, rot: 0.8, seed: 822, n: 3 });
   // beggars on the ground by the colonnade's inner columns, a seller of rosaries and medals at a stall
   for (const [x, z] of [[OVAL.c[0] - 30, -78], [OVAL.c[0] + 28, 80], [OVAL.c[0] - 52, 62]]) L.push({ t: 'figure', at: [x, z], y: 0, rot: Math.atan2(OVAL.c[0] - x, OVAL.c[1] - z) + Math.PI, seed: Math.floor(x * 11 + z), pose: 'ground', dress: 'robe', cloth: 'cloth_grey', cloth2: 'cloth_brown', skin: 'skin_medium', hat: 'none', over: 'cape', feet: 'bare' });
   L.push({ t: 'stall', at: [OVAL.c[0] + 40, 46], rot: -2.3, seed: 77, awning: 'cloth_white', goods: ['basket', 'cloth', 'basket'], w: 2.2, d: 1.2 });

@@ -1,7 +1,7 @@
 // The insulae of the Campus Martius (docs/settlements/rome.md §5): in 100 m tiles, each in full
 // (shops, windows, shutters, balconies, cornices) near and in outline far (as src/settlements/lod.js, but in 160 m tiles:
 // fewer plan x material buckets, DESIGN geometry budget).
-import { RADIUS, VIA_LATA, lots, inRect, rows, INN, FULLER, STADIUM, saeptaRows, quayRows, riverEdge, fountains, fills, gardens, FORUM, TEMPLE, PISTRINUM, LATRINE } from './layout.js';
+import { RADIUS, VIA_LATA, lots, inRect, rows, INN, FULLER, STADIUM, saeptaRows, quayRows, riverEdge, fountains, fills, gardens, FORUM, TEMPLE, PISTRINUM, LATRINE, inn2 } from './layout.js';
 import '../../styles/roman/ways.js';
 import '../../styles/roman/houses.js';
 import { DOMUS, LITTER, lifePlan } from './life.js';
@@ -27,12 +27,13 @@ const site = (id, elements, rooms = []) => ({ id, style: 'rome-site', origin: [0
 export async function town() {
   // the lot by the street north of the Pantheon holds the atrium house with its thermopolium (§4.4), walked into
   const same = (r, q) => r.every((v, i) => Math.abs(v - q[i]) < 1);
-  const free = lots().filter((l) => !inRect(DOMUS, (l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) && !same(l.rect, INN) && !same(l.rect, FULLER));
+  const free = lots().filter((l) => !inRect(DOMUS, (l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) && !same(l.rect, INN) && !same(l.rect, FULLER) && !(inn2() && same(l.rect, inn2().rect)));
   const inn = lots().find((l) => same(l.rect, INN)), full = lots().find((l) => same(l.rect, FULLER));
   const R = (r, u0, u1, d0, d1) => [r[0] + u0, r[3] - d1, r[0] + u1, r[3] - d0];                  // the frame of a building with its front on the south
   const houses = { id: 'rome-houses', style: 'roman', origin: [0, 0], base: 0, yaw: 0, feature: true, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -200], facing: 's' },
-    elements: [{ t: 'caupona', rect: inn.rect, front: 's', seed: inn.seed }, { t: 'fullonica', rect: full.rect, front: 's', seed: full.seed }],
+    elements: [{ t: 'caupona', rect: inn.rect, front: 's', seed: inn.seed }, { t: 'fullonica', rect: full.rect, front: 's', seed: full.seed }, ...(inn2() ? [{ t: 'caupona', rect: inn2().rect, front: 's', seed: inn2().seed }] : [])],
     rooms: [
+      ...(inn2() ? [{ id: 'caupona2-bar', rect: R(inn2().rect, 0.6, 8.4, 0.6, 7.9), y: 0, kind: 'hall', market: false }, { id: 'caupona2-stable', rect: R(inn2().rect, 12.7, 19.4, 0.6, 7.9), y: 0, kind: 'hall', market: false }, { id: 'caupona2-court', rect: R(inn2().rect, 0.6, 17.4, 9.0, 13.6), y: 0, kind: 'hall', market: false }] : []),
       { id: 'caupona-bar', rect: R(inn.rect, 0.6, 8.4, 0.6, 7.9), y: 0, kind: 'hall', market: false },
       { id: 'caupona-stable', rect: R(inn.rect, 12.7, 19.4, 0.6, 7.9), y: 0, kind: 'hall', market: false },
       { id: 'caupona-court', rect: R(inn.rect, 0.6, 17.4, 9.0, 13.6), y: 0, kind: 'hall', market: false },

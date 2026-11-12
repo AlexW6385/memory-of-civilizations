@@ -183,7 +183,7 @@ export function village() {
   // the crafts, in the open spaces among the houses: each with its worker (and a watching child, a dog)
   const KINDS = ['knap', 'pots', 'basket', 'grind', 'hides'], POSE = { knap: 'squat', pots: 'squat', basket: 'sit_ground', grind: 'kneel', hides: 'kneel' };
   const spots = [];
-  for (let n = 0; n < 2000 && spots.length < 20; n++) {
+  for (let n = 0; n < 2000 && spots.length < 28; n++) {
     const a = rand() * 6.28, d = 8 + rand() * 90, x = VILLAGE.c[0] + Math.cos(a) * d, z = VILLAGE.c[1] + Math.sin(a) * d;
     if (!free(x, z, 3) || Math.hypot(x, z) > RADIUS - 58 || spots.some((q) => Math.hypot(q[0] - x, q[1] - z) < 9)) continue;
     spots.push([x, z]);
@@ -197,7 +197,7 @@ export function village() {
     if (rand() < 0.35) L.push({ t: 'animal', kind: 'dog', at: [x - Math.sin(yaw) * 2.6, z + Math.cos(yaw) * 2.6], y: height(x, z), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
   });
   // four-post granaries among the houses
-  for (let n = 0, m = 0; n < 1500 && m < 12; n++) {
+  for (let n = 0, m = 0; n < 1500 && m < 16; n++) {
     const a = rand() * 6.28, d = 10 + rand() * 90, x = VILLAGE.c[0] + Math.cos(a) * d, z = VILLAGE.c[1] + Math.sin(a) * d;
     if (!free(x, z, 3.2) || Math.hypot(x, z) > RADIUS - 58 || C.some((q) => q.c && Math.hypot(q.c[0] - x, q.c[1] - z) < 5)) continue;
     m++; C.push({ t: 'granary', c: [x, z], y: height(x, z), yaw: rand() * 1.57, s: 2.0 + rand() * 0.5, seed: Math.floor(rand() * 1e6) });
@@ -262,19 +262,42 @@ export function village() {
     const wm = P(41, 17); person(wm, face(wm, [0, 0]) + 0.4, { dress: 'wrap', carry: 'pot' });
     const dg = P(30.5, 20.5); L.push({ t: 'animal', kind: 'dog', at: dg, y: height(...dg), rot: 2, seed: 77 });
   }
+  // a sarsen being hauled up the Avenue on a sledge-ladder over rollers: the team of men and oxen ahead of it hauling toward the circle, the
+  // rollers and the lever men behind, children running alongside; a second knot of people at the Heel Stone with their gifts
+  {
+    const stoneAt = P(124, 1.5);
+    C.push({ t: 'standing_stone', at: P(121, 0), y: height(...P(121, 0)) + 0.35, yaw: AXIS, lying: true, h: 4.6, w0: 1.5, w1: 1.3, d0: 1.0, d1: 0.9, rough: 0.14, dress: 0, bury: 0.1, mat: 'rock_boulder', natural: true, tool: { faces: 'none', lichen: 20 }, seed: 6001 });
+    const hz = P(122, 1.5); S.push({ t: 'litter', kind: 'dressing', c: hz, y: height(...hz), r: 2.6, n: 22, seed: 6002 });
+    for (const [u, v, rot] of [[100, -1.3, 0], [100, 1.3, 0], [103.5, -1.6, 0], [103.5, 1.6, 0], [107, -1.0, 0], [107, 1.0, 0], [110.5, -1.7, 0], [110.5, 1.7, 0], [114, -1.1, 0], [114, 1.1, 0]]) { const at = P(u, v); person(at, face(at, P(u - 10, v)) + rot, { pose: 'stand', dress: 'tunic', carry: 'rope' }); }
+    for (const v of [-0.9, 0.9]) { const at = P(95, v); L.push({ t: 'animal', kind: 'ox', at, y: height(...at), rot: face(at, P(60, v)), seed: 6010 + Math.round(v * 10), gear: true }); }
+    for (const [u, v] of [[132, -2.0], [133, 2.2], [135, 0.2]]) { const at = P(u, v); person(at, face(at, stoneAt), { pose: 'stand', carry: 'staff' }); }
+    for (const [u, v] of [[118, 4.8], [121, 5.6]]) { const at = P(u, v); person(at, rand() * 6.28, { pose: 'stand', h: 0.6 }); }
+    // pilgrim parties and offerings between the entrance and the Heel Stone
+    for (const [u, v, n] of [[60, 5.2, 3], [66, -4.4, 2], [88, 5.5, 3], [92, -5.4, 2]]) for (let k = 0; k < n; k++) { const at = P(u + (k - 1) * 1.2, v + (rand() - 0.5) * 1.4); person(at, face(at, [0, 0]) + (rand() - 0.5) * 0.8, { pose: k === 0 ? 'talk' : 'stand', carry: rand() < 0.3 ? 'basket' : 'none' }); }
+  }
   const rooms = H.map((h, i) => { const k = h.s / 2 / (Math.abs(Math.cos(h.yaw)) + Math.abs(Math.sin(h.yaw))) - 0.15; return { id: 'house ' + i, rect: [h.c[0] - k, h.c[1] - k, h.c[0] + k, h.c[1] + k], y: h.y, kind: 'hall' }; });
   return [base('stonehenge-yards', Y, 'neolithic', rooms), base('stonehenge-crafts', C, 'neolithic'), base('stonehenge-scrub', S, 'neolithic'), base('stonehenge-village-life', L, 'life')];
 }
 const HEEL_D = HEEL.d;
 
+/** No figure or animal within 9 m of where the visitor arrives (34, -16): moved out along the line from the arrival. */
+const ARR = [34, -16];
+function clearArrival(plans) {
+  for (const p of plans) for (const e of p.elements) {
+    if ((e.t !== 'figure' && e.t !== 'animal') || !e.at) continue;
+    const dx = e.at[0] - ARR[0], dz = e.at[1] - ARR[1], d = Math.hypot(dx, dz);
+    if (d < 9) { const k = d < 0.01 ? 1 : 9.5 / d, a = d < 0.01 ? [1, 0] : [dx, dz], x = ARR[0] + (d < 0.01 ? 9.5 : a[0] * k), z = ARR[1] + (d < 0.01 ? 0 : a[1] * k); e.at = [x, z]; e.y = height(x, z); }
+  }
+  return plans;
+}
 export async function town() {
-  return [
+  return clearArrival([
     base('stonehenge-timber-circle', timberCircle(), 'neolithic'),
     base('stonehenge-houses', houses().map((h) => ({ t: 'neolithic_house', ...h })), 'neolithic'),
     base('stonehenge-people', people(), 'life'),
     ...feast(),
     ...camp(),
     ...village(),
-  ];
+  ]);
 }
 void avenue;

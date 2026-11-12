@@ -101,6 +101,15 @@ export function fills() {
   return FILLS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
+/** A second inn (caupona), walked into: the roomiest insula nearest the Pantheon's forecourt, not the first inn, the fuller's or the atrium house. */
+let INN2 = null;
+export function inn2() {
+  if (INN2) return INN2;
+  const same = (r, q) => r.every((v, i) => Math.abs(v - q[i]) < 1), far = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 + 120);
+  const c = lots().filter((l) => !same(l.rect, INN) && !same(l.rect, FULLER) && l.rect[2] - l.rect[0] >= 21.4 && l.rect[3] - l.rect[1] >= 17.6 && !inRect([-36, -208, -17.9, -189.4], (l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2, 8)).sort((a, b) => far(a) - far(b));
+  INN2 = c[0] ?? null;
+  return INN2;
+}
 
 /** The water's edge on one side of the Tiber (side −1 the west bank, +1 the east): points every 6 m where the river is drawn. */
 export function riverEdge(side, off = 21.6) {
