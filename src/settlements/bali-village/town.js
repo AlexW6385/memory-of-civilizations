@@ -1,6 +1,7 @@
 // Round the pura (docs/settlements/bali-village.md §4): the walled family compounds along the village street and the cross lane, the banjar's wantilan with its gamelan
 // at the crossing, the kulkul and the banyan, the subak channel along the street, the penjors of the temple festival, the flooded paddies of the terraces, the shrine of the
 // water temple; the people — the gamelan's players, the worshippers in the temple, the households in their natah, the farmers in the paddies.
+import { compoundParts } from '../../styles/balinese/compound.js';
 import { RADIUS, CORE, WANTILAN, KULKUL, BANYAN, CHANNEL_X, PURA, DALEM_C, lots, lotFrame, outward, height, flooded, TREAD } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -116,6 +117,19 @@ function people() {
     if (rand() < 0.4) E.push({ t: 'animal', kind: 'pig', at: [cx - 2.5, cz + 2.0], y: 0, rot: rand() * 6.28, seed: i + 9 });
     if (rand() < 0.35) E.push({ t: 'animal', kind: 'dog', at: [cx + 1.8, cz + 2.4], y: 0, rot: rand() * 6.28, seed: i + 31 });
   });
+  // inside: the household at home in the sleeping houses (on the platform under the lamp, facing the door), the family on the street-side pavilions
+  for (const l of lots()) {
+    const parts = compoundParts({ rect: l.rect, front: l.front, seed: l.seed, rich: l.rich, gateF: l.gateF, shop: l.shop }), r = rand();
+    if (parts.house && r < 0.5) {
+      const [hx0, hz0, hx1, hz1] = parts.house.rect, dd = { e: [1, 0], w: [-1, 0], n: [0, -1], s: [0, 1] }[parts.house.door], zc = hz0 + 0.9 + rand() * (hz1 - hz0 - 1.8);
+      (r < 0.25 ? woman : man)([hx0 + 1.05, zc], 0.88, Math.atan2(-dd[0], -dd[1]), { pose: 'sit_ground', carry: 'none' });
+    }
+    if (parts.pav) {
+      const [px0, pz0, px1, pz1] = parts.pav.rect, [ox, oz] = outward(l), out = Math.atan2(-ox, -oz), cx = (px0 + px1) / 2, cz = (pz0 + pz1) / 2;
+      woman([cx - oz * 0.7, cz + ox * 0.7], 0.5, out, { pose: 'sit_ground', carry: 'none' });
+      if (rand() < 0.7) man([cx + oz * 0.7, cz - ox * 0.7], 0.5, out, { pose: 'sit_ground', carry: 'none' });
+    }
+  }
   // the farmers on the terraces: hoeing in the green paddies, in conical straw hats; ducks in the flooded ones
   for (let k = 0; k < 160 && P.length < 150; k++) {
     const a = rand() * 6.283, d = 112 + rand() * 60, x = Math.cos(a) * d * 1.0, z = Math.sin(a) * d * 0.95, r2 = Math.hypot(x, z);

@@ -205,5 +205,8 @@ export function house(el, ctx) {
   ctx.bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.02], [0.16, 0.16], [0.1, 0.3]], 8, null, x1 - t - 0.75, f, z1 - t - 0.25));
   bx(ctx, 'sacking', x1 - t - 0.9, f, z0 + t + 0.9, x1 - t - 0.35, f + 0.55, z0 + t + 1.4);
   bx(ctx, ['cloth_red', 'cloth_black', 'cloth_ochre'][(sd >> 2) % 3], x1 - t - 0.06, f + 0.9, z0 + t + 0.3, x1 - t - 0.02, f + 1.9, z0 + t + 0.9);
+  // the lamp: a clay oil lamp on the offering ledge, lit (one light in the room)
+  ctx.bag.add('pottery_dark', lathe([[0.001, 0], [0.05, 0.01], [0.07, 0.04], [0.04, 0.06], [0.001, 0.06]], 8, null, x0 + t + 0.17, f + 1.16, z1 - t - 1.05));
+  ctx.lights?.push({ at: [x0 + t + 0.17, f + 1.3, z1 - t - 1.05], color: '#ffb86a', intensity: 2.6, distance: 6 });
   void pick; void rng;
 }

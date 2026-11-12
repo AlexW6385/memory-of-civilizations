@@ -8,6 +8,28 @@ import { banana } from './plants.js';
 import { lathe } from '../../core/geom.js';
 import { shrine as shrineOf } from './stone.js';
 
+
+/**
+ * The places of a compound that other code needs (the people of the settlement stand in them): the sleeping house's rect and door side, and the street-side pavilion
+ * (bale bengong) that some compounds open on the street in place of a shop. Pure; the same frame as compound() below.
+ */
+export function compoundParts(el) {
+  const [x0, z0, x1, z1] = el.rect, f = el.front, alongX = f === 'n' || f === 's';
+  const W = alongX ? x1 - x0 : z1 - z0, D = alongX ? z1 - z0 : x1 - x0;
+  const P = (u, v) => (f === 'n' ? [x0 + u, z0 + v] : f === 's' ? [x1 - u, z1 - v] : f === 'w' ? [x0 + v, z1 - u] : [x1 - v, z0 + u]);
+  const R = (u0, v0, u1, v1) => { const a = P(u0, v0), b = P(u1, v1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
+  const dirV = (sg) => (f === 'n' ? (sg > 0 ? 's' : 'n') : f === 's' ? (sg > 0 ? 'n' : 's') : f === 'w' ? (sg > 0 ? 'e' : 'w') : (sg > 0 ? 'w' : 'e'));
+  const cL = P(0, D), cR = P(W, D), left = cL[0] - cL[1] >= cR[0] - cR[1];
+  const M = (u) => (left ? u : W - u), RM = (u0, v0, u1, v1) => R(M(u0), v0, M(u1), v1);
+  const gateU = W * (el.gateF ?? 0.5), out = {};
+  const hu0 = 8.8, hu1 = Math.min(W - 2.2, hu0 + 6.4), hv1 = D - 1.9, hv0 = hv1 - 3.2;
+  out.house = hu1 - hu0 >= 3.2 ? { rect: RM(hu0, hv0, hu1, hv1), door: dirV(-1) } : null;
+  // the pavilion: canonical u from W − 4.3 to W − 0.9 (clear of the kitchen and the sanggah), v 0.6…2.8, the gate's aling-aling well clear
+  const cg = M(gateU), pu0 = W - 4.3, pu1 = W - 0.9;
+  out.pav = !el.shop && ((el.seed >>> 5) % 3 === 0) && cg + 2.9 < pu0 && D >= 18 ? { rect: RM(pu0, 0.6, pu1, 2.8), uc: M((pu0 + pu1) / 2), w: pu1 - pu0, stairs: dirV(1) } : null;
+  return out;
+}
+
 /** bali_compound: { rect, front ('n'|'s'|'e'|'w': the side the street is on), seed, rich, y } */
 export function compound(el, ctx) {
   const [x0, z0, x1, z1] = el.rect, rand = rng(el.seed), y = el.y ?? 0, f = el.front, rich = el.rich ?? rand() < 0.6;
@@ -24,7 +46,7 @@ export function compound(el, ctx) {
   const RM = (u0, v0, u1, v1) => R(M(u0), v0, M(u1), v1);
   const sgn = left ? 1 : -1;                                  // +u of the canonical frame in the real frame's u
   const th = 0.5, h = rich ? 2.4 : 2.0, mat = rich ? 'brick' : 'earth_wall', cap = rich ? 'stone' : 'thatch';
-  const gateU = W * (el.gateF ?? 0.5);
+  const gateU = W * (el.gateF ?? 0.5), parts = compoundParts(el);
   const wl = (a, b, gaps) => wall({ a, b, h, th, mat, cap, gaps, y }, ctx);
   // the four walls (centre lines on the lot's edge, inset by half the thickness)
   const c00 = P(0, 0), c10 = P(W, 0), c01 = P(0, D), c11 = P(W, D);
@@ -37,6 +59,7 @@ export function compound(el, ctx) {
     const L = Math.hypot(b[0] - a[0], b[1] - a[1]);
     const gaps = [{ at: L * (gateU - 0.25) / (W - 0.5), w: gw }];
     if (el.shop) gaps.push({ at: L * ((el.shop.u0 + el.shop.u1) / 2 - 0.25) / (W - 0.5), w: el.shop.u1 - el.shop.u0 + 0.3 });
+    if (parts.pav) gaps.push({ at: L * (parts.pav.uc - 0.25) / (W - 0.5), w: parts.pav.w + 0.3 });
     wl(a, b, gaps);
   }
   wl(P(0.25, D - 0.25), P(W - 0.25, D - 0.25));
@@ -63,13 +86,7 @@ export function compound(el, ctx) {
     void cp;
   }
   // the sleeping house across the back, door to the natah
-  {
-    const hu0 = 8.8, hu1 = Math.min(W - 2.2, hu0 + 6.4), hv1 = D - 1.9, hv0 = hv1 - 3.2;
-    if (hu1 - hu0 >= 3.2) {
-      const r = RM(hu0, hv0, hu1, hv1);
-      house({ rect: r, y, door: dirV(-1), roof: rich ? 'ijuk' : 'palm', seed: el.seed }, ctx);
-    }
-  }
+  if (parts.house) house({ rect: parts.house.rect, y, door: parts.house.door, roof: rich ? 'ijuk' : 'palm', seed: el.seed }, ctx);
   // the guest bale on the side opposite the sanggah (u large), open to the natah
   {
     const bu1 = W - 0.9, bu0 = bu1 - 3.6, bv0 = 6.5 + rand() * 2, bv1 = bv0 + 5.2;
@@ -83,6 +100,8 @@ export function compound(el, ctx) {
     lumbung({ c: [lc[0], lc[1]], y }, ctx);
   }
   if (el.shop) shop({ rect: el.rect, front: f, shop: el.shop, seed: el.seed, y }, ctx);
+  // the street-side pavilion (bale bengong): a raised open pavilion of thatch behind the street wall's opening, mats and an offering table in it, the steps to the natah
+  if (parts.pav) bale({ rect: parts.pav.rect, y, floor: 0.5, h: 2.3, bays: [2, 1], walls: 'none', stairs: parts.pav.stairs, furnish: 'mats', roof: rich ? 'palm' : 'thatch', seed: el.seed + 5 }, ctx);
   // the variants of the plan: a bale dangin on the east of the natah, or a second barn
   const variant = (el.seed >>> 3) % 3;
   if (variant === 1 && D >= 21) bale({ rect: RM(10.0, 11.8, 13.6, 15.0), y, floor: 0.5, h: 2.2, bays: [1, 1], walls: 'none', stairs: dirV(-1), furnish: 'mats', roof: 'thatch', seed: el.seed + 3 }, ctx);
@@ -106,7 +125,7 @@ export function compound(el, ctx) {
   }
   // the front of the compound at eye level, on the street: shelves for offerings let into the wall, bougainvillea over the coping, a bench and water jar by the gate, the tugu
   {
-    const span = el.shop ? [el.shop.u0 - 0.5, el.shop.u1 + 0.5] : null, free = (u, w = 0.6) => Math.abs(u - gateU) > 2.9 && (!span || u + w < span[0] || u > span[1]);
+    const span = el.shop ? [el.shop.u0 - 0.5, el.shop.u1 + 0.5] : parts.pav ? [parts.pav.uc - parts.pav.w / 2 - 0.9, parts.pav.uc + parts.pav.w / 2 + 0.9] : null, free = (u, w = 0.6) => Math.abs(u - gateU) > 2.9 && (!span || u + w < span[0] || u > span[1]);
     let n = 0;
     for (let k = 0; k < 14 && n < 3; k++) {
       const u = 1.2 + rand() * (W - 3.0);
@@ -123,14 +142,14 @@ export function compound(el, ctx) {
     const ju = gateU - side * 3.2;
     if (ju > 1.0 && ju < W - 1.0 && free(ju, 0.6)) { const p = P(ju, -0.45); ctx.bag.add('terracotta', lathe([[0.001, 0], [0.18, 0.02], [0.26, 0.22], [0.2, 0.44], [0.14, 0.5]], 8, null, p[0], y, p[1])); }
     const tu = gateU + side * 3.6, tp = P(tu, 1.5);
-    if (el.penjor !== false && tu > 1.2 && tu < W - 1.2 && free(tu, 0.8) && !el.shop) shrineOf({ c: [tp[0], tp[1]], y, kind: 'small' }, ctx);
+    if (el.penjor !== false && tu > 1.2 && tu < W - 1.2 && free(tu, 0.8) && !el.shop && !parts.pav) shrineOf({ c: [tp[0], tp[1]], y, kind: 'small' }, ctx);
   }
   // banana clumps in the front strip of the natah, their leaves showing over the street wall (two on a rich compound, one on the others); clear of the gate, the shrine by it and the shop
   {
     const spots = [], want = rich ? 2 : 1;
     for (let k = 0; k < 12 && spots.length < want; k++) {
       const u = 1.6 + rand() * (W - 3.2);
-      if (Math.abs(u - gateU) < 4.8 || (el.shop && u > el.shop.u0 - 1.8 && u < el.shop.u1 + 1.8) || spots.some((q) => Math.abs(q - u) < 3.2)) continue;
+      if (Math.abs(u - gateU) < 4.8 || (el.shop && u > el.shop.u0 - 1.8 && u < el.shop.u1 + 1.8) || (parts.pav && Math.abs(u - parts.pav.uc) < parts.pav.w / 2 + 1.8) || spots.some((q) => Math.abs(q - u) < 3.2)) continue;
       spots.push(u);
     }
     spots.forEach((u, i) => { const p = P(u, 1.4 + rand() * 0.7); banana({ at: p, y, seed: el.seed + 17 * i, n: 3 + (i % 2), h: 2.7 + rand() * 0.8 }, ctx); });
