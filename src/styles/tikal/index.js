@@ -5,10 +5,11 @@
 // small ball court; and the houses of the town, poles and mud daub under hipped palm thatch on low rubble platforms.
 
 import { registerStyle, STYLES, subtractRects } from '../../core/build.js';
-import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
+import { box, lathe, rod, fromTriangles, orientOutward } from '../../core/geom.js';
 import '../qing/index.js';
-import { hearthKit, ollaKit, metateKit, waterJarKit, bedKit, storeJarKit, put } from '../maya/household.js';
+import { hearthKit, ollaKit, metateKit, waterJarKit, bedKit, storeJarKit, put, patch, soot } from '../maya/household.js';
 import { frame, slab, frust, flipGeo, hex, flight, rng, L, RED, LIME } from './kit.js';
+import { DRESS, tierWeather, wallWeather, curtain, hammock } from './dress.js';
 
 const TIM = 'timber';
 
@@ -69,6 +70,13 @@ function shrine(el, { bag, col }) {
   { const r = F.R(D * 0.5, D * 0.62, -0.7, 0.7); bag.add(L, box(r[0], yy, r[1], r[2], yy + 0.5, r[3])); const q = F.R(D * 0.53, D * 0.59, -0.35, 0.35); bag.add(RED, box(q[0], yy + 0.5, q[1], q[2], yy + 1.5, q[3])); const h = F.R(D * 0.54, D * 0.58, -0.45, 0.45); bag.add(L, box(h[0], yy + 1.5, h[1], h[2], yy + 2.1, h[3])); }   // the crowning figure
   // inside: the innermost chamber has a low bench, a censer bowl on the floor of each
   { const ua = tf + (n - 1) * (ch + tp), r = F.R(ua + ch - 0.7, ua + ch, -len / 2 + 0.3, len / 2 - 0.3); slab(bag, L, r, y, y + 0.45, col); }
+  { const rr = rng(Math.round(fx * 5 + fz * 3) + 9);                                     // painted walls in the chambers: a band of ochre and rows of glyph panels
+    for (let i = 0; i < n; i++) { const ua = tf + i * (ch + tp);
+      for (const sg of [-1, 1]) {
+        const wv = sg * (len / 2), b = F.R(ua + 0.1, ua + ch - 0.1, wv - (sg > 0 ? 0.03 : 0), wv + (sg > 0 ? 0 : 0.03));
+        bag.add('stucco_ochre', box(b[0], y + 0.9, b[1], b[2], y + 2.1, b[3]));
+        for (let g = 0; g < 3; g++) { const gu = ua + 0.45 + g * (ch - 0.9) / 2, q = F.R(gu - 0.18, gu + 0.18, wv - (sg > 0 ? 0.06 : -0.03), wv + (sg > 0 ? -0.03 : 0.06)); bag.add(rr() < 0.5 ? 'maya_blue' : RED, box(q[0], y + 1.2, q[1], q[2], y + 1.9, q[3])); }
+      } } }
   for (let i = 0; i < n; i++) { const ua = tf + i * (ch + tp), p = F.P(ua + 0.8, len / 2 - 0.8); bag.add('pottery_dark', lathe([[0.001, 0], [0.16, 0.01], [0.2, 0.1], [0.16, 0.15], [0.001, 0.15]], 10, null, p[0], y + 0.002, p[1])); }
   col.floor(F.R(0, D, -W / 2, W / 2), y + roof);                         // the roof, to stand on (reached only by flight)
   return { D, W, F, ch, tf, tp, n };
@@ -83,6 +91,7 @@ function pyramid(el, ctx) {
   const Lr = el.foot !== undefined ? Math.abs(head - el.foot) : H / 1.72;
   const foot = dir[0] ? [head - dir[0] * Lr, cz] : [cx, head - dir[1] * Lr];
   const hole = dir[0] ? [Math.min(foot[0], head) - 0.5, cz - sw - 0.1, Math.max(foot[0], head) + 1, cz + sw + 0.1] : [cx - sw - 0.1, Math.min(foot[1], head) - 0.5, cx + sw + 0.1, Math.max(foot[1], head) + 1];
+  const wr = rng((el.seed ?? Math.round(cx * 7 + cz * 13)) + 5);
   for (let k = 0; k < n; k++) {
     const [a0, b0] = A(k), [a1, b1] = A(k + 1), y0 = Y + k * th, d = Math.min(a0 - a1, b0 - b1);
     const af = a0 - (a0 - a1) * 0.2, bf = b0 - (b0 - b1) * 0.2;
@@ -90,8 +99,13 @@ function pyramid(el, ctx) {
     frust(bag, L, cx, cz, af + 0.2, bf + 0.2, af + 0.2, bf + 0.2, y0 + th * 0.86, y0 + th);                         // the moulding
     frust(bag, 'maya_blue', cx, cz, af + 0.05, bf + 0.05, af + 0.05, bf + 0.05, y0 + th * 0.58, y0 + th * 0.66);    // a painted band
     void d;
+    tierWeather(bag, cx, cz, a0, b0, af, bf, y0, th, wr, { nx: -dir[0], nz: -dir[1], w: sw + 1 });
     for (const r of subtractRects([cx - a0, cz - b0, cx + a0, cz + b0], [hole])) col.rect(r, y0 - 0.3, y0 + th - 0.31);
     col.floor([cx - a1 - 0.2, cz - b1 - 0.2, cx + a1 + 0.2, cz + b1 + 0.2], y0 + th);
+  }
+  if (el.masks) for (let k = 1; k < n; k++) {                                                    // the stucco masks flanking the stair, one pair on each tier
+    const [a, b] = A(k + 0.5), half = dir[0] ? a : b;
+    for (const sg of [-1, 1]) { const off = sg * (sw + 2.4), fx = cx - dir[0] * (half - 0.06), fz = cz - dir[1] * (half - 0.06); DRESS.k_mask({ c: dir[0] ? [fx, cz + off] : [cx + off, fz], face: f, y: Y + k * th + 0.2, s: Math.min(1, th / 3.3) }, ctx); }
   }
   flight(bag, col, { foot, dir, w: el.stairW, H, Lr, steps: Math.round(H / 0.3), y0: Y });
   if (el.shrine) shrine({ ...el.shrine, y: Y + H, face: { w: 'w', e: 'e', n: 'n', s: 's' }[f], c: el.shrine.c ?? (dir[0] ? [cx - dir[0] * (el.top[0] - 1.8), cz] : [cx, cz - dir[1] * (el.top[1] - 1.8)]) }, ctx);
@@ -111,6 +125,14 @@ function platform(el, ctx) {
   const Y = el.y0 ?? 0;
   bag.add(mat, box(x0, Y - 0.1, z0, x1, Y + H, z1));
   if (b > 0) { frust(bag, el.trim ?? L, (x0 + x1) / 2, (z0 + z1) / 2, (x1 - x0) / 2 + 0.25, (z1 - z0) / 2 + 0.25, (x1 - x0) / 2 + 0.25, (z1 - z0) / 2 + 0.25, Y + H - 0.45, Y + H); }
+  { const wr = rng(Math.round(x0 * 3 + z1 * 5) + 11), Yh = Y + H, nrm = (F) => F;
+    for (const face of ['w', 'e', 'n', 's']) {
+      const dir = { w: [1, 0], e: [-1, 0], n: [0, 1], s: [0, -1] }[face], onX = dir[0] !== 0, len = onX ? z1 - z0 : x1 - x0;
+      const edge = dir[0] > 0 ? x0 : dir[0] < 0 ? x1 : dir[1] > 0 ? z0 : z1, mid = onX ? (z0 + z1) / 2 : (x0 + x1) / 2;
+      const F = onX ? frame(face, edge, mid) : frame(face, mid, edge), cnt = Math.max(3, Math.round(len / 5));
+      wallWeather(bag, F, -len / 2 + 1, len / 2 - 1, Y, Yh - 0.45, wr, cnt, -0.0);
+    }
+    void nrm; }
   for (const r of subtractRects([x0, z0, x1, z1], holes.map((h) => [h[0] - 0.6, h[1] - 0.6, h[2] + 0.6, h[3] + 0.6]))) col.rect(r, Y - 0.3, Y + H - 0.31);
   col.floor([x0, z0, x1, z1], Y + H);
 }
@@ -149,6 +171,16 @@ function range(el, { bag, col }) {
   // the piers between the doors: a painted dado in blue on the front
   for (let i = 0; i <= n; i++) { const v = V0 + i * (rw + pt) + pt / 2, r = F.R(-0.12, 0, v - 0.18, v + 0.18); bag.add(RED, box(r[0], y, r[1], r[2], y + ceil, r[3])); }
   if (el.comb) { const r = F.R(D * 0.3, D * 0.7, V0 + 2, Lv / 2 - 2); bag.add(RED, box(r[0], y + roof + 1.4, r[1], r[2], y + roof + 1.4 + el.comb, r[3])); const q = F.R(D * 0.3 - 0.08, D * 0.3, V0 + 3, Lv / 2 - 3); bag.add(L, box(q[0], y + roof + 1.4 + el.comb * 0.25, q[1], q[2], y + roof + 1.4 + el.comb * 0.8, q[3])); }
+  wallWeather(bag, F, V0 + 0.6, Lv / 2 - 0.6, y, y + ceil, rng((el.seed ?? 7) + 31), Math.max(4, n + 1));
+  // inside every room: the painted dado along its back wall (an ochre band, blue and red glyph panels), a hanging mat at the door
+  { const rr = rng((el.seed ?? 7) + 77);
+    for (const [ua, ub] of uRow) for (let i = 0; i < n; i++) {
+      const wb = F.R(ub - 0.03, ub, vc(i) - rw / 2 + 0.1, vc(i) + rw / 2 - 0.1);
+      bag.add('stucco_ochre', box(wb[0], y + 1.0, wb[1], wb[2], y + 2.0, wb[3]));
+      for (let g = 0; g < 4; g++) { const gv = vc(i) - rw / 2 + 0.55 + g * (rw - 1.1) / 3, q = F.R(ub - 0.06, ub - 0.03, gv - 0.2, gv + 0.2); bag.add(rr() < 0.5 ? 'maya_blue' : RED, box(q[0], y + 1.25, q[1], q[2], y + 1.8, q[3])); }
+      if (ua === uRow[0][0]) curtain(bag, F, vc(i) + 0.45, y + dh - 0.05, 0.5, 0.8);
+    }
+  }
   // furnishing: a masonry bench along the back of every room, a mat, jars, a hearth in one
   if (el.furn) {
     const rand = rng(el.seed ?? 7);
@@ -246,8 +278,17 @@ function house(el, ctx) {
   const ix = (a) => cx + a, iz = (a) => cz + a, F = P - 0.0;
   const alongX = long, e0 = (long ? -1 : -1) * (long ? w : d) / 2 + 1.0, e1 = -e0;
   const at = (a, b) => (alongX ? [ix(a), iz(b)] : [ix(b), iz(a)]);
+  const hang = !el.kitchen && rand() < 0.55;
   if (el.kitchen) { const p = at(e1 - 0.2, 0); put(bag, hearthKit('rubble'), p[0], F, p[1], 0); col.circle(p[0], p[1], 0.42, F, F + 0.3); const q = at(e1 - 0.5, -0.8); put(bag, ollaKit(), q[0], F, q[1], 0); const m = at(e1 - 1.5, 0.7); put(bag, metateKit(), m[0], F, m[1], alongX ? Math.PI : -Math.PI / 2); }
-  else { const b = at(e0 + 0.2, 0.2); put(bag, bedKit(rand() < 0.7 ? 'cloth_white' : 'cloth_ochre', 'cloth_red'), b[0], F, b[1], alongX ? Math.PI / 2 : 0); }
+  else if (!hang) { const b = at(e0 + 0.2, 0.2); put(bag, bedKit(rand() < 0.7 ? 'cloth_white' : 'cloth_ochre', 'cloth_red'), b[0], F, b[1], alongX ? Math.PI / 2 : 0); }
+  if (hang) { const a = at(e0 + 0.5, -((long ? d : w) / 2 - 0.5)), b2 = at(e0 + 0.5, (long ? d : w) / 2 - 0.5); hammock(bag, [a[0], F + 1.5, a[1]], [b2[0], F + 1.5, b2[1]], 0.45, rand() < 0.5 ? 'cloth_white' : 'cloth_ochre'); }
+  // outside: the doorway's poles, strings of maize and chiles under the eave, a log bench, the stains where the rain splashes the daub
+  { const F2 = frame(side, ...(side === 'n' ? [cx, cz - d / 2] : side === 's' ? [cx, cz + d / 2] : side === 'w' ? [cx - w / 2, cz] : [cx + w / 2, cz])), dn = [-F2.U[0], 0, -F2.U[1]];
+    for (const v of [-0.58, 0.58]) { const p = F2.P(-0.06, v); bag.add(TIM, rod([p[0], P, p[1]], [p[0], P + dh, p[1]], 0.05, 5)); }
+    for (const [v, m, hh] of [[-0.95, 'wood_ochre', 0.5], [-1.05, 'stucco_red', 0.4], [0.95, 'wood_ochre', 0.45]]) { const p = F2.P(-0.14, v); bag.add('rope_fibre', rod([p[0], P + wh - 0.25, p[1]], [p[0], P + wh - 0.25 - hh, p[1]], 0.012, 4)); bag.add(m, box(p[0] - 0.07, P + wh - 0.25 - hh, p[1] - 0.07, p[0] + 0.07, P + wh - 0.3, p[1] + 0.07)); }
+    if (rand() < 0.6) { const q = F2.R(-1.05, -0.65, 0.9, 2.1); bag.add(TIM, box(q[0], P, q[1], q[2], P + 0.28, q[3])); }
+    for (let k = 0; k < 3; k++) { const v = (rand() - 0.5) * (side === 'n' || side === 's' ? w : d) * 0.8, p = F2.P(-0.01, v); patch(bag, 'plaster_damp', [p[0], P + 0.3, p[1]], dn, 0.6 + rand() * 0.8, 0.4, Math.floor(rand() * 1e6), 0.01); }
+    if (el.kitchen) soot(bag, [cx, P + wh + 0.8, cz], [0, -1, 0], 1.2, 1.2, el.seed || 3); }
   const j = at(e1 - 0.3, (long ? d : w) / 2 - 0.6); put(bag, waterJarKit(), j[0], F, j[1], 0); col.circle(j[0], j[1], 0.33, F, F + 0.8);
   const s = at(e0 + 0.35, -((long ? d : w) / 2 - 0.55)); put(bag, storeJarKit(), s[0], F, s[1], 0);
 }
@@ -274,7 +315,7 @@ function albarrada(el, { bag, col }) {
 
 registerStyle('tikal', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, k_pyramid: pyramid, k_shrine: shrine, k_platform: platform, k_range: range, k_stela: stela, k_causeway: causeway, k_ballcourt: ballcourt, k_house: house, k_ball: ball, petate, albarrada },
+  elements: { ...STYLES.qing.elements, k_pyramid: pyramid, k_shrine: shrine, k_platform: platform, k_range: range, k_stela: stela, k_causeway: causeway, k_ballcourt: ballcourt, k_house: house, k_ball: ball, petate, albarrada, ...DRESS },
   objects: {},
 });
 export { frame };
