@@ -105,6 +105,9 @@ export async function town() {
   for (const l of L) if (l.open && rand() < 0.35) { const q = fp(l, (l.rect[2] - l.rect[0] > 0 ? 1.0 : 1.0) + rand() * 2, -1.2); A.push({ t: 'animal', kind: 'dog', at: q, y: 0.05, rot: rand() * 6.28, seed: l.seed % 53 }); }
   for (const [x, z] of [[8, 60], [-70, -30]]) A.push({ t: 'animal', kind: 'goat', at: [x, z], y: 0, rot: rand() * 6.28, seed: Math.round(z) });
   void STREETS;
-  out.push({ ...base('bhaktapur-people', 'life', [...P, ...A]), feature: true });
+  // the arrival (src/planet/arrivals.js, 19 m, 21 m): no figure within 6 m of the visitor's feet, and none close on the right of the lens
+  const AR = [19, 21];
+  const awayFromArrival = (e) => Math.hypot(e.at[0] - AR[0], e.at[1] - AR[1]) > 6;
+  out.push({ ...base('bhaktapur-people', 'life', [...P.filter(awayFromArrival), ...A.filter(awayFromArrival)]), feature: true });
   return out;
 }
