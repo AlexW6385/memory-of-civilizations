@@ -12,6 +12,7 @@ function traffic() {
   // on the bridge (its east half clear of the view from the arrival)
   veh('hansom_cab', 140, zw, deck, W, 11); veh('omnibus', 166, zw, deck, W, 12, { mat: 'car_cream', board: 'cloth_red' });
   veh('hansom_cab', 152, ze, deck, E, 13); veh('omnibus', 240, ze, deck, E, 14, { mat: 'paint_cab_yellow', board: 'cloth_green' }); veh('hansom_cab', 236, zw, deck, W, 15);
+  veh('hansom_cab', 123, ze, deck, E, 81); veh('omnibus', 112, zw, deck, W, 82, { mat: 'paint_cab_yellow', board: 'cloth_red' }); veh('hansom_cab', 187, zw, deck, W, 83);
   // Bridge Street, between the Clock Tower and the square, and Parliament Street up the square's east side
   veh('hansom_cab', 86, zw, GROUND, W, 16); veh('omnibus', 70, ze, GROUND, E, 17, { mat: 'car_blue', board: 'cloth_white' }); veh('hansom_cab', 54, ze, GROUND, E, 18);
   veh('hansom_cab', 47, -195, GROUND, N, 19); veh('hansom_cab', 51, -205, GROUND, S, 20);
