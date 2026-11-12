@@ -7,6 +7,16 @@ import { HOUSES, YARDS, GAP, AXIS, PLAT, HGT, RANGES, CELL, RADIUS, rng } from '
 
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 165], facing: 'n' } });
 
+/** The arrival (src/planet/arrivals.js: (0, 160) looking north): nothing alive or placed within a few metres of the lens, and no figure
+ * cut by the frame's edge in the first ten metres or so (the view is about ±45° wide). */
+const ARR = [0, 160];
+function keepClear(e) {
+  if (!['figure', 'animal', 'chickens', 'cart', 'handcart', 'bench', 'stool', 'basket', 'pot', 'firewood', 'rain_tub', 'drying_tray'].includes(e.t)) return true;
+  const dx = e.at[0] - ARR[0], dz = ARR[1] - e.at[1], d = Math.hypot(dx, dz), live = e.t === 'figure' || e.t === 'animal' || e.t === 'chickens' || e.t === 'cart' || e.t === 'handcart';
+  if (d < (live ? 6.5 : 3.5)) return false;
+  if (live && dz > 0 && d < 12 && Math.atan2(Math.abs(dx), dz) > 0.5) return false;
+  return true;
+}
 const OUT = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
 /** The frame of a house front: P(t, d) = the point at fraction t along the front and d out from the posts; rot turns local +z out into the street; L the front's width. */
 function frontOf(h) {
@@ -64,6 +74,9 @@ function village() {
   E.push({ t: 'paving', rect: [17, 150.9, 88, 152], y: 0.02, th: 0.3, mat: 'granite_grey' });
   // dry grass and weeds along the foot of the fronts and in the ruts
   for (const [x0, x1] of [[-88, -17], [17, 88]]) { E.push({ t: 'shaolin_wear', kind: 'tufts', rect: [x0, 156.7, x1, 157.9], y: 0.0, n: 120, seed: 12 }); E.push({ t: 'shaolin_wear', kind: 'tufts', rect: [x0, 152.1, x1, 153.3], y: 0.0, n: 100, seed: 13 }); }
+  // the plaza's own weathering: dry grass in the joints along its edges and at the stele's feet, worn by the feet down the middle
+  E.push({ t: 'shaolin_wear', kind: 'tufts', rect: [-16, 129.4, -12, 151.6], y: 0.03, n: 40, seed: 31 }, { t: 'shaolin_wear', kind: 'tufts', rect: [12, 129.4, 16, 151.6], y: 0.03, n: 40, seed: 32 });
+  E.push({ t: 'shaolin_wear', kind: 'tufts', rect: [-13, 143.2, 13, 145.0], y: 0.03, n: 26, seed: 33 });
   return E;
 }
 
@@ -104,6 +117,10 @@ function frontLife() {
     plaza.push([sx * 12.4, z + 0.3]);
   }
   for (const sx of [-1, 1]) { L.push({ t: 'bench', at: [sx * 7.6, 149.5], y: 0.02, rot: Math.PI / 2, seed: sd() }); L.push({ t: 'handcart', at: [sx * 9, 139], y: 0.02, rot: sx * 0.4, load: pick(['baskets', 'crates', 'sacks']), seed: sd() }); }
+  // the leading line to the gate: paper lamps on posts down both sides of the processional way, a hitching place for the pilgrims' mounts at the plaza's
+  // south corners (a trough, the donkeys tied, their drivers squatting by them: the people are in town())
+  for (const sx of [-1, 1]) for (const z of [135, 141.5, 148]) L.push({ t: 'lantern', at: [sx * 4.4, z], y: 0.02, kind: 'paper', h: 2.6 });
+  for (const sx of [-1, 1]) { L.push({ t: 'trough', at: [sx * 11.6, 150.2], y: 0.02, rot: Math.PI / 2, seed: sd() }); L.push({ t: 'animal', kind: 'donkey', at: [sx * 12.6, 149.0], y: 0.02, rot: sx * 1.2, gear: true, graze: false, seed: sd() }); L.push({ t: 'animal', kind: 'donkey', at: [sx * 10.6, 149.6], y: 0.02, rot: -sx * 1.5, gear: false, graze: false, seed: sd() }); }
   // beasts: donkeys in carts and with packs on the approach and the street, dogs, an ox cart, goats
   L.push({ t: 'cart', kind: 'two', beast: 'donkey', load: 'sacks', at: [-9, 170], y: 0, rot: 0.15, seed: 5 });
   L.push({ t: 'cart', kind: 'two', beast: 'donkey', load: 'barrels', at: [30, 155], y: 0, rot: Math.PI / 2, seed: 6 });
@@ -130,7 +147,7 @@ function frontLife() {
   const people = [];
   const stand = (p) => people.push(p);
   // gather by tile
-  const tiles = new Map(), add = (e) => { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); };
+  const tiles = new Map(), add = (e) => { if (!keepClear(e)) return; const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); };
   L.forEach(add); void stand; void plaza;
   return { tiles, plaza, add };
 }
@@ -180,6 +197,14 @@ export async function town() {
   for (let k = 0; k < 26; k++) { const x = -82 + rand() * 164; if (Math.abs(x) < 3) continue; mk(rand() < 0.5 ? man : woman, [x, 152.8 + rand() * 4.4], 0, rand() * 6.28, rand() < 0.2 ? { pose: 'talk' } : rand() < 0.15 ? { carry: 'pole', arms: 'pole' } : {}); }
   for (let k = 0; k < 10; k++) child([-70 + rand() * 140, 153 + rand() * 4], rand() * 6.28);
   for (let k = 0; k < 14; k++) mk(rand() < 0.5 ? man : woman, [(rand() < 0.5 ? -1 : 1) * (1 + rand() * 3.5), 160 + rand() * 28], 0, rand() < 0.5 ? 0 : Math.PI, rand() < 0.2 ? { carry: 'basket' } : {});
+  // the gate's forecourt (the monastery's own life): pilgrims kneeling in a row before the gate steps, a monk-guide with a party of visitors, an old
+  // fortune-teller at his little table by a stele, a beggar with his bowl on the steps' foot, drivers squatting by the donkeys
+  for (let k = 0; k < 4; k++) mk(rand() < 0.5 ? man : woman, [-2.6 + k * 1.7 + (rand() - 0.5) * 0.4, 134.6 + (k % 2) * 0.9], 0.02, 0, { pose: 'kneel', arms: 'pray' });
+  mk(robeMonk, [-1.2, 138.5], 0.02, Math.PI, { pose: 'talk' });
+  for (const [x, z] of [[-0.2, 140.2], [1.0, 139.4], [-2.1, 139.6]]) mk(rand() < 0.5 ? man : woman, [x, z], 0.02, 0.3 + rand() * 0.4, { pose: 'talk' });
+  mk(man, [-12.0, 145.8], 0.02, Math.PI / 2, { pose: 'sit_ground', cloth: 'cloth_brown', hat: 'none' });
+  mk(man, [11.4, 146.4], 0.02, -Math.PI / 2, { pose: 'sit', cloth: 'cloth_grey' }); fl.add({ t: 'tea_table', at: [12.4, 146.4], c: [12.4, 146.4], r: 0.7, y: 0.02, rot: Math.PI / 2, seed: 17 });
+  for (const sx of [-1, 1]) { mk(man, [sx * 14.2, 150.4], 0.02, sx * 2.0, { pose: 'squat', cloth: 'cloth_brown', hat: 'straw', dress: 'trousers' }); }
   // each shop keeper stands or sits at his door (a third of the shops), a woman sweeps before every fifth house
   HOUSES.forEach((h, i) => {
     const F = frontOf(h);
@@ -188,7 +213,7 @@ export async function town() {
   });
   // the yards: the washing woman squatting at the tub, a man chopping wood
   YARDS.forEach((y, i) => { if (i % 4 === 0) mk(woman, [(y.rect[0] + y.rect[2]) / 2 - 0.8, (y.rect[1] + y.rect[3]) / 2 + 0.5], 0, rand() * 6.28, { pose: 'squat' }); });
-  const lifePlan = base('shaolin-people', 'life', [...P, ...A]);
+  const lifePlan = base('shaolin-people', 'life', [...P, ...A].filter(keepClear));
   const tiles = [...fl.tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`shaolin-village-life-${k}`, 'life', list), center: [i * 100 + 50, j * 100 + 50], near: 230 }; });
   return [base('shaolin-village', 'shaolin', village()), lifePlan, ...tiles];
 }
