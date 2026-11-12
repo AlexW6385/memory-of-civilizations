@@ -88,11 +88,11 @@ export function hakkaHouse(el, ctx) {
   const az = -hz + t;
   S('timber_red', -1.0, 0, az, 1.0, 1.0, az + 0.5); B('timber_red', -1.05, 1.0, az, 1.05, 1.08, az + 0.55);
   B('lacquer_black', -0.9, 1.1, az, 0.9, 2.5, az + 0.3); B('cloth_red', -0.8, 1.2, az + 0.3, 0.8, 2.4, az + 0.32);
-  for (let q = 0; q < 7; q++) { const x = (q - 3) * 0.23; B('lacquer_black', x - 0.07, 1.25, az + 0.32, x + 0.07, 1.75, az + 0.35); B('gilt_bronze', x - 0.03, 1.35, az + 0.35, x + 0.03, 1.65, az + 0.36); }
+  for (let q = 0; q < 7; q++) { const x = (q - 3) * 0.23; B('lacquer_black', x - 0.07, 1.25, az + 0.32, x + 0.07, 1.75, az + 0.35); B('gilt_bronze', x - 0.03, 1.35, az + 0.34, x + 0.03, 1.65, az + 0.365); }
   B('gilt_bronze', -0.85, 2.5, az, 0.85, 2.58, az + 0.34);
   { const p = W(0, az + 0.3); bag.add('bronze', lathe([[0.001, 0], [0.12, 0.02], [0.13, 0.08], [0.11, 0.14], [0.14, 0.17], [0.001, 0.17]], 12, null, p[0], 1.08, p[1])); }
   for (const x of [-0.7, -0.45, 0.45, 0.7]) { const p = W(x, az + 0.3); bag.add('flame', lathe([[0.03, 0], [0.01, 0.07], [0.001, 0.1]], 6, null, p[0], 1.14, p[1])); B('cloth_red', x - 0.015, 1.08, az + 0.28, x + 0.015, 1.3, az + 0.32); }
-  for (const s of [-1, 1]) B('lacquer_red', s * 1.12 - 0.07, 0.9, az, s * 1.12 + 0.07, 2.4, az + 0.03);
+  for (const s of [-1, 1]) B('lacquer_red', s * 1.0 - 0.05, 0.9, az, s * 1.0 + 0.05, 2.35, az + 0.03);
   // the hall: a tie-beam with two lanterns, the table with stools, benches along the walls, a rain tub and a winnowing basket at the door
   B('timber_red', -hx + t, 3.8, 2.15, hx - t, 4.0, 2.35);
   for (const x of [-1.5, 1.5]) LF.hang_lantern({ t: 'hang_lantern', at: W(x, 2.25), y: 3.8, rot: 0, seed: sd }, ctx);

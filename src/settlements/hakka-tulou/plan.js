@@ -31,6 +31,24 @@ for (const [x, z] of T.wells) E.push({ t: 'well', kind: 'windlass', mat: 'bluest
   }
 }
 
+{
+  // the foot of the great wall (eye level for the first approach): the households' own goods stand against it — wood for the stoves,
+  // baskets, trays of drying greens, benches in the shade, rain tubs, hens, stools, a stone mortar's barrel [inferred: lane life, NatGeo/Chinese sources]
+  const rand = rng(1712), kinds = ['firewood', 'basket', 'drying_tray', 'bench', 'rain_tub', 'chickens', 'stool', 'barrel', 'sacks', 'firewood'];
+  for (let q = 0; q < 56; q++) {
+    const a = q * 360 / 56 + (rand() - 0.5) * 3, ad = ((a % 360) + 360) % 360;
+    if (Math.abs(ad - 90) < 7 || Math.abs(ad - 270) < 5) continue;
+    const r = T.R + 1.0 + rand() * 1.2, [x, z] = polar(r, a), rot = (a + 90) * Math.PI / 180, kd = kinds[q % kinds.length];
+    if (kd === 'chickens') E.push({ t: kd, n: 4, kind: 'hen', at: [x, z], y: 0, seed: q });
+    else if (kd === 'firewood') E.push({ t: kd, at: [x, z], y: 0, rot: rot + Math.PI / 2, len: 1.4, seed: q });
+    else if (kd === 'bench') E.push({ t: kd, at: [x, z], y: 0, rot, len: 1.7 });
+    else if (kd === 'drying_tray') E.push({ t: kd, at: [x, z], y: 0, rot, seed: q });
+    else if (kd === 'basket' || kd === 'sacks') E.push({ t: kd, at: [x, z], y: 0, n: 3, seed: q });
+    else E.push({ t: kd, at: [x, z], y: 0, rot, seed: q });
+  }
+  for (const a of [20, 60, 120, 160, 200, 240, 300, 340]) { const [x, z] = polar(T.R + 2.6, a); E.push({ t: 'laundry', at: [x, z], y: 0, rot: (a + 90) * Math.PI / 180, len: 3.6, seed: a }); }
+}
+
 // (kind 'open' places are strolled by the engine's street life; the rooms and galleries here are 'hall': their own people are in town.js)
 const rooms = [
   { id: 'hall', rect: [-5, -4.5, 5, 4], y: 0.35, kind: 'hall' },

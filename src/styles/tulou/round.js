@@ -126,7 +126,7 @@ export function tulouRound(el, ctx) {
   }
 
   // the apron of cobbles round the foot, on which the lane's life stands
-  if (full || el.windows) for (let i = 0; i < n; i++) { const a0 = (i - 0.5) * da, a1 = (i + 0.5) * da; bag.add('pebbles', sector(c, R + (full ? 2.2 : 1.4), R - 0.1, R + (full ? 2.2 : 1.4), R - 0.1, 0, 0.05, a0, a1)); }
+  if (full || el.windows) for (let i = 0; i < n; i++) { const a0 = (i - 0.5) * da, a1 = (i + 0.5) * da; bag.add('pebbles', sector(c, R + (full ? 2.2 : 1.4), R - 0.1, R + (full ? 2.2 : 1.4), R - 0.1, -0.05, 0.03, a0, a1)); }
   // ── the court: cobbles to the room fronts, a bluestone way from the gate to the hall ──
   bag.add('pebbles', disc(front, 0.02, 72, c[0], c[1]));
   if (full) {
@@ -195,8 +195,8 @@ export function tulouRound(el, ctx) {
       {
         // red couplets either side of the door and a paper strip over it; on some rooms a lantern or a pole of washing over the gallery
         const ph = Math.PI / 2 - i * da, mid = P(c, front, i * da), hz = hash(i * 5 + k, 9), W2 = frameOf(mid[0], mid[1], ph);
-        if (L > 2.0) for (const sg of [-1, 1]) bag.add('lacquer_red', lbox(mid[0], mid[1], ph, sg > 0 ? 0.74 : -0.88, y + 0.9, -0.075, sg > 0 ? 0.88 : -0.74, y + 2.0, -0.035));
-        if (L > 2.0) bag.add('cloth_red', lbox(mid[0], mid[1], ph, -0.5, y + 2.18, -0.075, 0.5, y + 2.3, -0.035));
+        if (L > 2.0) for (const sg of [-1, 1]) bag.add('lacquer_red', lbox(mid[0], mid[1], ph, sg > 0 ? 0.74 : -0.88, y + 0.9, -0.09, sg > 0 ? 0.88 : -0.74, y + 2.0, -0.03));
+        if (L > 2.0) bag.add('cloth_red', lbox(mid[0], mid[1], ph, -0.5, y + 2.18, -0.09, 0.5, y + 2.3, -0.03));
         const ceilY = k < K - 1 ? fl[k + 1] - 0.3 : hTop + 0.05;
         if (hz < 0.2) LF.hang_lantern({ t: 'hang_lantern', at: W2(0, -0.8), y: ceilY, rot: 0, seed: i }, ctx);
         else if (hz < 0.36 && k > 0 && k < K - 1) LF.laundry_pole({ t: 'laundry_pole', at: W2(1.1, 0), y: y + 3.0, rot: ph + Math.PI, len: 1.4, seed: i * 3 + k }, ctx);
