@@ -95,9 +95,24 @@ function people() {
     woman([sx - d[0] * 0.2, sz + 0.1], TOP + 0.15, d, { pose: 'sit_low', carry: 'none', cloth: trade === 'robes' ? 'cloth_ochre' : (seed % 2 ? 'cloth_red' : 'cloth_indigo') });
     if (seed % 3) man([sx + d[0] * 2.3, sz - 0.9], SY, [-d[0], 0.3], { carry: seed % 2 ? 'basket' : 'none', pose: seed % 4 === 0 ? 'talk' : 'stand' });
   }
-  for (const [x, z, dir] of [[1.2, 52, [0, -1]], [-1.4, 58, [0, -1]], [0.4, 66, [0, 1]], [-0.9, 72, [0.1, -1]], [1.6, 79, [0, -1]], [-1.1, 86, [0, 1]]]) {
+  // (none within 4 m ahead of the arrival at z = 55: those at the way's sides, the rest well up toward the gateway or behind the visitor)
+  for (const [x, z, dir] of [[3.2, 47, [0, -1]], [-3.1, 43.5, [0.1, -1]], [1.2, 39.5, [0, 1]], [-2.6, 36, [0, -1]], [3.0, 33, [-0.3, -1]], [0.4, 66, [0, 1]], [-0.9, 72, [0.1, -1]], [1.6, 79, [0, -1]], [-1.1, 86, [0, 1]]]) {
     if (seed % 2) woman([x, z], SY, dir, { carry: seed % 3 ? 'pot' : 'basket' }); else man([x, z], SY, dir);
   }
+  // on the stone seats along the way, resting: a woman with her basket, a lay pilgrim, a monk
+  woman([5.6, 52.5], TOP, [-1, 0], { pose: 'sit', carry: 'basket' }); man([-5.6, 52.1], TOP, [1, 0.1], { pose: 'sit' }); monk([-5.6, 66.5], TOP, [1, 0], { pose: 'sit' }); woman([5.6, 80.5], TOP, [-1, 0], { pose: 'sit', carry: 'pot' });
+  // flower- and lamp-sellers on mats at the way's head, before the gateway, each with a buyer; a boy and his dog; a white zebu standing at the way's side
+  for (const [x, z, g, c, f] of [[6.4, 40.5, ['heap', 'heap', 'baskets'], ['cloth_red', 'cloth_ochre'], [-1, 0]], [-6.6, 39.5, ['baskets', 'heap'], ['cloth_white', 'cloth_ochre'], [1, 0]], [7.8, 35.5, ['heap', 'baskets'], ['cloth_white', 'cloth_red'], [-1, 0]], [-7.8, 35, ['heap', 'heap'], ['cloth_red', 'cloth_white'], [1, 0]]]) {
+    L.push({ t: 'goods_mat', at: [x, z], y: TOP, rot: face(f), seed: seed++, goods: g, produce: c });
+    woman([x - f[0] * 1.3, z + 0.2], TOP, f, { pose: 'sit_ground', carry: 'none', cloth: x > 0 ? 'cloth_indigo' : 'cloth_red' });
+  }
+  man([4.4, 38.2], TOP, [1, 0.2], { pose: 'talk' }); woman([5.0, 37.4], TOP, [-0.6, 0.3], { carry: 'basket' });
+  L.push({ t: 'figure', at: [-4.6, 45.5], y: TOP, rot: face([0.4, -1]), seed: seed++ * 7919, dress: 'wrap', top: 'bare', cloth: 'cloth_white', cloth2: 'cloth_white', skin: 'skin_dark', hat: 'none', hair: 'short', pose: 'stand', carry: 'none', feet: 'bare', h: 1.05 });
+  L.push({ t: 'animal', kind: 'dog', at: [-3.5, 46.8], y: TOP, rot: 2.6, seed: seed++ });
+  L.push({ t: 'animal', kind: 'zebu', at: [-9.5, 41.5], y: TOP, rot: 1.2, seed: seed++, graze: false, mat: 'hide_white' });
+  // before the south gateway: donors kneeling with garlands toward the dome, a monk standing by
+  for (const [x, z, k] of [[-3.4, 30.2, 0], [-1.7, 30.9, 1], [1.8, 30.6, 2], [3.5, 31.2, 3]]) (k % 2 ? woman : man)([x, z], TOP, [0, -1], { pose: 'kneel', arms: 'pray', carry: 'none' });
+  monk([6.2, 32.4], TOP, [-0.4, -1]);
   monk([2.2, 61], SY, [0, -1], { carry: 'staff' }); monk([-2.0, 75], SY, [0.2, 1], { carry: 'staff' }); monk([3.0, 88], SY, [0, -1], { pose: 'talk' });
   L.push({ t: 'figure', at: [-1.9, 63.5], y: SY, rot: face([1, 0]), seed: seed++ * 7919, dress: 'wrap', top: 'bare', cloth: 'cloth_white', cloth2: 'cloth_white', skin: 'skin_dark', hat: 'none', hair: 'short', pose: 'stand', carry: 'none', feet: 'bare', h: 0.62 });
   L.push({ t: 'animal', kind: 'zebu', at: [-19, 66], y: TOP, rot: 0.9, seed: seed++, graze: true, mat: 'hide_white' });

@@ -128,3 +128,10 @@ As for the hall (`docs/buildings/byodo-in-phoenix-hall.md` §9).
 - **Landing.** A plank stage on piles on the west bank with mooring posts, a barge and two rowboats, washers kneeling at the water, sacks and baskets, rafts of timber floated down the Uji [inferred].
 - **Precinct.** An earthen wall (tsuijibei) round the garden with gates on the south approach, the north and the west, the east open to the river [inferred].
 - **Planting.** Persimmon and mulberry in the yards behind houses, willows and reeds on the river banks, as before pines and maples in the garden and cedar on the hills.
+
+## 16. Third pass (the arrival at the pier, the shore)
+
+- **The view.** The hall faces east across the Aji pond; from the east shore "the face of Amida Buddha can be seen just through the round window of the hall" (§10) [stated: Kyoto Private Guides]. The earlier arrival on the gravel stood 80 m off and showed the hall as a thin line under the sky. Now a viewing pier of planks on piles runs west along the hall's axis from the east shore (`shore.js`, `VIEW_PIER`: 36 m, 2.6 m wide, red-lacquer railings on the outer half, mooring posts) and the arrival stands at its end, 37 m from the hall's steps, the wings filling about 60° of the view [inferred: the pier is ours; Heian gardens had landing stages (tsuridono, piers) on their ponds, and the pond's pleasure boats tied up at one (§13)].
+- **On the water.** A second dragon-head boat of the court bound for the hall with four players and a helmsman, mandarin ducks, lotus of the Pure Land in the coves and lilies along the shallows (the pond of a Pure Land garden bore lotus [inferred]).
+- **At the steps.** A pair of stone lanterns (ishidoro, granite, 2.3 m) either side of the stair, a monk sweeping the gravel with a besom, a monk with his staff, pilgrims at the podium's edge [inferred: the lanterns are of later date at Byōdō-in but belong to the shrine-and-temple gardens of the type; the placing is ours].
+- **The shore.** Two anglers on the pier's edge, visitors at its rail, a tea-seller's stall with a bench either side, a boy and a dog, a heap of cut reeds [inferred].

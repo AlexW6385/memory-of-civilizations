@@ -29,6 +29,8 @@ function planting(x, z) {
   const d = out(x, z);
   if (d === 0) {
     // on the summit, clear of the monuments and the ways between them: dry grass, a few neem and a pipal (a fig)
+    // the way's west side: neem and pipal in the shade of which the pilgrims sit, clear of the rest hall and the votive stupas
+    if (z > 44 && z < 94 && x < -14.5 && x > -32 && !inRect([-40, 70, -17, 87], x, z) && !VOTIVE.some(([vx, vz]) => Math.hypot(x - vx, z - vz) < 7)) return { grass_dry: 8, neem: 0.05, fig: 0.03 };
     if (VOTIVE.some(([vx, vz]) => Math.hypot(x - vx, z - vz) < 9) || inRect([30, -2, 68, 36], x, z, 4) || Math.hypot(x, z) < 34 || Math.hypot(x - 62, z + 40) < 16 || inRect([30, -2, 68, 36], x, z) || inRect(TEMPLE40.rect, x, z, 5) || inRect(VIHARA2, x, z, 4) || (x < -34 && x > -76 && z > 2 && z < 46 && Math.abs(z - 17) < 4) || Math.abs(x) < 8 || (Math.abs(z + 28) < 5 && x > 0 && x < 66) || Math.abs(x - 30) < 5 || (z > 40 && z < 95 && Math.abs(x) < 14)) return null;
     return { grass_dry: 9, neem: 0.015, fig: 0.01, oleander: 0.05 };
   }

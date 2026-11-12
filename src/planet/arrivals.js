@@ -15,10 +15,10 @@ export const ARRIVALS = {
   'lhasa':            [0, 0.1, 134, 0, 0.3],             // the Potala rising over the Shöl street, from the lane crossing in the open middle (no stall pole or awning at the shoulder)
   'muromachi-kyoto':  [200, 0.1, 17, 0, 0.16],           // the Kannon-den of Ginkaku-ji across the narrowed pond, the wooded hill behind
   'nara':             [0, 0.1, 20, 0, 0.25],             // the Great Buddha Hall from its court
-  'heian-uji':        [40, null, 0, 1.5708, 0.06],       // the Phoenix Hall across its pond, wings spread
+  'heian-uji':        [6.5, 0.1, 0, 1.5708, 0.06],       // the Phoenix Hall across its pond, wings spread, from the end of the viewing pier (37 m from the steps)
   'edo-himeji':       [-25, 37.1, -3, 0, 0.36],          // the keep cluster whole on its stone base, from the Honmaru's south edge (from 9 m nearer the top roof was cut)
-  'joseon-seoul':     [0, 0.1, 80, 0, 0.15],             // the throne hall across its court and rank stones
-  'sanchi':           [0, 22.1, 60, 0, 0.15],            // the Great Stupa, its gateway and Ashoka's pillar
+  'joseon-seoul':     [0, 0.1, 83.5, 0, 0.13],           // the throne hall across its court, the standards and the officials at their rank stones (the lower ranks' files stop short of the screen's edge)
+  'sanchi':           [0, 22.1, 55, 0, 0.14],            // the Great Stupa, its gateway and Ashoka's pillar, up the pilgrims' way between the stalls (nobody within 4 m ahead)
   'khajuraho':        [-14, null, -60, 1.5708, 0.22],    // up the pilgrims' approach lane between the shops of flowers and sweets to the stair of Kandariya Mahadeva's terrace, the porch and the climbing spires over the roofs
   'madurai':          [-20, 0.1, 170, 0, 0.3],           // the painted gopuram over the street
   'mughal-agra':      [0, 0.4, -62, 0, 0.2],             // the Taj Mahal down the garden's water channel, nearer: dome and minarets large

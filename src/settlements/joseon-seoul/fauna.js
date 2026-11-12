@@ -23,6 +23,8 @@ flights[1].a = flights[2].a = [26, 4];
 const perches = [];
 for (const [x, z] of [[-60, 358], [40, 356], [100, 357], [0, 300], [6, 270], [-8, 330], [-80, 357], [120, 360]]) perches.push({ kind: 'sparrow', x, z, y: 0.03, rot: 0.4 + (x * 7 % 3), range: [1.4, 1.3] });
 for (const [x, z, rot] of [[-80, PALACE[3], 0], [80, PALACE[3], 0], [PALACE[0], 100, Math.PI / 2], [PALACE[2], 100, Math.PI / 2]]) perches.push({ kind: 'sparrow', x, z, y: 5.5 + 0.5, rot, range: [2.6, 0], alert: 5 });
+// sparrows on the court's paving between the files, on the Heungnyemun court and the platform's steps
+for (const [x, z, y] of [[-22, 70, 0.04], [24, 62, 0.04], [-12, 58, 0.04], [14, 78, 0.04], [-30, 112, 0.04], [28, 118, 0.04], [10, 48, 1.64]]) perches.push({ kind: 'sparrow', x, z, y, rot: x * 0.3, range: [1.5, 1.3] });
 // a heron on the pond's south bank, facing the water
 perches.push({ kind: 'heron', x: -125, z: POND[3] + 1.2, y: 0.05, rot: -Math.PI / 2, stay: [80, 240], gone: [40, 150], alert: 10 });
 void AVENUE; void JONGNO;
