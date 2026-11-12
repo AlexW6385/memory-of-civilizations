@@ -3,9 +3,27 @@
 // 27 brick blocks; the Pillared Hall; the College of Priests; the town wall and its gate tower. Coordinates are the settlement's (absolute).
 import { box, lathe, frustum, fromTriangles } from '../../core/geom.js';
 import { Fr, rng, wellAt } from './kit.js';
+import { dressWall, furnishRoom } from './dress.js';
 
 const quadY = (r, y) => fromTriangles([r[0], y, r[1], r[0], y, r[3], r[2], y, r[3], r[0], y, r[1], r[2], y, r[3], r[2], y, r[1]]);
 const jar = (bag, mat, x, y, z, s = 1) => bag.add(mat, lathe([[0.07 * s, 0], [0.2 * s, 0.12 * s], [0.24 * s, 0.3 * s], [0.19 * s, 0.5 * s], [0.1 * s, 0.6 * s], [0.12 * s, 0.66 * s], [0.001, 0.66 * s]], 8, null, x, y, z));
+/** The weathering of the four outer faces of a rectangle of walls from y: `gaps` are the doors' spans per side ('n' | 's' | 'w' | 'e') along each face. */
+function outer(ctx, rect, y, H, lowH, seed, gaps = {}, sides = 'nswe', plain = false) {
+  const [x0, z0, x1, z1] = rect, rand = rng(seed), L = [
+    ['n', [x0, z0], [1, 0], [0, 1], x1 - x0, x0], ['s', [x1, z1], [-1, 0], [0, -1], x1 - x0, x1],
+    ['w', [x0, z1], [0, -1], [1, 0], z1 - z0, z1], ['e', [x1, z0], [0, 1], [-1, 0], z1 - z0, z0],
+  ];
+  for (const [k, o, U, V, len, org] of L) {
+    if (!sides.includes(k)) continue;
+    const F = new Fr(ctx, o, U, V, y), gs = (gaps[k] ?? []).map(([a, b]) => { const s0 = Math.abs(a - org), s1 = Math.abs(b - org); return [Math.min(s0, s1) - 0.3, Math.max(s0, s1) + 0.3]; });
+    dressWall(F, rand, 'front', len, H, lowH, { gaps: gs, life: true, plain });
+  }
+}
+/** A low heap of fallen brick at the foot of a wall: a short wedge (the mound's foot, the platforms). */
+function heap(bag, x, z, along, outx, outz, len) {
+  const w = 1.5 + Math.abs((x * 7 + z * 3) % 1.2), h = 0.55 + Math.abs((x + z) % 0.5), hx = along ? len / 2 : w / 2, hz = along ? w / 2 : len / 2;
+  bag.add('mudbrick', frustum([x - hx + outx * w / 2, z - hz + outz * w / 2, x + hx + outx * w / 2, z + hz + outz * w / 2], -0.3, h, along ? len * 0.2 : w * 0.4, along ? len * 0.2 : w * 0.4, along ? w * 0.4 : len * 0.2, along ? w * 0.4 : len * 0.2, { noBottom: true }));
+}
 /** A wall along x or z (rect), openings: [{ at (centre along), w, h }]; full height y0..y1, `mat` below `split` and `mat2` above. */
 function wallRect(ctx, rect, y0, y1, openings = [], mat = 'brick', lintel = true) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = rect, alongX = x1 - x0 >= z1 - z0, a = alongX ? x0 : z0, b = alongX ? x1 : z1;
@@ -48,6 +66,11 @@ export function mound(el, ctx) {
       const bw = 1.3, q = alongX ? [mid - bw, sg < 0 ? fixed - 1.1 : fixed, mid + bw, sg < 0 ? fixed : fixed + 1.1] : [sg < 0 ? fixed - 1.1 : fixed, mid - bw, sg < 0 ? fixed : fixed + 1.1, mid + bw];
       bag.add('brick', box(q[0], -0.3, q[1], q[2], y - 0.5, q[3])); col.rect(q, -0.3, y - 0.5);
       bag.add('mudbrick', box(q[0] - 0.05, y - 0.5, q[1] - 0.05, q[2] + 0.05, y - 0.3, q[3] + 0.05), false);
+      // the brick that has fallen from the platform lies in heaps between the buttresses
+      for (const off of [3.4, 8.8]) {
+        const sm = s + off, hx = alongX ? sm : fixed + sg * 0.35, hz = alongX ? fixed + sg * 0.35 : sm;
+        if (((Math.floor(s / 12) + (off > 5 ? 1 : 0)) % 3) !== 0 && !inGap(hx, hz, 3)) heap(bag, hx, hz, alongX, alongX ? 0 : sg, alongX ? sg : 0, 4 + (Math.floor(s + off) % 3));
+      }
     }
   }
   // the parapet along the edge of the top, gaps at the stair and the ramp, the corner towers
@@ -126,8 +149,27 @@ export function bath(el, ctx) {
   bag.add('brick_buff', box(ex + 0.6, y - 0.4, cl, ox1, y, ch)); col.floor([ex + 0.6, cl, ox1, ch], y);
   roof([ex, oz0 + wt, ox1, oz1 - wt], y + h - 0.4); col.floor([ex, oz0 + wt, ox1, oz1 - wt], y + h);
   wellAt(bag, col, (ex + ox1) / 2 + 0.3, y, cl + cw * 2.5, 0.55);
-  for (let i = 0; i < n; i++) if (i !== 2) { const zc = cl + cw * (i + 0.5); jar(bag, 'terracotta', ox1 - 1.2, y, zc - 0.6, 1.4); if (i % 2) jar(bag, 'pottery_dark', ox1 - 1.2, y, zc + 0.9, 1.1); bag.add('reed_mat', box(ex + 1.2, y, zc - 0.4, ex + 2.8, y + 0.04, zc + 0.8)); }
+  { const FY = new Fr(ctx, [0, 0], [1, 0], [0, 1], y), rr = rng(5), use = ['cell', 'bath', 'store', 'cell', 'bath', 'cell', 'store', 'bath'];
+    for (let i = 0; i < n; i++) if (i !== 2) furnishRoom(FY, [ex + 0.6 + 0.25, cl + cw * i + 0.25, ox1 - 0.5 - 0.1, cl + cw * (i + 1) - 0.25], 'u0', use[i], rr, lights, false); }
+  outer(ctx, B.outer, y, h, h * 0.45, 41, { s: [[xs[1] - 1.5, xs[2] + 0.9], [xs[6] - 1.5, xs[7] + 0.9]], n: [[xs[3] - 1.0, xs[4] + 0.7]], w: [[(cz0 + cz1) / 2 - 1, (cz0 + cz1) / 2 + 1]] });
   lights.push({ at: [ex + 3.2, y + 2.2, cl + cw * 2.5], color: '#ffc98a', intensity: 3, distance: 8 }, { at: [(cx0 + cx1) / 2, y + 2.6, cz0 - 1.5], color: '#ffd9a0', intensity: 2.5, distance: 10 }, { at: [(cx0 + cx1) / 2, y + 2.6, cz1 + 1.5], color: '#ffd9a0', intensity: 2.5, distance: 10 });
+  // wet brick round the pool's coping; wooden screens in alternate bays of the gallery (the stepped piers held them), the open bays at the doors; benches and jars along the gallery's back
+  for (const r of [[px0 - 0.9, pz0 - 0.9, px1 + 0.9, pz0 - 0.35], [px0 - 0.9, pz1 + 0.35, px1 + 0.9, pz1 + 0.9], [px0 - 0.9, pz0 - 0.35, px0 - 0.35, pz1 + 0.35], [px1 + 0.35, pz0 - 0.35, px1 + 0.9, pz1 + 0.35]]) bag.add('brick', box(r[0], y + 0.002, r[1], r[2], y + 0.016, r[3]), false);
+  const screen = (a0, a1, f0, f1, alongX) => {
+    const R = (p0, q0, p1, q1) => (alongX ? [p0, q0, p1, q1] : [q0, p0, q1, p1]);
+    for (const [lo, hi, m] of [[0.2, 0.34, 'timber'], [1.12, 1.26, 'timber']]) bag.add(m, box(...[R(a0, f0, a1, f1)[0], y + lo, R(a0, f0, a1, f1)[1], R(a0, f0, a1, f1)[2], y + hi, R(a0, f0, a1, f1)[3]]));
+    for (let a = a0 + 0.12; a < a1 - 0.05; a += 0.23) { const r = R(a, f0 + 0.03, a + 0.06, f1 - 0.03); bag.add('timber', box(r[0], y + 0.34, r[1], r[2], y + 1.12, r[3]), false); }
+    col.rect(R(a0, f0, a1, f1), y, y + 1.26);
+  };
+  for (let i = 0; i < 8; i++) {
+    if (i !== 1 && i !== 6) screen(xs[i] + 0.7, xs[i + 1] - 0.7, cz1 + 0.5, cz1 + 0.6, true);
+    if (i !== 3) screen(xs[i] + 0.7, xs[i + 1] - 0.7, cz0 - 0.6, cz0 - 0.5, true);
+  }
+  for (let k = 1; k < 8; k += 2) screen(zs[k] + 0.7, zs[k + 1] - 0.7, cx1 + 0.5, cx1 + 0.6, false);
+  for (const [zA, zB, dzs] of [[oz1 - wt - 0.6, oz1 - wt, [(xs[1] + xs[2]) / 2, (xs[6] + xs[7]) / 2]], [oz0 + wt, oz0 + wt + 0.6, [(xs[3] + xs[4]) / 2]]]) {
+    let x = ox0 + wt + 0.5;
+    while (x < ex - 3) { const e = x + 2.6; if (!dzs.some((d) => d > x - 1.7 && d < e + 1.7)) { bag.add('mudbrick', box(x, y, zA, e, y + 0.44, zB)); col.rect([x, zA, e, zB], y, y + 0.44); bag.add('reed_mat', box(x + 0.15, y + 0.44, zA + 0.05, e - 0.15, y + 0.47, zB - 0.05), false); jar(bag, 'terracotta', x + 1.3, y, zA > oz0 + wt + 1 ? zA - 0.5 : zB + 0.5, 1.3); } x = e + 1.2; }
+  }
   // the dressing-room benches and jars along the court's west wall
   for (let z = cz0 + 3; z < cz1 - 2; z += 4.5) { bag.add('mudbrick', box(ox0 + wt, y, z - 0.5, ox0 + wt + 0.6, y + 0.45, z + 0.5)); col.rect([ox0 + wt, z - 0.5, ox0 + wt + 0.6, z + 0.5], y, y + 0.45); }
 }
@@ -154,6 +196,20 @@ export function granary(el, ctx) {
   // inside: bays of sacks and big jars along the back, a tally post, lamps
   for (let i = 0; i < 9; i++) { const x = x0 + t + 2 + i * 4.6; for (let k = 0; k < 3; k++) bag.add('sacking', box(x - 1 + (k % 2) * 0.3, fy, z0 + t + 0.2 + k * 0.6, x + 0.5 + (k % 2) * 0.3, fy + 0.5 + (i % 3) * 0.25, z0 + t + 0.75 + k * 0.6)); for (let k = 0; k < 3; k++) jar(bag, i % 2 ? 'terracotta' : 'pottery_dark', x + 1.2 + k * 0.7, fy, z0 + t + 1.2 + rand() * 0.6, 2); }
   lights.push({ at: [x0 + 12, fy + 2.8, z0 + 6], color: '#ffc98a', intensity: 3, distance: 11 }, { at: [x0 + 36, fy + 2.8, z0 + 6], color: '#ffc98a', intensity: 3, distance: 11 });
+  // the roof beams seen from inside, a tally board and a ladder to the deck's loft, a balance with its stone weights, rows of sacks down the middle
+  for (let z = z0 + t + 1; z < z1 - 1.2; z += 2.4) bag.add('timber', box(x0 + t, fy + HH - 0.34, z - 0.14, x1 - t, fy + HH - 0.04, z + 0.14), false);
+  for (let x = x0 + t + 3; x < x1 - t - 1; x += 4.6) { bag.add('timber', box(x - 0.16, fy + HH - 0.7, z0 + t, x + 0.16, fy + HH - 0.34, z1 - 0.9), false); }
+  bag.add('timber', box(x0 + 30, fy, z0 + t + 0.06, x0 + 33.4, fy + 1.5, z0 + t + 0.16), false);
+  for (let k = 0; k < 8; k++) bag.add('chalk', box(x0 + 30.2 + (k % 4) * 0.8, fy + 0.4 + Math.floor(k / 4) * 0.6, z0 + t + 0.16, x0 + 30.5 + (k % 4) * 0.8, fy + 0.46 + Math.floor(k / 4) * 0.6, z0 + t + 0.19), false);
+  for (const xx of [x0 + 7, x0 + 7.9]) bag.add('timber', box(xx - 0.05, fy, z0 + t + 0.4, xx + 0.05, fy + 3.0, z0 + t + 0.5), false);
+  for (let k = 0; k < 9; k++) bag.add('timber', box(x0 + 7, fy + 0.3 + k * 0.3, z0 + t + 0.4, x0 + 7.9, fy + 0.35 + k * 0.3, z0 + t + 0.5), false);
+  bag.add('timber', box(x0 + 14, fy + 0.01, z0 + 11.4, x0 + 15.6, fy + 0.7, z0 + 12.4), false); bag.add('bronze', box(x0 + 14.2, fy + 0.7, z0 + 11.8, x0 + 15.4, fy + 0.74, z0 + 12.0), false);
+  for (let k = 0; k < 5; k++) bag.add('granite_grey', box(x0 + 14.2 + k * 0.25, fy + 0.7, z0 + 12.1, x0 + 14.38 + k * 0.25, fy + 0.7 + 0.08 + 0.02 * k, z0 + 12.3), false);
+  for (let i = 0; i < 6; i++) for (let k = 0; k < 4; k++) bag.add(k % 2 ? 'sacking' : 'wicker', box(x0 + 5 + i * 6.4, fy + k * 0.32, z0 + 7.6, x0 + 8.4 + i * 6.4, fy + 0.3 + k * 0.32, z0 + 8.6), false);
+  for (let i = 0; i < 7; i++) jar(bag, i % 2 ? 'terracotta' : 'pottery_dark', x0 + 4 + i * 6.3, fy, z0 + 10.6, 2.0);
+  // the weathering of the podium's faces and the hall's walls
+  outer(ctx, el.rect, y, PH, PH * 0.6, 21, { s: [[x0 + 23.6, x0 + 27.4]] }, 'nswe', true);
+  outer(ctx, [x0, z0, x1, z1], fy, HH, HH * 0.4, 22, { w: [[(z0 + z1) / 2 - 0.6, (z0 + z1) / 2 + 0.6]] }, 'nwe');
   // the cart ramp from the platform up to the deck on the south, and the loading platform in front
   F.stairs(x0 + 23.6, z1, x0 + 27.4, z1 + 9, y, fy, -1, 'brick', 0.12);
 }
@@ -171,6 +227,13 @@ export function pillared(el, ctx) {
   const ry = y + PH + GH;
   for (let j = 0; j < 4; j++) bag.add('timber', box(x0 - 0.8, ry, z0 + 3 + gz * j - 0.3, x1 + 0.8, ry + 0.4, z0 + 3 + gz * j + 0.3), false);
   bag.add('mud_plaster', box(x0 - 0.8, ry + 0.4, z0 - 0.8, x1 + 0.8, ry + 0.85, z1 + 0.8)); bag.add('mudbrick', box(x0 - 0.8, ry + 0.85, z0 - 0.8, x1 + 0.8, ry + 1.3, z0 - 0.5), false);
+  // the benches between the rows, a dais with its seat, braziers on tripods, water jars, an offering table
+  const py = y + PH;
+  for (let i = 0; i < 4; i++) for (const j of [0, 2]) { const bx = x0 + 3 + gx * i + gx * 0.15, bz = z0 + 3 + gz * j + gz * 0.5; bag.add('mudbrick', box(bx, py, bz - 0.3, bx + gx * 0.7, py + 0.44, bz + 0.3)); col.rect([bx, bz - 0.3, bx + gx * 0.7, bz + 0.3], py, py + 0.44); bag.add('reed_mat', box(bx + 0.1, py + 0.44, bz - 0.25, bx + gx * 0.7 - 0.1, py + 0.47, bz + 0.25), false); }
+  { const dx = (x0 + x1) / 2, dz = (z0 + z1) / 2; bag.add('brick_buff', box(dx - 4, py, dz - 2.2, dx + 4, py + 0.28, dz + 2.2)); col.rect([dx - 4, dz - 2.2, dx + 4, dz + 2.2], py, py + 0.28); bag.add('timber', box(dx - 0.6, py + 0.28, dz - 0.5, dx + 0.6, py + 0.7, dz + 0.5), false); bag.add('cloth_red', box(dx - 0.55, py + 0.7, dz - 0.45, dx + 0.55, py + 0.74, dz + 0.45), false); }
+  for (const [bx, bz] of [[x0 + 8, z0 + 9], [x1 - 8, z0 + 9], [x0 + 8, z1 - 9], [x1 - 8, z1 - 9]]) { for (let a = 0; a < 3; a++) bag.add('timber', box(bx + Math.cos(a * 2.09) * 0.3 - 0.03, py, bz + Math.sin(a * 2.09) * 0.3 - 0.03, bx + Math.cos(a * 2.09) * 0.3 + 0.03, py + 0.8, bz + Math.sin(a * 2.09) * 0.3 + 0.03), false); bag.add('terracotta', lathe([[0.001, 0], [0.34, 0.12], [0.4, 0.25], [0.001, 0.25]], 10, null, bx, py + 0.8, bz), false); bag.add('bitumen', box(bx - 0.25, py + 1.02, bz - 0.25, bx + 0.25, py + 1.05, bz + 0.25), false); }
+  for (let i = 0; i < 5; i++) jar(bag, i % 2 ? 'terracotta' : 'pottery_dark', x0 + 2 + i * 6.8, py, z1 - 1.3, 1.9);
+  outer(ctx, [x0, z0, x1, z1], y, PH, PH * 0.6, 31, { s: [[x0 + 11, x0 + 19]], n: [[x0 + 11, x0 + 19]] }, 'nswe', true);
   for (let k = 0; k < 6; k++) bag.add('reed_mat', box(x0 + 3 + (k % 3) * 8, y + PH, z0 + 4 + Math.floor(k / 3) * 12, x0 + 7.5 + (k % 3) * 8, y + PH + 0.04, z0 + 7 + Math.floor(k / 3) * 12));
 }
 
@@ -212,4 +275,25 @@ export function college(el, ctx) {
   for (let i = 0; i < 6; i++) bag.add('reed_mat', box(court[0] + 6 + i * 8, y, court[1] + 4.5, court[0] + 8.4 + i * 8, y + 0.04, court[1] + 6.3));
   for (let i = 0; i < 5; i++) jar(bag, i % 2 ? 'terracotta' : 'pottery_dark', court[0] + 5 + i * 10, y, court[3] - 1.0, 1.7);
   lights.push({ at: [mx - 12, y + 2.8, court[1] + 3], color: '#ffd9a0', intensity: 2.5, distance: 11 }, { at: [mx + 12, y + 2.8, court[1] + 3], color: '#ffd9a0', intensity: 2.5, distance: 11 });
+  // the rooms of the four ranges, each furnished: cells of the priests, stores, a work room, a shrine; the passage from the gate left bare
+  {
+    const FY = new Fr(ctx, [0, 0], [1, 0], [0, 1], y), rr = rng(11), uses = ['shrine', 'cell', 'cell', 'store', 'cell', 'work', 'cell', 'cell', 'store'];
+    let n = 0;
+    const put = (r, door) => { const k = uses[n % uses.length]; furnishRoom(FY, r, door, n === 0 ? 'shrine' : k === 'shrine' ? 'cell' : k, rr, lights, n % 5 === 2); n++; };
+    const cx = (i, c) => court[0] + (court[2] - court[0]) * i / c;
+    for (let i = 0; i < nW; i++) {
+      if (i === Math.floor(nW / 2)) continue;
+      put([cx(i, nW) + 0.3, z0 + 0.9 + 0.3, cx(i + 1, nW) - 0.3, z0 + RD - t - 0.3], 'v1');
+      put([cx(i, nW) + 0.3, z1 - RD + t + 0.3, cx(i + 1, nW) - 0.3, z1 - 0.9 - 0.3], 'v0');
+    }
+    const cz = (j, c) => court[1] + (court[3] - court[1]) * j / c;
+    for (let j = 0; j < nS; j++) {
+      put([x0 + 0.9 + 0.3, cz(j, nS) + 0.3, x0 + RD - t - 0.3, cz(j + 1, nS) - 0.3], 'u1');
+      put([x1 - RD + t + 0.3, cz(j, nS) + 0.3, x1 - 0.9 - 0.3, cz(j + 1, nS) - 0.3], 'u0');
+    }
+    // the benches of mud brick along the verandas' back, a water channel across the court
+    for (let x = court[0] + 3; x < court[2] - 3; x += 9) if (Math.abs(x - mx) > 4) { bag.add('mudbrick', box(x, y, court[1] + 0.2, x + 4.2, y + 0.42, court[1] + 0.8)); col.rect([x, court[1] + 0.2, x + 4.2, court[1] + 0.8], y, y + 0.42); }
+    bag.add('brick', box(court[0] + 6, y, (court[1] + court[3]) / 2 + 6.2, court[2] - 6, y + 0.04, (court[1] + court[3]) / 2 + 6.5), false);
+    outer(ctx, el.rect, y, RH, RH * 0.55, 13, { n: [[mx - 1.5, mx + 1.5]] });
+  }
 }

@@ -19,28 +19,29 @@ export const faceMap = (F, face) => {
 
 /** The weathering and the roofline of a blank outer wall of length `len`: baked brick to `lowH`, mud brick above to `H`. */
 export function dressWall(F, rand, face, len, H, lowH, o = {}) {
-  const gap = o.gap ?? [-9, -9], clear = (s0, s1) => s1 < gap[0] || s0 > gap[1];
-  let cnt = 0;
-  const m = faceMap(F, face), b = (mat, s0, y0, d0, s1, y1, d1) => { const r = m(s0, d0, s1, d1 + (cnt++ % 7) * 0.0023); F.b(mat, r[0], y0, r[1], r[2], y1, r[3], false); };
+  const gaps = o.gaps ?? (o.gap ? [o.gap] : []), clear = (s0, s1) => gaps.every((g) => s1 < g[0] || s0 > g[1]);
+  const m = faceMap(F, face), b = (mat, s0, y0, d0, s1, y1, d1) => { const r = m(s0, d0, s1, d1); F.b(mat, r[0], y0, r[1], r[2], y1, r[3], false); };
   // the string course where the baked brick gives way to mud brick, and the rafter ends under the parapet
-  b('brick', 0, lowH - 0.12, 0, len, lowH + 0.04, 0.07);
-  for (let s = 0.5 + rand() * 0.4; s < len - 0.3; s += 0.85 + rand() * 0.15) b('timber', s - 0.07, H - 0.42, 0, s + 0.07, H - 0.28, 0.3);
+  if (!o.plain) {
+    b('brick', 0, lowH - 0.12, 0, len, lowH + 0.04, 0.07);
+    for (let s = 0.5 + rand() * 0.4; s < len - 0.3; s += 0.85 + rand() * 0.15) b('timber', s - 0.07, H - 0.42, 0, s + 0.07, H - 0.28, 0.3);
+  }
   // the salt that rises in the baked brick: pale crust at the foot, in patches
   for (let s = 0.2; s < len - 0.8;) { const w = 0.7 + rand() * 2.2, h = 0.2 + rand() * 0.65; if (rand() < 0.62 && clear(s, s + w)) b('plaster_streak', s, 0, 0, Math.min(len - 0.1, s + w), h, 0.03); s += w + 0.3 + rand() * 1.4; }
   // mud plaster patches over the mud brick, brick showing where it has fallen
-  for (let k = 0, n = Math.round(len / 2.4); k < n; k++) {
+  for (let k = 0, n = H - lowH > 1.2 ? Math.round(len / 2.4) : 0; k < n; k++) {
     const s = 0.3 + rand() * (len - 2.6), w = 0.7 + rand() * 1.8, y = lowH + 0.1 + rand() * (H - lowH - 0.9), h = 0.4 + rand() * 0.8;
-    b(rand() < 0.7 ? 'mud_plaster' : 'earth_wall', s, y, 0, s + w, Math.min(H - 0.45, y + h), 0.035);
-    if (rand() < 0.25) b('mudbrick', s + w * 0.25, y + h * 0.2, 0, s + w * 0.6, y + h * 0.7, 0.045);
+    const pm = rand() < 0.7; b(pm ? 'mud_plaster' : 'earth_wall', s, y, 0, s + w, Math.min(H - 0.45, y + h), pm ? 0.05 : 0.07);
+    if (rand() < 0.25) b('mudbrick', s + w * 0.25, y + h * 0.2, 0, s + w * 0.6, y + h * 0.7, 0.085);
   }
   for (let k = 0, n = Math.round(len / 5); k < n; k++) { const s = 0.5 + rand() * (len - 1), w = 0.4 + rand() * 0.6; if (clear(s, s + w)) b('brick_baked', s, 0.6 + rand() * 1.1, 0, s + w, 1.0 + rand() * 1.2, 0.04); }   // baked brick spalled and patched
   // rain streaks under the parapet's spouts and a few crack lines
-  for (let k = 0, n = Math.round(len / 4); k < n; k++) { const s = 0.4 + rand() * (len - 0.8); b('plaster_damp', s, H - 1.5 - rand(), 0, s + 0.18 + rand() * 0.12, H - 0.42, 0.04); }
-  for (let k = 0, n = Math.round(len / 6); k < n; k++) { const s = 0.5 + rand() * (len - 1); if (clear(s, s + 0.03)) b('wood_dark', s, 0.5 + rand() * 1.5, 0, s + 0.03, 1.4 + rand() * 1.6, 0.045); }
+  for (let k = 0, n = o.plain ? 0 : Math.round(len / 4); k < n; k++) { const s = 0.4 + rand() * (len - 0.8); b('plaster_damp', s, H - 1.5 - rand(), 0, s + 0.18 + rand() * 0.12, H - 0.42, 0.095); }
+  for (let k = 0, n = Math.round(len / 6); k < n; k++) { const s = 0.5 + rand() * (len - 1); if (clear(s, s + 0.03)) b('wood_dark', s, 0.5 + rand() * 1.5, 0, s + 0.03, 1.4 + rand() * 1.6, 0.06); }
   // a square vent of two brick slots high up, now and then
-  if (rand() < 0.5) { const s = 0.8 + rand() * (len - 1.6), y = H - 0.95; b('brick', s, y, 0, s + 0.5, y + 0.3, 0.07); b('wood_dark', s + 0.08, y + 0.08, 0, s + 0.42, y + 0.22, 0.09); }
+  if (!o.plain && rand() < 0.5) { const s = 0.8 + rand() * (len - 1.6), y = H - 0.95; b('brick', s, y, 0, s + 0.5, y + 0.3, 0.07); b('wood_dark', s + 0.08, y + 0.08, 0, s + 0.42, y + 0.22, 0.09); }
   // washing on a pole, or a heap of dung cakes drying against the wall
-  if (o.life !== false) {
+  if (o.life !== false && !o.plain) {
     if (rand() < 0.2) { const s = 1 + rand() * (len - 3.5); if (!clear(s, s + 2.4)) return; b('timber', s, 2.3, 0.22, s + 2.4, 2.38, 0.3); for (let k = 0; k < 3; k++) b(['cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_indigo'][Math.floor(rand() * 4)], s + 0.2 + k * 0.7, 1.3, 0.24, s + 0.75 + k * 0.7, 2.3, 0.27); }
     else if (rand() < 0.3) { const s = 0.8 + rand() * (len - 2.6); if (!clear(s, s + 1.6)) return; for (let i = 0; i < 4; i++) for (let j = 0; j < 4 - i; j++) b('hide_tan', s + i * 0.12 + j * 0.28, 0.02 + i * 0.1, 0.02, s + i * 0.12 + j * 0.28 + 0.24, 0.1 + i * 0.1, 0.3); }
   }
@@ -109,6 +110,7 @@ export function dressRoof(F, rand, rooms, W, D, H, T) {
 function local(r, door) {
   const [u0, v0, u1, v1] = r;
   if (door === 'v0') return { A: u1 - u0, B: v1 - v0, pt: (a, b) => [u0 + a, v0 + b] };
+  if (door === 'v1') return { A: u1 - u0, B: v1 - v0, pt: (a, b) => [u0 + a, v1 - b] };
   if (door === 'u1') return { A: v1 - v0, B: u1 - u0, pt: (a, b) => [u1 - b, v0 + a] };
   return { A: v1 - v0, B: u1 - u0, pt: (a, b) => [u0 + b, v0 + a] };
 }
@@ -145,6 +147,16 @@ export function furnishRoom(F, r, door, kind, rand, lights, lit = false) {
     k('brick', 0.5, 0.0, 0.5, 1.6, 0.55, 1.4); k('bitumen', 0.55, 0.55, 0.55, 1.55, 0.58, 1.35);                             // the bathing platform
     jl('terracotta', A - 0.6, wall - 0.2, 2.1); jl('pottery_dark', A - 1.2, wall - 0.3, 1.2); k('brick', A - 0.9, 0.0, 0.3, A - 0.2, 0.3, 0.9);
     k('bitumen', 0.9, 0.06, wall, 1.1, 0.4, wall + 0.2);
+  } else if (kind === 'cell') {                                            // a priest's cell: a mat and a rolled blanket, a water jar, a stool, a lamp niche, his things in a basket
+    k('reed_mat', 0.5, 0, wall - 2.0, 1.7, 0.035, wall - 0.3); k('cloth_white', 0.6, 0.035, wall - 0.9, 1.5, 0.12, wall - 0.4);
+    KL(F, L, 'cloth_ochre', [[0.001, 0], [0.12, 0.01], [0.12, 0.5], [0.001, 0.5]], 0.5, wall - 0.4, 0.035, 8);
+    jl('terracotta', A - 0.5, wall - 0.2, 1.7); k('mudbrick', A - 1.4, 0, 0.9, A - 0.8, 0.38, 1.4); KL(F, L, 'wicker', [[0.22, 0], [0.28, 0.2], [0.001, 0.2]], A - 0.5, 1.2, 0);
+    k('brick', 0.15, 0.9, wall + 0.1, 0.65, 1.0, wall + 0.4); KL(F, L, 'terracotta', [[0.001, 0], [0.07, 0.01], [0.08, 0.04], [0.001, 0.05]], 0.4, wall + 0.25, 1.0, 8);
+  } else if (kind === 'shrine') {                                          // a brick plinth with a seated figure of soapstone, offerings before it
+    k('brick', m - 0.7, 0, wall - 1.0, m + 0.7, 0.5, wall - 0.1); k('soapstone', m - 0.22, 0.5, wall - 0.75, m + 0.22, 0.95, wall - 0.4); k('soapstone', m - 0.14, 0.95, wall - 0.68, m + 0.14, 1.22, wall - 0.47);
+    k('gold', m - 0.16, 1.12, wall - 0.7, m + 0.16, 1.17, wall - 0.45); k('reed_mat', m - 0.9, 0, 0.8, m + 0.9, 0.03, 2.0);
+    for (let i = 0; i < 3; i++) jl(i % 2 ? 'terracotta' : 'pottery_dark', m - 0.5 + i * 0.5, 2.3, 0.9, 0.03);
+    k('bitumen', m + 0.8, 0, wall - 0.5, m + 1.1, 0.7, wall - 0.2);
   } else {                                                                 // work: a loom frame, spindles, baskets of cotton or wool
     for (const a of [0.4, 1.9]) k('timber', a, 0, wall - 0.1, a + 0.08, 1.7, wall - 0.02); k('timber', 0.4, 1.6, wall - 0.1, 2.0, 1.68, wall - 0.02);
     for (let i = 0; i < 9; i++) k('cloth_white', 0.55 + i * 0.15, 0.4, wall - 0.08, 0.58 + i * 0.15, 1.6, wall - 0.06);
