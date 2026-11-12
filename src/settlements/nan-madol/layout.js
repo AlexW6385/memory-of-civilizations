@@ -256,12 +256,12 @@ export function walkPaths() {
 export const FORECOURT = {
   way: [-11.4, 6, -8.6, 27],
   clear: [-21.5, 6, 1.5, 27.4],                         // no trees here
-  cooks: [[-15.2, 23.4, 811], [-4.6, 23.8, 812]],
+  cooks: [[-14.6, 24.0, 811], [-4.6, 24.0, 812]],
   lamps: [[-12.8, 10], [-7.2, 10], [-12.8, 17], [-7.2, 17], [-12.8, 23.5], [-7.2, 23.5]],
   things: [
     { k: 'rack', at: [-17.6, 8.8], rot: 0 }, { k: 'rack', at: [-14.6, 8.8], rot: 0 }, { k: 'net', at: [-19.8, 12.4], rot: Math.PI / 2 },
     { k: 'matline', at: [-15.4, 12.6], rot: 0 }, { k: 'pound', at: [-17.2, 15.8], rot: 0.15 }, { k: 'nuts', at: [-14.6, 18.8], rot: 0.5 },
-    { k: 'hull', at: [-18.6, 20.6], rot: 0.08 },
+    { k: 'hull', at: [-17.4, 20.6], rot: 0.08, len: 4.8 },
     { k: 'pen', at: [-4.2, 9.2], rot: 0 }, { k: 'rack', at: [-5.1, 13.0], rot: Math.PI / 2 }, { k: 'matline', at: [-4.8, 16.2], rot: Math.PI / 2 },
     { k: 'pound', at: [-5.6, 19.0], rot: -0.2 }, { k: 'nuts', at: [-3.7, 21.4], rot: 1.1 },
   ],

@@ -194,7 +194,7 @@ export async function town() {
   // porters and priests on the way to the causeway (none nearer than 9 m of the arrival at (−10, 28))
   { const at = (x, z) => [x, z], fc = (a, b, o = {}, f = woman) => f(a, 0, face(a, b), o);
     for (const [bx, bz] of [[-17.2, 15.8], [-5.6, 19.0]]) { const a = at(bx + 0.1, bz + 1.0); woman(a, 0, face(a, [bx, bz]), { pose: 'kneel' }); const b = at(bx + 1.3, bz + 0.5); woman(b, 0, face(b, [bx, bz]), { pose: 'sit_ground' }); }
-    for (const [x, z, bx, bz] of [[-18.6, 21.9, -18.6, 20.6], [-17.0, 19.6, -18.0, 20.6], [-20.6, 20.9, -19.4, 20.6]]) man(at(x, z), 0, face([x, z], [bx, bz]), { pose: x < -18.8 ? 'squat' : 'kneel', cloth: 'hide_tan' });
+    for (const [x, z, bx, bz] of [[-17.4, 21.9, -17.4, 20.6], [-16.2, 19.3, -16.6, 20.6], [-19.8, 19.6, -19.0, 20.4]]) man(at(x, z), 0, face([x, z], [bx, bz]), { pose: x < -18.8 ? 'squat' : 'kneel', cloth: 'hide_tan' });
     fc([-16.0, 9.9], [-16.1, 8.8], { pose: 'stand' }, woman); fc([-13.6, 9.7], [-14.6, 8.8], { pose: 'kneel' }, woman);
     fc([-18.4, 12.6], [-19.8, 12.4], { pose: 'stand' }, man); fc([-4.0, 12.8], [-5.1, 13.0], { pose: 'stand' }, woman);
     fc([-3.4, 16.4], [-4.8, 16.2], { pose: 'sit_ground' }, woman);
