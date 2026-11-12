@@ -4,7 +4,7 @@
 import '../../styles/burmese/index.js';
 import {
   RADIUS, RIVER_Y, bankX, CITY, WALL, GATE, THAT, THAT_ENC, PALACE, PAL_HALL, SHWE, SHWE_PREC, SULA, SULA_PREC, TANK, TANK_Y, KILNS, KYAUNGS, PRECINCT, MAIN_ROAD,
-  lots, plainTemples, cityWalls, inRect, inRiver, inTank,
+  ANANDA, OKKYAUNG, lots, plainTemples, cityWalls, streets, inLot, inPlainTemple, inRect, inRiver, inTank,
 } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -55,8 +55,78 @@ function city() {
 
 /** The stilt houses in their strips. */
 function houses() {
-  const E = lots().map((l) => ({ t: 'bgn_house', rect: l.rect, front: l.front, seed: l.seed, open: l.open }));
+  const E = [];
+  for (const l of lots()) {
+    if (!l.shop) { E.push({ t: 'bgn_house', rect: l.rect, front: l.front, seed: l.seed, open: true, kind: l.kind }); continue; }
+    // a shop on the road, the owner's house behind it
+    const [x0, z0, x1, z1] = l.rect, S = 9.8;
+    E.push({ t: 'bgn_shop', rect: l.rect, front: l.front, seed: l.seed, trade: ['lacquer', 'pottery', 'cloth', 'offerings', 'betel', 'rice', 'tea', 'parasols'][l.seed % 8] });
+    E.push({ t: 'bgn_house', rect: l.front === 's' ? [x0, z0, x1, z1 - S] : [x0, z0 + S, x1, z1], front: l.front, seed: l.seed + 1, open: true, kind: 'small' });
+  }
   return base('bagan-houses', E);
+}
+
+/** Roadside props along the streets (water-pot stands, shrines, benches, festival poles, lamp pillars, firewood, drying mats), placed from the street rectangles, on the verge, facing the road. */
+function roadside() {
+  const r = rng(1213), items = [], taken = [];
+  const free = (x, z, m) => !inRiver(x, z, 4) && !inTank(x, z, 2) && !inLot(x, z, m) && !inPlainTemple(x, z, 1) && !taken.some(([a, b]) => Math.hypot(a - x, b - z) < 5)
+    && !streets().some((q) => inRect(q, x, z, 0.4)) && ![PRECINCT, SHWE_PREC, SULA_PREC, THAT_ENC, PALACE].some((q) => inRect(q, x, z, 0.5)) && Math.hypot(x, z) < RADIUS - 24;
+  const kinds = [['potstand', 4], ['bench', 2], ['pole', 1.2], ['shrine', 1.0], ['lamp', 1.0], ['firewood', 1.2], ['dry', 1.4], ['spirit', 0.8], ['pounder', 0.5]];
+  const tot = kinds.reduce((a, [, w]) => a + w, 0);
+  const pick = () => { let q = r() * tot; for (const [k, w] of kinds) { q -= w; if (q <= 0) return k; } return 'potstand'; };
+  for (const s of streets()) {
+    const horiz = s[2] - s[0] >= s[3] - s[1], L = horiz ? s[2] - s[0] : s[3] - s[1];
+    if (L < 24 || Math.min(s[2] - s[0], s[3] - s[1]) > 12) continue;
+    for (let a = 8 + r() * 10; a < L - 6; a += 14 + r() * 16) for (const side of [-1, 1]) {
+      if (r() < 0.35) continue;
+      const off = 1.4 + r() * 0.8, k = pick();
+      const x = horiz ? s[0] + a : (side < 0 ? s[0] - off : s[2] + off), z = horiz ? (side < 0 ? s[1] - off : s[3] + off) : s[1] + a;
+      if (!free(x, z, 1.2)) continue;
+      const rot = horiz ? (side < 0 ? 0 : Math.PI) : (side < 0 ? Math.PI / 2 : -Math.PI / 2);
+      items.push({ k, c: [Math.round(x * 10) / 10, Math.round(z * 10) / 10], rot, seed: Math.floor(r() * 1e6) });
+      taken.push([x, z]);
+    }
+  }
+  return items;
+}
+
+/** The precinct furniture of the Ananda: the chinthe pairs at the four gates, lamp pillars and festival poles along the approaches, rows of votive stupas inside the walls, offerings by the porches. */
+function anandaCourt() {
+  const [px0, pz0, px1, pz1] = PRECINCT, [ax, az] = ANANDA.c, items = [], r = rng(1105);
+  const lions = [[px0 + 2.6, az, -Math.PI / 2, 'z'], [px1 - 2.6, az, Math.PI / 2, 'z'], [ax, pz0 + 2.6, Math.PI, 'x'], [ax, pz1 - 2.6, 0, 'x']];
+  for (const [x, z, rot, ax2] of lions) for (const sd of [-1, 1]) items.push({ k: 'chinthe', c: ax2 === 'z' ? [x, z + sd * 5] : [x + sd * 5, z], rot, s: 1.15 });
+  for (let x = px0 + 9; x < ax - 52; x += 7) for (const sd of [-1, 1]) items.push({ k: 'lamp', c: [x, az + sd * 6.2], rot: 0, seed: x });
+  for (const [dx, dz] of [[-62, -9], [-62, 9], [-70, -9], [-70, 9], [62, -9], [62, 9], [-9, -62], [9, -62], [-9, 62], [9, 62]]) items.push({ k: 'pole', c: [ax + dx, az + dz], rot: 0, seed: Math.round(dx * 7 + dz) });
+  const rows = [[60, pz0 + 3.5, 0, 22], [150, pz0 + 3.5, 0, 22], [60, pz1 - 3.5, 0, 22], [150, pz1 - 3.5, 0, 22], [px0 + 4, -48, Math.PI / 2, 26], [px0 + 4, 52, Math.PI / 2, 26], [px1 - 4, 40, Math.PI / 2, 20],
+    [60, pz0 + 6.5, 0, 14], [150, pz1 - 6.5, 0, 14]];
+  for (const [x, z, rot, n] of rows) items.push({ k: 'votive', c: [x, z], rot, n, h: 2.4, gilt: true, seed: Math.round(x + z) });
+  // offerings before the four porches' steps, and the pot stands by them
+  for (const [dx, dz, rot] of [[-52.5, 0, 0], [52.5, 0, 0], [0, -52.5, 0], [0, 52.5, 0]]) { items.push({ k: 'offering', c: [ax + dx, az + dz + (dx ? 4 : 0)], rot: dx ? (dx < 0 ? Math.PI / 2 : -Math.PI / 2) : 0, w: 1.6 }); void rot; }
+  for (const [x, z] of [[40, -12], [40, 12], [170, -12], [170, 12], [105, -75], [105, 75]]) items.push({ k: 'potstand', c: [x, z], rot: 0, seed: x + z });
+  void r; void OKKYAUNG;
+  return items;
+}
+
+/** The other courts: the Thatbyinnyu's enclosure and the palace (brick libraries, lions at the gates, poles, lamps, votive stupas), the Shwezigon and the Sulamani (lions, votive rows, lamps). */
+function courts() {
+  const items = [], E = [];
+  for (const [x, z] of [[-240, 45], [-240, 120], [-156, 45], [-156, 122]]) E.push({ t: 'bgn_library', c: [x, z], rot: x < -200 ? Math.PI / 2 : -Math.PI / 2, seed: Math.round(x + z) });
+  for (const [x, z] of [[-240, -44], [-156, -44]]) E.push({ t: 'bgn_library', c: [x, z], rot: Math.PI, seed: Math.round(x - z) });
+  E.push({ t: 'bgn_kyaung', c: [-232, -90], A: 6, B: 4.5, y: 1.8, tiers: 3, palace: true, rot: 0, seed: 11 });
+  E.push({ t: 'bgn_kyaung', c: [-164, -90], A: 6, B: 4.5, y: 1.8, tiers: 3, palace: true, rot: 0, seed: 12 });
+  E.push({ t: 'bgn_kyaung', c: [-240, 82], A: 5, B: 4, y: 1.6, tiers: 3, rot: Math.PI / 2, seed: 13 });
+  E.push({ t: 'bgn_zayat', c: [-156, 82 + 14], A: 4.5, B: 3.2, y: 0.1, seed: 14 });
+  const lion = (x, z, rot, s = 1.1) => items.push({ k: 'chinthe', c: [x, z], rot, s });
+  lion(-198 - 4.5, 30 + 2.6, Math.PI); lion(-198 + 4.5, 30 + 2.6, Math.PI); lion(-146 - 2.6, 82 - 4.5, Math.PI / 2); lion(-146 - 2.6, 82 + 4.5, Math.PI / 2);
+  lion(-198 - 4.5, -30 - 2.6, 0); lion(-198 + 4.5, -30 - 2.6, 0);
+  lion(140 - 4.5, -148 - 2.6, 0); lion(140 + 4.5, -148 - 2.6, 0); lion(98 + 2.6, -190 - 4.5, -Math.PI / 2); lion(98 + 2.6, -190 + 4.5, -Math.PI / 2);
+  lion(155 - 4.5, 160 + 2.6, Math.PI); lion(155 + 4.5, 160 + 2.6, Math.PI); lion(112 + 2.6, 198 - 4.5, -Math.PI / 2); lion(112 + 2.6, 198 + 4.5, -Math.PI / 2);
+  for (const [x, z, rot, n] of [[-198, 133, 0, 12], [-198, 33, 0, 12], [140, -150.5, 0, 8], [155, 234, 0, 8], [-248, 90, Math.PI / 2, 10]]) items.push({ k: 'votive', c: [x, z], rot, n, h: 2.2, gilt: true, seed: Math.round(x + z) });
+  for (const [x, z] of [[-190, 36], [-206, 36], [-140, 70], [-140, 94], [-206, -34], [-190, -34], [135, -152], [145, -152], [150, 164], [160, 164]]) items.push({ k: 'lamp', c: [x, z], rot: 0, seed: Math.round(x + z) });
+  for (const [x, z] of [[-215, 40], [-181, 40], [-215, 125], [-181, 125], [-232, -40], [-164, -40], [-214, -48], [-182, -48]]) items.push({ k: 'pole', c: [x, z], rot: 0, seed: Math.round(x * 3 + z) });
+  for (const [x, z] of [[-236, 100], [-160, 60], [-214, -118], [-182, -118], [-242, -76], [-154, -76]]) items.push({ k: 'potstand', c: [x, z], rot: 0, seed: Math.round(x + z) });
+  E.push({ t: 'bgn_props', items });
+  return E;
 }
 
 /** The Shwezigon and the Sulamani in their precincts, the temples and stupas of the plain, kyaungs, rest houses, stalls. */
@@ -76,8 +146,9 @@ function temples() {
   for (const [x, z] of [[112, -168], [112, -212], [168, -212]]) E.push({ t: 'bgn_zayat', c: [x, z], A: 4.5, B: 3.2, y: 0.1, seed: Math.round(x * 3 + z) });
   // the stalls: along the main road before the Ananda's west gate, and on the roads to the great temples
   const goods = ['flowers', 'candles', 'pots', 'fruit'];
-  [[-70, -7, 0], [-52, 7, Math.PI], [-34, -7, 0], [-16, 7, Math.PI], [0, -7, 0]].forEach(([x, z, rot], i) => E.push({ t: 'bgn_stall', c: [x, z], y: 0, rot, seed: i + 30, goods: goods[i % 4] }));
   [[26, -8, 0], [26, 8, Math.PI], [105 - 9, 100, Math.PI], [105 + 9, -100, 0], [96, -112, Math.PI / 2], [96, 112, Math.PI / 2]].forEach(([x, z, rot], i) => E.push({ t: 'bgn_stall', c: [x, z], y: 0, rot, seed: i + 40, goods: goods[(i + 1) % 4] }));
+  E.push(...courts());
+  E.push({ t: 'bgn_props', items: [...anandaCourt(), ...roadside()] });
   return base('bagan-temples', E);
 }
 

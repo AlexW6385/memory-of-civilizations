@@ -67,7 +67,10 @@ const STRIPS = [
   { rect: [-8, -166, 90, -146], axis: 'x', front: 's' }, { rect: [-8, -138, 90, -118], axis: 'x', front: 'n' },
   { rect: [-214, 162, -110, 182], axis: 'x', front: 's' }, { rect: [-214, 191, -110, 211], axis: 'x', front: 'n' },
   { rect: [-198, -214, -110, -196], axis: 'x', front: 's' }, { rect: [-198, -187, -110, -168], axis: 'x', front: 'n' },
+  { rect: [-96, -27, 10, -6], axis: 'x', front: 's' }, { rect: [-96, 6, 10, 27], axis: 'x', front: 'n' },     // the shop rows between the Tharabar Gate and the Ananda's precinct
 ];
+/** The strips on the main road, whose lots are market shops (with the owner's house behind). */
+const SHOP_STRIPS = new Set([0, 1, 2, 3, 14, 15]);
 let LOTS = null;
 /** The lots: { rect, front, seed, open, kind, village } */
 export function lots() {
@@ -83,10 +86,11 @@ export function lots() {
       const wd = 10.5 + Math.floor(r() * 5) * 1.0, b = Math.min(a + wd, end);
       const rect = alongX ? [a, z0, b, z1] : [x0, a, x1, b];
       const hit = streets().some((q) => q[0] < rect[2] && q[2] > rect[0] && q[1] < rect[3] && q[3] > rect[1]);
-      if (b - a >= 9 && r() > 0.1 && !hit) {
-        LOTS.push({ rect, front: s.front, seed: Math.floor(r() * 1e6), open: k++ % 3 === 0, kind: r() < 0.35 ? 'large' : 'small', village: si >= 6 });
+      r();                       // (the stream the old gaps used; every lot that fits is built now)
+      if (b - a >= 8.5 && !hit) {
+        LOTS.push({ rect, front: s.front, seed: Math.floor(r() * 1e6), open: true, kind: r() < 0.35 ? 'large' : 'small', village: si >= 6 && si < 14, shop: SHOP_STRIPS.has(si) });
       }
-      a = b + 0.4;
+      a = b + 0.3;
     }
   });
   return LOTS;

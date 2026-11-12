@@ -158,6 +158,22 @@ export function ananda(el, ctx) {
   bag.add(GLAZE, box(c[0] + HO, f + 3.4, c[1] - 12, c[0] + HO + 0.05, f + 4.0, c[1] + 12));
   bag.add(GLAZE, box(c[0] - 12, f + 3.4, c[1] - HO - 0.05, c[0] + 12, f + 4.0, c[1] - HO));
   bag.add(GLAZE, box(c[0] - 12, f + 3.4, c[1] + HO, c[0] + 12, f + 4.0, c[1] + HO + 0.05));
+  // ── the upper terrace is a walk: a floor over the outer wall's top, a parapet, and a stair up the north porch's west flank ──
+  {
+    const N = S.n;
+    for (const sd of SIDES) {
+      const G = S[sd], w = sd === 'n' || sd === 's' ? HO : 20;
+      G.floor(-w, 20, w, HO, TOP1);
+      if (sd === 'n') { G.col.rect(G.R(-HO, HO - 0.45, -8.4, HO), TOP1, TOP1 + 1.1); G.col.rect(G.R(-5.5, HO - 0.45, HO, HO), TOP1, TOP1 + 1.1); }
+      else G.col.rect(G.R(-w, HO - 0.45, w, HO), TOP1, TOP1 + 1.1);
+    }
+    const n = 22, v1 = 46, v0 = HO, d = (v1 - v0) / n;
+    for (let i = 0; i < n; i++) {
+      N.b('brick_paving', -8.15, f, v1 - (i + 1) * d, -5.95, f + (TOP1 - f) * (i + 1) / n, v1 - i * d, false);
+      N.b(WHITE, -8.3, f, v1 - (i + 1) * d, -8.15, f + (TOP1 - f) * (i + 1) / n + 0.9, v1 - i * d, false);
+    }
+    N.ramp(-8.15, v0, -5.95, v1, f, TOP1, -1);
+  }
   // ── the receding terraces: the curvilinear roofs, as four stepped tiers with a glazed band and a stupa at each corner ──
   const tier = (h, y0, y1, ringOnly) => {
     const F = S.n;
@@ -228,6 +244,29 @@ export function tower(el, ctx) {
   bag.add(TRIM, box(c[0] - H - 0.3, Y1 - 0.35, c[1] - H - 0.3, c[0] + H + 0.3, Y1 + 0.03, c[1] + H + 0.3));
   merlons(bag, c, H - 0.2, Y1);
   for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) miniStupa(bag, c[0] + sx * (H - 2.2), Y1, c[1] + sz * (H - 2.2), 6.5 * k, WHITE, true, 10);
+  // the first terrace is a walk: a floor over the wall-tops, the parapet as an obstacle, and a stair of two flights (dog-leg) up the face opposite the entry
+  {
+    const Hs0 = H - 10.4 * k, back = { n: 's', s: 'n', e: 'w', w: 'e' }[facing], B = S[back], rise = Y1 - f, a = -(H - 2.0 * k), run = 15 * k, land = 3 * k;
+    for (const sd of SIDES) S[sd].floor(-H, Hs0, H, H, Y1);
+    for (const sd of SIDES) {
+      const G = S[sd], skip = sd === back;
+      if (!skip) G.col.rect(G.R(-H, H - 0.45, H, H), Y1, Y1 + 1.1);
+      else { G.col.rect(G.R(-H, H - 0.45, a - 0.6, H), Y1, Y1 + 1.1); G.col.rect(G.R(a + 4.2, H - 0.45, H, H), Y1, Y1 + 1.1); }
+    }
+    const comp = (sg) => { const d = [B.U[0] * sg, B.U[1] * sg]; return d[0] > 0.5 ? 'e' : d[0] < -0.5 ? 'w' : d[1] > 0.5 ? 's' : 'n'; };
+    const n = Math.round(run / 0.55), du = run / n, yh = f + rise / 2;
+    // flight A (outer, over the ground and the plinth's edge): from u = a up toward +u to the landing; flight B (inner, against the wall) back toward −u to the terrace
+    for (let i = 0; i < n; i++) {
+      B.b('brick_paving', a + i * du, 0, H + 3.4, a + (i + 1) * du + 0.01, yh * (i + 1) / n, H + 6.4, false);
+      B.b('brick_paving', a + run - (i + 1) * du, 0, H, a + run - i * du + 0.01, yh + (Y1 - yh) * (i + 1) / n, H + 3.0, false);
+    }
+    B.col.ramp(B.R(a, H + 3.4, a + run, H + 6.4), 0, yh, comp(1));
+    B.col.ramp(B.R(a, H, a + run, H + 3.0), Y1, yh, comp(1));
+    B.b('brick_paving', a + run, 0, H, a + run + land, yh, H + 6.4, false); B.floor(a + run, H, a + run + land, H + 6.4, yh);
+    B.floor(a - 0.3, H, a + 0.3, H + 3.0, Y1);
+    B.b(WHITE, a, 0.0, H + 6.4, a + run + land, 0.7, H + 6.55, false);
+    B.b(WHITE, a + run + land, 0.0, H, a + run + land + 0.15, yh + 0.7, H + 6.55, false);
+  }
   // the upper block (the third and fourth storeys) with one row of blind windows
   const Hu = H - 9 * k, Hs = Hu - 1.4 * k, Y2 = Y1 + 11 * k;
   S.n.b(WHITE, -Hs, Y1, -Hs, Hs, Y2, Hs, true);
@@ -253,17 +292,32 @@ export function tower(el, ctx) {
 
 /**
  * bgn_cella: { c, facing, w (half width), seed } — a small temple of the plain: a plinth, a square cell under receding terraces and a sikhara, a porch with a blind door
- * (not enterable); brick showing through worn stucco, or white.
+ * (enterable: a hollow cell with a seated Buddha); brick showing through worn stucco, or white.
  */
 export function cella(el, ctx) {
   const { bag, col } = ctx, [cx, cz] = el.c, r = rng(el.seed ?? 3), w = el.w ?? 4, facing = el.facing ?? 'e';
   const F = sideFrame(ctx, el.c, facing), f = 0.5, brick = el.brick ?? r() < 0.5;
   const body = brick ? 'brick' : WHITE, h = w * (1.5 + r() * 0.5);
   F.b(BRICK, -w - 1.2, 0, -w - 1.2, w + 1.2, f, w + 1.2, true);
-  const th = 0.55;
-  archWall(F, body, -w, w, w - th, w, f, f + h, [{ c: 0, w: Math.min(1.6, w * 0.4), top: f + h * 0.62 }]);
-  F.b('wood_dark', -0.75, f, w - th, 0.75, f + h * 0.58, w - th + 0.04, false);
-  F.b(body, -w, f, -w, w, f + h, w - th, true);
+  const t = Math.min(1.0, w * 0.28), wi = w - t;
+  // the cell is hollow: walls t thick, a pointed door, a floor to walk on; the first tier of the roof is its ceiling
+  archWall(F, body, -w, w, wi, w, f, f + h, [{ c: 0, w: Math.min(1.7, w * 0.42), top: f + h * 0.68 }]);
+  F.b(body, -w, f, -w, w, f + h, -wi, true);
+  F.b(body, -w, f, -wi, -wi, f + h, wi, true); F.b(body, wi, f, -wi, w, f + h, wi, true);
+  F.floor(-wi, -wi, wi, wi, f);
+  F.b('limewash_white', -wi + 0.02, f, -wi + 0.02, wi - 0.02, f + 0.05, wi - 0.02, false);
+  F.b('paint_ochre', -wi, f + 0.05, -wi + 0.01, wi, f + 0.4, -wi + 0.03, false);
+  // the seated Buddha on a throne against the back wall, an offering before it, a lamp
+  const kb = Math.min(1, wi / 3), by = f + 0.5 * kb;
+  F.b('lacquer_red', -1.1 * kb, f, -wi + 0.1, 1.1 * kb, by, -wi + 0.1 + 1.9 * kb, true);
+  F.lathe('gold', [[1.0 * kb, 0], [0.95 * kb, 0.5 * kb], [0.6 * kb, 1.2 * kb], [0.55 * kb, 1.8 * kb], [0.7 * kb, 2.0 * kb], [0.24 * kb, 2.1 * kb], [0.2 * kb, 2.25 * kb]], 0, by, -wi + 0.1 + 0.95 * kb, 12);
+  F.lathe('gilt_bronze', [[0.2 * kb, 2.25 * kb], [0.3 * kb, 2.45 * kb], [0.27 * kb, 2.75 * kb], [0.001, 2.9 * kb]], 0, by, -wi + 0.1 + 0.95 * kb, 10);
+  F.b('lacquer_red', -0.4, f, -wi + 0.2 + 1.9 * kb + 0.2, 0.4, f + 0.4, -wi + 0.2 + 1.9 * kb + 0.7, false);
+  F.b('flame', -0.05, f + 0.4, -wi + 0.3 + 1.9 * kb + 0.4, 0.05, f + 0.52, -wi + 0.3 + 1.9 * kb + 0.5, false);
+  if ((el.seed ?? 0) % 2 === 0) F.light(0, f + h * 0.55, 0, '#ffb865', 3, Math.max(6, w * 2.2));
+  // the steps up to the plinth before the door
+  for (let i = 0; i < 2; i++) F.b('brick_paving', -1.3, 0, w + 0.05 + (1 - i) * 0.6, 1.3, f * (i + 1) / 2, w + 1.2, false);
+  F.ramp(-1.3, w, 1.3, w + 1.2, 0, f, -1);
   F.b(TRIM, -w - 0.2, f + h - 0.3, -w - 0.2, w + 0.2, f + h + 0.03, w + 0.2, false);
   let y = f + h;
   const nt = 2;
