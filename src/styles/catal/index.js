@@ -8,7 +8,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, rod } from '../../core/geom.js';
 import '../qing/index.js';
 import { cell, cellGeom, leopard, seated, knapper } from './cell.js';
-import { court2, yard, edge, landing } from './yard.js';
+import { court2, yard, edge, landing, shade, screen, reedStack } from './yard.js';
 import { WALL, MUD, PLS, LIME, RED, BLK, LOG, REED, BONE, HORN, ASH, rng, flip, ladder, dome, basket, jar, frame, flat, ellipse, aurochs, zigzag, diamonds, hands, bucranium, hatch, onFace } from './kit.js';
 
 /**
@@ -43,6 +43,8 @@ function quarter(el, { bag, col, lights }) {
       // the lip along an edge with a drop beyond it
       const t = 0.18; onFace(bag, MUD, a, b, -nx, -nz, 0, L, top + 0.05, top + 0.2, t);
       onFace(bag, 'banco_rough', a, b, nx, nz, 0, L, -0.3, 0.3 + rand() * 0.25, 0.05);                       // eroded and re-mudded foot
+      for (let u = 0.35 + rand() * 0.3; u < L - 0.2; u += 0.78 + rand() * 0.1) onFace(bag, LOG, a, b, nx, nz, u, u + 0.09, top - 0.25, top - 0.16, 0.26);        // the beam ends standing out under the roof's edge
+      for (let g = 0; g < 2; g++) { const u = rand() * (L - 0.2); onFace(bag, 'banco_rough', a, b, nx, nz, u, u + 0.07 + rand() * 0.06, top - 0.3 - rand() * 1.1, top - 0.05, 0.012); }   // rain gullies
       if (rand() < 0.7) { const u0 = rand() * L * 0.6, u1 = Math.min(L, u0 + 0.8 + rand() * 1.6), y0 = 0.5 + rand() * (top - 1.5); onFace(bag, rand() < 0.6 ? WALL : 'earth_wall', a, b, nx, nz, u0, u1, y0, Math.min(top - 0.1, y0 + 0.5 + rand() * 0.9), 0.014); }
       if (rand() < 0.3) { const u0 = rand() * (L - 0.3); onFace(bag, 'pottery_dark', a, b, nx, nz, u0, u0 + 0.25, top - 1.2 - rand() * 0.6, top - 0.02, 0.012); }   // soot streak from a roof vent
       if (m === 0 && rand() < 0.35) {                                                                       // fallen mud brick at the foot
@@ -60,6 +62,15 @@ function quarter(el, { bag, col, lights }) {
     else if (r < 0.65) { for (let q = 0; q < 6; q++) bag.add('thatch', rod([px + q * 0.09, ty, pz], [px + q * 0.09 + 0.15, ty + 1.3, pz + 0.08], 0.03, 5)); bag.add('rope_fibre', rod([px - 0.05, ty + 0.6, pz], [px + 0.6, ty + 0.65, pz + 0.05], 0.015, 4)); }   // a bundle of reeds
     else if (r < 0.78) { for (const [dx, dz, m] of [[0, 0, 'hide_tan'], [0.9, 0.3, 'hide_brown'], [0.2, 0.9, 'hide_white']]) bag.add(m, box(px + dx, ty, pz + dz, px + dx + 0.8, ty + 0.025, pz + dz + 0.55)); }          // hides pegged to dry
     else if (r < 0.9) { jar(bag, px, ty, pz, 1.1); jar(bag, px + 0.55, ty, pz + 0.1, 0.8, 'pottery_dark'); }
+    // a second thing kept on the roof, in the half away from the hatch: dung cakes, firewood, a sleeping mat under a reed awning, a heap of grain, a strainer
+    {
+      const qx = x0 + 0.9 + rand() * Math.max(0.2, C[j] - 2.4), qz = hz < cz ? z1 - 1.1 : z0 + 1.1, q = rand();
+      if (q < 0.22) { for (let a = 0; a < 3; a++) for (let b = 0; b < 4 - a; b++) bag.add('silt', box(qx + b * 0.24 + a * 0.12, ty + a * 0.07, qz, qx + b * 0.24 + a * 0.12 + 0.2, ty + a * 0.07 + 0.065, qz + 0.14)); }
+      else if (q < 0.42) { for (let a = 0; a < 7; a++) bag.add('bark_dark', rod([qx, ty + 0.05 + (a % 3) * 0.08, qz + a * 0.08], [qx + 1.1, ty + 0.05 + (a % 3) * 0.08, qz + a * 0.08], 0.035, 5)); }
+      else if (q < 0.62) { for (const [a, b] of [[0, 0], [1.3, 0], [0, 1.0], [1.3, 1.0]]) bag.add(LOG, rod([qx + a, ty, qz + b], [qx + a, ty + (b ? 0.9 : 1.2), qz + b], 0.03, 4)); bag.add('reed_mat', box(qx - 0.1, ty + 0.9, qz, qx + 1.4, ty + 1.2, qz + 1.1)); bag.add('reed_mat', box(qx + 0.1, ty, qz + 0.2, qx + 1.1, ty + 0.02, qz + 0.9)); }
+      else if (q < 0.78) { dome(bag, 'cloth_ochre', qx + 0.4, ty, qz + 0.3, 0.45, 0.3, 1.2, 1, rand() * 3, 0.1); basket(bag, qx + 1.2, ty, qz + 0.3, 0.2); }
+      else if (q < 0.9) { bag.add('wicker', lathe([[0.3, 0], [0.34, 0.12], [0.3, 0.14], [0.001, 0.03]], 9, null, qx + 0.3, ty, qz + 0.3)); bag.add(LOG, rod([qx + 0.7, ty, qz], [qx + 1.4, ty + 0.01, qz + 0.5], 0.02, 4)); }
+    }
     // a ladder up from the ground on some houses at the edge of the town
     const free = (di, dj) => !topAt(i + di, j + dj) && K[i + di]?.[j + dj] !== 'c' && K[i + di]?.[j + dj] !== 'm';
     for (const [di, dj, side] of [[1, 0, 's'], [-1, 0, 'n'], [0, 1, 'e'], [0, -1, 'w']]) {
@@ -126,6 +137,14 @@ function pen(el, { bag, col }) {
   }
   bag.add(MUD, box(x0 + 1, 0, (z0 + z1) / 2 - 0.2, x0 + 4, 0.35, (z0 + z1) / 2 + 0.2));
   dome(bag, ASH, x1 - 2, 0, z1 - 2, 1.0, 0.25, 1.4, 1, 1, 0.1);
+  // a shade of poles and reed against the far side, a manger of wattle with a heap of fodder, a second trough, dung heaps, a stake for the herder's rest
+  const midz = (z0 + z1) / 2, west = el.gate === 'w';
+  shade(bag, col, west ? x1 - 4.2 : x0 + 1.6, z0 + 1.2, 2.6, 1.8, rand);
+  screen(bag, col, [west ? x1 - 3 : x0 + 3, z1 - 3], [west ? x1 - 3 : x0 + 3, z1 - 6], rand);
+  reedStack(bag, west ? x1 - 3.8 : x0 + 3.8, z1 - 4.5, rand, true);
+  bag.add(MUD, box(x0 + 6, 0, midz + 3, x0 + 9, 0.3, midz + 3.4)); col.rect([x0 + 6, midz + 3, x0 + 9, midz + 3.4], 0, 0.3);
+  for (let q = 0; q < 3; q++) dome(bag, ASH, x0 + 2 + rand() * (x1 - x0 - 4), 0, z0 + 2 + rand() * (z1 - z0 - 4), 0.5, 0.12, 1.3, 1, rand() * 3, 0.1);
+  for (let q = 0; q < 12; q++) { const px = x0 + 1 + rand() * (x1 - x0 - 2), pz = z0 + 1 + rand() * (z1 - z0 - 2); bag.add('silt', lathe([[0.1, 0], [0.09, 0.03], [0.001, 0.04]], 6, null, px, 0.02, pz)); }
 }
 
 /**
@@ -214,7 +233,7 @@ function house(el, { bag, col, lights }) {
   zigzag(bag, BLK, FS, 0.1, 4.8, 1.76, 2.04, 20);
   // the seated woman between her cats, on the east platform at the north end; a knapper's kit on the floor by the pillar
   seated(bag, lx(4.45), PH + 0.005, lz(0.35), 0);
-  knapper(bag, lx(2.9), F, lz(4.9), rand);
+  knapper(bag, lx(3.2), F, lz(4.0), rand);
   // hearth under the hatch (a ring of plaster, ash, a small fire), the oven in the south wall's corner, a mat of reeds before them
   const hx = lx(1.1), hz = lz(4.4);
   bag.add(LIME, lathe([[0.4, 0], [0.4, 0.1], [0.3, 0.1], [0.3, 0.04], [0.001, 0.04]], 14, null, hx, F, hz));
