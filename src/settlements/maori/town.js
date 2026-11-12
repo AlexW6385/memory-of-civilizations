@@ -264,6 +264,17 @@ export async function town() {
     for (const sx of [-1, 1]) { const at = [sx * 3.4, gz + (k === 0 ? 2.6 : -2.4)]; E.push({ t: 'kamaka', at, y: height(at[0], at[1]), r: 0.8, yaw: sx * 0.5, spears: sx > 0 ? 5 : 0 }); }
     if (k < 4) { const at = [-2.9, gz + 3.2]; warrior(at, height(at[0], at[1]), face(at, [0, gz + 9])); }
     void gyv;
+    if (k > 0 && k < 4) {                                              // by each terrace's gate: an old man at his ease with a kurī, a woman with her kete
+      const a = [4.6, gz - 3.4], b = [-4.4, gz - 4.2];
+      man(a, height(a[0], a[1]), face(a, [0, gz - 1]), { pose: 'sit', beard: true, cloth: 'hide_brown' });
+      P.push({ t: 'animal', kind: 'dog', at: [a[0] + 0.9, a[1] + 0.5], y: height(a[0], a[1]), rot: 2 + k, mat: KURI[k % 5], seed: 1100 + k });
+      woman(b, height(b[0], b[1]), face(b, [0, gz - 3]) + 0.4, { pose: 'stand' });
+    }
+  });
+  // before each storehouse on the summit its yard: firewood, kete, gourds, a mat
+  [...v.pataka.slice(0, 1), { c: [hx - 17, hz - 11], yaw: Math.PI }, { c: [hx + 16, hz - 12], yaw: Math.PI }].forEach((p, k) => {
+    const d = [p.c[0] - Math.sin(p.yaw) * 2.2, p.c[1] - Math.cos(p.yaw) * 2.2];
+    E.push({ t: 'yard', c: d, y: top, yaw: p.yaw, w: 2.6, seed: 800 + k, items: 2 });
   });
   E.push({ t: 'pahu', c: [hx + 8, hz + 17], y: top, yaw: 0.5 });                      // the alarm gong on the summit
   // the shared street life (src/objects/life.js) keeps its figures off what it sees as footprints — a `c` with a radius `r`,

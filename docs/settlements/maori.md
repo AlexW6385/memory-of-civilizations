@@ -125,3 +125,18 @@ Waiata (sung chant), the kōauau and pūtōrino flutes, the pūkāea trumpet. [i
 - [Te hopu tuna — eeling — Te Ara](https://teara.govt.nz/en/te-hopu-tuna-eeling/page-3)
 - [Kurī — Polynesian dogs — Te Ara](https://teara.govt.nz/en/kuri-polynesian-dogs/print)
 - [Horticultural use of native plants — Te Ara](https://teara.govt.nz/en/node/8349)
+
+## 4f. Sixth pass: the arrival on the summit, spirals and manaia, the working summit, the gates
+
+Brought toward the Suzhou standard. What was below it: the arrival stood in the gardens 20 m outside the outer gate, the view filled by a 4 m palisade; no life in the frame; the summit (the place the pā is for) was bare apart from the welcome and one oven; the carving had no spirals; the ground was one grass.
+
+- **The arrival** (`src/planet/arrivals.js`): inside the summit's gateway (0, 33) facing the chief's carved house across the marae ātea, the pōwhiri under way at the left (the visitors' body 5–10 m off, the challenger and the hosts beyond), the cooking place, the gong and the carver at the right [inferred: composition].
+- **Spirals and manaia** (`spirals.js`): the koru / pītau, "the unfurling fern frond", and the manaia, the bird-headed profile figure, are named by Te Ara as common motifs of Māori carving [stated: Te Ara "Māori art" — spiral forms, manaia]; the carved maihi of Te Arawa houses are cut in runs of pītau [inferred: after museum maihi]. Ours: the lower half of each maihi in a run of alternating pītau, the upper half still in rauponga; a manaia either side of the chief's door; pītau along both faces of every gateway's lintel; a pītau and a manaia down each standing pou [inferred: places and proportions].
+- **The carver** (`whakairo`): a post for the marae being cut — foot in bark, the shaft adzed square, the head blocked out, chips, adzes on a stump; a man kneeling at it, an old man and a boy by [stated: carving with stone adzes and chisels, Te Ara "Whakairo"; inferred: the stage and the placing].
+- **Cloak rack** (`kakahu`): cloaks of flax fibre and dog skin hung to air with their borders, as the cloaks of §4b/§4e [inferred: the rack].
+- **The gong** (`pahu`): the alarm gong, a hardwood slab hung from a frame of two carved posts, a mallet on a cord [inferred: from the pahu of museum collections; no source read for its siting in a pā].
+- **Stones and spears** (`kamaka`; stage detail): heaps of throwing stones by every gate and on the fighting stages, spears racked against a post and leaning at the stage's breastwork [inferred: that a pā's defenders kept stones and spears at the gates and stages — the fighting stage is the stated defence, §1].
+- **Summit life**: five children at a string game between marae and oven, others running; the carver's party; two more storehouses (carved like the first, each with its yard of firewood, kete and gourds); cabbage trees and tree ferns at the rim; sentries at the gates; at each terrace gate an old man with a kurī and a woman with her kete.
+- **Ground**: the marae ātea, the work places and the gates' surrounds beaten bare; a worn lane along each terrace behind the stages [inferred].
+- **Houses**: a common house's plain bargeboards and a ridge-board standing out over its porch; about one roof in four of straw-coloured thatch beside the raupō [inferred: variation].
+- **Life**: walks to the carver, the gong and the weavers; swallows low over the marae [stated: swallows, Te Ara "Birds"].
