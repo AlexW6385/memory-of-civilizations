@@ -2,7 +2,8 @@
 // the Masters' Houses in the pine grove, the Törten rows and the Konsum, the street's kerbs and furniture, the lamps, cars and bicycles, and the people — students at
 // the looms, the benches and the stairs, townspeople on the pavements, queues at the shops, children in the lane. Several plans (the four quarters, the grove, the estate)
 // so that each builds in turn and the viewer culls them by distance.
-import { RADIUS, LV, PL, B, ROADS, ROAD_K, ROAD_M, ROAD_KV, ROAD_E, FOOT, MASTERS, TORTEN, TORTEN_FRONT, KONSUM, lots, inRoad, inLot, inMasters, inSchool, inTorten, inRect } from './layout.js';
+import { streetLife, WHEELED } from './street-life.js';
+import { RADIUS, LV, PL, B, ROADS, ROAD_K, ROAD_M, ROAD_KV, ROAD_E, FOOT, MASTERS, TORTEN, TORTEN_FRONT, KONSUM, GARDEN, GARDEN_SHED, lots, inRoad, inLot, inMasters, inSchool, inTorten, inRect } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const bboxOf = (rects, m = 6) => { const b = [1e9, 1e9, -1e9, -1e9]; for (const r of rects) { b[0] = Math.min(b[0], r[0]); b[1] = Math.min(b[1], r[1]); b[2] = Math.max(b[2], r[2]); b[3] = Math.max(b[3], r[3]); } return [b[0] - m, b[1] - m, b[2] + m, b[3] + m]; };
@@ -96,6 +97,13 @@ function buildings() {
     plans.push(plan(`dessau-town-${q}`, 'bauhaus', groups[q], rects[q], { near: NEAR, center }));
     plans.push(plan(`dessau-town-${q}-far`, 'bauhaus', houses[q].map((h) => ({ ...h, simple: true })), rects[q], { far: NEAR, center, nocollide: true }));
   }
+  // the school's garden south of the workshop wing, with the bicycle shed's rows and the bicycles leaning along the glass wall's pavement
+  {
+    const el = [{ t: 'bauhaus_garden', seed: 12 }, ...WHEELED], rr = [GARDEN, [-20, 4, -17, 34]];
+    for (let i = 0; i < 19; i++) el.push({ t: 'bicycle', at: [GARDEN_SHED[0] + 0.5 + i * 0.55, 40.6], rot: 0, y: 0 });
+    for (let i = 0; i < 9; i++) el.push({ t: 'bicycle', at: [-18.7 + (i % 2) * 0.15, 6 + i * 3.1 + rand() * 0.4], rot: (i % 3 === 0 ? 0.1 : 0), y: 0 });
+    plans.push(plan('dessau-garden', 'bauhaus', el, rr));
+  }
   // the Masters' Houses in the pines; Törten's rows and the Konsum
   plans.push(plan('dessau-masters', 'bauhaus', MASTERS.map((h) => ({ t: 'bauhaus_master', rect: h.rect, kind: h.kind, id: h.id, seed: h.seed })), MASTERS.map((h) => h.rect)));
   const tor = TORTEN.map((r, i) => ({ t: 'torten_row', rect: r, n: 14, front: TORTEN_FRONT[i], seed: 40 + i }));
@@ -163,6 +171,7 @@ function life() {
     P.push({ t: 'chickens', at: [r[0] + 20, s ? r[1] - 5 : r[3] + 5], n: 5, seed: 11 + i, kind: 'hen' }, { t: 'chickens', at: [r[0] + 48, s ? r[1] - 5 : r[3] + 5], n: 4, seed: 21 + i, kind: 'hen' });
   }
   for (let k = 0; k < 6; k++) { const x = KONSUM[0] + 3 + rand() * 9, z = KONSUM[3] + 1.8; (k % 2 ? woman : fig)([x, z], 0, { hat: 'cap', carry: k % 2 ? 'basket' : undefined, pose: 'stand' }); }
+  streetLife({ fig, woman, P, rand });
   return P;
 }
 

@@ -82,7 +82,11 @@ function workshopWing(sk) {
   roof(sk, [x0, z0, x1, z1], FR, [holes[3]]);
   rail(sk, [L1[0], ZA], [L2[1], ZA], FR, 'steel_chrome'); // the roof edge of the stair hole's open end
   // the glass curtain wall on the west face: panes, mullions every 1.25 m, transoms at every floor and sill
-  sk.pane('glass_outer', { alongX: false, x: x0, u0: z0 + 0.05, u1: z1 - 0.05, y0: F0, y1: FR, n: -1 });
+  // (the glass is drawn only where it covers the slab edges and the sills — the dark bands of the photographs; between them the panes are left open to the eye
+  // so that the workshops behind the wall read from the street: the palette's glass is opaque)
+  for (const [ya, yb] of [[F0, F0 + 0.95], [F1 - 0.55, F1 + 0.35], [F2 - 0.55, F2 + 0.35], [FR - 0.95, FR]]) sk.pane('glass_outer', { alongX: false, x: x0, u0: z0 + 0.05, u1: z1 - 0.05, y0: ya, y1: yb, n: -1 });
+  // sky-reflecting upper lights: every third bay's panes at the heads of the 2nd and 3rd floors, tilted open (the louvred sashes, opened by a mechanism)
+  for (const y of [F1 + 2.2, F2 + 2.2]) for (let u = z0 + 1.3; u + 1.25 < z1; u += 3.75) sk.pane('glass_outer', { alongX: false, x: x0 - 0.02, u0: u, u1: u + 1.25 - 0.06, y0: y, y1: y + 0.9, n: -1 });
   for (let u = z0 + 0.05; u <= z1 + 0.01; u += 1.25) sk.b('steel_grey', x0 - 0.07, F0, u - 0.03, x0 + 0.03, FR, u + 0.03);
   for (const y of [F0 + 0.0, F1 - 0.6, F1 + 0.9, F1 + 2.2, F2 - 0.6, F2 + 0.9, F2 + 2.2, FR - 0.06]) sk.b('steel_grey', x0 - 0.07, y, z0, x0 + 0.03, y + 0.07, z1);
   sk.b('steel_grey', x0 - 0.07, F0 + 1.0, z0, x0 + 0.03, F0 + 1.07, z1);
@@ -306,6 +310,12 @@ function prellerhaus(sk) {
         slab(sk, [XB, b0, x1, b1], y, [], { mat: 'concrete_light', th: 0.2 });
         rail(sk, [x1 - 0.05, b0], [x1 - 0.05, b1], y); rail(sk, [XB, b0 + 0.05], [x1 - 0.05, b0 + 0.05], y); rail(sk, [XB, b1 - 0.05], [x1 - 0.05, b1 - 0.05], y);
         sk.b('car_red', x1 - 0.1, y + 0.4, b0, x1, y + 0.9, b1);
+        // the balcony's furnishing: tubular chairs and a little table, a window box of geraniums on the rail, a rug or a blanket aired over it, a bicycle against the wall
+        const q = rng(k * 31 + i * 7 + 5);
+        if (q() < 0.55) { chair(sk, x1 - 0.55, y, zm - 0.35, 1); if (q() < 0.5) chair(sk, x1 - 0.55, y, zm + 0.45, 1); }
+        if (q() < 0.4) { sk.b('wood_painted', x1 - 0.7, y + 0.36, zm - 0.2, x1 - 0.3, y + 0.4, zm + 0.2); sk.rod('steel_chrome', [x1 - 0.5, y, zm], [x1 - 0.5, y + 0.36, zm], 0.02, 4); }
+        if (q() < 0.6) { sk.b('wood_dark', x1 - 0.32, y + 1.0, b0 + 0.3, x1 - 0.06, y + 1.2, b1 - 0.3); sk.b('cloth_green', x1 - 0.3, y + 1.2, b0 + 0.34, x1 - 0.08, y + 1.45, b1 - 0.34); for (let u = b0 + 0.45; u < b1 - 0.4; u += 0.45) sk.b(q() < 0.6 ? 'car_red' : 'paint_white', x1 - 0.26, y + 1.45, u, x1 - 0.12, y + 1.58, u + 0.2); }
+        else if (q() < 0.7) sk.b(['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_white'][Math.floor(q() * 4)], x1 - 0.12, y + 0.45, b0 + 0.25, x1 - 0.04, y + 1.12, b1 - 0.25);
       }
     } else {
       part(sk, 'z', 22, CX + 0.1, XB - 0.15, y, y1 - y, [[CX + 0.2, CX + 1.4]]);

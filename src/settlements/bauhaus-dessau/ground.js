@@ -1,7 +1,7 @@
 // Bauhaus Dessau — the ground (docs/settlements/bauhaus-dessau.md §8): the flat sandy plain of the Mulde; asphalt and cobbled streets with
 // paved pavements, the school's forecourt of concrete flags, the sports field east of the school, the pine grove of the Masters' Houses on sand,
 // kitchen gardens at Törten; lindens along the streets, Scots pines (red_pine stands in) and birch in the grove; a grey central-German sky.
-import { RADIUS, ROADS, FOOT, PINES, MASTERS, TORTEN, inRect, inRoad, inLot, inMasters, inTorten, inTortenHouses, inSchool, smooth } from './layout.js';
+import { RADIUS, ROADS, FOOT, PINES, MASTERS, TORTEN, GARDEN, GARDEN_PATHS, GARDEN_BEDS, GARDEN_SHED, inGarden, inRect, inRoad, inLot, inMasters, inTorten, inTortenHouses, inSchool, smooth } from './layout.js';
 
 const SPORTS = [52, 4, 140, 40];
 const height = () => 0;
@@ -12,6 +12,9 @@ function cover(x, z) {
   if (r > RADIUS - 8) { c.grass = 0.7; return c; }
   if (inRoad(x, z)) { c.road = 0.95; c.sand = 0; c.grass = 0; return c; }
   if (pavement(x, z) || inRect([-12, -10, 52, 14], x, z) || inSchool(x, z, 1.5)) { c.road = 0.6; c.sand = 0.05; c.grass = 0; return c; }
+  if (GARDEN_PATHS.some((p) => inRect(p, x, z))) { c.road = 0.5; c.grass = 0; c.sand = 0.3; return c; }
+  if (GARDEN_BEDS.some((b) => inRect(b, x, z))) { c.soil = 0.9; c.grass = 0; c.sand = 0.1; return c; }
+  if (inGarden(x, z)) { c.grass = 0.95; c.sand = 0.05; c.soil = 0.05; return c; }
   if (inRect(SPORTS, x, z)) { c.grass = 0.9; c.sand = 0.1; return c; }
   if (inRect(PINES, x, z)) { c.sand = 0.5; c.grass = 0.35; c.dry = 0.5; return c; }
   if (inTorten(x, z)) { c.soil = 0.5; c.grass = 0.4; c.sand = 0.3; return c; }
@@ -29,6 +32,11 @@ function planting(x, z) {
   // a row of lindens on the outer edge of the pavement
   if (ROADS.some((rr) => { const ok = inRect(rr, x, z, 1.3) && !inRect(rr, x, z, 0.5); return ok; }) && !inRect(PINES, x, z)) return { plane_tree: 0.9, elm: 0.25, grass: 14 };
   if (inRect(PINES, x, z)) return { red_pine: 0.7, birch: 0.18, grass: 22 };
+  if (inGarden(x, z, 0.4)) {
+    // the lawns of the garden: grass, birches singly, a few shrubs; clear of the paths, the beds, the shed, the table and the hedge's foot
+    if (GARDEN_PATHS.some((p) => inRect(p, x, z, 1)) || GARDEN_BEDS.some((b) => inRect(b, x, z, 0.8)) || inRect(GARDEN_SHED, x, z, 2.5) || inRect([-8, 41, -1, 48], x, z) || inRect([21, 54, 27, 66], x, z) || x < GARDEN[0] + 1.6 || z > GARDEN[3] - 1.6) return null;
+    return { grass: 30, birch: 0.2, apple: 0.05 };
+  }
   if (inRect(SPORTS, x, z)) return { grass: 36 };
   if (inTorten(x, z)) return { apple: 0.14, grass: 14 };
   if (r > RADIUS - 30) return { red_pine: 0.15, birch: 0.1, grass: 20 };
@@ -36,7 +44,7 @@ function planting(x, z) {
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { plane_tree: 0.9, elm: 0.25, red_pine: 0.7, birch: 0.18, apple: 0.14 },
+  maxDensity: { plane_tree: 0.9, elm: 0.25, red_pine: 0.7, birch: 0.2, apple: 0.14 },
   climate: {
     sun: { az: 170, el: 38, color: [1.0, 0.95, 0.88], intensity: 3.0, lat: 51.8, dec: 10, hour: 11 },
     sky: { turbidity: 3.5, rayleigh: 1.1, mie: 0.006, mieG: 0.8, zenith: [0.1, 0.17, 0.36], horizon: [0.62, 0.66, 0.7] },
