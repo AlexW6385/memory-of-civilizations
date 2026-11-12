@@ -66,11 +66,10 @@ function ishigaki(el, { bag, col }) {
     for (let k = 0; k < N; k++) {
       const t0 = k / N, t1 = (k + 1) / N, ya = y0 + (y1 - y0) * t0 + 0.03, yb = y0 + (y1 - y0) * t1 - 0.03, tm = (t0 + t1) / 2, om = out(tm);
       const lay = (len, face) => {
-        const n = Math.max(2, Math.round(len / 1.6));
-        for (let i = 0; i < n; i++) {
-          const w = 0.7 + r() * 0.9, u = 0.8 + r() * Math.max(0.1, len - w - 1.6), m = r() < 0.7 ? 'granite_grey' : 'granite_black';
-          if (r() < 0.45) continue;
-          face(u, w, m);
+        for (let u = 1.4; u < len - 3;) {
+          const w = 0.7 + r() * 0.9, gap = 0.3 + r() * 1.2, m = r() < 0.7 ? 'granite_grey' : 'granite_black';
+          if (r() < 0.55) face(u, w, m);
+          u += w + gap;
         }
       };
       if (sd.n) lay(rx1 - rx0, (u, w, m) => bag.add(m, box(rx0 + u, ya, rz0 - om - p, rx0 + u + w, yb, rz0 - om + 0.02)));
