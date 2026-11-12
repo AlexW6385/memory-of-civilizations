@@ -91,16 +91,27 @@ export function snake(ctx, x, yTop, z, h, al, dir, amp = 0.35, r = 0.09) {
   for (let i = 0; i < 14; i++) ctx.bag.add('bronze', rod(pts[i], pts[i + 1], r * (1 - i / 40), 6));
   const hd = pts[14]; ctx.bag.add('bronze', lathe([[0.001, 0], [r * 1.5, 0.05], [r * 1.5, 0.25], [r * 0.8, 0.34], [0.001, 0.36]], 6, null, hd[0], hd[1] - 0.3, hd[2]));
 }
-/** A clay altar of rect: a low platform (two steps) and on it a row of heads with tusks and a bell or two. */
+/**
+ * A royal ancestral altar (Wikipedia "Benin ancestral altars": royal altars are round, of white clay): a round platform of two steps in
+ * white clay set against the back of `rect`, on it a half-circle of cast heads with carved tusks, the brass bell (eroro) at the front,
+ * a row of rattle staffs (ukhurue) at the back. `facing` is the side the altar looks to; heads: how many heads.
+ */
 export function altar(ctx, rect, facing, seed, heads = 5) {
-  const { bag } = ctx, rand = rng(seed), [x0, z0, x1, z1] = rect;
-  B(ctx, 'tuff_red', [x0, z0, x1, z1], 0, 0.45, true);
-  B(ctx, 'stucco_red', [x0 + 0.1, z0 + 0.1, x1 - 0.1, z1 - 0.1], 0.45, 0.62, false);
-  const alongX = facing === 's' || facing === 'n', n = heads, L = alongX ? x1 - x0 : z1 - z0, rot = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 }[facing];
+  const { bag, col } = ctx, rand = rng(seed), [x0, z0, x1, z1] = rect, w = x1 - x0, d = z1 - z0;
+  const dir = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] }[facing], al = [-dir[1], dir[0]];
+  const r = Math.max(0.7, Math.min(1.25, (facing === 's' || facing === 'n' ? w : d) / 2 - 0.2)), cx0 = (x0 + x1) / 2, cz0 = (z0 + z1) / 2;
+  const back = Math.max(0, r - (facing === 's' || facing === 'n' ? d : w) / 2), cx = cx0 - dir[0] * back, cz = cz0 - dir[1] * back;
+  bag.add('chalk', lathe([[r, 0], [r, 0.3], [r * 0.82, 0.3], [r * 0.82, 0.55], [0.001, 0.55]], 16, null, cx, 0, cz)); col.circle(cx, cz, r, 0, 0.6);
+  const rot = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 }[facing], n = Math.max(1, heads);
   for (let i = 0; i < n; i++) {
-    const u = (i + 0.5) / n * L, x = alongX ? x0 + u : (x0 + x1) / 2, z = alongX ? (z0 + z1) / 2 : z0 + u;
-    head(ctx, x, 0.62, z, rot, seed * 7 + i, true);
-    if (rand() < 0.5) bag.add('bronze', lathe([[0.001, 0], [0.07, 0.02], [0.06, 0.16], [0.02, 0.2]], 8, null, x + (alongX ? 0.38 : 0), 0.62, z + (alongX ? 0 : 0.38)));
+    const t = n === 1 ? 0 : (i / (n - 1) - 0.5) * 2.3, rr = r * 0.52;
+    // a point at angle t from the back, on the circle of radius rr
+    const px = cx - dir[0] * rr * Math.cos(t) + al[0] * rr * Math.sin(t) * 1.0, pz = cz - dir[1] * rr * Math.cos(t) + al[1] * rr * Math.sin(t) * 1.0;
+    head(ctx, px, 0.55, pz, rot, seed * 7 + i, true);
   }
+  for (let i = 0; i < 3; i++) { const o = (i - 1) * r * 0.55, bx = cx - dir[0] * r * 0.9 + al[0] * o, bz = cz - dir[1] * r * 0.9 + al[1] * o; bag.add('wood_dark', rod([bx, 0.5, bz], [bx, 1.7 - (i % 2) * 0.2, bz], 0.022, 5)); bag.add('bronze', lathe([[0.001, 0], [0.05, 0.02], [0.04, 0.12], [0.001, 0.16]], 6, null, bx, 1.7 - (i % 2) * 0.2, bz)); }
+  const fx = cx + dir[0] * r * 0.6, fz = cz + dir[1] * r * 0.6;
+  bag.add('bronze', lathe([[0.001, 0], [0.13, 0.02], [0.11, 0.2], [0.04, 0.3], [0.001, 0.32]], 8, null, fx, 0.55, fz));
+  if (rand() < 0.5) bag.add('bronze', lathe([[0.001, 0], [0.09, 0.02], [0.07, 0.15], [0.001, 0.2]], 7, null, fx + al[0] * 0.5, 0.55, fz + al[1] * 0.5));
 }
 export { box, frustum, lathe, rod, orientedBox };

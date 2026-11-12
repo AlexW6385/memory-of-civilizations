@@ -5,8 +5,8 @@
 // reached by a stair from the court). Furnished: beds of clay, stools, chests, hearth, mortar, pots, the ancestral altar.
 import { fromTriangles, quad } from '../../core/geom.js';
 import { frame } from '../greek/agora.js';
-import { rng, wallMat, clayWall, gable, lean, pillar, altar, box, lathe, rod } from './kit.js';
-import { pot, pots, stool, bed, chest, hearth, mortar, rack, wash, wood, plantain, wear, claySeat, hung } from './props.js';
+import { rng, wallMat, clayWall, gable, lean, pillar, box, lathe, rod } from './kit.js';
+import { homeAltar, pot, pots, stool, bed, chest, hearth, mortar, rack, wash, wood, plantain, wear, claySeat, hung } from './props.js';
 
 const toStreet = (F) => { const o = F.out; return o[1] !== 0 ? (o[1] > 0 ? 'zp' : 'zn') : (o[0] > 0 ? 'xp' : 'xn'); };
 
@@ -140,10 +140,9 @@ function house(el, ctx) {
   // ── the court and the back range: the shrine, the kitchen, drying racks, the yam mortar, firewood, washing, a plantain ──
   {
     const bz = D - bd, cvd = fd + 1.0;
-    // the ancestral altar on the back range, against the back wall, facing the court
-    const au = L * 0.22, ar = rr(au - 1.2, D - 1.7, au + 1.2, D - 0.7);
-    altar(ctx, ar, el.front === 'n' ? 'n' : 's', (el.seed || 1) % 997, chief ? 3 : 2);
-    { const cr = rr(au - 1.25, D - 1.75, au + 1.25, D - 1.7); bag.add('chalk', box(cr[0], Yf + 0.62, cr[1], cr[2], Yf + 0.7, cr[3])); }
+    // the ancestral altar on the back range, against the back wall, facing the court: mud rectangle, rattle staffs, the bell
+    const au = L * 0.22, ar = rr(au - 1.1, D - 1.6, au + 1.1, D - 0.7);
+    homeAltar(ctx, ar, el.front === 'n' ? 'n' : 's', (el.seed || 1) % 997, chief, Yf);
     // the kitchen in the back range: a hearth with pots beside the door, a bed, a stool
     const ku = L * 0.7; { const [x, z] = P(ku, bz + 2.4); hearth(ctx, x, Yf, z, (el.seed || 1) + 9); }
     const [k1, k2] = P(ku + 1.4, bz + 3.2); pots(ctx, k1, Yf, k2, (el.seed || 1) + 10, 4);

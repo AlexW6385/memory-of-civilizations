@@ -228,12 +228,15 @@ function gatehouse(el, ctx) {
     const r = s < 0 ? [cx - W, cz - D, cx - pw, cz] : [cx + pw, cz - D, cx + W, cz];
     bag.add('tuff_red', box(r[0], 0, r[1], r[2], Y, r[3]));
     clayWall(ctx, [r[0] + 0.3, r[1]], [r[0] + 0.3, r[3]], 0.6, Y, T, wm, []); clayWall(ctx, [r[2] - 0.3, r[1]], [r[2] - 0.3, r[3]], 0.6, Y, T, wm, []);
+    wear(ctx, [r[0] + 0.3, r[1]], [r[0] + 0.3, r[3]], 0.6, Y, T, Math.round(r[0])); wear(ctx, [r[2] - 0.3, r[1]], [r[2] - 0.3, r[3]], 0.6, Y, T, Math.round(r[2]) + 3); wear(ctx, [r[0], r[3] - 0.3], [r[2], r[3] - 0.3], 0.6, Y, T, Math.round(r[0]) + 5);
     clayWall(ctx, [r[0], r[1] + 0.3], [r[2], r[1] + 0.3], 0.6, Y, T, wm, []); clayWall(ctx, [r[0], r[3] - 0.3], [r[2], r[3] - 0.3], 0.6, Y, T, wm, [{ at: (r[2] - r[0]) / 2, w: 1.6, h: 2.5 }]);
   }
   bag.add('tuff_red', box(cx - pw, 0, cz - D, cx + pw, 0.12, cz)); col.floor([cx - pw, cz - D, cx + pw, cz], 0.12);
   bag.add('timber', box(cx - W - 0.9, T, cz - D - 0.9, cx + W + 0.9, T + 0.12, cz + 0.9));
   gable(ctx, [cx - W, cz - D, cx + W, cz], T + 0.12, 4.4, SHINGLE, 'x', 0.9);
   for (const s of [-1, 1]) { bird(ctx, cx + s * (W - 0.4), T + 4.5, cz - D / 2, 1.1, s); }
+  // the guards' seats of clay along the passage, their stools and a rack of staves
+  for (const sd of [-1, 1]) { claySeat(ctx, sd < 0 ? [cx - pw + 0.1, cz - 8, cx - pw + 0.65, cz - 4.5] : [cx + pw - 0.65, cz - 8, cx + pw - 0.1, cz - 4.5], 0.12, sd + 3); for (let i = 0; i < 4; i++) bag.add('timber', rod([cx + sd * (pw - 0.25), 0.12, cz - 9.0 + i * 0.12], [cx + sd * (pw - 0.5), 2.0, cz - 9.0 + i * 0.12], 0.03, 5)); }
   // the beam across the mouth and the two posts with plaques
   bag.add('wood_dark', box(cx - pw - 0.3, 3.7, cz - 0.9, cx + pw + 0.3, 4.2, cz - 0.4));
   for (const s of [-1, 1]) { pillar(ctx, cx + s * (pw - 0.2), cz + 0.35, 0.12, 4.0, 0.24); for (const y of [1.3, 2.1, 2.9]) plaque(ctx, cx + s * (pw - 0.2), y, cz + 0.6, 's', Math.floor(rand() * 1e6)); }

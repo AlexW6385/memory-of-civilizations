@@ -138,4 +138,21 @@ export function hung(ctx, x, y, z, along, n, seed, h = 0.9) {
   const rand = rng(seed), [ax, az] = along;
   for (let i = 0; i < n; i++) { const o = (i - (n - 1) / 2) * 0.32, m = pickOf(rand, CLOTHS), hh = h * (0.7 + rand() * 0.5), px = x + ax * o, pz = z + az * o; ctx.bag.add(m, box(px - 0.12 - Math.abs(az) * 0.01, y - hh, pz - 0.12 * Math.abs(ax) - 0.012, px + 0.12 + Math.abs(az) * 0.01, y, pz + 0.12 * Math.abs(ax) + 0.012)); }
 }
+/**
+ * A commoner's ancestral altar (Wikipedia "Benin ancestral altars"): a mud rectangle with a row of rattle staffs (ukhurue) at its back and
+ * a brass bell (eroro) in the middle; a chief's has a wooden commemorative head as well. rect: its plan, back = the side `facing` is not.
+ */
+export function homeAltar(ctx, r, facing, seed, chief = false, y = 0) {
+  const { bag, col } = ctx, rand = rng(seed), dir = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] }[facing], al = [-dir[1], dir[0]];
+  const cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2, wd = Math.abs(al[0]) * (r[2] - r[0]) + Math.abs(al[1]) * (r[3] - r[1]), dp = Math.abs(dir[0]) * (r[2] - r[0]) + Math.abs(dir[1]) * (r[3] - r[1]), T = y + 0.4;
+  bag.add('stucco_red', box(r[0], y, r[1], r[2], T, r[3])); col.rect(r, y, T + 0.05);
+  const n = Math.max(3, Math.round(wd / 0.28));
+  for (let i = 0; i < n; i++) {
+    const o = (i / (n - 1) - 0.5) * (wd - 0.3), x = cx - dir[0] * (dp / 2 - 0.15) + al[0] * o, z = cz - dir[1] * (dp / 2 - 0.15) + al[1] * o, h = 0.9 + rand() * 0.35;
+    bag.add('wood_dark', rod([x, T, z], [x, T + h, z], 0.018, 4)); bag.add('iron', lathe([[0.001, 0], [0.035, 0.02], [0.03, 0.1], [0.001, 0.14]], 5, null, x, T + h, z));
+  }
+  const bx = cx + dir[0] * dp * 0.12, bz = cz + dir[1] * dp * 0.12;
+  bag.add('bronze', lathe([[0.001, 0], [0.1, 0.02], [0.085, 0.16], [0.03, 0.24], [0.001, 0.26]], 8, null, bx, T, bz));
+  if (chief) { const hx = bx + al[0] * wd * 0.28, hz = bz + al[1] * wd * 0.28; bag.add('timber', lathe([[0.001, 0], [0.12, 0], [0.11, 0.3], [0.13, 0.42], [0.001, 0.46]], 8, null, hx, T, hz)); bag.add('chalk', lathe([[0.125, 0.01], [0.125, 0.05], [0.001, 0.05]], 8, null, hx, T, hz)); }
+}
 export { frustum };
