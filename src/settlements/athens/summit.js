@@ -60,19 +60,19 @@ export function summitLife() {
   // on the east steps and in the pteron before the great door: visitors sitting on the second step in the sun, others waiting under the colonnade for the priest, a woman with her jar
   for (const z of [21.2, 23.0, 28.6, 31.4]) { man([53.05, z], E, { pose: 'sit_low', cloth: pick(['cloth_white', 'linen', 'cloth_ochre']) }); L[L.length - 1].y = T + 1.04; if (z > 28) L[L.length - 1].dress = 'robe'; }
   woman([53.05, 25.4], E, { pose: 'sit_low' }); L[L.length - 1].y = T + 1.04; boy([52.95, 26.3], E + 0.3, {}); L[L.length - 1].y = T + 1.04;
-  for (const [x, z, r, o] of [[48.2, 9.5, S, {}], [48.9, 12.4, E, { pose: 'talk' }], [49.4, 13.2, W, { pose: 'talk' }], [48.4, 24.6, N, {}], [49.2, 29.6, S, { carry: 'pot', arms: 'head' }], [47.6, 5.2, E, { pose: 'pray' }]]) { (o.carry ? woman : man)([x, z], r, o); L[L.length - 1].y = T + 1.56; }
+  for (const [x, z, r, o] of [[50.2, 9.5, S, {}], [50.3, 12.4, E, { pose: 'talk' }], [50.9, 13.2, W, { pose: 'talk' }], [50.2, 24.6, N, {}], [50.3, 29.6, S, { carry: 'pot', arms: 'head' }], [50.2, 6.6, E, { pose: 'pray' }]]) { (o.carry ? woman : man)([x, z], r, o); L[L.length - 1].y = T + 1.56; }
   // the bronzes: dedications on their bases, cast figures in the cloak or bare, one hand a little out
   STATUES.forEach(([x, z, r, kind], k) => L.push({ t: 'figure', at: [x, z], y: Y + 1.34, rot: r, seed: seed(), skin: 'bronze', hairMat: 'bronze', hairShade: 1, dress: kind === 'robe' ? 'robe' : 'loincloth', top: kind === 'robe' ? undefined : 'bare', cloth: 'bronze', cloth2: 'bronze', over: kind === 'robe' ? 'cloak' : 'none', hair: 'short', beard: k % 3 === 0 ? 1 : 0, hat: 'none', feet: 'bare', pose: k % 2 ? 'stand' : 'staff', carry: k % 2 ? 'none' : 'staff', len: 1.9 }));
   // in the Parthenon's cella (local x 8..21 of the temple at (18, 18), its floor 2.26 m up): the priestess and a kneeling woman before the basin, men standing in awe, a child held by the hand,
   // the temple warden with his staff by the door, a bench with offerings of cakes and oil
   { const NY = T + 2.26, ox = 18, oz = 18, F = (lx, lz, f) => ({ at: [ox + lx, oz + lz], rot: f });
     const inside = (kind, lx, lz, f, o = {}) => { const q = F(lx, lz, f), fn = { man, woman, boy }[kind]; fn(q.at, q.rot, o); L[L.length - 1].y = NY; };
-    inside('woman', 10.6, -3.9, -Math.PI / 2, { pose: 'pray', cloth: 'cloth_white', cloth2: 'cloth_white', hat: 'veil' }); inside('woman', 9.4, 3.9, -Math.PI / 2 + 0.3, { pose: 'kneel', arms: 'pray', cloth: 'cloth_ochre' });
-    inside('man', 12.6, -1.4, -Math.PI / 2 + 0.2, {}); inside('man', 13.4, 1.0, -Math.PI / 2 - 0.3, { pose: 'talk', cloth: 'cloth_grey' }); inside('man', 14.5, 0.2, Math.PI / 2 - 0.4, { pose: 'talk' });
-    inside('boy', 15.8, 3.2, -Math.PI / 2 + 0.5, {}); inside('woman', 16.6, 3.0, -Math.PI / 2 + 0.2, { cloth: 'cloth_indigo' });
+    inside('woman', 10.6, -3.9, -Math.PI / 2, { pose: 'pray', cloth: 'cloth_white', cloth2: 'cloth_white', hat: 'veil' }); inside('woman', 11.8, 4.7, -Math.PI / 2 + 0.3, { pose: 'kneel', arms: 'pray', cloth: 'cloth_ochre' });
+    inside('man', 13.0, -3.4, -Math.PI / 2 + 0.2, {}); inside('man', 16.2, -3.7, -Math.PI / 2 - 0.3, { pose: 'talk', cloth: 'cloth_grey' }); inside('man', 17.2, -3.2, Math.PI / 2 - 0.4, { pose: 'talk' });
+    inside('boy', 15.2, 3.6, -Math.PI / 2 + 0.5, {}); inside('woman', 16.1, 3.8, -Math.PI / 2 + 0.2, { cloth: 'cloth_indigo' });
     inside('man', 20.3, -4.8, Math.PI, { carry: 'staff', pose: 'staff', len: 1.9, cloth: 'cloth_white' }); inside('man', 19.0, 3.6, Math.PI / 2 + 0.4, { pose: 'sit_low' });
-    for (const [lx, lz, kind, n] of [[8.6, -5.4, 'amphora', 2], [9.6, -5.5, 'water_pot', 3], [8.4, 5.3, 'pithos', 1]]) L.push({ t: 'pot', at: [ox + lx, oz + lz], y: NY, rot: 0, seed: seed(), kind, n });
-    L.push({ t: 'bench', at: [ox + 14.6, oz - 5.3], y: NY, rot: 0, seed: seed(), len: 2.2, mat: 'marble' }); L.push({ t: 'basket', at: [ox + 14.0, oz - 5.2], y: NY + 0.47, rot: 0, seed: seed(), n: 2 });
+    for (const [lx, lz, kind, n] of [[13.4, -5.6, 'amphora', 2], [14.5, -5.7, 'water_pot', 3], [14.0, 5.7, 'pithos', 1]]) L.push({ t: 'pot', at: [ox + lx, oz + lz], y: NY, rot: 0, seed: seed(), kind, n });
+    L.push({ t: 'bench', at: [ox + 18.0, oz - 5.3], y: NY, rot: 0, seed: seed(), len: 2.2, mat: 'marble' }); L.push({ t: 'basket', at: [ox + 17.4, oz - 5.2], y: NY + 0.47, rot: 0, seed: seed(), n: 2 });
     L.push({ t: 'stool', at: [ox + 19.0, oz + 3.5], y: NY, rot: 0, seed: seed() }); }
   // the stelae's readers, two men before the treasurers' lists
   man([60.2, 3.0], W, { pose: 'talk' }); man([60.4, 4.5], W, { pose: 'talk', cloth: 'cloth_grey' });
