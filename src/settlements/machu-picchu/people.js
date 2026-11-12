@@ -6,7 +6,7 @@
 // women's ankle-length wrap (anaku) under a shawl (lliklla), sandals [stated: encyclopedia.com, "America,
 // South: History of Dress"].
 
-import { SITE, TERRACE, KNOLL, PLOUGH, kanchas } from './layout.js';
+import { SITE, TERRACE, KNOLL, PLOUGH, CONDOR, kanchas, fountains } from './layout.js';
 import { ground } from './ground.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -48,8 +48,14 @@ export function people() {
   figures.push(man({ at: [3.4, 103], y: 0, rot: N, pose: 'staff', staffMat: 'wood_dark', len: 1.1 }));
 
   // the weavers in the patios: kneeling, the backstrap loom's near bar at her waist, the far bar tied to a post
-  for (const K of kanchas()) {
-    if (rand() < 0.45) continue;
+  for (const [ki, K] of kanchas().entries()) {
+    // the patio's own people: a man at the gate with a load of firewood or a bundle, a child, a dog asleep (every patio but the weavers' skip is by ki)
+    { const gate = K.at(K.A / 2 + (ki % 2 ? 2.2 : -2.2), 1.5), rotG = facing(K.inward);
+      if (ki % 3 !== 1) figures.push(man({ at: gate, y: 0, rot: rotG, carry: ki % 2 ? 'bundle' : 'basket', h: 1.6 + rand() * 0.1 }));
+      const ch = K.at(K.A / 2 + (ki % 2 ? -2.6 : 2.6), Math.min(K.sv0 + 1.2, K.D - K.bd - 2));
+      figures.push((ki % 2 ? woman : man)({ at: ch, y: 0, rot: rand() * 6.28, h: 0.95 + rand() * 0.15, pose: 'stand', over: 'belt' }));
+      if (ki % 2 === 0) { const dg = K.at(K.A / 2 + 1.9, Math.min(K.sv0 + 0.5, 3)); figures.push({ t: 'animal', kind: 'dog', at: dg, y: 0, rot: rand() * 6.28, seed: seed(), graze: false }); } }
+    if (ki % 5 === 0 || rand() < 0.3) continue;
     const at = K.at(12 + (rand() - 0.5) * 4, 4.5 + rand() * 2), rot = facing(K.inward), h = 1.5;
     figures.push(woman({ at, y: 0, rot, h, pose: 'seiza' }));
     const waist = toPlan(at, 0, rot, h, [0, 0.42, -0.22]), far = [at[0] + K.inward[0] * 2.1, at[1] + K.inward[1] * 2.1];
@@ -78,5 +84,29 @@ export function people() {
   figures.push(woman({ at: [5.4, 137.8], y: ground.height(5.4, 137.8), rot: N, carry: 'bundle', h: 1.48 }));
   for (const [x, z] of [[6.6, 149.5], [6.8, 152.0]]) figures.push({ t: 'animal', kind: 'llama', at: [x, z], y: ground.height(x, z), rot: N + (rand() - 0.5) * 0.2, seed: seed(), graze: false });
   figures.push(man({ at: [6.4, 154.4], y: ground.height(6.4, 154.4), rot: N, pose: 'staff', staffMat: 'wood_dark', len: 1.1, over: 'cape' }));
+  // the women at the fountains, urpu under the jet, on every third of the sixteen
+  for (const [i, f] of fountains().entries()) {
+    if (i % 3 !== 1) continue;
+    const at = [f.c[0] - 0.25, f.c[1] + (i % 2 ? 0.25 : -0.25)];
+    figures.push(woman({ at, y: f.y, rot: facing([1, 0]), carry: 'pot', h: 1.48 + rand() * 0.06 }));
+  }
+  // llamas grazing on the terraces' grass, in twos
+  for (const [t, j] of [[0.6, 4], [0.75, 4], [2.5, 6], [2.62, 6], [-1.0, 8], [-1.12, 8], [3.9, 10], [-2.3, 5], [-2.2, 5], [1.5, 7]]) {
+    const d = TERRACE.w * j - 1.5, at = ring(t, d), y = -TERRACE.h * j;
+    figures.push({ t: 'animal', kind: 'llama', at, y, rot: rand() * 6.28, seed: seed(), graze: true });
+  }
+  // the feast on the Main Plaza: four seated round the jars, a woman serving, two men talking before the kallanka
+  for (const [i, a] of [0.3, 1.35, 3.45, 5.55].entries()) {
+    const r = 3.25, at = [4 + Math.cos(a) * r, -24 + Math.sin(a) * r], y = ground.height(at[0], at[1]);
+    figures.push((i % 2 ? woman : man)({ at, y, rot: facing([-Math.cos(a), -Math.sin(a)]), pose: 'cross' }));
+  }
+  { const at = [5.2, -22.1]; figures.push(woman({ at, y: ground.height(...at), rot: S, carry: 'pot', cloth: 'cloth_red', h: 1.5 })); }
+  for (const [x, z, rot] of [[22.4, -40, W + 3.14], [23.2, -39.2, W], [22.6, -19.5, E + 3.14 + 0.4]]) figures.push(man({ at: [x, z], y: ground.height(x, z), rot, pose: 'talk' }));
+  // before the Temple of the Condor, a priest in white
+  { const at = [CONDOR.c[0] + Math.sin(CONDOR.yaw) * 5.2, CONDOR.c[1] + Math.cos(CONDOR.yaw) * 5.2]; figures.push(man({ at, y: ground.height(...at), rot: facing([-Math.sin(CONDOR.yaw), -Math.cos(CONDOR.yaw)]), cloth: 'cloth_white', cloth2: 'cloth_red', over: 'cape', pose: 'stand' })); }
+  // porters and a string of llamas on the road between the gate and the plaza, kept to its east edge
+  for (const [x, z, o] of [[4.6, 62, { carry: 'bundle' }], [5.4, 47, { carry: 'basket' }], [4.4, 30, { carry: 'bundle', over: 'cape' }]]) figures.push(man({ at: [x, z], y: 0, rot: N + (rand() - 0.5) * 0.4, ...o }));
+  figures.push(woman({ at: [5.0, 38], y: 0, rot: S, carry: 'child' }));
+  for (const z of [54, 55.8, 57.6]) figures.push({ t: 'animal', kind: 'llama', at: [5.2, z], y: 0, rot: N + 0.1, seed: seed(), graze: false });
   return { figures, gear };
 }

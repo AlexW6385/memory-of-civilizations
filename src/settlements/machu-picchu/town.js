@@ -1,5 +1,5 @@
 // The houses of Machu Picchu in their kanchas (docs/settlements/machu-picchu.md §5).
-import { RADIUS, TERRACE, houses, kanchaWalls, outside } from './layout.js';
+import { STORES, RADIUS, TERRACE, SITE, TOWN_WALL, CONDOR, houses, kanchas, kanchaWalls, outside } from './layout.js';
 import { ground } from './ground.js';
 import { people } from './people.js';
 
@@ -8,8 +8,29 @@ export async function town() {
   const all = houses(), plans = [];
   for (let i = 0; i < all.length; i += 50) plans.push(base(`machu-picchu-houses-${i / 50}`, all.slice(i, i + 50).map((h) => {
     const [x0, z0, x1, z1] = h.rect, y = Math.min(ground.height(x0, z0), ground.height(x1, z0), ground.height(x0, z1), ground.height(x1, z1));
-    return { t: 'inca_house', ...h, y };
+    // the houses a little different in height, by their seeds
+    return { t: 'inca_house', ...h, y, h: 2.45 + (h.seed % 9) * 0.07 };
   })));
+  // the strings of maize cobs under the eaves, either side of the door, on about half the houses
+  { const items = [];
+    for (const h of all) {
+      if (h.seed % 2) continue;
+      const [x0, z0, x1, z1] = h.rect, f = h.front, out = { e: [1, 0], w: [-1, 0], n: [0, -1], s: [0, 1] }[f], cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, hy = Math.min(ground.height(x0, z0), ground.height(x1, z1));
+      const L = f === 'n' || f === 's' ? x1 - x0 : z1 - z0; if (L < 4.2) continue;
+      const edge = f === 'e' ? [x1, cz] : f === 'w' ? [x0, cz] : f === 'n' ? [cx, z0] : [cx, z1], t = [-out[1], out[0]], sg = h.seed % 4 === 0 ? 1 : -1;
+      items.push({ at: [edge[0] + out[0] * 0.4 + t[0] * 1.35 * sg, edge[1] + out[1] * 0.4 + t[1] * 1.35 * sg], n: out, y: hy + 2.15, len: 1.0 });
+    }
+    plans.push(base('machu-picchu-cobs', [{ t: 'inca_cobs', items }])); }
+  // the patios' things
+  plans.push(base('machu-picchu-patios', kanchas().map((K, i) => {
+    const r = K.rect, gateE = K.inward[0] < 0, gx = gateE ? r[2] : r[0], gz = r[1] + K.A / 2;
+    return { t: 'inca_patio', o: [gx, gz], d: [K.inward[0], 0], A: K.A, D: K.D, sd: K.sd, sv0: K.sv0, sv1: K.sv1, bd: K.bd, weaver: i % 5 !== 0, y: ground.height(gx + K.inward[0] * 4, gz), seed: 500 + i };
+  })));
+  // the Temple of the Condor's rock and its walls
+  { const [cx, cz] = CONDOR.c, c = Math.cos(CONDOR.yaw), s = Math.sin(CONDOR.yaw), y = ground.height(cx, cz), P = (u, w) => [cx + u * c + w * s, cz - u * s + w * c];
+    const E = [{ t: 'condor_temple', c: CONDOR.c, yaw: CONDOR.yaw, y }];
+    for (const [a, b, h] of [[[-5.6, -2.4], [5.6, -2.4], 2.6], [[-5.6, -2.4], [-5.6, 2.0], 1.9], [[5.6, -2.4], [5.6, 2.0], 1.9]]) E.push({ t: 'stone_block', a: P(...a), b: P(...b), w: 0.38, y0: y - 0.3, y1: y + h });
+    plans.push(base('machu-picchu-condor', E)); }
   // the kanchas' walls, battered, of rough stones, each with its gateway
   const walls = kanchaWalls().map(({ a, b, y1, door, w = 0.35 }) => {
     const y0 = Math.min(ground.height(...a), ground.height(...b)) - 0.3;
@@ -28,6 +49,19 @@ export async function town() {
       P.push([fern ? 'fern' : 'bromeliad', x, z, ground.height(x, z) - (fern ? 0.1 : 0.03), fern ? 0.8 + r() * 0.5 : 0.8 + r() * 0.8, r() * 6.28, Math.floor(r() * 3)]);
     }
     plans.push(base('machu-picchu-cloud-forest', [{ t: 'inca_plants', plants: P }])); }
+  // the storehouses' goods, the Main Temple's offerings, a feast on the plaza
+  { const E = STORES.map((r, i) => ({ t: 'inca_goods', rect: r, y: 0, front: 'n', seed: 300 + i }));
+    E.push({ t: 'inca_offerings', at: [-42, -55.1], y: 0.6 + 0.95, yaw: 0, w: 4.2, seed: 8 });
+    E.push({ t: 'inca_feast', c: [4, -24], y: ground.height(4, -24), seed: 12 });
+    plans.push(base('machu-picchu-goods', E)); }
+  // the flagged road in from the gate to the plaza and the paved gates of the kanchas
+  { const E = [{ t: 'lane', rect: [0.4, 8.5, 3.6, TOWN_WALL.z - 0.4], y: 0.025, mat: 'granite_rough' }];
+    for (const K of kanchas()) {
+      const r = K.rect, gateE = K.inward[0] < 0, lane = gateE ? [r[2] + 0.25, r[1] + 1, r[2] + 1.75, r[3] - 1] : [r[0] - 1.75, r[1] + 1, r[0] - 0.25, r[3] - 1];
+      const ok = [[lane[0], lane[1]], [lane[2], lane[1]], [lane[0], lane[3]], [lane[2], lane[3]], [(lane[0] + lane[2]) / 2, (lane[1] + lane[3]) / 2]].every(([x, z]) => !all.some((h) => x > h.rect[0] - 0.3 && x < h.rect[2] + 0.3 && z > h.rect[1] - 0.3 && z < h.rect[3] + 0.3) && outside(x, z) < -2 && ground.height(x, z) === 0);
+      if (ok) E.push({ t: 'lane', rect: lane, y: 0.025, mat: 'granite_rough' });
+    }
+    plans.push(base('machu-picchu-lanes', E)); }
   for (let i = 0; i < walls.length; i += 120) plans.push(base(`machu-picchu-kancha-walls-${i / 120}`, walls.slice(i, i + 120)));
   return plans;
 }

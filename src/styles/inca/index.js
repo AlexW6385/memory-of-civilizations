@@ -10,6 +10,7 @@ import { box, lathe, fromTriangles, frustum, rod, quad, orientOutward } from '..
 import '../qing/index.js';
 import { rectRoof, beamTris } from '../ming/index.js';
 import { houseInterior, hallInterior, INCA_LIFE } from './life.js';
+import { INCA_DRESS } from './dress.js';
 
 import { patch } from '../maya/household.js';
 import { incaPlants } from './plants.js';
@@ -245,6 +246,25 @@ function incaHouse(el, { bag, col }) {
   // the things of the house: the stove, the grinding stone, the mats, the urpu, pots in the niches
   if (el.doors > 1) hallInterior(bag, col, el, f);
   else if (!el.empty) houseInterior(bag, col, el, walls, ops, f);
+  // outside the door: on some houses a stone bench against the wall beside it, on others a pole ladder of notched trunk leaning to the eaves [inferred: after the benches and ladders of Andean houses today]
+  if (!el.doors && f && el.roof !== 'none') {
+    const r2 = rng((el.seed || 1) * 7 + 3), k = r2(), out = { e: [1, 0], w: [-1, 0], n: [0, -1], s: [0, 1] }[f], tg = [-out[1], out[0]], sgn = r2() < 0.5 ? -1 : 1;
+    const cxh = (x0 + x1) / 2, czh = (z0 + z1) / 2, edge = f === 'e' ? [x1, czh] : f === 'w' ? [x0, czh] : f === 'n' ? [cxh, z0] : [cxh, z1], Lf = f === 'n' || f === 's' ? x1 - x0 : z1 - z0;
+    if (Lf > 4.2 && k < 0.7) {
+      const o = th / 2 + 0.3, px = edge[0] + out[0] * o + tg[0] * 1.35 * sgn, pz = edge[1] + out[1] * o + tg[1] * 1.35 * sgn, hu = 0.5, hw = 0.16, rot = Math.atan2(tg[1], tg[0]);
+      const c0 = Math.cos(rot), s0 = Math.sin(rot);
+      if (k < 0.4) {
+        bag.add('granite_inca', box(px - Math.abs(c0) * hu - Math.abs(s0) * hw, y + 0.3, pz - Math.abs(s0) * hu - Math.abs(c0) * hw, px + Math.abs(c0) * hu + Math.abs(s0) * hw, y + 0.4, pz + Math.abs(s0) * hu + Math.abs(c0) * hw));
+        for (const q of [-1, 1]) bag.add('granite_rough', box(px + tg[0] * 0.36 * q - 0.1, y - 0.03, pz + tg[1] * 0.36 * q - 0.1, px + tg[0] * 0.36 * q + 0.1, y + 0.3, pz + tg[1] * 0.36 * q + 0.1));
+        col.rect([px - Math.abs(c0) * hu - Math.abs(s0) * hw, pz - Math.abs(s0) * hu - Math.abs(c0) * hw, px + Math.abs(c0) * hu + Math.abs(s0) * hw, pz + Math.abs(s0) * hu + Math.abs(c0) * hw], y, y + 0.4);
+      } else {
+        // the ladder: two poles from the ground to the eaves, rungs lashed across
+        const lx = edge[0] + out[0] * (th / 2 + 0.03) + tg[0] * 1.35 * sgn, lz = edge[1] + out[1] * (th / 2 + 0.03) + tg[1] * 1.35 * sgn, top = h - 0.15, lean = 0.5;
+        for (const q of [-1, 1]) bag.add('wood_dark', rod([lx + tg[0] * 0.2 * q + out[0] * lean, y, lz + tg[1] * 0.2 * q + out[1] * lean], [lx + tg[0] * 0.2 * q, y + top, lz + tg[1] * 0.2 * q], 0.035, 5));
+        for (let v = 0.35; v < top; v += 0.35) { const t = v / top, o2 = lean * (1 - t); bag.add('wood_dark', rod([lx - tg[0] * 0.2 + out[0] * o2, y + v, lz - tg[1] * 0.2 + out[1] * o2], [lx + tg[0] * 0.2 + out[0] * o2, y + v, lz + tg[1] * 0.2 + out[1] * o2], 0.02, 4)); }
+      }
+    }
+  }
   // pegs inside under the wall-head, for hangings and the roof's poles [stated: World History Encyclopedia]
   for (const k of ['n', 'e', 's', 'w']) {
     const { F, off } = walls[k], list = [];
@@ -661,6 +681,6 @@ function stoneBlock(el, { bag, col }) {
 
 registerStyle('inca', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, inca_house: incaHouse, inca_temple: incaTemple, torreon, intihuatana, ring_wall: ringWall, flying_stair: flyingStair, inca_canal: incaCanal, inca_fountain: incaFountain, sacred_rock: sacredRock, stone_block: stoneBlock, inca_plants: incaPlants, ...INCA_LIFE },
+  elements: { ...STYLES.qing.elements, inca_house: incaHouse, inca_temple: incaTemple, torreon, intihuatana, ring_wall: ringWall, flying_stair: flyingStair, inca_canal: incaCanal, inca_fountain: incaFountain, sacred_rock: sacredRock, stone_block: stoneBlock, inca_plants: incaPlants, ...INCA_LIFE, ...INCA_DRESS },
   objects: {},
 });

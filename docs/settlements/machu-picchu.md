@@ -124,6 +124,19 @@ Panpipes and the quena flute, drums, the conch (a flute, a reed and a struck sou
 - **People.** Walkers by kind (men in unku and mantle, women in wrap and shawl, porters with loads on the back, mothers with a child, nobles in red with the cap, priests and aclla in white) on the plaza, the lanes between kanchas and the road through the gate; about 26 by day, 3 at night [inferred: numbers]. Dress as 5.2.
 - **Smoke and birds.** The houses' hearths smoke through the thatch at the three meals, the kallanka's too, mist rises from the cloud forest at dawn; swallows over the terraces, condors (the crow form stands in) high over the peaks, sparrows on the plaza and the kallanka's wall-head [inferred].
 
+## 11. Fifth pass: the packed town and its dressing (as built)
+
+- **Density.** The urban sector is "a central complex of closely packed buildings arranged around a central square" [stated: World History Encyclopedia]. Built: after the 20 x 24 m kanchas, a second pass packs smaller kanchas (18.5 x 17 m, the same three-house plan) into every gap, their gates to the nearer lane; 31 kanchas and about 90 houses now stand where 13 and 52 did; the road from the gate to the plaza and the Sacred Rock's lane are kept open. [inferred: sizes, the packing]
+- **Patios.** Each patio carries four or five of: a mat with heaps of chuño (dark) or maize drying on it, a stack of firewood, a cell of rough stones with guinea pigs (cuy) under a reed lid, urpu leaning together, a line of washing between two posts, an open hearth of three stones with a pot, a grindstone on its mat, a stone seat; the weavers' looms keep the middle. [stated: mats, pots, jars, grinding stones — ancient-history-sites; inferred: the arrangement after Andean patios today; cuy kept at the house — general]
+- **Fronts.** Houses vary in height by seed; on half of them strings of maize cobs hang under the eaves beside the door; on most, a stone bench against the wall beside the door or a notched-pole ladder leaning to the eaves. [inferred]
+- **Streets.** The road from the gate to the plaza is flagged with rough granite; every kancha's gate has a flagged strip before it where level. [inferred]
+- **Storehouses.** The five qollqa hold round wicker bins of maize, sacks of tubers, jars, fleeces. [inferred: contents after the qollqa's purpose]
+- **Offerings.** On the Main Temple's altar: llama figurines of gold and silver, spondylus shells, kero cups, a bowl of maize [stated: such offerings — general, Inca religion; inferred: the arrangement].
+- **The Temple of the Condor.** A condor's head carved in a boulder at the front of a flat floor, a ruff of white stone behind, two slabs of rock rising either side like wings, walls behind with cells [stated: Lonely Planet; Tierra de los Andes; imachupicchu (titles of the pages consulted; details inferred)]. Built north-west below the Sacred Plaza (`CONDOR` in layout.js): floor, hooked-beak head, white ruff, two leaning feathered slabs, back and side walls; a priest before it.
+- **The plaza.** A feast: six mats in a ring round three tall urpu of maize beer (aqha) and a small fire, four people seated, a woman serving; two men talking before the kallanka. [inferred]
+- **Terraces and fountains.** Maize on whole sectors of the terraces, the stairs kept clear; ten llamas grazing in twos on the terraces' grass; women with a jar at every third fountain. [inferred]
+- **Life.** Per patio: a man with a load at the gate, a child, a dog asleep in every other; porters and a string of llamas on the road; sparrows in patios and on gate walls.
+
 ## Sources
 
 - [Machu Picchu — Wikipedia (IPFS snapshot)](https://ipfs.ssi.eecc.de/ipns/en.wikipedia-on-ipfs.org/wiki/Machu_Picchu)
@@ -156,4 +169,7 @@ Panpipes and the quena flute, drums, the conch (a flute, a reed and a struck sou
 - [Biocolonizer species are putting the conservation of the granite at Machu Picchu at risk — ScienceDaily](https://www.sciencedaily.com/releases/2019/02/190214100044.htm)
 - [Chasqui — Wikipedia (IPFS mirror)](https://ipfs.ssi.eecc.de/ipns/en.wikipedia-on-ipfs.org/wiki/Chasqui)
 - [Guaman Poma, Nueva corónica y buen gobierno, drawing 138 — Royal Danish Library](https://poma.kb.dk/permalink/2006/poma/352/en/text)
+- [Temple of the Condor — Tierra de los Andes](https://terandes.com/en/blog/machu-picchu/temple-of-the-condor)
+- [The Temple of the Condor — imachupicchu](https://imachupicchu.com/?p=220)
+- [Temple of the Condor — Lonely Planet](https://www.lonelyplanet.com/peru/machu-picchu/attractions/temple-of-the-condor/a/poi-sig/1378638/363402)
 - [Ferns, Heliconia & Bromeliads — Inkaterra Asociación](https://inkaterra.com/inkaterra-asociacion-org/en/research/cloud-forest/ferns-heliconia-bromeliads)
