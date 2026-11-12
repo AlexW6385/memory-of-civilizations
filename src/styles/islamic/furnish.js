@@ -169,4 +169,27 @@ function ambo(el, { bag, col }) {
   col.rect([f.ax - 1.2, f.az - 1.2, f.ax + 1.2, f.az + 1.2], f.y, f.y + 2.5);
 }
 
-Object.assign(STYLES.islamic.elements, { candelabrum, cantharus, ciborium, templon, ambo, cistern_head: cisternHead, minbar, lamp_chain: lampChain, quran_stand: quranStand, censer, mastaba, bracket_lamp: streetBracket });
+/**
+ * wall_run: { segs [[x0, z0, x1, z1, yLow, yHigh, h] …], th, mat } — a field wall of dry stone in short pieces that follow the ground:
+ * each from below its lower end up to h above its higher, blocking the way.
+ */
+function wallRun(el, { bag, col }) {
+  const th = el.th ?? 0.5;
+  for (const [x0, z0, x1, z1, ya, yb, h = 1.1] of el.segs) {
+    const L = Math.hypot(x1 - x0, z1 - z0);
+    if (L < 0.05) continue;
+    const yaw = Math.atan2(x1 - x0, z1 - z0);
+    bag.add(el.mat ?? 'rubble', place(box(-th / 2, ya - 0.5, -0.02, th / 2, yb + h, L + 0.02), x0, 0, z0, yaw));
+    bag.add('limestone', place(box(-th / 2 - 0.04, yb + h, -0.02, th / 2 + 0.04, yb + h + 0.1, L + 0.02), x0, 0, z0, yaw));
+    col.segment([x0, z0], [x1, z1], th, ya - 0.5, yb + h + 0.1);
+  }
+}
+
+/** lane_arch: { x0, x1 (the lane's edges), z (the arch's middle), th (along the lane), y (the lane's ground) } — a room or a buttress carried over a lane on an arch from house to house. */
+function laneArch(el, ctx) {
+  const gap = el.x1 - el.x0, r = gap / 2 - 0.02, spring = el.y + 2.35, top = spring + r + 0.9, th = el.th ?? 3.2;
+  STYLES.islamic.elements.planar_wall({ o: [el.x0, el.z], u: [1, 0], th, u0: 0, u1: gap, y0: el.y - 0.5, y1: top, arches: [{ uc: gap / 2, r, spring }], mat: 'limestone' }, ctx);
+  ctx.bag.add('limestone_carved', box(el.x0, top, el.z - th / 2 - 0.05, el.x1, top + 0.1, el.z + th / 2 + 0.05));
+}
+
+Object.assign(STYLES.islamic.elements, { wall_run: wallRun, lane_arch: laneArch, candelabrum, cantharus, ciborium, templon, ambo, cistern_head: cisternHead, minbar, lamp_chain: lampChain, quran_stand: quranStand, censer, mastaba, bracket_lamp: streetBracket });

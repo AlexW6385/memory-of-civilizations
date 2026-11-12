@@ -6,8 +6,8 @@ import { houseLife, pilgrims } from './life.js';
 const base = (id, elements, style = 'islamic') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-180, 0], facing: 'e' } });
 /** The lots of the open houses: north of the street to the Haram (their doors to the south, toward it), nearest its stair. */
 export function openLots() {
-  return lots().filter((l) => l.rect[3] < -4 && l.rect[3] > -40 && l.rect[2] - l.rect[0] > 12.5 && l.rect[3] - l.rect[1] > 12.5)
-    .sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 + 185, a.rect[3]) - Math.hypot((b.rect[0] + b.rect[2]) / 2 + 185, b.rect[3])).slice(0, 4);
+  return lots().filter((l) => l.rect[3] < -14 && l.rect[3] > -52 && l.rect[2] - l.rect[0] > 12.5 && l.rect[3] - l.rect[1] > 12.5)
+    .sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 + 185, a.rect[3]) - Math.hypot((b.rect[0] + b.rect[2]) / 2 + 185, b.rect[3])).slice(0, 8);
 }
 export async function houses() {
   const all = lots(), open = new Set(openLots()), plans = [];

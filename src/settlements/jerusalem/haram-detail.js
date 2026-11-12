@@ -22,9 +22,13 @@ export function aqsaLayout() {
 }
 
 /** The islamic plan's elements: walks, kerbs, cisterns, mats, minbar, lamps. */
+/** The paved walks' rectangles (planting keeps off them). */
+export const WALKS = [];
 export function haramFurnish() {
+  WALKS.length = 0;
   const E = [], rand = rng(731);
-  const walk = (r, mat = 'flagstone', dy = 0) => E.push({ t: 'floor', rect: r, y: T + 0.02 + dy, mat, th: 0.3 });
+  const walkR = (r) => WALKS.push(r);
+  const walk = (r, mat = 'flagstone', dy = 0) => { if (!dy) walkR(r); E.push({ t: 'floor', rect: r, y: T + 0.02 + dy, mat, th: 0.3 }); };
   const edge = (r) => E.push({ t: 'block', rect: r, y0: T - 0.2, y1: T + 0.05, mat: 'limestone_carved', collide: false });
   const strip = (r, horiz) => { walk(r); if (horiz) { edge([r[0], r[1] - 0.25, r[2], r[1]]); edge([r[0], r[3], r[2], r[3] + 0.25]); } else { edge([r[0] - 0.25, r[1], r[0], r[3]]); edge([r[2], r[1], r[2] + 0.25, r[3]]); } };
   // the walks: west from the platform's west stair to the gate's stair head, round to the gate; south to the Aqsa; east to the Golden Gate

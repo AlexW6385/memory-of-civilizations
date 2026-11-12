@@ -104,7 +104,7 @@ function colonnade(el, ctx) {
   { const [p, q] = T(-0.45, D); bag.add('flagstone', fbox(o, u, 0, L, p, q, y - 0.4, y + 0.18));
     const nx = -u[1], nz = u[0], xs = [ax + nx * p, ax + nx * q, bx + nx * p, bx + nx * q], zs = [az + nz * p, az + nz * q, bz + nz * p, bz + nz * q];
     col.floor([Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)], y + 0.18); }
-  for (let k = 0; k <= n; k++) {
+  for (let k = 0; k <= (el.noEnd ? n - 1 : n); k++) {
     const s = k * step, cx = ax + u[0] * s, cz = az + u[1] * s;
     // a plain shaft of hard limestone, an Attic base and a simple capital
     bag.add('limestone', box(cx - 0.42, y + 0.18, cz - 0.42, cx + 0.42, y + 0.45, cz + 0.42));

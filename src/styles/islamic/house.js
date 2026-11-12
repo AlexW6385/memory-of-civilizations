@@ -8,7 +8,7 @@
 // its main room furnished (mats, cushions and bolsters along the walls, a chest, a tray on its stand, a
 // lamp burning in a niche); its jars, sacks, baskets and people are set by the settlement's life plan.
 
-import { box, lathe } from '../../core/geom.js';
+import { box, lathe, windMat, hangFrom } from '../../core/geom.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const L = 'limestone', CUT = 'limestone_carved';
@@ -63,6 +63,44 @@ function damp(bag, axis, p, sg, u0, u1, yb, yt, cuts = []) {
   }
 }
 
+/**
+ * What stood on the flat roofs: a mat with figs or raisins drying, a washing line, jars, a pigeon cote, a stack of firewood, a bed for the summer nights.
+ * rect: the roof's free ground [x0, z0, x1, z1] (clear of the parapets and the stair), top: its level.
+ */
+function roofLife(ctx, rand, [x0, z0, x1, z1], top) {
+  const { bag, col } = ctx, W = x1 - x0, D = z1 - z0;
+  if (W < 2.2 || D < 2.2) return;
+  const at = () => [x0 + 0.9 + rand() * Math.max(0.1, W - 1.8), z0 + 0.9 + rand() * Math.max(0.1, D - 1.8)];
+  const n = rand() < 0.2 ? 0 : rand() < 0.5 ? 1 : 2;
+  for (let k = 0; k < n; k++) {
+    const kind = Math.floor(rand() * 6), [x, z] = at();
+    if (kind === 0) {                     // a mat of figs or raisins drying
+      bag.add('reed_mat', box(x - 0.9, top + 0.05, z - 0.55, x + 0.9, top + 0.07, z + 0.55));
+      for (let r = 0; r < 4; r++) for (let q = 0; q < 6; q++) bag.add(rand() < 0.5 ? 'cloth_brown' : 'cloth_maroon', box(x - 0.8 + q * 0.28, top + 0.07, z - 0.45 + r * 0.28, x - 0.62 + q * 0.28, top + 0.1, z - 0.3 + r * 0.28));
+    } else if (kind === 1 && W > 3.4) {   // a washing line between two posts, the cloths on it
+      const L = Math.min(3.0, W - 1.4), xa = x0 + 0.7, y = top + 1.5;
+      for (const xp of [xa, xa + L]) bag.add('timber', box(xp - 0.04, top, z - 0.04, xp + 0.04, y + 0.05, z + 0.04));
+      bag.add('sacking', box(xa, y - 0.01, z - 0.008, xa + L, y + 0.01, z + 0.008));
+      for (let q = 0; q < 3; q++) { const c = ['cloth_white', 'cloth_indigo', 'cloth_ochre', 'cloth_white'][Math.floor(rand() * 4)], cx = xa + 0.35 + q * (L - 0.7) / 2.2; bag.add(windMat(c), hangFrom(box(cx - 0.3, y - 0.92, z - 0.012, cx + 0.3, y - 0.02, z + 0.012), y - 0.02)); }
+      col.circle(xa, z, 0.08, top, top + 1.5);
+    } else if (kind === 2) {              // jars, a cluster of three
+      for (let q = 0; q < 3; q++) bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.03], [0.24, 0.3], [0.2, 0.55], [0.1, 0.68], [0.12, 0.73], [0.001, 0.73]], 10, null, x + (q - 1) * 0.5, top, z + (q % 2) * 0.35));
+      col.circle(x, z + 0.17, 0.8, top, top + 0.75);
+    } else if (kind === 3) {              // a pigeon cote: a small plastered tower pierced with holes
+      bag.add('mud_plaster', box(x - 0.55, top, z - 0.45, x + 0.55, top + 1.6, z + 0.45)); bag.add('mud_plaster', box(x - 0.65, top + 1.6, z - 0.55, x + 0.65, top + 1.72, z + 0.55));
+      for (let r = 0; r < 4; r++) for (let q = 0; q < 4; q++) bag.add('opening', box(x - 0.42 + q * 0.28, top + 0.35 + r * 0.3, z - 0.46, x - 0.32 + q * 0.28, top + 0.45 + r * 0.3, z - 0.44));
+      for (let q = 0; q < 4; q++) bag.add('timber', box(x - 0.45 + q * 0.28, top + 0.3 + (q % 2) * 0.3 - 0.03, z - 0.52, x - 0.3 + q * 0.28, top + 0.33 + (q % 2) * 0.3, z - 0.44));
+      col.rect([x - 0.65, z - 0.55, x + 0.65, z + 0.55], top, top + 1.75);
+    } else if (kind === 4) {              // a stack of firewood and brushwood for the winter
+      for (let r = 0; r < 4; r++) for (let q = 0; q < 6 - r; q++) bag.add('timber', box(x - 0.8 + r * 0.14 + q * 0.27, top + r * 0.14, z - 0.3, x - 0.8 + r * 0.14 + q * 0.27 + 0.2, top + r * 0.14 + 0.13, z + 0.3));
+      col.rect([x - 0.8, z - 0.3, x + 0.8, z + 0.3], top, top + 0.6);
+    } else {                              // a bed for the summer nights: a mattress and a folded quilt
+      bag.add('cedar', box(x - 0.5, top + 0.1, z - 0.95, x + 0.5, top + 0.15, z + 0.95)); for (const sx of [-0.45, 0.45]) for (const sz of [-0.9, 0.9]) bag.add('cedar', box(x + sx - 0.03, top, z + sz - 0.03, x + sx + 0.03, top + 0.1, z + sz + 0.03));
+      bag.add(rand() < 0.5 ? 'cloth_indigo' : 'cloth_red', box(x - 0.46, top + 0.15, z - 0.9, x + 0.46, top + 0.25, z + 0.9)); bag.add('cloth_white', box(x - 0.4, top + 0.25, z - 0.9, x + 0.4, top + 0.33, z - 0.55));
+    }
+  }
+}
+
 /** The plan of an open house (for the life plan that furnishes it): its court, main room, store, door. */
 export function openLayout(el) {
   const [x0, z0, x1, z1] = el.rect, W = x1 - x0, D = z1 - z0, T = 0.65, F = Math.max(el.y ?? 0, el.y1 ?? el.y ?? 0) + 0.05;
@@ -107,6 +145,22 @@ export function levantHouse(el, ctx) {
   const drop = F - (el.ys ?? el.y ?? F), nS = Math.min(3, Math.ceil((drop - 0.08) / 0.18)), rS = nS > 0 ? drop / (nS + 1) : 0;
   for (let k = 1; k <= nS; k++) bag.add(CUT, box(dc - 0.75, yb, z1 + 0.32 + (k - 1) * 0.2, dc + 0.75, F - k * rS, z1 + 0.32 + k * 0.2));
   if (nS > 0) col.ramp([dc - 0.75, z1, dc + 0.75, z1 + 0.32 + nS * 0.2], el.ys ?? F, F, 'n');
+  // the street front: a stone bench (mastaba) by the door where the lane is wide enough, a bracket lamp on the jamb
+  if (!open) {
+    if ((el.gs ?? 0) > 3.4 && rand() < 0.7) {
+      const side = dc - dw / 2 - 2.6 > x0 + 0.6 ? -1 : 1, bx = side < 0 ? dc - dw / 2 - 0.6 : dc + dw / 2 + 0.6;
+      if (bx - 1.0 > x0 + 0.4 && bx + 1.0 < x1 - 0.4 && (side < 0 ? bx - 1.0 > xc0 - 0.1 || true : true)) {
+        const bz1 = z1 + 0.5, ys = el.ys ?? F, by = Math.max(ys, F - 0.25);
+        bag.add(CUT, box(bx - 1.0, by - 0.1, z1 + 0.02, bx + 1.0, by + 0.45, bz1)); bag.add(L, box(bx - 1.04, by + 0.45, z1 + 0.02, bx + 1.04, by + 0.5, bz1 + 0.04));
+        col.rect([bx - 1.04, z1, bx + 1.04, bz1 + 0.04], by - 0.1, by + 0.5);
+      }
+    }
+    if (rand() < 0.6) {
+      const lx = dc + dw / 2 + 0.34, ly = F + 2.45;
+      bag.add('iron', box(lx - 0.012, ly, z1, lx + 0.012, ly + 0.03, z1 + 0.5)); bag.add('iron', lathe([[0.001, 0], [0.08, 0], [0.1, 0.03], [0.001, 0.03]], 8, null, lx, ly - 0.32, z1 + 0.48));
+      bag.add('lamp_glass', lathe([[0.001, 0], [0.055, 0.01], [0.08, 0.09], [0.06, 0.18], [0.001, 0.18]], 8, null, lx, ly - 0.29, z1 + 0.48));
+    }
+  }
   // ── the faces: doors and windows onto the court, small windows to the streets, spouts, the damp ──
   const nDoor = (xc0 + xc1) / 2 + (open ? 0 : (rand() - 0.5) * 1.2);
   if (!open) {
@@ -115,7 +169,19 @@ export function levantHouse(el, ctx) {
     if (two) for (const s of [-1.6, 0, 1.6]) windowAt(bag, 'z', zc0, 1, nDoor + s, F + 5.0, 0.5, 0.9);
     const wc = zc0 + 1.0;
     doorway(bag, 'x', xc0, 1, wc, 0.9, F, 2.0);
-    if (hasE) doorway(bag, 'x', xc1, -1, wc + (rand() - 0.5), 0.9, F, 2.0);
+    if (hasE) doorway(bag, 'x', xc1, -1, wc + 0.3 + rand() * 0.5, 0.9, F, 2.0);
+  }
+  // the roofs: what stood on them; the kitchen's vent
+  if (!open) {
+    const rr = rng((el.seed || 1) + 5);
+    roofLife(ctx, rr, [N[0] + 0.7, N[1] + 0.7, N[2] - 0.7, N[3] - 0.7], hN);
+    roofLife(ctx, rr, [Wr[0] + 0.7, Wr[1] + 0.7, Wr[2] - 1.9, Wr[3] - 0.7], hW);
+    if (hasE) {
+      roofLife(ctx, rr, [Er[0] + 0.7, Er[1] + 0.7, Er[2] - 2.6, Er[3] - 2.8], hE);
+      const vx = x1 - 2.2, vz = z1 - 2.0;
+      bag.add('mud_plaster', box(vx - 0.4, hE, vz - 0.4, vx + 0.4, hE + 0.95, vz + 0.4)); bag.add('pottery_dark', box(vx - 0.46, hE + 0.95, vz - 0.46, vx + 0.46, hE + 1.03, vz + 0.46)); bag.add('opening', box(vx - 0.2, hE + 1.03, vz - 0.2, vx + 0.2, hE + 1.035, vz + 0.2));
+      col.rect([vx - 0.46, vz - 0.46, vx + 0.46, vz + 0.46], hE, hE + 1.05);
+    }
   }
   // to the streets: high slits in the outer walls
   for (const [axis, p, sg, a, b, top] of [['z', z0, -1, x0, x1, hN], ['x', x0, -1, z0, z1, hW], ['x', x1, 1, z0, z1, hasE ? hE : hS]]) {
