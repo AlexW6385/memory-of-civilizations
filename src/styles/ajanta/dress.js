@@ -3,7 +3,7 @@
 // painters (blocks and an unfinished pillar on rollers, a lime pit, the colour shed with its pigment pots), the washing
 // place on the river bank (stones, cloths spread to dry, a coracle, a fish trap) and the growth on the cliff (creepers,
 // shrubs on the tiers, fallen boulders, a bees' comb under an overhang).
-import { box, lathe, rod, frustum, disc } from '../../core/geom.js';
+import { box, lathe, rod, frustum, disc, clothBox, addCloth } from '../../core/geom.js';
 import { XF, ZW, FLOOR, LEDGE, RIVER, riverX, rng } from '../../settlements/ajanta/layout.js';
 
 const oil = (bag, x, y, z, h = 0.7) => {
@@ -37,6 +37,14 @@ export function ledge(el, { bag, col }) {
   { const cx0 = x0 + 2.4, cz0 = 53.2, cx1 = x0 + 5.4, cz1 = 56.4;
     bag.add('sandstone_carved', box(cx0, y, cz0, cx1, y + 0.55, cz0 + 0.3)); bag.add('sandstone_carved', box(cx0, y, cz1 - 0.3, cx1, y + 0.55, cz1)); bag.add('sandstone_carved', box(cx0, y, cz0, cx0 + 0.3, y + 0.55, cz1)); bag.add('sandstone_carved', box(cx1 - 0.3, y, cz0, cx1, y + 0.55, cz1));
     bag.add('water', box(cx0 + 0.3, y + 0.38, cz0 + 0.3, cx1 - 0.3, y + 0.4, cz1 - 0.3)); col.rect([cx0, cz0, cx1, cz1], y, y + 0.55); }
+  // pennants (dhvaja) on poles at the lip, flying over the drop: ochre, red, white and indigo cloth, a bronze finial
+  { const CL = ['cloth_ochre', 'cloth_red', 'cloth_white', 'cloth_indigo']; let i = 0;
+    for (const z of [-39.5, -22.5, -12.5, 4.5, 15.5, 27.0, 36.0, 47.5]) {
+      const px = kx + 0.2;
+      bag.add('timber', rod([px, y, z], [px, y + 5.2, z], 0.045, 5)); col.circle(px, z, 0.07, y, y + 5.2);
+      bag.add('bronze', lathe([[0.001, 0], [0.06, 0.04], [0.04, 0.12], [0.001, 0.22]], 6, null, px, y + 5.2, z));
+      addCloth(bag, CL[i++ % 4], clothBox(px + 0.05, y + 3.9, z - 0.02, px + 1.7, y + 4.9, z + 0.02), y + 4.9);
+    } }
   // marigold garlands and offerings of rice laid on the benches' ends
   for (const z of [-45, 7.5, 31]) for (let k = 0; k < 6; k++) bag.add(k % 2 ? 'paint_ochre' : 'cloth_red', lathe([[0.001, 0], [0.09, 0.01], [0.07, 0.06], [0.001, 0.08]], 6, null, x0 + 0.28 + (k % 3) * 0.08, y + 0.42, z - 0.35 + k * 0.14));
 }
