@@ -200,6 +200,9 @@ function worksPlan() {
     { t: 'ok_casing', at: stacks },
     { t: 'ok_tools', at: tools },
     { t: 'ok_shade', rect: [204.4, -88, 210.6, -83.2], h: 2.3 },
+    // the gangs' and masons' belongings about the stacks and the road: water jars, bread baskets, sherds, a bench in the shade, the firewood for the noon meal
+    { t: 'ok_lane', items: [[203.6, -86.2, 'bench', 0, 11], [212.4, -72.6, 'pots', 0.3, 12], [199.2, -72.4, 'basket', 0, 13], [219.8, -73.6, 'pots', 0, 14], [208.6, -57.6, 'pots', 0, 15], [213, -52.4, 'basket', 0.4, 16], [203.4, -51.4, 'sherds', 0, 17],
+      [218.2, -52.8, 'ash', 0, 18], [221.6, -55.2, 'wood', 0, 19], [194.6, -55.6, 'pots', 0, 20], [190.4, -73.4, 'basket', 0, 21], [228.4, -68.6, 'pots', 0, 22], [224.6, -58.8, 'sherds', 0, 23], [200.4, -82.4, 'wood', 0, 24]] },
   ]);
 }
 
