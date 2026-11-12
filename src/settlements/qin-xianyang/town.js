@@ -138,6 +138,7 @@ export async function town() {
   plans.push(base('qin-shops', shopLots().map((l) => ({ t: 'qin_shop', ...l }))));
   plans.push(base('qin-market', [{ t: 'qin_market' }, ...Q]));
   plans.push({ ...base('qin-stalls', S), style: 'life' });
+  plans.push({ ...base('qin-army', [{ t: 'qin_army' }]), style: 'life', nocollide: true });          // Pit 1's soldiers: drawn each within its own reach
   plans.push({ ...base('qin-people', people()), style: 'life' });
   plans.push({ ...base('qin-carts', carts()), style: 'life' });
   const LOTS = lots(), K = { row: 'qin_row_house', court: 'qin_court_house', official: 'qin_official', granary: 'qin_granary', garden: 'qin_garden', workshop: 'qin_workshop' };

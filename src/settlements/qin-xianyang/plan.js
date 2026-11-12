@@ -5,7 +5,8 @@ import { PIT, RAMP, GALLERY, CORR, ROOF, TERRACE, STAIR, HALL, QUE, FORECOURT, c
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 
 // ── Pit 1 ──
-const PE = [{ t: 'qin_pit' }, { t: 'qin_army' }];
+// (the army's figures are the plan 'qin-army' of town.js, drawn by the street life's rules; here only their colliders)
+const PE = [{ t: 'qin_pit' }, { t: 'qin_army', colOnly: true }];
 const zc = rampZ(1);
 const pitWalks = [[[PIT.x1 + RAMP.len + 8, zc], [PIT.x1 + RAMP.len, zc], [PIT.x1 + 10, zc], [PIT.x1 - 4, zc], [GALLERY[0] + 4, zc], [CORR.x1 - 8, zc], [60, zc], [10, zc]]];
 pitWalks[0].y0 = 0;
