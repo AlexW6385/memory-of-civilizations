@@ -1,7 +1,7 @@
 # Marinid Fez (Fez el-Bali), about 1350 — dossier
 
 Settlement id: `fez` · Style: `marinid` (new: `src/styles/marinid/`) · Region: Maghreb (northern Morocco) · Code: `src/settlements/fez/` · Class Medium, radius 330 m
-Status: L2–L3 in the Bou Inania madrasa (§4.1), L2 in the Qarawiyyin (§4.2), the Chouara tannery (§4.4), the souks (§4.3) and the funduq; L1–L2 in the courtyard houses (§5), the river, the walls and the ground. Recorded for later: the upper-floor student stair and cells of the Bou Inania, the Al-Attarine madrasa, the water clock's mechanism, the Qarawiyyin's library and ablution hall.
+Status: L2–L3 in the Bou Inania madrasa (§4.1, now with its upper-floor stairs and students' cells), L2 in the Qarawiyyin (§4.2), the Chouara tannery (§4.4), the souks (§4.3, enterable cells) and the funduq; L2 in the courtyard houses (§5), lanes with shopfronts, sabats and wash-places, the river, the walls and the ground. Recorded for later: the Al-Attarine madrasa, the water clock's mechanism, the Qarawiyyin's library and ablution hall, tile-level dukkan interiors, boats.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -86,3 +86,14 @@ Fassi men in djellabas and turbans, scholars and students in white, merchants, a
 - Animals: swifts and martins over the roofs and the minarets, jackdaws over the tannery, sparrows in the courts, an egret on the quay [inferred]. Storks on the roofs and hide-drying are not in our sources [inferred, not built as fact].
 - Smoke: kitchen smoke at the three meals, the tannery's hearths, coppersmiths' charcoal, incense at the Qarawiyyin [inferred].
 - Sound: donkeys, the call to prayer, the water of the fountains, coppersmiths' hammering [inferred].
+
+
+## 9. Deepening pass (added)
+
+- Bou Inania upper floor: two sandstone stairs at the NW and NE corners of the court lead to a gallery and 13 furnished cells (mat, chest, rahle, cushion, lamp) [stated: stairs and cells of a madrasa of this kind; exact corner placement inferred].
+- Dukkans: raised cells with lintel, jambs, striped awning, goods by trade (cloth, brass, leather, books, pottery, dates, bread), keeper on a cushion [stated: Fez shopfront type]; bakers' oven smoke over bread shops [inferred].
+- Derb sabats (rooms bridging lanes) on every third dead-end lane [stated: typical of the medina]; gutter strips and stone courses in lanes [inferred].
+- Courts: bitter-orange trees, pot rows, side rooms with divans in the open houses; weathered fronts, beam ends, shutters, spouts, roof-top jars and washing [inferred].
+- Street life: keepers, customers, benches, donkeys with muleteers, cats, fountain users, mat sellers, quay wash-place women, anglers, ducks [inferred].
+- Seffarine square: coppersmiths' anvils, stumps and braziers [stated]. Qarawiyyin: rahles, water jars and book cupboards in the gallery [inferred].
+- Known: walk-check routes bou-inania#1 and qarawiyyin#1 fail at a 0.5 m step in the street; identical before this pass.

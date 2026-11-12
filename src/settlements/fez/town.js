@@ -2,7 +2,9 @@
 // the funduq, the quarter mosque, the tannery, the river between its quays with its bridges, the wall and its gates, the wall fountains; and the people.
 import { lodTiles } from '../lod.js';
 import { RADIUS, WALL_R, RIVER, SITES, SOUKS, BRIDGES, lots, fabric, fountains, riverZ, ground0, quayY, siteY, height } from './layout.js';
-import { lifePlan } from './life.js';
+import { lifePlans } from './life.js';
+import { houseList, laneElements } from './houses.js';
+import { streetPlans } from './street.js';
 
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-132.5, -30], facing: 's' } });
 
@@ -37,18 +39,12 @@ export function civic() {
   return E;
 }
 export async function town() {
-  const F = fabric(), L = lots(), houses = [];
-  // the houses nearest the madrasa's door are open and furnished (a riad with its salon): wide, deep and clear of the lanes
-  const near = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 + 100, (l.rect[1] + l.rect[3]) / 2 + 40);
-  const cand = L.filter((l) => l.w >= 11 && l.d >= 15 && (l.door === 's' || l.door === 'n')).sort((a, b) => near(a) - near(b)).slice(0, 3);
-  for (const l of L) {
-    const open = cand.includes(l), rich = open || (l.seed % 9 === 0 && Math.hypot(l.rect[0], l.rect[1]) < 200);
-    houses.push({ t: 'fez_house', rect: l.rect, y: l.y, foot: l.foot, door: l.door, storeys: l.storeys, seed: l.seed, open, rich });
-  }
+  const F = fabric(), houses = [...houseList(), ...laneElements()];
   for (const f of F.fills) if (f.rect[2] - f.rect[0] > 0.8 && f.rect[3] - f.rect[1] > 0.8) houses.push({ t: 'fez_mass', rect: f.rect, y: f.y, foot: f.y - 1.0, storeys: 2, seed: Math.round(f.rect[0] * 7 + f.rect[1]) });
   const plans = lodTiles('fez-houses', 'marinid', houses, { R: RADIUS, near: 220, entrance: { at: [-132.5, -30], facing: 's' } });
   plans.push(base('fez-civic', 'marinid', civic()));
-  plans.push(lifePlan());
+  plans.push(...lifePlans());
+  plans.push(...streetPlans());
   return plans;
 }
 void quayY;

@@ -74,5 +74,9 @@ export function qarawiyyin(el, { bag, col, lights }) {
   for (const z of [hallZ0 + 8, hallZ0 + 20, z1 - 6]) F.mosqueLamp(bag, lights, cx, y + 3.6, z, y + 6.5, { k: 1.8, glow: 3, reach: 12 });
   for (let k = 0; k < 6; k++) F.mosqueLamp(bag, lights, uX(2 + k * 2) + nw / 2, y + 3.6, z0 + 14 + rand() * 30, y + 6.5, { k: 1, glow: 2, reach: 8 });
   for (let k = 0; k < 12; k++) F.prayerRug(bag, uX(1 + (k % 12)) + nw / 2 - 0.4, y + 0.025, z1 - 4, 0, 'persian');
-  void rod; void lathe; void rand;
+  // ——— the teaching: rahles (folding Quran stands) with cushions where the circles of students sit along the naves and the sahn's gallery, jars of drinking water at the piers, cupboards of books against the west wall
+  for (let k = 0; k < 14; k++) { const x = uX(1 + (k % 13)) + nw / 2 + 0.6 * ((k % 3) - 1), z = hallZ0 + 3 + Math.floor(k / 7) * 9 + (k % 4) * 1.3; F.rahle(bag, x, y + 0.03, z, (k % 5) * 0.3 - 0.6); F.cushion(bag, x + 0.1, y + 0.03, z + 0.7, 0.6, 0.6, 0.1, 0.2, ['cloth_green', 'cloth_indigo', 'cloth_red', 'cloth_ochre'][k % 4]); }
+  for (let k = 0; k < 8; k++) F.waterJar(bag, gal[0] + 1.4 + k * 3.2, y, gal[3] - 0.7, 1.0);
+  for (let k = 0; k < 4; k++) { const z = hallZ0 + 4 + k * 4.5; bag.add('cedar', box(x0 + t + 0.08, y + 0.05, z, x0 + t + 0.6, y + 2.2, z + 2.6)); for (let j = 0; j < 4; j++) bag.add('timber', box(x0 + t + 0.1, y + 0.5 + j * 0.5, z + 0.1, x0 + t + 0.5, y + 0.53 + j * 0.5, z + 2.5)); col.rect([x0 + t + 0.08, z, x0 + t + 0.6, z + 2.6], y, y + 2.2); }
+  void rod; void lathe;
 }

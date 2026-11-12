@@ -13,13 +13,20 @@ const flights = [
   { kind: 'crow', n: 6, loop: { c: [mid(SITES.tannery)[0], mid(SITES.tannery)[1]], a: [50, 35], rot: 0.4 }, y: [16, 30], speed: 8 },     // jackdaws over the tannery
   { kind: 'crow', n: 5, loop: { c: [-120, -150], a: [110, 60], rot: -0.3 }, y: [34, 58], speed: 8 },
 ];
+flights.push(
+  { kind: 'swallow', n: 5, lane: { a: [-290, -21], b: [40, -21] }, y: [7, 14], speed: 10 },                                              // swifts down the Talaa Kebira's slot of sky
+  { kind: 'swallow', n: 4, lane: { a: [-290, 22], b: [90, 22] }, y: [7, 13], speed: 10 },
+  { kind: 'swallow', n: 4, loop: { c: [-60, -40], a: [40, 24], rot: 0.2 }, y: [18, 30], speed: 10 },
+  { kind: 'crow', n: 4, loop: { c: [100, 60], a: [90, 40], rot: -0.2 }, y: [28, 46], speed: 8 },
+);
 const perches = [];
 const sp = (x, z, y = ground0(x, z) + 0.05, rot = 0.3 + (Math.abs(x) * 7 % 3)) => perches.push({ kind: 'sparrow', x, z, y, rot, range: [1.4, 1.2] });
 const b = SITES.bou, q = SITES.qar, yb = siteY('bou') + 0.05, yq = siteY('qar') + 0.05;
 for (const [x, z] of [[-139, -3], [-126, 6], [-135, 9], [-128, -5]]) sp(x, z, yb);
 for (const [x, z] of [[q[0] + 40, q[1] + 12], [q[0] + 30, q[1] + 18], [q[0] + 44, q[1] + 8]]) sp(x, z, yq);
-for (let x = -250; x < 250; x += 37) sp(x + 3, -21 + (x % 2 ? 1.1 : -1.1));
+for (let x = -280; x < 280; x += 17) sp(x + 1.3, -21 + (x % 3 ? 1.5 : -1.5)); for (let x = -250; x < 250; x += 37) sp(x + 3, -21 + (x % 2 ? 1.1 : -1.1));
 for (let x = -200; x < 240; x += 53) { const z = riverZ(x) - 5.2; sp(x, z); }
+for (let x = -270; x < 270; x += 23) { const z = riverZ(x) + (x % 2 ? 4.3 : -4.3); sp(x, z); }
 { const x = 190, z = riverZ(x) - 4.4; perches.push({ kind: 'egret', x, z, y: ground0(x, z), rot: Math.PI / 2, stay: [60, 200], gone: [60, 160], alert: 10 }); }
 void RADIUS; void b;
 export default { fish, flights, perches };

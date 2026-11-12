@@ -3,7 +3,7 @@
 // basin, galleries of zellij-clad piers and cedar screens, the two classrooms, the prayer hall to the south behind a channel
 // with two small bridges, the students' cells above under a carved cedar canopy, the minaret at the north-west corner.
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
-import { face, holedWall, archHead, dbl, dado, stucco, canopy, screen, door, basin, gable, rng, q4, zellij } from './kit.js';
+import { face, holedWall, archHead, dbl, dado, dadoFlat, stucco, canopy, screen, door, basin, gable, rng, q4, zellij } from './kit.js';
 import { minaret } from './minaret.js';
 import * as F from '../mughal/furnish.js';
 
@@ -49,7 +49,7 @@ export function bouInania(el, { bag, col, lights }) {
   for (const r of [[x0, z0, x1, z0 + 0.35], [x0, z1 - 0.35, x1, z1], [x0, z0, x0 + 0.35, z1], [x1 - 0.35, z0, x1, z1]]) bag.add('plaster_white', box(r[0], y + HT + 0.5, r[1], r[2], y + HT + 1.1, r[3]));
   // ——— the vestibule: walls either side of the passage from the portal to the court, a cedar ceiling carved in cells, a bent floor of tile
   { const vx = px, vz1 = zN; const w1 = [vx[0] - 0.4, z0 + t, vx[0], vz1], w2 = [vx[1], z0 + t, vx[1] + 0.4, vz1];
-    for (const w of [w1, w2]) { bag.add('plaster_white', box(w[0], y, w[1], w[2], y + H1, w[3])); col.rect(w, y, H1 + y); }
+    for (const w of [w1, w2]) { bag.add('plaster_white', box(w[0], y, w[1], w[2], y + H1 - 0.15, w[3])); col.rect(w, y, H1 + y); }
     bag.add('tile_cream', box(vx[0], y - 0.4, z0, vx[1], y, vz1)); col.floor([vx[0], z0, vx[1], vz1], y);
     const yc = y + 3.6;
     bag.add('cedar', box(vx[0], yc, z0 + t, vx[1], yc + 0.15, vz1));
@@ -58,7 +58,7 @@ export function bouInania(el, { bag, col, lights }) {
     // the dado and stucco of the passage
     for (const [at, n, a, b] of [[vx[0], 1, z0 + t, vz1], [vx[1], -1, z0 + t, vz1]]) { const f = face('x', at, n); dado(bag, f, a, b, y, 1.6); stucco(bag, f, a, b, y + 2.05, yc, [], { cornice: false }); }
     // the way on to the court: through the north range's south wall at the gallery
-    bag.add('plaster_white', box(w1[0], y + H1, w1[1], w2[2], y + HT, w1[3]));
+    // (over the passage the upper floor is the cells' floor: built with the cells below)
   }
   // ——— the north range: solid ground storey either side of the passage (stores, ablutions), its south face the gallery's wall
   { const f = face('z', zN, -1);
@@ -117,7 +117,14 @@ export function bouInania(el, { bag, col, lights }) {
   for (const r of [[gx0, zN, gx1, zN + 0.0], ]) void r;
   // ——— the upper floor: a platform over the galleries, its cedar balustrade, the cells' doors and lattice windows
   const yu = y + H1;
-  for (const r of [[gx0, zN, gx1, cz0], [gx0, cz0, cw0, cz1], [cw1, cz0, gx1, cz1]]) { bag.add('cedar', box(r[0], yu - 0.7, r[1], r[2], yu, r[3])); col.floor(r, yu); }
+  const STX = 6.6, STZ = [zN + 0.05, zN + 1.25];
+  for (const r of [[gx0 + STX, zN, gx1 - STX, cz0], [gx0, zN + 1.3, gx0 + STX, cz0], [gx1 - STX, zN + 1.3, gx1, cz0], [gx0, cz0, cw0, cz1], [cw1, cz0, gx1, cz1]]) { bag.add('cedar', box(r[0], yu - 0.7, r[1], r[2], yu, r[3])); col.floor(r, yu); }
+  // the two stairs at the north corners (the students' way up): stone flights along the north wall, rising inward, a rail along their open side
+  for (const [xa, xb, dir] of [[gx0, gx0 + STX, 'e'], [gx1, gx1 - STX, 'w']]) {
+    const n = 22, lo = Math.min(xa, xb);
+    for (let i = 0; i < n; i++) { const a0 = xa + (xb - xa) * i / n, a1 = xa + (xb - xa) * (i + 1) / n; bag.add('sandstone', box(Math.min(a0, a1), y - 0.2, STZ[0], Math.max(a0, a1), y + (yu - y) * (i + 1) / n, STZ[1])); }
+    col.ramp([lo, STZ[0], lo + STX, STZ[1]], y, yu, dir);
+  }
   for (let z = zN + 0.4; z < cz1; z += 0.9) { for (const x of [gx0 + 0.02, gx1 - 0.02]) void x; }
   // balustrade at the court edge: spindles between posts, a handrail
   const bal = (a, b, fixed, alongX) => { const L = Math.hypot(b - a); void L; const n = Math.floor((b - a) / 0.14);
@@ -125,15 +132,44 @@ export function bouInania(el, { bag, col, lights }) {
     bag.add('cedar', alongX ? box(a, yu + 0.97, fixed - 0.05, b, yu + 1.05, fixed + 0.05) : box(fixed - 0.05, yu + 0.97, a, fixed + 0.05, yu + 1.05, b)); bag.add('cedar', alongX ? box(a, yu, fixed - 0.04, b, yu + 0.1, fixed + 0.04) : box(fixed - 0.04, yu, a, fixed + 0.04, yu + 0.1, b));
     col.segment(alongX ? [a, fixed] : [fixed, a], alongX ? [b, fixed] : [fixed, b], 0.1, yu, yu + 1.0); };
   bal(cw0, cw1, cz0 - 0.05, true); bal(cz0, cz1, cw0 - 0.05, false); bal(cz0, cz1, cw1 + 0.05, false);
+  bal(gx0, gx0 + STX, zN + 1.32, true); bal(gx1 - STX, gx1, zN + 1.32, true);
   // the carved cedar between the pillars below: screens in every other bay on the north and the sides, open bays beside the middle ones
   for (let i = 0; i < nx; i++) { if (i % 2 === 0 && Math.abs((xs[i] + xs[i + 1]) / 2 - cx) > 1.5) { const f = face('z', cz0 - 0.3, -1); screen(bag, col, f, xs[i] + 0.35, xs[i + 1] - 0.35, y + 0.4, y + 3.2, 0, { gap: 0.15 }); } }
+  // which doors open on a cell: the north range's three middle ones (the stairs take the ends), the side ranges' all but the corner ones
+  const cellDoor = (alongX, at, u) => (alongX ? [8.0, 11.2, 14.4].some((o) => Math.abs(u - (gx0 + o)) < 0.05) : u > zN + 2.5);
   // the upper storey's walls on the north and sides: stucco, doors to the cells, lattice windows
   for (const [at, n, a, b, alongX] of [[zN, -1, gx0, gx1, true], [gx0, 1, zN, cz1, false], [gx1, -1, zN, cz1, false]]) {
     const f = face(alongX ? 'z' : 'x', at, n), holes = [];
     for (let u = a + 1.6; u < b - 1.0; u += 3.2) holes.push([u - 0.55, u + 0.55, yu + 0.1, yu + 2.5]);
     holedWall(bag, col, 'plaster_white', alongX ? [a, at - 0.5, b, at] : n > 0 ? [at - 0.5, a, at, b] : [at, a, at + 0.5, b], yu, yu + H2, holes, alongX);
     stucco(bag, f, a, b, yu, yu + H2 - 0.05, holes, { cell: 0.4 });
-    for (const h of holes) { const u = (h[0] + h[1]) / 2; door(bag, f, h[0], h[1], yu + 0.1, 2.3, 0.04); const g = f.R(0.1, 0.17, u - 0.55, u + 0.55); void g; const w = f.R(0.03, 0.08, u - 0.5, u + 0.5); bag.add('lattice', box(w[0], yu + 2.55, w[1], w[2], yu + 3.2, w[3])); }
+    for (const h of holes) { const u = (h[0] + h[1]) / 2; if (!cellDoor(alongX, at, u)) door(bag, f, h[0], h[1], yu + 0.1, 2.3, 0.04); else { const lf = f.R(-0.9, -0.03, h[0], h[0] + 0.05); bag.add('cedar', box(lf[0], yu + 0.12, lf[1], lf[2], yu + 2.4, lf[3])); } const g = f.R(0.1, 0.17, u - 0.55, u + 0.55); void g; const w = f.R(0.03, 0.08, u - 0.5, u + 0.5); bag.add('lattice', box(w[0], yu + 2.55, w[1], w[2], yu + 3.2, w[3])); }
+  }
+  // ——— the students' cells: a floor over the north range and the side ranges, partitions every 3.2 m, a mat, a book-stand, a chest, a lamp
+  { const yf = yu - 0.7, mk = (name, rects) => { void name; for (const r of rects) { bag.add('cedar', box(r[0], yf, r[1], r[2], yu, r[3])); col.floor(r, yu); } };
+    const cellFurn = (R, seed, axis, backIsMin) => {
+      const [a0, b0, a1, b1] = R, cx = (a0 + a1) / 2, cz = (b0 + b1) / 2, r2 = rng(seed);
+      F.reedMat(bag, cx, yu, cz, Math.min(a1 - a0 - 0.6, 2.4), Math.min(b1 - b0 - 0.6, 2.4), 0);
+      const bx = axis === 'z' ? cx + (r2() - 0.5) * 0.6 : (backIsMin ? a0 + 0.45 : a1 - 0.45), bz = axis === 'z' ? (backIsMin ? b0 + 0.5 : b1 - 0.5) : cz + (r2() - 0.5) * 0.6;
+      F.chest(bag, bx + (axis === 'z' ? 0.9 : 0), yu, bz + (axis === 'z' ? 0 : 0.9), axis === 'z' ? 0.8 : 0.45, axis === 'z' ? 0.45 : 0.8, 0.5, 0);
+      F.rahle(bag, cx - (axis === 'z' ? 0.3 : 0), yu + 0.01, cz - (axis === 'z' ? 0 : 0.3), axis === 'z' ? 0 : Math.PI / 2);
+      F.cushion(bag, cx + 0.5, yu + 0.01, cz + 0.45, 0.6, 0.6, 0.1, 0.4, ['cloth_green', 'cloth_indigo', 'cloth_red'][Math.floor(r2() * 3)]);
+      F.oilLamp(bag, [], bx - (axis === 'z' ? 0.7 : 0), yu + 0.9, bz - (axis === 'z' ? 0 : 0.7), 'bronze', 0);
+      bag.add('timber', box(bx - 0.4, yu + 1.0, bz - 0.12, bx + 0.4, yu + 1.04, bz + 0.12));
+    };
+    // north range: three cells over and beside the vestibule
+    { const zb = z0 + t, ze = zN - 0.5, xa = gx0 + 6.4, xb = gx0 + 16.0;
+      mk('north', [[xa, zb, xb, zN]]);
+      for (const o of [6.4, 9.6, 12.8, 16.0]) { const q = [gx0 + o - 0.1, zb, gx0 + o + 0.1, ze]; bag.add('plaster_white', box(q[0], yu, q[1], q[2], yu + H2, q[3])); col.rect(q, yu, yu + H2); }
+      for (const o of [8.0, 11.2, 14.4]) { const R = [gx0 + o - 1.5, zb, gx0 + o + 1.5, ze]; dadoFlat(bag, face('z', zb, 1), R[0], R[2], yu, 1.2, []); cellFurn(R, 100 + o, 'z', true); }
+    }
+    // the side ranges: five cells each
+    for (const [xin, xout, nn, seed0] of [[gx0 - 0.5, x0 + t, 1, 200], [gx1 + 0.5, x1 - t, -1, 300]]) {
+      const za = zN + 3.2, zb2 = zN + 19.2, xa = Math.min(xin, xout), xb = Math.max(xin, xout);
+      mk('side', [[nn > 0 ? xa : xa - 0.5, za, nn > 0 ? xb + 0.5 : xb, zb2]]);
+      for (let m = 1; m <= 6; m++) { const zz = zN + 3.2 * m, q = [xa, zz - 0.1, xb, zz + 0.1]; bag.add('plaster_white', box(q[0], yu, q[1], q[2], yu + H2, q[3])); col.rect(q, yu, yu + H2); }
+      for (let m = 1; m <= 5; m++) { const zc = zN + 3.2 * m + 1.6, R = [xa, zc - 1.5, xb, zc + 1.5]; dadoFlat(bag, face('x', xout, nn > 0 ? 1 : -1), R[1], R[3], yu, 1.2, []); cellFurn(R, seed0 + m, 'x', nn > 0); }
+    }
   }
   // ——— the cedar canopy crowning the court's walls: corbels, lintel, green tiles, all round
   canopy(bag, face('z', zN, -1), gx0, gx1, yu + HT - H1 - 0.15, 1.2); canopy(bag, face('x', gx0, 1), zN, cz1, yu + HT - H1 - 0.15, 1.2); canopy(bag, face('x', gx1, -1), zN, cz1, yu + HT - H1 - 0.15, 1.2);

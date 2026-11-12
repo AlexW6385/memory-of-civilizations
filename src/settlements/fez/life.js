@@ -39,8 +39,9 @@ export function life() {
   man([q[0] + 6, -21], yq, 0); woman([q[0] - 8, -22], ground0(q[0] - 8, -22), 0);
   // the souks: a merchant in nearly every shop, seated cross-legged behind his goods; customers in the lane
   for (const s of SOUKS) for (const [i, sh] of soukShops(s).entries()) {
+    if (i % 2 === 0 && s.covered) { const alongX = Math.abs(s.a[1] - s.b[1]) < 0.1, c = alongX ? s.a[1] : s.a[0], side = Math.sign((alongX ? sh.z : sh.x) - c) || 1, e = c + side * (s.w / 2 - 0.5); L.push({ t: 'hang_lantern', at: alongX ? [sh.x, e] : [e, sh.z], y: sh.y + 4.55, rot: 0, kind: 'white', drop: 0.2, seed: i }); }
     if (rand() < 0.35) continue;
-    const dir = sh.dir; man([sh.x, sh.z], sh.y + 0.55, dir, { pose: 'cross', cloth: CL[i % CL.length], hat: i % 3 ? 'turban' : 'cap' });
+    const dir = sh.dir; man([sh.x, sh.z], sh.y + 0.5, dir, { pose: 'cross', cloth: CL[i % CL.length], hat: i % 3 ? 'turban' : 'cap' });
   }
   for (const s of SOUKS) {
     const [ax, az] = s.a, [bx, bz] = s.b, alongX = Math.abs(az - bz) < 0.1, L0 = alongX ? Math.abs(bx - ax) : Math.abs(bz - az), u0 = alongX ? Math.min(ax, bx) : Math.min(az, bz), n = Math.floor(L0 / 9);
@@ -59,16 +60,28 @@ export function life() {
     L.push({ t: 'sacks', at: [fx + 7.5, fz + 4], y: yf, rot: 0.3, n: 4, seed: 3 }, { t: 'sacks', at: [f[0] + 8, fz + 5], y: yf, rot: 1.0, n: 3, seed: 4 }); }
   // the tannery: men standing waist-deep in the vats treading the hides, others carrying hides along the walks
   { const T = SITES.tannery, yt = siteY('tannery'), P2 = pits(T);
-    for (const [i, p] of P2.entries()) if (i % 4 === 1 && p.liq !== 'limewash_white') P([p.x, p.z], yt + 0.53 - 0.95, rand() * 6.28, { dress: 'tunic', cloth: 'cloth_brown', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_white', hair: 'short', beard: true, legs: 'bare', pose: 'stand' });
+    for (const [i, p] of P2.entries()) if (i % 3 === 1 && p.liq !== 'limewash_white') P([p.x, p.z], yt + 0.53 - 0.95, rand() * 6.28, { dress: 'tunic', cloth: 'cloth_brown', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_white', hair: 'short', beard: true, legs: 'bare', pose: 'stand' });
     for (let k = 0; k < 8; k++) { const x = T[0] + 9 + rand() * 40, z = T[1] + 56 * 0 + 12 + rand() * 4; P([x, z], yt, rand() * 6.28, { dress: 'tunic', cloth: 'cloth_brown', hat: 'cap', hatMat: 'cloth_white', legs: 'bare', carry: 'basket' }); }
   }
-  // the lanes: a water-carrier, women with baskets, a muleteer with his donkey in some of the longer lanes
-  for (let k = 0; k < 40; k++) {
-    const a = rand() * Math.PI * 2, r = 30 + rand() * 230, x = Math.cos(a) * r, z = Math.sin(a) * r * 0.9 - 20;
-    if (Math.abs(z - -21) < 2 && x < 40) { if (rand() < 0.7) man([x, -21 + (rand() - 0.5) * 1.6], ground0(x, -21), rand() * 6.28); }
+  // the tannery's terrace and yard: donkeys laden with skins at the west gap, porters with bundles of hides, boys with mint, pigeons on the walks
+  { const T = SITES.tannery, yt = siteY('tannery');
+    for (let k = 0; k < 4; k++) { const x = T[0] + 3 + k * 2.2, z = T[1] + 18 + (k % 2) * 1.4; L.push({ t: 'animal', kind: 'donkey', at: [x, z], y: yt, rot: 1.2 + k * 0.4, seed: 70 + k }); L.push({ t: 'sacks', at: [x + 0.2, z + 1.2], y: yt, rot: 0.4 * k, n: 3, seed: 60 + k }); }
+    for (let k = 0; k < 10; k++) { const x = T[0] + 10 + rand() * 46, z = T[1] + 9.5 + rand() * 2.0; P([x, z], yt, rand() * 6.28, { dress: 'tunic', cloth: 'cloth_brown', hat: 'cap', hatMat: 'cloth_white', legs: 'bare', carry: 'bundle' }); }
+    for (let k = 0; k < 3; k++) P([T[0] + 22 + k * 7, T[1] + 14], yt + 3.7, Math.PI, { dress: 'tunic', hat: 'cap', cloth: 'cloth_white', pose: 'stand' });   // visitors on the terrace
+    for (let k = 0; k < 5; k++) L.push({ t: 'chickens', kind: 'pigeon', at: [T[0] + 12 + rand() * 40, T[1] + 40 + rand() * 6], y: yt, rot: rand() * 6.28, seed: 90 + k });
   }
-  for (let k = 0; k < 26; k++) { const x = -280 + k * 8.2 + rand() * 3, z = -21 + (rand() - 0.5) * 1.8; if ((x > 40 && x < 130) || (x > -150 && x < -112)) continue; const y = ground0(x, z); if (k % 5 === 0) { L.push({ t: 'animal', kind: 'donkey', at: [x, z], y, rot: Math.PI / 2 + (rand() < 0.5 ? Math.PI : 0), seed: 60 + k }); man([x + 1.6, z + 0.3], y, 1.6, { dress: 'tunic', hat: 'cap', cloth: 'cloth_brown', legs: 'bare', hatMat: 'cloth_white' }); } else if (k % 3 === 0) woman([x, z], y, rand() * 6.28, { carry: k % 2 ? 'basket' : 'pot' }); else man([x, z], y, rand() * 6.28, { pose: k % 4 === 1 ? 'talk' : 'stand' }); }
-  for (let k = 0; k < 10; k++) { const x = -200 + rand() * 330, z = -21 + (rand() - 0.5) * 1.4; L.push({ t: 'animal', kind: 'cat', at: [x, z + (rand() < 0.5 ? 1.3 : -1.3)], y: ground0(x, z), rot: rand() * 6.28, seed: 9 + k }); }
+  // the Qarawiyyin's court: pigeons at the basin, a water-seller, boys; the Bou Inania's door: a beggar, a porter
+  { const q = SITES.qar, yq = siteY('qar') + 0.05, cx = (q[0] + q[2]) / 2, cz = q[1] + 13.5;
+    for (let k = 0; k < 4; k++) L.push({ t: 'chickens', kind: 'pigeon', at: [cx + 3 + rand() * 4, cz + 3 + rand() * 4], y: yq, rot: rand() * 6.28, seed: 120 + k });
+    man([cx + 4.5, cz - 3.2], yq, 0.6, { dress: 'tunic', carry: 'pot', hat: 'cap', cloth: 'cloth_brown' });
+    for (let k = 0; k < 3; k++) man([cx - 5 + k * 5, cz - 4.4], yq, 3.1, { pose: 'cross', hat: 'turban' }); }
+  // (the people of the lanes: street.js)
   return L;
 }
-export const lifePlan = () => ({ id: 'fez-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: life(), rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 's' } });
+const base = (id, elements) => ({ id, style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 's' } });
+/** The still life of the landmarks and the lanes, in tiles of 100 m each shown within 230 m. */
+export function lifePlans() {
+  const tiles = new Map();
+  for (const e of life()) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
+  return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`fez-life-${k}`, list), center: [i * 100 + 50, j * 100 + 50], near: 230 }; });
+}

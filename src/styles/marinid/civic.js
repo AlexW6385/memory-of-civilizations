@@ -188,3 +188,33 @@ export function mosque(el, { bag, col, lights }) {
   F.mosqueLamp(bag, lights, cx, y + 3.6, mid - 1.5, y + 5.4, { k: 1, glow: 2.4, reach: 8 });
   minaret(bag, col, [x1 - 4.6, z0 - 0.3, x1 - 0.3, z0 + 4.0], y, 21);
 }
+
+/** fez_lane: { rect, axis ('x' | 'z'), ys: [ground height every `step` m from the lane's start], step, kind } — the lane's gutter down the middle and the courses of paving across it. Near level only. */
+export function lane(el, { bag }) {
+  if (el.simple) return;
+  const [x0, z0, x1, z1] = el.rect, alongX = el.axis === 'x', ys = el.ys, st = el.step, w = alongX ? z1 - z0 : x1 - x0, c = alongX ? (z0 + z1) / 2 : (x0 + x1) / 2, u0 = alongX ? x0 : z0, len = alongX ? x1 - x0 : z1 - z0;
+  const yAt = (u) => { const t = Math.max(0, Math.min(ys.length - 1.001, (u - u0) / st)), i = Math.floor(t), f = t - i; return ys[i] * (1 - f) + ys[i + 1] * f; };
+  const T = [];
+  const P = (u, v, yy) => (alongX ? [u, yy, c + v] : [c + v, yy, u]);
+  for (let u = u0; u < u0 + len - 0.01; u += st) {
+    const a = u, b = Math.min(u + st, u0 + len), ya = yAt(a) + 0.045, yb = yAt(b) + 0.045;
+    q4(T, P(a, -0.13, ya), P(b, -0.13, yb), P(b, 0.13, yb), P(a, 0.13, ya));
+  }
+  bag.add('bluestone', dbl(T));
+  const sp = el.kind === 'street' ? 2.5 : 3.2;
+  for (let u = u0 + sp / 2; u < u0 + len - 0.2; u += sp) {
+    const hw = w / 2 - 0.1, yy = yAt(u);
+    bag.add('limestone', alongX ? box(u - 0.07, yy - 0.02, c - hw, u + 0.07, yy + 0.03, c + hw) : box(c - hw, yy - 0.02, u - 0.07, c + hw, yy + 0.03, u + 0.07));
+  }
+}
+/** fez_wash: { at: [x, z] (on the quay), side (-1 north bank, +1 south), top (the quay's height), water, cx (the river's centre z) } — a wash-place: a stone slab at the water, three steps down the wall, cloth spread on the quay. */
+export function wash(el, { bag }) {
+  if (el.simple) return;
+  const [x, z] = el.at, s = el.side, hw = 2.8, zc = el.cz, y = el.top, wl = el.water;
+  const zs = (a, b) => [Math.min(zc + s * a, zc + s * b), Math.max(zc + s * a, zc + s * b)];
+  const [za, zb] = zs(hw - 1.5, hw + 0.02); bag.add('limestone', box(x - 1.1, wl + 0.2, za, x + 1.1, wl + 0.5, zb));
+  for (let k = 0; k < 4; k++) { const [a, b] = zs(hw - 0.5 - k * 0.0, hw + 0.02); bag.add('limestone', box(x + 1.1 - 0.2, wl + 0.5 + k * ((y - wl - 0.5) / 4), a, x + 1.1 + 0.6 - k * 0.05, wl + 0.5 + (k + 1) * ((y - wl - 0.5) / 4), b)); }
+  const cls = ['cloth_white', 'cloth_indigo', 'cloth_ochre', 'cloth_white', 'cloth_red'];
+  for (let k = 0; k < 4; k++) { const cx = x - 1.8 - k * 1.1, [a, b] = zs(hw + 1.2, hw + 2.0); bag.add(cls[(k + (Math.abs(Math.round(x)) % 5)) % 5], box(cx - 0.45, y + 0.025, a, cx + 0.45, y + 0.04, b)); }
+}
+

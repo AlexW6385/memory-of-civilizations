@@ -4,16 +4,19 @@
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
 import { lots, SITES, RADIUS, siteY } from './layout.js';
+import { houseList } from './houses.js';
 
 const ID = 'fez';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 function emitters() {
   const E = [], rand = rng(1351);
   for (const l of lots()) {
-    if (rand() > 0.28) continue;
+    if (rand() > 0.4) continue;
     const [x0, z0, x1, z1] = l.rect;
     E.push({ p: [x0 + (x1 - x0) * (0.25 + rand() * 0.5), l.y + 3.7 + 3.25 * (l.storeys - 1) + 1.1, z0 + (z1 - z0) * (0.25 + rand() * 0.5)], kind: 'kitchen', seed: l.seed + 1 });
   }
+  // the bakers' ovens (furnan): a thin smoke from the roof over each bread dukkan, early and at midday
+  for (const h of houseList()) if (h.shops?.includes('bread') && Math.hypot(h.rect[0], h.rect[1]) < 280) E.push({ p: [(h.rect[0] + h.rect[2]) / 2, h.y + 3.7 + 3.25 * (h.storeys - 1) + 1.2, (h.rect[1] + h.rect[3]) / 2], kind: 'kitchen', thr: 0.1, seed: h.seed + 3 });
   const T = SITES.tannery, yt = siteY('tannery'), s = SITES.seffarine;
   for (const [x, z] of [[T[0] + 3.5, T[1] + 14], [T[2] - 3.5, T[1] + 30]]) E.push({ p: [x, yt + 11, z], kind: 'kitchen', thr: 0, seed: 81 });
   for (const [x, z] of [[s[0] - 2, s[1] + 10], [s[2] + 2, s[1] + 16]]) E.push({ p: [x, siteY('tannery') + 5, z], kind: 'kitchen', thr: 0.2, seed: 82 });
