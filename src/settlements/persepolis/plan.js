@@ -35,7 +35,7 @@ for (const [x, z, rot, scroll] of [[-100.5, -34.5, -Math.PI / 2, false], [-100.5
 // the Gate of All Nations
 E.push({ t: 'lamassu_gate', c: [-112, STAIR.z], s: 25, h: 17, y: T });
 // the Apadana on its 2.6 m plinth: 6 × 6 columns in the hall, porticoes north, west and east
-E.push({ t: 'hall', rect: [-60, -90, 0, -30], y: T, plinth: 2.6, h: 20, grid: [6, 6], porticoes: 'nwe', portDepth: 17, walls: 5, towers: 20, doors: 'nwe',
+E.push({ t: 'hall', rect: [-60, -90, 0, -30], y: T, plinth: 2.6, h: 20, grid: [6, 6], porticoes: 'nwe', portDepth: 17, walls: 5, towers: 20, doors: 'nwe', dress: true,
   stairs: [{ face: 'w', W: 26, flight: 9, D: 6, wings: ['nobles', 'nobles'], c: -60 }] });   // the west porch's stair (the visitor's side) [inferred]
 E.push({ t: 'audience', c: [-30, -40], y: T + 2.75, dir: [0, -1], aisle: 44 });
 // its two stairways, north and east, with their reliefs: the nobles on the north, the delegations on the east stair's south wing
