@@ -3,6 +3,7 @@
 // and pillar tombs; benches against the lane walls; Husuni Kubwa's courts with the sultan on his pavilion, courtiers
 // on mats, guards, servants at the well; the beach with fish-drying racks, net-menders, children and canoes at the
 // shallows. Returns { S: swahili-style elements, L: life-style elements }; every place is derived from layout.js.
+import { mosqueStands } from '../../styles/swahili/index.js';
 import { MOSQUE, MOSQUE_STREET, LANES, COURTS, PY, SEA, height, inLot, inSea } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -36,6 +37,15 @@ export function yard() {
   { const nx = Math.floor((mx1 - mx0) / 4.6), nz = Math.floor((mz1 - mz0) / 4.6), sx = (mx1 - mx0) / nx, sz = (mz1 - mz0) / nz;
     for (let k = 1; k < 6; k++) for (let i = 2; i < nx - 1; i += 2) { if (rand() < 0.25) continue; const x = mx0 + (i + 0.5) * sx + (rand() - 0.5) * 0.8, z = mz0 + (k + 0.5) * sz; fig([x, z], my + 0.05, [x, z - 5], { pose: 'kneel', arms: 'pray', over: 'none', hat: pick(['cap', 'cap', 'turban']) }); }
     for (let k = 0; k < 6; k++) { const x = mx0 + 3 + k * 2.2, z = mz1 - 1.6; fig([x, z], my + 0.05, [x, z - 3], { pose: 'cross', over: 'none', hat: 'cap' }); } }
+  // readers at the Qur'an stands (the stands are the style's: mosqueStands), a teacher with his boys on mats in a side bay, two men resting against a pillar, one at the water jar by the door
+  { const stands = mosqueStands(MOSQUE, 4.6);
+    stands.forEach((p, k) => { if (k % 5 === 4) return; fig([p.x - 0.35, p.z + 0.82], my + 0.1, [p.x - 0.35, p.z - 6], { pose: 'cross', over: 'none', hat: pick(['cap', 'cap', 'turban']), beard: rand() < 0.6 }); });
+    const tx = mx0 + 4.615 * 5.5, tz = mz0 + 5 * 6.5;
+    fig([tx, tz], my + 0.08, [tx + 1.2, tz + 2.4], { pose: 'cross', over: 'none', hat: 'turban', beard: true, cloth: 'cloth_white' });
+    for (let k = 0; k < 5; k++) { const a = -0.9 + k * 0.45; child([tx + Math.sin(a) * 2.0 + 0.3, tz + 2.4 + Math.cos(a) * 0.9], my + 0.08, [tx, tz], { pose: 'cross' }); }
+    L.push({ t: 'stool', at: [tx - 1.1, tz - 0.4], y: my + 0.07, rot: 0, seed: 12 });
+    for (const [dx, dz] of [[2.3, 0.4], [2.9, 0.9]]) fig([mx0 + 4.615 * 7.5 + dx, mz0 + 5 * 3.5 + dz], my + 0.08, [mx0 + 4.615 * 7.5, mz0 + 5 * 3.5], { pose: 'sit_ground', over: 'none', hat: 'cap' });
+    fig([-9.2, mz1 - 3.4], my + 0.05, [-8.4, mz1 - 1.3], { pose: 'stand', over: 'none', hat: 'turban', carry: 'none' }); }
   // ---- the graveyard east of the mosque
   for (let k = 0; k < 9; k++) { const x = mx1 + 3.2 + (k % 2) * 2.0 + rand() * 0.6, z = mz0 + 4 + k * 3.6; S.push({ t: 'swahili_tomb', at: [x, z], y: height(x, z), rot: 0, kind: k === 2 || k === 6 ? 'pillar' : 'slab', seed: k }); }
   // ---- benches against the lane walls (the lots' blank flanks), jars at their feet

@@ -103,6 +103,15 @@ function insetBowls(bag, { x0, z0, x1, z1, nx, nz, sx, sz, yT, PD, mid, kindOf }
     }
   }
 }
+/** The Qur'an stands (rehal) of the Great Mosque's hall: beside the pillars of the side bays, facing the qibla (north); [{ x, z }] from the hall's rect and bay. */
+export function mosqueStands(rect, b = 4.5) {
+  const [x0, z0, x1, z1] = rect, nx = Math.floor((x1 - x0) / b), nz = Math.floor((z1 - z0) / b), sx = (x1 - x0) / nx, sz = (z1 - z0) / nz, mid = Math.floor(nx / 2), out = [];
+  for (let i = 2; i < nx - 1; i++) for (let k = 2; k < nz; k++) {
+    if (Math.abs(i - mid) < 1 || (i * 7 + k * 3) % 5 > 1) continue;                                   // none in the central aisle; about two pillars in five
+    out.push({ x: x0 + i * sx + 0.95, z: z0 + k * sz - 0.45 });
+  }
+  return out;
+}
 /** swahili_mosque: { rect, y, bay, big (index of the bay carrying the great dome) } — a walled hall of bays on pillars, each bay roofed by a small dome. */
 function mosque(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, b = el.bay ?? 4.5, yS = y + 3.4, yT = y + 6.1, PD = 0.5, yTop = yT + PD + 0.35, h = yTop - y - 0.6;
@@ -207,6 +216,22 @@ function mosque(el, { bag, col }) {
     const crown = (i === mid ? yT + PD + sx / 2 - 0.05 : yT + PD + 0.82 * (Math.min(sx, sz) / 2 - 0.05)) - 0.05;
     bag.add('iron', box(x - 0.01, y + 2.9, z - 0.01, x + 0.01, crown, z + 0.01));
     bag.add('lamp_glass', lathe([[0.001, 0], [0.12, 0.05], [0.16, 0.2], [0.1, 0.32], [0.001, 0.34]], 8, null, x, y + 2.6, z));
+  }
+  // the furnishing of the hall (docs/settlements/kilwa.md §4a): the imam's carpet before the mihrab, small rugs by the pillars, a Qur'an stand (rehal) with its book at
+  // the foot of every second pillar, a water jar with its cup and a row of sandals inside each south door, an alms chest by the door nearest the arrival
+  bag.add('cloth_red', box(mx - 1.7, y + 0.075, qz + 0.5, mx + 1.7, y + 0.095, qz + 2.1)); bag.add('cloth_indigo', box(mx - 1.5, y + 0.095, qz + 0.7, mx + 1.5, y + 0.105, qz + 1.9)); bag.add('cloth_ochre', box(mx - 1.2, y + 0.105, qz + 0.9, mx + 1.2, y + 0.112, qz + 1.7));
+  for (const p of mosqueStands(el.rect, b)) {
+    bag.add('cloth_brown', box(p.x - 0.55, y + 0.075, p.z - 0.4, p.x + 0.65, y + 0.088, p.z + 0.5));
+    for (const sg of [-1, 1]) bag.add('wood_dark', box(-0.2, -0.18, -0.013, 0.2, 0.18, 0.013).rotateX(sg * 0.5).rotateY(0).translate(p.x + sg * 0.0, y + 0.3, p.z));
+    bag.add('cloth_white', box(-0.14, -0.012, -0.1, 0.14, 0.012, 0.1).rotateX(-0.5).translate(p.x, y + 0.45, p.z + 0.02));
+  }
+  for (let i = 0; i < Math.floor((x1 - x0) / (b * 2)); i += 2) {
+    const u = x0 + (i + 0.5) * (x1 - x0) / Math.floor((x1 - x0) / (b * 2)), jz = z1 - 1.25;
+    bag.add('pottery_dark', lathe([[0.001, 0], [0.12, 0.02], [0.2, 0.16], [0.22, 0.34], [0.14, 0.5], [0.09, 0.56], [0.1, 0.62], [0.001, 0.62]], 10, null, u + 1.4, y + 0.55, jz));
+    for (const sg of [0, 1, 2]) bag.add('wood_dark', box(-0.02, -0.55, -0.02, 0.02, 0, 0.02).rotateZ(0).translate(u + 1.4 + Math.cos(sg * 2.09) * 0.16, y + 0.55, jz + Math.sin(sg * 2.09) * 0.16));
+    bag.add('wood_dark', lathe([[0.001, 0], [0.06, 0.01], [0.07, 0.07], [0.001, 0.07]], 8, null, u + 1.72, y + 0.05, jz));
+    for (let k = 0; k < 5; k++) for (const sg of [-1, 1]) bag.add('hide_brown', box(u - 1.3 + k * 0.26 + sg * 0.05, y + 0.05, z1 - 1.2 - (k % 2) * 0.12, u - 1.3 + k * 0.26 + sg * 0.05 + 0.09, y + 0.07, z1 - 1.2 - (k % 2) * 0.12 + 0.22));
+    if (i === 2) { bag.add('wood_dark', box(u + 0.5, y + 0.05, jz - 0.3, u + 1.1, y + 0.5, jz + 0.3)); bag.add('iron', box(u + 0.5, y + 0.28, jz - 0.31, u + 1.1, y + 0.32, jz + 0.31)); }
   }
 }
 /**
