@@ -108,6 +108,6 @@ function merlons(el, { bag }) {
 
 registerStyle('hadhrami', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.life?.elements, tower_house: towerHouse, merlons, ...OPEN_ELEMENTS, ...MOSQUE_ELEMENTS, ...SABAT_ELEMENTS, ...GARDEN_ELEMENTS, reserve: () => {} },
+  elements: { ...STYLES.life?.elements, tower_house: towerHouse, merlons, ...OPEN_ELEMENTS, ...MOSQUE_ELEMENTS, ...SABAT_ELEMENTS, ...GARDEN_ELEMENTS, reserve_wall: () => {} },
   objects: {},
 });

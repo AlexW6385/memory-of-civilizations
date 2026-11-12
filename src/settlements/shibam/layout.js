@@ -43,7 +43,7 @@ export function lots() {
       while (x < X1 - 5) {
         let w = 6.4 + rand() * 3.8;
         if (x >= ROAD[0] && x < ROAD[1]) { x = ROAD[1]; run = 0; prevEnd = true; continue; }
-        if (x < ROAD[0] && x + w > ROAD[0] - 0.2) { w = ROAD[0] - x; if (w < 5.2) { x = ROAD[1]; run = 0; prevEnd = true; continue; } }
+        if (x < ROAD[0] && x + w > ROAD[0] - 0.2) { w = ROAD[0] - x; if (w < 5.2) { const lastL = rowLots[rowLots.length - 1]; if (lastL && Math.abs(lastL.rect[2] - x) < 0.01) { lastL.rect[2] = ROAD[0]; lastL.free.e = 1; } x = ROAD[1]; run = 0; prevEnd = true; continue; } }
         if (x + w > X1) w = X1 - x;
         if (w < 5) break;
         const rect = [x, z0, x + w, z1], endNext = run + 1 >= limit || x + w >= ROAD[0] - 0.2 && x < ROAD[0];

@@ -48,6 +48,12 @@ M.push({ t: 'wall', a: [wx1, wz0], b: [wx1, wz1], th, y0: -0.6, y1: WH, mat: 'li
 M.push({ t: 'beam', a: [wx1 + 0.3, doorZ - 1.1], b: [wx1 + 0.3, doorZ + 1.1], w: 0.3, y: 2.8, h: 0.25, mat: 'timber', ext: 0 });
 M.push({ t: 'mosque_hall', rect: [wx0 + th / 2, wz0 + th / 2, mx0 + 11, wz1 - th / 2], y: 0.06, roofY: 5.6 });
 M.push({ t: 'minaret', c: [mx1 - 2.4, mz0 + 2.2], w: 3.8, h: 27 });
+// the court: benches of mud and lime along its long walls, the water jars of the sabil by the door, a shade of mats over a corner, stone seats round the basin
+for (const zz of [wz0 + 0.45, wz1 - 0.95]) { M.push({ t: 'block', rect: [-46.5, zz, -34.6, zz + 0.5], y0: 0.0, y1: 0.42, mat: 'mud_plaster', collide: false }); M.push({ t: 'block', rect: [-46.55, zz - 0.02, -34.55, zz + 0.52], y0: 0.42, y1: 0.46, mat: 'lime_plaster', collide: false }); }
+M.push({ t: 'block', rect: [-35.6, -19.5, -34.6, -17.5], y0: 0, y1: 0.9, mat: 'mud_plaster' }); M.push({ t: 'block', rect: [-35.7, -19.6, -34.5, -17.4], y0: 0.9, y1: 0.98, mat: 'lime_plaster', collide: false });
+for (const [x, z] of [[-35.1, -19.0], [-35.1, -18.0]]) M.push({ t: 'pot', kind: 'water_pot', at: [x, z], y: 0.98, n: 1, seed: Math.floor(-z) });
+M.push({ t: 'mat_shade', rect: [-46, wz0 + 1.4, -41.5, wz0 + 6.4], y: 0.06, seed: 12 });
+M.push({ t: 'block', rect: [-43.2, -14.4, -42.8, -10.6], y0: 0, y1: 0.4, mat: 'lime_plaster', collide: false }); M.push({ t: 'block', rect: [-38.8, -14.4, -38.4, -10.6], y0: 0, y1: 0.4, mat: 'lime_plaster', collide: false });
 // the ablution basin in the court
 M.push({ t: 'block', rect: [-42, -14, -39.5, -11], y0: 0, y1: 0.55, mat: 'limestone' });
 M.push({ t: 'water', rect: [-41.8, -13.8, -39.7, -11.2], y: 0.5 });

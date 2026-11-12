@@ -1,6 +1,6 @@
 // The Friday mosque of Shibam (docs/settlements/shibam.md §2): a whitewashed mudbrick mosque squeezed among the towers, a court
 // before a flat-roofed prayer hall on piers and beams of palm trunk, and a tall square minaret in stages.
-import { box, rod } from '../../core/geom.js';
+import { box, rod, lathe } from '../../core/geom.js';
 import { frustum } from '../../core/geom.js';
 
 /** mosque_hall: { rect (the hall's interior), y, roofY } — square piers in two rows, palm-trunk beams, a flat roof, the mihrab niche in the west wall and a timber minbar. */
@@ -17,6 +17,13 @@ function mosqueHall(el, { bag, col, lights }) {
   for (let k = 0; k < 5; k++) bag.add('cedar', box(x0 + 0.2, y, mz + 1.6 + k * 0.0, x0 + 0.9 - k * 0.1, y + 0.3 + k * 0.28, mz + 2.5)), void k;
   col.rect([x0 + 0.2, mz + 1.6, x0 + 0.9, mz + 2.5], y, y + 1.7);
   for (let k = 0; k < 4; k++) lights.push({ at: [xs[k % 2], R - 1.0, z0 + 6 + Math.floor(k / 2) * 12], color: '#ffd9a0', intensity: 1.6, distance: 9 });
+  // prayer rugs in rows before the mihrab, the Qur'an stands along the qibla wall, the shoe rack at the open side, brass lamps hung from the beams, a carved band
+  for (let r = 0; r < 3; r++) for (let z = z0 + 2.2; z < z1 - 2; z += 1.0) bag.add(['cloth_green', 'cloth_red', 'cloth_maroon'][(((r + Math.floor(z)) % 3) + 3) % 3], box(x0 + 1.4 + r * 1.3, y + 0.02, z, x0 + 2.4 + r * 1.3, y + 0.035, z + 0.7));
+  for (let z = z0 + 2.5; z < z1 - 2; z += 3.2) { if (Math.abs(z - mz) < 3) continue; for (const q of [-1, 1]) bag.add('wood_dark', rod([x0 + 0.5, y, z + q * 0.2], [x0 + 0.5, y + 0.4, z - q * 0.2], 0.02, 4)); bag.add('cedar', box(x0 + 0.38, y + 0.38, z - 0.28, x0 + 0.65, y + 0.42, z + 0.28)); }
+  bag.add('timber', box(x1 - 0.5, y, z0 + 3, x1 - 0.1, y + 0.9, z0 + 6)); col.rect([x1 - 0.5, z0 + 3, x1 - 0.1, z0 + 6], y, y + 0.9); for (let k = 0; k < 3; k++) bag.add('timber', box(x1 - 0.5, y + 0.28 + k * 0.28, z0 + 3, x1 - 0.1, y + 0.3 + k * 0.28, z0 + 6));
+  for (let k = 0; k < 5; k++) bag.add('leather_bench', box(x1 - 0.45, y + 0.3, z0 + 3.1 + k * 0.5, x1 - 0.15, y + 0.32, z0 + 3.4 + k * 0.5)), void k;
+  bag.add('cedar', box(x0, R - 1.5, z0, x0 + 0.12, R - 0.9, z1)); for (let z = z0 + 0.6; z < z1 - 0.3; z += 0.9) bag.add('wood_dark', box(x0 + 0.1, R - 1.4, z, x0 + 0.13, R - 1.0, z + 0.45));
+  for (let k = 0; k < 4; k++) { const lx = xs[k % 2], lz = z0 + 6 + Math.floor(k / 2) * 12; bag.add('iron', rod([lx, R - 0.55, lz], [lx, R - 1.2, lz], 0.008, 3)); bag.add('bronze', lathe([[0.001, 0], [0.12, 0.05], [0.18, 0.2], [0.1, 0.34], [0.001, 0.36]], 9, null, lx, R - 1.55, lz)); }
   // mats in rows
   for (let z = z0 + 1; z < z1 - 1; z += 1.4) bag.add('reed_mat', box(x0 + 1.2, y, z, x1 - 0.5, y + 0.02, z + 1.0));
 }

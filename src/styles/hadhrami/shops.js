@@ -30,6 +30,8 @@ export function hollowShell(ctx, el, doorW, H = 2.35) {
   // the plinth of rubble, a ring on the faces that show (not through the door)
   const pw = 0.08;
   for (const [a, b, c, d] of n ? [[x0 + WT, z0 - pw, u - hw - 0.25, z0], [u + hw + 0.25, z0 - pw, x1 - WT, z0]] : [[x0 + WT, z1, u - hw - 0.25, z1 + pw], [u + hw + 0.25, z1, x1 - WT, z1 + pw]]) bag.add('schist_rubble', box(a, -0.6, b, c, 1.1, d));
+  bag.add('schist_rubble', box(x0 - pw, -0.6, z0, x0, 1.1, z1)); bag.add('schist_rubble', box(x1, -0.6, z0, x1 + pw, 1.1, z1));
+  bag.add('schist_rubble', n ? box(x0, -0.6, z1, x1, 1.1, z1 + pw) : box(x0, -0.6, z0 - pw, x1, 1.1, z0));
   // the lining of lime inside, the floor, the beams of palm trunk under the floor above
   const li = 0.025, lw = [[ix0 - li, iz0, ix0, iz1], [ix1, iz0, ix1 + li, iz1], [ix0, n ? iz1 : iz0 - li, ix1, n ? iz1 + li : iz0]];
   for (const r of lw) bag.add('lime_plaster', box(r[0], 0, r[1], r[2], GH, r[3]));

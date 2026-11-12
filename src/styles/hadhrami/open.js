@@ -105,6 +105,7 @@ function towerOpen(el, ctx) {
     bag.add('lime_plaster', box(X0 + q - 0.02, y, Z0 + q - 0.08, X1 - q + 0.02, y + hh, Z0 + q)); bag.add('lime_plaster', box(X0 + q - 0.08, y, Z0 + q, X0 + q, y + hh, Z1 - q));
   }
   furnish(ctx, el, D, rand);
+  extras(ctx, el, D, rand, top);
   void GH; void SH; void T;
 }
 
@@ -185,6 +186,53 @@ function furnish(ctx, el, D, rand) {
     bag.add('hide_tan', rod([x1 - 0.6, y + 0.3, z0 + 0.6], [x1 - 0.6, y + 0.3, z0 + 1.5], 0.25, 8));
     rug(x0 + 1.2, z0 + 1.0, x1 - 1.2, z1 - 1.6, y, 'cloth_ochre');
   }
+}
+
+/** What the first furnishing leaves: the stair's lamps, the mangers and the quern, the oven, the book shelves, the weapons and plates of the majlis, the roof's life. */
+function extras(ctx, el, D, rand, top) {
+  const { bag, col, lights } = ctx, [x0, z0, x1, z1] = D.room, [I0, I1] = D.I, n = el.storeys ?? 7, cx = (x0 + x1) / 2, [X0, Z0, X1, Z1] = el.rect;
+  const bx = (m, a, b, c, d, y0, y1, solid = false) => { bag.add(m, box(a, y0, b, c, y1, d)); if (solid) col.rect([a, b, c, d], y0, y1); };
+  // the stair: a lamp in a niche at every second landing, lit
+  for (let s = 0; s < n; s += 2) { const fy = s === 0 ? F0 : ys(s); bx('lamp_glass', I0 + 1.08, I1 + 0.4, I0 + 1.2, I1 + 0.52, fy + 1.6, fy + 1.78); lights.push({ at: [I0 + 1.0, fy + 1.7, I1 + 0.8], color: '#ffc880', intensity: 0.9, distance: 4.5 }); }
+  // storey 0: the manger with hay and the ring for the tether, the hand quern, a skin hung up
+  { const y = F0; bx('timber', x0 + 0.08, z0 + 1.3, x0 + 0.6, z0 + 3.3, y, y + 0.55, true); bx('thatch', x0 + 0.12, z0 + 1.35, x0 + 0.56, z0 + 3.25, y + 0.55, y + 0.7); bx('iron', x0 + 0.02, z0 + 2.2, x0 + 0.1, z0 + 2.3, y + 0.9, y + 1.0);
+    bag.add('granite_grey', lathe([[0.001, 0], [0.35, 0], [0.35, 0.1], [0.001, 0.1]], 12, null, cx + 0.6, y, z0 + 2.4)); bag.add('granite_grey', lathe([[0.001, 0.1], [0.3, 0.1], [0.3, 0.18], [0.001, 0.18]], 12, null, cx + 0.6, y, z0 + 2.4)); col.circle(cx + 0.6, z0 + 2.4, 0.35, y, y + 0.18);
+    bag.add('hide_tan', rod([x1 - 0.1, y + 1.6, z0 + 5.5], [x1 - 0.1, y + 0.9, z0 + 5.5], 0.14, 8)); }
+  // storey 1: the clay oven (tannur) by the hearth, a shelf of pots on the wall, a grain bin
+  { const y = ys(1);
+    bag.add('terracotta', lathe([[0.001, 0], [0.36, 0], [0.4, 0.2], [0.34, 0.6], [0.24, 0.82], [0.2, 0.86], [0.001, 0.86]], 12, null, x1 - 0.8, y, z1 - 2.3)); col.circle(x1 - 0.8, z1 - 2.3, 0.4, y, y + 0.86);
+    bx('timber', x1 - 0.4, z0 + 2.4, x1 - 0.02, z0 + 4.6, y + 1.05, y + 1.09); for (let k = 0; k < 5; k++) bag.add(k % 2 ? 'pottery_dark' : 'terracotta', lathe([[0.001, 0], [0.09, 0.01], [0.13, 0.1], [0.1, 0.2], [0.001, 0.2]], 8, null, x1 - 0.2, y + 1.09, z0 + 2.6 + k * 0.4));
+    bx('timber', x0 + 3.0, z0 + 0.2, x0 + 4.4, z0 + 1.1, y, y + 0.9, true); bx('wood_dark', x0 + 3.0, z0 + 0.2, x0 + 4.4, z0 + 1.1, y + 0.9, y + 0.95); }
+  // storey 2: the Qur'an stand (two boards crossed) and a low table with a brass tray; cushions
+  { const y = ys(2);
+    for (const s of [-1, 1]) bag.add('wood_dark', rod([x0 + 2.2 + s * 0.3, y, z0 + 2.6], [x0 + 2.2 - s * 0.3, y + 0.45, z0 + 2.6], 0.025, 4));
+    bx('cedar', x0 + 1.9, z0 + 2.45, x0 + 2.5, z0 + 2.75, y + 0.43, y + 0.46); bx('cloth_white', x0 + 2.0, z0 + 2.46, x0 + 2.4, z0 + 2.7, y + 0.46, y + 0.5);
+    bx('timber', cx + 0.6, z0 + 3.0, cx + 1.4, z0 + 3.6, y, y + 0.32, true); bag.add('bronze', lathe([[0.001, 0], [0.2, 0.01], [0.28, 0.06], [0.001, 0.06]], 10, null, cx + 1.0, y + 0.32, z0 + 3.3)); }
+  // storey 3: a cradle on its stand, an incense burner
+  { const y = ys(3);
+    bx('timber', x0 + 3.2, z0 + 0.4, x0 + 4.1, z0 + 0.9, y + 0.25, y + 0.45); bx('cloth_white', x0 + 3.25, z0 + 0.42, x0 + 4.05, z0 + 0.88, y + 0.45, y + 0.52); for (const dx of [0.15, 0.85]) bx('timber', x0 + 3.2 + dx - 0.04, z0 + 0.4, x0 + 3.2 + dx + 0.04, z0 + 0.9, y, y + 0.25);
+    bag.add('bronze', lathe([[0.001, 0], [0.08, 0.01], [0.1, 0.06], [0.14, 0.14], [0.1, 0.18], [0.001, 0.18]], 10, null, cx - 0.6, y + 0.03, (z0 + z1) / 2 - 0.6)); bag.add('flame', lathe([[0.001, 0.18], [0.04, 0.19], [0.001, 0.22]], 6, null, cx - 0.6, y + 0.03, (z0 + z1) / 2 - 0.6)); }
+  // storey 4, the majlis: plates and daggers and long guns hung, a lantern from the beam
+  { const y = ys(4);
+    for (let k = 0; k < 6; k++) { bx(k % 2 ? 'glaze_blue' : 'glaze_white', x1 - 0.06, y + 1.5 + (k % 2) * 0.45, z0 + 0.8 + k * 1.0, x1 - 0.02, y + 1.85 + (k % 2) * 0.45, z0 + 1.15 + k * 1.0); bx('cloth_red', x1 - 0.07, y + 1.58 + (k % 2) * 0.45, z0 + 0.9 + k * 1.0, x1 - 0.06, y + 1.75 + (k % 2) * 0.45, z0 + 1.05 + k * 1.0); }
+    for (let k = 0; k < 3; k++) { const z = z0 + 0.6 + k * 0.9; bx('iron', x0 + 0.04, y + 1.5, z, x0 + 0.07, y + 1.9, z + 0.07); bx('silver', x0 + 0.04, y + 1.9, z - 0.02, x0 + 0.08, y + 2.05, z + 0.09); }
+    for (let k = 0; k < 2; k++) bag.add('wood_dark', rod([x0 + 0.05, y + 1.2, z0 + 3.0 + k * 0.45], [x0 + 0.05, y + 2.4, z0 + 3.05 + k * 0.45], 0.022, 4));
+    bag.add('rope_fibre', rod([cx - 0.3, y + 2.95, (z0 + z1) / 2 + 1.5], [cx - 0.3, y + 2.55, (z0 + z1) / 2 + 1.5], 0.01, 3)); bag.add('lamp_glass', lathe([[0.001, 0], [0.1, 0.05], [0.14, 0.2], [0.08, 0.3], [0.001, 0.32]], 8, null, cx - 0.3, y + 2.25, (z0 + z1) / 2 + 1.5));
+    lights.push({ at: [cx - 0.3, y + 2.3, (z0 + z1) / 2 + 1.5], color: '#ffcf8a', intensity: 1.6, distance: 5 }); }
+  // storey 5: a low writing desk with the books and the ink pot
+  { const y = ys(5);
+    bx('timber', x0 + 0.5, z0 + 1.0, x0 + 1.5, z0 + 1.6, y, y + 0.36, true); for (let k = 0; k < 5; k++) bx(['cloth_brown', 'cloth_maroon', 'cloth_white', 'cloth_green', 'cloth_indigo'][k], x0 + 0.6 + k * 0.1, z0 + 1.1, x0 + 0.68 + k * 0.1, z0 + 1.5, y + 0.36, y + 0.62);
+    bag.add('pottery_dark', lathe([[0.001, 0], [0.04, 0], [0.04, 0.05], [0.001, 0.05]], 8, null, x0 + 1.3, y + 0.36, z0 + 1.3)); }
+  // storey 6: baskets of dates under the roof
+  { const y = ys(6); for (let k = 0; k < 5; k++) { bag.add('wicker', lathe([[0.001, 0], [0.26, 0], [0.34, 0.25], [0.3, 0.28], [0.001, 0.28]], 9, null, x1 - 0.5, y, z0 + 1.0 + k * 0.7)); bag.add('cloth_brown', lathe([[0.001, 0.2], [0.28, 0.24], [0.001, 0.32]], 8, null, x1 - 0.5, y, z0 + 1.0 + k * 0.7)); } }
+  // the roof terrace: the line with washing, the jars, a sleeping mat for the hot nights, dates drying on a mat, a stove, a cote
+  { const t = K * top, a0 = X0 + t, b0 = Z0 + t, a1 = X1 - t, b1 = Z1 - t, y = top;
+    for (const dx of [0, 3.4]) bag.add('palm_trunk', rod([a0 + 4.6 + dx, y, b0 + 0.8], [a0 + 4.6 + dx, y + 1.9, b0 + 0.8], 0.05, 5));
+    bag.add('rope_fibre', rod([a0 + 4.6, y + 1.85, b0 + 0.8], [a0 + 8.0, y + 1.8, b0 + 0.8], 0.012, 3)); for (let k = 0; k < 4; k++) bx(['cloth_white', 'cloth_indigo', 'cloth_ochre', 'cloth_white'][k], a0 + 4.8 + k * 0.8, b0 + 0.79, a0 + 5.4 + k * 0.8, b0 + 0.81, y + 0.8 + (k % 2) * 0.1, y + 1.82);
+    for (let k = 0; k < 3; k++) bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.02], [0.24, 0.2], [0.26, 0.4], [0.16, 0.6], [0.1, 0.66], [0.001, 0.66]], 8, null, a1 - 0.8, y, b0 + 1.0 + k * 0.6)); 
+    bx('reed_mat', a0 + 5.0, b1 - 2.8, a0 + 7.6, b1 - 1.0, y, y + 0.025); bx('cloth_white', a0 + 5.2, b1 - 2.6, a0 + 6.0, b1 - 2.0, y + 0.025, y + 0.1); for (let k = 0; k < 14; k++) bx('cloth_brown', a0 + 6.2 + (k % 5) * 0.25, b1 - 2.6 + Math.floor(k / 5) * 0.4, a0 + 6.35 + (k % 5) * 0.25, b1 - 2.4 + Math.floor(k / 5) * 0.4, y + 0.025, y + 0.045);
+    bx('schist_rubble', a1 - 1.5, b1 - 1.4, a1 - 0.7, b1 - 0.6, y, y + 0.35); bag.add('bronze', lathe([[0.001, 0], [0.2, 0.01], [0.26, 0.16], [0.2, 0.3], [0.001, 0.3]], 10, null, a1 - 1.1, y + 0.35, b1 - 1.0));
+    bx('mud_plaster', a1 - 1.6, b0 + 0.4, a1 - 0.5, b0 + 1.4, y, y + 1.4); bx('lime_plaster', a1 - 1.7, b0 + 0.3, a1 - 0.4, b0 + 1.5, y + 1.4, y + 1.5); for (let k = 0; k < 4; k++) bx('opening', a1 - 1.5 + (k % 2) * 0.45, b0 + 1.39, a1 - 1.3 + (k % 2) * 0.45, b0 + 1.42, y + 0.5 + Math.floor(k / 2) * 0.45, y + 0.68 + Math.floor(k / 2) * 0.45); }
 }
 
 export const OPEN_ELEMENTS = { tower_open: towerOpen };

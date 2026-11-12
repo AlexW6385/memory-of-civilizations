@@ -21,6 +21,12 @@ function wall() {
   E.push({ t: 'block', rect: [gx - GATE.w / 2 - 0.12, z1 - 2.1, gx - GATE.w / 2, z1 + 0.9], y0: 0, y1: 3.3, mat: 'cedar', collide: false });
   E.push({ t: 'block', rect: [gx + GATE.w / 2, z1 - 2.1, gx + GATE.w / 2 + 0.12, z1 + 0.9], y0: 0, y1: 3.3, mat: 'cedar', collide: false });
   E.push({ t: 'block', rect: [gx - GATE.w / 2 - 0.3, z1 - 2.5, gx + GATE.w / 2 + 0.3, z1 - 2.3], y0: GATE.h - 0.05, y1: GATE.h + 0.2, mat: 'timber', collide: false });
+  // the buttresses of the wall's outer face every thirteen metres, the rubble at its foot
+  const bt = WALL_TH / 2, put = (rect, ba) => E.push({ t: 'block', rect, y0, y1: WALL_H - 0.5, batter: ba, mat: 'mud_plaster' });
+  for (let x = x0 + 12; x < x1 - 8; x += 13) put([x - 0.6, z0 - bt - 0.8, x + 0.6, z0 - bt], [0.15, 0.15, 0.5, 0]);
+  for (let x = x0 + 12; x < x1 - 8; x += 13) if (Math.abs(x - gx) > 10) put([x - 0.6, z1 + bt, x + 0.6, z1 + bt + 0.8], [0.15, 0.15, 0, 0.5]);
+  for (let z = z0 + 12; z < z1 - 8; z += 13) { put([x0 - bt - 0.8, z - 0.6, x0 - bt, z + 0.6], [0.5, 0, 0.15, 0.15]); put([x1 + bt, z - 0.6, x1 + bt + 0.8, z + 0.6], [0, 0.5, 0.15, 0.15]); }
+  E.push({ t: 'block', rect: [x0 - bt - 0.1, z0 - bt - 0.1, x1 + bt + 0.1, z0 - bt + 0.02], y0, y1: -1.2, mat: 'schist_rubble', collide: false });
   // corner towers
   for (const [cx, cz] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) {
     E.push({ t: 'block', rect: [cx - 2.8, cz - 2.8, cx + 2.8, cz + 2.8], y0, y1: 8.0, batter: [0.3, 0.3, 0.3, 0.3], mat: 'mud_plaster' });
@@ -89,6 +95,8 @@ function people() {
   // at the gate: a guard and a man with camels
   man([GATE.x + 3.4, 99.5], Math.PI, { pose: 'staff', carry: 'staff', len: 1.6 });
   man([GATE.x - 3.4, 99.5], Math.PI, { pose: 'sit_low', beard: true });
+  // at the palace's door: the sultan's guards with their long guns
+  for (const x of [-3.2, 3.2]) man([x, PALACE[3] + 1.4], 0, { pose: 'staff', carry: 'staff', len: 1.7, cloth: 'cloth_ochre' });
   return T;
 }
 function beasts() {
@@ -176,9 +184,10 @@ export async function town() {
   plans.push(base('shibam-wall', wall()));
   // ground kept clear of the generic street life (src/objects/life.js reads these footprints): the shops' doors, the palace's door, the stalls and the arrival
   const res = [];
-  for (const l of shops()) { const u = doorOf(l); res.push({ t: 'reserve', rect: l.front === 'n' ? [u - 1.4, l.rect[1] - 2.5, u + 1.4, l.rect[1]] : [u - 1.4, l.rect[3], u + 1.4, l.rect[3] + 2.5] }); }
-  res.push({ t: 'reserve', rect: [-2.6, PALACE[3], 0, PALACE[3] + 3] }, { t: 'reserve', rect: [0, PALACE[3], 2.6, PALACE[3] + 3] });
-  for (const [x, z] of [[-26, -24], [-19, -24], [-12, -24.5], [-2, -24], [6, -24.5], [13, -24], [-26, -15], [-14, -3.5], [14, -3.5], [21, -3], [27, -6]]) res.push({ t: 'reserve', rect: [x - 1.6, z - 1.4, x + 1.6, z + 1.5] });
+  for (const l of shops()) { const u = doorOf(l); res.push({ t: 'reserve_wall', rect: l.front === 'n' ? [u - 1.4, l.rect[1] - 2.5, u + 1.4, l.rect[1]] : [u - 1.4, l.rect[3], u + 1.4, l.rect[3] + 2.5] }); }
+  res.push({ t: 'reserve_wall', rect: [-2.6, PALACE[3], 0, PALACE[3] + 3] }, { t: 'reserve_wall', rect: [0, PALACE[3], 2.6, PALACE[3] + 3] });
+  for (const [x, z] of [[-26, -24], [-19, -24], [-12, -24.5], [-2, -24], [6, -24.5], [13, -24], [-26, -15], [-14, -3.5], [14, -3.5], [21, -3], [27, -6]]) res.push({ t: 'reserve_wall', rect: [x - 1.6, z - 1.4, x + 1.6, z + 1.5] });
+  res.push({ t: 'reserve_wall', rect: [SQUARE[0], SQUARE[1], SQUARE[2], SQUARE[3]] });
   plans.push(base('shibam-reserve', res));
   const { lines, bridges } = crossings_();
   plans.push(base('shibam-sabat', bridges));
