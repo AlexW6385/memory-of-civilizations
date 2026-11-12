@@ -10,6 +10,8 @@ const ZC = zOf(SPARROW), FOOT = stairRect(SPARROW)[2];
 /** The carriages and the places kept clear of planting: [x, z, radius]. */
 export const CARRIAGES = [[-133, ZC - 12.8, Math.PI / 2, 'cloth_black'], [-129, ZC + 12.6, Math.PI / 2, 'cloth_red'], [-152, ZC - 16, Math.PI / 2, 'cloth_blue']];
 export const MATS = [[-124, ZC - 17, 0.15], [-109, ZC - 12.5, -0.2], [-124.5, ZC + 17, 3.0], [-108, ZC + 14, 3.3], [-134, ZC + 24, 2.9]];
+/** The garden's pavilions (town.js builds them): each gets a mat, a table and its company. */
+export const PAVILIONS = [[POND[2] + 6, POND[1] + 8], [POND[0] - 8, POND[3] - 6], [-95, -100], [-150, -118], [-92, -60]];
 export const KEEP = [...CARRIAGES.map(([x, z]) => [x + 2, z, 7]), ...MATS.map(([x, z]) => [x, z, 4.2])];
 
 export function forecourtElements() {
@@ -34,7 +36,7 @@ export function forecourtElements() {
   MATS.forEach(([x, z, yaw], i) => E.push(P('mat', x, z, { yaw, seed: 40 + i, zither: i % 2 === 0 })));
   // a well and a jar stand for the attendants beside the south lawn, rocks by the pond's landing already in town.js
   E.push(P('well', -116, ZC + 22), P('jars', -118.5, ZC + 20, { seed: 7, n: 5 }), P('bench', -118, ZC + 24.5, { len: 2.4, yaw: Math.PI / 2 }));
-  void POND;
+  PAVILIONS.forEach(([x, z], i) => E.push(P('mat', x, z, { y: 0.02, yaw: i * 0.7, seed: 70 + i, zither: i % 2 === 1, w: 2.2, d: 1.7 })));
   return E;
 }
 
@@ -57,6 +59,13 @@ export function forecourtLife() {
     fig(at(0.55, 0.85), yaw + Math.PI, { y: 0.04, pose: 'seiza', cloth: pick(COL), cloth2: 'cloth_white', beard: r() < 0.5 ? 1 : 0 });
     if (i % 2 === 0) fig(at(0, -0.95), yaw, { y: 0.04, pose: 'seiza', cloth: pick(COL), cloth2: 'cloth_white', beard: 1 });
     else fig(at(1.7, -0.2), yaw + 1.2, { cloth: 'cloth_brown', hat: 'none', over: 'belt', h: 1.15, pose: 'stand' });
+  });
+  // the pavilions: two at a table over the wine or the zither, one standing at the rail looking over the water
+  PAVILIONS.forEach(([x, z], i) => {
+    const yaw = i * 0.7, c = Math.cos(yaw), s = Math.sin(yaw), at = (u, v) => [x + u * c + v * s, z - u * s + v * c];
+    fig(at(-0.5, 0.8), yaw + Math.PI, { y: 0.06, pose: 'seiza', cloth: pick(COL), cloth2: 'cloth_white', beard: 1 });
+    if (i % 2 === 0) fig(at(0.6, 0.8), yaw + Math.PI, { y: 0.06, pose: 'seiza', cloth: pick(COL), cloth2: 'cloth_white' });
+    else fig(at(2.0, -1.7), yaw + 2.5, { cloth: pick(COL), cloth2: 'cloth_white', pose: 'stand' });
   });
   // the officials at the stair's foot talking, the porters at the carriages' rear, a woman of the court with her maid
   const [ax, az] = [FOOT - 4.5, ZC];

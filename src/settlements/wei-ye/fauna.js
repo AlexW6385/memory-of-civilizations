@@ -28,5 +28,7 @@ for (const [x, z, rot] of [[-120, WALL.s - 0.2, 0], [60, WALL.s, 0], [-20, WALL.
 for (const [x, k] of [[-150, 'egret'], [20, 'heron'], [140, 'egret'], [-90, 'heron']]) { const z = riverZ(x) + RIVER.w / 2 + 2.6; perches.push({ kind: k, x, z, y: height(x, z) + 0.1, rot: -Math.PI / 2, stay: [60, 220], gone: [40, 150], alert: 10 }); }
 perches.push({ kind: 'egret', x: POND[2] - 2, z: POND[1] + 10, y: POND_Y + 0.3, rot: Math.PI, stay: [60, 200], gone: [60, 160], alert: 10 });
 perches.push({ kind: 'heron', x: 60, z: riverZ(60) + RIVER.w / 2 + 3, y: height(60, riverZ(60) + RIVER.w / 2 + 3) + 0.1, rot: -Math.PI / 2, stay: [80, 240], gone: [40, 150], alert: 10 });
+// sparrows on the forecourt's paving and the carriages' shafts, at the stair's foot
+for (const [x, z] of [[-135, -86], [-129, -91], [-142, -83], [-131, -98], [-125, -78]]) perches.push({ kind: 'sparrow', x, z, y: height(x, z) + 0.05, rot: (x * 5) % 3, range: [1.8, 1.5] });
 void SPARROW;
 export default { fish, flights, perches };
