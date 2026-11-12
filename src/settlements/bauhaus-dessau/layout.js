@@ -83,8 +83,8 @@ export function lots() {
   rowX(ROAD_K[1] - F - 20, ROAD_K[1] - F, 40, 186, 's');
   rowX(ROAD_K[3] + F, ROAD_K[3] + F + 18, 66, 186, 'n');
   // the cross streets' sides in the west
-  rowX(ROAD_C1[1] - F - 20, ROAD_C1[1] - F, -186, -102, 's');
-  rowX(ROAD_C2[3] + F, ROAD_C2[3] + F + 20, -186, -102, 'n');
+  rowX(ROAD_C1[1] - F - 20, ROAD_C1[1] - F, -186, ROAD_KV[0] - F - 24, 's');
+  rowX(ROAD_C2[3] + F, ROAD_C2[3] + F + 20, -186, ROAD_KV[0] - F - 24, 'n');
   // Ebertallee's south side: villas
   rowX(ROAD_E[3] + F + 3, ROAD_E[3] + F + 17, -15, 186, 'n');
   return LOTS;

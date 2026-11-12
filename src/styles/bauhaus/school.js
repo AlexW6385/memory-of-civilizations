@@ -218,6 +218,7 @@ function northWing(sk) {
         for (const sx of [a + 0.4, b - 0.8]) cabinet(sk, sx, -27.3, sx + 0.4, -18, y, 2.1, 'wood_painted', sx < cx ? 'e' : 'w');
         for (const zz of [-24.5, -21.5, -18]) { table(sk, cx - 1.5, zz, cx + 1.5, zz + 0.8, y, 0.74); for (const s of [-1, 1]) chair(sk, cx + s * 0.8, y, zz + 1.25, 0); }
         sk.b('car_red', cx - 1, y + 0.9, -27.5, cx + 1, y + 1.7, -27.45);
+        { const rr = rng(i * 13 + 5); bookRows(sk, a + 0.8, -27.1, -18.2, y, 2.1, 1, rr); bookRows(sk, b - 0.8, -27.1, -18.2, y, 2.1, -1, rr); }
       } else {
         const tz = [-26.5, -23.5, -20.5, -17.5];
         for (const z of tz) for (const dx of [-2.6, 0.2]) { table(sk, cx + dx - 0.4, z, cx + dx + 1.2, z + 0.7, y, 0.76); stool(sk, cx + dx + 0.2, y, z + 1.1); stool(sk, cx + dx + 0.9, y, z + 1.1); }
@@ -320,10 +321,72 @@ function prellerhaus(sk) {
   sk.b('concrete_light', XB, 0, z0 + 3, x1 + 1.5, F0, z1 - 3); sk.fl([XB, z0 + 3, x1 + 1.5, z1 - 3], F0);
 }
 
+
+// ── the extras: the vertical lettering, the boiler house and its chimney, curtains behind the glass wall, books, hangings, a piano, weathering ──
+const GLYPH = { B: ['110', '101', '110', '101', '110'], A: ['010', '101', '111', '101', '101'], U: ['101', '101', '101', '101', '111'], H: ['101', '101', '111', '101', '101'], S: ['011', '100', '010', '001', '110'] };
+function lettering(sk) {
+  // a plastered fin at the workshop wing's north-west corner, BAUHAUS down its north face in black blocks (docs §2, [inferred] from the photographs)
+  const x0 = -17.95, x1 = -16.9, z0 = 3.55, z1 = B.ww[1] + 0.05, top = FR + 1.4, cell = 0.24;
+  sk.s(WHITE, x0, 0, z0, x1, top, z1); sk.b('concrete_light', x0 - 0.04, top, z0 - 0.04, x1 + 0.04, top + 0.1, z1);
+  let y = top - 0.9;
+  for (const ch of 'BAUHAUS') {
+    const g = GLYPH[ch];
+    for (let r = 0; r < 5; r++) for (let c = 0; c < 3; c++) if (g[r][c] === '1') { const xx = x1 - 0.12 - c * cell; sk.b('car_black', xx - cell + 0.02, y - (r + 1) * cell + 0.02, z0 - 0.04, xx - 0.02, y - r * cell - 0.02, z0 - 0.0); }
+    y -= 5 * cell + 0.3;
+  }
+  sk.b('plaster_damp', x0 + 0.05, 0.3, z0 - 0.03, x1 - 0.05, 1.0, z0 + 0.01);
+}
+function boilerHouse(sk) {
+  sk.s(WHITE, 40.5, 0, 36.2, 47.5, 4.0, 41.4); sk.b('concrete_light', 40.45, 4.0, 36.15, 47.55, 4.12, 41.45); sk.b('asphalt', 40.5, 4.12, 36.2, 47.5, 4.15, 41.4);
+  sk.b('steel_grey', 41.2, 0.2, 36.17, 43.6, 2.4, 36.2); sk.b('steel_grey', 44.6, 0.2, 36.17, 46.8, 2.2, 36.2); sk.b('wood_dark', 44.9, 0, 36.15, 46.0, 2.1, 36.2);
+  for (let u = 41.4; u < 47; u += 1.7) sk.pane('glass_outer', { alongX: true, x: 0, z: 36.16, u0: u, u1: u + 1.2, y0: 2.7, y1: 3.5, n: -1 });
+  sk.lathe('concrete_light', [[0.95, 0], [0.9, 4.0], [0.62, 16.6], [0.7, 16.65], [0.7, 17.0], [0.001, 17.0]], 44, 4.15, 40, 14);
+  sk.b('car_red', 43.3, 15.0, 39.3, 44.7, 15.4, 40.7);
+  sk.k(43.1, 0, 39.1, 44.9, 17, 40.9); sk.b('plaster_streak', 40.6, 0.7, 36.14, 41.6, 3.9, 36.2); sk.b('plaster_damp', 40.6, 0.0, 36.14, 47.4, 0.6, 36.2);
+  for (const x of [41.6, 46.4]) sk.b('iron_galv', x - 0.04, 0.2, 36.1, x + 0.04, 4.0, 36.16);
+  sk.b('wood_ochre', 41.0, 0, 41.5, 47, 0.9, 42.0); for (let i = 0; i < 6; i++) sk.b('soil', 41.2 + i, 0.9, 41.55, 41.9 + i, 1.1, 41.95);   // coke heap, a stack of coal
+}
+function curtains(sk) {
+  // summer curtains drawn behind the glass wall on some panes (docs §2: "curtains needed against summer sun")
+  const r = rng(1926), [x0, z0, , z1] = B.ww;
+  for (const [k, y] of [[0, F0], [1, F1], [2, F2]]) for (let u = z0 + 0.1; u + 2.4 < z1; u += 1.25) if (r() < 0.38 + k * 0.1) { const w = 1.25 * (1 + Math.floor(r() * 2)); sk.b(r() < 0.8 ? 'cloth_white' : 'cloth_ochre', x0 + 0.1, y + 0.4 + (r() < 0.3 ? 0.9 : 0), u + 0.04, x0 + 0.16, y + 3.9, Math.min(z1 - 0.1, u + w - 0.04)); u += w - 1.25; }
+}
+function bookRows(sk, x, z0, z1, y, h, face, r) {
+  for (let k = 0; k < 5; k++) {
+    const yy = y + 0.3 + k * (h - 0.5) / 5; sk.b('timber', face > 0 ? x : x - 0.02, yy, z0, face > 0 ? x + 0.02 : x, yy + 0.02, z1);
+    for (let z = z0 + 0.05; z < z1 - 0.1; z += 0.06 + r() * 0.05) sk.b(['cloth_red', 'cloth_blue', 'cloth_brown', 'cloth_green', 'paint_white', 'cloth_ochre', 'cloth_black'][Math.floor(r() * 7)], face > 0 ? x : x - 0.28, yy + 0.02, z, face > 0 ? x + 0.28 : x, yy + 0.24 + r() * 0.06, z + 0.04 + r() * 0.04);
+  }
+}
+function hangings(sk) {
+  // woven hangings of the weaving workshop (Stölzl's school): striped panels on the walls of the vestibule, the exhibition hall and the foyer
+  const r = rng(11), cols = ['cloth_red', 'cloth_ochre', 'cloth_blue', 'cloth_green', 'cloth_indigo', 'cloth_white', 'cloth_black'];
+  const panel = (alongX, c, u0, u1, y0, y1, sgn) => { const n = 6; for (let i = 0; i < n; i++) { const a = u0 + (u1 - u0) * i / n, b = u0 + (u1 - u0) * (i + 1) / n, m = cols[Math.floor(r() * cols.length)]; if (alongX) sk.b(m, a, y0, c, b, y1, c + sgn * 0.03); else sk.b(m, c, y0, a, c + sgn * 0.03, y1, b); } };
+  for (const y of [F0, F2]) { panel(true, 13.9, -15.6, -13.6, y + 1.0, y + 3.0, -1); panel(true, 13.9, -11.0, -9.4, y + 1.2, y + 2.8, -1); }
+  panel(false, 6.9, 15.6, 18.4, F0 + 1.0, F0 + 3.0, 1); panel(false, 6.9, 27.0, 29.5, F0 + 1.2, F0 + 3.0, 1);
+}
+function piano(sk) {
+  // the upright piano on the stage (the Bauhaus band played jazz at the school's parties), a drum and a stool
+  const y = F0 + 0.9;
+  sk.s('wood_dark', 32.3, y, 20.0, 32.9, y + 1.3, 21.8); sk.b('paint_white', 32.0, y + 0.72, 20.1, 32.3, y + 0.76, 21.7); sk.b('car_black', 32.0, y + 0.76, 20.4, 32.3, y + 0.8, 20.5);
+  sk.s('wood_painted', 31.2, y, 20.5, 31.7, y + 0.45, 21.1);
+  sk.lathe('wood_painted', [[0.3, 0], [0.3, 0.45], [0.001, 0.45]], 29.5, y, 28.5, 10); sk.lathe('steel_chrome', [[0.29, 0.45], [0.29, 0.47], [0.001, 0.47]], 29.5, y, 28.5, 10);
+  sk.rod('iron', [28.8, y + 0.4, 26.5], [28.8, y + 1.3, 26.5], 0.012, 4); sk.lathe('steel_chrome', [[0.001, 0], [0.18, 0.02], [0.18, 0.04], [0.001, 0.05]], 28.8, y + 1.3, 26.5, 10);
+}
+function weathering(sk) {
+  // rain streaks under the parapets and at the foot of the white walls, damp at the plinth
+  const r = rng(77);
+  const sides = [[B.nw[0], B.nw[2], B.nw[1], 'z', -1, FR], [B.nw[0], B.nw[2], B.nw[3], 'z', 1, FR], [B.fest[0] + 6, B.fest[2], B.fest[3], 'z', 1, 4.2], [B.pre[0], B.pre[2], B.pre[1], 'z', -1, PL.roof], [B.pre[0], B.pre[2], B.pre[3], 'z', 1, PL.roof]];
+  for (const [a0, a1, c, , sg, top] of sides) {
+    for (let x = a0 + 0.8; x < a1 - 0.8; x += 2.4 + r() * 2.4) if (r() < 0.8) { const h = 0.9 + r() * 1.8; sk.b('plaster_streak', x, top - h, c + (sg > 0 ? -0.01 : -0.03), x + 0.3 + r() * 0.5, top - 0.05, c + (sg > 0 ? 0.03 : 0.01)); }
+    sk.b('plaster_damp', a0 + 0.2, F0, c + (sg > 0 ? -0.01 : -0.03), a1 - 0.2, F0 + 0.5, c + (sg > 0 ? 0.03 : 0.01));
+  }
+}
+
 /** bauhaus_school: the whole building. */
 export function bauhausSchool(el, ctx) {
   const sk = new S(ctx);
   workshopWing(sk); bridge(sk); northWing(sk); festBlock(sk); prellerhaus(sk);
+  lettering(sk); boilerHouse(sk); curtains(sk); hangings(sk); piano(sk); weathering(sk);
   // the courtyard's paving, the entrance plinth steps and bicycle racks by the main door
   sk.b('concrete_light', 1.2, 0, 4.4, 8.0, 0.03, 13.8);
   for (let i = 0; i < 6; i++) { const x = 3 + i * 0.55; sk.rod('steel_chrome', [x, 0, 12.4], [x, 0.9, 12.4], 0.012, 4); }
