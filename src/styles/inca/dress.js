@@ -251,4 +251,41 @@ function condorTemple(el, { bag, col }) {
   }
 }
 
-export const INCA_DRESS = { condor_temple: condorTemple, inca_patio: patio, inca_cobs: cobs, inca_goods: goods, inca_offerings: offerings, inca_feast: feast };
+
+// ---- the Guardhouse's yard ------------------------------------------------------------------------
+/**
+ * inca_guardpost: the things of the knoll's top { y, cairn: [x, z], brazier: [x, z], wood: [x, z, yaw], jars: [[x, z]…], seat: [x, z, yaw], seed }:
+ * an apacheta — a cairn of flat stones, as the Andean traveller adds one to it, with a few offerings (a coca bundle, a pot, a pole with a red
+ * cloth) — a brazier of stones with its ash, a stack of firewood, water jars, a stone seat for the watch [inferred: after the apachetas
+ * of the Inca roads and the watchposts' furniture].
+ */
+function guardpost(el, { bag, col }) {
+  const rand = rng(el.seed || 1), y = el.y;
+  if (el.cairn) {
+    const [cx, cz] = el.cairn;
+    for (let i = 0; i < 9; i++) { const f = i / 9, r = 0.52 * (1 - f * 0.72); blk(bag, 'granite_rough', cx + (rand() - 0.5) * 0.08, y + i * 0.13, cz + (rand() - 0.5) * 0.08, r, r * (0.7 + rand() * 0.25), 0.14, rand() * 3.14); }
+    col.circle(cx, cz, 0.5, y, y + 1.1);
+    bag.add('wood_dark', rod([cx + 0.7, y, cz + 0.2], [cx + 0.72, y + 1.9, cz + 0.2], 0.025, 5));
+    bag.add('cloth_red', box(cx + 0.72, y + 1.45, cz + 0.18, cx + 1.1, y + 1.85, cz + 0.2));
+    blk(bag, 'cloth_brown', cx - 0.55, y, cz + 0.55, 0.09, 0.07, 0.06, 0.4);
+    olla(bag, cx + 0.45, y, cz - 0.6, 0.09); olla(bag, cx - 0.25, y, cz - 0.7, 0.07, 'paint_ochre');
+  }
+  if (el.brazier) {
+    const [bx, bz] = el.brazier;
+    for (let i = 0; i < 7; i++) { const a = i / 7 * 6.283; blk(bag, 'granite_rough', bx + Math.cos(a) * 0.42, y, bz + Math.sin(a) * 0.42, 0.14, 0.11, 0.2 + rand() * 0.1, a); }
+    bag.add('pottery_dark', box(bx - 0.3, y, bz - 0.3, bx + 0.3, y + 0.05, bz + 0.3));
+    col.circle(bx, bz, 0.55, y, y + 0.3);
+  }
+  if (el.wood) {
+    const [wx, wz, yaw] = el.wood, c = Math.cos(yaw), s = Math.sin(yaw);
+    for (let row = 0; row < 3; row++) for (let i = 0; i < 6 - row * 2; i++) {
+      const u = (i - (5 - row * 2) / 2) * 0.17, v = 0.1 + row * 0.15, a = [wx + (-0.55) * c - u * s, y + v, wz + (-0.55) * s + u * c], b = [wx + 0.55 * c - u * s, y + v + 0.01, wz + 0.55 * s + u * c];
+      bag.add('wood_dark', rod(a, b, 0.055, 5));
+    }
+    col.rect([wx - 0.62, wz - 0.5, wx + 0.62, wz + 0.5], y, y + 0.5);
+  }
+  for (const [jx, jz] of el.jars || []) { olla(bag, jx, y, jz, 0.3); col.circle(jx, jz, 0.32, y, y + 0.7); }
+  if (el.seat) { const [sx, sz, yaw] = el.seat; blk(bag, 'granite_inca', sx, y, sz, 0.55, 0.22, 0.42, yaw, col); }
+}
+
+export const INCA_DRESS = { inca_guardpost: guardpost, condor_temple: condorTemple, inca_patio: patio, inca_cobs: cobs, inca_goods: goods, inca_offerings: offerings, inca_feast: feast };

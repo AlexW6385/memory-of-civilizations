@@ -83,6 +83,8 @@ hill(KNOLL, -Math.PI / 2, 'granite_rough');
   E.push({ t: 'inca_temple', rect: [KNOLL.c[0] - 5.5, KNOLL.c[1] + 1, KNOLL.c[0] + 2.5, KNOLL.c[1] + 5], y: top + 0.3, h: 2.7, th: 0.75, open: 'n', roof: 'thatch', windowSide: 's', windows: 3, win: { w: 0.55, h: 0.6, sill: 1.15 }, niches: { e: 1, w: 1 }, seed: 71 });
   // the Funerary Rock a few steps from it: a square-cut monolith with a little stair cut in the same rock [stated: imachupicchu]
   E.push({ t: 'funerary_rock', c: [KNOLL.c[0] + 8, KNOLL.c[1] + 3], y: top, yaw: 0.4 });
+  // the yard: an apacheta (cairn with its offerings) at the knoll's edge, a brazier, firewood, water jars and a stone seat for the watch
+  E.push({ t: 'inca_guardpost', y: top, cairn: [KNOLL.c[0] - 6.8, KNOLL.c[1] - 4.9], brazier: [KNOLL.c[0] + 2.2, KNOLL.c[1] - 1.8], wood: [KNOLL.c[0] - 7.6, KNOLL.c[1] + 2.2, 0.3], jars: [[KNOLL.c[0] + 3.6, KNOLL.c[1] + 4.2], [KNOLL.c[0] + 4.2, KNOLL.c[1] + 4.6]], seat: [KNOLL.c[0] - 2, KNOLL.c[1] - 1.2, 0], seed: 77 });
 }
 // the Temple of the Sun on its rock south of the Sacred Plaza, the royal residence beside it, the first fountain's
 // stair between: the Torreón stands on its rock over the cave of the Royal Tomb, the mouth in the rock's east face; a stair up beside it

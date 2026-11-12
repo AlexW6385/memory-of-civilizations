@@ -6,7 +6,7 @@
 // women's ankle-length wrap (anaku) under a shawl (lliklla), sandals [stated: encyclopedia.com, "America,
 // South: History of Dress"].
 
-import { SITE, TERRACE, KNOLL, PLOUGH, CONDOR, kanchas, fountains } from './layout.js';
+import { SITE, TERRACE, KNOLL, hillRing, PLOUGH, CONDOR, kanchas, fountains } from './layout.js';
 import { ground } from './ground.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -101,6 +101,11 @@ export function people() {
     const kt = (m, th) => { const d = KNOLL.r + 6 - 2.4 * (m + 0.5), x = KNOLL.c[0] + Math.cos(th) * d, z = KNOLL.c[1] + Math.sin(th) * d; return [x, z, 2.2 * m]; };
     for (const [m, th] of [[1, -1.2], [1, -1.62], [2, -1.9], [3, -1.35], [1, -2.05]]) { const [x, z, y] = kt(m, th); figures.push({ t: 'animal', kind: 'llama', at: [x, z], y, rot: rand() * 6.28, seed: seed(), graze: true }); }
     { const [x, z, y] = kt(1, -1.45); figures.push(man({ at: [x, z], y, rot: S + 0.6, h: 1.1, pose: 'staff', staffMat: 'wood_dark', len: 1.0, over: 'belt' })); }
+    // on the knoll's stair below the arrival: a porter coming down with his load, a woman with a pot going up, a girl behind her
+    { const top = 2.2 * KNOLL.n, zl = KNOLL.c[1] - KNOLL.r - 10, zh = KNOLL.c[1] - hillRing(KNOLL, KNOLL.n - 1) + 0.6, ns = Math.round(top / 0.16), yAt = (z) => top * Math.ceil((z - zl) / (zh - zl) * ns) / ns;
+      figures.push(man({ at: [KNOLL.c[0] + 0.55, 121.5], y: yAt(121.5), rot: N + 0.05, carry: 'bundle', h: 1.62 }));
+      figures.push(woman({ at: [KNOLL.c[0] - 0.55, 115.5], y: yAt(115.5), rot: S, carry: 'pot', h: 1.5 }));
+      figures.push(woman({ at: [KNOLL.c[0] + 0.3, 113.2], y: yAt(113.2), rot: S - 0.1, h: 1.2, over: 'shawl' })); }
     // the spearmen of the gate, inside the wall to either side of the road
     for (const [x, z, r] of [[-0.5, 81.2, S + 0.15], [4.5, 81.2, S - 0.15]]) figures.push(man({ at: [x, z], y: 0, rot: r, pose: 'staff', staffMat: 'wood_dark', len: 1.85, cloth: 'cloth_red', cloth2: 'cloth_black', over: 'cape', h: 1.7 }));
   }
