@@ -16,6 +16,7 @@ import { Matrix4 } from '../../core/three.js';
 import { sculpt, rows, smooth, bump, blob } from '../rapanui/sculpt.js';
 import '../qing/index.js';
 import { SCENES } from './scenes.js';
+import { YARDS } from './yards.js';
 
 const K = 'kokowai', P = 'palisade', TH = 'raupo', PAUA = 'shell_inlay';
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -230,7 +231,7 @@ function whare(el, ctx) {
   const FM = carved ? 'timber' : WM;
   add(FM, prism([[-w / 2 + t, h], [w / 2 - t, h], [w / 2 - t, under(w / 2 - t) + 0.04], [0, under(0) + 0.04], [-w / 2 + t, under(w / 2 - t) + 0.04]], zf, zf + 0.15));
   // the front wall: the door left of centre, the window right (a storehouse: a small door in the middle)
-  const small = w < 3, dl = small ? -0.28 : -w * 0.18 - 0.32, dr = small ? 0.28 : dl + 0.64, dh = small ? Math.min(0.75, h - 0.1) : Math.min(1.15, h - (carved ? 0.45 : 0.08));
+  const small = w < 3, dl = small ? -0.28 : -w * 0.18 - 0.32, dr = small ? 0.28 : dl + 0.95, dh = small ? Math.min(0.75, h - 0.1) : Math.min(1.15, h - (carved ? 0.45 : 0.08));
   const wl = small ? w : w * 0.16, wr = wl + 0.5, wb = 0.6, wt = Math.min(1.05, h - 0.05);
   const piece = (x0, x1, a, b) => { if (x1 - x0 > 0.01 && b - a > 0.01) add(FM, box(x0, a, zf, x1, b, zf + 0.15)); };
   if (small) { piece(-w / 2 + t, dl, -0.2, h); piece(dr, w / 2 - t, -0.2, h); piece(dl, dr, dh, h); }
@@ -242,6 +243,14 @@ function whare(el, ctx) {
     tr.push(...a, ...b, ...c, ...a, ...c, ...d, ...a, ...c, ...b, ...a, ...d, ...c);
   }
   add(TH, fromTriangles(tr));
+  // the thatch's lashings: battens tied down the slopes at intervals, and the ridge capped with a roll of raupō [inferred: after museum models of thatched whare]
+  if (!small && rank < 2) {
+    const sl = (x) => e + (ridge - e) * (1 - Math.abs(x) / (w / 2 + ov));
+    for (const s of [-1, 1]) for (let zz = -l / 2 + 0.5; zz < l / 2 - 0.2; zz += 1.1) add('rope_fibre', rod([s * (w / 2 + ov - 0.05), sl(w / 2 + ov - 0.05) + 0.03, zz], [s * 0.1, sl(0.1) + 0.04, zz], 0.022, 4));
+    add(TH, rod([0, ridge + 0.04, -l / 2 - 0.1], [0, ridge + 0.04, l / 2 + 0.2], 0.1, 6));
+  }
+  // the underside of the thatch, smoke-darkened (rafters and the inner layer of reed): a ceiling under the roof, so that one may walk in
+  if (!small) { const tu = tr.slice(); for (let q = 1; q < tu.length; q += 3) tu[q] -= 0.1; add('wood_dark', fromTriangles(tu)); }
   // the ridge beam (tāhuhu) under the ridge, the rafters (heke) of the porch
   add(carved ? K : 'timber', box(-0.1, ridge - 0.32, -l / 2 - 0.05, 0.1, under(0.1) - 0.005, l / 2 - t));
   for (const s of [-1, 1]) for (let zz = -l / 2 + 0.2; zz < zf - 0.1; zz += 0.45) add(carved ? K : 'timber', board([s * (w / 2 - 0.05), under(w / 2 - 0.05) - 0.06], [s * 0.12, under(0.12) - 0.06], 0.1, zz - 0.04, zz + 0.04));
@@ -293,13 +302,32 @@ function whare(el, ctx) {
     add('reed_mat', box(-w / 2 + t + 0.15, -0.2, zf + 1.2, w / 2 - t - 0.15, 0.03, l / 2 - t - 0.15));
     for (let k = 0; k < 4; k++) add('pebbles', box(-0.45 + (k % 2) * 0.75, -0.2, zf + 0.35 + Math.floor(k / 2) * 0.55, -0.3 + (k % 2) * 0.75, 0.1, zf + 0.5 + Math.floor(k / 2) * 0.55));
     add('opening', box(-0.3, -0.2, zf + 0.5, 0.3, 0.04, zf + 0.9));
+    // the chief's household things: sleeping places of fern and mats at the back by the walls with folded cloaks, a carved box (waka huia)
+    // on a stand, a dog-skin cloak on a peg, a taiaha and a pair of paddles on pegs against the back wall, kete and a net hung from the rafters
+    const zb = l / 2 - t - 0.15, zm2 = (zf + l / 2) / 2 + 1.0;
+    for (const s of [-1, 1]) {
+      const x0 = s > 0 ? w / 2 - t - 1.25 : -w / 2 + t + 0.35, x1 = x0 + 0.9;
+      add('rope_fibre', box(x0, -0.15, zm2 + 0.3, x1, 0.12, zb));
+      add('reed_mat', box(x0 + 0.03, 0.12, zm2 + 0.35, x1 - 0.03, 0.14, zb - 0.05));
+      for (let k = 0; k < 2; k++) add(k ? 'hide_white' : 'cloth_ochre', box(x0 + 0.08, 0.14, zm2 + 0.6 + k * 0.95, x1 - 0.08, 0.27, zm2 + 1.1 + k * 0.95));
+    }
+    add('wood_dark', box(-0.3, 0.0, zb - 0.55, 0.3, 0.38, zb - 0.2)); add(K, box(-0.34, 0.38, zb - 0.58, 0.34, 0.45, zb - 0.17));
+    fig('slab', 0, 0.45, zb - 0.38, 0.38, Math.PI);
+    for (const [x, kind] of [[-0.9, 'hide_white'], [0.9, 'hide_brown']]) { add('timber', rod([x, 1.1, zb + 0.02], [x, 1.1, zb - 0.1], 0.03, 5)); add(kind, box(x - 0.3, 0.45, zb - 0.06, x + 0.3, 1.1, zb - 0.02)); }
+    add('timber', rod([-0.2, 0.0, zb - 0.04], [-0.2, 1.9, zb - 0.04], 0.03, 5)); add('basalt', box(-0.24, 1.9, zb - 0.07, -0.16, 2.1, zb - 0.01));
+    for (const [x, z] of [[-0.6, zm2 - 0.6], [0.7, zm2 + 0.5]]) {
+      const top = under(Math.abs(x)) - 0.1;
+      add('rope_fibre', rod([x, top, z], [x, top - 0.55, z], 0.012, 4));
+      add('wicker', lathe([[0.001, 0], [0.15, 0.02], [0.19, 0.16], [0.14, 0.3], [0.001, 0.3]], 9, null, x, top - 0.85, z));
+    }
   }
-  if (rank === 0 && !small && el.furnished !== false) commonHouse(add, { w, l, h, t, zf, e, under, rank });
+  if (rank <= 1 && !small && el.furnished !== false) commonHouse(add, { w, l, h, t, zf, e, under, rank });
   col.segment(W2(-w / 2, -l / 2 + 0.1), W2(-w / 2, l / 2), 0.3, y0, y0 + h + rise * 0.5);
   col.segment(W2(w / 2, -l / 2 + 0.1), W2(w / 2, l / 2), 0.3, y0, y0 + h + rise * 0.5);
   col.segment(W2(-w / 2, l / 2), W2(w / 2, l / 2), 0.3, y0, y0 + h + rise);
-  col.segment(W2(-w / 2, zf + 0.08), W2(dl, zf + 0.08), 0.2, y0, y0 + h + rise);
-  col.segment(W2(dr, zf + 0.08), W2(w / 2, zf + 0.08), 0.2, y0, y0 + h + rise);
+  // (the door is 0.95 m, wider than the old 0.64, and the front wall's colliders thin, so that a visitor can walk in)
+  col.segment(W2(-w / 2, zf + 0.08), W2(dl, zf + 0.08), 0.07, y0, y0 + h + rise);
+  col.segment(W2(dr, zf + 0.08), W2(w / 2, zf + 0.08), 0.07, y0, y0 + h + rise);
 }
 
 /** pataka: a storehouse raised on posts { c, y, yaw, w, l, lift } — walls of adzed boards, carved round the entrance, a deck before the door, a notched pole to climb. */
@@ -420,6 +448,14 @@ function waka(el, { bag, col }) {
   col.segment([x - sa * L / 2, z - ca * L / 2], [x + sa * L / 2, z + ca * L / 2], B, y0, y0 + D);
 }
 
+/** pou: a carved post standing alone { at, y, h, yaw } — a figure on a shaft, red ochre (boundary and ancestor posts on the marae ātea and by the paths). */
+function pou(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, h = el.h ?? 2.4;
+  post(bag, x, y - 0.4, z, 0.14, h, K);
+  figure(bag, 'post', x, y + h - 0.1, z, 1.2, el.yaw ?? 0, 260);
+  col.circle(x, z, 0.2, y, y + h + 1);
+}
+
 // ---- gardens -------------------------------------------------------------------------------
 /** The fence's stakes, three heights. */
 const STAKES = [1.25, 1.4, 1.55].map((hh) => lathe([[0.04, 0], [0.03, hh], [0.001, hh + 0.03]], 5));
@@ -457,6 +493,6 @@ function mara(el, { bag }) {
 
 registerStyle('maori', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, palisade, whare, pataka, stage, waharoa, rua, waka, mara, ...SCENES },
+  elements: { ...STYLES.qing.elements, palisade, whare, pataka, stage, waharoa, rua, waka, mara, pou, ...SCENES, ...YARDS },
   objects: {},
 });

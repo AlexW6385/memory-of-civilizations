@@ -15,7 +15,7 @@ const CHIEF = ['hide_white', 'hide_brown'];
 
 export async function town() {
   const v = village(), E = [], P = [], rand = rng(1769);
-  for (const h of v.houses.slice(1)) E.push({ t: 'whare', carved: false, ...h });
+  for (const h of v.houses.slice(1)) E.push({ t: 'whare', carved: false, walls: (h.c[0] * 7 + h.c[1] * 3) % 5 < 2 ? 'reed_mat' : 'raupo', ...h, ...(Math.hypot(h.c[0], h.c[1]) > 250 ? { furnished: false } : {}) });
   for (const p of v.pataka.slice(1)) E.push({ t: 'pataka', ...p });
   for (const p of v.pits) E.push({ t: 'rua', ...p });
   for (const w of v.waka) E.push({ t: 'waka', ...w });
@@ -136,18 +136,111 @@ export async function town() {
   // ---- the household work of the kāinga: before each few houses the cooking place or the racks, the flax, the weaver, a man at his adze or net -----------
   const houses = v.houses.slice(1).filter((h) => Math.hypot(h.c[0] - hx, h.c[1] - hz) > HILL.ditch + 10 && Math.hypot(h.c[0], h.c[1]) < RADIUS - 60 && !inLake(h.c[0], h.c[1] - 12));
   const door = (h, d) => [h.c[0] - Math.sin(h.yaw) * (h.l / 2 + d), h.c[1] - Math.cos(h.yaw) * (h.l / 2 + d)];   // before the porch
+  const gy = (p) => height(p[0], p[1]);
+  // every house on the hill and below it: the dressing of its front (firewood, the cloak line, kete, gourds, adze, fish, windbreak)
+  v.houses.slice(1).forEach((h, k) => {
+    if (inLake(h.c[0], h.c[1] - 8) || Math.hypot(h.c[0], h.c[1]) > RADIUS - 48) return;
+    const d = door(h, 0.25);
+    E.push({ t: 'yard', c: d, y: gy(d), yaw: h.yaw, w: h.w, seed: 100 + k, items: 2 + (k % 3 === 0 ? 1 : 0) });
+  });
   houses.forEach((h, k) => {
     const rot = h.yaw + Math.PI, at0 = door(h, 3.2);
     if (Math.hypot(at0[0], at0[1]) > RADIUS - 55 || !clear(at0[0], at0[1], 1.5)) return;
-    const gy = (p) => height(p[0], p[1]);
-    if (k % 7 === 0) { E.push({ t: 'hangi', c: door(h, 5.5), y: gy(door(h, 5.5)), yaw: rot, seed: 40 + k }); taken.push(door(h, 5.5)); const w1 = door(h, 3.4); woman(w1, gy(w1), face(w1, door(h, 5.5)), { pose: 'squat', over: 'none' }); }
-    else if (k % 7 === 2) { const w = [at0[0] + Math.cos(h.yaw) * 1.4, at0[1] - Math.sin(h.yaw) * 1.4]; E.push({ t: 'weaving', at: w, y: gy(w), yaw: rot, seed: 50 + k }); const q = [w[0] - Math.sin(rot) * 1.5, w[1] - Math.cos(rot) * 1.5]; woman(q, gy(q), face(q, w), { pose: 'squat', over: 'none' }); }
-    else if (k % 7 === 4) { const a = [at0[0] - Math.cos(h.yaw) * 5, at0[1] + Math.sin(h.yaw) * 5], b = [at0[0] + Math.cos(h.yaw) * 0 - Math.cos(h.yaw) * 1, at0[1] + Math.sin(h.yaw) * 1]; E.push({ t: 'whata', a, b, y: gy(a), h: 1.9 }); taken.push(a, b); }
+    if (k % 7 === 2) { const w = [at0[0] + Math.cos(h.yaw) * 1.4, at0[1] - Math.sin(h.yaw) * 1.4]; E.push({ t: 'weaving', at: w, y: gy(w), yaw: rot, seed: 50 + k }); const q = [w[0] - Math.sin(rot) * 1.5, w[1] - Math.cos(rot) * 1.5]; woman(q, gy(q), face(q, w), { pose: 'squat', over: 'none' }); }
     else if (k % 7 === 5) { const q = door(h, 2.6); man(q, gy(q), face(q, h.c), { pose: 'squat' }); }
+    else if (k % 7 === 6) { const q = door(h, 2.2); woman(q, gy(q), face(q, h.c) + 0.4, { pose: 'sit' }); }
+    else if (k % 7 === 3) { const q = door(h, 3.0); (k % 2 ? man : woman)(q, gy(q), rand() * 6.28, { pose: 'talk' }); const q2 = [q[0] + 0.8, q[1] + 0.3]; woman(q2, gy(q2), face(q2, q), {}); }
     // flax at the corner of the house, a hīnaki or two by the wall
     const hk = [h.c[0] + Math.cos(h.yaw) * (h.w / 2 + 1.6), h.c[1] - Math.sin(h.yaw) * (h.w / 2 + 1.6)];
     if (clear(hk[0], hk[1], 2)) E.push({ t: 'harakeke', at: hk, y: gy(hk), h: 1.4 + rand() * 0.7, seed: Math.floor(rand() * 1e5) });
     if (k % 3 === 0) { const hn = [hk[0] - Math.cos(h.yaw) * 1.2, hk[1] + Math.sin(h.yaw) * 1.2]; E.push({ t: 'hinaki', at: hn, y: gy(hn), yaw: rand() * 3, len: 1.0 + rand() * 0.3 }); }
   });
+  // the terraces: a person at about every third door, a cooking place on each terrace, a dog or two
+  const terr = v.houses.slice(1).filter((h) => Math.hypot(h.c[0] - hx, h.c[1] - hz) < HILL.foot - 4 && Math.hypot(h.c[0] - hx, h.c[1] - hz) > HILL.tihi + 4);
+  terr.forEach((h, k) => {
+    const at = door(h, 2.8 + (k % 2) * 0.6), a2 = [at[0] + Math.cos(h.yaw) * 0.9, at[1] - Math.sin(h.yaw) * 0.9];
+    if (k % 3 === 0) (k % 2 ? woman : man)(at, h.y, face(at, h.c) + (rand() - 0.5) * 0.6, { pose: k % 4 === 0 ? 'squat' : 'stand', over: k % 2 ? 'none' : undefined });
+    if (k % 9 === 4) woman(a2, h.y, face(a2, at), { pose: 'squat', over: 'none' });
+    if (k % 13 === 6 && clear(door(h, 6.2)[0], door(h, 6.2)[1], 5.5)) { taken.push(door(h, 6.2)); E.push({ t: 'hangi', c: door(h, 6.2), y: h.y, yaw: h.yaw + Math.PI, seed: 300 + k }); }
+    if (k % 17 === 8) P.push({ t: 'animal', kind: 'dog', at: a2, y: h.y, rot: rand() * 6.28, mat: KURI[k % 5], seed: 1000 + k });
+  });
+  // ---- the whānau yards: each compound's cooking place in the middle, its women and children, a man at work, the dogs --------------------
+  v.compounds.forEach((c, k) => {
+    const [cx, cz] = c.c;
+    if (Math.hypot(cx, cz) > RADIUS - 56) return;
+    E.push({ t: 'hangi', c: [cx, cz], y: gy([cx, cz]), yaw: rand() * 6.28, seed: 200 + k });
+    const ring = (n, r0, f) => { for (let i = 0; i < n; i++) { const a = rand() * 6.28, r = r0 + rand() * 1.4, at = [cx + Math.cos(a) * r, cz + Math.sin(a) * r]; if (inLake(at[0], at[1])) continue; f(at, i); } };
+    ring(2, 3.6, (at) => woman(at, gy(at), face(at, [cx, cz]), { pose: 'squat', over: 'none' }));
+    ring(2, 5.6, (at, i) => P.push({ t: 'figure', at, y: gy(at), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: CLOAK[i], cloth2: 'cloth_brown', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: 'short', beard: false, h: 1.05, pose: 'stand' }));
+    ring(1, 6.2, (at) => man(at, gy(at), face(at, [cx, cz]), { pose: 'squat' }));
+    const kd = [cx + (rand() - 0.5) * 8, cz + (rand() - 0.5) * 8];
+    if (clear(kd[0], kd[1], 1)) P.push({ t: 'animal', kind: 'dog', at: kd, y: gy(kd), rot: rand() * 6.28, mat: KURI[k % 5], seed: 960 + k });
+    // a cabbage tree or two by the compound, a tree fern or two behind
+    for (let q = 0; q < 2; q++) { const a = rand() * 6.28, r = c.r + 11 + rand() * 6, at = [cx + Math.cos(a) * r, cz + Math.sin(a) * r]; if (clear(at[0], at[1], 3) && !inLake(at[0], at[1] - 10) && Math.hypot(at[0], at[1]) < RADIUS - 50) { E.push({ t: q ? 'ponga' : 'tikouka', at, y: gy(at), h: q ? 2.5 + rand() * 2.5 : 4 + rand() * 3, seed: Math.floor(rand() * 1e5) }); taken.push(at); } }
+  });
+  // ---- trees: cabbage trees along the shore, tree ferns on the banks and the scarps, a grove behind the hill -----------------------------
+  for (let k = 0, n = 0; k < 800 && n < 60; k++) {
+    const x = -250 + rand() * 500, z = shoreZ(x) + 6 + rand() * 22;
+    if (Math.hypot(x, z) > RADIUS - 48 || !clear(x, z, 4) || inLake(x, z - 2)) continue;
+    E.push({ t: 'tikouka', at: [x, z], y: height(x, z), h: 3.5 + rand() * 3.5, seed: Math.floor(rand() * 1e5) }); taken.push([x, z]); n++;
+  }
+  for (let k = 0, n = 0; k < 600 && n < 70; k++) {
+    const a = rand() * 6.28, r = HILL.ditch + 6 + rand() * 30, x = hx + Math.cos(a) * r, z = hz + Math.sin(a) * r;
+    if (Math.hypot(x, z) > RADIUS - 48 || Math.abs(x - PATH.x) < PATH.w + 3 || inLake(x, z - 6) || !clear(x, z, 3.5) || inGarden(x, z)) continue;
+    E.push({ t: 'ponga', at: [x, z], y: height(x, z), h: 2 + rand() * 3.5, seed: Math.floor(rand() * 1e5) }); taken.push([x, z]); n++;
+  }
+  // ---- the way in, at the gardens' end: carved posts on either side of the path and the gardeners at their plots ------------------------
+  for (const [dx, zz] of [[-4.5, 150], [4.5, 150], [-4.5, 124], [4.5, 124]]) { const at = [dx, zz]; E.push({ t: 'pou', at, y: gy(at), h: 2.2 + (zz === 124 ? 0.4 : 0), yaw: dx < 0 ? 0.35 : -0.35 }); taken.push(at); }
+  for (const [px, pz] of [[hxm - 9, 18], [hxm + 9, 18], [hxm - 9, 31], [hxm + 9, 31]]) E.push({ t: 'pou', at: [px, pz], y: top, h: 2.6, yaw: Math.PI });   // the marae ātea's carved posts
+  const lanes = []; for (let x0 = -116; x0 < 116; x0 += 21) lanes.push(x0 + 19.5);
+  let gk = 0;
+  for (const lx of lanes) for (const zz of [158 + rand() * 6, 188 + rand() * 8, 228 + rand() * 10]) {
+    if (Math.abs(lx) < PATH.w + 4 || !inGarden(lx, zz) || (gk++ % 2 && zz > 200)) continue;
+    const at = [lx + (rand() - 0.5) * 1.2, zz], toPlot = lx > 0 ? -1 : 1;
+    (rand() < 0.65 ? woman : man)(at, gy(at), Math.PI / 2 * toPlot + (rand() - 0.5) * 0.5, { pose: rand() < 0.6 ? 'squat' : 'stand', over: 'none' });
+  }
+  // by the path as one arrives: two boys with a kurī, a man with a kete of kūmara resting
+  for (const [px, pz, o] of [[5.2, 156, { pose: 'stand' }], [-5.4, 163, { pose: 'squat' }], [5.6, 172, { pose: 'sit' }]]) { const at = [px, pz]; man(at, gy(at), face(at, [0, 150]) + 0.4, o); }
+  P.push({ t: 'animal', kind: 'dog', at: [4.2, 158.5], y: gy([4.2, 158.5]), rot: 1.2, mat: 'hide_white', seed: 990 });
+  // ---- the gardens' corridor (the clear way through the plots, x −11 … 10): the gardeners' huts facing the path, a rack, a store, cabbage trees lining the way ----
+  [[-8.2, 186, -Math.PI / 2], [8.2, 211, Math.PI / 2], [-8.4, 243, -Math.PI / 2], [8.4, 276, Math.PI / 2]].forEach(([x, z, yaw], k) => {
+    E.push({ t: 'whare', carved: false, c: [x, z], yaw, w: 2.9 + (k % 2) * 0.4, l: 4.2, h: 1.1, y: height(x, z), rank: 0 });
+    const d = [x - Math.sin(yaw) * 2.35, z - Math.cos(yaw) * 2.35];
+    E.push({ t: 'yard', c: d, y: gy(d), yaw, w: 3.4, seed: 700 + k, items: 2 });
+    const q = [x - Math.sin(yaw) * 4.2, z - Math.cos(yaw) * 4.2 + 1.0];
+    (k % 2 ? man : woman)(q, gy(q), face(q, [x, z]) + 0.3, { pose: k % 2 ? 'squat' : 'sit', over: 'none' });
+    taken.push([x, z]);
+  });
+  { const a = [-6, 166], b = [-2.6, 166]; E.push({ t: 'whata', a, b, y: gy(a), h: 1.9 }); }
+  { const at = [7.6, 168]; E.push({ t: 'pataka', c: at, y: gy(at), yaw: -Math.PI / 2 }); taken.push(at); }
+  for (let z = 176; z < RADIUS - 52; z += 21 + rand() * 6) for (const sx of [-1, 1]) {
+    const at = [sx * (9.6 + rand() * 0.8), z + rand() * 5];
+    if (Math.hypot(at[0], at[1]) < RADIUS - 52 && clear(at[0], at[1], 3)) { E.push({ t: 'tikouka', at, y: gy(at), h: 3.2 + rand() * 3, seed: Math.floor(rand() * 1e5) }); taken.push(at); }
+  }
+  // tree ferns and flax on the terraces' scarps (the steep banks between the terraces)
+  HILL.rings.slice(1).forEach(([r0], ri) => {
+    for (let k = 0; k < 26; k++) {
+      const a = rand() * 6.28, r = r0 + 0.2 + rand() * 1.8, x = hx + Math.cos(a) * r, z = hz + Math.sin(a) * r;
+      if (Math.abs(x - PATH.x) < PATH.w + 2 && z > hz) continue;
+      E.push(k % 3 ? { t: 'harakeke', at: [x, z], y: height(x, z), h: 1.1 + rand() * 0.6, seed: Math.floor(rand() * 1e5) } : { t: 'ponga', at: [x, z], y: height(x, z), h: 1.6 + rand() * 1.8, seed: Math.floor(rand() * 1e5) });
+    }
+    void ri;
+  });
+  // ---- the lake: fishing canoes with their crews, a waka taua paddling in ---------------------------------------------------------
+  const seat = (wx, wz, yw, u, w) => [wx + Math.sin(yw) * u + Math.cos(yw) * w, wz + Math.cos(yw) * u - Math.sin(yw) * w];
+  [[-70, 26, 0.5, 6.5, 2], [95, 40, -0.4, 6, 2], [-190, 34, 0.2, 5.5, 2], [40, 70, 3.0, 14, 8]].forEach(([x, dz, yw, l, crew], q) => {
+    const z = shoreZ(x) - dz; if (Math.hypot(x, z) > RADIUS - 40) return;
+    E.push({ t: 'waka', c: [x, z], y: LAKE.level - 0.22, yaw: yw, l, seed: q });
+    for (let i = 0; i < crew; i++) {
+      const u = -l * 0.3 + i * (l * 0.6 / Math.max(1, crew - 1)) * (crew > 3 ? 1 : 0.85) + (crew > 3 ? 0 : 0.4), at = seat(x, z, yw, u, 0), sk = skin();
+      P.push({ t: 'figure', at, y: LAKE.level - 0.05, rot: yw + (q === 3 ? 0 : (i % 2 ? 0.5 : -0.5)), seed: Math.floor(rand() * 1e9), dress: 'tunic', cloth: sk, cloth2: 'cloth_brown', over: 'belt', skin: sk, hat: 'none', feet: 'bare', hair: 'bun', beard: false, pose: 'sit' });
+    }
+  });
+  // the shared street life (src/objects/life.js) keeps its figures off what it sees as footprints — a `c` with a radius `r`,
+  // a rectangle or a line: give every house, store, oven, tree and post one, and mark the way in and the marae ātea as kept clear
+  const RAD = { whare: (e) => e.l / 2 + 0.7, pataka: () => 2.2, rua: () => 2.4, hangi: () => 2.8, waka_build: () => 5, waka: (e) => (e.l ?? 10) / 2, harakeke: () => 0.5, hinaki: () => 0.4, tikouka: () => 0.6, ponga: () => 0.5, pou: () => 0.4, yard: () => 1.4, weaving: () => 1.2 };
+  for (const e of E) if (RAD[e.t] && !e.r) { const at = e.c ?? e.at; if (!at) continue; e.r = RAD[e.t](e); if (!e.c) e.c = at; }
+  E.push({ t: 'trim', rect: [-2.6, HILL.c[1] + HILL.ditch, 2.6, RADIUS - 20] });
+  E.push({ t: 'trim', rect: [hxm - 10, 11, hxm + 10, 33] });
   return [plan('maori-kainga', 'maori', E), plan('maori-people', 'life', P)];
 }

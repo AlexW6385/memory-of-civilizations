@@ -4,11 +4,34 @@
 
 import { RADIUS, HILL, LAKE, PATH, height, inLake, inGarden, village } from './layout.js';
 
+// the trodden ground: bare earth round every house and across each whānau yard, in cells of 12 m
+let CELLS = null;
+function cells() {
+  if (CELLS) return CELLS;
+  CELLS = new Map();
+  const v = village(), add = (o) => { const k = Math.floor(o[0] / 12) + ',' + Math.floor(o[1] / 12); (CELLS.get(k) || CELLS.set(k, []).get(k)).push(o); };
+  for (const h of v.houses) add([h.c[0], h.c[1], h.l / 2 + 2.6, 1]);
+  for (const c of v.compounds) add([c.c[0], c.c[1], c.r + 1.5, 2]);
+  for (const p of [...v.pataka, ...v.pits]) add([p.c[0], p.c[1], 2.6, 1]);
+  return CELLS;
+}
+/** 0..1: how trodden the ground is at (x, z). */
+function trodden(x, z) {
+  const C = cells(), i = Math.floor(x / 12), j = Math.floor(z / 12);
+  let t = 0;
+  for (let a = i - 2; a <= i + 2; a++) for (let b = j - 2; b <= j + 2; b++) for (const [ox, oz, r, k] of C.get(a + ',' + b) || []) {
+    const d = Math.hypot(ox - x, oz - z);
+    if (d < r) t = Math.max(t, k === 2 ? 1 : 0.5 + 0.5 * (1 - d / r));
+  }
+  return t;
+}
 function cover(x, z, h, ny) {
   const c = { sand: 0, grass: 0.8, rock: 0, soil: 0.2, fields: 0, dry: 0.15, warmth: 0.45, red: 0.1, road: 0, snow: 0, forest: 0 };
   if (inGarden(x, z)) { c.fields = 0.8; c.soil = 0.6; return c; }
   if (Math.abs(x - PATH.x) < PATH.w / 2 && z > HILL.c[1]) { c.road = 0.8; return c; }
   if (ny < 0.8) { c.soil = 0.6; c.grass = 0.4; return c; }
+  const tr = trodden(x, z);
+  if (tr > 0.05) { c.soil = 0.25 + 0.55 * tr; c.grass = 0.8 - 0.7 * tr; c.dry = 0.15 + 0.3 * tr; }
   if (h < LAKE.level + 0.8) { c.sand = 0.6; c.grass = 0.2; return c; }
   return c;
 }
@@ -18,8 +41,7 @@ function fromWater(x, z) { return Math.max(-5, Math.min(40, height(x, z) - LAKE.
 function planting(x, z) {
   const r = Math.hypot(x - HILL.c[0], z - HILL.c[1]);
   if (Math.hypot(x, z) > RADIUS - 6 || inLake(x, z) || r < HILL.ditch + 4 || Math.abs(x - PATH.x) < PATH.w + 1 || inGarden(x, z)) return r < HILL.ditch + 4 && r > 20 ? { grass: 30 } : null;
-  const v = village();
-  if ([...v.houses, ...v.pataka, ...v.pits].some((o) => Math.hypot(o.c[0] - x, o.c[1] - z) < 4.5)) return null;
+  if (trodden(x, z) > 0.3) return null;
   if (height(x, z) < LAKE.level + 3) return { reeds: 12, maquis: 0.15, grass: 20 };
   if (Math.hypot(x, z) > RADIUS - 70) return { maquis: 0.3, tamarisk: 0.05, grass: 25 };
   return { grass: 35, maquis: 0.04 };
