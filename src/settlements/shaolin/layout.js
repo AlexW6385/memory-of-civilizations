@@ -97,7 +97,7 @@ export const STUPAS = [];
   const big = [[-150, 48, 14, 7, 8], [-132, 92, 13, 7, 8], [-158, 100, 12, 7, 6], [-121, 54, 11, 5, 4], [-145, 78, 10.5, 5, 6], [-166, 62, 11, 7, 8], [-118, 108, 9.5, 5, 6]];
   for (const [x, z, h, tiers, shape] of big) STUPAS.push({ c: [x, z], kind: 'brick', tiers, shape, h, yaw: (x * 0.13) % 1, seed: Math.round(x * z), rad: h * 0.22 + 2 });
   let tries = 0;
-  while (STUPAS.length < 92 && tries++ < 8000) {
+  while (STUPAS.length < 160 && tries++ < 14000) {
     const x = x0 + 6 + r() * (x1 - x0 - 12), z = z0 + 6 + r() * (z1 - z0 - 12);
     const k = r(), kind = k < 0.35 ? 'stone' : k < 0.55 ? 'bell' : 'brick';
     const tiers = kind === 'brick' ? (r() < 0.35 ? 1 : 3 + 2 * Math.floor(r() * 2)) : 1;
@@ -119,7 +119,7 @@ export const GEAR = [];
 {
   const g = (kind, x, z, o = {}) => GEAR.push({ kind, at: [x, z], rad: o.rad ?? 1.4, ...o });
   for (const [zc, zl1, zl2] of [[108, 122, 101], [56, 82, 66], [20, 28, 10], [-14, -20, -8], [-42, -47, -36]]) {
-    for (const sx of [-1, 1]) { g('cistern', sx * 9.5, zc, { rad: 1.5 }); g('lamp', sx * 4.6, zl1, { rad: 0.6 }); g('lamp', sx * 4.6, zl2, { rad: 0.6 }); }
+    for (const sx of [-1, 1]) { g('cistern', sx * 15.5, zc, { rad: 1.5 }); g('lamp', sx * 4.6, zl1, { rad: 0.6 }); g('lamp', sx * 4.6, zl2, { rad: 0.6 }); }
   }
   // the training court before the Thousand Buddha Hall
   for (const sx of [-1, 1]) {

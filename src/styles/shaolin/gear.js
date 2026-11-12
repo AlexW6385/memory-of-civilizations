@@ -97,7 +97,7 @@ export function shaolinGear(el, { bag, col }) {
 export function shaolinWear(el, { bag }) {
   if (el.kind === 'tufts') {
     const r = rng(el.seed ?? 5), P = new Parts(), [x0, z0, x1, z1] = el.rect;
-    for (let k = 0; k < (el.n ?? 40); k++) { const x = x0 + r() * (x1 - x0), z = z0 + r() * (z1 - z0), h = 0.1 + r() * 0.16; for (let j = 0; j < 3; j++) { const a = r() * 6.28; P.add(r() < 0.6 ? 'ichu' : 'sod', limb([x, el.y, z], [x + Math.cos(a) * 0.05, el.y + h, z + Math.sin(a) * 0.05], 0.012, 0.002, 3)); } }
+    for (let k = 0; k < (el.n ?? 40); k++) { const x = x0 + r() * (x1 - x0), z = z0 + r() * (z1 - z0), h = 0.1 + r() * 0.16, gy = el.ground ? el.ground(x, z) - 0.02 : el.y; for (let j = 0; j < 3; j++) { const a = r() * 6.28; P.add(r() < 0.6 ? 'ichu' : 'sod', limb([x, gy, z], [x + Math.cos(a) * 0.05, gy + h, z + Math.sin(a) * 0.05], 0.012, 0.002, 3)); } }
     P.emit(bag); return;
   }
   const [ax, az] = el.a, [bx, bz] = el.b, L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, nx = -uz, nz = ux;

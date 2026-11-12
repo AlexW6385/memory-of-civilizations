@@ -132,9 +132,9 @@ for (const q of GEAR) E.push({ t: 'shaolin_gear', kind: q.kind, at: q.at, y: 0.0
 {
   const r = rng(77);
   for (const [z0, z1] of [[-112, -88], [-87, -56], [-55, -30], [-29, 1], [2, 38], [39, 91], [92, 127]]) {
-    E.push({ t: 'shaolin_wear', kind: 'tufts', rect: [WALL[0] + 0.5, z0, WALL[0] + 2.0, z1], y: 0.3, n: 14, seed: Math.floor(r() * 999) });
-    E.push({ t: 'shaolin_wear', kind: 'tufts', rect: [WALL[2] - 2.0, z0, WALL[2] - 0.5, z1], y: 0.3, n: 14, seed: Math.floor(r() * 999) });
-    E.push({ t: 'shaolin_wear', kind: 'tufts', rect: [-9, z0, 9, z1], y: 0.3, n: 8, seed: Math.floor(r() * 999) });
+    E.push({ t: 'shaolin_wear', kind: 'tufts', rect: [WALL[0] + 0.5, z0, WALL[0] + 2.0, z1], y: 0.02, n: 14, seed: Math.floor(r() * 999) });
+    E.push({ t: 'shaolin_wear', kind: 'tufts', rect: [WALL[2] - 2.0, z0, WALL[2] - 0.5, z1], y: 0.02, n: 14, seed: Math.floor(r() * 999) });
+    E.push({ t: 'shaolin_wear', kind: 'tufts', rect: [-9, z0, 9, z1], y: 0.02, n: 8, seed: Math.floor(r() * 999) });
   }
 }
 
@@ -148,6 +148,9 @@ for (const [x, z, s] of [[-21, 84.5, 1], [21, 84.5, 2]]) { E.push({ t: 'ming_pav
 for (let k = 0; k < 12; k++) stele(-59, -8 - k * 1.9, { kind: 'plain', h: 2.0 + (k % 3) * 0.2, yaw: Math.PI / 2, seed: 60 + k, w: 0.8 });
 for (let k = 0; k < 10; k++) stele(59, 20 - k * 2.2, { kind: 'plain', h: 2.0 + (k % 3) * 0.2, yaw: -Math.PI / 2, seed: 80 + k, w: 0.8 });
 for (const x of [-30, 30]) stele(x, 60, { kind: 'bixi', h: 3.5, seed: 90 });
+// the forecourt: the stones that told riders to dismount, and a great censer for the pilgrims who burn incense before entering
+for (const sx of [-1, 1]) stele(sx * 10.5, 144, { kind: 'bixi', h: 3.2, yaw: 0, seed: 110 + sx });
+E.push({ t: 'court_censer', at: [6, 141], y: 0.04, s: 1.3 });
 E.push({ t: 'court_censer', at: [3.6, 105], y: 0.04, s: 1.2 });
 E.push({ t: 'court_censer', at: [3.6, 62], y: 0.04, s: 1.2 });
 E.push({ t: 'court_censer', at: [3.6, 22], y: 0.04, s: 1.0 });
@@ -157,6 +160,9 @@ for (const s of STUPAS) {
   const y = H(s.c[0], s.c[1]) - 0.05;
   E.push({ t: 'shaolin_stupa', c: s.c, y, kind: s.kind, tiers: s.tiers, shape: s.shape, h: s.h, jit: ((s.seed % 7) - 3) * 0.05, seed: s.seed });
 }
+// dry grass and weeds between the stupas, a stone lamp at each side of the entrance
+{ const r = rng(91); for (let k = 0; k < 8; k++) E.push({ t: 'shaolin_wear', kind: 'tufts', rect: [FOREST[0] + k * 8, FOREST[1], FOREST[0] + k * 8 + 8, FOREST[3]], y: 0.0, ground: H, n: 90, seed: Math.floor(r() * 999) }); }
+for (const z of [66, 74]) E.push({ t: 'shaolin_gear', kind: 'lamp', at: [-110.5, z], y: H(-110.5, z), rot: 0, s: 1 });
 // the forest's own path of beaten earth, and two big steles at its entrance
 E.push({ t: 'path_earth', pts: FOREST_PATH, w: 2.2, ground: H });
 stele(-114, 63, { kind: 'bixi', h: 3.4, yaw: Math.PI / 2, seed: 5 }); stele(-114, 77, { kind: 'bixi', h: 3.4, yaw: Math.PI / 2, seed: 6 });

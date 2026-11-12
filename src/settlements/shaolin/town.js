@@ -3,7 +3,7 @@
 // staffs), kneeling in the Mahavira Hall, sweeping the courts, pilgrims and villagers in Ming dress, dogs. Several plans.
 import '../../styles/shaolin/index.js';
 import { PAL_HOUSE } from '../../styles/shaolin/index.js';
-import { HOUSES, YARDS, GAP, AXIS, PLAT, CELL, RADIUS, rng } from './layout.js';
+import { HOUSES, YARDS, GAP, AXIS, PLAT, HGT, RANGES, CELL, RADIUS, rng } from './layout.js';
 
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 165], facing: 'n' } });
 
@@ -54,6 +54,16 @@ function village() {
     const z0 = north ? q[1] : q[3], z1 = back;
     wallOnce([q[0], z0], [q[0], z1]); wallOnce([q[2], z0], [q[2], z1]);
   }
+  // the street: a strip of worn bluestone down the middle of the village street, the approach's shoulders and the processional way across the plaza
+  E.push({ t: 'paving', rect: [-88, 153.4, 88, 156.6], y: 0.02, th: 0.3, mat: 'bluestone' });
+  E.push({ t: 'paving', rect: [-5.2, 152, -4, 190], y: 0.02, th: 0.3, mat: 'bluestone' });
+  E.push({ t: 'paving', rect: [4, 152, 5.2, 190], y: 0.02, th: 0.3, mat: 'bluestone' });
+  E.push({ t: 'paving', rect: [-2.2, 131.6, 2.2, 152], y: 0.04, th: 0.3, mat: 'granite_grey' });
+  E.push({ t: 'paving', rect: [-88, 158, 88, 159.1], y: 0.02, th: 0.3, mat: 'granite_grey' });       // the kerb of flagstones along the north row's fronts
+  E.push({ t: 'paving', rect: [-88, 150.9, -17, 152], y: 0.02, th: 0.3, mat: 'granite_grey' });
+  E.push({ t: 'paving', rect: [17, 150.9, 88, 152], y: 0.02, th: 0.3, mat: 'granite_grey' });
+  // dry grass and weeds along the foot of the fronts and in the ruts
+  for (const [x0, x1] of [[-88, -17], [17, 88]]) { E.push({ t: 'shaolin_wear', kind: 'tufts', rect: [x0, 156.7, x1, 157.9], y: 0.0, n: 120, seed: 12 }); E.push({ t: 'shaolin_wear', kind: 'tufts', rect: [x0, 152.1, x1, 153.3], y: 0.0, n: 100, seed: 13 }); }
   return E;
 }
 
@@ -104,6 +114,19 @@ function frontLife() {
   for (let k = 0; k < 12; k++) L.push({ t: 'chickens', at: [-80 + r() * 160, 152 + r() * 6], y: 0, rot: r() * 6.28, seed: sd() });
   // the street's own furniture: wells, benches under the eaves, carts waiting, a rack of tools at the smith's
   for (let x = -80; x < 80; x += 18 + r() * 10) { if (Math.abs(x) < 20) continue; L.push({ t: 'bench', at: [x, r() < 0.5 ? 152.6 : 157.4], y: 0, rot: 0, seed: sd() }); }
+  // the monastery: lanterns under the eaves of the halls, and before each range's door its trade's clutter
+  for (const [name, a] of Object.entries(AXIS)) {
+    const front = name === 'shanmen' || name === 'tianwang' ? [a[3], a[1]] : [a[3]], hwid = (a[2] - a[0]) / 2;
+    for (const z of front) for (const sx of [-1, 1]) L.push({ t: 'hang_lantern', at: [sx * Math.min(hwid - 0.6, 4.2), z + (z === a[3] ? 0.4 : -0.4)], y: 0.02 + PLAT[name] + HGT[name] - 1.7, rot: 0, kind: 'paper', seed: 3 });
+  }
+  for (const q of RANGES) {
+    const e = q.front === 'e', cz = (q.rect[1] + q.rect[3]) / 2, ex = e ? q.rect[2] + 1.0 : q.rect[0] - 1.0, out = e ? 1 : -1, rt = e ? Math.PI / 2 : -Math.PI / 2, len = q.rect[3] - q.rect[1];
+    L.push({ t: 'hang_lantern', at: [ex - out * 0.5, cz], y: 0.37 + 2.7, rot: rt, kind: 'paper', seed: 4 });
+    L.push({ t: 'bench', at: [ex + out * 0.6, cz + len * 0.3], y: 0.02, rot: Math.PI / 2, seed: sd() });
+    L.push({ t: 'pot', kind: 'glazed_jar', at: [ex + out * 0.3, cz - len * 0.3], y: 0.02, rot: r() * 6.28, s: 1, seed: sd() });
+    if (q.kind === 'kitchen' || q.kind === 'refectory') { for (let k = 0; k < 3; k++) L.push({ t: 'firewood', at: [ex + out * 0.8, cz - len * 0.35 + k * 1.2], y: 0.02, rot: rt, len: 1.6, seed: sd() }); L.push({ t: 'rain_tub', at: [ex + out * 1.0, cz + len * 0.35], y: 0.02, rot: 0, seed: sd() }); L.push({ t: 'barrel', at: [ex + out * 0.9, cz + len * 0.25], y: 0.02, rot: 0.1, n: 2, seed: sd() }); }
+    if (q.kind === 'guest') { L.push({ t: 'tea_table', at: [ex + out * 1.6, cz], c: [ex + out * 1.6, cz], r: 1.0, y: 0.02, rot: rt, seed: sd() }); }
+  }
   const people = [];
   const stand = (p) => people.push(p);
   // gather by tile

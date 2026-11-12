@@ -8,6 +8,7 @@ const ID = 'shaolin';
 export function emitters() {
   const E = [], r = rng(1600);
   // incense: the great censers (plan.js: court_censer at the processional way, 2.3 m high) and the halls' altars
+  E.push({ p: [6, 3.1, 141], kind: 'incense', thr: 0, seed: 141 });
   for (const z of [105, 62, 22]) E.push({ p: [3.6, 2.4, z], kind: 'incense', thr: 0, seed: Math.round(z) });
   { const q = AXIS.mahavira, y = 0.02 + PLAT.mahavira; for (const s of [-1, 1]) E.push({ p: [s * 6.2, y + 2.6, q[3] + 0.8 + 3.3], kind: 'incense', thr: 0, seed: 31 + s }); E.push({ p: [0, y + 2.1, q[1] + 7.0], kind: 'incense', thr: 0, seed: 5 }); }
   { const q = AXIS.tianwang, y = 0.02 + PLAT.tianwang; E.push({ p: [0, y + 1.9, q[1] + 5.1], kind: 'incense', thr: 0, seed: 6 }); }
@@ -17,7 +18,7 @@ export function emitters() {
     E.push({ p: [cx, 0.37 + 4.4 + 0.9, cz], kind: 'kitchen', thr: 0, seed: Math.round(cz) });
     E.push({ p: [cx, 0.37 + 4.4 + 0.9, cz + 3], kind: 'steam', thr: 0.1, seed: Math.round(cz) + 1 });
   }
-  for (const h of HOUSES) if (r() < 0.4) { const rr = h.rect; E.push({ p: [(rr[0] + rr[2]) / 2 + r() * 2 - 1, 0.25 + 3.6 + 0.9, (rr[1] + rr[3]) / 2], kind: 'kitchen', thr: r() * 0.7, seed: h.seed % 997 }); }
+  for (const h of HOUSES) if (r() < (h.trade === 'food' && h.kind === 'shop' ? 0.9 : 0.55)) { const rr = h.rect; E.push({ p: [(rr[0] + rr[2]) / 2 + r() * 2 - 1, 0.25 + h.H + 1.6, (rr[1] + rr[3]) / 2], kind: 'kitchen', thr: r() * 0.7, seed: h.seed % 997 }); }
   return E;
 }
 const ATT = [];

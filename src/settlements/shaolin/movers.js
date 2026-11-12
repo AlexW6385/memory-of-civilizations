@@ -8,7 +8,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 30, night: 4, rain: 0.5, reach: 150, spawnMin: 26, far: 44 },
+  walkers: { day: 44, night: 4, rain: 0.5, reach: 150, spawnMin: 26, far: 44 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -50,
 };
@@ -31,7 +31,7 @@ export function walkways() {
   // the forecourt, the approach road and the village street
   rects.push({ r: [-14, 130, 14, 152], weight: 1.4, market: 1.4, kind: 'street' });
   rects.push({ r: [-4, 152, 4, RADIUS - 24], weight: 1.4, market: 1.2, kind: 'street' });
-  rects.push({ r: [-95, 152, 95, 158], weight: 1.2, market: 1.2, kind: 'street' });
+  rects.push({ r: [-90, 152, 90, 158], weight: 1.2, market: 1.2, kind: 'street' });
   // the path west to the Pagoda Forest
   rects.push({ r: [-106, 68, -62, 72], weight: 0.5, market: 0.1, kind: 'lane' });
   rects.push({ r: [-165, 64, -106, 72], weight: 0.5, market: 0.1, kind: 'lane' });
