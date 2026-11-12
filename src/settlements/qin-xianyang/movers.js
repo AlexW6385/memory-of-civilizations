@@ -4,7 +4,7 @@
 // imperial road, the market's aisles, the forecourt of the palace, the figure-makers' street. No boats.
 // Data for the engine's movers (src/engine/movers.js, read in its worker); the ways come from layout.js.
 
-import { RADIUS, ROAD, MARKET, FORECOURT, WS_Z, WS_X, MWALL, streets } from './layout.js';
+import { RADIUS, YARD, HAUL, PIT, RAMP, ROAD, MARKET, FORECOURT, WS_Z, WS_X, MWALL, streets } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
@@ -26,7 +26,9 @@ export function walkways() {
   r([MARKET[0] + 2, 51.5, MARKET[2] - 2, 64.5], 3.0, 3.0); r([-33.5, MARKET[1] + 1, -26.5, MARKET[3] - 1], 3.0, 3.0);
   r([MARKET[0] + 2, 36.5, MARKET[2] - 2, 38.5], 2.4, 2.8); r([MARKET[0] + 2, 80.5, MARKET[2] - 2, 82.5], 2.4, 2.8);
   r([MARKET[0] - 2, 54.5, MARKET[0] + 3, 61.5], 2.0, 1.0); r([MARKET[2] - 3, 54.5, MARKET[2] + 2, 61.5], 2.0, 1.0);
-  void MWALL;
+  r([YARD[0] + 1, YARD[1] + 6, YARD[2] - 4, YARD[3] - 6], 2.2, 0.2, 'street');                                      // the building yard at the ramps
+  r([HAUL.x0, HAUL.z - HAUL.w / 2 + 1, HAUL.x1, HAUL.z + HAUL.w / 2 - 1], 1.8, 0.2);                       // the haul road
+  void MWALL; void PIT; void RAMP;
   return { rects, links: [], clip: RADIUS - 20 };
 }
 export function waterways() { return { rects: [], bridges: [], clip: RADIUS - 18 }; }

@@ -2,9 +2,10 @@
 // earth with a coping of grey brick, the great stair of brick steps with hollow-brick cheeks, the hall of vermilion walls
 // and round red columns under a grey-tiled hipped roof, black and ochre architraves, simple bracket blocks, the throne dais,
 // the screen, lamps and the bells of the hall inside; the twin que (gate towers) at the stair's foot.
-import { box, frustum, lathe, rod } from '../../core/geom.js';
+import { box, frustum, lathe, rod, addCloth, clothBox } from '../../core/geom.js';
+import { frame, gable } from './houses.js';
 import { hipRoof } from '../chinese/index.js';
-import { TERRACE, STAIR, HALL, QUE } from '../../settlements/qin-xianyang/layout.js';
+import { TERRACE, STAIR, HALL, QUE, FORECOURT } from '../../settlements/qin-xianyang/layout.js';
 
 const TOP = TERRACE.h, T1 = TERRACE.h1;
 
@@ -97,6 +98,46 @@ export function qinHall(el, { bag, col, lights }) {
     bag.add('timber_red', lathe([[0.7, 0.9], [0.9, 1.5], [0.9, 2.2], [0.001, 2.2]], 16, null, dx, y + 0.08, bz)); col.circle(dx, bz, 0.9, y, y + 2.3);
     bag.add('lacquer_black', box(dx - 0.7, y + 0.08, bz - 0.7, dx + 0.7, y + 0.9, bz + 0.7));
   }
+  // the ceiling: a coffered field of painted panels between black beams, the beams' ends carved as bracket blocks
+  { const cy = y + ch - 0.14;
+    bag.add('ceiling_coffer', box(c[0], cy, c[1], c[2], cy + 0.1, c[3]));
+    for (let x = c[0]; x <= c[2] + 0.01; x += (c[2] - c[0]) / 8) bag.add('lacquer_black', box(x - 0.14, cy - 0.34, c[1], x + 0.14, cy, c[3]));
+    for (let z = c[1]; z <= c[3] + 0.01; z += (c[3] - c[1]) / 6) bag.add('lacquer_black', box(c[0], cy - 0.3, z - 0.12, c[2], cy, z + 0.12));
+    for (let x = c[0] + 2; x < c[2]; x += 5.9) for (let z = c[1] + 2; z < c[3]; z += 4.6) bag.add('paint_caihua', box(x - 0.55, cy - 0.02, z - 0.55, x + 0.55, cy, z + 0.55));    // the painted panels' roundels
+  }
+  // the murals along the walls' inner faces: a white ground, a frieze of chariots, horses, banqueters and tribute-bearers in ochre, red, blue and green
+  { const band = (a, b, fixed, alongX) => {
+      const len = Math.abs(b - a), lo = Math.min(a, b);
+      const P = (u0, y0, u1, y1, d, mat) => { const n = Math.abs(d) > 0.04 ? d / 4 : 0, a = Math.min(n, d), b = Math.max(n, d); bag.add(mat, alongX ? box(lo + u0, y + y0, fixed + a, lo + u1, y + y1, fixed + b) : box(fixed + a, y + y0, lo + u0, fixed + b, y + y1, lo + u1)); };
+      return { len, P };
+    };
+    const sides = [[c[0], c[2], c[1] + 0.0, true, 1], [c[1], c[3], c[0], false, 1], [c[1], c[3], c[2], false, -1]];
+    sides.forEach(([a, b, fixed, alongX, dir], si) => {
+      const { len, P } = band(a, b, fixed, alongX), d = 0.03 * dir;
+      P(0.5, 1.15, len - 0.5, 3.6, d, 'paint_white');
+      P(0.45, 1.1, len - 0.45, 1.3, d * 2, 'lacquer_red'); P(0.45, 3.45, len - 0.45, 3.65, d * 2, 'lacquer_red');
+      const r2 = ((si + 1) * 2654435761 >>> 0) / 4294967296;
+      for (let u = 1.2, k = 0; u < len - 2.2; u += 2.4, k++) {
+        const kind = (k + si) % 3;
+        if (kind === 0) { P(u, 1.65, u + 1.4, 2.3, d * 2, 'lacquer_black'); P(u + 0.1, 2.3, u + 0.2, 2.9, d * 2, 'timber_red'); for (let h = 0; h < 2; h++) P(u + 1.4 + h * 0.4, 1.65, u + 1.7 + h * 0.4, 2.3 + (h ? 0.1 : 0), d * 2, h ? 'hide_brown' : 'hide_black'); }   // a chariot and its horses
+        else if (kind === 1) { for (let q = 0; q < 3; q++) { P(u + q * 0.55, 1.6, u + 0.35 + q * 0.55, 2.55, d * 2, ['cloth_red', 'paint_ochre', 'cloth_green'][(q + k) % 3]); P(u + 0.07 + q * 0.55, 2.55, u + 0.28 + q * 0.55, 2.8, d * 2, 'skin_light'); } }   // banqueters
+        else { for (let q = 0; q < 2; q++) { P(u + q * 0.8, 1.6, u + 0.45 + q * 0.8, 2.6, d * 2, 'paint_blue'); P(u + 0.1 + q * 0.8, 2.6, u + 0.35 + q * 0.8, 2.85, d * 2, 'skin_light'); } P(u + 1.7, 1.6, u + 2.1, 1.95, d * 2, 'bronze'); }   // tribute-bearers
+        void r2;
+      }
+    });
+  }
+  // curtains and banners: black valances across the dais, long red and black streamers from the beams
+  { const cy = y + ch - 0.4;
+    addCloth(bag, 'cloth_black', clothBox(cx - 9, cy - 1.5, c[1] + 8.1, cx + 9, cy, c[1] + 8.2), cy);
+    for (let i = -4; i <= 4; i++) addCloth(bag, i % 2 ? 'cloth_red' : 'cloth_black', clothBox(cx + i * 4.4 - 0.4, cy - 3.4, cz + 1.0, cx + i * 4.4 + 0.4, cy, cz + 1.05), cy);
+  }
+  // a canopy over the sovereign's mat, on four posts; the great ding either side of the doors
+  { const dz = c[1] + 0.2;
+    for (const sx of [-1, 1]) for (const sz of [0.45, 3.2]) { bag.add('lacquer_black', lathe([[0.1, 0], [0.09, 3.4]], 8, null, cx + sx * 3.3, y + 1.1, dz + sz)); col.circle(cx + sx * 3.3, dz + sz, 0.14, y + 1.1, y + 4.5); }
+    bag.add('lacquer_black', box(cx - 3.5, y + 4.5, dz + 0.3, cx + 3.5, y + 4.7, dz + 3.4)); bag.add('paint_ochre', box(cx - 3.55, y + 4.7, dz + 0.25, cx + 3.55, y + 4.76, dz + 3.45));
+    addCloth(bag, 'cloth_red', clothBox(cx - 3.4, y + 3.7, dz + 3.35, cx + 3.4, y + 4.5, dz + 3.4), y + 4.5);
+    for (const sx of [-1, 1]) { const px = cx + sx * 6.0, pz = c[3] - 2.6; bag.add('bronze', lathe([[0.001, 0.5], [0.6, 0.62], [0.78, 1.0], [0.7, 1.3], [0.001, 1.3]], 14, null, px, y + 0.08, pz)); for (const a of [0.3, 2.4, 4.5]) bag.add('bronze', rod([px + Math.cos(a) * 0.45, y + 0.08, pz + Math.sin(a) * 0.45], [px + Math.cos(a) * 0.45, y + 0.6, pz + Math.sin(a) * 0.45], 0.1, 6)); col.circle(px, pz, 0.8, y, y + 1.4); }
+  }
   // the hipped roof of grey tiles, the eaves reaching 3.5 m past the colonnade
   const A = (x1 - x0) / 2 + 3.5, B = (z1 - z0) / 2 + 3.5;
   hipRoof({ c: [cx, cz], A, B, y: ay + 1.2, rise: 6.4, lift: 0.3, pow: 1.3, mat: 'tile_dark', soffit: 'timber_red', ridgeMat: 'tile_dark', noChiwei: true }, { bag });
@@ -119,4 +160,38 @@ export function qinQue(el, { bag, col }) {
   bag.add('lacquer_black', box(x - hw + 1.2, h + 2.6, z - hd + 1.2, x + hw - 1.2, h + 3.1, z + hd - 1.2));
   col.rect([x - hw + 1.3, z - hd + 1.3, x + hw - 1.3, z + hd - 1.3], h, h + 3.1);
   hipRoof({ c: [x, z], A: hw + 1.4, B: hd + 1.4, y: h + 3.3, rise, lift: 0.2, pow: 1.3, mat: 'tile_dark', soffit: 'timber_red', ridgeMat: 'tile_dark', noChiwei: true }, { bag });
+}
+
+/** qin_court: {} — the terrace's paving and drains, the galleries and lamp-posts of the forecourt, banner staffs, incense burners. */
+export function qinCourt(el, { bag, col, lights }) {
+  const { x0, z0, x1, z1 } = TERRACE, sx = STAIR.x, sw = STAIR.w / 2;
+  // the terrace's paving of grey brick round the hall (the hall has its own floor), with drains along the south coping
+  bag.add('brick_grey', box(x0 + 0.7, TOP, z0 + 0.7, x1 - 0.7, TOP + 0.04, HALL.z0 - 0.05));
+  bag.add('brick_grey', box(x0 + 0.7, TOP, HALL.z1 + 0.05, x1 - 0.7, TOP + 0.04, z1 - 0.7));
+  bag.add('brick_grey', box(x0 + 0.7, TOP, HALL.z0, HALL.x0 - 0.05, TOP + 0.04, HALL.z1)); bag.add('brick_grey', box(HALL.x1 + 0.05, TOP, HALL.z0, x1 - 0.7, TOP + 0.04, HALL.z1));
+  for (let x = x0 + 8; x < x1 - 4; x += 12) { if (Math.abs(x - sx) < sw + 1) continue; bag.add('bronze', rod([x, TOP + 0.3, z1], [x, TOP + 0.1, z1 + 1.2], 0.1, 6)); bag.add('granite_grey', box(x - 0.35, 0, z1 + 0.9, x + 0.35, 0.12, z1 + 2.4)); }   // the dragon-head spouts and their stones
+  for (const s of [-1, 1]) for (const dz of [-10, 10]) { const bx = (x0 + x1) / 2 + s * 16, bz = (HALL.z0 + HALL.z1) / 2 + dz * 1.4; bag.add('granite_grey', lathe([[0.5, 0], [0.45, 0.5], [0.5, 0.6], [0.001, 0.6]], 10, null, bx, TOP, bz)); bag.add('bronze', lathe([[0.001, 0.6], [0.4, 0.64], [0.5, 0.9], [0.001, 0.95]], 10, null, bx, TOP, bz)); col.circle(bx, bz, 0.55, TOP, TOP + 1.0); }
+  // the forecourt: lamp-posts with bronze lamps along the stair's axis and banner staffs along the sides
+  const [fx0, fz0, fx1, fz1] = FORECOURT;
+  for (const s of [-1, 1]) for (let z = fz0 + 14; z < fz1 - 6; z += 9) {
+    const lx = sx + s * 9;
+    bag.add('granite_grey', lathe([[0.3, 0], [0.26, 0.4]], 8, null, lx, 0.02, z)); bag.add('bronze', lathe([[0.07, 0], [0.05, 2.4], [0.22, 2.5], [0.001, 2.7]], 8, null, lx, 0.4, z));
+    bag.add('flame', lathe([[0.001, 0], [0.08, 0.1], [0.001, 0.35]], 6, null, lx, 2.9, z)); col.circle(lx, z, 0.3, 0, 3); lights.push({ at: [lx, 3.1, z], color: '#ffb468', intensity: 1.6, distance: 10 });
+  }
+  for (const x of [fx0 + 6, fx0 + 22, fx1 - 22, fx1 - 6]) {
+    bag.add('log_pine', lathe([[0.12, 0], [0.1, 9.0]], 8, null, x, 0.02, fz0 + 8)); bag.add('timber', box(x - 0.9, 8.3, fz0 + 7.96, x + 0.9, 8.38, fz0 + 8.04));
+    addCloth(bag, 'cloth_black', clothBox(x - 0.85, 4.6, fz0 + 7.95, x + 0.85, 8.3, fz0 + 8.05), 8.3); col.circle(x, fz0 + 8, 0.2, 0, 9);
+  }
+  // two long galleries along the north of the court, open to the south: a rammed base, posts, a tiled roof, benches for those who wait
+  for (const [gx0, gx1] of [[fx0 + 1, sx - 22], [sx + 22, fx1 - 1]]) {
+    const F = frame([gx0, -64, gx1, -57], 's', bag, col), W = F.W;
+    F.b('earth_wall', 0, 0, 0, W, 0.45, 7.0, false); col.floor([gx0, -64, gx1, -57], 0.45);
+    F.b('earth_wall', 0, 0.45, 6.4, W, 3.2, 7.0); F.b('earth_wall', 0, 0.45, 0, 0.6, 3.2, 7.0); F.b('earth_wall', W - 0.6, 0.45, 0, W, 3.2, 7.0);
+    for (let u = 3; u < W; u += 4) F.b('timber_red', u - 0.17, 0.45, 0.2, u + 0.17, 3.2, 0.54);
+    F.b('lacquer_black', 0, 3.2, 0.05, W, 3.6, 0.6, false);
+    gable(F, 0, 0, W, 7.0, 3.6, 1.6, 'tile_grey', 0.9);
+    for (let u = 0.3; u < W; u += 0.3) F.b('tile_dark', u - 0.06, 3.58, -0.92, u + 0.06, 3.73, -0.86, false);
+    for (let u = 6; u < W - 4; u += 9) F.b('timber', u, 0.45, 1.5, u + 2.2, 0.9, 2.0);
+    for (let u = 2; u < W - 2; u += 5) F.b('reed_mat', u, 0.45, 3.5, u + 2.4, 0.48, 5.5, false);
+  }
 }

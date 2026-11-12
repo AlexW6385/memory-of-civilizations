@@ -3,7 +3,7 @@
 // soot). The engine part is src/engine/smoke.js (one draw call); positions come from layout.js.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, HALL, STAIR, lots as townLots } from './layout.js';
+import { RADIUS, HALL, STAIR, PIT, RAMP, rampZ, shopLots, lots as townLots } from './layout.js';
 import { ground } from './ground.js';
 
 const ID = 'qin-xianyang';
@@ -21,6 +21,12 @@ export function emitters() {
   for (const [x, z] of [[(HALL.x0 + HALL.x1) / 2 - 7.5, HALL.z0 + 12], [(HALL.x0 + HALL.x1) / 2 + 7.5, HALL.z0 + 12]]) E.push({ p: [x, 9.4, z], kind: 'incense', thr: 0, seed: Math.round(x) });
   E.push({ p: [STAIR.x, 1.5, -40], kind: 'incense', thr: 0.2, seed: 9 });
   for (const [x, z] of [[118, -137], [118, -121], [118, -105]]) E.push({ p: [x, -3.3, z], kind: 'kitchen', thr: 0.6, seed: Math.round(z) });
+  // the yard: the braziers at the three portals, the beacon on the watch tower, the kitchen of the gangs' sheds
+  for (let i = 0; i < 3; i++) for (const q of [-1, 1]) E.push({ p: [PIT.x1 + RAMP.len + 2.2, 1.6, rampZ(i) + q * (RAMP.w / 2 + 0.55 + 1.6)], kind: 'incense', thr: 0.1, seed: 40 + i * 2 + (q > 0 ? 1 : 0) });
+  E.push({ p: [PIT.x1 + RAMP.len + 54, 7.4, rampZ(0) - 24], kind: 'kitchen', thr: 0, seed: 77 });
+  for (let k = 0; k < 2; k++) E.push({ p: [PIT.x1 + RAMP.len + 31 + k * 11, 2.6, rampZ(0) - 12 - k * 11], kind: 'kitchen', thr: 0.4, seed: 88 + k });
+  // the market's wine and cook shops (their stoves), the shop-houses' chimneys
+  shopLots().forEach((l, i) => { if (i % 3 === 0) E.push({ p: [(l.rect[0] + l.rect[2]) / 2, 5.2, (l.rect[1] + l.rect[3]) / 2], kind: 'kitchen', thr: 0.35, seed: l.seed }); });
   return E;
 }
 
