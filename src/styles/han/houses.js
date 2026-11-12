@@ -4,6 +4,8 @@
 // from the lane into the lot (the front is the side the door is on). Four kinds: court, row, tower, and the office (shu) of the avenue.
 import { box, lathe } from '../../core/geom.js';
 import { rng, lotFrame, eaveTilesGable, roofs } from './kit.js';
+import { furnish, KINDS } from './interiors.js';
+import { frontDress, yardDress } from './dress.js';
 
 const WALLS = ['earth_wall', 'earth_wall', 'lime_plaster', 'mud_plaster', 'earth_wall'];
 
@@ -50,20 +52,6 @@ function hallBlock(F, u0, u1, v0, v1, H, wm, door, open, rand) {
   F.col.rect(F.R(u0, v0, u1, v1), P, H);
   return du;
 }
-/** The room inside a hall: a mat and a low table, a bed (ta) with its screen, a chest, a bronze lamp, bamboo-slip books. */
-function furnishHall(F, u0, u1, v0, v1, rand, lights) {
-  const y = 0.33, mu = (u0 + u1) / 2;
-  F.b('reed_mat', mu - 1.4, y, v0 + 2.0, mu + 0.4, y + 0.03, v0 + 3.8, false);
-  F.b('lacquer_black', mu - 0.9, y + 0.03, v0 + 2.5, mu - 0.1, y + 0.4, v0 + 3.2, false);
-  F.b('timber', u1 - 3.4, y, v1 - 2.6, u1 - 0.6, y + 0.4, v1 - 0.6, false); F.b('cloth_indigo', u1 - 3.3, y + 0.4, v1 - 2.5, u1 - 0.7, y + 0.46, v1 - 0.7, false);
-  F.b('lacquer_black', u1 - 3.5, y, v1 - 0.7, u1 - 0.5, y + 1.4, v1 - 0.58, false);
-  F.b('lacquer_red', u0 + 0.7, y, v1 - 1.6, u0 + 2.2, y + 0.7, v1 - 0.6);
-  for (let k = 0; k < 5; k++) F.b(k % 2 ? 'wood_ochre' : 'bamboo_culm', u0 + 0.8 + k * 0.22, y + 0.7, v1 - 1.5, u0 + 0.95 + k * 0.22, y + 1.0, v1 - 0.7, false);
-  const p = F.pt(mu + 1.2, v0 + 3.0);
-  F.bag.add('bronze', lathe([[0.15, 0], [0.04, 0.1], [0.035, 0.7], [0.1, 0.75], [0.14, 0.8]], 8, null, p[0], y, p[1]));
-  lights.push({ at: [p[0], y + 1.0, p[1]], color: '#ffc98a', intensity: 3, distance: 7 });
-  void rand;
-}
 function sideWing(F, u0, u1, v0, v1, H, wm) {
   const t = 0.4, P = 0.25;
   F.b('brick_paving', u0 - 0.3, 0, v0 - 0.3, u1 + 0.3, P, v1 + 0.3, false);
@@ -72,10 +60,17 @@ function sideWing(F, u0, u1, v0, v1, H, wm) {
   F.roof('gable_roof_c', (u0 + u1) / 2, (v0 + v1) / 2, (u1 - u0) / 2 + 0.7, (v1 - v0) / 2 + 0.9, H + 0.05, 1.4, { mat: 'tile_grey', soffit: 'timber_red', noHorns: true });
 }
 /** The two-storey watch-tower house (lou): plaster walls, a balcony of red rails under the upper eave, a hipped roof over a smaller upper storey. */
-function louBlock(F, cu, cv, a, H1, H2, wm) {
-  const P = 0.3;
+function louBlock(F, cu, cv, a, H1, H2, wm, seed = 1, lights = []) {
+  const P = 0.3, t = 0.4, dw = 0.8;
   F.b('brick_paving', cu - a - 0.4, 0, cv - a - 0.4, cu + a + 0.4, P, cv + a + 0.4, false);
-  F.b(wm, cu - a, P, cv - a, cu + a, P + H1, cv + a);
+  F.floor(cu - a, cv - a, cu + a, cv + a, P);
+  // the ground floor is a room: walls round it, a door in the front (toward the lane), a slab over it
+  F.b(wm, cu - a, P, cv + a - t, cu + a, P + H1 - 0.3, cv + a); F.b(wm, cu - a, P, cv - a, cu - a + t, P + H1 - 0.3, cv + a); F.b(wm, cu + a - t, P, cv - a, cu + a, P + H1 - 0.3, cv + a);
+  F.b(wm, cu - a, P, cv - a, cu - dw, P + H1 - 0.3, cv - a + t); F.b(wm, cu + dw, P, cv - a, cu + a, P + H1 - 0.3, cv - a + t); F.b(wm, cu - dw, P + 2.3, cv - a, cu + dw, P + H1 - 0.3, cv - a + t);
+  F.b('timber_red', cu - dw - 0.1, P, cv - a - 0.05, cu - dw + 0.07, P + 2.3, cv - a + t + 0.05, false); F.b('timber_red', cu + dw - 0.07, P, cv - a - 0.05, cu + dw + 0.1, P + 2.3, cv - a + t + 0.05, false);
+  F.b('wood_dark', cu - a + t, P, cv - a + t, cu + a - t, P + 0.03, cv + a - t, false);
+  F.b(wm, cu - a, P + H1 - 0.3, cv - a, cu + a, P + H1, cv + a);
+  furnish(F, 'granary', cu - a + t + 0.2, cu + a - t - 0.2, cv - a + t + 0.2, cv + a - t - 0.2, P + 0.03, seed + 9, lights, false);
   F.b('lime_plaster', cu - a - 0.03, P, cv - a - 0.03, cu + a + 0.03, P + 0.8, cv + a + 0.03, false);
   F.b('lattice', cu - a * 0.4, P + 1.2, cv - a - 0.05, cu + a * 0.4, P + 2.5, cv - a + 0.03, false);
   F.roof('hip_roof', cu, cv, a + 1.1, a + 1.1, P + H1, 1.1, { mat: 'tile_grey', soffit: 'timber_red', noChiwei: true, lift: 0.3, pow: 1.1 });
@@ -97,7 +92,9 @@ export function house(el, ctx) {
     perimeter(F, W, D, 2.3, gateU, 1.7, wm, true);
     const hv = 1.4;
     const du = hallBlock(F, 0.5, W - 0.5, hv, hv + 6.4, H - 0.2, wm, true, el.open, rand);
-    if (el.open) furnishHall(F, 0.5, W - 0.5, hv, hv + 6.4, rand, ctx.lights);
+    furnish(F, KINDS[(el.seed >> 3) % KINDS.length], 0.9, W - 0.9, hv + 0.4, hv + 6.0, 0.33, el.seed, ctx.lights, el.open);
+    frontDress(F, W, D, gateU, 1.7, 2.3, el.seed, 'row');
+    yardDress(F, W, D, hv + 6.4, el.seed);
     // a granary on posts, a well-curb and a mortar in the yard
     F.b('bluestone', W - 2.6, 0, D - 3.2, W - 0.9, 0.6, D - 1.5);
     F.b('timber', 0.8, 0, D - 2.8, 2.6, 0.5, D - 0.8, false);
@@ -105,17 +102,22 @@ export function house(el, ctx) {
     return;
   }
   perimeter(F, W, D, 2.5, gateU, 1.8, wm);
+  frontDress(F, W, D, gateU, 1.8, 2.5, el.seed, kind);
   if (kind === 'tower') {
     const a = Math.min(2.8, (W - 3.4) / 2);
-    louBlock(F, W - a - 1.0, 5.6 + a, a, 3.4, 3.0, wm);
-    hallBlock(F, 1.0, Math.max(5.5, W - 2 * a - 3.0), D - 7.0, D - 0.9, H - 0.2, wm, true, el.open, rand);
+    louBlock(F, W - a - 1.0, 5.6 + a, a, 3.4, 3.0, wm, el.seed, ctx.lights);
+    const hu1 = Math.max(5.5, W - 2 * a - 3.0);
+    hallBlock(F, 1.0, hu1, D - 7.0, D - 0.9, H - 0.2, wm, true, el.open, rand);
+    furnish(F, KINDS[(el.seed >> 3) % KINDS.length], 1.4, hu1 - 0.4, D - 6.6, D - 1.3, 0.33, el.seed, ctx.lights, el.open);
     F.b('bluestone', 1.2, 0, 1.5, 2.8, 0.5, 3.1);
+    yardDress(F, W, D, D - 7.4, el.seed);
     return;
   }
   // the court house: the hall at the back across the yard, a wing along one side, a well
   const hallV0 = D - 7.8;
   hallBlock(F, 1.0, W - 1.0, hallV0, D - 0.9, H, wm, true, el.open, rand);
-  if (el.open) furnishHall(F, 1.0, W - 1.0, hallV0, D - 0.9, rand, ctx.lights);
+  furnish(F, KINDS[(el.seed >> 3) % KINDS.length], 1.4, W - 1.4, hallV0 + 0.4, D - 1.3, 0.33, el.seed, ctx.lights, el.open);
+  yardDress(F, W, D, hallV0, el.seed);
   if (rand() < 0.75) { const left = rand() < 0.5; sideWing(F, left ? 0.8 : W - 4.2, left ? 4.2 : W - 0.8, 3.4, hallV0 - 1.6, H - 0.5, wm); }
   F.b('bluestone', W / 2 - 0.6 + (rand() - 0.5) * 2, 0, hallV0 - 3.4, W / 2 + 0.6 + (rand() - 0.5) * 2, 0.6, hallV0 - 2.2);
 }
@@ -125,6 +127,6 @@ export function office(el, ctx) {
   const [x0, z0, x1, z1] = el.rect, rand = rng(el.seed), W = x1 - x0, cx = (x0 + x1) / 2;
   const F = lotFrame(ctx, el.rect, 's');
   perimeter(F, W, z1 - z0, 2.6, W / 2, 4.2, 'earth_wall');
-  ctx.style.elements.han_hall({ cx, z1: z1 - 7.2, bays: 3, bayW: 4.2, depth: 2, depthW: 5.6, floor: 0.6, h: 4.2, base: 0.6, roof: 'gable', rise: 2.0, overhang: 2.2, ap: 1.0, furnish: el.open ? 'office' : undefined, seed: el.seed, open: [1, 1] }, ctx);
+  ctx.style.elements.han_hall({ cx, z1: z1 - 7.2, bays: 3, bayW: 4.2, depth: 2, depthW: 5.6, floor: 0.6, h: 4.2, base: 0.6, roof: 'gable', rise: 2.0, overhang: 2.2, ap: 1.0, furnish: 'office', seed: el.seed, open: [1, 1] }, ctx);
   void rand;
 }

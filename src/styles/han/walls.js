@@ -2,7 +2,7 @@
 // parapet and walkable top, the palace walls, the ward walls with their little gates, the city gate of three passages under its tower,
 // the que (a main tower with its lower subsidiary tower, in pairs before the gates), the pavilions that crown them.
 import { box, lathe } from '../../core/geom.js';
-import { rng, roofs, eaveTiles, hipLite } from './kit.js';
+import { rng, roofs, eaveTiles, hipLite, steps } from './kit.js';
 
 /**
  * han_wall: { a, b, th, h, mat, gaps: [{ at, w }] (distance from a to the centre), cap ('tile' | none), walk (the top walkable, with a parapet), face (the plaster band) }.
@@ -31,10 +31,28 @@ export function wall(el, ctx) {
       bag.add('brick_paving', box(rr[0], h - 0.02, rr[1], rr[2], h + 0.02, rr[3]));
       // the parapet along both edges, with crenels (a solid course and the merlons)
       const par = (q) => { bag.add(mat, box(q[0], h, q[1], q[2], h + 1.15, q[3])); col.rect(q, h, h + 1.15); bag.add('tile_grey', box(q[0] - 0.08, h + 1.15, q[1] - 0.08, q[2] + 0.08, h + 1.3, q[3] + 0.08)); };
-      if (alongX) { par([r[0], r[1], r[2], r[1] + c]); par([r[0], r[3] - c, r[2], r[3]]); } else { par([r[0], r[1], r[0] + c, r[3]]); par([r[2] - c, r[1], r[2], r[3]]); }
+      // the inner parapet is broken where a ramp (madao) comes up: pieces between the ramps' mouths
+      const inner = el.inner ?? 0, mouths = (el.ramps ?? []).map((m) => [m - 2.2, m + 2.2]).filter(([m0, m1]) => m1 > s0 && m0 < s1);
+      const edge = (q, isInner) => {
+        if (!isInner || !mouths.length) return par(q);
+        let cur = s0;
+        for (const [m0, m1] of [...mouths].sort((p2, q2) => p2[0] - q2[0])) { if (m0 > cur) { const piece2 = alongX ? [Math.min(ax + sg * cur, ax + sg * m0), q[1], Math.max(ax + sg * cur, ax + sg * m0), q[3]] : [q[0], Math.min(az + sg * cur, az + sg * m0), q[2], Math.max(az + sg * cur, az + sg * m0)]; par(piece2); } cur = Math.max(cur, m1); }
+        if (cur < s1) par(alongX ? [Math.min(ax + sg * cur, ax + sg * s1), q[1], Math.max(ax + sg * cur, ax + sg * s1), q[3]] : [q[0], Math.min(az + sg * cur, az + sg * s1), q[2], Math.max(az + sg * cur, az + sg * s1)]);
+      };
+      if (alongX) { edge([r[0], r[1], r[2], r[1] + c], inner < 0); edge([r[0], r[3] - c, r[2], r[3]], inner > 0); } else { edge([r[0], r[1], r[0] + c, r[3]], inner < 0); edge([r[2] - c, r[1], r[2], r[3]], inner > 0); }
     } else if (el.cap !== 'none') bag.add('tile_grey', box(r[0] - (alongX ? 0 : 0.2), h, r[1] - (alongX ? 0.2 : 0), r[2] + (alongX ? 0 : 0.2), h + 0.32, r[3] + (alongX ? 0.2 : 0)));
     // the plaster band at the foot where the street's wet reaches, weathering reads from the material
   };
+  // the ramps (madao) up the inner face, and the sentries' sheds on the wall top
+  for (const m of el.ramps ?? []) {
+    const p = alongX ? ax + sg * m : az + sg * m, inn = el.inner ?? 1, Lr = 24, hw = 1.7;
+    if (alongX) { const f = az + inn * th / 2; steps(bag, col, [p - hw, Math.min(f, f + inn * Lr), p + hw, Math.max(f, f + inn * Lr)], 0, h, inn > 0 ? 'n' : 's', 'bluestone', 0.18, -0.3, 'brick_paving'); }
+    else { const f = ax + inn * th / 2; steps(bag, col, [Math.min(f, f + inn * Lr), p - hw, Math.max(f, f + inn * Lr), p + hw], 0, h, inn > 0 ? 'w' : 'e', 'bluestone', 0.18, -0.3, 'brick_paving'); }
+  }
+  for (const m of el.sheds ?? []) {
+    const p = alongX ? ax + sg * m : az + sg * m;
+    pavilion({ c: alongX ? [p, az] : [ax, p], A: alongX ? 2.4 : 1.7, B: alongX ? 1.7 : 2.4, y: h, h: 3.0, tiers: 1, walls: true }, ctx);
+  }
   let s = 0;
   for (const [g0, g1] of gaps) { piece(s, Math.max(s, g0)); s = g1; }
   piece(s, L);

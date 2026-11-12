@@ -48,6 +48,11 @@ export const ACADEMY = [60, 288, 175, 352];
 
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+// the moat outside the wall (docs: 6.13 m wide, a berm of 3 m between it and the wall's foot), crossed by timber bridges at the two gates
+export const MOAT_Y = -0.9, MOAT_BED = -2.5;
+export const MOAT = [[WALL_W - 6 - 3 - 6.1, -440, WALL_W - 6 - 3, WALL_S + 12], [WALL_W - 6 - 3 - 6.1, WALL_S + 9, WALL_E + 6 + 3 + 6.1, WALL_S + 15.1], [WALL_E + 9, -440, WALL_E + 15.1, WALL_S + 12], [WALL_W - 9, WALL_N - 15.1, WALL_E + 15.1, WALL_N - 9]];
+export const BRIDGES = [{ c: [WALL_W - 12, GATE_W.z], axis: 'x', len: 14, w: 16 }, { c: [GATE_S.x, WALL_S + 12.2], axis: 'z', len: 14, w: 30 }];
+export const inMoat = (x, z, m = 0) => MOAT.some((r) => inRect(r, x, z, m));
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const lakeD = (x, z) => 1 - Math.hypot((x - LAKE.c[0]) / LAKE.rx, (z - LAKE.c[1]) / LAKE.rz);   // > 0 inside
 export const inLake = (x, z, m = 0) => lakeD(x, z) > -m / 60;
@@ -60,6 +65,7 @@ export function height(x, z) {
   if (d > -0.03) h = Math.min(h, LAKE_BED * smooth(-0.03, 0.08, d));
   const dp = Math.min(x - GARDEN_POND[0], GARDEN_POND[2] - x, z - GARDEN_POND[1], GARDEN_POND[3] - z);
   if (dp > -1) h = Math.min(h, -1.4 * smooth(-1, 1.5, dp));
+  for (const m of MOAT) { const dm = Math.min(x - m[0], m[2] - x, z - m[1], m[3] - z); if (dm > -1.4) h = Math.min(h, MOAT_BED * smooth(-1.4, 1.2, dm)); }
   return h * (1 - smooth(RADIUS - 30, RADIUS, r));
 }
 
@@ -159,5 +165,19 @@ export function cityWalls() {
   seg(-286, WALL_E, WALL_N, 'x');           // north
   seg(WALL_N, WALL_S, WALL_W, 'z');         // west
   seg(WALL_N, WALL_S, WALL_E, 'z');         // east
+  return out;
+}
+
+/** The shop rows of a market: four quadrants about the cross lanes, rows in back-to-back pairs with a lane between: [{ rect, front, n, seed }]. */
+export function marketShops(rect, seedBase, th = MARKET_WALL.th) {
+  const [x0, z0, x1, z1] = rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, lane = 8, out = [];
+  const quads = [[x0 + th + 3, z0 + th + 3, cx - lane, cz - lane], [cx + lane, z0 + th + 3, x1 - th - 3, cz - lane], [x0 + th + 3, cz + lane, cx - lane, z1 - th - 3], [cx + lane, cz + lane, x1 - th - 3, z1 - th - 3]];
+  let seed = seedBase;
+  for (const [qx0, qz0, qx1, qz1] of quads) {
+    const nShops = Math.max(2, Math.floor((qx1 - qx0) / 5.2));
+    for (let zz = qz0; zz + 12 <= qz1 + 0.01; zz += 16) {
+      out.push({ rect: [qx0, zz, qx0 + nShops * 5.2, zz + 6], front: 'n', n: nShops, seed: seed++ }, { rect: [qx0, zz + 6, qx0 + nShops * 5.2, zz + 12], front: 's', n: nShops, seed: seed++ });
+    }
+  }
   return out;
 }

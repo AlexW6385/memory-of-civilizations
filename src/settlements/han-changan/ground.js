@@ -3,7 +3,7 @@
 // mulberry in the ward courtyards, millet and wheat in the country; a pale hazy sky of the Wei valley.
 // Pure (used by the relief, the collision and the plant workers).
 
-import { RADIUS, AX, PALACE, TIERS, LAKE, LAKE_Y, GARDEN_POND, AVENUE, WEST_MARKET, EAST_MARKET, CHANGLE, ACADEMY, WARDS, QUARTERS, height, inLake, inPond, inRect, inLot, lots, streets } from './layout.js';
+import { RADIUS, AX, PALACE, TIERS, LAKE, LAKE_Y, GARDEN_POND, AVENUE, WEST_MARKET, EAST_MARKET, CHANGLE, ACADEMY, WARDS, QUARTERS, height, inLake, inPond, inRect, inLot, lots, streets, inMoat, MOAT_Y } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 const inCity = (x, z) => x > -286 && x < 464 && z > -436 && z < 274;
@@ -20,18 +20,20 @@ function cover(x, z, h) {
   c.sand = 0.45 + 0.15 * hash2(x * 0.07, z * 0.07); c.road = 0.15;
   return c;
 }
-const water = (x, z, y) => (inLake(x, z) && y < LAKE_Y + 0.3) || (inPond(x, z) && y < -0.6 + 0.3);
-const waterLevel = (x, z) => (inLake(x, z, 1) ? LAKE_Y : inPond(x, z, 0.5) ? -0.6 : -Infinity);
+const water = (x, z, y) => (inLake(x, z) && y < LAKE_Y + 0.3) || (inPond(x, z) && y < -0.6 + 0.3) || (inMoat(x, z) && y < MOAT_Y + 0.3);
+const waterLevel = (x, z) => (inLake(x, z, 1) ? LAKE_Y : inPond(x, z, 0.5) ? -0.6 : inMoat(x, z, 0.5) ? MOAT_Y : -Infinity);
 const fromWater = (x, z) => (inLake(x, z) || inPond(x, z) ? -3 : Math.max(-5, Math.min(40, Math.min(Math.hypot((x - LAKE.c[0]) / LAKE.rx, (z - LAKE.c[1]) / LAKE.rz) * 60 - 60, 30))));
 /** Plants per 100 m²: pagoda trees and elms along the avenues, willows at the water, jujube and mulberry in the ward courtyards, millet and wheat outside the city. */
 function planting(x, z) {
   if (Math.hypot(x, z) > RADIUS - 6 || inLake(x, z, 1) || inPond(x, z, 0.4)) return null;
+  if (inMoat(x, z, 0.5)) return null;
+  if (inMoat(x, z, 5) && !streets().some((r) => inRect(r, x, z, 6)) && !inRect(AVENUE, x, z, 8)) return { willow: 0.9, grass: 10 };
   const nearLake = inLake(x, z, 6) && !inLake(x, z, 1);
   if (nearLake) return { willow: 1.6, grass: 12 };
   if (inPond(x, z, 6) && !inPond(x, z, 0.8)) return { willow: 1.4, pagoda_tree: 0.2, grass: 8 };
   if (inRect(TIERS[0].r, x, z, 2.5)) return null;
   // the avenue's rows of trees along the kerbs, in the ward streets' crossings
-  if (inRect(AVENUE, x, z, 0)) { const e = Math.min(x - AVENUE[0], AVENUE[2] - x); return e < 3 ? { pagoda_tree: 0.7, elm: 0.35 } : null; }
+  if (inRect(AVENUE, x, z, 0)) { const e = Math.min(x - AVENUE[0], AVENUE[2] - x); return e < 3.5 ? { pagoda_tree: 2.0, elm: 0.8 } : null; }
   if (streets().some((r) => inRect(r, x, z, 0.3))) return null;
   if (inLot(x, z, 0.5)) {
     const l = lotAt(x, z);
@@ -56,7 +58,7 @@ function planting(x, z) {
 }
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { pagoda_tree: 0.7, elm: 0.35, willow: 1.6, jujube: 0.8, mulberry: 0.5, wheat: 90 },
+  maxDensity: { pagoda_tree: 2.0, elm: 0.8, willow: 1.6, jujube: 0.8, mulberry: 0.5, wheat: 90 },
   climate: {
     sun: { az: 160, el: 52, color: [1.0, 0.95, 0.86], intensity: 3.2, lat: 34.3, dec: 8, hour: 10.5 },
     sky: { turbidity: 4.2, rayleigh: 1.15, mie: 0.007, mieG: 0.82, zenith: [0.13, 0.2, 0.35], horizon: [0.7, 0.68, 0.64] },

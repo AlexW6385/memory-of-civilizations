@@ -2,7 +2,7 @@
 // before the throne and at the gates. The engine part is src/engine/smoke.js (one draw call); positions from the layout.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, AX, HALL, WEST_MARKET, EAST_MARKET, GATE_W, lots as townLots } from './layout.js';
+import { RADIUS, AX, HALL, WEST_MARKET, EAST_MARKET, GATE_W, lots as townLots, marketShops } from './layout.js';
 import { ground } from './ground.js';
 
 const ID = 'han-changan';
@@ -22,6 +22,8 @@ export function emitters() {
     const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
     for (const [dx, dz] of [[-22, -12], [24, 12], [-30, 26], [34, -28]]) E.push({ p: [cx + dx, 3.4, cz + dz], kind: 'kitchen', thr: 0, seed: Math.round(cx + dx) });
   }
+  // the shops that cook or forge: a flue over every ninth shop of the rows
+  [WEST_MARKET, EAST_MARKET].forEach((M, mi) => { let n = 0; for (const row of marketShops(M, mi ? 700 : 600)) for (let i = 0; i < row.n; i++, n++) if (n % 9 === 4) { const [rx0, rz0, rx1, rz1] = row.rect, sw = (rx1 - rx0) / row.n; E.push({ p: [rx0 + (i + 0.7) * sw, 4.8, row.front === 'n' ? rz1 - 1.2 : rz0 + 1.2], kind: 'kitchen', thr: 0.1 + 0.6 * r(), seed: n * 5 + mi }); } });
   // incense: before the throne, in the hall's aisle, at the ramp's foot and the west gate
   for (const [x, y, z, thr] of [[AX - 2.8, HALL.floor + 1.8, HALL.z0 + 4.3, 0], [AX + 2.8, HALL.floor + 1.8, HALL.z0 + 4.3, 0], [AX - 4.6, HALL.floor + 0.8, HALL.z1 - 2.5, 0.1], [AX + 4.6, HALL.floor + 0.8, HALL.z1 - 2.5, 0.1], [AX, 1.0, -88, 0.2], [-266, 1.0, GATE_W.z - 6, 0.3]]) E.push({ p: [x, y, z], kind: 'incense', thr, seed: Math.round(x) });
   return E;
