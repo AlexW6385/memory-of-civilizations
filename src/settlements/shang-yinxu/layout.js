@@ -81,8 +81,8 @@ const RESERVED = [
 ];
 export const reserved = (x, z, m = 0) => RESERVED.some((r) => inRect(r, x, z, m));
 
-// ── the lineage compounds: cells of 36 × 34 m round the zone, lanes 6 m wide between ──
-export const CELL = [36, 34], ORG = [-324, -170], LANE = 6, ZONE_R = 272;
+// ── the lineage compounds: cells of 34 × 32 m round the zone, lanes 5 m wide between, the lots filling the cells to the lane's edge ──
+export const CELL = [34, 32], ORG = [-323, -168], LANE = 5, ZONE_R = 292;
 const lotOverlapsFixed = (rect) => RESERVED.some((q) => rect[0] < q[2] + 2 && rect[2] > q[0] - 2 && rect[1] < q[3] + 2 && rect[3] > q[1] - 2);
 const bad = (x, z, m) => inRiver(x, z, m) || inMoat(x, z, m) || Math.hypot(x, z) > ZONE_R;
 let LOTS = null;
@@ -102,18 +102,18 @@ export function lots() {
     for (let i = 0; ; i++) {
       const xc = ORG[0] + i * CELL[0] + CELL[0] / 2;
       if (xc > ZONE_R) break;
-      const w = 21 + Math.floor(rand() * 5), d = 19 + Math.floor(rand() * 5);
-      const cx = xc + (rand() - 0.5) * 2, cz = zc + (rand() - 0.5) * 2;
+      const w = 27.4 + Math.floor(rand() * 3) * 0.4, d = 25.4 + Math.floor(rand() * 3) * 0.4;
+      const cx = xc + (rand() - 0.5) * 0.5, cz = zc + (rand() - 0.5) * 0.5;
       const rect = [cx - w / 2, cz - d / 2, cx + w / 2, cz + d / 2];
       const seed = Math.floor(rand() * 1e6), r = rand(), front = rand() < 0.5 ? 'n' : 's';
       const near = Math.hypot(cx - AXIS, cz + 30);
       if (lotOverlapsFixed(rect) || [[rect[0], rect[1]], [rect[2], rect[1]], [rect[0], rect[3]], [rect[2], rect[3]]].some(([a, b]) => bad(a, b, 3))) continue;
-      if (near > 215 && r < 0.2) continue;                                           // fields between the clusters
-      let kind = near < 140 ? (r < 0.5 ? 'court' : r < 0.78 ? 'pits' : 'row') : (r < 0.2 ? 'court' : r < 0.65 ? 'pits' : 'row');
+      if (near > 235 && r < 0.12) continue;                                           // fields between the clusters
+      let kind = near < 140 ? (r < 0.5 ? 'court' : r < 0.78 ? 'pits' : 'row') : (r < 0.25 ? 'court' : r < 0.55 ? 'pits' : 'row');
       let trade;
       if (r > 0.9 && near < 220) { kind = 'workshop'; trade = trades[ti++ % trades.length]; }
-      const lot = { rect, front, kind, trade, seed, open: false };
-      if (kind !== 'pits' && (kind === 'workshop' || (near < 200 && furnished++ % 3 === 0))) lot.open = true;
+      const lot = { rect, front, kind, trade, seed, open: false, lod: near > 150 ? 1 : 0, near };
+      if (kind === 'workshop' || kind === 'court' || (near < 235 && furnished++ % 2 === 0)) lot.open = true;
       LOTS.push(lot);
     }
   }

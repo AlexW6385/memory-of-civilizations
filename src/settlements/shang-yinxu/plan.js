@@ -10,6 +10,7 @@ const E = [
   { t: 'shang_hall', plat: HALL.plat, h: HALL.h, rot: 0, bays: 9, bw: 4, deep: 3, porch: 3.6, over: 2.8, rise: 6.0, rich: true },
   ...FLANKS.map((f, i) => ({ t: 'shang_hall', plat: f.plat, h: f.h, rot: 1, flip: i === 1, bays: 5, bw: 4, deep: 2, porch: 3.2, over: 2.2, rise: 3.6, rich: false })),
   { t: 'shang_pits' },
+  { t: 'shang_court' },
   { t: 'shang_gate', plat: GATE.plat, axis: GATE.axis, h: GATE.h },
 ];
 const hallRoom = [HALL.plat[0] + 4, HALL.plat[1] + 3, HALL.plat[2] - 4, HALL.plat[3] - 2];

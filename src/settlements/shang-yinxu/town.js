@@ -88,7 +88,7 @@ export async function town() {
   plans.push({ ...base('yinxu-carts', carts()), style: 'life' });
   const K = { court: 'shang_court_house', pits: 'shang_pit_yard', row: 'shang_row_house', workshop: 'shang_workshop' };
   const LOTS = lots();
-  for (let i = 0; i < LOTS.length; i += 16) plans.push(base(`yinxu-town-${i / 16}`, LOTS.slice(i, i + 16).map((l) => ({ t: K[l.kind], rect: l.rect, front: l.front, seed: l.seed, open: l.open, trade: l.trade }))));
+  for (let i = 0; i < LOTS.length; i += 16) plans.push(base(`yinxu-town-${i / 16}`, LOTS.slice(i, i + 16).map((l) => ({ t: K[l.kind], rect: l.rect, front: l.front, seed: l.seed, open: l.open, trade: l.trade, lod: l.lod }))));
   void FOUNDRY;
   return (CACHE = plans);
 }
