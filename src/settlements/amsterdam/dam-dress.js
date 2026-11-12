@@ -3,7 +3,7 @@
 // stoops with their tubs, benches, baskets and casks, a maid scrubbing the step, neighbours in talk — and the square is given its small
 // theatre: a quack's stage with its audience, the crier with his staff, the milkmaids with their pails, a beggar at the Weigh House steps,
 // halberdiers at the Town Hall's door, children, dogs and pigeons. Explicit, derived from layout.js; a life plan like damLife's.
-import { RADIUS, GROUND, DAM, HALL, WAAG, NIEUWE_KERK, lots, inLot, inRect } from './layout.js';
+import { RADIUS, GROUND, DAM, HALL, WAAG, NIEUWE_KERK, VOC, IJ_Z, QUAY, lots, inLot, inRect } from './layout.js';
 import { faceFrame } from '../../styles/dutch/facade.js';
 import { person, rng } from './town.js';
 
@@ -82,6 +82,20 @@ export function damDress() {
     }
     E.push({ t: 'bench', at: [kx0 + 6, kz1 + 0.6], y: Y, rot: 0, len: 1.8, back: true }, { t: 'bench', at: [kx1 - 5, kz1 + 0.6], y: Y, rot: 0, len: 1.8, back: true });
   }
+
+  // the VOC's quay on the IJ (§5.11): before each warehouse the goods landed from the ships' boats — casks of wine and oil, bales of cloth, sacks of pepper
+  // and grain, chests — stacked along the strip between the warehouse front and the quay's coping, porters with sacks, a clerk with a merchant tallying
+  VOC.forEach(([vx0, vz0, vx1], k) => {
+    const zq = IJ_Z + QUAY + 2.2, mid = (vx0 + vx1) / 2;
+    for (let q = 0; q < 5; q++) {
+      const x = vx0 + 2.5 + q * (vx1 - vx0 - 5) / 4 + (rand() - 0.5), z = zq + (q % 2) * 1.6 + rand() * 0.6, kind = ['barrel', 'crates', 'sacks', 'barrel', 'basket'][(q + k) % 5];
+      E.push({ t: kind, at: [x, z], y: Y, n: kind === 'barrel' ? 3 : kind === 'sacks' ? 4 : 3, seed: Math.floor(rand() * 1e6), rot: rand() * 6 });
+    }
+    for (let q = 0; q < 3; q++) P('porter', vx0 + 3 + rand() * (vx1 - vx0 - 6), zq + 2.4 + rand() * 1.4, rand() * 6.28, { carry: q === 0 ? 'sack' : 'none', pose: q === 2 ? 'talk' : 'stand' });
+    P('burgher', mid + 1.5, zq + 3.6, Math.PI, { pose: 'talk' }); P('burgher', mid + 2.6, zq + 3.2, Math.PI * 0.6, { pose: 'talk', cloth: 'cloth_brown' });
+    E.push({ t: 'handcart', at: [vx0 + 4 + rand() * 5, zq + 3.2], y: Y, rot: 0.2 + rand() * 0.5, seed: Math.floor(rand() * 1e6) });
+    E.push({ t: 'sledge', at: [vx1 - 3, zq + 3.6], y: Y + 0.003, rot: Math.PI / 2, load: k % 2 ? 'casks' : 'bales', seed: 30 + k });
+  });
   // the pigeons of the Dam, about the Weigh House and the Town Hall's steps
   for (const [x, z] of [[-5, -233], [-26, -216], [15, -222], [26, -233], [-14, -222], [34, -214], [3, -240]]) E.push({ t: 'chickens', kind: 'pigeon', n: 8 + Math.floor(rand() * 6), at: [x, z], y: Y, seed: Math.floor(x * 13 - z) });
   return [{ id: 'amsterdam-dam-dress', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: E, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [20, -207], facing: 'n' }, center: [5, -235], near: 230 }];
