@@ -259,3 +259,16 @@ export function fangGates() {
   }
   return FANG;
 }
+
+/** The canal's landings (granite steps down to the water, §12): [{ z, west: bool, hl: half length }] — every 31–43 m on both banks, clear of the bridges and the walls. */
+let LAND = null;
+export function canalLandings() {
+  if (LAND) return LAND;
+  LAND = [];
+  const r = rng(1090);
+  for (const west of [true, false]) for (let z = -420; z < 120; z += 31 + r() * 12) {
+    if (CANAL_BRIDGES.some((bz) => Math.abs(bz - z) < 12) || Math.abs(z - CITY.zs) < 18 || Math.abs(z - CITY.zn) < 18) continue;
+    LAND.push({ z, west, hl: r() < 0.4 ? 2.2 : 1.1 });
+  }
+  return LAND;
+}

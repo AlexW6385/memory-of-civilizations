@@ -11,7 +11,7 @@ import { STYLES } from '../../core/build.js';
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import '../../styles/song/index.js';
 import { gableRoof } from './townscape.js';
-import { WAZI, spans, fangGates, IMPERIAL } from './layout.js';
+import { WAZI, WATCH_TOWERS, spans, fangGates, IMPERIAL } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const ly = (prof, seg = 8, x = 0, y = 0, z = 0) => lathe(prof, seg, null, x, y, z);
@@ -333,3 +333,40 @@ export function waziLife(y0 = 0) {
   for (const g of WAZI.gates) { const p = g.side === 's' ? [g.at + 2.6, z1 - 1.0] : [x1 - 1.0, g.at + 2.6]; L.push({ t: 'basket', at: p, y: y0, rot: 0.4, n: 2, seed: seed() }); person([p[0] + (g.side === 's' ? 0.5 : 0.0), p[1] + (g.side === 's' ? 0.0 : 0.5)], y0, g.side === 's' ? north : faceTo([1, 0]), { pose: 'squat', dress: 'trousers', hat: 'straw' }); }
   return L;
 }
+
+/**
+ * The market of the Imperial Way (§24): "all the households on both sides were engaged in business", hundreds of stalls in its central part (Nottingham,
+ * §12). Two rows of trestle stalls stand inside the shop aprons, facing the middle, a 4 m way left free between the buyers (the king's way); each with its
+ * seller, most with a buyer or two; goods mats, handcarts, a dog or a pair of chickens between. Returns life elements, skipping lane mouths, fire towers
+ * and the poles of the sunshades. A second pass of the density, not a replacement: the shop aprons' own stalls stay.
+ */
+export function wayMarket(y0 = 0) {
+  const L = [], rand = rng(8801), pick = (a) => a[Math.floor(rand() * a.length)], seed = () => Math.floor(rand() * 1e9);
+  const person = (at, y, rot, extra = {}) => L.push({ t: 'figure', at, y, rot, seed: seed(), dress: rand() < 0.7 ? 'robe' : 'trousers', cloth: pick(CLOTH), cloth2: pick(CLOTH), skin: rand() < 0.8 ? 'skin_light' : 'skin_medium', hat: pick(['none', 'cap', 'cap', 'straw']), carry: 'none', ...extra });
+  const lanes = [-205, -160, -120, -75, -10, 45, 90], sp = spans().map((s) => s.z);
+  const GOODS = [['produce', 'basket'], ['dark_pot', 'water_pot', 'basket'], ['cloth', 'basket'], ['produce', 'produce', 'basket'], ['cloth', 'cloth', 'basket'], ['glazed_jar', 'dark_pot']];
+  const rows = [{ x: IMPERIAL[0] + 4.4, face: 1 }, { x: IMPERIAL[2] - 4.4, face: -1 }];
+  for (const [a, b] of [[-206, -52], [-10, 108]]) {
+    for (const row of rows) {
+      for (let z = a + 3 + rand() * 4; z < b - 3; z += 8 + rand() * 7) {
+        if (lanes.some((l) => Math.abs(l - z) < 6) || sp.some((s) => Math.abs(s - z) < 2) || WATCH_Z.some((t) => Math.abs(t - z) < 5)) continue;
+        if (rand() < 0.2) continue;
+        const k = rand(), rot = row.face > 0 ? Math.PI / 2 : -Math.PI / 2, at = [row.x, z];
+        if (k < 0.7) {
+          L.push({ t: 'stall', at, y: y0, rot, w: 2.3 + rand() * 0.7, d: 1.3, awning: pick(['cloth_white', 'cloth_indigo', 'cloth_ochre', 'cloth_red', 'cloth_white']), stripe: rand() < 0.4 ? pick(['cloth_red', 'cloth_indigo']) : undefined, goods: pick(GOODS), seed: seed() });
+          person([row.x - row.face * 0.95, z + (rand() - 0.5) * 0.8], y0, faceTo([row.face, 0]), { pose: rand() < 0.3 ? 'talk' : 'stand', hat: pick(['cap', 'none']) });
+          const n = Math.floor(rand() * 3);
+          for (let q = 0; q < n; q++) person([row.x + row.face * (1.6 + rand() * 0.5), z + (q - 0.5) * 0.9 + (rand() - 0.5) * 0.4], y0, faceTo([-row.face, (rand() - 0.5) * 0.4]), { pose: rand() < 0.45 ? 'talk' : 'stand', carry: rand() < 0.3 ? 'basket' : 'none', woman: rand() < 0.35 });
+        } else if (k < 0.82) {
+          L.push({ t: 'goods_mat', at, y: y0, rot: row.face > 0 ? Math.PI / 2 : -Math.PI / 2, goods: pick([['heap', 'baskets'], ['pottery', 'baskets'], ['bolts', 'heap']]), seed: seed() });
+          person([row.x - row.face * 0.2, z + 1.4], y0, faceTo([row.face, 0]), { pose: 'squat', dress: 'trousers', hat: 'straw', cloth: pick(['cloth_brown', 'cloth_grey', 'cloth_indigo']) });
+        } else if (k < 0.92) {
+          L.push({ t: 'handcart', at, y: y0, rot: 0, seed: seed() });
+          person([row.x, z - 1.9], y0, faceTo([0, 1]), { pose: 'stand', dress: 'trousers', hat: 'straw', carry: 'pole' });
+        } else L.push({ t: k < 0.96 ? 'chickens' : 'animal', ...(k < 0.96 ? {} : { kind: pick(['dog', 'cat']) }), at: [row.x + row.face * 1.5, z], y: y0, rot: rand() * 6, seed: seed() });
+      }
+    }
+  }
+  return L;
+}
+const WATCH_Z = WATCH_TOWERS.map((t) => (t[1] + t[3]) / 2);
