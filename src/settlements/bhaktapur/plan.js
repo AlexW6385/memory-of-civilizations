@@ -5,8 +5,12 @@
 import { SQ, POT, NYATAPOLA, BHAIRAB, SHI, DABALI, PATI, DHARA, CHAITYA, TREES, HOUSE, STALLS } from './layout.js';
 
 const E = [];
-E.push({ t: 'newar_paving', rect: SQ, y: 0.05, th: 0.3, mat: 'brick_paving' });
+const KEEP_RINGS = [[NYATAPOLA.c[0] - 8.5, NYATAPOLA.c[1] - 8.5, NYATAPOLA.c[0] + 15.5, NYATAPOLA.c[1] + 8.5], [BHAIRAB.c[0] - 11, BHAIRAB.c[1] - 6, BHAIRAB.c[0] + 6, BHAIRAB.c[1] + 6]];
+E.push({ t: 'newar_paving', rect: SQ, y: 0.05, th: 0.3, mat: 'cotto_floor' });
+E.push({ t: 'newar_inlay', rect: SQ, rings: KEEP_RINGS, seed: 4 });
 E.push({ t: 'newar_pagoda', ...NYATAPOLA });
+E.push({ t: 'newar_offerings', pagoda: NYATAPOLA, seed: 11 });
+E.push({ t: 'newar_trisul', c: [BHAIRAB.c[0] - 7.4, BHAIRAB.c[1] - 4.2], s: 1 }, { t: 'newar_trisul', c: [BHAIRAB.c[0] - 7.4, BHAIRAB.c[1] + 4.2], s: 1 });
 E.push({ t: 'newar_pagoda', ...BHAIRAB });
 E.push({ t: 'newar_shikhara', c: SHI.c, s: 1 });
 E.push({ t: 'newar_dabali', rect: DABALI, h: 0.8, stair: 'n' });

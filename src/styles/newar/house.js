@@ -88,7 +88,11 @@ export function houseParts(el, ctx, { hipRoof }) {
     }
     if (W >= 6.5) {
       const wS = 0.85, wC = 1.05, g = 0.16, tw = wS * 2 + wC + g * 2, lx0 = cx - tw / 2, sill = y0 + 0.5;
-      lattice(lx0, sill, wS, 1.2, det); lattice(lx0 + wS + g, sill - 0.05, wC, 1.45, det); lattice(lx0 + wS + g + wC + g, sill, wS, 1.2, det);
+      // the projecting bay (sajhyah) of the better houses: the middle window stands out 0.6 m on brackets under its own small tiled roof [stated: Newar bay windows]
+      if (i === 1 && n > 2 && ((el.seed || 1) * 2654435761 >>> 0) % 100 < 38) {
+        lattice(lx0, sill, wS, 1.2, det); lattice(lx0 + wS + g + wC + g, sill, wS, 1.2, det);
+        bay(lx0 + wS + g + wC / 2, sill, 1.7, 1.5);
+      } else { lattice(lx0, sill, wS, 1.2, det); lattice(lx0 + wS + g, sill - 0.05, wC, 1.45, det); lattice(lx0 + wS + g + wC + g, sill, wS, 1.2, det); }
       B(lx0 - 0.12, sill - 0.12, -0.2, lx0 + tw + 0.12, sill - 0.02, 0.0, 'timber');            // the carved sill
       if (det > 1) B(lx0 - 0.12, sill + 1.5, -0.16, lx0 + tw + 0.12, sill + 1.64, 0.0, 'timber');  // the cornice
       if (det > 1 && rand() < 0.4) for (let k = 0; k < 3; k++) B(lx0 + 0.3 + k * 0.9, sill - 0.7, -0.14, lx0 + 0.42 + k * 0.9, sill - 0.14, -0.04, rand() < 0.5 ? 'cloth_red' : 'cloth_ochre');   // chillies and maize hung to dry
@@ -130,6 +134,13 @@ export function houseParts(el, ctx, { hipRoof }) {
       if (det > 1) { B(dx + 1.38, 1.2, -0.08, dx + 1.62, 1.55, 0.0, 'wood_dark'); B(dx + 1.42, 1.25, -0.1, dx + 1.58, 1.45, -0.04, 'opening'); const p = toW(dx + 1.5, -0.08); bag.add('flame', lathe([[0.02, 0], [0.001, 0.06]], 5, null, p[0], 1.28, p[1])); }
       if (det > 0 && rand() < 0.6) for (let k = 0; k < 5; k++) B(dx + 0.1 + k * 0.2, 1.5 - 0.1 * Math.sin(k * 0.8), -0.1, dx + 0.2 + k * 0.2, 1.62 - 0.1 * Math.sin(k * 0.8), -0.04, 'cloth_ochre');
     }
+    // a wall niche with a Ganesh at the end of the front, a lamp and a marigold before it
+    if (!open && W > 7 && ((el.seed || 1) * 40503 >>> 0) % 100 < 28) {
+      const nx = W - 0.85;
+      B(nx - 0.08, 1.25, -0.12, nx + 0.58, 2.05, 0.0, 'wood_dark'); B(nx, 1.33, -0.14, nx + 0.5, 1.97, -0.04, 'opening');
+      { const p = toW(nx + 0.25, -0.07); bag.add('gilt_bronze', lathe([[0.001, 0], [0.09, 0], [0.07, 0.14], [0.04, 0.22], [0.001, 0.26]], 6, null, p[0], 1.36, p[1])); }
+      B(nx - 0.1, 1.2, -0.22, nx + 0.6, 1.26, 0.0, 'sandstone'); B(nx + 0.15, 1.26, -0.2, nx + 0.35, 1.31, -0.08, 'cloth_ochre');
+    }
     // washing on a line along an upper storey, a flower pot on a sill
     if (n > 2 && rand() < 0.4) {
       const ly = Y[2] - 0.45, lx0 = 0.5 + rand() * 0.6, lx1 = W - 0.5 - rand() * 0.6;
@@ -151,6 +162,22 @@ export function houseParts(el, ctx, { hipRoof }) {
   if (det > 0) for (let x = 0.7; x < W - 0.5; x += 1.5) {
     RODL([x, H - 1.25, 0], [x, H - 0.1, -fo + 0.12], 0.06, 'wood_painted');
     if (det > 1) B(x - 0.04, H - 0.85, -0.5, x + 0.04, H - 0.35, -0.42, 'gilt_bronze');
+  }
+
+  /** The bay window: a floor of planks on two struts, a lattice front and two lattice sides, a cornice and a little hipped roof. */
+  function bay(cx, y, w, h) {
+    const x0b = cx - w / 2, x1b = cx + w / 2, o = 0.62;
+    B(x0b - 0.05, y - 0.2, -o - 0.05, x1b + 0.05, y - 0.08, 0.0, 'wood_dark');
+    for (const x of [x0b + 0.2, x1b - 0.2]) RODL([x, y - 1.0, -0.02], [x, y - 0.2, -o + 0.06], 0.05, 'wood_painted');
+    B(x0b, y - 0.08, -o - 0.02, x1b, y + h, -o + 0.04, 'opening');
+    B(x0b - 0.08, y - 0.08, -o - 0.1, x1b + 0.08, y, -o + 0.04, 'wood_dark'); B(x0b - 0.08, y + h, -o - 0.1, x1b + 0.08, y + h + 0.1, -o + 0.04, 'wood_dark');
+    for (const x of [x0b - 0.08, x1b]) B(x, y - 0.08, -o - 0.1, x + 0.08, y + h, -o + 0.04, 'wood_dark');
+    const m = det > 0 ? Math.round(w / 0.17) : 4;
+    for (let k = 1; k < m; k++) { const x = x0b + w * k / m; B(x - 0.015, y, -o - 0.06, x + 0.015, y + h, -o - 0.02, 'wood_dark'); }
+    if (det > 1) for (let k = 1; k < 4; k++) B(x0b, y + h * k / 4 - 0.015, -o - 0.07, x1b, y + h * k / 4 + 0.015, -o - 0.03, 'wood_dark');
+    for (const x of [x0b, x1b - 0.03]) { B(x, y, -o, x + 0.03, y + h, -0.0, 'wood_dark'); B(x, y + h * 0.2, -o + 0.05, x + 0.03, y + h * 0.8, -0.02, 'opening'); }
+    const a = toW(x0b - 0.12, -o - 0.12), b = toW(x1b + 0.12, 0.0);
+    hipRoof(bag, [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], y + h + 0.1, 0.5, [0.04, 0.04, 0.04, 0.04], 'roof_tile', ns);
   }
 
   /** A lattice window at (lx, y) of width w and height h: the dark recess, a carved frame, the screen of bars. */

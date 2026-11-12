@@ -21,7 +21,7 @@ export async function town() {
   const rand = rng(1710), L = lots();
   const out = [];
   // the streets' brick paving, and the small stupas at some crossings
-  out.push(base('bhaktapur-streets', 'newar', [...PAVED.map((rect) => ({ t: 'newar_paving', rect, y: 0.05, th: 0.3, mat: 'brick_paving' })), ...PAVED.map((rect, i) => ({ t: 'newar_lane', rect, y: 0.05, seed: i + 3 }))]));
+  out.push(base('bhaktapur-streets', 'newar', [...PAVED.map((rect) => ({ t: 'newar_paving', rect, y: 0.05, th: 0.3, mat: 'cotto_floor' })), ...PAVED.map((rect, i) => ({ t: 'newar_lane', rect, y: 0.05, seed: i + 3 }))]));
   const stupas = [];
   for (const [x, z] of [[8, -72], [8, 44], [-52, 0], [60, 0], [-52, -72], [60, 44], [-82, 0], [94, 0], [8, -106], [8, 78]]) if (Math.hypot(x, z) < 150) stupas.push({ t: 'newar_chaitya', c: [x, z], s: 0.9 });
   out.push(base('bhaktapur-shrines', 'newar', stupas));
