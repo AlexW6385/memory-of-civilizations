@@ -96,7 +96,7 @@ function way() {
   }
   // the forecourt before the gate and the first stretch of the way, where pilgrims gather: washing at the jars, pausing, a monk with an almsbowl, sellers of flowers
   for (let k = 0; k < 11; k++) {
-    const x = 78 + rand() * 18, z = (rand() - 0.5) * 6.4, pose = pick(rand, ['stand', 'talk', 'stand', 'squat']);
+    const x = 78 + rand() * 18, z = (rand() < 0.5 ? -1 : 1) * (1.2 + rand() * 2.3), pose = pick(rand, ['stand', 'talk', 'stand', 'squat']);
     L.push(person(rand, [x, z], 0, faceTo([pick(rand, [-1, 1]), pick(rand, [-0.3, 0.3])]), { pose, carry: rand() < 0.4 ? pick(rand, ['basket', 'pot']) : 'none' }));
   }
   for (const [x, z, a] of [[88, 3.8, 1], [84, -3.9, -1]]) L.push({ t: 'figure', at: [x, z], y: 0, rot: faceTo([0, -a]), seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: 'cloth_ochre', cloth2: 'cloth_ochre', skin: pick(rand, SK), hat: 'none', hair: 'shaven', pose: 'stand', arms: 'clasp' });
