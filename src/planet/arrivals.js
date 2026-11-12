@@ -25,7 +25,7 @@ export const ARRIVALS = {
   'angkor':           [-178, 1.05, 1.5, -1.5708, 0.08],  // Angkor Wat's towers at the end of the causeway
   'borobudur':        [110, 0.1, 0, 1.5708, 0.18],       // the monument up the east way
   'abbasid-baghdad':  [-110, 0.1, 16, 0, 0.2],               // the Palace of the Golden Gate and its Green Dome across the esplanade, now busy with petitioners, horses, a caravan and mat-sellers
-  'ur':               [0, 0.1, -118, 3.1416, 0.22],      // the ziggurat across its court
+  'ur':               [0, 0.1, -118, 3.1416, 0.17],      // the ziggurat across its court: the pale way, the standards and the three stairways under the white house of Nanna (pitch lowered from 0.22 now that the enclosure's front is a low parapet and the whole stage shows)
   'babylon':          [-40, 0.1, -360, 3.1416, 0.2],     // the Processional Way's lions to the Ishtar Gate
   'persepolis':       [-122, 14.05, -60, -1.571, 0.16],  // at the head of the royal way, the guards' ranks leading to the Apadana's stair
   'isfahan':          [0, 0.1, 170, 3.1416, 0.17],       // the mosque's portal and minarets over the square, its dome rising beside them (from 44 m the court's wall hid the dome)
