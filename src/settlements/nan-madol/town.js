@@ -202,8 +202,8 @@ export async function town() {
     P.push({ t: 'animal', kind: 'pig', at: [-4.2, 9.4], y: 0, rot: 1.2, seed: 1601 }, { t: 'animal', kind: 'pig', at: [-4.5, 8.8], y: 0, rot: 3.9, seed: 1602 });
     man([-2.6, 11.2], 0, 2.0, { h: 0.62, pose: 'stand', beard: false, hair: 'long' }); man([-13.0, 15.2], 0, 4.0, { h: 0.66, pose: 'stand', beard: false, hair: 'long' });
     // on the way: porters with poles of baskets to the causeway, two priests with their white mats, an old man with a staff
-    man([-9.4, 12.2], 0, Math.PI, { carry: 'pole' }); woman([-10.9, 14.2], 0, Math.PI, { carry: 'basket' }); woman([-10.2, 8.6], 0, 0.3, { carry: 'basket' });
-    man([-9.0, 17.6], 0, Math.PI, { cloth: 'cloth_white', cloth2: 'cloth_white', over: 'cloak', pose: 'talk', beard: true, hair: 'bun' }); man([-10.4, 18.4], 0, Math.PI - 0.3, { cloth: 'cloth_white', cloth2: 'cloth_white', over: 'cloak', pose: 'talk', beard: true });
+    man([-7.6, 12.2], 0, Math.PI, { carry: 'pole' }); woman([-12.5, 14.2], 0, Math.PI, { carry: 'basket' }); woman([-12.4, 8.6], 0, 0.3, { carry: 'basket' });
+    man([-7.7, 19.4], 0, face([-7.7, 19.4], [-12.3, 19.6]), { cloth: 'cloth_white', cloth2: 'cloth_white', over: 'cloak', pose: 'talk', beard: true, hair: 'bun' }); man([-12.3, 19.6], 0, face([-12.3, 19.6], [-7.7, 19.4]), { cloth: 'cloth_white', cloth2: 'cloth_white', over: 'cloak', pose: 'talk', beard: true });
     for (const [x, z] of [[-14.6, 17.4], [-6.6, 11.4], [-14.2, 21.0]]) P.push({ t: 'basket', n: 2, at: [x, z], y: 0, seed: Math.round(x * 10), goods: 'cloth_ochre' });
     for (const [x, z] of [[-18.2, 17.6], [-2.4, 22.6]]) P.push({ t: 'firewood', at: [x, z], y: 0, rot: 0.4, len: 1.4, seed: Math.round(z) });
     P.push({ t: 'chickens', n: 4, at: [-12.8, 20.8], y: 0, rot: 2, seed: 1603 }, { t: 'animal', kind: 'dog', at: [-8.4, 20.2], y: 0, rot: 4.4, seed: 1604 });
