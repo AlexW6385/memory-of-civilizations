@@ -54,13 +54,13 @@ export function compound(el, ctx) {
   const { bag, col } = ctx, rand = rng(el.seed || 5), [x0, z0, x1, z1] = el.rect, y = el.y, wid = x1 - x0;
   const gw = Math.min(7.6, wid * 0.58) + (rand() - 0.5) * 0.4, dep = 4.2 + rand() * 0.4, west = rand() < 0.5;
   const gx0 = west ? x0 + 0.4 : x1 - 0.4 - gw, gx1 = gx0 + gw, gz1 = z1 - 0.2, gz0 = gz1 - dep;
-  const H = 3.0 + rand() * 0.5;
+  const H = 3.0 + rand() * 0.5 + (el.ginna === 'tall' ? 1.0 : 0);
   // the ginna: a solid mass with the niched facade on its south face, a roof with its parapet
   bag.add(WALL, box(gx0, y - 0.5, gz0, gx1, y + H, gz1));
   col.rect([gx0, gz0, gx1, gz1], y - 0.5, y + H + 0.3);
   roofTop(bag, col, [gx0, gz0, gx1, gz1], y + H, rand, { stalks: 1 + Math.floor(rand() * 2), pots: Math.floor(rand() * 3) });
   const doors = [gx0 + gw * 0.3, gx0 + gw * 0.7];
-  nicheFacade(bag, gx0 + 0.3, gx1 - 0.3, gz1, y, H, rand, { plain: el.ginna === 'plain', doors });
+  nicheFacade(bag, gx0 + 0.3, gx1 - 0.3, gz1, y, H, rand, { kind: el.ginna, doors });
   for (const u of doors) carvedDoor(bag, u, y, gz1, 0.9, 1.45, rand);
   weatherFront(bag, gx0 + 0.3, gx1 - 0.3, gz1, y, H, rand, doors);
   frontDress(bag, col, { x0: gx0, x1: gx1, zf: gz1, y, doors, seed: el.seed });
@@ -81,7 +81,7 @@ export function compound(el, ctx) {
  * (a notched log) climbs through the hatch to the kitchen roof, from which a step leads to the ginna's roof terrace.
  */
 export function house(el, { bag, col, lights }) {
-  const [x0, z0, x1, z1] = el.rect, y = el.y, rand = rng(el.seed || 9), T = 0.45, F = y + 0.05, CH = y + 2.1, ST = y + 2.6, FH = 3.5;
+  const [x0, z0, x1, z1] = el.rect, y = el.y, rand = rng(el.seed || 9), T = 0.45, F = y + 0.05, CH = y + 2.1, ST = y + 2.6, FH = el.ginna === 'tall' ? 4.4 : 3.5;
   const ix0 = x0 + T, iz0 = z0 + T, ix1 = x1 - T, iz1 = z1 - T;
   const lx = (u) => ix0 + u, lz = (v) => iz0 + v;
   const DOORW = 1.0, DOORH = 1.95;
@@ -100,7 +100,7 @@ export function house(el, { bag, col, lights }) {
   // the lintels over the doorways: a beam
   for (const u of [1.5, 4.9]) { bag.add(DARK, box(lx(u) - 0.65, F + DOORH, lz(2.6) - 0.2, lx(u) + 0.65, F + DOORH + 0.12, lz(2.6) + 0.2)); }
   // the facade
-  nicheFacade(bag, x0 + 0.3, x1 - 0.3, z1, y, FH, rand, { plain: el.plain, doors: doorU.map((u) => x0 + T + u) });
+  nicheFacade(bag, x0 + 0.3, x1 - 0.3, z1, y, FH, rand, { kind: el.ginna ?? (el.plain ? 'plain' : 'niche'), doors: doorU.map((u) => x0 + T + u) });
   for (const u of doorU) carvedDoor(bag, x0 + T + u, y, z1, DOORW, DOORH, rand, true);
   weatherFront(bag, x0 + 0.3, x1 - 0.3, z1, y, FH, rand, doorU.map((u) => x0 + T + u));
   // the roof: beams under (logs across, from the south to the north wall), a mat of reeds, the mud over; a parapet; the facade above it
@@ -219,7 +219,7 @@ export function houseOf(c) {
 export function landmarkCompound(el, ctx) {
   const { bag, col } = ctx, rand = rng(el.seed || 5), y = el.y;
   const h = houseOf({ rect: el.rect, hw: el.hw ?? true });
-  house({ rect: h.rect, y, seed: el.seed, plain: el.plain, lite: el.lite }, ctx);
+  house({ rect: h.rect, y, seed: el.seed, ginna: el.ginna, plain: el.plain, lite: el.lite }, ctx);
   courtyard(bag, col, h.court, y, rand, { side: h.side, gate: true, south: true });
   furnish(bag, col, [h.court[0] + 0.4, h.court[1] + 0.4, h.court[2] - 0.4, h.court[3] - 0.4], y, rand, {});
   frontDress(bag, col, { x0: h.rect[0], x1: h.rect[2], zf: h.rect[3], y, doors: [h.rect[0] + 0.45 + 1.5, h.rect[0] + 0.45 + 4.9], seed: el.seed });
@@ -230,7 +230,7 @@ export const HOUSE_RECT = (r) => [r[0] + 0.5, r[3] - 0.2 - 5.4, r[0] + 0.5 + 7.4
 /** The ginna of a plain compound as compound() places it: { rect, H } (the same random sequence). */
 export function ginnaOf(el) {
   const rand = rng(el.seed || 5), [x0, , x1, z1] = el.rect, wid = x1 - x0;
-  const gw = Math.min(7.6, wid * 0.58) + (rand() - 0.5) * 0.4, dep = 4.2 + rand() * 0.4, west = rand() < 0.5, H = 3.0 + rand() * 0.5;
+  const gw = Math.min(7.6, wid * 0.58) + (rand() - 0.5) * 0.4, dep = 4.2 + rand() * 0.4, west = rand() < 0.5, H = 3.0 + rand() * 0.5 + (el.ginna === 'tall' ? 1.0 : 0);
   const gx0 = west ? x0 + 0.4 : x1 - 0.4 - gw, gz1 = z1 - 0.2;
   return { rect: [gx0, gz1 - dep, gx0 + gw, gz1], H, west };
 }

@@ -7,8 +7,8 @@ import { houseOf } from '../../styles/dogon/compound.js';
 
 const E = [];
 for (const c of COMPOUNDS) {
-  if (c.landmark) E.push({ t: 'dogon_landmark', rect: c.rect, y: c.y, seed: c.seed, hw: c.hw });
-  else if (c.open) E.push({ t: 'dogon_landmark', rect: c.rect, y: c.y, seed: c.seed, hw: c.hw, lite: true, plain: c.ginna === 'plain' });
+  if (c.landmark) E.push({ t: 'dogon_landmark', rect: c.rect, y: c.y, seed: c.seed, hw: c.hw, ginna: c.ginna });
+  else if (c.open) E.push({ t: 'dogon_landmark', rect: c.rect, y: c.y, seed: c.seed, hw: c.hw, lite: true, ginna: c.ginna });
   else E.push({ t: 'dogon_compound', rect: c.rect, y: c.y, seed: c.seed, ginna: c.ginna });
 }
 E.push({ t: 'toguna', c: TOGUNA.c, w: TOGUNA.w, d: TOGUNA.d, y: TOGUNA.y, seed: 31 });
