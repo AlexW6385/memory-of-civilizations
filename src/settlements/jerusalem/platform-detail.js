@@ -10,7 +10,7 @@ import { PLATFORM } from './haram-detail.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const PY = HARAM.top + 4;
 const DOME = [-28, -48, 28, 8];            // the Dome's footprint (octagon of apothem 25 about (0, -20)), joints stop at it
-export const CHAIN = [39, -20];
+export const CHAIN = [40, -2];
 
 export function platformFurnish() {
   const E = [], [px0, pz0, px1, pz1] = PLATFORM;
@@ -38,7 +38,7 @@ export function platformFurnish() {
   E.push({ t: 'shoe_rack', at: [-30.2, -13.5], dir: [-1, 0], y: PY, len: 2.4 });
   E.push({ t: 'shoe_rack', at: [30.2, -26.5], dir: [1, 0], y: PY, len: 2.4 });
   E.push({ t: 'shoe_rack', at: [-8.5, 12.5], dir: [0, 1], y: PY, len: 2.4 });
-  E.push({ t: 'censer', at: [-27.5, -20], y: PY });
+  E.push({ t: 'censer', at: [-27.5, -24.5], y: PY });
   // the readers' stands before the Dome's west and south doors
   for (const z of [-34, -6]) E.push({ t: 'quran_stand', at: [-33, z], dir: [-1, 0], y: PY });
   // the esplanade: waqf water and shoe racks at the Aqsa's doors, stone benches along the walks and at the Golden Gate, a bench by each cistern
@@ -77,7 +77,7 @@ export function platformLife() {
   person(46, -54.4, Math.PI, { pose: 'pray', arms: 'pray', cloth: 'cloth_white', hatMat: 'cloth_white' });
   // readers at the stands, one with a boy beside him; a man at the censer
   for (const z of [-34, -6]) { person(-34.4, z, Math.PI / 2, { pose: 'cross', cloth: 'cloth_white' }); child(-35.2, z + 1.0, Math.PI / 2, { pose: 'cross' }); }
-  person(-26.6, -21.2, Math.PI / 2, { pose: 'stand', cloth: 'cloth_white', hatMat: 'cloth_white' });
+  person(-26.8, -25.6, Math.PI / 2, { pose: 'stand', cloth: 'cloth_white', hatMat: 'cloth_white' });
   // the water stations: the attendant behind the bench, two waiting
   person(-60, -30.1, 0, { pose: 'stand', cloth: 'cloth_white', cloth2: 'cloth_green' });
   person(-61.2, -26.8, Math.PI, { pose: 'talk' }); woman(-58.6, -26.9, Math.PI, { carry: 'pot' });
