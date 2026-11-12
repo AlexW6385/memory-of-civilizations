@@ -162,6 +162,7 @@ function palisade(el, { bag, col }) {
     if (big && !el.simple) {
       post(bag, x, y - 0.5, z, 0.22, h + 0.8, K);
       figure(bag, 'post', x, y + h + 0.25, z, 1.3, out);
+      for (const yy of [y + 1.0, y + h - 0.6]) bag.add('rope_fibre', lathe([[0.235, 0], [0.235, 0.08]], 6, null, x, yy - 0.02, z));   // the rails' lashings
     } else post(bag, x, y - 0.5, z, big ? 0.22 : 0.12, (big ? h + 1.4 : h) + 0.5 + ((i * 37) % 5) * 0.06, big ? K : P);
   }
   for (const yy of [y + 1.0, y + h - 0.6]) bag.add(P, orientedBox(el.a, el.b, 0.12, yy, yy + 0.12));
@@ -371,6 +372,9 @@ function stage(el, { bag, col }) {
   for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { post(bag, x + dx * s / 2, y0 - 0.5, z + dz * s / 2, 0.15, h + 1.6); col.circle(x + dx * s / 2, z + dz * s / 2, 0.16, y0, y0 + h); }
   bag.add('timber', box(x - s / 2 - 0.3, y0 + h - 0.15, z - s / 2 - 0.3, x + s / 2 + 0.3, y0 + h, z + s / 2 + 0.3));
   for (const [a, b] of [[[x - s / 2, z - s / 2], [x + s / 2, z - s / 2]], [[x - s / 2, z + s / 2], [x + s / 2, z + s / 2]]]) bag.add(P, orientedBox(a, b, 0.1, y0 + h, y0 + h + 0.9));
+  // a heap of throwing stones on the platform and spears (tao) leaning at the breastwork [inferred]
+  for (let k = 0; k < 7; k++) bag.add('basalt', box(x - 0.8 + (k % 4) * 0.22 + (k > 3 ? 0.1 : 0), y0 + h, z + 0.1 + Math.floor(k / 4) * 0.2, x - 0.62 + (k % 4) * 0.22 + (k > 3 ? 0.1 : 0), y0 + h + 0.14 + (k > 3 ? 0.1 : 0), z + 0.27 + Math.floor(k / 4) * 0.2));
+  for (const u of [0.3, 0.45, 0.6]) bag.add('wood_dark', rod([x + u, y0 + h, z + s / 2 - 0.1], [x + u + 0.08, y0 + h + 1.9, z + s / 2 - 0.05], 0.018, 5));
   // the ladder up one side
   bag.add('timber', rod([x - s / 2 - 0.9, y0, z], [x - s / 2 - 0.05, y0 + h, z], 0.07, 6));
   for (let k = 1; k < 9; k++) { const t = k / 9; bag.add('timber', box(x - s / 2 - 0.9 + 0.85 * t - 0.03, y0 + h * t, z - 0.1, x - s / 2 - 0.9 + 0.85 * t + 0.05, y0 + h * t + 0.04, z + 0.1)); }

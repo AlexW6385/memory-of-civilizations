@@ -2,7 +2,7 @@
 // paths, kūmara gardens in mounds, flax (harakeke) and cabbage trees by the lake, the lake itself;
 // mānuka and forest beyond; the mild, changeable sky of the North Island.
 
-import { RADIUS, HILL, LAKE, PATH, height, inLake, inGarden, village } from './layout.js';
+import { RADIUS, HILL, LAKE, LANES, PATH, height, inLake, inGarden, village } from './layout.js';
 
 // the trodden ground: bare earth round every house and across each whānau yard, in cells of 12 m
 let CELLS = null;
@@ -13,6 +13,12 @@ function cells() {
   for (const h of v.houses) add([h.c[0], h.c[1], h.l / 2 + 2.6, 1]);
   for (const c of v.compounds) add([c.c[0], c.c[1], c.r + 1.5, 2]);
   for (const p of [...v.pataka, ...v.pits]) add([p.c[0], p.c[1], 2.6, 1]);
+  // the summit: the marae atea beaten bare before the chief's house, the cooking place, the weavers' and the carver's places
+  const [hx, hz] = HILL.c, h0 = v.houses[0];
+  for (let k = 0; k < 4; k++) add([h0.c[0] + 1 + (k % 2) * 7 - 3, hz + 11 + k * 5.5, 7.5, 2]);
+  for (const [x, z, r] of [[hx + 13, hz + 10, 5], [hx - 16, hz + 9, 5], [hx - 18, hz + 1, 4], [hx + 17, hz - 2, 4.5], [hx + 5.5, hz + 14, 3]]) add([x, z, r, 2]);
+  // the gates' surrounds, trodden by everyone who passes
+  for (const r of [HILL.tihi - 1.5, ...HILL.rings.map(([, r1]) => r1 - 2), HILL.ditch + 5]) for (const dz of [-3, 0, 3]) add([PATH.x, hz + r + dz, 4, 2]);
   return CELLS;
 }
 /** 0..1: how trodden the ground is at (x, z). */
@@ -23,6 +29,9 @@ function trodden(x, z) {
     const d = Math.hypot(ox - x, oz - z);
     if (d < r) t = Math.max(t, k === 2 ? 1 : 0.5 + 0.5 * (1 - d / r));
   }
+  // the walks along each terrace behind the stages: a worn lane
+  const r = Math.hypot(x - HILL.c[0], z - HILL.c[1]);
+  for (const q of LANES) { const d = Math.abs(r - q); if (d < 1.5) t = Math.max(t, 0.9 * (1 - d / 1.5)); }
   return t;
 }
 function cover(x, z, h, ny) {

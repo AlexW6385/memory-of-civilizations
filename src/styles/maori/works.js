@@ -69,4 +69,17 @@ function kamaka(el, { bag, col }) {
   }
 }
 
-export const WORKS = { whakairo, kakahu, kamaka };
+/** pahu: the alarm gong { c, y, yaw } — two posts crowned with carved heads and a cross-beam, a long slab of hardwood hung from it by cords at an angle, a mallet on a cord [inferred: after museum pahu, the gong hung in the pā]. */
+function pahu(el, { bag, col }) {
+  const [x, z] = el.c, y = el.y ?? 0, yaw = el.yaw ?? 0;
+  const M = new Matrix4().makeRotationY(yaw).setPosition(x, y, z), add = (mat, g) => { g.applyMatrix4(M); bag.add(mat, g); };
+  for (const s of [-1, 1]) { add('kokowai', tube([[s * 1.0, -0.4, 0, 0.1], [s * 1.0, 3.0, 0, 0.09]], 7)); add('kokowai', lathe([[0.001, 0], [0.12, 0.05], [0.1, 0.3], [0.001, 0.38]], 7, null, s * 1.0, 3.0, 0)); }
+  add('kokowai', box(-1.15, 2.7, -0.07, 1.15, 2.84, 0.07));
+  for (const s of [-1, 1]) add('rope_fibre', rod([s * 0.7, 2.7, 0], [s * 0.6, 1.55, 0], 0.012, 4));
+  add('wood_dark', box(-0.85, 1.28, -0.13, 0.85, 1.58, 0.13)); add('kokowai', box(-0.85, 1.28, -0.14, -0.55, 1.58, -0.12)); add('opening', box(-0.5, 1.36, -0.135, 0.5, 1.5, -0.125));
+  add('rope_fibre', rod([-1.0, 2.0, 0.05], [-0.95, 1.2, 0.35], 0.01, 4)); add('wood_dark', tube([[-0.95, 1.2, 0.35, 0.03], [-0.95, 0.95, 0.4, 0.05]], 6));
+  const ca = Math.cos(yaw), sa = Math.sin(yaw);
+  for (const s of [-1, 1]) col.circle(x + s * ca, z - s * sa, 0.15, y, y + 3);
+}
+
+export const WORKS = { whakairo, kakahu, kamaka, pahu };
