@@ -15,7 +15,7 @@ const CHIEF = ['hide_white', 'hide_brown'];
 
 export async function town() {
   const v = village(), E = [], P = [], rand = rng(1769);
-  for (const h of v.houses.slice(1)) E.push({ t: 'whare', carved: false, ...h, ...(Math.hypot(h.c[0], h.c[1]) > 250 ? { furnished: false } : {}) });
+  for (const h of v.houses.slice(1)) E.push({ t: 'whare', carved: false, walls: (h.c[0] * 7 + h.c[1] * 3) % 5 < 2 ? 'reed_mat' : 'raupo', ...h, ...(Math.hypot(h.c[0], h.c[1]) > 250 ? { furnished: false } : {}) });
   for (const p of v.pataka.slice(1)) E.push({ t: 'pataka', ...p });
   for (const p of v.pits) E.push({ t: 'rua', ...p });
   for (const w of v.waka) E.push({ t: 'waka', ...w });
@@ -154,6 +154,15 @@ export async function town() {
     const hk = [h.c[0] + Math.cos(h.yaw) * (h.w / 2 + 1.6), h.c[1] - Math.sin(h.yaw) * (h.w / 2 + 1.6)];
     if (clear(hk[0], hk[1], 2)) E.push({ t: 'harakeke', at: hk, y: gy(hk), h: 1.4 + rand() * 0.7, seed: Math.floor(rand() * 1e5) });
     if (k % 3 === 0) { const hn = [hk[0] - Math.cos(h.yaw) * 1.2, hk[1] + Math.sin(h.yaw) * 1.2]; E.push({ t: 'hinaki', at: hn, y: gy(hn), yaw: rand() * 3, len: 1.0 + rand() * 0.3 }); }
+  });
+  // the terraces: a person at about every third door, a cooking place on each terrace, a dog or two
+  const terr = v.houses.slice(1).filter((h) => Math.hypot(h.c[0] - hx, h.c[1] - hz) < HILL.foot - 4 && Math.hypot(h.c[0] - hx, h.c[1] - hz) > HILL.tihi + 4);
+  terr.forEach((h, k) => {
+    const at = door(h, 2.8 + (k % 2) * 0.6), a2 = [at[0] + Math.cos(h.yaw) * 0.9, at[1] - Math.sin(h.yaw) * 0.9];
+    if (k % 3 === 0) (k % 2 ? woman : man)(at, h.y, face(at, h.c) + (rand() - 0.5) * 0.6, { pose: k % 4 === 0 ? 'squat' : 'stand', over: k % 2 ? 'none' : undefined });
+    if (k % 9 === 4) woman(a2, h.y, face(a2, at), { pose: 'squat', over: 'none' });
+    if (k % 13 === 6 && clear(door(h, 6.2)[0], door(h, 6.2)[1], 5.5)) { taken.push(door(h, 6.2)); E.push({ t: 'hangi', c: door(h, 6.2), y: h.y, yaw: h.yaw + Math.PI, seed: 300 + k }); }
+    if (k % 17 === 8) P.push({ t: 'animal', kind: 'dog', at: a2, y: h.y, rot: rand() * 6.28, mat: KURI[k % 5], seed: 1000 + k });
   });
   // ---- the whānau yards: each compound's cooking place in the middle, its women and children, a man at work, the dogs --------------------
   v.compounds.forEach((c, k) => {

@@ -231,7 +231,7 @@ function whare(el, ctx) {
   const FM = carved ? 'timber' : WM;
   add(FM, prism([[-w / 2 + t, h], [w / 2 - t, h], [w / 2 - t, under(w / 2 - t) + 0.04], [0, under(0) + 0.04], [-w / 2 + t, under(w / 2 - t) + 0.04]], zf, zf + 0.15));
   // the front wall: the door left of centre, the window right (a storehouse: a small door in the middle)
-  const small = w < 3, dl = small ? -0.28 : -w * 0.18 - 0.32, dr = small ? 0.28 : dl + 0.64, dh = small ? Math.min(0.75, h - 0.1) : Math.min(1.15, h - (carved ? 0.45 : 0.08));
+  const small = w < 3, dl = small ? -0.28 : -w * 0.18 - 0.32, dr = small ? 0.28 : dl + 0.95, dh = small ? Math.min(0.75, h - 0.1) : Math.min(1.15, h - (carved ? 0.45 : 0.08));
   const wl = small ? w : w * 0.16, wr = wl + 0.5, wb = 0.6, wt = Math.min(1.05, h - 0.05);
   const piece = (x0, x1, a, b) => { if (x1 - x0 > 0.01 && b - a > 0.01) add(FM, box(x0, a, zf, x1, b, zf + 0.15)); };
   if (small) { piece(-w / 2 + t, dl, -0.2, h); piece(dr, w / 2 - t, -0.2, h); piece(dl, dr, dh, h); }
@@ -243,6 +243,8 @@ function whare(el, ctx) {
     tr.push(...a, ...b, ...c, ...a, ...c, ...d, ...a, ...c, ...b, ...a, ...d, ...c);
   }
   add(TH, fromTriangles(tr));
+  // the underside of the thatch, smoke-darkened (rafters and the inner layer of reed): a ceiling under the roof, so that one may walk in
+  if (!small) { const tu = tr.slice(); for (let q = 1; q < tu.length; q += 3) tu[q] -= 0.1; add('wood_dark', fromTriangles(tu)); }
   // the ridge beam (tāhuhu) under the ridge, the rafters (heke) of the porch
   add(carved ? K : 'timber', box(-0.1, ridge - 0.32, -l / 2 - 0.05, 0.1, under(0.1) - 0.005, l / 2 - t));
   for (const s of [-1, 1]) for (let zz = -l / 2 + 0.2; zz < zf - 0.1; zz += 0.45) add(carved ? K : 'timber', board([s * (w / 2 - 0.05), under(w / 2 - 0.05) - 0.06], [s * 0.12, under(0.12) - 0.06], 0.1, zz - 0.04, zz + 0.04));
@@ -317,8 +319,9 @@ function whare(el, ctx) {
   col.segment(W2(-w / 2, -l / 2 + 0.1), W2(-w / 2, l / 2), 0.3, y0, y0 + h + rise * 0.5);
   col.segment(W2(w / 2, -l / 2 + 0.1), W2(w / 2, l / 2), 0.3, y0, y0 + h + rise * 0.5);
   col.segment(W2(-w / 2, l / 2), W2(w / 2, l / 2), 0.3, y0, y0 + h + rise);
-  col.segment(W2(-w / 2, zf + 0.08), W2(dl, zf + 0.08), 0.2, y0, y0 + h + rise);
-  col.segment(W2(dr, zf + 0.08), W2(w / 2, zf + 0.08), 0.2, y0, y0 + h + rise);
+  // (the door is 0.95 m, wider than the old 0.64, and the front wall's colliders thin, so that a visitor can walk in)
+  col.segment(W2(-w / 2, zf + 0.08), W2(dl, zf + 0.08), 0.07, y0, y0 + h + rise);
+  col.segment(W2(dr, zf + 0.08), W2(w / 2, zf + 0.08), 0.07, y0, y0 + h + rise);
 }
 
 /** pataka: a storehouse raised on posts { c, y, yaw, w, l, lift } — walls of adzed boards, carved round the entrance, a deck before the door, a notched pole to climb. */
