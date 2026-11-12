@@ -34,7 +34,7 @@ export const monks = {
     { t: 'yard_fire', c: [-6, -116], y: height, seed: 45 }, { t: 'yard_fire', c: [14, -112], y: height, seed: 46 },
     { t: 'drying_rack', rect: [16, -122, 22, -121.4], y: height, kind: 'maize', seed: 47 }, { t: 'drying_rack', rect: [-14, -122, -8, -121.4], y: height, kind: 'hide', seed: 48 },
     { t: 'craft_arbor', rect: [29, -120, 32.4, -117.6], y: height, trade: 'shell', seed: 49 }, { t: 'craft_arbor', rect: [-52, -124, -48.6, -121.6], y: height, trade: 'pottery', seed: 50 },
-    { t: 'shade_arbor', rect: [38, -86, 44, -81], y: height }, { t: 'shade_arbor', rect: [-52, -84, -46, -79], y: height },
+    { t: 'shade_arbor', rect: [46, -84, 52, -79], y: height }, { t: 'shade_arbor', rect: [-52, -84, -46, -79], y: height },
     // the summit: a shade for the chief's guests, the work of the bead makers, racks
     { t: 'shade_arbor', rect: [30, -162, 36, -157], y: height }, { t: 'craft_arbor', rect: [-46, -170, -42.6, -167.6], y: height, trade: 'shell', seed: 51 },
     { t: 'drying_rack', rect: [26, -150, 32, -149.4], y: height, kind: 'hide', seed: 52 },
