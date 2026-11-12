@@ -2,7 +2,7 @@
 // the red-brown plain with fields, neem, banyan and palms round the village; the hot, hazy sky
 // of central India before the rains.
 
-import { RADIUS, TOP, VOTIVE, PATH, SUMMIT, STAIR, STUPA2, TEMPLE40, TANK, HALL, SHRINE, PLAZA, NORTH, STREETS, height, out, inLot, inRect, onStreet, yards, tankD, inTank, inTankWater } from './layout.js';
+import { RADIUS, TOP, VOTIVE, PATH, SUMMIT, STAIR, STUPA2, TEMPLE40, VIHARA2, TANK, HALL, SHRINE, PLAZA, NORTH, STREETS, height, out, inLot, inRect, onStreet, yards, tankD, inTank, inTankWater } from './layout.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0.2, grass: 0.3, rock: 0, soil: 0.5, fields: 0, dry: 0.75, warmth: 0.85, red: 0.5, road: 0, snow: 0, forest: 0 };
@@ -29,7 +29,7 @@ function planting(x, z) {
   const d = out(x, z);
   if (d === 0) {
     // on the summit, clear of the monuments and the ways between them: dry grass, a few neem and a pipal (a fig)
-    if (VOTIVE.some(([vx, vz]) => Math.hypot(x - vx, z - vz) < 9) || inRect([30, -2, 68, 36], x, z, 4) || Math.hypot(x, z) < 34 || Math.hypot(x - 62, z + 40) < 16 || inRect([30, -2, 68, 36], x, z) || inRect(TEMPLE40.rect, x, z, 5) || Math.abs(x) < 8 || (Math.abs(z + 28) < 5 && x > 0 && x < 66) || Math.abs(x - 30) < 5 || (z > 40 && z < 95 && Math.abs(x) < 14)) return null;
+    if (VOTIVE.some(([vx, vz]) => Math.hypot(x - vx, z - vz) < 9) || inRect([30, -2, 68, 36], x, z, 4) || Math.hypot(x, z) < 34 || Math.hypot(x - 62, z + 40) < 16 || inRect([30, -2, 68, 36], x, z) || inRect(TEMPLE40.rect, x, z, 5) || inRect(VIHARA2, x, z, 4) || (x < -34 && x > -76 && z > 2 && z < 46 && Math.abs(z - 17) < 4) || Math.abs(x) < 8 || (Math.abs(z + 28) < 5 && x > 0 && x < 66) || Math.abs(x - 30) < 5 || (z > 40 && z < 95 && Math.abs(x) < 14)) return null;
     return { grass_dry: 9, neem: 0.015, fig: 0.01, oleander: 0.05 };
   }
   if (d < 30) return { grass_dry: 10, maquis: 0.08, ...(d > 12 ? { acacia: 0.01 } : {}) };

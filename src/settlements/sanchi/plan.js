@@ -2,7 +2,7 @@
 // gateways, companions, pillar and monasteries (the full building of the previous design,
 // src/buildings/sanchi-great-stupa) on the summit; Stupa 2 on its terrace at the foot of the west slope;
 // Temple 40's pillared hall on the summit; the monks and pilgrims.
-import { TOP, STUPA2, TEMPLE40, VOTIVE, height } from './layout.js';
+import { TOP, STUPA2, TEMPLE40, VOTIVE, VIHARA2, height } from './layout.js';
 import stupaPlan from '../../buildings/sanchi-great-stupa/plan.js';
 import './style.js';
 import { summitElements, SUMMIT_STALLS, HALL2, BOWL } from './summit.js';
@@ -111,6 +111,11 @@ function people() {
   monk([vx, vz - 2.0], vy + 0.4, [0, 1], { pose: 'cross', arms: 'pray' });
   for (const [dx, dz] of [[-1.7, 0.9], [0, 1.5], [1.7, 0.9], [-0.8, 2.4], [0.9, 2.4]]) monk([vx + dx, vz + dz], vy, [0, -1], { pose: 'cross' });
   monk([vx - 5.5 + 1.4, vz + 4], TOP, [-1, 0], { carry: 'pot' });
+  // the second monastery's court: monks seated before the teacher in the pavilion
+  { const wx = (VIHARA2[0] + VIHARA2[2]) / 2, wz = (VIHARA2[1] + VIHARA2[3]) / 2, wy = TOP + 0.4;
+    monk([wx, wz - 2.0], wy + 0.4, [0, 1], { pose: 'cross', arms: 'pray' });
+    for (const [dx, dz] of [[-1.5, 1.0], [0.2, 1.6], [1.6, 1.0], [-0.6, 2.4]]) monk([wx + dx, wz + dz], wy, [0, -1], { pose: 'cross' });
+    monk([wx - 5.5 + 1.4, wz + 4], TOP, [-1, 0], { carry: 'pot' }); man([VIHARA2[0] - 2.2, wz + 0.8], TOP, [1, 0]); }
   // at the Great Bowl: a monk ladling the food, monks with their alms bowls coming for it, a lay donor
   monk([BOWL[0] + 1.9, BOWL[1] + 0.4], TOP, [-1, 0], { carry: 'pot' }); monk([BOWL[0] - 1.9, BOWL[1] - 0.6], TOP, [1, 0.2], { carry: 'basket' }); monk([BOWL[0] - 0.8, BOWL[1] + 2.3], TOP, [0.3, -1]); man([BOWL[0] + 0.8, BOWL[1] - 2.4], TOP, [-0.2, 1], { carry: 'basket' });
   // Temple 40: a monk and a pilgrim before the altar

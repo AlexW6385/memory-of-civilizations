@@ -2,7 +2,7 @@
 // gateway, the pilgrims' stalls on both sides (flowers, lamps, incense, water, bowls), stone seats, a second rest hall,
 // and Temple 40's hall dressed with an altar, lamps, garlands and the bell. Plan elements for the site (style sanchi-site)
 // and the people (style life).
-import { TOP, TEMPLE40 } from './layout.js';
+import { TOP, TEMPLE40, VIHARA2 } from './layout.js';
 
 const WAY = [-4.2, 44, 4.2, 94];
 /** The stalls along the way: [x, z, front, trade]; those on the east look west and the reverse. */
@@ -24,6 +24,8 @@ export function summitElements() {
   for (const z of [52.5, 66.5, 80.5, 90]) for (const sx of [-1, 1]) E.push({ t: 'block', rect: [sx * 5.6 - 0.3, z - 0.9, sx * 5.6 + 0.3, z + 0.9], y0: TOP, y1: TOP + 0.45, mat: 'sandstone', walk: true });
   // the second rest hall west of the way
   E.push({ t: 'pilgrim_hall', rect: HALL2.map((v, i) => v), plinth: 0.5, h: 3.0, y: TOP });
+  // the second monastery, west of the Great Stupa
+  E.push({ t: 'obj', kind: 'vihara', at: [0, 0], y: TOP, rect: VIHARA2 });
   // the Great Bowl before the monastery's door, cut from one boulder, food heaped in it for the monks
   E.push({ t: 'great_bowl', c: BOWL, y: TOP, r: 1.3 });
   // lamp pillars at the way's head by the stair

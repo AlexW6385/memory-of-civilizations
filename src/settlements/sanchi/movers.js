@@ -2,7 +2,7 @@
 // with the dome on their right (pradakshina), lay pilgrims in white with turbans and women in red carrying offerings up the north
 // path, donors, bearers, boys and herders in the village below. Data for the engine's movers (src/engine/movers.js, read in its
 // worker); the ways come from layout.js. No boats.
-import { RADIUS, PATH, SUMMIT, STAIR, STUPA2, TEMPLE40, STREETS, PLAZA, TANK } from './layout.js';
+import { RADIUS, PATH, SUMMIT, STAIR, VIHARA2, STUPA2, TEMPLE40, STREETS, PLAZA, TANK } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
@@ -31,6 +31,7 @@ export function walkways() {
   L([STUPA2.c[0], -62], [STUPA2.c[0], z0 - 2], 2.0, 0.8);                               // the way to Stupa 2 and its terrace
   rects.push({ r: [STUPA2.terrace[0] + 2, STUPA2.terrace[1] + 2, STUPA2.terrace[2] - 2, STUPA2.terrace[3] - 2], weight: 0.8, market: 0, kind: 'street' });
   void t0;
+  L([-14, 44], [VIHARA2[0] - 8, 44], 2.0, 1.0); L([VIHARA2[0] - 8, 44], [VIHARA2[0] - 8, (VIHARA2[1] + VIHARA2[3]) / 2], 1.6, 1.0); L([VIHARA2[0] - 8, (VIHARA2[1] + VIHARA2[3]) / 2], [VIHARA2[0] + 15, (VIHARA2[1] + VIHARA2[3]) / 2], 1.6, 1.0);   // to the western monastery's court
   // the summit's south approach and the pilgrims' stair down to the village (the stalls on both sides of the way)
   L([0, 44], [0, STAIR.z0], 2.6, 3.0); L([0, STAIR.z0], [0, STAIR.z1], 2.2, 2.6);
   // the plaza at the stair's foot, the pilgrims' road, the bazaar street and the lanes, the way to the tank's ghat
