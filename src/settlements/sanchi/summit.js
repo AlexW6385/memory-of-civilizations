@@ -20,6 +20,8 @@ export function summitElements() {
   E.push({ t: 'floor', rect: [-12.5, 44, -4.2, 94], y: TOP + 0.02, mat: 'sandstone_floor', th: 0.04 });
   E.push({ t: 'floor', rect: [4.2, 44, 12.5, 94], y: TOP + 0.02, mat: 'sandstone_floor', th: 0.04 });
   for (const [cx, cz, front, trade] of SUMMIT_STALLS) E.push({ t: 'stall', rect: [cx - 1.3, cz - 1.8, cx + 1.3, cz + 1.8], front, y: TOP, seed: Math.floor(cx * 31 + cz * 17), trade });
+  // strings of garlands and pennants across the way, from stall to stall at the awnings' height
+  for (const [z, m] of [[49.5, ['cloth_red', 'cloth_ochre']], [63, ['cloth_white', 'cloth_red']], [77, ['cloth_ochre', 'cloth_white']]]) E.push({ t: 'rite', kind: 'garland', a: [-9.6, TOP + 3.1, z], b: [9.6, TOP + 3.1, z], sag: 0.9, mats: m });
   // stone seats along the way between the stalls, facing it
   for (const z of [52.5, 66.5, 80.5, 90]) for (const sx of [-1, 1]) E.push({ t: 'block', rect: [sx * 5.6 - 0.3, z - 0.9, sx * 5.6 + 0.3, z + 0.9], y0: TOP, y1: TOP + 0.45, mat: 'sandstone', walk: true });
   // the second rest hall west of the way
