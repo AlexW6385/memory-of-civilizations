@@ -6,7 +6,7 @@
 
 export const RADIUS = 360;
 export const TEMPLES = [
-  { c: [-70, -60], len: 24, w: 13, h: 27, jagati: 4, spires: 84, interior: true },   // Kandariya Mahadeva, its 84 spires
+  { c: [-70, -60], len: 24, w: 13, h: 27, jagati: 4, spires: 84, interior: true, frieze: true },   // Kandariya Mahadeva, its 84 spires
   { c: [-70, -14], len: 16, w: 9, h: 22, jagati: 3.5 },      // Jagadambi
   { c: [-70, 26], len: 16, w: 9, h: 22, jagati: 3.5 },       // Chitragupta
   // Lakshmana on its great platform (10 ft high, its sides carved with the life of the kingdom), a shrine at each corner

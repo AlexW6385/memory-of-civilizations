@@ -12,6 +12,9 @@ import { villageElements } from './village.js';
 import { rite, diya, lampStand, garland, kalasha, flowerPlate } from '../indian/rites.js';
 
 const S = 'sandstone_rail', RELIEF = 'sandstone_relief';
+// Legibility at 40–80 m (the arrival's view along the pilgrims' lane): the sculpture reads by tone, not by relief alone —
+// the recessed bands and the dormer openings in DARK shade, the mouldings, cornices and figures in PALE / LIGHT stone.
+const DARK = 'sandstone_carved', LIGHT = 'sandstone_dressed', PALE = 'sandstone_white';
 
 /** The stepped plan of a tower course (one quadrant mirrored round): the central offset (bhadra),
  *  the intermediate one (pratiratha), the corner (karna) — half-extent s. Star-shaped about the centre. */
@@ -60,7 +63,7 @@ function crown(bag, cx, top, cz, s, mat = S, rich = true) {
 }
 /** A horseshoe dormer (gavaksha) motif on a face whose outward normal is (nx, nz), at (x, y, z), width w:
  *  the jambs' block and the pointed hood over it, in shallow relief. */
-function gavaksha(bag, x, y, z, nx, nz, w, mat = 'sandstone') {
+function gavaksha(bag, x, y, z, nx, nz, w, mat = DARK) {
   const t = Math.max(0.02, w * 0.08), ux = -nz, uz = nx, hw = w * 0.42, hb = w * 0.36, hh = w * 0.42, tris = [];
   const P = (u, v, o) => [x + ux * u + nx * o, y + v, z + uz * u + nz * o];
   // the block: front, top-less sides (the hood covers the top)
@@ -90,7 +93,7 @@ function shikhara(bag, cx, cz, y, w, h, mat = S, courses = 14, mesh = true) {
     // the storey line: a ribbed bhumi-amalaka on each corner, the corner course under it set back
     if (courses >= 8 && (i + 1) % storey === 0 && i < courses - 1) {
       const sk = s * f(t1);
-      for (const [sx, sz] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) amalaka(bag, cx + sx * sk * 0.65, y1 - ch * 0.42, cz + sz * sk * 0.65, sk * 0.19, mat, 8);
+      for (const [sx, sz] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) amalaka(bag, cx + sx * sk * 0.65, y1 - ch * 0.42, cz + sz * sk * 0.65, sk * 0.19, PALE, 8);
     }
     if (mesh) for (const [nx, nz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       const ux = -nz, uz = nx;
@@ -99,30 +102,49 @@ function shikhara(bag, cx, cz, y, w, h, mat = S, courses = 14, mesh = true) {
     }
   }
   bag.add(mat, fromTriangles(tris));
-  crown(bag, cx, y + h, cz, s * f(1), mat, courses > 6);
+  crown(bag, cx, y + h, cz, s * f(1), PALE, courses > 6);
 }
-/** A band of figures in high relief round a wall rect r, standing on yb, h tall — gods, attendants, couples, set in niches between pilasters. */
-function figureBand(bag, r, yb, h, gap = 0, hide = '') {
+/** A band of figures in high relief round a wall rect r, standing on yb, h tall — gods, attendants, couples, set in niches between pilasters.
+ *  The band's ground is a dark recessed strip, the figures and pilasters pale stone, the ledges over and under it pale cornices:
+ *  at 50 m the band reads as a row of bright figures in shade. `eskip`: where the east face is hidden by the next hall,
+ *  the half-width of that hall — the step beyond it still shows the band. */
+function figureBand(bag, r, yb, h, gap = 0, hide = '', eskip = 0) {
   const [x0, z0, x1, z1] = r, k = h / 1.15, zc = (z0 + z1) / 2;
   const prof = [[0.2 * k, 0], [0.16 * k, 0.45 * k], [0.12 * k, 0.72 * k], [0.07 * k, 0.78 * k], [0.1 * k, 0.86 * k], [0.085 * k, 1.0 * k], [0.001, 1.12 * k]];
   for (const [a, b, fx, fz] of [[[x0, z0], [x1, z0], 0, -1], [[x1, z1], [x0, z1], 0, 1], [[x0, z1], [x0, z0], -1, 0], [[x1, z0], [x1, z1], 1, 0]]) {
-    if ((fx === -1 && hide.includes('w')) || (fx === 1 && hide.includes('e'))) continue;   // the faces against the next hall
+    if (fx === -1 && hide.includes('w')) continue;   // the faces against the next hall
+    const eh = fx === 1 && hide.includes('e');
+    if (eh && !eskip) continue;
     const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.floor(L / (h * 0.62)));
+    // the recessed ground of the band (not across a doorway, nor where the next hall covers the face)
+    if (fx === 0) bag.add(DARK, box(x0, yb - 0.05, fz < 0 ? z0 - 0.07 : z1, x1, yb + h + 0.1, fz < 0 ? z0 : z1 + 0.07));
+    else if (fx === -1) bag.add(DARK, box(x0 - 0.07, yb - 0.05, z0, x0, yb + h + 0.1, z1));
+    else {
+      const cuts = gap ? [[z0, zc - gap], [zc + gap, z1]] : [[z0, z1]];
+      for (const [s0, s1] of cuts) {
+        if (!eh) { bag.add(DARK, box(x1, yb - 0.05, s0, x1 + 0.07, yb + h + 0.1, s1)); continue; }
+        const lo = zc - eskip, hi = zc + eskip;
+        if (s0 < lo) bag.add(DARK, box(x1, yb - 0.05, s0, x1 + 0.07, yb + h + 0.1, Math.min(s1, lo)));
+        if (s1 > hi) bag.add(DARK, box(x1, yb - 0.05, Math.max(s0, hi), x1 + 0.07, yb + h + 0.1, s1));
+      }
+    }
     for (let i = 0; i < n; i++) {
       const t = (i + 0.5) / n, x = a[0] + (b[0] - a[0]) * t + fx * 0.12, z = a[1] + (b[1] - a[1]) * t + fz * 0.12;
       if (gap && fx === 1 && Math.abs(z - zc) < gap) continue;          // the doorway into the hall
-      bag.add('sandstone', lathe(prof, 5, null, x, yb + 0.05, z));
-      if (i % 3 === 1) bag.add('sandstone', lathe(prof.map(([pr, py]) => [pr * 0.95, py * 0.93]), 5, null, x + (fz ? h * 0.18 : 0), yb + 0.05, z + (fx ? h * 0.18 : 0)));   // a couple
+      if (eh && Math.abs(z - zc) < eskip + 0.3) continue;
+      bag.add(LIGHT, lathe(prof, 5, null, x, yb + 0.05, z));
+      if (i % 3 === 1) bag.add(LIGHT, lathe(prof.map(([pr, py]) => [pr * 0.95, py * 0.93]), 5, null, x + (fz ? h * 0.18 : 0), yb + 0.05, z + (fx ? h * 0.18 : 0)));   // a couple
       const pt = (a[0] + (b[0] - a[0]) * (i / n)), pz = (a[1] + (b[1] - a[1]) * (i / n));
       if (gap && fx === 1 && Math.abs(pz - zc) < gap + 0.1) continue;
-      bag.add(S, box(pt - 0.1 + fx * 0.05, yb, pz - 0.1 + fz * 0.05, pt + 0.1 + fx * 0.2, yb + h + 0.15, pz + 0.1 + fz * 0.2));
+      if (eh && Math.abs(pz - zc) < eskip + 0.3) continue;
+      bag.add(PALE, box(pt - 0.1 + fx * 0.05, yb, pz - 0.1 + fz * 0.05, pt + 0.1 + fx * 0.2, yb + h + 0.15, pz + 0.1 + fz * 0.2));
     }
   }
   // the ledges over and under the band (broken by a doorway on the east face)
   for (const [o, ya, yb2] of [[0.25, yb + h + 0.1, yb + h + 0.35], [0.2, yb - 0.2, yb]]) {
-    if (!gap) { bag.add(S, box(x0 - o, ya, z0 - o, x1 + o, yb2, z1 + o)); continue; }
-    bag.add(S, box(x0 - o, ya, z0 - o, x1, yb2, z1 + o));
-    bag.add(S, box(x1, ya, z0 - o, x1 + o, yb2, zc - gap)); bag.add(S, box(x1, ya, zc + gap, x1 + o, yb2, z1 + o));
+    if (!gap) { bag.add(PALE, box(x0 - o, ya, z0 - o, x1 + o, yb2, z1 + o)); continue; }
+    bag.add(PALE, box(x0 - o, ya, z0 - o, x1, yb2, z1 + o));
+    bag.add(PALE, box(x1, ya, z0 - o, x1 + o, yb2, zc - gap)); bag.add(PALE, box(x1, ya, zc + gap, x1 + o, yb2, z1 + o));
   }
 }
 /** The doorway from the porch into the halls on the face x = x (facing +x): the dark opening, the jambs in
@@ -219,20 +241,20 @@ function porch(bag, col, r, y, wh, simple) {
 const along = (ax, u, zz, hw, d, yy, h) => (ax ? box(u - hw, yy, zz - d, u + hw, yy + h, zz + d) : box(zz - d, yy, u - hw, zz + d, yy + h, u + hw));
 /** A stepped pyramidal roof over a hall. */
 function stepped(bag, r, y, h, mat = S, n = 7) {
-  const [x0, z0, x1, z1] = r, w = x1 - x0, d = z1 - z0;
+  const [x0, z0, x1, z1] = r, w = x1 - x0, d = z1 - z0, slopeM = mat === S ? RELIEF : mat, ledgeM = mat === S ? PALE : mat;
   for (let i = 0; i < n; i++) {
     const f0 = 1 - 0.8 * i / n, f1 = 1 - 0.8 * (i + 1) / n, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
     const ya = y + h * i / n, yb = y + h * (i + 1) / n;
     // each tier a sloped course under a projecting ledge, a row of little pot-finials along the ledge
-    bag.add(mat, frustum([cx - w * f0 / 2, cz - d * f0 / 2, cx + w * f0 / 2, cz + d * f0 / 2], ya, yb - (yb - ya) * 0.3, w * (f0 - f1) / 2 * 0.7, w * (f0 - f1) / 2 * 0.7, d * (f0 - f1) / 2 * 0.7, d * (f0 - f1) / 2 * 0.7));
+    bag.add(slopeM, frustum([cx - w * f0 / 2, cz - d * f0 / 2, cx + w * f0 / 2, cz + d * f0 / 2], ya, yb - (yb - ya) * 0.3, w * (f0 - f1) / 2 * 0.7, w * (f0 - f1) / 2 * 0.7, d * (f0 - f1) / 2 * 0.7, d * (f0 - f1) / 2 * 0.7));
     const fm = f0 - (f0 - f1) * 0.62;
-    bag.add(mat, box(cx - w * fm / 2 - 0.12, yb - (yb - ya) * 0.3, cz - d * fm / 2 - 0.12, cx + w * fm / 2 + 0.12, yb, cz + d * fm / 2 + 0.12));
+    bag.add(ledgeM, box(cx - w * fm / 2 - 0.12, yb - (yb - ya) * 0.3, cz - d * fm / 2 - 0.12, cx + w * fm / 2 + 0.12, yb, cz + d * fm / 2 + 0.12));
     // along the ledge a row of little bell-roofed pavilions (ghaṇṭā kūṭas), a small spire at each corner
     const m = Math.max(2, Math.floor(w * fm / 1.5)), kh = (yb - ya) * 0.9;
     for (let j = 1; j < m; j++) for (const sz of [-1, 1]) { const x = cx - w * fm / 2 + j * w * fm / m; bell(bag, x, yb, cz + sz * (d * fm / 2 - 0.2), Math.min(0.32, kh * 0.4), kh * 0.8); }
     const mz = Math.max(2, Math.floor(d * fm / 1.5));
     for (let j = 1; j < mz; j++) for (const sx of [-1, 1]) { const z = cz - d * fm / 2 + j * d * fm / mz; bell(bag, cx + sx * (w * fm / 2 - 0.2), yb, z, Math.min(0.32, kh * 0.4), kh * 0.8); }
-    for (const [sx, sz] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) shikhara(bag, cx + sx * (w * fm / 2 - 0.35), cz + sz * (d * fm / 2 - 0.35), yb, 0.7, kh * 1.3, mat, 3, false);
+    for (const [sx, sz] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) shikhara(bag, cx + sx * (w * fm / 2 - 0.35), cz + sz * (d * fm / 2 - 0.35), yb, 0.7, kh * 1.3, mat === S ? LIGHT : mat, 3, false);
   }
   // the crown: a great bell (ghaṇṭā) with its amalaka and pot
   const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, wt = Math.min(w, d) * 0.2;
@@ -241,8 +263,8 @@ function stepped(bag, r, y, h, mat = S, n = 7) {
 }
 /** A little bell-roofed pavilion of radius r, height h at (x, y, z): a square base, the bell, a tiny amalaka. */
 function bell(bag, x, y, z, r, h) {
-  bag.add(S, box(x - r, y, z - r, x + r, y + h * 0.3, z + r));
-  bag.add('sandstone', lathe([[r * 1.05, 0], [r * 0.6, h * 0.3], [r * 0.3, h * 0.5], [r * 0.42, h * 0.58], [0.001, h * 0.7]], 6, null, x, y + h * 0.3, z));
+  bag.add(LIGHT, box(x - r, y, z - r, x + r, y + h * 0.3, z + r));
+  bag.add(PALE, lathe([[r * 1.05, 0], [r * 0.6, h * 0.3], [r * 0.3, h * 0.5], [r * 0.42, h * 0.58], [0.001, h * 0.7]], 6, null, x, y + h * 0.3, z));
 }
 /**
  * nagara_temple: { c (the sanctum's centre), len (west–east, the porch at the east), w, h (the
@@ -268,6 +290,8 @@ function temple(el, ctx) {
   // the halls' walls with their sculpture bands, from the sanctum eastward, each roof lower
   // (the halls fill the plinth from the sanctum's east wall to its east end)
   const Lh = (L - W / 2) / 0.84;
+  // the roofs climb hall by hall to the tower: the apex of each above the plinth, as a fraction of H (porch, hall, great hall, vestibule)
+  const RISE = [0, 0.59, 0.54, 0.44, 0.32];
   const halls = [[cx - W / 2, W, H * 0.3, null], [cx + W / 2, Lh * 0.16, H * 0.27, 0.55], [cx + W / 2 + Lh * 0.16, Lh * 0.3, H * 0.27, 0.62], [cx + W / 2 + Lh * 0.46, Lh * 0.2, H * 0.24, 0.48], [cx + W / 2 + Lh * 0.66, Lh * 0.18, H * 0.2, 0.34]];
   // the halls as rooms (el.interior): thick walls round a floor and a ceiling, doors through the party walls, the sanctum's cell dark
   const fl = y + plinth + 0.9, WT = 0.8;
@@ -310,8 +334,8 @@ function temple(el, ctx) {
     else if (el.interior) interiorHall(ctx, i, r, y + plinth, wh);
     else { bag.add(S, box(r[0], y + plinth, r[1], r[2], y + plinth + wh, r[3])); col.rect(r, y, y + plinth + wh); }
     if (i === 4) { /* the open porch */ } else if (el.simple) for (const k of [0.3, 0.62]) bag.add('sandstone', box(r[0] - 0.05, y + plinth + wh * k, r[1] - 0.05, r[2] + 0.05, y + plinth + wh * k + wh * 0.22, r[3] + 0.05));
-    else { for (const k of [0.2, 0.47, 0.74]) figureBand(bag, r, y + plinth + wh * k, Math.min(1.5, wh * 0.21), i === 3 ? 1.6 : 0, (i > 0 ? 'w' : '') + (i < 3 ? 'e' : '')); if (i === 3) doorway(bag, r[2], cz, y + plinth + 0.9, Math.min(3.2, wh * 0.62), !!el.interior); if (i === 2 || i === 0) for (const sd of [-1, 1]) balcony(bag, r[0] + len * 0.25, r[2] - len * 0.25, sd < 0 ? r[1] : r[3], sd, y + plinth + wh * 0.18, wh * 0.55); }
-    if (i > 0) stepped(bag, [r[0] - 0.4, r[1] - 0.6, r[2] + 0.4, r[3] + 0.6], y + plinth + wh, H * roofH * 0.45);
+    else { for (const k of [0.2, 0.47, 0.74]) figureBand(bag, r, y + plinth + wh * k, Math.min(1.5, wh * 0.21), i === 3 ? 1.6 : 0, (i > 0 ? 'w' : '') + (i < 3 ? 'e' : ''), i === 0 ? W * 0.36 : i === 2 ? W * 0.36 : 0); if (i === 3) doorway(bag, r[2], cz, y + plinth + 0.9, Math.min(3.2, wh * 0.62), !!el.interior); if (i === 2 || i === 0) for (const sd of [-1, 1]) balcony(bag, r[0] + len * 0.25, r[2] - len * 0.25, sd < 0 ? r[1] : r[3], sd, y + plinth + wh * 0.18, wh * 0.55); }
+    if (i > 0) stepped(bag, [r[0] - 0.4, r[1] - 0.6, r[2] + 0.4, r[3] + 0.6], y + plinth + wh, el.simple ? H * roofH * 0.45 : Math.max(2.2, H * RISE[i] - wh));
   });
   // the steep flight from the terrace up the plinth to the porch's floor
   {
@@ -326,7 +350,7 @@ function temple(el, ctx) {
   // against its faces and corners in tiers, each smaller and lower outward (the sekhari tower)
   const ty = y + plinth + H * 0.3, th = H - plinth - H * 0.3;
   if (el.simple) { shikhara(bag, cx, cz, ty, W * 0.86, th); return; }
-  shikhara(bag, cx, cz, ty, W * 0.62, th, S, 18);
+  shikhara(bag, cx, cz, ty, W * 0.62, th, LIGHT, 18);
   const spires = [];
   for (const [nx, nz] of [[-1, 0], [0, -1], [0, 1], [1, 0]]) {
     const ux = -nz, uz = nx, P = (a, b) => [cx + nx * a * W + ux * b * W, cz + nz * a * W + uz * b * W];
@@ -388,7 +412,7 @@ function temple(el, ctx) {
  *  with its rider, 1 a horse and rider, 2 and 3 foot soldiers with shields, 4 a dancer, 5 a drummer, 6 a
  *  couple, 7 a porter with his load. Parts in the round, low and simple; ux, uz along the band. */
 function friezeFig(bag, kind, x, y, z, ux, uz, h) {
-  const k = h / 0.75, M = RELIEF, P = (u, v, d = 0) => [x + ux * u, y + v * k, z + uz * u];
+  const k = h / 0.75, M = LIGHT, P = (u, v, d = 0) => [x + ux * u, y + v * k, z + uz * u];
   const man = (u, sc = 1, arms = 0) => {
     bag.add(M, lathe([[0.07 * k * sc, 0], [0.05 * k * sc, 0.3 * k * sc], [0.06 * k * sc, 0.42 * k * sc], [0.04 * k * sc, 0.5 * k * sc], [0.001, 0.52 * k * sc]], 5, null, ...P(u, 0)));
     bag.add(M, lathe([[0.001, 0], [0.04 * k * sc, 0.02 * k * sc], [0.04 * k * sc, 0.08 * k * sc], [0.001, 0.1 * k * sc]], 5, null, ...P(u, 0.52 * sc)));
@@ -417,8 +441,10 @@ function friezeFig(bag, kind, x, y, z, ux, uz, h) {
 function platformFrieze(bag, T, y0, y, cz, sw) {
   const [x0, z0, x1, z1] = T, H = y - y0, bh = Math.min(0.85, H * 0.28), yb = y0 + H * 0.38;
   for (const [ya, yb2, o] of [[y0, y0 + 0.35, 0.3], [y0 + 0.35, y0 + 0.55, 0.15], [y - 0.35, y, 0.25], [yb - 0.18, yb, 0.12], [yb + bh, yb + bh + 0.18, 0.12]]) {
-    for (const r of [[x0 - o, z0 - o, x1 + o, z0], [x0 - o, z1, x1 + o, z1 + o], [x0 - o, z0, x0, z1], [x1, z0, x1 + o, cz - sw], [x1, cz + sw, x1 + o, z1]]) bag.add(o > 0.2 ? S : 'sandstone', box(r[0], ya, r[1], r[2], yb2, r[3]));
+    for (const r of [[x0 - o, z0 - o, x1 + o, z0], [x0 - o, z1, x1 + o, z1 + o], [x0 - o, z0, x0, z1], [x1, z0, x1 + o, cz - sw], [x1, cz + sw, x1 + o, z1]]) bag.add(o > 0.2 ? PALE : LIGHT, box(r[0], ya, r[1], r[2], yb2, r[3]));
   }
+  // the sunk band between the mouldings: a dark ground the figures stand against (the stair's opening left)
+  for (const r of [[x0, z0 - 0.06, x1, z0], [x0, z1, x1, z1 + 0.06], [x0 - 0.06, z0, x0, z1], [x1, z0, x1 + 0.06, cz - sw], [x1, cz + sw, x1 + 0.06, z1]]) bag.add(DARK, box(r[0], yb, r[1], r[2], yb + bh, r[3]));
   let n = 0;
   const run = (ax, az, bx, bz, nx, nz) => {
     const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, step = 0.62, m = Math.floor(L / step);
