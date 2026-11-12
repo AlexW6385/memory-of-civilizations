@@ -1,7 +1,7 @@
 // Han Chang'an — the animals (src/engine/fauna.js; docs/settlements/han-changan.md §8): carp in the Kunming Lake and the imperial pond, swallows over
 // the water and the avenue, crows over the palaces' roofs and the city wall, sparrows on the paving of the court, the markets and the lanes, an egret
 // and a heron at the lake's shore.
-import { LAKE, LAKE_Y, GARDEN_POND, POND_Y, AX, height } from './layout.js';
+import { LAKE, LAKE_Y, GARDEN_POND, POND_Y, AX, height, WARDS, WEST_MARKET, EAST_MARKET, MOAT, MOAT_Y, WALL_W, WALL_S, PALACE } from './layout.js';
 
 const lakeDist = (x, z) => (1 - Math.hypot((x - LAKE.c[0]) / LAKE.rx, (z - LAKE.c[1]) / LAKE.rz)) * 60;
 const fish = [];
@@ -20,5 +20,17 @@ for (const [x, z] of [[AX - 8, -60], [AX + 8, -40], [AX, -125], [AX - 30, 40], [
   perches.push({ kind: 'sparrow', x, z, y: height(x, z) + 0.12, rot: (x * 7) % 3, range: [1.6, 1.4] });
 perches.push({ kind: 'egret', x: LAKE.c[0] + LAKE.rx * 0.9, z: LAKE.c[1] - 12, y: 0.1, rot: Math.PI, stay: [60, 200], gone: [60, 160], alert: 10 });
 perches.push({ kind: 'heron', x: GARDEN_POND[2] + 1.5, z: GARDEN_POND[1] + 15, y: 0.1, rot: -Math.PI / 2, stay: [80, 240], gone: [40, 150], alert: 10 });
+// sparrows on the copings: the ward walls (3.3 m + the tile cap), the markets' walls (5 m), the palace wall (8 m) and the city wall's parapet (11 m + 1.3 m)
+for (const w of WARDS) for (const f of [0.3, 0.7]) perches.push({ kind: 'sparrow', x: w[0] + (w[2] - w[0]) * f, z: w[1] + 0.8, y: 3.3 + 0.34, rot: 0, range: [3.2, 0], alert: 5 });
+for (const [x0, z0, x1, z1] of [WEST_MARKET, EAST_MARKET]) for (const f of [0.25, 0.75]) perches.push({ kind: 'sparrow', x: x0 + (x1 - x0) * f, z: z1 - 1.2, y: 5.34, rot: 0, range: [3, 0], alert: 5 });
+for (const f of [0.3, 0.55]) perches.push({ kind: 'sparrow', x: PALACE[0] + (PALACE[2] - PALACE[0]) * f, z: PALACE[3], y: 8.34, rot: 0, range: [3, 0], alert: 5 });
+perches.push({ kind: 'sparrow', x: WALL_W + 1.5, z: 80, y: 12.4, rot: Math.PI / 2, range: [3, 0], alert: 5 }, { kind: 'sparrow', x: 60, z: WALL_S - 1.5, y: 12.4, rot: 0, range: [3, 0], alert: 5 });
+// the moat: carp along the west and south reaches, an egret on its berm, swallows skimming it
+for (const m of [MOAT[0], MOAT[1]]) {
+  const alongZ = m[3] - m[1] > m[2] - m[0], c = [(m[0] + m[2]) / 2, (m[1] + m[3]) / 2];
+  for (let k = 0; k < 3; k++) { const t = 0.2 + k * 0.28; const cx = alongZ ? c[0] : m[0] + (m[2] - m[0]) * t, cz = alongZ ? m[1] + (m[3] - m[1]) * t : c[1]; fish.push({ n: 3, size: [0.3, 0.6], palette: 'carp', y: MOAT_Y, area: alongZ ? [m[0] + 1, cz - 20, m[2] - 1, cz + 20] : [cx - 20, m[1] + 1, cx + 20, m[3] - 1], dist: (x, z) => Math.min(x - m[0], m[2] - x, z - m[1], m[3] - z) - 0.4, margin: 0.4, a: alongZ ? [2, 12] : [12, 2], ratio: 0.4, speed: 0.4, rise: 0.2 }); }
+}
+perches.push({ kind: 'egret', x: WALL_W - 12.5, z: 120, y: 0.1, rot: Math.PI, stay: [60, 200], gone: [60, 160], alert: 10 });
+flights.push({ kind: 'swallow', n: 4, lane: { a: [WALL_W - 8, -300], b: [WALL_W - 8, 250] }, y: [-0.4, 3], speed: 9, half: 6 }, { kind: 'swallow', n: 4, lane: { a: [-200, WALL_S + 12], b: [420, WALL_S + 12] }, y: [-0.4, 3], speed: 9, half: 6 });
 void LAKE_Y;
 export default { fish, flights, perches };

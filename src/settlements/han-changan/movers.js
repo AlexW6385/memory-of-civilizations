@@ -8,7 +8,7 @@ import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
 
 export const PARAMS = {
-  walkers: { day: 56, night: 5, rain: 0.35, reach: 160, spawnMin: 26, far: 46 },
+  walkers: { day: 66, night: 5, rain: 0.35, reach: 160, spawnMin: 26, far: 46 },
   boats: { count: 0, reach: 0, spawnMin: 0, far: 0, speed: [1, 1], bridgeSpeed: 1 },
   water: -1.6,
 };
@@ -62,6 +62,17 @@ export const WALKERS = [
   { id: 'boy', weight: 0.6, market: 0.8, el: { dress: 'tunic', legs: 'hose', hat: 'none', over: 'none', arms: 'hang', hair: 'topknot', feet: 'bare' },
     c1: [CL.white, CL.ochre, CL.green], c2: [CL.brown], c3: [CL.black], speed: [1.1, 1.5], stride: 1.0, h: [0.6, 0.72], swing: 1.1 },
 ];
+WALKERS.push(
+  // the faggot-bearer: firewood on the shoulder or head, for the ward kitchens
+  { id: 'faggot', weight: 0.7, market: 0.5, el: { dress: 'trousers', top: 'bare', hat: 'straw', carry: 'wood_head', arms: 'head', hair: 'topknot', feet: 'bare' }, swing: 0.6,
+    c1: [CL.brown, CL.grey, CL.white], c2: [CL.grey, CL.brown], c3: [CL.black], speed: [0.85, 1.1], stride: 1.1 },
+  // the water-carrier with two pails on the pole
+  { id: 'pails', weight: 0.7, market: 0.5, el: { dress: 'trousers', hat: 'none', carry: 'pails', arms: 'pole', hair: 'topknot', feet: 'bare' }, swing: 0.75,
+    c1: [CL.brown, CL.indigo, CL.grey], c2: [CL.brown], c3: [CL.black], speed: [0.9, 1.1], stride: 1.05 },
+  // the lady of a good house in the curved-hem robe, the hair in a high bun
+  { id: 'lady', weight: 0.5, market: 0.9, el: { dress: 'robe', hat: 'none', over: 'sash', arms: 'hang', hair: 'bun', feet: 'shod' }, swing: 0.5,
+    c1: [CL.red, CL.ochre, CL.green, CL.blue], c2: [CL.white, CL.black, CL.red], c3: [CL.black], speed: [0.7, 0.95], stride: 1.05, h: [0.92, 0.98] },
+);
 export const CREW = {};
 export function walkerShapes(sb) {
   for (const k of WALKERS) for (const far of [false, true]) {

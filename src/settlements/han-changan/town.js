@@ -4,7 +4,8 @@
 // and the caravans of the Silk Road at the west gate.
 
 import { RADIUS, AX, PALACE, PALACE_WALL, HALL, CROWN, EAST_GATE, SOUTH_GATE, CHANGLE, CHANGLE_HALL, WEST_MARKET, EAST_MARKET, MARKET_WALL, LAKE, LAKE_Y, ACADEMY, WARDS, WARD_WALL, GARDEN_POND, POND_Y, JIAOFANG,
-  RAMP, CITY_WALL, WALL_W, WALL_S, GATE_W, GATE_S, cityWalls, lots, TIERS, marketShops } from './layout.js';
+  RAMP, CITY_WALL, WALL_W, WALL_S, GATE_W, GATE_S, cityWalls, lots, TIERS, marketShops, BRIDGES, MOAT_Y, AVENUE } from './layout.js';
+const AVENUE_BAND = { mid: [AVENUE[0] + 11, AVENUE[1], AVENUE[2] - 11, WALL_S - 6], kerbW: [AVENUE[0], AVENUE[1], AVENUE[0] + 0.6, WALL_S - 6], kerbE: [AVENUE[2] - 0.6, AVENUE[1], AVENUE[2], WALL_S - 6] };
 
 import { lifePlans } from './life.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -33,6 +34,12 @@ function people() {
   const dz = HALL.z0, f = HALL.floor;
   fig([AX, dz + 2.6], Math.PI, { y: f + 1.64, pose: 'seiza', cloth: 'cloth_black', cloth2: 'cloth_red', hat: 'cap', over: 'sash', beard: 1 });
   for (const s of [-1, 1]) fig([AX + s * 3.6, dz + 4.4], Math.PI, { y: f + 1.2, cloth: 'cloth_red', hat: 'cap', over: 'sash', pose: 'staff', carry: 'staff', len: 2.0 });
+  // the court's musicians at the racks of bells and chimes and the drums (src/styles/han/hall.js): a zither, a flute and a drummer each side
+  for (const s of [-1, 1]) {
+    fig([AX + s * 11.5 - 1.2, dz + 21.8], 0, { y: f + 0.05, pose: 'harp', cloth: 'cloth_indigo', cloth2: 'cloth_white', hat: 'cap', over: 'sash' });
+    fig([AX + s * 11.5 + 1.2, dz + 21.8], 0, { y: f + 0.05, pose: 'flute', cloth: 'cloth_green', cloth2: 'cloth_white', hat: 'cap', over: 'sash' });
+    fig([AX + s * 7.2, dz + 22.0], 0, { y: f + 0.05, pose: 'drum', cloth: 'cloth_red', cloth2: 'cloth_white', hat: 'cap', over: 'sash' });
+  }
   // the ministers kneeling on their mats before their low tables, the same places as the hall's (src/styles/han/hall.js)
   const aisle = HALL.bayW * 1.6, x0 = AX - HALL.w / 2, cols = [];
   for (let i = 0; i <= HALL.bays; i++) for (let j = 0; j <= HALL.depth; j++) {
@@ -87,7 +94,7 @@ export async function town() {
       E.push({ t: 'han_wall', a: [x - 9, z], b: [x + 9, z], th: 14, h: 2.6, mat: 'earth_wall', cap: 'none' });
       E.push({ t: 'han_pavilion', c: [x, z], A: 5.2, B: 5.2, y: 2.6, h: 4.2, tiers: 2, walls: true });
     }
-    E.push({ t: 'han_pond', rect: GARDEN_POND, y: POND_Y });
+    E.push({ t: 'han_pond', rect: GARDEN_POND, y: POND_Y }, { t: 'han_island', at: [(GARDEN_POND[0] + GARDEN_POND[2]) / 2 - 6, GARDEN_POND[1] + 17], r: 7, y: POND_Y, pond: GARDEN_POND, seed: 4 });
     // the paved axial way from the south gate to the ramp, and the paved court at its foot
     E.push({ t: 'floor', rect: [AX - 6, RAMP.z1 - 0.5, AX + 6, PALACE[3] - 2], y: 0.03, mat: 'bluestone', th: 0.3 }, { t: 'floor', rect: [AX - 26, RAMP.z1 - 0.5, AX + 26, RAMP.z1 + 24], y: 0.02, mat: 'brick_paving', th: 0.3 });
     plans.push(base('han-palace', E));
@@ -129,11 +136,18 @@ export async function town() {
       const alongX = Math.abs(b[0] - a[0]) > Math.abs(b[1] - a[1]), gaps = [];
       if (alongX && Math.abs(a[1] - WALL_S) < 1 && GATE_S.x > a[0] && GATE_S.x < b[0]) gaps.push({ at: GATE_S.x - a[0], w: 28.8 });
       if (!alongX && Math.abs(a[0] - WALL_W) < 1 && GATE_W.z > a[1] && GATE_W.z < b[1]) gaps.push({ at: GATE_W.z - a[1], w: 28.8 });
-      E.push({ t: 'han_wall', a, b, th, h, mat: 'earth_wall', walk: true, layers: true, gaps });
+      const Ls = alongX ? Math.abs(b[0] - a[0]) : Math.abs(b[1] - a[1]), at = [], sheds = [];
+      // a ramp every ~120 m and a sentries' shed between them, clear of the gate (the wall runs a → b; the city lies to +z (north wall), −z (south), +x (west), −x (east))
+      const inner = alongX ? (Math.abs(a[1] - WALL_S) < 1 ? -1 : 1) : (Math.abs(a[0] - WALL_W) < 1 ? 1 : -1);
+      const gc = gaps.length ? gaps[0].at : -1e9;
+      for (let m = 40; m < Ls - 30; m += 120) if (Math.abs(m - gc) > 40) at.push(m);
+      for (let m = 100; m < Ls - 30; m += 120) if (Math.abs(m - gc) > 30) sheds.push(m);
+      E.push({ t: 'han_wall', a, b, th, h, mat: 'earth_wall', walk: true, layers: true, gaps, ramps: at, sheds, inner });
     }
     E.push({ t: 'han_gate', c: [WALL_W, GATE_W.z], axis: 'z', th, h, n: 3, pw: 6, pier: 2.4, ph: 5.4 });
     E.push({ t: 'han_gate', c: [GATE_S.x, WALL_S], axis: 'x', th, h, n: 3, pw: 6, pier: 2.4, ph: 5.4 });
     void wn;
+    for (const b of BRIDGES) E.push({ t: 'han_bridge', ...b, y: MOAT_Y });
     plans.push(base('han-citywall', E));
     const A = ACADEMY, cx = (A[0] + A[2]) / 2, L = walledRect(A, 1.6, 3.4, 'earth_wall', [{ side: 'n', c: cx, w: 6 }]);
     for (const e of L) if (e.t === 'han_gate') { e.h = 3.4; e.th = 1.6; e.ph = 2.6; e.pw = 3; }
@@ -141,6 +155,10 @@ export async function town() {
     for (const s of [-1, 1]) L.push({ t: 'han_hall', cx: cx + s * 40, z1: A[1] + 30, bays: 4, bayW: 6, depth: 2, depthW: 6, floor: 0.9, base: 0.9, h: 4.6, roof: 'gable', rise: 3.2, overhang: 2.2, ap: 1.6, furnish: 'lecture', open: [1, 2], seed: 62 + s });
     plans.push(base('han-academy', L));
     plans.push(base('han-lake', [{ t: 'han_lake', c: LAKE.c, rx: LAKE.rx, rz: LAKE.rz, y: LAKE_Y, pier: [LAKE.c[0] + 40, LAKE.c[1] - LAKE.rz * 0.96] }, { t: 'han_ship', at: [LAKE.c[0] - 8, LAKE.c[1] + 4], y: LAKE_Y, len: 16, yaw: 0 }]));
+  }
+  {
+    const A = AVENUE_BAND;
+    plans.push(base('han-avenue', [{ t: 'floor', rect: A.mid, y: 0.04, mat: 'brick_paving', th: 0.3 }, { t: 'floor', rect: A.kerbW, y: 0.1, mat: 'bluestone', th: 0.3 }, { t: 'floor', rect: A.kerbE, y: 0.1, mat: 'bluestone', th: 0.3 }]));
   }
   plans.push({ ...base('han-people', people()), style: 'life' }, ...lifePlans());
   void TIERS; void rand;

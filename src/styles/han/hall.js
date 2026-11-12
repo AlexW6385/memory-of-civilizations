@@ -49,6 +49,21 @@ const lamp = (bag, x, y, z) => {
   bag.add('bronze', lathe([[0.2, 0], [0.18, 0.05], [0.05, 0.12], [0.04, 1.1], [0.1, 1.15], [0.24, 1.25], [0.2, 1.3]], 10, null, x, y, z));
   bag.add('gilt_bronze', lathe([[0.001, 1.3], [0.12, 1.3], [0.12, 1.34], [0.001, 1.34]], 8, null, x, y, z));
 };
+/** A rack of bronze bells (bianzhong) above a row of stone chimes (bianqing) on a lacquered frame, 4.4 m long. */
+function bellRack(bag, col, x, y, z) {
+  for (const sx of [-1, 1]) { bag.add('lacquer_black', box(x + sx * 2.2 - 0.14, y, z - 0.5, x + sx * 2.2 + 0.14, y + 2.4, z - 0.3)); bag.add('lacquer_black', box(x + sx * 2.2 - 0.14, y, z + 0.3, x + sx * 2.2 + 0.14, y + 2.4, z + 0.5)); bag.add('bronze', lathe([[0.001, 2.4], [0.2, 2.4], [0.001, 2.62]], 6, null, x + sx * 2.2, y, z)); }
+  bag.add('lacquer_red', box(x - 2.3, y + 2.0, z - 0.1, x + 2.3, y + 2.2, z + 0.1)); bag.add('lacquer_red', box(x - 2.3, y + 1.0, z - 0.1, x + 2.3, y + 1.16, z + 0.1));
+  for (let k = 0; k < 9; k++) { const bx = x - 1.9 + k * 0.475, h = 0.55 - k * 0.03; bag.add('bronze', lathe([[0.11 + (8 - k) * 0.008, 0], [0.1, 0.1 * h * 2], [0.08, h], [0.06, h + 0.04]], 7, null, bx, y + 2.0 - h - 0.1, z)); }
+  for (let k = 0; k < 9; k++) { const bx = x - 1.9 + k * 0.475, h = 0.5 - k * 0.03; bag.add('granite_grey', box(bx - 0.16, y + 1.0 - h, z - 0.04, bx + 0.16, y + 1.0 - 0.02, z + 0.04)); }
+  col.rect([x - 2.4, z - 0.55, x + 2.4, z + 0.55], y, y + 2.4);
+}
+/** The great drum on its post and base in the hall. */
+function drumRack(bag, col, x, y, z) {
+  bag.add('lacquer_red', box(x - 0.6, y, z - 0.6, x + 0.6, y + 0.22, z + 0.6)); bag.add('timber_red', lathe([[0.09, 0.2], [0.07, 2.3]], 6, null, x, y, z));
+  const g = lathe([[0.001, -0.5], [0.46, -0.45], [0.58, -0.18], [0.58, 0.18], [0.46, 0.45], [0.001, 0.5]], 11); g.rotateZ(Math.PI / 2); g.translate(x, y + 1.3, z); bag.add('lacquer_red', g);
+  bag.add('tile_dark', lathe([[0.001, 2.65], [0.8, 2.3], [0.8, 2.25], [0.001, 2.4]], 8, null, x, y, z));
+  col.circle(x, z, 0.7, y, y + 2.4);
+}
 const censer = (bag, x, y, z) => {
   bag.add('bronze', lathe([[0.001, 0], [0.16, 0], [0.16, 0.05], [0.05, 0.1], [0.05, 0.28], [0.17, 0.34], [0.17, 0.5], [0.12, 0.56], [0.1, 0.62], [0.001, 0.66]], 10, null, x, y, z));
   bag.add('bronze', lathe([[0.17, 0.5], [0.2, 0.5], [0.2, 0.44], [0.17, 0.44]], 10, null, x, y, z));
@@ -151,6 +166,8 @@ export function hall(el, ctx) {
     for (const s of [-1, 1]) addCloth(bag, 'cloth_red', clothBox(mid + s * 7.4 - 0.6, f + 1.6, dz + 0.9, mid + s * 7.4 + 0.6, f + H - 0.5, dz + 1.0, 0.3), f + H - 0.5);
     for (const [x, z] of [[-4.4, 1.0], [4.4, 1.0], [-6.3, 5.4], [6.3, 5.4]]) lamp(bag, mid + x, f + 1.2 * (Math.abs(x) > 5 ? 0.4 : 1) * 0 + (Math.abs(x) > 5 ? 0.4 : 1.2), dz + z);
     for (const s of [-1, 1]) censer(bag, mid + s * 2.8, f + 1.2, dz + 4.3);
+    // the court's orchestra either side of the aisle before the throne: a frame of bronze bells over a row of stone chimes, the great drum on its post
+    for (const s of [-1, 1]) { bellRack(bag, col, mid + s * 11.5, f, dz + 20.2); drumRack(bag, col, mid + s * 7.2, f, dz + 20.6); }
     lights.push({ at: [mid, f + H - 1.2, dz + 6], color: '#ffc98a', intensity: 8, distance: 22 }, { at: [mid - 13, f + H - 1.2, dz + 14], color: '#ffc98a', intensity: 6, distance: 18 }, { at: [mid + 13, f + H - 1.2, dz + 14], color: '#ffc98a', intensity: 6, distance: 18 });
   }
   if (fl === 'throne' || fl === 'court') {

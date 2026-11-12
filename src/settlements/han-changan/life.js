@@ -2,7 +2,7 @@
 // in groups and the guards lining the paved way of the forecourt; the sellers behind their counters and the customers in the market lanes, the stalls
 // of the cross lanes; the palace quarters' lanes with their benches, wells and woodpiles; the keepers at the ward gates; ox-carts on the great
 // avenue. Plans of style 'life' (src/objects/index.js), placed from layout.js.
-import { RADIUS, AX, PALACE, WEST_MARKET, EAST_MARKET, WARDS, WARD_WALL, AVENUE, QUARTERS, QUARTER_LANES, MARKET_WALL, marketShops, GATE_S, GATE_W, WALL_W, WALL_S } from './layout.js';
+import { RADIUS, AX, PALACE, WEST_MARKET, EAST_MARKET, WARDS, WARD_WALL, AVENUE, QUARTERS, QUARTER_LANES, MARKET_WALL, marketShops, GATE_S, GATE_W, WALL_W, WALL_S, LAKE, LAKE_Y, GARDEN_POND, POND_Y, inLake, ACADEMY } from './layout.js';
 import { chariotSpots } from '../../styles/han/court.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -115,6 +115,35 @@ function gates() {
   return L;
 }
 
+/** The Kunming Lake: sampans with their boatmen punting or fishing, a barge with a load, washing women at the stage, an angler on the shore; a boat on the palace pond. */
+function lake() {
+  const rand = rng(404), L = [], [cx, cz] = LAKE.c, yw = LAKE_Y - 0.25;
+  const boat = (x, z, rot, kind = 'sampan', len = 6.2, crew = true) => {
+    L.push({ t: 'boat', kind, at: [x, z], c: [x, z], r: len / 2, y: yw, rot, len, seed: Math.floor(rand() * 1e9) });
+    const d = [Math.sin(rot), Math.cos(rot)];
+    if (crew) { const st = [x + d[0] * len * 0.4, z + d[1] * len * 0.4]; L.push(figure(rand, st, faceTo(-d[0], -d[1]) + 0.3, 'labourer', { y: yw + 0.28, hat: 'straw', pose: 'stand' })); L.push({ t: 'oar', at: [st[0] + d[0] * 0.2, st[1] + d[1] * 0.2], y: yw + 0.3, rot: rot + Math.PI, seed: 3 }); }
+  };
+  for (let k = 0; k < 7; k++) { const a = rand() * 6.28, d = 0.25 + rand() * 0.5, x = cx + Math.cos(a) * LAKE.rx * d, z = cz + Math.sin(a) * LAKE.rz * d; if (Math.hypot(x - (cx - 8), z - (cz + 4)) < 14) continue; boat(x, z, rand() * 6.28, 'sampan', 5.8 + rand() * 1.6); }
+  boat(cx + 22, cz + 18, 0.6, 'barge', 9, true);
+  // the landing stage: women washing, a man with a basket, an angler sitting at the shore
+  const px = cx + 40, pz = cz - LAKE.rz * 0.96;
+  L.push(figure(rand, [px + 1.5, pz - 1.0], 0, 'woman', { pose: 'squat' }), figure(rand, [px - 0.8, pz - 1.8], 0.4, 'woman', { pose: 'squat' }), figure(rand, [px, pz - 3.5], 0, 'labourer', { carry: 'pole' }));
+  for (const [dx, dz] of [[-30, 2], [-52, 14]]) { const x = cx + dx, z = cz - LAKE.rz * Math.sqrt(Math.max(0.05, 1 - (dx / LAKE.rx) ** 2)) - 1.2; if (inLake(x, z, 0)) continue; L.push(figure(rand, [x, z], 0, 'labourer', { pose: 'sit_ground', hat: 'straw' })); void dz; }
+  // the palace pond: a little pleasure boat by the island's pavilion
+  const [x0, z0, x1, z1] = GARDEN_POND;
+  L.push({ t: 'boat', kind: 'sampan', at: [x1 - 12, z0 + 12], c: [x1 - 12, z0 + 12], r: 2.4, y: POND_Y - 0.25, rot: 1.2, len: 4.8, seed: 5 });
+  return L;
+}
+
+/** The Imperial Academy: the master on his mat and the pupils kneeling in rows before him in the lecture hall (src/styles/han/hall.js 'lecture'), a pupil or two crossing the yard. */
+function academy() {
+  const rand = rng(515), L = [], A = ACADEMY, mid = (A[0] + A[2]) / 2, dz = A[3] - 16 - 12, f = 0.9;
+  L.push(figure(rand, [mid, dz + 2.3], Math.PI, 'official', { y: f + 0.05, pose: 'seiza', cloth: 'cloth_white', cloth2: 'cloth_grey', beard: 1 }));
+  for (const r of [1, 2]) for (let k = -3; k <= 3; k++) if (rand() < 0.8) L.push(figure(rand, [mid + k * 2.2, dz + 6.2 + r * 2.1 + 0.3], 0, 'customer', { y: f + 0.05, pose: 'seiza', cloth: pick(rand, ['cloth_white', 'cloth_grey', 'cloth_blue']), hat: 'none' }));
+  for (let k = 0; k < 3; k++) L.push(figure(rand, [mid - 8 + k * 8 + rand() * 3, A[1] + 12 + rand() * 6], rand() * 6, 'customer', { cloth: 'cloth_white', hat: 'none' }));
+  return L;
+}
+
 export function lifePlans() {
-  return [plan('han-life-court', forecourt()), plan('han-life-west', market(WEST_MARKET, 600)), plan('han-life-east', market(EAST_MARKET, 700)), plan('han-life-quarters', quarters()), plan('han-life-gates', gates())];
+  return [plan('han-life-court', forecourt()), plan('han-life-west', market(WEST_MARKET, 600)), plan('han-life-east', market(EAST_MARKET, 700)), plan('han-life-quarters', quarters()), plan('han-life-gates', gates()), plan('han-life-lake', lake()), plan('han-life-academy', academy())];
 }

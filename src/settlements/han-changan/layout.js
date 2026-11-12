@@ -48,6 +48,11 @@ export const ACADEMY = [60, 288, 175, 352];
 
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+// the moat outside the wall (docs: 6.13 m wide, a berm of 3 m between it and the wall's foot), crossed by timber bridges at the two gates
+export const MOAT_Y = -0.9, MOAT_BED = -2.5;
+export const MOAT = [[WALL_W - 6 - 3 - 6.1, -440, WALL_W - 6 - 3, WALL_S + 12], [WALL_W - 6 - 3 - 6.1, WALL_S + 9, WALL_E + 6 + 3 + 6.1, WALL_S + 15.1], [WALL_E + 9, -440, WALL_E + 15.1, WALL_S + 12], [WALL_W - 9, WALL_N - 15.1, WALL_E + 15.1, WALL_N - 9]];
+export const BRIDGES = [{ c: [WALL_W - 12, GATE_W.z], axis: 'x', len: 14, w: 16 }, { c: [GATE_S.x, WALL_S + 12.2], axis: 'z', len: 14, w: 30 }];
+export const inMoat = (x, z, m = 0) => MOAT.some((r) => inRect(r, x, z, m));
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const lakeD = (x, z) => 1 - Math.hypot((x - LAKE.c[0]) / LAKE.rx, (z - LAKE.c[1]) / LAKE.rz);   // > 0 inside
 export const inLake = (x, z, m = 0) => lakeD(x, z) > -m / 60;
@@ -60,6 +65,7 @@ export function height(x, z) {
   if (d > -0.03) h = Math.min(h, LAKE_BED * smooth(-0.03, 0.08, d));
   const dp = Math.min(x - GARDEN_POND[0], GARDEN_POND[2] - x, z - GARDEN_POND[1], GARDEN_POND[3] - z);
   if (dp > -1) h = Math.min(h, -1.4 * smooth(-1, 1.5, dp));
+  for (const m of MOAT) { const dm = Math.min(x - m[0], m[2] - x, z - m[1], m[3] - z); if (dm > -1.4) h = Math.min(h, MOAT_BED * smooth(-1.4, 1.2, dm)); }
   return h * (1 - smooth(RADIUS - 30, RADIUS, r));
 }
 
