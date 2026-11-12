@@ -179,7 +179,7 @@ const courtLife = { id: 'nara-court-life', style: 'life', origin: [0, 0], base: 
     }
   }
   // two monks of the Tōdai-ji with a pilgrim procession toward the hall, one bearing a staff
-  for (let i = 0; i < 6; i++) fig(-2 + (i % 2) * 3.2 - 1, 2 - i * 3.4, [0, -1], { hair: i < 2 ? 'shaven' : 'topknot', carry: i === 0 ? 'staff' : 'none', cloth: i < 2 ? 'cloth_ochre' : CLS[i % 6], cloth2: i < 2 ? 'cloth_maroon' : 'cloth_white' });
+  for (let i = 0; i < 6; i++) fig((i % 2 ? 2.7 : -2.7) + (r() - 0.5) * 0.4, 2 - i * 3.4, [0, -1], { hair: i < 2 ? 'shaven' : 'topknot', carry: i === 0 ? 'staff' : 'none', cloth: i < 2 ? 'cloth_ochre' : CLS[i % 6], cloth2: i < 2 ? 'cloth_maroon' : 'cloth_white' });
 }
 
 // the deer of the hills: a few small herds on the lawns outside the temple's courts and up the
