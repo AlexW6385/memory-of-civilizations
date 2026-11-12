@@ -22,7 +22,7 @@ export function frame(ctx, cx, cz, k) {
     ramp: (r, y0, y1, dir) => {
       if (!quarter) return;
       // the ascent's direction in the local frame (e = +x, s = +z, w = −x, n = −z) turned like the frame
-      const i = (DIRS.indexOf(dir) + k) % 4;
+      const i = (((DIRS.indexOf(dir) - k) % 4) + 4) % 4;
       ctx.col.ramp(R(r), y0, y1, DIRS[i]);
     },
     segment: (a, b, th2, y0, y1) => ctx.col.segment(P(...a), P(...b), th2, y0, y1),

@@ -265,12 +265,12 @@ export function timHouse(el, ctx) {
     bx(bag, 'limestone', px - pw - 0.3, 0, cc[1] - pd - 0.3, px + pw + 0.3, 0.38, cc[1] + pd + 0.3); col.rect([px - pw - 0.3, cc[1] - pd - 0.3, px + pw + 0.3, cc[1] + pd + 0.3], 0, 0.38);
     bx(bag, 'water', px - pw, 0.3, cc[1] - pd, px + pw, 0.34, cc[1] + pd);
   }
-  { const tx = rsgn < 0 ? xr - 0.8 : xl + 0.8, tz = zs - 1.2;
+  { const tx = rsgn < 0 ? xl + 0.8 : xr - 0.8, tz = zs - 1.2;
     bag.add('terracotta', lathe([[0.55, 0], [0.55, 0.35], [0.45, 0.65], [0.2, 0.82], [0.001, 0.84]], 12, null, tx, 0, tz)); col.circle(tx, tz, 0.58, 0, 0.9);
-    woodStack(bag, tx + (rsgn < 0 ? -0.2 : 0.2), tz - 1.1, 0, 0.9, 3);
+    woodStack(bag, tx + (rsgn < 0 ? 0.2 : -0.2), tz - 1.1, 0, 0.9, 3);
     F.waterJar(bag, tx, 0, tz - 2.2, 0.9); }
   if (full) {
-    const lx = rsgn < 0 ? xr - 1.0 : xl + 1.0;
+    const lx = rsgn < 0 ? xl + 1.0 : xr - 1.0;
     for (const zz of [zf + 1.0, zf + 3.6]) { bx(bag, 'timber', lx - 0.03, 0, zz - 0.03, lx + 0.03, 2.1, zz + 0.03); }
     bag.add('rope_fibre', place(box(-0.01, -0.01, 0, 0.01, 0.01, 2.6), lx, 2.05, zf + 1.0));
     ['cloth_white', 'cloth_indigo', 'cloth_red', 'cloth_ochre'].forEach((m, i) => addCloth(bag, m, clothBox(lx - 0.25, 1.15, zf + 1.2 + i * 0.55, lx + 0.25, 2.05, zf + 1.28 + i * 0.55), 2.05));

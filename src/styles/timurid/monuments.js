@@ -67,7 +67,7 @@ export function bibiKhanym(el, ctx) {
   pishtaqOf({ a: M(18, -HL + o), b: M(-18, -HL + o), facing: M(0, -HL - 50), y: 0, h: 35, depth: 16, iwan: { w: 15, h: 28, depth: 9, pass: true, doorH: 8 } }, ctx);
   // the end belts: solid ranges of rooms (the entrance's, the sanctuary's), the passage left open between
   UV(-HW + 2, -HL + 16.5, -9, -CV, 0, WH); UV(9, -HL + 16.5, HW - 2, -CV, 0, WH);
-  UV(-HW + 2, CV, HW - 2, HL - 2, 0, WH);
+  UV(-HW + 2, CV, -13, HL - 2, 0, WH); UV(13, CV, HW - 2, HL - 2, 0, WH); UV(-13, 75, 13, HL - 2, 0, WH);        // (the sanctuary's hall and the iwan's way are left open between)
   // the court's faces: the end arcades, the gallery arcades with their bays (pass arches into the covered galleries)
   const gal = (u, v0, v1, ins) => {
     const a = M(u, v0), b = M(u, v1), L = v1 - v0, n = Math.round(L / 4.5), w = L / n, ar = [];
