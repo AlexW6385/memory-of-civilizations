@@ -1,7 +1,7 @@
 // The Sparrow's forecourt (docs/settlements/wei-ye.md §6.2): what the visitor stands among on arrival — the garden's paving before the Bronze Sparrow's stair, the
 // stone chimeras and banners at the stair's foot, the censers on the royal way, the officials' carriages waiting with their horses and grooms, the poets
 // on their mats on the lawns either side, the attendants. Pure data; positions derive from layout.js (the stair, the garden's ways).
-import { SPARROW, stairRect, zOf, POND } from './layout.js';
+import { SPARROW, ICE, TIGER, BATTER, stairRect, zOf, POND } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const P = (kind, x, z, o = {}) => ({ t: 'wei_prop', kind, at: [x, z], ...o });
@@ -68,6 +68,15 @@ export function forecourtLife() {
   fig([-127, ZC - 0.4], 0.4, { cloth: 'cloth_black', cloth2: 'cloth_red', pose: 'talk', beard: 1 }); fig([-126.1, ZC + 0.1], 0.4 + Math.PI, { cloth: 'cloth_blue', pose: 'talk', beard: 1 });
   fig([-128, ZC + 3.4], 1.9, { cloth: 'cloth_red', hat: 'none', hair: 'bun', over: 'none', h: 1.5, pose: 'stand' }); fig([-129.3, ZC + 4.3], 1.9, { cloth: 'cloth_green', hat: 'none', hair: 'bun', over: 'none', h: 1.48, pose: 'stand', carry: 'pot' });
   fig([-137, ZC + 8.9], Math.PI / 2, { cloth: 'cloth_grey', hat: 'cap', pose: 'staff', carry: 'staff', len: 2.0 });
+  // the storerooms at the terraces' feet (open: terrace.js): a keeper at the door with his tally, a porter at the jars
+  for (const t of [ICE, SPARROW, TIGER]) {
+    const st = stairRect(t), zc = zOf(t), xf = t.r[2] - BATTER / 4;
+    for (const [k, z] of [[0, st[1] - 1.5 - 3], [1, st[3] + 1.5 + 3]]) {
+      fig([xf - 1.2, z + (k ? -0.5 : 0.5)], Math.PI / 2 * -1, { cloth: 'cloth_brown', hat: 'cap', over: 'belt', pose: 'stand' });
+      fig([xf - 3.4, z + (k ? 0.5 : -0.5)], 1.2, { cloth: 'cloth_grey', hat: 'none', over: 'belt', dress: 'trousers', top: 'bare', feet: 'bare', carry: 'sack', pose: 'stand' });
+    }
+    void zc;
+  }
   void ax; void az;
   return L;
 }

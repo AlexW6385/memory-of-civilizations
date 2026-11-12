@@ -6,7 +6,7 @@
 import { SPARROW, ICE, TIGER, TOWER, DAIS_STAIR, SKYWAYS, BATTER, stairRect, zOf, faceX, POND, POND_Y } from './layout.js';
 
 const E = [];
-const terr = (t, extra = {}) => ({ t: 'wei_terrace', r: t.r, top: t.top, batter: BATTER, stair: { rect: stairRect(t), riser: 0.25 }, doors: 6, skyX: -195, ...extra });
+const terr = (t, extra = {}) => ({ t: 'wei_terrace', r: t.r, top: t.top, batter: BATTER, stair: { rect: stairRect(t), riser: 0.25 }, doors: 6, open: 2, skyX: -195, ...extra });
 E.push(terr(ICE, { gapS: true }));
 E.push(terr(SPARROW, { gapN: true, gapS: true, dais: { r: SPARROW.dais, top: SPARROW.daisTop, stair: DAIS_STAIR } }));
 E.push(terr(TIGER, { gapN: true }));
