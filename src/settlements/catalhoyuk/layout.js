@@ -39,6 +39,21 @@ export const TOP = KIND.map((row, i) => row.map((k, j) => {
   const r = rng(i * 97 + j * 13 + 5)();
   return ST + (Math.floor(r * 3) - 1) * 0.2;
 }));
+/** The houses one can go down into (besides the landmark): nearest the arrival first, the rest spread through the town; each a trade (variant 0–4: painted bands and bucrania, leopards in relief, seated figurine, knapper, baker) and a side (mirror). */
+export const ENTER = (() => {
+  const out = [];
+  const cands = [];
+  for (let i = 0; i < ROWS; i++) for (let j = 0; j < COLS; j++) if (KIND[i][j] === 'h') cands.push({ i, j, d: Math.hypot(j - LM.j, (i - LM.i) * 1.2) + ((i * 7 + j * 3) % 5) * 0.5 });
+  cands.sort((a, b) => a.d - b.d);
+  const used = new Set();
+  for (const c of cands) {
+    if (out.length >= 14) break;
+    if ([[0, 1], [1, 0], [0, -1], [-1, 0]].some(([a, b]) => used.has((c.i + a) + ',' + (c.j + b)))) continue;   // no two side by side: the rest stay solid
+    used.add(c.i + ',' + c.j);
+    out.push({ i: c.i, j: c.j, variant: (c.i * 3 + c.j * 5) % 5, mirror: (c.i + c.j) % 2 === 1 });
+  }
+  return out;
+})();
 export const cellRect = (i, j) => [colX(j), rowZ(i), colX(j) + CW[j], rowZ(i) + CD[i]];
 export const CLUSTER = [X0, Z0, X0 + W, Z0 + D];
 export const LANDMARK = { i: LM.i, j: LM.j, rect: cellRect(LM.i, LM.j) };
