@@ -199,6 +199,8 @@ function fabric() {
 import { streetPlans } from './street.js';
 import { wazisStatic, waziLife, wayMarket } from './wazi.js';
 import { watersideLife, riverStairs } from './waterside.js';
+import { courtTrees } from './trees.js';
+import { hillStatic, hillLife } from './hill.js';
 
 export async function town() {
   const chosen = interiorLots(), tea = new Set(teaHouses()), inter = new Set(Object.values(chosen).flat());
@@ -218,6 +220,9 @@ export async function town() {
   for (const e of [...watersideLife(LEVEL.street), ...wayMarket(LEVEL.street)]) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   for (const [k, list] of tiles) { const [i, j] = k.split(',').map(Number); plans.push({ ...base(`song-hangzhou-waterside-${k}`, list, 'life'), center: [i * 100 + 50, j * 100 + 50], near: 230 }); }
   plans.push(base('song-hangzhou-river-stairs', riverStairs()));
+  plans.push(base('song-hangzhou-court-trees', courtTrees()));
+  plans.push(base('song-hangzhou-hill', hillStatic()));
+  plans.push({ ...base('song-hangzhou-hill-life', hillLife(), 'life'), center: [-165, -90], near: 200 });
   // the entertainment ground, the Way's sunshades and the ward gates (§24)
   plans.push(base('song-hangzhou-wazi', wazisStatic(LEVEL.street)));
   plans.push({ ...base('song-hangzhou-wazi-life', waziLife(LEVEL.street), 'life'), center: [72, -140], near: 200, rooms: [{ id: 'hz-wazi', rect: [66, -153, 78, -127], y: LEVEL.street, kind: 'winehouse' }] });

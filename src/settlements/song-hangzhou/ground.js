@@ -4,6 +4,7 @@
 // pines, fir, camphor, bamboo and tea; willows on the canal, the lake and the causeway, peach trees on
 // the causeway; the humid sky of Jiangnan (docs/settlements/song-hangzhou.md §6, §7, §12).
 
+import { pathDist } from './hillpath.js';
 import { WAZI, spans, RADIUS, LEVEL, WALL, ROAD, T1, T2, CANAL_STREETS, WEST_LAKE, LAKE_GATE, TAFANG, WAREHOUSES, WATCH_TOWERS, inRect, hill, inRiver, inCanal, inLot, inWestLake, lakeDepth, onStreet, onWall, smooth as sm } from './layout.js';
 
 function height(x, z) {
@@ -60,6 +61,7 @@ function planting(x, z) {
   if (inLot(x, z, 0.5) || z > ROAD.z0 - 0.5) return null;
   if (NOGO().some((r) => inRect(r, x, z, 3))) return null;
   const h = hill(x, z);
+  if (h > 2 && pathDist(x, z) < 3.2) return { grass: 14 };
   if (h > 2) {
     const up = sm(18, 40, h);
     return { masson_pine: 0.5 * up, chinese_fir: 0.35 * up, chinese_pine: 0.3 * (1 - up), camphor: 0.25 * (1 - up), bamboo: 1.0 * (1 - up), tea: 0.6 * sm(0.2, 0.7, 1 - up) * (1 - sm(28, 38, h)), maple: 0.3, grass: 25 };

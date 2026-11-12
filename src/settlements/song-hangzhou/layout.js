@@ -43,10 +43,17 @@ export const inLake = inWestLake;
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 /** The hill: Yuelun in the south-west, rising to the north-west to the ridge behind the lake's south shore; flat inside the city's wall and north of z = −262 (the lake). */
-export function hill(x, z) {
+function hillBase(x, z) {
   const q = Math.hypot(x - HILL.c[0], z - HILL.c[1]) / HILL.r;
   if (q >= 1) return 0;
   return HILL.h * smooth(0, 1, 1 - q) * smooth(-262, -200, z) * (1 - smooth(-130, -50, x));
+}
+/** Levelled pads on the hill for the pavilions of the temple path (hill.js, §26): { c, r (level), b (blend out), y }. */
+export const HILL_PADS = [{ c: [-198, -124], r: 5, b: 5 }, { c: [-170, -72], r: 4, b: 4 }].map((p) => ({ ...p, y: hillBase(p.c[0], p.c[1]) }));
+export function hill(x, z) {
+  let h = hillBase(x, z);
+  for (const p of HILL_PADS) { const d = Math.hypot(x - p.c[0], z - p.c[1]); if (d < p.r + p.b) { const w = 1 - smooth(p.r, p.r + p.b, d); h = h * (1 - w) + p.y * w; } }
+  return h;
 }
 export const inRiver = (x, z) => z > WALL.z1;
 export const inCanal = (x, z) => x > CANAL.x0 && x < CANAL.x1 && z > CANAL.z0 && z < CANAL.z1;
