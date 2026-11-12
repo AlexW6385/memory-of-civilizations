@@ -17,7 +17,7 @@ function waterLevel(x, z) { return inTankWater(x, z) ? TANK.level : -Infinity; }
 function fromWater(x, z) { return Math.max(-5, Math.min(40, tankD(x, z))); }
 // the arrival's view of Kandariya Mahadeva (src/planet/arrivals.js) kept free of the oleander clumps:
 // the wedge from the arrival point to the temple's two ends, as far as its terrace
-const EYE = [2.5, -60], ENDS = [[-42, -73], [-42, -47]];
+const EYE = [-9.5, -60], ENDS = [[-42, -73], [-42, -47]];
 const ang = (x, z) => Math.atan2(z - EYE[1], x - EYE[0]);
 const A0 = Math.min(...ENDS.map(([x, z]) => ang(x, z))) - 0.08, A1 = Math.max(...ENDS.map(([x, z]) => ang(x, z))) + 0.08;
 function inView(x, z) { const a = ang(x, z); return a > A0 && a < A1 && Math.hypot(x - EYE[0], z - EYE[1]) < 50; }

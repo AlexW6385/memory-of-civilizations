@@ -115,21 +115,23 @@ export function dressing() {
       if (rand() < 0.2) continue;
       const z = zc + sz * 1.85;
       L.push({ t: 'goods_mat', at: [x + rand(), z], y: 0, rot: face([0, -sz]), seed: seed++, goods: ['heap', 'heap', 'baskets'], produce: pickOf([['cloth_white', 'cloth_red', 'cloth_white'], ['cloth_ochre', 'cloth_white', 'cloth_red']]) });
-      if (rand() < 0.7) F([x + rand(), z + sz * 0.95], 0, [0, -sz], { pose: 'sit_ground', dress: 'wrap', cloth: pickOf(['cloth_red', 'cloth_green', 'cloth_indigo']), cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5 });
+      if (rand() < 0.7 && !(x > -14.5 && x < -9)) F([x + rand(), z + sz * 0.95], 0, [0, -sz], { pose: 'sit_ground', dress: 'wrap', cloth: pickOf(['cloth_red', 'cloth_green', 'cloth_indigo']), cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5 });
     }
+    // the arrival stands at x −9.5 (src/planet/arrivals.js): nobody within 5 m of it along the lane; the pilgrims begin beyond that
     const P = (x, z, o) => F([x, z], 0, [-1, 0.05], o);
-    P(-12, -60.4, { carry: 'basket', cloth: 'cloth_white', hat: 'turban' });
-    P(-13.4, -59.3, { dress: 'wrap', cloth: 'cloth_red', cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5, carry: 'pot' });
-    P(-17.5, -60.8, { dress: 'wrap', top: 'bare', hair: 'topknot', over: 'sash', cloth: 'cloth_white', carry: 'none' });
-    P(-22, -59.6, { dress: 'wrap', cloth: 'cloth_green', cloth2: 'cloth_white', hair: 'bun', over: 'shawl', h: 1.5, child: true });
-    P(-24.5, -60.5, { carry: 'basket', cloth: 'cloth_ochre' });
-    F([-9, -59.6], 0, [1, 0], { dress: 'wrap', top: 'bare', hair: 'short', hat: 'turban', cloth: 'cloth_white', carry: 'pole', arms: 'pole' });
-    F([-19, -61.2], 0, [1, -0.1], { dress: 'wrap', cloth: 'cloth_indigo', cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5, carry: 'pot' });
+    P(-15.2, -60.9, { carry: 'basket', cloth: 'cloth_white', hat: 'turban' });
+    P(-16.6, -59.3, { dress: 'wrap', cloth: 'cloth_red', cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5, carry: 'pot' });
+    P(-19.6, -60.7, { dress: 'wrap', top: 'bare', hair: 'topknot', over: 'sash', cloth: 'cloth_white', carry: 'none' });
+    P(-22.4, -59.5, { dress: 'wrap', cloth: 'cloth_green', cloth2: 'cloth_white', hair: 'bun', over: 'shawl', h: 1.5, child: true });
+    P(-24.8, -60.6, { carry: 'basket', cloth: 'cloth_ochre' });
+    P(-27.3, -59.6, { dress: 'wrap', cloth: 'cloth_indigo', cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5, arms: 'pray' });
+    F([-18.6, -61.5], 0, [1, -0.1], { dress: 'wrap', cloth: 'cloth_indigo', cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5, carry: 'pot' });
+    F([-21.2, -59.1], 0, [1, 0], { dress: 'wrap', top: 'bare', hair: 'short', hat: 'turban', cloth: 'cloth_white', carry: 'pole', arms: 'pole' });
     L.push({ t: 'animal', kind: 'zebu', at: [-26.5, -56.5], y: 0, rot: 1.9, seed: seed++, graze: false, mat: 'hide_white' });
     L.push({ t: 'animal', kind: 'zebu', at: [-28, -64.5], y: 0, rot: 4.8, seed: seed++, graze: true, mat: 'hide_tan' });
-    L.push({ t: 'chickens', at: [-5, -62.2], y: 0, rot: 0.4, seed: seed++, n: 4 });
+    L.push({ t: 'chickens', at: [-3, -62.4], y: 0, rot: 0.4, seed: seed++, n: 4 });
     L.push({ t: 'bench', at: [-17.2, -63.2], y: 0, rot: 0, seed: seed++, len: 1.6 });
-    L.push({ t: 'pot', at: [-9.5, -57.4], y: 0, seed: seed++, kind: 'water_pot', n: 4 });
+    L.push({ t: 'pot', at: [-12.5, -57.4], y: 0, seed: seed++, kind: 'water_pot', n: 4 });
   }
   return L;
 }
