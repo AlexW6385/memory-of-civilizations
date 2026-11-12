@@ -21,6 +21,8 @@ function cover(x, z, h) {
   if (wet(x, z)) { c.soil = 0.6; c.rock = 0.4; return c; }
   if (inRect(INNER, x, z)) {
     if (h > BANK + 3 && !onPlatform(x, z)) { c.forest = 0.6; c.grass = 0.4; c.soil = 0; return c; }
+    // the baileys' yards are raked pale gravel (the flagstones laid on it), the enclosure's open ground beaten earth
+    if (onPlatform(x, z)) { c.sand = 0.8; c.soil = 0.1; c.grass = 0.06; c.road = 0.12; return c; }
     c.sand = 0.5; c.soil = 0.4; c.grass = 0.1; c.road = 0.3; return c;
   }
   if (Math.hypot(x, z) > RADIUS - 26) { c.fields = 0.7; c.grass = 0.3; return c; }
