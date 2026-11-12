@@ -5,6 +5,7 @@
 
 import { lots, voids, height, GREEN, GATE_X, LANES, RADIUS, inRect } from './layout.js';
 import { frame, dirOf } from '../../styles/chinese/village.js';
+import { TRADES, trade } from './shops.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const g4 = (r) => [height(r[0], r[1]), height(r[2], r[1]), height(r[0], r[3]), height(r[2], r[3])];
@@ -26,6 +27,13 @@ export function village() {
   const all = [...lots(), ...plots.filter((p) => p.kind === 'yard')];
   // the open houses: the three yards nearest the gate on the main lane's two sides, an inn first
   const near = [...all].filter((l) => (l.rect[2] - l.rect[0]) >= 13).sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 + 76, (a.rect[1] + a.rect[3]) / 2) - Math.hypot((b.rect[0] + b.rect[2]) / 2 + 76, (b.rect[1] + b.rect[3]) / 2)).slice(0, 3);
+  // the trades: the nearest flat plots on the main lane (after the three open houses) take an inn, a smithy, a shop and a hostel, each with a
+  // furnished interior (shops.js); the next seven flat houses are open as well
+  const dg = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 + 100, (l.rect[1] + l.rect[3]) / 2);
+  const flat = (l) => l.y - l.foot <= 0.7 && (l.rect[2] - l.rect[0]) >= 14;
+  const specials = new Map();
+  [...all].filter((l) => !near.includes(l) && l.lane === 0 && flat(l)).sort((a, b) => dg(a) - dg(b)).slice(0, TRADES.length).forEach((l, i) => specials.set(l, TRADES[i]));
+  const more = new Set([...all].filter((l) => !near.includes(l) && !specials.has(l) && flat(l)).sort((a, b) => dg(a) - dg(b)).slice(0, 16));
   for (const p of plots) {
     const fr = frame(p.rect, p.front), { L, D } = fr;
     if (p.kind === 'yard') continue;
@@ -38,7 +46,13 @@ export function village() {
     else C.push({ t: 'wutai_garden', rect: p.rect, front: p.front, y: (p.y + p.foot) / 2, seed: p.seed });
   }
   for (const l of all) {
-    const rand = rng(l.seed), fr = frame(l.rect, l.front), { L, D, P, R } = fr, open = near.includes(l);
+    if (specials.has(l)) {
+      const tr = trade(l, specials.get(l));
+      C.push(...tr.chinese); Lf.push(...tr.life); for (const m of tr.smoke) smoke.push({ p: m.p, y: m.y - 1.7, r: l.seed, trade: true });
+      continue;
+    }
+    const rand = rng(l.seed), fr = frame(l.rect, l.front), { L, D, P, R } = fr;
+    let open = near.includes(l);
     const dist = Math.hypot((l.rect[0] + l.rect[2]) / 2 + 80, (l.rect[1] + l.rect[3]) / 2);
     // the gate on the lane side, away from the house's front door
     const gu = L * (0.22 + rand() * 0.2) + (rand() < 0.5 ? L * 0.38 : 0);
@@ -57,6 +71,7 @@ export function village() {
     // the house: by the yard's means — the inner yards richer (brick-arched, three bays), the outer poorer
     const r = rand(), rich = dist < 70 || r < 0.2;
     let kind = open ? 'flat' : rich && r < 0.45 ? 'arch' : r < 0.6 ? 'flat' : r < 0.85 ? 'shed' : 'flat';
+    if (!open && more.has(l) && kind === 'flat') open = true;
     const wing = L >= 16 && rand() < 0.75, nb = rich || open ? 3 : 2 + (rand() < 0.4 ? 1 : 0), bay = kind === 'arch' ? 3.6 : 3.3, Wh = nb * bay;
     const Dh = kind === 'arch' ? 4.8 : kind === 'shed' ? 5.0 : 5.4;
     const v0 = D - 1.3 - Dh, u0 = Math.min(L - Wh - 1.0, wing ? 4.9 + rand() * 1.0 : (L - Wh) / 2 + (rand() - 0.5) * 1.2);
@@ -115,6 +130,8 @@ export function village() {
     if (rand() < 0.25) drop({ t: 'chickens', n: 2 + Math.floor(rand() * 3), kind: rand() < 0.3 ? 'goose' : 'hen', seed: l.seed + 53 }, 1.2);
     if (rand() < 0.15) drop({ t: 'animal', kind: ['donkey', 'ox', 'sheep', 'goat'][Math.floor(rand() * 4)], seed: l.seed + 55 }, 1.4);
     if (kind === 'flat') { for (let k = 0; k < nb; k++) if (k !== Math.floor(nb / 2) && rand() < 0.35) put({ t: 'stool', seed: l.seed + 60 + k }, (k + 0.5) * bay + u0, vf - 0.7, { rot: rand() * 6.28 }); }
+    // a tree in the yard's front corner, away from the gate: a jujube, a poplar or (rarely) a willow
+    if (rand() < 0.55) { const tu = gu < L / 2 ? L - 1.9 : 1.9, tv = 2.3 + rand() * 1.2, [tx, tz] = P(tu, tv), kd = rand(); C.push({ t: 'wutai_tree', at: [tx, tz], y: gh(tx, tz), h: kd < 0.5 ? 4.6 + rand() * 1.4 : kd < 0.85 ? 7.5 + rand() * 2.5 : 8 + rand() * 2, kind: kd < 0.5 ? 'jujube' : kd < 0.85 ? 'poplar' : 'willow', seed: l.seed % 997 }); }
     // on the lane outside the wall: firewood or sorghum stalks piled against it, a barrow, a donkey tied by the gate, a bench
     const lane = (el, r, extra = {}) => {
       for (let i = 0; i < 6; i++) { const u = 1.2 + rand() * (L - 2.4); if (Math.abs(u - gu) > 1.9 + r) { put(el, u, -0.6, { rot: yaw[l.front] + Math.PI / 2, ...extra }); return true; } }
