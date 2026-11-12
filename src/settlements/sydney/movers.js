@@ -4,7 +4,7 @@
 // Suzhou's: the ways come from layout.js; the boats are the modern style's ferry (with its passengers baked into the hull set); they
 // have no oar and no boatman (those variants are empty).
 
-import { RADIUS, LEVEL, streetCells, OPERA, QUAY, BENNELONG } from './layout.js';
+import { RADIUS, LEVEL, streetCells, OPERA, QUAY, BENNELONG, shore } from './layout.js';
 import { STYLES } from '../../core/build.js';
 import '../../styles/modern/index.js';
 import '../../objects/index.js';
@@ -45,6 +45,11 @@ export function walkways() {
   // the Royal Botanic Garden: paths round Farm Cove and across the lawns
   street([158, 40, 166, 72], 1.2, 0.5, 'lane');
   street([162, 40, 410, 48], 1.8, 0.8, 'lane'); street([196, -30, 204, 142], 1.4, 0.8, 'lane'); street([316, -30, 324, 142], 1.2, 0.8, 'lane');
+  // Mrs Macquarie's Point: the promenade along the west wall (the arrival's foreground), the walk round the north wall and the path in from the Garden
+  const wallX = (z) => { let x = 205; while (shore(x, z) <= 1.8 && x < 260) x += 0.25; return x; };
+  const wx = Math.max(wallX(-140), wallX(-120), wallX(-100));
+  street([wx + 3.6, -142, wx + 7.6, -99], 3.0, 1.2);
+  street([wx + 3.6, -146.5, 336, -142.5], 1.6, 0.8, 'lane'); street([wx + 3.6, -104, 330, -100], 1.4, 0.8, 'lane');
   return { rects, links: [], clip: RADIUS - 12 };
 }
 /** The ferries' lanes: from the quay's wharves north into the harbour, and across it (wide: the boats are 38 m). */
