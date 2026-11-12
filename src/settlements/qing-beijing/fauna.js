@@ -32,13 +32,12 @@ const flights = [
   { kind: 'swallow', n: 2, lane: { a: [-127, -200], b: [-127, 190] }, y: [-0.5, 3], speed: 8 },
   // swallows hawking over the great court
   { kind: 'swallow', n: 3, lane: { a: [-88, 60], b: [88, 60] }, y: [2.5, 11], speed: 9 },
-  { kind: 'swallow', n: 2, lane: { a: [-60, 100], b: [60, 100] }, y: [3, 12], speed: 9 },
   // crows at dusk, wheeling over the Hall of Supreme Harmony and the courts
   { kind: 'crow', n: 9, loop: { c: [0, -10], a: [70, 55], rot: 0.3 }, y: [38, 16], speed: 8 },
   { kind: 'crow', n: 5, loop: { c: [-50, 90], a: [45, 30], rot: -0.4 }, y: [26, 12], speed: 8 },
 ];
 flights[0].a = flights[1].a = flights[2].a = [30, 4];
-flights[3].a = flights[4].a = [30, 4];
+flights[3].a = [30, 4];
 
 const perches = [];
 // tree sparrows on the paving of the lanes and the avenue

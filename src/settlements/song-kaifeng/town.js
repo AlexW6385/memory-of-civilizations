@@ -182,6 +182,25 @@ function more(S, L, rand, person, pick) {
       for (const dz of [0, 1.1]) person([ax + sx * 63.5, -131 + dz], 0.04, faceTo([sx, 0]), { pose: 'stand', dress: 'robe', hat: 'cap', carry: dz ? 'none' : 'pole' });
     }
   }
+  // ---- the court's furniture and its quiet life: stone benches under the cloisters' eaves with monks and pilgrims resting on them, water tubs (against fire) at the
+  // halls' corners, the incense-sellers' tables at the censer's foot with their bundles, lamp posts, a monk at the donation chest
+  {
+    const M = LY.MONASTERY, ax = LY.PAGODA[0], k = 0.42;
+    for (const [x, z, face, side] of [[M[0] + k + 1.6, -150, 1, -1], [M[0] + k + 1.6, -196, 1, -1], [M[2] - k - 1.6, -150, -1, 1], [M[2] - k - 1.6, -196, -1, 1], [M[0] + k + 1.6, -236, 1, -1], [M[2] - k - 1.6, -236, -1, 1]]) {
+      L.push({ t: 'bench', at: [x, z], y: 0.04, rot: Math.PI / 2, len: 2.0, mat: 'granite_grey', seed: Math.floor(rand() * 1e6) });
+      for (const q of [-0.5, 0.5]) if (rand() < 0.65) person([x, z + q], 0.04, faceTo([face, 0]), { pose: 'sit', dress: 'robe', hat: rand() < 0.5 ? 'none' : 'cap', hair: rand() < 0.5 ? 'shaven' : 'topknot', cloth: pick(['cloth_grey', 'cloth_brown', 'cloth_ochre']) });
+      void side;
+    }
+    for (const [x, z] of [[ax - 19.5, -176], [ax + 19.5, -176], [ax - 19.5, -197], [ax + 19.5, -197], [ax - 38, -219], [ax + 38, -219], [M[0] + 20, -166], [M[2] - 20, -166]]) L.push({ t: 'rain_tub', at: [x, z], y: 0.04, rot: rand() * 6.28, seed: Math.floor(rand() * 1e6) });
+    for (const sx of [-1, 1]) {
+      const x = ax + sx * 9.2, z = -155.5;
+      S.push({ t: 'hawker_stall', at: [x, z], y: 0.075, rot: -sx * Math.PI / 2, kind: 'cloth', w: 1.8, awning: 'cloth_ochre' });
+      person([x + sx * 0.7, z], 0.075, faceTo([-sx, 0]), { pose: 'stand', dress: 'robe', hat: 'none', hair: 'shaven', cloth: 'cloth_brown' });
+      person([x - sx * 1.6, z + 0.5], 0.075, faceTo([sx, 0]), { pose: 'stand', dress: 'robe', hat: 'cap' });
+    }
+    person([ax - 7.6, -164.4], 0.075, faceTo([1, 0.5]), { pose: 'stand', dress: 'robe', hat: 'none', hair: 'shaven', cloth: 'cloth_grey' });
+    for (const sx of [-1, 1]) for (const z of [-196, -226]) L.push({ t: 'lantern', at: [ax + sx * 7.5, z], y: 0.04, kind: 'iron', h: 2.4 });
+  }
   // ---- the Sun Yang main shop: the great standing sign at its corner, the wine jars heaped in the yard behind
   {
     const l = wineShops()[0], F = frontLine(l), back = l.front === 'e' ? [-1, 0] : l.front === 'w' ? [1, 0] : l.front === 's' ? [0, -1] : [0, 1];
