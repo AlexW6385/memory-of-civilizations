@@ -147,7 +147,63 @@ export function tileHall(el, { bag, col, lights }) {
     lights?.push({ at: [cx, F + 1.3, z0 + 3.4], color: '#ffb45a', intensity: 2, distance: 8 });
     bag.add('bronze', lathe([[0.001, 0], [0.18, 0.02], [0.14, 0.3], [0.001, 0.3]], 8, null, cx, F, z0 + 3.4));
   }
+  hallFurnish(bag, col, lights, [x0, z0, x1, z1], F, Y + H, el.altar === 'buddha' ? 'temple' : el.furnish ?? null, el.seed ?? Math.round(x0 * 7 + z0));
 }
+
+/**
+ * The furnishing of a small hall, by use [inferred]: 'temple' (offering table, incense burner, candle stands, two attendant figures, painted panels on the walls, hanging banners, a drum
+ * and a bell on frames, prayer mats and monks' cushions), 'potter' (a wheel, shelves of drying ware, clay heaps, stacked tiles), 'smith' (anvil, bellows, tool racks, charcoal),
+ * 'store' (sacks, chests, bolts of silk, jars of oil and wine on racks) — the interior of the halls that were bare.
+ */
+export function hallFurnish(bag, col, lights, rect, F, top, kind, seed) {
+  if (!kind) return;
+  const [x0, z0, x1, z1] = rect, cx = (x0 + x1) / 2, rand = rng(seed), W = x1 - x0, D = z1 - z0;
+  const cols = ['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_green', 'cloth_maroon'], pc = () => cols[Math.floor(rand() * cols.length)];
+  if (kind === 'temple') {
+    bag.add('lacquer_red', box(cx - 0.9, F, z0 + 3.2, cx + 0.9, F + 0.8, z0 + 4.0)); col.rect([cx - 0.9, z0 + 3.2, cx + 0.9, z0 + 4.0], F, F + 0.8);
+    bag.add('cloth_ochre', box(cx - 0.95, F + 0.78, z0 + 3.15, cx + 0.95, F + 0.82, z0 + 4.05));
+    for (const dx of [-0.5, 0.5]) bag.add('silver', lathe([[0.001, 0], [0.08, 0.02], [0.1, 0.1], [0.001, 0.1]], 8, null, cx + dx, F + 0.82, z0 + 3.6));
+    bag.add('bronze', lathe([[0.2, 0], [0.26, 0.2], [0.2, 0.34], [0.12, 0.36]], 10, null, cx, F, z0 + 5.0)); col.circle(cx, z0 + 5.0, 0.3, F, F + 0.4);
+    for (let k = 0; k < 5; k++) bag.add('timber', rod([cx - 0.1 + (k - 2) * 0.03, F + 0.36, z0 + 5.0], [cx - 0.1 + (k - 2) * 0.03, F + 0.62, z0 + 5.0], 0.006, 3));
+    for (const s of [-1, 1]) {
+      bag.add('iron', lathe([[0.1, 0], [0.04, 0.5], [0.12, 0.9], [0.001, 0.9]], 8, null, cx + s * 2.6, F, z0 + 3.4));
+      bag.add('clay_robe', lathe([[0.001, 0], [0.26, 0.0], [0.22, 0.7], [0.14, 1.3], [0.001, 1.34]], 10, null, cx + s * 2.6, F + 0.3, z0 + 1.6)); bag.add('clay_gilt', lathe([[0.001, 0], [0.12, 0.02], [0.1, 0.24], [0.001, 0.26]], 10, null, cx + s * 2.6, F + 1.6, z0 + 1.6));
+      bag.add('granite_grey', box(cx + s * 2.6 - 0.45, F, z0 + 1.2, cx + s * 2.6 + 0.45, F + 0.3, z0 + 2.0)); col.rect([cx + s * 2.6 - 0.45, z0 + 1.2, cx + s * 2.6 + 0.45, z0 + 2.0], F, F + 0.3);
+    }
+    // painted panels on the side walls, banners from the beams, drum and bell
+    for (const [X, sd] of [[x0, 1], [x1, -1]]) for (let k = 0; k < 3; k++) { const z = z0 + 1.6 + k * (D - 3.2) / 2.4; bag.add(['paint_blue', 'paint_ochre', 'fresco_green'][k], box(Math.min(X + sd * 0.17, X + sd * 0.2), F + 0.8, z, Math.max(X + sd * 0.17, X + sd * 0.2), F + 2.8, z + 1.8)); }
+    for (let k = 0; k < 4; k++) { const x = x0 + 1.4 + k * (W - 2.8) / 3, z = z0 + D * 0.55; bag.add(pc(), box(x - 0.2, top - 2.4, z - 0.01, x + 0.2, top - 0.2, z + 0.01)); bag.add('gold', box(x - 0.2, top - 0.35, z - 0.012, x + 0.2, top - 0.2, z + 0.012)); }
+    bag.add('lacquer_red', box(x0 + 0.6, F, z1 - 1.8, x0 + 1.4, F + 0.15, z1 - 0.8)); bag.add('lacquer_red', lathe([[0.5, 0], [0.62, 0.45], [0.5, 0.9], [0.001, 0.9]], 12, null, x0 + 1.0, F + 0.4, z1 - 1.3).rotateZ(0));
+    col.rect([x0 + 0.6, z1 - 1.8, x1 - W + 1.6, z1 - 0.8], F, F + 1.3);
+    bag.add('bronze', lathe([[0.4, 0], [0.45, 0.4], [0.3, 0.8], [0.001, 0.8]], 10, null, x1 - 1.1, F + 0.7, z1 - 1.3)); bag.add('lacquer_red', box(x1 - 1.6, F, z1 - 1.5, x1 - 0.6, F + 0.7, z1 - 1.1)); col.rect([x1 - 1.6, z1 - 1.5, x1 - 0.6, z1 - 1.1], F, F + 0.7);
+    for (let r = 0; r < 3; r++) for (let k = 0; k < 3; k++) { const x = cx - 2.2 + k * 2.2, z = z0 + 6.0 + r * 1.2; if (z > z1 - 1.2) continue; bag.add(pc(), box(x - 0.35, F, z - 0.35, x + 0.35, F + 0.08, z + 0.35)); }
+    lights?.push({ at: [cx, F + 2.4, z0 + 5.0], color: '#ffb45a', intensity: 1.6, distance: 8 });
+  } else if (kind === 'potter') {
+    bag.add('wood_dark', box(x0 + 1.5, F, z0 + 1.2, x0 + 2.4, F + 0.45, z0 + 2.1)); bag.add('terracotta', lathe([[0.001, 0], [0.4, 0], [0.4, 0.06], [0.001, 0.06]], 12, null, x0 + 1.95, F + 0.45, z0 + 1.65)); col.rect([x0 + 1.5, z0 + 1.2, x0 + 2.4, z0 + 2.1], F, F + 0.5);
+    bag.add('clay_green', lathe([[0.001, 0], [0.15, 0.02], [0.13, 0.16], [0.001, 0.2]], 8, null, x0 + 1.95, F + 0.52, z0 + 1.65));
+    for (const y of [0.55, 1.15, 1.75]) bag.add('timber', box(x1 - 1.4, F + y, z0 + 0.5, x1 - 0.4, F + y + 0.05, z1 - 0.5));
+    bag.add('timber', box(x1 - 1.4, F, z0 + 0.5, x1 - 1.3, F + 1.8, z1 - 0.5)); bag.add('timber', box(x1 - 0.5, F, z0 + 0.5, x1 - 0.4, F + 1.8, z1 - 0.5)); col.rect([x1 - 1.4, z0 + 0.5, x1 - 0.4, z1 - 0.5], F, F + 1.8);
+    for (let k = 0; k < 8; k++) for (const y of [0.6, 1.2, 1.8]) bag.add(k % 3 ? 'terracotta' : 'pottery_dark', lathe([[0.001, 0], [0.1, 0.02], [0.13, 0.12], [0.08, 0.2], [0.001, 0.22]], 8, null, x1 - 0.9, F + y, z0 + 0.9 + k * (D - 1.8) / 8));
+    bag.add('mud_plaster', lathe([[0.7, 0], [0.5, 0.35], [0.001, 0.5]], 9, null, cx, F, z1 - 1.5)); for (let k = 0; k < 6; k++) bag.add('roof_tile', box(x0 + 1.0, F + k * 0.07, z1 - 1.2, x0 + 2.4, F + k * 0.07 + 0.06, z1 - 0.7));
+    bag.add('lacquer_red', box(cx - 0.4, F, z0 + 3.0, cx + 0.4, F + 0.7, z0 + 4.4)); col.rect([cx - 0.4, z0 + 3.0, cx + 0.4, z0 + 4.4], F, F + 0.7);
+    lights?.push({ at: [cx, F + 2.2, cz0(z0, z1)], color: '#ffd9a0', intensity: 1.2, distance: 7 });
+  } else if (kind === 'smith') {
+    bag.add('wood_dark', lathe([[0.001, 0], [0.3, 0], [0.26, 0.6], [0.001, 0.6]], 8, null, cx, F, z0 + 2.0)); bag.add('iron', box(cx - 0.25, F + 0.6, z0 + 1.9, cx + 0.25, F + 0.75, z0 + 2.1)); bag.add('iron', box(cx + 0.15, F + 0.66, z0 + 1.93, cx + 0.5, F + 0.72, z0 + 2.07)); col.circle(cx, z0 + 2.0, 0.34, F, F + 0.75);
+    bag.add('mudbrick', box(x1 - 2.2, F, z0 + 0.5, x1 - 0.5, F + 0.9, z0 + 1.7)); col.rect([x1 - 2.2, z0 + 0.5, x1 - 0.5, z0 + 1.7], F, F + 0.9); bag.add('flame', lathe([[0.2, 0], [0.1, 0.12], [0.001, 0.26]], 6, null, x1 - 1.35, F + 0.9, z0 + 1.1)); bag.add('hide_tan', box(x1 - 1.0, F + 0.4, z0 + 1.8, x1 - 0.6, F + 0.9, z0 + 2.6));
+    for (let k = 0; k < 6; k++) bag.add('iron', rod([x0 + 0.5, F + 1.8 - k * 0.0, z0 + 0.7 + k * 0.5], [x0 + 0.9, F + 1.3 + (k % 2) * 0.3, z0 + 0.7 + k * 0.5], 0.02, 4));
+    bag.add('timber', box(x0 + 0.4, F + 1.6, z0 + 0.5, x0 + 0.5, F + 1.9, z0 + 3.8));
+    bag.add('bark_dark', lathe([[0.9, 0], [0.6, 0.35], [0.001, 0.6]], 8, null, x0 + 1.6, F, z1 - 1.3)); bag.add('wood_dark', lathe([[0.001, 0], [0.4, 0], [0.45, 0.4], [0.4, 0.7], [0.001, 0.7]], 10, null, cx, F, z1 - 1.3)); bag.add('water', lathe([[0.36, 0], [0.001, 0]], 8, null, cx, F + 0.66, z1 - 1.3)); col.circle(cx, z1 - 1.3, 0.46, F, F + 0.7);
+    lights?.push({ at: [x1 - 1.4, F + 1.4, z0 + 1.2], color: '#ff9a4a', intensity: 1.6, distance: 7 });
+  } else if (kind === 'store') {
+    for (let k = 0; k < 8; k++) for (let h = 0; h < 3 - (k % 2); h++) bag.add('sacking', lathe([[0.001, 0], [0.3, 0.02], [0.34, 0.22], [0.26, 0.44], [0.001, 0.48]], 8, null, x0 + 1.0 + (k % 4) * 0.8, F + h * 0.4, z0 + 1.0 + Math.floor(k / 4) * 0.8)); col.rect([x0 + 0.6, z0 + 0.6, x0 + 4.2, z0 + 2.4], F, F + 1.2);
+    for (let k = 0; k < 4; k++) { bag.add(k % 2 ? 'lacquer_red' : 'paint_ochre', box(x1 - 2.0, F + k * 0.0, z0 + 0.8 + k * 1.1, x1 - 0.8, F + 0.7, z0 + 1.7 + k * 1.1)); bag.add('gilt_bronze', box(x1 - 2.02, F + 0.55, z0 + 0.8 + k * 1.1, x1 - 0.78, F + 0.6, z0 + 1.7 + k * 1.1)); col.rect([x1 - 2.0, z0 + 0.8 + k * 1.1, x1 - 0.8, z0 + 1.7 + k * 1.1], F, F + 0.7); if (z0 + 0.8 + (k + 1) * 1.1 > z1) break; }
+    for (let k = 0; k < 6; k++) for (let h = 0; h < 3; h++) bag.add(['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_green', 'cloth_white', 'cloth_maroon'][(k + h) % 6], box(x0 + 0.8 + k * 0.6, F + 1.1 + h * 0.3, z1 - 1.6, x0 + 1.3 + k * 0.6, F + 1.38 + h * 0.3, z1 - 0.6));
+    bag.add('timber', box(x0 + 0.7, F + 1.0, z1 - 1.7, x0 + 4.5, F + 1.05, z1 - 0.5)); bag.add('timber', box(x0 + 0.7, F, z1 - 1.7, x0 + 0.8, F + 1.0, z1 - 0.5)); bag.add('timber', box(x0 + 4.4, F, z1 - 1.7, x0 + 4.5, F + 1.0, z1 - 0.5)); col.rect([x0 + 0.7, z1 - 1.7, x0 + 4.5, z1 - 0.5], F, F + 2.0);
+    for (let k = 0; k < 4; k++) bag.add('pottery_dark', lathe([[0.001, 0], [0.3, 0.02], [0.4, 0.3], [0.3, 0.6], [0.2, 0.7], [0.001, 0.7]], 9, null, cx + 0.6 + k * 0.8, F, z0 + 1.0)); col.rect([cx + 0.2, z0 + 0.6, cx + 3.6, z0 + 1.4], F, F + 0.7);
+    lights?.push({ at: [cx, F + 2.4, (z0 + z1) / 2], color: '#ffd9a0', intensity: 1.0, distance: 7 });
+  }
+}
+const cz0 = (a, b) => (a + b) / 2;
 
 /**
  * great_hall: the Great Hall of Karakorum [stated: DAI: 38 × 38 m, rammed-earth podium in alternating layers, 64 granite column bases,

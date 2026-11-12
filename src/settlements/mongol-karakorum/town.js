@@ -4,9 +4,10 @@
 // (the walkers are in movers.js).
 import {
   RADIUS, WALL, WALL_TH, WALL_H, GATES, GATE_W, MAIN, CROSS, PALACE, HALL, HALL_RECT, TREE, GREAT_HALL, KILNS, FORGES, TEMPLES, TEMPLES_NW, WORKSHOPS, MOSQUES, CHURCH,
-  SECRETARIES, SHOPS, LOTS, CAMPS, PENS, OUTSIDE_WAGONS, COURT_GER, STORES, height, inBuilt, inTown, inPalace, onStreet,
+  SECRETARIES, SHOPS, shopRect, WELLS, LOTS, CAMPS, PENS, OUTSIDE_WAGONS, COURT_GER, STORES, height, inBuilt, inTown, inPalace, onStreet,
 } from './layout.js';
 import { campElements } from './camp.js';
+import { frontFrame } from '../../styles/mongol/local.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 'n' }, elements });
@@ -28,12 +29,12 @@ function fabric() {
   for (const [i, q] of SECRETARIES.entries()) E.push({ t: 'mud_compound', rect: q, gate: i ? 'n' : 's', seed: 77 + i, floors: 2, dome: true });
   for (const [i, q] of MOSQUES.entries()) E.push({ t: 'mosque', rect: q, seed: i });
   E.push({ t: 'church', rect: CHURCH });
-  for (const s of SHOPS) E.push({ t: 'shop_row', a: s.a, n: s.n, face: s.face, seed: s.seed });
+  for (const s of SHOPS) E.push({ t: 'shop_row', a: s.a, n: s.n, face: s.face, seed: s.seed, d: s.d });
   // the Cathayan quarter: the Great Hall, the idol temples, workshops with kilns and forges
   E.push({ t: 'great_hall', c: GREAT_HALL.c, y: GREAT_HALL.y });
   for (const q of TEMPLES) E.push({ t: 'tile_hall', rect: q, y: 0.7, nx: 3, H: 4.4, kind: 'xieshan', mat: r() < 0.5 ? 'tile_grey' : 'tile_green', altar: 'buddha' });
   for (const q of TEMPLES_NW) E.push({ t: 'tile_hall', rect: q, y: 0.7, nx: 3, H: 4.4, kind: 'xieshan', mat: 'tile_grey', altar: 'buddha' });
-  for (const q of WORKSHOPS) E.push({ t: 'tile_hall', rect: q, y: 0.5, nx: 3, H: 3.8, kind: 'gable', mat: 'tile_grey', wallMat: 'brick_grey', altar: null });
+  WORKSHOPS.forEach((q, i) => E.push({ t: 'tile_hall', rect: q, y: 0.5, nx: 3, H: 3.8, kind: 'gable', mat: 'tile_grey', wallMat: 'brick_grey', altar: null, furnish: i % 3 === 2 ? 'smith' : 'potter', seed: 100 + i }));
   KILNS.forEach(([x, z], i) => E.push({ t: 'kiln', at: [x, z], r: 2.0 + (i % 2) * 0.25, yaw: i * 1.3 }));
   for (const q of FORGES) E.push({ t: 'forge', rect: q });
   [[100, 28, 106, 31], [124, 28, 130, 31], [116, 42, 122, 45], [60, 82, 66, 85]].forEach((q) => E.push({ t: 'tile_stack', rect: q, rows: 5 }));
@@ -41,11 +42,14 @@ function fabric() {
   const ger = (c, rad, o = {}) => E.push({ t: 'ger', c, r: rad, y: 0, seed: Math.floor(r() * 1e6), door: Math.PI / 2, ...o });
   for (const l of LOTS) if (l.kind === 'open') {
     const [x0, z0, x1, z1] = l.rect, n = r() < 0.5 ? 1 : 2;
-    for (let k = 0; k < n; k++) ger([x0 + 4.2 + k * 7.4, (z0 + z1) / 2 + (r() - 0.5) * 2], 2.7 + r() * 0.5, { cart: r() < 0.2, rich: r() < 0.3, door: l.gate === 'n' ? -Math.PI / 2 + 0 : Math.PI / 2 });
+    for (let k = 0; k < n; k++) {
+      const gr = 3.0 + r() * 0.5, cart = r() < 0.15;
+      ger([x0 + 4.2 + k * 7.4, (z0 + z1) / 2 + (r() - 0.5) * 2], gr, { cart, open: !cart && k === 0 && r() < 0.6, rich: r() < 0.3, door: l.gate === 'n' ? -Math.PI / 2 : Math.PI / 2 });
+    }
   }
-  for (const [x, z] of [[-110, -90], [-100, -82], [-76, -88]]) ger([x, z], 3.0 + r() * 0.5, { rich: true });
+  for (const [x, z] of [[-110, -90], [-100, -82], [-76, -88]]) ger([x, z], 3.2 + r() * 0.5, { rich: true, open: x === -100 });
   // the court's second camp outside the south wall
-  E.push(...campElements(CAMPS.se, 4242, -1, 8).E);
+  E.push(...campElements(CAMPS.se, 4242, -1, 8, [1, 2, 4, 6]).E);
   // the pens at the gates' markets: horses north, sheep and goats west
   for (const q of PENS.n) E.push({ t: 'pen', rect: q, y: height((q[0] + q[2]) / 2, (q[1] + q[3]) / 2), gate: 's' });
   for (const q of PENS.w) E.push({ t: 'pen', rect: q, y: height((q[0] + q[2]) / 2, (q[1] + q[3]) / 2), gate: 'e' });
@@ -93,23 +97,74 @@ export async function town() {
   for (let k = 0; k < 4; k++) E_animal(T, 'horse', [92 + k * 1.6, -14 + (k % 2) * 0.5], 0, 1.57 + (rand() - 0.5) * 0.3, seed());
   for (let k = 0; k < 2; k++) mongol([91 + k * 3.2, -12.2], 0, face([91, -12], [92, -14]), { pose: 'talk' });
 
-  // ── the main street: bazaar, sellers behind counters, buyers, stalls ──
-  for (const s of SHOPS) {
-    const f = s.face === 's' ? 1 : -1;
-    for (let i = 0; i < s.n; i++) {
-      if (rand() < 0.22) continue;
-      const x = s.a[0] + (i + 0.5) * 3.6 + 0.2, z = (s.face === 's' ? s.a[1] + 4.4 : s.a[1]) - f * 1.25;
-      const w = rand();
-      const o = { pose: 'stand' };
-      if (s.east) cathay([x, z], 0, f > 0 ? 0 : Math.PI, o); else if (w < 0.7) saracen([x, z], 0, f > 0 ? 0 : Math.PI, o); else mongol([x, z], 0, f > 0 ? 0 : Math.PI, o);
-      if (rand() < 0.35) { const bz = z + f * 3.3; (rand() < 0.5 ? mongol : saracen)([x + (rand() - 0.5), bz], 0, f > 0 ? Math.PI : 0, { pose: 'talk' }); }
+  // ── the palace court, crowded as a court is on a feast day: envoys and courtiers in knots, retainers with their horses, cooks at the kitchens, carts of wine and meat at the storehouses ──
+  { const clear = (x, z) => !(x > 60 && x < 80 && z < -4) && Math.hypot(x - COURT_GER.c[0], z - COURT_GER.c[1]) > 6.4 && Math.hypot(x - 36, z + 26) > 5.2 && Math.hypot(x - 51, z + 18) > 3 && Math.hypot(x - 58, z + 22) > 1.5 && Math.hypot(x - 82, z + 22) > 1.5;
+    let n = 0;
+    for (let k = 0; k < 400 && n < 26; k++) {
+      const x = 18 + rand() * 106, z = -38 + rand() * 25;
+      if (!clear(x, z)) continue;
+      n++;
+      const w = rand(), pos = [x, z], pose = rand() < 0.6 ? 'talk' : 'stand', toward = rot_(rand);
+      if (w < 0.34) mongol(pos, 0, toward, { pose }); else if (w < 0.5) mwoman(pos, 0, toward, { pose });
+      else if (w < 0.66) saracen(pos, 0, toward, { pose }); else if (w < 0.78) cathay(pos, 0, toward, { pose });
+      else if (w < 0.88) monk(pos, 0, toward, { pose });
+      else fig(pos, 0, toward, { dress: 'robe', cloth: pick([col.grey, col.brown, col.black]), cloth2: col.white, over: 'belt', hat: 'none', hair: 'short', beard: true, feet: 'shod', skin: 'skin_light', pose });
+      if (pose === 'talk') mongol([x + 1.1 * Math.cos(toward), z - 1.1 * Math.sin(toward)], 0, toward + Math.PI, { pose: 'talk' });
     }
+    // the horses of the visitors tethered along the west wall, and a camel
+    for (let k = 0; k < 6; k++) E_animal(T, 'horse', [20 + k * 2.2, -35.5 + (k % 2) * 0.4], 0, 1.57 + (rand() - 0.5) * 0.4, seed());
+    E_animal(T, 'camel', [38, -14], 0, 0.4, seed()); E_animal(T, 'camel', [41, -13.4], 0, 0.6, seed());
+    T.push({ t: 'trough', at: [28, -33], y: 0, rot: 0, seed: seed() });
+    // the wine and mare's-milk carts (barrels on two wheels with their oxen) and the stacks at the storehouses
+    T.push({ t: 'cart', at: [92, -33], y: 0, rot: 1.3, seed: seed(), kind: 'two', load: 'barrels', beast: 'ox' }); T.push({ t: 'cart', at: [50, -34], y: 0, rot: 1.8, seed: seed(), kind: 'two', load: 'barrels', beast: 'ox' });
+    mongol([88, -31.4], 0, 1.4, { carry: 'sack', cloth: col.maroon });
+    for (const q of STORES.slice(2)) { const cx = (q[0] + q[2]) / 2; T.push({ t: 'sacks', at: [cx + 3.2, q[3] + 3.4], y: 0, rot: 0.3, seed: seed(), n: 5 }); T.push({ t: 'crates', at: [cx - 3.4, q[3] + 3.4], y: 0, rot: 0, seed: seed(), n: 3 }); T.push({ t: 'barrel', at: [cx - 1, q[3] + 3.6], y: 0, rot: 0, seed: seed(), n: 3 }); cathay([cx + 1.2, q[3] + 3.2], 0, 1.0, { carry: 'sack' }); }
+    for (const q of STORES.slice(0, 2)) { const cx = (q[0] + q[2]) / 2; T.push({ t: 'sacks', at: [cx + 4.2, q[3] + 3.2], y: 0, rot: 0.1, seed: seed(), n: 6 }); T.push({ t: 'barrel', at: [cx - 4.0, q[3] + 3.2], y: 0, rot: 0, seed: seed(), n: 4 }); mongol([cx + 0.6, q[3] + 3.4], 0, 0.1, { carry: 'sack' }); }
+    // the kitchens by the west stores: cauldron fires, a butcher's block with a sheep, firewood, cooks in aprons
+    for (const [x, z] of [[40, -72], [40, -62], [40, -50]]) { T.push({ t: 'pot', at: [x, z], y: 0, rot: 0, seed: seed(), kind: 'vat', n: 2 }); T.push({ t: 'firewood', at: [x + 2.4, z], y: 0, rot: 0, seed: seed() }); cathay([x - 1.4, z + 0.4], 0, 1.2, { cloth: col.brown, over: 'apron', carry: 'pot' }); }
+    for (const [x, z] of [[40, -77], [38, -57]]) { E_animal(T, 'sheep', [x, z], 0, rand() * 6, seed()); mongol([x + 1.6, z + 0.6], 0, 2.4, { cloth: col.brown, over: 'apron' }); }
+    // the cellar's mouth and the wine-carriers
+    for (let k = 0; k < 2; k++) mongol([94 + k * 1.2, -85], 0, 3.1, { carry: 'pot' });
+    T.push({ t: 'barrel', at: [97, -86.5], y: 0, rot: 0, seed: seed(), n: 6 });
   }
-  for (let x = -120; x < -10; x += 17 + rand() * 6) {
-    const z = rand() < 0.5 ? -5.7 : 5.7;
-    T.push({ t: 'stall', at: [x, z], y: 0, rot: z < 0 ? 0 : Math.PI, seed: seed(), awning: pick(['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_white']), goods: [pick(['basket', 'cloth', 'produce'])] });
-    saracen([x, z + (z < 0 ? -1.3 : 1.3)], 0, z < 0 ? 0 : Math.PI, {});
+  // ── the streets: every bay has its seller inside, buyers at the apron, and its goods out at the front ──
+  const goodsOf = { cloth: ['bolts', 'baskets'], carpet: ['bolts'], saddler: ['baskets'], spice: ['spice', 'heap'], pots: ['pottery'], metal: ['pottery'], food: ['bread', 'greens', 'melons'], wine: ['baskets'] };
+  for (const s of SHOPS) {
+    const F = frontFrame(shopRect(s), s.face), Pf = (u, v) => [F.O[0] + F.U[0] * u + F.V[0] * v, F.O[1] + F.U[1] * u + F.V[1] * v];
+    const out = Math.atan2(F.V[0], F.V[1]), faceOut = Math.atan2(-F.V[0], -F.V[1]), faceIn = Math.atan2(F.V[0], F.V[1]);
+    for (let i = 0; i < s.n; i++) {
+      const um = (i + 0.5) * 3.6, r = rand();
+      // the seller in his bay (a woman at the food shops, a Chinese craftsman in the east)
+      if (r > 0.12) { const sp = Pf(um + (rand() < 0.5 ? 0.9 : -0.9), -1.5); const sell = s.east ? cathay : rand() < 0.72 ? saracen : mongol; sell(sp, 0, faceOut, { pose: 'stand' }); }
+      if (rand() < 0.4) { const bp = Pf(um + (rand() - 0.5) * 1.2, 2.7); (s.east ? cathay : rand() < 0.5 ? mongol : saracen)(bp, 0, faceIn, { pose: rand() < 0.5 ? 'talk' : 'stand' }); }
+      // the goods out at the front: on a mat with a seller, crates, barrels, a bench with a stool, a cart, pots, firewood, chickens
+      const k = Math.floor(rand() * 9), at = Pf(um + (rand() - 0.5) * 1.0, 3.3 + rand() * 0.4);
+      if (k === 0) T.push({ t: 'goods_mat', at, y: 0, rot: out, seed: seed(), goods: goodsOf[['cloth', 'carpet', 'saddler', 'spice', 'pots', 'metal', 'food', 'wine'][Math.floor(rand() * 8)]] });
+      else if (k === 1) T.push({ t: 'crates', at, y: 0, rot: out, seed: seed(), n: 3 });
+      else if (k === 2) T.push({ t: 'barrel', at, y: 0, rot: out, seed: seed(), n: 2 });
+      else if (k === 3) { T.push({ t: 'bench', at, y: 0, rot: out + Math.PI / 2, seed: seed(), len: 1.6 }); T.push({ t: 'stool', at: Pf(um + 1.4, 3.3), y: 0, rot: out, seed: seed() }); }
+      else if (k === 4) T.push({ t: 'pot', at, y: 0, rot: out, seed: seed(), kind: pick(['amphora', 'pithos', 'water_pot', 'glazed_jar', 'blue_jar']), n: 3 });
+      else if (k === 5) T.push({ t: 'firewood', at, y: 0, rot: out + Math.PI / 2, seed: seed() });
+      else if (k === 6) T.push({ t: 'chickens', at, y: 0, rot: rand() * 6, seed: seed(), n: 4 });
+      else if (k === 7) T.push({ t: 'sacks', at, y: 0, rot: out, seed: seed(), n: 4 });
+      else T.push({ t: 'basket', at, y: 0, rot: out, seed: seed(), n: 3 });
+    }
+    // at the row's ends: a ladder against the wall, a water jar under the eave, a heap of dung for the oven
+    const e0 = Pf(-0.7, 1.0); T.push({ t: 'ladder', at: e0, y: 0, rot: out + Math.PI / 2, seed: seed(), len: 3.4 });
+    T.push({ t: 'pot', at: Pf(s.n * 3.6 + 0.8, 0.9), y: 0, rot: out, seed: seed(), kind: 'water_pot', n: 2 });
   }
+  // along the main street's margins (the strip between the awnings and the paving): stalls under cloth, camels and horses at rest, water troughs, carts
+  for (let x = -128; x < 128; x += 11 + rand() * 7) {
+    const side = rand() < 0.5 ? -1 : 1, z = side * (4.9 + rand() * 0.5);
+    if (Math.abs(x) < 6) continue;
+    const kind = rand();
+    if (kind < 0.4) { T.push({ t: 'stall', at: [x, z], y: 0, rot: side < 0 ? 0 : Math.PI, seed: seed(), awning: pick(['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_white']), goods: [pick(['basket', 'cloth', 'produce'])] }); saracen([x, z + side * -1.3 * -1], 0, side < 0 ? 0 : Math.PI, {}); }
+    else if (kind < 0.6) { T.push({ t: 'trough', at: [x, z], y: 0, rot: 0, seed: seed() }); E_animal(T, rand() < 0.6 ? 'horse' : 'camel', [x + 1.8, z + side * 0.4], 0, 1.57 + rand() * 0.4, seed()); }
+    else if (kind < 0.8) { T.push({ t: 'cart', at: [x, z], y: 0, rot: 1.57, seed: seed(), kind: 'two', load: pick(['sacks', 'barrels', 'hay']) }); mongol([x + 2.4, z], 0, 1.4, { pose: 'talk' }); }
+    else { T.push({ t: 'handcart', at: [x, z], y: 0, rot: rand() * 6, seed: seed(), load: 'baskets' }); cathay([x + 1.6, z], 0, 0.8, { carry: 'basket' }); }
+  }
+  // the cross-street's wells and lanes' ends
+  for (let z = -90; z < 90; z += 14 + rand() * 8) if (Math.abs(z) > 14) { T.push({ t: 'barrel', at: [side_(rand) * 3.2, z], y: 0, rot: 0, seed: seed(), n: 2 }); }
   // ── the Cathayan quarter's people: smiths at the forges, kiln tenders, monks at the temples ──
   for (const q of FORGES) { const cx = (q[0] + q[2]) / 2; cathay([cx + 0.5, q[3] - 1.5], 0, 0.6, { pose: 'stand', cloth: col.brown, over: 'apron' }); cathay([q[0] + 2.2, q[1] + 1.6], 0, -0.7, { cloth: col.grey, over: 'apron' }); }
   for (const [x, z] of KILNS) cathay([x + 3.4, z + 0.6], 0, 1.4, { carry: 'basket' });
@@ -139,6 +194,21 @@ export async function town() {
       if (rand() < 0.6) E_animal(T, 'horse', [g.c[0] + g.r + 3.4, g.c[1] + g.r * 0.4], 0, 1.57, seed());
     }
   }
+  // ── the ger yards: dung cakes stacked for the fire, the churn with its stick, meat drying on a rack, a cart, a heap of hay, washing on a line, hobbled horses ──
+  const yard = (gx, gz, gr, k) => {
+    const a = k * 2.1;
+    T.push({ t: 'firewood', at: [gx - gr - 1.4, gz + 0.8], y: height(gx, gz), rot: 1.57, seed: seed() });
+    T.push({ t: 'barrel', at: [gx + gr + 0.7, gz + gr * 0.5 + 0.2], y: height(gx, gz), rot: 0, seed: seed(), n: 1 });
+    if (k % 2 === 0) T.push({ t: 'drying_tray', at: [gx - gr * 0.5, gz + gr + 2.2], y: height(gx, gz), rot: a, seed: seed(), h: 1.2 });
+    if (k % 3 === 1) T.push({ t: 'haystack', at: [gx + gr + 3.2, gz - 1.0], y: height(gx, gz), rot: 0, seed: seed() });
+    if (k % 3 === 2) T.push({ t: 'laundry', at: [gx - gr - 3.2, gz + gr + 1.2], y: height(gx, gz), rot: 1.57, seed: seed(), len: 3.4 });
+    if (k % 4 === 0) T.push({ t: 'cart', at: [gx + gr + 4.6, gz + 2.2], y: height(gx, gz), rot: 1.2 + a * 0.05, seed: seed(), kind: 'two', load: 'hay' });
+    if (k % 4 === 3) T.push({ t: 'sacks', at: [gx - gr - 1.8, gz - gr * 0.5], y: height(gx, gz), rot: 0.4, seed: seed(), n: 3 });
+  };
+  open.forEach((l, i) => { const [x0, z0, , z1] = l.rect; yard(x0 + 4.2, (z0 + z1) / 2, 3.0, i); });
+  for (const [i, c] of [CAMPS.sw, CAMPS.se].entries()) campElements(c, i ? 4242 : 1254, -1, i ? 8 : 9).G.forEach((g, k) => yard(g.c[0], g.c[1], g.r, k));
+  // lone herd-boys, a woman milking mares at the horse lines, tethers
+  for (const c of [CAMPS.sw, CAMPS.se]) { mwoman([c[0] + 28, c[1] - 6], height(c[0], c[1]), 1.0, { pose: 'kneel' }); for (let k = 0; k < 4; k++) E_animal(T, 'horse', [c[0] + 30 + (k % 2) * 1.6, c[1] - 4 + k * 1.6], height(c[0], c[1]), 1.57, seed()); }
   // ── the markets at the gates [stated: Rubruck]: horses at the north, sheep and goats at the west, oxen and carts at the south, grain at the east ──
   for (const q of PENS.n) for (let k = 0; k < 6; k++) E_animal(T, 'horse', [q[0] + 2 + rand() * (q[2] - q[0] - 4), q[1] + 2 + rand() * (q[3] - q[1] - 4)], height(q[0], q[1]), rand() * 6.28, seed());
   for (const q of PENS.w) for (let k = 0; k < 9; k++) E_animal(T, rand() < 0.55 ? 'sheep' : 'goat', [q[0] + 1.5 + rand() * (q[2] - q[0] - 3), q[1] + 1.5 + rand() * (q[3] - q[1] - 3)], height(q[0], q[1]), rand() * 6.28, seed());
@@ -151,9 +221,11 @@ export async function town() {
   for (let k = 0; k < 3; k++) E_animal(T, 'camel', [-118 + k * 2.4, -4.6 + k * 0.1], 0, 1.57, seed());
   saracen([-150, 38.5], height(-150, 38), 0.2, { pose: 'talk', cloth: col.indigo }); saracen([-152, 37.5], height(-150, 38), 3.4, { pose: 'talk', cloth: col.white });
   // wells in the quarters
-  for (const [x, z] of [[-70, 12], [-20, -40], [30, 40], [-100, -45]]) T.push({ t: 'well', at: [x, z], y: 0, rot: 0, seed: seed() });
+  for (const [x, z] of WELLS) T.push({ t: 'well', at: [x, z], y: 0, rot: 0, seed: seed() });
   void WALL; void MAIN; void CROSS; void PALACE; void STORES; void inBuilt; void inTown; void inPalace; void onStreet; void GATES;
   void rand;
   return [base('karakorum-town', 'mongol', fabric()), base('karakorum-people', 'life', [...P, ...T])];
 }
+const rot_ = (rand) => rand() * Math.PI * 2;
+const side_ = (rand) => (rand() < 0.5 ? -1 : 1);
 function E_animal(T, kind, at, y, rot, seed) { T.push({ t: 'animal', kind, at, y, rot, seed }); }

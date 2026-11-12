@@ -16,5 +16,11 @@ for (const [x, z] of [[-90, -97], [-30, -97], [40, -97], [100, -97], [-132, -40]
 for (const [x, z] of [[30, -92], [90, -92], [126, -50]]) perches.push({ kind: 'sparrow', x, z, y: 4.4, rot: 1, range: [1.6, 0.3], alert: 5 });
 for (const [x, z] of [[-49, -80], [-100, 32]]) perches.push({ kind: 'sparrow', x, z, y: 3.5, rot: 0.4, range: [1.2, 1.2], alert: 7 });
 for (const [x, z] of [[-62, 128], [66, 126]]) perches.push({ kind: 'sparrow', x: x + 8, z: z + 4, y: ground.height(x + 8, z + 4), rot: 2, range: [3, 2], alert: 10 });
-void WALL; void PALACE; void MOSQUES;
+// sparrows hopping on the paving of the main street and the cross-street among the stalls, and on the flat roofs of the shop rows and houses
+for (let x = -120; x < 125; x += 21) perches.push({ kind: 'sparrow', x, z: (Math.round(x / 21) % 2 ? 1 : -1) * 4.6, y: 0.02, rot: 0, range: [1.8, 0.6], alert: 4.5 });
+for (let z = -88; z < 90; z += 22) if (Math.abs(z) > 12) perches.push({ kind: 'sparrow', x: (Math.round(z / 22) % 2 ? 1 : -1) * 3.0, z, y: 0.02, rot: 1.57, range: [0.6, 1.8], alert: 4.5 });
+for (const [x, z] of [[-100, -9.4], [-60, -9.4], [-30, 10], [30, 10], [60, 10], [-7.4, -40], [7.4, -70], [7.4, 40], [-7.4, 70]]) perches.push({ kind: 'sparrow', x, z, y: 3.5 + 0.9, rot: 0.3, range: [1.6, 0.4], alert: 6 });
+for (const m of MOSQUES) perches.push({ kind: 'sparrow', x: (m[0] + m[2]) / 2, z: m[1] + 8, y: 6.5, rot: 0.2, range: [2.2, 0.6], alert: 7 });
+flights.push({ kind: 'swallow', n: 5, lane: { a: [-130, 0], b: [130, 0] }, y: [2, 6], speed: 9 }, { kind: 'swallow', n: 4, loop: { c: [-70, 30], a: [40, 20], rot: 0.3 }, y: [3, 9], speed: 9 }, { kind: 'crow', n: 5, loop: { c: [60, -50], a: [50, 40], rot: 0.2 }, y: [12, 30], speed: 8 }, { kind: 'crow', n: 4, loop: { c: [-80, 60], a: [50, 30], rot: 1.1 }, y: [10, 26], speed: 8 });
+void WALL; void PALACE;
 export default { fish, flights, perches };

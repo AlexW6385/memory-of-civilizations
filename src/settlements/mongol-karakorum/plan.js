@@ -21,9 +21,13 @@ E.push({ t: 'ger', c: COURT_CART.c, r: COURT_CART.r, cart: true, rich: true, see
 for (const at of BANNERS) E.push({ t: 'tug', at, h: 7.5 });
 E.push({ t: 'tortoise', at: TORTOISE, yaw: 0.4 });
 // the storehouses (provisions and treasure "in great barns" [stated: Rubruck via UW]) and, on the west, the kitchens and the cellar of the drinks
-STORES.forEach((r, i) => E.push({ t: 'tile_hall', rect: r, y: 0.6, nx: 3, H: 4.0, kind: i < 2 ? 'gable' : 'hip', mat: 'tile_grey', wallMat: 'brick_grey', altar: null }));
+STORES.forEach((r, i) => E.push({ t: 'tile_hall', rect: r, y: 0.6, nx: 3, H: 4.0, kind: i < 2 ? 'gable' : 'hip', mat: 'tile_grey', wallMat: 'brick_grey', altar: null, furnish: 'store', seed: 200 + i }));
 // the cellar's mouth: a low brick vault set into the ground north of the hall, from which the drink is carried
-E.push({ t: 'tile_stack', rect: [96, -90, 100, -88], y: 0, rows: 3 });
+E.push({ t: 'cellar', at: [95, -86] });
+// the flagged way from the gate to the hall's steps, hitching rails for the visitors' horses along the west court, store sheds against the east wall
+E.push({ t: 'court_path', rect: [66, -37, 74, -11], y: 0.01 });
+E.push({ t: 'hitch', a: [18, -34.6], b: [40, -34.6] }, { t: 'hitch', a: [98, -37], b: [110, -37] });
+E.push({ t: 'shed', rect: [88, -60, 98, -54] }, { t: 'shed', rect: [88, -70, 98, -64] });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const F = HALL.y + 0.04;
@@ -32,7 +36,7 @@ const rooms = [
   room('khan-ger', [COURT_GER.c[0] - COURT_GER.r + 0.3, COURT_GER.c[1] - COURT_GER.r + 0.3, COURT_GER.c[0] + COURT_GER.r - 0.3, COURT_GER.c[1] + COURT_GER.r - 0.3], 0, 'hall'),
   room('court', PALACE, 0, 'open'),
 ];
-const walks = [[[70, -4], [70, -18], [70, -38], [70, -43], [76, -60], [70, -70]], [[104, -18], [104, -24]]];
+const walks = [[[70, -4], [70, -18], [70, -38], [70, -43], [75.5, -46], [76, -60], [73, -64], [73, -71]], [[104, -18], [104, -21.6]]];
 walks[0].y0 = 0; walks[1].y0 = 0;
 
 export const palace = {

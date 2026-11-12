@@ -13,7 +13,7 @@ const FELT = 'cloth_white', LAT = 'lattice', WOOD = 'timber', DOOR = 'lacquer_re
 export function ger(el, { bag, col, lights }) {
   const [cx, cz0] = el.c, r = el.r ?? 3.2, y = el.y ?? 0, rand = rng(el.seed || 7), open = !!el.open, cart = !!el.cart;
   const da = el.door ?? Math.PI / 2, cz = cz0;
-  const wh = open ? 1.8 : (r > 3.6 ? 1.6 : 1.4), rise = r * 0.3 + 0.5, ringR = 0.62, dw = open ? 1.15 : 0.95, dh = open ? 1.72 : wh - 0.1;
+  const wh = open ? 2.05 : (r > 3.6 ? 1.6 : 1.4), rise = r * 0.3 + 0.5, ringR = 0.62, dw = open ? 1.15 : 0.95, dh = open ? 1.9 : wh - 0.1;
   const Y = cart ? y + 1.32 : y;
   const N = Math.max(20, Math.round(r * 7));
   const inDoor = (am, a0, a1) => angDist(am, da) < (dw / 2) / r + 0.5 * (TAU / N) * 0.9;
@@ -26,7 +26,7 @@ export function ger(el, { bag, col, lights }) {
   const post = (u) => { const p = P(u, 0); bag.add(WOOD, obox([p[0] - dx * 0.1, p[1] - dz * 0.1], [p[0] + dx * 0.12, p[1] + dz * 0.12], 0.1, Y, Y + dh)); };
   post(-dw / 2 - 0.05); post(dw / 2 + 0.05);
   { const a = P(-dw / 2 - 0.1, -0.1), b = P(dw / 2 + 0.1, -0.1), a2 = P(-dw / 2 - 0.1, 0.12), b2 = P(dw / 2 + 0.1, 0.12); bag.add(DOOR, obox([(a[0] + a2[0]) / 2, (a[1] + a2[1]) / 2], [(b[0] + b2[0]) / 2, (b[1] + b2[1]) / 2], 0.22, Y + dh, Y + dh + 0.14)); }
-  { const a = P(-dw / 2 - 0.14, 0.2), b = P(dw / 2 + 0.14, 0.2); bag.add('cloth_ochre', obox(a, b, 0.07, Y + dh + 0.18, Y + wh - 0.05)); const a1 = P(-dw / 2 - 0.14, 0.245), b1 = P(dw / 2 + 0.14, 0.245); bag.add('cloth_red', obox(a1, b1, 0.012, Y + dh + 0.24, Y + dh + 0.3)); }
+  { const a = P(-dw / 2 - 0.14, 0.2), b = P(dw / 2 + 0.14, 0.2); bag.add('cloth_ochre', obox(a, b, 0.07, Y + dh + 0.14, Y + Math.max(wh - 0.05, dh + 0.3))); const a1 = P(-dw / 2 - 0.14, 0.245), b1 = P(dw / 2 + 0.14, 0.245); bag.add('cloth_red', obox(a1, b1, 0.012, Y + dh + 0.24, Y + dh + 0.3)); }
   if (open) {
     const hinge = P(dw / 2 + 0.08, 0.14), tip = P(dw / 2 + 0.08 + tx * 0.01 + dx * 0.0, 0.14 + 0.0);
     const lf = [hinge[0] + dx * dw * 0.92, hinge[1] + dz * dw * 0.92];
@@ -36,7 +36,7 @@ export function ger(el, { bag, col, lights }) {
   // the roof: felt outside over the roof poles, the crown ring open to the sky
   const top = Y + wh + rise;
   bag.add(FELT, lathe([[r + 0.14, Y + wh - 0.1], [r * 0.7, Y + wh + rise * 0.4], [r * 0.35, Y + wh + rise * 0.78], [ringR + 0.1, top - 0.02]], 28, null, cx, 0, cz));
-  bag.add('linen', lathe([[ringR + 0.02, top - 0.1], [r * 0.35, Y + wh + rise * 0.78 - 0.08], [r * 0.7, Y + wh + rise * 0.4 - 0.08], [r - 0.06, Y + wh - 0.04]], 28, null, cx, 0, cz));
+  bag.add('linen', lathe([[ringR + 0.02, top - 0.1], [r * 0.35, Y + wh + rise * 0.78 - 0.08], [r * 0.7, Y + wh + rise * 0.4 - 0.08], [r - 0.06, Y + wh - 0.04], [r + 0.16, Y + wh - 0.28]], 28, null, cx, 0, cz));
   // the crown ring and its crossed arches
   bag.add(WOOD, lathe([[ringR + 0.12, top - 0.14], [ringR + 0.12, top + 0.06], [ringR - 0.04, top + 0.06], [ringR - 0.04, top - 0.14], [ringR + 0.12, top - 0.14]], 20, null, cx, 0, cz));
   for (const a of [0.4, 0.4 + Math.PI / 2]) bag.add(WOOD, rod([cx + Math.cos(a) * ringR, top - 0.04, cz + Math.sin(a) * ringR], [cx - Math.cos(a) * ringR, top - 0.04, cz - Math.sin(a) * ringR], 0.035, 5));

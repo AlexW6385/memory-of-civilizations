@@ -1,6 +1,6 @@
 // Karakorum — the ground (docs/settlements/mongol-karakorum.md §7): the broad floor of the Orkhon valley, short steppe grass on gravelly soil, the street dust of the town,
 // millet fields outside the east gate; willows and poplars at the wells; a continental sky, dry and windy.
-import { RADIUS, WALL, GATES, CAMPS, MAIN, CROSS, inTown, inBuilt, inPalace, height, smooth as sm, inRect, PALACE, GREAT_RECT } from './layout.js';
+import { RADIUS, WALL, GATES, CAMPS, MAIN, CROSS, inTown, inBuilt, inPalace, height, smooth as sm, inRect, PALACE, GREAT_RECT, WELLS, COURTS } from './layout.js';
 
 function cover(x, z) {
   const c = { sand: 0.25, grass: 0.35, rock: 0.05, soil: 0.45, fields: 0, dry: 0.75, warmth: 0.6, red: 0.1, road: 0, snow: 0, forest: 0 };
@@ -17,12 +17,21 @@ function cover(x, z) {
 }
 function planting(x, z) {
   const r = Math.hypot(x, z);
-  if (r > RADIUS - 6 || inTown(x, z, -1) || inBuilt(x, z, 2) || (x > WALL[2] && x < WALL[2] + 8 && Math.abs(z) < 14) || Math.abs(x) < 10 && r < 140) return null;
+  if (r > RADIUS - 6) return null;
+  // inside the town: a poplar or two and dry grass in the courts of the houses (clear of the gate's way and the walls), willows round the wells
+  if (inTown(x, z, -1)) {
+    for (const [wx, wz] of WELLS) { const d = Math.hypot(x - wx, z - wz); if (d > 2.2 && d < 5.2) return { willow: 1.6, grass_dry: 4 }; }
+    for (const c of COURTS) if (inRect(c.rect, x, z) && Math.abs((x - c.gu)) > 2.6) return { poplar: 0.55, grass_dry: 2 };
+    if (inRect([14, -36, 46, -14], x, z)) return { poplar: 0.3, grass_dry: 3 };      // the palace's western court
+    return null;
+  }
+  if (inBuilt(x, z, 2) || (x > WALL[2] && x < WALL[2] + 8 && Math.abs(z) < 14) || Math.abs(x) < 10 && r < 140) return null;
   // the court's ger camps and the markets' pens are kept bare: no plants among the gers
   for (const c of [CAMPS.sw, CAMPS.se]) if (x > c[0] - 36 && x < c[0] + 36 && z > c[1] - 28 && z < c[1] + 32) return null;
-  if (z > 104 && z < 150 && Math.abs(x) < 110) return { grass_dry: 14 };
+  if (z > 104 && z < 150 && Math.abs(x) < 110) return { grass_dry: 14, halfa: 1.5 };
   if (x > WALL[2] + 6 && Math.abs(z) < 70) return { wheat: 20, grass_dry: 6 };
-  return { grass_dry: 18, maquis: 0.25, grass: 8 };
+  // the steppe: short dry grass, tufts of feather grass (halfa stands in), a few low shrubs (tamarisk for the saxaul and sagebrush)
+  return { grass_dry: 18, halfa: 2.5, tamarisk: 0.12, grass: 8 };
 }
 export const ground = {
   height,
@@ -31,7 +40,7 @@ export const ground = {
   waterLevel: () => -Infinity,
   fromWater: () => 999,
   planting,
-  maxDensity: { maquis: 0.25 },
+  maxDensity: { poplar: 0.55, willow: 1.6, tamarisk: 0.12, halfa: 2.5, grass_dry: 18 },
   climate: {
     sun: { az: 160, el: 38, color: [1.0, 0.96, 0.88], intensity: 3.5, lat: 47.2, dec: 5, hour: 11 },
     sky: { turbidity: 1.8, rayleigh: 1.1, mie: 0.003, mieG: 0.8, zenith: [0.07, 0.15, 0.42], horizon: [0.62, 0.68, 0.76] },
