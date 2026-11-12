@@ -47,7 +47,7 @@ const faces = ([x0, z0, x1, z1], e = 0.04) => [[[x1, z0 - e], [x0, z0 - e]], [[x
  * earth), walk }: the faces curve — steep at the top, spreading at the foot (ōgi-no-kōbai).
  */
 function ishigaki(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, y0 = el.y0 ?? 0, y1 = el.y1, b = el.batter ?? (y1 - y0) * 0.3, N = Math.max(6, Math.min(16, Math.round((y1 - y0) / 0.95)));
+  const [x0, z0, x1, z1] = el.rect, y0 = el.y0 ?? 0, y1 = el.y1, b = el.batter ?? (y1 - y0) * 0.3, N = el.coursed ? Math.max(8, Math.min(26, Math.round((y1 - y0) / (el.course ?? 0.5)))) : Math.max(6, Math.min(16, Math.round((y1 - y0) / 0.95)));
   // `rect` is the top; the faces lean out by out(t) at height fraction t: vertical at the top,
   // spreading at the foot
   const out = (t) => b * (1 - t) * (1 - t);
@@ -55,8 +55,28 @@ function ishigaki(el, { bag, col }) {
     for (let k = 0; k < N; k++) {
       const t0 = k / N, t1 = (k + 1) / N, ya = y0 + (y1 - y0) * t0, yb = y0 + (y1 - y0) * t1, o = out(t0), d = o - out(t1);
       const r0 = [rx0 - (sd.w ? o : 0), rz0 - (sd.n ? o : 0), rx1 + (sd.e ? o : 0), rz1 + (sd.s ? o : 0)];
-      bag.add(el.mat ?? ST, frustum(r0, ya, yb, sd.w ? d : 0, sd.e ? d : 0, sd.n ? d : 0, sd.s ? d : 0));
+      // a coursed rampart alternates two tones of granite from course to course, so the courses read from far
+      bag.add(el.coursed && k % 3 === 1 ? 'granite_block' : el.mat ?? ST, frustum(r0, ya, yb, sd.w ? d : 0, sd.e ? d : 0, sd.n ? d : 0, sd.s ? d : 0));
       col.rect(r0, ya, yb);
+    }
+  };
+  /** coursed: dressed blocks standing a hand out of the curved face, a few in every course, the lighter and the darker (weathering) */
+  const relief = ([rx0, rz0, rx1, rz1], sd) => {
+    const r = rng(Math.round(rx0 * 7 + rz0 * 13) + 5), p = 0.07;
+    for (let k = 0; k < N; k++) {
+      const t0 = k / N, t1 = (k + 1) / N, ya = y0 + (y1 - y0) * t0 + 0.03, yb = y0 + (y1 - y0) * t1 - 0.03, tm = (t0 + t1) / 2, om = out(tm);
+      const lay = (len, face) => {
+        const n = Math.max(2, Math.round(len / 1.6));
+        for (let i = 0; i < n; i++) {
+          const w = 0.7 + r() * 0.9, u = 0.8 + r() * Math.max(0.1, len - w - 1.6), m = r() < 0.7 ? 'granite_grey' : 'granite_black';
+          if (r() < 0.45) continue;
+          face(u, w, m);
+        }
+      };
+      if (sd.n) lay(rx1 - rx0, (u, w, m) => bag.add(m, box(rx0 + u, ya, rz0 - om - p, rx0 + u + w, yb, rz0 - om + 0.02)));
+      if (sd.s) lay(rx1 - rx0, (u, w, m) => bag.add(m, box(rx0 + u, ya, rz1 + om - 0.02, rx0 + u + w, yb, rz1 + om + p)));
+      if (sd.w) lay(rz1 - rz0, (u, w, m) => !(el.door && ya < y0 + el.door.h + 0.4 && rz0 + u + w > el.door.at - el.door.w / 2 - 0.3 && rz0 + u < el.door.at + el.door.w / 2 + 0.3) && bag.add(m, box(rx0 - om - p, ya, rz0 + u, rx0 - om + 0.02, yb, rz0 + u + w)));
+      if (sd.e) lay(rz1 - rz0, (u, w, m) => bag.add(m, box(rx1 + om - 0.02, ya, rz0 + u, rx1 + om + p, yb, rz0 + u + w)));
     }
   };
   if (el.ring) {
@@ -73,11 +93,18 @@ function ishigaki(el, { bag, col }) {
       bag.add('wood_dark', box(x0 + w - 0.3, y0 + dr.h, dr.at - dr.w / 2 - 0.2, x0 + w, y0 + dr.h + 0.35, dr.at + dr.w / 2 + 0.2));
     } else band([x0, z0 + w, x0 + w, z1 - w], { w: 1 });
     band([x1 - w, z0 + w, x1, z1 - w], { e: 1 });
+    if (el.coursed) {
+      relief([x0, z0, x1, z1], { n: 1, s: 1, e: 1, w: 1 });
+      quoins([x0, z0, x1, z1], { n: 1, s: 1, e: 1, w: 1 }, y0, y1, out, N, bag);
+      // the coping: a course of long granite slabs round the top, standing a hand out
+      for (const [a, c2] of [[[x0 - 0.15, z0 - 0.15, x1 + 0.15, z0 + 0.1], 0], [[x0 - 0.15, z1 - 0.1, x1 + 0.15, z1 + 0.15], 0], [[x0 - 0.15, z0, x0 + 0.1, z1], 0], [[x1 - 0.1, z0, x1 + 0.15, z1], 0]]) { void c2; bag.add('granite_grey', box(a[0], y1 - 0.28, a[1], a[2], y1, a[3])); }
+    }
     for (const r of [[x0, z0, x1, z0 + w], [x0, z1 - w, x1, z1], [x0, z0, x0 + w, z1], [x1 - w, z0, x1, z1]]) if (el.walk !== false) col.floor(r, y1);
   } else {
     const sd = el.sides ? Object.fromEntries([...el.sides].map((c) => [c, 1])) : { n: 1, s: 1, e: 1, w: 1 };
     band([x0, z0, x1, z1], sd);
     quoins([x0, z0, x1, z1], sd, y0, y1, out, N, bag);
+    if (el.coursed) relief([x0, z0, x1, z1], sd);
     if (el.walk !== false) col.floor([x0, z0, x1, z1], y1);
   }
 }
