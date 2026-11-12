@@ -79,6 +79,20 @@ for (const s of STATIONS) stone(s.at, AXIS + rand() * 0.5, { h: s.n === 91 ? 2.7
   E.push({ t: 'aubrey_holes', holes });
 }
 
+
+// ── the work and the gifts about the stones (§1e): the sarsen waiting to be dressed where the visitor comes in, the chips, mauls, antler
+// picks, rope and rollers about it; pots, bones and antlers left at the foot of the stones ──
+{
+  const blk = P(34, 24);                                          // a sarsen as hauled, not yet dressed, lying on rollers, one face begun
+  E.push({ t: 'standing_stone', at: blk, y: height(blk[0], blk[1]), yaw: AXIS + 0.5, lying: true, h: 3.6, w0: 1.5, w1: 1.2, d0: 1.0, d1: 0.9, rough: 0.14, dress: 0, bury: 0.1, mat: 'rock_boulder', natural: true, tool: { faces: 'none', lichen: 20 }, seed: 5150 });
+  for (const [u, v, r, n] of [[34, 24, 4.5, 60], [60, -12, 3.5, 24], [-18, 5, 3.5, 24], [8, -18, 3.5, 24], [40, 13, 3.5, 24]]) {
+    const at = P(u, v); E.push({ t: 'litter', kind: 'dressing', c: at, y: height(at[0], at[1]), r, n, seed: Math.floor(rand() * 1e6) });
+  }
+  for (const [u, v] of [[-2.2, -1.5], [-9.0, -3.0], [3.8, 5.0], [45.5, -1.7], [HEEL.d - 3.6, 0.5], [HEEL.d + 3.2, -2.4], [20.5, 6.0], [-19.5, -3.0]]) {
+    const at = P(u, v); E.push({ t: 'litter', kind: 'offering', c: at, y: height(at[0], at[1]), r: 0.7, seed: Math.floor(rand() * 1e6) });
+  }
+}
+
 export const henge = {
   id: 'stonehenge-henge',
   name: { en: 'Stonehenge', zh: '巨石阵' },

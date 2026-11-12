@@ -74,6 +74,23 @@ Sources added:
 - [Aubrey holes - Wikipedia](https://en.wikipedia.org/wiki/Aubrey_holes)
 - [Ancient feasts drew people and animals from across Neolithic Britain - The Science Breaker](https://thesciencebreaker.org/en/breaks/evolution-behaviour/ancient-feasts-drew-people-and-animals-from-across-neolithic-britain)
 
+## 10c. The village and the work in the open (2026-11 deepening; `yard`, `craft`, `granary`, `litter`, `scrub`, `village()` in `town.js`)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| Yards | Before each house door: chalk lumps and flints trodden in; by turns a hazel hurdle screen and a log seat, a storage pit lidded with a weighted hurdle disc and a basket, a hide stretched to dry on a pole frame, bundles of thatching straw and a sheaf of hazel rods against the wall, a pot of water | Pits for storage and abundant hazel and flint are found at Durrington; hurdles, straw and hide-working follow from the houses' own materials (the walls and roofs are hazel and straw) [inferred: the arrangement] |
+| Houses, weathering and interior | Hairline cracks down the daub, patches of fresh chalk wash where mended; within, hazelnut strings, herb and meat bundles hung from the rafters, a hide by the hearth, two log seats, firewood stacked inside the door; a person at the hearth in about a third of the houses | Hazelnut shells are among the commonest plant remains on Neolithic sites in Britain; hearth, beds and dressers [stated, §5a]; the rest [inferred] |
+| Crafts in the open | Flint knapping (anvil stone, nodules, a drift of flakes, axe blanks, an antler hammer), pot making (clay heap, Grooved Ware drying, a firing pit), basket making (rods, a half-woven basket), grain grinding (saddle querns on a hide), hide scraping (a hide pegged out); each with its worker, sometimes a child and a dog | Grooved Ware pots and flint working at Durrington [stated: EH "Monumental feasts"; the-past.com]; saddle querns, hides and baskets [inferred] |
+| Four-post granaries | Twelve among the houses: four posts, a plank floor a metre up, wattle walls, hipped thatch, a notched log ladder | Four-post structures are a common find on later Neolithic and Bronze Age sites in Britain [inferred as a store; the type is attested, its use as a granary is a common reading] |
+| Traders | A hide spread with Grooved Ware, polished greenstone axes, a basket, rolled hides and a string of beads, a seated trader and one or two buyers, along the Durrington avenue and the Stonehenge Avenue | Goods and animals came from across Britain [stated: Madgwick et al. 2019, §10b]; the greenstone axes (such as Langdale and Cornish axes, traded across Britain from the 4th millennium) [inferred as the goods carried]; the setting out on a hide [inferred] |
+| The Southern Circle | A fire at its heart with six sitting and eight standing round it at the midwinter sunrise | The circle was aligned on the midwinter sunrise [stated, §5b]; the fire [inferred] |
+| Dressing the stones | By the arrival: a sarsen as hauled, undressed, on oak rollers, men squatting to pound it with mauls, chips and flakes of grey and white sarsen, hammerstones, antler picks, a coil of lime-bast rope, rollers; more such scatter about the circle | Sarsens were dressed by pounding (§1c) [stated: EH, sarsen.org]; that this was done with hammerstones and that antler picks, rope and oak rollers lay about the work is the usual reconstruction [inferred; not verified in a cited source here] |
+| Gifts | Eight small deposits at the foot of stones and in the Heel Stone's ditch: a Grooved Ware pot, bones, an antler, a flint axe | Deposits in ditches and pits of pots, bones and antler are the usual finds at henges [inferred from this pattern] |
+| The track | The Avenue's centre trodden to bare chalk, chalk lumps and flints along it and over the Durrington avenue; the ground about each door trodden bare | [inferred] |
+| Scrub | Gorse clumps (dark spines, yellow flowers) on the chalk, hawthorns alone and by the barrows (the first scrub of unmanaged downland) | Sheep- and cattle-grazed chalk downland with scattered scrub of hawthorn and gorse [inferred from the present downland]; the down was largely open grassland by 2500 BC [stated: Wikipedia "Stonehenge" environmental setting, in general terms] |
+| Sheep | Six small flocks of sheep and a few goats on the down, each with a herder and a dog | Sheep and goats were kept but were a small part of the herds beside pigs and cattle [inferred from the bone counts in §10a] |
+| Sound | A frame drum's slow beat in the open and low at the hearths, voices over it | [inferred] |
+
 ## 2. Layout of the settlement (radius 360 m)
 
 | Part | Where (m, +x east, +z south) | Notes |

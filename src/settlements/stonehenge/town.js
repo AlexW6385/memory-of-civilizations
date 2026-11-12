@@ -1,10 +1,10 @@
 // The builders' houses (docs/settlements/stonehenge.md §5) and the people (§10): a gathering at the
 // stones and up the Avenue, as at the midwinter feasts; at the houses people, pigs fattened for the
 // feast, cattle and dogs.
-import { RADIUS, AXIS, VILLAGE, DURR, BARROWS, height, houses, avenue, durr } from './layout.js';
+import { RADIUS, AXIS, VILLAGE, DURR, BARROWS, DITCH, HEEL, height, houses, avenue, durr } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-const base = (id, elements, style) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [40, -40], facing: 'w' } });
+const base = (id, elements, style, rooms = []) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [40, -40], facing: 'w' } });
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));     // a figure faces −z when rot = 0
 const CLOTH = ['hide_tan', 'hide_brown', 'cloth_brown', 'cloth_ochre', 'cloth_grey', 'hide_grey'];
 
@@ -153,6 +153,120 @@ export function camp() {
   return [base('stonehenge-camp', N, 'neolithic'), base('stonehenge-camp-life', L, 'life')];
 }
 
+/** Where the village's open ground is free: not in a house, a fire, a figure or a camp. */
+function freeSpots() {
+  const H = houses(), pts = [];
+  for (const p of feast()) for (const e of p.elements) { if (e.c) pts.push([e.c[0], e.c[1], 4]); }
+  for (const p of camp()) for (const e of p.elements) { if (e.c) pts.push([e.c[0], e.c[1], e.t === 'camp_shelter' ? 3.5 : 5]); else if (e.a) pts.push([(e.a[0] + e.b[0]) / 2, (e.a[1] + e.b[1]) / 2, 3]); }
+  for (const p of people()) pts.push([p.at[0], p.at[1], 1.6]);
+  return (x, z, m) => H.every((h) => Math.hypot(h.c[0] - x, h.c[1] - z) > h.s * 1.1 + m) && pts.every(([a, b, r]) => Math.hypot(a - x, b - z) > r + m) && Math.hypot(x - DURR.c[0], z - DURR.c[1]) > DURR.r + 6
+    && (() => { const [ds, dt] = durr(x, z); return !(ds > 0 && ds < DURR.r + DURR.len && Math.abs(dt) < DURR.w / 2 + 3); })();
+}
+const house_frame = (h) => { const c = Math.cos(h.yaw), s = Math.sin(h.yaw); return (u, v) => [h.c[0] + u * c - v * s, h.c[1] + u * s + v * c]; };
+
+/** The living village (§10c): the yards before the doors, the work done in the open (flint, pots, baskets, grain, hides) with the workers at it,
+ *  people at the hearth inside some houses; the scrub of the down; the track and the avenue trodden with chalk lumps and flints; the sheep with
+ *  their herders on the down; and the people at the unfinished stone and about the entrance, where the visitor arrives. */
+export function village() {
+  const rand = rng(2510), H = houses(), free = freeSpots();
+  const Y = [], C = [], K = [], S = [], L = [];
+  const ax = Math.cos(AXIS), az = Math.sin(AXIS), P = (u, v) => [u * ax - v * az, u * az + v * ax];
+  const person = (at, rot, o = {}) => L.push({ t: 'figure', at, y: height(at[0], at[1]), rot, seed: Math.floor(rand() * 1e9), dress: rand() < 0.45 ? 'robe' : 'tunic', cloth: CLOTH[Math.floor(rand() * CLOTH.length)], cloth2: CLOTH[Math.floor(rand() * CLOTH.length)], skin: rand() < 0.6 ? 'skin_light' : 'skin_medium', hat: 'none', ...o });
+  // the yards
+  for (const h of H) Y.push({ t: 'yard', c: h.c, s: h.s, yaw: h.yaw, y: h.y, seed: h.seed, k: h.seed % 4 });
+  // the people inside: at the hearth, on the log seat, in about a third of the houses
+  for (const h of H) if (rand() < 0.33) {
+    const F = house_frame(h), at = F(0.85, 0.15), hearth = F(0, -0.1);
+    person(at, face(at, hearth), { pose: rand() < 0.5 ? 'sit_low' : 'sit_ground' });
+    if (rand() < 0.4) { const a2 = F(-0.95, -0.2); person(a2, face(a2, hearth), { pose: 'sit_low' }); }
+  }
+  // the crafts, in the open spaces among the houses: each with its worker (and a watching child, a dog)
+  const KINDS = ['knap', 'pots', 'basket', 'grind', 'hides'], POSE = { knap: 'squat', pots: 'squat', basket: 'sit_ground', grind: 'kneel', hides: 'kneel' };
+  const spots = [];
+  for (let n = 0; n < 2000 && spots.length < 20; n++) {
+    const a = rand() * 6.28, d = 8 + rand() * 90, x = VILLAGE.c[0] + Math.cos(a) * d, z = VILLAGE.c[1] + Math.sin(a) * d;
+    if (!free(x, z, 3) || Math.hypot(x, z) > RADIUS - 58 || spots.some((q) => Math.hypot(q[0] - x, q[1] - z) < 9)) continue;
+    spots.push([x, z]);
+  }
+  spots.forEach(([x, z], i) => {
+    const kind = KINDS[i % KINDS.length], yaw = rand() * 6.28;
+    C.push({ t: 'craft', c: [x, z], y: height(x, z), yaw, kind, seed: Math.floor(rand() * 1e6) });
+    const at = [x + Math.sin(yaw) * 1.4, z - Math.cos(yaw) * 1.4];
+    person(at, face(at, [x, z]), { pose: POSE[kind] });
+    if (rand() < 0.5) { const c2 = [x + Math.cos(yaw) * 2.2, z + Math.sin(yaw) * 2.2]; person(c2, face(c2, [x, z]), { pose: 'sit_ground', h: 0.62 }); }
+    if (rand() < 0.35) L.push({ t: 'animal', kind: 'dog', at: [x - Math.sin(yaw) * 2.6, z + Math.cos(yaw) * 2.6], y: height(x, z), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
+  });
+  // four-post granaries among the houses
+  for (let n = 0, m = 0; n < 1500 && m < 12; n++) {
+    const a = rand() * 6.28, d = 10 + rand() * 90, x = VILLAGE.c[0] + Math.cos(a) * d, z = VILLAGE.c[1] + Math.sin(a) * d;
+    if (!free(x, z, 3.2) || Math.hypot(x, z) > RADIUS - 58 || C.some((q) => q.c && Math.hypot(q.c[0] - x, q.c[1] - z) < 5)) continue;
+    m++; C.push({ t: 'granary', c: [x, z], y: height(x, z), yaw: rand() * 1.57, s: 2.0 + rand() * 0.5, seed: Math.floor(rand() * 1e6) });
+  }
+  // traders on their hides along the two avenues (goods came from across Britain: pots, polished axes of greenstone, hides, beads), a buyer or two at each
+  {
+    const spotsW = [];
+    for (let s = DURR.r + 10; s < DURR.r + DURR.len - 6; s += 15) for (const sg of [-1, 1]) if (rand() < 0.55) spotsW.push([DURR.c[0] + DURR.dir[0] * s - DURR.dir[1] * sg * (DURR.w / 2 - 3), DURR.c[1] + DURR.dir[1] * s + DURR.dir[0] * sg * (DURR.w / 2 - 3), sg]);
+    for (const [s, t] of [[78, -12.5], [104, 12.5], [150, -12.5], [186, 12.5], [226, -12.5]]) { const [x, z] = P(s, t); spotsW.push([x, z, 1]); }
+    for (const [x, z] of spotsW) {
+      if (Math.hypot(x, z) > RADIUS - 55) continue;
+      const yaw = rand() * 6.28;
+      C.push({ t: 'craft', c: [x, z], y: height(x, z), yaw, kind: 'wares', seed: Math.floor(rand() * 1e6) });
+      const tr = [x + Math.sin(yaw) * 1.7, z - Math.cos(yaw) * 1.7]; person(tr, face(tr, [x, z]), { pose: 'sit_ground' });
+      for (let k = 0, nb = 1 + Math.floor(rand() * 2); k < nb; k++) { const b = [x - Math.sin(yaw) * (1.8 + k * 0.7) + Math.cos(yaw) * (k - 0.5) * 1.3, z + Math.cos(yaw) * (1.8 + k * 0.7) + Math.sin(yaw) * (k - 0.5) * 1.3]; person(b, face(b, [x, z]) + (rand() - 0.5) * 0.5, { pose: rand() < 0.4 ? 'talk' : 'stand', carry: rand() < 0.3 ? 'basket' : 'none' }); }
+    }
+  }
+  // the Southern Circle: a fire at its heart with people about it at the midwinter sunrise (the way the posts open toward the avenue)
+  {
+    const [cx, cz] = DURR.c;
+    C.push({ t: 'feast_fire', c: [cx, cz], r: 2.4, y: height(cx, cz), yaw: 0.5, pig: false, seed: 909 });
+    for (let k = 0; k < 6; k++) { const t = k / 6 * 6.28 + 0.4, at = [cx + Math.cos(t) * 2.7, cz + Math.sin(t) * 2.7]; person(at, face(at, [cx, cz]), { pose: k % 3 === 0 ? 'sit_ground' : k % 3 === 1 ? 'talk' : 'cross' }); }
+    const posts = timberCircle()[0].posts;
+    for (let k = 0, n = 0; k < 8 && n++ < 200;) { const t = rand() * 6.28, r = 7 + rand() * 4, at = [cx + Math.cos(t) * r, cz + Math.sin(t) * r]; if (posts.some((q) => Math.hypot(q.at[0] - at[0], q.at[1] - at[1]) < q.r + 0.75)) continue; k++; person(at, face(at, [cx, cz]) + (rand() - 0.5), { pose: rand() < 0.4 ? 'talk' : 'stand' }); }
+  }
+  // the scrub: gorse in clumps on the chalk, hawthorns alone and in threes (also by the barrows)
+  const okScrub = (x, z, m) => { const r = Math.hypot(x, z), [, t] = avenue(x, z), [s0] = avenue(x, z); return r > DITCH.r + 12 && r < RADIUS - 55 && !(s0 > 0 && Math.abs(t) < 14) && free(x, z, m) && BARROWS.every(([bx, bz, br]) => Math.hypot(bx - x, bz - z) > br + 4); };
+  for (let c = 0, n = 0; c < 26 && n++ < 600;) {
+    const a = rand() * 6.28, d = 70 + rand() * 230, x0 = Math.cos(a) * d, z0 = Math.sin(a) * d;
+    if (!okScrub(x0, z0, 3)) continue;
+    c++;
+    for (let k = 0, m = 2 + Math.floor(rand() * 4); k < m; k++) {
+      const x = x0 + (rand() - 0.5) * 9, z = z0 + (rand() - 0.5) * 9;
+      if (okScrub(x, z, 2)) S.push({ t: 'scrub', kind: 'gorse', c: [x, z], y: height(x, z), r: 0.8 + rand() * 0.9, h: 0.8 + rand() * 0.8, seed: Math.floor(rand() * 1e6) });
+    }
+  }
+  for (let c = 0, n = 0; c < 18 && n++ < 600;) {
+    const near = rand() < 0.5 ? BARROWS[Math.floor(rand() * BARROWS.length)] : null;
+    const a = rand() * 6.28, d = near ? near[2] + 8 + rand() * 6 : 90 + rand() * 210, x = (near ? near[0] : 0) + Math.cos(a) * d, z = (near ? near[1] : 0) + Math.sin(a) * d;
+    if (!okScrub(x, z, 3)) continue;
+    c++;
+    S.push({ t: 'scrub', kind: 'hawthorn', c: [x, z], y: height(x, z), r: 1.3 + rand() * 0.9, h: 1.7 + rand() * 1.2, seed: Math.floor(rand() * 1e6) });
+  }
+  // the trodden track and the avenue: chalk lumps and flints kicked up along them
+  for (let s = 40; s < RADIUS - 40; s += 8) { const [x, z] = P(s, (rand() - 0.5) * 6); if (Math.abs(s - HEEL_D) > 6) S.push({ t: 'litter', kind: 'path', c: [x, z], y: height(x, z), r: 2.6, n: 14, seed: Math.floor(rand() * 1e6) }); }
+  for (let s = DURR.r + 3; s < DURR.r + DURR.len; s += 7) { const t = (rand() - 0.5) * DURR.w * 0.8, x = DURR.c[0] + DURR.dir[0] * s - DURR.dir[1] * t, z = DURR.c[1] + DURR.dir[1] * s + DURR.dir[0] * t; S.push({ t: 'litter', kind: 'path', c: [x, z], y: height(x, z), r: 3, n: 18, seed: Math.floor(rand() * 1e6) }); }
+  // sheep on the down with a herder and a dog each (a few; the Neolithic flocks were small, mixed with goats)
+  const flocks = [[-150, 210], [-232, -58], [120, -260], [180, 160], [-180, -170], [-60, 120]];
+  for (const [fx, fz] of flocks) {
+    const x0 = fx + (rand() - 0.5) * 20 + 22, z0 = fz + (rand() - 0.5) * 20 + 14;
+    if (!okScrub(x0, z0, 4)) continue;
+    for (let k = 0, m = 7 + Math.floor(rand() * 5); k < m; k++) { const x = x0 + (rand() - 0.5) * 16, z = z0 + (rand() - 0.5) * 12; if (okScrub(x, z, 1)) L.push({ t: 'animal', kind: k % 6 === 5 ? 'goat' : 'sheep', at: [x, z], y: height(x, z), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) }); }
+    person([x0 + 9, z0 - 5], rand() * 6.28, { carry: 'staff', pose: 'stand', over: 'cloak' });
+    L.push({ t: 'animal', kind: 'dog', at: [x0 + 7, z0 - 4], y: height(x0 + 7, z0 - 4), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
+  }
+  // at the arrival: the unfinished stone and the men dressing it, a knapper and a child watching, a woman bringing water
+  {
+    const blk = P(34, 24);
+    for (const [u, v, pose, rr] of [[31.5, 22.5, 'squat', 0.6], [36.5, 25.3, 'squat', 3.5], [33.5, 19.8, 'stand', 0.2]]) { const at = P(u, v); person(at, face(at, blk) + rr * 0.1, { pose }); }
+    const kn = P(26, 18); C.push({ t: 'craft', c: kn, y: height(...kn), yaw: 1.1, kind: 'knap', seed: 4242 }); const w = P(26.2, 19.6); person(w, face(w, kn), { pose: 'squat' });
+    const ch = P(28.4, 16.6); person(ch, face(ch, kn), { pose: 'stand', h: 0.6 });
+    const wm = P(41, 17); person(wm, face(wm, [0, 0]) + 0.4, { dress: 'wrap', carry: 'pot' });
+    const dg = P(30.5, 20.5); L.push({ t: 'animal', kind: 'dog', at: dg, y: height(...dg), rot: 2, seed: 77 });
+  }
+  const rooms = H.map((h, i) => { const k = h.s / 2 / (Math.abs(Math.cos(h.yaw)) + Math.abs(Math.sin(h.yaw))) - 0.15; return { id: 'house ' + i, rect: [h.c[0] - k, h.c[1] - k, h.c[0] + k, h.c[1] + k], y: h.y, kind: 'hall' }; });
+  return [base('stonehenge-yards', Y, 'neolithic', rooms), base('stonehenge-crafts', C, 'neolithic'), base('stonehenge-scrub', S, 'neolithic'), base('stonehenge-village-life', L, 'life')];
+}
+const HEEL_D = HEEL.d;
+
 export async function town() {
   return [
     base('stonehenge-timber-circle', timberCircle(), 'neolithic'),
@@ -160,6 +274,7 @@ export async function town() {
     base('stonehenge-people', people(), 'life'),
     ...feast(),
     ...camp(),
+    ...village(),
   ];
 }
 void avenue;
