@@ -6,6 +6,7 @@
 import { RADIUS, HARBOUR, ENCLOSURE, TOWN, VALLEY, SPHINX, SPHINX_PIT, KHAFRE_VT, KV_Y, QUARRY, QUARRY_DEPTH, inRect, plateau, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
+const WORKS = [170, -112, 272, 4];
 const inHarbour = (x, z) => inRect(HARBOUR, x, z);
 /** Distance inside a rectangle's edge (negative outside). */
 const into = (r, x, z) => Math.min(x - r[0], r[2] - x, z - r[1], r[3] - z);
@@ -40,7 +41,11 @@ function cover(x, z, h, ny) {
   if (inRect(SPHINX_PIT, x, z) && x < 300) { c.rock = 0.6; c.sand = 0.4; return c; }               // the pit's floor, chips and drift sand
   if (x > 330) { c.fields = 0.7; c.grass = 0.2; c.sand = 0.1; c.dry = 0.3; return c; }
   if (inRect(TOWN, x, z)) { c.soil = 0.6; c.sand = 0.4; return c; }
-  c.sand = 0.6 + 0.3 * hash2(x * 0.05, z * 0.05); c.rock = 1 - c.sand; return c;
+  c.sand = 0.6 + 0.3 * hash2(x * 0.05, z * 0.05); c.rock = 1 - c.sand;
+  // the works and the gangs' camps east of the temple: the ground trodden hard and pale with chips and dust, patchy, softening at its edges
+  const dw = into(WORKS, x, z);
+  if (dw > 0) { const t = sm(0, 14, dw) * (0.55 + 0.45 * hash2(x * 0.11 + 3, z * 0.11)); c.road = 0.5 * t; c.sand = c.sand * (1 - 0.4 * t); c.rock = 1 - c.sand; c.warmth = 1 - 0.1 * t; }
+  return c;
 }
 function water(x, z, y) { return inRect(HARBOUR, x, z, 1) && y < VALLEY - 1.2 + 0.3; }
 function waterLevel(x, z) { return inRect(HARBOUR, x, z, 1) ? VALLEY - 1.2 : -Infinity; }

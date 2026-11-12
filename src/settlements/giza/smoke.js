@@ -5,6 +5,7 @@ import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
 import { RADIUS, KHAFRE_VT, KV_Y, mastabas, town as townLots } from './layout.js';
 import { ground } from './ground.js';
+import { CAMP_FIRES } from './camps.js';
 
 const ID = 'giza';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -24,6 +25,8 @@ export function emitters() {
   }
   // the tombs' chapels: incense at the door of one in seven (the chapel's door on its east face)
   for (const m of mastabas()) if (r() < 0.14) { const x = m.c[0] + m.a + 2.8, z = m.c[1] + m.b - 2.6; E.push({ p: [x - 1.0, ground.height(x, z) + 1.0, z], kind: 'incense', thr: 0.2 + 0.6 * r(), seed: m.seed % 997 }); }
+  // the gangs' hearths on the plateau, kept for the meals
+  CAMP_FIRES.forEach(([x, z], k) => E.push({ p: [x, 1.1, z], kind: 'kitchen', thr: 0, seed: 40 + k }));
   // the mortuary temple's court; the valley temples' doors
   E.push({ p: [146, 1.0, -40], kind: 'incense', thr: 0, seed: 21 });
   E.push({ p: [KHAFRE_VT[2] + 2.5, KV_Y + 0.9, KHAFRE_VT[1] + 15.3], kind: 'incense', thr: 0, seed: 22 }, { p: [KHAFRE_VT[2] + 2.5, KV_Y + 0.9, KHAFRE_VT[1] + 36.3], kind: 'incense', thr: 0.1, seed: 23 });

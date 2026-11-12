@@ -10,16 +10,18 @@ const E = [];
 const [ex0, ez0, ex1, ez1] = ENCLOSURE;
 // the court round the pyramid, paved with limestone, its enclosure wall
 E.push({ t: 'lane', rect: [ex0 + 1, ez0 + 1, ex1 - 1, ez1 - 1], y: 0.05, mat: 'tura_limestone' });
-const wall = (a, b, gates = []) => E.push({ t: 'ming_wall', a, b, y: 0, h: 8, th: 3, gates, pal: { plaster: 'limestone_core', roof: 'limestone_core', plinth: 'limestone_core' } });
+const wall = (a, b, gates = []) => { E.push({ t: 'ming_wall', a, b, y: 0, h: 8, th: 3, gates, pal: { plaster: 'limestone_core', roof: 'limestone_core', plinth: 'limestone_core' } }); E.push({ t: 'ok_wall_dress', a, b, h: 8, th: 3 }); };
 wall([ex0, ez0], [ex1, ez0]); wall([ex0, ez1], [ex1, ez1]); wall([ex0, ez0], [ex0, ez1]);
 wall([ex1, ez0], [ex1, -66]); wall([ex1, -14], [ex1, ez1]);
 // the entrance left open in the north face for the burial (§4.6): the passages and chambers are a plan of their own (town.js)
 E.push({ t: 'ok_pyramid', c: PYRAMID.c, a: PYRAMID.a, h: PYRAMID.h, door: pyramidGeometry(PYRAMID.a, PYRAMID.h).hole });
 // its east door takes the causeway; the west door opens into the pyramid's court
 E.push({ t: 'ok_temple', rect: TEMPLE, h: 7.5, court: [133, -58, 160, -22], pillars: 6, door: 'e', backDoor: true });
+E.push({ t: 'ok_temple_dress', rect: TEMPLE, h: 7.5, door: 'e', backDoor: true });
 for (const [x, z, a, h] of QUEENS) {
   E.push({ t: 'ok_pyramid', c: [x, z], a, h });
   E.push({ t: 'ok_temple', rect: [x + a + 2, z - 6, x + a + 12, z + 6], h: 4, court: [x + a + 4, z - 3, x + a + 10, z + 3], pillars: 2, door: 'e' });
+  E.push({ t: 'ok_temple_dress', rect: [x + a + 2, z - 6, x + a + 12, z + 6], h: 4, door: 'e' });
 }
 // the causeway: level on the plateau, down its edge with the ground, level again into the valley temple
 {
@@ -27,6 +29,9 @@ for (const [x, z, a, h] of QUEENS) {
   const [d0, d1] = CAUSEWAY.down, p = at(d0), q = at(d1);
   // the straight reach from the temple's east door, with a doorway in its north wall onto the plateau (the way in from the arrival), then the long run down
   E.push({ t: 'causeway', a: [168, -40], b: CAUSEWAY.a, w: 4.6, h: 5, ya: 0, yb: 0, gap: { side: -1, from: 1, to: 2 } });
+  E.push({ t: 'ok_causeway_dress', a: [168, -40], b: CAUSEWAY.a, w: 4.6, h: 5, ya: 0, yb: 0, gap: { side: -1, from: 1, to: 2 } });
+  E.push({ t: 'ok_causeway_dress', a: CAUSEWAY.a, b: p, w: 4.6, h: 5, ya: 0, yb: 0 });
+  E.push({ t: 'ok_causeway_dress', a: p, b: q, w: 4.6, h: 5, ya: 0, yb: VALLEY });
   E.push({ t: 'causeway', a: CAUSEWAY.a, b: p, w: 4.6, h: 5, ya: 0, yb: 0 });
   E.push({ t: 'causeway', a: p, b: q, w: 4.6, h: 5, ya: 0, yb: VALLEY });
   E.push({ t: 'causeway', a: q, b: CAUSEWAY.b, w: 4.6, h: 5, ya: VALLEY, yb: VALLEY });

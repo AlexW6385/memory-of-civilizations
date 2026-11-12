@@ -3,6 +3,7 @@
 // streets, a little egret on the quay and one on the valley temple's terrace. No fish are drawn in the harbour.
 import { WEST_FIELD, EAST_FIELD, HARBOUR, ENCLOSURE, KHAFRE_VT, KV_Y, VALLEY } from './layout.js';
 import { ground } from './ground.js';
+import { CAMP_ITEMS } from './camps.js';
 
 const fish = [];
 const flights = [
@@ -20,6 +21,7 @@ for (const [x, z] of [[-60, 162], [20, 162], [100, 162], [-94, 200], [-42, 200],
 for (const [x, z] of [[-30, 255], [30, 270], [90, 250], [150, 262], [-80, 300], [20, 320], [120, 330], [-120, 270], [60, 200], [130, 205]]) sp(x, z);
 for (const [x, z] of [[-60, ENCLOSURE[1] + 10], [60, ENCLOSURE[1] + 10], [-60, ENCLOSURE[3] - 10], [60, ENCLOSURE[3] - 10]]) sp(x, z);
 for (const [x, z] of [[214, -77.8], [205.4, -55.9], [199, -72.6], [211, -83.6]]) sp(x, z);   // the works' stacks of stone
+for (const i of CAMP_ITEMS) if (i.kind === 'sacks' || i.kind === 'jars') sp(i.x + 1.5, i.z + 1.5);   // sparrows after the grain and at the water
 sp(349, 30, VALLEY + 0.04); sp(349.5, 80, VALLEY + 0.04);
 sp(ENCLOSURE[2] - 6.5, -60); sp(ENCLOSURE[2] - 6.5, 10); sp(KHAFRE_VT[2] + 3, 140, KV_Y + 0.04);
 // a little egret at the quay's edge, facing the water

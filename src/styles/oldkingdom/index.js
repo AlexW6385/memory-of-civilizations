@@ -16,6 +16,8 @@ import { khafreTemple, statue } from './khafre.js';
 import { houseFront, houseRoof, mastabaWear, galleryOutside, bakeryShade, yard, lane, cemetery, magazines, quay } from './dress.js';
 import { quarry, track, tools } from './quarry.js';
 import { ramp, shade, casingStones } from './works.js';
+import { templeDress, causewayDress, wallDress } from './frontage.js';
+import { camp, chips } from './camp.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** A frustum over a rectangle centred at (cx, cz): half-sizes (a0, b0) at y0 to (a1, b1) at y1. */
@@ -33,14 +35,27 @@ function frust(bag, mat, cx, cz, a0, b0, a1, b1, y0, y1) {
  *  opening); `door` [x0, y0, x1, y1] (east–west from the centre and heights, optional): the entrance left open in the
  *  north face, a window of 2 m pieces round it. */
 function casing(bag, mat, cx, cz, a, h, ph, y, door) {
-  const t = [], top = h - ph, half = (v) => a * (1 - v / h);
+  const T = {}, top = h - ph, half = (v) => a * (1 - v / h);
+  // The casing was laid in batches of Tura stone of slightly different tone and polish: here in two (the stock's own and a
+  // finer, smoother one), the courses taken in runs of a few metres with a hash choosing the batch, so that a face reads as
+  // laid stone from far off (a faint banding and sheen) while a close view keeps its joints. Other materials (a queen's
+  // pyramid in plain limestone) keep their one.
+  const MATS = mat === 'tura_limestone' ? ['tura_limestone', 'revetment'] : [mat];
+  const hash = (a1, b1, c1) => { let q = Math.imul(a1 * 73856093 ^ b1 * 19349663 ^ c1 * 83492791, 2654435761) >>> 0; q = (q ^ (q >>> 15)) >>> 0; return q / 4294967296; };
+  const pick = (f, i, j, vm) => {
+    const run = Math.floor(vm / 3.4), base = hash(f, run, 7) < 0.5 ? 0 : 1, flip = hash(f, i * 31 + run, 11) < 0.22 ? 1 : 0;
+    return MATS[(base ^ flip) % MATS.length];
+  };
   // a point of face f (north, east, south, west) at u (along the foot, to the left seen from outside) and height v
   const FACE = [(u, v) => [cx + u, y + v, cz - half(v)], (u, v) => [cx + half(v), y + v, cz + u], (u, v) => [cx - u, y + v, cz + half(v)], (u, v) => [cx - half(v), y + v, cz - u]];
   const quad = (f, p, q, r, s, size = 6) => {
     const L = (A, B) => Math.hypot(B[0] - A[0], B[1] - A[1]), n = Math.max(1, Math.ceil(Math.max(L(p, q), L(s, r)) / size)), m = Math.max(1, Math.ceil(Math.max(L(p, s), L(q, r)) / size));
     const at = (i, j) => { const a0 = [p[0] + (q[0] - p[0]) * i / n, p[1] + (q[1] - p[1]) * i / n], a1 = [s[0] + (r[0] - s[0]) * i / n, s[1] + (r[1] - s[1]) * i / n]; return FACE[f](a0[0] + (a1[0] - a0[0]) * j / m, a0[1] + (a1[1] - a0[1]) * j / m); };
     // (wound counter-clockwise seen from outside)
-    for (let i = 0; i < n; i++) for (let j = 0; j < m; j++) t.push(...at(i, j), ...at(i + 1, j + 1), ...at(i + 1, j), ...at(i, j), ...at(i, j + 1), ...at(i + 1, j + 1));
+    for (let i = 0; i < n; i++) for (let j = 0; j < m; j++) {
+      const mid = at(i + 0.5, j + 0.5), M = pick(f, i, j, mid[1] - y);
+      (T[M] = T[M] || []).push(...at(i, j), ...at(i + 1, j + 1), ...at(i + 1, j), ...at(i, j), ...at(i, j + 1), ...at(i + 1, j + 1));
+    }
   };
   for (let f = 1; f < 4; f++) quad(f, [-half(0), 0], [half(0), 0], [half(top), top], [-half(top), top]);
   if (!door) quad(0, [-half(0), 0], [half(0), 0], [half(top), top], [-half(top), top]);
@@ -57,7 +72,7 @@ function casing(bag, mat, cx, cz, a, h, ph, y, door) {
       quad(0, [us[i], vs[j]], [us[i + 1], vs[j]], [us[i + 1], vs[j + 1]], [us[i], vs[j + 1]], 3);
     }
   }
-  bag.add(mat, fromTriangles(t));
+  for (const k of Object.keys(T)) bag.add(k, fromTriangles(T[k]));
 }
 
 /**
@@ -68,9 +83,9 @@ function casing(bag, mat, cx, cz, a, h, ph, y, door) {
 function okPyramid(el, { bag, col }) {
   const [cx, cz] = el.c, a = el.a, h = el.h, y = el.y ?? 0;
   // the casing up to the foot of the pyramidion, the pyramidion gilded (electrum) at the top
-  const ph = Math.min(3, h * 0.03), ap = a * ph / h;
+  const ph = Math.min(4.4, h * 0.03), ap = a * ph / h;
   casing(bag, el.mat || 'tura_limestone', cx, cz, a, h, ph, y, el.door);
-  frust(bag, 'gilt_bronze', cx, cz, ap, ap, 0, 0, y + h - ph, y + h);
+  frust(bag, 'clay_gilt', cx, cz, ap, ap, 0, 0, y + h - ph, y + h);
   frust(bag, 'tura_limestone', cx, cz, a + 0.6, a + 0.6, a, a, y - 0.4, y + 0.3);                 // the pavement's edge
   // climbing the faces: each face as strips of ramps, from the foot up to where the strip meets the
   // arrises (the triangle of the face, approximated)
@@ -661,7 +676,7 @@ registerStyle('oldkingdom', {
     ok_pyramid: okPyramid, mastaba, ok_temple: okTemple, causeway, mud_house: mudHouse, gallery_hall: galleryHall, crow_wall: crowWall,
     boat_pit: boatPit, royal_ship: royalShip, bakery, ok_pyramid_interior: pyramidInterior, stone_sledge: stoneSledge,
     ok_yard: yard, ok_lane: lane, ok_cemetery: cemetery, ok_magazines: magazines, ok_quay: quay,
-    ok_sphinx: sphinx, ok_khafre_temple: khafreTemple, ok_quarry: quarry, ok_track: track, ok_tools: tools, ok_ramp: ramp, ok_shade: shade, ok_casing: casingStones,
+    ok_sphinx: sphinx, ok_khafre_temple: khafreTemple, ok_quarry: quarry, ok_track: track, ok_tools: tools, ok_ramp: ramp, ok_shade: shade, ok_casing: casingStones, ok_wall_dress: wallDress, ok_camp: camp, ok_chips: chips, ok_temple_dress: templeDress, ok_causeway_dress: causewayDress,
   },
   objects: {},
 });
