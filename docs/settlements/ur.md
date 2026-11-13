@@ -177,3 +177,7 @@ A punter at the stern of most moored boats, a man seated amidships in some; wome
 - [Museum Notes (Woolley on the houses of Ur) — Penn Museum Journal](https://www.penn.museum/sites/journal/?p=13251)
 - [House of Abraham (Ur) — Madain Project](https://madainproject.com/house_of_abraham_(ur))
 - [Eduba: schools for training scribes in ancient Mesopotamia — brewminate](https://brewminate.com/eduba-schools-for-training-scribes-in-ancient-mesopotamia/)
+
+## Round 5: measured
+
+Within 120 m of the arrival (0, −118), in the court before the ziggurat: 41 lots, 14 entered and furnished (the temple's workshops of weavers, bakers and potters in the temenos, houses of brewers, weavers and smiths by the north gate, the scribal school), every one lit (two to four lamps) and nine with someone inside (the trades' figures at their places, `life.js`). Fronts along the first 100 m: single- and two-storey courtyard houses, mud-plastered or limewashed, with the trade's wares at the door; the public chapel; the temenos wall and gate towers; the ziggurat's court. Nothing needed adding.

@@ -13,6 +13,7 @@ import { theatreCenser } from './palace.js';
 import { Wall, tlalocan, procession } from './mural.js';
 import { workshopRoom } from './market.js';
 import { weaverRoom, potterRoom } from './craft.js';
+import { fig, rng as prng } from './street.js';
 
 const el_seed = (j, a) => Math.floor(Math.abs(a) * 7 + j * 13) + 1;
 const S = 'stucco_ochre', RD = 'stucco_red', WH = 'stucco_pale';
@@ -64,6 +65,12 @@ export function porticoRooms(ctx, back, [fx, fz], ph, ceil, roles, rand) {
     }
     for (let v = v0 + 0.45; v < v1 - 0.2; v += 0.85) { const q = R(a0 - 0.1, a1 + 0.1, v - 0.1, v + 0.1); bag.add('viga', box(q[0], ceil - 0.18, q[1], q[2], ceil + 0.02, q[3])); }
     const A = (uu, vv) => P(uu, vv), at3 = (uu, vv) => { const [x, z] = P(uu, vv); return [x, f, z]; }, w = a1 - a0, d = v1 - v0;
+    // the light of the room: one clay lamp's glow at the front rooms (a lamp's point of light, warmer at the shrine); and, in a stream of its own, who is at home
+    if (isFront && ctx.lights) { const [lx, lz] = A(m, v0 + d * 0.5); ctx.lights.push({ at: [lx, f + 1.55, lz], color: role === 'shrine' ? '#ff9a55' : '#ffb46b', intensity: role === 'shrine' ? 1.8 : 2.2, distance: 6.5 }); }
+    const pr = prng(Math.floor(Math.abs(back[0]) * 131 + Math.abs(back[1]) * 71) + j * 17 + role.length), pq = pr();
+    if (role === 'sleep' && pq < 0.4) fig(ctx, { who: pq < 0.15 ? 'elder' : 'woman', at: A(m, v0 + d * 0.5), y: f, rot: inward + Math.PI, seed: Math.floor(pr() * 1e6) + 1, pose: 'sit_ground' });
+    else if (role === 'store' && pq < 0.3) fig(ctx, { who: 'man', at: A(a1 - 1.3, v0 + 1.6), y: f, rot: inward + Math.PI * 0.5, seed: Math.floor(pr() * 1e6) + 1, pose: 'squat' });
+    else if (role === 'shrine' && pq < 0.5) fig(ctx, { who: 'man', at: A(m, v1 - 2.1), y: f, rot: inward, seed: Math.floor(pr() * 1e6) + 1, pose: 'kneel' });
     if (role === 'mural') {
       // the Tlalocan on the back wall, a procession of priests on each side wall (mural.js), a red bench along the front
       const ax = fx ? 'x' : 'z', uax = fx ? 'z' : 'x', fy = f + 0.1, H = ceil - fy - 0.1;

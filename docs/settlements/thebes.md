@@ -97,3 +97,11 @@ Hot, dry, dust-laden: bleached and sand-scoured sandstone, soot above doorways, 
 - **Street furniture:** shaduf wells, stands of water jars in the shade, mudbricks stacked to dry, straw heaps, tethering posts with troughs, small roadside chapels. [inferred]
 - **Quay cargo:** grain sacks, palm logs, a dressed block on its sledge and rollers, rope coils, nets drying on poles. [inferred: stone and timber were shipped on the Nile to Karnak]
 - **Avenue and forecourt:** braziers and stone offering tables at the edges of the sphinx avenue, stelae at the gate, statues before the colonnades, basins of purification, date palms in mud-brick rings. [inferred]
+
+## Round 5: lit and lived-in houses near the arrival
+
+Measured before: within 120 m of the arrival (−236, 0) 55 lots, 25 of them entered and furnished (14 workmen's row houses, 4 court houses, 7 villas); none had a light or anyone at home. Five kinds of front stand along the first 100 m (row, court, villa, granary yard, garden; walls of mud plaster, mud brick or limewash; mat awnings on the shops).
+- Each entered house has a clay oil lamp on its platform, bench or stand with a point of light (`interiors.js`); the villa's hall two. [inferred: lamps and lit rooms; the household equipment of Deir el-Medina houses was jars, a bread oven, a grain silo, cellars, niches with ancestor stelae — ancient-egypt.co.uk]
+- People at home: the housewife kneeling at the oven (the row house's kitchen, the court house's yard), the master or an elder on his mat or the bench, a child, the shopkeeper behind the counter of a shop; in the villa the master on the raised seat of the hall and a servant. [inferred]
+- A third of the houses not entered carry a room built on the roof over the front (a second storey of the street's front). [stated: rooms built on the roof in Egyptian towns; inferred as to the share]
+- Sources: [Deir el-Medina: the houses — ancient-egypt.co.uk](https://ancient-egypt.co.uk/Deir%20el%20Medina/pages/deir_el_medina_4.htm)

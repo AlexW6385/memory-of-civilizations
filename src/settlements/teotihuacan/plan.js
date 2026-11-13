@@ -3,7 +3,7 @@
 // stepped into sunken plazas by talud-tablero platforms, the Ciudadela's banks with the Feathered Serpent Pyramid and its Adosada.
 
 import { avenueItems } from './dress.js';
-import { compounds, MARKET } from './layout.js';
+import { compounds, MARKET, lodges } from './layout.js';
 import { AVENUE, MOON, PLAZA, SUN, CIUD, KEEP_CLEAR, RADIUS, CROSS, STEP, BANK, LEVELS, QPP, JAGUARS } from './layout.js';
 
 const E = [], LP = MOON.rise;
@@ -121,7 +121,9 @@ const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('avenue', AVENUE, 0, 'open'), room('plaza', PLAZA, MOON.rise, 'open'), room('market', MARKET, 0, 'market'),
   room('palace', QPP.rect, QPP.y, 'hall'), room('jaguars', JAGUARS.rect, JAGUARS.y, 'hall'), room('sun-temple', [SUN.c[0] - 6, SUN.c[1] - 6, SUN.c[0] + 6, SUN.c[1] + 6], SUN.h, 'hall'),
   // the households: the compounds' courts and rooms
-  ...compounds().map((c, i) => room(`compound-${i}`, c.rect, 0, 'house'))];
+  ...compounds().map((c, i) => room(`compound-${i}`, c.rect, 0, 'house')),
+  // the houses of the avenue's servants
+  ...lodges().map((l, i) => room(`lodge-${i}`, l.foot, l.y, 'house'))];
 const walks = [[[0, 300], [0, 100], [0, -80], [0, -160], [0, -194], [-18, -200], [-30, -236]]];
 walks[0].y0 = 0;
 
