@@ -1,6 +1,7 @@
 import { ARRIVALS } from '../../planet/arrivals.js';
 // The houses and palaces of the streets (docs/settlements/florence.md §5).
 import { RADIUS, MERCATO, lots } from './layout.js';
+import { insidePlans } from './inside.js';
 
 // The houses in two levels of detail as src/settlements/lod.js makes them, but in tiles of TILE m
 // rather than 100 m: every house wears one of six stuccoes, so each tile costs a mesh per stucco per
@@ -36,12 +37,15 @@ function enterable(all) {
   const out = new Map(), A = ARRIVALS['florence'];
   const dist = (l, x, z) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - x, (l.rect[1] + l.rect[3]) / 2 - z);
   const take = (list, n, use) => { let k = 0; for (const l of list) { if (k >= n) break; if (out.has(l)) continue; out.set(l, typeof use === 'function' ? use(l, k) : use); k++; } };
-  take([...ok].sort((a, b) => dist(a, A[0], A[2]) - dist(b, A[0], A[2])), 1, 'inn');
-  take([...ok].filter((l) => l.kind === 'casa').sort((a, b) => dist(a, A[0], A[2]) - dist(b, A[0], A[2])), 2, 'home');
-  // one workshop of each trade, the nearest to the market and to the arrival
-  const mc = [(MERCATO[0] + MERCATO[2]) / 2, (MERCATO[1] + MERCATO[3]) / 2], seen = new Set();
-  const shops = ok.filter((l) => l.kind === 'bottega').sort((a, b) => Math.min(dist(a, mc[0], mc[1]), dist(a, A[0], A[2]) + 40) - Math.min(dist(b, mc[0], mc[1]), dist(b, A[0], A[2]) + 40));
-  for (const l of shops) { if (seen.has(l.trade) || out.size >= 14) continue; seen.add(l.trade); out.set(l, l.trade); }
+  const byArrival = (a, b) => dist(a, A[0], A[2]) - dist(b, A[0], A[2]);
+  take([...ok].sort(byArrival), 1, 'inn');
+  take([...ok].filter((l) => l.kind === 'casa').sort(byArrival), 3, 'home');
+  // the botteghe round the arrival first: one of each trade, the nearest to the walker (the first streets west and south of the square), then those at the market
+  const mc = [(MERCATO[0] + MERCATO[2]) / 2, (MERCATO[1] + MERCATO[3]) / 2], seen = new Set(), botteghe = ok.filter((l) => l.kind === 'bottega');
+  for (const l of [...botteghe].sort(byArrival)) { if (seen.has(l.trade) || seen.size >= 5 || dist(l, A[0], A[2]) > 115) continue; seen.add(l.trade); out.set(l, l.trade); }
+  take([...ok].filter((l) => l.kind === 'casa' && dist(l, A[0], A[2]) < 115).sort(byArrival), 2, 'home');
+  seen.clear();
+  for (const l of [...botteghe].sort((a, b) => Math.min(dist(a, mc[0], mc[1]), dist(a, A[0], A[2]) + 40) - Math.min(dist(b, mc[0], mc[1]), dist(b, A[0], A[2]) + 40))) { if (out.has(l) || seen.has(l.trade) || out.size >= 18) continue; seen.add(l.trade); out.set(l, l.trade); }
   take([...ok].filter((l) => l.kind === 'casa').sort((a, b) => dist(a, mc[0], mc[1]) - dist(b, mc[0], mc[1])), 2, 'home');
   return out;
 }
@@ -49,5 +53,5 @@ function enterable(all) {
 export async function houses() {
   const all = lots(), open = enterable(all);
   const mine = all.map((l) => ({ t: 'casa', ...l, ...(open.has(l) ? { open: true, use: open.get(l) } : {}) }));
-  return tiles('florence-houses', 'renaissance', mine);
+  return [...tiles('florence-houses', 'renaissance', mine), ...insidePlans(mine.filter((l) => l.open))];
 }

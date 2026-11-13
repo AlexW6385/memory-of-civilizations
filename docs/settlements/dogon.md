@@ -113,3 +113,6 @@ Sources added: encyclopedia.com, "Dogon"; dogon-lobi.ch, "The smithy".
 - **The fields:** farmers with the daba (hoe) in the millet at the village's foot, a woman with a water jar, sacks and a donkey at the field's edge, a boy with a goat troop above the upper row [inferred].
 - **Arrival:** at (4.5, 27.5) on the place, 8 m from the toguna, looking north; nobody walks or stands within 7 m of it (the walkers' lane strips end at z = 20 and avoid the place's middle).
 
+
+## Round 5: fronts and households
+- Five kinds of ginna front stand along the rows (niched, tall with four rows of small niches, smooth with two zig-zag bands of white wash, plain, and a darker mud wash up to the first rows' height with a pale band under the cornice) [inferred from the geometric designs in lighter or darker wash noted above]. Ten ginnas within 120 m of the arrival are opened; the households sit inside (woman at the hearth with a child on the mat, an elder on the hall's bench, a cook at the kitchen fire).

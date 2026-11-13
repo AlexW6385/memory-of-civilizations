@@ -165,3 +165,6 @@ The settlement's position in `src/planet/sites.js` may be nudged inland so that 
 - [Hishi-no-mon — kojodan](https://kojodan.jp/castle/1/memo/409.html)
 - [hishi-no-mon — JAANUS](https://projects.mcah.columbia.edu/jaanus/node/4018)
 - [Mizu-no-ichi-mon (the water gates) — tabi-mag](https://tabi-mag.jp/hg0423/)
+
+## Round 5: walk-in buildings at the arrival
+- The arrival stands in the Honmaru; no merchants' or samurai houses lie within 120 m (the nearest yashiki is over 220 m away), so what is opened is what stands there: the guards' hall, four plastered storehouses (kura: arms and banners, rice, rice, cloth and ledgers) and the ground rooms of four turrets (yagura) of the Honmaru and the Ninomaru, with the main keep: nine ordinary buildings within 120 m [inferred from the castle's usual stores and watch posts]. Code: `src/styles/edo/stores.js`; the clerks and the watch are in `town.js`.

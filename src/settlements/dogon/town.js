@@ -1,7 +1,7 @@
 // The village's own life (docs/settlements/dogon.md §4.1, §5, §7): the old men sitting under the toguna's low roof on mats and stools,
 // women with jars on the place and the lanes, men talking, children, goats on the terraces and dogs about; people on the middle lane.
 import { TOGUNA, PLACE, PLACE_Y, COMPOUNDS, FORGE, DYE, THRESH, PENS, SHADE, height, inCompound, nearBaobab } from './layout.js';
-import { frontOf } from '../../styles/dogon/compound.js';
+import { frontOf, houseOf } from '../../styles/dogon/compound.js';
 import { dressing } from './dressing.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -100,6 +100,16 @@ export async function town() {
   for (const [i, p] of PENS.entries()) {
     const [px, pz] = p.at, py = height(px, pz);
     for (let k = 0; k < 6; k++) { const a = k * 1.05 + i, rr = 0.8 + (k % 3) * 0.55; A.push({ t: 'animal', kind: k % 3 === 2 ? 'sheep' : 'goat', at: [px + Math.cos(a) * rr, pz + Math.sin(a) * rr], y: py, rot: a + 1.3, seed: 70 + i * 10 + k }); }
+  }
+  // inside the opened ginnas (compound.js house(): lx/lz from the room's west and north wall): the household at its day — a woman at the hearth of
+  // the central room with a child on the mat, the old man on the entrance hall's bench, the cook at the kitchen's fire
+  for (const [n, c] of COMPOUNDS.entries()) {
+    if (!c.open) continue;
+    const hr = houseOf(c).rect, ix0 = hr[0] + 0.45, hz0 = hr[3] - 5.4, iz0 = hz0 + 0.45, f = c.y + 0.05, lx = (u) => ix0 + u, lz = (v) => iz0 + v;
+    const kx = lx(5.45), kz = hz0 - 1.55, q = rng(n * 17 + 4);
+    if (c.landmark || q() < 0.75) { woman([lx(1.9), lz(0.33)], f + 0.02, 0, { pose: 'sit_ground', cloth: 'cloth_indigo' }); P.push({ t: 'figure', at: [lx(0.7), lz(1.2)], y: f + 0.06, rot: 1.2, seed: n * 31 + 7, dress: 'tunic', legs: 'bare', cloth: 'cloth_ochre', over: 'none', hat: 'none', feet: 'bare', hair: 'short', beard: false, child: true, h: 0.95, pose: 'sit_ground', ...SK() }); }
+    if (c.landmark || q() < 0.5) man([lx(0.3), lz(3.55)], f, -Math.PI / 2, { pose: 'sit', dress: 'robe', cloth: 'cloth_white', over: 'none' });
+    if (c.landmark || q() < 0.4) woman([kx - 1.1, kz + 0.25], f, -0.73, { pose: 'sit_ground', cloth: 'cloth_ochre' });
   }
   A.push({ t: 'animal', kind: 'donkey', at: [-39, 28.4], y: PLACE_Y, rot: 1.7, seed: 99 }, { t: 'animal', kind: 'donkey', at: [22.5, 22], y: PLACE_Y, rot: 3.5, seed: 98 });
   void COMPOUNDS;

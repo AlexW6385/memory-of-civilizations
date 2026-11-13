@@ -124,39 +124,68 @@ export function kitchen(bag, col, x, y, z, r, h, yaw, rand) {
  * leaf (double) in a frame at doorAt (or none).
  */
 export function nicheFacade(bag, x0, x1, zf, y, H, rand, o = {}) {
-  const smooth = o.plain;
+  // kinds (docs/settlements/dogon.md §5): 'niche' (three rows of niches, the red band of triangles), 'plain' (smooth plaster, the older kind),
+  // 'tall' (a higher facade, stepped pilaster heads, four rows of smaller niches), 'zigzag' (smooth, two raised bands with white zig-zags),
+  // 'wash' (a darker mud wash up to the first rows' height, niches above it, a pale band under the cornice)
+  const kind = o.kind ?? (o.plain ? 'plain' : 'niche');
+  const smooth = kind === 'plain' || kind === 'zigzag';
   const n = Math.max(2, Math.round((x1 - x0) / 1.05)), pitch = (x1 - x0) / n;
   const door = o.doors ?? [];
   const inDoor = (u, w) => door.some((d) => Math.abs(u - d) < w / 2 + d * 0 + 0.75);
   const top = y + H;
+  const step = kind === 'tall' ? 0.2 : 0.12, beat = kind === 'tall' ? 3 : 2;
   for (let i = 0; i <= n; i++) {
     const u = x0 + i * pitch;
     if (door.some((d) => Math.abs(u - d) < 0.78)) continue;
-    bag.add(PLASTER, box(u - 0.14, y, zf, u + 0.14, top + 0.2 + (i % 2) * 0.12, zf + 0.15));
+    bag.add(PLASTER, box(u - 0.14, y, zf, u + 0.14, top + 0.2 + (i % beat) * step, zf + 0.15));
   }
+  // the spans between the doors and the facade's ends, for the bands laid on the wall
+  const cuts = [x0 - 0.2, ...[...door].sort((a, b) => a - b).flatMap((d) => [d - 0.75, d + 0.75]), x1 + 0.2], spans = [];
+  for (let i = 0; i < cuts.length; i += 2) if (cuts[i + 1] - cuts[i] > 0.4) spans.push([cuts[i], cuts[i + 1]]);
   if (!smooth) {
+    const rows = kind === 'tall' ? 4 : 3, nh = kind === 'tall' ? 0.28 : 0.34, nw = kind === 'tall' ? 0.13 : 0.17, sp = kind === 'tall' ? 0.72 : 0.8, y0 = kind === 'wash' ? y + 1.45 : y + 1.15;
     for (let i = 0; i < n; i++) {
       const uc = x0 + (i + 0.5) * pitch;
       if (inDoor(uc, 0)) continue;
-      for (let r = 0; r < 3; r++) {
-        const yy = y + 1.15 + r * 0.8 + (H - 3) * 0.3 * r * 0.3;
-        if (yy + 0.4 > top - 0.35) continue;
-        if (r === 0 && rand() < 0.25) continue;
-        bag.add(HOLE, box(uc - 0.17, yy, zf, uc + 0.17, yy + 0.34, zf + 0.012));
-        bag.add(SMOOTH, box(uc - 0.2, yy + 0.34, zf, uc + 0.2, yy + 0.37, zf + 0.04));    // lintel plaster
-        bag.add(SMOOTH, box(uc - 0.2, yy - 0.03, zf, uc + 0.2, yy, zf + 0.04));
+      for (let r = 0; r < rows; r++) {
+        const yy = y0 + r * sp + (H - 3) * 0.3 * r * 0.3;
+        if (yy + 0.4 > top - 0.35 - (kind === 'wash' ? 0.35 : 0)) continue;
+        if (r === 0 && kind !== 'wash' && rand() < 0.25) continue;
+        bag.add(HOLE, box(uc - nw, yy, zf, uc + nw, yy + nh, zf + 0.012));
+        bag.add(SMOOTH, box(uc - nw - 0.03, yy + nh, zf, uc + nw + 0.03, yy + nh + 0.03, zf + 0.04));    // lintel plaster
+        bag.add(SMOOTH, box(uc - nw - 0.03, yy - 0.03, zf, uc + nw + 0.03, yy, zf + 0.04));
       }
     }
   }
   bag.add(PLASTER, box(x0 - 0.2, top - 0.1, zf - 0.02, x1 + 0.2, top + 0.14, zf + 0.12));      // the cornice
-  // the red band of triangles under the cornice
-  const T = [];
-  for (let i = 0; i < n * 3; i++) {
-    const a = x0 + i * pitch / 3, b = a + pitch / 3, yb = top - 0.5, yt = top - 0.15;
-    if (door.some((d) => Math.abs((a + b) / 2 - d) < 0.78)) continue;
-    T.push(a, yb, zf + 0.165, (a + b) / 2, yt, zf + 0.165, b, yb, zf + 0.165);
+  if (kind === 'wash') {
+    // the darker wash of the lower wall, a raised hem at its top, and the pale band under the cornice
+    for (const [a, b] of spans) { bag.add(MUD, box(a, y, zf, b, y + 1.25, zf + 0.04)); bag.add(SMOOTH, box(a, y + 1.25, zf, b, y + 1.3, zf + 0.08)); bag.add('limewash_white', box(a, top - 0.62, zf, b, top - 0.12, zf + 0.04)); }
   }
-  if (T.length && !smooth) bag.add(RED, fromTriangles(T));
+  // the red band of triangles under the cornice
+  const T = [], W = [];
+  if (kind === 'niche' || kind === 'tall' || kind === 'wash') {
+    for (let i = 0; i < n * 3; i++) {
+      const a = x0 + i * pitch / 3, b = a + pitch / 3, yb = top - (kind === 'wash' ? 1.1 : 0.5), yt = top - (kind === 'wash' ? 0.75 : 0.15);
+      if (door.some((d) => Math.abs((a + b) / 2 - d) < 0.78)) continue;
+      T.push(a, yb, zf + 0.165, (a + b) / 2, yt, zf + 0.165, b, yb, zf + 0.165);
+    }
+    if (T.length && kind !== 'wash') bag.add(RED, fromTriangles(T));
+  }
+  if (kind === 'zigzag') {
+    // two raised bands of plaster with a zig-zag of white wash: one low, one under the cornice
+    for (const [b0, b1] of [[y + 1.0, y + 1.55], [top - 0.85, top - 0.3]]) {
+      for (const [a, b] of spans) bag.add(PLASTER, box(a, b0, zf, b, b1, zf + 0.15));
+      const k = Math.max(4, Math.round((x1 - x0) / 0.3));
+      for (let i = 0; i < k; i++) {
+        const a = x0 + (i / k) * (x1 - x0), b = x0 + ((i + 1) / k) * (x1 - x0), m = (a + b) / 2;
+        if (door.some((d) => Math.abs(m - d) < 0.78)) continue;
+        if (i % 2 === 0) W.push(a, b0 + 0.04, zf + 0.153, m, b1 - 0.04, zf + 0.153, b, b0 + 0.04, zf + 0.153);
+        else W.push(a, b1 - 0.04, zf + 0.153, m, b0 + 0.04, zf + 0.153, b, b1 - 0.04, zf + 0.153);
+      }
+    }
+    if (W.length) bag.add('limewash_white', fromTriangles(W));
+  }
 }
 
 /** A carved door: a frame with a pair of leaves, bands of figures cut in rows. At (u, y), facing +z at zf. */
