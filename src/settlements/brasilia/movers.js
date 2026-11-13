@@ -2,7 +2,7 @@
 // of the sixties, students in their school uniform, workers (candangos) in hats and work shirts, nuns and priests near the
 // Cathedral, the soldiers of the guard. Data for the engine's movers (src/engine/movers.js, read in its worker), in Suzhou's
 // format; the ways come from layout.js. No boats; the cars and buses stand as placed things (town.js).
-import { RADIUS, LAWN, SQ, SQ2, SQS, AVENUE, SHOPS, CATH, PRACA, ALL_BLOCKS, RAMP, TUNNEL, ROAD_N, ROAD_S, MINISTRIES, MUSEU } from './layout.js';
+import { RADIUS, LAWN, SQ, SQ2, SQS, AVENUE, SHOPS, SERV, CATH, PRACA, ALL_BLOCKS, RAMP, TUNNEL, ROAD_N, ROAD_S, MINISTRIES, MUSEU } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
@@ -34,6 +34,7 @@ export function walkways() {
   R([cx - 30, cz + CATH.pool + 2, cx + 30, cz + CATH.pool + 12], 0.8, 0.3);
   R([AVENUE[0] - 5, AVENUE[1] + 10, AVENUE[0] - 1, AVENUE[3] - 20], 1.0, 0.8); R([AVENUE[2] + 1, AVENUE[1] + 10, AVENUE[2] + 5, AVENUE[3] - 20], 1.0, 0.8);
   R([SHOPS[0] - 3.3, SHOPS[1], SHOPS[0], SHOPS[3]], 1.6, 2.0);
+  R([SERV[0] - 3.3, SERV[1], SERV[0], SERV[3]], 1.6, 1.2);
   // the superquadra: the lanes between the block rows, the strips beyond the blocks' ends, the lawns' diagonals
   // the ministries' pavements along the carriageways' outer kerbs, and the bus-stop strips on the lawn side
   R([LAWN[0] + 30, ROAD_N[1] - 3.2, LAWN[2] - 70, ROAD_N[1] - 0.3], 0.8, 0.3); R([LAWN[0] + 30, ROAD_S[3] + 0.3, LAWN[2] - 70, ROAD_S[3] + 3.2], 0.8, 0.3);
