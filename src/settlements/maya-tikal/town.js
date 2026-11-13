@@ -6,6 +6,7 @@
 import { RADIUS, PLAZA, groups, CAUSEWAYS, CW_H, RESERVOIRS, resDist, T1, T2, T4, BALL, CA, NA } from './layout.js';
 import { ground } from './ground.js';
 import { SOUTH_RANGE, STEP_PALACE } from './plan.js';
+import plazaPlan from './plan.js';
 import { frame } from '../../styles/tikal/kit.js';
 import { boatFloat } from '../../objects/index.js';
 
@@ -175,6 +176,54 @@ function plazaLife() {
   return [{ ...base('maya-tikal-plaza-life', L), style: 'life' }, base('maya-tikal-plaza-dress', M)];
 }
 
+/**
+ * The craftsmen's quarter (layout.js CRAFTS) and the palaces' rooms occupied (maya-tikal.md §5b): at each ward house the trade's goods on its
+ * platform and the craftsman at work in the door; in the house a household at the hearth; in the vaulted rooms of the Central Acropolis'
+ * ranges and the North Acropolis' terrace a noble or a scribe on the bench, a woman at her mat, a servant by the door. Nobody within 9 m of
+ * the arrival (-18, 28).
+ */
+function quarterLife() {
+  const rand = rng(5511), L = [], M = [], pick = (a) => a[Math.floor(rand() * a.length)], P = 0.42;
+  const seat = { n: [0, 1], s: [0, -1], w: [1, 0], e: [-1, 0] };
+  for (const g of groups().filter((q) => q.ward)) {
+    g.houses.forEach((h, k) => {
+      const [dx, dz] = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[h.door], hw = h.w / 2 + 0.4, hd = h.d / 2 + 0.4;
+      const dp = [h.c[0] + dx * (dx ? hw + 0.3 : 0), h.c[1] + dz * (dz ? hd + 0.3 : 0)], sd = [-dz, dx];   // the doorstep, and the way along the platform
+      const at = (a, b) => [dp[0] + dx * a + sd[0] * b, dp[1] + dz * a + sd[1] * b];
+      // the trade's goods on the platform before the door, the craftsman working beside them
+      if (h.craft === 'obsidian') { for (let i = 0; i < 3; i++) L.push({ t: 'basket', n: 1, at: at(0.4, -0.9 + i * 0.5), y: P, seed: h.seed + i, goods: 'obsidian' }); L.push(person(rand, ...at(0.9, 0.9), P, face(-dx, -dz), { woman: false, pose: 'kneel' })); }
+      else if (h.craft === 'potter') { L.push({ t: 'pot', kind: 'dark_pot', n: 3, at: at(0.5, -0.9), y: P, seed: h.seed }, { t: 'pot', kind: 'water_pot', n: 2, at: at(0.5, 0.2), y: P, seed: h.seed + 1 }); L.push(person(rand, ...at(1.0, 1.0), P, face(-dx, -dz), { woman: true, pose: 'kneel', over: 'none' })); }
+      else if (h.craft === 'cloth') { L.push({ t: 'basket', n: 2, at: at(0.4, -0.9), y: P, seed: h.seed, goods: 'cloth_white' }, { t: 'basket', n: 1, at: at(0.4, 0.2), y: P, seed: h.seed + 2, goods: 'cloth_red' }); L.push(person(rand, ...at(1.0, 1.0), P, face(-dx, -dz), { woman: true, pose: 'sit_ground', over: 'none' })); }
+      else if (h.craft === 'cook') { L.push({ t: 'firewood', at: at(0.5, -1.0), y: P, rot: dx ? 0 : Math.PI / 2, len: 1.2, seed: h.seed }, { t: 'pot', kind: 'water_pot', n: 2, at: at(0.5, 0.3), y: P, seed: h.seed }); L.push(person(rand, ...at(1.1, 1.0), P, face(-dx, -dz), { woman: true, pose: 'kneel', over: 'none' })); }
+      else { for (const [i, c] of ['paint_ochre', 'maya_blue', 'stucco_red'].entries()) L.push({ t: 'basket', n: 1, at: at(0.4, -0.9 + i * 0.5), y: P, seed: h.seed + i, goods: c }); L.push(person(rand, ...at(1.0, 0.9), P, face(-dx, -dz), { woman: false, pose: 'sit_ground', hat: 'cap', hatMat: 'stucco_leaf' })); }
+      // inside: the household by the hearth or the bed, facing the door (the house's middle is clear: the bed and the hearth lie at its ends)
+      if (k % 5 !== 3) L.push(person(rand, h.c[0], h.c[1], P, face(dx, dz), { woman: k % 2 === 0, pose: k % 3 === 0 ? 'kneel' : 'sit_ground', over: 'none', ...(k % 3 === 1 ? { child: true, h: 1.1 } : {}) }));
+    });
+    // the court: a girl with a jar, a man at the shrine with a bowl of copal
+    L.push(person(rand, g.rect[0] + 12, (g.rect[1] + g.rect[3]) / 2 + 0.5, 0.1, rand() * 6.28, { woman: true, child: true, h: 1.1, carry: 'pot' }));
+  }
+  // the vaulted rooms occupied: in the lit rooms of the ranges nearest the plaza
+  const ranges = plazaPlan.elements.filter((e) => e.t === 'k_range' && e.furn && Math.hypot(e.c[0] + 18, e.c[1] - 28) < 118);
+  let n = 0;
+  for (const e of ranges) {
+    const F = frame(e.face, ...e.c), rw = 4.2, pt = 1.1, tf = 1.2, rd = 2.7, rows = e.rows ?? 1, Lv = e.n * rw + (e.n + 1) * pt, V0 = -Lv / 2, vc = (i) => V0 + pt + i * (rw + pt) + rw / 2;
+    const ub = rows === 2 ? tf + 2 * rd + pt : tf + rd, dir = face(-F.U[0], -F.U[1]);
+    for (let i = 0; i < e.n; i++) {
+      if ((i + n) % 3 !== 1) continue;
+      n++;
+      const bench = F.P(ub - 0.5, vc(i) + 0.4), floor = F.P(ub - 1.7, vc(i) - 0.9), door = F.P(tf + 0.7, vc(i) + 1.2);
+      if (Math.hypot(bench[0] + 18, bench[1] - 28) < 9) continue;
+      const r = n % 4;
+      if (r === 0) { L.push(person(rand, bench[0], bench[1], e.y, dir, { woman: false, pose: 'sit', over: 'cape', cloth2: 'cloth_blue', hat: 'cap', hatMat: 'stucco_leaf' })); }
+      else if (r === 1) { L.push(person(rand, bench[0], bench[1], e.y, dir, { woman: false, pose: 'sit', hat: 'cap', hatMat: 'stucco_leaf', cloth2: 'cloth_ochre' })); L.push({ t: 'basket', n: 1, at: F.P(ub - 1.3, vc(i) + 1.2), y: e.y, seed: n, goods: 'paint_ochre' }); }
+      else if (r === 2) { L.push(person(rand, floor[0], floor[1], e.y, dir + Math.PI, { woman: true, pose: 'kneel', over: 'none' })); L.push({ t: 'basket', n: 1, at: F.P(ub - 1.7, vc(i) - 0.1), y: e.y, seed: n, goods: 'cloth_white' }); }
+      else { L.push(person(rand, bench[0], bench[1], e.y, dir, { woman: true, pose: 'sit', over: 'none' })); L.push(person(rand, door[0], door[1], e.y, dir + Math.PI * 0.5, { woman: false, carry: 'staff', cloth2: 'cloth_red' })); }
+    }
+  }
+  void M; void seat; void pick;
+  return [{ ...base('maya-tikal-quarter-life', L), style: 'life' }];
+}
+
 /** The life at the reservoirs: women with jars and washing at the rim, a fisher in a dugout canoe, ducks. */
 function reservoirLife() {
   const rand = rng(2210), L = [], out = [];
@@ -221,7 +270,7 @@ export async function town() {
     const [cx, cz] = R.c, r = Math.max(R.a, R.b) + 2;
     plans.push({ ...base(`maya-tikal-water-${R.id}`, [{ t: 'water_cells', rect: [cx - r, cz - r, cx + r, cz + r], y: R.water, cell: 1, inside: (x, z) => resDist(R, x, z) < -0.3 && ground.height(x, z) < R.water + 0.3 }]), style: 'ming' });
   }
-  plans.push(...market(), ...people(), ...plazaLife(), ...reservoirLife());
+  plans.push(...market(), ...people(), ...plazaLife(), ...quarterLife(), ...reservoirLife());
   void PLAZA;
   return plans;
 }

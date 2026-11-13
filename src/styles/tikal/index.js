@@ -141,7 +141,7 @@ function platform(el, ctx) {
  * A palace range { c (the middle of the front), face, y, n (rooms), rw, rd, rows (1 or 2), furn, comb }: rooms entered by a doorway
  * each from the front, vaulted across by corbelling, walls of plaster, the upper zone red, a moulding at the springing.
  */
-function range(el, { bag, col }) {
+function range(el, { bag, col, lights }) {
   const [fx, fz] = el.c, y = el.y ?? 0, n = el.n, rw = el.rw ?? 4.2, rd = el.rd ?? 2.7, rows = el.rows ?? 1, pt = 1.1, tf = 1.2, F = frame(el.face, fx, fz);
   const Lv = n * rw + (n + 1) * pt, hs = 2.6, steps = 4, sh = 0.45, ceil = hs + steps * sh, roof = ceil + 0.4, dh = 2.4, dw = 1.3;
   const uRow = [[tf, tf + rd]]; if (rows === 2) uRow.push([tf + rd + pt, tf + 2 * rd + pt]);
@@ -191,6 +191,8 @@ function range(el, { bag, col }) {
       const ph = F.P(ua + 0.4, vc(i) + rw / 2 - 0.45);
       if (rand() < 0.5) { put(bag, waterJarKit(), ph[0], y, ph[1], 0); col.circle(ph[0], ph[1], 0.33, y, y + 0.8); } else { put(bag, storeJarKit(), ph[0], y, ph[1], 0); }
       if (rand() < 0.4) { const po = F.P(ua + 0.45, vc(i) - rw / 2 + 0.4); put(bag, ollaKit(), po[0], y, po[1], 0); }
+      // the room's lamp: a clay bowl of burning pitch-pine on the bench's end, one warm light to the room
+      if (lights && el.lit !== false) { const pl = F.P(ub - 0.5, vc(i) + 1.3); lights.push({ at: [pl[0], y + 1.5, pl[1]], color: '#ffa860', intensity: 3.2, distance: 5.5 }); bag.add('flame', lathe([[0.04, 0], [0.02, 0.1], [0.001, 0.18]], 6, null, pl[0], y + 0.5, pl[1])); }
     }
   }
 }
@@ -242,7 +244,7 @@ function ballcourt(el, { bag, col }) {
 
 /** A pole-and-thatch house { c, w, d (the extents in x and z), door ('n'…), seed, kitchen }: a rubble platform, walls of daub, a hipped roof of palm thatch; furnished. */
 function house(el, ctx) {
-  const { bag, col } = ctx, [cx, cz] = el.c, w = el.w, d = el.d, rand = rng(el.seed || 1), P = 0.42, T = 0.16, wh = 1.95, side = el.door ?? 's';
+  const { bag, col, lights } = ctx, [cx, cz] = el.c, w = el.w, d = el.d, rand = rng(el.seed || 1), P = 0.42, T = 0.16, wh = 1.95, side = el.door ?? 's';
   const px = w / 2 + 0.7, pz = d / 2 + 0.7;
   bag.add('rubble', box(cx - px, -0.1, cz - pz, cx + px, P, cz + pz));
   bag.add(LIME, box(cx - px + 0.1, P - 0.04, cz - pz + 0.1, cx + px - 0.1, P, cz + pz - 0.1));
@@ -289,6 +291,7 @@ function house(el, ctx) {
     if (rand() < 0.6) { const q = F2.R(-1.05, -0.65, 0.9, 2.1); bag.add(TIM, box(q[0], P, q[1], q[2], P + 0.28, q[3])); }
     for (let k = 0; k < (el.lite ? 0 : 3); k++) { const v = (rand() - 0.5) * (side === 'n' || side === 's' ? w : d) * 0.8, p = F2.P(-0.01, v); patch(bag, 'plaster_damp', [p[0], P + 0.3, p[1]], dn, 0.6 + rand() * 0.8, 0.4, Math.floor(rand() * 1e6), 0.01); }
     if (el.kitchen) soot(bag, [cx, P + wh + 0.8, cz], [0, -1, 0], 1.2, 1.2, el.seed || 3); }
+  if (lights && !el.lite) { const pl = at(0, 0); lights.push({ at: [pl[0], F + 1.2, pl[1]], color: '#ff9a55', intensity: 3, distance: 5 }); }
   const j = at(e1 - 0.3, (long ? d : w) / 2 - 0.6); put(bag, waterJarKit(), j[0], F, j[1], 0); col.circle(j[0], j[1], 0.33, F, F + 0.8);
   const s = at(e0 + 0.35, -((long ? d : w) / 2 - 0.55)); put(bag, storeJarKit(), s[0], F, s[1], 0);
 }
