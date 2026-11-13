@@ -100,3 +100,7 @@ Rain streaks (plaster_streak) down the earth walls from the coping and patches o
 - https://www.ancient-history-sites.com/?p=173983
 - https://www.ancient-history-sites.com/?p=174139
 - https://travelchinaguide.com/attraction/shaanxi/xian/weiyang-palace-site.htm
+
+## 6c. The service quarters below the ramp (release pass)
+
+Two blocks of the palace's service quarters (clerks, guards, stewards) lie west and east of the paved court at the ramp's foot, 25-80 m from the arrival: fourteen houses in four fronts (walled court, row on the lane, open-fronted store under an awning, two-storey lou). The wards' houses (`han_house`) have solid halls, so these are built by their own style, `src/styles/hanlodge` (`hanl_house`), from the same kit: the hall has a doorway, a floor, a ceiling and a lit room furnished as a dwelling, kitchen, weaver's, scholar's, granary or workshop, with someone at home (`han-life-households`). The ceiling slab keeps the eave over the platform kerb from shutting the doorway in the walker's collision.

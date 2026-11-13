@@ -133,7 +133,8 @@ export function lots() {
   }
   return LOTS;
 }
-export const QUARTERS = [[-25, -78, 100, 106], [203, -190, 255, -4], [338, -190, 388, -4]];
+// (the last two: the palace's service quarters either side of the axial way below the terrace, within sight of the ramp: officials' lodgings, clerks' and guards' houses, all lit)
+export const QUARTERS = [[-25, -78, 100, 106], [203, -190, 255, -4], [338, -190, 388, -4], [-182, -100, -134, -51.5], [-84, -100, -36, -51.5]];
 export const QUARTER_LANES = QUARTERS.flatMap(([qx0, qz0, qx1, qz1]) => { const o = []; for (let zz = qz0; zz + 48.5 <= qz1 + 0.01; zz += 53) o.push([qx0, zz + 22, qx1, zz + 26.5]); return o; });
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
 /** Rectangles of the wards' lanes, the great avenue and the streets between the wards (free of houses). */
@@ -181,3 +182,8 @@ export function marketShops(rect, seedBase, th = MARKET_WALL.th) {
   }
   return out;
 }
+
+/** The service quarters below the ramp (the last two QUARTERS) build their houses enterable (src/styles/hanlodge): the lots there, with the style's kind. */
+export const SERVICE_QUARTERS = QUARTERS.slice(3);
+export const inService = (l) => l.ward === -2 && SERVICE_QUARTERS.some((q) => l.rect[0] >= q[0] - 0.01 && l.rect[2] <= q[2] + 0.01 && l.rect[1] >= q[1] - 0.01 && l.rect[3] <= q[3] + 0.01);
+export const serviceKind = (l) => (l.kind === 'tower' ? 'lou' : l.kind === 'row' ? (l.seed % 2 ? 'shop' : 'row') : 'court');

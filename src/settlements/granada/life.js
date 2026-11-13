@@ -3,7 +3,8 @@
 // seated, women walking in the Sultana's garden, a man at prayer, horses and grooms in the Dismount court.
 
 import { darroSlots } from '../../styles/nasrid/streets.js';
-import { RADIUS, gardens, DARRO, DARRO_BRIDGES, GY, ACEQUIA, GEN, TERRACES, SULTANA_Y, DISMOUNT_Y, HILL, LIONS, COMARES, MYRTLES, PARTAL } from './layout.js';
+import { isShop } from '../../styles/nasrid/houses.js';
+import { RADIUS, lots, gardens, DARRO, DARRO_BRIDGES, GY, ACEQUIA, GEN, TERRACES, SULTANA_Y, DISMOUNT_Y, HILL, LIONS, COMARES, MYRTLES, PARTAL } from './layout.js';
 
 export function life() {
   const L = [], T = Object.fromEntries(TERRACES.map((t) => [t.id, t]));
@@ -90,6 +91,19 @@ function streets(P, man, woman, L) {
     if (kind === 0) { woman([x + 1.7, Z(w + 1.5)], y, face, { pose: 'squat', cloth: k % 2 ? 'cloth_ochre' : 'cloth_white' }); if (k % 3 === 0) woman([x + 2.9, Z(w + 1.6)], y, face + 0.5, { cloth: 'cloth_red', carry: 'basket' }); }
     else if (kind === 1) man([x + 1.3, Z(w + 2.2)], y, sg < 0 ? Math.PI : 0, { pose: 'squat', cloth: 'cloth_brown', hat: 'cap' });
     else if (kind === 2 && k % 2 === 0) man([x + 0.9, Z(7.3)], y + 0.48, face, { pose: 'sit', cloth: 'cloth_grey', hat: 'turban' });
+  }
+  // the households at home: a woman or a man on the divan of the ground room, the shopkeeper behind his counter (the houses nearest the way in)
+  {
+    const A = [19.5, 3], near = lots().filter((l) => l.y === HILL.top && Math.hypot((l.rect[0] + l.rect[2]) / 2 - A[0], (l.rect[1] + l.rect[3]) / 2 - A[1]) < 110)
+      .sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 - A[0], (a.rect[1] + a.rect[3]) / 2 - A[1]) - Math.hypot((b.rect[0] + b.rect[2]) / 2 - A[0], (b.rect[1] + b.rect[3]) / 2 - A[1]));
+    let n = 0;
+    for (const l of near) {
+      if (n >= 16 || l.seed % 3 === 1) continue;
+      const [x0, z0, x1, z1] = l.rect, sf = l.front === 's', Ln = x1 - x0, D = z1 - z0, F = (u, v) => (sf ? [x1 - u, z1 - v] : [x0 + u, z0 + v]), y = l.y + 0.15, face = sf ? Math.PI : 0;
+      if (isShop(l.seed)) woman(F(Ln / 2 + 0.4, 3.25), y, face, { cloth: ['cloth_ochre', 'cloth_red', 'cloth_indigo'][l.seed % 3] }), n++;
+      else if (l.seed % 2) { woman(F(Ln * 0.38, D - 0.9), y + 0.36, face, { pose: 'sit', cloth: 'cloth_ochre' }); n++; }
+      else { man(F(Ln * 0.62, D - 0.9), y + 0.36, face, { pose: 'sit', cloth: 'cloth_white' }); n++; }
+    }
   }
   const at = [20, 30];
   for (const g of gardens().sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 - at[0], (a.rect[1] + a.rect[3]) / 2 - at[1]) - Math.hypot((b.rect[0] + b.rect[2]) / 2 - at[0], (b.rect[1] + b.rect[3]) / 2 - at[1])).slice(0, 6)) {

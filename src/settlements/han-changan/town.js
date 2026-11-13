@@ -4,10 +4,11 @@
 // and the caravans of the Silk Road at the west gate.
 
 import { RADIUS, AX, PALACE, PALACE_WALL, HALL, CROWN, EAST_GATE, SOUTH_GATE, CHANGLE, CHANGLE_HALL, WEST_MARKET, EAST_MARKET, MARKET_WALL, LAKE, LAKE_Y, ACADEMY, WARDS, WARD_WALL, GARDEN_POND, POND_Y, JIAOFANG,
-  RAMP, CITY_WALL, WALL_W, WALL_S, GATE_W, GATE_S, cityWalls, lots, TIERS, marketShops, BRIDGES, MOAT_Y, AVENUE } from './layout.js';
+  RAMP, CITY_WALL, WALL_W, WALL_S, GATE_W, GATE_S, cityWalls, lots, inService, serviceKind, TIERS, marketShops, BRIDGES, MOAT_Y, AVENUE } from './layout.js';
 const AVENUE_BAND = { mid: [AVENUE[0] + 11, AVENUE[1], AVENUE[2] - 11, WALL_S - 6], kerbW: [AVENUE[0], AVENUE[1], AVENUE[0] + 0.6, WALL_S - 6], kerbE: [AVENUE[2] - 0.6, AVENUE[1], AVENUE[2], WALL_S - 6] };
 
 import { lifePlans } from './life.js';
+import '../../styles/hanlodge/index.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements, o = {}) => ({ id, style: 'han', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [AX, 60], facing: 'n' }, ...o });
 const pick = (rand, a) => a[Math.floor(rand() * a.length) % a.length];
@@ -120,9 +121,11 @@ export async function town() {
       E.push({ t: 'han_ward', rect: w, gates: [{ side: 'w', c: lc[0], w: 4.5 }, { side: 'e', c: lc[0], w: 4.5 }, { side: 'w', c: lc[1], w: 3.5 }, { side: 'e', c: lc[1], w: 3.5 }] });
     }
     plans.push(base('han-wards', E));
-    const H = lots().filter((l) => l.kind !== 'office'), K = { court: 'han_house', row: 'han_house', tower: 'han_house' };
+    const H = lots().filter((l) => l.kind !== 'office' && !inService(l)), K = { court: 'han_house', row: 'han_house', tower: 'han_house' };
     for (let i = 0; i < H.length; i += 40) plans.push(base(`han-houses-${i / 40}`, H.slice(i, i + 40).map((l) => ({ t: K[l.kind], rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, open: l.open }))));
   }
+  // the service quarters' houses: enterable (src/styles/hanlodge)
+  plans.push(base('han-service-houses', lots().filter(inService).map((l) => ({ t: 'hanl_house', rect: l.rect, front: l.front, kind: serviceKind(l), seed: l.seed })), { style: 'hanlodge' }));
   // ── the markets ──
   for (const [id, rect, sd] of [['west', WEST_MARKET, 600], ['east', EAST_MARKET, 700]]) {
     const cx = (rect[0] + rect[2]) / 2, cz = (rect[1] + rect[3]) / 2;

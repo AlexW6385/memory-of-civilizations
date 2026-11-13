@@ -84,3 +84,7 @@ Hakka mountain songs (客家山歌) [stated: DESIGN §7]; a pentatonic voice, a 
 - **Rooms of the great ring** [inferred from §4.1: each family owned a vertical slice]: every one of the 262 rooms outside the stair bays and the gate passages is furnished — kitchen (stove, pots, vat), pigsty or tool room on the ground floor; grain store, loom or tool room on the second; bedroom, loom or sitting room with household altar above; red paper couplets by every door, lanterns and washing poles on the galleries.
 - **Weathering of the earth wall**: splash-darkened foot, lichen, pale rain tails under the sills, lime patches where it was mended, bare earth in places [inferred].
 - **Neighbouring round tulou** are enterable on every floor (stairs in two bays), furnished like the great ring; the square tulou's courts have well, trays, washing, hens and people but their rooms are shut.
+
+## Round 5: four fronts along the hamlet's lanes
+
+[inferred] The ordinary houses of a Hakka hamlet were not one pattern: beside the plain two-storey house stood the shop-house (a counter in the porch under a cloth awning, jars and baskets, a hanging board), the lime-washed house of a better-off family (painted frieze under the eave, a granite lintel over the door), and the house with a latticed balcony over the porch. `hakka_house` (src/styles/tulou/houses.js) chooses by seed; households (a woman at the tea table, an elder on the hall bench) stand in the halls of the houses nearest the arrival (town.js).

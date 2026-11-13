@@ -5,6 +5,7 @@
 import { RADIUS, PYRAMID, VALLEY, TOWN_Y, VALLEY_TEMPLE, HARBOUR, CROW_WALL, BOAT_PITS, SHIP, SPHINX, KHAFRE_VT, KV_Y, KHAFRE_CW, QUARRY, ENCLOSURE, mastabas, slots, furnished, town as townLots } from './layout.js';
 import { ground } from './ground.js';
 import { RAMP, haulRoad } from './works.js';
+import { LODGES, lodgeLife } from './lodges.js';
 import { CAMP_ITEMS, CHIPS, HAUL, YARD, campLife, haulLife, yardLife } from './camps.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -240,6 +241,7 @@ export async function town() {
   }
   plans.push(worksPlan(), { ...base('giza-works-life', worksLife()), style: 'life' });
   plans.push(base('giza-camps', [{ t: 'ok_camp', items: CAMP_ITEMS }, { t: 'ok_chips', at: CHIPS }, { t: 'ok_casing', at: YARD.stacks }, { t: 'ok_shade', rect: YARD.shade, h: 2.3 }, { t: 'ok_lane', items: YARD.lane }, { t: 'stone_sledge', at: HAUL.at, y: 0.06, rot: HAUL.ang, w: 1.15, len: 1.7 }]), { ...base('giza-camp-life', [...campLife(), ...haulLife(), ...yardLife()]), style: 'life' });
+  plans.push(base('giza-lodges', [...LODGES.filter((l) => l.t !== 'gallery_hall' && l.t !== 'bakery').map((l) => ({ t: 'ok_lodge', rect: l.rect, kind: l.kind, door: l.door, seed: l.seed })), ...LODGES.filter((l) => l.t === 'gallery_hall' || l.t === 'bakery').map((l) => ({ t: l.t, rect: l.rect, seed: l.seed }))]), { ...base('giza-lodge-life', lodgeLife()), style: 'life' });
   const Q = quarryWorks();
   plans.push(base('giza-quarry', [{ t: 'ok_quarry', blocks: Q.blocks }, { t: 'ok_track', pts: Q.pts, w: 3.6 }, { t: 'ok_tools', at: Q.toolAt }, { t: 'stone_sledge', at: [116, 122], y: Q.sledgeY + 0.1, rot: 0, w: 1.15, len: 1.7 }]));
   plans.push({ ...base('giza-quarry-life', quarryLife(Q)), style: 'life' });

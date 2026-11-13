@@ -56,6 +56,7 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
 // the cattle kraals' sites (life.js kraals() reads these; kept here so the homesteads keep clear of them)
 export const KRAAL_AT = [[150, -40, 6.5], [-170, 120, 5.5], [110, 230, 6]];
 let COMP = null, HUTS = null;
+const ARRIVAL = [46, 60];
 /**
  * The homesteads of the valley: each a walled compound (a low wall of granite rubble round a yard, a gate in
  * it), two to four daga houses on a ring in the yard with their doors to its middle, and a granary raised on
@@ -95,6 +96,8 @@ export function compounds() {
     huts[0].open = rand() < 0.4;
     COMP.push({ c: [x, z], r: R, gap, y, huts, granary: [x + Math.cos(a0) * 6.2, z + Math.sin(a0) * 6.2], seed: Math.floor(rand() * 1e6) });
   }
+  // the homesteads nearest the arrival are the ones the visitor walks into: all their houses open (furnished inside)
+  [...COMP].sort((p, q) => Math.hypot(p.c[0] - ARRIVAL[0], p.c[1] - ARRIVAL[1]) - Math.hypot(q.c[0] - ARRIVAL[0], q.c[1] - ARRIVAL[1])).slice(0, 9).forEach((k) => k.huts.forEach((h) => { h.open = true; }));
   return COMP;
 }
 /** The houses of the homesteads (flattened), those inside the Great Enclosure included. */
@@ -104,3 +107,23 @@ export function huts() {
   return HUTS;
 }
 void hash2;
+
+let DARAS = null;
+/** The men's meeting houses (dara) outside the gates of the homesteads nearest the arrival: [{ c, y, r, gap, seed }]. */
+export function daras() {
+  if (DARAS) return DARAS;
+  DARAS = [];
+  const all = compounds(), d = (k) => Math.hypot(k.c[0] - ARRIVAL[0], k.c[1] - ARRIVAL[1]);
+  for (const k of [...all].sort((p, q) => d(p) - d(q)).slice(0, 14)) {
+    if (DARAS.length >= 5 || d(k) > 115) break;
+    for (const off of [0, 0.5, -0.5]) {
+      const a = k.gap + off, x = k.c[0] + Math.cos(a) * (k.r + 5.4), z = k.c[1] + Math.sin(a) * (k.r + 5.4), r = 2.3;
+      if (inEnclosure(x, z, 6) || inWalled(x, z, 6) || onAscent(x, z, 4) || height(x, z) > 3.5 || Math.hypot(x, z) > RADIUS - 60) continue;
+      if (all.some((o) => o !== k && Math.hypot(o.c[0] - x, o.c[1] - z) < o.r + r + 3.5) || KRAAL_AT.some(([kx, kz, kr]) => Math.hypot(kx - x, kz - z) < kr + r + 3)) continue;
+      if (all.some((o) => o.huts.some((h) => Math.hypot(h.c[0] - x, h.c[1] - z) < h.r + r + 2.2)) || DARAS.some((q) => Math.hypot(q.c[0] - x, q.c[1] - z) < 8)) continue;
+      DARAS.push({ c: [x, z], y: height(x, z), r, gap: a + Math.PI, seed: Math.floor(k.seed % 997) });
+      break;
+    }
+  }
+  return DARAS;
+}

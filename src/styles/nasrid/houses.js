@@ -17,7 +17,7 @@ const TRADES = ['potter', 'cloth', 'grocer'];
  * for the houses beyond the visitor's reach.
  */
 function house(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, y = el.y, rand = rng(el.seed + 3), N = el.storeys === 1 ? 1 : 2, s = el.front === 's';
+  const [x0, z0, x1, z1] = el.rect, y = el.y, rand = rng(el.seed + 3), N = el.storeys === 1 ? 1 : el.seed % 7 === 3 ? 3 : 2, VAR = el.seed % 4, LW = el.seed % 11 === 0 ? 'limewash_yellow' : 'limewash_white', SHOP = isShop(el.seed), s = el.front === 's';
   const L = x1 - x0, D = z1 - z0, H = N * ST, top = y + H + 0.95;
   const F = (u, v) => (s ? [x1 - u, z1 - v] : [x0 + u, z0 + v]);
   const R = (u0, v0, u1, v1) => { const a = F(u0, v0), b = F(u1, v1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
@@ -35,7 +35,7 @@ function house(el, { bag, col }) {
   const hz = (va, vb, ya, yb) => [Math.min(wz(va), wz(vb)), Math.max(wz(va), wz(vb)), ya, yb];
   // the front: the door, and on the upper floor a window in every bay
   const frontHoles = [hx(du - 0.6, du + 0.6, y + 0.12, y + 2.45)];
-  if (N > 1) for (let b = 0; b < bays; b++) { const u = (b + 0.5) * L / bays; frontHoles.push(hx(u - 0.36, u + 0.36, y + ST + 1.0, y + ST + 2.05)); }
+  for (let q = 1; q < N; q++) for (let b = 0; b < bays; b++) { const u = (b + 0.5) * L / bays; frontHoles.push(hx(u - 0.36, u + 0.36, y + q * ST + 1.0, y + q * ST + 2.05)); }
   wall(0, 0, L, T, frontHoles, true);
   wall(0, D - T, L, D, [hx(L * 0.3 - 0.3, L * 0.3 + 0.3, y + 1.5, y + 2.2), ...(N > 1 ? [hx(L * 0.7 - 0.3, L * 0.7 + 0.3, y + ST + 1.0, y + ST + 1.9)] : [])], true);
   const sideHoles = (k) => { const h = []; for (let q = 0; q < N; q++) for (const v of [2.5 + k, 6.0 - k]) if (v < D - 1) h.push(hz(v - 0.28, v + 0.28, y + q * ST + 1.6, y + q * ST + 2.2)); return h; };
@@ -45,16 +45,29 @@ function house(el, { bag, col }) {
   col.rect(R(0, D - T, L, D), y, top); col.rect(R(0, T, T, D - T), y, top); col.rect(R(L - T, T, L, D - T), y, top);
   B('roof_tile', -0.06, -0.06, L + 0.06, D + 0.06, top, top + 0.1);
   // the horseshoe arch over the door, the leaf folded back, the step
-  archHead(bag, face('z', s ? z1 : z0, s ? -1 : 1), Math.min(wx(du - 0.6), wx(du + 0.6)), Math.max(wx(du - 0.6), wx(du + 0.6)), y + 1.9, y + 2.45, T, 'horseshoe', { alfiz: true });
+  archHead(bag, face('z', s ? z1 : z0, s ? -1 : 1), Math.min(wx(du - 0.6), wx(du + 0.6)), Math.max(wx(du - 0.6), wx(du + 0.6)), y + 1.9, y + 2.45, T, ['horseshoe', 'pointed', 'horseshoe', 'lobed'][VAR], { alfiz: true });
   B('wood_dark', du - 0.55, 0.08, du - 0.05, 0.16, y + 0.12, y + 2.0);
   B(LW, du - 0.9, -0.5, du + 0.9, 0, y - 0.1, y + 0.12); col.floor(R(du - 0.9, -0.5, du + 0.9, 0), y + 0.12);
-  // a wooden lattice over each upper window, standing a hand off the wall
-  if (N > 1) for (let b = 0; b < bays; b++) {
-    const u = (b + 0.5) * L / bays;
-    B('wood_dark', u - 0.46, -0.18, u + 0.46, -0.1, y + ST + 0.92, y + ST + 2.13);
-    B('lattice', u - 0.4, -0.16, u + 0.4, -0.12, y + ST + 0.98, y + ST + 2.07);
-    B('wood_dark', u - 0.5, -0.19, u + 0.5, -0.04, y + ST + 2.12, y + ST + 2.2);
+  // a wooden lattice over each upper window, standing a hand off the wall (the middle bay of the first upper floor of some houses is a mirador, an enclosed lattice bay on corbels)
+  for (let q = 1; q < N; q++) for (let b = 0; b < bays; b++) {
+    const u = (b + 0.5) * L / bays, yq = y + q * ST;
+    B('wood_dark', u - 0.46, -0.18, u + 0.46, -0.1, yq + 0.92, yq + 2.13);
+    B('lattice', u - 0.4, -0.16, u + 0.4, -0.12, yq + 0.98, yq + 2.07);
+    B('wood_dark', u - 0.5, -0.19, u + 0.5, -0.04, yq + 2.12, yq + 2.2);
   }
+  if (N > 1 && VAR === 2) {
+    const u = (Math.floor(bays / 2) + 0.5) * L / bays, yq = y + ST, w = 0.62, d = 0.55;
+    B('wood_dark', u - w - 0.08, -d - 0.08, u + w + 0.08, -0.04, yq + 0.8, yq + 0.92);
+    for (const dd of [-w, w]) { B('wood_dark', u + dd - 0.06, -d, u + dd + 0.06, -0.04, yq + 0.92, yq + 2.2); B('lattice', u + dd + (dd > 0 ? 0.04 : -0.09), -d + 0.08, u + dd + (dd > 0 ? 0.09 : -0.04), -0.12, yq + 1.0, yq + 2.1); }
+    B('wood_dark', u - w + 0.06, -d - 0.06, u + w - 0.06, -d, yq + 0.92, yq + 2.2);
+    B('lattice', u - w + 0.14, -d - 0.09, u + w - 0.14, -d - 0.04, yq + 1.0, yq + 2.1);
+    B('roof_tile', u - w - 0.12, -d - 0.12, u + w + 0.12, -0.02, yq + 2.2, yq + 2.3);
+    for (const dd of [-0.45, 0, 0.45]) B('wood_dark', u + dd - 0.05, -d + 0.02, u + dd + 0.05, -0.04, yq + 0.45, yq + 0.8);
+    col.rect(R(u - w - 0.08, -d - 0.08, u + w + 0.08, 0), y + ST + 0.45, y + ST + 2.3);
+  }
+  // a tiled canopy on corbels over the door (the shops have their cloth awning instead); on the other houses a crenellated coping
+  if (!SHOP && VAR === 1) { B('roof_tile', du - 1.0, -0.7, du + 1.0, -0.02, y + 2.8, y + 2.9); for (const dd of [-0.8, 0.8]) B('wood_dark', du + dd - 0.05, -0.62, du + dd + 0.05, -0.02, y + 2.5, y + 2.8); }
+  if (VAR === 3 || (VAR === 0 && N === 3)) for (let u = 0.2; u < L - 0.4; u += 0.75) B(LW, u, 0, u + 0.4, T, top + 0.1, top + 0.45);
   // the floors: each storey a slab with the flight below it cut out; the flights; the roof
   const fy = y + 0.15, lvl = (k) => (k === 0 ? fy : y + k * ST);
   const holeOf = (k) => (k % 2 === 0 ? [T, 1.4, T + 1.05, 5.6] : [L - T - 1.05, 1.4, L - T, 5.6]);

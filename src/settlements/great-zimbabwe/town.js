@@ -1,6 +1,6 @@
 // The daga houses and homesteads (docs/settlements/great-zimbabwe.md §5, §15): walled compounds, each with its
 // houses round a yard, a granary raised on stones, firewood and seats; a few houses stand free in the Great Enclosure.
-import { RADIUS, compounds, huts, height, inWalled, inEnclosure, onAscent, KRAAL_AT } from './layout.js';
+import { RADIUS, compounds, huts, daras, height, inWalled, inEnclosure, onAscent, KRAAL_AT } from './layout.js';
 import { people, mounds } from './life.js';
 export async function town() {
   const E = [];
@@ -23,6 +23,7 @@ export async function town() {
     });
   }
   for (const h of huts()) E.push({ t: 'daga_hut', ...h });
+  for (const dd of daras()) E.push({ t: 'dara_house', ...dd });
   for (const m of mounds()) E.push({ t: 'termite_mound', ...m });
   const frame = { origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 's' } };
   return [{ id: 'great-zimbabwe-huts', style: 'zimbabwe', ...frame, elements: E },
