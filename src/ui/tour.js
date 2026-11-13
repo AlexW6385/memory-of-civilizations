@@ -252,6 +252,7 @@ export class Tour {
     const C = this.controls, F = C.feet;
     // the camera is the tour's alone: keys, the stick, the mouse and the fly button do nothing meanwhile
     C.enabled = false; C.stick.x = C.stick.y = 0; C.flyHeld = false;
+    C.keys.clear();   // (no key reaches the walker while the tour has it: Space pauses, it does not lift)
     const L = this.leg;
     if (!L) return;
     dt = Math.min(dt, 0.1);
