@@ -641,7 +641,7 @@ function sagrada(el, { bag, col, lights }) {
   nativity(bag, col, cx + 22, y, cz);
   schools(bag, col, lights, cx - 12, cz + 25, y);
   workshop(bag, col, lights, [cx - 33, cz - 8, cx - 27, cz + 14], y, rand);
-  derrick(bag, cx + 12, y, cz + 30, 46, [cx + 23, y + 38, cz + 16]);
+  derrick(bag, cx + 12, y, cz + 30, 46, [cx + 23, y + 33, cz + 16]);
 }
 
 // ── Casa Milà and Casa Batlló ────────────────────────────────────────────────────────────────

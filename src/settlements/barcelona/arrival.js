@@ -3,6 +3,7 @@
 // visitors at the kerb looking up, a cab rank, a fruiterer, a porter's handcart, a tram standing up the street, the masons on the
 // scaffolds of the towers. Positions follow layout.js (the Marina at x = PITCH × 2.5, the cross street at z = −PITCH / 2).
 import { PITCH, BLOCK, SAGRADA, height } from './layout.js';
+import { scaffoldSpots } from '../../styles/modernisme/nativity.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const XM = PITCH * 2.5;                                   // the Marina's middle
@@ -55,11 +56,15 @@ export function arrivalLife() {
   L.push({ t: 'animal', kind: 'dog', at: [HC[0] + 1.0, HC[1] - 2.8], y: Y(HC[0], HC[1]) + 0.04, rot: 2.2, seed: 4103 });
   // pigeons on the paving of the junction's corner
   L.push({ t: 'chickens', kind: 'pigeon', at: [EDGE + 3.5, SOUTH - 3], y: Y(EDGE + 3.5, SOUTH - 3) + 0.04, seed: 4104 });
-  // the masons on the boards of the towers' scaffolding (the boards stand every 4 m from the bases' tops, on the street side)
-  const ty = Y(SAGRADA[0] + 22, SAGRADA[1]), bx = SAGRADA[0] + 22 + 1 + 3.35 + 0.65;
-  for (const [u, k, face] of [[-21, 1, 1], [-7.5, 2, -1], [-7.5, 4, 1], [7.5, 3, 1], [7.5, 5, -1], [21, 2, 1], [21, 1, -1]]) {
-    const z = SAGRADA[1] + u + (face > 0 ? 1.2 : -1.2), y = ty + 24 + 4 * k + 0.27;
-    L.push({ t: 'figure', at: [bx, z], y, rot: face > 0 ? Math.PI / 2 : Math.PI / 2 + 0.6, seed: Math.floor(r() * 1e9), skin: 'skin_light', pose: k % 2 ? 'talk' : 'stand', ...worker({ cloth: 'cloth_white' }) });
+  // the masons on the boards of the façade's scaffolds (nativity.js, scaffoldSpots: the boards stand every 4 m, on the street side): two at the cypress's foot, three on the
+  // lanterns' stumps, one on the Hope tower's cut-off head and one on the nearer inner tower's
+  const g0 = Y(SAGRADA[0] + 22, SAGRADA[1]), spots = scaffoldSpots(SAGRADA[0] + 22, g0, SAGRADA[1]);
+  const at = (dz, rel) => spots.find((q) => Math.abs(q[1] - SAGRADA[1] - dz) < 0.3 && Math.abs(q[2] - g0 - rel - 0.26) < 0.2);
+  const picks = [[at(0, 42), -0.9, 1], [at(0, 46), 1.0, -1], [at(-14.25, 32), 0.9, 1], [at(-14.25, 36), -0.9, -1], [at(14.25, 32), 1.0, 1], [at(21, 47), -1.0, -1], [at(7.5, 67), 0.8, 1]];
+  let k = 0;
+  for (const [q, dz, face] of picks) {
+    if (!q) continue;
+    L.push({ t: 'figure', at: [q[0], q[1] + dz], y: q[2] + 0.01, rot: face > 0 ? Math.PI / 2 : Math.PI / 2 + 0.6, seed: Math.floor(r() * 1e9), skin: 'skin_light', pose: k++ % 2 ? 'talk' : 'stand', ...worker({ cloth: 'cloth_white' }) });
   }
   // lamps: the gas lamps of the corner
   for (const [x, z] of [[EDGE + 1.0, SOUTH - 3.2]]) L.push({ t: 'street_lamp', at: [x, z], y: Y(x, z), h: 4.2, seed: 4110 });
