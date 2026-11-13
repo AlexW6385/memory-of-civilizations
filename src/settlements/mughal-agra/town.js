@@ -1,6 +1,7 @@
 // Taj Ganj and the riverside (docs/settlements/mughal-agra.md §6): the town's houses with their balconies.
-import { RADIUS, RIVER_Z, STREETS, houses, KATRAS, HAVELI_OPEN, WORKSHOP, GWALKS, GW } from './layout.js';
+import { RADIUS, RIVER_Z, STREETS, houses, KATRAS, LODGES, HAVELI_OPEN, WORKSHOP, GWALKS, GW } from './layout.js';
 import { lifePlan } from './life.js';
+import { frameOf } from '../../styles/mughal/townhouse.js';
 import { ground, LEVEL } from './ground.js';
 const base = (id, elements) => ({ id, style: 'mughal', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 245], facing: 'n' } });
 export async function town() {
@@ -37,6 +38,9 @@ export async function town() {
   // the caravanserais and the open house (docs/settlements/mughal-agra.md §11)
   for (const k of KATRAS) { const [x0, z0, x1, z1] = k.rect; plans.push({ ...base(`mughal-agra-katra-${k.id}`, [{ t: 'katra', rect: k.rect, gate: k.gate, lit: 2 }]), bounds: [x0 - 6, z0 - 2, x1 + 6, z1 + 2], rooms: [{ id: 'sarai court', rect: [x0 + 1.6, z0 + 7.5, x1 - 1.6, z1 - 7.5], y: 0, kind: 'open' }] }); }
   { const [x0, z0, x1, z1] = HAVELI_OPEN; plans.push({ ...base('mughal-agra-haveli-open', [{ t: 'haveli_open', rect: HAVELI_OPEN, entry: 'w' }]), bounds: [x0 - 2, z0 - 2, x1 + 2, z1 + 2], rooms: [{ id: 'dalan', rect: [x0 + 3.4, z0 + 0.55, x1 - 3.8, z0 + 4.15], y: 0.45, kind: 'hall' }, { id: 'house court', rect: [x0 + 3.4, z0 + 4.6, x1 - 3.8, z1 - 3.4], y: 0, kind: 'open' }] }); }
+  // the garden keepers' lodges (§13b): one plan of eight rooms, each lit and furnished
+  plans.push({ ...base('mughal-agra-lodges', LODGES.map((l) => ({ t: 'garden_lodge', ...l }))), bounds: [-95, -150, 95, -10],
+    rooms: LODGES.map((l) => { const f = frameOf(l.rect, l.front), r = f.rect([-f.W / 2 + 0.4, -f.D + 0.4, f.W / 2 - 0.4, -1.8]); return { id: `${l.kind} lodge`, rect: r, y: l.y + 0.04, kind: 'hall' }; }) });
   // the inlay workshop, open to the axis street (§12)
   { const [x0, z0, x1, z1] = WORKSHOP.rect;
     plans.push({ ...base('mughal-agra-workshop', [{ t: 'inlay_workshop', ...WORKSHOP, seed: 7 }]), bounds: [x0 - 2, z0 - 2, x1 + 2, z1 + 2], rooms: [{ id: 'inlay workshop', rect: [x0 + 0.4, z0 + 0.4, x1 - 0.4, z1 - 0.4], y: 0.35, kind: 'hall' }] }); }

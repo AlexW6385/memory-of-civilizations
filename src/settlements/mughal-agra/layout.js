@@ -30,6 +30,11 @@ export const KATRAS = [{ id: 'omar-khan', rect: [-58, 235, -14, 266], gate: 'e' 
 export const HAVELI_OPEN = [8, 277, 30, 299];
 // the pietra dura workshop on the axis street's west side, its front on the street (§12)
 export const WORKSHOP = { rect: [-20, 281, -8, 293], front: 'e' };
+// the lodges of the garden's keepers (docs/settlements/mughal-agra.md §13b): in the outer sunken beds of the four northern quarters on both
+// sides of the axis, each on a plinth level with the raised walk (x = ±80) it opens on; four designs, two of each
+const LK = ['mali', 'store', 'chowki', 'hut', 'hut', 'chowki', 'store', 'mali'];
+export const LODGES = [-28, -63, -97, -129].flatMap((z, i) => [1, -1].map((s, j) => ({ kind: LK[i * 2 + j], seed: 11 + i * 2 + j, front: s > 0 ? 'w' : 'e', y: 0.55,
+  rect: s > 0 ? [81.5, z - 3, 87.1, z + 3] : [-87.1, z - 3, -81.5, z + 3] })));
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 

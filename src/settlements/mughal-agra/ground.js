@@ -2,7 +2,7 @@
 // the north; the garden's beds, the town's dusty lanes; cypresses and fruit trees in the garden,
 // neem and peepal in the town; the hazy sky of the north Indian winter.
 
-import { RADIUS, RIVER_Z, TERRACE, GARDEN, KATRAS, HAVELI_OPEN, WORKSHOP, inRect, inHouse, onStreet, walkDist, smooth as sm } from './layout.js';
+import { RADIUS, RIVER_Z, TERRACE, GARDEN, KATRAS, LODGES, HAVELI_OPEN, WORKSHOP, inRect, inHouse, onStreet, walkDist, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 export const LEVEL = { water: -2.4, bed: -5 };
@@ -34,6 +34,7 @@ function planting(x, z, p) {
     // the sixteen sunken beds of each quarter: cypresses (death) in a line along the edge of every raised walk, fruit
     // trees (life) in the beds behind them, grass and flowers; nothing on the walks, the channels or the terrace's foot
     const ax = Math.abs(x), az = Math.abs(z), d = walkDist(x, z);
+    if (LODGES.some((l) => inRect(l.rect, x, z, 1.6))) return null;
     if (ax < 12 || az < 12 || inRect([-150, -148, 150, -138], x, z) || d < 0.3) return null;
     // (thinner within the axes' view, where the near-black crowns closed the Taj off: a cypress every ~12 m, flowering shrubs between)
     if (d < 1.6) return ax < 60 ? { cypress: 6, oleander: 0.45, grass: 40 } : { cypress: 14, grass: 40 };
