@@ -3,6 +3,7 @@
 // behind the middle door), the dwelling (a sleeping room and a kitchen), the workshop house (obsidian, pottery or weaving at the front, a store behind).
 // Built from the same room blocks as the compounds' (rooms.js): a doorway into each room from the portico, plastered walls with a red dado, a
 // roof of beams, the hearth and the jars, the lamp, the people at home. Some stand in a low-walled forecourt with a gate.
+// (The element's name has `platform` in it so that the generic street-life pass (src/objects/life.js SKIP) does not take these for street-front houses.)
 import { box, frustum } from '../../core/geom.js';
 import { porticoRooms } from './rooms.js';
 import { ttStair } from './index.js';
@@ -13,7 +14,7 @@ const S = 'stucco_ochre', RD = 'stucco_red', WH = 'stucco_pale';
 const DIR = { e: [1, 0], w: [-1, 0], s: [0, 1], n: [0, -1] };
 
 /**
- * tt_house { rect (the block with its portico), face ('e' | 'w' | 'n' | 's': the portico's side), y (the ground it stands on), kind ('lodge' | 'dwelling' | 'workshop' | 'potter' | 'weaver'),
+ * tt_lodge_platform { rect (the block with its portico), face ('e' | 'w' | 'n' | 's': the portico's side), y (the ground it stands on), kind ('lodge' | 'dwelling' | 'workshop' | 'potter' | 'weaver'),
  * seed, yard (a walled forecourt, metres deep, 0 for none), simple }.
  */
 export function ttHouse(el, ctx) {
