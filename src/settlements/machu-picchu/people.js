@@ -6,7 +6,7 @@
 // women's ankle-length wrap (anaku) under a shawl (lliklla), sandals [stated: encyclopedia.com, "America,
 // South: History of Dress"].
 
-import { SITE, TERRACE, KNOLL, hillRing, PLOUGH, CONDOR, kanchas, fountains } from './layout.js';
+import { SITE, TERRACE, KNOLL, hillRing, PLOUGH, CONDOR, kanchas, fountains, houses } from './layout.js';
 import { ground } from './ground.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -145,5 +145,16 @@ export function people() {
   for (const [x, z, o] of [[4.6, 62, { carry: 'bundle' }], [5.4, 47, { carry: 'basket' }], [4.4, 30, { carry: 'bundle', over: 'cape' }]]) figures.push(man({ at: [x, z], y: 0, rot: N + (rand() - 0.5) * 0.4, ...o }));
   figures.push(woman({ at: [5.0, 38], y: 0, rot: S, carry: 'child' }));
   for (const z of [54, 55.8, 57.6]) figures.push({ t: 'animal', kind: 'llama', at: [5.2, z], y: 0, rot: N + 0.1, seed: seed(), graze: false });
+  // the people at home in the houses within 140 m of the arrival (their hearths lit: town.js): a woman cooking or spinning by the stove, a man mending a tool or resting, a grandmother with a child, on about every second house
+  { const A = [-21, 129.8], inV = { n: [0, 1], s: [0, -1], e: [-1, 0], w: [1, 0] };
+    for (const [i, h] of houses().entries()) {
+      const [x0, z0, x1, z1] = h.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+      if (Math.hypot(cx - A[0], cz - A[1]) >= 140 || i % 2) continue;
+      const y = Math.min(ground.height(x0, z0), ground.height(x1, z0), ground.height(x0, z1), ground.height(x1, z1)) + 0.04, d = inV[h.front], k = (h.seed % 3);
+      const at = [cx - d[1] * 0.5, cz + d[0] * 0.5];
+      if (k === 0) figures.push(woman({ at, y, rot: facing(d), pose: 'cross', carry: 'none', h: 1.46 + rand() * 0.06 }));
+      else if (k === 1) { figures.push(man({ at, y, rot: facing([-d[0], -d[1]]), pose: 'cross', carry: 'none' })); }
+      else { figures.push(woman({ at, y, rot: facing(d), pose: 'cross', h: 1.5 })); figures.push({ ...woman({ at: [at[0] + d[0] * 0.55 - d[1] * 0.5, at[1] + d[1] * 0.55 + d[0] * 0.5], y, rot: facing([-d[0], -d[1]]), pose: 'stand', h: 1.0 }), cloth: 'cloth_red' }); }
+    } }
   return { figures, gear };
 }
