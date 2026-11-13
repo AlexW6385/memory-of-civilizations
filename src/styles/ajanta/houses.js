@@ -29,7 +29,7 @@ function wallRun(F, bag, col, mat, u0, u1, v0, v1, H, ops) {
 const MUDS = ['mud_plaster', 'earth_wall'];
 
 /** aj_house: { rect, front, seed, variant 0–3, mud } — see the file header. */
-export function house(el, { bag, col }) {
+export function house(el, { bag, col, lights }) {
   const rect = el.rect, F = frame(rect, el.front), { W, D } = F, rand = rng(el.seed ?? 1), mud = el.mud ?? MUDS[Math.floor(rand() * 2)], V = el.variant ?? 0;
   const flat = V === 3, H = flat ? 2.55 : 2.3, t = 0.35, uc = W * (0.38 + rand() * 0.24), dw = 0.52, dh = 1.75, y = 0;
   const ops = [[uc, dw, 0, dh]];
@@ -84,7 +84,8 @@ export function house(el, { bag, col }) {
   { const hu = left ? t + 0.15 : W - t - 0.85, hv = D - t - 0.6;
     B(F, bag, 'terracotta', hu, 0, hv, hu + 0.7, 0.34, hv + 0.45); C(F, col, hu, hv, hu + 0.7, hv + 0.45, 0, 0.34);
     for (const k of [0.2, 0.52]) { const [px, pz] = F.xz(hu + k, hv + 0.22); pot(bag, px, 0.34, pz, 0.17, 0.26, 'pottery_dark'); }
-    B(F, bag, 'pottery_dark', hu - 0.05, 0.34, hv + 0.45, hu + 0.75, 1.6, hv + 0.5); }                                    // the soot on the wall
+    B(F, bag, 'pottery_dark', hu - 0.05, 0.34, hv + 0.45, hu + 0.75, 1.6, hv + 0.5);                                     // the soot on the wall
+    { const [lx, lz] = F.xz(hu + 0.35, hv + 0.15); lights?.push({ at: [lx, 0.62, lz], color: '#ff9a4a', intensity: 3, distance: 7 }); } }   // the hearth's fire lights the room
   { const cu = left ? W - t - 1.8 : t + 0.1, cv = D - t - 1.05;
     for (const a of [0.08, 1.62]) for (const b of [0.08, 0.82]) { const [lx, lz] = F.xz(cu + a, cv + b); bag.add('timber', rod([lx, 0, lz], [lx, 0.42, lz], 0.04, 5)); }
     B(F, bag, 'timber', cu, 0.4, cv, cu + 1.7, 0.46, cv + 0.9); B(F, bag, 'rope_fibre', cu + 0.06, 0.44, cv + 0.06, cu + 1.64, 0.49, cv + 0.84);

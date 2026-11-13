@@ -169,6 +169,14 @@ export async function town() {
     if (rand() < 0.25) T.push({ t: 'chickens', at: [x1 + 1.8, front], y: 0, seed: seed() });
     if (rand() < 0.3) T.push({ t: 'basket', at: [x1 + 0.6, front], y: 0, rot: rand() * 6, seed: seed() });
   }
+  // inside the huts (the house's own dice: styles/ajanta/houses.js): a woman squatting at the hearth in one hut of two, a man resting on the rope cot in another
+  for (const l of LOTS) {
+    const [x0, z0, x1, z1] = l.rect, W = x1 - x0, D = z1 - z0, d = rng(l.seed ?? 1), uc = W * (0.38 + d() * 0.24), left = uc > W / 2, tt = 0.35, south = l.front === 's';
+    const xz = (u, v) => (south ? [x0 + u, z1 - v] : [x1 - u, z0 + v]), rot = south ? 0 : Math.PI;           // v runs into the house; the person at the hearth faces the back wall
+    if (Math.hypot((x0 + x1) / 2 + 21.5, (z0 + z1) / 2 + 4) > 125) continue;
+    if (l.seed % 2 === 0) woman(xz((left ? tt + 0.15 : W - tt - 0.85) + 0.35, D - tt - 1.25), 0.02, rot, { pose: 'squat' });
+    else if (l.seed % 3 === 0) { const cu = left ? W - tt - 1.8 : tt + 0.1; (rand() < 0.5 ? worker : lay)(xz(cu + 0.9, D - tt - 0.6), 0.5, rot + Math.PI, { pose: 'sit' }); }
+  }
   T.push({ t: 'chickens', at: [wx - 6, wz + 4], y: 0, seed: 3 }); T.push({ t: 'chickens', at: [wx + 9, wz - 5], y: 0, seed: 4 });
   for (let k = 0; k < 4; k++) T.push({ t: 'animal', kind: 'goat', at: [wx - 10 + k * 1.6, wz + 7 + (k % 2)], y: 0, rot: rand() * 6.28, seed: 40 + k, graze: k % 2 === 0 });
   T.push({ t: 'cart', kind: 'two', beast: 'zebu', load: 'sacks', at: [wx + 12, wz + 3], y: 0, rot: Math.PI / 2, seed: 9 });

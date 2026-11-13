@@ -5,7 +5,7 @@
 import { lodTiles } from '../lod.js';
 import { ALL_SUQS, C, PALACE, MOSQUE, LIBRARY, SUQS, RC, RIVER, CANAL, JETTIES, jettyAt, riverX, lots, inRect } from './layout.js';
 import { KHAN_RECT, HAMMAM_RECT, WORKSHOPS, CANAL_BRIDGES, moored } from './layout.js';
-import { frontElements, esplanadeElements } from './fronts.js';
+import { frontElements, esplanadeElements, esplanadeShopFronts } from './fronts.js';
 import { suqKeepers } from '../../styles/abbasid/market.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -143,6 +143,8 @@ export async function lifePlan() {
     const hx = (HAMMAM_RECT[0] + HAMMAM_RECT[2]) / 2, hz = (HAMMAM_RECT[1] + HAMMAM_RECT[3]) / 2;
     for (const [dx, dz] of [[-3, 9], [2.5, 8], [-1, 4]]) P.push({ t: 'figure', at: [hx + dx, hz + dz], y: 0, rot: rand() * 6, seed: Math.floor(rand() * 1e9), dress: 'tunic', legs: 'bare', cloth: 'cloth_white', cloth2: 'cloth_white', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: 'short', beard: rand() < 0.6, pose: 'sit_ground' });
     for (const w of WORKSHOPS) { const wx = (w.rect[0] + w.rect[2]) / 2, wz = (w.rect[1] + w.rect[3]) / 2; man([wx + 1.2, wz + 1.0], 0, 0, { pose: w.kind === 'perfumer' ? 'cross' : 'stand', cloth: pick(CL), over: 'sash' }); if (w.kind !== 'coppersmith') porter([wx - 1.5, wz + 2.2], 0, 3.14, { pose: 'stand' }); }
+    // the service houses of the south gate road: goods and sitters before the fronts, the keepers inside
+    { const s = esplanadeShopFronts(); E.push(...s.E); for (const p of s.P) man(p.at, p.y, p.rot, { pose: p.pose, over: 'none' }); for (const q of s.I) (q.guard ? guard : man)(q.at, 0.03, q.rot, q.guard ? {} : { pose: q.pose ?? 'stand', cloth: pick(CL), over: 'sash' }); }
     for (const x of [-110]) void x;
   }
   // ── the water's edge: fishermen in the moored quffas, ducks and geese on the banks and the canal's quay, a boat yard's fire and fuel at the canal's end ──

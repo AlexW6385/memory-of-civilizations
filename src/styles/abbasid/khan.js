@@ -81,17 +81,63 @@ function hammam(el, ctx) {
   });
 }
 
-/** abbasid_workshop: { rect, face, kind: 'bakery' | 'perfumer' | 'coppersmith' | 'potter', seed } — one room on the street with a wide door. */
+/**
+ * abbasid_workshop: { rect, face, kind, seed, front, mat, RH } — one room on the street with a wide door, furnished by its kind ('bakery' | 'perfumer' |
+ * 'coppersmith' | 'potter' or any kind of dress.js: guard, diwan, treasury, kitchen, stable, store, reception, bedroom, barracks). `front` varies the street
+ * face: 'arch' (the plain arched door and board), 'awning' (a reed-mat awning on poles over the whole front), 'portico' (an arcade of palm-trunk posts under
+ * a reed roof), 'tall' (two storeys with a lattice window and a projecting timber oriel), 'domed' (a small plaster dome over the room, a heavy door), 'wide'
+ * (a broad low shop arch with folded shutters and a hanging sign).
+ */
 export const WORK = { bakery: 'bakery', perfumer: 'perfumer', coppersmith: 'coppersmith', potter: 'workshop' };
 function workshop(el, ctx) {
-  const [cx, cz] = mid(el.rect), face = el.face || 's', y = el.y ?? 0, rand = rng(el.seed ?? 9);
+  const [cx, cz] = mid(el.rect), face = el.face || 's', y = el.y ?? 0, rand = rng(el.seed ?? 9), front = el.front ?? 'arch', wmat = el.mat ?? 'brick_buff';
   const turned = face === 's' || face === 'n', w = turned ? el.rect[2] - el.rect[0] : el.rect[3] - el.rect[1], d = turned ? el.rect[3] - el.rect[1] : el.rect[2] - el.rect[0], hw = w / 2, hd = d / 2;
+  const RH = el.RH ?? (front === 'tall' ? 7.0 : 4.4), TOP = RH + 1.0, ceil = front === 'tall' ? 4.2 : 3.8;
   local(ctx, [cx, cz], YAWS[face], (c) => {
-    const { bag } = c, rect = [-hw, -hd, hw, hd];
-    buildRooms(c, [{ rect, door: '+z', kind: WORK[el.kind] ?? 'workshop', k: 0, n: 1, doorW: 3.0, doorH: 3.0 }], { y, RH: 4.4, TOP: 5.4, ceil: 3.8, floor: 'brick_paving', rand, mat: 'brick_buff', back: true, lightEvery: 1 });
-    bag.add('cedar', box(-1.6, y + 4.2, hd + 0.02, 1.6, y + 4.9, hd + 0.08)); bag.add('plaster_white', box(-1.5, y + 4.28, hd + 0.08, 1.5, y + 4.82, hd + 0.1));
-    for (let k = 0; k < 4; k++) bag.add('lacquer_black', box(-1.2 + k * 0.65, y + 4.4, hd + 0.1, -0.95 + k * 0.65, y + 4.65, hd + 0.105));
-    bag.add('limestone', box(-1.5, y, hd - 0.1, 1.5, y + 0.1, hd + 0.5)); void lathe;
+    const { bag, col } = c, rect = [-hw, -hd, hw, hd], doorW = front === 'wide' ? 4.6 : front === 'domed' ? 2.2 : 3.0, doorH = front === 'wide' ? 3.1 : 3.0;
+    buildRooms(c, [{ rect, door: '+z', kind: WORK[el.kind] ?? el.kind ?? 'workshop', k: 0, n: 1, doorW, doorH }], { y, RH, TOP, ceil, floor: 'brick_paving', rand, mat: wmat, back: true, lightEvery: 1 });
+    // the board over the door (not on the tall front, whose oriel carries the eye)
+    const sy = front === 'tall' ? 3.5 : front === 'wide' ? 3.45 : 4.2;
+    if (front !== 'domed') { bag.add('cedar', box(-1.6, y + sy, hd + 0.02, 1.6, y + sy + 0.7, hd + 0.08)); bag.add('plaster_white', box(-1.5, y + sy + 0.08, hd + 0.08, 1.5, y + sy + 0.62, hd + 0.1)); for (let k = 0; k < 4; k++) bag.add('lacquer_black', box(-1.2 + k * 0.65, y + sy + 0.2, hd + 0.1, -0.95 + k * 0.65, y + sy + 0.45, hd + 0.105)); }
+    bag.add('limestone', box(-doorW / 2, y, hd - 0.1, doorW / 2, y + 0.1, hd + 0.5));
+    if (front === 'awning') {
+      // a reed-mat awning from the wall at 3.4 m, sloping to 2.8 m at the outer edge on two posts, a fringe along it
+      const D = 1.9, zA = hd, zB = hd + D;
+      bag.add('reed_mat', fromTriangles([-hw, y + 3.4, zA, hw, y + 3.4, zA, hw, y + 2.8, zB, -hw, y + 3.4, zA, hw, y + 2.8, zB, -hw, y + 2.8, zB, -hw, y + 2.8, zB, hw, y + 2.8, zB, hw, y + 3.4, zA, -hw, y + 2.8, zB, hw, y + 3.4, zA, -hw, y + 3.4, zA]));
+      for (const sx of [-1, 1]) { bag.add('palm_trunk', box(sx * (hw - 0.3) - 0.07, y, zB - 0.07, sx * (hw - 0.3) + 0.07, y + 2.8, zB + 0.07)); col.circle(sx * (hw - 0.3), zB, 0.1, y, y + 2.8); }
+      bag.add('palm_trunk', box(-hw, y + 2.7, zB - 0.05, hw, y + 2.82, zB + 0.05));
+      for (let x = -hw + 0.4; x < hw - 0.2; x += 0.5) bag.add(rand() < 0.5 ? 'cloth_ochre' : 'cloth_red', box(x, y + 2.45, zB + 0.04, x + 0.22, y + 2.7, zB + 0.05));
+    } else if (front === 'portico') {
+      // an arcade: posts of palm trunk with a beam and a flat reed roof, a paved floor under it
+      const D = 2.3, n = 3, zB = hd + D;
+      bag.add('brick_paving', box(-hw, y - 0.2, hd, hw, y + 0.03, zB)); col.floor([-hw, hd, hw, zB], y + 0.03);
+      for (let k = 0; k <= n; k++) { const x = -hw + 0.3 + k * (w - 0.6) / n; bag.add('limestone', box(x - 0.2, y, zB - 0.2, x + 0.2, y + 0.2, zB + 0.2)); bag.add('palm_trunk', box(x - 0.12, y + 0.2, zB - 0.12, x + 0.12, y + 3.5, zB + 0.12)); col.circle(x, zB, 0.2, y, y + 3.5); }
+      bag.add('palm_trunk', box(-hw, y + 3.5, zB - 0.14, hw, y + 3.8, zB + 0.14)); for (let x = -hw + 0.3; x < hw - 0.1; x += 0.7) bag.add('palm_trunk', box(x - 0.05, y + 3.45, hd, x + 0.05, y + 3.55, zB + 0.2));
+      bag.add('reed_mat', box(-hw, y + 3.55, hd, hw, y + 3.62, zB + 0.2)); bag.add('mud_plaster', box(-hw, y + 3.62, hd, hw, y + 3.7, zB + 0.2));
+    } else if (front === 'tall') {
+      // the upper storey: two small lattice windows and a projecting oriel (rawshan) of timber lattice on three brackets, a string course
+      const zf = hd, oy = y + 4.5;
+      bag.add('brick_baked', box(-hw, y + 3.9, zf, hw, y + 4.02, zf + 0.06));
+      for (const sx of [-1, 1]) { const wx = sx * (hw - 1.4); bag.add('opening', box(wx - 0.35, oy + 0.2, zf - 0.02, wx + 0.35, oy + 1.3, zf + 0.04)); bag.add('lattice', box(wx - 0.35, oy + 0.2, zf + 0.04, wx + 0.35, oy + 1.3, zf + 0.06)); bag.add('cedar', box(wx - 0.45, oy + 0.13, zf, wx + 0.45, oy + 0.2, zf + 0.18)); }
+      const ox = 0, ow = 2.6;
+      bag.add('cedar', box(ox - ow / 2, oy, zf + 0.0, ox + ow / 2, oy + 0.12, zf + 0.8)); bag.add('cedar', box(ox - ow / 2, oy + 1.6, zf + 0.0, ox + ow / 2, oy + 1.76, zf + 0.84));
+      for (const sx of [-1, 1]) bag.add('cedar', box(ox + sx * (ow / 2 - 0.04) - 0.04, oy + 0.12, zf, ox + sx * (ow / 2 - 0.04) + 0.04, oy + 1.6, zf + 0.8));
+      bag.add('lattice', box(ox - ow / 2, oy + 0.12, zf + 0.76, ox + ow / 2, oy + 1.6, zf + 0.8)); bag.add('opening', box(ox - ow / 2 + 0.1, oy + 0.12, zf + 0.7, ox + ow / 2 - 0.1, oy + 1.6, zf + 0.74));
+      for (const bx of [-ow / 2 + 0.2, 0, ow / 2 - 0.2]) { bag.add('cedar', box(ox + bx - 0.05, oy - 0.5, zf, ox + bx + 0.05, oy, zf + 0.06)); bag.add('cedar', box(ox + bx - 0.05, oy - 0.5, zf, ox + bx + 0.05, oy - 0.44, zf + 0.7)); }
+      bag.add('bitumen', box(-hw, y, hd, hw, y + 0.35, hd + 0.015));
+    } else if (front === 'domed') {
+      // a small plaster dome on the roof over the room, light-pins in it; a studded door leaf folded back against the jamb
+      domeShell(bag, 'plaster_white', 0, 0, Math.min(hw, hd) * 0.62, y + RH + 0.14, { pointed: 0.12, seg: 16, rows: 5 });
+      for (let k = 0; k < 3; k++) bag.add('daylight', box(-0.7 + k * 0.7, y + RH + 0.15, -0.3, -0.5 + k * 0.7, y + RH + 0.2, -0.05));
+      bag.add('wood_dark', box(doorW / 2 - 0.06, y + 0.05, hd + 0.02, doorW / 2 + 0.0, y + 2.9, hd + 0.02 + doorW * 0.5)); for (const hy of [0.5, 1.2, 2.0]) bag.add('iron', box(doorW / 2 - 0.08, y + hy, hd + 0.02, doorW / 2 + 0.02, y + hy + 0.06, hd + 0.02 + doorW * 0.5));
+      bag.add('cedar', box(-1.2, y + 3.3, hd + 0.02, 1.2, y + 3.85, hd + 0.08)); bag.add('plaster_white', box(-1.1, y + 3.36, hd + 0.08, 1.1, y + 3.79, hd + 0.1));
+      for (let k = 0; k < 3; k++) bag.add('lacquer_black', box(-0.8 + k * 0.6, y + 3.5, hd + 0.1, -0.55 + k * 0.6, y + 3.65, hd + 0.105));
+    } else if (front === 'wide') {
+      // folded shutters up as an awning board over the broad arch, a hanging sign on an iron bracket
+      bag.add('cedar', box(-doorW / 2 - 0.2, y + 3.2, hd, doorW / 2 + 0.2, y + 3.28, hd + 1.0)); bag.add('timber', box(-doorW / 2 - 0.2, y + 3.28, hd + 0.96, doorW / 2 + 0.2, y + 3.34, hd + 1.0));
+      bag.add('iron', box(hw - 1.1, y + 3.6, hd, hw - 1.07, y + 3.65, hd + 1.0)); bag.add('cedar', box(hw - 1.4, y + 2.9, hd + 0.95, hw - 0.8, y + 3.6, hd + 0.99)); bag.add('plaster_white', box(hw - 1.34, y + 2.96, hd + 0.99, hw - 0.86, y + 3.54, hd + 1.0));
+      bag.add('brick_baked', box(-hw, y + 3.9, hd, hw, y + 4.02, hd + 0.05));
+    }
   });
 }
 export const khanElements = { abbasid_khan: khan, abbasid_hammam: hammam, abbasid_workshop: workshop };
