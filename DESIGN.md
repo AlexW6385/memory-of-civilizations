@@ -323,7 +323,7 @@ Targets on the author's machine (Apple M2, 8 GB). Automatic quality settles ther
 
 Replace these lines, never append to them; keep them few.
 
-- v12.0 (2026-11-12): 94 settlements stand, each reviewed at its arrival in the author's Chrome (§4.4, §5). **Still below §5:** ordinary houses beyond the first 120 m are mostly shut; the fronts vary by add-ons in several; Barcelona's Sagrada Família façade is still blocky; Kaifeng loads slowly (about 20 s) and stands at the edge of the frame budget. The baked light and the impostors are current for all 94; every walk route passes.
+- v12.0 (2026-11-12): 94 settlements stand, each reviewed at its arrival in the author's Chrome (§4.4, §5). **Still below §5:** ordinary houses beyond the first 120 m are mostly shut; the fronts vary by add-ons in several; Barcelona's Sagrada Família façade is still blocky; Kaifeng loads slowly (about 20 s) and stands at the edge of the frame budget. The baked light and the impostors are current (Lalibela alone has no bake: its volumes come out unlit, to be found); every walk route passes.
 - **Next:** a second browser tour beyond the arrivals (the first 300 m of each), and the phone.
 
 ## 11. Rules

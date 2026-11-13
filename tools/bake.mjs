@@ -314,7 +314,7 @@ function encode(G, vol) {
   for (let c = 0; c < 12; c++) {
     let prev = 0;
     for (let i = 0; i < N; i++) {
-      const h = DataUtils.toHalfFloat(vol[i * 12 + c]);
+      const f = vol[i * 12 + c], h = DataUtils.toHalfFloat(Number.isFinite(f) ? Math.max(-60000, Math.min(60000, f)) : 0);   // (a probe inside a wall or a degenerate ray: no light, never NaN or infinity)
       planes[c * N + i] = (h - prev) & 0xffff;
       prev = h;
     }
