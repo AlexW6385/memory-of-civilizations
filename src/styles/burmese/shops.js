@@ -35,15 +35,17 @@ export function shop(el, ctx) {
   const F = lotFrame(ctx, el.rect, el.front), r = rng(el.seed ?? 3), W = F.W, trade = el.trade ?? TRADES[Math.floor(r() * TRADES.length)];
   const fl = 0.55, wh = 2.9, v0 = 0.5, v1 = 9.2, t = 0.14, u0 = 0.1, u1 = W - 0.1;
   const tint = r() < 0.5 ? 'planks_grey' : 'wood_ochre';
+  // the front's design (town.js gives the shops along a road in turn 0..3): 0 the open counter, 1 the plank front with its shutter propped as a canopy, 2 the screened porch on red posts, 3 the two-storey front with a loft window
+  const V = (el.variant ?? 0) % 4, ext = V === 3 ? 2.0 : 0, H = wh + ext;
   // the footing and floor
   F.b('brick', u0, 0, v0, u1, fl - 0.1, v1, false);
   F.b('wood_ochre', u0, fl - 0.1, v0, u1, fl, v1, false); F.floor(u0, v0, u1, v1, fl);
   // the front step along the whole front and the walls: sides shared with the neighbours, a back wall
   F.b('brick', u0 + 0.2, 0, -1.0, u1 - 0.2, fl * 0.5, v0, false); F.b('brick', u0 + 0.2, 0, -0.25, u1 - 0.2, fl, v0, false);
   F.ramp(u0 + 0.2, -1.0, u1 - 0.2, v0, 0, fl, 1);
-  F.b(tint, u0, fl, v1 - t, u1, fl + wh, v1, true);
-  F.b(tint, u0, fl, v0 + 1.6, u0 + t, fl + wh, v1, true); F.b(tint, u1 - t, fl, v0 + 1.6, u1, fl + wh, v1, true);
-  F.b(tint, u0, fl, v0, u0 + t, fl + wh, v0 + 1.6, true); F.b(tint, u1 - t, fl, v0, u1, fl + wh, v0 + 1.6, true);
+  F.b(tint, u0, fl, v1 - t, u1, fl + H, v1, true);
+  F.b(tint, u0, fl, v0 + 1.6, u0 + t, fl + H, v1, true); F.b(tint, u1 - t, fl, v0 + 1.6, u1, fl + H, v1, true);
+  F.b(tint, u0, fl, v0, u0 + t, fl + H, v0 + 1.6, true); F.b(tint, u1 - t, fl, v0, u1, fl + H, v0 + 1.6, true);
   // the front: two posts, the beam, the counter under it with a gap for the door at one side
   const dpos = r() < 0.5 ? u0 + 1.2 : u1 - 1.2;
   for (const u of [u0 + 0.2, (u0 + u1) / 2, u1 - 0.2]) F.b('timber', u - 0.09, fl, v0 - 0.09, u + 0.09, fl + wh, v0 + 0.09, false);
@@ -53,13 +55,39 @@ export function shop(el, ctx) {
   F.b('wood_dark', c0 - 0.03, fl + 0.88, v0 - 0.5, c1 + 0.03, fl + 0.95, v0, false);
   goods(F, trade, c0, c1, v0 - 0.25, fl + 0.95, r);
   // the deep roof, an awning of cloth over the counter, goods hung from the beam
-  gable(F, 'thatch_palm', u0 - 0.15, u1 + 0.15, v0 - 1.3, v1 + 0.5, fl + wh, 2.0 + 0.2 * r(), true);
+  gable(F, 'thatch_palm', u0 - 0.15, u1 + 0.15, v0 - 1.3, v1 + 0.5, fl + H, (V === 3 ? 2.6 : V === 2 ? 1.6 : 2.0) + 0.2 * r(), true);
   const aw = trade === 'parasols' || trade === 'cloth' ? 'cloth_red' : r() < 0.5 ? 'cloth_ochre' : 'cloth_white';
   F.b(aw, c0 - 0.1, fl + 2.15, v0 - 1.25, c1 + 0.1, fl + 2.22, v0 - 0.2, false);
   for (let u = c0; u < c1 - 0.2; u += 0.5) F.b(aw, u, fl + 1.95, v0 - 1.27, u + 0.28, fl + 2.15, v0 - 1.25, false);
   const hang = trade === 'pottery' || trade === 'offerings' ? 'wicker' : trade === 'parasols' ? 'cloth_green' : 'wicker';
   for (let u = c0 + 0.5; u < c1 - 0.3; u += 1.1) hangBasket(F, u, fl + 1.8, v0 - 0.8, 1.0, hang);
   sign(F, (u0 + u1) / 2 + (r() - 0.5) * 1.2, fl + 2.45, v0 - 1.0, 1.1, SIGN[trade] ?? 'paint_ochre');
+  if (V === 1) {
+    // the plank front closed above the counter but for a wide window, its shutter leaf propped up on two sticks as a canopy over the goods; the door gap beside it stays
+    const wm = (c0 + c1) / 2, ww = Math.min(1.5, (c1 - c0) * 0.4), y0 = fl + 0.95, y1 = fl + wh - 0.55;
+    for (const [a, b] of [[c0, wm - ww / 2], [wm + ww / 2, c1]]) F.b(tint, a, y0, v0 - 0.04, b, y1, v0 + 0.06, true);
+    F.b(tint, wm - ww / 2, fl + 2.05, v0 - 0.04, wm + ww / 2, y1, v0 + 0.06, true);
+    F.b('planks_grey', wm - ww / 2 - 0.05, fl + 2.0, v0 - 0.9, wm + ww / 2 + 0.05, fl + 2.06, v0 - 0.08, false);
+    for (const u of [wm - ww / 2, wm + ww / 2]) F.b('bamboo_culm', u - 0.02, fl + 0.95, v0 - 0.86, u + 0.02, fl + 2.0, v0 - 0.82, false);
+    F.b('lacquer_red', c0 - 0.05, fl + 0.9, v0 - 0.5, c1 + 0.05, fl + 0.95, v0 + 0.02, false);
+  } else if (V === 2) {
+    // a screened porch: the posts painted red, a rolled reed blind under the beam, a low basket-work screen below the counter's goods, a bench either side, a deeper porch roof
+    for (const u of [u0 + 0.2, (u0 + u1) / 2, u1 - 0.2]) F.b('lacquer_red', u - 0.11, fl, v0 - 0.11, u + 0.11, fl + wh - 0.55, v0 + 0.11, false);
+    F.b('reed_mat', c0, fl + wh - 0.95, v0 - 0.18, c1, fl + wh - 0.62, v0 - 0.05, false);
+    F.b('wicker', c0, fl + 0.95, v0 - 0.12, c1, fl + 1.35, v0 - 0.06, false);
+    gable(F, 'thatch_palm', c0 - 0.4, c1 + 0.4, v0 - 2.5, v0 - 1.1, fl + 2.45, 0.7, true);
+    for (const u of [c0 - 0.2, c1 + 0.2]) F.b('bamboo_culm', u - 0.04, fl, v0 - 2.35, u + 0.04, fl + 2.45, v0 - 2.27, true);
+    F.b('wood_ochre', c0, fl, v0 - 2.3, c1, fl + 0.4, v0 - 1.8, false);
+  } else if (V === 3) {
+    // the loft: the front carried up over the beam with a window, its shutters propped open, a rail across the sill, a hanging lantern
+    const wm = (u0 + u1) / 2, y0 = fl + wh, y1 = fl + H;
+    for (const [a, b] of [[u0, wm - 0.65], [wm + 0.65, u1]]) F.b(tint, a, y0, v0 - 0.06, b, y1, v0 + 0.08, true);
+    F.b(tint, wm - 0.65, y0, v0 - 0.06, wm + 0.65, y0 + 0.65, v0 + 0.08, true); F.b(tint, wm - 0.65, y0 + 1.55, v0 - 0.06, wm + 0.65, y1, v0 + 0.08, true);
+    for (const sg of [-1, 1]) F.b('wood_dark', wm + sg * 0.66 - 0.02, y0 + 0.65, v0 - 0.62, wm + sg * 0.66 + 0.02, y0 + 1.55, v0 - 0.06, false);
+    F.b('timber', wm - 0.8, y0 + 0.62, v0 - 0.36, wm + 0.8, y0 + 0.68, v0 - 0.06, false);
+    F.b('timber', wm - 0.8, y0 + 1.2, v0 - 0.38, wm + 0.8, y0 + 1.25, v0 - 0.34, false);
+    F.b('lamp_paper', wm + 1.0, y0 + 0.3, v0 - 0.3, wm + 1.24, y0 + 0.62, v0 - 0.06, false);
+  }
   // inside: shelves along the sides and back with the trade's goods, a bench, a stool, a lamp, the back platform for sleeping
   for (const side of [u0 + t, u1 - t]) {
     const sg = side < W / 2 ? 1 : -1;

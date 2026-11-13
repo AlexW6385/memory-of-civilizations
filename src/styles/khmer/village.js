@@ -30,9 +30,19 @@ export function jar(bag, x, z, y, s, mat = 'terracotta') {
 /**
  * stilt_house: { rect, front, seed, kind ('plain' | 'big' | 'small') } — see the head of this file.
  */
-export function stiltHouse(el, { bag, col }) {
-  const rand = rng(el.seed || 1), { F, W, R, hF, hS } = frame(el.rect, el.front), kind = el.kind ?? 'plain';
-  const up = 2.0 + rand() * 0.45, wallH = kind === 'small' ? 2.0 : 2.25, top = up + wallH, wall = rand() < 0.5 ? 'reed_mat' : 'timber';
+/** The front design of a house: el.variant ('plain' | 'porch' | 'shop' | 'tile') or, by its seed, one of them; a small house has none. */
+export const VARIANTS = ['plain', 'porch', 'shop', 'tile'];
+export function variantOf(el) {
+  if ((el.kind ?? 'plain') === 'small') return 'plain';
+  return el.variant ?? VARIANTS[Math.floor(rng((el.seed || 1) * 7919 + 13)() * VARIANTS.length)];
+}
+/** The height of the floor above the ground (the first draw of the house's own stream; the tile house stands higher). */
+export function houseUp(el) { return 2.0 + rng(el.seed || 1)() * 0.45 + (variantOf(el) === 'tile' ? 0.35 : 0); }
+export function stiltHouse(el, { bag, col, lights }) {
+  const rand = rng(el.seed || 1), { F, W, R, hF, hS } = frame(el.rect, el.front), kind = el.kind ?? 'plain', variant = variantOf(el);
+  const up = houseUp(el), wallH = kind === 'small' ? 2.0 : variant === 'tile' ? 2.45 : 2.25, top = up + wallH;
+  rand();                                                                       // (the floor's height, drawn above)
+  const w0 = rand() < 0.5, wall = variant === 'tile' ? 'timber_red' : variant === 'porch' ? 'planks_grey' : variant === 'shop' ? 'wood_ochre' : w0 ? 'reed_mat' : 'timber';
   const th = 0.07, deck = kind === 'small' ? 0 : 0.95, doorW = 0.5, doorH = 1.85;
   // ── the posts: the perimeter ones rise to the eaves, the inner ones carry the floor
   const nu = hS > 2.3 ? 3 : 2, nv = hF > 3 ? 4 : 3;
@@ -122,8 +132,9 @@ export function stiltHouse(el, { bag, col }) {
   const long = el.rect[2] - el.rect[0] >= el.rect[3] - el.rect[1];
   void along;
   const cx = (el.rect[0] + el.rect[2]) / 2, cz = (el.rect[1] + el.rect[3]) / 2, A = (long ? el.rect[2] - el.rect[0] : el.rect[3] - el.rect[1]) / 2 + 0.85, B = (long ? el.rect[3] - el.rect[1] : el.rect[2] - el.rect[0]) / 2 + 0.95, rise2 = B * 1.15;
-  rectRoof({ c: [cx, cz], A, B, y: top, rise: rise2, kind: 'gable', sweep: 0, curl: false, p: 1.05, alongZ: !long, mat: 'thatch_palm', soffit: 'thatch_palm' }, bag);
-  {
+  const tiled = variant === 'tile';
+  rectRoof({ c: [cx, cz], A, B, y: top, rise: tiled ? rise2 * 0.8 : rise2, kind: tiled ? 'hip' : 'gable', sweep: 0, curl: false, p: 1.05, alongZ: !long, mat: tiled ? 'roof_tile' : 'thatch_palm', soffit: tiled ? 'timber' : 'thatch_palm' }, bag);
+  if (!tiled) {
     const ry = top + rise2, ends = long ? [[cx - A, cz], [cx + A, cz]] : [[cx, cz - A], [cx, cz + A]], d = long ? [1, 0] : [0, 1], ridge = [];
     const a = [cx - d[0] * (A - 0.1), ry + 0.04, cz - d[1] * (A - 0.1)], b = [cx + d[0] * (A - 0.1), ry + 0.04, cz + d[1] * (A - 0.1)];
     beamTris(ridge, a, b, 0.17, 0.2);
@@ -188,6 +199,52 @@ export function stiltHouse(el, { bag, col }) {
     for (const dx of [-0.45, 0, 0.45]) jar(bag, ...(() => { const q = W(dx - hS * 0.4, -hF + 0.55); return [q[0], q[1]]; })(), up, 0.8, 'pottery_dark');
     void x; void z;
     bag.add('clay_gilt', boxR(R(-0.3, 0.3, hF + 0.02, hF + 0.06), up + doorH + 0.16, up + doorH + 0.4));
+  }
+  // ── the oil lamp: a wick in a dish of coconut oil on a low stand by the sleeping mats, its light filling the room
+  { const [lx, lz] = W(hS * 0.3, -hF * 0.15);
+    bag.add('timber', lathe([[0.001, 0], [0.12, 0], [0.1, 0.34], [0.001, 0.36]], 6, null, lx, up, lz));
+    bag.add('pottery_dark', lathe([[0.001, 0.36], [0.08, 0.36], [0.1, 0.4], [0.001, 0.4]], 8, null, lx, up, lz));
+    bag.add('flame', lathe([[0.001, 0.4], [0.014, 0.45], [0.001, 0.5]], 4, null, lx, up, lz));
+    col.circle(lx, lz, 0.14, up, up + 0.4);
+    if (lights) lights.push({ at: [lx, up + 0.55, lz], color: '#ffb25a', intensity: 2.6, distance: 6.5 }); }
+  // ── the front designs (the houses along one road do not repeat one front)
+  const sheetQ = (mat, a, b, c, d) => { const T = [], q = (p0, p1, p2, p3) => T.push(...p0, ...p1, ...p2, ...p0, ...p2, ...p3, ...p0, ...p2, ...p1, ...p0, ...p3, ...p2); q(a, b, c, d); bag.add(mat, fromTriangles(T)); };
+  const P3 = (u, v, y) => { const [x, z] = W(u, v); return [x, y, z]; };
+  if (variant === 'porch' && deck) {
+    // the deck roofed over its whole width by a lean-to of thatch on two posts, a rolled reed blind under its edge, a bench and a woven fish trap
+    const u1 = hS + 0.25, v1 = vd + 0.95, yh = top - 0.3, yl = up + 2.1;
+    sheetQ('thatch_palm', P3(-u1, hF - 0.1, yh), P3(u1, hF - 0.1, yh), P3(u1, v1, yl), P3(-u1, v1, yl));
+    sheetQ('thatch_palm', P3(-u1, hF - 0.1, yh - 0.12), P3(u1, hF - 0.1, yh - 0.12), P3(u1, v1, yl - 0.12), P3(-u1, v1, yl - 0.12));
+    for (const sg of [-1, 1]) { const [x, z] = W(sg * (u1 - 0.1), v1 - 0.1); bag.add('timber', lathe([[0.09, 0], [0.075, yl - up - 0.05]], 6, null, x, up - 0.02, z)); col.circle(x, z, 0.1, up, yl); }
+    bag.add('reed_mat', boxR(R(-hS + 0.3, hS - 0.3, v1 - 0.16, v1 - 0.08), yl - 0.28, yl - 0.06));
+    bag.add('bamboo_culm', boxR(R(-hS + 0.25, hS - 0.25, v1 - 0.18, v1 - 0.12), yl - 0.08, yl - 0.02));
+    { const bu = -hS * 0.55, [x, z] = W(bu, hF + 0.3); bag.add('bamboo_culm', boxR(R(bu - 0.6, bu + 0.6, hF + 0.12, hF + 0.42), up + 0.38, up + 0.44)); void x; void z; }
+    { const [x, z] = W(hS * 0.6, hF + 0.55); bag.add('wicker', lathe([[0.001, 0], [0.16, 0], [0.2, 0.3], [0.14, 0.75], [0.001, 0.8]], 8, null, x, up + 0.0, z)); }
+  }
+  if (variant === 'shop' && deck) {
+    // a shop: the counter across the deck either side of the stair with the day's goods, a striped cloth awning slung out from the eave on poles, wares hung from it, a hanging sign
+    const dw2 = Math.min(hS, 1.7), cl = [['cloth_red', 'cloth_white'], ['cloth_indigo', 'cloth_white'], ['cloth_ochre', 'cloth_brown']][Math.floor(rand() * 3)];
+    for (const sg of [-1, 1]) {
+      const a = 0.62 * sg, b = (dw2 - 0.06) * sg;
+      bag.add('wood_ochre', boxR(R(Math.min(a, b), Math.max(a, b), vd - 0.5, vd - 0.12), up, up + 0.86)); col.rect(R(Math.min(a, b), Math.max(a, b), vd - 0.5, vd - 0.12), up, up + 0.9);
+      bag.add('timber', boxR(R(Math.min(a, b) - 0.03, Math.max(a, b) + 0.03, vd - 0.55, vd - 0.08), up + 0.86, up + 0.91));
+      for (let k = 0; k < 4; k++) { const u = Math.min(a, b) + 0.2 + k * (Math.abs(b - a) - 0.4) / 3, [x, z] = W(u, vd - 0.3), r = rand();
+        if (r < 0.4) bag.add('terracotta', lathe([[0.001, 0], [0.1, 0], [0.15, 0.12], [0.1, 0.22], [0.001, 0.22]], 7, null, x, up + 0.91, z));
+        else if (r < 0.7) bag.add('wicker', lathe([[0.001, 0], [0.14, 0], [0.18, 0.1], [0.001, 0.12]], 7, null, x, up + 0.91, z));
+        else bag.add(['cloth_green', 'cloth_ochre', 'cloth_red'][k % 3], boxR(R(u - 0.13, u + 0.13, vd - 0.42, vd - 0.18), up + 0.91, up + 1.03)); }
+    }
+    const u1 = hS + 0.1, v1 = vd + 1.5, yh = up + 2.25, yl = up + 1.75, n = 6, w = 2 * u1 / n;
+    for (let k = 0; k < n; k++) sheetQ(k % 2 ? cl[1] : cl[0], P3(-u1 + k * w, hF - 0.05, yh), P3(-u1 + (k + 1) * w, hF - 0.05, yh), P3(-u1 + (k + 1) * w, v1, yl), P3(-u1 + k * w, v1, yl));
+    for (const sg of [-1, 1]) { const [x, z] = W(sg * (u1 - 0.05), v1 - 0.05); bag.add('bamboo_culm', lathe([[0.04, 0], [0.035, yl - 0.05]], 5, null, x, 0, z)); col.circle(x, z, 0.06, 0, yl); }
+    for (let k = 0; k < 3; k++) { const u = -0.9 + k * 0.9, [x, z] = W(u, v1 - 0.25); bag.add('rope_fibre', boxR([x - 0.004, z - 0.004, x + 0.004, z + 0.004], yl - 0.55, yl)); bag.add(k % 2 ? 'wicker' : 'sacking', lathe([[0.001, 0], [0.09, 0.02], [0.11, 0.14], [0.001, 0.2]], 7, null, x, yl - 0.75, z)); }
+    bag.add('lacquer_red', boxR(R(hS - 0.95, hS - 0.2, v1 - 0.05, v1 - 0.01), yl - 0.8, yl - 0.05)); bag.add('clay_gilt', boxR(R(hS - 0.8, hS - 0.35, v1 - 0.06, v1 - 0.04), yl - 0.65, yl - 0.2));
+  }
+  if (variant === 'tile') {
+    // the house of a person of standing: the posts on laterite footings, a carved gilt board over the door, painted window frames, a tile roof
+    for (let i = 0; i <= nv; i++) for (let j = 0; j <= nu; j++) { const edge = i === 0 || i === nv || j === 0 || j === nu; if (!edge) continue; const [x, z] = W(-hS + 2 * hS * j / nu, -hF + 2 * hF * i / nv); bag.add('laterite', lathe([[0.26, 0], [0.22, 0.34], [0.16, 0.36], [0.001, 0.36]], 8, null, x, 0, z)); }
+    bag.add('clay_gilt', boxR(R(-0.55, 0.55, hF + 0.02, hF + 0.07), up + doorH + 0.14, up + doorH + 0.52));
+    bag.add('timber_red', boxR(R(-hS - 0.04, hS + 0.04, hF - 0.05, hF + 0.05), up + wallH - 0.2, up + wallH));
+    bag.add('clay_gilt', boxR(R(-hS - 0.05, hS + 0.05, hF - 0.04, hF + 0.06), up + wallH - 0.2, up + wallH - 0.14));
   }
 }
 

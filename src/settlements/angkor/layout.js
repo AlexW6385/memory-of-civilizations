@@ -97,6 +97,8 @@ export function houses() {
     const x = cx + (rand() - 0.5) * 36, z = cz + (rand() - 0.5) * 36, toC = Math.atan2(-z, -x), front = Math.abs(Math.cos(toC)) > Math.abs(Math.sin(toC)) ? (Math.cos(toC) > 0 ? 'e' : 'w') : (Math.sin(toC) > 0 ? 's' : 'n');
     place(x, z, rand() < 0.5, front);
   }
+  // the front designs (styles/khmer/village.js variantOf): along each side of a road the houses take them in turn, so that no two neighbours share a front
+  { const n = {}, V = ['plain', 'porch', 'shop', 'tile']; for (const h of HOUSES) { n[h.front] = (n[h.front] ?? (h.front === 'e' ? 0 : h.front === 'w' ? 1 : h.front === 's' ? 2 : 3)) + 3; if (h.kind !== 'small') h.variant = V[n[h.front] % 4]; } }
   return HOUSES;
 }
 /** Rice stores on posts beside the houses, and rest houses (salas) along the road: { at } and { rect }. */

@@ -2,6 +2,7 @@
 // them and the river; the floating houses moored on the river and the floating market on its reach below the palace (boats with fruit,
 // pots, rice and fish, the vendors sitting in them); sugar palms and the granaries; the monks and the people of the banks.
 import { lodTiles } from '../lod.js';
+import { frame } from '../../styles/khmer/village.js';
 import { RADIUS, WATER, CANALS, BRIDGES, MARKET, RIVER_W, ISLAND, inRect, wet, lots, onBridge, onPath, paths, inLot, WAT, PALACE, UBOSOT, wetRiver } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -135,6 +136,23 @@ function people() {
     if (!inRect(ISLAND, x, z, -8) || onBridge(x, z, 6) || Math.hypot(x, z) > RADIUS - 52 || P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 3)) continue;
     const rot = ew ? (z < (b + d) / 2 ? Math.PI : 0) : (x < (a + c1) / 2 ? -Math.PI / 2 : Math.PI / 2);
     if (k < 2) fig([x, z], 0.08, rot, { pose: 'sit_ground', legs: 'cross', hair: 'bun', hat: 'straw', carry: k ? 'pot' : undefined }); else fig([x, z], 0.1, rot, { hat: 'straw', pose: 'talk' }); } } }
+  // at home: the houses near the wat's gate (the first lanes the visitor walks) have someone in them — a woman sitting on the floor of the room facing the door, a man resting, children; the shophouses' keepers
+  // behind their counters, a customer at the lane before them (all inside or before the doors, none within 6 m of the arrival's stand)
+  { const hr = rng(1688), AR = [10, -100];
+    for (const l of lots()) {
+      const [x0, z0, x1, z1] = l.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+      if (Math.hypot(cx - AR[0], cz - AR[1]) > 125 || hr() < 0.25) continue;
+      const fr = frame(l.rect, l.front), { F, W, hF, hS } = fr, dir = Math.atan2(-F[0], -F[1]);
+      if (l.kind === 'shop') {
+        fig(W(0, hF - 1.45), 0.3, dir, { pose: 'stand', hair: 'bun', over: 'shawl', cloth: CL[Math.floor(hr() * CL.length)] });
+        if (hr() < 0.5) { const p = W((hr() - 0.5) * 2, hF + 1.6); fig(p, 0, dir + Math.PI, { pose: 'talk', carry: hr() < 0.5 ? 'basket' : undefined }); }
+        continue;
+      }
+      const up = 1.9 + rng(l.seed || 1)() * 0.6, k = l.kind === 'big' ? 1 : 0;
+      fig(W(k ? 0.4 : 0.0, -hF + 1.2), up, dir, { pose: 'sit_ground', legs: 'cross', hair: 'bun', top: '', over: 'shawl', cloth: CL[Math.floor(hr() * CL.length)] });
+      if (hr() < 0.5 && l.kind !== 'small') fig(W(-hS * 0.45, -hF + 1.9), up, dir + 1.2, { pose: 'sit_ground', legs: 'cross', hair: 'short', cloth: CL[Math.floor(hr() * CL.length)] });
+      if (hr() < 0.35) fig(W(hS * 0.4, -hF + 1.6), up, dir, { pose: 'stand', child: true, h: 0.8, hair: 'short' });
+    } }
   void face;
   return plan('ayutthaya-people', 'life', P);
 }

@@ -96,7 +96,7 @@ export async function houses() {
   // the houses in plans by tile of 150 m (each culls apart), the open ones and the shops of the core in plans of their own
   for (const l of all) {
     const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, key = `${Math.floor(cx / 150)},${Math.floor(cz / 150)}`;
-    const lite = Math.hypot(cx - CORE_C[0], cz - CORE_C[1]) > 150;
+    const lite = !l.gate && Math.hypot(cx - CORE_C[0], cz - CORE_C[1]) > 150;
     const e = l.shop ? { t: 'babylon_shop', rect: l.rect, door: l.door, seed: l.seed, trade: l.shop, shop: true, storeys: 1, front: l.door }
       : { t: 'babylon_house', rect: l.rect, seed: l.seed, door: l.door, open: !!l.open, school: !!l.school, white: l.open && l.seed % 3 === 0, storeys: l.open ? 1 : storeysOf(l.seed), front: l.door, lite };
     if (!tiles.has(key)) tiles.set(key, []);
