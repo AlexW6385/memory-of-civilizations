@@ -36,7 +36,7 @@ function planting(x, z) {
   const r = Math.hypot(x, z);
   if (r > RADIUS - 6 || inCut(x, z, 2)) return null;
   // (the arrival on the hill's crest looks down at Bete Giyorgis: nothing tall at the lens, only short grass along the view)
-  { const dx = x + 236, dz = z - 176, d = Math.hypot(dx, dz); if (d < 12) return { grass: 10 }; if (d < 75 && Math.abs(dx * Math.cos(-0.45) - dz * Math.sin(-0.45)) < 10 + d * 0.25 && dz < 0) return { grass: 10 }; }
+  { const dx = x + 236, dz = z - 176, d = Math.hypot(dx, dz); if (d < 12) return null; if (d < 75 && Math.abs(dx * Math.cos(-0.45) - dz * Math.sin(-0.45)) < 10 + d * 0.25 && dz < 0) return null; }
   const y = inYard(x, z, 0);
   if (y) return nearHouse(x, z, 2.2) ? null : { olive: 0.35, cypress: 0.2 };
   if (nearHouse(x, z, 1.5) || onLane(x, z) < 0.6) return null;
