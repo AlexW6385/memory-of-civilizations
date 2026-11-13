@@ -534,7 +534,7 @@
  },
  "barcelona-sagrada": {
   "site": "barcelona",
-  "hash": "50af2f738a4dfd6f",
+  "hash": "455d816bcff49463",
   "rays": 128,
   "probes": 12096,
   "boxes": [
@@ -556,8 +556,8 @@
     ]
    }
   ],
-  "bytes": 192064,
-  "seconds": 13,
+  "bytes": 192164,
+  "seconds": 19,
   "baked": "2026-11-13"
  },
  "baroque-rome-stpeter": {
@@ -4468,7 +4468,7 @@
  },
  "song-kaifeng-iron-pagoda": {
   "site": "song-kaifeng",
-  "hash": "7c12ec2348b9e559",
+  "hash": "b82d0b7ba5ee1294",
   "rays": 128,
   "probes": 39780,
   "boxes": [
@@ -4537,8 +4537,8 @@
     ]
    }
   ],
-  "bytes": 630723,
-  "seconds": 55,
+  "bytes": 630708,
+  "seconds": 77,
   "baked": "2026-11-13"
  },
  "sydney-opera": {
