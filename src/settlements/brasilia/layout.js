@@ -55,7 +55,9 @@ export const BLOCKS = (() => {
   rows.forEach((zc, r) => [[-171, -115], [-87, -31]].forEach(([x0, x1], c) => out.push({ rect: [x0, zc - BLOCK_D / 2, x1, zc + BLOCK_D / 2], seed: r * 2 + c + 5, tile: (r + c) % 2 })));
   return out;
 })();
-export const SHOPS = [50, 290, 62, 372];                                  // the commercial strip east of the avenue
+export const SHOPS = [50, 290, 62, 372];
+// the Esplanade's services gallery: a short arcade of eight shop units on the lawn's north side behind the visitors' foot of the ramp (bank agency's neighbours: snack bar, news stand, pharmacy, shoemaker...) [inferred, docs §10]
+export const SERV = [-176, -108, -164, -74];                                  // the commercial strip east of the avenue
 // the second superquadra, east of the shops' strip: the same plan, the blocks' tiles turned (the avenue's other side, §1d)
 export const SQ2 = [80, 268, 260, 448];
 export const SQS = [SQ, SQ2];
@@ -104,7 +106,7 @@ export const onRoad = (x, z, m = 0) => inRect(ROAD_N, x, z, m) || inRect(ROAD_S,
   || SQS.some((q) => inRect([q[0] - RING, q[1] - RING, q[2] + RING, q[3] + RING], x, z, m) && !inRect(q, x, z, -m));
 export const inPraca = (x, z, m = 0) => inRect(PRACA, x, z, m);
 export const inBuilding = (x, z, m = 0) => inRect(PLATFORM, x, z, m) || inRect(PLANALTO, x, z, m) || inRect(STF, x, z, m) || inRect(ITAMARATY, x, z, m) || inRect(JUSTICE, x, z, m)
-  || MINISTRIES.some((b) => inRect(b.rect, x, z, m)) || ALL_BLOCKS.some((b) => inRect(b.rect, x, z, m)) || inRect(SHOPS, x, z, m) || inRect(CHAPEL, x, z, m) || inRect(CAMP, x, z, m) || inRect(MUSEU, x, z, m) || PLAYS.some((r) => inRect(r, x, z, m)) || inRect(PITCH_AT, x, z, m)
+  || MINISTRIES.some((b) => inRect(b.rect, x, z, m)) || ALL_BLOCKS.some((b) => inRect(b.rect, x, z, m)) || inRect(SHOPS, x, z, m) || inRect(SERV, x, z, m) || inRect(CHAPEL, x, z, m) || inRect(CAMP, x, z, m) || inRect(MUSEU, x, z, m) || PLAYS.some((r) => inRect(r, x, z, m)) || inRect(PITCH_AT, x, z, m)
   || Math.hypot(x - CATH.c[0], z - CATH.c[1]) < CATH.pool + m || inRect(TUNNEL_BOX(), x, z, m) || inRect([RAMP.x0, RAMP.z0, RAMP.x1, RAMP.z1], x, z, m) || POOLS.some((p) => inRect(p, x, z, m));
 function TUNNEL_BOX() { return [TUNNEL.x0, TUNNEL.zR, TUNNEL.x1, TUNNEL.z0]; }
 

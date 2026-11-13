@@ -18,7 +18,9 @@ export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 /** The pilgrims' lodgings by the way: [x, z, front, W, D]. */
-export const WAYHOUSES = [[122, -13.5, 's', 7, 5.4], [147, 15, 'n', 7.4, 5.6], [176, -14.5, 's', 7, 5.4], [128, 14.5, 'n', 6.4, 5], [112, -15, 's', 6.2, 5]];
+export const WAYHOUSES = [[122, -13.5, 's', 7, 5.4], [147, 15, 'n', 7.4, 5.6], [176, -14.5, 's', 7, 5.4], [128, 14.5, 'n', 6.4, 5], [112, -15, 's', 6.2, 5],
+  // five more lodgings and a tea-house along the first stretch of the way (within 120 m of the arrival), differing in width and depth
+  [92, 14.8, 'n', 6.6, 5.2], [84, -14.5, 's', 6.4, 5], [168, 14.5, 'n', 7.8, 5.8], [190, -14.8, 's', 7.2, 5.6], [196, 15, 'n', 6.8, 5.2], [212, 15, 'n', 8.2, 5.6]];
 let HOUSES = null;
 const FRONT_OF = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
 /**

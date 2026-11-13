@@ -3,12 +3,13 @@
 // the bus-stop's exhaust is not drawn. The engine part is src/engine/smoke.js; positions come from layout.js.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { SHOPS, RADIUS, KIOSKS, CARTS, CHAPEL, CAMP_FIRES, inBuilding } from './layout.js';
+import { SHOPS, SERV, RADIUS, KIOSKS, CARTS, CHAPEL, CAMP_FIRES, inBuilding } from './layout.js';
 
 const ID = 'brasilia';
 export function emitters() {
   const E = [];
   for (let z = SHOPS[1] + 9; z < SHOPS[3]; z += 29) E.push({ p: [SHOPS[0] + 1.6, 3.2, z], kind: 'steam', thr: 0.1 + (z % 7) / 20, seed: Math.round(z) });
+  for (let z = SERV[1] + 9; z < SERV[3]; z += 29) E.push({ p: [SERV[0] + 1.6, 3.2, z], kind: 'steam', thr: 0.1 + (z % 7) / 20, seed: Math.round(z) + 7 });
   // the kiosks' coffee urns and the vendors' carts (the popcorn kettle, the churros' fryer)
   KIOSKS.forEach(([x, z, , kind], i) => { if (kind === 'lanchonete' && !inBuilding(x, z, 2)) E.push({ p: [x + 0.3, 2.6, z], kind: 'steam', thr: 0.15 + (i % 4) / 20, seed: 300 + i }); });
   CARTS.forEach(([x, z, kind], i) => { if ((kind === 'pipoca' || kind === 'churro') && !inBuilding(x, z, 1.5)) E.push({ p: [x, 1.4, z], kind: 'steam', thr: 0.12, seed: 400 + i }); });

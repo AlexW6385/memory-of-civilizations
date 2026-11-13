@@ -119,7 +119,7 @@ export function lots() {
   for (const l of byD) {
     const d = dist(l), W = wOf(l);
     if (nOpen < 40 && W >= 6.4 && dOf(l) >= 6.5 && d < 100 && r2() < (d < 40 ? 0.55 : d < 70 ? 0.4 : 0.22)) {
-      l.open = true; l.shop = false; l.trade = l.rect[1] >= POT[1] - 0.5 && l.rect[3] <= POT[3] + 12 && l.rect[0] < POT[2] + 6 && l.rect[2] > POT[0] - 6 ? 'pots' : TR[(ti++ + Math.floor(r2() * 3)) % TR.length]; l.light = nOpen < 14; nOpen++;
+      l.open = true; l.shop = false; l.trade = l.rect[1] >= POT[1] - 0.5 && l.rect[3] <= POT[3] + 12 && l.rect[0] < POT[2] + 6 && l.rect[2] > POT[0] - 6 ? 'pots' : TR[(ti++ + Math.floor(r2() * 3)) % TR.length]; l.light = nOpen < 24; nOpen++;
       continue;
     }
     l.shop = l.shop ?? r2() < 0.3;

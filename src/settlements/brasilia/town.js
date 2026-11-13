@@ -2,7 +2,7 @@
 // and the Justice palaces at the Congress end, the superquadra's eight blocks on pilotis with the commercial strip, the carriageways'
 // and the avenue's traffic of cars and buses, the lamps and benches, and the people of the lawn, the pavements, the square and the
 // plaza. Everything is placed from layout.js.
-import { RADIUS, LAWN, ROAD_N, ROAD_S, AVENUE, SQ, SQ2, SQS, RING, MINISTRIES, ITAMARATY, JUSTICE, ALL_BLOCKS, SHOPS, CATH, PRACA, TUNNEL, POOLS, RAMP, PLATFORM, PARKS, CHAPEL, MUSEU, PLAYS, PITCH_AT, CAMP, CAMP_FIRES, KIOSKS, CARTS, inRect, inBuilding, rng } from './layout.js';
+import { RADIUS, LAWN, ROAD_N, ROAD_S, AVENUE, SQ, SQ2, SQS, RING, MINISTRIES, ITAMARATY, JUSTICE, ALL_BLOCKS, SHOPS, SERV, CATH, PRACA, TUNNEL, POOLS, RAMP, PLATFORM, PARKS, CHAPEL, MUSEU, PLAYS, PITCH_AT, CAMP, CAMP_FIRES, KIOSKS, CARTS, inRect, inBuilding, rng } from './layout.js';
 
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-110, 0], facing: 'e' } });
 const N = -Math.PI / 2, S = Math.PI / 2;   // heading east (rot −π/2) and west (π/2); north 0, south π
@@ -17,7 +17,7 @@ export async function town() {
   B.push({ t: 'arcade_palace', rect: ITAMARATY, variant: 'arches', front: 'n' });
   B.push({ t: 'arcade_palace', rect: JUSTICE, variant: 'curtain', front: 's' });
   for (const b of ALL_BLOCKS) B.push({ t: 'superblock', rect: b.rect, h: 21.6, pilotis: 3.6, seed: b.seed, tile: b.tile });
-  B.push({ t: 'shops_row', rect: SHOPS, floors: 2, seed: 5 });
+  B.push({ t: 'shops_row', rect: SHOPS, floors: 2, seed: 5 }, { t: 'shops_row', rect: SERV, floors: 2, seed: 12 });
   B.push({ t: 'chapel' }, { t: 'museu' }, { t: 'roadmarks' }, { t: 'apron' }, { t: 'camp' });
   // the Esplanade's kerbside furniture: a litter bin at every second lamp, a drinking fountain and a street-name plate at the bus stops
   { const items = [];
@@ -145,6 +145,8 @@ export async function town() {
   // the apron and the squares: pigeons, and dogs asleep in the shade of the pilotis and by the kiosks
   L.push({ t: 'chickens', at: [-104, -13], y: 0, rot: 0.3, n: 7, kind: 'pigeon' }, { t: 'chickens', at: [-103, 14], y: 0, rot: 1.4, n: 6, kind: 'pigeon' }, { t: 'chickens', at: [PRACA[0] + 60, 6], y: 0, rot: 0.5, n: 8, kind: 'pigeon' }, { t: 'chickens', at: [PRACA[0] + 130, -12], y: 0, rot: 2.0, n: 8, kind: 'pigeon' }, { t: 'chickens', at: [PRACA[0] + 130, 20], y: 0, rot: 3.0, n: 7, kind: 'pigeon' });
   for (const b of ALL_BLOCKS.slice(0, 5)) P.push({ t: 'animal', kind: 'dog', at: [b.rect[0] + 12 + rand() * 20, (b.rect[1] + b.rect[3]) / 2 + 3], y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 999) });
+  // the services gallery on the lawn: a keeper behind each counter, customers in the aisles, people under the arcade
+  { const n = Math.floor((SERV[3] - SERV[1] - 0.4) / 4.2); for (let k = 0; k < n; k++) { const z = SERV[1] + 0.4 + k * 4.2; person(SERV[0] + 3.4 + 0.4 + 3.6, z + 3.6, 0, { inside: true, kind: rand() < 0.4 ? 'worker' : undefined, w: rand() < 0.5 }); if (rand() < 0.7) person(SERV[0] + 3.4 + 0.4 + 2.2 + rand() * 2.5, z + 1.9, Math.PI + (rand() - 0.5) * 0.6, { inside: true }); if (rand() < 0.4) person(SERV[0] + 1.5, z + 1.5 + rand() * 2, rand() * 6.28, { inside: true }); } }
   // the vehicles' fronts are not in the way: the people stand clear of the roadways (the carriageways are not walked by the still figures)
   void inRect; void POOLS; void RAMP; void PLATFORM; void TUNNEL; void LAWN;
   return [base('brasilia-buildings', 'brasilia', B), base('brasilia-life', 'life', [...L, ...P])];
