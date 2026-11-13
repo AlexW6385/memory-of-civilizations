@@ -40,6 +40,23 @@ export function dressItems() {
   const { wood } = woodpiles();
   const rand = rng(4242), I = [];
   const add = (k, at, y, rot, v, o = {}) => I.push({ k, at: [+at[0].toFixed(2), +at[1].toFixed(2)], y, rot, v, ...o });
+  // 1b. the fronts that differ: a portal (a porch of posts and a header) before about one room in three, a washed front on some of the plaza faces
+  const FRONT = new Set();
+  {
+    const r2 = rng(5150);
+    for (const B of [NORTH, SOUTH]) {
+      const H = B.heights, tag = B === NORTH ? 'N' : 'S', rooms = roomsOf(B), f = faces;
+      for (let i = 0; i < H.length; i++) for (let j = 0; j < H[0].length; j++) {
+        if (!H[i][j]) continue;
+        const x0 = B.x0 + j * CELL, z0 = B.z0 + i * CELL, room = rooms.find((r) => r.i === i && r.j === j), fc = f(x0, z0).find((q) => q.kind === (B === NORTH ? 's' : 'n'));
+        if ((H[i + fc.di]?.[j + fc.dj] ?? 0) > 0) continue;
+        const px = fc.o[0] + fc.n[0] * 1.0, pz = fc.o[1] + fc.n[1] * 1.0;
+        if (nearYard(px, pz, 1.5) || inCreek(px, pz, 3) || wood.has(`${tag}:${i}:${j}`)) continue;
+        if (room && r2() < 0.7 && !isRoom(B, i, j - 1)) { FRONT.add(`${tag}:${i}:${j}`); add('portal', [fc.o[0], fc.o[1]], 0, fc.rot, Math.floor(r2() * 2), { reach: 140 }); }
+        else if (!room && r2() < 0.3) { FRONT.add(`${tag}:${i}:${j}`); add('whitewash', [fc.o[0], fc.o[1]], 0, fc.rot, Math.floor(r2() * 2), { reach: 140 }); }
+      }
+    }
+  }
   // 1. the feet of the house faces: benches, jars, maize on the viga ends, hides, blankets airing, squash, by face and by what the face looks on
   for (const B of [NORTH, SOUTH]) {
     const H = B.heights, tag = B === NORTH ? 'N' : 'S', rooms = roomsOf(B);
@@ -48,7 +65,7 @@ export function dressItems() {
       const x0 = B.x0 + j * CELL, z0 = B.z0 + i * CELL, room = rooms.find((r) => r.i === i && r.j === j);
       for (const f of faces(x0, z0)) {
         if ((H[i + f.di]?.[j + f.dj] ?? 0) > 0) continue;
-        if (wood.has(`${tag}:${i}:${j}`) && f.kind === (B === NORTH ? 's' : 'n')) continue;
+        if ((wood.has(`${tag}:${i}:${j}`) || FRONT.has(`${tag}:${i}:${j}`)) && f.kind === (B === NORTH ? 's' : 'n')) continue;
         const out = [f.o[0] + f.n[0] * 2.5 + f.t[0] * 2.5, f.o[1] + f.n[1] * 2.5 + f.t[1] * 2.5];
         const plaza = inRect(PLAZA, out[0], out[1]), alley = f.kind === 'e' || f.kind === 'w';
         // free runs along the face, clear of a doorway
