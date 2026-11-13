@@ -661,6 +661,8 @@ function logHouse(el, ctx) {
   if (open) {
     const io = { rect: el.rect, fl: y + 0.17, top: y + H, ridge: top - (roof === 'sod' ? 0.28 : 0.16), alongX, wt: r + 0.05, door: hole, seed: el.seed };
     (kind === 'barn' ? FARM.interiors.barn : kind === 'smithy' ? FARM.interiors.smithy : stueInside)(bag, col, io);
+    // the fire's light in the room: the hearth of the stue (in the middle of the floor), the forge of the smithy; the byre has a horn lantern on its beam
+    if (ctx.lights && !el.simple) ctx.lights.push({ at: [(x0 + x1) / 2, y + 0.17 + (kind === 'barn' ? 1.7 : 1.0), (z0 + z1) / 2], color: kind === 'barn' ? '#ffd9a0' : '#ffb46b', intensity: kind === 'barn' ? 1.6 : kind === 'smithy' ? 3.2 : 2.8, distance: kind === 'barn' ? 6 : 8 });
   }
 }
 /** fence: { pts, y, h } — a fence of split staves along a polyline. */
