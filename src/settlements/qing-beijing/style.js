@@ -6,6 +6,7 @@ import { bjBooth } from './shops.js';
 import { bjShopgoods, bjBarber, bjTeastall, bjWatercart, bjSedan, bjLane, bjPet, bjShrine, bjBenchtree, bjCoalcart, bjDrying } from './streetlife.js';
 import { pekingCart, camelString } from '../../styles/qing/street.js';
 import { bjRooms, bjTeahouse, bjPharmacy } from './interiors.js';
+import { bjPalaceRoom } from './palace-rooms.js';
 import { bjClothShop, bjGrainShop, bjPawnShop, bjWineShop, bjLanternShop, bjShoeShop } from './shoprooms.js';
 
 import { bjRankstones, bjLubu } from './courtlife.js';
@@ -13,6 +14,7 @@ STYLES.life.elements.bj_rankstones = bjRankstones;
 STYLES.life.elements.bj_lubu = bjLubu;
 STYLES.life.elements.bj_booth = bjBooth;
 STYLES.life.elements.bj_rooms = bjRooms;
+STYLES.life.elements.bj_palace_room = bjPalaceRoom;
 STYLES.life.elements.bj_teahouse = bjTeahouse;
 STYLES.life.elements.bj_pharmacy = bjPharmacy;
 STYLES.life.elements.bj_shop_cloth = bjClothShop;

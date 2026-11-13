@@ -29,7 +29,7 @@ const TRADES = [
 ];
 export const tradeOfSeed = (seed) => TRADES[(seed >>> 3) % TRADES.length].id;
 
-function paris_house(el, { bag, col }) {
+function paris_house(el, { bag, col, lights }) {
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, y = el.y, f = el.front || 's';
   const along = f === 's' || f === 'n', L = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0;
   const n = Math.max(2, el.storeys || 3), simple = !!el.simple;
@@ -96,7 +96,7 @@ function paris_house(el, { bag, col }) {
   // the stone storey: the shop's opening, framed, with its counter board, shutter and sign; the door beside it
   const doorL = rand() < 0.5, ws = Math.max(2.2, Math.min(4.0, L - 1.7)), su = doorL ? L - 0.35 - ws : 0.35, du = doorL ? 0.3 : L - 1.2;
   const lintel = 2.75;
-  if (OPEN) openGround({ bag, col, rect: el.rect, y, foot: el.foot, f, L, D, st: ST0, su, ws, du, doorL, trade: trade.id, seed: el.seed });
+  if (OPEN) openGround({ bag, col, rect: el.rect, y, foot: el.foot, f, L, D, st: ST0, su, ws, du, doorL, trade: trade.id, seed: el.seed, lights, lit: !!el.lit });
   else B('opening', su, su + ws, 0.12, lintel, -0.03, 0.05);
   for (const u of [su - 0.2, su + ws]) B('timber', u, u + 0.2, 0, lintel + 0.3, -0.14, 0.06);                 // the posts
   B('timber', su - 0.2, su + ws + 0.2, lintel, lintel + 0.32, -0.18, 0.08);                                 // the head beam

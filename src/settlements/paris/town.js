@@ -1,4 +1,5 @@
 import { openLots, lodTiles } from '../lod.js';
+import { courtHouses, courtHouseLife } from './court-houses.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
 // The houses of the Cité and the banks (docs/settlements/paris.md §5, §5a): timber-framed, jettied, gabled.
 // The core (RICH) is built as `paris_house` of the gothic style in two levels (full near, the mass far); the outer
@@ -30,6 +31,7 @@ export async function houses() {
     }
   }
   plans.push(...lodTiles('paris-rues', 'gothic', pieces, { near: 90, R: RADIUS, entrance: { at: [0, -60], facing: 'w' } }));
+  plans.push(...courtHouses(), courtHouseLife());
   return plans;
 }
 function lrng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }

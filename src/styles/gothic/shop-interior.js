@@ -10,7 +10,7 @@ export const FL = 0.1;                                  // the floor, over the s
 
 /** ctx: { bag, col, rect, y, foot, f, L, D, st, su, ws, du, doorL, trade (id), seed } — builds the stone storey in place of the solid one. */
 export function openGround(c) {
-  const { bag, col, rect, y, foot, f, L, D, st, su, ws, du, doorL, trade } = c, rand = rng((c.seed || 1) + 77);
+  const { bag, col, rect, y, foot, f, L, D, st, su, ws, du, doorL, trade, lights, lit } = c, rand = rng((c.seed || 1) + 77);
   const [x0, z0, x1, z1] = rect, T = 0.4, fl = y + FL;
   const P = (u, d) => (f === 's' ? [x0 + u, z1 - d] : f === 'n' ? [x1 - u, z0 + d] : f === 'e' ? [x1 - d, z0 + u] : [x0 + d, z1 - u]);
   const R = (u0, d0, u1, d1) => { const a = P(u0, d0), b = P(u1, d1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
@@ -42,6 +42,9 @@ export function openGround(c) {
   { const r = R(T, T, L - T, D - T); bag.add('timber', box(r[0], y + st - 0.06, r[1], r[2], y + st - 0.02, r[3])); }
   for (let d = T + 0.8; d < D - T; d += 1.25) B('wood_dark', T, L - T, d - 0.1, d + 0.1, st - FL - 0.3, st - FL - 0.04);
   col.rect(R(0, 0, L, D), y + st - 0.1, y + st + 0.3);
+
+  // a hanging lamp over the shop (one light a room, only where asked: the court's lodgings)
+  if (lit && lights) { const p = P(L / 2, Math.min(D * 0.38, 2.8)); lights.push({ at: [p[0], fl + 2.35, p[1]], color: '#ffc27a', intensity: 3, distance: 8 }); rodU('iron', [L / 2, Math.min(D * 0.38, 2.8), 2.75], [L / 2, Math.min(D * 0.38, 2.8), 2.45], 0.012); vase('lamp_glass', L / 2, Math.min(D * 0.38, 2.8), 0.08, 0.2, 2.2); }
 
   // ── the partition (the doorway where the corridor from the street door runs on) and its door
   const PD = Math.min(D - 3.2, 5.6), pu = doorL ? du : du - 0.05;

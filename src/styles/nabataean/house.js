@@ -187,7 +187,7 @@ function merlons(L, bag, u0, u1, v, dirIn, yr) {
 }
 
 /** nabataean_house: { rect, seed, y, front }. */
-export function house(el, { bag, col: C }) {
+export function house(el, { bag, col: C, lights }) {
   const L = houseLayout(el), { W: Wd, D, y, tall, rand } = L, y0 = y - 2.2;
   const red = rand() < 0.35, hc = L.range.hc;
   // ---------- the window and door holes
@@ -210,6 +210,8 @@ export function house(el, { bag, col: C }) {
     const ri = L.room.rect, rc = L.Rc(...ri);
     bag.add(FL, box(rc[0], y - 0.3, rc[1], rc[2], y + 0.03, rc[3])); C.floor(rc, y + 0.03);
     bag.add(TI, box(rc[0], y + hc, rc[1], rc[2], y + hc + 0.12, rc[3]));
+    // (a hanging oil lamp, one light, in the houses that are asked to be lit)
+    if (el.lit && lights) { const lx = (rc[0] + rc[2]) / 2, lz = (rc[1] + rc[3]) / 2; bag.add('iron', box(lx - 0.01, y + hc - 0.55, lz - 0.01, lx + 0.01, y + hc, lz + 0.01)); bag.add('lamp_glass', lathe([[0.001, 0], [0.1, 0.04], [0.12, 0.16], [0.001, 0.24]], 10, null, lx, y + hc - 0.8, lz)); lights.push({ at: [lx, y + hc - 0.7, lz], color: '#ffb46b', intensity: 3, distance: 8 }); }
     for (let k = 1; k <= 3; k++) { const v = ri[1] + (ri[3] - ri[1]) * k / 4, r = L.Rc(ri[0], v - 0.12, ri[2], v + 0.12); bag.add(TI, box(r[0], y + hc - 0.24, r[1], r[2], y + hc, r[3])); }
     // (the walls stand up round the room's whole height; the block above the ceiling is solid)
     bag.add(A, box(rc[0], y + hc + 0.12, rc[1], rc[2], y + L.h - 0.12, rc[3])); C.rect(rc, y + hc, y + L.h);

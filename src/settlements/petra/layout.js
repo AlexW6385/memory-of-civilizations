@@ -167,3 +167,24 @@ export function shopUnits() {
   }
   return out;
 }
+
+/**
+ * The houses along the Outer Siq's east side (docs/settlements/petra.md §19): the first dwellings a visitor meets below the Khazneh,
+ * small one-room houses of rose ashlar stepping down the corridor's east edge with their doors to the way, the west edge being the Street of Façades.
+ * Each: { rect (world), seed, y, front 'w', local (the lot in the house plan's own frame, yawed 90°: x = world z, z = −world x, front 's'), i }.
+ */
+let OUTER_LOTS = null;
+const outerCentre = (z) => { const P = OUTER.path; for (let i = 0; i + 1 < P.length; i++) if (z >= P[i][1] && z <= P[i + 1][1]) return P[i][0] + (P[i + 1][0] - P[i][0]) * (z - P[i][1]) / (P[i + 1][1] - P[i][1]); return P[P.length - 1][0]; };
+export function outerLots() {
+  if (OUTER_LOTS) return OUTER_LOTS;
+  OUTER_LOTS = [];
+  const rand = rng(190);
+  let z = -136;
+  for (let i = 0; i < 8; i++) {
+    const w = 6.6 + rand() * 1.0, d = 7.3 + rand() * 0.9, z1 = z + w, xe = outerCentre(z1) + 16.0;
+    const rect = [+(xe - d).toFixed(2), +z.toFixed(2), +xe.toFixed(2), +z1.toFixed(2)];
+    OUTER_LOTS.push({ rect, local: [rect[1], -rect[2], rect[3], -rect[0]], seed: Math.floor(rand() * 1e6), y: 0, front: 's', i, lit: true });
+    z = z1 + 1.5;
+  }
+  return OUTER_LOTS;
+}

@@ -10,7 +10,7 @@ const VAL = { wine: 'cloth_white', grain: 'cloth_ochre', cloth: 'cloth_indigo', 
 
 /** qin_shop: { rect, front, seed, trade } */
 export function qinShop(el, ctx) {
-  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D, T = el.trade ?? 'cloth', H = 3.5, th = 0.4;
+  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col, ctx.lights), W = F.W, D = F.D, T = el.trade ?? 'cloth', H = 3.5, th = 0.4;
   // floor, party walls, back wall
   F.b('brick_grey', 0, -0.02, 0, W, 0.04, D, false);
   F.b('earth_wall', 0, 0, 0, th, H, D); F.b('earth_wall', W - th, 0, 0, W, H, D); F.b('earth_wall', 0, 0, D - th, W, H, D);
