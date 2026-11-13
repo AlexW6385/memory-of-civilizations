@@ -1,4 +1,173 @@
 {
+ "abbasid-baghdad": {
+  "site": "abbasid-baghdad",
+  "hash": "786c48665c4790c0",
+  "rays": 128,
+  "probes": 73040,
+  "boxes": [
+   {
+    "min": [
+     -208,
+     -0.5,
+     -101.5
+    ],
+    "n": [
+     83,
+     22,
+     40
+    ],
+    "spacing": 2.3,
+    "rooms": [
+     "great iwan",
+     "audience chamber",
+     "palace diwan range 1",
+     "palace diwan range 2",
+     "palace diwan range 3",
+     "palace diwan range 4",
+     "palace diwan range 5",
+     "palace diwan range 6",
+     "palace north range 1",
+     "palace north range 2",
+     "palace north range 3",
+     "palace north range 4",
+     "palace north range 5",
+     "palace north range 6",
+     "palace north range 7",
+     "palace north range 8",
+     "palace household range 1",
+     "palace household range 2",
+     "palace household range 3",
+     "palace household range 4",
+     "palace household range 5",
+     "palace household range 6",
+     "palace gate guard east 1",
+     "mosque hall",
+     "palace gate guard west 1",
+     "house of wisdom hall"
+    ]
+   }
+  ],
+  "bytes": 1122125,
+  "seconds": 43,
+  "baked": "2026-11-13"
+ },
+ "abu-simbel-great-temple": {
+  "site": "abu-simbel",
+  "hash": "3e6d1f02ee72dfe8",
+  "rays": 128,
+  "probes": 77112,
+  "boxes": [
+   {
+    "min": [
+     -103.7,
+     -0.46,
+     -15.45
+    ],
+    "n": [
+     56,
+     51,
+     27
+    ],
+    "spacing": 1.2,
+    "rooms": [
+     "door",
+     "hall of the Osiride pillars",
+     "a side chamber",
+     "a side chamber",
+     "a side chamber",
+     "a side chamber",
+     "passage to the second hall",
+     "second pillared hall",
+     "passage to the vestibule",
+     "passage to the sanctuary",
+     "sanctuary",
+     "vestibule",
+     "a side chamber",
+     "a side chamber"
+    ]
+   }
+  ],
+  "bytes": 1178116,
+  "seconds": 61,
+  "baked": "2026-11-13"
+ },
+ "abu-simbel-small-temple": {
+  "site": "abu-simbel",
+  "hash": "983af507b385b443",
+  "rays": 128,
+  "probes": 12480,
+  "boxes": [
+   {
+    "min": [
+     -61.2,
+     -0.46,
+     -118.1
+    ],
+    "n": [
+     30,
+     32,
+     13
+    ],
+    "spacing": 1,
+    "rooms": [
+     "door",
+     "hall of the Hathor pillars",
+     "passage to the vestibule",
+     "vestibule",
+     "passage to the sanctuary",
+     "sanctuary of Hathor"
+    ]
+   }
+  ],
+  "bytes": 203434,
+  "seconds": 10,
+  "baked": "2026-11-13"
+ },
+ "alexandria-museion": {
+  "site": "alexandria",
+  "hash": "71194ccadefe8470",
+  "rays": 128,
+  "probes": 51696,
+  "boxes": [
+   {
+    "min": [
+     193,
+     0.7,
+     -37
+    ],
+    "n": [
+     108,
+     15,
+     27
+    ],
+    "spacing": 1,
+    "rooms": [
+     "reading hall 1",
+     "reading hall 2",
+     "reading hall 3"
+    ]
+   },
+   {
+    "min": [
+     312.8,
+     0.7,
+     -67.3
+    ],
+    "n": [
+     18,
+     13,
+     34
+    ],
+    "spacing": 1,
+    "rooms": [
+     "dining hall"
+    ]
+   }
+  ],
+  "bytes": 866212,
+  "seconds": 72,
+  "baked": "2026-11-13"
+ },
  "amsterdam-dam": {
   "site": "amsterdam",
   "hash": "f8ddf36624236692",
@@ -170,6 +339,34 @@
   "seconds": 69,
   "baked": "2026-11-13"
  },
+ "barcelona-sagrada": {
+  "site": "barcelona",
+  "hash": "50af2f738a4dfd6f",
+  "rays": 128,
+  "probes": 12096,
+  "boxes": [
+   {
+    "min": [
+     149.3,
+     1.75,
+     -101.7
+    ],
+    "n": [
+     36,
+     8,
+     42
+    ],
+    "spacing": 1,
+    "rooms": [
+     "workshop",
+     "schools"
+    ]
+   }
+  ],
+  "bytes": 192064,
+  "seconds": 13,
+  "baked": "2026-11-13"
+ },
  "baroque-rome-stpeter": {
   "site": "baroque-rome",
   "hash": "b087870bea0d17f4",
@@ -197,6 +394,141 @@
   "seconds": 139,
   "baked": "2026-11-13"
  },
+ "benin-palace": {
+  "site": "benin-city",
+  "hash": "ca2388192f6b4279",
+  "rays": 128,
+  "probes": 34311,
+  "boxes": [
+   {
+    "min": [
+     -113,
+     -0.15,
+     -77
+    ],
+    "n": [
+     97,
+     17,
+     15
+    ],
+    "spacing": 1,
+    "rooms": [
+     "great gallery"
+    ]
+   },
+   {
+    "min": [
+     -131,
+     -0.2,
+     -64
+    ],
+    "n": [
+     9,
+     8,
+     63
+    ],
+    "spacing": 1,
+    "rooms": [
+     "west gallery"
+    ]
+   },
+   {
+    "min": [
+     -12.8,
+     -0.2,
+     -64
+    ],
+    "n": [
+     10,
+     8,
+     63
+    ],
+    "spacing": 1,
+    "rooms": [
+     "east gallery"
+    ]
+   }
+  ],
+  "bytes": 536032,
+  "seconds": 35,
+  "baked": "2026-11-13"
+ },
+ "bhaktapur-taumadhi": {
+  "site": "bhaktapur",
+  "hash": "400cfb1589a76211",
+  "rays": 128,
+  "probes": 3416,
+  "boxes": [
+   {
+    "min": [
+     12.6,
+     -0.4,
+     22.6
+    ],
+    "n": [
+     14,
+     12,
+     12
+    ],
+    "spacing": 1,
+    "rooms": [
+     "house"
+    ]
+   },
+   {
+    "min": [
+     25.4,
+     2.2,
+     -10.6
+    ],
+    "n": [
+     10,
+     14,
+     10
+    ],
+    "spacing": 1,
+    "rooms": [
+     "bhairabnath"
+    ]
+   }
+  ],
+  "bytes": 60982,
+  "seconds": 5,
+  "baked": "2026-11-13"
+ },
+ "borobudur-temple": {
+  "site": "borobudur",
+  "hash": "bdcfe0b419b0c44d",
+  "rays": 128,
+  "probes": 70448,
+  "boxes": [
+   {
+    "min": [
+     -208.1,
+     0.3,
+     -168.1
+    ],
+    "n": [
+     74,
+     17,
+     56
+    ],
+    "spacing": 1.05,
+    "rooms": [
+     "great-hall",
+     "monks-house-0",
+     "monks-house-4",
+     "monks-house-1",
+     "monks-house-3",
+     "monks-house-5",
+     "monks-house-2"
+    ]
+   }
+  ],
+  "bytes": 1010765,
+  "seconds": 48,
+  "baked": "2026-11-13"
+ },
  "byodo-in-phoenix-hall": {
   "site": "heian-uji",
   "hash": "c7a8b4eaea0c957e",
@@ -222,6 +554,227 @@
   ],
   "bytes": 98499,
   "seconds": 9,
+  "baked": "2026-11-13"
+ },
+ "cahokia-monks": {
+  "site": "cahokia",
+  "hash": "d67e5437a43d4a3e",
+  "rays": 128,
+  "probes": 35352,
+  "boxes": [
+   {
+    "min": [
+     -55.4,
+     11.5,
+     -105.4
+    ],
+    "n": [
+     26,
+     13,
+     18
+    ],
+    "spacing": 1,
+    "rooms": [
+     "lodge-0"
+    ]
+   },
+   {
+    "min": [
+     24.6,
+     11.5,
+     -105.4
+    ],
+    "n": [
+     26,
+     13,
+     18
+    ],
+    "spacing": 1,
+    "rooms": [
+     "lodge-1"
+    ]
+   },
+   {
+    "min": [
+     -21.4,
+     29.5,
+     -216.4
+    ],
+    "n": [
+     46,
+     21,
+     24
+    ],
+    "spacing": 1,
+    "rooms": [
+     "summit-hall"
+    ]
+   }
+  ],
+  "bytes": 555122,
+  "seconds": 49,
+  "baked": "2026-11-13"
+ },
+ "catalhoyuk-town": {
+  "site": "catalhoyuk",
+  "hash": "c2742c197c55faed",
+  "rays": 128,
+  "probes": 9792,
+  "boxes": [
+   {
+    "min": [
+     -21.95,
+     -0.45,
+     -9.8
+    ],
+    "n": [
+     51,
+     6,
+     32
+    ],
+    "spacing": 1,
+    "rooms": [
+     "house",
+     "store",
+     "house-7-4",
+     "house-7-2",
+     "house-7-7",
+     "house-7-9",
+     "house-6-6",
+     "house-4-6",
+     "house-5-5",
+     "house-3-3",
+     "house-3-5",
+     "house-4-9",
+     "house-3-8",
+     "house-5-8"
+    ]
+   }
+  ],
+  "bytes": 169504,
+  "seconds": 10,
+  "baked": "2026-11-13"
+ },
+ "delphi-sanctuary": {
+  "site": "delphi",
+  "hash": "814992266bb98250",
+  "rays": 128,
+  "probes": 17685,
+  "boxes": [
+   {
+    "min": [
+     55.15,
+     3.44,
+     85.15
+    ],
+    "n": [
+     32,
+     10,
+     10
+    ],
+    "spacing": 1,
+    "rooms": [
+     "treasury sikyonian",
+     "treasury cnidian"
+    ]
+   },
+   {
+    "min": [
+     59.15,
+     7.58,
+     65.15
+    ],
+    "n": [
+     9,
+     9,
+     9
+    ],
+    "spacing": 1,
+    "rooms": [
+     "treasury siphnian"
+    ]
+   },
+   {
+    "min": [
+     79.15,
+     7.78,
+     64.15
+    ],
+    "n": [
+     13,
+     10,
+     10
+    ],
+    "spacing": 1,
+    "rooms": [
+     "treasury theban"
+    ]
+   },
+   {
+    "min": [
+     45.15,
+     10.91,
+     26.65
+    ],
+    "n": [
+     30,
+     12,
+     28
+    ],
+    "spacing": 1,
+    "rooms": [
+     "treasury corinthian",
+     "treasury massaliot",
+     "treasury athenian"
+    ]
+   },
+   {
+    "min": [
+     0.4,
+     12.8,
+     25.5
+    ],
+    "n": [
+     33,
+     8,
+     9
+    ],
+    "spacing": 1,
+    "rooms": [
+     "Athenian stoa"
+    ]
+   }
+  ],
+  "bytes": 305665,
+  "seconds": 18,
+  "baked": "2026-11-13"
+ },
+ "delphi-temple": {
+  "site": "delphi",
+  "hash": "c85c272785eb6b9a",
+  "rays": 128,
+  "probes": 12784,
+  "boxes": [
+   {
+    "min": [
+     -25.5,
+     19.95,
+     -9
+    ],
+    "n": [
+     47,
+     17,
+     16
+    ],
+    "spacing": 1,
+    "rooms": [
+     "cella",
+     "adyton"
+    ]
+   }
+  ],
+  "bytes": 209323,
+  "seconds": 38,
   "baked": "2026-11-13"
  },
  "djenne-great-mosque": {
@@ -279,6 +832,43 @@
   "seconds": 24,
   "baked": "2026-11-07"
  },
+ "dunhuang-mogao": {
+  "site": "dunhuang",
+  "hash": "4b1ed91019ac0218",
+  "rays": 128,
+  "probes": 74340,
+  "boxes": [
+   {
+    "min": [
+     -100,
+     -0.05,
+     -93.6
+    ],
+    "n": [
+     28,
+     15,
+     177
+    ],
+    "spacing": 1.1,
+    "rooms": [
+     "great",
+     "hall2-cave",
+     "cell",
+     "pillar3-cave",
+     "pillar-cave",
+     "pillar2-cave",
+     "cell3-cave",
+     "cell4-cave",
+     "hall-cave",
+     "hall3-cave",
+     "cell2-cave"
+    ]
+   }
+  ],
+  "bytes": 1255655,
+  "seconds": 138,
+  "baked": "2026-11-13"
+ },
  "edo-himeji-castle": {
   "site": "edo-himeji",
   "hash": "f26ec1d2eda01cda",
@@ -318,6 +908,111 @@
   ],
   "bytes": 1216496,
   "seconds": 78,
+  "baked": "2026-11-13"
+ },
+ "fez-bou-inania": {
+  "site": "fez",
+  "hash": "45b82f51697a521e",
+  "rays": 128,
+  "probes": 5806,
+  "boxes": [
+   {
+    "min": [
+     -136.2,
+     7.75,
+     -21
+    ],
+    "n": [
+     8,
+     11,
+     13
+    ],
+    "spacing": 1,
+    "rooms": [
+     "vestibule",
+     "cell north"
+    ]
+   },
+   {
+    "min": [
+     -150.4,
+     12.15,
+     -5.7
+    ],
+    "n": [
+     9,
+     7,
+     7
+    ],
+    "spacing": 1,
+    "rooms": [
+     "cell west"
+    ]
+   },
+   {
+    "min": [
+     -122.2,
+     12.15,
+     -5.7
+    ],
+    "n": [
+     9,
+     7,
+     7
+    ],
+    "spacing": 1,
+    "rooms": [
+     "cell east"
+    ]
+   },
+   {
+    "min": [
+     -145.6,
+     7.75,
+     8.9
+    ],
+    "n": [
+     27,
+     10,
+     14
+    ],
+    "spacing": 1,
+    "rooms": [
+     "prayer hall"
+    ]
+   }
+  ],
+  "bytes": 101576,
+  "seconds": 15,
+  "baked": "2026-11-13"
+ },
+ "fez-qarawiyyin": {
+  "site": "fez",
+  "hash": "2be52981748047fe",
+  "rays": 128,
+  "probes": 68586,
+  "boxes": [
+   {
+    "min": [
+     127.2,
+     3.45,
+     -44.8
+    ],
+    "n": [
+     71,
+     14,
+     69
+    ],
+    "spacing": 1,
+    "rooms": [
+     "hall",
+     "west naves",
+     "east naves"
+    ]
+   }
+  ],
+  "bytes": 1138045,
+  "seconds": 99,
   "baked": "2026-11-13"
  },
  "florence-centre": {
@@ -626,6 +1321,51 @@
   "seconds": 125,
   "baked": "2026-11-13"
  },
+ "han-changan-weiyang": {
+  "site": "han-changan",
+  "hash": "5a86d97dde6ce88a",
+  "rays": 128,
+  "probes": 76245,
+  "boxes": [
+   {
+    "min": [
+     -167,
+     9.1,
+     -192
+    ],
+    "n": [
+     115,
+     18,
+     29
+    ],
+    "spacing": 1,
+    "rooms": [
+     "front-hall",
+     "east-chamber",
+     "west-chamber"
+    ]
+   },
+   {
+    "min": [
+     272,
+     2.6,
+     -100
+    ],
+    "n": [
+     47,
+     15,
+     23
+    ],
+    "spacing": 1,
+    "rooms": [
+     "changle-hall"
+    ]
+   }
+  ],
+  "bytes": 1137052,
+  "seconds": 99,
+  "baked": "2026-11-13"
+ },
  "isfahan-maidan": {
   "site": "isfahan",
   "hash": "fd5769d8b2565788",
@@ -727,6 +1467,104 @@
   ],
   "bytes": 355040,
   "seconds": 32,
+  "baked": "2026-11-13"
+ },
+ "karakorum-ger-camp": {
+  "site": "mongol-karakorum",
+  "hash": "3a21c78d31913274",
+  "rays": 128,
+  "probes": 864,
+  "boxes": [
+   {
+    "min": [
+     -66.6,
+     -0.5,
+     124.97
+    ],
+    "n": [
+     12,
+     6,
+     12
+    ],
+    "spacing": 1,
+    "rooms": [
+     "ger"
+    ]
+   }
+  ],
+  "bytes": 16002,
+  "seconds": 1,
+  "baked": "2026-11-13"
+ },
+ "karakorum-palace": {
+  "site": "mongol-karakorum",
+  "hash": "f13107dd1ddcc08e",
+  "rays": 128,
+  "probes": 12186,
+  "boxes": [
+   {
+    "min": [
+     59.8,
+     1.14,
+     -77.4
+    ],
+    "n": [
+     21,
+     14,
+     38
+    ],
+    "spacing": 1,
+    "rooms": [
+     "palace-hall"
+    ]
+   },
+   {
+    "min": [
+     97.9,
+     -0.5,
+     -30.1
+    ],
+    "n": [
+     13,
+     6,
+     13
+    ],
+    "spacing": 1,
+    "rooms": [
+     "khan-ger"
+    ]
+   }
+  ],
+  "bytes": 208791,
+  "seconds": 23,
+  "baked": "2026-11-13"
+ },
+ "khajuraho-temples": {
+  "site": "khajuraho",
+  "hash": "7a51fcd8f6295beb",
+  "rays": 128,
+  "probes": 12852,
+  "boxes": [
+   {
+    "min": [
+     -74.4,
+     7.64,
+     -68.24
+    ],
+    "n": [
+     28,
+     27,
+     17
+    ],
+    "spacing": 1,
+    "rooms": [
+     "kandariya halls",
+     "kandariya garbhagriha"
+    ]
+   }
+  ],
+  "bytes": 224326,
+  "seconds": 19,
   "baked": "2026-11-13"
  },
  "kilwa-mosque": {
@@ -1083,6 +1921,33 @@
   "seconds": 67,
   "baked": "2026-11-07"
  },
+ "maori-pa": {
+  "site": "maori",
+  "hash": "0cacbaba35cfc05c",
+  "rays": 128,
+  "probes": 840,
+  "boxes": [
+   {
+    "min": [
+     -10.3,
+     39.5,
+     -0.2
+    ],
+    "n": [
+     10,
+     7,
+     12
+    ],
+    "spacing": 1,
+    "rooms": [
+     "chief-house"
+    ]
+   }
+  ],
+  "bytes": 15586,
+  "seconds": 12,
+  "baked": "2026-11-13"
+ },
  "ming-suzhou-garden": {
   "site": "ming-suzhou",
   "hash": "5ce2278d5f0794ae",
@@ -1251,6 +2116,77 @@
   "seconds": 118,
   "baked": "2026-11-13"
  },
+ "muromachi-ginkaku": {
+  "site": "muromachi-kyoto",
+  "hash": "b2acc4aa7bfda7bf",
+  "rays": 128,
+  "probes": 3882,
+  "boxes": [
+   {
+    "min": [
+     130.5,
+     0.2,
+     -9.5
+    ],
+    "n": [
+     12,
+     8,
+     12
+    ],
+    "spacing": 1,
+    "rooms": [
+     "togudo"
+    ]
+   },
+   {
+    "min": [
+     193.1,
+     0.4,
+     -31.9
+    ],
+    "n": [
+     15,
+     14,
+     13
+    ],
+    "spacing": 1,
+    "rooms": [
+     "kannon-den",
+     "chounkaku"
+    ]
+   }
+  ],
+  "bytes": 66561,
+  "seconds": 4,
+  "baked": "2026-11-13"
+ },
+ "muromachi-ryoanji": {
+  "site": "muromachi-kyoto",
+  "hash": "773dda1dcadc5240",
+  "rays": 128,
+  "probes": 4743,
+  "boxes": [
+   {
+    "min": [
+     -180,
+     0.35,
+     -140.6
+    ],
+    "n": [
+     31,
+     9,
+     17
+    ],
+    "spacing": 1,
+    "rooms": [
+     "hojo"
+    ]
+   }
+  ],
+  "bytes": 78020,
+  "seconds": 5,
+  "baked": "2026-11-13"
+ },
  "muscovy-dormition": {
   "site": "muscovy",
   "hash": "8e06815084b2c6a5",
@@ -1304,6 +2240,205 @@
   "bytes": 179588,
   "seconds": 32,
   "baked": "2026-11-07"
+ },
+ "mycenae-citadel": {
+  "site": "mycenae",
+  "hash": "f38ba52d7530f4ad",
+  "rays": 128,
+  "probes": 35960,
+  "boxes": [
+   {
+    "min": [
+     28.5,
+     22,
+     -29.5
+    ],
+    "n": [
+     58,
+     10,
+     62
+    ],
+    "spacing": 1,
+    "rooms": [
+     "the porch",
+     "the vestibule",
+     "the megaron",
+     "the perfume suite",
+     "the south magazines",
+     "the north suite",
+     "the oil magazines"
+    ]
+   }
+  ],
+  "bytes": 598380,
+  "seconds": 36,
+  "baked": "2026-11-13"
+ },
+ "mycenae-treasury": {
+  "site": "mycenae",
+  "hash": "7eb7d3b173b8d8c7",
+  "rays": 128,
+  "probes": 8400,
+  "boxes": [
+   {
+    "min": [
+     -76.1,
+     2.1,
+     90.2
+    ],
+    "n": [
+     21,
+     16,
+     25
+    ],
+    "spacing": 1,
+    "rooms": [
+     "the doorway",
+     "the tholos",
+     "the side chamber"
+    ]
+   }
+  ],
+  "bytes": 138347,
+  "seconds": 9,
+  "baked": "2026-11-13"
+ },
+ "nalanda-mahavihara": {
+  "site": "nalanda",
+  "hash": "f02ec1bdae6757f8",
+  "rays": 128,
+  "probes": 11238,
+  "boxes": [
+   {
+    "min": [
+     45.4,
+     -0.15,
+     -4.5
+    ],
+    "n": [
+     11,
+     9,
+     10
+    ],
+    "spacing": 1,
+    "rooms": [
+     "shrine"
+    ]
+   },
+   {
+    "min": [
+     30,
+     -0.5,
+     -23.5
+    ],
+    "n": [
+     21,
+     10,
+     11
+    ],
+    "spacing": 1,
+    "rooms": [
+     "lower cell",
+     "upper gallery"
+    ]
+   },
+   {
+    "min": [
+     -49,
+     19.5,
+     -4
+    ],
+    "n": [
+     9,
+     14,
+     9
+    ],
+    "spacing": 1,
+    "rooms": [
+     "temple shrine"
+    ]
+   },
+   {
+    "min": [
+     -82,
+     -0.5,
+     -95.2
+    ],
+    "n": [
+     15,
+     20,
+     7
+    ],
+    "spacing": 1,
+    "rooms": [
+     "library hall",
+     "library upper hall"
+    ]
+   },
+   {
+    "min": [
+     -101,
+     -0.5,
+     -99.2
+    ],
+    "n": [
+     11,
+     39,
+     7
+    ],
+    "spacing": 1,
+    "rooms": [
+     "sacred hall"
+    ]
+   },
+   {
+    "min": [
+     -123,
+     -0.5,
+     -98.2
+    ],
+    "n": [
+     9,
+     27,
+     7
+    ],
+    "spacing": 1,
+    "rooms": [
+     "second hall"
+    ]
+   }
+  ],
+  "bytes": 156130,
+  "seconds": 9,
+  "baked": "2026-11-13"
+ },
+ "nandauwas": {
+  "site": "nan-madol",
+  "hash": "706e5be1e0770c90",
+  "rays": 128,
+  "probes": 4760,
+  "boxes": [
+   {
+    "min": [
+     -23.5,
+     -0.5,
+     -54.5
+    ],
+    "n": [
+     28,
+     5,
+     34
+    ],
+    "spacing": 1,
+    "rooms": [
+     "inner court",
+     "crypt"
+    ]
+   }
+  ],
+  "bytes": 85495,
+  "seconds": 7,
+  "baked": "2026-11-13"
  },
  "nara-todaiji": {
   "site": "nara",
@@ -1693,6 +2828,61 @@
   "seconds": 73,
   "baked": "2026-11-13"
  },
+ "qin-palace": {
+  "site": "qin-xianyang",
+  "hash": "25d45d6de543c047",
+  "rays": 128,
+  "probes": 26624,
+  "boxes": [
+   {
+    "min": [
+     -244.6,
+     6.58,
+     -116.6
+    ],
+    "n": [
+     52,
+     16,
+     32
+    ],
+    "spacing": 1,
+    "rooms": [
+     "hall"
+    ]
+   }
+  ],
+  "bytes": 433491,
+  "seconds": 33,
+  "baked": "2026-11-13"
+ },
+ "qin-pit1": {
+  "site": "qin-xianyang",
+  "hash": "eb0ffb6e19074564",
+  "rays": 128,
+  "probes": 75480,
+  "boxes": [
+   {
+    "min": [
+     -100,
+     -5.5,
+     -152
+    ],
+    "n": [
+     185,
+     8,
+     51
+    ],
+    "spacing": 1.25,
+    "rooms": [
+     "pit-gallery",
+     "pit-corridors"
+    ]
+   }
+  ],
+  "bytes": 1123819,
+  "seconds": 84,
+  "baked": "2026-11-13"
+ },
  "qing-beijing-palace": {
   "site": "qing-beijing",
   "hash": "e8e51ee276d910b3",
@@ -1799,6 +2989,354 @@
   "seconds": 123,
   "baked": "2026-11-13"
  },
+ "samarkand-registan": {
+  "site": "timurid-samarkand",
+  "hash": "94e32b0464df8f90",
+  "rays": 128,
+  "probes": 55818,
+  "boxes": [
+   {
+    "min": [
+     -61,
+     -0.5,
+     -27.6
+    ],
+    "n": [
+     19,
+     33,
+     56
+    ],
+    "spacing": 1,
+    "rooms": [
+     "classroom",
+     "library",
+     "pishtaq passage"
+    ]
+   },
+   {
+    "min": [
+     58,
+     -0.5,
+     -8
+    ],
+    "n": [
+     17,
+     34,
+     17
+    ],
+    "spacing": 1,
+    "rooms": [
+     "khanqah hall"
+    ]
+   },
+   {
+    "min": [
+     -119.4,
+     -0.5,
+     -19.4
+    ],
+    "n": [
+     8,
+     34,
+     40
+    ],
+    "spacing": 1,
+    "rooms": [
+     "mosque"
+    ]
+   }
+  ],
+  "bytes": 938647,
+  "seconds": 107,
+  "baked": "2026-11-13"
+ },
+ "sgang-gwaay-house": {
+  "site": "sgang-gwaay",
+  "hash": "b8e76316cb69e8e6",
+  "rays": 128,
+  "probes": 3240,
+  "boxes": [
+   {
+    "min": [
+     13.54,
+     -0.7,
+     -9.3
+    ],
+    "n": [
+     18,
+     9,
+     20
+    ],
+    "spacing": 1,
+    "rooms": [
+     "house"
+    ]
+   }
+  ],
+  "bytes": 55496,
+  "seconds": 5,
+  "baked": "2026-11-13"
+ },
+ "shaolin-monastery": {
+  "site": "shaolin",
+  "hash": "a6b3eae69c1e1d7b",
+  "rays": 128,
+  "probes": 74099,
+  "boxes": [
+   {
+    "min": [
+     -13,
+     0.12,
+     86
+    ],
+    "n": [
+     25,
+     11,
+     11
+    ],
+    "spacing": 1.1,
+    "rooms": [
+     "tianwang"
+    ]
+   },
+   {
+    "min": [
+     -17,
+     0.72,
+     31
+    ],
+    "n": [
+     32,
+     12,
+     15
+    ],
+    "spacing": 1.1,
+    "rooms": [
+     "mahavira"
+    ]
+   },
+   {
+    "min": [
+     -12,
+     0.22,
+     -4
+    ],
+    "n": [
+     23,
+     10,
+     11
+    ],
+    "spacing": 1.1,
+    "rooms": [
+     "fatang"
+    ]
+   },
+   {
+    "min": [
+     -17,
+     0.92,
+     -96
+    ],
+    "n": [
+     32,
+     12,
+     16
+    ],
+    "spacing": 1.1,
+    "rooms": [
+     "qianfo"
+    ]
+   },
+   {
+    "min": [
+     -10,
+     -0.03,
+     -34
+    ],
+    "n": [
+     19,
+     9,
+     10
+    ],
+    "spacing": 1.1,
+    "rooms": [
+     "fangzhang"
+    ]
+   },
+   {
+    "min": [
+     -8,
+     0.02,
+     -60
+    ],
+    "n": [
+     16,
+     9,
+     10
+    ],
+    "spacing": 1.1,
+    "rooms": [
+     "lixue"
+    ]
+   },
+   {
+    "min": [
+     -54,
+     -0.13,
+     -84
+    ],
+    "n": [
+     14,
+     10,
+     182
+    ],
+    "spacing": 1.1,
+    "rooms": [
+     "cell",
+     "range4",
+     "range6",
+     "range8",
+     "range10",
+     "range2",
+     "range0"
+    ]
+   },
+   {
+    "min": [
+     -12,
+     0.02,
+     123
+    ],
+    "n": [
+     23,
+     10,
+     11
+    ],
+    "spacing": 1.1,
+    "rooms": [
+     "shanmen"
+    ]
+   },
+   {
+    "min": [
+     40,
+     -0.13,
+     -84
+    ],
+    "n": [
+     14,
+     10,
+     182
+    ],
+    "spacing": 1.1,
+    "rooms": [
+     "range1",
+     "range3",
+     "range5",
+     "range7",
+     "range9",
+     "range11"
+    ]
+   }
+  ],
+  "bytes": 1190509,
+  "seconds": 107,
+  "baked": "2026-11-13"
+ },
+ "shibam-friday-mosque": {
+  "site": "shibam",
+  "hash": "a4be2d39cf763bab",
+  "rays": 128,
+  "probes": 3248,
+  "boxes": [
+   {
+    "min": [
+     -58,
+     -0.44,
+     -26
+    ],
+    "n": [
+     14,
+     8,
+     29
+    ],
+    "spacing": 1,
+    "rooms": [
+     "the prayer hall"
+    ]
+   }
+  ],
+  "bytes": 56930,
+  "seconds": 6,
+  "baked": "2026-11-13"
+ },
+ "shibam-tower-house": {
+  "site": "shibam",
+  "hash": "0f2e5d607d581d93",
+  "rays": 128,
+  "probes": 16800,
+  "boxes": [
+   {
+    "min": [
+     32,
+     -0.44,
+     -29
+    ],
+    "n": [
+     13,
+     24,
+     12
+    ],
+    "spacing": 1,
+    "rooms": [
+     "the store and stable",
+     "the women's floor",
+     "the family room",
+     "the bedroom",
+     "the majlis",
+     "the upper room",
+     "the room under the roof",
+     "the stair lobby"
+    ]
+   },
+   {
+    "min": [
+     -22.71,
+     -0.44,
+     22.1
+    ],
+    "n": [
+     26,
+     17,
+     24
+    ],
+    "spacing": 1,
+    "rooms": [
+     "the indigo room",
+     "the silver room"
+    ]
+   },
+   {
+    "min": [
+     25.23,
+     -0.44,
+     33.9
+    ],
+    "n": [
+     12,
+     17,
+     12
+    ],
+    "spacing": 1,
+    "rooms": [
+     "the spice room"
+    ]
+   }
+  ],
+  "bytes": 149054,
+  "seconds": 15,
+  "baked": "2026-11-13"
+ },
  "song-hangzhou-liuhe": {
   "site": "song-hangzhou",
   "hash": "f7c35e5f244a955f",
@@ -1848,6 +3386,81 @@
   "seconds": 41,
   "baked": "2026-11-13"
  },
+ "song-kaifeng-iron-pagoda": {
+  "site": "song-kaifeng",
+  "hash": "7c12ec2348b9e559",
+  "rays": 128,
+  "probes": 39780,
+  "boxes": [
+   {
+    "min": [
+     150.55,
+     -0.08,
+     -116.4
+    ],
+    "n": [
+     20,
+     12,
+     14
+    ],
+    "spacing": 1,
+    "rooms": [
+     "gate-hall"
+    ]
+   },
+   {
+    "min": [
+     140,
+     0.4,
+     -252
+    ],
+    "n": [
+     41,
+     20,
+     27
+    ],
+    "spacing": 1,
+    "rooms": [
+     "main-hall"
+    ]
+   },
+   {
+    "min": [
+     86,
+     0.1,
+     -202
+    ],
+    "n": [
+     17,
+     12,
+     35
+    ],
+    "spacing": 1,
+    "rooms": [
+     "sutra-hall"
+    ]
+   },
+   {
+    "min": [
+     218,
+     0.1,
+     -202
+    ],
+    "n": [
+     17,
+     12,
+     35
+    ],
+    "spacing": 1,
+    "rooms": [
+     "guanyin-hall"
+    ]
+   }
+  ],
+  "bytes": 630723,
+  "seconds": 55,
+  "baked": "2026-11-13"
+ },
  "sydney-opera": {
   "site": "sydney",
   "hash": "432df579c12a57ed",
@@ -1889,6 +3502,208 @@
   ],
   "bytes": 1266068,
   "seconds": 237,
+  "baked": "2026-11-13"
+ },
+ "tang-changan-daci-en": {
+  "site": "tang-changan",
+  "hash": "ba4b8532002ef3ff",
+  "rays": 128,
+  "probes": 22188,
+  "boxes": [
+   {
+    "min": [
+     118.2,
+     0.7,
+     102
+    ],
+    "n": [
+     39,
+     13,
+     19
+    ],
+    "spacing": 1,
+    "rooms": [
+     "main-hall"
+    ]
+   },
+   {
+    "min": [
+     123.8,
+     0.4,
+     143
+    ],
+    "n": [
+     27,
+     11,
+     15
+    ],
+    "spacing": 1,
+    "rooms": [
+     "kings-hall"
+    ]
+   },
+   {
+    "min": [
+     78.2,
+     0.2,
+     98
+    ],
+    "n": [
+     15,
+     10,
+     27
+    ],
+    "spacing": 1,
+    "rooms": [
+     "sutra-hall"
+    ]
+   },
+   {
+    "min": [
+     182.2,
+     0.2,
+     98
+    ],
+    "n": [
+     15,
+     10,
+     27
+    ],
+    "spacing": 1,
+    "rooms": [
+     "translation-hall"
+    ]
+   }
+  ],
+  "bytes": 367766,
+  "seconds": 28,
+  "baked": "2026-11-13"
+ },
+ "taos-pueblo": {
+  "site": "taos",
+  "hash": "f0a0903bc3322e78",
+  "rays": 128,
+  "probes": 10269,
+  "boxes": [
+   {
+    "min": [
+     -61.5,
+     -0.5,
+     -59.5
+    ],
+    "n": [
+     94,
+     7,
+     9
+    ],
+    "spacing": 1,
+    "rooms": [
+     "room-n11",
+     "room-n10",
+     "room-n3",
+     "room-n5",
+     "room-n7",
+     "room-n14",
+     "room-n18",
+     "room-n17",
+     "room-n20"
+    ]
+   },
+   {
+    "min": [
+     -21.5,
+     -0.5,
+     44.5
+    ],
+    "n": [
+     69,
+     7,
+     9
+    ],
+    "spacing": 1,
+    "rooms": [
+     "room-s3",
+     "room-s5",
+     "room-s7",
+     "room-s11",
+     "room-s13",
+     "room-s15"
+    ]
+   }
+  ],
+  "bytes": 170427,
+  "seconds": 10,
+  "baked": "2026-11-13"
+ },
+ "teotihuacan-centre": {
+  "site": "teotihuacan",
+  "hash": "aa6150fc4bba6754",
+  "rays": 128,
+  "probes": 41582,
+  "boxes": [
+   {
+    "min": [
+     -100,
+     0.1,
+     -185
+    ],
+    "n": [
+     51,
+     10,
+     77
+    ],
+    "spacing": 1,
+    "rooms": [
+     "palace",
+     "jaguars"
+    ]
+   },
+   {
+    "min": [
+     172,
+     64.5,
+     -88
+    ],
+    "n": [
+     17,
+     8,
+     17
+    ],
+    "spacing": 1,
+    "rooms": [
+     "sun-temple"
+    ]
+   }
+  ],
+  "bytes": 682788,
+  "seconds": 39,
+  "baked": "2026-11-13"
+ },
+ "thebes-karnak": {
+  "site": "thebes",
+  "hash": "4cee8acccc918137",
+  "rays": 128,
+  "probes": 69445,
+  "boxes": [
+   {
+    "min": [
+     -100,
+     -0.5,
+     -57
+    ],
+    "n": [
+     43,
+     19,
+     85
+    ],
+    "spacing": 1.35,
+    "rooms": [
+     "hall"
+    ]
+   }
+  ],
+  "bytes": 1139743,
+  "seconds": 124,
   "baked": "2026-11-13"
  },
  "ur-ziggurat": {
@@ -1998,6 +3813,205 @@
   ],
   "bytes": 1254339,
   "seconds": 127,
+  "baked": "2026-11-13"
+ },
+ "wei-ye-bronze-sparrow": {
+  "site": "wei-ye",
+  "hash": "05be746c0f86fe8d",
+  "rays": 128,
+  "probes": 24136,
+  "boxes": [
+   {
+    "min": [
+     -206,
+     14.5,
+     -98
+    ],
+    "n": [
+     21,
+     21,
+     21
+    ],
+    "spacing": 1,
+    "rooms": [
+     "sparrow-tower"
+    ]
+   },
+   {
+    "min": [
+     -213,
+     12.1,
+     -154
+    ],
+    "n": [
+     35,
+     14,
+     17
+    ],
+    "spacing": 1,
+    "rooms": [
+     "ice-hall"
+    ]
+   },
+   {
+    "min": [
+     -213,
+     12.1,
+     -30
+    ],
+    "n": [
+     35,
+     11,
+     17
+    ],
+    "spacing": 1,
+    "rooms": [
+     "tiger-hall"
+    ]
+   }
+  ],
+  "bytes": 385010,
+  "seconds": 32,
+  "baked": "2026-11-13"
+ },
+ "wei-ye-wenchang": {
+  "site": "wei-ye",
+  "hash": "7a3e3aed0318b432",
+  "rays": 128,
+  "probes": 25024,
+  "boxes": [
+   {
+    "min": [
+     -31.7,
+     3.4,
+     -82
+    ],
+    "n": [
+     64,
+     17,
+     23
+    ],
+    "spacing": 1,
+    "rooms": [
+     "wenchang"
+    ]
+   }
+  ],
+  "bytes": 379296,
+  "seconds": 38,
+  "baked": "2026-11-13"
+ },
+ "yinxu-archive": {
+  "site": "shang-yinxu",
+  "hash": "e09c8a2ccb948911",
+  "rays": 128,
+  "probes": 7128,
+  "boxes": [
+   {
+    "min": [
+     94,
+     0,
+     -94
+    ],
+    "n": [
+     33,
+     8,
+     27
+    ],
+    "spacing": 1,
+    "rooms": [
+     "archive"
+    ]
+   }
+  ],
+  "bytes": 114159,
+  "seconds": 6,
+  "baked": "2026-11-13"
+ },
+ "yinxu-hall": {
+  "site": "shang-yinxu",
+  "hash": "5da655ba19a8400a",
+  "rays": 128,
+  "probes": 24964,
+  "boxes": [
+   {
+    "min": [
+     -1,
+     1,
+     -99
+    ],
+    "n": [
+     43,
+     12,
+     24
+    ],
+    "spacing": 1,
+    "rooms": [
+     "hall"
+    ]
+   },
+   {
+    "min": [
+     -23,
+     0.5,
+     -65
+    ],
+    "n": [
+     17,
+     10,
+     37
+    ],
+    "spacing": 1,
+    "rooms": [
+     "jia"
+    ]
+   },
+   {
+    "min": [
+     47,
+     0.5,
+     -65
+    ],
+    "n": [
+     17,
+     10,
+     37
+    ],
+    "spacing": 1,
+    "rooms": [
+     "bing"
+    ]
+   }
+  ],
+  "bytes": 398328,
+  "seconds": 21,
+  "baked": "2026-11-13"
+ },
+ "yinxu-tomb": {
+  "site": "shang-yinxu",
+  "hash": "de8d5c64630b121b",
+  "rays": 128,
+  "probes": 1352,
+  "boxes": [
+   {
+    "min": [
+     -71,
+     0.1,
+     -117
+    ],
+    "n": [
+     13,
+     8,
+     13
+    ],
+    "spacing": 1,
+    "rooms": [
+     "tomb-hall"
+    ]
+   }
+  ],
+  "bytes": 22430,
+  "seconds": 2,
   "baked": "2026-11-13"
  }
 }

@@ -18,7 +18,7 @@ function ishidoro(x, z, y, s = 1) {
 function pierPlan() {
   const E = [{ t: 'pier', a: VIEW_PIER.a, b: VIEW_PIER.b, y: VIEW_PIER.y, bed: POND_LEVEL - 1.2, w: VIEW_PIER.w }];
   // mooring posts at the end, to either side, and two more half way: the boats of the court tie up here
-  for (const [x, dz] of [[4.6, -1.7], [4.6, 1.7], [18, -1.7], [18, 1.7], [30, 1.7]]) E.push({ t: 'block', rect: [x - 0.1, dz - 0.1, x + 0.1, dz + 0.1], y0: POND_LEVEL - 1.2, y1: VIEW_PIER.y + 0.9, mat: 'bark_dark', collide: false });
+  for (const [x, dz, top = 0.9] of [[4.6, -1.7, 0.2], [4.6, 1.7, 0.2], [18, -1.7], [18, 1.7], [30, 1.7]]) E.push({ t: 'block', rect: [x - 0.1, dz - 0.1, x + 0.1, dz + 0.1], y0: POND_LEVEL - 1.2, y1: VIEW_PIER.y + top, mat: 'bark_dark', collide: false });
   // railings of two bars on posts along the sides of the outer half, red lacquer
   for (const sd of [-1, 1]) {
     const z = sd * (VIEW_PIER.w / 2 - 0.05);
