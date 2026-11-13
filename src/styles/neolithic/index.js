@@ -590,6 +590,89 @@ function campShelter(el, { bag, col }) {
   col.circle(x, z, R * 0.95, y, y + Hh);
 }
 
+/**
+ * camp_hut: { c, y, yaw, r (inside radius), h (the apex), kind ('hide' | 'thatch'), fire, seed } — a round hut of the gathering camp that a visitor can walk into
+ * (docs/settlements/stonehenge.md §10b): twelve hazel stakes woven into a wall two metres high (wicker, or hazel daubed with chalk), a doorway 1.1 m wide
+ * on +v with a lintel pole and the flap rolled up over it, a steep roof of sewn hides (tan, brown, grey) or of thatch, the eave out past the wall, the
+ * poles crossing above a smoke hole, the roof lined within; inside, a chalk floor, the hearth with its kerb (a fire in some, with a light), two beds of
+ * bracken under hides, pots, a basket, a quern, firewood, a rack of drying meat under the roof, hazel rods leaning. The wall and the furniture are
+ * colliders, the doorway open.
+ */
+function campHut(el, { bag, col, lights }) {
+  const rand = rng(el.seed || 31), [x, z] = el.c, y = el.y ?? 0, a = el.yaw ?? 0, R = el.r ?? 2.3, apex = el.h ?? 3.9, thatch = el.kind === 'thatch';
+  const fr = { x, z, y, c: Math.cos(a), s: Math.sin(a) };
+  const N = 12, wh = 2.0, th = 0.14, eave = R + 0.34, ye = wh - 0.03, D = Math.PI * 2 / N;
+  const th_ = (j) => Math.PI / 2 + (j - 0.5) * D;                       // vertex j; the doorway between 0 and 1
+  const Wp = (r, t, yy) => W(fr, r * Math.cos(t), yy, r * Math.sin(t));
+  const hint = (t) => [Math.cos(t) * fr.c - Math.sin(t) * fr.s, 0, Math.cos(t) * fr.s + Math.sin(t) * fr.c];
+  const quad = (T, p, q, r, s2, h) => {
+    for (const [A, B, C] of [[p, q, r], [p, r, s2]]) {
+      const ux = B[0] - A[0], uy = B[1] - A[1], uz = B[2] - A[2], vx = C[0] - A[0], vy = C[1] - A[1], vz = C[2] - A[2];
+      const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      if (nx * h[0] + ny * h[1] + nz * h[2] < 0) T.push(...A, ...C, ...B); else T.push(...A, ...B, ...C);
+    }
+  };
+  const P2 = (r, t) => { const p = Wp(r, t, 0); return [p[0], p[2]]; };
+  // the floor of beaten chalk, its edge bedded
+  bag.add('chalk', lathe([[R + th, -0.25], [R + th, 0.03], [0.001, 0.03]], 28, null, x, y, z));
+  // the wall: panels between the stakes, outer and inner faces and the top (the doorway left open)
+  const wallMat = thatch ? 'chalk' : 'wicker', wall = [], top = [];
+  for (let j = 1; j < N; j++) {
+    const t0 = th_(j), t1 = th_(j + 1), tm = (t0 + t1) / 2, hh = hint(tm);
+    quad(wall, Wp(R + th, t0, -0.25), Wp(R + th, t1, -0.25), Wp(R + th, t1, wh), Wp(R + th, t0, wh), hh);
+    quad(wall, Wp(R, t0, 0), Wp(R, t1, 0), Wp(R, t1, wh), Wp(R, t0, wh), [-hh[0], 0, -hh[2]]);
+    quad(top, Wp(R, t0, wh), Wp(R, t1, wh), Wp(R + th, t1, wh), Wp(R + th, t0, wh), [0, 1, 0]);
+    col.segment(P2(R + th / 2, t0), P2(R + th / 2, t1), th, y - 0.1, y + wh);
+  }
+  bag.add(wallMat, fromTriangles(wall)); bag.add('timber', fromTriangles(top));
+  if (thatch) { for (let j = 1; j < N; j++) { const t0 = th_(j), t1 = th_(j + 1), hh = hint((t0 + t1) / 2), sk = []; quad(sk, Wp(R + th + 0.015, t0, -0.25), Wp(R + th + 0.015, t1, -0.25), Wp(R + th + 0.015, t1, 0.4), Wp(R + th + 0.015, t0, 0.4), hh); bag.add('plaster_damp', fromTriangles(sk)); } }
+  // the stakes: a post at every vertex, the jambs thicker and rising to the lintel
+  for (let j = 0; j < N; j++) { const jamb = j === 0 || j === 1; bag.add('timber', stick(Wp(R + th / 2, th_(j), -0.2), Wp(R + th / 2, th_(j), wh + 0.1), jamb ? 0.085 : 0.05, 6)); }
+  { const p = Wp(R + th / 2, th_(0), 1.92), q = Wp(R + th / 2, th_(1), 1.92); bag.add('timber', stick(p, q, 0.06, 6));
+    const f0 = Wp(R + th / 2 + 0.05, th_(0) + 0.04, 1.84), f1 = Wp(R + th / 2 + 0.05, th_(1) - 0.04, 1.84); bag.add('hide_brown', stick(f0, f1, 0.09, 6)); }
+  // the roof: panels of hide (or thatch), outer; the lining within; the soffit of the eave
+  const M = 4, hides = ['hide_tan', 'hide_brown', 'hide_grey', 'hide_tan'];
+  const rr = (f) => 0.3 + (eave - 0.3) * (1 - f) * (1 + 0.07 * Math.sin(f * Math.PI)), ry = (f) => ye + (apex - ye) * Math.pow(f, 0.8);
+  const ri = (f) => 0.2 + (R - 0.2) * (1 - f), yi = (f) => wh + 0.04 + (apex - 0.2 - wh - 0.04) * Math.pow(f, 0.85);
+  const roof = {}, lining = [], soff = [];
+  for (let j = 0; j < N; j++) {
+    const t0 = th_(j), t1 = th_(j + 1), tm = (t0 + t1) / 2, hh = hint(tm), m = thatch ? 'thatch' : hides[Math.floor(rand() * hides.length)];
+    const T = roof[m] ??= [];
+    for (let k = 0; k < M; k++) { const f0 = k / M * 0.97, f1 = (k + 1) / M * 0.97; quad(T, Wp(rr(f0), t0, ry(f0)), Wp(rr(f0), t1, ry(f0)), Wp(rr(f1), t1, ry(f1)), Wp(rr(f1), t0, ry(f1)), [hh[0], 1, hh[2]]); }
+    for (let k = 0; k < M; k++) { const f0 = k / M * 0.97, f1 = (k + 1) / M * 0.97; quad(lining, Wp(ri(f0), t0, yi(f0)), Wp(ri(f0), t1, yi(f0)), Wp(ri(f1), t1, yi(f1)), Wp(ri(f1), t0, yi(f1)), [-hh[0], -1, -hh[2]]); }
+    quad(soff, Wp(R + th, t0, wh), Wp(R + th, t1, wh), Wp(eave, t1, ye - 0.02), Wp(eave, t0, ye - 0.02), [0, -1, 0]);
+  }
+  for (const [m, T] of Object.entries(roof)) bag.add(m, fromTriangles(T));
+  bag.add(thatch ? 'wicker' : 'hide_tan', fromTriangles(lining)); bag.add('timber', fromTriangles(soff));
+  // the crossing poles standing out over the smoke hole, a collar round it, the rim of the eave tied with a withy
+  for (let k = 0; k < 8; k++) { const t = k / 8 * Math.PI * 2; bag.add('timber', stick(Wp(eave * 1.01, t, ye - 0.12), Wp(0.1, t + 2.6, apex + 0.5 + 0.1 * (k % 2)), 0.026, 5)); }
+  bag.add('timber', lathe([[0.34, apex - 0.22], [0.34, apex - 0.05], [0.27, apex - 0.05], [0.27, apex - 0.22]], 10, null, x, y, z));
+  // the hearth in the middle: a kerb of chalk, the ash, charred sticks, a fire in some; a pot on the stones
+  bag.add('chalk', lathe([[0.66, 0], [0.66, 0.08], [0.52, 0.1], [0.47, 0.04], [0.001, 0.04]], 18, null, ...W(fr, 0, 0.03, 0)));
+  bag.add('pottery_dark', lathe([[0.47, 0.03], [0.44, 0.065], [0.001, 0.075]], 14, null, ...W(fr, 0, 0.04, 0)));
+  for (let k = 0; k < 4; k++) { const t = rand() * 6.28, p0 = W(fr, Math.cos(t) * 0.38, 0.1, Math.sin(t) * 0.38), p1 = W(fr, Math.cos(t) * 0.05, 0.15, Math.sin(t) * 0.05); bag.add('log_pine', stick(p0, p1, 0.034, 6)); }
+  if (el.fire) { bag.add('flame', lathe([[0.17, 0], [0.12, 0.2], [0.05, 0.4], [0.001, 0.5]], 8, null, ...W(fr, 0, 0.1, 0))); const q = W(fr, 0, 0.8, 0); lights?.push({ at: [q[0], q[1], q[2]], color: '#ff9a4a', intensity: 1.1, distance: 7 }); }
+  const at2 = (u, v) => { const p = W(fr, u, 0, v); return [p[0], p[2]]; };
+  bag.add('pottery_dark', lathe(groovedWare(0.2, 0.3), 14, null, ...W(fr, 1.25, 0.03, -0.1))); col.circle(...at2(1.25, -0.1), 0.22, y, y + 0.3);
+  bag.add('terracotta', lathe(groovedWare(0.16, 0.26), 14, null, ...W(fr, -1.3, 0.03, 0.45))); col.circle(...at2(-1.3, 0.45), 0.2, y, y + 0.3);
+  bag.add('wicker', lathe([[0.001, 0], [0.23, 0], [0.28, 0.32], [0.24, 0.34], [0.001, 0.05]], 12, null, ...W(fr, 0, 0.03, -1.7))); col.circle(...at2(0, -1.7), 0.26, y, y + 0.34);
+  // two beds of bracken against the back wall, laid along the radius (at about 140 and 40 degrees behind the doorway's line): a reed mat, the bracken heaped, a hide thrown over
+  for (const psi of [-Math.PI / 2 - 0.85, -Math.PI / 2 + 0.85]) {
+    const f2 = { x, z, y, c: Math.cos(a + psi - Math.PI / 2), s: Math.sin(a + psi - Math.PI / 2) }, v0 = 0.75, v1 = R - 0.18, hide = ['hide_tan', 'hide_brown', 'hide_grey'][Math.floor(rand() * 3)];
+    bag.add('reed_mat', obox(f2, -0.45, 0.45, 0.03, 0.2, v0, v1)); bag.add(hide, obox(f2, -0.4, 0.4, 0.2, 0.27, v0 + 0.05, v1 - 0.35)); bag.add('hide_tan', obox(f2, -0.35, 0.35, 0.27, 0.33, v1 - 0.4, v1 - 0.05));
+    const p0 = W(f2, 0, 0, v0), p1 = W(f2, 0, 0, v1);
+    col.segment([p0[0], p0[2]], [p1[0], p1[2]], 0.9, y, y + 0.34);
+  }
+  // hazel rods leaning against the wall at the right of the doorway
+  for (let k = 0; k < 5; k++) { const t = 0.25 + k * 0.05; bag.add('timber', stick(Wp(R - 0.08, t, 0), Wp(R - 0.28, t + 0.03, 1.9 - k * 0.07), 0.02, 4)); }
+  // by the door, inside to the left: a saddle quern on its stone; firewood stacked against the wall on the right
+  { const u = -(Math.min(R * 0.45, 1.0)) - 0.3, v = R - 0.7; bag.add('granite_rough', lathe([[0.001, 0], [0.26, 0], [0.28, 0.06], [0.2, 0.12], [0.001, 0.12]], 10, null, ...W(fr, u, 0.03, v))); bag.add('granite_rough', lathe([[0.001, 0.1], [0.1, 0.12], [0.11, 0.16], [0.001, 0.17]], 8, null, ...W(fr, u + 0.05, 0.03, v - 0.04))); }
+  for (let k = 0; k < 6; k++) { const q0 = W(fr, 1.4 + (k % 3) * 0.0, 0.05 + Math.floor(k / 3) * 0.1, R - 1.5 + (k % 3) * 0.12), q1 = W(fr, 1.4, 0.05 + Math.floor(k / 3) * 0.1, R - 0.75 + (k % 3) * 0.12); bag.add('log_pine', stick(q0, q1, 0.06, 6)); }
+  // under the roof over the hearth: a rack of two poles with strips of meat and a skin bag hung from it (above head height)
+  { const pa = W(fr, -1.0, 2.4, 0.2), pb = W(fr, 1.0, 2.4, 0.2); bag.add('timber', stick(pa, pb, 0.028, 5));
+    for (let k = 0; k < 4; k++) { const u = -0.7 + k * 0.45; bag.add(k % 2 ? 'hide_brown' : 'terracotta', obox(fr, u, u + 0.07, 1.95, 2.38, 0.18, 0.22)); } }
+}
+
 /** hurdle: { a, b, y, h, seed } — a woven hazel hurdle fence (a windbreak, a pen): rails of withy woven between stakes. */
 function hurdle(el, { bag, col }) {
   const [ax, az] = el.a, [bx, bz] = el.b, y = el.y ?? 0, h = el.h ?? 1.1, L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L;
@@ -798,6 +881,6 @@ function granary(el, { bag, col }) {
 
 registerStyle('neolithic', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, standing_stone: standingStone, lintel_ring: lintelRing, lintel, neolithic_house: house, timber_circle: timberCircle, feast_fire: feastFire, midden, aubrey_holes: aubreyHoles, camp_shelter: campShelter, hurdle, yard, craft, litter, scrub, granary },
+  elements: { ...STYLES.qing.elements, standing_stone: standingStone, lintel_ring: lintelRing, lintel, neolithic_house: house, timber_circle: timberCircle, feast_fire: feastFire, midden, aubrey_holes: aubreyHoles, camp_shelter: campShelter, camp_hut: campHut, hurdle, yard, craft, litter, scrub, granary },
   objects: {},
 });

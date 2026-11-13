@@ -4,6 +4,8 @@
 import { RADIUS, AXIS, VILLAGE, DURR, BARROWS, DITCH, HEEL, height, houses, avenue, durr } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+/** The huts of the camps (camp()): what can be entered, and who is inside. */
+const HUTS = [];
 const base = (id, elements, style, rooms = []) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [40, -40], facing: 'w' } });
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));     // a figure faces −z when rot = 0
 const CLOTH = ['hide_tan', 'hide_brown', 'cloth_brown', 'cloth_ochre', 'cloth_grey', 'hide_grey'];
@@ -117,7 +119,10 @@ export function camp() {
     for (let k = 0; k < nS; k++) {
       const a = a0 + k / nS * 6.28 + (rand() - 0.5) * 0.4, d = 6.2 + rand() * 1.6, x = cx + Math.cos(a) * d, z = cz + Math.sin(a) * d;
       if (!ok(x, z, 2)) continue;
-      N.push({ t: 'camp_shelter', c: [x, z], y: height(x, z), yaw: Math.atan2(-(cx - x), cz - z), r: 1.7 + rand() * 0.5, h: 2.3 + rand() * 0.5, seed: Math.floor(rand() * 1e6) });
+      const sr = 1.7 + rand() * 0.5, sh = 2.3 + rand() * 0.5, ss = Math.floor(rand() * 1e6), yawS = Math.atan2(-(cx - x), cz - z), y0 = height(x, z);
+      // the camps within reach of the arrival have round huts a visitor can walk into (hide-roofed and thatched, in turn), one shelter in each camp left a leaning cone of hides
+      if (Math.hypot(x - ARR[0], z - ARR[1]) < 135 && (k > 0 || nS < 3)) { const kind = k % 2 ? 'hide' : 'thatch', hut = { t: 'camp_hut', c: [x, z], y: y0, yaw: yawS, r: 2.2 + (ss % 7) * 0.05, h: 3.7 + (ss % 5) * 0.1, kind, fire: ss % 5 < 3, seed: ss }; N.push(hut); HUTS.push(hut); }
+      else N.push({ t: 'camp_shelter', c: [x, z], y: y0, yaw: yawS, r: sr, h: sh, seed: ss });
     }
     // a windbreak of hurdles on the windward side (the wind is from the south-west: ENV wind [0.9, 0.3])
     const wa = Math.PI + 0.3 + (rand() - 0.5) * 0.5, wx = cx + Math.cos(wa) * 3.6, wz = cz + Math.sin(wa) * 3.6, wl = 2.4 + rand() * 1.2;
@@ -149,6 +154,18 @@ export function camp() {
       L.push({ t: 'animal', kind: 'ox', at, y: height(...at), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) });
       if (k % 4 === 0) person([at[0] + 3, at[1] + 2], rand() * 6.28, { carry: 'staff', pose: 'stand' });
     }
+  }
+  // inside the huts, from a stream of its own: by the hearth, sitting on the floor or the bed's edge, one with a child; a hut left empty now and then
+  {
+    const r2 = rng(2599);
+    HUTS.forEach((h, i) => {
+      if (i % 4 === 3) return;
+      const c = Math.cos(h.yaw), s = Math.sin(h.yaw), at = (u, v) => [h.c[0] + u * c - v * s, h.c[1] + u * s + v * c], y = h.y + 0.05;
+      const mk = (u, v, to, o) => { const p = at(u, v), q = at(to[0], to[1]); L.push({ t: 'figure', at: p, y, rot: face(p, q), seed: Math.floor(r2() * 1e9), dress: r2() < 0.5 ? 'robe' : 'tunic', cloth: CLOTH[Math.floor(r2() * CLOTH.length)], cloth2: CLOTH[Math.floor(r2() * CLOTH.length)], skin: r2() < 0.5 ? 'skin_light' : 'skin_medium', hat: 'none', ...o }); };
+      mk(0.85, 0.75, [0, 0], { pose: 'sit_ground' });
+      if (i % 2 === 0) mk(-0.85, 0.7, [0, 0], { pose: 'sit_low' });
+      if (i % 3 === 0) mk(0.2, 1.05, [0, 0], { pose: 'sit_ground', h: 0.62 });
+    });
   }
   return [base('stonehenge-camp', N, 'neolithic'), base('stonehenge-camp-life', L, 'life')];
 }
