@@ -3,8 +3,9 @@
 // staffs), kneeling in the Mahavira Hall, sweeping the courts, pilgrims and villagers in Ming dress, dogs. Several plans.
 import '../../styles/shaolin/index.js';
 import { STYLES } from '../../core/build.js';
-import { slFronttrim } from './trim.js';
+import { slFronttrim, slShop } from './trim.js';
 STYLES.life.elements.sl_fronttrim = slFronttrim;
+STYLES.life.elements.sl_shop = slShop;
 import { PAL_HOUSE } from '../../styles/shaolin/index.js';
 import { HOUSES, YARDS, GAP, AXIS, PLAT, HGT, RANGES, CELL, RADIUS, rng } from './layout.js';
 
@@ -30,6 +31,13 @@ function frontOf(h) {
   return { P, L, rot: Math.atan2(o[0], o[1]), o, along };
 }
 const FRONT_Y = 0.25;
+/** The palettes of the front designs (layout.js VTYPES): earth is the village's own. */
+const DESIGN_PAL = {
+  brick: { ...PAL_HOUSE, plaster: 'brick_grey', plinth: 'granite_grey' },
+  white: { ...PAL_HOUSE, plaster: 'plaster_white' },
+  thatch: { ...PAL_HOUSE, roof: 'thatch', plinth: 'granite_grey' },
+  loft: { ...PAL_HOUSE, plaster: 'lime_plaster' },
+};
 
 /** The houses: continuous fronts with party walls, furnished rooms, the yards behind them with their earth walls. */
 function village() {
@@ -37,15 +45,25 @@ function village() {
   HOUSES.forEach((h) => {
     const rr = h.rect, along = h.front === 'n' || h.front === 's';
     const walls = { n: 'plaster', s: 'plaster', e: 'plaster', w: 'plaster' }; delete walls[h.front];
-    E.push({ t: 'ming_hall', rect: rr, y: FRONT_Y, H: h.H, front: h.front, four: false, roof: h.roof, plat: 0.25, platMargin: 0.25, eave: 0.35, pal: PAL_HOUSE, lat: 'lattice', walls, winWall: true, bays: [3, 1] });
+    const pal = DESIGN_PAL[h.vt] ?? PAL_HOUSE, loft = h.vt === 'loft';
+    E.push({ t: 'ming_hall', rect: rr, y: FRONT_Y, H: h.H, front: h.front, four: false, roof: loft ? 'none' : h.roof, plat: 0.25, platMargin: 0.25, eave: h.vt === 'thatch' ? 0.55 : h.vt === 'white' ? 0.5 : 0.35, pal, lat: 'lattice', walls, winWall: true, bays: [3, 1] });
+    if (loft) {
+      // the loft: a second, lower hall on the first's ceiling, its front a lattice screen (the doorway the hall cuts in the middle bay is filled), a roof of its own
+      const yU = FRONT_Y + h.H - 0.1, nb = 3, fr = frontOf(h), [x0, z0, x1, z1] = rr, o = fr.o, k = 1;
+      const uw = { ...walls };
+      E.push({ t: 'ming_hall', rect: rr, y: yU, H: h.Hu, front: h.front, four: false, roof: h.roof, platform: false, eave: 0.4, pal, lat: 'lattice', walls: uw, winWall: true, bays: [3, 1] });
+      const a0 = (along ? x0 : z0) + fr.L * k / nb + 0.12, a1 = (along ? x0 : z0) + fr.L * (k + 1) / nb - 0.12, edge = { n: z0, s: z1, w: x0, e: x1 }[h.front];
+      const rect = along ? [a0, edge - 0.07, a1, edge + 0.07] : [edge - 0.07, a0, edge + 0.07, a1];
+      E.push({ t: 'block', rect, y0: yU, y1: yU + h.Hu - 0.6, mat: 'lattice' });
+      void o;
+    }
     E.push({ t: 'shaolin_room', kind: h.kind === 'shop' ? 'shop' : 'farmhouse', rect: rr, front: h.front, y: FRONT_Y, H: h.H, trade: h.trade, seed: h.seed });
-    void along;
   });
   // the party walls between neighbours in a row
   for (let i = 0; i < HOUSES.length; i++) for (let j = i + 1; j < HOUSES.length; j++) {
     const a = HOUSES[i], b = HOUSES[j];
     if (a.front !== b.front) continue;
-    const ra = a.rect, rb = b.rect, H = Math.min(a.H, b.H) - 0.3;
+    const ra = a.rect, rb = b.rect, H = Math.min(a.H + (a.Hu || 0), b.H + (b.Hu || 0)) - 0.3;
     if (Math.abs(rb[0] - ra[2] - GAP) < 0.01 || Math.abs(ra[0] - rb[2] - GAP) < 0.01) {
       const xl = Math.min(ra[2], rb[2]), xr = Math.max(ra[0], rb[0]), z0 = Math.max(ra[1], rb[1]), z1 = Math.min(ra[3], rb[3]);
       if (z1 - z0 > 0.5 && xr > xl) E.push({ t: 'block', rect: [xl, z0, xr, z1], y0: 0, y1: FRONT_Y + H, mat: 'earth_wall' });
@@ -88,15 +106,15 @@ function frontLife() {
   const L = [], r = rng(1611), pick = (a) => a[Math.floor(r() * a.length)], sd = () => Math.floor(r() * 1e9);
   const dressed = (h) => {
     const F = frontOf(h), Y = FRONT_Y - 0.25, at = F.P(0.5, 0.45);
-    if (h.kind === 'shop') L.push({ t: 'suzhou_shop', at, y: 0, rot: F.rot, L: F.L, v0: 0.45, trade: h.trade, seed: h.seed + 7, open: false, detail: 1, water: false });
+    if (h.kind === 'shop') L.push({ t: 'sl_shop', at, y: 0, rot: F.rot, L: F.L, v0: 0.45, trade: h.trade, seed: h.seed + 7, open: false, detail: 1, water: false });
     else {
       // a home: a lantern at the door, firewood, a bench, a water tub, pots at the step, drying trays of corn on a rack
       if (r() < 0.6) L.push({ t: 'hang_lantern', at: F.P(0.5, 0.15), y: FRONT_Y + 2.7, rot: F.rot, kind: pick(['paper', 'paper', 'white']), seed: 1 });
       if (r() < 0.7) L.push({ t: 'firewood', at: F.P(0.12 + r() * 0.1, 0.9), y: Y, rot: F.rot, len: 1.5, seed: sd() });
       if (r() < 0.5) L.push({ t: 'bench', at: F.P(0.8, 1.0), y: Y, rot: F.rot + Math.PI / 2 * 0 + (F.along ? 0 : Math.PI / 2), seed: sd() });
       if (r() < 0.45) L.push({ t: 'rain_tub', at: F.P(0.9, 0.7), y: Y, rot: r() * 6.28, seed: sd() });
-      for (let k = 0; k < (r() < 0.6 ? 2 : 0); k++) L.push({ t: 'pot', kind: pick(['glazed_jar', 'water_pot', 'dark_pot']), at: F.P(0.2 + r() * 0.6, 0.6 + r() * 0.3), y: Y + 0.25, rot: r() * 6.28, s: 0.8, seed: sd() });
-      if (r() < 0.35) L.push({ t: 'drying_tray', at: F.P(0.3 + r() * 0.4, 1.3), y: Y, rot: r() * 6.28, seed: sd() });
+      for (let k = 0; k < (r() < 0.6 ? 2 : 0); k++) L.push({ t: 'pot', kind: pick(['glazed_jar', 'water_pot', 'dark_pot']), at: F.P(r() < 0.5 ? 0.1 + r() * 0.16 : 0.74 + r() * 0.16, 0.6 + r() * 0.3), y: Y + 0.25, rot: r() * 6.28, s: 0.8, seed: sd() });
+      if (r() < 0.35) L.push({ t: 'drying_tray', at: F.P(r() < 0.5 ? 0.14 + r() * 0.12 : 0.74 + r() * 0.12, 1.3), y: Y, rot: r() * 6.28, seed: sd() });
       if (r() < 0.3) L.push({ t: 'chickens', at: F.P(r(), 1.8), y: Y, rot: r() * 6.28, seed: sd() });
     }
     L.push({ t: 'sl_fronttrim', at: F.P(0.5, 0.0), y: FRONT_Y, rot: F.rot, L: F.L, eave: h.H - 0.2, couplets: h.kind !== 'shop', strings: h.kind === 'shop' ? r() < 0.35 : r() < 0.65, seed: h.seed + 3 });
@@ -215,6 +233,25 @@ export async function town() {
     if (h.kind === 'shop' && rand() < 0.4) mk(rand() < 0.6 ? man : woman, F.P(0.3 + rand() * 0.4, 1.5), 0, Math.atan2(-F.o[0], -F.o[1]), { pose: rand() < 0.5 ? 'stand' : 'talk' });
     else if (i % 5 === 0) mk(woman, F.P(0.2 + rand() * 0.6, 1.6), 0, rand() * 6.28, { carry: 'broom', arms: 'sweep' });
   });
+  // inside the houses (src/styles/shaolin/rooms.js): the shop keeper behind his counter, the old man on the kang, the woman at the table with the children's
+  // bowls; the room's own frame (a across from its middle, b from the back wall toward the front) turned to the lot
+  {
+    const FRM = { s: [(x0, z0, x1, z1) => [(x0 + x1) / 2, z0], 0], n: [(x0, z0, x1, z1) => [(x0 + x1) / 2, z1], Math.PI], e: [(x0, z0, x1, z1) => [x0, (z0 + z1) / 2], Math.PI / 2], w: [(x0, z0, x1, z1) => [x1, (z0 + z1) / 2], -Math.PI / 2] };
+    HOUSES.forEach((h, i) => {
+      const [x0, z0, x1, z1] = h.rect, [org, yaw] = FRM[h.front], o = org(x0, z0, x1, z1), cs = Math.cos(yaw), sn = Math.sin(yaw), Dp = h.front === 'n' || h.front === 's' ? z1 - z0 : x1 - x0;
+      const WC = (a, b) => [o[0] + a * cs + b * sn, o[1] - a * sn + b * cs], y = FRONT_Y + 0.05;
+      const facing = (p, t) => Math.atan2(-(t[0] - p[0]), -(t[1] - p[1]));
+      if (h.kind === 'shop') {
+        const p = WC(0.2, Dp * 0.45 - 0.62);
+        mk(rand() < 0.65 ? man : woman, p, y, facing(p, WC(0.2, Dp)), { pose: 'stand', arms: 'hang' });
+        if (i % 3 === 0) { const c = WC(-1.2, Dp * 0.45 + 1.1); mk(rand() < 0.5 ? man : woman, c, y, facing(c, WC(-1.2, Dp * 0.45 - 0.5)), { pose: 'stand' }); }
+      } else if (i % 2 === 0) {
+        const wp = WC(-0.8, Dp * 0.55 + 0.4), mp = WC(0.8, Dp * 0.55 + 0.4);
+        mk(woman, wp, y, facing(wp, mp), { pose: 'sit' });
+        if (i % 4 === 0) mk(man, mp, y, facing(mp, wp), { pose: 'sit', cloth: 'cloth_grey' });
+      }
+    });
+  }
   // the yards: the washing woman squatting at the tub, a man chopping wood
   YARDS.forEach((y, i) => { if (i % 4 === 0) mk(woman, [(y.rect[0] + y.rect[2]) / 2 - 0.8, (y.rect[1] + y.rect[3]) / 2 + 0.5], 0, rand() * 6.28, { pose: 'squat' }); });
   const lifePlan = base('shaolin-people', 'life', [...P, ...A].filter(keepClear));

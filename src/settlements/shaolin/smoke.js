@@ -18,7 +18,7 @@ export function emitters() {
     E.push({ p: [cx, 0.37 + 4.4 + 0.9, cz], kind: 'kitchen', thr: 0, seed: Math.round(cz) });
     E.push({ p: [cx, 0.37 + 4.4 + 0.9, cz + 3], kind: 'steam', thr: 0.1, seed: Math.round(cz) + 1 });
   }
-  for (const h of HOUSES) if (r() < (h.trade === 'food' && h.kind === 'shop' ? 0.9 : 0.55)) { const rr = h.rect; E.push({ p: [(rr[0] + rr[2]) / 2 + r() * 2 - 1, 0.25 + h.H + 1.6, (rr[1] + rr[3]) / 2], kind: 'kitchen', thr: r() * 0.7, seed: h.seed % 997 }); }
+  for (const h of HOUSES) if (r() < (h.trade === 'food' && h.kind === 'shop' ? 0.9 : 0.55)) { const rr = h.rect; E.push({ p: [(rr[0] + rr[2]) / 2 + r() * 2 - 1, 0.25 + h.H + (h.Hu || 0) + 1.6, (rr[1] + rr[3]) / 2], kind: 'kitchen', thr: r() * 0.7, seed: h.seed % 997 }); }
   return E;
 }
 const ATT = [];
