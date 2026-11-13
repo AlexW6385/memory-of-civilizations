@@ -100,7 +100,7 @@ function serapeum() {
 function houses() {
   const L = lots(), ARR = [100, -86];
   const byD = [...L].sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 - ARR[0], (a.rect[1] + a.rect[3]) / 2 - ARR[1]) - Math.hypot((b.rect[0] + b.rect[2]) / 2 - ARR[0], (b.rect[1] + b.rect[3]) / 2 - ARR[1]));
-  const lamp = new Set(byD.slice(0, 10));
+  const lamp = new Set(byD.slice(0, 16));
   const els = L.map((l) => (l.warehouse ? { t: 'horreum', rect: l.rect, front: 'n', y: l.y, seed: l.seed, tint: ['plaster_white', 'limewash_yellow', 'plaster_ochre'][l.seed % 3] } : l.quarter === 'egyptian'
     ? { t: 'egyptian_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front }
     : { t: 'ptol_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front, quarter: l.quarter, lamp: lamp.has(l) }));
