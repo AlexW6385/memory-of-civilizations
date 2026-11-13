@@ -46,6 +46,23 @@ export function lots() {
     }
     LOTS.push({ rect: r, houses, range, gate: Math.floor(rand() * 4), level: Math.hypot(mx, mz) < 210 ? 1 : Math.hypot(mx, mz) < 260 ? 0.6 : 0.35, seed: Math.floor(rand() * 1e6) });
   }
+  // the solares on the plaza's south edge, between the plaza and the first rows of the grid (z 126–143): seven lots of the families who serve the plaza
+  // (the first, third, fifth and seventh with a long house of a better family, the rest with two oval houses), made after the grid's lots from a stream of
+  // their own so that nothing else moves. Ordinary houses within a short walk of the arrival: all of them can be entered.
+  { const r2 = rng(4242);
+    for (let i = 0; i < 7; i++) {
+      const x0 = -66 + i * 30.5, r = [x0 + 1, 126, x0 + 29.5, 143], zc = 134.4, houses = [];
+      let range = null;
+      if (i % 2 === 0) {
+        range = { c: [x0 + 9.5, zc - 0.6], a: 6.2, b: 2.4, rot: 0, seed: Math.floor(r2() * 1e6) };
+        houses.push({ c: [x0 + 22, zc], a: 3.7 + r2() * 0.8, b: 2.3 + r2() * 0.4, dir: 'x', seed: Math.floor(r2() * 1e6) });
+      } else {
+        houses.push({ c: [x0 + 8.5, zc], a: 3.8 + r2() * 0.8, b: 2.3 + r2() * 0.4, dir: i % 4 === 1 ? 'x' : 'z', seed: Math.floor(r2() * 1e6) });
+        houses.push({ c: [x0 + 21.5, zc + 0.5], a: 3.8 + r2() * 0.8, b: 2.3 + r2() * 0.4, dir: i % 4 === 1 ? 'z' : 'x', seed: Math.floor(r2() * 1e6) });
+      }
+      LOTS.push({ rect: r, houses, range, gate: 0, level: 1, seed: Math.floor(r2() * 1e6) });
+    }
+  }
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));

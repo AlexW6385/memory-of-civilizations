@@ -474,6 +474,7 @@ function flipGeo(g) {
 function mayaHouseThings(ctx, el, P, alongX, F, a, b, rand) {
   const { bag, col } = ctx, L = STYLES.life.elements, endA = alongX ? 0 : Math.PI / 2, endB = endA + Math.PI, f = F;
   const [hx, , hz] = P(endA, a - 1.0, f); put(bag, hearthKit('rubble'), hx, f, hz, 0); col.circle(hx, hz, 0.45, f, f + 0.3);
+  ctx.lights?.push({ at: [hx, f + 0.9, hz], color: '#ff9a4a', intensity: 2.4, distance: 6 });      // the hearth's fire lights the house
   for (const [da, r] of [[0.5, a - 1.0], [-0.5, a - 1.0]]) { const p = P(endA + da, r, f); put(bag, ollaKit(), ...p, 0); }
   const m = P(endA + (alongX ? 1.15 : 1.15), a - 0.75, f); put(bag, metateKit(), m[0], f, m[2], alongX ? Math.PI : -Math.PI / 2);
   const w = P(endA - 1.2, a - 0.55, f); put(bag, waterJarKit(), ...w, 0); col.circle(w[0], w[2], 0.33, f, f + 0.8);
