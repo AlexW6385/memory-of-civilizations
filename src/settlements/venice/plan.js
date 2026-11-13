@@ -26,7 +26,8 @@ export const sanMarco = {
   rooms: [{ id: 'piazza', rect: PIAZZA, y: g, kind: 'open' },
     { id: 'basilica', rect: [BASILICA.c[0] - BASILICA.s + 1.5, BASILICA.c[1] - 9.5, BASILICA.c[0] + 8, BASILICA.c[1] + 9.5], y: g, kind: 'hall' },
     { id: 'transepts', rect: [BASILICA.c[0] - 9.5, BASILICA.c[1] - BASILICA.s * 0.8 + 2, BASILICA.c[0] + 9.5, BASILICA.c[1] + BASILICA.s * 0.8 - 2], y: g, kind: 'hall' }],
-  walks: [Object.assign([[-120, -5], [-40, -5], [10, -5], [22, -5], [40, -5], [BASILICA.c[0], BASILICA.c[1]]], { y0: g })],
+  // (past the market stall and the wells and well-heads of the square, then the Campanile's open ground floor: the street life stands where it stands)
+  walks: [Object.assign([[-120, -5], [-108, -6.3], [-45, -6.3], [-38, 1.5], [12, 1.5], [17, -5], [22, -5], [40, -5], [BASILICA.c[0], BASILICA.c[1]]], { y0: g })],
 };
 // the gondolas moored stern to the Molo before the Piazzetta and the palace, between their posts
 const boats = [];

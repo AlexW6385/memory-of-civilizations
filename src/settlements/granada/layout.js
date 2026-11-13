@@ -63,8 +63,8 @@ export const TERRACES = [
   { id: 'orchard3', r: [248, -36, 256, 35], y: 27.5 },
 ];
 // the sultan's passage: a lane between walls from the postern (y 30) down to the ravine's floor, along
-// it, and up to the gate of the entrance court — [x, z, y] at its corners
-export const LANE = [[GEN.gate[2], 13, HILL.top], [241.5, 13, 25], [241.5, 44, 24.6], [GEN.dismount[0], 44, DISMOUNT_Y]];
+// it, and up to the gate of the entrance court — [x, z, y] at its corners (the floor level for 3 m past the turn, so that the ground does not step where the two legs' nearest points change over)
+export const LANE = [[GEN.gate[2], 13, HILL.top], [241.5, 13, 25], [241.5, 44, 24.6], [244.8, 44, 24.6], [GEN.dismount[0], 44, DISMOUNT_Y]];
 export const LANE_W = 3.2;
 const dRect = (r, x, z) => Math.hypot(Math.max(r[0] - x, 0, x - r[2]), Math.max(r[1] - z, 0, z - r[3]));
 /** The open hillside of the Cerro del Sol rising east from the ravine's floor (y 22), falling to the Darro on the north and to the rim on the east. */

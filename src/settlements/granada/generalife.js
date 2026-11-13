@@ -108,6 +108,8 @@ export const generalife = {
     room('oratory', [GEN.oratory[0] + 0.8, GEN.oratory[1] + 0.8, GEN.oratory[2] - 0.8, GEN.oratory[3] - 0.8], GEN.stair.y1, 'hall'),
     room('huerta', [o1.r[0] + 1, -40, o1.r[2] - 4, 4], o1.y, 'open'),
   ],
-  walks: [Object.assign([[GEN.gate[0] - 3, 13], [241.5, 13], [241.5, GATE_Z], [GEN.dismount[0] + 3, GATE_Z], [STAIR_X, 41.5], [STAIR_X, 30], [(a0 + a1) / 2 + 2.5, 0], [(a0 + a1) / 2 + 2.5, -30], [GEN.sultana[0] + 3, GEN.stair.z], [GEN.oratory[0] - 1, GEN.stair.z]], { y0: 30 })],
+  // (the lane, the Descabalgamiento, up the stair and through the south pavilion's doors on its axis; along the court's east walk, round the fountain by the cross walk;
+  // through the north portico's middle arch and the gallery (along its back wall) and up the passage; across the Sultana's garden by its cross walk, out by its gate, up the Escalera)
+  walks: [Object.assign([[GEN.gate[0] - 3, 13], [241.5, 13], [241.5, GATE_Z], [GEN.dismount[0] + 3, GATE_Z], [STAIR_X, 41.5], [STAIR_X, 30], [STAIR_X, 10], [288.4, 8], [288.4, -8], [289.8, -11.65], [288.4, -15], [288.4, -30], [STAIR_X, -33], [STAIR_X, -36.5], [287, -38.5], [298, -38.5], [302, -38], [312.8, -38], [314.4, GEN.stair.z], [GEN.oratory[0] - 1, GEN.stair.z]], { y0: 30 })],
 };
 export default generalife;

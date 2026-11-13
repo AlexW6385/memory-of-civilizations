@@ -4,7 +4,7 @@
 // turn one part of the picture off at a time — shadows, ambient occlusion, bloom, the plants, the
 // open country's plants, the ground, the other settlements, the far views, the small things of the
 // streets, the fine detail of buildings. Turning one off and reading the frame time again says what
-// it costs. The same switches are `window.palace.perf` for tools/perf.mjs.
+// it costs. The same switches are `window.palace.perf`, for the console.
 //
 // Nothing here changes the picture unless a switch is turned.
 
