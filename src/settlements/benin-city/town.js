@@ -124,6 +124,22 @@ function streetLife(F) {
     if (rand() < 0.3) { const p = Fr.P(dc + 1.4, -1.6); woman(p, 0, lookOut(Fr) + Math.PI, { pose: 'talk', carry: pick(['basket', 'pot', 'none']) }); const q = Fr.P(dc + 2.4, -1.9); man(q, 0, lookOut(Fr) + 2.6, { pose: 'talk', carry: 'none' }); }
     if (rand() < 0.3) { const p = Fr.P(dc - 1.5, -2.4); P2.push({ t: 'figure', at: p, y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), skin: 'skin_dark', hair: 'short', hairMat: 'hair_dark', feet: 'bare', dress: 'loincloth', top: 'bare', cloth: pick(CL), cloth2: pick(CL), hat: 'none', over: 'none', pose: 'squat', h: 0.62 }); }
   }
+  // inside the compounds (the frame of the house: u along the front, v inward): the trader behind her clay counter, the housewife on her stool by the hearth, the cook squatting at the kitchen fire
+  {
+    const rr = rng(1601);
+    for (const l of lots()) {
+      const c = [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2];
+      if (!near(c[0], c[1], 200) && rr() > 0.35) continue;
+      const Fr = frame(l.rect, l.front), Lw = Fr.L, D = Fr.D, dw = 2.4, fd = 5.4, bd = 6.4, Yf = 0.25;
+      const put = (f, u, v, tu, tv, o) => { const a = Fr.P(u, v); if (Math.hypot(a[0] - ARR[0], a[1] - ARR[1]) > 4) f(a, Yf, face(a, Fr.P(tu, tv)), o); };
+      if (l.kind === 'trade') { put(woman, Lw / 2, 1.9, Lw / 2, 0, { pose: 'stand', carry: 'none' }); if (rr() < 0.5) put(man, Lw / 2 + 1.2, -0.9, Lw / 2 + 1.2, 1.0, { pose: 'stand', carry: 'none' }); }
+      else {
+        const lw = l.du - 0.9, rw = Lw - (l.du + dw) - 0.9, big = lw >= rw, u0 = big ? 0.9 : l.du + dw + 0.3, uw = big ? lw : rw;
+        if (uw > 2.0 && rr() < 0.55) put(woman, u0 + uw * 0.55, 2.2, l.du + dw / 2, 2.2, { pose: 'sit', carry: 'none' });
+      }
+      if (rr() < 0.4) { const bz = D - bd, ku = Lw * 0.7; put(woman, ku - 0.95, bz + 2.4, ku, bz + 2.4, { pose: 'squat', carry: 'none' }); }
+    }
+  }
   return L;
 }
 /** The king's square at the arrival: petitioners and chiefs on the clay seats, the drummer at the log drum, groups in talk, women with pots, children, fowls and goats, sellers on mats along the street side. */

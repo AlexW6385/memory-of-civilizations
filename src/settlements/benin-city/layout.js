@@ -110,6 +110,13 @@ export function lots() {
       }
     }
   }
+  // a chief's house or two (the upper storey, the brass-sheathed posts) among the compounds of the first 100 m, so that the street shows all four fronts
+  {
+    const A = [-65, 24], chosen = [];
+    const cand = LOTS.filter((l) => !l.chief && l.w >= 16 && l.d > 18).map((l) => ({ l, d: Math.hypot((l.rect[0] + l.rect[2]) / 2 - A[0], (l.rect[1] + l.rect[3]) / 2 - A[1]) })).filter((q) => q.d > 45 && q.d < 96).sort((a, b) => a.d - b.d);
+    for (const q of cand) { if (chosen.length >= 2) break; if (chosen.every((c) => Math.hypot(c.l.rect[0] - q.l.rect[0], c.l.rect[1] - q.l.rect[1]) > 30)) chosen.push(q); }
+    for (const { l } of chosen) { l.chief = true; l.kind = 'chief'; l.du = Math.min(l.w - 3.3, 10.2); }
+  }
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));

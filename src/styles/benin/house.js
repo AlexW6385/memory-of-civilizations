@@ -131,6 +131,7 @@ function house(el, ctx) {
     const o0 = big ? du + dw + 0.3 : 0.9, ow = big ? rw : lw;
     if (ow > 1.6) {
       const [hx, hz] = P(o0 + ow / 2, 2.3); hearth(ctx, hx, Yf, hz, (el.seed || 1) + 6);
+      ctx.lights?.push({ at: [hx, Yf + 0.15, hz], color: '#ff9c52', intensity: 2.4, distance: 7 });                // the hearth's fire lights the room
       const [a1, a2] = P(o0 + 0.5, fd - 0.8); pots(ctx, a1, Yf, a2, (el.seed || 1) + 7, 3);
     }
     // calabashes on a shelf and cloth on pegs on the room's side wall
@@ -144,7 +145,7 @@ function house(el, ctx) {
     const au = L * 0.22, ar = rr(au - 1.1, D - 1.6, au + 1.1, D - 0.7);
     homeAltar(ctx, ar, el.front === 'n' ? 'n' : 's', (el.seed || 1) % 997, chief, Yf);
     // the kitchen in the back range: a hearth with pots beside the door, a bed, a stool
-    const ku = L * 0.7; { const [x, z] = P(ku, bz + 2.4); hearth(ctx, x, Yf, z, (el.seed || 1) + 9); }
+    const ku = L * 0.7; { const [x, z] = P(ku, bz + 2.4); hearth(ctx, x, Yf, z, (el.seed || 1) + 9); if (kind === 'trade') ctx.lights?.push({ at: [x, Yf + 0.15, z], color: '#ff9c52', intensity: 2.2, distance: 7 }); }
     const [k1, k2] = P(ku + 1.4, bz + 3.2); pots(ctx, k1, Yf, k2, (el.seed || 1) + 10, 4);
     const [m1, m2] = P(ku - 1.4, bz + 1.4); stool(ctx, m1, Yf, m2);
     const [w1, w2] = P(L - 1.4, D - 1.0); wood(ctx, w1, Yf, w2, F.along, 1.5, (el.seed || 1) + 15);
