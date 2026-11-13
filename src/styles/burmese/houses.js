@@ -95,6 +95,16 @@ export function house(el, ctx) {
   void bag; void col;
 }
 
+/** Where the household sits in a furnished house (the same geometry as house() above): { fl, hearth, mat, F } with the points as world [x, z], or null where the lot only holds a granary. */
+export function houseSpots(el) {
+  const F = lotFrame({}, el.rect, el.front), r = rng(el.seed ?? 5), W = F.W, D = F.D;
+  const big = el.kind === 'large' || (el.kind !== 'small' && r() < 0.4);
+  const hw = Math.min(W - 2.2, big ? 7 + r() * 1.5 : 5 + r() * 1.2), hd = Math.min(D - 5.5, big ? 8.5 + r() * 1.5 : 6.2 + r());
+  if (hw < 3.5 || hd < 4) return null;
+  const u0 = (W - hw) / 2 + (r() - 0.5) * 0.8, u1 = u0 + hw, v0 = 3.2, v1 = v0 + hd;
+  return { fl: 1.35, hearth: F.pt(u1 - 1.55, v1 - 1.3), mat: F.pt(u0 + 1.7, v0 + 1.9), door: F.pt((u0 + u1) / 2, v0 + 0.3), F };
+}
+
 /** A granary on posts: a small raised store with a thatch roof and a ladder (for lots too small for a house). */
 function granary(el, ctx, F) {
   const u0 = F.W / 2 - 1.6, v0 = F.D / 2 - 1.6, fl = 1.0;

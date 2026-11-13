@@ -3,6 +3,7 @@
 // houses, the roadside stalls, the brickworks and the tank, and the people and animals about them. Several plans, so that each builds in turn while the visitor already walks.
 import '../../styles/burmese/index.js';
 import { dressing } from './dressing.js';
+import { houseSpots } from '../../styles/burmese/houses.js';
 import {
   RADIUS, RIVER_Y, bankX, CITY, WALL, GATE, THAT, THAT_ENC, PALACE, PAL_HALL, SHWE, SHWE_PREC, SULA, SULA_PREC, TANK, TANK_Y, KILNS, KYAUNGS, PRECINCT, MAIN_ROAD,
   ANANDA, OKKYAUNG, lots, plainTemples, cityWalls, streets, inLot, inPlainTemple, inRect, inRiver, inTank,
@@ -68,17 +69,22 @@ function city() {
   return [base('bagan-city', E), ...RIV];
 }
 
-/** The stilt houses in their strips. */
-function houses() {
+/** The houses of the strips (and the shops, each with the owner's house behind): the elements, shared by the town and the people in it. */
+function houseEls() {
   const E = [];
+  let n = 0;
   for (const l of lots()) {
     if (!l.shop) { E.push({ t: 'bgn_house', rect: l.rect, front: l.front, seed: l.seed, open: true, kind: l.kind }); continue; }
-    // a shop on the road, the owner's house behind it
+    // a shop on the road, the owner's house behind it; the shops along a road take their four front designs in turn
     const [x0, z0, x1, z1] = l.rect, S = 9.8;
-    E.push({ t: 'bgn_shop', rect: l.rect, front: l.front, seed: l.seed, trade: ['lacquer', 'pottery', 'cloth', 'offerings', 'betel', 'rice', 'tea', 'parasols'][l.seed % 8] });
+    E.push({ t: 'bgn_shop', rect: l.rect, front: l.front, seed: l.seed, variant: n++ % 4, trade: ['lacquer', 'pottery', 'cloth', 'offerings', 'betel', 'rice', 'tea', 'parasols'][l.seed % 8] });
     E.push({ t: 'bgn_house', rect: l.front === 's' ? [x0, z0, x1, z1 - S] : [x0, z0 + S, x1, z1], front: l.front, seed: l.seed + 1, open: true, kind: 'small' });
   }
-  return base('bagan-houses', E);
+  return E;
+}
+/** The stilt houses in their strips. */
+function houses() {
+  return base('bagan-houses', houseEls());
 }
 
 /** Roadside props along the streets (water-pot stands, shrines, benches, festival poles, lamp pillars, firewood, drying mats), placed from the street rectangles, on the verge, facing the road. */
@@ -233,6 +239,18 @@ function people() {
   // the boatmen standing at the sterns, women washing at the ghat
   for (const b of moored()) if (b.len > 10) P.push({ t: 'figure', at: [b.at[0], b.at[1] + b.len / 2 - 1.3], y: b.y + 0.55, rot: 0, seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: 'cloth_brown', cloth2: 'cloth_white', over: 'none', skin: skin(), hat: 'straw', feet: 'bare', hair: 'short', beard: false });
   for (let k = 0; k < 4; k++) { const z = 8 + k * 2.2; lay([bankX(z) + 0.6, z], -1.57, { pose: 'squat' }); }
+  // at home: in the houses by the road between the gate and the Ananda (the first the visitor passes) a woman crouches at the hearth, a man or a child sits on the mat; the owners' houses behind the shops too
+  { const hr = rng(1215), AR = [30, 0], at = (p, tgt) => Math.atan2(-(tgt[0] - p[0]), -(tgt[1] - p[1]));
+    for (const e of houseEls()) {
+      if (e.t !== 'bgn_house') continue;
+      const cx = (e.rect[0] + e.rect[2]) / 2, cz = (e.rect[1] + e.rect[3]) / 2;
+      if (Math.hypot(cx - AR[0], cz - AR[1]) > 130 || hr() < 0.2) continue;
+      const sp = houseSpots(e); if (!sp) continue;
+      const hp = [sp.hearth[0] - (sp.hearth[0] - sp.door[0]) * 0.2, sp.hearth[1] - (sp.hearth[1] - sp.door[1]) * 0.2];
+      P.push({ t: 'figure', at: hp, y: sp.fl, rot: at(hp, sp.hearth), seed: Math.floor(hr() * 1e9), dress: 'wrap', cloth: ['cloth_green', 'cloth_brown', 'cloth_red', 'cloth_ochre'][Math.floor(hr() * 4)], cloth2: 'cloth_white', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: 'bun', beard: false, pose: 'squat' });
+      const q = hr();
+      P.push({ t: 'figure', at: sp.mat, y: sp.fl, rot: at(sp.mat, sp.door), seed: Math.floor(hr() * 1e9), dress: 'wrap', cloth: ['cloth_white', 'cloth_brown', 'cloth_green'][Math.floor(hr() * 3)], cloth2: 'cloth_white', over: 'none', skin: skin(), hat: 'none', feet: 'bare', hair: q < 0.5 ? 'short' : 'bun', beard: false, pose: 'sit', ...(q > 0.7 ? { child: true, h: 0.8 } : {}) });
+    } }
   const A = [];
   for (let k = 0; k < 26; k++) {
     const x = -250 + rand() * 440, z = -150 + rand() * 300;
