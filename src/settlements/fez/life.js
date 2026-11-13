@@ -2,6 +2,9 @@
 // tanners in the vats, muleteers and their donkeys in the funduq and the lanes, women in the white haik with the veil, water-carriers, cats.
 import { RADIUS, SITES, SOUKS, siteY, ground0 } from './layout.js';
 import { pits } from '../../styles/marinid/tannery.js';
+import { planOf } from '../../styles/marinid/house.js';
+import { frame } from '../../styles/mamluk/kit.js';
+import { houseList } from './houses.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 export function soukShops(s) {
@@ -89,6 +92,29 @@ export function life() {
     for (let k = 0; k < 4; k++) L.push({ t: 'chickens', kind: 'pigeon', at: [cx + 3 + rand() * 4, cz + 3 + rand() * 4], y: yq, rot: rand() * 6.28, seed: 120 + k });
     man([cx + 4.5, cz - 3.2], yq, 0.6, { dress: 'tunic', carry: 'pot', hat: 'cap', cloth: 'cloth_brown' });
     for (let k = 0; k < 3; k++) man([cx - 5 + k * 5, cz - 4.4], yq, 3.1, { pose: 'cross', hat: 'turban' }); }
+  // inside the riads that are open (marinid/house.js: the court with its basin, the salon behind it, the side rooms with their divans): the wife at the basin with her
+  // jar, the master of the house cross-legged on the salon's divan with a guest or a boy, a woman and a child on the divans of the side rooms
+  for (const h of houseList()) {
+    if (!h.open) continue;
+    const Q = planOf(h), fr = frame(h.rect, h.door), r = rng(h.seed * 3 + 11), face = (dx, dz) => Math.atan2(-dx, -dz), y = h.y;
+    const cu = (Q.cu0 + Q.cu1) / 2, dm = (Q.Dc0 + Q.Dc1) / 2, at = (u, d) => fr.P(u, -d);
+    if (r() < 0.8) woman(at(Q.cu0 + 0.75, Q.Dc0 + 0.85), y, face(...fr.N.map((v) => -v)), { carry: 'pot' });
+    const sd = Q.Dp - Q.t - Q.Dc1;
+    if (sd >= 3.0 && Q.cw >= 4.1) {
+      const sr = fr.rect(Q.cu0 + 0.35, Q.cu1 - 0.35, -(Q.Dp - Q.t - 0.05), -Q.Dc1), cz = (sr[1] + sr[3]) / 2;
+      man([sr[0] + 0.55, cz], y + 0.45, -Math.PI / 2, { pose: 'cross', hat: 'turban', cloth: 'cloth_white' });
+      if (r() < 0.6) man([sr[2] - 0.55, cz + 0.4], y + 0.45, Math.PI / 2, { pose: 'cross', cloth: 'cloth_ochre' });
+    }
+    for (const q of Q.rooms) {
+      if (r() > 0.7) continue;
+      const R = fr.rect(q.u0, q.u1, -q.d1, -q.d0), wide = R[2] - R[0], deep = R[3] - R[1], cx = (R[0] + R[2]) / 2, cz = (R[1] + R[3]) / 2;
+      // the divan of the room (house.js): along its north wall when the room is wider than deep, else along its west wall
+      const seat = wide >= deep ? [cx - 0.3, R[1] + 0.5, 0] : [R[0] + 0.5, cz - 0.3, -Math.PI / 2];
+      woman([seat[0], seat[1]], y + 0.45, seat[2], { pose: 'cross', cloth: r() < 0.5 ? 'cloth_ochre' : 'cloth_indigo' });
+      if (r() < 0.5) P(wide >= deep ? [seat[0] + 0.7, seat[1]] : [seat[0], seat[1] + 0.7], y + 0.45, seat[2], { dress: 'tunic', cloth: 'cloth_ochre', hat: 'cap', hair: 'short', child: true, h: 1.05, pose: 'cross' });
+    }
+    void cu; void dm;
+  }
   // (the people of the lanes: street.js)
   return L;
 }

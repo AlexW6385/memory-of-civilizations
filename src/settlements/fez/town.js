@@ -1,10 +1,30 @@
 // The medina of Fez about 1350 (docs/settlements/fez.md §5): the courtyard houses in their blocks, the lanes' walls, the souks, the Place Seffarine,
 // the funduq, the quarter mosque, the tannery, the river between its quays with its bridges, the wall and its gates, the wall fountains; and the people.
-import { lodTiles } from '../lod.js';
 import { RADIUS, WALL_R, RIVER, SITES, SOUKS, BRIDGES, lots, fabric, fountains, riverZ, ground0, quayY, siteY, height } from './layout.js';
 import { lifePlans } from './life.js';
 import { houseList, laneElements } from './houses.js';
 import { streetPlans } from './street.js';
+
+// The houses in two levels of detail as src/settlements/lod.js makes them, but in tiles of 150 m rather than 100 m: every house wears one of
+// eight stuccoes, so each tile costs a mesh per material and level, and fewer, larger tiles keep the mesh count in budget (DESIGN §8). The near
+// distance grows with the tile so that the full houses reach as far round the walker as before (220 m less the half-diagonal of a 100 m tile).
+const TILE = 150, NEAR = 220 - 50 * Math.SQRT2 + (TILE / 2) * Math.SQRT2;
+function lodTiles(id, style, elements, { R, entrance }) {
+  const by = new Map();
+  for (const e of elements) {
+    const [x, z] = e.rect ? [(e.rect[0] + e.rect[2]) / 2, (e.rect[1] + e.rect[3]) / 2] : (e.at ?? e.c), k = `${Math.floor((x + TILE / 2) / TILE)},${Math.floor((z + TILE / 2) / TILE)}`;
+    if (!by.has(k)) by.set(k, []);
+    by.get(k).push(e);
+  }
+  const plans = [];
+  for (const [k, list] of by) {
+    const [i, j] = k.split(',').map(Number), center = [i * TILE, j * TILE];
+    const b = { style, origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-R, -R, R, R], entrance, center };
+    plans.push({ ...b, id: `${id}-${k}`, near: NEAR, elements: list });
+    plans.push({ ...b, id: `${id}-${k}-far`, far: NEAR, elements: list.map((e) => ({ ...e, simple: true })), nocollide: true });
+  }
+  return plans;
+}
 
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-132.5, -30], facing: 's' } });
 
@@ -41,7 +61,7 @@ export function civic() {
 export async function town() {
   const F = fabric(), houses = [...houseList(), ...laneElements()];
   for (const f of F.fills) if (f.rect[2] - f.rect[0] > 0.8 && f.rect[3] - f.rect[1] > 0.8) houses.push({ t: 'fez_mass', rect: f.rect, y: f.y, foot: f.y - 1.0, storeys: 2, seed: Math.round(f.rect[0] * 7 + f.rect[1]) });
-  const plans = lodTiles('fez-houses', 'marinid', houses, { R: RADIUS, near: 220, entrance: { at: [-132.5, -30], facing: 's' } });
+  const plans = lodTiles('fez-houses', 'marinid', houses, { R: RADIUS, entrance: { at: [-132.5, -30], facing: 's' } });
   plans.push(base('fez-civic', 'marinid', civic()));
   plans.push(...lifePlans());
   plans.push(...streetPlans());
