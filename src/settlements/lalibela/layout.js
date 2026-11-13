@@ -80,6 +80,7 @@ export const PATHS = [
 ];
 export const LINKS = [{ a: [-250, -14], b: [-250, -250], w: 1.2 }, { a: [-250, -14], b: [-250, 128], w: 1.2 }, { a: [250, -14], b: [250, 150], w: 1.2 }];
 export const ARRIVAL = [-217, 113];
+export const WATCH = [-236, 176];                  // where the visitor arrives (arrivals.js): the knoll's viewing place
 const rectDist = (r, x, z) => Math.hypot(Math.max(r[0] - x, 0, x - r[2]), Math.max(r[1] - z, 0, z - r[3]));
 const segDist = (a, b, x, z) => { const dx = b[0] - a[0], dz = b[1] - a[1], L = dx * dx + dz * dz || 1, t = Math.max(0, Math.min(1, ((x - a[0]) * dx + (z - a[1]) * dz) / L)); return Math.hypot(x - a[0] - dx * t, z - a[1] - dz * t); };
 const nearPath = (x, z) => { let best = null, bd = 1e9; for (const r of PATHS) { const px = Math.max(r[0], Math.min(r[2], x)), pz = Math.max(r[1], Math.min(r[3], z)), d = Math.hypot(px - x, pz - z); if (d < bd) { bd = d; best = [px, pz]; } } return { p: best, d: bd }; };
@@ -136,14 +137,16 @@ function build() {
   // the knoll is left open: no compound, house or lane on it
   { const off = (p) => Math.hypot(p[0] - KNOLL.c[0], p[1] - KNOLL.c[1]) < KNOLL.clear;
     CMP = CMP.filter((q) => !off(q.c)); HOUSES = HOUSES.filter((h) => !off(h.c)); LAN = LAN.filter((l) => !off(l.a) && !off(l.b)); }
-  // the enterable houses: the main houses nearest the arrival, a good way apart
+  // the enterable houses: the main houses nearest the arrival (the knoll's pilgrims' viewing place, WATCH), a good way apart, then the kitchens
+  // of the compounds nearest it (a smaller round house each, the family's cooking house, entered like the others)
   ENTER = [];
-  const mains = HOUSES.filter((h) => h.kind === 'main' && h.r > 3.0).sort((p, q) => Math.hypot(p.c[0] - ARRIVAL[0], p.c[1] - ARRIVAL[1]) - Math.hypot(q.c[0] - ARRIVAL[0], q.c[1] - ARRIVAL[1]));
-  const KINDS = ['household', 'weaver', 'brewer', 'scribe', 'store', 'household', 'weaver', 'brewer', 'scribe'];
+  const dA = (h) => Math.hypot(h.c[0] - WATCH[0], h.c[1] - WATCH[1]);
+  const mains = HOUSES.filter((h) => h.kind === 'main' && h.r > 3.0).sort((p, q) => dA(p) - dA(q));
+  const KINDS = ['household', 'weaver', 'brewer', 'scribe', 'store', 'household', 'weaver', 'brewer', 'scribe', 'household', 'store', 'brewer'];
   for (const h of mains) {
     if (ENTER.length >= KINDS.length) break;
-    if (Math.hypot(h.c[0] - ARRIVAL[0], h.c[1] - ARRIVAL[1]) < 22) continue;
-    if (ENTER.some((e) => Math.hypot(e.c[0] - h.c[0], e.c[1] - h.c[1]) < 38)) continue;
+    if (Math.hypot(h.c[0] - ARRIVAL[0], h.c[1] - ARRIVAL[1]) < 22 || dA(h) > 170) continue;
+    if (ENTER.some((e) => Math.hypot(e.c[0] - h.c[0], e.c[1] - h.c[1]) < 16)) continue;
     h.enter = KINDS[ENTER.length]; h.storeys = 1; h.r = 3.8; ENTER.push(h);
   }
   BUCKET = new Map();
