@@ -6,17 +6,19 @@
 import { box, lathe } from '../../core/geom.js';
 import { Parts, limb, T } from '../../styles/qing/carving.js';
 import { rng } from './layout.js';
+import { suzhouShop } from '../ming-suzhou/shops.js';
 
 /** sl_fronttrim: { at, y, rot, L (front width), eave (the height of the eave's lower edge), couplets, strings, seed } */
 export function slFronttrim(el, { bag }) {
   const r = rng(el.seed ?? 1), P = new Parts(), L = el.L ?? 6, he = el.eave ?? 3.0;
-  if (el.strings !== false) {
+  if (el.strings !== false && he - 2.1 >= 0.3) {
     // a pole under the eave, strings of corn (ochre), peppers (red), garlic (white) hung from it, a persimmon rack at one side
     const x0 = -L * 0.42, x1 = L * 0.42, n = Math.floor((x1 - x0) / 0.34);
-    P.add('timber', limb([x0, he - 0.12, 0.28], [x1, he - 0.12, 0.28], 0.025, 0.025, 4));
+    // (the pole stops short of the doorway: a bar hung across it, with nothing under it in the walker's top field, shuts the door to the walk check)
+    P.add('timber', limb([x0, he - 0.12, 0.28], [-0.6, he - 0.12, 0.28], 0.025, 0.025, 4)); P.add('timber', limb([0.6, he - 0.12, 0.28], [x1, he - 0.12, 0.28], 0.025, 0.025, 4));
     for (let i = 0; i < n; i++) {
       if (Math.abs(x0 + i * 0.34 + 0.17) < 0.55) continue;                       // clear of the door
-      const x = x0 + 0.17 + i * 0.34, k = r(), len = 0.5 + r() * 0.55, mat = k < 0.55 ? 'cloth_ochre' : k < 0.85 ? 'cloth_red' : 'cloth_white';
+      const x = x0 + 0.17 + i * 0.34, k = r(), len = Math.min(0.5 + r() * 0.55, he - 2.1), mat = k < 0.55 ? 'cloth_ochre' : k < 0.85 ? 'cloth_red' : 'cloth_white';
       P.add('rope_fibre', limb([x, he - 0.12, 0.28], [x, he - 0.12 - len, 0.28], 0.008, 0.008, 3));
       const m = Math.max(2, Math.round(len / (k < 0.55 ? 0.17 : 0.12)));
       for (let j = 0; j < m; j++) P.add(mat, T(lathe([[0.001, -0.08], [0.045, -0.05], [0.05, 0.02], [0.03, 0.08], [0.001, 0.09]], 5), x + (j % 2 ? 0.035 : -0.035), he - 0.2 - j * (len / m), 0.28));
@@ -39,4 +41,22 @@ export function slFronttrim(el, { bag }) {
     P.add('rope_fibre', T(lathe([[0.1, 0], [0.14, 0.02], [0.14, 0.1], [0.1, 0.12]], 7), x + 0.5 * s, 1.1, 0.08));
   }
   P.emit(bag, el.at[0], el.y ?? 0, el.at[1], el.rot ?? 0);
+}
+
+/**
+ * sl_shop: the signs and goods of a village shop (Suzhou's shop front, ming-suzhou/shops.js) with the doorway left free: the goods are laid out
+ * from one end of the front and some of them stood in the door the walker must pass. The front is drawn through a filter that drops what
+ * stands low in the door's span (goods, trestles: their piece and its collider), and keeps the name board, the hanging sign, the pole and the
+ * goods at the ends. Same fields as suzhou_shop; el.door: the clear half-width (default a sixth of the front less a post).
+ */
+export function slShop(el, ctx) {
+  const half = (el.door ?? Math.max(0.8, el.L / 6 - 0.2)) + 0.55, c = Math.cos(el.rot), sn = Math.sin(el.rot), [cx, cz] = el.at, y0 = el.y ?? 0;
+  const lx = (x, z) => (x - cx) * c - (z - cz) * sn;
+  const bag = {
+    ...ctx.bag,
+    add: (...a) => ctx.bag.add(...a),
+    addInstance: (mat, g, M, o) => { const e = M.elements; if (e[13] - y0 > 2.0 || Math.abs(lx(e[12], e[14])) >= half) ctx.bag.addInstance(mat, g, M, o); },
+  };
+  const col = ctx.col && { circle: (x, z, r, a, b) => { if (Math.abs(lx(x, z)) >= half) ctx.col.circle(x, z, r, a, b); } };
+  suzhouShop(el, { ...ctx, bag, col });
 }

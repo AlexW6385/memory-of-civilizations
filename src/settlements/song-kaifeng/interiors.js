@@ -119,18 +119,23 @@ STYLES.song.elements.kf_interior = interior;
 // stands in the building's footprint (lot.foot), on its floor (P0).
 const KIND = { wine: 'tavern', tea: 'tea', inn: 'inn' };
 let PICK = null;
+/** Where the visitor arrives (src/planet/arrivals.js): the Iron Pagoda's enclosure. The rooms are furnished round it first, then round the bridge (the scroll's own scene). */
+const ARRIVAL = [160, -140];
 function picks() {
   if (PICK) return PICK;
-  const L = lots(), out = [], dist = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - BRIDGE.at[0], (l.rect[1] + l.rect[3]) / 2 - BRIDGE.at[1]);
+  const L = lots(), out = [], mid = (l) => [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2];
+  const dB = (l) => { const [x, z] = mid(l); return Math.hypot(x - BRIDGE.at[0], z - BRIDGE.at[1]); };
+  const dA = (l) => { const [x, z] = mid(l); return Math.hypot(x - ARRIVAL[0], z - ARRIVAL[1]); };
+  const dist = (l) => Math.min(dA(l), dB(l) * 1.6);       // the arrival's lots count full; the bridge's are held to its nearest 55 m or so
   const skip = new Set(teaHouses());                      // the two tea houses by the bridge are the style's own tea_house (its room is its own)
   for (const l of L) {
     const t = tradeOf(l), w = l.foot[2] - l.foot[0], d = l.foot[3] - l.foot[1], dd = Math.min(w, d), big = Math.max(w, d);
     if (skip.has(l) || dd < 5 || big < 7 || l.zone !== 'city') continue;
-    if (t === 'wine') out.push({ l, kind: 'tavern', trade: t, furnish: (l.kind === 'wine' || l.kind === 'shop') && l.bays > 1 });
-    else if (t === 'inn') out.push({ l, kind: 'inn', trade: t, furnish: false });
-    else if (t === 'tea' && dist(l) < 160) out.push({ l, kind: 'tea', trade: t, furnish: l.kind === 'shop' && l.bays > 1 });
-    else if (t && l.kind === 'shop' && dist(l) < 140) out.push({ l, kind: 'shop', trade: t, furnish: l.bays > 1 });
-    else if (!t && l.kind === 'house' && dist(l) < 120) out.push({ l, kind: 'house', trade: null, furnish: true });
+    if (t === 'wine') { if (dist(l) < 130) out.push({ l, kind: 'tavern', trade: t, furnish: (l.kind === 'wine' || l.kind === 'shop') && l.bays > 1 }); }
+    else if (t === 'inn') { if (dist(l) < 130) out.push({ l, kind: 'inn', trade: t, furnish: false }); }
+    else if (t === 'tea' && dist(l) < 130) out.push({ l, kind: 'tea', trade: t, furnish: l.kind === 'shop' && l.bays > 1 });
+    else if (t && l.kind === 'shop' && dist(l) < 130) out.push({ l, kind: 'shop', trade: t, furnish: l.bays > 1 });
+    else if (!t && l.kind === 'house' && dist(l) < 130) out.push({ l, kind: 'house', trade: null, furnish: true });
   }
   // a door with a sign pole of a neighbour (or its own) in its way in is left shut
   const poles = shopElements().map((e) => { const c = Math.cos(e.rot), sn = Math.sin(e.rot); return [e.at[0] + e.poleX * c + e.poleZ * sn, e.at[1] - e.poleX * sn + e.poleZ * c]; });
@@ -147,7 +152,7 @@ export const furnishedLots = () => new Set(picks().filter((p) => p.furnish).map(
 const ceilOf = (l, kind) => (l.kind === 'wine' ? 3.2 : l.storeys === 2 ? 2.95 : 2.7);
 /** The furniture elements (style song) of the furnished lots. */
 export function interiorElements() {
-  return picks().filter((p) => p.furnish).map(({ l, kind, trade }) => ({ t: 'kf_interior', rect: l.foot, front: l.front, y: FLOOR, kind, trade, seed: l.seed + 3, ceil: ceilOf(l, kind), lite: Math.hypot((l.foot[0] + l.foot[2]) / 2 - BRIDGE.at[0], (l.foot[1] + l.foot[3]) / 2 - BRIDGE.at[1]) > 85 }));
+  return picks().filter((p) => p.furnish).map(({ l, kind, trade }) => ({ t: 'kf_interior', rect: l.foot, front: l.front, y: FLOOR, kind, trade, seed: l.seed + 3, ceil: ceilOf(l, kind), lite: Math.min(Math.hypot((l.foot[0] + l.foot[2]) / 2 - BRIDGE.at[0], (l.foot[1] + l.foot[3]) / 2 - BRIDGE.at[1]), Math.hypot((l.foot[0] + l.foot[2]) / 2 - ARRIVAL[0], (l.foot[1] + l.foot[3]) / 2 - ARRIVAL[1]) * 1.4) > 85 }));
 }
 /**
  * The rooms (music and acoustics: kinds shop, tea, tavern, inn, house) of the lots of picks(): { id, rect, y, kind }. The buildings

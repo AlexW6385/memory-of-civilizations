@@ -21,7 +21,7 @@ for (const [x, z, rot] of [[WALL[0], 20, Math.PI / 2], [WALL[2], -30, Math.PI / 
   HOUSES.forEach((h, i) => {
     if (i % 3) return;
     const q = h.rect, along = q[2] - q[0] >= q[3] - q[1], cx = (q[0] + q[2]) / 2, cz = (q[1] + q[3]) / 2;
-    perches.push({ kind: 'sparrow', x: cx + (along ? (r() - 0.5) * 3 : 0), z: cz + (along ? 0 : (r() - 0.5) * 3), y: 0.25 + h.H + 1.75, rot: along ? 0 : Math.PI / 2, range: [2.2, 0], alert: 6 });
+    perches.push({ kind: 'sparrow', x: cx + (along ? (r() - 0.5) * 3 : 0), z: cz + (along ? 0 : (r() - 0.5) * 3), y: 0.25 + h.H + (h.Hu || 0) + 1.75, rot: along ? 0 : Math.PI / 2, range: [2.2, 0], alert: 6 });
   });
   for (const [x, z] of [[-30, 155], [-12, 153], [22, 157], [48, 155], [-60, 156], [70, 154], [3, 170], [-3, 182], [8, 141], [-9, 136]]) sp(x, z, ground.height(x, z) + 0.06);
 }

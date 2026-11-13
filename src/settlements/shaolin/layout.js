@@ -87,6 +87,28 @@ export const GAP = 0.7;                                         // between neigh
     }
   }
 }
+/**
+ * The front designs of the village (docs/settlements/shaolin.md §5): the rammed-earth house (the common one), the grey-brick shop front,
+ * the whitewashed house under a hipped roof, the low thatched cottage of the poor, and the shop with a loft over it (two storeys, the upper
+ * a lattice screen). vt names the design; H is the ground storey's eave (the loft house's is lower), Hu what the loft adds above it.
+ * Drawn from a stream of its own, so the lots themselves stay as they were; no design repeats next door.
+ */
+export const VTYPES = ['earth', 'brick', 'white', 'thatch', 'loft'];
+{
+  const rv = rng(1717);
+  let prev = '';
+  for (const h of HOUSES) {
+    let t = '';
+    for (let k = 0; k < 4; k++) { const q = rv(); t = q < 0.3 ? 'earth' : q < 0.5 ? 'brick' : q < 0.66 ? 'white' : q < 0.8 ? 'thatch' : 'loft'; if (t !== prev) break; }
+    if (t === 'loft' && h.kind !== 'shop') t = 'white';
+    if (t === 'thatch') h.kind = 'home';
+    prev = t; h.vt = t; h.Hu = 0;
+    if (t === 'brick') { h.H += 0.35; h.roof = 'gable'; }
+    else if (t === 'white') { h.H = 3.9 + rv() * 0.3; h.roof = 'hip'; }
+    else if (t === 'thatch') { h.H = 2.9 + rv() * 0.2; h.roof = 'gable'; }
+    else if (t === 'loft') { h.H = 3.1; h.Hu = 2.5; h.roof = rv() < 0.5 ? 'gable' : 'hip'; }
+  }
+}
 /** The stupas of the Pagoda Forest: { c, kind, tiers, shape, h, yaw, seed }. */
 export const STUPAS = [];
 {
