@@ -167,8 +167,8 @@ Sources added:
 
 ## 14. Walk-in houses and shops (round 5)
 
-- **Measured.** Within 120 m of the arrival (the north end of the outer court) twelve of the quarter's houses and shops are open (the nearest of the open ones the lots north of the terrace, 66-77 m away): six trades (baker, butcher, potter, barber, grocer) and four homes. Before: none could be walked into from the arrival: the terrace's retaining wall to the north had no gap, so the lanes below were 250 m of walking away round the terrace, and each shop's counter ran the whole width of its room, so no shop could be entered. Fronts in the first 110 m: 66 houses in 16 designs (storeys 1-3 by trade or home).
-- **Built.** A gate 12 m wide in the retaining wall on the axis of the outer court's north gate [inferred]; a way through the middle of each shop counter, in line with the door (the raised flap); the open houses chosen only where the door's step is not more than a walker's step above the lane (11 of the 60 open houses stood on slopes too steep); a lamp light in every open room (the glass lamp's light, at any hour; one light a room); the keeper in each open shop (the baker in his white cap and apron, the butcher, the coppersmith at his stump) and the woman or the old man of the house on the divan in each home, within 220 m of the arrival [inferred: the figures of the quarter's life, as §12].
+- **Measured.** Twelve open houses and shops stand within 120 m of the arrival. At the start of the round none could be walked into from the arrival: the terrace's north retaining wall had no gap, the shop counters ran the full width of the room, and some door steps rose more than a walker's step above the lane.
+- **Built.** A 12 m gate in the terrace's north retaining wall on the axis (plan.js); a flap gap in line with the door in each shop counter (konak.js); `openSet()` (layout.js) now picks open houses only where the door step is within 0.45 m of the lane; a real light at the lamp of each open room; and a keeper or a woman of the house inside each open house within 220 m of the arrival (life.js, its own rng). All twelve are reachable by the walker's rules.
 
 ## Sources
 

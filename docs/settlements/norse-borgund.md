@@ -80,8 +80,8 @@ The farm work of a summer (haymaking, wood, the yards), the herds at pasture wit
 
 ## Round 5: walk-in houses
 
-- **Measured.** Within 120 m of the arrival (30 m west of the church's yard) 23 log buildings are open: 10 dwellings (stue), 12 barns and the smith's, with the housewife at the hearth or an old man on the bench, the smith at his forge, the beasts in the stalls (§10). Fronts in the first 100 m: the stue in two sizes, the loft in two sizes, the barn, the shed, the smithy, the stave church and its bell house: nine designs.
-- **Built.** The fire's light in every open room (a real light at the hearth of each stue, the forge of the smithy, a horn lantern in each byre; one light a room), so that the rooms are lit at any hour [inferred: the open fire was the only light of the house].
+- **Measured.** 23 log buildings (stue, barn, smithy) within 120 m of the arrival are open and reachable (the smithy only in part).
+- **Built.** A hearth, forge or horn-lantern light in each open building (one light a room), so the rooms are lit at any hour.
 
 ## Sources
 
