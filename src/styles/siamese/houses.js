@@ -187,6 +187,11 @@ function stilt(el, ctx) {
   for (let n = 0; n < 3; n++) L('wicker', [[0.001, 0], [0.18, 0.0], [0.24, 0.2], [0.26, 0.3], [0.001, 0.3]], iu0 + 0.55 + n * 0.55, iv1 - 0.1, up + 1.5, 8);
   B('timber', iu0, iu1, iv1 - 0.4, iv1, up + 1.45, up + 1.5);
   if (hS > 1.9) { const cu = (rand() < 0.5 ? -1 : 1) * (hS - 0.55); BC('timber_red', cu - 0.4, cu + 0.4, -hF * 0.1 - 0.3, -hF * 0.1 + 0.3, up, up + 0.55); B('clay_gilt', cu - 0.42, cu + 0.42, -hF * 0.1 - 0.32, -hF * 0.1 - 0.28, up + 0.3, up + 0.38); }
+  // the lamp: a wick in a dish of oil on the hearth's rim, the room lit by it
+  { const [lx, lz] = W(0.0, (iv0 + iv1) / 2);
+    bag.add('rope_fibre', rod([lx, top - 0.05, lz], [lx, up + 2.08, lz], 0.007, 3));
+    bag.add('lamp_paper', lathe([[0.001, 0], [0.1, 0.04], [0.13, 0.15], [0.09, 0.27], [0.001, 0.3]], 8, null, lx, up + 1.8, lz));
+    if (ctx.lights) ctx.lights.push({ at: [lx, up + 1.75, lz], color: '#ffb25a', intensity: 2.6, distance: 6.5 }); }
   // the yard: the spirit house at the lot's corner, a bamboo fence at the lane's edge
   spiritHouse(k, -hS - 0.55, hF + 1.1, 0);
   if (rand() < 0.6) { const t = []; for (let u = -hS - 0.6; u <= hS + 0.6; u += 1.0) { const [x, z] = W(u, hF + 1.9); if (Math.abs(u) > 0.7) bag.add('timber', lathe([[0.04, 0], [0.04, 1.05]], 5, null, x, 0, z)); } void t; const g0 = [-hS - 0.6, hF + 1.9], g1 = [-0.75, hF + 1.9], h0 = [0.75, hF + 1.9], h1 = [hS + 0.6, hF + 1.9]; for (const [p, q] of [[g0, g1], [h0, h1]]) { B('reed_mat', p[0], q[0], p[1] - 0.02, p[1] + 0.02, 0.1, 0.95); k.col.segment(W(p[0], p[1]), W(q[0], q[1]), 0.08, 0, 1.0); } }
@@ -256,6 +261,7 @@ function shop(el, ctx) {
     const t = []; const a = W(sgn * (hS - 0.05), hF + 0.05), b = W(sgn * (hS - 0.05), hF + 1.15); beamTris(t, [a[0], uy + 0.4, a[1]], [b[0], uy + 0.4, b[1]], 0.06, 0.06); bag.add('timber', fromTriangles(t));
     B('timber_red', sgn * (hS - 0.05) - 0.02, sgn * (hS - 0.05) + 0.02, hF + 0.8, hF + 1.1, uy - 1.5, uy + 0.35); B('clay_gilt', sgn * (hS - 0.05) - 0.03, sgn * (hS - 0.05) + 0.03, hF + 0.84, hF + 1.06, uy - 1.1, uy - 0.2); }
   for (const s of [-1, 1]) { const c = W(s * (hS - 0.3), hF + 0.3); bag.add('lamp_paper', lathe([[0.001, 0], [0.13, 0.05], [0.16, 0.2], [0.12, 0.36], [0.001, 0.4]], 8, null, c[0], y0 + gh - 0.45 - 0.4 + 0.5, c[1])); bag.add('timber', rod([c[0], y0 + gh - 0.45, c[1]], [c[0], y0 + gh + 0.05, c[1]], 0.008, 3)); }
+  if (ctx.lights) { const [lx, lz] = W(0, hF - 1.6), [ux, uz] = W(0, 0); ctx.lights.push({ at: [lx, y0 + 2.5, lz], color: '#ffb25a', intensity: 3, distance: 8 }, { at: [ux, uy + 1.5, uz], color: '#ffb25a', intensity: 2.2, distance: 6 }); }
   // the roof of tile with the gable to the lane, horns, a hanging board at the gable
   const rb = R(-hS, hS, -hF, hF), long = rb[2] - rb[0] >= rb[3] - rb[1], c0 = [(rb[0] + rb[2]) / 2, (rb[1] + rb[3]) / 2];
   const alongV = Math.abs(k.F[1]) > 0 ? !long : long;     // ridge along the depth when the front is n/s
