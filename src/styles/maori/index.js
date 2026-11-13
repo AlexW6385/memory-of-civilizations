@@ -183,7 +183,7 @@ function palisade(el, { bag, col }) {
  * outside of the side walls against the wind [stated: Te Ara "Māori housing": earth floors with fern and mats, a hearth with
  * the passage past it, sleeping places down both sides, "some had earth banked against the walls"].
  */
-function commonHouse(add, { w, l, h, t, zf, e, under }) {
+function commonHouse(add, { w, l, h, t, zf, e, under, trade }) {
   const zi0 = zf + 0.3, zi1 = l / 2 - t - 0.1, xi = w / 2 - t - 0.05, zm = (zi0 + zi1) / 2;
   add('reed_mat', box(-xi, -0.2, zi0, xi, 0.035, zi1));
   // the sleeping places along each wall: a raised bed of fern, a mat over it, a folded cloak or two
@@ -206,6 +206,33 @@ function commonHouse(add, { w, l, h, t, zf, e, under }) {
     const top = under(Math.abs(x)) - 0.1;
     add('rope_fibre', rod([x, top, z], [x, top - 0.6, z], 0.012, 4));
     add('wicker', lathe([[0.001, 0], [0.15, 0.02], [0.19, 0.16], [0.14, 0.3], [0.001, 0.3]], 9, null, x, top - 0.9, z));
+  }
+  // the household's trade (el.trade), its tools and goods along the back wall and on the beams [inferred: Te Ara, 'Raranga', 'Hī ika', 'Toki']
+  const bw = zi1 - 0.12, xs = xi - 1.0;
+  if (trade === 'weaver') {          // a weaving frame (whāriki / korowai in the making): two uprights, a rail, the warp hanging, bundles of dressed muka and a stack of finished mats
+    for (const x of [-0.75, 0.75]) add('timber', box(x - 0.04, 0.0, bw - 0.1, x + 0.04, 1.35, bw - 0.02));
+    add('timber', box(-0.8, 1.3, bw - 0.1, 0.8, 1.38, bw - 0.02));
+    for (let k = 0; k < 14; k++) add('flax_leaf', box(-0.7 + k * 0.1, 0.55, bw - 0.08, -0.66 + k * 0.1, 1.3, bw - 0.06));
+    add('cloth_ochre', box(-0.7, 0.3, bw - 0.09, 0.3, 0.55, bw - 0.07));
+    for (let k = 0; k < 3; k++) add('rope_fibre', lathe([[0.001, 0], [0.12, 0.01], [0.15, 0.12], [0.1, 0.24], [0.001, 0.26]], 8, null, -xs + 0.1 + k * 0.3, 0.036, zi1 - 0.9));
+    for (let k = 0; k < 3; k++) add('reed_mat', box(-0.3, 0.04 + k * 0.05, zi1 - 0.62, 0.45, 0.09 + k * 0.05, zi1 - 0.3));
+  } else if (trade === 'fisher') {   // a net draped over the rafters, a paddle, gourd floats, an eel pot, a bone fish-hook on a peg
+    for (const z of [zm - 0.8, zm + 0.3]) add('rope_fibre', box(-xi + 1.0, under(xi - 1.0) - 0.42, z, xi - 1.0, under(xi - 1.0) - 0.08, z + 0.5));
+    add('timber', rod([xi - 0.2, 0.0, zi1 - 0.15], [xi - 0.35, 1.9, zi1 - 0.2], 0.03, 5)); add('timber', box(xi - 0.5, 1.55, zi1 - 0.27, xi - 0.2, 2.0, zi1 - 0.16));
+    for (let k = 0; k < 4; k++) add('hide_tan', lathe([[0.001, 0], [0.1, 0.02], [0.13, 0.12], [0.08, 0.22], [0.001, 0.24]], 8, null, -0.7 + k * 0.28, 0.036, zi1 - 0.45));
+    add('wicker', lathe([[0.2, 0], [0.25, 0.18], [0.2, 0.5], [0.001, 0.6]], 9, null, 0.65, 0.036, zi1 - 0.55));
+  } else if (trade === 'carver') {   // the adzes (toki) and chisels on the shelf, a slab half cut on the floor, the shavings about it
+    add('timber', box(-0.8, 0.9, bw - 0.25, 0.8, 0.95, bw - 0.02));
+    for (let k = 0; k < 5; k++) { const x = -0.65 + k * 0.3; add('timber', rod([x, 0.95, bw - 0.12], [x + 0.05, 1.28, bw - 0.1], 0.016, 4)); add('basalt', box(x - 0.04, 1.2, bw - 0.14, x + 0.1, 1.3, bw - 0.08)); }
+    add('kokowai', box(-0.45, 0.036, zm + 0.35, 0.35, 0.1, zm + 0.78));
+    for (let k = 0; k < 9; k++) add('timber', box(-0.5 + (k % 5) * 0.25, 0.036, zm + 0.15 + (k % 3) * 0.3, -0.42 + (k % 5) * 0.25, 0.05, zm + 0.22 + (k % 3) * 0.3));
+    add('wood_dark', box(xs - 0.4, 0.0, zm + 0.5, xs + 0.2, 0.3, zm + 1.1));
+  } else if (trade === 'cook') {      // kete of kūmara and fern-root, calabashes, a cooking basket, stones for the hāngi, a bundle of flax for lining the oven
+    for (let k = 0; k < 4; k++) add('wicker', lathe([[0.001, 0], [0.2, 0.02], [0.26, 0.18], [0.2, 0.34], [0.001, 0.36]], 9, null, -xs + 0.05 + (k % 2) * 0.45, 0.036, zi1 - 0.4 - Math.floor(k / 2) * 0.45));
+    for (let k = 0; k < 6; k++) add('hide_tan', lathe([[0.001, 0], [0.08, 0.02], [0.1, 0.09], [0.001, 0.14]], 7, null, -xs + 0.15 + (k % 3) * 0.12, 0.2, zi1 - 0.4 - Math.floor(k / 3) * 0.1));
+    for (let k = 0; k < 3; k++) add('hide_brown', lathe([[0.001, 0], [0.14, 0.02], [0.2, 0.14], [0.12, 0.26], [0.09, 0.32], [0.001, 0.32]], 8, null, xs + 0.3, 0.036, zm - 0.5 + k * 0.4));
+    for (let k = 0; k < 6; k++) add('basalt', box(xs - 0.1 + (k % 3) * 0.16, 0.036, zi1 - 0.5 - Math.floor(k / 3) * 0.16, xs + 0.04 + (k % 3) * 0.16, 0.15, zi1 - 0.38 - Math.floor(k / 3) * 0.16));
+    add('flax_leaf', box(0.2, 0.036, zi1 - 0.7, 0.9, 0.2, zi1 - 0.4));
   }
   // the earth banked against the outside of the side walls and round the back
   for (const s of [-1, 1]) add('sod', prism([[s * (w / 2 + 0.01), 0.6], [s * (w / 2 + 0.01), -0.2], [s * (w / 2 + 0.95), -0.2], [s * (w / 2 + 0.5), 0.2]], zf + 0.4, l / 2 - 0.1));
@@ -346,7 +373,32 @@ function whare(el, ctx) {
       add('wicker', lathe([[0.001, 0], [0.15, 0.02], [0.19, 0.16], [0.14, 0.3], [0.001, 0.3]], 9, null, x, top - 0.85, z));
     }
   }
-  if (rank <= 1 && !small && el.furnished !== false) commonHouse(add, { w, l, h, t, zf, e, under, rank });
+  if (rank <= 1 && !small && el.furnished !== false) {
+    commonHouse(add, { w, l, h, t, zf, e, under, rank, trade: el.trade });
+    // the hearth's glow: one warm light to the room (the pool lights the nearest, DESIGN §5)
+    const zmL = (zf + 0.3 + l / 2 - t - 0.1) / 2, [lx, lz] = W2(0.06, zmL);
+    if (ctx.lights) ctx.lights.push({ at: [lx, y0 + 1.0, lz], color: '#ff9650', intensity: 3.4, distance: 6 });
+  }
+  // the front's variants of the ordinary houses [inferred: a pā's houses differed in porch, door-surround and what stood before them]
+  if (!carved && !small && rank < 1 && el.variant) {
+    const v = el.variant;
+    if (v === 1) {            // posts under the porch's eaves and a lintel beam across them, cloaks hung on a pole
+      for (const s of [-1, 1]) add('timber', rod([s * (w / 2 - 0.12), -0.2, -l / 2 + 0.2], [s * (w / 2 - 0.12), e + 0.05, -l / 2 + 0.2], 0.07, 6));
+      add('timber', box(-w / 2 + 0.05, e - 0.12, -l / 2 + 0.12, w / 2 - 0.05, e + 0.06, -l / 2 + 0.28));
+      add('timber', rod([wl - 0.1, 1.15, zf - 0.12], [wr + 0.3, 1.15, zf - 0.12], 0.02, 4)); add('hide_white', box(wl - 0.05, 0.45, zf - 0.14, wl + 0.45, 1.15, zf - 0.1));
+      col.circle(...W2(w / 2 - 0.12, -l / 2 + 0.2), 0.09, y0, y0 + e); col.circle(...W2(-w / 2 + 0.12, -l / 2 + 0.2), 0.09, y0, y0 + e);
+    } else if (v === 2) {     // the door and window framed in red ochre, a woven panel beside the window
+      const ft = Math.min(dh + 0.15, h - 0.03); add(K, box(dl - 0.2, -0.1, zf - 0.07, dl, ft, zf + 0.01)); add(K, box(dr, -0.1, zf - 0.07, dr + 0.2, ft, zf + 0.01)); add(K, box(dl - 0.2, dh + 0.02, zf - 0.07, dr + 0.2, ft, zf + 0.01));
+      add(K, box(wl - 0.14, wb - 0.14, zf - 0.07, wr + 0.14, wb - 0.02, zf + 0.01)); add(K, box(wl - 0.14, wt + 0.02, zf - 0.07, wr + 0.14, Math.min(wt + 0.14, h - 0.03), zf + 0.01));
+      add('tukutuku', box(wr + 0.2, 0.2, zf - 0.05, Math.min(w / 2 - t - 0.1, wr + 1.0), 0.95, zf));
+    } else if (v === 3) {     // a stoop of boards before the door, a bench by it and a drying frame with fish
+      add('timber', box(dl - 0.5, -0.2, zf - 0.9, dr + 0.5, 0.1, zf));
+      add('timber', box(wl - 0.1, 0.0, zf - 0.55, wr + 0.5, 0.42, zf - 0.3));
+      for (const x of [w / 2 - 0.55, w / 2 + 0.55]) add('timber', rod([x, -0.2, -l / 2 - 0.3], [x, 1.7, -l / 2 - 0.3], 0.04, 5));
+      add('timber', rod([w / 2 - 0.55, 1.65, -l / 2 - 0.3], [w / 2 + 0.55, 1.65, -l / 2 - 0.3], 0.03, 5));
+      for (let k = 0; k < 4; k++) add('hide_grey', box(w / 2 - 0.45 + k * 0.25, 0.95, -l / 2 - 0.33, w / 2 - 0.35 + k * 0.25, 1.65, -l / 2 - 0.27));
+    }
+  }
   col.segment(W2(-w / 2, -l / 2 + 0.1), W2(-w / 2, l / 2), 0.3, y0, y0 + h + rise * 0.5);
   col.segment(W2(w / 2, -l / 2 + 0.1), W2(w / 2, l / 2), 0.3, y0, y0 + h + rise * 0.5);
   col.segment(W2(-w / 2, l / 2), W2(w / 2, l / 2), 0.3, y0, y0 + h + rise);

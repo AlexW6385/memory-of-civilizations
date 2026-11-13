@@ -42,6 +42,26 @@ export const onCauseway = (x, z, m = 0) => CAUSEWAYS.some((c) => { for (let i = 
 export const CORE = [-120, -140, 140, 150];
 export const inCore = (x, z, m = 0) => inRect(CORE, x, z, m) || Math.hypot(x + 262, z) < 70 + m;
 
+/**
+ * The craftsmen's quarter west of Temple II (docs/settlements/maya-tikal.md §5b): three patio groups of five houses each on the plaza's
+ * edge (the nobles' retainers and the plaza's craftsmen lived within a few hundred paces of the rulers' courts), the first houses a
+ * visitor from the Great Plaza reaches. Each in its own 38 m cell of the grid, east side toward Temple II. trade: what the house makes.
+ */
+export const CRAFTS = ['obsidian', 'potter', 'cloth', 'cook', 'painter'];
+function craftGroups() {
+  const out = [], rand = rng(751), hw = 5.4, hd = 3.4;
+  [[-107, -31, 22], [-107, 5, 18], [-107, 45, 22]].forEach(([x0, z0, d], gi) => {
+    const w = 24, cx = x0 + w / 2, cz = z0 + d / 2, houses = [];
+    const mk = (c, ww, dd, dir, door, kitchen, k) => houses.push({ c, w: ww, d: dd, dir, seed: Math.floor(rand() * 1e6), kitchen, door, craft: CRAFTS[(gi * 2 + k) % 5] });
+    mk([x0 + hd / 2 + 1.6, cz], hd, hw, 'z', 'e', false, 0);
+    mk([cx - 6.3, z0 + hd / 2 + 1.6], hw, hd, 'x', 's', false, 1);
+    mk([cx + 1.0, z0 + hd / 2 + 1.6], hw, hd, 'x', 's', true, 2);
+    mk([cx - 6.3, z0 + d - hd / 2 - 1.6], hw, hd, 'x', 'n', true, 3);
+    mk([cx + 1.0, z0 + d - hd / 2 - 1.6], hw, hd, 'x', 'n', false, 4);
+    out.push({ rect: [x0, z0, x0 + w, z0 + d], h: 0.7 + rand() * 0.5, shrine: [x0 + w - 5, cz], houses, seed: Math.floor(rand() * 1e6), ward: true });
+  });
+  return out;
+}
 let GROUPS = null;
 /** Patio groups { rect, platform h, shrine, houses: [{ c, w, d, dir, seed, kitchen }], seed } on a 38 m grid, not on the core, the causeways or the reservoirs. */
 export function groups() {
@@ -63,6 +83,7 @@ export function groups() {
     if (rand() < 0.8) houses.push({ c: [cx + (rand() - 0.5) * 4 - 1, z0 + d - hd / 2 - 1.6], w: hw, d: hd, dir: 'x', seed: Math.floor(rand() * 1e6), kitchen: rand() < 0.2, door: 'n' });
     GROUPS.push({ rect: [x0, z0, x0 + w, z0 + d], h: 0.7 + rand() * 0.5, shrine: [x0 + w - 5, cz], houses, seed: Math.floor(rand() * 1e6) });
   }
+  GROUPS.push(...craftGroups());
   return GROUPS;
 }
 // the groups sit on a 38 m grid (one at most to a cell, never leaving it): a point only needs the nine cells about it (the relief, the cover

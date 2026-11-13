@@ -140,3 +140,7 @@ Brought toward the Suzhou standard. What was below it: the arrival stood in the 
 - **Ground**: the marae ātea, the work places and the gates' surrounds beaten bare; a worn lane along each terrace behind the stages [inferred].
 - **Houses**: a common house's plain bargeboards and a ridge-board standing out over its porch; about one roof in four of straw-coloured thatch beside the raupō [inferred: variation].
 - **Life**: walks to the carver, the gong and the weavers; swallows low over the marae [stated: swallows, Te Ara "Birds"].
+
+## 4c. Inside the houses and the fronts (round 5)
+
+[inferred, after Te Ara "Raranga — Māori weaving", "Hī ika — fishing", "Toki — adzes" and the museum models of whare] Every ordinary whare of the pā (105 within 120 m of the arrival, all with a door a visitor can walk through) is furnished for the household's trade: the weaver's frame with the warp hanging, muka bundles and a stack of mats; the fisher's net over the rafters, paddle, gourd floats and eel pot; the carver's adzes on their shelf, a slab half cut and the shavings; the cook's kete of kūmara, calabashes and hāngi stones. Each room has the hearth's warm light, and the fourteen houses nearest the arrival have their household at the fire (woman, man, child, by trade). Fronts differ in four ways beyond wall and roof material: plain; porch posts and lintel with a cloak line; door and window framed in red ochre with a tukutuku panel; a board stoop with a bench and a drying frame of fish.

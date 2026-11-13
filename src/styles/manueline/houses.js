@@ -22,7 +22,7 @@ function hip(bag, mat, rect, y0, rise, oh) {
 export function manuHouse(el, ctx) {
   const { bag, col, lights } = ctx, rand = rng(el.seed || 1), y = el.y ?? 0, F = frame(el.rect, el.front ?? 's'), { L, D } = F, simple = !!el.simple;
   const kind = el.kind ?? 'merchant', plinth = el.plinth ?? 0.6, open = !!el.open && !simple;
-  const n = open && kind === 'fisher' ? 1 : kind === 'merchant' ? 3 + (rand() < 0.4 ? 1 : 0) : kind === 'alfama' ? 2 + Math.floor(rand() * 3) : 1 + (rand() < 0.4 ? 1 : 0);
+  const n = el.storeys ? el.storeys : open && kind === 'fisher' ? 1 : kind === 'merchant' ? 3 + (rand() < 0.4 ? 1 : 0) : kind === 'alfama' ? 2 + Math.floor(rand() * 3) : 1 + (rand() < 0.4 ? 1 : 0);
   const h0 = kind === 'merchant' ? 3.9 : 3.0, hs = kind === 'merchant' ? 3.4 : 3.0, H = h0 + (n - 1) * hs;
   const wall = pick(rand, WALLS), shut = pick(rand, SHUT), cap = kind === 'merchant' ? 'limestone' : 'plaster_white';
   const R = (u0, v0, u1, v1, y0, y1, m, solid = false) => { const r = F.R(u0, v0, u1, v1); bag.add(m, box(r[0], y + y0, r[1], r[2], y + y1, r[3])); if (solid) col.rect(r, y + y0, y + y1); return r; };

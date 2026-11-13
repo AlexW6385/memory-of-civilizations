@@ -84,7 +84,27 @@ export function lots() {
     }
   }
   chooseOpen(LOTS);
+  LOTS.push(...plazaLots());
   return LOTS;
+}
+/** The east end of the Jerónimos' plaza: three rows of Restelo's houses, shops and inns across two lanes, within 105 m of the arrival (docs §8c). Row A and C face south, row B north. [kind, width, use (null = shut), storeys]. */
+export const PLAZA_ROWS = [
+  { z: [44, 62], face: 's', lots: [['merchant', 11, 'tavern', 4], ['alfama', 6, 'home', 3], ['alfama', 6, null, 4], ['merchant', 10, 'apothecary', 3], ['fisher', 8, 'home', 1]] },
+  { z: [68, 86], face: 'n', lots: [['fisher', 10, 'home', 1], ['merchant', 11, 'chandler', 3], ['merchant', 10, 'grocer', 2], ['fisher', 10, 'home', 2]] },
+  { z: [92, 110], face: 's', lots: [['fisher', 10, 'home', 1], ['merchant', 11, 'cloth', 3], ['alfama', 7, 'home', 3], ['merchant', 12, null, 4]] },
+];
+export const PLAZA_HOUSES_X0 = -164;
+function plazaLots() {
+  const out = [], rand = rng(1522);
+  for (const row of PLAZA_ROWS) {
+    let x = PLAZA_HOUSES_X0;
+    for (const [kind, w, use, storeys] of row.lots) {
+      const rect = [x, row.z[0], x + w, row.z[1]];
+      x += w + 0.4;
+      out.push({ rect, seed: Math.floor(rand() * 1e6), y: GROUND, plinth: 0.6, front: row.face, kind, w, d: row.z[1] - row.z[0], storeys, nova: false, plazaRow: true, ...(use ? { open: true, use } : {}) });
+    }
+  }
+  return out;
 }
 /** The houses you can walk into: ten merchants' shops on the Rua Nova (one of each trade), the fishermen's homes near the plaza, two Alfama homes. */
 export const TRADES = ['spice', 'porcelain', 'cloth', 'jeweller', 'parrots', 'chandler', 'grocer', 'apothecary', 'tavern', 'spice'];

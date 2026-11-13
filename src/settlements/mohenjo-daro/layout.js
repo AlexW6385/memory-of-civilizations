@@ -100,7 +100,8 @@ export function lots() {
         parts.forEach(([a, b], pi) => {
           const rect = [cx0, a, cx1, b - 0.25];
           if (!free(rect) && tag === 'town') return;
-          LOTS.push({ rect, front, kind: 'house', seed: Math.floor(rand() * 1e6), open: false, y, tag, street: outer, ends: [pi === 0, pi === parts.length - 1] });
+          const seed = Math.floor(rand() * 1e6);
+          LOTS.push({ rect, front, kind: 'house', seed, variant: (seed >> 2) % 4, open: false, y, tag, street: outer, ends: [pi === 0, pi === parts.length - 1] });
         });
       }
     });

@@ -76,7 +76,39 @@ function trade(F, kind, u0, v0, u1, v1, rand, lights) {
   lights.push({ at: [F.pt(mu, v0 + 3)[0], F.y + 2.0, F.pt(mu, v0 + 3)[1]], color: '#ffd9a0', intensity: 2.5, distance: 9 });
 }
 
-/** indus_house: { rect, front, kind ('house' | 'small' | trade), seed, open, y } */
+/**
+ * The front's variants (docs/settlements/mohenjo-daro.md §5b; the street fronts of one lane were not all alike): 1 a shop front (a mat awning
+ * on posts the width of the house, a mud-brick counter at the door with the trade's goods, strings hung under the eave); 2 a screen of brick
+ * pillars along the parapet; 3 the lower front plastered and limewashed, a red-ochre dado at its foot. 0 is the plain baked-brick front.
+ */
+function frontVariant(F, rand, variant, du, W, H, kind) {
+  const PARh = PAR;
+  if (variant === 1) {
+    for (let u = 0.4; u < W - 0.3; u += 2.9) F.b('timber', u - 0.05, 0, -0.99, u + 0.05, 2.95, -0.89, false);
+    F.b('timber', 0.2, 2.92, -1.05, W - 0.2, 3.0, -0.2, false); F.b('reed_mat', 0.15, 3.0, -1.1, W - 0.15, 3.05, -0.15, false);
+    const b0 = du < W / 2 ? du + 1.05 : 0.5, b1 = du < W / 2 ? W - 0.5 : du - 1.05;
+    if (b1 - b0 > 1.4) {
+      F.b('mudbrick', b0, 0, -0.62, b1, 0.85, -0.12, false); F.b('mud_plaster', b0 - 0.03, 0.85, -0.66, b1 + 0.03, 0.9, -0.1, false);
+      for (let u = b0 + 0.5; u < b1 - 0.3; u += 0.55) {
+        if (kind === 'bead' || kind === 'seal') F.b(kind === 'bead' ? 'inlay_carnelian' : 'soapstone', u - 0.12, 0.9, -0.5, u + 0.12, 1.02, -0.3, false);
+        else if (kind === 'bronze') F.b('bronze', u - 0.12, 0.9, -0.5, u + 0.12, 0.96, -0.25, false);
+        else if (kind === 'shell') F.b('chalk', u - 0.1, 0.9, -0.5, u + 0.1, 0.98, -0.3, false);
+        else jar(F, rand() < 0.5 ? 'terracotta' : 'pottery_dark', u, -0.4, 0.9, 0.9);
+      }
+    }
+    for (let u = 0.8 + rand() * 0.5; u < W - 0.6; u += 0.7) F.b(kind === 'bead' ? 'inlay_carnelian' : 'cloth_ochre', u - 0.02, 2.2 + rand() * 0.4, -1.0, u + 0.02, 2.9, -0.98, false);
+  } else if (variant === 2) {
+    for (let u = 0.1; u < W - 0.3; u += 0.95) F.b('brick', u, H + PARh, 0, u + 0.3, H + PARh + 0.85, 0.28, false);
+    F.b('brick', 0, H + PARh + 0.85, 0, W, H + PARh + 1.0, 0.34, false);
+  } else if (variant === 3) {
+    for (const [a, b] of [[0.05, du - 0.7], [du + 0.7, W - 0.05]]) if (b - a > 0.4) {
+      F.b('limewash_white', a, 0.12, -0.12, b, 2.25, 0, false); F.b('paint_ochre', a, 0.12, -0.14, b, 0.5, -0.1, false);
+      F.b('paint_ochre', a, 2.0, -0.14, b, 2.12, -0.1, false);
+    }
+  }
+}
+
+/** indus_house: { rect, front, kind ('house' | 'small' | trade), seed, open, y, variant } */
 export function house(el, ctx) {
   const rand = rng(el.seed), H = 3.0 + rand() * 0.8, F = lotFrame(ctx, el.rect, el.front, el.y ?? 0), W = F.W, D = F.D, kind = el.kind, small = kind === 'small', isTrade = !['house', 'small'].includes(kind);
   const lowH = 2.2;
@@ -98,6 +130,7 @@ export function house(el, ctx) {
   // the door's frame, leaf, step, bench and shade, the windows; the weathering and the roofline of the street fronts
   dressDoor(F, rand, du, W, H, T);
   dressWall(F, rand, 'front', W, H, lowH, { gap: [du - 1.0, du + 1.0] });
+  frontVariant(F, rand, el.variant ?? (isTrade ? 1 : 0), du, W, H, isTrade ? kind : null);
   if (el.street) dressWall(F, rand, 'back', W, H, lowH);
   if (el.ends?.[0]) dressWall(F, rand, 'endA', D, H, lowH, { life: false });
   if (el.ends?.[1]) dressWall(F, rand, 'endB', D, H, lowH, { life: false });

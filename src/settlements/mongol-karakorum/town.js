@@ -29,7 +29,7 @@ function fabric() {
   for (const [i, q] of SECRETARIES.entries()) E.push({ t: 'mud_compound', rect: q, gate: i ? 'n' : 's', seed: 77 + i, floors: 2, dome: true });
   for (const [i, q] of MOSQUES.entries()) E.push({ t: 'mosque', rect: q, seed: i });
   E.push({ t: 'church', rect: CHURCH });
-  for (const s of SHOPS) E.push({ t: 'shop_row', a: s.a, n: s.n, face: s.face, seed: s.seed, d: s.d });
+  for (const s of SHOPS) E.push({ t: 'shop_row', a: s.a, n: s.n, face: s.face, seed: s.seed, d: s.d, east: !!s.east, storey: !s.east && (Math.abs(s.seed) % 3 === 0 || s.face === 'e') });
   // the Cathayan quarter: the Great Hall, the idol temples, workshops with kilns and forges
   E.push({ t: 'great_hall', c: GREAT_HALL.c, y: GREAT_HALL.y });
   for (const q of TEMPLES) E.push({ t: 'tile_hall', rect: q, y: 0.7, nx: 3, H: 4.4, kind: 'xieshan', mat: r() < 0.5 ? 'tile_grey' : 'tile_green', altar: 'buddha' });

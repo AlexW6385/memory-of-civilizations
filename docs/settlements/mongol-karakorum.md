@@ -94,3 +94,7 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 - **The court at eye level:** the yards of the great ger and the wagon-house (dung cakes, the churn, meat drying, washing); the gate guards' bench, fire-wood and barrels inside the gate; dogs asleep in the sun, children at knucklebones by the banners; a felt-maker's yard by the west storehouses (rolled felts, wool, aaruul — dried curd — on trays) [inferred].
 - **Birds:** ravens on the banner staves and the great hall's ridge, doves on the gate hall's eaves, a falcon and a kite over the court.
 - **Ground and planting:** the court's floor trodden along its axis and scuffed and patched with dry grass and dung at the margins, grassy at the foot of the walls; poplars along the walls' feet.
+
+## 3b. The fronts of the shop rows (round 5)
+
+[inferred] Within 120 m of the arrival stand 106 shop bays (each a furnished, walkable shop of one of eight trades with its seller inside), four workshops, five idol temples and the court's gers. The rows were not all one design: the Cathayan east rows (craftsmen from North China) now keep a Chinese front — red lacquered posts between the bays, a grey-tiled eave with a green ridge on painted brackets; the Saracen rows along the cross-street and some on the main street carry a plastered upper storey with latticed windows over the shops; the rest keep the mud-brick bays with cloth awnings. Every other bay now has a lamp inside (a point light) besides its paper lantern.
