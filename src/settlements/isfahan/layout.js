@@ -63,3 +63,33 @@ export function inHouse(x, z, m = 0) {
   return !!l && l.some((h) => inRect(h.rect, x, z, m));
 }
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+
+// ── the arcades round the square (docs/settlements/isfahan.md §4): the runs between the gaps, and the shops of the walk-in bays ──
+export const ARRIVAL = [0, 170];                      // src/planet/arrivals.js
+/** The arcade's straight runs [a, b], broken for the streets and the monuments (the gaps are the lanes at z −180, the Ali Qapu and Lotfollah portals, the lane at z 120, the Qeysarieh and the Shah Mosque portals). */
+export const ARCADE_RUNS = (() => {
+  const [sx0, sz0, sx1, sz1] = SQUARE, out = [];
+  const runs = (along, gaps, lo, hi) => { let u = lo; for (const [g0, g1] of gaps) { if (g0 > u) out.push([along(u), along(g0)]); u = g1; } if (hi > u) out.push([along(u), along(hi)]); };
+  runs((z) => [sx0 - 0.6, z], [[-183, -177], [-51, -29], [117, 123]], sz0, sz1);
+  runs((z) => [sx1 + 0.6, z], [[-183, -177], [LOTF.portal[1][1], LOTF.portal[0][1]], [117, 123]], sz0, sz1);
+  runs((x) => [x, sz0 - 0.6], [[-15, 15]], sx0, sx1);
+  runs((x) => [x, sz1 + 0.6], [[PORTAL.a[0], PORTAL.b[0]]], sx0, sx1);
+  return out;
+})();
+/** The shops that can be entered: every second bay of the arcade within 115 m of the arrival (a shop room 5 m deep behind the door, lit, furnished by its trade, the shopkeeper in it). */
+export const ARCADE_OPEN = { at: ARRIVAL, r: 115, every: 2, not: [[-84, 252, -12, 292]] };   // not: where the Shah Mosque's court and its masses stand behind the arcade
+export const SHOP_TRADES = ['cloth', 'carpet', 'copper', 'spice', 'pottery'];
+/** Every bay of the arcade: { c (on the wall line), u (along), n (away from the square), w (bay width), open, trade }. */
+export function arcadeBays() {
+  const [sx0, sz0, sx1, sz1] = SQUARE, mid = [0, (sz0 + sz1) / 2], out = [];
+  for (const [a, b] of ARCADE_RUNS) {
+    const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.round(L / 7)), w = L / n, u = [(b[0] - a[0]) / L, (b[1] - a[1]) / L];
+    let nv = [-u[1], u[0]]; if ((mid[0] - (a[0] + b[0]) / 2) * nv[0] + (mid[1] - (a[1] + b[1]) / 2) * nv[1] > 0) nv = [-nv[0], -nv[1]];
+    for (let i = 0; i < n; i++) {
+      const c = [a[0] + u[0] * (i + 0.5) * w, a[1] + u[1] * (i + 0.5) * w];
+      const e = [c[0] + nv[0] * 8, c[1] + nv[1] * 8], open = i % ARCADE_OPEN.every === 0 && Math.hypot(e[0] - ARCADE_OPEN.at[0], e[1] - ARCADE_OPEN.at[1]) < ARCADE_OPEN.r && !ARCADE_OPEN.not.some((r) => inRect(r, e[0], e[1]));
+      out.push({ c, u, n: nv, w, open, trade: SHOP_TRADES[Math.abs(Math.round(c[0] * 7 + c[1] * 3)) % SHOP_TRADES.length] });
+    }
+  }
+  return out;
+}

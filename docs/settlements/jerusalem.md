@@ -167,3 +167,8 @@ As for the Dome of the Rock (`docs/buildings/dome-of-the-rock.md` §9).
 - [Huldah Gates — Wikipedia](https://en.wikipedia.org/wiki/Huldah_Gates)
 - [Golden Gate (Jerusalem) — Wikipedia](https://en.wikipedia.org/wiki/Golden_Gate_(Jerusalem))
 - [The markets of Jerusalem after the Arab conquest — Hebrew University](https://cris.huji.ac.il/en/publications/the-markets-of-jerusalem-after-the-arab-conquest-in-light-of-an-e/)
+
+## 5c. The servants' lodges on the esplanade (round 5, 2026-11-12)
+
+- The dossier's §1d gives the Haram's staff: the caliph's slaves who served it, ten gatekeepers at each gate, the Jewish and Christian families who cleaned, made the glass for the lamps and prepared the wicks, the olive oil sent from far to light the mosque, the incense and perfume for the Rock [stated: Elad, as in §1d].
+- Built, within 120 m of the arrival (the esplanade has no ordinary houses; the city's lots begin 105 m west beyond the wall): eight courtyard houses in two rows on the esplanade's west margin, doors to the south — the first row onto the paved way from the platform's west stair to the gate, the second onto the yard behind it — each open, its main room lit by a lamp in a niche: servants' dwellings, the gatekeepers' lodge, two oil stores, the wick-makers, the glass-lamp makers' (the furnace in the court, lamps of glass cooling on a board), the perfumers' (censers, jars). Awnings of cloth over the doors of four, goods before the doors, someone in each [inferred: the place and form of the lodges; their use is from the sources above].

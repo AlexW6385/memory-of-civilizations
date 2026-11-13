@@ -6,6 +6,7 @@
 // (jobok) with the gilt coronet, the lower ranks in the black robe (dallyeong) with the black hat —
 // and the guards at Gwanghwamun and Geunjeongmun with their spears, in black felt hats.
 import { courtPlans } from './court.js';
+import { officePlans } from './offices.js';
 import { RADIUS, lots, SHOPS, BELL, JONGNO, AVENUE, YANGBAN } from './layout.js';
 const base = (id, elements) => ({ id, style: 'joseon', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 70], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -151,6 +152,6 @@ export async function town() {
   const all = lots(), plans = [];
   for (let i = 0; i < all.length; i += 80) plans.push(base(`joseon-seoul-hanok-${i / 80}`, all.slice(i, i + 80).map((l) => ({ t: 'hanok', ...l, simple: true }))));
   plans.push({ ...base('joseon-seoul-yangban', [{ t: 'yangban_house', rect: YANGBAN, seed: 1888 }]), feature: false });
-  plans.push(...courtPlans(), jongno(), shopfronts(), ...lanedress(), ...street());
+  plans.push(...courtPlans(), ...officePlans(), jongno(), shopfronts(), ...lanedress(), ...street());
   return plans;
 }

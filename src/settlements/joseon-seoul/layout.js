@@ -80,3 +80,27 @@ export function lanes() {
   }
   return out;
 }
+
+/**
+ * The palace's offices in the Heungnyemun court (docs/settlements/joseon-seoul.md §17): ranges of rooms with their backs to the cross wall of
+ * the court (north of the Geumcheon) and to the stream's south bank, fronts to the south, on the outer sides of the officials' horses and
+ * grooms: the clerks' offices, the guard-rooms of the gate, the waiting rooms of the officials, the pantries of the grooms and servants.
+ * Each { org (the back's left end), face, L, kinds (the rooms by bay), use, seed } for styles/joseon/house.js's `joseon_range`. [inferred: their place and size]
+ */
+export const OFFICES = (() => {
+  const BAY = 2.7, K = {
+    clerk: [['sarangbang', 2], ['daecheong', 1], ['sarangbang', 2]], guard: [['kitchen', 1], ['room', 1], ['daecheong', 2]], wait: [['daecheong', 2], ['sarangbang', 2], ['room', 1]],
+    store: [['kitchen', 1], ['daecheong', 2], ['room', 2]], clerk4: [['sarangbang', 2], ['daecheong', 2]], guard5: [['kitchen', 1], ['room', 2], ['daecheong', 2]],
+    office: [['sarangbang', 2], ['room', 1], ['daecheong', 2]], pantry: [['kitchen', 1], ['daecheong', 2], ['room', 1]], room5: [['room', 2], ['sarangbang', 2], ['daecheong', 1]], serv: [['kitchen', 1], ['room', 1], ['sarangbang', 2]],
+  };
+  const out = [];
+  const add = (x0, z, use, seed) => { const kinds = K[use], nb = kinds.reduce((a, k) => a + k[1], 0); out.push({ org: [x0, z], face: 's', L: nb * BAY, kinds, use, seed }); return x0 + nb * BAY; };
+  const addW = (xEnd, z, use, seed) => { const nb = K[use].reduce((a, k) => a + k[1], 0); add(xEnd - nb * BAY, z, use, seed); return xEnd - nb * BAY; };
+  // the row against the cross wall (z 92), east and west of the gate hall and the horses' standing
+  let x = 38; x = add(x, 95.6, 'clerk', 1701) + 2.4; x = add(x, 95.6, 'guard', 1702) + 2.4; add(x, 95.6, 'wait', 1703);
+  x = -38; x = addW(x, 95.6, 'store', 1704) - 2.4; x = addW(x, 95.6, 'clerk4', 1705) - 2.4; addW(x, 95.6, 'guard5', 1710);
+  // the row on the stream's south bank
+  x = 40; x = add(x, 141, 'office', 1706) + 2.4; add(x, 141, 'pantry', 1707);
+  x = -40; x = addW(x, 141, 'room5', 1708) - 2.4; addW(x, 141, 'serv', 1709);
+  return out;
+})();

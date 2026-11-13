@@ -80,13 +80,18 @@ function minaret(el, { bag, col }) {
  * point in the square) }: two storeys of pointed arches in the buff brick — shops below, open
  * balconies above — over a mass of rooms behind, a flat roof with a low parapet.
  */
-function squareArcade(el, { bag, col }) {
+function squareArcade(el, { bag, col, lights }) {
   const a = el.a, b = el.b, y = el.y ?? 0, h = el.h ?? 12, D = el.depth ?? 12, bay = el.bay ?? 7;
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.round(L / bay)), w = L / n;
   const [nx, nz] = awayFrom(a, b, el.facing), behind = [(a[0] + b[0]) / 2 + nx * 100, (a[1] + b[1]) / 2 + nz * 100];
+  const ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, rand = rng(Math.round(a[0] * 31 + a[1] * 17) + 7);
+  const Q = (s, d) => [a[0] + ux * s + nx * d, a[1] + uz * s + nz * d];
+  const R = (s0, s1, d0, d1) => { const p = Q(s0, d0), q = Q(s1, d1); return [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; };
+  // the bays that can be entered (el.open: { at, r, every }): the lower arch is open (a walk-through), the shop a room behind its door
+  const isOpen = (i) => !!el.open && i % (el.open.every ?? 2) === 0 && Math.hypot(...Q((i + 0.5) * w, 8).map((v, k) => v - el.open.at[k])) < el.open.r && !(el.open.not || []).some((r) => { const e = Q((i + 0.5) * w, 8); return e[0] >= r[0] && e[0] <= r[2] && e[1] >= r[1] && e[1] <= r[3]; }) && (Math.abs(ux) < 1e-6 || Math.abs(uz) < 1e-6);
   const arches = [];
   for (let i = 0; i < n; i++) {
-    arches.push({ at: (i + 0.5) * w, w: w * 0.62, h: h * 0.44, depth: 3.2, back: 'kahgel' });
+    arches.push({ at: (i + 0.5) * w, w: w * 0.62, h: h * 0.44, depth: 3.2, back: 'kahgel', ...(isOpen(i) ? { pass: true } : {}) });
     arches.push({ at: (i + 0.5) * w, w: w * 0.55, h: h * 0.33, sill: h * 0.53, depth: 2.4, back: 'kahgel' });
   }
   arcadeWall(bag, col, a, b, y, h, 1.2, B, arches, behind);
@@ -94,12 +99,11 @@ function squareArcade(el, { bag, col }) {
   // two timber door leaves, folded open, under a lattice transom — and before it the stone platform
   // (sakku) the shopkeeper sits on with his wares: bales of cloth, rolled carpets, copper vessels,
   // jars; in each upper arch a wooden lattice balustrade
-  const ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, rand = rng(Math.round(a[0] * 31 + a[1] * 17) + 7);
-  const Q = (s, d) => [a[0] + ux * s + nx * d, a[1] + uz * s + nz * d];
-  const R = (s0, s1, d0, d1) => { const p = Q(s0, d0), q = Q(s1, d1); return [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; };
   const wares = ['cloth_indigo', 'cloth_red', 'cloth_ochre', 'cloth_green'];
+  const trades = ['cloth', 'carpet', 'copper', 'spice', 'pottery'], AWN = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green', 'cloth_maroon'];
+  const tradeOf = (i) => { const c = Q((i + 0.5) * w, 0); return trades[Math.abs(Math.round(c[0] * 7 + c[1] * 3)) % trades.length]; };
   for (let i = 0; i < n; i++) {
-    const c = (i + 0.5) * w, dw = Math.min(1.25, w * 0.18), dh = 2.7, df = 3.7;
+    const c = (i + 0.5) * w, dw = Math.min(1.25, w * 0.18), dh = 2.7, df = 3.7, open = isOpen(i), trade = tradeOf(i);
     for (const s of [-1, 1]) {                                                                       // the door leaves, folded back against the jambs
       bag.add('wood_dark', boxR(R(c + s * dw, c + s * (dw + 0.08), df - 0.95, df), y, y + dh));
       bag.add('wood_dark', boxR(R(c + s * (dw - 0.12), c + s * (dw + 0.1), df - 0.06, df), y, y + dh + 0.12));
@@ -107,30 +111,95 @@ function squareArcade(el, { bag, col }) {
     bag.add('wood_dark', boxR(R(c - dw - 0.12, c + dw + 0.12, df - 0.06, df), y + dh, y + dh + 0.14));
     bag.add('lattice', boxR(R(c - dw, c + dw, df - 0.04, df), y + dh + 0.14, y + dh + 1.3));
     bag.add('wood_dark', boxR(R(c - dw - 0.12, c + dw + 0.12, df - 0.06, df), y + dh + 1.3, y + dh + 1.42));
-    bag.add('opening', boxR(R(c - dw, c + dw, df - 0.02, df), y, y + dh));
-    // the platform and the wares on it
+    if (!open) bag.add('opening', boxR(R(c - dw, c + dw, df - 0.02, df), y, y + dh));
+    // the platform and the wares on it (an open shop's platform is two pieces, the way in between)
     const pw = Math.min(w * 0.28, 1.9), ph = 0.45, pr = R(c - pw, c + pw, df - 1.3, df - 0.95);
-    bag.add('limestone', boxR(pr, y, y + ph)); col.rect(pr, y, y + ph);
-    const kind = Math.floor(rand() * 4);
+    if (open) for (const [s0, s1] of [[c - pw, c - dw - 0.15], [c + dw + 0.15, c + pw]]) { const q = R(s0, s1, df - 1.3, df - 0.95); bag.add('limestone', boxR(q, y, y + ph)); col.rect(q, y, y + ph); }
+    else { bag.add('limestone', boxR(pr, y, y + ph)); col.rect(pr, y, y + ph); }
+    const kind = open ? Math.max(0, trades.indexOf(trade)) % 4 : Math.floor(rand() * 4);
     for (let k = 0; k < 3; k++) {
+      if (open && k === 1) continue;
       const s = c - pw + 0.45 + k * (2 * pw - 0.9) / 2, d = df - 1.12, yp = y + ph, [px, pz] = Q(s, d);
       if (kind === 0) bag.add(wares[(i + k) & 3], boxR(R(s - 0.28, s + 0.28, d - 0.15, d + 0.15), yp, yp + 0.3 + 0.1 * k));              // bales of cloth
       else if (kind === 1) bag.add(wares[(i + k + 1) & 3], lathe([[0.001, 0], [0.16, 0.01], [0.17, 0.5], [0.16, 1.1], [0.001, 1.12]], 8, null, px, yp, pz)); // carpets rolled, stood up
       else if (kind === 2) bag.add('bronze', lathe([[0.001, 0], [0.12, 0.02], [0.2, 0.12], [0.18, 0.24], [0.08, 0.32], [0.07, 0.42], [0.11, 0.46], [0.001, 0.46]], 10, null, px, yp, pz)); // copper vessels
       else bag.add(k === 1 ? 'pottery_dark' : 'terracotta', lathe([[0.001, 0], [0.1, 0.01], [0.2, 0.18], [0.19, 0.36], [0.08, 0.5], [0.09, 0.56], [0.001, 0.56]], 10, null, px, yp, pz)); // jars
     }
+    if (open) shopFront(bag, R, Q, c, dw, df, y, dh, trade, AWN[i % AWN.length]);
     // the upper arch's balustrade, in the middle of the wall's thickness
     const bw = w * 0.55 / 2, ys = y + h * 0.53;
     bag.add('lattice', boxR(R(c - bw, c + bw, -0.03, 0.03), ys, ys + 0.85));
     bag.add('wood_dark', boxR(R(c - bw, c + bw, -0.07, 0.07), ys + 0.85, ys + 0.95));
   }
+  // the mass of rooms behind the passage: solid, but for the shops that are entered (each a room between the walls of its neighbours, 5.2 m deep)
   const off = (d) => [[a[0] + nx * d, a[1] + nz * d], [b[0] + nx * d, b[1] + nz * d]];
-  const [m0, m1] = off((3.8 + D) / 2);
-  slab(bag, col, B, m0, m1, y, D - 3.8, h - 0.05);
+  const sub = (s0, s1, d0, d1, y0, y1, c, mat = B) => slab(bag, c ? col : null, mat, Q(s0, (d0 + d1) / 2), Q(s1, (d0 + d1) / 2), y0, d1 - d0, y1 - y0);
+  let run = 0;
+  const flush = (end) => { if (end > run) sub(run * w, end * w, 3.8, D, y, y + h - 0.05, true); };
+  for (let i = 0; i < n; i++) if (isOpen(i)) { flush(i); arcadeShop(bag, col, lights, { Q, R, sub, i, w, y, h, D, c: (i + 0.5) * w, trade: tradeOf(i), ux, uz, nx, nz, L }); run = i + 1; }
+  flush(n);
   // the band of tile along the top, the parapet
   const [f0, f1] = off(-0.62);
   slab(bag, null, T, f0, f1, y + h * 0.92, 0.1, h * 0.06);
   const [p0, p1] = off(0); slab(bag, null, B, p0, p1, y + h, 1.2, 0.9);
+}
+
+/** The front of an entered shop: an awning of cloth over the door, and by trade what hangs at it (carpets on a line, copper trays, jars, bolts). */
+function shopFront(bag, R, Q, c, dw, df, y, dh, trade, awn) {
+  bag.add(awn, boxR(R(c - dw - 0.5, c + dw + 0.5, df - 1.1, df - 0.02), y + dh + 0.02, y + dh + 0.07));
+  bag.add('wood_dark', boxR(R(c - dw - 0.5, c + dw + 0.5, df - 1.14, df - 1.08), y + dh - 0.05, y + dh + 0.07));
+  const hang = (s0, s1, mat, y0, y1, d) => bag.add(mat, boxR(R(s0, s1, d, d + 0.03), y0, y1));
+  if (trade === 'carpet') for (let k = 0; k < 2; k++) { const s = c + (k ? 1 : -1) * (dw + 0.7); bag.add('wood_dark', boxR(R(s - 0.55, s + 0.55, df - 0.9, df - 0.86), y + 2.45, y + 2.5)); hang(s - 0.5, s + 0.5, k ? 'cloth_maroon' : 'cloth_red', y + 0.9, y + 2.45, df - 0.88); hang(s - 0.5, s + 0.5, 'cloth_indigo', y + 0.9, y + 1.05, df - 0.9); }
+  else if (trade === 'copper') for (let k = 0; k < 4; k++) { const s = c + (k < 2 ? -1 : 1) * (dw + 0.35 + (k % 2) * 0.45); const g = lathe([[0.001, 0], [0.2, 0], [0.22, 0.03], [0.001, 0.012]], 14); g.rotateX(Math.PI / 2); const q = Q(s, df - 0.8); bag.add('bronze', place(g, q[0], y + 1.6 + (k % 2) * 0.5, q[1], 0)); }
+  else if (trade === 'spice') for (let k = 0; k < 6; k++) { const s = c + (k < 3 ? -1 : 1) * (dw + 0.3 + (k % 3) * 0.28), q = Q(s, df - 0.7); bag.add(k % 2 ? 'cloth_ochre' : 'cloth_red', lathe([[0.001, 0], [0.1, 0.08], [0.09, 0.4], [0.001, 0.42]], 6, null, q[0], y + 2.0, q[1])); bag.add('rope_fibre', box(q[0] - 0.005, y + 2.4, q[1] - 0.005, q[0] + 0.005, y + dh + 0.02, q[1] + 0.005)); }
+  else if (trade === 'pottery') for (let k = 0; k < 3; k++) { const q = Q(c + (k - 1) * 2.2 + (k === 1 ? 0.0 : 0), df - 1.6); if (k !== 1) for (let j = 0; j < 3; j++) bag.add(j === 1 ? 'glaze_blue' : 'terracotta', lathe([[0.001, 0], [0.16, 0.01], [0.28, 0.2], [0.24, 0.42], [0.1, 0.55], [0.001, 0.56]], 9, null, q[0], y + 0.45 + j * 0.0, q[1] + 0)); }
+  else for (let k = 0; k < 2; k++) { const s = c + (k ? 1 : -1) * (dw + 0.6); hang(s - 0.45, s + 0.45, k ? 'cloth_green' : 'cloth_ochre', y + 1.2, y + 2.4, df - 0.9); }
+}
+
+/**
+ * One entered shop of the arcade: the doorway through a front wall 0.4 m thick, a plank floor, walls of plaster, a painted
+ * ceiling, the trade's goods on the platform and shelves, a lamp, and the shopkeeper's cushion; behind it the room stays solid.
+ */
+function arcadeShop(bag, col, lights, { Q, R, sub, i, w, y, h, D, c, trade, ux, uz, nx, nz, L }) {
+  const s0 = i * w, s1 = (i + 1) * w, dw = Math.min(1.25, w * 0.18), dh = 2.7, d0 = 3.8, d1 = 4.2, RD = 5.2, d2 = d1 + RD, fy = y + 0.1, CH = 4.0;
+  const flip = nx * -uz + nz * ux < 0;                                  // the frame the trades' goods are laid in: u along, v into the room (+z of a placed object)
+  const yaw = flip ? Math.atan2(uz, -ux) : Math.atan2(-uz, ux);
+  const q = (u, v) => Q(flip ? L - u : u, d1 + v), uc = flip ? L - c : c;
+  // the front wall: two pieces and the lintel; the floor and its step; the rear mass; the ceiling and the mass above
+  sub(s0, c - dw, d0, d1, y, y + h - 0.05, true); sub(c + dw, s1, d0, d1, y, y + h - 0.05, true); sub(c - dw, c + dw, d0, d1, y + dh, y + h - 0.05, false);
+  sub(s0, s1, d2, D, y, y + h - 0.05, true);
+  const fl = R(s0, s1, d1, d2); bag.add('timber', boxR(fl, y, fy)); col.floor(fl, fy);
+  const th = R(c - dw, c + dw, d0, d1); bag.add('limestone', boxR(th, y, fy)); col.floor(th, fy);
+  bag.add('ceiling_painted', boxR(R(s0, s1, d1, d2), y + CH - 0.15, y + CH));
+  sub(s0, s1, d1, d2, y + CH, y + h - 0.05, false);
+  // the plaster on the inner faces (a skin just off the brick) and a band of dark wainscot
+  const sk = 0.04;
+  bag.add('plaster_persian', boxR(R(s0, s1, d2 - sk, d2), fy, y + CH - 0.15)); bag.add('plaster_persian', boxR(R(s0, s0 + sk, d1, d2), fy, y + CH - 0.15)); bag.add('plaster_persian', boxR(R(s1 - sk, s1, d1, d2), fy, y + CH - 0.15));
+  bag.add('plaster_persian', boxR(R(s0, c - dw, d1, d1 + sk), fy, y + CH - 0.15)); bag.add('plaster_persian', boxR(R(c + dw, s1, d1, d1 + sk), fy, y + CH - 0.15)); bag.add('plaster_persian', boxR(R(c - dw, c + dw, d1, d1 + sk), y + dh, y + CH - 0.15));
+  bag.add('wood_dark', boxR(R(s0 + sk, s1 - sk, d2 - sk - 0.03, d2 - sk), fy, fy + 0.6));
+  const back = RD - 0.35, mid = RD / 2, yw = yaw;
+  const P = (u, v) => q(u, v);
+  if (trade === 'cloth') {
+    for (const k of [0, 1, 2]) { const p = P(uc, back); bag.add('timber', place(box(-1.5, 1.0 + k * 0.7, -0.2, 1.5, 1.04 + k * 0.7, 0.2), p[0], 0, p[1], yaw)); for (let j = 0; j < 7; j++) { const pp = P(uc - 1.35 + j * 0.45, back); F.bolts(bag, pp[0], 1.04 + k * 0.7, pp[1], 3 + (j + k) % 3, yaw, undefined, 0.42); } }
+    { const p = P(uc - 0.6, mid); F.bolts(bag, p[0], fy, p[1], 4, yaw + 0.1); const p2 = P(uc + 0.9, mid + 0.3); F.bolts(bag, p2[0], fy, p2[1], 3, yaw - 0.15, ['cloth_white', 'linen', 'cloth_ochre']); }
+  } else if (trade === 'carpet') {
+    { const p = P(uc, back - 0.25); F.rolledCarpets(bag, p[0], fy, p[1], 6, 1.8, yaw); }
+    { const p = P(uc, mid - 0.3); F.carpet(bag, p[0], fy, p[1], 2.8, 1.8, yaw, ['persian', 'blue', 'maroon'][i % 3]); }
+    { const p = P(uc, d2 - d1 - 0.05); bag.add('cloth_red', place(box(-1.3, 1.2, -0.01, 1.3, 3.5, 0.01), p[0], 0, p[1], yaw)); for (const r of [[-1.3, 1.2, -1.15, 3.5], [1.15, 1.2, 1.3, 3.5], [-1.15, 1.2, 1.15, 1.35], [-1.15, 3.35, 1.15, 3.5]]) bag.add('cloth_indigo', place(box(r[0], r[1], -0.025, r[2], r[3], 0.025), p[0], 0, p[1], yaw)); }
+  } else if (trade === 'copper') {
+    { const p = P(uc, back); F.copperware(bag, p[0], fy, p[1], yw, i * 7 + 3, 6); const p2 = P(uc - 0.9, mid); F.copperware(bag, p2[0], fy, p2[1], yw, i * 11 + 5, 4); }
+    for (let j = 0; j < 6; j++) { const p = P(uc - 1.6 + j * 0.64, RD - 0.05); const g = lathe([[0.001, 0], [0.2 + (j % 2) * 0.06, 0], [0.22 + (j % 2) * 0.06, 0.03], [0.001, 0.012]], 16); g.rotateX(Math.PI / 2); bag.add('bronze', place(g, p[0], 2.2 + (j % 2) * 0.55, p[1], yaw)); }
+    { const p = P(uc + 1.3, mid + 0.3); bag.add('iron', lathe([[0.12, 0], [0.1, 0.3], [0.2, 0.36], [0.2, 0.42], [0.001, 0.42]], 8, null, p[0], fy, p[1])); }
+  } else if (trade === 'spice') {
+    { const p = P(uc, mid); F.spiceSacks(bag, p[0], fy, p[1], yw, 6); const p2 = P(uc, back); F.pots(bag, p2[0], fy, p2[1], yw, 8, ['glaze_green', 'terracotta', 'glaze_blue']); }
+    { const p = P(uc + 0.2, back - 0.05); bag.add('timber', place(box(-1.4, 1.3, -0.15, 1.4, 1.34, 0.15), p[0], 0, p[1], yaw)); const p3 = P(uc, back - 0.05); F.pots(bag, p3[0], 1.34, p3[1], yw, 8, ['glaze_white', 'glaze_blue', 'terracotta']); }
+  } else {
+    { const p = P(uc, back); F.pots(bag, p[0], fy, p[1], yw, 9); const p2 = P(uc - 0.3, mid); F.pots(bag, p2[0], fy, p2[1], yw, 6, ['glaze_blue', 'glaze_white', 'glaze_green']); }
+    { const p = P(uc + 0.2, back - 0.05); bag.add('timber', place(box(-1.4, 1.3, -0.15, 1.4, 1.34, 0.15), p[0], 0, p[1], yaw)); const p3 = P(uc, back - 0.05); F.pots(bag, p3[0], 1.34, p3[1], yw, 8, ['glaze_blue', 'glaze_white', 'glaze_blue']); }
+  }
+  { const p = P(uc - 1.5, mid + 0.6); F.cushion(bag, p[0], fy, p[1], 0.7, 0.7, 0.08, yaw, 'cloth_red'); }
+  { const p = P(uc + 2.0, mid + 1.2); F.carpet(bag, p[0], fy, p[1], 1.4, 1.0, yaw, 'maroon'); }
+  { const p = P(uc, mid + 0.4), lp = [p[0], p[1]]; hangingLamp(bag, lights, lp[0], y + CH - 1.1, lp[1], y + CH - 0.15, 4, 8); }
 }
 
 /**
@@ -1232,7 +1301,7 @@ registerStyle('safavid', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.mughal.elements,
-    square_arcade: squareArcade, portal, dome_chamber: domeChamber, court_arcade: courtArcade,
+    square_arcade: squareArcade, arcade_precinct: () => {}, portal, dome_chamber: domeChamber, court_arcade: courtArcade,
     safavid_minaret: minaret, adobe_wall: wall, mass, arcade, talar, goalpost, bazaar, khaneh, khaneh_open: khanehOpen, ali_qapu: aliQapu, sagittarius, qahveh_khaneh: qahvehKhaneh,
   },
   objects: {},

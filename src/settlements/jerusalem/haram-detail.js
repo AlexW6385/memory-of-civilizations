@@ -78,7 +78,7 @@ export function haramLife() {
   };
   const circles = [[-45, -55], [-55, 15], [42, 20], [55, -60], [30, -75], [-30, 30]];
   for (const [x, z] of circles) if (inPlat(x, z, 3)) circle(x, z, PY, 6 + Math.floor(rand() * 4));
-  for (const [x, z] of [[-100, -60], [-100, 40], [100, -40], [-112, 120], [95, 100], [-70, 100]]) circle(x, z, T, 6 + Math.floor(rand() * 4));
+  for (const [x, z] of [[-100, -100], [-100, 40], [100, -40], [-112, 120], [95, 100], [-70, 100]]) circle(x, z, T, 6 + Math.floor(rand() * 4));
   // attendants sweeping the platform and the esplanade (the cleaning of the Haram), incense carriers, a water carrier
   for (let k = 0; k < 14; k++) {
     const onP = k < 8, x = onP ? PLATFORM[0] + 6 + rand() * (PLATFORM[2] - PLATFORM[0] - 12) : hx0 + 20 + rand() * (hx1 - hx0 - 40), z = onP ? PLATFORM[1] + 6 + rand() * (PLATFORM[3] - PLATFORM[1] - 12) : -180 + rand() * 340;

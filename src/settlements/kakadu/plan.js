@@ -39,7 +39,11 @@ const rooms = [
   room('floodplain', [-85, -22, 85, 85], 0, 'open'),
 ];
 const mx = (MAIN.x0 + MAIN.x1) / 2;
-const walks = [Object.assign(ROUTE.map((p) => [...p]), { y0: height(mx, -14) })];
+// (the way out from under the east end of the lip goes by the clear strip at z -27, round the scree on the shelter's floor)
+const WALK = ROUTE.flatMap((p) => (p[0] === 10 && p[1] === -31 ? [[...p], [10, -27]] : [[...p]]));
+// and into three of the walk-in shelters (docs §5c): the brush shade west, the bark house east, the bark house by the west camp
+const into = (pts) => Object.assign(pts, { y0: height(0, -14) });
+const walks = [Object.assign(WALK, { y0: height(mx, -14) }), into([[0, -14], [-8, -10], [-18, -6.5], [-20.4, -6.5], [-22, -6.1]]), into([[0, -14], [10, -11], [18.6, -8.7], [19.9, -8.4], [21.8, -8]]), into([[0, -14], [-20, -12], [-34, -9], [-36.4, -7.7], [-37.8, -8.9]])];
 
 export const ubirr = {
   id: 'kakadu-ubirr',

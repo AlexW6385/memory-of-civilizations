@@ -90,10 +90,23 @@ export const CAMPS = [
   { c: [-30, 26], hut: [-34, 28, 0.5], lean: [-26, 30, -0.2], fire: [-30, 26], rack: [-24, 25], fish: true },          // the billabong's west bank
   { c: [57, 10], hut: [61, 13, -0.3], lean: [52, 12, 0.3], fire: [57, 10], rack: [62, 8], grind: true, fish: true },   // by the east hollow
 ];
+/** The walk-in shelters (docs §5c): kind, centre, the point the door faces. The first four stand at their camps' old hut sites, the fifth by the camp that had only a lean-to, the rest on their own hearths. */
+export const HOUSES = [
+  { kind: 'bark', at: [-38, -9], face: [-33, -5] },
+  { kind: 'dome', at: [-59, -26], face: [-54, -25] },
+  { kind: 'dome', at: [-34, 28], face: [-30, 26] },
+  { kind: 'bark', at: [61, 13], face: [57, 10] },
+  { kind: 'shade', at: [-16.5, 9.5], face: [-11, 14] },
+  { kind: 'shade', at: [-22, -6], face: [-1, -13] },
+  { kind: 'bark', at: [22, -8], face: [-1, -13] },
+  { kind: 'dome', at: [20, 12], face: [10, -5] },
+  { kind: 'bark', at: [44, 16], face: [30, 0] },
+];
+export const houseRot = (H) => Math.atan2(H.face[0] - H.at[0], H.face[1] - H.at[1]);
 /** Paperbark and pandanus round the billabong and the hollows; the termite mounds on the dry edge. Seeded, outside the shelters and tracks. */
 export function groves() {
   const r = rng(77), paper = [], pand = [], term = [];
-  const clear = (x, z, m) => !inPool(x, z, -0.0) && !inHollow(x, z, 0.6) && Math.hypot(x, z) < RADIUS - 6 && !CAMPS.some((k) => Math.hypot(x - k.c[0], z - k.c[1]) < 8 + m) && z > -20;
+  const clear = (x, z, m) => !inPool(x, z, -0.0) && !inHollow(x, z, 0.6) && Math.hypot(x, z) < RADIUS - 6 && !CAMPS.some((k) => Math.hypot(x - k.c[0], z - k.c[1]) < 8 + m) && !HOUSES.some((h) => Math.hypot(x - h.at[0], z - h.at[1]) < 5 + m) && z > -20;
   for (let k = 0; k < 600 && paper.length < 30; k++) { const a = r() * 6.283, d = 1.12 + r() * 0.45, x = POOL.c[0] + Math.cos(a) * POOL.a * d, z = POOL.c[1] + Math.sin(a) * POOL.b * d; if (clear(x, z, 0)) paper.push([x, z, 6.5 + r() * 5]); }
   for (let k = 0; k < 600 && pand.length < 26; k++) { const a = r() * 6.283, d = 1.06 + r() * 0.3, x = POOL.c[0] + Math.cos(a) * POOL.a * d, z = POOL.c[1] + Math.sin(a) * POOL.b * d; if (clear(x, z, 0) && !paper.some((p) => Math.hypot(p[0] - x, p[1] - z) < 3)) pand.push([x, z, 3 + r() * 3.5]); }
   for (const [cx, cz, a, b] of HOLLOWS) for (let k = 0; k < 3; k++) { const t = r() * 6.28, x = cx + Math.cos(t) * (a + 2.5), z = cz + Math.sin(t) * (b + 2.5); if (clear(x, z, 0)) (k ? pand : paper).push([x, z, k ? 3.5 + r() * 2 : 7 + r() * 3]); }
@@ -104,7 +117,7 @@ export function groves() {
 /** The woodland: stringybark gums on the dry ground and the rock's flanks, cycads and fallen logs; clear of water, camps, tracks, the shelters' mouths and the arrival. */
 export function woodland() {
   const r = rng(88), gum = [], cyc = [], log = [];
-  const ok = (x, z, m) => Math.hypot(x, z) < RADIUS - 5 && !inPool(x, z, 0.12) && !inHollow(x, z, 1.5) && !CAMPS.some((k) => Math.hypot(x - k.c[0], z - k.c[1]) < 7 + m)
+  const ok = (x, z, m) => Math.hypot(x, z) < RADIUS - 5 && !inPool(x, z, 0.12) && !inHollow(x, z, 1.5) && !CAMPS.some((k) => Math.hypot(x - k.c[0], z - k.c[1]) < 7 + m) && !HOUSES.some((h) => Math.hypot(x - h.at[0], z - h.at[1]) < 5 + m)
     && !inRect([MAIN.x0 - 6, MAIN.zb, MAIN.x1 + 6, MAIN.zl + 14], x, z) && !inRect([SMALL.x0 - 5, SMALL.zb, SMALL.x1 + 5, SMALL.zl + 12], x, z)
     && !FLIGHTS.some((F) => inRect(F.rect, x, z, 6)) && !BLOCKS.some((B) => inRect(B.r, x, z, 2.5 + m)) && !inRect([-34, -40, 34, -4], x, z) && !onWay(x, z, 3.2);
   for (let k = 0; k < 2500 && gum.length < 70; k++) { const x = -86 + r() * 172, z = -34 + r() * 120; const dry = poolD(x, z) > 1.5; if (ok(x, z, 1) && (dry || r() < 0.2) && (z < -18 || r() < 0.7) && !gum.some((g) => Math.hypot(g[0] - x, g[1] - z) < 5)) gum.push([x, z, 7 + r() * 7]); }
@@ -116,7 +129,7 @@ export function woodland() {
 export function tuftSpots() {
   const r = rng(91), out = [];
   const ok = (x, z) => Math.hypot(x, z) < RADIUS - 6 && !inPool(x, z, -0.02) && !inHollow(x, z, 0.2) && !BLOCKS.some((B) => inRect(B.r, x, z, 0.8)) && !inRect([MAIN.x0 - 3, MAIN.zb, MAIN.x1 + 3, MAIN.zl + 4], x, z) && !inRect([SMALL.x0 - 3, SMALL.zb, SMALL.x1 + 3, SMALL.zl + 4], x, z)
-    && !onWay(x, z, 1.8) && !CAMPS.some((k) => Math.hypot(x - k.c[0], z - k.c[1]) < 3.4) && !inRect([-6, -30, 6, -8], x, z);
+    && !onWay(x, z, 1.8) && !CAMPS.some((k) => Math.hypot(x - k.c[0], z - k.c[1]) < 3.4) && !HOUSES.some((h) => Math.hypot(x - h.at[0], z - h.at[1]) < 3.4) && !inRect([-6, -30, 6, -8], x, z);
   for (let k = 0; k < 6000 && out.length < 700; k++) {
     const x = -88 + r() * 176, z = -40 + r() * 128, foot = z < -16 ? 1 : 0, edge = poolD(x, z) < 1.5 ? 1 : 0;
     if (r() > 0.18 + 0.5 * foot + 0.35 * edge) continue;

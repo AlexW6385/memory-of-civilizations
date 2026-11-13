@@ -45,7 +45,7 @@ export function platformFurnish() {
   const ES = [];
   E.push({ t: 'water_station', at: [-30, 100.6], dir: [0, 1], y: HARAM.top + 0.05 }); E.push({ t: 'water_station', at: [30, 100.6], dir: [0, 1], y: HARAM.top + 0.05 });
   for (const x of [-18, -9, 9, 18]) E.push({ t: 'shoe_rack', at: [x, 99.2], dir: [0, 1], y: HARAM.top + 0.05, len: 2.4 });
-  for (const [x, z, d] of [[-100, -23.2, [0, -1]], [-100, -14, [0, 1]], [-60, -86, [0, -1]], [60, -86, [0, -1]], [100, -26, [0, -1]], [100, -14, [0, 1]], [-40, 92, [0, -1]], [40, 92, [0, -1]], [HARAM.rect[2] - 14, HGATES.golden - 14, [0, 1]], [HARAM.rect[2] - 14, HGATES.golden + 14, [0, -1]], [-8, 60, [0, -1]], [8, 60, [0, -1]]]) E.push({ t: 'mastaba', at: [x, z], dir: d, y: HARAM.top + 0.05, len: 2.6 });
+  for (const [x, z, d] of [[-100, -14, [0, 1]], [-60, -86, [0, -1]], [60, -86, [0, -1]], [100, -26, [0, -1]], [100, -14, [0, 1]], [-40, 92, [0, -1]], [40, 92, [0, -1]], [HARAM.rect[2] - 14, HGATES.golden - 14, [0, 1]], [HARAM.rect[2] - 14, HGATES.golden + 14, [0, -1]], [-8, 60, [0, -1]], [8, 60, [0, -1]]]) E.push({ t: 'mastaba', at: [x, z], dir: d, y: HARAM.top + 0.05, len: 2.6 });
   void ES;
   // prayer mats under the ranks (laid below; the worshippers stand on them)
   const MATS = ['reed_mat', 'cloth_red', 'cloth_indigo', 'reed_mat'];
@@ -110,7 +110,7 @@ export function platformLife() {
   for (const [x, z, n] of [[-52, -33, 9], [-40, -14, 7], [-62, -20, 8], [34, -30, 8], [8, -52, 7], [-14, 24, 8], [CHAIN[0] + 7, CHAIN[1] + 3, 6]]) E.push({ t: 'chickens', kind: 'pigeon', n, at: [x, z], y: PY, seed: Math.floor(x * 7 + z) });
   // the esplanade: men on the benches, a group at each water station, the Aqsa's forecourt thick with pilgrims at the doors
   const eper = (x, z, rot, o = {}) => E.push({ t: 'figure', at: [x, z], y: HARAM.top + 0.05, rot, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: pick(CL), cloth2: pick(CL), skin: 'skin_medium', hat: 'turban', hatMat: 'cloth_white', hair: 'short', beard: rand() < 0.6, feet: 'bare', ...o });
-  for (const [x, z, d] of [[-100, -23.2, -1], [-100, -14, -1], [-60, -86, 1], [60, -86, 1], [100, -26, 1], [100, -14, -1], [-40, 92, 1], [40, 92, 1], [-8, 60, 1], [8, 60, 1]]) { eper(x - 0.5, z + d * 0.45, d > 0 ? 0 : Math.PI, { pose: 'sit', y: HARAM.top + 0.5 }); if (rand() < 0.6) eper(x + 0.6, z + d * 0.45, d > 0 ? 0 : Math.PI, { pose: 'sit', y: HARAM.top + 0.5 }); }
+  for (const [x, z, d] of [[-100, -14, -1], [-60, -86, 1], [60, -86, 1], [100, -26, 1], [100, -14, -1], [-40, 92, 1], [40, 92, 1], [-8, 60, 1], [8, 60, 1]]) { eper(x - 0.5, z + d * 0.45, d > 0 ? 0 : Math.PI, { pose: 'sit', y: HARAM.top + 0.5 }); if (rand() < 0.6) eper(x + 0.6, z + d * 0.45, d > 0 ? 0 : Math.PI, { pose: 'sit', y: HARAM.top + 0.5 }); }
   for (const x of [-30, 30]) { eper(x, 98.7, Math.PI, { pose: 'stand', cloth: 'cloth_white', cloth2: 'cloth_green' }); eper(x - 1.1, 102.2, 0, { pose: 'talk' }); eper(x + 0.5, 102.6, 3.0, { pose: 'talk' }); }
   for (let k = 0; k < 40; k++) { const x = -42 + rand() * 84, z = 100.5 + rand() * 13; eper(x, z, rand() < 0.6 ? 0 : rand() * 6.28, { pose: rand() < 0.3 ? 'talk' : 'stand', hat: rand() < 0.2 ? 'veil' : 'turban', ...(rand() < 0.15 ? { child: true } : {}) }); }
   for (const [x, z, n] of [[-24, 103, 9], [0, 106, 10], [24, 103, 9], [-70, 8, 7], [HARAM.rect[2] - 20, HGATES.golden, 8], [-110, -4, 7], [60, 94, 6]]) E.push({ t: 'chickens', kind: 'pigeon', n, at: [x, z], y: HARAM.top + 0.05, seed: Math.floor(x * 3 + z) });

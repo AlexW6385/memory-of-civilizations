@@ -1,7 +1,7 @@
 // The square's life about 1630 (docs/settlements/isfahan.md §5, §15): horses held by grooms at both ends of the polo
 // field, by the stone goalposts; the guard's horses before Ali Qapu; people at the Qeysarieh portal and on the walks.
 
-import { RADIUS, SQUARE, CANAL, ALIQAPU, BAZAAR, OPEN_HOUSE } from './layout.js';
+import { RADIUS, SQUARE, CANAL, ALIQAPU, BAZAAR, OPEN_HOUSE, arcadeBays } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -102,6 +102,12 @@ export function life() {
     else if (u < 0.85) L.push({ t: 'sacks', n: 3, at: [xw, zc + 1.4], rot: face, seed: sd() });
     else L.push({ t: 'crates', n: 2, at: [xw, zc - 1.4], rot: face, seed: sd() });
     if (rand() < 0.55) person([sdx * (-sx0 - 4.4), zc + (rand() - 0.5) * 2.4], face + Math.PI + (rand() - 0.5), { pose: rand() < 0.5 ? 'talk' : 'stand' });
+  }
+  // the shops of the arcade that are entered: the shopkeeper on his cushion among his wares, facing the door, and a customer at the door in some
+  for (const [k, bay] of arcadeBays().filter((x) => x.open).entries()) {
+    const { c, u, n } = bay, flip = n[0] * -u[1] + n[1] * u[0] < 0, sg = flip ? 1 : -1, at = (s, d) => [c[0] + u[0] * s + n[0] * d, c[1] + u[1] * s + n[1] * d];
+    person(at(sg * 1.5, 4.2 + 3.2), Math.atan2(n[0], n[1]), { man: true, pose: 'cross', y: 0.2 });
+    if (k % 3 === 1) person(at(0.4, 4.9), Math.atan2(n[0], n[1]) + Math.PI + 0.3, { pose: 'talk', y: 0.1 });
   }
   // the open house: the master of the house on the talar's carpet, a servant in the court
   { const [x0, z0, x1, z1] = OPEN_HOUSE().rect, cx = (x0 + 3.6 + x1 - 3.8) / 2; person([cx - 1.4, z0 + 1.9], Math.PI, { man: true, pose: 'cross', y: 0.47, cloth: 'cloth_green', cloth2: 'cloth_white' }); person([x1 - 4.6, z1 - 4.4], Math.PI / 2, { man: true, cloth: 'cloth_white' }); }

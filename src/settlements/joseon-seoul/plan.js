@@ -160,6 +160,7 @@ const rooms = [room('throne court', [cx0, cz0, cx1, cz1], 0, 'open'), room('hall
   room('gyeonghoeru island', [-104 - 40 + 2, 8, -108, 18], 0.5, 'open'), room('hyangwonji island', [HISLE.c[0] - 2, HISLE.c[1] + 4.5, HISLE.c[0] + 2, HISLE.c[1] + 6.5], 0, 'open')];
 const walks = [[[0, 300], [0, 236], [0, 160], [0, 132], [0, 92], [0, 56]]];
 walks[0].y0 = 0;
+walks.push([[39.4, 106], [39.4, 100.6], [39.4, 99.0], [39.4, 97.2]], [[41.4, 150], [41.4, 145.6], [41.4, 144.6], [41.4, 142.4]]);          // up the step and through the doorway of a clerks' office on each row
 
 export const palace = {
   id: 'joseon-seoul-gyeongbokgung',
