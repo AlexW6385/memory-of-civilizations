@@ -183,3 +183,8 @@ Sources added:
 - [Petra, the rose red city — chefindisguise](https://chefindisguise.com/2012/07/06/petra-the-rose-red-city-half-as-old-as-time/)
 - [Petra — bestopics](https://bestopics.pages.dev/travel/destinations/historic/petra)
 - [Full-day tour text — pelago](https://www.pelago.com/en-AU/activity/pry13y1tm-full-day-private-guided-tour-in-petra-amman/)
+
+## 19. The houses of the Outer Siq (round 5, 2026-11-12; `outerLots` in layout.js)
+
+- **Why.** The arrival is at the Siq's mouth: no lot of the valley lies within 120 m (the nearest are over 140 m away), only the Khazneh's forecourt, the Siq and the Outer Siq with the Street of Façades on its west edge. The caravan's last halt before the city was here [inferred: the Siq was the way in, the Khazneh square its end], and dwellings and stores for its keepers and the tomb-keepers are placed on the corridor's east edge, where no tomb is cut [inferred].
+- **Built.** Eight small one-room houses of rose ashlar (the style's room house) stepping down the corridor's east edge from z −136, their doors to the way (the plan is turned 90° so the existing house builder's north–south fronts face west), 16 m clear of the line of the walking route; each with a hanging lamp, jars, sacks, a bench and mat inside, a woman or old man in some, a jar at the door, wash and figs on the roof (the style's `houseLife`). The caravan's camels stay on the west side.
