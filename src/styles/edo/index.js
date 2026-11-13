@@ -14,6 +14,7 @@ import { barredWindows, shachi as shachiFish, karaHafu, samaWall, katomado } fro
 import { machiyaShop, zashiki, kago, daisho } from './rooms.js';
 import { yashikiParts } from './yard.js';
 import { kido, hinomiYagura, kosatsu, jizo, inari } from './street.js';
+import { kuraIn, turretFurnish, doorWall } from './stores.js';
 import { machiyaFront, mushikoMado, ridgeCap, eaveBand, kuraWalls, gateFront, ishidoro, niwaki, ido, boat, barrel } from './town.js';
 
 const PL = 'plaster_castle', ST = 'ishigaki', TL = 'tile_grey', WD = 'wood_dark';
@@ -255,10 +256,15 @@ function tenshu(el, { bag, col }) {
 }
 
 /** One floor of a hollow keep: walls with posts and barred windows, the floor and its joists, the warriors' corridor's ring of posts, gun racks. */
-function hollowTier(bag, col, rect, y, h, i, { T, below, hole, keep, racks }) {
+function hollowTier(bag, col, rect, y, h, i, { T, below, hole, keep, racks, door, ring = true }) {
   const [x0, z0, x1, z1] = rect, inn = [x0 + T, z0 + T, x1 - T, z1 - T];
   // the walls
-  for (const r of [[x0, z0, x1, z0 + T], [x0, z1 - T, x1, z1], [x0, z0 + T, x0 + T, z1 - T], [x1 - T, z0 + T, x1, z1 - T]]) { bag.add(PL, box(r[0], y, r[1], r[2], y + h, r[3])); col.rect(r, y, y + h); }
+  const dpt = door ? { n: [door.at, z0 + T], s: [door.at, z1 - T], w: [x0 + T, door.at], e: [x1 - T, door.at] }[door.face] : null;
+  const nearDoor = (px, pz) => !!dpt && Math.hypot(px - dpt[0], pz - dpt[1]) < (door.w ?? 1.5) / 2 + 0.9;
+  for (const [fc, r] of [['n', [x0, z0, x1, z0 + T]], ['s', [x0, z1 - T, x1, z1]], ['w', [x0, z0 + T, x0 + T, z1 - T]], ['e', [x1 - T, z0 + T, x1, z1 - T]]]) {
+    if (door && door.face === fc) doorWall(bag, col, r, fc, door.at, door.w ?? 1.5, door.h ?? 2.6, y, h);
+    else { bag.add(PL, box(r[0], y, r[1], r[2], y + h, r[3])); col.rect(r, y, y + h); }
+  }
   // the floor (over the storey below, its hole for the stair up into this one) and the joists under it
   const cut = (r, q) => q ? [[r[0], r[1], r[2], q[1]], [r[0], q[3], r[2], r[3]], [r[0], q[1], q[0], q[3]], [q[2], q[1], r[2], q[3]]].filter((a) => a[2] - a[0] > 0.05 && a[3] - a[1] > 0.05) : [r];
   const fb = [Math.min(below[0], x0), Math.min(below[1], z0), Math.max(below[2], x1), Math.max(below[3], z1)];
@@ -276,15 +282,16 @@ function hollowTier(bag, col, rect, y, h, i, { T, below, hole, keep, racks }) {
     const t = [];
     const bar = (s0, s1, o, yb, hh, ww) => { const p = P(s0, o), q = P(s1, o); beamTris(t, [p[0], yb, p[1]], [q[0], yb, q[1]], ww, hh); };
     bar(0, L, 0.06, wy - 0.14, 0.14, 0.06); bar(0, L, 0.08, y + h - 0.42, 0.36, 0.08); bar(0, L, 0.04, y, 0.12, 0.04);
-    for (let s = 0; s <= L + 0.01; s += L / Math.max(1, Math.round(L / 1.9))) { const p = P(s, 0.12); bag.add(WD, box(p[0] - 0.12, y, p[1] - 0.12, p[0] + 0.12, y + h, p[1] + 0.12)); }
+    for (let s = 0; s <= L + 0.01; s += L / Math.max(1, Math.round(L / 1.9))) { const p = P(s, 0.12); if (nearDoor(p[0], p[1])) continue; bag.add(WD, box(p[0] - 0.12, y, p[1] - 0.12, p[0] + 0.12, y + h, p[1] + 0.12)); }
     for (let k = 0; k < nw; k++) {
       const sc = (k + 0.5) * Lo / nw - T;
+      { const pc = P(sc, 0); if (nearDoor(pc[0], pc[1])) continue; }
       const g = P(sc - w / 2, 0.02), g2 = P(sc + w / 2, 0.02), gt = [];
       beamTris(gt, [g[0], wy, g[1]], [g2[0], wy, g2[1]], 0.02, wh); bag.add('daylight_plain', fromTriangles(gt));
       for (let j = 0; j <= 8; j++) bar(sc - w / 2 + j * w / 8 - 0.025, sc - w / 2 + j * w / 8 + 0.025, 0.07, wy, wh, 0.05);
       bar(sc - w / 2 - 0.08, sc + w / 2 + 0.08, 0.06, wy + wh, 0.1, 0.06);
       // the gun racks between the windows
-      if (racks && k + 1 < nw) {
+      if (racks && k + 1 < nw && !(() => { const pm = P((k + 1) * Lo / nw - T, 0); return nearDoor(pm[0], pm[1]); })()) {
         const sm = (k + 1) * Lo / nw - T;
         bar(sm - 0.7, sm + 0.7, 0.16, y + 0.55, 0.08, 0.05); bar(sm - 0.7, sm + 0.7, 0.16, y + 1.55, 0.08, 0.05);
         for (let j = 0; j < 5; j++) {
@@ -300,7 +307,7 @@ function hollowTier(bag, col, rect, y, h, i, { T, below, hole, keep, racks }) {
   const rg = [inn[0] + 1.85, inn[1] + 1.85, inn[2] - 1.85, inn[3] - 1.85];
   const inKeep = (px, pz) => keep.some((q) => px > q[0] - 0.35 && px < q[2] + 0.35 && pz > q[1] - 0.35 && pz < q[3] + 0.35);
   const posts = [];
-  for (const [ax, az, bx, bz] of [[rg[0], rg[1], rg[2], rg[1]], [rg[0], rg[3], rg[2], rg[3]], [rg[0], rg[1], rg[0], rg[3]], [rg[2], rg[1], rg[2], rg[3]]]) {
+  for (const [ax, az, bx, bz] of (ring ? [[rg[0], rg[1], rg[2], rg[1]], [rg[0], rg[3], rg[2], rg[3]], [rg[0], rg[1], rg[0], rg[3]], [rg[2], rg[1], rg[2], rg[3]]] : [])) {
     const L = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.round(L / 1.9));
     for (let k = 0; k <= n; k++) posts.push([ax + (bx - ax) * k / n, az + (bz - az) * k / n]);
     bag.add(WD, box(Math.min(ax, bx) - 0.13, y + h - 0.62, Math.min(az, bz) - 0.13, Math.max(ax, bx) + 0.13, y + h - 0.3, Math.max(az, bz) + 0.13));
@@ -331,13 +338,24 @@ function stair(bag, col, st, RISE, RUN) {
  * ground storey stone-drop bays standing out at the corners; a triangular gable (chidori-hafu) on
  * the lower roof's faces; shachi on the top ridge's ends.
  */
-function yagura(el, { bag, col }) {
+function yagura(el, { bag, col, lights }) {
+  el = { ...el, lights };
   let [x0, z0, x1, z1] = el.rect, y = el.y ?? 0;
   const n = el.storeys ?? 2, h = el.h ?? 3.6, ov = 1.2;
   for (let i = 0; i < n; i++) {
     const rect = [x0, z0, x1, z1], last = i === n - 1, mn = Math.min(x1 - x0, z1 - z0), s = mn * 0.12;
-    tierBox(bag, col, rect, y, h);
-    if (i === 0) turretBays(bag, col, rect, y, h);
+    if (i === 0 && el.door) {
+      // the ground room opened (stores.js): hollow walls with the door on the bailey side, the floor, the ceiling under the storey above
+      const T = 0.5, dface = el.door.face, fi = { n: 0, e: 1, s: 2, w: 3 }[dface], along = dface === 'n' || dface === 's', at = el.door.at ?? (along ? (x0 + x1) / 2 : (z0 + z1) / 2);
+      hollowTier(bag, col, rect, y, h, 0, { T, below: rect, hole: null, keep: [], racks: true, ring: false, door: { face: dface, at, w: 1.5, h: 2.6 } });
+      bag.add('cedar', box(x0 + T, y + h - 0.14, z0 + T, x1 - T, y + h, z1 - T));
+      faces(rect, 0).forEach(([a, b], k) => { const L = Math.hypot(b[0] - a[0], b[1] - a[1]); barredWindows(bag, a, b, y + h * 0.42, h * 0.3, k === fi ? 2 : Math.max(1, Math.round(L / 3.2)), Math.min(1.2, L / 8)); });
+      turretBays(bag, col, rect, y, h, fi);
+      turretFurnish(bag, col, el.lights, { rect, y, h, T, face: dface });
+    } else {
+      tierBox(bag, col, rect, y, h);
+      if (i === 0) turretBays(bag, col, rect, y, h);
+    }
     const B = mn / 2 + ov, rise = B * (last ? 0.7 : 0.55);
     roof(bag, rect, y + h - 0.2, ov, last ? (el.top || 'xieshan') : 'hip', rise);
     if (last) {
@@ -358,9 +376,10 @@ function yagura(el, { bag, col }) {
   }
 }
 /** A turret's stone-drop bays: one on each face, between its first and second windows (alternating ends round the turret), clear of them. */
-function turretBays(bag, col, rect, y, h) {
+function turretBays(bag, col, rect, y, h, skip = -1) {
   const o = 0.6, yb = y + Math.min(1.0, h * 0.25), yt = y + h - Math.min(1.3, h * 0.33), list = [];
   faces(rect, 0).forEach(([a, b], k) => {
+    if (k === skip) return;
     const L = Math.hypot(b[0] - a[0], b[1] - a[1]), nw = Math.max(1, Math.round(L / 3.2)), ww = Math.min(1.2, L / 8), gap = L / nw - ww - 0.3;
     if (nw < 2 || gap < 0.8) return;
     const ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = -uz, nz = ux, sc = k % 2 ? L - L / nw : L / nw, w = Math.min(1.7, gap);
@@ -606,6 +625,14 @@ function kura(bag, col, rect, y = 0) {
   if (alongX) ridgeCap(bag, x0 - 0.5, x1 + 0.5, ry, zc, true);
 }
 
+/** The roof of a storehouse (the solid kura's): the tiled gable and its ridge cap. */
+function roofKura(bag, rect, y) {
+  const [x0, z0, x1, z1] = rect;
+  roof(bag, rect, y + 5.3, 0.5, 'gable', Math.min(x1 - x0, z1 - z0) * 0.35, { sweep: 0 });
+  const alongX = x1 - x0 >= z1 - z0, zc = (z0 + z1) / 2, ry = y + 5.3 + Math.min(x1 - x0, z1 - z0) * 0.35;
+  if (alongX) ridgeCap(bag, x0 - 0.5, x1 + 0.5, ry, zc, true);
+}
+
 /** nagaya: the retainers' row house { rect } along a wall of the yard: plastered, a dark base, doors and barred windows on the yard side, a long tiled gable roof. */
 function nagaya(bag, col, rect, g) {
   const [x0, z0, x1, z1] = rect, H = 3.0, alongZ = z1 - z0 > x1 - x0;
@@ -720,6 +747,7 @@ registerStyle('edo', {
     taru: (el, ctx) => { for (let r = 0; r < (el.rows ?? 3); r++) for (let k = 0; k < (el.rows ?? 3) - r; k++) barrel(ctx.bag, 'timber', el.at[0] + (k + r * 0.5) * 0.56, (el.y ?? 0) + r * 0.55, el.at[1], 0.27, 0.62, 'thatch'); ctx.col.circle(el.at[0] + 0.6, el.at[1], 1.0, el.y ?? 0, (el.y ?? 0) + 1.5); },
     kido, hinomi_yagura: hinomiYagura, kosatsu, jizo, inari,
     kura: (el, ctx) => kura(ctx.bag, ctx.col, el.rect, el.y ?? 0),
+    kura_in: (el, ctx) => { kuraIn(el, ctx); roofKura(ctx.bag, el.rect, el.y ?? 0); },
     moat_boat: (el, ctx) => boat(ctx.bag, ctx.col, el.at[0], el.at[1], el.y, el.dir ?? [1, 0], el.len ?? 7.5),
   },
   objects: {},

@@ -132,3 +132,6 @@ People: merchants and officials in the lucco (the long gown) in dark red, black 
 - [The panel painter's workshop — shafe.co.uk](https://www.shafe.co.uk/essay_panel_painters_workshop/)
 - [Corso dei Tintori — voicemap](https://voicemap.me/tour/florence/bridging-florence-s-history-an-arno-river-walking-tour-with-context/sites/corso-dei-tintori)
 - [Tracking down tintori — refashioningrenaissance.eu](https://refashioningrenaissance.eu/tracking-down-tintori/)
+
+## Round 5: houses to enter
+- Eleven houses within 120 m of the arrival are open (the osteria, five homes, botteghe of cloth, wine, goldsmith, smith and candles), with the innkeeper and customers, the craftsman at his counter or bench, the wife at the hearth (`src/settlements/florence/inside.js`).

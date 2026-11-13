@@ -6,7 +6,7 @@
 
 import { INNER, OUTER, BANK, LEVEL, NINO, HON, DAI, NISHI, KEEP, SMALL, GOTEN, OTEMON, MIDDLE, RADIUS } from './layout.js';
 
-const E = [];
+const E = [], KURA_ROOMS = [];
 const KEEP_TIERS = [{ hw: 11.5, hd: 10.5, h: 6.5 }, { hw: 10.3, hd: 9.3, h: 5 }, { hw: 9, hd: 8, h: 5 }, { hw: 7.6, hd: 6.6, h: 4.8 }, { hw: 6.2, hd: 5.3, h: 4.7 }];
 const [ix0, iz0, ix1, iz1] = INNER, [ox0, oz0, ox1, oz1] = OUTER, RW = 4, RT = BANK + 1.4;
 const ST = 'ishigaki';
@@ -65,9 +65,13 @@ ring(HON.rect, HON.top, [[6, 18]]);
   wall([dx0 + e, dz1 - e], [g0, dz1 - e], DAI.top); wall([g1, dz1 - e], [dx1 - e, dz1 - e], DAI.top);
   wall([dx0 + e, dz0 + e], [dx0 + e, dz1 - e], DAI.top); wall([dx1 - e, dz0 + e], [dx1 - e, dz1 - e], DAI.top); wall([dx0 + e, dz0 + e], [dx1 - e, dz0 + e], DAI.top);
   E.push({ t: 'kabuki_mon', rect: [g0, dz1 - 2.6, g1, dz1 - 0.4], y: DAI.top, w: 3.6, h: 3.5 }); }
+// the four turrets within a short walk of the arrival have their ground rooms opened (stores.js), the door on the bailey side
+const OPEN_TURRET = { [`${NINO.rect[0]},${NINO.rect[3] - 9}`]: 'e', [`${NINO.rect[2] - 9},${NINO.rect[3] - 9}`]: 'w', [`${HON.rect[2] - 8},${HON.rect[3] - 8}`]: 'w', [`${HON.rect[0]},${HON.rect[3] - 8}`]: 'e' };
+const TURRET_ROOMS = [];
 for (const [x, z] of [[NINO.rect[0], NINO.rect[1]], [NINO.rect[2] - 9, NINO.rect[1]], [NINO.rect[0], NINO.rect[3] - 9], [NINO.rect[2] - 9, NINO.rect[3] - 9], [HON.rect[2] - 8, HON.rect[3] - 8], [HON.rect[0], HON.rect[3] - 8]]) {
-  const y = z > HON.rect[1] && z < HON.rect[3] && x > HON.rect[0] - 1 && x < HON.rect[2] ? HON.top : NINO.top;
-  E.push({ t: 'yagura', rect: [x + 0.5, z + 0.5, x + (y === HON.top ? 7.5 : 8.5), z + (y === HON.top ? 7.5 : 8.5)], y, storeys: 2 });
+  const y = z > HON.rect[1] && z < HON.rect[3] && x > HON.rect[0] - 1 && x < HON.rect[2] ? HON.top : NINO.top, rect = [x + 0.5, z + 0.5, x + (y === HON.top ? 7.5 : 8.5), z + (y === HON.top ? 7.5 : 8.5)], face = OPEN_TURRET[`${x},${z}`];
+  E.push({ t: 'yagura', rect, y, storeys: 2, ...(face ? { door: { face } } : {}) });
+  if (face) TURRET_ROOMS.push({ rect, y, face });
 }
 // the Nishinomaru: its long gallery on the west edge with a turret at each end (the north one three storeys)
 const [nx0, nz0, nx1, nz1] = NISHI.rect;
@@ -111,7 +115,7 @@ E.push({ t: 'yagura_mon', rect: [-12, MIDDLE.z0 - 9, 12, MIDDLE.z0 - 1], y: 0, p
   [[-70, -60, 8], [-76, -20, 7], [18, -70, 8.5], [22, -20, 7], [-45, -10, 6.5], [-20, -112, 7], [10, -108, 7.5]].forEach(([x, z, h], i) => pine(x, z, H, h, 90 + i));
   // the Honmaru's south yard, the foreground of the arrival: the guards' hall west of the stair (the lord's reception hall of the Honmaru, after Honda's time) and two plastered storehouses east of it
   E.push({ t: 'goten', y: H, halls: [[-76, -27, -52, -9]], open: { 0: { face: 'e', W: 12, dq: 7 } } });
-  for (const x of [8, 17]) E.push({ t: 'kura', rect: [x, -28, x + 7, -20], y: H });
+  for (const [i, x] of [8, 17].entries()) { const el = { t: 'kura_in', rect: [x, -28, x + 7, -20], y: H, face: 's', goods: i ? 'rice' : 'arms' }; E.push(el); KURA_ROOMS.push(el); }
   // a garden before the hall: pruned pines, stone lanterns, the flagstone path from the stair
   pine(-49, -24.5, H, 5.2, 201); pine(-50.5, -8, H, 6, 202); pine(-3.5, -27, H, 5.5, 203);
   E.push({ t: 'ishidoro', at: [-49.5, -17.8], y: H, s: 1.15 }, { t: 'ishidoro', at: [-38.5, -12.5], y: H, s: 1.0 });
@@ -120,7 +124,7 @@ E.push({ t: 'yagura_mon', rect: [-12, MIDDLE.z0 - 9, 12, MIDDLE.z0 - 1], y: 0, p
   E.push({ t: 'ido', at: [-46, 11], y: N, rot: 0.4 }, { t: 'ido', at: [46, -72], y: N, rot: 1.2 }, { t: 'ido', at: [-72, -14], y: H, rot: 2 });
   for (const [x, z, y] of [[-12, 14, N], [12, 15, N], [-8, -8, H], [24, -4, H], [-25.5, -16, H]]) E.push({ t: 'ishidoro', at: [x, z], y, s: 1.2 });
   for (const x of [-90, -78, -66]) E.push({ t: 'kura', rect: [x, -138, x + 8, -130], y: N });
-  for (const x of [-98, -86]) E.push({ t: 'kura', rect: [x, 2, x + 8, 10], y: N });
+  for (const [i, x] of [-98, -86].entries()) { const el = { t: 'kura_in', rect: [x, 2, x + 8, 10], y: N, face: 's', goods: i ? 'cloth' : 'rice' }; E.push(el); KURA_ROOMS.push(el); }
   E.push({ t: 'lane', rect: [-34, -7, 16, -1], y: H + 0.02, mat: 'flagstone' }, { t: 'lane', rect: [-34, -22, -28, -7], y: H + 0.02, mat: 'flagstone' });
   E.push({ t: 'lane', rect: [-3, 12, 16, 17.5], y: N + 0.02, mat: 'flagstone' });
   // the Sannomaru: pines along the lane to the gate, storehouses in rows west and east of the lord's residence
@@ -131,12 +135,16 @@ E.push({ t: 'yagura_mon', rect: [-12, MIDDLE.z0 - 9, 12, MIDDLE.z0 - 1], y: 0, p
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('main keep', [KEEP.c[0] - 12, KEEP.c[1] - 11, KEEP.c[0] + 12, KEEP.c[1] + 11], DAI.top, 'hall'), room('inner', INNER, BANK, 'open'), room('honmaru', HON.rect, HON.top, 'open'), room('keep', DAI.rect, DAI.top, 'hall'),
-  room('keep courtyard', [-40, -77, -26, -55], DAI.top, 'open')];
+  room('keep courtyard', [-40, -77, -26, -55], DAI.top, 'open'),
+  // the storehouses and turrets opened (styles/edo/stores.js): each room's floor, so that the checks walk in
+  ...KURA_ROOMS.map((k, i) => room(`storehouse ${i + 1}`, [k.rect[0] + 0.6, k.rect[1] + 0.6, k.rect[2] - 0.6, k.rect[3] - 0.6], k.y + 0.15, 'hall')),
+  ...TURRET_ROOMS.map((t, i) => room(`turret ${i + 1}`, [t.rect[0] + 0.6, t.rect[1] + 0.6, t.rect[2] - 0.6, t.rect[3] - 0.6], t.y, 'hall'))];
 // every floor of the main keep, climbed by its own stairs from the basement
 { let y = KEEP.base; for (const [i, t] of KEEP_TIERS.entries()) { rooms.push(room(`main keep floor ${i + 1}`, [KEEP.c[0] - t.hw + 1, KEEP.c[1] - t.hd + 1, KEEP.c[0] + t.hw - 1, KEEP.c[1] + t.hd - 1], y, 'hall')); y += t.h; } }
 const walks = [[[0, 300], [0, 215], [0, 180], [70, 180], [70, 90], [0, 80], [0, 40], [0, 14], [12, 14], [12, -3], [-31, -3], [-31, -30]]];
 walks[0].y0 = 0;
 
+export const OPENED = { kura: KURA_ROOMS, turrets: TURRET_ROOMS };
 export const castle = {
   id: 'edo-himeji-castle',
   name: { en: 'Himeji Castle', zh: '姬路城' },

@@ -2,6 +2,8 @@
 // beyond the middle moat; some houses open inside (§5.1); the life of the street and the avenue (§5.2): a palanquin
 // and its bearers, samurai with their two swords, pedlars with their carrying poles, the shopkeepers at their counters.
 import { props } from './props.js';
+import { OPENED } from './plan.js';
+import { insidePeople } from '../../styles/edo/stores.js';
 import { RADIUS, STREET, OUTER, MIDDLE, LEVEL, HON, DAI, NINO, lots, furniture } from './layout.js';
 const base = (id, elements, style = 'edo') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 240], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -56,6 +58,11 @@ function life() {
   furniture().filter((f) => f.t === 'moat_boat').forEach((f, i) => { if (i % 2 === 0) fig([f.at[0] + 0.4, f.at[1]], Math.PI / 2, { y: LEVEL.water - 0.08 + 0.08, pose: 'sit', hat: 'straw', dress: 'wrap', cloth: 'cloth_indigo', feet: 'bare' }); });
   furniture().filter((f) => f.t === 'landing').forEach((f, i) => fig([f.x + (i % 2 ? 1 : -1) * 0.6, f.z0 - 0.35], 0, { y: 0.3, pose: 'seiza', hair: 'bun', cloth: i % 2 ? 'cloth_maroon' : 'cloth_indigo', over: 'apron', cloth2: 'cloth_white' }));
   castleLife(fig, samurai, rand);
+  // inside the opened storehouses and turrets (styles/edo/stores.js): the clerk kneeling at his desk before the rice, the watch on its raised mat and at the spear rack
+  for (const k of OPENED.kura) for (const q of insidePeople('kura', k)) fig(q.at, q.rot, { y: q.y, pose: q.pose, dress: 'robe', cloth: 'cloth_brown', over: 'apron', cloth2: 'cloth_indigo', hair: 'topknot' });
+  for (const t of OPENED.turrets) for (const q of insidePeople('turret', t)) {
+    if (q.pose === 'stand') samurai(q.at, q.rot, q.y); else fig(q.at, q.rot, { y: q.y, pose: q.pose, cloth: 'cloth_black', cloth2: 'cloth_grey' });
+  }
   return [base('edo-himeji-street', E), base('edo-himeji-people', P, 'life')];
 }
 

@@ -106,3 +106,6 @@ Fassi men in djellabas and turbans, scholars and students in white, merchants, a
 - **The basin.** Ewers of brass on the kerb stones and two porous jars of water at its foot, the marble wet and dark round it (ablutions) [inferred]. Pigeons, a cat, a youth washing his feet, a water-seller's boy [inferred].
 - **At the portal.** A mint-seller on her mat, an old man on the steps, a donkey with sacks in the lane [inferred: the Talaa Kebira's trade].
 - **Vines over the derbs.** Cedar poles across the quiet lanes at 3 m, the canes along them, leaves and bunches hanging: about a quarter of the derb and lane stretches of the core carry one [inferred: vines trained over the lanes and courts of Fez's medina are a commonplace of its descriptions; marked inferred].
+
+## Round 5: households and budget
+- The fourteen open riads within 120 m of the Bou Inania now hold their households: the wife at the basin, the master and a guest cross-legged on the salon's divans, women and children on the side rooms' divans (`life.js`). The houses are tiled in 150 m pieces (mesh count 2734 to 1839).
