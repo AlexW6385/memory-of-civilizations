@@ -2,13 +2,13 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
-## Unreleased — arrivals shown only when whole, and a lighter long session (2026-11-12)
+## v12.0 — release pass (2026-11-12)
 
-The view stays dark after a travel (and after the first load) until the settlement, its colliders, its street life's shaders and the ground are in and the camera stands on its final pose; nobody spawns within 6 m of the arrival for the first seconds and walkers stop short of a visitor in their path. The street life is built in slices (no 0.5 s frame), baked-light volumes are let go of when a settlement is left, and the page has a first-visit hint, focus rings and keyboard-reachable map, language and sound buttons.
+All 94 settlements stand, each visited in Chrome on the author's machine (an Apple M2), arriving through the map, and fixed where the first view failed; a last pass made ordinary buildings near every arrival enterable and furnished and varied the fronts. The view stays dark after a travel until the settlement, its colliders and the ground are in, nobody spawns beside the arrival, the street life is built in slices and a baked-light leak is closed; the page has a first-visit controls hint, focus rings and keyboard-reachable map, language and sound buttons, link-preview tags and a favicon.
 
 ## v11.1 — the browser review: every arrival checked on the target machine (2026-11-12)
 
-Every settlement was visited in Chrome on an Intel Mac and fixed where the first view failed: figures at the lens, landmarks hidden or unreadable, empty squares, over-budget frames (Thebes, Qin) and slow loads (Yinxu, Qufu); birds now fly wherever swallows follow a lane, Beijing loads again, and water reflects less of the horizon's haze.
+Every settlement was visited in Chrome on an Apple M2 (8 GB) and fixed where the first view failed: figures at the lens, landmarks hidden or unreadable, empty squares, over-budget frames (Thebes, Qin) and slow loads (Yinxu, Qufu); birds now fly wherever swallows follow a lane, Beijing loads again, and water reflects less of the horizon's haze.
 
 ## v11.0 — every settlement built, and a first deepening pass for all (2026-11-12)
 
