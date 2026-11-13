@@ -182,6 +182,7 @@ export default function make(H) {
     for (let u = x0 + 1.4; u < x1 - 0.5; u += 1.4) B(bag, 'wood_dark', u - 0.1, HT - 0.28, z0 + T / 2, u + 0.1, HT - 0.02, z1 - T / 2);
     const IX0 = x0 + T / 2 + 0.2, IX1 = x1 - T / 2 - 0.2, IZ0 = z0 + T / 2 + 0.2, IZ1 = z1 - T / 2 - 0.2, back = dn ? IZ1 : IZ0, sgn = dn ? -1 : 1;
     const potAt = (x, z, k = 1, y = 0, m = 'terracotta') => bag.add(m, lathe(POT.map(([a, b]) => [a * k, b * k]), 8, null, x, y, z));
+    B(bag, 'wood_dark', cx - 0.012, HT - 0.9, cz - 0.012, cx + 0.012, HT - 0.28, cz + 0.012); B(bag, 'lamp_glass', cx - 0.11, HT - 1.2, cz - 0.11, cx + 0.11, HT - 0.9, cz + 0.11);   // a lamp of oil hung from the beam, lit
     if (el.kind === 'kitchen') {
       // three hearths of brick along the back wall, each with a great iron cauldron, a chimney through the roof; fuel and water at the side walls
       for (let i = 0; i < 3; i++) {

@@ -141,6 +141,16 @@ function people() {
     if (rand() < 0.6) { const q = fr.P(du + 1.1, -1.2); woman(q, h(...q), fr.face + 0.4, rand() < 0.5 ? { carry: 'pot' } : { pose: 'talk' }); }
     void o; void W;
   }
+  // inside the houses and workshops within reach of the road, their hearths lit: the housewife at her hearth, the householder at the table, in some the worker at his bench, a guard in the guard-room (docs §5.2)
+  for (const l of lots()) {
+    const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2;
+    if (l.kind === 'granary' || l.kind === 'cult' || Math.hypot(cx + 136, cz) > 125 || l.seed % 5 === 4) continue;
+    const fr = frame(l), D = l.face === 'n' || l.face === 's' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], cu = l.W / 2, side = l.du < cu ? 1 : -1, yy = l.y + 0.05, inward = fr.face + Math.PI;
+    if (l.kind === 'guard') { const p = fr.P(cu, D * 0.55); man(p, yy, inward + 0.4, { carry: 'staff', pose: 'staff', len: 1.9, dress: 'tunic', cloth: 'cloth_red', beard: true }); continue; }
+    if (l.seed % 3 !== 0) { const p = fr.P(cu - side * 1.3, D * 0.5 + 0.2); woman(p, yy, inward + (rand() - 0.5) * 0.8, { pose: 'stand', carry: 'none' }); }
+    if (l.seed % 2 === 0) { const p = fr.P(cu + side * 1.5, D - 1.9); man(p, yy, fr.face + (rand() - 0.5) * 0.6, { pose: 'stand', dress: 'tunic' }); }
+    if (l.kind === 'workshop' && l.seed % 3 !== 1) { const p = fr.P(l.W * 0.5 + side * 0.6, D * 0.7); man(p, yy, inward, { pose: l.trade === 'weaver' ? 'sit_ground' : l.trade === 'potter' ? 'squat' : 'stand', dress: l.trade === 'smith' ? 'loincloth' : 'shendyt', cloth: 'cloth_brown' }); }
+  }
   // the grave circle's visitors and the dromos of the Treasury: a procession of mourners with offerings, a priest
   for (let k = 0; k < 4; k++) woman([TREAS.x0 + 10 + k * 3.4, TREAS.z + (k % 2 ? 1.2 : -1.2)], TREAS.y + 0.3 + 0.0, Math.PI / 2, { carry: k % 2 ? 'pot' : 'basket', cloth: 'cloth_white', cloth2: 'cloth_indigo' });
   void GCA;

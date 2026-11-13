@@ -12,6 +12,7 @@ import * as F from './furnish.js';
 import { courtHouse } from './courthouse.js';
 import { townHouse } from './townhouse.js';
 import { inlayWorkshop } from './workshop.js';
+import { gardenLodge } from './lodge.js';
 import './fronts.js';
 import { box, lathe, fromTriangles, frustum, disc, rod, orientOutward } from '../../core/geom.js';
 import '../qing/index.js';
@@ -998,7 +999,7 @@ registerStyle('mughal', {
     minaret: (el, { bag, col }) => minaret(bag, col, el.c[0], el.y, el.c[1], el.h, el.r),
     chhatri: (el, { bag, col }) => chhatri(bag, col, el.c[0], el.y, el.c[1], el.r, el.h, el.n ?? 8, el.mat ?? W, el.domeMat ?? W),
     fountains: (el, { bag }) => { for (const [x, z] of el.pts) fountain(bag, x, z, el.y0 ?? 0, el.y, el.h ?? 1.6); },
-    red_hall: redHall, great_gate: greatGate, bazaar_row: bazaarRow, bazaar_gate: bazaarGate, mughal_wall: mughalWall, octa_tower: octaTower, haveli: townHouse, inlay_workshop: inlayWorkshop, katra, haveli_open: haveliOpen,
+    red_hall: redHall, great_gate: greatGate, bazaar_row: bazaarRow, bazaar_gate: bazaarGate, mughal_wall: mughalWall, octa_tower: octaTower, haveli: townHouse, inlay_workshop: inlayWorkshop, katra, haveli_open: haveliOpen, garden_lodge: gardenLodge,
   },
   objects: {},
 });

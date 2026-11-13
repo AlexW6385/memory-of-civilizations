@@ -2,12 +2,13 @@
 // the forecourt's bazaar cells with their keepers sitting by them and buyers in the street; horses held by grooms in
 // the forecourt, where visitors dismounted; boats on the Yamuna below the riverfront terrace.
 
-import { RADIUS, STREETS, FORECOURT, KATRAS, HAVELI_OPEN, WORKSHOP, PLINTH, GATE, TERRACE, GARDEN, POOL, GWALKS, RIVER_Z, houses } from './layout.js';
+import { RADIUS, STREETS, FORECOURT, KATRAS, LODGES, HAVELI_OPEN, WORKSHOP, PLINTH, GATE, TERRACE, GARDEN, POOL, GWALKS, RIVER_Z, houses } from './layout.js';
 import { ground } from './ground.js';
 import { frameOf } from '../../styles/mughal/townhouse.js';
 import { boatFloat } from '../../objects/index.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+const PIH = Math.PI / 2;
 const WATER = -2.4;                                   // the Yamuna's level (ground.js)
 
 export function life() {
@@ -70,6 +71,17 @@ export function life() {
   }
   // the open house: the master on his takht with the hookah, a woman by the water pots in the court
   { const [x0, z0, x1, z1] = HAVELI_OPEN, tx = (x0 + 3.4 + x1 - 3.8) / 2; person([tx - 0.3, z0 + 1.3], 0.45 + 0.4 + 0.02, Math.PI, { man: true, pose: 'cross', cloth: 'cloth_white', cloth2: 'cloth_green' }); person([x0 + 3.4 + 1.6, z1 - 3.4 - 1.3], 0.04, -Math.PI / 2, { cloth: 'cloth_red', cloth2: 'cloth_ochre', hat: 'veil', hair: 'long', beard: false, over: 'none' }); }
+  // the garden keepers in their lodges (§13b): the gardener resting on his charpoy, the storekeeper among the pots, the watchman sitting up by his post, the labourer at the stove; a gardener at work in the bed beside each
+  for (const l of LODGES) {
+    const f = frameOf(l.rect, l.front), T = 0.38, FY = l.y + 0.04, X0 = -f.W / 2 + T, X1 = f.W / 2 - T, Z0 = -f.D + T, sgn = l.seed % 2 ? 1 : -1;
+    const loc = (u, v, y, rot, o) => { const [x, z] = f.pt(u, v); person([x, z], y, f.yaw + rot, o); };
+    if (l.kind === 'mali') loc(X1 - 0.75, Z0 + 1.15, FY + 0.45, -PIH, { man: true, pose: 'cross', cloth: 'cloth_white', cloth2: 'cloth_green', hatMat: 'cloth_ochre' });
+    else if (l.kind === 'store') loc(0.2, -f.D + 3.0, FY, Math.PI, { man: true, pose: 'stand', cloth: 'cloth_ochre', cloth2: 'cloth_brown', hatMat: 'cloth_white' });
+    else if (l.kind === 'chowki') loc(X0 + 0.75, Z0 + 1.15, FY + 0.45, PIH, { man: true, pose: 'cross', cloth: 'cloth_white', cloth2: 'cloth_red', hatMat: 'cloth_red', beard: true });
+    else loc(X1 - 0.8, Z0 + 1.5, FY, Math.PI, { pose: 'stand', cloth: 'cloth_red', cloth2: 'cloth_ochre', hat: 'veil', hair: 'long', beard: false, over: 'none' });
+    void sgn;
+    const [bx, bz] = f.pt(sgn * 1.35 + 1.6, 1.0); person([bx, bz], 0.55, f.yaw + 0.4, { man: true, pose: 'squat', cloth: 'cloth_white', hatMat: 'cloth_white' });
+  }
   // the shops of the town's streets: the keeper sits cross-legged on his platform among his goods, a customer stands in the street at some
   for (const h of houses()) {
     if (!h.shop || rand() < 0.3) continue;

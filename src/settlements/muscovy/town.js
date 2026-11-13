@@ -14,7 +14,7 @@ export function variantOf(l) {
   if (l.kind === 'barn') return 'barn';
   if (openIzba(l)) return 'one';
   const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, d = Math.hypot(cx - 40, cz - 20), h = (l.seed >> 3) % 100;
-  return h < (inKremlin(cx, cz) ? 45 : d < 260 ? 13 : 4) ? 'two' : 'one';
+  return h < (inKremlin(cx, cz) ? 45 : d < 130 ? 34 : d < 260 ? 13 : 4) ? 'two' : 'one';
 }
 /** The rooms of the furnished izby (kind 'house', for the sound inside): the one room, its floor a little over the ground. */
 const roomsOf = (chunk) => chunk.filter((l) => openIzba(l)).map((l) => ({ id: `izba-${l.seed}`, rect: [l.rect[0] + 0.3, l.rect[1] + 0.3, l.rect[2] - 0.3, l.rect[3] - 0.3], y: l.y + 0.32, kind: 'house' }));
@@ -77,6 +77,16 @@ export function people() {
   { const [bx, bz] = BASIL, by = height(bx, bz) + 4.02;
     fig([bx + 1.6, bz], -Math.PI / 2, { y: by, cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'cape', hat: 'none', beard: 1, hair: 'long' });
     for (let q = 0; q < 7; q++) { const at = [bx - 0.5 - rand() * 3, bz + (rand() - 0.5) * 4.5]; fig(at, -Math.PI / 2 + (rand() - 0.5) * 0.4, { y: by, pose: 'stand', hat: 'none' }); } }
+  // inside the furnished izby near the square: the housewife at the stove's mouth, the master standing by the table under the icons (docs §5.1)
+  for (const l of lots()) {
+    if (l.kind === 'barn' || !openIzba(l)) continue;
+    const [x0, z0, x1, z1] = l.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+    if (Math.hypot(cx - 40, cz - 40) > 130) continue;
+    const f = front(l.rect), ex = f[0] === 'x', sg = f.endsWith('0') ? -1 : 1, fc = l.rect[{ x0: 0, z0: 1, x1: 2, z1: 3 }[f]], u0 = ex ? z0 : x0, u1 = ex ? z1 : x1, D = ex ? x1 - x0 : z1 - z0, fl = l.y + 0.34;
+    const pt = (u, dd) => (ex ? [fc - sg * dd, u] : [u, fc - sg * dd]);
+    if (l.seed % 3 !== 2) { const a = pt(u1 - 1.1, D - 3.15); fig(a, face(a, pt(u1 - 1.1, D)), { y: fl, pose: 'stand', hair: 'bun', over: 'shawl', hat: 'none', beard: 0, cloth: CLOTH[l.seed % CLOTH.length] }); }
+    if (l.seed % 2 === 0) { const a = pt(u0 + 1.25, 2.0); fig(a, face(a, pt(u0 + 1.25, 0)), { y: fl, pose: 'stand', beard: 1, hat: 'cap', over: 'sash' }); }
+  }
   stallFolk(L, rand, fig, face);
   squareLife(L, rand, fig, face);
   return L;
