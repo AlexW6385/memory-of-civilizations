@@ -55,6 +55,17 @@ export function interiorLots() {
   // shops off the Way: the canal streets' and lanes' (trade by the layout's mix), nearest the core first
   CHOSEN.shop.push(...takeSpread((l) => l.shop && w(l) >= 6 && d(l) >= 6.5 && !nearIW(l) && core(l) < 330, 12, near, 30));
   CHOSEN.house = takeSpread((l) => !l.shop && w(l) >= 6.5 && d(l) >= 7 && core(l) < 300, 12, (a, b) => (b.storeys || 1) - (a.storeys || 1) || near(a, b), 34);
+  // the fronts nearest the arrival (-110, 138, the stair's foot) come first in the visitor's reach: every lot of the river road within 125 m that is big enough
+  // (the wide ones a tea house or a wine house, the rest shops and houses), so that there are fronts to walk into where one arrives
+  const AR = [-110, 138], dAr = (l) => { const q = frontOf(l).P(0.5, 0); return Math.hypot(q[0] - AR[0], q[1] - AR[1]); };
+  let nTea = 0, nWine = 0;
+  for (const l of all.filter((o) => !used.has(o) && dAr(o) < 125 && w(o) >= 6 && d(o) >= 6.5).sort((a, b) => dAr(a) - dAr(b))) {
+    used.add(l);
+    if (l.shop && w(l) >= 8.5 && d(l) >= 14 && nWine < 1) { nWine++; CHOSEN.winehouse.push(l); }
+    else if (l.shop && w(l) >= 8 && d(l) >= 8 && nTea < 2) { nTea++; CHOSEN.teahouse.push(l); }
+    else if (l.shop) CHOSEN.shop.push(l);
+    else CHOSEN.house.push(l);
+  }
   void rand;
   for (const l of [...CHOSEN.winehouse, ...CHOSEN.teahouse, ...CHOSEN.shop]) l.trade = l.trade || tradeOf(l);
   CHOSEN.winehouse.forEach((l) => { l.trade = 'wine'; });

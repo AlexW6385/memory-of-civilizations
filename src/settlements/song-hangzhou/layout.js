@@ -214,6 +214,10 @@ export function lots() {
   strips(outside, WEST_X, IMPERIAL[0] - 22.3, 0.2, false);
   strips(outside, IMPERIAL[2] + 22.3, CANAL_STREETS[0][0] - 13.3, 0.25, false);
   strips(outside, CANAL_STREETS[1][2] + 13.3, RADIUS, 0.2, false);
+  // 5. the river road below the pagoda (added last, so that no other lot moves): shop houses and tea houses either side of the stair's foot, the stair's
+  // width and its camphors kept clear (the arrival at (-110, 138) looks up the stair between them): the first fronts the visitor can walk into
+  row(-151, -134.5, ROAD.z0 - 14, ROAD.z0, 's', 0.85, 0.7, () => ({ where: 'pagoda' }));
+  row(-85, -70.4, ROAD.z0 - 14, ROAD.z0, 's', 0.85, 0.7, () => ({ where: 'pagoda' }));
   return LOTS;
 }
 let TEA = null;
