@@ -103,3 +103,14 @@ export function laneArches() {
   }
   return ARCHES;
 }
+
+/**
+ * The lodges of the Haram's servants on the esplanade's west margin (docs/settlements/jerusalem.md §1d, §5c): the caliph's attendants
+ * and the gatekeepers, the families who made the glass for the lamps and prepared the wicks, the oil that was sent to light the
+ * mosque, the incense and perfume for the Rock. Two rows of courtyard houses, doors to the south: the first to the paved way from the
+ * platform's west stair to the gate, the second to the yard behind it. [inferred: their place and form]
+ */
+export const LODGES = (() => {
+  const row = (z0, depth, specs) => { let x = -146.5; return specs.map(([w, use]) => { const r = { rect: [x, z0, x + w, z0 + depth], use }; x += w + 1.5; return r; }); };
+  return [...row(-38.5, 13, [[12, 'home'], [13.5, 'gate'], [12.5, 'oil'], [13, 'wick']]), ...row(-64.5, 13, [[11.5, 'glass'], [12, 'perfume'], [12, 'home'], [13.5, 'oil']])].map((l, k) => ({ ...l, seed: 4100 + k * 37 }));
+})();
