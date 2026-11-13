@@ -42,7 +42,7 @@ export function townHouse(el, { bag, col }) {
   const stHt = (s) => (s === 0 ? ST0 : ST[Math.min(s - 1, ST.length - 1)] + (hotel && s === 1 ? 0.5 : 0));
   const sy = [0]; for (let s = 0; s < n; s++) sy.push(sy[s] + stHt(s));      // storey s from sy[s] to sy[s+1]
   const H = sy[n];
-  const wall = hotel ? 'limestone' : pick(rand, WALLS), brickish = wall === 'brick' || wall === 'brick_grey', trim = 'limestone', shut = pick(rand, SHUT);
+  const wall = hotel ? 'limestone' : (() => { const w = pick(rand, WALLS); return el.wall ?? w; })(), brickish = wall === 'brick' || wall === 'brick_grey', trim = 'limestone', shut = pick(rand, SHUT);
   const P = (u, v) => (f === 's' ? [x1 - u, z1 - v] : [x0 + u, z0 + v]);
   const rectOf = (u0, v0, u1, v1) => { const a = P(u0, v0), b = P(u1, v1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
   const B = (mat, u0, v0, u1, v1, ya, yb, c = false) => { const r = rectOf(u0, v0, u1, v1); bag.add(mat, box(r[0], ya, r[1], r[2], yb, r[3])); if (c) col.rect(r, ya, yb); };
@@ -78,16 +78,17 @@ export function townHouse(el, { bag, col }) {
     col.rect(el.rect, foot - 0.6, y + H);
   } else {
     // the three walls of the room, the front in piers between the openings
-    B(trim, 0, D - T, L, D, y - 0.3, y + ST0, true); B(trim, 0, T, T, D - T, y - 0.3, y + ST0, true); B(trim, L - T, T, L, D - T, y - 0.3, y + ST0, true);
+    const yb0 = el.plinth ?? y - 0.3;
+    B(trim, 0, D - T, L, D, yb0, y + ST0, true); B(trim, 0, T, T, D - T, yb0, y + ST0, true); B(trim, L - T, T, L, D - T, yb0, y + ST0, true);
     let u = 0;
     for (const o of ops) {
       const a = o.u - o.w / 2, b = o.u + o.w / 2;
-      if (a > u) B(trim, u, 0, a, T, y - 0.3, y + ST0, true);
+      if (a > u) B(trim, u, 0, a, T, yb0, y + ST0, true);
       B(trim, a, 0, b, T, y + o.h, y + ST0, true);                              // over it
-      if (o.type === 'shop' || o.type === 'win') B(trim, a, 0, b, T, y - 0.3, y + (o.type === 'shop' ? 0.95 : 1.0), true);  // the stall riser, the sill
+      if (o.type === 'shop' || o.type === 'win') B(trim, a, 0, b, T, yb0, y + (o.type === 'shop' ? 0.95 : 1.0), true);  // the stall riser, the sill
       u = b;
     }
-    if (u < L) B(trim, u, 0, L, T, y - 0.3, y + ST0, true);
+    if (u < L) B(trim, u, 0, L, T, yb0, y + ST0, true);
     col.rect(el.rect, y + ST0, y + ST0 + 0.3);
     // the floor of the ground storey, the ceiling
     B(el.use === 'hotel' ? 'marble_floor' : 'flagstone', T, T, L - T, D - T, y + 0.02, fy);

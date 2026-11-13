@@ -33,7 +33,12 @@ export const STATE_ROOMS = [
   ['salon of diana', [39.7, -48.7, 46.9, -39.3], FY], ['salon of venus', [39.7, -54.1, 46.9, -49.9], FY],
   ['ambassadors staircase landing', [49.8, -54.2, 51.6, -40.8], FY], ['ambassadors staircase vestibule', [71.6, -54.2, 76.2, -40.8], RISE + 0.06],
 ];
-export const LATONA_Y = RISE * 0.352;                 // the ground at the Latona basin (the slope's height there)
+export const LATONA_Y = RISE * 0.352;
+// the service yards (docs/settlements/versailles.md §5d): two levelled terraces behind the hornbeam walls either side of the Latona walk, entered by the
+// gate in each wall at x = -104 — the gardeners', fountain-keepers', sculptors' and guards' lodgings and workshops of the gardens
+export const YARD_Y = 3.55;
+export const YARDS = [[-121, 40, -87, 84], [-121, -84, -87, -40]];
+const rectDist = (r, x, z) => Math.hypot(Math.max(r[0] - x, 0, x - r[2]), Math.max(r[1] - z, 0, z - r[3]));                 // the ground at the Latona basin (the slope's height there)
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 export const inCanal = (x, z) => Math.hypot(x, z) < RADIUS - 50 && x > CANAL.end && ((x < CANAL.x0 && Math.abs(z - AXIS_Z) < CANAL.w / 2) || (Math.abs(x - CANAL.cross) < CANAL.crossW / 2 && Math.abs(z) < 260));
@@ -44,6 +49,7 @@ export function height(x, z) {
   const dl = Math.hypot(x - LATONA[0], z - LATONA[1]);
   if (dl < 26) h = LATONA_Y + (h - LATONA_Y) * smooth(18, 26, dl);
   if (inCanal(x, z)) h = -2.2;
+  for (const r of YARDS) { const d = rectDist(r, x, z); if (d < 8) h = YARD_Y + (h - YARD_Y) * smooth(0, 8, d); }
   return h * (1 - smooth(RADIUS - 40, RADIUS - 5, Math.hypot(x, z)));
 }
 // the three avenues: Paris on the axis, Saint-Cloud and Sceaux leaving the Place's corners, the stables in the wedges between

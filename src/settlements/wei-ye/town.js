@@ -4,7 +4,7 @@
 import { forecourtElements, forecourtLife } from './forecourt.js';
 import { streetElements, marketElements, wallElements, compoundElements, riverElements, farmElements, lifeElements } from './dressing.js';
 import { RADIUS, PALACE, PALACE_WALL, WENCHANG, W_TERRACE, MARKET, MARKET_WALL, WARDS, WARD_WALL, POND, POND_Y, CITY_WALL, WALL, GATES_S, GATES_N, GATE_W, AVENUE_Z, TOWER, SPARROW, ICE, TIGER,
-  cityWalls, lots, riverZ, RIVER, stairRect, zOf } from './layout.js';
+  cityWalls, lots, riverZ, RIVER, stairRect, zOf, LODGES } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements, o = {}) => ({ id, style: 'wei', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 5], facing: 'n' }, ...o });
@@ -43,7 +43,7 @@ function people() {
   // the poets of the loft above it (the second storey), at their mats and the zither
   for (let k = 0; k < 3; k++) for (const s of [0, 1]) if (rand() < 0.8) fig([TOWER.c[0] - 5.0 + k * 3.0, TOWER.c[1] + 0.6 + s * 3.4 + 0.3], 0, { y: TOWER.floor + 4.9 + 0.05, pose: 'seiza', cloth: pick(rand, ['cloth_white', 'cloth_blue', 'cloth_grey', 'cloth_indigo']), cloth2: 'cloth_white', hat: 'cap', over: 'sash', beard: rand() < 0.4 ? 1 : 0 });
   // the garden: scholars at the pond looking at the ships, the musicians at the pavilion, attendants at the stair's foot
-  for (const [x, z, r0] of [[-128, -132, 2.6], [-124, -131.5, 2.8], [-100, -131.6, 3.3], [-93, -128, 3.5], [-104, -92, 1.5], [-102, -84, -1.5]]) fig([x, z], r0, { cloth: pick(rand, ['cloth_white', 'cloth_blue', 'cloth_indigo']), hat: 'cap', over: 'sash', pose: 'stand' });
+  for (const [x, z, r0] of [[-128, -132, 2.6], [-124, -131.5, 2.8], [-100, -132.6, 3.3], [-93, -132.2, 3.5], [-104, -92, 1.5], [-102, -84, -1.5]]) fig([x, z], r0, { cloth: pick(rand, ['cloth_white', 'cloth_blue', 'cloth_indigo']), hat: 'cap', over: 'sash', pose: 'stand' });
   for (let k = 0; k < 3; k++) fig([POND[2] + 5.0 + k * 1.1, POND[1] + 8.6], Math.PI, { y: 0, pose: 'seiza', cloth: pick(rand, ['cloth_red', 'cloth_blue', 'cloth_white']), cloth2: 'cloth_white', hat: 'cap', over: 'sash' });
   // the poets at their mats in the Sparrow's ground storey (the same places as src/styles/wei/terrace.js), and standing on the dais
   const [tx, tz] = TOWER.c, tf = TOWER.floor;
@@ -60,6 +60,23 @@ function people() {
   // the market: sellers by the tower, officials of the market
   const cx = (MARKET[0] + MARKET[2]) / 2, cz = (MARKET[1] + MARKET[3]) / 2;
   for (const s of [-1, 1]) fig([cx + s * 8, cz + 8], 0, { y: 2.6, cloth: 'cloth_blue', hat: 'cap', over: 'sash', pose: 'staff', carry: 'staff', len: 1.7 });
+  return L;
+}
+
+/** The people in the garden's lodgings: each stands in the middle of its room, facing the door (the hall of a court is at the back of its lot, of a row at the front). */
+function lodgeLife() {
+  const rand = rng(216), L = [], pick = (a) => a[Math.floor(rand() * a.length) % a.length];
+  for (const l of LODGES) {
+    const [x0, z0, x1, z1] = l.rect, W = x1 - x0, D = z1 - z0, s = l.front === 's';
+    const hallV = l.kind === 'row' ? [1.4, 7.8] : l.kind === 'tower' ? [D - 7.0, D - 0.9] : [D - 7.8, D - 0.9];
+    const at = (u, v) => [x0 + u, s ? z1 - v : z0 + v], rot = s ? Math.PI : 0;
+    const vm = hallV[0] + 4.7, n = l.room === 'barracks' || l.room === 'music' ? 3 : 2;
+    for (let k = 0; k < n; k++) {
+      const guard = l.room === 'barracks', sing = l.room === 'music';
+      L.push({ t: 'figure', at: at(W / 2 - 1.6 + k * 1.7 + (rand() - 0.5) * 0.3, vm - (k % 2) * 0.4), y: 0.33, rot: rot + (rand() - 0.5) * 0.8, seed: Math.floor(rand() * 1e9), dress: 'robe', top: '', skin: 'skin_light', hair: 'topknot', hairMat: 'hair_dark', feet: 'shod', carry: guard ? 'staff' : 'none', len: 2.2,
+        cloth: guard ? 'cloth_grey' : sing ? pick(['cloth_red', 'cloth_blue', 'cloth_white']) : pick(['cloth_brown', 'cloth_grey', 'cloth_indigo', 'cloth_ochre']), cloth2: guard ? 'cloth_black' : 'cloth_white', hat: guard ? 'cap' : 'none', over: guard ? 'belt' : 'sash', pose: guard ? 'staff' : sing && k === 0 ? 'seiza' : rand() < 0.4 ? 'talk' : 'stand', ...(l.room === 'kitchen' || l.room === 'loom' ? { h: 1.52 } : {}) });
+    }
+  }
   return L;
 }
 
@@ -132,13 +149,19 @@ export async function town() {
       if (z > -100 || (x > -150 && x < -90 && z > -135 && z < -130)) continue;
       E.push({ t: 'wei_prop', kind: 'rock', at: [x, z], seed: k + 4, s: 0.8 + rr() * 0.9 });
     }
-    for (const [x, z] of [[-128, -128], [-108, -128], [-124, -66], [-146, -64], [-100, -110]]) E.push({ t: 'wei_prop', kind: 'rock', at: [x, z], seed: Math.round(x), s: 1.2 });
+    for (const [x, z] of [[-128, -128], [-108, -128], [-100, -110], [-118, -64]]) E.push({ t: 'wei_prop', kind: 'rock', at: [x, z], seed: Math.round(x), s: 1.2 });
     // the fleet's pond: the tower-ship at anchor, fighting ships and a skiff, the landing
     E.push({ t: 'han_ship', at: [-120, -147.5], y: POND_Y, len: 15, yaw: 0 });
     E.push({ t: 'wei_boat', at: [-97, -142], y: POND_Y, yaw: 1.2, len: 8, kind: 'war' }, { t: 'wei_boat', at: [-104, -153], y: POND_Y, yaw: 0.25, len: 9, kind: 'war' },
       { t: 'wei_boat', at: [-132, -139], y: POND_Y, yaw: 0.5, len: 5, kind: 'skiff' });
     E.push(...forecourtElements());
     plans.push(base('wei-garden', E));
+  }
+  // ── the household of the garden: lodgings and workrooms, entered from the garden's paths (rooms for the ambience) ──
+  {
+    const rooms = LODGES.map((l) => ({ id: l.say, rect: [l.rect[0] + 1.2, l.rect[1] + (l.front === 's' ? 0.9 : l.rect[3] - l.rect[1] - 8.4), l.rect[2] - 1.2, l.rect[1] + (l.front === 's' ? l.rect[3] - l.rect[1] - 0.9 : 8.4)], y: 0.33, kind: 'inner' }));
+    plans.push(base('wei-lodges', LODGES.map((l) => ({ t: 'wei_house', rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, room: l.room, open: true })), { rooms }));
+    plans.push({ ...base('wei-lodges-life', lodgeLife()), style: 'life' });
   }
   // ── the offices along the avenue ──
   {

@@ -141,6 +141,36 @@ function room(F, kind, u0, u1, v0, v1, du, rand, lights, P = 0.3) {
     for (let k = 0; k < 6; k++) put('sacking', u1 - 3.2 + (k % 3) * 1.0, y + Math.floor(k / 3) * 0.55, v0 + 1.8 + (k % 2) * 0.4, u1 - 2.4 + (k % 3) * 1.0, y + 0.55 + Math.floor(k / 3) * 0.55, v0 + 2.4 + (k % 2) * 0.4, k < 3);
     put('wood_dark', mu - 0.9, y, v0 + 2.2, mu - 0.8, y + 1.3, v0 + 2.3); put('wood_dark', mu - 0.9, y + 1.3, v0 + 2.2, mu + 0.3, y + 1.35, v0 + 2.3);
     put('wood_ochre', mu + 0.2, y, v0 + 2.9, mu + 0.7, y + 0.28, v0 + 3.4, true);
+  } else if (kind === 'barracks') {
+    // the guards' barracks: plank beds with mats and quilts along the walls, the halberds and spears in their racks, shields and a suit of lamellar armour on a stand, a long table
+    for (const sg of [0, 1]) for (let k = 0; k < 2; k++) {
+      const ua = sg ? u1 - 2.6 : u0 + 0.5, vb = v0 + 1.8 + k * 2.2;
+      put('timber', ua, y, vb, ua + 2.1, y + 0.4, vb + 1.8, true); put('reed_mat', ua + 0.05, y + 0.4, vb + 0.05, ua + 2.05, y + 0.43, vb + 1.75); put(k ? 'cloth_indigo' : 'cloth_brown', ua + 0.5, y + 0.43, vb + 0.1, ua + 2.0, y + 0.52, vb + 1.7);
+    }
+    for (let k = 0; k < 6; k++) { put('bamboo_culm', mu - 1.4 + k * 0.5, y, v1 - 0.75, mu - 1.35 + k * 0.5, y + 2.4, v1 - 0.7); put('iron', mu - 1.45 + k * 0.5, y + 2.4, v1 - 0.77, mu - 1.3 + k * 0.5, y + 2.8, v1 - 0.68); }
+    put('wood_dark', mu - 1.6, y + 0.9, v1 - 0.82, mu + 1.6, y + 0.95, v1 - 0.6); put('wood_dark', mu - 1.6, y + 1.7, v1 - 0.82, mu + 1.6, y + 1.75, v1 - 0.6);
+    for (let k = 0; k < 3; k++) put(k % 2 ? 'lacquer_black' : 'lacquer_red', u0 + 0.6 + k * 0.7, y + 0.9, v1 - 0.5, u0 + 1.2 + k * 0.7, y + 1.7, v1 - 0.42);
+    { const p = F.pt(mu + 2.2, v1 - 1.7); F.bag.add('iron', lathe([[0.001, 0], [0.3, 0.9], [0.34, 1.3], [0.2, 1.55], [0.001, 1.6]], 8, null, p[0], y + 0.1, p[1])); F.bag.add('wood_dark', lathe([[0.04, 0], [0.04, 0.12]], 6, null, p[0], y, p[1])); F.col.circle(p[0], p[1], 0.35, y, y + 1.7); }
+    put('lacquer_black', mu - 1.0, y, v0 + 2.2, mu + 1.0, y + 0.45, v0 + 3.0, true); lamp(mu, v0 + 3.4, y);
+  } else if (kind === 'music') {
+    // the musicians' hall: mats in rows with the long zither (se) and the lute-like qin on low stands, the frame of bronze bells and the frame of stone chimes, a drum on its stand, a mouth-organ on the mat
+    for (let r = 0; r < 2; r++) put('reed_mat', u0 + 0.8, y, v0 + 1.6 + r * 2.1, u1 - 0.8, y + 0.03, v0 + 2.9 + r * 2.1);
+    for (let k = 0; k < 3; k++) { const ua = u0 + 1.4 + k * 2.3; put('lacquer_black', ua, y + 0.03, v0 + 1.9, ua + 1.6, y + 0.2, v0 + 2.5, true); for (let q = 0; q < 8; q++) put('silver', ua + 0.1 + q * 0.19, y + 0.2, v0 + 1.95, ua + 0.12 + q * 0.19, y + 0.21, v0 + 2.45); }
+    for (let k = 0; k < 2; k++) { const ua = u0 + 2.2 + k * 3.4; put('wood_ochre', ua, y + 0.03, v0 + 4.0, ua + 1.1, y + 0.14, v0 + 4.4, true); }
+    for (let k = 0; k < 2; k++) put('lacquer_red', u1 - 3.6 + k * 2.4, y, v1 - 0.8, u1 - 3.4 + k * 2.4, y + 2.0, v1 - 0.6); put('lacquer_red', u1 - 3.6, y + 1.8, v1 - 0.8, u1 - 1.2, y + 2.0, v1 - 0.6);
+    for (let k = 0; k < 6; k++) { const ub = u1 - 3.3 + k * 0.4, p = F.pt(ub, v1 - 0.7); F.bag.add('bronze', lathe([[0.12, 0], [0.16, 0.15], [0.12, 0.3], [0.001, 0.3]], 8, null, p[0], y + 1.45 - (k % 3) * 0.1, p[1])); put('iron', ub - 0.01, y + 1.75, v1 - 0.71, ub + 0.01, y + 1.8 - (k % 3) * 0.1, v1 - 0.69); }
+    for (let k = 0; k < 5; k++) put('slate', u0 + 0.6 + k * 0.45, y + 1.2 - k * 0.07, v1 - 0.72, u0 + 0.95 + k * 0.45, y + 1.7 - k * 0.07, v1 - 0.66);
+    put('wood_dark', u0 + 0.5, y + 1.15, v1 - 0.72, u0 + 3.0, y + 1.2, v1 - 0.66); put('wood_dark', u0 + 0.5, y, v1 - 0.72, u0 + 0.58, y + 1.2, v1 - 0.66); put('wood_dark', u0 + 2.92, y, v1 - 0.72, u0 + 3.0, y + 1.2, v1 - 0.66);
+    { const p = F.pt(mu, v1 - 2.0); F.bag.add('lacquer_red', lathe([[0.001, 0], [0.5, 0.0], [0.55, 0.3], [0.5, 0.6], [0.001, 0.6]], 12, null, p[0], y + 0.7, p[1])); F.bag.add('wood_dark', lathe([[0.1, 0], [0.12, 0.7]], 6, null, p[0], y, p[1])); F.col.circle(p[0], p[1], 0.55, y, y + 1.3); }
+    lamp(mu - 1.8, v0 + 3.4, y); lamp(mu + 1.8, v0 + 3.4, y);
+  } else if (kind === 'ice') {
+    // the ice-keepers' store: blocks of ice from the Zhang packed in straw, coal in a heap, sacks of salt, jars of grain, tally sticks and the long tongs on the wall
+    for (let r = 0; r < 3; r++) for (let q = 0; q < 4 - r; q++) { put('thatch', u1 - 3.8 + q * 0.95, y + r * 0.55, v1 - 2.0, u1 - 2.9 + q * 0.95 + 0.0, y + r * 0.55 + 0.05, v1 - 0.5, r === 0); put('chalk', u1 - 3.75 + q * 0.95, y + r * 0.55 + 0.05, v1 - 1.95, u1 - 2.95 + q * 0.95, y + r * 0.55 + 0.5, v1 - 0.55, false); }
+    for (let k = 0; k < 6; k++) put('bitumen', u0 + 0.5 + (k % 3) * 0.5, y, v1 - 1.9 + Math.floor(k / 3) * 0.7, u0 + 0.95 + (k % 3) * 0.5 - (k > 2 ? 0.1 : 0), y + 0.55 - (k % 3) * 0.1, v1 - 1.4 + Math.floor(k / 3) * 0.7, k === 0);
+    for (let k = 0; k < 6; k++) put('sacking', u0 + 0.8 + (k % 3) * 0.9, y + Math.floor(k / 3) * 0.5, v0 + 1.7, u0 + 1.5 + (k % 3) * 0.9, y + 0.5 + Math.floor(k / 3) * 0.5, v0 + 2.4, k < 3);
+    for (let q = 0; q < 4; q++) { const p = F.pt(mu + 0.8 + q * 0.7, v0 + 1.9); F.bag.add(q % 2 ? 'pottery_dark' : 'terracotta', lathe([[0.2, 0], [0.34, 0.3], [0.4, 0.6], [0.28, 0.95], [0.2, 1.0], [0.001, 1.0]], 8, null, p[0], y, p[1])); F.col.circle(p[0], p[1], 0.38, y, y + 1.0); }
+    put('wood_dark', mu - 0.4, y, v0 + 3.2, mu + 0.9, y + 0.1, v0 + 3.4); for (let k = 0; k < 2; k++) put('iron', mu - 0.3 + k * 1.0, y + 0.1, v0 + 3.25, mu - 0.26 + k * 1.0, y + 1.7, v0 + 3.3);
+    lamp(mu, v0 + 2.8, y);
   }
 }
 const ROOMS = ['dwelling', 'dwelling', 'kitchen', 'loom', 'smithy', 'scribe', 'store'];
@@ -212,7 +242,7 @@ function yard(F, W, D, gateU, hallV0, rand, o) {
 export function house(el, ctx) {
   const rand = rng(el.seed), F = lotFrame(ctx, el.rect, el.front), W = F.W, D = F.D, kind = el.kind;
   const wm = WALLS[Math.floor(rand() * WALLS.length)], H = 3.3 + rand() * 0.4, wallH = 2.2 + rand() * 0.6;
-  const gateU = Math.max(1.6, Math.min(W - 1.6, W * (0.25 + 0.5 * rand()))), room0 = pickOf(rand, ROOMS);
+  const gateU = Math.max(1.6, Math.min(W - 1.6, W * (0.25 + 0.5 * rand()))), room1 = pickOf(rand, ROOMS), room0 = el.room ?? room1;
   const poor = kind === 'row' && rand() < 0.45, rich = kind === 'court' && rand() < 0.3 && W > 11.5;
   const o = { open: el.open, thatch: poor, hip: rich, rich, shut: !el.open && rand() < 0.5 };
   if (kind === 'row') {
