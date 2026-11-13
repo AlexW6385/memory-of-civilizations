@@ -3,7 +3,7 @@
 // (src/engine/movers.js), read in its worker: the ways (layout.js), who walks. There is no water to float on.
 // Format as Suzhou's (src/settlements/ming-suzhou/movers.js).
 
-import { RADIUS, COURT, MARKET, streets } from './layout.js';
+import { RADIUS, COURT, MARKET, SERVICE_LANE, streets } from './layout.js';
 import '../../objects/index.js';
 import { figure } from '../../objects/figures.js';
 import { addFigure } from '../../engine/movers-kit.js';
@@ -26,6 +26,8 @@ export function walkways() {
   rects.push({ r: [COURT[0] + 8, COURT[1] + 6, COURT[2] - 8, -38], weight: 0.6, market: 0, kind: 'street', temple: true });   // before the hall (the ceremony's rows stand on it)
   rects.push({ r: [-1.6, -33, 1.6, 38], weight: 2.8, market: 0, kind: 'street' });                                    // the flagged way up the court to the hall's stairs: pilgrims, monks, officials
   rects.push({ r: [COURT[0] + 8, 12, COURT[2] - 8, 36], weight: 1.4, market: 0, kind: 'street' });                  // the court's south end between the Middle Gate and the sellers
+  rects.push({ r: [-1.6, 44, 1.6, 148], weight: 1.6, market: 0, kind: 'street' });                                    // the approach between the gates
+  rects.push({ r: [SERVICE_LANE[0] + 4, SERVICE_LANE[1] + 1.5, SERVICE_LANE[2] - 4, SERVICE_LANE[3] - 1.5], weight: 1.5, market: 0, kind: 'lane' });   // the service quarter's lane: pilgrims, porters, monks
   return { rects, links: [], clip: RADIUS - 14 };
 }
 export function waterways() { return { rects: [], bridges: [], clip: 0 }; }

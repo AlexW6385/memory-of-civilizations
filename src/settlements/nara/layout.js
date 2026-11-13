@@ -56,6 +56,41 @@ export function streets() {
 export const inStreet = (x, z, m = 0) => streets().some((r) => inRect(r, x, z, m));
 export const inBlock = (x, z, m = 0) => blocks().some((b) => inRect(b.rect, x, z, m));
 
+// ── the temple's service quarter (docs/settlements/nara.md §16): along the approach between the Middle Gate and the Great South
+// Gate, a lane across the way (z 101–107) with a row of houses either side of it on each side of the flagged avenue — the pilgrims'
+// lodging, the scriptorium of the construction office, the kitchen that fed the monks, the carpenters' shed, the shops of incense and
+// of lamp oil, the gate wardens' lodge. The eight houses with a `use` are open; the rest are the servants' homes.
+export const SERVICE_LANE = [-70, 101, 70, 107];
+const SVC_ROWS = [
+  // [side, row z0, z1, front, [[width, use, thatch, trade]]]
+  [1, 92.6, 101.0, 's', [[10.4, 'inn', false], [9.2, 'scriptorium', false], [9.8, null, true], [8.8, null, false]]],
+  [1, 107.0, 115.4, 'n', [[10.0, 'kitchen', true], [9.4, 'carpenter', true], [9.0, null, false], [10.2, null, true]]],
+  [-1, 92.6, 101.0, 's', [[9.6, 'incense', false], [8.8, 'oil', true], [9.6, null, true], [9.0, null, false]]],
+  [-1, 107.0, 115.4, 'n', [[9.0, 'lodge', false], [10.2, 'inn', true], [9.4, null, false], [9.8, null, true]]],
+];
+const SVC_PREV = new Map(), SEEDS = new Set();
+let SVC = null;
+/** The houses of the service quarter: lots as the capital's, with `use` on the eight that can be entered (and `shop` on the two shops). */
+export function serviceLots() {
+  if (SVC) return SVC;
+  SVC = [];
+  for (const [side, z0, z1, front, list] of SVC_ROWS) {
+    let x = 17, prev = null;
+    list.forEach(([w, use, thatch], k) => {
+      const x0 = side > 0 ? x : -x - w, x1 = x0 + w;
+      // a seed whose house takes the roof asked for (vernacular house_japan: thatch when its stream's first draw is ≥ 0.5)
+      let seed = 8000 + (side > 0 ? 0 : 400) + (z0 > 100 ? 200 : 0) + k * 17;
+      while ((rng(seed + 7)() >= 0.5) !== thatch || SEEDS.has(seed)) seed++;
+      SEEDS.add(seed);
+      const lot = { rect: [x0, z0, x1, z1], seed, y: 0, foot: -0.2, front, ...(use ? { use } : {}), ...(use === 'incense' || use === 'oil' ? { shop: true, trade: use } : { shop: false }) };
+      SVC.push(lot); if (prev) SVC_PREV.set(lot, prev);
+      prev = lot; x += w + 1.4;
+    });
+  }
+  return SVC;
+}
+/** A point inside a lot's house: u along the front from its low corner side, v in from the door (the frame of the house builders: the door's side is v = 0). */
+export function lotPoint(l, u, v) { const [x0, z0, x1, z1] = l.rect; return l.front === 's' ? [x1 - u, z1 - v] : [x0 + u, z0 + v]; }
 let LOTS = null, WALLS = null, YARDS = null, FENCES = null, GARDENS = null;
 function build() {
   LOTS = []; WALLS = []; YARDS = []; FENCES = []; GARDENS = [];
@@ -100,6 +135,12 @@ function build() {
   // the East Market's rim: a few shop houses on the square's north and west edges (the square is left open)
   const [mx0, mz0, mx1] = MARKET.block;
   for (let x = mx0 + 2; x < mx1 - 10; x += 10.5 + rand() * 1.5) LOTS.push({ rect: [x, mz0 + 1, x + 9.5, mz0 + 9.5], seed: Math.floor(rand() * 1e6), y: 0, foot: -0.2, front: 's', shop: true });
+  // the temple's service quarter along the south approach (docs/settlements/nara.md §16): the lane across it, a row of houses either side of it
+  for (const l of serviceLots()) {
+    LOTS.push(l);
+    const prev = SVC_PREV.get(l);
+    if (prev) { const g = l.rect[0] > prev.rect[0] ? (prev.rect[2] + l.rect[0]) / 2 : (l.rect[2] + prev.rect[0]) / 2; FENCES.push({ pts: [[g, Math.min(l.rect[1], prev.rect[1])], [g, Math.max(l.rect[3], prev.rect[3])]], kind: 'board', h: 1.5 }); }
+  }
   // and its south edge: a second row of shop houses facing north over the mat-sellers' row
   const mz1 = MARKET.block[3], r2 = rng(7533);
   for (let x = mx0 + 2; x < mx1 - 10; x += 10.5 + r2() * 1.5) LOTS.push({ rect: [x, mz1 - 6.8, x + 9.5, mz1 - 0.6], seed: Math.floor(r2() * 1e6), y: 0, foot: -0.2, front: 'n', shop: true });

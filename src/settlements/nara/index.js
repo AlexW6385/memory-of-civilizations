@@ -187,7 +187,7 @@ const courtLife = { id: 'nara-court-life', style: 'life', origin: [0, 0], base: 
 const deer = { id: 'nara-deer', style: 'nara', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-340, -340, 340, 340], entrance: { at: [0, 180], facing: 'n' }, elements: [] };
 {
   let s = 7520; const r = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
-  for (const [hx, hz, n] of [[34, 72, 4], [-42, 102, 5], [58, 128, 3], [-24, 64, 2], [196, -24, 5], [232, 40, 4], [205, 96, 3], [182, -96, 4], [-70, 150, 3], [-70, 36, 3], [72, 40, 3], [-76, -20, 2]]) {
+  for (const [hx, hz, n] of [[34, 72, 4], [-46, 128, 5], [58, 128, 3], [-24, 64, 2], [196, -24, 5], [232, 40, 4], [205, 96, 3], [182, -96, 4], [-70, 150, 3], [-70, 36, 3], [72, 40, 3], [-76, -20, 2]]) {
     for (let i = 0; i < n; i++) {
       const x = hx + (r() - 0.5) * 12, z = hz + (r() - 0.5) * 12;
       deer.elements.push({ t: 'obj', kind: 'shika', at: [x, z], y: height(x, z), rot: r() * Math.PI * 2, seed: Math.floor(r() * 1e6) });

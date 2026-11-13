@@ -14,6 +14,7 @@ function emitters() {
   E.push({ p: [(KOFUKU.block[0] + KOFUKU.block[2]) / 2 - 12, 1.9, KOFUKU.block[1] + 36], kind: 'incense', thr: 0, seed: 11 });
   E.push({ p: [-100, 5.6, -165], kind: 'kitchen', thr: 0, seed: 31 }, { p: [100, 5.6, -150], kind: 'kitchen', thr: 0, seed: 32 });     // the monks' kitchens
   for (const l of lots()) {
+    if (l.use === 'kitchen') { E.push({ p: [(l.rect[0] + l.rect[2]) / 2 + 0.5, 5.6, (l.rect[1] + l.rect[3]) / 2], kind: 'kitchen', thr: 0, seed: l.seed + 1 }); E.push({ p: [(l.rect[0] + l.rect[2]) / 2 - 3, 5.2, (l.rect[1] + l.rect[3]) / 2 + 1], kind: 'steam', thr: 0, seed: l.seed + 2 }); continue; }
     if (l.shop) {
       E.push({ p: [(l.rect[0] + l.rect[2]) / 2, 5.4, (l.rect[1] + l.rect[3]) / 2 + 1], kind: 'steam', thr: rand() * 0.3, seed: l.seed + 2 });
       continue;
