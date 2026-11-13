@@ -108,6 +108,20 @@ export function shopRow(el, { bag, col, lights }) {
     // a trestle or a bale at the apron
     if (rand() < 0.5) { const su = left ? ub - 0.7 : ua + 0.7; L.box('timber', su - 0.5, 1.1, su + 0.5, 1.7, 0.0, 0.5, true); L.box(BOLT[Math.floor(rand() * BOLT.length)], su - 0.45, 1.15, su + 0.45, 1.65, 0.5, 0.6); }
   }
+  // the row's character (docs/settlements/mongol-karakorum.md §3b): the east rows of the Cathayan quarter keep a Chinese front — red lacquered posts between the bays,
+  // a tile eave on painted brackets with its green ridge; some of the Saracen rows carry a plastered upper storey with latticed windows over the shops
+  if (el.east) {
+    for (let i = 0; i <= n; i++) L.box('lacquer_red', i * w - 0.12, 0.08, i * w + 0.12, 0.34, 0, 2.62);
+    L.box('tile_grey', -0.3, 1.55, n * w + 0.3, 0.08, H + 0.5, H + 0.62); L.box('tile_green', -0.3, 1.8, n * w + 0.3, 1.45, H + 0.62, H + 0.78);
+    for (let i = 0; i < n; i++) L.box('paint_caihua', (i + 0.5) * w - 0.3, 0.1, (i + 0.5) * w + 0.3, 0.95, H + 0.1, H + 0.5);
+    L.box('lacquer_red', -0.1, 0.12, n * w + 0.1, 0.02, H - 0.35, H - 0.2);
+  } else if (el.storey) {
+    L.box('plaster_white', 0, -0.02, n * w, -d + 0.3, H + 0.78, H + 3.4);
+    L.box('mud_plaster', -0.1, 0.1, n * w + 0.1, -d + 0.2, H + 3.4, H + 3.55); L.box('wood_dark', -0.1, 0.1, n * w + 0.1, -0.05, H + 3.2, H + 3.4);
+    for (let i = 0; i < n; i++) { const u = (i + 0.5) * w; L.box('wood_dark', u - 0.5, 0.1, u + 0.5, -0.02, H + 1.3, H + 2.7); L.box('lattice', u - 0.38, 0.12, u + 0.38, 0.06, H + 1.45, H + 2.55); L.box('timber', u - 0.6, 0.45, u + 0.6, -0.02, H + 1.2, H + 1.3); }
+    for (let u = 0.3; u < n * w; u += 0.9) L.box('wood_dark', u, 0.12, u + 0.1, 0.05, H + 0.9, H + 1.1);
+  }
+  for (let i = 0; i < n; i += 2) L.light((i + 0.5) * w, 2.1, -d * 0.45, '#ffcf86', 1.8, 6);   // the lamps of the shops: every other bay
   // the weathered row's end: a slumped corner with rubble
   if (rand() < 0.5) L.lathe('mudbrick', [[0.9, 0], [0.6, 0.4], [0.3, 0.7], [0.001, 0.8]], 7, n * w + 0.7, -d * 0.3, 0);
   void lights;
