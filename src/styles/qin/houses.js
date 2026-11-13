@@ -7,12 +7,14 @@
 import { box, lathe, fromTriangles, quad, rod, frustum } from '../../core/geom.js';
 import { rng } from '../../objects/kit.js';
 
-export function frame(rect, front, bag, col) {
+export function frame(rect, front, bag, col, lights) {
   const [x0, z0, x1, z1] = rect, zs = front === 's' ? z1 : z0, sg = front === 's' ? -1 : 1, Z = (v) => zs + sg * v;
   const R = (u0, v0, u1, v1) => { const a = Z(v0), b = Z(v1); return [x0 + u0, Math.min(a, b), x0 + u1, Math.max(a, b)]; };
   return {
     W: x1 - x0, D: z1 - z0, X: (u) => x0 + u, Z, R, rise: front === 's' ? 'n' : 's', bag, col, sg,
     b(mat, u0, y0, v0, u1, y1, v1, solid = true) { const r = R(u0, v0, u1, v1); bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3])); if (solid) col.rect(r, y0, y1); },
+    /** A lamp's light (one a room) in the lot's frame, where the house is asked to be lit. */
+    light(u, y, v, intensity = 3) { lights?.push({ at: [x0 + u, y, Z(v)], color: '#ffb46b', intensity, distance: 8 }); },
     lathe(mat, prof, u, y, v, seg = 10) { bag.add(mat, lathe(prof, seg, null, x0 + u, y, Z(v))); },
     rod(mat, a, b, r, seg = 6) { bag.add(mat, rod([x0 + a[0], a[1], Z(a[2])], [x0 + b[0], b[1], Z(b[2])], r, seg)); },
   };
@@ -175,7 +177,7 @@ export function doorOf(el) {
 
 /** qin_row_house: { rect, front, seed, open } — the workman's house: door and one room, a back room, a roof of grey tile, of thatch or flat. */
 export function rowHouse(el, ctx) {
-  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D, th = 0.55, H = 3.0 + rand() * 0.3, wm = WALLS[Math.floor(rand() * WALLS.length)], open = !!el.open;
+  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col, ctx.lights), W = F.W, D = F.D, th = 0.55, H = 3.0 + rand() * 0.3, wm = WALLS[Math.floor(rand() * WALLS.length)], open = !!el.open;
   const uD = W * (0.3 + rand() * 0.4), rk = rand(), roof = rk < 0.42 ? 'tile' : rk < 0.72 ? 'thatch' : 'flat', rise = 1.5 + rand() * 0.5;
   const uW = uD < W / 2 ? W * 0.5 + (W - W * 0.5) * 0.5 : W * 0.25;
   const wk = rand() < 0.5 ? 'lattice' : 'shutter', hh = HOUSEHOLDS[Math.floor(rand() * HOUSEHOLDS.length)];
@@ -188,6 +190,7 @@ export function rowHouse(el, ctx) {
   if (open) {
     F.b(wm, th, 0, D * 0.55, W * 0.55 - 0.5, H, D * 0.55 + 0.4); F.b(wm, W * 0.55 + 0.5, 0, D * 0.55, W - th, H, D * 0.55 + 0.4); F.b('timber', W * 0.55 - 0.5, 2.0, D * 0.55, W * 0.55 + 0.5, H, D * 0.55 + 0.4, false);
     furnish(F, rand, th, th, W - th, D * 0.55, hh);
+    if (el.lit) F.light(W * 0.5, 2.3, D * 0.28);
     // the back room: the bed (a low platform with mats and a quilt), a chest, a lamp, a basket of mending
     const bu = th + 0.4, bv = D * 0.55 + 0.9;
     F.b('timber', bu, 0, bv, bu + 2.4, 0.32, bv + 1.5); F.b('reed_mat', bu + 0.05, 0.32, bv + 0.05, bu + 2.35, 0.34, bv + 1.45, false); F.b(rand() < 0.5 ? 'cloth_indigo' : 'cloth_brown', bu + 0.9, 0.34, bv + 0.1, bu + 2.3, 0.5, bv + 1.4, false);
@@ -201,7 +204,7 @@ export function rowHouse(el, ctx) {
 
 /** qin_court_house: { rect, front, seed, open } — a walled court with a gate, the house of two rooms behind, a shed, the court's furniture. */
 export function courtHouse(el, ctx) {
-  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D, th = 0.55, wm = WALLS[Math.floor(rand() * WALLS.length)], open = !!el.open;
+  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col, ctx.lights), W = F.W, D = F.D, th = 0.55, wm = WALLS[Math.floor(rand() * WALLS.length)], open = !!el.open;
   const cv = 5.8 + rand() * 1.6, uD = W * (0.25 + rand() * 0.5), H = 3.3 + rand() * 0.4, HW = 2.6, tile = rand() < 0.7;
   frontWall(F, wm, 0, th, HW, [{ u: uD, w: 1.8, y0: 0, y1: 2.3 }]);
   doorFit(F, uD, 1.8, 2.3, 0, th, open, rand, false);
@@ -217,6 +220,7 @@ export function courtHouse(el, ctx) {
   windowFit(F, W * 0.2, 1.2, 0.7, 0.75, cv, cv + th, 'lattice', open); windowFit(F, W * 0.8, 1.2, 0.7, 0.75, cv, cv + th, 'lattice', open);
   F.b('tile_grey', -0.02, 0.02, cv - 0.02, W + 0.02, 0.285, cv + 0.04, false);
   if (open) furnish(F, rand, th, cv + th, W - th, D - th, HOUSEHOLDS[Math.floor(rand() * HOUSEHOLDS.length)]);
+  if (open && el.lit) F.light(W * 0.5, 2.3, cv + (D - cv) * 0.5);
   const rise = 1.7 + rand() * 0.4;
   gable(F, 0, cv, W, D, H, rise, tile ? 'tile_grey' : 'thatch', 0.7);
   eave(F, -0.5, W + 0.5, cv - 0.7, H, tile); ridgeEnds(F, 0, W, cv, D, H + rise, tile);
@@ -239,7 +243,7 @@ export function courtHouse(el, ctx) {
 
 /** qin_official: { rect, front, seed, open } — an official's house on a raised earth platform, a gate with a plaque, a hall with a porch of columns. */
 export function official(el, ctx) {
-  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D, th = 0.65, P = 0.9, H = 4.0, open = !!el.open;
+  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col, ctx.lights), W = F.W, D = F.D, th = 0.65, P = 0.9, H = 4.0, open = !!el.open;
   const uD = W / 2, cv = 6.5;
   // the gate: a bay on the street wall with a tile roof, doors of red lacquer, a plaque above, two banner posts before it
   F.b('earth_wall', 0, 0, 0, uD - 1.6, 2.9, th); F.b('earth_wall', uD + 1.6, 0, 0, W, 2.9, th);
@@ -266,6 +270,7 @@ export function official(el, ctx) {
   F.b('earth_wall', hu0 - 0.6, P + wallsH, hv0 - 1.5, hu1 + 0.6, P + wallsH + 0.01, hv1 + 0.6, false);
   gable(F, hu0 - 0.6, hv0 - 1.5, hu1 + 0.6, hv1 + 0.2, P + wallsH + 0.3, 2.3, 'tile_grey', 0.9);
   eave(F, hu0 - 1.4, hu1 + 1.4, hv0 - 2.4, P + wallsH + 0.3, true); ridgeEnds(F, hu0 - 0.6, hu1 + 0.6, hv0 - 1.5, hv1 + 0.2, P + wallsH + 0.3 + 2.3, true);
+  if (open && el.lit) F.light(dc, P + 2.5, (hv0 + hv1) / 2);
   if (open) {
     F.b('reed_mat', hu0 + th + 1, P + 0.08, hv0 + th + 1, hu1 - th - 1, P + 0.11, hv1 - th - 1, false); F.b('lacquer_black', dc - 1.2, P + 0.05, hv1 - th - 1.6, dc + 1.2, P + 0.6, hv1 - th - 0.3); F.b('lacquer_red', dc - 1.0, P + 0.6, hv1 - th - 1.5, dc + 1.0, P + 0.66, hv1 - th - 0.4, false);
     F.b('lacquer_black', dc - 2.6, P + 0.08, hv1 - th - 3.8, dc - 0.8, P + 0.38, hv1 - th - 3.0); F.b('lacquer_black', dc + 0.8, P + 0.08, hv1 - th - 3.8, dc + 2.6, P + 0.38, hv1 - th - 3.0);   // two low tables

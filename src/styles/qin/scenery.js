@@ -75,7 +75,7 @@ export function qinMarket(el, { bag, col }) {
 
 /** qin_workshop: { rect, front, seed, trade } — a figure-makers' yard: open to the street, a roofed shed behind, the trade's things between. */
 export function qinWorkshop(el, ctx) {
-  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col), W = F.W, D = F.D, T = el.trade ?? 'clay';
+  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col, ctx.lights), W = F.W, D = F.D, T = el.trade ?? 'clay';
   const S = (u, v, o = {}) => soldier(bag, { at: [F.X(u), F.Z(v)], y: 0, rot: o.rot ?? (F.sg > 0 ? Math.PI : 0), kind: o.kind ?? 'arm', seed: Math.floor(rand() * 1e6), reach: 90, clay: o.clay, s: o.s ?? 1 });
   // the yard's fence: low walls of earth on three sides, the street side open but for two gate posts
   for (const [a, b, c, d] of [[0, 0, 0.5, D], [W - 0.5, 0, W, D], [0, D - 0.5, W, D]]) F.b('earth_wall', a, 0, b, c, 1.7, d);
@@ -83,6 +83,7 @@ export function qinWorkshop(el, ctx) {
   F.b('lacquer_black', W * 0.25, 2.6, -0.05, W * 0.75, 2.9, 0.45, false);
   // the shed at the back: posts, a thatched roof on a ridge, the floor of beaten earth
   const sv0 = D - 8, sh = 2.9;
+  if (el.lit && el.open) F.light(W / 2, 2.5, sv0 + 3.5);
   for (let u = 1.5; u < W - 1; u += 4.8) for (const v of [sv0, D - 1.2]) F.b('timber', u - 0.12, 0, v - 0.12, u + 0.12, sh, v + 0.12);
   gable(F, 0.6, sv0 - 0.3, W - 0.6, D - 0.5, sh, 1.4, 'thatch', 0.6);
   const mid = W / 2;

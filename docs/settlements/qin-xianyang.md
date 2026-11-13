@@ -87,3 +87,7 @@ Hammers on clay, the beat of rammers (the labourers' chant), kiln roar, carts' a
 - Qin standardization — https://historyrise.com/article/qin-shi-huangs-devotion-to-standardizing-chinese-measurements-and-scripts/
 - Making the warrior — https://www.metmuseum.org/articles/terracotta-warriors-age-of-empires
 - Original colours — https://www.chinahighlights.com/xian/terracotta-army/color.htm
+
+## 9c. The lit houses and their people (round 5, 2026-11-12)
+
+- Before: 23 open, furnished lots within 120 m of the arrival (the figure-makers' workshops and the town's open houses south of the pit), without light and with no one inside. Now each of them within 130 m of the arrival has its lamp lit (`lit`: one light a room, in the row houses, court houses, officials' halls and the workshops' sheds), and a householder stands in the room of a row house or the court of a court house (`insideLife` in town.js) [inferred: the household's day].

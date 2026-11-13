@@ -2,6 +2,7 @@
 // stalls, scales and sellers, the figure-makers' quarter, the rammed-earth houses of the town, the people (officials, guards, labourers
 // at the pit's roof, the figure-makers at their trades), carts on the road.
 import { TRADES } from '../../styles/qin/shops.js';
+import { ARRIVALS } from '../../planet/arrivals.js';
 import { doorOf } from '../../styles/qin/houses.js';
 import { RADIUS, YARD, HAUL, rampZ, RAMP, ROAD, MARKET, TOWER, MWALL, TERRACE, STAIR, HALL, ROOF, PIT, WS_Z, lots } from './layout.js';
 
@@ -149,6 +150,22 @@ export function shopLots() {
   return out;
 }
 
+/** An open house near the arrival has its lamp lit (one light a room, never beyond 130 m). */
+const lit = (l) => l.open && Math.hypot((l.rect[0] + l.rect[2]) / 2 - ARRIVALS['qin-xianyang'][0], (l.rect[1] + l.rect[3]) / 2 - ARRIVALS['qin-xianyang'][2]) < 130;
+/** The people inside the lit houses: the householder in the room of a row house, someone in the court of a court house. */
+function insideLife() {
+  const rand = rng(218), L = [], cl = ['cloth_brown', 'cloth_ochre', 'cloth_grey', 'cloth_white', 'cloth_indigo'];
+  let n = 0;
+  for (const l of lots()) {
+    if (!lit(l) || (l.kind !== 'row' && l.kind !== 'court') || n++ % 3 === 2) continue;
+    const [x0, z0, x1, z1] = l.rect, W = x1 - x0, s = l.front === 's', Z = (v) => (s ? z1 - v : z0 + v), d = doorOf({ kind: l.kind, seed: l.seed, rect: l.rect });
+    const u = l.kind === 'row' ? Math.min(W - 1.4, Math.max(1.4, W * 0.55 + (d.u > W / 2 ? -1 : 1))) : Math.min(W - 1.2, Math.max(1.2, d.u + (d.u > W / 2 ? -2.2 : 2.2))), v = l.kind === 'row' ? 1.5 : 3.0;
+    const f = rand() < 0.5;
+    L.push({ t: 'figure', at: [x0 + u, Z(v)], y: 0.06, rot: s ? Math.PI : 0, seed: Math.floor(rand() * 1e9), dress: f ? 'robe' : 'tunic', legs: f ? undefined : 'hose', cloth: f ? ['cloth_red', 'cloth_ochre', 'cloth_green'][n % 3] : cl[n % cl.length], cloth2: 'cloth_brown', over: f ? 'sash' : 'belt', skin: 'skin_light', hat: 'none', hair: f ? 'bun' : 'topknot', beard: !f && rand() < 0.4, pose: n % 2 ? 'talk' : 'stand', feet: 'shod' });
+  }
+  return { ...base0('qin-insidelife', L), style: 'life', center: [ARRIVALS['qin-xianyang'][0], ARRIVALS['qin-xianyang'][2]], near: 260 };
+}
+
 let CACHE = null;
 export async function town() {
   if (CACHE) return CACHE;
@@ -163,9 +180,9 @@ export async function town() {
   plans.push({ ...base('qin-carts', carts()), style: 'life' });
   const LOTS = lots(), K = { row: 'qin_row_house', court: 'qin_court_house', official: 'qin_official', granary: 'qin_granary', garden: 'qin_garden', workshop: 'qin_workshop' };
   const ws = LOTS.filter((l) => l.trade), houses = LOTS.filter((l) => !l.trade);
-  plans.push(base('qin-workshops', ws.map((l) => ({ t: K.workshop, rect: l.rect, front: l.front, seed: l.seed, open: l.open, trade: l.trade }))));
-  for (let i = 0; i < houses.length; i += 70) plans.push(base(`qin-town-${i / 70}`, houses.slice(i, i + 70).map((l) => ({ t: K[l.kind], rect: l.rect, front: l.front, seed: l.seed, open: l.open }))));
-  plans.push(...frontLife());
+  plans.push(base('qin-workshops', ws.map((l) => ({ t: K.workshop, rect: l.rect, front: l.front, seed: l.seed, open: l.open, lit: lit(l), trade: l.trade }))));
+  for (let i = 0; i < houses.length; i += 70) plans.push(base(`qin-town-${i / 70}`, houses.slice(i, i + 70).map((l) => ({ t: K[l.kind], rect: l.rect, front: l.front, seed: l.seed, open: l.open, lit: lit(l) }))));
+  plans.push(...frontLife(), insideLife());
   void MWALL;
   return (CACHE = plans);
 }

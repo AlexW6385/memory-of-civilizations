@@ -54,11 +54,11 @@ export function shopLife() {
  * bench and a mat with a lamp's pot, the woman at her work in the court; before the door a stool and the old man on it, firewood, a
  * beast tied; on the roof the wash on its line, figs drying on a mat, a jar, the woman among them.
  */
-export function houseLife() {
+export function houseLife(list = lots(), k0 = 0) {
   const L = [], rand = rng(777), pick = (a) => a[Math.floor(rand() * a.length)];
   const person = (at, y, rot, o = {}) => L.push({ t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: pick(CL), cloth2: pick(CL), over: 'shawl', skin: 'skin_medium', hat: 'none', hatMat: 'cloth_white', feet: 'bare', ...o });
-  lots().forEach((lot, i) => {
-    const H = houseLayout(lot), { P, y } = H, k = i * 20, F = y + 0.03, rin = H.front === 's' ? Math.PI : 0, rout = rin + Math.PI;
+  list.forEach((lot, i0) => {
+    const i = i0 + k0, H = houseLayout(lot), { P, y } = H, k = i * 20, F = y + 0.03, rin = H.front === 's' ? Math.PI : 0, rout = rin + Math.PI;
     const ph = (u, v) => P(u, v);
     const roofY = y + H.h + 0.03;
     if (H.court) {

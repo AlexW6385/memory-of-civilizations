@@ -7,6 +7,8 @@ import { RADIUS, LEVEL, MOAT, RING, AVENUE, NOTCH, TEMPLE, DANBI, STREET_X, lane
 import './townstyle.js';
 import { lifePlans } from './life.js';
 import { thrones } from './plan.js';
+import { HOUSE } from '../../styles/qing/index.js';
+import { COURT_ROOMS, PAVILION_ROOMS, palaceRoomFigures } from './palace-rooms.js';
 
 const R = RADIUS - 26;
 const base = (id, elements, style = 'qing') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 215], facing: 'n' } });
@@ -184,4 +186,10 @@ function traffic() {
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
-export async function town() { return [thrones, streets(), ...surfaces(), temple(), ...traffic(), ...courtyards(), ...shopStreet(), ...(await lifePlans())]; }
+/** The rooms of the outer court that are walked into (palace-rooms.js): the duty and waiting rooms at the courtyard's south end (shells of plain grey tile here, furnished there) and the pavilions' storerooms. */
+function courtRooms() {
+  const shells = COURT_ROOMS.map((r) => ({ t: 'qing_hall', rect: r.rect, y: 0.3, H: 3.6, roof: 'gable', bays: [4, 2], front: r.front, plat: 0.3, pal: HOUSE }));
+  const furn = [...COURT_ROOMS.map((r, i) => ({ t: 'bj_palace_room', rect: r.rect, front: r.front, kind: r.kind, y: 0.3, H: 3.6, seed: 40 + i })), ...PAVILION_ROOMS.map((r, i) => ({ t: 'bj_palace_room', ...r, seed: 60 + i }))];
+  return [base('qing-beijing-court-rooms', shells), { ...base('qing-beijing-court-rooms-furnished', furn, 'life'), style: 'life', center: [0, 80], near: 230 }, { ...base('qing-beijing-court-rooms-people', palaceRoomFigures(), 'life'), style: 'life', center: [0, 80], near: 230 }];
+}
+export async function town() { return [thrones, ...courtRooms(), streets(), ...surfaces(), temple(), ...traffic(), ...courtyards(), ...shopStreet(), ...(await lifePlans())]; }
