@@ -169,7 +169,7 @@ function shed(bag, col, F, L, Wd, h = 2.7, floor = 0) {
  * a grating bench, hanging presses of fibre, nut heaps, bamboo tubes), cookshed (a shed over four earth ovens, hot stones, leaf piles, firewood),
  * landing (a store shed with heaped baskets and yams, mats, poles), hall (the chief's assembly: a raised platform under a great roof, mats).
  */
-export function works(el, { bag, col }) {
+export function works(el, { bag, col, lights }) {
   const rand = rng(el.seed ?? 5), F = mk(el.c, el.yaw ?? 0), put = (m, g) => { g.applyMatrix4(F.M); bag.add(m, g); };
   const L = el.l ?? 14, Wd = el.w ?? 6;
   if (el.kind === 'drift') {
@@ -226,6 +226,7 @@ export function works(el, { bag, col }) {
     for (let i = 0; i < 12; i++) put('timber', lathe([[0.07, 0], [0.07, 0.3]], 6).rotateZ(Math.PI / 2).rotateY(rand() * 3).translate(-0.9 + rand() * 1.8, 0.45, -0.4 + rand() * 0.8));
     // a pole with its two baskets, laid down
     put('timber', lathe([[0.03, 0], [0.03, 2.0]], 5).rotateZ(Math.PI / 2).translate(-1.0, 0.42, 0));
+    { const q = F.W(0, Wd * 0.28); lights?.push({ at: [q[0], 1.4, q[1]], color: '#ffb46b', intensity: 2.0, distance: 7 }); put('bark_dark', lathe([[0.001, 0], [0.08, 0.01], [0.09, 0.07], [0.001, 0.07]], 7, null, 0, 0.37, Wd * 0.28)); put('flame', lathe([[0.001, 0.07], [0.02, 0.08], [0.001, 0.19]], 5, null, 0, 0.37, Wd * 0.28)); }
   } else if (el.kind === 'hall') {
     // the chief's assembly: a platform 0.9 m, a great hip roof on posts, the chief's seat at the far end, mats, kava cups
     const ph = 0.9;
@@ -246,6 +247,8 @@ export function works(el, { bag, col }) {
     put('timber', box(L / 2 - 1.6, ph, -Wd / 2 + 0.5, L / 2 - 0.6, ph + 0.26, Wd / 2 - 0.5));            // the chief's seat, a long low bench of wood
     for (let i = 0; i < 6; i++) { const z = -Wd / 2 + 1.0 + i * (Wd - 2) / 5; put('bark_dark', lathe([[0.001, 0], [0.1, 0.01], [0.13, 0.08], [0.001, 0.08]], 7, null, L / 2 - 2.6, ph + 0.03, z)); }
     for (const z of [-1, 1]) put('reed_mat', box(-L / 4 - 1, ph + 0.03, z * 1.4 - 0.5, -L / 4 + 1, ph + 0.05, z * 1.4 + 0.5));
+    // two bowls of burning coconut oil on the floor either side of the chief's seat, their light in the hall
+    for (const z of [-1, 1]) { put('bark_dark', lathe([[0.001, 0], [0.1, 0.01], [0.12, 0.08], [0.001, 0.08]], 7, null, L / 2 - 1.9, ph + 0.03, z * (Wd / 2 - 1.2))); put('flame', lathe([[0.001, 0.08], [0.02, 0.09], [0.001, 0.2]], 5, null, L / 2 - 1.9, ph + 0.03, z * (Wd / 2 - 1.2))); const q = F.W(L / 2 - 1.9, z * (Wd / 2 - 1.2)); lights?.push({ at: [q[0], ph + 0.7, q[1]], color: '#ffb46b', intensity: 2.6, distance: 8 }); }
   }
 }
 
