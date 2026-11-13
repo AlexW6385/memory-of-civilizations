@@ -20,6 +20,8 @@ function field(x, z) {
 function cover(x, z) {
   const c = { sand: 0, grass: 0.45, rock: 0, soil: 0.45, fields: 0, dry: 0.45, warmth: 0.6, red: 0.35, road: 0, snow: 0, forest: 0 };
   if (inCut(x, z, 1)) { c.rock = 0.9; c.soil = 0.1; c.grass = 0; return c; }
+  // (the viewing place on the hill's crest and the slope below it toward the church: trodden bare, so no tuft stands at the lens)
+  { const dx = x + 236, dz = z - 176, d = Math.hypot(dx, dz); if (d < 14 || (d < 60 && dz < 0 && Math.abs(dx * Math.cos(-0.45) - dz * Math.sin(-0.45)) < 8 + d * 0.2)) { c.road = 0.7; c.soil = 0.8; c.grass = 0; c.dry = 0; c.fields = 0; return c; } }
   const f = field(x, z);
   if (f) {
     if (f.riser) { c.rock = 0.5; c.grass = 0.2; return c; }
