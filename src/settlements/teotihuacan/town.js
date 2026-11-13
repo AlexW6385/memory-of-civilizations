@@ -1,6 +1,6 @@
 // The apartment compounds of Teotihuacan (docs/settlements/teotihuacan.md §5, §12), and the maguey and
 // nopal grown in the open ground between them (§12).
-import { RADIUS, AVENUE, KEEP_CLEAR, PALACE_CLEAR, MARKET, MARKET_PLATFORM, compounds, emptyLots, inCompound, inRect } from './layout.js';
+import { RADIUS, AVENUE, KEEP_CLEAR, PALACE_CLEAR, MARKET, MARKET_PLATFORM, compounds, emptyLots, inCompound, inRect, lodges } from './layout.js';
 import { ground } from './ground.js';
 import { lodTiles } from '../lod.js';
 const base = (id, elements) => ({ id, style: 'teotihuacano', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -80], facing: 'e' } });
@@ -52,6 +52,8 @@ export async function town() {
   // (src/settlements/lod.js); the outer ring only as the simple version (walls and blocks), in 220 m tiles drawn from 1 m
   const ent = { at: [0, -80], facing: 'e' }, A = [0, 70], near = all.filter((c) => Math.hypot((c.rect[0] + c.rect[2]) / 2 - A[0], (c.rect[1] + c.rect[3]) / 2 - A[1]) < 210);
   plans.push(...lodTiles('teotihuacan-compounds', 'teotihuacano', near.map((c) => ({ t: 'compound', ...c })), { near: 130, R: RADIUS, entrance: ent }));
+  // the houses of those who serve the avenue, on its west platform and in the open ground east of it (layout.js lodges): rooms, furniture and people near, blocks beyond 130 m
+  plans.push(...lodTiles('teotihuacan-houses', 'teotihuacano', lodges().map((l) => ({ t: 'tt_lodge_platform', rect: l.rect, face: l.face, y: l.y, kind: l.kind, seed: l.seed, yard: l.yard })), { near: 130, R: RADIUS, entrance: ent }));
   const outer = new Map();
   for (const c of all) if (!near.includes(c)) { const k = `${Math.floor((c.rect[0] + c.rect[2]) / 440)},${Math.floor((c.rect[1] + c.rect[3]) / 440)}`; if (!outer.has(k)) outer.set(k, []); outer.get(k).push({ t: 'compound', ...c, simple: true }); }
   for (const [k, els] of outer) { const [i, j] = k.split(',').map(Number); plans.push({ ...base(`teotihuacan-outer-${k}`, els), far: 1, center: [i * 220 + 110, j * 220 + 110], nocollide: false }); }

@@ -114,3 +114,9 @@ Polychoral music in San Marco; the lute and the viol; the gondoliers' songs. [in
 - [Rialto Bridge — Wikipedia](https://en.wikipedia.org/wiki/Rialto_Bridge)
 - [Rialto — Wikipedia](https://en.wikipedia.org/wiki/Rialto)
 - [Tragheto — historywalksvenice](https://historywalksvenice.com/glossary/tragheto/)
+
+## Round 5: lit and lived-in houses and shop awnings near the piazza
+
+Measured before: within 120 m of the arrival (−60, −5) 102 houses, 26 entered and furnished (an osteria in every fourth, the rest homes: the shared `house_med` builds their ground floor); none had a light or anyone at home. Fronts: three or four storeys, six colours of stucco, shutters, arched shop doors and now and then a balcony or an altana, the Procuratie's arcades, the clock tower.
+- `settlements/venice/rooms.js` and `styles/venetian/rooms.js`: a small oil lamp (lucerna) with its light on the table and the counter of each osteria and on the table of each home; people at home — the host across his counter and patrons on the bench, or the housewife at the hearth and the master on his stool, sometimes a child. The positions follow the frame of `house_med`'s `openGround`. [inferred]
+- The bottega's striped awning over the shop front on a third of the other houses within 170 m of the arrival where the calle lies before the front (not a neighbour's wall or the water): cloth slats in two colours sloping from the lintel to a rail on two poles. [inferred: shop awnings in Venetian streets of the period]

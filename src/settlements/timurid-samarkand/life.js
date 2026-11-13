@@ -6,6 +6,30 @@ import { RADIUS, SQUARE, MADRASA, SHOPS_N, SHOPS_S, BAZAAR, CHORSU, TAPCHANS, ma
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
+/**
+ * The people at home in the furnished houses within 135 m of the arrival (a stream of its own, so that the rest of the life stays where it was): the host
+ * or a guest sitting cross-legged on the carpet of the talar (the raised recess on the court), the housewife kneeling at the tandoor in the court, an old man
+ * or a boy on the charpoy. Positions in each house's own frame (houses.js timHouse: the talar's floor is 0.45 m up, the tandoor beside the wing with the room).
+ */
+function homes(L) {
+  const A = [14, 0];
+  for (const h of houses()) {
+    if (h.garden || !h.full || Math.hypot((h.rect[0] + h.rect[2]) / 2 - A[0], (h.rect[1] + h.rect[3]) / 2 - A[1]) > 135) continue;
+    const r = rng(h.seed + 4242), G = houseGeom(h), q = rng(h.seed + 7), W = G.W, D = G.D;
+    q(); if (!h.rich) q();
+    const rsgn = q() < 0.5 ? -1 : 1, dN = 4.8, dW = 4.3, dS = 4.6, zf = -D / 2 + dN, zs = D / 2 - dS, zb = zf - 2.5, xl = -W / 2 + dW, xr = W / 2 - dW, mid = (zb + zf) / 2;
+    const o = G.toWorld(0, 0), dir = ([du, dv]) => { const p = G.toWorld(du, dv); return Math.atan2(-(p[0] - o[0]), -(p[1] - o[1])); };
+    const man = (u, v, fc, ex = {}) => L.push({ t: 'figure', at: G.toWorld(u, v), y: 0.45, rot: dir(fc), seed: Math.floor(r() * 1e9), skin: r() < 0.7 ? 'skin_medium' : 'skin_light', dress: 'robe', cloth: ['cloth_green', 'cloth_ochre', 'cloth_indigo', 'cloth_white', 'cloth_brown', 'cloth_maroon'][Math.floor(r() * 6)], cloth2: 'cloth_white', over: 'sash', hat: 'turban', hatMat: r() < 0.6 ? 'cloth_white' : 'cloth_ochre', hair: 'short', beard: true, pose: 'cross', ...ex });
+    const woman = (u, v, fc, ex = {}) => L.push({ t: 'figure', at: G.toWorld(u, v), y: 0.04, rot: dir(fc), seed: Math.floor(r() * 1e9), skin: 'skin_medium', dress: 'robe', cloth: ['cloth_indigo', 'cloth_maroon', 'cloth_green'][Math.floor(r() * 3)], cloth2: 'cloth_white', hat: 'veil', hair: 'long', pose: 'stand', ...ex });
+    const t = r();
+    if (t < 0.75) man(1.5, mid - 0.4, [0, 1]);                                                         // the host in the talar, facing the court
+    if (t > 0.35) man(-1.2, mid + 0.65, [1, 0], { y: 0.45 });                                          // a guest across the tray
+    const tx = rsgn < 0 ? xl + 0.8 : xr - 0.8, tz = zs - 1.2;
+    if (r() < 0.8) woman(tx + (rsgn < 0 ? 1.1 : -1.1), tz, [rsgn < 0 ? -1 : 1, 0], { pose: 'kneel' });   // the housewife at the tandoor
+    if (r() < 0.45) man(rsgn < 0 ? xl + 1.5 : xr - 1.5, zf + 6.6 > zs - 3 ? zf + 3 : zf + 6.6, [rsgn < 0 ? 1 : -1, 0], { y: 0.42, pose: 'cross', hat: 'none', cloth: 'cloth_white' });     // an old man on the charpoy
+  }
+}
+
 export function life() {
   const rand = rng(1421), L = [], pick = (a) => a[Math.floor(rand() * a.length)];
   /** A man in a long robe (chapan) with a sash and a turban, or a woman in a long robe with a headcloth. */
@@ -94,6 +118,7 @@ export function life() {
   // nothing within a few metres of the arrival (x 14, z 0, looking west)
   const keep = L.filter((e) => !(e.at && Math.abs(e.at[1]) < 3.6 && e.at[0] > 4 && e.at[0] < 20));
   L.length = 0; L.push(...keep);
+  homes(L);
   void CHORSU;
   return L;
 }

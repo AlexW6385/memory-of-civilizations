@@ -58,7 +58,35 @@ export function compounds() {
   }
   return LOTS;
 }
-export const inCompound = (x, z, m = 0) => compounds().some((c) => inRect(c.rect, x, z, m));
+export const inCompound = (x, z, m = 0) => compounds().some((c) => inRect(c.rect, x, z, m)) || lodges().some((l) => inRect(l.foot, x, z, m));
+
+/**
+ * The houses of those who serve the avenue (docs/settlements/teotihuacan.md §5b), standing where the city has room for them near the arrival: two on
+ * the avenue's west platform in each of the two gaps between its platform temples (the priest's house and a dwelling; a workshop and a weaver's), and a
+ * little barrio of six along a lane in the open ground east of the avenue, between the Sun's front and the Ciudadela. Each { rect (the block with its
+ * portico), face, y, kind, seed, yard, foot (its whole footprint with the forecourt) }.
+ */
+let LODGES = null;
+export function lodges() {
+  if (LODGES) return LODGES;
+  LODGES = [];
+  const PL = LEVELS[2] + 2.4, add = (rect, face, y, kind, seed, yard = 0) => {
+    const [x0, z0, x1, z1] = rect, e = { e: [x1, z0, x1 + yard + 1.8, z1], w: [x0 - yard - 1.8, z0, x0, z1], s: [x0, z1, x1, z1 + yard + 1.8], n: [x0, z0 - yard - 1.8, x1, z0] }[face];
+    LODGES.push({ rect, face, y, kind, seed, yard, foot: [Math.min(x0, e[0]), Math.min(z0, e[1]), Math.max(x1, e[2]), Math.max(z1, e[3])] });
+  };
+  // the west platform's gaps (between the temples at z 6–24, 41–65 and 82–100), the platform's top 2.4 m up
+  for (const [c, a, b, d] of [[32.5, 'lodge', 'dwelling', 0], [73.5, 'workshop', 'weaver', 1]]) {
+    add([-50.5, c - 6.5, -39.5, c + 6.5], 'e', PL, a, 100 + d * 10, 0);
+    add([-35.5, c - 6, -24.5, c + 6], 'e', PL, b, 101 + d * 10, 0);
+  }
+  // the barrio along the lane x 79–83, z 103–143: the west row faces east, the east row west, each in a forecourt
+  const rows = [[103, 'dwelling', 'workshop'], [117, 'potter', 'lodge'], [131, 'dwelling', 'weaver']];
+  rows.forEach(([z, w, e2], i) => {
+    add([64.5, z, 75.5, z + 12], 'e', 0, w, 200 + i, 3.5);
+    add([86.5, z, 97.5, z + 12], 'w', 0, e2, 210 + i, 3.5);
+  });
+  return LODGES;
+}
 
 /** Is (x, z) in a street of the grid (the gaps between the compounds' lots, along the lines x or z = −RADIUS + 64 k)? */
 export function inStreet(x, z) {

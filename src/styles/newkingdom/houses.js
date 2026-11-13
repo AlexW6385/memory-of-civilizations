@@ -9,6 +9,7 @@ import { box, lathe, fromTriangles, clothBox, addCloth } from '../../core/geom.j
 import { rng } from './kit.js';
 import { nkPalm } from './palm.js';
 import { facade, cabin, dovecote, shopGoods } from './dress.js';
+import { lamp, person } from './interiors.js';
 
 export function frame(rect, front, bag, col) {
   const [x0, z0, x1, z1] = rect, zs = front === 's' ? z1 : z0, sg = front === 's' ? -1 : 1, Z = (v) => zs + sg * v;
@@ -119,8 +120,16 @@ export function rowHouse(el, ctx) {
     F.b('pottery_dark', W - th - 1.2, 0.05, D - th - 1.3, W - th - 0.8, 0.42, D - th - 1.25, false);
     F.b('mud_plaster', 2.3, 0, D - th - 1.0, 3.2, 0.18, D - th - 0.2); F.b('granite_red', 2.4, 0.18, D - th - 0.9, 3.1, 0.26, D - th - 0.3, false);
     F.lathe('terracotta', JAR(0.3), 2.0, 0, 11.4, 10);
+    // the room is lit by a clay lamp on the platform, and someone is at home: the housewife at the oven, the master on his mat, the shopkeeper behind the counter
+    lamp(F, ctx, W - th - 0.5, 0.5, 5.9, 0, 2.6);
+    const pr = rng(el.seed + 31), q = pr();
+    if (el.shop) person(F, ctx, { u: Math.max(th + 0.5, uD - 1.5), v: 1.7, face: [0, -1], who: pr() < 0.5 ? 'woman' : 'man', pose: 'squat', seed: el.seed + 3 });
+    if (q < 0.6) person(F, ctx, { u: Math.max(2.2, W - th - 2.7), v: D - th - 1.0, face: [1, 0.2], who: 'woman', pose: 'kneel', seed: el.seed + 5, cloth: 'cloth_white' });
+    if (q > 0.3) person(F, ctx, { u: 2.5, v: 6.6, face: [1, 0], who: q > 0.8 ? 'elder' : 'man', pose: 'sit_ground', seed: el.seed + 7 });
   }
   roof(F, rand, H, hole, open);
+  // a third of the houses not entered carry a room built on the roof over the front (a second storey of the street's front: its window, its door to the terrace)
+  if (!open && (el.lod ?? 1) >= 1 && W > 5.4 && rng(el.seed + 17)() < 0.38) cabin(F, rng(el.seed + 19), H, wm, [0.4, 0.5, W - 0.4, 3.9]);
 }
 
 /** nk_court_house: { rect, front, seed, open } — a court at the front with its oven, granary and palm, the roofed rooms behind, the roof terrace. */
@@ -154,6 +163,12 @@ export function courtHouse(el, ctx) {
     F.b('timber', 0.6, 0.2, sv + 0.5, 2.6, 0.3, sv + 2.2, false); F.b('reed_mat', 0.62, 0.3, sv + 0.52, 2.58, 0.32, sv + 2.18, false);
     F.lathe('terracotta', JAR(0.28), W - th - 0.5, 0, sv + 1.0, 10);
     for (let x = th + 0.3; x < W - th - 0.3; x += 0.9) F.b('timber', x, H - 0.16, cv + 0.4, x + 0.14, H, D - th, false);
+    // a clay lamp on the bench, the housewife kneeling at the court's oven, the master or an old man on the bench
+    lamp(F, ctx, W - th - 0.25, 0.42, cv + 1.4, 0, 2.6);
+    const pr = rng(el.seed + 31), q = pr();
+    if (q < 0.7) person(F, ctx, { u: th + 0.9, v: cv - 2.2, face: [0, 1], who: 'woman', pose: 'kneel', seed: el.seed + 5 });
+    if (q > 0.25) person(F, ctx, { u: W - th - 0.3, v: cv + 2.4, face: [-1, 0], who: q > 0.7 ? 'elder' : 'man', pose: 'sit', y: -0.04, seed: el.seed + 7 });
+    if (q > 0.55) person(F, ctx, { u: W * 0.5 + 1.2, v: cv - 1.6, face: [0, -1], who: 'child', pose: 'sit_ground', seed: el.seed + 9 });
   } else F.b(wm, th, 0, cv, W - th, 2.2, D - th, true);
   F.b('mud_plaster', th, -0.02, th, W - th, 0.02, cv, false);
   F.lathe('mudbrick', [[0.55, 0], [0.56, 0.3], [0.45, 0.65], [0.25, 0.85], [0.001, 0.9]], th + 0.9, 0, cv - 1.0, 12); col.circle(F.X(th + 0.9), F.Z(cv - 1.0), 0.56, 0, 0.9);
@@ -215,6 +230,10 @@ export function villa(el, ctx) {
     F.b('mud_plaster', 2.2, 0, cv + 0.4, 4.6, 0.55, cv + 1.9); F.b('reed_mat', 2.25, 0.55, cv + 0.45, 4.55, 0.57, cv + 1.85, false); F.b('limestone_carved', 4.0, 0.57, cv + 0.6, 4.4, 0.68, cv + 0.85, false);        // the bed niche
     F.b('mud_plaster', th, 1.0, cv + 0.35, 0.95, 1.6, D - th, false);
     for (let x = th + 0.3; x < W - th - 0.3; x += 0.9) F.b('timber', x, H - 0.16, hv + 1.85, x + 0.14, H, D - th, false);
+    // the hall is lit by two stands of lamps, the master of the house sits on the raised seat, a servant kneels on the mat with a tray
+    lamp(F, ctx, W / 2 + 1.0, 0.03, hv + 2.5, 1.0, 2.6); lamp(F, ctx, W / 2 - 1.0, 0.03, cv + 0.7, 1.0, 2.2);
+    person(F, ctx, { u: th + 0.5, v: hv + 3.0, face: [1, 0], who: 'man', pose: 'sit', y: 0.04, seed: el.seed + 7, cloth: 'cloth_white' });
+    person(F, ctx, { u: W / 2 - 0.4, v: hv + 3.0, face: [-1, 0.2], who: 'woman', pose: 'kneel', seed: el.seed + 5, cloth: 'cloth_white' });
   } else F.b(wm, th, 0, hv + 1.85, W - th, 2.5, D - th, true);
   roof(F, rand, H, hole, open, [0, hv, W, D]);
 }

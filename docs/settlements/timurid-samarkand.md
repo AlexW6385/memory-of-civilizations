@@ -107,3 +107,8 @@ Sources: Leiden Iran-Turan, Gur-i Amir (https://iranturan.leiden.edu/cities/sama
 ## 14. Level reached
 
 L2–L3: every house's court and roof walkable, a room and talar furnished in the houses near the centres, fronts dressed, the market on the Registan, all four great interiors (Gur-e Amir, Bibi-Khanym, the observatory hall, the madrasa's mosque and classroom, the khanqah) enterable. Below Suzhou: the madrasa's upper storeys and three of its four corner halls (and the cells beyond the furnished ones) are shut, the observatory's upper floors, the minarets' stairs, Gur-e Amir's crypt and screen; no water life (there is none); weathering is by the generic material rules (plinth, patches) with no per-climate tuning; the town beyond the furnished ring is courts and roofs without rooms.
+
+## Round 5: people at home in the courtyard houses
+
+Measured before: within 120 m of the arrival (14, 0) in the Registan 26 houses, 24 courtyard houses and 2 garden houses, all entered, furnished and each lit by two oil lamps; someone stood at the street door of about every second, but nobody was inside. Fronts: the madrasa's pishtaq, the khanqah, the two rows of shop recesses, the one- and two-storey courtyard houses, the tea-houses' platforms.
+- In the furnished houses within 135 m of the arrival (`life.js` `homes`): the host sitting cross-legged on the carpet of the talar (the raised recess on the court) and a guest across the tray; the housewife kneeling at the tandoor in the court; an old man on the charpoy. [inferred]
