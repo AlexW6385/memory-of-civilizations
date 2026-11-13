@@ -93,6 +93,21 @@ export const zoneOf = (x) => (x < WALL_X - 8 ? 'suburb' : x > FIELDS_X ? 'countr
 const TRADES = ['cloth', 'grain', 'tea', 'medicine', 'pawn', 'books', 'incense', 'sweets', 'noodles', 'pottery', 'iron', 'oil', 'paper', 'lanterns', 'rope', 'bamboo'];
 const TRADES_NEAR = ['cloth', 'tea', 'medicine', 'books', 'incense', 'sweets', 'noodles', 'lanterns', 'paper', 'pawn'];
 
+
+// the places the visitor is set down at and walks to: the arrival, the Rainbow Bridge, the city gate (its radius counts 1/1.6)
+export const hotDist = (x, z) => Math.min(Math.hypot(x - 160, z + 140), Math.hypot(x, z - 76), Math.hypot(x + 282, z + 84) * 1.6);
+/**
+ * How much detail a lot's building gets: 2 within 130 m of the bridge, 1 within 170 m of it or 130 m of the arrival or the gate, 0 within 180 m
+ * of any of them, and beyond that (-1) the far shell of far.js for the plain houses and cottages (shops and inns stay at 0).
+ */
+function detOf(zone, dBridge, px, pz, kind) {
+  const h = hotDist(px, pz);
+  let det;
+  if (zone === 'city') det = dBridge < 130 ? 2 : (dBridge < 170 || h < 130) ? 1 : h < 180 ? 0 : -1;
+  else det = h < 130 ? 1 : h < 180 ? 0 : -1;
+  if (det < 0 && !(kind === 'house' || kind === 'thatch' || kind === 'farm')) det = 0;
+  return det;
+}
 let LOTS = null, GRID = null;
 const rectsMeet = (a, b, m = 0) => a[0] - m < b[2] && a[2] + m > b[0] && a[1] - m < b[3] && a[3] + m > b[1];
 /** The building's footprint inside its lot: against the street, `dep` deep, inset `ins` at the sides. */
@@ -174,7 +189,7 @@ export function lots() {
           const [r, wdt] = rectFor(n2);
           if (!(fits(r) && inZone(r) && clearOfPlaces(r) && !rw(r) && free(r))) continue;
           take(r);
-          const det = zone === 'city' ? (d < 170 ? 2 : d < 300 ? 1 : 0) : (zone === 'suburb' ? (Math.hypot(px - WALL_X, pz + 80) < 90 ? 1 : 0) : 0);
+          const det = detOf(zone, d, px, pz, kind);
           const along = horiz ? r[2] - r[0] : r[3] - r[1];
           LOTS.push({ rect: r, foot: footOf(r, front, kind === 'inn' ? depLot - 0.5 : dep, kind === 'farm' ? 0.5 : ins), front, kind, storeys: kind === 'inn' ? 2 : storeys, shop: kind === 'shop' || kind === 'inn' || kind === 'warehouse', seed: Math.floor(rand() * 1e6), bays: n2, bay: kind === 'farm' ? 3.2 : (along - 0.3 - ins * 2) / n2, ins, det, trade: kind === 'shop' ? pickTrade(d) : null, street: w.i, riverside: riverS || riverN, zone });
           t += wdt; placedLot = true;
