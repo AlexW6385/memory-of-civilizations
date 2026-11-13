@@ -9,7 +9,7 @@
 // with their bucket-carriers, and along the river's quays the sacks, barrels, crates, mooring posts and
 // porters. Everything is derived from layout.js (lots, streets, lanes, river) at build time; every thing is an
 // instance of the shared life-style objects (src/objects), merged per material by the plan.
-import { RADIUS, RIVER, BRIDGE, WALL_X, FIELDS_X, GATE, STREETS, LANES, STONE_BANK, WHARVES, STEPS, lots, inLot, inRect, bridgeDeck } from './layout.js';
+import { RADIUS, RIVER, BRIDGE, WALL_X, FIELDS_X, GATE, STREETS, LANES, STONE_BANK, WHARVES, STEPS, lots, inLot, inRect, bridgeDeck, hotDist } from './layout.js';
 import { tradeOf } from './trades.js';
 import { shopElements } from './shops.js';
 import { doorOf } from './houses.js';
@@ -62,7 +62,7 @@ export function streetPlans(base) {
 
   // ---- the lots' fronts ---------------------------------------------------------------------------------
   for (const l of lots()) {
-    if (special.has(l) || l.zone === 'country' && l.kind !== 'farm') continue;
+    if (special.has(l) || l.zone === 'country' && l.kind !== 'farm' || l.det < 0) continue;      // (the far shells, over 200 m from the sights, are left bare)
     const F = frontOf(l), d = dBridge(...F.P(0.5, 0)), trade = tradeOf(l), lim = reach(l), r = rng(l.seed * 7 + 3), rp = (a) => a[Math.floor(r() * a.length)];
     if (Math.hypot(...F.P(0.5, 0)) > RADIUS - 40) continue;
     const near = d < 260, along = (t, o) => F.P(t, o);
@@ -227,6 +227,9 @@ export function streetPlans(base) {
   }
   // the walker's route along the main street's axis (x = 0) and over the bridge stays free of standing people
   for (let i = L.length - 1; i >= 0; i--) if (L[i].t === 'figure' && Math.abs(L[i].at[0]) < 0.9 && L[i].at[1] > -84 && L[i].at[1] < 204) L.splice(i, 1);
+  // far from the sights (the arrival, the bridge, the gate) only every third thing stays: the outskirts are quieter and nobody stands there to see
+  let nFar = 0;
+  for (let i = L.length - 1; i >= 0; i--) if (hotDist(L[i].at[0], L[i].at[1]) > 150 && nFar++ % 3) L.splice(i, 1);
   return [base('song-kaifeng-street-life', L, 'life'), base('song-kaifeng-street-things', S)];
 }
 

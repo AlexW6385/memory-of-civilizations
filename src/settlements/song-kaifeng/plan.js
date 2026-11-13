@@ -4,6 +4,7 @@
 // city gate with its tower; the streets' paving.
 
 import { RADIUS, RIVER, BRIDGE, MONASTERY, PAGODA, WALL_X, STREETS, GATE, FIELDS_X, STONE_BANK, APPROACH, pavedWay, paveRects, RIVER_WALK, BRIDGE_APRON, STEPS } from './layout.js';
+import './style.js';
 import { interiorRooms } from './interiors.js';
 
 const E = [];
@@ -11,7 +12,7 @@ const RW = RADIUS - 26, half = (z) => Math.sqrt(Math.max(0, RW * RW - z * z));
 // ---- the Iron Pagoda: base side 4.16 m (circumradius 5.4), thirteen storeys narrowing to the top
 const tiers = [];
 for (let i = 0; i < 13; i++) tiers.push({ r: 5.4 - i * 0.19, h: i === 0 ? 5.6 : 3.75 - i * 0.06 });
-E.push({ t: 'pagoda_oct', c: PAGODA, y: 0, base: { r: 7.2, h: 1.2 }, tiers, galleries: false, core: 'tile_iron', eave: 'tile_iron', frame: 'tile_iron', spire: 3.6, relief: true, bells: 'bronze', interior: true });
+E.push({ t: 'kf_pagoda', c: PAGODA, y: 0, base: { r: 7.2, h: 1.2 }, tiers, galleries: false, core: 'tile_iron', eave: 'tile_iron', frame: 'tile_iron', spire: 3.6, relief: true, bells: 'bronze', interior: true });
 // the way up onto the base on the south, to the pagoda's door (the inside is walkable: a spiral stair in the shaft, a window to the west on every storey)
 E.push({ t: 'stairs', rect: [PAGODA[0] - 1.9, PAGODA[1] + 6.5, PAGODA[0] + 1.9, PAGODA[1] + 9.9], y0: 0.04, y1: 1.2, dir: 'n', mat: 'granite_block' });
 // the monastery: its wall, the gate hall standing in the south wall's line (the way in through its
@@ -126,7 +127,7 @@ export const pagoda = {
   id: 'song-kaifeng-iron-pagoda',
   name: { en: 'The Iron Pagoda and the Rainbow Bridge', zh: '铁塔与虹桥' },
   era: { en: 'Northern Song, c. 1120', zh: '北宋，约1120年' },
-  style: 'song',
+  style: 'kaifeng-site',
   origin: [0, 0], base: 0, yaw: 0,
   entrance: { at: [160, -130], facing: 'n' },
   // the landmark's precinct: the gate and its wall, the monastery, the bridge and the two river streets. The generic street life (src/objects/life.js) keeps out of the bounds

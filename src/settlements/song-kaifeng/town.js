@@ -6,6 +6,7 @@
 // Physician Zhao's shop with its standing signboards, the fortune tellers' stands and the young men
 // round them, ox carts under their mat covers, a one-wheeled barrow drawn by a donkey, a dray of wine
 // casks, the trackers hauling a boat up the river, the fields to the east with a train of donkeys.
+import { hotDist } from './layout.js';
 import { RADIUS, RIVER, BRIDGE, GATE, WALL_X, FIELDS_X, STREETS, inRect, inLot, lots, wineLots, teaLots, bridgeDeck } from './layout.js';
 import * as LY from './layout.js';
 import './style.js';
@@ -128,9 +129,10 @@ function scroll() {
   const wine = new Set(wineShops()), tea = new Set(teaHouses());
   for (const l of lots()) {
     if (!l.shop || wine.has(l) || tea.has(l)) continue;
+    if (hotDist((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) > 200) continue;      // (name boards are read from near: none on the far shops)
     const F = frontLine(l), m = [(F.a[0] + F.b[0]) / 2 - F.out[0] * 0.505, (F.a[1] + F.b[1]) / 2 - F.out[1] * 0.505], L = Math.hypot(F.b[0] - F.a[0], F.b[1] - F.a[1]);
-    const n = Math.min(Math.floor((L - 0.6) / 0.36), 2 + (l.seed % 4));
-    if (n >= 2) S.push({ t: 'shop_plaque', at: m, y: 0, rot: Math.atan2(F.out[0], F.out[1]), n, scheme: [0, 0, 1, 2][l.seed % 4 === 3 ? (l.seed >> 3) % 4 : (l.seed >> 2) % 3], seed: l.seed >> 5 });
+    const n = Math.min(Math.floor((L - 0.6) / 0.36), 2 + (l.seed % 3));          // (2-4 characters, two stroke sets: 18 shapes in all, each repeated enough to be instanced)
+    if (n >= 2) S.push({ t: 'shop_plaque', at: m, y: 0, rot: Math.atan2(F.out[0], F.out[1]), n, scheme: [0, 0, 1, 2][l.seed % 4 === 3 ? (l.seed >> 3) % 4 : (l.seed >> 2) % 3], seed: (l.seed >> 5) % 2 });
   }
   more(S, L, rand, person, pick);
   return [base('song-kaifeng-scroll', S), base('song-kaifeng-crowds', L, 'life')];
@@ -359,7 +361,7 @@ export async function town() {
     groups.get(k).push(l);
   }
   const furnished = furnishedLots();
-  for (const [k, all] of [...groups].sort()) for (let i = 0; i < all.length; i += 120) plans.push(base(`song-kaifeng-houses-${k.replace(':', '-')}-${i / 120}`, all.slice(i, i + 120).map((l) => ({ t: 'house_song', y: 0, ...l, trade: tradeOf(l) ?? l.trade, furnished: furnished.has(l) })), 'kaifeng-site'));
+  for (const [k, all] of [...groups].sort()) for (let i = 0; i < all.length; i += 120) plans.push(base(`song-kaifeng-houses-${k.replace(':', '-')}-${i / 120}`, all.slice(i, i + 120).map((l) => (l.det < 0 ? { t: 'kf_far_wall', y: 0, ...l, door: doorOf(l) } : { t: l.det === 0 && !l.shop && hotDist((l.foot[0] + l.foot[2]) / 2, (l.foot[1] + l.foot[3]) / 2) > 150 ? 'kf_mid_wall' : 'house_song', y: 0, ...l, trade: tradeOf(l) ?? l.trade, furnished: furnished.has(l) })), 'kaifeng-site'));
   plans.push(waterside(), ...scroll(), ...landing());
   // the shops' signs on their poles and goods in the street; the rooms of the shops, wine shops and tea shops furnished, their people
   plans.push(base('song-kaifeng-shops', shopElements(), 'life'));

@@ -14,7 +14,7 @@ import { hangFrom, windMat, fromTriangles } from '../../core/geom.js';
 import '../../objects/index.js';
 import { placer, assembly } from '../../objects/kit.js';
 import { box, rod, ly, drum, bowl, jar, prismX, rng, limb } from './props.js';
-import { lots } from './layout.js';
+import { lots, hotDist } from './layout.js';
 import { poleA, doorOf } from './houses.js';
 import { tradeOf, wineShops, teaHouses } from './trades.js';
 
@@ -252,6 +252,7 @@ export function shopElements() {
   for (const l of lots()) {
     const trade = tradeOf(l);
     if (!l.shop || !trade || l.kind === 'warehouse') continue;
+    if (hotDist((l.foot[0] + l.foot[2]) / 2, (l.foot[1] + l.foot[3]) / 2) > 230) continue;      // (the far shops' sign poles and goods: nobody is near to read them)
     const { at, rot, w } = frontOf(l), c = Math.cos(rot), s = Math.sin(rot);
     const a = poleA(l.seed, w), pole = [[a, 0]];                    // house frame: a along u from its origin
     const f = l.front, [x0, z0, x1, z1] = l.foot, o = f === 's' ? [x1, z1] : f === 'n' ? [x0, z0] : f === 'e' ? [x1, z0] : [x0, z1], u = f === 's' ? [-1, 0] : f === 'n' ? [1, 0] : f === 'e' ? [0, 1] : [0, -1];
