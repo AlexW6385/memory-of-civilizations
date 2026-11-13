@@ -323,7 +323,7 @@ Targets on the author's machine (Apple M2, 8 GB). Automatic quality settles ther
 
 Replace these lines, never append to them; keep them few.
 
-- v12.0 (2026-11-12): 94 settlements stand, each reviewed at its arrival in the author's Chrome (§4.4, §5). **Still below §5:** ordinary houses beyond the first 120 m are mostly shut; the fronts vary by add-ons in several; Barcelona's Sagrada Família façade is still blocky; the baked light for the new rooms is to be re-run (`node tools/bake.mjs <id> --stale`) and the impostors regenerated; four walk routes fail in the plans (Paris, Sainte-Chapelle route 2; Granada, Generalife route 1; Venice, San Marco route 1; Ayutthaya, wat routes 1–2).
+- v12.0 (2026-11-12): 94 settlements stand, each reviewed at its arrival in the author's Chrome (§4.4, §5). **Still below §5:** ordinary houses beyond the first 120 m are mostly shut; the fronts vary by add-ons in several; Barcelona's Sagrada Família façade is still blocky; Kaifeng loads slowly (about 20 s) and stands at the edge of the frame budget. The baked light and the impostors are current for all 94; every walk route passes.
 - **Next:** a second browser tour beyond the arrivals (the first 300 m of each), and the phone.
 
 ## 11. Rules
