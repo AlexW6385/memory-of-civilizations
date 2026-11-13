@@ -961,7 +961,9 @@ export class World {
         for (const rec of st.parts) {
           const P = rec.plan;
           if (!P.near && !P.far) continue;
-          const d = Math.hypot(L[0] - P.center[0], L[2] - P.center[1], alt * 0.7);
+          // (a plan that names a distance but no centre: its bounds' middle, else the settlement's own)
+          const c = P.center ?? (P.center = P.bounds ? [(P.bounds[0] + P.bounds[2]) / 2, (P.bounds[1] + P.bounds[3]) / 2] : [0, 0]);
+          const d = Math.hypot(L[0] - c[0], L[2] - c[1], alt * 0.7);
           rec.group.visible = P.near ? d < P.near : d >= P.far;
           // the small things of the streets cast shadows only in the tiles round the visitor: farther
           // off their shadows are a few texels in the outer cascades but cost a draw each
