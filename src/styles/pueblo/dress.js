@@ -60,8 +60,8 @@ const KINDS = {
   whitewash(P, rand, v) {
     const y0 = 0.45 + (v % 2) * 0.1;
     let x = 0.1;
-    for (let k = 0; k < 6; k++) { const x1 = Math.min(4.9, x + 0.55 + rand() * 0.55); P.add('kahgel', box(x, y0, 0.016, x1, y0 + 1.55 + rand() * 0.75, 0.034)); x = x1; if (x >= 4.9) break; }
-    if (v % 2) P.add('kahgel', box(0.1, y0, 0.016, 4.9, y0 + 0.2, 0.04));
+    for (let k = 0; k < 6; k++) { const x1 = Math.min(4.9, x + 0.55 + rand() * 0.55); P.add('kahgel', box(x, y0, 0.07, x1, y0 + 1.55 + rand() * 0.75, 0.086)); x = x1; if (x >= 4.9) break; }
+    if (v % 2) P.add('kahgel', box(0.1, y0, 0.07, 4.9, y0 + 0.2, 0.092));
   },
   /** A viga end with strings of maize hung from it: a peg of pole stands out of the wall at head height. */
   maize(P, rand, v) {
