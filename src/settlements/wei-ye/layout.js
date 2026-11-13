@@ -57,6 +57,19 @@ export function height(x, z) {
   return h * (1 - smooth(RADIUS - 30, RADIUS, r));
 }
 
+// the household of the Tongque Garden (docs/settlements/wei-ye.md §6.3): the lodgings and workrooms of the people who kept it — the guards' barracks, the
+// ice-keepers' store, the steward's office, the garden's kitchen, the musicians' hall, the weavers' row, the smith, the servants' row — in the garden's open
+// ground between the terraces and the palace wall, on the paths; door sides on the paths (front 's': the door on the south side)
+export const LODGES = [
+  { rect: [-164, -58, -151, -43], front: 's', kind: 'row', room: 'barracks', seed: 2151, say: 'guards\' barracks' },
+  { rect: [-150, -58, -137, -43], front: 's', kind: 'court', room: 'ice', seed: 2152, say: 'ice-keepers\' store' },
+  { rect: [-136, -63, -122, -43], front: 's', kind: 'tower', room: 'scribe', seed: 2153, say: 'steward\'s office' },
+  { rect: [-106, -58, -92, -43], front: 's', kind: 'court', room: 'kitchen', seed: 2154, say: 'garden kitchen' },
+  { rect: [-91, -58, -78, -43], front: 's', kind: 'row', room: 'smithy', seed: 2155, say: 'smithy' },
+  { rect: [-106, -128, -92, -113], front: 's', kind: 'court', room: 'music', seed: 2156, say: 'musicians\' hall' },
+  { rect: [-165, -130, -153, -119], front: 's', kind: 'row', room: 'loom', seed: 2157, say: 'weavers\' row' },
+];
+export const inLodge = (x, z, m = 0) => LODGES.some((l) => inRect(l.rect, x, z, m));
 // the markets and wards (walled units of 104 × 104 m, two lanes each) and the Qili ward
 export const MARKET = [128, 50, 236, 158];
 export const MARKET_WALL = { th: 2.4, h: 5 };

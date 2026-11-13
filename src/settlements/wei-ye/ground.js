@@ -4,7 +4,7 @@
 // Pure (used by the relief, the collision and the plant workers).
 
 import { KEEP } from './forecourt.js';
-import { GATES_S, GATES_N, inFarm, RADIUS, PALACE, W_TERRACE, TERRACES, SPARROW, zOf, POND, POND_Y, AVENUE, MARKET, WARDS, RIVER, riverZ, height, inPond, inRiver, inRect, inLot, lots, streets, inCity } from './layout.js';
+import { GATES_S, GATES_N, inFarm, RADIUS, PALACE, W_TERRACE, TERRACES, SPARROW, zOf, POND, POND_Y, AVENUE, MARKET, WARDS, RIVER, riverZ, height, inPond, inRiver, inRect, inLot, lots, streets, inCity, inLodge } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 const inWard = (x, z) => WARDS.some((w) => inRect(w, x, z));
@@ -23,6 +23,7 @@ function cover(x, z, h) {
   }
   if (inRect(W_TERRACE.r, x, z, 3) || inRect([-50, -102, 50, -8], x, z) || nearTerrace(x, z, 3)) { c.road = 0.9; c.sand = 0.2; c.soil = 0.2; c.dry = 0.9; return c; }
   if (inRect(AVENUE, x, z) || inRect(MARKET, x, z) || streets().some((r) => inRect(r, x, z))) { c.road = 0.85; c.sand = 0.3; c.soil = 0.4; return c; }
+  if (inLodge(x, z, 1)) { c.road = 0.7; c.sand = 0.3; c.soil = 0.4; c.grass = 0.05; return c; }
   if (inRect(GARDEN, x, z)) { c.grass = 0.45; c.sand = 0.25; c.soil = 0.45; c.road = 0.05; return c; }
   c.sand = 0.45 + 0.15 * hash2(x * 0.07, z * 0.07); c.road = 0.15;
   return c;
@@ -50,6 +51,7 @@ function planting(x, z) {
     return null;
   }
   if (inRect(MARKET, x, z, 1) || inWard(x, z)) return null;
+  if (inLodge(x, z, 2)) return null;
   if (inRect(GARDEN, x, z)) {
     if (GARDEN_WAYS.some((r) => inRect(r, x, z, 1.5))) return null;
     if (KEEP.some(([kx, kz, kr]) => Math.hypot(x - kx, z - kz) < kr)) return { grass: 6 };
