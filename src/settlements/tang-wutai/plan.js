@@ -6,6 +6,7 @@
 import { HALL, RADIUS } from './layout.js';
 import { monasteryElements } from './monastery.js';
 import { courtElements } from './courts.js';
+import { cellElements, cellPeople } from './cells.js';
 import hallPlan from '../../buildings/foguang-east-hall/plan.js';
 
 const T = 13;                                   // the upper terrace (hall plan, y above the courtyard)
@@ -73,11 +74,11 @@ function quarters() {
       const a = at(x0 + k * BAY + 0.22, 0)[0], b = at(x0 + (k + 1) * BAY - 0.22, 0)[0], [, Zb] = at(0, zb), [, Zf] = at(0, zf), L = b - a, m = (a + b) / 2;
       wall([a, Zb], [b, Zb]);
       const door = k % 2 === 1;
-      wall([a, Zf], [b, Zf], door ? [] : [{ at: L / 2, w: 1.8, h: 1.1, y0: P + 1.1 }]);
+      wall([a, Zf], [b, Zf], door ? (k < 6 ? [{ at: L / 2, w: 1.5, h: 2.3, y0: P }] : []) : [{ at: L / 2, w: 1.8, h: 1.1, y0: P + 1.1 }]);
       const fz = Zf + out * 0.18;                                   // the outer face of the front wall
       if (door) {
         // a plank door of two leaves in its frame, closed; the threshold stone
-        add({ t: 'block', rect: [m - 0.75, Math.min(fz - out * 0.02, fz + out * 0.06), m + 0.75, Math.max(fz - out * 0.02, fz + out * 0.06)], y0: P + 0.12, y1: P + 2.3, mat: 'timber_red', collide: false });
+        // (the leaves stand open against the jambs: the way in)
         for (const e of [-0.86, 0.86]) add({ t: 'block', rect: [m + e - 0.1, Math.min(fz - out * 0.02, fz + out * 0.1), m + e + 0.1, Math.max(fz - out * 0.02, fz + out * 0.1)], y0: P, y1: P + 2.45, mat: 'timber_red', collide: false });
         add({ t: 'block', rect: [m - 0.96, Math.min(fz - out * 0.02, fz + out * 0.1), m + 0.96, Math.max(fz - out * 0.02, fz + out * 0.1)], y0: P + 2.3, y1: P + 2.5, mat: 'timber_red', collide: false });
         add({ t: 'block', rect: [m - 0.9, Math.min(fz, fz + out * 0.3), m + 0.9, Math.max(fz, fz + out * 0.3)], y0: P - 0.02, y1: P + 0.12, mat: 'limestone', collide: false });
@@ -93,6 +94,7 @@ function quarters() {
     for (const x of [x0, x1]) { const X = at(x, 0)[0] + (x === x0 ? 0 : 0); for (const [za, zb2] of [[zf, zb]]) wall([X, at(0, za)[1] + (za < zb2 ? 0.22 : -0.22)], [X, at(0, zb2)[1] + (za < zb2 ? -0.22 : 0.22)]); }
     add({ t: 'hip_roof', c: [cx, cz], A: N * BAY / 2 + 1.7, B: D / 2 + 1.7, y: P + H + 0.45, rise: 2.9, eaveSlope: 0.3, pow: 1.5, lift: 0.35, mat: 'tile_grey', soffit: 'timber_red', rafters: { out: 1.7, sp: 0.3 }, tangChiwei: 1.0 });
   }
+  E.push(...cellElements(at));
   const [bx0, bz0] = at(-105, -44), [bx1, bz1] = at(-74, 44);
   return { id: 'tang-wutai-quarters', style: 'chinese', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: E, rooms: [], bounds: [bx0, bz0, bx1, bz1], entrance: { at: at(-90, 0), facing: 'e' } };
 }
@@ -131,6 +133,8 @@ function monks() {
   // the monk Yuancheng under the south end bay's window, facing the platform
   L.push({ t: 'figure', at: at(-2.5, 10.5), y: F + 0.9, rot: faceTo([-1, 0]), seed: 8571, dress: 'robe', cloth: 'clay_robe', cloth2: 'clay_green', over: 'collar', skin: 'stucco_warm', hair: 'bun', hairMat: 'hide_black', hat: 'none', pose: 'cross', arms: 'clasp', h: 1.58, beard: false });
   L.push({ t: 'figure', at: at(-7.7, 14.8), y: F + 0.3, rot: faceTo([1, -0.45]), seed: 8572, dress: 'robe', cloth: 'clay_robe', cloth2: 'clay_robe', over: 'sash', skin: 'stucco_warm', hair: 'shaven', hat: 'none', pose: 'cross', arms: 'clasp', h: 1.66, beard: false });
+  // in the rooms of the quarters (cells.js)
+  L.push(...cellPeople(at, (pt, y, dir, extra = {}) => ({ t: 'figure', at: pt, y, rot: faceTo(dir), seed: seed++ * 7919, dress: 'robe', cloth: seed % 3 ? 'cloth_black' : 'cloth_grey', cloth2: 'cloth_brown', skin: 'skin_light', hat: 'cap', hatMat: 'skin_light', carry: 'none', pose: 'stand', ...extra })));
   return { id: 'tang-wutai-monks', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: L, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-80, 0], facing: 'e' } };
 }
 export const people = monks();

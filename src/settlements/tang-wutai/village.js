@@ -26,13 +26,14 @@ export function village() {
   });
   const all = [...lots(), ...plots.filter((p) => p.kind === 'yard')];
   // the open houses: the three yards nearest the gate on the main lane's two sides, an inn first
-  const near = [...all].filter((l) => (l.rect[2] - l.rect[0]) >= 13).sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 + 76, (a.rect[1] + a.rect[3]) / 2) - Math.hypot((b.rect[0] + b.rect[2]) / 2 + 76, (b.rect[1] + b.rect[3]) / 2)).slice(0, 3);
+  // (round the gate: the four trades take the first plots of the lane's two sides, then three open houses)
   // the trades: the nearest flat plots on the main lane (after the three open houses) take an inn, a smithy, a shop and a hostel, each with a
   // furnished interior (shops.js); the next seven flat houses are open as well
-  const dg = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 + 100, (l.rect[1] + l.rect[3]) / 2);
+  const dg = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 + 76, (l.rect[1] + l.rect[3]) / 2);
   const flat = (l) => l.y - l.foot <= 0.7 && (l.rect[2] - l.rect[0]) >= 14;
   const specials = new Map();
-  [...all].filter((l) => !near.includes(l) && l.lane === 0 && flat(l)).sort((a, b) => dg(a) - dg(b)).slice(0, TRADES.length).forEach((l, i) => specials.set(l, TRADES[i]));
+  [...all].filter((l) => l.lane === 0 && flat(l)).sort((a, b) => dg(a) - dg(b)).slice(0, TRADES.length).forEach((l, i) => specials.set(l, TRADES[i]));
+  const near = [...all].filter((l) => (l.rect[2] - l.rect[0]) >= 13 && !specials.has(l)).sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 + 76, (a.rect[1] + a.rect[3]) / 2) - Math.hypot((b.rect[0] + b.rect[2]) / 2 + 76, (b.rect[1] + b.rect[3]) / 2)).slice(0, 3);
   const more = new Set([...all].filter((l) => !near.includes(l) && !specials.has(l) && flat(l)).sort((a, b) => dg(a) - dg(b)).slice(0, 16));
   for (const p of plots) {
     const fr = frame(p.rect, p.front), { L, D } = fr;
