@@ -50,6 +50,7 @@ const SKIP = (x, z, m = 0) => inRect(PALACE, x, z, m + 2) || inRect(PRECINCT, x,
 /** Is this point on a lane (its centre line within LANE/2 of a line and the lane not cut off by a landmark)? */
 export function onLane(x, z, m = 0) {
   const hw = LANE / 2 + m;
+  if (GATE_LANES.some((r) => inRect(r, x, z, m - 0.5))) return true;
   let ax = false, az = false;
   for (const l of XL) if (Math.abs(x - l) < hw) { ax = true; break; }
   for (const l of ZL) if (Math.abs(z - l) < hw) { az = true; break; }
@@ -133,7 +134,26 @@ function build() {
     else if (!way && q > 0.93 && nOpen < 16) { l.open = true; nOpen++; }
   }
   // (the ones east of the Way are given the lane's first houses as shops too)
+  // the gate quarter (docs/settlements/babylon.md §13.7): outside the inner wall, where the Way leaves the open ground for the Ishtar Gate, the caravans that came in at the northern roads stood and were
+  // taxed; the houses of the people who lived by them stand in two double rows either side of the Way's mouth, on lanes of their own, fronts to the lane, the ale-houses and bakers, the smiths who shod the
+  // animals, potters, carpenters and weavers in their shops among open houses of the same plan and a few shut ones of two storeys. [inferred: the plan of an outer-city quarter, the trades from the Code of
+  // Hammurabi's ale-wives and the Neo-Babylonian business archives]
+  const GQ = [['e', -85, -71, ['shop', 'open', 'shop', 'plain', 'open']], ['w', -66, -53, ['open', 'shop', 'plain', 'shop', 'open']], ['e', -27, -14, ['shop', 'plain', 'open', 'shop', 'shop']], ['w', -9, 5, ['open', 'shop', 'shop', 'open', 'plain']]];
+  const GT = ['brewer', 'baker', 'smith', 'potter', 'grocer', 'carpenter', 'weaver', 'brewer'];
+  let gt = 0;
+  for (const [door, x0, x1, kinds] of GQ) {
+    let a = GATE_Z0, i = 0;
+    while (a + 11 <= GATE_Z1 + 0.01) {
+      let w = 11 + Math.floor(rand() * 4); if (GATE_Z1 - (a + w) < 11) w = GATE_Z1 - a;
+      const kind = kinds[i++ % kinds.length], l = { rect: [x0, a, x1, a + w], door, seed: seedFor(rand, door), col: 'gate', gate: true };
+      if (kind === 'shop') l.shop = GT[gt++ % GT.length]; else if (kind === 'open') l.open = true;
+      LOTS.push(l); a += w;
+    }
+  }
 }
+/** The gate quarter's span along z (north of the inner wall) and its two lanes, one either side of the Way's mouth: [x0, z0, x1, z1] each (5 m wide; the cross lane in the north joins them). */
+export const GATE_Z0 = -378, GATE_Z1 = -318;
+export const GATE_LANES = [[-71, GATE_Z0 - 6, -66, GATE_Z1 - 4], [-14, GATE_Z0 - 6, -9, GATE_Z1 - 4], [-71, GATE_Z0 - 6, -9, GATE_Z0 - 1]];
 /** The houses of the blocks: { rect, door, seed, open?, school?, shop? }. */
 export function lots() { if (!LOTS) build(); return LOTS; }
 /** The 3 m alleys between the back-to-back rows: [x0, z0, x1, z1]. */
@@ -171,6 +191,7 @@ export function laneRects() {
     const cuts = XL.map((x) => [x - LANE / 2, x + LANE / 2]);
     run(-RADIUS, RADIUS, 2, (x) => !SKIP(x, l, -2) && CORE(x, l) && !cuts.some(([a, b]) => x > a - 1 && x < b + 1), (a, b) => [a + (cuts.some(([c, d]) => Math.abs(a - d) < 1.5) ? 1 : 0) , l - LANE / 2, b - (cuts.some(([c]) => Math.abs(b - c) < 1.5) ? 1 : 0), l + LANE / 2]);
   }
+  out.push(...GATE_LANES);
   return out;
 }
 /** The furniture of the lanes: { at, kind, rot, seed } at the lane's edge every 20–45 m, clear of every open house and shop. */
