@@ -3,19 +3,24 @@
 // each fitted out by its trade.
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import { frame, chair } from './rooms.js';
+import { milkbar, butcher, chemist, barber } from './shops2.js';
 import { Quads, letters, textLen, fitCell } from '../artdeco/dress.js';
 
 const both = (t) => { const o = [...t]; for (let i = 0; i < t.length; i += 9) o.push(...t.slice(i, i + 3), ...t.slice(i + 6, i + 9), ...t.slice(i + 3, i + 6)); return o; };
 const KINDS = {
   pub: { name: 'HOTEL', wall: 'sandstone_dressed', floor: 'tile_grey', riser: 'tile_green', fascia: 'paint_ferry_green', letter: 'gold', awning: ['cloth_green', 'cloth_white'], door: 0.5, H1: 3.9 },
   newsagent: { name: 'NEWSAGENT', wall: 'brick', floor: 'tile_cream', riser: 'tile_cream', fascia: 'car_blue', letter: 'paint_white', awning: ['cloth_blue', 'cloth_white'], door: 0.3, H1: 3.5 },
+  milkbar: { name: 'MILK BAR', wall: 'stucco_cream', floor: 'tile_cream', riser: 'tile_green', fascia: 'car_red', letter: 'paint_white', awning: ['cloth_red', 'cloth_white'], door: 0.3, H1: 3.4, top: 7.5, parapet: 'step', blade: 'car_red' },
+  butcher: { name: 'BUTCHER', wall: 'brick', floor: 'tile_white', riser: 'tile_white', fascia: 'cloth_maroon', letter: 'paint_white', awning: ['cloth_red', 'cloth_white'], door: 0.7, H1: 3.6, top: 8.0, parapet: 'cornice' },
+  chemist: { name: 'CHEMIST', wall: 'facade_buff', floor: 'tile_cream', riser: 'granite_black', fascia: 'glaze_green', letter: 'paint_white', awning: ['cloth_green', 'cloth_white'], door: 0.5, H1: 3.8, top: 9.0, parapet: 'cornice', blade: 'glaze_green' },
+  barber: { name: 'BARBER', wall: 'facade_brick', floor: 'tile_grey', riser: 'glaze_blue', fascia: 'car_blue', letter: 'paint_white', awning: ['cloth_blue', 'cloth_white'], door: 0.3, H1: 3.3, top: 7.2, parapet: 'step', pole: true },
   greengrocer: { name: 'FRUIT VEG', wall: 'brick', floor: 'concrete_light', riser: 'wood_painted', fascia: 'shutter_green', letter: 'paint_white', awning: ['cloth_green', 'cloth_white'], door: 0.5, H1: 3.5 },
 };
 
 /** shop_room: { rect, y (the floor), front, kind ('pub' | 'newsagent' | 'greengrocer'), gy (the footpath), seed, name } */
 export function shopRoom(el, { bag, col, lights }) {
   const K = KINDS[el.kind] ?? KINDS.newsagent, { L, Dp, W, R, B } = frame(el.rect, el.front ?? 'n');
-  const y = el.y ?? 0, F = y + 0.12, H1 = K.H1, top = y + 8.4, T = 0.3, gy = el.gy ?? y, wall = el.wall ?? K.wall;
+  const y = el.y ?? 0, F = y + 0.12, H1 = K.H1, top = y + (K.top ?? 8.4), T = 0.3, gy = el.gy ?? y, wall = el.wall ?? K.wall;
   const rc = (a, b, d0, d1, ya, yb) => col.rect(R(a, b, d0, d1), ya, yb);
   const S = (m, a, b, d0, d1, ya, yb) => { bag.add(m, B(a, b, d0, d1, ya, yb)); rc(a, b, d0, d1, ya, yb); };
   const dw = 1.2, du = L * K.door + (K.door > 0.4 ? 0 : 0.3), fy1 = F + 2.7;
@@ -55,9 +60,13 @@ export function shopRoom(el, { bag, col, lights }) {
   }
   if (el.kind === 'pub') { bag.add('iron', B(0.3, L - 0.3, -1.25, -1.2, F + H1 + 0.95, F + H1 + 1.05)); bag.add('timber', B(0.2, L - 0.2, -1.3, 0, F + H1 - 0.1, F + H1 + 0.05)); for (let u = 0.5; u < L - 0.4; u += 0.14) bag.add('iron', B(u, u + 0.02, -1.25, -1.22, F + H1 + 0.05, F + H1 + 0.95)); }   // the hotel's balcony
   bag.add(wall === 'brick' ? 'concrete_light' : 'sandstone_dressed', B(-0.05, L + 0.05, -0.15, Dp + 0.05, top, top + 0.3));
+  if (K.parapet === 'step') { bag.add(wall, B(L * 0.3, L * 0.7, -0.05, 0.4, top + 0.3, top + 1.2)); bag.add('concrete_light', B(L * 0.28, L * 0.72, -0.08, 0.43, top + 1.2, top + 1.35)); }
+  if (K.parapet === 'cornice') bag.add('concrete_light', B(-0.2, L + 0.2, -0.4, 0.2, top - 0.25, top + 0.3));
+  if (K.blade) bag.add(K.blade, B(L - 0.55, L - 0.45, -1.2, 0, fy1 + 0.4, F + H1 + 1.6));
+  if (K.pole) for (let k = 0; k < 8; k++) bag.add(['car_red', 'paint_white', 'car_blue', 'paint_white'][k % 4], B(L - 0.5, L - 0.38, -0.5, -0.38, F + 0.9 + k * 0.17, F + 1.07 + k * 0.17));
   const pend = (u, d, h = 0.7, m = 'lamp_white') => { const p = W(u, d, F + H1 - h); bag.add(m, lathe([[0.001, 0], [0.18, 0.1], [0.2, 0.25], [0.1, 0.42], [0.001, 0.42]], 12, null, p[0], p[1], p[2])); bag.add('iron', rod([p[0], F + H1 - 0.3, p[2]], [p[0], p[1] + 0.42, p[2]], 0.01, 4)); };
   const light = (u, d, color = '#ffe2b0') => lights.push({ at: W(u, d, F + H1 - 0.8), color, intensity: 1.5, distance: 6 });
-  const fit = { pub, newsagent, greengrocer }[el.kind] ?? newsagent;
+  const fit = { pub, newsagent, greengrocer, milkbar, butcher, chemist, barber }[el.kind] ?? newsagent;
   fit({ bag, col, lights, B, W, R, S, rc, L, Dp, F, T, H1, du, dw, pend, light });
 }
 

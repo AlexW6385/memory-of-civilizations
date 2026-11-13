@@ -152,6 +152,20 @@ export function roomPeople() {
       if (rand() < 0.7) at(Wd / 2 - 1.2, Dp - T - 3.0, 0, -1, {}, true);
       at(Wd / 2 + 0.2, Dp - T - 1.1, 0, -1, {}, false);                                          // the shopkeeper behind it
       if (l.kind === 'newsagent') at(Wd * 0.3 + 0.3, T + 1.6, 0, 1, {}, rand() < 0.4);           // browsing the rack
+    } else if (l.kind === 'milkbar') {
+      at(Wd - T - 1.0, T + 3.0, -1, 0, {}, false);                                               // the owner behind the counter
+      at(Wd - T - 2.65, T + 3.6, 1, 0, { pose: 'sit' }, rand() < 0.5); at(Wd - T - 2.65, T + 4.4, 1, 0, { pose: 'sit' }, false);   // two on the stools
+      at(T + 0.45, T + 2.3, 1, 0, { pose: 'sit' }, true); at(T + 0.45, T + 3.5, 1, 0, { pose: 'sit' }, false);                      // a booth
+    } else if (l.kind === 'butcher') {
+      at(Wd / 2 + 0.3, Dp - T - 1.4, 0, -1, { cloth: 'cloth_white', over: 'belt' }, false);       // the butcher in his white apron behind the counter
+      at(Wd / 2 - 0.9, Dp - T - 3.4, 0, -1, {}, true);                                          // a woman at the counter
+    } else if (l.kind === 'chemist') {
+      at(Wd / 2 + 0.4, Dp - T - 1.4, 0, -1, { cloth: 'cloth_white', cloth2: 'cloth_white' }, false);   // the chemist in his white coat
+      at(Wd / 2 - 0.5, Dp - T - 3.4, 0, -1, {}, rand() < 0.6);
+    } else if (l.kind === 'barber') {
+      at(T + 1.15, T + 2.2, -1, 0, { pose: 'sit' }, false);                                       // a man in the first chair
+      at(T + 1.9, T + 2.2, -1, 0, { cloth: 'cloth_white', cloth2: 'cloth_grey' }, false);        // the barber at his shoulder
+      at(Wd - T - 0.3, T + 2.5, -1, 0, { pose: 'sit' }, false);                                   // one waiting with the paper
     } else {
       const cu0 = Wd - T - 1.55, c0 = T + 3.0, c1 = Dp - T - 1.0;
       for (const u of [T + 1.1, T + 3.2]) for (let d = T + 1.3; d < Dp - T - 1.0; d += 1.5) if (u + 0.9 < cu0 - 0.6 && rand() < 0.55) {

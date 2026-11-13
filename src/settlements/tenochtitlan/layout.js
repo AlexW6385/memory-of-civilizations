@@ -25,7 +25,11 @@ export const inLake = (x, z) => Math.hypot(x, z) > ISLAND && !(x < 0 && z > CAUS
 export const inLakeWater = (x, z, h) => h < LEVEL.water && (inLake(x, z) || Math.hypot(x, z) > 300 && !(inCanal(x, z) && Math.hypot(x, z) < ISLAND - 6));
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
-let HOUSES = null, YARDS = null;
+let HOUSES = null, YARDS = null, PRIESTS = null;
+/** The precinct's compounds of priests and temple servants: centres and the side of each gate. */
+export const PRIEST_SITES = [[-118, -20, 'e'], [-118, 20, 'e'], [-118, 60, 'e'], [-100, -20, 'w'], [-100, 20, 'w'], [-100, 60, 'w'], [-82, -20, 'e'], [-82, 20, 'e'], [-82, 60, 'e']];
+const gateOfSeed = (seed) => { let s = seed >>> 0 || 1; s = (s * 1664525 + 1013904223) >>> 0; return ['n', 's', 'w', 'e'][Math.floor(s / 4294967296 * 4)]; };
+export const priestHouses = () => { houses(); return PRIESTS; };
 /**
  * Calpulli houses round patios, 12.4–14.4 m, on blocks between streets 4.6–6.6 m wide (the compounds' walls make continuous
  * fronts along the lanes), clear of the precinct, the palace, the canals and the causeway. The cells left empty
@@ -43,6 +47,14 @@ export function houses() {
     if (Math.abs(cx) < 8 + w / 2 || Math.abs(cz) < 8 + d / 2) continue;           // the avenues to the gates
     if (rand() < 0.06) { YARDS.push({ rect: r, seed: Math.floor(rand() * 1e6) }); continue; }
     HOUSES.push({ rect: r, seed: Math.floor(rand() * 1e6) });
+  }
+  // the priests' and temple servants' compounds inside the serpent wall, west of the arrival (the tlamacazcalli of Sahagún's list of the
+  // precinct's buildings [inferred: their places]): three rows of three on a lane grid, their gates on the lanes (x −109) and the plaza
+  PRIESTS = [];
+  for (const [i, [cx, cz, gate]] of PRIEST_SITES.entries()) {
+    let seed = 6100 + i * 7919; while (gateOfSeed(seed) !== gate) seed++;
+    const h = { rect: [cx - 6.7, cz - 6.7, cx + 6.7, cz + 6.7], seed, priest: true };
+    PRIESTS.push(h); HOUSES.push(h);
   }
   return HOUSES;
 }

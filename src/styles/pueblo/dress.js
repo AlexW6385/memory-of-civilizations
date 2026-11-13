@@ -39,6 +39,30 @@ const KINDS = {
     if (v % 4 === 3) P.add('wicker', lathe([[0.001, 0], [0.16, 0.01], [0.22, 0.1], [0.2, 0.17], [0.001, 0.15]], 10, null, 0.5, h, d / 2));
     P.solid.push(['s', 0, d / 2, L, d / 2, d, h]);
   },
+  /** A portal: the porch of a house front, two posts with carved corbels carrying a header, latillas laid across it and brush and earth on them; a bench and strings of maize under it [inferred: the shade porches of the Pueblos' plaza fronts]. */
+  portal(P, rand, v) {
+    const W0 = 0.3, W1 = 4.7, D = 2.0, Hh = 2.5;
+    for (const x of v % 2 ? [W0 + 0.05, W1 - 0.05, 2.5] : [W0 + 0.05, W1 - 0.05]) {
+      if (x === 2.5 && false) continue;
+      P.add(V, rod([x, -0.1, D], [x, Hh, D], 0.12, 8)); P.add(V, box(x - 0.3, Hh - 0.25, D - 0.1, x + 0.3, Hh, D + 0.1)); P.add(V, box(x - 0.18, Hh - 0.45, D - 0.08, x + 0.18, Hh - 0.25, D + 0.08));
+      P.solid.push(['c', x, D, 0.14, Hh]);
+    }
+    P.add(V, rod([W0 - 0.1, Hh, D], [W1 + 0.1, Hh, D], 0.11, 8)); P.add(V, rod([W0 - 0.1, Hh, 0.05], [W1 + 0.1, Hh, 0.05], 0.1, 8));
+    for (const x of [W0 + 0.05, W1 - 0.05]) P.add(V, rod([x, Hh + 0.05, -0.05], [x, Hh + 0.05, D + 0.12], 0.09, 6));
+    for (let x = W0; x < W1; x += 0.2) P.add('bark_dark', rod([x, Hh + 0.16, -0.05], [x + (rand() - 0.5) * 0.03, Hh + 0.16, D + 0.3], 0.035, 5));
+    P.add('thatch', box(W0 - 0.1, Hh + 0.19, 0.0, W1 + 0.1, Hh + 0.26, D + 0.3)); P.add('mud_plaster', box(W0 - 0.1, Hh + 0.26, 0.0, W1 + 0.1, Hh + 0.38, D + 0.3));
+    P.add(A, box(W0 - 0.1, Hh + 0.38, 0.0, W1 + 0.1, Hh + 0.46, D + 0.3));
+    P.add(A, box(W0 + 0.2, 0, 0.04, W0 + 1.5, 0.42, 0.46)); P.solid.push(['s', W0 + 0.2, 0.25, W0 + 1.5, 0.25, 0.42, 0.42]);
+    if (v % 2 === 0) jar(P, 'olla', W1 - 0.6, 0, 0.5, 1.1);
+    for (let k = 0; k < 3; k++) strings(P, W0 + 1.9 + k * 0.5 + (v % 2) * 0.4, Hh, D * 0.55, 0.8 + rand() * 0.5, rand);
+  },
+  /** A washed front: the wall's face over a cell washed with white gypsum clay to head height, its top edge ragged, the dark mud of the foot showing under it. */
+  whitewash(P, rand, v) {
+    const y0 = 0.45 + (v % 2) * 0.1;
+    let x = 0.1;
+    for (let k = 0; k < 6; k++) { const x1 = Math.min(4.9, x + 0.55 + rand() * 0.55); P.add('kahgel', box(x, y0, 0.07, x1, y0 + 1.55 + rand() * 0.75, 0.086)); x = x1; if (x >= 4.9) break; }
+    if (v % 2) P.add('kahgel', box(0.1, y0, 0.07, 4.9, y0 + 0.2, 0.092));
+  },
   /** A viga end with strings of maize hung from it: a peg of pole stands out of the wall at head height. */
   maize(P, rand, v) {
     const n = 2 + (v % 2);

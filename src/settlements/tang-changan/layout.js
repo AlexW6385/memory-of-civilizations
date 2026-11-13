@@ -234,3 +234,22 @@ export const sightDist = (x, z) => {
   const [ax, az] = ARRIVE, vx = PAGODA[0] - ax, vz = PAGODA[1] - az, t = Math.max(0, Math.min(1, ((x - ax) * vx + (z - az) * vz) / (vx * vx + vz * vz)));
   return Math.hypot(x - (ax + vx * t), z - (az + vz * t));
 };
+
+/**
+ * Daci'en's ordinary buildings (docs/settlements/tang-changan.md §11a): beside the court's two lanes behind the cloisters, west (the
+ * refectory and kitchen on the north side of the lane, two monks' cells on the south) and east (the library of cases and the guest house
+ * on the north, the storehouse and the abbot's lodging on the south). { id, c, w, d, face, kind, roof, nb, H, pal }: halls of their own frame.
+ */
+export const DACI_QUARTERS = (() => {
+  const z = DACI.rect[1] + 61, q = (id, x, dz, w, d, face, kind, o) => ({ id, c: [x, z + dz], w, d, face, kind, ...o });
+  return [
+    q('refectory', 67, 0, 20, 9, 's', 'refectory', { nb: 5, H: 4.2, roof: 'hip', plat: 0.5 }),
+    q('kitchen', 84, 0, 12, 9, 's', 'kitchen', { nb: 3, H: 3.8, roof: 'gable', plat: 0.35, chi: 1.0, pal: { wall: 'mud_plaster', roof: 'tile_dark' } }),
+    q('cell-1', 61.5, 19, 9, 8, 'n', 'cell', { nb: 3, H: 3.3, roof: 'gable', plat: 0.35, pal: { roof: 'thatch', wall: 'plaster_white', column: 'timber' } }),
+    q('cell-2', 72.5, 19, 9, 8, 'n', 'cell', { nb: 3, H: 3.3, roof: 'gable', plat: 0.35, pal: { roof: 'thatch', wall: 'plaster_white', column: 'timber' } }),
+    q('library', 191, 0, 16, 9, 's', 'library', { nb: 5, H: 4.4, roof: 'hip', plat: 0.7, pal: { roof: 'tile_dark', wall: 'plaster_grey' } }),
+    q('guest-house', 207.5, 0, 14, 8, 's', 'guest', { nb: 3, H: 3.8, roof: 'gable', plat: 0.45 }),
+    q('storehouse', 202.5, 19, 10, 9, 'n', 'store', { nb: 3, H: 3.5, roof: 'gable', plat: 0.35, pal: { wall: 'mud_plaster', roof: 'thatch', column: 'timber' } }),
+    q('abbot', 213, 19, 8, 8, 'n', 'house', { nb: 3, H: 3.9, roof: 'hip', plat: 0.5 }),
+  ];
+})();
