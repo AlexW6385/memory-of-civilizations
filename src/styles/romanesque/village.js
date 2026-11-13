@@ -66,7 +66,7 @@ export function chimneyTop(l) {
 }
 
 // ── the house ────────────────────────────────────────────────────────────────
-function maison(el, { bag, col }) {
+function maison(el, { bag, col, lights }) {
   const c = frame(el, bag, col), { L, D, B, X, P } = c, rand = rng(el.seed || 1);
   const y = el.y, G = el.G ?? 2.7, G2 = el.G2 ?? 2.4, n = el.storeys ?? 2, S = el.stone || 'schist_rubble', simple = !!el.simple;
   const hostel = !!el.hostel, open = el.open && !simple ? el.open : null, shop = !!el.shop && !hostel, dep = 0.5;
@@ -116,6 +116,8 @@ function maison(el, { bag, col }) {
     rr(0, 0, doorCol[0], dep); rr(doorCol[1], 0, L, dep);
     col.rect(el.rect, ceil - 0.22, ytop + 1.5);
     furnish(c, open, { L, D, fy, ceil, du, shopA, dep, rand, trade: el.trade, homeKind: el.homeKind ?? 0 });
+    // the room is lit: a rushlight on its stand near the middle of the room (the hostel's long hall has two), at any hour
+    for (const u of open === 'hostel' ? [L * 0.3, L * 0.7] : [L / 2]) { const q = c.P(u, D * 0.55); lights?.push({ at: [q[0], fy + 1.7, q[1]], color: '#ffb46b', intensity: 3, distance: 7 }); }
   }
   // the door: voussoirs of the arch in dressed stone, the step, the leaf of boards (shut unless the house is open)
   if (du !== null) {

@@ -200,6 +200,7 @@ function mayaRange(el, ctx) {
   for (const uu of [-ia + 0.9, ia - 0.9]) { const [jx, jz] = W(uu, -ib + 1.4); put(bag, storeJarKit(), jx, F, jz, 0); col.circle(jx, jz, 0.28, F, F + 0.6); }
   { const [wx, wz] = W(ia * 0.35, -ib + 1.6); put(bag, waterJarKit(), wx, F, wz, 0); col.circle(wx, wz, 0.33, F, F + 0.8); }
   if (rand() < 0.7) { const [hx, hz] = W(a + 0.6, b + 0.4); put(bag, hearthKit('rubble'), hx, F, hz, 0); col.circle(hx, hz, 0.45, F, F + 0.3); }
+  { const [lx, lz] = W(0, 0); ctx.lights?.push({ at: [lx, F + 1.7, lz], color: '#ffb46b', intensity: 2.4, distance: 7 }); }      // a lamp of resinous wood (a torch of ocote) lights the long room
   const L2 = STYLES.life.elements;
   if (rand() < 0.6) { const [px, pz] = W(-ia * 0.2, -ib + 1.3); L2.figure({ at: [px, pz], y: F, rot: rot, seed: Math.floor(rand() * 1e9), pose: 'sit_ground', dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_red', skin: 'skin_dark', hair: 'bun', hairMat: 'hair_dark', feet: 'bare', legs: 'bare', over: 'none' }, ctx); }
 }

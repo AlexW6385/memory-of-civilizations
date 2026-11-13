@@ -180,6 +180,9 @@ export function home(el, ctx) {
     if (rand() < 0.5) for (let i = 0; i < 3; i++) k.bx('wood_dark', tw + 0.55, 0.5, 1.2 + i * 0.7, tw + 0.6, 1.0, 1.55 + i * 0.7);
     else for (let i = 0; i < 3; i++) k.sack(W - tw - 1.1, 1.3 + i * 0.6);
   }
+  // ── the rooms are lit at any hour: a clay lamp in a niche of the vestibule and the fire of the back room ──
+  { const a = k.pt(mid, 1.6), b = k.pt(mid, bv + tw + 1.4);
+    ctx.lights?.push({ at: [a[0], 2.1, a[1]], color: '#ffb46b', intensity: 2.6, distance: 6 }, { at: [b[0], 1.7, b[1]], color: '#ff9a4a', intensity: 2.4, distance: 6 }); }
   // ── the court ──
   courtContents(k, tw + 1.1, W - tw, vc0, bv, rand);
   // ── the back block: the sleeping room, or the store ──

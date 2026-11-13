@@ -115,6 +115,7 @@ function shopFit(el, ctx) {
   else at(chest, -cs * (hw - 0.6), 1.6, 0.3);
   at(stool, -cs * (hw - 0.4), 2.2, rand() * 6);
   at(lampstand, 0, bd - 0.25, 0, 0, 1.9);
+  { const q = F.W(0, bd * 0.45); pushLight(ctx, [q[0], y + 2.2, q[1]], 2.6, 6.5); }      // the shop is lit by its lamp at any hour
 }
 
 /** The ground floor's west half of a working house by its trade (the east half, the store and the stair, stay): a cook-shop (popina) with

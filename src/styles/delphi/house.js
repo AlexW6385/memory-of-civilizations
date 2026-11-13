@@ -80,11 +80,37 @@ function delphiHouse(el, ctx) {
   wall(true, v2, T, L - T, TI, [[kx - 1.45, kx - 0.5], [(kx + sx) / 2 - 0.5, (kx + sx) / 2 + 0.45], [sx + 0.5, sx + 1.45]]);
   wall(false, kx, v2, D - T, TI, []); wall(false, sx, v2, D - T, TI, []);
   // the court's side walls are the house's own side walls: lowered to 2.7 m where they enclose the court (coped below)
-  rangeRoof(ctx, G.R(0, 0, L, v1 + TI / 2), y, H);
+  // the front range by the house's kind (el.variant, 0–3), so that a row of walk-in houses shows different fronts: 0 the tiled hip over plaster; 1 a loft storey
+  // over the front range with a pair of shuttered windows and a ledge (jettied on beams); 2 a flat roof terrace behind a parapet with its spouts and a red dado;
+  // 3 an ashlar front of limestone with a painted frieze and a cornice
+  const fr = G.R(0, 0, L, v1 + TI / 2), vr = el.variant ?? 0, openAt = [so, [(pa + pb) / 2 - 0.55, (pa + pb) / 2 + 0.55]].sort((p, q) => p[0] - q[0]);
+  const fpiece = (mat, u0, u1, d0, d1, y0, y1) => { const r = G.R(u0, d0, u1, d1); bag.add(mat, box(r[0], y0, r[1], r[2], y1, r[3])); };
+  if (vr === 1) {
+    bag.add('timber', box(fr[0] + 0.05, y + H - 0.12, fr[1] + 0.05, fr[2] - 0.05, y + H, fr[3] - 0.05));
+    bag.add(plaster, box(fr[0], y + H, fr[1], fr[2], y + H + 2.7, fr[3])); col.rect(fr, y + H, y + H + 2.7);
+    fpiece('timber', 0, L, -0.45, 0.0, y + H - 0.2, y + H + 0.05);                                   // the beams that carry the loft out over the lane
+    for (let k = 0; k < 3; k++) { const u = L * (k + 0.5) / 3; fpiece('opening', u - 0.4, u + 0.4, -0.05, 0.0, y + H + 0.8, y + H + 1.9); for (const sg of [-1, 1]) fpiece('shutter_brown', sg < 0 ? u - 0.72 : u + 0.42, sg < 0 ? u - 0.42 : u + 0.72, -0.07, 0.0, y + H + 0.8, y + H + 1.9); fpiece('timber', u - 0.5, u + 0.5, -0.12, 0.0, y + H + 0.7, y + H + 0.8); }
+    rangeRoof(ctx, fr, y + 2.7, H);
+  } else if (vr === 2) {
+    bag.add('timber', box(fr[0] + 0.05, y + H - 0.12, fr[1] + 0.05, fr[2] - 0.05, y + H, fr[3] - 0.05));
+    bag.add('mud_plaster', box(fr[0] - 0.1, y + H, fr[1] - 0.1, fr[2] + 0.1, y + H + 0.14, fr[3] + 0.1));
+    for (const r of [G.R(-0.1, -0.1, L + 0.1, 0.1), G.R(-0.1, v1 + TI / 2 - 0.1, L + 0.1, v1 + TI / 2 + 0.1), G.R(-0.1, 0, 0.1, v1 + TI / 2), G.R(L - 0.1, 0, L + 0.1, v1 + TI / 2)]) bag.add(plaster, box(r[0], y + H + 0.14, r[1], r[2], y + H + 0.62, r[3]));
+    for (let k = 0; k < 3; k++) fpiece('limestone', L * (k + 0.5) / 3 - 0.1, L * (k + 0.5) / 3 + 0.1, -0.3, 0.0, y + H + 0.18, y + H + 0.26);
+    { let u = 0; for (const [d0, d1] of [...openAt, [L, L]]) { if (d0 - u > 0.05) fpiece('wall_red', u, d0, -0.05, 0.0, y + 0.7, y + 1.4); u = d1; } }                  // the red dado either side of the openings
+  } else {
+    rangeRoof(ctx, fr, y, H);
+    if (vr === 3) {
+      let u = 0; for (const [d0, d1] of [...openAt, [L, L]]) { if (d0 - u > 0.05) fpiece('limestone', u, d0, -0.1, 0.0, y, y + H); u = d1; }
+      for (const [d0, d1] of openAt) fpiece('limestone', d0 - 0.1, d1 + 0.1, -0.1, 0.0, y + 2.4, y + H);
+      fpiece('limestone', -0.1, L + 0.1, -0.22, 0.0, y + H - 0.3, y + H); fpiece('paint_blue', 0.1, L - 0.1, -0.12, -0.02, y + H - 0.62, y + H - 0.32);
+    }
+  }
   rangeRoof(ctx, G.R(0, v2 - TI / 2, L, D), y, H);
-  for (const r of [G.R(-0.3, 0, L + 0.3, v1 + TI / 2), G.R(-0.3, v2 - TI / 2, L + 0.3, D)]) {
+  for (const [ri, r] of [G.R(-0.3, 0, L + 0.3, v1 + TI / 2), G.R(-0.3, v2 - TI / 2, L + 0.3, D)].entries()) {
+    if (ri === 0 && vr === 2) continue;
+    const yb = ri === 0 && vr === 1 ? y + 2.7 : y;
     const along = r[2] - r[0] > r[3] - r[1], mx = (r[0] + r[2]) / 2, mz = (r[1] + r[3]) / 2, rise = (along ? r[3] - r[1] : r[2] - r[0]) * 0.28;
-    bag.add('roof_ridge', along ? box(r[0] - 0.1, y + H + rise - 0.02, mz - 0.1, r[2] + 0.1, y + H + rise + 0.12, mz + 0.1) : box(mx - 0.1, y + H + rise - 0.02, r[1] - 0.1, mx + 0.1, y + H + rise + 0.12, r[3] + 0.1));
+    bag.add('roof_ridge', along ? box(r[0] - 0.1, yb + H + rise - 0.02, mz - 0.1, r[2] + 0.1, yb + H + rise + 0.12, mz + 0.1) : box(mx - 0.1, yb + H + rise - 0.02, r[1] - 0.1, mx + 0.1, yb + H + rise + 0.12, r[3] + 0.1));
   }
   // the door leaf standing open inward, the shop's shutter propped as an awning, a threshold and a step on the lane
   { const u = (pa + pb) / 2, r = G.R(u - 0.5, T, u - 0.44, T + 0.9); bag.add('wood_dark', box(r[0], y + 0.04, r[1], r[2], y + 2.05, r[3]));
@@ -157,7 +183,7 @@ function delphiHouse(el, ctx) {
     bag.add('lacquer_black', box(kx0 - 0.36, y, kz0 - 0.36, kx0 + 0.36, y + 0.03, kz0 + 0.36));
     bag.add('pottery_dark', lathe([[0.001, 0], [0.12, 0.02], [0.17, 0.12], [0.15, 0.22], [0.12, 0.25], [0.13, 0.27], [0.001, 0.26]], 12, null, kx0, y + 0.13, kz0));
     lights.push({ at: [kx0, y + 0.4, kz0], color: '#ff8a3a', intensity: 1.5, distance: 4 }); col.circle(kx0, kz0, 0.55, y, y + 0.4);
-    const sk = G.R(ku - 0.9, D - T - 0.012, ku + 0.9, D - T - 0.002); bag.add('lacquer_black', box(sk[0], y + 2.0, sk[1], sk[2], y + H - 0.12, sk[3]));
+    const sk = G.R(ku - 0.9, D - T - 0.03, ku + 0.9, D - T - 0.015); bag.add('lacquer_black', box(sk[0], y + 2.0, sk[1], sk[2], y + H - 0.12, sk[3]));
     const [wj, wk] = P(T + 0.45, D - T - 0.5); bag.add('terracotta', lathe([[0.1, 0], [0.24, 0.12], [0.28, 0.42], [0.2, 0.62], [0.12, 0.66], [0.001, 0.7]], 12, null, wj, y, wk)); col.circle(wj, wk, 0.28, y, y + 0.7);
     const su = (kx + sx) / 2;
     for (let k = 0; k < 4; k++) { const [ax, az] = P(kx + TI / 2 + 0.4 + k * 0.4, D - T - 0.3); vase(bag, 'amphora', ax, y, az, { s: 1.15, dark: false, tilt: 0.14, seg: 8 }); }
