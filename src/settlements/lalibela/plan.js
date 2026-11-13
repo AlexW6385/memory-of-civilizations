@@ -142,9 +142,9 @@ for (const [ti, from, to] of [[0, -262, -226], [1, -146, -114], [2, -130, -106],
 // ---- lamps hung in the great churches' naves
 {
   const yG = GY + 6.4, yM = -M.depth + 0.95 + 7.4, yP = -PITS.maryam.depth + 0.15 + 0.6 + 6.6;
-  for (const [x, z] of [[gc[0] - 6.8, gc[1]], [gc[0], gc[1] - 6.8], [gc[0], gc[1] + 6.8]]) E.push({ t: 'lamp', at: [x, z], y: yG, drop: 1.7 });
-  for (const dx of [-9, -3, 3]) E.push({ t: 'lamp', at: [mc[0] + dx, mc[1]], y: yM, drop: 2.2 });
-  for (const x of [66.2, 72.4]) E.push({ t: 'lamp', at: [x, -90], y: yP, drop: 2.0 });
+  for (const [x, z] of [[gc[0] - 6.8, gc[1]], [gc[0], gc[1] - 6.8], [gc[0], gc[1] + 6.8]]) E.push({ t: 'lamp', at: [x, yG - 1.7, z] });
+  for (const dx of [-9, -3, 3]) E.push({ t: 'lamp', at: [mc[0] + dx, yM - 2.2, mc[1]] });
+  for (const x of [66.2, 72.4]) E.push({ t: 'lamp', at: [x, yP - 2.0, -90] });
 }
 // ---- the courts: sandals at the doors, and at the foot of the rock walls the pilgrims' staffs, bundles, jars and the masons' rock seats
 {
