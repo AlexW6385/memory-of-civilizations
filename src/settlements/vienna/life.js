@@ -14,7 +14,7 @@ export function life() {
   const rand = rng(1902), L = [], pick = (a) => a[Math.floor(rand() * a.length)], seed = () => Math.floor(rand() * 1e9);
   const faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
   const man = (at, y, rot, o = {}) => L.push({ t: 'figure', at, y, rot, seed: seed(), dress: 'trousers', hair: 'short', hat: pick(['none', 'brim', 'cap']), over: 'collar', cloth: pick(CL), cloth2: pick(['cloth_black', 'cloth_grey']), cloth3: 'cloth_black', skin: 'skin_light', beard: rand() < 0.5 ? 0.6 : 0, pose: 'stand', ...o });
-  const woman = (at, y, rot, o = {}) => L.push({ t: 'figure', at, y, rot, seed: seed(), dress: 'robe', hair: 'bun', hat: pick(['none', 'brim']), over: pick(['shawl', 'cape']), cloth: pick(['cloth_maroon', 'cloth_green', 'cloth_indigo', 'cloth_grey', 'cloth_blue']), cloth2: 'cloth_white', cloth3: 'cloth_black', skin: 'skin_light', h: 0.93, pose: 'stand', ...o });
+  const woman = (at, y, rot, o = {}) => L.push({ t: 'figure', at, y, rot, seed: seed(), dress: 'robe', hair: 'bun', hat: pick(['none', 'brim']), over: pick(['shawl', 'cape']), cloth: pick(['cloth_maroon', 'cloth_green', 'cloth_indigo', 'cloth_grey', 'cloth_blue']), cloth2: 'cloth_white', cloth3: 'cloth_black', skin: 'skin_light', h: 1.55, pose: 'stand', ...o });
   const either = (...a) => (rand() < 0.5 ? man : woman)(...a);
 
   // the shops and coffee houses

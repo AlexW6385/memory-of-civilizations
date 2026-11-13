@@ -79,3 +79,7 @@ Chestnuts and planes along the Ring (Rosskastanie, Platane), lindens in the squa
 - Street life: tram wires on the Ring, manholes, hydrants, a chestnut roaster on the Karlsplatz [stated: Maroni sellers are a Viennese winter-spring custom], cab troughs, flower beds and hedges, the Ressel monument, a Stadtbahn steam train on the Wien's ledge. [stated: Otto Wagner's Stadtbahn opened 1898]
 - People: shopkeepers, coffee-house guests, stallholders, the chestnut seller, anglers on the Wien promenade, visitors in the Secession's court, the Opera's audience and dancers (plan `vienna-life`, style `life`); movers also cross the yards. Smoke from the roaster and the Stadtbahn engine; sparrows in the yards.
 - Not built: tenement upper floors (flats), worshippers in the Karlskirche, the Fiakers' drivers, the Stadtbahn pavilions' furnishing beyond what exists, a moving train.
+
+## Round 5 check: what can be entered near the arrival
+
+Measured from `layout.js` (arrival 0, -66): 28 of the 499 lots within 120 m are open, furnished shops and Kaffeehäuser (each with its room, lamp and goods; `life.js` puts a shopkeeper behind the counter and guests at the tables); of the 66 lots within 100 m the fronts differ in kind (Gründerzeit, Ring house, Biedermeier), storeys (2 to 6), tint, sgraffito/pilasters/oriel/faience/medallions, shop front and Durchhaus (44 distinct combinations). Nothing added. Fixed: the women of `life.js` were set 0.93 m tall (a scale mistaken for a height); now 1.55 m.
