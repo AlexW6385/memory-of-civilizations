@@ -28,7 +28,7 @@ function whakairo(el, { bag, col }) {
   for (const s of [-1, 1]) add('wood_dark', lathe([[0.001, 0], [0.06, 0.02], [0.001, 0.04]], 6, null, s * 0.1, 0.69, L / 2 - 0.3));   // eye hollows
   for (let k = 0; k < 70; k++) {
     const u = (rand() - 0.5) * (L + 1.2), v = (rand() - 0.5) * 2.2, s = 0.03 + rand() * 0.05;
-    add('timber', box(v - s, 0, u - s * 0.6, v + s, 0.012, u + s * 0.6).applyMatrix4(new Matrix4().makeRotationY(rand() * 3)));
+    add('timber', box(-s, 0, -s * 0.6, s, 0.012, s * 0.6).applyMatrix4(new Matrix4().makeRotationY(rand() * 3)).translate(v, 0, u));
   }
   add('timber', tube([[1.2, 0, 0.9, 0.2], [1.2, 0.36, 0.9, 0.2]], 8));                                       // a stump with the tools
   add('basalt', box(1.1, 0.36, 0.8, 1.3, 0.4, 1.4)); add('timber', rod([1.2, 0.38, 0.9], [1.5, 0.42, 1.2], 0.02, 5)); add('wood_dark', tube([[0.95, 0.36, 0.95, 0.03], [1.1, 0.42, 1.0, 0.05]], 6));

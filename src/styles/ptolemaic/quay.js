@@ -23,13 +23,13 @@ function cargoPile({ at: [x, z], y = 0, rot = 0, kind = 'sacks', n = 3, seed = 1
     for (let layer = 0; layer < n; layer++) for (let k = 0; k < 5 - layer; k++) for (let j = 0; j < 2; j++) { const [px, pz] = P((k - (4 - layer) / 2) * 0.55, (j - 0.5) * 0.45); sack(bag, px, y + layer * 0.34, pz, rot + (rand() - 0.5) * 0.5, pick(rand, ['sacking', 'sacking', 'linen'])); }
     col.circle(x, z, 1.4, y, y + 1.0);
   } else if (kind === 'bales') {
-    for (let layer = 0; layer < Math.min(n, 3); layer++) for (let k = 0; k < 4 - layer; k++) { const [px, pz] = P((k - (3 - layer) / 2) * 1.0, 0); bag.add(pick(rand, ['cloth_ochre', 'linen', 'cloth_indigo', 'sacking']), box(px - 0.5, y + layer * 0.55, pz - 0.35, px + 0.5, y + layer * 0.55 + 0.52, pz + 0.35).rotateY(rot).translate(0, 0, 0)); bag.add('rope_fibre', box(px - 0.52, y + layer * 0.55 + 0.2, pz - 0.37, px + 0.52, y + layer * 0.55 + 0.26, pz + 0.37).rotateY(rot)); }
+    for (let layer = 0; layer < Math.min(n, 3); layer++) for (let k = 0; k < 4 - layer; k++) { const [px, pz] = P((k - (3 - layer) / 2) * 1.0, 0); bag.add(pick(rand, ['cloth_ochre', 'linen', 'cloth_indigo', 'sacking']), box(-0.5, y + layer * 0.55, -0.35, 0.5, y + layer * 0.55 + 0.52, 0.35).rotateY(rot).translate(px, 0, pz)); bag.add('rope_fibre', box(-0.52, y + layer * 0.55 + 0.2, -0.37, 0.52, y + layer * 0.55 + 0.26, 0.37).rotateY(rot).translate(px, 0, pz)); }
     col.circle(x, z, 1.6, y, y + 1.5);
   } else if (kind === 'logs') {
     for (let layer = 0; layer < n; layer++) for (let k = 0; k < 5 - layer; k++) { const [px, pz] = P((k - (4 - layer) / 2) * 0.34, 0); const g = lathe([[0.16, 0], [0.15, 3.6], [0.001, 3.6]], 6); g.rotateX(Math.PI / 2).translate(0, 0, -1.8).rotateY(rot).translate(px, y + 0.17 + layer * 0.29, pz); bag.add('cedar', g); }
     col.circle(x, z, 2.0, y, y + 1.0);
   } else if (kind === 'ingots') {
-    for (let layer = 0; layer < n; layer++) for (let k = 0; k < 4; k++) { const [px, pz] = P((k - 1.5) * 0.4, 0); bag.add(layer % 2 ? 'bronze' : 'lead', box(px - 0.18, y + layer * 0.12, pz - 0.1, px + 0.18, y + layer * 0.12 + 0.11, pz + 0.1).rotateY(rot)); }
+    for (let layer = 0; layer < n; layer++) for (let k = 0; k < 4; k++) { const [px, pz] = P((k - 1.5) * 0.4, 0); bag.add(layer % 2 ? 'bronze' : 'lead', box(-0.18, y + layer * 0.12, -0.1, 0.18, y + layer * 0.12 + 0.11, 0.1).rotateY(rot).translate(px, 0, pz)); }
     col.circle(x, z, 0.9, y, y + 0.4);
   } else {
     for (let layer = 0; layer < n; layer++) for (let k = 0; k < 3; k++) { const [px, pz] = P((k - 1) * 0.8, 0); crate(bag, col, px, y + layer * 0.5, pz, 0.74, 0.48, 0.55); }
@@ -115,7 +115,7 @@ function shrine({ at: [x, z], y = 0, rot = 0 }, { bag, col, lights }) {
 }
 /** stele: { at, y, rot, h } — an inscribed stele on a base (decrees, dedications). */
 function stele({ at: [x, z], y = 0, rot = 0, h = 2.0 }, { bag, col }) {
-  bag.add('limestone', box(x - 0.4, y, z - 0.3, x + 0.4, y + 0.3, z + 0.3).rotateY(rot).translate(0, 0, 0));
+  bag.add('limestone', box(-0.4, y, -0.3, 0.4, y + 0.3, 0.3).rotateY(rot).translate(x, 0, z));
   const g = box(-0.3, 0.3, -0.1, 0.3, h, 0.1); g.rotateY(rot); bag.add('marble_smooth', g.translate(x, y, z)); col.circle(x, z, 0.45, y, y + h);
 }
 /** ptol_wash: { a [x, z], b [x, z], y, seed } — a line of washing across an alley between the upper windows. */

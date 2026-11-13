@@ -94,9 +94,9 @@ export function oven(bag, col, x, y, z, r = 0.6, yaw = 0) {
 }
 /** A hand mill (the quern): a saddle stone on a bench, a rider on it. */
 export function quern(bag, col, x, y, z, rot = 0) {
-  bag.add('granite_grey', box(x - 0.35, y + 0.4, z - 0.2, x + 0.35, y + 0.52, z + 0.2).rotateY(rot));
-  bag.add('timber', box(x - 0.3, y, z - 0.15, x + 0.3, y + 0.4, z + 0.15).rotateY(rot));
-  bag.add('granite_black', box(x - 0.12, y + 0.52, z - 0.14, x + 0.12, y + 0.6, z + 0.14).rotateY(rot));
+  bag.add('granite_grey', box(-0.35, y + 0.4, -0.2, 0.35, y + 0.52, 0.2).rotateY(rot).translate(x, 0, z));
+  bag.add('timber', box(-0.3, y, -0.15, 0.3, y + 0.4, 0.15).rotateY(rot).translate(x, 0, z));
+  bag.add('granite_black', box(-0.12, y + 0.52, -0.14, 0.12, y + 0.6, 0.14).rotateY(rot).translate(x, 0, z));
   col?.circle(x, z, 0.4, y, y + 0.6);
 }
 /** A date palm of the courts and the shore: the ringed trunk, the crown of arching fronds, the hanging dates. */

@@ -113,7 +113,7 @@ function house(el, ctx) {
   const cmid = (cu0 + cu1) / 2, vm = (cv0 + vc) / 2;
   { const [wx, wz] = F.P(cmid + (rand() - 0.5) * 1.2, vm);
     bag.add('limestone', lathe([[0.5, 0], [0.5, 0.78], [0.4, 0.78], [0.4, 0.6], [0.001, 0.6]], 12, null, wx, y, wz)); col.circle(wx, wz, 0.5, y, y + 0.78);
-    bag.add('timber', box(wx - 0.55, y + 0.78, wz - 0.03, wx + 0.55, y + 1.5, wz + 0.03).rotateY(F.yaw)); }
+    bag.add('timber', box(-0.55, y + 0.78, -0.03, 0.55, y + 1.5, 0.03).rotateY(F.yaw).translate(wx, 0, wz)); }
   if (cv1 - cv0 > 6.2) { const [tx, tz] = F.P(cu0 + 0.9, cv0 + 1.1); if (two || rand() < 0.5) fig(bag, col, tx, y, tz, 3.4, el.seed); else palm(bag, col, tx, y, tz, 5.2, el.seed); }
   { const [px, pz] = F.P(cu1 - 0.6, cv0 + 0.7); bag.add('terracotta', lathe([[0.001, 0], [0.18, 0.02], [0.3, 0.3], [0.32, 0.6], [0.2, 0.75], [0.22, 0.82], [0.001, 0.8]], 8, null, px, y, pz)); col.circle(px, pz, 0.3, y, y + 0.8);
     const [qx, qz] = F.P(cu0 + 0.5, cv1 - 1.3); basket(bag, qx, y, qz, 0.3, 0.3, 'lotus_leaf'); }
@@ -144,7 +144,7 @@ function house(el, ctx) {
   R(bU0, aV0, bU1, aV1, -0.05, 0.0, 'flagstone', false);
   { const t2 = pick(rand, ['bench', 'stable', 'work']);
     if (t2 === 'bench') { bench(bag, col, F.R(bU0 + 0.1, aV1 - 0.6, bU1 - 0.1, aV1 - 0.1), y, 'timber'); for (let k = 0; k < 3; k++) { const [px, pz] = F.P(bU0 + 0.5 + k * 0.6, aV0 + 0.6); amphora(bag, px, y, pz, { s: 1.0, tilt: 0 }); } }
-    else if (t2 === 'stable') { const [px, pz] = F.P((bU0 + bU1) / 2, aV1 - 0.6); bag.add('reed_mat', box(px - 0.8, y, pz - 0.5, px + 0.8, y + 0.15, pz + 0.5).rotateY(F.yaw)); for (let k = 0; k < 4; k++) { const [rx, rz] = F.P(bU0 + 0.3 + k * 0.2, aV0 + 0.4); reedBundle(bag, rx, y, rz, 1.4); } }
+    else if (t2 === 'stable') { const [px, pz] = F.P((bU0 + bU1) / 2, aV1 - 0.6); bag.add('reed_mat', box(-0.8, y, -0.5, 0.8, y + 0.15, 0.5).rotateY(F.yaw).translate(px, 0, pz)); for (let k = 0; k < 4; k++) { const [rx, rz] = F.P(bU0 + 0.3 + k * 0.2, aV0 + 0.4); reedBundle(bag, rx, y, rz, 1.4); } }
     else { const [px, pz] = F.R(bU0 + 0.2, aV1 - 0.9, bU1 - 0.2, aV1 - 0.2); R(bU0 + 0.2, aV1 - 0.9, bU1 - 0.2, aV1 - 0.2, 0.7, 0.78, 'timber', false); R(bU0 + 0.3, aV1 - 0.8, bU0 + 0.4, aV1 - 0.3, 0, 0.7, 'wood_dark', solid); R(bU1 - 0.4, aV1 - 0.8, bU1 - 0.3, aV1 - 0.3, 0, 0.7, 'wood_dark', solid); void px; void pz; basketsAt(bag, F, y, bU0 + 0.8, aV0 + 0.5, 2); } }
   // ── the kitchen (a side range): the oven, the hearth, water jars, firewood, a table ──
   { const ku0 = left ? 0.8 : sideX + 0.4, ku1 = left ? sideX - 0.2 : L - 0.8, kv0 = df + 0.4, kv1 = cv1 - 0.2;
@@ -175,7 +175,7 @@ function house(el, ctx) {
     const bu0 = split + 0.3, bu1 = L - 0.8;
     R(bu0 - 0.2, av0 - 0.2, bu1 + 0.2, av1 + 0.2, -0.05, 0.0, 'cotto_floor', false);
     const [x0, z0, x1, z1] = F.R(bu0 + 0.1, av1 - 0.95, Math.min(bu1, bu0 + 2.1), av1 - 0.05); kline(bag, col, x0, z0, x1, z1, y, true, rand);
-    const [chx, chz] = F.P(bu1 - 0.5, av0 + 0.5); bag.add('cedar', box(chx - 0.4, y, chz - 0.25, chx + 0.4, y + 0.55, chz + 0.25).rotateY(F.yaw)); col.circle(chx, chz, 0.42, y, y + 0.55);
+    const [chx, chz] = F.P(bu1 - 0.5, av0 + 0.5); bag.add('cedar', box(-0.4, y, -0.25, 0.4, y + 0.55, 0.25).rotateY(F.yaw).translate(chx, 0, chz)); col.circle(chx, chz, 0.42, y, y + 0.55);
     if (el.seed % 7 === 0) { const [px, pz] = F.P((au0 + au1) / 2 + 1.4, (av0 + av1) / 2 + 0.6); figureAt(ctx, px, pz, y, -ox, -oz, { seed: el.seed + 21, dress: 'robe', cloth: 'cloth_white', skin: 'skin_medium', hair: 'short', beard: true, pose: 'talk' }); }
   }
   // ── the front's dressing: shutters, the loggia, benches, jars, a pot of basil, a lamp bracket, washing ──
@@ -300,7 +300,7 @@ function egyptianHouse(el, ctx) {
   // the ground room: a mat bed, a quern, jars, a stool, a lamp niche; the family at the quern
   { const ru0 = 0.7, ru1 = L - 0.7, rv0 = 0.7, rv1 = hd - 0.7;
     R(ru0, rv0, ru1, rv1, -0.05, 0.0, 'mud_plaster');
-    const [mx, mz] = F.P(ru0 + 1.0, rv1 - 0.8); bag.add('reed_mat', box(mx - 0.9, y, mz - 0.5, mx + 0.9, y + 0.1, mz + 0.5).rotateY(F.yaw));
+    const [mx, mz] = F.P(ru0 + 1.0, rv1 - 0.8); bag.add('reed_mat', box(-0.9, y, -0.5, 0.9, y + 0.1, 0.5).rotateY(F.yaw).translate(mx, 0, mz));
     for (let k = 0; k < 3; k++) { const [px, pz] = F.P(ru1 - 0.5, rv1 - 0.5 - k * 0.8); pithos(bag, col, px, y, pz, 0.7); }
     const [qx, qz] = F.P((ru0 + ru1) / 2 + 0.6, rv1 - 0.8); quern(bag, col, qx, y, qz, F.yaw);
     for (let k = 0; k < 3; k++) { const [px, pz] = F.P(ru0 + 0.5 + k * 0.5, rv0 + 0.5); basket(bag, px, y, pz, 0.26, 0.3, null); }

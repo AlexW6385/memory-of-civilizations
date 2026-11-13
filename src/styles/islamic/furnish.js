@@ -231,7 +231,7 @@ function kidronTomb(el, { bag, col }) {
     bag.add(CUT, lathe([[0.25, 0], [0.5, 0.25], [0.35, 0.6], [0.18, 0.9], [0.001, 1.1]], 10, null, x, b0 + H + 9.3, z));
   } else {
     const prof = [[(S + 0.6) / Math.SQRT2, 0], [0.001, 3.2]];
-    bag.add(ST, lathe(prof, 4, null, x, b0 + H + 0.3, z).rotateY(Math.PI / 4));
+    bag.add(ST, lathe(prof, 4).rotateY(Math.PI / 4).translate(x, b0 + H + 0.3, z));
   }
   void cap;
 }

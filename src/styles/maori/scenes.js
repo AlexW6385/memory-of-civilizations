@@ -170,7 +170,7 @@ function wakaBuild(el, { bag, col }) {
   const rand = rng(Math.floor(x * 11 + z * 5));
   for (let k = 0; k < 90; k++) {
     const u = -L / 2 + rand() * L, side = rand() < 0.5 ? -1 : 1, v = side * (B / 2 + 0.2 + rand() * 1.4), s = 0.04 + rand() * 0.05;
-    add('timber', box(v - s, 0.0, u - s * 0.5, v + s, 0.015, u + s * 0.5).applyMatrix4(new Matrix4().makeRotationY(rand() * 3)));
+    add('timber', box(-s, 0.0, -s * 0.5, s, 0.015, s * 0.5).applyMatrix4(new Matrix4().makeRotationY(rand() * 3)).translate(v, 0, u));
   }
   // adzes leaning on the hull and lying by it: the handle bent at the head, the blade lashed on
   const adze = (p, dir, up) => {

@@ -46,7 +46,7 @@ export function mescit(el, { bag, col, lights }) {
   // the roof: a flat lead roof, the dome on its octagonal drum over the middle
   bag.add('lead', box(rx0 - 0.15, ry, rz0 - 0.15, rx1 + 0.15, ry + 0.25, rz1 + 0.15));
   const dr = (rx1 - rx0) / 2 - 1.0, dz = (rz0 + rz1) / 2;
-  bag.add(S, lathe([[dr, 0], [dr, 1.6]], 8, null, cx, ry + 0.25, dz).rotateY(Math.PI / 8).translate(0, 0, 0));
+  bag.add(S, lathe([[dr, 0], [dr, 1.6]], 8).rotateY(Math.PI / 8).translate(cx, ry + 0.25, dz));
   for (let i = 0; i < 8; i++) { const a = (i + 0.5) / 8 * Math.PI * 2, wx = cx + Math.cos(a) * (dr * 0.93 + 0.05), wz = dz + Math.sin(a) * (dr * 0.93 + 0.05); bag.add('daylight', box(wx - 0.3, ry + 0.9, wz - 0.3, wx + 0.3, ry + 1.5, wz + 0.3)); }
   dome(bag, cx, ry + 1.85, dz, dr);
   // the portico: four columns, three small domes over a flat roof, a stone floor and the doorstep

@@ -57,9 +57,9 @@ function globe(bag, col, x, z, y) {
   for (let k = 0; k < 3; k++) { const a = k / 3 * Math.PI * 2; bag.add('cedar', box(x + Math.cos(a) * 0.3 - 0.03, y, z + Math.sin(a) * 0.3 - 0.03, x + Math.cos(a) * 0.3 + 0.03, y + 0.9, z + Math.sin(a) * 0.3 + 0.03)); }
   bag.add('cedar', lathe([[0.36, 0], [0.36, 0.06], [0.3, 0.06], [0.001, 0.06]], 12, null, x, y + 0.82, z));
   bag.add('bronze', lathe(Array.from({ length: 11 }, (_, i) => { const t = i / 10 * Math.PI; return [Math.max(0.001, Math.sin(t) * R), R - Math.cos(t) * R]; }), 16, null, x, cy - R, z));
-  bag.add('gilt_bronze', lathe([[R + 0.02, -0.02], [R + 0.02, 0.02]], 20, null, x, cy, z).rotateZ(0.41));
+  bag.add('gilt_bronze', lathe([[R + 0.02, -0.02], [R + 0.02, 0.02]], 20).rotateZ(0.41).translate(x, cy, z));
   bag.add('gilt_bronze', lathe([[R + 0.04, -0.015], [R + 0.04, 0.015]], 20, null, x, cy, z));
-  bag.add('gilt_bronze', lathe([[0.012, -R - 0.12], [0.012, R + 0.12]], 6, null, x, cy, z).rotateZ(0.3));
+  bag.add('gilt_bronze', lathe([[0.012, -R - 0.12], [0.012, R + 0.12]], 6).rotateZ(0.3).translate(x, cy, z));
   col.circle(x, z, 0.4, y, y + 1.4);
 }
 

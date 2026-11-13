@@ -113,7 +113,7 @@ function head(parts, c, k, style, turn = 0) {
   const jaw = fierce ? 1.08 : old ? 0.94 : 1.0;
   const rings = prof.map(([r, y]) => { const ring = []; for (let s = 0; s < 18; s++) { const th = (s / 18) * Math.PI * 2, front = Math.max(0, Math.sin(th)); ring.push([Math.cos(th) * r * 1.0 * (y < -0.04 ? jaw : 1) * k, y * k, Math.sin(th) * r * (1.04 + 0.1 * front) * k]); } return ring; });
   rings[0] = rings[0].map((p) => [p[0], p[1], p[2]]);
-  const skull = skin(rings, true, true); skull.translate(c[0], c[1], c[2]); if (turn) skull.rotateY(turn);
+  const skull = skin(rings, true, true); if (turn) skull.rotateY(turn); skull.translate(c[0], c[1], c[2]);
   F.push(skull);
   const at = (x, y, z) => { const p = [x * k, y * k, z * k]; if (turn) { const cs = Math.cos(turn), sn = Math.sin(turn); return [c[0] + p[0] * cs + p[2] * sn, c[1] + p[1], c[2] - p[0] * sn + p[2] * cs]; } return [c[0] + p[0], c[1] + p[1], c[2] + p[2]]; };
   const bl = (x, y, z, rx, ry, rz, seg = 8, rows = 4) => { const b = blob([0, 0, 0], rx * k, ry * k, rz * k, seg, rows); if (turn) b.rotateY(turn); const p = at(x, y, z); b.translate(p[0] - c[0] + c[0], p[1], p[2]); return b; };

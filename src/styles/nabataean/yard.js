@@ -74,8 +74,8 @@ export function yard(el, { bag, col }) {
     const n = 2 + Math.floor(rand() * 2);
     for (let i = 0; i < n; i++) {
       const tx = x0 + 2.6 + i * (x1 - x0 - 5.2) / Math.max(1, n - 1) + (rand() - 0.5) * 0.8, tz = cz + (rand() - 0.5) * 3, s = 0.9 + rand() * 0.35, a = Math.PI / 4;
-      bag.add('cloth_black', lathe([[2.5 * s, 0.55], [2.5 * s, 1.15], [0.12, 2.5 * s]], 4, null, tx, y, tz).rotateY(a));
-      bag.add('cloth_black', lathe([[2.5 * s, 0.02], [2.5 * s, 0.6]], 4, null, tx, y, tz).rotateY(a));
+      bag.add('cloth_black', lathe([[2.5 * s, 0.55], [2.5 * s, 1.15], [0.12, 2.5 * s]], 4).rotateY(a).translate(tx, y, tz));
+      bag.add('cloth_black', lathe([[2.5 * s, 0.02], [2.5 * s, 0.6]], 4).rotateY(a).translate(tx, y, tz));
       bag.add('timber', box(tx - 0.05, y, tz - 0.05, tx + 0.05, y + 2.7 * s, tz + 0.05));
       const fz = el.gate === 's' ? tz + 1.74 * s : tz - 1.74 * s;
       bag.add('opening', box(tx - 0.55, y, fz - 0.02, tx + 0.55, y + 1.5, fz + 0.02));

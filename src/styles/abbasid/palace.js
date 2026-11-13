@@ -81,7 +81,7 @@ function greenDome({ bag, col }, y, S = 7.6, hole = 6.0) {
   // the horseman: a horse (barrel, neck, head, legs) and a rider with a lance couched forward; on a swivelling arm
   const hy = top + 3.6;
   bag.add('bronze', lathe([[0.001, -1.1], [0.38, -0.8], [0.45, -0.3], [0.45, 0.4], [0.33, 0.9], [0.001, 1.15]], 10, null, 0, 0, 0).rotateX(Math.PI / 2).translate(0, hy, 0));
-  bag.add('bronze', box(-0.1, hy - 0.1, -1.55, 0.1, hy + 0.55, -1.0).rotateX(-0.4).translate(0, 0.2, 0.2));
+  bag.add('bronze', box(-0.1, -0.325, -0.275, 0.1, 0.325, 0.275).rotateX(-0.4).translate(0, hy + 0.225 + 0.2, -1.275 + 0.2));
   bag.add('bronze', box(-0.16, hy - 0.04, -1.9, 0.16, hy + 0.2, -1.4));
   for (const [lx, lz] of [[-0.18, -0.75], [0.18, -0.75], [-0.18, 0.8], [0.18, 0.8]]) bag.add('bronze', box(lx - 0.07, hy - 0.9, lz - 0.07, lx + 0.07, hy - 0.2, lz + 0.07));
   bag.add('bronze', box(-0.2, hy + 0.35, -0.2, 0.2, hy + 1.1, 0.2));

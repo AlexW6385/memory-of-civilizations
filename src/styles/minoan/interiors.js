@@ -207,7 +207,7 @@ function workshop(el, ctx) {
   // the grindstone: a stone wheel on a trestle with its crank
   const gx = x1 - 3.4, gz = z1 - 1.5;
   for (const dz of [-0.35, 0.35]) bag.add('wood_dark', box(gx - 0.4, f, gz + dz - 0.04, gx + 0.4, f + 0.55, gz + dz + 0.04));
-  bag.add('sandstone', lathe([[0.001, -0.18], [0.36, -0.18], [0.36, 0.18], [0.001, 0.18]], 20).rotateX(Math.PI / 2).translate(gx, f + 0.55, gz)); bag.add('wood_dark', rod([gx - 0.55, f + 0.55, gz], [gx + 0.55, f + 0.55, gz], 0.025, 6).rotateY(Math.PI / 2).translate(gx, 0, gz).translate(-gx, 0, -gz));
+  bag.add('sandstone', lathe([[0.001, -0.18], [0.36, -0.18], [0.36, 0.18], [0.001, 0.18]], 20).rotateX(Math.PI / 2).translate(gx, f + 0.55, gz)); bag.add('wood_dark', rod([gx - 0.55, f + 0.55, gz], [gx + 0.55, f + 0.55, gz], 0.025, 6).translate(-gx, 0, -gz).rotateY(Math.PI / 2).translate(gx, 0, gz));
   col.rect([gx - 0.4, gz - 0.4, gx + 0.4, gz + 0.4], f, f + 0.92);
   // in the light well: a long table with a block half carved, a stool, a water jar
   table(ctx, [wx0 + 1.2, wz0 + 3.0, wx0 + 3.2, wz0 + 7.0], f, 0.8, 'timber');

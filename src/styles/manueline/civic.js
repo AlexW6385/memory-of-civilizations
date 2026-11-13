@@ -70,7 +70,7 @@ export function se(el, ctx) {
     for (let u = 0.6; u < 10; u += 1.8) for (const [mx, mz] of [[x0 + u, a - 0.1], [x0 + u, b - 0.9], [x0 - 0.1, a + u], [x0 + 9.1, a + u]]) addBox(bag, LIME, mx, y + 27.2, mz, mx + 1.0, y + 28.6, mz + 1.0);
     for (const yy of [9, 17]) addBox(bag, 'opening', x0 - 0.05, y + yy, (a + b) / 2 - 0.4, x0 + 0.05, y + yy + 2.6, (a + b) / 2 + 0.4);
   }
-  bag.add('stained_glass', lathe([[2.4, 0], [0.001, 0]], 16, null, x0 + 0.02, y + 16, zc).rotateZ(Math.PI / 2).translate(0, 0, 0));
+  bag.add('stained_glass', lathe([[2.4, 0], [0.001, 0]], 16).rotateZ(Math.PI / 2).translate(x0 + 0.02, y + 16, zc));
   addBox(bag, 'stained_glass', x0 - 0.04, y + 14.2, zc - 1.8, x0 + 0.02, y + 17.8, zc + 1.8);
   addBox(bag, LIME, x0 - 0.2, y + 11.4, zc - 2.6, x0 + 0.1, y + 20.6, zc - 2.3); addBox(bag, LIME, x0 - 0.2, y + 11.4, zc + 2.3, x0 + 0.1, y + 20.6, zc + 2.6);
   addBox(bag, 'wood_dark', x0 - 0.1, y, zc - 1.4, x0 + 0.1, y + 3.6, zc + 1.4);
