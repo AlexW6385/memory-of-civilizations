@@ -74,6 +74,17 @@ function people() {
     if (!['house', 'small'].includes(l.kind)) { const p = P(l, 3.5, 6.0); man(p, facing(l) + Math.PI + 0.6, { y: l.y, pose: 'stand', hair: 'short', cloth: 'cloth_white', beard: 0 }); }
     else if (l.open && l.kind === 'house') { const p = P(l, (l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0]) * 0.45, 4.6); woman(p, rand() * 6.28, { y: l.y, pose: 'cross', carry: 'none' }); }
   }
+  // inside the lit rooms of the open houses: the household just within the first rooms' doors, off the doorway's line (the rooms: back range, T 0.7, 4.4 deep, 2 or 3 to the width)
+  for (const l of lots()) {
+    if (!l.open || l.kind === 'small') continue;
+    const Wl = l.front === 'w' || l.front === 'e' ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], Dl = l.front === 'w' || l.front === 'e' ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1];
+    const nb = Wl > 15 ? 3 : 2, bw = (Wl - 1.4) / nb, v = Dl - 0.7 - 4.4 + 1.0, rot = facing(l);
+    for (let i = 0; i < Math.min(2, nb); i++) {
+      if (i === 1 && l.seed % 2) continue;
+      const u = 0.7 + bw * (i + 0.5) + (i ? -1.05 : 1.05), p = P(l, u, v), who = (l.seed + i) % 3;
+      (who === 0 ? man : woman)(p, rot + (i ? 0.5 : -0.4), { y: l.y, pose: who === 2 ? 'cross' : 'stand', carry: 'none' });
+    }
+  }
   // the quay: washing and net-mending on the apron; fishermen and boatmen are set on the boats (life)
   for (const [x, z] of FISH) { woman([x + 3.6, z + 1.2], Math.PI / 2, { y: QUAY.top + 0.02, pose: 'squat', carry: 'none' }); woman([x + 3.6, z + 3.2], -Math.PI / 2, { y: QUAY.top + 0.02, pose: 'squat', carry: 'none' }); man([x + 5, z - 1.6], 0, { y: QUAY.top + 0.02, pose: 'cross', cloth: 'cloth_ochre', beard: 1 }); }
   // the quay: boatmen and porters at the stairs, the harbour clerk at his office
@@ -150,7 +161,7 @@ export async function town() {
     for (const x of [WALL.x0 + 14, WALL.x1 - 14, -40, 160]) E.push({ t: 'indus_tower', c: [x, WALL_Z], a: 2.6, y: 0, h: 7 });
     plans.push(base('md-wall', E));
   }
-  for (let i = 0; i < LT.length; i += 60) plans.push(base(`md-houses-${i / 60}`, LT.slice(i, i + 60).map((l) => ({ t: 'indus_house', rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, open: l.open, y: l.y, street: l.street, ends: l.ends }))));
+  for (let i = 0; i < LT.length; i += 60) plans.push(base(`md-houses-${i / 60}`, LT.slice(i, i + 60).map((l) => ({ t: 'indus_house', rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, variant: l.variant, open: l.open, y: l.y, street: l.street, ends: l.ends }))));
   plans.push({ ...base('md-life', life()), style: 'life' });
   plans.push({ ...base('md-people', people()), style: 'life' });
   return (CACHE = plans);
