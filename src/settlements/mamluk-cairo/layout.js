@@ -152,10 +152,13 @@ export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m)
 // ── the trades of the shop fronts and which of them can be entered (docs §13)
 const TRADES = [['spice', 3], ['cloth', 3], ['brass', 2], ['pottery', 2], ['grain', 2], ['sweets', 2], ['lamps', 1], ['butcher', 1]];
 export function tradeOf(l) {
+  if (l.trade) return l.trade;
   const r = rng(l.seed + 11)(); let t = r * TRADES.reduce((a, [, w]) => a + w, 0);
   for (const [k, w] of TRADES) { t -= w; if (t <= 0) return k; }
   return 'spice';
 }
+/** The arrival: on the Rumayla square's south edge, before the Madrasa of Sultan Hasan. */
+export const ARRIVAL = [116, 104];
 let SHOPS = null;
 /** The street lots (on the Qasaba and the E–W street) that are shop fronts, and of them the ones to enter: { fronts: [lot], open: [lot] }. */
 export function shops() {
@@ -166,6 +169,16 @@ export function shops() {
     const c = [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2], key = Math.round(c[0] / 70) + ',' + Math.round(c[1] / 70);
     if (seen.has(key) || Math.hypot(c[0] + 160, c[1] + 120) > 260) continue;
     seen.add(key); open.push(l);
+  }
+  // and round the arrival (ARRIVAL, on the Rumayla's south edge): the houses' rows along the square's south side give ten shops of different trades, a stretch apart
+  // so that houses stand between them, each a cell of its trade with its merchant on his mat (docs §13: the shops of the squares and their flanking rows)
+  const rows = lots().filter((l) => !l.yard && !l.street && l.rect[2] - l.rect[0] >= 8.4 && l.rect[3] - l.rect[1] >= 9 && Math.hypot((l.rect[0] + l.rect[2]) / 2 - ARRIVAL[0], (l.rect[1] + l.rect[3]) / 2 - ARRIVAL[1]) < 105)
+    .sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 - ARRIVAL[0], (a.rect[1] + a.rect[3]) / 2 - ARRIVAL[1]) - Math.hypot((b.rect[0] + b.rect[2]) / 2 - ARRIVAL[0], (b.rect[1] + b.rect[3]) / 2 - ARRIVAL[1]));
+  const NEAR_TRADES = ['spice', 'cloth', 'brass', 'pottery', 'grain', 'sweets', 'lamps', 'cloth', 'brass', 'spice'], chosen = [];
+  for (const l of rows) {
+    if (chosen.length >= NEAR_TRADES.length) break;
+    if (chosen.some((c) => c.rect[1] === l.rect[1] && Math.abs((c.rect[0] + c.rect[2]) / 2 - (l.rect[0] + l.rect[2]) / 2) < 21)) continue;
+    l.trade = NEAR_TRADES[chosen.length]; chosen.push(l); open.push(l);
   }
   return (SHOPS = { fronts: all, open });
 }

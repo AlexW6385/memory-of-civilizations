@@ -222,7 +222,7 @@ function rectWalls(bag, col, rect, y, h, th, mat, opsBySide, open = null, extra 
  * niches in rows inside, now and then a window; stone gables at the short ends with pegs standing
  * out of them to tie the roof down, a steep roof of ichu thatch between them.
  */
-function incaHouse(el, { bag, col }) {
+function incaHouse(el, { bag, col, lights }) {
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 2.6, th = el.th ?? 0.7, mat = el.mat || 'granite_rough';
   const along = x1 - x0 >= z1 - z0, f = el.front || 's', ops = {};
   for (const k of ['n', 'e', 's', 'w']) {
@@ -246,6 +246,8 @@ function incaHouse(el, { bag, col }) {
   // the things of the house: the stove, the grinding stone, the mats, the urpu, pots in the niches
   if (el.doors > 1) hallInterior(bag, col, el, f);
   else if (!el.empty) houseInterior(bag, col, el, walls, ops, f);
+  // the hearth's glow in a lived-in house (the stove's embers and the smoke-hole's daylight), one light a room
+  if (el.lit && !el.empty && !el.doors && lights) lights.push({ at: [(x0 + x1) / 2, y + 1.15, (z0 + z1) / 2], color: '#ff9a52', intensity: 3.2, distance: 6.5 });
   // outside the door: on some houses a stone bench against the wall beside it, on others a pole ladder of notched trunk leaning to the eaves [inferred: after the benches and ladders of Andean houses today]
   if (!el.doors && f && el.roof !== 'none') {
     const r2 = rng((el.seed || 1) * 7 + 3), k = r2(), out = { e: [1, 0], w: [-1, 0], n: [0, -1], s: [0, 1] }[f], tg = [-out[1], out[0]], sgn = r2() < 0.5 ? -1 : 1;

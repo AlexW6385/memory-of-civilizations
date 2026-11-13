@@ -57,7 +57,15 @@ export function stelePavilion(el, ctx) {
   const { bag, col } = ctx, [cx, cz] = el.c, w = el.w ?? 6.4, y = el.y ?? 0.5;
   withPal(mingPavilion)({ c: el.c, shape: 'square', w, y, H: 4.6, plat: y, bench: false, steps: false, open: [0, 1, 2, 3], pal: IMPERIAL }, ctx);
   stele({ at: [cx, cz], y, yaw: el.yaw ?? 0, s: el.big ? 1.05 : 0.62, h: el.big ? 3.9 : 2.6 }, ctx);
-  void bag; void col;
+  // what stands in it: the offering stand of granite before the stele with its bronze censer, a candle-stick either side, a hanging lantern from the beam, a worn kneeling mat
+  const big = !!el.big, sz = cz + (big ? 2.45 : 1.65);
+  bag.add('granite_grey', box(cx - 0.55, y, sz - 0.28, cx + 0.55, y + 0.78, sz + 0.28)); bag.add('granite_block', box(cx - 0.62, y + 0.78, sz - 0.34, cx + 0.62, y + 0.84, sz + 0.34));
+  col.rect([cx - 0.62, sz - 0.34, cx + 0.62, sz + 0.34], y, y + 0.84);
+  bag.add('bronze', lathe([[0.001, 0], [0.12, 0.02], [0.17, 0.12], [0.15, 0.2], [0.001, 0.2]], 10, null, cx, y + 0.84, sz));
+  for (const sx of [-1, 1]) bag.add('gilt_bronze', lathe([[0.05, 0], [0.04, 0.2], [0.07, 0.24], [0.001, 0.24]], 6, null, cx + sx * 0.4, y + 0.84, sz));
+  bag.add('reed_mat', box(cx - 0.5, y + 0.005, sz + 0.5, cx + 0.5, y + 0.02, sz + 1.0));
+  bag.add('lamp_paper', lathe([[0.001, 0], [0.09, 0.02], [0.17, 0.12], [0.17, 0.22], [0.09, 0.32], [0.001, 0.34]], 10, null, cx, y + 3.2, cz + (big ? 2.4 : 1.6)));
+  bag.add('cloth_red', lathe([[0.012, 0], [0.012, 0.7]], 4, null, cx, y + 3.54, cz + (big ? 2.4 : 1.6)));
 }
 
 /** lu_altar: the Apricot Altar { c, y } — a square pavilion of double eaves, the roofs cross-ridged, open on four sides, on a stone platform. */

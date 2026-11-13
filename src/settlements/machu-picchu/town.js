@@ -3,13 +3,18 @@ import { laneLevel, STAIRS, STORES, RADIUS, TERRACE, SITE, TOWN_WALL, CONDOR, ho
 import { ground } from './ground.js';
 import { people } from './people.js';
 
+const ARRIVAL = [-21, 129.8];
 const base = (id, elements) => ({ id, style: 'inca', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [2, 110], facing: 'n' } });
 export async function town() {
   const all = houses(), plans = [];
   for (let i = 0; i < all.length; i += 50) plans.push(base(`machu-picchu-houses-${i / 50}`, all.slice(i, i + 50).map((h) => {
     const [x0, z0, x1, z1] = h.rect, y = Math.min(ground.height(x0, z0), ground.height(x1, z0), ground.height(x0, z1), ground.height(x1, z1));
     // the houses a little different in height, by their seeds
-    return { t: 'inca_house', ...h, y, h: 2.45 + (h.seed % 9) * 0.07 };
+    // the houses a little different in height, by their seeds; near the way in each a different front: the nobles' with the double jamb in fine ashlar,
+    // a tall house with the second-storey window of its gable, the newly thatched pale ichu, the plain; every lived-in house within 140 m of the arrival has its hearth lit
+    const near = Math.hypot((x0 + x1) / 2 - ARRIVAL[0], (z0 + z1) / 2 - ARRIVAL[1]) < 140, k = h.seed % 7;
+    const v = !near ? {} : k === 0 || k === 4 ? { jamb: true, mat: 'granite_inca' } : k === 1 ? { roofMat: 'ichu' } : k === 2 ? { tall: true } : {};
+    return { t: 'inca_house', ...h, y, h: 2.45 + (h.seed % 9) * 0.07 + (v.tall ? 0.55 : 0), ...v, ...(near ? { lit: true } : {}) };
   })));
   // the strings of maize cobs under the eaves, either side of the door, on about half the houses
   { const items = [];
