@@ -120,13 +120,19 @@ async function main() {
   initLang();
   // the one button: the language (there from the start, the loading included)
   const langBtn = $('btn-lang');
-  const paintLang = () => { langBtn.textContent = getLang() === 'zh' ? 'EN' : '中'; };
+  const paintLang = () => {
+    langBtn.textContent = getLang() === 'zh' ? 'EN' : '中';
+    langBtn.setAttribute('aria-label', t('lang-to')); langBtn.title = t('lang-to');   // (what it switches to)
+  };
   langBtn.onclick = () => setLang(getLang() === 'zh' ? 'en' : 'zh');
   onLang(paintLang); paintLang();
   const status = $('intro-status');
   const progress = window.__progress = new Progress($('progress-bar'), status);
   const canvas = $('view');
-  if (!navigator.gpu) { $('notice').textContent = t('no-webgpu'); $('notice').hidden = false; setTimeout(() => { $('notice').hidden = true; }, 12000); }
+  // no WebGPU: the world runs on WebGL 2 (slower). Said on the loading screen, where it is seen, and once more
+  // when the world opens
+  const noGpu = !navigator.gpu;
+  if (noGpu) { const n = $('intro-note'); n.textContent = t('no-webgpu'); n.hidden = false; onLang(() => { n.textContent = t('no-webgpu'); }); }
 
   // timings of the start, in the console (and kept for the next visit's estimate)
   let T0 = performance.now(), times = {};
@@ -137,7 +143,17 @@ async function main() {
   progress.set('renderer', 0);
   // the hitch logger (`?perf`): on before the renderer and the world make their workers
   if (params.has('perf')) HITCH.enable();
-  const R = await new Renderer(canvas).init(settings.quality);
+  let R;
+  try { R = await new Renderer(canvas).init(settings.quality); } catch (e) {
+    // neither WebGPU nor WebGL 2: the loading screen says so plainly, with no bar to wait on
+    console.error(e);
+    clearInterval(progress.timer);
+    progress.error = true;
+    $('progress-bar').parentElement.hidden = true;
+    status.textContent = t('no-gpu'); status.style.whiteSpace = 'normal';
+    onLang(() => { status.textContent = t('no-gpu'); });
+    return;
+  }
   HITCH.watchRenderer(R.renderer);
   // the loading screen is up: shaders and pipelines made side by side and awaited at once (renderer.js hold)
   R.hold(true);
@@ -179,6 +195,15 @@ async function main() {
 
   // the planet position of the camera, for the ground's detail
   const camPlanet = () => toPlanet(world.anchor.frame, R.camera.position.toArray());
+  // The pose the visitor is to stand at once an arrival is over (set by each arrival's last step, `stand`),
+  // checked and set again by the arrival gate (below) before the view is shown; `pinned`: the physics are
+  // held while a travel's veil is up, so that nothing moves the camera between the last pose and the reveal
+  let intent = null, pinned = false;
+  const stand = (x, y, z, yaw, pitch, floor = true) => {
+    controls.setPose(x, y, z, yaw, pitch);
+    world.place(R.camera);
+    intent = { x, y: controls.feet.y, z, yaw, pitch, want: y, floor };
+  };
   // arriving somewhere: the settlement (if any), the ground and the plants round are made before
   // the view is shown; everything further comes in while walking
   const arrive = async (report = null) => {
@@ -247,6 +272,60 @@ async function main() {
     controls.setPose(x, y + 0.01, z, controls.yaw, controls.pitch);
     world.place(R.camera);
   };
+  /**
+   * The arrival gate: the last thing before a view is shown (the end of the start's loading screen, a
+   * travel's fade). Waits, with a limit so that the visitor is never held for ever, until what the
+   * first look stands on and in is there — the settlement built (its plans, their colliders, the
+   * merged meshes, the street life's shaders), the ground under the pose — and the pose is sound:
+   * a floor under the feet where the arrival wants one (an arrival on a platform is not made while
+   * the platform's colliders are missing: the visitor would stand low in its wall) and no wall in
+   * the body; if it is not, set again until it is, or, a wall in the body, a free place nearby. Then
+   * the pose is set exactly, the walkers keep clear of it (world.noteArrival) and two frames are drawn
+   * there behind the veil.
+   */
+  const nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
+  const arrivalGate = async (report = null) => {
+    const t0 = performance.now(), wait = (p, ms) => Promise.race([p, new Promise((r) => setTimeout(r, ms))]);
+    const site = world.anchor.site;
+    if (site) {
+      if (site.loading) await wait(site.loading, 25000);
+      if (site.merging) await wait(site.merging, 25000);
+      if (site.lifeCompiled) await wait(site.lifeCompiled, 10000);
+    }
+    report?.('plants', 1);
+    // (the ground tiles under the final pose, which may lie a little from where the arrival waited)
+    if (intent) { controls.setPose(intent.x, intent.want, intent.z, intent.yaw, intent.pitch); world.place(R.camera); }
+    await wait(world.terrain.readyAt(camPlanet), 10000);
+    for (let k = 0; intent; k++) {
+      const C = world.collide, { x, z, want, floor } = intent;
+      const g = C.groundAt(x, z, want + 0.5);
+      // a platform asked for and not there: wait (the settlement is built by now, so only for a
+      // collision still being made) — then the floor that is there is taken (the controls stand on it)
+      const noFloor = floor && Number.isFinite(g) && want - g > 0.6;
+      const wall = C.blockedAt(x, z, 0.3, controls.feet.y + 0.2, controls.feet.y + 1.8);
+      // (a settlement built and merged cannot change under the visitor: a pose still wrong after a
+      // moment is the arrival's own — the floor there is taken, a wall in the body moved out of)
+      const built = !site || (site.state === 'ready' && !site.mergingNow);
+      if ((!noFloor && !wall) || (built ? k >= 3 : performance.now() - t0 > 20000)) {
+        if (wall) { settle(); intent = { x: controls.feet.x, y: controls.feet.y, z: controls.feet.z, yaw: controls.yaw, pitch: controls.pitch, want: controls.feet.y, floor: false }; }
+        break;
+      }
+      await new Promise((r) => setTimeout(r, 150));
+      world.update(R.camera, controls);
+      controls.setPose(x, want, z, intent.yaw, intent.pitch); world.place(R.camera);
+    }
+    await finishArrival();
+  };
+  // the pose set exactly, nobody spawned on it, the frame drawn there
+  const finishArrival = async () => {
+    if (intent) { controls.setPose(intent.x, intent.want, intent.z, intent.yaw, intent.pitch); world.place(R.camera); }
+    world.noteArrival(controls.feet.x, controls.feet.z);
+    frameOnce(0); R.render();
+    await nextFrame();
+    if (intent) { controls.setPose(intent.x, intent.want, intent.z, intent.yaw, intent.pitch); world.place(R.camera); }
+    frameOnce(0);
+    await nextFrame();
+  };
   // to a building's entrance: into its settlement's frame
   const goTo = async (rec, report) => {
     const site = rec.site;
@@ -263,7 +342,7 @@ async function main() {
     controls.setPose(x, y, z, yaw, 0.04);
     world.place(R.camera);
     await arrive(report);
-    controls.setPose(x, y, z, yaw, 0.04);
+    stand(x, y, z, yaw, 0.04);
   };
   // to any point of the planet (lat, lon): stand on the ground there, facing `yaw` from north
   const goToPlace = async (lat, lon, report, yaw = 0) => {
@@ -278,8 +357,7 @@ async function main() {
     // face the widest view (leaning toward the nearest settlement, if any is close)
     const F = controls.feet, near = world.anchor.site;
     const prefer = near ? Math.atan2(-(near.S.local.center[0] - F.x), -(near.S.local.center[1] - F.z)) : null;
-    controls.setPose(F.x, F.y, F.z, openYaw(world.collide, F.x, F.y, F.z, prefer), 0.03);
-    world.place(R.camera);
+    stand(F.x, F.y, F.z, openYaw(world.collide, F.x, F.y, F.z, prefer), 0.03, false);
   };
   // from the map: beside the settlement's landmark, a little way in front of it and facing it
   const goNear = async (rec, report) => {
@@ -309,8 +387,7 @@ async function main() {
       world.place(R.camera);
       await arrive(report);
       inFrame();
-      controls.setPose(ax, feet() + 0.01, az, ayaw, apitch);
-      world.place(R.camera);
+      stand(ax, feet() + 0.01, az, ayaw, apitch, ay != null);
       return;
     }
     const part = site.parts.find((p) => p.plan === plan);
@@ -329,9 +406,8 @@ async function main() {
     inFrame();
     // the ground and the plants are in now: choose again (nothing changes for the buildings)
     v = place() || start;
-    controls.setPose(v.x, v.y + 0.01, v.z, v.yaw, v.pitch);
-    if (!place()) settle();
-    world.place(R.camera);
+    stand(v.x, v.y + 0.01, v.z, v.yaw, v.pitch);
+    if (!place()) { settle(); intent = { x: controls.feet.x, y: controls.feet.y, z: controls.feet.z, yaw: controls.yaw, pitch: controls.pitch, want: controls.feet.y, floor: false }; }
   };
   let first = world.plans.get(params.get('start') || 'ming-suzhou-garden');
   if (!first && params.get('start')) { await world.loadPlans(); first = world.plans.get(params.get('start')); }
@@ -351,7 +427,7 @@ async function main() {
       controls.setPose(v[0], v[1], v[2], v[3] || 0, v[4] || 0);
       world.place(R.camera);
       await arrive(boot);
-      controls.setPose(v[0], v[1], v[2], v[3] || 0, v[4] || 0);
+      stand(v[0], v[1], v[2], v[3] || 0, v[4] || 0);
     } else await goToPlace(+p[0], +p[1], boot, +(p[2] || 0));
   } else await goTo(first, boot);
   if (tq) {
@@ -363,7 +439,9 @@ async function main() {
   progress.set('shaders', 0);
   progress.shaderT0 = performance.now();
   frameOnce(0);
-  await warmAround((f) => progress.set('shaders', f));
+  await warmAround((f) => progress.set('shaders', f * 0.95));
+  // the first view is not shown before what it stands on and in is there (arrivalGate)
+  await arrivalGate();
   mark('shaders');
   // the far views and the open country's plants from now on (World.starting)
   world.starting = false;
@@ -378,6 +456,28 @@ async function main() {
   const intro = $('intro'), mapPanel = $('map');
   intro.classList.add('fading');
   setTimeout(() => { intro.hidden = true; intro.classList.remove('fading'); }, 850);
+  // WebGPU missing: said again over the world, for a while
+  if (noGpu) { const n = $('notice'); n.textContent = t('no-webgpu'); n.hidden = false; setTimeout(() => { if (n.textContent === t('no-webgpu')) n.hidden = true; }, 12000); }
+  // a mouse click on a button must not leave it focused (Space and Enter would then press it, not fly)
+  for (const b of document.querySelectorAll('button')) b.addEventListener('click', (e) => { if (e.detail > 0) b.blur(); });
+  // the first visit: a short hint of the controls, dismissible, remembered (shown once; the loading
+  // screen already lists every key)
+  {
+    const hint = $('hint'), text = $('hint-text');
+    let seen = false;
+    try { seen = localStorage.getItem('mp.hint') === 'seen'; } catch { /* storage unavailable */ }
+    const paintHint = () => { text.textContent = t(controls.touch ? 'hint-touch' : 'hint-desk'); };
+    const closeHint = () => { hint.hidden = true; try { localStorage.setItem('mp.hint', 'seen'); } catch { /* ignore */ } };
+    if (!seen && !params.has('film') && !params.has('capture')) {
+      paintHint(); onLang(paintHint);
+      setTimeout(() => { hint.hidden = false; }, 1200);
+      $('hint-close').onclick = closeHint;
+      setTimeout(closeHint, 30000);
+      // (the first move made on one's own: the hint has done its work)
+      const onKey = (e) => { if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'KeyM'].includes(e.code)) { removeEventListener('keydown', onKey); setTimeout(closeHint, 4000); } };
+      addEventListener('keydown', onKey);
+    }
+  }
   // the corner card folds into one button (remembered; folded by default on phones)
   const corner = $('corner'), cornerOpen = $('corner-open');
   let folded = matchMedia('(max-width: 560px)').matches;
@@ -448,6 +548,7 @@ async function main() {
       await new Promise((r) => setTimeout(r, 380));
     }
     T0 = performance.now(); times = {};
+    pinned = true; intent = null;
     // the fade is up: compiles side by side, awaited at once (renderer.js hold, warmAround)
     R.hold(true);
     // the notice counts down what is still being made ready
@@ -463,6 +564,9 @@ async function main() {
       frameOnce(0);
       if (performance.now() - T0 > 700) toast(`${t('travelling')} 95%`);
       await warmAround();
+      // the view is shown only when the arrival is whole and the camera stands on its final pose (arrivalGate)
+      if (performance.now() - T0 > 700) toast(`${t('travelling')} 98%`);
+      await arrivalGate(report);
       mark('shaders');
       console.info('[memory of civilizations] travel (ms):', JSON.stringify(times));
       // the next settlement of the shared random order is built ahead, in the background
@@ -473,6 +577,7 @@ async function main() {
       report.over = true; clearTimeout(noticeT);
       busy = false;
       const next = waiting; waiting = null;
+      pinned = !!next;                        // (held still to the reveal, and between travels)
       if (next) journey(next);                // the fade stays down: straight on to the next place
       else {
         toast(''); fade.classList.remove('on');
@@ -482,18 +587,28 @@ async function main() {
     }
   };
   // from the map: a settlement (its landmark's record fetched during the travel if not yet here)
-  const mapView = new GlobeView(world, (x) => travel(async (report) => { const rec = x.plan ? x : await world.recordFor(x); if (rec) await goNear(rec, report); }), (lat, lon) => travel((report) => goToPlace(lat, lon, report)), () => sunPlanet(climate.utc));
+  // (a travel that fails is said so and is not left an uncaught rejection; the tour still sees the rejection and goes on)
+  const travelFailed = (e) => { console.warn('[travel]', e); toast(t('travel-failed')); setTimeout(() => { if (!busy) toast(''); }, 4000); };
+  const safely = (p) => { p.catch(travelFailed); return p; };
+  const mapView = new GlobeView(world, (x) => safely(travel(async (report) => { const rec = x.plan ? x : await world.recordFor(x); if (rec) await goNear(rec, report); })), (lat, lon) => safely(travel((report) => goToPlace(lat, lon, report))), () => sunPlanet(climate.utc));
 
+  // the map takes the keyboard's focus when it opens and gives it back when it closes
+  let focusBack = null, byKeyboard = false;
+  addEventListener('keydown', () => { byKeyboard = true; }, true);
+  addEventListener('pointerdown', () => { byKeyboard = false; }, true);
   const closePanels = () => {
+    const wasOpen = !mapPanel.hidden;
     mapPanel.hidden = true;
     document.body.classList.remove('panel-open');
     controls.enabled = true;
+    if (wasOpen) { const b = focusBack; focusBack = null; if (b && b.isConnected && !b.hidden && b.offsetParent !== null) b.focus({ preventScroll: true }); else document.activeElement?.blur?.(); }
   };
   const openPanel = (p) => {
+    focusBack = byKeyboard && document.activeElement && document.activeElement !== document.body ? document.activeElement : null;
     controls.enabled = false; controls.unlock();
     p.hidden = false;
     document.body.classList.add('panel-open');
-    if (p === mapPanel) mapView.open(world.here(controls), heading());
+    if (p === mapPanel) { mapView.open(world.here(controls), heading()); p.querySelector('.close')?.focus({ preventScroll: true }); }
   };
   // Random city: the next settlement of the one shared random order (src/ui/order.js), from wherever one is
   const randomCity = () => { if (busy) return; const S = take(nearest(world.here(controls))); if (S) mapView.go(S); };
@@ -526,6 +641,8 @@ async function main() {
     const periods = t('periods'), bounds = [5, 7, 11, 14, 17.5, 20, 22];
     let k = bounds.findIndex((b) => h < b); if (k < 0) k = 7;
     clockPeriod.textContent = periods[k];
+    clockHour.setAttribute('aria-valuetext', `${clockTime.textContent}, ${periods[k]}`);
+    clockPlay.setAttribute('title', t('t-pause'));
   };
   clockHour.oninput = () => {
     climate.hour = +clockHour.value % 24;
@@ -730,7 +847,7 @@ async function main() {
     const dt = CAPTURE ? 1 / 30 : (now - last) / 1000;
     last = now;
     tour.update(dt);
-    HITCH.time('controls', () => controls.update(dt));
+    if (!pinned) HITCH.time('controls', () => controls.update(dt));
     frameOnce(dt);
     HITCH.time('minimap', () => minimap?.update(world.here(controls), heading()));
     const tR = HITCH.mark();

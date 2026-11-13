@@ -27,6 +27,7 @@ import { MoverSet, WakeSet } from './movers-gpu.js';
 import { factor } from './movers-kit.js';
 import { ENV } from './env.js';
 import { SMALL, MID } from './layers.js';
+import { spawnAllowed, inArrivalCircle, holdBack, ARRIVAL_QUIET } from './walker-rules.js';
 
 const STATES = new Map();                // site → state
 const TAU = Math.PI * 2;
@@ -241,9 +242,18 @@ export class SiteMovers {
       hl: 3.5, hw: 1, hx: 0, hz: -1, stuck: 0, guard: null, give: null, giveZ: -1, giveT: 0, exI: -1, brI: -1, brT: 0, brRel: 0, jI: -1, jT: 0, jD: 0, jRel: 0 }));
     this.t = 0; this.nextList = 0; this.cands = []; this.wetness = 0;
     this.queue = null; this.idle = 0;
+    // the visitor's arrival (World.noteArrival), if it was a moment ago: nobody spawns on it
+    this.arr = null;
+    const A = world.arrival;
+    if (A && A.site === site && performance.now() - A.at < ARRIVAL_QUIET * 1000) this.arrive(A.x, A.z, (ARRIVAL_QUIET * 1000 - (performance.now() - A.at)) / 1000);
     site.group.add(this.root);
     this.root.visible = false;
     this.ready = false;
+  }
+  /** The visitor has arrived at (x, z): the walkers within the arrival's circle let go of, none spawned there for a while. */
+  arrive(x, z, quiet = ARRIVAL_QUIET) {
+    this.arr = { x, z, until: this.t + quiet };
+    for (const w of this.W) if (w.on && inArrivalCircle(w.x, w.z, x, z)) w.on = false;
   }
   variantsOf(id, V) {
     const n = (w, f) => V(this.wv, `${id}|${w}|${f}`);
@@ -335,6 +345,7 @@ export class SiteMovers {
     const x = e.ax + e.ux * s + e.nx * e.off[k], z = e.az + e.uz * s + e.nz * e.off[k], y = this.walk.heightAt(e, s);
     const d = len2(x - _cam.x, z - _cam.z);
     if (d > P.reach - 5 || (d < P.spawnMin && this.seen(x, y + 1, z, 8))) return;
+    if (!spawnAllowed(this.arr, this.t, x, z)) return;
     for (const w of this.W) if (w.on && Math.abs(w.x - x) < 1.2 && Math.abs(w.z - z) < 1.2) return;
     let w = null; for (const q of this.W) if (!q.on) { w = q; break; }
     if (!w) return false;
@@ -429,6 +440,8 @@ export class SiteMovers {
         else w.bias = Math.min(uT, w.bias + dt * 1.5);
       }
       w.bias = Math.max(0, w.bias - dt * 0.25);
+      // a visitor standing in the way: held back short of them (walker-rules.js)
+      vT = holdBack(vT, w.x, w.z, w.y, w.yaw, _cam.x, _cam.y, _cam.z);
       if (vT < 0.05) { w.stuck += dt; if (w.stuck > 4 && !w.turning) { w.turning = 1; w.dir = -w.dir; w.next = null; w.stuck = 0; } } else w.stuck = 0;
       // steer toward the point ahead, walk
       const want = Math.atan2(-(tx - w.x), -(tz - w.z));
@@ -922,6 +935,7 @@ registerSystem({
     worker.onerror = (e) => { console.warn('movers worker', e.message); worker.terminate(); st.worker = null; };
     worker.postMessage({ id: site.id });
   },
+  arrived(site, x, z) { STATES.get(site)?.m?.arrive(x, z); },
   detach(site) {
     const st = STATES.get(site);
     if (!st) return;

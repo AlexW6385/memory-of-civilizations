@@ -22,6 +22,8 @@ export class MiniMap {
     this.off = document.createElement('canvas');
     this.off.width = this.off.height = RES;
     this.box.addEventListener('click', () => onOpen());
+    // (reached by Tab, opened by Enter or Space)
+    this.box.addEventListener('keydown', (e) => { if (e.code === 'Enter' || e.code === 'Space') { e.preventDefault(); e.stopPropagation(); onOpen(); } });
   }
 
   /** Redraw (a few times a second) for the visitor at planet direction u, heading (radians from north). */

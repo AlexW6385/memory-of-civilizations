@@ -48,12 +48,13 @@ export class GIVolume {
    * listed in data/gi/index.json are fetched (the others would be a 404 each).
    */
   async fetch(id, url) {
-    if (this.cache.has(id)) return this.cache.get(id);
+    // (a set whose release is waiting is wanted again: kept)
+    if (this.cache.has(id)) { this.pendingRelease?.delete(id); return this.cache.get(id); }
     const dir = url.slice(0, url.lastIndexOf('/') + 1);
     this.index ??= fetch(dir + 'index.json').then((r) => (r.ok ? r.json() : null)).catch(() => null);
     const index = await this.index;
     if (index && !index[id]) return null;
-    if (this.cache.has(id)) return this.cache.get(id);
+    if (this.cache.has(id)) { this.pendingRelease?.delete(id); return this.cache.get(id); }
     const res = await fetch(url);
     if (!res.ok) return null;
     const buf = await res.arrayBuffer();
@@ -100,9 +101,20 @@ export class GIVolume {
   /** Let go of a volume whose building was unloaded (kept while it is the active one). */
   release(id) {
     const set = this.cache.get(id);
-    if (!set?.parts || set.parts.includes(this.current)) return;
+    if (!set?.parts) return;
+    // (the volume in force is let go of as soon as it is not: a set released while the visitor still
+    // stood in it was kept for ever, three half-float 3D textures and their arrays for each landmark
+    // of every settlement left in a long session)
+    if (set.parts.includes(this.current)) { (this.pendingRelease ??= new Set()).add(id); return; }
     for (const vol of set.parts) for (const t of vol.tex) t.dispose();
     this.cache.delete(id);
+    this.pendingRelease?.delete(id);
+  }
+
+  /** Let go of the sets whose release waited on the volume in force (see release). */
+  sweep() {
+    if (!this.pendingRelease?.size) return;
+    for (const id of [...this.pendingRelease]) this.release(id);
   }
 
   /**
@@ -122,6 +134,7 @@ export class GIVolume {
     if (!vol) { this.clear(); return; }
     if (this.current === vol) return;
     this.current = vol;
+    this.sweep();
     for (let t = 0; t < 3; t++) { this.tex[t] = vol.tex[t]; if (this.nodes) this.nodes[t].value = vol.tex[t]; }
     const s = vol.spacing;
     this.uMin.value.set(vol.min[0] - s / 2, vol.min[1] - s / 2, vol.min[2] - s / 2);
@@ -131,7 +144,7 @@ export class GIVolume {
   }
 
   /** No volume in force (outside every building, or away from the settlement it belongs to). */
-  clear() { this.current = null; this.uActive.value = 0; }
+  clear() { this.current = null; this.uActive.value = 0; this.sweep(); }
 
   /**
    * Mean indirect luminance around a point (for eye adaptation): the DC term of the nearest

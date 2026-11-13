@@ -322,7 +322,7 @@ export class Renderer {
   precompile(roots, opts = {}) {
     const r = this.renderer, sp = this.scenePass, ctx = sp?._contextNodeCache?.context;
     if (!r || !sp?.renderTarget || !ctx) return Promise.resolve();      // before the first frame
-    const seen = this._compiled ??= new Set(), kinds = this._kinds ??= new Set(), reps = [], later = [];
+    const seen = this._compiled ??= new Set(), seenMeshes = this._compiledMeshes ??= new WeakSet(), kinds = this._kinds ??= new Set(), reps = [], later = [];
     for (const root of Array.isArray(roots) ? roots : [roots]) root.traverse((o) => {
       if (!o.isMesh || !o.material || !o.geometry) return;
       const g = o.geometry;
@@ -335,9 +335,16 @@ export class Renderer {
       // with packed ones are two pipelines of one material; keyed by names alone, the second was
       // taken as compiled and built in the frame that first drew it, after arriving)
       const kind = `${o.material.uuid}|${o.isInstancedMesh ? 1 : 0}${o.instanceColor ? 1 : 0}${g.index ? 1 : 0}${o.receiveShadow ? 1 : 0}|${layoutOf(g)}`;
-      const key = o.isInstancedMesh ? `i:${o.uuid}|${o.material.uuid}|${o.receiveShadow ? 1 : 0}` : kind;
-      if (seen.has(key)) return;
-      seen.add(key);
+      // (an instanced mesh is remembered by the mesh itself, weakly: a string key of its uuid for every
+      // mesh of every settlement ever visited was kept for the whole session)
+      if (o.isInstancedMesh) {
+        const mk = `${o.material.uuid}|${o.receiveShadow ? 1 : 0}`;
+        if (o._compiledFor === mk && seenMeshes.has(o)) return;
+        o._compiledFor = mk; seenMeshes.add(o);
+      } else {
+        if (seen.has(kind)) return;
+        seen.add(kind);
+      }
       // the first mesh of each kind (its shader and pipeline) is awaited; the other instanced
       // meshes' own builds are done afterwards in idle moments (`later`). Awaiting all of them made
       // every travel wait on ~800 builds one after another, latency-bound at ~50 a second (~16 s)
