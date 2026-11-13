@@ -16,7 +16,7 @@ export function terraceLots() {
   LOTS = [];
   const rand = rng(481);
   let x = -147, i = 0;
-  while (x < -52 && i < KINDS.length) {
+  while (x < -36 && i < KINDS.length) {
     const [kind, trade] = KINDS[i], w = (kind === 'shop' ? 9.8 : 10.6) + rand() * 2.4, d = 11 + rand() * 2.2;
     LOTS.push({ rect: [x, -13, x + w, -13 + d], seed: Math.floor(rand() * 1e6), front: 'n', kind, trade, enter: true });
     x += w + 1.3; i++;
