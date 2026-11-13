@@ -4,23 +4,13 @@
 // toward Mecca); the Sheikh Lotfollah Mosque; Ali Qapu with its talar; the Qeysarieh portal and the
 // first stretch of the vaulted bazaar; the royal garden behind Ali Qapu.
 
-import { SQUARE, ARCADE, CANAL, GARDEN, BAZAAR, PORTAL, COURT, M, C, LOTF, ALIQAPU } from './layout.js';
+import { SQUARE, ARCADE, CANAL, GARDEN, BAZAAR, PORTAL, COURT, M, C, LOTF, ALIQAPU, ARCADE_RUNS, ARCADE_OPEN } from './layout.js';
 
 const E = [];
 const [sx0, sz0, sx1, sz1] = SQUARE, H = 12;
 const mid = [0, (sz0 + sz1) / 2];
 // ---- the arcades round the square, broken for the monuments and a few streets
-const side = (a, b) => E.push({ t: 'square_arcade', a, b, h: H, depth: ARCADE, bay: 7, facing: mid });
-const runs = (fixed, along, gaps, lo, hi) => {
-  let u = lo;
-  for (const [g0, g1] of gaps) { if (g0 > u) side(along(u), along(g0)); u = g1; }
-  if (hi > u) side(along(u), along(hi));
-  void fixed;
-};
-runs('w', (z) => [sx0 - 0.6, z], [[-183, -177], [-51, -29], [117, 123]], sz0, sz1);
-runs('e', (z) => [sx1 + 0.6, z], [[-183, -177], [LOTF.portal[1][1], LOTF.portal[0][1]], [117, 123]], sz0, sz1);
-runs('n', (x) => [x, sz0 - 0.6], [[-15, 15]], sx0, sx1);
-runs('s', (x) => [x, sz1 + 0.6], [[PORTAL.a[0], PORTAL.b[0]]], sx0, sx1);
+for (const [a, b] of ARCADE_RUNS) E.push({ t: 'square_arcade', a, b, h: H, depth: ARCADE, bay: 7, facing: mid, open: ARCADE_OPEN });
 for (const [x0, z0] of [[sx0 - ARCADE - 0.6, sz0 - ARCADE - 0.6], [sx1 + 0.6, sz0 - ARCADE - 0.6], [sx0 - ARCADE - 0.6, sz1 + 0.6], [sx1 + 0.6, sz1 + 0.6]]) {
   E.push({ t: 'block', walk: true, rect: [x0, z0, x0 + ARCADE, z0 + ARCADE], y0: 0, y1: H, mat: 'brick_buff' });
 }
@@ -112,8 +102,9 @@ E.push({ t: 'lane', rect: [gx0 + 6, -50, gx1 - 1, -40], y: 0.04, mat: 'brick_pav
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('square', SQUARE, 0, 'open'), room('garden', GARDEN, 0, 'open'), room('talar', [-92, az0 + 1, ax1, az1 - 1], 13, 'hall'), room('music_room', [-102, -47, -94, -38], 32.5, 'hall'), room('bazaar', [-2.5, BAZAAR.z1, 2.5, BAZAAR.z0], 0, 'hall'), room('shah_sanctuary', [M(0, sv)[0] - 8, M(0, sv)[1] - 8, M(0, sv)[0] + 8, M(0, sv)[1] + 8], 0, 'hall'), room('lotfollah', [LOTF.c[0] - 6.7, LOTF.c[1] - 6.7, LOTF.c[0] + 6.7, LOTF.c[1] + 6.7], 0, 'hall')];
-const walks = [[[0, -280], [0, -150], [0, 0], [0, 150], [0, 245]]];
+const walks = [[[0, -280], [2.5, -168], [2.5, -155], [-1, -143], [-1, -125], [1.6, 35], [1.6, 150], [0, 200], [0, 245]]];   // down the square's axis, bearing round the strollers and goods the generated street life stands on it
 walks[0].y0 = 0;
+walks.push([[-70, 167.5], [-82.6, 167.5], [-88, 167.5], [-82.6, 167.5]], [[70, 181.2], [82.6, 181.2], [88, 181.2]]);          // into an arcade shop on each side of the square, by the arch and the doorway
 
 export const square = {
   id: 'isfahan-maidan',
