@@ -1,8 +1,9 @@
 // Ubirr's country and its family camp (docs/settlements/kakadu.md §4, §5): paperbark and pandanus round the billabong, termite mounds on
 // the dry edge, lilies on the water; the bark hut, the lean-to, the fires with their trough, grindstone and turtle, the racks of geese;
 // the people at the camp (bare, with fibre belts, ochre and white clay), dingoes, and magpie geese crowded on the water [docs §5].
+import { HOUSE } from '../../styles/kakadu/house.js';
 import { faceSpots } from '../../styles/kakadu/outcrop.js';
-import { RADIUS, POOL, CAMPS, height, groves, inPool, poolD, rng, inRect, MAIN, SMALL, woodland, tuftSpots, screeSpots, shelterSpots } from './layout.js';
+import { RADIUS, POOL, CAMPS, HOUSES, houseRot, height, groves, inPool, poolD, rng, inRect, MAIN, SMALL, woodland, tuftSpots, screeSpots, shelterSpots } from './layout.js';
 
 const plan = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -14], facing: 's' } });
 
@@ -22,7 +23,7 @@ export async function town() {
   CAMPS.forEach((C, i) => {
     const [fx, fz] = C.fire, y = height(fx, fz);
     K.push({ t: 'ka_fire', at: [fx, fz], y, seed: i + 3, turtle: C.turtle, trough: C.trough, grind: C.grind, fish: C.fish });
-    if (C.hut) K.push({ t: 'ka_hut', at: [C.hut[0], C.hut[1]], y: height(C.hut[0], C.hut[1]), rot: C.hut[2], seed: 1 });
+    if (C.hut && !HOUSES.some((h) => h.at[0] === C.hut[0] && h.at[1] === C.hut[1])) K.push({ t: 'ka_hut', at: [C.hut[0], C.hut[1]], y: height(C.hut[0], C.hut[1]), rot: C.hut[2], seed: 1 });
     if (C.lean) K.push({ t: 'ka_leanto', at: [C.lean[0], C.lean[1]], y: height(C.lean[0], C.lean[1]), rot: C.lean[2], seed: 2 });
     K.push({ t: 'ka_rack', at: [C.rack[0], C.rack[1]], y: height(C.rack[0], C.rack[1]), rot: 0.2, len: 2.2 });
     woman([fx + 1.0, fz + 0.9], y, -2.3, { pose: 'sit_ground' });
@@ -97,7 +98,7 @@ export async function town() {
   CAMPS.forEach((C, i) => {
     const [fx, fz] = C.fire, put = (kind, dx, dz, rot) => K.push({ t: 'ka_item', kind, at: [fx + dx, fz + dz], y: height(fx + dx, fz + dz), rot, seed: i + (kind.length % 3) });
     put('bags', -2.8, 2.6, 0.3); put('spears', 3.6, -1.6, 0.5 + i); put('wood', -3.0, -1.8, 0.4 * i); put('midden', 4.4 + (i % 2), -3.6, i);
-    if (i % 2 === 0) { put('bed', C.hut ? C.hut[0] - fx : -3, C.hut ? C.hut[1] - fz + 2.5 : 4.5, 0.2); put('bark', 2.6, 4.1, 1.0); } else { put('mat', -2.2, 3.6, 0.5); put('yams', 2.0, 3.8, 0.2); }
+    if (i % 2 === 0) { if (!HOUSES.some((h) => C.hut && h.at[0] === C.hut[0])) put('bed', C.hut ? C.hut[0] - fx : -3, C.hut ? C.hut[1] - fz + 2.5 : 4.5, 0.2); put('bark', 2.6, 4.1, 1.0); } else { put('mat', -2.2, 3.6, 0.5); put('yams', 2.0, 3.8, 0.2); }
     if (C.fish || i === 2) put('trap', 3.2, 3.2, 0.6);
     woman([fx - 2.6, fz + 3.8], height(fx - 2.6, fz + 3.8), 0.4, { pose: i % 2 ? 'sit_ground' : 'kneel' });
     L.push({ t: 'animal', kind: 'dog', at: [fx - 3.2, fz - 1.0], y: height(fx - 3.2, fz - 1.0), rot: R2() * 6.28, seed: 40 + i });
@@ -137,6 +138,30 @@ export async function town() {
     at2(man, 18.8, -24.4, 2.5, { pose: 'staff' }); at2(woman, 20.6, -24.8, 3.5, { pose: 'stand', carry: 'basket' }); at('bags', 22.0, -23.2, 0.5, 69); dog(-17.2, -26.4, 92);
     // the lane's two edges: a bundle of spears leaned on a rock, a sleeping dog in the shade of the apron's gum
     at('spears', -4.4, -22.4, 0.2, 70); at('yams', 4.6, -22.6, 0.4, 71); dog(3.8, -24.6, 93);
+  }
+  // the walk-in shelters (docs §5c): bark houses, paperbark domes and brush shades with a fire, a bed, goods and people inside, their doors to the fires or the open
+  {
+    const wl = (Hs, lx, lz) => { const r = houseRot(Hs), c = Math.cos(r), sn = Math.sin(r); return [Hs.at[0] + lx * c + lz * sn, Hs.at[1] - lx * sn + lz * c]; };
+    const within = (Hs, x, z, m) => { const r = houseRot(Hs), c = Math.cos(r), sn = Math.sin(r), dx = x - Hs.at[0], dz = z - Hs.at[1], lx = dx * c - dz * sn, lz = dx * sn + dz * c, B = HOUSE[Hs.kind]; return Math.abs(lx) < B.hw + m && Math.abs(lz) < B.hd + m; };
+    const clearOf = (x, z) => !HOUSES.some((Hs) => within(Hs, x, z, 0.7));
+    for (let i = K.length - 1; i >= 0; i--) { const e = K[i]; if (!e.list && e.at && ['ka_item', 'ka_rack', 'ka_leanto', 'ka_fire'].includes(e.t) && !clearOf(e.at[0], e.at[1])) K.splice(i, 1); }
+    for (let i = L.length - 1; i >= 0; i--) { const e = L[i]; if (e.at && !clearOf(e.at[0], e.at[1])) L.splice(i, 1); }
+    const rects = [];
+    HOUSES.forEach((Hs, i) => {
+      const B = HOUSE[Hs.kind], rot = houseRot(Hs), [x, z] = Hs.at, y = height(x, z), ca = Math.abs(Math.cos(rot)), sa = Math.abs(Math.sin(rot));
+      const ex = (B.hw + 0.5) * ca + (B.hd + 0.5) * sa, ez = (B.hw + 0.5) * sa + (B.hd + 0.5) * ca;
+      K.push({ t: 'ka_house', kind: Hs.kind, at: [x, z], y, rot });
+      rects.push({ t: 'ka_homeprecinct', at: [x, z], rect: [x - ex, z - ez, x + ex, z + ez] });
+      const [fx, fz] = wl(Hs, ...B.fire); K.push({ t: 'ka_fire', at: [fx, fz], y, seed: 60 + i });
+      for (const [lx, lz, kind] of B.goods) { const [gx, gz] = wl(Hs, lx, lz); K.push({ t: 'ka_item', kind, at: [gx, gz], y, rot, seed: i }); }
+      // at the door: what is leaned or stacked outside
+      const out = Hs.kind === 'bark' ? [[1.35, B.hd + 0.5, 'spears', 0.3], [-1.3, B.hd + 0.6, 'wood', 0.2]] : Hs.kind === 'dome' ? [[-1.5, B.hd + 0.5, 'bark', 0.5], [1.6, B.hd + 0.8, 'wood', 1.4]] : [[0, B.hd + 1.3, 'mat', 0.1], [2.1, B.hd + 0.5, 'trap', 0.5]];
+      for (const [lx, lz, kind, rr] of out) { const [gx, gz] = wl(Hs, lx, lz); if (clearOf(gx, gz) || true) K.push({ t: 'ka_item', kind, at: [gx, gz], y: height(gx, gz), rot: rot + rr, seed: i + 5 }); }
+      // the people: one or two sitting by the fire, a child on the bed
+      B.sit.forEach(([lx, lz, rl], k) => { if (i % 3 === 2 && k === 1) return; const [px, pz] = wl(Hs, lx, lz); (k ? man : woman)([px, pz], y, rot + rl, { pose: 'sit_ground' }); });
+      if (i % 2 === 0) { const [px, pz] = wl(Hs, ...B.child); L.push({ t: 'figure', at: [px, pz], y: y + 0.4, rot: rot + 1.3, seed: 900 + i, dress: 'loincloth', cloth: 'cloth_brown', skin: 'skin_dark', child: true, h: 0.95, pose: 'sit_ground', hair: 'short', feet: 'bare', over: 'none' }); }
+    });
+    K.push(...rects);
   }
   void poolD; void inRect;
   // the country in four quarters (so that the far ones cull apart)
