@@ -15,6 +15,8 @@ const CHIEF = ['hide_white', 'hide_brown'];
 
 export async function town() {
   const v = village(), E = [], P = [], rand = rng(1769);
+  const TRADES = ['weaver', 'fisher', 'carver', 'cook', 'plain'];
+  v.houses.forEach((h, i) => { if (i) { h.trade = TRADES[(i * 7 + (h.rank || 0) * 3) % 5]; h.variant = (i * 3 + Math.floor(h.c[0] / 9)) % 4; } });
   for (const h of v.houses.slice(1)) E.push({ t: 'whare', carved: false, walls: (h.c[0] * 7 + h.c[1] * 3) % 5 < 2 ? 'reed_mat' : 'raupo', roof: (h.c[0] * 3 + h.c[1] * 11) % 7 < 2 ? 'thatch' : 'raupo', ...h, ...(Math.hypot(h.c[0], h.c[1]) > 250 ? { furnished: false } : {}) });
   for (const p of v.pataka.slice(1)) E.push({ t: 'pataka', ...p });
   for (const p of v.pits) E.push({ t: 'rua', ...p });
@@ -155,6 +157,18 @@ export async function town() {
     if (clear(hk[0], hk[1], 2)) E.push({ t: 'harakeke', at: hk, y: gy(hk), h: 1.4 + rand() * 0.7, seed: Math.floor(rand() * 1e5) });
     if (k % 3 === 0) { const hn = [hk[0] - Math.cos(h.yaw) * 1.2, hk[1] + Math.sin(h.yaw) * 1.2]; E.push({ t: 'hinaki', at: hn, y: gy(hn), yaw: rand() * 3, len: 1.0 + rand() * 0.3 }); }
   });
+  // ---- indoors: the nearest ordinary houses to the arrival each have their household at the hearth (the room's light is the hearth's, maori style whare) ----
+  { const ARR = [0, 33], inside = v.houses.slice(1).map((h, i) => ({ h, i: i + 1 })).filter(({ h }) => (h.rank || 0) <= 1 && h.w >= 3).sort((p, q) => Math.hypot(p.h.c[0] - ARR[0], p.h.c[1] - ARR[1]) - Math.hypot(q.h.c[0] - ARR[0], q.h.c[1] - ARR[1])).slice(0, 14);
+    for (const { h } of inside) {
+      const ca = Math.cos(h.yaw), sa = Math.sin(h.yaw), W2 = (x, z) => [h.c[0] + x * ca + z * sa, h.c[1] - x * sa + z * ca], zm = 0.775, zi1 = h.l / 2 - 0.35, hy = h.y || height(h.c[0], h.c[1]);
+      const lf = ([fx, fz]) => face([0, 0], [fx * ca + fz * sa, -fx * sa + fz * ca]);
+      const put = (who, x, z, f, o = {}) => { const at = W2(x, z); (who === 'woman' ? woman : who === 'man' ? man : person)(at, hy, lf(f), who === 'child' ? { child: true, hair: 'long', ...o } : o); };
+      if (h.trade === 'weaver') { put('woman', 0.0, zi1 - 1.15, [0, 1], { pose: 'squat', over: 'none' }); put('child', 0.95, zm + 0.5, [-1, 0], { pose: 'squat' }); }
+      else if (h.trade === 'fisher') { put('man', 0.0, zm + 1.0, [0, -1], { pose: 'squat' }); }
+      else if (h.trade === 'carver') { put('man', -0.1, zm + 1.25, [0, -1], { pose: 'squat' }); }
+      else if (h.trade === 'cook') { put('woman', 0.0, zm + 1.0, [0, -1], { pose: 'squat', over: 'none' }); put('child', 0.95, zm - 0.3, [-1, 0], { pose: 'squat' }); }
+      else { put('woman', 0.0, zm + 1.0, [0, -1], { pose: 'squat' }); put('man', 0.95, zm - 0.2, [-1, 0], { pose: 'squat' }); }
+    } }
   // the terraces: a person at about every third door, a cooking place on each terrace, a dog or two
   const terr = v.houses.slice(1).filter((h) => Math.hypot(h.c[0] - hx, h.c[1] - hz) < HILL.foot - 4 && Math.hypot(h.c[0] - hx, h.c[1] - hz) > HILL.tihi + 4);
   terr.forEach((h, k) => {
