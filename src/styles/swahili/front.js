@@ -144,6 +144,11 @@ function shelf(bag, rand, xa, xb, zw, fl, trade, n = 2) {
 export function furnishFront(ctx, o, R0) {
   const { bag, col } = ctx, { fl, rand, trade, duka } = o, [rx0, rz0, rx1, rz1] = R0;
   const depth = rz1 - rz0;
+  // the brass lamp hung from a cord in the middle of the room, lit (the room's light), over the floor's free middle
+  { const lx = (rx0 + rx1) / 2 + (rand() - 0.5) * 1.2, lz = rz0 + depth * 0.5, top = fl + 2.45;
+    bag.add('rope_fibre', box(lx - 0.006, fl + 2.08, lz - 0.006, lx + 0.006, top, lz + 0.006));
+    bag.add('bronze', lathe([[0.001, 0], [0.06, 0.02], [0.1, 0.07], [0.12, 0.09], [0.001, 0.09]], 10, null, lx, fl + 1.99, lz));
+    bag.add('flame', lathe([[0.001, 0.07], [0.03, 0.08], [0.02, 0.15], [0.001, 0.18]], 6, null, lx, fl + 1.99, lz)); }
   // shelves along the north wall (the court's side) where the door is not, and along the south wall's free stretch
   const doorU = o.frontDoorU;
   const spans = [[rx0 + 0.15, doorU[0] - 0.25], [doorU[1] + 0.25, rx1 - 0.15]].filter((s) => s[1] - s[0] > 0.9);
