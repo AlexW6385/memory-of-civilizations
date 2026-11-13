@@ -3,7 +3,7 @@
 // hall of an official's house near the avenue, with its dais, screen and zither — walkable from its court; the temple's halls are
 // the plan's. The rooms give the music its zones.
 import { YAW, rng } from '../../styles/tang/kit.js';
-import { lots, WINE, DACI_AX, DACI_MAIN, OFFICE } from './layout.js';
+import { lots, WINE, DACI_AX, DACI_MAIN, OFFICE, DACI_QUARTERS } from './layout.js';
 
 const mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
 const ext = (rect, f) => { const w = rect[2] - rect[0], d = rect[3] - rect[1]; return f === 'n' || f === 's' ? [w, d] : [d, w]; };
@@ -32,6 +32,11 @@ export function interiorElements() {
   E.push({ t: 'block', rect: [px - 0.06, pz - 0.06, px + 0.06, pz + 0.06], y0: 0, y1: 5.6, mat: 'bamboo_culm' });
   E.push({ t: 'block', rect: [px + 0.06, pz - 0.02, px + 0.9, pz + 0.02], y0: 3.9, y1: 5.4, mat: 'cloth_ochre', collide: false });
   E.push({ t: 'tang_jars', at: [f[0] + 4, f[3] + 1.8], n: 5, y: 0, dir: [1, 0], seed: 4 });
+  // Daci'en's ordinary buildings: each a hall of its own frame with its furnished room (tang style interior.js)
+  for (const q of DACI_QUARTERS) {
+    E.push({ t: 'tang_hall', c: q.c, w: q.w, d: q.d, face: q.face, y: 0, plat: q.plat, H: q.H, nb: q.nb, kind: 'hall', roof: q.roof, over: 1.8, bh: 1.0, doorW: q.w > 12 ? 2.6 : 2.2, interior: true, det: 2, chi: q.chi, pal: q.pal });
+    E.push({ t: 'tang_interior', c: q.c, face: q.face, w: q.w, d: q.d, y: q.plat, kind: q.kind, seed: q.c[0] | 0 });
+  }
   return E;
 }
 /** The rooms (music zones): the wine shop (with the apron before it) and the furnished house's hall. */
@@ -39,6 +44,7 @@ export function interiorRooms() {
   const f = WINE.foot, out = [{ id: 'hu-wine-shop', rect: [f[0], f[1], f[2], f[3] + 2.5], y: WH.plat, kind: 'tavern' }];
   const l = furnishedLot();
   if (l) { const h = houseHall(l), fr = frameOf(mid(l.rect), l.front), a = fr.P([-h.hw / 2, h.hz - h.hd / 2]), b = fr.P([h.hw / 2, h.hz + h.hd / 2 + 1.5]); out.push({ id: 'official-hall', rect: [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], y: h.plat, kind: 'house' }); }
+  for (const q of DACI_QUARTERS) { const al = q.face === 'e' || q.face === 'w'; out.push({ id: 'daci-' + q.id, rect: [q.c[0] - (al ? q.d : q.w) / 2, q.c[1] - (al ? q.w : q.d) / 2, q.c[0] + (al ? q.d : q.w) / 2, q.c[1] + (al ? q.w : q.d) / 2], y: q.plat, kind: q.kind === 'refectory' || q.kind === 'library' ? 'hall' : 'house' }); }
   return out;
 }
 /** The people of the interiors (style life). */
@@ -84,5 +90,26 @@ export function interiorLife() {
     per([0, bz4 + 1.35], y4 + 0.37, [0, 5], { pose: 'cross', cloth: 'cloth_maroon', cloth2: 'cloth_white', over: 'sash', beard: true });
     per([-7.5, 0.4], y4, [0, bz4], { pose: 'stand', cloth: 'cloth_green', cloth2: 'cloth_white', over: 'sash' }); per([7.4, 0.8], y4, [0, bz4], { pose: 'stand', cloth: 'cloth_green', cloth2: 'cloth_white', over: 'sash', beard: true });
     per([2.5, 2.4], y4, [0, bz4], { pose: 'stand', cloth: 'cloth_indigo', cloth2: 'cloth_white', over: 'belt', hat: 'brim', skin: 'skin_medium', beard: true, hair: 'short' }); }
+  // Daci'en's ordinary buildings: monks at their meal and work, the cook at the stove, a reader in the library, the steward in the storehouse
+  for (const q of DACI_QUARTERS) {
+    const fr = frameOf(q.c, q.face), bz = -q.d / 2 + 0.35, hx = q.w / 2 - 0.5, y = q.plat;
+    const per = (at, y2, toward, o = {}) => { const p = fr.P(at), t = fr.P(toward); out.push({ t: 'figure', at: p, y: y2, rot: face([t[0] - p[0], t[1] - p[1]]), seed: Math.floor(rand() * 1e9), dress: 'robe', skin: 'skin_light', hat: 'none', hair: 'shaven', over: 'shawl', cloth: ['cloth_ochre', 'cloth_grey', 'cloth_brown'][Math.floor(rand() * 3)], cloth2: 'cloth_maroon', ...o }); };
+    if (q.kind === 'refectory') {
+      per([0, bz + 1.1], y + 0.3, [0, 5], { pose: 'cross', cloth: 'cloth_ochre' });
+      for (const sx of [-1, 1]) for (const [z, k] of [[bz + 3.2, 0], [bz + 5.4, 1]]) for (let i = 0; i < 4; i++) { if (rand() < 0.25) continue; const x = sx * (hx - 3.6) - 3.0 + 0.6 + i * 1.1 + (i > 1 ? 1.1 : 0); per([x, z + (k ? 0.75 : -0.75)], y, [x, z], { pose: 'cross' }); }
+    } else if (q.kind === 'kitchen') {
+      per([-hx / 2 - 0.4, bz + 2.0], y, [-hx / 2 - 0.4, bz], { pose: 'stand', cloth: 'cloth_brown', hair: 'topknot', over: 'belt' });
+      per([hx - 2.2, 2.1], y, [hx - 2.2, 1.0], { pose: 'stand', cloth: 'cloth_grey' });
+    } else if (q.kind === 'library') {
+      per([0.7, bz + 2.0], y, [0, bz + 1.2], { pose: 'sit', cloth: 'cloth_ochre' });
+      per([-3.4, bz + 2.5], y, [-2.6, bz + 2.5], { pose: 'stand', cloth: 'cloth_grey' });
+    } else if (q.kind === 'cell') {
+      per([0, bz + 1.15], y + 0.07, [0, bz], { pose: 'cross', cloth: 'cloth_grey' });
+    } else if (q.kind === 'guest') {
+      per([0, bz + 1.75], y + 0.3, [0, bz + 1.2], { pose: 'cross', cloth: 'cloth_maroon', hair: 'topknot', hat: 'cap', hatMat: 'cloth_black', beard: true });
+    } else if (q.kind === 'store') {
+      per([0, 2.3], y, [0, 0.9], { pose: 'stand', cloth: 'cloth_brown', hair: 'topknot', over: 'belt' });
+    }
+  }
   return out;
 }

@@ -153,20 +153,20 @@ export function lots() {
   const terrs = [terr];
   for (const [tx, tz] of [[-250, -40], [-150, -80], [-220, 50]]) { const t2 = best(LOTS.filter((l) => okT(l) && !terrs.includes(l)), tx, tz); if (t2) terrs.push(t2); }
   for (const t of terrs) if (t) { t.enter = 0; t.gy = height(t.rect[0] + 0.85, t.front === 'n' ? t.rect[1] - 1.2 : t.rect[3] + 1.2); }
-  const AMP = [-40, 30, 20, 76];
-  const cafe = best(LOTS.filter((l) => !l.t && !inRect(AMP, (l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2, 14) && !LOTS.some((o) => o !== l && o.rect[0] < l.rect[2] + 0.5 && o.rect[2] > l.rect[0] - 0.5 && o.rect[1] < l.rect[3] + 0.5 && o.rect[3] > l.rect[1] - 0.5 && false)
-    && ['n', 's'].some((f) => clearR(l, strip(l, f))) && l.rect[2] - l.rect[0] >= 11), -10, 90);
-  if (cafe) {
-    const f = clearR(cafe, strip(cafe, 'n')) ? 'n' : 's', [x0, z0, x1, z1] = cafe.rect, du = (x1 - x0) * 0.62;
-    Object.assign(cafe, { t: 'espresso_bar', front: f, gy: height(x0 + du, f === 'n' ? z0 - 1.2 : z1 + 1.2), wall: 'brick' });
-  }
-  // the three more (shops.js, §1g): the public bar of a sandstone hotel at the Rocks' edge, a newsagent and a greengrocer
-  const used = new Set(cafe ? [cafe] : []);
-  for (const [kind, tx, tz, wall, name] of [['pub', -100, 30, 'sandstone_dressed', 'HOTEL'], ['newsagent', -80, 130, null, 'NEWSAGENT'], ['greengrocer', 70, 150, null, 'FRUIT VEG']]) {
-    const c = best(LOTS.filter((l) => !l.t && !used.has(l) && !inRect(AMP, (l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2, 14) && ['n', 's'].some((f) => clearR(l, strip(l, f))) && l.rect[2] - l.rect[0] >= 11 && l.rect[3] - l.rect[1] >= 11), tx, tz);
+  // the eight rooms one can walk into near the arrival (rooms: styles/modern shops.js, shops2.js, rooms.js): on the Domain's edge east of the Point
+  // (a hotel, a milk bar, a butcher, a greengrocer) and along Macquarie Street's side across the cove's mouth (an espresso bar, a newsagent, a chemist, a barber)
+  const ARR = [222, -116];
+  const mid = (l) => [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2];
+  const used = new Set();
+  const NEAR = [['pub', 312, -88, 'sandstone_dressed', 'HOTEL'], ['milkbar', 312, -72, null, 'MILK BAR'], ['butcher', 312, -56, null, 'BUTCHER'], ['greengrocer', 328, -88, null, 'FRUIT VEG'],
+    ['espresso', 136, -88, null, null], ['chemist', 152, -56, null, 'CHEMIST'], ['newsagent', 136, -72, null, 'NEWSAGENT'], ['barber', 120, -88, null, 'BARBER']];
+  for (const [kind, tx, tz, wall, name] of NEAR) {
+    const c = best(LOTS.filter((l) => !l.t && !used.has(l) && Math.hypot(...mid(l).map((v, i) => v - ARR[i])) < 118 && ['n', 's'].some((f) => clearR(l, strip(l, f))) && l.rect[2] - l.rect[0] >= 11 && l.rect[3] - l.rect[1] >= 11), tx, tz);
     if (!c) continue;
     used.add(c);
-    const f = clearR(c, strip(c, 'n')) ? 'n' : 's', [x0, z0, x1, z1] = c.rect, du = (x1 - x0) * (kind === 'pub' ? 0.5 : 0.3) + 0.3;
+    const f = clearR(c, strip(c, 'n')) ? 'n' : 's', [x0, z0, x1, z1] = c.rect;
+    if (kind === 'espresso') { Object.assign(c, { t: 'espresso_bar', front: f, gy: height(x0 + (x1 - x0) * 0.62, f === 'n' ? z0 - 1.2 : z1 + 1.2), wall: 'brick' }); continue; }
+    const du = (x1 - x0) * (kind === 'pub' || kind === 'chemist' || kind === 'greengrocer' ? 0.5 : kind === 'butcher' ? 0.7 : 0.3) + 0.3;
     Object.assign(c, { t: 'shop_room', kind, name, front: f, gy: height(x0 + du, f === 'n' ? z0 - 1.2 : z1 + 1.2), ...(wall ? { wall } : {}) });
   }
   return LOTS;
