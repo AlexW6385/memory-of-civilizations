@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## Unreleased — arrivals shown only when whole, and a lighter long session (2026-11-12)
+
+The view stays dark after a travel (and after the first load) until the settlement, its colliders, its street life's shaders and the ground are in and the camera stands on its final pose; nobody spawns within 6 m of the arrival for the first seconds and walkers stop short of a visitor in their path. The street life is built in slices (no 0.5 s frame), baked-light volumes are let go of when a settlement is left, and the page has a first-visit hint, focus rings and keyboard-reachable map, language and sound buttons.
+
 ## v11.1 — the browser review: every arrival checked on the target machine (2026-11-12)
 
 Every settlement was visited in Chrome on an Intel Mac and fixed where the first view failed: figures at the lens, landmarks hidden or unreadable, empty squares, over-budget frames (Thebes, Qin) and slow loads (Yinxu, Qufu); birds now fly wherever swallows follow a lane, Beijing loads again, and water reflects less of the horizon's haze.

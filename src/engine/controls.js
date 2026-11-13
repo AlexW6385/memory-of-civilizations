@@ -55,6 +55,8 @@ export class Controls {
     const cv = this.canvas;
     addEventListener('keydown', (e) => {
       if (e.target.closest && e.target.closest('input, select')) return;
+      // a focused button (reached by Tab) keeps Space and Enter for itself: they press it, they do not fly
+      if ((e.code === 'Space' || e.code === 'Enter') && e.target.closest?.('button, [role="button"]')) return;
       this.keys.add(e.code);
       if (!this.enabled) return;
       if (e.code === 'Space') {

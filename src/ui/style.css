@@ -161,3 +161,19 @@ body.panel-open #btn-mute, body.panel-open #btn-lang, body.panel-open #corner, b
 
 /* ?film: only the picture (and the recorder's line) while a film is made */
 body.filming > :not(#view):not(#film-status) { display: none !important; }
+
+/* keyboard focus: a ring on whatever Tab reaches (not after a click) */
+button:focus-visible, .minimap:focus-visible, .sky-range:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sky-range:focus-visible { outline-offset: 5px; }
+button:focus:not(:focus-visible), .minimap:focus:not(:focus-visible) { outline: none; }
+
+/* the loading screen's note (no WebGPU) and the first visit's hint of the controls */
+.intro .note { margin: 14px 0 0; max-width: min(520px, 88vw); font-size: 12.5px; line-height: 1.5; color: var(--accent); }
+.intro .note[hidden] { display: none; }
+.hint { position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 6; display: flex; align-items: flex-start; gap: 10px; max-width: min(640px, calc(100vw - 32px)); padding: 10px 8px 10px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); font-size: 13px; line-height: 1.5; color: var(--ink); }
+.hint[hidden] { display: none; }
+.hint p { margin: 2px 0 0; }
+.hint button { flex: none; background: none; border: 0; font-size: 22px; line-height: 1; padding: 0 8px; color: var(--ink-dim); }
+body.panel-open .hint { display: none; }
+.noscript { position: fixed; inset: 0; z-index: 20; margin: 0; display: grid; place-items: center; padding: 24px; text-align: center; background: #15120e; color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .fade, .intro.fading, #progress-bar { transition: none; } }

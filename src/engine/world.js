@@ -268,7 +268,8 @@ class Settlement {
       if (stale()) return this;
       if (this.ahead()) await this.world.calm(() => !this.ahead());
       if (stale()) return this;
-      this.buildLife();
+      await this.buildLife(gen);
+      if (stale()) return this;
       this.done = this.expected;
       this.state = 'ready';
       // the living additions (src/engine/systems.js): boats, walkers, birds, smoke...
@@ -382,20 +383,23 @@ class Settlement {
     this.quietFor = undefined;             // the indoor shadows (World.update) set again
   }
 
-  /** The life of the streets, settlement-wide (src/engine/life-instances.js). */
-  buildLife() {
+  /** The life of the streets, settlement-wide (src/engine/life-instances.js), built in slices. */
+  async buildLife(gen = this.gen) {
     if (!this.lifeParts?.length) return;
     const t0 = HITCH.mark();
-    this.life = new LifeInstances(this.group, castsShadow, (o) => this.world.r.precompile?.(o) ?? Promise.resolve());
-    // (the rarer shapes are merged settlement-wide by material, their copies chosen by distance)
-    this.life.build(this.lifeParts);
-    // shown once its shaders are compiled (off the frame)
-    const life = this.life;
+    const life = this.lifeBuilding = new LifeInstances(this.group, castsShadow, (o) => this.world.r.precompile?.(o) ?? Promise.resolve());
     life.ready = false; life.group.visible = false;
-    Promise.resolve(this.world.r.precompile?.(life.group)).then(() => { life.ready = true; });
+    // (the rarer shapes are merged settlement-wide by material, their copies chosen by distance;
+    // long slices behind the loading screen or a travel's fade, 8 ms between frames)
+    await life.build(this.lifeParts, { slice: this.world.r.held && !this.ahead() ? HELD_SLICE : 8 });
+    this.lifeBuilding = null;
+    if (gen !== this.gen || life.disposed) { life.dispose(); return; }
+    this.life = life;
+    // shown once its shaders are compiled (off the frame); a visit waits for them (this.lifeCompiled)
+    this.lifeCompiled = Promise.resolve(this.world.r.precompile?.(life.group)).catch(() => {}).then(() => { life.ready = true; });
     // the lanterns among the street's things: one lamp per copy of a glow shape, and per piece of the rarer ones
-    this.lifeLamps = lampsOf({}, this.life.meshes.map((L) => ({ mat: L.near.name.split(":")[1], geometry: L.near.geometry, matrices: L.all })));
-    this.lifeLamps.push(...lampsOf({}, this.life.rare.map((B) => ({ mat: B.near.name.split(":")[1], geometry: B.near.geometry }))));
+    this.lifeLamps = lampsOf({}, life.meshes.map((L) => ({ mat: L.near.name.split(":")[1], geometry: L.near.geometry, matrices: L.all })));
+    this.lifeLamps.push(...lampsOf({}, life.rare.map((B) => ({ mat: B.near.name.split(":")[1], geometry: B.near.geometry }))));
     this.lifeParts = [];
     HITCH.since('life build', t0);
   }
@@ -449,7 +453,8 @@ class Settlement {
     this.group.traverse((o) => { o.geometry?.dispose(); if (o.isInstancedMesh) o.dispose(); });
     this.merged = null; this.merging = null; this.mergingNow = false; this.quietFor = undefined; this.lods = null;
     this.group.clear();
-    this.life?.dispose(); this.life = null; this.lifeParts = []; this.lifeLamps = null;
+    this.life?.dispose(); this.life = null; this.lifeParts = []; this.lifeLamps = null; this.lifeCompiled = null;
+    this.lifeBuilding?.dispose(); this.lifeBuilding = null;
     for (const rec of this.parts) this.world.r.gi.release?.(rec.plan.id);
     this.parts = [];
     this.collide = Object.assign(new CollisionWorld(), { terrain: this.collide.terrain, water: this.collide.water, waterLevel: this.collide.waterLevel });
@@ -657,6 +662,17 @@ export class World {
     const site = this.settlements.find((s) => s.S === S);
     if (site) await this.plansOf(site);
     return find();
+  }
+
+  /**
+   * The visitor has arrived at (x, z) of the current frame and the view is about to be shown: the
+   * systems that fill the streets keep clear of that spot for a while (movers.js: no walker spawns
+   * within 6 m of it in the first seconds, those standing there are let go of).
+   */
+  noteArrival(x, z) {
+    const site = this.anchor?.site ?? null;
+    this.arrival = { site, x, z, at: performance.now() };
+    if (site) for (const Sy of SYSTEMS) { try { Sy.arrived?.(site, x, z, this); } catch (e) { console.warn('system arrived', e); } }
   }
 
   /** The collision world in force (the settlement's in its frame, the open country's elsewhere). */

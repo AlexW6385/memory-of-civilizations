@@ -6,6 +6,16 @@
   <title>Memory of Civilizations</title>
   <meta name="description" content="A walkable, realistic world of architecture from every age and civilization.">
   <meta name="theme-color" content="#1b1712">
+  <link rel="canonical" href="https://alexw6385.github.io/memory-of-civilizations/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Memory of Civilizations">
+  <meta property="og:title" content="Memory of Civilizations">
+  <meta property="og:description" content="A small planet you can walk and fly over, on which the civilizations of Earth stand where they stood, as real, detailed settlements.">
+  <meta property="og:url" content="https://alexw6385.github.io/memory-of-civilizations/">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Memory of Civilizations">
+  <meta name="twitter:description" content="A small planet you can walk and fly over, on which the civilizations of Earth stand where they stood, as real, detailed settlements.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231b1712'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%23d9b26a' stroke-width='3'/%3E%3Cpath d='M14 32h36M32 14c-9 9-9 27 0 36M32 14c9 9 9 27 0 36' fill='none' stroke='%23d9b26a' stroke-width='2.5'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="src/ui/style.css">
   <script type="importmap">
   {
@@ -21,18 +31,18 @@
 <body>
   <canvas id="view"></canvas>
 
-  <button id="btn-lang" class="icon lang" aria-label="中文 / English"></button>
-  <button id="btn-mute" class="icon" aria-label="Sound on" data-i18n-label="sound-on" title="Sound on" data-i18n-title="sound-on">
+  <button id="btn-lang" class="icon lang" type="button" aria-label="中文" title="中文"></button>
+  <button id="btn-mute" class="icon" type="button" aria-label="Sound on" data-i18n-label="sound-on" title="Sound on" data-i18n-title="sound-on">
     <svg class="off" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4V9Zm12.3.3 1.4-1.4L20 10.2l2.3-2.3 1.4 1.4-2.3 2.3 2.3 2.3-1.4 1.4-2.3-2.3-2.3 2.3-1.4-1.4 2.3-2.3-2.3-2.3Z"/></svg>
     <svg class="on" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4V9Zm11.5-1.9a6 6 0 0 1 0 9.8l-1.1-1.6a4 4 0 0 0 0-6.6l1.1-1.6Zm2.6-2.6a9.6 9.6 0 0 1 0 15l-1.2-1.6a7.6 7.6 0 0 0 0-11.8l1.2-1.6Z"/></svg>
   </button>
 
-  <button id="corner-open" class="icon" aria-label="Show the map and the clock" data-i18n-label="card-show" hidden>
+  <button id="corner-open" class="icon" type="button" aria-label="Show the map and the clock" data-i18n-label="card-show" hidden>
     <svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Zm0 2.2 6 2v11.6l-6-2V6.2Z"/></svg>
   </button>
   <div id="corner" class="corner-card" hidden>
-    <button id="corner-fold" class="fold" aria-label="Fold the card" data-i18n-label="card-fold">&minus;</button>
-    <div id="minimap" class="minimap" title="Map (M)" data-i18n-title="map-open">
+    <button id="corner-fold" class="fold" type="button" aria-label="Fold the card" data-i18n-label="card-fold">&minus;</button>
+    <div id="minimap" class="minimap" role="button" tabindex="0" aria-label="Open the map (M)" data-i18n-label="map-open" title="Map (M)" data-i18n-title="map-open">
       <canvas id="minimap-canvas"></canvas>
       <div id="minimap-region" class="mm-region"></div>
     </div>
@@ -40,10 +50,10 @@
       <div class="row time-row">
         <span id="clock-icon" class="clock-icon"></span>
         <span id="clock-time" class="big">16:30</span>
-        <button id="clock-play" class="round" aria-label="Pause or run the time" data-i18n-label="t-pause"></button>
+        <button id="clock-play" class="round" type="button" aria-label="Pause or run the time" data-i18n-label="t-pause"></button>
       </div>
       <div id="clock-period" class="period"></div>
-      <input id="clock-hour" class="sky-range" type="range" min="0" max="24" step="0.1" aria-label="Time of day" data-i18n-label="time">
+      <input id="clock-hour" class="sky-range" type="range" min="0" max="24" step="0.1" aria-label="Time of day" data-i18n-label="time" aria-valuetext="">
       <div class="row speed-row">
         <span id="gait-icon" class="gait-icon" aria-hidden="true"></span>
         <span id="speed-name" class="speed-name"></span>
@@ -60,22 +70,25 @@
   <section id="intro" class="intro">
     <h1 data-i18n="title">Memory of Civilizations</h1>
     <div class="progress"><div id="progress-bar"></div></div>
-    <p id="intro-status" class="status" data-i18n="loading">Preparing the world…</p>
+    <p id="intro-status" class="status" role="status" data-i18n="loading">Preparing the world…</p>
+    <p id="intro-note" class="note" role="alert" hidden></p>
     <div class="keys" aria-label="Controls" data-i18n-label="ctl-title">
       <dl class="keys-desk"><dt><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> <kbd>←↑↓→</kbd></dt><dd data-i18n="ctl-walk">Walk</dd><dt data-i18n="ctl-k-mouse">Mouse</dt><dd data-i18n="ctl-look">Look (double-click to capture the mouse)</dd><dt><kbd>Q</kbd><kbd>E</kbd></dt><dd data-i18n="ctl-turn">Turn left / right</dd><dt><kbd>Shift</kbd></dt><dd data-i18n="ctl-run">Run</dd><dt><span data-i18n="ctl-k-hold">Hold</span> <kbd>Space</kbd></dt><dd data-i18n="ctl-fly">Fly, faster the longer you hold</dd><dt><kbd>Space</kbd> ×2</dt><dd data-i18n="ctl-cruise">Cruise</dd><dt><kbd>M</kbd></dt><dd data-i18n="ctl-map">Map</dd><dt><kbd>R</kbd></dt><dd data-i18n="ctl-random">Random city (also the map's button)</dd><dt><kbd>T</kbd></dt><dd data-i18n="ctl-tour">Tour: flies over each city in turn; R skips to the next, any other key stops it</dd><dt><kbd>Esc</kbd></dt><dd data-i18n="ctl-esc">Close panels, release the mouse</dd><dt data-i18n="ctl-k-clock">Clock</dt><dd data-i18n="ctl-clock">Drag the slider in the corner card to change the hour</dd></dl>
       <dl class="keys-touch"><dt data-i18n="ctl-k-thumb">Left thumb</dt><dd data-i18n="ctl-t-walk">Walk</dd><dt data-i18n="ctl-k-drag">Drag</dt><dd data-i18n="ctl-t-look">Look around</dd><dt data-i18n="ctl-k-holdup">Hold ↑</dt><dd data-i18n="ctl-t-fly">Fly</dd><dt data-i18n="ctl-k-slide">Slide to →</dt><dd data-i18n="ctl-t-cruise">Cruise</dd><dt data-i18n="ctl-k-corner">Corner map</dt><dd data-i18n="ctl-t-map">Tap to open the map</dd><dt data-i18n="ctl-k-btns">Map buttons</dt><dd data-i18n="ctl-t-btns">Random city / Tour</dd></dl>
     </div>
   </section>
 
-  <section id="map" class="panel map" hidden>
-    <header><h2 data-i18n="map">Map</h2><button id="map-random" class="map-random" data-i18n="random" title="R" type="button">Random city</button><button id="map-tour" class="map-random map-tour" data-i18n="tour" title="T" type="button">Tour</button><button class="close" aria-label="Close">×</button></header>
+  <section id="map" class="panel map" role="dialog" aria-modal="true" aria-labelledby="map-title" hidden>
+    <header><h2 id="map-title" data-i18n="map">Map</h2><button id="map-random" class="map-random" data-i18n="random" title="R" type="button">Random city</button><button id="map-tour" class="map-random map-tour" data-i18n="tour" title="T" type="button">Tour</button><button class="close" type="button" aria-label="Close" data-i18n-label="card-close">×</button></header>
     <canvas id="map-canvas"></canvas>
     <p class="map-hint" data-i18n="map-hint">Click anywhere on the map to go there; near a building, or on its name, you arrive at its entrance.</p>
   </section>
 
 
   <div id="fade" class="fade" hidden></div>
-  <div id="notice" class="notice" hidden></div>
+  <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+  <div id="hint" class="hint" role="status" hidden><p id="hint-text"></p><button id="hint-close" type="button" aria-label="Close" data-i18n-label="card-close">×</button></div>
+  <noscript><p class="noscript">Memory of Civilizations needs JavaScript and a browser with WebGPU or WebGL 2.</p></noscript>
 
   <script type="module" src="src/main.js"></script>
 </body>

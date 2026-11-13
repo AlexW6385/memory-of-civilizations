@@ -7,6 +7,8 @@
 //                          group is hidden with the settlement — and precompile them
 //                          (world.r.precompile(list)) before they show;
 //   detach(site, world)    when the settlement is let go of: dispose of what attach made;
+//   arrived(site, x, z, world)  optional: the visitor has just arrived at (x, z) of the settlement's
+//                          frame (World.noteArrival), the view about to be shown;
 //   update(dt, camera, world)  each frame (dt in s): move what it moves; for each site it attached
 //                          to (site.state === 'ready' && site.group.visible), cheaply.
 // }

@@ -29,6 +29,17 @@ export const LIFE_MIN_TRIS = 30000;
 /** Is a shape of n copies of this geometry instanced (else merged by real material)? */
 export const lifeInstanced = (n, geometry) => n >= LIFE_MIN && n * ((geometry.index ? geometry.index.count : geometry.attributes.position.count) / 3) > LIFE_MIN_TRIS;
 
+/** Gives the page back to the event loop (a frame may be drawn, input handled) and returns after it. */
+const yieldNow = () => new Promise((r) => { const c = new MessageChannel(); c.port1.onmessage = () => { c.port1.close(); r(); }; c.port2.postMessage(0); });
+/**
+ * A time-slicer: `await tick()` is free until `ms` have passed since the last yield, then gives the
+ * page back (yieldNow). Without frames to protect (the loading screen) a long slice is used.
+ */
+export function slicer(ms = 8) {
+  let t0 = performance.now();
+  return async () => { if (performance.now() - t0 < ms) return false; await yieldNow(); t0 = performance.now(); return true; };
+}
+
 const samePrototype = (a, b) => {
   const A = a.attributes.position.array, B = b.attributes.position.array;
   if (A.length !== B.length || a.index.count !== b.index.count) return false;
@@ -56,11 +67,16 @@ export class LifeInstances {
    * Build from the life tiles' instanced pieces: parts = [{ rec, list }] (list: GeoBag.instanced).
    * The rarer shapes are merged settlement-wide by real material (this.rare).
    */
-  build(parts) {
+  async build(parts, { slice = 8 } = {}) {
+    // (in slices, `slice` ms at a time: built in one go it was ~0.5 s of one frame at Suzhou, and a
+    // settlement built ahead of a visit made that hitch in the middle of a walk. If the life is
+    // let go of meanwhile (dispose), the build stops.)
+    const tick = slicer(slice), gone = () => this.disposed;
     // shapes by key, each checked against the prototype (two tiles may give one key two shapes)
     const shapes = new Map();
     for (const { rec, list } of parts) {
       for (const p of list) {
+        await tick(); if (gone()) return;
         // (a shape instanced by the bag itself, not placed: its own material, the default reach)
         const k = p.matrices.length / 16;
         if (!p.reals) p.reals = new Array(k).fill(p.mat);
@@ -79,12 +95,15 @@ export class LifeInstances {
     const M = new THREE.Matrix4();
     for (const alts of shapes.values()) {
       for (const s of alts) {
+        await tick(); if (gone()) return;
         if (!lifeInstanced(s.n, s.geometry)) {
           // rare: merged into its tile, by real material (indexed: a lathe's vertices are shared by
           // about six triangle corners, so a copy kept indexed costs a fraction of an unrolled one)
           const local = s.geometry.clone();
           for (const { p } of s.chunks) {
+            await tick(); if (gone()) return;
             for (let i = 0; i < p.reals.length; i++) {
+              if ((i & 31) === 31) { await tick(); if (gone()) return; }
               const g = placeHanging(local.clone(), M.fromArray(p.matrices, i * 16));
               const list = rareByMat.get(p.reals[i]) || rareByMat.set(p.reals[i], []).get(p.reals[i]);
               list.push({ g, x: p.matrices[i * 16 + 12], y: p.matrices[i * 16 + 13], z: p.matrices[i * 16 + 14], reach: p.reach[i] });
@@ -148,6 +167,7 @@ export class LifeInstances {
     }
     // the rare shapes, per real material: one geometry, drawn by an index of the copies chosen
     for (const [mat, list] of rareByMat) {
+      await tick(); if (gone()) return;
       const n = list.length, pos = new Float32Array(n * 3), reach = new Float32Array(n), ranges = new Uint32Array(n * 2);
       let o = 0, size = 0;
       list.forEach((c, i) => {
@@ -158,7 +178,8 @@ export class LifeInstances {
         const k = c.g.index ? c.g.index.count : c.g.attributes.position.count;
         ranges[i * 2] = o; ranges[i * 2 + 1] = k; o += k;
       });
-      const merged = mergeList(list.map((c) => c.g));
+      const merged = await mergeList(list.map((c) => c.g), tick);
+      if (gone()) { merged.dispose(); return; }
       const index = merged.index.array;
       const make = (cast) => {
         const g = new THREE.BufferGeometry();
@@ -287,7 +308,7 @@ export class LifeInstances {
   }
 }
 
-function mergeList(gs) {
+async function mergeList(gs, tick = async () => {}) {
   let n = 0, ni = 0;
   for (const g of gs) { n += g.attributes.position.count; ni += g.index ? g.index.count : g.attributes.position.count; }
   const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), idx = n > 65535 ? new Uint32Array(ni) : new Uint16Array(ni);
@@ -295,6 +316,7 @@ function mergeList(gs) {
   const hang = gs.some((g) => g.attributes.hang) ? new Float32Array(n) : null;
   let o = 0, oi = 0;
   for (const g of gs) {
+    await tick();
     const v = g.attributes.position.count;
     pos.set(g.attributes.position.array, o * 3); nor.set(g.attributes.normal.array, o * 3);
     if (hang && g.attributes.hang) hang.set(g.attributes.hang.array, o);
