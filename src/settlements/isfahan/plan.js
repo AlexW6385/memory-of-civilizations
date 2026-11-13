@@ -4,13 +4,15 @@
 // toward Mecca); the Sheikh Lotfollah Mosque; Ali Qapu with its talar; the Qeysarieh portal and the
 // first stretch of the vaulted bazaar; the royal garden behind Ali Qapu.
 
-import { SQUARE, ARCADE, CANAL, GARDEN, BAZAAR, PORTAL, COURT, M, C, LOTF, ALIQAPU, ARCADE_RUNS, ARCADE_OPEN } from './layout.js';
+import { SQUARE, ARCADE, CANAL, GARDEN, BAZAAR, PORTAL, COURT, M, C, LOTF, ALIQAPU, ARCADE_RUNS, ARCADE_OPEN, arcadeBays } from './layout.js';
 
 const E = [];
 const [sx0, sz0, sx1, sz1] = SQUARE, H = 12;
 const mid = [0, (sz0 + sz1) / 2];
 // ---- the arcades round the square, broken for the monuments and a few streets
 for (const [a, b] of ARCADE_RUNS) E.push({ t: 'square_arcade', a, b, h: H, depth: ARCADE, bay: 7, facing: mid, open: ARCADE_OPEN });
+// (the street life's generator keeps its strollers and goods out of the footprint of a shop that is entered: it reads a rect; 'precinct' is skipped as a house)
+for (const b of arcadeBays().filter((q) => q.open)) { const p = [b.c[0] + b.n[0] * 3.8 - b.u[0] * b.w / 2, b.c[1] + b.n[1] * 3.8 - b.u[1] * b.w / 2], q = [b.c[0] + b.n[0] * ARCADE + b.u[0] * b.w / 2, b.c[1] + b.n[1] * ARCADE + b.u[1] * b.w / 2]; E.push({ t: 'arcade_precinct', rect: [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])] }); }
 for (const [x0, z0] of [[sx0 - ARCADE - 0.6, sz0 - ARCADE - 0.6], [sx1 + 0.6, sz0 - ARCADE - 0.6], [sx0 - ARCADE - 0.6, sz1 + 0.6], [sx1 + 0.6, sz1 + 0.6]]) {
   E.push({ t: 'block', walk: true, rect: [x0, z0, x0 + ARCADE, z0 + ARCADE], y0: 0, y1: H, mat: 'brick_buff' });
 }

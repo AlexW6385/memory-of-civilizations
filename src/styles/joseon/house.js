@@ -84,7 +84,7 @@ function range(bag, col, o) {
       const pa = P(ta, C), pb = P(tb, C);
       if (j === 0 && n >= 1) {
         // one leaf closed, the other slid aside: a doorway 1.05 m wide through the middle
-        const tm = (ta + tb) / 2 - 0.1, tg = (ta + tb) / 2 + 0.55;
+        const tm = (ta + tb) / 2 - 0.5, tg = (ta + tb) / 2 + 0.55;
         latticeBay(bag, null, pa, P(tm, C), FL + 0.05, H - 0.4, 'door', 0.04);
         col.rect(R(ta, C - 0.05, tm, C + 0.05), FL, FL + H);
         latticeBay(bag, null, P(tg, C), pb, FL + 0.05, H - 0.4, 'door', 0.04);
@@ -314,4 +314,15 @@ export function yangbanHouse(el, { bag, col }) {
   rectRoof({ c: [xc, z1], A: gate + 0.9, B: 1.0, y: 2.78, rise: 0.8, kind: 'xieshan', sweep: 0.5, p: 1.5, alongZ: false, mat, soffit: 'timber', curl: false }, bag);
   // paving of the yard: flagstones along the way from the gate to the steps
   bag.add('granite_korea', box(xc - 0.8, 0, z0 + 1.6 + C + V + 1.0, xc + 0.8, 0.03, z1));
+}
+
+/** joseon_range { org, face, L, kinds, seed, thatch }: one range of rooms (as the yangban house's), standing by itself — the palace's offices, guard-rooms and pantries. */
+export function officeRange(el, { bag, col }) {
+  range(bag, col, { org: el.org, face: el.face ?? 's', L: el.L, kinds: el.kinds, seed: el.seed ?? 5, thatch: !!el.thatch });
+}
+/** Where things are in a range: P(a, b) the world point at a along it and b deep (b 0 the back wall, 2.9 the room line, 3.9 the veranda's edge), the rooms' spans, the floor's height. */
+export function rangeFrame({ org: [ox, oz], face = 's', L, kinds }) {
+  const nb = kinds.reduce((s, k) => s + k[1], 0), bw = L / nb, spans = []; let a = 0;
+  for (const [kind, n] of kinds) { spans.push({ kind, a0: a, a1: a + n * bw }); a += n * bw; }
+  return { P: (u, v) => (face === 's' ? [ox + u, oz + v] : [ox + v, oz + u]), spans, bw, FL, C, V, yaw: face === 's' ? Math.PI : -Math.PI / 2 };
 }

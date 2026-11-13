@@ -1301,7 +1301,7 @@ registerStyle('safavid', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.mughal.elements,
-    square_arcade: squareArcade, portal, dome_chamber: domeChamber, court_arcade: courtArcade,
+    square_arcade: squareArcade, arcade_precinct: () => {}, portal, dome_chamber: domeChamber, court_arcade: courtArcade,
     safavid_minaret: minaret, adobe_wall: wall, mass, arcade, talar, goalpost, bazaar, khaneh, khaneh_open: khanehOpen, ali_qapu: aliQapu, sagittarius, qahveh_khaneh: qahvehKhaneh,
   },
   objects: {},
