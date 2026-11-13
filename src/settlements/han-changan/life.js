@@ -2,7 +2,7 @@
 // in groups and the guards lining the paved way of the forecourt; the sellers behind their counters and the customers in the market lanes, the stalls
 // of the cross lanes; the palace quarters' lanes with their benches, wells and woodpiles; the keepers at the ward gates; ox-carts on the great
 // avenue. Plans of style 'life' (src/objects/index.js), placed from layout.js.
-import { CROWN, TIERS, HALL, RADIUS, AX, PALACE, WEST_MARKET, EAST_MARKET, WARDS, WARD_WALL, AVENUE, QUARTERS, QUARTER_LANES, MARKET_WALL, marketShops, GATE_S, GATE_W, WALL_W, WALL_S, LAKE, LAKE_Y, GARDEN_POND, POND_Y, inLake, ACADEMY } from './layout.js';
+import { CROWN, TIERS, HALL, RADIUS, AX, PALACE, WEST_MARKET, EAST_MARKET, WARDS, WARD_WALL, AVENUE, QUARTERS, QUARTER_LANES, lots, inService, serviceKind, MARKET_WALL, marketShops, GATE_S, GATE_W, WALL_W, WALL_S, LAKE, LAKE_Y, GARDEN_POND, POND_Y, inLake, ACADEMY } from './layout.js';
 import { chariotSpots } from '../../styles/han/court.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -130,6 +130,20 @@ function quarters() {
   return L;
 }
 
+/** The households at home: someone inside the hall of each open house of the palace quarters near the ramp (a clerk at his desk, a woman at the loom or the stove, a guard off duty). */
+function households() {
+  const rand = rng(133), L = [], roles = ['official', 'woman', 'guard', 'woman', 'seller'];
+  for (const l of lots()) {
+    if (!inService(l)) continue;
+    const [x0, z0, x1, z1] = l.rect, W = x1 - x0, D = z1 - z0, s = l.front === 's', k = serviceKind(l);
+    const u = W * 0.4 + (k === 'shop' ? 0.8 : 0), v = k === 'row' ? 4.6 : k === 'shop' ? 4.9 : D - 4.5;
+    const x = x0 + u, z = s ? z1 - v : z0 + v, rot = s ? 0 : Math.PI;
+    L.push(figure(rand, [x, z], rot, roles[Math.floor(rand() * roles.length)], { pose: 'stand', carry: 'none' }));
+    if (rand() < 0.4) L.push(figure(rand, [x + 1.3, z], rot, 'boy'));
+  }
+  return L;
+}
+
 /** The keepers at the ward gates (the ward's two-lane gates on the west side) and an ox-cart or two on the great avenue. */
 function gates() {
   const rand = rng(91), L = [];
@@ -181,5 +195,5 @@ function academy() {
 }
 
 export function lifePlans() {
-  return [plan('han-life-court', forecourt()), plan('han-life-crown', crown()), plan('han-life-west', market(WEST_MARKET, 600)), plan('han-life-east', market(EAST_MARKET, 700)), plan('han-life-quarters', quarters()), plan('han-life-gates', gates()), plan('han-life-lake', lake()), plan('han-life-academy', academy())];
+  return [plan('han-life-court', forecourt()), plan('han-life-crown', crown()), plan('han-life-west', market(WEST_MARKET, 600)), plan('han-life-east', market(EAST_MARKET, 700)), plan('han-life-quarters', quarters()), plan('han-life-households', households()), plan('han-life-gates', gates()), plan('han-life-lake', lake()), plan('han-life-academy', academy())];
 }
