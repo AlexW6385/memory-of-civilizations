@@ -156,7 +156,7 @@ export function chamber(T, [x0, x1], y, zb, zf, kind, rand) {
   void rand; void zf;
 }
 /** The kitchen (west house): the brick stove with its great iron pot, the chimney, the jars, firewood, a table of dough. */
-function kitchen(T, [x0, z0, x1, z1], y, rand) {
+export function kitchen(T, [x0, z0, x1, z1], y, rand) {
   const cx = (x0 + x1) / 2;
   T.B('brick_grey', x0 + 0.3, y, z0 + 0.3, x0 + 1.9, y + 0.95, z0 + 1.4, true);
   T.L('iron', [[0.001, 0], [0.5, 0.04], [0.56, 0.2], [0.001, 0.22]], 10, x0 + 1.1, y + 0.95, z0 + 0.85);
@@ -169,7 +169,7 @@ function kitchen(T, [x0, z0, x1, z1], y, rand) {
   T.col.circle(x1 - 0.5, z0 + 0.5, 0.35, y, y + 0.9); T.col.circle(x1 - 0.5, z0 + 1.3, 0.3, y, y + 0.8);
 }
 /** The store (east house): grain bins, sacks, jars of oil and pickles, a spinning wheel, strings of dried things. */
-function store(T, [x0, z0, x1, z1], y, rand) {
+export function store(T, [x0, z0, x1, z1], y, rand) {
   for (let k = 0; k < 3; k++) { T.B('wood_ochre', x1 - 1.3, y, z0 + 0.3 + k * 1.2, x1 - 0.3, y + 1.1, z0 + 1.2 + k * 1.2, true); T.B('wicker', x1 - 1.25, y + 1.1, z0 + 0.35 + k * 1.2, x1 - 0.35, y + 1.14, z0 + 1.15 + k * 1.2); }
   for (let k = 0; k < 5; k++) T.L('sacking', [[0.001, 0], [0.26, 0.03], [0.3, 0.3], [0.22, 0.6], [0.13, 0.66], [0.001, 0.62]], 8, x0 + 0.6 + (k % 3) * 0.55, y + (k > 2 ? 0.55 : 0), z0 + 0.5 + (k > 2 ? 0.3 : 0));
   jar(T, x0 + 0.5, y, z1 - 0.6, 1.0); jar(T, x0 + 1.3, y, z1 - 0.6, 0.85, 'glaze_green'); jar(T, x0 + 2.0, y, z1 - 0.6, 0.9);

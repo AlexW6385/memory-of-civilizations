@@ -45,6 +45,16 @@ export const SIDE = [                                                // the side
 ];
 export const SIDE_GATE_Z = -100;
 
+/** The service halls of the side roads (west: Jinsi Hall, the vessel store, a keeper's house; east: Shili Hall, the Divine Kitchen, the cooks' house), z of their yard gates -100. */
+export const ANCILLARY = [
+  { id: 'jinsi', rect: [-92, -94, -68, -84], bays: [5, 2], H: 4.6, roof: 'xieshan', kind: 'music', seed: 31 },
+  { id: 'vessels', grey: true, rect: [-92, -77, -78, -69], bays: [3, 2], kind: 'vessels', seed: 32 },
+  { id: 'keeper-w', grey: true, rect: [-92, -65, -76, -57], bays: [3, 2], kind: 'parlor', seed: 33 },
+  { id: 'shili', rect: [68, -94, 92, -84], bays: [5, 2], H: 4.6, roof: 'xieshan', kind: 'study', seed: 34 },
+  { id: 'shenchu', grey: true, rect: [72, -77, 90, -68], bays: [5, 2], kind: 'kitchen', seed: 35 },
+  { id: 'cooks-e', grey: true, rect: [74, -65, 90, -57], bays: [3, 2], kind: 'parlor', seed: 36 },
+];
+
 // ── the Kong Mansion ──
 export const MANSION = [107, -172, 205, 112];
 export const MX = 156;                                              // its axis

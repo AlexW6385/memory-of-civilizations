@@ -7,7 +7,7 @@
 import { box, lathe } from '../../core/geom.js';
 import { Parts } from '../qing/carving.js';
 import { rng } from './kit.js';
-import { tools, tang, chamber, table, chair, stool, lantern } from './house.js';
+import { tools, tang, chamber, table, chair, stool, lantern, kitchen, store, jar, firewood } from './house.js';
 import { seatedSage } from './dacheng.js';
 
 function shrineRoom(T, ctx, [x0, z0, x1, z1], y, rand, scale = 0.5) {
@@ -106,6 +106,61 @@ function parlorRoom(T, [x0, z0, x1, z1], y, rand, study) {
   if (n >= 3) { chamber(T, [x0 + 0.2, x0 + bw * Math.floor(mid) - 0.15], y, zb, z1, rand() < 0.5 ? 0 : 1, rand); chamber(T, [x0 + bw * (Math.floor(mid) + 1) + 0.15, x1 - 0.2], y, zb, z1, 0, rand); }
   stool(T, x1 - 2, y, z1 - 1.2);
 }
+/** The Divine Kitchen (shenchu): a row of brick stoves each with its iron cauldron under a wooden lid, a long chopping table, water jars, stacked firewood, the cook's bench. */
+function kitchenRoom(T, [x0, z0, x1, z1], y, rand) {
+  const w = x1 - x0, n = Math.max(2, Math.floor((w - 3) / 3.2)), step = (w - 3) / n;
+  for (let k = 0; k < n; k++) {
+    const sx = x0 + 1.2 + k * step;
+    T.B('brick_grey', sx, y, z0 + 0.3, sx + 1.7, y + 0.95, z0 + 1.6, true);
+    T.L('iron', [[0.001, 0], [0.62, 0.04], [0.7, 0.2], [0.001, 0.22]], 10, sx + 0.85, y + 0.95, z0 + 0.95);
+    T.L('timber', [[0.72, 0.0], [0.72, 0.05], [0.001, 0.12]], 10, sx + 0.85, y + 1.17, z0 + 0.95);
+    T.B('brick_grey', sx + 0.2, y + 0.95, z0 + 0.3, sx + 0.7, y + 2.9, z0 + 0.7);                 // the flue
+    firewood({ ...T }, sx + 0.1, y, z0 + 1.9, 1.5, 3, 'x', rand);
+  }
+  table(T, (x0 + x1) / 2, y, (z0 + z1) / 2 + 0.6, 3.4, 0.9, 0.82);                                 // the chopping table: the joints of the sacrifice, a cleaver
+  T.B('hide_tan', (x0 + x1) / 2 - 1.2, y + 0.82, (z0 + z1) / 2 + 0.35, (x0 + x1) / 2 - 0.3, y + 0.86, (z0 + z1) / 2 + 0.85); T.B('iron', (x0 + x1) / 2 + 0.5, y + 0.82, (z0 + z1) / 2 + 0.5, (x0 + x1) / 2 + 0.9, y + 0.84, (z0 + z1) / 2 + 0.56);
+  for (let k = 0; k < 4; k++) { jar(T, x1 - 0.6, y, z0 + 0.7 + k * 0.9, 1.0 - (k % 2) * 0.12); T.col.circle(x1 - 0.6, z0 + 0.7 + k * 0.9, 0.36, y, y + 0.95); }
+  for (let k = 0; k < 3; k++) stool(T, x0 + 1.5 + k * 1.0, y, z1 - 1.0);
+  for (let k = 0; k < 6; k++) T.L('wicker', [[0.001, 0], [0.3, 0.02], [0.32, 0.12], [0.001, 0.14]], 10, x0 + 1.0 + k * 0.4, y + 0.9 + 0.14 * (k % 2), z1 - 0.5);   // the bamboo steamers stacked on a shelf
+  T.B('wood_dark', x0 + 0.8, y, z1 - 0.7, x0 + 3.6, y + 0.9, z1 - 0.3, true);
+}
+/** The Jinsi Hall (the music of the sacrifice): the bell frame of bronze bells in two rows, the stone-chime frame, a drum on its stand, zithers on a table, benches. */
+function musicRoom(T, [x0, z0, x1, z1], y, rand) {
+  const cx = (x0 + x1) / 2, zb = z0 + 1.0;
+  const frame = (fx, mat, bells) => {                                                                // a hanging frame: two end posts on feet, a beam, the pieces hung from it in two rows
+    for (const sx of [-1, 1]) { T.B('lacquer_red', fx + sx * 2.3 - 0.1, y, zb - 0.3, fx + sx * 2.3 + 0.1, y + 2.1, zb + 0.3, true); T.B('lacquer_black', fx + sx * 2.3 - 0.35, y, zb - 0.5, fx + sx * 2.3 + 0.35, y + 0.16, zb + 0.5); }
+    T.B('lacquer_red', fx - 2.45, y + 1.95, zb - 0.07, fx + 2.45, y + 2.15, zb + 0.07); T.B('gilt_bronze', fx - 2.4, y + 2.15, zb - 0.075, fx + 2.4, y + 2.17, zb + 0.075);
+    for (let r = 0; r < 2; r++) for (let k = 0; k < bells; k++) {
+      const x = fx - 2.0 + (k + 0.5) * 4.0 / bells, h = 0.5 - k * 0.012 + (r ? 0.1 : 0.2);
+      if (mat === 'bronze') T.L('bronze', [[0.06, 0], [0.14, 0.04], [0.16, h * 0.9], [0.12, h], [0.001, h + 0.02]], 8, x, y + 1.95 - r * 0.7 - h - 0.1, zb + (r ? 0.08 : -0.08));
+      else T.B('granite_grey', x - 0.14, y + 1.9 - r * 0.7 - h, zb + (r ? 0.04 : -0.1), x + 0.14, y + 1.9 - r * 0.7, zb + (r ? 0.1 : -0.04));
+    }
+  };
+  frame(cx - 5.0, 'bronze', 8); frame(cx + 5.0, 'stone', 8);
+  T.B('lacquer_red', cx - 0.6, y, zb - 0.3, cx + 0.6, y + 0.15, zb + 0.5);                          // the drum on its stand between them
+  T.L('lacquer_red', [[0.001, 0], [0.4, 0], [0.55, 0.3], [0.55, 0.7], [0.4, 1.0], [0.001, 1.0]], 12, cx, y + 0.15, zb + 0.1); T.col.circle(cx, zb + 0.1, 0.5, y, y + 1.2);
+  table(T, cx - 2.0, y, zb + 3.2, 2.2, 0.55, 0.7, 'lacquer_black'); table(T, cx + 2.0, y, zb + 3.2, 2.2, 0.55, 0.7, 'lacquer_black');
+  for (const sx of [-1, 1]) for (let k = 0; k < 2; k++) { const px = cx + sx * 2.0 + (k - 0.5) * 0.9; T.B('wood_dark', px - 0.55, y + 0.7, zb + 3.05, px + 0.55, y + 0.76, zb + 3.35); T.B('hide_black', px - 0.5, y + 0.76, zb + 3.1, px + 0.5, y + 0.78, zb + 3.3); }   // zithers (qin) with their strings
+  for (let k = 0; k < 6; k++) stool(T, cx - 3.8 + k * 1.5, y, zb + 4.4);
+  void x1; void z1; void rand;
+}
+/** The store of the sacrificial vessels: racks of bronze tripods and vessels, chests of robes and banners, boxed jade, a bamboo ladder, jars of wine, a clerk's table with the ledger. */
+function vesselRoom(T, [x0, z0, x1, z1], y, rand) {
+  const w = x1 - x0;
+  for (const [a, b, c, d] of [[x0 + 0.3, z0 + 0.3, x1 - 0.3, z0 + 0.9], [x0 + 0.3, z0 + 1.4, x0 + 0.9, z1 - 2.0]]) {
+    T.B('lacquer_chestnut', a, y, b, c, y + 2.2, d, true);
+    const along = c - a > d - b;
+    for (let r = 0; r < 3; r++) for (let k = 0; k < Math.floor((along ? c - a : d - b) / 0.7); k++) {
+      const u = (along ? a : b) + 0.35 + k * 0.7, h = y + 0.12 + r * 0.7, cxx = along ? u : c + 0.15, czz = along ? d + 0.15 : u;
+      if ((k + r) % 3 === 0) T.L('bronze', [[0.001, 0], [0.16, 0.02], [0.22, 0.14], [0.2, 0.28], [0.001, 0.28]], 8, cxx, h + 0.04, czz);                         // a tripod ding's bowl
+      else T.L('gilt_bronze', [[0.06, 0], [0.12, 0.05], [0.14, 0.25], [0.1, 0.34], [0.001, 0.34]], 8, cxx, h + 0.04, czz);
+    }
+  }
+  for (let k = 0; k < 2; k++) { T.B('lacquer_red', x1 - 1.6, y, z0 + 1.6 + k * 1.3, x1 - 0.4, y + 0.7, z0 + 2.7 + k * 1.3, true); T.B('cloth_red', x1 - 1.55, y + 0.7, z0 + 1.65 + k * 1.3, x1 - 0.45, y + 0.78, z0 + 2.65 + k * 1.3); }   // chests with a cloth folded on each
+  for (let k = 0; k < 3; k++) { jar(T, x0 + 1.2 + k * 0.8, y, z1 - 0.7, 1.0); T.col.circle(x0 + 1.2 + k * 0.8, z1 - 0.7, 0.36, y, y + 0.95); }
+  table(T, x0 + w / 2, y, z1 - 2.3, 1.6, 0.8, 0.8); chair(T, x0 + w / 2, y, z1 - 3.1, 's'); T.B('cloth_white', x0 + w / 2 - 0.3, y + 0.8, z1 - 2.4, x0 + w / 2 + 0.3, y + 0.82, z1 - 2.1);
+  void rand;
+}
 export function inside(el, ctx) {
   const T = tools(ctx), rand = rng(el.seed ?? 7), [x0, z0, x1, z1] = el.rect, y = el.y ?? 0;
   const r = [x0 + 0.3, z0 + 0.3, x1 - 0.3, z1 - 0.3];
@@ -123,6 +178,11 @@ export function inside(el, ctx) {
       break;
     }
     case 'study': parlorRoom(T, r, y, rand, true); break;
+    case 'kitchen': kitchenRoom(T, r, y, rand); break;
+    case 'music': musicRoom(T, r, y, rand); break;
+    case 'vessels': vesselRoom(T, r, y, rand); break;
+    case 'store': store(T, r, y, rand); break;
+    case 'cook': kitchen(T, r, y, rand); break;
     default: parlorRoom(T, r, y, rand, false);
   }
   // the lamps of the hall for the dusk

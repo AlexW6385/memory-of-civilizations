@@ -2,7 +2,7 @@
 // gate, the Jinsheng Yuzhen archway, Queli Street and its shops, the courtyard houses of the town, the edge of the Kong Forest with
 // Confucius's tomb, and the people: the sacrificing officials and the guards of the temple, students in the court, the shopkeepers.
 
-import { RADIUS, TEMPLE, MANSION, MX, MANSION_HALLS, MANSION_RANGES, CITY_WALL, WANREN, JINSHENG, QUELI, SQUARE, HALL, GATE_HALLS, ALTAR, KONG_FOREST, DRUM, OLD, streets, lots, shopRuns, streetItems, laneZs, LANES_X, STREET_W } from './layout.js';
+import { RADIUS, TEMPLE, MANSION, MX, MANSION_HALLS, MANSION_RANGES, CITY_WALL, WANREN, JINSHENG, QUELI, SQUARE, HALL, GATE_HALLS, ALTAR, KONG_FOREST, DRUM, OLD, streets, lots, shopRuns, streetItems, laneZs, LANES_X, STREET_W, ANCILLARY, STELE_PAV } from './layout.js';
 import { HOUSE } from '../../styles/qing/index.js';
 void [laneZs, LANES_X, STREET_W];
 
@@ -167,6 +167,22 @@ function people() {
   fig([MX, dt.rect[1] + 1.9], Math.PI, { y: 0.85, pose: 'sit', cloth: 'cloth_maroon', cloth2: 'cloth_black', beard: 1 });
   for (const sx of [-1, 1]) for (let k = 0; k < 3; k++) fig([MX + sx * (5 + k * 1.2), dt.rect[1] + 7.5], -sx * Math.PI / 2, { y: 0.45, cloth: pick(['cloth_blue', 'cloth_indigo']), pose: 'stand' });
   for (let k = 0; k < 14; k++) { const at = [MX - 12 + rand() * 24, -146 + rand() * 250]; if (MANSION_HALLS.some((h) => at[0] > h.rect[0] - 1 && at[0] < h.rect[2] + 1 && at[1] > h.rect[1] - 1 && at[1] < h.rect[3] + 1)) continue; fig(at, rand() * 6.28, { cloth: pick(CL), pose: rand() < 0.3 ? 'talk' : 'stand', carry: rand() < 0.25 ? 'basket' : 'none' }); }
+  // the service halls of the side roads: the temple's musicians in the Jinsi Hall, the clerk of the vessel store, the cooks of the Divine Kitchen, the teacher and his pupils in the Shili Hall, a keeper in each house
+  { const A = Object.fromEntries(ANCILLARY.map((a) => [a.id, a.rect])), mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2], y0 = 0.45;
+    const m = mid(A.jinsi);
+    fig([m[0] - 5.0, A.jinsi[1] + 2.4], 0, { y: y0, cloth: 'cloth_blue', pose: 'stand' }); fig([m[0] + 5.0, A.jinsi[1] + 2.4], 0, { y: y0, cloth: 'cloth_blue', pose: 'stand' });
+    fig([m[0] - 1.1, A.jinsi[1] + 5.9], Math.PI, { y: y0, cloth: 'cloth_indigo', pose: 'sit' }); fig([m[0] + 2.4, A.jinsi[1] + 5.9], Math.PI, { y: y0, cloth: 'cloth_white', pose: 'sit' });
+    fig([A.vessels[2] - 3.2, A.vessels[3] - 2.3], Math.PI / 2, { y: y0, cloth: 'cloth_grey', over: 'sash', pose: 'sit' });
+    const k = A.shenchu;
+    for (const [dx, dz, o] of [[2.4, 2.4, {}], [6.0, 2.6, { pose: 'talk' }], [9.5, 2.5, {}]]) fig([k[0] + dx, k[1] + dz], 0, { y: y0, cloth: 'cloth_white', cloth2: 'cloth_grey', over: 'apron', hat: 'cap', ...o });
+    fig([(k[0] + k[2]) / 2, (k[1] + k[3]) / 2 + 2.3], Math.PI, { y: y0, cloth: 'cloth_grey', over: 'apron' });
+    const sh = A.shili, sm = mid(sh);
+    fig([sm[0], sh[1] + 2.4], Math.PI, { y: y0, cloth: 'cloth_indigo', cloth2: 'cloth_white', beard: 1, pose: 'sit' });
+    for (const dx of [-5.5, -2.0, 2.0, 5.5]) fig([sm[0] + dx, sh[1] + 6.2], 0, { y: y0, cloth: dx < 0 ? 'cloth_blue' : 'cloth_white', pose: 'sit' });
+    for (const id of ['keeper-w', 'cooks-e']) { const r = A[id], c = mid(r); fig([c[0] + 1.4, r[1] + 2.6], Math.PI, { y: y0, cloth: 'cloth_brown', over: 'sash', pose: 'stand' }); }
+    // a keeper and a kneeling pilgrim in the stele pavilions
+    for (const [i, p] of STELE_PAV.entries()) if (i % 3 === 0) fig([p.c[0] + (p.big ? 2.6 : 1.8), p.c[1] + 1.0], -Math.PI / 2, { y: 0.5, cloth: 'cloth_grey', over: 'sash', pose: 'stand' });
+    for (const i of [1, 8]) { const p = STELE_PAV[i]; fig([p.c[0], p.c[1] + (p.big ? 3.0 : 2.1)], Math.PI, { y: 0.5, pose: 'kneel', arms: 'pray', cloth: 'cloth_indigo' }); } }
   // the Drum Tower's keeper on the platform, and a gossiping group under it
   fig([DRUM.x + 5, DRUM.z + 4.5], Math.PI, { y: DRUM.h, cloth: 'cloth_red', pose: 'staff', carry: 'staff', len: 1.9, over: 'sash' });
   for (let k = 0; k < 3; k++) fig([DRUM.x + 6.5 + k * 0.9, DRUM.z - 8], rand() * 6, { cloth: pick(CL), pose: 'talk' });

@@ -3,7 +3,8 @@
 // the Wu corridors, the Resting Hall and the Hall of Sage Traces, the side compounds of the ancestors and the parents.
 // Authored in world coordinates (origin 0, yaw 0). The temple faces south; the axis is x = 0.
 
-import { TEMPLE, INNER_X, WALL_Z, TEMPLE_WALL, GATE_HALLS, GATE_D, LINGXING, TAIHE, POOL, POOL_Y, POOL_BED, BRIDGE, KUIWEN, STELE_PAV, ALTAR, HALL, BASE, MOON, WU, QIN, SAGE, SIDE, SIDE_GATE_Z, OLD } from './layout.js';
+import { TEMPLE, INNER_X, WALL_Z, TEMPLE_WALL, GATE_HALLS, GATE_D, LINGXING, TAIHE, POOL, POOL_Y, POOL_BED, BRIDGE, KUIWEN, STELE_PAV, ALTAR, HALL, BASE, MOON, WU, QIN, SAGE, SIDE, SIDE_GATE_Z, OLD, ANCILLARY } from './layout.js';
+import { HOUSE } from '../../styles/qing/index.js';
 
 const E = [];
 const [tx0, tz0, tx1, tz1] = TEMPLE, W = TEMPLE_WALL;
@@ -83,6 +84,14 @@ E.push({ t: 'qing_hall', rect: SAGE.rect, y: SAGE.y, H: 5.2, roof: 'xieshan', ba
 
 // ── the side compounds ──
 for (const s of SIDE) E.push({ t: 'qing_hall', rect: s.rect, y: 0.45, H: 5.2, roof: 'xieshan', bays: [5, 2], front: 's', doors: ['n'], four: false, plat: 0.45, orn: { figures: 5 }, simple: true });
+
+// ── the service halls of the two side roads (docs/settlements/lu-qufu.md §4): the west road's Jinsi Hall (the instruments of the sacrificial music)
+// and its store of vessels, the east road's Shili Hall (where the Master taught his son the Poems and the rites) and the Divine Kitchen (shenchu),
+// each with its keeper's or cooks' house beside it. All open to the side-road yards through the gates in the inner walls. ──
+for (const a of ANCILLARY) {
+  E.push({ t: 'qing_hall', rect: a.rect, y: 0.45, H: a.H ?? 4.4, roof: a.roof ?? 'gable', bays: a.bays, front: 's', doors: ['n'], four: false, plat: 0.45, ...(a.grey ? { pal: HOUSE } : {}) });
+  E.push({ t: 'lu_inside', kind: a.kind, rect: a.rect, y: 0.45, seed: a.seed });
+}
 
 // the stairs up to the high platforms of Kuiwen, the Resting Hall and the Hall of Sage Traces (a platform over half a metre needs them)
 const flight = (cx, zEdge, y, dir) => { const len = 2.2 + y * 1.6; E.push({ t: 'stairs', rect: dir === 'n' ? [cx - 1.6, zEdge, cx + 1.6, zEdge + len] : [cx - 1.6, zEdge - len, cx + 1.6, zEdge], y0: 0.03, y1: y, dir }); };
