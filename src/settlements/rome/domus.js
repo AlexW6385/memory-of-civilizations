@@ -253,4 +253,24 @@ function litter(el, { bag, col }) {
   col.circle(x, z, 1.0, y + PY - 0.4, y + PY + 1.0); void c; void s;
 }
 
-registerStyle('rome-site', { trim: () => {}, opening: () => {}, column: () => {}, elements: { ...STYLES.life.elements, domus, litter }, objects: {} });
+/**
+ * shop_awnings: { list: [{ at [x, z] (the foot of the wall at the door's middle), rot (the direction out into the street, as the yaw of +z), w, mat }] } —
+ * the cloth awnings of the tabernae (docs/settlements/rome.md §4.5): a strip of dyed linen on a bracket each end in the wall under the lintel, sloping
+ * out 1.5 m over the footway, its low edge at 2.45 m with a white hem along it. Above head height: nothing to collide with.
+ */
+function shopAwnings(el, { bag }) {
+  for (const a of el.list) {
+    const w = a.w ?? 3.6, d = 1.5, hi = 3.05, lo = 2.45, sl = Math.atan2(hi - lo, d);
+    const put = (mat, g, dy = 0) => { g.rotateY(a.rot); g.translate(a.at[0], dy, a.at[1]); bag.add(mat, g); };
+    const panel = box(-w / 2, 0, 0, w / 2, 0.035, Math.hypot(d, hi - lo));
+    panel.rotateX(sl); panel.translate(0, hi, 0);                                              // hinged at the wall (z 0, y hi), falling out to y lo at z d
+    put(a.mat, panel);
+    const hem = box(-w / 2, 0, 0, w / 2, 0.14, 0.03); hem.translate(0, lo - 0.14, d);
+    put('cloth_white', hem);
+    for (const sx of [-1, 1]) {
+      put('wood_dark', box(sx * (w / 2 - 0.05) - 0.02, hi - 0.06, 0.0, sx * (w / 2 - 0.05) + 0.02, hi, 0.1));                       // the bracket in the wall
+    }
+  }
+}
+
+registerStyle('rome-site', { trim: () => {}, opening: () => {}, column: () => {}, elements: { ...STYLES.life.elements, domus, litter, shop_awnings: shopAwnings }, objects: {} });

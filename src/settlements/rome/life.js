@@ -78,7 +78,7 @@ export function life() {
     for (const sx of [-1, 1]) for (let z = -138; z < -60; z += 11.5) {
       L.push({ t: 'bench', at: [sx * 37.4, z], y: 0, rot: sx > 0 ? -Math.PI / 2 : Math.PI / 2, seed: seed(), len: 1.8 });
       if (rand() < 0.45) tunic([sx * 36.4, z + 1.6], sx > 0 ? Math.PI / 2 : -Math.PI / 2, { pose: 'sit' });
-      if (rand() < 0.35) L.push({ t: 'pot', kind: 'amphora', at: [sx * 38.4, z + 4], y: 0, rot: 0, n: 2, seed: seed() });
+      if (rand() < 0.35) L.push({ t: 'pot', kind: 'amphora', at: [sx * 38.4, z + 2.4], y: 0, rot: 0, n: 2, seed: seed() });
     }
     for (const [x, z] of [[-9, -96], [12, -84], [-18, -112], [24, -104], [-26, -78], [6, -134]]) L.push({ t: 'chickens', kind: 'pigeon', n: 5, at: [x, z], y: 0, rot: rand() * 6.28, seed: seed() });
     for (const [x, z, g, aw] of [[-27, -72, ['heap', 'greens'], 'cloth_green'], [27, -72, ['baskets', 'bread'], 'cloth_ochre'], [-30, -122, ['pottery', 'pot:amphora'], 'cloth_red']]) {

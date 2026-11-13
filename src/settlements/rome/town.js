@@ -70,7 +70,7 @@ export async function town() {
     for (const i of [4, 14, 24, 31]) if (E[i]) ways.push({ t: 'landing', at: [E[i][0], E[i][1]], land: 1, level: -5, w: 4 });
     for (const i of [9, 20]) if (E[i]) ways.push({ t: 'crane', at: [E[i][0] + 5.5, E[i][1]], rot: -Math.PI / 2, y: 0.06 });
     for (const r of quayRows()) ways.push({ t: 'taberna_row', ...r }); }
-  const tiles = tiles160('rome-insulae', 'roman', [...ways, ...free.map((l) => ({ t: 'insula', ...l })), ...rows().map((r) => ({ t: 'taberna_row', ...r })), ...saeptaRows().map((r) => ({ t: 'taberna_row', ...r })), ...fountains().map((f) => ({ t: 'fountain', ...f })), ...forum], { near: 270, R: RADIUS, entrance: { at: [0, -200], facing: 's' } });
+  const tiles = tiles160('rome-insulae', 'roman', [...ways, ...free.map((l) => ({ t: 'insula', ...l })), ...rows().map((r) => ({ t: 'taberna_row', ...r, storeys: r.front === 's' && r.seed % 3 === 0 ? 2 : undefined })), ...saeptaRows().map((r) => ({ t: 'taberna_row', ...r })), ...fountains().map((f) => ({ t: 'fountain', ...f })), ...forum], { near: 270, R: RADIUS, entrance: { at: [0, -200], facing: 's' } });
   const [x0, z0, x1, z1] = DOMUS;
   return [...tiles, houses,
     site('rome-domus', [{ t: 'domus', rect: DOMUS, y: 0 }, { t: 'litter', at: LITTER.at, y: 0, rot: LITTER.rot }], [
@@ -80,5 +80,18 @@ export async function town() {
     { id: 'rome-street', style: 'roman', origin: [0, 0], base: 0, yaw: 0, feature: true, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -200], facing: 's' },
       elements: [{ t: 'pistrinum', rect: PISTRINUM, front: 's', y: 0 }, { t: 'latrine', rect: LATRINE, front: 's', y: 0 }],
       rooms: [{ id: 'pistrinum', rect: [PISTRINUM[0] + 0.5, PISTRINUM[1] + 0.5, PISTRINUM[2] - 0.5, PISTRINUM[3] - 0.5], y: 0, kind: 'hall', market: false }, { id: 'latrine', rect: [LATRINE[0] + 0.5, LATRINE[1] + 0.5, LATRINE[2] - 0.5, LATRINE[3] - 0.5], y: 0, kind: 'hall', market: false }] },
-    lifePlan()];
+    lifePlan(), awningPlan()];
 }
+
+/** The cloth awnings over the doors of the tabernae along the street before the forecourt and the Via Lata (every other shop, in the colours of the cloth dyers). */
+function awningPlan() {
+  const rand = rng(2128), list = [], MAT = ['cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_green', 'cloth_indigo', 'cloth_ochre', 'cloth_red'];
+  for (const r of rows()) {
+    const [x0, z0, x1, z1] = r.rect, f = r.front, W = f === 'e' || f === 'w' ? z1 - z0 : x1 - x0, nb = Math.max(2, Math.round(W / 4.4)), bw = W / nb;
+    const rot = f === 'e' ? Math.PI / 2 : f === 'w' ? -Math.PI / 2 : f === 's' ? 0 : Math.PI;          // out into the street (the yaw of +z)
+    const P = (u) => f === 'e' ? [x1, z0 + u] : f === 'w' ? [x0, z0 + u] : f === 's' ? [x0 + u, z1] : [x0 + u, z0];
+    for (let i = 0; i < nb; i++) { const q = rand(); if (q < 0.5) list.push({ at: P((i + 0.5) * bw), rot, w: bw - 0.7, mat: MAT[Math.floor(q * 14) % MAT.length] }); }
+  }
+  return site('rome-awnings', [{ t: 'shop_awnings', list }]);
+}
+function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
