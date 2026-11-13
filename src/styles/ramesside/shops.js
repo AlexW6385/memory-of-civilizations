@@ -18,6 +18,11 @@ const jar = (bag, x, y, z, s = 1, mat = 'terracotta', prof = JAR) => bag.add(mat
 /** A cylinder lying along x (a roll of linen, a log). */
 function roll(bag, mat, x0, x1, y, z, r) { const g = lathe([[r, 0], [r, x1 - x0], [0.001, x1 - x0]], 8); g.rotateZ(-Math.PI / 2); g.translate(x0, y, z); bag.add(mat, g); }
 const post = (bag, x, y0, y1, z, r = 0.05) => bag.add('palm_trunk', lathe([[r, y0], [r * 0.9, y1], [0.001, y1]], 6, null, x, 0, z));
+/** A clay oil lamp (a bowl with a pinched lip) at (x, y, z) and the light of its flame; zm mirrors z for the lanes' north-facing rows. */
+function oilLamp(bag, lights, x, y, z, zm = null, intensity = 3) {
+  bag.add('terracotta', lathe([[0.001, 0], [0.05, 0.012], [0.085, 0.045], [0.08, 0.06], [0.05, 0.05], [0.001, 0.045]], 8, null, x, y, z));
+  lights.push({ at: [x, y + 0.12, zm === null ? z : zm - z], color: '#ffb46b', intensity, distance: 7 });
+}
 const ACCENT = ['paint_ochre', 'egyptian_blue', 'limewash_red', 'plaster_white', 'paint_ochre'];
 
 /** The courtyard house of the lanes: { rect, seed, furnish, front ('s' | 'n'), wash: whitewashed front (the priests') }. */
@@ -39,6 +44,8 @@ export function ramHouse(el, ctx) {
       bag.add('limewash_red', box(a, 0.0, zf + 0.002, b, 0.4, zf + 0.012));
     }
   }
+  // the lit room: an oil lamp on the sitting bench (the bench's dice are mud_house's: it runs along the north wall at the room's east end)
+  if (el.furnish) { const ix1 = (court ? split : x1) - 0.225; oilLamp(bag, c.lights, ix1 - 0.55, 0.38, z0 + 0.45 + 0.1, el.front === 'n' ? z0 + z1 : null, 3); }
   // a stack of bricks drying on edge against the wall; sand banked on the walls the wind blows to
   if (rand() < 0.6) {
     const bx = rand() < 0.5 ? x0 + 0.3 : x1 - 1.3, by = zf + 0.05;
@@ -209,6 +216,8 @@ export function ramShop(el, ctx) {
   bag.add('banco_rough', box(x0 - th / 2 - 0.012, -0.05, z0 - th / 2 - 0.012, x1 + th / 2 + 0.012, 0.45, z0 - th / 2 + 0.003));
   bag.add('banco_rough', box(x0 - th / 2 - 0.012, -0.05, z0 - th / 2, x0 - th / 2 + 0.003, 0.5, z1 + th / 2)); bag.add('banco_rough', box(x1 + th / 2 - 0.003, -0.05, z0 - th / 2, x1 + th / 2 + 0.012, 0.5, z1 + th / 2));
   { const a = U(d0 - 0.1), b = U(d1 + 0.1); bag.add('reed_mat', box(Math.min(a, b), 0.004, z1 - 1.5, Math.max(a, b), 0.014, z1 - 0.3)); }
+  // the lit room: a hanging oil lamp from a log of the roof, a light of its flame
+  { const lx = (f.ix0 + f.ix1) / 2, lz = (f.iz0 + f.iz1) / 2 - 0.4; bag.add('timber', box(lx - 0.01, 2.55, lz - 0.01, lx + 0.01, h - 0.12, lz + 0.01)); oilLamp(bag, c.lights, lx, 2.45, lz, el.front === 'n' ? z0 + z1 : null, 3); }
   // the trade's room, and a painted board of the guild's colour over the door
   TRADES[el.trade]?.(c, f, rand, { ox: (cxa + cxb) / 2, oz: f.zf + 0.9 });
   { const a = U(d0 + dw / 2); bag.add(ACCENT[Math.floor(rand() * 4)], box(a - 0.3, 2.35, f.zf + 0.005, a + 0.3, 2.7, f.zf + 0.02)); }

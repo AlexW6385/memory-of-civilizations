@@ -79,6 +79,13 @@ function people() {
     if (rand() < 0.8) { const a = W2([cx + (rand() - 0.5) * 1.2, z1 + 1.35]), to = W2([cx, z1 + 0.25]); (rand() < 0.6 ? woman : man)(a, 0, face(a, to), rand() < 0.4 ? { carry: 'basket' } : {}); }
     void out;
   }
+  // ── in the houses: the woman at the quern in the court of one furnished house in two, a man on the bench of another (the house's own dice: layout of styles/oldkingdom mud_house)
+  for (const l of L) {
+    if (l.kind !== 'house' || !l.furnish || Math.hypot((l.rect[0] + l.rect[2]) / 2 + 4, (l.rect[1] + l.rect[3]) / 2 - 17) > 125) continue;
+    const [x0, z0, x1, z1] = l.rect, d = rng(l.seed || 1); d(); const court = d() < 0.7, split = court ? x0 + (x1 - x0) * (0.45 + d() * 0.2) : x1, W2 = (p) => toWorld(l, p);
+    if (court && l.seed % 2 === 0) { const qz = Math.min(z1 - 1.6, z0 + 0.225 + 1.9); if (qz > z0 + 1.9) woman(W2([split + 0.225 + 0.45 + 0.75, qz]), 0, Math.PI / 2, { pose: 'kneel' }); }
+    else if (l.seed % 3 === 0) { const sx = (split - 0.225 + (x0 + 0.225 + Math.min(2.0, (split - x0 - 0.45) * 0.4) + 0.13)) / 2; man(W2([sx, z0 + 0.225 + 0.3]), 0.38, l.front === 'n' ? 0 : Math.PI, { pose: 'sit', hair: 'short' }); }
+  }
   // in the street between: women with jars on their heads, men with sacks, boys running, two quarrelling over a price, a donkey-boy
   { const [mx0, mz0, mx1, mz1] = MARKET;
     for (let k = 0; k < 16; k++) { const x = mx0 + 3 + rand() * (mx1 - mx0 - 6), z = mz0 + 1.3 + rand() * (mz1 - mz0 - 2.6); (rand() < 0.5 ? woman : man)([x, z], 0, rand() * 6.28, rand() < 0.5 ? { carry: ['basket', 'pot', 'sack'][Math.floor(rand() * 3)], ...(rand() < 0.5 ? {} : {}) } : {}); }
