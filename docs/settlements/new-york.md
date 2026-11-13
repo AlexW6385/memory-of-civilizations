@@ -154,6 +154,10 @@ Arrival is on Fifth Avenue at 35th Street, looking down the avenue (S 29° W sin
 
 Jazz, Gershwin, the big bands on the radio; horns and the El. [stated: Wikipedia "Jazz Age"]
 
+## Round 5: walk-in shops (measured)
+
+Ten shop rooms stand within 120 m of the arrival; each has its keeper, lights and goods, and all are reachable by the walker's rules. Nothing was changed in this round.
+
 ## Sources
 
 - [Chrysler Building — Wikipedia (IPFS mirror)](https://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq.ipfs.4everland.io/wiki/Chrysler_Building.html)

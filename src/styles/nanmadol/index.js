@@ -113,12 +113,12 @@ function stair(bag, col, rect, y0, y1, dir, inner) {
 
 // ── the nah ─────────────────────────────────────────────────────────────────────────────────────
 /**
- * nah { c, yaw, w, l, rank, seed }: the Pohnpeian house — a platform of stacked basalt (the chief's higher), posts, half walls of lashed
+ * nah { c, yaw, w, l, rank, seed, design ('open' | 'porch' | 'closed'), lit }: the Pohnpeian house — a platform of stacked basalt (the chief's higher), posts, half walls of lashed
  * reed on three sides, the fourth (toward −z at yaw 0) wholly open, a deep hip roof of ivory-palm thatch (docs/settlements/nan-madol.md §6).
  */
-function nah(el, { bag, col }) {
+function nah(el, { bag, col, lights }) {
   const { w, l } = el, rank = el.rank ?? 0, rand = rng(el.seed ?? 1), F = frame(el.c, el.yaw ?? 0);
-  const ph = rank ? 0.7 : 0.45, eave = 1.95, ov = 0.9, put = (mat, g) => { g.applyMatrix4(F.M); bag.add(mat, g); };
+  const ph = rank ? 0.7 : 0.45, eave = ph + 2.3, ov = 0.9, put = (mat, g) => { g.applyMatrix4(F.M); bag.add(mat, g); };
   // the platform: stacked basalt prisms laid in courses (a box of dark stone with the courses cut in), the top matted
   put('granite_black', box(-w / 2 - 0.15, 0, -l / 2 - 0.15, w / 2 + 0.15, ph - 0.12, l / 2 + 0.15));
   put('dolerite_spotted', box(-w / 2 - 0.2, 0, -l / 2 - 0.2, w / 2 + 0.2, 0.2, l / 2 + 0.2));
@@ -157,9 +157,36 @@ function nah(el, { bag, col }) {
     if (rand() < 0.7) { const x = -w / 4 + rand() * w / 2; put(ROPE, rod([x, eave, 0.3], [x, eave - 0.6, 0.3], 0.008, 3)); put('wicker', lathe([[0.001, 0], [0.15, 0.05], [0.17, 0.25], [0.001, 0.3]], 7, null, x, eave - 0.9, 0.3)); }
     if (rand() < 0.6) { const x = w / 4 + rand() * 0.3; put(ROPE, rod([x, eave, -0.4], [x, eave - 0.4, -0.4], 0.008, 3)); for (let k = 0; k < 7; k++) put('glaze_yellow', lathe([[0.001, 0], [0.04, 0.08], [0.036, 0.18], [0.001, 0.22]], 5, null, x + Math.cos(k) * 0.09, eave - 0.85 + (k % 3) * 0.06, -0.4 + Math.sin(k) * 0.09)); }
     if (rand() < 0.5) { const x = -w / 4; put(ROPE, rod([x, eave, -0.2], [x, eave - 0.5, -0.2], 0.006, 3)); for (let k = 0; k < 4; k++) put('hide_grey', box(x - 0.03, eave - 0.6 - k * 0.1, -0.21, x + 0.03, eave - 0.52 - k * 0.1, -0.19)); }
-    if (rand() < 0.5) { put('bark_dark', lathe([[0.001, 0], [0.07, 0.01], [0.08, 0.06], [0.001, 0.06]], 6, null, -w / 2 + 0.7, ph + 0.07, 0.3)); put('flame', lathe([[0.001, 0.06], [0.015, 0.075], [0.001, 0.13]], 5, null, -w / 2 + 0.7, ph + 0.07, 0.3)); }
+    if (rand() < 0.5 || el.lit) { put('bark_dark', lathe([[0.001, 0], [0.07, 0.01], [0.08, 0.06], [0.001, 0.06]], 6, null, -w / 2 + 0.7, ph + 0.07, 0.3)); put('flame', lathe([[0.001, 0.06], [0.015, 0.075], [0.001, 0.13]], 5, null, -w / 2 + 0.7, ph + 0.07, 0.3)); }
     for (const u of [-w / 2 + 0.3, w / 2 - 0.3]) put('timber', rod([u, ph + 0.9, l / 2 - 0.9], [u + 0.04, ph + 1.8, l / 2 - 0.9], 0.015, 4)); // spears in the corner
   }
+  // the houses of the commoners differ at the front (docs/settlements/nan-madol.md §6): a porch (the roof carried forward on two posts over a deck, a bench of palm trunk),
+  // or a closed house (the walls raised to the eaves in lashed reed, the front walled with a door in it, a mat rolled up over the door)
+  const design = rank ? 'open' : el.design ?? 'open';
+  const wt = eave - 0.12;
+  if (design === 'porch') {
+    const pd = 0.95, pz0 = -l / 2 - 0.15 - pd;
+    put('granite_black', box(-w / 2 - 0.15, 0, pz0, w / 2 + 0.15, ph - 0.12, -l / 2 - 0.15)); put('coral_rag', box(-w / 2 - 0.15, ph - 0.12, pz0, w / 2 + 0.15, ph, -l / 2 - 0.15)); put('reed_mat', box(-w / 2 + 0.1, ph, pz0 + 0.1, w / 2 - 0.1, ph + 0.025, -l / 2 - 0.15));
+    for (const x of px) { put(WOOD, lathe([[0.08, 0], [0.07, eave - ph - 0.25]], 7, null, x, ph, pz0 + 0.25)); const c = F.W(x, pz0 + 0.25); col.circle(c[0], c[1], 0.1, ph, eave); }
+    put('timber', box(-w / 2 + 0.1, eave - 0.3, pz0 + 0.17, w / 2 - 0.1, eave - 0.15, pz0 + 0.33));
+    put(TH, frustum([-w / 2 - 0.5, pz0 - 0.3, w / 2 + 0.5, -l / 2 + 0.6], eave - 0.5, eave + 0.45, 0.45, 0.45, 0.9, 0.0));
+    put('palm_trunk', lathe([[0.08, 0], [0.08, w - 1.2]], 6).rotateZ(Math.PI / 2).translate(-w / 2 + 0.6, ph + 0.2, pz0 + 0.55));
+    { const a = F.W(-w / 2 - 0.15, pz0), b = F.W(w / 2 + 0.15, -l / 2 - 0.15); col.floor([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], ph); }
+  } else if (design === 'closed') {
+    const t0 = -l / 2 + 0.3;
+    for (const [x0, x1] of [[-w / 2 + 0.12, -w / 2 + 0.2], [w / 2 - 0.2, w / 2 - 0.12]]) put('wicker', box(x0, ph + 0.92, t0, x1, wt, l / 2 - 0.12));
+    put('wicker', box(-w / 2 + 0.2, ph + 0.92, l / 2 - 0.2, w / 2 - 0.2, wt, l / 2 - 0.12));
+    for (const [x0, x1] of [[-w / 2 + 0.12, -0.55], [0.55, w / 2 - 0.12]]) put('wicker', box(x0, ph, t0, x1, wt, t0 + 0.1));
+    put('timber', box(-0.62, ph + 1.45, t0 - 0.03, 0.62, ph + 1.55, t0 + 0.13));
+    for (const x of [-0.58, 0.58]) put(WOOD, lathe([[0.05, 0], [0.05, 1.55]], 6, null, x, ph, t0 + 0.05));
+    put('reed_mat', lathe([[0.07, 0], [0.07, 1.0]], 8).rotateZ(Math.PI / 2).translate(-0.5, ph + 1.6, t0 - 0.06));
+    for (const u of [-w / 4 - 0.2, w / 4 + 0.2]) if (Math.abs(u) > 0.9) { put('opening', box(u - 0.28, ph + 0.95, t0 - 0.015, u + 0.28, ph + 1.4, t0 + 0.11)); put('timber', box(u - 0.32, ph + 1.4, t0 - 0.03, u + 0.32, ph + 1.46, t0 + 0.13)); }
+    const Sw = (u0, v0, u1, v1) => col.segment(F.W(u0, v0), F.W(u1, v1), 0.12, ph, wt);
+    Sw(-w / 2 + 0.16, t0, -0.55, t0); Sw(0.55, t0, w / 2 - 0.16, t0);
+    Sw(-w / 2 + 0.16, -l / 2 + 0.5, -w / 2 + 0.16, t0); Sw(w / 2 - 0.16, -l / 2 + 0.5, w / 2 - 0.16, t0);
+  }
+  // the lamp of a lit house: the bowl of coconut oil by the wall, its light in the room
+  if (el.lit && lights) { const q = F.W(-w / 2 + 0.7, 0.3); lights.push({ at: [q[0], ph + 0.45, q[1]], color: '#ffb46b', intensity: 2.4, distance: 7 }); }
   // colliders: the three half walls, the platform's floor, a ramp up at the front for a high platform
   const S = (u0, v0, u1, v1) => col.segment(F.W(u0, v0), F.W(u1, v1), 0.12, 0, ph + 0.95);
   S(-w / 2 + 0.16, -l / 2 + 0.5, -w / 2 + 0.16, l / 2 - 0.12); S(w / 2 - 0.16, -l / 2 + 0.5, w / 2 - 0.16, l / 2 - 0.12); S(-w / 2 + 0.2, l / 2 - 0.16, w / 2 - 0.2, l / 2 - 0.16);

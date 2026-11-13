@@ -149,3 +149,23 @@ export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m)
 export const inYard = (x, z) => yards().some((y) => inRect(y.rect, x, z));
 /** The coffee house (docs/settlements/ottoman-istanbul.md §10): the 10 m lot on the east column of the block nearest the lane west of the terrace. */
 export const COFFEE = () => lots().find((l) => l.coffee) ?? lots()[0];
+
+/** The houses and shops that can be entered (many): the nearest to six points round the terrace, the shops by preference (the open ones are furnished: styles/ottoman/konak.js). */
+let OPENED = null;
+export function openSet() {
+  if (OPENED) return OPENED;
+  const coffee = COFFEE(), all = lots().filter((l) => l !== coffee), out = new Set();
+  // (not where the door's step would stand more than a walker's step (0.5 m) above the lane: on the steeper slopes the floor is cut into the hill above it)
+  const stepOK = (l) => { const [x0, z0, x1, z1] = l.rect, mx = (x0 + x1) / 2, mz = (z0 + z1) / 2, p = l.front === 's' ? [mx, z1 + 0.5] : l.front === 'n' ? [mx, z0 - 0.5] : l.front === 'e' ? [x1 + 0.5, mz] : [x0 - 0.5, mz]; return l.y + 0.3 - height(p[0], p[1]) <= 0.45; };
+  const ok = all.filter((l) => l.rect[2] - l.rect[0] >= 4.5 && l.rect[3] - l.rect[1] >= 4.5 && stepOK(l));
+  for (const [px, pz, nShop, nHome] of [[0, -135, 8, 4], [-176, 40, 8, 4], [176, 40, 8, 4], [0, 185, 8, 4], [-176, -80, 4, 2], [176, -80, 4, 2]]) {
+    const d = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - px, (l.rect[1] + l.rect[3]) / 2 - pz), srt = ok.filter((l) => !out.has(l)).sort((a, b) => d(a) - d(b)).slice(0, 60);
+    srt.filter((l) => l.shop).slice(0, nShop).forEach((l) => out.add(l)); srt.filter((l) => !l.shop).slice(0, nHome).forEach((l) => out.add(l));
+  }
+  return (OPENED = out);
+}
+/** A point inside an open house's ground room: u along its front, v in from the door's wall (the frame of styles/ottoman/konak.js room()). */
+export function roomPoint(l, u, v) {
+  const [x0, z0, x1, z1] = l.rect;
+  return l.front === 's' ? [x1 - u, z1 - v] : l.front === 'n' ? [x0 + u, z0 + v] : l.front === 'e' ? [x1 - v, z0 + u] : [x0 + v, z1 - u];
+}

@@ -107,3 +107,7 @@ Coconut palms, breadfruit, banana, ivory palms (for thatch), hibiscus (*Hibiscus
 ## 11. Left out (to be done)
 
 Carved or painted work (none recorded), the great sailing canoes, the sacred eel pools, ritual objects of the burial, the ivory-palm groves behind the shore; the tide's rise and fall.
+## Round 5: the houses of the islets (walk-in)
+
+- **Measured.** 91 nahs and the hall stand within 120 m of the arrival. At the start of the round none could be entered: the roof's lower edge (1.6 m above the ground) caught the walker's head above the 0.45 m platform.
+- **Built.** The eave of the nah is now 2.3 m above the platform, so the walker passes under it. Commoners' nahs take one of three fronts by seed: open, with a porch (a deck 0.95 m deep on two posts, a trunk bench), or closed (walls to the eaves, a 1.1 m door, windows) [inferred: variants of the Pohnpeian house]. The 16 nahs nearest the arrival burn an oil lamp (one light a room) with someone seated inside; the hall has two lamp bowls and the landing store one. Interior points of every nah within 120 m were checked reachable by the walker's flood-fill.

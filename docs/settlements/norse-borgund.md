@@ -78,6 +78,11 @@ Plainchant in the church; the lur and the herding calls (kulokk) in the pastures
 
 The farm work of a summer (haymaking, wood, the yards), the herds at pasture with their herders, the priest at the altar and people at the church, as still figures and objects (`town.js`); see §1, "The farm life". [stated in part: Landslov exhibition; places and numbers inferred]
 
+## Round 5: walk-in houses
+
+- **Measured.** 23 log buildings (stue, barn, smithy) within 120 m of the arrival are open and reachable (the smithy only in part).
+- **Built.** A hearth, forge or horn-lantern light in each open building (one light a room), so the rooms are lit at any hour.
+
 ## Sources
 
 - [Borgund Stave Church — Wikipedia](https://en.wikipedia.org/wiki/Borgund_Stave_Church) (the dragon heads, the portals' paint)

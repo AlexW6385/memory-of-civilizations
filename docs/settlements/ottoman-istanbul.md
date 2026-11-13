@@ -165,6 +165,11 @@ Sources added:
 
 **Not built.** The Golden Horn and its quays lie beyond the class radius (about 800 m); the han and the sıbyan mektebi are recorded for later.
 
+## 14. Walk-in houses and shops (round 5)
+
+- **Measured.** Twelve open houses and shops stand within 120 m of the arrival. At the start of the round none could be walked into from the arrival: the terrace's north retaining wall had no gap, the shop counters ran the full width of the room, and some door steps rose more than a walker's step above the lane.
+- **Built.** A 12 m gate in the terrace's north retaining wall on the axis (plan.js); a flap gap in line with the door in each shop counter (konak.js); `openSet()` (layout.js) now picks open houses only where the door step is within 0.45 m of the lane; a real light at the lamp of each open room; and a keeper or a woman of the house inside each open house within 220 m of the arrival (life.js, its own rng). All twelve are reachable by the walker's rules.
+
 ## Sources
 
 - [Strolling through Istanbul — Freely and Sumner-Boyd, the Süleymaniye](https://erenow.org/common/strolling-through-istanbul-classic-guide-to-the-city/11.php) (the interior's piers, arcades, mihrab, minbar, glass, tiles)

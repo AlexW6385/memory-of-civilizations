@@ -5,6 +5,7 @@
 // builders on Dapahu, food landed by canoe at the Peiniot islet.
 import { RADIUS, WATER, ISLETS, ISLET, FORDS, LANDINGS, edges, gaps, village, cooks, height, inland, inRect, SAKAU, TOMB, INNER, OUTER, OUTER_GATE, INNER_GATE, TOMB_COURT, LESSER_TOMB, FORECOURT } from './layout.js';
 import '../../objects/index.js';
+import { ARRIVALS } from '../../planet/arrivals.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));          // a figure faces −z when rot = 0
@@ -64,7 +65,10 @@ export async function town() {
   }
   // ── the nahs and the cook-houses ──
   const taroOf = (h, k) => (h.islet[0] === 'w' || 's2,s3,s5,s6'.includes(h.islet)) && k % 4 === 1 && (h.depth ?? 0) >= 6.5 && !h.back;
-  v.houses.forEach((h, k) => { const hh = taroOf(h, k) ? { ...h, depth: 2.6 } : h; E.push({ t: 'nah', c: h.c, yaw: h.yaw, w: h.w, l: h.l, rank: h.rank, seed: h.seed }); E.push({ t: 'yard', c: h.c, yaw: h.yaw, w: h.w, l: h.l, depth: hh.depth, rank: h.rank, seed: h.seed + 7 }); });
+  // the nahs nearest the arrival burn a lamp; the commoners' houses differ at the front: open, with a porch, closed with a door (by the house's seed)
+  const A0 = ARRIVALS['nan-madol'], dA = (h) => Math.hypot(h.c[0] - A0[0], h.c[1] - A0[2]), litSet = new Set([...v.houses].sort((a, b) => dA(a) - dA(b)).slice(0, 16));
+  const designOf = (h) => (h.rank ? 'open' : ['open', 'porch', 'closed', 'porch', 'closed', 'open'][h.seed % 6]);
+  v.houses.forEach((h, k) => { const hh = taroOf(h, k) ? { ...h, depth: 2.6 } : h; E.push({ t: 'nah', c: h.c, yaw: h.yaw, w: h.w, l: h.l, rank: h.rank, seed: h.seed, design: designOf(h), ...(litSet.has(h) ? { lit: true } : {}) }); E.push({ t: 'yard', c: h.c, yaw: h.yaw, w: h.w, l: h.l, depth: hh.depth, rank: h.rank, seed: h.seed + 7 }); });
   for (const k of v.works) E.push({ t: 'works', kind: k.kind, c: k.c, yaw: k.yaw, l: k.l, w: k.w, seed: k.seed });
   // the tomb islet (Peinkitel-like): a walled court, a platform with its crypt, tabu markers, offerings in the crypt
   { const [cx0, cz0, cx1, cz1] = TOMB_COURT.rect;
@@ -216,6 +220,8 @@ export async function town() {
   // the arrival: families on Peiniot by the cross path and the canoes at its landings, someone aboard half the moored canoes
   for (const [x, z, k] of [[-13.2, 66, 0], [-6.8, 70, 1], [-6.6, 84, 2], [-13.4, 86, 3], [-12.8, 77, 4], [-7.0, 77, 5]]) { const at = [x, z]; (k % 2 ? man : woman)(at, 0, face(at, [-10, z + (k % 3 - 1) * 3]), { pose: k < 2 ? 'talk' : k < 4 ? 'sit_ground' : 'stand' }); }
   moored().forEach((m, i) => { if (i % 2) return; const at = [m.at[0], m.at[1]]; man(at, m.y + 0.18, m.yaw + Math.PI, { pose: 'cross', hat: 'none' }); });
+  // and in each of the lit houses someone sits at the lamp, whatever the draw gave (a stream of its own: the households' stay as they were)
+  { const lr = rng(1771); [...litSet].forEach((h, i) => { const F = frameW(h.c, h.yaw), ph = h.rank ? 0.7 : 0.45, at = F(-h.w / 2 + 1.5 + lr() * 0.6, 1.9 + lr() * 0.8); (i % 3 === 0 ? man : woman)(at, ph, face(at, F(0, -h.l)), { pose: i % 2 ? 'cross' : 'sit_ground' }); }); }
   void INNER; void OUTER; void OUTER_GATE; void INNER_GATE; void TOMB; void inRect;
   return [plan('nan-madol-islets', 'nanmadol', E), plan('nan-madol-people', 'life', P)];
 }

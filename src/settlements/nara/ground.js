@@ -1,13 +1,14 @@
 // Nara — the ground: the temple's white gravel courts, lawns cropped by deer, the grassy dome of
 // Wakakusa, cedars and maples on the hills, the capital's earth streets; the soft light of Yamato.
 
-import { RADIUS, TEMPLE, COURT, PAGODAS, height, inRect, inLot, inStreet, inBlock, blocks, KOFUKU } from './layout.js';
+import { RADIUS, TEMPLE, COURT, PAGODAS, SERVICE_LANE, height, inRect, inLot, inStreet, inBlock, blocks, KOFUKU } from './layout.js';
 
 const MKT = [9, 165, 75, 235];
 function cover(x, z, h, ny) {
   const c = { sand: 0.1, grass: 0.7, rock: 0, soil: 0.2, fields: 0, dry: 0.15, warmth: 0.5, red: 0.05, road: 0, snow: 0, forest: 0 };
   if (inRect(COURT, x, z)) { c.sand = 0.8; c.grass = 0.2; return c; }
   if (Math.abs(x) < 6 && z > 40 && z < 160) { c.road = 0.8; return c; }
+  if (inRect(SERVICE_LANE, x, z)) { c.road = 0.8; c.grass = 0.05; return c; }
   if (inStreet(x, z)) { c.road = 0.8; c.grass = 0.05; return c; }
   if (inRect(KOFUKU.block, x, z)) { c.sand = 0.8; c.grass = 0.15; return c; }
   if (blocks().some((b) => b.kind === 'market' && inRect(b.rect, x, z))) { c.road = 0.6; c.soil = 0.5; c.grass = 0.05; return c; }
