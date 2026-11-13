@@ -68,7 +68,7 @@ function spiritHouse(k, u, v, y = 0) {
   bag.add('plaster_white', box(x - 0.34, y + 1.45, z - 0.34, x + 0.34, y + 1.5, z + 0.34));
   bag.add('plaster_white', box(x - 0.24, y + 1.5, z - 0.24, x + 0.24, y + 1.92, z + 0.24));
   bag.add('opening', box(x - 0.12, y + 1.55, z - 0.255, x + 0.12, y + 1.82, z - 0.23));
-  bag.add('tile_dark', lathe([[0.4, 0], [0.3, 0.1], [0.001, 0.38]], 4, null, x, y + 1.92, z).rotateY(Math.PI / 4));
+  bag.add('tile_dark', lathe([[0.4, 0], [0.3, 0.1], [0.001, 0.38]], 4, null, 0, 0, 0).rotateY(Math.PI / 4).translate(x, y + 1.92, z));   // (turned about its own axis, then put in place: turned in place it swung round the world's origin)
   bag.add('gold', rod([x, y + 2.28, z], [x, y + 2.52, z], 0.025, 4));
   bag.add('cloth_red', box(x - 0.3, y + 1.5, z - 0.46, x - 0.1, y + 1.56, z - 0.36));
   bag.add('cloth_ochre', lathe([[0.001, 0], [0.07, 0.01], [0.05, 0.1], [0.001, 0.13]], 6, null, x + 0.18, y + 1.5, z - 0.42));

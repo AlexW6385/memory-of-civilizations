@@ -164,7 +164,7 @@ async function main() {
   await world.init((step, f) => progress.set(step, f, step === 'plans' ? '' : ''));
   // the scene pass made now, so that what loads from here on is compiled as it comes (renderer.js prime)
   R.prime();
-  // frame costs (`?perf` shows the panel; tools/perf.mjs uses window.palace.perf)
+  // frame costs (`?perf` shows the panel; the same switches are `window.palace.perf`, for the console)
   const perf = new Perf(world, R);
   if (params.has('perf')) perf.show();
   // the pixel ratio lowered and raised by the frame time on the high preset; ?dpr=x pins it

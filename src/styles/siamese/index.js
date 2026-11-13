@@ -270,7 +270,7 @@ function bellTower(el, { bag, col }) {
     bag.add('cloth_white', rod([cx, y + 5.2, cz], [cx, y + 4.3, cz + 0.4], 0.03, 4)); }
   bag.add('bronze', lathe([[0.1, 0], [0.5, -0.2], [0.8, -1.1], [0.88, -1.4], [0.001, -1.4]], 10, null, cx, y + 6.6, cz));
   let r = a + 0.9, yy = y + 7.0;
-  for (let i = 0; i < 5; i++) { const h = 1.0 - i * 0.08; bag.add('roof_tile', lathe([[r * 1.414, 0], [r * 0.7 * 1.414, h]], 4, null, cx, yy, cz).rotateY(Math.PI / 4)); yy += h * 0.8; r *= 0.74; }
+  for (let i = 0; i < 5; i++) { const h = 1.0 - i * 0.08; bag.add('roof_tile', lathe([[r * 1.414, 0], [r * 0.7 * 1.414, h]], 4, null, 0, 0, 0).rotateY(Math.PI / 4).translate(cx, yy, cz)); yy += h * 0.8; r *= 0.74; }
   bag.add('gold', lathe([[0.15, 0], [0.001, 1.8]], 6, null, cx, yy + 0.2, cz));
 }
 /** cloister: the gallery round the platform — { rect, y, gate (the opening's centre on its south side) }, brick walls with a tiled lean-to roof, seated images facing outward. */

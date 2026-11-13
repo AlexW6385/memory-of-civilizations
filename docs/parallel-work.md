@@ -1,6 +1,6 @@
 # Parallel work
 
-How work on this repository is run with many agents at once. The coordinating session follows this; each implementing agent gets `docs/agent-brief.md` plus its assignment. Which settlements go in which batch, and how many agents each gets, is in `docs/batches.md`.
+How work on this repository is run with many agents at once. The coordinating session follows this; each implementing agent gets `docs/agent-brief.md` plus its assignment. The process now: one worktree per agent, each on its own branch (`agent/<name>`), and the coordinator merges the branches into `master`; agents never share a file or push. About ten agents at a time is the author's number.
 
 ## Roles
 
@@ -12,13 +12,13 @@ How work on this repository is run with many agents at once. The coordinating se
 
 - **Set the model on every agent call** (`model: "sonnet"` for implementers, `"opus"` only for hard engine work): an agent started without one runs on the coordinator's model. Set the effort the roles above give.
 
-- Assignments follow `docs/batches.md`: a settlement gets the slots its class and density give, split by files of its folder (landmark / townscape / life); agents never share a file. An agent edits only the files its assignment names, its settlements' style directories under `src/styles/`, their dossiers, and new tests of its own.
-- Shared styles (`src/styles/vernacular`, `ming`, `chinese`, `roman`, `song`, `greek`, `islamic`, `byzantine`) and `src/objects/*` are edited, in a batch, only by the one agent the assignment names as their owner; it keeps every other user of them working (surface-check those too). `src/engine/*`, `src/planet/*`, `src/core/palette.js`, `src/planet/arrivals.js` stay with the coordinator (unless the assignment names a line). An agent that needs a change it does not own says so in its report.
+- An assignment names a settlement or a task and, where several agents work on one settlement, the files of its folder each owns (landmark / townscape / life); agents never share a file. An agent edits only the files its assignment names, its settlements' style directories under `src/styles/`, their dossiers, and new tests of its own.
+- Shared styles (`src/styles/vernacular`, `ming`, `chinese`, `roman`, `song`, `greek`, `islamic`, `byzantine`) and `src/objects/*` are edited only by the one agent the assignment names as their owner; it keeps every other user of them working (surface-check those too). `src/engine/*`, `src/planet/*`, `src/core/palette.js`, `src/planet/arrivals.js` stay with the coordinator (unless the assignment names a line). An agent that needs a change it does not own says so in its report.
 - New civilizations, when the owner asks for them, go one per agent: dossier first, then the settlement.
 
 ## How many at once
 
-- A batch is about **10** agents (the author's number), plus two research-only dossier agents from B3 on. Raise or lower by what the last batch showed: renders killed for memory, merge conflicts, how long merging took.
+- About **10** agents at a time (the author's number). Raise or lower by what the last round showed: renders killed for memory, merge conflicts, how long merging took.
 - The machine is shared (8 GB). Agents run their checks one at a time and never several renders in parallel.
 
 ## Checks: light for agents, heavy for the coordinator
@@ -26,21 +26,27 @@ How work on this repository is run with many agents at once. The coordinating se
 | Check | Who | When |
 |---|---|---|
 | `node tools/surface-check.mjs <id>` ("surfaces ok") | agent | every settlement touched |
-| `node tools/geo-one.mjs <id>` (guard: 150 MB, 3000 meshes) | agent | every settlement touched |
 | `node tools/plan-check.mjs <id>` (walkable from the arrival) | agent | every settlement touched |
+| `node tools/walk-check.mjs --sites <id>` (the landmark's routes can be walked) | agent | every settlement touched |
+| `node tools/view-check.mjs <id>`, `node tools/disc-check.mjs <id>` (the free-view and disc faults the planet test would stop at) | agent | every settlement touched |
+| `node tools/geo-one.mjs <id>` (geometry guard, below) | agent | every settlement touched |
 | `node --test tests/worker.test.mjs` | agent | before finishing |
 | `tools/showroom.mjs` renders | agent, sparingly (one or two per task); coordinator for doubtful reports | |
-| `node --test tests/planet.test.mjs` (~15 min) | coordinator after merging; agent only if it added rooms or music zones | |
-| light bakes (`node tools/bake.mjs --status`, `--stale`) | coordinator, or one bake agent, at the end of a wave | |
+| the heavy suite (`node --test tests/planet.test.mjs`, ~15 min, and the rest) | CI on every push; locally only for a major version, when something has gone wrong, or when the owner asks | |
+| light bakes (`node tools/bake.mjs --status`, `--stale`) | coordinator, or one bake agent, after a round of merges | |
 | CI on every push | coordinator: wait for the result, read the log if it fails, fix at once | every push |
-| browser survey in the owner's Chrome | coordinator | after each wave |
+| browser survey in the owner's Chrome | coordinator | after each round of merges |
+
+## The geometry guard
+
+Tests allow 150 MB of geometry and 3000 meshes per settlement (`tools/geo-budget.mjs`). The merge target is at most 140 MB / 2900 meshes, and the aim at most 130 MB / 2600: the coordinator does not merge a settlement past the target.
 
 ## Merging
 
 1. `git worktree add -b agent/<name> /home/claude/wt/<name> HEAD` and a `node_modules` symlink for each agent.
 2. When an agent reports: read the report; merge its branch (`git merge --no-edit agent/<name>`); check that no commit carries a co-author or session trailer; re-run surface-check (and plan-check where rooms or walks changed) for its settlements; run the tests it touched.
 3. Push straight to `master` with the version, `CHANGELOG.md` line and, where they changed, the `DESIGN.md` status lines and a line in `docs/decisions.md`; wait for CI. Nothing is appended to `DESIGN.md`: it holds the design as it stands (§11).
-4. Remove the worktree and branch; start the next agent in the free slot.
+4. Remove the worktree and branch; start the next agent.
 5. If an agent is stopped (server restart), resume it from its transcript; if that fails, start a new agent on the same worktree to finish its uncommitted work.
 
 ## Rules learned

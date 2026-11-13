@@ -1,4 +1,4 @@
-// The built settlements of the planet (the whole set of 100, with levels, is DESIGN.md §7), each with
+// The built settlements of the planet (94 built; the set and its levels are DESIGN.md §7), each with
 // its true place on Earth. Where each one stands on the planet (`placed`) is worked out by
 // tools/planet-layout.mjs from these and written to src/planet/layout.js; the reasoning is in
 // docs/world.md.
@@ -145,9 +145,9 @@ export const room = (s) => Math.max(s.radius, s.size ?? s.radius);
 /** Metres over which a settlement's ground blends into the open country beyond its disc. */
 export const BLEND = 100;
 /**
- * The settlements of the set not built yet (DESIGN §7, level L0), with their true places and the disc
- * their size class gives them (§4.5). Not on the planet until built (then moved into SITES); the
- * layout keeps room for them, so that building one does not move the others.
+ * Settlements planned but not built yet, with their true places and the disc their size class gives
+ * them (§4.5). Not on the planet until built (then moved into SITES); the layout keeps room for them,
+ * so that building one does not move the others. Empty now: all 94 of the set are built.
  */
 export const PLANNED = [
 ];

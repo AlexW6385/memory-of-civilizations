@@ -182,8 +182,8 @@ const rooms = [
 const walks = [
   // from the courtyard into the lower chapel and along it
   [[-30, 0], [-12, 0], [-6, 0], [-2.5, 0], [1.5, 0], [10, 0], [24, 0], [30, 0]],
-  // up the stair to the upper porch and into the upper chapel, round to the apse
-  [[-22, -8.6], [-18.5, -8.6], [-4.8, -8.6], [-2.6, -7.2], [-2.6, 0], [1.5, 0], [12, 0], [12, -3.6], [24, -3.6], [24, 3.6], [12, 3.6], [12, 0]],
+  // up the stair to the upper porch and into the upper chapel, round to the apse (straight along the landing past the stair parapet's end post before turning in, not across its corner)
+  [[-22, -8.6], [-18.5, -8.6], [-4.8, -8.6], [-3.2, -8.6], [-2.6, -7.2], [-2.6, 0], [1.5, 0], [12, 0], [12, -3.6], [24, -3.6], [24, 3.6], [12, 3.6], [12, 0]],
   // up the stair and along the king's gallery
   [[-22, -8.6], [-18.5, -8.6], [-4.8, -8.6], [-2.9, -8.6], [-2.9, -12], [-2.9, -32]],
 ];

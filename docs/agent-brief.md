@@ -1,6 +1,6 @@
 # Agent brief
 
-Given to every implementing agent with its assignment (docs/parallel-work.md).
+Given to every implementing agent with its assignment (docs/parallel-work.md). The process: you work alone in your own worktree on your own branch; the coordinator merges it.
 
 You are improving the detail of the "Memory of Civilizations" repo (a three.js WebGPU planet of walkable, realistic 3D historical settlements). You work in your own git worktree of the repo; other agents work in parallel on OTHER settlements, so stay strictly inside your assignment.
 
@@ -16,7 +16,8 @@ STRICT FILE RULES (to avoid merge conflicts with the other agents):
 
 TOOLS:
 - `node tools/surface-check.mjs <id>` must print "surfaces ok" for each of your settlements.
-- `node tools/geo-one.mjs <id>` prints the geometry budget; it must stay under the guard of 150 MB and 3000 meshes (each distinct material per plan is a mesh; reuse materials); the real test is the frame in the browser.
+- `node tools/geo-one.mjs <id>` prints the geometry budget. The guard: tests allow 150 MB / 3000 meshes (tools/geo-budget.mjs); the merge target is at most 140 MB / 2900, and the aim at most 130 / 2600 (each distinct material per plan is a mesh; reuse materials); the real test is the frame in the browser.
+- `node tools/plan-check.mjs <id>`, `node tools/walk-check.mjs --sites <id>`, `node tools/view-check.mjs <id>` and `node tools/disc-check.mjs <id>` must pass for each settlement you touch.
 - `node --test tests/worker.test.mjs` must pass.
 - To look at an element: `node tools/showroom.mjs '<json array of elements>' --style <style> --imports <style> --cam x,y,z --look x,y,z --out shots/<name>.png` then Read the png (renders in ~1–3 min). Elements need their params (see the plan files). Full-scene shots (tools/shot.mjs) take 20+ minutes here; avoid them.
 - Long commands: run with a timeout (e.g. `timeout 900 ...`).
@@ -25,13 +26,12 @@ COMMITS: commit your work in your worktree (several commits are fine), authored 
 
 FINAL REPORT (your last message): the branch name and commit hashes, a short English list of what you built (one line each), any material you wanted but did not have, and anything you found broken but left alone.
 
-EXTRA RULES (learned from earlier waves; see also docs/parallel-work.md):
+EXTRA RULES (learned from earlier rounds; see also docs/parallel-work.md):
 - NEVER run `git stash` (the stash list is shared by all worktrees and another process may pop yours). Commit WIP instead.
-- Shared styles are OFF-LIMITS even if your settlement uses them (src/styles/vernacular, ming, chinese, roman, song, greek, islamic, byzantine, and anything under src/objects) — unless your assignment names you as that style's owner for this batch; then you alone edit it, and you run surface-check on every other settlement that imports it.
+- Shared styles are OFF-LIMITS even if your settlement uses them (src/styles/vernacular, ming, chinese, roman, song, greek, islamic, byzantine, and anything under src/objects) — unless your assignment names you as that style's owner for this assignment; then you alone edit it, and you run surface-check on every other settlement that imports it.
 - Several agents may share one settlement, each owning named files of its folder (landmark: plan.js, index.js and the style; townscape: layout.js, town.js, ground.js; life: movers/fauna/smoke/shops data, interiors, music.js). Touch only yours.
-- The bar is docs/suzhou-method.md §7: work through its order (§1) for your part, and run `node tools/standard-check.mjs <id>` once it exists.
+- The bar is docs/suzhou-method.md §7: work through its order (§1) for your part.
 - The machine (8 GB) is shared by ~15 agents: run surface-check/showroom one at a time, never several in parallel. If a run is OOM-killed, retry later.
 - tools/showroom.mjs: --inplace (keeps positions), --ground <y>|off, --timeout, game lighting by default (--light simple for 3 s renders), 68° FOV, any list size, and --site <id> --arrival | --at x,y,z,yaw,pitch for real in-game views (2–4 min). surface-check is fast now and reports elements that fail to build. tools/plan-check.mjs <id> checks walkability from the arrival point.
-- If you add or change rooms or music zones, run `node --test tests/planet.test.mjs` once before finishing with `timeout 1800` (it takes ~15 min on this loaded machine; a timeout is not a failure).
-- Checks are light for you (surface-check, geo-one, plan-check, worker test; one or two showroom renders at most); the coordinator runs the heavy ones after merging.
-- The goal and phase of the wave are given in your assignment.
+- Checks are light for you: per settlement touched, surface-check, plan-check, `node tools/walk-check.mjs --sites <id>`, view-check, disc-check and geo-one, and the worker test; one or two showroom renders at most. The heavy suite (tests/planet.test.mjs and the rest) runs in CI after the coordinator pushes; do not run it yourself.
+- The goal of the work is given in your assignment.
