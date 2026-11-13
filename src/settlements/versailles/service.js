@@ -38,7 +38,7 @@ export function servicePlans() {
   inside('sculptor', 3.0, 4.4, { cloth: 'cloth_grey', cloth2: 'cloth_brown', hat: 'cap', hatMat: 'cloth_brown', carry: 'pole' });
   inside('bearers', 4.6, 7.2, { cloth: 'cloth_indigo', pose: 'talk' });
   inside('bearers', 5.6, 7.3, { cloth: 'cloth_blue', pose: 'stand' });
-  inside('guard', 'mid', 2.2, { cloth: 'cloth_red', cloth2: 'cloth_white', h: 1.78, carry: 'pole' });
+  inside('guard', 'mid', 2.2, { cloth: 'cloth_red', cloth2: 'cloth_white', h: 1.78, carry: 'staff' });
   inside('guard', 3.8, 2.4, { cloth: 'cloth_blue', cloth2: 'cloth_white', h: 1.76, pose: 'talk' });
   inside('fountain', 'mid', 2.9, { cloth: 'cloth_brown', cloth2: 'cloth_grey', hat: 'cap', hatMat: 'cloth_brown' });
   inside('orangery', 4.0, 3.3, { cloth: 'cloth_grey', cloth2: 'cloth_brown', hat: 'brim', hatMat: 'thatch', carry: 'pails' });
