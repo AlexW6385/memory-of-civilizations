@@ -119,7 +119,9 @@ export function makeShops(H) {
    */
   function shop(el, ctx) {
     const { bag, col, lights } = ctx, rand = rng(el.seed || 1), y = el.y ?? 0, door = el.door ?? 's', tea = el.kind === 'tea';
-    const Hh = tea ? 5.4 : 4.7, ceil = tea ? 3.9 : 3.4, dw = tea ? 1.7 : 2.4, dh = 2.45;
+    // four fronts of the trading house: plain, with the household's floor over the shop (windows above the door), the front's upper wall painted yellow, a striped awning over the door
+    const vr = tea ? -1 : (el.seed || 0) % 4;
+    const Hh = tea ? 5.4 : vr === 1 ? 7.6 : 4.7, ceil = tea ? 3.9 : 3.4, dw = tea ? 1.7 : 2.4, dh = 2.45;
     const { yi, t } = shell(ctx, el, { H: Hh, ceil, dw, dh, floor: tea ? 'planks_grey' : 'planks_grey' });
     const F = frame(el.rect, door), { Wd, Dp, P, R } = F;
     const iu = Wd / 2 - t, vi0 = t, vi1 = Dp - t;                   // the inner extent: u in ±iu, v from vi0 to vi1
@@ -138,6 +140,27 @@ export function makeShops(H) {
     for (const sg of [-1, 1]) {
       const p = P(sg * (Wd / 2), Dp * (tea ? 0.62 : 0.55)), sn = [tt[0] * sg, tt[1] * sg], yy = y + 1.7, ins = k * (yy - (y - 0.3)) - 0.01;
       win(bag, [p[0] - sn[0] * ins, p[1] - sn[1] * ins], [-sn[1], sn[0]], sn, yy, 0.75, rand, { k });
+    }
+    if (vr === 1) {
+      // the upper floor: three black-framed windows on the front, high, and a row of small ones above the shop's own
+      for (const du of [-2.6, 0, 2.6]) { if (Math.abs(du) > Wd / 2 - 0.9) continue; const p = P(du, 0), yy = y + 4.6, ins = k * (yy - (y - 0.3)) - 0.01; win(bag, [p[0] - nn[0] * ins, p[1] - nn[1] * ins], tt, nn, yy, 0.95, rand, { k }); }
+    }
+    if (vr === 2) {
+      // the front's upper wall washed yellow between the valance and the dark frieze (faces on the battered wall)
+      const inset = (h) => k * (h + 0.3) - 0.012, pt = (u, h) => { const p = P(u, 0); return [p[0] - nn[0] * inset(h), y + h, p[1] - nn[1] * inset(h)]; };
+      const hw2 = Wd / 2 - 0.35;
+      face(bag, 'limewash_yellow', [nn[0], nn[1]], pt(-hw2, 3.45), pt(hw2, 3.45), pt(hw2, Hh - 0.62), pt(-hw2, Hh - 0.62));
+    }
+    if (vr === 3) {
+      // a striped cloth awning over the door on two poles, sloping down to its fringe
+      const A = (u, v, h) => { const c = P(u, -v); return [c[0], y + h, c[1]]; }, W2 = dw / 2 + 0.9;
+      for (const sg of [-1, 1]) { const c = P(sg * W2, -1.7); bag.add('timber', rod([c[0], y, c[1]], [c[0], y + 2.55, c[1]], 0.05, 6)); col.circle(c[0], c[1], 0.06, y, y + 2.55); }
+      const ns = Math.round(W2 * 2 / 0.45);
+      for (let i = 0; i < ns; i++) {
+        const u0 = -W2 + 2 * W2 * i / ns, u1 = -W2 + 2 * W2 * (i + 1) / ns, m = STRIPES[(i + (el.seed || 0)) % 5], a0 = A(u0, 0.0, 3.0), b0 = A(u1, 0.0, 3.0), c0 = A(u1, 1.8, 2.5), d0 = A(u0, 1.8, 2.5);
+        face(bag, m, [0, 1], a0, b0, c0, d0); face(bag, m, [0, -1], a0, b0, c0, d0);
+        face(bag, m, [nn[0], nn[1]], d0, c0, [c0[0], c0[1] - 0.25, c0[2]], [d0[0], d0[1] - 0.25, d0[2]]); face(bag, m, [-nn[0], -nn[1]], d0, c0, [c0[0], c0[1] - 0.25, c0[2]], [d0[0], d0[1] - 0.25, d0[2]]);
+      }
     }
     const lampAt = (u, v, yy, o = {}) => { const p = P(u, v); lights?.push({ at: [p[0], y + yy, p[1]], color: '#ffb46b', intensity: o.i ?? 1.6, distance: o.d ?? 6 }); };
     // the back wall's painted dado

@@ -100,6 +100,14 @@ export async function town() {
     const woman = rand() < 0.3;
     seated.push({ t: 'figure', at: q.at, y: 0, rot: q.rot, h: 1.5 + rand() * 0.2, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: rand() < 0.2 ? 'cloth_maroon' : ['cloth_brown', 'cloth_black', 'cloth_grey', 'hide_tan'][Math.floor(rand() * 4)], cloth2: ['cloth_red', 'cloth_green', 'cloth_ochre', 'paint_blue'][Math.floor(rand() * 4)], over: woman ? 'apron' : 'sash', skin: rand() < 0.5 ? 'skin_medium' : 'skin_dark', hat: woman ? 'none' : rand() < 0.5 ? 'cap' : 'none', hatMat: 'hide_brown', hair: woman ? 'bun' : 'short', hairMat: 'hair_dark', beard: false, feet: 'shod', pose: 'sit' });
   }
+  // the keepers of the trading houses, standing behind their counters looking out at the street (the room's frame as styles/tibetan/shops.js has it:
+  // u along the front from its middle, v in from the front face; the counter across the room at v = 0.7 + 1.7 … 2.4, the free floor behind it)
+  for (const q of sh) {
+    if (q.kind !== 'trade' || q.seed % 3 === 2) continue;
+    const NORM = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] }[q.door], [x0, z0, x1, z1] = q.rect, Fp = q.door === 'e' ? [x1, (z0 + z1) / 2] : [x0, (z0 + z1) / 2];
+    const P = (u, v) => [Fp[0] + -NORM[1] * u - NORM[0] * v, Fp[1] + NORM[0] * u - NORM[1] * v], at = P(0.5 + (q.seed % 5) * 0.12, 3.55), woman = q.seed % 4 === 0;
+    seated.push({ t: 'figure', at, y: 0.04, rot: Math.atan2(-NORM[0], -NORM[1]), h: 1.5 + rand() * 0.15, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: woman ? 'cloth_black' : ['cloth_brown', 'cloth_grey', 'hide_tan'][q.seed % 3], cloth2: ['cloth_red', 'cloth_green', 'cloth_ochre'][q.seed % 3], over: woman ? 'apron' : 'sash', skin: 'skin_medium', hat: woman ? 'none' : 'cap', hatMat: 'cloth_brown', hair: woman ? 'long' : 'short', hairMat: 'hair_dark', beard: false, feet: 'shod', pose: 'stand' });
+  }
   plans.push(base('lhasa-patrons', seated, 'life'));
   // eye-level dressing of the lanes and the street's fronts, tiled 100 m with the plans drawn near (as Suzhou's life)
   const dr = dressing(), tile = (list, style, name) => {

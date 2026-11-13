@@ -49,7 +49,7 @@ export function life() {
   }
   for (const [x, z] of [[-101, 24], [-100, 28]]) { L.push({ t: 'pot', kind: 'pithos', at: [x, z], y: Y0, n: 1, seed: seed() }, { t: 'sacks', at: [x - 0.6, z + 1.4], y: Y0, rot: rand() * 6, seed: seed(), n: 4 }); }
   man([-98.6, 26], 1.2, { y: Y0, pose: 'talk' }); woman([-97.8, 26.8], 4.2, { y: Y0, pose: 'talk' });
-  [[-105, -12, 'amphora'], [-100.4, -9.6, 'water_pot'], [-105.4, -4.4, 'basket'], [-99.6, -2.2, 'amphora'], [-104, 5.5, 'basket'], [-99, 8.6, 'water_pot']].forEach(([x, z, g], i) => {
+  [[-105, -12, 'amphora'], [-100.4, -9.6, 'water_pot'], [-105.4, -4.4, 'basket'], [-102.8, -2.2, 'amphora'], [-104, 5.5, 'basket'], [-99, 8.6, 'water_pot']].forEach(([x, z, g], i) => {
     L.push({ t: 'goods_mat', at: [x, z], y: Y0, rot: (i % 2) * 0.4, seed: seed(), goods: [g, 'pithos' === g ? 'amphora' : g, 'amphora', 'basket'] });
     woman([x + 0.2, z - 1.0], Math.PI + (i % 2) * 0.4, { y: Y0, pose: i % 2 ? 'sit_ground' : 'squat' });
   });

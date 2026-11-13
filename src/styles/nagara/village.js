@@ -25,9 +25,12 @@ function building(el, ctx) {
   const R = (u0, v0, u1, v1) => { const a = P(u0, v0), b = P(u1, v1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
   const B = (m, u0, v0, u1, v1, ya, yb, c = false) => { const r = R(u0, v0, u1, v1); bag.add(m, box(r[0], ya, r[1], r[2], yb, r[3])); if (c) col.rect(r, ya, yb); };
   const pot = (m, u, v, r, h, ya = fy) => { const p = P(u, v); bag.add(m, lathe([[r * 0.6, 0], [r, h * 0.45], [r * 0.75, h * 0.85], [r * 0.55, h], [0.001, h]], 10, null, p[0], ya, p[1])); };
-  const wall = pick(rand, WALLS), flat = kind === 'mud' || kind === 'haveli', storeys = kind === 'haveli' ? 2 : 1;
+  // three kinds of shop-front: the tiled gable over a tiled lean-to; a flat roof with a parapet under a striped cloth awning; a thatched gable and lean-to
+  const sv = kind === 'shop' ? (el.seed || 0) % 3 : 0;
+  const wall = pick(rand, WALLS), flat = kind === 'mud' || kind === 'haveli' || sv === 1, storeys = kind === 'haveli' ? 2 : 1;
   const H = (kind === 'hut' ? 2.5 : kind === 'shed' ? 2.6 : 3.1) + (storeys - 1) * 3.0, top = fy + H;
-  const tiled = kind !== 'hut' && kind !== 'shed', roofM = tiled ? 'roof_tile' : 'thatch';
+  const tiled = kind !== 'hut' && kind !== 'shed' && sv !== 2, roofM = tiled ? 'roof_tile' : 'thatch';
+  const awM = sv === 1 ? ['cloth_red', 'cloth_ochre', 'cloth_indigo', 'cloth_green'][(el.seed || 0) % 4] : roofM;
   // plinth under the house, the front platform (otla) a step above the lane
   bag.add('mudbrick', box(...(() => { const r = R(-0.1, -0.1, L + 0.1, D + 0.1); return [r[0], y - 0.6, r[1], r[2], fy, r[3]]; })()));
   const open0 = kind === 'shop' || kind === 'shed';
@@ -60,6 +63,12 @@ function building(el, ctx) {
       B('wood_dark', nu - 0.3, nb - 0.07, nu + 0.3, nb - 0.02, fy + 1.45, fy + 2.1); B('cloth_red', nu - 0.25, nb - 0.09, nu + 0.25, nb - 0.07, fy + 1.5, fy + 2.05);
       B('cloth_white', nu - 0.32, nb - 0.12, nu + 0.32, nb - 0.07, fy + 1.4, fy + 1.46);
       B('timber', nu - 0.3, nb - 0.28, nu + 0.3, nb - 0.02, fy + 1.28, fy + 1.32); pot('bronze', nu - 0.12, nb - 0.16, 0.05, 0.08, fy + 1.32); B('flame', nu + 0.1, nb - 0.17, nu + 0.14, nb - 0.13, fy + 1.32, fy + 1.4);
+    }
+    if (kind !== 'shop') {
+      // the household's niche on the back wall: a shelf with a brass lamp, lit (the room's light), a garlanded picture of the god above it
+      const nu = L * 0.42, nb = D - T;
+      B('timber', nu - 0.3, nb - 0.26, nu + 0.3, nb - 0.02, fy + 1.28, fy + 1.32); pot('bronze', nu - 0.1, nb - 0.15, 0.05, 0.08, fy + 1.32); B('flame', nu + 0.08, nb - 0.17, nu + 0.12, nb - 0.13, fy + 1.32, fy + 1.4);
+      B('cloth_red', nu - 0.25, nb - 0.09, nu + 0.25, nb - 0.07, fy + 1.5, fy + 2.0); B('cloth_ochre', nu - 0.3, nb - 0.1, nu + 0.3, nb - 0.07, fy + 1.44, fy + 1.5);
     }
     // the door leaf standing open inside
     if (!open0) B('timber', du - dw / 2 - 0.02, T, du - dw / 2 + 0.05, T + dw, fy, fy + 2.05);
@@ -137,7 +146,7 @@ function building(el, ctx) {
     // lean-to: slab sloping from the wall at (fy + 3.0) down to the beam
     const q = [P(-0.3, 0.05), P(L + 0.3, 0.05), P(L + 0.3, -oD - 0.3), P(-0.3, -oD - 0.3)], yt = [fy + 2.95, fy + 2.95, ve + 0.25, ve + 0.25];
     const pts = q.map((p, i) => [p[0], yt[i], p[1]]), bot = pts.map((p) => [p[0], p[1] - 0.12, p[2]]);
-    bag.add(roofM, fromTriangles(orientOutward([...pts[0], ...pts[1], ...pts[2], ...pts[0], ...pts[2], ...pts[3], ...bot[0], ...bot[2], ...bot[1], ...bot[0], ...bot[3], ...bot[2], ...pts[1], ...pts[0], ...bot[0], ...pts[1], ...bot[0], ...bot[1], ...pts[2], ...pts[1], ...bot[1], ...pts[2], ...bot[1], ...bot[2], ...pts[3], ...pts[2], ...bot[2], ...pts[3], ...bot[2], ...bot[3], ...pts[0], ...pts[3], ...bot[3], ...pts[0], ...bot[3], ...bot[0]])));
+    bag.add(awM, fromTriangles(orientOutward([...pts[0], ...pts[1], ...pts[2], ...pts[0], ...pts[2], ...pts[3], ...bot[0], ...bot[2], ...bot[1], ...bot[0], ...bot[3], ...bot[2], ...pts[1], ...pts[0], ...bot[0], ...pts[1], ...bot[0], ...bot[1], ...pts[2], ...pts[1], ...bot[1], ...pts[2], ...bot[1], ...bot[2], ...pts[3], ...pts[2], ...bot[2], ...pts[3], ...bot[2], ...bot[3], ...pts[0], ...pts[3], ...bot[3], ...pts[0], ...bot[3], ...bot[0]])));
     void ya;
   }
   // openings on the front of the closed or home houses

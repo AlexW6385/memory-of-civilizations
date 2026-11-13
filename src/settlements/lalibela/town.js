@@ -1,7 +1,7 @@
 // The village round the churches (docs/settlements/lalibela.md §5): round stone houses with conical thatch;
 // and the people of the churches (§10): pilgrims wrapped in white in the pits, the trenches and on
 // the rims looking down, priests among them holding their hand crosses.
-import { RADIUS, POOL, PITS, PRECINCT, TERR, KNOLL, riserR, cutDepth, houses, compounds, slope, inRect } from './layout.js';
+import { RADIUS, POOL, PITS, PRECINCT, TERR, KNOLL, riserR, cutDepth, houses, compounds, enterable, HUT, slope, inRect } from './layout.js';
 const base = (id, elements, style = 'zagwe') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-240, 100], facing: 's' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -108,6 +108,22 @@ function village() {
     if (rand() < 0.45) fig(L, [M.c[0] + mu[0] * (M.r + 1.2) + mv[0] * 0.2, M.c[1] + mu[1] * (M.r + 1.2) + mv[1] * 0.2], Math.atan2(-mu[0], -mu[1]) + 3.14 * 0 + Math.PI, 'squat', { hat: 'veil', hair: 'bun', over: 'shawl' });
     if (rand() < 0.35) fig(L, [M.c[0] + mu[0] * (M.r + 0.55) - mv[0] * 1.9, M.c[1] + mu[1] * (M.r + 0.55) - mv[1] * 1.9], Math.atan2(-mu[0], -mu[1]) + Math.PI, 'sit_low', { hat: rand() < 0.4 ? 'turban' : 'none', hatMat: 'cloth_white', beard: 0.6, hair: 'short', over: 'cape' });
     if (rand() < 0.4) fig(L, [q.c[0] + u[0] * q.R * 0.55 - v[0] * 1.2, q.c[1] + u[1] * q.R * 0.55 - v[1] * 1.2], rand() * 6.28, 'stand', { h: 1.1, over: 'none', hair: 'short', cloth: rand() < 0.5 ? 'cloth_ochre' : 'cloth_white' });
+  }
+  // those at home in the round houses one can enter (hut.js: W(sx, sd) is the house's own frame; its hearth at (0, 1.15), the stool at (-1.25, 0.95), the loom at (1.9, 1.3),
+  // the jars at (2.2, 0.5…1.5), the mat and the book stand at (1.5…2.0, 1.4…0.7)): the mother on her stool at the hearth, the weaver at her loom, the brewer at his jars,
+  // the priest-scribe on his mat before the book stand, the farmer among his sacks
+  for (const h of [...enterable(), { c: HUT.c, door: HUT.door, seed: 1220, enter: 'household' }]) {
+    const da = h.door ?? Math.PI, mir = (h.seed || 7) & 1 ? -1 : 1, nr = [Math.cos(da), Math.sin(da)], tn = [-Math.sin(da), Math.cos(da)];
+    const W = (sx, sd) => [h.c[0] + nr[0] * sd + tn[0] * sx * mir, h.c[1] + nr[1] * sd + tn[1] * sx * mir];
+    const toward = (a, b) => Math.atan2(-(b[0] - a[0]), -(b[1] - a[1]));
+    const Lq = out[quad(...h.c)], y = slope(...h.c) + 0.05;
+    const put = (sx, sd, look, pose, o = {}) => { const at = W(sx, sd); Lq.push({ t: 'figure', at, y, rot: toward(at, W(...look)), seed: Math.floor(rand() * 1e9), dress: 'robe', over: 'shawl', cloth: 'cloth_white', cloth2: rand() < 0.4 ? 'cloth_ochre' : 'cloth_white', hat: 'none', skin: 'skin_dark', pose, ...o }); };
+    const woman = { hat: 'veil', hair: 'bun', cloth2: 'cloth_ochre' }, man = { hat: 'none', hair: 'short', over: 'none' };
+    if (h.enter === 'weaver') put(1.9, 0.5, [1.9, 1.3], 'stand', woman);
+    else if (h.enter === 'brewer') put(1.5, 1.55, [2.1, 1.5], 'stand', man);
+    else if (h.enter === 'scribe') put(1.5, 1.6, [2.0, 0.7], 'sit_ground', { ...man, hat: 'turban', hatMat: 'cloth_white', beard: true });
+    else if (h.enter === 'store') put(-1.0, 1.4, [-1.6, 0.7], 'stand', man);
+    else put(-1.25, 0.95, [0, 1.15], 'sit_low', woman);
   }
   for (let k = 0; k < 4; k++) P.push(base(`lalibela-hamlet-life-${k}`, out[k], 'life'));
   return P;

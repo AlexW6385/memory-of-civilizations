@@ -2,7 +2,7 @@
 // morning and the evening, women with jars at the doors, children, a goat tied at a post, hens in the alley, firewood
 // by the hearths, sacks and baskets before the shops; the pounding of grain. One life-style plan; positions come from the
 // houses' own facts (houseFacts: where the door is, which side the front faces), never hard-coded.
-import { lots, height, inRect, STREETS } from './layout.js';
+import { lots, height, inRect, STREETS, isOpen } from './layout.js';
 import { houseFacts } from '../../styles/swahili/house.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -32,6 +32,17 @@ export function fronts() {
       L.push({ t: 'stool', at: [x, alleyZ + out * 0.3], y: yl(alleyZ), rot: 0, seed: l.seed });
       woman([x, alleyZ + out * 0.3], yl(alleyZ), [x, alleyZ + out * 5], { pose: 'sit_low' });
       fig([x + 0.7, alleyZ + out * 0.3], yl(alleyZ), [x, alleyZ + out * 0.3], { pose: 'stand', dress: 'wrap', top: 'bare', hat: 'none', over: 'none', h: 0.62, cloth: 'cloth_white' });
+    }
+    // at home in the court (house.js: the court's floor 0.05 m over the ground's highest corner, between the street wall and the front room, 0.42 m walls; the hearth and the
+    // mortar at its far side, the rubble block in the corner by the street wall): the woman of the house on her low stool pounding grain, or a man sitting on a mat, in the
+    // court's free stretch beside the door's line
+    if (isOpen(l) && l.dh < 120 && !l.simple && rand() < 0.55) {
+      const [, z0, , z1] = l.rect, zc0 = z0 + 0.42 + 1.25, cz = l.flip ? z0 + z1 - zc0 : zc0, dir = d - x0 > x1 - d ? -1 : 1, cx = d + dir * 1.7;
+      if (cx > x0 + 1.0 && cx < x1 - 2.0 && z1 - z0 >= 9.2) {
+        const cy = l.y + 0.05, to = [cx, cz + (l.flip ? -1 : 1) * 5];
+        if (rand() < 0.65) { L.push({ t: 'stool', at: [cx, cz], y: cy, rot: 0, seed: l.seed + 9 }); woman([cx, cz], cy, to, { pose: 'sit_low', carry: 'none' }); }
+        else fig([cx, cz], cy, to, { pose: 'sit', over: 'none', hat: 'cap' });
+      }
     }
     // animals and things in the alley, against the wall
     const r2 = rand();

@@ -101,11 +101,15 @@ export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m)
 export const inYard = (x, z, m = 0) => yards().some((y) => inRect(y.rect, x, z, m));
 export const onLane = (x, z, m = 0) => lanes().some((l) => Math.abs(z - l.z) < LANE.w / 2 + m && x > l.x0 - m && x < l.x1 + m) || alleys().some((a) => inRect(a, x, z, m)) || streets().some((c) => Math.abs(x - c.x) < LANE.cross / 2 + m && z > c.z0 && z < c.z1);
 
-/** The houses that can be entered: near the palace on the flat ground, wide and deep enough; their kinds by the lot's seed. */
+/** The houses that can be entered: the ones nearest the arrival in the Central Court (the town's south rows below the palace), and a second set
+ *  by the West Court and the Royal Road's end (where the other approach comes in); wide and deep enough, their kinds by the lot's seed. */
+export const ARRIVAL = [0, 22];
 export function openHouses() {
   const m = new Map(), kinds = ['home', 'home', 'weaver', 'shop', 'shop', 'store', 'home', 'weaver'];
-  const ok = lots().filter((l) => l.rect[0] > -165 && l.rect[2] < 62 && l.r < 150 && l.rect[2] - l.rect[0] >= 6.3 && l.rect[3] - l.rect[1] >= 10.5 && l.seed % 2 === 0);
-  const d = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 + 100, (l.rect[1] + l.rect[3]) / 2);
-  for (const l of ok.sort((a, b) => d(a) - d(b)).slice(0, 56)) m.set(l, kinds[Math.floor(l.seed / 8) % kinds.length]);
+  const ok = lots().filter((l) => l.r < 150 && l.rect[2] - l.rect[0] >= 6.3 && l.rect[3] - l.rect[1] >= 10.5 && l.seed % 2 === 0);
+  const dist = (c) => (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - c[0], (l.rect[1] + l.rect[3]) / 2 - c[1]);
+  const pick = (c, n, test = () => true) => { const d = dist(c); let k = 0; for (const l of ok.filter(test).sort((a, b) => d(a) - d(b))) { if (k >= n) break; if (!m.has(l)) { m.set(l, kinds[Math.floor(l.seed / 8) % kinds.length]); k++; } } };
+  pick(ARRIVAL, 40);
+  pick([-100, 0], 16, (l) => l.rect[0] > -165 && l.rect[2] < 62);
   return m;
 }

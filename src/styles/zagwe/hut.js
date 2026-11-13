@@ -71,6 +71,7 @@ export function hut(el, { bag, col }) {
     bag.add('hide_grey', lathe([[0.001, 0.075], [0.38, 0.075], [0.001, 0.075]], 12, null, hx, y, hz));
     for (let k = 0; k < 3; k++) { const a = k / 3 * Math.PI * 2 + 0.3; bag.add('rubble', lathe([[0.001, 0.0], [0.1, 0.0], [0.11, 0.2], [0.08, 0.28], [0.001, 0.28]], 8, (th) => 1 + 0.12 * Math.sin(th * 3 + k), hx + Math.cos(a) * 0.26, y, hz + Math.sin(a) * 0.26)); }
     bag.add('pottery_dark', lathe([[0.001, 0.3], [0.36, 0.3], [0.38, 0.31], [0.38, 0.34], [0.34, 0.33], [0.001, 0.32]], 16, null, hx, y, hz));
+    bag.add('flame', lathe([[0.001, 0.075], [0.14, 0.075], [0.08, 0.2], [0.001, 0.27]], 6, null, hx, y, hz));          // the embers' glow: the room's light
     col.circle(hx, hz, 0.5, y, y + 0.35); }
   // ---- the raised bed at the back: a platform of mud with hide spread on it and a rolled blanket
   { const a = W(-1.15, -2.45), b = W(1.15, -2.45);

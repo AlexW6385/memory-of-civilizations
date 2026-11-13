@@ -94,6 +94,11 @@ export function dressing() {
     const at = (u, v) => P(Math.max(0.4, Math.min(Lw - 0.4, u)), v);
     const u1 = Lw * (0.2 + rand() * 0.2), u2 = Lw * (0.6 + rand() * 0.2);
     const kind = l.kind;
+    // at home: the woman of an open house sits by her hearth at the back (styles/nagara/village.js: the hearth block at u = L − 1.3 … L − 0.4, v from the back wall 0.6 deep)
+    if (l.open && (kind === 'home' || kind === 'haveli') && Lw >= 4.4 && rand() < 0.7) {
+      const Dd = (l.front === 's' || l.front === 'n') ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], bk = Dd - 0.3, a = P(Lw - 1.9, bk - 1.0), hh = P(Lw - 0.85, bk - 0.33);
+      F(a, 0.42, [hh[0] - a[0], hh[1] - a[1]], { pose: 'squat', top: undefined, hat: 'none', dress: 'wrap', cloth: pickOf(['cloth_red', 'cloth_green', 'cloth_indigo']), cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5, skin: 'skin_medium' });
+    }
     // the hanging lamp / cloth banner over a shop; the sign hook at the eave
     if (kind === 'shop') {
       const trade = l.trade;

@@ -505,7 +505,9 @@ function aksumite(el, { bag, col, lights }) {
  */
 function tukul(el, { bag, col }) {
   const rand = rng(el.seed || 1), [x, z] = el.c, r = el.r, st = el.storeys ?? 1, H = st === 2 ? 5.4 : 2.7, y = el.y ?? 0;
-  bag.add(TU, lathe([[r + 0.1, -1.0], [r + 0.1, 0], [r, H], [0.001, H]], 20, (th) => 1 + 0.012 * Math.sin(th * 7 + el.seed), x, y, z));
+  // three fronts of the Lasta village: the drum of red stone as quarried, the same plastered over with mud (a third of the houses), and either with a little thatched porch on posts over the door
+  const sdv = el.seed || 1, wm = sdv % 3 === 0 ? 'mud_plaster' : TU, porch = sdv % 5 < 2;
+  bag.add(wm, lathe([[r + 0.1, -1.0], [r + 0.1, 0], [r, H], [0.001, H]], 20, (th) => 1 + 0.012 * Math.sin(th * 7 + el.seed), x, y, z));
   // the courses: thin proud bands of flatter stones every 0.6 m or so
   for (let yy = 0.55; yy < H - 0.3; yy += 0.55 + rand() * 0.15) { const rr = r + 0.1 - 0.1 * yy / H + 0.015; bag.add('rubble', lathe([[rr, yy], [rr, yy + 0.07], [0.001, yy + 0.07]], 20, null, x, y, z)); }
   bag.add('bark_grey', lathe([[r + 0.112, -0.2], [r + 0.112, 0.0], [r + 0.1, 0.5], [r + 0.0, 0.5], [0.001, 0.5]].slice(0, 3), 20, (th) => 1 + 0.012 * Math.sin(th * 7 + el.seed), x, y, z));
@@ -521,6 +523,13 @@ function tukul(el, { bag, col }) {
     if (yb > 0) bar('timber', -w / 2 - 0.2, w / 2 + 0.2, -0.1, 0.14, yb - 0.1, yb);
   };
   door(0, 0.95, 1.8);
+  if (wm !== TU) { bar('plaster_white', -0.8, -0.62, 0.02, 0.06, 0, 1.95); bar('plaster_white', 0.62, 0.8, 0.02, 0.06, 0, 1.95); bar('plaster_white', -0.8, 0.8, 0.02, 0.06, 1.95, 2.1); }
+  if (porch && st === 1) {
+    for (const sg of [-1, 1]) { bar('timber', sg * 1.15 - 0.05, sg * 1.15 + 0.05, 1.5, 1.6, 0, 2.45); col.circle(P(sg * 1.15, 1.55)[0], P(sg * 1.15, 1.55)[1], 0.08, y, y + 2.45); }
+    bar('timber', -1.25, 1.25, 1.5, 1.62, 2.4, 2.5);
+    bar('thatch', -1.45, 1.45, 0.0, 1.95, 2.5, 2.72);
+    bar('thatch', -1.3, 1.3, 0.2, 1.75, 2.72, 2.84);
+  }
   if (st === 2) {
     // the joists of the upper floor, their ends out through the drum
     for (let k = 0; k < 14; k++) { const b = k / 14 * Math.PI * 2 + 0.1, t = []; beamTris(t, [x + Math.cos(b) * (r - 0.3), y + 2.5, z + Math.sin(b) * (r - 0.3)], [x + Math.cos(b) * (r + 0.32), y + 2.5, z + Math.sin(b) * (r + 0.32)], 0.07, 0.14); bag.add('timber', fromTriangles(t)); }
