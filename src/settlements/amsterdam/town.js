@@ -3,11 +3,39 @@
 // beside their horses and sledges, burghers in conversation, boats at the Damrak's head.
 import { RADIUS, GROUND, WATER, WAAG, DAMRAK, VOC, lots } from './layout.js';
 import { SLEDGES, BOATS } from './plan.js';
+export const ARRIVAL = [20, -210];
 const base = (id, elements) => ({ id, style: 'dutch', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [20, -207], facing: 'n' } });
+/** Is this lot built open (a furnished ground floor you can walk into)? The Dam's south row, and one house in four near the Dam (one in nine beyond 190 m). */
+export const isOpen = (l) => (l.front === 'n' && l.rect[1] === -203) || l.seed % (Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 + 230) < 190 ? 4 : 9) === 0;
 export async function houses() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 160) plans.push(base(`amsterdam-houses-${i / 160}`, all.slice(i, i + 160).map((l) => ({ t: 'canal_house', ...l, open: (l.front === 'n' && l.rect[1] === -203) || l.seed % (Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 + 230) < 190 ? 4 : 9) === 0 }))));
+  for (let i = 0; i < all.length; i += 160) plans.push(base(`amsterdam-houses-${i / 160}`, all.slice(i, i + 160).map((l) => ({ t: 'canal_house', ...l, open: isOpen(l) }))));
+  plans.push(...houseLights());
   return plans;
+}
+
+/**
+ * The lit halls of the open houses near the arrival (the dutch style's canal_house hangs its brass chandelier in the hall but lights no candle): one light
+ * at the chandelier of each, and in every second house a burgher or his wife standing under it. The hall's geometry is the style's own (styles/dutch/house.js
+ * and interior.js: the house's dice, the annex that shortens the main block, the partition at 0.47 of its depth, the stair's well); replayed here.
+ */
+function houseLights() {
+  const faces = { n: (r, u, d) => [r[2] - u, r[1] - d], s: (r, u, d) => [r[0] + u, r[3] + d], e: (r, u, d) => [r[2] + d, r[3] - u], w: (r, u, d) => [r[0] - d, r[1] + u] };
+  const out = [], people = [], rand = rng(1671);
+  for (const l of lots()) {
+    if (!isOpen(l) || Math.hypot((l.rect[0] + l.rect[2]) / 2 - ARRIVAL[0], (l.rect[1] + l.rect[3]) / 2 - ARRIVAL[1]) > 140) continue;
+    const r = rng(l.seed || 1); r(); r(); r(); const kr = r(), kind = l.gable ?? (kr > 0.9 ? 'spout' : kr < 0.3 ? 'step' : kr < 0.65 ? 'neck' : 'bell');
+    if (kind === 'spout') continue;
+    const turned = l.front === 'n' || l.front === 's', w = turned ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1], D = turned ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0];
+    const annex = D >= 11 && rng((l.seed || 1) * 7 + 13)() < 0.55, Dm = annex ? D - 3.4 : D, dP = -Math.max(3.4, Math.min(5.8, Dm * 0.47)), cd = (dP + 2.9 - 0.32) / 2;
+    const [x, z] = faces[l.front](l.rect, w / 2, cd);
+    out.push({ t: 'lamp', at: [x, GROUND + 4.65, z], color: '#ffc27a', intensity: 4, distance: 8 });
+    if (l.seed % 2 === 0) {
+      const dx = { n: 0, s: 0, e: 1, w: -1 }[l.front], dz = { n: -1, s: 1, e: 0, w: 0 }[l.front];
+      people.push(person(rand, l.seed % 4 === 0 ? 'wife' : 'burgher', [x, z], Math.atan2(-dx, -dz), { y: GROUND + 1.03, pose: l.seed % 8 === 0 ? 'talk' : 'stand' }));
+    }
+  }
+  return [base('amsterdam-hall-lamps', out), { ...base('amsterdam-hall-people', people), style: 'life', center: ARRIVAL, near: 170 }];
 }
 
 /** The VOC's warehouses along the IJ's quay (docs §5.11). */
