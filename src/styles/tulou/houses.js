@@ -110,7 +110,33 @@ export function hakkaHouse(el, ctx) {
   const left = [() => obj('firewood', -hx + 0.8, hz + 0.45, { len: 1.2, seed: sd, rot: phi }), () => obj('rain_tub', -hx + 0.6, hz + 0.6), () => obj('basket', -hx + 0.8, hz + 0.6, { n: 3, seed: sd })];
   const mid = [() => obj('bench', -1.6, hz + 0.5, { len: 1.8, rot: phi }), () => obj('stool', -1.6, hz + 0.6, { seed: sd }), () => obj('goods_mat', -1.9, hz + 0.7, { seed: sd })];
   const right = [() => obj('drying_tray', 2.3, hz + 0.95, { seed: sd, rot: 0.3 }), () => obj('sacks', hx - 0.7, hz + 0.5, { n: 3, seed: sd }), () => obj('basket', hx - 0.9, hz + 0.6, { n: 2, seed: sd + 3 })];
-  left[sd % 3](); mid[(sd >> 1) % 3](); right[(sd >> 2) % 3]();
+  // four kinds of front along the hamlet's lanes, by seed: the plain house; the shop-house (indigo awning on the porch beam, a counter with its goods,
+  // a hanging sign); the whitewashed house of a better-off family (lime-washed front, a painted frieze under the eave, a granite lintel); the house with a
+  // balcony of lattice rails over the porch
+  const kind = sd % 4;
+  if (kind !== 1) { left[sd % 3](); mid[(sd >> 1) % 3](); } else {
+    B('cloth_indigo', -hx + 0.25, 2.5, hz + 0.25, hx - 0.25, 2.56, hz + 1.1); B('cloth_indigo', -hx + 0.25, 2.2, hz + 1.1, hx - 0.25, 2.56, hz + 1.14);
+    for (const x of [-hx + 0.28, hx - 0.28]) B('timber', x - 0.03, 2.2, hz + 1.08, x + 0.03, 2.56, hz + 1.16);
+    S('timber_red', -3.45, 0, hz + 0.5, -1.15, 1.0, hz + 0.95); B('wood_dark', -3.5, 1.0, hz + 0.45, -1.1, 1.05, hz + 1.0);
+    for (let q = 0; q < 6; q++) { const x = -3.2 + q * 0.38; bag.add(q % 2 ? 'terracotta' : 'pottery_dark', lathe([[0.001, 0], [0.1, 0.01], [0.15, 0.12], [0.12, 0.24], [0.07, 0.3], [0.001, 0.3]], 9, null, W(x, hz + 0.72)[0], 1.05, W(x, hz + 0.72)[1])); }
+    for (const x of [-2.9, -1.7]) bag.add('wicker', lathe([[0.001, 0], [0.2, 0.01], [0.26, 0.2], [0.001, 0.22]], 9, null, W(x, hz + 0.72)[0], 0.0, W(x, hz + 0.72)[1] + 0.0));
+    B('wood_dark', hx - 0.3, 1.9, hz + 1.17, hx - 0.15, 4.2, hz + 1.2); B('lacquer_black', hx - 1.0, 3.0, hz + 1.21, hx - 0.35, 4.15, hz + 1.25); B('gilt_bronze', hx - 0.85, 3.2, hz + 1.25, hx - 0.75, 4.0, hz + 1.265);
+  }
+  right[(sd >> 2) % 3]();
+  if (kind === 2) {
+    const P = (x0, x1, y0, y1) => B('lime_plaster_rough', x0, y0, hz + 0.03, x1, y1, hz + 0.045);
+    P(-hx + 0.02, -2.8, 0.7, topF); P(2.8, hx - 0.02, 0.7, topF); P(-1.9, -dw - 0.1, 0.7, topF); P(dw + 0.1, 1.9, 0.7, topF);
+    for (const [a, b] of [[-hx + 0.02, -2.8], [2.8, hx - 0.02], [-1.9, -dw - 0.1], [dw + 0.1, 1.9]]) { B('paint_blue', a, H - 0.62, hz + 0.045, b, H - 0.4, hz + 0.055); B('paint_white', a, H - 0.5, hz + 0.055, b, H - 0.46, hz + 0.062); }
+    B('granite_block', -dw - 0.3, 2.5, hz - 0.1, dw + 0.3, 2.72, hz + 0.14);
+  }
+  if (kind === 3) {
+    const y0 = 3.1, d = 0.95;
+    B('timber', -hx + 0.35, y0, hz, hx - 0.35, y0 + 0.1, hz + d); for (const x of [-hx + 0.6, -1.6, 1.6, hx - 0.6]) B('timber', x - 0.05, y0 - 0.3, hz, x + 0.05, y0, hz + 0.5);
+    B('timber_red', -hx + 0.3, y0 + 1.0, hz + d - 0.06, hx - 0.3, y0 + 1.08, hz + d); B('timber_red', -hx + 0.3, y0 + 1.0, hz, -hx + 0.36, y0 + 1.08, hz + d); B('timber_red', hx - 0.36, y0 + 1.0, hz, hx - 0.3, y0 + 1.08, hz + d);
+    B('lattice', -hx + 0.36, y0 + 0.1, hz + d - 0.045, hx - 0.36, y0 + 1.0, hz + d - 0.02);
+    for (const x of [-hx + 0.3, -1.6, 1.6, hx - 0.36]) B('timber_red', x, y0 + 0.1, hz + d - 0.06, x + 0.06, y0 + 1.0, hz + d);
+  }
+  void left; void mid;
   if (sd % 2) obj('drying_tray', 1.5, hz + 1.9, { seed: sd + 7, rot: 0.2 });
   LF.laundry_pole({ t: 'laundry_pole', at: W(0.0, hz + 0.02), y: 4.3, rot: phi, len: 1.5, seed: sd * 3 }, ctx);
   if (sd % 3 !== 1) LF.chickens({ t: 'chickens', n: 3 + (sd % 3), kind: 'hen', at: W(1.0 - (sd % 3), hz + 2.3), y: 0, seed: sd }, ctx);

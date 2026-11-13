@@ -90,6 +90,9 @@ export async function town() {
     if ((sd >> 1) % 3 === 0 && sd % 2) (k % 2 ? woman : man)(W(-1.6, hz + 0.5), 0, out, { pose: 'sit', hat: k % 2 ? 'none' : 'cap', carry: 'none' });
     else if (k % 3 === 0) woman(W(1.8, hz + 1.7), 0, out + 0.6, { carry: 'basket' });
     if (k % 4 === 1) L.push({ t: 'figure', at: W(0.9, hz + 2.4), y: 0, rot: out + 0.3, seed: Math.floor(rand() * 1e9), dress: 'trousers', cloth: 'cloth_red', cloth2: 'cloth_blue', over: 'none', skin: 'skin_medium', hat: 'none', hair: 'short', h: 0.6 + rand() * 0.1, feet: 'shod' });
+    // inside the hall: a woman at the tea table, an elder on the bench under the window
+    if (k % 2 === 0) woman(W(-1.5, 2.7), 0, fo(W(-1.5, 2.7), W(0, 1.4)), { carry: 'none' });
+    if (k % 3 === 1) man(W(3.18, 2.4), 0, fo(W(3.18, 2.4), W(-3.18, 2.4)), { pose: 'sit', hat: 'cap', cloth: 'cloth_black', carry: 'none' });
     if (k % 5 === 2) man(W(-3.18, 2.4), 0, h.yaw + Math.PI / 2 * (Math.sin(h.yaw) > 0 ? 1 : -1), { pose: 'sit', hat: 'cap', cloth: 'cloth_black', carry: 'none' });
     if (k % 3 === 1) F.push({ t: 'animal', kind: k % 2 ? 'dog' : 'cat', at: W(-hx(h) + 0.7, hz + 0.9), y: 0, rot: rand() * 6, seed: k + 4 });
   });
