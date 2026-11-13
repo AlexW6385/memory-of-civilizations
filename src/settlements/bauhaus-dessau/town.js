@@ -3,6 +3,7 @@
 // the looms, the benches and the stairs, townspeople on the pavements, queues at the shops, children in the lane. Several plans (the four quarters, the grove, the estate)
 // so that each builds in turn and the viewer culls them by distance.
 import { streetLife, WHEELED } from './street-life.js';
+import { ARRIVALS } from '../../planet/arrivals.js';
 import { RADIUS, LV, PL, B, ROADS, ROAD_K, ROAD_M, ROAD_KV, ROAD_E, FOOT, MASTERS, TORTEN, TORTEN_FRONT, KONSUM, GARDEN, GARDEN_SHED, lots, inRoad, inLot, inMasters, inSchool, inTorten, inRect } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -171,6 +172,26 @@ function life() {
     P.push({ t: 'chickens', at: [r[0] + 20, s ? r[1] - 5 : r[3] + 5], n: 5, seed: 11 + i, kind: 'hen' }, { t: 'chickens', at: [r[0] + 48, s ? r[1] - 5 : r[3] + 5], n: 4, seed: 21 + i, kind: 'hen' });
   }
   for (let k = 0; k < 6; k++) { const x = KONSUM[0] + 3 + rand() * 9, z = KONSUM[3] + 1.8; (k % 2 ? woman : fig)([x, z], 0, { hat: 'cap', carry: k % 2 ? 'basket' : undefined, pose: 'stand' }); }
+  // inside the ground floors (the frame of the tenement: u along the front, v inward; the shops' counter at v = pv − 1.7…−1.0, the kitchen table at v = pv + 1.0…1.8):
+  // the shopkeeper behind the counter with a customer before it, the housewife at her kitchen table
+  {
+    const FLR = 0.12, r2 = rng(5191), A = ARRIVALS['bauhaus-dessau'];
+    for (const l of lots()) {
+      const [x0, z0, x1, z1] = l.rect, f = l.front, along = f === 'n' || f === 's', D = along ? z1 - z0 : x1 - x0, pv = Math.min(D - 5.5, l.shop ? 7.2 : 6.2), kv = pv + 0.2;
+      const W = along ? x1 - x0 : z1 - z0;
+      const P2 = (u, v) => (f === 'n' ? [x0 + u, z0 + v] : f === 's' ? [x0 + u, z1 - v] : f === 'w' ? [x0 + v, z0 + u] : [x1 - v, z0 + u]);
+      const put = (u, v, tu, tv, o, w = false) => {
+        const a = P2(u, v), b = P2(tu, tv);
+        if (Math.hypot(a[0] - A[0], a[1] - A[2]) < 4) return;
+        (w ? woman : fig)(a, Math.atan2(-(b[0] - a[0]), -(b[1] - a[1])), { y: FLR, ...o });
+      };
+      if (l.shop && r2() < 0.9) {
+        put(Math.min(W - 4, 4.2), pv - 0.78, Math.min(W - 4, 4.2), 0, { pose: 'stand', cloth: 'cloth_white', cloth2: 'cloth_grey', over: 'apron', hat: 'none' });
+        if (r2() < 0.6) put(2.8, pv - 3.2, 2.8, pv - 1.7, { pose: 'stand', carry: 'basket', hair: 'bun', hat: 'cap' }, true);
+      }
+      if (r2() < (l.shop ? 0.35 : 0.5)) put(2.5, kv + 1.2, 3.8, kv + 1.2, { pose: 'sit', hair: 'bun', cloth: pick(r2, ['cloth_blue', 'cloth_grey', 'cloth_ochre']), over: 'apron' }, true);
+    }
+  }
   streetLife({ fig, woman, P, rand });
   return P;
 }
