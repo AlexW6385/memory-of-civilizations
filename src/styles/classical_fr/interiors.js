@@ -152,6 +152,105 @@ export function furnish(use, c) {
       for (let k = 0; k < 3; k++) bu('cloth_white', L - 2.8, back - 2.0 + k * 0.3, L - 2.4, back - 1.8 + k * 0.3, 0, 0.18);
       common(); break;
     }
+    // ── the service yards of the gardens (docs/settlements/versailles.md §5d): the gardeners', fountain-keepers', sculptors', joiners' and guards' rooms ──
+    case 'gardener': {
+      // the head gardener's lodge: table and stools, the hearth, a bed; his tools on the wall, onions and herbs hung from the beams, bulbs in sacks, a basket of apples
+      table(L * 0.4, D * 0.42, 1.5, 0.8, 0.78); for (const [a, c2] of [[-0.95, 0], [0.95, 0], [0, 0.65]]) stool(L * 0.4 + a, D * 0.42 + c2);
+      lu('glaze_white', [[0.001, 0], [0.1, 0.01], [0.12, 0.1], [0.07, 0.16], [0.001, 0.16]], L * 0.4 - 0.2, D * 0.42, 0.78, 8); lu('pottery_dark', [[0.001, 0], [0.09, 0], [0.1, 0.12], [0.06, 0.2], [0.001, 0.2]], L * 0.4 + 0.3, D * 0.42, 0.78, 8);
+      hearth(L - 1.7); bed(0.9, back - 2.1);
+      for (let k = 0; k < 7; k++) { const u = 2.2 + k * 0.42; if (u > L - 3.0) break; ru('wood_dark', [u, 0.1, back - 0.1], [u, 1.95, back - 0.1], 0.02, 4); bu('iron', u - (k % 3 === 0 ? 0.2 : 0.12), back - 0.15, u + (k % 3 === 0 ? 0.2 : 0.12), back - 0.07, 1.9, 1.96); }
+      ru('wood_dark', [2.0, 1.1, back - 0.06], [L - 3.0, 1.1, back - 0.06], 0.015, 4);
+      for (let k = 0; k < 6; k++) { const u = 1.0 + k * 0.9; if (u > L - 2.6) break; ru('rope_fibre', [u, CH, 3.0 + (k % 2) * 0.8], [u, CH - 0.5, 3.0 + (k % 2) * 0.8], 0.01, 3); lu(k % 2 ? 'cloth_ochre' : 'lotus_leaf', [[0.001, 0], [0.09, 0.05], [0.1, 0.2], [0.001, 0.32]], u, 3.0 + (k % 2) * 0.8, CH - 0.82, 7); }
+      for (let k = 0; k < 3; k++) sack(0.5 + k * 0.45, 4.1 + (k % 2) * 0.35);
+      lu('wicker', [[0.001, 0], [0.22, 0.01], [0.3, 0.2], [0.28, 0.24], [0.001, 0.24]], 1.9, 4.2, 0, 10); lu('paint_ochre', [[0.001, 0.12], [0.2, 0.18], [0.001, 0.3]], 1.9, 4.2, 0.1, 8);
+      lu('pottery_dark', [[0.12, 0], [0.18, 0.2], [0.16, 0.3], [0.001, 0.3]], L - 0.6, 3.2, 0, 8);       // a watering pot
+      common(); break;
+    }
+    case 'tools': {
+      // the tool house: barrows, ladders, stacked flower pots, racks of spades and shears, seed sacks, stakes and a bench
+      counter(0.5, L * 0.5, 2.0, 0.9);
+      for (let k = 0; k < 5; k++) lu('terracotta', [[0.001, 0], [0.12, 0], [0.18, 0.2], [0.001, 0.2]], 0.9 + k * 0.55, 2.3, 0.9, 8);
+      for (let r = 0; r < 3; r++) for (let k = 0; k < 4 - r; k++) lu('terracotta', [[0.001, 0], [0.15, 0], [0.22, 0.26], [0.001, 0.26]], 0.7 + k * 0.5 + r * 0.25, back - 0.4, r * 0.26, 8);
+      for (let k = 0; k < 2; k++) { const u = L * 0.35 + k * 1.9, v = 4.2; bu('wood_dark', u - 0.4, v - 0.55, u + 0.4, v + 0.2, 0.35, 0.6, true); lu('timber', [[0.3, 0], [0.3, 0.06], [0.001, 0.06]], u, v - 0.7, 0.05, 12); ru('wood_dark', [u - 0.25, 0.6, v + 0.2], [u - 0.2, 0.9, v + 1.1], 0.02, 4); ru('wood_dark', [u + 0.25, 0.6, v + 0.2], [u + 0.2, 0.9, v + 1.1], 0.02, 4); }
+      for (let k = 0; k < 8; k++) { const u = 1.2 + k * 0.4; if (u > L * 0.75) break; ru('wood_dark', [u, 0.1, back - 0.1], [u, 1.9, back - 0.1], 0.02, 4); bu('iron', u - 0.1, back - 0.14, u + 0.1, back - 0.07, 1.8, 1.95); }
+      for (const sg of [0, 1]) { ru('wood_dark', [L - 0.9 - sg * 0.4, 0, back - 0.4], [L - 1.3 - sg * 0.4, 2.3, back - 0.9], 0.03, 4); }
+      for (let k = 0; k < 6; k++) bu('wood_dark', L - 1.2 - 0.04 * k, back - 0.9 + k * 0.1, L - 0.85, back - 0.86 + k * 0.1, 0.3 + k * 0.35, 0.34 + k * 0.35);
+      for (let k = 0; k < 4; k++) sack(1.0 + k * 0.5, back - 1.2); for (let k = 0; k < 10; k++) ru('timber', [0.5 + k * 0.06, 0, back - 2.2], [0.5 + k * 0.06, 1.1, back - 2.2], 0.02, 4);
+      common(); break;
+    }
+    case 'sculptor': {
+      // the sculptors' atelier: blocks of marble, a figure half out of its block, plaster casts on stands, the bench of chisels and mallets, a model in clay
+      for (const [u, v, w, d, h] of [[1.6, back - 1.3, 1.5, 1.1, 1.4], [L - 3.6, back - 1.2, 1.2, 1.0, 1.0], [3.4, back - 1.1, 1.0, 0.9, 0.7]]) { bu('marble', u - w / 2, v - d / 2, u + w / 2, v + d / 2, 0, h, true); bu('marble_smooth', u - w / 2 + 0.05, v - d / 2 + 0.05, u + w / 2 - 0.05, v + d / 2 - 0.05, h, h + 0.02); }
+      bu('timber', L * 0.5 - 0.7, 3.6, L * 0.5 + 0.7, 4.8, 0, 0.45, true);                                    // the stand, and on it the figure being carved
+      lu('marble_smooth', [[0.001, 0], [0.3, 0.02], [0.3, 0.6], [0.34, 0.9], [0.22, 1.1], [0.13, 1.2], [0.11, 1.4], [0.13, 1.55], [0.1, 1.68], [0.001, 1.72]], L * 0.5, 4.2, 0.45, 12);
+      lu('marble', [[0.001, 0], [0.38, 0], [0.38, 0.55], [0.001, 0.55]], L * 0.5, 4.2, 0.45, 8);
+      for (let k = 0; k < 4; k++) { const u = 0.8 + k * 0.7; bu('wood_dark', u - 0.2, 2.5, u + 0.2, 2.9, 0, 1.2 + (k % 2) * 0.1, true); lu('plaster_white', [[0.001, 0], [0.12, 0.02], [0.16, 0.2], [0.12, 0.32], [0.001, 0.34]], u, 2.7, 1.2 + (k % 2) * 0.1, 8); }
+      counter(L * 0.5 + 1.2, L - 2.4, 3.3, 0.9); for (let k = 0; k < 8; k++) { bu('iron', L * 0.5 + 1.4 + k * 0.28, 3.45, L * 0.5 + 1.45 + k * 0.28, 3.75, 0.95, 0.96 + 0.01); bu('wood_dark', L * 0.5 + 1.4 + k * 0.28, 3.75, L * 0.5 + 1.47 + k * 0.28, 3.9, 0.95, 0.98); }
+      wallShelves(0.5, L * 0.45, 2, { step: 0.4, put: (u, v, ya) => lu('plaster_white', [[0.001, 0], [0.1, 0.02], [0.12, 0.14], [0.08, 0.24], [0.001, 0.26]], u, v, ya, 8) });
+      bu('wood_dark', L - 1.6, back - 2.2, L - 0.5, back - 1.4, 0, 0.8, true); lu('pottery_dark', [[0.001, 0], [0.22, 0], [0.26, 0.18], [0.001, 0.26]], L - 1.05, back - 1.8, 0.8, 9);   // the clay
+      bu('cloth_white', 1.0, back - 0.04, 2.6, back, 1.1, 2.0); bu('wood_dark', 0.95, back - 0.06, 2.65, back - 0.04, 1.05, 2.05);   // a drawing pinned on a board
+      bu('plaster_white', L * 0.5 - 1.4, 3.4, L * 0.5 + 1.4, 5.0, 0.0, 0.02);                              // the dust on the floor
+      common(); break;
+    }
+    case 'guard': {
+      // the Cent-Suisses' guardroom: benches and a table with the dice, the halberds in their rack, a drum, coats and helmets on pegs, bunks, a stove
+      table(L * 0.45, D * 0.4, 1.8, 0.8, 0.78); for (const s of [-1, 1]) bu('timber', L * 0.45 - 0.9, D * 0.4 + s * 0.65 - 0.13, L * 0.45 + 0.9, D * 0.4 + s * 0.65 + 0.13, 0.42, 0.46, true);
+      for (let k = 0; k < 3; k++) bu('paint_white', L * 0.45 - 0.5 + k * 0.4, D * 0.4 - 0.1, L * 0.45 - 0.42 + k * 0.4, D * 0.4 - 0.02, 0.78, 0.84); lu('pottery_dark', [[0.001, 0], [0.07, 0], [0.08, 0.12], [0.001, 0.14]], L * 0.45 + 0.6, D * 0.4 + 0.1, 0.78, 8);
+      bu('wood_dark', 0.5, back - 0.45, 3.4, back, 0, 0.1); for (let k = 0; k < 6; k++) { const u = 0.8 + k * 0.45; ru('wood_dark', [u, 0.1, back - 0.2], [u, 2.3, back - 0.2], 0.018, 4); bu('iron', u - 0.1, back - 0.3, u + 0.1, back - 0.12, 2.1, 2.3); bu('iron', u - 0.02, back - 0.3, u + 0.02, back - 0.12, 2.3, 2.45); }
+      lu('wood_painted', [[0.001, 0], [0.3, 0.02], [0.32, 0.3], [0.001, 0.32]], 4.4, back - 0.8, 0, 12); lu('cloth_white', [[0.001, 0.32], [0.3, 0.32], [0.001, 0.33]], 4.4, back - 0.8, 0, 12);   // the drum
+      for (let k = 0; k < 4; k++) { const u = 5.4 + k * 0.7; if (u > L - 3.2) break; bu(['cloth_red', 'cloth_blue', 'cloth_white', 'cloth_red'][k], u, back - 0.08, u + 0.5, back - 0.02, 0.9, 1.9); lu('iron', [[0.001, 0], [0.12, 0], [0.13, 0.08], [0.001, 0.16]], u + 0.25, back - 0.2, 1.9, 8); }
+      bed(L - 1.1, 1.6); bu('wood_dark', L - 1.9, 1.6, L - 0.3, 3.7, 1.3, 1.35);                                     // a bunk over a bed
+      hearth(L * 0.45 + 3.0, 1.4);
+      common(); break;
+    }
+    case 'fountain': {
+      // the fontainiers' room: the plan of the waterworks on the table, lead pipes in racks, bronze jets and cocks, the lead-melting furnace, coils of leather hose
+      table(L * 0.4, D * 0.4, 2.2, 1.0, 0.82); bu('cloth_white', L * 0.4 - 1.05, D * 0.4 - 0.45, L * 0.4 + 1.05, D * 0.4 + 0.45, 0.82, 0.835);
+      for (const [a, b2] of [[-0.8, -0.3], [-0.2, 0.2], [0.4, -0.1], [0.8, 0.3]]) bu('prussian_blue', L * 0.4 + a, D * 0.4 + b2, L * 0.4 + a + 0.5, D * 0.4 + b2 + 0.04, 0.835, 0.84);
+      for (let k = 0; k < 4; k++) ru('lead', [0.6, 0.15 + k * 0.2, back - 0.3 - (k % 2) * 0.2], [L * 0.5, 0.15 + k * 0.2, back - 0.3 - (k % 2) * 0.2], 0.09, 8);
+      for (let k = 0; k < 5; k++) { const u = 1.0 + k * 0.5; lu('bronze', [[0.001, 0], [0.05, 0], [0.04, 0.12], [0.07, 0.2], [0.03, 0.34], [0.001, 0.36]], u, back - 0.3, 1.0, 8); }
+      bu('wood_dark', 0.5, back - 0.5, L * 0.5 + 0.5, back, 0.0, 1.0, true);
+      bu('brick', L - 2.6, back - 1.6, L - 0.6, back - 0.4, 0, 0.9, true); lu('iron', [[0.5, 0], [0.55, 0.12], [0.001, 0.12]], L - 1.6, back - 1.0, 0.9, 10); bu('flame', L - 1.9, back - 1.3, L - 1.3, back - 0.7, 0.9, 1.0);   // the lead pot
+      for (let k = 0; k < 3; k++) lu('hide_brown', [[0.001, 0], [0.3, 0], [0.32, 0.12], [0.001, 0.14]], L - 1.0 - k * 0.1, 4.2 + k * 0.1, k * 0.14, 12);        // coils of hose
+      barrel(L * 0.6, back - 0.5); barrel(L * 0.6 + 0.8, back - 0.5);
+      for (let k = 0; k < 3; k++) lu('bronze', [[0.001, 0], [0.5, 0.05], [0.5, 0.14], [0.001, 0.14]], 1.2 + k * 0.7, 4.3, 0, 12);         // basins' covers
+      common(); break;
+    }
+    case 'orangery': {
+      // the tub store: orange trees in their green boxes wintering, a stove, watering cans, pruning tools, straw mats and soil sacks
+      for (let k = 0; k < 6; k++) { const u = 1.2 + (k % 3) * 1.9, v = 3.4 + Math.floor(k / 3) * 2.2; if (u > L - 3.2) continue; bu('shutter_green', u - 0.4, v - 0.4, u + 0.4, v + 0.4, 0, 0.7, true); bu('paint_white', u - 0.42, v - 0.42, u + 0.42, v - 0.38, 0.6, 0.7); ru('bark_dark', [u, 0.7, v], [u, 1.5, v], 0.05, 6); lu('lotus_leaf', [[0.001, 0], [0.45, 0.2], [0.55, 0.55], [0.4, 0.95], [0.001, 1.05]], u, v, 1.3, 9); for (const [a, c2] of [[0.25, 0.1], [-0.2, 0.3], [0.1, -0.35]]) lu('paint_ochre', [[0.001, 0], [0.08, 0.05], [0.001, 0.14]], u + a, v + c2, 1.7, 6); }
+      counter(0.5, L * 0.5, 2.0, 0.9); for (let k = 0; k < 4; k++) lu('pottery_dark', [[0.12, 0], [0.18, 0.2], [0.16, 0.3], [0.001, 0.3]], 0.9 + k * 0.5, 2.3, 0.9, 8);
+      bu('iron', L - 1.9, back - 1.5, L - 0.6, back - 0.4, 0, 1.2, true); ru('iron', [L - 1.2, 1.2, back - 0.9], [L - 1.2, CH, back - 0.9], 0.07, 8); bu('flame', L - 1.4, back - 1.5, L - 1.0, back - 1.46, 0.3, 0.5);   // the stove and its pipe
+      for (let k = 0; k < 4; k++) bu('reed_mat', 0.5, back - 1.4 + k * 0.0, 2.3, back - 0.2, k * 0.08, k * 0.08 + 0.07);
+      for (let k = 0; k < 3; k++) sack(3.0 + k * 0.5, back - 0.6, 'sacking');
+      ru('wood_dark', [L * 0.5, 1.0, back - 0.06], [L - 2.2, 1.0, back - 0.06], 0.015, 4); for (let k = 0; k < 5; k++) { bu('iron', L * 0.5 + 0.2 + k * 0.3, back - 0.12, L * 0.5 + 0.3 + k * 0.3, back - 0.06, 0.55, 1.0); }
+      common(); break;
+    }
+    case 'bearers': {
+      // the chair-bearers' room: the sedan chairs in blue, their poles and straps on the wall, the bearers' blue coats, a bench and a small stove
+      for (const [u, v] of [[1.7, 3.6], [L - 1.7, 3.6]]) {
+        bu('paint_blue', u - 0.45, v - 0.45, u + 0.45, v + 0.45, 0.45, 1.5, true); bu('cloth_white', u - 0.3, v - 0.4, u + 0.3, v - 0.44 + 0.01, 0.7, 1.35); bu('gilt_bronze', u - 0.47, v - 0.47, u + 0.47, v - 0.45, 1.46, 1.52);
+        bu('paint_blue', u - 0.5, v - 0.5, u + 0.5, v + 0.5, 1.5, 1.6); bu('opening', u - 0.3, v - 0.46, u + 0.3, v - 0.44, 0.75, 1.35); bu('cloth_red', u - 0.4, v - 0.4, u + 0.4, v + 0.4, 0.4, 0.46);
+        for (const sg of [-1, 1]) ru('wood_dark', [u + sg * 0.55, 0.75, v - 1.1], [u + sg * 0.55, 0.75, v + 1.1], 0.03, 5);
+      }
+      for (let k = 0; k < 4; k++) { const u = L * 0.5 - 1.5 + k * 1.0; ru('wood_dark', [u, 0.1, back - 0.1], [u, 1.8, back - 0.1], 0.015, 4); bu(k % 2 ? 'cloth_blue' : 'cloth_indigo', u - 0.28, back - 0.1, u + 0.28, back - 0.04, 0.8, 1.7); }
+      bu('timber', 0.5, back - 0.5, L - 0.5, back, 0.42, 0.46, true); bu('wood_dark', 0.5, back - 0.5, 0.6, back, 0, 0.42); bu('wood_dark', L - 0.6, back - 0.5, L - 0.5, back, 0, 0.42);
+      for (let k = 0; k < 2; k++) lu('glass_lamp', [[0.001, 0], [0.09, 0.05], [0.1, 0.2], [0.001, 0.26]], 0.9 + k * (L - 1.8), 6.4, 1.0, 8);
+      hearth(L * 0.5, 1.4);
+      common(); break;
+    }
+    case 'joiner': {
+      // the joiner's shop: a bench with its vice, planks stacked to dry, garden trellis and tubs in the making, a foot lathe, saws and planes on the wall
+      counter(0.5, L * 0.55, 2.0, 0.9); bu('iron', 1.2, 2.1, 1.5, 2.4, 0.9, 1.0); for (let k = 0; k < 4; k++) bu('wood_ochre', 2.2 + k * 0.4, 2.2, 2.5 + k * 0.4, 2.5, 0.9, 0.97 + k * 0.02);
+      for (let k = 0; k < 7; k++) bu(k % 2 ? 'wood_ochre' : 'timber', 0.5, back - 1.0 + (k % 2) * 0.0, L * 0.4, back - 0.1, k * 0.09, k * 0.09 + 0.08);
+      for (let k = 0; k < 3; k++) { const u = L * 0.55 + k * 1.1; ru('timber', [u, 0, 4.4], [u + 0.4, 2.0, 4.0], 0.03, 4); }
+      for (let k = 0; k < 3; k++) bu('lattice', L * 0.55, back - 0.5 - k * 0.12, L * 0.55 + 2.4, back - 0.46 - k * 0.12, 0.0, 1.8 - 0.1 * k);
+      bu('wood_dark', L - 2.6, 3.3, L - 1.0, 3.6, 0.65, 0.7, true); for (const sx of [0, 1]) bu('wood_dark', L - 2.6 + sx * 1.5, 3.3, L - 2.5 + sx * 1.5, 3.6, 0, 0.65); lu('timber', [[0.001, 0], [0.4, 0], [0.4, 0.06], [0.001, 0.06]], L - 1.0, 3.5, 0.3, 12);
+      ru('wood_dark', [0.9, 1.1, back - 0.06], [L * 0.45, 1.1, back - 0.06], 0.015, 4); for (let k = 0; k < 7; k++) bu('iron', 1.0 + k * 0.4, back - 0.12, 1.4 + k * 0.4, back - 0.06, 1.15, 1.9 - (k % 2) * 0.3);
+      barrel(L - 1.2, 5.8, 0, 0.3, 0.8); barrel(L - 0.6, 5.2, 0, 0.3, 0.8);
+      bu('wood_ochre', L * 0.3, 3.4, L * 0.3 + 2.0, 4.2, 0, 0.02);                                              // shavings
+      common(); break;
+    }
     case 'hotel': {
       // the vestibule of a hotel particulier: marble floor, a long table with chairs, the hearth with its mirror, hung pictures
       table(L / 2, D * 0.45, 3.0, 1.0, 0.85, 'lacquer_chestnut'); bu('cloth_red', L / 2 - 1.5, D * 0.45 - 0.5, L / 2 + 1.5, D * 0.45 + 0.5, 0.85, 0.87);
