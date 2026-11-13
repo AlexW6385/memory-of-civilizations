@@ -1,18 +1,23 @@
-// The tour: one click and the visitor is carried from settlement to settlement, about a minute in each:
-// the arrival view held for a few seconds, then the free camera lifts off from the walker's own eye (from
-// rest, first straight up) and flies a smooth low route across the whole town, past the landmark, so the
-// city is seen from just above its roofs. Any input ends it.
+// The tour: one click and the visitor is carried from settlement to settlement, about a minute in each, at a
+// good hour of its day: the arrival view held for a few seconds under a caption (name, time, one sentence),
+// a short walk forward at eye height among the people, then the free camera lifts off from the walker's own
+// eye (from rest, first straight up) and flies a smooth low route across the whole town, past the landmark.
+// The mouse looks about (the view comes back by itself), Space or a tap pauses, R goes on to the next, and
+// a walking key, the stick or Esc hands the place over to the visitor where the camera is.
 import { footing, EYE } from '../core/walk.js';
 import { ARRIVALS } from '../planet/arrivals.js';
 import { BUILT } from '../planet/relief.js';
 import { nearest, take, visit } from './order.js';
+import { CARDS } from '../planet/cards.js';
+import { t, tr, era, getLang } from './i18n.js';
 
 const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const yawTo = (dx, dz) => Math.atan2(-dx, -dz);       // the camera looks along (-sin yaw, -cos yaw)
 const ease = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
-const HOLD = 3, RISE = 8, FLY = 49;                   // seconds: the arrival view, the climb, the flyover (60 s in all)
-const INPUTS = ['keydown', 'pointerdown', 'mousedown', 'mousemove', 'wheel', 'touchstart', 'touchmove'];
+const HOLD = 4, WALK = 13, RISE = 8, FLY = 40;        // seconds: the arrival view, the walk, the climb, the flyover (65 s in all)
+const INPUTS = ['keydown', 'pointerdown', 'mousemove'];
+const TAKE = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
 const CLEAR = 8;                                      // m the camera keeps above the ground and buildings
 
 export class Tour {
@@ -26,19 +31,67 @@ export class Tour {
     this.active = false;
     this.leg = null;
     this.runId = 0;
-    // any input ends the tour (the first half second is ignored, and the repeat of the start key)
+    this.paused = false; this.oy = 0; this.op = 0; this.lookedAt = -1e9;
+    // input during the tour (the first half second is ignored, and the repeat of the start key)
     this._stop = (e) => {
       if (!this.active || performance.now() - this.t0 < 500) return;
-      if (e.type === 'keydown' && e.repeat && e.code === this.startKey) return;
-      // R skips to the next settlement (main.js) and the tour goes on there
-      if (e.type === 'keydown' && (e.code === 'KeyR' || e.code === 'KeyM' || (e.code === 'Escape' && !document.getElementById('map')?.hidden)) && !e.ctrlKey && !e.metaKey && !e.altKey) return;
-      if (e.type === 'mousemove' && !e.buttons) return;
-      // the page's own controls (sound, language, the corner map and its zoom, the panels, the clock) do
-      // not end the tour: only input on the world itself (the view, the walking stick) or a key does
-      if (e.type !== 'keydown' && e.target instanceof Element && !(e.target.id === 'view' || e.target.id === 'stick' || e.target === document.body || e.target === document.documentElement)) return;
+      if (e.type === 'mousemove') {
+        // the mouse looks about (dragging, or the pointer held by the page); the view eases back afterwards
+        if (!e.buttons && !document.pointerLockElement) return;
+        this.oy = clamp(this.oy - (e.movementX || 0) * 0.0025, -1.4, 1.4);
+        this.op = clamp(this.op - (e.movementY || 0) * 0.0025, -0.7, 0.7);
+        this.lookedAt = performance.now();
+        return;
+      }
+      // the page's own controls (sound, language, the corner map and its zoom, the panels, the clock) are theirs
+      const onWorld = !(e.target instanceof Element) || e.target.id === 'view' || e.target.id === 'stick' || e.target === document.body || e.target === document.documentElement;
+      if (e.type === 'pointerdown') {
+        if (!onWorld) return;
+        if (e.target.id === 'stick') { this.stop(); return; }            // the walking stick: the visitor's from here
+        e.stopImmediatePropagation();
+        if (e.pointerType === 'touch') this.pause();                     // a tap pauses and goes on
+        return;
+      }
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.repeat && e.code === this.startKey) return;
+      // R skips to the next settlement and M opens the map (main.js); T is the tour's own key
+      if (e.code === 'KeyR' || e.code === 'KeyM' || e.code === 'KeyT' || (e.code === 'Escape' && !document.getElementById('map')?.hidden)) return;
+      if (e.target instanceof Element && e.target.closest('input, select, button')) return;
+      if (TAKE.includes(e.code)) { this.stop(); return; }                // a walking key: it already walks
       e.stopImmediatePropagation(); e.preventDefault?.();
-      this.stop();
+      if (e.code === 'Space') { if (!e.repeat) this.pause(); return; }
+      if (e.code === 'Escape') this.stop();
     };
+  }
+
+  pause() { this.paused = !this.paused; this.caption(this.paused ? this.last : null, true); }
+
+  /** The caption under the arrival view: the name, the time shown and the first sentence of the settlement's card. */
+  caption(S, keys = false) {
+    let el = this.cap;
+    if (!el) { el = this.cap = document.createElement('div'); el.id = 'tour-cap'; el.className = 'tour-cap'; el.setAttribute('role', 'status'); el.hidden = true; document.body.appendChild(el); }
+    clearTimeout(this.capT);
+    if (!S) { el.classList.remove('on'); this.capT = setTimeout(() => { el.hidden = true; }, 700); return; }
+    const para = (CARDS[S.site.id]?.[getLang()] || CARDS[S.site.id]?.en || [''])[0];
+    const first = (/^.*?(?:[.!?](?=\s|$)|[。！？])/.exec(para) || [para])[0];
+    el.textContent = '';
+    const h = document.createElement('b'); h.textContent = tr(S.site.name);
+    const e = document.createElement('span'); e.textContent = era(S.site.era);
+    const p = document.createElement('p'); p.textContent = first;
+    const k = document.createElement('small'); k.textContent = t(this.paused ? 'tour-paused' : 'tour-keys');
+    el.append(h, e, p, k);
+    el.hidden = false; void el.offsetWidth; el.classList.add('on');
+    if (!this.paused) this.capT = setTimeout(() => this.caption(null), keys ? 4000 : 9000);
+  }
+
+  /** A good hour for S: mid-morning or mid-afternoon, whichever puts the sun behind the arrival view. */
+  light(S) {
+    const K = this.climate;
+    if (!K) return;
+    const A = ARRIVALS[S.site.id], east = A ? -Math.sin(A[3]) > 0 : false;
+    const h = east ? 15.75 : 9.5;
+    K.utc = ((h - (S.site.lon || 0) / 15) % 24 + 24) % 24;
+    K.setTime('held');
   }
 
   /** Whether the camera is being moved by the tour (the frame loop keeps drawing at full rate). */
@@ -48,6 +101,8 @@ export class Tour {
     if (this.active) return;
     this.startKey = startKey;
     this.active = true; this.t0 = performance.now(); this.leg = null;
+    this.paused = false; this.oy = this.op = 0;
+    if (this.climate) this.clock = { mode: this.climate.mode, utc: this.climate.utc };
     this.controls.keys.clear(); this.controls.flyHeld = false;
     for (const t of INPUTS) addEventListener(t, this._stop, { capture: true, passive: false });
     this.onChange?.(true);
@@ -57,6 +112,8 @@ export class Tour {
   stop() {
     if (!this.active) return;
     this.active = false; this.leg?.done?.(); this.leg = null; this.runId++;
+    this.paused = false; this.caption(null);
+    if (this.climate && this.clock) { this.climate.utc = this.clock.utc; this.climate.setTime(this.clock.mode); }
     for (const t of INPUTS) removeEventListener(t, this._stop, true);
     const C = this.controls;
     this.land();
@@ -88,12 +145,15 @@ export class Tour {
       const S = this.next();
       if (!S) break;
       let ok;
+      // (the hour changes once the view has gone dark for the travel)
+      setTimeout(() => { if (this.active && id === this.runId) this.light(S); }, this.last ? 450 : 0);
       try { ok = await this.go(S); } catch (e) { console.warn('[tour]', e); await new Promise((r) => setTimeout(r, 3000)); continue; }
       if (!this.active || id !== this.runId) break;
       // (a travel asked for elsewhere, the map, took the place of this one: the visitor chose; the tour ends)
       if (ok === false) break;
       this.last = S;
       this.begin(S);
+      this.caption(S);
       // the leg ends by itself (the loop is closed or its time spent), or the tour is stopped
       await new Promise((resolve) => { this.leg.done = resolve; });
       if (id !== this.runId) return;
@@ -195,16 +255,37 @@ export class Tour {
     const L = this.leg;
     if (!L) return;
     dt = Math.min(dt, 0.1);
+    // the look about: held while the mouse moves, then eased back to the tour's own view
+    if (performance.now() - this.lookedAt > 2500) { const k = Math.exp(-1.6 * dt); this.oy *= k; this.op *= k; }
+    if (!L.b) L.b = { yaw: C.yaw, pitch: C.pitch, x: F.x, z: F.z, w1: HOLD + WALK, still: 0 };
+    const B = L.b;
+    if (!L.start) {
+      // on foot (the arrival view, then the walk): the walker's own rules carry it, the tour only leans the stick
+      C.enabled = true;
+      C.yaw = wrap(B.yaw + this.oy); C.pitch = clamp(B.pitch + this.op, -1.2, 1.2);
+    } else if (this.paused) { C.yaw = wrap(L.yaw + this.oy); C.pitch = clamp(L.pitch + this.op, -1.2, 1.2); C.apply(); }
+    if (this.paused) return;
     L.t += dt;
-    const END = HOLD + RISE + FLY;
+    const END = B.w1 + RISE + FLY;
     // the frame changed under us (left the settlement's zone) or the minute is spent: this leg is over
     if (world_site(this.world) !== L.site || L.t > END) { L.done?.(); return; }
     if (L.t <= HOLD) return;                         // holding the arrival view (the walker stands there)
+    if (L.t <= B.w1) {
+      // the walk: forward along the arrival's own line at a stroll, eased in and out; where the way is shut
+      // (a wall, water, a crowd) it ends early and the camera lifts off from there
+      const k = Math.min(1, (L.t - HOLD) / 1.5, (B.w1 - L.t) / 1.5);
+      C.stick.x = Math.sin(this.oy) * 0.5 * k; C.stick.y = -Math.cos(this.oy) * 0.5 * k;   // (toward the view's own line, whichever way the visitor looks)
+      const moved = Math.hypot(F.x - B.x, F.z - B.z); B.x = F.x; B.z = F.z;
+      B.still = moved < 0.25 * dt ? B.still + dt : 0;
+      if (B.still > 1.2 && L.t > HOLD + 2.5) { B.w1 = L.t; C.stick.x = C.stick.y = 0; }
+      return;
+    }
+    C.enabled = false; C.stick.x = C.stick.y = 0;
     const total = (L.M - 1) * L.STEP;
     if (!L.start) {
       // the hand-over: the free camera starts exactly where the walker's eye is, looking where it looks
-      L.start = { x: F.x, y: F.y + EYE, z: F.z, yaw: C.yaw, pitch: C.pitch };
-      L.yaw = C.yaw; L.pitch = C.pitch; L.wy = 0; L.wp = 0;
+      L.start = { x: F.x, y: F.y + EYE, z: F.z, yaw: B.yaw, pitch: B.pitch };
+      L.yaw = B.yaw; L.pitch = B.pitch; L.wy = 0; L.wp = 0;
       L.s0 = Math.min(0.15 * L.R, total * 0.2);
       const [qx, qz, qy] = this.at(L, L.s0), [rx, rz, ry] = this.at(L, L.s0 + L.STEP);
       const tl = Math.hypot(rx - qx, rz - qz) || 1;
@@ -215,7 +296,7 @@ export class Tour {
     }
     const S0 = L.start, E = L.end;
     let x, y, z, look;                               // look: the arc length the gaze aims ahead of
-    const tr = (L.t - HOLD) / RISE;
+    const tr = (L.t - B.w1) / RISE;
     if (tr < 1) {
       // lift-off: a Hermite curve that leaves the eye from rest, first straight up, then leaning out and
       // joining the route at its cruising velocity (time warped by u = t²(2 − t): zero speed at the start)
@@ -267,7 +348,7 @@ export class Tour {
     // always rate- and acceleration-limited, from the walker's own view on
     [L.yaw, L.wy] = steer(L.yaw, L.wy, wantYaw, true, 0.5);
     [L.pitch, L.wp] = steer(L.pitch, L.wp, wantPitch, false, 0.3);
-    C.yaw = wrap(L.yaw); C.pitch = L.pitch;
+    C.yaw = wrap(L.yaw + this.oy); C.pitch = clamp(L.pitch + this.op, -1.2, 1.2);
     if (this.pp && dt > 0) { this.vel = { x: (x - this.pp.x) / dt, y: (y - this.pp.y) / dt, z: (z - this.pp.z) / dt }; }
     this.pp = { x, y, z };
     F.x = x; F.z = z; F.y = y - EYE; F.vy = 0; C.vy = 0;

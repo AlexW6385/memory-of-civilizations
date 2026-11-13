@@ -614,7 +614,7 @@ async function main() {
   const randomCity = () => { if (busy) return; const S = take(nearest(world.here(controls))); if (S) mapView.go(S); };
   $('map-random').onclick = randomCity;
   // the tour: settlement after settlement, an aerial circuit over each; any input ends it
-  const tour = new Tour({ controls, world, go: (S) => mapView.go(S), onChange: () => { snap = true; } });
+  const tour = new Tour({ controls, world, climate, go: (S) => mapView.go(S), onChange: () => { snap = true; } });
   $('map-tour').onclick = () => { closePanels(); tour.start(); };
   const minimap = new MiniMap(world, mapView, () => openPanel(mapPanel), () => sunPlanet(climate.utc));
 

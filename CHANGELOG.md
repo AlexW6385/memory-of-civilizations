@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.1 — the tour (2026-11-13)
+
+The tour (T, or the map's Tour button) still takes a random city each time, but each visit now has three parts: the arrival view under a caption (name, time, one sentence of the settlement's card), a short walk forward at eye height, then the flight over the town. Each city is shown at mid-morning or mid-afternoon, whichever puts the sun behind the arrival view, and the visitor's own hour comes back when the tour ends. Dragging the mouse looks about and the view eases back; Space or a tap pauses; R goes on; a walking key, the stick or Esc hands the place over where the camera is. Other input no longer ends it.
+
 ## v12.0 — release pass (2026-11-12)
 
 All 94 settlements stand, each visited in Chrome on the author's machine (an Apple M2), arriving through the map, and fixed where the first view failed; a last pass made ordinary buildings near every arrival enterable and furnished and varied the fronts. The view stays dark after a travel until the settlement, its colliders and the ground are in, nobody spawns beside the arrival, the street life is built in slices and a baked-light leak is closed; the page has a first-visit controls hint, focus rings and keyboard-reachable map, language and sound buttons, link-preview tags and a favicon.
