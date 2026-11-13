@@ -4,6 +4,7 @@
 // the yard, fowl, a dog, washing; the workshops (layout.js shops()) their craftsmen; the moat its lotus, its moored
 // canoes with fishermen, women washing at the bank. Plans are tiles of 100 m, drawn within 260 m of the visitor.
 
+import { houseUp, variantOf } from '../../styles/khmer/village.js';
 import { RADIUS, LEVEL, MOAT, ROAD, CX, T, ENCLOSURE, ENC_PATHS, BASINS, CAUSEWAY, LIBRARIES, MARKET, houses, ponds, stores, shops, moatLotus, moatLanes, inRect, inMoat, inBasin, inPond, inHouse, inShop, onRoad } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -26,7 +27,7 @@ function yards() {
   const man = (at, y, dir, o = {}) => fig(at, y, dir, { hair: rand() < 0.6 ? 'bun' : 'short', ...o });
   const free = (x, z, m = 1.2) => !inHouse(x, z, m) && !inPond(x, z, 1.5) && !inMoat(x, z) && !inRect(T.base.rect, x, z, 4) && !onRoad(x, z) && !inShop(x, z, 1.5) && !ENC_PATHS.some((p) => inRect(p, x, z, 1)) && !BASINS.some((b) => inRect(b, x, z, 2)) && !inRect(MARKET, x, z, 3);
   for (const h of all) {
-    const r = rng(h.seed || 1), up = 2.0 + r() * 0.45, F = FRONT[h.front], S = [-F[1], F[0]], cx = (h.rect[0] + h.rect[2]) / 2, cz = (h.rect[1] + h.rect[3]) / 2;
+    const r = rng(h.seed || 1), up = houseUp(h), F = FRONT[h.front], S = [-F[1], F[0]], cx = (h.rect[0] + h.rect[2]) / 2, cz = (h.rect[1] + h.rect[3]) / 2;
     const hF = Math.abs(F[0]) ? (h.rect[2] - h.rect[0]) / 2 : (h.rect[3] - h.rect[1]) / 2, hS = Math.abs(F[0]) ? (h.rect[3] - h.rect[1]) / 2 : (h.rect[2] - h.rect[0]) / 2;
     const W = (u, v) => [cx + F[0] * v + S[0] * u, cz + F[1] * v + S[1] * u], rot = Math.atan2(-F[1], F[0]);
     const near = Math.hypot(cx, cz) < RADIUS - 30;
@@ -64,6 +65,14 @@ function yards() {
       const p = W(hS * 0.4, hF - 1.3); L.push({ t: 'bench', at: p, y: 0, rot, seed: Math.floor(rand() * 1e9) });
       if (rand() < 0.7) man(p, 0, [F[0], F[1]], { pose: 'sit', cloth: pick(CLOTH) });
     }
+    // inside: someone at home in about two houses in three — a woman crouched at the hearth tray with her pot (the lamp beside the mats), a man or an old woman resting on the sleeping mats, a child; the shop's keeper sitting just inside the door behind her counter
+    { const D = (du, dv) => [S[0] * du + F[0] * dv, S[1] * du + F[1] * dv], home = (h.seed % 3) !== 0, v = variantOf(h);
+      if (home) {
+        woman(W(hS - 1.35, -hF + 0.95), up, D(0.65, -0.25), { pose: 'squat', cloth: pick(CLOTH), over: 'none' });
+        if (h.seed % 2) (rand() < 0.5 ? man : woman)(W(-hS + 1.1, -hF + 1.7), up, D(1, 0.3), { pose: 'sit', cloth: pick(CLOTH), arms: 'hang' });
+        else fig(W(-hS + 1.2, -hF + 1.6), up, D(0.5, 1), { pose: 'cross', child: true, hair: 'short', cloth: pick(CLOTH) });
+      }
+      if (v === 'shop' && h.kind !== 'small') woman(W(0.95, hF - 0.8), up, D(0, 1), { pose: 'cross', cloth: pick(CLOTH), over: 'shawl' }); }
     // on the deck at the door: a woman or a man sitting in the shade of the eaves, now and then with a child
     if (h.kind !== 'small' && rand() < 0.5) {
       const p = W((rand() - 0.5) * 1.2, hF + 0.5);
