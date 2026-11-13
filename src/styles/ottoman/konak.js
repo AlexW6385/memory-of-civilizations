@@ -37,7 +37,7 @@ function hipRoof(bag, mat, R, ye, pitch, o) {
 }
 
 /** The furnished ground room of an open house (frame: u along the front, v in from it). */
-function room(bag, col, el, { wall, y, st, f, rand }) {
+function room(bag, col, el, { wall, y, st, f, rand }, lights) {
   const [x0, z0, x1, z1] = el.rect, T = 0.4, fy = y + 0.6, along = f === 'n' || f === 's';
   const L = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0;
   const P = (u, v) => (f === 's' ? [x1 - u, z1 - v] : f === 'n' ? [x0 + u, z0 + v] : f === 'e' ? [x1 - v, z0 + u] : [x0 + v, z1 - u]);
@@ -56,9 +56,10 @@ function room(bag, col, el, { wall, y, st, f, rand }) {
   B('plaster_white', T, T, L - T, D - T, y + st - 0.05, y + st - 0.02);
   for (let v = T + 0.5; v < D - T; v += 0.8) B('wood_dark', T, v - 0.08, L - T, v + 0.08, y + st - 0.24, y + st - 0.05);
   if (!shop) B('wood_dark', du - dw / 2 - 0.02, T, du - dw / 2 + 0.06, T + dw, fy, fy + 2.45);
-  const lamp = () => { const lp = P(L / 2, D / 2); bag.add('lamp_glass', lathe([[0.001, 0], [0.12, 0.05], [0.15, 0.2], [0.08, 0.3], [0.001, 0.32]], 10, null, lp[0], y + st - 0.9, lp[1])); B('iron', L / 2 - 0.005, D / 2 - 0.005, L / 2 + 0.005, D / 2 + 0.005, y + st - 0.58, y + st - 0.24); };
+  const lamp = () => { const lp = P(L / 2, D / 2); lights?.push({ at: [lp[0], y + st - 1.0, lp[1]], color: '#ffd9a0', intensity: 2.4, distance: 7 }); bag.add('lamp_glass', lathe([[0.001, 0], [0.12, 0.05], [0.15, 0.2], [0.08, 0.3], [0.001, 0.32]], 10, null, lp[0], y + st - 0.9, lp[1])); B('iron', L / 2 - 0.005, D / 2 - 0.005, L / 2 + 0.005, D / 2 + 0.005, y + st - 0.58, y + st - 0.24); };
   const shelf = (u0, u1, v, hs) => { for (const q of hs) { B('wood_dark', u0, v, u1, v + 0.3, fy + q, fy + q + 0.04); for (let u = u0 + 0.2; u < u1 - 0.1; u += 0.32) h(rand() < 0.5 ? 'terracotta' : pick(rand, ['glaze_white', 'pottery_dark', 'glaze_blue']), u, v + 0.15, 0.07, 0.18, q + 0.04); } };
-  const counter = () => { B('wood_dark', T + 0.1, T + 0.15, L - T - 0.1, T + 0.75, fy, fy + 0.95, true); B('timber', T + 0.05, T + 0.1, L - T - 0.05, T + 0.8, fy + 0.95, fy + 1.0); };
+  // the counter across the shop, its flap raised in the middle (a way through 1.1 m wide in line with the door, to the keeper's side)
+  const counter = () => { for (const [a, b] of [[T + 0.1, du - 0.55], [du + 0.55, L - T - 0.1]]) { B('wood_dark', a, T + 0.15, b, T + 0.75, fy, fy + 0.95, true); B('timber', a - 0.05, T + 0.1, b + 0.05, T + 0.8, fy + 0.95, fy + 1.0); } };
   const use = el.use ?? 'home';
   if (use === 'home' || use === 'inn') {
     // the divan round three walls with mattresses and cushions, a rug, the brass tray on its stand, a lamp, a painted chest
@@ -121,7 +122,7 @@ function room(bag, col, el, { wall, y, st, f, rand }) {
   }
 }
 
-function house(el, { bag, col }) {
+function house(el, { bag, col, lights }) {
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, foot = el.foot ?? y - 0.4, simple = !!el.simple;
   const n = Math.max(1, el.storeys), st = 2.9 + rand() * 0.35, H = n * st, f = el.front || 's';
   const wall = el.plaster ? pick(rand, PLAST) : pick(rand, WALLS), shut = pick(rand, ['timber', 'shutter_green', 'shutter_brown', 'shutter_grey', 'timber']);
@@ -131,7 +132,7 @@ function house(el, { bag, col }) {
   if (jet) { if (f === 's') R[3] += jet; else if (f === 'n') R[1] -= jet; else if (f === 'e') R[2] += jet; else R[0] -= jet; bag.add(wall, box(R[0], y + st, R[1], R[2], y + H, R[3])); bag.add('timber', box(R[0] - 0.05, y + st - 0.18, R[1] - 0.05, R[2] + 0.05, y + st, R[3] + 0.05)); }
   else bag.add(wall, box(x0, y + (OPEN ? st : 0.6), z0, x1, y + H, z1));
   if (!OPEN) col.rect(el.rect, foot - 0.6, y + H);
-  else room(bag, col, { ...el, shop: !!el.shop }, { wall: 'rubble', y, st, f, rand });
+  else room(bag, col, { ...el, shop: !!el.shop }, { wall: 'rubble', y, st, f, rand }, simple ? null : lights);
   const along = f === 'n' || f === 's', L = along ? R[2] - R[0] : R[3] - R[1], a0 = along ? R[0] : R[1];
   const fz = f === 'n' ? R[1] : f === 's' ? R[3] : f === 'w' ? R[0] : R[2], sg = f === 'n' || f === 'w' ? -1 : 1;
   // a box on the front face: u0..u1 along it, v0..v1 up, d0..d1 out from the wall (R's face: the jetty's outer face above the ground storey)

@@ -165,6 +165,11 @@ Sources added:
 
 **Not built.** The Golden Horn and its quays lie beyond the class radius (about 800 m); the han and the sıbyan mektebi are recorded for later.
 
+## 14. Walk-in houses and shops (round 5)
+
+- **Measured.** Within 120 m of the arrival (the north end of the outer court) twelve of the quarter's houses and shops are open (the nearest of the open ones the lots north of the terrace, 66-77 m away): six trades (baker, butcher, potter, barber, grocer) and four homes. Before: none could be walked into from the arrival: the terrace's retaining wall to the north had no gap, so the lanes below were 250 m of walking away round the terrace, and each shop's counter ran the whole width of its room, so no shop could be entered. Fronts in the first 110 m: 66 houses in 16 designs (storeys 1-3 by trade or home).
+- **Built.** A gate 12 m wide in the retaining wall on the axis of the outer court's north gate [inferred]; a way through the middle of each shop counter, in line with the door (the raised flap); the open houses chosen only where the door's step is not more than a walker's step above the lane (11 of the 60 open houses stood on slopes too steep); a lamp light in every open room (the glass lamp's light, at any hour; one light a room); the keeper in each open shop (the baker in his white cap and apron, the butcher, the coppersmith at his stump) and the woman or the old man of the house on the divan in each home, within 220 m of the arrival [inferred: the figures of the quarter's life, as §12].
+
 ## Sources
 
 - [Strolling through Istanbul — Freely and Sumner-Boyd, the Süleymaniye](https://erenow.org/common/strolling-through-istanbul-classic-guide-to-the-city/11.php) (the interior's piers, arcades, mihrab, minbar, glass, tiles)

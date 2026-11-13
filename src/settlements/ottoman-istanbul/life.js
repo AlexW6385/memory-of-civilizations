@@ -4,7 +4,8 @@
 // the waterskin; donkeys bringing firewood to the soup kitchen; horses held at the outer court's gate.
 
 import { courtLife, laneLife } from './court-life.js';
-import { RADIUS, TOP, height, COFFEE, IMARET, ARASTA, PRECINCT, lanes, TERRACE, MESCIT } from './layout.js';
+import { RADIUS, TOP, height, COFFEE, IMARET, ARASTA, PRECINCT, lanes, TERRACE, MESCIT, openSet, roomPoint } from './layout.js';
+import { ARRIVALS } from '../../planet/arrivals.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -29,6 +30,24 @@ export function life() {
   sit(hw - 0.18 - 0.45, 0.2, 0); sit(hw - 2.35, 0.2, Math.PI, { y: fy + 0.01 });             // the backgammon players either side of the stool
   { const p = W(-hw + 1.0, hd - 1.2); person(p, -Math.PI / 2 + 0.6, { man: true, y: fy, cloth: 'cloth_white', cloth2: 'cloth_brown', over: 'apron' }); }      // the coffee-maker by his hearth
   { const p = W(0.6, -0.4); L.push({ t: 'figure', at: p, y: fy, rot: Math.PI / 2, seed: Math.floor(rand() * 1e9), child: true, skin: 'skin_light', dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_red', over: 'sash', hat: 'cap', hatMat: 'cloth_red', hair: 'short', pose: 'stand' }); }
+  // inside the open shops and houses near the terrace: the keeper behind his counter or at his work, the woman of the house on her divan
+  {
+    const A = ARRIVALS['ottoman-istanbul'], rnd = rng(1562), pk = (a) => a[Math.floor(rnd() * a.length)];      // (a stream of its own: the street life's stays as it was)
+    for (const l of openSet()) {
+      const mx = (l.rect[0] + l.rect[2]) / 2, mz = (l.rect[1] + l.rect[3]) / 2;
+      if (Math.hypot(mx - A[0], mz - A[2]) > 220) continue;
+      const al = l.front === 'n' || l.front === 's', Lw = al ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1], Dw = al ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], fy = l.y + 0.6;
+      const to = (a, b) => Math.atan2(-(b[0] - a[0]), -(b[1] - a[1]));          // a figure faces −z at rot 0
+      const door = roomPoint(l, Lw / 2, -2);
+      const put = (u, v, o) => { const p = roomPoint(l, u, v); L.push({ t: 'figure', at: p, y: o.y ?? fy, rot: to(p, door), seed: Math.floor(rnd() * 1e9), skin: 'skin_light', dress: 'robe', cloth: pk(['cloth_red', 'cloth_green', 'cloth_indigo', 'cloth_brown', 'cloth_ochre', 'cloth_maroon']), cloth2: 'cloth_white', over: 'sash', hat: 'turban', hatMat: 'cloth_white', hair: 'short', beard: true, pose: 'stand', ...Object.fromEntries(Object.entries(o).filter(([, q]) => q !== undefined)) }); };
+      if (l.shop) {
+        const trade = l.trade, apron = ['baker', 'butcher', 'coppersmith', 'cobbler', 'saddler', 'weaver'].includes(trade);
+        put(Lw * 0.3, trade === 'coppersmith' ? Dw * 0.6 + 0.9 : 1.7, { over: apron ? 'apron' : 'sash', cloth: trade === 'baker' || trade === 'butcher' ? 'cloth_white' : undefined, ...(trade === 'baker' ? { hat: 'cap', hatMat: 'cloth_white' } : {}) });
+      } else {
+        put(Lw * 0.35, Dw - 0.4 - 0.45, { y: fy + 0.42, pose: 'cross', ...(rnd() < 0.6 ? { dress: 'robe', hat: 'veil', hair: 'long', beard: false, cloth: pk(['cloth_indigo', 'cloth_brown', 'cloth_maroon']), over: 'none' } : {}) });
+      }
+    }
+  }
   // porters in the avenues before the shops, bent under their loads; buyers at the shops
   for (const sx of [-1, 1]) {
     const xa = sx * 76, xb = sx * (Math.abs(ARASTA.w) - ARASTA.d);

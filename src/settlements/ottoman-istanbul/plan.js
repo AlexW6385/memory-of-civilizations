@@ -36,7 +36,8 @@ E.push({ t: 'minaret', c: MESCIT.minaret, y: TOP, h: 24, r: 0.95, balconies: 1 }
   E.push({ t: 'court_dress', y: TOP, benches, jars, posts, lamps });
 }
 const [t0, u0, t1, u1] = TERRACE;
-E.push({ t: 'block', rect: [t0, u0 - 0.6, t1, u0], y0: 0, y1: TOP + 1, mat: 'limestone' });
+// (a gate 12 m wide in the middle, on the axis of the outer court's north gate: the way down to the lanes of the quarter and its shops)
+E.push({ t: 'block', rect: [t0, u0 - 0.6, -6, u0], y0: 0, y1: TOP + 1, mat: 'limestone' }, { t: 'block', rect: [6, u0 - 0.6, t1, u0], y0: 0, y1: TOP + 1, mat: 'limestone' });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const hw = MOSQUE.d * 1.1 - 2.6, hd = MOSQUE.d * 1.1 - 2.6;
