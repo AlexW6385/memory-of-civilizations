@@ -369,6 +369,8 @@ function hut(el, ctx) {
   // a clay pot set over the apex of some roofs, to shed the rain from the point
   if (seed % 4 === 1) bag.add('terracotta', lathe(potProf(0.7).map(([rr, vv]) => [rr, -vv + 0.22]).reverse(), 8, null, x, ye + r * 1.3 - 0.06, z));
   if (ver) for (let k = 0; k < 8; k++) { const b = a + Math.PI / 8 + k * Math.PI / 4; bag.add('timber', lathe([[0.06, 0], [0.055, ye - y - 0.2 + 0.1], [0.001, ye - y - 0.15]], 6, null, x + Math.cos(b) * (fr - 0.2), y + 0.2, z + Math.sin(b) * (fr - 0.2))); }
+  // the soffit of the eaves: the roof's underside from its edge to the wall, so that the way in under the eaves is not taken for a slope of roof
+  if (el.open) bag.add('tar_wood', lathe([[eave - 0.02, -0.09], [r + 0.02, 0.1]].reverse(), 18, null, x, ye, z));
   if (el.open) {
     // the thatch seen from within: a cone a little under the outer one, blackened by the hearth's smoke, the
     // rafters radiating from the wall plate to the apex, a ring of withies binding them
@@ -415,7 +417,7 @@ const potProf = (s) => [[0.001, 0], [0.09, 0.01], [0.16, 0.08], [0.18, 0.16], [0
  * (guyo nehuyo) by the wall; a water pot by the door; the hearth's glow.
  */
 function hutInside(el, { bag, col, lights }, { x, z, r, y, h, a, seed }) {
-  const y0 = y + 0.2, y1 = y0 + h, th = 0.22, g = 0.46 / r, T = [];
+  const y0 = y + 0.2, y1 = y0 + h, th = 0.22, g = 0.66 / r, T = [];
   // the wall: battered outside, plumb within; over the doorway the wall goes on above the lintel
   const wallProf = [[r - th + 0.06, 0], [r + 0.06, 0], [r - 0.06, h], [r - th, h]];
   arcSolid(T, x, z, y0, a + g, a + Math.PI * 2 - g, wallProf, 22);
@@ -697,8 +699,53 @@ function stoneCarver(el, { bag, col }) {
   for (const v of [0.6, 0.72]) { const [p0, p1] = [W(-0.3, v), W(-0.05, v)]; bag.add('iron', orientedBox(p0, p1, 0.02, y + 0.005, y + 0.03)); }
   { const [wx, wz] = W(-1.5, 0.7); bag.add('terracotta', lathe(potProf(1.4), 12, null, wx, y, wz)); }
 }
+
+/**
+ * dara_house: the men's meeting house of a homestead (the dara of the Shona) { c, y, r, seed, gap } — a low round wall of daga with
+ * three wide openings, six poles carrying a thatched cone, inside a swept floor, carved stools, a drum and a mat, a small fire
+ * (docs/settlements/great-zimbabwe.md §14; forms inferred from later Shona practice). Open and walkable at the openings.
+ */
+function daraHouse(el, { bag, col, lights }) {
+  const [x, z] = el.c, y = el.y ?? 0, r = el.r ?? 2.3, seed = el.seed ?? 1, a = el.gap ?? 0, wh = 0.62, th = 0.3, ph = 2.15;
+  const T = [], g = 0.62 / r, Pw = [];
+  bag.add('mud_plaster', lathe([[r + 0.5, -0.3], [r + 0.5, 0.1], [r + 0.38, 0.2], [0.001, 0.2]], 18, null, x, y, z));
+  for (let k = 0; k < 3; k++) {
+    const a0 = a + k * Math.PI * 2 / 3 + g, a1 = a + (k + 1) * Math.PI * 2 / 3 - g;
+    arcSolid(T, x, z, y + 0.2, a0, a1, [[r - th + 0.05, 0], [r + 0.05, 0], [r - 0.03, wh], [r - th + 0.03, wh]], 8);
+    col.segment([x + Math.cos(a0) * (r - 0.12), z + Math.sin(a0) * (r - 0.12)], [x + Math.cos((a0 + a1) / 2) * (r - 0.12), z + Math.sin((a0 + a1) / 2) * (r - 0.12)], th, y, y + wh + 0.2);
+    col.segment([x + Math.cos((a0 + a1) / 2) * (r - 0.12), z + Math.sin((a0 + a1) / 2) * (r - 0.12)], [x + Math.cos(a1) * (r - 0.12), z + Math.sin(a1) * (r - 0.12)], th, y, y + wh + 0.2);
+  }
+  bag.add(['mud_plaster', 'banco_smooth', 'kahgel'][seed % 3], fromTriangles(T));
+  // the poles on the wall's outer edge, the plate round their heads, the rafters to the apex
+  for (let k = 0; k < 6; k++) {
+    const t = a + Math.floor(k / 2) * Math.PI * 2 / 3 + g + (Math.PI * 2 / 3 - 2 * g) * (k % 2 ? 0.8 : 0.2), px = x + Math.cos(t) * (r + 0.1), pz = z + Math.sin(t) * (r + 0.1);
+    bag.add('timber', lathe([[0.075, 0.2], [0.065, ph], [0.001, ph + 0.05]], 7, null, px, y, pz));
+    col.circle(px, pz, 0.1, y, y + ph);
+    Pw.push([px, pz]);
+  }
+  const R = [];
+  for (let k = 0; k < 6; k++) { const [p0, q0] = [Pw[k], Pw[(k + 1) % 6]]; beamTris(R, [p0[0], y + ph, p0[1]], [q0[0], y + ph, q0[1]], 0.06, 0.1); beamTris(R, [p0[0], y + ph + 0.1, p0[1]], [x, y + ph + r * 1.05 - 0.1, z], 0.04, 0.06); }
+  bag.add('tar_wood', fromTriangles(R));
+  const ee = r + 0.85;
+  bag.add(seed % 2 ? 'thatch' : 'thatch_palm', lathe([[ee, y + ph - 0.02], [ee - 0.05, y + ph + 0.1], [(ee + 0.5) / 2, y + ph + 0.55], [0.5, y + ph + r * 0.95], [0.06, y + ph + r * 1.25], [0.001, y + ph + r * 1.3]].map(([rr, yy]) => [rr, yy]), 18, (th2, i) => (i < 2 ? 1 + 0.03 * Math.sin(th2 * 9) : 1), x, 0, z));
+  bag.add('tar_wood', lathe([[0.001, y + ph + r * 1.25 - 0.2], [0.06, y + ph + r * 1.25 - 0.2], [0.5, y + ph + r * 0.95 - 0.16], [(ee + 0.5) / 2 - 0.1, y + ph + 0.55 - 0.16], [ee - 0.05, y + ph - 0.1], [ee - 0.03, y + ph - 0.12]], 18, null, x, 0, z));      // the ceiling of thatch seen from within
+  bag.add('wicker', lathe([[0.4, y + ph + r * 0.98], [0.44, y + ph + r * 1.03], [0.4, y + ph + r * 1.08], [0.36, y + ph + r * 1.03]], 12, null, x, 0, z));
+  // inside: a swept floor of beaten daga, the fire of three stones off-centre, four carved stools and a drum, a mat
+  const F = y + 0.22;
+  bag.add('plaster_grey', lathe([[0.45, 0], [0.45, 0.01], [0.001, 0.01]], 12, null, x + 0.1, F, z - 0.1));
+  for (let k = 0; k < 3; k++) { const t = k * 2.1 + 0.4; bag.add('granite_grey', lathe([[0.001, 0], [0.08, 0.01], [0.09, 0.07], [0.001, 0.14]], 7, null, x + 0.1 + Math.cos(t) * 0.18, F, z - 0.1 + Math.sin(t) * 0.18)); }
+  if (lights) lights.push({ at: [x + 0.1, F + 0.3, z - 0.1], color: '#ff9a4a', intensity: 1.4, distance: 4.5 });
+  for (let k = 0; k < 4; k++) {
+    const t = a + 0.9 + k * 1.3, sx = x + Math.cos(t) * 1.25, sz = z + Math.sin(t) * 1.25;
+    bag.add('timber', lathe([[0.17, 0], [0.1, 0.06], [0.08, 0.2], [0.17, 0.3], [0.2, 0.34], [0.001, 0.34]], 8, null, sx, F, sz));
+    col.circle(sx, sz, 0.2, F, F + 0.35);
+  }
+  { const dx = x + Math.cos(a + 3.9) * 0.9, dz = z + Math.sin(a + 3.9) * 0.9;
+    bag.add('timber', lathe([[0.2, 0], [0.26, 0.2], [0.24, 0.5], [0.2, 0.6], [0.001, 0.6]], 10, null, dx, F, dz)); bag.add('hide_tan', lathe([[0.001, 0.6], [0.21, 0.6], [0.2, 0.62], [0.001, 0.62]], 10, null, dx, F, dz)); col.circle(dx, dz, 0.28, F, F + 0.62); }
+  bag.add('reed_mat', orientedBox([x + Math.cos(a + 2.4) * 0.3 - 0.8, z + Math.sin(a + 2.4) * 0.3 + 0.2], [x + Math.cos(a + 2.4) * 0.3 + 0.8, z + Math.sin(a + 2.4) * 0.3 + 0.2], 0.5, F, F + 0.018));
+}
 registerStyle('zimbabwe', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, dry_wall: dryWall, cone_tower: coneTower, daga_hut: hut, platform, soapstone_bird: soapstoneBird, monolith, boulder, stone_steps: stoneSteps, daga_yard: dagaYard, thatch_roof: thatchRoof, kraal, trade_goods: tradeGoods, granary, compound, homestead_goods: homesteadGoods, millet_plot: milletPlot, smithy, stone_carver: stoneCarver, termite_mound: termiteMound },
+  elements: { ...STYLES.qing.elements, dry_wall: dryWall, cone_tower: coneTower, daga_hut: hut, platform, soapstone_bird: soapstoneBird, monolith, boulder, stone_steps: stoneSteps, daga_yard: dagaYard, thatch_roof: thatchRoof, kraal, trade_goods: tradeGoods, granary, compound, homestead_goods: homesteadGoods, millet_plot: milletPlot, smithy, stone_carver: stoneCarver, termite_mound: termiteMound, dara_house: daraHouse },
   objects: {},
 });

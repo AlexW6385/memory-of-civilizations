@@ -132,3 +132,7 @@ Sources as §14–§16; the browser review of the arrival found the enclosure wa
 - [Great Zimbabwe — Smarthistory](https://smarthistory.org/great-zimbabwe)
 - [The Great Enclosure in photographs — Zimbabwe Field Guide](https://mail.zimfieldguide.com/node/710)
 - [Great Zimbabwe Urbanism and Architecture — Ebsco](https://www.ebsco.com/research-starters/anthropology/great-zimbabwe-urbanism-and-architecture)
+
+## Round 5: the houses nearest the arrival are walk-in
+
+[inferred, from later Shona practice] Every house of the nine homesteads nearest the arrival is an open (furnished) daga house: the hearth of three stones with its glow, the rukuva with pots, the shelf, the mat, the grinding stones, a woman at the hearth in every second one. The eaves of open houses now have a soffit (the walker is not caught under a roof's slope on the way in) and the doorway is 1.3 m wide. The men's meeting house of a homestead (dara; `dara_house`: a low daga wall with three openings, six poles, a thatched cone, stools, a drum, a fire) stands outside the gate of four of them, men seated on the stools.

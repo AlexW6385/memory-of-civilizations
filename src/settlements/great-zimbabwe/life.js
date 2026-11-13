@@ -3,7 +3,7 @@
 // sticks; women grinding and carrying water in the courts of the Valley Ruins; a trader with the goods of the
 // coast; a few people in the Great Enclosure. Kept few and quiet. Pure data.
 
-import { ENCLOSURE, VALLEY, WEST, RADIUS, KRAAL_AT, height, huts, compounds, inWalled, inEnclosure, pathDist } from './layout.js';
+import { ENCLOSURE, VALLEY, WEST, RADIUS, KRAAL_AT, height, huts, daras, compounds, inWalled, inEnclosure, pathDist } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));     // a figure faces −z when rot = 0
@@ -58,6 +58,21 @@ export function people() {
       if (i % 3 === 0) { const p = W(-0.4, -2.1); L.push({ t: 'animal', kind: 'goat', at: p, y, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), graze: rand() < 0.5 }); }
       if (i % 4 === 1) { const p = W(0.2, 0.3); L.push({ t: 'animal', kind: 'dog', at: p, y, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) }); }
       if (i % 5 === 2) { const p = W(-2.2, 0.2); man(p, y, face(p, k.c), { h: 0.95, pose: 'stand' }); }
+    });
+  }
+  // inside: a woman at the hearth of every second open house nearest the arrival; the men on the stools of the meeting houses (dara)
+  {
+    const arr = [46, 60], open = huts().filter((h) => h.open && Math.hypot(h.c[0] - arr[0], h.c[1] - arr[1]) < 110).sort((p, q) => Math.hypot(p.c[0] - arr[0], p.c[1] - arr[1]) - Math.hypot(q.c[0] - arr[0], q.c[1] - arr[1]));
+    open.forEach((h, i) => {
+      if (i % 2) return;
+      const a = (h.seed % 628) / 100, Q = (rr, t) => [h.c[0] + Math.cos(a + t) * rr, h.c[1] + Math.sin(a + t) * rr], p = Q(0.95, 2.3), hearth = Q(0.25, 0);
+      woman(p, h.y + 0.24, face(p, hearth), { pose: i % 4 === 0 ? 'kneel' : 'sit_ground' });
+    });
+    daras().forEach((d, i) => {
+      for (const k of i % 2 ? [0, 2] : [1]) {
+        const t = d.gap + 0.9 + k * 1.3, p = [d.c[0] + Math.cos(t) * 1.25, d.c[1] + Math.sin(t) * 1.25];
+        man(p, d.y + 0.22 + 0.34, face(p, d.c), { pose: 'sit', over: 'cape', cloth: 'hide_tan' });
+      }
     });
   }
   // inside the Great Enclosure's homesteads: women at the mortars and a man at the granary
