@@ -124,7 +124,7 @@ function quayLife() {
 /** Washing across the alleys between the upper windows. */
 function washing() {
   const rand = rng(77), E = [];
-  for (const x of ALLEYS_X) for (const [a, b] of runs(x, false, -80, 250)) for (let z = a + 6; z < b - 6; z += 14 + rand() * 12) if (rand() < 0.55) E.push({ t: 'ptol_wash', a: [x - 2.9, z], b: [x + 2.9, z], y: g + 4.9 + rand() * 0.8, seed: Math.floor(rand() * 1e6) });
+  for (const x of ALLEYS_X) for (const [a, b] of runs(x, false, -80, 250)) for (let z = a + 6; z < b - 6; z += 14 + rand() * 12) if (rand() < 0.55) E.push({ t: 'ptol_wash', a: [x - 2.9, z], b: [x + 2.9, z], g, y: g + 4.9 + rand() * 0.8, seed: Math.floor(rand() * 1e6) });
   return base('alexandria-wash', E);
 }
 /** The life at the fronts, as the `life` style's objects (instanced settlement-wide): by the house's trade, donkeys, dogs, benches, fowl. */

@@ -319,7 +319,8 @@ export function makeShops(H) {
   }
 
   /** flag_line: prayer flags in the five colours strung between two poles across the street { a: [x, z], b: [x, z], y0, y1 }: a thin cord sagging, the flags along it. */
-  function flagLine(el, { bag }) {
+  function flagLine(el, { bag, col }) {
+    if (el.poles) for (const [px, pz, py] of [[el.a[0], el.a[1], el.y0], [el.b[0], el.b[1], el.y1 ?? el.y0]]) { bag.add('timber', lathe([[0.1, -0.5], [0.07, py + 0.15], [0.001, py + 0.2]], 6, null, px, 0, pz)); col.circle(px, pz, 0.12, -0.5, py + 0.2); }
     flagString(bag, [el.a[0], el.y0, el.a[1]], [el.b[0], el.y1 ?? el.y0, el.b[1]], el.sag ?? 0.7);
     const ax = el.a[0], az = el.a[1], bx = el.b[0], bz = el.b[1], L = Math.hypot(bx - ax, bz - az), n = Math.max(6, Math.floor(L / 0.5));
     let px = ax, py = el.y0, pz = az;

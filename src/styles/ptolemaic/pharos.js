@@ -10,7 +10,7 @@ import { stageOne, stageTwo, stageThree, triton as tritonFig, fire, zeus } from 
 
 /** An eight-sided tapering prism (flat across `w` at the foot, `w2` at the top), turned so that a face looks along +z. */
 function octagon(x, y0, y1, z, w, w2) {
-  const R = (a) => a / 2 / Math.cos(Math.PI / 8), g = lathe([[R(w), 0], [R(w2), y1 - y0]], 8, null, 0, 0, 0);
+  const R = (a) => a / 2 / Math.cos(Math.PI / 8), g = lathe([[R(w), 0], [R(w2), y1 - y0], [0.001, y1 - y0]], 8, null, 0, 0, 0);
   g.rotateY(Math.PI / 8); g.translate(x, y0, z); return g;
 }
 /**
