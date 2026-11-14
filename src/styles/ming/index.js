@@ -1965,7 +1965,11 @@ function houseJiangnan(el, { bag, col }) {
     for (const [p, q] of [[[a0, bo], [a1, bo]], [[a0, bo], [a0 + 0.06, h.v0]], [[a1 - 0.06, bo], [a1, h.v0]]]) { B(p[0], p[1], q[0] + 0.06, q[1] + 0.06, yy + 0.9, yy + 0.97, 'lacquer_chestnut'); if (det) B(p[0], p[1], q[0] + 0.05, q[1] + 0.05, yy + 0.2, yy + 0.85, 'lattice'); }
   }
   // collision: the whole house (an open house: floor, walls)
-  if (!open) col.rect([x0, z0, x1, z1], plinthBottom, y0 + 3.2);
+  if (!open && (kind === 'simple' || kind === 'row')) {
+    // (the plain house and the row house are drawn from their front to their back wall only: the rest of the lot is open ground)
+    const p = W(0, Math.max(0, halls[0].v0 - 0.3), 0), q = W(L, Math.min(D, lastB + 0.1), 0);
+    col.rect([Math.min(p[0], q[0]), Math.min(p[2], q[2]), Math.max(p[0], q[0]), Math.max(p[2], q[2])], plinthBottom, y0 + 3.2);
+  } else if (!open) col.rect([x0, z0, x1, z1], plinthBottom, y0 + 3.2);
   else {
     col.rect([x0, z0, x1, z1], plinthBottom, y + 0.2);
     col.floor([x0, z0, x1, z1], y0);
