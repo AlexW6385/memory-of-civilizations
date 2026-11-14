@@ -143,7 +143,13 @@ function stairs(el, { bag, col }) {
     else { t.push(a, y0, z0, a, y0, z1, bb, y1, z1, a, y0, z0, bb, y1, z1, bb, y1, z0); }
     bag.add('marble_smooth', fromTriangles(t.concat(flipTris(t))));
     if (el.carve !== false) rampRelief(bag, el);
-    col.rect([x0, z0, x1, z1], y0, (y0 + y1) / 2);
+    // the slab is stepped round as it rises: each strip of its length is solid up to the slab's surface at the strip's upper end
+    const ns = Math.max(1, Math.ceil(len / 0.5));
+    for (let k = 0; k < ns; k++) {
+      const f0 = k / ns, f1 = (k + 1) / ns, top = y0 + (y1 - y0) * f1;
+      const r = dir === 'n' ? [x0, z1 - len * f1, x1, z1 - len * f0] : dir === 's' ? [x0, z0 + len * f0, x1, z0 + len * f1] : dir === 'e' ? [x0 + len * f0, z0, x0 + len * f1, z1] : [x1 - len * f1, z0, x1 - len * f0, z1];
+      col.rect(r, y0, top);
+    }
     return;
   }
   for (let k = 0; k < n; k++) {

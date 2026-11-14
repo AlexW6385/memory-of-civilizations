@@ -50,7 +50,7 @@ export function flight(bag, col, o) {
     for (let i = 0; i < poly.length; i++) { const a = poly[i], b = poly[(i + 1) % poly.length]; q(P(a[0], o0, a[1]), P(b[0], o0, b[1]), P(b[0], o1, b[1]), P(a[0], o1, a[1])); }
     bag.add(m, fromTriangles(orientOutward(t)));
   };
-  prism(mat, [[0, -0.3], [0, 0], [Lr, H - 0.02], [Lr + back, H - 0.02], [Lr + back, -0.3]], -hw, hw);
+  prism(mat, [[0, -0.3], [0, 0], [Lr, H - 0.02], [Lr + back, H - 0.02], [Lr + back, -0.3]], -hw - bw, hw + bw);
   const t = [];
   for (let i = 0; i < steps; i++) {
     const d0 = Lr * i / steps, d1 = Lr * (i + 1) / steps, ya = H * i / steps, yb = H * (i + 1) / steps, e = hw + 0.02;
@@ -63,6 +63,13 @@ export function flight(bag, col, o) {
   const ex = foot[0] + dx * Lr, ez = foot[1] + dz * Lr;
   const r = [Math.min(foot[0], ex) - (dx ? 0 : hw), Math.min(foot[1], ez) - (dz ? 0 : hw), Math.max(foot[0], ex) + (dx ? 0 : hw), Math.max(foot[1], ez) + (dz ? 0 : hw)];
   col.ramp(r, y0, y0 + H, dx > 0 ? 'e' : dx < 0 ? 'w' : dz > 0 ? 's' : 'n');
+  // the balustrades are walls: strips of 1.5 m, each solid up to the balustrade's top at the strip's upper end
+  const nb = Math.max(1, Math.ceil((Lr + 0.4) / 1.5));
+  for (const sg of [-1, 1]) for (let k = 0; k < nb; k++) {
+    const d0 = -0.4 + (Lr + 0.4) * k / nb, d1 = -0.4 + (Lr + 0.4) * (k + 1) / nb;
+    const a = P(d0, sg * hw, 0), b = P(d1, sg * (hw + bw), 0);
+    col.rect([a[0], a[2], b[0], b[2]], y0 - 0.3, y0 + 1.0 + (H - 0.1) * (d1 + 0.4) / (Lr + 0.4));
+  }
   return r;
 }
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
