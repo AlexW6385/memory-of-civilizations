@@ -29,6 +29,13 @@ export function dogesPalace(el, { bag, col }) {
   // the core behind the portico and the loggia, the upper wall over all, the roof
   const core = [x0 + (fronts.includes('w') ? DP : 0), z0 + (fronts.includes('n') ? DP : 0), x1 - (fronts.includes('e') ? DP : 0), z1 - (fronts.includes('s') ? DP : 0)];
   bag.add(I, box(core[0], y - 0.5, core[1], core[2], y + yU, core[3])); col.rect(core, y, y + h);
+  // the end walls of a portico where the next side is a plain one: the stone closes the portico's end
+  for (const f of fronts) for (const e of { n: 'we', s: 'we', w: 'ns', e: 'ns' }[f]) {
+    if (fronts.includes(e)) continue;
+    const zx = f === 'n' ? [z0, z0 + DP] : f === 's' ? [z1 - DP, z1] : [z0, z1], xz = f === 'w' ? [x0, x0 + DP] : f === 'e' ? [x1 - DP, x1] : [x0, x1];
+    const r = e === 'w' ? [x0, zx[0], x0 + 1, zx[1]] : e === 'e' ? [x1 - 1, zx[0], x1, zx[1]] : e === 'n' ? [xz[0], z0, xz[1], z0 + 1] : [xz[0], z1 - 1, xz[1], z1];
+    bag.add(I, box(r[0], y - 0.5, r[1], r[2], y + yU, r[3])); col.rect(r, y, y + yU);
+  }
   bag.add(M, box(x0, y + yU, z0, x1, y + h, z1)); col.floor(rect, y + h);
   bag.add(L, frustum([x0 + 0.6, z0 + 0.6, x1 - 0.6, z1 - 0.6], y + h + 0.6, y + h + 6.5, 9, 9, 9, 9));
   bag.add(M, box(x0 + 0.6, y + h, z0 + 0.6, x1 - 0.6, y + h + 0.6, z1 - 0.6));

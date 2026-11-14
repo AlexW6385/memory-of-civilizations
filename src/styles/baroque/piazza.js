@@ -40,7 +40,8 @@ export function obelisk(el, { bag, col }) {
   L.add(T, frustum([x - die, z - die, x + die, z + die], p0 + 5.6, p0 + 6.0, -0.45, -0.45, -0.45, -0.45));
   L.add(T, box(x - die - 0.45, p0 + 6.0, z - die - 0.45, x + die + 0.45, p0 + 6.35, z + die + 0.45));
   L.add(T, box(x - 2.3, p0 + 6.35, z - 2.3, x + 2.3, p0 + 6.9, z + 2.3));
-  col.rect([x - 5.2, z - 5.2, x + 5.2, z + 5.2], y, y + 8);
+  // (the plinth blocks; the three steps round it are walked up, they are not in the collider)
+  col.rect([x - 3.9, z - 3.9, x + 3.9, z + 3.9], y, y + 8);
   // Fontana's lions at the corners, each with two bodies along the sides, the heads out on the corners
   const yl = p0 + 6.9, Lb = new Local();
   for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
