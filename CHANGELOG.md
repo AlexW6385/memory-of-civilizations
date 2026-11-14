@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.2 — solid pass (2026-11-14)
+
+Every settlement was scanned with the new `tools/float-check` (geometry hanging in the air, rooms open to the sky, places where the walker is stopped by nothing drawn, walls walked through) and its faults fixed: lanterns, lamps and wash lines hung from nothing now hang from beams, chains and posts; objects scaled after being placed (moss, domes, shop goods) stand where they belong; houses and stairs stand on their ground; missing roofs, gables and wall backs are built; colliders follow what is drawn (house lots, shop fronts, bridges, battered walls, boulders, monuments' steps), and walls, stairs and gates that had none have them. In the engine, a top overhead (an awning, a beam, a single sheet of roof) no longer walls the ground under it; rain and snow fall at six tenths and their haze is thin; a room's light no longer changes at its threshold; a hop keeps the walking pace, and the flying pace comes with height. The baked light and the impostors are current.
+
 ## v12.1 — the tour (2026-11-13)
 
 The tour (T, or the map's Tour button) still takes a random city each time, but each visit now has three parts: the arrival view under a caption (name, time, one sentence of the settlement's card), a short walk forward at eye height, then the flight over the town. Each city is shown at mid-morning or mid-afternoon, whichever puts the sun behind the arrival view, and the visitor's own hour comes back when the tour ends. Dragging the mouse looks about and the view eases back; Space or a tap pauses; R goes on; a walking key, the stick or Esc hands the place over where the camera is. Other input no longer ends it.
