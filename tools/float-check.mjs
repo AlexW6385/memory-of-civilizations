@@ -82,7 +82,9 @@ for (const id of ids) {
     return h;
   };
   const un = (k) => { const kz = k % NX - OX; const r = Math.floor(k / NX); return [Math.floor(r / NY) - OX, r % NY - OY, kz]; };
-  const seen = new Set(), stack = [];
+  const seenS = Array.from({ length: 64 }, () => new Set());
+  const seen = { has: (k) => seenS[k % 64].has(k), add: (k) => seenS[k % 64].add(k) };
+  const stack = [];
   for (const k of cells.keys()) { const [i, j, kz] = un(k); if (j * C <= groundAt(i, kz) + 0.8) { seen.add(k); stack.push(k); } }
   const R = 2;   // joined across a gap of one cell
   const flood = (collect) => {
