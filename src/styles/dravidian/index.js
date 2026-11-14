@@ -565,7 +565,7 @@ function ther(el, { bag, col }) {
       bag.add('wood_painted', lathe([[0.13 * k, 0], [0.1 * k, 0.5 * k], [0.07 * k, 0.75 * k], [0.09 * k, 0.86 * k], [0.001, 1.1 * k]], 5, null, px, y0 + 0.08, pz));
     }
   }
-  col.rect([...[P(-L / 2 - 1, -Wd / 2 - 1), P(L / 2 + 1, Wd / 2 + 1)].reduce((r, p) => [Math.min(r[0], p[0]), Math.min(r[1], p[1]), Math.max(r[2], p[0]), Math.max(r[3], p[1])], [Infinity, Infinity, -Infinity, -Infinity])], 0, 9);
+  col.rect([...[P(-L / 2 - 0.35, -Wd / 2 - 0.7), P(L / 2 + 0.35, Wd / 2 + 0.7)].reduce((r, p) => [Math.min(r[0], p[0]), Math.min(r[1], p[1]), Math.max(r[2], p[0]), Math.max(r[3], p[1])], [Infinity, Infinity, -Infinity, -Infinity])], 0, 9);
   // the god's platform: posts at the corners and the middle of the sides, a cloth ceiling over it
   const yp = yb + 3.1, hp = 2.6, o = 0.9;
   for (const [a, b] of [[-L / 2 - o + 0.3, -Wd / 2 - o + 0.3], [L / 2 + o - 0.3, -Wd / 2 - o + 0.3], [-L / 2 - o + 0.3, Wd / 2 + o - 0.3], [L / 2 + o - 0.3, Wd / 2 + o - 0.3], [0, -Wd / 2 - o + 0.3], [0, Wd / 2 + o - 0.3]]) { const [px, pz] = P(a, b); bag.add('gilt_bronze', lathe([[0.12, 0], [0.09, 0.2], [0.09, hp - 0.2], [0.14, hp]], 8, null, px, yp, pz)); }
