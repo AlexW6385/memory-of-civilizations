@@ -27,7 +27,7 @@ export function cellar(el, { bag, col }) {
   bag.add('brick_grey', box(cx - W / 2, 0, cz - D / 2, cx - W / 2 + 0.5, H, cz + D / 2)); bag.add('brick_grey', box(cx + W / 2 - 0.5, 0, cz - D / 2, cx + W / 2, H, cz + D / 2));
   bag.add('brick_grey', box(cx - W / 2, 0, cz - D / 2, cx + W / 2, H + 0.6, cz - D / 2 + 0.5));
   col.rect([cx - W / 2, cz - D / 2, cx - W / 2 + 0.5, cz + D / 2], 0, H); col.rect([cx + W / 2 - 0.5, cz - D / 2, cx + W / 2, cz + D / 2], 0, H); col.rect([cx - W / 2, cz - D / 2, cx + W / 2, cz - D / 2 + 0.5], 0, H + 0.6);
-  bag.add('brick_buff', lathe([[W / 2, 0], [W / 2 - 0.3, 0.5], [0.6, 0.9], [0.001, 1.0]], 12, null, cx, H, cz - 0.2).scale(1, 0.55, 0.9));
+  bag.add('brick_buff', lathe([[W / 2, 0], [W / 2 - 0.3, 0.5], [0.6, 0.9], [0.001, 1.0]], 12, null, 0, 0, 0).scale(1, 0.55, 0.9).translate(cx, H, cz - 0.2));
   bag.add('opening', box(cx - W / 2 + 0.5, 0, cz - D / 2 + 0.5, cx + W / 2 - 0.5, 0.03, cz + D / 2)); 
   bag.add('wood_dark', obox([cx + 1.0, cz + D / 2], [cx + 2.0, cz + D / 2 + 0.4], 0.06, 0, 1.8));
   for (let k = 0; k < 3; k++) bag.add('terracotta', lathe([[0.1, 0], [0.26, 0.1], [0.3, 0.3], [0.2, 0.55], [0.12, 0.62], [0.001, 0.62]], 8, null, cx - 1.9 + k * 0.1, 0, cz + D / 2 + 0.6 + k * 0.6));

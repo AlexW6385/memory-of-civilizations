@@ -104,7 +104,7 @@ function sideStairs() {
     E.push({ t: 'stair', rect: [18, zl, 30, zh], dir: 'e', y0: 6.5, y1: 13, riser: 0.171, base: 6.5, mat: 'limestone' });
     for (const [x0, x1, y0, y1] of [[-14, -2, 0, 6.5], [18, 30, 6.5, 13]]) for (const zz of [zl - 0.3, zh + 0.3]) for (let i = 0; i < 6; i++) {
       const t0 = i / 6, t1 = (i + 1) / 6;
-      E.push({ t: 'block', rect: [x0 + (x1 - x0) * t0, zz - 0.3, x0 + (x1 - x0) * t1, zz + 0.3], y0: y0 - 0.1, y1: y0 + (y1 - y0) * t1 + 0.6, mat: 'limestone', collide: false });
+      E.push({ t: 'block', rect: [x0 + (x1 - x0) * t0, zz - 0.3, x0 + (x1 - x0) * t1, zz + 0.3], y0: y0 - 0.1, y1: y0 + (y1 - y0) * t1 + 0.6, mat: 'limestone' });
     }
   }
   return E;
