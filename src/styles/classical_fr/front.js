@@ -48,7 +48,8 @@ export function gardenFront(ctx, f, rect, y, h, opts = {}) {
   const groups = []; for (const i of all) if (avant.has(i)) { if (groups.length && groups.at(-1)[1] === i - 1) groups.at(-1)[1] = i; else groups.push([i, i]); }
   for (const [a, b] of groups) wallSlab(TH - 0.01, TH + P, a * bw, (b + 1) * bw, y - 0.3, T, archesFor(Array.from({ length: b - a + 1 }, (_, k) => a + k)), holesFor(Array.from({ length: b - a + 1 }, (_, k) => a + k)));
   const dAt = (i) => TH + (avant.has(i) ? P : 0);
-  { const cr = (u0, u1, v0) => { const a = W(u0, 0), b = W(u1, TH + P + 1.2); col.rect([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], v0, T); };
+  // the collider stands as far out as the stone does, bay by bay: the skin, and over the avant-corps its projection
+  { const cr = (u0, u1, v0) => { for (let i = Math.max(0, Math.floor(u0 / bw + 1e-9)); i < nb && i * bw < u1 - 1e-9; i++) { const s0 = Math.max(u0, i * bw), s1 = Math.min(u1, (i + 1) * bw), a = W(s0, 0), b = W(s1, dAt(i) + 0.25); col.rect([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], v0, T); } };
     if (door < 0) cr(0, L, y);
     else { cr(0, uc(door) - gW.r, y); cr(uc(door) + gW.r, L, y); cr(uc(door) - gW.r, uc(door) + gW.r, gW.spring + gW.r); } }
 
