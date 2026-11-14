@@ -54,7 +54,7 @@ const rooms = [
   room('outer court', [ox0 + 2, oz0 + 2, ox1 - 2, oz1 - 2], 0, 'open'),
   room('inner court', [ix0 + 1.5, iz0 + 1.5, ix1 - 1.5, iz1 - 1.5], 0, 'hall'),
   room('crypt', [TOMB.pit[0] + 0.5, TOMB.pit[1] + 0.5, TOMB.pit[2] - 0.5, TOMB.roofZ - 0.2], 0, 'hall'),
-  room('tomb top', [TOMB.rect[0] + 1.8, TOMB.rect[1] + 1, TOMB.rect[2] - 1.8, TOMB.rect[1] + 2.4], TOMB.h, 'hall'),
+  room('tomb top', [TOMB.rect[0] + 1.8, TOMB.rect[1] + 1, TOMB.rect[2] - 1.8, TOMB.rect[1] + 2.4], TOMB.h, 'open'),
 ];
 // from the landing's causeway, over the canal, in through the south gate, round into the inner court and to the crypt's stair
 const walks = [[[-10, 80], [-10, 56], [-10, 8], [-10, -2], [-10, -9], [-10, -16], [1, -16], [1, -22], [1, -27], [-10, -26.6]]];
