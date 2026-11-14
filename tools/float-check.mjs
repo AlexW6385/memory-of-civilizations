@@ -161,6 +161,13 @@ for (const id of ids) {
     let sx = Math.round(A[0] * 2) / 2, sz = Math.round(A[2] * 2) / 2;
     for (let r = 0; r < 40 && isFree(sx, sz) === null; r++) { sx += 0.5; }
     const q = [[sx, sz]]; reach.add(Math.round(sx * 2) * 8192 + Math.round(sz * 2));
+    // (and from the open ground every 15 m: an arrival on a roof or a platform reaches the rest by stairs
+    // the cells here do not follow)
+    for (let x = -lim; x <= lim; x += 15) for (let z = -lim; z <= lim; z += 15) {
+      if (x * x + z * z > lim * lim) continue;
+      const y = isFree(x, z);
+      if (y !== null && Math.abs(y - G.height(x, z)) < 0.05) { const k = Math.round(x * 2) * 8192 + Math.round(z * 2); if (!reach.has(k)) { reach.add(k); q.push([x, z]); } }
+    }
     while (q.length) {
       const [x, z] = q.pop(), y = isFree(x, z);
       for (const [a, b] of [[0.5, 0], [-0.5, 0], [0, 0.5], [0, -0.5]]) {
@@ -210,7 +217,7 @@ for (const id of ids) {
     through.sort((a, b) => b.n - a.n);
   }
   out[id] = { floats, open, air, through };
-  console.log(`${id}: reach ${Math.round(reach.size / 4)} m² on foot from the arrival; ${floats.length} hanging, ${open.length} rooms open to the sky, ${air.length} walls of air (${walls.length} cells)`);
+  console.log(`${id}: reach ${Math.round(reach.size / 4)} m² on foot; ${floats.length} hanging, ${open.length} rooms open to the sky, ${air.length} walls of air (${walls.length} cells)`);
   { const by = new Map(); for (const a of air) { const k = a.why.replace(/[-\d.]+/g, '#').replace(/ \S+ /, ' '); by.set(a.why.split(' ').slice(0, 2).join(' '), (by.get(a.why.split(' ').slice(0, 2).join(' ')) || 0) + a.n); } console.log('  air by cause: ' + [...by].sort((a, b) => b[1] - a[1]).slice(0, 12).map(([k, n]) => `${k} ×${n}`).join(', ')); }
   console.log(`  ${through.length} walls walked through`);
   for (const a of through.slice(0, +(opt.top ?? 25))) console.log(`  thru  at ${a.at}  ${a.n} cells  ${a.of}`);
