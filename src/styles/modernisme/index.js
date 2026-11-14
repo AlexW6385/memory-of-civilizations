@@ -399,11 +399,11 @@ function block(el, ctx) {
     const fr2 = ret.n[0] * (Q[1][0] - cx) + ret.n[1] * (Q[1][1] - cz) > 0 ? ret : frame(Q[2], Q[1]);
     streetFront(bag, fc, 0, fc.L, y, h, mat, rand, true);
     streetFront(bag, fr2, 0, fr2.L, y, h, mat, rand);
-    roofTop(bag, fc, 2, fc.L - 2, y, h, 9, Math.floor(rand() * 1e9) + 1);
+    roofTop(bag, fc, 6, fc.L - 6, y, h, 9, Math.floor(rand() * 1e9) + 1);   // 6 m in from each end keeps the chimneys inside the corner house's trapezoid
     col.segment(fc.at(0, -3), fc.at(fc.L, -3), 6, yb, yt);
     const a = fr2.at(0, -ch), b = fr2.at(fr2.L, 0); col.rect([a[0], a[1], b[0], b[1]], yb, yt);
   }
-  court(el, bag, P8, bounds, o - D, rand);
+  court(el, bag, col, P8, bounds, o - D, rand);
   pavement(el, bag);
 }
 /**
@@ -412,12 +412,12 @@ function block(el, ctx) {
  * middle); in each garden a gravel path from the back door, a pergola by the house on some, a round
  * basin or a well at the far end, pots of plants along the walls.
  */
-function court(el, bag, P8, bounds, q, rand) {
+function court(el, bag, col, P8, bounds, q, rand) {
   const [cx, cz] = el.c, y = el.y ?? 0, dz = el.dz ?? 0, yAt = (z) => y + dz * (z - cz), o = (el.s ?? 70) / 2, ch = el.ch ?? 12, D = el.d ?? 18;
-  const wall = (p0, p1, h = 2.1) => { const ya = Math.min(yAt(p0[1]), yAt(p1[1])); bag.add(P, orientedBox(p0, p1, 0.3, ya - 0.5, ya + h)); bag.add(S, orientedBox(p0, p1, 0.42, ya + h, ya + h + 0.1)); };
+  const wall = (p0, p1, h = 2.1) => { const ya = Math.min(yAt(p0[1]), yAt(p1[1])); bag.add(P, orientedBox(p0, p1, 0.3, ya - 0.5, ya + h)); bag.add(S, orientedBox(p0, p1, 0.42, ya + h, ya + h + 0.1)); col.segment(p0, p1, 0.3, ya - 0.5, ya + h); };
   // the diagonals, corner to centre (stopping short of the middle where the four meet in a small pier)
   for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) wall([cx + sx * q, cz + sz * q], [cx + sx * 0.3, cz + sz * 0.3]);
-  bag.add(S, box(cx - 0.45, y - 0.5, cz - 0.45, cx + 0.45, yAt(cz) + 2.4, cz + 0.45));
+  bag.add(S, box(cx - 0.45, y - 0.5, cz - 0.45, cx + 0.45, yAt(cz) + 2.4, cz + 0.45)); col.rect([cx - 0.45, cz - 0.45, cx + 0.45, cz + 0.45], y - 0.5, yAt(cz) + 2.4);
   for (let k = 0; k < 4; k++) {
     const fr = frame(P8[2 * k], P8[2 * k + 1]), xs = (s) => s - (o - ch);          // s along the side → the offset from the side's middle
     const cuts = [...new Set(bounds[k].map((v) => +v.toFixed(2)))].sort((a, b) => a - b);
@@ -438,9 +438,11 @@ function court(el, bag, P8, bounds, q, rand) {
         bag.add(S, lathe([[1.0, -0.3], [1.0, 0.45], [1.1, 0.5], [1.1, 0.58], [0.85, 0.58], [0.85, 0.15], [0.001, 0.15]], 16, null, end[0], ye, end[1]));
         bag.add('water', lathe([[0.86, 0.38], [0.001, 0.38]], 16, null, end[0], ye, end[1]));
         bag.add(S, lathe([[0.12, 0.15], [0.08, 0.6], [0.14, 0.7], [0.001, 0.8]], 8, null, end[0], ye, end[1]));
+        col.circle(end[0], end[1], 1.1, ye - 0.3, ye + 0.6);
       } else {
         // a well head with its iron hoop and pulley
         bag.add(S, lathe([[0.7, -0.3], [0.7, 0.8], [0.78, 0.85], [0.78, 0.95], [0.55, 0.95], [0.55, 0.3], [0.001, 0.3]], 14, null, end[0], ye, end[1]));
+        col.circle(end[0], end[1], 0.78, ye - 0.3, ye + 0.95);
         const n = [fr.n[0], fr.n[1]], t = [fr.u[0], fr.u[1]];
         for (const sg of [-1, 1]) bag.add(IRON, rod([end[0] + t[0] * sg * 0.62, ye + 0.9, end[1] + t[1] * sg * 0.62], [end[0] + t[0] * sg * 0.3, ye + 2.0, end[1] + t[1] * sg * 0.3], 0.03, 5));
         bag.add(IRON, rod([end[0] - t[0] * 0.32, ye + 2.0, end[1] - t[1] * 0.32], [end[0] + t[0] * 0.32, ye + 2.0, end[1] + t[1] * 0.32], 0.03, 5));
@@ -686,7 +688,9 @@ function pedrera(el, { bag, col }) {
     quad(wall, [a[0], yb, a[1]], [b[0], yb, b[1]], [b[0], yt, b[1]], [a[0], yt, a[1]]);
     face(wall, j, b[1] - a[1], 0, -(b[0] - a[0]));
   }
-  col.segment(W(-35, -1), W(-35, -23), 4, yb, yt); col.segment(W(-35, -23), W(-23, -35), 4, yb, yt); col.segment(W(-23, -35), W(-1, -35), 4, yb, yt);
+  // the front's colliders: 4 m thick along the smoothed front, their outer faces 0.15 m out from the body's face (the bands over them start at 4.2 m)
+  const pc = (k) => { const { p, n } = path[k]; return [p[0] - n[0] * 2.6, p[1] - n[1] * 2.6]; };
+  for (let k = 0; k < path.length - 1; k += 8) col.segment(pc(k), pc(Math.min(k + 8, path.length - 1)), 4, yb, yt);
   col.rect([cx - 34, cz - 34, cx - 17, cz - 1], yb, yt); col.rect([cx - 34, cz - 34, cx - 1, cz - 17], yb, yt);
   // the bands, one at each floor's edge
   const B = [], qo = (A, C, E, G, ref) => { const j = B.length; quad(B, A, C, E, G); const m = [(A[0] + E[0]) / 2 - ref[0], (A[1] + E[1]) / 2 - ref[1], (A[2] + E[2]) / 2 - ref[2]]; face(B, j, ...m); };

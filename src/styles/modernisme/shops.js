@@ -274,7 +274,7 @@ export function makeShops(H) {
     // colliders of the furnishing in the shop's frame (the same layout as the furnishing was built from)
     const mapS = (s) => (flip ? s1 - s : s0 + s);
     const furn = (q0, q1, d0, d1, y1) => wr(Math.min(mapS(q0), mapS(q1)), Math.max(mapS(q0), mapS(q1)), -d1, -d0, FL, FL + y1);
-    furn(...Ly.counter, 1.1); for (const sh2 of Ly.shelves) furn(sh2[0], sh2[1], sh2[2], sh2[3], 3.0); for (const t of Ly.tables) furn(...t, 0.9);
+    furn(...Ly.counter, 1.1); for (const sh2 of Ly.shelves) { if (sh.trade === 'perruqueria' && sh2[4] === 'd') continue; furn(sh2[0], sh2[1], sh2[2], sh2[3], 3.0); }   // the hairdresser has no side shelves for (const t of Ly.tables) furn(...t, 0.9);
     if (sh.trade === 'forn') { const s = W / 2; furn(s - 1.3, s + 1.3, DD - 1.7, DD, 2.0); }
     if (lights) { const q = fr.at(s0 + W / 2, -4.0); lights.push({ at: [q[0], FL + 3.6, q[1]], color: '#ffc98a', intensity: 6, distance: 8 }); }
   }

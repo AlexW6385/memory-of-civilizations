@@ -86,6 +86,8 @@ export const CELL = [34, 32], ORG = [-323, -168], LANE = 5, ZONE_R = 292;
 const lotOverlapsFixed = (rect) => RESERVED.some((q) => rect[0] < q[2] + 2 && rect[2] > q[0] - 2 && rect[1] < q[3] + 2 && rect[3] > q[1] - 2);
 const bad = (x, z, m) => inRiver(x, z, m) || inMoat(x, z, m) || Math.hypot(x, z) > ZONE_R;
 let LOTS = null;
+/** True when the river or the moat crosses the rect (the corners alone miss a ditch narrower than the lot). */
+const overWater = (r) => { for (let x = r[0]; x <= r[2] + 1e-6; x += 2) for (let z = r[1]; z <= r[3] + 1e-6; z += 2) if (inRiver(x, z, 1) || inMoat(x, z, 1)) return true; return false; };
 /**
  * The lots: { rect, front ('n' | 's'), kind ('court' | 'pits' | 'row' | 'workshop'), trade, seed, open }.
  * `court`: a main house on a rammed foundation with pit houses; `pits`: pit houses round a hearth yard;
@@ -107,7 +109,7 @@ export function lots() {
       const rect = [cx - w / 2, cz - d / 2, cx + w / 2, cz + d / 2];
       const seed = Math.floor(rand() * 1e6), r = rand(), front = rand() < 0.5 ? 'n' : 's';
       const near = Math.hypot(cx - AXIS, cz + 30);
-      if (lotOverlapsFixed(rect) || [[rect[0], rect[1]], [rect[2], rect[1]], [rect[0], rect[3]], [rect[2], rect[3]]].some(([a, b]) => bad(a, b, 3))) continue;
+      if (lotOverlapsFixed(rect) || [[rect[0], rect[1]], [rect[2], rect[1]], [rect[0], rect[3]], [rect[2], rect[3]]].some(([a, b]) => bad(a, b, 3)) || overWater(rect)) continue;
       if (near > 235 && r < 0.12) continue;                                           // fields between the clusters
       let kind = near < 140 ? (r < 0.5 ? 'court' : r < 0.78 ? 'pits' : 'row') : (r < 0.25 ? 'court' : r < 0.55 ? 'pits' : 'row');
       let trade;

@@ -285,12 +285,12 @@ function trade(c, kind, o) {
   if (kind === 'baker') {
     // the oven of rubble under its dome at the back, its mouth glowing; the kneading trough, a table of loaves, a stack of wood, the peel
     K('schist_rubble', L - 2.4, D - 2.5, L - 0.5, D - 0.5, fy, fy + 0.9);
-    bag.add('schist_rubble', lathe([[0.95, 0], [0.9, 0.22], [0.7, 0.46], [0.38, 0.62], [0.001, 0.7]], 14, null, ...c.P(L - 1.45, D - 1.5), fy + 0.9));
+    bag.add('schist_rubble', lathe([[0.95, 0], [0.9, 0.22], [0.7, 0.46], [0.38, 0.62], [0.001, 0.7]], 14, null, c.P(L - 1.45, D - 1.5)[0], fy + 0.9, c.P(L - 1.45, D - 1.5)[1]));
     B('opening', L - 1.85, D - 2.54, L - 1.05, D - 2.5, fy + 0.95, fy + 1.4, false); B('flame', L - 1.75, D - 2.5, L - 1.15, D - 2.2, fy + 0.98, fy + 1.3, false);
     K('timber', 0.8, D - 1.5, 2.9, D - 0.8, fy + 0.62, fy + 0.72); for (const u of [0.95, 2.75]) B('timber', u, D - 1.4, u + 0.1, D - 0.9, fy, fy + 0.62, false);
     c.B('sacking', 3.2, D - 1.3, 4.0, D - 0.8, fy, fy + 0.6, true);
     K('timber', L / 2 - 1.0, D / 2 - 0.4, L / 2 + 0.9, D / 2 + 0.4, fy + 0.74, fy + 0.8); for (const [a, b] of [[-0.95, -0.35], [0.8, -0.35], [-0.95, 0.3], [0.8, 0.3]]) B('timber', L / 2 + a, D / 2 + b, L / 2 + a + 0.07, D / 2 + b + 0.07, fy, fy + 0.74, false);
-    for (let k = 0; k < 9; k++) bag.add('hide_tan', lathe([[0.001, 0], [0.13, 0.01], [0.12, 0.06], [0.07, 0.1], [0.001, 0.11]], 8, null, ...c.P(L / 2 - 0.8 + (k % 5) * 0.4, D / 2 - 0.2 + Math.floor(k / 5) * 0.4), fy + 0.8));
+    for (let k = 0; k < 9; k++) bag.add('hide_tan', lathe([[0.001, 0], [0.13, 0.01], [0.12, 0.06], [0.07, 0.1], [0.001, 0.11]], 8, null, c.P(L / 2 - 0.8 + (k % 5) * 0.4, D / 2 - 0.2 + Math.floor(k / 5) * 0.4)[0], fy + 0.8, c.P(L / 2 - 0.8 + (k % 5) * 0.4, D / 2 - 0.2 + Math.floor(k / 5) * 0.4)[1]));
     K('wood_dark', 0.55, dep + 0.8, 1.1, dep + 2.0, fy, fy + 1.0);
     B('timber', L - 2.6, D - 2.2, L - 2.56, D - 0.9, fy + 0.5, fy + 1.9, false);
     for (let u = 1.2; u < L - 3; u += 0.4) fill(bag, 'hide_tan', c, u, dep + 0.5 + (u * 7 % 0.5), fy, 0.1, 0.1);
@@ -315,8 +315,8 @@ function trade(c, kind, o) {
     hearth(L - 0.5, D / 2);
     for (const v of [dep + 1.9, dep + 3.4]) { B('timber', 1.4, v - 0.4, L - 3.2, v + 0.4, fy + 0.72, fy + 0.78, true); for (const u of [1.6, L / 2 - 0.6, L - 3.4]) B('timber', u - 0.05, v - 0.35, u + 0.05, v + 0.35, fy, fy + 0.72, false); B('timber', 1.4, v + 0.5, L - 3.2, v + 0.85, fy + 0.4, fy + 0.45, true); if (v < D - 2.5) B('timber', 1.4, v - 0.85, L - 3.2, v - 0.5, fy + 0.4, fy + 0.45, true); for (let k = 0; k < 4; k++) fill(bag, k % 2 ? 'glaze_green' : 'pottery_dark', c, 2.0 + k * 0.9, v + (k % 2) * 0.1, fy + 0.78, 0.06, 0.12); }
     K('timber', 0.6, D - 1.0, 3.4, D - 0.5, fy, fy + 1.0);
-    for (const u of [4.0, 4.7, 5.4]) if (u < L - 2.5) { bag.add('timber', lathe([[0.3, 0], [0.36, 0.3], [0.36, 0.7], [0.3, 1.0], [0.001, 1.0]], 12, null, ...c.P(u, D - 0.9), fy)); bag.add('iron', lathe([[0.355, 0.15], [0.355, 0.2], [0.001, 0.2]], 12, null, ...c.P(u, D - 0.9), fy)); }
-    for (let k = 0; k < 4; k++) { const u = 1.5 + k * 1.1; B('rope_fibre', u - 0.01, dep + 2.4, u + 0.01, dep + 2.42, ceil - 0.6, ceil - 0.22, false); bag.add('terracotta', lathe([[0.001, 0], [0.1, 0.1], [0.12, 0.25], [0.07, 0.42], [0.001, 0.47]], 8, null, ...c.P(u, dep + 2.4), ceil - 1.1)); }
+    for (const u of [4.0, 4.7, 5.4]) if (u < L - 2.5) { bag.add('timber', lathe([[0.3, 0], [0.36, 0.3], [0.36, 0.7], [0.3, 1.0], [0.001, 1.0]], 12, null, c.P(u, D - 0.9)[0], fy, c.P(u, D - 0.9)[1])); bag.add('iron', lathe([[0.355, 0.15], [0.355, 0.2], [0.001, 0.2]], 12, null, c.P(u, D - 0.9)[0], fy, c.P(u, D - 0.9)[1])); }
+    for (let k = 0; k < 4; k++) { const u = 1.5 + k * 1.1; B('rope_fibre', u - 0.01, dep + 2.4, u + 0.01, dep + 2.42, ceil - 0.6, ceil - 0.22, false); bag.add('terracotta', lathe([[0.001, 0], [0.1, 0.1], [0.12, 0.25], [0.07, 0.42], [0.001, 0.47]], 8, null, c.P(u, dep + 2.4)[0], ceil - 1.1, c.P(u, dep + 2.4)[1])); }
     return;
   }
   if (kind === 'weaver') {

@@ -99,7 +99,7 @@ function room(bag, col, el, { wall, y, st, f, rand }, lights) {
     } else if (use === 'barber') {
       // a stool, a basin on a stand, a shelf of bottles, a brass dish
       const p = P(L / 2, D * 0.55); bag.add('wood_dark', lathe([[0.26, 0], [0.2, 0.2], [0.24, 0.45], [0.001, 0.45]], 8, null, p[0], fy, p[1])); col.circle(p[0], p[1], 0.28, fy, fy + 0.5);
-      B('wood_dark', T + 0.2, D - T - 0.5, T + 0.8, D - T - 0.1, fy, fy + 0.8, true); bag.add('bronze', lathe([[0.001, 0], [0.22, 0.02], [0.24, 0.12], [0.001, 0.1]], 12, null, ...P(T + 0.5, D - T - 0.3), fy + 0.8));
+      B('wood_dark', T + 0.2, D - T - 0.5, T + 0.8, D - T - 0.1, fy, fy + 0.8, true); bag.add('bronze', lathe([[0.001, 0], [0.22, 0.02], [0.24, 0.12], [0.001, 0.1]], 12, null, P(T + 0.5, D - T - 0.3)[0], fy + 0.8, P(T + 0.5, D - T - 0.3)[1]));
       shelf(L - T - 1.8, L - T - 0.1, D - T - 0.32, [1.0, 1.5]);
     } else if (use === 'potter') {
       for (let q = 0; q < 9; q++) h(pick(rand, ['terracotta', 'glaze_blue', 'glaze_green', 'pottery_dark', 'glaze_white']), T + 0.6 + (q % 5) * 0.55, D * 0.5 + Math.floor(q / 5) * 0.8, 0.2, 0.4, 0);
