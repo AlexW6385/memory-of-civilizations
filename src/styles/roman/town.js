@@ -41,15 +41,17 @@ function insula(el, { bag, col }) {
   col.rect(el.rect, y - 0.5, y + H); col.floor(el.rect, y + H);
   /** The dressing tools of a face: d negative toward the street, as in street.js. */
   const tl = (F) => ({ bag, col, y, P: (u, d) => [F.a[0] + F.u[0] * u - F.o[0] * d, F.a[1] + F.u[1] * u - F.o[1] * d],
-    B: (mat, u0, u1, d0, d1, ya, yb) => fb(F, u0, u1, y + ya, y + yb, -d1, -d0, mat) });
+    B: (mat, u0, u1, d0, d1, ya, yb, solid) => fb(F, u0, u1, y + ya, y + yb, -d1, -d0, mat, solid) });
   const faces = [
     { a: [x0, z0], u: [1, 0], o: [0, -1], L: x1 - x0 }, { a: [x0, z1], u: [1, 0], o: [0, 1], L: x1 - x0 },
     { a: [x0, z0], u: [0, 1], o: [-1, 0], L: z1 - z0 }, { a: [x1, z0], u: [0, 1], o: [1, 0], L: z1 - z0 },
   ];
   /** A box on a face: along u0…u1, heights y0…y1, from d0 to d1 out from the wall's plane. */
-  const fb = (F, u0, u1, ya, yb, d0, d1, mat) => {
+  const fb = (F, u0, u1, ya, yb, d0, d1, mat, solid = false) => {
     const A = [F.a[0] + F.u[0] * u0 + F.o[0] * d0, F.a[1] + F.u[1] * u0 + F.o[1] * d0], B = [F.a[0] + F.u[0] * u1 + F.o[0] * d1, F.a[1] + F.u[1] * u1 + F.o[1] * d1];
-    bag.add(mat, box(Math.min(A[0], B[0]), ya, Math.min(A[1], B[1]), Math.max(A[0], B[0]), yb, Math.max(A[1], B[1])));
+    const r = [Math.min(A[0], B[0]), Math.min(A[1], B[1]), Math.max(A[0], B[0]), Math.max(A[1], B[1])];
+    bag.add(mat, box(r[0], ya, r[1], r[2], yb, r[3]));
+    if (solid) col.rect(r, ya, yb);
   };
   const long = faces[0].L >= faces[2].L ? (rand() < 0.5 ? 0 : 1) : (rand() < 0.5 ? 2 : 3);
   const balcony = !far && rand() < (el.balcony ?? 0.5);
@@ -274,6 +276,7 @@ function stadium(el, ctx) {
       if (pr.corner) continue;
       const c = P(along(pr.v, pr.dn, FT / 2 + 0.15)), du = V(pr.du);
       orderColumn(bag, kind, c[0], c[1], -Math.atan2(du[1], du[0]), k ? yb : y, k ? ch : ch - (y - yb), d, 'travertine');
+      if (k === 0) col.circle(c[0], c[1], 0.6, y, yt);
     }
     // the entablature: architrave, frieze, cornice
     for (const [e0, e1, pr] of [[0, 0.38, 0.18], [0.38, 0.7, 0.12], [0.7, EH, 0.45]]) {

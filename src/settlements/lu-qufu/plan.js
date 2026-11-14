@@ -102,7 +102,7 @@ flight(0, SAGE.rect[3] + 1.4, SAGE.y, 'n');
 // ── the rooms of the halls: the shrines, the sage slabs, the tablets of the Wu, the books of Kuiwen ──
 E.push({ t: 'lu_inside', kind: 'shrine', rect: QIN.rect, y: QIN.y, seed: 3, scale: 0.55 });
 E.push({ t: 'lu_inside', kind: 'sage', rect: SAGE.rect, y: SAGE.y, seed: 5 });
-E.push({ t: 'lu_inside', kind: 'kuiwen', rect: KUIWEN.rect, y: KUIWEN.y, seed: 9 });
+E.push({ t: 'lu_inside', kind: 'kuiwen', rect: KUIWEN.rect, y: KUIWEN.y, seed: 9, ceil: KUIWEN.y + 7.45 });
 for (const w of WU) E.push({ t: 'lu_inside', kind: 'wu', rect: w.rect, y: 0.45, front: w.front });
 for (const s of SIDE) E.push({ t: 'lu_inside', kind: 'shrine', rect: s.rect, y: 0.45, seed: s.c > 0 ? 21 : 22, scale: 0.45 });
 
