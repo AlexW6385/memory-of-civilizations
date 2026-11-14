@@ -12,6 +12,7 @@
 import { buildPlan } from '../src/core/build.js';
 import { MODULES, GROUNDS } from '../src/settlements/grounds.js';
 import { SITES } from '../src/planet/sites.js';
+import { ARRIVALS } from '../src/planet/arrivals.js';
 import { writeFile } from 'node:fs/promises';
 import { topField } from '../src/core/collide.js';
 import { SiteWorld } from './lib/site.mjs';
@@ -30,7 +31,12 @@ for (const id of ids) {
   const plans = [...(mod.landmarks || []).map((l) => l.plan), ...(mod.town ? await mod.town() : [])];
   const cw = new SiteWorld();
   cw.terrain = (x, z) => G.height(x, z); cw.water = (x, z, y) => G.water(x, z, y); cw.waterLevel = (x, z) => G.waterLevel(x, z);
-  const cells = new Map();            // cell → index of the plan/material that first marked it
+  // cell → index of the plan/material that first marked it (in 64 maps: one Map holds 16 M entries at most)
+  const shard = Array.from({ length: 64 }, () => new Map());
+  const cells = {
+    has: (k) => shard[k % 64].has(k), get: (k) => shard[k % 64].get(k), set: (k, v) => shard[k % 64].set(k, v),
+    *keys() { for (const m of shard) yield* m.keys(); },
+  };
   const tags = [];                    // [planId, mat]
 
   const mark = (x, y, z, tag) => { const k = key(Math.floor(x / C), Math.floor(y / C), Math.floor(z / C)); if (!cells.has(k)) cells.set(k, tag); };
@@ -52,7 +58,7 @@ for (const id of ids) {
         const ax = P[a], ay = P[a + 1], az = P[a + 2], bx = P[b], by = P[b + 1], bz = P[b + 2], cx = P[c], cy = P[c + 1], cz = P[c + 2];
         if (!Number.isFinite(ax + ay + az + bx + by + bz + cx + cy + cz)) continue;
         const L = Math.max(Math.hypot(bx - ax, by - ay, bz - az), Math.hypot(cx - ax, cy - ay, cz - az), Math.hypot(cx - bx, cy - by, cz - bz));
-        const m = Math.min(64, Math.max(1, Math.ceil(L / (C * 0.7))));
+        const m = Math.min(700, Math.max(1, Math.ceil(L / (C * 0.7))));
         for (let u = 0; u <= m; u++) for (let v = 0; v <= m - u; v++) {
           const s = u / m, r = v / m, q = 1 - s - r;
           mark(ax * q + bx * s + cx * r, ay * q + by * s + cy * r, az * q + bz * s + cz * r, tag);
@@ -146,13 +152,31 @@ for (const id of ids) {
   const walls = [], free = new Map();
   const isFree = (x, z) => { const kk = Math.round(x * 2) * 8192 + Math.round(z * 2); let f = free.get(kk); if (f === undefined) { const y = stand(x, z); f = Number.isFinite(y) && !G.water(x, z, y) && !why(x, z, y) ? y : null; free.set(kk, f); } return f; };
   const lim = radius - 6;
+  // where the walker can get to from the arrival, over free cells a step apart in height
+  const reach = new Set();
+  {
+    const A = ARRIVALS[id] || [0, 0, 0];
+    let sx = Math.round(A[0] * 2) / 2, sz = Math.round(A[2] * 2) / 2;
+    for (let r = 0; r < 40 && isFree(sx, sz) === null; r++) { sx += 0.5; }
+    const q = [[sx, sz]]; reach.add(Math.round(sx * 2) * 8192 + Math.round(sz * 2));
+    while (q.length) {
+      const [x, z] = q.pop(), y = isFree(x, z);
+      for (const [a, b] of [[0.5, 0], [-0.5, 0], [0, 0.5], [0, -0.5]]) {
+        const nx = x + a, nz = z + b, k = Math.round(nx * 2) * 8192 + Math.round(nz * 2);
+        if (reach.has(k) || nx * nx + nz * nz > lim * lim) continue;
+        const f = isFree(nx, nz);
+        if (f !== null && Math.abs(f - y) <= STEP + 0.05) { reach.add(k); q.push([nx, nz]); }
+      }
+    }
+  }
+  const reached = (x, z) => reach.has(Math.round(x * 2) * 8192 + Math.round(z * 2));
   for (let x = -lim; x <= lim; x += 0.5) for (let z = -lim; z <= lim; z += 0.5) {
     if (x * x + z * z > lim * lim) continue;
     if (isFree(x, z) !== null) continue;
     const y = stand(x, z);
     if (!Number.isFinite(y) || G.water(x, z, y) || drawn(x, z, y)) continue;
     let nb = false;
-    for (const [a, b] of [[0.5, 0], [-0.5, 0], [0, 0.5], [0, -0.5]]) { const f = isFree(x + a, z + b); if (f !== null && Math.abs(f - y) < 0.5) nb = true; }
+    for (const [a, b] of [[0.5, 0], [-0.5, 0], [0, 0.5], [0, -0.5]]) { const f = isFree(x + a, z + b); if (f !== null && Math.abs(f - y) < 0.5 && reached(x + a, z + b)) nb = true; }
     if (nb) walls.push({ at: [x, +y.toFixed(1), z], why: why(x, z, y) });
   }
   // (neighbouring cells are one wall)
@@ -170,8 +194,8 @@ for (const id of ids) {
     const hit = new Map();
     for (let x = -lim; x <= lim; x += 0.5) for (let z = -lim; z <= lim; z += 0.5) {
       if (x * x + z * z > lim * lim) continue;
-      const y = isFree(x + 0.25, z + 0.25); if (y === null) continue;
-      const tg = solid(x + 0.25, z + 0.25, y); if (tg == null) continue;
+      const y = isFree(x, z); if (y === null || !reached(x, z)) continue;
+      const tg = solid(x, z, y); if (tg == null) continue;
       hit.set(Math.round(x * 2) * 8192 + Math.round(z * 2), [x, y, z, tg]);
     }
     const used = new Set();
@@ -184,7 +208,7 @@ for (const id of ids) {
     through.sort((a, b) => b.n - a.n);
   }
   out[id] = { floats, open, air, through };
-  console.log(`${id}: ${floats.length} hanging, ${open.length} rooms open to the sky, ${air.length} walls of air (${walls.length} cells)`);
+  console.log(`${id}: reach ${Math.round(reach.size / 4)} m² on foot from the arrival; ${floats.length} hanging, ${open.length} rooms open to the sky, ${air.length} walls of air (${walls.length} cells)`);
   { const by = new Map(); for (const a of air) { const k = a.why.replace(/[-\d.]+/g, '#').replace(/ \S+ /, ' '); by.set(a.why.split(' ').slice(0, 2).join(' '), (by.get(a.why.split(' ').slice(0, 2).join(' ')) || 0) + a.n); } console.log('  air by cause: ' + [...by].sort((a, b) => b[1] - a[1]).slice(0, 12).map(([k, n]) => `${k} ×${n}`).join(', ')); }
   console.log(`  ${through.length} walls walked through`);
   for (const a of through.slice(0, +(opt.top ?? 25))) console.log(`  thru  at ${a.at}  ${a.n} cells  ${a.of}`);
