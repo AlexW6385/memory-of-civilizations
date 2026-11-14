@@ -4,7 +4,7 @@
 // eye (from rest, first straight up) and flies a smooth low route across the whole town, past the landmark.
 // The mouse looks about (the view comes back by itself), Space or a tap pauses, R goes on to the next, and
 // a walking key, the stick or Esc hands the place over to the visitor where the camera is.
-import { footing, EYE } from '../core/walk.js';
+import { footing, move, EYE } from '../core/walk.js';
 import { ARRIVALS } from '../planet/arrivals.js';
 import { BUILT } from '../planet/relief.js';
 import { nearest, take, visit } from './order.js';
@@ -163,6 +163,29 @@ export class Tour {
     if (id === this.runId) this.stop();
   }
 
+  /** The clearest way on foot from F near the heading `yaw`: { dir (offset from yaw, rad), far (m walked before stopped, of 12) }. */
+  way(F, yaw, was) {
+    const C = this.controls.collide;
+    let best = { dir: 0, far: -1, score: -1e9 };
+    for (const d of [0, 0.2, -0.2, 0.42, -0.42, 0.7, -0.7, 1.0, -1.0, 1.4, -1.4]) {
+      const a = yaw + d, ux = -Math.sin(a), uz = -Math.cos(a), P = { x: F.x, y: F.y, z: F.z, vy: 0 };
+      let far = 0;
+      try {
+        for (let i = 0; i < 48; i++) {
+          const x0 = P.x, z0 = P.z;
+          move(P, ux * 0.25, uz * 0.25, 1 / 60, C);
+          const adv = (P.x - x0) * ux + (P.z - z0) * uz;
+          if (adv < 0.12 || Math.abs(P.y - F.y) > 3) break;
+          far += adv;
+        }
+      } catch { /* this way is not tried */ }
+      // (the straighter the better; not straight back into the way just found shut)
+      const score = far - 3.5 * Math.abs(d) - (was !== undefined && Math.abs(d - was) < 0.05 ? 4 : 0);
+      if (score > best.score) best = { dir: d, far, score };
+    }
+    return best;
+  }
+
   /** The height of the highest ground or building top under (x, z) in the settlement's frame. */
   ground(x, z) {
     const C = this.controls.collide;
@@ -275,11 +298,17 @@ export class Tour {
     if (L.t <= B.w1) {
       // the walk: forward along the arrival's own line at a stroll, eased in and out; where the way is shut
       // (a wall, water, a crowd) it ends early and the camera lifts off from there
-      const k = Math.min(1, (L.t - HOLD) / 1.5, (B.w1 - L.t) / 1.5);
-      C.stick.x = Math.sin(this.oy) * 0.5 * k; C.stick.y = -Math.cos(this.oy) * 0.5 * k;   // (toward the view's own line, whichever way the visitor looks)
+      // (the way is tried first: of the headings within 80° of the view's line the one that goes farthest
+      // before anything stops it, the straighter preferred; tried again whenever the walker is stopped)
+      if (B.dir === undefined || B.still > 0.5) {
+        const way = this.way(F, B.yaw, B.dir);
+        B.still = 0; B.dir = way.dir;
+        if (way.far < 2.5) { B.w1 = L.t; C.stick.x = C.stick.y = 0; return; }     // shut in: lift off from here
+      }
+      const k = Math.min(1, (L.t - HOLD) / 1.5, (B.w1 - L.t) / 1.5), dl = this.oy - B.dir;
+      C.stick.x = Math.sin(dl) * 0.5 * k; C.stick.y = -Math.cos(dl) * 0.5 * k;   // (along the chosen way, whichever way the visitor looks)
       const moved = Math.hypot(F.x - B.x, F.z - B.z); B.x = F.x; B.z = F.z;
-      B.still = moved < 0.25 * dt ? B.still + dt : 0;
-      if (B.still > 1.2 && L.t > HOLD + 2.5) { B.w1 = L.t; C.stick.x = C.stick.y = 0; }
+      B.still = moved < 0.25 * dt && k > 0.5 ? B.still + dt : 0;
       return;
     }
     C.enabled = false; C.stick.x = C.stick.y = 0;

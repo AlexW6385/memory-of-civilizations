@@ -212,64 +212,49 @@ export const PROMO = {
   title: ['Memory of Civilizations', '文明的记忆'],
   sub: 'Ninety-four towns of the world, as they stood · walk them in the browser',
   url: 'alexw6385.github.io/memory-of-civilizations',
-  // (no hour: mid-morning or mid-afternoon, whichever puts the sun behind the camera)
+  // A shot is one move in one settlement:
+  //   ground  from the arrival view: f forward, s to the right, u up from the eye (m, start → end), yaw and
+  //           pitch added to the arrival's (rad, start → end)
+  //   fly     round the landmark: a the bearing from the arrival's side (degrees), d the distance and h the
+  //           height over the landmark's ground (m), start → end, looking at the landmark `look` m up
+  // (no hour: mid-morning or mid-afternoon, whichever puts the sun behind the arrival view)
   shots: [
-    { site: 'ming-suzhou', kind: 'arrive', t: 4 },
-    { site: 'qing-beijing', kind: 'orbit', t: 4 },
-    { site: 'edo-himeji', kind: 'arrive', t: 3.5 },
-    { site: 'song-kaifeng', kind: 'arrive', t: 3 },
-    { site: 'machu-picchu', kind: 'orbit', t: 3.5 },
-    { site: 'venice', kind: 'arrive', t: 3.5 },
-    { site: 'florence', kind: 'orbit', t: 3.5 },
-    { site: 'thebes', kind: 'arrive', t: 3 },
-    { site: 'angkor', kind: 'arrive', t: 3.5 },
-    { site: 'isfahan', kind: 'arrive', t: 3 },
-    { site: 'athens', kind: 'arrive', t: 3 },
-    { site: 'song-hangzhou', kind: 'arrive', t: 3 },
-    { site: 'ming-suzhou', kind: 'rise', t: 4.5 },
+    { site: 'ming-suzhou', kind: 'ground', f: [-1, 2], s: [-2.5, 2.5], u: [-0.5, -0.2], t: 5 },
   ],
 };
 
 const yawTo = (dx, dz) => Math.atan2(-dx, -dz);
 const near = (a, ref) => a + Math.round((ref - a) / (2 * Math.PI)) * 2 * Math.PI;
+const lerp2 = (v, u) => (Array.isArray(v) ? v[0] + (v[1] - v[0]) * u : v);
 
-/** The keys of a promo shot, in its settlement's frame (the settlement must be built: the ground is asked). */
 export const promoHour = (shot) => shot.hour ?? (-Math.sin((ARRIVALS[shot.site] || [0, 0, 0, 0])[3]) > 0 ? 15.75 : 9.5);
 
+/** The keys of a promo shot, in its settlement's frame (the settlement must be built: the ground is asked). */
 export function promoKeys(palace, shot) {
   const S = SITES.find((s) => s.id === shot.site), R = clamp(S?.radius || 200, 80, 420);
   const A = ARRIVALS[shot.site] || [0, null, 60, 0, 0.1], C = palace.world.collide;
   const g = (x, z) => { let t = 0; try { t = C.terrain(x, z); } catch { /* 0 */ } try { const f = footing(C, x, z, t + 400); if (Number.isFinite(f)) t = Math.max(t, f); } catch { /* terrain */ } return t; };
-  const ax = A[0], az = A[2], yaw = A[3], pitch = A[4], fx = -Math.sin(yaw), fz = -Math.cos(yaw);
+  const ax = A[0], az = A[2], yaw = A[3], pitch = A[4], fx = -Math.sin(yaw), fz = -Math.cos(yaw), rx = -fz, rz = fx;
   let ground0 = 0; try { ground0 = Math.max(C.terrain(ax, az), C.groundAt(ax, az, C.terrain(ax, az) + 3)); } catch { /* 0 */ }
   const eye = (Number.isFinite(A[1]) && A[1] !== null ? Math.max(A[1], ground0) : ground0) + 1.62;
   // the landmark: where the arrival's line of sight passes nearest the centre (if near it), else the centre
   const tt = Math.max(0, -(ax * fx + az * fz));
   let tx = ax + fx * tt, tz = az + fz * tt;
   if (Math.hypot(tx, tz) > 0.35 * R) { tx = 0; tz = 0; }
-  const ty = g(tx, tz) * 0.5 + (C.terrain(tx, tz) || 0) * 0.5 + 0.05 * R;
-  const look = (x, y, z) => ({ p: [x, y, z], yaw: yawTo(tx - x, tz - z), pitch: Math.atan2(ty - y, Math.hypot(tx - x, tz - z) || 1) });
-  let keys;
-  if (shot.kind === 'arrive') {
-    keys = [0, 0.5, 1].map((u) => P(ax + fx * 4 * u, eye + 2.6 * u * u, az + fz * 4 * u, yaw, pitch - 0.05 * u));
-  } else if (shot.kind === 'rise') {
-    keys = [0, 0.5, 1].map((u) => {
-      const x = ax - fx * 18 * u * u, z = az - fz * 18 * u * u, y = Math.max(eye + 0.5 + (0.1 * R + 10) * u, g(x, z) + 4);
-      return P(x, y, z, yaw, pitch - 0.25 * u);
-    });
-  } else if (shot.kind === 'descend') {
-    const a0 = Math.atan2(ax - tx, az - tz);
-    keys = [0, 0.5, 1].map((u) => {
-      const d = (1.0 - 0.5 * u) * R, x = tx + Math.sin(a0) * d, z = tz + Math.cos(a0) * d;
-      const y = Math.max(g(tx, tz) + (0.55 - 0.33 * u) * R, g(x, z) + 8);
-      return look(x, y, z);
-    });
-  } else {
-    const a0 = Math.atan2(ax - tx, az - tz), rr = clamp(0.5 * R, 60, 170), h = clamp(0.2 * R, 25, 70);
-    keys = [-0.42, -0.14, 0.14, 0.42].map((da) => {
-      const x = tx + Math.sin(a0 + da) * rr, z = tz + Math.cos(a0 + da) * rr;
-      return look(x, Math.max(g(tx, tz) + h, g(x, z) + 8), z);
-    });
+  if (shot.at) { tx = shot.at[0]; tz = shot.at[1]; }
+  let tg = 0; try { tg = C.terrain(tx, tz); } catch { /* 0 */ }
+  const ty = tg + (shot.look ?? 0.05 * R);
+  const N = 5, keys = [];
+  for (let k = 0; k < N; k++) {
+    const u = k / (N - 1);
+    if (shot.kind === 'ground') {
+      const f = lerp2(shot.f ?? 0, u), sd = lerp2(shot.s ?? 0, u), up = lerp2(shot.u ?? 0, u);
+      keys.push(P(ax + fx * f + rx * sd, eye + up, az + fz * f + rz * sd, yaw + lerp2(shot.yaw ?? 0, u), pitch + lerp2(shot.pitch ?? 0, u)));
+    } else {
+      const a = Math.atan2(ax - tx, az - tz) + lerp2(shot.a ?? 0, u) * Math.PI / 180, d = lerp2(shot.d ?? 0.5 * R, u);
+      const x = tx + Math.sin(a) * d, z = tz + Math.cos(a) * d, y = Math.max(tg + lerp2(shot.h ?? 0.2 * R, u), g(x, z) + (shot.clear ?? 3));
+      keys.push(P(x, y, z, yawTo(tx - x, tz - z), Math.atan2(ty - y, Math.hypot(tx - x, tz - z) || 1) + lerp2(shot.pitch ?? 0, u)));
+    }
   }
   for (let i = 1; i < keys.length; i++) keys[i].yaw = near(keys[i].yaw, keys[i - 1].yaw);
   return keys;
