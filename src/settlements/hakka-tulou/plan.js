@@ -52,10 +52,12 @@ for (const [x, z] of T.wells) E.push({ t: 'well', kind: 'windlass', mat: 'bluest
 // (kind 'open' places are strolled by the engine's street life; the rooms and galleries here are 'hall': their own people are in town.js)
 const rooms = [
   { id: 'hall', rect: [-5, -4.5, 5, 4], y: 0.35, kind: 'hall' },
-  { id: 'gallery-2', rect: [-26, -26, 26, 26], y: T.floors[1], kind: 'hall' },
-  { id: 'gallery-3', rect: [-26, -26, 26, 26], y: T.floors[2], kind: 'hall' },
-  { id: 'gallery-4', rect: [-26, -26, 26, 26], y: T.floors[3], kind: 'hall' },
 ];
+// the upper galleries run round the ring under the floor or the eave above and open on the court: a room for the gallery's stretch on each of the four axes
+for (const k of [1, 2, 3]) {
+  const a = T.rail, b = T.front;
+  for (const [side, r] of [['n', [-10, -b, 10, -a]], ['s', [-10, a, 10, b]], ['w', [-b, -10, -a, 10]], ['e', [a, -10, b, 10]]]) rooms.push({ id: `gallery-${k + 1}-${side}`, rect: r, y: T.floors[k], kind: 'hall' });
+}
 for (const f of FURNISH) {
   const [x, z] = polar(26.4, f.i * 360 / T.n);
   rooms.push({ id: `${f.kind}-${f.k}-${f.i}`, rect: [x - 0.3, z - 0.3, x + 0.3, z + 0.3], y: T.floors[f.k], kind: 'hall' });

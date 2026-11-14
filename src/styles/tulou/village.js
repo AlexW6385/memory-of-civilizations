@@ -67,11 +67,10 @@ export function farmhouse(el, { bag, col }) {
   L(EARTH, -w / 2, 0.6, -d / 2, w / 2, H, -d / 2 + 0.5); L(EARTH, -w / 2, 0.6, -d / 2, -w / 2 + 0.5, H, d / 2); L(EARTH, w / 2 - 0.5, 0.6, -d / 2, w / 2, H, d / 2);
   L(EARTH, -w / 2, 0.6, d / 2 - 0.5, -0.8, H, d / 2); L(EARTH, 0.8, 0.6, d / 2 - 0.5, w / 2, H, d / 2); L(EARTH, -0.8, 2.1, d / 2 - 0.5, 0.8, H, d / 2);
   const c = Math.cos(q), s = Math.sin(q);
-  col.segment([cx + (-w / 2) * c, cz - (-w / 2) * s], [cx + (w / 2) * c, cz - (w / 2) * s], 0.5, 0, H);
-  col.segment([cx + (-w / 2) * c + (d / 2) * s, cz - (-w / 2) * s + (d / 2) * c], [cx + (-0.8) * c + (d / 2) * s, cz - (-0.8) * s + (d / 2) * c], 0.5, 0, H);
-  col.segment([cx + (0.8) * c + (d / 2) * s, cz - (0.8) * s + (d / 2) * c], [cx + (w / 2) * c + (d / 2) * s, cz - (w / 2) * s + (d / 2) * c], 0.5, 0, H);
-  col.segment([cx + (-w / 2) * c - (d / 2) * s, cz - (-w / 2) * s - (d / 2) * c], [cx + (-w / 2) * c + (d / 2) * s, cz - (-w / 2) * s + (d / 2) * c], 0.5, 0, H);
-  col.segment([cx + (w / 2) * c - (d / 2) * s, cz - (w / 2) * s - (d / 2) * c], [cx + (w / 2) * c + (d / 2) * s, cz - (w / 2) * s + (d / 2) * c], 0.5, 0, H);
+  const Pw = (x, z) => [cx + x * c + z * s, cz - x * s + z * c], seg = (x0, z0, x1, z1) => col.segment(Pw(x0, z0), Pw(x1, z1), 0.5, 0, H);
+  seg(-w / 2, -d / 2 + 0.25, w / 2, -d / 2 + 0.25);                                 // the back wall
+  seg(-w / 2, d / 2 - 0.25, -0.8, d / 2 - 0.25); seg(0.8, d / 2 - 0.25, w / 2, d / 2 - 0.25);       // the front, open at the door
+  seg(-w / 2 + 0.25, -d / 2, -w / 2 + 0.25, d / 2); seg(w / 2 - 0.25, -d / 2, w / 2 - 0.25, d / 2);   // the two ends
   // the gabled roof: ridge along x, the eaves 0.9 m out
   const roof = (m, zA, yA, zB, yB, t) => { const geo = zslab(-w / 2 - 0.9, w / 2 + 0.9, zA, yA, zB, yB, t); geo.applyMatrix4(new Matrix4().makeRotationY(q).setPosition(cx, 0, cz)); bag.add(m, geo); };
   roof(TILE, -d / 2 - 0.9, H + 0.1, 0, H + 1.4, 0.1); roof(TILE, d / 2 + 0.9, H + 0.1, 0, H + 1.4, 0.1);
