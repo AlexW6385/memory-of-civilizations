@@ -29,10 +29,31 @@ export const CHALKE = { c: [28, 159] };
 const KEEP = [[3, 110, 42, 140], [19, 143, 37, 175], [37, 150, 60, 168]];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
-/** The hill: level round Hagia Sophia, falling toward the sea to the east and south-east, back up to the rim's level at the edge. */
-export function height(x, z) {
+/** The hill without the palace's terraces: level round Hagia Sophia, falling toward the sea to the east and south-east, back up to the rim's level at the edge. */
+function natural(x, z) {
   const fall = -14 * smooth(120, 330, x + z * 0.5), r = Math.hypot(x, z);
   return fall * (1 - smooth(RADIUS - 70, RADIUS - 5, r));
+}
+/** The Great Palace's four courts (plan.js) and what stands on them: each is a level terrace cut into the slope. */
+export const COURTS = [[60, 140, 150, 220], [160, 150, 250, 230], [70, 235, 160, 325], [170, 240, 255, 325]];
+export const COURT_KINDS = ['porticus', 'thermae', 'thermae', 'porticus'];
+/** The floor level of each court: the slope's height at its centre, to the half metre. */
+export const COURT_Y = COURTS.map((r) => Math.round(natural((r[0] + r[2]) / 2, (r[1] + r[3]) / 2) * 2) / 2);
+const TERRACE_EDGE = 8, PAVING = 0.3;
+const COURTS_BOX = [Math.min(...COURTS.map((r) => r[0])) - TERRACE_EDGE, Math.min(...COURTS.map((r) => r[1])) - TERRACE_EDGE, Math.max(...COURTS.map((r) => r[2])) + TERRACE_EDGE, Math.max(...COURTS.map((r) => r[3])) + TERRACE_EDGE];
+/** The ground: the hill with each court's terrace in it, the paving's slabs standing PAVING over the terrace; within TERRACE_EDGE of a court the slope blends into its level. */
+export function height(x, z) {
+  const h = natural(x, z);
+  if (x < COURTS_BOX[0] || z < COURTS_BOX[1] || x > COURTS_BOX[2] || z > COURTS_BOX[3]) return h;
+  let num = h, den = 1;
+  for (let i = 0; i < COURTS.length; i++) {
+    const r = COURTS[i], d = Math.hypot(Math.max(r[0] - x, 0, x - r[2]), Math.max(r[1] - z, 0, z - r[3])), y = COURT_Y[i] - PAVING;
+    if (d < 1e-3) return y;
+    if (d >= TERRACE_EDGE) continue;
+    const t = d / TERRACE_EDGE, k = ((1 - t) / t) ** 2;
+    num += k * y; den += k;
+  }
+  return num / den;
 }
 const segDist = (x, z, [ax, az], [bx, bz]) => { const dx = bx - ax, dz = bz - az, t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz))); return Math.hypot(x - ax - dx * t, z - az - dz * t); };
 export const onMese = (x, z, m = 0) => MESE.path.slice(1).some((b, i) => segDist(x, z, MESE.path[i], b) < MESE.w / 2 + m);

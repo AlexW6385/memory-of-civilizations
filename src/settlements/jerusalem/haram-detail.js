@@ -55,8 +55,8 @@ export function haramFurnish() {
       if (z > A.zb - 2 && nave) break;
       for (let k = 0; k < nx; k++) { const px = x0 + (x1 - x0) * (k + 0.5) / nx; if ((k + r * 3 + i) % 4 === 0) continue; E.push({ t: 'block', rect: [px - 0.38, z - 0.62, px + 0.38, z + 0.62], y0: FY, y1: FY + 0.018, mat: ['reed_mat', 'reed_mat', 'cloth_red', 'cloth_indigo'][(k + r + i) % 4], collide: false }); }
     }
-    // lamps hung over the aisle from the tie-beams: three in each side aisle
-    if (!nave) for (let k = 0; k < 3; k++) E.push({ t: 'lamp_chain', at: [ax, A.zi0 + 8 + k * 22], y: FY + 5.5, drop: 1.9 + rand() * 0.3, n: 2, dir: [0, 1] });
+    // lamps hung over the aisle from its painted ceiling (the aisle's ceiling is 8.9 m over the floor): three in each side aisle
+    if (!nave) for (let k = 0; k < 3; k++) E.push({ t: 'lamp_chain', at: [ax, A.zi0 + 8 + k * 22], y: T + 8.9, drop: 3.4 + 1.9 + rand() * 0.3, n: 2, dir: [0, 1] });
   }
   // Qur'an stands: one before every second column of the nave's arcades, facing east or west
   for (const s of [-1, 1]) for (let k = 2; k < 12; k += 3) E.push({ t: 'quran_stand', at: [A.cx + s * (A.cw / 2 + 1.0), A.zi0 + (k + 0.5) * A.b], dir: [-s, 0], y: FY });
