@@ -66,8 +66,9 @@ export class Tour {
 
   pause() { this.paused = !this.paused; this.caption(this.paused ? this.last : null, true); }
 
+  /** (plain: without the tour's keys, for an arrival by the map or the random city.) */
   /** The caption under the arrival view: the name, the time shown and the first sentence of the settlement's card. */
-  caption(S, keys = false) {
+  caption(S, keys = false, plain = false) {
     let el = this.cap;
     if (!el) { el = this.cap = document.createElement('div'); el.id = 'tour-cap'; el.className = 'tour-cap'; el.setAttribute('role', 'status'); el.hidden = true; document.body.appendChild(el); }
     clearTimeout(this.capT);
@@ -79,7 +80,7 @@ export class Tour {
     const e = document.createElement('span'); e.textContent = era(S.site.era);
     const p = document.createElement('p'); p.textContent = first;
     const k = document.createElement('small'); k.textContent = t(this.paused ? 'tour-paused' : 'tour-keys');
-    el.append(h, e, p, k);
+    if (plain) el.append(h, e, p); else el.append(h, e, p, k);
     el.hidden = false; void el.offsetWidth; el.classList.add('on');
     if (!this.paused) this.capT = setTimeout(() => this.caption(null), keys ? 4000 : 9000);
   }

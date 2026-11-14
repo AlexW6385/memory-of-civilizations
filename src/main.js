@@ -537,6 +537,7 @@ async function main() {
     if (busy) { waiting?.resolve(false); waiting = job; return; }
     journey(job);
   });
+  let captioned = null;
   const journey = async ({ fn, resolve, reject }) => {
     busy = true;
     closePanels();
@@ -582,6 +583,8 @@ async function main() {
       if (next) journey(next);                // the fade stays down: straight on to the next place
       else {
         toast(''); fade.classList.remove('on');
+        // arriving in another settlement by the map or the random city: its name, time and a sentence, as in the tour
+        { const st = world.anchor?.site, S = st?.S; if (!error && S?.site && !tour.active && st !== captioned && Math.hypot(controls.feet.x, controls.feet.z) < (S.radius || 300) + 60) tour.caption(S, false, true); captioned = st || captioned; }
         clearTimeout(fadeT); fadeT = setTimeout(() => { if (!busy) fade.hidden = true; }, 400);
       }
       if (error) reject(error); else resolve(true);
