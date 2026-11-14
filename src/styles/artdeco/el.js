@@ -118,7 +118,11 @@ export function elTrack(el, { bag, col }) {
       for (let k = 0; k <= 8; k++) { const f = k / 8, P = [xx, A[1] + (B[1] - A[1]) * f, A[2] + (B[2] - A[2]) * f]; bag.add(IRON, box(xx - 0.03, P[1] - 0.2, P[2] - 0.03, xx + 0.03, P[1] + 0.9, P[2] + 0.03)); }
     }
     for (let k = 1; k <= 3; k++) { const zz = top - 2.5 - run * k / 4, yy = PY - (PY - foot) * k / 4; bag.add(IRON, box(qa + 0.2, foot - 0.3, zz - 0.12, qa + 0.45, yy - 0.3, zz + 0.12)); bag.add(IRON, box(qb - 0.45, foot - 0.3, zz - 0.12, qb - 0.2, yy - 0.3, zz + 0.12)); }
-    col.segment([qa, top - 2.5 - run], [qa, top - 2.5], 0.1, foot, PY + 1); col.segment([qb, top - 2.5 - run], [qb, top - 2.5], 0.1, foot, PY + 1);
+    // (the stringers and handrails follow the slope: one can walk under the stair, where it is high)
+    for (let k = 0; k < 12; k++) {
+      const f0 = k / 12, f1 = (k + 1) / 12, ya = PY - (PY - foot) * f0, yb = PY - (PY - foot) * f1;
+      for (const xx of [qa, qb]) col.segment([xx, top - 2.5 - run * f0], [xx, top - 2.5 - run * f1], 0.1, Math.min(ya, yb) - 0.6, Math.max(ya, yb) + 1);
+    }
   }
   void inStation;
   bag.add(IRON, fromTriangles(T));
