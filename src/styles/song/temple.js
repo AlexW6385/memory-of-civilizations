@@ -168,7 +168,7 @@ function templeInterior(el, { bag, col, lights }) {
     for (const s of [-1, 1]) { statueAt(F, bag, 'kneel', s * 2.3, 2.5, yA, 1.2, 0, 1, 'clay_robe', 'clay_green'); statueAt(F, bag, 'disciple', s * 7, 1.6, y, 1.9, -s, 1, 'clay_robe', 'clay_green'); }
     offering(F, bag, col, lights, 0, 5.2, y, 2.6);
     for (const k of [-1, 0, 1]) { const [x, z] = F.pt(k * 1.1, 6.6); cushion(bag, x, z, y, k ? 'cloth_red' : 'cloth_ochre'); }
-    for (const a of [-9, -4.5, 4.5, 9, -13, 13]) { const [x, z] = F.pt(a, D * 0.55); lantern(bag, x, z, y + H - 0.4, 0.7); }
+    for (const a of [-9, -4.5, 4.5, 9, -13, 13]) { if (Math.abs(a) > W / 2 - 1.0) continue; const [x, z] = F.pt(a, D * 0.55); lantern(bag, x, z, y + H - 0.4, 0.7); }
     for (const [i, a] of [-4.5, -7.5, -10.5, 4.5, 7.5, 10.5].entries()) banner(F, bag, a, 1.0, y + H - 0.9, 2.6, cols[i % 4]);
     return;
   }

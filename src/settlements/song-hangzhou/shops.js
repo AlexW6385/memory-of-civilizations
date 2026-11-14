@@ -262,8 +262,9 @@ function hzShop(el, { bag, col }) {
     if (xc - w / 2 < free0 - 0.2 || xc + w / 2 > free1 + 0.2) break;
     const mats = { ...m };
     for (const k of Object.keys(mats)) if (mats[k] === 'cloth') mats[k] = pick(CLOTHS);
-    put(name, { mats, x: xc, z: 0.55 + rand() * 0.15, ry: (rand() - 0.5) * 0.2 });
-    col?.circle(...loc(xc, 0.6), w * 0.4, y0, y0 + 0.9);
+    const zg = 0.55 + rand() * 0.15;
+    put(name, { mats, x: xc, z: zg, ry: (rand() - 0.5) * 0.2 });
+    col?.segment(loc(xc - w * 0.4, zg), loc(xc + w * 0.4, zg), 0.6, y0, y0 + 0.9);   // the goods' own width and depth along the front
     x += dir * (w + 0.1);
   }
 }

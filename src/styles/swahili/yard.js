@@ -60,5 +60,5 @@ export function fishRack(el, { bag, col }) {
   for (let u = -L / 2 + 0.2; u < L / 2 - 0.1; u += 0.28) for (const v of [-0.3, 0.3]) { const a = W(u, v, 1.65), b = W(u + 0.1, v, 1.65), cc = W(u + 0.05, v, 1.2); F.push(...a, ...b, ...cc, ...a, ...cc, ...b); }
   bag.add('hide_grey', fromTriangles(F));
   bag.add('rope_fibre', box(Math.min(W(-L / 2, 0.31, 0)[0], W(L / 2, 0.31, 0)[0]) - 0.02, y + 0.35, Math.min(W(-L / 2, 0.31, 0)[2], W(L / 2, 0.31, 0)[2]) - 0.02, Math.max(W(-L / 2, 0.31, 0)[0], W(L / 2, 0.31, 0)[0]) + 0.02, y + 0.37, Math.max(W(-L / 2, 0.31, 0)[2], W(L / 2, 0.31, 0)[2]) + 0.02));
-  col.circle(x, z, L / 2, y, y + 1.7);
+  col.segment([W(-L / 2, 0, 0)[0], W(-L / 2, 0, 0)[2]], [W(L / 2, 0, 0)[0], W(L / 2, 0, 0)[2]], 0.8, y, y + 1.7);
 }

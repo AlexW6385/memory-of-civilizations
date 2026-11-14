@@ -38,7 +38,7 @@ for (const [x, z, a, h] of QUEENS) {
 }
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('court', ENCLOSURE, 0, 'open'), room('temple', TEMPLE, 0.12, 'hall')];
+const rooms = [room('court', ENCLOSURE, 0, 'open'), room('temple and court', TEMPLE, 0.12, 'hall')];
 // the King's Chamber, reached by the entrance in the north face, the passages and the Grand Gallery (§4.6)
 {
   const g = pyramidGeometry(PYRAMID.a, PYRAMID.h), [cx, cz] = PYRAMID.c;

@@ -9,7 +9,7 @@
 // with their bucket-carriers, and along the river's quays the sacks, barrels, crates, mooring posts and
 // porters. Everything is derived from layout.js (lots, streets, lanes, river) at build time; every thing is an
 // instance of the shared life-style objects (src/objects), merged per material by the plan.
-import { RADIUS, RIVER, BRIDGE, WALL_X, FIELDS_X, GATE, STREETS, LANES, STONE_BANK, WHARVES, STEPS, lots, inLot, inRect, bridgeDeck, hotDist } from './layout.js';
+import { RADIUS, RIVER, BRIDGE, smooth, WALL_X, FIELDS_X, GATE, STREETS, LANES, STONE_BANK, WHARVES, STEPS, lots, inLot, inRect, bridgeDeck, hotDist } from './layout.js';
 import { tradeOf } from './trades.js';
 import { shopElements } from './shops.js';
 import { doorOf } from './houses.js';
@@ -188,7 +188,7 @@ export function streetPlans(base) {
   // the promenade along the water: hawkers' stands under awnings and mats of wares between the quays and the shops, benches facing the river
   for (const bank of ['n', 's']) for (let x = -300; x < FIELDS_X - 30; x += (Math.abs(x) < 150 ? 4.5 : 9) + rand() * (Math.abs(x) < 150 ? 5 : 9)) {
     if (Math.abs(x) < 14) continue;
-    const n = bank === 'n', d = n ? -1 : 1, z = n ? RIVER.z0 - 4.2 : RIVER.z1 + 4.2, p = [x, z];
+    const n = bank === 'n', d = n ? -1 : 1, lead = 4 * smooth(STONE_BANK, STONE_BANK + 25, Math.abs(x)), z = n ? RIVER.z0 - lead - 4.2 : RIVER.z1 + lead + 4.2, p = [x, z];   // (beyond the stone banks the earth bank slopes from `lead` before the water: the stand stands on the level)
     if (dBridge(x, z) > 150 && rand() < 0.5) continue;
     if (!spot(x, z, 1.7)) continue;
     claim(x, z, 2);

@@ -4,7 +4,7 @@
 // ladders on the roofs; the market's well, carts and buyers. Elements of the `life` style, which instances every piece. Positions come
 // from layout.js (the lots, their doors, the streets); the ones near the arrival first.
 import { lots, wells, MARKET, ROAD, ARRIVAL, STREETS } from './layout.js';
-import { houseDoor } from '../../styles/achaemenid/houses-data.js';
+import { houseDoor, frameOf } from '../../styles/achaemenid/houses-data.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const rotOut = (o) => Math.atan2(-o[0], -o[1]);          // the rot that faces along o
@@ -41,7 +41,10 @@ export function street() {
     if (rand() < 0.12) F.push({ t: 'animal', kind: 'dog', at: at(-side * 3.2, 1.4), y: 0, rot: rot + 1, seed: seed() });
     if (rand() < 0.12) F.push({ t: 'animal', kind: 'donkey', at: at(side * 4.5, 1.6), y: 0, rot: rot + Math.PI / 2, seed: seed() });
     // the roof: washing on a line, a sunshade's mat
-    if (rand() < 0.3) F.push({ t: 'laundry', len: 3.2, at: at(2.0 + rand() * (d.m.L - 6), d.m.D * 0.2 * (d.m.court ? 0 : 1) + 0.9 - (d.m.court ? 0 : 0)), y: d.h + 0.14, rot: rotOut(o) + Math.PI / 2, seed: seed() });
+    if (rand() < 0.3) {                                   // a line of washing over the roof: a court house's roof is its back range only
+      const m = d.m, P = frameOf(m.rect, m.front).P, a = 1.8 + rand() * (m.L - 3.6), b = m.court ? m.D * 0.54 + 1.4 : m.D * 0.2 + 0.9;
+      F.push({ t: 'laundry', len: 3.2, at: P(a, b), y: d.h + 0.14, rot: rotOut(o) + Math.PI / 2, seed: seed() });
+    }
     if (kind === 'shop') {
       const g = { grain: ['sacks', 3], potter: ['pot', 3], wine: ['barrel', 3], fruit: ['basket', 3], carpenter: ['firewood', 0], baker: ['firewood', 0], butcher: ['crates', 2], cloth: ['crates', 1], dyer: ['pot', 2], smith: ['crates', 2] }[l.trade];
       if (g) {

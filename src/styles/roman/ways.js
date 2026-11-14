@@ -197,8 +197,10 @@ function quay(el, { bag, col }) {
   for (let i = 0; i + 1 < E.length; i++) {
     const a = E[i], b = E[i + 1];
     bag.add('travertine', orientedBox(at(a, 0.5), at(b, 0.5), 1.0, bed, top, 0.5));
+    col.segment(at(a, 0.5), at(b, 0.5), 1.0, bed, top);
     bag.add('limestone', orientedBox(at(a, 0.35), at(b, 0.35), 1.3, top - 0.0, top + 0.16, 0.5));
     bag.add('flagstone', orientedBox(at(a, 1.0 + W / 2), at(b, 1.0 + W / 2), W, bed, top, 0.6));
+    col.segment(at(a, 1.0 + W / 2), at(b, 1.0 + W / 2), W, bed, top - 0.2);
     col.floor([Math.min(a[0], b[0], a[0] + L * (1 + W), b[0] + L * (1 + W)), Math.min(a[1], b[1]), Math.max(a[0], b[0], a[0] + L * (1 + W), b[0] + L * (1 + W)), Math.max(a[1], b[1])].map((v) => v), top);
   }
   // mooring stones every 14 m with a ring

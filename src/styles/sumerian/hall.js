@@ -79,8 +79,8 @@ export function urHall(el, { bag, col, lights }) {
     if (!o.room) { lintel(o.a, o.b, vv, vv + ti, o.h); continue; }
     if (side === 'f' || side === 'b') { lintel(o.a, o.b, vv, vv + ti, o.h); } else { lintel(o.a, o.b, uu, uu + ti, o.h, false); }
     // the door: two cedar leaves open against the jambs, a threshold
-    if (side === 'f' || side === 'b') for (const [u, s] of [[o.a, 1], [o.b, -1]]) B('cedar', Math.min(u, u + s * 0.07), vv + (side === 'f' ? -0.55 : ti + 0.0), Math.max(u, u + s * 0.07), vv + (side === 'f' ? 0 : ti + 0.55), 0.08, o.h - 0.05);
-    else for (const [v, s] of [[o.a, 1], [o.b, -1]]) B('cedar', uu + (side === 'l' ? -0.55 : ti), Math.min(v, v + s * 0.07), uu + (side === 'l' ? 0 : ti + 0.55), Math.max(v, v + s * 0.07), 0.08, o.h - 0.05);
+    if (side === 'f' || side === 'b') for (const [u, s] of [[o.a, 1], [o.b, -1]]) col.rect(B('cedar', Math.min(u, u + s * 0.07), vv + (side === 'f' ? -0.55 : ti + 0.0), Math.max(u, u + s * 0.07), vv + (side === 'f' ? 0 : ti + 0.55), 0.08, o.h - 0.05), 0.08, o.h - 0.05);
+    else for (const [v, s] of [[o.a, 1], [o.b, -1]]) col.rect(B('cedar', uu + (side === 'l' ? -0.55 : ti), Math.min(v, v + s * 0.07), uu + (side === 'l' ? 0 : ti + 0.55), Math.max(v, v + s * 0.07), 0.08, o.h - 0.05), 0.08, o.h - 0.05);
   }
   // partitions between rooms (perpendicular to each wing)
   for (const w of wings) for (let i = 1; i < w.ranges.length; i++) {
@@ -92,8 +92,8 @@ export function urHall(el, { bag, col, lights }) {
   { const a = gateR.a; wall(a - tp / 2, t, a + tp / 2, d - ti, [], H); const b = gateR.b; wall(b - tp / 2, t, b + tp / 2, d - ti, [], H); }
   // the towers at the gateway, outside the front wall, with buttresses; the wall's own pilasters every 3.5 m
   for (const [u0, u1] of [[gA - 4.2, gA - 0.4], [gB + 0.4, gB + 4.2]]) { const q = B(BB, u0, -1.6, u1, 0.1, -0.3, H + 1.2); col.rect(q, 0, H + 1.2); col.floor(q, H + 1.2); B(up, u0 + 0.2, -1.6, u1 - 0.2, -1.55, H + 1.2, H + 1.7); }
-  for (let u = 2; u < U - 1.5; u += 3.5) { if (u > gA - 5 && u < gB + 5) continue; B(up, u - 0.3, -0.35, u + 0.3, 0.02, 0, H); B(up, u - 0.3, V - 0.02, u + 0.3, V + 0.35, 0, H); }
-  for (let v = 2; v < V - 1.5; v += 3.5) { B(up, -0.35, v - 0.3, 0.02, v + 0.3, 0, H); B(up, U - 0.02, v - 0.3, U + 0.35, v + 0.3, 0, H); }
+  for (let u = 2; u < U - 1.5; u += 3.5) { if (u > gA - 5 && u < gB + 5) continue; for (const [a, b] of [[-0.35, 0.02], [V - 0.02, V + 0.35]]) col.rect(B(up, u - 0.3, a, u + 0.3, b, 0, H), 0, H); }
+  for (let v = 2; v < V - 1.5; v += 3.5) { for (const [a, b] of [[-0.35, 0.02], [U - 0.02, U + 0.35]]) col.rect(B(up, a, v - 0.3, b, v + 0.3, 0, H), 0, H); }
   B(BB, gA, -1.0, gB, t, -0.3, 0.1);
   // ---- floors, roofs, parapets
   B(BB, t, t, U - t, V - t, -0.3, 0.06); col.floor(R(0, 0, U, V), 0.06);

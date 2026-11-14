@@ -44,7 +44,7 @@ export function awning(T, u0, u1, yw, yo, out, cloth, poles = true) {
   T.bag.add(cloth, fromTriangles(tris));
   T.B(cloth, u0, u1, -out - 0.02, -out + 0.01, yo - 0.34, yo - 0.02);                         // the valance
   T.B('timber', u0, u1, -out - 0.03, -out, yo - 0.02, yo + 0.04);                              // the front rail
-  if (poles) for (const u of [u0 + 0.06, u1 - 0.06]) T.B('timber', u - 0.045, u + 0.045, -out - 0.09, -out, 0.0, yo + 0.04);
+  if (poles) for (const u of [u0 + 0.06, u1 - 0.06]) T.B('timber', u - 0.045, u + 0.045, -out - 0.09, -out, 0.0, yo + 0.04, true);
 }
 /** A rack of amphorae against the wall by the door: n standing in two ranks leaning on a timber frame. */
 export function amphoraRack(T, u, n, rand) {

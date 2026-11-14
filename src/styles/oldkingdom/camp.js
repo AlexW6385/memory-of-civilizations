@@ -36,8 +36,7 @@ export function camp(el, { bag, col }) {
       bag.add('cloth_ochre', lathe([[0.001, 0], [0.22, 0.02], [0.2, 0.2], [0.001, 0.26]], 7, null, ...(() => { const q = at(-0.6, 0.6); return [q[0], y0, q[1]]; })()));
       for (let i = 0; i < 2; i++) { const q = at(-0.9 + i * 0.5, -1.2); bag.add('terracotta', lathe(JAR.map(([r, h]) => [r * 0.8, h * 0.8]), 8, null, q[0], y0, q[1])); }
       // blocks the walker: the low slopes
-      const hx2 = Math.abs(c) * 1.7 + Math.abs(s) * 1.9, hz2 = Math.abs(s) * 1.7 + Math.abs(c) * 1.9;
-      col.rect([x - hx2, z - hz2, x + hx2, z + hz2], y0, y0 + 1.8);
+      col.segment(at(0, -1.85), at(0, 1.85), 2.8, y0, y0 + 1.8);
     } else if (kind === 'fire') {
       for (let k = 0; k < 3; k++) { const a = k * 2.1 + rand(), q = at(Math.cos(a) * 0.3, Math.sin(a) * 0.3); bag.add('limestone_core', lathe([[0.17, 0], [0.13, 0.2], [0.001, 0.22]], 6, null, q[0], y0, q[1])); }
       bag.add('plaster_grey', lathe([[0.75, 0], [0.5, 0.03], [0.001, 0.05]], 9, null, x, y0, z));
@@ -58,21 +57,21 @@ export function camp(el, { bag, col }) {
     } else if (kind === 'sacks') {
       for (let i = 0; i < 5; i++) { const q = at((i % 3) * 0.55 - 0.5, Math.floor(i / 3) * 0.5 - 0.2); bag.add('cloth_ochre', lathe([[0.001, 0], [0.24, 0.02], [0.27, 0.2], [0.18, 0.38], [0.06, 0.46], [0.001, 0.46]], 7, null, q[0], y0 + (i > 2 ? 0.36 : 0), q[1])); }
       const q = at(1.0, 0.1); bag.add('wicker', lathe([[0.001, 0], [0.22, 0.01], [0.28, 0.28], [0.25, 0.3], [0.001, 0.05]], 9, null, q[0], y0, q[1]));
-      col.circle(x, z, 0.9, y0, y0 + 0.6);
+      col.segment(at(-0.55, 0.05), at(1.1, 0.05), 1.1, y0, y0 + 0.6);
     } else if (kind === 'rollers') {
       const L = [];
       for (let r = 0; r < 3; r++) for (let i = 0; i < 4 - r; i++) beamTris(L, P(-0.9 + i * 0.28 + r * 0.14, -0.6, 0.12 + r * 0.22), P(-0.9 + i * 0.28 + r * 0.14, 0.6, 0.12 + r * 0.22), 0.1, 0.2);
       bag.add('palm_trunk', fromTriangles(L));
             for (let k = 0; k < 3; k++) { const q = at(0.7 + 0.02 * k, 0), rr = 0.32 - k * 0.0; bag.add('rope_fibre', lathe([[rr, 0], [rr, 0.07], [rr * 0.6, 0.08], [rr * 0.6, 0]], 8, null, q[0], y0 + k * 0.07, q[1])); }
       const Lv = []; beamTris(Lv, P(1.1, -1.0, 0.04), P(1.1, 1.4, 0.12), 0.05, 0.08); bag.add('timber', fromTriangles(Lv));
-      col.rect([x - 1.1, z - 0.8, x + 1.1, z + 0.8], y0, y0 + 0.6);
+      col.segment(at(-1.1, 0), at(1.2, 0), 1.4, y0, y0 + 0.6);
     } else if (kind === 'trough') {
       bag.add('plaster_white', box(...(() => { const q = at(0, 0); return [q[0] - 0.9, y0, q[1] - 0.45, q[0] + 0.9, y0 + 0.35, q[1] + 0.45]; })()));
       bag.add('plaster_grey', box(...(() => { const q = at(0, 0); return [q[0] - 0.8, y0 + 0.3, q[1] - 0.35, q[0] + 0.8, y0 + 0.36, q[1] + 0.35]; })()));
       const H = [];
       for (const v of [-0.3, 0.3]) { beamTris(H, P(-1.5, v + 0.9, 0.0), P(-1.2, v + 0.9, 0.7), 0.025, 0.04); }
       bag.add('timber', fromTriangles(H));
-      col.rect([x - 1.0, z - 0.6, x + 1.0, z + 0.6], y0, y0 + 0.4);
+      col.segment(at(-0.9, 0), at(0.9, 0), 0.95, y0, y0 + 0.4);
     } else if (kind === 'mats') {
       for (let i = 0; i < 3; i++) { const q = at(0, i * 1.0 - 1); bag.add('reed_mat', box(q[0] - 0.8, y0, q[1] - 0.35, q[0] + 0.8, y0 + 0.025, q[1] + 0.35)); const h = at(-0.7, i * 1.0 - 1); bag.add('limestone_carved', box(h[0] - 0.1, y0, h[1] - 0.07, h[0] + 0.1, y0 + 0.12, h[1] + 0.07)); }
     }

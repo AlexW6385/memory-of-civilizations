@@ -93,7 +93,8 @@ export function sphinx(el, { bag, col }) {
   bag.add('gilt_bronze', box(FX - 0.8, F + 18.9, zc - 0.17, FX - 0.45, F + 19.9, zc + 0.17));
   bag.add('gilt_bronze', box(FX - 1.1, F + 19.55, zc - 0.22, FX - 0.45, F + 19.85, zc + 0.22));
   // ── walking: the body's mass, in slices, and the paws ─────────────────────────────────────────────────────────
-  for (let s = 0; s < 58; s += 4) col.rect([S(s), zc - half(s + 2), S(s + 4), zc + half(s + 2)], F - 0.5, F + top(s + 2) - 0.2);
+  // (a squared oval narrows toward the floor: its width at the height of the body is about four fifths of the profile's, where no rock lies at the foot)
+  for (let s = 0; s < 58; s += 4) { const hw = half(s + 2) * (s >= 52 ? 0.82 : 1); col.rect([S(s), zc - hw, S(s + 4), zc + hw], F - 0.5, F + top(s + 2) - 0.2); }
   col.rect([S(55.5) - 3.2, zc - 3.2, S(55.5) + 3.2, zc + 3.2], F, F + 20);
-  for (const sg of [-1, 1]) col.rect([S(58), zc + sg * 2.5 - 1.9, S(72.6), zc + sg * 2.5 + 1.9], F - 0.5, F + 3.2);
+  for (const sg of [-1, 1]) col.rect([S(58), zc + sg * 2.5 - 1.6, S(72.6), zc + sg * 2.5 + 1.6], F - 0.5, F + 3.2);
 }

@@ -226,6 +226,6 @@ export async function town() {
   plans.push({ ...base('song-hangzhou-hill-life', hillLife(), 'life'), center: [-165, -90], near: 200 });
   // the entertainment ground, the Way's sunshades and the ward gates (§24)
   plans.push(base('song-hangzhou-wazi', wazisStatic(LEVEL.street)));
-  plans.push({ ...base('song-hangzhou-wazi-life', waziLife(LEVEL.street), 'life'), center: [72, -140], near: 200, rooms: [{ id: 'hz-wazi', rect: [66, -153, 78, -127], y: LEVEL.street, kind: 'winehouse' }] });
+  plans.push({ ...base('song-hangzhou-wazi-life', waziLife(LEVEL.street), 'life'), center: [72, -140], near: 200, rooms: [{ id: 'hz-wazi-court', rect: [66, -153, 78, -127], y: LEVEL.street, kind: 'winehouse' }] });
   return plans;
 }

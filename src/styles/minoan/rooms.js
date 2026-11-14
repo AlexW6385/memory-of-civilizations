@@ -141,6 +141,9 @@ function antechamber(el, { bag, col }) {
   // the red walls above the benches, with a dark band at the foot (as in the Throne Room)
   bag.add('wall_red', box(x0 + 0.05, y + 0.46, z0 + 0.004, x1 - 0.6, y + 2.6, z0 + 0.02));
   bag.add('wall_red', box(x0 + 0.05, y + 0.46, z1 - 0.02, x1 - 0.6, y + 2.6, z1 - 0.004));
+  // the flat roof on the two end walls (3.65 m): a timber course and plaster, level with the portico's roof beside it
+  bag.add('timber', box(x0 - 0.2, y + 3.65, z0 - 0.2, x1 + 0.1, y + 4.1, z1 + 0.2));
+  bag.add('plaster', box(x0 - 0.3, y + 4.1, z0 - 0.3, x1 + 0.1, y + 4.4, z1 + 0.3)); col.floor([x0 - 0.3, z0 - 0.3, x1 + 0.1, z1 + 0.3], y + 4.4);
 }
 
 // ── the Queen's Megaron ──────────────────────────────────────────────────────────────────────

@@ -272,6 +272,14 @@ function greatMosque(el, { bag, col }) {
   col.floor([cx - A, cz - A, cx + A, cz + A], py);
   col.rect([cx - A, cz - A, cx + A, cz + A], -0.4, py - 0.31);
   for (const [r, dir] of [[[cx - 6, cz + A, cx + 6, cz + A + 5], 'n'], [[cx - 6, cz - A - 5, cx + 6, cz - A], 's'], [[cx - A - 5, cz - 5, cx - A, cz + 5], 'e']]) STYLES.qing.elements.stairs({ rect: r, y0: 0, y1: py, dir, mat: 'banco_smooth' }, { bag, col });
+  // the mass under each flight, in slices that follow the rising steps, so the flanks are solid where the steps are drawn
+  for (const [r, dir] of [[[cx - 6, cz + A, cx + 6, cz + A + 5], 'n'], [[cx - 6, cz - A - 5, cx + 6, cz - A], 's'], [[cx - A - 5, cz - 5, cx - A, cz + 5], 'e']]) {
+    const SL = 10, alongZ = dir === 'n' || dir === 's', u0 = alongZ ? r[1] : r[0], u1 = alongZ ? r[3] : r[2], up = dir === 'n' || dir === 'w' ? -1 : 1;
+    for (let k = 4; k < SL; k++) {
+      const a = up > 0 ? u0 + (u1 - u0) * k / SL : u1 - (u1 - u0) * (k + 1) / SL, b = up > 0 ? u0 + (u1 - u0) * (k + 1) / SL : u1 - (u1 - u0) * k / SL;
+      col.rect(alongZ ? [r[0], a, r[2], b] : [a, r[1], b, r[3]], -0.05, py * k / SL - 0.6);
+    }
+  }
   // the walls: the hall (east part) and the court (west part)
   const x0 = cx - A + 4, x1 = cx + A - 4, z0 = cz - A + 8, z1 = cz + A - 8, xm = cx + 2, H = 10;
   const w = (a, b, opts = {}) => bancoWall(bag, col, a, b, py, opts.h ?? H, 0.9, { step: 3, ph: 2.2, ...opts });

@@ -153,7 +153,16 @@ for (let k = 0; k < 48; k++) {
   E.push({ t: 'wall', a: [ACRO.c[0] + Math.cos(a0) * ACRO.r[0], ACRO.c[1] + Math.sin(a0) * ACRO.r[1]], b: [ACRO.c[0] + Math.cos(a1) * ACRO.r[0], ACRO.c[1] + Math.sin(a1) * ACRO.r[1]], th: 1.6, y0: T - 6, y1: T + 1.6, mat: 'limestone' });
 }
 // the summit's paving, round the lower court north of the Erechtheion
-for (const r of [[-108, -55, NCOURT.rect[0], 55], [NCOURT.rect[2], -55, 128, 55], ...subtractRects([NCOURT.rect[0], NCOURT.edge, NCOURT.rect[2], 55], [[27.6, -53.4, 30.4, -51.3]])]) E.push({ t: 'floor', rect: r, y: T + 0.04, th: 0.3, mat: 'limestone', walk: true });
+// (the outer pieces in strips that stop inside the rim's wall, where the rock's edge curves in)
+const withinRim = (r) => {
+  const out = [];
+  for (let z = r[1]; z < r[3] - 1e-6; z += 4) {
+    const z2 = Math.min(z + 4, r[3]), m = ACRO.r[0] * Math.sqrt(Math.max(0, 1 - (Math.max(Math.abs(z), Math.abs(z2)) / ACRO.r[1]) ** 2)) - 1.8, x0 = Math.max(r[0], -m), x1 = Math.min(r[2], m);
+    if (x1 - x0 > 0.5) out.push([x0, z, x1, z2]);
+  }
+  return out;
+};
+for (const r of [...withinRim([-108, -55, NCOURT.rect[0], 55]), ...withinRim([NCOURT.rect[2], -55, 128, 55]), ...subtractRects([NCOURT.rect[0], NCOURT.edge, NCOURT.rect[2], 55], [[27.6, -53.4, 30.4, -51.3]])]) E.push({ t: 'floor', rect: r, y: T + 0.04, th: 0.3, mat: 'limestone', walk: true });
 
 // ── the Agora (docs/settlements/athens.md §4d) ──
 // the Hephaisteion on its hill (449–415): a Doric temple of 6 × 13 columns; pronaos and opisthodomos with two columns

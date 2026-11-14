@@ -163,6 +163,7 @@ export function comares(el, ctx) {
   // ——— the Comares Tower and the Hall of the Ambassadors inside it
   const [t0, u0, t1, u1] = T, I = [t0 + 2.35, u0 + 2.35, t1 - 2.35, u1 - 2.35], ic = [(I[0] + I[2]) / 2, (I[1] + I[3]) / 2], th = 1.8;
   bag.add(RED, box(t0, y - 12, u0, t1, y - 0.5, u1));
+  col.rect(T, y - 12, y - 0.5);
   const al = (c) => [[c - 1.2, c + 1.2], [c - 4.6, c - 2.6], [c + 2.6, c + 4.6]];
   const win = (c) => [[c - 0.8, c - 0.08], [c + 0.08, c + 0.8], [c - 4.05, c - 3.15], [c + 3.15, c + 4.05]];
   const H = (spans, v0, v1) => spans.map(([a, b]) => [a, b, v0, v1]);

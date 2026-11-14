@@ -66,7 +66,7 @@ export function dressFront({ bag, col }, o) {
         case 'fuel': { for (let k = 0; k < 6; k++) fl('pottery_dark', [[0.001, 0], [0.13, 0.005], [0.14, 0.035], [0.001, 0.04]], base + sg * 0.2, 0.22, k * 0.04, 10);
           for (let k = 0; k < 5; k++) fbeam('palm_trunk', base + sg * (0.5 + k * 0.07), 0.08, 1.4, base + sg * (0.55 + k * 0.07), 0.38, 0.05, 0.022, 0.04); break; }
         case 'reeds': { for (let k = 0; k < 5; k++) fbeam('reed_mat', base + sg * (0.2 + k * 0.1), 0.05, 1.9, base + sg * (0.22 + k * 0.1), 0.34, 0.05, 0.05, 0.09); break; }
-        case 'rack': { const u0 = base, u1 = base + sg * Math.min(1.6, room(s) - 0.2); for (const u of [u0, u1]) fb('palm_trunk', u - 0.03, 0.4, u + 0.03, 0.46, 0, 1.6);
+        case 'rack': { const u0 = base, u1 = base + sg * Math.min(1.6, room(s) - 0.2); for (const u of [u0, u1]) { fb('palm_trunk', u - 0.03, 0.4, u + 0.03, 0.46, 0, 1.6); fcol(u - 0.05, 0.38, u + 0.05, 0.48, 1.6); }
           fbeam('palm_trunk', u0, 0.43, 1.55, u1, 0.43, 1.55, 0.02, 0.04); for (let u = Math.min(u0, u1) + 0.1; u < Math.max(u0, u1) - 0.1; u += 0.22) fb(rand() < 0.5 ? 'hide_grey' : 'cloth_ochre', u, 0.41, u + 0.14, 0.45, 0.85, 1.5); break; }
         case 'lamp': { const u = base - sg * 0.2; fb('mud_plaster', u - 0.15, 0, u + 0.15, 0.2, 1.55, 1.62); fl('terracotta', [[0.001, 0], [0.05, 0.005], [0.06, 0.03], [0.03, 0.045], [0.001, 0.04]], u, 0.1, 1.62, 8); fb('flame', u - 0.01, 0.09, u + 0.01, 0.11, 1.66, 1.7); fb('pottery_dark', u - 0.2, 0.052, u + 0.2, 0.062, 1.7, 2.4); break; }
         case 'mat': { const u0 = base, u1 = base + sg * Math.min(1.6, room(s) - 0.1); fb('reed_mat', u0, 0.1, u1, 0.9, 0, 0.014); break; }
@@ -94,7 +94,7 @@ export function dressFront({ bag, col }, o) {
       const quad = [[A[0], 2.75, A[1]], [B[0], 2.75, B[1]], [C[0], 2.3, C[1]], [D[0], 2.3, D[1]]];
       T.push(...quad[0], ...quad[1], ...quad[2], ...quad[0], ...quad[2], ...quad[3], ...quad[0], ...quad[2], ...quad[1], ...quad[0], ...quad[3], ...quad[2]);
       bag.add('reed_mat', fromTriangles(T));
-      for (const u of [u0 + 0.05, u1 - 0.05]) fb('palm_trunk', u - 0.04, 0.86, u + 0.04, 0.94, 0, 2.32);
+      for (const u of [u0 + 0.05, u1 - 0.05]) { fb('palm_trunk', u - 0.04, 0.86, u + 0.04, 0.94, 0, 2.32); fcol(u - 0.06, 0.84, u + 0.06, 0.96, 2.32); }
       fbeam('palm_trunk', u0, 0.9, 2.3, u1, 0.9, 2.3, 0.03, 0.05);
     }
   }

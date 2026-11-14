@@ -29,6 +29,9 @@ function patioHouse(el, { bag, col }) {
   const R = { n: [x0, z0, x1, P[1]], s: [x0, P[3], x1, z1], w: [x0, P[1], P[0], P[3]], e: [P[2], P[1], x1, P[3]] };
   for (const [k, r] of Object.entries(R)) holedWall(bag, col, LW, r, y, y + H, k === front ? [[du[0], du[1], dv[0], dv[1]]] : [], k === 'n' || k === 's');
   const pr = R[front]; bag.add('brick_paving', box(du[0], y - 0.2, pr[1], du[1], y + 0.05, pr[3])); col.floor([du[0], pr[1], du[1], pr[3]], y + 0.05);
+  // the plinth is solid but for the passage in
+  for (const r of [[pr[0], pr[1], du[0], pr[3]], [du[1], pr[1], pr[2], pr[3]]]) col.rect(r, (el.foot ?? y) - 0.5, y);
+  col.rect(front === 'n' ? [x0, P[1], x1, z1] : [x0, z0, x1, P[3]], (el.foot ?? y) - 0.5, y);
   // the arch's head through the passage, framed on the lane side; the leaf folded back against its side
   archHead(bag, front === 'n' ? face('z', z0, 1) : face('z', z1, -1), du[0], du[1], y + 1.75, y + 2.35, front === 'n' ? dN : dS, 'horseshoe', { alfiz: true });
   { const a = front === 'n' ? z0 + 0.25 : z1 - 1.25, b = a + 1.0; bag.add('wood_dark', box(du[1] - 0.06, y + 0.05, a, du[1] - 0.01, y + 1.7, b)); }

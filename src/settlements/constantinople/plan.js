@@ -4,7 +4,7 @@
 // Zeuxippus, the Hippodrome, the Great Palace's courts and halls, the Forum of Constantine with
 // its column on the Mese; the Senate house and the Chalke on the Augustaion; the Mese's porticoes.
 
-import { AUGUSTAION, EIRENE, ZEUXIPPUS, HIPPODROME, PALACE, MESE, MILION, FORUM, SENATE, CHALKE, height } from './layout.js';
+import { AUGUSTAION, EIRENE, ZEUXIPPUS, HIPPODROME, PALACE, MESE, MILION, FORUM, SENATE, CHALKE, COURTS, COURT_KINDS, COURT_Y, height } from './layout.js';
 import sophiaPlan from '../../buildings/hagia-sophia/plan.js';
 
 const E = [];
@@ -34,9 +34,9 @@ E.push({ t: 'thermae', rect: ZEUXIPPUS, h: 20 });
   E.push({ t: 'kathisma', rect: [ax1, along(52) - 12, x1 - 2, along(52) + 12], face: 'w', y: 0, h: 18 });
 }
 // the Great Palace: courts with porticoes and halls on terraces stepping down toward the sea
-for (const [r, kind] of [[[60, 140, 150, 220], 'porticus'], [[160, 150, 250, 230], 'thermae'], [[70, 235, 160, 325], 'thermae'], [[170, 240, 255, 325], 'porticus']]) {
-  const y = height(r[2], r[3]);
-  E.push({ t: 'block', rect: r, y0: y - 3, y1: y, mat: 'limestone', walk: true });
+for (let i = 0; i < COURTS.length; i++) {
+  const r = COURTS[i], kind = COURT_KINDS[i], y = COURT_Y[i];
+  E.push({ t: 'block', rect: r, y0: y - 1, y1: y, mat: 'limestone', walk: true });
   E.push(kind === 'porticus' ? { t: 'porticus', rect: r, h: 8, depth: 6, y } : { t: 'thermae', rect: r, h: 18, y });
 }
 // the Milion over the start of the Mese

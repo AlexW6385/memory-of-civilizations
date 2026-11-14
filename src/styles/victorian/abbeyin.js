@@ -175,7 +175,7 @@ export function abbeyInterior(ctx, G0) {
   { const lx = xc - 1.5, lz = cz - 1.0;                                                         // the brass eagle lectern at the crossing
     bag.add(G, lathe([[0.3, 0], [0.12, 0.1], [0.06, 0.2], [0.06, 1.1], [0.2, 1.2]], 8, null, lx, y + 0.05, lz)); bag.add(G, box(lx - 0.25, y + 1.25, lz - 0.2, lx + 0.25, y + 1.5, lz + 0.2)); bag.add('linen', box(lx - 0.22, y + 1.5, lz - 0.17, lx + 0.22, y + 1.54, lz + 0.17)); col.circle(lx, lz, 0.35, y, y + 1.6); }
   // gasoliers hung in the nave, the crossing and the choir; rows of rush chairs in the nave
-  for (const [gx, gz] of [[nw0 + 14, cz], [nw0 + 28, cz], [nw0 + 42, cz], [xc, cz], [xE + 8, cz], [xE + 16, cz]]) corona(bag, gx, gz, Y(24), 6);
+  for (const [gx, gz, top] of [[nw0 + 14, cz, 30.3], [nw0 + 28, cz, 30.3], [nw0 + 42, cz, 30.3], [xc, cz, 31.9], [xE + 8, cz, 30.3], [xE + 16, cz, 30.3]]) corona(bag, gx, gz, Y(top), 6);   // (each chain ends at the crown of the vault over it, the crossing's at the floor of the lantern's roof)
   for (let r = 0; r < 8; r++) for (const s of [-1, 1]) for (let c = 0; c < 4; c++) { const x = nw0 + 10 + r * 1.0, z = cz + s * (0.9 + c * 0.55 + (c > 1 ? 0.5 : 0)); if (c === 0 && r > 6) continue; bag.add('wicker', box(x - 0.2, y + 0.4, z - 0.24, x + 0.2, y + 0.45, z + 0.24)); bag.add(OAK, box(x - 0.2, y + 0.05, z - 0.24, x - 0.16, y + 0.9, z + 0.24)); bag.add(OAK, box(x - 0.2, y + 0.05, z - 0.24, x + 0.2, y + 0.4, z - 0.2)); bag.add(OAK, box(x - 0.2, y + 0.05, z + 0.2, x + 0.2, y + 0.4, z + 0.24)); }
   col.rect([nw0 + 9.6, cz - 3.6, nw0 + 17.4, cz + 3.6], y, y + 0.9);
   // ── the porch under the west window, between Hawksmoor's towers ──

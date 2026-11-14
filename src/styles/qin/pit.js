@@ -49,7 +49,8 @@ export function qinPit(el, { bag, col, lights }) {
   col.floor([ROOF.bareX, z0, x1, z1], ROOF.top);                                           // the bare part of the roof can be walked
   // the earth over the western part: heaped to 2.2 m, sloping away at the east end toward the bare logs
   bag.add('earth_wall', frustum([x0 - 6, z0 - 6, ROOF.bareX + 16, z1 + 6], ROOF.top, ROOF.mound, 8, 16, 8, 8, { noBottom: true }));
-  col.rect([x0 - 6, z0 - 6, ROOF.bareX + 8, z1 + 6], ROOF.top, ROOF.mound);
+  // (the slopes are walked up; the collider steps in with the surface, each step a little lower than the earth at its foot)
+  for (let k = 3; k <= 5; k++) { const t = k / 5, r = [x0 - 6 + 8 * t, z0 - 6 + 8 * t, ROOF.bareX + 16 - 16 * t, z1 + 6 - 8 * t], h = ROOF.top + (ROOF.mound - ROOF.top) * t - 0.3; if (k === 5) col.rect(r, ROOF.top, ROOF.mound); else col.rect(r, ROOF.top, h); }
   // the east: mats of reed being laid over the logs and baskets of earth waiting
   const r = rng(77);
   for (let i = 0; i < 26; i++) { const x = ROOF.bareX + 20 + r() * 38, zz = z0 + 4 + r() * (z1 - z0 - 8); bag.add('reed_mat', box(x, ROOF.top, zz, x + 2.4 + r() * 1.5, ROOF.top + 0.03, zz + 1.6)); }

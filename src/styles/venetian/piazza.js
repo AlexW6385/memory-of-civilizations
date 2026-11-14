@@ -200,5 +200,5 @@ export function columnStatue(el, { bag, col }) {
     for (const g of [...f.stone, ...f.metal, ...f.skin]) { g.translate(x, yt + 0.3, z); Lc.add(CV, g); }
   }
   Lc.emit(bag);
-  col.circle(x, z, 2.4, y, y + 0.84);
+  col.circle(x, z, 1.15, y + 0.84, ys + sh);                 // the plinth and the shaft; the three steps below are walked up
 }

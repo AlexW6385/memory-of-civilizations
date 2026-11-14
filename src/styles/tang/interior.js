@@ -61,6 +61,7 @@ function house(L, el) {
   dais(L, -3.2, bz + 0.5, 3.2, bz + 3.6, y, 0.34);
   bag.add('lacquer_red', box(-3.0, y + 0.34, bz, 3.0, y + 2.3, bz + 0.12)); bag.add('paint_ochre', box(-2.85, y + 0.5, bz + 0.12, 2.85, y + 2.15, bz + 0.14));
   bag.add('paint_white', box(-2.4, y + 0.7, bz + 0.14, 2.4, y + 1.95, bz + 0.15));
+  col.rect([-3.0, bz, 3.0, bz + 0.15], y + 0.34, y + 2.3);
   table(L, 0, bz + 2.2, y + 0.34, 1.5, 0.6, 0.4); for (let k = 0; k < 2; k++) cup(bag, -0.3 + k * 0.5, y + 0.74, bz + 2.2, 'glaze_green');
   bag.add('cloth_maroon', box(-0.6, y + 0.36, bz + 3.0, 0.6, y + 0.44, bz + 3.7));
   // the zither (qin) on its own low table at the dais's side, the incense burner, a lamp stand

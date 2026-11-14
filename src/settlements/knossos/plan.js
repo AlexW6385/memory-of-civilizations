@@ -65,7 +65,7 @@ E.push({ t: 'portico', a: [14.2, -22], b: [14.2, 22], n: 10, depth: 4.6, side: 1
 E.push({ t: 'portico', a: [-6, -66], b: [6, -66], n: 4, depth: 4, side: -1, h: 3.4 });
 // the West Bastion: a portico raised over the passage, the charging bull in painted relief on its back wall
 E.push({ t: 'bastion', rect: [-12, -72, -6, -62], y: 0, podium: 2.4, front: 'e' }, { t: 'wing', rect: [6, -72, 12, -62], storeys: 1, sh: 4.4, windows: '' });
-// the south propylon
+// the south propylon; the passage behind it between the wings is drawn open to the sky (a room of kind 'open')
 E.push({ t: 'portico', a: [-3, 60], b: [3, 60], n: 2, depth: 3, side: 1, h: 3.4 });
 // the Procession Fresco along both walls of the south passage, over the gypsum dado: the bearers walking in toward
 // the court (Evans set copies of it in the South Propylaeum, §4c)
@@ -129,7 +129,7 @@ E.push({ t: 'court_front', face: 'w', p: 3, u0: -61, u1: -29, y: 0, seed: 9, doo
 
 const room = (id, rect, y, kind, extra = {}) => ({ id, rect, y, kind, ...extra });
 const rooms = [room('central court', COURT, 0.05, 'open'), room('west court', [-120, -50, -64, 50], 0.05, 'open', { market: true }), room('throne room antechamber', [-19, -20, -14, -8], 0, 'hall'),
-  room('throne room', TR, 0, 'inner'), room('long corridor', CORR, 0, 'inner'), room('grand staircase light well', LW, 0, 'open'), room("queen's megaron", QM, 0, 'inner'), room('south propylaeum', [-3, 28, 3, 63], 0, 'hall'),
+  room('throne room', TR, 0, 'inner'), room('long corridor', CORR, 0, 'inner'), room('grand staircase light well', LW, 0, 'open'), room("queen's megaron", QM, 0, 'inner'), room('south propylaeum', [-3, 28, 3, 63], 0, 'open'),
   room('hall of the double axes', HALL, 0, 'hall'), room('lapidary workshop', WS, 0, 'inner'), room('archive', AR, 0, 'inner'), room('oil store', ST, 0, 'inner'), room('kitchen', KI, 0, 'inner')];
 const walks = [[[-100, 0], [-90, -60], [-92, -87], [-92, -95], [-70, -95], [-60, -89], [0, -89], [0, -60], [0, 0]], [[-39, -66], [-39, -54], [-39, 0], [-46, 0.5]]];
 walks.push([[0, 20], [19, 19.75], [30, 19.75], [31.5, 25], [31.5, 31]]);
