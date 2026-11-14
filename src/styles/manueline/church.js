@@ -16,6 +16,14 @@ export function churchFrame(rect) {
   const [x0, z0, x1, z1] = rect, xi0 = x0 + T, xi1 = x1 - T, zi0 = z0 + T, zi1 = z1 - T, zc = (z0 + z1) / 2;
   return { xi0, xi1, zi0, zi1, zc, bays: [0, 10, 20, 30, 40, 50].map((d) => xi0 + d), chancel: xi0 + 50, rows: [zc - 4.5, zc + 4.5] };
 }
+/** The height above the floor of the net vaults' underside at (x, z): what a lamp's chain hangs from. */
+export function vaultY(F, x, z) {
+  const { xi0, xi1, zi0, zi1, rows, bays, chancel } = F, ze = [zi0, rows[0], rows[1], zi1], arc = (t) => Math.pow(Math.max(0, 1 - t * t), 0.75);
+  const c = Math.max(0, Math.min(2, ze.findIndex((e, i) => i < 3 && z >= e && z <= ze[i + 1])));
+  const [xa, xb] = x < bays[1] ? [xi0, bays[1]] : x < chancel ? [bays[Math.min(4, Math.floor((x - xi0) / 10))], bays[Math.min(4, Math.floor((x - xi0) / 10)) + 1]] : x < chancel + 8.5 ? [chancel, chancel + 8.5] : [chancel + 8.5, xi1];
+  const spring = x < bays[1] ? 6.4 : SPRING, crown = x < bays[1] ? 8.0 : c === 1 ? CROWN : CROWN - 1, u = (x - xa) / (xb - xa), v = (z - ze[c]) / (ze[c + 1] - ze[c]);
+  return spring + (crown - spring) * Math.max(arc(Math.abs(2 * u - 1)), arc(Math.abs(2 * v - 1)));
+}
 export function jeronChurch(el, ctx) {
   const { bag, col, lights } = ctx, rect = el.rect, y = el.y ?? 0, [x0, z0, x1, z1] = rect, F = churchFrame(rect);
   const { xi0, xi1, zi0, zi1, zc, bays, chancel, rows } = F, px = el.portalX;
@@ -138,7 +146,7 @@ export function jeronChurch(el, ctx) {
   // the nave: benches of the monks' choir in the western bays are not here (the choir is in the gallery); a pair of candlesticks and prayer stools
   for (const z of [zc - 7.0, zc + 9.2]) for (const xb of [bays[2] + 5, bays[3] + 5]) { addBox(bag, 'wood_dark', xb - 1.2, y, z - 0.35, xb + 1.2, y + 0.45, z + 0.35); col.rect([xb - 1.2, z - 0.35, xb + 1.2, z + 0.35], y, y + 0.45); }
   for (const [lx, lz] of [[bays[2] + 5, zc], [bays[4] - 5, zc], [chancel + 6, zc - 5], [chancel + 6, zc + 5]]) lights.push({ at: [lx, y + 4.5, lz], color: '#ffc27a', intensity: 7, distance: 16 });
-  for (const [lx, lz] of [[bays[2] + 5, zc], [bays[4] - 5, zc]]) { bag.add('iron', rod([lx, y + 9, lz], [lx, y + 4.8, lz], 0.02, 4)); bag.add('gilt_bronze', lathe([[0.4, 0], [0.1, 0.25], [0.3, 0.45]], 8, null, lx, y + 4.4, lz)); }
+  for (const [lx, lz] of [[bays[2] + 5, zc], [bays[4] - 5, zc]]) { bag.add('iron', rod([lx, y + vaultY(F, lx, lz) + 0.1, lz], [lx, y + 4.8, lz], 0.02, 4)); bag.add('gilt_bronze', lathe([[0.4, 0], [0.1, 0.25], [0.3, 0.45]], 8, null, lx, y + 4.4, lz)); }
   furnishChurch(ctx, rect, y, px);
 }
 /**

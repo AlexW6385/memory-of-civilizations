@@ -16,14 +16,22 @@ const DIR = { '0,1': 's', '0,-1': 'n', '1,0': 'e', '-1,0': 'w' };
 /** A hipped roof over rect from y0, rising `rise`, eaves overhanging by oh. */
 function hip(bag, mat, rect, y0, rise, oh) {
   const r = [rect[0] - oh, rect[1] - oh, rect[2] + oh, rect[3] + oh], m = Math.min(r[2] - r[0], r[3] - r[1]) / 2;
-  bag.add(mat, frustum(r, y0, y0 + rise, m, m, m, m, { noBottom: true }));
+  bag.add(mat, frustum(r, y0, y0 + rise, m, m, m, m));
 }
+
+/** The storeys of a house element (the first draw of its random stream `rand`, which the house goes on to use). */
+export function storeysOf(el, rand = rng(el.seed || 1)) {
+  const kind = el.kind ?? 'merchant', open = !!el.open && !el.simple;
+  return el.storeys ? el.storeys : open && kind === 'fisher' ? 1 : kind === 'merchant' ? 3 + (rand() < 0.4 ? 1 : 0) : kind === 'alfama' ? 2 + Math.floor(rand() * 3) : 1 + (rand() < 0.4 ? 1 : 0);
+}
+/** The ground storey's height and the upper storeys' height of a house of this kind. */
+export const HEIGHTS = (kind) => ({ h0: kind === 'merchant' ? 3.9 : 3.0, hs: kind === 'merchant' ? 3.4 : 3.0 });
 
 export function manuHouse(el, ctx) {
   const { bag, col, lights } = ctx, rand = rng(el.seed || 1), y = el.y ?? 0, F = frame(el.rect, el.front ?? 's'), { L, D } = F, simple = !!el.simple;
   const kind = el.kind ?? 'merchant', plinth = el.plinth ?? 0.6, open = !!el.open && !simple;
-  const n = el.storeys ? el.storeys : open && kind === 'fisher' ? 1 : kind === 'merchant' ? 3 + (rand() < 0.4 ? 1 : 0) : kind === 'alfama' ? 2 + Math.floor(rand() * 3) : 1 + (rand() < 0.4 ? 1 : 0);
-  const h0 = kind === 'merchant' ? 3.9 : 3.0, hs = kind === 'merchant' ? 3.4 : 3.0, H = h0 + (n - 1) * hs;
+  const n = storeysOf(el, rand);
+  const { h0, hs } = HEIGHTS(kind), H = h0 + (n - 1) * hs;
   const wall = pick(rand, WALLS), shut = pick(rand, SHUT), cap = kind === 'merchant' ? 'limestone' : 'plaster_white';
   const R = (u0, v0, u1, v1, y0, y1, m, solid = false) => { const r = F.R(u0, v0, u1, v1); bag.add(m, box(r[0], y + y0, r[1], r[2], y + y1, r[3])); if (solid) col.rect(r, y + y0, y + y1); return r; };
   const T = 0.5, fy = y + 0.45;
