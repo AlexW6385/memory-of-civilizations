@@ -60,7 +60,7 @@ export function cliffWall(el, { bag, col }) {
   // the collider: a wall behind the face's forward-most line in each 6 m
   for (let i = 0; i + 3 <= xs.length - 1; i += 3) {
     let zmax = -1e9, ymin = 1e9, ymax = -1e9;
-    for (let k = i; k <= i + 3; k++) { zmax = Math.max(zmax, wallFace(xs[k]) + 1.2); ymin = Math.min(ymin, yb[k]); ymax = Math.max(ymax, yt[k]); }
+    for (let k = i; k <= i + 3; k++) { zmax = Math.max(zmax, wallFace(xs[k]) + 0.5); ymin = Math.min(ymin, yb[k]); ymax = Math.max(ymax, yt[k]); }
     col.rect([xs[i] - 0.1, zmax - 14, xs[i + 3] + 0.1, zmax], ymin - 1, ymax + 1);
   }
 }

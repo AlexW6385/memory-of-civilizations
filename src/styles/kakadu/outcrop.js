@@ -363,7 +363,7 @@ export function outcropBlock(acc, B, o = {}) {
       if (BLOCKS.some((C) => C !== B && C.y[1] > B.y[1] - 0.3 && inRect(C.r, x, z, 1.2)) || FLIGHTS.some((F) => inRect(F.rect, x, z, 1.5)) || onWay(x, z, 3.2)) continue;
       o.spots.push({ x, y: y1, z, w: 1, kind: 'top', m: B.m });
     }
-    for (const t of tops) if (rnd() < 0.8) o.spots.push({ x: t.x, y: t.y - 0.05, z: t.z, w: 1, kind: 'top', m: B.m });
+    for (const t of tops) if (rnd() < 0.8 && !BLOCKS.some((C) => C !== B && C.y[1] > t.y + 0.3 && inRect(C.r, t.x, t.z, 0.2))) o.spots.push({ x: t.x, y: t.y - 0.05, z: t.z, w: 1, kind: 'top', m: B.m });
   }
   if (o.spots) for (const j of joints) if (j.cleft) o.spots.push({ x: j.x, y: height(j.x, z1 - 1.2), z: z1 - 1.2, w: 1, kind: 'cleft' });
 }

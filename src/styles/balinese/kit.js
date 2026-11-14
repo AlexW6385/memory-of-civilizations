@@ -19,6 +19,12 @@ export function post(ctx, mat, x, z, y0, y1, r = 0.12, solid = true) {
 }
 const quadUp = (out, a, b, c, d, up = true) => { if (up) out.push(...a, ...c, ...b, ...a, ...d, ...c); else out.push(...a, ...b, ...c, ...a, ...c, ...d); };
 
+/** The height of a hipped roof's top above its eave at the offset (dx, dz) from its centre; the same curve thatchHip draws. */
+export function hipHeight(A, B, R, pw, dx, dz) {
+  const s = Math.min(A, B);
+  return R * Math.pow(Math.max(0, Math.min(1, Math.min((A - Math.abs(dx)) / s, (B - Math.abs(dz)) / s))), pw);
+}
+
 /**
  * The hipped roof of thatch or ijuk: { c [x, z], A, B (half extents along x and z at the eave), y (eave), rise, pow (concave when > 1), mat, th (the thickness of the thatch) }.
  * The ridge runs along the longer side; the grid takes the hip lines as breaks. Open below (the soffit shows the same material darkened by the shade).
@@ -46,7 +52,7 @@ export function thatchHip(ctx, el) {
   bag.add(mat, box(cx + A - 0.08 - e, y - th, cz - B, cx + A, y, cz + B));
   // the ridge: a roll of thatch bound with bamboo
   const L = Math.abs(A - B);
-  if (L > 0.3) { if (A > B) bag.add(el.ridge ?? mat, box(cx - L, y + R - 0.05, cz - 0.17, cx + L, y + R + 0.2, cz + 0.17)); else bag.add(el.ridge ?? mat, box(cx - 0.17, y + R - 0.05, cz - L, cx + 0.17, y + R + 0.2, cz + L)); }
+  if (L > 0.3) { if (A > B) bag.add(el.ridge ?? mat, box(cx - L, y + R - 0.3, cz - 0.17, cx + L, y + R + 0.2, cz + 0.17)); else bag.add(el.ridge ?? mat, box(cx - 0.17, y + R - 0.3, cz - L, cx + 0.17, y + R + 0.2, cz + L)); }
 }
 /** Steps rising from y0 to y1 toward dir ('n' = −z, 's', 'e', 'w') over rect, solid down to base. */
 export function steps(ctx, rect, y0, y1, dir, mat = 'andesite', riser = 0.17, base = null) {

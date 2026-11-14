@@ -320,7 +320,8 @@ function boulder(el, { bag, col }) {
   const n = (th, i) => 1 + 0.12 * Math.sin(th * 3 + seed) + 0.07 * Math.sin(th * 5 + seed * 1.7 + i) + 0.04 * Math.sin(th * 9 + i * 2.1);
   const prof = []; for (let k = 0; k <= 8; k++) { const f = -0.35 + 1.35 * k / 8, a = Math.asin(Math.max(-1, Math.min(1, f))); prof.push([Math.max(0.001, Math.cos(a) * r * (k === 8 ? 0 : 1)), Math.sin(a) * h]); }
   bag.add('rock_boulder', lathe(prof, 18, n, x, y, z));
-  col.circle(x, z, r * 0.95, y - h, y + h);
+  // the collider follows the dome in bands: the radius at each band's middle, so that no invisible wall stands beside the narrow top
+  for (let k = 0; k < 6; k++) { const f0 = -0.35 + 1.35 * k / 6, f1 = -0.35 + 1.35 * (k + 1) / 6, fm = Math.min(0.97, (f0 + f1) / 2); col.circle(x, z, r * 0.95 * Math.cos(Math.asin(fm)), y + h * f0, y + h * f1); }
 }
 /**
  * daga_hut: { c, r, y, h, seed } — a round house of daga (puddled clay) on its raised daga floor

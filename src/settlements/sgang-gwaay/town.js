@@ -13,6 +13,8 @@ export async function town() {
   // the yards: what stands before each house, on the beach and in the shallows; who sits there and inside
   const Y = yards(), grp = H.map(() => ({ E: [], P: [], pts: [] }));
   const bnd = (g, pad = 4) => { const xs = g.pts.map((q) => q[0]), zs = g.pts.map((q) => q[1]); return [Math.min(...xs) - pad, Math.min(...zs) - pad, Math.max(...xs) + pad, Math.max(...zs) + pad]; };
+  // the lowest ground under a house's walls: a house at the end of the arc stands over the shore's drop, and its walls then rest on a log crib down to it
+  const footOf = (h) => { let m = 1e9; for (const [u, v] of [[-1, -1], [1, -1], [-1, 1], [1, 1], [0, -1], [0, 1], [-1, 0], [1, 0]]) { const [x, z] = toWorld(h, u * h.w / 2, v * h.d / 2); m = Math.min(m, height(x, z)); } return m; };
   const nearest = (x, z) => { let b = 0, bd = 1e9; H.forEach((h, k) => { const d = Math.hypot(h.c[1] - z, (h.c[0] - x) * 0.3); if (d < bd) { bd = d; b = k; } }); return b; };
   for (const p of Y.props) { const g = grp[nearest(...p.c)]; g.E.push({ t: 'haida_prop', kind: p.kind, c: p.c, yaw: p.yaw, y: p.y, w: p.w, seed: p.seed }); g.pts.push(p.c, [p.c[0] + 5, p.c[1] + 5], [p.c[0] - 5, p.c[1] - 5]); }
   for (const r of Y.racks) { const g = grp[nearest(...r.c)]; g.E.push({ t: 'haida_rack', c: r.c, yaw: r.yaw, w: r.w, seed: r.seed, y: height(...r.c) }); g.pts.push(r.c); }
@@ -22,7 +24,7 @@ export async function town() {
   H.forEach((h, k) => {
     if (h.landmark) { landYard.push(...grp[k].E); return; }
     const r = Math.max(h.w, h.d) / 2 + 6;
-    plans.push(plan('sgang-house-' + h.i, 'haida', [{ t: 'haida_house', c: h.c, yaw: h.yaw, w: h.w, d: h.d, age: h.age, ridge: h.ridge, eave: h.eave, seed: h.seed, g: G, landmark: false, tiers: tiers(h), pole: 5.2 + (h.w - 11) * 0.5 }, ...grp[k].E],
+    plans.push(plan('sgang-house-' + h.i, 'haida', [{ t: 'haida_house', c: h.c, yaw: h.yaw, w: h.w, d: h.d, age: h.age, ridge: h.ridge, eave: h.eave, seed: h.seed, g: G, foot: footOf(h), landmark: false, tiers: tiers(h), pole: 5.2 + (h.w - 11) * 0.5 }, ...grp[k].E],
       bnd({ pts: [...grp[k].pts, [h.c[0] - r, h.c[1] - r], [h.c[0] + r, h.c[1] + r]] }, 2)));
   });
   // the poles of the street, the graveyard at the south end
