@@ -78,7 +78,15 @@ class RegionWeather {
   /** Current blended state values. */
   get() {
     const S = this.r.climate.weather, a = S[this.cur], b = S[this.next], t = this.t < 1 ? this.t * this.t * (3 - 2 * this.t) : 1;
-    const v = (k, d = 0) => lerp(a[k] ?? d, b[k] ?? d, this.cur === this.next ? 0 : t);
+    // rain and snow are light: the falling itself at six tenths, and the haze that comes with it thin
+    // enough that the town is still seen through it (a wet state's fog counts for a third of its excess)
+    const soft = (w, k, d) => {
+      const x = w[k] ?? d;
+      if (k === 'rain' || k === 'snow') return x * 0.6;
+      if (k === 'fog' && ((w.rain ?? 0) > 0 || (w.snow ?? 0) > 0)) return Math.min(1.45, 1 + (x - 1) * 0.35);
+      return x;
+    };
+    const v = (k, d = 0) => lerp(soft(a, k, d), soft(b, k, d), this.cur === this.next ? 0 : t);
     const fc = a.fogColor || this.r.climate.fog.color, fd = b.fogColor || this.r.climate.fog.color;
     return {
       clouds: v('clouds'), cloudDensity: v('cloudDensity', 0.4), sun: v('sun', 1), fog: v('fog', 1), rain: v('rain'), windy: v('windy'),

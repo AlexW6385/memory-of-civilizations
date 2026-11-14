@@ -43,7 +43,7 @@ export class Rain {
     const p = base.add(side.mul(cr.x)).sub(dir.mul(cr.y.mul(LEN)));
     m.positionNode = p;
     m.colorNode = vec3(0.75, 0.78, 0.82);
-    m.opacityNode = this.amount.mul(0.32).mul(mix(float(0.15), float(1), cr.y));
+    m.opacityNode = this.amount.mul(0.2).mul(mix(float(0.15), float(1), cr.y));
     m.fog = false;
     this.mesh = new THREE.Mesh(g, m);
     this.mesh.frustumCulled = false;
@@ -106,7 +106,7 @@ class Flakes {
     const toV = normalize(cameraPosition.sub(base));
     const side = normalize(cross(toV, vec3(0, 1, 0)).add(vec3(0.0001, 0, 0)));
     const upv = cross(side, toV);
-    const size = mix(float(0.034), float(0.016), k).mul(sd.z.mul(0.8).add(0.6));
+    const size = mix(float(0.026), float(0.016), k).mul(sd.z.mul(0.8).add(0.6));
     m.positionNode = base.add(side.mul(cr.x.mul(size))).add(upv.mul(cr.y.mul(size)));
     // lit as the ground round is, roughly: the sun's light and the haze's (unlit flakes read dark on sunlit snow)
     m.colorNode = mix(vec3(0.95, 0.96, 0.98), vec3(0.78, 0.62, 0.42), k).mul(ENV.sunColor.mul(0.5).add(ENV.fogColor.mul(0.6)));
@@ -114,7 +114,7 @@ class Flakes {
     const d = length(rel);
     const near = smoothstep(0.25, 1.2, d), far = float(1).sub(smoothstep(FBOX[0] * 0.3, FBOX[0] * 0.48, d));
     const round = float(1).sub(smoothstep(0.55, 1.0, length(vec2(cr.x, cr.y))));
-    m.opacityNode = mix(this.snow.mul(0.85), this.dust.mul(0.6), k).mul(round).mul(near).mul(far);
+    m.opacityNode = mix(this.snow.mul(0.55), this.dust.mul(0.6), k).mul(round).mul(near).mul(far);
     m.fog = false;
     m.alphaTest = 0.04;
     this.mesh = new THREE.Mesh(g, m);

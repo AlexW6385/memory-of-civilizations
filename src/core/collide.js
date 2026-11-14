@@ -131,7 +131,18 @@ export class CollisionWorld {
         if (T.dn?.[o]) continue;
         // (not where a floor or a ramp runs at about that height, at the cell's centre where the top
         // was taken: the top is what one walks on there)
-        if (top > climb && top > y0 && T.under[o] < y1 && this.groundAt(T.x0 + (i + 0.5) * T.res, T.z0 + (j + 0.5) * T.res, top + 0.05) < top - 0.3) return true;
+        const u = T.under[o];
+        if (top > climb && top > y0 && u < y1 && this.groundAt(T.x0 + (i + 0.5) * T.res, T.z0 + (j + 0.5) * T.res, top + 0.05) < top - 0.3) {
+          // (an underside or the top itself at the body's height: a slope, a low eave)
+          if (!T.steep || u > y0 + 0.05 || top < y1 + 0.2) return true;
+          // (the underside is the floor and the top is over the head: a wall only if something stands
+          // between them here; an awning, a beam or a sheet of roof overhead is walked under)
+          const base = Number.isFinite(u) ? u : top - 16;
+          const b0 = Math.max(0, Math.floor((y0 - base) / 0.5)), b1 = Math.floor((y1 - base) / 0.5);
+          if (b1 > 31) return true;
+          let m = 0; for (let b = b0; b <= b1; b++) m |= 1 << b;
+          if (T.steep[o] & m) return true;
+        }
       }
     }
     return false;
@@ -242,7 +253,41 @@ export async function topField(parts, res = 0.5, skip = ['water', 'glass_outer',
       if ((k & 1023) === 0 && performance.now() - t > 8) { await new Promise((r) => setTimeout(r, 0)); t = performance.now(); }
     }
   }
-  return { x0, z0, res, w, h, data, under, dn };
+  // what stands in each cell between its underside (or 16 m under its top) and its top: the steep faces
+  // (walls, posts, the sides of things), as 32 bands of half a metre from that base. Where the underside is
+  // the floor and nothing stands at the body's height, the top is overhead (an awning, a beam, a single
+  // sheet of roof) and one walks under it (see inShell).
+  const steep = new Uint32Array(w * h);
+  const band = (o, ya, yb) => {
+    const base = Number.isFinite(under[o]) ? under[o] : data[o] - 16;
+    const b0 = Math.max(0, Math.floor((ya - base) / 0.5)), b1 = Math.min(31, Math.floor((yb - base) / 0.5));
+    for (let b = b0; b <= b1; b++) steep[o] |= 1 << b;
+  };
+  for (const { mat, geometry } of parts) {
+    if (skip.includes(mat)) continue;
+    const P = geometry.attributes.position.array;
+    for (let k = 0; k < P.length; k += 9) {
+      const ax = P[k], ay = P[k + 1], az = P[k + 2], bx = P[k + 3], by = P[k + 4], bz = P[k + 5], cx = P[k + 6], cy = P[k + 7], cz = P[k + 8];
+      const ux = bx - ax, uy = by - ay, uz = bz - az, vx = cx - ax, vy = cy - ay, vz = cz - az;
+      const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      if (Math.abs(ny) > 0.3 * Math.hypot(nx, ny, nz)) continue;
+      const ya = Math.min(ay, by, cy) + 0.02, yb = Math.max(ay, by, cy) - 0.02;
+      if (yb < ya) continue;
+      // (seen from above a steep face is a line: its cells are those along its edges)
+      let last = -1;
+      for (const [px, pz, qx, qz] of [[ax, az, bx, bz], [bx, bz, cx, cz], [cx, cz, ax, az]]) {
+        const n = Math.max(1, Math.ceil(Math.hypot(qx - px, qz - pz) / (res * 0.5)));
+        for (let e = 0; e <= n; e++) {
+          const i = Math.floor((px + (qx - px) * e / n - x0) / res), j = Math.floor((pz + (qz - pz) * e / n - z0) / res);
+          if (i < 0 || j < 0 || i >= w || j >= h) continue;
+          const o = j * w + i;
+          if (o !== last) { band(o, ya, yb); last = o; }
+        }
+      }
+      if ((k & 1023) === 0 && performance.now() - t > 8) { await new Promise((r) => setTimeout(r, 0)); t = performance.now(); }
+    }
+  }
+  return { x0, z0, res, w, h, data, under, dn, steep };
 }
 
 /**

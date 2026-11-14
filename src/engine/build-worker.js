@@ -93,7 +93,7 @@ async function buildOne(plan) {
   const b = build.buildPlan(plan, { instancing: true, detail: true });
   const transfer = [];
   const tops = plan.nocollide ? null : await collide.topField(build.flatParts(b));
-  if (tops) transfer.push(tops.data.buffer, tops.under.buffer, tops.dn.buffer);
+  if (tops) transfer.push(tops.data.buffer, tops.under.buffer, tops.dn.buffer, tops.steep.buffer);
   const parts = b.parts.map(({ mat, geometry, detail, shadowBig }) => {
     const pos = geometry.attributes.position.array, nor = geometry.attributes.normal.array, index = geometry.index?.array ?? null;
     // (cloth in the wind: how far each vertex hangs, src/core/geom.js hangFrom)

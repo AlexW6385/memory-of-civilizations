@@ -981,7 +981,10 @@ export class World {
     // bounds, casting shadows within DETAIL_SHADOW; indoors, only the building one is in casts
     if (!this._nextD || now > this._nextD) {
       this._nextD = now + 250;
-      const inside = this.indoorsIn;
+      // (only from a sealed room, where the town outside is not drawn: in a room open to the street the
+      // neighbours' shadows fall through its door and windows, and dropping them at the threshold changed
+      // the light in the room at a step)
+      const inside = this.sealedIn || null;
       for (const s of this.settlements) {
         if (s.state === 'idle' || !s.parts.length) continue;
         const L = toLocal(s.S.frame, camP);
