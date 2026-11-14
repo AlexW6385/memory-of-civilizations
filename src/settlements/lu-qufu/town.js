@@ -48,7 +48,7 @@ function mansion() {
   wall([x0, -146], [MX - 4, -146]); wall([MX + 4, -146], [x1, -146]);
   for (const h of MANSION_HALLS) E.push({ t: 'qing_hall', rect: h.rect, y: 0.45, H: h.H, ...(h.double ? { double: h.double } : {}), roof: 'xieshan', bays: h.bays, front: 's', doors: h.doors, four: false, plat: 0.45, platMargin: 1.2, pal: HOUSE });
   const KIND = { chongguang: ['yamen'], datang: ['yamen', 1], ertang: ['yamen'], santang: ['yamen'], neizhai: ['parlor'], qianshang: ['parlor'], qiantang: ['parlor'], houtang: ['parlor'], flower: ['study'] };
-  for (const h of MANSION_HALLS) if (KIND[h.id]) E.push({ t: 'lu_inside', kind: KIND[h.id][0], grand: !!KIND[h.id][1], rect: h.rect, y: 0.45, seed: Math.abs(Math.round(h.rect[1])) + 11 });
+  for (const h of MANSION_HALLS) if (KIND[h.id]) E.push({ t: 'lu_inside', kind: KIND[h.id][0], grand: !!KIND[h.id][1], rect: h.rect, y: 0.45, seed: Math.abs(Math.round(h.rect[1])) + 11, ceil: 0.45 + h.H - 0.15 });
   for (const r of MANSION_RANGES) E.push({ t: 'qing_hall', rect: r.rect, y: 0.4, H: 4.0, roof: 'gable', bays: [11, 2], front: r.front, four: false, plat: 0.4, pal: HOUSE });
   E.push({ t: 'lane', rect: [MX - 3.5, -146, MX + 3.5, 112], y: 0.04, mat: 'bluestone' });
   E.push({ t: 'lane', rect: [x0 + 2, 36, x1 - 2, 108], y: 0.03, mat: 'brick_paving' });
