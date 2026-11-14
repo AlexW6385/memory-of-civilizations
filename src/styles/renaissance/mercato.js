@@ -40,7 +40,6 @@ function dovizia(Lc) {
 function abundance(bag, col, x, z, y) {
   // three steps of pietraforte, the pedestal, the moulded base
   for (let i = 0; i < 3; i++) { const h = 2.6 - i * 0.55; bag.add(PF, box(x - h, y - 0.3 + i * 0.22, z - h, x + h, y + (i + 1) * 0.22, z + h)); }
-  col.rect([x - 2.6, z - 2.6, x + 2.6, z + 2.6], y, y + 0.66);
   for (let i = 0; i < 3; i++) col.floor([x - 2.6 + i * 0.55, z - 2.6 + i * 0.55, x + 2.6 - i * 0.55, z + 2.6 - i * 0.55], y + (i + 1) * 0.22);
   const yp = y + 0.66;
   bag.add(SER, box(x - 0.9, yp, z - 0.9, x + 0.9, yp + 0.25, z + 0.9));
