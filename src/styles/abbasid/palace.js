@@ -202,9 +202,11 @@ function furnishChamber({ bag, col, lights }, y) {
   // hanging lamps of glass and bronze from the dome's ring (long chains); each lit
   for (const [lx, lz] of [[-3, -2], [3, -2], [0, 2], [-3.4, 3.4], [3.4, 3.4]]) {
     bag.add('bronze', lathe([[0.2, 0], [0.12, 0.2], [0.04, 0.26]], 10, null, lx, y + 7.2, lz)); bag.add('lamp_glass', lathe([[0.001, 0], [0.12, 0.05], [0.14, 0.2], [0.001, 0.3]], 10, null, lx, y + 7.3, lz));
-    bag.add('iron', box(lx - 0.01, y + 7.6, lz - 0.01, lx + 0.01, y + 14, lz + 0.01));
+    bag.add('iron', box(lx - 0.01, y + 7.6, lz - 0.01, lx + 0.01, y + 17.5, lz + 0.01));
     lights.push({ at: [lx, y + 7.5, lz], color: '#ffc27a', intensity: 6, distance: 12 });
   }
+  // (the chains hang from tie beams of cedar across the chamber, from wall to wall under the tower's cornice)
+  for (const bz of [-2, 2, 3.4]) bag.add('cedar', box(-6.1, y + 17.3, bz - 0.14, 6.1, y + 17.7, bz + 0.14));
   // stucco dado round the chamber walls (style C), 2.6 m high, and a frieze of the blue band of tiles
   const S = 6.0;
   for (const [a, b, ox, oz] of [[[-S, -S], [S, -S], 0, 1], [[-S, -S], [-S, S], 1, 0], [[S, -S], [S, S], -1, 0]]) {

@@ -84,6 +84,14 @@ function house(el, { bag, col }) {
     const [a, v0, c, v1] = holeOf(k), ya = lvl(k) + (k === 0 ? 0 : 0.03), yb = lvl(k + 1) + 0.03, n = 14, run = (v1 - v0) / n, up = k % 2 === 0;
     for (let i = 0; i < n; i++) B('brick', a, up ? v0 + i * run : v0, c, up ? v1 : v1 - i * run, ya, ya + (yb - ya) * (i + 1) / n);
     col.ramp(R(a, v0, c, v1), ya, yb, up ? (s ? 'n' : 's') : (s ? 's' : 'n'));
+    // the flight's open side (toward the room) and its tall end: the brick of each step blocks the body beside it, below the height of one who climbs
+    const uo = k % 2 === 0 ? [c, c + 0.05] : [a - 0.05, a];
+    for (let i = 0; i < n; i++) {
+      if ((yb - ya) * (i + 1) / n <= 0.5) continue;
+      const va = up ? v0 + i * run : v1 - (i + 1) * run;
+      col.rect(R(uo[0], va, uo[1], va + run), ya, ya + (yb - ya) * i / n + 0.2);
+    }
+    col.rect(up ? R(a, v1, c, v1 + 0.05) : R(a, v0 - 0.05, c, v0), ya, yb - 0.05);
   }
   // the roof: jars of water, a washing line
   const ry = lvl(N) + 0.03;
