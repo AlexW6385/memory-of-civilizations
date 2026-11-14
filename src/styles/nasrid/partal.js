@@ -33,6 +33,7 @@ function partal(el, ctx) {
   const W = (r, y0, y1, holes = [], mat = RED) => holedWall(bag, col, mat, r, y0, y1, holes);
   // the tower: its foot down the slope, the walls with their doors and windows, the room dressed inside under the star cupola
   bag.add(RED, box(t0, y - 8, u0, t1, y - 0.5, u1));
+  col.rect([t0, u0, t1, u1], y - 8, y - 0.5);
   const dS = [cx - 1.2, cx + 1.2, y, y + 3.7], dN = [cx - 1.0, cx + 1.0, y, y + 3.3];
   const zw = (I[1] + I[3]) / 2, wE = [[zw - 0.78, zw + 0.78, y + 1.0, y + 3.0]];
   W([t0, I[3], t1, u1], y - 0.5, y + Ht, [dS]); W([t0, u0, t1, I[1]], y - 0.5, y + Ht, [dN]);
@@ -54,6 +55,7 @@ function partal(el, ctx) {
   // the mirador beyond the wall: on its own foot, paired windows on three sides, a little tiled roof
   const mw = 2.6, M = [cx - mw, u0 - 3.4, cx + mw, u0], mt = 0.5, Hm = 4.2;
   bag.add(RED, box(M[0], y - 9, M[1], M[2], y - 0.5, M[3]));
+  col.rect([M[0], M[1], M[2], M[3]], y - 9, y - 0.5);
   const zm = (M[1] + mt + M[3]) / 2, wN = [[cx - 0.78, cx + 0.78, y + 0.9, y + 3.0]], wS = [[zm - 0.78, zm + 0.78, y + 0.9, y + 3.0]];
   W([M[0], M[1], M[2], M[1] + mt], y - 0.5, y + Hm, wN, PL); W([M[0], M[1] + mt, M[0] + mt, M[3]], y - 0.5, y + Hm, wS, PL); W([M[2] - mt, M[1] + mt, M[2], M[3]], y - 0.5, y + Hm, wS, PL);
   pairedWindow(bag, face('z', M[1], 1), cx, y + 0.9, y + 3.0, mt);
