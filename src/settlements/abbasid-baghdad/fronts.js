@@ -37,8 +37,8 @@ export function frontElements() {
     else if (q < 0.34 && free(ox + side * 3.2)) E.push({ t: 'goods_mat', at: at(ox + side * 3.2, 0.8), y: 0, rot, goods: ['heap', 'basket'], seed });
     else if (q < 0.44 && free(ox + side * 2.8)) { const [x, z] = at(ox + side * 2.8, 0.7); E.push({ t: 'stool', at: [x, z], y: 0, rot: rot + Math.PI }); P.push({ at: [x, z], y: 0, rot: rot, pose: 'sit_low' }); }
     else if (q < 0.5) { const [x, z] = at(ox + side * 2.4, 1.2); E.push({ t: 'animal', kind: 'donkey', at: [x, z], y: 0, rot: rot + 1.57, seed, gear: true }); }
-    // washing on poles over the flat roof, a few houses in the ring and in Karkh
-    if (w >= 10 && rand() < 0.3) E.push({ t: 'wash_line', at: houseToWorld(l, (rand() - 0.5) * 3, 0), y: H + 0.14, rot, len: 4, pole: true, seed });
+    // washing on a line between props on the flat roof of the front range, a few houses in the ring and in Karkh
+    if (w >= 10 && rand() < 0.3) E.push({ t: 'laundry', at: houseToWorld(l, (rand() - 0.5) * 3, hd - Math.min(3.6, 2 * hd * 0.25) / 2), y: H + 0.12, rot, len: 4, seed });
   }
   return { E, P };
 }

@@ -42,6 +42,7 @@ function ringWall(el, ctx) {
         bag.add(mat, lathe([[t.r, -1], [t.r, ty - y0], [t.r + 0.35, ty - y0 + 0.01], [t.r + 0.35, ty - y0 + 0.45], [t.r - 0.2, ty - y0 + 0.45]], 16, null, tx, y0, tz));
         const k = 12;
         for (let j = 0; j < k; j++) { const aa = j / k * Math.PI * 2 + 0.13, x = tx + Math.cos(aa) * (t.r + 0.1), z = tz + Math.sin(aa) * (t.r + 0.1); bag.add(mat, box(x - 0.32, ty + 0.44, z - 0.32, x + 0.32, ty + 1.6, z + 0.32)); }
+        bag.add(mat, lathe([[0.001, 0], [t.r - 0.19, 0]], 16, null, tx, ty + 0.44, tz));      // the tower's deck, under the dark hatch
         bag.add('opening', lathe([[0.001, 0], [t.r * 0.45, 0]], 8, null, tx, ty + 0.46, tz));
         ctx.col.circle(tx, tz, t.r, y0, ty);
       }
