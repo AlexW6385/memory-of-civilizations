@@ -112,7 +112,7 @@ function ziggurat(el, ctx) {
     const SK = ZIG_SKIN[i] || BB;                                          // the stage's facing: pale baked brick below, red above (lit well even against the low sun)
     bag.add(SK, frustum(r, y, y + s.h, b, b, b, b, { noBottom: true }));
     buttresses(bag, r, y, s.h, b, 3.2, (px) => Math.abs(px - cx) < 5, SK, LIT ? 0.9 : 0.55, LIT ? 0.62 : 0.35);        // broad, deep buttresses: the recesses between them throw shadow and read from afar
-    col.rect([r[0] + b * 0.4, r[1] + b * 0.4, r[2] - b * 0.4, r[3] - b * 0.4], y, y + s.h);
+    const ci = Math.min(b * 0.4, 0.2); col.rect([r[0] + ci, r[1] + ci, r[2] - ci, r[3] - ci], y, y + s.h);   // the battered face at body height is within 0.2 m of the foot
     col.floor([r[0] + b, r[1] + b, r[2] - b, r[3] - b], y + s.h);
     tops.push({ r, b, y0: y, y1: y + s.h });
     const y0s = y, stains = [], fx0 = (px, nx, o2) => px - nx * o2, fz0 = (pz, nz, o2) => pz - nz * o2;

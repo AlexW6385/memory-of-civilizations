@@ -76,6 +76,8 @@ function houseSong(el, { bag, col }) {
   const hipIn = Math.min(L / 2 - 0.3, (vbE - vf) / 2 - 0.2);
   const tProf = (vv) => { const t = vv <= vm ? (vv - vf) / (vm - vf) : (vbE - vv) / (vbE - vm); return Math.pow(Math.max(0, Math.min(1, t)), 1.35); };
   const prof = (vv) => yEv + rise * tProf(vv);
+  // the collider is the house as drawn: from the front's outermost things at body height (the counters, sills and frames at v0 − 0.16; the steps are low enough to walk over) to the back wall
+  const solid = () => { const p = W(0, v0 - 0.16, 0), q = W(L, D - 0.15, 0); col.rect([p[0], p[2], q[0], q[2]], y - 0.4, yE + rise); };
 
   // plinth, party walls, back wall, with the damp band
   B(0, v0 - 0.12, L, vb, y - 0.4, y0, 'granite_block');
@@ -274,14 +276,23 @@ function houseSong(el, { bag, col }) {
     B(0, vb, L, vr0, y0 - 0.45, y0 - 0.37, 'brick_grey');                                                       // the court's bricks
     for (const [a0, a1] of [[0, 0.24], [L - 0.24, L]]) { wall(a0, vb, a1, vr0, y0 - 0.45, y0 + 2.7); B(a0 - 0.03, vb, a1 + 0.03, vr0, y0 + 2.7, y0 + 2.8, 'tile_dark'); }
     B(0, vr0, L, rb, y - 0.4, y0, 'granite_block');
-    wall(0, vr0, L, rb, y0, y0 + h);
+    wall(0, vr0, L, rb, y0, yEr);
     B(0.3, vr0 - 0.03, L - 0.3, vr0, y0 + 0.2, y0 + 2.4, 'lattice');
     for (let k = 0; k <= 4; k++) { const a = 0.3 + (L - 0.6) * k / 4; B(a - 0.07, vr0 - 0.1, a + 0.07, vr0 + 0.1, y0, y0 + 2.5, 'timber'); }
     const r2 = (E0, E1, R0, R1) => { const T = []; const P = (s, t) => W(E0[0] + (E1[0] - E0[0]) * s + (R0[0] - E0[0]) * t, E0[1] + (E1[1] - E0[1]) * s + (R0[1] - E0[1]) * t, yEr + 1.1 * Math.pow(t, 1.35)); T.push(...tri4([P(0, 0), P(1, 0), P(1, 1), P(0, 1)])); put(roofMat, facing(T, [0, 1, 0])); };
     const m2 = (vr0 - 0.8 + rb + 0.5) / 2;
     r2([-0.0, vr0 - 0.8], [L, vr0 - 0.8], [0, m2], [L, m2]); r2([L, rb + 0.5], [0, rb + 0.5], [L, m2], [0, m2]);
     qF(roofMat, 0, L, yEr - 0.15, yEr + 0.03, vr0 - 0.8, -1);
-    col.rect(el.rect, y - 0.4, yE + rise);
+    // the rear hall's gable ends, filled to the roof's line over the walls
+    for (const [a, sd] of [[0, -1], [L, 1]]) {
+      const hr = (vv) => yEr + 1.1 * Math.pow(Math.max(0, Math.min(1, vv <= m2 ? (vv - (vr0 - 0.8)) / (m2 - (vr0 - 0.8)) : (rb + 0.5 - vv) / (rb + 0.5 - m2))), 1.35);
+      const vs = [m2]; for (let i = 0; i <= 5; i++) vs.push(vr0 + (rb - vr0) * i / 5);
+      vs.sort((p1, q1) => p1 - q1);
+      const T = [];
+      for (let i = 0; i + 1 < vs.length; i++) T.push(...tri4([W(a, vs[i], yEr - 0.02), W(a, vs[i + 1], yEr - 0.02), W(a, vs[i + 1], hr(vs[i + 1]) - 0.02), W(a, vs[i], hr(vs[i]) - 0.02)]));
+      put(wallMat, facing(T, dirU(sd)));
+    }
+    solid();
     return flush();
   }
   if (vb < rb - 0.5) {
@@ -296,7 +307,7 @@ function houseSong(el, { bag, col }) {
       B(cx + 0.9, rb - 0.8, cx + 2.0, rb - 0.26, y0 - 0.3, y0 + 0.5, 'timber');
     }
   }
-  col.rect(el.rect, y - 0.4, yE + rise);
+  solid();
   flush();
 
   function flush() { for (const [mat, arr] of acc) if (arr.length) bag.add(mat, fromTriangles(arr)); }
