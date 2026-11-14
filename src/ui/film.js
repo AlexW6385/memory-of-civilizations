@@ -219,7 +219,34 @@ export const PROMO = {
   //           height over the landmark's ground (m), start → end, looking at the landmark `look` m up
   // (no hour: mid-morning or mid-afternoon, whichever puts the sun behind the arrival view)
   shots: [
-    { site: 'ming-suzhou', kind: 'ground', f: [-1, 2], s: [-2.5, 2.5], u: [-0.5, -0.2], t: 5 },
+    // low over the lotus, out from behind a Taihu rock: the hall across the pond (the title)
+    { site: 'ming-suzhou', kind: 'ground', f: [-1, 2], s: [-2.5, 0.4], u: [-0.6, -0.3], hour: 16.6, t: 5 },
+    // toward the Iron Pagoda through the market
+    { site: 'song-kaifeng', kind: 'ground', f: [0, 5], u: [0, 0.6], t: 3 },
+    // up the street of white houses, rising to the Potala
+    { site: 'lhasa', kind: 'ground', f: [0, 4], u: [0, 5], pitch: [0, -0.06], t: 3 },
+    // the gaze climbing the castle's stone base to the keep
+    { site: 'edo-himeji', kind: 'ground', f: [0, 2], u: [-0.6, 0.4], pitch: [-0.25, 0], t: 3 },
+    // low along the water channel to the Taj
+    { site: 'mughal-agra', kind: 'ground', f: [0, 10], u: [-0.9, -0.5], t: 3 },
+    // with the people on the causeway of Angkor Wat
+    { site: 'angkor', kind: 'ground', f: [0, 5], u: [0, 0.4], t: 3 },
+    // round the ridge of Machu Picchu
+    { site: 'machu-picchu', kind: 'fly', a: [-25, 15], t: 3.5 },
+    // past the workmen before the Great Pyramid
+    { site: 'giza', kind: 'ground', s: [-4, 4], t: 3 },
+    // the gaze climbing the Treasury's face
+    { site: 'petra', kind: 'ground', f: [0, 2], pitch: [-0.3, 0.05], t: 3 },
+    // rising before the Parthenon
+    { site: 'athens', kind: 'ground', f: [0, 3], u: [0, 3], t: 2.5 },
+    // across the Piazza
+    { site: 'venice', kind: 'ground', s: [-3.5, 3.5], t: 3 },
+    // round the dome over the roofs of Florence
+    { site: 'florence', kind: 'fly', a: [-35, -5], t: 3 },
+    // the gaze climbing the street's walls to the Chrysler Building
+    { site: 'new-york', kind: 'ground', f: [0, 3], pitch: [-0.35, 0.1], t: 3 },
+    // back and up along the axis of the Forbidden City (the end card)
+    { site: 'qing-beijing', kind: 'fly', a: [0, 0], d: [150, 340], h: [45, 95], look: 15, t: 4 },
   ],
 };
 

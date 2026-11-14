@@ -6,7 +6,7 @@ from scipy.signal import fftconvolve, butter, sosfilt
 import wave, sys
 
 SR = 48000
-CUTS = [4, 8, 11.5, 14.5, 18, 21.5, 25, 28, 31.5, 34.5, 37.5, 40.5]   # the shots' starts after the first
+CUTS = [5, 8, 11, 14, 17, 20, 23.5, 26.5, 29.5, 32, 35, 38, 41]   # the shots' starts after the first
 DUR = 45.0
 N = int(SR * DUR)
 rng = np.random.default_rng(11)
@@ -35,10 +35,10 @@ def pad(ms, dur):
 
 # the drone and the chords: D, then B flat and C under the middle, D again with its fifth for the end
 place(pad([38, 45], 45), 0, 0, 0.5)
-for t0, ch in [(0, [50, 57, 62]), (11.5, [46, 53, 62]), (21.5, [48, 55, 64]), (31.5, [50, 57, 65]), (40, [50, 57, 62, 66, 69])]:
+for t0, ch in [(0, [50, 57, 62]), (11, [46, 53, 62]), (20, [48, 55, 64]), (29.5, [50, 57, 65]), (40.5, [50, 57, 62, 66, 69])]:
     place(pad(ch, min(14.5, DUR - t0)), t0, rng.uniform(-0.3, 0.3), 0.42)
 # a bell at every cut, the line climbing; a higher answer between
-line = [62, 65, 69, 67, 69, 72, 74, 72, 76, 77, 81, 74]
+line = [62, 65, 69, 67, 69, 72, 74, 72, 76, 74, 77, 79, 81, 74]
 for k, t0 in enumerate([0.6] + CUTS[:-1]):
     place(bell(line[k]), t0, (-1) ** k * 0.35, 0.22)
     place(bell(line[k] + 7, 3.5), t0 + (CUTS[k] - t0) * 0.5 if k < len(CUTS) else t0 + 1.5, -(-1) ** k * 0.5, 0.09)
