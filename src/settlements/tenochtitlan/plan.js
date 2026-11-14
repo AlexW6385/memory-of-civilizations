@@ -151,7 +151,10 @@ for (const [z, cargo] of [[30, 'maize'], [44, 'pots'], [56, 'chile'], [74, 'reed
   E.push({ t: 'plaza_dress', pieces, people });
 }
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('eagle-house', [88, -136, 134, -106], 1.4, 'hall'), room('calmecac', [-138, -138, -86, -106], 1.2, 'hall'), room('precinct', PRECINCT, 0, 'open'), room('tianguis', MARKET, 0.04, 'open'), room('palace', PALACE, 1.0, 'open')];
+// the House of the Eagles and the calmecac are roofed in ranges round an open patio and court: a room for each roofed range, the patio and the court open
+const rooms = [room('eagle-house north-west', [84.4, -137.6, 104.6, -125.8], 1.4, 'hall'), room('eagle-house north-east', [115, -137.6, 135.6, -125.8], 1.4, 'hall'), room('eagle-house portico', [84.4, -125.8, 118.4, -122.5], 1.4, 'hall'), room('eagle-house east', [118.4, -125.8, 135.6, -104.4], 1.4, 'hall'), room('eagle-house patio', [104.6, -137.2, 115, -126.4], 1.4, 'open'),
+  room('calmecac north', [-139.6, -139.6, -84.4, -130.2], 1.2, 'hall'), room('calmecac west', [-139.6, -130.2, -130.2, -104.4], 1.2, 'hall'), room('calmecac east', [-93.8, -130.2, -84.4, -104.4], 1.2, 'hall'), room('calmecac court', [-130.2, -130.2, -93.8, -104.4], 1.2, 'open'),
+  room('precinct', PRECINCT, 0, 'open'), room('tianguis', MARKET, 0.04, 'open'), room('palace', PALACE, 1.0, 'open')];
 const walks = [[[-260, 0], [-150, 0], [-60, 0], [-20, 8], [20, 8], [34, 0]]];
 walks[0].y0 = 0;
 
