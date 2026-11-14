@@ -1,11 +1,10 @@
 // Constantinople — the ground: the paved squares and streets of the first hill, gardens with
 // cypresses, plane trees and vines on the slopes toward the sea; the bright, windy Bosphorus sky.
 
-import { GARDEN_COURT, RADIUS, SOPHIA, AUGUSTAION, EIRENE, ZEUXIPPUS, HIPPODROME, PALACE, FORUM, height, onMese, inRect, inLot, onLane, gardens } from './layout.js';
+import { GARDEN_COURT, RADIUS, SOPHIA, AUGUSTAION, EIRENE, ZEUXIPPUS, HIPPODROME, PALACE, FORUM, COURTS, height, onMese, inRect, inLot, onLane, gardens } from './layout.js';
 
 const PAVED = [SOPHIA, AUGUSTAION, EIRENE, ZEUXIPPUS, HIPPODROME];
-// the Great Palace's courts and halls (plan.js); between them the palace gardens
-const COURTS = [[60, 140, 150, 220], [160, 150, 250, 230], [70, 235, 160, 325], [170, 240, 255, 325]];
+// the Great Palace's courts and halls (layout.js COURTS); between them the palace gardens
 const inCourt = (x, z, m = 0) => COURTS.some((r) => inRect(r, x, z, m));
 const inGarden = (x, z, m = 0) => gardens().some((g) => inRect(g.rect, x, z, m));
 function cover(x, z) {
