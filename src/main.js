@@ -26,7 +26,7 @@ import { REGION } from './world/regions.js';
 import { openClimate } from './planet/climates.js';
 import { ARRIVALS } from './planet/arrivals.js';
 import { Tour } from './ui/tour.js';
-import { runFilm, runPromo, promoKeys, PROMO } from './ui/film.js';
+import { runFilm, runPromo, promoKeys, promoHour, PROMO } from './ui/film.js';
 import { nearest, peek, take } from './ui/order.js';
 
 const $ = (id) => document.getElementById(id);
@@ -930,7 +930,7 @@ async function main() {
   // (once the start is over: a pose in the middle of it waited for ever)
   if (params.has('bench')) startedP.then(() => runBench(window.palace));
   // ?film=<settlement>: a scripted flight recorded into an MP4 (src/ui/film.js; with &capture and &quality=cinema)
-  window.promoPose = async (i, u = 0.5) => { const sh = PROMO.shots[i], A = ARRIVALS[sh.site]; await window.palace.pose(sh.site, A[0], A[1] ?? 0, A[2], A[3], A[4]); const st = world.byId[sh.site]; for (let k = 0; k < 400 && !(st.state === 'ready' && !st.mergingNow); k++) await new Promise((r) => setTimeout(r, 150)); climate.hour = sh.hour; climate.setTime('held'); const keys = promoKeys(window.palace, sh), n = keys.length - 1, s = Math.min(n - 1e-6, u * n), a = keys[Math.floor(s)], b = keys[Math.floor(s) + 1], f = s - Math.floor(s); const m = (x, y) => x + (y - x) * f; await window.palace.camera(sh.site, m(a.p[0], b.p[0]), m(a.p[1], b.p[1]), m(a.p[2], b.p[2]), m(a.yaw, b.yaw), m(a.pitch, b.pitch)); climate.hour = sh.hour; return sh.site + ' ' + sh.kind; };
+  window.promoPose = async (i, u = 0.5) => { const sh = PROMO.shots[i], A = ARRIVALS[sh.site]; await window.palace.pose(sh.site, A[0], A[1] ?? 0, A[2], A[3], A[4]); const st = world.byId[sh.site]; for (let k = 0; k < 400 && !(st.state === 'ready' && !st.mergingNow); k++) await new Promise((r) => setTimeout(r, 150)); climate.hour = promoHour(sh); climate.setTime('held'); const keys = promoKeys(window.palace, sh), n = keys.length - 1, s = Math.min(n - 1e-6, u * n), a = keys[Math.floor(s)], b = keys[Math.floor(s) + 1], f = s - Math.floor(s); const m = (x, y) => x + (y - x) * f; await window.palace.camera(sh.site, m(a.p[0], b.p[0]), m(a.p[1], b.p[1]), m(a.p[2], b.p[2]), m(a.yaw, b.yaw), m(a.pitch, b.pitch)); climate.hour = promoHour(sh); return sh.site + ' ' + sh.kind; };
   if (params.has('film')) startedP.then(() => (params.get('film') === 'promo' ? runPromo : (pal, fr, pr) => runFilm(params.get('film'), pal, fr, pr))(window.palace, (n) => new Promise((r) => {
     const f0 = stats.frames, wait = () => (stats.frames >= f0 + n ? r() : requestAnimationFrame(wait)); wait();
   }), params)).catch((e) => { console.error('[film]', e); window.FILM_DONE = { error: String(e.message || e) }; });
