@@ -127,6 +127,15 @@ function house(el, ctx) {
   const K = (ridgeY - eaveY) / R, yAt = (u) => ridgeY - Math.abs(u) * K;
   const yTop = yAt(hw) - 0.1, y0 = -0.3, ch = 0.32, nC = Math.ceil((yTop - y0) / ch);
   const doorK = Math.ceil((g + 2.3 - y0) / ch), doorTop = y0 + doorK * ch, dw = 0.5;
+  // a house whose ground falls away below its walls (at the shore) stands on a crib of logs, laid in courses down to that ground
+  if (el.foot !== undefined && el.foot < y0 - 0.3) {
+    const lr = rng(el.seed + 7);
+    for (let a = el.foot - 0.3; a < y0; a += 0.45) {
+      const b = Math.min(y0 + 0.02, a + 0.43), m = woodOf(el.age, lr());
+      for (const s of [-1, 1]) add(m, box(s > 0 ? hw - wt : -hw, a, -hd + wt, s > 0 ? hw : -hw + wt, b, hd - wt));
+      add(m, box(-hw, a, hd - wt, hw, b, hd)); add(m, box(-hw, a, -hd, hw, b, -hd + wt));
+    }
+  }
   // the wall planks: courses, each a little proud of the one below
   for (let c = 0; c < nC; c++) {
     const a = y0 + c * ch, b = Math.min(yTop, a + ch - 0.015), m = woodOf(el.age, rand()), o = (c % 2) * 0.03;
