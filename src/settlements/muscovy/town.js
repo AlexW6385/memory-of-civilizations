@@ -159,6 +159,7 @@ export function yards(all) {
     const gLo = lat0 - (cl - 7) - 0.55, gHi = (cl + 7) - lat1 - 0.55;                    // free width each side, after the margins
     const R = (la, lb, da, db) => (ex ? [da, la, db, lb] : [la, da, lb, db]);
     const yy = (r) => Math.max(height(r[0], r[1]), height(r[2], r[1]), height(r[0], r[3]), height(r[2], r[3]));
+    const yl = (r) => Math.min(height(r[0], r[1]), height(r[2], r[1]), height(r[0], r[3]), height(r[2], r[3]), height((r[0] + r[2]) / 2, (r[1] + r[3]) / 2)) - 0.1;
     const bigSide = gLo >= gHi ? -1 : 1, gBig = Math.max(gLo, gHi), gSmall = Math.min(gLo, gHi);
     let used = 0;
     const sideRange = (s, w) => (s < 0 ? [lat0 - 0.3 - w, lat0 - 0.3] : [lat1 + 0.3, lat1 + 0.3 + w]);
@@ -171,7 +172,7 @@ export function yards(all) {
     const gs = used === bigSide ? (gSmall >= 1.9 ? -bigSide : 0) : (gBig >= 1.9 ? bigSide : 0);
     if (gs && rand() < (d < 200 ? 0.8 : 0.45)) {
       const w = Math.min(gs < 0 ? gLo : gHi, 3.4), [la, lb] = sideRange(gs, w), rect = R(la, lb, dp0 + 0.3, dp1 - 0.3);
-      E.push({ t: 'garden', rect, y: yy(rect), seed: l.seed + 13 });
+      E.push({ t: 'garden', rect, y: yy(rect), foot: yl(rect), seed: l.seed + 13 });
     }
   }
   return E;

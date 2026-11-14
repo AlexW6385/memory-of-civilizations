@@ -229,7 +229,7 @@ function kremlinWall(el, { bag, col }) {
       const yy = yf(x, z), r = round ? 7 : 5.5, H = tall ? h + 22 : h + 8;
       let top;
       if (round) {
-        bag.add(BR, lathe([[r + 0.8, 0], [r, 4], [r, H], [r + 0.6, H + 0.4], [r + 0.6, H + 2], [0.001, H + 2]], 24, null, x, yy - 3, z)); col.circle(x, z, r + 0.8, yy - 3, yy - 3 + H);
+        bag.add(BR, lathe([[r + 0.8, 0], [r, 4], [r, H], [r + 0.6, H + 0.4], [r + 0.6, H + 2], [0.001, H + 2]], 24, null, x, yy - 3, z)); col.circle(x, z, r + 0.25, yy - 3, yy - 3 + H);
         top = yy - 1 + H;
         const nm = 14;
         for (let q = 0; q < nm; q++) { const a0 = q / nm * Math.PI * 2, a1 = a0 + MW / (r + 0.25), R = r + 0.25; bag.add(BR, slab(MERLON, 0.7, [x + Math.cos(a0) * R, z + Math.sin(a0) * R], [x + Math.cos(a1) * R, z + Math.sin(a1) * R], top, 1)); }

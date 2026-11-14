@@ -225,8 +225,10 @@ function tower(el, { bag, col }, rect, front, tu, s, P, yc, y, RU) {
   }
   // inside the belfry: the floor, the bell on its beam; above, the cap and the lion with the lily on its pole
   const [tx, tz] = [(tr[0] + tr[2]) / 2, (tr[1] + tr[3]) / 2], ya = yB + 6.2, yE = ya + (s - 3.4) / 2 + 0.9;
+  bag.add(PF, box(tr[0], yS - 0.01, tr[1], tr[2], yB - 0.3, tr[3]));                // the shaft's core up through the gallery to the belfry's floor
   bag.add(PF, box(tr[0] + 0.3, yB - 0.3, tr[1] + 0.3, tr[2] - 0.3, yB, tr[3] - 0.3));
   bag.add(W, box(tr[0] + 1.6, ya - 0.2, tz - 0.2, tr[2] - 1.6, ya + 0.2, tz + 0.2));
+  for (const x of [tr[0] + 1.6, tr[2] - 1.6]) bag.add(W, box(x - 0.2, yB, tz - 0.2, x + 0.2, ya + 0.2, tz + 0.2)); // a post under each end of the beam, standing on the belfry floor
   bag.add(GB, lathe([[0.001, -2.6], [1.05, -2.6], [0.95, -2.2], [0.68, -1.4], [0.6, -0.4], [0.35, -0.05], [0.001, 0]], 14, null, tx, ya - 0.2, tz));
   bag.add(PF, box(tr[0], yE - 0.05, tr[1], tr[2], yE + 1.1, tr[3]));
   bag.add(SER, frustum([tr[0] + 0.6, tr[1] + 0.6, tr[2] - 0.6, tr[3] - 0.6], yE + 1.1, yE + 6.4, s / 2 - 1.1, s / 2 - 1.1, s / 2 - 1.1, s / 2 - 1.1));
