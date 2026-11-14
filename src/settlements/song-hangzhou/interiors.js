@@ -82,6 +82,12 @@ export function lantern(P, x, y, z, mat = 'lamp_paper') {
   P.add(mat, ly([[0.001, -0.5], [0.11, -0.46], [0.15, -0.38], [0.15, -0.3], [0.001, -0.29]], 8, x, y, z).scale(1, 1, 1));
   P.add('lacquer_red', ly([[0.001, -0.54], [0.09, -0.54], [0.09, -0.5], [0.001, -0.5]], 8, x, y, z)); P.add('cloth_red', limb([x, y - 0.54, z], [x, y - 0.72, z], 0.012, 0.004, 4));
 }
+/** A tie beam across the room at depth b, its underside at height y, its ends in the side walls: what a row of lanterns hangs from. */
+function tieBeam(R, Wd, b, y) {
+  const P = new Parts();
+  P.add('timber', box(-Wd / 2 + 0.1, y, -0.07, Wd / 2 - 0.1, y + 0.14, 0.07));
+  R.put(P, 0, b);
+}
 /** A three-fold screen (pingfeng) with its painted panels, standing. */
 export function screen3(P, w = 1.8, h = 1.5, seed = 2) {
   const r = rng(seed), pw = w / 3;
@@ -201,6 +207,7 @@ function teaHouse(el, ctx) {
   }
   // by the door, the flower rack
   { const P = new Parts(); flowerRack(P); put(P, a0 + 0.3, Dp - 0.9, Math.PI); R.rect(a0 - 0.3, Dp - 1.2, a0 + 0.9, Dp - 0.6, 1.0); }
+  tieBeam(R, Wd, Dp * 0.5, 3.2);
   for (let k = 0; k < 3; k++) { const L = new Parts(); lantern(L, 0, 3.2, 0); put(L, -Wd / 2 + (k + 0.5) * Wd / 3, Dp * 0.5, 0, 0); }
   R.emit();
   return R.figs;
@@ -237,6 +244,7 @@ function restaurant(el, ctx) {
     const J = new Parts(); for (let m = 0; m < 5; m++) J.add('pottery_dark', ly([[0.001, 0], [0.12, 0], [0.18, 0.18], [0.16, 0.34], [0.09, 0.44], [0.001, 0.44]], 9, -0.9 + m * 0.4, 0.95, 0)), J.add('cloth_red', ly([[0.001, 0.44], [0.1, 0.44], [0.1, 0.5], [0.001, 0.54]], 8, -0.9 + m * 0.4, 0.95, 0)); put(J, Wd / 2 - 1.9, Dp - 2.2, 0);
     R.person(Wd / 2 - 1.9, Dp - 2.7, 0, 1, { dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_black', hat: 'cap', pose: 'stand' }); }
   { const P = new Parts(); screen3(P, 2.0, 1.6, el.seed); put(P, -Wd / 2 + 2.0, Dp - 2.6, Math.PI); R.rect(-Wd / 2 + 1.0, Dp - 2.8, -Wd / 2 + 3.0, Dp - 2.4, 1.6); }
+  tieBeam(R, Wd, Dp * 0.6, 3.4);
   for (let k = 0; k < Math.floor(Wd / 3); k++) { const L = new Parts(); lantern(L, 0, 3.4, 0); put(L, -Wd / 2 + 1.5 + k * 3, Dp * 0.6, 0); }
   // the incense woman with her small burner, going between the tables
   R.person(-Wd / 2 + 4.2, Dp - 3.2, 0.5, 0.5, { dress: 'robe', cloth: 'cloth_maroon', cloth2: 'cloth_white', hair: 'bun', pose: 'stand' });
@@ -255,6 +263,7 @@ function imperialShop(el, ctx) {
     if (el.trade === 'medicine') { const T = new Parts(); T.add('iron', box(-0.3, 0.95, -0.1, 0.3, 1.05, 0.1)); T.add('iron', ly([[0.001, 0], [0.16, 0], [0.16, 0.03], [0.001, 0.03]], 12).rotateX(Math.PI / 2).translate(0, 1.2, 0)); put(T, -w / 4, Dp * 0.55, 0); }
     R.person(0, Dp * 0.55 - 0.7, 0, 1, { dress: 'robe', cloth: pick(CL), cloth2: pick(CL), hat: 'cap', pose: 'stand' }); }
   { const T = new Parts(); table(T, 0.8, 0.6, 0.74); put(T, Wd / 2 - 1.0, Dp * 0.55 + 1.4, 0); R.rect(Wd / 2 - 1.4, Dp * 0.55 + 1.1, Wd / 2 - 0.6, Dp * 0.55 + 1.7, 0.74); const S = new Parts(); stool(S); put(S, Wd / 2 - 1.0, Dp * 0.55 + 0.7, 0); }
+  tieBeam(R, Wd, Dp * 0.5, 3.1);
   { const L = new Parts(); lantern(L, 0, 3.1, 0); put(L, 0, Dp * 0.5, 0); }
   R.emit();
   return R.figs;
@@ -270,6 +279,7 @@ function house(el, ctx) {
   if (Wd > 5) { const P = new Parts(); couch(P, 1.9, 0.95); put(P, -Wd / 2 + 1.1, Dp * 0.55, Math.PI / 2 * 0 + Math.PI); R.rect(-Wd / 2 + 0.1, Dp * 0.55 - 0.5, -Wd / 2 + 2.1, Dp * 0.55 + 0.5, 0.98); }
   { const P = new Parts(); chest(P); put(P, Wd / 2 - 0.5, 0.6, -Math.PI / 2 * 0 + 0); R.rect(Wd / 2 - 0.9, 0.4, Wd / 2 - 0.1, 0.8, 0.5); }
   if (Wd > 4.5) { const P = new Parts(); qinTable(P); put(P, Wd / 2 - 1.2, Dp * 0.6, Math.PI); R.rect(Wd / 2 - 1.6, Dp * 0.6 - 0.2, Wd / 2 - 0.8, Dp * 0.6 + 0.2, 0.55); }
+  tieBeam(R, Wd, Dp * 0.5, 2.9);
   { const L = new Parts(); lantern(L, 0, 2.9, 0); put(L, 0, Dp * 0.5, 0); }
   if (rand() < 0.7) R.person(0.4, 2.6, 0, -1, { dress: 'robe', cloth: pick(CL), cloth2: pick(CL), hat: 'cap', pose: 'sit' });
   R.emit();
