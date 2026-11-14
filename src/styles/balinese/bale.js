@@ -1,7 +1,7 @@
 // Towers and pavilions (docs/settlements/bali-village.md §3, §4): the meru, the kulkul tower, the bale (open pavilion on a plinth), the wantilan with the gamelan,
 // the compound's house (bale daja), the kitchen (paon), the rice barn (lumbung).
 import { box, lathe } from '../../core/geom.js';
-import { bx, post, thatchHip, steps, coping, canang, rng, pick, TAU } from './kit.js';
+import { bx, post, thatchHip, hipHeight, steps, coping, canang, rng, pick, TAU } from './kit.js';
 
 /** bali_meru: { c, y, tiers (3 | 5 | 7 | 9 | 11), a (half width of the base), seed } — a base with stair, the closed cell, then the roofs diminishing upward. */
 export function meru(el, ctx) {
@@ -72,7 +72,10 @@ export function bale(el, ctx) {
   const pm = el.postMat ?? 'wood_painted', ins = 0.3, px0 = x0 + ins, px1 = x1 - ins, pz0 = z0 + ins, pz1 = z1 - ins;
   const posts = [];
   for (let i = 0; i <= nc; i++) for (let j = 0; j <= nr; j++) if (i === 0 || j === 0 || i === nc || j === nr) posts.push([px0 + (px1 - px0) * i / nc, pz0 + (pz1 - pz0) * j / nr]);
-  for (const [x, z] of posts) { post(ctx, pm, x, z, f, f + H, 0.13); bx(ctx, 'wood_dark', x - 0.17, f, z - 0.17, x + 0.17, f + 0.12, z + 0.17); }
+  // the posts rise to the underside of the first roof stage, which is higher over them than at the eave
+  const rA = (x1 - x0) / 2 + 1.0, rB = (z1 - z0) / 2 + 1.0, rRise = Math.max(1.4, Math.min(rA, rB) * 1.15) * (el.tier2 ? 0.45 : 1);
+  const postTop = (x, z) => f + H + hipHeight(rA, rB, rRise, 1.3, x - cx, z - cz) - 0.2;
+  for (const [x, z] of posts) { post(ctx, pm, x, z, f, Math.max(f + H, postTop(x, z)), 0.13); bx(ctx, 'wood_dark', x - 0.17, f, z - 0.17, x + 0.17, f + 0.12, z + 0.17); }
   // the tie-beams and the carved fascia under the eave
   bx(ctx, pm, px0 - 0.2, f + H - 0.28, pz0 - 0.1, px1 + 0.2, f + H - 0.06, pz0 + 0.1); bx(ctx, pm, px0 - 0.2, f + H - 0.28, pz1 - 0.1, px1 + 0.2, f + H - 0.06, pz1 + 0.1);
   bx(ctx, pm, px0 - 0.1, f + H - 0.28, pz0, px0 + 0.1, f + H - 0.06, pz1); bx(ctx, pm, px1 - 0.1, f + H - 0.28, pz0, px1 + 0.1, f + H - 0.06, pz1);
@@ -91,7 +94,8 @@ export function bale(el, ctx) {
   if (el.tier2) {
     thatchHip(ctx, { c: [cx, cz], A, B, y: f + H, rise: rise * 0.45, mat, pow: 1.3 });
     const a2 = A * 0.62, b2 = B * 0.62, y2 = f + H + rise * 0.45 + 0.7;
-    for (const [x, z] of [[cx - a2 * 0.8, cz - b2 * 0.8], [cx + a2 * 0.8, cz - b2 * 0.8], [cx - a2 * 0.8, cz + b2 * 0.8], [cx + a2 * 0.8, cz + b2 * 0.8]]) post(ctx, 'wood_dark', x, z, y2 - 0.7, y2, 0.1, false);
+    for (const [x, z] of [[cx - a2 * 0.8, cz - b2 * 0.8], [cx + a2 * 0.8, cz - b2 * 0.8], [cx - a2 * 0.8, cz + b2 * 0.8], [cx + a2 * 0.8, cz + b2 * 0.8]]) post(ctx, 'wood_dark', x, z, f + H, y2, 0.1, false);
+    post(ctx, 'wood_dark', cx, cz, f + H + rise * 0.45 - 0.2, y2 + rise * 0.9 - 0.15, 0.12, false);  // the king post from the lower roof up to the ridge of the upper
     thatchHip(ctx, { c: [cx, cz], A: a2 + 0.6, B: b2 + 0.6, y: y2, rise: rise * 0.9, mat, pow: 1.3 });
   } else thatchHip(ctx, { c: [cx, cz], A, B, y: f + H, rise, mat, pow: 1.3 });
   // furnishing

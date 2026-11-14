@@ -50,7 +50,7 @@ const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
   room('forecourt', [-12, zS + 1, 12, -46], 0, 'market'),
   room('jaba-tengah', [x0 + 1, zM + 1, x1 - 1, zS - 3], y1, 'open'),
-  room('jeroan', [x0 + 1, zN + 1, x1 - 1, zM - 3], y2, 'inner'),
+  room('jeroan', [x0 + 1, zN + 1, x1 - 1, zM - 3], y2, 'open'),
   room('gong-pavilion', [15, -103, 27, -94.5], y1 + 0.5, 'hall'),
   room('bale-agung', [-29.5, -101.5, -16.5, -93.5], y1 + 0.6, 'hall'),
 ];
