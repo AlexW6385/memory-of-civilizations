@@ -108,6 +108,9 @@ export function shop(el, ctx) {
   F.b('cloth_red', u0 + 0.5, fl + 0.3, v1 - 2.1, u0 + 2.1, fl + 0.34, v1 - 0.7, false);
   shelf(F, W / 2, fl + 1.75, v1 - 0.18, 'u');
   F.b('lamp_paper', W / 2 - 0.12, fl + wh - 0.6, v0 + 3.4, W / 2 + 0.12, fl + wh - 0.3, v0 + 3.64, false);
+  // the lamp's cord and the tie beam it hangs from, across the shop from wall to wall
+  F.b('wood_dark', W / 2 - 0.01, fl + wh - 0.3, v0 + 3.51, W / 2 + 0.01, fl + wh, v0 + 3.53, false);
+  F.b('wood_dark', u0 + t, fl + wh - 0.08, v0 + 3.44, u1 - t, fl + wh + 0.04, v0 + 3.6, false);
   F.light(W / 2, fl + wh - 0.5, v0 + 4.0, '#ffb865', 4, 10);
   if (trade === 'tea') { F.b('wood_ochre', W / 2 + 1.4, fl, v0 + 2.0, W / 2 + 2.3, fl + 0.5, v0 + 2.8, false); for (const dv of [-0.3, 1.1]) F.b('wood_dark', W / 2 + 1.5, fl, v0 + 2.1 + dv, W / 2 + 1.9, fl + 0.3, v0 + 2.4 + dv, false); }
   void laundryLine; void offering;

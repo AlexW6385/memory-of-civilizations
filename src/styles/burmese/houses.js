@@ -271,6 +271,9 @@ function houseDetail(F, r, o) {
   F.b('lacquer_red', u1 - 1.1, fl, v0 + 3.1, u1 - 0.3, fl + 0.55, v0 + 3.9, true);
   F.b('lacquer_black', u1 - 1.1, fl + 0.55, v0 + 3.1, u1 - 0.3, fl + 0.6, v0 + 3.9, false);
   F.b('lamp_paper', (u0 + u1) / 2 - 0.12, fl + wh - 0.55, (v0 + v1) / 2 - 0.12, (u0 + u1) / 2 + 0.12, fl + wh - 0.25, (v0 + v1) / 2 + 0.12, false);
+  // its cord and the tie beam across the room, wall to wall
+  F.b('wood_dark', (u0 + u1) / 2 - 0.01, fl + wh - 0.25, (v0 + v1) / 2 - 0.01, (u0 + u1) / 2 + 0.01, fl + wh, (v0 + v1) / 2 + 0.01, false);
+  F.b('wood_dark', u0, fl + wh - 0.08, (v0 + v1) / 2 - 0.08, u1, fl + wh + 0.04, (v0 + v1) / 2 + 0.08, false);
   void sign;
 }
 
