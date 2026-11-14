@@ -70,7 +70,7 @@ export function urHouseOpen(el, { bag, col, lights }) {
   for (const o of [dRec, dCh]) if (ok(o)) lintel(o.a, o.b, V - t - dB - ti - 0.06, o.h);
   { const a = W(uC1 - 0.06, dKit.a - 0.15), b = W(uC1 - 0.06, dKit.b + 0.15), T = []; beamTris(T, [a[0], dKit.h, a[1]], [b[0], dKit.h, b[1]], 0.1, 0.16); bag.add('palm_trunk', fromTriangles(T)); }
   // the reception room's door: two cedar leaves standing open into the room
-  for (const [u, s] of [[dRec.a, 1], [dRec.b, -1]]) B('cedar', Math.min(u, u + s * 0.06), V - t - dB + 0.02, Math.max(u, u + s * 0.06), V - t - dB + 0.64, 0.08, dRec.h - 0.05);
+  for (const [u, s] of [[dRec.a, 1], [dRec.b, -1]]) col.rect(B('cedar', Math.min(u, u + s * 0.06), V - t - dB + 0.02, Math.max(u, u + s * 0.06), V - t - dB + 0.64, 0.08, dRec.h - 0.05), 0.08, dRec.h - 0.05);
   // the floors: baked brick in the court (sloping to its drain), the lavatory and the chapel; beaten earth under
   // reed mats elsewhere (brick here too, laid flat)
   B(BB, t, t, U - t, V - t, -0.3, 0.06); col.floor(R(0, 0, U, V), 0.06);
