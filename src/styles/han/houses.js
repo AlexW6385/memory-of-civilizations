@@ -38,7 +38,9 @@ function hallBlock(F, u0, u1, v0, v1, H, wm, door, open, rand) {
   if (door) {
     F.b(wm, u0, P, v0, du - doorW / 2, H, v0 + t); F.b(wm, du + doorW / 2, P, v0, u1, H, v0 + t); F.b(wm, du - doorW / 2, P + 2.2, v0, du + doorW / 2, H, v0 + t);
     F.b('timber_red', du - doorW / 2 - 0.1, P, v0 - 0.05, du - doorW / 2 + 0.06, P + 2.2, v0 + t + 0.05, false); F.b('timber_red', du + doorW / 2 - 0.06, P, v0 - 0.05, du + doorW / 2 + 0.1, P + 2.2, v0 + t + 0.05, false);
-    F.b('lacquer_black', du - doorW / 2 + 0.05, P, v0 + 0.05, du - doorW / 2 + 0.1 + (open ? 0 : 0.8), P + 2.1, v0 + 0.1 + (open ? 0.8 : 0), false);
+    // the leaves: swung back against the wall where the house is open to the visitor, shut across the doorway otherwise
+    if (open) F.b('lacquer_black', du - doorW / 2 + 0.05, P, v0 + 0.05, du - doorW / 2 + 0.1, P + 2.1, v0 + 0.9, false);
+    else F.b('lacquer_black', du - doorW / 2 + 0.06, P, v0 + 0.05, du + doorW / 2 - 0.06, P + 2.2, v0 + 0.16);
   } else F.b(wm, u0, P, v0, u1, H, v0 + t);
   // lattice windows between the posts on the front and the sides
   const win = (u, v, alongU, len) => (alongU ? F.b('lattice', u - len / 2, P + 1.0, v - 0.04, u + len / 2, P + 2.1, v + 0.04, false) : F.b('lattice', u - 0.04, P + 1.0, v - len / 2, u + 0.04, P + 2.1, v + len / 2, false));
@@ -49,7 +51,8 @@ function hallBlock(F, u0, u1, v0, v1, H, wm, door, open, rand) {
   F.b('timber_red', u0, H - 0.4, v0 - 0.22, u1, H, v0 + 0.08, false);
   const ov = 1.1, A = w / 2 + 0.9, B = (v1 - v0) / 2 + ov, el = F.roof('gable_roof_c', (u0 + u1) / 2, (v0 + v1) / 2, A, B, H + 0.1, 1.7 + B * 0.12, { mat: 'tile_grey', soffit: 'timber_red', noHorns: true });
   if (el.alongZ === false || el.alongZ === undefined) { const c = el.c; eaveTilesGable(F.bag, c[0], c[1], el.A, el.B, H + 0.1); }
-  F.col.rect(F.R(u0, v0, u1, v1), P, H);
+  // the ceiling under the roof: a slab over the room (the strings of the room's goods hang from it)
+  F.b(wm, u0 + t, H - 0.3, v0 + t, u1 - t, H - 0.1, v1 - t, false);
   return du;
 }
 function sideWing(F, u0, u1, v0, v1, H, wm) {
