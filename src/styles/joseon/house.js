@@ -294,12 +294,13 @@ export function yangbanHouse(el, { bag, col }) {
   // the crock terrace in the yard's south-east corner: a stone step, jars of three sizes in rows
   const jx = x1 - 4.2, jz = z1 - 3.0;
   bag.add('granite_korea', box(jx - 1.8, 0, jz - 1.0, jx + 1.8, 0.28, jz + 1.0));
-  col.rect([jx - 1.8, jz - 1.0, jx + 1.8, jz + 1.0], 0, 0.95);
+  col.floor([jx - 1.8, jz - 1.0, jx + 1.8, jz + 1.0], 0.28);
   for (let a = 0; a < 4; a++) for (let b = 0; b < 2; b++) {
     if (rand() < 0.15) continue;
     const big = (a + b) % 2 === 0, rr = big ? 0.32 : 0.22, hh = big ? 0.72 : 0.5, x = jx - 1.3 + a * 0.85 + (rand() - 0.5) * 0.06, z = jz - 0.45 + b * 0.9;
     bag.add('pottery_dark', lathe([[rr * 0.55, 0], [rr * 0.95, hh * 0.35], [rr, hh * 0.55], [rr * 0.7, hh * 0.9], [rr * 0.55, hh], [0.001, hh]], 10, null, x, 0.28, z));
     bag.add('pottery_dark', lathe([[rr * 0.62, 0], [rr * 0.58, 0.05], [0.001, 0.09]], 10, null, x, 0.28 + hh, z));
+    col.circle(x, z, rr, 0.28, 0.28 + hh);
   }
   // the lot's wall (fieldstone below, plaster above, a tiled coping) and the gate on the south
   const xc = x0 + W * 0.62, gate = 1.25, mat = el.thatch ? 'thatch' : 'tile_grey';

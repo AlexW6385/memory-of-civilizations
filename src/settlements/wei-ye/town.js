@@ -159,7 +159,7 @@ export async function town() {
   }
   // ── the household of the garden: lodgings and workrooms, entered from the garden's paths (rooms for the ambience) ──
   {
-    const rooms = LODGES.map((l) => ({ id: l.say, rect: [l.rect[0] + 1.2, l.rect[1] + (l.front === 's' ? 0.9 : l.rect[3] - l.rect[1] - 8.4), l.rect[2] - 1.2, l.rect[1] + (l.front === 's' ? l.rect[3] - l.rect[1] - 0.9 : 8.4)], y: 0.33, kind: 'inner' }));
+    const rooms = LODGES.map((l) => ({ id: `${l.say} and yard`, rect: [l.rect[0] + 1.2, l.rect[1] + (l.front === 's' ? 0.9 : l.rect[3] - l.rect[1] - 8.4), l.rect[2] - 1.2, l.rect[1] + (l.front === 's' ? l.rect[3] - l.rect[1] - 0.9 : 8.4)], y: 0.33, kind: 'inner' }));
     plans.push(base('wei-lodges', LODGES.map((l) => ({ t: 'wei_house', rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, room: l.room, open: true })), { rooms }));
     plans.push({ ...base('wei-lodges-life', lodgeLife()), style: 'life' });
   }

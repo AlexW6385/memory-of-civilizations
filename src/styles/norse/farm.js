@@ -148,10 +148,10 @@ export function makeFarm({ hexa, logRod }) {
     S(0, 0.0, LA, 0.08, y + 0.03, ya - 0.04);
     for (let row = 0; row < 7; row++) for (let a = 0.35; a < LA - 0.3; a += 0.17) {
       if (row >= 5 && rand() < 0.5) continue; if (rand() < 0.04) continue;
-      const p = P(a + (row % 2) * 0.08 + (rand() - 0.5) * 0.02, 0.18 + (rand() - 0.5) * 0.02), r = P(a + (row % 2) * 0.08, 0.95 + rand() * 0.1), vv = y + 0.12 + row * 0.27;
+      const aa = a + (row % 2) * 0.08 + (rand() - 0.5) * 0.02, p = P(aa, 0.18 + (rand() - 0.5) * 0.02), r = P(aa, 0.95 + rand() * 0.1), vv = y + 0.12 + row * 0.27;
       bag.add(rand() < 0.15 ? 'bark_birch' : LOG, logRod([p[0], vv, p[1]], [r[0], vv, r[1]], 0.075, 5));
     }
-    { const p = P(0.3, 0.1), r = P(LA - 0.3, 1.0); col.rect([Math.min(p[0], r[0]), Math.min(p[1], r[1]), Math.max(p[0], r[0]), Math.max(p[1], r[1])], y, y + 2); }
+    col.segment(P(0.3, 0.55), P(LA - 0.3, 0.55), 1.0, y, y + 2);
     { const [bx, bz] = P(LA * 0.5, LB * 0.7); bag.add(LOG, lathe([[0.001, 0], [0.26, 0], [0.24, 0.5], [0.001, 0.5]], 10, null, bx, y, bz)); bag.add('iron', box(bx - 0.1, y + 0.5, bz - 0.01, bx + 0.02, y + 0.62, bz + 0.01)); bag.add(W, rod([bx, y + 0.5, bz], [bx - 0.05, y + 0.9, bz + 0.3], 0.02, 5)); col.circle(bx, bz, 0.27, y, y + 0.5); }
   }
 
@@ -177,7 +177,7 @@ export function makeFarm({ hexa, logRod }) {
         bag.add('granite_grey', lathe([[0.001, -0.06], [0.34, -0.06], [0.34, 0.06], [0.001, 0.06]], 14).rotateZ(Math.PI / 2).translate(x, y + 0.8, z)); col.circle(x, z, 0.5, y, y + 1);
       } else if (it.k === 'cairn') {
         for (let k = 0; k < 12; k++) { const a = rand() * 6.28, d = rand() * 0.9, r = 0.18 + rand() * 0.2, hh = Math.max(0, 0.6 - d * 0.55); bag.add(rand() < 0.5 ? 'rubble' : 'schist_rubble', lathe([[0.001, 0], [r, 0.04], [r * 0.9, r * 0.9], [0.001, r * 1.1]], 6, null, x + Math.cos(a) * d, y + hh, z + Math.sin(a) * d)); }
-        col.circle(x, z, 1.0, y, y + 0.7);
+        col.circle(x, z, 0.8, y, y + 0.7);
       } else if (it.k === 'tub') {
         bag.add('wood_dark', lathe([[0.001, 0], [0.4, 0], [0.45, 0.7], [0.001, 0.7]], 12, null, x, y, z)); bag.add('water', lathe([[0.001, 0.62], [0.42, 0.62]], 12, null, x, y, z)); col.circle(x, z, 0.45, y, y + 0.7);
         bag.add('wood_dark', lathe([[0.001, 0], [0.14, 0], [0.17, 0.26], [0.001, 0.26]], 8, null, x + 0.7, y, z + 0.2));

@@ -288,13 +288,13 @@ export function cemetery(el, { bag, col }) {
       blockAt(bag, 'limestone_core', x, -0.1, z, rot, a, 0.55, b);
       bag.add('basalt', box(x - 0.45, 0.45, z - 0.45, x + 0.45, 0.455, z + 0.45));
       blockAt(bag, 'tura_limestone', x + 1.9 * c, 0, z + 1.9 * s, rot + 0.4, 0.5, 0.12, 0.35);
-      col.rect([x - a - 0.1, z - b - 0.1, x + a + 0.1, z + b + 0.1], 0, 1.0);
+      col.segment([x + s * (b + 0.05), z - c * (b + 0.05)], [x - s * (b + 0.05), z + c * (b + 0.05)], 2 * a + 0.1, 0, 1.0);
       continue;
     }
     if (kind === 'blocks') {
       const n = 3 + Math.floor(rand() * 4);
       for (let i = 0; i < n; i++) blockAt(bag, rand() < 0.5 ? 'tura_limestone' : 'limestone_core', x + (i % 3) * 1.35 * Math.cos(rot) , Math.floor(i / 3) * 0.7, z + (i % 3) * 1.35 * Math.sin(rot), rot + (rand() - 0.5) * 0.12, 0.65, 0.34, 0.5);
-      col.rect([x - 0.8, z - 0.8, x + 3.5, z + 0.8], 0, 0.7 * Math.ceil(n / 3));
+      col.segment([x - 0.7 * Math.cos(rot), z - 0.7 * Math.sin(rot)], [x + 3.4 * Math.cos(rot), z + 3.4 * Math.sin(rot)], 1.1, 0, 0.7 * Math.ceil(n / 3));
       continue;
     }
     if (kind === 'shade') {

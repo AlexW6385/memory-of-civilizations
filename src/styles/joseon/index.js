@@ -93,12 +93,13 @@ function hanok(el, { bag, col }) {
   const jx = x1 - 4.2, jz = z1 - 2.6;
   if (jx > x0 + 2 + d && rand() < 0.85) {
     bag.add('granite_korea', box(jx - 1.3, 0, jz - 0.8, jx + 1.3, 0.25, jz + 0.8));
-    col.rect([jx - 1.3, jz - 0.8, jx + 1.3, jz + 0.8], 0, 0.9);
+    col.floor([jx - 1.3, jz - 0.8, jx + 1.3, jz + 0.8], 0.25);
     for (let a = 0; a < 3; a++) for (let b = 0; b < 2; b++) {
       if (rand() < 0.2) continue;
       const big = b === 0, rr = big ? 0.3 : 0.22, hh = big ? 0.68 : 0.48, x = jx - 0.85 + a * 0.85 + (rand() - 0.5) * 0.08, z = jz - 0.35 + b * 0.7;
       bag.add('pottery_dark', lathe([[rr * 0.55, 0], [rr * 0.95, hh * 0.35], [rr, hh * 0.55], [rr * 0.7, hh * 0.9], [rr * 0.55, hh], [0.001, hh]], 10, null, x, 0.25, z));
       bag.add('pottery_dark', lathe([[rr * 0.62, 0], [rr * 0.58, 0.05], [0.001, 0.09]], 10, null, x, 0.25 + hh, z));
+      col.circle(x, z, rr, 0.25, 0.25 + hh);
     }
   }
   // the lot's wall (fieldstone below, plaster above, a coping) and its gate on the south under a little roof

@@ -83,7 +83,7 @@ E.push({ t: 'mandapa', rect: [WALL[0] + 12, GATES.w[1] - 7, MEENAKSHI[0] - 6, GA
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
   room('outer court', WALL, 0, 'open'),
-  room('golden lotus tank', [TANK[0] - 6, TANK[1] - 6, TANK[2] + 6, TANK[3] + 6], 0.5, 'hall'),
+  room('golden lotus tank (open court)', [TANK[0] - 6, TANK[1] - 6, TANK[2] + 6, TANK[3] + 6], 0.5, 'hall'),
   room('thousand-pillar hall', HALL, 0.5, 'hall'),
   room('ashta shakti mandapam', [ASHTA[0] + 2, ASHTA[1] + 2, ASHTA[2] - 2, ASHTA[3] - 2], 0.5, 'hall'),
 ];
