@@ -305,7 +305,7 @@ export function houseSong(el, { bag, col }) {
     const bayA = (k) => k * L / nb;
     if (kind === 'warehouse') {
       // timber posts on stone bases, the wall between them plastered, wide doors standing open at two bays
-      for (let k = 0; k <= nb; k++) { const a = Math.min(L - 0.14, Math.max(0.14, bayA(k))); B('granite_block', a - 0.2, fb - 0.2, a + 0.2, fb + 0.2, P0, P0 + 0.3); B('timber', a - 0.13, fb - 0.13, a + 0.13, fb + 0.13, P0 + 0.3, yTop - 0.35); }
+      for (let k = 0; k <= nb; k++) { const a = Math.min(L - 0.14, Math.max(0.14, bayA(k))); B('granite_block', a - 0.2, fb - 0.2, a + 0.2, fb + 0.2, P0, P0 + 0.3); B('timber', a - 0.13, fb - 0.13, a + 0.13, fb + 0.13, P0 + 0.3, yTop - 0.35); cCircle(a, fb, 0.18, P0, yTop - 0.35); }
       B('timber', 0, fb - 0.1, L, fb + 0.1, yTop - 0.35, yTop);
       for (let k = 0; k < nb; k++) {
         const a0 = bayA(k) + 0.14, a1 = bayA(k + 1) - 0.14, open = k === nb >> 1 || (nb > 3 && k === (nb >> 1) - 1);

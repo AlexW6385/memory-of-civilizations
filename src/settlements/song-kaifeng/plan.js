@@ -74,7 +74,7 @@ E.push({ t: 'bridge_stalls', at: BRIDGE.at, span: BRIDGE.span, width: BRIDGE.wid
 // downstream, and the one before the bridge, its crew lowering the mast as it comes up to it
 for (const [x, z, d, L, mast] of [[-200, 63.4, 1, 18, 90], [-120, 89.2, -1, 16, 90], [-17.5, 75, 1, 19, 42], [62, 89.4, -1, 18, 90], [140, 63.0, -1, 16, 0], [220, 88.7, -1, 20, 90], [300, 62.6, 1, 12, 0]]) E.push({ t: 'song_boat', at: [x, z], dir: [d, 0], len: L, beam: L * 0.25, mast, y: RIVER.water, seed: x + 1000 });
 // ---- the city wall east of the city (rammed earth, battered, no battlements) with its water gate and the gate over the road
-const wz = (z0, z1) => E.push({ t: 'block', walk: true, rect: [WALL_X - 8, z0, WALL_X + 8, z1], y0: RIVER.bed, y1: 9, mat: 'earth_wall', batter: [2.2, 2.2, 0, 0] });
+const wz = (z0, z1) => E.push({ t: 'block', walk: true, rect: [WALL_X - 8, z0, WALL_X + 8, z1], y0: -1.2, y1: 9, mat: 'earth_wall', batter: [2.2, 2.2, 0, 0] });   // (from just under the ground, so that the collider's rect is the wall's foot)
 wz(-half(WALL_X) + 4, GATE.rect[1] + 0.5); wz(GATE.rect[3] - 0.5, RIVER.z0 - 1.5); wz(RIVER.z1 + 1.5, half(WALL_X) - 4);
 E.push({ t: 'block', walk: true, rect: [WALL_X - 8, RIVER.z0 - 2, WALL_X + 8, RIVER.z1 + 2], y0: 4.5, y1: 9, mat: 'brick_grey' });
 E.push({ t: 'song_gate', rect: GATE.rect, along: 'x', w: 5.2, h: 4.2, top: 5.8, tw: 3.2, H: 9.5, mat: 'brick_grey' });
