@@ -10,6 +10,10 @@ import { bannai, LAP, TUR, CRE, WHI } from './kit.js';
 
 const bx = (bag, m, x0, y0, z0, x1, y1, z1) => bag.add(m, box(Math.min(x0, x1), y0, Math.min(z0, z1), Math.max(x0, x1), y1, Math.max(z0, z1)));
 
+/** The height of the underside of a chamber's inner dome (chamber's options) at radius r from its axis. */
+export function domeUnder(o) {
+  return (r) => o.h + o.drumH + o.domeH * Math.sin(Math.acos(Math.min(1, r / o.innerR) ** (1 / 0.9))) ** 1.1 - 0.05;
+}
 /**
  * chamber: a square room { c: [x, z], hx, hz (half sizes), h (to the ring), floor ('marble_floor'), dado (2.0), innerR, drumH, domeH, ribs,
  * frieze (the Kufic band's top, h − 1) }: the floor, the dado and the bands on the four walls, the ring, the inner drum and dome.
@@ -100,7 +104,7 @@ export function prayerHall(fr, o, lights) {
   else { F.carpet(bag, cx, 0.06, zq - 3.5, 6, 3.0, 0, 'persian');
   for (const sx of [-4.2, 4.2, 0]) { F.rahle(bag, cx + sx - 0.0, 0.065, zq - 7.5 + (sx === 0 ? 1 : 0), Math.PI, { h: 0.5 }); } }
   if (o.single) { for (const sx of [-12, -6, 0, 6, 12]) F.mosqueLamp(bag, lights, cx + sx, o.lampY, cz, o.lampTop, { k: 1.1, enamel: true, glow: 3, reach: 9 }); return; }
-  for (const sx of [-1, 1]) F.mosqueLamp(bag, lights, cx + sx * hx * 0.45, o.lampY ?? 7, cz + hz * 0.3, o.lampTop ?? 12, { k: 1.4, enamel: true, glow: 4, reach: 18 });
-  F.mosqueLamp(bag, lights, cx, o.lampY ?? 7, cz - hz * 0.2, o.lampTop ?? 12, { k: 1.6, enamel: true, glow: 5, reach: 22 });
+  for (const sx of [-1, 1]) F.mosqueLamp(bag, lights, cx + sx * hx * 0.45, o.lampY ?? 7, cz + hz * 0.3, o.under ? o.under(Math.hypot(hx * 0.45, hz * 0.3)) : (o.lampTop ?? 12), { k: 1.4, enamel: true, glow: 4, reach: 18 });
+  F.mosqueLamp(bag, lights, cx, o.lampY ?? 7, cz - hz * 0.2, o.under ? o.under(hz * 0.2) : (o.lampTop ?? 12), { k: 1.6, enamel: true, glow: 5, reach: 22 });
   void rod;
 }
