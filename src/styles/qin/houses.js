@@ -276,7 +276,7 @@ export function official(el, ctx) {
     F.b('lacquer_black', dc - 2.6, P + 0.08, hv1 - th - 3.8, dc - 0.8, P + 0.38, hv1 - th - 3.0); F.b('lacquer_black', dc + 0.8, P + 0.08, hv1 - th - 3.8, dc + 2.6, P + 0.38, hv1 - th - 3.0);   // two low tables
     F.b('lacquer_black', hu0 + th + 0.2, P + 0.08, hv1 - th - 3.2, hu0 + th + 0.5, P + 1.9, hv1 - th - 0.4, false); F.b('paint_white', hu0 + th + 0.5, P + 0.5, hv1 - th - 3.1, hu0 + th + 0.55, P + 1.8, hv1 - th - 0.5, false);   // a screen
     for (const s of [-1, 1]) { F.lathe('bronze', [[0.2, 0], [0.04, 0.2], [0.04, 1.3], [0.2, 1.4], [0.001, 1.5]], dc + s * 3.2, P + 0.08, hv1 - th - 1.2, 9); F.lathe('flame', [[0.001, 1.5], [0.07, 1.58], [0.001, 1.85]], dc + s * 3.2, P + 0.08, hv1 - th - 1.2, 6); }
-    for (let k = 0; k < 4; k++) F.rod('timber', [hu0 + th + 0.2 + k * 2.2, P + wallsH - 0.2, hv0 + th + 0.1], [hu0 + th + 0.2 + k * 2.2, P + wallsH - 0.2, hv1 - th - 0.1], 0.07, 5);
+    for (let k = 0; k < 4 && hu0 + th + 0.2 + k * 2.2 < hu1 - th - 0.3; k++) F.rod('timber', [hu0 + th + 0.2 + k * 2.2, P + wallsH - 0.2, hv0 + th + 0.1], [hu0 + th + 0.2 + k * 2.2, P + wallsH - 0.2, hv1 - th - 0.1], 0.07, 5);
   }
   F.lathe('bronze', [[0.001, 0], [0.4, 0.05], [0.5, 0.5], [0.001, 0.55]], dc + 4, 0, 3.4, 12);
   F.b('granite_grey', dc - 7, 0, 3.2, dc - 6.2, 0.8, 4.0);                                                              // a horse-block

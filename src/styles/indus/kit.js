@@ -31,6 +31,13 @@ export class Fr {
       const r = this.R(u0, lo, u1, hi);
       this.bag.add(mat, box(r[0], this.y + y0 - 0.05, r[1], r[2], this.y + top, r[3]));
     }
+    // the flight is a solid wedge: its collider under the climbing surface steps up with it, so that nobody walks into it from the side
+    const SL = 6;
+    for (let k = 1; k < SL; k++) {
+      const va = dv > 0 ? v0 + vs * k / SL : v1 - vs * (k + 1) / SL, vb = dv > 0 ? v0 + vs * (k + 1) / SL : v1 - vs * k / SL, r = this.R(u0, va, u1, vb);
+      const top = (y1 - y0) * k / SL - 0.6;                                  // (the engine trims what reaches the climbing surface, so the collider stops short of it)
+      if (top > 0.3) this.col.rect(r, this.y + y0 - 0.05, this.y + y0 + top);
+    }
     const w = this.R(u0, v0, u1, v1), asc = [this.V[0] * dv, this.V[1] * dv];
     this.col.ramp(w, this.y + y0, this.y + y1, DIR(asc));
   }
