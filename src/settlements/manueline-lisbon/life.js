@@ -2,6 +2,7 @@
 // (signs, pots, benches, stalls, firewood, washing, a dog or a cat), the shopkeepers in the open shops, the plaza of the Jerónimos
 // with its pilgrims, beggars and friars, the Terreiro do Paço as a market, the quay with its porters, the yard's workers, the
 // beach at Belém with its nets and drying fish, the Alfama's lanes. Elements of style `life`, in tiles of 100 m.
+import { storeysOf, HEIGHTS } from '../../styles/manueline/houses.js';
 import { RADIUS, GROUND, QUAY, RUA_NOVA, TERREIRO, YARD, PLAZA, SQUARE, ZS, SHIPS, height, lots, onStreet, inRect, wet, shore, inLot } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -21,6 +22,8 @@ export function lifeElements() {
   const friar = (at, y, rot, e = {}) => person(at, y, rot, { dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_black', over: 'cape', hat: 'none', hair: 'shaven', ...e });
   const labourer = (at, y, rot, e = {}) => person(at, y, rot, { dress: 'tunic', cloth: pick(['cloth_brown', 'cloth_ochre', 'cloth_grey', 'cloth_white']), hat: pick(['cap', 'none']), over: 'belt', hair: 'short', ...e });
   const child = (at, y, rot, e = {}) => person(at, y, rot, { dress: 'tunic', child: true, hat: 'none', over: 'none', ...e });
+  // the sill of an upper-storey window of the house on lot l (storey `k`, the top one at most): the pole is pushed out of a window the house has
+  const sill = (l, k) => { const { h0, hs } = HEIGHTS(l.kind), n = storeysOf({ seed: l.seed, kind: l.kind, open: l.open, storeys: l.storeys }), s = Math.max(1, Math.min(k, n - 1)); return l.y + h0 + (s - 1) * hs + 0.8; };
   const faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
   const ok = ([x, z]) => Math.hypot(x, z) < RADIUS - 40 && wet(x, z) > 2;
   const crowd = (n, rect, y, mix) => { for (let k = 0; k < n; k++) { const p = [rect[0] + rand() * (rect[2] - rect[0]), rect[1] + rand() * (rect[3] - rect[1])]; if (!ok(p) || inLot(p[0], p[1], 0.3)) continue; if (Math.hypot(p[0] - ARR[0], p[1] - ARR[1]) < 8) p[1] -= 12; if (Math.abs(p[0] - ARR[0]) < 1.6 && p[1] > 40 && p[1] < 118) p[0] += 2.4; mix(p, y, rand() * 6.28); } };
@@ -55,10 +58,10 @@ export function lifeElements() {
       if (rand() < 0.5) merchant(P(0.3 + rand() * 0.4, 3.4), y, faceTo(n), { pose: rand() < 0.5 ? 'talk' : 'stand' });
       if (rand() < 0.3) woman(P(0.5 + rand() * 0.3, 3.0), y, rand() * 6, { carry: pick(['basket', 'pot']) });
       if (rand() < 0.18) L.push({ t: 'animal', kind: pick(['dog', 'cat']), at: P(0.7, 1.2), y, rot: rand() * 6.28, seed: seed() });
-      if (rand() < 0.2) L.push({ t: 'laundry_pole', at: P(0.3 + rand() * 0.4, -0.5), y: y + 7.2, rot, len: 1.4, prop: false, seed: seed() });
+      if (rand() < 0.2) L.push({ t: 'laundry_pole', at: P(0.3 + rand() * 0.4, -0.5), y: sill(l, 99), rot, len: 1.4, prop: false, seed: seed() });
     } else if (l.kind === 'alfama') {
       if (rand() < 0.45) L.push({ t: 'laundry', at: P(0.5, 2.0), y, rot: 0, len: Math.min(w, 5), seed: seed() });
-      if (rand() < 0.4) L.push({ t: 'laundry_pole', at: P(0.3 + rand() * 0.4, -0.5), y: y + 4.6 + (rand() < 0.5 ? 3 : 0), rot, len: 1.3, prop: false, seed: seed() });
+      if (rand() < 0.4) L.push({ t: 'laundry_pole', at: P(0.3 + rand() * 0.4, -0.5), y: sill(l, rand() < 0.5 ? 1 : 2), rot, len: 1.3, prop: false, seed: seed() });
       if (rand() < 0.6) L.push({ t: 'pot', kind: pick(['water_pot', 'glazed_jar', 'dark_pot']), at: P(0.15, 0.5), y, rot: 0, n: 2, seed: seed() });
       if (rand() < 0.3) L.push({ t: 'firewood', at: P(0.85, 0.5), y, rot, len: 1.3, seed: seed() });
       if (rand() < 0.3) L.push({ t: 'stool', at: P(0.5, 0.8), y, rot, seed: seed() });

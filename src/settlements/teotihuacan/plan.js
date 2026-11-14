@@ -118,7 +118,7 @@ E.push({ t: 'tt_pyramid', c: [104, 260], w: 30, d: 46, tw: 22, td: 36, h: 9, lev
 E.push({ t: 'tt_avenue', items: avenueItems() });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('avenue', AVENUE, 0, 'open'), room('plaza', PLAZA, MOON.rise, 'open'), room('market', MARKET, 0, 'market'),
+const rooms = [room('avenue', AVENUE, 0, 'open'), room('plaza', PLAZA, MOON.rise, 'open'), room('market-plaza', MARKET, 0, 'market'),
   room('palace', QPP.rect, QPP.y, 'hall'), room('jaguars', JAGUARS.rect, JAGUARS.y, 'hall'), room('sun-temple', [SUN.c[0] - 6, SUN.c[1] - 6, SUN.c[0] + 6, SUN.c[1] + 6], SUN.h, 'hall'),
   // the households: the compounds' courts and rooms
   ...compounds().map((c, i) => room(`compound-${i}`, c.rect, 0, 'house')),

@@ -27,7 +27,7 @@ export function wallRun({ bag, col }, a, b, th, y0, y1, mat, gaps = [], colTop =
 export function gable(bag, mat, rect, y0, rise, alongX = true, oh = 0.5) {
   const [x0, z0, x1, z1] = rect, r = [x0 - oh, z0 - oh, x1 + oh, z1 + oh];
   const D = alongX ? r[3] - r[1] : r[2] - r[0];
-  bag.add(mat, alongX ? frustum(r, y0, y0 + rise, 0, 0, D / 2, D / 2, { noBottom: true }) : frustum(r, y0, y0 + rise, D / 2, D / 2, 0, 0, { noBottom: true }));
+  bag.add(mat, alongX ? frustum(r, y0, y0 + rise, 0, 0, D / 2, D / 2) : frustum(r, y0, y0 + rise, D / 2, D / 2, 0, 0));
 }
 
 /** An armillary sphere (Manuel's emblem): three rings and a small core, radius r, at (x, y, z). */

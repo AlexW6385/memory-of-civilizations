@@ -32,7 +32,9 @@ export function palace(el, ctx) {
   const up = Array.from({ length: n }, (_, k) => ({ uc: 4 + pitch * (k + 0.5), r: pitch * 0.34, sill: y + 8.0, spring: y + 9.6, f: 0.5 }));
   arcade(ctx, [x1 + 0.9, z0], [x1 + 0.9, z1], 0.6, y + 6.4, y + 12.6, up, LIME, true);
   bag.add(LIME, box(x1, y + 6.2, z0, x1 + 1.5, y + 6.6, z1)); bag.add(LIME, box(x1, y + 12.6, z0, x1 + 1.5, y + 13.0, z1));
-  col.rect([x1, z0, x1 + 1.5, z1], y, y + 13);
+  // the ground arches stand open: the palace's face behind them, and the piers between (not a block across the doorways)
+  col.rect([x1, z0, x1 + 0.3, z1], y, y + 13);
+  { let a = z0; for (const o of ops) { if (z0 + o.uc - o.r > a + 0.05) col.rect([x1 + 0.3, a, x1 + 0.9, z0 + o.uc - o.r], y, y + 6.4); a = z0 + o.uc + o.r; } if (z1 > a + 0.05) col.rect([x1 + 0.3, a, x1 + 0.9, z1], y, y + 6.4); }
   void east; void rand;
   for (let k = 0; k < n; k++) { const zc = z0 + 4 + pitch * (k + 0.5); if (k % 2 === 0) armillary(bag, 'limestone_carved', x1 + 1.55, y + 12.0, zc, 0.4); }
   // window rows on the south front facing the river, with the great arms over the middle
@@ -52,14 +54,16 @@ export function palace(el, ctx) {
 }
 export function se(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, zc = (z0 + z1) / 2;
-  bag.add(LIME, box(x0 - 0.5, y - 6, z0 - 0.5, x1 + 0.5, y, z1 + 0.5));
+  bag.add(LIME, box(x0 - 0.5, y - 6, z0 - 0.5, x1 + 0.5, y, z1 + 0.5)); col.rect([x0 - 0.5, z0 - 0.5, x1 + 0.5, z1 + 0.5], y - 6, y);   // (the terrace the church stands on)
   // aisles, nave, the transept and the lantern over the crossing, the apse
   bag.add(LIME, box(x0 + 8, y, z0, x1 - 6, y + 11, z1)); col.rect([x0 + 8, z0, x1 - 6, z1], y, y + 12);
-  bag.add(LIME, box(x0 + 8, y + 11, zc - 10, x1 - 6, y + 17, zc + 10));
-  gable(bag, 'roof_tile', [x0 + 8, zc - 10, x1 - 6, zc + 10], y + 17, 3.2, true, 0.5);
+  // (the west front between the towers is one wall with the nave's: the rose window and the portal stand on it)
+  bag.add(LIME, box(x0, y, z0 + 10, x0 + 8, y + 11, z1 - 10)); col.rect([x0, z0 + 10, x0 + 8, z1 - 10], y, y + 12);
+  bag.add(LIME, box(x0, y + 11, zc - 10, x1 - 6, y + 17, zc + 10));
+  gable(bag, 'roof_tile', [x0, zc - 10, x1 - 6, zc + 10], y + 17, 3.2, true, 0.5);
   for (const s of [-1, 1]) bag.add('roof_tile', box(x0 + 8, y + 11, zc + s * 10 - (s > 0 ? 0 : 0), x1 - 6, y + 11.2, zc + s * 10 + s * 0.1).translate(0, 0, 0));
   const tx = (x0 + x1) / 2 + 6;
-  bag.add(LIME, box(tx - 6, y + 11, z0 - 4, tx + 6, y + 20, z1 + 4)); col.rect([tx - 6, z0 - 4, tx + 6, z1 + 4], y, y + 20);
+  bag.add(LIME, box(tx - 6, y, z0 - 4, tx + 6, y + 20, z1 + 4)); col.rect([tx - 6, z0 - 4, tx + 6, z1 + 4], y, y + 20);
   gable(bag, 'roof_tile', [tx - 6, z0 - 4, tx + 6, z1 + 4], y + 20, 2.6, false, 0.4);
   bag.add(LIME, lathe([[4.2, 0], [4.2, 5]], 8, null, tx, y + 20, zc)); bag.add('roof_tile', lathe([[4.5, 0], [3.0, 1.4], [0.001, 3.6]], 8, null, tx, y + 25, zc));
   bag.add(LIME, lathe([[5.5, 0], [5.0, 6]], 10, null, x1 - 1, y, zc));
@@ -77,6 +81,7 @@ export function se(el, ctx) {
   const T = [];
   archWall(T, (u, yy, d) => [x0 - 0.7 + d, yy, zc - 3 + u], { u0: 0, u1: 6, d0: 0, d1: 0.7, y0: y, y1: y + 8, openings: [{ uc: 3, r: 1.9, sill: y, spring: y + 3.6, f: 0.5 }], n: 8 });
   bag.add('limestone_carved', fromTriangles(T));
+  col.rect([x0 - 0.7, zc - 3, x0, zc - 1.9], y, y + 8); col.rect([x0 - 0.7, zc + 1.9, x0, zc + 3], y, y + 8);   // the portal's jambs (its doorway stands open)
   for (let k = 0; k < 7; k++) { const zz = z0 + 11 + k * (z1 - z0 - 22) / 6; pinnacle(bag, 'limestone_carved', x0 + 8.5, y + 11, zz, 0.3, 1.6, 6); }
 }
 export function castle(el, ctx) {
@@ -138,8 +143,12 @@ export function hullOnStocks(el, ctx) {
     for (const s of [-1, 1]) bag.add('timber', tube(Array.from({ length: 7 }, (_, j) => { const t = j / 6; return [x, ky + t * h, zc + s * w * (Math.sin(t * Math.PI / 2) * 0.95 + 0.05 * t), 0.09]; }), 4, { capA: false, capB: false }));
     if (u < 0.45) for (const s of [-1, 1]) bag.add('wood_ochre', box(x - 0.75, ky + 0.2, zc + s * w * 0.7 - (s > 0 ? 0.0 : 0.04), x + 0.75, ky + h * 0.55, zc + s * w * 0.7 + (s > 0 ? 0.04 : 0.0)));
   }
-  col.rect([x0 - 0.5, zc - W - 0.5, x1 + 0.5, zc + W + 0.5], y, y + 3);
-  for (const x of [x0 + 6, x0 + L / 2, x1 - 6]) for (const s of [-1, 1]) { bag.add('timber', rod([x, y, zc + s * (W + 1.5)], [x, y + 8, zc + s * (W + 1.5)], 0.08, 4)); }
+  // the hull is solid to the walker as far as its ribs reach: a slice of the plan for each rib's span, as wide as the ribs there
+  for (let k = 0; k <= nR; k++) {
+    const ua = Math.max(0, (k - 0.5) / nR), ub = Math.min(1, (k + 0.5) / nR), um = (ua + ub) / 2, f = Math.sin(Math.PI * (0.06 + 0.88 * um)), w = W * (0.15 + 0.85 * f) + 0.1;
+    col.rect([k === 0 ? x0 + 0.7 : x0 + 1 + ua * (L - 2), zc - w, k === nR ? x1 - 0.7 : x0 + 1 + ub * (L - 2), zc + w], y, y + 3);
+  }
+  for (const x of [x0 + 6, x0 + L / 2, x1 - 6]) for (const s of [-1, 1]) { bag.add('timber', rod([x, y, zc + s * (W + 1.5)], [x, y + 8, zc + s * (W + 1.5)], 0.08, 4)); col.circle(x, zc + s * (W + 1.5), 0.1, y, y + 8); }
   for (const s of [-1, 1]) for (const yy of [3, 6]) bag.add('timber', rod([x0 + 6, y + yy, zc + s * (W + 1.5)], [x1 - 6, y + yy, zc + s * (W + 1.5)], 0.06, 4));
 }
 export function timberStack(el, { bag, col }) {

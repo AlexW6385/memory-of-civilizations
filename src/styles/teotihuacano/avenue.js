@@ -145,13 +145,15 @@ export function weatherPyramid(bag, el) {
       const half = fx ? a[1] : a[0], ext = fx ? a[0] : a[1], sl = fx ? sx : sz, tilt = Math.atan2(sl, hh);
       const face = fx ? (fx > 0 ? 'e' : 'w') : (fz > 0 ? 's' : 'n');
       for (let i = 0; i < per; i++) {
-        const u = (rand() * 2 - 1) * (half - 2), y = ya + hh * (0.12 + rand() * 0.8), e = ext - (y - ya) / hh * sl;
-        if (face === el.stair && Math.abs(u) < (el.stairW ?? 12) / 2 + 1.5) continue;
+        const ur = rand() * 2 - 1, yr = rand();
         const roll = rand(), spall = roll < 0.4, red = roll > 0.8, w = spall ? 1.2 + rand() * 2.8 : red ? 0.8 + rand() * 1.6 : 0.5 + rand() * 0.8, h = spall ? 0.8 + rand() * 1.6 : red ? 0.5 + rand() : 1.6 + rand() * 2.4;
+        const u = ur * Math.max(0.5, half - (fx ? sz : sx) - 1 - w * 1.1);   // (the patch and its pale neighbour stay on the face, short of its corners)
+        if (face === el.stair && Math.abs(u) < (el.stairW ?? 12) / 2 + 1.5) continue;
+        const hp = Math.min(h, hh * 0.9), y = ya + hp / 2 + 0.05 + yr * Math.max(0, hh - hp - 0.1), e = ext - (y - ya) / hh * sl;   // (the patch lies wholly on the slope, between its foot and its ledge)
         const c = fx ? [cx + fx * e, y, cz + u] : [cx + u, y, cz + fz * e];
         const mat = spall ? 'rubble_teo' : red ? RD : 'plaster_damp';
         patch(bag, mat, c, [fx, 0, fz], w, Math.min(h, hh * 0.9), Math.floor(rand() * 1e6), spall ? 0.006 : 0.004, tilt);
-        if (spall && rand() < 0.6) patch(bag, 'lime_plaster', [c[0] + (fx ? 0 : w * 0.7), Math.min(yt - 0.2, y + h * 0.2), c[2] + (fx ? w * 0.7 : 0)], [fx, 0, fz], w * 0.8, h * 0.7, Math.floor(rand() * 1e6), 0.009, tilt);
+        if (spall && rand() < 0.6) patch(bag, 'lime_plaster', [c[0] + (fx ? 0 : w * 0.7), Math.min(yt - 0.2, y + hp * 0.2), c[2] + (fx ? w * 0.7 : 0)], [fx, 0, fz], w * 0.8, hp * 0.7, Math.floor(rand() * 1e6), 0.009, tilt);
       }
     }
   }

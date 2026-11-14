@@ -4,7 +4,7 @@
 import { box, lathe, rod } from '../../core/geom.js';
 import { tube } from '../../objects/kit.js';
 import { addBox, ropeColumn, armillary, orderCross } from './util.js';
-import { churchFrame } from './church.js';
+import { churchFrame, vaultY } from './church.js';
 
 const MAT = 'limestone_yellow', CARVED = 'limestone_carved';
 const candle = (bag, x, y, z, h = 0.3) => { bag.add('ivory', lathe([[0.03, 0], [0.03, h], [0.001, h]], 6, null, x, y, z)); bag.add('flame', lathe([[0.001, 0], [0.018, 0.03], [0.001, 0.08]], 5, null, x, y + h, z)); };
@@ -58,7 +58,7 @@ export function furnishChurch(ctx, rect, y, px) {
   bag.add('water', lathe([[0.001, 0], [0.62, 0]], 10, null, fontP[0], y + 1.0, fontP[1]));
   // ── hanging lamps (silver, on chains) over the nave, lit; candle stands at the aisles; votive stands before the portal
   for (const [lx, lz] of [[bays[1] + 5, zc], [bays[3] + 5, zc], [bays[2] + 5, zc - 7.5], [bays[2] + 5, zc + 7.5], [bays[4] + 5, zc - 7.5], [bays[4] + 5, zc + 7.5], [chancel + 6, zc]]) {
-    bag.add('iron', rod([lx, y + 18, lz], [lx, y + 5.6, lz], 0.015, 4)); bag.add('silver', lathe([[0.3, 0], [0.12, 0.2], [0.2, 0.4], [0.001, 0.42]], 8, null, lx, y + 5.2, lz)); bag.add('flame', lathe([[0.001, 0], [0.04, 0.08], [0.001, 0.2]], 5, null, lx, y + 5.35, lz));
+    bag.add('iron', rod([lx, y + vaultY(F, lx, lz) + 0.1, lz], [lx, y + 5.6, lz], 0.015, 4)); bag.add('silver', lathe([[0.3, 0], [0.12, 0.2], [0.2, 0.4], [0.001, 0.42]], 8, null, lx, y + 5.2, lz)); bag.add('flame', lathe([[0.001, 0], [0.04, 0.08], [0.001, 0.2]], 5, null, lx, y + 5.35, lz));
   }
   for (const [vx, vz] of [[px - 7, zi1 - 1.6], [px + 7, zi1 - 1.6]]) {
     addBox(bag, 'iron', vx - 0.5, y, vz - 0.3, vx + 0.5, y + 0.9, vz + 0.3); col.rect([vx - 0.5, vz - 0.3, vx + 0.5, vz + 0.3], y, y + 0.9);
