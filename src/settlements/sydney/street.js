@@ -132,8 +132,8 @@ export function streets() {
   // ── the people at the shops: standing, talking in twos, looking in the windows ──────────────────────────────────────
   const DRESS = [['cloth_white', 'cloth_grey'], ['cloth_blue', 'cloth_grey'], ['cloth_ochre', 'cloth_brown'], ['cloth_white', 'cloth_indigo'], ['cloth_grey', 'cloth_black'], ['cloth_green', 'cloth_brown']];
   const FROCK = ['cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_blue', 'cloth_white', 'cloth_maroon', 'cloth_indigo'];
-  const person = (at, y, rot, o = {}) => {
-    const [c1, c2] = pick(DRESS);
+  const person = (at, y0, rot, o = {}) => {
+    const [c1, c2] = pick(DRESS), y = Math.min(y0, height(at[0], at[1]) + 0.15);      // (the footpath there lies on the ground)
     LT(tileOf(at[0], at[1])).push(rand() < 0.45
       ? { t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: 'tunic', hair: rand() < 0.6 ? 'long' : 'bun', cloth: pick(FROCK), cloth2: 'cloth_white', skin: 'skin_light', hat: 'none', ...o }
       : { t: 'figure', at, y, rot, seed: Math.floor(rand() * 1e9), dress: 'trousers', hair: 'short', over: 'collar', cloth: c1, cloth2: c2, skin: rand() < 0.9 ? 'skin_light' : 'skin_medium', hat: rand() < 0.14 ? 'brim' : 'none', hatMat: 'cloth_grey', ...o });

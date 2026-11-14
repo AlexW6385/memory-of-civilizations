@@ -47,8 +47,8 @@ export function smallCraft(el, { bag, col }) {
   } else {
     bx('paint_white', -B * 0.3, yd, -L * 0.04, B * 0.3, yd + 1.7, L * 0.2); bx('glass_outer', -B * 0.31, yd + 1.0, -L * 0.02, B * 0.31, yd + 1.5, L * 0.18); bx('car_black', -B * 0.33, yd + 1.7, -L * 0.06, B * 0.33, yd + 1.78, L * 0.22);
     bx('paint_white', -B * 0.2, yd + 1.78, L * 0.0, B * 0.2, yd + 2.5, L * 0.14); bx('glass_outer', -B * 0.21, yd + 2.0, L * 0.01, B * 0.21, yd + 2.4, L * 0.13);
-    bag.add('car_red', rod(W(0, yd + 1.78, L * 0.28), W(0, yd + 4.0, L * 0.28), 0.5, 10)); bx('car_black', -0.52, yd + 4.0, L * 0.28 - 0.52, 0.52, yd + 4.25, L * 0.28 + 0.52);
-    bag.add('aluminium_dull', rod(W(0, yd + 1.78, -L * 0.2), W(0, yd + 4.2, -L * 0.2), 0.05, 5));
+    bag.add('car_red', rod(W(0, yd, L * 0.28), W(0, yd + 4.0, L * 0.28), 0.5, 10)); bx('car_black', -0.52, yd + 4.0, L * 0.28 - 0.52, 0.52, yd + 4.25, L * 0.28 + 0.52);
+    bag.add('aluminium_dull', rod(W(0, yd, -L * 0.2), W(0, yd + 4.2, -L * 0.2), 0.05, 5));
     for (const t of [0.12, 0.3, 0.5, 0.7]) for (const sg of [-1, 1]) bag.add('rubber', rod(W(sg * (half(t) + 0.02), yd - 0.5, -L / 2 + L * t), W(sg * (half(t) + 0.02), yd - 0.1, -L / 2 + L * t), 0.2, 6));   // the tyre fenders
     col.circle(x, z, B * 0.55, y - 1, y + 2);
   }
