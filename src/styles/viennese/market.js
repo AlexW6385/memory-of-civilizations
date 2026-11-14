@@ -44,6 +44,8 @@ export function naschmarktStall(el, { bag, col }) {
   }
   // the poles and the awning (stripes of 0.3 m along the front, the valance hanging)
   for (const u of [0.04, w - 0.04]) A('wood_dark', u - 0.04, u + 0.04, 0, 2.5, D * 0.45 + 0.9, D * 0.45 + 0.98);
+  // the sign posts at the front corners: the street life hangs a shop's board on a bracket at 12 % and 88 % of the front, and the bracket needs a post to stand out of
+  for (const u of [0.12 * w, 0.88 * w]) A('wood_dark', u - 0.04, u + 0.04, 0, 3.1, -0.05, 0.05);
   const sw = 0.32;
   for (let u = 0, k = 0; u < w; u += sw, k++) { const u1 = Math.min(w, u + sw); A(stripe[k % 2], u, u1, 2.45, 2.52, D - 0.4, D * 0.45 + 1.4); A(stripe[k % 2], u, u1, 2.12, 2.45, D * 0.45 + 1.36, D * 0.45 + 1.4); }
   A('iron', w * 0.5 - 0.02, w * 0.5 + 0.02, 1.9, 2.45, D * 0.45 + 0.4, D * 0.45 + 0.44);
