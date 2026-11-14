@@ -58,6 +58,9 @@ export function gate(el, { bag, col }) {
   const r = ax ? [cx - len / 2, cz - wd / 2, cx + len / 2, cz + wd / 2] : [cx - wd / 2, cz - len / 2, cx + wd / 2, cz + len / 2], H = 10.5;
   const hole = [[(ax ? cz : cx) - hw, (ax ? cz : cx) + hw, y, y + 4.4]];
   holedWall(bag, col, mat, r, y - 2.5, y + H, hole, !ax);
+  // the piers either side of the passage and the mass over it (the walls' own colliders stop at the foot)
+  { const [lo, hi] = ax ? [r[1], r[3]] : [r[0], r[2]], c = ax ? cz : cx, side = (u0, u1) => col.rect(ax ? [r[0], u0, r[2], u1] : [u0, r[1], u1, r[3]], y - 2.5, y + H);
+    side(lo, c - hw); side(c + hw, hi); col.rect(ax ? [r[0], c - hw, r[2], c + hw] : [c - hw, r[1], c + hw, r[3]], y + 4.4, y + H); }
   for (const [at, n] of ax ? [[r[0], -1], [r[2], 1]] : [[r[1], -1], [r[3], 1]]) {
     const f = face(ax ? 'x' : 'z', at, -n);
     archHead(bag, f, (ax ? cz : cx) - hw, (ax ? cz : cx) + hw, y + 2.9, y + 4.4, 0.8, 'horseshoe', { alfiz: true, side: 'near' });

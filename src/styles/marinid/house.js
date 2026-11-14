@@ -65,6 +65,7 @@ export function house(el, ctx) {
   // — the ground storey: the solid between the outer walls and the voids
   const inner = fr.rect(0, Lw, -Dp, 0), bayR = bays.map((b) => W(b.u0, b.u1, 0, BD)), roomR = sideRooms.map((q) => W(q.u0, q.u1, q.d0, q.d1)), doorR = sideRooms.map((q) => W(q.door[0], q.door[1], q.door[2], q.door[3])), voids = [court, leg1, leg2, ...(salon ? [salon] : []), ...bayR, ...roomR, ...doorR];
   bag.add(mat, box(x0, foot, z0, x1, y - 0.3, z1));
+  if (foot < y - 0.3) col.rect(r, foot, y - 0.3);
   for (const p of subtractRects(inner, voids)) { bag.add(mat, box(p[0], y - 0.3, p[1], p[2], y + FLOOR, p[3])); col.rect(p, y - 0.3, y + FLOOR); }
   // the dukkans of the front; the side rooms of an open house (floor, ceiling, dado, divans, a lamp)
   const eye = [];
