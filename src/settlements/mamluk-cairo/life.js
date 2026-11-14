@@ -92,7 +92,7 @@ export function life() {
   }
   // the Rumayla: horse-copers and buyers, a man with a hawk, children at the trough, more camels kneeling in the fodder
   for (const [x, z] of [[128, -50], [132, -54], [148, 70], [152, 74], [104, -60]]) person([x, z], rand() * 6.28, { man: true, pose: 'talk' });
-  for (const [x, z, r] of [[160, -58, 0.5], [163, -26, 2.5], [101, 94, 4]]) L.push({ t: 'animal', kind: 'camel', at: [x - 3, z + 2], y: Y(x, z), rot: r, seed: Math.floor(rand() * 1e9), gear: true });
+  for (const [x, z, r] of [[160, -58, 0.5], [163, -26, 2.5], [101, 94, 4]]) L.push({ t: 'animal', kind: 'camel', at: [x - 3, z + 2], y: Y(x - 3, z + 2), rot: r, seed: Math.floor(rand() * 1e9), gear: true });
   // the Rumayla below the madrasa, in view of the arrival: sellers on mats with their goods (fruit, bread, spices, pots, greens,
   // baskets), horse-copers with the horses they trade, mamluks with their staves, children running, benches and water jars
   // against the madrasa's wall; none within 6 m of the arrival (116, 104), the way the view lies
