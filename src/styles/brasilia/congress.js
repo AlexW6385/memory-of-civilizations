@@ -59,6 +59,7 @@ function salaoNegro(bag, col, lights, H, hy) {
   // the walls: black granite on the north, south and east inner faces, the west a glazed front with a door
   const wl = (a, b, c, d) => { bag.add('granite_black', box(a, 0.06, b, c, hy, d)); };
   wl(hx0, hz0, hx1, hz0 + 0.3); wl(hx0, hz1 - 0.3, hx1, hz1); wl(hx1 - 0.3, hz0, hx1, hz1);
+  col.rect([hx0, hz0, hx1, hz0 + 0.3], 0, hy); col.rect([hx0, hz1 - 0.3, hx1, hz1], 0, hy); col.rect([hx1 - 0.3, hz0, hx1, hz1], 0, hy);
   const door = [-94, -90];
   for (const [a, b] of [[hz0, door[0]], [door[1], hz1]]) { bag.add('glass_outer', box(hx0 - 0.12, 0.2, a, hx0, hy - 0.5, b)); col.rect([hx0 - 0.12, a, hx0, b], 0, hy); bag.add('granite_black', box(hx0 - 0.12, 0, a, hx0, 0.2, b)); }
   bag.add(CONC, box(hx0 - 0.12, hy - 0.5, hz0, hx0, hy, hz1));
@@ -91,11 +92,12 @@ export function congress(el, { bag, col, lights }) {
   bag.add('marble', box(x0, y - 0.35, z0, x1, y, z1));
   col.floor(PLATFORM, y);
   salaoNegro(bag, col, lights, HALL, hy);
-  for (let z = z0 + 2; z < z1 - 2; z += 4.4) {
+  for (let z = z0 + 2; z + 4.4 <= z1 - 0.4; z += 4.4) {
     if (z > RAMP.z0 - 4.4 && z < RAMP.z1 + 0.2) continue;
     if (z + 4.4 > HALL[1] && z < HALL[3]) continue;
     bag.add('glass_outer', box(x0 - 0.12, 0.8, z, x0, y - 1.6, z + 3.8));
     bag.add(CONC, box(x0 - 0.2, 0.4, z + 3.8, x0 + 0.05, y - 1.0, z + 4.4));
+    col.rect([x0 - 0.22, z, x0, z + 4.4], 0, y - 1.0);                                                       // the band, glass and mullion
   }
   bag.add(CONC, box(x0 - 0.4, y - 1.0, z0 - 0.4, x0, y - 0.35, z1 + 0.4));                                  // the fascia
   // parapet round the deck, open at the ramp's head
@@ -108,7 +110,11 @@ export function congress(el, { bag, col, lights }) {
   // ── the ramp from the lawn to the deck, with its cheeks, and the paved apron at its foot ──
   bag.add('marble', wedgeX(RAMP.x0, RAMP.x1, RAMP.z0, RAMP.z1, 0, y));
   col.ramp([RAMP.x0, RAMP.z0, RAMP.x1, RAMP.z1], 0, y, 'e');
-  for (const [za, zb] of [[RAMP.z0 - 0.5, RAMP.z0], [RAMP.z1, RAMP.z1 + 0.5]]) bag.add(CONC, wedgeX(RAMP.x0, RAMP.x1, za, zb, 0.7, y + 0.7));
+  for (const [za, zb] of [[RAMP.z0 - 0.5, RAMP.z0], [RAMP.z1, RAMP.z1 + 0.5]]) {
+    bag.add(CONC, wedgeX(RAMP.x0, RAMP.x1, za, zb, 0.7, y + 0.7));
+    // the cheek is a wall: its collider steps up along the ramp, each step as high as the cheek's top at its lower end
+    for (let xa = RAMP.x0; xa < RAMP.x1 - 0.01; xa += 3) col.rect([xa, za, Math.min(RAMP.x1, xa + 3), zb], -1, 0.7 + y * (xa - RAMP.x0) / (RAMP.x1 - RAMP.x0));
+  }
   bag.add('granite_grey', box(RAMP.x0 - 16, -0.4, RAMP.z0 - 8, RAMP.x0, 0.02, RAMP.z1 + 8)); col.floor([RAMP.x0 - 16, RAMP.z0 - 8, RAMP.x0, RAMP.z1 + 8], 0.02);
   for (let k = 0; k < 8; k++) bag.add('granite_black', box(RAMP.x0 + 10 + k * 10, 0.0, RAMP.z0, RAMP.x0 + 10.25 + k * 10, 0.0 + 0.05 + (10 + k * 10) / (RAMP.x1 - RAMP.x0) * y, RAMP.z1));
   // ── the pools along the front: low curbs, still water ──

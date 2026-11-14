@@ -22,7 +22,9 @@ export function car60(el, { bag, col }) {
   }
   for (const sx of [-0.78, 0.78]) for (const zz of kind === 'kombi' ? [-1.3, 1.3] : [-1.25, 1.25]) parts.push(['rubber', wheel(sx, zz)]);
   for (const [m, g] of parts) bag.add(m, P(g));
-  col.circle(x, z, 1.4, y, y + 1.6);
+  // the body's footprint: a box a hand's breadth longer and wider than the car, turned with it
+  const hl = kind === 'aero' ? 2.4 : kind === 'kombi' ? 2.2 : 2.15, hw = 1.05, ux = Math.sin(rot), uz = Math.cos(rot);
+  col.segment([x - ux * hl, z - uz * hl], [x + ux * hl, z + uz * hl], hw * 2, y, y + (kind === 'kombi' ? 1.95 : 1.5));
 }
 /** bus: { at, y, rot, mat } — about 11 m long; cream above a coloured skirt, a band of windows, a rounded front, a roof sign. */
 export function bus(el, { bag, col }) {

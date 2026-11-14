@@ -26,7 +26,9 @@ export function chapel(el, { bag, col, lights }) {
   bag.add('granite_grey', box(x0 - 3, 0, z0 - 3, x1 + 3, 0.03, z1 + 3)); col.floor([x0 - 3, z0 - 3, x1 + 3, z1 + 3], 0.03);
   bag.add('marble_floor', box(x0, 0.03, z0 + 1, x1, 0.07, z1)); col.floor([x0, z0 + 1, x1, z1], 0.07);
   // the three piers: pyramids of concrete at the corners, carrying the roof
-  for (const [px, pz] of [A, B, C]) { const g = lathe([[1.7, 0], [0.55, yR]], 4); g.rotateY(Math.PI / 4); g.translate(px, 0, pz); bag.add(CONC, g); col.circle(px, pz, 1.0, 0, yR); }
+  for (const [px, pz] of [A, B, C]) { const g = lathe([[1.7, 0], [0.55, yR]], 4); g.rotateY(Math.PI / 4); g.translate(px, 0, pz); bag.add(CONC, g);
+    // the pier narrows from a 2.4 m square at its foot to 0.8 m at the roof; its collider steps in with it, each step as wide as the pier at its foot
+    for (let k = 0; k < 4; k++) { const hw = 1.2 - (1.2 - 0.39) * k / 4, y0p = yR * k / 4; col.rect([px - hw, pz - hw, px + hw, pz + hw], y0p, yR * (k + 1) / 4); } }
   // the roof: a triangular slab overhanging the walls, a cross on its apex
   const cen = [(A[0] + B[0] + C[0]) / 3, (A[1] + B[1] + C[1]) / 3], sc = 1.12;
   const R = [A, B, C].map(([x, z]) => [cen[0] + (x - cen[0]) * sc, cen[1] + (z - cen[1]) * sc]);
