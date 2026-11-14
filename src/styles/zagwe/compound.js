@@ -84,8 +84,7 @@ function washLine(bag, col, x, z, rot, rand) {
   col.circle(x - c * L, z - s * L, 0.06, y, y + 1.7); col.circle(x + c * L, z + s * L, 0.06, y, y + 1.7);
 }
 /** Water pots (terracotta, a gourd dipper), standing together by a doorstep. */
-function pots(bag, col, x, z, rand) {
-  const y = ground(x, z);
+function pots(bag, col, x, z, rand, y = ground(x, z)) {
   const n = 2 + Math.floor(rand() * 2);
   for (let k = 0; k < n; k++) {
     const px = x + (k - 1) * 0.55 + (rand() - 0.5) * 0.15, pz = z + (rand() - 0.5) * 0.3, sc = 0.8 + rand() * 0.5;
@@ -212,7 +211,7 @@ export function courtEl(el, { bag, col }) {
   for (const [x, z, nx, nz, kind] of el.walls ?? []) {
     if (kind === 'staff') staffs(bag, x, y + 0.15, z, nx, nz, rand);
     else if (kind === 'bundle') { bundle(bag, x + nx * 0.5, y + 0.15, z + nz * 0.5, rand); bundle(bag, x + nx * 0.5 - nz * 0.7, y + 0.15, z + nz * 0.5 + nx * 0.7, rand); }
-    else if (kind === 'jar') { pots(bag, col, x + nx * 0.5, z + nz * 0.5, rand); }
+    else if (kind === 'jar') { pots(bag, col, x + nx * 0.5, z + nz * 0.5, rand, y + 0.15); }
     else if (kind === 'bench') {
       const ux = -nz, uz = nx, L = 1.6 + rand() * 1.2, a = [x + nx * 0.35 - ux * L / 2, z + nz * 0.35 - uz * L / 2], b = [x + nx * 0.35 + ux * L / 2, z + nz * 0.35 + uz * L / 2];
       bag.add('tuff_red', orientedBox(a, b, 0.55, y + 0.1, y + 0.5)); col.segment(a, b, 0.55, y + 0.15, y + 0.5);
