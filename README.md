@@ -2,13 +2,21 @@
 
 [中文说明](README.zh-CN.md)
 
-A small planet you can walk and fly over, on which the civilizations of Earth stand where they stood, each as a place at one moment in time. Every **settlement** is a realistic, detailed 3D town: a famous landmark built after the real building, with its interior, and round it the townscape of its people and time — streets, houses, markets, gardens, walls, water, people at work — with real materials, light and shadow, weather, and music in the manner of its civilization.
+![Ming Suzhou: a garden hall across its lotus pond](docs/img/hero-suzhou.jpg)
 
-**Walk it: <https://alexw6385.github.io/memory-of-civilizations/>** — desktop or phone, in a browser with WebGPU (Chrome, Edge, Safari 26). English or Chinese.
+A small planet you can walk and fly over, on which the civilizations of Earth stand where they stood, each as a place at one moment in time. There are **94 settlements**, from Çatalhöyük (c. 6500 BC) to Brasília (1960s). Each is a realistic, detailed 3D town: a famous landmark built after the real building, with its interior, and round it the townscape of its people and time — streets, houses you can walk into, markets, gardens, walls, water, people at work — under a real sun, with weather, seasons, baked indirect light and its own music.
+
+**Walk it: <https://alexw6385.github.io/memory-of-civilizations/>** — in a browser with WebGPU (Chrome, Edge, Safari 26), English or Chinese. **[Watch the 45-second film](https://alexw6385.github.io/media/moc-film.mp4).**
 
 The name means only that these buildings are the memory of civilizations. This is a world to walk, not a study tool: no notes, no markers, no route.
 
-> **State of the site (v12.0, 2026-11-12):** all 94 settlements of the plan stand on the planet, each built from a sourced dossier and each visited in the author's Chrome at its arrival. Still to come: depth beyond the arrivals, and the phone. See [DESIGN.md](DESIGN.md) §10.
+| | | |
+|---|---|---|
+| ![The Forbidden City along its axis](docs/img/beijing.jpg) | ![The Potala over Lhasa](docs/img/lhasa.jpg) | ![The Taj Mahal down its water channel](docs/img/agra.jpg) |
+| ![The Treasury at Petra](docs/img/petra.jpg) | ![Florence: the dome and the campanile](docs/img/florence.jpg) | ![New York: the Chrysler Building](docs/img/newyork.jpg) |
+| ![The Great Pyramid at Giza](docs/img/giza.jpg) | ![Himeji Castle](docs/img/himeji.jpg) | ![Machu Picchu](docs/img/machu.jpg) |
+
+> **State of the site (v12.2, 2026-11-14):** all 94 settlements stand on the planet, each built from a sourced dossier. Every one has been scanned and corrected for geometry hanging in the air, missing roofs, invisible walls and walls one could walk through, and its walk routes pass. Tested in desktop Chrome on an Apple M2 (60 fps in nearly every settlement); the phone is untested. What is still below the standard is listed in [DESIGN.md](DESIGN.md) §10: ordinary houses far from the arrivals are shut, and the service buildings where no houses survive are inferred.
 
 ## The settlements
 
@@ -39,7 +47,7 @@ They stand on a sphere of 12 km radius with Earth's continents and latitudes, ea
 | Space twice | cruise |
 | M | the globe map: drag to turn, wheel to zoom, click a city to go there |
 | R | a random city |
-| T | tour: an aerial loop over each city in turn, about a minute each; R skips ahead, any other input stops it where you are |
+| T | tour: a random city each time, about a minute in each — the arrival view under a caption, a short walk at eye height, then a flight over the town, at a good hour of its day. Drag to look about, Space pauses, R goes on to the next, W or Esc hands the place over to you |
 | Esc | close panels, release the mouse |
 
 A short controls hint shows on the first visit (dismiss it with its button; it is remembered). Walk in through any doorway: ordinary buildings near each arrival can be entered.
@@ -52,6 +60,7 @@ On a phone: left thumb on the stick to walk, drag to look, hold ↑ to fly, tap 
 - **Plan is data, look is code.** A settlement is a plan of walls, openings, floors, roofs, columns and objects in metres (`src/settlements/<id>/`, `src/buildings/`), drawn by the reusable vocabulary of its civilization (`src/styles/<style>/`). Street life, markets and everyday objects come from `src/objects/`.
 - **Renderer:** three.js WebGPU with a reversed depth buffer; procedural physically based materials aligned to each wall's coursing; cascaded shadows with a shadow cache; GTAO; bloom; AgX tone mapping and eye adaptation; indoor air with light shafts and coloured glass; lamp light at night.
 - **Baked light:** indirect light is ray traced offline into an irradiance volume per interior (`tools/bake.mjs` → `data/gi/`).
+- **Checked by scan:** `tools/float-check.mjs` builds a settlement as the viewer does and lists geometry joined to nothing, rooms open to the sky, places where the walker is stopped by nothing drawn, and walls walked through.
 - **Speed:** static meshes merged per settlement, cells with coarse levels of detail, dynamic resolution, automatic quality, and the next city of the random order preloaded so jumps are near instant.
 - **Planet:** sphere terrain streamed in workers, biomes, ocean, atmosphere, instanced trees and grass with wind and levels of detail (`src/planet/`, `src/engine/flora/`).
 - **Sound:** music and ambience synthesised in the browser per settlement; rooms have their own reverberation.
@@ -66,6 +75,7 @@ npm run serve                      # http://127.0.0.1:8000
 npm run check                      # plan check: walkability, reachable rooms, nothing floating
 npm run walk -- --sites            # walk routes of every settlement
 node tools/disc-check.mjs          # plans inside their disc, materials known, rooms with music
+node tools/float-check.mjs <id>    # hanging geometry, roofless rooms, invisible walls, walls walked through
 node tools/view-check.mjs          # a free arrival view of each landmark
 node tools/rim-check.mjs           # each rim against the open country
 node tools/geo-budget.mjs          # geometry budget of every settlement
@@ -75,7 +85,7 @@ npm run budget                     # load and size budgets
 npm test
 ```
 
-URL switches: `?perf` (frame-time panel with switches; `window.palace.perf`), `?trace` (counts the pipelines compiled), `?bench` (a fixed route on the author's machine, with fps, draw calls and hitches), `?capture` (fixed 1/30 s steps for recording), `?tour=a,b,c` (fixed tour order), `?quality=high|medium|low|cinema` (picture quality; automatic by default).
+URL switches: `?perf` (frame-time panel with switches; `window.palace.perf`), `?trace` (counts the pipelines compiled), `?bench` (a fixed route on the author's machine, with fps, draw calls and hitches), `?capture` (fixed 1/30 s steps for recording), `?tour=a,b,c` (fixed tour order), `?quality=high|medium|low|cinema` (picture quality; automatic by default), `?range=1` (how far plants, street life, detail and shadows are drawn; 1.5 by default), `?film=promo&quality=cinema&capture&weather=clear` (records the 45-second film to an MP4).
 
 Every push to `master` runs the checks and publishes the site to GitHub Pages. How the work is run with parallel agents: [docs/parallel-work.md](docs/parallel-work.md).
 
