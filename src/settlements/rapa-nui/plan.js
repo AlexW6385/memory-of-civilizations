@@ -32,7 +32,10 @@ const rooms = [room('plaza', PLAZA, 0.12, 'open'), room('long-house', [CHIEF.c[0
 for (const h of village().houses) {
   if (!h.inside) continue;                                  // the common houses to walk into: a room each (the hull's bounding rect)
   const dx = Math.abs(Math.cos(h.yaw)) * h.len / 2 + Math.abs(Math.sin(h.yaw)) * h.w / 2, dz = Math.abs(Math.sin(h.yaw)) * h.len / 2 + Math.abs(Math.cos(h.yaw)) * h.w / 2;
-  rooms.push(room('house-' + h.seed, [h.c[0] - dx, h.c[1] - dz, h.c[0] + dx, h.c[1] + dz], height(h.c[0], h.c[1]) + 0.07, 'hall'));
+  // a room is an axis-aligned rect: the largest one with the bounding rect's proportions that lies inside the hull's footprint, so its corners are roofed
+  const cs = Math.cos(h.yaw), sn = Math.sin(h.yaw), inside = (k) => [[1, 1], [1, -1]].every(([p, q]) => Math.abs(k * dx * p * cs + k * dz * q * sn) <= h.len / 2 && Math.abs(-k * dx * p * sn + k * dz * q * cs) <= h.w / 2 * 0.85);
+  let k0 = 0, k1 = 1; for (let i = 0; i < 16; i++) { const k = (k0 + k1) / 2; if (inside(k)) k0 = k; else k1 = k; }
+  rooms.push(room('house-' + h.seed, [h.c[0] - dx * k0, h.c[1] - dz * k0, h.c[0] + dx * k0, h.c[1] + dz * k0], height(h.c[0], h.c[1]) + 0.07, 'hall'));
 }
 const walks = [[[0, 20], [0, 60], [0, 84]]];
 walks[0].y0 = height(0, 20);

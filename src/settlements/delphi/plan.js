@@ -62,7 +62,8 @@ retain(S, [THEATRE.c[0] - 24, THEATRE.c[1] + 9], [THEATRE.c[0] + 24, THEATRE.c[1
   retain(S, [x0, z1], [x1, z1], y, -1, 500);
   S.push({ t: 'block', rect: [x1 - 3.0, z0 + 2.0, x1 - 1.8, z1 - 2.0], y0: y - 0.3, y1: y + 0.06, mat: 'limestone', collide: false });
   for (let z = z0 + 2.3; z < z1 - 2.2; z += 0.72) S.push({ t: 'block', rect: [x1 - 2.95, z, x1 - 1.85, z + 0.07], y0: y + 0.055, y1: y + 0.075, mat: 'marble_dark', collide: false });
-  S.push({ t: 'block', rect: [x0 + 2.0, (z0 + z1) / 2 - 0.4, x0 + 2.8, (z0 + z1) / 2 + 0.4], y0: y - 0.3, y1: y + 1.5, mat: 'limestone' });
+  const py = Math.min(y, height(x0 + 2.4, (z0 + z1) / 2));                  // the west end lies by the world's rim, where the ground is lower than the track
+  S.push({ t: 'block', rect: [x0 + 2.0, (z0 + z1) / 2 - 0.4, x0 + 2.8, (z0 + z1) / 2 + 0.4], y0: py - 0.3, y1: py + 1.5, mat: 'limestone' });
   S.push({ t: 'block', rect: [x1 - 42, z0 - 0.6, x1 - 38.5, z0 + 0.9], y0: y - 0.2, y1: y + 0.9, mat: 'marble' });
 }
 // the Castalian spring: the fountain house with its basin, benches, lion-head spouts, against the foot of the cliff; the paved court
@@ -110,6 +111,8 @@ retain(S, [THEATRE.c[0] - 24, THEATRE.c[1] + 9], [THEATRE.c[0] + 24, THEATRE.c[1
   for (const [dx, dz] of [[-12, 4], [-11, 3]]) { const x = x0 + dx, z = z0 + dz; S.push({ t: 'tree', kind: 'bay', at: [x, z], y: height(x, z), seed: dx }); }
   S.push({ t: 'offering_table', at: [x0 - 6.8, 0], y: SPRING_Y, yaw: Math.PI / 2, seed: 31 });
 }
+// the forecourt reaches the world's rim, where the ground falls to nothing: what stands there is set on the ground
+for (const e of S) if (e.y === FC_Y) { const c = e.at || [(e.rect[0] + e.rect[2]) / 2, (e.rect[1] + e.rect[3]) / 2]; e.y = Math.min(FC_Y, height(c[0], c[1])); }
 void FC; void WALL_S; void TT;
 const swalks = [wayPoints(WAY, wayY, 4).map(([x, , z]) => [x, z]).filter(([, z]) => z >= 26)];
 swalks[0].y0 = wayY(0);
