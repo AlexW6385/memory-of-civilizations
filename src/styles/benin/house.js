@@ -63,7 +63,7 @@ function house(el, ctx) {
   const cu = L / 2, cv = (fd + D - bd) / 2, iw = Math.min(3.0, (L - 2 * sw) * 0.4), id = Math.min(2.4, (D - bd - fd) * 0.4);
   if (iw > 1.2 && id > 1.2) {
     const out = rr(cu - iw / 2 - 0.35, cv - id / 2 - 0.35, cu + iw / 2 + 0.35, cv + id / 2 + 0.35), inn = rr(cu - iw / 2, cv - id / 2, cu + iw / 2, cv + id / 2);
-    bag.add('stucco_red', box(out[0], y + Y, out[1], out[2], y + Y + 0.2, out[3])); col.rect(out, y + Y, y + Y + 0.4);
+    bag.add('stucco_red', box(out[0], y + Y, out[1], out[2], y + Y + 0.2, out[3]));
     bag.add('pottery_dark', box(inn[0], y + Y, inn[1], inn[2], y + Y + 0.21, inn[3]));
     const t = []; quad(t, [inn[0], y + Y + 0.22, inn[1]], [inn[0], y + Y + 0.22, inn[3]], [inn[2], y + Y + 0.22, inn[3]], [inn[2], y + Y + 0.22, inn[1]]);
     bag.add('water', fromTriangles(t));
