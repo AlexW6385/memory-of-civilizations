@@ -18,9 +18,12 @@ export function riverFront(el, { bag, col }) {
   const proj = (u) => (pav.some(([a, b]) => u > a + 0.01 && u < b - 0.01) ? 2.4 : 0);
   const rows = [[1.8, 4.9], [6.3, 10.0], [11.5, 14.9], [16.4, 18.9]].map(([a, b]) => [a * k, b * k]);
   A(S, -0.3, L + 0.3, -0.5, 1.2, 0, 0.5);                                                   // the plinth on the terrace
+  // what stands out from the wall is solid too: the plinth, the pavilions' bays, the buttresses
+  const solid = (u0, u1, d0, d1, y0, y1) => { const a = F.at(u0, d0), b = F.at(u1, d1); col.rect([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], y0, y1); };
+  solid(-0.3, L + 0.3, 0, 0.5, y - 0.5, y + 1.2);
   for (let i = 0; i < n; i++) {
     const u0 = i * bw, u1 = u0 + bw, um = (u0 + u1) / 2, p = proj(um), top = h + (p ? 1.6 : 0);
-    if (p) A(S, u0, u1, 0, top, 0, p);
+    if (p) A(S, u0, u1, 0, top, 0, p); if (p) solid(u0, u1, 0, p, y, y + top);
     // the window of each storey: two lights, a transom, cusped heads, the label over it
     const ww = Math.min(0.72, bw / 2 - 0.8);
     // the panelling runs the full height: shafts at the windows' edges and between the bays' halves
@@ -57,6 +60,7 @@ export function riverFront(el, { bag, col }) {
   for (let i = 0; i <= n; i++) {
     const u = i * bw, p = Math.max(proj(u - 0.1), proj(u + 0.1)), top = h + (p ? 1.6 : 0);
     A(S, u - 0.36, u + 0.36, 0, top + 1.2, p, p + 0.7);
+    solid(u - 0.36, u + 0.36, 0, p + 0.7, y, y + top + 1.2);
     for (const [, v1] of rows) A(S, u - 0.42, u + 0.42, v1 + 0.5, v1 + 0.75, p, p + 0.8);
     pinnacle(bag, F, y, u, top + 1.2, p + 0.35, 0.6, 3.6);
   }
@@ -64,6 +68,7 @@ export function riverFront(el, { bag, col }) {
   if (el.turrets !== false) for (const [a, b] of pav) for (const u of [a, b]) {
     const [tx, tz] = F.at(u, 2.4 - 0.4), r = 0.95;
     bag.add(S, lathe([[r, 0], [r, h + 5.5]], 8, null, tx, y, tz));
+    col.circle(tx, tz, r + 0.12, y, y + h + 1.6);
     for (const v of [h * 0.33, h * 0.62, h + 1.6]) bag.add(S, lathe([[r + 0.12, 0], [r + 0.12, 0.3]], 8, null, tx, y + v, tz));
     for (let j = 0; j < 8; j++) { const t = (j + 0.5) * Math.PI / 4; bag.add('opening', box(tx + Math.cos(t) * r * 0.93 - 0.12, y + h + 2.4, tz + Math.sin(t) * r * 0.93 - 0.12, tx + Math.cos(t) * r * 0.93 + 0.12, y + h + 4.6, tz + Math.sin(t) * r * 0.93 + 0.12)); }
     bag.add('iron_galv', lathe([[r + 0.15, 0], [r * 0.9, 1.0], [r * 0.45, 2.4], [0.12, 3.6], [0.001, 4.0]], 8, null, tx, y + h + 5.5, tz));

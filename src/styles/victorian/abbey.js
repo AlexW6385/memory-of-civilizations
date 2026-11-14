@@ -77,7 +77,7 @@ export function abbey(el, ctx) {
   bag.add(L, vprism(half(nw / 2 + aw, xe - 4), y - 0.5, y + Ha + 0.5));
   bag.add(L, vprism(half(nw / 2, xe), y - 0.5, y + H + 0.5));
   bag.add('lead', lathe([[nw / 2 + 0.4, 0], [0.001, nw * 0.45]], 14, null, xe, y + H, cz));
-  for (let k = 0; k < 8; k++) { const dz0 = -(nw / 2 + aw) + k * (nw + 2 * aw) / 8, dz1 = dz0 + (nw + 2 * aw) / 8, ext = Math.sqrt(Math.max(0, (nw / 2 + aw) ** 2 - Math.min(Math.abs(dz0), Math.abs(dz1)) ** 2)); col.rect([xe - 4, cz + dz0, xe - 4 + ext, cz + dz1], y - 0.5, y + H); }
+  for (let k = 0; k < 26; k++) { const dz0 = -(nw / 2 + aw) + k * (nw + 2 * aw) / 26, dz1 = dz0 + (nw + 2 * aw) / 26, ext = Math.sqrt(Math.max(0, (nw / 2 + aw) ** 2 - ((dz0 + dz1) / 2) ** 2)); col.rect([xe - 4, cz + dz0, xe - 4 + ext, cz + dz1], y - 0.5, y + H); }
   const lc = [xe + 2, cz - 8, x1, cz + 8], Hl = 21;
   bag.add('lead', frustum([lc[0], lc[1] + 0.6, lc[2] - 0.6, lc[3] - 0.6], y + Hl, y + Hl + 4.5, 0, 7.4, 7.4, 7.4));
   const nl = 5, lw = (lc[2] - lc[0]) / nl;
@@ -100,10 +100,11 @@ export function abbey(el, ctx) {
  * pointed openings, a clock on the north one, a pierced parapet with a gablet on each face, pinnacles. */
 function towerH(bag, col, x, z, s, T, y, clock) {
   const r = [x - s / 2, z - s / 2, x + s / 2, z + s / 2], Tb = T - 8;
-  bag.add(PO, box(r[0], y - 0.5, r[1], r[2], y + Tb, r[3])); col.rect(r, y - 0.5, y + Tb);
+  bag.add(PO, box(r[0], y - 0.5, r[1], r[2], y + Tb, r[3])); col.rect([r[0] - 0.4, r[1] - 0.4, r[2] + 0.4, r[3] + 0.4], y - 0.5, y + Tb);
   for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
     const tx = x + dx * (s / 2 - 0.3), tz = z + dz * (s / 2 - 0.3);
     bag.add(PO, lathe([[1.0, 0], [1.0, Tb + 2.5]], 8, null, tx, y - 0.5, tz));
+    col.circle(tx, tz, 1.1, y - 0.5, y + Tb);
     for (const v of [12, 26, 38, 48]) bag.add(PO, lathe([[1.12, 0], [1.12, 0.35]], 8, null, tx, y + v, tz));
     bag.add(PO, lathe([[1.05, 0], [0.8, 0.6], [0.8, 2.4], [0.001, 7.5]], 8, null, tx, y + Tb + 2, tz));
     bag.add('gilt_bronze', lathe([[0.001, 0], [0.12, 0.15], [0.001, 0.5]], 6, null, tx, y + Tb + 9.5, tz));

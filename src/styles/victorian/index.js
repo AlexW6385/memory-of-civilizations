@@ -24,8 +24,8 @@ const pinnacle = (bag, x, y, z, s = 0.6, h = 3) => { bag.add(S, box(x - s / 2, y
 /** gothic_tower: { c, s, h, y, clock, spire, crown } — a square tower with corner turrets, tracery panels, the clock stage, a spire or a crown of pinnacles. */
 function gothicTower(el, { bag, col }) {
   const [x, z] = el.c, s = el.s ?? 12, h = el.h ?? 96, y = el.y ?? 0, body = el.clock ? h * 0.58 : h * 0.86;
-  bag.add(S, box(x - s / 2, y - 0.5, z - s / 2, x + s / 2, y + body, z + s / 2)); col.rect([x - s / 2, z - s / 2, x + s / 2, z + s / 2], y, y + h);
-  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const tx = x + dx * s / 2, tz = z + dz * s / 2; bag.add(S, lathe([[s * 0.09, 0], [s * 0.09, body + 2]], 8, null, tx, y, tz)); pinnacle(bag, tx, y + body + 2, tz, s * 0.12, s * 0.5); }
+  bag.add(S, box(x - s / 2, y - 0.5, z - s / 2, x + s / 2, y + body, z + s / 2)); col.rect([x - s / 2 - 0.2, z - s / 2 - 0.2, x + s / 2 + 0.2, z + s / 2 + 0.2], y, y + h);
+  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const tx = x + dx * s / 2, tz = z + dz * s / 2; bag.add(S, lathe([[s * 0.09, 0], [s * 0.09, body + 2]], 8, null, tx, y, tz)); col.circle(tx, tz, s * 0.09 + 0.05, y, y + body + 2); pinnacle(bag, tx, y + body + 2, tz, s * 0.12, s * 0.5); }
   // each face in a frame: R(u0, u1, y0, y1, d0, d1) a box with u along the face, d outward from it
   const face = (f) => { const sg = f === 'n' || f === 'w' ? -1 : 1, along = f === 'n' || f === 's', o = along ? z + sg * s / 2 : x + sg * s / 2, c = along ? x : z;
     return (u0, u1, y0, y1, d0, d1) => { const a = o + sg * d0, b = o + sg * d1; return along ? box(c + u0, y0, Math.min(a, b), c + u1, y1, Math.max(a, b)) : box(Math.min(a, b), y0, c + u0, Math.max(a, b), y1, c + u1); }; };
