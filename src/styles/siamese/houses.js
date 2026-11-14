@@ -48,7 +48,7 @@ function kit(el, ctx) {
   /** The post's flood line: a band of dark algae at the foot. */
   const foot = (u, v, r = 0.11) => { const [x, z] = W(u, v); bag.add('plaster_damp', lathe([[r * 1.2, 0], [r * 1.13, 0.75], [r * 1.0, 0.9]], 6, null, x, 0, z)); };
   const tri = (a, b, c, out) => out.push(...a, ...b, ...c, ...a, ...c, ...b);
-  return { ...fr, B, C, F, BC, wallU, wallV, L, sheet, post, foot, tri, bag, col, ctx };
+  return { ...fr, FV: fr.F, B, C, F, BC, wallU, wallV, L, sheet, post, foot, tri, bag, col, ctx };
 }
 
 /** Crossed horns (kalae) at both ends of a ridge: centre c [x, z], half-length A along the axis (long: x, else z), ridge height ry. */
@@ -189,6 +189,7 @@ function stilt(el, ctx) {
   if (hS > 1.9) { const cu = (rand() < 0.5 ? -1 : 1) * (hS - 0.55); BC('timber_red', cu - 0.4, cu + 0.4, -hF * 0.1 - 0.3, -hF * 0.1 + 0.3, up, up + 0.55); B('clay_gilt', cu - 0.42, cu + 0.42, -hF * 0.1 - 0.32, -hF * 0.1 - 0.28, up + 0.3, up + 0.38); }
   // the lamp: a wick in a dish of oil on the hearth's rim, the room lit by it
   { const [lx, lz] = W(0.0, (iv0 + iv1) / 2);
+    B('timber', -hS + th, hS - th, (iv0 + iv1) / 2 - 0.06, (iv0 + iv1) / 2 + 0.06, top - 0.14, top - 0.02);              // the tie beam it hangs from
     bag.add('rope_fibre', rod([lx, top - 0.05, lz], [lx, up + 2.08, lz], 0.007, 3));
     bag.add('lamp_paper', lathe([[0.001, 0], [0.1, 0.04], [0.13, 0.15], [0.09, 0.27], [0.001, 0.3]], 8, null, lx, up + 1.8, lz));
     if (ctx.lights) ctx.lights.push({ at: [lx, up + 1.75, lz], color: '#ffb25a', intensity: 2.6, distance: 6.5 }); }
@@ -229,7 +230,7 @@ function shop(el, ctx) {
   const ns = 14, rise = (y1 - y0) / ns, run = 0.25, sv0 = -hF + 0.7, su0 = -side * (hS - th - 0.45), sv1 = sv0 + ns * run;
   if (sv1 < hF - 1.3) {
     for (let n = 0; n < ns; n++) B('timber', su0 - 0.45, su0 + 0.45, sv0 + n * run, sv0 + n * run + run + 0.01, y0 - 0.02, y0 + rise * (n + 1) - 0.035);
-    col.ramp(R(su0 - 0.45, su0 + 0.45, sv0, sv1), y0, y1, DIRW[`${k.F[0]},${k.F[1]}`]);
+    col.ramp(R(su0 - 0.45, su0 + 0.45, sv0, sv1), y0, y1, DIRW[`${k.FV[0]},${k.FV[1]}`]);
     // the floor of the upper room, with the stair's well open
     const wl = su0 - 0.45, wr = su0 + 0.45, ul = Math.min(wl, wr), ur = Math.max(wl, wr);
     B('timber', -hS + th, hS - th, -hF + th, hF - 0.1, y1 - 0.22, y1 - 0.04);
@@ -264,11 +265,11 @@ function shop(el, ctx) {
   if (ctx.lights) { const [lx, lz] = W(0, hF - 1.6), [ux, uz] = W(0, 0); ctx.lights.push({ at: [lx, y0 + 2.5, lz], color: '#ffb25a', intensity: 3, distance: 8 }, { at: [ux, uy + 1.5, uz], color: '#ffb25a', intensity: 2.2, distance: 6 }); }
   // the roof of tile with the gable to the lane, horns, a hanging board at the gable
   const rb = R(-hS, hS, -hF, hF), long = rb[2] - rb[0] >= rb[3] - rb[1], c0 = [(rb[0] + rb[2]) / 2, (rb[1] + rb[3]) / 2];
-  const alongV = Math.abs(k.F[1]) > 0 ? !long : long;     // ridge along the depth when the front is n/s
-  const Al = (Math.abs(k.F[1]) > 0 ? rb[3] - rb[1] : rb[2] - rb[0]) / 2 + 0.7, Bh = (Math.abs(k.F[1]) > 0 ? rb[2] - rb[0] : rb[3] - rb[1]) / 2 + 0.5, rise2 = Bh * 0.7;
+  const alongV = Math.abs(k.FV[1]) > 0 ? !long : long;     // ridge along the depth when the front is n/s
+  const Al = (Math.abs(k.FV[1]) > 0 ? rb[3] - rb[1] : rb[2] - rb[0]) / 2 + 0.7, Bh = (Math.abs(k.FV[1]) > 0 ? rb[2] - rb[0] : rb[3] - rb[1]) / 2 + 0.5, rise2 = Bh * 0.7;
   void alongV;
-  rectRoof({ c: c0, A: Al, B: Bh, y: ut, rise: rise2, kind: 'gable', sweep: 0, curl: false, p: 1.05, alongZ: Math.abs(k.F[1]) > 0, mat: 'roof_tile', soffit: 'timber' }, bag);
-  kalae(bag, c0, Al, ut + rise2, Math.abs(k.F[1]) === 0, 'timber_red');
+  rectRoof({ c: c0, A: Al, B: Bh, y: ut, rise: rise2, kind: 'gable', sweep: 0, curl: false, p: 1.05, alongZ: Math.abs(k.FV[1]) > 0, mat: 'roof_tile', soffit: 'timber' }, bag);
+  kalae(bag, c0, Al, ut + rise2, Math.abs(k.FV[1]) === 0, 'timber_red');
   // eaves' stains and the damp line (flood marks on the lane side of the plinth)
   B('plaster_streak', -hS + 0.4, -hS + 1.2, hF + 0.0, hF + 0.02, y0 + 0.2, y0 + 1.4);
 }

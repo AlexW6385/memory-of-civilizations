@@ -184,6 +184,9 @@ export function naraBelltower(el, ctx) {
   if (el.simple) return;
   // the bell: from the cross beam, a waisted cylinder 2.7 m high, studs in a band, a crown with a dragon's loop
   const by = top + H - 0.6 - 2.9;
+  // the bell's beam across the frame between the two side tie beams, and a lighter one over the log's cords
+  bag.add('timber_red', box(cx - a - 0.4, top + H - 0.6, cz - 0.25, cx + a + 0.4, top + H - 0.1, cz + 0.25));
+  bag.add('timber_red', box(cx - a - 0.4, top + H - 0.5, cz + 0.4, cx + a + 0.4, top + H - 0.1, cz + 0.7));
   bag.add('bronze', lathe([[0.001, 0], [0.62, 0], [0.7, 0.25], [0.66, 1.2], [0.58, 2.2], [0.5, 2.7], [0.3, 2.78], [0.001, 2.78]], 20, null, cx, by, cz));
   for (let k = 0; k < 4; k++) for (let j = 0; j < 12; j++) {
     const ang = j / 12 * Math.PI * 2 + k * 0.1, r = 0.6;

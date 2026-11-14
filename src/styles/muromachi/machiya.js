@@ -156,8 +156,7 @@ function machiya(el, ctx) {
       B(WD, x1, y0 + 0.03, -d + 0.5, x1 + 0.04, y0 + 2.4, -d + 0.54); }
     // the loft over the back rooms (a floor of boards over the rear, its edge showing, a ladder)
     if (D.two) { B(TM, x0, y0 + H - 0.1, -d + 0.1, x1, y0 + H, -d / 2); B(WD, x0, y0 + H - 0.2, -d / 2, x1, y0 + H, -d / 2 + 0.1); for (let k = 0; k < 8; k++) B(WD, x1 - 0.5 + 0.0, y0 + fl + k * 0.37, -d / 2 + 0.2, x1 - 0.2, y0 + fl + k * 0.37 + 0.06, -d / 2 + 0.3); }
-    buildTrade(trade, { B, L }, { x0, x1, y0, fl, qm, d, H, r });
-    col.rect([x0, -qm - 0.1, x1, -qm + 0.35], y0 + fl, y0 + fl + 1.4);
+    buildTrade(trade, { B, L, col }, { x0, x1, y0, fl, qm, d, H, r });
   });
 }
 export const machiyaElements = { machiya_m: machiya };

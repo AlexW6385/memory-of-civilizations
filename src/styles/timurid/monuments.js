@@ -5,7 +5,7 @@
 import { box, lathe, fromTriangles, clothBox, addCloth, place, rod } from '../../core/geom.js';
 import { hungCarpet } from './market.js';
 import { frame } from './frame.js';
-import { chamber, cenotaph, prayerHall } from './interiors.js';
+import { chamber, cenotaph, prayerHall, domeUnder } from './interiors.js';
 import { orientedBox } from '../../core/build.js';
 import { Shape, Path, ExtrudeGeometry } from '../../core/three.js';
 import { arcadeWall } from '../mughal/index.js';
@@ -119,8 +119,9 @@ export function bibiKhanym(el, ctx) {
     fr.bag.add('marble_floor', box(-2.3, 0, 47.4, 2.3, 0.06, 51));
     for (const sgn of [-1, 1]) bannai(fr.bag, { a: [sgn * 13, 60], b: [sgn * 13, 74], n: [sgn, 0], d: 0.02, y: 0, s0: 0.2, s1: 13.8, v0: 13.2, v1: 14.8, kind: 'kufic', base: LAP, ink: WHI, alt: CRE, ink2: TUR, cell: 0.55, seed: 77 + sgn });
     domeBlock({ c: [0, 62], half: 13, y: 0, hole: 8.1, walls: false, wallH: 16, trans: 3.5, drum: { r: 8.6, h: 8 }, dome: { r: 10.2, h: 12.5, ribs: 32 } }, { bag: fr.bag, col: fr.col });
-    chamber(fr, { c: [0, 62], hx: 11, hz: 11, h: 16, innerR: 8.1, drumH: 12, domeH: 10, ribs: 32, dado: 2.6, doorWall: 2, door: [8.7, 13.3] });
-    prayerHall(fr, { c: [0, 62], hx: 11, hz: 11, lampY: 10.5, lampTop: 16 }, fr.lights);
+    const bibiDome = { c: [0, 62], hx: 11, hz: 11, h: 16, innerR: 8.1, drumH: 12, domeH: 10, ribs: 32, dado: 2.6, doorWall: 2, door: [8.7, 13.3] };
+    chamber(fr, bibiDome);
+    prayerHall(fr, { c: [0, 62], hx: 11, hz: 11, lampY: 10.5, under: domeUnder(bibiDome) }, fr.lights);
   }
   // the two lesser domes at the middles of the long sides, behind a pishtaq each
   for (const s of [-1, 1]) {
@@ -178,11 +179,12 @@ export function gurEAmir(el, ctx) {
   pishtaqOf({ a: [cx - 10, mz - A + 0.6], b: [cx + 10, mz - A + 0.6], facing: [cx, mz - 80], y: 0, h: 16, depth: 4, iwan: { w: 9, h: 12, depth: 3.4, pass: true, doorH: 5.2 } }, ctx);
   { // inside: the finish of the chamber, the cenotaphs, the lamps
     const fr = frame(ctx, 0, 0, 0);
-    chamber(fr, { c: [cx, mz], hx: 6, hz: 6, h: 12, innerR: 5.9, drumH: 11, domeH: 8, ribs: 32, doorWall: 2, door: [3.97, 8.03] });
+    const gurDome = { c: [cx, mz], hx: 6, hz: 6, h: 12, innerR: 5.9, drumH: 11, domeH: 8, ribs: 32, doorWall: 2, door: [3.97, 8.03] };
+    chamber(fr, gurDome);
     cenotaph(bag, col, cx, mz, Math.PI / 2, true, 1.0);
     for (const [dx, dz] of [[-3.5, 0.3], [3.5, 0.3], [-1.7, 3.5], [1.7, 3.5], [-3.7, -3.4]]) cenotaph(bag, col, cx + dx, mz + dz, Math.PI / 2, false, 0.92);
-    for (const [dx, dz] of [[-3.5, -3.5], [3.5, -3.5], [-3.5, 3.5], [3.5, 3.5]]) F.mosqueLamp(bag, ctx.lights, cx + dx, 8.2, mz + dz, 12, { k: 1.5, enamel: true, glow: 4, reach: 16 });
-    F.mosqueLamp(bag, ctx.lights, cx, 7.0, mz, 12, { k: 1.9, enamel: true, glow: 5, reach: 20 });
+    for (const [dx, dz] of [[-3.5, -3.5], [3.5, -3.5], [-3.5, 3.5], [3.5, 3.5]]) F.mosqueLamp(bag, ctx.lights, cx + dx, 8.2, mz + dz, domeUnder(gurDome)(Math.hypot(dx, dz)), { k: 1.5, enamel: true, glow: 4, reach: 16 });
+    F.mosqueLamp(bag, ctx.lights, cx, 7.0, mz, domeUnder(gurDome)(0), { k: 1.9, enamel: true, glow: 5, reach: 20 });
   }
   domeBlock({ c: [cx, mz], half: A, y: 0, wallH: 12, hole: 5.9, walls: false, trans: 3.2, drum: { r: 7.6, h: 11 }, dome: { r: 9, h: 12.5, ribs: 32 } }, ctx);
   // four minarets: two on the portal's flanks, two at the mausoleum's front corners
@@ -249,16 +251,23 @@ export function observatory(el, ctx) {
   }
   bag.add(B, lathe([[R + 0.2, H - 0.1], [R + 0.9, H], [R + 0.9, H + 1.1], [R - 0.2, H + 1.1]], N, null, cx, y, cz));
   // the sextant's arc on the plateau: a strip of marble (2 m wide) along an arc of 40 m radius, 70° of it, due south of the drum
+  // (the arc lies on the hill's slope: el.ground gives the ground's height where the plan has one)
+  const gy = el.ground || (() => y);
   const r0 = 40, tris = [], n = 28, a0 = Math.PI / 2 - 0.61, a1 = Math.PI / 2 + 0.61;
   for (let i = 0; i < n; i++) {
     const t0 = a0 + (a1 - a0) * i / n, t1 = a0 + (a1 - a0) * (i + 1) / n;
-    const P = (t, r) => [cx + Math.cos(t) * r, y + 0.07, cz + Math.sin(t) * r];
+    const P = (t, r) => { const px = cx + Math.cos(t) * r, pz = cz + Math.sin(t) * r; return [px, gy(px, pz) + 0.07, pz]; };
     const A1 = P(t0, r0 - 1), B1 = P(t0, r0 + 1), C1 = P(t1, r0 + 1), D1 = P(t1, r0 - 1);
     tris.push(...A1, ...C1, ...B1, ...A1, ...D1, ...C1);
   }
   bag.add('marble', fromTriangles(tris));
   // its degree marks: small cross-pieces of dark brick every 2.5°
-  for (let k = 0; k <= 28; k++) { const t = a0 + (a1 - a0) * k / 28, p0 = [cx + Math.cos(t) * (r0 - 1), cz + Math.sin(t) * (r0 - 1)], p1 = [cx + Math.cos(t) * (r0 + 1.2), cz + Math.sin(t) * (r0 + 1.2)]; bag.add('lacquer_black', orientedBox(p0, p1, 0.08, y + 0.07, y + 0.1)); }
+  for (let k = 0; k <= 28; k++) { const t = a0 + (a1 - a0) * k / 28, p0 = [cx + Math.cos(t) * (r0 - 1), cz + Math.sin(t) * (r0 - 1)], p1 = [cx + Math.cos(t) * (r0 + 1.2), cz + Math.sin(t) * (r0 + 1.2)]; {
+    // a strip 8 cm broad lying on the slope
+    const dx = p1[0] - p0[0], dz = p1[1] - p0[1], dl = Math.hypot(dx, dz), ox = -dz / dl * 0.04, oz = dx / dl * 0.04;
+    const q = (px, pz) => [px, gy(px, pz) + 0.085, pz], A = q(p0[0] - ox, p0[1] - oz), Bq = q(p0[0] + ox, p0[1] + oz), C = q(p1[0] + ox, p1[1] + oz), D = q(p1[0] - ox, p1[1] - oz);
+    bag.add('lacquer_black', fromTriangles([...A, ...C, ...Bq, ...A, ...D, ...C, ...A, ...Bq, ...C, ...A, ...C, ...D]));
+  } }
 }
 
 /**
@@ -361,8 +370,9 @@ export function khanqah(el, ctx) {
   bag.add(B, box(x0 + 9.6, 5, zm - 1.8, w0, h, zm + 1.8)); col.rect([x0 + 9.6, zm - 1.8, w0, zm + 1.8], 5, h);
   bag.add('marble_floor', box(x0 + 5.8, 0, zm - 1.8, w0, 0.06, zm + 1.8));
   { const fr = frame(ctx, 0, 0, 0);
-    chamber(fr, { c: [hx, zm], hx: hw, hz: hw, h: h - 1, innerR: 5.2, drumH: 9, domeH: 7, ribs: 20, dado: 1.8, doorWall: 0, door: [4.2, 7.8], floor: 'brick_paving', dadoMat: 'marble' });
-    prayerHall(fr, { c: [hx, zm], hx: hw, hz: hw, mh: 6, steps: 5, lampY: 8.5, lampTop: h - 1 }, ctx.lights);
+    const khDome = { c: [hx, zm], hx: hw, hz: hw, h: h - 1, innerR: 5.2, drumH: 9, domeH: 7, ribs: 20, dado: 1.8, doorWall: 0, door: [4.2, 7.8], floor: 'brick_paving', dadoMat: 'marble' };
+    chamber(fr, khDome);
+    prayerHall(fr, { c: [hx, zm], hx: hw, hz: hw, mh: 6, steps: 5, lampY: 8.5, under: domeUnder(khDome) }, ctx.lights);
     F.carpet(bag, hx, 0.06, zm - 1.0, 7, 5, 0, 'persian'); }
   domeBlock({ c: [hx, zm], half: 8, y: h - 1, hole: 5.2, walls: false, wallH: 1, trans: 2, drum: { r: 6, h: 7 }, dome: { r: 7.4, h: 9.5, ribs: 24 } }, ctx);
   for (const z of [z0, z1]) tiledMinaret(bag, col, { c: [x0, z], y: 0, h: 26, r: 1.8 });

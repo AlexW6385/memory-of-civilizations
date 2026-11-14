@@ -7,8 +7,18 @@ export const TRADES = ['cloth', 'sake', 'pottery', 'rice', 'tea', 'lacquer', 'sm
 const bowl = (L, m, x, y, z, k = 1) => L(m, [[0.001, 0], [0.04 * k, 0], [0.06 * k, 0.05 * k], [0.001, 0.05 * k]], 8, x, y, z);
 
 /** Builds the goods and the furniture of one trade. */
-export function trade(kind, { B, L }, { x0, x1, y0, fl, qm, d, H, r }) {
-  const g = B, Y = y0 + fl + 0.03, cx = (x0 + x1) / 2;
+export function trade(kind, { B, L, col }, { x0, x1, y0, fl, qm, d, H, r }) {
+  const g = B, Y = y0 + fl + 0.03, cx = (x0 + x1) / 2, f0 = y0 + fl;
+  // what stands on the floor stops the walker, each fixture by its own footprint
+  const post = (a, b, c, e, h) => col.rect([a, b, c, e], f0, f0 + h);
+  if (kind === 'cloth' || kind === 'pottery' || kind === 'lacquer' || kind === 'sandals') post(x0, -qm - 0.1, x1, -qm + 0.3, 1.4);
+  else if (kind === 'sake') for (let k = 0; k < 4; k++) col.circle(x0 + 0.5 + k * 0.62, -qm - 0.45, 0.33, f0, f0 + 0.85);
+  else if (kind === 'rice') post(x0 + 0.2, -qm - 0.3, x0 + 2.2, -qm + 0.3, 1.3);
+  else if (kind === 'dye') for (let k = 0; k < 3; k++) col.circle(x0 + 0.55 + k * 0.85, -qm - 0.2, 0.37, f0, f0 + 0.65);
+  else if (kind === 'wood') post(x0 + 0.2, -qm - 0.5, x1 - 0.2, -qm + 0.2, 0.55);
+  else if (kind === 'smith') post(x0 + 0.1, -qm + 0.2, x0 + 2.1, -qm + 1.2, 1.5);
+  else if (kind === 'paper') col.circle(x0 + 0.8, -qm - 0.6, 0.45, f0, f0 + 0.55);
+  else if (kind === 'food') col.circle(x1 - 0.55, -qm + 0.6, 0.2, f0, f0 + 0.35);
   if (kind === 'cloth') { const cols = ['cloth_indigo', 'cloth_red', 'linen', 'cloth_brown', 'cloth_green', 'cloth_ochre']; for (let s = 0; s < 3; s++) for (let k = 0; k < 6; k++) g(cols[(k + s) % 6], x0 + 0.2 + k * 0.32, Y + 0.1 + s * 0.4, -qm - 0.07, x0 + 0.5 + k * 0.32, Y + 0.3 + s * 0.4 + (k % 2) * 0.06, -qm + 0.3); B(WD, x0 + 0.1, Y, -qm - 0.08, x1 - 0.1, Y + 1.3, -qm - 0.04);
     for (let k = 0; k < 3; k++) B(k % 2 ? 'cloth_indigo' : 'cloth_red', x0 + 0.6 + k * 0.9, Y + 1.4, -qm + 0.05, x0 + 1.1 + k * 0.9, y0 + H - 0.5, -qm + 0.07); }   // bolts hung from the beam
   else if (kind === 'sake') { for (let k = 0; k < 4; k++) { L('timber', [[0.001, 0], [0.28, 0], [0.32, 0.25], [0.33, 0.5], [0.3, 0.8], [0.001, 0.8]], 12, x0 + 0.5 + k * 0.62, Y, -qm - 0.45); L('iron', [[0.3, 0.2], [0.33, 0.2], [0.33, 0.24], [0.3, 0.24]], 12, x0 + 0.5 + k * 0.62, Y, -qm - 0.45); } B('lacquer_black', x0 + 0.3, Y, -1.4, x0 + 1.1, Y + 0.3, -0.8);

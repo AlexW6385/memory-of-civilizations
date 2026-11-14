@@ -158,7 +158,9 @@ export function laneItem(f, kind, rand, bag, col, H) {
       for (const sgn of [-1, 1]) bag.add('wood_dark', place(box(sgn * 0.5 - 0.03, 0.98, -1.1, sgn * 0.5 + 0.03, 1.35, 1.1), c[0], 0, c[1], ay));
       for (const sgn of [-1, 1]) bag.add('timber', place(box(sgn * 0.3 - 0.04, 0.55, -2.9, sgn * 0.3 + 0.04, 0.62, -1.0), c[0], 0, c[1], ay));
       F.spiceSacks(bag, c[0], 0.98, c[1], ay, 3, ['cloth_ochre', 'cloth_red']); F.bale(bag, c[0] + ax[0] * 0.5, 0.98, c[1] + ax[1] * 0.5, 0.7, 0.4, 0.5, ay, 'thatch');
-      const e0 = f.p(f.s - 1.2, 0.0), e1 = f.p(f.s + 2.3, 1.8); col.rect([Math.min(e0[0], e1[0]), Math.min(e0[1], e1[1]), Math.max(e0[0], e1[0]), Math.max(e0[1], e1[1])], 0, 1.0);
+      // the bed with its wheels, and the two shafts running out behind it
+      const box2 = (u0, v0, u1, v1, y0, y1) => { const e0 = f.p(f.s + u0, v0), e1 = f.p(f.s + u1, v1); col.rect([Math.min(e0[0], e1[0]), Math.min(e0[1], e1[1]), Math.max(e0[0], e1[0]), Math.max(e0[1], e1[1])], y0, y1); };
+      box2(-1.15, 0.95 - 0.7, 1.15, 0.95 + 0.7, 0, 1.4); box2(-2.9, 0.95 - 0.38, -1.15, 0.95 + 0.38, 0.5, 0.65);
       break;
     }
     case 'dung': {
