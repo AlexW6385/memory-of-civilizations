@@ -183,12 +183,16 @@ export function westminsterHall(el, ctx) {
     void L;
     const Ao = (m, ...r) => bag.add(m, fbox(Fo, y, ...r));
     Ao(ST, -0.1, Fo.w + 0.1, -0.5, 0.8, 0, 0.3);
+    // (what stands out from the wall is solid: the plinth and each buttress)
+    const solid = (u0, u1, d1, y1) => { const p = Fo.at(u0, 0), q = Fo.at(u1, d1); col.rect([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], y - 0.5, y + y1); };
+    solid(-0.1, Fo.w + 0.1, 0.3, 0.8);
     for (let i = 0; i < nT; i++) {
       const z = zi0 + (i + 0.5) * sp, zb = zi0 + (i + 1) * sp;
       // u of z on each frame: outside the 'w' frame runs with z, 'e' against it; the inner frames the other way
       const uo = (zz) => (f === 'w' ? zz - z0 : z1 - zz), ui = (zz) => (f === 'w' ? z1 - zz : zz - z0);
       // the buttress at each truss, stepped twice
       Ao(ST, uo(z) - 0.7, uo(z) + 0.7, -0.5, h - 1.0, 0, 1.0); Ao(ST, uo(z) - 0.7, uo(z) + 0.7, -0.5, 5.5, 0, 1.6);
+      solid(uo(z) - 0.7, uo(z) + 0.7, 1.6, 5.5); solid(uo(z) - 0.7, uo(z) + 0.7, 1.0, h - 1.0);
       Fo && bag.add(ST, prism(Fo, y, [[uo(z) - 0.7, 5.5], [uo(z) + 0.7, 5.5], [uo(z) + 0.7, 6.3], [uo(z) - 0.7, 6.3]], 1.0, 1.6));
       bag.add(ST, prism(Fo, y, [[uo(z) - 0.7, h - 1.0], [uo(z) + 0.7, h - 1.0], [uo(z), h + 0.6]], 0, 1.0));
       if (i === nT - 1) continue;
@@ -246,6 +250,7 @@ function northFront(bag, col, el, { y, h, cx, x0, x1, z0, zi0, door, dSpring, dR
     // the angle buttresses at the outer corners, set back in stages
     const ox = s < 0 ? tx0 : tx1;
     for (const [w, v1] of [[1.1, 8.0], [0.85, 15.0], [0.6, 25.2]]) { bag.add(ST, box(Math.min(ox, ox + s * w), y - 0.5, tz0 - w, Math.max(ox, ox + s * w), y + v1, tz0 + 1.2)); bag.add(ST, box(Math.min(ox - s * 1.2, ox + s * w), y - 0.5, tz0 - w, Math.max(ox - s * 1.2, ox + s * w), y + v1, tz0)); }
+    col.rect([Math.min(ox, ox + s * 1.1), tz0 - 1.1, Math.max(ox, ox + s * 1.1), tz0 + 1.2], y - 0.5, y + 8.0); col.rect([Math.min(ox - s * 1.2, ox + s * 1.1), tz0 - 1.1, Math.max(ox - s * 1.2, ox + s * 1.1), tz0], y - 0.5, y + 8.0);
     // the battlements and the pinnacles at the corners
     bag.add(ST, box(tx0 - 0.15, top, tz0 - 0.15, tx1 + 0.15, top + 0.3, tz1 + 0.15));
     for (const [a, b, alongX] of [[tx0, tx1, true], [tz0, tz1, false]]) for (const e of [0, 1]) for (let u = a + 0.35; u < b - 0.3; u += 1.1) { const m = alongX ? [u - 0.3, e ? tz1 - 0.35 : tz0 - 0.15, u + 0.3, e ? tz1 + 0.15 : tz0 + 0.35] : [e ? tx1 - 0.35 : tx0 - 0.15, u - 0.3, e ? tx1 + 0.15 : tx0 + 0.35, u + 0.3]; bag.add(ST, box(m[0], top + 0.3, m[1], m[2], top + 1.2, m[3])); }
