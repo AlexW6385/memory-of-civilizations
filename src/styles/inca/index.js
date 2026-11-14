@@ -494,7 +494,7 @@ function ringWall(el, { bag, col }) {
     const out = [nor[i][0], 0.1, nor[i][1]];
     quad4(t, at(i, half + lean, yb), at(i + 1, half + lean, yb), at(i + 1, half, yt), at(i, half, yt), out);
     quad4(t, at(i, half, yt), at(i + 1, half, yt), at(i + 1, -half, yt), at(i, -half, yt), [0, 1, 0]);
-    quad4(t, at(i, -half, yt), at(i + 1, -half, yt), at(i + 1, -half, el.y1 - 0.4), at(i, -half, el.y1 - 0.4), [-nor[i][0], 0, -nor[i][1]]);
+    quad4(t, at(i, -half, yt), at(i + 1, -half, yt), at(i + 1, -half, yb), at(i, -half, yb), [-nor[i][0], 0, -nor[i][1]]);          // the uphill face goes down to the footing: where the town's lanes lie below the wall's top it shows, and never leaves the wall open at the back
     col.segment(pts[i], pts[i + 1], 0.9, yb, yt - 0.3);
   }
   for (const i of [0, n - 1]) {
