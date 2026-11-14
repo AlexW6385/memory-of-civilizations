@@ -35,12 +35,22 @@ function arch(T, p0, az, el, L, W, droop, torn = 0, r = Math.random) {
   }
 }
 
+/** The stems of a banana clump of variant v: { x, z (from its centre), H }; the first at the centre, the others 0.45–0.75 m round it. */
+function bananaStems(v) {
+  const r = rng(53 + v * 29), n = 2 + (v % 2) + (v === 2 ? 1 : 0), out = [], a0 = r() * 6.28;
+  for (let k = 0; k < n; k++) {
+    const ang = k / n * 6.28 + a0, d = k ? 0.45 + r() * 0.3 : 0;
+    out.push({ x: Math.cos(ang) * d, z: Math.sin(ang) * d, H: 2.3 + r() * 1.2 - (k ? 0.5 : 0) });
+  }
+  return out;
+}
+
 /** k_banana: { at, y, s, seed } — a clump of banana plants: pseudostems 2.5–3.5 m, five broad leaves each, now and then a hanging bunch. */
 export function banana(el, { bag, col }) {
   const v = (el.seed ?? 1) % 3, A = assembly(`k-banana|${v}`, (a) => {
-    const r = rng(77 + v * 31), stems = 2 + (v % 2) + (v === 2 ? 1 : 0);
-    for (let k = 0; k < stems; k++) {
-      const ang = k / stems * 6.28 + r(), d = k ? 0.45 + r() * 0.3 : 0, x = Math.cos(ang) * d, z = Math.sin(ang) * d, H = 2.3 + r() * 1.2 - (k ? 0.5 : 0);
+    const r = rng(77 + v * 31), stems = bananaStems(v);
+    for (let k = 0; k < stems.length; k++) {
+      const { x, z, H } = stems[k];
       a('stem', tube([[x, 0, z, 0.15], [x + 0.03, H * 0.5, z, 0.12], [x, H, z, 0.1]], 7));
       for (let q = 0; q < 5; q++) {
         const az = q * 1.26 + r() * 0.5 + k, torn = q > 1 ? 0.45 : 0.15;
@@ -60,7 +70,9 @@ export function banana(el, { bag, col }) {
   const put = placer({ at: el.at, y: el.y ?? 0, rot: (el.seed ?? 1) * 1.7, s: el.s ?? 1 }, bag);
   put('stucco_leaf', A.stem.clone()); put('palm_leaf', A.leaf.clone());
   if (A.fruit) { put('glaze_yellow', A.fruit.clone()); put('lacquer_red', A.bud.clone()); }
-  col.circle(el.at[0], el.at[1], 0.4 * (el.s ?? 1), el.y ?? 0, (el.y ?? 0) + 2.5);
+  // a collider on each pseudostem (the placer turns the clump about y by rot and scales it)
+  const rot = (el.seed ?? 1) * 1.7, s = el.s ?? 1, c = Math.cos(rot), sn = Math.sin(rot);
+  for (const { x, z } of bananaStems(v)) col.circle(el.at[0] + (x * c + z * sn) * s, el.at[1] + (-x * sn + z * c) * s, 0.17 * s, el.y ?? 0, (el.y ?? 0) + 2.5);
 }
 
 /** k_areca: { at, y, s, seed } — an areca palm (the betel nut): a slim ringed trunk of 8–11 m, a green crownshaft, a dozen drooping fronds, the nuts in orange bunches. */
@@ -214,7 +226,7 @@ export function workshop(el, ctx) {
     for (let k = 0; k < 5; k++) { const [x, z] = at(-hS + 0.5 + k * 0.28, hF - 0.45); bag.add('iron', box(x - 0.1, up + 0.012, z - 0.012, x + 0.1, up + 0.03, z + 0.012)); }
   } else if (trade === 'sugar') {
     // the boiling of palm sap: a trench-fire under three round pans in a clay stove, ladles of coconut shell on bamboo, tubes of sap fresh from the palms, jars, a stack of leaves for fuel and fans
-    const [sx, sz] = at(0, -hF + 1.15); bag.add('laterite', box(sx - hS * 0.7, up, sz - 0.5, sx + hS * 0.7, up + 0.45, sz + 0.5)); solid(0, -hF + 1.15, hS * 0.75, 0.5);
+    const [sx, sz] = at(0, -hF + 1.15); bag.add('laterite', box(sx - hS * 0.7, up, sz - 0.5, sx + hS * 0.7, up + 0.45, sz + 0.5)); col.rect([sx - hS * 0.7, sz - 0.5, sx + hS * 0.7, sz + 0.5], up, up + 0.5);
     const np = 3; for (let k = 0; k < np; k++) { const [px, pz] = at(-hS * 0.5 + k * hS * 0.5, -hF + 1.15); bag.add('pottery_dark', lathe([[0.5, 0], [0.62, 0.08], [0.58, 0.16], [0.001, 0.16]], 12, null, px, up + 0.45, pz)); bag.add('rubble', lathe([[0.001, 0.12], [0.55, 0.12], [0.001, 0.13]], 12, null, px, up + 0.45, pz)); }
     for (let k = 0; k < 4; k++) { const [x, z] = at(-hS + 0.5 + k * 0.4, hF - 0.6); bag.add('bamboo_culm', lathe([[0.05, 0], [0.05, 0.9]], 6, null, x, up, z)); }
     const [lx, lz] = at(hS * 0.45, 0.3); const T = []; beamTris(T, [lx, up + 0.2, lz], [lx - 0.4, up + 1.2, lz - 0.4], 0.02, 0.04); bag.add('bamboo_culm', fromTriangles(T));

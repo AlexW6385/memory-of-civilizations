@@ -211,10 +211,10 @@ export function cairoYard(el, { bag, col }) {
   bag.add('wood_dark', rod([wp[0] - 0.7, y + 2.0, wp[1]], [wp[0] + 0.7, y + 2.0, wp[1]], 0.04, 5));
   for (let k = 0; k < 3; k++) { const p = F.P(L * 0.3 + 1.2 + k * 0.45, D * 0.5 + 0.9); bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.02], [0.22, 0.25], [0.14, 0.5], [0.15, 0.55]], 8, null, p[0], y, p[1])); }
   const sh = [L * 0.62, D * 0.55];                                                                                // the shed
-  for (const [a, b] of [[0, 0], [2.6, 0], [0, 2.2], [2.6, 2.2]]) B('palm_trunk', sh[0] + a, sh[0] + a + 0.1, sh[1] + b, sh[1] + b + 0.1, y, y + 1.9);
+  for (const [a, b] of [[0, 0], [2.6, 0], [0, 2.2], [2.6, 2.2]]) col.rect(B('palm_trunk', sh[0] + a, sh[0] + a + 0.1, sh[1] + b, sh[1] + b + 0.1, y, y + 1.9), y, y + 1.9);
   B('thatch_palm', sh[0] - 0.2, sh[0] + 2.9, sh[1] - 0.2, sh[1] + 2.5, y + 1.9, y + 2.05); B('hide_tan', sh[0] + 0.3, sh[0] + 2.3, sh[1] + 0.4, sh[1] + 2.0, y, y + 0.08);
   for (let k = 0; k < 5; k++) { const p = F.P(L * 0.12 + k * 0.7, D * 0.8 - (k % 2) * 0.5); bag.add('mudbrick', lathe([[0.4, 0], [0.34, 0.4], [0.18, 0.7], [0.001, 0.82]], 7, null, p[0], y, p[1])); }    // dung cakes stacked
-  { const p = F.P(L * 0.8, D * 0.85); bag.add('thatch', lathe([[0.9, 0], [0.8, 0.7], [0.4, 1.3], [0.001, 1.5]], 8, null, p[0], y, p[1])); }
+  { const p = F.P(L * 0.8, D * 0.85); bag.add('thatch', lathe([[0.9, 0], [0.8, 0.7], [0.4, 1.3], [0.001, 1.5]], 8, null, p[0], y, p[1])); col.circle(p[0], p[1], 0.8, y, y + 1.3); }
   const pp = F.P(L * 0.15, D * 0.4); palm(bag, pp[0], pp[1], 9 + rand() * 4, el.seed + 1, y); col.circle(pp[0], pp[1], 0.3, y, y + 12);
   if (L > 9) { const pq = F.P(L * 0.85, D * 0.3); palm(bag, pq[0], pq[1], 8 + rand() * 4, el.seed + 2, y); col.circle(pq[0], pq[1], 0.3, y, y + 12); }
 }

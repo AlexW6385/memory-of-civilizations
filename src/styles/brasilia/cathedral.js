@@ -85,9 +85,9 @@ export function cathedral(el, { bag, col, lights }) {
     bag.add('granite_grey', turnedBox(px, pz, 0.55, 0.06, F + 1.9, F + 2.6, a + Math.PI / 2)); bag.add('gilt_bronze', turnedBox(px - Math.cos(a) * 0.03, pz - Math.sin(a) * 0.03, 0.12, 0.03, F + 2.2, F + 2.3, a + Math.PI / 2));
     if (k % 4 === 0) bag.add('wood_painted', turnedBox(px - Math.cos(a) * 0.1, pz - Math.sin(a) * 0.1, 0.9, 0.04, F + 3.0, F + 3.7, a + Math.PI / 2));
   }
-  // the three angels, hung from the crown on steel cables at three heights over the nave
+  // the three angels, hung from the skylight's glass on steel cables at three heights over the nave
   const hang = [[cx - 4.5, cz + 3, 2.22, 0.2], [cx + 3.5, cz - 4, 3.4, 1.3], [cx + 2.5, cz + 9, 4.25, 2.4]];
-  hang.forEach(([x, z, h, yaw], i) => { const y0 = [16, 19.5, 14][i], s = h / 2.05; angel(bag, x, y0, z, s, yaw); for (const dx of [-0.25, 0.25]) bag.add('steel_chrome', rod([x + dx * 0.5, y0 + 2.1 * s, z], [x + dx * 3, CATH.top - 3, z + (i - 1) * 2], 0.012, 4)); });
+  hang.forEach(([x, z, h, yaw], i) => { const y0 = [16, 19.5, 14][i], s = h / 2.05; angel(bag, x, y0, z, s, yaw); for (const dx of [-0.25, 0.25]) bag.add('steel_chrome', rod([x + dx * 0.5, y0 + 2.1 * s, z], [x + dx * 3, CATH.top - 0.4, z + (i - 1) * 2], 0.012, 4)); });
   // ── the columns (§1b): each a tapering shaft along the hyperbola of the roof, wide at the foot and slender at the waist ──
   const wt = (y) => 0.5 + 1.35 * (1 - Math.min(1, Math.max(0, y) / CATH.yw)) ** 1.5, wr = (y) => 0.45 + 0.75 * (1 - Math.min(1, Math.max(0, y) / CATH.yw)) ** 1.5;
   const ys = []; for (let k = 0; k <= 30; k++) ys.push(-0.6 + (CATH.top + 0.6) * (k / 30) ** 1.0);
@@ -125,9 +125,9 @@ export function cathedral(el, { bag, col, lights }) {
   col.ramp([x0 + 0.5, zR, x1 - 0.5, z0], F, 0, 'n');
   col.floor([x0 + 0.5, z0, x1 - 0.5, zN + 0.4], F);
   for (const [xa, xb] of [[x0, x0 + 0.5], [x1 - 0.5, x1]]) {
-    bag.add(CONC, wedgeZ(xa, xb, zR, z0, 0.0, F, wy0)); bag.add(CONC, box(xa, wy0, z0, xb, 0.02, zN));
+    bag.add(CONC, wedgeZ(xa, xb, zR, z0, 0.9, F + 0.9, wy0)); bag.add(CONC, box(xa, wy0, z0, xb, 0.02, zN));
     col.rect([xa - 0.1, zR, xb + 0.1, zN], F - 0.4, 1.1);
-    bag.add('steel_grey', box(xa + 0.1, 0.02, zR, xb - 0.1, 1.0, z0 - 1));                                           // the rail along the ramp's cheek, over the wall
+    bag.add('steel_grey', rod([(xa + xb) / 2, 0.95, zR], [(xa + xb) / 2, F + 0.95, z0], 0.05, 6));                    // the rail along the ramp's cheek, on the parapet
   }
   bag.add(CONC, box(x0 + 0.5, F + 3.6, z0, x1 - 0.5, F + 3.9, zN)); bag.add('plaster_white', box(x0 + 0.5, F + 3.45, z0, x1 - 0.5, F + 3.6, zN));
   for (let zz = z0 + 2; zz < zN - 1; zz += 3.5) { lights.push({ at: [cx, F + 3.0, zz], color: '#ffd9a0', intensity: 3.0, distance: 8 }); bag.add('lamp_white', box(cx - 0.4, F + 3.35, zz - 0.15, cx + 0.4, F + 3.45, zz + 0.15)); }
@@ -147,7 +147,10 @@ export function cathedral(el, { bag, col, lights }) {
   {
     const bx = cx + 30, bz = cz - 54, a = 10, b = 6.5;
     bag.add('plaster_white', lathe([[1, 0], [0.99, 2.5], [0.93, 5.5], [0.78, 8], [0.55, 9.7], [0.25, 10.6], [0.001, 10.9]].map(([r, h]) => [r, h]), 40, (th) => 1 / Math.hypot(Math.cos(th) / a, Math.sin(th) / b), bx, 0, bz));
-    col.circle(bx, bz, 8.0, 0, 11);
+    for (let k = 0; k < 24; k++) {   // the ovoid's footprint: a ring of chords 2.2 m thick just inside its rim
+      const u = k / 24 * TAU, v = (k + 1) / 24 * TAU, e = (t) => [bx + (a - 1.1) * Math.cos(t), bz + (b - 1.1) * Math.sin(t)];
+      col.segment(e(u), e(v), 2.4, 0, 11);
+    }
     bag.add(CONC, disc(a + 0.5, 0.03, 40, bx, bz, true));
   }
   // ── the Evangelists in the entrance square (§1b: four bronzes by Ceschiatti and Croce, 1968) ──

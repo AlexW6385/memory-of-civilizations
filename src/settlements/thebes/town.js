@@ -25,7 +25,7 @@ function people() {
   // the quay: the porters with sacks and jars, the stevedores, the overseer, the women at the water's edge
   for (let k = 0; k < 9; k++) { const z = -100 + rand() * 230, x = QUAY.x + 2 + rand() * 3, r = rand() * 6.28; fig([x, z], r, { carry: pick(rand, ['sack', 'pot', 'basket', 'sack']), cloth: pick(rand, ['cloth_white', 'cloth_ochre', 'linen']) }); }
   for (const z of [-96, -30, 12, 62, 100]) { fig([QUAY.x + 1.2, z], Math.PI / 2, { pose: 'staff', carry: 'staff', over: 'sash', len: 1.7 }); fig([QUAY.x + 1.6, z + 1.1], Math.PI * 0.6, { pose: 'talk' }); }
-  for (const z of [-60, 36, 112]) for (const dz of [0, 0.9]) fig([QUAY.x - 5.1 + 0, z + dz], -Math.PI / 2, { dress: 'sheath', hair: 'long', pose: 'kneel', h: 1.52 });
+  for (const z of [-60, 36, 112]) for (const dz of [0, 0.9]) fig([QUAY.x + 1.8, z + dz], -Math.PI / 2, { dress: 'sheath', hair: 'long', pose: 'kneel', h: 1.52 });
   // the market: sellers sitting behind their stalls, facing the buyers
   for (const [z, dz, rot] of [[26.5, -0.9, Math.PI], [33.5, 0.9, 0], [39.5, -0.9, Math.PI], [46, 0.9, 0]]) for (let x = MARKET[0] + 3; x < MARKET[2] - 2; x += 8) if (rand() < 0.8) fig([x + 0.4, z + dz], rot, { dress: rand() < 0.5 ? 'sheath' : 'shendyt', hair: rand() < 0.5 ? 'long' : 'short', pose: 'squat' });
   // the workshop street: each trade's worker at the bench, wheel or loom

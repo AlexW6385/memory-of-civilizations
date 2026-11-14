@@ -41,14 +41,16 @@ export function stairs(el, { bag, col }) {
   col.ramp([x0, z0, x1, z1], y0, y1, dir);
 }
 /** Shallow buttresses along the faces of a sloping stage [x0, z0, x1, z1] from y to y + h (inset at the top by b). */
-export function buttresses(bag, [x0, z0, x1, z1], y, h, b, step = 3.2, skip = null, mat = BB, hw = 0.55, dp = 0.35) {
+export function buttresses(bag, [x0, z0, x1, z1], y, h, b, step = 3.2, skip = null, mat = BB, hw = 0.55, dp = 0.35, col = null) {
   for (const [ax, az, bx, bz, nx, nz] of [[x0, z0, x1, z0, 0, -1], [x0, z1, x1, z1, 0, 1], [x0, z0, x0, z1, -1, 0], [x1, z0, x1, z1, 1, 0]]) {
     const L = Math.hypot(bx - ax, bz - az), n = Math.floor(L / step);
     for (let i = 1; i < n; i++) {
       const s = i * L / n, px = ax + (bx - ax) * s / L, pz = az + (bz - az) * s / L;
       if (skip && skip(px, pz)) continue;
       const tx = nz !== 0 ? hw : dp, tz = nx !== 0 ? hw : dp;
-      bag.add(mat, frustum([px - tx + nx * 0.2, pz - tz + nz * 0.2, px + tx + nx * 0.2, pz + tz + nz * 0.2], y, y + h * 0.97, nx > 0 ? 0 : nx < 0 ? b : 0, nx > 0 ? b : 0, nz < 0 ? b : 0, nz > 0 ? b : 0));
+      const q = [px - tx + nx * 0.2, pz - tz + nz * 0.2, px + tx + nx * 0.2, pz + tz + nz * 0.2];
+      bag.add(mat, frustum(q, y, y + h * 0.97, nx > 0 ? 0 : nx < 0 ? b : 0, nx > 0 ? b : 0, nz < 0 ? b : 0, nz > 0 ? b : 0));
+      if (col) col.rect(q, y, y + h * 0.97);
     }
   }
 }
@@ -112,7 +114,7 @@ function ziggurat(el, ctx) {
     const SK = ZIG_SKIN[i] || BB;                                          // the stage's facing: pale baked brick below, red above (lit well even against the low sun)
     bag.add(SK, frustum(r, y, y + s.h, b, b, b, b, { noBottom: true }));
     buttresses(bag, r, y, s.h, b, 3.2, (px) => Math.abs(px - cx) < 5, SK, LIT ? 0.9 : 0.55, LIT ? 0.62 : 0.35);        // broad, deep buttresses: the recesses between them throw shadow and read from afar
-    col.rect([r[0] + b * 0.4, r[1] + b * 0.4, r[2] - b * 0.4, r[3] - b * 0.4], y, y + s.h);
+    const ci = Math.min(b * 0.4, 0.2); col.rect([r[0] + ci, r[1] + ci, r[2] - ci, r[3] - ci], y, y + s.h);   // the battered face at body height is within 0.2 m of the foot
     col.floor([r[0] + b, r[1] + b, r[2] - b, r[3] - b], y + s.h);
     tops.push({ r, b, y0: y, y1: y + s.h });
     const y0s = y, stains = [], fx0 = (px, nx, o2) => px - nx * o2, fz0 = (pz, nz, o2) => pz - nz * o2;
@@ -155,7 +157,8 @@ function ziggurat(el, ctx) {
   const gz = fz + S0.b + 1, GH = 6.2, gw = 2.6;
   for (const sx of [-1, 1]) { const q = [Math.min(cx + sx * gw, cx + sx * 6.5), gz, Math.max(cx + sx * gw, cx + sx * 6.5), gz + 4]; bag.add(LIT ? WH : MP, box(q[0], S0.y1, q[1], q[2], S0.y1 + GH, q[3])); col.rect(q, S0.y1, S0.y1 + GH); col.floor(q, S0.y1 + GH); }
   bag.add(LIT ? WH : MP, box(cx - gw, S0.y1 + 4.8, gz, cx + gw, S0.y1 + GH, gz + 4));
-  if (LIT) for (const sx of [-1, 1]) bag.add('glaze_lapis', box(Math.min(cx + sx * 2.6, cx + sx * 6.5) - 0.04, S0.y1 + GH - 0.9, gz - 0.04, Math.max(cx + sx * 2.6, cx + sx * 6.5) + 0.04, S0.y1 + GH - 0.3, gz));   // a band of blue glaze under the gatehouse's top col.floor([cx - gw, gz, cx + gw, gz + 4], S0.y1 + GH);
+  if (LIT) for (const sx of [-1, 1]) bag.add('glaze_lapis', box(Math.min(cx + sx * 2.6, cx + sx * 6.5) - 0.04, S0.y1 + GH - 0.9, gz - 0.04, Math.max(cx + sx * 2.6, cx + sx * 6.5) + 0.04, S0.y1 + GH - 0.3, gz));   // a band of blue glaze under the gatehouse's top
+  col.floor([cx - gw, gz, cx + gw, gz + 4], S0.y1 + GH);
   bag.add('palm_trunk', box(cx - gw - 0.2, S0.y1 + 4.62, gz - 0.12, cx + gw + 0.2, S0.y1 + 4.8, gz + 0.3));
   // the stairs on up the second and third stages, each from the front edge of the stage below
   for (let i = 1; i < tops.length; i++) {
@@ -231,7 +234,7 @@ function shrine(el, { bag, col, lights }) {
   }
   bag.add(BB, box(cx - dw / 2, y, z0 - 1.1, cx + dw / 2, y + 0.06, z0 + t));                            // the threshold
   // buttresses and recesses round the outside, clear of the towers
-  buttresses(bag, [x0, z0, x1, z1], y, H, 0, 2.2, (px, pz) => pz < z0 + 0.01 && Math.abs(px - cx) < dw / 2 + 2.6, WH, 0.4);
+  buttresses(bag, [x0, z0, x1, z1], y, H, 0, 2.2, (px, pz) => pz < z0 + 0.01 && Math.abs(px - cx) < dw / 2 + 2.6, WH, 0.4, 0.35, col);
   // the blue glazed brick (docs/settlements/ur.md §4.2): a frieze under the parapet all round, a panel on each tower's face, and
   // above the roof the standard of Nanna, a pole bearing the gilded crescent, so that the house of the god reads from the court
   if (LIT) for (const [a, b, c, d] of [[x0, z1, x1, z1 + 0.05], [x0 - 0.05, z0, x0, z1], [x1, z0, x1 + 0.05, z1], [x0, z0 - 0.05, cx - dw / 2 - 2.0, z0], [cx + dw / 2 + 2.0, z0 - 0.05, x1, z0]])
@@ -298,6 +301,7 @@ function precinctWall(el, { bag, col }) {
   for (let i = 1; i < n; i++) for (const s of [-1, 1]) {
     const px = a[0] + ux * i * L / n - uz * s * (th / 2 + 0.25), pz = a[1] + uz * i * L / n + ux * s * (th / 2 + 0.25), q = [];
     beamTris(q, [px - ux * 0.6, y, pz - uz * 0.6], [px + ux * 0.6, y, pz + uz * 0.6], 0.25, h - 0.1); bag.add(el.mat ?? MB, fromTriangles(q));
+    col.segment([px - ux * 0.6, pz - uz * 0.6], [px + ux * 0.6, pz + uz * 0.6], 0.5, y, y + h - 0.1);
   }
 }
 
@@ -452,7 +456,7 @@ function terrace(el, { bag, col }) {
   bag.add('brick_buff', frustum([x0, z0, x1, z1], y - 0.3, y + h, b, b, b, b, { noBottom: true }));
   col.rect([x0, z0, x1, z1], y, y + h); col.floor([x0 + b, z0 + b, x1 - b, z1 - b], y + h);
   const gap = el.gap, inGap = (px, pz) => gap && pz < z0 + 0.1 && px > gap[0] - 1 && px < gap[1] + 1;
-  buttresses(bag, [x0, z0, x1, z1], y - 0.3, h + 0.3, b, 4, inGap, 'brick_buff');
+  buttresses(bag, [x0, z0, x1, z1], y - 0.3, h + 0.3, b, 4, inGap, 'brick_buff', 0.55, 0.35, col);
   // the cones: two rows of round heads near the top of each face, following its slope
   const head = lathe([[0.06, 0], [0.055, 0.03], [0.03, 0.05], [0.001, 0.055]], 8);
   for (const [f, a0, a1] of [['n', x0, x1], ['s', x0, x1], ['w', z0, z1], ['e', z0, z1]]) {
@@ -484,7 +488,7 @@ function gateTower(el, { bag, col }) {
   const over = ns ? [c - w / 2, z0, c + w / 2, z1] : [x0, c - w / 2, x1, c + w / 2];
   bag.add(m, box(over[0], dh, over[1], over[2], h, over[3])); col.rect(over, dh, h); col.floor(over, h);
   bag.add(BB, frustum(over, -0.3, 0.1, 0, 0, 0, 0, { noBottom: true })); col.floor(over, 0.1);
-  buttresses(bag, [x0, z0, x1, z1], -0.3, h + 0.3, 0, 2.6, (px, pz) => (ns ? Math.abs(px - c) < w / 2 + 0.8 : Math.abs(pz - c) < w / 2 + 0.8));
+  buttresses(bag, [x0, z0, x1, z1], -0.3, h + 0.3, 0, 2.6, (px, pz) => (ns ? Math.abs(px - c) < w / 2 + 0.8 : Math.abs(pz - c) < w / 2 + 0.8), BB, 0.55, 0.35, col);
   // a frieze of blue glazed brick under the coping on the faces with the doors, above the doorways' heads (§4.1b), and the coping itself
   if (el.glaze) {
     bag.add('brick_buff', box(x0 - 0.12, h - 0.1, z0 - 0.12, x1 + 0.12, h + 0.3, z1 + 0.12));

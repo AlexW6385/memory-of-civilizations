@@ -186,6 +186,8 @@ function acequia(el, ctx) {
   const hole = [mzc - hw, mzc + hw, y - 0.6, y + 3.8];
   holedWall(bag, col, PL, [w0, z0, w1, z1], el.orchardY - 0.5, y + Hw, [hole], false);
   archHead(bag, face('x', w1, 1), mzc - hw, mzc + hw, y + 2.4, y + 3.8, w1 - w0, 'lobed', { both: true });
+  // (the wall above the orchard terrace stands on the walks' level too: solid from there up, but for the mirador's opening)
+  col.rect([w0, z0, w1, mzc - hw], y - 0.6, y + Hw); col.rect([w0, mzc + hw, w1, z1], y - 0.6, y + Hw); col.rect([w0, mzc - hw, w1, mzc + hw], y + 3.8, y + Hw);
   bag.add('brick', box(w0 - 0.04, y + Hw, z0, w1 + 0.04, y + Hw + 0.09, z1));
   tileFloor(bag, col, [m0 + 0.5, mz0 + 0.5, w1, mz1 - 0.5], y);
   bag.add(PL, box(m0, el.orchardY - 0.5, mz0, w0, y - 0.3, mz1)); col.rect([m0, mz0, w0, mz1], el.orchardY - 0.5, y - 0.3);

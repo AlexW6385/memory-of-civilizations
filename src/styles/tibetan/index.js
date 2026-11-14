@@ -216,7 +216,14 @@ function dzong(el, { bag, col }) {
     if (roofVoids.length) for (const q of cells(bag, null, el.capMat || 'limewash_white', grow(r1, led), y1 - cap, y1, 0, 0, voids, { top: true })) col.floor(q, y1);
     else bx(el.capMat || 'limewash_white', grow(r1, led), y1 - cap, y1);
   } else if (roofVoids.length) { for (const q of cells(bag, null, el.capMat || mat, grow(r1, 0.12), yw, y1, 0, 0, voids, { top: true })) col.floor(q, y1); } else bx(el.capMat || mat, grow(r1, 0.12), yw, y1);
-  if (!voids.length) col.rect([x0 + Math.max(0, bW) / 2, z0 + Math.max(0, bN) / 2, x1 - Math.max(0, bE) / 2, z1 - Math.max(0, bS) / 2], y0, y1);
+  if (!voids.length) {
+    // the batter leans each face inward as it rises: the collider follows it in slices, each at its own mid-height set-in
+    const ns = Math.max(1, Math.ceil((y1 - y0) / 3));
+    for (let i = 0; i < ns; i++) {
+      const ya = y0 + (y1 - y0) * i / ns, yb = y0 + (y1 - y0) * (i + 1) / ns, f = Math.min(1, Math.max(0, ((ya + yb) / 2 - y0) / (yw - y0)));
+      col.rect([x0 + Math.max(0, bW) * f, z0 + Math.max(0, bN) * f, x1 - Math.max(0, bE) * f, z1 - Math.max(0, bS) * f], ya, yb);
+    }
+  }
   else if (!roofVoids.length) col.rect(r1, yw, y1);
   if (!roofVoids.length) col.floor(r1, y1);
   const avoid = [...(el.win?.avoid || []), ...voids.map((v) => [v.r[0] - 1.2, v.r[1] - 1.2, v.r[2] + 1.2, v.r[3] + 1.2, v.y0 - 1.5, v.y1 + 1.2])];
@@ -511,7 +518,7 @@ function house(el, ctx) {
     const rr = rng((el.seed || 1) * 7 + 3);
     if (rr() < 0.7) { const fx = x0 + 2.2 + rr() * Math.max(0.5, W - 9), fz = z0 + 0.6, fw = 1.6 + rr() * 1.4; bag.add('thatch', box(fx, y + H, fz, fx + fw, y + H + 0.8 + rr() * 0.4, fz + 1.2)); bag.add('rope_fibre', box(fx + fw * 0.3, y + H + 0.5, fz - 0.01, fx + fw * 0.34, y + H + 0.6, fz + 1.21)); }
     if (rr() < 0.6) { const dx = x1 - 4.4 - rr() * 2, dz = z0 + 0.6, dh = 0.5 + rr() * 0.4; bag.add('banco_rough', box(dx, y + H, dz, dx + 2, y + H + dh, dz + 0.8)); for (let r = 1; r < 4; r++) bag.add('mud_plaster', box(dx - 0.01, y + H + r * dh / 4 - 0.015, dz - 0.01, dx + 2.01, y + H + r * dh / 4 + 0.015, dz + 0.81)); }
-    if (rr() < 0.5) { const bx = x0 + 1 + rr() * (W - 4), bz = z1 - 2.6 - rr() * 2; for (let q = 0; q < 4; q++) bag.add('bark_pine', box(bx, y + H + 0.07 * q, bz + q * 0.02, bx + 1.4, y + H + 0.07 * q + 0.07, bz + 0.1 + q * 0.02)); }
+    if (rr() < 0.5) { const bx = x0 + 1 + rr() * (W - 4), bz = z0 + 2.0 + rr() * (dn - 3.4); for (let q = 0; q < 4; q++) bag.add('bark_pine', box(bx, y + H - 0.03 + 0.07 * q, bz + q * 0.02, bx + 1.4, y + H - 0.03 + 0.07 * q + 0.07, bz + 0.1 + q * 0.02)); }
   }
   if (third) {
     const r3 = [x0 + 1.3, z0 + 1.0, x0 + 1.3 + Math.min(W - 2.6, 5 + rand() * 3), z0 + dn - 0.3];

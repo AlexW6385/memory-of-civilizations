@@ -486,7 +486,7 @@ function borobudur(el, { bag, col }) {
     }
     y = c.y;
   }
-  col.floor([cx - 30, cz - 30, cx + 30, cz + 30], y);
+  col.floor([cx - 9.9, cz - 9.9, cx + 9.9, cz + 9.9], y);   // the top terrace's inner square (its edge is a circle of 14.1 m)
   crownStupa(bag, cx, y, cz, el.crown.r, el.crown.top ?? 42);
   col.circle(cx, cz, el.crown.r * 1.18, y, y + el.crown.r * 2.4);
 }
@@ -896,11 +896,11 @@ function lesung(el, ctx) {
 }
 /** gubuk: a hut in the paddies { at, rot, seed } — a platform on four bamboo posts 1.5 m up, a small steep thatched roof, a ladder, a drum of tin... a rattle line of bamboo clappers to scare the birds. */
 function gubuk(el, ctx) {
-  const { bag, col } = ctx, rand = rng(el.seed || 1), F = smallFrame(el.at, 2.4, 2.4, 's'), { R, P } = F, fl = 1.5;
+  const { col } = ctx, yy = el.y ?? 0, bag = { add: (m, geo) => ctx.bag.add(m, geo.translate(0, yy, 0)) }, rand = rng(el.seed || 1), F = smallFrame(el.at, 2.4, 2.4, 's'), { R, P } = F, fl = 1.5;
   const rot = el.rot ?? 0, Rr = (u, v) => { const [x, z] = P(u, v), c = Math.cos(rot), s = Math.sin(rot), dx = x - el.at[0], dz = z - el.at[1]; return [el.at[0] + c * dx + s * dz, el.at[1] - s * dx + c * dz]; };
   const bxr = (mat, u0, v0, u1, v1, y0, y1) => { const a = Rr(u0, v0), b = Rr(u1, v1); bag.add(mat, box(Math.min(a[0], b[0]), y0, Math.min(a[1], b[1]), Math.max(a[0], b[0]), y1, Math.max(a[1], b[1]))); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
-  for (const u of [-1, 1]) for (const v of [-1, 1]) { const r = bxr('bamboo_culm', u * 1.0 - 0.06, v * 1.0 - 0.06, u * 1.0 + 0.06, v * 1.0 + 0.06, 0, 2.9); col.rect(r, 0, 2.9); }
-  col.floor(bxr('bamboo_culm', -1.15, -1.15, 1.15, 1.15, fl - 0.1, fl), fl);
+  for (const u of [-1, 1]) for (const v of [-1, 1]) { const r = bxr('bamboo_culm', u * 1.0 - 0.06, v * 1.0 - 0.06, u * 1.0 + 0.06, v * 1.0 + 0.06, -0.6, 2.9); col.rect(r, yy - 0.6, yy + 2.9); }
+  col.floor(bxr('bamboo_culm', -1.15, -1.15, 1.15, 1.15, fl - 0.1, fl), yy + fl);
   for (let k = 0; k < 9; k++) bxr('timber', -1.1 + k * 0.25, -1.1, -1.1 + k * 0.25 + 0.03, 1.1, fl, fl + 0.02);
   bxr('reed_mat', -1.0, -1.0, 1.0, -0.96, fl, fl + 0.9);                                         // the screen at the back
   bxr('timber', -1.0, 0.9, 1.0, 0.94, fl + 0.85, fl + 0.9);
@@ -908,16 +908,17 @@ function gubuk(el, ctx) {
   const t = [], apex = Rr(0, 0), c = [[-1.5, -1.5], [1.5, -1.5], [1.5, 1.5], [-1.5, 1.5]].map(([u, v]) => Rr(u, v));
   for (let i = 0; i < 4; i++) { const a = c[i], b = c[(i + 1) % 4]; t.push(a[0], 2.75, a[1], b[0], 2.75, b[1], apex[0], 3.7, apex[1], a[0], 2.69, a[1], apex[0], 3.64, apex[1], b[0], 2.69, b[1]); }
   bag.add('thatch_palm', fromTriangles(t));
-  const l = []; const a = Rr(0.4, 1.9), b = Rr(0.4, 1.0); beamTris(l, [a[0], 0, a[1]], [b[0], fl, b[1]], 0.07, 0.05); bag.add('timber', fromTriangles(l));    // the ladder pole
+  const l = []; const a = Rr(0.4, 1.9), b = Rr(0.4, 1.0); beamTris(l, [a[0], -0.3, a[1]], [b[0], fl, b[1]], 0.07, 0.05); bag.add('timber', fromTriangles(l));    // the ladder pole
   // the clapper line: a cord from the hut's corner out over the paddy with bamboo clappers hanging
   const e0 = Rr(1.0, 1.0), e1 = Rr(1.0, 9.0), cl = []; beamTris(cl, [e0[0], 2.4, e0[1]], [e1[0], 1.4, e1[1]], 0.008, 0.008); bag.add('rope_fibre', fromTriangles(cl));
   for (let k = 1; k <= 4; k++) { const p = Rr(1.0, 1.0 + k * 2), y = 2.4 - k * 0.25; bag.add('bamboo_culm', box(p[0] - 0.03, y - 0.5, p[1] - 0.03, p[0] + 0.03, y, p[1] + 0.03)); }
   void rand;
 }
 /** orang: a scarecrow { at, rot, seed } — a pole with a cross bar, a rag shirt, a straw hat, a clay pot for a head. */
-function orang(el, { bag }) {
+function orang(el, ctx) {
+  const yy = el.y ?? 0, bag = { add: (m, geo) => ctx.bag.add(m, geo.translate(0, yy, 0)) };
   const [x, z] = el.at, rand = rng(el.seed || 1), c = Math.cos(el.rot ?? 0), s = Math.sin(el.rot ?? 0), P = (u) => [x + c * u, z - s * u];
-  bag.add('bamboo_culm', box(x - 0.035, 0, z - 0.035, x + 0.035, 1.85, z + 0.035)); const t = [], a = P(-0.6), b = P(0.6); beamTris(t, [a[0], 1.4, a[1]], [b[0], 1.4, b[1]], 0.025, 0.04); bag.add('bamboo_culm', fromTriangles(t));
+  bag.add('bamboo_culm', box(x - 0.035, -0.6, z - 0.035, x + 0.035, 1.85, z + 0.035)); const t = [], a = P(-0.6), b = P(0.6); beamTris(t, [a[0], 1.4, a[1]], [b[0], 1.4, b[1]], 0.025, 0.04); bag.add('bamboo_culm', fromTriangles(t));
   bag.add(rand() < 0.5 ? 'cloth_brown' : 'cloth_indigo', lathe([[0.001, 0.75], [0.3, 0.78], [0.2, 1.35], [0.001, 1.4]], 8, null, 0, 0, 0).scale(1, 1, 0.5).translate(x, 0, z));
   const sl = P(-0.55), sr = P(0.55); bag.add('cloth_ochre', box(sl[0] - 0.04, 1.05, sl[1] - 0.04, sl[0] + 0.04, 1.4, sl[1] + 0.04)); bag.add('cloth_ochre', box(sr[0] - 0.04, 1.0, sr[1] - 0.04, sr[0] + 0.04, 1.4, sr[1] + 0.04));
   bag.add('pottery_dark', ellipsoid([x, 1.7, z], 0.14, 0.17, 0.14, 8));

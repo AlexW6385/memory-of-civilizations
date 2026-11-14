@@ -133,7 +133,7 @@ function block(el, { bag, col }) {
   const inPortal = (face, u, half) => face === f && Math.abs(u - pm) < 5 + half + 0.6;
   for (const face of 'nsew') {
     const R = frame(face), along = face === 'n' || face === 's', a0 = along ? x0 : z0, L = along ? x1 - x0 : z1 - z0, n = Math.floor(L / 7);
-    for (let i = 0; i <= n; i++) { const u = a0 + i * L / n; if (!inPortal(face, u, 0.7)) bag.add(S, R(u - 0.7, u + 0.7, y, y + h - 1.6, 0, 0.45)); }
+    for (let i = 0; i <= n; i++) { const u = a0 + i * L / n; if (!inPortal(face, u, 0.7)) { bag.add(S, R(u - 0.7, u + 0.7, y, y + h - 1.6, 0, 0.45)); const o = face === 'n' ? z0 : face === 's' ? z1 : face === 'w' ? x0 : x1, sg = face === 'n' || face === 'w' ? -1 : 1, pa = Math.min(o, o + sg * 0.45), pb = Math.max(o, o + sg * 0.45); col.rect(along ? [u - 0.7, pa, u + 0.7, pb] : [pa, u - 0.7, pb, u + 0.7], y, y + h - 1.6); } }
     for (let i = 0; i < n; i++) {
       const u = a0 + (i + 0.5) * L / n, bw = L / n / 2 - 0.9;
       if (inPortal(face, u, bw)) continue;
@@ -151,6 +151,8 @@ function block(el, { bag, col }) {
   // of the recess between them, the door at the back under a grilled window, frames of moulding
   const R = frame(f), m = f === 'n' || f === 's' ? (x0 + x1) / 2 - (x1 - x0) * 0.25 : (z0 + z1) / 2, ph = h * 1.05, D = 3, W = 5;
   for (const s2 of [-1, 1]) bag.add(S, R(s2 < 0 ? m - W : m + W - 1.6, s2 < 0 ? m - W + 1.6 : m + W, y - 0.5, y + ph, 0, D));
+  { const o = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1, pa = Math.min(o, o + sg * D), pb = Math.max(o, o + sg * D);
+    for (const [u0, u1] of [[m - W, m - W + 1.6], [m + W - 1.6, m + W]]) col.rect(f === 'n' || f === 's' ? [u0, pa, u1, pb] : [pa, u0, pb, u1], y - 0.5, y + ph); }
   bag.add(S, R(m - W, m + W, y + ph * 0.8, y + ph, 0, D));
   bag.add(S, R(m - W - 0.3, m + W + 0.3, y + ph - 1.2, y + ph - 0.6, D - 0.2, D + 0.3));
   for (let k = 0; k < 7; k++) {
@@ -362,13 +364,13 @@ function citadelWall(el, { bag, col }) {
     bag.add(S, slab(g0, g1, th, y + 6.5, y + h));
     // the arch's voussoirs over the opening, red and white in turn on both faces
     for (let k = 0; k < 7; k++) for (const sg of [-1, 1]) { const p = at(el.gate * L - 2.2 + k * 4.4 / 7), q = at(el.gate * L - 2.2 + (k + 1) * 4.4 / 7); bag.add(k % 2 ? 'stucco_red' : 'marble_smooth', slab([p[0] - uz * sg * (th / 2 + 0.05), p[1] + ux * sg * (th / 2 + 0.05)], [q[0] - uz * sg * (th / 2 + 0.05), q[1] + ux * sg * (th / 2 + 0.05)], 0.1, y + 6.5, y + 7.4)); }
-    for (const u of [el.gate * L - 2.2 - 3.0, el.gate * L + 2.2 + 3.0]) { const p = at(u); bag.add(S, lathe([[3.2, 0], [3.0, h + 5]], 16, null, p[0], y - 3, p[1])); col.circle(p[0], p[1], 3.2, y - 3, y + h + 5); for (let k = 0; k < 12; k += 2) { const t = k / 12 * Math.PI * 2; bag.add(S, box(p[0] + Math.cos(t) * 2.7 - 0.35, y + h + 5, p[1] + Math.sin(t) * 2.7 - 0.35, p[0] + Math.cos(t) * 2.7 + 0.35, y + h + 6.1, p[1] + Math.sin(t) * 2.7 + 0.35)); } }
+    for (const u of [el.gate * L - 2.2 - 3.0, el.gate * L + 2.2 + 3.0]) { const p = at(u); bag.add(S, lathe([[3.2, 0], [3.0, h + 8], [0.001, h + 8]], 16, null, p[0], y - 3, p[1])); col.circle(p[0], p[1], 3.2, y - 3, y + h + 5); for (let k = 0; k < 12; k += 2) { const t = k / 12 * Math.PI * 2; bag.add(S, box(p[0] + Math.cos(t) * 2.7 - 0.35, y + h + 5, p[1] + Math.sin(t) * 2.7 - 0.35, p[0] + Math.cos(t) * 2.7 + 0.35, y + h + 6.1, p[1] + Math.sin(t) * 2.7 + 0.35)); } }
   }
   // the merlons on the outer edge of the walk
   const nx = -uz, nz = ux, mo = th / 2 - 0.3;
   for (let u = 1; u < L - 1; u += 2.0) { if (el.gate !== undefined && Math.abs(u - el.gate * L) < 6) continue; const p = at(u), q = at(u + 1.1); bag.add(S, slab([p[0] + nx * mo, p[1] + nz * mo], [q[0] + nx * mo, q[1] + nz * mo], 0.6, y + h, y + h + 1.4)); }
   // the round tower at the segment's start
-  bag.add(S, lathe([[th * 1.6, 0], [th * 1.5, h + 5]], 16, null, a[0], y - 3, a[1])); col.circle(a[0], a[1], th * 1.6, y - 3, y + h + 5);
+  bag.add(S, lathe([[th * 1.6, 0], [th * 1.5, h + 8], [0.001, h + 8]], 16, null, a[0], y - 3, a[1])); col.circle(a[0], a[1], th * 1.6, y - 3, y + h + 5);
   for (let k = 0; k < 14; k += 2) { const t = k / 14 * Math.PI * 2; bag.add(S, box(a[0] + Math.cos(t) * (th * 1.5 - 0.4) - 0.35, y + h + 5, a[1] + Math.sin(t) * (th * 1.5 - 0.4) - 0.35, a[0] + Math.cos(t) * (th * 1.5 - 0.4) + 0.35, y + h + 6.2, a[1] + Math.sin(t) * (th * 1.5 - 0.4) + 0.35)); }
 }
 

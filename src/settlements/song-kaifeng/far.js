@@ -45,6 +45,8 @@ export function houseFar(el, { bag, col }) {
   };
   const quad = (a, b, c, d, hint) => { tri(a, b, c, hint); tri(a, c, d, hint); };
   const UP = [0, 1, 0];
+  // each roof surface is drawn on both faces: the underside of the eaves is seen from the street
+  const both = (t) => { const r = [...t]; for (let i = 0; i < t.length; i += 9) r.push(...t.slice(i, i + 3), ...t.slice(i + 6, i + 9), ...t.slice(i + 3, i + 6)); return r; };
   if (thatch) {
     // hipped: the ridge shortened by `hip` at each end, four slopes
     const hip = Math.min(hb - 0.2, (s1 - s0) / 2 - 0.3);
@@ -52,12 +54,12 @@ export function houseFar(el, { bag, col }) {
     quad(A, B, R1, R0, UP); quad(C, Dd, R0, R1, UP);
     const mid = [(A[0] + B[0] + C[0] + Dd[0]) / 4, yw, (A[2] + B[2] + C[2] + Dd[2]) / 4];
     tri(Dd, A, R0, [R0[0] - mid[0], 0.3, R0[2] - mid[2]]); tri(B, C, R1, [R1[0] - mid[0], 0.3, R1[2] - mid[2]]);
-    bag.add('thatch', fromTriangles(T));
+    bag.add('thatch', fromTriangles(both(T)));
   } else {
     // a gable: two slopes, the gable ends filled to the roof's underside
     const A = M(s0, t0, yE), B = M(s1, t0, yE), C = M(s1, t1, yE), Dd = M(s0, t1, yE), R0 = M(s0, tm, yR), R1 = M(s1, tm, yR);
     quad(A, B, R1, R0, UP); quad(C, Dd, R0, R1, UP);
-    bag.add(tile, fromTriangles(T));
+    bag.add(tile, fromTriangles(both(T)));
     const G = [], g = (a, b, c, hint) => {
       const nx = (b[1] - a[1]) * (c[2] - a[2]) - (b[2] - a[2]) * (c[1] - a[1]), ny = (b[2] - a[2]) * (c[0] - a[0]) - (b[0] - a[0]) * (c[2] - a[2]), nz = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
       if (nx * hint[0] + ny * hint[1] + nz * hint[2] < 0) G.push(...a, ...c, ...b); else G.push(...a, ...b, ...c);

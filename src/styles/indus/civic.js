@@ -210,7 +210,7 @@ export function granary(el, ctx) {
   bag.add('mud_plaster', box(x0 - 0.2, fy + HH, z0 - 0.2, x1 + 0.2, fy + HH + 0.4, z1 + 0.2)); col.floor([x0, z0, x1, z1], fy + HH + 0.4);
   bag.add('mudbrick', box(x0 - 0.2, fy + HH + 0.4, z0 - 0.2, x1 + 0.2, fy + HH + 1.0, z0 + 0.1), false); bag.add('mudbrick', box(x0 - 0.2, fy + HH + 0.4, z1 + 0.1, x1 + 0.2, fy + HH + 1.0, z1 + 0.2), false);
   // inside: bays of sacks and big jars along the back, a tally post, lamps
-  for (let i = 0; i < 9; i++) { const x = x0 + t + 2 + i * 4.6; for (let k = 0; k < 3; k++) bag.add('sacking', box(x - 1 + (k % 2) * 0.3, fy, z0 + t + 0.2 + k * 0.6, x + 0.5 + (k % 2) * 0.3, fy + 0.5 + (i % 3) * 0.25, z0 + t + 0.75 + k * 0.6)); for (let k = 0; k < 3; k++) jar(bag, i % 2 ? 'terracotta' : 'pottery_dark', x + 1.2 + k * 0.7, fy, z0 + t + 1.2 + rand() * 0.6, 2); }
+  for (let i = 0; i < 9; i++) { const x = x0 + t + 2 + i * 4.6; for (let k = 0; k < 3; k++) bag.add('sacking', box(x - 1 + (k % 2) * 0.3, fy, z0 + t + 0.2 + k * 0.6, x + 0.5 + (k % 2) * 0.3, fy + 0.5 + (i % 3) * 0.25, z0 + t + 0.75 + k * 0.6)); col.rect([x - 1, z0 + t + 0.2, x + 0.8, z0 + t + 1.95], fy, fy + 1.0); for (let k = 0; k < 3; k++) { const jz = z0 + t + 1.2 + rand() * 0.6; jar(bag, i % 2 ? 'terracotta' : 'pottery_dark', x + 1.2 + k * 0.7, fy, jz, 2); col.circle(x + 1.2 + k * 0.7, jz, 0.5, fy, fy + 1.3); } }
   lights.push({ at: [x0 + 12, fy + 2.8, z0 + 6], color: '#ffc98a', intensity: 3, distance: 11 }, { at: [x0 + 36, fy + 2.8, z0 + 6], color: '#ffc98a', intensity: 3, distance: 11 });
   // the roof beams seen from inside, a tally board and a ladder to the deck's loft, a balance with its stone weights, rows of sacks down the middle
   for (let z = z0 + t + 1; z < z1 - 1.2; z += 2.4) bag.add('timber', box(x0 + t, fy + HH - 0.34, z - 0.14, x1 - t, fy + HH - 0.04, z + 0.14), false);
@@ -221,8 +221,8 @@ export function granary(el, ctx) {
   for (let k = 0; k < 9; k++) bag.add('timber', box(x0 + 7, fy + 0.3 + k * 0.3, z0 + t + 0.4, x0 + 7.9, fy + 0.35 + k * 0.3, z0 + t + 0.5), false);
   bag.add('timber', box(x0 + 14, fy + 0.01, z0 + 11.4, x0 + 15.6, fy + 0.7, z0 + 12.4), false); bag.add('bronze', box(x0 + 14.2, fy + 0.7, z0 + 11.8, x0 + 15.4, fy + 0.74, z0 + 12.0), false);
   for (let k = 0; k < 5; k++) bag.add('granite_grey', box(x0 + 14.2 + k * 0.25, fy + 0.7, z0 + 12.1, x0 + 14.38 + k * 0.25, fy + 0.7 + 0.08 + 0.02 * k, z0 + 12.3), false);
-  for (let i = 0; i < 6; i++) for (let k = 0; k < 4; k++) bag.add(k % 2 ? 'sacking' : 'wicker', box(x0 + 5 + i * 6.4, fy + k * 0.32, z0 + 7.6, x0 + 8.4 + i * 6.4, fy + 0.3 + k * 0.32, z0 + 8.6), false);
-  for (let i = 0; i < 7; i++) jar(bag, i % 2 ? 'terracotta' : 'pottery_dark', x0 + 4 + i * 6.3, fy, z0 + 10.6, 2.0);
+  for (let i = 0; i < 6; i++) { for (let k = 0; k < 4; k++) bag.add(k % 2 ? 'sacking' : 'wicker', box(x0 + 5 + i * 6.4, fy + k * 0.32, z0 + 7.6, x0 + 8.4 + i * 6.4, fy + 0.3 + k * 0.32, z0 + 8.6), false); col.rect([x0 + 5 + i * 6.4, z0 + 7.6, x0 + 8.4 + i * 6.4, z0 + 8.6], fy, fy + 1.3); }
+  for (let i = 0; i < 7; i++) { jar(bag, i % 2 ? 'terracotta' : 'pottery_dark', x0 + 4 + i * 6.3, fy, z0 + 10.6, 2.0); col.circle(x0 + 4 + i * 6.3, z0 + 10.6, 0.5, fy, fy + 1.3); }
   // the weathering of the podium's faces and the hall's walls
   outer(ctx, el.rect, y, PH, PH * 0.6, 21, { s: [[x0 + 23.6, x0 + 27.4]] }, 'nswe', true);
   outer(ctx, [x0, z0, x1, z1], fy, HH, HH * 0.4, 22, { w: [[(z0 + z1) / 2 - 0.6, (z0 + z1) / 2 + 0.6]] }, 'nwe');

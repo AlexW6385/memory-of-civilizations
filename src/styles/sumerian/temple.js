@@ -66,7 +66,7 @@ export function giparu(el, ctx) {
   }
   for (const s of [-1, 1]) { const y = s < 0 ? gap[0] : gap[1] - 0.1; B('cedar', 0.6, y, 2.1, y + 0.1, 0.1, 4.0); for (const v of [0.5, 2.0, 3.5]) B('bronze', 0.6, y - 0.01, 2.1, y + 0.11, v - 0.06, v + 0.06); }
   B(BB, -1.6, gap[0], t, gap[1], -0.3, 0.1);
-  buttresses(bag, [X0, Z0, X1, Z1], 0, HW, 0, 3.5, (px, pz) => px <= X0 + 0.01 && Math.abs(pz - (Z0 + cv)) < 7.5);
+  buttresses(bag, [X0, Z0, X1, Z1], 0, HW, 0, 3.5, (px, pz) => px <= X0 + 0.01 && Math.abs(pz - (Z0 + cv)) < 7.5, undefined, undefined, undefined, col);
   // ---- the floors: baked brick throughout (the courts), the street through the middle ----
   B(BB, t, t, U - t, V - t, -0.3, 0.06); col.floor(T.R(t, t, U - t, V - t), 0.06);
   // ---- the street through the middle (z 29.2…34.8 for V = 64) between the two blocks ----

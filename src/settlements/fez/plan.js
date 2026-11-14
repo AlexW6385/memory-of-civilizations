@@ -27,7 +27,7 @@ export const bouInania = {
     room('court', [b[0] + 8.8, cz0, b[2] - 8.8, cz1], y, 'open'),
     room('galleries', [b[0] + 6.4, zN, b[2] - 6.4, cz1], y, 'open'),
     room('vestibule', [cx - 1.7, b[1], cx + 1.7, zN], y, 'hall'),
-    room('upper gallery', [gx0 + STX + 0.4, zN + 0.3, gx1 - STX - 0.4, cz0 - 0.3], yu, 'hall'),
+    room('upper gallery', [gx0 + STX + 0.4, zN + 0.3, gx1 - STX - 0.4, cz0 - 0.3], yu, 'open'),
     room('cell north', [gx0 + 9.7, zb + 0.5, gx0 + 12.7, ze - 0.5], yu, 'hall'),
     room('cell west', [b[0] + 1.6, zN + 7.3, gx0 - 1.2, zN + 9.7], yu, 'hall'),
     room('cell east', [gx1 + 1.2, zN + 7.3, b[2] - 1.6, zN + 9.7], yu, 'hall'),

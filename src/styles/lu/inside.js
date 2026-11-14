@@ -3,7 +3,7 @@
 // of Sage Traces (the stone slabs of the carved life, set in the walls), the Wu corridors (a red tablet shrine and its offering table in
 // every bay), Kuiwen Pavilion (the books of the emperors on their shelves, the stele) and the Kong Mansion's halls: the yamen hall of the Duke
 // (the dais, the table and the high chair before the screen, the red staves and the signs of silence), and the family rooms.
-// Element lu_inside: { kind, rect (the hall's), y (its floor), seed, front ('s' | 'e' | 'w') }.
+// Element lu_inside: { kind, rect (the hall's), y (its floor), seed, front ('s' | 'e' | 'w'), ceil (the ceiling's underside, where lanterns hang from) }.
 import { box, lathe } from '../../core/geom.js';
 import { Parts } from '../qing/carving.js';
 import { rng } from './kit.js';
@@ -56,7 +56,12 @@ function sageRoom(T, [x0, z0, x1, z1], y, rand) {
   T.B('granite_grey', (x0 + x1) / 2 - 0.5, y, (z0 + z1) / 2 - 0.12, (x0 + x1) / 2 + 0.5, y + 2.6, (z0 + z1) / 2 + 0.12, true);
   T.B('granite_black', (x0 + x1) / 2 - 0.7, y, (z0 + z1) / 2 - 0.3, (x0 + x1) / 2 + 0.7, y + 0.35, (z0 + z1) / 2 + 0.3, true);
 }
-function kuiwenRoom(T, ctx, [x0, z0, x1, z1], y, rand) {
+/** A lantern on its chain from the ceiling (`ceil`, the underside of the hall's ceiling). */
+function chained(T, x, y, z, ceil) {
+  lantern(T, x, y, z);
+  if (ceil > y + 0.36) T.B('timber', x - 0.012, y + 0.36, z - 0.012, x + 0.012, ceil, z + 0.012);
+}
+function kuiwenRoom(T, ctx, [x0, z0, x1, z1], y, rand, ceil) {
   // books of the emperors on shelves along the back and sides; a reading table; a great stele; the lantern
   for (const [a, b, c, d] of [[x0 + 0.4, z0 + 0.3, (x0 + x1) / 2 - 2.4, z0 + 0.8], [(x0 + x1) / 2 + 2.4, z0 + 0.3, x1 - 0.4, z0 + 0.8], [x0 + 0.3, z0 + 1.2, x0 + 0.8, z1 - 2.5], [x1 - 0.8, z0 + 1.2, x1 - 0.3, z1 - 2.5]]) {
     T.B('lacquer_chestnut', a, y, b, c, y + 2.6, d, true);
@@ -69,10 +74,10 @@ function kuiwenRoom(T, ctx, [x0, z0, x1, z1], y, rand) {
   const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
   table(T, cx - 5.5, y, cz, 2.4, 1.0, 0.8); for (const sx of [-1, 1]) chair(T, cx - 5.5 + sx * 0.7, y, cz - 0.8, 's');
   T.B('granite_black', cx + 5.2, y, cz + 0.3, cx + 6.4, y + 0.4, cz + 2.0, true); T.B('granite_grey', cx + 5.4, y + 0.4, cz + 0.8, cx + 6.2, y + 3.4, cz + 1.0, true);
-  lantern(T, cx, y + 3.0, cz); lantern(T, cx - 5, y + 3.0, cz + 1.0); lantern(T, cx + 5, y + 3.0, cz + 1.0);
+  chained(T, cx, y + 3.0, cz, ceil); chained(T, cx - 5, y + 3.0, cz + 1.0, ceil); chained(T, cx + 5, y + 3.0, cz + 1.0, ceil);
   void ctx;
 }
-function yamenRoom(T, ctx, [x0, z0, x1, z1], y, rand, grand) {
+function yamenRoom(T, ctx, [x0, z0, x1, z1], y, rand, grand, ceil) {
   const cx = (x0 + x1) / 2, zb = z0 + 0.5, w = x1 - x0;
   // the dais, the screen painted with the sun over the sea, the Duke's table and high chair, the brush stand and seal box
   T.B('brick_grey', cx - 3.6, y, zb, cx + 3.6, y + 0.35, zb + 4.4, true);
@@ -90,7 +95,7 @@ function yamenRoom(T, ctx, [x0, z0, x1, z1], y, rand, grand) {
   }
   for (const sx of [-1, 1]) { T.B('lacquer_black', cx + sx * 6.2 - 0.04, y + 0.2, zb + 5.5, cx + sx * 6.2 + 0.04, y + 2.4, zb + 6.2); T.B('gilt_bronze', cx + sx * 6.2 - 0.08, y + 0.8, zb + 5.6, cx + sx * 6.2 + 0.08, y + 2.0, zb + 6.1); }
   for (const sx of [-1, 1]) for (let k = 0; k < Math.max(0, Math.floor((w - 14) / 3.2)); k++) { const x = cx + sx * (7.5 + k * 3.0); if (Math.abs(x - cx) < w / 2 - 0.8) { table(T, x, y, zb + 4, 0.8, 1.6, 0.8); } }
-  for (const dx of [-5, 0, 5]) lantern(T, cx + dx, y + 3.2, zb + 4.5);
+  for (const dx of [-5, 0, 5]) chained(T, cx + dx, y + 3.2, zb + 4.5, ceil);
   void ctx; void rand;
 }
 function parlorRoom(T, [x0, z0, x1, z1], y, rand, study) {
@@ -168,8 +173,8 @@ export function inside(el, ctx) {
     case 'shrine': shrineRoom(T, ctx, r, y, rand, el.scale ?? 0.5); break;
     case 'wu': wuRoom(T, r, y, el.front ?? 'e'); break;
     case 'sage': sageRoom(T, r, y, rand); break;
-    case 'kuiwen': kuiwenRoom(T, ctx, r, y, rand); break;
-    case 'yamen': yamenRoom(T, ctx, r, y, rand, !!el.grand); break;
+    case 'kuiwen': kuiwenRoom(T, ctx, r, y, rand, el.ceil ?? 0); break;
+    case 'yamen': yamenRoom(T, ctx, r, y, rand, !!el.grand, el.ceil ?? 0); break;
     case 'drum': {
       const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
       T.B('lacquer_chestnut', cx - 1.3, y, cz - 0.4, cx - 1.1, y + 1.6, cz + 0.4, true); T.B('lacquer_chestnut', cx + 1.1, y, cz - 0.4, cx + 1.3, y + 1.6, cz + 0.4, true);

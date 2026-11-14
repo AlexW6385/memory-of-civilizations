@@ -20,7 +20,7 @@ export const centre = {
   view: [DUOMO.c[0] - DUOMO.nave - 25, DUOMO.c[1] - 22, DUOMO.c[0] + 34, DUOMO.c[1] + 22],
   bakeTop: 115,
   elements: E,
-  rooms: [{ id: 'nave', rect: [-70, -77.5, 17, -42.5], y: 0, kind: 'hall' }, { id: 'crossing', rect: [17, -103, 83, -17], y: 0, kind: 'hall', sealed: true }, { id: 'piazza', rect: [-160, -110, 100, -10], y: 0, kind: 'open' }],
+  rooms: [{ id: 'nave', rect: [-70, -77.5, 17, -42.5], y: 0, kind: 'hall' }, { id: 'crossing', rect: [24, -76, 56, -44], y: 0, kind: 'hall', sealed: true }, { id: 'tribune east', rect: [64, -67.8, 79.5, -52.2], y: 0, kind: 'hall', sealed: true }, { id: 'tribune north', rect: [32.2, -99.5, 47.8, -84], y: 0, kind: 'hall', sealed: true }, { id: 'tribune south', rect: [32.2, -36, 47.8, -20.5], y: 0, kind: 'hall', sealed: true }, { id: 'piazza', rect: [-160, -110, 100, -10], y: 0, kind: 'open' }],
   walks: [Object.assign([[-150, -60], [-150, -20], [-80, -20]], { y0: 0 })],
 };
 const az = ARNO.z + 12 * Math.sin(BRIDGE.x / 130);

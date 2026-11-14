@@ -90,8 +90,8 @@ function pont(el, { bag, col }) {
   bag.add('flagstone', box(x0, y - 0.25, z0, x1, y, z1));
   for (const xk of [xs0, xs1]) bag.add('limestone', box(xk - 0.15, y, z0, xk + 0.15, y + 0.15, z1));
   col.floor([x0, z0, x1, z1], y);
-  col.rect([x0 - 2, z0 + 4, x0, z1 - 4], bed, y);
-  col.rect([x1, z0 + 4, x1 + 2, z1 - 4], bed, y);
+  // the cutwaters' blunt cores, inside their drawn points, so the wader meets the stone and nothing else
+  for (let i = 1; i < n; i++) { const zm = z0 + ab + i * (span + PW) - PW / 2, top = wl + 2.6; col.rect([x0 - 1, zm - 0.65, x0, zm + 0.65], bed, top); col.rect([x1, zm - 0.65, x1 + 1, zm + 0.65], bed, top); }
 }
 
 /**

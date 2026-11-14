@@ -77,6 +77,7 @@ function houseOfWisdom(el, ctx) {
     merlons(bag, 'brick_buff', [-X, Z], [X, Z], T, y + WH, { w: 0.8, gap: 0.8, h: 0.9 });
     // gate hall deepening: a vaulted passage 4 m deep (the porter's room by it)
     bag.add('brick_buff', box(-X + 0.4, y, Z - 4, -4.0, y + WH, Z - T / 2)); bag.add('brick_buff', box(4.0, y, Z - 4, X - 0.4, y + WH, Z - T / 2));
+    col.rect([-X + 0.4, Z - 4, -4.0, Z - T / 2], y, y + WH); col.rect([4.0, Z - 4, X - 0.4, Z - T / 2], y, y + WH);
     // the court: paved, a pool 4 × 9 m in the middle with a rim, paths between four beds of earth with pots of orange and pomegranate
     const cz0 = -Z + 12.4, cz1 = Z - 4.2;
     bag.add('brick_paving', box(-X + 0.45, y - 0.2, cz0, X - 0.45, y + 0.02, cz1));

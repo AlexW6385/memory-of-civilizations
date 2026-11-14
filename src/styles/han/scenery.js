@@ -77,7 +77,7 @@ export function pondIsland(el, ctx) {
   bag.add('rock_boulder', lathe([[r, y - 1.2], [r * 0.95, y + 0.2], [r * 0.8, y + 0.9], [r * 0.55, y + 1.8], [r * 0.3, y + 2.4], [0.001, y + 2.6]], 9, (th) => 0.86 + 0.14 * Math.sin(th * 3 + 1)));
   bag.add('ground', lathe([[r * 0.62, y + 1.7], [r * 0.3, y + 2.3], [0.001, y + 2.4]], 9, null));
   col.circle(ix, iz, r * 0.85, y - 1, y + 2.6);
-  pavilionTop(ctx, ix, iz, y + 2.45);
+  pavilionTop(ctx, ix, iz, y + 1.75);
   for (let k = 0; k < 5; k++) { const a = rand() * 6.28, d = r * (0.55 + rand() * 0.3); bag.add('taihu', lathe([[0.5, 0], [0.35, 0.8], [0.45, 1.5], [0.2, 2.2], [0.001, 2.5]], 6, null, ix + Math.cos(a) * d, y + 0.9, iz + Math.sin(a) * d)); }
   const [x0, z0, x1, z1] = el.pond;
   for (let k = 0; k < 46; k++) { const x = x0 + 2 + rand() * (x1 - x0 - 4), z = z0 + 2 + rand() * (z1 - z0 - 4); if (Math.hypot(x - ix, z - iz) < r + 1 || Math.abs(z - (z0 + z1) / 2) < 3) continue; bag.add('lotus_leaf', lathe([[0.001, 0.0], [0.34, 0.0], [0.38, 0.03], [0.001, 0.03]], 6, null, x, y + 0.02, z)); }

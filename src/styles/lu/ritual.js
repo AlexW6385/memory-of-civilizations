@@ -49,7 +49,7 @@ export function stele(el, { bag, col }) {
   for (const sx of [-1, 1]) S.add('granite_grey', T(ball(0.34 * s, 0.3 * s, 0.22 * s, 8, 5), sx * 0.52 * s, top + (h + 0.4) * s, 0));
   S.emit(bag, x, 0, z, el.yaw ?? 0);
   void c; void sn;
-  col.rect([x - 1.0 * s, z - 1.6 * s, x + 1.0 * s, z + 1.6 * s].map((v, i) => v), y, top + h * s);
+  col.rect(Math.abs(Math.sin(el.yaw ?? 0)) > 0.7 ? [x - 1.05 * s, z - 0.9 * s, x + 1.05 * s, z + 0.9 * s] : [x - 0.9 * s, z - 1.05 * s, x + 0.9 * s, z + 1.05 * s], y, top + h * s);   // (the tortoise's own footprint, turned with the stele)
 }
 
 /** lu_stele_pavilion: a square pavilion in yellow tile over a tortoise and stele { c, w, y, s (stele scale), yaw, big }. */
@@ -103,5 +103,6 @@ export function tomb(el, { bag, col }) {
   const f = el.face ?? [0, 1];
   stele({ at: [cx + f[0] * (r + 3), cz + f[1] * (r + 3)], yaw: Math.atan2(f[0], f[1]) + Math.PI, s: 0.8, h: 3.0 }, { bag, col });
   bag.add('granite_grey', box(cx + f[0] * (r + 7) - 1.0, 0, cz + f[1] * (r + 7) - 0.6, cx + f[0] * (r + 7) + 1.0, 0.7, cz + f[1] * (r + 7) + 0.6));
+  col.rect([cx + f[0] * (r + 7) - 1.0, cz + f[1] * (r + 7) - 0.6, cx + f[0] * (r + 7) + 1.0, cz + f[1] * (r + 7) + 0.6], 0, 0.7);
   void fromTriangles;
 }

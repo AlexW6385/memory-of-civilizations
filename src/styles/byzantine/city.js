@@ -253,7 +253,8 @@ function honorColumn(el, { bag, col }) {
   let yy = y;
   const steps = el.steps ?? (J ? 7 : 3);
   for (let i = 0; i < steps; i++) { const w = r * 2.6 + (steps - i) * 0.45; bag.add('marble', box(x - w, yy - (i ? 0 : 0.3), z - w * (J ? 1.15 : 1), x + w, yy + 0.4, z + w * (J ? 1.15 : 1))); yy += 0.4; }
-  col.rect([x - r * 2.6 - steps * 0.45, z - r * 2.6 - steps * 0.45, x + r * 2.6 + steps * 0.45, z + r * 2.6 + steps * 0.45], y, yy);
+  const pw = r * 1.6 * 1.15;                                       // the steps are walked up; the pedestal stands on the top step
+  col.rect([x - pw, z - pw, x + pw, z + pw], yy, yy + r * 3.2);
   yy = pedestal(bag, 'marble', x, yy, z, r * 1.6, r * 3.2);
   bag.add('marble', lathe([[r * 1.3, 0], [r * 1.3, 0.25], [r * 1.15, 0.45], [r * 1.08, 0.75], [r * 1.2, 0.9], [r * 1.02, 1.1]], 32, null, x, yy, z));
   yy += 1.1;
@@ -418,7 +419,7 @@ function domedBasilica(el, ctx) {
  * screen across the nave, the altar under its ciborium, the bishop's seat on the steps of the synthronon in the apse, hanging lamps.
  */
 function eireneInterior(ctx, g) {
-  const { bag, col } = ctx, BZ = STYLES.byzantine, { x0, z0, z1, y, zc, nave, nz0, nz1, xa, dx, s, GH, apseR, wallTh } = g;
+  const { bag, col } = ctx, BZ = STYLES.byzantine, { x0, z0, z1, y, zc, nave, nz0, nz1, xa, dx, s, GH, yv, apseR, wallTh } = g;
   const fy = y + 0.02, gy = y + 7.4, xs = x0 + wallTh + 2.2, xe = dx - s - 1.3, n = Math.max(2, Math.round((xe - xs) / 3.3)), step = (xe - xs) / n;
   for (const zz of [nz0, nz1]) {
     for (let k = 0; k <= n; k++) {
@@ -460,7 +461,8 @@ function eireneInterior(ctx, g) {
   bag.add('marble_smooth', box(xa + apseR - 2.3, y + 1.35, zc - 0.5, xa + apseR - 1.7, y + 2.4, zc + 0.5));
   // hanging lamps over the nave and the chancel
   for (const [lx, lz] of [[dx, zc], [dx - 6.5, zc], [dx + 5.5, zc - 3], [dx + 5.5, zc + 3], [x0 + 11, zc]]) {
-    bag.add('bronze', box(lx - 0.01, y + 9.6, lz - 0.01, lx + 0.01, y + 14.0, lz + 0.01));
+    const ceil = lx < dx - s ? yv + nave / 2 + 0.55 : yv + nave / 2 + 2.2 + 0.38;      // the vault's crown over the west bays, the ceiling of the dome bay
+    bag.add('bronze', box(lx - 0.01, y + 9.6, lz - 0.01, lx + 0.01, ceil, lz + 0.01));
     bag.add('gold', lathe([[0.55, 0], [0.5, 0.12], [0.001, 0.14]], 14, null, lx, y + 9.3, lz));
     for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; bag.add('flame', lathe([[0.01, 0], [0.001, 0.1]], 5, null, lx + Math.cos(a) * 0.45, y + 9.45, lz + Math.sin(a) * 0.45)); }
     ctx.lights?.push({ at: [lx, y + 9.1, lz], color: '#ffb46b', intensity: 1.6, distance: 13 });

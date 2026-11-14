@@ -692,7 +692,8 @@ function haystack(el, { bag, col }) {
     }
   });
   for (const [role, g] of Object.entries(A)) put({ rope: 'sacking', stone: 'rock_boulder' }[role] ?? role, g.clone());
-  col.circle(x, z, 1.45 * k, y, y + 3.2 * k);
+  const sc = el.s ?? 1;
+  col.circle(x, z, 1.45 * k * sc, y, y + 3.2 * k * sc);
 }
 /**
  * A hen or a cock (front along −z) as an assembly: 'p' its plumage, 't' its tail (a darker or a glossy

@@ -52,7 +52,7 @@ for (const c of CELLS) E.push({ t: 'rumah', rect: cellRect(c), seed: c[0] * 7 + 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const inset = (r, m) => [r[0] + m, r[1] + m, r[2] - m, r[3] - m];
 const rooms = [
-  room('summit', [-34, -34, 34, 34], CIRCLES[2].y, 'open'),
+  room('summit', [-9.9, -9.9, 9.9, 9.9], CIRCLES[2].y, 'open'),
   room('great-hall', HALL, 0.8, 'hall'),
   ...CELLS.filter((c) => c[3]).map((c, i) => room(`monks-house-${i}`, cellRoom(c), floorOf(c[0] * 7 + c[1]), 'hall')),
   ...houses().filter((h) => h.interior).map((h, i) => room(`house-${i}`, inset(h.rect, 0.5), floorOf(h.seed), 'hall')),

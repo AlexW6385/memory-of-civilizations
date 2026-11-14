@@ -733,7 +733,7 @@ function hallOfferings(el, { bag, col }) {
     const fx = cx + 2.4 + 1.1, fz = z0 + 13;
     for (const [a, b] of [[-0.18, -0.12], [0.18, -0.12], [-0.18, 0.12], [0.18, 0.12]]) bag.add('wood_dark', box(fx + a - 0.02, y, fz + b - 0.02, fx + a + 0.02, y + 0.5, fz + b + 0.02));
     bag.add('wood_dark', box(fx - 0.22, y + 0.5, fz - 0.16, fx + 0.22, y + 0.54, fz + 0.16));
-    bag.add('lacquer_red', lathe([[0.001, -0.14], [0.12, -0.12], [0.18, 0], [0.16, 0.1], [0.001, 0.12]], 10, null, fx, y + 0.68, fz).scale(1.1, 1, 1.4));
+    bag.add('lacquer_red', lathe([[0.001, -0.14], [0.12, -0.12], [0.18, 0], [0.16, 0.1], [0.001, 0.12]], 10).scale(1.1, 1, 1.4).translate(fx, y + 0.68, fz));
     bag.add('bronze', lathe([[0.001, 0], [0.12, 0], [0.16, 0.08], [0.15, 0.13], [0.001, 0.13]], 12, null, fx - 0.9, y + 0.15, fz - 0.4));
     bag.add('cloth_ochre', lathe([[0.001, 0], [0.2, 0], [0.21, 0.07], [0.16, 0.14], [0.001, 0.15]], 10, null, fx - 0.9, y, fz - 0.4));
     col.rect([fx - 0.24, fz - 0.2, fx + 0.24, fz + 0.2], y, y + 0.7);
@@ -774,7 +774,7 @@ function courtPaving(el, { bag }) {
   const tufts = [], pat = [];
   for (const [x0, z0, x1, z1] of el.moss ?? []) for (let k = 0; k < Math.ceil((x1 - x0) * (z1 - z0) / 2.5); k++) {
     const px = x0 + rand() * (x1 - x0), pz = z0 + rand() * (z1 - z0), r = 0.2 + rand() * 0.45;
-    pat.push(lathe([[0.001, 0.018], [r, 0.01], [r * 1.05, 0.002]], 8, null, px, y, pz).scale(1, 1, 0.8 + rand() * 0.5));
+    pat.push(lathe([[0.001, 0.018], [r, 0.01], [r * 1.05, 0.002]], 8).scale(1, 1, 0.8 + rand() * 0.5).translate(px, y, pz));
     for (let q = 0; q < 3; q++) tufts.push(rod([px + (rand() - 0.5) * r, y, pz + (rand() - 0.5) * r], [px + (rand() - 0.5) * r * 1.2, y + 0.12 + rand() * 0.14, pz + (rand() - 0.5) * r * 1.2], 0.006, 3));
   }
   for (const g of pat) bag.add('lotus_leaf', g);
@@ -819,7 +819,7 @@ function hzShell(el, ctx) {
     for (const x of xs) column(bag, col, x, fz, Y, H1 - 0.35, 0.26, 'lacquer_chestnut', true);
     bag.add('lacquer_chestnut', box(a0, Y + H1 - 0.4, fz - 0.12, a1, Y + H1, fz + 0.12));
     for (let i = 0; i < nb; i++) { const a = xs[i] + 0.14, b = xs[i + 1] - 0.14; bag.add('lacquer_chestnut', box(a, Y + H1 - 0.78, fz - 0.03, b, Y + H1 - 0.73, fz + 0.03)); lat(a, b, Y + H1 - 0.73, Y + H1 - 0.4, fz); }
-    if (kind === 'shop') for (const sx of [-1, 1]) for (let k = 0; k < 3; k++) { const u = sx * (L / 2 - 0.55 - k * 0.2); bag.add('timber', box(u - 0.09, Y + 0.05, fz + 0.14, u + 0.09, Y + H1 - 0.8, fz + 0.18)); }   // the shutters of the front, stacked at the ends
+    if (kind === 'shop') for (const sx of [-1, 1]) for (let k = 0; k < 3; k++) { const u = sx * (L / 2 - 0.55 - k * 0.2); bag.add('timber', box(u - 0.09, Y + 0.05, fz + 0.14, u + 0.09, Y + H1 - 0.8, fz + 0.18)); col.rect([u - 0.09, fz + 0.14, u + 0.09, fz + 0.18], Y, Y + H1 - 0.8); }   // the shutters of the front, stacked at the ends
   }
   if (two) {
     // the upper storey: a plaster wall over the front beam with lattice windows behind blinds; a gallery over the rear, its rail toward the hall
@@ -831,8 +831,10 @@ function hzShell(el, ctx) {
     bag.add('lacquer_chestnut', box(a0 + th, Y + H1 + 0.9, b0 + 3.35, a1 - th, Y + H1 + 1.0, b0 + 3.45));
   }
   // the roof: a gable (or hipped) roof, its ridge along the front; white gable boards over the side walls
-  const rise = Math.min(D * 0.3, 3.6) + (two ? 0.4 : 0), hip = el.roof === 'hip' && kind !== 'winehouse';
-  rectRoof({ c: [0, 0], A: L / 2 + 0.25, B: D / 2 + 0.55, y: Y + H - 0.05, rise, kind: hip ? 'hip' : 'gable', sweep: 0.15, mat: 'tile_dark', soffit: 'timber', p: 1.4 }, bag);
+  // a hip roof runs its ridge along the longer side (the roof's ridge is the longer axis; a lot deeper than it is wide has the ridge from front to back)
+  const hip = el.roof === 'hip' && kind !== 'winehouse', RA = L / 2 + 0.25, RB = D / 2 + 0.55, deep = hip && RB > RA;
+  const rise = Math.min((deep ? L : D) * 0.3, 3.6) + (two ? 0.4 : 0);
+  rectRoof({ c: [0, 0], A: deep ? RB : RA, B: deep ? RA : RB, alongZ: deep, y: Y + H - 0.05, rise, kind: hip ? 'hip' : 'gable', sweep: 0.15, mat: 'tile_dark', soffit: 'timber', p: 1.4 }, bag);
   if (!hip) for (const x of [a0, a1 - th]) { const t = [], top = Y + H + rise - 0.25, e0 = b0 + th, e1 = kind === 'house' ? b1 - th : fz; t.push(x, Y + H, e0, x, Y + H, e1, x, top, 0, x + th, Y + H, e0, x + th, top, 0, x + th, Y + H, e1); bag.add('plaster_white', fromTriangles(t.concat([x, Y + H, e0, x + th, Y + H, e0, x + th, top, 0, x, Y + H, e0, x + th, top, 0, x, top, 0, x, Y + H, e1, x, top, 0, x + th, top, 0, x, Y + H, e1, x + th, top, 0, x + th, Y + H, e1]))); }
   void rand;
 }
@@ -957,10 +959,10 @@ function hzStair(el, { bag, col }) {
       const damp = 1 - k / N * 0.6;
       for (const sx of [x0 + 0.5, x1 - 0.5]) if (rand() < 0.5 * damp + 0.1) {
         const r = 0.15 + rand() * 0.3, px = sx + (rand() - 0.5) * 1.0, pz = zf - rand() * run;
-        moss.push(lathe([[0.001, 0.012], [r, 0.006], [r * 1.05, 0.0]], 7, null, px, top, pz).scale(1, 1, 0.6));
+        moss.push(lathe([[0.001, 0.012], [r, 0.006], [r * 1.05, 0.0]], 7).scale(1, 1, 0.6).translate(px, top, pz));
         for (let q = 0; q < 2; q++) tufts.push(rod([px + (rand() - 0.5) * r, top, pz], [px + (rand() - 0.5) * r * 1.4, top + 0.09 + rand() * 0.1, pz + (rand() - 0.5) * 0.1], 0.005, 3));
       }
-      if (rand() < 0.25) { const px = x0 + rand() * W; moss.push(lathe([[0.001, 0.01], [0.12, 0.005], [0.13, 0]], 6, null, px, top, zf - run * 0.9).scale(1.8, 1, 0.4)); }
+      if (rand() < 0.25) { const px = x0 + rand() * W; moss.push(lathe([[0.001, 0.01], [0.12, 0.005], [0.13, 0]], 6).scale(1.8, 1, 0.4).translate(px, top, zf - run * 0.9)); }
     }
     fl.push({ zf: zf0, zb: z - ns * run, yb: y0 + (k - ns) * rise, ns });
     col.ramp([x0 + 0.34, z - ns * run, x1 - 0.34, zf0], y0 + (k - ns) * rise, y0 + k * rise, 'n');

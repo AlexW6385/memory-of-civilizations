@@ -193,6 +193,212 @@ function overlay(g, film, t, total, W, H) {
   if (k > 0) { g.fillStyle = `rgba(0,0,0,${k})`; g.fillRect(0, 0, W, H); }
 }
 
+
+// ---------------------------------------------------------------------------------------------
+// The promo: one film across many settlements (index.html?film=promo&quality=cinema&capture&weather=clear).
+// A shot names its settlement, the local hour and a kind of move worked out there from the arrival
+// view, the landmark it looks at and the ground (so a shot holds whatever the town's layout):
+//   arrive  the arrival view itself, the camera rising a little as it goes forward
+//   rise    a crane up and back from the arrival, looking the way the arrival looks, the gaze lowering
+//   orbit   an arc round the landmark above the roofs
+//   descend from high and far, gliding down toward the landmark
+// Between settlements nothing is recorded: the travel and the building of the place are waited for.
+// &shots=0,3,5 records only those (takes to choose from); window.promoPose(i, u) shows shot i at u (0…1).
+import { ARRIVALS } from '../planet/arrivals.js';
+import { SITES } from '../planet/sites.js';
+import { footing } from '../core/walk.js';
+
+export const PROMO = {
+  title: ['Memory of Civilizations', '文明的记忆'],
+  sub: 'Ninety-four towns of the world, as they stood · walk them in the browser',
+  url: 'alexw6385.github.io/memory-of-civilizations',
+  // (no hour: mid-morning or mid-afternoon, whichever puts the sun behind the camera)
+  shots: [
+    { site: 'ming-suzhou', kind: 'arrive', t: 4 },
+    { site: 'qing-beijing', kind: 'orbit', t: 4 },
+    { site: 'edo-himeji', kind: 'arrive', t: 3.5 },
+    { site: 'song-kaifeng', kind: 'arrive', t: 3 },
+    { site: 'machu-picchu', kind: 'orbit', t: 3.5 },
+    { site: 'venice', kind: 'arrive', t: 3.5 },
+    { site: 'florence', kind: 'orbit', t: 3.5 },
+    { site: 'thebes', kind: 'arrive', t: 3 },
+    { site: 'angkor', kind: 'arrive', t: 3.5 },
+    { site: 'isfahan', kind: 'arrive', t: 3 },
+    { site: 'athens', kind: 'arrive', t: 3 },
+    { site: 'song-hangzhou', kind: 'arrive', t: 3 },
+    { site: 'ming-suzhou', kind: 'rise', t: 4.5 },
+  ],
+};
+
+const yawTo = (dx, dz) => Math.atan2(-dx, -dz);
+const near = (a, ref) => a + Math.round((ref - a) / (2 * Math.PI)) * 2 * Math.PI;
+
+/** The keys of a promo shot, in its settlement's frame (the settlement must be built: the ground is asked). */
+export const promoHour = (shot) => shot.hour ?? (-Math.sin((ARRIVALS[shot.site] || [0, 0, 0, 0])[3]) > 0 ? 15.75 : 9.5);
+
+export function promoKeys(palace, shot) {
+  const S = SITES.find((s) => s.id === shot.site), R = clamp(S?.radius || 200, 80, 420);
+  const A = ARRIVALS[shot.site] || [0, null, 60, 0, 0.1], C = palace.world.collide;
+  const g = (x, z) => { let t = 0; try { t = C.terrain(x, z); } catch { /* 0 */ } try { const f = footing(C, x, z, t + 400); if (Number.isFinite(f)) t = Math.max(t, f); } catch { /* terrain */ } return t; };
+  const ax = A[0], az = A[2], yaw = A[3], pitch = A[4], fx = -Math.sin(yaw), fz = -Math.cos(yaw);
+  let ground0 = 0; try { ground0 = Math.max(C.terrain(ax, az), C.groundAt(ax, az, C.terrain(ax, az) + 3)); } catch { /* 0 */ }
+  const eye = (Number.isFinite(A[1]) && A[1] !== null ? Math.max(A[1], ground0) : ground0) + 1.62;
+  // the landmark: where the arrival's line of sight passes nearest the centre (if near it), else the centre
+  const tt = Math.max(0, -(ax * fx + az * fz));
+  let tx = ax + fx * tt, tz = az + fz * tt;
+  if (Math.hypot(tx, tz) > 0.35 * R) { tx = 0; tz = 0; }
+  const ty = g(tx, tz) * 0.5 + (C.terrain(tx, tz) || 0) * 0.5 + 0.05 * R;
+  const look = (x, y, z) => ({ p: [x, y, z], yaw: yawTo(tx - x, tz - z), pitch: Math.atan2(ty - y, Math.hypot(tx - x, tz - z) || 1) });
+  let keys;
+  if (shot.kind === 'arrive') {
+    keys = [0, 0.5, 1].map((u) => P(ax + fx * 4 * u, eye + 2.6 * u * u, az + fz * 4 * u, yaw, pitch - 0.05 * u));
+  } else if (shot.kind === 'rise') {
+    keys = [0, 0.5, 1].map((u) => {
+      const x = ax - fx * 18 * u * u, z = az - fz * 18 * u * u, y = Math.max(eye + 0.5 + (0.1 * R + 10) * u, g(x, z) + 4);
+      return P(x, y, z, yaw, pitch - 0.25 * u);
+    });
+  } else if (shot.kind === 'descend') {
+    const a0 = Math.atan2(ax - tx, az - tz);
+    keys = [0, 0.5, 1].map((u) => {
+      const d = (1.0 - 0.5 * u) * R, x = tx + Math.sin(a0) * d, z = tz + Math.cos(a0) * d;
+      const y = Math.max(g(tx, tz) + (0.55 - 0.33 * u) * R, g(x, z) + 8);
+      return look(x, y, z);
+    });
+  } else {
+    const a0 = Math.atan2(ax - tx, az - tz), rr = clamp(0.5 * R, 60, 170), h = clamp(0.2 * R, 25, 70);
+    keys = [-0.42, -0.14, 0.14, 0.42].map((da) => {
+      const x = tx + Math.sin(a0 + da) * rr, z = tz + Math.cos(a0 + da) * rr;
+      return look(x, Math.max(g(tx, tz) + h, g(x, z) + 8), z);
+    });
+  }
+  for (let i = 1; i < keys.length; i++) keys[i].yaw = near(keys[i].yaw, keys[i - 1].yaw);
+  return keys;
+}
+
+/** Plays and records the promo (see above). */
+export async function runPromo(palace, frames, params) {
+  const [W, H] = (params.get('size') || '1920x1080').split('x').map(Number);
+  const bitrate = (+params.get('mbps') || 24) * 1e6;
+  const pick = params.get('shots') ? params.get('shots').split(',').map(Number) : null;
+  const shots = PROMO.shots.filter((_, i) => !pick || pick.includes(i));
+  const takes = !!pick;                                   // takes: no title, no end card
+  const status = filmStatus();
+  document.body.classList.add('filming');
+  const R = palace.renderer, cam = R.camera;
+  const put = (pose) => { cam.position.set(...pose.p); cam.rotation.set(pose.pitch, pose.yaw, 0, 'YXZ'); };
+  const avc = { codec: W * H > 1920 * 1088 ? 'avc1.640034' : 'avc1.640028', width: W, height: H, bitrate, framerate: FPS, latencyMode: 'quality', avc: { format: 'avc' } };
+  const vp9 = { codec: 'vp09.00.41.08', width: W, height: H, bitrate, framerate: FPS, latencyMode: 'quality' };
+  const useAvc = (await VideoEncoder.isConfigSupported(avc).catch(() => ({}))).supported;
+  // the score (tools/film/promo-score.py, composed to the cuts), under the whole film; takes are silent
+  let score = null;
+  if (!takes && !params.has('silent')) {
+    try {
+      const buf = await (await fetch('./data/film/promo-score.m4a')).arrayBuffer();
+      const pcm = await new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 48000 }).decodeAudioData(buf);
+      const cfg = { codec: 'mp4a.40.2', sampleRate: pcm.sampleRate, numberOfChannels: 2, bitrate: 160000 };
+      if ((await AudioEncoder.isConfigSupported(cfg)).supported) score = { pcm, cfg };
+    } catch (e) { console.warn('[film] no score', e); }
+  }
+  const muxer = new Muxer({ target: new ArrayBufferTarget(), video: { codec: useAvc ? 'avc' : 'vp9', width: W, height: H, frameRate: FPS }, ...(score ? { audio: { codec: 'aac', numberOfChannels: 2, sampleRate: score.pcm.sampleRate } } : {}), fastStart: 'in-memory', firstTimestampBehavior: 'offset' });
+  let failed = null;
+  const enc = new VideoEncoder({ output: (chunk, meta) => { try { muxer.addVideoChunk(chunk, meta); } catch (e) { failed = e; } }, error: (e) => { failed = e; } });
+  enc.configure(useAvc ? avc : vp9);
+  const out = new OffscreenCanvas(W, H), g = out.getContext('2d');
+  const src = R.renderer.domElement;
+  const loop = R.renderer._animation._animationLoop;
+  const total = shots.reduce((a, s) => a + s.t, 0);
+  let n = 0, t0 = 0;
+  try {
+    for (let i = 0; i < shots.length; i++) {
+      const shot = shots[i], A = ARRIVALS[shot.site] || [0, null, 60, 0, 0.1];
+      status(`promo ${i + 1}/${shots.length}: travelling to ${shot.site}…`);
+      await palace.pose(shot.site, A[0], A[1] ?? 0, A[2], A[3], A[4]);
+      const site = palace.world.byId[shot.site];
+      for (let k = 0; k < 600 && !(site.state === 'ready' && !site.mergingNow); k++) await frames(6);
+      const hold = async () => { for (let k = 0; k < 2; k++) { palace.climate.hour = promoHour(shot); palace.climate.setTime('held'); await frames(2); } };
+      await hold();
+      const keys = promoKeys(palace, shot);
+      // the shot's start, middle and end visited first: the ground, the plants and the shaders are there
+      for (const u of [0, 1, 0.5, 0]) { const q = along(keys, u); await palace.camera(shot.site, ...q.p, q.yaw, q.pitch); await frames(40); }
+      await hold(); palace.settle(); await frames(90);
+      R.renderer.setAnimationLoop(null);
+      await new Promise((r) => requestAnimationFrame(r));
+      const N = Math.round(shot.t * FPS), S = SITES.find((s) => s.id === shot.site);
+      for (let f = 0; f < N; f++, n++) {
+        const u = f / N;
+        put(along(keys, 0.12 * ease(u) + 0.88 * u));
+        if (f === 0) palace.settle();
+        loop(performance.now());
+        cover(g, src, W, H);
+        promoOverlay(g, { t: n / FPS, total, ts: f / FPS, tn: shot.t, first: i === 0, last: i === shots.length - 1, takes, S, i }, W, H);
+        const vf = new VideoFrame(out, { timestamp: Math.round(n * 1e6 / FPS), duration: Math.round(1e6 / FPS) });
+        enc.encode(vf, { keyFrame: f === 0 || n % (FPS * 2) === 0 });
+        vf.close();
+        while (enc.encodeQueueSize > 3) await new Promise((r) => setTimeout(r, 2));
+        if (failed) throw failed;
+        await new Promise((r) => requestAnimationFrame(r));
+        if (f % 15 === 0) status(`promo ${i + 1}/${shots.length} ${shot.site}: frame ${f + 1}/${N}`);
+      }
+      R.renderer.setAnimationLoop(loop);
+      t0 += shot.t;
+    }
+  } finally { R.renderer.setAnimationLoop(loop); }
+  await enc.flush();
+  if (failed) throw failed;
+  if (score) {
+    const { pcm, cfg } = score, sr = pcm.sampleRate, len = Math.min(pcm.length, Math.round(total * sr));
+    const ch = [pcm.getChannelData(0), pcm.getChannelData(pcm.numberOfChannels > 1 ? 1 : 0)];
+    const ae = new AudioEncoder({ output: (chunk, meta) => { try { muxer.addAudioChunk(chunk, meta); } catch (e) { failed = e; } }, error: (e) => { failed = e; } });
+    ae.configure(cfg);
+    for (let o = 0; o < len; o += 4800) {
+      const m = Math.min(4800, len - o), data = new Float32Array(m * 2);
+      data.set(ch[0].subarray(o, o + m), 0); data.set(ch[1].subarray(o, o + m), m);
+      const ad = new AudioData({ format: 'f32-planar', sampleRate: sr, numberOfFrames: m, numberOfChannels: 2, timestamp: Math.round(o * 1e6 / sr), data });
+      ae.encode(ad); ad.close();
+    }
+    await ae.flush();
+    if (failed) throw failed;
+  }
+  muxer.finalize();
+  const blob = new Blob([muxer.target.buffer], { type: 'video/mp4' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = takes ? `promo-takes-${pick.join('-')}.mp4` : 'memory-of-civilizations-promo.mp4';
+  document.body.appendChild(a); a.click();
+  status(`done: ${a.download} (${(blob.size / 1e6).toFixed(1)} MB, ${n} frames)`);
+  window.FILM_DONE = { frames: n, bytes: blob.size };
+  return blob;
+}
+
+// each shot dips in from and out to black over a few frames; the place's name low on the left; the title
+// over the first shot and the end card over the last
+function promoOverlay(g, o, W, H) {
+  const serif = '"Cormorant Garamond", "Songti SC", "Noto Serif SC", Georgia, serif', han = '"Songti SC", "Noto Serif SC", "STSong", serif';
+  g.save();
+  g.fillStyle = '#f4efe4'; g.shadowColor = 'rgba(0,0,0,0.55)'; g.shadowBlur = H * 0.012; g.textBaseline = 'alphabetic';
+  if (o.S && !(o.first && !o.takes) && !(o.last && !o.takes)) {
+    const a = ease((o.ts - 0.3) / 0.5) * (1 - ease((o.ts - (o.tn - 0.6)) / 0.4));
+    g.globalAlpha = a; g.textAlign = 'left';
+    g.font = `400 ${Math.round(H * 0.034)}px ${serif}`;
+    g.fillText(`${o.S.name.en} · ${o.S.era}`, W * 0.05, H * 0.9);
+    g.font = `400 ${Math.round(H * 0.024)}px ${han}`;
+    g.fillText(o.S.name.zh, W * 0.05, H * 0.94);
+    if (o.takes) { g.textAlign = 'right'; g.font = `400 ${Math.round(H * 0.03)}px sans-serif`; g.fillText(`shot ${o.i}`, W * 0.95, H * 0.94); }
+  }
+  if (!o.takes && (o.first || o.last)) {
+    const a = o.first ? ease((o.ts - 0.8) / 0.9) * (1 - ease((o.ts - (o.tn - 0.9)) / 0.6)) : ease((o.ts - 0.5) / 0.9);
+    g.globalAlpha = a; g.textAlign = 'center';
+    g.font = `400 ${Math.round(H * 0.075)}px ${serif}`;
+    g.fillText(PROMO.title[0], W / 2, H * 0.47);
+    g.font = `400 ${Math.round(H * 0.045)}px ${han}`;
+    g.fillText(PROMO.title[1], W / 2, H * 0.55);
+    g.globalAlpha = a * 0.85; g.font = `400 ${Math.round(H * 0.022)}px "Helvetica Neue", "PingFang SC", sans-serif`;
+    g.fillText(o.last ? PROMO.url : PROMO.sub, W / 2, H * 0.62);
+  }
+  g.restore();
+  const k = Math.max(o.first ? 1 - ease(o.t / 1.2) : 1 - ease(o.ts / 0.25), o.last ? ease((o.t - (o.total - 1.2)) / 1.2) : ease((o.ts - (o.tn - 0.25)) / 0.25));
+  if (k > 0) { g.fillStyle = `rgba(0,0,0,${k})`; g.fillRect(0, 0, W, H); }
+}
+
 function filmStatus() {
   const el = document.createElement('div');
   el.id = 'film-status';

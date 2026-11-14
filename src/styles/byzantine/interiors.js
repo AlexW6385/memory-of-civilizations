@@ -268,7 +268,7 @@ function chapel(el, ctx) {
   bag.add('ceiling_painted', box(x0 + th, Yc, z0 + th, x1 - th, Yc + 0.15, z1 - th));
   for (let x = x0 + 1.4; x < x1; x += 1.4) bag.add('timber', box(x - 0.12, Yc - 0.3, z0 + th, x + 0.12, Yc, z1 - th));
   bag.add('plaster', box(x0 + th, Y0 + 3.0, z0 + th, x1 - th, Yc - 0.3, z0 + th + 0.03)); bag.add('plaster', box(x0 + th, Y0 + 3.0, z1 - th - 0.03, x1 - th, Yc - 0.3, z1 - th));
-  bag.add('roof_tile', frustum([x0 - 0.7, z0 - 0.7, x1 + 0.7, z1 + 0.7], Y0 + H, Y0 + H + 3.2, 0.3, 0.3, hw + 0.7 - 0.05, hw + 0.7 - 0.05, { noBottom: true }));
+  bag.add('roof_tile', frustum([x0 - 0.7, z0 - 0.7, x1 + 0.7, z1 + 0.7], Y0 + H, Y0 + H + 3.2, 0.3, 0.3, hw + 0.7 - 0.05, hw + 0.7 - 0.05));
   bag.add('roof_tile', lathe([[r + th + 0.5, 0], [r + th + 0.1, 0.8], [0.2, 2.4]], 16, null, xa, Y0 + H - 0.9, zc).rotateY(0));
   // the templon: six columns with silver capitals, marble parapets, a door, the architrave with a cross, curtains
   const tx = colX[3] + 1.4, tz0 = zc - 3.8, tz1 = zc + 3.8, nT = 6;
