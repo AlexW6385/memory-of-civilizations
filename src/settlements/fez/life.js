@@ -84,7 +84,7 @@ export function life() {
   { const T = SITES.tannery, yt = siteY('tannery');
     for (let k = 0; k < 4; k++) { const x = T[0] + 3 + k * 2.2, z = T[1] + 18 + (k % 2) * 1.4; L.push({ t: 'animal', kind: 'donkey', at: [x, z], y: yt, rot: 1.2 + k * 0.4, seed: 70 + k }); L.push({ t: 'sacks', at: [x + 0.2, z + 1.2], y: yt, rot: 0.4 * k, n: 3, seed: 60 + k }); }
     for (let k = 0; k < 10; k++) { const x = T[0] + 10 + rand() * 46, z = T[1] + 9.5 + rand() * 2.0; P([x, z], yt, rand() * 6.28, { dress: 'tunic', cloth: 'cloth_brown', hat: 'cap', hatMat: 'cloth_white', legs: 'bare', carry: 'bundle' }); }
-    for (let k = 0; k < 3; k++) P([T[0] + 22 + k * 7, T[1] + 14], yt + 3.7, Math.PI, { dress: 'tunic', hat: 'cap', cloth: 'cloth_white', pose: 'stand' });   // visitors on the terrace
+    for (let k = 0; k < 3; k++) P([T[0] + 22 + k * 7, T[1] + 10.65], yt + 3.7, Math.PI, { dress: 'tunic', hat: 'cap', cloth: 'cloth_white', pose: 'stand' });   // visitors on the terrace
     for (let k = 0; k < 5; k++) L.push({ t: 'chickens', kind: 'pigeon', at: [T[0] + 12 + rand() * 40, T[1] + 40 + rand() * 6], y: yt, rot: rand() * 6.28, seed: 90 + k });
   }
   // the Qarawiyyin's court: pigeons at the basin, a water-seller, boys; the Bou Inania's door: a beggar, a porter
