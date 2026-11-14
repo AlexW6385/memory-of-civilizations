@@ -64,7 +64,7 @@ export function karlskirche(el, ctx) {
   karlskircheShell({ bag, col, y, X, Z, bx, solid });
   bag.add('glaze_green', frustum([X(10), Z(-14), X(34), Z(14)], y + 22, y + 27, 3, 3, 3, 3));
   for (const s of [-1, 1]) { solid('limestone', s < 0 ? -22 : 11, 0, s < 0 ? -11 : 22, 14, -0.5, 16); bag.add('glaze_green', frustum([X(0), Z(s < 0 ? -22 : 11), X(14), Z(s < 0 ? -11 : 22)], y + 16, y + 20, 1, 1, 1, 1)); }
-  for (const s of [-1, 1]) { const p = [X(2), Z(s * 27)]; for (let k = 0; k < 6; k++) bag.add('sandstone_white', lathe([[1.8 - k * 0.0, k * 5.4], [1.8, k * 5.4 + 5.0], [1.95, k * 5.4 + 5.4]], 16, null, p[0], y + k * 5.4, p[1])); bag.add('sandstone_relief', lathe([[1.5, 3], [1.5, 30.5]], 12, null, p[0], y, p[1]));
+  for (const s of [-1, 1]) { const p = [X(2), Z(s * 27)]; for (let k = 0; k < 6; k++) bag.add('sandstone_white', lathe([[1.8 - k * 0.0, k * 5.4], [1.8, k * 5.4 + 5.0], [1.95, k * 5.4 + 5.4]], 16, null, p[0], y, p[1])); bag.add('sandstone_relief', lathe([[1.5, 3], [1.5, 30.5]], 12, null, p[0], y, p[1]));
     bag.add('sandstone_white', lathe([[2.4, 32.6], [2.0, 33.0], [1.9, 34.2]], 14, null, p[0], y, p[1])); bag.add('glaze_green', lathe([[2.4, 34.2], [2.4, 35.2], [1.6, 37.2], [0.7, 39.0], [0.001, 40.2]], 14, null, p[0], y, p[1])); col.circle(p[0], p[1], 2.0, y, y + 34); }
   // the drum and the dome: stone drum with windows, the green copper dome with its lantern
   const dc = [X(22), Z(0)];

@@ -134,7 +134,8 @@ E.push({ t: 'yagura_mon', rect: [-12, MIDDLE.z0 - 9, 12, MIDDLE.z0 - 1], y: 0, p
 }
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('main keep', [KEEP.c[0] - 12, KEEP.c[1] - 11, KEEP.c[0] + 12, KEEP.c[1] + 11], DAI.top, 'hall'), room('inner', INNER, BANK, 'open'), room('honmaru', HON.rect, HON.top, 'open'), room('keep', DAI.rect, DAI.top, 'hall'),
+// the keep cluster's base is a walled yard under the sky between the roofed keeps and passages, so its room is open (no roof is owed over its whole floor)
+const rooms = [room('main keep', [KEEP.c[0] - 12, KEEP.c[1] - 11, KEEP.c[0] + 12, KEEP.c[1] + 11], DAI.top, 'hall'), room('inner', INNER, BANK, 'open'), room('honmaru', HON.rect, HON.top, 'open'), room('keep', DAI.rect, DAI.top, 'open'),
   room('keep courtyard', [-40, -77, -26, -55], DAI.top, 'open'),
   // the storehouses and turrets opened (styles/edo/stores.js): each room's floor, so that the checks walk in
   ...KURA_ROOMS.map((k, i) => room(`storehouse ${i + 1}`, [k.rect[0] + 0.6, k.rect[1] + 0.6, k.rect[2] - 0.6, k.rect[3] - 0.6], k.y + 0.15, 'hall')),

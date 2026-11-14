@@ -58,7 +58,7 @@ export function cafeHouse(el, ctx) {
     bag.add('glass_lamp', lathe([[0.001, 0], [0.22, 0.02], [0.2, 0.2], [0.001, 0.25]], 10, null, a0 + 1.2, y + 1.1, b0 + 0.4));
   }
   // the billiard table
-  { const a = ix0 + 15.3, b = iz1 - 3.6; solid('wood_dark', a - 1.5, b - 0.8, a + 1.5, b + 0.8, 0.12, 0.8); bx('cloth_green', a - 1.3, b - 0.62, a + 1.3, b + 0.62, 0.8, 0.84); for (const s of [-1, 1]) for (const t of [-1, 1]) bx('wood_dark', a + s * 1.35 - 0.06, b + t * 0.65 - 0.06, a + s * 1.35 + 0.06, b + t * 0.65 + 0.06, FL, 0.12); lights?.push({ at: [a, y + 2.8, b], color: '#ffe8c0', intensity: 5, distance: 7 }); bx('lamp_white', a - 1.0, b - 0.3, a + 1.0, b + 0.3, 2.6, 2.75); }
+  { const a = ix0 + 15.3, b = iz1 - 3.6; solid('wood_dark', a - 1.5, b - 0.8, a + 1.5, b + 0.8, 0.12, 0.8); bx('cloth_green', a - 1.3, b - 0.62, a + 1.3, b + 0.62, 0.8, 0.84); for (const s of [-1, 1]) for (const t of [-1, 1]) bx('wood_dark', a + s * 1.35 - 0.06, b + t * 0.65 - 0.06, a + s * 1.35 + 0.06, b + t * 0.65 + 0.06, FL, 0.12); lights?.push({ at: [a, y + 2.8, b], color: '#ffe8c0', intensity: 5, distance: 7 }); bx('lamp_white', a - 1.0, b - 0.3, a + 1.0, b + 0.3, 2.6, 2.75); for (const k of [-0.8, 0.8]) bag.add('iron', rod([a + k, y + 2.75, b], [a + k, y + GH - 0.05, b], 0.012, 4)); }
   // the pillars in the middle, clad in dark wood to the capital
   for (const a of [ix0 + 7.5, ix0 + 15.5]) { const b = (iz0 + iz1) / 2; solid('wood_dark', a - 0.3, b - 0.3, a + 0.3, b + 0.3, FL, 3.4); bx('gilt_bronze', a - 0.33, b - 0.33, a + 0.33, b + 0.33, 3.4, 3.5); bx('gilt_bronze', a - 0.33, b - 0.33, a + 0.33, b + 0.33, FL, 0.2); }
   // tables and their chairs in rows

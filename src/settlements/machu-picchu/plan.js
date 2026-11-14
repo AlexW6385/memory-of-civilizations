@@ -145,7 +145,10 @@ E.push({ t: 'sacred_rock', c: SACRED_ROCK.c, y: 0, yaw: 0, w: 6.8, h: 3.0 });
 for (const [r, open] of SACRED_ROCK.wayronas) E.push({ t: 'inca_temple', rect: r, y: 0.3, h: 2.8, th: 0.8, open, roof: 'thatch', niches: { n: 2, s: 2, e: 4, w: 4 }, seed: r[0] + 50 });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('sacred-plaza', [-52, -62, -18, -24], 0.6, 'open'), room('town', [-95, -175, 95, 175], 0, 'open')];
+const rooms = [room('sacred-plaza', [-52, -62, -18, -24], 0.6, 'open'),
+  // the open ground of the town in three parts, each centred on level ground: the street life stands on the ground where it is
+  // flat (one room over the whole ellipse, centred in the sunk plaza, set people at y 0 over the terraces and the cliffs)
+  room('town north', [-95, -175, 95, -62], 0, 'open'), room('town west', [-95, -62, -18, 84], 0, 'open'), room('town south', [-95, 84, 95, 175], 0, 'open')];
 const walks = [[[2, 110], [2, 80], [2, 14], [-12, 12], [-21, 15.5]], [[2, 14], [2, 2], [2, -20], [-14, -24], [-22, -24]]];
 walks[0].y0 = 0; walks[1].y0 = 0;
 
