@@ -63,7 +63,7 @@ export function sugarPalm(el, { bag, col }) {
   const put = placer({ at: el.at, y: el.y ?? 0, rot: el.rot ?? 0, s: el.s ?? 1 }, bag);
   put('palm_trunk', A.trunk.clone()); put('palm_leaf', A.leaf.clone()); put('thatch_palm', A.dead.clone());
   if (A.ladder) put('bamboo_culm', A.ladder.clone());
-  col.circle(el.at[0], el.at[1], 0.32 * (el.s ?? 1), el.y ?? 0, (el.y ?? 0) + 3);
+  col.circle(el.at[0], el.at[1], 0.36 * (el.s ?? 1), el.y ?? 0, (el.y ?? 0) + 3);
 }
 
 /**

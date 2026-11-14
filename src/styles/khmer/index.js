@@ -124,7 +124,7 @@ function portico(ctx, { c, N, y, d0, depth, width, h, tiers = 2, door = true, op
     // passage, the framed doorway at its mouth, and two steps up to it
     const { dw, dh } = open, W = width / 2;
     bag.add(C, boxR(rUD(c, N, -W - 0.3, W + 0.3, d0, d1 + 0.3), y, y + 0.7));
-    for (const sg of [-1, 1]) { const r = rUD(c, N, sg < 0 ? -W : dw, sg < 0 ? -dw : W, d0, d1); bag.add(S, boxR(r, y + 0.7, y + h - 0.45)); col.rect(r, y, y + h); }
+    for (const sg of [-1, 1]) { const r = rUD(c, N, sg < 0 ? -W : dw, sg < 0 ? -dw : W, d0, d1); bag.add(S, boxR(r, y + 0.7, y + h - 0.45)); col.rect(rUD(c, N, sg < 0 ? -W : dw, sg < 0 ? -dw : W, d0, d1 + 0.35), y, y + h); }
     bag.add(S, boxR(rUD(c, N, -dw, dw, d0, d1), y + 0.7 + dh, y + h - 0.45));
     col.floor(rUD(c, N, -W - 0.3, W + 0.3, d0, d1 + 0.3), y + 0.7);
     openDoorway(bag, c, N, d1, y + 0.7, dw, dh);
