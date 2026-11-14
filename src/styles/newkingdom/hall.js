@@ -87,7 +87,7 @@ export function nkHall(el, ctx) {
     const x0 = lines[i] + (i === 0 ? 2.0 : 0.7), x1 = lines[i + 1] - 0.7;
     for (const s of [-1, 1]) { const bay = s < 0 ? [-x1, zA, -x0, zB, 'sky'] : [x0, zA, x1, zB, 'sky']; (i < 3 ? bays : plain).push(bay); }
   }
-  astroCeiling({ y: 22.5, bays }, ctx); astroCeiling({ y: 15.2, bays: bays.filter((b) => b[4] === 'sky') }, ctx);
+  astroCeiling({ y: 22.5, bays: bays.filter((b) => b[4] === 'vultures') }, ctx); astroCeiling({ y: 15.2, bays: bays.filter((b) => b[4] === 'sky') }, ctx);
   void plain;
   for (const [x0, , x1] of plain) bag.add('vault_stars', box(x0, 15.18, zA, x1, 15.2, zB));
   // the painted reliefs of the side walls and of the pylons' faces
