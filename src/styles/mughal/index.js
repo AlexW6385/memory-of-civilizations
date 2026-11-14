@@ -35,6 +35,8 @@ function onion(r, h) {
 function dome(bag, mat, x, y, z, r, h, finial = true) {
   bag.add(mat, lathe(onion(r, h), 32, null, x, y, z));
   if (finial) {
+    // (a neck from the dome's tip through the lotus to the spire: the crown is one piece with the dome)
+    bag.add(mat, lathe([[r * 0.035, 0], [r * 0.03, r * 0.2]], 8, null, x, y + h * 0.97, z));
     bag.add(mat, lathe([[r * 0.18, 0], [r * 0.22, r * 0.06], [r * 0.1, r * 0.12], [0.001, r * 0.14]], 16, (t) => 1 + 0.25 * Math.max(0, Math.cos(t * 16)), x, y + h * 0.98, z));
     bag.add('gilt_bronze', lathe([[0.001, 0], [r * 0.03, 0], [r * 0.05, r * 0.15], [r * 0.025, r * 0.3], [r * 0.05, r * 0.42], [0.001, r * 0.6]], 8, null, x, y + h * 0.98 + r * 0.12, z));
   }
@@ -682,7 +684,12 @@ function hollowHall(el, ctx) {
       }
     }
     // lamps on chains from the ceiling, the Qur'an stands in a row along the back
-    for (const [zc] of holes) for (const dxl of [-2.4, 2.4]) F.mosqueLamp(bag, lights, xm + dxl * 1.2, yc - 3.0, zc, yc + 0.2, { k: 1.2, glow: 1.5, reach: 9 });
+    for (const [zc, r] of holes) for (const dxl of [-2.4, 2.4]) {
+      // (each chain ends on the inside of the dome over the hole, where the dome's profile is over the lamp)
+      const prof = [[0, 0.62], [0.45, 0.56], [0.75, 0.4], [0.92, 0.2], [0.995, 0]], rho = Math.abs(dxl * 1.2) / r;
+      let hy = 0.62; for (let q = 0; q + 1 < prof.length; q++) if (rho >= prof[q][0] && rho <= prof[q + 1][0]) hy = prof[q][1] + (prof[q + 1][1] - prof[q][1]) * (rho - prof[q][0]) / (prof[q + 1][0] - prof[q][0]);
+      F.mosqueLamp(bag, lights, xm + dxl * 1.2, yc - 3.0, zc, yc + hy * r + 0.02, { k: 1.2, glow: 1.5, reach: 9 });
+    }
     for (let i = 0; i < 6; i++) F.rahle(bag, ci + ox * 1.6, fl, Z0 + 3 + i * ((Z1 - Z0 - 6) / 5), east ? Math.PI / 2 : -Math.PI / 2);
     if (kind === 'mosque') {
       // the mihrab on the qibla wall: an arched niche of marble inlaid with black, and the minbar of three steps at its right
@@ -750,7 +757,7 @@ function greatGate(el, { bag, col }) {
   bag.add(R, box(cx - w * 0.3, y + h * 0.78, cz - d + 1.2, cx + w * 0.3, y + h, cz + d - 1.2));
   for (let i = 0; i < 11; i++) chhatri(bag, null, cx - w * 0.75 + i * w * 1.5 / 10, y + h, cz + d - 1.2, 0.9, 1.6, 6, W, W);
   for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-    bag.add(R, lathe([[2.2, 0], [2, h + 2]], 8, null, cx + sx * w, y, cz + sz * d));
+    bag.add(R, lathe([[2.2, 0], [2, h + 2]], 8, null, cx + sx * w, y, cz + sz * d)); col.circle(cx + sx * w, cz + sz * d, 2.2, y, y + h + 2);
     chhatri(bag, null, cx + sx * w, y + h + 2, cz + sz * d, 1.8, 2.8, 8, R, W);
   }
 }
