@@ -21,13 +21,13 @@ function cargoPile({ at: [x, z], y = 0, rot = 0, kind = 'sacks', n = 3, seed = 1
     col.circle(x, z, 1.3, y, y + 1.4);
   } else if (kind === 'sacks') {
     for (let layer = 0; layer < n; layer++) for (let k = 0; k < 5 - layer; k++) for (let j = 0; j < 2; j++) { const [px, pz] = P((k - (4 - layer) / 2) * 0.55, (j - 0.5) * 0.45); sack(bag, px, y + layer * 0.34, pz, rot + (rand() - 0.5) * 0.5, pick(rand, ['sacking', 'sacking', 'linen'])); }
-    col.circle(x, z, 1.4, y, y + 1.0);
+    col.segment(P(-1.55, 0), P(1.55, 0), 1.3, y, y + 1.0);
   } else if (kind === 'bales') {
     for (let layer = 0; layer < Math.min(n, 3); layer++) for (let k = 0; k < 4 - layer; k++) { const [px, pz] = P((k - (3 - layer) / 2) * 1.0, 0); bag.add(pick(rand, ['cloth_ochre', 'linen', 'cloth_indigo', 'sacking']), box(-0.5, y + layer * 0.55, -0.35, 0.5, y + layer * 0.55 + 0.52, 0.35).rotateY(rot).translate(px, 0, pz)); bag.add('rope_fibre', box(-0.52, y + layer * 0.55 + 0.2, -0.37, 0.52, y + layer * 0.55 + 0.26, 0.37).rotateY(rot).translate(px, 0, pz)); }
-    col.circle(x, z, 1.6, y, y + 1.5);
+    col.segment(P(-2.15, 0), P(2.15, 0), 1.0, y, y + 1.5);
   } else if (kind === 'logs') {
     for (let layer = 0; layer < n; layer++) for (let k = 0; k < 5 - layer; k++) { const [px, pz] = P((k - (4 - layer) / 2) * 0.34, 0); const g = lathe([[0.16, 0], [0.15, 3.6], [0.001, 3.6]], 6); g.rotateX(Math.PI / 2).translate(0, 0, -1.8).rotateY(rot).translate(px, y + 0.17 + layer * 0.29, pz); bag.add('cedar', g); }
-    col.circle(x, z, 2.0, y, y + 1.0);
+    col.segment(P(0, -1.95), P(0, 1.95), 1.9, y, y + 1.0);
   } else if (kind === 'ingots') {
     for (let layer = 0; layer < n; layer++) for (let k = 0; k < 4; k++) { const [px, pz] = P((k - 1.5) * 0.4, 0); bag.add(layer % 2 ? 'bronze' : 'lead', box(-0.18, y + layer * 0.12, -0.1, 0.18, y + layer * 0.12 + 0.11, 0.1).rotateY(rot).translate(px, 0, pz)); }
     col.circle(x, z, 0.9, y, y + 0.4);
@@ -119,7 +119,11 @@ function stele({ at: [x, z], y = 0, rot = 0, h = 2.0 }, { bag, col }) {
   const g = box(-0.3, 0.3, -0.1, 0.3, h, 0.1); g.rotateY(rot); bag.add('marble_smooth', g.translate(x, y, z)); col.circle(x, z, 0.45, y, y + h);
 }
 /** ptol_wash: { a [x, z], b [x, z], y, seed } — a line of washing across an alley between the upper windows. */
-function wash({ a, b, y = 4.6, seed = 1 }, { bag }) { washLine(bag, a, b, y, rng(seed), 0.95); }
+function wash({ a, b, y = 4.6, g = 0, seed = 1 }, { bag, col }) {
+  washLine(bag, a, b, y, rng(seed), 0.95);
+  // the line is tied to a slender post at each end, standing at the alley's edge
+  for (const [x, z] of [a, b]) { bag.add('timber', rod([x, g, z], [x, y + 0.1, z], 0.06, 5)); col.circle(x, z, 0.1, g, y + 0.1); }
+}
 /** mooring: { at [x, z], y, rot } — mooring rings, a fisherman's basket and a coil of rope on the quay's edge. */
 function mooring({ at: [x, z], y = 0, rot = 0, seed = 1 }, { bag, col }) {
   const rand = rng(seed); ropeCoil(bag, x, y, z, 0.3 + rand() * 0.1); basket(bag, x + Math.cos(rot) * 0.9, y, z - Math.sin(rot) * 0.9, 0.27, 0.3, 'steel_grey'); void col; void STYLES;
