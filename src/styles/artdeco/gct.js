@@ -156,5 +156,10 @@ export function grandCentral(el, { bag, col, lights }) {
   for (const [s0, s1] of spans) for (const zz of [s0, s1]) bag.add('granite_block', box(va - 0.6, gy(zz) - 0.5, zz - (zz === s0 ? 1.2 : 0), vb + 0.6, deckY(zz) - 1.4, zz + (zz === s1 ? 1.2 : 0)));   // the abutments
   col.ramp([va, v.flat ?? z1 + 14, vb, zEnd], gy(zEnd), y + dk + 0.05, 'n');
   col.floor([va, z1, vb, v.flat ?? z1 + 14], y + dk + 0.05);
-  col.segment([va - 0.3, z1], [va - 0.3, zEnd], 0.6, gy(zEnd), y + dk + 1.2); col.segment([vb + 0.3, z1], [vb + 0.3, zEnd], 0.6, gy(zEnd), y + dk + 1.2);
+  // (the walls on the fill stand from the ground; over a street only the balustrade stands, at the deck: the street runs under the span)
+  for (let k = 0; k < n; k++) {
+    const za = z1 + k * (zEnd - z1) / n, zb = z1 + (k + 1) * (zEnd - z1) / n, ya2 = deckY(za), yb2 = deckY(zb), zm = (za + zb) / 2;
+    const overStreet = spans.some(([s0, s1]) => zm > s0 && zm < s1), y0 = overStreet ? Math.min(ya2, yb2) + 0.05 : gy(zm) - 0.5, y1 = Math.max(ya2, yb2) + 1.1;
+    for (const xx of [va - 0.3, vb + 0.3]) col.segment([xx, za], [xx, zb], 0.6, y0, y1);
+  }
 }
