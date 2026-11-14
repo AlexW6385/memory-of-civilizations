@@ -203,7 +203,10 @@ function kidronTomb(el, { bag, col }) {
   if (!ab) for (let k = 0; k < 3; k++) bag.add(ST, box(x - h2 - 0.9 + k * 0.3, y0, z - h2 - 0.9 + k * 0.3, x + h2 + 0.9 - k * 0.3, y + 0.3 * (k + 1) - 0.9 + 0.9, z + h2 + 0.9 - k * 0.3));
   const b0 = ab ? y : y + 0.9;
   bag.add(ST, box(x - h2, y0, z - h2, x + h2, b0 + H, z + h2));
-  col.rect([x - h2 - (ab ? 0 : 0.9), z - h2 - (ab ? 0 : 0.9), x + h2 + (ab ? 0 : 0.9), z + h2 + (ab ? 0 : 0.9)], y0, b0 + H + 0.2);
+  // (the two low steps round the monument are walked up; the third, at 0.9 m, stands with the body)
+  const ox = ab ? 0 : 0.3;
+  col.rect([x - h2 - ox, z - h2 - ox, x + h2 + ox, z + h2 + ox], y0, b0 + H + 0.2);
+  if (!ab) for (let k = 0; k < 2; k++) col.floor([x - h2 - 0.9 + k * 0.3, z - h2 - 0.9 + k * 0.3, x + h2 + 0.9 - k * 0.3, z + h2 + 0.9 - k * 0.3], y + 0.3 * (k + 1));
   // a column on each face's pair and at the corners: the shaft, a base, an Ionic capital with its volutes
   const colAt = (cx, cz, r) => {
     bag.add(CUT, lathe([[r * 1.25, 0], [r * 1.25, 0.12], [r, 0.2], [r * 0.9, 0.3]], 12, null, cx, b0 + 0.2, cz));
