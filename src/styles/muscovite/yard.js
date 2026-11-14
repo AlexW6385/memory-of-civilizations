@@ -26,7 +26,7 @@ export function dressHouse(o) {
   if (zb) {
     add('sod', u0 - 0.1, u1 + 0.1, foot, y + 0.42, 0.14, 0.66);
     add('planks_grey', u0 - 0.1, u1 + 0.1, foot, y + 0.46, 0.66, 0.7);
-    if (rand() < 0.65) { add('timber', u0 + 0.3, u1 - 0.3, y + 0.5, y + 0.55, 0.78, 1.22); for (const u of [u0 + 0.8, u1 - 0.8]) add('timber', u - 0.05, u + 0.05, y, y + 0.5, 0.88, 1.12); Cb(u0 + 0.3, u1 - 0.3, 0.78, 1.22, y, y + 0.55); }
+    if (rand() < 0.65) { add('timber', u0 + 0.3, u1 - 0.3, y + 0.5, y + 0.55, 0.78, 1.22); for (const u of [u0 + 0.8, u1 - 0.8]) add('timber', u - 0.05, u + 0.05, y, y + 0.5, 0.88, 1.12); Cb(u0 + 0.3, u1 - 0.3, 0.78, 1.22, foot, y + 0.55); }
     else Cb(u0 - 0.1, u1 + 0.1, 0.14, 0.7, foot, y + 0.46);
   }
   // the woodpile along the u1 wall under the eaves, split logs on end under a board cover; a log laid to hold it
@@ -131,9 +131,8 @@ export function garden(el, { bag, col }) {
   for (let i = 0; i < n; i++) {
     const t = (i + 0.5) / n, b0 = (alongX ? z0 : x0) + t * (alongX ? z1 - z0 : x1 - x0) - 0.4, b1 = b0 + 0.8, k = kinds[Math.floor(rand() * kinds.length)], h = k === 'cloth_green' ? 0.34 : 0.22;
     const R = alongX ? [x0 + 0.2, b0, x1 - 0.2, b1] : [b0, z0 + 0.2, b1, z1 - 0.2];
-    bag.add('wood_dark', box(R[0], y - 0.05, R[1], R[2], y + 0.14, R[3]));
+    bag.add('wood_dark', box(R[0], el.foot ?? y - 0.05, R[1], R[2], y + 0.14, R[3]));
     bag.add(k, box(R[0] + (alongX ? 0.1 : 0.22), y + 0.14, R[1] + (alongX ? 0.22 : 0.1), R[2] - (alongX ? 0.1 : 0.22), y + 0.14 + h, R[3] - (alongX ? 0.22 : 0.1)));
   }
   if (rand() < 0.4) { const p = [(x0 + x1) / 2, (z0 + z1) / 2]; bag.add('timber', box(p[0] - 0.03, y, p[1] - 0.03, p[0] + 0.03, y + 1.7, p[1] + 0.03)); bag.add('timber', box(p[0] - 0.55, y + 1.35, p[1] - 0.025, p[0] + 0.55, y + 1.4, p[1] + 0.025)); bag.add('cloth_brown', box(p[0] - 0.4, y + 0.85, p[1] - 0.04, p[0] + 0.4, y + 1.35, p[1] + 0.04)); bag.add('linen', lathe([[0.001, 0], [0.12, 0.05], [0.13, 0.2], [0.001, 0.28]], 8, null, p[0], y + 1.7, p[1])); }
-  col.rect([x0, z0, x1, z1], y - 0.05, y + 0.15);
 }
