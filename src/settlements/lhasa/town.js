@@ -87,7 +87,7 @@ export async function town() {
   // the street's shops, booths, the flags across it, the yaks, the pilgrims prostrating
   const sh = shops(), rand = rng(77), E = [];
   for (const s of sh) E.push(s.kind === 'stall' ? { t: 'stall', at: s.at, rot: s.rot, w: s.w, y: 0, seed: s.seed, goods: s.goods } : { t: 'tibetan_shop', rect: s.rect, door: s.door, kind: s.kind, y: 0, seed: s.seed });
-  for (const z of [78, 88, 98, 108, 118, 156, 167, 178, 190, 199]) E.push({ t: 'flag_line', a: [STREET[0] - 0.4, z], b: [STREET[2] + 0.4, z + 1.5], y0: 8.2, y1: 8.4, sag: 0.8 });
+  for (const z of [78, 88, 98, 108, 118, 156, 167, 178, 190, 199]) E.push({ t: 'flag_line', a: [STREET[0] - 0.4, z], b: [STREET[2] + 0.4, z + 1.5], y0: 8.2, y1: 8.4, sag: 0.8, poles: ![78, 88, 98, 108, 118, 178, 190].includes(z) });
   E.push({ t: 'sangkhang', at: SANG, rot: 0 });
   plans.push(base('lhasa-shops', E));
   // sangkhang in the street, its smoke (smoke.js)
