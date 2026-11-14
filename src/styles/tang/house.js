@@ -172,7 +172,7 @@ export function tangShopRow(el, ctx) {
     let k = 0;
     units.forEach((u, ui) => {
       const x0 = -hw / 2 + k * bay, x1 = x0 + u.nb * bay;
-      if (ui > 0) bag.add('plaster_white', box(x0 - 0.15, 0.3, -hd / 2, x0 + 0.15, 3.1, hd / 2 - 0.2));
+      if (ui > 0) { bag.add('plaster_white', box(x0 - 0.15, 0.3, -hd / 2, x0 + 0.15, 3.1, hd / 2 - 0.2)); col.rect([x0 - 0.15, -hd / 2, x0 + 0.15, hd / 2 - 0.2], 0.3, 3.1); }
       if ((el.det ?? 1) >= 1) {
         for (let b = 0; b < u.nb; b++) {
           if (u.nb >= 3 && b === Math.floor(u.nb / 2)) continue;                       // the door bay
