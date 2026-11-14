@@ -214,8 +214,8 @@ function extras(ctx, el, D, rand, top) {
     bag.add('bronze', lathe([[0.001, 0], [0.08, 0.01], [0.1, 0.06], [0.14, 0.14], [0.1, 0.18], [0.001, 0.18]], 10, null, cx - 0.6, y + 0.03, (z0 + z1) / 2 - 0.6)); bag.add('flame', lathe([[0.001, 0.18], [0.04, 0.19], [0.001, 0.22]], 6, null, cx - 0.6, y + 0.03, (z0 + z1) / 2 - 0.6)); }
   // storey 4, the majlis: plates and daggers and long guns hung, a lantern from the beam
   { const y = ys(4);
-    for (let k = 0; k < 6; k++) { bx(k % 2 ? 'glaze_blue' : 'glaze_white', x1 - 0.06, y + 1.5 + (k % 2) * 0.45, z0 + 0.8 + k * 1.0, x1 - 0.02, y + 1.85 + (k % 2) * 0.45, z0 + 1.15 + k * 1.0); bx('cloth_red', x1 - 0.07, y + 1.58 + (k % 2) * 0.45, z0 + 0.9 + k * 1.0, x1 - 0.06, y + 1.75 + (k % 2) * 0.45, z0 + 1.05 + k * 1.0); }
-    for (let k = 0; k < 3; k++) { const z = z0 + 0.6 + k * 0.9; bx('iron', x0 + 0.04, y + 1.5, z, x0 + 0.07, y + 1.9, z + 0.07); bx('silver', x0 + 0.04, y + 1.9, z - 0.02, x0 + 0.08, y + 2.05, z + 0.09); }
+    for (let k = 0; k < 6; k++) { bx(k % 2 ? 'glaze_blue' : 'glaze_white', x1 - 0.06, z0 + 0.8 + k * 1.0, x1 - 0.02, z0 + 1.15 + k * 1.0, y + 1.5 + (k % 2) * 0.45, y + 1.85 + (k % 2) * 0.45); bx('cloth_red', x1 - 0.07, z0 + 0.9 + k * 1.0, x1 - 0.06, z0 + 1.05 + k * 1.0, y + 1.58 + (k % 2) * 0.45, y + 1.75 + (k % 2) * 0.45); }
+    for (let k = 0; k < 3; k++) { const z = z0 + 0.6 + k * 0.9; bx('iron', x0 + 0.04, z, x0 + 0.07, z + 0.07, y + 1.5, y + 1.9); bx('silver', x0 + 0.04, z - 0.02, x0 + 0.08, z + 0.09, y + 1.9, y + 2.05); }
     for (let k = 0; k < 2; k++) bag.add('wood_dark', rod([x0 + 0.05, y + 1.2, z0 + 3.0 + k * 0.45], [x0 + 0.05, y + 2.4, z0 + 3.05 + k * 0.45], 0.022, 4));
     bag.add('rope_fibre', rod([cx - 0.3, y + 2.95, (z0 + z1) / 2 + 1.5], [cx - 0.3, y + 2.55, (z0 + z1) / 2 + 1.5], 0.01, 3)); bag.add('lamp_glass', lathe([[0.001, 0], [0.1, 0.05], [0.14, 0.2], [0.08, 0.3], [0.001, 0.32]], 8, null, cx - 0.3, y + 2.25, (z0 + z1) / 2 + 1.5));
     lights.push({ at: [cx - 0.3, y + 2.3, (z0 + z1) / 2 + 1.5], color: '#ffcf8a', intensity: 1.6, distance: 5 }); }

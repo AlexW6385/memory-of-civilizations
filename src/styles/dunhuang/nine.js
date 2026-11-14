@@ -31,7 +31,8 @@ export function greatCave(ctx, c) {
   // the Buddha (h 34 on a throne of lotus petals); the chinese style's Buddha is built at 5.2 m and scaled
   const cx = XF - 14;
   buddha({ at: [cx, 0], y, h: 33.0, dir: [1, 0], robe: 'clay_robe' }, ctx);
-  col.rect([cx - 9, -9.6, cx + 9, 9.6], y, H);
+  // (the lotus throne is round: a circle follows it, a rectangle left four corners of air)
+  col.circle(cx, 0, 9.6, y, H);
   // the front wall of the rock hall: plastered round the great doorway and the high window
   for (const [zA, zB, yA, yB] of [[-11.5, -7, y, H], [7, 11.5, y, H], [-7, 7, 20, 27], [-7, -3.2, 27, H], [3.2, 7, 27, H], [-7, 7, 37, H]]) bag.add('lime_plaster', box(XF - 1.0 - t, yA, zA, XF - 1.0, yB, zB));
   // lamps in the lobby between the doorway and the throne: a row of stands, and a few hanging high
