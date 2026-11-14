@@ -84,6 +84,8 @@ export function fangGate(el, ctx) {
       for (let k = 0; k < n; k++) { const xa = x1 - (x1 - x0) * (k + 1) / n, xb = x1 - (x1 - x0) * k / n; bag.add('brick_grey', box(xa, 0, z0, xb, top * (k + 1) / n, z1)); }
       for (let k = 1; k < n; k += 3) { const xm = x1 - (x1 - x0) * (k + 0.5) / n; bag.add('timber_red', box(xm - 0.04, top * (k + 1) / n, z1, xm + 0.04, top * (k + 1) / n + 0.9, z1 + 0.08)); }
       col.ramp([x0, z0, x1, z1], 0, top, 'w');
+      // the flight's open side: each step's brick mass blocks the body beside it, below the height of one who climbs it
+      for (let k = 2; k < n; k++) col.rect([x1 - (x1 - x0) * (k + 1) / n, z1, x1 - (x1 - x0) * k / n, z1 + 0.06], 0, top * k / n + 0.2);
     }
     // the door leaves, swung back against the piers (open), with their iron studs
     for (const s of [-1, 1]) bag.add('wood_dark', box(s * (w / 2 - 0.02) - 0.07, 0, -D / 2 + 0.1, s * (w / 2 - 0.02) + 0.07, ph - 0.5, -D / 2 + 1.55));

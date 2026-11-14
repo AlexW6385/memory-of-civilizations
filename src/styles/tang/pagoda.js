@@ -28,6 +28,11 @@ export function tangPagoda(el, ctx) {
   }
   // (the flight: the step i's tread at height (PH+0.12)(1 − i/n) over the run's i-th slice, shaped as a stack)
   col.ramp([cx - sw / 2, z0 - 2, cx + sw / 2, z0 + run], y0, y0 + PH + 0.12, 'n');
+  // (the flight's open sides: each step's mass blocks the body beside it, below the height of one who climbs the flight)
+  for (let i = 0; i < n - 1; i++) {
+    const zb = z0 + run * (i + 1) / n, zt = z0 + run * i / n, hb = y0 + (PH + 0.12) * (z0 + run - zb) / (run + 2) + 0.2;
+    for (const s of [-1, 1]) col.rect([cx + s * (sw / 2 + 0.15), zt, cx + s * (sw / 2 + 0.55), zb], y0 - 0.02, hb);
+  }
   for (const s of [-1, 1]) bag.add('granite_block', box(cx + s * (sw / 2 + 0.3) - 0.2, y0, z0 - 2, cx + s * (sw / 2 + 0.3) + 0.2, y0 + 0.9, z0 + run));
   // the tower: hollow. Each storey is a ring of thick brick walls round a chamber; the floors are timber slabs with a stairwell, a
   // two-flight stair (west strip up to a landing in the north, east strip up to the next floor) in every storey but the last;
