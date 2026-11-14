@@ -3,6 +3,7 @@
 // same scene pass (one pass draws colour and normals), bloom, AgX tone mapping.
 
 import * as THREE from 'three/webgpu';
+import { RANGE } from './range.js';
 import { Fn, rtt, pass, mrt, output, normalView, packNormalToRGB, sample, context, renderOutput, fog, uv, uniform, getViewPosition, abs, vec2, vec3, vec4, min, mix, luminance, smoothstep, positionLocal, normalize, floor, fract, hash, length, dot, exp, sin, time, max, pow, float, mx_fractal_noise_float } from 'three/tsl';
 import { ao } from 'three/addons/tsl/display/GTAONode.js';
 import { bloom } from 'three/addons/tsl/display/BloomNode.js';
@@ -170,7 +171,7 @@ export class Renderer {
     // the static casters' depth kept per cascade and drawn again only when it would change
     // (src/engine/shadow-cache.js); `?shadowcache=0` draws every cascade whole, as before
     const cache = new URLSearchParams(location.search).get('shadowcache') !== '0';
-    const csm = new CachedCSM(sun, { cascades: Q.cascades, maxFar: Q.shadowFar ?? 320, mode: 'practical', lightMargin: LIGHT_MARGIN }, cache);
+    const csm = new CachedCSM(sun, { cascades: Q.cascades, maxFar: Q.shadowFar ?? Math.round(320 * Math.min(RANGE, 1.5)), mode: 'practical', lightMargin: LIGHT_MARGIN }, cache);
     csm.fade = true;
     sun.shadow.shadowNode = csm;
     // the lamps' pool: a fixed number of lights per preset (a change recompiles every material)

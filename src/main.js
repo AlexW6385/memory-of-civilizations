@@ -1,6 +1,7 @@
 // Memory of Civilizations — boot, interface and the frame loop.
 
 import { Vector3 } from 'three';
+import { RANGE } from './engine/range.js';
 import { Renderer } from './engine/renderer.js';
 import { ENV } from './engine/env.js';
 import { World } from './engine/world.js';
@@ -178,7 +179,7 @@ async function main() {
   climate.setTime(settings.timeRuns ? 'cycle' : 'held');
   const tq = params.get('time');
   const floraScale = { cinema: 1.6, high: 1, medium: 0.7, low: 0.45 };
-  world.flora.scale = world.openFlora.scale = floraScale[settings.quality] ?? 1;
+  world.flora.scale = world.openFlora.scale = (floraScale[settings.quality] ?? 1) * (settings.quality === 'cinema' ? 1 : RANGE);
   const controls = new Controls(R.camera, canvas, world.collide);
   world.onCollide = (c) => { controls.collide = c; };
   controls.sensitivity = settings.sensitivity;
@@ -920,7 +921,7 @@ async function main() {
       console.info('[memory of civilizations] quality:', q, `(median frame ${p50.toFixed(1)} ms over ${dts.length} frames)`);
       if (q !== 'high') {
         R.setQualityLive(q);
-        world.flora.scale = world.openFlora.scale = floraScale[q];
+        world.flora.scale = world.openFlora.scale = floraScale[q] * (q === 'cinema' ? 1 : RANGE);
         world.flora.dirty = true;
       }
     };

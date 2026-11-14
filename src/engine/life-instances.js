@@ -8,6 +8,7 @@
 // material, not one per tile and material.
 
 import * as THREE from 'three/webgpu';
+import { RANGE } from './range.js';
 import { material } from './materials.js';
 import { SMALL } from './layers.js';
 import { releaseAfterUpload } from './release.js';
@@ -236,7 +237,7 @@ export class LifeInstances {
       const Mn = near.instanceMatrix.array, Cn = near.instanceColor.array, Mf = far?.instanceMatrix.array, Cf = far?.instanceColor.array;
       let c = 0, f = 0;
       for (let i = 0; i < n; i++) {
-        const dx = pos[i * 3] - x, dy = (pos[i * 3 + 1] - y) * 0.7, dz = pos[i * 3 + 2] - z, r = reach[i], d2 = dx * dx + dy * dy + dz * dz;
+        const dx = pos[i * 3] - x, dy = (pos[i * 3 + 1] - y) * 0.7, dz = pos[i * 3 + 2] - z, r = reach[i] * RANGE, d2 = dx * dx + dy * dy + dz * dz;
         if (d2 > r * r) continue;
         if (behind(dx, pos[i * 3 + 1] - y, dz, d2, 3)) continue;
         // (the coarse copies beyond LIFE_FULL, where the shape has a coarse version)
@@ -263,7 +264,7 @@ export class LifeInstances {
       let fill = 0, x0 = Infinity, y0 = Infinity, z0 = Infinity, x1 = -Infinity, y1 = -Infinity, z1 = -Infinity;
       for (let i = 0; i < n; i++) {
         const px = pos[i * 3], py = pos[i * 3 + 1], pz = pos[i * 3 + 2];
-        const dx = px - x, dy = (py - y) * 0.7, dz = pz - z, r = reach[i];
+        const dx = px - x, dy = (py - y) * 0.7, dz = pz - z, r = reach[i] * RANGE;
         const d2 = dx * dx + dy * dy + dz * dz;
         if (d2 > r * r) continue;
         if (behind(dx, py - y, dz, d2, size)) continue;

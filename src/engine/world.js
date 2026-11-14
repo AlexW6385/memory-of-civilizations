@@ -10,6 +10,7 @@
 // of the place, so that the switch from one frame to the other cannot be seen.
 
 import { SYSTEMS } from './systems.js';
+import { RANGE } from './range.js';
 import './systems-list.js';
 import * as THREE from 'three/webgpu';
 import { BUILDINGS } from '../buildings/index.js';
@@ -992,7 +993,7 @@ export class World {
           for (const o of rec.detail) {
             const b = o.boundingSphere || o.geometry.boundingSphere;
             const d = Math.hypot(L[0] - b.center.x, L[1] - b.center.y, L[2] - b.center.z) - b.radius;
-            const vis = d < DETAIL_REACH, cast = vis && d < DETAIL_SHADOW && castsShadow(o.material.name);
+            const vis = d < DETAIL_REACH * RANGE, cast = vis && d < DETAIL_SHADOW * RANGE && castsShadow(o.material.name);
             if (o.visible !== vis) o.visible = vis;
             if (o.castShadow !== cast) o.castShadow = cast;
           }

@@ -154,7 +154,7 @@ export class Flora {
     const out = new Map();
     const [fx, fz] = focus.center, fr = focus.radius;
     const [X0, Z0, X1, Z1] = [fx - fr + 400, fz - fr + 400, fx + fr - 400, fz + fr - 400];
-    const R = this.maxLod;
+    const R = this.maxLod * Math.max(1, this.scale);
     const add = (kind, cx, cz, size) => out.set(`${kind}:${cx},${cz}`, { rect: [cx, cz, cx + size, cz + size], near: kind === 'S', d: Math.hypot(cx + size / 2 - x, cz + size / 2 - z) });
     for (let cx = Math.floor((x - R) / BIG) * BIG; cx < x + R; cx += BIG) for (let cz = Math.floor((z - R) / BIG) * BIG; cz < z + R; cz += BIG) {
       if (cx + BIG < X0 - 400 || cx > X1 + 400 || cz + BIG < Z0 - 400 || cz > Z1 + 400) continue;

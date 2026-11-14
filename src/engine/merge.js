@@ -19,6 +19,7 @@
 // at all.
 
 import * as THREE from 'three/webgpu';
+import { RANGE } from './range.js';
 import { releaseAfterUpload } from './release.js';
 import { SPLIT_TRIS, SPLIT_INST, LOD_NEAR, LOD_FAR, FINE_SHADOW, THIN_FAR, OPEN_FAR, cellKey, lodKind, coarseSet, trianglesByCell, subGeometry } from './cells.js';
 import { SMALL, MID, NEAR_SHADOW, FAR_SHADOW } from './layers.js';
@@ -475,7 +476,7 @@ export class LodSet {
     let a = 0, b = 0, c = 0, sh = 0;
     // full within r1 (to LOD_FAR where there is no coarse version), coarse to r2 (all the rest
     // where there is no coarser one), coarser beyond
-    const r1 = (kind === 'thin' ? THIN_FAR : kind === 'open' ? OPEN_FAR : kind === 'near' ? this.reach : mid ? LOD_NEAR : LOD_FAR) ** 2, r2 = far ? LOD_FAR ** 2 : Infinity, rs = FINE_SHADOW ** 2;
+    const r1 = ((kind === 'thin' ? THIN_FAR : kind === 'open' ? OPEN_FAR : kind === 'near' ? this.reach : mid ? LOD_NEAR : LOD_FAR) * RANGE) ** 2, r2 = far ? (LOD_FAR * RANGE) ** 2 : Infinity, rs = (FINE_SHADOW * RANGE) ** 2;
     for (let i = 0; i < n; i++) {
       const dx = pos[i * 3] - x, dy = pos[i * 3 + 1] - y, dz = pos[i * 3 + 2] - z, d2 = dx * dx + dy * dy + dz * dz;
       if (view && d2 > R * R && dx * dir[0] + dy * dir[1] + dz * dir[2] < Math.sqrt(d2) * COS_VIEW - R) { if (d2 < rs) S[sh++] = i; continue; }
