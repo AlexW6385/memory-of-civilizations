@@ -116,6 +116,8 @@ export async function town() {
   { const [x0, z0, x1, z1] = PEN, y = TT_Y + 0.03;
     for (let k = 0; k < 3; k++) L.push({ t: 'animal', kind: k % 2 ? 'goat' : 'sheep', at: [x0 + 1.4 + k * 0.9, z0 + 1.6 + (k % 2) * 0.5], y, rot: 1 + k * 1.3, seed: 300 + k });
     worker([x1 + 0.9, (z0 + z1) / 2], Math.PI / 2, { y, carry: 'staff', cloth: 'cloth_brown', h: 1.25 }); }
+  // the forecourt reaches the world's rim, where the ground falls to nothing: what stands there is set on the ground
+  for (const e of L) if (e.y === FC_Y && e.at) e.y = Math.min(FC_Y, height(e.at[0], e.at[1]));
   plans.push({ ...base('delphi-life', 'life', L), rooms: [] });
   void WAY2;
   return plans;
