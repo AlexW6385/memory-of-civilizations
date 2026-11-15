@@ -218,35 +218,46 @@ export const PROMO = {
   //   fly     round the landmark: a the bearing from the arrival's side (degrees), d the distance and h the
   //           height over the landmark's ground (m), start → end, looking at the landmark `look` m up
   // (no hour: mid-morning or mid-afternoon, whichever puts the sun behind the arrival view)
+  //   pose    a place given in the settlement's frame, [x, z, yaw, pitch] start → end, the eye `up` over the
+  //           floor found there (the highest within `rise` m over the ground: an upper chapel, a podium)
+  // `cut`: the second shot of the same settlement (no caption, no dip to black before it).
   shots: [
     // low over the lotus, out from behind a Taihu rock: the hall across the pond (the title)
-    { site: 'ming-suzhou', kind: 'ground', f: [-1, 2], s: [-2.5, 0.4], u: [-0.6, -0.3], hour: 16.6, t: 5 },
+    { site: 'ming-suzhou', kind: 'ground', f: [-1, 2], s: [-2.5, 0.4], u: [-0.6, -0.3], hour: 16.6, t: 4.5 },
     // toward the Iron Pagoda through the market
-    { site: 'song-kaifeng', kind: 'ground', f: [0, 5], u: [0, 0.6], t: 3 },
-    // up the street of white houses, rising to the Potala
-    { site: 'lhasa', kind: 'ground', f: [0, 4], u: [0, 5], pitch: [0, -0.06], t: 3 },
-    // the gaze climbing the castle's stone base to the keep
-    { site: 'edo-himeji', kind: 'ground', f: [0, 2], u: [-0.6, 0.4], pitch: [-0.25, 0], t: 3 },
+    { site: 'song-kaifeng', kind: 'ground', f: [0, 5], u: [0, 0.6], t: 2.5 },
+    // with the people on the causeway of Angkor Wat; then the temple in its moat
+    { site: 'angkor', kind: 'ground', f: [0, 5], u: [0, 0.4], t: 2.5 },
+    { site: 'angkor', kind: 'fly', a: [-25, 0], d: [260, 240], h: [60, 60], cut: true, t: 2.5 },
     // low along the water channel to the Taj
     { site: 'mughal-agra', kind: 'ground', f: [0, 10], u: [-0.9, -0.5], t: 3 },
-    // with the people on the causeway of Angkor Wat
-    { site: 'angkor', kind: 'ground', f: [0, 5], u: [0, 0.4], t: 3 },
-    // round the ridge of Machu Picchu
-    { site: 'machu-picchu', kind: 'fly', a: [-25, 15], t: 3.5 },
-    // past the workmen before the Great Pyramid
-    { site: 'giza', kind: 'ground', s: [-4, 4], t: 3 },
-    // the gaze climbing the Treasury's face
-    { site: 'petra', kind: 'ground', f: [0, 2], pitch: [-0.3, 0.05], t: 3 },
-    // rising before the Parthenon
-    { site: 'athens', kind: 'ground', f: [0, 3], u: [0, 3], t: 2.5 },
-    // across the Piazza
-    { site: 'venice', kind: 'ground', s: [-3.5, 3.5], t: 3 },
+    // past the workmen before the Great Pyramid; then the pyramid over its field of tombs
+    { site: 'giza', kind: 'ground', s: [-4, 4], t: 2.5 },
+    { site: 'giza', kind: 'fly', a: [-40, -15], d: [380, 380], h: [60, 60], look: 50, cut: true, t: 2.5 },
+    // the Acropolis from the air
+    { site: 'athens', kind: 'fly', a: [-35, -5], d: [170, 170], h: [45, 45], look: 10, t: 3 },
+    // under the Pantheon's dome, the gaze rising to the oculus; then the dome among the roofs
+    { site: 'rome', kind: 'pose', from: [0, -16, Math.PI, 0.15], to: [0, -8, Math.PI, 0.75], rise: 3, t: 2.5 },
+    { site: 'rome', kind: 'fly', a: [-20, 20], d: [110, 110], h: [40, 40], look: 14, cut: true, t: 2.5 },
+    // the upper chapel of the Sainte-Chapelle, toward the glass of the apse; then the island in the Seine
+    { site: 'paris', kind: 'pose', from: [-198, -10, -Math.PI / 2, 0.12], to: [-190, -10, -Math.PI / 2, 0.38], rise: 16, t: 2.5 },
+    { site: 'paris', kind: 'fly', a: [-30, -5], cut: true, t: 2.5 },
     // round the dome over the roofs of Florence
     { site: 'florence', kind: 'fly', a: [-35, -5], t: 3 },
-    // the gaze climbing the street's walls to the Chrysler Building
-    { site: 'new-york', kind: 'ground', f: [0, 3], pitch: [-0.35, 0.1], t: 3 },
-    // back and up along the axis of the Forbidden City (the end card)
-    { site: 'qing-beijing', kind: 'fly', a: [0, 0], d: [150, 340], h: [45, 95], look: 15, t: 4 },
+    // across the Piazza; then the Piazza, the campanile and the lagoon
+    { site: 'venice', kind: 'ground', s: [-3.5, 3.5], t: 2.5 },
+    { site: 'venice', kind: 'fly', a: [-30, -5], cut: true, t: 2.5 },
+    // over the heads of the crowd toward St Peter's; then the square, the colonnades and the city
+    { site: 'baroque-rome', kind: 'ground', f: [0, 10], u: [0.7, 1.0], t: 2.5 },
+    { site: 'baroque-rome', kind: 'fly', a: [-12, 12], d: [300, 300], h: [80, 80], look: 30, cut: true, t: 2.5 },
+    // toward the garden front of Versailles; then the palace over its parterres
+    { site: 'versailles', kind: 'ground', f: [0, 8], u: [0.5, 0.8], t: 2.5 },
+    { site: 'versailles', kind: 'fly', a: [-10, 10], h: [55, 55], cut: true, t: 2.5 },
+    // on Westminster Bridge
+    { site: 'london', kind: 'ground', f: [0, 5], u: [0, 0.5], t: 3 },
+    // the gaze climbing the street's walls to the Chrysler Building; then the towers of Manhattan (the end card)
+    { site: 'new-york', kind: 'ground', f: [0, 3], pitch: [-0.35, 0.1], t: 2.5 },
+    { site: 'new-york', kind: 'fly', a: [-40, -15], d: [330, 330], h: [150, 150], look: 120, cut: true, t: 3.5 },
   ],
 };
 
@@ -274,7 +285,11 @@ export function promoKeys(palace, shot) {
   const N = 5, keys = [];
   for (let k = 0; k < N; k++) {
     const u = k / (N - 1);
-    if (shot.kind === 'ground') {
+    if (shot.kind === 'pose') {
+      const q = (n) => shot.from[n] + (shot.to[n] - shot.from[n]) * u, x = q(0), z = q(1);
+      let fl = 0; try { fl = C.terrain(x, z); const gf = C.groundAt(x, z, fl + (shot.rise ?? 3)); if (Number.isFinite(gf)) fl = Math.max(fl, gf); } catch { /* the ground */ }
+      keys.push(P(x, fl + (shot.up ?? 1.62), z, q(2), q(3)));
+    } else if (shot.kind === 'ground') {
       const f = lerp2(shot.f ?? 0, u), sd = lerp2(shot.s ?? 0, u), up = lerp2(shot.u ?? 0, u);
       keys.push(P(ax + fx * f + rx * sd, eye + up, az + fz * f + rz * sd, yaw + lerp2(shot.yaw ?? 0, u), pitch + lerp2(shot.pitch ?? 0, u)));
     } else {
@@ -342,7 +357,7 @@ export async function runPromo(palace, frames, params) {
         if (f === 0) palace.settle();
         loop(performance.now());
         cover(g, src, W, H);
-        promoOverlay(g, { t: n / FPS, total, ts: f / FPS, tn: shot.t, first: i === 0, last: i === shots.length - 1, takes, S, i }, W, H);
+        promoOverlay(g, { t: n / FPS, total, ts: f / FPS, tn: shot.t, first: i === 0, last: i === shots.length - 1, takes, S, i, cut: !!shot.cut, cutNext: !!shots[i + 1]?.cut }, W, H);
         const vf = new VideoFrame(out, { timestamp: Math.round(n * 1e6 / FPS), duration: Math.round(1e6 / FPS) });
         enc.encode(vf, { keyFrame: f === 0 || n % (FPS * 2) === 0 });
         vf.close();
@@ -388,7 +403,8 @@ function promoOverlay(g, o, W, H) {
   g.save();
   g.fillStyle = '#f4efe4'; g.shadowColor = 'rgba(0,0,0,0.55)'; g.shadowBlur = H * 0.012; g.textBaseline = 'alphabetic';
   if (o.S && !(o.first && !o.takes) && !(o.last && !o.takes)) {
-    const a = ease((o.ts - 0.3) / 0.5) * (1 - ease((o.ts - (o.tn - 0.6)) / 0.4));
+    // (the name stays through the cut to the settlement's second shot)
+    const a = (o.cut ? 1 : ease((o.ts - 0.2) / 0.4)) * (o.cutNext ? 1 : 1 - ease((o.ts - (o.tn - 0.5)) / 0.35));
     g.globalAlpha = a; g.textAlign = 'left';
     g.font = `400 ${Math.round(H * 0.034)}px ${serif}`;
     g.fillText(`${o.S.name.en} · ${o.S.era}`, W * 0.05, H * 0.9);
@@ -407,7 +423,7 @@ function promoOverlay(g, o, W, H) {
     g.fillText(o.last ? PROMO.url : PROMO.sub, W / 2, H * 0.62);
   }
   g.restore();
-  const k = Math.max(o.first ? 1 - ease(o.t / 1.2) : 1 - ease(o.ts / 0.25), o.last ? ease((o.t - (o.total - 1.2)) / 1.2) : ease((o.ts - (o.tn - 0.25)) / 0.25));
+  const k = Math.max(o.first ? 1 - ease(o.t / 1.2) : o.cut ? 0 : 1 - ease(o.ts / 0.18), o.last ? ease((o.t - (o.total - 1.2)) / 1.2) : o.cutNext ? 0 : ease((o.ts - (o.tn - 0.18)) / 0.18));
   if (k > 0) { g.fillStyle = `rgba(0,0,0,${k})`; g.fillRect(0, 0, W, H); }
 }
 

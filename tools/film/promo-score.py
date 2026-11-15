@@ -1,4 +1,4 @@
-# The 45 s score of the promo (src/ui/film.js, PROMO): a low drone in D, a slow rising line of bell tones
+# The 60 s score of the promo (src/ui/film.js, PROMO): a low drone in D, a slow rising line of bell tones
 # with one struck at every cut, a soft pulse from the middle on, the swell and last chord under the end
 # card, the fade over the last 1.2 s. usage: python3 tools/film/promo-score.py out.wav
 import numpy as np
@@ -6,8 +6,8 @@ from scipy.signal import fftconvolve, butter, sosfilt
 import wave, sys
 
 SR = 48000
-CUTS = [5, 8, 11, 14, 17, 20, 23.5, 26.5, 29.5, 32, 35, 38, 41]   # the shots' starts after the first
-DUR = 45.0
+CUTS = [4.5, 7, 9.5, 12, 15, 17.5, 20, 23, 25.5, 28, 30.5, 33, 36, 38.5, 41, 43.5, 46, 48.5, 51, 54, 56.5]   # the shots' starts after the first
+DUR = 60.0
 N = int(SR * DUR)
 rng = np.random.default_rng(11)
 L = np.zeros(N); R = np.zeros(N)
@@ -34,11 +34,11 @@ def pad(ms, dur):
     return s * env / (3 * len(ms))
 
 # the drone and the chords: D, then B flat and C under the middle, D again with its fifth for the end
-place(pad([38, 45], 45), 0, 0, 0.5)
-for t0, ch in [(0, [50, 57, 62]), (11, [46, 53, 62]), (20, [48, 55, 64]), (29.5, [50, 57, 65]), (40.5, [50, 57, 62, 66, 69])]:
-    place(pad(ch, min(14.5, DUR - t0)), t0, rng.uniform(-0.3, 0.3), 0.42)
+place(pad([38, 45], DUR), 0, 0, 0.5)
+for t0, ch in [(0, [50, 57, 62]), (12, [46, 53, 62]), (23, [48, 55, 64]), (33, [43, 55, 62]), (43.5, [50, 57, 65]), (54, [50, 57, 62, 66, 69])]:
+    place(pad(ch, min(13.5, DUR - t0)), t0, rng.uniform(-0.3, 0.3), 0.42)
 # a bell at every cut, the line climbing; a higher answer between
-line = [62, 65, 69, 67, 69, 72, 74, 72, 76, 74, 77, 79, 81, 74]
+line = [62, 65, 69, 67, 69, 72, 74, 72, 69, 72, 74, 76, 74, 77, 76, 79, 77, 81, 79, 81, 84, 74]
 for k, t0 in enumerate([0.6] + CUTS[:-1]):
     place(bell(line[k]), t0, (-1) ** k * 0.35, 0.22)
     place(bell(line[k] + 7, 3.5), t0 + (CUTS[k] - t0) * 0.5 if k < len(CUTS) else t0 + 1.5, -(-1) ** k * 0.5, 0.09)
@@ -46,9 +46,9 @@ place(bell(74, 6), CUTS[-1], 0, 0.3); place(bell(62, 6), CUTS[-1], 0, 0.25); pla
 # a soft pulse on D from 14.5 s, twice a second, swelling toward the end card
 t = np.arange(int(0.25 * SR)) / SR
 tick = np.sin(2 * np.pi * midi(50) * t) * np.exp(-t * 22)
-for k in range(int((CUTS[-1] - 14.5) * 2)):
-    tt = 14.5 + k * 0.5
-    place(tick, tt, 0.15 * (-1) ** k, 0.05 + 0.1 * (tt - 14.5) / 26)
+for k in range(int((CUTS[-1] - 15) * 2)):
+    tt = 15 + k * 0.5
+    place(tick, tt, 0.15 * (-1) ** k, 0.05 + 0.1 * (tt - 15) / 41)
 # a hall: a decaying noise tail
 ir_n = int(2.8 * SR); ti = np.arange(ir_n) / SR
 ir = rng.standard_normal(ir_n) * np.exp(-ti * 2.2); ir = sosfilt(butter(2, [200, 6000], 'bandpass', fs=SR, output='sos'), ir)
