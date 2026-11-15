@@ -2,7 +2,7 @@
 // good hour of its day: the arrival view held for a few seconds under a caption (name, time, one sentence);
 // a low glide to where the landmark's own way in begins; a walk along that way at eye height, through its
 // gates and courts and into its halls (the plan's walk route, checked to be walkable); then the free camera
-// lifts off and flies a spiral out round the landmark, close at first, the town opening round it.
+// lifts off and flies once round the town, low over its roofs and near them, the landmark close by.
 // The mouse looks about (the view comes back by itself), Space or a tap pauses, R goes on to the next, and
 // a walking key, the stick or Esc hands the place over to the visitor where the camera is.
 import { footing, move, EYE } from '../core/walk.js';
@@ -17,10 +17,10 @@ const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const yawTo = (dx, dz) => Math.atan2(-dx, -dz);       // the camera looks along (-sin yaw, -cos yaw)
 const ease = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
-const HOLD = 3, GLIDE = 7, WALK = 24, RISE = 7, FLY = 26;   // seconds: the arrival view, the glide to the landmark's way in (at most), the walk along it, the climb, the flight (about 65 s in all)
+const HOLD = 3, GLIDE = 6, WALK = 11, RISE = 6, FLY = 38;   // seconds: the arrival view, the glide to the landmark's way in (at most), the walk along it, the climb, the flight (about a minute in all)
 const INPUTS = ['keydown', 'pointerdown', 'mousemove'];
 const TAKE = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
-const CLEAR = 8;                                      // m the camera keeps above the ground and buildings
+const CLEAR = 5;                                      // m the camera keeps above the ground and buildings
 
 export class Tour {
   /**
@@ -235,15 +235,16 @@ export class Tour {
 
   /** Plans the flight of leg L from (fromX, fromZ): its line (X, Z at even spacing) and heights (Y). */
   plan(L, fromX, fromZ) {
-    // the line: a spiral out from where the camera stands, three quarters of a turn round the landmark,
-    // from close by it to about 0.42 R: first the landmark near and large, then the town opening round it
+    // the line: out from where the camera stands to a ring at about 0.3 R, then once round the town on it,
+    // the ring drawn in and let out by a sixth as it goes so the line passes over different quarters: near
+    // enough that the streets and the people in them are seen, the landmark always close by
     const { R, tx, tz } = L;
-    const rr = clamp(0.42 * R, 45, 160), a0 = Math.atan2(fromX - tx, fromZ - tz);
-    const r0 = clamp(Math.hypot(fromX - tx, fromZ - tz), clamp(0.14 * R, 22, 55), rr);
+    const rr = clamp(0.3 * R, 38, 115), a0 = Math.atan2(fromX - tx, fromZ - tz);
+    const r0 = clamp(Math.hypot(fromX - tx, fromZ - tz), clamp(0.1 * R, 18, 45), rr);
     const pts = [[fromX, fromZ]];
-    for (let k = 1; k <= 10; k++) {
-      const u = k / 10, a = a0 + u * Math.PI * 1.5, r = r0 + (rr - r0) * ease(u);
-      pts.push([tx + Math.sin(a) * r, tz + Math.cos(a) * r]);
+    for (let k = 1; k <= 15; k++) {
+      const u = k / 15, a = a0 + u * Math.PI * 2.5, ring = rr * (1 + 0.17 * Math.sin(a * 2 + 1));
+      pts.push([tx + Math.sin(a) * (r0 + (ring - r0) * ease(Math.min(1, u * 4))), tz + Math.cos(a) * (r0 + (ring - r0) * ease(Math.min(1, u * 4)))]);
     }
     // centripetal Catmull-Rom through them, resampled at even spacing
     const dense = [];
@@ -272,7 +273,7 @@ export class Tour {
       const tx = X[b] - X[a], tz = Z[b] - Z[a], l = Math.hypot(tx, tz) || 1, nx = -tz / l * 10, nz = tx / l * 10;
       return Math.max(this.ground(x, Z[i]), this.ground(x + nx, Z[i] + nz), this.ground(x - nx, Z[i] - nz));
     });
-    const W = Math.round(90 / STEP), WA = Math.round(120 / STEP), KC = 0.08, KD = 0.05;   // (wide: the line runs level over the roofs and the lanes between them, climbing only for what really rises)
+    const W = Math.round(28 / STEP), WA = Math.round(44 / STEP), KC = 0.14, KD = 0.1;   // (wide: the line runs level over the roofs and the lanes between them, climbing only for what really rises)
     const env = g.map((v, i) => {
       let m = v; for (let j = Math.max(0, i - W); j <= Math.min(M - 1, i + W); j++) m = Math.max(m, g[j]);
       return m + CLEAR;
@@ -441,7 +442,7 @@ export class Tour {
     const [gx, gz] = this.at(L, look + lk);
     let wantYaw = yawTo(gx - x, gz - z), wantPitch = -0.3;
     const ldx = L.tx - x, ldz = L.tz - z;
-    wantYaw += wrap(yawTo(ldx, ldz) - wantYaw) * 0.6;    // turned well in toward the landmark: it stays in the frame
+    wantYaw += wrap(yawTo(ldx, ldz) - wantYaw) * 0.4;    // turned in toward the landmark and the town's middle
     if (tr < 1) { const k = ease(tr); wantYaw = S0.yaw + wrap(wantYaw - S0.yaw) * k; wantPitch = S0.pitch + (wantPitch - S0.pitch) * k; }
     // never look into a wall close ahead: raise the gaze over whatever stands within 45 m of it
     {
