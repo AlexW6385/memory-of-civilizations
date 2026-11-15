@@ -6,7 +6,7 @@
 
 一颗可以行走、可以飞越的小星球。地球上的各个文明在它们原本的位置上，每一个都是某个地方的某个时代。一共 **94 个聚落**，从恰塔霍裕克（约公元前 6500 年）到巴西利亚（1960 年代）。每个聚落都是写实、细节丰富的 3D 城镇：中心是一座依照真实建筑建造的著名地标，带有室内；周围是那个民族、那个时代的城镇风貌——街道、可以走进去的房屋、集市、园林、城墙、水面、劳作的人——有真实的太阳、天气和季节，有烘焙的间接光照，也有各自的音乐。
 
-**进入：<https://alexw6385.github.io/memory-of-civilizations/>**。浏览器需要支持 WebGPU（Chrome、Edge、Safari 26），界面可在中英文之间切换。**[观看 45 秒宣传片](https://alexw6385.github.io/media/moc-film.mp4)。**
+**进入：<https://alexw6385.github.io/memory-of-civilizations/>**。浏览器需要支持 WebGPU（Chrome、Edge、Safari 26），界面可在中英文之间切换。**[观看一分钟宣传片](https://alexw6385.github.io/media/moc-film.mp4)。**
 
 名字的意思只有一层：这些建筑是各个文明的记忆。这里是一个用来行走的世界，不是学习工具：没有笔记、没有标记、没有路线。
 
@@ -85,7 +85,7 @@ npm run budget                     # 加载与体积预算
 npm test
 ```
 
-URL 参数：`?perf` 显示帧时间面板（带开关，对应 `window.palace.perf`）；`?trace` 统计编译的管线；`?bench` 在作者的机器上跑固定路线，报告帧率、绘制调用和卡顿；`?capture` 以固定的 1/30 秒步长运行，用于录屏；`?tour=a,b,c` 固定游览顺序；`?quality=high|medium|low|cinema` 指定画质（默认自动）；`?range=1` 设置植物、街头物件、细节和阴影的绘制距离（默认 1.5）；`?film=promo&quality=cinema&capture&weather=clear` 把 45 秒宣传片录成 MP4。
+URL 参数：`?perf` 显示帧时间面板（带开关，对应 `window.palace.perf`）；`?trace` 统计编译的管线；`?bench` 在作者的机器上跑固定路线，报告帧率、绘制调用和卡顿；`?capture` 以固定的 1/30 秒步长运行，用于录屏；`?tour=a,b,c` 固定游览顺序；`?quality=high|medium|low|cinema` 指定画质（默认自动）；`?range=1` 设置植物、街头物件、细节和阴影的绘制距离（默认 1.5）；`?film=promo&quality=cinema&capture&weather=clear` 把一分钟宣传片录成 MP4。
 
 每次推送到 `master` 都会运行检查，并把网站发布到 GitHub Pages。多 agent 并行开发的做法见 [docs/parallel-work.md](docs/parallel-work.md)。
 

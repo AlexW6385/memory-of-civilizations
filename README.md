@@ -6,7 +6,7 @@
 
 A small planet you can walk and fly over, on which the civilizations of Earth stand where they stood, each as a place at one moment in time. There are **94 settlements**, from Çatalhöyük (c. 6500 BC) to Brasília (1960s). Each is a realistic, detailed 3D town: a famous landmark built after the real building, with its interior, and round it the townscape of its people and time — streets, houses you can walk into, markets, gardens, walls, water, people at work — under a real sun, with weather, seasons, baked indirect light and its own music.
 
-**Walk it: <https://alexw6385.github.io/memory-of-civilizations/>** — in a browser with WebGPU (Chrome, Edge, Safari 26), English or Chinese. **[Watch the 45-second film](https://alexw6385.github.io/media/moc-film.mp4).**
+**Walk it: <https://alexw6385.github.io/memory-of-civilizations/>** — in a browser with WebGPU (Chrome, Edge, Safari 26), English or Chinese. **[Watch the one-minute film](https://alexw6385.github.io/media/moc-film.mp4).**
 
 The name means only that these buildings are the memory of civilizations. This is a world to walk, not a study tool: no notes, no markers, no route.
 
@@ -85,7 +85,7 @@ npm run budget                     # load and size budgets
 npm test
 ```
 
-URL switches: `?perf` (frame-time panel with switches; `window.palace.perf`), `?trace` (counts the pipelines compiled), `?bench` (a fixed route on the author's machine, with fps, draw calls and hitches), `?capture` (fixed 1/30 s steps for recording), `?tour=a,b,c` (fixed tour order), `?quality=high|medium|low|cinema` (picture quality; automatic by default), `?range=1` (how far plants, street life, detail and shadows are drawn; 1.5 by default), `?film=promo&quality=cinema&capture&weather=clear` (records the 45-second film to an MP4).
+URL switches: `?perf` (frame-time panel with switches; `window.palace.perf`), `?trace` (counts the pipelines compiled), `?bench` (a fixed route on the author's machine, with fps, draw calls and hitches), `?capture` (fixed 1/30 s steps for recording), `?tour=a,b,c` (fixed tour order), `?quality=high|medium|low|cinema` (picture quality; automatic by default), `?range=1` (how far plants, street life, detail and shadows are drawn; 1.5 by default), `?film=promo&quality=cinema&capture&weather=clear` (records the one-minute film to an MP4).
 
 Every push to `master` runs the checks and publishes the site to GitHub Pages. How the work is run with parallel agents: [docs/parallel-work.md](docs/parallel-work.md).
 
