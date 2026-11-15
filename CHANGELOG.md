@@ -4,7 +4,7 @@ Newest first. What you can visit and what looks better, in plain words.
 
 ## v12.3 — the tour again (2026-11-15)
 
-A visit is now: the arrival view under its caption (3 s); a low glide to where the landmark's own way in begins; a short walk along that way (the plan's walk route, which the checks walk, so nothing stands in it); then the flight, once round the town on a ring at about 0.3 R, about 5 m over the roofs it passes, the landmark close by. Where the walk ends under a roof the view dips to black and the flight begins over it.
+A visit is the arrival view under its caption (3 s), a slow stroll of a few seconds by whichever way is clear, a lift-off from rest, and one even turn round the town on a ring at about 0.32 R (it was 0.4 R), 6 m over the roofs it passes (it was 8 m). A glide to the landmark's way in and a walk along it were tried and taken out: they did not look natural.
 
 ## v12.2 — solid pass (2026-11-14)
 
