@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.3 — the tour again (2026-11-15)
+
+A visit is now: the arrival view under its caption (3 s); a low glide to where the landmark's own way in begins; a short walk along that way (the plan's walk route, which the checks walk, so nothing stands in it); then the flight, once round the town on a ring at about 0.3 R, about 5 m over the roofs it passes, the landmark close by. Where the walk ends under a roof the view dips to black and the flight begins over it.
+
 ## v12.2 — solid pass (2026-11-14)
 
 Every settlement was scanned with the new `tools/float-check` (geometry hanging in the air, rooms open to the sky, places where the walker is stopped by nothing drawn, walls walked through) and its faults fixed: lanterns, lamps and wash lines hung from nothing now hang from beams, chains and posts; objects scaled after being placed (moss, domes, shop goods) stand where they belong; houses and stairs stand on their ground; missing roofs, gables and wall backs are built; colliders follow what is drawn (house lots, shop fronts, bridges, battered walls, boulders, monuments' steps), and walls, stairs and gates that had none have them. In the engine, a top overhead (an awning, a beam, a single sheet of roof) no longer walls the ground under it; rain and snow fall at six tenths and their haze is thin; a room's light no longer changes at its threshold; a hop keeps the walking pace, and the flying pace comes with height. The baked light and the impostors are current.
