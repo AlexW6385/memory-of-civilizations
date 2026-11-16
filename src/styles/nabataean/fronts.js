@@ -103,6 +103,28 @@ export function prop(el, { bag, col }) {
     B(bag, col, A, -0.55, -0.3, 0.55, 0.3, y + 0.82, y + 0.9, true); for (const s2 of [-1, 1]) B(bag, col, A, s2 * 0.4 - 0.1, -0.24, s2 * 0.4 + 0.1, 0.24, y, y + 0.82, true);
     const [x, z] = P(0.1, 0); bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.01], [0.17, 0.08], [0.15, 0.09], [0.1, 0.03], [0.001, 0.025]], 10, null, x, y + 0.9, z));
     const [x2, z2] = P(-0.3, 0.05); bag.add('pottery_dark', lathe([[0.06, 0], [0.08, 0.07], [0.04, 0.14], [0.001, 0.14]], 8, null, x2, y + 0.9, z2));
+  } else if (k === 'cistern') {
+    // a rock-cut cistern of a household or a street (the water comes along the conduit at −v, through a feeder pipe and a settling
+    // tank): a paved collar and a round coping round the dark of the mouth, the stone lid stood against it, a jar waiting by it
+    const [x, z] = el.at, fd = el.feed ?? 1.4;
+    bag.add(A, lathe([[1.2, -0.7], [1.2, 0.1], [1.0, 0.16], [0.98, 0.44], [0.72, 0.5], [0.001, 0.5]], 16, null, x, y, z));
+    bag.add('opening', lathe([[0.001, 0.505], [0.55, 0.505], [0.55, 0.52], [0.001, 0.52]], 14, null, x, y, z));
+    col.circle(x, z, 1.0, y - 0.7, y + 0.5);
+    B(bag, col, W, 0.5, 1.0, 1.1, 1.14, y + 0.5, y + 1.4);                                                        // the lid stood on edge against the coping
+    // the settling tank at the collar's edge toward the conduit, the pipe from it
+    B(bag, col, R, -0.55, -1.0 - 0.9, 0.55, -1.0, y - 0.3, y + 0.5, true);
+    B(bag, col, 'water', -0.4, -1.0 - 0.8, 0.4, -1.1, y + 0.44, y + 0.445);
+    B(bag, col, W, -0.6, -1.95, 0.6, -1.78, y + 0.5, y + 0.58); B(bag, col, W, -0.6, -1.12, 0.6, -0.95, y + 0.5, y + 0.58); B(bag, col, W, -0.6, -1.95, -0.43, -0.95, y + 0.5, y + 0.58); B(bag, col, W, 0.43, -1.95, 0.6, -0.95, y + 0.5, y + 0.58);
+    B(bag, col, 'terracotta', -0.1, -1.95 - fd, 0.1, -1.95, y + 0.25, y + 0.45); B(bag, col, 'terracotta', -0.13, -1.95 - 0.12, 0.13, -1.95, y + 0.22, y + 0.48);
+    const [jx, jz] = P(1.7, 0.4); bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.05], [0.24, 0.3], [0.2, 0.5], [0.1, 0.62], [0.12, 0.7], [0.001, 0.7]], 10, null, jx, y, jz));
+    col.circle(jx, jz, 0.24, y, y + 0.7);
+  } else if (k === 'conduit') {
+    // a stone-lined channel on the ground (len along u from `at`, width 0.5, the kerbs 0.3 high) with its water, a cover slab every 24 m
+    const L = el.len ?? 20;
+    B(bag, col, A, 0, -0.35, L, 0.35, y - 0.2, y + 0.04);
+    B(bag, col, W, 0, -0.35, L, -0.25, y + 0.04, y + 0.3); B(bag, col, W, 0, 0.25, L, 0.35, y + 0.04, y + 0.3);
+    B(bag, col, 'water', 0, -0.25, L, 0.25, y + 0.04, y + 0.2);
+    for (let u = el.cover ?? 12; u < L - 1; u += 24) B(bag, col, W, u - 0.5, -0.5, u + 0.5, 0.5, y + 0.3, y + 0.38);
   } else if (k === 'niche') {
     // a pilastered frame on the wall with a lintel, crow-steps, a baetyl on a ledge in the dark behind
     const h = el.h ?? 2.4;

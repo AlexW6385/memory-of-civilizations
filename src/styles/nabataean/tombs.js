@@ -94,7 +94,7 @@ export function crowTomb(el, { bag, col: C, lights }) {
       bag.add(R, B(U[i], V[j], U[i + 1], V[j + 1], ya, boxTop));
       // (the cell's thick segment: its centre line across the cell, its thickness along v; the façade's 0.35 on the front row)
       const vm = (V[j] + V[j + 1]) / 2 + (V[j + 1] === 0 ? fv / 2 : 0), th = V[j + 1] - V[j] + (V[j + 1] === 0 ? fv : 0);
-      C.segment(P(U[i], vm), P(U[i + 1], vm), th, y0 + ya, y0 + H);
+      C.segment(P(U[i], vm), P(U[i + 1], vm), th, y0 + ya, y0 + boxTop);
     }
   }
   // standing alone (not under a built cliff): the rock above, set back behind the crow-steps

@@ -2,7 +2,7 @@
 // `fronts()` (elements of style nabataean: the shop awnings, the wall niches, the benches, shrines and basins, the Nymphaeum, the
 // yards' walls) and `life()` (elements of style life: the goods before the shops, the north portico's stalls, the beasts and people
 // of the forecourt, the Siq, the Outer Siq, the yards and the roofs).
-import { STREET, PLAZA, OUTER, SIQ_LINE, GREAT_TEMPLE, GARDEN, QASR, shopUnits, lots, yards, height, pathDist, inRect, THEATRE, TEMENOS, smooth } from './layout.js';
+import { STREET, PLAZA, OUTER, SIQ_LINE, GREAT_TEMPLE, GARDEN, QASR, shopUnits, lots, lotAt, yards, yardAt, height, pathDist, inRect, THEATRE, TEMENOS, smooth } from './layout.js';
 import { tradeOf } from './shops.js';
 import { CARAVAN } from './people.js';
 import { khazneh } from './plan.js';
@@ -55,6 +55,16 @@ export function fronts() {
   for (const x of [(gt[0] + gt[2]) / 2 - 7, (gt[0] + gt[2]) / 2 + 7]) E.push({ t: 'petra_prop', kind: 'brazier', at: [x, gt[1] + 56], y: 5.92, seed: 5 });
   for (const [x, z, r] of [[ax - 11.5, az - 8, 0], [ax - 11.5, az + 8, Math.PI]]) E.push({ t: 'petra_prop', kind: 'table', at: [x, z], rot: dirRot(1, 0) , y: 0.06, seed: 6 + r });
   for (const [x, z] of [[ax - 14, az - 3.5], [ax - 14, az + 3.5]]) E.push({ t: 'petra_prop', kind: 'brazier', at: [x, z], y: 0.06, seed: 8 });
+  // the water of the city's north side (docs/settlements/petra.md §20): a stone-lined conduit from behind the Nymphaeum west along the
+  // north portico's back, and rock-cut cisterns tapping it, set back from the houses' doorsteps
+  { const zc = -0.6, x1 = 56, x0 = -100;
+    E.push({ t: 'petra_prop', kind: 'conduit', at: [x0, zc], rot: 0, y: 0, len: x1 - x0, cover: 12, seed: 1 });
+    for (let x = x0 + 6; x < x1 - 10; x += 17.5) {
+      const cz = -3.2, pts = [[x, cz], [x + 1.4, cz], [x - 1.4, cz], [x, cz - 1.4], [x, cz + 1.2]];
+      if (pts.some(([a, b]) => lotAt(a, b, 2.2) || yardAt(a, b, 2.2))) continue;
+      E.push({ t: 'petra_prop', kind: 'cistern', at: [+x.toFixed(2), cz], rot: Math.PI, y: 0, feed: 0.3, seed: x | 0 });
+    }
+  }
   // the yards of the empty lots
   for (const y of yards()) E.push({ t: 'petra_yard', rect: y.rect, kind: y.kind, seed: y.seed, y: y.y, gate: y.gate });
   return E;

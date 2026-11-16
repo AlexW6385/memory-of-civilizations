@@ -35,8 +35,34 @@ export function triclinium(el, { bag, col, lights }) {
       T.push(...V[0], ...V[1], ...V[2]);
     }
     bag.add(R, fromTriangles(T));
-    for (const r of [[cx - sx * 0.85, zc - sz * 0.8, x0 - t, zc], [x1 + t, zc - sz * 0.8, cx + sx * 0.85, zc], [x0 - t, zc - sz * 0.85, x1 + t, z0 - t]]) col.rect(r, y - 1, y + Hd * 0.7);
-    col.floor([cx - sx * 0.7, zc - sz * 0.7, cx + sx * 0.7, zc], y + Hd * 0.7); }
+    // (its colliders follow the drawn lump: for each of its eight tiers, strips 1 m wide across it, as far back as the tier's
+    // outline (the smaller of the two rings it lies between, less the wobble's greatest swing), none over the hall and its walls)
+    const wob = (th, i) => 1 + (i < 8 ? 0.11 * Math.sin(th * 3 + 1.3) + 0.07 * Math.sin(th * 7 + i) + 0.04 * Math.cos(th * 11 - i * 2) : 0);
+    for (let i = 0; i < 8; i++) {
+      const fa = i / 8, fb = (i + 1) / 8, ra = Math.cbrt(1 - fa * fa * fa), rb = Math.max(0, Math.cbrt(1 - fb * fb * fb)), ya = y - 1.2 + fa * Hd, yb = y - 1.2 + fb * Hd;
+      const reach = (x) => {                                   // how far behind the cut the tier extends at x (the least over the two rings)
+        let best = Infinity, mean = 0;
+        for (const [rr, k] of [[ra, i], [rb, Math.min(i + 1, 8)]]) {
+          let z = null;
+          for (let q = 0; q <= 720; q++) {
+            const th = Math.PI + q / 720 * Math.PI, px = Math.cos(th) * rr * sx * wob(th, k), pz = Math.sin(th) * rr * sz * wob(th, k);   // (the back half: sin < 0)
+            if (Math.abs(cx + px - x) < 0.1 && (z === null || pz < z)) z = pz;
+          }
+          if (z === null) return null;
+          best = Math.min(best, -z);
+          mean += -z / 2;
+        }
+        return (best + mean) / 2 * 0.98;
+      };
+      for (let x = cx - sx * 1.15; x < cx + sx * 1.15; x += 1.0) {
+        const xm = x + 0.5, d = reach(xm); if (d === null || d < 0.5) continue;
+        const zlo = zc - d, hall = xm > x0 - t - 0.5 && xm < x1 + t + 0.5, zhi = hall ? z0 - t : zc;
+        // (a shell 1.6 m thick behind the outline, and behind the cut front where it is drawn: the lump's inside is never reached)
+        if (zhi - zlo > 3.2) { col.rect([x, zlo, x + 1.0, zlo + 1.6], ya, yb); if (!hall) col.rect([x, zhi - 1.6, x + 1.0, zhi], ya, yb); }
+        else if (zhi - zlo > 0.3) col.rect([x, zlo, x + 1.0, zhi], ya, yb);
+      }
+    }
+  }
   // ---- the front: dressed, with three doorways and a large window over each, a plain fascia and cornice above ----------
   const dw = 1.7, dh = 3.3, ww = 1.3, wy0 = y + 3.9, wy1 = y + 5.0, xs = [cx - W / 4, cx, cx + W / 4];
   let p = x0 - t;
