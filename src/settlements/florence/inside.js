@@ -8,7 +8,7 @@ import { RADIUS } from './layout.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const T = 0.4, FY = 0.15;
 /** The bench of a trade's counter or bench: its v (in from the front) and how far behind it the worker stands. */
-const WORK = { cloth: [0.45, 0.8], wine: [0.4, 0.8], bread: [-1, 0.85], spice: [0.45, 0.8], leather: [0.45, 1.15], smith: [0.4, 0.75], goldsmith: [0.5, 0.8], woodwork: [0.4, 1.05], candles: [-1, 0.85] };
+const WORK = { cloth: [0.45, 0.8], wine: [0.4, 0.8], bread: [-1, 0.85], spice: [0.45, 0.8], leather: [0.45, 1.15], smith: [0.4, 0.75], goldsmith: [0.5, 0.8], woodwork: [0.4, 1.05], candles: [-1, 0.85], apothecary: [0.45, 0.8], weaver: [0.25, 0.4] };
 
 export function insidePlans(open) {
   const rand = rng(1481), by = new Map(), TILE = 150;
@@ -38,6 +38,9 @@ export function insidePlans(open) {
       put(hu, D - T - 1.35, 0, 1, 'woman');
       put(L / 2 - 0.9, D * 0.45, 1, 0, 'man', { pose: 'sit' });
       put(L / 2 + 0.95, D * 0.45 + 0.1, -1, 0, 'child', { pose: 'sit' });
+    } else if (l.use === 'kitchen') {
+      put(L / 2 + 0.6, D - T - 1.35, 0, 1, 'woman');
+      if (D > 6) put(L / 2 - 1.5, D * 0.5, 1, 0, 'child', { pose: 'sit' });
     } else if (WORK[l.use]) {
       const [cv, behind] = WORK[l.use], v = cv < 0 ? T + 1.2 + behind : D * cv + behind;
       if (v < D - T - 0.7) put(L * 0.5, v, 0, -1, 'worker', { arms: l.use === 'smith' || l.use === 'woodwork' || l.use === 'goldsmith' ? 'talk' : 'hang' });

@@ -15,6 +15,8 @@ import { mercato } from './mercato.js';
 import { novella } from './novella.js';
 import { bottega, tintoria, tiratoio } from './craft.js';
 import { casa } from './casa.js';
+import { campanileDetail } from './campanile.js';
+import { drumDetail, lantern } from './dome.js';
 
 const M = 'marble', G = 'verde_antico', R = 'roof_tile', ST = 'limestone_yellow';
 const oct = (bag, mat, cx, y, cz, r, h) => bag.add(mat, lathe([[r, 0], [r, h], [0.001, h]], 8, null, cx, y, cz));
@@ -114,13 +116,11 @@ function duomo(el, { bag, col }) {
   // the drum with its round windows, the dome in eight ribbed sails, the lantern
   const dy = y + H + 4;
   if (!IN) oct(TB, M, cx, y + H, cz, R0 + 1.5, 13);
-  for (let k = 0; k < 8; k++) { const a = (k + 0.5) / 8 * Math.PI * 2; TB.add('opening', box(cx + Math.cos(a) * (R0 + 1.55) - 1.5, dy + 3, cz + Math.sin(a) * (R0 + 1.55) - 1.5, cx + Math.cos(a) * (R0 + 1.55) + 1.5, dy + 6, cz + Math.sin(a) * (R0 + 1.55) + 1.5)); }
+  drumDetail(TB, cx, cz, R0, dy);
   const dome = [[R0 + 1, 0], [R0 + 0.6, R0 * 0.35], [R0 * 0.92, R0 * 0.62], [R0 * 0.72, R0 * 0.88], [R0 * 0.42, R0 * 1.08], [R0 * 0.16, R0 * 1.18]];
   TB.add(R, lathe(dome, 8, null, cx, y + H + 13, cz));
   for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; for (let i = 0; i + 1 < dome.length; i++) { const [r0, h0] = dome[i], [r1, h1] = dome[i + 1]; const g = box(-0.7, 0, -0.7, 0.7, Math.hypot(r1 - r0, h1 - h0) + 0.3, 0.7); g.rotateZ(Math.atan2(r0 - r1, h1 - h0)); g.translate(r0 + 0.2, h0, 0); g.rotateY(-a); g.translate(cx, y + H + 13, cz); TB.add(M, g); } }
-  const ly = y + H + 13 + R0 * 1.18;
-  oct(TB, M, cx, ly, cz, R0 * 0.18, 9); TB.add(M, lathe([[R0 * 0.2, 0], [0.4, 7], [0.001, 8]], 8, null, cx, ly + 9, cz));
-  bag.add('gilt_bronze', lathe([[0.9, 0], [0.9, 0.3], [0.001, 1.8]], 12, null, cx, ly + 17, cz));
+  lantern(TB, bag, cx, cz, y + H + 13 + R0 * 1.18, R0);
   if (IN) crossingHollow(bag, col, cx, cz, y, H, R0, apses);
 }
 
@@ -337,7 +337,8 @@ function campanile(el, { bag, col }) {
   bag.add(M, box(r[0], y - 0.5, r[1], r[2], y + h, r[3])); col.rect(r, y, y + h);
   // the marble skin storey by storey: the lower two in panels, the upper with their pointed windows
   const faces = [[[r[0], r[1]], [r[2], r[1]]], [[r[2], r[1]], [r[2], r[3]]], [[r[2], r[3]], [r[0], r[3]]], [[r[0], r[3]], [r[0], r[1]]]];
-  for (const [a, b] of faces) { inlay(bag, a, b, y, y + h * 0.47, { pitch: s / 3, bands: 4 }); inlay(bag, a, b, y + h * 0.47, y + h, { pitch: s, bands: 3, pink: false }); }
+  for (const [a, b] of faces) { inlay(bag, a, b, y + 19.4, y + h * 0.47, { pitch: s / 3, bands: 2 }); inlay(bag, a, b, y + h * 0.47, y + h, { pitch: s, bands: 3, pink: false }); }
+  campanileDetail(bag, r, y, h);
   for (const [x0, x1, z0, z1] of [[r[0] - 0.4, r[0] + 0.6, r[1] - 0.4, r[1] + 0.6], [r[2] - 0.6, r[2] + 0.4, r[1] - 0.4, r[1] + 0.6], [r[0] - 0.4, r[0] + 0.6, r[3] - 0.6, r[3] + 0.4], [r[2] - 0.6, r[2] + 0.4, r[3] - 0.6, r[3] + 0.4]]) bag.add(M, box(x0, y, z0, x1, y + h, z1));
   // Giotto's windows: two storeys of paired two-light windows, then the tall three-light belfry; each light
   // dark under a pointed head, the lights parted by slender twisted shafts, the window framed in white
@@ -362,9 +363,8 @@ function campanile(el, { bag, col }) {
       const pc = P(uc, gy + gh * 0.35, 0.17); rose.translate(...pc); bag.add('opening', rose);
     };
     for (const yy of [h * 0.5, h * 0.66]) for (const du of [-s * 0.2, s * 0.2]) win(du, s * 0.22, y + yy, 8, 2);
-    win(0, s * 0.42, y + h * 0.81, 12, 3);
+    win(0, s * 0.42, y + h * 0.81 - 1.4, 12, 3);
   }
-  bag.add(M, box(r[0] - 1, y + h, r[1] - 1, r[2] + 1, y + h + 1.2, r[3] + 1));
 }
 registerStyle('renaissance', {
   trim: () => {}, opening: () => {}, column: () => {},
