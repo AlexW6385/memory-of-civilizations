@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.5 — a detail wave: Nara, Thebes; Petra's rock (2026-11-16)
+
+Nara: ordinary houses follow a trade (weaver, smith, lacquer worker, farmer, potter, straw worker) with its front and furnished room, 150 houses are entered (30 before), workers stand at their work, the halls have a stone dado and tie beams, and the Great Buddha's lotus throne is engraved. Thebes: war reliefs of Seti I and Ramesses II on the hypostyle hall's outer walls, the festival hall with tent-pole columns and a clerestory, the barque shrine with its gilded barque, half the near houses entered, looms, ovens and a brick yard in the streets. Petra: the Siq's rock collides where it is drawn (places where one was stopped by nothing drawn: 759 cells to 78) and the theatre's back wall follows its arc.
+
 ## v12.4 — up to the wall (2026-11-16)
 
 The walker now comes right up to a wall under an eave instead of stopping at the edge of the half-metre cell the wall stands in (it stopped up to 0.7 m short): the top field records where in each cell its walls stand (`box`, `src/core/collide.js`). In Suzhou the places where one was stopped by nothing drawn fell from 411 to 257 cells.
