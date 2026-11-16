@@ -9,6 +9,7 @@
 
 import { box, lathe } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
+import { WORKING, craftOf, craftFront, craftRoom } from './crafts.js';
 
 function rng(seed) { let s = (seed >>> 0) || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const TRADES = ['rice', 'cloth', 'pottery', 'wood', 'greens', 'sake', 'fish'];
@@ -29,14 +30,14 @@ export function naraHouse(el, ctx) {
   };
   const Jr = (r, h, u, v, ya) => { const p = P(u, v); bag.add('pottery_dark', jar(r, h, p[0], ya, p[1])); };
   const shop = !!el.shop;
-  const use = USES.includes(el.use) ? el.use : null, trade = el.trade ?? TRADES[Math.floor(rand() * TRADES.length)];
+  const use = USES.includes(el.use) ? el.use : null, craft = craftOf(el), working = craft && craft !== 'home', trade = el.trade ?? TRADES[Math.floor(rand() * TRADES.length)];
   const CL = ['cloth_indigo', 'cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_green', 'cloth_brown'];
   const side = rand() < 0.5 ? -1 : 1;                       // which side of the door the goods stand
   const su = du + side * (1.5 + rand() * 0.5);
   // the noren in the door, under the eave; a shop's is longer and darker
   Bx(shop ? 'cloth_indigo' : CL[Math.floor(rand() * 6)], du - 0.55, -0.1, du + 0.55, -0.07, y + (shop ? 0.9 : 1.2), y + 2.05);
   Bx('wood_dark', du - 0.62, -0.13, du + 0.62, -0.07, y + 2.05, y + 2.12);
-  const inside = su > 0.9 && su < L - 0.9 && !(use && use !== 'incense' && use !== 'oil');
+  const inside = su > 0.9 && su < L - 0.9 && !(use && use !== 'incense' && use !== 'oil') && !working;
   if (inside) {
     if (shop) {
       // the trestle and the goods of the trade; the signboard on an arm from the eave
@@ -74,7 +75,7 @@ export function naraHouse(el, ctx) {
       for (let i = 0; i < 2; i++) Bx('wicker', T + 0.05 + i * 0.7, 0.35, T + 0.55 + i * 0.7, 0.85, fy, fy + 0.45, true);
     }
   }
-  if (use) serviceHouse(el, ctx, { Bx, Jr, P, L, D, du, y, use, shop });
+  if (use || working) serviceHouse(el, ctx, { Bx, Jr, P, L, D, du, y, use: use || craft, shop });
   else if (el.open && lights) { const q = P(L / 2, D / 2); lights.push({ at: [q[0], y + 2.3, q[1]], color: '#ffd9a0', intensity: 2.2, distance: 7 }); }
 }
 
@@ -95,6 +96,12 @@ function serviceHouse(el, ctx, helpers) {
   // the front, outside the wall (v < 0): the banner on its pole, the lanterns, the blinds, the hearth and cauldron, the timbers, the spears
   const sgn = left ? 1 : -1, fu = (t) => U(t);
   const tall = (m, u, v, w, h, ya = 0, c = true) => Bx(m, u - w, v - w, u + w, v + w, y + ya, y + ya + h, c);
+  if (WORKING.includes(use)) {
+    const kit = { Z, lat, U, Jr, lampAt, tall, rf, fy, D, T, P, lights, y, zw, colAt: (u, v, r, yt) => { const p = P(u, v); col.rect([p[0] - r, p[1] - r, p[0] + r, p[1] + r], y, yt); } };
+    craftFront(use, kit);
+    if (el.open) craftRoom(use, kit);
+    return;
+  }
   if (use === 'inn') {
     // a banner of red cloth on a bamboo pole, two paper lanterns under the eave either side of the door, a deep valance on two posts over the step
     tall('bamboo_culm', du + sgn * -2.3, -1.0, 0.04, 3.6);
