@@ -23,6 +23,7 @@ import { FURNITURE } from './furniture.js';
 import { worksFence, stoneYard } from './works.js';
 import { schoolRooms, workshopRooms } from './school.js';
 import { makeShops, plotShops, shopPeople } from './shops.js';
+import { boxGeo, cull } from './boxes.js';
 
 const S = 'limestone_yellow', P = 'stucco_cream', IRON = 'iron';
 const FACADES = [S, P, 'stucco_ochre', 'stucco_pale', P, 'stucco_rose'];
@@ -39,9 +40,12 @@ function frame(a, b) {
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]), u = [(b[0] - a[0]) / L, (b[1] - a[1]) / L], n = [u[1], -u[0]];
   const axis = Math.abs(u[0]) < 1e-6 || Math.abs(u[1]) < 1e-6;
   const at = (s, t) => [a[0] + u[0] * s + n[0] * t, a[1] + u[1] * s + n[1] * t];
-  const F = (s0, s1, t0, t1, y0, y1) => {
-    if (axis) { const p = at(s0, t0), q = at(s1, t1); return box(Math.min(p[0], q[0]), y0, Math.min(p[1], q[1]), Math.max(p[0], q[0]), y1, Math.max(p[1], q[1])); }
-    const tm = (t0 + t1) / 2; return orientedBox(at(s0, tm), at(s1, tm), t1 - t0, y0, y1);
+  const F = (s0, s1, t0, t1, y0, y1, drop) => {
+    let g;
+    if (axis) { const p = at(s0, t0), q = at(s1, t1); g = box(Math.min(p[0], q[0]), y0, Math.min(p[1], q[1]), Math.max(p[0], q[0]), y1, Math.max(p[1], q[1])); }
+    else { const tm = (t0 + t1) / 2; g = orientedBox(at(s0, tm), at(s1, tm), t1 - t0, y0, y1); }
+    g.userData.bx = { b: [s0, s1, t0, t1, y0, y1], drop };
+    return g;
   };
   return { L, u, n, at, F, axis, yaw: Math.atan2(n[0], n[1]) };
 }
@@ -66,8 +70,15 @@ const PROTO = new Map(), LOCAL = frame([0, 0], [1, 0]);
 function proto(key, build) {
   let p = PROTO.get(key);
   if (!p) {
-    const parts = new Map(), mini = { add: (m, g) => { if (!parts.has(m)) parts.set(m, []); parts.get(m).push(g.index ? g.toNonIndexed() : g); } };
+    const parts = new Map(), boxes = [], mini = { add: (m, g) => {
+      if (g.userData.bx) { boxes.push({ mat: m, ...g.userData.bx }); return; }
+      if (!parts.has(m)) parts.set(m, []); parts.get(m).push(g.index ? g.toNonIndexed() : g);
+    } };
     build(mini, LOCAL);
+    // the boxes without the faces that face the wall or lie buried in the next (boxes.js)
+    // (an opening is a dark panel on the wall: its front face is all there is of it)
+    const faces = cull(boxes.map((q) => (q.mat === 'opening' ? { ...q, only: ['tp'] } : q)));
+    boxes.forEach((q, i) => { if (!faces[i].length) return; if (!parts.has(q.mat)) parts.set(q.mat, []); parts.get(q.mat).push(boxGeo(LOCAL, q.b, faces[i])); });
     p = [...parts].map(([m, list]) => {
       let n = 0; for (const g of list) n += g.attributes.position.array.length;
       const P = new Float32Array(n), N = new Float32Array(n); let o = 0;
@@ -107,7 +118,7 @@ const balconyP = (d) => proto(`bal|${d}`, (b, fr) => {
   const F = fr.F;
   b.add(S, F(-0.95, 0.95, 0, d, -0.12, 0.06));
   b.add(S, F(-0.8, -0.6, 0, d * 0.7, -0.32, -0.12)); b.add(S, F(0.6, 0.8, 0, d * 0.7, -0.32, -0.12));
-  railing(b, fr, -0.92, 0.92, d - 0.03, 0.06, 0.95, 0.19);
+  railing(b, fr, -0.92, 0.92, d - 0.03, 0.06, 0.95, 0.23);
 });
 /** 0.96 m of the principal floor's railing. */
 const railBars = () => proto('railbars', (b, fr) => { const F = fr.F; b.add(IRON, F(0, 0.96, 0.86, 0.9, 0.95, 1.0)); b.add(IRON, F(0, 0.96, 0.865, 0.895, 0.1, 0.14)); for (let i = 0; i < 6; i++) { const s = 0.08 + i * 0.16; b.add(IRON, F(s - 0.012, s + 0.012, 0.868, 0.892, 0, 0.95)); } });
@@ -266,12 +277,17 @@ function streetFront(bag, fr, s0, s1, y, h, mat, rand, tribune = false, opt = {}
   }
 }
 /** The court side of a house: plain windows with shutters, floor over floor. */
+/** A court window: a dark panel 1.1 × 1.6 m (the court wall's frame: s along, t out into the court). */
+const courtWindowP = () => proto('courtwin', (b, { F }) => b.add('opening', F(-0.55, 0.55, 0.0, 0.03, 0, 1.6)));
+/** Washing hung out on a line: a sheet seen from both sides. */
+const laundryP = () => proto('laundry', (b, { F }) => { b.add('cloth_white', F(-0.45, 0.45, 0.1, 0.12, 0, 0.7, ['sn', 'sp', 'yn', 'yp'])); });
 function courtFront(bag, fr, s0, s1, y, h, D, rand, from = 1) {
+  const cf = frame(fr.at(s1, -D), fr.at(s0, -D));                      // the court wall's own frame, looking into the court
   const top = LV.findIndex((l) => l >= h - 0.01), n = Math.max(1, Math.floor((s1 - s0) / 3.2)), bw = (s1 - s0) / n;
   for (let f = from; f < top; f++) for (let i = 0; i < n; i++) {
     const sc = s0 + (i + 0.5) * bw, y0 = y + LV[f] + 0.8;
-    bag.add('opening', fr.F(sc - 0.55, sc + 0.55, -D - 0.03, -D + 0.03, y0, y0 + 1.6));
-    if (rand() < 0.35) bag.add('cloth_white', fr.F(sc - 0.5, sc + 0.4, -D - 0.12, -D - 0.1, y0 - 0.9, y0 - 0.2));     // laundry hung out
+    put(bag, cf, courtWindowP(), s1 - sc, y0 - 0.0);
+    if (rand() < 0.35) put(bag, cf, laundryP(), s1 - sc, y0 - 0.9);                                              // laundry hung out
   }
   bag.add(S, fr.F(s0, s1, -D - 0.1, -D + 0.3, y + h + 0.0, y + h + 0.9));
 }

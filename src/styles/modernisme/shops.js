@@ -63,17 +63,24 @@ export function plotShops(p, nb, bw, on, lim = [-1e9, 1e9]) {
 export function makeShops(H) {
   // the furnishing is a heap of small pieces (each a fine detail drawn only near): kept as pieces, not merged into one prototype
   const KITS = new Map();
-  const proto = (key, build) => { let k = KITS.get(key); if (!k) { k = []; build({ add: (m, g) => k.push([m, g.index ? g.toNonIndexed() : g]) }); KITS.set(key, k); } return k; };
-  const put = (bag, fr, pieces, s, y) => {
+  const proto = (key, build) => { let k = KITS.get(key); if (!k) { k = []; build({ add: (m, g) => k.push([m, g.index ? g.toNonIndexed() : g]), box: (m, x0, y0, z0, x1, y1, z1) => k.push([m, null, [x0, y0, z0, x1, y1, z1]]) }); KITS.set(key, k); } return k; };
+  // the furnishing's boxes are set as copies of one unit box (a matrix each: turned and stretched), seen only within `reach`; the small pieces are merged as before
+  const UNIT = box(0, 0, 0, 1, 1, 1);
+  const put = (bag, fr, pieces, s, y, reach = 230) => {
     const q = fr.at(s, 0), M = new Matrix4().makeRotationY(Math.atan2(-fr.u[1], fr.u[0])).setPosition(q[0], y, q[1]);
-    for (const [m, g] of pieces) bag.add(m, g.clone().applyMatrix4(M));
+    for (const [m, g, bb] of pieces) {
+      if (!bb) { bag.add(m, g.clone().applyMatrix4(M)); continue; }
+      if (!bag.addInstance) { bag.add(m, box(...bb).applyMatrix4(M)); continue; }
+      const L = new Matrix4().makeTranslation(bb[0], bb[1], bb[2]).multiply(new Matrix4().makeScale(bb[3] - bb[0], bb[4] - bb[1], bb[5] - bb[2]));
+      bag.addInstance(m, UNIT, M.clone().multiply(L), { reach });
+    }
   };
 
   // ── a shop's furnishing in its own frame ──────────────────────────────────────────────────────
   const furnish = (trade, W, dc, flip) => proto(`shop|${trade}|${W.toFixed(1)}|${dc.toFixed(1)}|${flip ? 1 : 0}`, (b) => {
     const T = TRADES[trade], Ly = layout(W, dc), r = rng(Math.round(W * 10) * 131 + trade.length * 17 + (flip ? 5 : 0));
     const S = (s) => (flip ? W - s : s), Y0 = 0.12;
-    const bx = (m, s0, s1, d0, d1, y0, y1) => { const a = S(s0), c = S(s1); b.add(m, box(Math.min(a, c), y0, d0, Math.max(a, c), y1, d1)); };
+    const bx = (m, s0, s1, d0, d1, y0, y1) => { const a = S(s0), c = S(s1); b.box(m, Math.min(a, c), y0, d0, Math.max(a, c), y1, d1); };
     const lat = (m, prof, s, d, y, seg = 7) => b.add(m, lathe(prof, seg, null, S(s), y, d));
     const rd = (m, p, q, rr, seg = 6) => b.add(m, rod([S(p[0]), p[2], p[1]], [S(q[0]), q[2], q[1]], rr, seg));
     const pick = (a) => a[Math.floor(r() * a.length)];
@@ -160,7 +167,7 @@ export function makeShops(H) {
   /** Goods and a bench at the front: set on the pavement before the shop (t > 0), and the blade sign on its bracket. */
   const dress = (trade, W, dc, flip) => proto(`shopfront|${trade}|${W.toFixed(1)}|${dc.toFixed(1)}|${flip ? 1 : 0}`, (b) => {
     const S = (s) => (flip ? W - s : s), r = rng(Math.round(W * 10) * 71 + trade.length * 13 + (flip ? 3 : 0)), T = TRADES[trade];
-    const bx = (m, s0, s1, t0, t1, y0, y1) => { const a = S(s0), c = S(s1); b.add(m, box(Math.min(a, c), y0, -Math.max(t0, t1), Math.max(a, c), y1, -Math.min(t0, t1))); };
+    const bx = (m, s0, s1, t0, t1, y0, y1) => { const a = S(s0), c = S(s1); b.box(m, Math.min(a, c), y0, -Math.max(t0, t1), Math.max(a, c), y1, -Math.min(t0, t1)); };
     const lat = (m, prof, s, t, y, seg = 7) => b.add(m, lathe(prof, seg, null, S(s), y, -t));
     const rd = (m, p, q, rr, seg = 6) => b.add(m, rod([S(p[0]), p[2], -p[1]], [S(q[0]), q[2], -q[1]], rr, seg));
     const wnd = dc + 0.9 + 0.3, far = W - 0.35;                   // the pavement before the windows (beyond the door's lane)
@@ -170,8 +177,8 @@ export function makeShops(H) {
     const ds = dc, bt = 0.85, by = 2.95;
     rd(IRON, [ds - 0.7, 0.04, by + 0.55], [ds - 0.7, bt + 0.1, by + 0.55], 0.014, 5); rd(IRON, [ds - 0.7, 0.04, by + 0.1], [ds - 0.7, bt * 0.6, by + 0.5], 0.01, 4);
     rd(IRON, [ds - 0.7, 0.3, by + 0.55], [ds - 0.7, 0.3, by + 0.45], 0.005, 3);
-    const board = (m, y0, y1, t0, t1) => b.add(m, box(S(ds - 0.7) - 0.02, y0, -t1, S(ds - 0.7) + 0.02, y1, -t0));
-    const mark = (m, y0, y1, t0, t1) => b.add(m, box(S(ds - 0.7) - 0.032, y0, -t1, S(ds - 0.7) + 0.032, y1, -t0));
+    const board = (m, y0, y1, t0, t1) => b.box(m, S(ds - 0.7) - 0.02, y0, -t1, S(ds - 0.7) + 0.02, y1, -t0);
+    const mark = (m, y0, y1, t0, t1) => b.box(m, S(ds - 0.7) - 0.032, y0, -t1, S(ds - 0.7) + 0.032, y1, -t0);
     board('wood_painted', by - 0.05, by + 0.5, 0.25, bt);
     ({
       colmado: () => { mark('cloth_green', by + 0.02, by + 0.43, 0.32, 0.78); mark('cloth_red', by + 0.1, by + 0.28, 0.4, 0.7); },
