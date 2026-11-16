@@ -8,7 +8,7 @@ import { placer, assembly, tube, slathe, rng } from '../../objects/kit.js';
 const at = (g, x, y, z) => { g.translate(x, y, z); return g; };
 
 /** A stringybark gum: a dark fibrous base, a pale upper trunk, a few limbs, ragged oblate crowns of grey-green leaf. */
-export function gum(el, { bag }) {
+export function gum(el, { bag, col }) {
   const put = placer(el, bag), v = (el.seed ?? 1) % 3, H = el.h ?? 10;
   const A = assembly(`ka_gum|${v}|${H}`, (a) => {
     const r = rng(700 + v * 13 + Math.round(H * 3)), lean = (r() - 0.5) * 0.9, s = H / 10;
@@ -23,9 +23,12 @@ export function gum(el, { bag }) {
     }
   });
   put('bark_dark', A.base.clone()); put('bark_grey', A.trunk.clone()); put('flax_leaf', A.leaf.clone());
+  // the trunk, as thick as it is drawn at the height of the body (the base tube: 0.34 s at the ground, 0.24 s at 0.12 H, 0.18 s at 0.34 H)
+  const s = H / 10, y = 1.0, rr = (y < H * 0.12 ? 0.34 - 0.1 * y / (H * 0.12) : 0.24 - 0.06 * Math.min(1, (y - H * 0.12) / (H * 0.22))) * s;
+  col?.circle(el.at[0], el.at[1], Math.max(0.25, rr - 0.03), (el.y ?? 0) - 0.3, (el.y ?? 0) + 3);   // (a trunk thinner than a cell of the checks is given the walker's own reach)
 }
 /** A cycad (Cycas): a short stub of a trunk with rings of old frond bases, a crown of arching pinnate fronds. */
-export function cycad(el, { bag }) {
+export function cycad(el, { bag, col }) {
   const put = placer(el, bag), v = (el.seed ?? 1) % 3, h = el.h ?? 1;
   const A = assembly(`ka_cycad|${v}|${h}`, (a) => {
     const r = rng(800 + v * 7), n = 15 + v * 3;
@@ -37,6 +40,7 @@ export function cycad(el, { bag }) {
     }
   });
   put('bark_dark', A.trunk.clone()); put('palm_leaf', A.leaf.clone());
+  if (h >= 0.6) col?.circle(el.at[0], el.at[1], 0.28, (el.y ?? 0) - 0.3, (el.y ?? 0) + h + 0.5);   // the stub and the crown's heart; the fronds arch over it
 }
 /** One tuft of spinifex or dry grass: a dome of thin arching blades. */
 function tuftShape(v) {

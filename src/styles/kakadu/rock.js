@@ -1,7 +1,7 @@
 // The sandstone of Ubirr (docs/settlements/kakadu.md §3, §10): the outlier's beds, joints and fallen blocks are built in outcrop.js; the painted wall and the painted ceiling as separate smooth surfaces under the
 // roof slab; the rock steps up to the lookout; boulders at the foot. Everything stands on the ground and collides with its box.
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
-import { Acc, outcropBlock, shedBlocks, chunk, hex } from './outcrop.js';
+import { Acc, outcropBlock, blockColliders, shedBlocks, chunk, hex } from './outcrop.js';
 import { BLOCKS, MAIN, SMALL, FLIGHTS, height, rng, smooth } from '../../settlements/kakadu/layout.js';
 
 // smooth value noise in 3D, about −1…1, features about one unit
@@ -35,7 +35,7 @@ export function rockMass(el, { bag, col }) {
   const acc = new Acc();
   for (const B of BLOCKS) {
     outcropBlock(acc, B, { res: B.r[3] > -50 ? 0.55 : 0.9 });
-    col.rect(B.r, B.slab ? B.y[0] - 0.55 : B.y[0], B.y[1]);
+    for (const o of blockColliders(B)) col.obstacles.push(o);   // (what is drawn: the rounded columns, not the box)
   }
   shedBlocks(acc);
   acc.flush(bag);

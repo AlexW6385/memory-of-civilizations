@@ -213,7 +213,7 @@ const GREY = 'rock_boulder', BLACK = 'pottery_dark', IRON = 'scoria_red';
  * Everything is in the settlement's frame; the front is at z = zf − set.
  */
 export function columnMass(acc, o) {
-  if (acc.dry) return;
+  if (acc.dry && !o.rings) return;   // (a dry build with o.rings only measures the slices' outlines, for the colliders)
   const w = o.xb - o.xa, cx0 = (o.xa + o.xb) / 2, res = o.res ?? 0.55, seed = o.seed;
   const rnd = rng(seed * 31 + 7), scars = [];
   const yLo = o.slices[0].ya, yHi = o.slices[o.slices.length - 1].yb;
@@ -252,6 +252,7 @@ export function columnMass(acc, o) {
       }
       R.push(ring);
     }
+    if (o.rings) o.rings.push({ ya: s.ya, yb: s.yb, rows: rows.map(([y, ins], ri) => ({ y, ins, pts: R[ri].map((i) => [V[i][0], V[i][2]]) })) });
     const tris = [], M = th.length;
     for (let r = 0; r + 1 < R.length; r++) for (let j = 0; j < M; j++) { const a = R[r][j], b = R[r][(j + 1) % M], c = R[r + 1][(j + 1) % M], d = R[r + 1][j]; tris.push(a, b, c, a, c, d); }
     const matBase = s.mat, pitMat = s.pitMat;
@@ -296,7 +297,7 @@ export function outcropBlock(acc, B, o = {}) {
   // ── the plateau behind the columns: the top walked on, the north face seen from the lookout
   {
     const C = corners(x0, x1, y0, y1, z0, z1 - deepC + 1.2, uniformJit(0), rnd);
-    hex(acc, B.m, C, { S: { res: 2.5, mat: BLACK }, N: { res: 1.6, relief: relief(B.seed, 0.35, 0.12) }, T: { res: 1.2, edge: 0.5, relief: relief(B.seed + 4, 0.04, 0.5) } });
+    hex(acc, B.m, C, { S: { res: 2.5, mat: BLACK }, N: { res: 1.6, relief: relief(B.seed, 0.35, 0.12) }, E: { res: 2.0, relief: relief(B.seed + 2, 0.1, 0.12) }, W: { res: 2.0, relief: relief(B.seed + 3, 0.1, 0.12) }, T: { res: 1.2, edge: 0.5, relief: relief(B.seed + 4, 0.04, 0.5) } });
     // the dark back of the clefts, inside the columns' depth
     if (!slab) { const Cs = corners(x0 + 0.4, x1 - 0.4, y0, y1 - 0.5, z1 - 3.9, z1 - 3.8, uniformJit(0), rnd); hex(acc, BLACK, Cs, { S: { res: 2.5 } }); }
   }
@@ -344,14 +345,27 @@ export function outcropBlock(acc, B, o = {}) {
     if (slab) slices[0].rb = 0;
     void H;
     const gapL = edges[c].g, gapR = edges[c + 1].g;
-    if (!slab && !flat) tops.push({ x: xa + 0.9 + rnd() * Math.max(0.1, w - 1.8), y: yTop, z: z1 - deepC * (0.35 + rnd() * 0.3) });
-    columnMass(acc, { fine: z1 > -31 ? 0.4 : z1 > -40 ? 0.55 : 0.8, xa, xb, zf: z1, deep: deepC, slices, seed, res, amp: 0.2 + rnd() * 0.12, darkL: gapL > 0.9, darkR: gapR > 0.9, bridge: slab ? 0.2 : 0 });
+    let tp = null;
+    if (!slab && !flat) tops.push(tp = { x: xa + 0.9 + rnd() * Math.max(0.1, w - 1.8), y: yTop, z: z1 - deepC * (0.35 + rnd() * 0.3) });
+    const rings = o.cols || tp ? [] : undefined;
+    columnMass(acc, { fine: z1 > -31 ? 0.4 : z1 > -40 ? 0.55 : 0.8, xa, xb, zf: z1, deep: deepC, slices, seed, res, amp: 0.2 + rnd() * 0.12, darkL: gapL > 0.9, darkR: gapR > 0.9, bridge: slab ? 0.2 : 0, rings });
+    if (o.cols) o.cols.push({ xa, xb, wall, yBase, rings });
+    // a plant on the cap stands on the cap: where the column stands back (set, lean) from where the spot was drawn, it moves to the middle of the cap
+    if (tp && rings.length) {
+      const P = rings[rings.length - 1].rows.at(-1).pts, n = P.length;
+      let mx = 0, mz = 0; for (const [px, pz] of P) { mx += px / n; mz += pz / n; }
+      const inside = (x, z) => { let c = false; for (let i = 0, j = n - 1; i < n; j = i++) { const [xi, zi] = P[i], [xj, zj] = P[j]; if ((zi > z) !== (zj > z) && x < (xj - xi) * (z - zi) / (zj - zi) + xi) c = !c; } return c; };
+      const k = 0.55;   // (the cap's outline drawn in towards its middle, so that the plant is clear of the edge)
+      if (!inside(mx + (tp.x - mx) / k, mz + (tp.z - mz) / k)) { tp.x = mx; tp.z = mz; }
+    }
     // plants: the ledges where a slice stands back from the one under it, the feet of the clefts
+    // (the ledges' plants draw from a stream of their own: the draws of the build itself are the same with or without the spots, so that the dry build of faceSpots is the very build that is drawn)
     if (o.spots) {
+      const rl = rng(seed * 17 + 5);
       slices.forEach((s, k) => {
         if (!k) return;
         const p = slices[k - 1], led = s.set - p.set;
-        if (led > 0.4 && !flat && rnd() < 0.85) { const zz = z1 - s.set + led * (0.25 + rnd() * 0.4); o.spots.push({ x: xa + 0.6 + rnd() * Math.max(0.1, w - 1.2), y: p.yb - 0.02, z: zz, w: led, lim: z1 - zz, kind: 'ledge' }); }
+        if (led > 0.4 && !flat && rl() < 0.85) { const zz = z1 - s.set + led * (0.25 + rl() * 0.4); o.spots.push({ x: xa + 0.6 + rl() * Math.max(0.1, w - 1.2), y: p.yb - 0.02, z: zz, w: led, lim: z1 - zz, kind: 'ledge' }); }
       });
     }
   }
@@ -399,4 +413,65 @@ export function faceSpots() {
   acc.dry = true;
   for (const B of BLOCKS) outcropBlock(acc, B, { spots });
   return spots;
+}
+
+// ── the colliders: the blocks as they are drawn ─────────────────────────────────────────────────────────────
+/** Douglas–Peucker on a closed ring (a vertex dropped from a convex outline moves the line inward, never out). */
+function simplify(P, tol) {
+  const n = P.length;
+  if (n < 8) return P;
+  const dist = (p, a, b) => { const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz) || 1e-9; return Math.abs((p[0] - a[0]) * dz - (p[1] - a[1]) * dx) / L; };
+  const keep = new Array(n).fill(false);
+  const rec = (i, j) => {
+    let m = -1, md = tol;
+    for (let k = i + 1; k < j; k++) { const d = dist(P[k], P[i], P[j]); if (d > md) { md = d; m = k; } }
+    if (m >= 0) { keep[m] = true; rec(i, m); rec(m, j); }
+  };
+  const h = n >> 1; keep[0] = keep[h] = keep[n - 1] = true;
+  rec(0, h); rec(h, n - 1);
+  return P.filter((_, k) => keep[k]);
+}
+/** One slice's outline at the height of the body: the mean of its straight-sided rings, a few centimetres in. */
+function sliceOutline(sl, inset) {
+  const mid = sl.rows.filter((r) => r.ins < 0.02), rows = mid.length ? mid : sl.rows, M = rows[0].pts.length;
+  const P = [];
+  let cx = 0, cz = 0; for (const p of rows[0].pts) { cx += p[0] / M; cz += p[1] / M; }
+  for (let j = 0; j < M; j++) { let b = rows[0].pts[j]; for (const r of rows) if (Math.hypot(r.pts[j][0] - cx, r.pts[j][1] - cz) > Math.hypot(b[0] - cx, b[1] - cz)) b = r.pts[j]; P.push(b); }
+  const Q = P.map(([x, z]) => { const d = Math.hypot(x - cx, z - cz) || 1, k = Math.max(0, d - inset) / d; return [cx + (x - cx) * k, cz + (z - cz) * k]; });
+  // (the ring is open: its last angle is next to its first)
+  const out = simplify([...Q, Q[0]], 0.03); out.pop();
+  return out;
+}
+/** The obstacles of a block that follow what is drawn: the plateau behind the columns, each column's slices as their rounded outlines. [{ poly, y0, y1 }] */
+export function blockColliders(B) {
+  const acc = new Acc(); acc.dry = true;
+  const cols = [];
+  outcropBlock(acc, B, { cols });
+  const [x0, z0, x1, z1] = B.r, [y0, y1] = B.y, slab = !!B.slab, D = z1 - z0, deepC = slab ? D - 0.3 : Math.min(D - 0.3, 7.0);
+  const lo = slab ? y0 - 0.55 : y0, out = [];
+  const rect = (a, b, c, d, ya, yb) => { if (yb > ya + 0.01 && c > a && d > b) out.push({ poly: [[a, b], [c, b], [c, d], [a, d]], y0: ya, y1: yb }); };
+  // the plateau behind the columns (the whole roof for a slab: its soffit and the bed over it are one flat sheet)
+  if (slab) rect(x0 + 0.1, z0 + 0.1, x1 - 0.1, z1 - 0.05, lo, y0 + 0.9);
+  rect(x0, z0, x1, z1 - deepC + 1.2, lo, y1);
+  // the top, to be walked on where it always was (the box's lid over the whole plan: the drawn crown is broken into caps, clefts and ledges)
+  rect(x0, z0, x1, z1, y1 - 0.04, y1);
+  const walls = cols.filter((c) => c.wall);
+  if (walls.length) rect(Math.min(...walls.map((c) => c.xa)), z1 - deepC + 1.2, Math.max(...walls.map((c) => c.xb)), z1 - 0.05, lo, Math.min(y1, walls[0].yBase));
+  // the joints that are too narrow to enter are closed (a flight's steps run up in one: the top is walked on there), as far forward as the neighbours' hard beds stand
+  const zFront = (c) => Math.max(...c.rings.filter((q) => q.ya < y0 + 3).map((q) => Math.max(...q.rows[0].pts.map((p) => p[1]))));
+  for (let i = 0; i + 1 < cols.length; i++) {
+    const a = cols[i], b = cols[i + 1];
+    if (b.xa - a.xb < 1.0 && a.rings.length && b.rings.length) rect(a.xb - 0.15, z1 - deepC + 1.2, b.xa + 0.15, Math.min(zFront(a), zFront(b)), lo, y1);
+  }
+  for (const c of cols) {
+    // (the painted wall's columns stand on a free space: the wall itself, down to the floor: one filler for all, joints included)
+    // the painted wall's columns stand on a free space: the wall itself, down to the floor
+    for (const sl of c.rings) {
+      const ya = Math.max(lo, sl.ya), yb = Math.min(y1, sl.yb);
+      if (yb <= ya + 0.05) continue;
+      const poly = sliceOutline(sl, -0.12);
+      if (poly.length >= 3) out.push({ poly, y0: ya, y1: yb });
+    }
+  }
+  return out;
 }
