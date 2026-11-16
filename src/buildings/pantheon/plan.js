@@ -74,6 +74,23 @@ for (let k = 0; k < 8; k++) add({ t: 'aedicula', c: [0, 0], R, bearing: 22.5 + k
 // the attic as first faced: porphyry pilasters, framed blind windows, panels (none over the apse, which rises into it)
 add({ t: 'attic', c: [0, 0], R, y0: CORNICE1, y1: SPRING - 0.5, skip: [180] });
 
+// the gods in the seven niches (the seven planets: Jupiter in the apse opposite the door) and in the eight aediculae, and
+// Augustus and Agrippa in the portico's apses (docs/buildings/pantheon.md §8a)
+{
+  const PLAN = { 45: 'mars', 90: 'sol', 135: 'mercury', 180: 'jupiter', 225: 'venus', 270: 'luna', 315: 'saturn' };
+  for (const n of NICHES) {
+    const a = (n.b - 90) * Math.PI / 180, ux = Math.cos(a), uz = Math.sin(a), r = R + (n.kind === 'semi' ? 2.5 : 2.4);
+    add({ t: 'god', god: PLAN[n.b], at: [ux * r, uz * r], y: F, face: [-ux, -uz], h: n.apse ? 4.6 : 4.0, base: n.apse ? 1.6 : 1.3, w: 1.7, mat: n.apse ? 'marble' : undefined });
+  }
+  const AED = ['minerva', 'neptune', 'caesar', 'hercules', 'ceres', 'juno', 'vesta', 'venus'];
+  for (let k = 0; k < 8; k++) {
+    const b = 22.5 + k * 45, a = (b - 90) * Math.PI / 180, ux = Math.cos(a), uz = Math.sin(a), r = R - 0.65;
+    add({ t: 'god', god: AED[k], at: [ux * r, uz * r], y: F + 1.5, face: [-ux, -uz], h: 3.0, base: 0.35, w: 0.8, die: 'marble' });
+  }
+  add({ t: 'god', god: 'augustus', at: [-8.85, -32.6], y: F + 0.8, face: [0, -1], h: 3.3, base: 0.5, w: 0.9, die: 'marble' });
+  add({ t: 'god', god: 'agrippa', at: [8.85, -32.6], y: F + 0.8, face: [0, -1], h: 3.3, base: 0.5, w: 0.9, die: 'marble' });
+}
+
 // ── the dome ──────────────────────────────────────────────────────────────────
 add({
   t: 'coffered_dome', c: [0, 0], y: SPRING, R, thick: WALL - 0.3, top: 1.45, oculus: 4.45,
@@ -81,6 +98,8 @@ add({
   outSteps: [[8.7, RO - 0.95], [9.6, RO - 1.9], [10.5, RO - 2.85], [11.4, RO - 3.8], [12.3, RO - 4.75], [13.2, RO - 5.7], [14.1, RO - 6.65]],
   mat: 'dome_stucco', outMat: 'gilt_bronze', stepMat: 'stucco',
 });
+// a gilt rosette in the back of every coffer (docs/buildings/pantheon.md §8b)
+add({ t: 'coffer_rosettes', c: [0, 0], y: SPRING, R, n: 28, step: 0.24, rings: [[7, 17.5], [17.5, 28], [28, 38], [38, 47.5], [47.5, 56.5]] });
 // exterior cornices dividing the drum into its three zones
 for (const y of [F + 10.6, F + 21.0, F + 30.4]) add({ t: 'ring_wall', c: [0, 0], r0: RO - 0.2, r1: RO + 0.55, y0: y - 0.7, y1: y, gaps: [{ a: 0, w: 30 }], mat: 'marble' });
 
@@ -133,7 +152,7 @@ const rooms = [
   room('niche-west', [-25.5, -3, -22.5, 3], F, 'hall'),
 ];
 const walks = [
-  [[0, -165], [0, -146], [0, -95], [-42.5, -100], [-42.5, -60], [-30, -60], [0, -52], [0, -48.5], [0, -36], [0, -27.5], [0, -24.5], [0, -18], [0, 0], [16, 0], [23.5, 0], [16, 0], [0, 16], [0, 23.5], [0, 16], [-16, 0], [-23.5, 0], [-16, 0], [0, 0]],
+  [[0, -165], [0, -146], [0, -95], [-42.5, -100], [-42.5, -60], [-30, -60], [0, -52], [0, -48.5], [0, -36], [0, -27.5], [0, -24.5], [0, -18], [0, 0], [16, 0], [22.3, 0], [16, 0], [0, 16], [0, 22.3], [0, 16], [-16, 0], [-22.3, 0], [-16, 0], [0, 0]],
   [[0, -40.5], [-8.8, -40.5], [-8.8, -37.2], [-8.8, -40.5], [-13.3, -40.5], [-13.3, -36.2], [-16.3, -40.0]],
 ];
 walks.forEach((w, i) => { w.y0 = [0, F][i]; });
