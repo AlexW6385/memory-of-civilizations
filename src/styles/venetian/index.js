@@ -17,6 +17,7 @@ import { rive, rialto } from './rive.js';
 import { palazzo } from './palazzo.js';
 import { ponte, pozzo, squero } from './ponte.js';
 import { bellTower } from './campanile.js';
+import { venFacade } from './facade.js';
 import { venRoom, venFront } from './rooms.js';
 
 const M = 'marble', B = 'brick', L = 'lead', I = 'limestone';
@@ -103,6 +104,6 @@ function basilica(el, { bag, col, lights }) {
 }
 registerStyle('venetian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, basilica, bell_tower: bellTower, doges_palace: dogesPalace, procuratie: procuratieOld, clock_tower: clockTower, column_statue: columnStatue, gondola, palo, pennone, rive, rialto, palazzo, ponte, pozzo, squero, ven_room: venRoom, ven_front: venFront },
+  elements: { ...STYLES.qing.elements, basilica, bell_tower: bellTower, doges_palace: dogesPalace, procuratie: procuratieOld, clock_tower: clockTower, column_statue: columnStatue, gondola, palo, pennone, rive, rialto, palazzo, ponte, pozzo, squero, ven_room: venRoom, ven_front: venFront, ven_facade: venFacade },
   objects: {},
 });
