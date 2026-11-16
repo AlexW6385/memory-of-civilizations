@@ -89,3 +89,36 @@ export function flagstaff(el, { bag, col }) {
   [['cloth_red', -0.9, 7.5], ['cloth_white', 0.0, 6.5], ['cloth_blue', 0.9, 7.0]].forEach(([mat, dz, L]) => addCloth(bag, mat, clothBox(x + side * 0.1 - 0.02, top - L, z + dz - 0.32, x + side * 0.1 + 0.02, top, z + dz + 0.32, 0.25), top));
   col.circle(x, z, 0.45, y, y + h);
 }
+
+/**
+ * nk_barque: the processional barque of Amun { at, y, yaw (0 = prow toward +z), len }: the gilded hull with a ram's head at prow and stern, the
+ * cabin (naos) amidships under a blue canopy with its curtain, the carrying poles through the hull's sides on a pedestal of black granite.
+ */
+export function barque(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, yaw = el.yaw ?? 0, L = el.len ?? 4.4, hl = L / 2;
+  const add = (mat, g) => { place(g, x, y, z, yaw); bag.add(mat, g); };
+  add('granite_black', box(-0.9, 0, -hl - 0.1, 0.9, 0.55, hl + 0.1));                                                // the pedestal
+  add('sandstone_dressed', box(-1.0, 0, -hl - 0.2, 1.0, 0.1, hl + 0.2));
+  const hy = 0.55;
+  for (const s of [-1, 1]) {                                                                                         // the hull's sides, rising to the two ends
+    for (let i = 0; i < 6; i++) {
+      const z0 = -hl + i * L / 6, z1 = z0 + L / 6, t0 = Math.abs(z0 / hl), t1 = Math.abs(z1 / hl);
+      add('gold', box(s * 0.36 - 0.05, hy + 0.15 + 0.5 * t0 * t0, z0, s * 0.36 + 0.05, hy + 0.62 + 0.5 * t1 * t1, z1));
+    }
+  }
+  add('gold', box(-0.36, hy, -hl, 0.36, hy + 0.2, hl));
+  for (const s of [-1, 1]) {                                                                                         // ram heads on tall necks at both ends
+    const zz = s * (hl - 0.05);
+    add('gold', box(-0.07, hy + 0.5, zz - 0.07, 0.07, hy + 1.05, zz + 0.07));
+    add('gold', ellip(0, hy + 1.1, zz + s * 0.1, 0.14, 0.17, 0.22, 8));
+    add('gold', ellip(0, hy + 1.04, zz + s * 0.3, 0.09, 0.1, 0.16, 8));
+    for (const q of [-1, 1]) add('gold', ellip(q * 0.17, hy + 1.1, zz + s * 0.05, 0.05, 0.12, 0.1, 6));
+    add('egyptian_blue', lathe([[0.001, 0], [0.2, 0], [0.001, 0.05]], 8, null, 0, hy + 1.3, zz));
+  }
+  add('cedar', box(-0.55, hy + 0.1, -hl * 0.55, 0.55, hy + 0.2, -hl * 0.55 + 0.1)); add('cedar', box(-0.55, hy + 0.1, hl * 0.55 - 0.1, 0.55, hy + 0.2, hl * 0.55));   // the carrying poles' crossbars
+  for (const s of [-1, 1]) add('cedar', box(s * 0.55 - 0.05, hy + 0.1, -hl - 0.3, s * 0.55 + 0.05, hy + 0.2, hl + 0.3));
+  add('gold', box(-0.3, hy + 0.2, -0.6, 0.3, hy + 1.0, 0.6));                                                        // the naos
+  add('cloth_blue', box(-0.32, hy + 1.0, -0.62, 0.32, hy + 1.08, 0.62));
+  add('cloth_red', box(-0.31, hy + 0.28, -0.62, 0.31, hy + 0.95, -0.58));                                           // its curtain
+  col.rect([x - hl - 0.3, z - hl - 0.3, x + hl + 0.3, z + hl + 0.3], y, y + 1.5);
+}

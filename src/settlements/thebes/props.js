@@ -6,7 +6,7 @@ import { QUAY, QUAY_STAIRS, AVENUE, ENCL, ENCL_TH, PYLON2, STREET_ZS, LANES_X, T
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const pickW = (rand, list) => { const t = list.reduce((a, [, w]) => a + w, 0); let r = rand() * t; for (const [k, w] of list) { r -= w; if (r <= 0) return k; } return list[0][0]; };
-const STREET_KINDS = [['jars', 0.22], ['bricks', 0.13], ['straw', 0.08], ['post', 0.1], ['bench', 0.14], ['well', 0.07], ['stack', 0.09], ['logs', 0.04], ['chapel', 0.03], ['bricks', 0.05], ['jars', 0.05]];
+const STREET_KINDS = [['jars', 0.22], ['bricks', 0.13], ['straw', 0.08], ['post', 0.1], ['bench', 0.14], ['well', 0.07], ['stack', 0.09], ['logs', 0.04], ['chapel', 0.03], ['bricks', 0.03], ['jars', 0.04], ['loom', 0.05], ['bread', 0.05], ['brickyard', 0.03]];
 const dist = (x, z) => Math.hypot(x + 120, z);
 
 /** Items along one east–west street rectangle. */
@@ -37,6 +37,7 @@ export function propPlans() {
     const items = [];
     for (const r of streets().filter((q) => Math.abs((q[1] + q[3]) / 2 - zs) < 0.1 && q[2] - q[0] > 12)) alongStreet(r, rand, items, inStreet);
     if (zs === WORKSHOP_Z) for (const it of items) if (it.k === 'straw' || it.k === 'bench') it.k = 'bricks';
+    for (const it of items) if (it.k === 'brickyard' && Math.hypot(it.at[0] + 120, it.at[1]) < 150) it.k = 'loom';   // the brick-makers work on the outskirts, not under the temple
     if (items.length) L.push(items);
   }
   for (const r of TEMPLE_STREETS) { const items = []; alongStreet(r, rand, items, null); L.push(items); }

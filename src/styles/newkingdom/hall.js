@@ -6,13 +6,14 @@ import { box, fromTriangles } from '../../core/geom.js';
 import { trim } from '../egyptian/trim.js';
 import { wallReliefs, astroCeiling, offeringTable } from '../egyptian/objects.js';
 import { nkColumn } from './columns.js';
+import { battleWall } from './battle.js';
 
 /**
  * A bag that keeps of what is added to it only the triangles facing along N = [nx, nz] (the horizontal direction a wall's face looks):
  * the egyptian vocabulary's reliefs are extruded solids drawn from both sides (a figure's side walls, its back, the tops of the bands),
  * four fifths of their triangles against a wall that is never seen from behind.
  */
-function facing(bag, N) {
+export function facing(bag, N) {
   const out = Object.create(bag);
   out.add = (mat, g, ...rest) => {
     const q = g.index ? g.toNonIndexed() : g, P = q.attributes.position.array, T = [];
@@ -95,6 +96,11 @@ export function nkHall(el, ctx) {
   W([Hh, zB], [Hh, zA], [-1, 0]); W([-Hh, zB], [-Hh, zA], [1, 0]);
   W([-Hh, zB], [-4.5, zB], [0, -1]); W([Hh, zB], [4.5, zB], [0, -1]);
   W([-Hh, zA], [-4.5, zA], [0, 1]); W([Hh, zA], [4.5, zA], [0, 1]);
+  // the outside of the side walls: Seti I's wars on the north face (local x < 0), Ramesses II's on the south (docs §4.1)
+  for (const [sx, seed] of [[-1, 2], [1, 5]]) {
+    const X = sx * (Hh + wt);
+    battleWall({ ...ctx, bag: facing(bag, [sx, 0]) }, { a: [X, zB], b: [X, zA], n: [sx, 0], y: 0, v0: 1.6, reg: 3.9, nreg: 3, seed });
+  }
   // the offering tables set in the nave before the gate of the sanctuary side
   for (const [x, z] of [[-2.7, zA + 9], [2.7, zA + 9], [-2.7, zA + 17], [2.7, zA + 25]]) offeringTable({ at: [x, z], y: 0, yaw: 0 }, ctx);
 }

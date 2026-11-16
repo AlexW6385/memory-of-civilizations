@@ -97,7 +97,7 @@ export function lots() {
       const lot = { rect, front, kind, seed, open: false, row: zs };
       if (ws) lot.trade = trades[wsi++ % trades.length];
       // furnished and entered: every third near the temple, the workshops, the villas
-      if (kind !== 'garden' && kind !== 'granary' && (ws || kind === 'villa' || (Math.hypot(c[0] - 0, c[1] - 0) < 255 && furnished++ % 3 === 0))) lot.open = true;
+      if (kind !== 'garden' && kind !== 'granary' && (ws || kind === 'villa' || (Math.hypot(c[0] - 0, c[1] - 0) < 270 && furnished++ % 2 === 0))) lot.open = true;
       LOTS.push(lot);
     }
   }
