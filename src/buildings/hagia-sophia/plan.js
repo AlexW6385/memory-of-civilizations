@@ -295,6 +295,21 @@ slab([-50, -36, -43.5, 36], 10.0, 10.6, 'lead');
 obj('doors', -42.0, 0, 0, { yaw: Math.PI / 2, w: 2.6, h: 5.0, th: 0.16, depth: 0 });
 obj('doors', -48.5, 0, 0, { yaw: Math.PI / 2, w: 2.6, h: 4.5, th: 0.16, depth: 0 });
 
+// ── the portals: stone frames with a gold lunette round every door of the narthexes (docs/settlements/constantinople.md §4.9) ──
+{
+  const portal = (x, z, nx, w, h) => add({ t: 'obj', kind: 'portal', at: [x, z], y: 0, n: [nx, 0], w, h });
+  // the nave's west wall (x = −33.2 … −31.7): the Imperial Door and the eight others, framed on the nave side and on the narthex side
+  for (const d of westDoors) { portal(XW, d.z, 1, d.w, d.h); portal(XW - 1.5, d.z, -1, d.w, d.h); }
+  // the inner narthex's west wall (x = −43.5 … −42): five doors, framed on both faces
+  for (const z of [0, -10, 10, -20, 20]) { portal(-42, z, 1, 2.6, 5.0); portal(-43.5, z, -1, 2.6, 5.0); }
+  // the outer narthex's west wall (x = −50 … −48.5): five doors to the atrium
+  for (const z of [0, -10, 10, -20, 20]) { portal(-48.5, z, 1, 2.6, 4.5); portal(-50, z, -1, 2.6, 4.5); }
+}
+// ── the pavement: slab joints, and four green bands across the nave, the rivers of paradise ──
+add({ t: 'obj', kind: 'pavement', at: [0, 0], y: 0, rect: [XW, -ZO, XE, ZO], step: 2.4, bands: [-12, -6, 6, 12].map((z) => ({ z0: z - 0.4, z1: z + 0.4, x0: XW, x1: 21.0 })) });
+add({ t: 'obj', kind: 'pavement', at: [0, 0], y: 0, rect: [-42, -ZO, -33.2, ZO], step: 2.0 });
+add({ t: 'obj', kind: 'pavement', at: [0, 0], y: 0, rect: [-98, -24, -50, 24], step: 2.4 });
+
 // ── the ramp tower at the north-west corner (four flights round a core) ──────
 {
   const y = [0, 3.98, 7.30, 11.28, GF];

@@ -326,6 +326,51 @@ function polykandelon(el, { bag, lights }) {
   }
 }
 
+/**
+ * portal: the stone frame of a door in one of the church's walls (docs/buildings/hagia-sophia.md; docs/settlements/constantinople.md
+ * §4.9): two marble jambs and an architrave, a cornice slab over them, over that a lunette, a marble arch band round a field of gold
+ * mosaic with a cross (the vaults of the church were plain gold with crosses and no figures). { at [x, z] on the wall's face, n [nx, nz]
+ * the way it stands out of that face, w, h (the opening) }.
+ */
+function portal(el, { bag, col }) {
+  const [x, z] = el.at, n = el.n, W = frame([x, z], [-n[1], n[0]], n), hw = el.w / 2, h = el.h;
+  const fw = Math.min(0.5, el.w * 0.17), P = 0.3, ch = 0.28, yl = h + fw + ch, r = hw + fw;
+  const m = [], ms = [], gl = [], tri = [];
+  fbox(m, W, -hw - fw, -hw, 0, h + fw, 0, P); fbox(m, W, hw, hw + fw, 0, h + fw, 0, P);
+  fbox(m, W, -hw, hw, h, h + fw, 0, P);
+  fbox(ms, W, -r - 0.2, r + 0.2, h + fw, yl, 0, P + 0.14);
+  // the lunette: an arch band of marble round a half disc of gold, the cross on it
+  const N = 14, A = (k, rr, d) => W(rr * Math.cos(Math.PI * k / N), yl + rr * Math.sin(Math.PI * k / N), d);
+  for (let k = 0; k < N; k++) {
+    hexa(m, [A(k, r - 0.3, 0), A(k, r, 0), A(k + 1, r, 0), A(k + 1, r - 0.3, 0)], [A(k, r - 0.3, 0.16), A(k, r, 0.16), A(k + 1, r, 0.16), A(k + 1, r - 0.3, 0.16)]);
+    const c = W(0, yl, 0.04), a = A(k, r - 0.3, 0.04), b = A(k + 1, r - 0.3, 0.04);
+    tri.push(...c, ...b, ...a);
+  }
+  const cy = yl + (r - 0.3) * 0.5;
+  fbox(gl, W, -0.07, 0.07, cy - 0.5 * (r - 0.3) * 0.7, cy + 0.5 * (r - 0.3) * 0.8, 0.04, 0.09); fbox(gl, W, -0.3, 0.3, cy + 0.12, cy + 0.26, 0.04, 0.09);
+  bag.add('marble', fromTriangles(m));
+  bag.add('marble_smooth', fromTriangles(ms)); bag.add('mosaic_gold', fromTriangles(tri)); bag.add('gold', fromTriangles(gl));
+  for (const s of [-1, 1]) {
+    const a = W(s * hw, 0, 0), b = W(s * (hw + fw), 0, P);
+    col.rect([Math.min(a[0], b[0]), Math.min(a[2], b[2]), Math.max(a[0], b[0]), Math.max(a[2], b[2])], 0, h + fw);
+  }
+}
+
+/**
+ * pavement: the marble floor's joints and rivers (Paul the Silentiary; docs/settlements/constantinople.md §4.9): the nave floor a
+ * sea of pale Proconnesian slabs, crossed by bands of green Thessalian stone, the "rivers" of paradise. Laid a hair over the
+ * floor: slab joints every `step` m, and the green bands { z0, z1, x0, x1 }. { rect, y, step, bands }.
+ */
+function pavement(el, { bag }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, s = el.step ?? 2.4, jw = 0.016;
+  for (let x = x0 + s; x < x1 - 0.3; x += s) bag.add('marble_dark', box(x - jw, y, z0 + 0.05, x + jw, y + 0.012, z1 - 0.05));
+  for (let z = z0 + s; z < z1 - 0.3; z += s) bag.add('marble_dark', box(x0 + 0.05, y, z - jw, x1 - 0.05, y + 0.009, z + jw));
+  for (const b of el.bands ?? []) {
+    bag.add('verde_antico', box(b.x0, y, b.z0, b.x1, y + 0.016, b.z1));
+    for (const e of [b.z0, b.z1]) bag.add('marble_smooth', box(b.x0, y, e - (e === b.z0 ? 0.05 : 0), b.x1, y + 0.018, e + (e === b.z0 ? 0 : 0.05)));
+  }
+}
+
 const base = STYLES.byzantine;
 /**
  * The ambo (Paul the Silentiary, Descriptio Ambonis; docs/settlements/constantinople.md §4.7): "as an island rises amidst
@@ -404,5 +449,5 @@ function ambo(el, { bag, col }) {
 registerStyle('byzantine-hs', {
   ...base,
   elements: { ...base.elements, dome_cross: domeCross, cornice_lamps: corniceLamps, n_cornice: nCornice, spandrel_discs: spandrelDiscs },
-  objects: { ...base.objects, chancel_screen: chancelScreen, ciborium, polykandelon, ambo },
+  objects: { ...base.objects, chancel_screen: chancelScreen, ciborium, polykandelon, ambo, portal, pavement },
 });

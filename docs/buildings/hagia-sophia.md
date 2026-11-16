@@ -124,3 +124,8 @@ Our synthesis (`src/buildings/hagia-sophia/music.js`): voices (formant pads) sin
 - Pallasweb, "The poem of Paul the Silentiary". https://www.pallasweb.com/deesis/hagia-sophia-poem-of-paul-the-silentiary.html
 - Pallasweb, "Inlaid panels". https://www.pallasweb.com/deesis/hagia-sophia-inlaid-panels.html
 - R. J. Mainstone, *Hagia Sophia: Architecture, Structure and Liturgy of Justinian's Great Church* (1988); Procopius, *De Aedificiis* I.1.
+
+
+## Doors and floor (pass 2)
+
+Stone portals with gold lunettes round the doors of the narthexes and the nave's west wall, and the nave's marble floor with slab joints and four green bands: sources and reasoning in `docs/settlements/constantinople.md` §4.9 (`portal`, `pavement` in `src/buildings/hagia-sophia/style.js`).

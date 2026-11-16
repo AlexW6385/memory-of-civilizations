@@ -77,7 +77,10 @@ const excluded = (r) => EXCL().some((e) => r[0] < e[2] + 3 && r[2] > e[0] - 3 &&
   || [[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]], [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2]].some(([x, z]) => onMese(x, z, 11) || Math.hypot(x - FORUM.c[0], z - FORUM.c[1]) < FORUM.r + 9);
 const TEMPLATES = [[12, 12, 12], [18, 18], [9, 13, 14], [10, 16, 10], [14, 8, 14], [18, 9, 9], [9, 9, 18], [13, 10, 13], [18, 18], [20, 16], [21, 15]];
 /** The special rects (enterable buildings): chapel and bath, taking a little more depth than a row. */
-export const SPECIAL = { home: [-148, 65, 'home'], tavern: [-122, 65, 'tavern'], chapel: [-147, 29, 'chapel'], bath: [-150, -6, 'bath'], bakery: [-148, 100, 'bakery'], weaver: [-235, 0, 'weaver'], home2: [-100, 28, 'home'], home3: [-200, 160, 'home'] };
+export const SPECIAL = { home: [-148, 65, 'home'], tavern: [-122, 65, 'tavern'], chapel: [-147, 29, 'chapel'], bath: [-150, -6, 'bath'], bakery: [-148, 100, 'bakery'], weaver: [-235, 0, 'weaver'], home2: [-100, 28, 'home'], home3: [-200, 160, 'home'],
+  // the working and family houses of the outer lanes (all beyond 120 m of the arrival point), each one of the style's family of houses (styles/constantinople/homes.js)
+  w01: [-330, -40, 'potter'], w02: [-250, -110, 'smith'], w03: [-190, -90, 'home'], w04: [-90, -112, 'bakery'], w05: [-140, -150, 'tavern'], w06: [90, -60, 'weaver'], w07: [130, -120, 'home'],
+  w08: [200, -40, 'smith'], w09: [190, 30, 'potter'], w10: [262, -90, 'home'], w11: [135, 95, 'tavern'], w12: [-40, 232, 'bakery'], w13: [-120, 282, 'home'], w14: [-330, 130, 'weaver'], w15: [-330, 250, 'home'], w16: [10, 300, 'smith'] };
 let LOTS = null, BLOCKS = null, SPEC = null;
 const KINDS = { chapel: [19, 17], bath: [15, 17] };
 export function lots() {
