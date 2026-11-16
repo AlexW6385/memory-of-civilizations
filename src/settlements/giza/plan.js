@@ -51,7 +51,7 @@ export const pyramid = {
   id: 'giza-great-pyramid',
   name: { en: 'The Great Pyramid of Khufu', zh: '胡夫大金字塔' },
   era: { en: '4th dynasty, c. 2560 BC', zh: '第四王朝，约公元前2560年' },
-  style: 'oldkingdom',
+  style: 'oldkingdom-giza',
   origin: [0, 0], base: 0, yaw: 0,
   entrance: { at: [200, -40], facing: 'w' },
   bounds: [ex0, ez0, 200, ez1 + 60],

@@ -78,8 +78,8 @@ export function mastabas() {
 }
 let TOWNS = null;
 const YARDS = ['pen', 'pen', 'pen', 'brickyard', 'brickyard', 'silo', 'silo', 'midden', 'threshing', 'threshing'];
-/** Is this house furnished (enterable with its room and court fitted out)? Two in three. */
-export const furnished = (l) => l.seed % 3 !== 2;
+/** Is this house furnished (enterable with its room and court fitted out)? Five in six. */
+export const furnished = (l) => l.seed % 6 !== 5;
 /** The workers' town: gallery halls in blocks, houses, bakeries: { kind, rect, seed }. */
 export function town() {
   if (TOWNS) return TOWNS;

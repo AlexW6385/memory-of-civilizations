@@ -6,6 +6,7 @@ import { RADIUS, PYRAMID, VALLEY, TOWN_Y, VALLEY_TEMPLE, HARBOUR, CROW_WALL, BOA
 import { ground } from './ground.js';
 import { RAMP, haulRoad } from './works.js';
 import { LODGES, lodgeLife } from './lodges.js';
+import { housePlan } from '../../styles/oldkingdom-giza/houses.js';
 import { CAMP_ITEMS, CHIPS, HAUL, YARD, campLife, haulLife, yardLife } from './camps.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -35,6 +36,15 @@ function people() {
     const qz = Math.min(z1 - 1.6, z0 + 0.225 + 1.9), qx = split + 0.225 + 0.45;
     if (court && qz > z0 + 0.225 + 0.65 + 0.9) fig(T, [qx, qz - 0.75], Math.PI, { dress: 'sheath', hair: 'long', pose: 'kneel', h: 1.52 });
   }
+  // the crafts of the court houses (docs/settlements/giza.md §16): a woman kneeling at the ground loom, a man squatting at the turntable, a woman by the fish rack
+  { const r3 = rng(2570);
+    for (const l of townLots()) if (l.kind === 'house' && furnished(l)) {
+      const P = housePlan(l); if (!P.craft || r3() > 0.6) continue;
+      const [x, z] = P.at;
+      if (P.craft === 'loom') fig(T, [x, z + 1.4], 0, { dress: 'sheath', hair: 'long', pose: 'kneel', h: 1.52 });
+      else if (P.craft === 'potter') fig(T, [x - 0.3, z + 0.4], 0, { dress: 'wrap', top: 'bare', hair: 'short', pose: 'squat' });
+      else fig(T, [x + 0.95, z], face([x + 0.95, z], [x, z]), { dress: 'sheath', hair: 'long', pose: 'kneel', h: 1.52 });
+    } }
   return { C, T };
 }
 
@@ -208,7 +218,7 @@ function worksPlan() {
   ]);
 }
 
-const base = (id, elements, y = 0) => ({ id, style: 'oldkingdom', origin: [0, 0], base: y, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [200, -40], facing: 'w' } });
+const base = (id, elements, y = 0) => ({ id, style: 'oldkingdom-giza', origin: [0, 0], base: y, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [200, -40], facing: 'w' } });
 
 export async function town() {
   const plans = [];
