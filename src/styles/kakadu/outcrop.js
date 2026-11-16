@@ -453,8 +453,16 @@ export function blockColliders(B) {
   // the plateau behind the columns (the whole roof for a slab: its soffit and the bed over it are one flat sheet)
   if (slab) rect(x0 + 0.1, z0 + 0.1, x1 - 0.1, z1 - 0.05, lo, y0 + 0.9);
   rect(x0, z0, x1, z1 - deepC + 1.2, lo, y1);
+  // the top, to be walked on where it always was (the box's lid over the whole plan: the drawn crown is broken into caps, clefts and ledges)
+  rect(x0, z0, x1, z1, y1 - 0.04, y1);
   const walls = cols.filter((c) => c.wall);
   if (walls.length) rect(Math.min(...walls.map((c) => c.xa)), z1 - deepC + 1.2, Math.max(...walls.map((c) => c.xb)), z1 - 0.05, lo, Math.min(y1, walls[0].yBase));
+  // the joints that are too narrow to enter are closed (a flight's steps run up in one: the top is walked on there), as far forward as the neighbours' hard beds stand
+  const zFront = (c) => Math.max(...c.rings.filter((q) => q.ya < y0 + 3).map((q) => Math.max(...q.rows[0].pts.map((p) => p[1]))));
+  for (let i = 0; i + 1 < cols.length; i++) {
+    const a = cols[i], b = cols[i + 1];
+    if (b.xa - a.xb < 1.0 && a.rings.length && b.rings.length) rect(a.xb - 0.15, z1 - deepC + 1.2, b.xa + 0.15, Math.min(zFront(a), zFront(b)), lo, y1);
+  }
   for (const c of cols) {
     // (the painted wall's columns stand on a free space: the wall itself, down to the floor: one filler for all, joints included)
     // the painted wall's columns stand on a free space: the wall itself, down to the floor

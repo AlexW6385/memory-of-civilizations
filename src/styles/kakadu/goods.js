@@ -99,7 +99,7 @@ export function canoe(el, { bag }) {
 }
 
 /** The small things (el.kind): spears, bags, bark, wood, midden, bed, trap, mat, paint, ladder, yams, hearth_stones. */
-export function item(el, { bag, col }) {
+export function item(el, { bag }) {
   const put = placer(el, bag), kind = el.kind, v = (el.seed ?? 1) % 3;
   const A = assembly(`ka_item|${kind}|${v}`, (a) => {
     const r = rng(1300 + v * 11 + kind.length * 3);
@@ -172,5 +172,4 @@ export function item(el, { bag, col }) {
   });
   const m = { pole: 'wood_dark', spear: 'wood_dark', tip: 'wood_dark', thrower: 'wood_dark', cord: 'rope_fibre', bag: 'rope_fibre', bag2: 'hide_tan', sheet: 'roof_bark', log: 'wood_dark', shell: kind === 'midden' ? 'chalk' : 'sandstone_white', bone: 'chalk', grass: 'ichu', wick: 'wicker', mat: 'reed_mat', strip: 'palm_leaf', stone: 'sandstone_yellow', red: 'paint_minoan_red', yel: 'paint_ochre', wht: 'paint_white', brush: 'wood_dark', rung: 'wood_dark', lash: 'rope_fibre', yam: 'hide_brown', stick: 'wood_dark' };
   for (const [role, g] of Object.entries(A)) put(m[role] ?? 'wood_dark', g.clone());
-  if (kind === 'spears') col?.circle(el.at[0], el.at[1], 0.3, (el.y ?? 0) - 0.1, (el.y ?? 0) + 2.3);   // the frame the spears lean on
 }

@@ -132,7 +132,7 @@ export async function town() {
     at2(woman, -11.4, -24.2, 0.5, { pose: 'sit_ground' }); kid(-12.4, -23.6, 0.9, 821); at('mat', -11.0, -25.3, 0.2, 63);
     // east of the lane: three women at a long mat with yams and a bark dish, a boy fetching water in a bark trough
     at('mat', 9.6, -26.0, -0.1, 64); at2(woman, 8.2, -25.1, 0.2, { pose: 'sit_ground' }); at2(woman, 11.0, -25.0, -0.4, { pose: 'sit_ground' }); at2(woman, 9.8, -23.9, 3.3, { pose: 'kneel' });
-    at('yams', 10.6, -26.4, 0.3, 65); at('bark', 12.6, -23.8, 0.7, 66); kid(7.0, -23.8, 4.2, 822, 'stand'); dog(13.6, -25.4, 91);
+    at('yams', 10.6, -26.4, 0.3, 65); at('bark', 12.6, -23.8, 0.7, 66); kid(7.0, -23.8, 4.2, 822, 'stand'); dog(15.0, -22.6, 91);
     // far to either side, along the foot: pairs talking, a man with a goose spear going to the water, a heap of bark and of firewood stacked for the wet
     at2(man, -19.6, -25.6, 0.7, { pose: 'talk' }); at2(woman, -18.2, -25.2, 3.9, { pose: 'talk' }); at('wood', -21.4, -24.6, 0.3, 67); at('bark', -20.0, -23.0, 1.1, 68);
     at2(man, 18.8, -24.4, 2.5, { pose: 'staff' }); at2(woman, 20.6, -24.8, 3.5, { pose: 'stand', carry: 'basket' }); at('bags', 22.0, -23.2, 0.5, 69); dog(-17.2, -26.4, 92);
