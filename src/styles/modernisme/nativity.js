@@ -179,24 +179,60 @@ function tower(bag, col, xc, zc, y, hq, top, hf, rand) {
   // the collar from the square to the round
   const sq = (th) => 1 / Math.max(Math.abs(Math.cos(th)), Math.abs(Math.sin(th)));
   bag.add(S, lathe([[3.1, 0], [3.1, 0.5], [R0 + 0.3, 1.4], [R0, 2.6]], 24, (th, i) => (i < 2 ? 1 + (sq(th) - 1) * 0.55 : 1)).translate(xc, y + BV - 0.01, zc));
-  // the spindle: a solid parabolic cone (the stair and the bells' hollow are out of sight behind its slots)
-  const prof = [];
-  for (let v = V0; v < top - 0.8; v += 1.5) prof.push([spin(v, hf), v - V0]);
-  prof.push([Math.max(0.001, spin(top, hf)), top - V0]);
-  if (!done) prof.push([0.001, top - V0]);                       // the flat head
-  bag.add(S, lathe(prof, 28).translate(xc, y + V0, zc));
-  // bands round the shaft every 9 m
-  for (let v = V0 + 6; v < top - 3; v += 9) { const r = spin(v, hf); bag.add('limestone', lathe([[r - 0.05, 0], [r + 0.2, 0.08], [r + 0.2, 0.42], [r - 0.05, 0.52]], 24).translate(xc, y + v, zc)); }
-  // tall slots round the shaft in rings, each ring turned half a bay from the one below, longer and closer in the belfry stage
-  for (let k = 0, v = V0 + 2.2; v + 3 < top - 1.2; k++, v += v > top - 18 ? 3.8 : 5.2) {
-    const len = v > top - 18 ? 3.0 : 3.5, r = spin(v + len / 2, hf), M = Math.max(5, Math.round(Math.PI * 2 * r / 1.9)), w = 0.3;
+  // the spindle: a parabolic cone of ashlar. Its belfry openings are real: rings of tall slots cut through the wall (each ring turned half a
+  // bay from the one below, longer and closer in the belfry stage), with the wall in the ring stages built as piers between them, a dark
+  // hollow behind each, and inclined stone slabs across it (the abat-sons that throw the bells' sound down and keep the rain out)
+  const stages = [];
+  for (let k = 0, v = V0 + 2.2; v + 3 < top - 1.2; k++, v += v > top - 18 ? 3.8 : 5.2) stages.push({ k, v, len: v > top - 18 ? 3.0 : 3.5 });
+  const spindle = (a0, a1, cap) => {                               // a solid run of the cone between two heights
+    const pr = [];
+    for (let v = a0; v < a1 - 0.01; v += 1.5) pr.push([spin(v, hf), v - a0]);
+    pr.push([Math.max(0.001, spin(a1, hf)), a1 - a0]);
+    if (cap) pr.push([0.001, a1 - a0]);                              // the flat head
+    bag.add(S, lathe(pr, 28).translate(xc, y + a0, zc));
+  };
+  const TS = [], DW = 0.8, SQ = 2 * Math.PI / 28;
+  const P = (a, rho, tau, h) => [xc + Math.cos(a) * rho - Math.sin(a) * tau, y + h, zc + Math.sin(a) * rho + Math.cos(a) * tau];
+  let cur = V0;
+  for (const { k, v, len } of stages) {
+    spindle(cur, v, false); cur = v + len;
+    const r0 = spin(v, hf), r1 = spin(v + len, hf), rm = spin(v + len / 2, hf), M = Math.max(5, Math.round(Math.PI * 2 * rm / 1.9)), w0 = 0.42, w1 = 0.34;
+    const ang = (m) => (m + (k % 2) * 0.5) / M * Math.PI * 2 + 0.2;
     for (let m = 0; m < M; m++) {
-      const a = (m + (k % 2) * 0.5) / M * Math.PI * 2 + 0.2, t = [-Math.sin(a), Math.cos(a)], r0 = spin(v, hf) + 0.05, r1 = spin(v + len, hf) + 0.05;
-      const c0 = [xc + Math.cos(a) * r0, zc + Math.sin(a) * r0], c1 = [xc + Math.cos(a) * r1, zc + Math.sin(a) * r1], i0 = O.length;
-      quad(O, [c0[0] - t[0] * w, y + v, c0[1] - t[1] * w], [c0[0] + t[0] * w, y + v, c0[1] + t[1] * w], [c1[0] + t[0] * w * 0.8, y + v + len, c1[1] + t[1] * w * 0.8], [c1[0] - t[0] * w * 0.8, y + v + len, c1[1] - t[1] * w * 0.8]);
-      orient(O, i0, [xc, y + v, zc], true);
+      const a = ang(m), an = ang(m + 1);
+      // the pier from this slot's edge to the next one's, as a strip of facets as fine as the cone's own
+      const d0 = Math.asin(w0 / r0), d1 = Math.asin(w1 / r1), n = Math.max(1, Math.ceil((an - a - 2 * d0) / SQ));
+      const i0 = TS.length;
+      for (let j = 0; j < n; j++) {
+        const f0 = j / n, f1 = (j + 1) / n, b0 = a + d0 + (an - a - 2 * d0) * f0, b1 = a + d0 + (an - a - 2 * d0) * f1;
+        const c0 = a + d1 + (an - a - 2 * d1) * f0, c1 = a + d1 + (an - a - 2 * d1) * f1;
+        quad(TS, [xc + Math.cos(b0) * r0, y + v, zc + Math.sin(b0) * r0], [xc + Math.cos(b1) * r0, y + v, zc + Math.sin(b1) * r0], [xc + Math.cos(c1) * r1, y + v + len, zc + Math.sin(c1) * r1], [xc + Math.cos(c0) * r1, y + v + len, zc + Math.sin(c0) * r1]);
+      }
+      orient(TS, i0, [xc, y + v + len / 2, zc], true);
+      // the slot: the dark hollow at the back, the reveals round it
+      const o0 = Math.sqrt(r0 * r0 - w0 * w0), o1 = Math.sqrt(r1 * r1 - w1 * w1), h1 = v + len;
+      const OBL = P(a, o0, -w0, v), OBR = P(a, o0, w0, v), OTR = P(a, o1, w1, h1), OTL = P(a, o1, -w1, h1);
+      const BBL = P(a, o0 - DW, -w0, v), BBR = P(a, o0 - DW, w0, v), BTR = P(a, o1 - DW, w1, h1), BTL = P(a, o1 - DW, -w1, h1);
+      let j0 = O.length;
+      quad(O, BBL, BBR, BTR, BTL); orient(O, j0, [xc, y + v + len / 2, zc], true);
+      const ctr = P(a, (o0 + o1) / 2 - DW / 2, 0, v + len / 2);
+      for (const q of [[OBL, BBL, BTL, OTL], [OBR, BBR, BTR, OTR], [OBL, OBR, BBR, BBL], [OTL, OTR, BTR, BTL]]) { j0 = TS.length; quad(TS, ...q); orient(TS, j0, ctr, false); }
+      // the slabs: each slopes down and outward, shown by its underside and its lip
+      const ns = Math.max(3, Math.round(len / 0.85));
+      for (let q = 0; q < ns; q++) {
+        const h = v + (q + 0.55) * len / ns, f = (h - v) / len, ro = r0 + (r1 - r0) * f, wl = (w0 + (w1 - w0) * f) * 0.99;
+        const tin = Math.sqrt(ro * ro - wl * wl), hi = h + 0.2, ho = h - 0.07;
+        const A0 = P(a, tin - DW + 0.05, -wl, hi), A1 = P(a, tin - DW + 0.05, wl, hi), B1 = P(a, tin - 0.03, wl, ho), B0 = P(a, tin - 0.03, -wl, ho);
+        j0 = TS.length; quad(TS, A0, A1, B1, B0); orient(TS, j0, P(a, tin + 3, 0, ho - 4), false);
+        const C1 = [B1[0], B1[1] + 0.12, B1[2]], C0 = [B0[0], B0[1] + 0.12, B0[2]];
+        j0 = TS.length; quad(TS, B0, B1, C1, C0); orient(TS, j0, [xc, B0[1], zc], true);
+      }
     }
   }
+  spindle(cur, top, !done);
+  bag.add(S, fromTriangles(TS));
+  // bands round the shaft every 9 m
+  for (let v = V0 + 6; v < top - 3; v += 9) { const r = spin(v, hf); bag.add('limestone', lathe([[r - 0.05, 0], [r + 0.2, 0.08], [r + 0.2, 0.42], [r - 0.05, 0.52]], 24).translate(xc, y + v, zc)); }
   bag.add('opening', fromTriangles(O));
   if (done) {                                                     // the finished spire: a pale finial and its cross
     bag.add('limestone', ball(0.5, 10, 7).translate(xc, y + top - 0.1, zc));
