@@ -4,7 +4,7 @@
 // is open at its door; inside, the counter stands across the room 3 m from the back wall (the keeper's side behind it).
 // All laid out on the lot's street face: u along it, d inward from the front plane.
 
-import { box, lathe } from '../../core/geom.js';
+import { box, lathe, rod } from '../../core/geom.js';
 import { face } from './blocks.js';
 import { Quads, shopSign, rng } from './dress.js';
 
@@ -19,7 +19,13 @@ export const KINDS = {
   shoe: { name: 'SHOE REPAIR', sur: '', wall: 'stucco_pale', floor: 'timber', pane: 'HEELS WHILE U WAIT', board: ['cloth_maroon', 'gold'] },
   tailor: { name: 'TAILOR', sur: 'COHEN', wall: 'stucco_pale', floor: 'timber', pane: 'ALTERATIONS', board: ['prussian_blue', 'paint_white'] },
   haber: { name: 'HABERDASHER', sur: 'HARRIS', wall: 'stucco_cream', floor: 'timber', pane: 'SHIRTS', board: ['car_black', 'gold'] },
-  lunch: { name: 'LUNCH', sur: '', wall: 'tile_white', floor: 'tile_dark', pane: 'COFFEE 5 CENTS', board: ['car_black', 'paint_white'] },
+  lunch: { name: 'LUNCH', sur: '', wall: 'tile_white', floor: 'tile_dark', pane: 'COFFEE 5 CENTS', board: ['car_black', 'paint_white'], awn: ['car_blue', 'paint_white'] },
+  // the farther blocks (docs/settlements/new-york.md §1n): each trade's riser, awning and lining by rule
+  automat: { name: 'AUTOMAT', sur: 'HORN & HARDART', wall: 'marble', floor: 'tile_dark', pane: 'FRESH COFFEE', board: ['car_black', 'gold'], riser: 'marble_dark' },
+  butcher: { name: 'MEATS', sur: 'KRAUSE', wall: 'tile_white', floor: 'timber', pane: 'POULTRY', board: ['cloth_maroon', 'paint_white'], awn: ['car_red', 'paint_white'], riser: 'tile_white' },
+  grocer: { name: 'FRUIT AND VEGETABLES', sur: '', wall: 'stucco_cream', floor: 'timber', pane: 'FRESH DAILY', board: ['shutter_green', 'paint_white'], awn: ['shutter_green', 'paint_white'], riser: 'wood_dark' },
+  hardware: { name: 'HARDWARE', sur: 'BRODY', wall: 'stucco_pale', floor: 'timber', pane: 'TOOLS PAINT', board: ['wood_dark', 'gold'], riser: 'iron' },
+  fabric: { name: 'DRY GOODS', sur: 'LEVY', wall: 'stucco_cream', floor: 'timber', pane: 'NOTIONS TRIMMINGS', board: ['prussian_blue', 'gold'], riser: 'marble_dark' },
 };
 export const KIND_ORDER = ['drug', 'deli', 'barber', 'cigar', 'hat', 'bakery', 'shoe', 'tailor', 'haber', 'lunch'];
 const SHIRT = ['paint_white', 'cloth_blue', 'cloth_ochre', 'cloth_grey', 'cloth_red', 'cloth_indigo'], BOXES = ['paint_white', 'cloth_brown', 'wood_ochre', 'cloth_green', 'cloth_blue', 'cloth_red', 'cloth_grey'];
@@ -55,11 +61,11 @@ export function shopRoom(bag, col, lights, el, r) {
   // the front: black granite stall riser, plate glass in chrome, the door (open, a mat and a brass sill), its transom; the fascia over all
   const dw = 1.3, du0 = doorR ? L - T - dw - 0.2 : T + 0.2, du1 = du0 + dw, g0 = doorR ? T : du1, g1 = doorR ? du0 : L - T;
   for (const [a, b] of [[T, du0], [du1, L - T]]) {
-    bag.add('granite_black', R(a, b, y - 0.5, y + 0.8, -0.2, 0.1)); col.rect(F.rc(a, b, -0.2, 0.1), y - 0.5, y + 3.3);
+    bag.add(K.riser ?? 'granite_black', R(a, b, y - 0.5, y + 0.8, -0.2, 0.1)); col.rect(F.rc(a, b, -0.2, 0.1), y - 0.5, y + 3.3);
     bag.add('glass_outer', R(a, b, y + 0.8, y + 3.3, -0.05, 0.0));
     for (let u = a; u <= b + 0.01; u += (b - a) / Math.max(1, Math.round((b - a) / 1.7))) bag.add('steel_chrome', R(Math.max(a, u - 0.03), Math.min(b, u + 0.03), y + 0.8, y + 3.3, -0.07, 0.04));
   }
-  for (const [a, b] of [[0, T + 0.2], [L - T - 0.2, L]].filter(([a, b]) => b - a > 0.3)) { bag.add('granite_black', R(a, b, y - 0.5, y + 3.3, -0.2, 0.1)); col.rect(F.rc(a, b, -0.2, 0.1), y - 0.5, y + 3.3); }
+  for (const [a, b] of [[0, T + 0.2], [L - T - 0.2, L]].filter(([a, b]) => b - a > 0.3)) { bag.add(K.riser ?? 'granite_black', R(a, b, y - 0.5, y + 3.3, -0.2, 0.1)); col.rect(F.rc(a, b, -0.2, 0.1), y - 0.5, y + 3.3); }
   bag.add('granite_black', R(0, L, y + 3.3, y + 3.7, -0.2, 0.15)); bag.add('limestone', R(0, L, y + 3.7, y + 4.3, 0, 0.4)); bag.add('limestone', R(0, L, y + 4.3, y + 4.5, -0.1, 0.5));
   bag.add('glass_outer', R(du0, du1, y + 2.5, y + 3.3, -0.05, 0)); bag.add('steel_chrome', R(du0, du1, y + 2.42, y + 2.5, -0.08, 0.05));
   bag.add('gilt_bronze', R(du0, du1, y, y + 0.05, -0.2, 0.2)); bag.add('rubber', I(du0 + 0.1, du1 - 0.1, fy, fy + 0.012, 0.3, 1.0));
@@ -157,6 +163,62 @@ export function shopRoom(bag, col, lights, el, r) {
     solid('steel_chrome', u0 + 0.4, u1 - 0.4, fy, fy + 1.0, Dr - 0.7, Dr - 0.05); bag.add('tile_white', I(u0 + 0.4, u1 - 0.4, fy + 1.0, fy + 2.4, Dr - 0.05, Dr - 0.02));
     for (const [u, m] of [[u0 + 1.2, 'steel_chrome'], [u0 + 1.8, 'steel_chrome']]) { const [x, , z] = P(u, dC + 0.35, 0); bag.add(m, lathe([[0.17, 0], [0.17, 0.5], [0.12, 0.6], [0.001, 0.65]], 10, null, x, fy + 1.0, z)); }
     for (const [u, d] of [[u0 + 0.8, 1.6], [midU, 1.6], [u1 - 0.8, 1.6]]) { table(u, d, 0.8, 0.8, 'marble'); chair(u - 0.6, d); chair(u + 0.6, d); }
+  } else if (k === 'automat') {
+    // Horn & Hardart: the wall of little glass doors in chrome frames, a nickel's worth each, over the slot and the plate shelf; marble tables, bentwood chairs; the cashier's booth that changes dollars into nickels
+    solid('marble', u0, u1, fy, fy + 0.7, Dr - 0.6, Dr - 0.05, false); bag.add('steel_chrome', I(u0, u1, fy + 0.7, fy + 0.74, Dr - 0.64, Dr - 0.04));
+    const cw = 0.46, nc = Math.floor((u1 - u0) / cw), cu0 = u0 + ((u1 - u0) - nc * cw) / 2;
+    for (let row = 0; row < 3; row++) for (let c = 0; c < nc; c++) {
+      const ua = cu0 + c * cw + 0.03, yy = fy + 0.95 + row * 0.42;
+      bag.add(['cloth_ochre', 'paint_white', 'cloth_brown', 'wood_ochre', 'cloth_red'][Math.floor(r() * 5)], I(ua + 0.04, ua + cw - 0.1, yy + 0.04, yy + 0.2 + r() * 0.1, Dr - 0.42, Dr - 0.14));
+      bag.add('glass_outer', I(ua, ua + cw - 0.06, yy, yy + 0.38, Dr - 0.12, Dr - 0.1)); bag.add('steel_chrome', I(ua + cw - 0.06, ua + cw - 0.03, yy, yy + 0.38, Dr - 0.14, Dr - 0.08)); bag.add('steel_chrome', I(ua, ua + cw - 0.03, yy + 0.38, yy + 0.41, Dr - 0.14, Dr - 0.08));
+    }
+    bag.add('steel_chrome', I(cu0, cu0 + nc * cw, fy + 0.7, fy + 0.74, Dr - 0.64, Dr - 0.6));
+    for (let u = u0 + 0.8; u < u1 - 1.2; u += 1.9) for (const d of [2.0, 3.4]) { table(u, d, 0.75, 0.75, 'marble'); chair(u - 0.55, d); chair(u + 0.55, d); }
+    { const [a, b] = fs(0, 1.6); solid('steel_chrome', a, b, fy, fy + 1.15, 0.6, 1.5); bag.add('glass_outer', I(a, b, fy + 1.15, fy + 2.3, 0.6, 1.5)); bag.add('steel_chrome', I(a - 0.04, b + 0.04, fy + 2.3, fy + 2.4, 0.56, 1.54)); }
+  } else if (k === 'butcher') {
+    // the white-tiled shop: the glass case of red meat, the block, the rail of hooks with carcasses and rings of sausage, the scale, sawdust on the boards
+    glassCase(u0 + 0.3, u1 - 0.3, dC, dC + 0.8, 0.85, ['cloth_red', 'cloth_maroon', 'paint_white', 'cloth_brown']);
+    bag.add('iron', I(u0, u1, fy + 2.1, fy + 2.15, Dr - 0.5, Dr - 0.45));
+    for (let u = u0 + 0.5; u < u1 - 0.5; u += 0.7) { const rr = r(), [x, , z] = P(u, Dr - 0.47, 0); bag.add(rr < 0.5 ? 'cloth_maroon' : 'cloth_red', lathe([[0.04, 0], [0.16, 0.2], [0.2, 0.7], [0.14, 1.2], [0.001, 1.3]], 6, null, x, fy + 0.75, z)); bag.add('iron', lathe([[0.01, 0], [0.01, 0.12]], 3, null, x, fy + 2.0, z)); }
+    for (const u of [fp(0.5), fp(1.4)]) { const [x, , z] = P(u, 2.4, 0); bag.add('wood_ochre', lathe([[0.32, 0], [0.34, 0.8], [0.001, 0.8]], 10, null, x, fy, z)); col.circle(x, z, 0.36, fy, fy + 0.8); }
+    { const [x, , z] = P(midU, dC + 0.4, 0); bag.add('steel_chrome', lathe([[0.2, 0], [0.04, 0.05], [0.04, 0.3], [0.2, 0.34], [0.001, 0.34]], 8, null, x, fy + 1.0, z)); }
+    solid('steel_chrome', u0, u1, fy, fy + 0.45, Dr - 0.4, Dr - 0.05, false);
+    for (let u = u0 + 0.4; u < u1 - 0.6; u += 1.3) solid('wood_painted', u, u + 0.7, fy, fy + 0.5, 1.2, 1.8);
+  } else if (k === 'grocer') {
+    // the greengrocer's: crates of apples, oranges and greens tilted on trestles down the room, barrels, scales, the shelves of tins behind the counter
+    counter(u0 + 0.4, u1 - 0.4, 'timber', 'wood_dark'); shelves(u0, u1, 4, ['cloth_red', 'paint_cab_yellow', 'cloth_green', 'paint_white', 'cloth_ochre'], 0.3, 0.22);
+    for (let u = u0 + 0.4; u < u1 - 1.2; u += 1.5) for (const d of [1.2, 2.5]) {
+      solid('wood_dark', u, u + 1.1, fy, fy + 0.62, d - 0.4, d + 0.4);
+      const fm = ['cloth_red', 'cloth_ochre', 'cloth_green', 'paint_cab_yellow', 'cloth_red'][Math.floor(r() * 5)];
+      for (let a = 0; a < 3; a++) for (let b = 0; b < 2; b++) { const [x, , z] = P(u + 0.25 + a * 0.3, d - 0.18 + b * 0.36, 0); bag.add(fm, lathe([[0.001, 0], [0.13, 0.06], [0.13, 0.17], [0.001, 0.22]], 7, null, x, fy + 0.62, z)); }
+    }
+    for (const u of [fp(0.3)]) { const [x, , z] = P(u, 1.0, 0); bag.add('timber', lathe([[0.3, 0], [0.34, 0.2], [0.34, 0.7], [0.3, 0.9], [0.001, 0.9]], 10, null, x, fy, z)); col.circle(x, z, 0.36, fy, fy + 0.9); }
+    { const [x, , z] = P(midU, dC + 0.35, 0); bag.add('iron', lathe([[0.2, 0], [0.04, 0.05], [0.04, 0.35], [0.2, 0.4], [0.001, 0.4]], 8, null, x, fy + 1.0, z)); }
+  } else if (k === 'hardware') {
+    // tools on boards and pegs up the walls, kegs of nails, coils of rope, pails, a ladder against the shelves, the long counter with its scale
+    counter(u0 + 0.3, u1 - 0.3, 'timber', 'wood_dark'); shelves(u0, u1, 5, ['iron', 'wood_ochre', 'car_red', 'paint_white', 'cloth_green', 'iron'], 0.3, 0.2);
+    for (let u = u0 + 0.5; u < u1 - 1.5; u += 0.9) { const [x, , z] = P(u, 1.0, 0); bag.add('timber', lathe([[0.26, 0], [0.3, 0.2], [0.3, 0.5], [0.26, 0.6], [0.001, 0.6]], 9, null, x, fy, z)); bag.add('iron', lathe([[0.27, 0.58], [0.27, 0.64], [0.001, 0.64]], 9, null, x, fy, z)); col.circle(x, z, 0.32, fy, fy + 0.65); }
+    for (const u of [fp(0.4), fp(1.1)]) { const [x, , z] = P(u, 2.6, 0); bag.add('rope_fibre', lathe([[0.3, 0], [0.34, 0.1], [0.3, 0.22], [0.001, 0.22]], 10, null, x, fy, z)); bag.add('iron', lathe([[0.17, 0], [0.2, 0.3], [0.001, 0.3]], 8, null, x + 0.7, fy, z)); }
+    { const [x, , z] = P(fp(2.0), Dr - 0.3, 0), [x2, , z2] = P(fp(2.0), Dr - 0.9, 0); for (const s of [-0.18, 0.18]) { const q = P(fp(2.0) + s, Dr - 0.3, 0), q2 = P(fp(2.0) + s, Dr - 0.9, 0); bag.add('wood_ochre', rod([q[0], fy, q[2]], [q2[0], fy + 2.4, q2[2]], 0.025, 5)); } void x; void x2; void z; void z2; }
+    for (let kk = 0; kk < 6; kk++) { const [x, , z] = P(u0 + 1.0 + kk * 0.6, dC + 0.3, 0); bag.add('iron', box(x - 0.15, fy + 1.0, z - 0.1, x + 0.15, fy + 1.12, z + 0.1)); }
+  } else if (k === 'fabric') {
+    // bolts of cloth standing in the racks, the long cutting counter with its brass yardstick let into the edge, spools and trimmings in a cabinet of small drawers, remnants on a round table, a fitting glass
+    solid('wood_ochre', u0 + 0.3, u1 - 0.3, fy, fy + 0.92, dC, dC + 0.9); bag.add('timber', I(u0 + 0.26, u1 - 0.26, fy + 0.92, fy + 0.97, dC - 0.04, dC + 0.94)); bag.add('gilt_bronze', I(u0 + 0.3, u1 - 0.3, fy + 0.97, fy + 0.99, dC - 0.02, dC + 0.03));
+    for (let c = 0; c < 4; c++) for (let u = u0 + 0.1; u < u1 - 0.3; u += 0.26) { const hh = 0.9 + r() * 0.5; bag.add(['cloth_red', 'cloth_indigo', 'cloth_green', 'cloth_ochre', 'cloth_white', 'cloth_blue', 'cloth_maroon', 'cloth_grey'][Math.floor(r() * 8)], I(u, u + 0.22, fy + 0.4 + (c % 2) * 0.0 + (c >> 1) * 1.1, fy + 0.4 + (c >> 1) * 1.1 + hh * 0.7, Dr - 0.55 + (c % 2) * 0.2, Dr - 0.35 + (c % 2) * 0.2)); }
+    solid('wood_dark', u0, u1, fy, fy + 0.4, Dr - 0.6, Dr - 0.05, false); for (const yy of [1.5, 2.6]) solid('wood_dark', u0, u1, fy + yy, fy + yy + 0.04, Dr - 0.65, Dr - 0.05, false);
+    { const [a, b] = fs(0, 1.4); solid('wood_dark', a, b, fy, fy + 1.4, 1.2, 1.6); for (let rr = 0; rr < 4; rr++) for (let c = 0; c < 4; c++) bag.add('gilt_bronze', I(a + 0.12 + c * 0.3, a + 0.2 + c * 0.3, fy + 0.2 + rr * 0.3, fy + 0.24 + rr * 0.3, 1.19, 1.2)); }
+    { const [x, , z] = P(midU, 2.6, 0); bag.add('wood_dark', lathe([[0.55, 0], [0.5, 0.05], [0.07, 0.1], [0.07, 0.72], [0.65, 0.76], [0.001, 0.76]], 10, null, x, fy, z)); col.circle(x, z, 0.65, fy, fy + 0.8); for (let kk = 0; kk < 4; kk++) bag.add(['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_green'][kk], lathe([[0.001, 0], [0.4, 0], [0.4, 0.03 + kk * 0.02], [0.001, 0.03 + kk * 0.02]], 8, null, x + (kk - 1.5) * 0.08, fy + 0.76 + kk * 0.03, z)); }
+    mirror(u1 - 1.6, u1 - 0.4, fy + 0.2, fy + 2.0);
+  }
+  // the awning on the trades that put one out (K.awn): a canvas of stripes sloping from the fascia to a valance, on an iron bar
+  if (K.awn) {
+    const QA = new Quads(), a0 = g0 + 0.1, a1 = g1 - 0.1, sw = 0.5, nS = Math.max(1, Math.round((a1 - a0) / sw)), w = (a1 - a0) / nS;
+    for (let i = 0; i < nS; i++) {
+      const ua = a0 + i * w, ub = ua + w, m = K.awn[i % 2];
+      QA.quad(m, F.P(ua, 0.5, y + 3.25), F.P(ub, 0.5, y + 3.25), F.P(ub, 1.7, y + 2.7), F.P(ua, 1.7, y + 2.7));
+      QA.quad(m, F.P(ua, 1.7, y + 2.7), F.P(ub, 1.7, y + 2.7), F.P(ub, 1.7, y + 2.45), F.P(ua, 1.7, y + 2.45));
+    }
+    QA.flush(bag); bag.add('iron', F.R(a0, a1, y + 2.66, y + 2.7, 1.66, 1.7));
   }
   // the lamps: a globe over the counter and one at the front, the tin ceiling's
   for (const d of [2.3, Dr - 2.6]) { const [x, , z] = P(midU, d, 0); bag.add('lamp_white', lathe([[0.001, -0.3], [0.13, -0.22], [0.17, -0.1], [0.1, -0.02], [0.001, 0]], 12, null, x, HC - 0.1, z)); bag.add('iron', lathe([[0.01, 0], [0.01, 0.2]], 3, null, x, HC - 0.1, z)); lights.push({ at: [x, HC - 0.6, z], color: '#ffe3b4', intensity: 2.2, distance: 8 }); }

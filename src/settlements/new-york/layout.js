@@ -86,14 +86,23 @@ export function lots() {
 }
 /** The shops one can enter, in the order the lots nearest the arrival get them (the style's shoprooms.js KINDS). */
 export const ROOM_KINDS = ['drug', 'deli', 'barber', 'cigar', 'hat', 'bakery', 'shoe', 'tailor', 'haber', 'lunch'];
+/** The trades of the farther blocks by district (docs §1n): the garment district's dry goods and tailors, Murray Hill's grocers and butchers, Midtown's automats and lunch counters. */
+const DISTRICT_KINDS = {
+  garment: ['fabric', 'tailor', 'lunch', 'fabric', 'deli', 'haber', 'hardware', 'hat', 'shoe', 'fabric'],
+  murray: ['grocer', 'butcher', 'bakery', 'deli', 'grocer', 'hardware', 'drug', 'barber', 'butcher', 'cigar', 'bakery'],
+  midtown: ['automat', 'drug', 'lunch', 'haber', 'cigar', 'automat', 'barber', 'hat', 'deli', 'shoe'],
+};
+const FAR = 26;
 function assignRooms(all) {
   const E = [4, 110], mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
   const cand = all.filter((l) => !l.row && l.h >= 14 && l.h < 70 && (l.front === 'n' || l.front === 's') && l.rect[2] - l.rect[0] >= 10 && l.rect[3] - l.rect[1] >= 12 && !inRect(l.rect, DINER_AT[0], DINER_AT[1]) && !inRect(l.rect, WALKUP_AT[0], WALKUP_AT[1]) && !onElStair(...mid(l.rect), 4))
-    .map((l) => ({ l, d: Math.hypot(mid(l.rect)[0] - E[0], mid(l.rect)[1] - E[1]) })).filter((c) => c.d < 260).sort((a, b) => a.d - b.d);
+    .map((l) => ({ l, d: Math.hypot(mid(l.rect)[0] - E[0], mid(l.rect)[1] - E[1]) })).filter((c) => c.d < 440).sort((a, b) => a.d - b.d);
   const chosen = [];
   // (the first ten, one of each kind, 45 m apart as before; then six more of the same kinds, 34 m apart, farther out along the avenues)
-  for (const c of cand) { if (chosen.length >= ROOM_KINDS.length + 6) break; const m = mid(c.l.rect), gap = chosen.length < ROOM_KINDS.length ? 45 : 34; if (chosen.some((o) => Math.hypot(mid(o.l.rect)[0] - m[0], mid(o.l.rect)[1] - m[1]) < gap)) continue; chosen.push(c); }
-  chosen.forEach((c, i) => { c.l.room = { kind: ROOM_KINDS[(i + (i >= ROOM_KINDS.length ? 3 : 0)) % ROOM_KINDS.length], depth: Math.min(9, c.l.rect[3] - c.l.rect[1] - 3), door: i % 2 }; });
+  for (const c of cand) { if (chosen.length >= ROOM_KINDS.length + 6 + FAR) break; const m = mid(c.l.rect), gap = chosen.length < ROOM_KINDS.length ? 45 : chosen.length < ROOM_KINDS.length + 6 ? 34 : 26; if (chosen.some((o) => Math.hypot(mid(o.l.rect)[0] - m[0], mid(o.l.rect)[1] - m[1]) < gap)) continue; chosen.push(c); }
+  let far = 0;
+  chosen.forEach((c, i) => { const m = mid(c.l.rect), dk = m[0] < -10 ? 'garment' : m[0] > 60 && m[1] > -150 ? 'murray' : 'midtown', DK = DISTRICT_KINDS[dk];
+    c.l.room = { kind: i < ROOM_KINDS.length + 6 ? ROOM_KINDS[(i + (i >= ROOM_KINDS.length ? 3 : 0)) % ROOM_KINDS.length] : DK[far++ % DK.length], depth: Math.min(9, c.l.rect[3] - c.l.rect[1] - 3), door: i % 2 }; });
 }
 /** The shops' own lots (those with a `room`). */
 export const roomLots = () => lots().filter((l) => l.room);
