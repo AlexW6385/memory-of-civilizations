@@ -8,7 +8,7 @@ import { placer, assembly, tube, slathe, rng } from '../../objects/kit.js';
 const at = (g, x, y, z) => { g.translate(x, y, z); return g; };
 
 /** A stringybark gum: a dark fibrous base, a pale upper trunk, a few limbs, ragged oblate crowns of grey-green leaf. */
-export function gum(el, { bag }) {
+export function gum(el, { bag, col }) {
   const put = placer(el, bag), v = (el.seed ?? 1) % 3, H = el.h ?? 10;
   const A = assembly(`ka_gum|${v}|${H}`, (a) => {
     const r = rng(700 + v * 13 + Math.round(H * 3)), lean = (r() - 0.5) * 0.9, s = H / 10;
@@ -23,9 +23,12 @@ export function gum(el, { bag }) {
     }
   });
   put('bark_dark', A.base.clone()); put('bark_grey', A.trunk.clone()); put('flax_leaf', A.leaf.clone());
+  // the trunk, as thick as it is drawn at the height of the body (the base tube: 0.34 s at the ground, 0.24 s at 0.12 H, 0.18 s at 0.34 H)
+  const s = H / 10, y = 1.0, rr = (y < H * 0.12 ? 0.34 - 0.1 * y / (H * 0.12) : 0.24 - 0.06 * Math.min(1, (y - H * 0.12) / (H * 0.22))) * s;
+  col?.circle(el.at[0], el.at[1], Math.max(0.25, rr - 0.03), (el.y ?? 0) - 0.3, (el.y ?? 0) + 3);   // (a trunk thinner than a cell of the checks is given the walker's own reach)
 }
 /** A cycad (Cycas): a short stub of a trunk with rings of old frond bases, a crown of arching pinnate fronds. */
-export function cycad(el, { bag }) {
+export function cycad(el, { bag, col }) {
   const put = placer(el, bag), v = (el.seed ?? 1) % 3, h = el.h ?? 1;
   const A = assembly(`ka_cycad|${v}|${h}`, (a) => {
     const r = rng(800 + v * 7), n = 15 + v * 3;
@@ -37,6 +40,7 @@ export function cycad(el, { bag }) {
     }
   });
   put('bark_dark', A.trunk.clone()); put('palm_leaf', A.leaf.clone());
+  if (h >= 0.6) col?.circle(el.at[0], el.at[1], 0.28, (el.y ?? 0) - 0.3, (el.y ?? 0) + h + 0.5);   // the stub and the crown's heart; the fronds arch over it
 }
 /** One tuft of spinifex or dry grass: a dome of thin arching blades. */
 function tuftShape(v) {
@@ -95,7 +99,7 @@ export function canoe(el, { bag }) {
 }
 
 /** The small things (el.kind): spears, bags, bark, wood, midden, bed, trap, mat, paint, ladder, yams, hearth_stones. */
-export function item(el, { bag }) {
+export function item(el, { bag, col }) {
   const put = placer(el, bag), kind = el.kind, v = (el.seed ?? 1) % 3;
   const A = assembly(`ka_item|${kind}|${v}`, (a) => {
     const r = rng(1300 + v * 11 + kind.length * 3);
@@ -168,4 +172,5 @@ export function item(el, { bag }) {
   });
   const m = { pole: 'wood_dark', spear: 'wood_dark', tip: 'wood_dark', thrower: 'wood_dark', cord: 'rope_fibre', bag: 'rope_fibre', bag2: 'hide_tan', sheet: 'roof_bark', log: 'wood_dark', shell: kind === 'midden' ? 'chalk' : 'sandstone_white', bone: 'chalk', grass: 'ichu', wick: 'wicker', mat: 'reed_mat', strip: 'palm_leaf', stone: 'sandstone_yellow', red: 'paint_minoan_red', yel: 'paint_ochre', wht: 'paint_white', brush: 'wood_dark', rung: 'wood_dark', lash: 'rope_fibre', yam: 'hide_brown', stick: 'wood_dark' };
   for (const [role, g] of Object.entries(A)) put(m[role] ?? 'wood_dark', g.clone());
+  if (kind === 'spears') col?.circle(el.at[0], el.at[1], 0.3, (el.y ?? 0) - 0.1, (el.y ?? 0) + 2.3);   // the frame the spears lean on
 }

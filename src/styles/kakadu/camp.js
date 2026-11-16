@@ -7,7 +7,7 @@ const at = (g, x, y, z) => { g.translate(x, y, z); return g; };
 const hang = (g, x, y, z, yaw) => { g.rotateY(yaw); g.translate(x, y, z); return g; };
 
 /** A weeping paperbark: a leaning white trunk with peeling sheets, a few thick limbs, drooping crowns of narrow leaves. */
-export function paperbark(el, { bag }) {
+export function paperbark(el, { bag, col }) {
   const put = placer(el, bag), v = (el.seed ?? 1) % 4, H = el.h ?? 8;
   const A = assembly(`ka_paperbark|${v}|${H}`, (a) => {
     const r = rng(300 + v * 17), lean = (r() - 0.5) * 0.9;
@@ -24,9 +24,12 @@ export function paperbark(el, { bag }) {
     }
   });
   put('bark_birch', A.bark.clone()); if (A.bark_dark) put('bark_dark', A.bark_dark.clone()); put('palm_leaf', A.leaf.clone());
+  // the trunk at the height of the body (0.3 k at the ground, 0.2 k at 0.2 H, 0.14 k at 0.5 H; k = H / 8)
+  const k = H / 8, y = 1.0, rr = (y < H * 0.2 ? 0.3 - 0.1 * y / (H * 0.2) : 0.2 - 0.06 * Math.min(1, (y - H * 0.2) / (H * 0.3))) * k;
+  col?.circle(el.at[0], el.at[1], Math.max(0.25, rr - 0.03), (el.y ?? 0) - 0.3, (el.y ?? 0) + 3);
 }
 /** A pandanus: a slender trunk with the spiral of old leaf bases, crowns of long strap leaves spiralling at the tips, an orange fruit. */
-export function pandanus(el, { bag }) {
+export function pandanus(el, { bag, col }) {
   const put = placer(el, bag), v = (el.seed ?? 1) % 3, H = el.h ?? 5;
   const A = assembly(`ka_pandanus|${v}|${H}`, (a) => {
     const r = rng(500 + v * 9), n = 1 + (v === 2 ? 2 : v);
@@ -43,6 +46,17 @@ export function pandanus(el, { bag }) {
     }
   });
   put('wood_dark', A.trunk.clone()); put('palm_leaf', A.leaf.clone()); put('clay_robe', A.fruit.clone());
+  // each trunk (the same draws as the shape's: height, then tilt, then forty for the leaves), where it stands at the height of the body
+  {
+    const r = rng(500 + v * 9), n = 1 + (v === 2 ? 2 : v), rot = el.rot ?? 0, cs = Math.cos(rot), sn = Math.sin(rot), y0 = el.y ?? 0;
+    for (let c = 0; c < n; c++) {
+      const th = c * 2.4, off = c ? 0.5 : 0, h = H * (c ? 0.55 + r() * 0.3 : 1), bx = Math.cos(th) * off, bz = Math.sin(th) * off, tilt = (r() - 0.5) * 0.8;
+      for (let q = 0; q < 40; q++) r();
+      if (h < 1.7) continue;
+      const lx = bx + tilt * Math.min(1, 1.0 / h), rr = 0.14 - 0.04 * Math.min(1, 1.0 / (h * 0.5));
+      col?.circle(el.at[0] + lx * cs + bz * sn, el.at[1] - lx * sn + bz * cs, Math.max(0.28, rr - 0.02), y0 - 0.3, y0 + Math.min(3, h));
+    }
+  }
 }
 /** A termite mound: a low cone of grey-brown earth with a rough top, 0.6–1.8 m. */
 export function termite(el, { bag }) {
