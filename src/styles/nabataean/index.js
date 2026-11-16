@@ -78,7 +78,8 @@ function theatre(el, { bag, col: C }) {
     const w = passage(i) ? wp : ws, y = i * rh;
     // the row, solid down to the rock beneath it
     ring(R, r, r + w, -0.5, y + rh);
-    for (let k = 0; k < segs; k += 3) { const t0 = a0 - span / 2 + span * k / segs, t1 = a0 - span / 2 + span * Math.min(segs, k + 3) / segs; C.segment(at(t0, r + w / 2), at(t1, r + w / 2), w, -1, y + rh); }
+    // (its colliders are chords cut as the drawn row's boxes are: the chord's middle on the row's radius, not its ends)
+    for (let k = 0; k < segs; k += 2) { const t0 = a0 - span / 2 + span * k / segs, t1 = a0 - span / 2 + span * Math.min(segs, k + 2) / segs, rm = (r + w / 2) / Math.cos((t1 - t0) / 2); C.segment(at(t0, rm), at(t1, rm), w, -1, y + rh); }
     // the stairways' intermediate steps on the back half of each row (not on the passages)
     if (!passage(i) && !passage(i + 1) && i < rows - 1) for (const t of stairs) { const dt = 0.65 / (r + w); ring(A, r + w / 2, r + w, y + rh - 0.1, y + rh * 1.5, t - dt, t + dt, 1); }
     r += w;
@@ -86,7 +87,7 @@ function theatre(el, { bag, col: C }) {
   const yTop = rows * rh;
   // the parapet at the back, the rock cut away behind it
   ring(R, r - 0.02, r + 4, -0.5, yTop + rh);
-  C.segment(at(a0 - span / 2, r + 2), at(a0, r + 2), 4, -1, yTop + rh); C.segment(at(a0, r + 2), at(a0 + span / 2, r + 2), 4, -1, yTop + rh);
+  for (let k = 0; k < segs; k++) { const t0 = a0 - span / 2 + span * k / segs, t1 = a0 - span / 2 + span * (k + 1) / segs, rm = (r + 2) / Math.cos((t1 - t0) / 2); C.segment(at(t0, rm), at(t1, rm), 4, -1, yTop + rh); }
   // the ends closed: walls stepping up with the rows
   for (const s of [-1, 1]) {
     const t = a0 + s * span / 2, ux = -Math.sin(t) * s, uz = Math.cos(t) * s;
