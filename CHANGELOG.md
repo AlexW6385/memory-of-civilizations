@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.6 — the detail wave goes on: eight more places (2026-11-16)
+
+New York: the Chrysler Building's body (granite base, portals, setbacks, the hubcap frieze) and 42 shops to enter with five new trades, an automat among them. Rome: the gods in the Pantheon's niches, gilt rosettes in the dome's coffers, fourteen insulae with shops, a court, a stair and furnished rooms. Constantinople: marble portals and a slab floor with green bands in Hagia Sophia, sixteen more houses to enter (a potter, a smith), fronts by rule, stalls, wells and fountains in the outer lanes. Florence: the campanile's reliefs, niches and crown, the dome's oculi and lantern, 35 more houses to enter (a kitchen, an apothecary, a weaver). Tenochtitlan: serpent heads and braziers on the Templo Mayor, the palace's upper rooms, six calpulli temples with their schools, lords' houses and steam baths. Agra: the Taj Mahal's parapet, guldastas and plinth dado, households in the open houses with rooms above. Venice: the Campanile rebuilt (belfry, bells, lion, angel), 82 houses to enter, Gothic and plainer fronts by rule. Kakadu: the rocks and tree trunks collide where they are drawn.
+
 ## v12.5 — a detail wave: Nara, Thebes; Petra's rock (2026-11-16)
 
 Nara: ordinary houses follow a trade (weaver, smith, lacquer worker, farmer, potter, straw worker) with its front and furnished room, 150 houses are entered (30 before), workers stand at their work, the halls have a stone dado and tie beams, and the Great Buddha's lotus throne is engraved. Thebes: war reliefs of Seti I and Ramesses II on the hypostyle hall's outer walls, the festival hall with tent-pole columns and a clerestory, the barque shrine with its gilded barque, half the near houses entered, looms, ovens and a brick yard in the streets. Petra: the Siq's rock collides where it is drawn (places where one was stopped by nothing drawn: 759 cells to 78) and the theatre's back wall follows its arc.
