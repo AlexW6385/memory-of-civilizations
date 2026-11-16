@@ -262,11 +262,13 @@ export function interiorShops() {
   for (const r of shopRows()) for (const s of r.shops) if (s.interior) out.push({ kind: s.interior, side: r.side, front: r.front, z0: s.z0, z1: s.z1, depth: SHOP_DEPTH_BUILT, seed: s.seed });
   return out;
 }
-/** The courtyard houses furnished inside (§21): the n lod-0 houses nearest the avenue's mouth, whatever the layout. */
-export function furnishedHouses(n = 5) {
-  const d2 = (h) => ((h.rect[0] + h.rect[2]) / 2 + 30) ** 2 + ((h.rect[1] + h.rect[3]) / 2 - 225) ** 2;
-  return [...houses()].filter((h) => h.lod === 0 && h.rect[2] - h.rect[0] >= 24).sort((a, b) => d2(a) - d2(b)).slice(0, n);
-}
+/**
+ * The courtyard houses that are entered and furnished (§35): every house of the core and the middle ring (lod 0 and 1) and the lod-2 houses
+ * within ENTER_R of the avenue's mouth, whatever the layout. Their shells are built with open doors and ceilings (houses.js `enter`).
+ */
+export const ENTER_R = 235;
+export function enterable(h) { const d = Math.hypot((h.rect[0] + h.rect[2]) / 2 + 30, (h.rect[1] + h.rect[3]) / 2 - 225); return h.rect[2] - h.rect[0] >= 24 && (h.lod <= 1 || (h.lod === 2 && d < ENTER_R)); }
+export function furnishedHouses() { return houses().filter(enterable); }
 export function inShopRow(x, z, m = 0) { return shopRows().some((r) => inRect([Math.min(r.front, r.back, r.yard[0], r.yard[2]), r.z0, Math.max(r.front, r.back, r.yard[0], r.yard[2]), r.z1], x, z, m)); }
 
 let WELLS = null;

@@ -5,7 +5,8 @@ import '../../objects/index.js';
 import { bjBooth } from './shops.js';
 import { bjShopgoods, bjBarber, bjTeastall, bjWatercart, bjSedan, bjLane, bjPet, bjShrine, bjBenchtree, bjCoalcart, bjDrying } from './streetlife.js';
 import { pekingCart, camelString } from '../../styles/qing/street.js';
-import { bjRooms, bjTeahouse, bjPharmacy } from './interiors.js';
+import { bjTeahouse, bjPharmacy } from './interiors.js';
+import { bjRooms } from './rooms.js';
 import { bjPalaceRoom } from './palace-rooms.js';
 import { bjClothShop, bjGrainShop, bjPawnShop, bjWineShop, bjLanternShop, bjShoeShop } from './shoprooms.js';
 

@@ -82,8 +82,11 @@ function quadTo(out, a, b, c, d, want) {
  * wd0, wd1: the wall's depths (the gable wall fills between them under the slopes), wy: its foot.
  */
 export function gableRoof(bag, F, o) {
-  const { s0, s1, dB, dF, dm, ey, rise, wd0, wd1, wy, ovG = 0, lod = 0, orn = true } = o;
-  const p = 1.3, N = lod === 0 ? 6 : lod === 1 ? 4 : 3;
+  const { s0, s1, dB, dF, dm, ey, rise, wd0, wd1, wy, lod = 0, orn = true, kind = 'qingshui', wall = 'brick_grey' } = o;
+  // roof kinds (§35): the flush gable with the qingshui ridge (default), the rolled guolong ridge (a rounder profile, a thick plain roll, no
+  // turned ends), the overhanging gable (xuanshan: the roof runs out past the end wall on its purlins, under a bargeboard)
+  const ovG = kind === 'xuanshan' ? Math.max(o.ovG ?? 0, 0.42) : (o.ovG ?? 0);
+  const p = kind === 'guolong' ? 1.12 : 1.3, N = lod === 0 ? 6 : lod === 1 ? 4 : 3;
   const yAt = (d) => { const half = d >= dm ? dF - dm : dm - dB, t = 1 - Math.abs(d - dm) / half; return ey + rise * Math.pow(Math.max(0, t), p); };
   const ds = []; for (let i = 0; i <= N; i++) ds.push(dB + (dm - dB) * i / N); for (let i = 1; i <= N; i++) ds.push(dm + (dF - dm) * i / N);
   const a0 = s0 - ovG, a1 = s1 + ovG, roof = [], under = [], gab = [];
@@ -119,7 +122,21 @@ export function gableRoof(bag, F, o) {
       if (t0 - wy < 0.03 && t1 - wy < 0.03) continue;
       quadTo(tri, F.P(s, dd[i], wy), F.P(s, dd[i + 1], wy), F.P(s, dd[i + 1], t1), F.P(s, dd[i], t0), [F.u[0] * sgn, 0, F.u[1] * sgn]);
     }
-    if (tri.length) bag.add('brick_grey', fromTriangles(tri));
+    if (tri.length) bag.add(wall, fromTriangles(tri));
+  }
+  // the overhanging gable (xuanshan): the underside of the roof where it runs past the end wall, the purlin heads standing out of the gable
+  // in a row along each slope, and a bargeboard along each slope's edge
+  if (kind === 'xuanshan' && lod <= 1) for (const sgn of [-1, 1]) {
+    const sw = sgn < 0 ? s0 : s1, se = sgn < 0 ? a0 : a1, und = [], tail = [];
+    for (let i = 0; i < ds.length - 1; i++) {
+      const d0 = ds[i], d1 = ds[i + 1], lo = (d) => yAt(d) - 0.16;
+      quadTo(und, F.P(sw, d0, lo(d0)), F.P(se, d0, lo(d0)), F.P(se, d1, lo(d1)), F.P(sw, d1, lo(d1)), [0, -1, 0]);
+      bag.add('lacquer_red', rod(F.P(se, d0, yAt(d0) - 0.12), F.P(se, d1, yAt(d1) - 0.12), 0.045, 4));          // the bargeboard (bo feng), a red board along the edge
+    }
+    bag.add('timber', fromTriangles(und));
+    const sd = Math.max(5, Math.round((dF - dB) / 0.9));
+    for (let k = 0; k <= sd; k++) { const d = dB + 0.4 + (dF - dB - 0.9) * k / sd, yy = yAt(d) - 0.22; if (yy > wy - 0.05 && k > 0 && k < sd) bag.add('timber', rod(F.P(sw, d, yy), F.P(sw + sgn * (ovG - 0.04), d, yy), 0.045, 5)); }
+    void tail; void se;
   }
   // weeds on old tiles: tufts along the ridge, in the gutters of the slopes near the eaves, at the gable's foot
   if (lod === 0) {
@@ -133,8 +150,10 @@ export function gableRoof(bag, F, o) {
   }
   // the rolled ridge and its ends turned up
   const ry = ey + rise;
-  const r = rod(F.P(s0 - 0.05, dm, ry + 0.06), F.P(s1 + 0.05, dm, ry + 0.06), lod === 0 ? 0.16 : 0.14, lod === 0 ? 8 : 5);
+  const rr = kind === 'guolong' ? 0.21 : lod === 0 ? 0.16 : 0.14;
+  const r = rod(F.P(a0 - 0.05, dm, ry + 0.06), F.P(a1 + 0.05, dm, ry + 0.06), rr, lod === 0 ? 8 : 5);
   bag.add('tile_grey', r);
+  if (kind === 'guolong' && lod <= 1) bag.add('tile_dark', rod(F.P(a0 + 0.05, dm, ry + 0.2), F.P(a1 - 0.05, dm, ry + 0.2), 0.095, 6));   // the roll's upper course
   if (orn && lod === 0) for (const [s, sg] of [[s0 - 0.05, -1], [s1 + 0.05, 1]]) {
     const a = F.P(s, dm, ry + 0.06), b = F.P(s + sg * 0.26, dm, ry + 0.52);
     bag.add('tile_grey', rod(a, b, 0.1, 6));
@@ -150,45 +169,52 @@ export function gableRoof(bag, F, o) {
  * Returns { rect, top }.
  */
 export function house(bag, col, F, o) {
-  const { s0, s1, dB, dF, vw = 1.0, y = 0.4, H = 3.3, bays = 3, door = Math.floor((bays - 1) / 2), lod = 0, rich = false, win = true, ridgeOnly = false } = o;
+  const { s0, s1, dB, dF, vw = 1.0, y = 0.4, H = 3.3, bays = 3, door = Math.floor((bays - 1) / 2), lod = 0, rich = false, win = true, ridgeOnly = false, enter = false } = o;
   const L = s1 - s0, bw = L / bays, dW = dF - vw;      // the front wall's line
   const rise = (dF - dB + 1.8) * 0.5 * 0.46;
-  const plinth = rich ? 'granite_grey' : 'brick_grey';
+  const plinth = rich ? 'granite_grey' : 'brick_grey', wallM = o.wall || 'brick_grey', latM = o.lat || 'lattice_red', doorM = o.latDoor || latM;
+  // an enterable house keeps the detail of the near ring in its front whatever its distance (its door is walked through)
+  const fl = enter ? Math.min(lod, 1) : lod;
   F.B(bag, plinth, s0 - 0.2, dB - 0.12, s1 + 0.2, dF + 0.05, -0.05, y);
   // back wall (it rises to the eave) and the side walls (chitou: they reach the front posts' line)
-  F.B(bag, 'brick_grey', s0, dB, s1, dB + 0.5, y, y + H - 0.28);
-  for (const [a, b] of [[s0, s0 + 0.5], [s1 - 0.5, s1]]) F.B(bag, 'brick_grey', a, dB + 0.5, b, dF, y, y + H);
+  F.B(bag, wallM, s0, dB, s1, dB + 0.5, y, y + H - 0.28);
+  for (const [a, b] of [[s0, s0 + 0.5], [s1 - 0.5, s1]]) F.B(bag, wallM, a, dB + 0.5, b, dF, y, y + H);
   // the front: posts on the line dF, the wall behind them on dW, windows and the door
   const lintelY = y + H - 0.5;
   for (let i = 0; i <= bays; i++) {
     const s = s0 + 0.25 + (L - 0.5) * i / bays;
     if (i === 0 || i === bays || lod >= 3) continue;          // the ends are the walls (the far houses' posts are left out)
     F.B(bag, 'lacquer_red', s - 0.12, dF - 0.24, s + 0.12, dF, y, lintelY);
+    if (enter) col.rect(F.rect(s - 0.12, dF - 0.24, s + 0.12, dF), 0, y + H);
   }
   F.B(bag, 'lacquer_red', s0 + 0.5, dF - 0.26, s1 - 0.5, dF, lintelY, y + H - 0.2);                     // the lintel (feng)
-  F.B(bag, 'brick_grey', s0 + 0.5, dW - 0.2, s1 - 0.5, dW, lintelY, y + H - 0.2);                        // the wall above the front wall's lattice
+  F.B(bag, wallM, s0 + 0.5, dW - 0.2, s1 - 0.5, dW, lintelY, y + H - 0.2);                        // the wall above the front wall's lattice
   if (lod === 0 && rich) F.B(bag, 'paint_caihua', s0 + 0.9, dF + 0.005, s1 - 0.9, dF + 0.02, lintelY + 0.06, lintelY + 0.3);      // the painted band on the lintel
   const P2 = (s) => { const p = F.P(s, dW, y); return [p[0], p[2]]; };
   const lx = (i0, i1) => [P2(s0 + 0.25 + (L - 0.5) * i0 / bays), P2(s0 + 0.25 + (L - 0.5) * i1 / bays)];
-  const fh = lintelY - y;
+  const fh = lintelY - y, colw = enter ? col : (lod === 0 ? col : NOCOL);
+  let doorC = null;
   for (let i = 0; i < bays; i++) {
-    const [a, b] = lx(i, i + 1), isDoor = i === door, inset = (pt, k) => [pt[0] + (i === 0 ? 0 : 0) * k, pt[1], pt[2]];
-    void inset;
+    const [a, b] = lx(i, i + 1), isDoor = i === door;
     // posts' faces on the verandah give each leaf its bay; the first and last bays are shortened by the end walls
+    const sa = i === 0 ? s0 + 0.5 : s0 + 0.25 + (L - 0.5) * i / bays, sb = i === bays - 1 ? s1 - 0.5 : s0 + 0.25 + (L - 0.5) * (i + 1) / bays;
     const aa = i === 0 ? P2(s0 + 0.5) : a, bb = i === bays - 1 ? P2(s1 - 0.5) : b;
+    if (enter && isDoor) { doorC = (sa + sb) / 2; doorway(bag, colw, F, o, sa, sb, y, fh, dW, lintelY, latM, doorM, fl); continue; }
     if (win || isDoor) {
       // beyond ~250 m (lod 2) one flat leaf a bay
-      if (lod >= 2) F.B(bag, isDoor ? 'lacquer_red' : 'lattice_red', Math.min(i === 0 ? s0 + 0.5 : s0 + 0.25 + (L - 0.5) * i / bays, s1), dW - 0.05, Math.min(i === bays - 1 ? s1 - 0.5 : s0 + 0.25 + (L - 0.5) * (i + 1) / bays, s1), dW, y, lintelY);
-      else latticeBay(bag, lod === 0 ? col : NOCOL, aa, bb, y, fh, isDoor ? 'door' : 'window', 0.06, 'lattice_red');
+      if (fl >= 2) F.B(bag, isDoor ? 'lacquer_red' : latM, Math.min(sa, s1), dW - 0.05, Math.min(sb, s1), dW, y, lintelY);
+      else latticeBay(bag, colw, aa, bb, y, fh, isDoor ? 'door' : 'window', 0.06, isDoor ? doorM : latM);
     }
-    else F.B(bag, 'brick_grey', Math.min(i === 0 ? s0 + 0.5 : s0 + 0.25 + (L - 0.5) * i / bays, s1), dW - 0.2, Math.min(i === bays - 1 ? s1 - 0.5 : s0 + 0.25 + (L - 0.5) * (i + 1) / bays, s1), dW, y, lintelY);
+    else F.B(bag, wallM, Math.min(sa, s1), dW - 0.2, Math.min(sb, s1), dW, y, lintelY);
   }
   // the verandah's floor (the plinth is its floor) and the steps to the door
   if (o.steps !== false && lod < 3) {
-    const sc = s0 + 0.25 + (L - 0.5) * (door + 0.5) / bays, n = Math.max(1, Math.round(y / 0.17));
-    for (let k = 0; k < n; k++) F.B(bag, 'granite_grey', sc - 0.9 - 0.0 * k, dF + 0.05 + 0.0, sc + 0.9, dF + 0.05 + 0.3 * (n - k), -0.05, y * (k + 1) / (n + 1) * 1 - (k === n - 1 ? 0 : 0));
+    const sc = enter && doorC !== null ? doorC : s0 + 0.25 + (L - 0.5) * (door + 0.5) / bays, n = Math.max(1, Math.round(y / 0.17));
+    for (let k = 0; k < n; k++) F.B(bag, 'granite_grey', sc - 0.9, dF + 0.05, sc + 0.9, dF + 0.05 + 0.3 * (n - k), -0.05, y * (k + 1) / (n + 1));
+    if (enter) col.ramp(F.rect(sc - 0.9, dF + 0.05, sc + 0.9, dF + 0.05 + 0.3 * n), 0.03, y, RISE[F.face]);
   }
-  const yAt = gableRoof(bag, F, { s0, s1, dB: dB - 0.4, dF: dF + 0.9, dm: (dB + dF) / 2 + 0.1, ey: y + H - 0.55, rise, wd0: dB, wd1: dF, wy: y + H, lod, orn: rich });
+  const roofKind = o.roof || 'qingshui';
+  const yAt = gableRoof(bag, F, { s0, s1, dB: dB - 0.4, dF: dF + 0.9, dm: (dB + dF) / 2 + 0.1, ey: y + H - 0.55, rise, wd0: dB, wd1: dF, wy: y + H, lod, orn: rich && roofKind === 'qingshui', kind: roofKind, wall: wallM });
   // a chimney on the back slope: a brick stack with a tile cap
   if (lod <= 1 && !ridgeOnly && o.chimney !== false) {
     const sc = s0 + L * (o.chimneyAt ?? 0.28), dc = dB + (dF - dB) * 0.3, base = yAt(dc) - 0.1, top = base + 1.25;
@@ -196,8 +222,57 @@ export function house(bag, col, F, o) {
     F.B(bag, 'tile_grey', sc - 0.3, dc - 0.3, sc + 0.3, dc + 0.3, top, top + 0.09);
   }
   const rect = F.rect(s0 - 0.2, dB - 0.12, s1 + 0.2, dF + 0.05);
-  col.rect(rect, 0, y + H + 1);
-  return { rect, yAt };
+  if (!enter) { col.rect(rect, 0, y + H + 1); return { rect, yAt }; }
+  // ── an enterable house (§35): the walls are the obstacles, the floor and the ceiling are made, the door is open ──
+  const T = y + H;
+  col.segment(F.P(s0, dB + 0.25).filter((_, k) => k !== 1), F.P(s1, dB + 0.25).filter((_, k) => k !== 1), 0.5, 0, T);               // the back wall
+  for (const s of [s0 + 0.25, s1 - 0.25]) col.segment(F.P(s, dB + 0.5).filter((_, k) => k !== 1), F.P(s, dF).filter((_, k) => k !== 1), 0.5, 0, T);   // the side walls
+  col.floor(F.rect(s0 + 0.5, dB + 0.5, s1 - 0.5, dF + 0.05), y + 0.02);
+  F.B(bag, 'brick_paving', s0 + 0.5, dB + 0.5, s1 - 0.5, dW, y, y + 0.02);                                       // the floor of the rooms: laid brick
+  F.B(bag, o.floor2 || 'brick_paving', s0 + 0.5, dW, s1 - 0.5, dF, y, y + 0.02);
+  // the walls' inside faces: lime plaster above a brick dado
+  const pl = 'plaster_white', yp = y + 0.9, yc = T - 0.35;
+  F.B(bag, pl, s0 + 0.5, dB + 0.5, s1 - 0.5, dB + 0.52, yp, yc); F.B(bag, pl, s0 + 0.5, dB + 0.5, s0 + 0.52, dW - 0.1, yp, yc); F.B(bag, pl, s1 - 0.52, dB + 0.5, s1 - 0.5, dW - 0.1, yp, yc);
+  // the ceiling: white paper over a lattice of battens (dingpeng), a ceiling under the rafters, with a darker frame of battens round it
+  const ceil = [];
+  quadTo(ceil, F.P(s0 + 0.5, dB + 0.5, yc), F.P(s1 - 0.5, dB + 0.5, yc), F.P(s1 - 0.5, dW, yc), F.P(s0 + 0.5, dW, yc), [0, -1, 0]);
+  bag.add('plaster_white', fromTriangles(ceil));
+  if (lod <= 1) {
+    for (const [d0, d1] of [[dB + 0.5, dB + 0.62], [dW - 0.12, dW]]) F.B(bag, 'wood_dark', s0 + 0.5, d0, s1 - 0.5, d1, yc - 0.04, yc);
+    F.B(bag, 'wood_dark', s0 + 0.5, dB + 0.5, s0 + 0.62, dW, yc - 0.04, yc); F.B(bag, 'wood_dark', s1 - 0.62, dB + 0.5, s1 - 0.5, dW, yc - 0.04, yc);
+    const nb = Math.max(1, Math.round(L / 1.6));
+    for (let k = 1; k < nb; k++) { const s = s0 + 0.5 + (L - 1.0) * k / nb; F.B(bag, 'wood_dark', s - 0.03, dB + 0.5, s + 0.03, dW, yc - 0.03, yc); }        // the battens across
+    // the beam over the verandah posts and the inside of the lintel, painted
+    F.B(bag, 'lacquer_red', s0 + 0.5, dW - 0.3, s1 - 0.5, dW - 0.2, yc - 0.28, yc - 0.04);
+  }
+  // the verandah's ceiling (under the eave): boards between the posts' line and the front wall
+  const vc = []; quadTo(vc, F.P(s0 + 0.5, dW, lintelY + 0.02), F.P(s1 - 0.5, dW, lintelY + 0.02), F.P(s1 - 0.5, dF - 0.26, lintelY + 0.02), F.P(s0 + 0.5, dF - 0.26, lintelY + 0.02), [0, -1, 0]);
+  bag.add('timber', fromTriangles(vc));
+  return { rect, yAt, doorC, T };
+}
+/** The direction a flight of steps rises toward a house whose front faces `face` ('s' | 'n' | 'e' | 'w'), for col.ramp. */
+const RISE = { s: 'n', n: 's', e: 'w', w: 'e' };
+/** The open door of an enterable house: a clear doorway in the middle of the door bay between two fixed leaves, its frame, a transom, the two leaves swung back inside. */
+function doorway(bag, col, F, o, sa, sb, y, fh, dW, lintelY, latM, doorM, fl) {
+  const sc = (sa + sb) / 2, dw = Math.min(o.dw ?? 1.5, sb - sa - 0.5), P2 = (s) => { const p = F.P(s, dW, y); return [p[0], p[2]]; };
+  const top = Math.min(2.4, fh - 0.3);
+  // the fixed leaves either side (dado panel, lattice over it)
+  if (sc - dw / 2 - sa > 0.15) latticeBay(bag, col, P2(sa), P2(sc - dw / 2), y, fh, 'door', 0.06, doorM);
+  if (sb - (sc + dw / 2) > 0.15) latticeBay(bag, col, P2(sc + dw / 2), P2(sb), y, fh, 'door', 0.06, doorM);
+  // the frame: two jambs, the head, the transom of lattice over it up to the lintel
+  for (const sg of [-1, 1]) F.B(bag, 'lacquer_red', sc + sg * dw / 2 - 0.06, dW - 0.1, sc + sg * dw / 2 + 0.06, dW + 0.1, y, y + top);
+  F.B(bag, 'lacquer_red', sc - dw / 2 - 0.06, dW - 0.1, sc + dw / 2 + 0.06, dW + 0.1, y + top, y + top + 0.1);
+  F.B(bag, latM, sc - dw / 2, dW - 0.04, sc + dw / 2, dW + 0.04, y + top + 0.1, lintelY);
+  F.B(bag, 'granite_grey', sc - dw / 2 - 0.1, dW - 0.2, sc + dw / 2 + 0.1, dW + 0.2, y, y + 0.04);          // the sill-stone (menkan) underfoot
+  // the two leaves, open, swung back against the walls inside (a lattice leaf on a dado)
+  for (const sg of [-1, 1]) {
+    const s = sc + sg * (dw / 2 + 0.03);
+    F.B(bag, 'lacquer_red', s - 0.025, dW - 0.12 - dw / 2, s + 0.025, dW - 0.1, y + 0.05, y + 0.65);
+    F.B(bag, doorM, s - 0.025, dW - 0.12 - dw / 2, s + 0.025, dW - 0.1, y + 0.65, y + top - 0.05);
+    F.B(bag, 'lacquer_red', s - 0.03, dW - 0.14 - dw / 2, s + 0.03, dW - 0.1, y + top - 0.05, y + top);
+  }
+  // the winter door curtain (mian menlian), rolled up and tied above the door
+  if (fl <= 1) { const a = F.P(sc - dw / 2 + 0.1, dW + 0.18, y + top + 0.14), b = F.P(sc + dw / 2 - 0.1, dW + 0.18, y + top + 0.14); bag.add('cloth_indigo', rod(a, b, 0.07, 6)); }
 }
 
 const GATE = {
@@ -205,7 +280,7 @@ const GATE = {
   jinzhu: { gw: 3.2, rec: 1.2, open: 1.7, up: 0.45, plinth: 0.27, pins: 4, door: 'lacquer_red', drum: 'square', chitou: true },
   manzi: { gw: 2.7, rec: 0.28, open: 1.5, up: 0, plinth: 0.15, pins: 2, door: 'lacquer_black', drum: 'round', chitou: false },
   ruyi: { gw: 2.5, rec: 0.32, open: 1.4, up: 0, plinth: 0.15, pins: 2, door: 'lacquer_black', drum: 'square', chitou: false },
-  wall: { gw: 1.8, rec: 0.12, open: 1.2, up: 0, plinth: 0.05, pins: 0, door: 'lacquer_black', drum: null, chitou: false },
+  wall: { gw: 2.3, rec: 0.12, open: 1.3, up: 0, plinth: 0.05, pins: 0, door: 'lacquer_black', drum: null, chitou: false },
 };
 export { GATE };
 
@@ -455,6 +530,27 @@ function chuihua(bag, col, cx, z, lod) {
   col.rect([cx + hw - 0.14, z - 0.7, cx + hw + 0.14, z + 0.7], 0, 3);
 }
 
+/**
+ * The fronts of a house, by rule from its lot (§35): the pattern of the window lattices (the "step by step brocade", the ice-crack, the
+ * wan fret, the haitang flower), the roof (the qingshui ridge, the plain rolled guolong ridge, the overhanging gable), the finish of the
+ * walls (grey brick, or lime plaster over it) — richer lots take the finer patterns and the turned ridge, poorer lots the plain ones; the
+ * main house and the side houses of one yard differ. Pure data, from el.seed and el.wealth.
+ */
+export function dwelling(el) {
+  const r = rng(((el.seed | 0) * 3 + 11) >>> 0), w = el.wealth ?? 0.4, pick = (a) => a[Math.floor(r() * a.length)];
+  const rich = w > 0.6, mid = w > 0.38;
+  return {
+    latMain: rich ? pick(['lattice_bubujin', 'lattice_wan', 'lattice_haitang', 'lattice_bubujin']) : mid ? pick(['lattice_bubujin', 'lattice_ice', 'lattice_wan', 'lattice_red']) : pick(['lattice_red', 'lattice_ice', 'lattice_red']),
+    latWing: rich ? pick(['lattice_ice', 'lattice_bubujin']) : pick(['lattice_red', 'lattice_ice']),
+    roofMain: rich ? pick(['qingshui', 'qingshui', 'guolong']) : mid ? pick(['guolong', 'qingshui', 'xuanshan']) : pick(['guolong', 'xuanshan', 'xuanshan']),
+    roofWing: rich ? pick(['guolong', 'qingshui']) : pick(['guolong', 'xuanshan', 'guolong']),
+    wallMain: !rich && r() < 0.35 ? 'plaster_grey' : 'brick_grey',
+    wallWing: w < 0.55 && r() < 0.5 ? 'plaster_grey' : 'brick_grey',
+  };
+}
+/** How many bays an enterable side house is built with (odd, so that the door is in the middle one): 1 under 5.6 m, 3 under 9 m, else 5. */
+export const wingBays = (L, enter) => (enter ? (L < 5.6 ? 1 : L < 9 ? 3 : 5) : Math.max(2, Math.round(L / 3.2)));
+
 /** One courtyard house, as an element: { rect, seed, gate, courts, wealth, lod, trees }. */
 /**
  * The parts of a hutong house, from its lot alone (rect, courts, gate rank, lod): the main house's
@@ -467,9 +563,9 @@ export function houseParts(el) {
   const sideM = lod >= 2 ? 1.0 : dE * 0.5;
   const main = [x0 + 0.44 + sideM, z0 + 0.3, x1 - 0.44 - sideM, z0 + 0.3 + dN], mb = W > 27 ? 5 : 3;
   const yardTop = z0 + 0.3 + dN + 0.9, zWall = courts === 2 ? z0 + 12.95 : null;
-  const wingZ1 = (zWall ?? zN) - (courts === 2 ? 0.6 : 2.2), wingZ0 = yardTop + 0.2, ww = Math.min(3.4, W * 0.13);
+  const wingZ1 = (zWall ?? zN) - (courts === 2 ? 0.6 : 2.2), wingZ0 = yardTop + 0.2, ww = (el.enter && lod <= 2) ? Math.min(4.0, W * 0.15) : Math.min(3.4, W * 0.13);   // the side houses of an enterable house are deeper (room to walk past the kang)
   const wings = [];
-  if (wingZ1 - wingZ0 > 3.5) for (const [side, xa] of [['e', x0 + 0.44], ['w', x1 - 0.44 - ww]]) wings.push({ side, rect: [xa, wingZ0, xa + ww, wingZ1], ww, L: wingZ1 - wingZ0 });
+  if (wingZ1 - wingZ0 > 3.5) for (const [side, xa] of [['e', x0 + 0.44], ['w', x1 - 0.44 - ww]]) wings.push({ side, rect: [xa, wingZ0, xa + ww, wingZ1], ww, L: wingZ1 - wingZ0, bays: wingBays(wingZ1 - wingZ0, !!el.enter && lod <= 2) });
   void G;
   return { main, mb, mainY: 0.55, dN, wings, wingY: 0.35, zN, zWall };
 }
@@ -496,7 +592,8 @@ export function hutongHouse(el, ctx0) {
   const mainR = [x0 + 0.44 + sideM, z0 + 0.3, x1 - 0.44 - sideM, z0 + 0.3 + dN];
   const mb = W > 27 ? 5 : 3;
   const Fm = Frame((mainR[0] + mainR[2]) / 2, (mainR[1] + mainR[3]) / 2, 's'), mL = mainR[2] - mainR[0];
-  house(bag, col, Fm, { s0: -mL / 2, s1: mL / 2, dB: -dN / 2, dF: dN / 2, vw: 1.1, y: 0.55, H: 3.45, bays: mb, lod, rich: g.wealth > 0.45, chimneyAt: 0.2 });
+  const enter = !!el.enter && lod <= 2, dwl = dwelling(el);
+  house(bag, col, Fm, { s0: -mL / 2, s1: mL / 2, dB: -dN / 2, dF: dN / 2, vw: 1.1, y: 0.55, H: 3.45, bays: mb, lod, rich: g.wealth > 0.45, chimneyAt: 0.2, enter, dw: 1.6, lat: dwl.latMain, roof: dwl.roofMain, wall: dwl.wallMain });
   // the ear rooms (erfang) of the grander main house, lower, at its two ends
   const earW = (sideM - 0.1);
   void earW;
@@ -505,13 +602,13 @@ export function hutongHouse(el, ctx0) {
   const zWall = g.courts === 2 ? z0 + 12.95 : null;                    // the hanging-flower gate's wall
   const wingZ1 = (zWall ?? zN) - (g.courts === 2 ? 0.6 : 2.2);
   const wingZ0 = yardTop + 0.2;
-  const ww = Math.min(3.4, W * 0.13);
+  const ww = enter ? Math.min(4.0, W * 0.15) : Math.min(3.4, W * 0.13);
   if (wingZ1 - wingZ0 > 3.5) {
     for (const [side, xa] of [['e', x0 + 0.44], ['w', x1 - 0.44 - ww]]) {
       const F = Frame(xa + ww / 2, (wingZ0 + wingZ1) / 2, side), L = wingZ1 - wingZ0;
       // a wing's 'front' faces the yard: the west wing (at x0) faces east ('e'), the east wing faces west ('w'); local s runs along z
       const bk = side === 'e' ? -ww / 2 : -ww / 2;
-      house(bag, col, F, { s0: -L / 2, s1: L / 2, dB: bk, dF: ww / 2, vw: 0.8, y: 0.35, H: 3.05, bays: Math.max(2, Math.round(L / 3.2)), lod, rich: g.wealth > 0.5, chimneyAt: 0.8 });
+      house(bag, col, F, { s0: -L / 2, s1: L / 2, dB: bk, dF: ww / 2, vw: 0.8, y: 0.35, H: 3.05, bays: wingBays(L, enter), lod, rich: g.wealth > 0.5, chimneyAt: 0.8, enter, dw: 1.2, lat: dwl.latWing, roof: dwl.roofWing, wall: dwl.wallWing });
     }
   }
   // the second court: a wall across, with the hanging-flower gate in its middle; the screen wall near the gate

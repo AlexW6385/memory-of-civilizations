@@ -35,8 +35,12 @@ export async function lifePlans() {
     out.push({ ...base('qing-beijing-shop-people', 'life', P2), center: [-16, 280], near: 150 });
   }
   // courtyard houses furnished inside, fitted to the shells (houses.js houseParts): the five lod-0 houses nearest the avenue's mouth
-  const near = furnishedHouses(10);
-  out.push(base('qing-beijing-interiors-houses', 'life', near.map((h) => ({ t: 'bj_rooms', rect: h.rect, seed: h.seed, courts: h.courts, gate: h.gate, lod: h.lod })), [-40, 235]));
+  const near = furnishedHouses(), tiles = new Map();
+  for (const h of near) { const k = Math.floor((h.rect[0] + h.rect[2]) / 2 / 90) + ',' + Math.floor((h.rect[1] + h.rect[3]) / 2 / 90); (tiles.get(k) || tiles.set(k, []).get(k)).push(h); }
+  for (const [k, hs] of tiles) {
+    const cx = hs.reduce((a, h) => a + (h.rect[0] + h.rect[2]) / 2, 0) / hs.length, cz = hs.reduce((a, h) => a + (h.rect[1] + h.rect[3]) / 2, 0) / hs.length;
+    out.push({ ...base('qing-beijing-interiors-houses-' + k, 'life', hs.map((h) => ({ t: 'bj_rooms', rect: h.rect, seed: h.seed, courts: h.courts, gate: h.gate, lod: h.lod, wealth: h.wealth }))), center: [cx, cz], near: 130 });
+  }
   // pigeons on the paving and the roofs' feet of a few lanes
   const pig = [[-22, 230], [30, 225], [-120, 118], [120, 118], [-60, 60], [60, 62], [-8, 266], [8, 318]].map(([x, z]) => ({ t: 'chickens', kind: 'pigeon', at: [x, z], y: 0.04, n: 6 + Math.floor(rand() * 4), seed: Math.floor(rand() * 1e6) }));
   // the still figures of the palace: guards at the gates, officials at the foot of the terrace
