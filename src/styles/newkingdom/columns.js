@@ -34,7 +34,7 @@ export function nkColumn(el, { bag, col }) {
   // the stone drum under the column
   bag.add('sandstone_dressed', lathe([[R * 1.28, 0], [R * 1.28, baseH * 0.7], [R * 1.1, baseH], [R * 0.8, baseH]], 28, null, x, y, z));
   // the shaft: eight stems (the bundle's ribs), narrowing toward the foot, its swell above, a slight taper to the top
-  const rAt = (v) => { const t = Math.max(0, Math.min(1, (v - yS0) / (yT1 - yS0))); return R * (0.72 + 0.28 * Math.min(1, t / 0.2)) * (1 - 0.07 * t) * 1; };
+  const rAt = (v) => { const t = Math.max(0, Math.min(1, (v - yS0) / (yT1 - yS0))); if (el.tent) return R * (0.6 + 0.4 * t); return R * (0.72 + 0.28 * Math.min(1, t / 0.2)) * (1 - 0.07 * t) * 1; };
   const prof = []; const N = 14;
   for (let i = 0; i <= N; i++) { const v = yS0 + (yT1 - yS0) * (i / N) ** 1.0; prof.push([rAt(v), v]); }
   bag.add('sandstone_column', lathe(prof, 24, (th, i, r, v) => 1 + 0.035 * Math.cos(8 * th) * Math.min(1, (v - yS0) / 1.5), x, y, z));

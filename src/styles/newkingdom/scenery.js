@@ -5,6 +5,9 @@ import { box, lathe, place, fromTriangles } from '../../core/geom.js';
 import { trim } from '../egyptian/trim.js';
 import { rng } from './kit.js';
 import { nkColumn } from './columns.js';
+import { facing } from './hall.js';
+import { barque } from './monuments.js';
+import { wallReliefs, offeringTable } from '../egyptian/objects.js';
 
 /** nk_quay: { x (the stone face), z0, z1, top (walk width), bed, level, stairs: [z], wide } */
 export function quay(el, ctx) {
@@ -108,40 +111,84 @@ export function magazines(el, ctx) {
   }
 }
 
-/** nk_festival: { rect, h } — the festival hall of Thutmose III: tent-pole columns down the nave, square pillars in the side aisles, the roof stepped over the nave, in local frame x/z world. */
+/** nk_festival: { rect, h } — the festival hall of Thutmose III (Akh-menu): a roof held up on two rows of tent-pole columns (the shaft thin at the foot, thick under the bell capital)
+ *  down the high nave, its clerestory pierced with stone grilles between piers, square pillars in the aisles, the ceiling painted blue with stars, the walls in painted registers. */
 export function festival(el, ctx) {
-  const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, zc = (z0 + z1) / 2, hs = 2.4, Hn = el.h ?? 9.6, Ha = Hn - 2.4, wallT = 2.4, mat = 'sandstone';
+  const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, zc = (z0 + z1) / 2, hs = 2.4, Hn = el.h ?? 9.6, Ha = Hn - 2.4, wallT = 2.4, mat = 'sandstone', step = 6.4;
   bag.add('sandstone_floor', box(x0, -0.5, z0, x1, 0.02, z1)); col.floor([x0, z0, x1, z1], 0.02);
   const W = (r, y1) => { bag.add(mat, box(r[0], -0.5, r[1], r[2], y1, r[3])); col.rect(r, -0.5, y1); };
   W([x0, z0, x1, z0 + wallT], Ha + 0.9); W([x0, z1 - wallT, x1, z1], Ha + 0.9); W([x1 - wallT, z0, x1, z1], Hn);
   W([x0, z0 + wallT, x0 + wallT, zc - 4.6], Hn); W([x0, zc + 4.6, x0 + wallT, z1 - wallT], Hn);                // the west end, the door between
   bag.add(mat, box(x0, Ha + 0.4, zc - 4.6, x0 + wallT, Hn, zc + 4.6));
-  for (let x = x0 + 7; x < x1 - 4; x += 6.4) for (const s of [-1, 1]) nkColumn({ at: [x, zc + s * 5.2], h: Hn - 0.9, d: 1.9, cap: 'open', scenes: 2, seed: 5 + (Math.round(x) % 3) }, ctx);
-  for (let x = x0 + 7; x < x1 - 4; x += 6.4) for (const s of [-1, 1]) { bag.add('sandstone_dressed', box(x - hs / 2 + 0.2, 0, zc + s * 12.6 - 0.7, x + hs / 2 - 0.2, Ha - 0.9, zc + s * 12.6 + 0.7)); col.rect([x - 0.7, zc + s * 12.6 - 0.7, x + 0.7, zc + s * 12.6 + 0.7], 0, Ha - 0.9); }
-  // the roof: the nave's slab at Hn over the central columns, the aisles' lower at Ha, with the clerestory wall between
+  const xs = []; for (let x = x0 + 7; x < x1 - 4; x += step) xs.push(x);
+  for (const x of xs) for (const s of [-1, 1]) nkColumn({ at: [x, zc + s * 5.2], h: Hn - 0.9, d: 1.9, cap: 'open', scenes: 2, tent: true, seed: 5 + (Math.round(x) % 3) }, ctx);
+  for (const x of xs) for (const s of [-1, 1]) for (const dz of [12.6, 20.0]) {                                  // the square pillars of the aisles, two rows each side
+    bag.add('sandstone_dressed', box(x - hs / 2 + 0.2, 0, zc + s * dz - 0.7, x + hs / 2 - 0.2, Ha - 0.9, zc + s * dz + 0.7)); col.rect([x - 0.7, zc + s * dz - 0.7, x + 0.7, zc + s * dz + 0.7], 0, Ha - 0.9);
+    bag.add('sandstone_dressed', box(x - 0.95, 0, zc + s * dz - 0.85, x + 0.95, 0.12, zc + s * dz + 0.85));
+    bag.add('egyptian_blue', box(x - 0.72, Ha - 1.3, zc + s * dz - 0.72, x + 0.72, Ha - 1.2, zc + s * dz + 0.72));
+  }
+  // the roofs: the nave's slab at Hn over the central columns, the aisles' lower at Ha
   bag.add(mat, box(x0 + wallT, Hn - 0.9, zc - 7.2, x1 - wallT, Hn, zc + 7.2));
-  for (const s of [-1, 1]) { bag.add(mat, box(x0 + wallT, Ha - 0.9, s < 0 ? z0 + wallT : zc + 7.2, x1 - wallT, Ha, s < 0 ? zc - 7.2 : z1 - wallT)); bag.add(mat, box(x0 + wallT, Ha, zc + s * 7.2 - (s < 0 ? 0 : 0), x1 - wallT, Hn - 0.9, zc + s * 7.2 + s * 0.6)); }
+  for (const s of [-1, 1]) bag.add(mat, box(x0 + wallT, Ha - 0.9, s < 0 ? z0 + wallT : zc + 7.2, x1 - wallT, Ha, s < 0 ? zc - 7.2 : z1 - wallT));
+  // the clerestory between nave and aisles: a pier over each column, between the piers a window barred with stone slats
+  for (const s of [-1, 1]) {
+    const a = zc + s * 7.2, lo = Math.min(a, a + s * 0.6), hi = Math.max(a, a + s * 0.6);
+    const edges = [x0 + wallT, ...xs.flatMap((x) => [x - 1.1, x + 1.1]), x1 - wallT];
+    for (let k = 0; k < edges.length; k += 2) { bag.add(mat, box(edges[k], Ha, lo, edges[k + 1], Hn - 0.9, hi)); }
+    for (let k = 1; k + 1 < edges.length; k += 2) {
+      const w0 = edges[k], w1 = edges[k + 1];
+      bag.add(mat, box(w0, Ha, lo, w1, Ha + 0.5, hi)); bag.add(mat, box(w0, Hn - 1.4, lo, w1, Hn - 0.9, hi));
+      for (let x = w0 + 0.3; x < w1 - 0.2; x += 0.5) bag.add('sandstone_dressed', box(x - 0.1, Ha + 0.5, lo + 0.15, x + 0.1, Hn - 1.4, hi - 0.15));
+    }
+  }
+  // the ceiling: blue sown with yellow stars, nave and aisles
+  bag.add('vault_stars', box(x0 + wallT, Hn - 0.92, zc - 7.2, x1 - wallT, Hn - 0.9, zc + 7.2));
+  for (const s of [-1, 1]) bag.add('vault_stars', box(x0 + wallT, Ha - 0.92, s < 0 ? z0 + wallT : zc + 7.2, x1 - wallT, Ha - 0.9, s < 0 ? zc - 7.2 : z1 - wallT));
+  // the walls: registers of the king before the gods on the north, south and east inner faces
+  const Wr = (a, b, n) => wallReliefs({ a, b, n, y: 0, v0: 0.9, top: 5.3, reg: 2.2, inward: 1, gods: 'paint' }, { ...ctx, bag: facing(bag, n) });
+  Wr([x0 + wallT + 0.5, z0 + wallT], [x1 - wallT - 0.5, z0 + wallT], [0, 1]); Wr([x1 - wallT - 0.5, z1 - wallT], [x0 + wallT + 0.5, z1 - wallT], [0, -1]);
+  // the offering tables before the west door and a table at the east wall
+  for (const [x, z] of [[x0 + 6, zc - 2.2], [x0 + 6, zc + 2.2], [x1 - wallT - 2.5, zc]]) offeringTable({ at: [x, z], y: 0, yaw: 0 }, ctx);
   trim({ t: 'block', rect: [x0 - 0.2, z0 - 0.2, x1 + 0.2, z1 + 0.2], y0: Ha - 0.2, y1: Ha + 0.9, mat, trim: { torus: 0.3, cornice: 0.9, corners: true } }, ctx);
 }
 
-/** nk_sanctuary: { rect, h } — the sanctuary of the barque: a granite shrine in the middle of a pillared hall, the chapels ranged on both sides. */
+/** nk_sanctuary: { rect, h } — the sanctuary of the barque: the hollow shrine of red granite with its gilded doorway, the gilded barque of Amun on its pedestal inside, the vestibule's pillars, the chapels ranged on both sides; the ceiling of stars and the painted walls. */
 export function sanctuary(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, zc = (z0 + z1) / 2, H = el.h ?? 9, wallT = 2.2, mat = 'sandstone';
   bag.add('sandstone_floor', box(x0, -0.5, z0, x1, 0.02, z1)); col.floor([x0, z0, x1, z1], 0.02);
   const W = (r, y1) => { bag.add(mat, box(r[0], -0.5, r[1], r[2], y1, r[3])); col.rect(r, -0.5, y1); };
   W([x0, z0, x1, z0 + wallT], H); W([x0, z1 - wallT, x1, z1], H); W([x1 - wallT, z0, x1, z1], H);
   W([x0, z0 + wallT, x0 + wallT, zc - 4], H); W([x0, zc + 4, x0 + wallT, z1 - wallT], H); bag.add(mat, box(x0, 6.2, zc - 4, x0 + wallT, H, zc + 4));
-  // the pillars of the vestibule, the shrine of red granite with its doorway, the chapels' dividing walls
+  // the pillars of the vestibule, then the shrine
   for (const s of [-1, 1]) for (let k = 0; k < 3; k++) nkColumn({ at: [x0 + 6 + k * 5.4, zc + s * 6.6], h: H - 0.9, d: 1.3, cap: 'bud', scenes: 1, seed: 4 + k }, ctx);
-  const sx = x0 + 22, sw = 7.4, sd = 5.6;
-  bag.add('granite_red', box(sx - sw / 2, 0, zc - sd / 2, sx + sw / 2, 5.2, zc + sd / 2)); col.rect([sx - sw / 2, zc - sd / 2, sx + sw / 2, zc + sd / 2], 0, 5.2);
-  bag.add('opening', box(sx - sw / 2 - 0.05, 0, zc - 0.9, sx - sw / 2 + 0.05, 2.6, zc + 0.9));
-  bag.add('granite_black', box(sx - sw / 2 - 0.5, 0, zc - sd / 2 - 0.5, sx + sw / 2 + 0.5, 0.45, zc + sd / 2 + 0.5));
-  trim({ t: 'block', rect: [sx - sw / 2, zc - sd / 2, sx + sw / 2, zc + sd / 2], y0: 4.2, y1: 5.2, mat: 'granite_red', trim: { torus: 0.2, cornice: 0.5, corners: true } }, ctx);
+  const sx = x0 + 22, sw = 7.4, sd = 5.6, th = 0.8, dh = 2.7, sh = 5.2, G = 'granite_red';
+  const [a0, a1, b0, b1] = [sx - sw / 2, sx + sw / 2, zc - sd / 2, zc + sd / 2];
+  const SW = (r, y0, y1) => { bag.add(G, box(r[0], y0, r[1], r[2], y1, r[3])); col.rect(r, y0, y1); };
+  SW([a0, b0, a1, b0 + th], 0, sh); SW([a0, b1 - th, a1, b1], 0, sh); SW([a1 - th, b0 + th, a1, b1 - th], 0, sh);   // the north, south and east walls
+  SW([a0, b0 + th, a0 + th, zc - 0.95], 0, sh); SW([a0, zc + 0.95, a0 + th, b1 - th], 0, sh);                         // the west wall either side of the doorway
+  bag.add(G, box(a0, dh, zc - 0.95, a0 + th, sh, zc + 0.95));                                                           // the lintel over the door
+  bag.add(G, box(a0 + th, sh - 0.35, b0 + th, a1 - th, sh, b1 - th));                                                   // the shrine's roof
+  bag.add('vault_stars', box(a0 + th, sh - 0.37, b0 + th, a1 - th, sh - 0.35, b1 - th));
+  bag.add('sandstone_floor', box(a0 + th, -0.05, b0 + th, a1 - th, 0.02, b1 - th));
+  bag.add('granite_black', box(a0 - 0.5, 0, b0 - 0.5, a1 + 0.5, 0.45, b1 + 0.5)); col.rect([a0 - 0.5, b0 - 0.5, a0, b1 + 0.5], 0, 0.45);
+  for (const q of [-1, 1]) bag.add('gold', box(a0 - 0.06, 0.1, zc + q * 0.95 - 0.07, a0 + th * 0.4, dh, zc + q * 0.95 + 0.07)); // the gilded jambs
+  bag.add('gold', box(a0 - 0.06, dh, zc - 1.02, a0 + th * 0.4, dh + 0.14, zc + 1.02));
+  for (const q of [-1, 1]) { bag.add('egyptian_blue', box(a0 - 0.05, dh + 0.14, zc + q * 0.95 - 0.5, a0 + 0.03, sh - 0.5, zc + q * 0.95 + 0.5)); }
+  // the barque on its pedestal in the middle of the shrine, prow toward the door (west)
+  barque({ at: [sx + 0.2, zc], y: 0.02, yaw: -Math.PI / 2, len: 3.6 }, ctx);
+  // the outside of the shrine: the torus and the cavetto, a frieze of kheker and a band of blue under it
+  trim({ t: 'block', rect: [a0, b0, a1, b1], y0: sh - 1.0, y1: sh, mat: G, trim: { torus: 0.2, cornice: 0.5, corners: true } }, ctx);
+  for (const q of [-1, 1]) bag.add('egyptian_blue', box(a0 + 0.2, sh - 1.25, q < 0 ? b0 - 0.02 : b1, a1 - 0.2, sh - 1.05, q < 0 ? b0 : b1 + 0.02));
+  // the chapels' dividing walls with their doors
   for (const s of [-1, 1]) for (let k = 0; k < 3; k++) {
     const cz = zc + s * (7.2 + k * 3.8); W([x0 + 12, cz - 0.4, x1 - wallT, cz + 0.4], H - 1.0);
     bag.add('opening', box(x1 - wallT - 0.05, 0, cz + s * 1.9 - 0.6, x1 - wallT + 0.05, 2.0, cz + s * 1.9 + 0.6));
   }
   bag.add(mat, box(x0 + wallT, H - 1.0, z0 + wallT, x1 - wallT, H, z1 - wallT));                                   // the roof
+  bag.add('vault_stars', box(x0 + wallT, H - 1.02, z0 + wallT, x1 - wallT, H - 1.0, z1 - wallT));                   // its soffit: blue and stars
+  // the painted walls: registers on the north and south inner faces
+  const Wr = (a, b, n) => wallReliefs({ a, b, n, y: 0, v0: 1.0, top: 7.0, reg: 2.0, inward: 1, gods: 'paint' }, { ...ctx, bag: facing(bag, n) });
+  Wr([x0 + wallT + 0.5, z0 + wallT], [x1 - wallT - 0.5, z0 + wallT], [0, 1]); Wr([x1 - wallT - 0.5, z1 - wallT], [x0 + wallT + 0.5, z1 - wallT], [0, -1]);
+  offeringTable({ at: [a0 - 2.2, zc - 3.6], y: 0, yaw: 0 }, ctx); offeringTable({ at: [a0 - 2.2, zc + 3.6], y: 0, yaw: 0 }, ctx);
   trim({ t: 'block', rect: [x0 - 0.2, z0 - 0.2, x1 + 0.2, z1 + 0.2], y0: H - 1.1, y1: H + 0.9, mat, trim: { torus: 0.35, cornice: 1.0, corners: true } }, ctx);
 }

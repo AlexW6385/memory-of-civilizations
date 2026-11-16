@@ -6,7 +6,7 @@
 // a roadside chapel, tethering posts, troughs), the cargo on the quay.
 // Local frame of a house: u along the street, v from the street into the lot (v < 0 is the street); F is houses.js's frame().
 import { box, lathe, fromTriangles, addCloth, clothBox, place } from '../../core/geom.js';
-import { rng } from './kit.js';
+import { rng, glyphs } from './kit.js';
 import { nkPalm } from './palm.js';
 
 const POT = (r, k = 1) => [[0.001, 0], [r * 0.45, 0.02], [r, r * k], [r * 0.9, r * 1.8 * k], [r * 0.5, r * 2.3 * k], [r * 0.56, r * 2.45 * k], [0.001, r * 2.45 * k]];
@@ -46,16 +46,26 @@ export function facade(F, rand, o) {
     const m = pick(rand, WALL_MATS.filter((x) => x !== wm));
     F.b(m, u, y, -0.02 - k * 0.003, u + w, y + h, -0.005, false);
   }
-  F.b('plaster_streak', uD - dw / 2 - 0.05, H - 0.9, -0.02, uD + dw / 2 + 0.05, H - 0.1, -0.005, false);                                          // soot and drip over the door
+  const stone = lod >= 1 && W > 6.2 && rand() < 0.5, hd0 = o.doorH ?? 1.95;
+  if (!stone) F.b('plaster_streak', uD - dw / 2 - 0.05, H - 0.9, -0.02, uD + dw / 2 + 0.05, H - 0.1, -0.005, false);                                          // soot and drip over the door
   // the roof edge: the ends of the palm-log beams, the drain spout, the stain under it
   const step = lod >= 2 ? 0.5 : 0.75;
   for (let u = 0.35; u < W - 0.5; u += step) F.b('palm_trunk', u, H - 0.34, -0.3, u + 0.17, H - 0.14, 0, false);
-  const su = clear(0.6, 1.0) ? 0.6 + rand() * (W - 1.4) : W - 0.8;
+  let su = clear(0.6, 1.0) ? 0.6 + rand() * (W - 1.4) : W - 0.8;
+  if (stone && su > uD - dw / 2 - 0.8 && su < uD + dw / 2 + 0.8) su = uD < W / 2 ? W - 0.8 : 0.6;
   F.b('limestone_core', su, H + 0.02, -0.5, su + 0.14, H + 0.1, 0.1, false);
   F.b('plaster_streak', su - 0.02, H - 1.7, -0.025, su + 0.16, H, -0.008, false);
   if (lod < 1) return;
   // the door's painted frame (blue posts, a red lintel band): the household's, the poorest leave the wood bare
-  if (rand() < 0.7) {
+  if (stone) {
+    // the better house: a doorway of dressed limestone with the owner's name and titles cut on the lintel under its little cavetto (Deir el-Medina)
+    for (const sd of [-1, 1]) F.b('limestone_core', uD + sd * (dw / 2 + 0.09) - 0.1, 0, -0.13, uD + sd * (dw / 2 + 0.09) + 0.1, hd0 + 0.12, -0.0, false);
+    F.b('limestone_carved', uD - dw / 2 - 0.22, hd0 + 0.12, -0.15, uD + dw / 2 + 0.22, hd0 + 0.42, -0.0, false);
+    F.b('limestone_core', uD - dw / 2 - 0.3, hd0 + 0.42, -0.24, uD + dw / 2 + 0.3, hd0 + 0.5, -0.0, false);
+    const len = dw + 0.2, T = [];
+    glyphs(T, (u, v, d) => [F.X(uD + len / 2 - v), hd0 + 0.27 + u, F.Z(-0.16 - d)], 0, 0, len, 0.2, Math.floor(rand() * 1e6), 0.012);
+    if (T.length) F.bag.add('egyptian_blue', fromTriangles(T));
+  } else if (rand() < 0.7) {
     const hd = o.doorH ?? 1.95;
     for (const s of [-1, 1]) F.b('egyptian_blue', uD + s * (dw / 2 + 0.17) - 0.05, 0, -0.07, uD + s * (dw / 2 + 0.17) + 0.05, hd + 0.2, -0.05, false);
     F.b('limewash_red', uD - dw / 2 - 0.22, hd + 0.2, -0.07, uD + dw / 2 + 0.22, hd + 0.34, -0.05, false);
@@ -157,6 +167,32 @@ export function props(el, ctx) {
         B('palm_trunk', -0.07, 0, -0.07, 0.07, 1.1, 0.07);
         B('mud_plaster', 0.45, 0, -0.25, 1.65, 0.38, 0.25); B('mud_plaster', 0.52, 0.3, -0.18, 1.58, 0.4, 0.18); B('opening', 0.58, 0.395, -0.12, 1.52, 0.405, 0.12);
         break;
+      case 'loom': {                                                                                           // a horizontal ground loom pegged out in the street: the warp between two beams, the shed stick, the web half woven, flax and spindles beside it
+        for (const u of [-1.3, 1.3]) { B('timber', u - 0.04, 0, -0.45, u + 0.04, 0.16, -0.37); B('timber', u - 0.04, 0, 0.37, u + 0.04, 0.16, 0.45); B('timber', u - 0.07, 0.12, -0.45, u + 0.07, 0.2, 0.45); }
+        for (let v = -0.36; v < 0.37; v += 0.06) B('linen', -1.25, 0.15, v, 0.3, 0.165, v + 0.012);
+        B('linen', 0.3, 0.15, -0.37, 1.25, 0.17, 0.37); B('timber', 0.25, 0.17, -0.4, 0.33, 0.23, 0.4); B('palm_trunk', -0.4, 0.17, -0.4, -0.34, 0.2, 0.4);
+        L('wicker', [[0.2, 0], [0.26, 0.16], [0.24, 0.2], [0.001, 0.06]], -0.2, 0, 0.9, 9); B('linen', -0.4, 0.2, 0.78, 0.0, 0.3, 1.02);
+        for (const [u, v] of [[0.6, 0.8], [0.8, 0.92]]) L('timber', [[0.012, 0], [0.012, 0.26], [0.03, 0.18]], u, 0.0, v, 5);
+        break;
+      }
+      case 'bread':                                                                                              // the baker's table in the street: a mud-brick oven with its flat top, the stack of loaves, a trough, dough in a bowl
+        L('mudbrick', [[0.6, 0], [0.58, 0.4], [0.45, 0.8], [0.25, 0.95], [0.001, 1.0]], 0, 0, 0, 12); solid(-0.6, -0.6, 0.6, 0.6, 1.0);
+        B('banco', 0.5, 0.25, -0.12, 0.62, 0.5, 0.12);                                                           // the oven's mouth
+        B('mud_plaster', 0.9, 0, -0.5, 1.9, 0.62, 0.5); solid(0.9, -0.5, 1.9, 0.5, 0.62);
+        for (let i = 0; i < 6; i++) L('banco_smooth', [[0.001, 0], [0.12, 0.01], [0.13, 0.05], [0.07, 0.09], [0.001, 0.1]], 1.15 + (i % 3) * 0.3, 0.62 + Math.floor(i / 3) * 0.08, -0.2 + (i % 2) * 0.35, 8);
+        L('terracotta', POT(0.22, 0.7), 1.55, 0.62, 0.3, 9);
+        B('palm_trunk', -2.0, 0, -0.2, -1.2, 0.1, 0.0); B('palm_trunk', -2.0, 0.1, -0.15, -1.2, 0.2, 0.05);           // the fuel by the oven
+        break;
+      case 'brickyard': {                                                                                        // the brick-makers: a pit of puddled clay with its straw, a wooden mould, bricks laid out to dry in rows, a stack of dried bricks
+        B('mud_plaster', -1.6, -0.03, -0.7, -0.2, 0.03, 0.2);
+        B('banco_smooth', -1.4, 0.03, -0.55, -0.4, 0.07, 0.05);
+        B('palm_trunk', 0.0, 0, -0.55, 0.4, 0.07, -0.3); B('timber', 0.05, 0.07, -0.5, 0.35, 0.11, -0.35);            // the mould
+        for (let r = 0; r < 3; r++) for (let i = 0; i < 5; i++) B('mudbrick', 0.6 + i * 0.5, 0, -0.62 + r * 0.32, 0.6 + i * 0.5 + 0.4, 0.09, -0.62 + r * 0.32 + 0.2);
+        for (let r = 0; r < 4; r++) for (let i = 0; i < 3 - (r > 1 ? 1 : 0); i++) B('mudbrick', -1.6 + i * 0.45, r * 0.19, 0.4, -1.6 + i * 0.45 + 0.4, r * 0.19 + 0.17, 0.65);
+        L('terracotta', POT(0.18, 0.9), -1.9, 0, -0.3, 9); L('wicker', [[0.2, 0], [0.26, 0.18], [0.001, 0.2]], -0.1, 0, 0.45, 8);
+        B('banco_rough', 0.5, 0, 0.35, 1.0, 0.12, 0.65);                                                          // the chopped straw
+        break;
+      }
       case 'chapel':
         B('mud_plaster', -0.9, 0, -0.7, 0.9, 1.6, 0.7); solid(-0.9, -0.7, 0.9, 0.7, 1.6);
         B('limewash_white', -0.92, 0.0, -0.72, 0.92, 0.35, 0.72);

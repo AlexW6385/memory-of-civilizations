@@ -58,7 +58,7 @@ function market() {
   }
   return L;
 }
-const NEAR = 150, OPEN_R = 200;
+const NEAR = 150, OPEN_R = 260;
 let CACHE = null;
 export async function town() {
   if (CACHE) return CACHE;
