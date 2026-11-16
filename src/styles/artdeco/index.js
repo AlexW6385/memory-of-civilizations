@@ -16,6 +16,7 @@ import { turned } from './turn.js';
 import { pavement, curb } from './pave.js';
 import { shopRoom } from './shoprooms.js';
 import { library } from './library.js';
+import { chryslerBody, CAP_AT } from './chrysler.js';
 import { rowhouses, castIronFront, chimney, bulkhead, subwayEntrance, face } from './blocks.js';
 import { shopName, shopSign, bladeText, nearEntrance, rng as rng2, Quads, letters, textLen, fitCell, readDir } from './dress.js';
 
@@ -201,18 +202,14 @@ function skyscraper(el, { bag, col, lights }) {
 /** chrysler: { rect, y } — the base, the tower with its eagles, the stainless crown of seven tiers of sunbursts with triangular windows, the spire to 319 m. */
 function chrysler(el, { bag, col }) {
   const r = el.rect, y = el.y ?? 0, cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
-  block(bag, 'facade_grey', r, y - 0.5, y + 60); block(bag, 'granite_black', inset(r, -0.15), y - 0.5, y + 6); col.rect(r, y - 0.5, y + 60); col.floor(r, y + 60);
-  const t1 = [cx - 18, cz - 18, cx + 18, cz + 18];
-  block(bag, 'facade_grey', t1, y + 60, y + 120);
-  // the radiator caps of 1929 at the corners of the 31st floor: a winged cap on a stepped base
+  chryslerBody(bag, col, r, y, cx, cz);
+  // the radiator caps of 1929 at the corners of the 31st floor's roof: a winged cap on a stepped base
   for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-    const px = cx + dx * 18, pz = cz + dz * 18, ang = Math.atan2(dx, dz);
-    bag.add(CH, box(px - 1.3, y + 117, pz - 1.3, px + 1.3, y + 120.4, pz + 1.3));
-    bag.add(CH, lathe([[0.9, 0], [0.9, 0.5], [0.7, 0.7], [0.75, 1.6], [0.5, 1.9], [0.001, 2.0]], 12, null, px, y + 120.4, pz));
-    for (const s of [-1, 1]) { const g = fromTriangles(both3([0, 0.6, 0, s * 2.4, 2.2, -0.6, s * 2.0, 1.2, 0.4, 0, 0.6, 0, s * 2.0, 1.2, 0.4, 0, 1.6, 0.3])); g.rotateY(ang); g.translate(px, y + 120.4, pz); bag.add(CH, g); }
+    const px = cx + dx * CAP_AT[0], pz = cz + dz * CAP_AT[1], ang = Math.atan2(dx, dz), yc = y + CAP_AT[2];
+    bag.add(CH, box(px - 1.3, yc - 3.4, pz - 1.3, px + 1.3, yc, pz + 1.3));
+    bag.add(CH, lathe([[0.9, 0], [0.9, 0.5], [0.7, 0.7], [0.75, 1.6], [0.5, 1.9], [0.001, 2.0]], 12, null, px, yc, pz));
+    for (const s of [-1, 1]) { const g = fromTriangles(both3([0, 0.6, 0, s * 2.4, 2.2, -0.6, s * 2.0, 1.2, 0.4, 0, 0.6, 0, s * 2.0, 1.2, 0.4, 0, 1.6, 0.3])); g.rotateY(ang); g.translate(px, yc, pz); bag.add(CH, g); }
   }
-  const t2 = [cx - 15, cz - 15, cx + 15, cz + 15];
-  block(bag, 'facade_grey', t2, y + 120, y + 240);
   // the eagles at the corners of the 61st floor, leaning out diagonally over the street
   for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
     const ang = Math.atan2(dx, dz), g = [];

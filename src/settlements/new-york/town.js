@@ -280,13 +280,18 @@ function shopLife() {
   const P = (l, u, d, o) => { const [x, z] = frontPoint(l.rect, l.front, u, -d), F = l.y + 0.06; return { t: 'figure', at: [x, z], y: F + (o.pose === 'sit' ? 0.16 : 0), seed: Math.floor(rand() * 1e9), skin: pick(['skin_light', 'skin_light', 'skin_medium']), ...o, rot: (o.rot ?? 0) + (l.front === 's' ? Math.PI : 0) }; };
   for (const l of roomLots()) {
     const L = l.rect[2] - l.rect[0], Dr = l.room.depth, mid = L / 2, k = l.room.kind, dC = Dr - 3.1;
-    const keeper = { dress: 'trousers', cloth: k === 'bakery' || k === 'deli' || k === 'drug' || k === 'lunch' ? 'cloth_white' : pick(DR), cloth2: 'cloth_white', hat: k === 'bakery' || k === 'lunch' ? 'cap' : 'none', hatMat: 'cloth_white', over: k === 'tailor' || k === 'shoe' || k === 'deli' || k === 'bakery' || k === 'lunch' ? 'apron' : 'none' };
+    const WHITE = ['bakery', 'deli', 'drug', 'lunch', 'butcher', 'automat'], APRON = ['tailor', 'shoe', 'deli', 'bakery', 'lunch', 'butcher', 'grocer', 'hardware'];
+    const keeper = { dress: 'trousers', cloth: WHITE.includes(k) ? 'cloth_white' : pick(DR), cloth2: 'cloth_white', hat: k === 'bakery' || k === 'lunch' || k === 'butcher' ? 'cap' : 'none', hatMat: 'cloth_white', over: APRON.includes(k) ? 'apron' : 'none' };
     const cust = (u, d, o = {}) => P(l, u, d, { dress: rand() < 0.35 ? 'robe' : 'trousers', cloth: pick(DR), cloth2: 'cloth_white', hat: 'brim', hatMat: pick(['cloth_black', 'cloth_grey', 'cloth_brown']), rot: Math.PI, ...o });
     if (k === 'barber') {
       const n = Math.max(2, Math.min(3, Math.floor((L - 0.6 - 0.8 - 2) / 1.8)));
       for (let i = 0; i < n; i++) { const u = 0.7 + 1.2 + i * ((L - 1.4 - 2.4) / Math.max(1, n - 1)); out.push(P(l, u + 0.7, Dr - 1.7, { ...keeper, cloth: 'cloth_white', over: 'apron', hat: 'none', rot: Math.PI / 2 })); if (i < 2) out.push(P(l, u, Dr - 1.7, { dress: 'trousers', cloth: pick(DR), cloth2: 'cloth_white', hat: 'none', pose: 'sit', rot: Math.PI })); }
+    } else if (k === 'automat') {
+      // the cashier in the change booth at the far side from the door, diners at the marble tables
+      out.push(P(l, l.room.door === 1 ? 1.4 : L - 1.4, 1.05, { ...keeper, cloth: 'cloth_grey', rot: Math.PI }));
+      for (let u = 1.5; u < L - 2.5; u += 3.8) out.push(cust(u + 0.5, 2.0, { pose: 'sit', rot: rand() * 6 }));
     } else {
-      out.push(P(l, mid + (rand() - 0.5) * 2, Dr - 1.5, keeper));
+      out.push(P(l, mid + (rand() - 0.5) * 2, k === 'fabric' || k === 'hardware' ? dC + 1.0 : Dr - 1.5, keeper));
       if (k === 'drug' || k === 'lunch') { out.push(cust(mid - 1.2, dC - 0.55, { pose: 'sit' })); out.push(cust(mid + 0.6, dC - 0.55, { pose: 'sit', dress: 'trousers' })); }
       else out.push(cust(mid + (rand() - 0.5) * 3, dC - 0.9));
       if (rand() < 0.6) out.push(cust(mid + (rand() < 0.5 ? -2.2 : 2.2), 2.4 + rand() * 1.5, { rot: rand() * 6 }));
