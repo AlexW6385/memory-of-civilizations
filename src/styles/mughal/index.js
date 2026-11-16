@@ -1043,7 +1043,7 @@ function fountain(bag, x, z, y0, y, h = 1.6) {
  * plant in relief, a coping band at the top; `skip`: a face's [lo, hi] range of u (metres along it from the middle) kept
  * clear (the stairs). Everything stands on the terrace and on the moulding, nothing floats.
  */
-function plinthDado(el, { bag }) {
+function plinthDado(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, hx = (x1 - x0) / 2, hz = (z1 - z0) / 2, y0 = el.y0, V = el.y1 - el.y0;
   const faces = [{ n: [0, 1], t: [1, 0], h: hz, key: 's' }, { n: [0, -1], t: [-1, 0], h: hz, key: 'n' }, { n: [1, 0], t: [0, 1], h: hx, key: 'e' }, { n: [-1, 0], t: [0, -1], h: hx, key: 'w' }];
   const M = 'marble_smooth', DK = 'marble_dark';
@@ -1052,14 +1052,16 @@ function plinthDado(el, { bag }) {
     const slab = (m, u0, u1, v0, v1, o0, o1) => {
       const P = (u, o) => [cx + f.t[0] * u + f.n[0] * (f.h + o), cz + f.t[1] * u + f.n[1] * (f.h + o)], a = P(u0, o0), b = P(u1, o1);
       bag.add(m, box(Math.min(a[0], b[0]), y0 + v0, Math.min(a[1], b[1]), Math.max(a[0], b[0]), y0 + v1, Math.max(a[1], b[1])));
+      if (solid && col) col.rect([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], y0 + v0, y0 + v1);
     };
+    let solid = false;
     const E = 42;
-    slab(M, -E, E, 0, 0.45, -0.01, 0.2); slab(M, -E, E, 0.45, 0.6, -0.01, 0.12);
-    slab(M, -E, E, V - 0.75, V, -0.01, 0.2); slab(DK, -E, E, V - 0.82, V - 0.75, 0, 0.17); slab(M, -E, E, V - 0.9, V - 0.82, -0.01, 0.12);
+    solid = true; slab(M, -E, E, 0, 0.45, -0.01, 0.2); slab(M, -E, E, 0.45, 0.6, -0.01, 0.12);
+    slab(M, -E, E, V - 0.75, V, -0.01, 0.2); solid = false; slab(DK, -E, E, V - 0.82, V - 0.75, 0, 0.17); slab(M, -E, E, V - 0.9, V - 0.82, -0.01, 0.12);
     for (let k = 0; k <= 15; k++) {
       const u = -37.5 + k * 5;
       if (skip && u + 0.25 > skip[0] && u - 0.25 < skip[1]) continue;
-      slab(M, u - 0.25, u + 0.25, 0.6, V - 0.9, -0.01, 0.15);
+      solid = true; slab(M, u - 0.25, u + 0.25, 0.6, V - 0.9, -0.01, 0.15); solid = false;
     }
     for (let k = 0; k < 15; k++) {
       const u0 = -37.5 + k * 5 + 0.25, u1 = u0 + 4.5, pc = (u0 + u1) / 2;
