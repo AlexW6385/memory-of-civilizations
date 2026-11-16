@@ -25,6 +25,14 @@ export const inLake = (x, z) => Math.hypot(x, z) > ISLAND && !(x < 0 && z > CAUS
 export const inLakeWater = (x, z, h) => h < LEVEL.water && (inLake(x, z) || Math.hypot(x, z) > 300 && !(inCanal(x, z) && Math.hypot(x, z) < ISLAND - 6));
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
+/**
+ * The calpulli's own ground (docs/settlements/tenochtitlan.md §17): six blocks of two by three cells, 38 × 57 m, each the
+ * temple of a calpulli on its small pyramid and, north of it on a paved plaza, the telpochcalli (the young men's school
+ * and house), given the cells' places in the grid; { x, z (the block's north-west corner), god }.
+ */
+export const SITES = [{ x: -210, z: -115, god: 'earth' }, { x: 170, z: -96, god: 'sun' }, { x: 18, z: 208, god: 'tezcatlipoca' }, { x: -210, z: 113, god: 'sun' }, { x: -134, z: -267, god: 'earth' }, { x: 227, z: 37, god: 'tezcatlipoca' }]
+  .map((q) => ({ ...q, rect: [q.x, q.z, q.x + 38, q.z + 57] }));
+export const inSite = (x, z, m = 0) => SITES.some((q) => inRect(q.rect, x, z, m));
 let HOUSES = null, YARDS = null, PRIESTS = null;
 /** The precinct's compounds of priests and temple servants: centres and the side of each gate. */
 export const PRIEST_SITES = [[-118, -20, 'e'], [-118, 20, 'e'], [-118, 60, 'e'], [-100, -20, 'w'], [-100, 20, 'w'], [-100, 60, 'w'], [-82, -20, 'e'], [-82, 20, 'e'], [-82, 60, 'e']];
@@ -45,6 +53,7 @@ export function houses() {
     if (inRect(PRECINCT, cx, cz, w / 2 + 10) || inRect(PALACE, cx, cz, w / 2 + 6) || inRect(MARKET, cx, cz, w / 2 + 3) || CANALS.some((c) => inRect(c, cx, cz, w / 2 + 4))) continue;
     if (Math.abs(cz) < 12 + d / 2 && cx < -150) continue;
     if (Math.abs(cx) < 8 + w / 2 || Math.abs(cz) < 8 + d / 2) continue;           // the avenues to the gates
+    if (inSite(cx, cz)) { rand(); rand(); continue; }                                   // the calpulli's temple and school stand here (SITES)
     if (rand() < 0.06) { YARDS.push({ rect: r, seed: Math.floor(rand() * 1e6) }); continue; }
     HOUSES.push({ rect: r, seed: Math.floor(rand() * 1e6) });
   }
@@ -82,6 +91,8 @@ export function houseTrade(h) {
   if (u < 0.34) return 'cook';
   return null;
 }
+/** A house of a lord or a high warrior (only they might build upper rooms: historycrunch, "Aztec Housing"): about one compound in five within 230 m of the precinct, apart from the priests' compounds. */
+export const houseNoble = (h) => { const [x0, z0, x1, z1] = h.rect; return !h.priest && Math.hypot((x0 + x1) / 2, (z0 + z1) / 2) < 230 && hash1(h.seed + 77) < 0.2; };
 let GRID = null;
 export function inHouse(x, z, m = 0) {
   if (!GRID) { GRID = new Map(); for (const h of houses()) for (let i = Math.floor((h.rect[0] - 3) / 19); i <= Math.floor((h.rect[2] + 3) / 19); i++) for (let j = Math.floor((h.rect[1] - 3) / 19); j <= Math.floor((h.rect[3] + 3) / 19); j++) { const k = i + ',' + j; if (!GRID.has(k)) GRID.set(k, []); GRID.get(k).push(h); } }
@@ -131,7 +142,7 @@ export function lanes() {
     cuts.push(...canalCuts);
     const pr = PRECINCT.map((v, i) => v + (i < 2 ? -8 : 8)), pa = PALACE.map((v, i) => v + (i < 2 ? -2 : 2)), mk = MARKET;
     const ia = vertical ? 1 : 0, ib = ia + 2;                                       // the rect's interval along the lane
-    for (const r of [pr, pa, mk]) { const across = vertical ? [r[0], r[2]] : [r[1], r[3]]; if (t > across[0] && t < across[1]) cuts.push([r[ia], r[ib]]); }
+    for (const r of [pr, pa, mk, ...SITES.map((q) => [q.x + 1.6, q.z + 1.6, q.x + 36.4, q.z + 55.4])]) { const across = vertical ? [r[0], r[2]] : [r[1], r[3]]; if (t > across[0] && t < across[1]) cuts.push([r[ia], r[ib]]); }
     cuts.sort((a, b) => a[0] - b[0]);
     for (const [s0, s1] of cut1(-ext, ext, cuts)) out.push(vertical ? [t - LANE_W / 2, s0, t + LANE_W / 2, s1] : [s0, t - LANE_W / 2, s1, t + LANE_W / 2]);
   }
@@ -147,7 +158,7 @@ export const onLaneStrip = (x, z) => [x, z].some((v) => { const m = (((v + 1) % 
 export function houseHearth(h) {
   const [x0, z0, x1, z1] = h.rect, I = [x0 + 0.25, z0 + 0.25, x1 - 0.25, z1 - 0.25];
   let s = h.seed >>> 0 || 1; const rand = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
-  const gate = ['n', 's', 'w', 'e'][Math.floor(rand() * 4)], back = { n: 's', s: 'n', w: 'e', e: 'w' }[gate], db = 3.9 + rand() * 0.8;
+  const gate = ['n', 's', 'w', 'e'][Math.floor(rand() * 4)], back = { n: 's', s: 'n', w: 'e', e: 'w' }[gate], db = 3.9 + rand() * 0.8 + (houseNoble(h) ? 1.2 : 0);
   const r = back === 'n' ? [I[0], I[1], I[2], I[1] + db] : back === 's' ? [I[0], I[3] - db, I[2], I[3]] : back === 'w' ? [I[0], I[1], I[0] + db, I[3]] : [I[2] - db, I[1], I[2], I[3]];
   return { p: [(r[0] + r[2]) / 2, 0.42 + 2.9, (r[1] + r[3]) / 2], seed: h.seed };
 }

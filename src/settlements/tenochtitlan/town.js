@@ -1,6 +1,6 @@
 // The calpulli round the precinct (docs/settlements/tenochtitlan.md §5, §13): house compounds of plastered adobe on low stone platforms
 // round their patios, their rooms furnished; the farmers' houses of wattle and thatch on the chinampas.
-import { RADIUS, LEVEL, ISLAND, PRECINCT, TM, houses, yards, priestHouses, houseGate, houseTrade, chinampaHouses, inLake, inLakeWater } from './layout.js';
+import { RADIUS, LEVEL, ISLAND, PRECINCT, TM, SITES, houses, yards, priestHouses, houseGate, houseTrade, houseNoble, chinampaHouses, inLake, inLakeWater } from './layout.js';
 import { ground } from './ground.js';
 const base = (id, elements) => ({ id, style: 'aztec', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-60, 0], facing: 'e' } });
 /**
@@ -63,7 +63,8 @@ export async function town() {
   const all = houses(), plans = [];
   for (let i = 0; i < all.length; i += 150) plans.push(base(`tenochtitlan-houses-${i / 150}`, all.slice(i, i + 150).flatMap((h) => {
     const c = [(h.rect[0] + h.rect[2]) / 2, (h.rect[1] + h.rect[3]) / 2], r = Math.hypot(c[0], c[1]), lod = r < 170 ? 2 : r < 250 ? 1 : 0;
-    return [{ t: 'calli', ...h }, { t: 'calli_front', rect: h.rect, seed: h.seed, gate: houseGate(h), trade: houseTrade(h), lod }];
+    const noble = houseNoble(h);
+    return [{ t: 'calli', ...h, noble }, { t: 'calli_front', rect: h.rect, seed: h.seed, gate: houseGate(h), trade: noble ? null : houseTrade(h), lod }];
   })));
   // the people in the priests' compounds of the precinct (layout.js): in each patio, by the gate's side
   {
@@ -74,6 +75,20 @@ export async function town() {
     });
     plans.push(base('tenochtitlan-priests-people', [{ t: 'mx_people', people }]));
   }
+  // the calpulli's temples and schools (layout.js SITES): the telpochcalli round its court in the north of the block, the paved plaza before its
+  // gate, the calpulli's temple on its small pyramid in the south with the stair toward the plaza; youths at their training, a brazier at the stair's foot
+  plans.push(base('tenochtitlan-calpulli', SITES.flatMap((q, i) => {
+    const X = q.x, Z = q.z, rp = ((a) => () => ((a = (a * 1664525 + 1013904223) >>> 0) / 4294967296))(1600 + i);
+    const P = [[X + 12 + rp() * 14, Z + 29 + rp() * 2.5, 0.03, rp() * 6.28, 'youth', 1700 + i * 10], [X + 12 + rp() * 14, Z + 29 + rp() * 2.5, 0.03, rp() * 6.28, 'youth', 1701 + i * 10],
+      [X + 10 + rp() * 6, Z + 30, 0.03, rp() * 6.28, 'man', 1702 + i * 10], [X + 25 + rp() * 6, Z + 30.5, 0.03, rp() * 6.28, 'sweeper', 1703 + i * 10]];
+    return [
+      { t: 'court_house', rect: [X + 7.2, Z + 2.7, X + 31.2, Z + 27.2], h: 3.4, ring: 5.5, seed: 1650 + i, band: i % 2 === 0 },
+      { t: 'lane', rect: [X + 4, Z + 27.2, X + 34, Z + 33], y: 0.03, mat: 'stucco' },
+      { t: 'mx_pyramid', c: [X + 19.2, Z + 42.6], base: 9, top: 5, h: 6.6, tiers: 3, stairs: 'n', steps: 30, stairW: 3.6, shrine: { w: 8, d: 8, h: 3.6, door: 'n', god: q.god } },
+      { t: 'mx_dress', items: [['brazier', X + 15.2, Z + 32.2], ['brazier', X + 22.8, Z + 32.2], ['flowers', X + 19, Z + 31.4, 0.4]] },
+      { t: 'mx_people', people: P },
+    ];
+  })));
   plans.push(base('tenochtitlan-yards', yards().map((y) => ({ t: 'huerto', ...y }))));
   // the farmers' houses on the chinampas, with their granaries, maguey and nopal
   plans.push(base('tenochtitlan-chinampa-houses', chinampaHouses().map((h) => ({ t: 'chinampa_house', ...h, y: ground.height(h.c[0], h.c[1]) }))));

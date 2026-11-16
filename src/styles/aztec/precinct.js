@@ -18,7 +18,7 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
 const FACE = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
 
 /** A flat strip in a carving's frame (x across, y up) from 2D a to b, half-widths w0 → w1, from z0 out to z1. */
-function strip(k, mat, a, b, w0, z0, z1, w1 = w0) {
+export function strip(k, mat, a, b, w0, z0, z1, w1 = w0) {
   const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l;
   const P = (p, w, z) => [p[0] + nx * w, p[1] + ny * w, z];
   return k.hex(mat, [P(a, w0, z0), P(b, w1, z0), P(b, -w1, z0), P(a, -w0, z0), P(a, w0, z1), P(b, w1, z1), P(b, -w1, z1), P(a, -w0, z1)]);
@@ -139,7 +139,7 @@ const mictlan = () => carved('mictlantecuhtli', (k) => {
 });
 
 /** A ceramic brazier with Tlaloc's face (mesoweb: tears of rain), about 0.8 m, facing +z: the goggles, the moustache-lip and fangs. */
-const tlalocBrazier = () => carved('tlaloc-brazier', (k) => {
+export const tlalocBrazier = () => carved('tlaloc-brazier', (k) => {
   k.geo(TC, lathe([[0.2, 0], [0.16, 0.12], [0.2, 0.3], [0.28, 0.62], [0.3, 0.78], [0.26, 0.8], [0.001, 0.7]], 14));
   for (const sx of [-1, 1]) { k.disc(B, sx * 0.1, 0.56, 0.23, 0.08, 0.06, 12, 0.04); k.fy(W, [sx * 0.05 - 0.025, sx * 0.05 + 0.025, 0.25, 0.3], [sx * 0.05 - 0.005, sx * 0.05 + 0.005, 0.27, 0.29], 0.42, 0.32); for (let t = 0; t < 2; t++) k.bx(B, sx * 0.1 - 0.015, sx * 0.1 + 0.015, 0.36 - t * 0.09, 0.42 - t * 0.09, 0.2, 0.25); }
   k.fz(B, [-0.12, 0.12, 0.42, 0.47], [-0.1, 0.1, 0.43, 0.46], 0.23, 0.29);                               // the lip

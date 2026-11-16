@@ -164,6 +164,35 @@ function roofBed(bag, r, y, seed) {
 }
 
 /**
+ * The temazcalli, the household's steam bath (Codex Magliabechiano; historyskills.com, "What was a Temazcal?": a compact low dome of
+ * adobe on a stone footing, its door small and low so that one crawls in, the firebox outside, the stones heated there and carried
+ * in; nearly every house had one, a small low building apart from the main house), facing +z: a ring of twelve wall panels with the
+ * door's panel left out under a stone lintel, the plastered dome over it with a smoke-hole, the firebox of stone behind with its
+ * fire, a pile of firewood by it.
+ */
+const temazcal = () => carved('mx-temazcal', (k) => {
+  const N = 12, R0 = 1.0, hw = 0.95, th = 0.17, step = Math.PI * 2 / N, door = 0;
+  k.geo(ST, lathe([[1.22, 0], [1.22, 0.2], [0.001, 0.2]], 20));                                          // the footing, a low drum of stone
+  for (let i = 0; i < N; i++) {
+    if (i === door) continue;
+    const a0 = (i - 0.5) * step, a1 = (i + 0.5) * step, e = 0.07;                                         // panels a little long, overlapping at the corners
+    const P = (a, f) => [Math.sin(a) * R0 + Math.cos(a) * f, 0.2 + hw / 2, Math.cos(a) * R0 - Math.sin(a) * f];
+    k.seg('mud_plaster', P(a0, -e), P(a1, e), th, hw / 2);
+  }
+  // the door: jambs of stone, the lintel, the low opening 0.72 wide and 0.7 high
+  for (const sx of [-1, 1]) k.bx(ST, sx * 0.46 - 0.11, sx * 0.46 + 0.11, 0.2, 1.15, R0 - 0.2, R0 + 0.2);
+  k.bx(ST, -0.6, 0.6, 0.9, 1.15, R0 - 0.2, R0 + 0.2);
+  k.bx('paint_minoan_black', -0.35, 0.35, 0.2, 0.9, R0 - 0.2, R0 - 0.17);                                 // the dark inside, seen through the door
+  k.geo('mud_plaster', lathe([[1.04, 0], [0.98, 0.3], [0.78, 0.6], [0.46, 0.85], [0.2, 0.98], [0.13, 1.0], [0.13, 0.9], [0.001, 0.9]], 20).translate(0, 1.1, 0));   // the dome
+  k.geo('paint_minoan_black', lathe([[0.13, 0], [0.13, 0.04], [0.001, 0.04]], 8).translate(0, 2.08, 0));  // the smoke-hole
+  // the firebox behind: a stone hearth with the fire and the stones heating in it, the wood beside
+  k.bx(ST, -0.5, 0.5, 0, 0.5, -1.95, -1.25);
+  k.bx('basalt', -0.34, 0.34, 0.5, 0.54, -1.82, -1.38);
+  k.geo('flame', lathe([[0.3, 0], [0.16, 0.18], [0.001, 0.38]], 8).translate(0, 0.54, -1.6));
+  for (let i = 0; i < 5; i++) k.seg('timber', [0.75 + (i % 2) * 0.05, 0.1 + 0.12 * Math.floor(i / 3), -1.9 + i * 0.06 * 0], [0.95, 0.1 + 0.12 * Math.floor(i / 3), -1.1 - (i % 3) * 0.02], 0.05, 0.05);
+});
+
+/**
  * calli: a commoner's house compound { rect, seed }: a low platform of stone filled with earth and
  * plastered; two or three one-room houses on its sides, their doors on the patio; a compound wall
  * closing the rest with its gate on the street; in the patio the metate, the water jar, sometimes
@@ -177,7 +206,7 @@ export function calli(el, ctx) {
   const perp = gate === 'n' || gate === 's' ? ['w', 'e'] : ['n', 's'];
   const depth = () => 3.9 + rand() * 0.8, H = () => 2.5 + rand() * 0.45;
   const rooms = [];
-  const db = depth();
+  const noble = !!el.noble, db = depth() + (noble ? 1.2 : 0);
   rooms.push({ r: band(I, back, 0, db), door: gate, side: back });
   // the side rooms run from the back room toward the street, leaving the patio between them
   for (const f of perp) {
@@ -193,20 +222,21 @@ export function calli(el, ctx) {
   const tops = rooms.map((q, i) => { const hh = H(); roomThings(ctx, { r: q.r, y: P, h: hh, door: q.door }, i === 0 ? 'hearth' : rand() < 0.65 ? 'sleep' : 'store', rand); return room(bag, col, { r: q.r, y: P, h: hh, door: q.door }); });
   // the compound wall along the rest of the perimeter (the walls on x run full length, those on z
   // between them), its gate on the street
-  const t = 0.4, wh = P + 1.9;
+  const t = 0.4, wh = P + (noble ? 2.45 : 1.9);
   for (const f of SIDES) {
     const alongX = f === 'n' || f === 's', a0 = alongX ? I[0] : I[1] + t, a1 = alongX ? I[2] : I[3] - t;
     const cover = rooms.filter((q) => q.side === f || touches(q.r, I, f)).map((q) => (alongX ? [q.r[0], q.r[2]] : [q.r[1], q.r[3]])).sort((p, q) => p[0] - q[0]);
     let u = a0; const segs = [];
     for (const [c0, c1] of cover) { if (c0 > u + 0.05) segs.push([u, c0]); u = Math.max(u, c1); }
     if (a1 > u + 0.05) segs.push([u, a1]);
-    const cap = (s0, s1) => B(bag, W, band(I, f, -0.03, t + 0.03, s0 + (alongX ? 0 : 0.03), s1 - (alongX ? 0 : 0.03)), wh, wh + 0.08);
+    const cap = (s0, s1) => { B(bag, W, band(I, f, -0.03, t + 0.03, s0 + (alongX ? 0 : 0.03), s1 - (alongX ? 0 : 0.03)), wh, wh + 0.08); if (noble && s1 - s0 > 0.4) B(bag, R, band(I, f, -0.03, t + 0.03, s0 + 0.01, s1 - 0.01), wh - 0.5, wh - 0.1); };
     for (const [s0, s1] of segs) {
       if (f === gate && s1 - s0 > 2.6) {
-        const m = (s0 + s1) / 2 + (rand() - 0.5) * Math.max(0, s1 - s0 - 3), g0 = m - 0.65, g1 = m + 0.65;
+        const gh = noble ? 0.85 : 0.65, m = (s0 + s1) / 2 + (rand() - 0.5) * Math.max(0, s1 - s0 - 3), g0 = m - gh, g1 = m + gh;
         adobeWall(bag, col, band(I, f, 0, t, s0, g0), P, wh); adobeWall(bag, col, band(I, f, 0, t, g1, s1), P, wh); cap(s0, g0); cap(g1, s1);
         B(bag, ST, band(I, f, -0.25, t, g0, g1), P - 0.22, P - 0.02);                              // the step at the gate
         B(bag, 'timber', band(I, f, -0.04, t + 0.04, g0 - 0.25, g1 + 0.25), wh - 0.2, wh);          // the gate's lintel
+        if (noble) for (const [u0, u1] of [[g0 - 0.35, g0], [g1, g1 + 0.35]]) B(bag, ST, band(I, f, -0.14, t + 0.14, u0, u1), P, wh - 0.2);   // the lord's gate: posts of cut stone
       } else { adobeWall(bag, col, band(I, f, 0, t, s0, s1), P, wh); cap(s0, s1); }
     }
   }
@@ -228,7 +258,7 @@ export function calli(el, ctx) {
   if (rand() < 0.22 && deep > 1.8) L.figure({ at: at(ma, 1.5), y: P, rot: face, seed: el.seed, pose: 'squat', dress: 'wrap', cloth: rand() < 0.6 ? 'cloth_white' : 'cloth_ochre', skin: 'skin_medium' }, ctx);
   // a ladder up to the back room's roof on the other side of the door
   const top = tops[0];
-  if (rand() < 0.55 && half > 1.7) {
+  if ((noble || rand() < 0.55) && half > 1.7) {
     const len = (top - P + 0.45) / Math.cos(0.28), off = len * Math.sin(0.28) + 0.04;
     L.ladder({ at: at(-Math.min(1.3, half - 0.4), off), y: P, rot: Math.atan2(-bd[0], -bd[1]), len }, ctx);
   }
@@ -236,11 +266,25 @@ export function calli(el, ctx) {
   const cA = at(-(half - 0.5), 2 * deep - 0.5), cB = at(half - 0.9, 2 * deep - 0.9);
   L.pot({ at: cA, y: P, seed: el.seed + 1, kind: 'water_pot', n: 1 + Math.floor(rand() * 2) }, ctx);
   const g = rand();
-  if (g < 0.3 && half > 2 && deep > 2) { granary().emit(bag, cB[0], P, cB[1], 0, 1); col.circle(cB[0], cB[1], 0.8, P, P + 2.4); }
-  else if (g < 0.6) altar().emit(bag, cB[0], P, cB[1], bd[0], bd[1]);
+  if (g < 0.25 && half > 2 && deep > 2) { granary().emit(bag, cB[0], P, cB[1], 0, 1); col.circle(cB[0], cB[1], 0.8, P, P + 2.4); }
+  else if (g < 0.45) altar().emit(bag, cB[0], P, cB[1], bd[0], bd[1]);
+  else if (g < 0.7 && half > 3 && deep > 3) {
+    // the household's temazcalli, its door toward the middle of the patio
+    const tp = at(half - 1.7, 2 * deep - 1.8), dx = cx - tp[0], dz = cz - tp[1], dl = Math.hypot(dx, dz) || 1;
+    temazcal().emit(bag, tp[0], P, tp[1], dx / dl, dz / dl); col.circle(tp[0], tp[1], 1.25, P, P + 2.2);
+    col.circle(tp[0] - dx / dl * 1.6, tp[1] - dz / dl * 1.6, 0.6, P, P + 0.6);
+  }
   else L.basket({ at: cB, y: P, seed: el.seed + 2, n: 2 }, ctx);
+  // a lord's house has an upper room over the back room (Cortés: "others, both upper and lower"; only nobles and high warriors built upward),
+  // set back from the roof's edge to leave a terrace before its door; furnished, reached by the ladder
+  if (noble) {
+    const r = rooms[0].r, alongX = back === 'n' || back === 's', Lr = alongX ? r[2] - r[0] : r[3] - r[1], len = 6.4 + rand() * 1.6, u0 = (alongX ? r[0] : r[1]) + 0.8 + rand() * Math.max(0, Lr - len - 1.6);
+    const up = band(r, back, 0.6, db - 1.8, u0, u0 + len), hh = 2.55;
+    room(bag, col, { r: up, y: tops[0], h: hh, door: gate, spout: false });
+    roomThings(ctx, { r: up, y: tops[0], h: hh, door: gate }, rand() < 0.5 ? 'sleep' : 'store', rand);
+  }
   // the flowers on the roofs ("others, both upper and lower, that contain conservatories of flowers": Cortés)
-  if (rand() < 0.45) {
+  if (!noble && rand() < 0.45) {
     const r = rooms[0].r, alongX = back === 'n' || back === 's', yr = top;
     if (rand() < 0.5) {
       const bed = alongX ? [r[0] + 0.4, (r[1] + r[3]) / 2 - 0.35, r[2] - 0.4, (r[1] + r[3]) / 2 + 0.35] : [(r[0] + r[2]) / 2 - 0.35, r[1] + 0.4, (r[0] + r[2]) / 2 + 0.35, r[3] - 0.4];
@@ -368,7 +412,9 @@ export function tecpan(el, ctx) {
   // room open on the terrace through piers, the king's seat in it
   const ux1 = x0 + wr - 4.2, hz0 = zc - 13, hz1 = zc + 13, y2 = y1 + H2;
   const ublock = (r) => { B(bag, W, r, y1, y2); col.rect(r, y1, y2); col.floor(r, y2); };
-  ublock([x0, z0 + 0.3, ux1, hz0]); ublock([x0, hz1, ux1, z1 - 0.3]);
+  // the ranges either side of the hall are hollow: rooms of the lords and the household in two rows, their doors on the terrace (palace.js)
+  hollow(hctx, [x0, z0 + 0.3, ux1, hz0], [{ f: 'e', doors: null, roles: ['hall', 'sleep', 'workshop', 'hall', 'sleep'], back: ['store', 'sleep', 'store'] }], { Y: y1, y1: y2, seed: 4101 });
+  hollow(hctx, [x0, hz1, ux1, z1 - 0.3], [{ f: 'e', doors: null, roles: ['sleep', 'hall', 'sleep', 'armoury', 'hall'], back: ['sleep', 'store', 'treasury'] }], { Y: y1, y1: y2, seed: 4102 });
   ublock([x0, hz0, x0 + 0.8, hz1]);
   for (const [a, b] of [[hz0, hz0 + 0.6], [hz1 - 0.6, hz1]]) ublock([x0 + 0.8, a, ux1, b]);
   col.floor([x0 + 0.8, hz0 + 0.6, ux1, hz1 - 0.6], y1);
