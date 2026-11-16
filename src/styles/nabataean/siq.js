@@ -178,13 +178,19 @@ export function siqWalls(el, { bag, col }) {
       for (let k = 0; k < P.length; k++) { const v = P[k], q = P[(k + 1) % P.length]; if ((s > 0) === (sg > 0)) push(R, ctr, q, v); else push(R, ctr, v, q); }
     }
     for (const [mat, t] of Object.entries(T)) bag.add(mat, fromTriangles(t));
-    // the walker stops at the face's foremost point near the floor
+    // the walker stops at the face as it is drawn: a piece for every metre of the wall, its front the foremost point of the
+    // face over that metre at the height of the body, its back deep in the rock (the drawn rock is a skin over the ground,
+    // whose slope rises a few metres behind it: nothing of the hollow between may be walked)
+    const PIECE = SUB / 2;
     for (let i = 0; i + 1 < n; i++) {
       if (pts[i][6] > pts[i][4] + 0.5 || pts[i + 1][6] > pts[i + 1][4] + 0.5) continue;
-      let dmin = Infinity;
-      for (let q = 0; q <= SUB; q++) for (const yy of [0, 0.6, 1.6, 2.5]) dmin = Math.min(dmin, faceD(face, i + q / SUB, yy, si));
-      const mid = (dmin + face + 2.5) / 2, a = at(i, mid, 0), b = at(i + 1, mid, 0);
-      col.segment([a[0], a[2]], [b[0], b[2]], face + 2.5 - dmin, Math.min(pts[i][4], pts[i + 1][4]) - 1, Math.max(pts[i][5], pts[i + 1][5]));
+      for (let h = 0; h < 2; h++) {
+        const ia = i + h / 2, ib = i + (h + 1) / 2;
+        let dmin = Infinity;
+        for (let q = 0; q <= PIECE; q++) for (const yy of [0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4]) dmin = Math.min(dmin, faceD(face, ia + (ib - ia) * q / PIECE, yy, si));
+        const back = Math.max(dmin + 0.6, sample(pts, (ia + ib) / 2)[7] ?? face + 12), A = at(ia, dmin, 0), B = at(ib, dmin, 0), C = at(ib, back, 0), D = at(ia, back, 0);
+        col.obstacles.push({ poly: [[A[0], A[2]], [B[0], B[2]], [C[0], C[2]], [D[0], D[2]]], y0: Math.min(pts[i][4], pts[i + 1][4]) - 1, y1: Math.max(pts[i][5], pts[i + 1][5]) });
+      }
     }
     // the channel or pipe runs on from the Siq along the walls it is joined to, as far as the first one raised over a monument
     if (channel) { let m = pts.findIndex((p) => p[6] > p[4] + 0.5); if (m < 0) m = n; if (m >= 4) waterworks(bag, pts.slice(0, m), s, face, channel, at, si); }

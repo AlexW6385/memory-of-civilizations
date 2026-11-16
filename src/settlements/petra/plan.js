@@ -143,6 +143,13 @@ const ROYAL = [];
     for (let z = PLAZA.c[1] - 16; z <= PLAZA.c[1] + 16.01; z += 2) out.push([+(fx + face - 1.5).toFixed(3), +z.toFixed(3), -1, 0, 0, RIM - 0.3, 39.7]);
     sides.push({ s: 1, pts: out }); }
   E.push({ t: 'siq_walls', face, sides, seed: 7, clear: [[100, -185, 160, -135]] });
+  // each sample's [7]: how far behind the line the ground has risen 2 m over the floor, where the rock's collider ends (the
+  // drawn rock is a skin over the ground, and the hollow between the skin and the slope is rock too)
+  for (const el of E) if (el.t === 'siq_walls') for (const sd of el.sides) for (const p of sd.pts) {
+    let d = face;
+    while (d < face + 14 && height(p[0] + p[2] * d, p[1] + p[3] * d) < p[4] + 2) d += 0.25;
+    p[7] = +d.toFixed(2);
+  }
 }
 // the colonnaded street, the Great Temple on the south, Qasr al-Bint at the west end
 // (no shops where the Great Temple's propylaeum opens off the southern portico)
