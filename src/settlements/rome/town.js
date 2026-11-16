@@ -5,6 +5,7 @@ import { RADIUS, VIA_LATA, lots, inRect, rows, INN, FULLER, STADIUM, saeptaRows,
 import '../../styles/roman/ways.js';
 import '../../styles/roman/houses.js';
 import { DOMUS, LITTER, lifePlan } from './life.js';
+import './flats.js';
 /** lodTiles of src/settlements/lod.js with a wider tile (the geometry budget counts plan x material buckets). */
 function tiles160(id, style, elements, { near, R, entrance, T = 160 }) {
   const tiles = new Map();
@@ -28,6 +29,15 @@ export async function town() {
   // the lot by the street north of the Pantheon holds the atrium house with its thermopolium (§4.4), walked into
   const same = (r, q) => r.every((v, i) => Math.abs(v - q[i]) < 1);
   const free = lots().filter((l) => !inRect(DOMUS, (l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) && !same(l.rect, INN) && !same(l.rect, FULLER) && !(inn2() && same(l.rect, inn2().rect)));
+  // beyond the first 120 m from the arrival (0, -120): every third insula of the middle belt is one walked into (flats.js)
+  const dA = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 + 120);
+  const cand = free.filter((l) => dA(l) > 125 && dA(l) < 340 && (l.rect[2] - l.rect[0] >= 17.5 || l.rect[3] - l.rect[1] >= 17.5)).sort((a, b) => dA(a) - dA(b));
+  const openLots = cand.filter((_, i) => i % 3 === 1).slice(0, 14).map((l) => {
+    const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, ns = l.rect[3] - l.rect[1] >= 17.5;
+    return { t: 'insula_open', rect: l.rect, seed: l.seed, front: ns ? (cz > 0 ? 'n' : 's') : (cx > 0 ? 'w' : 'e') };
+  });
+  const openSet = new Set(openLots.map((e) => e.rect));
+  free.splice(0, free.length, ...free.filter((l) => !openSet.has(l.rect)));
   const inn = lots().find((l) => same(l.rect, INN)), full = lots().find((l) => same(l.rect, FULLER));
   const R = (r, u0, u1, d0, d1) => [r[0] + u0, r[3] - d1, r[0] + u1, r[3] - d0];                  // the frame of a building with its front on the south
   const houses = { id: 'rome-houses', style: 'roman', origin: [0, 0], base: 0, yaw: 0, feature: true, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -200], facing: 's' },
@@ -80,7 +90,7 @@ export async function town() {
     { id: 'rome-street', style: 'roman', origin: [0, 0], base: 0, yaw: 0, feature: true, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -200], facing: 's' },
       elements: [{ t: 'pistrinum', rect: PISTRINUM, front: 's', y: 0 }, { t: 'latrine', rect: LATRINE, front: 's', y: 0 }],
       rooms: [{ id: 'pistrinum', rect: [PISTRINUM[0] + 0.5, PISTRINUM[1] + 0.5, PISTRINUM[2] - 0.5, PISTRINUM[3] - 0.5], y: 0, kind: 'hall', market: false }, { id: 'latrine', rect: [LATRINE[0] + 0.5, LATRINE[1] + 0.5, LATRINE[2] - 0.5, LATRINE[3] - 0.5], y: 0, kind: 'hall', market: false }] },
-    lifePlan(), awningPlan()];
+    site('rome-flats', openLots), lifePlan(), awningPlan()];
 }
 
 /** The cloth awnings over the doors of the tabernae along the street before the forecourt and the Via Lata (every other shop, in the colours of the cloth dyers). */
