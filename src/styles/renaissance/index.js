@@ -15,6 +15,7 @@ import { mercato } from './mercato.js';
 import { novella } from './novella.js';
 import { bottega, tintoria, tiratoio } from './craft.js';
 import { casa } from './casa.js';
+import { campanileDetail } from './campanile.js';
 
 const M = 'marble', G = 'verde_antico', R = 'roof_tile', ST = 'limestone_yellow';
 const oct = (bag, mat, cx, y, cz, r, h) => bag.add(mat, lathe([[r, 0], [r, h], [0.001, h]], 8, null, cx, y, cz));
@@ -337,7 +338,8 @@ function campanile(el, { bag, col }) {
   bag.add(M, box(r[0], y - 0.5, r[1], r[2], y + h, r[3])); col.rect(r, y, y + h);
   // the marble skin storey by storey: the lower two in panels, the upper with their pointed windows
   const faces = [[[r[0], r[1]], [r[2], r[1]]], [[r[2], r[1]], [r[2], r[3]]], [[r[2], r[3]], [r[0], r[3]]], [[r[0], r[3]], [r[0], r[1]]]];
-  for (const [a, b] of faces) { inlay(bag, a, b, y, y + h * 0.47, { pitch: s / 3, bands: 4 }); inlay(bag, a, b, y + h * 0.47, y + h, { pitch: s, bands: 3, pink: false }); }
+  for (const [a, b] of faces) { inlay(bag, a, b, y + 19.4, y + h * 0.47, { pitch: s / 3, bands: 2 }); inlay(bag, a, b, y + h * 0.47, y + h, { pitch: s, bands: 3, pink: false }); }
+  campanileDetail(bag, r, y, h);
   for (const [x0, x1, z0, z1] of [[r[0] - 0.4, r[0] + 0.6, r[1] - 0.4, r[1] + 0.6], [r[2] - 0.6, r[2] + 0.4, r[1] - 0.4, r[1] + 0.6], [r[0] - 0.4, r[0] + 0.6, r[3] - 0.6, r[3] + 0.4], [r[2] - 0.6, r[2] + 0.4, r[3] - 0.6, r[3] + 0.4]]) bag.add(M, box(x0, y, z0, x1, y + h, z1));
   // Giotto's windows: two storeys of paired two-light windows, then the tall three-light belfry; each light
   // dark under a pointed head, the lights parted by slender twisted shafts, the window framed in white
@@ -362,9 +364,8 @@ function campanile(el, { bag, col }) {
       const pc = P(uc, gy + gh * 0.35, 0.17); rose.translate(...pc); bag.add('opening', rose);
     };
     for (const yy of [h * 0.5, h * 0.66]) for (const du of [-s * 0.2, s * 0.2]) win(du, s * 0.22, y + yy, 8, 2);
-    win(0, s * 0.42, y + h * 0.81, 12, 3);
+    win(0, s * 0.42, y + h * 0.81 - 1.4, 12, 3);
   }
-  bag.add(M, box(r[0] - 1, y + h, r[1] - 1, r[2] + 1, y + h + 1.2, r[3] + 1));
 }
 registerStyle('renaissance', {
   trim: () => {}, opening: () => {}, column: () => {},
