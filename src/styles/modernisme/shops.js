@@ -69,7 +69,7 @@ export function makeShops(H) {
   const put = (bag, fr, pieces, s, y, reach = 230) => {
     const q = fr.at(s, 0), M = new Matrix4().makeRotationY(Math.atan2(-fr.u[1], fr.u[0])).setPosition(q[0], y, q[1]);
     for (const [m, g, bb] of pieces) {
-      if (!bb) { bag.add(m, g.clone().applyMatrix4(M)); continue; }
+      if (!bb) { if (bag.addInstance) bag.addInstance(m, g, M.clone(), { reach }); else bag.add(m, g.clone().applyMatrix4(M)); continue; }
       if (!bag.addInstance) { bag.add(m, box(...bb).applyMatrix4(M)); continue; }
       const L = new Matrix4().makeTranslation(bb[0], bb[1], bb[2]).multiply(new Matrix4().makeScale(bb[3] - bb[0], bb[4] - bb[1], bb[5] - bb[2]));
       bag.addInstance(m, UNIT, M.clone().multiply(L), { reach });
@@ -84,8 +84,9 @@ export function makeShops(H) {
     const lat = (m, prof, s, d, y, seg = 7) => b.add(m, lathe(prof, seg, null, S(s), y, d));
     const rd = (m, p, q, rr, seg = 6) => b.add(m, rod([S(p[0]), p[2], p[1]], [S(q[0]), q[2], q[1]], rr, seg));
     const pick = (a) => a[Math.floor(r() * a.length)];
-    const jar = (m, s, d, y, rr, h) => lat(m, [[0.001, 0.02], [rr, 0], [rr, h * 0.75], [rr * 0.55, h * 0.9], [rr * 0.6, h], [0.001, h]], s, d, y, 8);
-    const bottle = (m, s, d, y, rr, h) => lat(m, [[0.001, 0.02], [rr, 0], [rr, h * 0.55], [rr * 0.3, h * 0.78], [rr * 0.3, h], [0.001, h]], s, d, y, 8);
+    // the stock's jars and bottles: two jars and one bottle in all the trades, five-sided and open at the foot (it stands on a plank; a jar is 10 cm across: seen from the street it is a few pixels)
+    const jar = (m, s, d, y, rr, h) => { const big = h >= 0.2, R = big ? 0.075 : 0.05, H = big ? 0.22 : 0.12; lat(m, [[R, 0], [R, H * 0.75], [R * 0.6, H], [0.001, H]], s, d, y, 5); };
+    const bottle = (m, s, d, y) => lat(m, [[0.04, 0], [0.04, 0.17], [0.012, 0.25], [0.012, 0.3], [0.001, 0.3]], s, d, y, 5);
     const barrel = (m, s, d, y, rr, h) => { lat(m, [[0.001, 0], [rr * 0.85, 0], [rr, h * 0.5], [rr * 0.85, h], [0.001, h]], s, d, y, 9); lat(IRON, [[rr * 0.86, h * 0.2], [rr * 0.92, h * 0.2], [rr * 0.92, h * 0.25], [rr * 0.86, h * 0.25]], s, d, y, 9); lat(IRON, [[rr * 0.86, h * 0.75], [rr * 0.92, h * 0.75], [rr * 0.92, h * 0.8], [rr * 0.86, h * 0.8]], s, d, y, 9); };
     const sack = (m, s, d, y) => lat(m, [[0.001, 0], [0.26, 0], [0.3, 0.2], [0.24, 0.5], [0.12, 0.62], [0.001, 0.6]], s, d, y, 7);
     const crateOf = (s, d, y, fruit) => { bx('wood_ochre', s - 0.25, s + 0.25, d - 0.17, d + 0.17, y, y + 0.2); for (let k = 0; k < 6; k++) lat(fruit[k % fruit.length], [[0.001, 0], [0.05, 0.03], [0.065, 0.07], [0.04, 0.115], [0.001, 0.12]], s - 0.16 + (k % 3) * 0.16, d - 0.07 + Math.floor(k / 3) * 0.14, y + 0.2, 6); };

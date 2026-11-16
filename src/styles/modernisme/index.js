@@ -917,8 +917,20 @@ function batllo(el, { bag, col }) {
   // a cornice where the mosaic meets the roof
   bag.add(ST, F(0, w, -0.05, 0.4, y + h - 0.2, y + h + 0.08));
 }
+/**
+ * Materials of the shops' small stock that are one another's twins at a few metres (a jar of dark clay and a brown hide, a tan loaf and
+ * ochre wood): each distinct material of a plan is a draw, so the Eixample's blocks are built with the twins as one.
+ */
+const TWINS = { pottery_dark: 'hide_brown', glaze_blue: 'glaze_green', glass_topaz: 'hide_brown', hide_black: 'hide_brown', hide_tan: 'wood_ochre', rope_fibre: 'wicker', sacking: 'wicker', iron_galv: 'iron', steel_chrome: 'steel_grey', marble_dark: 'iron', cloth_blue: 'cloth_indigo', cloth_maroon: 'cloth_red', paint_white: 'cloth_white' };
+function twinned(bag) {
+  const o = Object.create(bag), m = (k) => TWINS[k] ?? k;
+  o.add = (k, g) => bag.add(m(k), g);
+  if (bag.addInstance) o.addInstance = (k, g, M, opt) => bag.addInstance(m(k), g, M, opt && opt.real ? { ...opt, real: m(opt.real) } : opt);
+  return o;
+}
+const twin = (fn) => (el, ctx) => fn(el, { ...ctx, bag: twinned(ctx.bag) });
 registerStyle('modernisme', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, mercat, casa_cafe: (el, ctx) => casaCafe(el, ctx, { frame, streetFront, courtFront, roofTop, rng }), eixample_block: block, sagrada, pedrera, batllo, ...STREET, ...FURNITURE, banc_fanal: bancFanal, works_fence: worksFence, stone_yard: stoneYard },
+  elements: { ...STYLES.qing.elements, mercat, casa_cafe: (el, ctx) => casaCafe(el, ctx, { frame, streetFront, courtFront, roofTop, rng }), eixample_block: twin(block), sagrada, pedrera, batllo, ...STREET, ...FURNITURE, banc_fanal: bancFanal, works_fence: worksFence, stone_yard: stoneYard },
   objects: {},
 });
