@@ -5,7 +5,7 @@
 // and up the Carrer de la Marina past the Nativity façade; hackney carriages at the kerbs.
 import { blockShops } from '../../styles/modernisme/index.js';
 import { worksElements, arrivalLife, arrivalStreet } from './arrival.js';
-import { RADIUS, PITCH, BLOCK, BATLLO, CASA, GRACIA_X, MERCAT, SAGRADA, shopCore, blocks, height, onDiagonal, bancsFanals } from './layout.js';
+import { RADIUS, PITCH, BLOCK, BATLLO, CASA, GRACIA_X, MERCAT, SAGRADA, ARRIVAL, shopCore, blocks, height, onDiagonal, bancsFanals } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements) => ({ id, style: 'modernisme', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 46], facing: 'n' } });
@@ -106,8 +106,8 @@ function mercatLife() {
     if (Math.abs(x - cx) < 2) continue;
     const rot = face > 0 ? 0 : Math.PI;
     L.push({ t: 'stall', at: [x, cz + zr], y, rot, w: 2.8, d: 1.3, goods: pick(GOODS), awning: 'cloth_white', seed: Math.floor(rand() * 1e6) });
-    if (rand() < 0.7) who([x + (rand() - 0.5), cz + zr - face * 1.2], rot, { dress: 'robe', over: 'apron', hat: 'none' });
-    if (rand() < 0.45) who([x + (rand() - 0.5) * 1.5, cz + zr + face * 2.1], rot + Math.PI, { carry: rand() < 0.5 ? 'basket' : 'none' });
+    if (rand() < 0.5) who([x + (rand() - 0.5), cz + zr - face * 1.2], rot, { dress: 'robe', over: 'apron', hat: 'none' });
+    if (rand() < 0.28) who([x + (rand() - 0.5) * 1.5, cz + zr + face * 2.1], rot + Math.PI, { carry: rand() < 0.5 ? 'basket' : 'none' });
   }
   // the flower sellers on the pavement before the north side, a cart unloading
   for (let x = cx - 24; x <= cx + 24; x += 6) { L.push({ t: 'goods_mat', goods: ['baskets', 'greens'], at: [x, cz - 25], y, rot: 0, seed: Math.floor(x * 7 + 1e4) }); who([x + 0.9, cz - 25.8], Math.PI, { dress: 'robe', hat: 'none', pose: rand() < 0.5 ? 'sit_ground' : 'stand' }); }
@@ -124,7 +124,7 @@ function shopLife(els) {
       const rot = (f) => Math.atan2(-f[0], -f[1]);
       const o = { skin: 'skin_light', pose: 'stand', seed: 0 };
       for (const q of sh.people) {
-        if (q.role === 'customer' && rand() > 0.38) continue;
+        if (q.role === 'customer' && (rand() > 0.38 || Math.hypot(q.at[0] - ARRIVAL[0], q.at[1] - ARRIVAL[1]) > 90)) continue;     // (the customers only in the arrival's street: the rest stand behind the shops' dark glass)
         const keeper = q.role === 'keeper', lady = !keeper && rand() < 0.55;
         if (keeper && rand() < 0.07) continue;
         L.push({ t: 'figure', at: q.at, y: sh.y + 0.12, rot: rot(q.face), ...o, seed: Math.floor(rand() * 1e9), hair: lady ? 'bun' : 'short',
@@ -182,10 +182,13 @@ function worksLife() {
   for (let k = 0; k < 3; k++) fig([cx - 12 - 10 + 0.32 + k * (20 / 3) + (k ? 0.1 : 0) + 0.45, cz + 25 + 2.4], sy + 0.12, [-1, 0], { dress: 'robe', cloth: ['cloth_black', 'cloth_grey', 'cloth_indigo'][k], cloth2: 'cloth_white', hair: 'bun', hat: 'none', over: 'shawl' });
   return L;
 }
+/** Blocks away from the three places a visitor goes to (the arrival's street, the house with the café, the market) are built of plainer pieces (styles/modernisme: block far). */
+const FOCUS = [[ARRIVAL[0], ARRIVAL[1], 118], [CASA.fx, CASA.z0, 118], [MERCAT[0], MERCAT[1], 105]];
+const isFar = (b) => !b.special && !FOCUS.some(([x, z, r]) => Math.hypot(b.c[0] - x, b.c[1] - z) < r);
 /** The Eixample's block elements (the smoke finds the chimneys from the same plan). */
 export function blockElements() {
   return blocks().filter((b) => b.special !== 'sagrada' && b.special !== 'mercat').map((b) => ({
-    t: 'eixample_block', shops: shopCore(b.c), far: !shopCore(b.c) && !b.special, pave: Math.abs(b.c[0] - GRACIA_X) < 60 ? 'tile_grey' : 'flagstone', c: b.c, s: BLOCK, d: 18, ch: 12, y: height(...b.c), dz: (height(b.c[0], b.c[1] + 1) - height(b.c[0], b.c[1] - 1)) / 2, seed: b.seed,
+    t: 'eixample_block', shops: shopCore(b.c), far: isFar(b), pave: Math.abs(b.c[0] - GRACIA_X) < 60 ? 'tile_grey' : 'flagstone', c: b.c, s: BLOCK, d: 18, ch: 12, y: height(...b.c), dz: (height(b.c[0], b.c[1] + 1) - height(b.c[0], b.c[1] - 1)) / 2, seed: b.seed,
     ...(b.special === 'pedrera' ? { cut: { corner: 3, a: 22, b: 22 } } : {}),
     ...(Math.hypot(b.c[0] - CASA.block[0], b.c[1] - CASA.block[1]) < 1 ? { gaps: [{ side: CASA.side, s0: CASA.s0, s1: CASA.s1 }] } : {}),
     ...(b.special === 'batllo' ? { gaps: [{ side: 1, s0: BATLLO.s0, s1: BATLLO.s1 }] } : {}),

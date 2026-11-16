@@ -110,6 +110,14 @@ function wallBox(bag, fr, mat, b, reach = 420) {
   M.multiply(new Matrix4().makeTranslation(s0, y0, -t1)).multiply(new Matrix4().makeScale(s1 - s0, y1 - y0, t1 - t0));
   bag.addInstance(mat, unitBox({ noZp: true }), M, { reach });
 }
+/** A dark panel (an 'opening') on a front: one face, a copy of the unit quad, however large (one draw for all the panels). s0…s1 along the front, y0…y1, t out from the wall. */
+function panel(bag, fr, s0, s1, t, y0, y1) {
+  if (!bag.addInstance) { bag.add('opening', boxGeo(fr, [s0, s1, t, t, y0, y1], ['tp'])); return; }
+  const q = fr.at(0, 0);
+  const M = new Matrix4().makeRotationY(Math.atan2(-fr.u[1], fr.u[0])).setPosition(q[0], 0, q[1]);
+  M.multiply(new Matrix4().makeTranslation(s0, y0, -t)).multiply(new Matrix4().makeScale(s1 - s0, y1 - y0, 1));
+  bag.addInstance('opening', unitBox({ noTop: true, noBottom: true, noXn: true, noXp: true, noZp: true }), M);
+}
 const SHOPS = makeShops({ proto, put });
 const CORNER_CLEAR = 5;
 /** Louvred shutters at a window: folded open against the wall, or closed over it, or one leaf drawn. */
@@ -128,7 +136,6 @@ function shutterLeaves(bag, fr, sc, y, k, state, mat) {
 /** A window of floor kind k ('2' the principal, 'mid', 'last'): its opening, lintel or pediment, sill. */
 const windowP = (k) => proto(`win|${k}`, (b, { F }) => {
   const [ww, wh] = WIN[k], y0 = 0.06, y1 = y0 + wh;
-  b.add('opening', F(-ww / 2, ww / 2, -0.03, 0.03, y0, y1));
   b.add(S, F(-ww / 2 - 0.18, ww / 2 + 0.18, 0, k === 2 ? 0.18 : 0.12, y1, y1 + (k === 2 ? 0.42 : 0.22)));
   if (k === 2) b.add(S, F(-ww / 2 - 0.3, ww / 2 + 0.3, 0, 0.26, y1 + 0.42, y1 + 0.54));
   if (k === 'last') b.add(S, F(-ww / 2 - 0.12, ww / 2 + 0.12, 0, 0.14, -0.06, 0.06));
@@ -144,19 +151,17 @@ const balconyP = (d) => proto(`bal|${d}`, (b, fr) => {
 const railBars = () => proto('railbars', (b, fr) => { const F = fr.F; b.add(IRON, F(0, 0.96, 0.86, 0.9, 0.95, 1.0)); b.add(IRON, F(0, 0.96, 0.865, 0.895, 0.1, 0.14)); for (let i = 0; i < 6; i++) { const s = 0.08 + i * 0.16; b.add(IRON, F(s - 0.012, s + 0.012, 0.868, 0.892, 0, 0.95)); } });
 /** The ground floor: a shop's opening in its wooden front, or the portal with its doors. */
 const shopP = () => proto('shop', (b, { F }) => {
-  b.add('opening', F(-1.2, 1.2, 0.07, 0.1, 0.1, 3.8));
   for (const sm of [-1.2, -0.02, 1.12]) b.add('wood_painted', F(sm, sm + 0.08, 0.1, 0.15, 0.1, 3.2));
   b.add('wood_painted', F(-1.2, 1.2, 0.1, 0.15, 0.1, 0.7)); b.add('wood_painted', F(-1.2, 1.2, 0.1, 0.16, 3.2, 3.75));
   b.add(S, F(-1.35, 1.35, 0.076, 0.2, 3.8, 4.1));
 });
 const doorP = () => proto('door', (b, { F }) => {
-  b.add('opening', F(-0.95, 0.95, 0.07, 0.1, 0.1, 3.9));
   b.add('wood_dark', F(-0.9, 0.9, 0.1, 0.14, 0.1, 2.9)); b.add('wood_dark', F(-0.03, 0.03, 0.14, 0.16, 0.1, 2.9));
   for (const e of [-1, 1]) b.add(S, F(e * 1.1 - 0.15, e * 1.1 + 0.15, 0.06, 0.22, 0.4, 3.9));
   b.add(S, F(-1.3, 1.3, 0.076, 0.28, 3.9, 4.35));
 });
 const entresolP = () => proto('entresol', (b, { F }) => {
-  b.add('opening', F(-0.6, 0.6, -0.03, 0.03, 5.3, 6.9)); b.add(S, F(-0.75, 0.75, 0, 0.12, 5.18, 5.3));
+  b.add(S, F(-0.75, 0.75, 0, 0.12, 5.18, 5.3));
   for (const e of [-1, 1]) b.add(S, F(e * 0.95 - 0.13, e * 0.95 + 0.13, 0, 0.72, 6.95, 7.25));
 });
 /** A shop's awning (toldo) over one bay: striped cloth sloping down 1.0 m from the wall (the tram poles stand 1.4 m out), a valance, two iron arms. */
@@ -182,10 +187,10 @@ const balconyFarP = (d) => proto(`balf|${d}`, (b, fr) => {
   for (let i = 0; i < 5; i++) { const s = -0.88 + i * 0.44; b.add(IRON, F(s - 0.02, s + 0.02, d - 0.065, d - 0.035, 0.06, 0.96)); }
 });
 /** A far shop bay: its dark opening and the cornice over it. */
-const shopFarP = () => proto('shopf', (b, { F }) => { b.add('opening', F(-1.2, 1.2, 0.07, 0.1, 0.1, 3.8)); b.add(S, F(-1.35, 1.35, 0.076, 0.2, 3.8, 4.1)); });
-const doorFarP = () => proto('doorf', (b, { F }) => { b.add('opening', F(-0.95, 0.95, 0.07, 0.1, 0.1, 3.9)); b.add(S, F(-1.3, 1.3, 0.076, 0.28, 3.9, 4.35)); });
+const shopFarP = () => proto('shopf', (b, { F }) => { b.add(S, F(-1.35, 1.35, 0.076, 0.2, 3.8, 4.1)); });
+const doorFarP = () => proto('doorf', (b, { F }) => { b.add(S, F(-1.3, 1.3, 0.076, 0.28, 3.9, 4.35)); });
 /** A far window of the entresol: its dark panel. */
-const entresolFarP = () => proto('entresolf', (b, { F }) => { b.add('opening', F(-0.6, 0.6, -0.03, 0.03, 5.3, 6.9)); b.add(S, F(-0.75, 0.75, 0, 0.12, 5.18, 5.3)); });
+const entresolFarP = () => proto('entresolf', (b, { F }) => { b.add(S, F(-0.75, 0.75, 0, 0.12, 5.18, 5.3)); });
 /** A flower box on a balcony's rail (geraniums, carnations, ferns). */
 const flowerP = (k, d) => proto(`flw|${k}|${d}`, (b, { F }) => {
   b.add('wood_painted', F(-0.8, 0.8, d - 0.08, d + 0.14, 0.72, 0.95));
@@ -252,22 +257,22 @@ function streetFront(bag, fr, s0, s1, y, h, mat, rand, tribune = false, opt = {}
   for (let i = 0; i < nb; i++) {
     const sc = s0 + (i + 0.5) * bw;
     if (tribune && i === door) {
-      put(bag, fr, shopP(), sc, y);
+      put(bag, fr, shopP(), sc, y); panel(bag, fr, sc - 1.2, sc + 1.2, 0.1, y + 0.1, y + 3.8);
       for (let f = 2; f < top; f++) put(bag, fr, tribuneP(+(LV[f + 1] - LV[f]).toFixed(2), f === top - 1), sc, y + LV[f]);
       continue;
     }
     if (!own) {
-      if (!inShop(i)) put(bag, fr, far ? (i === door ? doorFarP() : shopFarP()) : i === door ? doorP() : shopP(), sc, y);
+      if (!inShop(i)) { put(bag, fr, far ? (i === door ? doorFarP() : shopFarP()) : i === door ? doorP() : shopP(), sc, y); const hw = i === door ? 0.95 : 1.2; panel(bag, fr, sc - hw, sc + hw, 0.1, y + 0.1, y + (i === door ? 3.9 : 3.8)); }
       if (i !== door && rand() < 0.34) { const ci = Math.floor(rand() * AWN.length); if ((!inShop(i) || dr() < 0.5) && !far) put(bag, fr, awningP(ci), sc, y - (inShop(i) ? 0.2 : 0)); }
     }
-    put(bag, fr, far ? entresolFarP() : entresolP(), sc, y);
+    put(bag, fr, far ? entresolFarP() : entresolP(), sc, y); panel(bag, fr, sc - 0.6, sc + 0.6, 0.03, y + 5.3, y + 6.9);
     if (i === tb) for (let f = 2; f < top; f++) put(bag, fr, tribuneP(+(LV[f + 1] - LV[f]).toFixed(2), f === top - 1), sc, y + LV[f]);
     for (let f = 2; f < top; f++) {
       const k = f === 2 ? 2 : f === top - 1 ? 'last' : 'mid', st = Math.floor(rand() * 4) % 3;
       if (i === tb) continue;
-      if (!(own && f === 2)) put(bag, fr, windowP(k), sc, y + LV[f]);
+      if (!(own && f === 2)) { put(bag, fr, windowP(k), sc, y + LV[f]); panel(bag, fr, sc - WIN[k][0] / 2, sc + WIN[k][0] / 2, 0.03, y + LV[f] + 0.06, y + LV[f] + 0.06 + WIN[k][1]); }
       { const st2 = st === 2 && rand() < 0.5 ? 2 : st; shutterLeaves(bag, fr, sc, y + LV[f], k, far ? 0 : st2, sh); }
-      const bd = +(0.62 - 0.05 * (f - 3)).toFixed(2);
+      const bd = 0.58;                                  // (one depth for the slabs of all the floors: they were 0.62, 0.57, 0.52)
       if (k === 'mid') put(bag, fr, far ? balconyFarP(bd) : balconyP(bd), sc, y + LV[f]);
       // life at the windows: a flower box on the rail, washing over it, a cage, an awning over a window
       const q = dr();
@@ -312,8 +317,7 @@ function streetFront(bag, fr, s0, s1, y, h, mat, rand, tribune = false, opt = {}
   }
 }
 /** The court side of a house: plain windows with shutters, floor over floor. */
-/** A court window: a dark panel 1.1 × 1.6 m (the court wall's frame: s along, t out into the court). */
-const courtWindowP = () => proto('courtwin', (b, { F }) => b.add('opening', F(-0.55, 0.55, 0.0, 0.03, 0, 1.6)));
+
 /** Washing hung out on a line: a sheet seen from both sides. */
 const laundryP = () => proto('laundry', (b, { F }) => { b.add('cloth_white', F(-0.45, 0.45, 0.1, 0.12, 0, 0.7, ['sn', 'sp', 'yn', 'yp'])); });
 function courtFront(bag, fr, s0, s1, y, h, D, rand, from = 1, far = false) {
@@ -322,7 +326,7 @@ function courtFront(bag, fr, s0, s1, y, h, D, rand, from = 1, far = false) {
   for (let f = from; f < top; f++) for (let i = 0; i < n; i++) {
     const sc = s0 + (i + 0.5) * bw, y0 = y + LV[f] + 0.8;
     if (far) { rand(); continue; }                                   // (the court of a far block: no windows; its stream kept)
-    put(bag, cf, courtWindowP(), s1 - sc, y0 - 0.0);
+    panel(bag, cf, s1 - sc - 0.55, s1 - sc + 0.55, 0.03, y0, y0 + 1.6);
     if (rand() < 0.35) put(bag, cf, laundryP(), s1 - sc, y0 - 0.9);                                              // laundry hung out
   }
   bag.add(S, fr.F(s0, s1, -D - 0.1, -D + 0.3, y + h + 0.0, y + h + 0.9));
@@ -921,7 +925,7 @@ function batllo(el, { bag, col }) {
  * Materials of the shops' small stock that are one another's twins at a few metres (a jar of dark clay and a brown hide, a tan loaf and
  * ochre wood): each distinct material of a plan is a draw, so the Eixample's blocks are built with the twins as one.
  */
-const TWINS = { pottery_dark: 'hide_brown', glaze_blue: 'glaze_green', glass_topaz: 'hide_brown', hide_black: 'hide_brown', hide_tan: 'wood_ochre', rope_fibre: 'wicker', sacking: 'wicker', iron_galv: 'iron', steel_chrome: 'steel_grey', marble_dark: 'iron', cloth_blue: 'cloth_indigo', cloth_maroon: 'cloth_red', paint_white: 'cloth_white' };
+const TWINS = { pottery_dark: 'hide_brown', glaze_blue: 'glaze_green', glass_topaz: 'hide_brown', hide_black: 'wood_dark', hide_tan: 'wood_ochre', rope_fibre: 'wood_ochre', sacking: 'wood_ochre', iron_galv: 'iron', steel_chrome: 'steel_grey', marble_dark: 'iron', cloth_blue: 'cloth_indigo', cloth_maroon: 'cloth_red', paint_white: 'cloth_white', cloth_black: 'wood_dark', cloth_brown: 'wood_dark', cloth_grey: 'cloth_indigo', wicker: 'wood_ochre', mirror_tin: 'steel_grey', lime_plaster: 'plaster_white', plaster_grey: 'plaster_white', marble_floor: 'tile_cream' };
 function twinned(bag) {
   const o = Object.create(bag), m = (k) => TWINS[k] ?? k;
   o.add = (k, g) => bag.add(m(k), g);
