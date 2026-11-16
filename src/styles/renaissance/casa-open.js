@@ -144,6 +144,39 @@ export function openGround(bag, col, el, { wall, y, gh, f, rand, foot, stairs = 
     hearth(Math.min(L / 2, L - 2.5)); { const p = P(Math.min(L / 2, L - 2.5), D - T - 0.35); bag.add(IR, lathe([[0.001, 0], [0.3, 0.02], [0.33, 0.25], [0.28, 0.35], [0.001, 0.35]], 10, null, p[0], fy + 0.5, p[1])); }
     for (const v of [D * 0.4, D * 0.6]) { B(TM, ub + 0.2, v - 0.04, L - T - 0.3, v + 0.04, fy + 2.0, fy + 2.08); for (let u = ub + 0.4; u < L - T - 0.5; u += 0.22) B('plaster_white', u, v - 0.015, u + 0.04, v + 0.015, fy + 1.3, fy + 2.0); }
     counter(L * 0.35, L * 0.7, T + 1.2); for (let k = 0; k < 6; k++) B('plaster_white', L * 0.35 + 0.2 + k * 0.2, T + 1.15, L * 0.35 + 0.24 + k * 0.2, T + 1.2, fy + 1.05, fy + 1.3);
+  } else if (use === 'apothecary') {
+    // the speziale: tall shelves of glazed albarelli and pots along the back wall, the counter with the mortar and the balance,
+    // herbs hung to dry from a pole, a brick stove with the copper still
+    const ju = 1.6;
+    shelves(ju, L - T - 0.1, D - T, 4, W, (r, ya) => { for (let u = ju + 0.2; u < L - T - 0.3; u += 0.32) h(r % 2 ? TC : 'plaster_white', u, D - T - 0.17, 0.1, 0.3, ya + 0.04); });
+    counter(L * 0.55, L - T - 1.6, D * 0.45);
+    { const p = P(L * 0.55 + 0.5, D * 0.45); bag.add('granite_grey', lathe([[0.001, 0], [0.12, 0.02], [0.15, 0.12], [0.11, 0.17], [0.001, 0.17]], 8, null, p[0], fy + 1.05, p[1])); }
+    for (let k = 0; k < 4; k++) h(k % 2 ? TC : 'plaster_white', L * 0.55 + 1.0 + k * 0.28, D * 0.45, 0.07, 0.22, 1.05);
+    { const bu = L - T - 1.2; B(IR, bu - 0.01, D * 0.45 - 0.01, bu + 0.01, D * 0.45 + 0.01, fy + 1.05, fy + 1.4); B(IR, bu - 0.25, D * 0.45 - 0.01, bu + 0.25, D * 0.45 + 0.01, fy + 1.4, fy + 1.42); }
+    B(TM, ju, D * 0.62 - 0.03, L - T - 0.3, D * 0.62 + 0.03, fy + 2.2, fy + 2.25);
+    for (let u = ju + 0.2; u < L - T - 0.6; u += 0.45) B((Math.round(u * 7) % 2) ? 'cloth_green' : 'cloth_ochre', u, D * 0.62 - 0.05, u + 0.14, D * 0.62 + 0.05, fy + 1.7, fy + 2.2);
+    B('brick', L - T - 1.2, T + 0.4, L - T - 0.1, T + 1.5, fy, fy + 0.8, true);
+    { const p = P(L - T - 0.65, T + 0.95); bag.add('bronze', lathe([[0.001, 0], [0.22, 0.02], [0.34, 0.22], [0.3, 0.5], [0.12, 0.72], [0.06, 1.0], [0.001, 1.05]], 10, null, p[0], fy + 0.8, p[1])); }
+  } else if (use === 'weaver') {
+    // two looms with the warp stretched, a spinning wheel, baskets of carded wool, finished cloth hung from a pole
+    const loom = (lu, v0) => { for (const v of [v0, v0 + 1.1]) B(W, lu, v, lu + 0.08, v + 0.08, fy, fy + 1.7, true); B(TM, lu, v0, lu + 0.08, v0 + 1.18, fy + 1.6, fy + 1.7); B(TM, lu, v0, lu + 0.08, v0 + 1.18, fy + 0.5, fy + 0.58); B('cloth_white', lu + 0.02, v0 + 0.05, lu + 0.05, v0 + 1.13, fy + 0.58, fy + 1.6); B('cloth_indigo', lu + 0.02, v0 + 0.05, lu + 0.05, v0 + 1.13, fy + 0.58, fy + 0.95); B(W, lu - 0.5, v0 + 0.4, lu - 0.1, v0 + 0.8, fy, fy + 0.45, true); };
+    loom(L - T - 0.4, T + 0.5); if (D > 7) loom(L - T - 0.4, T + 2.4);
+    { const p = P(L * 0.4, D * 0.4); B(W, L * 0.4 - 0.35, D * 0.4 - 0.1, L * 0.4 + 0.35, D * 0.4 + 0.1, fy + 0.45, fy + 0.5, true); for (const a of [-0.3, 0.3]) B(W, L * 0.4 + a - 0.03, D * 0.4 - 0.05, L * 0.4 + a + 0.03, D * 0.4 + 0.05, fy, fy + 0.45); bag.add(W, lathe([[0.36, 0], [0.36, 0.03], [0.001, 0.03]], 10, null, 0, 0, 0).rotateZ(Math.PI / 2).translate(p[0], fy + 0.85, p[1])); B(W, L * 0.4 - 0.03, D * 0.4 - 0.04, L * 0.4 + 0.03, D * 0.4 + 0.04, fy + 0.5, fy + 0.85); }
+    for (let k = 0; k < 3; k++) { h('wicker', ub + 1.2 + k * 0.6, D - T - 0.45, 0.22, 0.35); h('cloth_white', ub + 1.2 + k * 0.6, D - T - 0.45, 0.17, 0.08, 0.33); }
+    if (L - T - 1.4 - (ub + 3.4) > 0.8) shelves(ub + 3.4, L - T - 1.4, D - T, 2, W, (r, ya) => { for (let u = ub + 3.6; u < L - T - 1.6; u += 0.3) h(r ? 'cloth_white' : 'terracotta', u, D - T - 0.15, 0.08, 0.2, ya + 0.04); });
+    B(TM, ub + 1.2, D * 0.62 - 0.03, L - T - 1.2, D * 0.62 + 0.03, fy + 2.2, fy + 2.26);
+    for (let u = ub + 1.4, k = 0; u < L - T - 1.6; u += 0.8, k++) B(CLOTHS[(k * 3 + 1) % 7], u, D * 0.62 - 0.02, u + 0.6, D * 0.62 + 0.02, fy + 1.05, fy + 2.2);
+  } else if (use === 'kitchen') {
+    // a home whose room is the kitchen: a long table with benches, the great hearth with pots, hams and pans hung from the beams, a cupboard, a water jar
+    hearth(L / 2);
+    for (const [a, r2] of [[-0.45, 0.2], [0.1, 0.16], [0.5, 0.18]]) h(IR, L / 2 + a, D - T - 0.35, r2, 0.24, 0.47);
+    table(L / 2, D * 0.5, Math.min(2.2, L - 2.6), 0.8, 0.78);
+    for (const s2 of [-1, 1]) B(TM, L / 2 - Math.min(1.1, (L - 2.6) / 2), D * 0.5 + s2 * 0.62 - 0.13, L / 2 + Math.min(1.1, (L - 2.6) / 2), D * 0.5 + s2 * 0.62 + 0.13, fy + 0.42, fy + 0.46, true);
+    for (let k = 0; k < 3; k++) h(k % 2 ? 'plaster_white' : TC, L / 2 - 0.6 + k * 0.5, D * 0.5, 0.07, 0.2, 0.78);
+    B(TM, ub + 0.2, D * 0.35 - 0.03, L - T - 0.3, D * 0.35 + 0.03, fy + 2.1, fy + 2.15);
+    for (let u = ub + 0.5, k = 0; u < L - T - 0.6; u += 0.55, k++) { if (k % 2) B(IR, u, D * 0.35 - 0.02, u + 0.3, D * 0.35 + 0.02, fy + 1.55, fy + 2.1); else h('hide_brown', u, D * 0.35, 0.09, 0.4, gh - 1.0); }
+    B(W, L - T - 0.7, D - T - 1.9, L - T - 0.05, D - T - 0.3, fy, fy + 1.9, true); for (const hh of [0.6, 1.2]) B('wood_painted', L - T - 0.72, D - T - 1.9, L - T - 0.7, D - T - 0.3, fy + hh, fy + hh + 0.04);
+    barrel(L - T - 0.5, D * 0.5 + 0.2, 0.3); h(TC, 1.7, D - T - 0.5, 0.25, 0.7, 0);
   } else {
     // a home: the table and stools, the hearth, a chest, the bed in the corner, a cupboard with crockery
     table(L / 2, D * 0.45, 1.3, 0.8, 0.78); for (const [a, b] of [[-0.9, 0], [0.9, 0], [0, -0.65]]) { const p = [L / 2 + a, D * 0.45 + b]; B(TM, p[0] - 0.18, p[1] - 0.18, p[0] + 0.18, p[1] + 0.18, fy, fy + 0.45, true); }

@@ -9,6 +9,7 @@ import { houses } from './town.js';
 import { craftPlans } from './crafts.js';
 import { arnoPlans } from './arno.js';
 import { piazzaPlans } from './piazza.js';
+import { streetPlans } from './streetlife.js';
 export { music };
 export const landmarks = [{ plan: centre, music }];
-export async function town() { return [bridge, river, medici, mercato, novella, ...craftPlans(), ...piazzaPlans(), ...arnoPlans(), ...(await houses())]; }
+export async function town() { return [bridge, river, medici, mercato, novella, ...craftPlans(), ...piazzaPlans(), ...streetPlans(), ...arnoPlans(), ...(await houses())]; }

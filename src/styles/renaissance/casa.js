@@ -307,7 +307,7 @@ export function casa(el, { bag, col }) {
       const L = Lg, wet = !pal && !tow;
       if (wet) {
         for (let k = 0, n = 2 + Math.floor(L / 3); k < n; k++) { const u = rand() * (L - 1.5), w = 0.8 + rand() * 1.6; Lc.add('plaster_damp', flr(u, 0.0, Math.min(L, u + w), 0.5 + rand() * 0.7, 0.025)); }
-        if (el.plaster) for (let k = 0, n = 1 + Math.floor(L / 2.5); k < n; k++) { const u = 0.3 + rand() * (L - 0.9), h0 = ys[Math.min(top, 2)] - rand() * 2.5; Lu2.add('plaster_streak', flr(u, h0 - 1.2 - rand() * 1.5, u + 0.2 + rand() * 0.3, h0, 0.022)); }
+        if (el.plaster) for (let k = 0, n = 1 + Math.floor(L / 2.5); k < n; k++) { const u = 0.3 + rand() * (L - 0.9), h0 = ys[Math.min(top, 2)] - rand() * 2.5; Lu2.add('plaster_streak', flr(u, h0 - 1.2 - rand() * 1.5, u + 0.2 + rand() * 0.3, h0, 0.0265)); }
       }
       if (!pal && !tow && rand() < 0.38) { const u = Math.min(L - 0.5, Math.max(0.5, L / 2 + (rand() < 0.5 ? -1 : 1) * (0.2 + rand()))); Lc.box(SER, u - 0.28, gh - 0.95, 0.0, u + 0.28, gh - 0.35, 0.09); Lc.box(['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_green'][Math.floor(rand() * 4)], u - 0.2, gh - 0.88, 0.09, u + 0.2, gh - 0.5, 0.11); Lc.box('cloth_white', u - 0.2, gh - 0.73, 0.1, u + 0.2, gh - 0.65, 0.12); }
       if (!tow && rand() < 0.3) { const u = rand() < 0.5 ? 0.35 : L - 0.35; Lc.box(IR, u - 0.02, 3.3, 0.0, u + 0.02, 3.5, 0.75); Lc.box(IR, u - 0.015, 3.5, 0.7, u + 0.015, 4.0, 0.74); Lc.add('lamp_glass', lathe([[0.001, 0], [0.1, 0.05], [0.12, 0.2], [0.001, 0.28]], 6, null, u, 3.1, 0.72)); }

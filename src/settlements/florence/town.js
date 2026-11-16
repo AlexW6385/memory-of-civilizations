@@ -47,6 +47,17 @@ function enterable(all) {
   seen.clear();
   for (const l of [...botteghe].sort((a, b) => Math.min(dist(a, mc[0], mc[1]), dist(a, A[0], A[2]) + 40) - Math.min(dist(b, mc[0], mc[1]), dist(b, A[0], A[2]) + 40))) { if (out.has(l) || seen.has(l.trade) || out.size >= 18) continue; seen.add(l.trade); out.set(l, l.trade); }
   take([...ok].filter((l) => l.kind === 'casa').sort((a, b) => dist(a, mc[0], mc[1]) - dist(b, mc[0], mc[1])), 2, 'home');
+  // beyond the first 120 m: a house or workshop in about every 40 m cell of the town, so that the streets away from the arrival
+  // are lived in too (homes with a hearth room or a kitchen; the spice shops as apothecaries or spice sellers, the cloth shops as weavers' or drapers'; the other trades as they are)
+  const cells = new Map(), far = [...ok].filter((l) => !out.has(l) && dist(l, A[0], A[2]) >= 120 && dist(l, A[0], A[2]) < 340 && Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) < 330);
+  for (const l of far) {
+    const cx = Math.floor((l.rect[0] + l.rect[2]) / 80), cz = Math.floor((l.rect[1] + l.rect[3]) / 80);
+    for (const [dx, dz] of [[0, 0]]) { const k = `${cx + dx},${cz + dz},${l.kind}`; if (!cells.has(k)) cells.set(k, l); }
+  }
+  for (const l of cells.values()) {
+    const odd = l.seed % 2 === 1;
+    out.set(l, l.kind === 'bottega' ? (l.trade === 'spice' && !odd ? 'apothecary' : l.trade === 'cloth' && !odd ? 'weaver' : l.trade) : odd ? 'kitchen' : 'home');
+  }
   return out;
 }
 
