@@ -16,6 +16,7 @@ import { novella } from './novella.js';
 import { bottega, tintoria, tiratoio } from './craft.js';
 import { casa } from './casa.js';
 import { campanileDetail } from './campanile.js';
+import { drumDetail, lantern } from './dome.js';
 
 const M = 'marble', G = 'verde_antico', R = 'roof_tile', ST = 'limestone_yellow';
 const oct = (bag, mat, cx, y, cz, r, h) => bag.add(mat, lathe([[r, 0], [r, h], [0.001, h]], 8, null, cx, y, cz));
@@ -115,13 +116,11 @@ function duomo(el, { bag, col }) {
   // the drum with its round windows, the dome in eight ribbed sails, the lantern
   const dy = y + H + 4;
   if (!IN) oct(TB, M, cx, y + H, cz, R0 + 1.5, 13);
-  for (let k = 0; k < 8; k++) { const a = (k + 0.5) / 8 * Math.PI * 2; TB.add('opening', box(cx + Math.cos(a) * (R0 + 1.55) - 1.5, dy + 3, cz + Math.sin(a) * (R0 + 1.55) - 1.5, cx + Math.cos(a) * (R0 + 1.55) + 1.5, dy + 6, cz + Math.sin(a) * (R0 + 1.55) + 1.5)); }
+  drumDetail(TB, cx, cz, R0, dy);
   const dome = [[R0 + 1, 0], [R0 + 0.6, R0 * 0.35], [R0 * 0.92, R0 * 0.62], [R0 * 0.72, R0 * 0.88], [R0 * 0.42, R0 * 1.08], [R0 * 0.16, R0 * 1.18]];
   TB.add(R, lathe(dome, 8, null, cx, y + H + 13, cz));
   for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; for (let i = 0; i + 1 < dome.length; i++) { const [r0, h0] = dome[i], [r1, h1] = dome[i + 1]; const g = box(-0.7, 0, -0.7, 0.7, Math.hypot(r1 - r0, h1 - h0) + 0.3, 0.7); g.rotateZ(Math.atan2(r0 - r1, h1 - h0)); g.translate(r0 + 0.2, h0, 0); g.rotateY(-a); g.translate(cx, y + H + 13, cz); TB.add(M, g); } }
-  const ly = y + H + 13 + R0 * 1.18;
-  oct(TB, M, cx, ly, cz, R0 * 0.18, 9); TB.add(M, lathe([[R0 * 0.2, 0], [0.4, 7], [0.001, 8]], 8, null, cx, ly + 9, cz));
-  bag.add('gilt_bronze', lathe([[0.9, 0], [0.9, 0.3], [0.001, 1.8]], 12, null, cx, ly + 17, cz));
+  lantern(TB, bag, cx, cz, y + H + 13 + R0 * 1.18, R0);
   if (IN) crossingHollow(bag, col, cx, cz, y, H, R0, apses);
 }
 
