@@ -323,7 +323,7 @@ Targets on the author's machine (Apple M2, 8 GB). Automatic quality settles ther
 
 Replace these lines, never append to them; keep them few.
 
-- v12.2 (2026-11-14): the solid pass (CHANGELOG): every settlement scanned by `tools/float-check` and corrected for hanging geometry, missing roofs, invisible walls and walls walked through; the draw range half as far again; the tour with a caption, a walk and a pause; the 45 s film. Not looked at one by one in the browser: the pieces the pass added. Still open: a walker stops about 0.9 m short of a wall under an eave with a plinth; the backs of Petra's rock walls and Kakadu's rounded rocks collide wider than they are drawn.
+- v12.2 (2026-11-14): the solid pass (CHANGELOG): every settlement scanned by `tools/float-check` and corrected for hanging geometry, missing roofs, invisible walls and walls walked through; the draw range half as far again; the tour with a caption, a walk and a pause; the 45 s film. Not looked at one by one in the browser: the pieces the pass added. Still open: the backs of Petra's rock walls and Kakadu's rounded rocks collide wider than they are drawn.
 - v12.0 (2026-11-12): 94 settlements stand, each reviewed at its arrival in the author's Chrome (§4.4, §5). **Still below §5:** ordinary houses beyond the first 120 m are mostly shut; the fronts vary by add-ons in several; Barcelona's arrival is over the frame budget (about 550 draws, 5.4 M triangles, 55 fps on an M2) and its tower slots are painted, not open; Kaifeng holds 60 fps but is the slowest to load (about 30 s cold), and its outer quarters are plain shells. The baked light and the impostors are current; every walk route passes.
 - **Next:** a second browser tour beyond the arrivals (the first 300 m of each), and the phone.
 

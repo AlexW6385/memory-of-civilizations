@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.4 — up to the wall (2026-11-16)
+
+The walker now comes right up to a wall under an eave instead of stopping at the edge of the half-metre cell the wall stands in (it stopped up to 0.7 m short): the top field records where in each cell its walls stand (`box`, `src/core/collide.js`). In Suzhou the places where one was stopped by nothing drawn fell from 411 to 257 cells.
+
 ## v12.3 — the tour again (2026-11-15)
 
 A visit is the arrival view under its caption (3 s), a slow stroll of a few seconds by whichever way is clear, a lift-off from rest, and one even turn round the town on a ring at about 0.32 R (it was 0.4 R), 6 m over the roofs it passes (it was 8 m). A glide to the landmark's way in and a walk along it were tried and taken out: they did not look natural.

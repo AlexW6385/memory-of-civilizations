@@ -141,7 +141,12 @@ export class CollisionWorld {
           const b0 = Math.max(0, Math.floor((y0 - base) / 0.5)), b1 = Math.floor((y1 - base) / 0.5);
           if (b1 > 31) return true;
           let m = 0; for (let b = b0; b <= b1; b++) m |= 1 << b;
-          if (T.steep[o] & m) return true;
+          if (T.steep[o] & m) {
+            // (only where those faces stand in the cell: one comes up to a wall, not to its cell's edge)
+            if (!T.box) return true;
+            const fx = ((x + dx - T.x0) / T.res - i) * 255, fz = ((z + dz - T.z0) / T.res - j) * 255, pad = 0.04 / T.res * 255;
+            if (fx >= T.box[o * 4] - pad && fx <= T.box[o * 4 + 1] + pad && fz >= T.box[o * 4 + 2] - pad && fz <= T.box[o * 4 + 3] + pad) return true;
+          }
         }
       }
     }
@@ -258,6 +263,14 @@ export async function topField(parts, res = 0.5, skip = ['water', 'glass_outer',
   // the floor and nothing stands at the body's height, the top is overhead (an awning, a beam, a single
   // sheet of roof) and one walks under it (see inShell).
   const steep = new Uint32Array(w * h);
+  // and where in the cell they stand: the box round them, in 255ths of the cell (x0, x1, z0, z1)
+  const box = new Uint8Array(w * h * 4);
+  for (let o = 0; o < w * h; o++) { box[o * 4] = 255; box[o * 4 + 2] = 255; }
+  const grow = (o, i, j, x, z) => {
+    const fx = Math.min(1, Math.max(0, (x - x0) / res - i)) * 255, fz = Math.min(1, Math.max(0, (z - z0) / res - j)) * 255;
+    if (fx < box[o * 4]) box[o * 4] = Math.floor(fx); if (fx > box[o * 4 + 1]) box[o * 4 + 1] = Math.ceil(fx);
+    if (fz < box[o * 4 + 2]) box[o * 4 + 2] = Math.floor(fz); if (fz > box[o * 4 + 3]) box[o * 4 + 3] = Math.ceil(fz);
+  };
   const band = (o, ya, yb) => {
     const base = Number.isFinite(under[o]) ? under[o] : data[o] - 16;
     const b0 = Math.max(0, Math.floor((ya - base) / 0.5)), b1 = Math.min(31, Math.floor((yb - base) / 0.5));
@@ -278,16 +291,22 @@ export async function topField(parts, res = 0.5, skip = ['water', 'glass_outer',
       for (const [px, pz, qx, qz] of [[ax, az, bx, bz], [bx, bz, cx, cz], [cx, cz, ax, az]]) {
         const n = Math.max(1, Math.ceil(Math.hypot(qx - px, qz - pz) / (res * 0.5)));
         for (let e = 0; e <= n; e++) {
-          const i = Math.floor((px + (qx - px) * e / n - x0) / res), j = Math.floor((pz + (qz - pz) * e / n - z0) / res);
+          const sx = px + (qx - px) * e / n, sz = pz + (qz - pz) * e / n;
+          const i = Math.floor((sx - x0) / res), j = Math.floor((sz - z0) / res);
           if (i < 0 || j < 0 || i >= w || j >= h) continue;
           const o = j * w + i;
           if (o !== last) { band(o, ya, yb); last = o; }
+          // (this point, and the points before and after it brought to the cell's edge: the piece of
+          // the edge that lies in the cell)
+          grow(o, i, j, sx, sz);
+          if (e > 0) grow(o, i, j, px + (qx - px) * (e - 1) / n, pz + (qz - pz) * (e - 1) / n);
+          if (e < n) grow(o, i, j, px + (qx - px) * (e + 1) / n, pz + (qz - pz) * (e + 1) / n);
         }
       }
       if ((k & 1023) === 0 && performance.now() - t > 8) { await new Promise((r) => setTimeout(r, 0)); t = performance.now(); }
     }
   }
-  return { x0, z0, res, w, h, data, under, dn, steep };
+  return { x0, z0, res, w, h, data, under, dn, steep, box };
 }
 
 /**
