@@ -14,6 +14,7 @@
 
 import { box, lathe, place, fromTriangles } from '../../core/geom.js';
 import * as F from './furnish.js';
+import { houseRoom, houseUpper, houseStairs, householdOf } from './household.js';
 
 const R = 'sandstone_red';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -50,8 +51,9 @@ export function layoutOf(el) {
   const mat = el.wash ?? WASHES[q < 0.2 ? 0 : q < 0.4 ? 1 : q < 0.55 ? 2 : q < 0.75 ? 3 : q < 0.9 ? 4 : 5];
   const variant = shop ? (r() < 0.25 ? 'loggia' : 'jharokha') : (r() < 0.35 ? 'plain' : 'jharokha');
   const dx = shop ? 0 : Math.max(-hw + 1.6, Math.min(hw - 1.6, (r() - 0.5) * (W - 3.4)));
-  const enter = shop || (r() < 0.55 && D >= 9.5 && W >= 5.4);
-  return { f, W, D, hw, shop, st, H: FH + (st - 1) * UH, mat, accent: mat === 'sandstone_red' ? 'marble' : R, variant, dx, enter, sx: r() < 0.5 ? -1 : 1, chh: r() < 0.4 && W > 6.5, dome: r() < 0.6, trade: shop ? GOODS[(el.seed + 0) % 6] : null, r };
+  const enter = shop || (r() < 0.78 && D >= 9 && W >= 5.2);
+  const rd = rng(((el.seed || 1) * 13 + 1) >>> 0)(), door = rd < 0.34 ? 'corbel' : rd < 0.52 && W >= 6.4 ? 'porch' : 'lintel';
+  return { f, W, D, hw, shop, st, H: FH + (st - 1) * UH, mat, accent: mat === 'sandstone_red' ? 'marble' : R, variant, dx, enter, door, kind: shop ? null : householdOf(el.seed | 0), sx: r() < 0.5 ? -1 : 1, chh: r() < 0.4 && W > 6.5, dome: r() < 0.6, trade: shop ? GOODS[(el.seed + 0) % 6] : null, r };
 }
 
 /** A quad strip of cloth sloping from (x, y0, z0) to (x, y1, z1), width w, both faces. */
@@ -118,8 +120,19 @@ export function townHouse(el, { bag, col }) {
     const wx = dx > 0 ? -hw + (dx + hw) / 2 : hw - (hw - dx) / 2;
     if (Math.abs(wx - dx) > 2.2) holes.push([wx - 0.35, wx + 0.35, 1.5, 2.3]);
     frontWall(0, FH, holes);
-    slab(FH, false);
-    if (st > 1) { B.add(mat, box(-hw, FH, -D, hw, H, 0)); C.rect([-hw, -D, hw, 0], FH, H); }
+    slab(FH, st > 1);
+    if (st > 1) {
+      // the room over it, reached by the stair at the back left: its front wall cut for latticed windows, clear of the jharokha; a third storey stays solid
+      const HL = FH + UH, wh = [];
+      roomWalls(FH, HL);
+      for (let x = -hw + 1.3; x < hw - 0.8; x += 2.5) if (Math.abs(x - dx) >= (variant === 'plain' ? 1.9 : 2.1)) wh.push([x - 0.4, x + 0.4, FH + 0.75, FH + 2.1]);
+      frontWall(FH, HL, wh);
+      if (st === 3) { B.add(mat, box(-hw, HL, -D, hw, H, 0)); C.rect([-hw, -D, hw, 0], HL, H); }
+      B.add(mat, box(-hw + T, HL - 0.25, -D + T, hw - T, HL, -0.5)); C.floor([-hw + T, -D + T, hw - T, -0.5], HL);
+      for (let z = -D + T + 0.9; z < -1.0; z += 1.1) B.add('wood_dark', box(-hw + T, HL - 0.4, z - 0.07, hw - T, HL - 0.25, z + 0.07));
+      houseStairs(B, C, L, ground); houseUpper(B, C, L, el, FH);
+    }
+    houseRoom(B, C, L, el, ground, L.kind);
   } else {
     B.add(mat, box(-hw, 0, -D, hw, H, 0));
     C.rect([-hw, -D, hw, 0], 0, H);
@@ -144,6 +157,12 @@ export function townHouse(el, { bag, col }) {
       B.add('wood_dark', box(dx - 0.75, 0, -0.5, dx + 0.75, 0.04, -0.02));
     }
     B.add(R, box(dx - 1.0, 0, 0, dx + 1.0, 0.15, 0.45));
+    // the door's head by rule: a plain lintel, stepped corbels of sandstone under it, or a porch (deorhi) on two posts
+    if (L.door === 'corbel') for (const s of [-1, 1]) for (let i = 0; i < 3; i++) B.add(R, box(Math.min(dx + s * 0.75, dx + s * (0.75 - 0.13 * (i + 1))), 2.1 + i * 0.1, 0.0, Math.max(dx + s * 0.75, dx + s * (0.75 - 0.13 * (i + 1))), 2.2 + i * 0.1, 0.12));
+    if (L.door === 'porch') {
+      B.add(R, box(dx - 1.2, 2.75, 0.65, dx + 1.2, 2.9, 1.0)); B.add(R, box(dx - 1.3, 0, 0.45, dx + 1.3, 0.12, 1.05));
+      for (const s of [-1, 1]) { B.add(R, lathe([[0.15, 0], [0.1, 0.12], [0.09, 0.5], [0.09, 2.0], [0.14, 2.2], [0.17, 2.3], [0.17, 2.75]], 8, null, dx + s * 1.1, 0.12, 0.85)); C.circle(dx + s * 1.1, 0.85, 0.17, 0, 2.9); }
+    }
     // a little chhajja over the door on two brackets, a lattice window beside it
     B.add(R, box(dx - 1.2, 2.75, 0, dx + 1.2, 2.9, 0.65));
     for (const s of [-1, 1]) B.add(R, box(dx + s * 0.95 - 0.07, 2.35, 0, dx + s * 0.95 + 0.07, 2.75, 0.4));

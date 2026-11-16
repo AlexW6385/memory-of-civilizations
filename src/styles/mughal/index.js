@@ -377,6 +377,41 @@ function minaret(bag, col, x, y, z, h, r) {
 }
 
 /**
+ * guldasta: the ornamental spire that ends a shaft of the tomb's corners and the minarets' kiosks (docs/settlements/mughal-agra.md §4b):
+ * a moulded base, a shaft with a ring, a collar of lotus petals, a slimmer shaft, a small bulbous cap, a gilt finial. k scales it (k = 1: 6.3 m).
+ */
+function guldasta(bag, x, y, z, k = 1) {
+  const L = (prof, seg, mod, dy = 0) => lathe(prof.map(([r, h]) => [r * k, h * k]), seg, mod, x, y + dy * k, z);
+  bag.add(W, L([[0.95, 0], [0.95, 0.3], [0.8, 0.45], [0.66, 0.5]], 12, null));
+  bag.add(W, L([[0.62, 0.5], [0.54, 2.3]], 12, null));
+  bag.add(W, L([[0.54, 2.2], [0.72, 2.28], [0.72, 2.44], [0.54, 2.5]], 12, null));
+  // the lotus collar: twelve petals, their tips pointing up
+  bag.add(W, L([[0.5, 2.5], [0.88, 2.85], [0.9, 3.2], [0.72, 3.45], [0.44, 3.55]], 24, (th, i) => (i === 1 || i === 2 ? 1 + 0.07 * Math.cos(12 * th) : i === 3 ? 1 + 0.03 * Math.cos(12 * th) : 1)));
+  bag.add(W, L([[0.42, 3.55], [0.36, 4.5], [0.5, 4.62]], 12, null));
+  bag.add(W, L([[0.5, 4.6], [0.64, 4.85], [0.46, 5.2], [0.18, 5.45], [0.001, 5.55]], 12, null));
+  bag.add('gilt_bronze', L([[0.001, 5.5], [0.05, 5.5], [0.05, 5.95], [0.1, 6.05], [0.04, 6.15], [0.001, 6.35]], 6, null));
+}
+
+/**
+ * The tomb's roofline (docs/settlements/mughal-agra.md §4b): over every face a parapet of white marble with a dark
+ * line and a cap, along it a row of lotus buds (the faces' crest); the guldastas stand on the corners of the chamfers.
+ */
+function tombRoofline(bag, P, y, H) {
+  for (let k = 0; k < 8; k++) {
+    const a = P[k], b = P[(k + 1) % 8], L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
+    bag.add(W, orientedBox(a, b, 2.5, y + H, y + H + 0.6, 0));
+    bag.add('marble_dark', orientedBox(a, b, 2.56, y + H + 0.3, y + H + 0.37, 0));
+    bag.add(W, orientedBox(a, b, 2.8, y + H + 0.6, y + H + 0.78, 0));
+    const n = Math.max(2, Math.floor((L - 2.6) / 1.45)), step = (L - 2.6) / n;
+    for (let i = 0; i <= n; i++) {
+      const s = 1.3 + i * step;
+      bag.add(W, lathe([[0.001, 0], [0.3, 0], [0.3, 0.1], [0.2, 0.28], [0.27, 0.48], [0.12, 0.78], [0.001, 1.02]], 8, null, a[0] + ux * s, y + H + 0.78, a[1] + uz * s));
+    }
+  }
+  for (const p of P) guldasta(bag, p[0], y + H + 0.78, p[1], 1);
+}
+
+/**
  * mausoleum: the tomb { c, y (the plinth's top), a (half-width of the square), chamfer, h (the
  * walls' height), dome: { r, h, drum } }: four faces with their iwans, four chamfered corners with
  * smaller iwans, the drum and the onion dome, the four chhatris.
@@ -397,7 +432,10 @@ function mausoleum(el, { bag, col }) {
   dome(bag, W, cx, y + H + drum + 0.8, cz, dr, dh);
   for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) chhatri(bag, null, cx + sx * (A - C) * 0.75, y + H, cz + sz * (A - C) * 0.75, 3.4, 4.6, 8);
   // pinnacles at the corners of the chamfers
-  for (const p of P) bag.add(W, lathe([[0.7, 0], [0.55, H + 4 - y + y], [0.001, H + 5.5]], 8, null, p[0], y, p[1]));
+  for (const p of P) bag.add(W, lathe([[0.7, 0], [0.62, H + 0.1]], 8, null, p[0], y, p[1]));
+  tombRoofline(bag, P, y, H);
+  // the lotus at the dome's foot: a ring of twenty-four petals round the drum's cap, standing out of the dome's curve and drawn back into it
+  bag.add(W, lathe([[dr, -0.05], [dr * 1.09, 0.45], [dr * 1.11, 0.95], [dr * 1.07, 1.8], [dr * 1.045, 2.6]], 48, (th, i) => (i >= 1 && i <= 3 ? 1 + 0.025 * Math.cos(24 * th) : 1), cx, y + H + drum + 0.8, cz));
 }
 
 /**
@@ -755,7 +793,8 @@ function greatGate(el, { bag, col }) {
     col.rect([cx - w, cz - d, cx - w * 0.3, cz + d], y, y + h); col.rect([cx + w * 0.3, cz - d, cx + w, cz + d], y, y + h);
   }
   bag.add(R, box(cx - w * 0.3, y + h * 0.78, cz - d + 1.2, cx + w * 0.3, y + h, cz + d - 1.2));
-  for (let i = 0; i < 11; i++) chhatri(bag, null, cx - w * 0.75 + i * w * 1.5 / 10, y + h, cz + d - 1.2, 0.9, 1.6, 6, W, W);
+  // the crown: eleven small domed kiosks along each face's wall top, twenty-two in all
+  for (const sz of [-1, 1]) for (let i = 0; i < 11; i++) chhatri(bag, null, cx - w * 0.75 + i * w * 1.5 / 10, y + h, cz + sz * (d - 1.2), 0.9, 1.6, 6, W, W);
   for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
     bag.add(R, lathe([[2.2, 0], [2, h + 2]], 8, null, cx + sx * w, y, cz + sz * d)); col.circle(cx + sx * w, cz + sz * d, 2.2, y, y + h + 2);
     chhatri(bag, null, cx + sx * w, y + h + 2, cz + sz * d, 1.8, 2.8, 8, R, W);
@@ -998,6 +1037,67 @@ function fountain(bag, x, z, y0, y, h = 1.6) {
   // the jet: a white column of broken water, spreading into a plume that falls back
   bag.add('water_jet', lathe([[0.045, 0], [0.035, h * 0.5], [0.025, h * 0.85], [0.07, h * 0.93], [0.11, h * 0.9], [0.05, h * 0.97], [0.001, h]], 8, null, x, y0 + hb + 0.14, z));
 }
+/**
+ * plinth_dado: the carved dado of the tomb's plinth (docs/settlements/mughal-agra.md §4c): on each face of the square plinth
+ * { rect, y0, y1, skip } a base moulding, pilasters every 5 m between them panels framed in dark stone with a flowering
+ * plant in relief, a coping band at the top; `skip`: a face's [lo, hi] range of u (metres along it from the middle) kept
+ * clear (the stairs). Everything stands on the terrace and on the moulding, nothing floats.
+ */
+function plinthDado(el, { bag }) {
+  const [x0, z0, x1, z1] = el.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, hx = (x1 - x0) / 2, hz = (z1 - z0) / 2, y0 = el.y0, V = el.y1 - el.y0;
+  const faces = [{ n: [0, 1], t: [1, 0], h: hz, key: 's' }, { n: [0, -1], t: [-1, 0], h: hz, key: 'n' }, { n: [1, 0], t: [0, 1], h: hx, key: 'e' }, { n: [-1, 0], t: [0, -1], h: hx, key: 'w' }];
+  const M = 'marble_smooth', DK = 'marble_dark';
+  for (const f of faces) {
+    const skip = el.skip?.[f.key];
+    const slab = (m, u0, u1, v0, v1, o0, o1) => {
+      const P = (u, o) => [cx + f.t[0] * u + f.n[0] * (f.h + o), cz + f.t[1] * u + f.n[1] * (f.h + o)], a = P(u0, o0), b = P(u1, o1);
+      bag.add(m, box(Math.min(a[0], b[0]), y0 + v0, Math.min(a[1], b[1]), Math.max(a[0], b[0]), y0 + v1, Math.max(a[1], b[1])));
+    };
+    const E = 42;
+    slab(M, -E, E, 0, 0.45, -0.01, 0.2); slab(M, -E, E, 0.45, 0.6, -0.01, 0.12);
+    slab(M, -E, E, V - 0.75, V, -0.01, 0.2); slab(DK, -E, E, V - 0.82, V - 0.75, 0, 0.17); slab(M, -E, E, V - 0.9, V - 0.82, -0.01, 0.12);
+    for (let k = 0; k <= 15; k++) {
+      const u = -37.5 + k * 5;
+      if (skip && u + 0.25 > skip[0] && u - 0.25 < skip[1]) continue;
+      slab(M, u - 0.25, u + 0.25, 0.6, V - 0.9, -0.01, 0.15);
+    }
+    for (let k = 0; k < 15; k++) {
+      const u0 = -37.5 + k * 5 + 0.25, u1 = u0 + 4.5, pc = (u0 + u1) / 2;
+      if (skip && u1 + 0.25 > skip[0] && u0 - 0.25 < skip[1]) continue;
+      const vb = 0.95, vt = V - 1.25, bi = 0.3;
+      // the frame in dark stone, then the plant: a stem, four pairs of stepped leaves, a flower of eight petals
+      slab(DK, u0 + bi, u1 - bi, vb, vb + 0.06, 0, 0.04); slab(DK, u0 + bi, u1 - bi, vt - 0.06, vt, 0, 0.04);
+      slab(DK, u0 + bi, u0 + bi + 0.06, vb + 0.06, vt - 0.06, 0, 0.04); slab(DK, u1 - bi - 0.06, u1 - bi, vb + 0.06, vt - 0.06, 0, 0.04);
+      slab(M, pc - 0.04, pc + 0.04, vb + 0.3, vt - 1.0, 0, 0.05);
+      for (let i = 0; i < 4; i++) for (const sd of [-1, 1]) for (let j = 0; j < 3; j++) {
+        const va = vb + 0.55 + i * 0.5 + j * 0.07, ua = pc + sd * (0.06 + j * 0.2);
+        slab(M, Math.min(ua, ua + sd * 0.2), Math.max(ua, ua + sd * 0.2), va, va + 0.07, 0, 0.05);
+      }
+      const fv = vt - 0.62;
+      for (let q = 0; q < 8; q++) { const an = q / 8 * Math.PI * 2, uu = pc + Math.cos(an) * 0.26, vv = fv + Math.sin(an) * 0.26; slab(M, uu - 0.07, uu + 0.07, vv - 0.07, vv + 0.07, 0, 0.05); }
+      slab(M, pc - 0.08, pc + 0.08, fv - 0.08, fv + 0.08, 0, 0.07);
+    }
+  }
+}
+
+/**
+ * plinth_floor: the paving of the plinth's top (docs/settlements/mughal-agra.md §4c): white marble octagons with small squares of red sandstone
+ * between them, set flush { rect, y, keep: [x0, z0, x1, z1] (the tomb's foot), circles: [[x, z, r]] (the minarets) }.
+ */
+function plinthFloor(el, { bag }) {
+  const [x0, z0, x1, z1] = el.rect, p = el.pitch ?? 2.4, hd = p * 0.2929, y = el.y + 0.012, tris = [];
+  for (let i = 0; ; i++) {
+    const x = x0 + 1.2 + (i + 0.5) * p; if (x > x1 - 1.0) break;
+    for (let j = 0; ; j++) {
+      const z = z0 + 1.2 + (j + 0.5) * p; if (z > z1 - 1.0) break;
+      if (x > el.keep[0] && x < el.keep[2] && z > el.keep[1] && z < el.keep[3]) continue;
+      if (el.circles.some(([cx, cz, r]) => Math.hypot(x - cx, z - cz) < r + hd)) continue;
+      tris.push(...F.flatUp([[x + hd, z], [x, z + hd], [x - hd, z], [x, z - hd]], y).attributes.position.array);
+    }
+  }
+  bag.add(R, fromTriangles(tris));
+}
+
 registerStyle('mughal', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
@@ -1006,6 +1106,7 @@ registerStyle('mughal', {
     minaret: (el, { bag, col }) => minaret(bag, col, el.c[0], el.y, el.c[1], el.h, el.r),
     chhatri: (el, { bag, col }) => chhatri(bag, col, el.c[0], el.y, el.c[1], el.r, el.h, el.n ?? 8, el.mat ?? W, el.domeMat ?? W),
     fountains: (el, { bag }) => { for (const [x, z] of el.pts) fountain(bag, x, z, el.y0 ?? 0, el.y, el.h ?? 1.6); },
+    plinth_dado: plinthDado, plinth_floor: plinthFloor,
     red_hall: redHall, great_gate: greatGate, bazaar_row: bazaarRow, bazaar_gate: bazaarGate, mughal_wall: mughalWall, octa_tower: octaTower, haveli: townHouse, inlay_workshop: inlayWorkshop, katra, haveli_open: haveliOpen, garden_lodge: gardenLodge,
   },
   objects: {},

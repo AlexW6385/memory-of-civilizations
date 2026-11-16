@@ -4,7 +4,8 @@
 
 import { RADIUS, STREETS, FORECOURT, KATRAS, LODGES, HAVELI_OPEN, WORKSHOP, PLINTH, GATE, TERRACE, GARDEN, POOL, GWALKS, RIVER_Z, houses } from './layout.js';
 import { ground } from './ground.js';
-import { frameOf } from '../../styles/mughal/townhouse.js';
+import { frameOf, layoutOf } from '../../styles/mughal/townhouse.js';
+import { householdOf } from '../../styles/mughal/household.js';
 import { boatFloat } from '../../objects/index.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -209,6 +210,21 @@ export function life() {
     person(at(0, -len * 0.34), by + 0.12, rot + Math.PI, { man: true, pose: kind === 'barge' ? 'punt' : 'row', carry: kind === 'barge' ? 'punt' : 'oars', cloth: 'cloth_brown', cloth2: 'cloth_white', hat: 'turban', hatMat: 'cloth_white', over: 'none' });
     if (kind === 'barge') { for (const [lz, g] of [[len * 0.12, 'cloth_white'], [len * 0.2, 'cloth_ochre']]) L.push({ t: 'sacks', n: 3, at: at(0.2, lz), y: by + 0.1, rot, seed: Math.floor(rand() * 1e9), mat: g === 'cloth_white' ? 'linen' : 'sacking' }); }
     else person(at(0, len * 0.1), by + 0.12, rot, { man: true, pose: 'cross', cloth: 'cloth_white', cloth2: 'cloth_green', hatMat: 'cloth_red' });
+  }
+  // ── in the houses that stand open (§15): the woman at the hearth, the weaver at his loom, the embroiderer at his frame ──
+  { let n = 0;
+    for (const h of houses()) {
+      if (n >= 36 || h.shop || rand() < 0.5) continue;
+      const l = layoutOf(h); if (!l.enter) continue;
+      const kind = householdOf(h.seed | 0); if (kind === 'grain') continue;
+      const { f, hw, D, st, dx } = l, T = 0.4, back = -D + T, side = dx > 0 ? -1 : 1, ix1 = hw - T, fx0 = -hw + T + (st > 1 ? 1.35 : 0.15);
+      let lx, lz, o;
+      if (kind === 'hearth') { lx = side > 0 ? ix1 - 1.1 : fx0 + 1.1; lz = back + 1.45; o = { pose: 'squat', hat: 'veil', hair: 'long', over: 'none', beard: false, cloth: pick(WOMEN), cloth2: 'cloth_white' }; }
+      else if (kind === 'weaver') { lx = side > 0 ? ix1 - 1.1 : fx0 + 1.1; lz = back + 3.55; o = { man: true, pose: 'cross', cloth: 'cloth_white', cloth2: 'cloth_brown' }; }
+      else { lx = side > 0 ? ix1 - 1.5 : fx0 + 1.5; lz = back + 2.85; o = { man: true, pose: 'cross', cloth: 'cloth_white', cloth2: 'cloth_ochre' }; }
+      const [wx, wz] = f.pt(lx, lz);
+      person([wx, wz], kind === 'weaver' ? 0.32 : 0.04, f.yaw, o); n++;
+    }
   }
   return L;
 }

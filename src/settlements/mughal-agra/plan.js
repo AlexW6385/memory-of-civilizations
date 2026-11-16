@@ -10,6 +10,10 @@ const [tx0, tz0, tx1, tz1] = TERRACE.rect, ty = TERRACE.y;
 // the riverfront terrace of red sandstone, the plinth of marble, stairs up to it
 E.push({ t: 'block', walk: true, rect: TERRACE.rect, y0: -4, y1: ty, mat: 'sandstone_red' });
 E.push({ t: 'block', walk: true, rect: [PLINTH.c[0] - PLINTH.a, PLINTH.c[1] - PLINTH.a, PLINTH.c[0] + PLINTH.a, PLINTH.c[1] + PLINTH.a], y0: ty, y1: PLINTH.y, mat: 'marble' });
+// the plinth's carved dado (panels of flowering plants between pilasters, the stairs left clear) and the paving of its top
+{ const [pcx, pcz] = PLINTH.c, pa = PLINTH.a;
+  E.push({ t: 'plinth_dado', rect: [pcx - pa, pcz - pa, pcx + pa, pcz + pa], y0: ty, y1: PLINTH.y, skip: { s: [-6.2, 6.2] } });
+  E.push({ t: 'plinth_floor', rect: [pcx - pa, pcz - pa, pcx + pa, pcz + pa], y: PLINTH.y, keep: [pcx - 29.8, pcz - 29.8, pcx + 29.8, pcz + 29.8], circles: [-1, 1].flatMap((sx) => [-1, 1].map((sz) => [pcx + sx * (pa - 3), pcz + sz * (pa - 3), 4.4])) }); }
 E.push({ t: 'stairs', rect: [-6, PLINTH.c[1] + PLINTH.a, 6, PLINTH.c[1] + PLINTH.a + 9], y0: ty, y1: PLINTH.y, dir: 'n', mat: 'marble' });
 E.push({ t: 'stairs', rect: [-10, tz1, 10, tz1 + 4], y0: 0, y1: ty, dir: 'n', mat: 'sandstone_red' });
 // the mausoleum: 56.6 m square with chamfered corners, its dome rising 73 m above the plinth
