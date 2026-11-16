@@ -16,6 +16,8 @@ import { basilicaInterior, vestibule } from './interior.js';
 import { rive, rialto } from './rive.js';
 import { palazzo } from './palazzo.js';
 import { ponte, pozzo, squero } from './ponte.js';
+import { bellTower } from './campanile.js';
+import { venFacade } from './facade.js';
 import { venRoom, venFront } from './rooms.js';
 
 const M = 'marble', B = 'brick', L = 'lead', I = 'limestone';
@@ -100,20 +102,8 @@ function basilica(el, { bag, col, lights }) {
     bag.add('gilt_bronze', box(x - 0.08, y + H + 6.5 + r * 1.72, z - 0.08, x + 0.08, y + H + 8.5 + r * 1.72, z + 0.08));
   }
 }
-/** bell_tower: { c, s, h, y } — brick shaft with pilaster strips, the belfry's arches, the attic and the pyramidal green spire with its angel. */
-function bellTower(el, { bag, col }) {
-  const [x, z] = el.c, s = el.s ?? 12, h = el.h ?? 98, y = el.y ?? 0, sh = h * 0.5;
-  bag.add(B, box(x - s / 2, y - 0.5, z - s / 2, x + s / 2, y + sh, z + s / 2)); col.rect([x - s / 2, z - s / 2, x + s / 2, z + s / 2], y, y + h);
-  for (let k = -2; k <= 2; k++) for (const [ax, az] of [[1, 0], [0, 1]]) bag.add(B, box(x + (ax ? k * s / 5 - 0.3 : -s / 2 - 0.15), y, z + (az ? k * s / 5 - 0.3 : -s / 2 - 0.15), x + (ax ? k * s / 5 + 0.3 : s / 2 + 0.15), y + sh, z + (az ? k * s / 5 + 0.3 : s / 2 + 0.15)));
-  bag.add(I, box(x - s / 2 - 0.3, y + sh, z - s / 2 - 0.3, x + s / 2 + 0.3, y + sh + 1.2, z + s / 2 + 0.3));
-  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) bag.add(I, box(x + dx * s * 0.42 - 0.5, y + sh + 1.2, z + dz * s * 0.42 - 0.5, x + dx * s * 0.42 + 0.5, y + sh + 10, z + dz * s * 0.42 + 0.5));
-  bag.add(I, box(x - s / 2 - 0.3, y + sh + 10, z - s / 2 - 0.3, x + s / 2 + 0.3, y + sh + 11.5, z + s / 2 + 0.3));
-  bag.add(B, box(x - s / 2 + 0.5, y + sh + 11.5, z - s / 2 + 0.5, x + s / 2 - 0.5, y + sh + 19, z + s / 2 - 0.5));
-  bag.add('tile_green', frustum([x - s / 2 + 0.5, z - s / 2 + 0.5, x + s / 2 - 0.5, z + s / 2 - 0.5], y + sh + 19, y + h - 2, s / 2 - 0.6, s / 2 - 0.6, s / 2 - 0.6, s / 2 - 0.6));
-  bag.add('gilt_bronze', lathe([[0.4, 0], [0.3, 1.5], [0.001, 2.5]], 8, null, x, y + h - 2, z));
-}
 registerStyle('venetian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, basilica, bell_tower: bellTower, doges_palace: dogesPalace, procuratie: procuratieOld, clock_tower: clockTower, column_statue: columnStatue, gondola, palo, pennone, rive, rialto, palazzo, ponte, pozzo, squero, ven_room: venRoom, ven_front: venFront },
+  elements: { ...STYLES.qing.elements, basilica, bell_tower: bellTower, doges_palace: dogesPalace, procuratie: procuratieOld, clock_tower: clockTower, column_statue: columnStatue, gondola, palo, pennone, rive, rialto, palazzo, ponte, pozzo, squero, ven_room: venRoom, ven_front: venFront, ven_facade: venFacade },
   objects: {},
 });

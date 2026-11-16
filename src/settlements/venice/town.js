@@ -6,11 +6,22 @@ import { molo, doge, iconostasis, masts } from './plan.js';
 import { canalPlans } from './rialto.js';
 import { dressPlans } from './dress.js';
 import { roomPlans } from './rooms.js';
+import { frontPlans } from './fronts.js';
+import { inLot, wet } from './layout.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-120, -5], facing: 'e' } });
 export async function town() {
   const all = lots(), plans = [molo, doge, iconostasis, masts, ...canalPlans()], open = openLots(all, [ARRIVALS['venice'][0], ARRIVALS['venice'][2]], 26);
   [...open.keys()].forEach((l, i) => open.set(l, i % 4 === 0 ? 'inn' : 'home'));                 // 26 houses to enter: an inn in every fourth
+  // beyond the first 120 m: more houses to enter, spread over the islands by a rule (a hash of the seed, a free calle before the front), an inn in every fifth
+  const A = ARRIVALS['venice'], far = all.filter((l) => !open.has(l) && l.rect[2] - l.rect[0] >= 6 && Math.hypot((l.rect[0] + l.rect[2]) / 2 - A[0], (l.rect[1] + l.rect[3]) / 2 - A[2]) > 120 && Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) < 300 && (l.seed % 6) === 3);
+  let nf = 0;
+  for (const l of far) {
+    const s = l.front === 's' ? 1 : -1, zf = s > 0 ? l.rect[3] : l.rect[1];
+    if ([0.35, 0.5, 0.65].some((t) => { const x = l.rect[0] + (l.rect[2] - l.rect[0]) * t; return [1.0, 2.0].some((d) => inLot(x, zf + s * d, 0.1) || wet(x, zf + s * d) < 1.2); })) continue;
+    open.set(l, nf++ % 5 === 2 ? 'inn' : 'home');
+  }
   plans.push(...dressPlans());
+  plans.push(...frontPlans(open));
   plans.push(...roomPlans(open));
   plans.push(...lodTiles('venice-houses', 'vernacular', all.map((l) => ({ t: 'house_med', variant: 'venetian', ...l, ...(open.has(l) ? { open: true, use: open.get(l) } : {}) })), { R: RADIUS }));
   // the piazza and the piazzetta paved in herringbone brick, laid from 1264, in fields between bands of white
