@@ -34,6 +34,7 @@ export function mxPeople(el, ctx) {
     else if (who === 'featherer') L.figure({ ...base, dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_indigo', over: 'cape', pose: 'cross', hair: 'short', ...extra }, ctx);
     else if (who === 'sweeper') L.figure({ ...base, dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'none', hair: 'bun', carry: 'besom', ...extra }, ctx);
     else if (who === 'washer') L.figure({ ...base, dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_red', over: 'none', hair: 'bun', pose: 'squat', ...extra }, ctx);
+    else if (who === 'youth') L.figure({ ...base, dress: 'loincloth', cloth: 'cloth_white', cloth2: 'cloth_red', hair: 'short', carry: r() < 0.5 ? 'staff' : 'none', len: 1.7, staffMat: 'timber', ...extra }, ctx);
     else if (who === 'child') L.figure({ ...base, dress: 'loincloth', cloth: 'cloth_white', child: true, hair: 'short', ...extra }, ctx);
     else if (who === 'guard') L.figure({ ...base, dress: 'tunic', cloth: 'cloth_ochre', cloth2: 'cloth_red', over: 'cape', carry: 'staff', len: 1.9, staffMat: 'timber', hair: 'short', ...extra }, ctx);
     else if (who === 'noble') L.figure({ ...base, dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_indigo', over: 'cape', hair: 'short', skin: 'skin_medium', ...extra }, ctx);

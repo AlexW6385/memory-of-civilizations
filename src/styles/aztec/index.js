@@ -19,7 +19,7 @@ import { landing, fisherCanoe, tuleBeds, plazaDress } from './canal.js';
 import { courtHouse as courtHouse2, mxPyramid } from './palace.js';
 import { tianguis } from './market.js';
 import { mxDress } from './dress.js';
-import { eagleHouse, calmecac, coatepantli, enclosure, ehecatl, mxTemple, causewayStakes } from './precinct.js';
+import { eagleHouse, calmecac, coatepantli, enclosure, ehecatl, mxTemple, causewayStakes, strip, tlalocBrazier } from './precinct.js';
 
 const W = 'plaster_white', R = 'stucco_red', B = 'maya_blue';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -106,6 +106,66 @@ const techcatl = () => carved('techcatl', (k) => {
   k.fy('basalt', [-0.3, 0.3, -0.22, 0.22], [-0.3, 0.3, -0.05, 0.05], 0.55, 0.85);
 });
 
+
+/**
+ * A seated standard-bearer of stone (World History Encyclopedia / ancient-history-sites: seated male figures at the stairway
+ * entrances held standards and bark-paper banners), facing +z: a block, the figure cross-legged with his hands before him
+ * round the pole, the headband, the pole with a crossbar and the banner of amate paper hanging from it, striped.
+ */
+const standardBearer = (paint) => carved('tm-bearer:' + paint, (k) => {
+  const S = 'andesite';
+  k.bx(S, -0.42, 0.42, 0, 0.42, -0.42, 0.42);                                                       // the block he sits on
+  k.bx(S, -0.34, 0.34, 0.42, 0.62, -0.34, 0.34);                                                    // the crossed legs
+  k.bx(S, -0.26, 0.26, 0.62, 1.2, -0.2, 0.2);                                                       // the body
+  k.bx(S, -0.19, 0.19, 1.2, 1.55, -0.17, 0.17);                                                     // the head
+  k.bx(paint, -0.21, 0.21, 1.42, 1.5, -0.19, 0.19);                                                 // the headband
+  for (const sx of [-1, 1]) k.seg(S, [sx * 0.3, 1.1, 0], [sx * 0.1, 0.85, 0.3], 0.07, 0.07);          // the arms to the pole
+  k.bx('timber', -0.04, 0.04, 0.4, 3.2, 0.27, 0.35);                                                // the pole
+  k.bx('timber', -0.55, 0.55, 3.0, 3.07, 0.26, 0.36);                                               // the crossbar
+  k.bx('cloth_white', -0.5, 0.5, 1.85, 3.0, 0.3, 0.33);                                             // the banner of paper
+  for (const x of [-0.34, -0.06, 0.22]) k.bx(paint, x, x + 0.12, 1.9, 2.95, 0.33, 0.345);              // its stripes
+  k.bx(paint, -0.5, 0.5, 1.85, 1.95, 0.33, 0.345);
+});
+/** A relief serpent's body along a slope (kit frame: x along the face, y up the slope, z out), undulating, banded; `tilt` lays it back on the talud. */
+const reliefSerpent = (paint, len, tilt) => carved(`tm-relief:${paint}:${len}:${tilt.toFixed(3)}`, (k) => {
+  const n = Math.round(len / 0.45), P = (i) => [-len / 2 + i * len / n, 1.9 + 0.55 * Math.sin(i * 0.5)];
+  for (let i = 0; i < n; i++) {
+    const a = P(i), b = P(i + 1);
+    strip(k, paint, a, b, 0.17, -0.03, 0.09, 0.17);
+    if (i % 2 === 0) { const c = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; k.bx('paint_minoan_black', c[0] - 0.07, c[0] + 0.07, c[1] - 0.07, c[1] + 0.07, 0.085, 0.105); }   // the scales
+  }
+  for (const list of k.m.values()) for (const g of list) g.rotateX(-tilt);
+});
+
+/**
+ * The faces of the Templo Mayor's lowest terrace and the platform's edge: on the west face either side of the stairs the
+ * wall with serpent heads standing on plinths (Stage VI: part of the facade with a wall of three serpent heads) joined by serpents
+ * undulating along the face (Stage IV: the enlarged front platform decorated with undulating serpents), Tlaloc's blue on the
+ * north, Huitzilopochtli's ochre on the south; Tlaloc braziers along the first ledge (Stage IV: braziers of Tlaloc and
+ * Huitzilopochtli round the platform); the seated standard-bearers at the stairheads (ancient-history-sites, "Templo Mayor").
+ */
+function templeDress(bag, col, { cx, cz, H, a0, tH, ix, w1 }) {
+  const X = (y) => cx - a0 + ix * y / tH, tilt = Math.atan2(ix, tH);
+  for (const s of [-1, 1]) {
+    const tl = s < 0, paint = tl ? B : 'paint_ochre';
+    for (const zz of [24, 32, 40]) {
+      const z = cz + s * zz, hy = 1.0, xf = X(hy), sc = 0.8;
+      bag.add(W, box(xf - 1.75, 0, z - 0.72, xf + 0.9, hy, z + 0.72)); col.rect([xf - 1.75, z - 0.72, xf + 0.9, z + 0.72], 0, hy);
+      serpentHeadKit({ stone: W, goggles: tl, plumes: !tl }).emit(bag, xf + 0.3 - 0.7 * sc, hy, z, -1, 0, sc);
+    }
+    for (const zz of [28, 36]) reliefSerpent(paint, 6.2, tilt).emit(bag, cx - a0, 0, cz + s * zz, -1, 0);
+    for (const zz of [23, 29, 35, 41]) {
+      const x = cx - a0 + ix + 0.8, z = cz + s * zz;
+      tlalocBrazier().emit(bag, x, tH, z, -1, 0, 1.2); col.circle(x, z, 0.45, tH, tH + 1);
+    }
+  }
+  // the seated bearers at the stairheads, either side of each stair's top, facing the stair
+  for (const s of [-1, 1]) for (const e of [-1, 1]) {
+    const x = cx - w1 + 1.4, z = cz + s * 23 * 0.45 + e * 6.0;
+    standardBearer(s < 0 ? B : R).emit(bag, x, H, z, -1, 0, 1.15); col.circle(x, z, 0.5, H, H + 1.8);
+  }
+}
+
 /**
  * templo_mayor: { c, w (east–west), d (north–south), h, terraces, top: { w, d } }: the terraces, the
  * two stairways on the west, the balustrades and serpent heads, the two shrines and their braziers.
@@ -121,6 +181,7 @@ function temploMayor(el, { bag, col }) {
     col.floor([cx - a[0] + ix, cz - a[1] + iz, cx + a[0] - ix, cz + a[1] - iz], y1);
     bag.add(R, box(cx - a[0] + ix - 0.05, y1 - 0.6, cz - a[1] + iz - 0.05, cx + a[0] - ix + 0.05, y1 - 0.2, cz + a[1] - iz + 0.05));
   }
+  { const a = [w0, d0], b = [w0 - (w0 - w1) / n, d0 - (d0 - d1) / n]; templeDress(bag, col, { cx, cz, H, a0: a[0], tH: H / n, ix: a[0] - b[0] - 1.6, w1 }); }
   // the stairways on the west face, side by side: Tlaloc's (north) blue and white, Huitzilopochtli's
   // (south) red; their balustrades steepen into a dado near the top and end at the foot in serpent
   // heads — Tlaloc's goggled, Huitzilopochtli's feathered
