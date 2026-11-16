@@ -112,6 +112,10 @@ export function naraHall(el, ctx) {
         const ww = Math.min(L - 1.2, 3.6 * k), wh = Math.min(3.4 * k, H * 0.34), wy = y + H * 0.42;
         wallRun(A, B, [{ at: L / 2, w: ww, y0: wy, h: wh }], yb - 0.9);
         if (el.windows !== false) tangWindow({ at, axis, y: wy, w: ww, h: wh, th: TH }, ctx);
+        // the frame on the plaster (docs/settlements/nara.md §17): a stone dado along the foot of the wall and a red tie beam (nuki) above the window, each proud of the plaster
+        bag.add('granite_block', orientedBox(A, B, TH + 0.12, y, y + Math.min(0.9, wy - y - 0.3)));
+        const ry = wy + wh + 0.22, rh = Math.min(0.55, yb - 0.9 - ry - 0.06);
+        if (rh > 0.2) bag.add('timber_red', orientedBox(A, B, TH + 0.12, ry, ry + rh));
       }
     }
   };

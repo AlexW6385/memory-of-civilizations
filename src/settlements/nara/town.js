@@ -3,6 +3,7 @@
 // pagoda and golden hall; the East Market's square with stalls, mats, carts, sellers and buyers.
 import { lodTiles, openLots } from '../lod.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
+import { craftOf, WORKING } from '../../styles/nara/crafts.js';
 import { RADIUS, streets, lots, walls, yards, blocks, fences, gardens, MARKET, KOFUKU, height, serviceLots, lotPoint, SERVICE_LANE } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -94,14 +95,38 @@ function service() {
   return L;
 }
 
+/** The trades at work (docs/settlements/nara.md §17): a worker in the room of each open house of a trade, by a rule of its seed, and people at the wells. */
+function workers(open) {
+  const L = [], rand = rng(7533), seed = () => Math.floor(rand() * 1e9);
+  const CL = ['cloth_indigo', 'cloth_grey', 'cloth_brown', 'cloth_ochre', 'cloth_white', 'cloth_green'];
+  const SPOT = { weaver: [1.2, 2.2, -1, 'kneel'], smith: [1.4, 2.1, 1, 'stand'], lacquer: [0.9, 3.9, 1, 'cross'], farm: [1.6, 4.0, 1, 'stand'], potter: [1.2, 2.3, -1, 'squat'], straw: [1.2, 3.4, 1, 'cross'] };
+  for (const l of lots()) {
+    if (!open.has(l) || l.use || l.shop || l.seed % 4 === 0) continue;
+    const c = craftOf(l);
+    if (!WORKING.includes(c) || (l.seed >> 3) % 5 > 2) continue;
+    const [t, v, toward, pose] = SPOT[c];
+    const Lw = l.rect[2] - l.rect[0], nb = Math.max(2, Math.floor(Lw / 3.2)), du = (Math.floor(nb / 2) + 0.5) * Lw / nb, left = du > Lw / 2, T = 0.3;
+    const u = left ? T + 0.1 + t : Lw - T - 0.1 - t, [x, z] = lotPoint(l, u, v), door = l.front === 's' ? 1 : -1, dz = toward * door;
+    L.push({ t: 'figure', at: [x, z], y: 0.85, rot: Math.atan2(0, -dz), seed: seed(), dress: c === 'smith' ? 'trousers' : 'robe', skin: 'skin_light', hat: 'none', carry: 'none', hair: c === 'weaver' ? 'bun' : 'topknot', over: c === 'smith' ? 'apron' : 'sash', cloth: CL[Math.floor(rand() * 6)], cloth2: 'cloth_white', pose });
+  }
+  // at the wells of the blocks: a woman drawing water, a child, a porter resting his pole
+  for (const [x, z] of yards()) {
+    if (Math.hypot(x, z - 20) < 120) continue;
+    const a = rand() * 6.28;
+    L.push({ t: 'figure', at: [x + 1.3, z + 0.4], y: 0, rot: Math.PI / 2, seed: seed(), dress: 'robe', skin: 'skin_light', hat: 'none', carry: 'bundle', hair: 'bun', over: 'sash', cloth: CL[Math.floor(rand() * 6)], cloth2: 'cloth_white', pose: 'stand' });
+    L.push({ t: 'figure', at: [x - 1.5 * Math.cos(a), z - 1.5 * Math.sin(a)], y: 0, rot: a, seed: seed(), dress: 'robe', skin: 'skin_light', hat: rand() < 0.5 ? 'straw' : 'none', carry: 'pole', hair: 'topknot', over: 'sash', cloth: CL[Math.floor(rand() * 6)], cloth2: 'cloth_white', pose: 'talk' });
+  }
+  return L;
+}
+
 export async function town() {
-  const all = lots(), open = openLots(all, [ARRIVALS['nara'][0], ARRIVALS['nara'][2]], 30);
+  const all = lots(), open = openLots(all, [ARRIVALS['nara'][0], ARRIVALS['nara'][2]], 150);
   for (const l of serviceLots()) if (l.use) open.set(l, l.use);                                  // the eight houses of the temple's service quarter are always open
   const houses = all.map((l) => ({ t: 'nara_house', ...l, shop: l.use ? !!l.shop : l.shop || l.seed % 4 === 0, ...(open.has(l) ? { open: true } : {}) }));
   const wells = yards().map(([x, z]) => ({ t: 'well', at: [x, z], y: height(x, z) }));
   const plans = [...lodTiles('nara-houses', 'nara', houses, { R: RADIUS, entrance: { at: [0, 180], facing: 'n' } }), ...lodTiles('nara-wells', 'vernacular', wells, { R: RADIUS, entrance: { at: [0, 180], facing: 'n' } })];
   plans.push(...lodTiles('nara-plots', 'nara', [...fences().map((f) => ({ t: 'nara_fence', y: 0, ...f, at: f.pts[0] })), ...gardens().map((g) => ({ t: 'nara_garden', y: 0, ...g })), ...streets().map((r) => ({ t: 'nara_gutter', rect: r, y: 0 }))], { R: RADIUS, near: 130, entrance: { at: [0, 180], facing: 'n' } }));
-  plans.push(base('nara-fabric', 'nara', fabric()), base('nara-market', 'life', market()), base('nara-beasts', 'life', beasts()), base('nara-service', 'life', service()));
+  plans.push(base('nara-fabric', 'nara', fabric()), base('nara-market', 'life', market()), base('nara-beasts', 'life', beasts()), base('nara-service', 'life', service()), base('nara-workers', 'life', workers(open)));
   plans.push(base('nara-lane', 'nara', [[14, SERVICE_LANE[1], SERVICE_LANE[2], SERVICE_LANE[3]], [SERVICE_LANE[0], SERVICE_LANE[1], -14, SERVICE_LANE[3]]].map((rect) => ({ t: 'nara_gutter', rect, y: 0 }))));
   void blocks;
   return plans;

@@ -32,6 +32,15 @@ export function daibutsu(el, { bag, col }) {
     plate(out, [P(0, 0, 0), P(wid, 0.5, 0.3), P(wid * 0.95, 1.6, 0.75), P(wid * 0.5, 2.5, 1.05), P(0, hgt, 1.2), P(-wid * 0.5, 2.5, 1.05), P(-wid * 0.95, 1.6, 0.75), P(-wid, 0.5, 0.3)], [d[0], -0.35, d[1]], 0.14 * s);
     // the incised ribs of the petal
     limb2(out, P(0, 0.3, 0.25), P(0, hgt - 0.3, 1.18), 0.06 * s);
+    if (row === 0) {
+      // the engraving of the petal (docs/settlements/nara.md §17): Shaka preaching on a lotus seat inside a pointed oval, a small attendant either side, a row of small seated Buddhas above
+      const Q = (w, v) => P(w, v, 0.4 * v + 0.2), wb = (p, r, kz = 1) => { const g = lathe([[0.001, -r], [r * 0.75, -r * 0.65], [r, 0], [r * 0.75, r * 0.65], [0.001, r]], 6); g.scale(1, 1, kz); g.translate(p[0], p[1], p[2]); bag.add(M, g); };
+      const oval = []; for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; oval.push(Q(0.5 * Math.sin(a), 1.8 + 0.5 * Math.cos(a) * (Math.cos(a) > 0 ? 1.15 : 1))); }
+      for (let i = 0; i < 8; i++) limb2(out, oval[i], oval[(i + 1) % 8], 0.025 * s);
+      wb(Q(0, 1.55), 0.17 * s, 0.6); wb(Q(0, 1.82), 0.14 * s); wb(Q(0, 2.05), 0.085 * s);
+      for (const sd of [-1, 1]) { wb(Q(sd * 0.34, 1.7), 0.07 * s); wb(Q(sd * 0.34, 1.84), 0.045 * s); }
+      for (let i = -1; i <= 1; i++) { wb(Q(i * 0.36, 2.58), 0.055 * s); wb(Q(i * 0.36, 2.49), 0.065 * s, 0.6); }
+    }
   }
   col.circle(x, z, 9.2 * s, y0, y0 + T * s);
   const Y = T;                                                                // the figure sits on the throne
