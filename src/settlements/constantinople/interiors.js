@@ -19,17 +19,21 @@ const shopsOf = () => {
 };
 const specials = () => special();
 const HOUSES = ['home', 'tavern', 'bakery', 'weaver', 'home2', 'home3'];
+/** The outer lanes' working and family houses (layout.js SPECIAL w01…): the same builder, a trade by kind. */
+const OUTER = () => Object.keys(specials()).filter((k) => /^w\d+$/.test(k));
 
 export function interiorPlan() {
   const S = specials(), shops = shopsOf();
   const elements = [
-    ...HOUSES.filter((k) => S[k]).map((k, i) => ({ t: 'byz_home', rect: S[k].rect, y: S[k].y, seed: i + 1, variant: k === 'home2' || k === 'home3' ? 'home' : k })),
+    ...HOUSES.filter((k) => S[k]).map((k, i) => ({ t: 'cn_home', rect: S[k].rect, y: S[k].y, seed: i + 1, variant: k === 'home2' || k === 'home3' ? 'home' : k })),
+    ...OUTER().map((k, i) => ({ t: 'cn_home', rect: S[k].rect, y: S[k].y, seed: 100 + i * 37, variant: S[k].kind })),
     { t: 'byz_chapel', rect: S.chapel.rect, y: S.chapel.y },
     { t: 'byz_bath', rect: S.bath.rect, y: S.bath.y },
     ...shops.map((s) => ({ t: 'byz_shopfit', ...s })),
   ];
   const rooms = [
     ...HOUSES.filter((k) => S[k]).map((k) => ({ id: k === 'home' ? 'house' : k, rect: S[k].rect, y: S[k].y + 0.2, kind: 'house' })),
+    ...OUTER().map((k) => ({ id: `${S[k].kind}-${k}`, rect: S[k].rect, y: S[k].y + 0.2, kind: 'house' })),
     { id: 'chapel', rect: S.chapel.rect, y: S.chapel.y + 0.25, kind: 'hall' },
     { id: 'bath', rect: S.bath.rect, y: S.bath.y + 0.2, kind: 'hall' },
     { id: 'eirene', rect: [EIRENE[0] + 24.5, EIRENE[1] + 11.5, EIRENE[2] - 7.5, EIRENE[1] + 43.5], y: 0.1, kind: 'hall' },
@@ -64,6 +68,16 @@ export function interiorLife() {
     for (const [dx, dz, r] of [[2.8, 2.5, 0], [2.9, 4.2, Math.PI], [6.2, 6.6, 1.6], [6.0, 8.2, -1.6], [2.8, 6.6, 0.4]]) fig([a0 + dx, b0 + dz], Yt, r, { pose: 'sit', dress: rand() < 0.3 ? 'robe' : 'tunic', hat: 'none' }); }
   if (S.bakery) { const [a0, b0] = S.bakery.rect, Yb = S.bakery.y + 0.2; fig([a0 + 4.7, b0 + 3.0], Yb, 0, { dress: 'tunic', legs: 'hose', cloth: 'cloth_white', cloth2: 'cloth_white' }); fig([a0 + 4.0, b0 + 6.4], Yb, Math.PI, { dress: 'robe', hat: 'veil', cloth: pick(CL) }); }
   if (S.weaver) { const [a0, b0] = S.weaver.rect, Yw = S.weaver.y + 0.2; for (const dx of [2.6, 6.2]) fig([a0 + dx, b0 + 3.2], Yw, Math.PI, { dress: 'robe', hat: 'veil', cloth: pick(CL), pose: 'sit' }); fig([a0 + 4.4, b0 + 8.0], Yw, Math.PI, { dress: 'tunic', cloth: pick(CL) }); }
+  // the outer lanes' houses: the household at table or at its trade
+  for (const k of OUTER()) {
+    const sp = S[k], [a0, b0, , b1] = sp.rect, Yo = sp.y + 0.2, zz = (b0 + b1) / 2, at = { sit: (x, z, r, o = {}) => fig([a0 + x, b0 + z], Yo, r, { pose: 'sit', ...o }), st: (x, z, r, o = {}) => fig([a0 + x, b0 + z], Yo, r, o) };
+    if (sp.kind === 'home') { at.st(3.4, zz - b0 + 0.2, 0, { dress: 'robe', hat: 'veil', cloth: pick(CL), pose: 'sit' }); at.st(5.5 + 2.1, zz - b0 + 0.2, Math.PI, { dress: 'tunic', cloth: pick(CL), pose: 'sit' }); }
+    else if (sp.kind === 'tavern') { at.st(6.6, 14 - 2.8, Math.PI, { cloth: 'cloth_white', cloth2: 'cloth_brown' }); at.sit(2.8, 2.5, 0); at.sit(6.2, 6.6, 1.6); }
+    else if (sp.kind === 'bakery') { at.st(4.7, 3.0, 0, { cloth: 'cloth_white', cloth2: 'cloth_white' }); at.st(4.0, 6.4, Math.PI, { dress: 'robe', hat: 'veil', cloth: pick(CL) }); }
+    else if (sp.kind === 'weaver') { at.sit(2.6, 3.2, 0, { dress: 'robe', hat: 'veil', cloth: pick(CL) }); at.st(4.4, 8.0, Math.PI, { cloth: pick(CL) }); }
+    else if (sp.kind === 'potter') { at.sit(5.6, 4.1, 0, { cloth: 'cloth_brown', cloth2: 'cloth_brown' }); at.st(4.8, zz - b0 + 2.3, 0, { dress: 'robe', hat: 'veil', cloth: pick(CL) }); }
+    else if (sp.kind === 'smith') { at.st(4.6, zz - b0 + 0.6, 0, { cloth: 'cloth_brown', cloth2: 'cloth_grey', pose: 'stand' }); }
+  }
   const [cx0, cz0, cx1, cz1] = S.chapel.rect, Yc = S.chapel.y + 0.25, ccz = (cz0 + cz1) / 2;
   fig([cx1 - 5.2, ccz], Yc, Math.PI / 2, { dress: 'robe', cloth: 'cloth_black', cloth2: 'cloth_black', over: 'none' });
   for (let k = 0; k < 6; k++) { const x = cx0 + 3 + rand() * 6, z = ccz + (rand() - 0.5) * 7, woman = rand() < 0.5; fig([x, z], Yc, Math.PI / 2 + (rand() - 0.5) * 0.4, woman ? { dress: 'robe', hat: 'veil', cloth: pick(CL) } : { pose: rand() < 0.5 ? 'pray' : 'stand' }); }

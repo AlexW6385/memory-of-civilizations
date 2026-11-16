@@ -1,6 +1,7 @@
 // The houses of the first hill (docs/settlements/constantinople.md §11, §14): rows of tenements of the Roman kind sharing
 // their side walls along the lanes, balconies frequent (Zeno's law regulated them), walled gardens filling some blocks,
 // house-bridges, awnings and wall shrines in the lanes; in 100 m tiles, full near and in outline far.
+import { laneFountains } from './outerlife.js';
 import { RADIUS, lots, gardens, special, height, xl, zl, PX, PZ } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -30,7 +31,7 @@ export function laneKit() {
 export function townElements() {
   const S = special(), skip = new Set(Object.values(S));
   void skip;
-  const E = lots().map((l) => ({ t: 'byz_house', balcony: 0.55, ...l, storeys: undefined }));
+  const E = lots().map((l) => ({ t: 'cn_house', balcony: 0.55, ...l, storeys: undefined }));
   const fountainAt = [];
   for (const g of gardens()) {
     const e = { t: 'byz_walled_yard', rect: g.rect, y: Math.min(...[[g.rect[0], g.rect[1]], [g.rect[2], g.rect[3]]].map(([x, z]) => height(x, z))), seed: g.seed };
@@ -38,7 +39,7 @@ export function townElements() {
     E.push(e);
   }
   for (const [x, z, y] of fountainAt) E.push({ t: 'byz_fountain', at: [x, z], y, rot: Math.PI, kind: 'niche' });
-  E.push(...laneKit());
+  E.push(...laneKit(), ...laneFountains());
   return E;
 }
 /** The houses in 160 m tiles (the geometry budget counts a mesh per tile × material), each in full near and simple far (as src/settlements/lod.js). */
