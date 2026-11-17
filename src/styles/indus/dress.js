@@ -47,6 +47,21 @@ export function dressWall(F, rand, face, len, H, lowH, o = {}) {
   }
 }
 
+/**
+ * The chute of an upper room's bathroom on a street wall (docs §13: vertical pipes in the walls led to chutes opening onto the street): the funnel at the upper floor,
+ * the pipe down the face, a wet streak, the spout over a jar set into the ground. u along the back wall, D the lot's depth, H the wall's height.
+ */
+export function dressChute(F, rand, u, D, H) {
+  const m = faceMap(F, 'back'), b = (mat, s0, y0, d0, s1, y1, d1) => { const r = m(s0, d0, s1, d1); F.b(mat, r[0], y0, r[1], r[2], y1, r[3], false); };
+  b('plaster_damp', u - 0.24, 0.95, 0, u + 0.24, H - 0.2, 0.036);
+  b('terracotta', u - 0.07, 0.62, 0, u + 0.07, H - 0.12, 0.063);
+  b('terracotta', u - 0.16, H - 0.3, 0, u + 0.16, H - 0.06, 0.15); b('bitumen', u - 0.11, H - 0.27, 0.15, u + 0.11, H - 0.1, 0.16);
+  b('terracotta', u - 0.1, 0.5, 0, u + 0.1, 0.64, 0.42);
+  const p = faceMap(F, 'back')(u, 0.52, u, 0.52);
+  F.lathe('pottery_dark', [[0.3, 0], [0.3, 0.07], [0.2, 0.07], [0.2, 0.0]], p[0], 0, p[1], 10); F.lathe('bitumen', [[0.2, 0.0], [0.2, 0.012], [0.001, 0.012]], p[0], 0.02, p[1], 10);
+  void rand;
+}
+
 /** The door and what is beside it: the frame, the leaf standing ajar, the step, a bench, a mat shade, a lamp niche, lattice windows. */
 export function dressDoor(F, rand, du, W, H, T) {
   F.b('timber', du - 0.62, 0, -0.08, du - 0.5, 2.15, T + 0.04, false); F.b('timber', du + 0.5, 0, -0.08, du + 0.62, 2.15, T + 0.04, false);
@@ -126,10 +141,18 @@ export function furnishRoom(F, r, door, kind, rand, lights, lit = false) {
     const a = rand() < 0.5 ? 0.3 : A - 2.1;                                // the bed against a side wall, a rope net on a timber frame
     k('timber', a, 0.26, wall - 1.5, a + 1.8, 0.33, wall - 0.35); for (const [x, z] of [[0, 0], [1.7, 0], [0, 1.1], [1.7, 1.1]]) k('timber', a + x, 0, wall - 1.5 + z, a + x + 0.1, 0.26, wall - 1.4 + z);
     k('rope_fibre', a + 0.05, 0.325, wall - 1.45, a + 1.75, 0.36, wall - 0.4); k(rand() < 0.5 ? 'cloth_white' : 'cloth_ochre', a + 0.1, 0.36, wall - 1.4, a + 1.0, 0.43, wall - 0.5);
-    k('reed_mat', a < 1 ? A - 1.9 : 0.4, 0, 0.8, a < 1 ? A - 0.4 : 1.9, 0.03, 2.2);
+    k('reed_mat', a < 1 ? A - 1.9 : 0.4, 0.082, 0.8, a < 1 ? A - 0.4 : 1.9, 0.112, 2.2);
     jl('terracotta', m + (a < 1 ? 0.7 : -0.7), wall, 1.5); jl('pottery_dark', m + (a < 1 ? 1.1 : -1.1), wall - 0.2, 1.1);
     k('brick', A - 0.55, 0, 0.2, A - 0.3, 0.55, 0.45);                      // a niche shelf with a lamp
     KL(F, L, 'terracotta', [[0.001, 0], [0.07, 0.01], [0.08, 0.04], [0.001, 0.05]], A - 0.43, 0.32, 0.55);
+    if (Math.abs(Math.floor(r[0] * 5 + r[1] * 3)) % 2 === 0) {            // the children's toys on the mat (docs §13): a clay cart on its two wheels, a bird rattle, a bird whistle
+      const ta = a < 1 ? A - 1.15 : 1.15, tb = 1.5, TY = 0.112;
+      k('terracotta', ta - 0.09, TY + 0.03, tb - 0.04, ta + 0.09, TY + 0.055, tb + 0.04);
+      for (const wz of [-0.058, 0.046]) { k('terracotta', ta - 0.04, TY + 0.0135, tb + wz, ta + 0.04, TY + 0.0665, tb + wz + 0.012); k('terracotta', ta - 0.0165, TY + 0.0, tb + wz, ta + 0.0165, TY + 0.08, tb + wz + 0.012); k('terracotta', ta - 0.03, TY + 0.0035, tb + wz, ta + 0.03, TY + 0.0765, tb + wz + 0.012); }
+      k('terracotta', ta + 0.09, TY + 0.04, tb - 0.01, ta + 0.24, TY + 0.05, tb + 0.01);
+      KL(F, L, 'terracotta', [[0.001, 0], [0.035, 0.02], [0.045, 0.05], [0.03, 0.085], [0.001, 0.1]], ta - 0.45, tb - 0.25, TY, 8);
+      KL(F, L, 'pottery_dark', [[0.001, 0], [0.025, 0.015], [0.03, 0.04], [0.015, 0.065], [0.001, 0.07]], ta + 0.4, tb + 0.3, TY, 8);
+    }
   } else if (kind === 'store') {
     for (let i = 0; i < 3; i++) for (let j = 0; j < 2; j++) jl((i + j) % 2 ? 'terracotta' : 'pottery_dark', 0.5 + i * 0.75, wall - j * 0.8, 1.9 + (j % 2) * 0.3);
     for (let i = 0; i < 3; i++) KL(F, L, 'sacking', [[0.3, 0], [0.34, 0.25], [0.2, 0.42], [0.001, 0.45]], A - 0.5 - (i % 2) * 0.1, 0.6 + i * 0.6, 0);
@@ -141,28 +164,34 @@ export function furnishRoom(F, r, door, kind, rand, lights, lit = false) {
     k('granite_grey', A - 1.5, 0, wall - 0.8, A - 0.5, 0.22, wall - 0.2); k('granite_grey', A - 1.2, 0.22, wall - 0.65, A - 0.8, 0.32, wall - 0.35);    // the saddle quern
     jl('terracotta', A - 0.5, 1.0, 1.7); jl('pottery_dark', A - 0.5, 1.7, 1.3);
     for (let i = 0; i < 3; i++) k('timber', 1.8, i * 0.14, wall - 0.4, 2.3, i * 0.14 + 0.12, wall - 0.1);                       // firewood
-    k('reed_mat', m - 0.6, 0, 1.2, m + 0.6, 0.03, 2.2); KL(F, L, 'wicker', [[0.24, 0], [0.3, 0.1], [0.001, 0.1]], m, 1.7, 0.03);
+    k('reed_mat', m - 0.6, 0.082, 1.2, m + 0.6, 0.112, 2.2); KL(F, L, 'wicker', [[0.24, 0], [0.3, 0.1], [0.001, 0.1]], m, 1.7, 0.112);
   } else if (kind === 'bath') {
     k('brick', 0.2, 0.0, 0.4, A - 0.2, 0.06, B - 0.3); k('bitumen', 0.2, 0.06, wall - 0.2, A - 0.2, 0.08, wall + 0.0);      // the brick floor, the drain channel along the wall
     k('brick', 0.5, 0.0, 0.5, 1.6, 0.55, 1.4); k('bitumen', 0.55, 0.55, 0.55, 1.55, 0.58, 1.35);                             // the bathing platform
     jl('terracotta', A - 0.6, wall - 0.2, 2.1); jl('pottery_dark', A - 1.2, wall - 0.3, 1.2); k('brick', A - 0.9, 0.0, 0.3, A - 0.2, 0.3, 0.9);
     k('bitumen', 0.9, 0.06, wall, 1.1, 0.4, wall + 0.2);
+    if (B >= 3.3 && Math.abs(Math.floor(r[0] * 13 + r[1] * 7)) % 3 !== 0) {   // the latrine (docs §13): a sump pot sunk in the floor between two footrests, a lota beside it, clean sand on the floor
+      k('silt', m - 0.62, 0.08, wall - 1.1, m + 0.62, 0.09, wall - 0.3);
+      k('brick', m - 0.44, 0.09, wall - 0.95, m - 0.14, 0.22, wall - 0.45); k('brick', m + 0.14, 0.09, wall - 0.95, m + 0.44, 0.22, wall - 0.45);
+      KL(F, L, 'pottery_dark', [[0.27, 0], [0.27, 0.05], [0.16, 0.05], [0.16, 0.0]], m, wall - 0.7, 0.09, 10); KL(F, L, 'bitumen', [[0.16, 0], [0.16, 0.012], [0.001, 0.012]], m, wall - 0.7, 0.11, 10);
+      jl('terracotta', m - 0.72, wall - 0.25, 0.55, 0.09);
+    }
   } else if (kind === 'cell') {                                            // a priest's cell: a mat and a rolled blanket, a water jar, a stool, a lamp niche, his things in a basket
-    k('reed_mat', 0.5, 0, wall - 2.0, 1.7, 0.035, wall - 0.3); k('cloth_white', 0.6, 0.035, wall - 0.9, 1.5, 0.12, wall - 0.4);
-    KL(F, L, 'cloth_ochre', [[0.001, 0], [0.12, 0.01], [0.12, 0.5], [0.001, 0.5]], 0.5, wall - 0.4, 0.035, 8);
+    k('reed_mat', 0.5, 0.082, wall - 2.0, 1.7, 0.115, wall - 0.3); k('cloth_white', 0.6, 0.115, wall - 0.9, 1.5, 0.17, wall - 0.4);
+    KL(F, L, 'cloth_ochre', [[0.001, 0], [0.12, 0.01], [0.12, 0.5], [0.001, 0.5]], 0.5, wall - 0.4, 0.115, 8);
     jl('terracotta', A - 0.5, wall - 0.2, 1.7); k('mudbrick', A - 1.4, 0, 0.9, A - 0.8, 0.38, 1.4); KL(F, L, 'wicker', [[0.22, 0], [0.28, 0.2], [0.001, 0.2]], A - 0.5, 1.2, 0);
     k('brick', 0.15, 0.9, wall + 0.1, 0.65, 1.0, wall + 0.4); KL(F, L, 'terracotta', [[0.001, 0], [0.07, 0.01], [0.08, 0.04], [0.001, 0.05]], 0.4, wall + 0.25, 1.0, 8);
   } else if (kind === 'shrine') {                                          // a brick plinth with a seated figure of soapstone, offerings before it
     k('brick', m - 0.7, 0, wall - 1.0, m + 0.7, 0.5, wall - 0.1); k('soapstone', m - 0.22, 0.5, wall - 0.75, m + 0.22, 0.95, wall - 0.4); k('soapstone', m - 0.14, 0.95, wall - 0.68, m + 0.14, 1.22, wall - 0.47);
-    k('gold', m - 0.16, 1.12, wall - 0.7, m + 0.16, 1.17, wall - 0.45); k('reed_mat', m - 0.9, 0, 0.8, m + 0.9, 0.03, 2.0);
-    for (let i = 0; i < 3; i++) jl(i % 2 ? 'terracotta' : 'pottery_dark', m - 0.5 + i * 0.5, 2.3, 0.9, 0.03);
+    k('gold', m - 0.16, 1.12, wall - 0.7, m + 0.16, 1.17, wall - 0.45); k('reed_mat', m - 0.9, 0.082, 0.8, m + 0.9, 0.112, 2.0);
+    for (let i = 0; i < 3; i++) jl(i % 2 ? 'terracotta' : 'pottery_dark', m - 0.5 + i * 0.5, 2.3, 0.9, 0.112);
     k('bitumen', m + 0.8, 0, wall - 0.5, m + 1.1, 0.7, wall - 0.2);
   } else {                                                                 // work: a loom frame, spindles, baskets of cotton or wool
     for (const a of [0.4, 1.9]) k('timber', a, 0, wall - 0.1, a + 0.08, 1.7, wall - 0.02); k('timber', 0.4, 1.6, wall - 0.1, 2.0, 1.68, wall - 0.02);
     for (let i = 0; i < 9; i++) k('cloth_white', 0.55 + i * 0.15, 0.4, wall - 0.08, 0.58 + i * 0.15, 1.6, wall - 0.06);
     k('cloth_indigo', 0.55, 0.4, wall - 0.08, 1.9, 0.9, wall - 0.04);
     for (let i = 0; i < 3; i++) KL(F, L, 'wicker', [[0.24, 0], [0.3, 0.2], [0.001, 0.2]], A - 0.6 - (i % 2) * 0.1, 0.8 + i * 0.6, 0);
-    k('reed_mat', m, 0, 1.0, m + 1.6, 0.03, 2.3); jl('terracotta', m + 0.2, 1.2, 1.2, 0.03);
+    k('reed_mat', m, 0.082, 1.0, m + 1.6, 0.112, 2.3); jl('terracotta', m + 0.2, 1.2, 1.2, 0.112);
   }
   if (lit) { const p = L.pt(m, B * 0.45); lights.push({ at: [p[0], F.y + 1.6, p[1]], color: '#ffc98a', intensity: 2.6, distance: 7 }); }
 }

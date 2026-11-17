@@ -4,7 +4,8 @@
 // coppersmiths and shell-workers. Frame: u along the lane, v from the lane into the lot.
 import { lathe } from './kit.js';
 import { rng, pick, lotFrame, wellAt } from './kit.js';
-import { dressWall, dressDoor, dressRoof, dressCourt, furnishRoom } from './dress.js';
+import { dressWall, dressDoor, dressRoof, dressCourt, furnishRoom, dressChute } from './dress.js';
+import { notchedBrick } from './civic.js';
 
 const T = 0.7, H0 = 3.3, PAR = 0.35;
 
@@ -100,6 +101,20 @@ function frontVariant(F, rand, variant, du, W, H, kind) {
   } else if (variant === 2) {
     for (let u = 0.1; u < W - 0.3; u += 0.95) F.b('brick', u, H + PARh, 0, u + 0.3, H + PARh + 0.85, 0.28, false);
     F.b('brick', 0, H + PARh + 0.85, 0, W, H + PARh + 1.0, 0.34, false);
+  } else if (variant === 4) {
+    // the high blind front: the wall carried on above the roof edge (the street wall of a house with an upper storey), a string course, two lattice slits
+    const hh = 1.5, t4 = 0.3;
+    F.b('mudbrick', 0, H + PARh, 0, W, H + PARh + hh, t4);
+    F.b('mud_plaster', -0.05, H + PARh + hh, -0.05, W + 0.05, H + PARh + hh + 0.1, t4 + 0.05, false);
+    F.b('brick', 0, H + PARh + 0.5, -0.06, W, H + PARh + 0.62, 0, false);
+    for (const u of [W * 0.28, W * 0.7]) { F.b('timber', u - 0.32, H + PARh + 0.78, -0.07, u + 0.32, H + PARh + 0.86, 0, false); F.b('wood_dark', u - 0.26, H + PARh + 0.86, -0.03, u + 0.26, H + PARh + 1.14, 0, false); for (let i = 0; i < 4; i++) F.b('timber', u - 0.2 + i * 0.13, H + PARh + 0.86, -0.07, u - 0.17 + i * 0.13, H + PARh + 1.14, -0.03, false); F.b('timber', u - 0.32, H + PARh + 1.14, -0.07, u + 0.32, H + PARh + 1.22, 0, false); }
+  } else if (variant === 5) {
+    // the stepped doorway: jambs and lintel stepped out in brick, as the Bath's piers are stepped (the lane is 3 m: the steps stand 0.12 m out)
+    for (const s of [-1, 1]) {
+      const a = du + s * 0.64, b = du + s * 0.92, c = du + s * 1.12;
+      F.b('brick', Math.min(a, b), 0, -0.12, Math.max(a, b), 2.34, 0, false); F.b('brick', Math.min(b, c), 0, -0.06, Math.max(b, c), 1.15, 0, false);
+    }
+    F.b('brick', du - 0.92, 2.34, -0.12, du + 0.92, 2.46, 0, false); F.b('brick_baked', du - 1.0, 2.46, -0.06, du + 1.0, 2.58, 0, false);
   } else if (variant === 3) {
     for (const [a, b] of [[0.05, du - 0.7], [du + 0.7, W - 0.05]]) if (b - a > 0.4) {
       F.b('limewash_white', a, 0.12, -0.12, b, 2.25, 0, false); F.b('paint_ochre', a, 0.12, -0.14, b, 0.5, -0.1, false);
@@ -127,6 +142,7 @@ export function house(el, ctx) {
   for (const u of [W * 0.3, W * 0.72]) F.b('brick', u - 0.12, H - 0.5, -0.35, u + 0.12, H - 0.38, 0.2, false);
   const dm = (du < W / 2 ? W - 1.4 : 1.4);
   F.b('brick', dm - 0.16, 0.2, -0.45, dm + 0.16, 0.34, 0.1, false); F.b('bitumen', dm - 0.08, 0.2, -0.46, dm + 0.08, 0.3, -0.3, false);
+  { const q = F.pt(dm, -0.52); notchedBrick(ctx.bag, q[0], F.y + 0.2, q[1], Math.abs(F.V[0]) > 0.5 ? 'x' : 'z'); }                // a brick on edge, notched, across the drain mouth
   // the door's frame, leaf, step, bench and shade, the windows; the weathering and the roofline of the street fronts
   dressDoor(F, rand, du, W, H, T);
   dressWall(F, rand, 'front', W, H, lowH, { gap: [du - 1.0, du + 1.0] });
@@ -169,5 +185,6 @@ export function house(el, ctx) {
   roomsOpen.forEach((r, i) => furnishRoom(F, [r[0] + 0.4, r[1] + 0.4, r[2] - 0.4, r[3] - 0.4], doors[i], uses[(off + i * 2) % uses.length], rand, ctx.lights, !!el.open && i < 2));
   dressCourt(F, rand, T + (ls ? lw : 0) + 0.3, T + 2.4, W - T - (rs ? lw : 0) - 0.3, D - T - rb - 0.1);
   dressRoof(F, rand, stor ? roomsOpen.slice(1) : roomsOpen, W, D, H, T);
+  if (stor && el.street) dressChute(F, rng((el.seed ?? 1) * 7 + 3), roomsOpen[0][0] + 0.7, D, H);          // the upper room's bathroom drains through a chute to the street
   void pick; void lathe;
 }

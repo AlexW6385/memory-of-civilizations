@@ -101,7 +101,7 @@ export function lots() {
           const rect = [cx0, a, cx1, b - 0.25];
           if (!free(rect) && tag === 'town') return;
           const seed = Math.floor(rand() * 1e6);
-          LOTS.push({ rect, front, kind: 'house', seed, variant: (seed >> 2) % 4, open: false, y, tag, street: outer, ends: [pi === 0, pi === parts.length - 1] });
+          LOTS.push({ rect, front, kind: 'house', seed, variant: (seed >> 2) % 6, open: false, y, tag, street: outer, ends: [pi === 0, pi === parts.length - 1] });
         });
       }
     });
@@ -119,7 +119,7 @@ export function lots() {
   const trades = ['bead', 'seal', 'potter', 'bronze', 'shell', 'bead', 'potter', 'seal'];
   let t = 0, k = 0;
   for (const l of near) {
-    if (t < trades.length && l.rect[3] - l.rect[1] >= 12 && k % 7 === 3) { l.kind = trades[t++]; l.open = t <= 5; }
+    if (t < trades.length && l.rect[3] - l.rect[1] >= 12 && k % 7 === 3) { l.kind = trades[t++]; l.open = t <= 5; l.variant = 1; }
     else if (k % 5 === 2 && l.rect[3] - l.rect[1] >= 11) l.open = true;
     k++;
   }

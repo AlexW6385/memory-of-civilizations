@@ -3,13 +3,14 @@
 // laundry on the quay, fish weirs in the river, the mat pavilions of the market place. All of it small and non-solid except the stands and sheds.
 import { box, lathe, frustum } from '../../core/geom.js';
 import { rng } from './kit.js';
+import { settlingTrap } from './civic.js';
 
 const JAR = (s) => [[0.07 * s, 0], [0.2 * s, 0.12 * s], [0.24 * s, 0.3 * s], [0.19 * s, 0.5 * s], [0.1 * s, 0.6 * s], [0.12 * s, 0.66 * s], [0.001, 0.66 * s]];
 const jar = (bag, mat, x, y, z, s = 1) => bag.add(mat, lathe(JAR(s), 8, null, x, y, z));
 
 /** indus_streetwork: { streets: [rect], seed } — along both edges of each street, by the walls (the drains lie 0.9–1.5 m in): what the street keeps. */
 export function streetwork(el, ctx) {
-  const { bag, col } = ctx, rand = rng(el.seed ?? 5), avoid = el.avoid ?? [], blocked = (x, z) => avoid.some((r) => x > r[0] - 2 && x < r[2] + 2 && z > r[1] - 2 && z < r[3] + 2);
+  const { bag, col } = ctx, rand = rng(el.seed ?? 5), trapRand = rng((el.seed ?? 5) * 31 + 7), avoid = el.avoid ?? [], blocked = (x, z) => avoid.some((r) => x > r[0] - 2 && x < r[2] + 2 && z > r[1] - 2 && z < r[3] + 2);
   for (const [x0, z0, x1, z1] of el.streets) {
     const alongZ = z1 - z0 > x1 - x0, L = alongZ ? z1 - z0 : x1 - x0, w = alongZ ? x1 - x0 : z1 - z0;
     // a point `t` along the street, `d` in from the edge `s` (−1 | +1), and the outward unit vector of that edge
@@ -33,6 +34,12 @@ export function streetwork(el, ctx) {
           bag.add('hide_brown', lathe([[0.001, 0], [0.5, 0.04], [0.42, 0.14], [0.001, 0.22]], 8, null, x, 0, z)); bag.add('wicker', lathe([[0.22, 0], [0.28, 0.2], [0.001, 0.2]], 8, null, x + 0.8, 0, z + 0.3));
         }
       }
+    }
+    // a settling trap over the covered drain every 40–70 m, on alternate sides, with the heap of sand cleaned out of it (docs §13)
+    for (let t = 14 + trapRand() * 30; t < L - 14; t += 40 + trapRand() * 30) {
+      const s = trapRand() < 0.5 ? -1 : 1, [x, z] = at(t, 1.2, s);
+      if (blocked(x, z)) continue;
+      settlingTrap(bag, x, 0, z, alongZ ? 'z' : 'x', 0.3, 0.08);
     }
     // wheel ruts down the middle of the broad streets, broken
     if (w > 8) for (let t = 3; t < L - 6; t += 5 + rand() * 12) {
