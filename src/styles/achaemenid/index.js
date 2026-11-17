@@ -128,6 +128,12 @@ function bullProtomes(bag, x, z, yS, s, axisX) {
 /** A stepped (crenellated) parapet of merlons along a segment: each merlon in three steps. */
 function merlons(bag, a, b, y, h = 1.4, w = 1.1, mat = S, th = 0.7) {
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.floor(L / (w * 2)), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
+  if (mat === S) {      // the coping course the merlons stand on, with its fillet
+    const px = Math.abs(ux) > 0.5, ex = px ? 0 : th / 2 + 0.08, ez = px ? th / 2 + 0.08 : 0;
+    bag.add(mat, box(Math.min(a[0], b[0]) - ex, y, Math.min(a[1], b[1]) - ez, Math.max(a[0], b[0]) + ex, y + 0.12, Math.max(a[1], b[1]) + ez));
+    bag.add(mat, box(Math.min(a[0], b[0]) - ex + (px ? 0 : 0.06), y + 0.12, Math.min(a[1], b[1]) - ez + (px ? 0.06 : 0), Math.max(a[0], b[0]) + ex - (px ? 0 : 0.06), y + 0.18, Math.max(a[1], b[1]) + ez - (px ? 0.06 : 0)));
+    y += 0.18;
+  }
   for (let i = 0; i < n; i++) {
     const s = (i + 0.5) * L / n, cx = a[0] + ux * s, cz = a[1] + uz * s, hw = w / 2;
     const hx = Math.abs(ux) > 0.5 ? hw : th / 2, hz = Math.abs(ux) > 0.5 ? th / 2 : hw, ax = Math.abs(ux) > 0.5;
@@ -528,7 +534,7 @@ function apadanaStair(el, { bag, col }) {
       relief(bag, C, climber, front, a, top(a) - 0.88, 0.7, up, 0.05);
       if (climber === 'persian') strip(bag, C, front, a + up * 0.115 * 0.7, top(a) - 0.88, a + up * 0.115 * 0.7, top(a) - 0.88 + 0.75, 0.018, 0.065);
     }
-    const size = 1.45, u0 = aIn - up * (0.5 * size + 0.35);
+    const size = 1.8, u0 = aIn - up * (0.5 * size + 0.35);
     relief(bag, C, 'bull', front, u0, 0.12, size, up, 0.07);
     relief(bag, C, 'lion', front, u0, 0.12, size, up, 0.09);
   }
@@ -574,9 +580,9 @@ function apadanaStair(el, { bag, col }) {
           else { relief(bag, paint(i + ri, k % 2 ? 'mede' : 'bearer'), k % 2 ? 'mede' : 'bearer', wall, a, v, rh * 0.96, toward, 0.05); a -= toward * 0.5; }
         } else if (kind === 'tribute') {
           // a delegation: an usher, three bearers and their animal, then a cypress
-          const k = i % 6;
+          const k = i % 6, beast = ['horse', 'zebu', 'camel', 'ram', 'horse', 'camel', 'zebu', 'ram'][(Math.floor(i / 6) * 3 + ri) % 8];
           if (k === 5) { relief(bag, 'cloth_green', 'cypress', wall, a, v, rh, 1, 0.05); a -= toward * 0.55; }
-          else if (k === 4) { relief(bag, C, 'ram', wall, a - toward * 0.1, v, rh * 0.95, toward, 0.05); a -= toward * 0.75; }
+          else if (k === 4) { relief(bag, C, beast, wall, a - toward * 0.1, v, rh * (beast === 'camel' ? 1.12 : beast === 'ram' ? 0.95 : 1.0), toward, 0.05); a -= toward * (beast === 'ram' ? 0.75 : 0.95); }
           else { relief(bag, paint(i + ri, k === 0 ? 'persian' : 'bearer'), k === 0 ? 'persian' : 'bearer', wall, a, v, rh * 0.96, toward, 0.05); a -= toward * 0.52; }
         } else {
           // Persians and Medes by turns, a cypress now and then
@@ -607,6 +613,11 @@ function flight(bag, col, face, line, c, W, y, h) {
 }
 function merlonsAlong(bag, M, a0, a1, o, yb) {
   const n = Math.max(1, Math.floor((a1 - a0) / 1.25)), p0 = M(0, 0), p1 = M(1, 0), face = Math.abs(p1[0] - p0[0]) > 0.5 ? 'n' : 'e';
+  // the coping: a course with a projecting fillet along the whole run, the merlons standing on it
+  const A = M(a0, o - 0.4), B = M(a1, o + 0.4), A2 = M(a0, o - 0.34), B2 = M(a1, o + 0.34);
+  bag.add(S, box(Math.min(A[0], B[0]), yb, Math.min(A[1], B[1]), Math.max(A[0], B[0]), yb + 0.1, Math.max(A[1], B[1])));
+  bag.add(S, box(Math.min(A2[0], B2[0]), yb + 0.1, Math.min(A2[1], B2[1]), Math.max(A2[0], B2[0]), yb + 0.16, Math.max(A2[1], B2[1])));
+  yb += 0.16;
   for (let i = 0; i < n; i++) merlon(bag, M, a0 + (i + 0.5) * (a1 - a0) / n, o, yb, 0.9, 0.7, 0.55, face);
 }
 
@@ -621,6 +632,14 @@ function gate(el, ctx) {
   const { bag, col } = ctx, [cx, cz] = el.c, s = el.s, h = el.h, th = 4, y = el.y ?? 0, pw = 1.9, half = pw + 1.88;
   hall({ rect: [cx - s / 2, cz - s / 2, cx + s / 2, cz + s / 2], y, h, grid: [2, 2], walls: th, doors: 'wes', d: 1.3, simple: el.simple, doorW: { w: 2 * half, e: 2 * half } }, ctx);
   if (el.simple) return;
+  // the facades dressed as the Apadana's porches are: a stone dado, two tiers of dark-framed niches and the glazed frieze under the cornice
+  {
+    const x0 = cx - s / 2, x1 = cx + s / 2, z0 = cz - s / 2, z1 = cz + s / 2, dd = half + 0.75 + 0.7, ds = Math.min(5, s * 0.12) / 2 + 0.75 + 1.2, yy = y + 0.15;
+    porchDress({ face: 'w', r: [x0 - th, z0, x0, z1], y: yy, h, fullFrieze: true, skip: [[cz - dd, cz + dd]] }, { bag });
+    porchDress({ face: 'e', r: [x1, z0, x1 + th, z1], y: yy, h, fullFrieze: true, skip: [[cz - dd, cz + dd]] }, { bag });
+    porchDress({ face: 's', r: [x0 - th, z1, x1 + th, z1 + th], y: yy, h, fullFrieze: true, skip: [[cx - ds, cx + ds]] }, { bag });
+    porchDress({ face: 'n', r: [x0 - th, z0 - th, x1 + th, z0], y: yy, h, fullFrieze: true, skip: [] }, { bag });
+  }
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
     const bx = cx + sx * (s / 2 + 3.2), bz = cz + sz * (pw + 0.98);
     lamassu(bag, bx, bz, y, [sx, 0], { kind: sx < 0 ? 'bull' : 'man' });
