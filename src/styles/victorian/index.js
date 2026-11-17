@@ -13,6 +13,7 @@ import { abbey } from './abbey.js';
 import { westminsterHall } from './hall.js';
 import { stStephens, centralLobby, commons, lords } from './interior.js';
 import { clockDial } from './dial.js';
+import { victoriaTower } from './vtower.js';
 import { faceFrame } from '../dutch/facade.js';
 import { terraceRich, shopHouse, pub, pillarBox, drinkingFountain, bollard, trestleStall } from './shops.js';
 import { parliamentSquare, barrelOrgan, punchBooth } from './square.js';
@@ -67,11 +68,12 @@ function gothicTower(el, { bag, col }) {
   else { bag.add(S, box(x - s / 2 - 0.3, y + body, z - s / 2 - 0.3, x + s / 2 + 0.3, y + body + 1, z + s / 2 + 0.3)); bag.add('iron', lathe([[0.1, 0], [0.08, h - body]], 6, null, x, y + body, z)); }
 }
 /** terrace_house: { rect, seed, front, storeys, y } — brick, a slate roof running along the street, chimney stacks, a bay window. */
-function terraceHouseBase(el, { bag, col }) {
+function terraceHouseBase(el, ctx) {
+  const { bag, col } = ctx;
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, n = el.storeys ?? 3, st = 3.2, H = n * st, f = el.front ?? 's', along = f === 'n' || f === 's';
   const mat = rand() < 0.3 ? 'brick_buff' : 'brick';
   const open = el.open && !el.simple && along;
-  if (open) { bag.add(mat, box(x0, y + st, z0, x1, y + H, z1)); col.rect(el.rect, y + st, y + H); terraceInterior(el, { bag, col }, mat, st); }
+  if (open) { bag.add(mat, box(x0, y + st, z0, x1, y + H, z1)); col.rect(el.rect, y + st, y + H); terraceInterior(el, ctx, mat, st); }
   else { bag.add(mat, box(x0, y - 0.5, z0, x1, y + H, z1)); col.rect(el.rect, y - 0.5, y + H); }
   const L = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0, k = Math.max(1, Math.round(L / 5.5));
   for (let s = 0; s < n; s++) for (let i = 0; i < k * 2; i++) {
@@ -118,6 +120,6 @@ function terraceHouseBase(el, { bag, col }) {
 
 registerStyle('victorian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.gothic.elements, river_front: riverFront, iron_bridge: ironBridge, embankment, abbey, westminster_hall: westminsterHall, st_stephens: stStephens, central_lobby: centralLobby, commons, lords, hansom_cab: hansomCab, omnibus, gas_lamp: gasLamp, paddle_steamer: paddleSteamer, lighter, steamboat_pier: steamboatPier, sailing_barge: sailingBarge, wherry, river_stairs: riverStairs, gothic_tower: gothicTower, terrace_house: (el, c) => terraceRich(el, c, terraceHouseBase), shop_house: (el, c) => shopHouse(el, c, terraceHouseBase), pub: (el, c) => pub(el, c, terraceHouseBase), parliament_square: parliamentSquare, barrel_organ: barrelOrgan, punch_booth: punchBooth, pillar_box: pillarBox, drinking_fountain: drinkingFountain, bollard, trestle_stall: trestleStall, bridge_stone: STYLES.vernacular?.elements?.bridge_stone },
+  elements: { ...STYLES.gothic.elements, river_front: riverFront, iron_bridge: ironBridge, embankment, abbey, westminster_hall: westminsterHall, st_stephens: stStephens, central_lobby: centralLobby, commons, lords, hansom_cab: hansomCab, omnibus, gas_lamp: gasLamp, paddle_steamer: paddleSteamer, lighter, steamboat_pier: steamboatPier, sailing_barge: sailingBarge, wherry, river_stairs: riverStairs, gothic_tower: gothicTower, victoria_tower: victoriaTower, terrace_house: (el, c) => terraceRich(el, c, terraceHouseBase), shop_house: (el, c) => shopHouse(el, c, terraceHouseBase), pub: (el, c) => pub(el, c, terraceHouseBase), parliament_square: parliamentSquare, barrel_organ: barrelOrgan, punch_booth: punchBooth, pillar_box: pillarBox, drinking_fountain: drinkingFountain, bollard, trestle_stall: trestleStall, bridge_stone: STYLES.vernacular?.elements?.bridge_stone },
   objects: {},
 });
