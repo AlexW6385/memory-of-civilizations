@@ -8,10 +8,13 @@ const E = [];
 E.push({ t: 'madrasa_block', rect: HASAN.rect, h: 36, court: HASAN.court, portal: 'n',
   iwans: [{ rect: [-10, 56, 10, 72], open: 'n', W: 20, D: 16, ys: 14.5, qibla: true }, { rect: [-7, 15, 7, 24], open: 's', W: 14, D: 9, ys: 11 },
     { rect: [-24, 34, -17, 46], open: 'e', W: 12, D: 7, ys: 9.5 }, { rect: [17, 34, 24, 46], open: 'w', W: 12, D: 7, ys: 9.5 }],
-  entry: [[-41.5, 6, -33.5, 14, 11.5], [-39, 14, -36, 18], [-39, 18, -14, 21], [-17, 21, -14, 24]] });
+  entry: [[-41.5, 6, -33.5, 14, 11.5], [-39, 14, -36, 18], [-39, 18, -14, 21], [-17, 21, -14, 24],
+    // the doors either side of the mihrab: two passages through the qibla wall to the chamber behind (the sources' way into the tomb)
+    [-8.1, 72, -5.9, 74.01, 4.2], [5.9, 72, 8.1, 74.01, 4.2]] });
 // the founder's tomb, hollow now: a 21 m square chamber (the court of the block, roofed by the dome), entered by the portal on its qibla side
 const TC = [(HASAN.tomb[0] + HASAN.tomb[2]) / 2, (HASAN.tomb[1] + HASAN.tomb[3]) / 2], TM = TC[0] - (HASAN.tomb[2] - HASAN.tomb[0]) * 0.25;
-E.push({ t: 'madrasa_block', rect: HASAN.tomb, h: 30, portal: 's', court: [TC[0] - 10.5, TC[1] - 10.5, TC[0] + 10.5, TC[1] + 10.5], entry: [[TM - 1.3, TC[1] + 10.5, TM + 1.3, HASAN.tomb[3], 5.2]] });
+E.push({ t: 'madrasa_block', rect: HASAN.tomb, h: 30, portal: 's', ph: 28.5, court: [TC[0] - 10.5, TC[1] - 10.5, TC[0] + 10.5, TC[1] + 10.5],
+  entry: [[TM - 1.3, TC[1] + 10.5, TM + 1.3, HASAN.tomb[3], 5.2], [-8.1, 73.99, -5.9, TC[1] - 10.5, 4.2], [5.9, 73.99, 8.1, TC[1] - 10.5, 4.2]] });
 E.push({ t: 'hasan_tomb', c: TC, a: 10.5 });
 E.push({ t: 'hasan_dome', c: TC, r: 10.5, y: 30, a: 10.5 });
 E.push({ t: 'hasan_door', rect: HASAN.rect, face: 'n', m: -37.5 });
