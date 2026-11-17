@@ -30,22 +30,22 @@ export function slab(bag, mat, a, b, c, d, th = 0.12) {
  * on the south, −1 north), mx (door x), wh (wall height), seed, lod (0 near, 1 middle, 2 far) }.
  */
 export function dressHouse({ bag, col }, el, g) {
-  const { x0, z0, x1, z1, y, f, sg, mx, wh } = g, rand = rng((g.seed | 0) + 4141), lod = g.lod ?? 0, G = y - 0.18;
+  const { x0, z0, x1, z1, y, f, sg, mx, wh } = g, dz = g.skin ? 0.04 : 0.012, d0 = g.skin ? 0.025 : 0, rand = rng((g.seed | 0) + 4141), lod = g.lod ?? 0, G = y - 0.18;
   const side = rand() < 0.5 ? 1 : -1, pick = (p) => rand() < p;
   const P = (u, v) => [mx + u, f + sg * v];
   const yb = (u, v) => Math.min(y, gy(el, ...P(u, v))) - 0.08;
   // the soot over the door and the marks of the roof's drip: dark and pale clay patches on the walls
-  bag.add('bark_dark', box(mx - 0.55, y + 1.78, Math.min(f, f + sg * 0.012), mx + 0.55, y + wh - 0.04, Math.max(f, f + sg * 0.012)));
+  bag.add('bark_dark', box(mx - 0.55, y + 1.78, Math.min(f + sg * d0, f + sg * dz), mx + 0.55, y + wh - 0.04, Math.max(f + sg * d0, f + sg * dz)));
   if (lod < 2) {
     for (let k = 0; k < 3; k++) {
       const w = 0.5 + rand() * 0.7, h = 0.4 + rand() * 0.5, u = (rand() - 0.5) * (x1 - x0 - 1.4) - (Math.abs(rand() - 0.5) < 0.1 ? 1 : 0), yy = y + 0.3 + rand() * (wh - 1.1);
       if (Math.abs(u) < 1.0) continue;
-      const q = f + sg * 0.012, z = Math.min(f, q), zz = Math.max(f, q);
+      const q = f + sg * dz, p0 = f + sg * d0, z = Math.min(p0, q), zz = Math.max(p0, q);
       bag.add(k % 2 ? 'earth_wall' : 'silt', box(mx + u - w / 2, yy, z, mx + u + w / 2, yy + h, zz));
     }
     // the back wall: a long damp stain along its foot
     const bz = f - sg * (z1 - z0);
-    bag.add('bark_dark', box(x0 + 0.3, y - 0.02, Math.min(bz, bz - sg * 0.012), x1 - 0.3, y + 0.38, Math.max(bz, bz - sg * 0.012)));
+    bag.add('bark_dark', box(x0 + 0.3, y - 0.02, Math.min(bz - sg * d0, bz - sg * dz), x1 - 0.3, y + 0.38, Math.max(bz - sg * d0, bz - sg * dz)));
   }
   if (lod >= 2) {                                              // far houses: the three things that read from afar
     jar(bag, mx + side * 1.3, yb(side * 1.3, 0.5), P(side * 1.3, 0.5)[1], 1.3); jar(bag, mx + side * 1.75, yb(side * 1.75, 0.45), P(side * 1.75, 0.45)[1], 0.95);
@@ -153,7 +153,7 @@ export function wattle(bag, col, a, b, yAt, h = 1.1) {
 export { ears };
 
 /** The kinds of furnished house: what its household does (docs §5.7). g: { x0, z0, x1, z1, t, F, cx, cz, top, hx, hz }. */
-export const HOUSE_KINDS = ['cook', 'weaver', 'knapper', 'shell', 'storage', 'drum'];
+export const HOUSE_KINDS = ['cook', 'weaver', 'knapper', 'shell', 'storage', 'drum', 'potter', 'basket', 'hide', 'fisher'];
 export function furnishKind({ bag, col }, el, g, kind) {
   const { x0, z0, x1, z1, t, F, cx, cz, top, hx, hz } = g, rand = rng((el.seed | 0) + 909), wallN = z0 + t + 0.03, wallE = x1 - t - 0.03, wallW = x0 + t + 0.03;
   const hang = (x, y0, y1, z, mat = 'linen', r = 0.008) => bag.add(mat, rod([x, y0, z], [x, y1, z], r, 4));
@@ -204,5 +204,57 @@ export function furnishKind({ bag, col }, el, g, kind) {
     bag.add('paint_ochre', lathe([[0.001, 0], [0.07, 0.02], [0.09, 0.09], [0.05, 0.17], [0.001, 0.19]], 8, null, wallE - 0.06, F + 1.2, cz - 0.3));
     for (let k = 0; k < 3; k++) bag.add(k ? 'hide_brown' : 'hide_white', box(wallE - 0.9, F + 0.45 + k * 0.03, z1 - t - 2.4 + k * 0.3, wallE - 0.1, F + 0.48 + k * 0.03, z1 - t - 2.0 + k * 0.3));
     bag.add('reed_mat', box(wallE - 1.0, F + 0.4, z1 - t - 2.5, wallE - 0.05, F + 0.44, z1 - t - 0.9));
+  } else if (kind === 'potter') {
+    // on the bench: a lump of clay, coils laid in a ring, a half-raised jar, a burnishing pebble; on a plank shelf at the east wall the dried jars and bowls; a basket of crushed shell for the temper [inferred: the arrangement; the ware is shell-tempered, RiverWeb "Ceramic function"]
+    const by = F + 0.49, bx = x0 + t + 0.6, bz = z0 + t + 0.45;
+    bag.add('earth_wall', lathe([[0.001, 0], [0.2, 0.01], [0.17, 0.1], [0.08, 0.17], [0.001, 0.18]], 9, null, bx, by, bz));
+    for (let k = 0; k < 3; k++) bag.add('terracotta', lathe([[0.17, 0], [0.19, 0.02], [0.17, 0.04], [0.001, 0.04]], 12, null, bx + 0.75, by + k * 0.04, bz));
+    bag.add('terracotta', lathe([[0.001, 0], [0.1, 0.01], [0.17, 0.1], [0.19, 0.2], [0.17, 0.26], [0.001, 0.26]], 10, null, bx + 1.45, by, bz));
+    bag.add('granite_grey', lathe([[0.001, 0], [0.04, 0.005], [0.04, 0.02], [0.001, 0.025]], 6, null, bx + 2.0, by, bz + 0.15));
+    const sy = F + 1.35, sa = z0 + t + 1.15, sb = z1 - t - 1.15;
+    if (sb - sa > 0.8) {
+      bag.add('timber', box(wallE - 0.34, sy, sa, wallE - 0.02, sy + 0.04, sb));
+      for (const z of [sa + 0.1, sb - 0.1]) bag.add('timber', rod([wallE - 0.05, sy - 0.3, z], [wallE - 0.2, sy, z], 0.025, 5));
+      const n = Math.max(2, Math.floor((sb - sa) / 0.38));
+      for (let k = 0; k < n; k++) { const z = sa + 0.2 + k * (sb - sa - 0.3) / Math.max(1, n - 1); if (k % 2) bag.add('terracotta', lathe([[0.001, 0], [0.05, 0.004], [0.11, 0.04], [0.13, 0.08], [0.001, 0.07]], 10, null, wallE - 0.18, sy + 0.04, z)); else jar(bag, wallE - 0.18, sy + 0.04, z, 0.62, 'pottery_dark'); }
+    }
+    bag.add('wicker', lathe([[0.001, 0], [0.2, 0.01], [0.24, 0.14], [0.22, 0.14], [0.001, 0.05]], 10, null, wallW + 0.4, F, z1 - t - 1.3));
+    bag.add('chalk', lathe([[0.001, 0], [0.2, 0], [0.2, 0.01], [0.001, 0.02]], 10, null, wallW + 0.4, F + 0.13, z1 - t - 1.3));
+  } else if (kind === 'basket') {
+    // cane splints hung in a curtain from a rod along the east wall, a basket half made on the bench with its splints, finished baskets stacked in the corner, a bone awl [inferred: the craft; baskets and mats are among the household's goods]
+    const a = z0 + t + 1.05, b = z1 - t - 1.2, zz = Math.max(a + 0.6, b);
+    bag.add('timber', rod([wallE - 0.06, F + 1.95, a], [wallE - 0.06, F + 1.95, zz], 0.025, 5));
+    for (let z = a + 0.08; z < zz; z += 0.1) bag.add(rand() < 0.5 ? 'wicker' : 'reed_mat', box(wallE - 0.075, F + 1.0 + rand() * 0.15, z, wallE - 0.045, F + 1.95, z + 0.045));
+    const bx = x0 + t + 0.8 + (x1 - x0 - 2 * t - 1.6) * 0.45, bz = z0 + t + 0.42, by = F + 0.49;
+    bag.add('wicker', lathe([[0.001, 0], [0.14, 0.01], [0.2, 0.1], [0.18, 0.17], [0.15, 0.19]], 12, null, bx, by, bz));
+    for (let k = 0; k < 6; k++) { const an = k * 0.9; bag.add('reed_mat', rod([bx + 0.4 + Math.cos(an) * 0.05, by + 0.01 + k * 0.012, bz + 0.1], [bx + 0.95 + Math.cos(an) * 0.05, by + 0.01 + k * 0.012, bz - 0.1 + Math.sin(an) * 0.05], 0.007, 4)); }
+    bag.add('ivory', rod([bx - 0.35, by + 0.01, bz + 0.2], [bx - 0.15, by + 0.01, bz + 0.3], 0.008, 4));
+    for (let k = 0; k < 4; k++) bag.add('wicker', lathe([[0.001, 0], [0.27 - k * 0.03, 0.02], [0.32 - k * 0.03, 0.17], [0.001, 0.17]], 10, null, wallW + 0.42, F + k * 0.17, z1 - t - 1.25));
+  } else if (kind === 'hide') {
+    // a hide pegged flat on the north wall above the bench with cords, a folded stack of tanned hides, scrapers of chert and a bone fleshing tool, a second hide stretched on four poles under the rafters to smoke over the fire [inferred; hides are among the goods of the plaza's traders, §5.9]
+    const zz = wallN + 0.03, a = x0 + t + 0.7, b = Math.min(x1 - t - 0.7, a + 1.7);
+    bag.add('hide_white', box(a, F + 1.0, zz, b, F + 1.95, zz + 0.02));
+    for (let k = 0; k <= 5; k++) { const x = a + (b - a) * k / 5; bag.add('linen', rod([x, F + 0.95, zz + 0.01], [x, F + 1.02, zz + 0.03], 0.006, 4)); bag.add('linen', rod([x, F + 1.95, zz + 0.01], [x, F + 2.02, zz + 0.03], 0.006, 4)); }
+    for (let k = 0; k < 4; k++) bag.add(k % 2 ? 'hide_brown' : 'hide_tan', box(x1 - t - 1.3, F + 0.49 + k * 0.045, z0 + t + 0.2 + k * 0.02, x1 - t - 0.35, F + 0.53 + k * 0.045, z0 + t + 0.75));
+    for (let k = 0; k < 3; k++) bag.add('flagstone', box(a + 1.0 + k * 0.22, F + 0.49, z0 + t + 0.3, a + 1.16 + k * 0.22, F + 0.51, z0 + t + 0.46));
+    bag.add('ivory', rod([a + 0.2, F + 0.5, z0 + t + 0.5], [a + 0.65, F + 0.5, z0 + t + 0.6], 0.015, 5));
+    const fx1 = Math.min(cx + 1.85, x1 - t - 0.15), fx0 = fx1 - 1.1, fz0 = cz - 0.55, fz1 = cz + 0.45, fy = top - 0.22;
+    for (const [x, z] of [[fx0, fz0], [fx1, fz0], [fx1, fz1], [fx0, fz1]]) bag.add('timber', rod([x, fy, z], [x, top - 0.05, z], 0.02, 4));
+    for (const [p, q] of [[[fx0, fz0], [fx1, fz0]], [[fx0, fz1], [fx1, fz1]], [[fx0, fz0], [fx0, fz1]], [[fx1, fz0], [fx1, fz1]]]) bag.add('timber', rod([p[0], fy, p[1]], [q[0], fy, q[1]], 0.02, 4));
+    bag.add('hide_tan', box(fx0 + 0.04, fy - 0.03, fz0 + 0.04, fx1 - 0.04, fy - 0.01, fz1 - 0.04));
+  } else if (kind === 'fisher') {
+    // a net hung over the rafters, its weights of fired clay and gourd floats along its edge, a fish trap of withies, a spear and two paddles against the west wall, a string of split fish [inferred: the creek's fishing, §5.10]
+    const nx0 = cx - 1.0, nx1 = cx + 1.0, ny1 = top - 0.2, ny0 = ny1 - 0.8, zz = wallN + 0.42;
+    bag.add('timber', rod([nx0 - 0.1, ny1, zz], [nx1 + 0.1, ny1, zz], 0.02, 5));
+    for (let k = 0; k <= 10; k++) { const x = nx0 + (nx1 - nx0) * k / 10; bag.add('rope_fibre', rod([x, ny1, zz], [x, ny0 + 0.04 * Math.sin(k), zz], 0.005, 4)); }
+    for (let r = 0; r < 4; r++) bag.add('rope_fibre', rod([nx0, ny1 - 0.18 - r * 0.2, zz], [nx1, ny1 - 0.2 - r * 0.2, zz], 0.004, 4));
+    for (let k = 0; k < 6; k++) bag.add(k % 2 ? 'pottery_dark' : 'chalk', lathe([[0.001, 0], [0.025, 0], [0.025, 0.04], [0.001, 0.04]], 6, null, nx0 + 0.1 + k * 0.36, ny0 - 0.04, zz));
+    bag.add('wicker', lathe([[0.17, 0], [0.22, 0.25], [0.15, 0.55], [0.001, 0.6]], 9, null, x1 - t - 0.9, F + 0.49, z0 + t + 0.4));
+    const za = z0 + t + 0.4, zb = z1 - t - 0.4;
+    bag.add('timber', rod([wallW + 0.1, F + 1.9, za], [wallW + 0.1, F + 1.9, zb], 0.02, 5));
+    bag.add('flagstone', box(wallW + 0.07, F + 1.87, zb, wallW + 0.13, F + 1.93, zb + 0.14));
+    for (const [yy, ln] of [[F + 1.6, 0.9], [F + 1.38, 0.8]]) { bag.add('timber', rod([wallW + 0.1, yy, za + 0.3], [wallW + 0.1, yy, zb - 0.1], 0.022, 5)); bag.add('timber', box(wallW + 0.07, yy - 0.09, za + 0.3 - ln * 0.3, wallW + 0.13, yy + 0.09, za + 0.3)); }
+    bag.add('timber', rod([x1 - t - 1.9, top - 0.35, cz + 0.9], [x1 - t - 0.2, top - 0.35, cz + 0.9], 0.025, 5));
+    for (let k = 0; k < 5; k++) bag.add(k % 2 ? 'hide_grey' : 'hide_brown', box(x1 - t - 1.8 + k * 0.3, top - 0.95, cz + 0.87, x1 - t - 1.74 + k * 0.3, top - 0.38, cz + 0.93));
   }
 }

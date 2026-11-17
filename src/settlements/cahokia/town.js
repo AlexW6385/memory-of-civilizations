@@ -9,13 +9,13 @@ const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));  
 const base = (id, elements, style = 'mississippian') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-25, -5], facing: 'n' } });
 const dist0 = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 + 25, (l.rect[1] + l.rect[3]) / 2 + 5);
 let OPEN = null;
-/** The houses that can be walked into: the 26 nearest the ramp below Monks Mound, and about one in ten of the rest within 230 m, to about 56. */
+/** The houses that can be walked into: the 26 nearest the ramp below Monks Mound, then one in four to 230 m and one in six to 290 m, about 150 in all (docs §5.14). */
 export function openSet() {
   if (OPEN) return OPEN;
   const L = lots(), order = L.map((l, k) => [k, dist0(l)]).sort((a, b) => a[1] - b[1]).map(([k]) => k);
   OPEN = new Map();
   order.slice(0, 26).forEach((k, i) => OPEN.set(k, i < 4 ? 'cook' : HOUSE_KINDS[(L[k].seed >> 3) % HOUSE_KINDS.length]));
-  for (const k of order.slice(26)) { if (OPEN.size >= 56 || dist0(L[k]) > 230) break; if (L[k].seed % 9 === 0) OPEN.set(k, HOUSE_KINDS[(L[k].seed >> 3) % HOUSE_KINDS.length]); }
+  for (const k of order.slice(26)) { const d = dist0(L[k]); if (OPEN.size >= 170 || d > 290) break; if (L[k].seed % (d < 230 ? 4 : 6) === 0) OPEN.set(k, HOUSE_KINDS[(L[k].seed >> 3) % HOUSE_KINDS.length]); }
   return OPEN;
 }
 const near = () => [...openSet().keys()].slice(0, 4);
@@ -51,8 +51,10 @@ export function fillerList() {
   for (const g of gaps()) {
     const [cx, cz] = g.c;
     if (Math.hypot(cx, cz) > 250 || inSmallPlaza(cx, cz, 4)) continue;
-    const k = g.seed % 6, r = [cx - 2.4, cz - 2.4, cx + 2.4, cz + 2.4];
+    const k = g.seed % 6, r = [cx - 2.4, cz - 2.4, cx + 2.4, cz + 2.4], q = (g.seed >> 7) % 40;
     if (!clearYard(r, 0.2)) continue;
+    if (q < 5) { E.push({ t: 'midden', c: [cx, cz], y: height, seed: g.seed }); continue; }
+    if (q === 5) { E.push({ t: 'sweat_lodge', c: [cx, cz], y: height, seed: g.seed }); continue; }
     if (k === 0) E.push({ t: 'granary', c: [cx, cz], y: height, s: 2.2 + (g.seed % 5) * 0.1, seed: g.seed });
     else if (k === 1) E.push({ t: 'yard_fire', c: [cx, cz], y: height, seed: g.seed });
     else if (k === 2) E.push({ t: 'garden', rect: [cx - 2.4, cz - 1.8, cx + 2.4, cz + 1.8], y: height, seed: g.seed });
@@ -100,6 +102,7 @@ function fieldsAndCreek() {
     C.push({ t: 'dugout', c: [x - 3.4, creekZ(x - 3.4) + 8.4], y: CREEK.level, rot: 1.6, len: 4.6, seed: x + 2 });
     C.push({ t: 'dugout', c: [x + 8, creekZ(x + 8) - 1], y: CREEK.level, rot: 0.2, len: 5.8, seed: x + 3 });
   }
+  for (const x of [LANDINGS[0], LANDINGS[2]]) C.push({ t: 'canoe_works', c: [x + 12, creekZ(x + 12) + 19], y: height, seed: x + 7 });
   C.push({ t: 'weir', c: [62, creekZ(62)], tip: [0, 0], a: [48, creekZ(48) - 9.5], b: [48, creekZ(48) + 9.5], y: CREEK.level });
   return [base('cahokia-fields', E), base('cahokia-creek-life', C)];
 }
@@ -183,9 +186,10 @@ function life() {
   const L = lots();
   for (const [k, kind] of openSet()) {
     const l = L[k], [x0, z0, x1, z1] = l.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, F = l.y + 0.04, dd = height;
-    const at = kind === 'cook' ? [cx - 0.75, cz + 0.6] : kind === 'weaver' ? [cx + 0.3, z0 + 1.5] : kind === 'knapper' ? [x0 + 1.45, z0 + 2.2] : kind === 'shell' ? [cx - 0.4, z0 + 1.45] : kind === 'drum' ? [x0 + 1.4, z0 + 1.9] : [cx - 0.75, cz + 0.6];
-    const look = kind === 'weaver' || kind === 'shell' ? [at[0], z0] : kind === 'knapper' ? [x0, at[1]] : [cx, cz + 0.15];
-    (kind === 'knapper' || kind === 'drum' ? man : woman)(at, F, face(at, look), { pose: kind === 'cook' ? 'kneel' : kind === 'weaver' ? 'squat' : 'cross', over: 'none' });
+    const bench = kind === 'potter' || kind === 'basket' || kind === 'hide' || kind === 'fisher';
+    const at = bench ? [cx + (kind === 'potter' || kind === 'basket' ? 1.0 : -1.0), z0 + 1.5] : kind === 'cook' ? [cx - 0.75, cz + 0.6] : kind === 'weaver' ? [cx + 0.3, z0 + 1.5] : kind === 'knapper' ? [x0 + 1.45, z0 + 2.2] : kind === 'shell' ? [cx - 0.4, z0 + 1.45] : kind === 'drum' ? [x0 + 1.4, z0 + 1.9] : [cx - 0.75, cz + 0.6];
+    const look = kind === 'weaver' || kind === 'shell' || bench ? [at[0], z0] : kind === 'knapper' ? [x0, at[1]] : [cx, cz + 0.15];
+    (kind === 'knapper' || kind === 'drum' || kind === 'hide' || kind === 'fisher' ? man : woman)(at, F, face(at, look), { pose: kind === 'cook' ? 'kneel' : kind === 'weaver' ? 'squat' : 'cross', over: 'none' });
     if (kind === 'cook' && rand() < 0.5) { const a2 = [cx + 1.1, cz - 0.4]; woman(a2, F, face(a2, [cx, cz]), { pose: 'squat', over: 'none' }); }
     const d = [cx - 1.6, z1 + 1.4]; (rand() < 0.5 ? woman : man)(d, dd(d[0], d[1]), face(d, [cx + 3, z1 + 6]), { pose: rand() < 0.5 ? 'squat' : 'stand' });
   }
@@ -238,6 +242,7 @@ function life() {
     const nm = [x - 2.0, zc + CREEK.w / 2 + 0.6]; man(nm, height(nm[0], nm[1]), 1.57, { pose: 'squat', over: 'none' });
     const fr = [x, zc + CREEK.w / 2 + 6.4]; woman(fr, height(fr[0], fr[1]), 3.14, { pose: 'stand', carry: 'basket' });
   }
+  for (const x of [LANDINGS[0], LANDINGS[2]]) { const cx = x + 12, cz = creekZ(cx) + 19, a1 = [cx + 0.3, cz + 0.9], a2 = [cx - 2.2, cz - 0.9]; man(a1, height(a1[0], a1[1]), face(a1, [cx, cz]), { pose: 'squat', over: 'none' }); woman(a2, height(a2[0], a2[1]), face(a2, [cx - 1.7, cz]), { pose: 'squat', over: 'none' }); }
   for (let k = 0; k < 10; k++) { const at = [PLAZA[0] + 10 + rand() * 200, PLAZA[1] + 10 + rand() * 170]; E.push({ t: 'animal', kind: 'dog', at, y: 0, rot: rand() * 6.28, seed: 100 + k }); }
   return E;
 }

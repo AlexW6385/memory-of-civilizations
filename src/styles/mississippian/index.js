@@ -15,6 +15,8 @@ import { chiefHall } from './hall.js';
 import { placeElements } from './place.js';
 import { moundElements } from './mound.js';
 import { dressHouse, leanTo, furnishKind } from './dress.js';
+import { frontRule, bankRing, matWalls, doorCovering } from './front.js';
+import { yardElements } from './yard.js';
 /**
  * great_house: { rect, y, h, rise, post (a great post before the door: [x, z]) } — a large
  * building of posts set in wall trenches, daubed with clay: the walls, a tall hipped roof of thatch
@@ -41,7 +43,9 @@ function house(el, ctx) {
   const wh = 1.75 + rand() * 0.5;                                            // wall height varies from house to house
   bag.add(WALL, box(x0, foot, z0, x1, y + wh, z1)); col.rect(el.rect, foot, y + wh);
   // earth banked against the foot of the walls [stated: "dirt banked along woven mat walls" — Illinois State Museum]
-  bag.add('silt', frustum([x0 - 0.45, z0 - 0.45, x1 + 0.45, z1 + 0.45], foot, y + 0.32, 0.45, 0.45, 0.45, 0.45));
+  const lod0 = el.lod ?? 0, fr = frontRule(el.seed || 1, lod0, x1 - x0), f = el.door ? (el.door === 'n' ? z0 : z1) : rand() < 0.5 ? z0 : z1, sg = f === z0 ? -1 : 1, mx = (x0 + x1) / 2 + fr.off, hw = fr.hw;
+  bankRing(bag, el.rect, foot, fr.fin === 'banked' ? y + 0.9 : y + 0.32, fr.fin === 'banked' ? 0.65 : 0.45, sg < 0 ? 'n' : 's', mx, hw);
+  if (fr.fin !== 'plaster') matWalls(bag, el.rect, y, fr.fin === 'banked' ? 0.88 : 0.28, wh, { wall: sg < 0 ? 'n' : 's', x: mx, hw, top: 1.5 }, lod0);
   const along = (x1 - x0) >= (z1 - z0), rise = 2.4 + rand() * 1.6, o = 0.3 + rand() * 0.25;
   const hipped = rand() < 0.5;
   if (hipped) thatchHip(bag, el.rect, y + wh, rise, o + 0.1, 3 + (rand() < 0.4 ? 1 : 0));
@@ -55,16 +59,17 @@ function house(el, ctx) {
     const ry = y + wh + rise + 0.05, cr = (a, b) => { for (const s2 of [-1, 1]) bag.add('timber', rod([a - (along ? 0.35 * s2 : 0), ry - 0.1, b - (along ? 0 : 0.35 * s2)], [a + (along ? 0.35 * s2 : 0), ry + 0.8, b + (along ? 0 : 0.35 * s2)], 0.03, 5)); };
     if (along) { cr(x0 - o - 0.1, (z0 + z1) / 2); cr(x1 + o + 0.1, (z0 + z1) / 2); } else { cr((x0 + x1) / 2, z0 - o - 0.1); cr((x0 + x1) / 2, z1 + o + 0.1); }
   }
-  const f = el.door ? (el.door === 'n' ? z0 : z1) : rand() < 0.5 ? z0 : z1, sg = f === z0 ? -1 : 1, mx = (x0 + x1) / 2;
-  bag.add('opening', box(mx - 0.4, y, f + sg * 0.01, mx + 0.4, y + 1.5, f + sg * 0.05));
-  // the door posts and the lintel pole across them
+  bag.add('opening', box(mx - hw, y, Math.min(f, f + sg * 0.05), mx + hw, y + 1.5, Math.max(f, f + sg * 0.05)));
+  // the door posts and the lintel pole across them, the clay sill
   const z0d = Math.min(f, f + sg * 0.16), z1d = Math.max(f, f + sg * 0.16);
-  for (const sd of [-1, 1]) bag.add(el.seed % 7 === 0 ? 'timber_red' : 'timber', box(mx + sd * 0.48 - 0.07, foot, z0d, mx + sd * 0.48 + 0.07, y + 1.72, z1d));
-  bag.add('timber', box(mx - 0.68, y + 1.58, z0d - 0.005, mx + 0.68, y + 1.74, z1d + 0.005));
+  for (const sd of [-1, 1]) bag.add(el.seed % 7 === 0 ? 'timber_red' : 'timber', box(mx + sd * (hw + 0.08) - 0.07, foot, z0d, mx + sd * (hw + 0.08) + 0.07, y + 1.72, z1d));
+  bag.add('timber', box(mx - hw - 0.28, y + 1.58, z0d - 0.005, mx + hw + 0.28, y + 1.74, z1d + 0.005));
+  bag.add(WALL, box(mx - hw - 0.2, y - 0.25, Math.min(f, f + sg * 0.45), mx + hw + 0.2, y + 0.06, Math.max(f, f + sg * 0.45)));
+  doorCovering(bag, fr.curtain, fr.tan, y, { x: mx, hw, f, sg });
   // eye-level dressing, weathering, a lean-to store at one end (docs §5.7)
   const lod = el.lod ?? 0, w = x1 - x0;
   if (lod < 2 && w < 6.0 && rand() < 0.3 && el.ext !== false) leanTo(ctx, el, { x0, z0, x1, z1, y, foot, wh, end: rand() < 0.5 ? 1 : -1, seed: el.seed });
-  dressHouse(ctx, el, { x0, z0, x1, z1, y, f, sg, mx, wh, rise, seed: el.seed, lod, smoke: hipped });
+  dressHouse(ctx, el, { x0, z0, x1, z1, y, f, sg, mx, wh, rise, seed: el.seed, lod, smoke: hipped, skin: fr.fin !== 'plaster' });
 }
 /**
  * A house opened and furnished (house with open: true; docs/settlements/cahokia.md §5.1): "a
@@ -86,9 +91,10 @@ function openHouse(el, { bag, col, lights }) {
   const W = [[x0, z0, x1, z0 + t], [x0, z0 + t, x0 + t, z1 - t], [x1 - t, z0 + t, x1, z1 - t], [x0, z1 - t, cx - dw / 2, z1], [cx + dw / 2, z1 - t, x1, z1]];
   for (const r of W) { bag.add(WALL, box(r[0], foot, r[1], r[2], top, r[3])); col.rect(r, foot, top); }
   bag.add(WALL, box(cx - dw / 2, F + dh, z1 - t, cx + dw / 2, top, z1)); col.rect([cx - dw / 2, z1 - t, cx + dw / 2, z1], F + dh, top);
-  // the earth banked outside, broken at the door
-  for (const [r, ins] of [[[x0 - 0.45, z0 - 0.45, x1 + 0.45, z0], [0.45, 0.45, 0.45, 0]], [[x0 - 0.45, z0, x0, z1], [0.45, 0, 0, 0]], [[x1, z0, x1 + 0.45, z1], [0, 0.45, 0, 0]],
-    [[x0 - 0.45, z1, cx - dw / 2 - 0.3, z1 + 0.45], [0.45, 0.3, 0, 0.45]], [[cx + dw / 2 + 0.3, z1, x1 + 0.45, z1 + 0.45], [0.3, 0.45, 0, 0.45]]]) bag.add('silt', frustum(r, foot, y + 0.32, ...ins));
+  // the earth banked outside, broken at the door; the walls' finish by rule (front.js)
+  const fr = frontRule(el.seed || 1, el.lod ?? 0, x1 - x0);
+  bankRing(bag, el.rect, foot, fr.fin === 'banked' ? y + 0.9 : y + 0.32, fr.fin === 'banked' ? 0.65 : 0.45, 's', cx, dw / 2);
+  if (fr.fin !== 'plaster') matWalls(bag, el.rect, y, fr.fin === 'banked' ? 0.88 : 0.28, 2.2, { wall: 's', x: cx, hw: dw / 2, top: dh + 0.04 }, 0);
   // the door frame: two posts, the lintel pole, the clay step down to the floor
   for (const sd of [-1, 1]) bag.add('timber', box(cx + sd * (dw / 2 + 0.07) - 0.07, foot, z1 - 0.02, cx + sd * (dw / 2 + 0.07) + 0.07, F + dh + 0.12, z1 + 0.14));
   bag.add('timber', box(cx - dw / 2 - 0.2, F + dh, z1 - 0.025, cx + dw / 2 + 0.2, F + dh + 0.14, z1 + 0.145));
@@ -147,7 +153,7 @@ function openHouse(el, { bag, col, lights }) {
     bag.add('linen', rod([hxk, top - 0.1, hzk], [hxk, top - 0.45, hzk], 0.01, 4));
     for (let e = 0; e < 4; e++) { const a = e * 1.57 + k; bag.add(e % 3 ? 'cloth_ochre' : 'paint_ochre', lathe([[0.001, 0], [0.03, 0.04], [0.035, 0.12], [0.02, 0.17], [0.001, 0.18]], 6, null, hxk + Math.cos(a) * 0.05, top - 0.65, hzk + Math.sin(a) * 0.05)); }
   }
-  dressHouse({ bag, col }, el, { x0, z0, x1, z1, y, f: z1, sg: 1, mx: cx, wh: 2.2, rise: 3.0, seed: el.seed, lod: 0, smoke: false });
+  dressHouse({ bag, col }, el, { x0, z0, x1, z1, y, f: z1, sg: 1, mx: cx, wh: 2.2, rise: 3.0, seed: el.seed, lod: 0, smoke: false, skin: fr.fin !== 'plaster' });
   furnishKind({ bag, col }, el, { x0, z0, x1, z1, t, F, cx, cz, top, hx, hz }, el.kind || 'cook');
 }
 /**
@@ -355,6 +361,6 @@ const flip = (t) => { const o = []; for (let i = 0; i < t.length; i += 9) o.push
 
 registerStyle('mississippian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, great_house: greatHouse, chief_hall: chiefHall, ...neighbourhoodElements, ...placeElements, ...moundElements, miss_house: house, palisade, woodhenge, plaza_pole: pole, chunkey_yard: chunkeyYard, charnel_house: charnelHouse },
+  elements: { ...STYLES.qing.elements, great_house: greatHouse, chief_hall: chiefHall, ...neighbourhoodElements, ...placeElements, ...moundElements, miss_house: house, palisade, woodhenge, plaza_pole: pole, chunkey_yard: chunkeyYard, charnel_house: charnelHouse, ...yardElements },
   objects: {},
 });

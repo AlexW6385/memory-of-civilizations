@@ -19,6 +19,8 @@ export const monks = {
     // the log stairs up the ramp, the first stretch to the terrace, the second to the summit
     { t: 'log_stair', from: [-25, -36], to: [-25, -76], width: 7, y: height, step: 1.5 },
     { t: 'log_stair', from: [-25, -106], to: [-25, -150], width: 7, y: height, step: 1.5 },
+    { t: 'stair_rail', from: [-25, -47], to: [-25, -72], half: 4.4, y: height, step: 2.5 },
+    { t: 'stair_rail', from: [-25, -112], to: [-25, -146], half: 4.4, y: height, step: 2.5 },
     // the first terrace: two more lodges (the houses of the chief's kin and of the priests), a fence of painted posts along its south edge, broken by the ramp
     { t: 'chief_hall', rect: LODGES[0], y: height(...mid(LODGES[0])), h: 4, rise: 6.5, seed: 13 },
     { t: 'chief_hall', rect: LODGES[1], y: height(...mid(LODGES[1])), h: 4, rise: 6.5, seed: 14 },
