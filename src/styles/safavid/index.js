@@ -1099,7 +1099,7 @@ function khanehOpen(el, { bag, col, lights }) {
     const len = side === 'n' || side === 's' ? (x1 - d.e) - (x0 + d.w) : (z1 - d.s) - (z0 + d.n);
     if (k === 'hall') {
       const arches = v.triple ? [{ at: 0.18, w: 1.9, h: 4.6 }, { at: 0.5, w: 2.5, h: 5.4 }, { at: 0.82, w: 1.9, h: 4.6 }] : [{ at: 0.5, w: Math.min(4.2, len - 3.2), h: 5.4 }];
-      return { kind: 'open', h: hallH, arches, windows: v.triple ? [] : [{ at: 0.13, w: 1.0, h: 1.7 }, { at: 0.87, w: 1.0, h: 1.7 }] };
+      return { kind: 'open', h: hallH, arches, windows: v.triple || len < 9 ? [] : [{ at: 0.13, w: 1.0, h: 1.7 }, { at: 0.87, w: 1.0, h: 1.7 }] };
     }
     if (k === 'sedari') return { kind: 'room', h: H, arches: [0.25, 0.5, 0.75].map((at) => ({ at, w: 1.05, h: 2.5 })) };
     if (k === 'winter') return { kind: 'room', h: H, arches: [{ at: 0.5, w: 1.1, h: 2.5 }], windows: [{ at: 0.18, w: 0.9, h: 1.5 }, { at: 0.82, w: 0.9, h: 1.5 }] };
