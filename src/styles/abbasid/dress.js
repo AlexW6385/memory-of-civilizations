@@ -5,7 +5,7 @@
 import { box, lathe } from '../../core/geom.js';
 import { rug, cushion } from './palace.js';
 import { desk, bookcase } from './library.js';
-import { wallRun } from './kit.js';
+import { wallRun, stuccoPanel, sawtooth } from './kit.js';
 
 const cl = ['cloth_maroon', 'cloth_indigo', 'cloth_green', 'cloth_ochre', 'cloth_red', 'cloth_blue'];
 
@@ -187,16 +187,31 @@ export function furnish(c, kind, r, door, y, ceil, rand, { light = true } = {}) 
  * beam and its posts, a brick bench (mastaba) at the door, a grilled window, the ends of the rafters under the parapet, patches of fallen plaster,
  * a clay spout, the damp course of bitumen at the foot. `ox` the doorway's offset, `rich` more of it.
  */
-export function dressFront(c, { hw, hd, T, y, H, ox, mat, top, rand, storeys }) {
+export function dressFront(c, { hw, hd, T, y, H, ox, mat, top, rand, storeys, door = { kind: 'arch', w: 1.5, h: 2.7 }, tier = 1, parapet = 'solid' }) {
   const { bag } = c, zf = hd, patchM = mat === 'brick_baked' || mat === 'brick_buff' ? 'mud_plaster' : 'brick_buff';
-  const dx = ox, w = 1.5;
-  // the doorway: a timber frame (lintel at 2.7 m under the arch's crown reads as a beam across the leaf's head), the leaf open against the jamb
-  bag.add('cedar', box(dx - w / 2 - 0.1, y, zf + 0.01, dx - w / 2 - 0.02, y + 2.15, zf + 0.09)); bag.add('cedar', box(dx + w / 2 + 0.02, y, zf + 0.01, dx + w / 2 + 0.1, y + 2.15, zf + 0.09));
-  bag.add('palm_trunk', box(dx - w / 2 - 0.16, y + 2.15, zf + 0.0, dx + w / 2 + 0.16, y + 2.33, zf + 0.12));
-  const lf = rand() < 0.5 ? 1 : -1, jx = dx + lf * (w / 2 - 0.03);
-  bag.add('wood_dark', box(jx - 0.03, y + 0.05, zf - T + 0.02, jx + 0.03, y + 2.1, zf - T + 0.02 + w * 0.5));
-  for (const hy of [0.4, 1.0, 1.6]) bag.add('iron', box(jx - 0.04, y + hy, zf - T + 0.02, jx + 0.04, y + hy + 0.05, zf - T + 0.02 + w * 0.5));
-  bag.add('iron', box(jx - 0.04, y + 1.05, zf - T + 0.02 + w * 0.5 - 0.1, jx + 0.04, y + 1.12, zf - T + 0.02 + w * 0.5)); // the knocker
+  const dx = ox, w = door.w, dh = door.h, dk = door.kind, FR = { O: [0, zf], U: [1, 0], N: [0, 1] };
+  // the doorway: a timber frame (the lintel across the leaf's head), the leaf (two leaves of a gate) standing open against the jamb
+  const post = dk === 'lintel' ? dh : Math.min(dh - 0.5, 2.15);
+  bag.add('cedar', box(dx - w / 2 - 0.1, y, zf + 0.01, dx - w / 2 - 0.02, y + post, zf + 0.09)); bag.add('cedar', box(dx + w / 2 + 0.02, y, zf + 0.01, dx + w / 2 + 0.1, y + post, zf + 0.09));
+  if (dk !== 'lintel') bag.add('palm_trunk', box(dx - w / 2 - 0.16, y + post, zf + 0.0, dx + w / 2 + 0.16, y + post + 0.18, zf + 0.12));
+  const lf = rand() < 0.5 ? 1 : -1, leaf = (sg) => {
+    const jx = dx + sg * (w / 2 - 0.03), lw = dk === 'gate' ? w * 0.5 : w * 0.5;
+    bag.add('wood_dark', box(jx - 0.03, y + 0.05, zf - T + 0.02, jx + 0.03, y + post - 0.05, zf - T + 0.02 + lw));
+    for (const hy of dk === 'gate' ? [0.4, 1.0, 1.6, 2.2] : [0.4, 1.0, 1.6]) bag.add('iron', box(jx - 0.04, y + hy, zf - T + 0.02, jx + 0.04, y + hy + 0.05, zf - T + 0.02 + lw));
+    bag.add('iron', box(jx - 0.04, y + 1.05, zf - T + 0.02 + lw - 0.1, jx + 0.04, y + 1.12, zf - T + 0.02 + lw)); // the knocker
+  };
+  leaf(lf); if (dk === 'gate') leaf(-lf);
+  // by kind: a lattice transom over a flat lintel; the brick hood of a porch; the stucco frames of a rich house's arch
+  if (dk === 'lintel') {
+    bag.add('opening', box(dx - w / 2 + 0.05, y + dh + 0.14, zf - 0.02, dx + w / 2 - 0.05, y + dh + 0.7, zf + 0.04)); bag.add('lattice', box(dx - w / 2 + 0.05, y + dh + 0.14, zf + 0.04, dx + w / 2 - 0.05, y + dh + 0.7, zf + 0.06));
+    bag.add('palm_trunk', box(dx - w / 2 - 0.22, y + dh, zf - 0.02, dx + w / 2 + 0.22, y + dh + 0.14, zf + 0.14)); bag.add('brick_baked', box(dx - w / 2 - 0.22, y + dh + 0.7, zf, dx + w / 2 + 0.22, y + dh + 0.78, zf + 0.06));
+  } else if (dk === 'porch') {
+    for (const sg of [-1, 1]) { const x0 = dx + sg * (w / 2 + 0.02), x1 = dx + sg * (w / 2 + 0.3); bag.add('brick_baked', box(Math.min(x0, x1), y, zf, Math.max(x0, x1), y + dh + 0.35, zf + 0.85)); c.col.rect([Math.min(x0, x1), zf, Math.max(x0, x1), zf + 0.85], y, y + dh + 0.35); }
+    bag.add('cedar', box(dx - w / 2 - 0.34, y + dh + 0.35, zf, dx + w / 2 + 0.34, y + dh + 0.5, zf + 0.9)); bag.add('mud_plaster', box(dx - w / 2 - 0.38, y + dh + 0.5, zf, dx + w / 2 + 0.38, y + dh + 0.62, zf + 0.94));
+    bag.add('brick_baked', box(dx - w / 2 - 0.34, y + dh + 0.62, zf + 0.02, dx + w / 2 + 0.34, y + dh + 0.7, zf + 0.9));
+  }
+  if (tier === 2 && (dk === 'arch' || dk === 'gate')) for (const sg of [-1, 1]) { const u0 = dx + sg * (w / 2 + 0.5), u1 = dx + sg * (w / 2 + 1.0); if (Math.abs(u1) < hw - 0.5) stuccoPanel(bag, FR, Math.min(u0, u1), Math.max(u0, u1), y + 0.5, y + Math.min(dh - 0.4, 2.3), 0.035, 'stucco', 0.25); }
+  if (parapet === 'frieze') sawtooth(bag, FR, -hw + 0.3, hw - 0.3, y + H - 0.62, 'brick_baked');
   // the mastaba: a brick seat 0.42 high, 0.42 deep, 1.8 long, beside the door
   const bs = -lf * (w / 2 + 1.2);
   if (hw - Math.abs(dx + bs) > 1.2 && rand() < 0.7) { bag.add('brick_baked', box(dx + bs - 0.9, y, zf, dx + bs + 0.9, y + 0.42, zf + 0.4)); c.col.rect([dx + bs - 0.9, zf, dx + bs + 0.9, zf + 0.4], y, y + 0.42); bag.add('reed_mat', box(dx + bs - 0.6, y + 0.42, zf + 0.04, dx + bs + 0.2, y + 0.435, zf + 0.36)); }
