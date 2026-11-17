@@ -99,6 +99,39 @@ function skinDetail(bag, col, r, b, y0, h, i, cx, rand) {
 }
 
 /**
+ * The brick courses of a stage's battered skin (docs/settlements/ur.md §4.1d): a ledge every 0.42 m where each set-back course of baked
+ * brick stands 5 cm proud of the one above it, run along each face and following its slope (so the skin reads as laid brick, and the
+ * low sun picks every course out). One strip per face and row, in the stage's own material, so it merges with the stage's skin.
+ */
+function courseLedges(bag, mat, r, b, y0, h, cx, front) {
+  const T = [], lip = 0.055, step = 0.42;
+  const quad = (a, c, d, e) => { T.push(...a, ...c, ...d, ...a, ...d, ...e, ...a, ...d, ...c, ...a, ...e, ...d); };
+  const FACES = [['n', r[0], r[2]], ['s', r[0], r[2]], ['w', r[1], r[3]], ['e', r[1], r[3]]];
+  const pt = (f, u, yy, off) => { const o = b * (yy - y0) / h; return f === 'n' ? [u, yy, r[1] + o - off] : f === 's' ? [u, yy, r[3] - o + off] : f === 'w' ? [r[0] + o - off, yy, u] : [r[2] - o + off, yy, u]; };
+  for (const [f, a0, a1] of FACES) {
+    const segs = f === 'n' && front ? [[a0 + 0.3, cx - 5], [cx + 5, a1 - 0.3]] : [[a0 + 0.3, a1 - 0.3]];
+    for (let yy = y0 + 0.5; yy < y0 + h - 0.4; yy += step) for (const [u0, u1] of segs) {
+      const A = [pt(f, u0, yy + 0.07, 0), pt(f, u1, yy + 0.07, 0)], B = [pt(f, u0, yy + 0.04, lip), pt(f, u1, yy + 0.04, lip)], C = [pt(f, u0, yy - 0.005, lip), pt(f, u1, yy - 0.005, lip)], D = [pt(f, u0, yy - 0.005, 0), pt(f, u1, yy - 0.005, 0)];
+      quad(A[0], A[1], B[1], B[0]); quad(B[0], B[1], C[1], C[0]); quad(C[0], C[1], D[1], D[0]);
+    }
+  }
+  bag.add(mat, fromTriangles(T));
+}
+
+/** Merlons (stepped battlement blocks) along the top of a rect [x0, z0, x1, z1] at y, each mw wide and mh high, pitch 2 mw; skip(px, pz) leaves a place bare. */
+export function merlons(bag, mat, [x0, z0, x1, z1], y, mw = 0.7, mh = 0.6, th = 0.5, skip = null) {
+  for (const [ax, az, bx, bz, nx, nz] of [[x0, z0, x1, z0, 0, 1], [x0, z1, x1, z1, 0, -1], [x0, z0, x0, z1, 1, 0], [x1, z0, x1, z1, -1, 0]]) {
+    const L = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.floor(L / (mw * 2.1))), pitch = L / n;
+    for (let i = 0; i < n; i++) {
+      const u = (i + 0.5) * pitch, px = ax + (bx - ax) * u / L, pz = az + (bz - az) * u / L;
+      if (skip && skip(px, pz)) continue;
+      const hw = mw / 2 * (1 + (i % 2) * 0.001), cx = px + nx * th / 2, cz = pz + nz * th / 2;
+      bag.add(mat, nx ? box(cx - th / 2, y, pz - hw, cx + th / 2, y + mh, pz + hw) : box(px - hw, y, cz - th / 2, px + hw, y + mh, cz + th / 2));
+    }
+  }
+}
+
+/**
  * ziggurat: { c, y, stages: [{ w, d, h, batter }], front ('n' | 's'), shrine: { w, d, h } }: the stages
  * sloping in, buttressed; on the front the central stair projecting out to the first stage's top and
  * two stairs leaning on the wall from the corners, meeting at the gatehouse; a single stair on up;
@@ -135,7 +168,7 @@ function ziggurat(el, ctx) {
       }
     }
     if (stains.length) bag.add('plaster_streak', fromTriangles(stains));
-    if (LIT) skinDetail(bag, col, r, b, y0s, s.h, i, cx, rng(900 + i * 17));
+    if (LIT) { skinDetail(bag, col, r, b, y0s, s.h, i, cx, rng(900 + i * 17)); courseLedges(bag, SK, r, b, y0s, s.h, cx, i === 0); }
     y += s.h;
   });
   const S0 = tops[0], fz = S0.r[1];                          // the front face (north)
@@ -159,6 +192,18 @@ function ziggurat(el, ctx) {
   bag.add(LIT ? WH : MP, box(cx - gw, S0.y1 + 4.8, gz, cx + gw, S0.y1 + GH, gz + 4));
   if (LIT) for (const sx of [-1, 1]) bag.add('glaze_lapis', box(Math.min(cx + sx * 2.6, cx + sx * 6.5) - 0.04, S0.y1 + GH - 0.9, gz - 0.04, Math.max(cx + sx * 2.6, cx + sx * 6.5) + 0.04, S0.y1 + GH - 0.3, gz));   // a band of blue glaze under the gatehouse's top
   col.floor([cx - gw, gz, cx + gw, gz + 4], S0.y1 + GH);
+  if (LIT) {                                                          // the gatehouse dressed (§4.1d): pilasters and blind niches on the towers' fronts, a stepped frame of baked brick round the way, a battlement of merlons
+    const y1 = S0.y1;
+    for (const sx of [-1, 1]) {
+      for (const u of [3.45, 4.5, 5.55]) { const px = cx + sx * u; bag.add(WH, box(px - 0.25, y1, gz - 0.22, px + 0.25, y1 + GH - 1.0, gz)); }
+      for (const u of [3.975, 5.025]) { const px = cx + sx * u; bag.add('opening', box(px - 0.2, y1 + 1.7, gz - 0.02, px + 0.2, y1 + 4.3, gz)); }
+      bag.add(BB, box(Math.min(cx + sx * 2.6, cx + sx * 3.0), y1, gz - 0.4, Math.max(cx + sx * 2.6, cx + sx * 3.0), y1 + 4.9, gz));
+      bag.add(BB, box(Math.min(cx + sx * 3.0, cx + sx * 3.25), y1, gz - 0.2, Math.max(cx + sx * 3.0, cx + sx * 3.25), y1 + 4.9, gz));
+    }
+    bag.add(BB, box(cx - gw, y1 + 4.8, gz - 0.4, cx + gw, y1 + 5.15, gz));
+    bag.add(BB, box(cx - gw - 0.65, y1 + 4.9, gz - 0.2, cx + gw + 0.65, y1 + 5.3, gz));
+    merlons(bag, WH, [cx - 6.5, gz, cx + 6.5, gz + 4], y1 + GH, 0.7, 0.75, 0.5);
+  }
   bag.add('palm_trunk', box(cx - gw - 0.2, S0.y1 + 4.62, gz - 0.12, cx + gw + 0.2, S0.y1 + 4.8, gz + 0.3));
   // the stairs on up the second and third stages, each from the front edge of the stage below
   for (let i = 1; i < tops.length; i++) {
@@ -245,6 +290,7 @@ function shrine(el, { bag, col, lights }) {
     crescent(bag, px, top + 1.2, pz - 0.1, 1.2, 0.85, 0.2); }
   // the parapet round the roof, the roof itself: mud over reed mats over palm trunks
   for (const r of [[x0, z0, x1, z0 + 0.35], [x0, z1 - 0.35, x1, z1], [x0, z0, x0 + 0.35, z1], [x1 - 0.35, z0, x1, z1]]) bag.add(WH, box(r[0], y + H, r[1], r[2], y + H + 0.5, r[3]));
+  if (LIT) merlons(bag, WH, [x0, z0, x1, z1], y + H + 0.5, 0.55, 0.5, 0.35, (px, pz) => pz < z0 + 0.5 && Math.abs(px - cx) < dw / 2 + 2.4);   // the battlement of the god's house (§4.1d)
   bag.add(MP, box(x0 + 0.35, y + H - 0.25, z0 + 0.35, x1 - 0.35, y + H, z1 - 0.35)); col.floor([x0, z0, x1, z1], y + H);
   for (const [a, b] of [[z0 + t, zA], [zC, z1 - t]]) {
     bag.add('reed_mat', box(x0 + t, y + H - 0.31, a, x1 - t, y + H - 0.25, b));
@@ -494,6 +540,14 @@ function gateTower(el, { bag, col }) {
     bag.add('brick_buff', box(x0 - 0.12, h - 0.1, z0 - 0.12, x1 + 0.12, h + 0.3, z1 + 0.12));
     for (const [fz0, fz1] of ns ? [[z0 - 0.04, z0], [z1, z1 + 0.04]] : [[z0, z1]]) if (ns) { bag.add('glaze_lapis', box(x0 + 0.5, h - 1.5, fz0, x1 - 0.5, h - 0.7, fz1)); }
     if (!ns) for (const [fx0, fx1] of [[x0 - 0.04, x0], [x1, x1 + 0.04]]) bag.add('glaze_lapis', box(fx0, h - 1.5, z0 + 0.5, fx1, h - 0.7, z1 - 0.5));
+  }
+  if (ns) {                                                           // the way framed in stepped reveals of baked brick on both faces, and a battlement on each tower (§4.1d)
+    for (const [fa, fb, sgn] of [[z0 - 0.35, z0, -1], [z1, z1 + 0.35, 1]]) {
+      for (const sx of [-1, 1]) bag.add(BB, box(Math.min(c + sx * w / 2, c + sx * (w / 2 + 0.55)), 0, fa, Math.max(c + sx * w / 2, c + sx * (w / 2 + 0.55)), dh + 0.5, fb));
+      bag.add(BB, box(c - w / 2 - 0.55, dh, fa, c + w / 2 + 0.55, dh + 0.5, fb));
+      bag.add(BB, box(c - w / 2 - 0.8, dh + 0.5, sgn < 0 ? z0 - 0.5 : z1, c + w / 2 + 0.8, dh + 0.8, sgn < 0 ? z0 : z1 + 0.5));
+    }
+    for (const r of parts) merlons(bag, m, r, h + (el.glaze ? 0.3 : 0), 0.7, 0.6, 0.5);
   }
   // the doors, standing open against the passage walls a little way in
   const e = ns ? z0 : x0;
