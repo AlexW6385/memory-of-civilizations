@@ -39,14 +39,15 @@ test('ways keep out of the houses and the shop rows; booths stand clear of shop 
   for (const s of S.SHOP_SITES) { assert.ok(!L.inShopStrip(s.at[0], s.at[1], 0), `booth in the shop strip ${s.at}`); assert.ok(!L.inHouse(s.at[0], s.at[1], 0)); }
 });
 
-test('the tea house, the pharmacy and the furnished trade shops lie inside real shops; furnished houses are lod-0 lots with their parts', async () => {
+test('the tea house, the pharmacy and the furnished trade shops lie inside real shops; furnished houses are the entered lots with their parts', async () => {
   const ins = L.interiorShops();
   const kinds = ins.map((s) => s.kind);
   for (const k of ['pharmacy', 'teahouse']) assert.ok(kinds.includes(k), k);
   assert.equal(kinds.filter((k) => k === 'teahouse' || k === 'pharmacy').length, 2);
   for (const s of ins) assert.ok(s.z1 - s.z0 >= 5.6 && s.side === 'w');
   const H = await import('../src/settlements/qing-beijing/houses.js');
-  const f = L.furnishedHouses(5);
-  assert.equal(f.length, 5);
+  const f = L.furnishedHouses();
+  assert.ok(f.length >= 40, `${f.length} entered houses`);
+  for (const h of f) assert.ok(h.lod <= 2 && h.rect[2] - h.rect[0] >= 24, 'a near lot, wide enough');
   for (const h of f) { const P = H.houseParts(h); assert.ok(P.main[2] > P.main[0] && P.wings.length === 2, 'two wings'); for (const w of P.wings) assert.ok(w.rect[1] >= P.main[3], 'wing south of the main house'); }
 });
