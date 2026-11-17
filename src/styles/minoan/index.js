@@ -126,6 +126,25 @@ function wing(el, { bag, col }) {
         for (let u = 0.1; u < L - 0.5; u += 1.8 + w2() * 1.6) { const w = Math.min(L - 0.1 - u, 1.2 + w2() * 2.4); if (free(u, u + w)) at('plaster_damp', u, u + w, y + 1.22, y + 1.5 + w2() * 0.7, 0.0, 0.012); }
         for (let i = 0, m = Math.floor(L / 6); i < m; i++) { const u = 0.5 + w2() * (L - 1.5), w = 0.3 + w2() * 0.6, v = y + 1.4 + w2() * (H - 3.2); if (free(u, u + w)) at(w2() < 0.7 ? 'rubble' : 'plaster_white', u, u + w, v, v + 0.2 + w2() * 0.5, 0.02, w2() < 0.5 ? 0.036 : 0.05); }
         for (let u = 1 + w2() * 3; u < L - 0.6; u += 4 + w2() * 5) if (free(u, u + 0.3)) at('plaster_streak', u, u + 0.28, y + H - 2.4 - w2() * 1.2, y + H - 0.9, 0.03, 0.044);
+        // the ashlar base (§4g): a plinth course of limestone standing 0.07 proud, over it the orthostats, upright slabs of gypsum 0.9 m high and 1–2.5 m long
+        // set a little proud with a dark joint between, a thin cornice over them; on some a mason's mark (the trident, the cross, the ladder) incised and filled dark
+        { const wA = rng((el.seed || 3) * 1303 + f.charCodeAt(0) * 17);
+          for (let u = 0.05, k = 0; u < L - 0.6; k++) {
+            const w = Math.min(L - 0.05 - u, 1.0 + wA() * 1.5), m = wA();
+            if (w > 0.4 && free(u, u + w + 0.05)) {
+              at('limestone', u, u + w + 0.05, y, y + 0.3, 0.0, 0.07);
+              at(G, u, u + w, y + 0.3, y + 1.2, 0.0, 0.045 + (k % 2) * 0.012);
+              at('plaster_damp', u + w, u + w + 0.05, y + 0.3, y + 1.2, 0.0, 0.02);
+              at(G, u - 0.02, u + w + 0.07, y + 1.2, y + 1.26, 0.0, 0.09);
+              if (m < 0.3 && w > 1.2) {
+                const c = u + w / 2, d0 = 0.05 + (k % 2) * 0.012, d1 = d0 + 0.006, v = y + 0.55;
+                if (m < 0.1) { at('wood_dark', c - 0.015, c + 0.015, v, v + 0.3, d0, d1); for (const dx of [-0.1, 0, 0.1]) at('wood_dark', c + dx - 0.015, c + dx + 0.015, v + 0.2, v + 0.34, d0, d1); at('wood_dark', c - 0.115, c + 0.115, v + 0.18, v + 0.21, d0, d1); }
+                else if (m < 0.2) { at('wood_dark', c - 0.015, c + 0.015, v, v + 0.3, d0, d1); at('wood_dark', c - 0.13, c + 0.13, v + 0.13, v + 0.16, d0, d1); }
+                else { at('wood_dark', c - 0.11, c - 0.08, v, v + 0.32, d0, d1); at('wood_dark', c + 0.08, c + 0.11, v, v + 0.32, d0, d1); for (const dv of [0.05, 0.15, 0.25]) at('wood_dark', c - 0.08, c + 0.08, v + dv, v + dv + 0.025, d0, d1); }
+              }
+            }
+            u += w + 0.05;
+          } }
       } }
     if (el.horns !== false) {
       for (let x = x0 + 2; x < x1 - 1; x += 4) { horns(bag, x, y + H, z0 + 0.4); horns(bag, x, y + H, z1 - 0.4); }
@@ -288,18 +307,50 @@ function throneRoom(el, ctx) {
   for (let i = 0; i < 4; i++) bag.add(G, box(px0 + 0.004, y - pd + 0.25 * i, pz1 - 0.02, px1, y - pd + 0.25 * i + 0.24, pz1 - 0.004));
 }
 
-/** lightwell_tiers: the colonnades of the Grand Staircase's light well { rect (the shaft), y, storeys, sh } on its north side, storey above storey. */
+/**
+ * lightwell_tiers: the Grand Staircase's light well { rect (the shaft), y, storeys, sh }: the colonnade on its north side
+ * storey above storey, and the broad gypsum flights that climb round it from one landing to the next (docs/settlements/knossos.md §4g).
+ * The flights alternate: the first from the south on the east side up to the north landing of the first floor, the second back
+ * down the west side to the south landing of the second, the third up the east side again. The lowest rests on earth, the upper
+ * flights on timber beams (slab steps), their open edge a plastered balustrade stepping with them.
+ */
 function lightwellTiers(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, n = el.storeys, sh = el.sh ?? 3.6, ld = 1.0;
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, n = el.storeys, sh = el.sh ?? 3.6, ld = 1.0, SW = 2.0, NS = 20, rise = sh / NS, tread = (z1 - z0 - 2 * ld) / NS;
+  const cxs = [x0 + (x1 - x0) * 0.42, x0 + (x1 - x0) * 0.58];
+  // the run of balustrade along a landing's inner edge, with the gaps where a flight arrives or leaves
+  const rail = (a, b, zr, yk, up) => {
+    if (b - a < 0.05) return;
+    bag.add(P, box(a, yk, zr, b, yk + 0.85, zr + 0.22)); bag.add('timber', box(a - 0.02, yk + 0.85, zr - 0.02, b + 0.02, yk + 0.95, zr + 0.24)); col.rect([a, zr, b, zr + 0.22], yk, yk + 0.95); void up;
+  };
   for (let k = 0; k < n; k++) {
     const yk = y + k * sh;
     if (k > 0) {
-      // the landing of this storey along the north side, its balustrade between the columns
+      // the landing of this storey along the north side, its balustrade (open where a flight comes in or goes out)
       bag.add(G, box(x0, yk - 0.3, z0, x1, yk, z0 + ld)); col.floor([x0, z0, x1, z0 + ld], yk);
-      bag.add(P, box(x0, yk, z0 + ld - 0.22, x1, yk + 0.85, z0 + ld)); bag.add('timber', box(x0, yk + 0.85, z0 + ld - 0.25, x1, yk + 0.95, z0 + ld + 0.02));
+      const gE = k === 1 || k === 3, gW = k === 1, a = x0 + (gW ? SW : 0), b = x1 - (gE ? SW : 0);
+      rail(a, b, z0 + ld - 0.22, yk);
+      if (k % 2 === 0) {
+        // the south landing of the even storeys, where the west flight arrives and the east flight starts
+        bag.add(G, box(x0, yk - 0.3, z1 - ld, x1, yk, z1)); col.floor([x0, z1 - ld, x1, z1], yk);
+        rail(x0 + SW, x1 - SW, z1 - ld, yk);
+      }
     }
     const top = k + 1 < n ? y + (k + 1) * sh - 0.3 : y + n * sh - 0.3;
-    for (const x of [x0 + (x1 - x0) * 0.3, x0 + (x1 - x0) * 0.7]) column(bag, col, x, z0 + ld - 0.11, k > 0 ? yk + 0.95 : yk, top - (k > 0 ? yk + 0.95 : yk) - 0.25, 0.2);
+    for (const x of cxs) column(bag, col, x, z0 + ld - 0.11, k > 0 ? yk + 0.95 : yk, top - (k > 0 ? yk + 0.95 : yk) - 0.25, 0.2);
+  }
+  // the flights: kf even climb the east side from the south, kf odd the west side from the north landing
+  for (let kf = 0; kf < n - 1; kf++) {
+    const east = kf % 2 === 0, ya = y + kf * sh, xa = east ? x1 - SW : x0, xb = east ? x1 : x0 + SW, inner = east ? xa : xb;
+    for (let i = 1; i <= NS; i++) {
+      const top = ya + i * rise, za = east ? z1 - ld - tread * i : z0 + ld + tread * (i - 1), zb = za + tread;
+      const bot = kf === 0 ? ya : top - 0.45;
+      bag.add(G, box(xa, bot, za, xb, top, zb)); col.floor([xa, za, xb, zb], top);
+      if (kf > 0 && i % 5 === 0) bag.add('timber', box(xa, top - 0.62, za - 0.02, xb, top - 0.45, zb + 0.02));
+      if (i < NS) {
+        const ra = east ? inner - 0.2 : inner, rb = east ? inner : inner + 0.2;
+        bag.add(P, box(ra, top, za, rb, top + 0.8, zb)); bag.add('timber', box(ra - 0.02, top + 0.8, za, rb + 0.02, top + 0.88, zb)); col.rect([ra, za, rb, zb], top, top + 0.88);
+      }
+    }
   }
   bag.add('timber', box(x0, y + n * sh - 0.3, z0 + ld - 0.4, x1, y + n * sh, z0 + ld + 0.05));
 }

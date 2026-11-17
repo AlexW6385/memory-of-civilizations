@@ -5,6 +5,7 @@
 import { RADIUS, ROAD, LANE, lots, lanes, streets, yards, openHouses, height } from './layout.js';
 import { YARD, lifePlan } from './life.js';
 import { lodTiles } from '../lod.js';
+import { houseClass } from '../../styles/minoan/town.js';
 
 const ENTRANCE = { at: [-100, 0], facing: 'e' };
 const base = (id, elements) => ({ id, style: 'minoan', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: ENTRANCE });
@@ -35,7 +36,7 @@ export const laneEls = () => {
 };
 export async function town() {
   const open = openHouses(), els = [];
-  for (const l of lots()) els.push({ t: 'dwelling', y: low(l.rect), front: l.front, rect: l.rect, seed: l.seed, alW: l.alW, alE: l.alE, ...(open.has(l) ? { enter: true, kind: open.get(l) } : {}) });
+  for (const l of lots()) els.push({ t: 'dwelling', y: low(l.rect), front: l.front, rect: l.rect, seed: l.seed, alW: l.alW, alE: l.alE, r: l.r, cls: houseClass(l.r), ...(open.has(l) ? { enter: true, kind: open.get(l) } : {}) });
   els.push(...laneEls());
   for (const y of yards()) { const c = [(y.rect[0] + y.rect[2]) / 2, (y.rect[1] + y.rect[3]) / 2]; els.push({ t: 'yard_garden', rect: y.rect, y: height(c[0], c[1]), seed: y.seed, at: c }); }
   // each open house is a room of its own ('inner': the quiet music of a room)

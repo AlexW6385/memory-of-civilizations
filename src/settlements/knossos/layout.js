@@ -111,5 +111,12 @@ export function openHouses() {
   const pick = (c, n, test = () => true) => { const d = dist(c); let k = 0; for (const l of ok.filter(test).sort((a, b) => d(a) - d(b))) { if (k >= n) break; if (!m.has(l)) { m.set(l, kinds[Math.floor(l.seed / 8) % kinds.length]); k++; } } };
   pick(ARRIVAL, 40);
   pick([-100, 0], 16, (l) => l.rect[0] > -165 && l.rect[2] < 62);
+  // the outer town (§4h): in each of twelve sectors round the palace the houses nearest the rings at 175 and 225 m can be entered too, most of them the trades of the town
+  const trades = ['potter', 'dyer', 'smith', 'press', 'sealcutter', 'weaver', 'home', 'store'], far = lots().filter((l) => l.r >= 125 && l.r <= 262 && l.rect[2] - l.rect[0] >= 6.3 && l.rect[3] - l.rect[1] >= 10.5 && !m.has(l));
+  const sec = (l) => Math.floor((Math.atan2((l.rect[1] + l.rect[3]) / 2, (l.rect[0] + l.rect[2]) / 2) + Math.PI) / (Math.PI / 6)) % 12;
+  for (let s = 0; s < 12; s++) for (const [j, ring] of [175, 225].entries()) {
+    const c = far.filter((l) => sec(l) === s && !m.has(l)).sort((a, b) => Math.abs(a.r - ring) - Math.abs(b.r - ring))[0];
+    if (c) m.set(c, trades[(s * 2 + j + (s > 5 ? 1 : 0)) % trades.length]);
+  }
   return m;
 }
