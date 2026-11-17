@@ -9,6 +9,7 @@ import { box, lathe, rod } from '../../core/geom.js';
 import { Matrix4 } from '../../core/three.js';
 
 const IRON = 'iron';
+const TIN = [[0.001, 0], [0.12, 0], [0.14, 0.24], [0.001, 0.24]];            // the ironmonger's tins and pots: one shape
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 /** The trades: floor, wall lining, fascia board and lettering, the sign's symbol, the shopkeeper's dress. */
@@ -63,22 +64,34 @@ export function plotShops(p, nb, bw, on, lim = [-1e9, 1e9]) {
 export function makeShops(H) {
   // the furnishing is a heap of small pieces (each a fine detail drawn only near): kept as pieces, not merged into one prototype
   const KITS = new Map();
-  const proto = (key, build) => { let k = KITS.get(key); if (!k) { k = []; build({ add: (m, g) => k.push([m, g.index ? g.toNonIndexed() : g]) }); KITS.set(key, k); } return k; };
-  const put = (bag, fr, pieces, s, y) => {
+  const proto = (key, build) => { let k = KITS.get(key); if (!k) { k = []; build({ add: (m, g) => k.push([m, g.index ? g.toNonIndexed() : g]), box: (m, x0, y0, z0, x1, y1, z1) => k.push([m, null, [x0, y0, z0, x1, y1, z1]]), lathe: (m, prof, seg, x, y, z) => k.push([m, turned(prof, seg), null, [x, y, z]]) }); KITS.set(key, k); } return k; };
+  // the furnishing's boxes are set as copies of one unit box (a matrix each: turned and stretched), seen only within `reach`; the small pieces are merged as before
+  const UNIT = box(0, 0, 0, 1, 1, 1);
+  // a turned piece is one geometry for all its places (the same object, set by matrix: copies of a shape are found by their coarse key, which float noise in the places could split)
+  const TURNED = new Map();
+  const turned = (prof, seg) => { const k = `${seg}|${JSON.stringify(prof)}`; let g = TURNED.get(k); if (!g) TURNED.set(k, (g = lathe(prof, seg))); return g; };
+  const put = (bag, fr, pieces, s, y, reach = 230) => {
     const q = fr.at(s, 0), M = new Matrix4().makeRotationY(Math.atan2(-fr.u[1], fr.u[0])).setPosition(q[0], y, q[1]);
-    for (const [m, g] of pieces) bag.add(m, g.clone().applyMatrix4(M));
+    for (const [m, g, bb, at] of pieces) {
+      if (at) { const T = new Matrix4().makeTranslation(...at); if (bag.addInstance) bag.addInstance(m, g, M.clone().multiply(T), { reach }); else bag.add(m, g.clone().applyMatrix4(M.clone().multiply(T))); continue; }
+      if (!bb) { if (bag.addInstance) bag.addInstance(m, g, M.clone(), { reach }); else bag.add(m, g.clone().applyMatrix4(M)); continue; }
+      if (!bag.addInstance) { bag.add(m, box(...bb).applyMatrix4(M)); continue; }
+      const L = new Matrix4().makeTranslation(bb[0], bb[1], bb[2]).multiply(new Matrix4().makeScale(bb[3] - bb[0], bb[4] - bb[1], bb[5] - bb[2]));
+      bag.addInstance(m, UNIT, M.clone().multiply(L), { reach });
+    }
   };
 
   // ── a shop's furnishing in its own frame ──────────────────────────────────────────────────────
   const furnish = (trade, W, dc, flip) => proto(`shop|${trade}|${W.toFixed(1)}|${dc.toFixed(1)}|${flip ? 1 : 0}`, (b) => {
     const T = TRADES[trade], Ly = layout(W, dc), r = rng(Math.round(W * 10) * 131 + trade.length * 17 + (flip ? 5 : 0));
     const S = (s) => (flip ? W - s : s), Y0 = 0.12;
-    const bx = (m, s0, s1, d0, d1, y0, y1) => { const a = S(s0), c = S(s1); b.add(m, box(Math.min(a, c), y0, d0, Math.max(a, c), y1, d1)); };
-    const lat = (m, prof, s, d, y, seg = 7) => b.add(m, lathe(prof, seg, null, S(s), y, d));
+    const bx = (m, s0, s1, d0, d1, y0, y1) => { const a = S(s0), c = S(s1); b.box(m, Math.min(a, c), y0, d0, Math.max(a, c), y1, d1); };
+    const lat = (m, prof, s, d, y, seg = 7) => b.lathe(m, prof, seg, S(s), y, d);
     const rd = (m, p, q, rr, seg = 6) => b.add(m, rod([S(p[0]), p[2], p[1]], [S(q[0]), q[2], q[1]], rr, seg));
     const pick = (a) => a[Math.floor(r() * a.length)];
-    const jar = (m, s, d, y, rr, h) => lat(m, [[0.001, 0.02], [rr, 0], [rr, h * 0.75], [rr * 0.55, h * 0.9], [rr * 0.6, h], [0.001, h]], s, d, y, 8);
-    const bottle = (m, s, d, y, rr, h) => lat(m, [[0.001, 0.02], [rr, 0], [rr, h * 0.55], [rr * 0.3, h * 0.78], [rr * 0.3, h], [0.001, h]], s, d, y, 8);
+    // the stock's jars and bottles: two jars and one bottle in all the trades, five-sided and open at the foot (it stands on a plank; a jar is 10 cm across: seen from the street it is a few pixels)
+    const jar = (m, s, d, y, rr, h) => { const big = h >= 0.2, R = big ? 0.075 : 0.05, H = big ? 0.22 : 0.12; lat(m, [[R, 0], [R, H * 0.75], [R * 0.6, H], [0.001, H]], s, d, y, 5); };
+    const bottle = (m, s, d, y) => lat(m, [[0.04, 0], [0.04, 0.17], [0.012, 0.25], [0.012, 0.3], [0.001, 0.3]], s, d, y, 5);
     const barrel = (m, s, d, y, rr, h) => { lat(m, [[0.001, 0], [rr * 0.85, 0], [rr, h * 0.5], [rr * 0.85, h], [0.001, h]], s, d, y, 9); lat(IRON, [[rr * 0.86, h * 0.2], [rr * 0.92, h * 0.2], [rr * 0.92, h * 0.25], [rr * 0.86, h * 0.25]], s, d, y, 9); lat(IRON, [[rr * 0.86, h * 0.75], [rr * 0.92, h * 0.75], [rr * 0.92, h * 0.8], [rr * 0.86, h * 0.8]], s, d, y, 9); };
     const sack = (m, s, d, y) => lat(m, [[0.001, 0], [0.26, 0], [0.3, 0.2], [0.24, 0.5], [0.12, 0.62], [0.001, 0.6]], s, d, y, 7);
     const crateOf = (s, d, y, fruit) => { bx('wood_ochre', s - 0.25, s + 0.25, d - 0.17, d + 0.17, y, y + 0.2); for (let k = 0; k < 6; k++) lat(fruit[k % fruit.length], [[0.001, 0], [0.05, 0.03], [0.065, 0.07], [0.04, 0.115], [0.001, 0.12]], s - 0.16 + (k % 3) * 0.16, d - 0.07 + Math.floor(k / 3) * 0.14, y + 0.2, 6); };
@@ -88,7 +101,7 @@ export function makeShops(H) {
       colmado: (s, d, y, i, t) => { const k = (i + t) % 4; if (k === 0) jar('glaze_white', s, d, y, 0.075, 0.22); else if (k === 1) lat('steel_chrome', [[0.001, 0], [0.06, 0], [0.06, 0.12], [0.001, 0.12]], s, d, y, 6); else if (k === 2) bx(pick(['cloth_red', 'cloth_ochre', 'paint_white', 'cloth_green']), s - 0.08, s + 0.08, d - 0.06, d + 0.06, y, y + 0.17); else bottle('glaze_green', s, d, y, 0.04, 0.3); },
       forn: (s, d, y, i) => { rd(pick(['hide_tan', 'wood_ochre']), [s - 0.2, d, y + 0.08], [s + 0.2, d, y + 0.08], i % 3 === 0 ? 0.075 : 0.06, 6); },
       bodega: (s, d, y, i, t) => { if (t % 2) bottle('glaze_green', s, d, y, 0.045, 0.32); else jar('pottery_dark', s, d, y, 0.09, 0.26); },
-      ferreteria: (s, d, y, i) => { const k = i % 4; if (k === 0) lat('iron_galv', [[0.001, 0], [0.11, 0], [0.13, 0.22], [0.001, 0.22]], s, d, y, 7); else if (k === 1) bx(IRON, s - 0.1, s + 0.1, d - 0.08, d + 0.08, y, y + 0.12); else if (k === 2) lat('rope_fibre', [[0.1, 0], [0.16, 0.02], [0.16, 0.12], [0.1, 0.14]], s, d, y, 8); else bx('wood_dark', s - 0.07, s + 0.07, d - 0.07, d + 0.07, y, y + 0.28); },
+      ferreteria: (s, d, y, i) => { const k = i % 4; if (k === 0) lat('iron_galv', TIN, s, d, y, 6); else if (k === 1) bx(IRON, s - 0.1, s + 0.1, d - 0.08, d + 0.08, y, y + 0.12); else if (k === 2) lat('rope_fibre', [[0.1, 0], [0.16, 0.02], [0.16, 0.12], [0.1, 0.14]], s, d, y, 8); else bx('wood_dark', s - 0.07, s + 0.07, d - 0.07, d + 0.07, y, y + 0.28); },
       draperia: (s, d, y, i, t) => { const m = cloths[(i * 3 + t * 5) % cloths.length]; rd(m, [s - 0.2, d, y + 0.1], [s + 0.2, d, y + 0.1], 0.1, 6); },
       farmacia: (s, d, y, i, t) => { const k = (i + t) % 3; if (k === 0) jar('glaze_white', s, d, y, 0.07, 0.24); else if (k === 1) jar('glaze_blue', s, d, y, 0.06, 0.2); else bottle('glass_topaz', s, d, y, 0.045, 0.28); },
       sabater: (s, d, y, i) => { const m = i % 2 ? 'hide_black' : 'hide_brown'; bx(m, s - 0.05, s + 0.05, d - 0.14, d + 0.14, y, y + 0.08); bx(m, s - 0.05, s + 0.05, d - 0.14, d - 0.04, y + 0.08, y + 0.17); },
@@ -119,7 +132,7 @@ export function makeShops(H) {
     if (trade === 'colmado') { let [s, d] = mk(cl * 0.2); bx(IRON, s - 0.14, s + 0.14, d - 0.1, d + 0.1, ty, ty + 0.04); lat('gilt_bronze', [[0.001, 0], [0.01, 0.3], [0.001, 0.3]], s, d, ty, 5); bx('gilt_bronze', s - 0.2, s + 0.2, d - 0.01, d + 0.01, ty + 0.3, ty + 0.32); [s, d] = mk(cl * 0.6); lat('hide_tan', [[0.001, 0], [0.2, 0], [0.2, 0.1], [0.001, 0.1]], s, d, ty, 10); [s, d] = mk(cl * 0.85); lat('hide_brown', [[0.001, 0], [0.09, 0.02], [0.1, 0.22], [0.04, 0.3], [0.001, 0.3]], s, d, ty, 7); }
     if (trade === 'forn') { const [s, d] = mk(cl * 0.5); bx('glass_outer', s - (alongS ? cl * 0.4 : 0.28), s + (alongS ? cl * 0.4 : 0.28), d - (alongS ? 0.28 : cl * 0.4), d + (alongS ? 0.28 : cl * 0.4), ty + 0.02, ty + 0.5); for (let k = 0; k < 5; k++) { const [a, c] = mk(cl * (0.15 + k * 0.17)); rd(pick(['hide_tan', 'wood_ochre']), [a - (alongS ? 0.1 : 0), c - (alongS ? 0 : 0.1), ty + 0.1], [a + (alongS ? 0.1 : 0), c + (alongS ? 0 : 0.1), ty + 0.1], 0.06, 6); } }
     if (trade === 'bodega') for (let k = 0; k < 3; k++) { const [s, d] = mk(cl * (0.2 + k * 0.3)); bottle('glaze_green', s, d, ty, 0.04, 0.3); jar('glaze_white', s + (alongS ? 0 : 0.15), d + (alongS ? 0.15 : 0), ty, 0.06, 0.12); }
-    if (trade === 'ferreteria') { const [s, d] = mk(cl * 0.3); bx(IRON, s - 0.12, s + 0.12, d - 0.08, d + 0.08, ty, ty + 0.08); bx(IRON, s - 0.03, s + 0.03, d - 0.03, d + 0.03, ty + 0.08, ty + 0.3); for (let k = 0; k < 4; k++) { const [a, c] = mk(cl * (0.5 + k * 0.12)); lat('iron_galv', [[0.001, 0], [0.07, 0], [0.09, 0.15], [0.001, 0.15]], a, c, ty, 6); } }
+    if (trade === 'ferreteria') { const [s, d] = mk(cl * 0.3); bx(IRON, s - 0.12, s + 0.12, d - 0.08, d + 0.08, ty, ty + 0.08); bx(IRON, s - 0.03, s + 0.03, d - 0.03, d + 0.03, ty + 0.08, ty + 0.3); for (let k = 0; k < 4; k++) { const [a, c] = mk(cl * (0.5 + k * 0.12)); lat('iron_galv', TIN, a, c, ty, 6); } }
     if (trade === 'draperia') { for (let k = 0; k < 3; k++) { const [s, d] = mk(cl * (0.2 + k * 0.3)); for (let j = 0; j < 4; j++) bx(cloths[(k * 3 + j) % cloths.length], s - 0.22, s + 0.22, d - 0.17, d + 0.17, ty + j * 0.05, ty + j * 0.05 + 0.045); } }
     if (trade === 'farmacia') { let [s, d] = mk(cl * 0.25); bx('gilt_bronze', s - 0.2, s + 0.2, d - 0.1, d + 0.1, ty, ty + 0.03); rd('gilt_bronze', [s - 0.18, d, ty + 0.35], [s + 0.18, d, ty + 0.35], 0.015, 5); rd('gilt_bronze', [s, d, ty + 0.03], [s, d, ty + 0.35], 0.015, 5); lat('gilt_bronze', [[0.001, 0], [0.07, 0.01], [0.08, 0.04], [0.001, 0.04]], s - 0.18, d, ty + 0.3, 7); lat('gilt_bronze', [[0.001, 0], [0.07, 0.01], [0.08, 0.04], [0.001, 0.04]], s + 0.18, d, ty + 0.3, 7); [s, d] = mk(cl * 0.65); lat('marble_dark', [[0.001, 0], [0.1, 0], [0.11, 0.1], [0.09, 0.1], [0.07, 0.03], [0.001, 0.03]], s, d, ty, 8); [s, d] = mk(cl * 0.85); lat('glaze_white', [[0.001, 0], [0.11, 0], [0.12, 0.1], [0.001, 0.1]], s, d, ty, 8); }
     if (trade === 'sabater') { const [s, d] = mk(cl * 0.5); bx('hide_brown', s - 0.3, s + 0.3, d - 0.2, d + 0.2, ty, ty + 0.03); for (let k = 0; k < 3; k++) { const [a, c] = mk(cl * (0.25 + k * 0.25)); bx('hide_black', a - 0.06, a + 0.06, c - 0.14, c + 0.14, ty + 0.03, ty + 0.12); } }
@@ -133,7 +146,7 @@ export function makeShops(H) {
       if (trade === 'colmado') { tbl(s0, s1, d0, d1); crateOf(cs - 0.28, cd, Y0 + 0.8, ['cloth_red', 'cloth_ochre']); crateOf(cs + 0.3, cd, Y0 + 0.8, ['cloth_green', 'cloth_ochre']); }
       else if (trade === 'forn') { tbl(s0, s1, d0, d1, 0, 'wood_ochre'); for (let k = 0; k < 4; k++) rd(pick(['hide_tan', 'wood_ochre']), [s0 + 0.2 + k * 0.28, cd - 0.2, Y0 + 0.9], [s0 + 0.2 + k * 0.28, cd + 0.2, Y0 + 0.9], 0.07, 6); lat('wicker', [[0.2, 0], [0.26, 0.2], [0.001, 0.2]], cs, cd + 0.5, Y0 + 0.8, 8); }
       else if (trade === 'bodega') { const sx = [cs - 0.4, cs + 0.4]; tbl(cs - 0.35, cs + 0.35, cd - 0.35, cd + 0.35, 0, 'wood_dark', 0.75); lat('glaze_white', [[0.001, 0], [0.04, 0], [0.04, 0.2], [0.001, 0.2]], cs, cd, Y0 + 0.75, 6); for (const sq of sx) stool(sq, cd); }
-      else if (trade === 'ferreteria') { tbl(s0, s1, d0, d1, 0, 'wood_dark'); for (let k = 0; k < 4; k++) lat('iron_galv', [[0.001, 0], [0.12, 0], [0.14, 0.26], [0.001, 0.26]], s0 + 0.25 + k * 0.28, cd, Y0 + 0.8, 7); bx(IRON, cs - 0.3, cs + 0.3, d0 + 0.1, d0 + 0.3, Y0 + 0.8, Y0 + 0.9); }
+      else if (trade === 'ferreteria') { tbl(s0, s1, d0, d1, 0, 'wood_dark'); for (let k = 0; k < 4; k++) lat('iron_galv', TIN, s0 + 0.25 + k * 0.28, cd, Y0 + 0.8, 6); bx(IRON, cs - 0.3, cs + 0.3, d0 + 0.1, d0 + 0.3, Y0 + 0.8, Y0 + 0.9); }
       else if (trade === 'draperia') { tbl(s0, s1, d0, d1, 0, 'wood_painted'); for (let j = 0; j < 5; j++) bx(cloths[j % cloths.length], s0 + 0.1, s1 - 0.1, d0 + 0.1, d1 - 0.1, Y0 + 0.8 + j * 0.07, Y0 + 0.8 + j * 0.07 + 0.06); }
       else if (trade === 'farmacia') { bx('wood_dark', s0, s1, d0, d1, Y0, Y0 + 0.85); bx('glass_outer', s0, s1, d0, d1, Y0 + 0.85, Y0 + 1.25); for (let k = 0; k < 3; k++) jar('glaze_blue', s0 + 0.25 + k * 0.35, cd, Y0 + 0.85, 0.07, 0.2); }
       else if (trade === 'sabater') { tbl(s0, s1, d0, d1, 0, 'wood_dark'); for (let k = 0; k < 5; k++) { bx(k % 2 ? 'hide_black' : 'hide_brown', s0 + 0.15 + k * 0.2, s0 + 0.25 + k * 0.2, cd - 0.14, cd + 0.14, Y0 + 0.8, Y0 + 0.88); } stool(cs, d1 + 0.35); }
@@ -144,7 +157,7 @@ export function makeShops(H) {
     if (trade === 'colmado') { barrel('wood_dark', fl[0] + 0.1, 7.9, Y0, 0.34, 0.8); barrel('wood_ochre', fl[0] + 0.1, 7.1, Y0, 0.3, 0.7); sack('sacking', fl[0] + 0.8, 8.1, Y0); sack('sacking', fl[0] + 1.3, 8.2, Y0); sack('cloth_white', fl[0] + 1.05, 7.7, Y0); for (let k = 0; k < 3; k++) { rd('hide_brown', [0.3 + k * 0.28, 0.9, 4.05], [0.3 + k * 0.28, 0.9, 3.55], 0.07, 6); } for (let k = 0; k < 5; k++) rd('hide_brown', [Ly.W / 2 + k * 0.25 - 0.5, 4.3, 4.18], [Ly.W / 2 + k * 0.25 - 0.5, 4.3, 3.62], 0.06, 6); rd(IRON, [Ly.W / 2 - 0.7, 4.3, 4.18], [Ly.W / 2 + 0.7, 4.3, 4.18], 0.012, 4); }
     if (trade === 'forn') { const s = Ly.W / 2; bx('brick', s - 1.3, s + 1.3, DD - 1.7, DD, Y0, 1.5); bx('brick', s - 1.0, s + 1.0, DD - 1.5, DD, 1.5, 2.2); bx('wood_dark', s - 0.65, s + 0.65, DD - 1.72, DD - 1.69, Y0 + 0.5, Y0 + 1.1); bx('flame', s - 0.4, s + 0.4, DD - 1.7, DD - 1.69, Y0 + 0.6, Y0 + 0.95); bx('iron', s - 0.75, s + 0.75, DD - 1.74, DD - 1.7, Y0 + 0.45, Y0 + 0.5); bx('brick', s - 0.35, s + 0.35, DD - 1.2, DD - 0.6, 2.2, 4.2); for (let k = 0; k < 4; k++) sack('cloth_white', fl[0] + 0.15 + (k % 2) * 0.5, 7.6 + Math.floor(k / 2) * 0.55, Y0 + (k > 1 ? 0 : 0)); rd('wood_ochre', [s + 1.5, DD - 0.7, Y0], [s + 1.2, DD - 0.7, 2.0], 0.025, 5); bx('wood_ochre', s + 1.05, s + 1.35, DD - 0.85, DD - 0.55, 2.0, 2.04); }
     if (trade === 'bodega') for (let tier = 0; tier < 2; tier++) for (let k = 0; k < 3; k++) { const s = (Ly.wide ? Ly.lane[1] + 0.9 : 1.0) + k * 0.85, y0 = Y0 + 0.42 + tier * 0.8; rd('wood_dark', [s, DD - 0.7, y0], [s, DD - 0.7 - 0.0001, y0], 0.34, 9); rd('wood_dark', [s, DD - 1.9, y0], [s, DD - 0.3, y0], 0.34, 9); rd(IRON, [s, DD - 1.5, y0], [s, DD - 1.44, y0], 0.355, 9); rd(IRON, [s, DD - 0.8, y0], [s, DD - 0.74, y0], 0.355, 9); bx('wood_dark', s - 0.4, s + 0.4, DD - 1.9, DD - 0.3, y0 - 0.38, y0 - 0.34); }
-    if (trade === 'ferreteria') { for (let k = 0; k < 6; k++) { const s = Ly.W - 1.0 - (Ly.wide ? 0 : 0.6) - k * 0.0; void s; } const hx = Ly.wide ? Ly.W - 0.45 : 0.45; for (let k = 0; k < 5; k++) lat('iron_galv', [[0.001, 0], [0.16, 0], [0.18, 0.3], [0.001, 0.3]], Ly.lane[1] + 0.4 + (k % 3) * 0.4, 7.9 - Math.floor(k / 3) * 0.4, Y0 + (k > 2 ? 0 : 0), 7); void hx; for (let k = 0; k < 4; k++) { const s = Ly.lane[1] + 0.3 + k * 0.5; lat(IRON, [[0.001, 0], [0.16, 0.0], [0.16, 0.03], [0.001, 0.03]], s, 3.2, 3.5, 8); rd(IRON, [s, 3.2, 3.55], [s, 3.2, 4.05], 0.008, 4); } }
+    if (trade === 'ferreteria') { for (let k = 0; k < 6; k++) { const s = Ly.W - 1.0 - (Ly.wide ? 0 : 0.6) - k * 0.0; void s; } const hx = Ly.wide ? Ly.W - 0.45 : 0.45; for (let k = 0; k < 5; k++) lat('iron_galv', TIN, Ly.lane[1] + 0.4 + (k % 3) * 0.4, 7.9 - Math.floor(k / 3) * 0.4, Y0 + (k > 2 ? 0 : 0), 6); void hx; for (let k = 0; k < 4; k++) { const s = Ly.lane[1] + 0.3 + k * 0.5; lat(IRON, [[0.001, 0], [0.16, 0.0], [0.16, 0.03], [0.001, 0.03]], s, 3.2, 3.5, 8); rd(IRON, [s, 3.2, 3.55], [s, 3.2, 4.05], 0.008, 4); } }
     if (trade === 'draperia') { const s = Ly.wide ? Ly.lane[1] + 0.6 : Ly.W - 0.7; lat('wood_painted', [[0.001, 0], [0.18, 0], [0.04, 0.05], [0.04, 0.9], [0.001, 0.9]], s, 7.6, Y0, 7); lat('cloth_maroon', [[0.001, 0.9], [0.18, 0.95], [0.19, 1.25], [0.1, 1.5], [0.001, 1.5]], s, 7.6, Y0, 8); lat('skin_light', [[0.001, 1.5], [0.05, 1.5], [0.05, 1.6], [0.001, 1.6]], s, 7.6, Y0, 6); }
     if (trade === 'farmacia') { const hx = Ly.wide ? Ly.lane[1] + 0.6 : Ly.W - 0.7; for (let k = 0; k < 2; k++) lat('glaze_green', [[0.001, 0], [0.16, 0.02], [0.26, 0.28], [0.2, 0.55], [0.07, 0.65], [0.07, 0.8], [0.001, 0.8]], hx + k * 0.6, 8.2, Y0, 9); }
     if (trade === 'sabater') { const s = Ly.wide ? Ly.lane[1] + 0.7 : Ly.W - 0.9; bx('wood_dark', s - 0.6, s + 0.6, 7.5, 8.0, Y0, Y0 + 0.9); for (let k = 0; k < 4; k++) rd('hide_brown', [s - 0.45 + k * 0.3, 8.1, 3.3], [s - 0.45 + k * 0.3, 8.1, 2.6], 0.12, 5); stool(s, 6.8, 0.42); lat(IRON, [[0.001, 0], [0.1, 0], [0.1, 0.1], [0.001, 0.1]], s + 0.4, 7.7, Y0 + 0.9, 6); }
@@ -160,8 +173,8 @@ export function makeShops(H) {
   /** Goods and a bench at the front: set on the pavement before the shop (t > 0), and the blade sign on its bracket. */
   const dress = (trade, W, dc, flip) => proto(`shopfront|${trade}|${W.toFixed(1)}|${dc.toFixed(1)}|${flip ? 1 : 0}`, (b) => {
     const S = (s) => (flip ? W - s : s), r = rng(Math.round(W * 10) * 71 + trade.length * 13 + (flip ? 3 : 0)), T = TRADES[trade];
-    const bx = (m, s0, s1, t0, t1, y0, y1) => { const a = S(s0), c = S(s1); b.add(m, box(Math.min(a, c), y0, -Math.max(t0, t1), Math.max(a, c), y1, -Math.min(t0, t1))); };
-    const lat = (m, prof, s, t, y, seg = 7) => b.add(m, lathe(prof, seg, null, S(s), y, -t));
+    const bx = (m, s0, s1, t0, t1, y0, y1) => { const a = S(s0), c = S(s1); b.box(m, Math.min(a, c), y0, -Math.max(t0, t1), Math.max(a, c), y1, -Math.min(t0, t1)); };
+    const lat = (m, prof, s, t, y, seg = 7) => b.lathe(m, prof, seg, S(s), y, -t);
     const rd = (m, p, q, rr, seg = 6) => b.add(m, rod([S(p[0]), p[2], -p[1]], [S(q[0]), q[2], -q[1]], rr, seg));
     const wnd = dc + 0.9 + 0.3, far = W - 0.35;                   // the pavement before the windows (beyond the door's lane)
     const fruit = ['cloth_red', 'cloth_ochre', 'cloth_green'];
@@ -170,8 +183,8 @@ export function makeShops(H) {
     const ds = dc, bt = 0.85, by = 2.95;
     rd(IRON, [ds - 0.7, 0.04, by + 0.55], [ds - 0.7, bt + 0.1, by + 0.55], 0.014, 5); rd(IRON, [ds - 0.7, 0.04, by + 0.1], [ds - 0.7, bt * 0.6, by + 0.5], 0.01, 4);
     rd(IRON, [ds - 0.7, 0.3, by + 0.55], [ds - 0.7, 0.3, by + 0.45], 0.005, 3);
-    const board = (m, y0, y1, t0, t1) => b.add(m, box(S(ds - 0.7) - 0.02, y0, -t1, S(ds - 0.7) + 0.02, y1, -t0));
-    const mark = (m, y0, y1, t0, t1) => b.add(m, box(S(ds - 0.7) - 0.032, y0, -t1, S(ds - 0.7) + 0.032, y1, -t0));
+    const board = (m, y0, y1, t0, t1) => b.box(m, S(ds - 0.7) - 0.02, y0, -t1, S(ds - 0.7) + 0.02, y1, -t0);
+    const mark = (m, y0, y1, t0, t1) => b.box(m, S(ds - 0.7) - 0.032, y0, -t1, S(ds - 0.7) + 0.032, y1, -t0);
     board('wood_painted', by - 0.05, by + 0.5, 0.25, bt);
     ({
       colmado: () => { mark('cloth_green', by + 0.02, by + 0.43, 0.32, 0.78); mark('cloth_red', by + 0.1, by + 0.28, 0.4, 0.7); },
@@ -188,7 +201,7 @@ export function makeShops(H) {
     if (trade === 'colmado') { bx('wood_dark', w0, w0 + 1.3, 0.3, 0.75, 0.7, 0.76); for (const t of [0.33, 0.7]) bx('wood_dark', w0 + 0.05, w0 + 0.1, t - 0.03, t + 0.03, 0, 0.7); crate(w0 + 0.35, 0.5, 0.76, fruit); crate(w0 + 0.95, 0.5, 0.76, ['cloth_green', 'cloth_ochre']); for (let k = 0; k < 3; k++) lat('sacking', [[0.001, 0], [0.26, 0], [0.3, 0.2], [0.22, 0.45], [0.001, 0.52]], far - 0.35 - k * 0.55, 0.4, 0, 7); }
     if (trade === 'forn') { bx('wood_ochre', w0, w0 + 1.2, 0.25, 0.7, 0.7, 0.75); lat('wicker', [[0.2, 0], [0.27, 0.22], [0.001, 0.22]], w0 + 0.3, 0.48, 0.75, 8); lat('wicker', [[0.2, 0], [0.27, 0.22], [0.001, 0.22]], w0 + 0.9, 0.48, 0.75, 8); for (let k = 0; k < 4; k++) rd('hide_tan', [w0 + 0.1 + k * 0.28, 0.4, 1.0], [w0 + 0.1 + k * 0.28, 0.58, 0.98], 0.05, 6); }
     if (trade === 'bodega') { for (let k = 0; k < 2; k++) { lat('wood_dark', [[0.001, 0], [0.3, 0], [0.35, 0.4], [0.3, 0.8], [0.001, 0.8]], w0 + 0.4 + k * 0.75, 0.55, 0, 9); lat(IRON, [[0.31, 0.15], [0.325, 0.15], [0.325, 0.2], [0.31, 0.2]], w0 + 0.4 + k * 0.75, 0.55, 0, 9); } if (W > 5) { lat('wood_dark', [[0.001, 0.72], [0.34, 0.72], [0.34, 0.76], [0.001, 0.76]], far - 0.4, 0.8, 0, 9); rd('wood_dark', [far - 0.4, 0.8, 0], [far - 0.4, 0.8, 0.72], 0.04, 5); } }
-    if (trade === 'ferreteria') { rd('wood_dark', [w0, 0.18, 0], [w0, 0.18, 2.3], 0.03, 5); rd('wood_dark', [w0 + 1.4, 0.18, 0], [w0 + 1.4, 0.18, 2.3], 0.03, 5); rd('wood_dark', [w0, 0.18, 2.3], [w0 + 1.4, 0.18, 2.3], 0.03, 5); for (let k = 0; k < 5; k++) lat('iron_galv', [[0.001, 0], [0.13, 0.0], [0.15, 0.04], [0.001, 0.04]], w0 + 0.15 + k * 0.28, 0.2, 1.4 + (k % 2) * 0.35, 7); for (let k = 0; k < 3; k++) lat('iron_galv', [[0.001, 0], [0.12, 0], [0.14, 0.24], [0.001, 0.24]], w0 + 0.2 + k * 0.4, 0.55, 0, 7); }
+    if (trade === 'ferreteria') { rd('wood_dark', [w0, 0.18, 0], [w0, 0.18, 2.3], 0.03, 5); rd('wood_dark', [w0 + 1.4, 0.18, 0], [w0 + 1.4, 0.18, 2.3], 0.03, 5); rd('wood_dark', [w0, 0.18, 2.3], [w0 + 1.4, 0.18, 2.3], 0.03, 5); for (let k = 0; k < 5; k++) lat('iron_galv', TIN, w0 + 0.15 + k * 0.28, 0.2, 1.4 + (k % 2) * 0.35, 6); for (let k = 0; k < 3; k++) lat('iron_galv', TIN, w0 + 0.2 + k * 0.4, 0.55, 0, 6); }
     if (trade === 'draperia') { bx('wood_painted', w0, w0 + 1.3, 0.25, 0.5, 0, 1.1); for (let k = 0; k < 4; k++) bx(['cloth_red', 'cloth_blue', 'cloth_white', 'cloth_green'][k], w0 + 0.05 + k * 0.3, w0 + 0.3 + k * 0.3, 0.3, 0.46, 1.1, 1.5); }
     if (trade === 'farmacia') { bx('wood_dark', w0, w0 + 1.6, 0.25, 0.65, 0, 0.5); bx('wood_dark', w0, w0 + 1.6, 0.25, 0.65, 0.5, 0.55); }
     if (trade === 'sabater') { bx('wood_dark', w0, w0 + 1.2, 0.2, 0.6, 0.6, 0.65); for (const t of [0.25, 0.55]) bx('wood_dark', w0 + 0.05, w0 + 0.1, t - 0.02, t + 0.02, 0, 0.6); for (let k = 0; k < 5; k++) bx(k % 2 ? 'hide_black' : 'hide_brown', w0 + 0.1 + k * 0.22, w0 + 0.2 + k * 0.22, 0.28, 0.5, 0.65, 0.72); }

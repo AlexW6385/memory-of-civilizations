@@ -13,7 +13,7 @@
 import { mercat } from './mercat.js';
 import { bancFanal } from './bench.js';
 import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
-import { box, lathe, fromTriangles, rod, disc } from '../../core/geom.js';
+import { box, frustum, lathe, fromTriangles, rod, disc } from '../../core/geom.js';
 import { Matrix4, BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import '../qing/index.js';
 import { nativity } from './nativity.js';
@@ -23,6 +23,7 @@ import { FURNITURE } from './furniture.js';
 import { worksFence, stoneYard } from './works.js';
 import { schoolRooms, workshopRooms } from './school.js';
 import { makeShops, plotShops, shopPeople } from './shops.js';
+import { boxGeo, cull } from './boxes.js';
 
 const S = 'limestone_yellow', P = 'stucco_cream', IRON = 'iron';
 const FACADES = [S, P, 'stucco_ochre', 'stucco_pale', P, 'stucco_rose'];
@@ -39,9 +40,12 @@ function frame(a, b) {
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]), u = [(b[0] - a[0]) / L, (b[1] - a[1]) / L], n = [u[1], -u[0]];
   const axis = Math.abs(u[0]) < 1e-6 || Math.abs(u[1]) < 1e-6;
   const at = (s, t) => [a[0] + u[0] * s + n[0] * t, a[1] + u[1] * s + n[1] * t];
-  const F = (s0, s1, t0, t1, y0, y1) => {
-    if (axis) { const p = at(s0, t0), q = at(s1, t1); return box(Math.min(p[0], q[0]), y0, Math.min(p[1], q[1]), Math.max(p[0], q[0]), y1, Math.max(p[1], q[1])); }
-    const tm = (t0 + t1) / 2; return orientedBox(at(s0, tm), at(s1, tm), t1 - t0, y0, y1);
+  const F = (s0, s1, t0, t1, y0, y1, drop) => {
+    let g;
+    if (axis) { const p = at(s0, t0), q = at(s1, t1); g = box(Math.min(p[0], q[0]), y0, Math.min(p[1], q[1]), Math.max(p[0], q[0]), y1, Math.max(p[1], q[1])); }
+    else { const tm = (t0 + t1) / 2; g = orientedBox(at(s0, tm), at(s1, tm), t1 - t0, y0, y1); }
+    g.userData.bx = { b: [s0, s1, t0, t1, y0, y1], drop };
+    return g;
   };
   return { L, u, n, at, F, axis, yaw: Math.atan2(n[0], n[1]) };
 }
@@ -66,8 +70,15 @@ const PROTO = new Map(), LOCAL = frame([0, 0], [1, 0]);
 function proto(key, build) {
   let p = PROTO.get(key);
   if (!p) {
-    const parts = new Map(), mini = { add: (m, g) => { if (!parts.has(m)) parts.set(m, []); parts.get(m).push(g.index ? g.toNonIndexed() : g); } };
+    const parts = new Map(), boxes = [], mini = { add: (m, g) => {
+      if (g.userData.bx) { boxes.push({ mat: m, ...g.userData.bx }); return; }
+      if (!parts.has(m)) parts.set(m, []); parts.get(m).push(g.index ? g.toNonIndexed() : g);
+    } };
     build(mini, LOCAL);
+    // the boxes without the faces that face the wall or lie buried in the next (boxes.js)
+    // (an opening is a dark panel on the wall: its front face is all there is of it)
+    const faces = cull(boxes.map((q) => (q.mat === 'opening' ? { ...q, only: ['tp'] } : q)));
+    boxes.forEach((q, i) => { if (!faces[i].length) return; if (!parts.has(q.mat)) parts.set(q.mat, []); parts.get(q.mat).push(boxGeo(LOCAL, q.b, faces[i])); });
     p = [...parts].map(([m, list]) => {
       let n = 0; for (const g of list) n += g.attributes.position.array.length;
       const P = new Float32Array(n), N = new Float32Array(n); let o = 0;
@@ -84,6 +95,29 @@ function put(bag, fr, pieces, s, y, reach = 420) {
   const q = fr.at(s, 0), M = new Matrix4().makeRotationY(Math.atan2(-fr.u[1], fr.u[0])).setPosition(q[0], y, q[1]);
   for (const [m, g] of pieces) { if (bag.addInstance) bag.addInstance(m, g, M.clone(), { reach }); else bag.add(m, g.clone().applyMatrix4(M)); }
 }
+/** A unit box without its back face (the one against the wall): one shape, set by matrix (turned with the front, stretched to size) — however many boxes, one draw a material. */
+const UNITS = new Map();
+function unitBox(opts) {
+  const k = JSON.stringify(opts);
+  if (!UNITS.has(k)) UNITS.set(k, frustum([0, 0, 1, 1], 0, 1, 0, 0, 0, 0, opts));
+  return UNITS.get(k);
+}
+/** A box of a front's frame b = [s0, s1, t0, t1, y0, y1], without its back face: a copy of the unit box (the viewer) or built whole (the tools). */
+function wallBox(bag, fr, mat, b, reach = 420) {
+  if (!bag.addInstance) { bag.add(mat, boxGeo(fr, b, ['sn', 'sp', 'tp', 'yn', 'yp'])); return; }
+  const [s0, s1, t0, t1, y0, y1] = b, q = fr.at(0, 0);
+  const M = new Matrix4().makeRotationY(Math.atan2(-fr.u[1], fr.u[0])).setPosition(q[0], 0, q[1]);
+  M.multiply(new Matrix4().makeTranslation(s0, y0, -t1)).multiply(new Matrix4().makeScale(s1 - s0, y1 - y0, t1 - t0));
+  bag.addInstance(mat, unitBox({ noZp: true }), M, { reach });
+}
+/** A dark panel (an 'opening') on a front: one face, a copy of the unit quad, however large (one draw for all the panels). s0…s1 along the front, y0…y1, t out from the wall. */
+function panel(bag, fr, s0, s1, t, y0, y1) {
+  if (!bag.addInstance) { bag.add('opening', boxGeo(fr, [s0, s1, t, t, y0, y1], ['tp'])); return; }
+  const q = fr.at(0, 0);
+  const M = new Matrix4().makeRotationY(Math.atan2(-fr.u[1], fr.u[0])).setPosition(q[0], 0, q[1]);
+  M.multiply(new Matrix4().makeTranslation(s0, y0, -t)).multiply(new Matrix4().makeScale(s1 - s0, y1 - y0, 1));
+  bag.addInstance('opening', unitBox({ noTop: true, noBottom: true, noXn: true, noXp: true, noZp: true }), M);
+}
 const SHOPS = makeShops({ proto, put });
 const CORNER_CLEAR = 5;
 /** Louvred shutters at a window: folded open against the wall, or closed over it, or one leaf drawn. */
@@ -93,39 +127,41 @@ function shutters(bag, F, ww, y0, y1, state, mat) {
   bag.add(mat, F(-ww - 0.02, -ww / 2 - 0.03, 0.03, 0.07, y0, y1)); bag.add(mat, F(ww / 2 + 0.03, ww + 0.02, 0.03, 0.07, y0, y1));
 }
 const WIN = { 2: [1.4, 2.85], mid: [1.2, 2.35], last: [1.1, 2.05] };
+/** The leaves of a window's shutters (state 0 closed over it, 1 two leaves drawn to the sides, 2 folded open against the wall), each one box of the one unit shape. */
+function shutterLeaves(bag, fr, sc, y, k, state, mat) {
+  const [ww, wh] = WIN[k], y0 = y + 0.06, y1 = y0 + wh;
+  const L = state === 0 ? [[-ww / 2, ww / 2]] : state === 1 ? [[-ww / 2, -0.01], [ww / 2 + 0.03, ww]] : [[-ww - 0.02, -ww / 2 - 0.03], [ww / 2 + 0.03, ww + 0.02]];
+  for (const [a, b] of L) wallBox(bag, fr, mat, [sc + a, sc + b, 0.03, 0.07, y0, y1]);
+}
 /** A window of floor kind k ('2' the principal, 'mid', 'last'): its opening, lintel or pediment, sill. */
 const windowP = (k) => proto(`win|${k}`, (b, { F }) => {
   const [ww, wh] = WIN[k], y0 = 0.06, y1 = y0 + wh;
-  b.add('opening', F(-ww / 2, ww / 2, -0.03, 0.03, y0, y1));
   b.add(S, F(-ww / 2 - 0.18, ww / 2 + 0.18, 0, k === 2 ? 0.18 : 0.12, y1, y1 + (k === 2 ? 0.42 : 0.22)));
   if (k === 2) b.add(S, F(-ww / 2 - 0.3, ww / 2 + 0.3, 0, 0.26, y1 + 0.42, y1 + 0.54));
   if (k === 'last') b.add(S, F(-ww / 2 - 0.12, ww / 2 + 0.12, 0, 0.14, -0.06, 0.06));
 });
-const shutterP = (k, state, mat) => proto(`sh|${k}|${state}|${mat}`, (b, { F }) => { const [ww, wh] = WIN[k]; shutters(b, F, ww, 0.06, 0.06 + wh, state, mat); });
 /** A balcony of an upper floor: the stone slab on two brackets, the iron railing; d its depth. */
 const balconyP = (d) => proto(`bal|${d}`, (b, fr) => {
   const F = fr.F;
   b.add(S, F(-0.95, 0.95, 0, d, -0.12, 0.06));
   b.add(S, F(-0.8, -0.6, 0, d * 0.7, -0.32, -0.12)); b.add(S, F(0.6, 0.8, 0, d * 0.7, -0.32, -0.12));
-  railing(b, fr, -0.92, 0.92, d - 0.03, 0.06, 0.95, 0.19);
+  railing(b, fr, -0.92, 0.92, d - 0.03, 0.06, 0.95, 0.23);
 });
 /** 0.96 m of the principal floor's railing. */
 const railBars = () => proto('railbars', (b, fr) => { const F = fr.F; b.add(IRON, F(0, 0.96, 0.86, 0.9, 0.95, 1.0)); b.add(IRON, F(0, 0.96, 0.865, 0.895, 0.1, 0.14)); for (let i = 0; i < 6; i++) { const s = 0.08 + i * 0.16; b.add(IRON, F(s - 0.012, s + 0.012, 0.868, 0.892, 0, 0.95)); } });
 /** The ground floor: a shop's opening in its wooden front, or the portal with its doors. */
 const shopP = () => proto('shop', (b, { F }) => {
-  b.add('opening', F(-1.2, 1.2, 0.07, 0.1, 0.1, 3.8));
   for (const sm of [-1.2, -0.02, 1.12]) b.add('wood_painted', F(sm, sm + 0.08, 0.1, 0.15, 0.1, 3.2));
   b.add('wood_painted', F(-1.2, 1.2, 0.1, 0.15, 0.1, 0.7)); b.add('wood_painted', F(-1.2, 1.2, 0.1, 0.16, 3.2, 3.75));
   b.add(S, F(-1.35, 1.35, 0.076, 0.2, 3.8, 4.1));
 });
 const doorP = () => proto('door', (b, { F }) => {
-  b.add('opening', F(-0.95, 0.95, 0.07, 0.1, 0.1, 3.9));
   b.add('wood_dark', F(-0.9, 0.9, 0.1, 0.14, 0.1, 2.9)); b.add('wood_dark', F(-0.03, 0.03, 0.14, 0.16, 0.1, 2.9));
   for (const e of [-1, 1]) b.add(S, F(e * 1.1 - 0.15, e * 1.1 + 0.15, 0.06, 0.22, 0.4, 3.9));
   b.add(S, F(-1.3, 1.3, 0.076, 0.28, 3.9, 4.35));
 });
 const entresolP = () => proto('entresol', (b, { F }) => {
-  b.add('opening', F(-0.6, 0.6, -0.03, 0.03, 5.3, 6.9)); b.add(S, F(-0.75, 0.75, 0, 0.12, 5.18, 5.3));
+  b.add(S, F(-0.75, 0.75, 0, 0.12, 5.18, 5.3));
   for (const e of [-1, 1]) b.add(S, F(e * 0.95 - 0.13, e * 0.95 + 0.13, 0, 0.72, 6.95, 7.25));
 });
 /** A shop's awning (toldo) over one bay: striped cloth sloping down 1.0 m from the wall (the tram poles stand 1.4 m out), a valance, two iron arms. */
@@ -141,6 +177,20 @@ const awningP = (ci) => proto(`awn|${ci}`, (b, { F }) => {
   for (const e of [-1, 1]) b.add(IRON, F(e * w / 2 - 0.015, e * w / 2 + 0.015, 0.06, 1.0, 2.66, 2.7));
   b.add(IRON, F(-w / 2, w / 2, 0.98, 1.03, 2.68, 2.72));
 });
+// ── The far blocks' pieces (el.far: blocks beyond the arrival's shops, 180 m and more from the Marina): the same bays, built of fewer, plainer pieces ──
+/** A far window's balcony: the slab on its brackets, the rail and five bars as thick as ten. */
+const balconyFarP = (d) => proto(`balf|${d}`, (b, fr) => {
+  const F = fr.F;
+  b.add(S, F(-0.95, 0.95, 0, d, -0.12, 0.06));
+  b.add(S, F(-0.8, -0.6, 0, d * 0.7, -0.32, -0.12)); b.add(S, F(0.6, 0.8, 0, d * 0.7, -0.32, -0.12));
+  b.add(IRON, F(-0.92, 0.92, d - 0.07, d - 0.03, 0.96, 1.01));
+  for (let i = 0; i < 5; i++) { const s = -0.88 + i * 0.44; b.add(IRON, F(s - 0.02, s + 0.02, d - 0.065, d - 0.035, 0.06, 0.96)); }
+});
+/** A far shop bay: its dark opening and the cornice over it. */
+const shopFarP = () => proto('shopf', (b, { F }) => { b.add(S, F(-1.35, 1.35, 0.076, 0.2, 3.8, 4.1)); });
+const doorFarP = () => proto('doorf', (b, { F }) => { b.add(S, F(-1.3, 1.3, 0.076, 0.28, 3.9, 4.35)); });
+/** A far window of the entresol: its dark panel. */
+const entresolFarP = () => proto('entresolf', (b, { F }) => { b.add(S, F(-0.75, 0.75, 0, 0.12, 5.18, 5.3)); });
 /** A flower box on a balcony's rail (geraniums, carnations, ferns). */
 const flowerP = (k, d) => proto(`flw|${k}|${d}`, (b, { F }) => {
   b.add('wood_painted', F(-0.8, 0.8, d - 0.08, d + 0.14, 0.72, 0.95));
@@ -183,7 +233,7 @@ const tribuneP = (H, last) => proto(`trib|${H}|${last}`, (b, { F }) => {
  * cornice and the parapet of the roof terrace. `tribune`: a glazed gallery up the middle bay (the corners).
  */
 function streetFront(bag, fr, s0, s1, y, h, mat, rand, tribune = false, opt = {}) {
-  const own = !!opt.own;                       // a house with its own ground floor and principal windows (interior.js)
+  const own = !!opt.own, far = !!opt.far;                       // a house with its own ground floor and principal windows (interior.js)
   const shops = opt.shops ?? [];               // shops with a front of their own (shops.js): their bays are dressed there
   const F = fr.F, w = s1 - s0, nb = Math.max(1, Math.round(w / 3.4)), bw = w / nb, sh = rand() < 0.7 ? 'shutter_green' : 'shutter_brown';
   const top = LV.findIndex((l) => l >= h - 0.01), door = Math.floor(nb / 2);
@@ -207,23 +257,23 @@ function streetFront(bag, fr, s0, s1, y, h, mat, rand, tribune = false, opt = {}
   for (let i = 0; i < nb; i++) {
     const sc = s0 + (i + 0.5) * bw;
     if (tribune && i === door) {
-      put(bag, fr, shopP(), sc, y);
+      put(bag, fr, shopP(), sc, y); panel(bag, fr, sc - 1.2, sc + 1.2, 0.1, y + 0.1, y + 3.8);
       for (let f = 2; f < top; f++) put(bag, fr, tribuneP(+(LV[f + 1] - LV[f]).toFixed(2), f === top - 1), sc, y + LV[f]);
       continue;
     }
     if (!own) {
-      if (!inShop(i)) put(bag, fr, i === door ? doorP() : shopP(), sc, y);
-      if (i !== door && rand() < 0.34) { const ci = Math.floor(rand() * AWN.length); if (!inShop(i) || dr() < 0.5) put(bag, fr, awningP(ci), sc, y - (inShop(i) ? 0.2 : 0)); }
+      if (!inShop(i)) { put(bag, fr, far ? (i === door ? doorFarP() : shopFarP()) : i === door ? doorP() : shopP(), sc, y); const hw = i === door ? 0.95 : 1.2; panel(bag, fr, sc - hw, sc + hw, 0.1, y + 0.1, y + (i === door ? 3.9 : 3.8)); }
+      if (i !== door && rand() < 0.34) { const ci = Math.floor(rand() * AWN.length); if ((!inShop(i) || dr() < 0.5) && !far) put(bag, fr, awningP(ci), sc, y - (inShop(i) ? 0.2 : 0)); }
     }
-    put(bag, fr, entresolP(), sc, y);
+    put(bag, fr, far ? entresolFarP() : entresolP(), sc, y); panel(bag, fr, sc - 0.6, sc + 0.6, 0.03, y + 5.3, y + 6.9);
     if (i === tb) for (let f = 2; f < top; f++) put(bag, fr, tribuneP(+(LV[f + 1] - LV[f]).toFixed(2), f === top - 1), sc, y + LV[f]);
     for (let f = 2; f < top; f++) {
       const k = f === 2 ? 2 : f === top - 1 ? 'last' : 'mid', st = Math.floor(rand() * 4) % 3;
       if (i === tb) continue;
-      if (!(own && f === 2)) put(bag, fr, windowP(k), sc, y + LV[f]);
-      put(bag, fr, shutterP(k, st === 2 && rand() < 0.5 ? 2 : st, sh), sc, y + LV[f]);
-      const bd = +(0.62 - 0.05 * (f - 3)).toFixed(2);
-      if (k === 'mid') put(bag, fr, balconyP(bd), sc, y + LV[f]);
+      if (!(own && f === 2)) { put(bag, fr, windowP(k), sc, y + LV[f]); panel(bag, fr, sc - WIN[k][0] / 2, sc + WIN[k][0] / 2, 0.03, y + LV[f] + 0.06, y + LV[f] + 0.06 + WIN[k][1]); }
+      { const st2 = st === 2 && rand() < 0.5 ? 2 : st; shutterLeaves(bag, fr, sc, y + LV[f], k, far ? 0 : st2, sh); }
+      const bd = 0.58;                                  // (one depth for the slabs of all the floors: they were 0.62, 0.57, 0.52)
+      if (k === 'mid') put(bag, fr, far ? balconyFarP(bd) : balconyP(bd), sc, y + LV[f]);
       // life at the windows: a flower box on the rail, washing over it, a cage, an awning over a window
       const q = dr();
       if (k === 'mid') { if (q < 0.34) put(bag, fr, flowerP(Math.floor(dr() * 3), bd), sc, y + LV[f], 90); else if (q < 0.5) put(bag, fr, washP(Math.floor(dr() * 5), bd), sc, y + LV[f], 90); else if (q < 0.56) put(bag, fr, cageP(bd), sc, y + LV[f], 60); else if (q < 0.64 && f === 3) put(bag, fr, awningP(Math.floor(dr() * AWN.length)), sc, y + LV[f] - 0.75, 120); }
@@ -236,24 +286,25 @@ function streetFront(bag, fr, s0, s1, y, h, mat, rand, tribune = false, opt = {}
     const n = Math.floor((b - a - 0.1) / 0.96); if (n < 1) continue;
     const m = (a + b) / 2, L = n * 0.96;
     bag.add(S, F(m - L / 2 - 0.05, m + L / 2 + 0.05, 0, 0.95, y + 7.25, y + 7.45));
-    for (let j = 0; j < n; j++) put(bag, fr, railBars(), m - L / 2 + j * 0.96, y + 7.45);
-    for (const e of [m - L / 2, m + L / 2 - 0.04]) { bag.add(IRON, F(e, e + 0.04, 0, 0.86, y + 8.4, y + 8.45)); for (let k = 1; k < 5; k++) bag.add(IRON, F(e + 0.008, e + 0.032, k * 0.17 - 0.012, k * 0.17 + 0.012, y + 7.45, y + 8.4)); }
+    if (far) { bag.add(IRON, F(m - L / 2, m + L / 2, 0.86, 0.9, y + 8.4, y + 8.45)); for (let j = 0; j <= n * 2; j++) { const u = m - L / 2 + 0.04 + j * 0.48 - (j === n * 2 ? 0.08 : 0); bag.add(IRON, F(u - 0.02, u + 0.02, 0.862, 0.898, y + 7.45, y + 8.4)); } }
+    else for (let j = 0; j < n; j++) put(bag, fr, railBars(), m - L / 2 + j * 0.96, y + 7.45);
+    for (const e of [m - L / 2, m + L / 2 - 0.04]) { bag.add(IRON, F(e, e + 0.04, 0, 0.86, y + 8.4, y + 8.45)); for (let k = 1; k < 5; k += far ? 2 : 1) bag.add(IRON, F(e + 0.008, e + 0.032, k * 0.17 - 0.012, k * 0.17 + 0.012, y + 7.45, y + 8.4)); }
   }
   // weathering (docs/settlements/barcelona.md §5c): the grime of the street on the lower stone of the ground floor,
   // wavering, broken at the portal; rain streaks greyed down the stucco from the cornice between the bays
-  for (let i = 0; i < nb && !own; i++) {
+  for (let i = 0; i < nb && !own && !far; i++) {
     if (i === door && !tribune) continue;
     if (inShop(i)) continue;
     const a = s0 + i * bw + (i === door + 1 && !tribune ? 0.9 : 0.05), b = s0 + (i + 1) * bw - (i === door - 1 && !tribune ? 0.9 : 0.05);
     if (b - a > 0.3) bag.add('plaster_damp', F(a, b, 0.062, 0.07, y + 0.45, y + 0.72 + 0.16 * Math.sin(i * 2.3 + s0)));
   }
-  for (let i = 1; i < nb; i++) if (rand() < 0.7) { const u = s0 + i * bw, L2 = 1.6 + rand() * 2.8; bag.add('plaster_streak', F(u - 0.16, u + 0.16, 0.006, 0.02, Math.max(y + 7.6, y + h - 0.62 - L2), y + h - 0.62)); }
+  for (let i = 1; i < nb; i++) if (rand() < 0.7 && !far) { const u = s0 + i * bw, L2 = 1.6 + rand() * 2.8; bag.add('plaster_streak', F(u - 0.16, u + 0.16, 0.006, 0.02, Math.max(y + 7.6, y + h - 0.62 - L2), y + h - 0.62)); }
   // the façade's own dressing (a stream of its own): pilasters between the bays, a ceramic band under the cornice, a curved crest over the middle bay,
   // a wall lantern at the plot's end, a poster on a blank pier
   if (!own && !tribune) {
     if (dr() < 0.3) for (let i = 1; i < nb; i++) { const u = s0 + i * bw; bag.add(S, F(u - 0.16, u + 0.16, 0, 0.1, y + 7.45, y + h - 0.62)); }
     if (dr() < 0.38) { const bm = dr() < 0.5 ? 'tile_turquoise' : dr() < 0.5 ? 'stucco_ochre' : 'glaze_green'; bag.add(bm, F(s0 + 0.3, s1 - 0.3, 0.0, 0.04, y + h - 1.5, y + h - 0.95)); for (let i = 0; i < nb; i++) { const u = s0 + (i + 0.5) * bw; bag.add('tile_cream', F(u - 0.35, u + 0.35, 0.04, 0.06, y + h - 1.4, y + h - 1.05)); } }
-    put(bag, fr, lanternP(), s0 + 0.3, y + 3.0, 80);
+    if (!far) put(bag, fr, lanternP(), s0 + 0.3, y + 3.0, 80);
   }
   bag.add(S, F(s0, s1, 0, 0.24, y + h - 0.62, y + h - 0.42));
   bag.add(S, F(s0, s1, 0, 0.52, y + h - 0.42, y + h - 0.16));
@@ -266,12 +317,17 @@ function streetFront(bag, fr, s0, s1, y, h, mat, rand, tribune = false, opt = {}
   }
 }
 /** The court side of a house: plain windows with shutters, floor over floor. */
-function courtFront(bag, fr, s0, s1, y, h, D, rand, from = 1) {
+
+/** Washing hung out on a line: a sheet seen from both sides. */
+const laundryP = () => proto('laundry', (b, { F }) => { b.add('cloth_white', F(-0.45, 0.45, 0.1, 0.12, 0, 0.7, ['sn', 'sp', 'yn', 'yp'])); });
+function courtFront(bag, fr, s0, s1, y, h, D, rand, from = 1, far = false) {
+  const cf = frame(fr.at(s1, -D), fr.at(s0, -D));                      // the court wall's own frame, looking into the court
   const top = LV.findIndex((l) => l >= h - 0.01), n = Math.max(1, Math.floor((s1 - s0) / 3.2)), bw = (s1 - s0) / n;
   for (let f = from; f < top; f++) for (let i = 0; i < n; i++) {
     const sc = s0 + (i + 0.5) * bw, y0 = y + LV[f] + 0.8;
-    bag.add('opening', fr.F(sc - 0.55, sc + 0.55, -D - 0.03, -D + 0.03, y0, y0 + 1.6));
-    if (rand() < 0.35) bag.add('cloth_white', fr.F(sc - 0.5, sc + 0.4, -D - 0.12, -D - 0.1, y0 - 0.9, y0 - 0.2));     // laundry hung out
+    if (far) { rand(); continue; }                                   // (the court of a far block: no windows; its stream kept)
+    panel(bag, cf, s1 - sc - 0.55, s1 - sc + 0.55, 0.03, y0, y0 + 1.6);
+    if (rand() < 0.35) put(bag, cf, laundryP(), s1 - sc, y0 - 0.9);                                              // laundry hung out
   }
   bag.add(S, fr.F(s0, s1, -D - 0.1, -D + 0.3, y + h + 0.0, y + h + 0.9));
 }
@@ -372,8 +428,8 @@ function block(el, ctx) {
       bag.add(mat, fr.F(a, b, -D, 0, y - 1.2, y + h));
       const p = fr.at(a, -D), q = fr.at(b, 0); col.rect([p[0], p[1], q[0], q[1]], y - 1.2, y + h);
     }
-    streetFront(bag, fr, a, b, y, h, mat, pr, false, { shops });
-    courtFront(bag, fr, a, b, y, h, D, pr);
+    streetFront(bag, fr, a, b, y, h, mat, pr, false, { shops, far: el.far });
+    courtFront(bag, fr, a, b, y, h, D, pr, 1, el.far);
     roofTop(bag, fr, a, b, y, h, D, seed);
   }
   // the four corner houses, each on its cut corner with a short return on the cross street
@@ -397,8 +453,8 @@ function block(el, ctx) {
     // the chamfer runs from the long side's end to the cross street's start: the frame must have the street outside
     const fc = frC.n[0] * (Q[0][0] - cx) + frC.n[1] * (Q[0][1] - cz) > 0 ? frC : frame(Q[1], Q[0]);
     const fr2 = ret.n[0] * (Q[1][0] - cx) + ret.n[1] * (Q[1][1] - cz) > 0 ? ret : frame(Q[2], Q[1]);
-    streetFront(bag, fc, 0, fc.L, y, h, mat, rand, true);
-    streetFront(bag, fr2, 0, fr2.L, y, h, mat, rand);
+    streetFront(bag, fc, 0, fc.L, y, h, mat, rand, true, { far: el.far });
+    streetFront(bag, fr2, 0, fr2.L, y, h, mat, rand, false, { far: el.far });
     roofTop(bag, fc, 6, fc.L - 6, y, h, 9, Math.floor(rand() * 1e9) + 1);   // 6 m in from each end keeps the chimneys inside the corner house's trapezoid
     col.segment(fc.at(0, -3), fc.at(fc.L, -3), 6, yb, yt);
     const a = fr2.at(0, -ch), b = fr2.at(fr2.L, 0); col.rect([a[0], a[1], b[0], b[1]], yb, yt);
@@ -865,8 +921,20 @@ function batllo(el, { bag, col }) {
   // a cornice where the mosaic meets the roof
   bag.add(ST, F(0, w, -0.05, 0.4, y + h - 0.2, y + h + 0.08));
 }
+/**
+ * Materials of the shops' small stock that are one another's twins at a few metres (a jar of dark clay and a brown hide, a tan loaf and
+ * ochre wood): each distinct material of a plan is a draw, so the Eixample's blocks are built with the twins as one.
+ */
+const TWINS = { pottery_dark: 'hide_brown', glaze_blue: 'glaze_green', glass_topaz: 'hide_brown', hide_black: 'wood_dark', hide_tan: 'wood_ochre', rope_fibre: 'wood_ochre', sacking: 'wood_ochre', iron_galv: 'iron', steel_chrome: 'steel_grey', marble_dark: 'iron', cloth_blue: 'cloth_indigo', cloth_maroon: 'cloth_red', paint_white: 'cloth_white', cloth_black: 'wood_dark', cloth_brown: 'wood_dark', cloth_grey: 'cloth_indigo', wicker: 'wood_ochre', mirror_tin: 'steel_grey', lime_plaster: 'plaster_white', plaster_grey: 'plaster_white', marble_floor: 'tile_cream' };
+function twinned(bag) {
+  const o = Object.create(bag), m = (k) => TWINS[k] ?? k;
+  o.add = (k, g) => bag.add(m(k), g);
+  if (bag.addInstance) o.addInstance = (k, g, M, opt) => bag.addInstance(m(k), g, M, opt && opt.real ? { ...opt, real: m(opt.real) } : opt);
+  return o;
+}
+const twin = (fn) => (el, ctx) => fn(el, { ...ctx, bag: twinned(ctx.bag) });
 registerStyle('modernisme', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, mercat, casa_cafe: (el, ctx) => casaCafe(el, ctx, { frame, streetFront, courtFront, roofTop, rng }), eixample_block: block, sagrada, pedrera, batllo, ...STREET, ...FURNITURE, banc_fanal: bancFanal, works_fence: worksFence, stone_yard: stoneYard },
+  elements: { ...STYLES.qing.elements, mercat, casa_cafe: (el, ctx) => casaCafe(el, ctx, { frame, streetFront, courtFront, roofTop, rng }), eixample_block: twin(block), sagrada, pedrera, batllo, ...STREET, ...FURNITURE, banc_fanal: bancFanal, works_fence: worksFence, stone_yard: stoneYard },
   objects: {},
 });
