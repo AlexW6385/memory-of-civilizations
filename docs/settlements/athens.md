@@ -154,7 +154,18 @@ Walkers (`movers.js`, 60 by day, 5 by night): citizens in chiton and himation, p
 
 Sources: Pausanias, *Description of Greece* 1.26 ([Perseus text via perseids.org](https://cts.perseids.org/read/greekLit/tlg0525/tlg001/perseus-eng2/1.26.1-1.27.1)).
 
+## 15. Detail pass, 2026-11-16
+
+- **Parthenon treasury and painted coffers:** see `docs/buildings/parthenon.md` §6a.
+- **Houses:** Olynthus houses are about 17 m square with a court, a pastas, an andron with an offset door, a kitchen complex, a store with a pithos, a possible upper floor [stated: MIT "House of Many Colors"; "House A vii 4"; U. Michigan Olynthos project]. The 26 walk-in houses are now built four to a plan (one mesh per material per plan: about 400 fewer meshes). A second house plan (pastas type) and more walk-in houses in the outer town were designed but not built: every added walk-in house raises the float-check's "walls walked through" count above its baseline.
+
 ## Sources
+- [House of Many Colors — MIT Olynthos](https://web.mit.edu/21h.405/www/olynthos/homc.html)
+- [House A vii 4 — MIT Olynthos](https://web.mit.edu/21h.405/www/olynthos/vii4.html)
+- [Olynthian houses — U. Michigan](https://sites.lsa.umich.edu/olynthos-project/olynthian-houses/)
+- [IG I3 329 Hekatompedon inventory](https://www.atticinscriptions.com/inscription/IGI3/329)
+- [Athena Parthenos — Wikipedia](https://en.wikipedia.org/wiki/Athena_Parthenos)
+- [At home in ancient Athens — Yale Alumni Magazine](https://yalealumnimagazine.com/articles/4177/at-home-in-ancient-athens)
 
 - [Simon the Shoemaker — Wikipedia](https://en.wikipedia.org/wiki/Simon_the_Shoemaker)
 - [Craft workshops — Foundation of the Hellenic World](https://www.fhw.gr/chronos/05/en/society/craft_workshops.html)

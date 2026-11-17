@@ -3,6 +3,7 @@
 // foot of the krepis (the rock of the Acropolis). Metres, true scale.
 
 import { SITES } from '../../world/regions.js';
+import './treasury.js';
 
 const E = [];
 const add = (o) => (E.push(o), o);
@@ -39,8 +40,8 @@ add({ t: 'pediment_roof', rect: [X[0] - FACE - 0.7, Z[0] - FACE - 0.7, X[16] + F
 
 // marble coffered ceilings over the pteron, from the entablature to the cella walls
 const CW = 10.85;                                          // outer face of the cella's long walls
-for (const s of [-1, 1]) add({ t: 'coffers', rect: [X[0] + FACE, Math.min(s * (14.42 - FACE), s * CW), X[16] - FACE, Math.max(s * (14.42 - FACE), s * CW)], y: FRIEZE_TOP, depth: 0.3, cell: 0.95, beam: 0.22, mat: 'marble' });
-for (const s of [-1, 1]) add({ t: 'coffers', rect: [Math.min(s * 23.45, s * (33.75 - FACE)), -CW, Math.max(s * 23.45, s * (33.75 - FACE)), CW], y: FRIEZE_TOP, depth: 0.3, cell: 0.95, beam: 0.22, mat: 'marble' });
+for (const s of [-1, 1]) add({ t: 'coffers', rect: [X[0] + FACE, Math.min(s * (14.42 - FACE), s * CW), X[16] - FACE, Math.max(s * (14.42 - FACE), s * CW)], y: FRIEZE_TOP, depth: 0.3, cell: 0.95, beam: 0.22, mat: 'marble', ceilMat: 'egyptian_blue' });
+for (const s of [-1, 1]) add({ t: 'coffers', rect: [Math.min(s * 23.45, s * (33.75 - FACE)), -CW, Math.max(s * 23.45, s * (33.75 - FACE)), CW], y: FRIEZE_TOP, depth: 0.3, cell: 0.95, beam: 0.22, mat: 'marble', ceilMat: 'egyptian_blue' });
 
 // ── the cella on its two-step podium ──────────────────────────────────────────
 const FL = ST + 0.7;                                       // floor of the porches and both rooms
@@ -99,6 +100,8 @@ obj('doors', -22.2, 0, FL, { yaw: PI / 2, w: 4.9, h: 9.8, th: 0.22, depth: 0 });
 // ── the west room: four Ionic columns ─────────────────────────────────────────
 for (const x of [-18.2, -12.8]) for (const z of [-4.6, 4.6]) column(x, z, FL, WALL_TOP - FL - 0.35, 1.25, { order: 'ionic', yaw: 0 });
 for (const z of [-4.6, 4.6]) beam([-22.2, z], [-8.8, z], WALL_TOP - 0.35, 1.0, 0.35);
+
+add({ t: 'parthenon_treasury', y: FL });
 
 // ── rooms and walks ───────────────────────────────────────────────────────────
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
