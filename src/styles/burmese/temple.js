@@ -4,6 +4,8 @@
 import { box, lathe } from '../../core/geom.js';
 import { rng, Fr, sideFrame, archWall, vault, miniStupa, hti } from './kit.js';
 import { offering } from './detail.js';
+import { buddha, pyramid, plaqueBand, plaqueRow, kuduNiche, reliefPanel, imageRow, grille, doorLeaves } from './ornament.js';
+export { buddha };
 
 const WHITE = 'limewash_white', TRIM = 'stucco_cream', BRICK = 'brick_baked', GLAZE = 'glaze_green';
 const SIDES = ['n', 'e', 's', 'w'];
@@ -14,16 +16,32 @@ export function sikhara(ctx, c, y0, h0, hEnd, n, bh, gilt = 3, niches = true) {
   let y = y0;
   for (let i = 0; i < n; i++) {
     const t = i / n, half = h0 - (h0 - hEnd) * Math.pow(t, 1.35), g = i >= n - gilt;
-    const mat = g ? 'gilt_bronze' : WHITE;
+    const mat = g ? 'gilt_bronze' : WHITE, trim = g ? 'gilt_bronze' : TRIM;
     bag.add(mat, box(c[0] - half, y, c[1] - half, c[0] + half, y + bh, c[1] + half));
     if (i === 0) col.rect([c[0] - half, c[1] - half, c[0] + half, c[1] + half], y, y + bh);
-    bag.add(g ? 'gilt_bronze' : TRIM, box(c[0] - half - 0.3, y + bh - 0.28, c[1] - half - 0.3, c[0] + half + 0.3, y + bh, c[1] + half + 0.3));
-    if (niches && !g && half > 2.2) {
-      const nw = half * 0.55, nh = bh * 0.6;
-      bag.add('stucco_ochre', box(c[0] - nw, y + bh * 0.12, c[1] - half - 0.06, c[0] + nw, y + bh * 0.12 + nh, c[1] - half));
-      bag.add('stucco_ochre', box(c[0] - nw, y + bh * 0.12, c[1] + half, c[0] + nw, y + bh * 0.12 + nh, c[1] + half + 0.06));
-      bag.add('stucco_ochre', box(c[0] - half - 0.06, y + bh * 0.12, c[1] - nw, c[0] - half, y + bh * 0.12 + nh, c[1] + nw));
-      bag.add('stucco_ochre', box(c[0] + half, y + bh * 0.12, c[1] - nw, c[0] + half + 0.06, y + bh * 0.12 + nh, c[1] + nw));
+    bag.add(trim, box(c[0] - half - 0.3, y + bh - 0.28, c[1] - half - 0.3, c[0] + half + 0.3, y + bh, c[1] + half + 0.3));
+    if (half > 1.0) {
+      // the ribs of the curvilinear tower: a ridge up each corner on every course
+      const cw = Math.min(0.32, half * 0.12), e = 0.12, y1 = y + bh - 0.28;
+      for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+        const x0 = sx > 0 ? c[0] + half - cw : c[0] - half - e, x1 = sx > 0 ? c[0] + half + e : c[0] - half + cw;
+        const z0 = sz > 0 ? c[1] + half - cw : c[1] - half - e, z1 = sz > 0 ? c[1] + half + e : c[1] - half + cw;
+        bag.add(trim, box(x0, y + 0.02, z0, x1, y1, z1));
+      }
+    }
+    if (niches && !g && half > 2.2 && i % 2 === 0) {
+      const nw = half * 0.55, nh = bh * 0.6, ny = y + bh * 0.12;
+      bag.add('stucco_ochre', box(c[0] - nw, ny, c[1] - half - 0.06, c[0] + nw, ny + nh, c[1] - half));
+      bag.add('stucco_ochre', box(c[0] - nw, ny, c[1] + half, c[0] + nw, ny + nh, c[1] + half + 0.06));
+      bag.add('stucco_ochre', box(c[0] - half - 0.06, ny, c[1] - nw, c[0] - half, ny + nh, c[1] + nw));
+      bag.add('stucco_ochre', box(c[0] + half, ny, c[1] - nw, c[0] + half + 0.06, ny + nh, c[1] + nw));
+    } else if (half > 1.4) {
+      // the middle rib of each face on the courses between
+      const rw = half * 0.16, e = 0.1, y1 = y + bh - 0.28;
+      bag.add(trim, box(c[0] - rw, y + 0.04, c[1] - half - e, c[0] + rw, y1, c[1] - half));
+      bag.add(trim, box(c[0] - rw, y + 0.04, c[1] + half, c[0] + rw, y1, c[1] + half + e));
+      bag.add(trim, box(c[0] - half - e, y + 0.04, c[1] - rw, c[0] - half, y1, c[1] + rw));
+      bag.add(trim, box(c[0] + half, y + 0.04, c[1] - rw, c[0] + half + e, y1, c[1] + rw));
     }
     y += bh;
   }
@@ -45,28 +63,6 @@ function steps(F, u0, u1, v1, len, f) {
   const n = 6, d = len / n;
   for (let i = 0; i < n; i++) F.b('brick_paving', u0, 0, v1 - len, u1, f * (i + 1) / n, v1 - i * d, false);
   F.ramp(u0, v1 - len, u1, v1, 0, f, -1);
-}
-
-/** A Buddha standing on a throne facing +v of the frame, at (u, v): total height H (the throne included). */
-export function buddha(F, u, v, H, throne = 2.2) {
-  const k = (H - throne) / 8.2, f0 = F.o;
-  void f0;
-  const y0 = throne;
-  F.b('lacquer_red', u - 2.3, F.base ?? 0, v - 1.5, u + 2.3, (F.base ?? 0) + throne, v + 1.6);
-  F.b('gilt_bronze', u - 2.4, (F.base ?? 0) + throne - 0.2, v - 1.6, u + 2.4, (F.base ?? 0) + throne, v + 1.7, false);
-  const P = (prof) => prof.map(([r, y]) => [r * k, (F.base ?? 0) + y0 + y * k]);
-  const robe = [[1.35, 0], [1.28, 0.4], [1.05, 2.2], [0.98, 3.8], [1.05, 5.0], [1.5, 5.8], [1.42, 6.15], [0.62, 6.35], [0.42, 6.5]].map(([r, y]) => [r * k, y * k]);
-  const [px, pz] = F.pt(u, v), by = (F.base ?? 0) + y0;
-  F.bag.add('gold', lathe(robe, 14, null, px, by, pz));
-  F.bag.add('gilt_bronze', lathe([[0.42 * k, 6.5 * k], [0.62 * k, 6.9 * k], [0.78 * k, 7.5 * k], [0.72 * k, 8.1 * k], [0.45 * k, 8.4 * k], [0.18 * k, 8.55 * k]], 12, null, px, by, pz));
-  F.bag.add('gold', lathe([[0.4 * k, 8.3 * k], [0.34 * k, 8.8 * k], [0.12 * k, 9.2 * k], [0.001, 9.35 * k]], 10, null, px, by, pz));
-  // the arms: the left hand at the hip holding the robe, the right raised (abhaya) — bars of gilt
-  F.b('gold', u - 1.7 * k, by + 3.0 * k, v + 0.55 * k, u - 1.3 * k, by + 5.6 * k, v + 1.0 * k, false);
-  F.b('gold', u + 1.3 * k, by + 4.6 * k, v + 0.8 * k, u + 1.75 * k, by + 5.7 * k, v + 1.15 * k, false);
-  F.b('gilt_bronze', u + 1.15 * k, by + 5.7 * k, v + 1.1 * k, u + 1.75 * k, by + 6.6 * k, v + 1.2 * k, false);
-  // the flame-shaped halo behind the head
-  F.b('gilt_bronze', u - 1.3 * k, by + 6.6 * k, v - 0.95 * k, u + 1.3 * k, by + 9.2 * k, v - 0.85 * k, false);
-  F.col.rect(F.R(u - 2.3, v - 1.5, u + 2.3, v + 1.6), F.base ?? 0, (F.base ?? 0) + H);
 }
 
 /**
@@ -96,6 +92,18 @@ export function ananda(el, ctx) {
   ], 'stucco_cream'));
   // ── the middle wall: the opening of the cross passage ──
   ring(HW, HC, (F, u0, u1, v0, v1) => archWall(F, WHITE, u0, u1, v0, v1, f, SLAB0, [{ c: 0, w: 4.8, top: 7.6 }], 'stucco_cream'));
+  // ── the outer wall's dress: the moulded base, pilasters, a frieze of blind kudu arches, the pierced stone windows, the teak doors folded back ──
+  for (const s of SIDES) {
+    const F = S[s];
+    for (const [a, b] of [[-HO, -5.8], [5.8, HO]]) {
+      F.b(TRIM, a, f, HO, b, f + 0.45, HO + 0.3, false);
+      F.b(TRIM, a, f + 0.45, HO, b, f + 0.8, HO + 0.18, false);
+      for (let u = a + 1.1; u < b - 0.6; u += 1.45) if (![-22.5, -14.5, 14.5, 22.5].some((p) => Math.abs(u - p) < 0.95)) kuduNiche(F, u, 8.7, HO, 1);
+    }
+    for (const u of [-22.5, -14.5, 14.5, 22.5]) F.b(TRIM, u - 0.25, f + 0.8, HO, u + 0.25, TOP1 - 0.36, HO + 0.2, false);
+    for (const u of [-18, -11, 11, 18]) grille(F, u, 1.1, f + 2.6, f + 5.4, HO - 0.14, 1);
+    doorLeaves(F, 0, 4.8, f, 4.9, HM + 0.3, HM + 2.7);
+  }
   // ── the core: the central cube with the four niches (u ±3.2, from v 9.4 to its face at 13.6), up to the niches' tops ──
   const coreLayer = (y0, y1, mat = WHITE) => {
     const F = S.n, n = NICHE.u, a = NICHE.v0;
@@ -125,8 +133,14 @@ export function ananda(el, ctx) {
     // the stone reliefs along the corridor walls (a band of carved stone), facing the walkers
     for (const sg of [-1, 1]) {
       const a = sg < 0 ? [-13.4, -2.6] : [2.6, 13.4];
-      F.b('sandstone_relief', a[0], f + 1.0, HW - 0.06, a[1], f + 3.3, HW, false);
-      F.b('sandstone_relief', a[0], f + 1.0, HI, a[1], f + 3.3, HI + 0.06, false);
+      // the 80 reliefs: five to a wall of each arm, each framed, the small stone images in a row above them
+      F.b('sandstone_dressed', a[0], f, HW - 0.04, a[1], f + 1.0, HW, false);
+      F.b('sandstone_dressed', a[0], f, HI, a[1], f + 1.0, HI + 0.04, false);
+      for (let q = 0; q < 5; q++) {
+        const uc = a[0] + (q + 0.5) * ((a[1] - a[0]) / 5);
+        reliefPanel(F, uc, f + 1.12, HW, -1, q); reliefPanel(F, uc, f + 1.12, HI, 1, q + 1);
+      }
+      imageRow(F, a[0], a[1], f + 2.82, HW, -1); imageRow(F, a[0], a[1], f + 2.82, HI, 1);
       // the murals above the reliefs: panels of painted plaster in gilt frames (the Jataka scenes), a band of glaze between
       const pm = ['paint_ochre', 'paint_blue', 'fresco_green', 'stucco_ochre', 'paint_ochre'];
       for (let q = 0; q < 4; q++) {
@@ -145,7 +159,8 @@ export function ananda(el, ctx) {
 
   }
   // the Buddhas: Kakusandha north, Konagamana east, Kassapa south, Gautama west
-  for (const s of SIDES) { buddha(S[s], 0, 11.5, 9.5, 2.4); }
+  const POSE = { n: 'dhamma', s: 'dhamma', e: 'hang', w: 'abhaya' };   // Kakusandha and Kassapa: the first sermon; Konagamana: arms down; Gautama: the raised hand
+  for (const s of SIDES) { buddha(S[s], 0, 11.5, 9.5, 2.4, POSE[s]); }
   // ── the porches: a vaulted hall under a stepped gable, a stupa on the front ──
   for (const s of SIDES) {
     const F = S[s], yp = f + 11;
@@ -158,6 +173,8 @@ export function ananda(el, ctx) {
     F.b(WHITE, -3.4, yp + 4.0, HO, 3.4, yp + 6.0, 41.1, false);
     for (const [y, u, v] of [[yp + 2.0, 5.8, 43.5], [yp + 4.0, 4.6, 42.3], [yp + 6.0, 3.4, 41.1]]) F.b(TRIM, -u - 0.25, y - 0.3, HO, u + 0.25, y, v + 0.25, false);
     F.b(GLAZE, -5.85, yp + 0.4, 38, 5.85, yp + 0.9, 43.55, false);
+    plaqueRow(F, -5.8, 5.8, yp + 1.1, 0.7, 43.5, 1); plaqueRow(F, -4.6, 4.6, yp + 2.4, 0.6, 42.3, 1); plaqueRow(F, -3.4, 3.4, yp + 4.4, 0.6, 41.1, 1);
+    for (const [uu, vv, yy] of [[5.2, 43.0, yp + 2.0], [-5.2, 43.0, yp + 2.0], [4.0, 41.8, yp + 4.0], [-4.0, 41.8, yp + 4.0]]) { const [qx, qz] = F.pt(uu, vv); pyramid(bag, WHITE, qx, yy, qz, 0.3, 0.8); }
     const [fx, fz] = F.pt(0, 39.5);
     miniStupa(bag, fx, yp + 6.0, fz, 5.5, WHITE, true);
     F.b(TRIM, -3.6, yp + 6.0, HO, 3.6, yp + 6.0 + 0.05, 41.3, false);
@@ -191,12 +208,16 @@ export function ananda(el, ctx) {
     N.ramp(-8.15, v0, -5.95, v1, f, TOP1, -1);
   }
   // ── the receding terraces: the curvilinear roofs, as four stepped tiers with a glazed band and a stupa at each corner ──
+  const edgeFinials = (h, y1) => {                     // a row of small pyramids along the edge of a terrace
+    for (let q = -h + 1.0; q < h - 0.8; q += 1.6) for (const [x, z] of [[q, -h + 0.35], [q, h - 0.35], [-h + 0.35, q], [h - 0.35, q]]) pyramid(bag, WHITE, c[0] + x, y1 + 0.03, c[1] + z, 0.22, 0.5);
+  };
   const tier = (h, y0, y1, ringOnly) => {
     const F = S.n;
-    if (ringOnly) { ring(HI, h, (G, u0, u1, v0, v1) => G.b(WHITE, u0, y0, v0, u1, y1, v1, true)); F.b(GLAZE, -h - 0.05, y0 + 0.5, -h - 0.05, h + 0.05, y0 + 1.0, h + 0.05, false); return; }
+    if (ringOnly) { ring(HI, h, (G, u0, u1, v0, v1) => G.b(WHITE, u0, y0, v0, u1, y1, v1, true)); plaqueBand(bag, c, h, y0 + 0.45, 0.6, { w: 0.4, step: 0.52 }); return; }
     F.b(WHITE, -h, y0, -h, h, y1, h, true);
     F.b(TRIM, -h - 0.3, y1 - 0.35, -h - 0.3, h + 0.3, y1 + 0.03, h + 0.3, false);
-    if (y0 > NT + 0.1) F.b(GLAZE, -h - 0.05, y0 + 0.5, -h - 0.05, h + 0.05, y0 + 1.0, h + 0.05, false);
+    if (y0 > NT + 0.1) plaqueBand(bag, c, h, y0 + 0.45, 0.6, { w: 0.4, step: 0.52 });
+    edgeFinials(h, y1);
     for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) miniStupa(bag, c[0] + sx * (h - 1.2), y1 + 0.03, c[1] + sz * (h - 1.2), 3.6, WHITE, true);
   };
   tier(20, TOP1, NT, true);
@@ -205,7 +226,7 @@ export function ananda(el, ctx) {
   S.n.b(WHITE, -12.8, 21, -12.8, 12.8, 24, 12.8, true);
   S.n.b(TRIM, -13.1, 23.65, -13.1, 13.1, 24.03, 13.1, false);
   // the sikhara and its gilded crown: bands with niches, the bud, the hti — the whole 51 m
-  const yTop = sikhara(ctx, c, 24, 12.0, 2.6, 10, 1.55, 4);
+  const yTop = sikhara(ctx, c, 24, 12.0, 2.6, 20, 0.775, 8);
   miniStupa(bag, c[0], yTop, c[1], 8, WHITE, true, 12);
   hti(bag, c[0], yTop + 8, c[1], 3.8, 1.0);
 }

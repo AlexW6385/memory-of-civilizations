@@ -2,6 +2,7 @@
 // the open rest house (zayat), the teak hall under tiered roofs (pyatthat) for the palace and the monasteries, the brick monastery (okkyaung).
 import { box, lathe, fromTriangles, orientOutward, frustum } from '../../core/geom.js';
 import { rng, Fr, archWall, vault, miniStupa } from './kit.js';
+import { tradeYard, beamHangings, pickTrade } from './trades.js';
 import { pot, potStand, firewood, hangBasket, laundryLine, dryMat, pounder, loom, hammock, shelf, bench, spiritHouse, sign } from './detail.js';
 
 /** A frame on a lot: u along the street from a corner, v from the street into the lot. */
@@ -81,6 +82,7 @@ export function house(el, ctx) {
   fence(0.1, 0.5, 0.1, D - 0.1); fence(W - 0.1, 0.5, W - 0.1, D - 0.1); fence(0.1, D - 0.1, W - 0.1, D - 0.1);
   fence(0.1, 0.1, du - 2.6 < 1 ? 1 : (u0 - 0.8 > 1.5 ? u0 - 0.8 : 1), 0.1); fence(Math.min(W - 1, u1 + 1.6), 0.1, W - 0.1, 0.1);
   houseDetail(F, r, { u0, u1, v0, v1, fl, wh, du, hw, hd, W, D, big, rich, rise });
+  houseVariety(F, el, { u0, u1, v0, v1, fl, wh, du, hw, hd, W, D, big, rich, rise, alongU, ov, WM });
   // inside: the floor to walk on, the mat, the hearth, pots, a rack, a lamp
   if (open) {
     F.floor(u0 + t, v0 + t, u1 - t, v1 - t, fl);
@@ -186,12 +188,18 @@ export function kyaung(el, ctx) {
   const [px, pz] = F.pt(0, 0);
   ctx.bag.add('gilt_bronze', lathe([[0.45, 0], [0.5, 0.4], [0.3, 0.7], [0.35, 1.4], [0.2, 2.2], [0.08, 3.4], [0.001, 3.8]], 8, null, px, yy, pz));
   // inside: the altar and image at the back, mats for the monks (or the court), a lamp
-  F.b('lacquer_red', -2.0, y, -B + 0.4, 2.0, y + 0.9, -B + 2.2, true);
-  F.b('gilt_bronze', -2.05, y + 0.8, -B + 0.35, 2.05, y + 0.9, -B + 2.25, false);
-  F.lathe('gold', [[1.0, 0], [0.9, 0.35], [0.6, 0.9], [0.7, 1.3], [0.28, 1.5], [0.22, 1.7]], 0, y + 0.9, -B + 1.3, 12);
-  F.lathe('gilt_bronze', [[0.22, 1.7], [0.3, 1.95], [0.27, 2.2], [0.001, 2.35]], 0, y + 0.9, -B + 1.3, 10);
-  for (let k = 0; k < 6; k++) { const u = -A + 1.6 + k * ((2 * A - 3.2) / 5); if (Math.abs(u) < 1.4) continue; F.b('reed_mat', u - 0.7, y, 0.2, u + 0.7, y + 0.03, 1.6, false); }
-  F.b('reed_mat', -A + 1.5, y, B - 2.3, A - 1.5, y + 0.03, B - 1.0, false);
+  const hall = pal && A >= 10;
+  if (hall) throneHall(F, y, A, B, wallH);
+  else {
+    F.b('lacquer_red', -2.0, y, -B + 0.4, 2.0, y + 0.9, -B + 2.2, true);
+    F.b('gilt_bronze', -2.05, y + 0.8, -B + 0.35, 2.05, y + 0.9, -B + 2.25, false);
+    F.lathe('gold', [[1.0, 0], [0.9, 0.35], [0.6, 0.9], [0.7, 1.3], [0.28, 1.5], [0.22, 1.7]], 0, y + 0.9, -B + 1.3, 12);
+    F.lathe('gilt_bronze', [[0.22, 1.7], [0.3, 1.95], [0.27, 2.2], [0.001, 2.35]], 0, y + 0.9, -B + 1.3, 10);
+    for (let k = 0; k < 6; k++) { const u = -A + 1.6 + k * ((2 * A - 3.2) / 5); if (Math.abs(u) < 1.4) continue; F.b('reed_mat', u - 0.7, y, 0.2, u + 0.7, y + 0.03, 1.6, false); }
+    F.b('reed_mat', -A + 1.5, y, B - 2.3, A - 1.5, y + 0.03, B - 1.0, false);
+
+  }
+  if (!pal) teachingHall(F, y, A, B, r);
   F.light(0, y + wallH - 0.5, 0, '#ffc98a', 6, 16);
   void r; void T;
 }
@@ -277,3 +285,86 @@ function houseDetail(F, r, o) {
   void sign;
 }
 
+
+/**
+ * What makes the houses differ, by rule from the house's own seed (a stream apart from the one that lays out the house, so the plan and the household's places stay as they were): the front (a thatched
+ * awning over the stair, a plank dado, corner posts of bamboo, a ridge cap, a gate of posts and a lintel), and the household's trade — its workplace in the back yard and what hangs from the tie beam.
+ */
+function houseVariety(F, el, o) {
+  const q = rng((Math.imul(el.seed ?? 5, 2654435761) + 977) >>> 0), { u0, u1, v0, v1, fl, wh, du, W, D, big, rich, rise, alongU, ov } = o;
+  const kind = pickTrade(q());
+  const awning = !big && q() < 0.4, dado = !rich && q() < 0.45, posts = !rich && q() > 0.55 && q() < 0.85, ridge = rich || q() < 0.3, gate = q() < 0.3;
+  if (awning) {
+    for (const s of [-1, 1]) F.b('bamboo_culm', du + s * 0.85 - 0.04, 0, v0 - 1.94, du + s * 0.85 + 0.04, fl + 1.95, v0 - 1.86, false);
+    F.b('thatch_palm', du - 1.1, fl + 1.95, v0 - 2.0, du + 1.1, fl + 2.1, v0 - 0.6, false);
+    F.b('thatch_palm', du - 0.8, fl + 2.1, v0 - 1.7, du + 0.8, fl + 2.24, v0 - 0.9, false);
+  }
+  if (dado) {
+    const e = 0.025, y1 = fl + 0.7;
+    F.b('planks_grey', u0, fl, v0 - e, du - 0.48, y1, v0, false); F.b('planks_grey', du + 0.48, fl, v0 - e, u1, y1, v0, false);
+    F.b('planks_grey', u0 - e, fl, v0, u0, y1, v1, false); F.b('planks_grey', u1, fl, v0, u1 + e, y1, v1, false); F.b('planks_grey', u0, fl, v1, u1, y1, v1 + e, false);
+  }
+  if (posts) for (const [u, v] of [[u0, v0], [u1, v0], [u0, v1], [u1, v1]]) F.b('bamboo_culm', u - 0.07, fl, v - 0.07, u + 0.07, fl + wh, v + 0.07, false);
+  if (ridge) {
+    const yr = fl + wh + 0.05 + rise, um = (u0 + u1) / 2, vm = (v0 + v1) / 2;
+    if (alongU) F.b('roof_ridge', u0 - ov, yr - 0.03, vm - 0.1, u1 + ov, yr + 0.1, vm + 0.1, false); else F.b('roof_ridge', um - 0.1, yr - 0.03, v0 - ov, um + 0.1, yr + 0.1, v1 + ov, false);
+  }
+  if (gate) {
+    const gl = du - 2.6 < 1 ? 1 : (u0 - 0.8 > 1.5 ? u0 - 0.8 : 1), gr = Math.min(W - 1, u1 + 1.6);
+    for (const u of [gl, gr]) { F.b('timber', u - 0.08, 0, 0.02, u + 0.08, 2.0, 0.18, false); F.lathe('gilt_bronze', [[0.1, 0], [0.04, 0.12], [0.001, 0.2]], u, 2.0, 0.1, 6); }
+    if (gr - gl < 6) { F.b('timber', gl - 0.08, 2.0, 0.04, gr + 0.08, 2.1, 0.16, false); F.b('thatch_palm', gl - 0.2, 2.1, -0.1, gr + 0.2, 2.22, 0.32, false); }
+  }
+  // the trade: its yard behind the house, and what hangs from the tie beam inside
+  if (D - v1 >= 4.4) tradeYard(F, kind, Math.max(2.0, Math.min(W - 2.0, (u0 + u1) / 2)), v1 + 2.2, q);
+  beamHangings(F, kind, u0, u1, (v0 + v1) / 2, fl + wh - 0.08);
+}
+
+/** The audience hall of the palace: a dais of three steps with the lion throne under a stack of white umbrellas, the regalia on stands (fans, sword, betel box, spittoon), carpets in two rows for the ministers. */
+function throneHall(F, y, A, B, wallH) {
+  const v0 = -B + 0.35;
+  for (let i = 0; i < 3; i++) F.b(i === 2 ? 'gilt_bronze' : 'lacquer_red', -5 + i * 0.8, y, v0, 5 - i * 0.8, y + 0.3 * (i + 1), v0 + 4.3 - i * 0.7, true);
+  const ty = y + 0.9;
+  F.b('gilt_bronze', -1.6, ty, v0 + 0.4, 1.6, ty + 0.6, v0 + 2.1, false);
+  F.b('cloth_red', -1.4, ty + 0.6, v0 + 0.6, 1.4, ty + 0.7, v0 + 1.9, false);
+  F.b('gilt_bronze', -1.6, ty + 0.6, v0 + 0.4, 1.6, ty + 2.8, v0 + 0.65, false);
+  for (const s of [-1, 1]) { F.b('gilt_bronze', s < 0 ? -1.6 : 1.35, ty + 0.6, v0 + 0.65, s < 0 ? -1.35 : 1.6, ty + 1.2, v0 + 2.1, false); F.b('gilt_bronze', s * 1.5 - 0.1, ty + 2.8, v0 + 0.4, s * 1.5 + 0.1, ty + 3.2, v0 + 0.65, false); }
+  F.b('gilt_bronze', -0.05, ty + 2.8, v0 + 0.4, 0.05, y + wallH - 0.1, v0 + 0.5, false);
+  for (let i = 0; i < 3; i++) { const r0 = 1.5 - i * 0.35; F.lathe('cloth_white', [[r0, 0], [r0 * 0.92, 0.05], [0.12, 0.3]], 0, y + wallH - 1.5 + i * 0.45, v0 + 0.45, 14); }
+  // the regalia on either side of the dais
+  for (const s of [-1, 1]) {
+    const u = s * 3.0;
+    F.b('gilt_bronze', u - 0.03, y + 0.9, v0 + 0.5, u + 0.03, y + 3.0, v0 + 0.56, false);
+    F.b('cloth_white', u - 0.4, y + 2.3, v0 + 0.5, u + 0.4, y + 3.0, v0 + 0.53, false);
+    F.b('lacquer_red', s * 3.9 - 0.25, y + 0.6, v0 + 0.9, s * 3.9 + 0.25, y + 0.9, v0 + 1.4, false);
+    F.b('gilt_bronze', s * 3.9 - 0.26, y + 0.9, v0 + 0.89, s * 3.9 + 0.26, y + 0.96, v0 + 1.41, false);
+    F.lathe('gilt_bronze', [[0.12, 0], [0.2, 0.1], [0.18, 0.22], [0.001, 0.22]], s * 3.0, y + 0.9, v0 + 1.6, 8);
+  }
+  F.b('gold', -3.9, y + 0.6, v0 + 1.8, -3.84, y + 0.7, v0 + 3.4, false);     // the sword laid on the step
+  // the carpets of the ministers: two rows, low tables, betel sets
+  for (const s of [-1, 1]) {
+    F.b('cloth_maroon', Math.min(s * 3.4, s * 6.2), y, -B + 5.2, Math.max(s * 3.4, s * 6.2), y + 0.03, B - 2.6, false);
+    for (let k = 0; k < 4; k++) {
+      const v = -B + 6.2 + k * 2.4, u = s * 4.8;
+      F.b('lacquer_red', u - 0.4, y + 0.03, v - 0.3, u + 0.4, y + 0.3, v + 0.3, false);
+      F.b('gilt_bronze', u - 0.12, y + 0.3, v - 0.1, u + 0.12, y + 0.4, v + 0.1, false);
+      F.b('cloth_ochre', u + s * 0.9 - 0.3, y + 0.03, v - 0.3, u + s * 0.9 + 0.3, y + 0.12, v + 0.3, false);
+    }
+  }
+}
+
+/** The teaching hall of a monastery: the preaching seat in the corner, the chest of palm-leaf books, the alms bowls on their board, the drum. */
+function teachingHall(F, y, A, B, r) {
+  const u0 = -A + 0.55, v0 = -B + 0.5;
+  F.b('lacquer_red', u0, y, v0, u0 + 1.9, y + 0.8, v0 + 1.7, true);
+  F.b('gilt_bronze', u0 - 0.05, y + 0.8, v0 - 0.05, u0 + 1.95, y + 0.86, v0 + 1.75, false);
+  F.b('cloth_ochre', u0 + 0.2, y + 0.86, v0 + 0.3, u0 + 1.7, y + 0.95, v0 + 1.5, false);
+  F.b('gilt_bronze', u0, y + 0.86, v0 - 0.05, u0 + 1.9, y + 2.0, v0 + 0.1, false);
+  F.b('lacquer_red', A - 2.3, y, v0, A - 0.5, y + 0.55, v0 + 1.1, true);
+  for (let i = 0; i < 6; i++) F.b(i % 2 ? 'cloth_ochre' : 'cloth_red', A - 2.2 + i * 0.29, y + 0.55, v0 + 0.15, A - 2.2 + i * 0.29 + 0.25, y + 0.75, v0 + 0.95, false);
+  F.b('wood_dark', -A + 0.4, y, B - 3.0, -A + 1.0, y + 0.12, B - 0.9, false);
+  for (let i = 0; i < 4; i++) F.lathe('bronze', [[0.001, 0], [0.12, 0.02], [0.16, 0.1], [0.14, 0.12], [0.001, 0.04]], -A + 0.7, y + 0.12, B - 2.8 + i * 0.5, 8);
+  F.lathe('wood_dark', [[0.3, 0], [0.4, 0.3], [0.42, 0.6], [0.3, 0.9], [0.28, 0.9]], A - 0.8, y, B - 1.5, 10);
+  F.lathe('hide_tan', [[0.3, 0.9], [0.001, 0.91]], A - 0.8, y, B - 1.5, 10);
+  F.circle(A - 0.8, B - 1.5, 0.42, y, y + 0.9);
+  void r;
+}
