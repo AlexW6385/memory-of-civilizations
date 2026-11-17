@@ -205,10 +205,10 @@ function zigguratLife(figures, man, rand, seed) {
     man([x, z], ty, r, o);
   for (const sx of [-1, 1]) man([sx * 7.3, -66.5], ty, N, { pose: 'staff', carry: 'staff', len: 2.0, staffMat: 'wood_dark', over: 'belt' });
   // the bull of the offering led up the way: a herdsman at its head, one behind with the stick, a priest going before
-  figures.push({ t: 'animal', kind: 'ox', at: [0.9, -88], y: 0.05, rot: S, seed: seed() });
-  man([-0.6, -85.8], 0.05, S, { carry: 'staff', len: 1.6, pose: 'staff', staffMat: 'wood_dark', over: 'shawl', top: '', cloth: 'cloth_brown' });
-  man([1.8, -91.4], 0.05, S, { carry: 'staff', len: 1.7, pose: 'staff', staffMat: 'wood_dark' });
-  man([0, -83.6], 0.05, S, robe('cloth_white', { pose: 'stand', carry: 'staff', len: 1.7, staffMat: 'wood_dark', beard: false }));
+  figures.push({ t: 'animal', kind: 'ox', at: [2.1, -88], y: 0.05, rot: S, seed: seed() });
+  man([2.1, -85.9], 0.05, S, { carry: 'staff', len: 1.6, pose: 'staff', staffMat: 'wood_dark', over: 'shawl', top: '', cloth: 'cloth_brown' });
+  man([2.5, -91.2], 0.05, S, { carry: 'staff', len: 1.7, pose: 'staff', staffMat: 'wood_dark' });
+  man([1.5, -83.3], 0.05, S, robe('cloth_white', { pose: 'stand', carry: 'staff', len: 1.7, staffMat: 'wood_dark', beard: false }));
   // the musicians on a reed mat at the way's east edge (the mat is the court's: court.js), facing the axis: a harp, a pipe, a drum
   for (const [z, pose] of [[-103.8, 'harp'], [-102.2, 'flute'], [-100.6, 'drum']]) man([4.85, z], 0.058, W, robe('cloth_white', { pose, beard: pose !== 'flute' }));
   // the queue of those bringing offerings, along the west edge, and the worshippers kneeling before the stair
@@ -238,10 +238,10 @@ function brickyardLife(figures, man, rand, seed) {
 /** The people of the mausoleum (§5.11): the priest of the dead king before the altar of the incense room, another at the altar of libation, the keeper at the gate, a woman bringing an offering. */
 function mausoleumLife(figures, man, rand, seed) {
   const [x0, z0] = MAUS, at = (u, v) => [x0 + u, z0 + v], T = 3.0, robe = (cloth, o = {}) => ({ dress: 'robe', top: '', cloth, over: 'shawl', cloth2: 'cloth_white', hair: 'shaven', beard: false, ...o });
-  man(at(29, 55.2), T + 0.03, S, robe('cloth_white', { pose: 'stand', arms: 'clasp' }));
+  man(at(33.5, 55.2), T + 0.03, S, robe('cloth_white', { pose: 'stand', arms: 'clasp' }));
   man(at(31.5, 31.4), T, S, robe('linen', { pose: 'stand', carry: 'pot' }));
   man(at(27, 31.8), T, S, robe('cloth_white', { pose: 'stand', arms: 'clasp' }));
-  man(at(30, 6.5), T, N, { pose: 'staff', carry: 'staff', len: 2.0, staffMat: 'wood_dark', over: 'belt' });
+  man(at(35, 6.0), T, N, { pose: 'staff', carry: 'staff', len: 2.0, staffMat: 'wood_dark', over: 'belt' });
   figures.push({ t: 'figure', at: at(31.4, 24), y: T, rot: S, seed: seed(), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'shawl', hair: 'bun', skin: 'skin_medium', feet: 'bare', carry: 'basket', h: 1.52 });
   man(at(52, 56.6), T, W, robe('cloth_white', { pose: 'stand', arms: 'clasp' }));                      // at the head of the stair down
 }

@@ -42,15 +42,14 @@ export function mausoleum(el, { bag, col, lights }) {
   for (const base of fillBase) for (const r of cutRects(base, [trench, passage, ch1, link, ch2])) C(r[0], r[1], r[2], r[3], 0, T);
   for (const r of [ch1, ch2]) C(r[0], r[1], r[2], r[3], 2.6, T);
   C(passage[0], passage[1], passage[2], passage[3], 2.2, T); C(link[0], link[1], link[2], link[3], 2.0, T);
+  for (const base of fillBase) for (const r of cutRects(base, [trench])) F(r[0], r[1], r[2], r[3], T);            // the court's pavement
   // (the chambers' floors: baked brick laid in bitumen)
   for (const r of [ch1, link, ch2, passage]) { B(BB, r[0], r[1], r[2], r[3], -0.3, 0.04); F(r[0], r[1], r[2], r[3], 0.04); }
   B('bitumen', ch1[0] + 0.3, mz - 0.9, ch1[2] - 0.3, mz + 0.9, 0.04, 0.045); B('bitumen', ch2[0] + 0.3, mz - 0.9, ch2[2] - 0.3, mz + 0.9, 0.04, 0.045);
   // the stair down, climbing eastward to the stepped room's floor
   stairs({ rect: [X(trench[0]), Z(trench[1]), X(trench[2]), Z(trench[3])], y0: 0.04, y1: T, dir: 'e', mat: BB }, { bag, col });
-  col.ramp([X(trench[0]), Z(trench[1]), X(trench[2]), Z(trench[3])], 0.04, T, 'e');
   // the stair up from the lane to the court
   stairs({ rect: [X(G[0]), Z(-5.7), X(G[1]), Z(0.0)], y0: 0, y1: T, dir: 's', mat: BB }, { bag, col });
-  col.ramp([X(G[0]), Z(-5.7), X(G[1]), Z(0.0)], 0, T, 's');
   B('mudbrick', G[0] - 0.5, -5.7, G[0], 0.0, 0, 1.0); B('mudbrick', G[1], -5.7, G[1] + 0.5, 0.0, 0, 1.0); C(G[0] - 0.5, -5.7, G[0], 0, 0, 1.0); C(G[1], -5.7, G[1] + 0.5, 0, 0, 1.0);
 
   // ---- the walls on the top: plastered mud brick on a baked footing, the court's gate between two towers, the doorways of the rooms
@@ -75,7 +74,7 @@ export function mausoleum(el, { bag, col, lights }) {
   for (const s of [-1, 1]) B('cedar', s < 0 ? 27.55 : 31.95, 1.9, s < 0 ? 28.05 : 32.45, 2.5 + 0.0, T + 0.05, T + 3.3);
   B('cedar', 27.6, 0.95, 27.8, 1.75, T + 0.05, T + 3.3); B('cedar', 32.2, 0.95, 32.4, 1.75, T + 0.05, T + 3.3);
   // buttresses along the outer faces, the gate left clear
-  buttresses(bag, [X(1.2), Z(1.2), X(W - 1.2), Z(D - 1.2)], T, H, 0, 3.6, (px) => false, MP, 0.5, 0.3, col);
+  buttresses(bag, [X(1.2), Z(1.2), X(W - 1.2), Z(D - 1.2)], T, H, 0, 3.6, (px, pz) => Math.abs(px - X(30)) < 4.6 && pz < Z(3), MP, 0.5, 0.3, col);
   // the inner partition before the court of offerings (a doorway between the forecourt and the court) and the front wall of the cult rooms
   wall(2.6, 17, W - 2.6, 18.2, [door(30, 3.6)], H);
   const rooms = { r4: [2.6, 53.6, 12.6, D - 2.6], r5: [13.8, 53.6, 43.2, D - 2.6], r6: [44.4, 53.6, W - 2.6, D - 2.6] };
@@ -89,7 +88,7 @@ export function mausoleum(el, { bag, col, lights }) {
   for (const r of Object.values(rooms)) {
     B(MP, r[0], r[1], r[2], r[3], T + H - 0.28, T + H); B('reed_mat', r[0], r[1], r[2], r[3], T + H - 0.33, T + H - 0.28); F(r[0], r[1], r[2], r[3], T + H);
     for (let u = r[0] + 0.35; u < r[2] - 0.15; u += 0.6) beam('palm_trunk', [X(u), T + H - 0.47, Z(r[1])], [X(u), T + H - 0.47, Z(r[3])], 0.07, 0.14);
-    F(r[0], r[1], r[2], r[3], T);                                                   // the floor of the room
+    for (const c of cutRects(r, [trench])) F(c[0], c[1], c[2], c[3], T);            // the floor of the room (not across the stair's opening)
   }
   for (const q of [[1.2, 52.4, W - 1.2, 52.7], [1.2, D - 1.2 - 0.3, W - 1.2, D - 1.2], [1.2, 52.7, 1.5, D - 1.5], [W - 1.5, 52.7, W - 1.2, D - 1.5]]) { B(MP, ...q, T + H, T + H + 0.45); C(...q, T + H, T + H + 0.45); }
   for (const [u0, u1] of [[12.6, 13.8], [43.2, 44.4]]) B(MP, u0, 53.6, u1, D - 2.6, T + H - 0.28, T + H);
@@ -118,7 +117,7 @@ export function mausoleum(el, { bag, col, lights }) {
     B('limestone', 8.2, 56.0, 8.9, 56.5, T, T + 0.05); for (const [u, v] of [[10.8, 55.0], [11.4, 55.4], [10.9, 58.2]]) jar(u, v, T, 0.9);
     lamp(3.2, 54.2, T, 2); }
   // ---- the stepped room (Room 6): the head of the stair down, a brick parapet round its opening, the lamp at the stair's head, a jar of water, benches
-  { const o = [trench[0] - 0.3, trench[1] - 0.3, trench[2], trench[3] + 0.3];
+  { const o = [trench[0] - 0.2, trench[1] - 0.2, trench[2], trench[3] + 0.2];
     B(BB, o[0], o[1], o[2], trench[1], T, T + 0.5); B(BB, o[0], trench[3], o[2], o[3], T, T + 0.5); C(o[0], o[1], o[2], trench[1], T, T + 0.5); C(o[0], trench[3], o[2], o[3], T, T + 0.5);
     B(BB, o[0], trench[1], trench[0], trench[3], T, T + 0.5); C(o[0], trench[1], trench[0], trench[3], T, T + 0.5);
     lamp(trench[2] + 0.8, trench[1] - 0.2, T, 2.5); jar(55.9, 54.2, T, 1.0); B(BB, 45.0, 58.2, 47.5, 59.0, T, T + 0.45); C(45, 58.2, 47.5, 59, T, T + 0.45);
@@ -127,7 +126,7 @@ export function mausoleum(el, { bag, col, lights }) {
   for (const [i, r] of [[0, ch1], [1, ch2]]) {
     const mid = (r[0] + r[2]) / 2;
     for (const s of [-1, 1]) { B(BB, r[0] + 0.5, s < 0 ? r[1] + 0.05 : r[3] - 0.85, r[2] - 0.5, s < 0 ? r[1] + 0.85 : r[3] - 0.05, 0.04, 0.5); C(r[0] + 0.5, s < 0 ? r[1] + 0.05 : r[3] - 0.85, r[2] - 0.5, s < 0 ? r[1] + 0.85 : r[3] - 0.05, 0, 0.5); B('reed_mat', r[0] + 0.7, s < 0 ? r[1] + 0.15 : r[3] - 0.75, r[2] - 0.7, s < 0 ? r[1] + 0.75 : r[3] - 0.15, 0.5, 0.52); }
-    for (let k = 0; k < 5; k++) { const u = r[0] + 1.2 + k * 1.8 + rand() * 0.4; jar(u, mz + (k % 2 ? 0.45 : -0.45), 0.04, 0.8 + 0.2 * (k % 3) / 2); }
+    for (let k = 0; k < 6; k++) { const u = r[0] + 1.3 + k * 1.5 + rand() * 0.3, v = mz + (k % 2 ? 0.95 : -0.95); jar(u, v, 0.04, 0.8 + 0.2 * (k % 3) / 2); col.circle(X(u), Z(v), 0.26, 0.04, 0.8); }
     lamp(mid, r[1] + 0.2, 1.1, 3.5); B(MP, mid - 0.25, r[1], mid + 0.25, r[1] + 0.12, 1.0, 1.1);
     B('gold', r[0] + 2.2 + i, r[1] + 0.2, r[0] + 2.45 + i, r[1] + 0.42, 0.52, 0.525);
     for (const dx of [0.3, 1.2]) B('bronze', mid + dx - 0.12, mz - 0.1, mid + dx + 0.12, mz + 0.12, 0.04, 0.1);
