@@ -11,7 +11,7 @@ const PL = 'plaster_castle', WD = 'wood_dark', TL = 'tile_grey', MAT = 'reed_mat
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 /** Mats (tatami) over [u0, u1] × [q0, q1] at height v, laid in 0.9 × 1.8 m with their dark cloth borders; B(m, u0, u1, v0, v1, q0, q1). */
-function tatami(B, u0, u1, q0, q1, v) {
+export function tatami(B, u0, u1, q0, q1, v) {
   B(MAT, u0, u1, v - 0.05, v, q0, q1);
   for (let u = u0 + 1.8; u < u1 - 0.3; u += 1.8) B('cloth_black', u - 0.025, u + 0.025, v, v + 0.004, q0, q1);
   for (let q = q0 + 0.9; q < q1 - 0.3; q += 0.9) B('cloth_black', u0, u1, v + 0.004, v + 0.006, q - 0.022, q + 0.022);

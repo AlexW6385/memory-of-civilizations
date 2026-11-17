@@ -119,6 +119,20 @@ Sources (2026-11-11):
 - **Boats:** six poled flat-bottomed boats (takase-bune style hull) on the moats, covered with a straw awning or loaded with rice bales; the boatman poles from the stern. [inferred]
 - Sources consulted: [hi-no-mi yagura — JAANUS](https://projects.mcah.columbia.edu/jaanus/node/4095), [jishin bansho — JAANUS](https://projects.mcah.columbia.edu/jaanus/node/3665), [Recognizing Design Features in Kyoto's Machiya — nippon.com](https://www.nippon.com/en/guide-to-japan/gu900011/recognizing-design-features-in-kyoto%E2%80%99s-machiya-townhouses.html), [Edo period street — muza-chan](https://muza-chan.net/japan/index.php/blog/edo-period-street).
 
+### 5.9 Detail pass (2026-11-16): retainers' rows opened, eave tiles, closed gables, lane life
+
+- **Eave tiles (nokimarugawara).** The eave of a tiled roof ends in a row of half-round cover tiles whose round end discs (gatō) stand at the eave edge, alternating with the concave flat tiles; they keep water from running in between the tiles [stated: JAANUS "nokimarugawara"]. Ours: every castle roof (keep tiers, small keeps, turrets, passages, gates) carries a row of them every 0.3 m along its eave, the discs dark, a pale crest at the middle on the larger roofs, following the lift of the eave's corners; the samurai main houses every 0.5 m; the town's houses and storehouses none (budget). The crest is a plain pale disc, not a family mon [inferred: the real tiles carry the lord's crest, not drawn].
+- **Closed gables.** The end walls of the gabled houses, storehouses and retainers' rows now carry the plastered triangle under the verge, with its bargeboard and tile roll, instead of an open loft [inferred: any plastered gabled house].
+- **Retainers' row (nagaya) opened** in every second samurai compound. A long house of small units under one ridge, rooms of about 8-10 m² with an earth-floored kitchen, shared well, a gate-house version (nagaya-mon) with servants' rooms having a wooden floor and a built-in hearth [stated: Wikipedia "Nagaya"; MLIT "Nagaya-mon"]. Ours: units of about 4.3 m along the yard face, each with its own door and close-barred window on the yard side (the row now faces the yard; the closed row on the west-gate compounds faced the wall); the earth-floored entry with the clay range (kamado), kettle, rice pot, water jar, a shelf of bowls and split firewood; the raised floor of mats (4.5 mats) behind the step; a low table with cups and a cushion, a brazier with an iron kettle, a lacquered chest of drawers, folded bedding under the household shrine's shelf, the long and short swords on a rack and a spear against the party wall, a paper lantern; a retainer kneeling at his table in every other unit; a plank ceiling. [inferred: the furnishing, from the shoin-less lower-rank dwelling as generally known; sizes]
+- **Open houses.** One samurai compound in two (was one in three) shows its reception room and its row; the merchants' shops stay one in two or more.
+- **Lanes.** Cats on the wall copings, firewood stacked and baskets of greens set down at the lane corners by the samurai walls. [inferred]
+
+Sources (2026-11-16):
+- [nokimarugawara — JAANUS](https://projects.mcah.columbia.edu/jaanus/node/2000)
+- [Nagaya (architecture) — Wikipedia](https://en.wikipedia.org/wiki/Nagaya_(architecture))
+- [Nagaya-mon — MLIT](https://www.mlit.go.jp/tagengo-db/en/H30-00651.html)
+- [Recognizing Design Features in Kyoto's Machiya — nippon.com](https://www.nippon.com/en/guide-to-japan/gu900011/recognizing-design-features-in-kyoto%E2%80%99s-machiya-townhouses.html)
+
 ## 6. Ground and water
 
 The level plain; the hill rising about 35 m above it; the moats holding water about 2.7 m below the banks. (`ground.js`) [stated: depths, ermakvagus; inferred: the rest]
