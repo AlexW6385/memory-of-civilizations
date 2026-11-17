@@ -83,8 +83,8 @@ E.push({ t: 'shaolin_interior', kind: 'tianwang', rect: AXIS.tianwang, y: 0.02 +
 E.push({ t: 'shaolin_interior', kind: 'mahavira', rect: AXIS.mahavira, y: 0.02 + PLAT.mahavira, H: HGT.mahavira });
 E.push({ t: 'shaolin_interior', kind: 'fatang', rect: AXIS.fatang, y: 0.02 + PLAT.fatang, H: HGT.fatang });
 E.push({ t: 'shaolin_interior', kind: 'qianfo', rect: AXIS.qianfo, y: 0.02 + PLAT.qianfo, H: HGT.qianfo });
-E.push({ t: 'hall_furniture', rect: AXIS.fangzhang, y: 0.02 + PLAT.fangzhang, front: 's', H: HGT.fangzhang, backDoor: true });
-E.push({ t: 'hall_furniture', rect: AXIS.lixue, y: 0.02 + PLAT.lixue, front: 's', H: HGT.lixue, backDoor: true });
+E.push({ t: 'shaolin_interior', kind: 'fangzhang', rect: AXIS.fangzhang, y: 0.02 + PLAT.fangzhang, H: HGT.fangzhang });
+E.push({ t: 'shaolin_interior', kind: 'lixue', rect: AXIS.lixue, y: 0.02 + PLAT.lixue, H: HGT.lixue });
 // the boards over the doors
 const board = (cx, y, z, n, seed, w = 2.6) => E.push({ t: 'plaque', at: [cx, z], y, facing: [0, 1], w, h: 0.8, n, seed });
 board(0, 0.02 + PLAT.shanmen + HGT.shanmen - 1.1, AXIS.shanmen[3] + 0.17, 4, 21);
@@ -94,19 +94,44 @@ board(0, 0.02 + PLAT.fatang + HGT.fatang - 1.1, AXIS.fatang[3] + 0.17, 3, 24);
 board(0, 0.02 + PLAT.lixue + HGT.lixue - 1.0, AXIS.lixue[3] + 0.17, 4, 25, 1.9);
 board(0, 0.02 + PLAT.qianfo + HGT.qianfo - 1.1, AXIS.qianfo[3] + 0.17, 5, 26, 3.4);
 
-// ── the bell and drum towers: a brick podium with an arched door, a four-sided open pavilion on it ──
+const stele = (x, z, o = {}) => E.push({ t: 'shaolin_stele', at: [x, z], y: 0.02, yaw: 0, ...o });
+// ── the bell and drum towers: a brick podium with a vaulted passage through it (a corbelled arch of stepped brick courses, stone jambs and a stone
+// band over it with the name board), a stone cornice, a brick parapet round the platform, a four-sided open pavilion on it (docs §6d) ──
 for (const [r, kind] of [[BELL, 'bell'], [DRUM, 'drum']]) {
-  const cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2, top = 4.6;
-  E.push({ t: 'block', rect: R(r), y0: 0, y1: top, mat: 'brick_grey' });
-  E.push({ t: 'block', rect: R(r, 0.25), y0: top - 0.35, y1: top, mat: 'granite_grey' });
-  E.push({ t: 'block', rect: R(r, 0.25), y0: 0, y1: 0.4, mat: 'granite_grey' });
-  E.push({ t: 'ming_pavilion', c: [cx, cz], shape: 'square', w: r[2] - r[0] - 0.8, d: r[3] - r[1] - 0.8, y: top, H: 3.6, plat: 0.3, open: [0, 1, 2, 3], pal: PAL });
-  // the stair up the court side of the podium to the pavilion's floor
+  const cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2, top = 4.6, pw = 1.3, B = 'brick_grey', G = 'granite_grey';
+  // the two piers either side of the passage (the passage runs north–south under the platform), the corbel courses closing the vault, the deck
+  E.push({ t: 'block', rect: [r[0], r[1], cx - pw, r[3]], y0: 0, y1: top, mat: B, walk: true });
+  E.push({ t: 'block', rect: [cx + pw, r[1], r[2], r[3]], y0: 0, y1: top, mat: B, walk: true });
+  for (const [k, y0, d] of [[0, 2.4, 0.3], [1, 2.8, 0.7], [2, 3.2, 1.1], [3, 3.6, 1.5]]) {
+    if (k === 3) { E.push({ t: 'block', rect: [cx - pw, r[1], cx + pw, r[3]], y0, y1: top, mat: B, walk: true }); continue; }
+    E.push({ t: 'block', rect: [cx - pw, r[1], cx - pw + d, r[3]], y0, y1: y0 + 0.4, mat: B });
+    E.push({ t: 'block', rect: [cx + pw - d, r[1], cx + pw, r[3]], y0, y1: y0 + 0.4, mat: B });
+  }
+  // stone jambs and the band over the arch at both ends (slabs 0.1 m proud of the brick; the band carries the name board)
+  for (const z of [r[1], r[3]]) {
+    const o = z === r[1] ? [z - 0.1, z] : [z, z + 0.1];
+    for (const j of [[cx - pw - 0.22, cx - pw], [cx + pw, cx + pw + 0.22]]) E.push({ t: 'block', rect: [j[0], o[0], j[1], o[1]], y0: 0.4, y1: 2.4, mat: G });
+    E.push({ t: 'block', rect: [cx - pw - 0.22, o[0], cx + pw + 0.22, o[1]], y0: 3.6, y1: 4.2, mat: G });
+  }
+  E.push({ t: 'block', rect: R(r, 0.25), y0: top - 0.35, y1: top - 0.02, mat: G });
+  for (const x of [[r[0] - 0.25, cx - pw], [cx + pw, r[2] + 0.25]]) E.push({ t: 'block', rect: [x[0], r[1] - 0.25, x[1], r[3] + 0.25], y0: 0, y1: 0.4, mat: G });   // the plinth, broken at the passage
+  // the name boards on the podium's south face, over the arch
+  E.push({ t: 'plaque', at: [cx, r[3] + 0.12], y: 3.68, facing: [0, 1], w: 1.5, h: 0.44, n: 2, seed: kind === 'bell' ? 31 : 32 });
+  // the parapet round the platform, 0.9 m of brick with a stone coping, open at the stair's landing (east for the bell tower, west for the drum)
+  { const t = 0.22, i0 = 0.04, west = kind === 'drum', gap = 1.45;
+    const par = (rect) => { E.push({ t: 'block', rect, y0: top, y1: top + 0.84, mat: B }); E.push({ t: 'block', rect: [rect[0] - 0.04, rect[1] - 0.04, rect[2] + 0.04, rect[3] + 0.04], y0: top + 0.84, y1: top + 0.92, mat: G }); };
+    par([r[0] + i0, r[1] + i0, r[2] - i0, r[1] + i0 + t]); par([r[0] + i0, r[3] - i0 - t, r[2] - i0, r[3] - i0]);
+    const xw = [r[0] + i0, r[0] + i0 + t], xe = [r[2] - i0 - t, r[2] - i0], za = [r[1] + i0 + t, r[3] - i0 - t];
+    if (west) { par([xw[0], za[0], xw[1], cz - gap]); par([xw[0], cz + gap, xw[1], za[1]]); par([xe[0], za[0], xe[1], za[1]]); }
+    else { par([xe[0], za[0], xe[1], cz - gap]); par([xe[0], cz + gap, xe[1], za[1]]); par([xw[0], za[0], xw[1], za[1]]); }
+  }
+  // the pavilion on the platform (the platform's 0.5 m margin within the parapet; no steps of its own)
+  E.push({ t: 'ming_pavilion', c: [cx, cz], shape: 'square', w: r[2] - r[0] - 2.1, d: r[3] - r[1] - 2.1, y: top, H: 3.6, plat: 0.3, open: [0, 1, 2, 3], steps: false, pal: PAL });
+  // the stair up the court side of the podium to the platform
   { const n = Math.ceil(top / 0.17), run = n * 0.32, east = kind === 'bell';
     if (east) E.push({ t: 'stair', rect: [r[2], cz - 1.3, r[2] + run, cz + 1.3], y0: 0.02, y1: top, dir: 'w', riser: 0.17, mat: 'granite_block' });
     else E.push({ t: 'stair', rect: [r[0] - run, cz - 1.3, r[0], cz + 1.3], y0: 0.02, y1: top, dir: 'e', riser: 0.17, mat: 'granite_block' }); }
-  if (kind === 'bell') E.push({ t: 'bell_hung', at: [cx, cz], y: top + 0.4, kind });
-  else E.push({ t: 'bell_hung', at: [cx, cz], y: top + 0.4, kind });
+  E.push({ t: 'bell_hung', at: [cx, cz], y: top + 0.4, kind });
 }
 // ── the side ranges ───────────────────────────────────────────────────────────────────────
 for (const q of RANGES) {
@@ -139,11 +164,13 @@ for (const q of GEAR) E.push({ t: 'shaolin_gear', kind: q.kind, at: q.at, y: 0.0
 }
 
 // ── steles, lions, trees' places ─────────────────────────────────────────────────────────────
-const stele = (x, z, o = {}) => E.push({ t: 'shaolin_stele', at: [x, z], y: 0.02, yaw: 0, ...o });
 for (let k = 0; k < 4; k++) for (const s of [-1, 1]) stele(s * (13 + k * 8.5), 116, { kind: (k + (s > 0 ? 1 : 0)) % 2 ? 'plain' : 'bixi', h: 3.0 + (k % 2) * 0.5, seed: k * 5 + (s > 0 ? 2 : 0) });
 for (let k = 0; k < 4; k++) for (const s of [-1, 1]) stele(s * (30 + (k % 2) * 4), 99 - k * 0 + (k > 1 ? 0 : 0), { kind: 'plain', h: 2.4, seed: 40 + k });
 // the Taizong stele (728) under its little pavilion before the bell tower, another before the drum tower
-for (const [x, z, s] of [[-21, 84.5, 1], [21, 84.5, 2]]) { E.push({ t: 'ming_pavilion', c: [x, z], shape: 'square', w: 3.6, d: 3.6, y: 0.02, H: 3.8, plat: 0.2, open: [0, 1, 2, 3], pal: PAL }); }
+for (const [x, z, s] of [[-21, 84.5, 1], [21, 84.5, 2]]) {
+  E.push({ t: 'ming_pavilion', c: [x, z], shape: 'square', w: 3.6, d: 3.6, y: 0.02, H: 4.5, plat: 0.2, open: [0, 1, 2, 3], pal: PAL });
+  stele(x, z - 0.35, { kind: 'bixi', h: 3.4, yaw: 0, seed: 700 + s, w: 1.0 });   // the tablet under its roof, the inscription to the south
+}
 // the Corridor of steles along the inside of the west wall (the Forest of Steles), plain tablets close set
 for (let k = 0; k < 12; k++) stele(-59, -8 - k * 1.9, { kind: 'plain', h: 2.0 + (k % 3) * 0.2, yaw: Math.PI / 2, seed: 60 + k, w: 0.8 });
 for (let k = 0; k < 10; k++) stele(59, 20 - k * 2.2, { kind: 'plain', h: 2.0 + (k % 3) * 0.2, yaw: -Math.PI / 2, seed: 80 + k, w: 0.8 });
@@ -159,6 +186,16 @@ E.push({ t: 'court_censer', at: [3.6, 22], y: 0.04, s: 1.0 });
 for (const s of STUPAS) {
   const y = H(s.c[0], s.c[1]) - 0.05;
   E.push({ t: 'shaolin_stupa', c: s.c, y, kind: s.kind, tiers: s.tiers, shape: s.shape, h: s.h, jit: ((s.seed % 7) - 3) * 0.05, seed: s.seed });
+}
+// before each of the seven great pagodas, a stone offering table with a censer (the tablet faces south; docs §6d)
+for (const s of STUPAS.slice(0, 7)) {
+  const rb = Math.max(0.75, Math.min(2.5, s.h * 0.17)), tz = s.c[1] + rb * 1.3 + 0.9, ty = Math.min(H(s.c[0] - 0.7, tz), H(s.c[0] + 0.7, tz)) - 0.03;
+  E.push({ t: 'shaolin_gear', kind: 'offering', at: [s.c[0], tz], y: ty, rot: 0, s: 1 + s.h * 0.012 });
+}
+// stone lamps beside the forest path every ten metres, alternating sides
+for (let k = 0, x = -118; x > -158; x -= 10, k++) {
+  const i = FOREST_PATH.findIndex((p, j) => j && p[0] <= x), a = FOREST_PATH[i - 1], b = FOREST_PATH[i], zc = a[1] + (b[1] - a[1]) * (x - a[0]) / (b[0] - a[0]), z = zc + (k % 2 ? 1.9 : -1.9);
+  E.push({ t: 'shaolin_gear', kind: 'lamp', at: [x, z], y: H(x, z) - 0.02, rot: 0, s: 0.8 });
 }
 // dry grass and weeds between the stupas, a stone lamp at each side of the entrance
 { const r = rng(91); for (let k = 0; k < 8; k++) E.push({ t: 'shaolin_wear', kind: 'tufts', rect: [FOREST[0] + k * 8, FOREST[1], FOREST[0] + k * 8 + 8, FOREST[3]], y: 0.0, ground: H, n: 90, seed: Math.floor(r() * 999) }); }

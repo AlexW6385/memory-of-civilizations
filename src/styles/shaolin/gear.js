@@ -74,6 +74,15 @@ function brooms(P) {
   for (const x of [0.7, 1.05]) P.add('timber', lathe([[0.001, 0], [0.2, 0], [0.24, 0.3], [0.001, 0.3]], 10, null, x, 0, 0));
 }
 
+/** The stone offering table before a memorial pagoda: a slab on two stone slabs, a small bronze censer with three burning incense sticks, a cup of offerings. */
+function offering(P, s = 1) {
+  P.add('granite_grey', box(-0.62 * s, 0, -0.26 * s, 0.62 * s, 0.1 * s, 0.26 * s));                    // the footing
+  for (const sx of [-1, 1]) P.add('granite_grey', box(sx * 0.42 * s - 0.1 * s, 0.1 * s, -0.22 * s, sx * 0.42 * s + 0.1 * s, 0.5 * s, 0.22 * s));
+  P.add('limestone', box(-0.62 * s, 0.5 * s, -0.28 * s, 0.62 * s, 0.62 * s, 0.28 * s));                // the top slab
+  P.add('bronze', lathe([[0.001, 0.62 * s], [0.12 * s, 0.62 * s], [0.17 * s, 0.7 * s], [0.18 * s, 0.82 * s], [0.14 * s, 0.84 * s], [0.001, 0.84 * s]], 10, null, 0, 0, 0));
+  for (const dx of [-0.05, 0, 0.05]) { P.add('lacquer_red', limb([dx * s, 0.84 * s, 0.0], [dx * s * 1.4, 1.15 * s, 0.0], 0.004 * s, 0.004 * s, 3)); P.add('flame', lathe([[0.001, 1.15 * s], [0.008 * s, 1.16 * s], [0.001, 1.18 * s]], 4, null, dx * s * 1.4, 0, 0)); }
+  P.add('glaze_white', lathe([[0.001, 0.62 * s], [0.05 * s, 0.62 * s], [0.06 * s, 0.7 * s], [0.001, 0.7 * s]], 8, null, 0.34 * s, 0, 0.0));
+}
 export function shaolinGear(el, { bag, col }) {
   const P = new Parts(), s = el.s ?? 1, [x, z] = el.at, y = el.y ?? 0.02, rot = el.rot ?? 0, seed = el.seed ?? 3;
   switch (el.kind) {
@@ -84,6 +93,7 @@ export function shaolinGear(el, { bag, col }) {
     case 'cistern': cistern(P, s); col.circle(x, z, 0.85 * s, y, y + 1.2 * s); break;
     case 'lamp': stoneLamp(P, s); col.circle(x, z, 0.4 * s, y, y + 2.3 * s); break;
     case 'robes': robes(P, el.n ?? 4, seed); break;
+    case 'offering': offering(P, s); col.rect([x - 0.65 * s, z - 0.3 * s, x + 0.65 * s, z + 0.3 * s], y, y + 0.7 * s); break;
     case 'brooms': brooms(P); break;
     default: throw new Error('shaolin_gear: ' + el.kind);
   }
