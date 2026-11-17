@@ -3,7 +3,7 @@
 // let the sun through in stripes. Also the Place Seffarine, a square of coppersmiths.
 import { box, lathe, rod } from '../../core/geom.js';
 import { frame } from '../mamluk/kit.js';
-import { face, rng, q4, dbl, basin } from './kit.js';
+import { face, rng, q4, dbl, basin, holedWall, archHead, canopy, stucco } from './kit.js';
 import * as F from '../mughal/furnish.js';
 
 const WALL = ['stucco_ochre', 'stucco_warm', 'plaster_white', 'mud_plaster'];
@@ -109,6 +109,16 @@ export function souk(el, { bag, col }) {
       const r = alongX ? [ua, side < 0 ? c - hw - depth : c + hw, ub, side < 0 ? c - hw : c + hw + depth] : [side < 0 ? c - hw - depth : c + hw, ua, side < 0 ? c - hw : c + hw + depth, ub];
       shop(bag, col, r, alongX ? (side < 0 ? 's' : 'n') : (side < 0 ? 'e' : 'w'), ym, trade, rand, { top: el.top ?? 7.2 });
     }
+  }
+  // the Attarine's west gate (bab): a wall across the street end with a horseshoe archway, a carved stucco panel over it and a cedar canopy with green tiles
+  if (el.covered && alongX && el.gate !== false && ax < bx) {
+    const e = u0 - 0.05, wy = y0 + slope * (-0.5), hs = hw + depth, wall = [e - 0.4, c - hs, e, c + hs];
+    holedWall(bag, col, 'stucco_warm', wall, wy - 0.4, wy + 6.2, [[c - hw, c + hw, wy, wy + 4.4]], false);
+    const fW = face('x', e - 0.4, -1), fE = face('x', e, 1);
+    archHead(bag, fE, c - hw, c + hw, wy + 2.6, wy + 4.4, 0.4, 'horseshoe', { alfiz: true, side: 'near', both: true });
+    stucco(bag, fW, c - hw - 0.5, c + hw + 0.5, wy + 4.5, wy + 6.2, [], { cell: 0.4 });
+    canopy(bag, fW, c - hw - 0.8, c + hw + 0.8, wy + 4.8, 0.9);
+    for (const sgn of [-1, 1]) { const zz = c + sgn * (hw + 0.2); bag.add('tile_green', box(e - 0.46, wy, zz - 0.2, e + 0.06, wy + 4.3, zz + 0.2)); }
   }
   if (!el.covered) return;
   // the roof of the lane: beams across every 1.6 m on the shops' upper floors, slats along them with gaps for light

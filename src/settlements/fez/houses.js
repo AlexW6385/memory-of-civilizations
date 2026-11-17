@@ -26,7 +26,7 @@ export function houseList() {
   const near = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 + 132, (l.rect[1] + l.rect[3]) / 2 + 30);
   const cand = L.filter((l) => l.w >= 10.5 && l.d >= 14).sort((a, b) => near(a) - near(b)).slice(0, 14);
   for (const l of L) {
-    const open = cand.includes(l), rich = open || (l.seed % 9 === 0 && Math.hypot(l.rect[0], l.rect[1]) < 200);
+    const open = cand.includes(l) || (l.w >= 10.5 && l.d >= 14 && l.seed % 9 === 4), rich = cand.includes(l) || (l.seed % 9 === 0 && Math.hypot(l.rect[0], l.rect[1]) < 200);
     const q = doorLane(l), cx = (l.rect[0] + l.rect[2]) / 2, dist = Math.hypot(cx, (l.rect[1] + l.rect[3]) / 2);
     const shop = q && (q.kind === 'street' || (q.kind === 'lane' && dist < 230 && rand() < 0.3) || (q.kind === 'derb' && dist < 170 && rand() < 0.07));
     houses.push({ t: 'fez_house', rect: l.rect, y: l.y, foot: l.foot, door: l.door, storeys: l.storeys, seed: l.seed, open, rich, laneW: q ? q.w : 2.4, shops: shop ? tradesAt(cx, l.seed) : undefined });
