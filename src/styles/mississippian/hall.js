@@ -10,6 +10,7 @@ import { box, frustum, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { WALL, TH, rng, tri, thatchHip } from './kit.js';
 import { slab } from './dress.js';
 import { bankRing } from './front.js';
+import { roofRibs, ridgeBirds } from './crest.js';
 
 /** The inside of a hip roof: woven mats lined on the slopes, facing in, the rafters and ridge beam along them. */
 function lining(bag, [x0, z0, x1, z1], y, rise) {
@@ -82,6 +83,8 @@ export function chiefHall(el, { bag, col, lights }) {
   // the roof over it, the lining and the rafters under it
   const ov = Math.min(1.1, 0.06 * (L + D));
   const { a, b } = thatchHip(bag, el.rect, top - 0.1, rise, ov, Math.max(4, Math.round(rise / 1.6)));
+  roofRibs(bag, el.rect, top - 0.1, rise, ov, rand);
+  ridgeBirds(bag, a, b, Math.min(1.4, 0.8 + 0.04 * L));
   // the soffit: the eaves closed underneath, back to the wall plate (a walker is not under a bare shell)
   { const E = [], e = [x0 - ov, z0 - ov, x1 + ov, z1 + ov], w = [x0 - 0.12, z0 - 0.12, x1 + 0.12, z1 + 0.12], yy = top - 0.22, P = (px, pz) => [px, yy, pz], dn = [0, -1, 0];
     for (const [q0, q1, q2, q3] of [[[e[0], e[1]], [e[2], e[1]], [w[2], w[1]], [w[0], w[1]]], [[e[2], e[1]], [e[2], e[3]], [w[2], w[3]], [w[2], w[1]]], [[e[2], e[3]], [e[0], e[3]], [w[0], w[3]], [w[2], w[3]]], [[e[0], e[3]], [e[0], e[1]], [w[0], w[1]], [w[0], w[3]]]]) {
