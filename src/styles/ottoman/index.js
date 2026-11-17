@@ -16,13 +16,19 @@ import { hallExterior, weightTower, portal } from './exterior.js';
 import { cesme } from './cesme.js';
 import { ottomanHouse } from './konak.js';
 import { mescit, courtDress } from './quarter.js';
+import { courtPortal } from './portal2.js';
+import { seams, domeProfile, alem } from './lead.js';
 import * as FN from '../mughal/furnish.js';
 
 const S = 'limestone', L = 'lead';
 export const dome = (bag, x, y, z, r, mat = L) => {
   bag.add(S, lathe([[r * 1.04, 0], [r * 1.04, r * 0.22], [r * 0.98, r * 0.28]], 24, null, x, y, z));
   bag.add(mat, lathe([[r, 0], [r * 0.94, r * 0.3], [r * 0.78, r * 0.6], [r * 0.5, r * 0.85], [0.001, r * 0.95]], 24, null, x, y + r * 0.26, z));
-  bag.add('gilt_bronze', lathe([[0.06 * r, 0], [0.03 * r, 0.25 * r], [0.001, 0.3 * r]], 6, null, x, y + r * 1.2, z));
+  if (r >= 2.2) {
+    // the larger domes (the court's bays): the standing seams of the lead sheets and the little alem
+    const dq = domeProfile(r, r * 0.95, 6); seams(bag, mat, dq, (a, rho, yy) => [x + Math.cos(a) * rho, y + r * 0.26 + yy, z + Math.sin(a) * rho], 9 + (Math.round(x * 3 + z * 7) % 5 + 5) % 5, 0, Math.PI * 2, 0.1, 0.05, 0.4);
+    alem(bag, x, y + r * 1.2, z, 0.28 + ((Math.round(x * 5 + z) % 7 + 7) % 7) * 0.012, 0);
+  } else bag.add('gilt_bronze', lathe([[0.06 * r, 0], [0.03 * r, 0.25 * r], [0.001, 0.3 * r]], 6, null, x, y + r * 1.2, z));
 };
 /** sinan_mosque: { c, d (the central dome's diameter), h (the dome's crown), y, court (depth of the courtyard, north) } — the prayer hall facing south-east (here: the qibla on +z). */
 function mosque(el, ctx) {
@@ -184,19 +190,8 @@ function courtyard(bag, col, C, y, nx, nz) {
   };
   wallRun([X0 - wt, Z0 - wt, X1 + wt, Z0], true, doorN);
   wallRun([X0 - wt, Z0, X0, Z1], false, doorEW); wallRun([X1, Z0, X1 + wt, Z1], false, doorEW);
-  // the portal: a block standing out from the north wall, taller than it, the niche with its muqarnas hood, the door
-  const pw = 5.2, pd = 2.4, pz = Z0 - wt, ph = 15;
-  for (const s2 of [-1, 1]) { const q = [s2 < 0 ? cx - pw - 1.6 : cx + pw - 0.2, pz - pd, s2 < 0 ? cx - pw + 0.2 : cx + pw + 1.6, pz]; bag.add(S, box(q[0], y - 0.5, q[1], q[2], y + ph, q[3])); col.rect(q, y, y + ph); }
-  bag.add(S, box(cx - pw + 0.2, y + ph - 3.4, pz - pd, cx + pw - 0.2, y + ph, pz));
-  bag.add(S, box(cx - pw - 1.6, y + wallTop, pz, cx + pw + 1.6, y + ph, pz + wt));
-  bag.add(S, box(cx - pw - 1.9, y + ph, pz - pd - 0.3, cx + pw + 1.9, y + ph + 0.5, pz + wt));
-  for (let k = 0; k < 7; k++) {
-    const yy = y + ph - 3.4 - (7 - k) * 0.5, out = pd * (k + 1) / 8, n = 9 - Math.floor(k / 2) * 2, w = 2 * pw - 0.4;
-    for (let i = 0; i < n; i++) { const u0 = cx - pw + 0.2 + i * w / n + 0.03, u1 = cx - pw + 0.2 + (i + 1) * w / n - 0.03; bag.add('marble_smooth', box(u0, yy, pz - out, u1, yy + 0.5, pz)); }
-  }
-  bag.add('glaze_white', box(cx - 2.4, y + 6.0, pz - 0.05, cx + 2.4, y + 7.2, pz)); bag.add('glaze_blue', box(cx - 2.2, y + 6.15, pz - 0.07, cx + 2.2, y + 7.05, pz - 0.04));
-  bag.add('marble_smooth', box(cx - 2.2, y + 5.2, pz - 0.18, cx + 2.2, y + 5.6, pz));
-  for (const s2 of [-1, 1]) bag.add('marble_smooth', box(cx + s2 * 1.6 - 0.2, y, pz - 0.18, cx + s2 * 1.6 + 0.2, y + 5.2, pz));
+  // the portal: a block standing out of the north wall and above it (src/styles/ottoman/portal2.js)
+  courtPortal(bag, col, { cx, pz: Z0 - wt, y, pw: 5.2, pd: 2.4, ph: 16.4, wt, wallTop });
   // the paving, the porphyry slab before the mosque's door
   bag.add('marble_floor', box(X0, y - 0.3, Z0, X1, y + 0.08, Z1)); col.floor(C, y + 0.08);
   bag.add('porphyry', disc(1.0, y + 0.09, 24, cx, Z1 - 1.6));
@@ -272,8 +267,9 @@ function minaret(el, { bag, col }) {
   bag.add(S, lathe([[rt, 0], [rt, shaftTop - y0 - 0.4]], 32, flute, x, y0, z));
   bag.add(S, lathe([[rt, 0], [rt * 1.1, 0.2], [rt * 1.1, 0.4]], 16, null, x, shaftTop - 0.4, z));
   bag.add(L, lathe([[rt * 1.12, 0], [rt * 0.9, cap * 0.18], [rt * 0.45, cap * 0.62], [0.001, cap * 0.9]], 16, null, x, shaftTop, z));
-  for (const [rr, yy] of [[0.18, 0], [0.26, 0.35], [0.2, 0.75]]) bag.add('gilt_bronze', lathe([[0.03, 0], [rr, 0.12], [0.03, 0.26]], 8, null, x, shaftTop + cap * 0.88 + yy, z));
-  bag.add('gilt_bronze', rod([x, shaftTop + cap * 0.86, z], [x, y + h, z], 0.03, 5));
+  { const cp = [[rt * 1.12, 0], [rt * 0.9, cap * 0.18], [rt * 0.45, cap * 0.62], [0.001, cap * 0.9]]; seams(bag, L, cp, (a, rho, yy) => [x + Math.cos(a) * rho, shaftTop + yy, z + Math.sin(a) * rho], 12, 0, Math.PI * 2, 0.07, 0.04, 0.15); }
+  alem(bag, x, shaftTop + cap * 0.88, z, 0.7, 0);
+  bag.add('gilt_bronze', rod([x, shaftTop + cap * 0.86, z], [x, shaftTop + cap * 0.88 + 0.1, z], 0.04, 5));
 }
 
 /** madrasa: { rect, y } — domed cells round a court with an arcade. */
