@@ -40,7 +40,7 @@ export const LATONA_Y = RISE * 0.352;
 export const OR_Y = -1.5;
 export const ORANGERIE = { low: [-68.25, 124, -7.75, 192.25], gallery: [-68.25, 124, -7.75, 139.25], walls: [-72.25, 124, -3.75, 196.25] };
 // the Colonnade bosquet (§1i): a ring of marble columns in a clearing of the woods south of the Allée Royale, reached from its gate in the hornbeam wall
-export const COLONNADE = { c: [-188, 96], R: 14, walk: [-194, 36, -182, 70] };
+export const COLONNADE = { c: [-188, 96], R: 14, walk: [-194, 36, -182, 72], clear: [-214, 70, -162, 122] };
 // the service yards (docs/settlements/versailles.md §5d): two levelled terraces behind the hornbeam walls either side of the Latona walk, entered by the
 // gate in each wall at x = -104 — the gardeners', fountain-keepers', sculptors' and guards' lodgings and workshops of the gardens
 export const YARD_Y = 3.55;

@@ -3,7 +3,7 @@
 // blue at the Place d'Armes, where visitors without the Honneurs du Louvre left their coaches, the coaches waiting
 // there; a courtier's own chair on the terrace. Pure data: the classical_fr style's builders and the shared objects.
 
-import { PARTERRE, PLACE, RISE, height, BRODERIE, LAWNS, HEDGE_Z, TAPIS, APOLLO, ORANGERIE, OR_Y } from './layout.js';
+import { PARTERRE, PLACE, RISE, height, BRODERIE, LAWNS, HEDGE_Z, TAPIS, APOLLO, ORANGERIE, OR_Y, COLONNADE } from './layout.js';
 
 const plan = (id, style, elements, bounds, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, 0], facing: 'n' }, bounds, rooms: [], elements, ...extra });
 const at = (x, z, rot, lx, lz) => [x + lx * Math.cos(rot) + lz * Math.sin(rot), z - lx * Math.sin(rot) + lz * Math.cos(rot)];
@@ -78,12 +78,20 @@ export function gardenPlans() {
   for (let x = -120; x > -130; x -= 8) for (const sz of [-1, 1]) bn.push([x, sz * 14.5, sz > 0 ? Math.PI : 0]);
   D.push({ t: 'statues', at: st, h: height, seed: 9 }, { t: 'yews', at: yw, h: height, seed: 5 }, { t: 'benches', at: bn, h: height });
   void LAWNS;
+  // the Colonnade bosquet (§1i): its ring, the hornbeam walls round its clearing and along the walk from the gate of the Allée Royale
+  const [kx, kz] = COLONNADE.c, Hq = 24.2, CO = [{ t: 'colonnade', c: COLONNADE.c, R: COLONNADE.R, y: height(kx, kz) }];
+  CO.push({ t: 'palissades', h: height, seed: 31, runs: [[kx - Hq, kz - Hq, kx - Hq, kz + Hq], [kx + Hq, kz - Hq, kx + Hq, kz + Hq], [kx - Hq, kz + Hq, kx + Hq, kz + Hq], [kx - Hq, kz - Hq, kx + Hq, kz - Hq, [Hq]], [kx - 6.2, 37, kx - 6.2, kz - Hq], [kx + 6.2, 37, kx + 6.2, kz - Hq]] });
+  const KL = [], kf = (o) => KL.push({ t: 'figure', y: height(kx, kz), dress: 'tunic', legs: 'hose', skin: 'skin_light', hat: 'brim', hatMat: 'cloth_black', pose: 'stand', ...o });
+  kf({ at: [kx - 5, kz + 4], rot: 0.8, seed: 2101, h: 1.74, cloth: 'cloth_indigo', cloth2: 'cloth_white' }); kf({ at: [kx - 4.2, kz + 5], rot: 4.0, seed: 2102, dress: 'robe', h: 1.58, cloth: 'cloth_red', cloth2: 'cloth_white', hat: 'none', pose: 'talk' });
+  KL.push({ t: 'bench', at: [kx + 8, kz - 6], y: height(kx, kz), rot: 2.4, len: 1.8, back: true });
   // the Orangerie and its court (§1i), built within 170 m
   const O = [{ t: 'orangerie', rect: ORANGERIE.low, gallery: ORANGERIE.gallery, walls: ORANGERIE.walls, floor: OR_Y, top: RISE + 0.04 }];
   const OL = [], of = (o) => OL.push({ t: 'figure', y: OR_Y + 0.04, dress: 'robe', legs: 'hose', skin: 'skin_light', over: 'none', cloth: 'cloth_grey', cloth2: 'cloth_brown', hat: 'brim', hatMat: 'thatch', ...o });
   of({ at: [-50, 130.5], rot: 0.5, seed: 1801, carry: 'pails' }); of({ at: [-30, 134.5], rot: 3.6, seed: 1802, pose: 'squat' }); of({ at: [-20, 150], rot: 1.2, seed: 1803, carry: 'broom' });
   OL.push({ t: 'barrow', at: [-24, 131], y: OR_Y + 0.04, rot: 1.0, seed: 17 }, { t: 'barrel', at: [-62, 134.6], y: OR_Y + 0.04, n: 2, seed: 18, rot: 0.3 });
   return [
+    plan('versailles-colonnade', 'classical_fr', CO, [kx - 30, 30, kx + 30, kz + 30], { center: [kx, kz], near: 170 }),
+    plan('versailles-colonnade-life', 'life', KL, [kx - 30, kz - 30, kx + 30, kz + 30], { center: [kx, kz], near: 120 }),
     plan('versailles-orangerie', 'classical_fr', O, ORANGERIE.walls.map((v, i) => v + (i < 2 ? -10 : 10)), { center: [-38, 160], near: 170, rooms: [{ id: 'orangerie', rect: [-66.2, 126.6, -9.8, 137.3], y: OR_Y + 0.04, kind: 'hall' }] }),
     plan('versailles-orangerie-life', 'life', OL, [-80, 115, 5, 205], { center: [-38, 160], near: 170 }),
     plan('versailles-garden-detail', 'classical_fr', D, [-340, -140, 10, 140], { center: [-160, 0], near: 230 }),
