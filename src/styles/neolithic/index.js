@@ -435,6 +435,79 @@ function house(el, { bag, col }) {
     if (k < 4) bag.add('pottery_dark', obox(fr, uu - (nu ? 0.003 : 0.012), uu + (nu ? 0.003 : 0.012), h0, h0 + L, vv - (nv ? 0.003 : 0.012), vv + (nv ? 0.003 : 0.012)));
     else bag.add('limewash_white', obox(fr, uu - (nu ? 0.006 : 0.3), uu + (nu ? 0.006 : 0.3), h0, h0 + 0.4, vv - (nv ? 0.006 : 0.3), vv + (nv ? 0.006 : 0.3)));
   }
+  // the thatch laid in courses (§5c): each face banded by the butt-ends of its straw courses, with a hazel spar bound over every other
+  // course, the hips bound with a rope of straw, one face patched with fresh straw; the number of courses and the patch by the house's seed
+  {
+    const rv = rng((el.seed || 1) * 7919 + 13), nC = 8 + Math.floor(rv() * 4), pf = Math.floor(rv() * 4), T = W(fr, 0, apex, 0);
+    const lerp3 = (p, q, f) => [p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f, p[2] + (q[2] - p[2]) * f];
+    const bands = [], rods = [], patch = [];
+    for (let k = 0; k < 4; k++) {
+      const [p, q] = [C[k], C[(k + 1) % 4]], A = W(fr, p[0] * e, ye, p[1] * e), B = W(fr, q[0] * e, ye, q[1] * e);
+      const ux = T[0] - A[0], uy = T[1] - A[1], uz = T[2] - A[2], vx = B[0] - A[0], vy = B[1] - A[1], vz = B[2] - A[2];
+      let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+      const nl = Math.hypot(nx, ny, nz); nx /= nl; ny /= nl; nz /= nl;
+      if (nx * ((A[0] + B[0]) / 2 - x) + nz * ((A[2] + B[2]) / 2 - z) < 0) { nx = -nx; ny = -ny; nz = -nz; }
+      const at = (f, u, off) => { const m = lerp3(lerp3(A, T, f), lerp3(B, T, f), u); return [m[0] + nx * off, m[1] + ny * off, m[2] + nz * off]; };
+      const quad = (arr, a, b, c, d) => arr.push(...a, ...b, ...c, ...a, ...c, ...d);
+      for (let c = 0; c < nC; c++) {
+        const f = 0.07 + (c / nC) * 0.86 + (rv() - 0.5) * 0.012, t = 0.07 - 0.04 * f;
+        // a course: its lower edge flush, a rounded lip standing out, back to the face above
+        quad(bands, at(f - 0.03, 0.02, 0.004), at(f - 0.03, 0.98, 0.004), at(f, 0.98, t), at(f, 0.02, t));
+        quad(bands, at(f, 0.02, t), at(f, 0.98, t), at(f + 0.04, 0.98, 0.004), at(f + 0.04, 0.02, 0.004));
+        if (c % 2 === 0) quad(rods, at(f + 0.004, 0.02, t + 0.006), at(f + 0.004, 0.98, t + 0.006), at(f + 0.018, 0.98, t + 0.004), at(f + 0.018, 0.02, t + 0.004));
+      }
+      if (k === pf) quad(patch, at(0.3, 0.26, 0.014), at(0.3, 0.64, 0.014), at(0.5, 0.64, 0.014), at(0.5, 0.26, 0.014));
+      bag.add('thatch', stick(W(fr, p[0] * e, ye + 0.03, p[1] * e), W(fr, 0, apex - 0.14, 0), 0.055, 6));       // the hip, bound with a rope of straw
+    }
+    bag.add('thatch', fromTriangles(orient(bands, 'out')));
+    bag.add('wicker', fromTriangles(orient(rods, 'out')));
+    bag.add('ichu', fromTriangles(orient(patch, 'out')));
+  }
+  // the front by rule (§5c): by the house's seed one of five — a bare doorway; a hide curtain rolled up over it; the daub fallen from a
+  // panel of the front wall and the woven hazel bared; an ox skull with its horns hung on a peg beside the door; a split-log bench
+  // with antler picks hung above it; and, but for the bare one, a worn threshold slab
+  {
+    const fv = Math.floor((el.seed || 0) / 5) % 5, rv = rng((el.seed || 1) * 104729 + 7), sd = doorU > 0 ? -1 : 1, vw = hw + th;
+    if (fv !== 0) bag.add('sandstone_white', obox(fr, doorU - 0.5, doorU + 0.5, -0.07, 0.035, vw, vw + 0.42));
+    if (fv === 1) {
+      const hide = ['hide_tan', 'hide_brown', 'hide_grey'][Math.floor(rv() * 3)];
+      bag.add(hide, stick(W(fr, doorU - dw / 2 + 0.06, dh - 0.07, vw + 0.06), W(fr, doorU + dw / 2 - 0.06, dh - 0.07, vw + 0.06), 0.065, 8));
+      for (const sg of [-1, 1]) {
+        const u = doorU + sg * (dw / 2 - 0.1);
+        bag.add(hide, obox(fr, u - 0.045, u + 0.045, 0.85, dh - 0.1, vw - 0.02, vw + 0.03));              // the two straps that tie it, hanging down the jambs
+        bag.add('rope_fibre', obox(fr, u - 0.05, u + 0.05, 1.0, 1.04, vw - 0.025, vw + 0.035));
+      }
+    } else if (fv === 2) {
+      const u0 = sd * 0.95, u1 = sd * 1.65, ua = Math.min(u0, u1), ub = Math.max(u0, u1);
+      bag.add('wicker', obox(fr, ua, ub, 0.5, 1.3, vw + 0.004, vw + 0.03));
+      for (let k = 0; k < 8; k++) { const u = ua + 0.04 + k * ((ub - ua - 0.08) / 7); bag.add('timber', stick(W(fr, u, 0.48, vw + 0.04), W(fr, u, 1.32, vw + 0.04), 0.017, 5)); }
+      for (let k = 0; k < 7; k++) { const yy = 0.58 + k * 0.1; bag.add('wicker', stick(W(fr, ua + 0.02, yy + (k % 2) * 0.012, vw + 0.058), W(fr, ub - 0.02, yy + (k % 2) * 0.012, vw + 0.058), 0.011, 4)); }
+      for (let k = 0; k < 12; k++) {                                              // the broken edge of the daub
+        const side = k % 4, t = rv(), pu = side < 2 ? ua + (ub - ua) * t : (side === 2 ? ua : ub) + (rv() - 0.5) * 0.06, py = side === 0 ? 0.5 : side === 1 ? 1.3 : 0.5 + 0.8 * t;
+        bag.add('chalk', pebble(0.05 + rv() * 0.05, W(fr, pu, py - 0.03, vw + 0.01), 0.9));
+      }
+    } else if (fv === 3) {
+      const u = doorU + sd * (dw / 2 + 0.55), pv = vw + 0.02;
+      bag.add('timber', stick(W(fr, u, 1.0, vw), W(fr, u, 1.0, pv + 0.14), 0.02, 5));                // the peg
+      bag.add('linen', obox(fr, u - 0.075, u + 0.075, 1.02, 1.24, pv + 0.1, pv + 0.24));             // the brow, the skull
+      bag.add('linen', obox(fr, u - 0.045, u + 0.045, 0.84, 1.03, pv + 0.14, pv + 0.3));             // the muzzle
+      bag.add('bark_dark', obox(fr, u - 0.065, u + 0.065, 0.97, 1.0, pv + 0.295, pv + 0.305));
+      for (const sg of [-1, 1]) {                                                                       // each horn: out from the brow, then curving up
+        bag.add('linen', stick(W(fr, u + sg * 0.07, 1.2, pv + 0.16), W(fr, u + sg * 0.3, 1.27, pv + 0.2), 0.026, 6));
+        bag.add('linen', stick(W(fr, u + sg * 0.3, 1.27, pv + 0.2), W(fr, u + sg * 0.4, 1.5, pv + 0.3), 0.02, 6));
+      }
+    } else if (fv === 4) {
+      const ub = doorU + sd * (dw / 2 + 0.3), ua = ub + sd * 1.3, lo = Math.min(ub, ua), hi = Math.max(ub, ua);
+      for (const u of [lo + 0.12, hi - 0.12]) bag.add('log_pine', lathe([[0.14, 0], [0.13, 0.38], [0.001, 0.4]], 8, null, ...W(fr, u, 0, vw + 0.3)));
+      bag.add('timber', obox(fr, lo, hi, 0.38, 0.43, vw + 0.14, vw + 0.46));
+      for (let k = 0; k < 2; k++) {                                                                     // antler picks hung on pegs above the bench
+        const u = lo + 0.35 + k * 0.5, p = W(fr, u, 1.15, vw + 0.03), q = W(fr, u + (k ? 0.04 : -0.04), 0.7, vw + 0.1);
+        bag.add('timber', stick(W(fr, u, 1.2, vw), W(fr, u, 1.2, vw + 0.08), 0.015, 4));
+        bag.add('linen', stick(p, q, 0.022, 5));
+        bag.add('linen', stick(W(fr, u, 0.95, vw + 0.05), W(fr, u + 0.12, 0.88, vw + 0.1), 0.014, 4));
+      }
+    }
+  }
   // within: strings of hazelnuts and bundles of herbs and a smoked flitch hung from the rafters, a hide spread by the hearth,
   // two log seats, a stack of firewood against the wall, an antler hung on a peg
   {
@@ -816,6 +889,23 @@ function craft(el, { bag, col }) {
 function litter(el, { bag }) {
   const rand = rng(el.seed || 3), [x, z] = el.c, R = el.r ?? 3, y = el.y ?? 0, n = el.n ?? 30, gy = () => y;
   const spot = (r = R) => { const t = rand() * 6.28, d = Math.sqrt(rand()) * r, px = x + Math.cos(t) * d, pz = z + Math.sin(t) * d; return [px, gy(px, pz), pz]; };
+  if (el.kind === 'rubble') {
+    // chalk spoil on the bank and the lips of the ditch: lumps and blocks of every size, a few flints
+    for (let i = 0; i < n; i++) { const p = spot(); bag.add(i % 7 === 0 ? 'granite_black' : 'chalk', pebble(0.04 + rand() * rand() * 0.2, p, 0.6)); }
+    return;
+  }
+  if (el.kind === 'ditchfind') {
+    // on the floor of the ditch where a segment ends: red deer antler picks dropped after digging, a cattle skull and jaw laid down, chalk blocks
+    for (let i = 0; i < 2 + Math.floor(rand() * 2); i++) antlerPick(bag, spot(1.6), rand() * 6.28, rand, y + 0.04);
+    if (rand() < 0.5) {
+      const p = spot(1.2), b = rand() * 6.28;
+      bag.add('linen', lathe([[0.001, 0], [0.12, 0.02], [0.14, 0.1], [0.08, 0.2], [0.001, 0.22]], 7, null, p[0], y + 0.02, p[2]));
+      for (const sg of [-1, 1]) bag.add('linen', stick([p[0] + Math.cos(b) * sg * 0.1, y + 0.12, p[2] + Math.sin(b) * sg * 0.1], [p[0] + Math.cos(b) * sg * 0.38, y + 0.2, p[2] + Math.sin(b) * sg * 0.38], 0.022, 5));
+      bag.add('linen', stick([p[0] + 0.2, y + 0.04, p[2]], [p[0] + 0.55, y + 0.05, p[2] + 0.1], 0.03, 5));
+    }
+    for (let i = 0; i < 8; i++) bag.add('chalk', pebble(0.07 + rand() * 0.12, spot(2.2), 0.7));
+    return;
+  }
   if (el.kind === 'path') {
     for (let i = 0; i < n; i++) { const p = spot(); bag.add(i % 3 ? 'chalk' : i % 2 ? 'granite_black' : 'granite_rough', pebble(0.025 + rand() * 0.05, p)); }
   } else if (el.kind === 'offering') {
@@ -830,6 +920,29 @@ function litter(el, { bag }) {
     for (let i = 0; i < 2; i++) antlerPick(bag, spot(R * 0.8), rand() * 6.28, rand, gy(x, z) + 0.02);
     { const q = spot(R * 0.5); for (let i = 0; i < 4; i++) bag.add('rope_fibre', lathe([[0.3 - i * 0.015, 0], [0.31 - i * 0.015, 0.045], [0.001, 0.06]], 12, null, q[0], q[1] + i * 0.04, q[2])); }
     { const q = spot(R * 0.7), b = rand() * 6.28; for (let i = 0; i < 3; i++) bag.add('bark_dark', stick([q[0] + i * 0.2, q[1] + 0.12, q[2] + i * 0.12], [q[0] + i * 0.2 + Math.cos(b) * 1.3, q[1] + 0.12, q[2] + i * 0.12 + Math.sin(b) * 1.3], 0.12, 7)); }
+  }
+}
+
+/**
+ * stone_setting: { c, y, yaw, w, d, seed } — the foot of a sarsen as it was raised (§1e): the hole lined with stakes and packed with
+ * rubble, so round the foot a low collar of rammed chalk rubble, elongated along the stone's width, and wedged into it the packing
+ * stones (broken sarsen and flint) and a few chalk lumps tamped in.
+ */
+function stoneSetting(el, { bag }) {
+  const rand = rng(el.seed || 9), [x, z] = el.c, y = el.y ?? 0, a = el.yaw ?? 0, w = el.w ?? 2, d = el.d ?? 1.1;
+  const ca = Math.cos(a), sa = Math.sin(a), tx = -sa, tz = ca;
+  const g = lathe([[1.55, -0.12], [1.42, 0.05], [1.12, 0.14], [1.0, 0.15]], 20);
+  g.scale(w * 0.46, 1, d * 0.46 + 0.1); g.rotateY(Math.atan2(-ca, -sa)); g.translate(x, y, z);
+  bag.add('chalk', g);
+  const n = 9 + Math.floor(rand() * 4);
+  for (let i = 0; i < n; i++) {
+    const t = i / n * 6.283 + rand() * 0.4, ex = (w * 0.5 + 0.1) * Math.cos(t), ez = (d * 0.5 + 0.12) * Math.sin(t), px = x + tx * ex + ca * ez, pz = z + tz * ex + sa * ez;
+    const r = 0.09 + rand() * 0.1;
+    bag.add(i % 4 === 0 ? 'granite_black' : 'granite_rough', lathe([[0.001, -0.05], [r, 0], [r * 1.05, r * 0.7], [r * 0.5, r * 1.3], [0.001, r * 1.5]], 6, null, px, y + 0.1, pz));
+  }
+  for (let i = 0; i < 7; i++) {
+    const t = rand() * 6.283, k = 1.15 + rand() * 0.25, ex = (w * 0.5 + 0.35) * Math.cos(t) * k, ez = (d * 0.5 + 0.35) * Math.sin(t) * k;
+    bag.add('chalk', pebble(0.05 + rand() * 0.05, [x + tx * ex + ca * ez, y + 0.12, z + tz * ex + sa * ez]));
   }
 }
 
@@ -881,6 +994,6 @@ function granary(el, { bag, col }) {
 
 registerStyle('neolithic', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, standing_stone: standingStone, lintel_ring: lintelRing, lintel, neolithic_house: house, timber_circle: timberCircle, feast_fire: feastFire, midden, aubrey_holes: aubreyHoles, camp_shelter: campShelter, camp_hut: campHut, hurdle, yard, craft, litter, scrub, granary },
+  elements: { ...STYLES.qing.elements, standing_stone: standingStone, lintel_ring: lintelRing, lintel, neolithic_house: house, stone_setting: stoneSetting, timber_circle: timberCircle, feast_fire: feastFire, midden, aubrey_holes: aubreyHoles, camp_shelter: campShelter, camp_hut: campHut, hurdle, yard, craft, litter, scrub, granary },
   objects: {},
 });
