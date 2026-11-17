@@ -107,3 +107,15 @@ Built:
 - Each lit dwelling (within 135 m) is a `hall` sound zone.
 
 Level: L2 deepened toward L3. Still missing for L3: the Nyatapola's ground storey and sanctum stay shut, the roofs have no carved eave boards or hip-end figures, the second-floor stair and kitchen under the roof are not modelled, relief carving of the brick fronts, and sound of the potters' wheels as a zone.
+
+## 15. The landmark pass, round two (November 2026)
+
+Sources: the top stage is a square chamber enclosed by a colonnade of wooden pillars, 20 columns, six to a face, each on a carved bracket (meth); each roof is held by struts at 45 degrees; the roofs are of uniform red clay tile and diminish upward; bells 48, 80, 104, 128 and 168 from the top roof down; five guardian pairs of monolithic stone [stated: [khwopa-raks, "Nyatapola Temple"](https://khwopa-raks.blogspot.com/2008/12/nyatapola-temple.html)]. 33 steps, 108 struts; the struts carved with the eight Astamatrika (first and second tiers), Lokeshwor, Mahalaxmi, Shiva-Shakti [stated: [bhaktapur.com](https://www.bhaktapur.com/discover/nyatapola/)]. Simhini and Vyaghrini as lion- and tiger-faced goddesses [inferred from the pair's names and general iconography].
+
+Built (`src/styles/newar/temples.js`, `guardians.js`):
+- **Roofs:** each tier's roof is four facets of pan-and-roll tile courses on a sagging profile, the eave rising at the corners, a red fascia with a gilt moulding that follows it, gilt hip ridges ending in curls, bells hung along the raised eave [inferred: the curve's amount]. Departure: the bell counts (280 in code) are not yet the stated 528.
+- **Colonnade:** the 20 columns of the ground tier on stone bases, bracketed, under a gilt-banded tie beam; the lowest struts start outside it [stated: 20, six to a face]. It stands tight to the cella wall (the plinth's top stage leaves no gallery).
+- **Tiers' walls:** cornice beam, base band, corner posts; larger windows with a finer lattice, a carved lintel board with three roundels, a stepped gilt cornice and sill brackets [inferred].
+- **Guardians rebuilt** as modelled figures: wrestlers with faces, moustaches, turbans, belts, club and shield; elephants with tusks, ears, curling trunk and caparison; seated lions with manes and claws; winged horned griffins; four-armed goddesses with lion and tiger heads, crowns and halos.
+- **Plinth:** a stone base course, a string course and stone pilaster strips dividing each stage's brick face [inferred].
+Still missing: the four corner Ganesh shrines and the stone tap on the first plinth [stated: bhaktapur.com]; the sanctum; the pinnacle's umbrellas.

@@ -21,7 +21,7 @@ export const STALLS = [[-8, 5, 0, 'pots'], [-2, 6.6, 0, 'fruit'], [3, 5.6, 0, 'g
 
 /** The pagoda of Nyatapola and the Bhairabnath in the style's terms (src/styles/newar/temples.js). */
 export const NYATAPOLA = {
-  c: NYA.c, front: 'e', plinth: { hw: [8.2, 7.3, 6.4, 5.5, 4.6], h: 1.0, tread: 2.2, top: 1.0, stair: 4.4 },
+  c: NYA.c, front: 'e', colonnade: true, plinth: { hw: [8.2, 7.3, 6.4, 5.5, 4.6], h: 1.0, tread: 2.2, top: 1.0, stair: 4.4 },
   roofs: [{ hw: 7.5, core: 4.0, wall: 2.6, rise: 2.0 }, { hw: 6.4, core: 3.3, wall: 2.6, rise: 2.0 }, { hw: 5.3, core: 2.6, wall: 2.6, rise: 2.0 }, { hw: 4.2, core: 1.9, wall: 2.6, rise: 1.9 }, { hw: 3.1, core: 1.3, wall: 2.6, rise: 1.6 }],
   bells: [80, 68, 56, 44, 32], struts: [7, 6, 6, 5, 3],              // 108 struts in all [stated: nepalitimes]
 };
