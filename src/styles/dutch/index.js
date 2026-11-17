@@ -13,6 +13,7 @@ import { waag, damPaving, fishBench, sledge } from './dam.js';
 import { praam, ship } from './boats.js';
 import { vocWarehouse } from './warehouse.js';
 import { windmill } from './mill.js';
+import { montelbaan } from './tower.js';
 
 const B = 'brick', W = 'plaster_white';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -26,6 +27,6 @@ function stackedTower(el, { bag, col }) {
 }
 registerStyle('dutch', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, canal_house: canalHouse, town_hall: townHall, dutch_church: dutchChurch, wester_tower: westerTower, quay_wall: quayWall, canal_bridge: canalBridge, stacked_tower: stackedTower, ship, waag, dam_paving: damPaving, fish_bench: fishBench, sledge, praam, voc_warehouse: vocWarehouse, windmill },
+  elements: { ...STYLES.qing.elements, canal_house: canalHouse, town_hall: townHall, dutch_church: dutchChurch, wester_tower: westerTower, quay_wall: quayWall, canal_bridge: canalBridge, stacked_tower: stackedTower, ship, waag, dam_paving: damPaving, fish_bench: fishBench, sledge, praam, voc_warehouse: vocWarehouse, windmill, montelbaan },
   objects: {},
 });

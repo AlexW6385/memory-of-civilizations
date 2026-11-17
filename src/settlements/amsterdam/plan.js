@@ -1,6 +1,6 @@
 // The Dam about 1670 (docs/settlements/amsterdam.md §2–§4): the Town Hall, the Nieuwe Kerk's tower,
 // the Westerkerk; the canals' water and bridges; ships on the IJ.
-import { RADIUS, C, RINGS, CANAL_W, HALL, DAM, IJ_Z, WATER, GROUND, QUAY, BRIDGE_ANGLES, DAMRAK, WAAG, FISH, NIEUWE_KERK, westerkerk, westerNave, height } from './layout.js';
+import { RADIUS, C, RINGS, CANAL_W, HALL, DAM, IJ_Z, WATER, GROUND, QUAY, BRIDGE_ANGLES, DAMRAK, WAAG, FISH, NIEUWE_KERK, MONTEL, westerkerk, westerNave, height } from './layout.js';
 
 const wk = westerkerk(), wn = westerNave();
 /** The sledges on the Dam (docs §5.6): [x, z, rot (their front along −z turned by rot), load]; each has its horse (town.js). */
@@ -82,11 +82,14 @@ export const canals = {
     // the bridges: each street crossing every ring on a vaulted brick bridge
     ...BRIDGE_ANGLES.flatMap((a) => RINGS.map((R) => {
       const x = C[0] + Math.cos(a) * R, z = C[1] + Math.sin(a) * R;
-      return Math.hypot(x, z) < RADIUS - 75 ? { t: 'canal_bridge', c: [x, z], dir: [Math.cos(a), Math.sin(a)], L: CANAL_W + 2 * QUAY + 8, w: 6.5, y: GROUND, water: WATER, bed: WATER - 1.8 } : null;
+      // the outer canals keep a drawbridge at every second street (the inner ones their high vaults, docs §6)
+      const draw = RINGS.indexOf(R) >= 2 && BRIDGE_ANGLES.indexOf(a) % 2 === 1;
+      return Math.hypot(x, z) < RADIUS - 75 ? { t: 'canal_bridge', c: [x, z], dir: [Math.cos(a), Math.sin(a)], L: CANAL_W + 2 * QUAY + 8, w: 6.5, y: GROUND, water: WATER, bed: WATER - 1.8, draw } : null;
     })).filter(Boolean),
     // the smock mills on the bastions of the rampart beyond the last canal's houses, turned to the south-west wind
     ...[22, 44, 66, 90, 114, 136, 158].map((deg, k) => { const a = deg * Math.PI / 180, r = 350, x = Math.cos(a) * r, z = Math.sin(a) * r; return { t: 'windmill', at: [x, z], y: height(x, z), h: 14 + (k % 3), yaw: -1.9 + (k % 3 - 1) * 0.25, seed: 5 + k }; }),
     ...BOATS.map(([x, z, rot, len, load], k) => ({ t: 'praam', at: [x, z], rot, len, load, seed: 40 + k, y: WATER })),
+    { t: 'montelbaan', c: MONTEL, y: height(MONTEL[0], MONTEL[1]) },
     // the quay walls along both edges of every canal and along the IJ
     ...quays(),
   ],

@@ -110,17 +110,35 @@ export function canalHouse(el, { bag, col }) {
   // annex (aanbouw) in a yard behind the main block, with the privy in the yard's other corner (docs §5.1)
   const rb = rng((el.seed || 1) * 7 + 13), annex = !warehouse && D >= 11 && rb() < 0.55, Dm = annex ? D - 3.4 : D;
   const main = ((r, k) => ({ s: [r[0], r[1] + k, r[2], r[3]], n: [r[0], r[1], r[2], r[3] - k], e: [r[0] + k, r[1], r[2], r[3]], w: [r[0], r[1], r[2] - k, r[3]] })[f])(el.rect, D - Dm);
-  const open = !!el.open && !warehouse, hallWins = [];
+  const open = !!el.open, hallWins = [];
+  const use = warehouse ? 'store' : ((q) => q < 0.45 ? 'zaal' : q < 0.75 ? 'kitchen' : 'office')(rng((el.seed || 1) * 19 + 7)());
   if (!open) { bag.add(mat, box(main[0], y - 0.6, main[1], main[2], y + H, main[3])); col.rect(main, y - 0.6, y + H); }
   A(ST, -0.02, w + 0.02, base - 0.16, base, 0, 0.06);                            // the water table over the basement
   A(mat, 0, w, H - 0.5, H, 0, 0.08); A(ST, -0.03, w + 0.03, H - 0.12, H + 0.02, 0, 0.14);  // a brick band and its stone cap at the eaves line
   const bays = w >= 6.4 ? 3 : 2, bw = w / bays, ww = Math.min(1.2, bw - 0.95), door = rand() < 0.5 ? 0 : bays - 1;
   let doorU = null, doorLeaf = 'wood_dark', stoneAt = -1;
+  const stoop = (u) => {
+    // the stoop: a stone landing at the door's sill, steps down to the quay, an iron rail each side
+    const L = 1.15, steps = 3, rise = base / (steps + 1);
+    A(ST, u - 0.95, u + 0.95, -0.6, base - 0.02, 0, L);
+    for (let k = 0; k < steps; k++) A(ST, u - 0.8, u + 0.8, -0.6, base - (k + 1) * rise, L + k * 0.3, L + (k + 1) * 0.3);
+    for (const s of [-1, 1]) {
+      const ue = u + s * 0.9;
+      A('iron', ue - 0.025, ue + 0.025, base + 0.85, base + 0.9, 0, L);
+      for (const dd of [0.3, 0.7, L - 0.05]) A('iron', ue - 0.015, ue + 0.015, base, base + 0.85, dd - 0.015, dd + 0.015);
+    }
+    if (open) {                                                                                                     // walkable: the landing, the flight down to the quay
+      const p0 = F.at(u - 0.95, 0), p1 = F.at(u + 0.95, L), q0 = F.at(u - 0.8, L), q1 = F.at(u + 0.8, L + steps * 0.3), nr = (a, c) => [Math.min(a[0], c[0]), Math.min(a[1], c[1]), Math.max(a[0], c[0]), Math.max(a[1], c[1])];
+      col.floor(nr(p0, p1), y + base - 0.02); col.ramp(nr(q0, q1), y + rise * 0.5, y + base - 0.02, { s: 'n', n: 's', e: 'w', w: 'e' }[f]);
+      for (const s of [-1, 1]) { const a = F.at(u + s * 0.88, 0), c = F.at(u + s * 0.95, L); col.rect(nr(a, c), y + base - 0.02, y + base + 0.9); }
+    } else { const p0 = F.at(u - 0.95, 0), p1 = F.at(u + 0.95, L + steps * 0.3); col.rect([p0[0], p0[1], p1[0], p1[1]], y - 0.6, y + base * 0.5); }
+  };
   // the ground floor: the door up its stoop, tall windows, basement windows below them
   for (let i = 0; i < bays; i++) {
     const u = (i + 0.5) * bw;
     if (warehouse && i === Math.floor(bays / 2)) {
-      for (let k = 0; k < n; k++) { const v0 = k ? floors[k] + 0.25 : 0.2, hh = k ? st - 0.6 : g + base - 0.6; A(ST, u - 0.75, u + 0.75, v0 + hh, v0 + hh + 0.2, 0, 0.05); for (const s of [-1, 1]) { A(shutter === 'lacquer_red' ? 'shutter_brown' : shutter, Math.min(u, u + s * 0.68), Math.max(u, u + s * 0.68), v0, v0 + hh, 0, 0.06); A('iron', Math.min(u + s * 0.12, u + s * 0.5), Math.max(u + s * 0.12, u + s * 0.5), v0 + hh * 0.3, v0 + hh * 0.3 + 0.05, 0.06, 0.08); A('iron', Math.min(u + s * 0.12, u + s * 0.5), Math.max(u + s * 0.12, u + s * 0.5), v0 + hh * 0.75, v0 + hh * 0.75 + 0.05, 0.06, 0.08); } A('wood_dark', u - 0.02, u + 0.02, v0, v0 + hh, 0.06, 0.08); }
+      for (let k = open ? 1 : 0; k < n; k++) { const v0 = k ? floors[k] + 0.25 : 0.2, hh = k ? st - 0.6 : g + base - 0.6; A(ST, u - 0.75, u + 0.75, v0 + hh, v0 + hh + 0.2, 0, 0.05); for (const s of [-1, 1]) { A(shutter === 'lacquer_red' ? 'shutter_brown' : shutter, Math.min(u, u + s * 0.68), Math.max(u, u + s * 0.68), v0, v0 + hh, 0, 0.06); A('iron', Math.min(u + s * 0.12, u + s * 0.5), Math.max(u + s * 0.12, u + s * 0.5), v0 + hh * 0.3, v0 + hh * 0.3 + 0.05, 0.06, 0.08); A('iron', Math.min(u + s * 0.12, u + s * 0.5), Math.max(u + s * 0.12, u + s * 0.5), v0 + hh * 0.75, v0 + hh * 0.75 + 0.05, 0.06, 0.08); } A('wood_dark', u - 0.02, u + 0.02, v0, v0 + hh, 0.06, 0.08); }
+      if (open) { doorU = u; doorLeaf = 'shutter_brown'; A(ST, u - 0.95, u + 0.95, base + 2.45, base + 2.72, 0, 0.1); A(ST, u - 0.78, u - 0.75, base, base + 2.45, 0, 0.06); A(ST, u + 0.75, u + 0.78, base, base + 2.45, 0, 0.06); stoop(u); }
       continue;
     }
     if (i === door && !warehouse) {
@@ -135,20 +153,7 @@ export function canalHouse(el, { bag, col }) {
       A('opening', u - d0, u + d0, dv + dh + 0.1, dv + dh + 0.95, -0.02, 0.04);                                         // the fanlight and its bars
       for (let k = 1; k < 5; k++) { const a = u - d0 + k * 2 * d0 / 5; A('wood_painted', a - 0.025, a + 0.025, dv + dh + 0.1, dv + dh + 0.95, 0, 0.07); }
       if (rand() < 0.35) stoneAt = i;                                                                                  // a gable stone (gevelsteen) by the door
-      // the stoop: a stone landing at the door's sill, steps down to the quay, an iron rail each side
-      const L = 1.15, steps = 3, rise = base / (steps + 1);
-      A(ST, u - 0.95, u + 0.95, -0.6, base - 0.02, 0, L);
-      for (let k = 0; k < steps; k++) A(ST, u - 0.8, u + 0.8, -0.6, base - (k + 1) * rise, L + k * 0.3, L + (k + 1) * 0.3);
-      for (const s of [-1, 1]) {
-        const ue = u + s * 0.9;
-        A('iron', ue - 0.025, ue + 0.025, base + 0.85, base + 0.9, 0, L);
-        for (const dd of [0.3, 0.7, L - 0.05]) A('iron', ue - 0.015, ue + 0.015, base, base + 0.85, dd - 0.015, dd + 0.015);
-      }
-      if (open) {                                                                                                     // walkable: the landing, the flight down to the quay
-        const p0 = F.at(u - 0.95, 0), p1 = F.at(u + 0.95, L), q0 = F.at(u - 0.8, L), q1 = F.at(u + 0.8, L + steps * 0.3), nr = (a, c) => [Math.min(a[0], c[0]), Math.min(a[1], c[1]), Math.max(a[0], c[0]), Math.max(a[1], c[1])];
-        col.floor(nr(p0, p1), y + base - 0.02); col.ramp(nr(q0, q1), y + rise * 0.5, y + base - 0.02, { s: 'n', n: 's', e: 'w', w: 'e' }[f]);
-        for (const s of [-1, 1]) { const a = F.at(u + s * 0.88, 0), c = F.at(u + s * 0.95, L); col.rect(nr(a, c), y + base - 0.02, y + base + 0.9); }
-      } else { const p0 = F.at(u - 0.95, 0), p1 = F.at(u + 0.95, L + steps * 0.3); col.rect([p0[0], p0[1], p1[0], p1[1]], y - 0.6, y + base * 0.5); }
+      stoop(u);
       continue;
     }
     crossWindow(bag, F, y, u, base + 0.45, ww, 2.55, { frame, shutter, shut: shutMode(), open }); if (open) hallWins.push(u);
@@ -165,7 +170,7 @@ export function canalHouse(el, { bag, col }) {
   frontDress(bag, F, y, { w, base, bays, bw, door, warehouse, open, seed: el.seed || 1 });
   // the gable stone in the pier of the first floor beside the door's bay (gable stones stood about 4 m up: docs §5.9)
   if (stoneAt >= 0 && n > 1) { const pu = (stoneAt === 0 ? 1 : stoneAt) * bw; gableStone(bag, F, y, pu, floors[1] + 0.5 + (st - 0.85) * 0.62 + 0.14, Math.min(0.56, bw - ww - 0.36), rng((el.seed || 1) * 31 + 3)); }
-  if (open && doorU !== null) canalInterior(bag, col, F, y, { w, Dm, base, g, H, mat, du: doorU, dw: 0.75, dh: 2.45, wins: hallWins, ww, leaf: doorLeaf });
+  if (open && doorU !== null) canalInterior(bag, col, F, y, { w, Dm, base, g, H, mat, du: doorU, dw: 0.75, dh: 2.45, wins: hallWins, ww, leaf: doorLeaf, use });
   // iron wall anchors at each floor, holding the front to the beams
   for (let s = 1; s < n; s++) for (const u of [0.32, w - 0.32]) { const v = floors[s] - 0.15; A('iron', u - 0.03, u + 0.03, v - 0.32, v + 0.32, 0, 0.04); A('iron', u - 0.16, u + 0.16, v - 0.03, v + 0.03, 0, 0.05); }
 

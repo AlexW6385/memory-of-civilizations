@@ -8,6 +8,7 @@
 
 import { box, lathe, rod } from '../../core/geom.js';
 import { fbox, vprism, sideprism } from './facade.js';
+import { kitchenFit, officeFit, storeFit } from './rooms.js';
 
 const ST = 'sandstone_dressed', OAK = 'wood_dark', PL = 'plaster_white';
 /** Sutherland–Hodgman: the convex polygon pts ([[u, d]…]) clipped to the box [u0, u1] × [d0, d1]. */
@@ -33,7 +34,7 @@ function clip(pts, u0, u1, d0, d1) {
  * ground floor (the basement below and the upper floors above stay solid) and furnishes it.
  */
 export function canalInterior(bag, col, F, y, o) {
-  const { w, Dm, base: b, g, H, mat, du, dw, dh, wins, ww } = o;
+  const { w, Dm, base: b, g, H, mat, du, dw, dh, wins, ww } = o, use = o.use ?? 'zaal';
   const T = 0.3, P = 0.22, top = b + g, fl = b + 0.03;
   const A = (m, u0, u1, v0, v1, d0, d1) => bag.add(m, fbox(F, y, Math.min(u0, u1), Math.max(u0, u1), Math.min(v0, v1), Math.max(v0, v1), Math.min(d0, d1), Math.max(d0, d1)));
   const C = (u0, u1, d0, d1, v0, v1) => { const p = F.at(u0, d0), q = F.at(u1, d1); col.rect([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], y + v0, y + v1); };
@@ -77,6 +78,7 @@ export function canalInterior(bag, col, F, y, o) {
   }
   A(ST, du - dw, du + dw, b - 0.06, b + 0.035, dF - lin, 0.02);
 
+  if (use === 'store') { storeFit({ A, C, lat, bag, F, y, b, fl, top, iu0, iu1, lin, dF, dB, du, dw, w }); return; }
   // ---- the floors: the hall's marble on the diagonal, the room's broad boards; the partition with its door
   const zone = (d0, d1) => [Math.min(d0, d1), Math.max(d0, d1)];
   { const [d0, d1] = zone(dP, dF - lin), a = 0.42, R = Math.SQRT1_2;
@@ -126,7 +128,7 @@ export function canalInterior(bag, col, F, y, o) {
   tiles('d', dP, iu0 + lin + 0.012, pdu - pw - 0.1, 1); tiles('d', dP, pdu + pw + 0.1, iu1 - lin - 0.012, 1);
   // the room: the hearth's wall (not behind the hearth), the far wall (not behind the bed), the partition's back, the back wall (not behind the bed)
   tiles('u', left ? iu0 + lin : iu1 - lin, roomD[0], hearthD - 1.12, left ? 1 : -1); tiles('u', left ? iu0 + lin : iu1 - lin, hearthD + 1.12, roomD[1], left ? 1 : -1);
-  tiles('u', left ? iu1 - lin : iu0 + lin, roomD[0] + bedD + 0.02, roomD[1], left ? -1 : 1);
+  tiles('u', left ? iu1 - lin : iu0 + lin, roomD[0] + (use === 'zaal' ? bedD + 0.02 : 0.78), roomD[1], left ? -1 : 1);
   tiles('d', dP - pT, iu0 + lin + 0.012, pdu - pw - 0.1, -1); tiles('d', dP - pT, pdu + pw + 0.1, iu1 - lin - 0.012, -1);
   { const a = left ? iu0 + lin + 0.012 : iu0 + lin + bedL + 0.06, c = left ? iu1 - lin - bedL - 0.06 : iu1 - lin - 0.012; tiles('d', dB + lin, a, c, 1); }
 
@@ -223,7 +225,9 @@ export function canalInterior(bag, col, F, y, o) {
     for (const s of [-0.6, 0, 0.6]) { const [x, z] = F.at(U(0.66), dc + s); const g = lathe([[0.001, 0], [0.13, 0.002], [0.14, 0.02], [0.001, 0.015]], 14); g.rotateZ(Math.PI / 2); g.rotateY(left ? 0 : Math.PI); g.translate(x, y + fl + 1.56 + 0.14, z); bag.add(s ? 'glaze_white' : 'glaze_blue', g); }
     C(Math.min(U(0), U(0.72)), Math.max(U(0), U(0.72)), dc - 1.1, dc + 1.1, fl, top);
   }
-  { // the box bed in the back corner on the far side: its panelled front with the opening, the curtains drawn half across, the bedding
+  if (use === 'kitchen') kitchenFit({ A, C, lat, bag, F, y, fl, top, left, iu0, iu1, lin, roomD, hearthD, bedL, fU, sU, w, pdu, pw, dP, pT });
+  else if (use === 'office') officeFit({ A, C, lat, bag, F, y, fl, top, roomD, bedL, fU });
+  if (use === 'zaal') { // the box bed in the back corner on the far side: its panelled front with the opening, the curtains drawn half across, the bedding
     const bu0 = fU(0.02), bu1 = fU(bedL + 0.02), [ua, ub] = [Math.min(bu0, bu1), Math.max(bu0, bu1)], d0 = roomD[0], d1 = d0 + bedD, dv0 = fl + 0.5, dv1 = fl + 1.95;
     const inner = left ? ua : ub, io = left ? 1 : -1;                                                                    // its open end (toward the room's middle) and its direction
     A(OAK, ua, ub, fl, dv0, d1 - 0.05, d1); A(OAK, ua, ub, dv1, top - 0.05, d1 - 0.05, d1);
@@ -246,7 +250,7 @@ export function canalInterior(bag, col, F, y, o) {
     C(ua, ub, d0, d1 + 0.1, fl, top);
   }
   // the table under its Turkish carpet in the middle of the room, a pewter jug, a glass and a dish on it; two Spanish chairs
-  { const tu = w / 2 + (left ? 0.25 : -0.25), td = Math.min((roomD[0] + bedD + roomD[1]) / 2, (roomD[0] + roomD[1]) / 2 + 0.3), hu = 0.62, hd = 0.42, tv = fl + 0.76;
+  if (use !== 'kitchen') { const tu = w / 2 + (left ? 0.25 : -0.25), td = Math.min((roomD[0] + (use === 'zaal' ? bedD : 1.2) + roomD[1]) / 2, (roomD[0] + roomD[1]) / 2 + 0.3), hu = 0.62, hd = 0.42, tv = fl + 0.76;
     for (const su of [-1, 1]) for (const sd of [-1, 1]) lat(OAK, [[0.001, 0], [0.04, 0.0], [0.04, 0.06], [0.03, 0.08], [0.035, 0.3], [0.001, 0.3]], 8, tu + su * (hu - 0.08), fl, td + sd * (hd - 0.08));
     A(OAK, tu - hu, tu + hu, tv - 0.04, tv, td - hd, td + hd);
     const oc = 0.03;
@@ -274,13 +278,13 @@ export function canalInterior(bag, col, F, y, o) {
     }
   }
   // a mirror in its black frame and two paintings on the far wall, before the bed; paintings on the partition's back
-  { const fw = left ? iu1 - lin : iu0 + lin, fs = left ? -1 : 1, d0 = roomD[0] + bedD + 0.15, d1 = roomD[1] - 0.15, mid = (d0 + d1) / 2;
+  { const fw = left ? iu1 - lin : iu0 + lin, fs = left ? -1 : 1, d0 = roomD[0] + (use === 'zaal' ? bedD : 1.2) + 0.15, d1 = roomD[1] - 0.15, mid = (d0 + d1) / 2;
     if (d1 - d0 > 0.9) {
       painting('u', fw, fs, mid, fl + 1.75, 0.55, 0.7, 'mirror_tin');
       if (d1 - d0 > 2.4) { painting('u', fw, fs, mid - 0.95, fl + 1.85, 0.7, 0.55); painting('u', fw, fs, mid + 0.95, fl + 1.85, 0.7, 0.55); }
     }
     const pa = left ? (iu0 + pdu - pw) / 2 : (pdu + pw + iu1) / 2;
-    painting('d', dP - pT, -1, pa, fl + 1.8, Math.min(0.9, Math.abs(pdu - pw - (left ? iu0 : iu1)) - 0.45), 0.7);
+    if (use !== 'kitchen') painting('d', dP - pT, -1, pa, fl + 1.8, Math.min(0.9, Math.abs(pdu - pw - (left ? iu0 : iu1)) - 0.45), 0.7);
   }
   void box;
 }
