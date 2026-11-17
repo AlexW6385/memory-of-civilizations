@@ -15,7 +15,7 @@ export function emitters() {
     E.push({ p: [x, heightOf(l) + 1.0, z], kind: 'kitchen', thr: 0.2 + 0.7 * r(), seed: l.seed % 1000 });
   }
   // the hearths of the trades: the coffee houses, the smithies and the spice shops with their coals, on the roofs above
-  for (const l of shops()) if (l.shop.trade === 'qahwa' || l.shop.trade === 'smith' || l.shop.trade === 'spice') E.push({ p: [l.cx, heightOf(l) + 1.0, l.cz], kind: 'kitchen', thr: l.shop.trade === 'smith' ? 0.05 : 0.12, seed: l.seed % 1000 });
+  for (const l of shops()) if (l.shop.trade === 'qahwa' || l.shop.trade === 'smith' || l.shop.trade === 'spice' || l.shop.trade === 'bakery') E.push({ p: [l.cx, heightOf(l) + 1.0, l.cz], kind: 'kitchen', thr: l.shop.trade === 'smith' ? 0.05 : 0.12, seed: l.seed % 1000 });
   E.push({ p: [-40, 0.8, -12], kind: 'incense', thr: 0.1, seed: 21 });
   return E;
 }

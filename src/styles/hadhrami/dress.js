@@ -29,7 +29,7 @@ const range = (el, f) => (f === 'n' || f === 's' ? [el.rect[0], el.rect[2]] : [e
 
 /** The door's surroundings on the front: mastaba, jars, niche, plaster patches (u: the door's place along the front). */
 export function dressFace(ctx, el, f, nx, nz, u, p, rand) {
-  const { bag } = ctx, [lo, hi] = range(el, f), r = rng((el.seed ^ 0x51ed) >>> 0), shop = !!el.shop;
+  const { bag } = ctx, [lo, hi] = range(el, f), r = rng((el.seed ^ 0x51ed) >>> 0), shop = !!el.shop && (!el.shop.fashion || el.shop.fashion === 'shop');
   const side = r() < 0.5 ? -1 : 1, at = (uu, y, o = 0) => onFace(el, f, uu, y, o);
   const lat = (d) => u + d, within = (uu, w = 0.4) => uu > lo + w && uu < hi - w;
   // the bench of mud and lime along the wall beside the door (not before a shop: its goods are there)

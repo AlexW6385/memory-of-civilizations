@@ -93,6 +93,14 @@ function towerOpen(el, ctx) {
   bag.add('schist_rubble', box(X0 - 0.25, -0.3, D.doorZ - 0.65, I0, 0.1, D.doorZ + 0.65)); col.floor([X0 - 0.25, D.doorZ - 0.55, I0, D.doorZ + 0.55], 0.1);
   bag.add('lime_plaster', box(X0 - 0.08, 0, D.doorZ - 0.72, X0, 2.2, D.doorZ - 0.55)); bag.add('lime_plaster', box(X0 - 0.08, 0, D.doorZ + 0.55, X0, 2.2, D.doorZ + 0.72)); bag.add('lime_plaster', box(X0 - 0.08, 2.1, D.doorZ - 0.72, X0, 2.3, D.doorZ + 0.72));
   bag.add('timber', box(X0 - 0.14, 2.3, D.doorZ - 0.85, X0, 2.42, D.doorZ + 0.85));
+  // the carved board over the lintel (a row of dentils), the stepped lime hood above it, the lime jambs' second order; the leaf's raised panels, studs and wooden lock-case
+  { const dz = D.doorZ;
+    bag.add('cedar', box(X0 - 0.12, 2.42, dz - 0.78, X0, 2.64, dz + 0.78));
+    for (let i = 0; i < 8; i++) bag.add('wood_dark', box(X0 - 0.145, 2.47, dz - 0.7 + i * 0.2, X0 - 0.12, 2.6, dz - 0.6 + i * 0.2));
+    bag.add('lime_plaster', box(X0 - 0.2, 2.64, dz - 0.95, X0, 2.71, dz + 0.95)); bag.add('lime_plaster', box(X0 - 0.14, 2.71, dz - 0.82, X0, 2.77, dz + 0.82));
+    for (const [z0, z1] of [[dz + 0.66, dz + 1.4]]) for (const [y0, y1] of [[0.15, 0.95], [1.1, 1.85]]) bag.add('wood_dark', box(I0 + 0.06, y0, z0, I0 + 0.075, y1, z1));
+    for (const z of [dz + 0.75, dz + 1.05, dz + 1.35]) for (const y of [0.4, 1.4, 1.75]) bag.add('iron', box(I0 + 0.075, y - 0.025, z - 0.025, I0 + 0.095, y + 0.025, z + 0.025));
+    bag.add('wood_dark', box(I0 + 0.075, 0.88, dz + 0.78, I0 + 0.16, 1.0, dz + 1.3)); bag.add('wood_dark', box(I0 + 0.075, 0.93, dz + 0.65, I0 + 0.12, 0.96, dz + 1.45)); }
   bag.add('cedar', box(I0, 0.02, D.doorZ + 0.56, I0 + 0.06, 2.0, D.doorZ + 1.5)); bag.add('iron', box(I0 + 0.06, 0.95, D.doorZ + 0.6, I0 + 0.1, 1.0, D.doorZ + 1.4));
   // the parapet, its corner piers and the spouts on the roof
   const t = K * top, pt = 0.34, [a0, b0, a1, b1] = [X0 + t, Z0 + t, X1 - t, Z1 - t];

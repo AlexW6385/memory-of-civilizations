@@ -102,6 +102,18 @@ export function shops() {
     l.shop.rect = [x0 + w, z0 + w, x1 - w, z1 - w];
     SHOPS.push(l);
   });
+  // beyond 120 m of the arrival: ordinary houses whose ground floor is entered as the household's stable, store, the builders' store, a bakery or a mat-maker's room
+  // (docs/settlements/shibam.md §12 "Houses"); the front by the room's use, spread over the east, west and south of the town
+  const FAR = [['stable', 'stable', 2.1], ['store', 'lobby', 1.4], ['mason', 'arch', 1.5], ['bakery', 'shop', 1.5], ['store', 'arch', 1.5], ['mats', 'shop', 1.5], ['stable', 'stable', 2.1], ['mason', 'lobby', 1.4]];
+  const taken = SHOPS.map((l) => l), cand = L.filter((l) => !l.shop && l.rect[2] - l.rect[0] >= 6.4 && Math.hypot(l.cx + 6, l.cz + 8) > 120).sort((a, b) => (a.seed % 977) - (b.seed % 977));
+  let k = 0;
+  for (const l of cand) {
+    if (k >= 16) break;
+    if (taken.some((t) => Math.hypot(t.cx - l.cx, t.cz - l.cz) < (SHOPS.includes(t) && !t.shop.far ? 20 : 26))) continue;
+    const [trade, fashion, doorW] = FAR[k % FAR.length], [x0, z0, x1, z1] = l.rect, w = 0.9;
+    l.shop = { trade, fashion, doorW, H: 2.4, far: true, i: SHOPS.length, rect: [x0 + w, z0 + w, x1 - w, z1 - w] };
+    SHOPS.push(l); taken.push(l); k++;
+  }
   return SHOPS;
 }
 /** The lots as a map by rect (for what must know a house's door). */

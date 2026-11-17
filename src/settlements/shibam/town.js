@@ -128,6 +128,14 @@ function beasts() {
   // the beasts stabled at the foot of the enterable house
   put('goat', [38.3, -24.2], { rot: 1 }); put('goat', [39.2, -24.8], { rot: 3 }); put('donkey', [40.6, -25.6], { rot: 4.7 });
   for (const [x, z] of [[-3, -4], [12, -6], [-22, -3], [0, 0], [16, -20], [-10, -26]]) E.push({ t: 'chickens', kind: 'pigeon', at: [x, z], rot: 0, n: 5, seed: Math.floor(x * 3 + 17) });
+  // the beasts of the stables: a donkey and a goat at the manger, tethered by their posts
+  for (const l of shops()) if (l.shop.trade === 'stable') {
+    const { W, D } = shopSize(l), P = (a, b) => shopPoint(l, a, b), tgt = P(W / 2, D - 0.6);
+    const a1 = P(1.6, D - 1.7), a2 = P(W - 2.0, D - 1.7), a3 = P(W / 2 + 0.1, D - 1.5);
+    E.push({ t: 'animal', kind: 'donkey', at: a1, y: 0.06, rot: face(a1, [a1[0], tgt[1]]), seed: l.seed % 1000 });
+    E.push({ t: 'animal', kind: l.seed % 2 ? 'goat' : 'sheep', at: a2, y: 0.06, rot: face(a2, [a2[0], tgt[1]]), seed: (l.seed >> 3) % 1000 });
+    if (W > 6) E.push({ t: 'animal', kind: 'goat', at: a3, y: 0.06, rot: face(a3, [a3[0], tgt[1]]), seed: (l.seed >> 5) % 1000 });
+  }
   // the cats of the shops
   for (const l of shops()) if (l.shop.i % 3 === 0) { const x = doorOf(l) + 1.8, z = l.front === 'n' ? l.rect[1] - 0.7 : l.rect[3] + 0.7; E.push({ t: 'animal', kind: 'cat', at: [x, z], y: 0, rot: rand() * 6.28, seed: l.seed % 1000 }); }
   return E;
@@ -173,9 +181,14 @@ function interiorLife() {
       case 'jars': at(cx + 1.1, 1.0, 'stand', cx, D - 2); break;
       case 'tailor': at(cx - 0.4, 2.1, 'cross', cx + 0.8, 2.1); break;
       case 'barber': at(cx, 2.7, 'sit', cx, D); at(cx, 3.4, 'stand', cx, 2.7); break;
+      case 'stable': at(cx - 0.9, D - 2.4, 'stand', cx - 0.9, D - 0.6); break;
+      case 'store': at(cx + 0.9, 1.9, 'stand', 0.5, 1.9, { carry: 'basket' }); break;
+      case 'mason': at(cx + 0.9, 2.6, 'stand', 0.8, 2.0, { cloth: 'cloth_brown' }); break;
+      case 'bakery': at(cx - 0.3, D - 2.1, 'stand', cx, D - 0.9); at(0.7, 3.8, 'stand', 0.6, 2.6); break;
+      case 'mats': at(cx - 0.5, 2.6, 'squat', cx + 0.5, 2.6, { cloth: 'cloth_brown' }); break;
       default: break;
     }
-    if (rand() < 0.55 && tr !== 'barber') at(cx - 0.9, 1.1, 'stand', cx, D - 1, { carry: rand() < 0.3 ? 'basket' : 'none' });
+    if (rand() < 0.55 && tr !== 'barber' && !l.shop.far) at(cx - 0.9, 1.1, 'stand', cx, D - 1, { carry: rand() < 0.3 ? 'basket' : 'none' });
   }
   // the sultan's hall: the sultan on the dais with two attendants standing, men seated along the walls, the guards by the rack
   const [x0, z0, x1, z1] = HALL.rect, W = x1 - x0, D = z1 - z0, P = (a, b) => [x0 + a, z1 - b];
@@ -223,6 +236,27 @@ export async function town() {
     gl.push({ t: 'well', at: [wx, wz], y, kind: 'pulley', mat: 'schist_rubble', roof: false }, { t: 'trough', at: [wx + 1.4, wz + 0.2], y, rot: 0 }, { t: 'animal', kind: 'donkey', at: [wx + 3.2, wz + 1.5], y: h(wx + 3.2, wz + 1.5), rot: rr() * 6.28, seed: k });
   });
   plans.push({ ...base('shibam-garden-life', gl, 'life') });
+  // the brickyard beside the south gate (outside the wall, on the wadi floor): the pit, the rows and stacks, the men who work it, a donkey with its panniers, the water
+  const YR = [14, 104.5, 38, 111], yy = h(26, 108);
+  plans.push(base('shibam-brickyard', [{ t: 'brick_rows', rect: YR, y: yy, seed: 3 }]));
+  const yl = [], fg = (at, rot, o = {}) => yl.push({ t: 'figure', at, y: yy, rot, seed: Math.floor(at[0] * 31 + at[1]), dress: 'robe', cloth: 'cloth_ochre', cloth2: 'cloth_white', over: 'belt', skin: 'skin_medium', hat: 'turban', feet: 'bare', hair: 'short', beard: true, ...o });
+  fg([YR[0] + 1.7, YR[1] + 1.4], 1.2, { pose: 'squat', cloth: 'cloth_brown' });                   // working the straw into the mud
+  fg([YR[0] + 6.7, YR[1] + 3.0], 3.1, { pose: 'squat', cloth: 'cloth_brown', h: 0.95 });         // pressing a brick in the mould
+  fg([YR[0] + 12.2, YR[1] + 4.8], 4.7, { pose: 'stand', carry: 'basket' });                         // carrying dried bricks
+  fg([YR[0] + 21, YR[1] + 3.2], 0.3, { pose: 'sit_low', cloth: 'cloth_white' });
+  yl.push({ t: 'animal', kind: 'donkey', at: [YR[0] + 19, YR[1] + 5.2], y: yy, rot: 1.5, seed: 17 }, { t: 'trough', at: [YR[0] + 2.4, YR[1] + 4.6], y: yy, rot: 0 }, { t: 'pot', kind: 'water_pot', at: [YR[0] + 4.2, YR[1] + 4.9], y: yy, n: 3, seed: 41 }, { t: 'sacks', at: [YR[0] + 8.5, YR[1] + 5.4], y: yy, rot: 0, n: 3, seed: 13 });
+  plans.push({ ...base('shibam-brickyard-life', yl, 'life') });
+  // by the doors of the far houses: what each room's work puts out on the street (a trough and fodder at a stable, bricks and a mortar tub at the builders', loaves at the bakery)
+  const sl = [];
+  for (const l of shops()) {
+    if (!l.shop.far) continue;
+    const u = doorOf(l), out = l.front === 'n' ? -1 : 1, z = out < 0 ? l.rect[1] - 0.55 : l.rect[3] + 0.55, side = l.seed % 2 ? 1 : -1, x = u + side * (l.shop.doorW / 2 + 1.1);
+    if (l.shop.trade === 'stable') sl.push({ t: 'trough', at: [x, z], y: 0, rot: 0 }, { t: 'sacks', at: [u - side * (l.shop.doorW / 2 + 0.9), z], y: 0, rot: 0, n: 2, seed: l.seed % 50 });
+    else if (l.shop.trade === 'mason') sl.push({ t: 'firewood', at: [x, z], y: 0, rot: 0, len: 1.4, seed: l.seed % 40 }, { t: 'pot', kind: 'water_pot', at: [x + side * 0.9, z], y: 0, n: 2, seed: l.seed % 30 });
+    else if (l.shop.trade === 'bakery') sl.push({ t: 'firewood', at: [x, z], y: 0, rot: 0, len: 1.2, seed: l.seed % 40 }, { t: 'sacks', at: [x + side * 0.9, z], y: 0, rot: 0, n: 2, seed: l.seed % 20 });
+    else sl.push({ t: 'pot', kind: 'water_pot', at: [x, z], y: 0, n: 2, seed: l.seed % 30 });
+  }
+  plans.push({ ...base('shibam-door-life', sl, 'life') });
   void streets; void WALL;
   return plans;
 }
