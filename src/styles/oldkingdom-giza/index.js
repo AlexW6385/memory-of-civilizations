@@ -6,6 +6,7 @@ import { registerStyle, STYLES } from '../../core/build.js';
 import '../oldkingdom/index.js';
 import { courseRibs } from './courses.js';
 import { falseDoor } from './sanctuary.js';
+import { sphinx } from './sphinx.js';
 import { roomThings, courtCraft } from './houses.js';
 
 const OK = STYLES.oldkingdom;
@@ -14,6 +15,7 @@ registerStyle('oldkingdom-giza', {
   elements: {
     ...OK.elements,
     ok_pyramid: (el, c) => { OK.elements.ok_pyramid(el, c); courseRibs(c.bag, el); },
+    ok_sphinx: sphinx,
     ok_temple: (el, c) => {
       OK.elements.ok_temple(el, c);
       // the great temple's west wall: a false door of granite beside the doorway to the pyramid's court, for the king's cult
