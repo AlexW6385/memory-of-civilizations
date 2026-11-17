@@ -12,10 +12,11 @@ import { HUSUNI } from './husuni.js';
 import { house } from './house.js';
 import { coconutPalm, baobab, tusks, mangrove, banana } from './plants.js';
 import { tank, well, tomb, benchRag, fishRack } from './yard.js';
-import { wall, carvedPanel, wallFace } from './kit.js';
+import { wall, carvedPanel, wallFace, nicheHoles } from './kit.js';
+import { pointedOpening, archMould, boxSoup } from './portal.js';
 import { Quaternion, Vector3, Matrix4 } from '../../core/three.js';
 
-const C = 'lime_plaster_rough', R = 'coral_rag';
+const C = 'lime_plaster_rough', R = 'coral_rag', DRESSED_ = 'limestone';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 /** The points where rays from the centre at the given angles meet the rectangle (half sizes hx, hz). */
@@ -115,20 +116,60 @@ export function mosqueStands(rect, b = 4.5) {
 /** swahili_mosque: { rect, y, bay, big (index of the bay carrying the great dome) } — a walled hall of bays on pillars, each bay roofed by a small dome. */
 function mosque(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, b = el.bay ?? 4.5, yS = y + 3.4, yT = y + 6.1, PD = 0.5, yTop = yT + PD + 0.35, h = yTop - y - 0.6;
-  // the enclosing walls, open at every other bay by a doorway (1.4 × 2.6 m)
-  const doorsAt = (a, b2) => { const L = b2 - a, n = Math.floor(L / (b * 2)), H = []; for (let i = 0; i < n; i += 2) { const u = a + (i + 0.5) * L / n; H.push({ u0: u - 0.7, u1: u + 0.7, v0: y + 0.05, v1: y + 2.6 }); } return H; };
-  for (const [ax, c, a, b2, u0, u1] of [['x', z0 + 0.4, x0, x1, x0, x1], ['x', z1 - 0.4, x0, x1, x0, x1], ['z', x0 + 0.4, z0, z1, z0 + 0.8, z1 - 0.8], ['z', x1 - 0.4, z0, z1, z0 + 0.8, z1 - 0.8]]) {
-    wall({ bag, col }, { axis: ax, c, u0, u1, t: 0.8, y0: y - 0.5, y1: y + h + 0.6, holes: doorsAt(a, b2), mat: C });
+  // the enclosing walls, open at every other bay by a pointed doorway (1.4 m wide to a crown at 3.56 m), with pointed
+  // windows of coral screens between and in the door bays, and a row of niches on the inner face (docs/settlements/kilwa.md §21)
+  const mxN = (x0 + x1) / 2, DOOR = { hw: 0.7, vS: 2.35 }, WIN = { hw: 0.35, v0: 2.7, vS: 3.3 };
+  const layOut = (a, b2, north) => {
+    const L = b2 - a, n = Math.floor(L / (b * 2)), O = { doors: [], wins: [], niches: [] }, ok = (u) => !(north && Math.abs(u - mxN) < 3.6);
+    for (let i = 0; i < n; i++) {
+      const u = a + (i + 0.5) * L / n;
+      if (i % 2 === 0) { O.doors.push(u); for (const d of [-3.1, 3.1]) if (ok(u + d)) O.wins.push(u + d); }
+      else for (const d of [-3.0, 0, 3.0]) if (ok(u + d)) O.wins.push(u + d);
+      for (const d of [-4.0, -1.9, 1.9, 4.0]) if (ok(u + d) && (i % 2 === 0 || Math.abs(d) > 2)) O.niches.push(u + d);
+    }
+    return O;
+  };
+  const SIDES = [[x0, x1, z0, true, -1], [x0, x1, z1, true, 1], [z0, z1, x0, false, -1], [z0, z1, x1, false, 1]];
+  const LAY = SIDES.map(([a, b2, , , sg], k) => layOut(a, b2, k === 0));
+  for (const [k, [ax, c, a, b2, u0, u1]] of [['x', z0 + 0.4, x0, x1, x0, x1], ['x', z1 - 0.4, x0, x1, x0, x1], ['z', x0 + 0.4, z0, z1, z0 + 0.8, z1 - 0.8], ['z', x1 - 0.4, z0, z1, z0 + 0.8, z1 - 0.8]].entries()) {
+    const O = LAY[k], sg = SIDES[k][4], inRange = (u, m) => u > u0 + m && u < u1 - m;
+    const holes = [...O.doors.map((u) => ({ u0: u - DOOR.hw, u1: u + DOOR.hw, v0: y + 0.05, v1: y + DOOR.vS + DOOR.hw * Math.sqrt(3) })), ...O.wins.filter((u) => inRange(u, 0.8)).map((u) => ({ u0: u - WIN.hw, u1: u + WIN.hw, v0: y + WIN.v0, v1: y + WIN.vS + WIN.hw * Math.sqrt(3) }))];
+    const rec = O.niches.filter((u) => inRange(u, 0.8)).map((u) => ({ u0: u - 0.28, u1: u + 0.28, v0: y + 0.9, v1: y + 1.9, d: 0.28, side: -sg, holes: nicheHoles(u, y + 0.9, 0.56, 1.0) }));
+    wall({ bag, col }, { axis: ax, c, u0, u1, t: 0.8, y0: y - 0.5, y1: y + h + 0.6, holes, rec, mat: C });
   }
   // the walls' faces: doorways with their stepped stone frames along the sides, small windows above, buttresses at the corners and between
   for (const [a, b2, zz, alongX, sg] of [[x0, x1, z0, true, -1], [x0, x1, z1, true, 1], [z0, z1, x0, false, -1], [z0, z1, x1, false, 1]]) {
     const L = b2 - a, n = Math.floor(L / (b * 2));
     for (let i = 0; i < n; i++) {
       const u = a + (i + 0.5) * L / n, f = (m, u0, u1, v0, v1, d0, d1) => { const p0 = zz + sg * d0, p1 = zz + sg * d1; bag.add(m, alongX ? box(u + u0, y + v0, Math.min(p0, p1), u + u1, y + v1, Math.max(p0, p1)) : box(Math.min(p0, p1), y + v0, u + u0, Math.max(p0, p1), y + v1, u + u1)); };
-      if (i % 2 === 0) { f('limestone', -1.0, -0.7, 0, 3.0, -0.01, 0.12); f('limestone', 0.7, 1.0, 0, 3.0, -0.01, 0.12); f('limestone', -0.7, 0.7, 2.6, 3.0, -0.01, 0.12); } else { f('limestone', -0.5, 0.5, 2.8, 4.0, -0.01, 0.1); f('opening', -0.35, 0.35, 3.0, 3.8, 0.09, 0.12); }
+      // (the pointed doorways and windows are cut and framed below)
       f(C, L / n / 2 - 0.45, L / n / 2 + 0.45, -0.5, h + 0.6, -0.01, 0.55);
     }
   }
+  // the pointed doorways and windows: crown arcs filled in the holes' corners, stepped archivolts of dressed coral on both faces,
+  // over each door a carved timber lintel (dart frieze) under a pierced screen of coral bars, in each window a lattice of bars
+  const ACC = { F: [], T: [], W: [] };
+  SIDES.forEach(([a, b2, zz, alongX, sg], k) => {
+    const O = LAY[k], lo = (alongX ? x0 : z0 + 0.8) + 0.8, hi = (alongX ? x1 : z1 - 0.8) - 0.8, axis = alongX ? 'x' : 'z';
+    const fb = (m, u0, v0, u1, v1, d0, d1) => { const p0 = zz + sg * d0, p1 = zz + sg * d1; const T = m === 'wood_dark' ? ACC.W : ACC.T; if (alongX) boxSoup(T, u0, y + v0, Math.min(p0, p1), u1, y + v1, Math.max(p0, p1)); else boxSoup(T, Math.min(p0, p1), y + v0, u0, Math.max(p0, p1), y + v1, u1); };
+    for (const u of O.doors) {
+      const hgt = pointedOpening(ACC, { alongX, zz, sg, u, hw: DOOR.hw, v0: y + 0.05, vS: y + DOOR.vS, bands: [[0.17, 0.07], [0.15, 0.035]] });
+      fb('wood_dark', u - DOOR.hw, DOOR.vS, u + DOOR.hw, DOOR.vS + 0.22, -0.55, -0.2);
+      carvedPanel({ bag, col }, wallFace(axis, zz - sg * 0.2, sg, y), u - DOOR.hw + 0.03 + 0.0013 * O.doors.indexOf(u) + 0.004 * k, DOOR.vS + 0.03, u + DOOR.hw - 0.03, DOOR.vS + 0.19, 'darts');
+      for (let q = -3; q <= 3; q++) { const bxu = u + q * 0.19; fb(DRESSED_, bxu - 0.025, DOOR.vS + 0.22, bxu + 0.025, hgt(bxu) - y - 0.02, -0.47, -0.33); }
+    }
+    for (const u of O.wins) {
+      if (u < lo || u > hi) continue;
+      const hgt = pointedOpening(ACC, { alongX, zz, sg, u, hw: WIN.hw, v0: y + WIN.v0, vS: y + WIN.vS, bands: [[0.13, 0.06], [0.1, 0.03]] });
+      for (let q = -2; q <= 2; q++) { const bxu = u + q * 0.13; fb(DRESSED_, bxu - 0.02, WIN.v0, bxu + 0.02, hgt(bxu) - y - 0.02, -0.46, -0.34); }
+      for (const v of [3.1, 3.5]) fb(DRESSED_, u - WIN.hw, v, u + WIN.hw, v + 0.04, -0.46, -0.34);
+    }
+    // a dressed cornice under the cresting, its dart frieze below: two stepped courses proud of the wall
+    const L = b2 - a;
+    fb('limestone', a, h + 0.3 - 0.05, b2, h + 0.6, 0, 0.14); fb('limestone', a, h + 0.18, b2, h + 0.3, 0, 0.07);
+    void L;
+  });
+  bag.add(C, fromTriangles(ACC.F)); bag.add('limestone', fromTriangles(ACC.T)); bag.add('wood_dark', fromTriangles(ACC.W));
   // weathering: the darker damp band at the foot of the outer walls, broken by the doorways' frames; rain streaks
   // greying the whitewash under the cresting (the spouts' and the merlons' runs), between the windows
   for (const [a, b2, zz, alongX, sg] of [[x0, x1, z0, true, -1], [x0, x1, z1, true, 1], [z0, z1, x0, false, -1], [z0, z1, x1, false, 1]]) {
@@ -172,6 +213,11 @@ function mosque(el, { bag, col }) {
   for (let i = 1; i < nx; i++) { const x = x0 + i * sx; for (let k = 0; k < nz; k++) pointedSpandrel(arches, x, 0.3, k === 0 ? z0 + 0.8 : z0 + k * sz + 0.35, k === nz - 1 ? z1 - 0.8 : z0 + (k + 1) * sz - 0.35, yS, yT, false, 0.6); }
   for (let k = 1; k < nz; k++) { const z = z0 + k * sz; for (let i = 0; i < nx; i++) pointedSpandrel(arches, z, 0.3, i === 0 ? x0 + 0.8 : x0 + i * sx + 0.35, i === nx - 1 ? x1 - 0.8 : x0 + (i + 1) * sx - 0.35, yS, yT, true, 0.6); }
   bag.add(C, fromTriangles(arches));
+  // the arches' mouldings: a band of dressed coral along each intrados, on both faces (docs/settlements/kilwa.md §21)
+  const mould = [];
+  for (let i = 1; i < nx; i++) { const x = x0 + i * sx; for (let k = 0; k < nz; k++) archMould(mould, x, 0.3, k === 0 ? z0 + 0.8 : z0 + k * sz + 0.35, k === nz - 1 ? z1 - 0.8 : z0 + (k + 1) * sz - 0.35, yS, yT, false, 0.6); }
+  for (let k = 1; k < nz; k++) { const z = z0 + k * sz; for (let i = 0; i < nx; i++) archMould(mould, z, 0.3, i === 0 ? x0 + 0.8 : x0 + i * sx + 0.35, i === nx - 1 ? x1 - 0.8 : x0 + (i + 1) * sx - 0.35, yS, yT, true, 0.6); }
+  bag.add('limestone', fromTriangles(mould));
   // the roof: over each bay a dome on pendentives, seen from below as from above; barrel vaults down
   // the central aisle; the great dome raised on its drum (Archnet: domes and vaults of lime-coral concrete)
   const mid = Math.floor(nx / 2), roof = [];
@@ -279,6 +325,17 @@ function mtepe(el, { bag, col }) {
   const bow = P(n, Math.floor(m / 2)), st = P(0, Math.floor(m / 2)), t1 = [];
   beamTris(t1, [bow[0] - fx * 0.3, bow[1] - 0.6, bow[2] - fz * 0.3], [bow[0] + fx * 1.6, bow[1] + 0.9, bow[2] + fz * 1.6], 0.09, 0.22);
   beamTris(t1, [st[0] + fx * 0.2, st[1] - 0.5, st[2] + fz * 0.2], [st[0] - fx * 0.5, st[1] + 0.5, st[2] - fz * 0.5], 0.09, 0.2);
+  // the gunwale: a rail of timber along each side's sheer, and aft the plaited-mat shelter (kidari) of the sewn boats, a half-barrel
+  // on the deck between the stern and the mast (docs/settlements/kilwa.md §21)
+  for (const sj of [0, m]) for (let i = 0; i < n; i++) { const a = P(i, sj), b = P(i + 1, sj); beamTris(t1, [a[0], a[1] + 0.03, a[2]], [b[0], b[1] + 0.03, b[2]], 0.07, 0.1); }
+  {
+    const cab = [], u0 = -L * 0.4, u1 = -L * 0.12, rc = B * 0.3, G = 10, Hh = 8, Q = (g, h) => { const u = u0 + (u1 - u0) * g / G, ph = Math.PI * h / Hh, t = (u + L / 2) / L, sh = 0.9 * (2 * t - 1) ** 4; return W(u, rc * Math.cos(ph), D + sh - 0.05 + rc * 0.85 * Math.sin(ph)); };
+    for (let g = 0; g < G; g++) for (let h = 0; h < Hh; h++) { const A = Q(g, h), B2 = Q(g + 1, h), C2 = Q(g + 1, h + 1), E2 = Q(g, h + 1); cab.push(...A, ...B2, ...C2, ...A, ...C2, ...E2, ...A, ...C2, ...B2, ...A, ...E2, ...C2); }
+    bag.add('reed_mat', fromTriangles(cab));
+    const hp = [];
+    for (let g = 0; g <= G; g += 2) for (let h = 0; h < Hh; h++) { const A = Q(g, h), B2 = Q(g, h + 1); beamTris(hp, [A[0], A[1] + 0.02, A[2]], [B2[0], B2[1] + 0.02, B2[2]], 0.035, 0.05); }
+    bag.add('timber', fromTriangles(hp));
+  }
   // thwarts
   for (const t of [0.3, 0.45, 0.62]) { const half = Math.pow(Math.sin(Math.PI * t), 0.7) * B / 2 * 0.9, a = W(-L / 2 + L * t, -half, D - 0.15), b = W(-L / 2 + L * t, half, D - 0.15); beamTris(t1, a, b, 0.09, 0.07); }
   bag.add('timber', fromTriangles(t1));
