@@ -6,6 +6,9 @@ import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { houseFar } from './far.js';
 import { houseOuter } from './outer.js';
 import { bianRevetment, wharf } from './banks.js';
+import { rainbowRich } from './bridge2.js';
+import { caimenRich } from './caimen2.js';
+import { ironPagoda as ironBuild } from './ironpagoda.js';
 
 /**
  * The Iron Pagoda (the song style's pagoda_oct) with the moulded bricks' smallest pieces left out: the heads, hands, topknots and bosses of the
@@ -35,7 +38,7 @@ function ironPagoda(el, ctx) {
     flush();
     pend = { mat, parts: [g], matrix: matrix.clone(), o };
   };
-  STYLES.song.elements.pagoda_oct(el, { ...ctx, bag });
+  ironBuild(el, { ...ctx, bag });
   flush();
 }
-registerStyle('kaifeng-site', { ...STYLES.song, elements: { ...STYLES.song.elements, house_song: houseSong, kf_pagoda: ironPagoda, kf_far_wall: houseFar, kf_outer: houseOuter, kf_mid_wall: houseSong, bian_revetment: bianRevetment, wharf } });
+registerStyle('kaifeng-site', { ...STYLES.song, elements: { ...STYLES.song.elements, house_song: houseSong, kf_pagoda: ironPagoda, caimen: caimenRich, rainbow_bridge: rainbowRich, kf_far_wall: houseFar, kf_outer: houseOuter, kf_mid_wall: houseSong, bian_revetment: bianRevetment, wharf } });
