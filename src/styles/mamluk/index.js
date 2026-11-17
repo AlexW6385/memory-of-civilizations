@@ -9,6 +9,7 @@ import { box, lathe, rod, disc, fromTriangles, orientOutward, place } from '../.
 import '../qing/index.js';
 import { houseMamluk } from '../vernacular/house-mamluk.js';
 import { cairoQaa } from './qaa.js';
+import { frame as kframe, polyGeo, archPoly, voussoirs } from './kit.js';
 import { baynFront, baynBed } from './bayn.js';
 import { cairoWikala, cairoHammam } from './khan.js';
 import { cairoShop, sharbatStall } from './shops.js';
@@ -16,14 +17,51 @@ import { cairoDress, cairoShopfront, cairoSabat, cairoYard, cairoSquare } from '
 import * as FN from '../mughal/furnish.js';
 
 const S = 'limestone_yellow';
+/** A band of inscription in relief on a face: a carved ground and the raised stems and heads of the letters (B: box in the face's frame, u world). */
+function inscription(bag, B, u0, u1, ya, bh, d, seed = 0) {
+  bag.add('stucco_warm', B(u0, u1, ya, ya + bh, 0, d));
+  bag.add(S, B(u0, u1, ya - 0.12, ya, 0, d + 0.1)); bag.add(S, B(u0, u1, ya + bh, ya + bh + 0.12, 0, d + 0.1));
+  let u = u0 + 0.25, k = seed;
+  while (u < u1 - 0.3) {
+    const tall = (k * 7 + 3) % 5 !== 0, w = tall ? 0.1 : 0.3;
+    bag.add(S, B(u, u + w, ya + 0.18, ya + (tall ? bh - 0.18 : 0.5), d, d + 0.09));
+    if (tall && k % 3 === 0) bag.add(S, B(u - 0.1, u + w + 0.1, ya + bh - 0.42, ya + bh - 0.3, d, d + 0.09));
+    if (!tall && k % 2) bag.add(S, B(u - 0.05, u + w + 0.05, ya + 0.62, ya + 0.72, d, d + 0.09));
+    u += w + 0.14 + (k % 4) * 0.04; k++;
+  }
+}
+/** The crown of a block: a deep muqarnas cornice (courses of hooded cells stepping out), the parapet of stepped merlons. */
 function crest(bag, r, y, mat = S) {
   const [x0, z0, x1, z1] = r;
-  bag.add(mat, box(x0 - 0.9, y - 1.6, z0 - 0.9, x1 + 0.9, y, z1 + 0.9));            // the muqarnas cornice (a projecting band)
+  const big = y > 25;
+  const sides = [['n', [x0, x1], z0, -1], ['s', [x0, x1], z1, 1], ['w', [z0, z1], x0, -1], ['e', [z0, z1], x1, 1]];
+  bag.add(mat, box(x0 - 0.9, y - 0.45, z0 - 0.9, x1 + 0.9, y, z1 + 0.9));            // the top course of the cornice
+  bag.add(mat, box(x0 - 0.2, y - 1.7, z0 - 0.2, x1 + 0.2, y - 0.45, z1 + 0.2));       // its core
+  for (const [f, [a, b], o, sg] of sides) {
+    const alongX = f === 'n' || f === 's', E = (u0, u1, d0, d1, ya, yb) => { const p = o + sg * d0, q = o + sg * d1, lo = Math.min(p, q), hi = Math.max(p, q); return alongX ? box(u0, ya, lo, u1, yb, hi) : box(lo, ya, u0, hi, yb, u1); };
+    const tiers = big ? [[0.8, 1.0, 0.45], [0.55, 1.0, 0.45], [0.32, 1.0, 0.4]] : [[0.5, 0.6, 0.5]];
+    const cw = big ? 0.5 : 0.8;
+    tiers.forEach(([out, , hh], k) => {
+      const yb = y - 0.45 - k * hh, n = Math.floor((b - a) / cw);
+      for (let i = 0; i < n; i++) {
+        const u0 = a + i * (b - a) / n + (k % 2) * 0.12, u1 = a + (i + 1) * (b - a) / n - 0.05 + (k % 2) * 0.12;
+        if (u1 > b) continue;
+        bag.add(mat, E(u0, u1, 0.2, 0.2 + out, yb - hh, yb));
+        if (big) bag.add('opening', E(u0 + 0.08, u1 - 0.08, 0.2 + out - 0.0, 0.2 + out + 0.03, yb - hh * 0.8, yb - 0.08));   // the dark niche in each cell's face
+      }
+    });
+  }
   for (const [a, b, alongX] of [[x0, x1, true], [z0, z1, false]]) {
     const n = Math.floor((b - a) / 2.2);
     for (let i = 0; i < n; i += 2) {
       const u0 = a + i * (b - a) / n, u1 = u0 + (b - a) / n;
-      for (const s of [0, 1]) { const q = alongX ? [u0, s ? z1 : z0 - 0.4, u1, s ? z1 + 0.4 : z0] : [s ? x1 : x0 - 0.4, u0, s ? x1 + 0.4 : x0, u1]; bag.add(mat, box(q[0], y, q[1], q[2], y + 1.3, q[3])); bag.add(mat, lathe([[0.5, 0], [0.001, 0.8]], 6, null, (q[0] + q[2]) / 2, y + 1.3, (q[1] + q[3]) / 2)); }
+      for (const s of [0, 1]) {
+        const q = alongX ? [u0, s ? z1 : z0 - 0.4, u1, s ? z1 + 0.4 : z0] : [s ? x1 : x0 - 0.4, u0, s ? x1 + 0.4 : x0, u1];
+        bag.add(mat, box(q[0], y, q[1], q[2], y + 1.0, q[3]));
+        const ins = (v) => alongX ? [q[0] + v, q[1], q[2] - v, q[3]] : [q[0], q[1] + v, q[2], q[3] - v];
+        const m1 = ins(0.14); bag.add(mat, box(m1[0], y + 1.0, m1[1], m1[2], y + 1.45, m1[3]));      // the stepped merlon: shoulders, a narrower neck
+        const m2 = ins(0.3); bag.add(mat, box(m2[0], y + 1.45, m2[1], m2[2], y + 1.8, m2[3]));
+      }
     }
   }
 }
@@ -144,21 +182,37 @@ function block(el, { bag, col }) {
         if (pointed) bag.add(S, R(u + s2 - 0.28, u + s2 + 0.28, yy + hh, yy + hh + 0.5, -0.02, 0.06));
         if (!pointed) for (let g = 1; g < 4; g++) bag.add('iron', R(u + s2 - 0.55, u + s2 + 0.55, yy + g * hh / 4 - 0.03, yy + g * hh / 4 + 0.03, 0.05, 0.1));
       }
+      if (h >= 30) inscription(bag, R, u - bw, u + bw, y + h - 7.1, 1.3, 0.1, i);
       for (let k = 0; k < 4; k++) bag.add(S, R(u - bw + k * 0.25, u + bw - k * 0.25, y + h - 5.5 + k * 0.9, y + h - 4.6 + k * 0.9, 0, 0.12 + k * 0.1));
     }
   }
   // the portal: two piers standing out from the face, the hood of muqarnas stepping out across the top
   // of the recess between them, the door at the back under a grilled window, frames of moulding
-  const R = frame(f), m = f === 'n' || f === 's' ? (x0 + x1) / 2 - (x1 - x0) * 0.25 : (z0 + z1) / 2, ph = h * 1.05, D = 3, W = 5;
+  const R = frame(f), m = f === 'n' || f === 's' ? (x0 + x1) / 2 - (x1 - x0) * 0.25 : (z0 + z1) / 2, ph = el.ph ?? h * 1.05, D = 3, W = 5;
   for (const s2 of [-1, 1]) bag.add(S, R(s2 < 0 ? m - W : m + W - 1.6, s2 < 0 ? m - W + 1.6 : m + W, y - 0.5, y + ph, 0, D));
   { const o = f === 'n' ? z0 : f === 's' ? z1 : f === 'w' ? x0 : x1, sg = f === 'n' || f === 'w' ? -1 : 1, pa = Math.min(o, o + sg * D), pb = Math.max(o, o + sg * D);
     for (const [u0, u1] of [[m - W, m - W + 1.6], [m + W - 1.6, m + W]]) col.rect(f === 'n' || f === 's' ? [u0, pa, u1, pb] : [pa, u0, pb, u1], y - 0.5, y + ph); }
   bag.add(S, R(m - W, m + W, y + ph * 0.8, y + ph, 0, D));
   bag.add(S, R(m - W - 0.3, m + W + 0.3, y + ph - 1.2, y + ph - 0.6, D - 0.2, D + 0.3));
+  // the hood: seven courses of muqarnas, each a row of cells (a body corbelled out and the dark pointed niche in its face), the rows staggered
+  const fr = kframe(el.rect, f), uo = f === 'n' || f === 's' ? x0 : z0, hC = ph * 0.22 / 7;
   for (let k = 0; k < 7; k++) {
-    const yy = y + ph * 0.58 + k * (ph * 0.22) / 7, out = D * (k + 1) / 7, n2 = 7 - Math.floor(k / 2);
-    for (let i = 0; i < n2; i++) { const u0 = m - W + 1.6 + i * (2 * W - 3.2) / n2, u1 = u0 + (2 * W - 3.2) / n2 - 0.08; bag.add(S, R(u0, u1, yy, yy + ph * 0.22 / 7, 0, out)); }
+    const yy = y + ph * 0.58 + k * hC, out = D * (k + 1) / 7, n2 = 7 - Math.floor(k / 2);
+    for (let i = 0; i < n2; i++) {
+      const u0 = m - W + 1.6 + i * (2 * W - 3.2) / n2, u1 = u0 + (2 * W - 3.2) / n2 - 0.08, cw = u1 - u0;
+      bag.add(S, R(u0, u1, yy, yy + hC, 0, out));
+      bag.add('opening', polyGeo(fr, archPoly(u0 + cw * 0.14 - uo, yy + hC * 0.08, cw * 0.72, hC * 0.8, 3), out - 0.01, out + 0.03));
+      bag.add('stucco', R(u0 + cw * 0.14, u1 - cw * 0.14, yy + hC * 0.88, yy + hC, out - 0.01, out + 0.04));
+    }
   }
+  // the pointed recess below it, framed in a ring of voussoirs, dark and light in turn (ablaq), and the bands of inscription across the piers
+  voussoirs(bag, fr, m - 2.5 - uo, y + 5.95, 5.0, ph * 0.56 - 5.95, 0.45, 0.02, 0.14, ['marble_dark', 'marble_smooth'], 8);
+  for (const [u0, u1] of [[m - W, m - W + 1.6], [m + W - 1.6, m + W]]) {
+    inscription(bag, R, u0 + 0.12, u1 - 0.12, y + ph * 0.45, 1.2, D + 0.02, 3);
+    inscription(bag, R, u0 + 0.12, u1 - 0.12, y + ph * 0.7, 1.2, D + 0.02, 11);
+    for (const yy of [y + 5.5, y + ph * 0.45 - 0.3]) bag.add(S, R(u0 - 0.08, u1 + 0.08, yy, yy + 0.2, 0, D + 0.1));
+  }
+  inscription(bag, R, m - 2.4, m + 2.4, y + 11.2, 1.1, 0.04, 5);
   if (el.entry) { for (const s2 of [-1, 1]) bag.add('bronze', R(s2 < 0 ? m - 1.5 : m + 1.3, s2 < 0 ? m - 1.3 : m + 1.5, y, y + 5.2, -1.4, 0)); }
   else bag.add('opening', R(m - 1.3, m + 1.3, y, y + 5.2, -0.02, 0.06));
   bag.add(S, R(m - 1.7, m + 1.7, y + 5.2, y + 5.9, 0, 0.2));
@@ -297,8 +351,12 @@ function iwan(bag, col, iw, y) {
     for (let g = 0; g <= 6; g++) bag.add('bronze', B(u - 1.0 + g / 3 - 0.03, u - 1.0 + g / 3 + 0.03, D - 0.1, D - 0.04, y + 6.4, y + 9.6));
     for (let g = 1; g < 6; g++) bag.add('bronze', B(u - 1.0, u + 1.0, D - 0.1, D - 0.04, y + 6.4 + g * 0.53 - 0.03, y + 6.4 + g * 0.53 + 0.03));
     const ud = s * 7;
-    bag.add('bronze', B(ud - 1.1, ud + 1.1, D - 0.08, D, y + 0.06, y + 4.2));
-    for (let a = 0; a < 4; a++) for (let b = 0; b < 6; b++) bag.add('gilt_bronze', B(ud - 0.85 + a * 0.56, ud - 0.75 + a * 0.56, D - 0.13, D - 0.08, y + 0.5 + b * 0.6, y + 0.6 + b * 0.6));
+    // the doorway itself, open (the passage runs through the qibla wall to the tomb): marble jambs, the leaves folded back against its walls
+    for (const t of [-1, 1]) {
+      bag.add('marble_pink', B(ud + t * 1.1 - (t > 0 ? 0 : 0.28), ud + t * 1.1 + (t > 0 ? 0.28 : 0), D - 0.12, D, y + 0.06, y + 4.2));
+      bag.add('bronze', B(ud + t * 1.1 - (t > 0 ? 0.07 : 0), ud + t * 1.1 + (t > 0 ? 0 : 0.07), D + 0.1, D + 1.3, y + 0.1, y + 4.1));
+      for (const yy of [0.5, 2.1, 3.6]) bag.add('gilt_bronze', B(ud + t * 1.1 - (t > 0 ? 0.085 : 0), ud + t * 1.1 + (t > 0 ? 0 : 0.085), D + 0.12, D + 1.28, y + yy, y + yy + 0.12));
+    }
     bag.add('marble_pink', B(ud - 1.4, ud + 1.4, D - 0.1, D, y + 4.2, y + 4.6));
   }
   {

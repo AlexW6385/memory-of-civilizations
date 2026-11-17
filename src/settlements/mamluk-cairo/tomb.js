@@ -45,7 +45,7 @@ function tomb(el, { bag, col, lights }) {
   };
   const Pf = (f, u, d) => f === 'n' ? [cx + u, cz - a + d] : f === 's' ? [cx + u, cz + a - d] : f === 'w' ? [cx - a + d, cz + u] : [cx + a - d, cz + u];
   const nrm = { n: [0, 0, 1], s: [0, 0, -1], w: [1, 0, 0], e: [-1, 0, 0] }, tan = { n: [1, 0, 0], s: [1, 0, 0], w: [0, 0, 1], e: [0, 0, 1] };
-  const door = [-9.3, -6.7], mih = 1.6;      // the doorway in the qibla (south) wall; the mihrab's half-width
+  const door = [-9.3, -6.7], mih = 1.6, DN = [[-8.1, -5.9], [5.9, 8.1]];   // the south doorway; the mihrab's half-width; the two doors from the qibla iwan in the north wall      // the doorway in the qibla (south) wall; the mihrab's half-width
   // ── the plastered walls above the dado
   for (const f of 'nsew') bag.add('stucco', Bf(f, -a, a, y + 4.6, Y0, 0, 0.04));
   // ── the dado: panels of marble in dark frames, a field in a second marble, an inlaid star in each; a plinth and a pink course
@@ -55,13 +55,21 @@ function tomb(el, { bag, col, lights }) {
     for (let i = 0; i < n; i++) {
       const u0 = -a + i * w, u1 = u0 + w, um = (u0 + u1) / 2;
       if (f === 's' && ((u1 > door[0] - 0.1 && u0 < door[1] + 0.1) || (u1 > -mih - 0.3 && u0 < mih + 0.3))) continue;
+      if (f === 'n' && DN.some(([d0, d1]) => u1 > d0 - 0.1 && u0 < d1 + 0.1)) continue;
       bag.add('marble_dark', Bf(f, u0 + 0.03, u1 - 0.03, fy + 0.25, y + 4.4, 0, 0.05));
       bag.add(kinds[(i + (f === 'n' ? 0 : f === 's' ? 1 : f === 'w' ? 2 : 3)) % 4], Bf(f, u0 + 0.15, u1 - 0.15, fy + 0.4, y + 4.25, 0.05, 0.08));
       const [px, pz] = Pf(f, um, 0.09), N = nrm[f], T = tan[f];
       bag.add('inlay_lapis', star([px, fy + 2.3, pz], T, [0, 1, 0], 0.32, 0.68, 8));
       bag.add('gilt_bronze', star([px + N[0] * 0.012, fy + 2.3, pz + N[2] * 0.012], T, [0, 1, 0], 0.13, 0.3, 8));
     }
-    bag.add('marble_dark', Bf(f, -a, a, fy, fy + 0.25, 0, 0.12)); bag.add('marble_pink', Bf(f, -a, a, y + 4.4, y + 4.62, 0, 0.1));
+    if (f === 'n') { for (const [u0, u1] of [[-a, DN[0][0]], [DN[0][1], DN[1][0]], [DN[1][1], a]]) bag.add('marble_dark', Bf(f, u0, u1, fy, fy + 0.25, 0, 0.12)); } else bag.add('marble_dark', Bf(f, -a, a, fy, fy + 0.25, 0, 0.12));
+    bag.add('marble_pink', Bf(f, -a, a, y + 4.4, y + 4.62, 0, 0.1));
+  }
+  // ── the two doorways of the north wall (from the qibla iwan's doors): a frame of dark and white marble, a lintel, the dark passage beyond
+  for (const [d0, d1] of DN) {
+    for (const [u0, u1, m] of [[d0 - 0.3, d0, 'marble_dark'], [d1, d1 + 0.3, 'marble_dark'], [d0 - 0.45, d0 - 0.3, 'marble_smooth'], [d1 + 0.3, d1 + 0.45, 'marble_smooth']]) bag.add(m, Bf('n', u0, u1, fy, y + 4.6, 0, 0.14));
+    bag.add('marble_dark', Bf('n', d0 - 0.45, d1 + 0.45, y + 4.2, y + 4.6, 0, 0.14)); bag.add('marble_smooth', Bf('n', d0 - 0.6, d1 + 0.6, y + 4.6, y + 4.8, 0, 0.18));
+    for (let k = 0; k < 5; k++) bag.add(k % 2 ? 'marble_smooth' : 'marble_dark', Bf('n', d0 - 0.45 + k * (d1 - d0 + 0.9) / 5, d0 - 0.45 + (k + 1) * (d1 - d0 + 0.9) / 5 - 0.02, y + 4.8, y + 5.3, 0, 0.12));
   }
   // ── the windows: a deep sill, the glass behind bronze grilles; two tiers
   const win = (f, u, y0, y1, hw) => {
@@ -148,14 +156,34 @@ function dome(el, { bag, col }) {
     const q = r * 1.1;
     bag.add(S, box(cx - q, y, cz - q, cx - q + 0.02, SH, cz + q)); bag.add(S, box(cx + q - 0.02, y, cz - q, cx + q, SH, cz + q)); bag.add(S, box(cx - q, y, cz - q, cx + q, SH, cz - q + 0.02)); bag.add(S, box(cx - q, y, cz + q - 0.02, cx + q, SH, cz + q));
   }
-  bag.add(S, lathe([[r * 1.08, 0], [r * 1.02, dr * 0.4]], 16, null, cx, SH, cz));
-  bag.add(S, lathe([[r, 0], [r, dr * 0.4]], 16, null, cx, y + dr, cz));
-  // the sixteen windows of the outer drum: dark pointed-head openings in frames
+  const DH = dr * 0.7, yT = y + dr + DH, q = r * 1.1;        // the drum rises 3.7 m; the dome starts at yT
+  bag.add(S, lathe([[r * 1.08, 0], [r * 1.02, dr * 0.4]], 32, null, cx, SH, cz));
+  bag.add(S, lathe([[r, 0], [r, DH]], 32, null, cx, y + dr, cz));
+  // the zone of transition seen from outside: at each corner of the cap stepped blocks climbing toward the drum (the stepped pyramids of the Mamluk domes)
+  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) [[0, 2.6], [0.7, 1.4], [1.2, 0.8]].forEach(([d, w], k) => {
+    const px = cx + sx * (q - d), pz = cz + sz * (q - d), y0 = SH + k * 0.9;
+    bag.add(S, box(Math.min(px, px - sx * w), y0, Math.min(pz, pz - sz * w), Math.max(px, px - sx * w), y0 + 0.9, Math.max(pz, pz - sz * w)));
+  });
+  // the sixteen windows of the drum: dark openings with pointed heads in frames
   for (let k = 0; k < 16; k++) { const th = (k + 0.5) / 16 * TAU, R = r * 1.0 + 0.02, yaw = -(th + Math.PI / 2);
     bag.add('opening', place(box(-0.45, dr * 0.12, -0.05, 0.45, dr * 0.34, 0.05), cx + Math.cos(th) * R, y + dr, cz + Math.sin(th) * R, yaw));
-    bag.add(S, place(box(-0.6, dr * 0.34, -0.06, 0.6, dr * 0.34 + 0.18, 0.07), cx + Math.cos(th) * R, y + dr, cz + Math.sin(th) * R, yaw)); }
-  bag.add('stucco', lathe([[r * 0.98, 0], [r * 0.95, r * 0.35], [r * 0.8, r * 0.7], [r * 0.5, r * 0.95], [0.001, r * 1.08]], 24, null, cx, y + dr * 1.4, cz));
-  bag.add('bronze', lathe([[0.15, 0], [0.4, 0.6], [0.05, 1.6], [0.001, 2]], 6, null, cx, y + dr * 1.4 + r * 1.08, cz));
+    bag.add(S, place(box(-0.6, dr * 0.34, -0.06, 0.6, dr * 0.34 + 0.18, 0.07), cx + Math.cos(th) * R, y + dr, cz + Math.sin(th) * R, yaw));
+    bag.add(S, place(box(-0.75, dr * 0.12 - 0.2, -0.05, -0.55, dr * 0.34 + 0.18, 0.07), cx + Math.cos(th) * R, y + dr, cz + Math.sin(th) * R, yaw));
+    bag.add(S, place(box(0.55, dr * 0.12 - 0.2, -0.05, 0.75, dr * 0.34 + 0.18, 0.07), cx + Math.cos(th) * R, y + dr, cz + Math.sin(th) * R, yaw)); }
+  // a band of inscription (stems in relief on a carved ground) above the windows, and a stalactite cornice at the drum's head
+  bag.add('stucco_warm', lathe([[r + 0.04, 0], [r + 0.04, 0.8]], 32, null, cx, y + dr + 2.2, cz));
+  bag.add(S, lathe([[r + 0.04, 0.15], [r + 0.04, 0.65]], 96, (t) => 1 + 0.012 * Math.sign(Math.cos(t * 48 + 0.4)) * (Math.cos(t * 7) > -0.6 ? 1 : 0), cx, y + dr + 2.2, cz));
+  for (let k = 0; k < 2; k++) { const n = 44 - k * 4; for (let i = 0; i < n; i++) { const th = (i + (k % 2) * 0.5) / n * TAU, w = r * Math.PI / n * 0.8; bag.add(S, place(box(0, 0, -w, 0.6 - k * 0.2, 0.3, w), cx + Math.cos(th) * (r - 0.02), yT - 0.3 * (k + 1), cz + Math.sin(th) * (r - 0.02), -th)); } }
+  bag.add(S, lathe([[r * 1.06, 0], [r * 1.06, 0.2], [r * 0.99, 0.2], [r * 0.99, 0]], 32, null, cx, yT - 0.05, cz));
+  // the dome: an ogival (pointed, egg-like) profile fluted all round by sixteen ribs in relief that gather toward the crown
+  const fl = (t) => 1 + 0.018 * Math.cos(t * 16);
+  const PR = [[0.99, 0], [1.03, 0.22], [1.0, 0.5], [0.82, 0.83], [0.58, 1.1], [0.3, 1.32], [0.1, 1.48], [0.001, 1.58]];
+  bag.add('stucco', lathe(PR.map(([a2, b2]) => [r * a2, r * b2]), 64, fl, cx, yT, cz));
+  for (let m = 0; m < 16; m++) { const th = m / 16 * TAU; let prevp = null;
+    for (const [rr, hh] of PR.slice(1, -1)) { const p = [cx + Math.cos(th) * r * rr * 1.02, yT + r * hh, cz + Math.sin(th) * r * rr * 1.02]; if (prevp) bag.add(S, rod(prevp, p, 0.07, 4)); prevp = p; } }
+  const yt = yT + r * 1.58;
+  bag.add('bronze', lathe([[0.2, 0], [0.5, 0.5], [0.3, 0.75], [0.5, 1.1], [0.06, 1.7], [0.05, 2.3], [0.001, 2.6]], 10, null, cx, yt - 0.35, cz));
+  bag.add('bronze', lathe([[0.001, 0], [0.18, 0.12], [0.001, 0.3]], 8, null, cx, yt + 2.3, cz));
   col.circle(cx, cz, r * 1.1, y, y + dr);
   // the inside: the drum with its windows, the ogival inner dome ribbed in gilt
   const yd = y + 4.2;
