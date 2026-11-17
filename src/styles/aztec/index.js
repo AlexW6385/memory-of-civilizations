@@ -10,6 +10,7 @@ import { box, frustum, lathe, fromTriangles } from '../../core/geom.js';
 import { beamTris } from '../ming/index.js';
 import '../maya/index.js';
 import '../../objects/index.js';
+import { Matrix4, Vector3 } from '../../core/three.js';
 import { Kit, carved, serpentHeadKit, chacmoolKit } from '../maya/meso.js';
 import { calli, tecpan, tzompantli, chinampaHouse, mesoPlants } from './houses.js';
 import { shrineInterior, huehuetl } from './shrines.js';
@@ -23,6 +24,11 @@ import { eagleHouse, calmecac, coatepantli, enclosure, ehecatl, mxTemple, causew
 
 const W = 'plaster_white', R = 'stucco_red', B = 'maya_blue';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+/** Lay a carving as instances of one prototype whatever its turn (so a repeated motif costs one draw, not one per direction). */
+function emitI(bag, kit, x, y, z, dx, dz, sc = 1) {
+  const m = new Matrix4().makeRotationY(Math.atan2(dx, dz)).setPosition(x, y, z); if (sc !== 1) m.scale(new Vector3(sc, sc, sc));
+  for (const [mt, list] of kit.m) for (const g of list) bag.addInstance(mt, g.clone(), m);
+}
 const stairs = (el, ctx) => STYLES.qing.elements.stairs(el, ctx);
 /** A serpent's head in plaster at (x, y, z), jaws toward (dx, dz) (meso.js); `kind`: 'tlaloc' (goggled) or 'feathered'. */
 export function serpentHead(bag, x, y, z, dx, dz, s = 1, kind = 'feathered') {
@@ -47,6 +53,40 @@ export function treads(bag, col, [x0, z0, x1, z1], y0, y1, dir, mat, riser = nul
   col.ramp([x0, z0, x1, z1], y0, y1, dir);
 }
 
+/** The disc on the crown of a roof comb, facing +z: Tlaloc's the blue ring of chalchihuitl round a white field, Huitzilopochtli's the sun with its rays. */
+const combDisc = (tl) => carved('tm-combdisc:' + tl, (k) => {
+  if (tl) { k.disc('maya_blue', 0, 0, 0, 0.9, 0.08, 20); k.disc(W, 0, 0, 0.08, 0.7, 0.05, 20); k.disc('maya_blue', 0, 0, 0.13, 0.42, 0.05, 16); k.disc(W, 0, 0, 0.18, 0.2, 0.04, 12);
+    for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; k.disc('maya_blue', Math.cos(a) * 0.56, Math.sin(a) * 0.56, 0.13, 0.09, 0.04, 8); } }
+  else { k.disc('paint_ochre', 0, 0, 0, 0.62, 0.09, 20); k.disc(R, 0, 0, 0.09, 0.42, 0.05, 20); k.disc('paint_ochre', 0, 0, 0.14, 0.2, 0.05, 12);
+    for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8, c = Math.cos(a), sn = Math.sin(a); k.seg(i % 2 ? R : 'paint_ochre', [c * 0.6, sn * 0.6, 0.045], [c * (i % 2 ? 0.95 : 1.15), sn * (i % 2 ? 0.95 : 1.15), 0.045], 0.09, 0.04, 0.03, 0.04); } }
+});
+/**
+ * The roof comb (crestería) on a shrine's front edge, over the door: a low wall of bays each with the god's emblem in relief, on it
+ * a row of stepped pylons with open gaps between them, and over the door a taller stepped crown carrying a great disc [inferred:
+ * after the codex pictures of the twin temple, whose roofs carry a tall stepped crest, and the stepped almenas of the
+ * excavated temples (Tenayuca, Teopanzolco)].
+ */
+function roofComb(bag, motif, tl, x0, x1, z0, z1, zc, y) {
+  const wall = tl ? W : R, inlay = tl ? B : 'plaster_white', za = z0 + 0.3, zb = z1 - 0.3, xf = x0 - 0.12, xb = x0 + 0.88;
+  bag.add(wall, box(xf, y, za, xb, y + 1.4, zb));
+  bag.add(tl ? B : 'paint_ochre', box(xf - 0.06, y, za - 0.06, xb + 0.0, y + 0.22, zb + 0.06));          // its footing, a band of colour
+  bag.add(tl ? B : 'paint_ochre', box(xf - 0.06, y + 1.2, za - 0.06, xb + 0.06, y + 1.4, zb + 0.06));     // and its cap
+  const bays = Math.max(3, Math.round((zb - za) / 1.25)), bw = (zb - za) / bays;
+  for (let i = 0; i < bays; i++) {
+    const z = za + bw * (i + 0.5);
+    bag.add(inlay, box(xf - 0.05, y + 0.32, z - bw / 2 + 0.12 + i * 0.004, xf, y + 1.1, z + bw / 2 - 0.12));
+    emitI(bag, motif, xf - 0.05, y + 0.71, z, -1, 0, 1);
+  }
+  const m = Math.max(3, Math.round((zb - za) / 1.5)), pw = (zb - za) / m;
+  for (let i = 0; i < m; i++) {
+    const z = za + pw * (i + 0.5), crown = Math.abs(z - zc) < pw * 0.6;
+    const tiers = crown ? [[1.15, 1.0], [0.85, 0.9], [0.58, 0.8], [0.34, 0.7]] : [[0.58, 0.7], [0.42, 0.7], [0.24, 0.7]];
+    let yy = y + 1.4;
+    tiers.forEach(([hw, h], t) => { const j = i * 0.004; bag.add(t % 2 ? inlay : wall, box(x0 + 0.04, yy, z - hw - j, x0 + 0.72, yy + h, z + hw + j)); yy += h; });
+    if (crown) { bag.add(tl ? B : 'paint_ochre', box(x0 + 0.04, yy, z - 0.2, x0 + 0.72, yy + 0.4, z + 0.2)); combDisc(tl).emit(bag, x0 + 0.04, y + 1.4 + 1.55, z, -1, 0, 1); }
+  }
+}
+
 /**
  * A shrine on the Templo Mayor { rect, y, h, roofH, god }, its door to the west: plastered walls, the
  * doorway framed, the tall roof stage and its crest. Tlaloc's painted with blue stripes, his roof blue
@@ -68,6 +108,9 @@ function shrine(bag, col, [x0, z0, x1, z1], y, h, roofH, god) {
   // the doorway: its dark opening, the jambs and the lintel standing out
   for (const s of [-1, 1]) bag.add(tl ? W : 'plaster_white', box(x0 - 0.18, y, zc + s * dw - (s > 0 ? 0 : 0.35), x0 + 0.02, y + dh, zc + s * dw + (s > 0 ? 0.35 : 0)));
   bag.add(tl ? W : 'plaster_white', box(x0 - 0.2, y + dh, zc - dw - 0.35, x0 + 0.02, y + dh + 0.45, zc + dw + 0.35));
+  // the plinth round the foot, broken at the door
+  { const pl = 'stucco_pale', e = 0.22, d0 = zc - dw - 0.35, d1 = zc + dw + 0.35;
+    for (const r of [[x0 - e, z0 - e, x1 + e, z0], [x0 - e, z1, x1 + e, z1 + e], [x1, z0, x1 + e, z1], [x0 - e, z0, x0, d0], [x0 - e, d1, x0, z1]]) bag.add(pl, box(r[0], y, r[1], r[2], y + 0.4, r[3])); }
   // the roof stage: a cornice, the tall upper walls, the crest
   const ry = y + h, rt = ry + roofH, roof = tl ? B : W;
   bag.add(tl ? W : 'plaster_white', box(x0 - 0.35, ry, z0 - 0.35, x1 + 0.35, ry + 0.35, z1 + 0.35));
@@ -76,28 +119,51 @@ function shrine(bag, col, [x0, z0, x1, z1], y, h, roofH, god) {
     ? carved('tm-ring', (k) => k.disc(W, 0, 0, 0, 0.26, 0.06, 12, 0.13))
     : carved('tm-skull', (k) => { k.fz('plaster_white', [-0.2, 0.2, -0.22, 0.2], [-0.16, 0.16, -0.18, 0.17], 0, 0.14); for (const sx of [-1, 1]) k.bx('paint_minoan_black', sx * 0.08 - 0.05, sx * 0.08 + 0.05, -0.02, 0.07, 0.13, 0.16); k.bx('paint_minoan_black', -0.025, 0.025, -0.12, -0.06, 0.13, 0.16); });
   for (const [ry0, row] of [[ry + 0.35 + (roofH - 0.35) * 0.3, 0], [ry + 0.35 + (roofH - 0.35) * 0.7, 1]]) {
-    for (let x = x0 + 0.5 + row * 0.4; x < x1 - 0.4; x += 0.8) { motif.emit(bag, x, ry0, z0 - 0.15, 0, -1); motif.emit(bag, x, ry0, z1 + 0.15, 0, 1); }
-    for (let z = z0 + 0.5 + row * 0.4; z < z1 - 0.4; z += 0.8) { motif.emit(bag, x0 - 0.15, ry0, z, -1, 0); motif.emit(bag, x1 + 0.15, ry0, z, 1, 0); }
+    for (let x = x0 + 0.5 + row * 0.4; x < x1 - 0.4; x += 0.8) { emitI(bag, motif, x, ry0, z0 - 0.15, 0, -1); emitI(bag, motif, x, ry0, z1 + 0.15, 0, 1); }
+    for (let z = z0 + 0.5 + row * 0.4; z < z1 - 0.4; z += 0.8) { emitI(bag, motif, x0 - 0.15, ry0, z, -1, 0); emitI(bag, motif, x1 + 0.15, ry0, z, 1, 0); }
   }
   bag.add(tl ? W : 'plaster_white', box(x0 - 0.3, rt, z0 - 0.3, x1 + 0.3, rt + 0.3, z1 + 0.3));
+  roofComb(bag, motif, tl, x0, x1, z0, z1, zc, rt + 0.3);
+  // the stepped merlons (almenas) along the other three edges, each in three steps with an inlay of the god's colour
+  const almena = (x, z, yaw) => { const c = (a, b, y0, y1) => (yaw ? box(x - a, rt + y0, z - b, x + a, rt + y1, z + b) : box(x - b, rt + y0, z - a, x + b, rt + y1, z + a)); bag.add(W, c(0.34, 0.2, 0.3, 0.9)); bag.add(W, c(0.2, 0.2, 0.9, 1.5)); bag.add(tl ? B : R, c(0.1, 0.22, 0.4, 0.62)); };
   const n = Math.max(3, Math.round((z1 - z0) / 1.3));
-  for (let i = 0; i < n; i++) for (const xx of [x0 + 0.2, x1 - 0.2]) { const z = z0 + (z1 - z0) * (i + 0.5) / n; bag.add(W, box(xx - 0.2, rt + 0.3, z - 0.28, xx + 0.2, rt + 1.2, z + 0.28)); bag.add(tl ? B : R, box(xx - 0.22, rt + 0.6, z - 0.1, xx + 0.22, rt + 0.9, z + 0.1)); }
-  for (let x = x0 + 0.9; x < x1 - 0.6; x += 1.3) for (const zz of [z0 + 0.2, z1 - 0.2]) { bag.add(W, box(x - 0.28, rt + 0.3, zz - 0.2, x + 0.28, rt + 1.2, zz + 0.2)); bag.add(tl ? B : R, box(x - 0.1, rt + 0.6, zz - 0.22, x + 0.1, rt + 0.9, zz + 0.22)); }
+  for (let i = 0; i < n; i++) almena(x1 - 0.2, z0 + (z1 - z0) * (i + 0.5) / n, 0);
+  for (let x = x0 + 0.9; x < x1 - 0.6; x += 1.3) for (const zz of [z0 + 0.2, z1 - 0.2]) almena(x, zz, 1);
   col.floor([x0, z0, x1, z1], rt + 0.3);
 }
 
-/** The Coyolxauhqui stone (3.5 m across), flat at the foot of Huitzilopochtli's stair: the goddess dismembered, in low relief. */
-const coyolxauhqui = () => carved('coyolxauhqui', (k) => {
-  k.geo('andesite', lathe([[0.001, 0], [1.75, 0], [1.75, 0.3], [0.001, 0.3]], 32));
-  const r = 'stucco_pale', y = 0.3, t = 0.07;
-  k.seg(r, [-0.15, y, -0.1], [0.3, y, 0.25], 0.32, t);                        // the torso
-  k.seg(r, [0.35, y, 0.35], [0.95, y, 0.5], 0.17, t);                         // the limbs, cut apart, scattered round
-  k.seg(r, [-0.55, y, 0.55], [-1.1, y, 0.75], 0.16, t);
-  k.seg(r, [0.75, y, -0.45], [1.2, y, -0.1], 0.16, t);
-  k.seg(r, [-0.7, y, -0.55], [-1.2, y, -0.2], 0.15, t);
-  k.seg(r, [-0.45, y, -0.55], [-0.05, y, -0.95], 0.26, t);                   // the head with its headdress
-  for (let i = 0; i < 5; i++) { const a = -2.4 + i * 0.25; k.seg(r, [-0.25 + Math.cos(a) * 0.3, y, -0.75 + Math.sin(a) * 0.3], [-0.25 + Math.cos(a) * 0.62, y, -0.75 + Math.sin(a) * 0.62], 0.05, t); }
-  for (let i = 0; i < 6; i++) { const a = i * 1.05 + 0.3; k.seg(r, [Math.cos(a) * 1.25, y, Math.sin(a) * 1.25], [Math.cos(a) * 1.45, y, Math.sin(a) * 1.45], 0.1, t); }   // the bells and knots at the rim
+/**
+ * The Coyolxauhqui stone (about 3.4 m across, 30 cm thick; excavated 1978): the goddess dismembered, seen from above in two levels of
+ * relief — the head with its headdress of feather balls, the bell (cascabel) on the cheek and the ear spool; the torso with the
+ * xiuhcoatl belt and its skull buckle; the limbs severed at the elbows and knees, each joint a skull, the hands and feet with
+ * sandal ties; the serpent bodies that bind the skirt; a raised rim with a ring of knotted ties [stated: the composition,
+ * World History Encyclopedia; Wikipedia, Coyolxauhqui; inferred: the placing of each piece].
+ */
+const coyolxauhqui = () => carved('coyolxauhqui2', (k) => {
+  k.geo('andesite', lathe([[0.001, 0], [1.72, 0], [1.72, 0.3], [0.001, 0.3]], 40));
+  const r = 'stucco_pale', r2 = 'paint_ochre', dk = 'paint_minoan_black', y = 0.3, L1 = 0.06, L2 = 0.12;
+  const sg = (m, a, b, w, y0, h) => k.seg(m, [a[0], y0 + h, a[1]], [b[0], y0 + h, b[1]], w, h);
+  const ring = (m, x, z, rr, y0, h, n = 12, rin = 0) => { const g = lathe(rin ? [[rin, 0], [rr, 0], [rr, h], [rin, h], [rin, 0]] : [[0.001, 0], [rr, 0], [rr, h], [0.001, h]], n); g.translate(x, y0, z); k.geo(m, g); };
+  // the rim: a raised band, with the ties (knots) set round it at equal turns
+  ring(r, 0, 0, 1.72, y, L1, 40, 1.58); ring(r, 0, 0, 1.46, y, L1, 40, 1.38);
+  for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8; ring(r2, Math.cos(a) * 1.52, Math.sin(a) * 1.52, 0.07, y, L2, 8); sg(r, [Math.cos(a + 0.2) * 1.4, Math.sin(a + 0.2) * 1.4], [Math.cos(a + 0.2) * 1.56, Math.sin(a + 0.2) * 1.56], 0.035, y, 0.05); }
+  // the torso, the belt, the skull at the waist; the serpent skirt bands below it
+  sg(r, [-0.12, -0.2], [0.22, 0.32], 0.3, y, L1);
+  sg(r2, [-0.02, 0.0], [0.34, 0.1], 0.07, y + L1, 0.04);
+  ring(r, 0.22, 0.12, 0.17, y + L1, L1 + 0.01, 10); ring(dk, 0.14, 0.1, 0.03, y + 2 * L1 + 0.01, 0.02, 6); ring(dk, 0.3, 0.1, 0.03, y + 2 * L1 + 0.01, 0.02, 6);
+  for (const s of [-1, 1]) { sg(r2, [0.1 + s * 0.12, 0.45], [0.55 + s * 0.4, 0.65 + s * 0.1], 0.07, y, L2); }
+  // the head, turned, with its headdress, the bell on the cheek and the ear spool
+  ring(r, -0.5, -0.62, 0.3, y, L2, 14); ring(dk, -0.58, -0.64, 0.045, y + L2, 0.02, 6); ring(dk, -0.42, -0.62, 0.045, y + L2, 0.02, 6); sg(dk, [-0.56, -0.5], [-0.44, -0.5], 0.025, y + L2, 0.015);
+  ring(r2, -0.36, -0.46, 0.08, y + L2, 0.04, 8); ring(r2, -0.78, -0.62, 0.1, y + L2, 0.04, 8);
+  for (let i = 0; i < 7; i++) { const a = -2.9 + i * 0.32, c = Math.cos(a), sn = Math.sin(a); sg(i % 2 ? r : r2, [-0.5 + c * 0.32, -0.62 + sn * 0.32], [-0.5 + c * 0.7, -0.62 + sn * 0.7], 0.06, y, L1 + 0.01); ring(r, -0.5 + c * 0.76, -0.62 + sn * 0.76, 0.07, y, L2, 8); }
+  // the limbs, cut at the elbow and the knee, a skull on each joint, the fists and sandalled feet beyond
+  const limb = (a, b, c, w, foot) => { sg(r, a, b, w, y, L2); sg(r, b, c, w * 0.9, y, L2); ring(r, b[0], b[1], w * 1.15, y, L2 + 0.02, 10); ring(dk, b[0], b[1], w * 0.42, y + L2 + 0.02, 0.02, 6); ring(r, c[0], c[1], w * (foot ? 1.2 : 1.0), y, L2, 8); if (foot) sg(r2, [c[0] - w, c[1] - w * 0.4], [c[0] + w, c[1] + w * 0.4], 0.04, y + L2, 0.02); };
+  limb([0.5, -0.45], [0.8, -0.28], [1.1, -0.4], 0.12, false);
+  limb([-0.5, 0.05], [-0.85, 0.3], [-1.1, 0.1], 0.12, false);
+  limb([0.4, 0.55], [0.75, 0.8], [1.15, 0.78], 0.15, true);
+  limb([-0.35, 0.5], [-0.7, 0.85], [-0.95, 1.1], 0.15, true);
+  // the knotted serpents between the pieces
+  for (const [a, b] of [[[0.2, -0.85], [0.75, -0.85]], [[-0.2, 1.05], [0.3, 1.0]], [[0.9, 0.1], [1.05, 0.4]]]) { for (let i = 0; i < 4; i++) { const t = i / 4, t2 = (i + 1) / 4; sg(i % 2 ? r2 : r, [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t + 0.05 * Math.sin(i)], [a[0] + (b[0] - a[0]) * t2, a[1] + (b[1] - a[1]) * t2 + 0.05 * Math.sin(i + 1)], 0.05, y, L1); } ring(dk, b[0], b[1], 0.04, y, 0.08, 6); }
 });
 
 /** The sacrificial stone (techcatl): a low block with a rounded, ridged top. */
@@ -167,6 +233,32 @@ function templeDress(bag, col, { cx, cz, H, a0, tH, ix, w1 }) {
 }
 
 /**
+ * The relief on a balustrade (alfarda) of the great stairs: the dado at the head with its framed panel and cap, the serpent's
+ * body along the slope — two rows of scales on each face and the ridge of vertebrae along the top, in the god's colour
+ * [inferred: the stairs' balustrades ended in serpents (Wikipedia; ancient-history-sites), so their bodies run up the slope].
+ */
+const scaleKit = (paint) => carved('tm-scale:' + paint, (k) => k.disc(paint, 0, 0, 0.14, 0.2, 0.05, 12));
+function balustradeRelief(bag, tl, sx0, sx1, H, z) {
+  const th = Math.atan2(H + 1, sx1 - sx0), paint = tl ? B : R, fr = 'stucco_pale';
+  // the head: a cap over the dado, the faces with a framed field and the god's emblem, the end face the same
+  bag.add(fr, box(sx1 - 3.2, H + 1.6, z - 1.2, sx1 + 0.2, H + 1.85, z + 1.2));
+  bag.add(W, box(sx1 - 3.1, H - 2.0, z - 1.1, sx1 + 0.1, H - 1.8, z + 1.1));
+  for (const f of [-1, 1]) {
+    const zf = z + f * 1.0, ye = H - 0.2, hw = 1.0, hh = 1.35;
+    for (const [a0, a1, b0, b1] of [[sx1 - 2.6, sx1 - 0.4, ye - hh, ye - hh + 0.16], [sx1 - 2.6, sx1 - 0.4, ye + hh - 0.16, ye + hh], [sx1 - 2.6, sx1 - 2.44, ye - hh, ye + hh], [sx1 - 0.56, sx1 - 0.4, ye - hh, ye + hh]]) bag.add(fr, box(a0, b0, f > 0 ? zf : zf - 0.07, a1, b1, f > 0 ? zf + 0.07 : zf));
+    combDisc(tl).emit(bag, sx1 - 1.5, ye, zf + f * 0.07, 0, f, 1.0);
+  }
+  for (const [a0, a1, b0, b1] of [[-0.8, 0.8, H - 1.8, H - 1.64], [-0.8, 0.8, H + 1.3, H + 1.46], [-0.8, -0.64, H - 1.8, H + 1.46], [0.64, 0.8, H - 1.8, H + 1.46]]) bag.add(fr, box(sx1 - 3.07, b0, z + a0, sx1 - 3.0, b1, z + a1));
+  combDisc(tl).emit(bag, sx1 - 3.0, H - 0.2, z, -1, 0, 0.9);
+  // the serpent's scales on both faces, two staggered rows a little under the slope
+  const ys = (x) => (H + 1) * (x - sx0) / (sx1 - sx0);
+  for (const f of [-1, 1]) {
+    const kit = scaleKit('paint_ochre');
+    for (const [off, st] of [[0.42, 0], [0.82, 0.5]]) for (let x = sx0 + 1.6 + st * 0.42; x < sx1 - 3.3; x += 0.42) { const y = ys(x) - off - (x - sx0) * 0.0; if (y > 0.3) { const m = new Matrix4().makeRotationY(f > 0 ? 0 : Math.PI).setPosition(x, y, z + f * 0.76); for (const [mt, list] of kit.m) for (const g of list) bag.addInstance(mt, g.clone(), m); } }
+  }
+}
+
+/**
  * templo_mayor: { c, w (east–west), d (north–south), h, terraces, top: { w, d } }: the terraces, the
  * two stairways on the west, the balustrades and serpent heads, the two shrines and their braziers.
  */
@@ -180,6 +272,10 @@ function temploMayor(el, { bag, col }) {
     col.rect([cx - a[0] + ix * 0.5, cz - a[1] + iz * 0.5, cx + a[0] - ix * 0.5, cz + a[1] - iz * 0.5], y0, y1);
     col.floor([cx - a[0] + ix, cz - a[1] + iz, cx + a[0] - ix, cz + a[1] - iz], y1);
     bag.add(R, box(cx - a[0] + ix - 0.05, y1 - 0.6, cz - a[1] + iz - 0.05, cx + a[0] - ix + 0.05, y1 - 0.2, cz + a[1] - iz + 0.05));
+    { // the moulded cornice along the lip of the terrace: a red band under a white course that stands a hand above the ledge
+      const X0 = cx - a[0] + ix, X1 = cx + a[0] - ix, Z0 = cz - a[1] + iz, Z1 = cz + a[1] - iz, e = 0.3, cw = 0.55;
+      for (const [yb, yt, ee, m] of [[y1 - 0.45, y1 - 0.3, e + 0.03, R], [y1 - 0.3, y1 + 0.1, e, W]]) for (const r of [[X0 - ee, Z0 - ee, X1 + ee, Z0 - ee + cw], [X0 - ee, Z1 + ee - cw, X1 + ee, Z1 + ee], [X0 - ee, Z0 - ee + cw, X0 - ee + cw, Z1 + ee - cw], [X1 + ee - cw, Z0 - ee + cw, X1 + ee, Z1 + ee - cw]]) bag.add(m, box(r[0], yb, r[1], r[2], yt, r[3]));
+    }
   }
   { const a = [w0, d0], b = [w0 - (w0 - w1) / n, d0 - (d0 - d1) / n]; templeDress(bag, col, { cx, cz, H, a0: a[0], tH: H / n, ix: a[0] - b[0] - 1.6, w1 }); }
   // the stairways on the west face, side by side: Tlaloc's (north) blue and white, Huitzilopochtli's
@@ -195,6 +291,7 @@ function temploMayor(el, { bag, col }) {
       t.push(sx0, 0, z - 0.9, sx1, H + 1, z - 0.9, sx1, 0, z - 0.9, sx0, 0, z + 0.9, sx1, 0, z + 0.9, sx1, H + 1, z + 0.9);
       bag.add(W, fromTriangles(t.concat(t.slice().reverse())));
       bag.add(tl ? B : R, box(sx1 - 3, H - 2, z - 1, sx1, H + 1.6, z + 1));
+      balustradeRelief(bag, tl, sx0, sx1, H, z);
       serpentHead(bag, sx0 - 0.4, 0, z, -1, 0, 1.1, tl ? 'tlaloc' : 'feathered');
       col.segment([sx0, z], [sx1, z], 1.8, 0, H + 1);
     }
