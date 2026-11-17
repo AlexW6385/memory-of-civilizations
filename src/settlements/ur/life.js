@@ -4,7 +4,7 @@
 // not camels); a shepherd with sheep and goats; porters carrying jars up from the moored boats on the quay;
 // a fisherman mending his net. Figures and beasts are a 'life' plan; the scribe's mat and tablets, the
 // net and the stacked jars are the 'sumerian' style's (`scribe_kit`, `quay_goods`).
-import { MARKET, COURT, HARBOUR, houses, usedLots, BOATS, YARD, TERRACE, stairY } from './layout.js';
+import { MARKET, COURT, HARBOUR, MAUS, BRICKYARD, RAMP, GATES, houses, usedLots, BOATS, YARD, TERRACE, stairY } from './layout.js';
 import { doorOf } from '../../styles/sumerian/index.js';
 import { lotPoint, lotRot, tradeRoom } from '../../styles/sumerian/house.js';
 import { TRADE_SPOT } from '../../styles/sumerian/trades.js';
@@ -62,6 +62,10 @@ export function urLife() {
   courtLife(figures, gear, man, rand, seed);
   tradeWorkers(figures, man, rand);
   harbourLife(figures, gear, man, rand, seed);
+  brickyardLife(figures, man, rand, seed);
+  mausoleumLife(figures, man, rand, seed);
+  gateLife(figures, man, rand, seed);
+  laneLife(figures, man, rand, seed);
   doorLife(figures, man, rand, seed);
   // the beasts in the pens of the empty lots: sheep and goats, a pair of oxen, or a donkey and a shepherd boy
   for (const { rect: r, k, kind } of usedLots()) {
@@ -213,4 +217,59 @@ function zigguratLife(figures, man, rand, seed) {
   // children at play by the palms of the way, a dog
   man([-13.4, -88.5], 0.035, E, { child: true }); man([-12.2, -87.2], 0.035, W, { child: true, carry: 'basket' });
   figures.push({ t: 'animal', kind: 'dog', at: [-11.4, -89.6], y: 0.035, rot: 2.2, seed: seed() });
+}
+
+/** The brickyard's people (§5.9): treaders in the clay beds, a man at the shaduf, moulders squatting at the rows, carriers with bricks on the way to the kilns, stokers, the bitumen boiler, the gang's overseer in the shade, a donkey with its load. */
+function brickyardLife(figures, man, rand, seed) {
+  const [x0, z0] = BRICKYARD, at = (u, v) => [x0 + u, z0 + v], clay = { over: 'belt', beard: false };
+  for (const [u, v] of [[8, 8.5], [11.5, 6.5], [14, 10], [26, 9]]) man(at(u, v), 0.3, rand() * 6.28, { ...clay, pose: 'stand' });
+  man(at(11.3, 22.5), 0, W, { pose: 'stand', over: 'belt' });                                       // pulling the shaduf's pole down
+  for (const [u, v, r] of [[12, 29.2, S], [26, 29.2, S], [16, 36.2, N], [27, 36.2, N]]) man(at(u, v), 0, r, { pose: rand() < 0.5 ? 'squat' : 'kneel', over: 'belt' });
+  for (const [u, v, k, r] of [[34, 40, 'basket', E], [38, 42.5, 'basket', E], [46, 30, 'bundle', E], [44.5, 24, 'basket', W]]) man(at(u, v), 0, r, { carry: k, over: 'belt' });
+  for (const u of [54, 63.5]) man(at(u, 19.4), 0, N, { pose: 'stand', over: 'belt', carry: 'staff', len: 1.6, staffMat: 'palm_trunk' });
+  man(at(52.5, 52.1), 0, N, { pose: 'squat', over: 'belt' });
+  man(at(22, 59), 0, S, { pose: 'sit_ground', over: 'shawl', top: '', cloth: 'cloth_ochre', beard: true });
+  figures.push({ t: 'animal', kind: 'donkey', at: at(40, 47), y: 0, rot: E + 0.2, seed: seed(), gear: true });
+  man(at(42.5, 48.5), 0, W, { pose: 'staff', carry: 'staff', len: 1.6, staffMat: 'wood_dark' });
+  man(at(31, 56), 0, N, { child: true, carry: 'pot' }); man(at(33.5, 57.5), 0, N, { child: true, carry: 'basket' });
+  figures.push({ t: 'animal', kind: 'dog', at: at(36, 55), y: 0, rot: 2.0, seed: seed() });
+}
+
+/** The people of the mausoleum (§5.11): the priest of the dead king before the altar of the incense room, another at the altar of libation, the keeper at the gate, a woman bringing an offering. */
+function mausoleumLife(figures, man, rand, seed) {
+  const [x0, z0] = MAUS, at = (u, v) => [x0 + u, z0 + v], T = 3.0, robe = (cloth, o = {}) => ({ dress: 'robe', top: '', cloth, over: 'shawl', cloth2: 'cloth_white', hair: 'shaven', beard: false, ...o });
+  man(at(29, 55.2), T + 0.03, S, robe('cloth_white', { pose: 'stand', arms: 'clasp' }));
+  man(at(31.5, 31.4), T, S, robe('linen', { pose: 'stand', carry: 'pot' }));
+  man(at(27, 31.8), T, S, robe('cloth_white', { pose: 'stand', arms: 'clasp' }));
+  man(at(30, 6.5), T, N, { pose: 'staff', carry: 'staff', len: 2.0, staffMat: 'wood_dark', over: 'belt' });
+  figures.push({ t: 'figure', at: at(31.4, 24), y: T, rot: S, seed: seed(), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'shawl', hair: 'bun', skin: 'skin_medium', feet: 'bare', carry: 'basket', h: 1.52 });
+  man(at(52, 56.6), T, W, robe('cloth_white', { pose: 'stand', arms: 'clasp' }));                      // at the head of the stair down
+}
+
+/** The guards at the three gates of the rampart: two to a gate, standing inside the passage's mouth with spear, and a drover with his ass coming in at the east gate. */
+function gateLife(figures, man, rand, seed) {
+  const r = RAMP.r - 11;
+  for (const g of GATES) {
+    const [cx, cz] = [Math.cos(g.a) * r, Math.sin(g.a) * r], tx = -Math.sin(g.a), tz = Math.cos(g.a), rot = Math.atan2(-Math.cos(g.a), -Math.sin(g.a));
+    for (const s of [-1, 1]) man([cx + tx * s * 3.4, cz + tz * s * 3.4], 0, rot, { pose: 'staff', carry: 'staff', len: 2.2, staffMat: 'palm_trunk', over: 'belt' });
+  }
+  const ge = GATES[1], ex = Math.cos(ge.a) * (RAMP.r - 18), ez = Math.sin(ge.a) * (RAMP.r - 18);
+  figures.push({ t: 'animal', kind: 'donkey', at: [ex, ez + 2], y: 0, rot: W, seed: seed(), gear: true }); man([ex - 3, ez + 1.2], 0, W, { pose: 'staff', carry: 'staff', len: 1.6, staffMat: 'wood_dark' });
+}
+
+/** The lanes of the outer town: at the doors of the houses beyond the core a woman with her jar, an old man on the step, a child, a dog or a tied donkey, one door in six (the core's doors are dressed by doorLife). */
+function laneLife(figures, man, rand, seed) {
+  const sx = { n: [0, -1], s: [0, 1], w: [-1, 0], e: [1, 0] };
+  for (const h of houses()) {
+    if (h.lod === 2 || h.chapel || h.temple || h.seed % 6 !== 1) continue;
+    const { face, dc } = h.open ? { face: h.door, dc: null } : doorOf(h);
+    if (dc === null) continue;
+    const [x0, z0, x1, z1] = h.rect, [nx, nz] = sx[face], P = (u, v) => (nx ? [(nx > 0 ? x1 : x0) + nx * v, u] : [u, (nz > 0 ? z1 : z0) + nz * v]);
+    const rot = Math.atan2(nx, nz) + Math.PI, k = (h.seed >> 3) % 5, side = h.seed % 2 ? -1 : 1, [x, z] = P(dc + side * 1.8, 0.8);
+    if (k === 0) figures.push({ t: 'figure', at: [x, z], y: 0, rot, seed: seed(), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_ochre', over: 'shawl', hair: 'bun', skin: 'skin_medium', feet: 'bare', carry: 'pot', h: 1.5 });
+    else if (k === 1) man([x, z], 0, rot, { pose: 'sit_ground', beard: true });
+    else if (k === 2) man([x, z], 0, rot + 0.3, { child: true, pose: 'squat' });
+    else if (k === 3) figures.push({ t: 'animal', kind: 'dog', at: [x, z], y: 0, rot: rand() * 6.28, seed: seed() });
+    else figures.push({ t: 'animal', kind: 'donkey', at: P(dc + side * 2.2, 1.0), y: 0, rot: rot + 1.57, seed: seed(), gear: true });
+  }
 }

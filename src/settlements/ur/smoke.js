@@ -3,7 +3,7 @@
 // and at the Giparu's altar. The engine part is src/engine/smoke.js (one draw call); positions come from the layout.
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
-import { RADIUS, GIPARU, COURT, houses } from './layout.js';
+import { RADIUS, GIPARU, COURT, MAUS, BRICKYARD, houses } from './layout.js';
 
 const ID = 'ur';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -31,7 +31,11 @@ export function emitters() {
   E.push({ p: [0, 1.2, -138], kind: 'incense', thr: 0.1, seed: 22 });
   // the fires of the libation altars at the stairs' foot, and the incense burning before the house of Nanna on the summit (docs/settlements/ur.md §4.4a)
   E.push({ p: [-9.5, 1.75, COURT[3] - 7.5], kind: 'incense', thr: 0, seed: 44 }, { p: [9.5, 1.75, COURT[3] - 7.5], kind: 'incense', thr: 0.2, seed: 45 });
-  E.push({ p: [0, 31.2, 1.6], kind: 'incense', thr: 0, seed: 46 });                         // at the Edublalmah
+  E.push({ p: [0, 31.2, 1.6], kind: 'incense', thr: 0, seed: 46 });
+  // the brickyard's two kilns, fired all day, and the pot of bitumen (docs/settlements/ur.md §5.9); the hearths of incense and the altar in the mausoleum's incense room (§5.11)
+  for (const [u, k] of [[54, 51], [63.5, 52]]) E.push({ p: [BRICKYARD[0] + u, 3.9, BRICKYARD[1] + 14], kind: 'kitchen', thr: 0, seed: k });
+  E.push({ p: [BRICKYARD[0] + 52.5, 1.2, BRICKYARD[1] + 50], kind: 'kitchen', thr: 0.2, seed: 53 });
+  for (const [u, k] of [[16.5, 54], [40.5, 55]]) E.push({ p: [MAUS[0] + u, 3.9, MAUS[1] + 56.5], kind: 'incense', thr: 0, seed: k });                         // at the Edublalmah
   return E;
 }
 
