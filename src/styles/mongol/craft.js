@@ -4,7 +4,7 @@ import { box, rod, lathe, obox, rng, TAU } from './util.js';
 import { tube, blob } from '../chinese/statues.js';
 import { fromTriangles, addCloth, clothBox } from '../../core/geom.js';
 
-const S = 'silver';
+const S = 'silver', GILT = 'gilt_bronze';
 /**
  * silver_tree: the drink-flowing tree [stated: Rubruck / William Buchier, Public Domain Review]: a silver trunk wrapped in four silver serpents
  * with branches, leaves and fruit; an angel with a trumpet above; four silver lions at the root belching white mare's milk; four pipes from
@@ -12,76 +12,116 @@ const S = 'silver';
  */
 export function silverTree(el, { bag, col }) {
   const [cx, cz] = el.c, y = el.y ?? 0, h = el.h ?? 5.2, rand = rng(el.seed || 3);
-  // the low platform of boards, eight-sided, edged in silver
-  const plat = lathe([[2.3, 0], [2.3, 0.18], [2.15, 0.2], [0.001, 0.2]], 8, null, cx, y, cz); bag.add('timber', plat);
-  bag.add(S, lathe([[2.34, 0.14], [2.34, 0.2], [2.28, 0.2], [2.28, 0.14]], 8, null, cx, y, cz));
+  // the low platform of boards, eight-sided, edged in silver; a drain-lip of silver round the foot of the trunk where the lions' milk and the four drinks gather
+  bag.add('timber', lathe([[2.95, 0], [2.95, 0.18], [2.8, 0.2], [0.001, 0.2]], 8, null, cx, y, cz));
+  bag.add(S, lathe([[2.99, 0.14], [2.99, 0.2], [2.93, 0.2], [2.93, 0.14]], 8, null, cx, y, cz));
+  bag.add(S, lathe([[2.2, 0.2], [2.2, 0.24], [2.14, 0.24], [2.14, 0.2]], 8, null, cx, y, cz));
   const Y = y + 0.2;
   col.floor([cx - 1.55, cz - 1.55, cx + 1.55, cz + 1.55], Y);
-  // the trunk, rising from a flared root
-  bag.add(S, lathe([[0.5, 0], [0.32, 0.3], [0.24, 0.9], [0.2, h * 0.7], [0.16, h * 0.86], [0.001, h * 0.9]], 14, null, cx, Y, cz));
-  col.circle(cx, cz, 0.45, Y, Y + h);
-  // four serpents spiralling up the trunk to the crown, heads at the top
-  for (let k = 0; k < 4; k++) {
-    const ph = k * TAU / 4, N = 26;
-    let prev = null;
-    for (let i = 0; i <= N; i++) {
-      const t = i / N, a = ph + t * TAU * 2.1, rho = 0.27 - t * 0.07, p = [cx + Math.cos(a) * rho, Y + 0.4 + t * (h * 0.78), cz + Math.sin(a) * rho];
-      if (prev) bag.add(S, rod(prev, p, 0.05 - t * 0.015, 6)); prev = p;
-    }
-    bag.add(S, lathe([[0.001, 0], [0.07, 0.05], [0.09, 0.14], [0.001, 0.22]], 8, null, prev[0], prev[1], prev[2]));
-  }
-  // branches: four main ones outward and up, each ending in a spout bent down over a basin; leaves and fruit along them
-  const topY = Y + h * 0.7;
+  // the trunk: a flared root on a stepped plinth, collars at the foot of each stage, swelling between, the crown of the tree a cup of leaves
+  const T = h * 0.7;
+  bag.add(S, lathe([[0.62, 0], [0.62, 0.08], [0.54, 0.1], [0.5, 0.16], [0.34, 0.5], [0.25, 1.0], [0.27, 1.06], [0.23, 1.12], [0.21, T * 0.5], [0.24, T * 0.5 + 0.05], [0.2, T * 0.5 + 0.1], [0.19, T], [0.22, T + 0.05], [0.17, h * 0.84], [0.001, h * 0.86]], 14, null, cx, Y, cz));
+  col.circle(cx, cz, 0.62, Y, Y + h);
+  const topY = Y + T, branchEnd = 1.75, leaves = [];
+  // a leaf: a pointed blade from its base b along dir d (unit, plan) tilted up by lift, width w, length l, drooping at the tip; two-sided
+  const leaf = (b, ang, lift, l, w) => {
+    const dx = Math.cos(ang) * Math.cos(lift), dz = Math.sin(ang) * Math.cos(lift), dy = Math.sin(lift), nx = -Math.sin(ang), nz = Math.cos(ang);
+    const m = [b[0] + dx * l * 0.45, b[1] + dy * l * 0.45 + 0.01, b[2] + dz * l * 0.45], t = [b[0] + dx * l, b[1] + dy * l - l * 0.18, b[2] + dz * l];
+    const L = [m[0] + nx * w, m[1], m[2] + nz * w], R = [m[0] - nx * w, m[1], m[2] - nz * w];
+    leaves.push(...b, ...L, ...m, ...b, ...m, ...R, ...m, ...L, ...t, ...m, ...t, ...R);
+    leaves.push(...b, ...m, ...L, ...b, ...R, ...m, ...m, ...t, ...L, ...m, ...R, ...t);
+  };
+  const fruit = (p, mat) => bag.add(mat, lathe([[0.001, 0], [0.045, 0.04], [0.05, 0.09], [0.03, 0.14], [0.001, 0.15]], 6, null, p[0], p[1] - 0.15, p[2]));
+  // four main branches, each carrying one of the four pipes; the serpent coiled about the trunk is the pipe: it leaves the trunk along its branch and ends in a head bent over the basin, pouring [stated: Rubruck: four pipes, each by a serpent whose tail twines the tree]
   for (let k = 0; k < 4; k++) {
     const a = k * TAU / 4 + TAU / 8, ux = Math.cos(a), uz = Math.sin(a);
-    const P = [[cx, topY - 0.2, cz], [cx + ux * 0.6, topY + 0.15, cz + uz * 0.6], [cx + ux * 1.2, topY + 0.2, cz + uz * 1.2], [cx + ux * 1.7, topY - 0.15, cz + uz * 1.7]];
-    for (let i = 0; i < 3; i++) bag.add(S, rod(P[i], P[i + 1], 0.07 - i * 0.015, 6));
-    // the pipe: a spout bent down, the stream of drink falling into the basin
-    const sp = P[3]; bag.add(S, rod(sp, [sp[0] + ux * 0.1, sp[1] - 0.25, sp[2] + uz * 0.1], 0.04, 6));
-    bag.add('water_jet', rod([sp[0] + ux * 0.1, sp[1] - 0.25, sp[2] + uz * 0.1], [sp[0] + ux * 0.1, Y + 0.62, sp[2] + uz * 0.1], 0.012, 4));
-    // the basin on the platform below the spout
-    const bx = sp[0] + ux * 0.1, bz = sp[2] + uz * 0.1;
-    bag.add(S, lathe([[0.001, 0], [0.2, 0.02], [0.46, 0.4], [0.5, 0.5], [0.44, 0.5], [0.38, 0.4], [0.001, 0.1]], 14, null, bx, Y, bz));
-    bag.add(['cloth_red', 'cloth_white', 'cloth_ochre', 'water_jet'][k], lathe([[0.001, 0], [0.42, 0]], 12, null, bx, Y + 0.47, bz));
-    col.circle(bx, bz, 0.5, Y, Y + 0.5);
-    // twigs with leaves and fruit
-    for (let q = 0; q < 8; q++) {
-      const f = 0.3 + rand() * 0.7, bp = [P[1][0] + (P[2][0] - P[1][0]) * f, P[1][1] + (P[2][1] - P[1][1]) * f, P[1][2] + (P[2][2] - P[1][2]) * f];
-      const ta = a + (rand() - 0.5) * 2.2, tu = [Math.cos(ta) * 0.45, 0.2 + rand() * 0.35, Math.sin(ta) * 0.45], e = [bp[0] + tu[0], bp[1] + tu[1], bp[2] + tu[2]];
-      bag.add(S, rod(bp, e, 0.016, 4));
-      bag.add(S, lathe([[0.001, 0], [0.07, 0.04], [0.001, 0.16]], 6, null, e[0], e[1], e[2]));
-      if (q % 2) bag.add('gilt_bronze', lathe([[0.001, 0], [0.05, 0.03], [0.05, 0.08], [0.001, 0.11]], 6, null, e[0], e[1] - 0.12, e[2]));
+    const P = [[0, -0.35, 0.12], [0.45, 0.05, 0.1], [0.95, 0.3, 0.085], [1.45, 0.34, 0.07], [branchEnd, 0.12, 0.055]].map(([u, v, r]) => [cx + ux * u, topY + v, cz + uz * u, r]);
+    bag.add(S, tube(P, 7));
+    // the serpent: coils up the trunk (two and a bit turns), then along the branch's upper side, the head turned down at its tip
+    const path = [], N = 20;
+    for (let i = 0; i <= N; i++) { const t = i / N, an = a - (1 - t) * TAU * 2.1, rho = 0.3 - t * 0.1; path.push([cx + Math.cos(an) * rho, Y + 0.55 + t * (T - 0.95), cz + Math.sin(an) * rho, 0.055 - t * 0.012]); }
+    for (const [u, v] of [[0.4, 0.17], [0.95, 0.43], [1.45, 0.46], [1.72, 0.3], [1.86, 0.1]]) path.push([cx + ux * u, topY + v, cz + uz * u, 0.04]);
+    bag.add(S, tube(path, 6));
+    const hx = cx + ux * 1.9, hz = cz + uz * 1.9, hy = topY + 0.02;
+    bag.add(S, blob([hx, hy, hz], 0.08, 0.075, 0.09, 8, 5));
+    bag.add(S, tube([[hx + ux * 0.06, hy - 0.04, hz + uz * 0.06, 0.05], [hx + ux * 0.13, hy - 0.2, hz + uz * 0.13, 0.04]], 6));
+    bag.add(GILT, blob([hx + ux * 0.04 - uz * 0.06, hy + 0.04, hz + uz * 0.04 + ux * 0.06], 0.018, 0.018, 0.018, 5, 3)); bag.add(GILT, blob([hx + ux * 0.04 + uz * 0.06, hy + 0.04, hz + uz * 0.04 - ux * 0.06], 0.018, 0.018, 0.018, 5, 3));
+    const sx = hx + ux * 0.13, sz = hz + uz * 0.13, sy = hy - 0.2;
+    bag.add('water_jet', rod([sx, sy, sz], [sx, Y + 0.62, sz], 0.014, 4));
+    // the basin on the platform below, its drink brimming
+    bag.add(S, lathe([[0.001, 0], [0.2, 0.02], [0.46, 0.4], [0.5, 0.5], [0.44, 0.5], [0.38, 0.4], [0.001, 0.1]], 14, null, sx, Y, sz));
+    bag.add(S, lathe([[0.15, 0], [0.12, 0.08], [0.26, 0.12], [0.001, 0.12]], 10, null, sx, Y + 0.0, sz));
+    bag.add(['cloth_red', 'cloth_white', 'cloth_ochre', 'water_jet'][k], lathe([[0.001, 0], [0.42, 0]], 12, null, sx, Y + 0.47, sz));
+    col.circle(sx, sz, 0.5, Y, Y + 0.5);
+    // twigs along the branch: silver wires forking, each with leaves in pairs and a hanging fruit (about 130 leaves a branch with the crown's)
+    for (let q = 0; q < 5; q++) {
+      const f = 0.2 + q * 0.17, i0 = Math.min(3, Math.floor(f * 4)), fr = f * 4 - i0, A0 = P[i0], A1 = P[i0 + 1];
+      const bp = [A0[0] + (A1[0] - A0[0]) * fr, A0[1] + (A1[1] - A0[1]) * fr, A0[2] + (A1[2] - A0[2]) * fr];
+      for (const sd of [-1, 1]) {
+        const ta = a + sd * (0.5 + rand() * 0.6), ln = 0.45 + rand() * 0.3, e = [bp[0] + Math.cos(ta) * ln, bp[1] + 0.16 + rand() * 0.34, bp[2] + Math.sin(ta) * ln], mid = [(bp[0] + e[0]) / 2, (bp[1] + e[1]) / 2 + 0.06, (bp[2] + e[2]) / 2];
+        bag.add(S, tube([[bp[0], bp[1], bp[2], 0.026], [mid[0], mid[1], mid[2], 0.02], [e[0], e[1], e[2], 0.012]], 4));
+        for (let m = 0; m < 4; m++) { const u = 0.25 + m * 0.25, lp = [bp[0] + (e[0] - bp[0]) * u, bp[1] + (e[1] - bp[1]) * u + 0.03, bp[2] + (e[2] - bp[2]) * u]; leaf(lp, ta + (m % 2 ? 1 : -1) * (0.7 + rand() * 0.3), 0.15 + rand() * 0.3, 0.2 + rand() * 0.06, 0.05); }
+        leaf(e, ta, 0.2, 0.26, 0.06);
+        if ((q + (sd > 0 ? 1 : 0)) % 2) fruit([e[0], e[1] - 0.02, e[2]], (q + k) % 3 ? S : GILT);
+      }
     }
   }
-  // the crown and the angel with the trumpet at the top (gilt on silver)
-  const cy = Y + h * 0.86;
-  bag.add(S, lathe([[0.22, 0], [0.34, 0.1], [0.18, 0.3], [0.001, 0.34]], 10, null, cx, cy, cz));
-  const ay = cy + 0.34;
-  bag.add('gilt_bronze', lathe([[0.001, 0], [0.16, 0.05], [0.13, 0.5], [0.07, 0.62], [0.001, 0.64]], 10, null, cx, ay, cz));
-  bag.add('skin_light', lathe([[0.001, 0], [0.07, 0.03], [0.08, 0.1], [0.04, 0.17], [0.001, 0.18]], 8, null, cx, ay + 0.62, cz));
-  for (const s of [-1, 1]) {
-    const w = [cx, ay + 0.5, cz, cx + s * 0.55, ay + 0.95, cz + 0.02, cx + s * 0.38, ay + 0.28, cz + 0.02, cx, ay + 0.5, cz, cx + s * 0.38, ay + 0.28, cz + 0.02, cx + s * 0.55, ay + 0.95, cz + 0.02];
-    bag.add('gilt_bronze', fromTriangles(w));
-  }
-  bag.add('gilt_bronze', rod([cx + 0.1, ay + 0.55, cz - 0.08], [cx + 0.1, ay + 0.72, cz - 0.4], 0.03, 5));
-  bag.add(S, lathe([[0.02, 0], [0.04, 0.2], [0.16, 0.9]], 8, null, 0, 0, 0).rotateX(-Math.PI / 2 * 0.8).translate(cx + 0.1, ay + 0.72, cz - 0.4));
-  // the four lions at the roots, each belching a white stream into a lip of the trunk's pool
+  // the crown: a cup of leaves round the angel's feet, and four hanging fruit
+  const cy = Y + h * 0.84;
+  for (let m = 0; m < 14; m++) { const an = m / 14 * TAU + rand() * 0.2; leaf([cx + Math.cos(an) * 0.14, cy + 0.02, cz + Math.sin(an) * 0.14], an, 0.8 + rand() * 0.3, 0.34 + rand() * 0.1, 0.07); }
+  bag.add(S, lathe([[0.2, 0], [0.34, 0.08], [0.3, 0.16], [0.16, 0.26], [0.001, 0.3]], 10, null, cx, cy - 0.04, cz));
+  for (let q = 0; q < 4; q++) fruit([cx + Math.cos(q * TAU / 4) * 0.4, cy - 0.08, cz + Math.sin(q * TAU / 4) * 0.4], GILT);
+  bag.add(S, fromTriangles(leaves));
+  angel(bag, cx, cy + 0.26, cz);
+  // the four lions at the roots, each belching a white stream; the stream falls beyond the drain-lip into the platform's gutter
   for (let k = 0; k < 4; k++) {
     const a = k * TAU / 4, ux = Math.cos(a), uz = Math.sin(a);
-    lion(bag, cx + ux * 1.45, Y, cz + uz * 1.45, Math.atan2(ux, uz));
-    col.circle(cx + ux * 1.45, cz + uz * 1.45, 0.5, Y, Y + 1.2);
+    lion(bag, cx + ux * 1.65, Y, cz + uz * 1.65, Math.atan2(ux, uz), k);
+    col.circle(cx + ux * 1.65, cz + uz * 1.65, 0.5, Y, Y + 1.2);
   }
 }
-/** A silver lion couchant about 1.2 m long at (x, y, z) facing yaw (0 = +z): body, haunch, chest, head with mane, forelegs, tail; white stream from the mouth. */
-function lion(bag, x, y, z, yaw) {
-  const put = (g) => g.rotateY(yaw).translate(x, y, z);
-  const body = blob([0, 0.5, -0.1], 0.28, 0.32, 0.55, 12, 7), chest = blob([0, 0.58, 0.32], 0.26, 0.34, 0.26, 10, 6), hind = blob([0, 0.42, -0.5], 0.3, 0.3, 0.3, 10, 6);
-  const head = blob([0, 0.84, 0.62], 0.2, 0.22, 0.22, 10, 6), mane = blob([0, 0.82, 0.48], 0.34, 0.36, 0.26, 10, 6), muzzle = blob([0, 0.76, 0.82], 0.11, 0.1, 0.13, 8, 5);
-  for (const g of [body, chest, hind, head, mane, muzzle]) bag.add('silver', put(g));
-  for (const s of [-1, 1]) { bag.add('silver', put(tube([[s * 0.14, 0.4, 0.3, 0.07], [s * 0.14, 0.12, 0.62, 0.06], [s * 0.14, 0.05, 0.8, 0.06]], 6))); bag.add('silver', put(tube([[s * 0.2, 0.3, -0.5, 0.1], [s * 0.2, 0.06, -0.3, 0.07]], 6))); }
+/** The angel on the crown, about 0.9 m tall: a belted robe with folds, bare arms (one raised to the trumpet), a head with a gilt cap of hair and a halo, six-feathered wings, the trumpet at the lips. */
+function angel(bag, x, y, z) {
+  const G = 'gilt_bronze', at = (g) => g.translate(x, y, z);
+  bag.add(G, lathe([[0.001, 0], [0.17, 0], [0.19, 0.04], [0.13, 0.3], [0.1, 0.46], [0.12, 0.5], [0.09, 0.52], [0.09, 0.6], [0.001, 0.62]], 10, (th) => 1 + 0.12 * Math.sin(th * 7), x, y, z));
+  bag.add('skin_light', blob([x, y + 0.72, z], 0.065, 0.08, 0.07, 8, 5));
+  bag.add(G, blob([x, y + 0.76, z - 0.01], 0.072, 0.07, 0.075, 8, 4));
+  bag.add(G, lathe([[0.11, 0], [0.11, 0.012], [0.095, 0.012], [0.095, 0]], 12).rotateX(Math.PI / 2 - 0.1).translate(x, y + 0.77, z - 0.1));
+  // arms: the right bent up to the lips with the trumpet, the left holding the robe
+  bag.add('skin_light', tube([[x + 0.09, y + 0.58, z + 0.01, 0.032], [x + 0.17, y + 0.52, z + 0.12, 0.026], [x + 0.06, y + 0.66, z + 0.2, 0.022]], 5));
+  bag.add('skin_light', tube([[x - 0.09, y + 0.58, z + 0.01, 0.032], [x - 0.16, y + 0.46, z + 0.08, 0.026], [x - 0.05, y + 0.38, z + 0.14, 0.022]], 5));
+  // the trumpet: a slim tube at the lips rising forward and up, flaring to a bell
+  bag.add('silver', tube([[x + 0.05, y + 0.68, z + 0.17, 0.012], [x + 0.1, y + 1.0, z + 0.4, 0.014], [x + 0.14, y + 1.25, z + 0.58, 0.02]], 6));
+  bag.add('silver', lathe([[0.001, 0], [0.02, 0.02], [0.05, 0.1], [0.065, 0.14], [0.05, 0.14], [0.001, 0.05]], 10).rotateX(0.9).translate(x + 0.14, y + 1.25, z + 0.58));
+  // the wings: six feathers a side, fanned from the shoulder, longer toward the tips
+  for (const s of [-1, 1]) for (let f = 0; f < 6; f++) {
+    const ang = 0.7 + f * 0.17, len = 0.42 + f * 0.04 - (f > 4 ? 0.06 : 0);
+    bag.add(G, tube([[x + s * 0.06, y + 0.5 + f * 0.012, z - 0.06, 0.035], [x + s * (0.06 + Math.sin(ang) * len * 0.55), y + 0.5 + Math.cos(ang) * len * 0.55 + 0.1, z - 0.1 - f * 0.012, 0.032], [x + s * (0.06 + Math.sin(ang) * len), y + 0.5 + Math.cos(ang) * len + 0.1 - f * 0.02, z - 0.14 - f * 0.012, 0.006]], 4, 0.3));
+  }
+  void at;
+}
+/** A silver lion couchant about 1.2 m long at (x, y, z) facing yaw (0 = +z): body, haunch, chest, head with a mane of tufts, open jaws with the pipe in the throat, fore-paws with claws, tail; a white stream from the mouth. */
+function lion(bag, x, y, z, yaw, k = 0) {
+  const put = (g) => g.rotateY(yaw).translate(x, y, z), m = k * 0.004;
+  const body = blob([0, 0.5, -0.1], 0.28 + m, 0.32, 0.55, 12, 7), chest = blob([0, 0.58, 0.32], 0.26, 0.34, 0.26, 10, 6), hind = blob([0, 0.42, -0.5], 0.3, 0.3, 0.3, 10, 6);
+  const head = blob([0, 0.84, 0.62], 0.2, 0.22, 0.22, 10, 6), muzzle = blob([0, 0.76, 0.82], 0.11, 0.1, 0.13, 8, 5), jaw = blob([0, 0.68, 0.84], 0.085, 0.04, 0.12, 7, 4);
+  for (const g of [body, chest, hind, head, muzzle, jaw]) bag.add('silver', put(g));
+  // the mane: a ring of flame-shaped tufts round the head and down the chest
+  for (let i = 0; i < 12; i++) {
+    const a = i / 12 * TAU, r0 = 0.2;
+    bag.add('silver', put(tube([[Math.cos(a) * r0, 0.84 + Math.sin(a) * r0 * 1.05, 0.5, 0.06], [Math.cos(a) * (r0 + 0.12), 0.84 + Math.sin(a) * (r0 + 0.12) * 1.05, 0.46, 0.04], [Math.cos(a) * (r0 + 0.2), 0.84 + Math.sin(a) * (r0 + 0.2) * 1.05 - 0.03, 0.42, 0.012]], 4)));
+  }
+  for (const s of [-1, 1]) {
+    bag.add('gilt_bronze', put(blob([s * 0.09, 0.9, 0.78], 0.025, 0.025, 0.025, 5, 3)));
+    bag.add('silver', put(blob([s * 0.2, 0.96, 0.58], 0.04, 0.05, 0.03, 6, 4)));
+    bag.add('silver', put(tube([[s * 0.14, 0.4, 0.3, 0.07], [s * 0.14, 0.12, 0.62, 0.06], [s * 0.14, 0.05, 0.8, 0.06]], 6)));
+    for (const c of [-0.04, 0, 0.04]) bag.add('silver', put(tube([[s * 0.14 + c, 0.05, 0.84, 0.014], [s * 0.14 + c, 0.015, 0.92, 0.008]], 4)));
+    bag.add('silver', put(tube([[s * 0.2, 0.3, -0.5, 0.1], [s * 0.2, 0.06, -0.3, 0.07]], 6)));
+  }
   bag.add('silver', put(tube([[0, 0.4, -0.8, 0.04], [0, 0.3, -1.05, 0.035], [0.08, 0.5, -1.2, 0.05]], 5)));
-  // the milk: a white stream falling from the mouth to the platform
-  bag.add('foam', put(tube([[0, 0.74, 0.92, 0.02], [0, 0.55, 1.05, 0.02], [0, 0.22, 1.12, 0.025]], 5)));
+  bag.add('silver', put(blob([0.09, 0.56, -1.22], 0.05, 0.09, 0.06, 6, 4)));
+  // the milk: a white stream from the open mouth to the platform
+  bag.add('foam', put(tube([[0, 0.7, 0.9, 0.02], [0, 0.52, 1.03, 0.022], [0, 0.22, 1.1, 0.026]], 5)));
 }
 /** tug: the nine-tailed white banner of the Mongols: a tall pole with an iron spear head and a boss of horsehair, tassels streaming in the wind. { at, y, h } */
 export function tug(el, { bag, col }) {
@@ -95,15 +135,69 @@ export function tug(el, { bag, col }) {
     addCloth(bag, k % 3 === 0 ? 'hide_black' : 'hide_white', g, y + h - 0.4);
   }
 }
-/** tortoise: a stone tortoise plinth for a stele [stated: UW: a stone tortoise plinth is one of the few surface traces]. { at, y, yaw } */
+/**
+ * tortoise: the stone tortoise (bixi) that carried a stele [stated: UW: a stone tortoise plinth is one of the few surface traces; inferred: the Chinese type of the Yuan: a dragon-headed tortoise
+ * with a plated shell and clawed flippers, a socket on its back for the stele, the stele with its inscription panel and a cap of two entwined dragons]. { at, y, yaw }
+ */
 export function tortoise(el, { bag, col }) {
-  const [x, z] = el.at, y = el.y ?? 0, yaw = el.yaw ?? 0;
+  const [x, z] = el.at, y = el.y ?? 0, yaw = el.yaw ?? 0, G = 'granite_grey';
   const put = (g) => g.rotateY(yaw).translate(x, y, z);
-  bag.add('granite_grey', put(blob([0, 0.5, 0], 0.95, 0.5, 1.5, 14, 8)));
-  bag.add('granite_grey', put(blob([0, 0.42, 1.6], 0.32, 0.3, 0.42, 10, 6)));
-  for (const [sx, sz] of [[-1, 0.85], [1, 0.85], [-1, -0.85], [1, -0.85]]) bag.add('granite_grey', put(blob([sx * 0.95, 0.15, sz], 0.3, 0.16, 0.38, 8, 5)));
-  bag.add('granite_grey', put(box(-0.6, 0.8, -0.2, 0.6, 3.6, 0.2)));
-  col.circle(x, z, 1.2, y, y + 1);
+  // a plinth slab under the beast
+  bag.add(G, put(box(-1.45, 0, -2.0, 1.45, 0.14, 2.9)));
+  bag.add(G, put(blob([0, 0.5, 0], 0.95, 0.5, 1.5, 16, 9)));
+  // the shell's plates: the grooves between them stand as low ridges on the dome — three rows of plates (the spine's five, the four of each flank) and the marginal ring
+  const sh = (u, v) => 0.5 + 0.5 * Math.sqrt(Math.max(0, 1 - (u / 0.95) ** 2 - (v / 1.5) ** 2));
+  const ridge = (pts, r = 0.028) => { for (let i = 0; i + 1 < pts.length; i++) bag.add(G, put(rod(pts[i], pts[i + 1], r, 4))); };
+  const on = (u, v, lift = 0.012) => [u, sh(u, v) + lift, v];
+  for (const u0 of [-0.3, 0.3, -0.62, 0.62]) { const pts = []; for (let v = -1.15; v <= 1.151; v += 0.23) { const uu = u0 * (1 - Math.abs(v) * 0.12); if ((uu / 0.95) ** 2 + (v / 1.5) ** 2 < 0.93) pts.push(on(uu, v)); } ridge(pts); }
+  for (let v = -1.05; v <= 1.06; v += 0.42) { const pts = [], w = 0.9 * Math.sqrt(Math.max(0, 1 - (v / 1.5) ** 2 / 0.95)); for (let k = -4; k <= 4; k++) { const uu = w * k / 4 * 0.97; if ((uu / 0.95) ** 2 + (v / 1.5) ** 2 < 0.93) pts.push(on(uu, v + Math.abs(uu) * 0.08)); } ridge(pts); }
+  { const pts = []; for (let a = 0; a <= TAU + 0.01; a += TAU / 28) { const u = Math.cos(a) * 0.86, v = Math.sin(a) * 1.35; pts.push(on(u, v)); } ridge(pts, 0.04); }
+  // the rim of the shell, a rolled lip
+  { const pts = []; for (let a = 0; a <= TAU + 0.01; a += TAU / 28) pts.push([Math.cos(a) * 0.96, 0.46, Math.sin(a) * 1.47]); ridge(pts, 0.06); }
+  // the socket on the back: a stepped mortise block of the stele, with a chamfered lip
+  bag.add(G, put(box(-0.78, 0.95, -0.3, 0.78, 1.14, 0.3))); bag.add(G, put(box(-0.7, 1.14, -0.24, 0.7, 1.2, 0.24)));
+  // the head: a dragon's — a long neck rising from the shell, brow, snout, open jaws with teeth, nostrils, horns swept back, ears, a beard
+  bag.add(G, put(tube([[0, 0.55, 1.1, 0.34], [0, 0.62, 1.6, 0.28], [0, 0.82, 2.05, 0.25]], 10)));
+  bag.add(G, put(blob([0, 0.9, 2.3, ], 0.27, 0.25, 0.36, 12, 8)));
+  bag.add(G, put(blob([0, 0.78, 2.62], 0.17, 0.1, 0.24, 9, 5))); bag.add(G, put(blob([0, 0.62, 2.6], 0.14, 0.05, 0.22, 8, 4)));
+  for (const s of [-1, 1]) {
+    bag.add(G, put(blob([s * 0.12, 0.9, 2.84], 0.045, 0.04, 0.04, 6, 4)));
+    bag.add(G, put(blob([s * 0.2, 1.1, 2.28], 0.1, 0.07, 0.12, 7, 5)));
+    bag.add(G, put(blob([s * 0.22, 0.99, 2.18], 0.05, 0.05, 0.05, 6, 4)));
+    bag.add(G, put(tube([[s * 0.14, 1.12, 2.2, 0.055], [s * 0.26, 1.32, 1.9, 0.045], [s * 0.3, 1.38, 1.55, 0.02]], 6)));
+    bag.add(G, put(tube([[s * 0.26, 0.95, 2.18, 0.1], [s * 0.4, 0.98, 2.0, 0.07], [s * 0.42, 0.9, 1.88, 0.01]], 5, 0.3)));
+    for (let t = 0; t < 4; t++) { bag.add(G, put(tube([[s * (0.09 + t * 0.012), 0.69, 2.5 + t * 0.07, 0.025], [s * (0.09 + t * 0.012), 0.76, 2.52 + t * 0.07, 0.003]], 4))); bag.add(G, put(tube([[s * (0.08 + t * 0.012), 0.66, 2.5 + t * 0.07, 0.022], [s * (0.08 + t * 0.012), 0.6, 2.5 + t * 0.07, 0.003]], 4))); }
+  }
+  bag.add(G, put(tube([[0, 0.58, 2.6, 0.05], [0, 0.4, 2.62, 0.04], [0, 0.26, 2.55, 0.008]], 5)));
+  // the four flippers, each with four claws; the short tail curled to one side
+  for (const [sx, sz] of [[-1, 0.85], [1, 0.85], [-1, -0.85], [1, -0.85]]) {
+    bag.add(G, put(blob([sx * 1.0, 0.2, sz], 0.3, 0.16, 0.4, 9, 5)));
+    for (let c = 0; c < 4; c++) bag.add(G, put(tube([[sx * (1.0 + 0.12), 0.1 - 0, sz + 0.32 + (c - 1.5) * 0.001 + 0.0, 0.001], [sx * (1.0 + 0.05 + (c - 1.5) * 0.09), 0.12, sz + 0.3 + (c - 1.5) * 0.02 + 0.2, 0.03], [sx * (1.0 + 0.05 + (c - 1.5) * 0.11), 0.15, sz + 0.62, 0.006]], 4)));
+  }
+  bag.add(G, put(tube([[0, 0.3, -1.4, 0.12], [0.2, 0.22, -1.8, 0.07], [0.45, 0.2, -1.95, 0.015]], 6)));
+  // the stele: the tablet in its socket, a framed panel of ruled columns of text, the cap of two entwined dragons about a pearl
+  const H0 = 1.2, H1 = 3.5;
+  bag.add(G, put(box(-0.55, H0, -0.15, 0.55, H1, 0.15)));
+  bag.add(G, put(box(-0.5, H0 + 0.1, 0.15, 0.5, H1 - 0.1, 0.18)));
+  const cols = 9, rows = 16;
+  for (let c = 0; c < cols; c++) for (let r = 0; r < rows; r++) {
+    const u = -0.4 + c * 0.1, v = H0 + 0.25 + r * 0.125, j = ((c * 7 + r * 13) % 5) * 0.004;
+    if ((c * 3 + r * 5) % 11 === 0) continue;                     // a gap: a space in the line
+    bag.add(G, put(box(u - 0.03 - j, v, 0.18, u + 0.03, v + 0.085 - j * 2, 0.2)));
+  }
+  bag.add(G, put(box(-0.34, H1 - 0.02, -0.15, 0.34, H1 + 0.0, 0.15)));
+  bag.add(G, put(box(-0.66, H1, -0.2, 0.66, H1 + 0.18, 0.2)));
+  // the cap: an arch of stepped slabs, the plaque for the title at its middle, and on its face the two dragons whose bodies cross over it
+  for (let i = 0; i < 5; i++) { const w = 0.62 - i * 0.12, y0 = H1 + 0.18 + i * 0.14; bag.add(G, put(box(-w - 0.004 * i, y0, -0.19, w, y0 + 0.14, 0.19))); }
+  bag.add(G, put(box(-0.16, H1 + 0.3, 0.19, 0.16, H1 + 0.62, 0.22)));
+  for (const s of [-1, 1]) {
+    const pts = []; for (let k = 0; k <= 8; k++) { const t = k / 8, u = s * (0.62 - t * 0.6), v = H1 + 0.22 + Math.sin(t * Math.PI * 0.62) * 0.62 + Math.sin(t * Math.PI * 3) * 0.04; pts.push([u, v, 0.25 + (k % 2) * 0.02, 0.07 - t * 0.02]); }
+    bag.add(G, put(tube(pts, 6)));
+    bag.add(G, put(blob([s * 0.66, H1 + 0.14, 0.27], 0.09, 0.08, 0.11, 7, 4)));
+    for (let c = 0; c < 3; c++) bag.add(G, put(tube([[s * (0.6 - c * 0.14), H1 + 0.3 + c * 0.1, 0.3, 0.02], [s * (0.6 - c * 0.14) + s * 0.05, H1 + 0.24 + c * 0.1, 0.34, 0.004]], 4)));
+  }
+  bag.add(G, put(blob([0, H1 + 0.82, 0.24], 0.07, 0.07, 0.07, 7, 5)));
+  col.circle(x, z, 1.3, y, y + 1);
 }
 /** kiln: a domed updraught kiln for tiles [stated: UW/finds: kilns for roof tiles, pipes, tableware] with its stoke-hole, flue and stacked tiles. { at, y, r, yaw } */
 export function kiln(el, { bag, col }) {

@@ -3,6 +3,7 @@
 // On the ground, on a cart (Rubruck's great houses on wagons), and one opened and furnished.
 import { fromTriangles } from '../../core/geom.js';
 import { box, rod, lathe, wedge, ringPieces, angDist, wheel, rng, TAU, obox } from './util.js';
+import { tube, blob } from '../chinese/statues.js';
 
 const FELT = 'cloth_white', LAT = 'lattice', WOOD = 'timber', DOOR = 'lacquer_red';
 
@@ -51,13 +52,16 @@ export function ger(el, { bag, col, lights }) {
     bag.add('cloth_blue', lathe([[r + 0.012, 0.0], [r + 0.012, 0.22]], 28, (th) => (angDist(th, da) < (dw / 2 + 0.15) / r ? 0 : 1), cx, Y + 0.02, cz));
     bag.add('cloth_red', lathe([[r + 0.012, 0.0], [r + 0.012, 0.1]], 28, (th) => (angDist(th, da) < (dw / 2 + 0.15) / r ? 0 : 1), cx, Y + wh - 0.28, cz));
   }
+  if (el.rich) richGer(bag, { cx, cz, r, Y, wh, rise, top, ringR, da, dw, dh, N, open, rand });
   // a skirt of felt weighted with stones at the foot, the felt left a little long
   bag.add('hide_grey', lathe([[r + 0.015, 0], [r + 0.07, 0.04], [r + 0.075, 0.12], [r + 0.02, 0.15]], 28, (th) => (angDist(th, da) < (dw / 2 + 0.12) / r ? 0 : 1), cx, Y, cz));
   if (!open) {
     // the door shut with its felt, a skin of kumiss hung beside it; the ger as one solid
     const a = P(-dw / 2, 0.02), b = P(dw / 2, 0.02);
-    bag.add('cloth_ochre', obox(a, b, 0.05, Y, Y + dh));
-    bag.add('cloth_red', obox(P(-dw / 2 + 0.1, 0.05), P(dw / 2 - 0.1, 0.05), 0.012, Y + dh * 0.45, Y + dh * 0.55));
+    if (el.rich) paintedDoor(bag, P, dw, dh, Y, rand()); else {
+      bag.add('cloth_ochre', obox(a, b, 0.05, Y, Y + dh));
+      bag.add('cloth_red', obox(P(-dw / 2 + 0.1, 0.05), P(dw / 2 - 0.1, 0.05), 0.012, Y + dh * 0.45, Y + dh * 0.55));
+    }
     col.circle(cx, cz, r + 0.12, Y, top);
   }
   if (cart) wagon(bag, col, cx, cz, y, r, da);
@@ -106,6 +110,48 @@ export function ger(el, { bag, col, lights }) {
   { const c = loc(da - 0.55, r - 0.65); bag.add('hide_tan', lathe([[0.001, 0], [0.22, 0.04], [0.3, 0.22], [0.2, 0.42], [0.1, 0.5], [0.001, 0.5]], 10, null, c[0], F, c[1])); bag.add(WOOD, rod([c[0], F + 0.2, c[1]], [c[0], F + 1.15, c[1]], 0.025, 5)); bag.add(WOOD, lathe([[0.001, 0], [0.09, 0], [0.09, 0.04], [0.001, 0.04]], 8, null, c[0], F + 1.15, c[1])); col.circle(c[0], c[1], 0.34, F, F + 0.5); }
   // bows and quivers hung on the lattice of the men's side
   { const a = north - 2.1; for (const dv of [0, 0.35]) { const c = loc(a - dv, r - 0.16), ux = -Math.sin(a - dv), uz = Math.cos(a - dv); bag.add('hide_brown', rod([c[0] - ux * 0.5, F + 1.3, c[1] - uz * 0.5], [c[0] + ux * 0.5, F + 1.35, c[1] + uz * 0.5], 0.018, 4)); } }
+}
+
+/** The painted door of a rich ger, shut: two leaves of red-lacquered boards, each a frame with two panels, gilt rails and studs, a gilt roundel on each leaf, the felt flap rolled up above it. */
+function paintedDoor(bag, P, dw, dh, Y, jit = 0) {
+  const J0 = 1 + Math.floor(jit * 9) * 0.02;
+  const leaf = (u0, u1, li) => {
+    const J = J0 * (1 + li * 0.015);
+    const a = P(u0, 0.03), b = P(u1, 0.03), c = (v, w) => [P(u0 + (u1 - u0) * v, 0.03 + w)];
+    bag.add(DOOR, obox(a, b, 0.05, Y, Y + dh));
+    const m = (f) => P(u0 + (u1 - u0) * f, 0.058);
+    // the frame: stiles and rails standing proud, in gilt
+    for (const [f0, f1] of [[0, 0.1], [0.9, 1]]) bag.add('cloth_red', obox(m(f0), m(f1), 0.016 * J, Y + 0.03, Y + dh - 0.03));
+    for (const yy of [0.03, dh * 0.5 - 0.03, dh - 0.09]) bag.add('cloth_red', obox(m(0.1), m(0.9), 0.016 * J, Y + yy, Y + yy + 0.06));
+    // roundels: a gilt disc with a boss in each panel, and a row of studs along the rails
+    for (const [fy, fk] of [[0.27, 0], [0.75, 1]]) { const J = J0 * (1 + li * 0.015 + fk * 0.03); const q = P((u0 + u1) / 2, 0.068), ang = Math.atan2(P(0, 1)[0] - P(0, 0)[0], P(0, 1)[1] - P(0, 0)[1]); bag.add('cloth_red', lathe([[0.12 * J, 0], [0.12 * J, 0.012], [0.001, 0.05 * J]], 7).rotateX(Math.PI / 2).rotateY(ang).translate(q[0], Y + dh * fy, q[1])); }
+    for (let k = 0; k < 4; k++) { const q = m(0.22 + k * 0.18); bag.add('cloth_red', lathe([[0.001, 0], [0.025 * J, 0], [0.018 * J, 0.02], [0.001, 0.025 * J]], 6).rotateX(Math.PI / 2).rotateY(Math.atan2(P(0, 1)[0] - P(0, 0)[0], P(0, 1)[1] - P(0, 0)[1])).translate(q[0], Y + dh * 0.5 + 0.02 + 0.0, q[1])); }
+    void c;
+  };
+  leaf(-dw / 2, -0.01, 0); leaf(0.01, dw / 2, 1);
+  // the felt flap rolled up and tied over the door
+  const a = P(-dw / 2 - 0.1, 0.22), b = P(dw / 2 + 0.1, 0.22);
+  bag.add('cloth_ochre', obox(a, b, 0.2, Y + dh + 0.14, Y + dh + 0.32));
+}
+/** The dress of a rich ger [inferred from Rubruck: felt embroidered with vines, trees, birds, beasts; the collar of the crown acting as a chimney]: stitched seams in the felt, hair-rope bands over the roof, studs about the crown ring and its felt collar. */
+function richGer(bag, g) {
+  const { cx, cz, r, Y, wh, rise, top, ringR, da, dw, N, rand } = g;
+  // the vertical seams of the felt strips (every ~0.9 m), a hand's breadth proud of the wall
+  const ns = Math.round(r * TAU / 0.9);
+  for (let k = 0; k < ns; k++) { const a = (k + 0.5) / ns * TAU; if (angDist(a, da) < (dw / 2 + 0.25) / r) continue; const rr = r + 0.018 + (k % 3) * 0.002; bag.add('rope_fibre', rod([cx + Math.cos(a) * rr, Y + 0.18, cz + Math.sin(a) * rr], [cx + Math.cos(a) * rr, Y + wh - 0.06 - (k % 9) * 0.0013 - Math.floor(rand() * 9) * 0.012, cz + Math.sin(a) * rr], 0.014 + (k % 5) * 0.0012, 4)); }
+  // four broad bands of hair rope over the roof, from the wall's rope to the crown, following the roof's curve
+  const prof = [[r + 0.15, Y + wh - 0.1], [r * 0.7, Y + wh + rise * 0.4], [r * 0.35, Y + wh + rise * 0.78], [ringR + 0.1, top - 0.02]];
+  for (let b = 0; b < 4; b++) {
+    const a = da + Math.PI / 4 + b * Math.PI / 2 + 0.1, pts = prof.map(([rr, yy], i) => [cx + Math.cos(a) * (rr + 0.02), yy + 0.03, cz + Math.sin(a) * (rr + 0.02), 0.03]);
+    pts.splice(1, 0, [cx + Math.cos(a) * (r * 0.85 + 0.02), Y + wh + rise * 0.17 + 0.03, cz + Math.sin(a) * (r * 0.85 + 0.02), 0.03]);
+    bag.add('rope_fibre', tube(pts, 5, 0.5));
+  }
+  // a ring of gilt studs on the crown, a collar of white felt standing up round the opening, an embroidered band
+  bag.add('cloth_ochre', lathe([[ringR + 0.02, top + 0.04], [ringR + 0.02, top + 0.1], [ringR + 0.08, top + 0.1 + Math.floor(rand() * 9) * 0.0013], [ringR + 0.08, top + 0.04]], 48, (th) => (Math.floor(th / TAU * 48) % 2 ? 1 : 0.9), cx, 0, cz));
+  bag.add('cloth_white', lathe([[ringR + 0.15, top - 0.02], [ringR + 0.12, top + 0.22], [ringR + 0.0, top + 0.24], [ringR + 0.03, top - 0.02]], 20, (th) => 1 + 0.02 * Math.sin(th * 5), cx, 0, cz));
+  // the embroidered trim: a band of raised knots (ulzii) at the eave, a stitched pattern in one piece: the ring's radius steps out and in every 0.16 m
+  const nk = Math.max(8, Math.round(r * TAU / 0.32)), pat = (th) => (angDist(th, da) < (dw / 2 + 0.2) / r ? 0 : (Math.floor(th / TAU * nk * 4) % 4 < 2 ? 1.012 : 1.0));
+  bag.add('cloth_ochre', lathe([[r + 0.012, 0], [r + 0.012, 0.09 + Math.floor(rand() * 9) * 0.0013]], nk * 4, pat, cx, Y + wh - 0.24, cz));
 }
 const boundsOf = (c, w, d, tx, tz) => { const hx = Math.abs(tx) * w / 2 + Math.abs(tz) * d / 2, hz = Math.abs(tz) * w / 2 + Math.abs(tx) * d / 2; return [c[0] - hx, c[1] - hz, c[0] + hx, c[1] + hz]; };
 
