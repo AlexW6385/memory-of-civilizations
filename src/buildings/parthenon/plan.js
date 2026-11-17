@@ -4,6 +4,8 @@
 
 import { SITES } from '../../world/regions.js';
 import './treasury.js';
+import './parthenos.js';
+import './cornice.js';
 
 const E = [];
 const add = (o) => (E.push(o), o);
@@ -37,6 +39,11 @@ add({ t: 'doric_entablature', axes: { x: X, z: Z }, y: ENT, face: FACE, arch: AR
 const TOP = ENT + ARCH + FRIEZE + GEISON;                  // 15.28 (13.72 above the stylobate)
 const FRIEZE_TOP = ENT + ARCH + FRIEZE;                    // where the ceilings are
 add({ t: 'pediment_roof', rect: [X[0] - FACE - 0.7, Z[0] - FACE - 0.7, X[16] + FACE + 0.7, Z[7] + FACE + 0.7], y: TOP, rise: 3.45, tympanumInset: 0.9, rakingGeison: 0.55, mat: 'marble' });
+
+// the sima with its lion-head spouts and anthemion, the painted leaf moulding at the head of the frieze, the floral acroteria
+const XE = X[16] + FACE + 0.7, ZE = Z[7] + FACE + 0.7;
+add({ t: 'parthenon_cornice', x: X.flatMap((x, i) => (i < 16 ? [x, (x + X[i + 1]) / 2] : [x])), xe: XE, ze: ZE, y: TOP, rise: 3.45, rg: 0.55, O: [X[0] - FACE, Z[0] - FACE, X[16] + FACE, Z[7] + FACE], yF: FRIEZE_TOP });
+add({ t: 'parthenon_acroteria', xe: XE, y: TOP + 3.45 + 0.55 + 0.3, yc: TOP + 0.58, zc: ZE - 0.35, h: 3.6, hc: 1.9 });
 
 // marble coffered ceilings over the pteron, from the entablature to the cella walls
 const CW = 10.85;                                          // outer face of the cella's long walls
@@ -91,7 +98,7 @@ beam([-5.2, -IZ], [-5.2, IZ], FL + LOW_H + IENT + UP_H, 0.75, WALL_TOP - (FL + L
 add({ t: 'coffers', rect: [-7.6, -9.6, 22.2, 9.6], y: WALL_TOP, depth: 0.35, cell: 1.3, beam: 0.24, mat: 'cedar' });
 add({ t: 'coffers', rect: [-22.2, -9.6, -8.8, 9.6], y: WALL_TOP, depth: 0.35, cell: 1.3, beam: 0.24, mat: 'cedar' });
 // the Athena Parthenos facing the door, and the shallow pool of water before her
-obj('athena_parthenos', -1.65, 0, FL, { yaw: PI / 2, pedestal: 1.2, pedestalMat: 'marble' });
+obj('athena_parthenos_rich', -1.65, 0, FL, { yaw: PI / 2, pedestal: 1.2, pedestalMat: 'marble' });
 obj('basin', 0, 0, FL, { rect: [1.0, -3.0, 7.0, 3.0], h: 0.16, curb: 0.3, mat: 'marble_dark' });
 // the bronze-sheathed doors standing open
 obj('doors', 22.2, 0, FL, { yaw: -PI / 2, w: 4.9, h: 9.8, th: 0.22, depth: 0 });
