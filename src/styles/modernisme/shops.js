@@ -5,6 +5,7 @@
 // wine shop (bodega), ironmonger (ferreteria), draper, chemist (farmacia), cobbler, barber. The furnishing is built once per
 // trade and width in the shop's own frame (s along the front from the shop's left end, d inward from the street line, y up)
 // and set by instancing; the walls, front and floor are exact for the plot.
+import { HW as PORTAL_HW } from './portal.js';
 import { box, lathe, rod } from '../../core/geom.js';
 import { Matrix4 } from '../../core/three.js';
 
@@ -214,18 +215,23 @@ export function makeShops(H) {
    * The ground floor of a plot with shops (replacing its solid box): shop shells, the solid between them, the upper mass.
    * fr: the plot's front frame; a, b the plot's ends; D its depth; y the block's level; yAt(s) the street's level at s; h the roof; mat the stucco.
    */
-  function mass(ctx, fr, a, b, D, y, h, mat, shops, yAt) {
+  function mass(ctx, fr, a, b, D, y, h, mat, shops, yAt, portal = null) {
     const { bag, col, lights } = ctx, F = fr.F;
     const wr = (s0, s1, t0, t1, y0, y1) => { const p = fr.at(s0, t0), q = fr.at(s1, t1); col.rect([p[0], p[1], q[0], q[1]], y0, y1); };
     const top = Math.max(y, ...shops.map((s) => yAt((s.s0 + s.s1) / 2))) + 4.3;
     bag.add(mat, F(a, b, -D, 0, top, y + h)); wr(a, b, -D, 0, top, y + h);
     let c = a;
     const solid = (s0, s1) => { if (s1 - s0 < 0.04) return; bag.add(mat, F(s0, s1, -D, 0, y - 1.2, top)); wr(s0, s1, -D, 0, y - 1.2, top); };
+    // the solid between two shops: with a portal's vestibule cut into it where the portal's bay lies (portal.js)
+    const gap = (s0, s1) => {
+      if (portal && s0 <= portal.pc - PORTAL_HW - 0.1 && s1 >= portal.pc + PORTAL_HW + 0.1) { solid(s0, portal.pc - PORTAL_HW); portal.mass(ctx, fr, portal.pc, D, y, top, mat, yAt(portal.pc), portal.v, portal.lamp); solid(portal.pc + PORTAL_HW, s1); }
+      else solid(s0, s1);
+    };
     for (const sh of shops) {
-      solid(c, sh.s0); c = sh.s1;
+      gap(c, sh.s0); c = sh.s1;
       shell(ctx, fr, sh, D, y, top, mat, yAt((sh.s0 + sh.s1) / 2));
     }
-    solid(c, b);
+    gap(c, b);
     void lights;
   }
 

@@ -48,4 +48,18 @@ export function kiosk(el, { bag, col }) {
   bag.add('gilt_bronze', lathe([[0.001, 3.2], [0.09, 3.3], [0.001, 3.55]], 8, null, cx, y, cz));
   col.circle(cx, cz, R + 0.12, y, y + 3.2);
 }
-export const FURNITURE = { terrace_set: terraceSet, kiosk };
+/**
+ * fanal: { at: [x, z], y } — a gas street lamp of the crossings (docs/settlements/barcelona.md §5f): a granite plinth, a fluted cast-iron
+ * column with its collars, the lamplighter's crossbar under a lantern of glass in an iron frame with a pyramid cap.
+ */
+export function fanal(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0;
+  bag.add('granite_grey', lathe([[0.22, 0], [0.22, 0.32], [0.17, 0.42], [0.001, 0.42]], 6, null, x, y, z));
+  bag.add('iron', lathe([[0.14, 0.4], [0.1, 0.52], [0.078, 0.66], [0.078, 3.2], [0.1, 3.3], [0.1, 3.38], [0.06, 3.46]], 6, null, x, y, z));
+  for (const h of [1.2, 2.3]) bag.add('iron', lathe([[0.1, h], [0.1, h + 0.06]], 6, null, x, y, z));
+  bag.add('iron', rod([x - 0.34, y + 3.05, z], [x + 0.34, y + 3.05, z], 0.014, 4));
+  bag.add('lamp_glass', lathe([[0.001, 3.46], [0.17, 3.52], [0.24, 3.8], [0.22, 4.15], [0.001, 4.18]], 6, null, x, y, z));
+  bag.add('iron', lathe([[0.3, 4.15], [0.27, 4.26], [0.12, 4.5], [0.001, 4.62]], 6, null, x, y, z));
+  col.circle(x, z, 0.24, y, y + 4.6);
+}
+export const FURNITURE = { terrace_set: terraceSet, kiosk, fanal };
