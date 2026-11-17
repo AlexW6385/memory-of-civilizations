@@ -2,7 +2,7 @@
 // shoin house, the upper a Zen hall with cusped windows — a pent roof between them, a hip roof of cypress bark with a
 // bronze phoenix on the ridge. Bare dark timber: the silver foil was planned and never laid. Built facing +z.
 import { STYLES } from '../../core/build.js';
-import { local, eaveRing, tatami, quad2, WD, PL, BARK, TM } from './kit.js';
+import { local, tatami, quad2, WD, PL, BARK, TM } from './kit.js';
 
 /** A cusped window (katōmado) on the face z = zf, facing +z (s = 1) or −z: a black frame, the paper within. */
 export function katomado(T, x, y, zf, w, h, s = 1) {
@@ -35,6 +35,72 @@ function buddha(L, B, T, x, y, z, s, kind) {
   }
 }
 
+
+/** A cusped window with depth: stepped lacquered mouldings (architrave, jamb), the paper set back, a lattice of thin bars clipped to its outline, a sill block. Face z = zf, facing +z (s = 1) or −z. */
+export function katomadoDeep(T, B, x, y, zf, w, h, s = 1) {
+  const out = (k) => { const hw = w / 2 * k, o = (1 - k) * h / 2; return [[-hw, o], [hw, o], [hw, o + h * k * 0.55], [hw * 0.55, o + h * k * 0.78], [0, o + h * k], [-hw * 0.55, o + h * k * 0.78], [-hw, o + h * k * 0.55]]; };
+  const V = (p, d) => [x + p[0], y + p[1], zf + s * d];
+  const ring = (mat, ka, da, kb, db) => { const A = out(ka), C = out(kb), t = []; for (let i = 0; i < A.length; i++) { const j = (i + 1) % A.length; quad2(t, V(A[i], da), V(A[j], da), V(C[j], db), V(C[i], db)); } T(mat, t); };
+  ring('lacquer_black', 1.22, 0.0, 1.22, 0.05);          // the architrave's outer wall
+  ring('lacquer_black', 1.22, 0.05, 1.09, 0.05);         // its face
+  ring('lacquer_black', 1.09, 0.05, 1.09, 0.11);         // the step
+  ring('wood_dark', 1.09, 0.11, 1.0, 0.11);              // the inner moulding
+  ring('lacquer_black', 1.0, 0.11, 1.0, 0.03);           // the reveal
+  const P = out(1.0), pa = [];
+  for (let i = 1; i < P.length - 1; i++) { const a = V(P[0], 0.03), b = V(P[i], 0.03), c = V(P[i + 1], 0.03); pa.push(...a, ...b, ...c, ...a, ...c, ...b); }
+  T('shoji', pa);
+  // the lattice: vertical and horizontal bars, clipped to the outline
+  const hwAt = (yy) => { const q = [[0, w / 2], [h * 0.55, w / 2], [h * 0.78, w / 2 * 0.55], [h, 0]]; for (let i = 0; i < 3; i++) if (yy <= q[i + 1][0]) return q[i][1] + (q[i + 1][1] - q[i][1]) * (yy - q[i][0]) / (q[i + 1][0] - q[i][0]); return 0; };
+  const hi = (yy) => Math.min(yy, h - 0.03);
+  for (let k = -2; k <= 2; k++) { const u = k * 0.2, top = h * (Math.abs(u) <= w / 2 * 0.55 ? 0.78 + 0.22 * (1 - Math.abs(u) / (w / 2 * 0.55)) : 0.55 + 0.23 * (1 - (Math.abs(u) - w / 2 * 0.55) / (w / 2 * 0.45))); B('wood_dark', x + u - 0.012, y + 0.02, Math.min(zf + s * 0.03, zf + s * 0.06), x + u + 0.012, y + hi(top) - 0.02, Math.max(zf + s * 0.03, zf + s * 0.06)); }
+  for (const f of [0.18, 0.36, 0.54, 0.7, 0.84]) { const hwv = hwAt(h * f) - 0.02; B('wood_dark', x - hwv, y + h * f - 0.012, Math.min(zf + s * 0.03, zf + s * 0.06), x + hwv, y + h * f + 0.012, Math.max(zf + s * 0.03, zf + s * 0.06)); }
+  B('wood_dark', x - w / 2 - 0.3, y - 0.2, Math.min(zf, zf + s * 0.28), x + w / 2 + 0.3, y - 0.06, Math.max(zf, zf + s * 0.28));    // the sill
+  B('lacquer_black', x - w / 2 - 0.26, y - 0.06, Math.min(zf, zf + s * 0.2), x + w / 2 + 0.26, y, Math.max(zf, zf + s * 0.2));
+}
+
+/** A pent roof of cypress-bark shingles in courses, concave in section, its eave swept up at the hip corners; the soffit below and the fascia; the height of the eave at s along side k is returned by eave(k, s). Outer rect X, inner rect x. */
+function pentCourses(T, [X0, Z0, X1, Z1], [x0, z0, x1, z1], yOut, yIn, lift) {
+  const sides = [[[X0, Z1], [X1, Z1], [x1, z1], [x0, z1]], [[X1, Z1], [X1, Z0], [x1, z0], [x1, z1]], [[X1, Z0], [X0, Z0], [x0, z0], [x1, z0]], [[X0, Z0], [X0, Z1], [x0, z1], [x0, z0]]];
+  const NC = 16, N = 14, top = [], edge = [], und = [], fas = [], hip = [];
+  const eave = (Ls, s) => { const m = Math.min(s, 1 - s) * Ls, q = Math.max(0, 1 - m / 3.4); return yOut + lift * q * q; };
+  sides.forEach(([a, b, c, d]) => {
+    const Ls = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const Y = (s, t) => { const m = Math.min(s, 1 - s) * Ls, q = Math.max(0, 1 - m / 3.4); return yOut + (yIn - yOut) * Math.pow(1 - t, 1.45) + lift * q * q * t * t; };
+    const Pt = (s, t, dy = 0) => [d[0] + (c[0] - d[0]) * s + ((a[0] + (b[0] - a[0]) * s) - (d[0] + (c[0] - d[0]) * s)) * t, Y(s, t) + dy, d[1] + (c[1] - d[1]) * s + ((a[1] + (b[1] - a[1]) * s) - (d[1] + (c[1] - d[1]) * s)) * t];
+    for (let k = 0; k < NC; k++) {
+      const t0 = k / NC, t1 = (k + 1) / NC, th = 0.05;
+      for (let j = 0; j < N; j++) {
+        const s0 = j / N, s1 = (j + 1) / N;
+        quad2(top, Pt(s0, t0), Pt(s1, t0), Pt(s1, t1, th), Pt(s0, t1, th));
+        if (k < NC - 1) quad2(edge, Pt(s0, t1, th), Pt(s1, t1, th), Pt(s1, t1), Pt(s0, t1));
+      }
+    }
+    for (let k = 0; k < 6; k++) for (let j = 0; j < N; j++) { const t0 = k / 6, t1 = (k + 1) / 6, s0 = j / N, s1 = (j + 1) / N; quad2(und, Pt(s0, t0, -0.22), Pt(s1, t0, -0.22), Pt(s1, t1, -0.22), Pt(s0, t1, -0.22)); }
+    for (let j = 0; j < N; j++) { const s0 = j / N, s1 = (j + 1) / N; quad2(fas, Pt(s0, 1, -0.22), Pt(s1, 1, -0.22), Pt(s1, 1, 0.05), Pt(s0, 1, 0.05)); }
+    // the hip ridge at this side's start corner: a raised cap along the line from the wall to the eave
+    for (let k = 0; k < 10; k++) { const t0 = k / 10, t1 = (k + 1) / 10, p0 = Pt(0, t0, 0.09), p1 = Pt(0, t1, 0.09), wd = 0.1, dx = p1[0] - p0[0], dz = p1[2] - p0[2], l = Math.hypot(dx, dz) || 1, nx = -dz / l * wd, nz = dx / l * wd; quad2(hip, [p0[0] - nx, p0[1], p0[2] - nz], [p0[0] + nx, p0[1], p0[2] + nz], [p1[0] + nx, p1[1], p1[2] + nz], [p1[0] - nx, p1[1], p1[2] - nz]); }
+  });
+  T(BARK, top); T(TM, edge.concat(und, fas, hip));
+  return eave;
+}
+const leafShoji = (B, x0, x1, yb, yt, z0) => {                                  // a sliding shoji leaf on its own track (z0 .. z0 + 0.04): stiles, rails, a boarded foot, the paper and its lattice
+  const z1 = z0 + 0.045;
+  B('shoji', x0 + 0.03, yb + 0.55, z0 + 0.012, x1 - 0.03, yt - 0.03, z0 + 0.03);
+  B(WD, x0, yb, z0, x1, yb + 0.55, z1); B('timber', x0 + 0.04, yb + 0.05, z1, x1 - 0.04, yb + 0.5, z1 + 0.012);
+  B(WD, x0, yb, z0, x0 + 0.04, yt, z1); B(WD, x1 - 0.04, yb, z0, x1, yt, z1); B(WD, x0, yt - 0.04, z0, x1, yt, z1); B(WD, x0, yb + 0.55, z0, x1, yb + 0.59, z1);
+  const nv = Math.round((x1 - x0) / 0.2), nh = Math.round((yt - yb - 0.6) / 0.3);
+  for (let i = 1; i < nv; i++) B(WD, x0 + (x1 - x0) * i / nv - 0.01, yb + 0.59, z0 - 0.005, x0 + (x1 - x0) * i / nv + 0.01, yt - 0.04, z1);
+  for (let k = 1; k < nh; k++) B(WD, x0 + 0.04, yb + 0.59 + (yt - yb - 0.63) * k / nh - 0.01, z0 - 0.005, x1 - 0.04, yb + 0.59 + (yt - yb - 0.63) * k / nh + 0.01, z1);
+};
+const leafBoard = (B, x0, x1, yb, yt, z0) => {                                  // a sliding board door (sugido): cedar boards between a lacquered frame, a mid rail, the pull
+  const z1 = z0 + 0.045, n = Math.round((x1 - x0) / 0.15);
+  B('cedar', x0 + 0.03, yb + 0.03, z0 + 0.01, x1 - 0.03, yt - 0.03, z0 + 0.035);
+  for (let i = 1; i < n; i++) B('wood_dark', x0 + (x1 - x0) * i / n - 0.004, yb + 0.05, z0 - 0.004, x0 + (x1 - x0) * i / n + 0.004, yt - 0.05, z0 + 0.04);
+  B('lacquer_black', x0, yb, z0, x1, yb + 0.07, z1); B('lacquer_black', x0, yt - 0.07, z0, x1, yt, z1); B('lacquer_black', x0, yb, z0, x0 + 0.06, yt, z1); B('lacquer_black', x1 - 0.06, yb, z0, x1, yt, z1);
+  B('lacquer_black', x0, (yb + yt) / 2 - 0.035, z0, x1, (yb + yt) / 2 + 0.035, z1);
+  B('gold', x1 - 0.2, (yb + yt) / 2 - 0.12, z0 - 0.012, x1 - 0.14, (yb + yt) / 2 - 0.06, z0 + 0.012);
+};
+
 function kannonDen(el, ctx) {
   local(el, ctx, ({ bag, col, B, T, L }, y0) => {
     const W = 10.5, D = 8.4, hw = W / 2, hd = D / 2, F = 0.9, H1 = 3.4, H2 = 3.6, yT = y0 + F + H1, yU = yT + H2;
@@ -51,13 +117,17 @@ function kannonDen(el, ctx) {
     B(PL, -hw + 0.1, y1, -hd + 0.04, hw - 0.1, yT - 0.25, -hd + 0.14);
     for (const sx of [-1, 1]) B(PL, sx > 0 ? hw - 0.14 : -hw + 0.04, y1, -hd + 0.1, sx > 0 ? hw - 0.04 : -hw + 0.14, yT - 0.25, hd - 0.1);
     for (let i = 0; i < 5; i++) {
-      const xa = -hw + i * 2.1 + 0.12, xb = xa + 1.86;
-      if (i === 2) { /* the doorway: the sliding doors drawn back */ B('shoji', xa, y1 + 0.12, hd - 0.1, xa + 0.5, yT - 0.7, hd - 0.07); B('shoji', xb - 0.5, y1 + 0.12, hd - 0.04, xb, yT - 0.7, hd - 0.01); }
-      else if (i === 1 || i === 3) { B('shoji', xa, y1 + 0.22, hd - 0.1, xb, yT - 0.7, hd - 0.07); for (let k = 1; k < 4; k++) B(WD, xa + k * (xb - xa) / 4 - 0.015, y1 + 0.22, hd - 0.11, xa + k * (xb - xa) / 4 + 0.015, yT - 0.7, hd - 0.05); B(WD, xa, y1 + 1.0, hd - 0.11, xb, y1 + 1.04, hd - 0.05); }
-      else B('koshi', xa, y1 + 0.12, hd - 0.1, xb, yT - 0.7, hd - 0.05);
-      B(PL, xa, yT - 0.7, hd - 0.1, xb, yT - 0.25, hd - 0.03);                       // the transom
-      B(WD, xa, yT - 0.75, hd - 0.08, xb, yT - 0.7, hd + 0.04);
-      B(WD, xa, y1 + 0.08, hd - 0.08, xb, y1 + 0.16, hd + 0.04);                     // the sill rail
+      const xa = -hw + i * 2.1 + 0.12, xb = xa + 1.86, yb = y1 + 0.16, yt = yT - 0.78, mid = (xa + xb) / 2;
+      if (i === 2) { /* the doorway: the sliding doors drawn back to either side */ leafShoji(B, xa, xa + 0.62, yb, yt, hd - 0.1); leafShoji(B, xb - 0.62, xb, yb, yt, hd - 0.055); }
+      else if (i === 1 || i === 3) { leafShoji(B, xa, mid + 0.05, yb, yt, hd - 0.1); leafShoji(B, mid - 0.05, xb, yb, yt, hd - 0.055); }
+      else { leafBoard(B, xa, mid + 0.05, yb, yt, hd - 0.1); leafBoard(B, mid - 0.05, xb, yb, yt, hd - 0.055); }
+      // the lintel with its groove, the sill; the transom (ranma) of slats and cross-bars over a dark ground
+      B(WD, xa - 0.02, yT - 0.78, hd - 0.14, xb + 0.02, yT - 0.68, hd + 0.04);
+      B('opening', xa, yT - 0.68, hd - 0.1, xb, yT - 0.27, hd - 0.08);
+      for (let k = 0; k <= 13; k++) { const x = xa + 0.05 + k * (xb - xa - 0.1) / 13; B(WD, x - 0.014, yT - 0.68, hd - 0.1, x + 0.014, yT - 0.27, hd - 0.03); }
+      for (const yy of [yT - 0.68, yT - 0.5, yT - 0.31]) B(WD, xa, yy, hd - 0.1, xb, yy + 0.04, hd - 0.02);
+      B('lacquer_black', mid - 0.2, yT - 0.62, hd - 0.03, mid + 0.2, yT - 0.33, hd + 0.0); B('gold', mid - 0.12, yT - 0.55, hd + 0.0, mid + 0.12, yT - 0.4, hd + 0.012);
+      B(WD, xa - 0.02, y1 + 0.04, hd - 0.14, xb + 0.02, y1 + 0.16, hd + 0.04);       // the sill (shikii), its track
     }
     for (let i = 0; i <= 5; i++) B('lacquer_black', -hw + i * 2.1 - 0.13, y1, hd - 0.14, -hw + i * 2.1 + 0.13, yT, hd + 0.02);
     B(WD, -hw - 0.2, yT - 0.25, -hd - 0.2, hw + 0.2, yT, hd + 0.2);                  // the head beam, round
@@ -108,11 +178,11 @@ function kannonDen(el, ctx) {
     for (const r of [[-hw - 1.3, uz, hw + 1.3, hd + 1.3], [-hw - 1.3, -hd - 1.3, hw + 1.3, -uz], [-hw - 1.3, -uz, -ux, uz], [ux, -uz, hw + 1.3, uz]]) col.rect(r, yT + 0.05, yT + 1.4);
     col.rect([-ux - 1.3, -uz - 1.3, ux + 1.3, uz + 1.3], yU, yU + 4);
     // the pent roof between the floors, the upper floor of 3 × 2 bays on the lower ceiling
-    eaveRing(T, BARK, TM, [-hw - 1.3, -hd - 1.3, hw + 1.3, hd + 1.3], [-ux - 0.15, -uz - 0.15, ux + 0.15, uz + 0.15], yT + 0.05, yT + 1.35);
-    B(BARK, -hw - 1.3, yT - 0.0, hd + 1.3 - 0.02, hw + 1.3, yT + 0.05, hd + 1.3);
-    // (rafter ends along the eave)
-    for (let x = -hw - 1.1; x <= hw + 1.1; x += 0.55) { B(WD, x - 0.05, yT - 0.22, hd + 1.0, x + 0.05, yT - 0.04, hd + 1.3); B(WD, x - 0.05, yT - 0.22, -hd - 1.3, x + 0.05, yT - 0.04, -hd - 1.0); }
-    for (let z = -hd - 1.1; z <= hd + 1.1; z += 0.55) for (const sx of [-1, 1]) B(WD, sx > 0 ? hw + 1.0 : -hw - 1.3, yT - 0.22, z - 0.05, sx > 0 ? hw + 1.3 : -hw - 1.0, yT - 0.04, z + 0.05);
+    const eaveY = pentCourses(T, [-hw - 1.3, -hd - 1.3, hw + 1.3, hd + 1.3], [-ux - 0.15, -uz - 0.15, ux + 0.15, uz + 0.15], yT + 0.05, yT + 1.35, 0.42);
+    // the rafter ends along the eave (they rise with it toward the corners)
+    { const X = hw + 1.3, Z = hd + 1.3, ez = (L, s) => eaveY(L, s) - 0.32;
+      for (let x = -X + 0.6; x <= X - 0.5; x += 0.55) { const y = ez(2 * X, (x + X) / (2 * X)); B(WD, x - 0.05, y, Z - 0.34, x + 0.05, y + 0.2, Z + 0.04); B(WD, x - 0.05, y, -Z - 0.04, x + 0.05, y + 0.2, -Z + 0.34); }
+      for (let z = -Z + 0.6; z <= Z - 0.5; z += 0.55) { const y = ez(2 * Z, (z + Z) / (2 * Z)); B(WD, X - 0.34, y, z - 0.05, X + 0.04, y + 0.2, z + 0.05); B(WD, -X - 0.04, y, z - 0.05, -X + 0.34, y + 0.2, z + 0.05); } }
     // the upper room's walls (thin, so that it can be entered), posts outside them
     B(WD, -ux, yT, uz - 0.16, ux, yU - 0.3, uz); B(WD, -ux, yT, -uz, ux, yU - 0.3, -uz + 0.16); B(WD, -ux, yT, -uz, -ux + 0.16, yU - 0.3, uz); B(WD, ux - 0.16, yT, -uz, ux, yU - 0.3, uz);
     for (let i = 0; i <= 3; i++) B('lacquer_black', -ux + i * 2.1 - 0.1, yT, uz - 0.02, -ux + i * 2.1 + 0.1, yU, uz + 0.06);
@@ -128,8 +198,8 @@ function kannonDen(el, ctx) {
     for (const x of [-2.1, 0, 2.1]) katomado(T, x, yT + 1.35, uz - 0.16, 1.1, 1.7, -1);
     katomado(T, 0, yT + 1.35, -uz + 0.16, 1.1, 1.7, 1);
     // the cusped windows: three on the front, one at each side
-    for (const x of [-2.1, 0, 2.1]) katomado(T, x, yT + 1.35, uz + 0.04, 1.1, 1.7);
-    katomado(T, 0, yT + 1.35, -uz - 0.04, 1.1, 1.7, -1);
+    for (const x of [-2.1, 0, 2.1]) katomadoDeep(T, B, x, yT + 1.35, uz + 0.04, 1.1, 1.7);
+    katomadoDeep(T, B, 0, yT + 1.35, -uz - 0.04, 1.1, 1.7, -1);
     // the upper storey's bracket sets (kara-yō / Zen style, the "Kara style" of the upper floor — docs §10b): on the head beam, a block, a
     // first arm with its cross arms, a second block and a second arm bearing the purlin that runs round the building; plaster between
     // them; the eave's rafters in two rows beyond. The roof stands on them, so it is raised the height of the sets.
