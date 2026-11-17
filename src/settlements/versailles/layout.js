@@ -141,9 +141,9 @@ function openSet(all, [px, pz] = [226, 0]) {
   // one of each trade, the nearest first
   for (const t of THE_TRADES) { const l = shops.find((q) => q.trade === t && !out.has(q)); if (l && d(l) < 330) { out.set(l, t); used.add(t); } }
   // two more of the busiest trades and homes
-  for (const l of shops) { if (out.size >= 16) break; if (!out.has(l)) out.set(l, l.trade); }
-  for (const l of ok.filter((q) => q.kind === 'house').sort((a, b) => d(a) - d(b)).slice(0, 8)) out.set(l, 'home');
-  for (const l of ok.filter((q) => q.kind === 'hotel').sort((a, b) => d(a) - d(b)).slice(0, 2)) out.set(l, 'hotel');
+  for (const l of shops) { if (out.size >= 46) break; if (!out.has(l)) out.set(l, l.trade); }
+  for (const l of ok.filter((q) => q.kind === 'house').sort((a, b) => d(a) - d(b)).slice(0, 20)) out.set(l, 'home');
+  for (const l of ok.filter((q) => q.kind === 'hotel').sort((a, b) => d(a) - d(b)).slice(0, 4)) out.set(l, 'hotel');
   return out;
 }
 let LGRID = null;

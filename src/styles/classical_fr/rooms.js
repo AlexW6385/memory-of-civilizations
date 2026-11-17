@@ -324,14 +324,25 @@ export function silverBench(F, col, u, y, w = 1.8, d = 0.15) {
 
 /** A gilt bronze trophy of arms on a wall frame: cuirass, helmet, round shield, crossed spears and standards, a laurel. */
 export function trophy(F, u, y, d, s = 1, mat = GB) {
-  F.disc(mat, [[0.24 * s, 0], [0.24 * s, 0.03 * s], [0.2 * s, 0.05 * s], [0.001, 0.06 * s]], u, y + 0.55 * s, d, 12);                     // the shield behind
+  const X = (v) => u + v * s, Y = (v) => y + v * s;
+  // the pikes crossed behind, each with its leaf-shaped head, and a banner hanging from each below the head
   for (const sg of [-1, 1]) {
-    F.add(mat, bar([u - sg * 0.32 * s, y - 0.05 * s, d + 0.03], [u + sg * 0.36 * s, y + 1.25 * s, d + 0.03], 0.025 * s));            // spears
-    F.shape(mat, [[u + sg * 0.33 * s, y + 1.05 * s], [u + sg * 0.55 * s, y + 1.0 * s], [u + sg * 0.5 * s, y + 0.8 * s], [u + sg * 0.3 * s, y + 0.86 * s]], d + 0.02, d + 0.035);   // standards
+    F.add(mat, bar([X(-sg * 0.5), Y(-0.1), d + 0.02], [X(sg * 0.5), Y(1.7), d + 0.02], 0.022 * s));
+    F.shape(mat, [[X(sg * 0.5), Y(1.58)], [X(sg * 0.57), Y(1.74)], [X(sg * 0.5), Y(1.98)], [X(sg * 0.43), Y(1.74)]], d + 0.015, d + 0.03);
+    F.shape(mat, [[X(sg * 0.44), Y(1.42)], [X(sg * 0.8), Y(1.34)], [X(sg * 0.74), Y(1.22)], [X(sg * 0.82), Y(1.08)], [X(sg * 0.4), Y(1.14)]], d + 0.01, d + 0.026);   // the banner with its swallow-tail
   }
-  { const g = lathe([[0.001, -0.02], [0.16 * s, 0.02 * s], [0.2 * s, 0.22 * s], [0.15 * s, 0.4 * s], [0.18 * s, 0.48 * s], [0.001, 0.52 * s]], 10); g.scale(1, 1, 0.45); g.translate(u, y + 0.1 * s, d + 0.11 * s); F.add(mat, g); }   // cuirass
-  F.lathe(mat, [[0.001, 0], [0.1 * s, 0.02 * s], [0.11 * s, 0.1 * s], [0.07 * s, 0.18 * s], [0.02 * s, 0.24 * s], [0.04 * s, 0.3 * s], [0.001, 0.31 * s]], u, d + 0.11 * s, y + 0.64 * s, 10);   // helmet with its crest
-  F.ring(mat, u, y + 0.05 * s, 0.2 * s, 0.24 * s, d, d + 0.03, Math.PI * 1.1, Math.PI * 1.9, 6);                                          // a laurel swag below
+  // the round shield, rimmed, with its boss, behind the cuirass
+  F.disc(mat, [[0.34 * s, 0], [0.34 * s, 0.03 * s], [0.3 * s, 0.05 * s], [0.12 * s, 0.07 * s], [0.07 * s, 0.1 * s], [0.001, 0.11 * s]], X(0), Y(0.82), d + 0.01, 16);
+  // the cuirass: breast with the shoulder straps, the waist and the flared tassets in plates
+  F.shape(mat, [[X(-0.2), Y(0.52)], [X(-0.27), Y(0.8)], [X(-0.13), Y(0.94)], [X(0.13), Y(0.94)], [X(0.27), Y(0.8)], [X(0.2), Y(0.52)], [X(0.23), Y(0.34)], [X(-0.23), Y(0.34)]], d + 0.05, d + 0.09);
+  for (let k = 0; k < 3; k++) F.shape(mat, [[X(-0.23 - k * 0.025), Y(0.34 - k * 0.1)], [X(0.23 + k * 0.025), Y(0.34 - k * 0.1)], [X(0.25 + k * 0.025), Y(0.25 - k * 0.1)], [X(-0.25 - k * 0.025), Y(0.25 - k * 0.1)]], d + 0.045 + k * 0.005, d + 0.085 + k * 0.005);
+  F.shape(mat, [[X(0), Y(0.56)], [X(0.04), Y(0.74)], [X(0), Y(0.9)], [X(-0.04), Y(0.74)]], d + 0.09, d + 0.105);                    // the ridge of the breastplate
+  // the helmet on the shoulders with its plume, a drum and a cannon-barrel at the foot, a laurel swag between
+  F.lathe(mat, [[0.001, 0], [0.12 * s, 0.01 * s], [0.14 * s, 0.1 * s], [0.1 * s, 0.2 * s], [0.001, 0.24 * s]], X(0), d + 0.11 * s, Y(0.98), 10);
+  F.shape(mat, [[X(-0.01), Y(1.16)], [X(0.12), Y(1.3)], [X(0.2), Y(1.18)], [X(0.14), Y(1.0)], [X(0.04), Y(1.1)]], d + 0.1, d + 0.125);   // the plume
+  F.box(mat, X(-0.3), X(0.3), Y(-0.02), Y(0.1), d + 0.02, d + 0.09);                                                                      // a drum's side
+  F.add(mat, bar([X(-0.5), Y(0.0), d + 0.07], [X(0.5), Y(0.12), d + 0.07], 0.05 * s));                                                    // a cannon
+  F.ring(mat, X(0), Y(0.2), 0.3 * s, 0.34 * s, d, d + 0.03, Math.PI * 1.1, Math.PI * 1.9, 8);
 }
 
 /** A sculpted head: Apollo's (a face in a sunburst) or the Nemean lion's skin, on a keystone. */

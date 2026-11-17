@@ -54,13 +54,29 @@ export function gardenFront(ctx, f, rect, y, h, opts = {}) {
     else { cr(0, uc(door) - gW.r, y); cr(uc(door) + gW.r, L, y); cr(uc(door) - gW.r, uc(door) + gW.r, gW.spring + gW.r); } }
 
   for (const i of all) {
-    const d = dAt(i), c = uc(i), u0 = i * bw, u1 = (i + 1) * bw;
-    // the rustication of the ground floor: courses of 0.55 m parted by deep channels
-    for (let v = y + 0.55; v < G - 0.3; v += 0.55) {
-      const hw = v > gW.spring ? Math.sqrt(Math.max(0, gW.r * gW.r - (v - gW.spring) ** 2)) : gW.r;
-      if (v < gSill(i) || v > gW.spring + gW.r) B(S, u0, u1, v - 0.06, v + 0.06, d - 0.01, d + 0.05);
-      else { B(S, u0, c - hw - 0.25, v - 0.06, v + 0.06, d - 0.01, d + 0.05); B(S, c + hw + 0.25, u1, v - 0.06, v + 0.06, d - 0.01, d + 0.05); }
+    const d = dAt(i), c = uc(i), u0 = i * bw, u1 = (i + 1) * bw; const c0 = uc;
+    // the rustication of the ground floor: courses of 0.55 m of blocks standing 0.08 m proud of the wall, parted by recessed
+    // channels and staggered vertical joints; the courses break round each arch and the arch is ringed by long and short voussoirs
+    for (let c = 0, v0 = y; v0 + 0.55 <= G - 0.3 + 1e-6; c++, v0 += 0.55) {
+      const yb = v0 + 0.06, ye = v0 + 0.5, vm = (yb + ye) / 2;
+      const inWin = vm > gSill(i) - 0.05 && vm < gW.spring + gW.r;
+      const hw = !inWin ? 0 : vm > gW.spring ? Math.sqrt(Math.max(0, gW.r * gW.r - (vm - gW.spring) ** 2)) : gW.r;
+      const spans = inWin ? [[u0, c0(i) - hw - 0.3], [c0(i) + hw + 0.3, u1]] : [[u0, u1]];
+      for (const [sa, sb] of spans) {
+        if (sb - sa < 0.15) continue;
+        let a = sa;
+        for (let j = sa + 0.55 + (c % 2) * 0.6 + 0.6; j < sb - 0.3; j += 1.2) { if (j - a > 0.3) B(S, a, j - 0.035, yb, ye, d - 0.01, d + 0.08); a = j + 0.035; }
+        if (sb - a > 0.1) B(S, a, sb, yb, ye, d - 0.01, d + 0.08);
+      }
     }
+    // the arch's voussoirs: long and short stones in turn, radial, round each ground-floor arch
+    if (i !== door) { const vs = [], N = 11;
+      for (let k = 0; k < N; k++) {
+        const a0 = Math.PI * (k + 0.06) / N, a1 = Math.PI * (k + 0.94) / N, R0 = gW.r + 0.24, R1 = gW.r + (k % 2 ? 0.62 : 0.84), pr = d + 0.1;
+        const Q = (r, t, dd) => { const p = W(c0(i) + r * Math.cos(t), dd); return [p[0], gW.spring + r * Math.sin(t), p[1]]; };
+        hexa(vs, [Q(R0, a0, d - 0.02), Q(R1, a0, d - 0.02), Q(R1, a1, d - 0.02), Q(R0, a1, d - 0.02)], [Q(R0, a0, pr), Q(R1, a0, pr), Q(R1, a1, pr), Q(R0, a1, pr)]);
+      }
+      bag.add(S, fromTriangles(vs)); }
     // windows: glass in its reveal, the frames and glazing bars; the keystones carved as masks; a balcony rail to the long windows
     for (const [w, sill, spring, key] of [[gW.r, gSill(i), gW.spring, 'mask'], [pW.r, pW.sill, pW.spring, 'key']]) {
       const g = W(0, 0.14), open = key === 'mask' && i === door;
@@ -107,10 +123,15 @@ export function gardenFront(ctx, f, rect, y, h, opts = {}) {
   for (let i = 0; i <= nb; i++) {
     const uu = i * bw, d = Math.max(dAt(Math.min(i, nb - 1)), dAt(Math.max(0, i - 1)));
     B(S, uu - 0.38, uu + 0.38, G + 0.22, G + 0.55, d - 0.02, d + 0.3);
-    B(S, uu - 0.34, uu + 0.34, G + 0.55, E - 0.5, d - 0.02, d + 0.22);
-    B(S, uu - 0.42, uu + 0.42, E - 0.5, E - 0.38, d - 0.02, d + 0.3);
-    for (const s of [-1, 1]) { const p = W(uu + s * 0.3, d + 0.26), g = lathe([[0.12, 0], [0.12, 0.12], [0.001, 0.12]], 10); g.rotateX(Math.PI / 2); g.rotateY(Math.atan2(n[0], n[1])); g.translate(p[0], E - 0.25, p[1]); bag.add(S, g); }
-    B(S, uu - 0.4, uu + 0.4, E - 0.12, E, d - 0.02, d + 0.32);
+    B(S, uu - 0.36, uu + 0.36, G + 0.55, E - 0.5, d - 0.02, d + 0.3);
+    // the Ionic capital: the echinus with its egg-and-dart, the pulvinus, a volute with its eye at each side, the abacus
+    B(S, uu - 0.4, uu + 0.4, E - 0.5, E - 0.4, d - 0.02, d + 0.33);
+    B(S, uu - 0.46, uu + 0.46, E - 0.4, E - 0.3, d - 0.02, d + 0.35);
+    B(S, uu - 0.52, uu + 0.52, E - 0.3, E - 0.18, d - 0.02, d + 0.37);
+    for (const s of [-1, 1]) {
+      const p = W(uu + s * 0.5, d + 0.36), g = lathe([[0.2, 0], [0.2, 0.11], [0.1, 0.11], [0.1, 0.15], [0.001, 0.15]], 12); g.rotateX(Math.PI / 2); g.rotateY(Math.atan2(n[0], n[1])); g.translate(p[0], E - 0.3, p[1]); bag.add(S, g);
+    }
+    B(S, uu - 0.58, uu + 0.58, E - 0.18, E, d - 0.02, d + 0.39);
     B(S, uu - 0.3, uu + 0.3, A, T - 0.35, d - 0.02, d + 0.14);
   }
   // the avant-corps' detached columns on their pedestals, the entablature broken forward over them, a statue above each
