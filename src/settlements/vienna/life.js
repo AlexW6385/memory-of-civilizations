@@ -35,7 +35,7 @@ export function life() {
     } else {
       const k = F.at(F.w * (0.35 + rand() * 0.3), db + 0.9);
       (rand() < 0.6 ? man : woman)(k, y, faceTo(out), { over: 'apron', hat: 'none' });
-      if (rand() < 0.35) either(F.at(F.w * (0.3 + rand() * 0.4), db + 4.2), y, faceTo(rand() < 0.5 ? out : inward), { pose: rand() < 0.5 ? 'talk' : 'stand' });
+      if (!['tischler', 'friseur', 'milch'].includes(l.open) && rand() < 0.35) either(F.at(F.w * (0.3 + rand() * 0.4), db + 4.2), y, faceTo(rand() < 0.5 ? out : inward), { pose: rand() < 0.5 ? 'talk' : 'stand' });
     }
   }
 

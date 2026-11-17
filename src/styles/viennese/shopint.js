@@ -16,8 +16,9 @@ export const NAMES = {
   kaffeehaus: ['KAFFEEHAUS', 'CAFÉ'], baeckerei: ['BÄCKEREI', 'BROT'], tabak: ['TABAK', 'TRAFIK'], apotheke: ['APOTHEKE'], greissler: ['GREISSLER', 'SPEZEREI'],
   fleischhauer: ['FLEISCH', 'SELCHER'], buchhandlung: ['BÜCHER', 'BUCH'], huetemacher: ['HÜTE', 'MODEN'], weinstube: ['WEIN', 'HEURIGER'], schneider: ['SCHNEIDER', 'STOFFE'],
   konditorei: ['KONDITOREI', 'TORTEN'], uhrmacher: ['UHREN', 'JUWELEN'], schuster: ['SCHUHE', 'SCHUSTER'], blumen: ['BLUMEN', 'GÄRTNER'],
+  friseur: ['FRISEUR', 'RASIEREN'], milch: ['MILCH', 'MEIEREI'], tischler: ['TISCHLER', 'MÖBEL'],
 };
-const SIGNC = { kaffeehaus: 'lacquer_black', baeckerei: 'shutter_green', tabak: 'lacquer_black', apotheke: 'paint_white', greissler: 'cloth_green', fleischhauer: 'cloth_maroon', buchhandlung: 'lacquer_black', huetemacher: 'paint_blue', weinstube: 'cloth_maroon', schneider: 'lacquer_black', konditorei: 'paint_white', uhrmacher: 'lacquer_black', schuster: 'cloth_maroon', blumen: 'shutter_green' };
+const SIGNC = { kaffeehaus: 'lacquer_black', baeckerei: 'shutter_green', tabak: 'lacquer_black', apotheke: 'paint_white', greissler: 'cloth_green', fleischhauer: 'cloth_maroon', buchhandlung: 'lacquer_black', huetemacher: 'paint_blue', weinstube: 'cloth_maroon', schneider: 'lacquer_black', konditorei: 'paint_white', uhrmacher: 'lacquer_black', schuster: 'cloth_maroon', blumen: 'shutter_green', friseur: 'paint_blue', milch: 'paint_white', tischler: 'cloth_maroon' };
 const LETTERC = { paint_white: 'lacquer_black', paint_blue: 'gold' };
 
 /** The tables of a Kaffeehaus or a Konditorei in frame coordinates (u along the front, d inward-negative): [[u, d]…], as shopRoom sets them. */
@@ -71,6 +72,7 @@ const WINDOWGOODS = {
   huetemacher: ['hide_black', 'cloth_grey', 'hide_brown', 'cloth_white'], weinstube: ['glaze_green', 'wood_dark', 'glass_lamp'], schneider: ['cloth_red', 'cloth_blue', 'cloth_green', 'cloth_ochre', 'cloth_grey'],
   konditorei: ['paint_white', 'cloth_red', 'wood_dark', 'paint_ochre', 'cloth_maroon'], uhrmacher: ['gilt_bronze', 'paint_white', 'steel_grey'], schuster: ['hide_black', 'hide_brown', 'hide_tan'],
   blumen: ['cloth_red', 'cloth_green', 'cloth_ochre', 'paint_white', 'cloth_maroon'], kaffeehaus: ['paint_white', 'wood_dark', 'cloth_red'],
+  friseur: ['glaze_white', 'mirror_tin', 'cloth_white'], milch: ['glaze_white', 'iron_galv', 'paint_white', 'paint_ochre'], tischler: ['wood_ochre', 'wood_dark', 'iron'],
 };
 
 /**
@@ -191,6 +193,41 @@ export function shopRoom(ctx, F, y, { w, D, g, H, mat, bays, trade, seed }) {
       B('wood_ochre', w / 2 - 1.2, w / 2 + 1.2, 0.12, 0.8, db + 4.4, db + 5.4, true);
       for (let k = 0; k < 7; k++) B(['cloth_red', 'cloth_ochre', 'paint_white', 'cloth_green'][k % 4], w / 2 - 1.1 + k * 0.3, w / 2 - 0.9 + k * 0.3, 0.8, 0.95 + (k % 3) * 0.08, db + 4.5, db + 5.3);
       break;
+    case 'friseur': {   // the barber's (Friseur): two chairs before the long mirror on the east wall, basins and bottles, a bench for waiting
+      shelf(...wall, [1.3, 1.9, 2.4], ['glaze_white', 'glass_lamp', 'paint_blue', 'paint_white'], [0.15, 0.2]);
+      B('mirror_tin', w - T - 0.06, w - T - 0.02, 0.9, 2.4, db + 2.6, db + 6.4); B('wood_dark', w - T - 0.09, w - T - 0.06, 0.85, 2.45, db + 2.55, db + 6.45);
+      B('wood_dark', w - T - 0.5, w - T - 0.06, 0.8, 0.86, db + 2.6, db + 6.4);
+      for (let k = 0; k < 5; k++) B(['glass_lamp', 'glaze_white', 'paint_blue'][k % 3], w - T - 0.4, w - T - 0.24, 0.86, 1.1 + (k % 2) * 0.1, db + 2.9 + k * 0.62, db + 3.06 + k * 0.62);
+      for (const dd of [db + 3.6, db + 5.5]) {
+        const u = w - T - 1.35, p = F.at(u, dd);
+        bag.add('iron', lathe([[0.001, 0.12], [0.3, 0.12], [0.3, 0.17], [0.07, 0.2], [0.07, 0.5], [0.001, 0.5]], 10, null, p[0], y + 0.0, p[1]));
+        B('hide_brown', u - 0.32, u + 0.32, 0.5, 0.6, dd - 0.32, dd + 0.32); B('hide_brown', u - 0.4, u - 0.3, 0.6, 1.3, dd - 0.32, dd + 0.32);
+        B('hide_brown', u - 0.28, u + 0.3, 0.6, 0.66, dd - 0.34, dd - 0.28); B('hide_brown', u - 0.28, u + 0.3, 0.6, 0.66, dd + 0.28, dd + 0.34);
+        B('steel_grey', u + 0.3, u + 0.5, 0.12, 0.2, dd - 0.3, dd + 0.3);
+        col.rect(P(u - 0.4, u + 0.5, dd - 0.35, dd + 0.35), y + 0.12, y + 1.3);
+      }
+      B('wood_ochre', T + 0.02, T + 0.45, 0.12, 0.45, db + 3.6, db + 6.0, true); B('wood_ochre', T + 0.02, T + 0.08, 0.45, 0.95, db + 3.6, db + 6.0);
+      break; }
+    case 'milch': {     // the dairy (Milchmeierei): cans in a row, marble counter, jars, butter and cheese, the scale
+      shelf(...wall, [0.6, 1.2, 1.8, 2.4], ['glaze_white', 'paint_white', 'paint_ochre', 'glass_lamp'], [0.15, 0.18]);
+      B('marble', c0 - 0.04, c1 + 0.04, 1.07, 1.1, cb - 0.04, ce + 0.04);
+      for (let k = 0; k < 6; k++) { const u = w - T - 0.45 - (k % 3) * 0.55, dd = db + 3.4 + (k >> 2) * 0.0 + Math.floor(k / 3) * 0.6, p = F.at(u, dd); bag.add('iron_galv', lathe([[0.001, 0.12], [0.2, 0.12], [0.2, 0.55], [0.12, 0.65], [0.1, 0.8], [0.14, 0.82], [0.14, 0.88], [0.001, 0.88]], 10, null, p[0], y, p[1])); col.circle(p[0], p[1], 0.22, y + 0.12, y + 0.88); }
+      for (let k = 0; k < 4; k++) { const u = c0 + 0.3 + k * 0.5, p = F.at(u, (cb + ce) / 2); bag.add('paint_ochre', lathe([[0.001, 0], [0.2, 0], [0.2, 0.09], [0.001, 0.09]], 10, null, p[0], y + 1.1, p[1])); }
+      for (let k = 0; k < 3; k++) B('wood_ochre', c1 - 0.9 + k * 0.28, c1 - 0.7 + k * 0.28, 1.1, 1.22, cb + 0.2, cb + 0.5);
+      B('steel_grey', c0 + 1.5, c0 + 1.9, 1.1, 1.14, cb + 0.1, cb + 0.5); B('steel_grey', c0 + 1.68, c0 + 1.72, 1.14, 1.5, cb + 0.28, cb + 0.32);
+      B('wood_painted', T + 0.3, T + 1.4, 0.12, 0.7, db + 3.8, db + 4.8, true); for (let k = 0; k < 3; k++) B('glaze_white', T + 0.4 + k * 0.33, T + 0.64 + k * 0.33, 0.7, 0.95, db + 4.0, db + 4.4);
+      break; }
+    case 'tischler': {  // the joiner's (Tischler): the bench with its vice, planks on the wall, tools, a half-made chair, shavings
+      for (let k = 0; k < 5; k++) B(k % 2 ? 'wood_ochre' : 'wood_painted', T + 0.1 + k * 0.28, T + 0.34 + k * 0.28, 0.12, 2.2 - (k % 3) * 0.2, db + 0.1, db + 0.22);
+      B('wood_dark', T + 1.6, w - T - 0.1, 1.4, 1.46, db, db + 0.06);
+      for (let k = 0; k < 9; k++) B('iron', T + 1.8 + k * 0.3, T + 1.84 + k * 0.3, 1.46, 1.46 + 0.14 + (k % 3) * 0.06, db + 0.01, db + 0.05);
+      B('wood_ochre', w / 2 - 1.6, w / 2 + 1.6, 0.8, 0.9, db + 3.8, db + 4.7); for (const u of [w / 2 - 1.5, w / 2 + 1.38]) for (const dd of [db + 3.84, db + 4.58]) B('wood_dark', u, u + 0.12, 0.12, 0.8, dd, dd + 0.12);
+      col.rect(P(w / 2 - 1.6, w / 2 + 1.6, db + 3.8, db + 4.7), y + 0.12, y + 0.9);
+      B('iron', w / 2 + 1.1, w / 2 + 1.5, 0.9, 1.0, db + 3.7, db + 3.8); B('wood_ochre', w / 2 - 0.6, w / 2 + 0.2, 0.9, 0.96, db + 4.0, db + 4.2); B('steel_grey', w / 2 - 0.5, w / 2 - 0.4, 0.96, 1.02, db + 4.05, db + 4.15);
+      for (const dd of [db + 6.2, db + 7.0]) for (const u of [T + 0.7, T + 1.8]) { B('wood_ochre', u, u + 0.6, 0.12, 0.2, dd, dd + 0.2); B('wood_ochre', u + 0.04, u + 0.12, 0.2, 0.9, dd, dd + 0.08); B('wood_ochre', u + 0.48, u + 0.56, 0.2, 0.9, dd, dd + 0.08); }
+      { const p = F.at(w - T - 1.0, db + 6.4); bag.add('wood_dark', lathe([[0.001, 0], [0.4, 0], [0.4, 0.8], [0.001, 0.8]], 12, null, p[0], y + 0.12, p[1])); col.circle(p[0], p[1], 0.42, y + 0.12, y + 0.9); }
+      for (let k = 0; k < 7; k++) B('wood_ochre', T + 3.2 + (k * 0.9 % 3.4), T + 3.4 + (k * 0.9 % 3.4), 0.12, 0.125, db + 5.2 + (k % 3) * 0.5, db + 5.4 + (k % 3) * 0.5);
+      break; }
     default: {  // the Kaffeehaus: marble tables with bentwood chairs in rows, newspapers on their holders, mirrors, the billiard table
       for (let k = 0; k < 5; k++) { const u = T + 1.2 + k * (w - 2 * T - 2.4) / 4; B('wood_dark', u - 0.02, u + 0.02, 1.2, 2.1, db + 0.06, db + 0.09); B('paint_white', u - 0.28, u + 0.28, 1.3, 2.0, db + 0.09, db + 0.12); B('mirror_tin', u - 0.5, u + 0.5, 2.2, 3.0, db + 0.01, db + 0.04); }
       tables('kaffeehaus', w).forEach(([a, dd], n) => FURNITURE.terrace_set({ at: [...F.at(a, dd)], y: y + 0.12, seed: n }, ctx));
