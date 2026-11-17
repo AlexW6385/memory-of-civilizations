@@ -4,6 +4,7 @@ import '../../styles/song/index.js';
 import { houseSong } from './houses.js';
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { houseFar } from './far.js';
+import { houseOuter } from './outer.js';
 import { bianRevetment, wharf } from './banks.js';
 
 /**
@@ -37,4 +38,4 @@ function ironPagoda(el, ctx) {
   STYLES.song.elements.pagoda_oct(el, { ...ctx, bag });
   flush();
 }
-registerStyle('kaifeng-site', { ...STYLES.song, elements: { ...STYLES.song.elements, house_song: houseSong, kf_pagoda: ironPagoda, kf_far_wall: houseFar, kf_mid_wall: houseSong, bian_revetment: bianRevetment, wharf } });
+registerStyle('kaifeng-site', { ...STYLES.song, elements: { ...STYLES.song.elements, house_song: houseSong, kf_pagoda: ironPagoda, kf_far_wall: houseFar, kf_outer: houseOuter, kf_mid_wall: houseSong, bian_revetment: bianRevetment, wharf } });
