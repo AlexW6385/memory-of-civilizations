@@ -145,7 +145,7 @@ Sources: architectural and urban histories, published plans and surveys, archaeo
 
 **The set is 94** (the author, 2026-11-09; six without a place of their own taken out 2026-11-10). Quality over number: every settlement must hold a reason no other covers, and none is kept to fill a count; small is fine when the form is its own. The set is closed: one is added only for such a reason. Three reasons bring a settlement in, and all three count: it shaped history; its form is like no other; or without it a people or a continent would be missing.
 
-The list below holds every settlement, with its moment, why it is here, the works and ideas tied to it, and what it holds. **L** is its level (§5): the one its dossier states, or L1–L2 where it states none — set by the agent that built it, not yet checked against §5 throughout; when a dossier's level changes, change it here. The data the code uses (id, true position, disc radius) is in `src/planet/sites.js`; a settlement's facts and sources are in its dossier. The dossier fixes the exact moment and may substitute a better-documented example; "moment to be fixed" marks a place with several possible periods.
+The list below holds every settlement, with its moment, why it is here, the works and ideas tied to it, and what it holds. **L** is its level (§5): the one its dossier states, or L1–L2 where it states none — as judged by the agent that last deepened it (the detail wave of v12.5–v12.19 went through all but Ming Suzhou, the reference); none of that wave's work has been looked at in a browser, so these are not yet checked against §5; when a dossier's level changes, change it here. The data the code uses (id, true position, disc radius) is in `src/planet/sites.js`; a settlement's facts and sources are in its dossier. The dossier fixes the exact moment and may substitute a better-documented example; "moment to be fixed" marks a place with several possible periods.
 
 Where little stands today (Baghdad, Ye, Chang'an, Karakorum) the dossier says plainly what is reconstructed from texts and excavation. For living Indigenous cultures, use only what the communities and published heritage documentation share publicly; nothing secret or sacred is depicted. Settlements of one place at different times (Qin, Han and Tang at Xi'an; the two Romes; Giza and Cairo) stand side by side.
 
@@ -155,145 +155,145 @@ All 94 are built.
 
 | Settlement · moment | L | Why it is here | Works and ideas | What it holds |
 |---|---|---|---|---|
-| Shang — Yinxu, Anyang (c. 1250 BC) | L1–L2 | Capital under Wu Ding; the first Chinese city known from its own writing | Oracle-bone inscriptions; the Shang hymns of the *Shijing*; Lady Fu Hao | Rammed-earth platforms with thatched halls and temples, the Huan river, bronze foundries, oracle-bone pits, chariot burials, Fu Hao's tomb |
-| Qufu — Confucius's Lu (moment to be fixed) | L1–L2 | Home of Confucius | The *Analects*; teaching at the Apricot Altar | Temple of Confucius and its Dacheng Hall, the Kong mansion, the Kong forest, the Apricot Altar |
-| Qin — Xianyang and the First Emperor's mausoleum (c. 210 BC) | L1–L2 | The first unified empire | Sima Qian's annals of the First Emperor; Han Feizi and Li Si | Raised palace terraces, imperial roads, the painted terracotta army in its pits, standard weights and measures |
-| Han Chang'an (c. 100 BC) | L1–L2 | Capital under Emperor Wu; the eastern end of the Silk Road | Sima Qian's *Shiji*; Ban Gu's rhapsodies on the two capitals; Confucianism made state doctrine | Weiyang Palace's front hall, Changle Palace, the East and West Markets, walled wards, Kunming Lake, the Imperial Academy |
-| Three Kingdoms — Ye (c. 215) | L1–L2 | Cao Cao's capital; the first capital laid out on one central axis | Jian'an poetry; Cao Zhi's rhapsody on the terrace; *Romance of the Three Kingdoms* | The Bronze Bird, Golden Tiger and Ice Well terraces, the Wenchang Hall, the axial avenue, the Zhang river |
+| Shang — Yinxu, Anyang (c. 1250 BC) | L2, L3 in part | Capital under Wu Ding; the first Chinese city known from its own writing | Oracle-bone inscriptions; the Shang hymns of the *Shijing*; Lady Fu Hao | Rammed-earth platforms with thatched halls and temples, the Huan river, bronze foundries, oracle-bone pits, chariot burials, Fu Hao's tomb |
+| Qufu — Confucius's Lu (moment to be fixed) | L2, L3 in part | Home of Confucius | The *Analects*; teaching at the Apricot Altar | Temple of Confucius and its Dacheng Hall, the Kong mansion, the Kong forest, the Apricot Altar |
+| Qin — Xianyang and the First Emperor's mausoleum (c. 210 BC) | L2, L3 in part | The first unified empire | Sima Qian's annals of the First Emperor; Han Feizi and Li Si | Raised palace terraces, imperial roads, the painted terracotta army in its pits, standard weights and measures |
+| Han Chang'an (c. 100 BC) | L2, L3 in part | Capital under Emperor Wu; the eastern end of the Silk Road | Sima Qian's *Shiji*; Ban Gu's rhapsodies on the two capitals; Confucianism made state doctrine | Weiyang Palace's front hall, Changle Palace, the East and West Markets, walled wards, Kunming Lake, the Imperial Academy |
+| Three Kingdoms — Ye (c. 215) | L2, L3 in part | Cao Cao's capital; the first capital laid out on one central axis | Jian'an poetry; Cao Zhi's rhapsody on the terrace; *Romance of the Three Kingdoms* | The Bronze Bird, Golden Tiger and Ice Well terraces, the Wenchang Hall, the axial avenue, the Zhang river |
 | Tang Chang'an (c. 750) | L2–L3 in the core | A city of a million under Xuanzong, the metropolis of its world | Li Bai, Du Fu, Wang Wei; *Song of Everlasting Sorrow*; Xuanzang's record of the Western Regions | Daming Palace's Hanyuan Hall, the Great Wild Goose Pagoda, 108 wards, the West Market's foreign merchants, Qujiang Pool, Zhuque Avenue |
-| Tang — Foguang Monastery, Mount Wutai (857) | L1–L2 | The most important timber hall surviving from the Tang | Tang Buddhism; found by Liang Sicheng and Lin Huiyin in 1937 | The East Hall with its bracket sets and statues, the hillside monastery, a village |
-| Northern Song Kaifeng (c. 1120) | L1–L2 | The city of *Along the River during Qingming*; China's commercial revolution | Zhang Zeduan's scroll; Meng Yuanlao's *Dongjing meng hua lu* | Iron Pagoda, Rainbow Bridge, grain boats on the Bian canal, shops along the streets, markets |
-| Southern Song Lin'an, Hangzhou (c. 1200) | L1–L2 | Among the largest and richest cities in the world | Wu Zimu's *Mengliang lu*; West Lake poetry; Marco Polo's Quinsai | Liuhe Pagoda, West Lake, the Qiantang river, tea houses, pleasure boats |
+| Tang — Foguang Monastery, Mount Wutai (857) | L2, L3 in part | The most important timber hall surviving from the Tang | Tang Buddhism; found by Liang Sicheng and Lin Huiyin in 1937 | The East Hall with its bracket sets and statues, the hillside monastery, a village |
+| Northern Song Kaifeng (c. 1120) | L2, L3 in part | The city of *Along the River during Qingming*; China's commercial revolution | Zhang Zeduan's scroll; Meng Yuanlao's *Dongjing meng hua lu* | Iron Pagoda, Rainbow Bridge, grain boats on the Bian canal, shops along the streets, markets |
+| Southern Song Lin'an, Hangzhou (c. 1200) | L2, L3 in part | Among the largest and richest cities in the world | Wu Zimu's *Mengliang lu*; West Lake poetry; Marco Polo's Quinsai | Liuhe Pagoda, West Lake, the Qiantang river, tea houses, pleasure boats |
 | Ming Suzhou (c. 1530) | L2–L3 | The model of the Jiangnan garden and water town | Wen Zhengming's album of the Humble Administrator's Garden; the Wu school; kunqu | The Humble Administrator's Garden, canal lanes, white walls and black tiles, stone bridges |
-| Ming–Qing Beijing (17th c.) | L1–L2 | The late imperial capital, the Forbidden City and the Temple of Heaven together | Ritual and the order of heaven; the age of *Dream of the Red Chamber* | The Forbidden City's Outer Court, the Hall of Prayer for Good Harvests, walls and moat, hutongs and courtyard houses |
-| Hakka tulou, Fujian (c. 1710) | L1–L2 | Clan fortresses of rammed earth, a form like no other | Hakka mountain songs | Round many-storeyed houses, the ancestral hall, the shared well, tea terraces |
-| Dunhuang — the Mogao caves (9th c.) | L1–L2 | The treasury of Buddhist art on the Silk Road | The Library Cave; the *Diamond Sutra* printed in 868; flying apsaras; bianwen | A cliff of caves under timber eaves, murals, the Singing Sand dunes, Crescent Spring, caravans, the oasis town |
-| Shaolin Monastery and Mount Song (moment to be fixed: Tang or Ming) | L2 | The cradle of Chan | Bodhidharma facing the wall; Huike; Shaolin martial arts | The gate, the Pagoda Forest, Bodhidharma's cave, Songyue Temple's Northern Wei brick pagoda, Zhongyue Temple, Songyang Academy |
+| Ming–Qing Beijing (17th c.) | L2, L3 in part | The late imperial capital, the Forbidden City and the Temple of Heaven together | Ritual and the order of heaven; the age of *Dream of the Red Chamber* | The Forbidden City's Outer Court, the Hall of Prayer for Good Harvests, walls and moat, hutongs and courtyard houses |
+| Hakka tulou, Fujian (c. 1710) | L2, L3 in part | Clan fortresses of rammed earth, a form like no other | Hakka mountain songs | Round many-storeyed houses, the ancestral hall, the shared well, tea terraces |
+| Dunhuang — the Mogao caves (9th c.) | L2, L3 in part | The treasury of Buddhist art on the Silk Road | The Library Cave; the *Diamond Sutra* printed in 868; flying apsaras; bianwen | A cliff of caves under timber eaves, murals, the Singing Sand dunes, Crescent Spring, caravans, the oasis town |
+| Shaolin Monastery and Mount Song (moment to be fixed: Tang or Ming) | L2, L3 in part | The cradle of Chan | Bodhidharma facing the wall; Huike; Shaolin martial arts | The gate, the Pagoda Forest, Bodhidharma's cave, Songyue Temple's Northern Wei brick pagoda, Zhongyue Temple, Songyang Academy |
 | Tibet — Lhasa (1694) | L2–L3 | The Potala completed after the Fifth Dalai Lama | Tibetan Buddhism; circumambulation and pilgrimage | The Potala's Red and White Palaces, Shöl town, the circuit and its prayer wheels |
 
 **Japan and Korea (5)**
 
 | Settlement · moment | L | Why it is here | Works and ideas | What it holds |
 |---|---|---|---|---|
-| Nara (752) | L1–L2 | The year the Great Buddha was consecrated; state Buddhism in the Tang manner | The *Man'yōshū*; Emperor Shōmu | The Great Buddha Hall of Tōdai-ji, the temple town |
-| Heian — Uji (1053) | L1–L2, L3 in part | Byōdō-in's Phoenix Hall; Pure Land faith and court taste | The Uji chapters of *The Tale of Genji*; mappō, the latter age of the Dharma | The Phoenix Hall and its pond, the Uji river, a timber village |
-| Muromachi Kyoto (c. 1490) | L1–L2 | Higashiyama culture, where the Zen aesthetic took form | The dry landscape garden; Murata Jukō's tea; wabi; Noh | Ginkaku-ji and its Tōgu-dō, Ryōan-ji's rock garden, machiya, a Zen abbot's quarters |
-| Edo — Himeji (c. 1620) | L1–L2 | The most complete Japanese castle | The samurai order; the castle town | The keep, the castle town's machiya, samurai houses |
+| Nara (752) | L2, L3 in part | The year the Great Buddha was consecrated; state Buddhism in the Tang manner | The *Man'yōshū*; Emperor Shōmu | The Great Buddha Hall of Tōdai-ji, the temple town |
+| Heian — Uji (1053) | L2, L3 in part | Byōdō-in's Phoenix Hall; Pure Land faith and court taste | The Uji chapters of *The Tale of Genji*; mappō, the latter age of the Dharma | The Phoenix Hall and its pond, the Uji river, a timber village |
+| Muromachi Kyoto (c. 1490) | L2, L3 in part | Higashiyama culture, where the Zen aesthetic took form | The dry landscape garden; Murata Jukō's tea; wabi; Noh | Ginkaku-ji and its Tōgu-dō, Ryōan-ji's rock garden, machiya, a Zen abbot's quarters |
+| Edo — Himeji (c. 1620) | L2, L3 in part | The most complete Japanese castle | The samurai order; the castle town | The keep, the castle town's machiya, samurai houses |
 | Joseon — Hanyang (c. 1888) | L2–L3 | Gyeongbokgung as rebuilt, the last decades of Joseon | Neo-Confucian court ritual; the reign of Gojong | Gyeongbokgung, Gyeonghoeru, Hyangwonjeong, the avenue of the six ministries, Jongno, hanok |
 
 **South Asia (8)**
 
 | Settlement · moment | L | Why it is here | Works and ideas | What it holds |
 |---|---|---|---|---|
-| Mohenjo-daro (c. 2500 BC) | L1–L2 | The Indus civilization, the one great ancient river civilization still missing | The undeciphered seal script; the "priest-king"; the bronze "dancing girl" | Grid streets, covered drains, the Great Bath, the granary, fired-brick houses, seal workshops |
-| Early Buddhist India — Sanchi (1st c.) | L1–L2 | Ashoka's Great Stupa; early Buddhist art | Ashoka; the Jataka tales on its gateways | The Great Stupa and its four gateways, monasteries, a limewashed village |
-| Ajanta (c. 480) | L1–L2 | The summit of Indian Buddhist painting | Jataka murals; the Bodhisattva Padmapani | About thirty caves cut in a horseshoe gorge, chaitya halls and monks' cells, murals, the waterfall |
-| Nalanda (c. 640) | L1–L2 | Where Xuanzang studied; one of the world's first universities | Xuanzang's record; Madhyamaka and Yogācāra; Śīlabhadra | Brick monasteries and lecture halls, Sariputta's stupa, libraries, monks in debate |
-| Medieval Hindu India — Khajuraho (c. 1050) | L2 | The Chandela temples, the summit of north Indian temple building | The temple as the cosmic mountain; temple sculpture | Kandariya Mahadeva and the Western Group, the temple town |
-| Dravidian South India — Madurai (c. 1650) | L2 | A temple city whose streets ring the temple | Tamil Sangam literature; the cult of Meenakshi | The Meenakshi temple and its gopurams, concentric streets, the sacred tank |
-| Mughal Agra (1632–1653) | L1–L2 | The Taj Mahal being built | Shah Jahan and Mumtaz Mahal; the garden as paradise | The Taj Mahal, the charbagh, the Yamuna, the bazaar town |
-| Bhaktapur, Nepal (c. 1700) | L2 | The Newar city of the Malla kings | Newar woodcarving and pottery | The five-storey pagoda of 1702, Durbar Square, carved windows, Pottery Square |
+| Mohenjo-daro (c. 2500 BC) | L2, L3 in part | The Indus civilization, the one great ancient river civilization still missing | The undeciphered seal script; the "priest-king"; the bronze "dancing girl" | Grid streets, covered drains, the Great Bath, the granary, fired-brick houses, seal workshops |
+| Early Buddhist India — Sanchi (1st c.) | L2, L3 in part | Ashoka's Great Stupa; early Buddhist art | Ashoka; the Jataka tales on its gateways | The Great Stupa and its four gateways, monasteries, a limewashed village |
+| Ajanta (c. 480) | L2, L3 in part | The summit of Indian Buddhist painting | Jataka murals; the Bodhisattva Padmapani | About thirty caves cut in a horseshoe gorge, chaitya halls and monks' cells, murals, the waterfall |
+| Nalanda (c. 640) | L2, L3 in part | Where Xuanzang studied; one of the world's first universities | Xuanzang's record; Madhyamaka and Yogācāra; Śīlabhadra | Brick monasteries and lecture halls, Sariputta's stupa, libraries, monks in debate |
+| Medieval Hindu India — Khajuraho (c. 1050) | L2, L3 in part | The Chandela temples, the summit of north Indian temple building | The temple as the cosmic mountain; temple sculpture | Kandariya Mahadeva and the Western Group, the temple town |
+| Dravidian South India — Madurai (c. 1650) | L2, L3 in part | A temple city whose streets ring the temple | Tamil Sangam literature; the cult of Meenakshi | The Meenakshi temple and its gopurams, concentric streets, the sacred tank |
+| Mughal Agra (1632–1653) | L2, L3 in part | The Taj Mahal being built | Shah Jahan and Mumtaz Mahal; the garden as paradise | The Taj Mahal, the charbagh, the Yamuna, the bazaar town |
+| Bhaktapur, Nepal (c. 1700) | L2, L3 in part | The Newar city of the Malla kings | Newar woodcarving and pottery | The five-storey pagoda of 1702, Durbar Square, carved windows, Pottery Square |
 
 **South-East Asia (5)**
 
 | Settlement · moment | L | Why it is here | Works and ideas | What it holds |
 |---|---|---|---|---|
-| Java — Borobudur (c. 825) | L2 | The largest Buddhist monument, a mandala in stone | Mahayana Buddhism; the Jataka and Gandavyuha reliefs | The terraces, 72 latticed stupas, a monastery, a Javanese village |
-| Khmer — Angkor (c. 1150) | L2 | Suryavarman II's Angkor Wat, the largest religious building | Zhou Daguan's account of Cambodia; the *Ramayana* reliefs | Angkor Wat, the moat, stilt houses, rice fields, the market |
-| Bagan (c. 1200) | L2 | Over two thousand temples on one plain; Theravada Buddhism | The Bagan inscriptions | The Ananda, Thatbyinnyu and Sulamani temples, the Irrawaddy |
-| Ayutthaya (c. 1650) | L1 | Siam's capital, trading with France and the Dutch under King Narai | The *Ramakien*; La Loubère's account of Siam | Wat Phra Si Sanphet's three chedis, the palace, canals, the Dutch and Japanese quarters, a floating market |
-| A Balinese temple village (moment to be fixed) | L1–L2 | Hinduism in a form found only on this island | Gamelan; Balinese dance; subak irrigation | Split gates, meru towers, rice terraces, walled house compounds |
+| Java — Borobudur (c. 825) | L2, L3 in part | The largest Buddhist monument, a mandala in stone | Mahayana Buddhism; the Jataka and Gandavyuha reliefs | The terraces, 72 latticed stupas, a monastery, a Javanese village |
+| Khmer — Angkor (c. 1150) | L2, L3 in part | Suryavarman II's Angkor Wat, the largest religious building | Zhou Daguan's account of Cambodia; the *Ramayana* reliefs | Angkor Wat, the moat, stilt houses, rice fields, the market |
+| Bagan (c. 1200) | L2, L3 in part | Over two thousand temples on one plain; Theravada Buddhism | The Bagan inscriptions | The Ananda, Thatbyinnyu and Sulamani temples, the Irrawaddy |
+| Ayutthaya (c. 1650) | L2, L3 in part | Siam's capital, trading with France and the Dutch under King Narai | The *Ramakien*; La Loubère's account of Siam | Wat Phra Si Sanphet's three chedis, the palace, canals, the Dutch and Japanese quarters, a floating market |
+| A Balinese temple village (moment to be fixed) | L2, L3 in part | Hinduism in a form found only on this island | Gamelan; Balinese dance; subak irrigation | Split gates, meru towers, rice terraces, walled house compounds |
 
 **Central Asia and the steppe (2)**
 
 | Settlement · moment | L | Why it is here | Works and ideas | What it holds |
 |---|---|---|---|---|
-| Timurid Samarkand (c. 1420) | L2 | The grandest city of the Silk Road, under Ulugh Beg | Ulugh Beg's observatory and star tables; Clavijo's account of 1404 | The Registan and Ulugh Beg's madrasa, the Bibi-Khanym mosque, Gur-e Amir, blue domes, the bazaar |
-| Mongol Karakorum (1254) | L1–L2 | The capital of the Mongol Empire | William of Rubruck's account; *The Secret History of the Mongols* | The palace, the silver tree fountain, ger camps, temples of many faiths side by side |
+| Timurid Samarkand (c. 1420) | L2, L3 in part | The grandest city of the Silk Road, under Ulugh Beg | Ulugh Beg's observatory and star tables; Clavijo's account of 1404 | The Registan and Ulugh Beg's madrasa, the Bibi-Khanym mosque, Gur-e Amir, blue domes, the bazaar |
+| Mongol Karakorum (1254) | L2, L3 in part | The capital of the Mongol Empire | William of Rubruck's account; *The Secret History of the Mongols* | The palace, the silver tree fountain, ger camps, temples of many faiths side by side |
 
 **Western Asia (11)**
 
 | Settlement · moment | L | Why it is here | Works and ideas | What it holds |
 |---|---|---|---|---|
-| Çatalhöyük (c. 6500 BC) | L1–L2 | One of the first towns | Neolithic figurines | Mud-brick houses packed without streets, entered by ladders through the roof, bull horns on the walls, murals |
+| Çatalhöyük (c. 6500 BC) | L2, L3 in part | One of the first towns | Neolithic figurines | Mud-brick houses packed without streets, entered by ladders through the roof, bull horns on the walls, murals |
 | Sumer — Ur (c. 2050 BC) | L2, L3 in part | The Third Dynasty of Ur, one of the first urban civilizations | *Gilgamesh*; the Code of Ur-Nammu | The Great Ziggurat, the mud-brick city, furnished houses, a market |
 | Babylon (c. 570 BC) | L2, L3 in part | Nebuchadnezzar II's capital | The Tower of Babel and the Exile; the Hanging Gardens legend | The Ishtar Gate, the Processional Way, Etemenanki, the Euphrates quay |
 | Achaemenid Persia — Persepolis (c. 480 BC) | L2, L3 in part | The ceremonial capital of the first world empire | Cyrus and Darius; Zoroastrianism; Herodotus | The Apadana, the Hall of a Hundred Columns, bull capitals, the Treasury and its archive, the tribute reliefs |
 | Nabataea — Petra (c. AD 50) | L2, L3 in part | A rock-cut city on the incense road | Strabo's account | The Khazneh, the Siq, the colonnaded street, the garden and pool, a banqueting hall, caravans |
-| Umayyad Jerusalem (c. 700) | L2 | A city holy to three faiths; the Dome of the Rock just completed | The Abrahamic traditions of the holy place | The Dome of the Rock, the esplanade, the stone old city |
-| Justinian's Constantinople (c. 562) | L1–L2 | Byzantium at its height; Hagia Sophia's dome rebuilt | Justinian's Code; Procopius | Hagia Sophia, the city quarter |
-| Abbasid Baghdad (c. 800) | L2 | Harun al-Rashid's Round City, the centre of the Islamic golden age | *The Thousand and One Nights*; the translation movement and the House of Wisdom; al-Khwarizmi's algebra | The Round City and its four gates, the Green Dome palace, the Tigris quays, markets, baths; nothing stands, so Samarra's spiral minaret is the built evidence |
-| Ottoman Istanbul (c. 1560) | L1–L2, L3 in the prayer hall | Süleyman the Magnificent and the architect Sinan | Sufi poetry; Ottoman court culture | The Süleymaniye, timber houses, the bazaar, the Golden Horn |
+| Umayyad Jerusalem (c. 700) | L2, L3 in part | A city holy to three faiths; the Dome of the Rock just completed | The Abrahamic traditions of the holy place | The Dome of the Rock, the esplanade, the stone old city |
+| Justinian's Constantinople (c. 562) | L2, L3 in part | Byzantium at its height; Hagia Sophia's dome rebuilt | Justinian's Code; Procopius | Hagia Sophia, the city quarter |
+| Abbasid Baghdad (c. 800) | L2, L3 in part | Harun al-Rashid's Round City, the centre of the Islamic golden age | *The Thousand and One Nights*; the translation movement and the House of Wisdom; al-Khwarizmi's algebra | The Round City and its four gates, the Green Dome palace, the Tigris quays, markets, baths; nothing stands, so Samarra's spiral minaret is the built evidence |
+| Ottoman Istanbul (c. 1560) | L2, L3 in the prayer hall | Süleyman the Magnificent and the architect Sinan | Sufi poetry; Ottoman court culture | The Süleymaniye, timber houses, the bazaar, the Golden Horn |
 | Safavid Isfahan (c. 1630) | L2, L3 in part | Shah Abbas I's capital, "half the world" | Persian miniatures; Mulla Sadra and the school of Isfahan | Naqsh-e Jahan Square, the Shah Mosque, the Sheikh Lotfollah Mosque, Ali Qapu, the Grand Bazaar |
-| Shibam, Hadhramaut (16th c. on) | L1–L2 | A city of mud-brick towers, like no other | The merchants and emigrants of the Hadhramaut | About 500 tower houses of five to eleven storeys, the wall, the dry valley |
+| Shibam, Hadhramaut (16th c. on) | L2, L3 in part | A city of mud-brick towers, like no other | The merchants and emigrants of the Hadhramaut | About 500 tower houses of five to eleven storeys, the wall, the dry valley |
 
 **Egypt and Africa (12)**
 
 | Settlement · moment | L | Why it is here | Works and ideas | What it holds |
 |---|---|---|---|---|
-| Old Kingdom Egypt — Giza (c. 2560 BC) | L2 | The Great Pyramid, the emblem of ancient Egypt | Kingship and the afterlife; Herodotus | Three pyramids, the Sphinx, the valley temple, mastaba streets, the workers' town, the Nile harbour |
-| New Kingdom Thebes (c. 1250 BC) | L1–L2 | Under Ramesses II, the summit of the Egyptian temple | The *Book of the Dead*; the Kadesh poem; love songs and strike records on the ostraca of Deir el-Medina | The Karnak hypostyle, Luxor temple, Hatshepsut's temple, the Valley of the Kings, Deir el-Medina, the Opet procession |
+| Old Kingdom Egypt — Giza (c. 2560 BC) | L2, L3 in part | The Great Pyramid, the emblem of ancient Egypt | Kingship and the afterlife; Herodotus | Three pyramids, the Sphinx, the valley temple, mastaba streets, the workers' town, the Nile harbour |
+| New Kingdom Thebes (c. 1250 BC) | L2, L3 in part | Under Ramesses II, the summit of the Egyptian temple | The *Book of the Dead*; the Kadesh poem; love songs and strike records on the ostraca of Deir el-Medina | The Karnak hypostyle, Luxor temple, Hatshepsut's temple, the Valley of the Kings, Deir el-Medina, the Opet procession |
 | Abu Simbel (c. 1250 BC) | L2–L3 | Ramesses II's temple cut into the cliff | The sun reaching the sanctuary twice a year | Four colossi, halls deep in the rock, Nefertari's temple, the Nile |
-| Alexandria (c. 250 BC) | L2 | The learned capital of the ancient world | Euclid's *Elements*; Eratosthenes measuring the Earth; the Septuagint | The Pharos, the Library and Museum, two harbours, the Serapeum, the Canopic Way |
-| Mamluk Cairo (c. 1363) | L1–L2 | The largest city of the medieval Islamic world | Ibn Khaldun, later a judge here; the Cairo tales of the *Nights* | The Sultan Hasan mosque-madrasa, lanes, mashrabiya, the bazaar |
-| Ethiopia — Lalibela (c. 1220) | L2 | Eleven churches cut whole from the rock | "A new Jerusalem"; Ethiopian Orthodoxy | Rock-hewn churches, trenches and courts with pools, a round-house village |
+| Alexandria (c. 250 BC) | L2, L3 in part | The learned capital of the ancient world | Euclid's *Elements*; Eratosthenes measuring the Earth; the Septuagint | The Pharos, the Library and Museum, two harbours, the Serapeum, the Canopic Way |
+| Mamluk Cairo (c. 1363) | L2, L3 in part | The largest city of the medieval Islamic world | Ibn Khaldun, later a judge here; the Cairo tales of the *Nights* | The Sultan Hasan mosque-madrasa, lanes, mashrabiya, the bazaar |
+| Ethiopia — Lalibela (c. 1220) | L2, L3 in part | Eleven churches cut whole from the rock | "A new Jerusalem"; Ethiopian Orthodoxy | Rock-hewn churches, trenches and courts with pools, a round-house village |
 | The Sahel — Djenné (14th c.) | L2, L3 in part | The largest mud building in the world | The Mali Empire; the learning of Timbuktu | The Great Mosque, the market, two-storey banco houses, the yearly replastering |
 | Fez (c. 1350) | L2, L3 in the Bou Inania | The Marinid capital, seat of al-Qarawiyyin | Ibn Khaldun served here; Ibn Battuta dictated his travels here | The Bou Inania madrasa, the tanneries, labyrinth lanes, water channels, courtyard houses |
-| Dogon villages of the Bandiagara cliff (moment to be fixed) | L1–L2 | Villages under a cliff in Mali, a form like no other | Dogon mask dances; Dogon cosmology (Griaule's account is disputed) | Mud houses and pointed granaries, the toguna shelter, the Tellem caves in the cliff |
+| Dogon villages of the Bandiagara cliff (moment to be fixed) | L2, L3 in part | Villages under a cliff in Mali, a form like no other | Dogon mask dances; Dogon cosmology (Griaule's account is disputed) | Mud houses and pointed granaries, the toguna shelter, the Tellem caves in the cliff |
 | The Swahili coast — Kilwa (15th c.) | L2–L3 | A coral-stone city of the Indian Ocean trade | Ibn Battuta's visit; the Kilwa Chronicle | The Great Mosque, Husuni Kubwa, coral houses, dhows |
-| Zimbabwe — Great Zimbabwe (c. 1350) | L1–L2 | The largest ancient stone building south of the Sahara | Shona kingship | The Great Enclosure and its conical tower, the Hill Complex, valley enclosures, daga houses, cattle |
-| Benin City (c. 1600) | L1–L2 | The Edo kingdom, its walls and moats of astonishing extent | The Benin bronzes; Dapper's description | The Oba's palace with its bronze-plaqued pillars, broad avenues, walls, the bronze-casters' guild |
+| Zimbabwe — Great Zimbabwe (c. 1350) | L2, L3 in part | The largest ancient stone building south of the Sahara | Shona kingship | The Great Enclosure and its conical tower, the Hill Complex, valley enclosures, daga houses, cattle |
+| Benin City (c. 1600) | L2, L3 in part | The Edo kingdom, its walls and moats of astonishing extent | The Benin bronzes; Dapper's description | The Oba's palace with its bronze-plaqued pillars, broad avenues, walls, the bronze-casters' guild |
 
 **Europe (21)**
 
 | Settlement · moment | L | Why it is here | Works and ideas | What it holds |
 |---|---|---|---|---|
 | Neolithic Britain — Stonehenge (c. 2500 BC) | L2, L3 in part | The most famous prehistoric circle | Its alignment on the solstice sunrise and sunset | The sarsen circle, trilithons, Durrington-type houses |
-| Minoan Crete — Knossos (c. 1600 BC) | L1–L2 | Europe's first palace civilization | The Minotaur and the labyrinth; Linear A | The palace, frescoes, the palace town |
-| Mycenae (c. 1250 BC) | L2 | Agamemnon's city in Homer | The *Iliad*; Aeschylus's *Oresteia* | The Lion Gate, Grave Circle A, the Treasury of Atreus, Cyclopean walls, the palace |
-| Delphi (c. 400 BC) | L1–L2 | The centre of the Greek world and its oracle | "Know thyself"; the oracle that named Socrates wisest; Pindar | The Temple of Apollo, the cities' treasuries, the theatre, the stadium, the Sacred Way, the Castalian spring |
-| Classical Athens (c. 410 BC) | L2 | The city of democracy and philosophy | Socrates, Sophocles, Thucydides | The Parthenon, the Acropolis, the Agora, houses. To add as part of this settlement (c. 300 BC): the schools — the Academy, the Lyceum, the Painted Stoa, Epicurus' Garden |
-| Hadrian's Rome (c. 128) | L1–L2 | The empire at its height | Hadrian; Epictetus the Stoic | The Pantheon, atrium houses, insulae, shops |
+| Minoan Crete — Knossos (c. 1600 BC) | L2, L3 in part | Europe's first palace civilization | The Minotaur and the labyrinth; Linear A | The palace, frescoes, the palace town |
+| Mycenae (c. 1250 BC) | L2, L3 in part | Agamemnon's city in Homer | The *Iliad*; Aeschylus's *Oresteia* | The Lion Gate, Grave Circle A, the Treasury of Atreus, Cyclopean walls, the palace |
+| Delphi (c. 400 BC) | L2, L3 in part | The centre of the Greek world and its oracle | "Know thyself"; the oracle that named Socrates wisest; Pindar | The Temple of Apollo, the cities' treasuries, the theatre, the stadium, the Sacred Way, the Castalian spring |
+| Classical Athens (c. 410 BC) | L2, L3 in part | The city of democracy and philosophy | Socrates, Sophocles, Thucydides | The Parthenon, the Acropolis, the Agora, houses. To add as part of this settlement (c. 300 BC): the schools — the Academy, the Lyceum, the Painted Stoa, Epicurus' Garden |
+| Hadrian's Rome (c. 128) | L2, L3 in part | The empire at its height | Hadrian; Epictetus the Stoic | The Pantheon, atrium houses, insulae, shops |
 | Romanesque Conques (c. 1120) | L2, L3 in part | A pilgrimage church on the road to Santiago | The pilgrimage; the *Book of the Miracles of Sainte Foy* | Sainte-Foy and its Last Judgement tympanum, the hill village |
-| Norse — Borgund (c. 1250) | L1–L2 | The most complete stave church | The Norse sagas; the conversion | Borgund stave church, a timber wharf of the Bryggen kind |
+| Norse — Borgund (c. 1250) | L2, L3 in part | The most complete stave church | The Norse sagas; the conversion | Borgund stave church, a timber wharf of the Bryggen kind |
 | Gothic Paris (1248) | L2, L3 in part | The Sainte-Chapelle consecrated | Aquinas at the University of Paris; scholasticism | The Sainte-Chapelle, Notre-Dame, the timber-framed lanes of the Île de la Cité, the Seine |
 | Nasrid Granada (c. 1390) | L2–L3 | The last kingdom of al-Andalus | Ibn Zamrak's poems carved on the Alhambra's walls | The Alhambra, the Court of the Lions, white houses and patios |
-| Renaissance Florence (c. 1480) | L1–L2 | The Medici city | Ficino's Platonic Academy; Botticelli; Dante | The cathedral dome, the campanile, the Baptistery, Tuscan streets |
-| Venice (c. 1500) | L1–L2 | The maritime republic | Bellini, Titian; later *The Merchant of Venice* | St Mark's, canals, palaces, gondolas |
-| Manueline Lisbon (c. 1520) | L1–L2 | The starting point of the age of discovery | Camões' *Lusiads*; Vasco da Gama | The Jerónimos Monastery, the Belém Tower, the riverside palace, carracks at the quay |
-| Muscovy (c. 1600) | L1–L2 | Early tsardom | Ivan the Terrible; Moscow as the "Third Rome" | St Basil's, the Kremlin, a log-house village |
-| Baroque Rome (c. 1670) | L1–L2 | The papal city after the Counter-Reformation | Bernini, Borromini; after Galileo's trial | St Peter's Square, Baroque streets, fountains |
+| Renaissance Florence (c. 1480) | L2, L3 in part | The Medici city | Ficino's Platonic Academy; Botticelli; Dante | The cathedral dome, the campanile, the Baptistery, Tuscan streets |
+| Venice (c. 1500) | L2, L3 in part | The maritime republic | Bellini, Titian; later *The Merchant of Venice* | St Mark's, canals, palaces, gondolas |
+| Manueline Lisbon (c. 1520) | L2, L3 in part | The starting point of the age of discovery | Camões' *Lusiads*; Vasco da Gama | The Jerónimos Monastery, the Belém Tower, the riverside palace, carracks at the quay |
+| Muscovy (c. 1600) | L2, L3 in part | Early tsardom | Ivan the Terrible; Moscow as the "Third Rome" | St Basil's, the Kremlin, a log-house village |
+| Baroque Rome (c. 1670) | L2, L3 in part | The papal city after the Counter-Reformation | Bernini, Borromini; after Galileo's trial | St Peter's Square, Baroque streets, fountains |
 | Dutch Golden Age — Amsterdam (c. 1670) | L2–L3 on the Dam | The merchant republic | Spinoza; Rembrandt | The Town Hall on the Dam, the canal ring, gabled houses |
-| French classicism — Versailles (c. 1690) | L1–L2 | The stage of absolute monarchy | Molière, Racine; the Sun King | The palace, the Hall of Mirrors, the formal gardens, the town |
+| French classicism — Versailles (c. 1690) | L2, L3 in part | The stage of absolute monarchy | Molière, Racine; the Sun King | The palace, the Hall of Mirrors, the formal gardens, the town |
 | Victorian London (c. 1870) | L2, L3 in part | The capital of the industrial empire | Dickens; Darwin; Marx writing *Capital* | The Palace of Westminster, St Pancras, terraces |
-| Vienna (c. 1900) | L1–L2 | The fin-de-siècle capital of modern thought | Freud, Mahler, Klimt, Wittgenstein | The Secession building, the Ringstrasse, coffee houses, Otto Wagner's Stadtbahn stations |
-| Art Nouveau Barcelona (c. 1910) | L2 | Catalan modernisme | Gaudí | The Sagrada Família, the Eixample blocks |
-| Bauhaus Dessau (1926) | L2 | The source of modern design | Gropius; the Bauhaus teaching | The glass-walled school building, the masters' houses, the workshops |
+| Vienna (c. 1900) | L2, L3 in part | The fin-de-siècle capital of modern thought | Freud, Mahler, Klimt, Wittgenstein | The Secession building, the Ringstrasse, coffee houses, Otto Wagner's Stadtbahn stations |
+| Art Nouveau Barcelona (c. 1910) | L2, L3 in part | Catalan modernisme | Gaudí | The Sagrada Família, the Eixample blocks |
+| Bauhaus Dessau (1926) | L2, L3 in part | The source of modern design | Gropius; the Bauhaus teaching | The glass-walled school building, the masters' houses, the workshops |
 
 **The Americas (10)**
 
 | Settlement · moment | L | Why it is here | Works and ideas | What it holds |
 |---|---|---|---|---|
-| Teotihuacan (c. 400) | L2 | The largest city of the ancient Americas | The feathered serpent; to the Aztecs, the place where the gods were born | The Pyramid of the Sun, the Avenue of the Dead, apartment compounds |
-| Classic Maya — Tikal (c. 750) | L1–L2 | A great city of the Classic Maya | Hieroglyphic stelae; the Long Count | Temples I and II, the North Acropolis, the ball court, causeways through the rainforest, reservoirs |
-| The Maya — Chichén Itzá (c. 1000) | L1–L2 | The Postclassic Maya | The Maya calendar; the serpent of light at the equinox | El Castillo, the Great Ball Court, the Sacred Cenote, the Temple of the Warriors, a village |
-| Mississippian Cahokia (c. 1175) | L1–L2 | The largest city north of Mexico before Columbus | Mississippian culture | Monks Mound, the Grand Plaza, the palisade, houses |
-| The Inca — Machu Picchu (c. 1450–1530) | L1–L2 | Pachacuti's mountain estate | Inca sun worship; khipu | Ashlar buildings, terraces, the Temple of the Sun |
-| The Pueblo — Taos (c. 1500) | L1–L2 | A many-storeyed adobe town, lived in to this day | Pueblo religious tradition | Stacked adobe houses, kivas, the creek |
-| The Aztecs — Tenochtitlan (1519) | L1–L2 | The lake capital in the year Cortés came | Bernal Díaz's eyewitness account; Nezahualcoyotl's poems | The Templo Mayor's twin shrines, the Sacred Precinct, canals, chinampas |
-| Haida village — SG̱ang Gwaay (c. 1850) | L1–L2 | The carved-pole culture of the Northwest Coast | Haida oral histories | A row of carved poles and cedar houses facing the beach, canoes |
-| Modern New York (1931) | L1–L2 | The Empire State Building completed; the Art Deco skyscraper | The age of *The Great Gatsby*; jazz | The Empire State Building, Manhattan blocks |
-| Brasília (1960) | L1–L2 | A capital planned whole by modernism | Niemeyer and Costa | The Congress towers and bowls, the cathedral, the superblocks |
+| Teotihuacan (c. 400) | L2, L3 in part | The largest city of the ancient Americas | The feathered serpent; to the Aztecs, the place where the gods were born | The Pyramid of the Sun, the Avenue of the Dead, apartment compounds |
+| Classic Maya — Tikal (c. 750) | L2, L3 in part | A great city of the Classic Maya | Hieroglyphic stelae; the Long Count | Temples I and II, the North Acropolis, the ball court, causeways through the rainforest, reservoirs |
+| The Maya — Chichén Itzá (c. 1000) | L2, L3 in part | The Postclassic Maya | The Maya calendar; the serpent of light at the equinox | El Castillo, the Great Ball Court, the Sacred Cenote, the Temple of the Warriors, a village |
+| Mississippian Cahokia (c. 1175) | L2, L3 in part | The largest city north of Mexico before Columbus | Mississippian culture | Monks Mound, the Grand Plaza, the palisade, houses |
+| The Inca — Machu Picchu (c. 1450–1530) | L2, L3 in part | Pachacuti's mountain estate | Inca sun worship; khipu | Ashlar buildings, terraces, the Temple of the Sun |
+| The Pueblo — Taos (c. 1500) | L2, L3 in part | A many-storeyed adobe town, lived in to this day | Pueblo religious tradition | Stacked adobe houses, kivas, the creek |
+| The Aztecs — Tenochtitlan (1519) | L2, L3 in part | The lake capital in the year Cortés came | Bernal Díaz's eyewitness account; Nezahualcoyotl's poems | The Templo Mayor's twin shrines, the Sacred Precinct, canals, chinampas |
+| Haida village — SG̱ang Gwaay (c. 1850) | L2, L3 in part | The carved-pole culture of the Northwest Coast | Haida oral histories | A row of carved poles and cedar houses facing the beach, canoes |
+| Modern New York (1931) | L2, L3 in part | The Empire State Building completed; the Art Deco skyscraper | The age of *The Great Gatsby*; jazz | The Empire State Building, Manhattan blocks |
+| Brasília (1960) | L2, L3 in part | A capital planned whole by modernism | Niemeyer and Costa | The Congress towers and bowls, the cathedral, the superblocks |
 
 **Oceania (5)**
 
 | Settlement · moment | L | Why it is here | Works and ideas | What it holds |
 |---|---|---|---|---|
-| Kakadu — the rock shelters of Ubirr | L2 | A tradition of rock painting tens of thousands of years long | X-ray style painting; only what is shared publicly of the Dreaming | Painted rock faces, wetlands, the dry and the wet season |
-| Nan Madol, Pohnpei (c. 1300) | L1 | An island city of stacked basalt columns, seat of the Saudeleur dynasty | Pohnpeian traditions of the Saudeleur | Nearly a hundred artificial islets, walls of crossed basalt columns, canals, royal tombs |
-| Rapa Nui (c. 1500) | L2 | The island of the moai | Ancestor veneration; the later Birdman rite | Ahu Tongariki and its fifteen moai, the Rano Raraku quarry, stone houses |
-| Māori — a pā by Lake Rotorua (18th c.) | L2 | A Māori fortified village | Oral tradition and whakapapa | The meeting house, terraces and ditch, the palisade, storehouses |
-| Modern Sydney (1973) | L1–L2 | The Opera House completed | Utzon's design | The Opera House, the harbour, the Harbour Bridge |
+| Kakadu — the rock shelters of Ubirr | L2, L3 in part | A tradition of rock painting tens of thousands of years long | X-ray style painting; only what is shared publicly of the Dreaming | Painted rock faces, wetlands, the dry and the wet season |
+| Nan Madol, Pohnpei (c. 1300) | L2, L3 in part | An island city of stacked basalt columns, seat of the Saudeleur dynasty | Pohnpeian traditions of the Saudeleur | Nearly a hundred artificial islets, walls of crossed basalt columns, canals, royal tombs |
+| Rapa Nui (c. 1500) | L2, L3 in part | The island of the moai | Ancestor veneration; the later Birdman rite | Ahu Tongariki and its fifteen moai, the Rano Raraku quarry, stone houses |
+| Māori — a pā by Lake Rotorua (18th c.) | L2, L3 in part | A Māori fortified village | Oral tradition and whakapapa | The meeting house, terraces and ditch, the palisade, storehouses |
+| Modern Sydney (1973) | L2, L3 in part | The Opera House completed | Utzon's design | The Opera House, the harbour, the Harbour Bridge |
 
 ## 8. Performance and budgets
 
@@ -323,9 +323,10 @@ Targets on the author's machine (Apple M2, 8 GB). Automatic quality settles ther
 
 Replace these lines, never append to them; keep them few.
 
-- v12.2 (2026-11-14): the solid pass (CHANGELOG): every settlement scanned by `tools/float-check` and corrected for hanging geometry, missing roofs, invisible walls and walls walked through; the draw range half as far again; the tour with a caption, a walk and a pause; the 45 s film. Not looked at one by one in the browser: the pieces the pass added.
-- v12.0 (2026-11-12): 94 settlements stand, each reviewed at its arrival in the author's Chrome (§4.4, §5). **Still below §5:** ordinary houses beyond the first 120 m are mostly shut; the fronts vary by add-ons in several; Barcelona's arrival was lightened in v12.7 (counted in Node; not yet measured in the browser); Kaifeng holds 60 fps but is the slowest to load (about 30 s cold). The baked light and the impostors are current; every walk route passes.
-- **Next:** a second browser tour beyond the arrivals (the first 300 m of each), and the phone.
+- v12.19 (2026-11-17): the detail wave (CHANGELOG v12.5–v12.19). Every settlement but Ming Suzhou was deepened by one agent each: the landmark's crudest parts rebuilt, ordinary houses beyond the first 120 m entered and furnished by use, fronts varied by rule, street life where it was empty. The walker comes up to walls (v12.4); Petra's and Kakadu's rock collide where drawn; Barcelona's arrival was lightened (counted in Node). Light re-baked and impostors remade after the wave.
+- **Not looked at:** none of the wave's geometry has been seen rendered (the build machine had no headless browser); it passed the surface, plan, walk, view, disc and budget checks only. `float-check` could not run for some large settlements (memory). Several dossier additions are marked [inferred] because pages could not be fetched.
+- **Still below §5:** upper storeys of ordinary houses are mostly shut; Versailles' town, Mamluk Cairo and Isfahan have few houses to enter; several landmarks were hardly touched (the Forbidden City, Angkor Wat's galleries, Notre-Dame); Kaifeng is the slowest to load (about 30 s cold, not re-measured after its outer quarters were built); Taos' upper rooms are reached only by flying (ladders cannot be walked); Granada's Generalife west mirador is not reachable on foot.
+- **Next:** a browser tour of every settlement on the author's machine (the arrival and the new interiors), measuring Barcelona and Kaifeng; then fix what it finds.
 
 ## 11. Rules
 
