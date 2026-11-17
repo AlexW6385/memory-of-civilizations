@@ -99,6 +99,20 @@ function hewnFace(bag, el) {
     for (let k = 0; k < 2; k++) { const f = rr(), y = lo + 0.5 + rr() * (hi - lo - 1), r = 0.2 + rr() * 0.35; beamTris(lichen, at(f - r / len, y, 0.014), at(f + r / len, y, 0.014), 0.014, r * 1.2); }
     if (hi - lo > 1) beamTris(streaks, at(0.0, lo, 0.012), at(1.0, lo, 0.012), 0.012, 0.35);
     bag.add('bark_dark', fromTriangles(streaks)); if (lichen.length) bag.add('plaster_damp', fromTriangles(lichen)); }
+  // the masons' chisel marks: in the Bete Giyorgis precinct, on each working lift groups of short slanted-looking strokes in rows
+  if (el.a[0] > -266 && el.a[0] < -170 && el.a[1] > 110 && el.a[1] < 160) {
+    const marks = [], sd2 = Math.abs(Math.round((el.a[0] * 3.7 + el.a[1] * 5.9) * 10)) + 3, r2 = rng(sd2), len2 = Math.hypot(el.b[0] - el.a[0], el.b[1] - el.a[1]) || 1;
+    for (let y = -1.1; y - 1.1 > Math.max(lo, el.y0 + 0.3); y -= 1.1) {
+      if (r2() < 0.35) continue;
+      const f0 = r2() * 0.4, f1 = f0 + 0.4 + r2() * 0.5;
+      for (let f = f0; f < Math.min(1, f1); f += 0.1 / len2 * 2.5) {
+        const yy = y - 0.18 - r2() * 0.12, lh = 0.22 + r2() * 0.12, sl = (r2() - 0.5) * 0.06, g = 0.012;
+        beamTris(marks, at2(f + sl / len2, yy), at2(f + sl / len2 + g / len2, yy), 0.006, Math.min(lh, hi - yy));
+      }
+    }
+    function at2(f, y) { return [A[0] + (B[0] - A[0]) * f + nx * 0.016, y, A[1] + (B[1] - A[1]) * f + nz * 0.016]; }
+    if (marks.length) bag.add('tuff_hewn', fromTriangles(marks));
+  }
   if (beds.length) bag.add('tuff_hewn', fromTriangles(beds));
   if (ledges.length) bag.add(TU, fromTriangles(ledges));
 }
@@ -124,6 +138,19 @@ function giyorgis(el, { bag, col }) {
   cross(bag, col, TH, cx, cz, a + 0.4, w + 0.4, y0 + 0.9, yf);
   // the walls round the crossing and the arms, to the roof (the four corners of the crossing stand as pilasters)
   for (const r of [[wc, wi, a, w], [wi, wc, wc, w], [wi, w, w, a]]) for (const q of quad(r)) solid(bag, col, TH, q, yf, top);
+  // the mouldings that run round the whole cross (Senses Atlas / photographs: string courses between the window rows and a stepped cornice under the roof)
+  { const P = [[a, -w], [a, w], [w, w], [w, a], [-w, a], [-w, w], [-a, w], [-a, -w], [-w, -w], [-w, -a], [w, -a], [w, -w]], conc = (p) => Math.abs(Math.abs(p[0]) - w) < 1e-6 && Math.abs(Math.abs(p[1]) - w) < 1e-6;
+    const run = (ya, yb, d) => {
+      for (let i = 0; i < 12; i++) {
+        const p = P[i], q = P[(i + 1) % 12], alongX = Math.abs(p[1] - q[1]) < 1e-6, k = alongX ? p[1] : p[0], sg = Math.sign(k), lo = Math.min(alongX ? p[0] : p[1], alongX ? q[0] : q[1]), hi = Math.max(alongX ? p[0] : p[1], alongX ? q[0] : q[1]);
+        const ends = [lo, hi].map((v, j) => { const c = alongX ? (v === p[0] ? p : q) : (v === p[1] ? p : q); return conc(c) ? (j ? -d : d) : (j ? d : -d); });
+        const l0 = lo + (alongX ? ends[0] : 0), l1 = hi + (alongX ? ends[1] : 0), o0 = Math.min(k, k + sg * d), o1 = Math.max(k, k + sg * d);
+        bag.add(TH, alongX ? box(cx + l0, ya, cz + o0, cx + l1, yb, cz + o1) : box(cx + o0, ya, cz + lo, cx + o1, yb, cz + hi));
+      }
+    };
+    run(yf + 5.0, yf + 5.1, 0.07); run(yf + 5.1, yf + 5.36, 0.16); run(yf + 5.36, yf + 5.46, 0.1);
+    run(top - 0.95, top - 0.8, 0.09); run(top - 0.8, top - 0.5, 0.21); run(top - 0.5, top - 0.3, 0.12); run(top - 0.3, top - 0.02, 0.3);
+  }
   // the arms: the end wall pierced by its windows and its door, the flat ceiling over the nave of the arm, the arch at its mouth
   const faces = [], sof = [];
   for (const [dx, dz] of ARMS) {
