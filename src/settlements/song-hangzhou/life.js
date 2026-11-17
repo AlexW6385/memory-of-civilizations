@@ -87,8 +87,9 @@ export function interiorRooms() {
 /** The plans: shop fronts in tiles of 100 m (style 'life'), one plan per interior. base(id, elements, style) is the town's plan maker. */
 export function lifePlans(base) {
   const plans = [], tiles = new Map(), chosen = interiorLots(), inside = new Set(Object.values(chosen).flat());
+  const dwSet = new Set(dwellingLots());
   for (const l of lots()) {
-    if (!l.shop) continue;
+    if (!l.shop || dwSet.has(l)) continue;   // (a dwelling's shop has its own goods inside, and no apron across its door)
     const F = frontOf(l), at = F.P(0.5, 0);
     if (Math.hypot(at[0], at[1]) > RADIUS - 20) continue;
     const e = { t: 'hz_shop', at, y: LEVEL.street, rot: F.rot, L: F.L, trade: l.trade || tradeOf(l), seed: (l.seed || 1) + 7, imperial: nearIW(l) };
@@ -119,6 +120,8 @@ export function dwellingLots() {
   const c = lots().filter(ok).map((l) => [rand(), l]).sort((a, b) => a[0] - b[0]).map((q) => q[1]);
   DW = [];
   for (const l of c) { if (DW.length >= 90) break; if (DW.some((o) => Math.hypot(cx(o) - cx(l), cz(o) - cz(l)) < 19)) continue; if (Object.values(ch).flat().some((o) => Math.hypot(cx(o) - cx(l), cz(o) - cz(l)) < 9)) continue; DW.push(l); }
+  // (one lot has a city fixture, a 1.2 m planter, standing across its only doorway: it is left as it was)
+  DW = DW.filter((l) => !(Math.abs(l.rect[0] - 77.37) < 0.1 && Math.abs(l.rect[1] + 115.7) < 0.1));
   return DW;
 }
 const dwSpec = (l) => dwellingSpec({ rect: l.rect, front: l.front, seed: l.seed, shop: !!l.shop });

@@ -62,28 +62,28 @@ function shell(el, ctx) {
   const rect = ([a, b, c, d]) => { const p = [[a, b], [c, d]].map(([u, v]) => [cx + u * Math.cos(yaw) + v * Math.sin(yaw), cz - u * Math.sin(yaw) + v * Math.cos(yaw)]); return [Math.min(p[0][0], p[1][0]), Math.min(p[0][1], p[1][1]), Math.max(p[0][0], p[1][0]), Math.max(p[0][1], p[1][1])]; };
   const bag = { add: (m, g) => ctx.bag.add(m, g.applyMatrix4(M)) };
   const E = 0.2, infl = (r) => [r[0] - E, r[1] - E, r[2] + E, r[3] + E];   // the colliders stand 0.2 m proud of the walls they follow, so that no free spot lies within a cell of the drawn wall
-  const col = { floor: (r, y) => ctx.col.floor(rect(r), y), rect: (r, a, b) => ctx.col.rect(rect(r), a, b), wall: (r, a, b) => ctx.col.rect(rect(infl(r)), a, b) };
+  const col = { floor: (r, y) => ctx.col.floor(rect(r), y), rect: (r, a, b) => ctx.col.rect(rect(r), a, b), wall: (r, a, b, nl, nr) => { const q = infl(r); if (nl) q[0] = r[0]; if (nr) q[2] = r[2]; ctx.col.rect(rect(q), a, b); } };
   const y = el.y ?? 0, Y = y + 0.45, A0 = -L / 2, A1 = L / 2, bw = (w) => D / 2 - w, rand = rng((el.seed || 1) + 5);
   const bx = (a0, a1, w0, w1, h0, h1, mat) => bag.add(mat, box(a0, Y + h0, bw(w1), a1, Y + h1, bw(w0)));
-  const wall = (a0, a1, w0, w1, h, mat = wash) => { if (a1 - a0 < 0.02) return; bx(a0, a1, w0, w1, 0, h, mat); bag.add('plaster_grey', box(a0 - 0.01, Y, bw(w1) - 0.01, a1 + 0.01, Y + 0.35, bw(w0) + 0.01)); col.wall([a0, bw(w1), a1, bw(w0)], Y, Y + h); };
+  const wall = (a0, a1, w0, w1, h, mat = wash, nl = false, nr = false) => { if (a1 - a0 < 0.02) return; bx(a0, a1, w0, w1, 0, h, mat); bag.add('plaster_grey', box(a0 - 0.01, Y, bw(w1) - 0.01, a1 + 0.01, Y + 0.35, bw(w0) + 0.01)); col.wall([a0, bw(w1), a1, bw(w0)], Y, Y + h, nl, nr); };
   const post = (a, w, h) => { bx(a - 0.1, a + 0.1, w - 0.1, w + 0.1, 0, h, 'lacquer_chestnut'); col.wall([a - 0.1, bw(w + 0.1), a + 0.1, bw(w - 0.1)], Y, Y + h); };
   // floor over the building (and the court), plinth under it
   bag.add('granite_block', box(A0, y - 0.4, bw(wB), A1, Y - 0.04, bw(0)));
   bag.add('brick_paving', box(A0 + 0.02, Y - 0.04, bw(wB) + 0.02, A1 - 0.02, Y, bw(0) - 0.02));
   col.floor([A0, bw(wB), A1, bw(0)], Y);
   // the step before the way in from the street (and the court's gate)
-  const step = (c, w) => { bag.add('granite_block', box(c - w / 2 - 0.1, y + 0.03, bw(0), c + w / 2 + 0.1, y + 0.25, bw(-0.45))); col.floor([c - w / 2 - 0.1, bw(0), c + w / 2 + 0.1, bw(-0.45)], y + 0.25); };
+  const step = (c, w) => { bag.add('granite_block', box(c - w / 2 - 0.1, y + 0.03, bw(0), c + w / 2 + 0.1, y + 0.12, bw(-0.45))); col.floor([c - w / 2 - 0.1, bw(0), c + w / 2 + 0.1, bw(-0.45)], y + 0.12); };
   // party walls, the back wall
   wall(A0, A0 + TH, 0, wB, H); wall(A1 - TH, A1, 0, wB, H);
   if (Yd > 0) {
-    wall(A0 + TH, pb - 0.65, wB - TH, wB, H); wall(pb + 0.65, A1 - TH, wB - TH, wB, H); bx(pb - 0.65, pb + 0.65, wB - TH, wB, 2.2, H, wash);
+    wall(A0 + TH, pb - 0.65, wB - TH, wB, H, wash, false, true); wall(pb + 0.65, A1 - TH, wB - TH, wB, H, wash, true); bx(pb - 0.65, pb + 0.65, wB - TH, wB, 2.2, H, wash);
     for (const s of [-1, 1]) bx(pb + s * 0.65 - (s > 0 ? 0 : 0.08), pb + s * 0.65 + (s > 0 ? 0.08 : 0), wB - TH - 0.03, wB + 0.03, 0, 2.2, 'lacquer_chestnut');
     // two treads down to the yard
     bag.add('granite_block', box(pb - 0.7, y + 0.03, bw(wB + 0.55), pb + 0.7, y + 0.25, bw(wB))); col.floor([pb - 0.7, bw(wB + 0.55), pb + 0.7, bw(wB)], y + 0.25);
   } else wall(A0 + TH, A1 - TH, wB - TH, wB, H);
   // the partition between the rooms (a doorway at pa, the head and posts of timber)
   { const wb = wB - TH, w1 = wb - Rp, w0 = w1 - 0.16;
-    wall(A0 + TH, pa - 0.65, w0, w1, H); wall(pa + 0.65, A1 - TH, w0, w1, H); bx(pa - 0.65, pa + 0.65, w0, w1, 2.3, H, wash);
+    wall(A0 + TH, pa - 0.65, w0, w1, H, wash, false, true); wall(pa + 0.65, A1 - TH, w0, w1, H, wash, true); bx(pa - 0.65, pa + 0.65, w0, w1, 2.3, H, wash);
     for (const s of [-1, 1]) bx(pa + s * 0.65 - (s > 0 ? 0 : 0.07), pa + s * 0.65 + (s > 0 ? 0.07 : 0), w0 - 0.03, w1 + 0.03, 0, 2.3, 'lacquer_chestnut');
     bx(pa - 0.72, pa + 0.72, w0 - 0.03, w1 + 0.03, 2.3, 2.42, 'lacquer_chestnut');
     // tie beams over the front room, the partition and the rear room
@@ -92,7 +92,7 @@ function shell(el, ctx) {
   const facade = (type, wf, gc, gwid, Hh) => {
     const g0 = gc - gwid / 2, g1 = gc + gwid / 2, a0 = A0 + TH, a1 = A1 - TH;
     if (type === 'door') {
-      wall(a0, g0, wf, wf + TH, Hh); wall(g1, a1, wf, wf + TH, Hh); bx(g0, g1, wf, wf + TH, 2.45, Hh, wash);
+      wall(a0, g0, wf, wf + TH, Hh, wash, false, true); wall(g1, a1, wf, wf + TH, Hh, wash, true); bx(g0, g1, wf, wf + TH, 2.45, Hh, wash);
       bx(g0 - 0.1, g0, wf - 0.04, wf + TH + 0.04, 0, 2.45, 'lacquer_chestnut'); bx(g1, g1 + 0.1, wf - 0.04, wf + TH + 0.04, 0, 2.45, 'lacquer_chestnut'); bx(g0 - 0.12, g1 + 0.12, wf - 0.05, wf + TH + 0.05, 2.4, 2.55, 'lacquer_chestnut');
       bx(g0 - 0.5, g1 + 0.5, wf - 0.55, wf + 0.05, 2.58, 2.68, 'tile_dark'); bx(g0 - 0.5, g1 + 0.5, wf - 0.55, wf + 0.05, 2.5, 2.58, 'timber');
       if (Hh >= H) for (const [s0, s1] of [[a0, g0], [g1, a1]]) { const wc = (s0 + s1) / 2; if (s1 - s0 < 1.7) continue;
@@ -101,18 +101,18 @@ function shell(el, ctx) {
     }
     if (type === 'boards') {
       bx(a0, a1, wf - 0.1, wf + TH + 0.05, H - 0.45, H, 'wood_dark');
-      for (const [s0, s1] of [[a0, g0], [g1, a1]]) {
+      for (const [s0, s1, nl, nr] of [[a0, g0, false, true], [g1, a1, true, false]]) {
         if (s1 - s0 < 0.1) continue;
-        bx(s0, s1, wf, wf + TH * 0.6, 0.18, H - 0.45, 'wood_dark'); bx(s0, s1, wf - 0.06, wf + TH, 0, 0.18, 'granite_grey'); col.wall([s0, bw(wf + TH * 0.6), s1, bw(wf - 0.06)], Y, Y + H - 0.45);
+        bx(s0, s1, wf, wf + TH * 0.6, 0.18, H - 0.45, 'wood_dark'); bx(s0, s1, wf - 0.06, wf + TH, 0, 0.18, 'granite_grey'); col.wall([s0, bw(wf + TH * 0.6), s1, bw(wf - 0.06)], Y, Y + H - 0.45, nl, nr);
         for (let a = s0 + 0.02, i = 0; a + 0.28 < s1; a += 0.32, i++) { if ((i * 7 + Math.floor(rand() * 5)) % 9 === 4) continue; bx(a, a + 0.28, wf - 0.03, wf, 0.18, H - 0.45, SHUT[i % 3]); }
       }
       bx(g0 - 0.1, g0, wf - 0.06, wf + TH, 0.18, H - 0.45, 'timber'); bx(g1, g1 + 0.1, wf - 0.06, wf + TH, 0.18, H - 0.45, 'timber');
       step(gc, gwid); return;
     }
     if (type === 'open') {
-      for (const [s0, s1] of [[a0, g0 - 0.1], [g1 + 0.1, a1]]) {
+      for (const [s0, s1, nl, nr] of [[a0, g0 - 0.1, false, true], [g1 + 0.1, a1, true, false]]) {
         if (s1 - s0 < 0.1) continue;
-        bx(s0, s1, wf, wf + 0.2, 0, 0.9, 'timber'); bx(s0, s1, wf - 0.04, wf + 0.2, 0.9, 0.95, 'wood_dark'); bx(s0, s1, wf, wf + 0.12, 0.95, H - 0.8, 'lattice'); col.wall([s0, bw(wf + 0.2), s1, bw(wf)], Y, Y + H - 0.8);
+        bx(s0, s1, wf, wf + 0.2, 0, 0.9, 'timber'); bx(s0, s1, wf - 0.04, wf + 0.2, 0.9, 0.95, 'wood_dark'); bx(s0, s1, wf, wf + 0.12, 0.95, H - 0.8, 'lattice'); col.wall([s0, bw(wf + 0.2), s1, bw(wf)], Y, Y + H - 0.8, nl, nr);
       }
       post(g0 - 0.1, wf + 0.1, H - 0.45); post(g1 + 0.1, wf + 0.1, H - 0.45);
       bx(a0, a1, wf - 0.12, wf + 0.12, H - 0.45, H, 'lacquer_chestnut'); bx(a0, a1, wf - 0.02, wf + 0.02, H - 0.8, H - 0.45, 'lattice_red');
@@ -123,7 +123,7 @@ function shell(el, ctx) {
       const lw = Math.min(1.6, Math.max(0, s1 - s0 - 0.4)), l0 = dir < 0 ? g0 - lw : g1, l1 = dir < 0 ? g0 : g1 + lw;
       if (dir < 0) wall(s0, l0, wf, wf + TH, Hh); else wall(l1, s1, wf, wf + TH, Hh);
       if (lw > 0.1) { bx(l0, l1, wf, wf + 0.1, 0, 0.2, 'lacquer_chestnut'); bx(l0, l1, wf, wf + 0.1, 0.2, 2.5, 'lattice_red'); bx(l0, l1, wf - 0.02, wf + 0.12, 2.5, 2.6, 'lacquer_chestnut'); for (let k = 0; k <= Math.round(lw / 0.4); k++) { const a = l0 + (l1 - l0) * k / Math.round(lw / 0.4); bx(a - 0.03, a + 0.03, wf - 0.03, wf + 0.13, 0, 2.6, 'lacquer_chestnut'); }
-        col.wall([l0, bw(wf + 0.12), l1, bw(wf - 0.02)], Y, Y + 2.6); }
+        col.wall([l0, bw(wf + 0.12), l1, bw(wf - 0.02)], Y, Y + 2.6, dir > 0, dir < 0); }
     }
     bx(g0, g1, wf, wf + TH, 2.6, Hh, wash); bx(g0 - 0.12, g0, wf - 0.04, wf + TH + 0.04, 0, 2.6, 'lacquer_chestnut'); bx(g1, g1 + 0.12, wf - 0.04, wf + TH + 0.04, 0, 2.6, 'lacquer_chestnut');
     bx(a0, a1, wf - 0.7, wf + 0.1, 2.9, 3.0, 'tile_dark'); bx(a0, a1, wf - 0.7, wf - 0.5, 2.8, 2.9, 'timber'); bx(a0, a1, wf - 0.05, wf + 0.1, 2.6, 2.9, 'timber');
