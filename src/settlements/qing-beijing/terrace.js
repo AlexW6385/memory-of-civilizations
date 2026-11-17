@@ -12,14 +12,13 @@ const hash01 = (v) => { const t = Math.sin(v * 12.9898) * 43758.5453; return t -
 // ── the post ──
 /** The post, built at its origin: a foot, shaft with a belt, a collar of lotus petals, the carved cap. */
 function post(P, head, H = 0.98) {
-  P.add(M, lathe([[0.15, 0], [0.15, 0.07], [0.12, 0.1], [0.115, 0.5], [0.14, 0.53], [0.14, 0.58], [0.115, 0.61], [0.115, H - 0.1], [0.15, H - 0.07], [0.15, H]], 8, (th, i) => (i === 4 || i === 5 ? 1 : 1)));
-  const petals = (th, i) => (i <= 2 ? 1 + 0.2 * Math.cos(th * 6) : 1);
+  P.add(M, lathe([[0.15, 0], [0.15, 0.07], [0.115, 0.1], [0.115, H - 0.1], [0.15, H - 0.07], [0.15, H]], 8));
   if (head === 'phoenix') {
-    // the collar, the folded wings (three lobes) over the body, the long crest and flame
-    P.add(M, lathe([[0.12, H], [0.155, H + 0.035], [0.12, H + 0.09], [0.095, H + 0.14], [0.13, H + 0.22], [0.125, H + 0.3], [0.09, H + 0.38], [0.075, H + 0.46], [0.03, H + 0.58], [0.001, H + 0.72]], 12, (th, i) => (i <= 2 ? petals(th, i) : i >= 4 && i <= 6 ? 1 + 0.3 * Math.cos(th * 3) : i >= 7 ? 1 + 0.25 * Math.cos(th * 2) : 1)));
+    // the collar, the folded wings (three lobes) over the body, the crest and flame
+    P.add(M, lathe([[0.12, H], [0.16, H + 0.04], [0.1, H + 0.12], [0.14, H + 0.24], [0.09, H + 0.38], [0.05, H + 0.52], [0.001, H + 0.7]], 8, (th, i) => (i === 3 ? 1 + 0.3 * Math.cos(th * 3) : i === 4 ? 1 + 0.25 * Math.cos(th * 2) : 1)));
   } else {
-    // the collar, then the dragon's coils (the spiral swung round the column) and the pearl-bearing head
-    P.add(M, lathe([[0.12, H], [0.155, H + 0.035], [0.12, H + 0.09], [0.1, H + 0.14], [0.13, H + 0.22], [0.1, H + 0.3], [0.13, H + 0.38], [0.095, H + 0.46], [0.11, H + 0.53], [0.05, H + 0.6], [0.001, H + 0.68]], 12, (th, i) => (i <= 2 ? petals(th, i) : i >= 4 && i <= 8 ? 1 + 0.3 * Math.cos(th - i * 1.6) : 1)));
+    // the collar, then the dragon's coils (a spiral swung round the column) and the head with the pearl
+    P.add(M, lathe([[0.12, H], [0.16, H + 0.04], [0.1, H + 0.12], [0.135, H + 0.24], [0.1, H + 0.36], [0.12, H + 0.5], [0.05, H + 0.6], [0.001, H + 0.68]], 8, (th, i) => (i >= 3 && i <= 5 ? 1 + 0.3 * Math.cos(th - i * 1.6) : 1)));
   }
 }
 // the old posts' signatures: their vertex counts and the bounding box at the origin, to find them among the bag's additions
@@ -50,22 +49,15 @@ function swapPosts(bag) {
 /** A chishou facing +z at its origin: its stub in the wall (z < 0), the head jutting to z ≈ 0.75, mouth open. */
 function spout(P) {
   P.add(M, frustum([-0.13, -0.5, 0.13, 0.05], -0.17, 0.12, 0, 0, 0, 0, { noZn: true }));
-  // the neck, thick, rising to the skull; the skull, brow, snout, the upper lip, the lower jaw
-  P.add(M, limb([0, -0.02, 0.0], [0, 0.0, 0.34], 0.125, 0.105, 7));
-  P.add(M, T(ball(0.115, 0.09, 0.17, 8, 4), 0, 0.03, 0.4));                                    // the skull
-  P.add(M, frustum([-0.085, 0.45, 0.085, 0.78], -0.04, 0.07, 0.005, 0.005, 0.02, 0.0, { noZn: true }));        // the snout
-  P.add(M, T(ball(0.1, 0.035, 0.1, 8, 3), 0, 0.07, 0.62));                                      // the nose's bridge
-  P.add(M, T(ball(0.1, 0.03, 0.11, 8, 3), 0, -0.065, 0.62));                                    // the lower jaw
-  P.add('slate', T(ball(0.045, 0.02, 0.1, 6, 2), 0, -0.035, 0.6));                              // the throat: the drain, dark
+  P.add(M, limb([0, -0.02, 0.0], [0, 0.0, 0.34], 0.125, 0.105, 6));                              // the neck
+  P.add(M, T(ball(0.115, 0.09, 0.17, 6, 3), 0, 0.03, 0.4));                                      // the skull
+  P.add(M, frustum([-0.085, 0.45, 0.085, 0.78], -0.04, 0.07, 0.005, 0.005, 0.02, 0.0, { noZn: true }));        // the snout, its mouth open under it
+  P.add(M, T(ball(0.1, 0.03, 0.11, 6, 2), 0, -0.07, 0.62));                                      // the lower jaw
   for (const sx of [-1, 1]) {
-    P.add(M, T(ball(0.022, 0.022, 0.022, 4, 2), sx * 0.04, 0.09, 0.76));                         // the nostrils
-    P.add(M, T(ball(0.04, 0.03, 0.07, 5, 2), sx * 0.085, 0.085, 0.47));                          // the brows
-    P.add(M, T(ball(0.026, 0.026, 0.026, 5, 2), sx * 0.1, 0.06, 0.5));                           // the eyes
-    P.add(M, limb([sx * 0.06, 0.1, 0.34], [sx * 0.1, 0.24, 0.12], 0.032, 0.012, 4));             // the horns, swept back
-    P.add(M, limb([sx * 0.1, -0.02, 0.4], [sx * 0.22, 0.02, 0.22], 0.03, 0.012, 4));             // the whiskers / mane fins
-    P.add(M, T(ball(0.07, 0.015, 0.11, 6, 2), sx * 0.17, 0.0, 0.3));                              // the ears
+    P.add(M, T(ball(0.04, 0.03, 0.07, 4, 2), sx * 0.085, 0.09, 0.47));                           // the brows
+    P.add(M, limb([sx * 0.06, 0.1, 0.34], [sx * 0.1, 0.24, 0.12], 0.032, 0.012, 3));             // the horns, swept back
+    P.add(M, T(ball(0.07, 0.015, 0.11, 4, 2), sx * 0.17, 0.0, 0.3));                              // the ears
   }
-  P.add(M, T(ball(0.045, 0.025, 0.09, 6, 2), 0, 0.12, 0.2));                                     // the mane's crest
 }
 
 function streak(out, x, z, f, y, len, k) {
@@ -82,13 +74,10 @@ function streak(out, x, z, f, y, len, k) {
 // ── the sumeru base's lotus band ──
 /** One lotus petal of the band (the upturned lotus of the base), facing +z, 0.27 wide, 0.42 high, standing 0.09 off the face. */
 function petal(P, h = 0.42, w = 0.27) {
-  const pts = [[-w / 2, 0], [w / 2, 0], [w / 2, h * 0.5], [w * 0.32, h * 0.8], [0, h], [-w * 0.32, h * 0.8], [-w / 2, h * 0.5]], t = [];
+  const pts = [[-w / 2, 0], [w / 2, 0], [w / 2, h * 0.55], [0, h], [-w / 2, h * 0.55]], t = [];
   const d = 0.09;
   for (let i = 1; i < pts.length - 1; i++) t.push(pts[0][0], pts[0][1], d, pts[i][0], pts[i][1], d, pts[i + 1][0], pts[i + 1][1], d);
   for (let i = 0; i < pts.length; i++) { const a = pts[i], b = pts[(i + 1) % pts.length]; t.push(a[0], a[1], 0, b[0], b[1], 0, b[0], b[1], d, a[0], a[1], 0, b[0], b[1], d, a[0], a[1], d); }
-  // the inner petal, a smaller one raised on it: the carved centre
-  const k = 0.55, e = 0.14;
-  for (let i = 1; i < 4; i++) t.push(pts[0][0] * k, h * 0.1 + pts[0][1] * k, e, pts[i][0] * k, h * 0.1 + pts[i][1] * k, e, pts[i + 1][0] * k, h * 0.1 + pts[i + 1][1] * k, e);
   orientOutward(t);
   P.add(M, fromTriangles(t));
 }
@@ -142,7 +131,7 @@ function bjTerrace(el, ctx) {
       }
       fil.emit(bag, 0, 0, 0);
       // the petals along it, 0.3 apart, each standing from the face of the plinth's top
-      const n = Math.max(1, Math.floor((r1 - r0) / 0.3)), pw = (r1 - r0) / n;
+      const n = Math.max(1, Math.floor((r1 - r0) / 0.36)), pw = (r1 - r0) / n;
       for (let q = 0; q < n; q++) {
         const c = r0 + pw * (q + 0.5), P = new Parts(); petal(P, 0.42, pw - 0.03);
         const yaw = fk === 's' ? 0 : fk === 'n' ? Math.PI : fk === 'e' ? Math.PI / 2 : -Math.PI / 2;

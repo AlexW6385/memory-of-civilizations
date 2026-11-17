@@ -43,7 +43,7 @@ function clip(p0, d, x0, y0, x1, y1) {
  * six-sided boss at each node; the paper behind (both faces).
  */
 function lattice(M, x0, y0, x1, y1, a, bw = 0.026, zb = 0.0, zt = 0.045) {
-  const h = a * S3, ox = (x0 + x1) / 2, oy = (y0 + y1) / 2, red = M('lacquer_red'), gilt = M('gilt_bronze'), paper = M('plaster_white');
+  const h = a * S3, ox = (x0 + x1) / 2, oy = (y0 + y1) / 2, red = M('lacquer_red'), gilt = M('gilt_bronze'), paper = M('marble_smooth');
   // the paper: one quad each way
   const quadT = (z, flip) => { const A = [x0, y0, z], B = [x1, y0, z], C = [x1, y1, z], D = [x0, y1, z]; return flip ? [...A, ...C, ...B, ...A, ...D, ...C] : [...A, ...B, ...C, ...A, ...C, ...D]; };
   paper.push(...quadT(zb, false), ...quadT(zb - 0.002, true));
@@ -66,7 +66,7 @@ function lattice(M, x0, y0, x1, y1, a, bw = 0.026, zb = 0.0, zt = 0.045) {
     const y = oy + j * h, off = (j & 1) ? a / 2 : 0;
     for (let i = Math.ceil((x0 - ox - off) / a); ox + off + i * a <= x1; i++) {
       const x = ox + off + i * a;
-      if (x > x0 + 0.04 && x < x1 - 0.04 && y > y0 + 0.04 && y < y1 - 0.04) prism(gilt, hex([x, y], 0.036), zb, zt + 0.014);
+      if (x > x0 + 0.04 && x < x1 - 0.04 && y > y0 + 0.04 && y < y1 - 0.04) { const hx = hex([x, y], 0.036); for (let q = 1; q < 5; q++) gilt.push(hx[0][0], hx[0][1], zt + 0.014, hx[q][0], hx[q][1], zt + 0.014, hx[q + 1][0], hx[q + 1][1], zt + 0.014); }
     }
   }
 }
@@ -150,12 +150,13 @@ function bjHallDoors(el, { bag }) {
   const [x0, , x1, z1] = el.rect, y = el.y, H = el.H, nb = el.bays[0], skip = el.skip ?? [Math.floor(nb / 2)];
   const hd = Math.min(H - 0.5, 5.5 + (H - 8) * 0.15), span = H - 1.0 - hd, cw = 0.45;       // the columns' clearance
   const nLeaf = el.leaves ?? 6, pitch = (x1 - x0) / nb, lw = (pitch - 2 * cw) / nLeaf;
-  const L = leaf(lw, hd - 0.12), nw = 3, ww = (pitch - 2 * cw) / nw, wh = span * 0.42, W = windowPanel(ww, wh);
+  const nw = 3, ww = (pitch - 2 * cw) / nw, wh = span * 0.42;
   const yWin = y + hd + 0.45 + span * 0.3;
   for (let i = 0; i < nb; i++) {
     const bx = x0 + pitch * i + cw;
-    if (!skip.includes(i)) for (let j = 0; j < nLeaf; j++) emit(bag, L, bx + j * lw, y + 0.04, z1 + 0.07);
-    for (let j = 0; j < nw; j++) emit(bag, W, bx + j * ww, yWin, z1 + 0.15);
+    // (each leaf a hair different in height, so that they are merged with the hall's meshes and not drawn as instances of their own)
+    if (!skip.includes(i)) for (let j = 0; j < nLeaf; j++) emit(bag, leaf(lw, hd - 0.12 + 0.0007 * (i * nLeaf + j)), bx + j * lw, y + 0.04, z1 + 0.07);
+    for (let j = 0; j < nw; j++) emit(bag, windowPanel(ww, wh + 0.0007 * (i * nw + j)), bx + j * ww, yWin, z1 + 0.15);
   }
 }
 
