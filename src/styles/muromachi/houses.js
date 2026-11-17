@@ -15,6 +15,10 @@ function bambooFence(el, { bag, col }) {
   const alongX = Math.abs(u[0]) > Math.abs(u[1]);
   for (const hy of [0.25, h * 0.55, h - 0.05]) bx3(Math.min(ax, bx) - (alongX ? 0 : 0.04), y + hy, Math.min(az, bz) - (alongX ? 0.04 : 0), Math.max(ax, bx) + (alongX ? 0 : 0.04), y + hy + 0.05, Math.max(az, bz) + (alongX ? 0.04 : 0));
   for (let s = 0.12; s < L; s += 0.14) { const x = ax + u[0] * s, z = az + u[1] * s; bx3(x - 0.025, y, z - 0.025, x + 0.025, y + h, z + 0.025); }
+  // the half-round cap of bamboo along the top, the posts' heads, and the black palm-fibre lashings where each rail meets a post
+  bx3(Math.min(ax, bx) - (alongX ? 0 : 0.06), y + h, Math.min(az, bz) - (alongX ? 0.06 : 0), Math.max(ax, bx) + (alongX ? 0 : 0.06), y + h + 0.07, Math.max(az, bz) + (alongX ? 0.06 : 0));
+  for (let i = 0; i <= n; i++) { const x = ax + u[0] * L * i / n, z = az + u[1] * L * i / n; for (const hy of [0.25, h * 0.55, h - 0.05]) bag.add(WD, box3(x - 0.075, y + hy - 0.02, z - 0.075, x + 0.075, y + hy + 0.07, z + 0.075)); }
+  for (let s = 0.5; s < L; s += 0.7) { const x = ax + u[0] * s, z = az + u[1] * s; for (const hy of [0.25, h * 0.55, h - 0.05]) bag.add(WD, box3(x - 0.04, y + hy - 0.01, z - 0.04, x + 0.04, y + hy + 0.06, z + 0.04)); }
   col.segment(el.a, el.b, 0.2, y, y + h); void t;
 }
 import { box as box3 } from '../../core/geom.js';

@@ -15,6 +15,13 @@ E.push({ t: 'lane', rect: [P.c[0] - P.r[0] - 4, P.c[1] + P.r[1] + 3, P.c[0] + P.
 E.push({ t: 'lane', rect: [P.c[0] - P.r[0] - 5.4, GINKAKU.kannon[1] + 8, P.c[0] - P.r[0] - 3, P.c[1] + P.r[1] + 5.4], y: 0.02, mat: 'flagstone' });
 // the pond (the shores are dug by the ground), a stone bridge over its narrow west neck
 E.push({ t: 'pond_water', c: P.c, r: P.r, y: P.level, margin: 0.6 });
+// the pond's bank set with stones, a moss islet with a pine, a stone bridge to it from the south bank
+E.push({ t: 'pond_stones', c: P.c, r: P.r, n: 22, y: -0.3, seed: 7, skip: [[205, 217]] });
+E.push({ t: 'islet', at: [211, -2.2], r: 2.5, y: -1.6, top: 0.2, seed: 9 });
+//E.push({ t: 'niwaki', at: [212, -2.8], y: 0.2, h: 4.2, seed: 33 });
+E.push({ t: 'stone_bridge', x: 211, z0: 7.8, z1: 0.4, y: 0.16, w: 0.95 });
+// the approach: a clipped camellia hedge each side of the way from the gate, a fence of split bamboo behind it [inferred: the hedge and fence of the present approach, set here at the brief's request]
+for (const sx of [-1, 1]) { E.push({ t: 'ikegaki', a: [gx + sx * 2.15, z1 - 4], b: [gx + sx * 2.15, 64], h: 1.5, y: 0, w: 0.5, seed: 5 + sx }); E.push({ t: 'bamboo_fence', a: [gx + sx * 3.0, z1 - 4], b: [gx + sx * 3.0, 64], h: 1.9, y: 0 }); }
 // the Kannon-den facing the pond, the Tōgu-dō facing it from the west
 E.push({ t: 'kannon_den', at: GINKAKU.kannon, y: 0, facing: 's' });
 E.push({ t: 'togudo', at: GINKAKU.togudo, y: 0, facing: 'e' });

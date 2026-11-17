@@ -1,7 +1,7 @@
 // Tōgu-dō with its Dōjinsai, the Ryōan-ji hōjō and its rock garden (docs/settlements/muromachi-kyoto.md §3.1, §4).
 import { STYLES } from '../../core/build.js';
 import { lathe, fromTriangles } from '../../core/geom.js';
-import { local, tatami, rng, WD, PL, BARK, TM } from './kit.js';
+import { local, tatami, rng, quad2, WD, PL, BARK, TM } from './kit.js';
 
 /** A thin screen (fusuma or shoji) from x0 to x1 at z (or from z0 to z1 at x) with the mid-section open: panels of paper in dark frames. */
 function screenZ(B, col, x0, x1, z, y0, y1, open = null, mat = 'shoji', th = 0.06) {
@@ -126,7 +126,7 @@ function togudo(el, ctx) {
 
     // the lintel (nageshi) round the rooms, the coffered ceiling of the Dōjinsai and its neighbours: rails on a lacquered ground
     B(WD, -h + 0.13, yc - 0.42, -h + 0.13, h - 0.13, yc - 0.3, -h + 0.2); B(WD, -h + 0.13, yc - 0.42, -h + 0.13, -h + 0.2, yc - 0.3, h - 0.13); B(WD, h - 0.2, yc - 0.42, -h + 0.13, h - 0.13, yc - 0.3, h - 0.13);
-    B('ceiling_coffer', -h + 0.1, yc - 0.03, -h + 0.1, h - 0.1, yc, h - 0.1);
+    B('lacquer_black', -h + 0.1, yc - 0.03, -h + 0.1, h - 0.1, yc, h - 0.1);
     for (let x = -h + 0.1 + 0.9; x < h - 0.2; x += 0.9) B('lacquer_black', x - 0.03, yc - 0.08, -h + 0.1, x + 0.03, yc - 0.03, h - 0.1);
     for (let z = -h + 0.1 + 0.9; z < h - 0.2; z += 0.9) B('lacquer_black', -h + 0.1, yc - 0.08, z - 0.03, h - 0.1, yc - 0.03, z + 0.03);
     // the writing bay's window: a moulded frame, its two sliding shoji leaves on their tracks
@@ -161,6 +161,9 @@ function hojo(el, ctx) {
     B(TM, -hw - 0.3, y1 - 0.14, hd, hw + 0.3, y1, hd + 1.9);
     for (let i = 0; i <= 12; i++) B(WD, -hw + i * bay - 0.08, y0 + 0.2, hd + 1.78, -hw + i * bay + 0.08, y1 - 0.14, hd + 1.9);
     col.floor([-hw - 0.3, hd, hw + 0.3, hd + 1.9], y1);
+    for (let z = hd + 0.18; z < hd + 1.85; z += 0.19) B(WD, -hw - 0.3, y1, z - 0.006, hw + 0.3, y1 + 0.004, z + 0.006);          // the joints of the boards, laid along the veranda
+    B(WD, -hw - 0.3, y1 - 0.16, hd + 1.84, hw + 0.3, y1 + 0.02, hd + 1.92);                                                     // the edge board
+    for (let i = 0; i <= 12; i++) B('granite_block', -hw + i * bay - 0.16, y0, hd + 1.74, -hw + i * bay + 0.16, y0 + 0.2, hd + 1.96);   // the stones under the veranda's posts
     for (let k = 0; k < 3; k++) B('granite_block', hw + 0.3 + (2 - k) * 0.4, y0 + k * 0.28, hd + 0.2, hw + 0.3 + (3 - k) * 0.4, y0 + (k + 1) * 0.28, hd + 1.7);
     col.ramp([hw + 0.3, hd + 0.2, hw + 1.5, hd + 1.7], y0, y1 - 0.14, 'w');
     for (const [p0, q0, p1, q1] of [[-hw - 0.3, hd + 1.8, hw + 0.3, hd + 1.9], [-hw - 0.3, hd, -hw - 0.2, hd + 1.9], [hw + 0.2, hd, hw + 0.3, hd + 1.9]]) col.rect([p0, q0, p1, q1], y0, y1 - 0.1);
@@ -208,6 +211,13 @@ export function stoneTris(w, h, d, seed, lean, slant, flat) {
   return t;
 }
 
+/** One raked line of gravel from a to b along x at z: a rounded ridge with the groove beside it. */
+function rakeLine(bag, a, b, z, y) {
+  const t = [], P = [[-0.07, 0], [-0.03, 0.035], [0.03, 0.035], [0.07, 0]];
+  for (let i = 0; i < 3; i++) { const p = P[i], q = P[i + 1]; quad2(t, [a, y + p[1], z + p[0]], [b, y + p[1], z + p[0]], [b, y + q[1], z + q[0]], [a, y + q[1], z + q[0]]); }
+  bag.add('plaster_white', fromTriangles(t));
+}
+
 /** The rock garden { rect, y, seed }: white gravel raked in lines along x and in rings round the five groups of stones (3, 2, 3, 2, 5 from west to east), moss under each group, the clay wall on three sides. */
 function karesansui(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, r = rng(el.seed || 15), gy = y + 0.07;
@@ -233,17 +243,32 @@ function karesansui(el, { bag, col }) {
   // the raked lines along the garden, broken at the groups, the rings round them
   const near = (px, pz, m) => centres.some(([cx, cz], gi) => Math.hypot((px - cx) / 1.0, (pz - cz) / 0.8) < (G[gi][2] === 5 ? 2.5 : G[gi][2] === 3 ? 2.0 : 1.6) + m);
   for (let z = z0 + 0.3; z < z1 - 0.2; z += 0.21) {
-    let a = null;
-    for (let x = x0 + 0.2; x <= x1 - 0.15; x += 0.4) {
-      const bad = near(x, z, 0.0);
-      if (!bad && a === null) a = x;
-      if ((bad || x + 0.4 > x1 - 0.15) && a !== null) { bag.add('plaster_white', boxGeo(a, gy, z - 0.025, bad ? x - 0.2 : x, gy + 0.035, z + 0.025)); a = null; }
-    }
+    // each line runs unbroken until the rings round a group; where the line meets a ring it stops short of it
+    let a = x0 + 0.2;
+    const hits = centres.map(([cx, cz], gi) => { const Rr = (G[gi][2] === 5 ? 2.5 : G[gi][2] === 3 ? 2.0 : 1.6), dz = (z - cz) / 0.8; return Math.abs(dz) < Rr ? [cx - Math.sqrt(Rr * Rr - dz * dz), cx + Math.sqrt(Rr * Rr - dz * dz)] : null; }).filter(Boolean).sort((p, q) => p[0] - q[0]);
+    for (const [h0, h1] of hits) { if (h0 - 0.1 > a + 0.3) rakeLine(bag, a, h0 - 0.1, z, gy); a = Math.max(a, h1 + 0.1); }
+    if (x1 - 0.15 > a + 0.3) rakeLine(bag, a, x1 - 0.15, z, gy);
   }
   G.forEach(([, , n], gi) => { const [cx, cz] = centres[gi]; for (let k = 0; k < (n === 5 ? 4 : 3); k++) { const R = (n === 5 ? 2.1 : n === 3 ? 1.7 : 1.35) + k * 0.24; const g = lathe([[R - 0.03, 0], [R, 0.04], [R + 0.03, 0]], 40, null, 0, 0, 0); g.scale(1, 1, 0.8); g.translate(cx, gy, cz); bag.add('plaster_white', g); } });
   // the clay wall on the north, east and west, a bark coping; a kerb of stone along the south
-  const wl = (a, b, c, d) => { bag.add('earth_wall', boxGeo(a, y, b, c, y + 1.45, d)); bag.add(BARK, boxGeo(a - 0.2, y + 1.45, b - 0.2, c + 0.2, y + 1.6, d + 0.2)); col.rect([a, b, c, d], y, y + 1.6); };
-  wl(x0 - 0.5, z0 - 0.5, x1 + 0.5, z0); wl(x0 - 0.5, z0, x0, z1); wl(x1, z0, x1 + 0.5, z1);
+  const wl = (a, b, c, d, face) => {
+    bag.add('earth_wall', boxGeo(a, y, b, c, y + 1.45, d)); bag.add('granite_block', boxGeo(a - 0.05, y, b - 0.05, c + 0.05, y + 0.18, d + 0.05));
+    // the coping: a plaster band, then the bark roof with its ridge
+    bag.add('plaster_white', boxGeo(a - 0.08, y + 1.45, b - 0.08, c + 0.08, y + 1.52, d + 0.08)); bag.add(BARK, boxGeo(a - 0.22, y + 1.52, b - 0.22, c + 0.22, y + 1.62, d + 0.22)); bag.add('roof_ridge', boxGeo(a - 0.1, y + 1.62, b - 0.1, c + 0.1, y + 1.7, d + 0.1));
+    col.rect([a, b, c, d], y, y + 1.7);
+    // the layers of tamped clay: a fine dark seam every 0.27 m on the face that looks into the garden, and the oil that has seeped through them as bands and runs of brown-orange
+    const along = Math.abs(c - a) > Math.abs(d - b), L = along ? c - a : d - b, f = face, ww = [], st = [];
+    const at = (u, yy) => (along ? [a + u, y + yy, f > 0 ? d + 0.006 : b - 0.006] : [f > 0 ? c + 0.006 : a - 0.006, y + yy, b + u]);
+    for (let yy = 0.27; yy < 1.4; yy += 0.27) quad2(ww, at(0, yy), at(L, yy), at(L, yy + 0.022), at(0, yy + 0.022));
+    const rr = rng(Math.round(a * 7 + b * 13 + 5));
+    for (let u = 0.2; u < L - 0.8; u += 0.5 + rr() * 1.2) {          // a patch: a broad band that sags, a few drips under it
+      const w = 0.6 + rr() * 1.6, y0 = 0.35 + rr() * 0.85, th = 0.12 + rr() * 0.22, sag = (rr() - 0.4) * 0.3, N = 6;
+      for (let i = 0; i < N; i++) { const p = u + w * i / N, q = u + w * (i + 1) / N, yp = y0 - sag * Math.sin(Math.PI * i / N), yq = y0 - sag * Math.sin(Math.PI * (i + 1) / N); quad2(st, at(p, yp), at(q, yq), at(q, yq + th), at(p, yp + th)); }
+      for (let k = 0; k < 2 + Math.floor(rr() * 3); k++) { const dx = u + rr() * w, ln = 0.2 + rr() * 0.45; quad2(st, at(dx, y0 - ln), at(dx + 0.035, y0 - ln), at(dx + 0.05, y0 + 0.05), at(dx - 0.01, y0 + 0.05)); }
+    }
+    bag.add('cloth_brown', fromTriangles(ww)); bag.add('laterite', fromTriangles(st));
+  };
+  wl(x0 - 0.5, z0 - 0.5, x1 + 0.5, z0, 1); wl(x0 - 0.5, z0, x0, z1, 1); wl(x1, z0, x1 + 0.5, z1, -1);
   bag.add('granite_block', boxGeo(x0, y, z1, x1, gy + 0.02, z1 + 0.25));
   void PL; void WD;
 }

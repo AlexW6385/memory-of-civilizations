@@ -94,11 +94,11 @@ const leafShoji = (B, x0, x1, yb, yt, z0) => {                                  
 };
 const leafBoard = (B, x0, x1, yb, yt, z0) => {                                  // a sliding board door (sugido): cedar boards between a lacquered frame, a mid rail, the pull
   const z1 = z0 + 0.045, n = Math.round((x1 - x0) / 0.15);
-  B('cedar', x0 + 0.03, yb + 0.03, z0 + 0.01, x1 - 0.03, yt - 0.03, z0 + 0.035);
+  B('wood_painted', x0 + 0.045, yb + 0.045, z0 + 0.015, x1 - 0.045, yt - 0.045, z0 + 0.03);
   for (let i = 1; i < n; i++) B('wood_dark', x0 + (x1 - x0) * i / n - 0.004, yb + 0.05, z0 - 0.004, x0 + (x1 - x0) * i / n + 0.004, yt - 0.05, z0 + 0.04);
   B('lacquer_black', x0, yb, z0, x1, yb + 0.07, z1); B('lacquer_black', x0, yt - 0.07, z0, x1, yt, z1); B('lacquer_black', x0, yb, z0, x0 + 0.06, yt, z1); B('lacquer_black', x1 - 0.06, yb, z0, x1, yt, z1);
   B('lacquer_black', x0, (yb + yt) / 2 - 0.035, z0, x1, (yb + yt) / 2 + 0.035, z1);
-  B('gold', x1 - 0.2, (yb + yt) / 2 - 0.12, z0 - 0.012, x1 - 0.14, (yb + yt) / 2 - 0.06, z0 + 0.012);
+  B('gilt_bronze', x1 - 0.2, (yb + yt) / 2 - 0.12, z0 - 0.012, x1 - 0.14, (yb + yt) / 2 - 0.06, z0 + 0.012);
 };
 
 function kannonDen(el, ctx) {
@@ -123,10 +123,10 @@ function kannonDen(el, ctx) {
       else { leafBoard(B, xa, mid + 0.05, yb, yt, hd - 0.1); leafBoard(B, mid - 0.05, xb, yb, yt, hd - 0.055); }
       // the lintel with its groove, the sill; the transom (ranma) of slats and cross-bars over a dark ground
       B(WD, xa - 0.02, yT - 0.78, hd - 0.14, xb + 0.02, yT - 0.68, hd + 0.04);
-      B('opening', xa, yT - 0.68, hd - 0.1, xb, yT - 0.27, hd - 0.08);
+      B('lacquer_black', xa, yT - 0.68, hd - 0.1, xb, yT - 0.27, hd - 0.08);
       for (let k = 0; k <= 13; k++) { const x = xa + 0.05 + k * (xb - xa - 0.1) / 13; B(WD, x - 0.014, yT - 0.68, hd - 0.1, x + 0.014, yT - 0.27, hd - 0.03); }
       for (const yy of [yT - 0.68, yT - 0.5, yT - 0.31]) B(WD, xa, yy, hd - 0.1, xb, yy + 0.04, hd - 0.02);
-      B('lacquer_black', mid - 0.2, yT - 0.62, hd - 0.03, mid + 0.2, yT - 0.33, hd + 0.0); B('gold', mid - 0.12, yT - 0.55, hd + 0.0, mid + 0.12, yT - 0.4, hd + 0.012);
+      B('lacquer_black', mid - 0.2, yT - 0.62, hd - 0.03, mid + 0.2, yT - 0.33, hd + 0.0); B('bronze', mid - 0.11, yT - 0.54, hd - 0.02, mid + 0.11, yT - 0.42, hd + 0.035);
       B(WD, xa - 0.02, y1 + 0.04, hd - 0.14, xb + 0.02, y1 + 0.16, hd + 0.04);       // the sill (shikii), its track
     }
     for (let i = 0; i <= 5; i++) B('lacquer_black', -hw + i * 2.1 - 0.13, y1, hd - 0.14, -hw + i * 2.1 + 0.13, yT, hd + 0.02);
