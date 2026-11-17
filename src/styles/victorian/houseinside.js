@@ -166,9 +166,9 @@ export function terraceInterior(el, ctx, mat, st) {
     who(cb - 1.0, T + 0.62, [cb, fv], { dress: 'robe', cloth: 'cloth_maroon', cloth2: 'cloth_black', hat: 'none', over: 'shawl', pose: 'sit' });
   }
   function lodgingRoom() {
-    // a working family's front room, living and sleeping room in one: Mayhew's costers kept "a bed, a table, chairs, a chest of drawers"
-    // and crockery; the iron bedstead under the window with a patchwork quilt, the chest with its jug and basin, the table and stools,
-    // the rag rug before the fire, a paraffin lamp and a candle
+    // a working family's front room, living and sleeping room in one ("home for a family was almost invariably a single small room": Mayhew via
+    // victorianweb.org; a bedstead with a quilt, a dresser of cups and blue plates, crockery busts on the mantelpiece): the iron bedstead under the
+    // window with a patchwork quilt, the chest with its jug and basin, the table and stools, the rag rug before the fire, a lamp and a candle
     const b0 = pu0 + 0.55, b1 = b0 + 1.85, bv0_ = T + 0.05, bv1_ = T + 0.95;
     for (const [u, v] of [[b0, bv0_], [b1 - 0.04, bv0_], [b0, bv1_ - 0.04], [b1 - 0.04, bv1_ - 0.04]]) B('iron', u, u + 0.04, fy, fy + (u > (b0 + b1) / 2 ? 0.6 : 0.95), v, v + 0.04);
     B('iron', b0, b0 + 0.03, fy + 0.5, fy + 0.9, bv0_, bv1_); B('iron', b1 - 0.03, b1, fy + 0.4, fy + 0.58, bv0_, bv1_);
