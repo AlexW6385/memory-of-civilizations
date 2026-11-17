@@ -27,18 +27,34 @@ add({ t: 'stair', rect: [-17.1, -51.2, 17.1, -49.1], dir: 's', y0: 0, y1: F, ris
   add({ t: 'floor', rect: [-BACK, N0, BACK, -110], y: 0, mat: 'travertine' });
   add({ t: 'floor', rect: [-BACK, -110, -40, -51.2], y: 0, mat: 'travertine' });
   add({ t: 'floor', rect: [40, -110, BACK, -51.2], y: 0, mat: 'travertine' });
+  const EH0 = 1.5;                                   // the colonnades' entablature (a fifth of the column)
+  // a pilaster on the back wall behind each column: base, shaft, capital block
+  const pil = (x0, z0, x1, z1) => {
+    add({ t: 'block', rect: [x0, z0, x1, z1], y0: 0, y1: 0.45, mat: 'marble' });
+    add({ t: 'block', rect: [x0 + 0.04, z0 + 0.04, x1 - 0.04, z1 - 0.04], y0: 0.45, y1: PH - 0.7, mat: 'marble' });
+    add({ t: 'block', rect: [x0 - 0.04, z0 - 0.04, x1 + 0.04, z1 + 0.04], y0: PH - 0.7, y1: PH, mat: 'marble' });
+  };
   for (const s of [-1, 1]) {
-    for (let z = N0 + 10.5; z < -53; z += 3.8) column(s * IN, z, 0, PH, PD, { shaftMat: 'granite_grey', lod: 1 });
-    add({ t: 'beam', a: [s * IN, N0 + 6.6], b: [s * IN, -53], y: PH, w: 1.0, h: 1.1, mat: 'marble' });
-    add({ t: 'wall', a: [s * (BACK - 0.5), N0], b: [s * (BACK - 0.5), -51.2], th: 1.0, y0: 0, y1: PH + 2.4, openings: [], mat: 'dome_stucco' });
-    add({ t: 'slab', rect: [Math.min(s * (IN - 0.6), s * BACK), N0 + 6, Math.max(s * (IN - 0.6), s * BACK), -51.2], y0: PH + 1.1, y1: PH + 1.5, mat: 'gilt_bronze', holes: [] });
+    for (let z = N0 + 10.5; z < -53; z += 3.8) {
+      column(s * IN, z, 0, PH, PD, { shaftMat: 'granite_grey', lod: 1 });
+      const fx = s * (BACK - 1.0);
+      pil(Math.min(fx, fx + s * -0.22) , z - 0.28, Math.max(fx, fx - s * 0.22), z + 0.28);
+    }
+    add({ t: 'roman_entablature', a: [s * IN, N0 + 6.6], b: [s * IN, -53], y: PH, w: 1.0, h: EH0, mat: 'marble', faces: [s] });
+    add({ t: 'wall', a: [s * (BACK - 0.5), N0], b: [s * (BACK - 0.5), -51.2], th: 1.0, y0: 0, y1: PH + 3.0, openings: [], mat: 'dome_stucco' });
+    add({ t: 'slab', rect: [Math.min(s * (IN - 0.5), s * BACK), N0 + 6, Math.max(s * (IN - 0.5), s * BACK), -51.2], y0: PH + EH0, y1: PH + EH0 + 0.4, mat: 'gilt_bronze', holes: [] });
   }
-  // north portico, with the gateway on the axis
+  // north portico, with the gateway on the axis: a round arch in the wall, framed by two columns and an entablature and pediment
   const NZ = N0 + 6.6;
   for (let x = -IN; x <= IN + 0.01; x += 3.95) if (Math.abs(x) > 4.5) column(x, NZ, 0, PH, PD, { shaftMat: 'granite_grey', lod: 1 });
-  add({ t: 'beam', a: [-IN, NZ], b: [IN, NZ], y: PH, w: 1.0, h: 1.1, mat: 'marble' });
-  add({ t: 'wall', a: [-BACK, N0 + 0.5], b: [BACK, N0 + 0.5], th: 1.0, y0: 0, y1: PH + 2.4, openings: [{ at: BACK, w: 7.2, h: PH, y0: 0 }], mat: 'dome_stucco' });
-  add({ t: 'slab', rect: [-BACK, N0, BACK, NZ + 0.6], y0: PH + 1.1, y1: PH + 1.5, mat: 'gilt_bronze', holes: [] });
+  add({ t: 'roman_entablature', a: [-IN, NZ], b: [IN, NZ], y: PH, w: 1.0, h: EH0, mat: 'marble', faces: [1] });
+  add({ t: 'wall', a: [-BACK, N0 + 0.5], b: [BACK, N0 + 0.5], th: 1.0, y0: 0, y1: PH + 3.0, openings: [{ at: BACK, w: 7.2, h: 9.0, y0: 0 }], mat: 'dome_stucco' });
+  add({ t: 'slab', rect: [-BACK, N0, BACK, NZ + 0.5], y0: PH + EH0, y1: PH + EH0 + 0.4, mat: 'gilt_bronze', holes: [] });
+  for (let x = -IN + 3.95 * 0; x <= IN + 0.01; x += 3.95) if (Math.abs(x) > 4.5) pil(x - 0.28, N0 + 1.0, x + 0.28, N0 + 1.22);
+  add({ t: 'gate_arch', at: [0, N0 + 0.5], th: 1.0, r: 3.6, spring: 3.4, top: 9.0, bw: 0.6 });
+  for (const s of [-1, 1]) column(s * 5.6, N0 + 1.55, 0, PH, PD, { shaftMat: 'granite_grey', lod: 1 });
+  add({ t: 'roman_entablature', a: [-7.2, N0 + 1.55], b: [7.2, N0 + 1.55], y: PH, w: 1.1, h: EH0, mat: 'marble', faces: [1] });
+  add({ t: 'pediment_roof_z', rect: [-7.4, N0 + 0.96, 7.4, N0 + 2.16], y: PH + EH0, rise: 2.4, tympanumInset: 0.3, rakingGeison: 0.3, mat: 'marble', tileMat: 'gilt_bronze' });
 }
 add({ t: 'floor', rect: [-17.1, -49.1, 17.1, -20], y: F, mat: 'marble_floor', th: F + 0.3 });
 add({ t: 'floor', rect: [-R - 5.2, -R - 1.0, R + 5.2, R + 5.6], y: F, mat: 'opus_sectile', th: F + 0.3 });
