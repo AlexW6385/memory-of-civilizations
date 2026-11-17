@@ -127,6 +127,12 @@ Sources added:
 - [Keeping free drinking water (with buttermilk) in thatched shed — Dinamalar](https://temple.dinamalar.com/en/news_detail.php?id=2213)
 - [Buttermilk distribution during Madurai's Chithirai festival — Ramakrishna Math](https://madurai.rkmm.org/blogs/post/buttermilk-distribution-during-madurai-s-chithrai-festival)
 
+## 16. The gopurams' sculpture seen close (2026-11 landmark pass)
+
+- **The tiers as bays of niches.** Each storey is "crowded with painted stucco figures" and the south tower carries 1,511 of them [stated: Studio Matrx, panneer-madurai; §4]. Ours: every face of every tier is divided by cream pilasters, leaning with the wall, into bays about 1.5 m wide; each bay is a niche whose back is painted in a colour against the wall's (sky, rose, saffron or leaf, changing storey by storey), with a ledge below, a lintel above and a cream halo arch behind the figure; the storey's window keeps its own wider bay on the long faces [inferred: the arrangement as photographed; the colours follow the stated palette]. In each bay stands, by a rule over storey and bay: a god with four arms and gilt emblems, a goddess holding a lotus, a couple, a seated deity with crossed legs, a guardian with a club, or a goddess with a raised hand, 2.5–3 m tall on the great towers, crowned and belted in gilt [inferred: the types of the Dravidian stucco]. The bodies are one cream prototype per kind tinted to the paint, placed as instances (draws stay below the earlier frame).
+- **The granite base.** Two rows of niches on the base's faces (the lower 2.2 m, the upper 2 m high), each with a dark recess, a sill, a lintel and a guardian or deity carved in the granite itself, in the one stone [inferred: the carved plinth niches of the type].
+- **The crown.** Cream ribs stand proud of the barrel vault, one about every 1.7 m [inferred].
+
 ## Sources
 
 - [Meenakshi Temple — Wikipedia](https://en.wikipedia.com/wiki/Meenakshi_Temple)
