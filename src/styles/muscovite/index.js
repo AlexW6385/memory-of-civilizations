@@ -16,6 +16,8 @@ import { nalichnik, yardFence, streetLog, stalls, logChurch } from './posad.js';
 import { ivanTower, archangel, annunciation } from './kremlin.js';
 import { kitaiWall } from './kitai.js';
 import { facetsPalace } from './palace.js';
+import { chapel } from './chapel.js';
+import { wayside } from './street.js';
 import { landing, raft } from './river.js';
 import { dressHouse, yardbuild, garden } from './yard.js';
 
@@ -156,19 +158,17 @@ function pokrov(el, { bag, col, lights }) {
   bag.add(BR, lathe([[6.2 * s, 0], [1.4 * s, 18 * s], [0.001, 18 * s]], 8, null, cx, yb + 25 * s, cz));
   for (let k = 0; k < 8; k++) { const a = (k + 0.5) / 8 * Math.PI * 2; for (const t of [0.15, 0.45, 0.75]) { const r = (6.2 * s * (1 - t) + 1.4 * s * t) * ap; bag.add(WS, box(cx + Math.cos(a) * r - 0.15, yb + 25 * s + 18 * s * t - 0.15, cz + Math.sin(a) * r - 0.15, cx + Math.cos(a) * r + 0.15, yb + 25 * s + 18 * s * t + 0.15, cz + Math.sin(a) * r + 0.15)); } }
   onion(bag, cx, yb + 43 * s, cz, 1.4 * s, 1.5 * s, G, BR, 12);
-  // the four great chapels on the axes, the four small ones on the diagonals
+  // the four great chapels on the axes, the four small ones on the diagonals (./chapel.js: the faceted drum, its windows and portal; the great ones hollow)
   const mats = ['tile_green', G, 'tile_green', G, G, 'tile_green', G, 'tile_green'];
   for (let k = 0; k < 8; k++) {
-    const big = k % 2 === 0, a = k / 8 * Math.PI * 2 + Math.PI / 2, d = (big ? 14 : 12) * s, r = (big ? 4.6 : 3) * s, h = (big ? 15 : 11) * s, seg = big ? 8 : 12;
+    const big = k % 2 === 0, a = k / 8 * Math.PI * 2 + Math.PI / 2, d = (big ? 14 : 12) * s, r = (big ? 4.6 : 3) * s, h = (big ? 15 : 11) * s, nf = big ? 8 : 12;
     const x = cx + Math.cos(a) * d, z = cz + Math.sin(a) * d;
-    bag.add(BR, lathe([[r, 0], [r, h], [r + 0.3, h + 0.3], [r * 0.85, h + 0.6], [r * 0.85, h + 2.5 * s], [0.001, h + 2.5 * s]], seg, null, x, yb, z)); col.circle(x, z, r, yb, yb + h);
-    bag.add(WS, lathe([[r + 0.01, 0], [r + 0.2, 0.15], [r + 0.2, 0.45], [r + 0.01, 0.6]], seg, null, x, yb + h * 0.42, z));      // a white band round the chapel's middle
-    const ap2 = Math.cos(Math.PI / seg), nk = big ? 8 : 6;
-    for (let q = 0; q < nk; q++) {
-      const qa = big ? (q + 0.5) / 8 * Math.PI * 2 : (q * 2 + 0.5) / 12 * Math.PI * 2, R = r * 0.85 * ap2 + 0.2;
+    chapel(bag, col, lights, { x, z, yb, r, h, n: nf, a0: a, hollow: big && s === 1, seed: 1561 + k });
+    // the neck over the drum, its shoulder, and the tier of kokoshniks round it
+    bag.add(BR, lathe([[r * 0.95, 0], [r * 0.85, 0.45], [r * 0.85, 2.5 * s], [0.001, 2.5 * s]], 24, null, x, yb + h + 0.15, z));
+    for (let q = 0; q < (big ? 8 : 6); q++) {
+      const qa = a + q * (big ? Math.PI / 4 : Math.PI / 3), R = r * 0.85 + 0.15;
       kokoshnik(bag, x, z, qa, R, yb + h + 0.6, (big ? 2.4 : 1.7) * s * (big ? 0.95 : 1), 0.5 * s, (big ? 1.5 : 1.1) * s, 0.4);
-      const Rw = r * Math.cos(Math.PI / seg) + 0.02, c = Math.cos(qa), sn = Math.sin(qa), w = (big ? 0.45 : 0.32) * s;
-      bag.add('opening', orientedBox([x + c * Rw - sn * w, z + sn * Rw + c * w], [x + c * Rw + sn * w, z + sn * Rw - c * w], 0.06, yb + h * 0.55, yb + h * 0.75));
     }
     onion(bag, x, yb + h + 2.5 * s, z, (big ? 2.4 : 1.8) * s, (big ? 3 : 2.2) * s, mats[k], BR, big ? 16 : 12);
   }
@@ -341,6 +341,16 @@ function izba(el, { bag, col }) {
     nalichnik(bag, Af, c, wy - 0.11, nmat, 0.2);
     if (two) bag.add('opening', B(c - 0.2, c + 0.2, y + 1.1, y + 1.45, 0.15, 0.165));        // the little lights of the storage storey below
   }
+  // by the seed, plank shutters on the outer sides of the outer windows, standing open against the logs (four houses in ten, not the storehouses)
+  if (!barn && ((el.seed ?? 0) >> 5) % 10 < 4) {
+    const shm = ((el.seed ?? 0) >> 9) % 2 ? 'shutter_brown' : 'planks_grey';
+    for (const sd of [-1, 1]) {
+      const ce = um + sd * ((nw - 1) / 2 * 1.35 + 0.98), ua = ce - 0.21, ub = ce + 0.21;
+      bag.add(shm, B(ua, ub, wy - 0.02, wy + 0.78, 0.15, 0.185)); bag.add('iron', B(ua, ub, wy + 0.1, wy + 0.14, 0.185, 0.195)); bag.add('iron', B(ua, ub, wy + 0.6, wy + 0.64, 0.185, 0.195));
+    }
+  }
+  // the log steps up to the open house's door
+  if (open) { bag.add('planks_grey', B(u0 - 0.5, u0, foot, y + 0.2, dW[0] - 0.05, dW[1] + 0.05)); bag.add('planks_grey', B(u0 - 1.0, u0 - 0.5, foot, y + 0.1, dW[0] - 0.05, dW[1] + 0.05)); }
   if (two) {
     // the gallery (krylets) across the front at the upper floor: planks on projecting log ends, posts, a railing of turned balusters, a plank stair up at one end
     const gy = y + 3.35;
@@ -591,6 +601,6 @@ function beamBox(a, b, w, h) {
 }
 registerStyle('muscovite', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.norse.elements, street_log: streetLog, kitai_wall: kitaiWall, facets_palace: facetsPalace, landing, raft, yardbuild, garden, stalls, log_church: logChurch, russian_church: russianChurch, bell_tower: bellTower, pokrov, kremlin_wall: kremlinWall, izba, lobnoye, rows, moat, tsar_cannon: tsarCannon, ivan_tower: ivanTower, archangel, annunciation },
+  elements: { ...STYLES.qing.elements, ...STYLES.norse.elements, street_log: streetLog, wayside, kitai_wall: kitaiWall, facets_palace: facetsPalace, landing, raft, yardbuild, garden, stalls, log_church: logChurch, russian_church: russianChurch, bell_tower: bellTower, pokrov, kremlin_wall: kremlinWall, izba, lobnoye, rows, moat, tsar_cannon: tsarCannon, ivan_tower: ivanTower, archangel, annunciation },
   objects: {},
 });

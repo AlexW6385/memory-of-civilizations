@@ -1,5 +1,5 @@
 // The log houses (izby) of the boyars' courts and the posad (docs/settlements/muscovy.md §5).
-import { RADIUS, ROWS, SQUARE, LOBNOYE, CATHEDRALS, SPASSKY, NIKOLSKY, MOAT, BASIL, CHURCHES, lots, height, wallX, gateZ, streetSegments, inKremlin, RIVER, riverZ } from './layout.js';
+import { RADIUS, ROWS, SQUARE, LOBNOYE, CATHEDRALS, SPASSKY, NIKOLSKY, MOAT, BASIL, CHURCHES, lots, height, wallX, gateZ, streetSegments, inKremlin, RIVER, riverZ, streetSkip, inLot } from './layout.js';
 const base = (id, elements, rooms = []) => ({ id, style: 'muscovite', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [40, 20], facing: 's' } });
 // the gable end of each house turned to the nearer street (the streets of layout.js: x = 42 − 420 + 84k, z = 35 − 420 + 70k)
 function front([x0, z0, x1, z1]) {
@@ -7,8 +7,8 @@ function front([x0, z0, x1, z1]) {
   if (x1 - x0 >= z1 - z0) { const sx = Math.round((cx + 378) / 84) * 84 - 378; return sx < cx ? 'x0' : 'x1'; }
   const sz = Math.round((cz + 385) / 70) * 70 - 385; return sz < cz ? 'z0' : 'z1';
 }
-/** The izby furnished inside and open (docs §5.1): one in five within reach of Red Square, one in thirty-one beyond. */
-export const openIzba = (l) => { const d = Math.hypot((l.rect[0] + l.rect[2]) / 2 - 40, (l.rect[1] + l.rect[3]) / 2 - 20); return d < 90 ? l.seed % 2 === 0 : d < 200 ? l.seed % 3 === 0 : l.seed % 12 === 0; };
+/** The izby furnished inside and open (docs §5.1): one in two within reach of Red Square, one in two to 200 m, one in four beyond. */
+export const openIzba = (l) => { if (l.kind === 'barn') return false; const d = Math.hypot((l.rect[0] + l.rect[2]) / 2 - 40, (l.rect[1] + l.rect[3]) / 2 - 20); return d < 90 ? l.seed % 2 === 0 : d < 200 ? l.seed % 2 === 1 : l.seed % 4 === 1; };
 /** Which build a lot has: the storehouse (barn), the two-storey house (a boyar's or a rich merchant's court: half the courts inside the Kremlin, one in eight near the square, one in twenty-five beyond), else the plain izba. */
 export function variantOf(l) {
   if (l.kind === 'barn') return 'barn';
@@ -23,11 +23,27 @@ export async function houses() {
   for (let i = 0; i < all.length; i += 200) plans.push(base(`muscovy-houses-${i / 200}`, all.slice(i, i + 200).map((l) => ({ t: 'izba', ...l, front: front(l.rect), open: openIzba(l), variant: variantOf(l), yard: Math.hypot((l.rect[0] + l.rect[2]) / 2 - 40, (l.rect[1] + l.rect[3]) / 2 - 20) < 240 ? 6.7 : 0, groundY: height })), roomsOf(all.slice(i, i + 200))));
   const yb = yards(all); for (let i = 0; i < yb.length; i += 300) plans.push(base(`muscovy-yards-${i / 300}`, yb.slice(i, i + 300)));
   plans.push(base('muscovy-streets', streets()), base('muscovy-market', market()), base('muscovy-churches', CHURCHES.map(([x, z, yaw]) => ({ t: 'log_church', c: [x, z], y: height(x, z), yaw }))));
-  plans.push(base('muscovy-stages', stages()), { ...base('muscovy-river-life', riverLife()), style: 'life' });
+  plans.push(base('muscovy-waysides', waysides()), base('muscovy-stages', stages()), { ...base('muscovy-river-life', riverLife()), style: 'life' });
   plans.push({ ...base('muscovy-people', people()), style: 'life' });
   return plans;
 }
 
+/**
+ * What stood at the crossings (docs/settlements/muscovy.md §5.4): at a corner of about two crossings in five of the posad's street grid, a street well,
+ * a wayside chapel or a wayside cross, none within the first 45 m of the arrival nor on the paving or in a house's lot.
+ */
+export function waysides() {
+  const E = [], H = (i, j) => { let h = (i * 73856093) ^ (j * 19349663); h = Math.imul(h ^ (h >>> 13), 0x5bd1e995); return (h ^ (h >>> 15)) >>> 0; };
+  for (let i = 0; i < 10; i++) for (let j = 0; j < 12; j++) {
+    const sx = -378 + 84 * i, sz = -385 + 70 * j, h = H(i, j), k = h % 10;
+    if (k > 5 || Math.hypot(sx, sz) > 340 || Math.hypot(sx - 40, sz - 20) < 45) continue;
+    const ox = h & 16 ? 5.2 : -5.2, oz = h & 32 ? 5.2 : -5.2, x = sx + ox, z = sz + oz;
+    const ok = [[0, 0], [1.6, 0], [-1.6, 0], [0, 1.6], [0, -1.6]].every(([a, b]) => !streetSkip(x + a, z + b) && !inLot(x + a, z + b, 1.2));
+    if (!ok) continue;
+    E.push({ t: 'wayside', kind: k < 3 ? 'well' : k < 5 ? 'chasovnya' : 'cross', c: [x, z], y: Math.max(height(x - 1, z - 1), height(x + 1, z + 1), height(x - 1, z + 1), height(x + 1, z - 1)), face: h & 64 ? (ox > 0 ? 3 : 1) : (oz > 0 ? 2 : 0) });
+  }
+  return E;
+}
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const CLOTH = ['cloth_red', 'cloth_brown', 'cloth_indigo', 'cloth_green', 'cloth_grey', 'cloth_ochre', 'cloth_brown'];
 /**

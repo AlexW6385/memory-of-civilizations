@@ -92,7 +92,7 @@ export function izbaInside(bag, o) {
   { const w = door[0] - 0.4; lat('timber', [[0.001, 0], [0.24, 0.0], [0.27, 0.45], [0.25, 0.46], [0.001, 0.4]], 12, iu0 + 0.4, fl, w); C(iu0 + 0.15, iu0 + 0.65, w - 0.25, w + 0.25, fl, fl + 0.46); }
   { const pu = iu0 + 0.9, pw = iwF - bd - 0.9; A('timber', pu - 0.12, pu + 0.12, fl, fl + 0.05, pw - 0.35, pw + 0.05); A('wood_painted', pu - 0.06, pu + 0.06, fl + 0.05, fl + 0.85, pw - 0.03, pw); A('wood_painted', pu - 0.12, pu + 0.12, fl + 0.85, fl + 1.05, pw - 0.03, pw); }
   // by the seed, what else the house kept on the free wall between the front bench and the stove (the u1 side): a chest, a loom, a cradle on its pole
-  { const k = (o.seed ?? 0) % 4, wa = sf + 0.55, wz = iwF - bd - 0.25, ua = iu1 - lin;
+  { const k = ((o.seed ?? 0) >>> 4) % 7, wa = sf + 0.55, wz = iwF - bd - 0.25, ua = iu1 - lin;
     if (wz - wa > 1.0 && k === 0) {          // the painted chest (sunduk) with iron bands, a folded cloth on it
       A('wood_painted', ua - 0.55, ua, fl, fl + 0.6, wa, wa + 1.1); A('iron', ua - 0.56, ua + 0.001, fl + 0.18, fl + 0.22, wa, wa + 1.1); A('iron', ua - 0.56, ua + 0.001, fl + 0.42, fl + 0.46, wa, wa + 1.1); A('cloth_red', ua - 0.45, ua - 0.1, fl + 0.6, fl + 0.66, wa + 0.2, wa + 0.9); C(ua - 0.56, ua, wa, wa + 1.1, fl, fl + 0.66);
     } else if (wz - wa > 1.3 && k === 1) {   // the upright loom (stan): two posts, beams, the warp strung, a half-woven cloth, the weaver's bench
@@ -103,6 +103,32 @@ export function izbaInside(bag, o) {
       A('wicker', ua - 0.7, ua - 0.2, h0, h0 + 0.28, cwm - 0.35, cwm + 0.35); A('linen', ua - 0.65, ua - 0.25, h0 + 0.18, h0 + 0.3, cwm - 0.3, cwm + 0.3);
       for (const du of [-0.7, -0.2]) for (const dw of [-0.35, 0.35]) A('rope_fibre', ua + du - 0.006, ua + du + 0.006, h0 + 0.28, top - 0.4, cwm + dw - 0.006, cwm + dw + 0.006);
       A('timber', ua - 0.72, ua - 0.18, top - 0.42, top - 0.38, cwm - 0.37, cwm + 0.37);
+    } else if (wz - wa > 1.2 && k === 4) {   // the kneading trough (kadka) on its legs, the rolling pin and a flour sack; a clay pot hung by the wall
+      const kw = wa + 0.6;
+      for (const [du, dw] of [[-0.45, -0.3], [-0.45, 0.3], [-0.1, -0.3], [-0.1, 0.3]]) A('timber', ua + du - 0.04, ua + du + 0.04, fl, fl + 0.6, kw + dw - 0.04, kw + dw + 0.04);
+      A('timber', ua - 0.55, ua, fl + 0.6, fl + 0.68, kw - 0.4, kw + 0.4); A('timber', ua - 0.55, ua - 0.5, fl + 0.68, fl + 0.82, kw - 0.4, kw + 0.4); A('timber', ua - 0.05, ua, fl + 0.68, fl + 0.82, kw - 0.4, kw + 0.4);
+      A('timber', ua - 0.5, ua - 0.05, fl + 0.68, fl + 0.82, kw - 0.4, kw - 0.35); A('timber', ua - 0.5, ua - 0.05, fl + 0.68, fl + 0.82, kw + 0.35, kw + 0.4);
+      A('linen', ua - 0.45, ua - 0.1, fl + 0.68, fl + 0.74, kw - 0.3, kw + 0.3);
+      A('wood_painted', ua - 0.4, ua - 0.15, fl + 0.74, fl + 0.77, kw - 0.28, kw + 0.28);
+      A('sacking', ua - 0.32, ua - 0.04, fl, fl + 0.5, wa + 1.15, wa + 1.55);
+      C(ua - 0.55, ua, kw - 0.4, kw + 0.4, fl, fl + 0.82);
+    } else if (wz - wa > 1.3 && k === 5) {   // the spinning wheel (samopryalka): a standing wheel on a bench, flax tied to a distaff, a basket of spindles
+      const sw = wa + 0.7;
+      A('timber', ua - 0.7, ua - 0.2, fl + 0.4, fl + 0.46, sw - 0.3, sw + 0.3);
+      for (const [du, dw] of [[-0.6, -0.22], [-0.6, 0.22], [-0.3, -0.22], [-0.3, 0.22]]) A('timber', ua + du - 0.03, ua + du + 0.03, fl, fl + 0.4, sw + dw - 0.03, sw + dw + 0.03);
+      { const q = at(ua - 0.45, fl + 0.78, sw - 0.1); bag.add('timber', lathe([[0.27, -0.015], [0.3, -0.015], [0.3, 0.015], [0.27, 0.015], [0.27, -0.015]], 20).rotateZ(Math.PI / 2).translate(q[0], q[1], q[2])); }
+      A('timber', ua - 0.47, ua - 0.43, fl + 0.46, fl + 1.5, sw + 0.1, sw + 0.14); A('linen', ua - 0.5, ua - 0.4, fl + 1.1, fl + 1.5, sw + 0.08, sw + 0.16);
+      A('wicker', ua - 0.3, ua - 0.05, fl, fl + 0.2, wa + 1.1, wa + 1.4);
+      C(ua - 0.75, ua - 0.15, sw - 0.32, sw + 0.32, fl, fl + 0.5);
+    } else if (wz - wa > 1.0 && k === 6) {   // the splinter light (svetets): a birch splinter in an iron holder over a trough of water, an ember pan beside it
+      const sw = wa + 0.5, hv = fl + 1.15;
+      A('timber', ua - 0.05, ua, fl, fl + 1.2, sw - 0.04, sw + 0.04);
+      A('iron', ua - 0.3, ua - 0.05, hv, hv + 0.03, sw - 0.015, sw + 0.015); A('iron', ua - 0.32, ua - 0.28, hv, hv + 0.2, sw - 0.025, sw + 0.025);
+      A('bark_birch', ua - 0.31, ua - 0.29, hv + 0.2, hv + 0.55, sw - 0.01, sw + 0.01); A('flame', ua - 0.325, ua - 0.275, hv + 0.5, hv + 0.58, sw - 0.012, sw + 0.012);
+      A('timber', ua - 0.4, ua - 0.18, fl + 0.7, fl + 0.74, sw - 0.1, sw + 0.1); A('cloth_black', ua - 0.38, ua - 0.2, fl + 0.74, fl + 0.745, sw - 0.08, sw + 0.08);
+      A('timber', ua - 0.4, ua - 0.18, fl + 0.74, fl + 0.8, sw - 0.1, sw - 0.08); A('timber', ua - 0.4, ua - 0.18, fl + 0.74, fl + 0.8, sw + 0.08, sw + 0.1);
+      A('wood_dark', ua - 0.1, ua - 0.04, fl + 0.7, fl + 1.15, sw - 0.02, sw + 0.02);
+      C(ua - 0.12, ua, sw - 0.05, sw + 0.05, fl, fl + 1.2);
     }
   }
   void dh; void box;
