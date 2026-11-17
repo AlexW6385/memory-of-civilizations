@@ -1,7 +1,7 @@
 // The oasis town (docs/settlements/dunhuang.md §6, §7): rows of rammed-earth houses on both sides of the main
 // street and along back lanes between the cross lanes, a wall round the town with the east gate, the caravanserai
 // with camels and loads, the market's awnings and stalls, the painters, monks and pilgrims at the cliff foot.
-import { RADIUS, XF, FLOOR, STREET, CROSS, LANE_W, TOWN, SERAI, GATE, CAVES, rng, inRect, riverX } from './layout.js';
+import { RADIUS, XF, FLOOR, STREET, CROSS, LANE_W, TOWN, SERAI, GATE, CAVES, BEACON, THRESH, rng, inRect, riverX } from './layout.js';
 import '../../styles/dunhuang/index.js';
 import { doorU } from '../../styles/dunhuang/homes.js';
 
@@ -55,6 +55,8 @@ export async function town() {
   E.push({ t: 'dh_gate', at: [GATE.x, GATE.z] });
   E.push({ t: 'dh_serai', ...SERAI });
   E.push({ t: 'dh_spring' }); E.push({ t: 'dh_streetwear', seed: 5 });
+  E.push({ t: 'dh_beacon', at: [BEACON.x, BEACON.z], seed: 3 });
+  E.push({ t: 'dh_threshing', at: [THRESH.x, THRESH.z], r: THRESH.r, seed: 4 });
   // the market: awnings on both sides of the street between the first two cross lanes
   const cl = ['cloth_ochre', 'cloth_red', 'cloth_blue', 'cloth_white', 'cloth_green'];
   // the doors along the main street (the market keeps off them)
@@ -191,6 +193,24 @@ export async function town() {
     // a pilgrim party coming from the oasis to the caves: a monk with a banner pole, six lay pilgrims with bundles, a donkey with the baggage
     for (let k = 0; k < 7; k++) man([68 + k * 1.5 + (rand() - 0.5) * 0.4, -1.4 + (k % 2) * 2.2 + (rand() - 0.5) * 0.3], 0, ONE - 0.1 + (rand() - 0.5) * 0.25, k === 0 ? { dress: 'robe', cloth: 'cloth_ochre', cloth2: 'cloth_brown', over: 'shawl', hair: 'shaven', hat: 'none', carry: 'staff' } : { carry: k % 3 ? 'bundle' : 'staff', hat: k % 2 ? 'straw' : 'cap' });
     put({ t: 'animal', kind: 'donkey', at: [79, 0.3], y: 0, rot: ONE + 0.1, seed: 77, gear: true });
+  }
+  // ── the beacon's yard north of the town (dossier §13): a guard on the kang in the guard room, another at the ladder's foot, two horses at the manger, the well and its trough, a dog
+  {
+    const { x: bx, z: bz } = BEACON, put = (o) => L.push(o);
+    man([bx - 7.0, bz + 3.3], 0.66, -Math.PI / 2, { dress: 'tunic', legs: 'hose', cloth: 'cloth_brown', cloth2: 'cloth_red', hat: 'cap', over: 'belt', pose: 'cross' });
+    man([bx + 1.6, bz - 0.4], 0, Math.PI, { dress: 'tunic', legs: 'hose', cloth: 'cloth_brown', cloth2: 'cloth_red', hat: 'cap', over: 'belt', carry: 'staff', pose: 'stand' });
+    for (const [dz, s] of [[0.5, 1], [2.9, 2]]) put({ t: 'animal', kind: 'horse', at: [bx + 6.5, bz + dz], y: 0, rot: -Math.PI / 2, seed: 90 + s, gear: false });
+    put({ t: 'well', kind: 'open', at: [bx + 3.6, bz + 5.2], y: 0, rot: 0, mat: 'banco', roof: false }); put({ t: 'trough', at: [bx + 3.6, bz + 6.8], y: 0, rot: 0, mat: 'banco' });
+    put({ t: 'animal', kind: 'dog', at: [bx - 1.6, bz + 6.2], y: 0, rot: 2.2, seed: 44 });
+  }
+  // ── the threshing floor (dossier §13): an ox resting by the roller's pole, a farmer with a fork, one winnowing, a woman sweeping grain into a sack, sacks and a basket
+  {
+    const { x: tx, z: tz } = THRESH, put = (o) => L.push(o);
+    put({ t: 'animal', kind: 'ox', at: [tx - 1.8, tz + 0.8], y: 0, rot: 0.6, seed: 12, gear: false });
+    man([tx + 0.9, tz - 3.3], 0, 0.4, { dress: 'tunic', legs: 'hose', cloth: 'cloth_white', hat: 'straw', carry: 'hoe', arms: 'hoe', feet: 'bare', pose: 'stand' });
+    man([tx + 3.0, tz + 2.3], 0, face([tx + 3.0, tz + 2.3], [tx + 1.6, tz + 1.6]), { dress: 'tunic', legs: 'hose', cloth: 'cloth_grey', hat: 'straw', feet: 'bare', pose: 'cross' });
+    man([tx - 2.2, tz + 2.6], 0, 2.6, { dress: 'tunic', cloth: 'cloth_ochre', hair: 'bun', hat: 'none', pose: 'cross' });
+    put({ t: 'sacks', at: [tx + 4.6, tz - 1.2], y: 0, rot: 0.2, n: 5, seed: 31 }); put({ t: 'basket', at: [tx - 3.4, tz + 3.3], y: 0, rot: 0.5, seed: 8 });
   }
   void face; void CAVES; void FLOOR; void STREET; void riverX;
   return [base('dunhuang-town', 'dunhuang', E), base('dunhuang-people', 'life', L)];

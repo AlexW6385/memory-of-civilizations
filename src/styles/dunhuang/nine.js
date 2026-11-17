@@ -28,11 +28,29 @@ export function greatCave(ctx, c) {
     friezeM(P, 0, L, 36, 36.8, 1, 2);
     P.flush();
   }
-  // the Buddha (h 34 on a throne of lotus petals); the chinese style's Buddha is built at 5.2 m and scaled
-  const cx = XF - 14;
-  buddha({ at: [cx, 0], y, h: 33.0, dir: [1, 0], robe: 'clay_robe' }, ctx);
-  // (the lotus throne is round: a circle follows it, a rectangle left four corners of air)
-  col.circle(cx, 0, 9.6, y, H);
+  // the Maitreya: seated with the feet down, the chinese style's pendant-legged Buddha built at 5.2 and scaled to 33
+  // (square sumeru seat 11.4 m across, the thighs forward, shins and lotus footrests on the floor). Set back so that the
+  // lobby between the footrests (cx + 10.9) and the doorway stays clear.
+  const cx = XF - 17.5;
+  buddha({ at: [cx, 0], y, h: 33.0, dir: [1, 0], robe: 'clay_robe', pendant: true }, ctx);
+  // collision follows the seat, the shins (z ±2.7…2.9, x cx + 6.9…7.4, r ≈ 1.4) and the footrests (cx + 8.1, z ±2.9, r 2.7)
+  col.rect([cx - 5.8, -5.8, cx + 5.8, 5.8], y, H);
+  col.rect([cx + 5.7, -3.4, cx + 7.6, 3.4], y, y + 13);
+  for (const k of [-1, 1]) { col.circle(cx + 7.1 * 1.0, k * 2.8, 1.6, y, y + 13); col.circle(cx + 8.1, k * 2.9, 2.7, y, y + 2.4); }
+  // before him: a bronze censer on a stone stand between two offering tables, the oil lamps behind them
+  const ix = XF - 4.6;
+  bag.add('granite_grey', lathe([[0.001, 0], [0.62, 0], [0.6, 0.16], [0.46, 0.22], [0.42, 0.7], [0.5, 0.78], [0.001, 0.8]], 12, null, ix, y, 0));
+  bag.add('bronze', lathe([[0.001, 0.8], [0.34, 0.82], [0.46, 1.0], [0.44, 1.28], [0.3, 1.36], [0.34, 1.42], [0.001, 1.42]], 14, (th) => 1 + 0.04 * Math.abs(Math.cos(th * 4)), ix, y, 0));
+  for (const k of [0, 1, 2]) { const a = k * 2.094 + 0.5; bag.add('bronze', rod([ix + Math.cos(a) * 0.4, y + 1.2, Math.sin(a) * 0.4], [ix + Math.cos(a) * 0.5, y + 0.82, Math.sin(a) * 0.5], 0.05, 6)); }
+  col.circle(ix, 0, 0.62, y, y + 1.4);
+  for (const z of [-3.6, 3.6]) {
+    bag.add('timber_red', box(ix - 0.4, y + 0.74, z - 0.9, ix + 0.4, y + 0.82, z + 0.9));
+    for (const [dx, dz] of [[-0.34, -0.84], [0.34, -0.84], [-0.34, 0.84], [0.34, 0.84]]) bag.add('timber_red', box(ix + dx - 0.05, y, z + dz - 0.05, ix + dx + 0.05, y + 0.74, z + dz + 0.05));
+    bag.add('lacquer_red', box(ix - 0.42, y + 0.62, z - 0.92, ix + 0.42, y + 0.74, z + 0.92));
+    col.rect([ix - 0.42, z - 0.92, ix + 0.42, z + 0.92], y, y + 0.82);
+    for (let j = -2; j <= 2; j++) { bag.add('clay_gilt', lathe([[0.001, 0], [0.1, 0.02], [0.12, 0.08], [0.06, 0.13], [0.001, 0.13]], 8, null, ix, y + 0.82, z + j * 0.34)); }
+  }
+  // (the lotus throne is replaced by the sumeru seat above)
   // the front wall of the rock hall: plastered round the great doorway and the high window
   for (const [zA, zB, yA, yB] of [[-11.5, -7, y, H], [7, 11.5, y, H], [-7, 7, 20, 27], [-7, -3.2, 27, H], [3.2, 7, 27, H], [-7, 7, 37, H]]) bag.add('lime_plaster', box(XF - 1.0 - t, yA, zA, XF - 1.0, yB, zB));
   // lamps in the lobby between the doorway and the throne: a row of stands, and a few hanging high
@@ -57,12 +75,34 @@ export function nineStair(k) {
 }
 export const NINE_TOP = LV[8].y + LV[8].h + 2.5;
 
-/** A tiled eave round three sides of a storey's top: an inner flat deck, a sloping skirt out and down, a fascia, soffit, bells at the corners. */
-function eave(ctx, x0, x1, z0, z1, y, out, drop) {
+const smoothS = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+/**
+ * A tiled eave round three sides of a storey's top (dossier §13): an inner flat deck at y, a sloping skirt out and down
+ * to a rim that rises about half a metre at the two front corners and at the wings' outer ends (the flying corners of the
+ * Tang eave), a fascia board and a row of round rafter heads along the rim, hip ridges to a finial at each corner, a bell
+ * on each lifted tip. The rim is sampled every ~0.8 m so that the skirt is a warped surface, not three flat quads.
+ */
+function eave(ctx, x0, x1, z0, z1, y, out, drop, lift = 0.5) {
   const { bag } = ctx;
-  const A = [x0, y, z0], B = [x0, y, z1], C = [x1, y, z1], D = [x1, y, z0];
-  const up = [], dn = [];
-  const A2 = [x0, y - drop, z0 - out], B2 = [x0, y - drop, z1 + out], C2 = [x1 + out, y - drop, z1 + out], D2 = [x1 + out, y - drop, z0 - out];
+  // three runs: north wing (A→D along +x), front (D→C along +z), south wing (C→B along −x); inner points on the wall line, outer on the rim
+  const runs = [
+    { I: [x0, z0], I2: [x1, z0], O: [x0, z0 - out], O2: [x1 + out, z0 - out], c1: true },
+    { I: [x1, z0], I2: [x1, z1], O: [x1 + out, z0 - out], O2: [x1 + out, z1 + out], c0: true, c1: true },
+    { I: [x1, z1], I2: [x0, z1], O: [x1 + out, z1 + out], O2: [x0, z1 + out], c0: true },
+  ];
+  const rimY = (e) => y - drop + lift * (1 - smoothS(0, 3.2, e));         // e: distance along the rim from the nearest lifted corner
+  const up = [], dn = [], rim = [], lw = (p) => [p[0], p[1] - 0.24, p[2]];
+  for (const R of runs) {
+    const L = Math.hypot(R.O2[0] - R.O[0], R.O2[1] - R.O[1]), n = Math.max(2, Math.round(L / 0.8)), P = [], Q = [];
+    for (let k = 0; k <= n; k++) {
+      const t = k / n, e = Math.min(R.c0 ? t * L : 1e9, R.c1 ? (1 - t) * L : 1e9);
+      P.push([R.I[0] + (R.I2[0] - R.I[0]) * t, y, R.I[1] + (R.I2[1] - R.I[1]) * t]);
+      Q.push([R.O[0] + (R.O2[0] - R.O[0]) * t, e > 1e8 ? y - drop : rimY(e), R.O[1] + (R.O2[1] - R.O[1]) * t]);
+    }
+    for (let k = 0; k < n; k++) { quad(up, P[k], P[k + 1], Q[k + 1], Q[k]); quad(dn, lw(Q[k]), lw(Q[k + 1]), lw(P[k + 1]), lw(P[k])); }
+    rim.push(Q);
+  }
+  quad(up, [x0, y, z0], [x1, y, z0], [x1, y, z1], [x0, y, z1]);              // the inner deck
   const flip = (t, upward) => {
     const o = [];
     for (let i = 0; i < t.length; i += 9) {
@@ -71,21 +111,42 @@ function eave(ctx, x0, x1, z0, z1, y, out, drop) {
     }
     return o;
   };
-  const Q = (a, b, c, d) => { const t = []; quad(t, a, b, c, d); return t; };
-  up.push(...Q(D, C, C2, D2), ...Q(A, D, D2, A2), ...Q(C, B, B2, C2), ...Q(A, D, C, B));
-  const lower = (p) => [p[0], p[1] - 0.24, p[2]];
-  dn.push(...Q(lower(D2), lower(C2), lower(C), lower(D)), ...Q(lower(A2), lower(D2), lower(D), lower(A)), ...Q(lower(C2), lower(B2), lower(B), lower(C)));
   bag.add('tile_grey', fromTriangles(flip(up, true)));
   bag.add('timber_red', fromTriangles(flip(dn, false)));
-  // ridges along the three hips, the fascia round the rim
-  bag.add('timber_red', box(D2[0] - 0.12, D2[1] - 0.34, D2[2], C2[0], D2[1] - 0.05, C2[2]));
-  bag.add('timber_red', box(A2[0], A2[1] - 0.34, A2[2] - 0.12, D2[0], A2[1] - 0.05, A2[2]));
-  bag.add('timber_red', box(B2[0], B2[1] - 0.34, B2[2], C2[0], B2[1] - 0.05, B2[2] + 0.12));
-  for (const [p, q] of [[D2, C2], [A2, D2], [B2, C2]]) {
-    const n = Math.max(2, Math.round(Math.hypot(q[0] - p[0], q[2] - p[2]) / 1.0));
-    for (let k = 1; k < n; k++) { const f = k / n; bag.add('lacquer_black', box(p[0] + (q[0] - p[0]) * f - 0.05, p[1] - 0.06, p[2] + (q[2] - p[2]) * f - 0.05, p[0] + (q[0] - p[0]) * f + 0.05, p[1] + 0.02, p[2] + (q[2] - p[2]) * f + 0.05)); void 0; }
+  // fascia (a board 0.34 high along the rim, both faces) and the round rafter heads below it
+  const fas = [];
+  for (const Q of rim) for (let k = 0; k < Q.length - 1; k++) {
+    const a = Q[k], b = Q[k + 1], a0 = [a[0], a[1] - 0.34, a[2]], b0 = [b[0], b[1] - 0.34, b[2]], a1 = [a[0], a[1] + 0.04, a[2]], b1 = [b[0], b[1] + 0.04, b[2]];
+    quad(fas, a0, b0, b1, a1); quad(fas, a1, b1, b0, a0);
   }
-  for (const p of [D2, C2, A2, B2]) if (p[0] > x0 + 1) bag.add('bronze', lathe([[0.001, 0], [0.09, 0.04], [0.1, 0.16], [0.001, 0.2]], 8, null, p[0] - 0.1, p[1] - 0.78, p[2] + Math.sign(p[2]) * -0.1));
+  bag.add('lacquer_red', fromTriangles(fas));
+  // the rafter heads: square-ended beams standing out 0.14 m from the fascia, two to a sample
+  rim.forEach((Q, ri) => {
+    const o = ri === 0 ? [0, -1] : ri === 1 ? [1, 0] : [0, 1];
+    for (let k = 0; k < Q.length - 1; k++) for (const f of [0.25, 0.75]) {
+      const a = Q[k], b = Q[k + 1], px = a[0] + (b[0] - a[0]) * f, pz = a[2] + (b[2] - a[2]) * f, py = a[1] + (b[1] - a[1]) * f - 0.17;
+      const qx = px + o[0] * 0.14, qz = pz + o[1] * 0.14;
+      bag.add('lacquer_black', box(Math.min(px, qx) - (o[0] ? 0 : 0.045), py - 0.045, Math.min(pz, qz) - (o[1] ? 0 : 0.045), Math.max(px, qx) + (o[0] ? 0 : 0.045), py + 0.045, Math.max(pz, qz) + (o[1] ? 0 : 0.045)));
+    }
+  });
+  // hip ridges from the inner corners to the lifted tips, a finial on each tip and its bell below
+  const corners = [[[x1, z0], rim[0][rim[0].length - 1]], [[x1, z1], rim[2][0]]];
+  for (const [I, T] of corners) {
+    bag.add('tile_grey', rod([I[0], y + 0.07, I[1]], [T[0], T[1] + 0.07, T[2]], 0.1, 6));
+    bag.add('gilt_bronze', lathe([[0.001, 0], [0.11, 0.0], [0.07, 0.14], [0.1, 0.26], [0.001, 0.4]], 8, null, T[0], T[1] + 0.02, T[2]));
+    bag.add('bronze', lathe([[0.001, 0], [0.09, 0.04], [0.1, 0.16], [0.001, 0.2]], 8, null, T[0] - 0.1, T[1] - 0.78, T[2] + Math.sign(T[2]) * -0.1));
+  }
+}
+/** A stepped bracket set (dougong) on the column at (xc, zc), its foot at yb, scaled by k: a block, then two tiers of arms along x and z, each tier reaching further. */
+export function bracketSet(ctx, xc, zc, yb, k = 1) {
+  const { bag } = ctx, B = (m, ax, ay, az, bx, by, bz) => bag.add(m, box(xc + ax * k, yb + ay * k, zc + az * k, xc + bx * k, yb + by * k, zc + bz * k));
+  B('timber_red', -0.22, 0, -0.22, 0.22, 0.28, 0.22);                              // the block on the column
+  B('timber_red', -0.25, 0.28, -0.09, 0.55, 0.48, 0.09);                           // tier 1, forward
+  B('timber_red', -0.1, 0.28, -0.6, 0.1, 0.48, 0.6);                               // tier 1, across
+  B('timber_red', -0.1, 0.48, -0.09, 0.95, 0.68, 0.09);                            // tier 2, forward
+  B('timber_red', -0.1, 0.48, -0.85, 0.1, 0.68, 0.85);                             // tier 2, across
+  for (const sgn of [-1, 1]) B('paint_ochre', -0.1, 0.48, sgn * 0.5 - 0.1, 0.1, 0.68, sgn * 0.5 + 0.1);   // the small blocks on the arm ends
+  B('paint_ochre', 0.5, 0.48, -0.1, 0.7, 0.68, 0.1);
 }
 
 export function nineStorey(ctx) {
@@ -118,8 +179,14 @@ export function nineStorey(ctx) {
       if (i > 0 || b === 0 || b === bays) bag.add('timber_red', box(x0, y, z - 0.25, x1 - 0.3, top, z + 0.25));     // the side walls' frames
     }
     bag.add('timber_red', box(x1 - 0.55, top - 0.6, z0 - 0.3, x1 + 0.05, top, z1 + 0.3));
-    // brackets: on every column two arms and a block
-    for (let b = 0; b <= bays; b++) { const z = z0 + b * bw; for (let k = 0; k < 2; k++) bag.add('timber_red', box(x1 - 0.5 + k * 0.4, top - 0.9 + k * 0.1, z - 0.13, x1 + 0.55 + k * 0.35, top - 0.72 + k * 0.1, z + 0.13)); }
+    // brackets: a stepped set on every column and a "human-shaped" brace and a painted band on every bay's beam
+    for (let b = 0; b <= bays; b++) bracketSet(ctx, x1 - 0.3, z0 + b * bw, top - 1.28);
+    for (let b = 0; b < bays; b++) {
+      const zm = z0 + (b + 0.5) * bw, za = z0 + b * bw, zb = za + bw;
+      for (const k of [-1, 1]) bag.add('timber_red', rod([x1 + 0.09, top - 0.62, zm + k * 0.5], [x1 + 0.09, top - 0.12, zm], 0.05, 5));
+      bag.add('paint_blue', box(x1 + 0.05, top - 0.5, za + 0.3, x1 + 0.075, top - 0.14, za + 0.8)); bag.add('clay_green', box(x1 + 0.05, top - 0.5, zb - 0.8, x1 + 0.075, top - 0.14, zb - 0.3));
+    }
+    bag.add('paint_ochre', box(x1 + 0.05, top - 0.57, z0 - 0.3, x1 + 0.075, top - 0.53, z1 + 0.3)); bag.add('paint_ochre', box(x1 + 0.05, top - 0.1, z0 - 0.3, x1 + 0.075, top - 0.06, z1 + 0.3));
     if (i > 0) {
       for (let b = 0; b < bays; b++) {
         const za = z0 + b * bw + 0.3, zb = z0 + (b + 1) * bw - 0.3, mid = (za + zb) / 2;
@@ -140,10 +207,19 @@ export function nineStorey(ctx) {
     eave(ctx, x0, x1 + 0.2, z0, z1, top, 2.2, 0.95);
     // the deck over the eave: the next storey's platform (tile) — drawn by the next level
   });
-  // the crowning roof: a hipped cap and a gilt finial
-  const s = LV[8], yc = s.y + s.h + 0.0;
-  bag.add('tile_grey', box(XF, yc + 0.0, -s.w + 0.4, XF + s.d - 0.4, yc + 0.5, s.w - 0.4));
-  bag.add('gilt_bronze', lathe([[0.001, 0], [0.5, 0], [0.3, 0.4], [0.5, 0.9], [0.1, 1.9], [0.001, 2.4]], 10, null, XF + s.d / 2, yc + 0.5, 0));
+  // the crowning roof: a hip over the top storey with a ridge along z, hip ridges, end finials and the gilt finial on the ridge
+  const s = LV[8], yc = s.y + s.h, xb = XF + s.d + 0.2, zw = s.w, rise = 2.2, xr = XF + 1.3, zr = zw - 2.2, yr = yc + rise;
+  {
+    const t = [], A = [XF, yc, -zw], D = [xb, yc, -zw], C = [xb, yc, zw], B = [XF, yc, zw], R0 = [xr, yr, -zr], R1 = [xr, yr, zr];
+    const tri = (a, b, c) => t.push(...a, ...b, ...c);
+    // each face wound to look outward: front, back, north hip, south hip (and their reverse so that no side is culled)
+    for (const [p, q, r2] of [[D, C, R1], [D, R1, R0], [A, R0, R1], [A, R1, B], [A, D, R0], [C, B, R1]]) { tri(p, q, r2); tri(p, r2, q); }
+    bag.add('tile_grey', fromTriangles(t));
+    bag.add('roof_ridge', box(xr - 0.18, yr - 0.02, -zr - 0.1, xr + 0.18, yr + 0.3, zr + 0.1));
+    for (const [I, T] of [[D, R0], [A, R0], [C, R1], [B, R1]]) bag.add('roof_ridge', rod([I[0], I[1] + 0.05, I[2]], [T[0], T[1] + 0.12, T[2]], 0.11, 6));
+    for (const z of [-zr, zr]) bag.add('gilt_bronze', lathe([[0.001, 0], [0.2, 0], [0.26, 0.22], [0.14, 0.5], [0.2, 0.7], [0.001, 0.9]], 8, null, xr, yr + 0.2, z));   // the ridge-end finials
+    bag.add('gilt_bronze', lathe([[0.001, 0], [0.4, 0], [0.25, 0.3], [0.4, 0.6], [0.08, 1.1], [0.001, 1.4]], 10, null, xr, yr + 0.3, 0));
+  }
   // painted cloth banners and a lamp at the porch
   for (const z of [-9, 9]) { bag.add('cloth_red', box(XF + 9.9, FLOOR[0] + 4.5, z - 0.35, XF + 9.95, FLOOR[0] + 7.5, z + 0.35)); }
 }

@@ -1,7 +1,8 @@
 // Dunhuang — the ground: the cliff's plateau and the Singing Sand dunes behind it, the stone apron, the Daquan's
 // dry bed with its stream, the oasis town's earth streets, fields and poplars, the dunes and the Crescent Spring at
 // the south. Climate: one of the sunniest places in China, dry, clear (dossier §6).
-import { RADIUS, XF, ROCK, ZEND, RIVER, riverX, inRiver, bankY, onStreet, TOWN, SPRING, inRect, smooth as sm, crescent } from './layout.js';
+import { RADIUS, XF, ROCK, ZEND, RIVER, riverX, inRiver, bankY, onStreet, TOWN, SPRING, inRect, smooth as sm, crescent, BEACON, THRESH } from './layout.js';
+const BEACON_R = [BEACON.x - BEACON.half - 4, BEACON.z - BEACON.half - 4, BEACON.x + BEACON.half + 4, BEACON.z + BEACON.half + 4];
 
 const PLATEAU = 27.5;
 function dune(x, z) { return Math.sin(x * 0.045 + z * 0.02) * 0.5 + Math.sin(x * 0.021 - z * 0.05 + 1.3) * 0.5 + 0.5; }
@@ -26,6 +27,8 @@ function cover(x, z) {
   const c = { sand: 0.5, grass: 0.1, rock: 0, soil: 0.3, fields: 0, dry: 0.9, warmth: 0.6, red: 0.1, road: 0, snow: 0, forest: 0 };
   if (x < XF - 10) { c.sand = 0.9; c.dry = 1; return c; }
   if (inRiver(x, z, 1)) { c.sand = 0.6; c.soil = 0.4; return c; }
+  if (Math.hypot(x - THRESH.x, z - THRESH.z) < THRESH.r + 2) { c.soil = 0.8; c.sand = 0.2; c.fields = 0; c.dry = 0.9; return c; }
+  if (inRect(BEACON_R, x, z)) { c.soil = 0.8; c.sand = 0.2; c.dry = 0.9; return c; }
   if (onStreet(x, z)) { c.road = 0.6; c.sand = 0.2; return c; }
   if (inRect(TOWN, x, z) && x > -30) { c.soil = 0.6; c.sand = 0.2; return c; }
   if (x > -28 && Math.abs(z) < 120 && z < 112 && Math.hypot(x, z) < RADIUS - 28) { c.fields = 0.6; c.grass = 0.3; c.soil = 0.4; c.sand = 0.1; return c; }
@@ -38,6 +41,8 @@ const fromWater = (x, z) => Math.min(Math.abs(x - riverX(z)), crescent(x, z, 3) 
 function planting(x, z) {
   const r = Math.hypot(x, z);
   if (r > RADIUS - 6 || x < XF + 8 && x > XF - 1 || inRiver(x, z) || onStreet(x, z, 1) || crescent(x, z, 0.5)) return null;
+  if (Math.hypot(x - THRESH.x, z - THRESH.z) < THRESH.r + 2.5) return null;
+  if (inRect(BEACON_R, x, z)) return { grass_dry: 2 };            // the beacon's yard and its trodden margin: no wheat
   if (x < XF - 8) return Math.hypot(x, z) < RADIUS - 20 && x > XF - ROCK - 5 ? null : { tamarisk: 0.03, grass_dry: 4 };
   const dr = Math.abs(x - riverX(z));
   if (dr < 14 && Math.abs(z) < ZEND) return { poplar: dr < 7 ? 0.35 : 0.12, willow: 0.14, tamarisk: 0.2, grass: 24 };
