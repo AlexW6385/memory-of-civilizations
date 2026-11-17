@@ -66,6 +66,22 @@ export function wall(sk, o) {
     R(a, o.y0, bb, lo); R(a, hi, bb, o.y1);
   }
   const n = o.out ?? (alongX ? [0, 1] : [1, 0]);
+  // doors: an architrave of jambs and head on both faces (Gropius drew the door handles himself: a lever on the leaf); an outer door's leaf stands open, flat against the wall inside
+  for (const p of ops) {
+    if (p.kind !== 'door') continue;
+    const fm = o.doorFrame ?? 'paint_white', e = 0.06, a = c - th / 2 - 0.02, b = c + th / 2 + 0.02, top = p.y1 + 0.05;
+    const bx = (m, ua, ub, ya, yb, va, vb) => { if (alongX) sk.b(m, ua, ya, va, ub, yb, vb); else sk.b(m, va, ya, ua, vb, yb, ub); };
+    bx(fm, p.u0 - e, p.u0, o.y0, top, a, b); bx(fm, p.u1, p.u1 + e, o.y0, top, a, b); bx(fm, p.u0, p.u1, p.y1 - 0.05, top, a, b);
+    if (!o.leaf) continue;
+    const lw = p.u1 - p.u0 - 0.06, nsg = alongX ? n[1] : n[0], inner = c - nsg * (th / 2 + 0.02);
+    const free = (from, to) => to - from >= lw + 0.1 && !ops.some((q) => q !== p && q.u1 > Math.min(from, to) + 1e-3 && q.u0 < Math.max(from, to) - 1e-3);
+    const side = free(p.u1 + e, u1) ? 1 : free(u0, p.u0 - e) ? -1 : 0;
+    if (!side) continue;
+    const l0 = side > 0 ? p.u1 + e + 0.02 : p.u0 - e - 0.02 - lw, l1 = l0 + lw, f0 = Math.min(inner, inner - nsg * 0.04), f1 = Math.max(inner, inner - nsg * 0.04);
+    bx(o.leaf, l0, l1, o.y0, p.y1 - 0.06, f0, f1);
+    const hu = side > 0 ? l0 + 0.08 : l1 - 0.08, hv0 = inner - nsg * 0.04, hv1 = inner - nsg * 0.12;
+    bx('steel_chrome', hu - 0.02, hu + 0.02, o.y0 + 1.0, o.y0 + 1.04, Math.min(hv0, hv1), Math.max(hv0, hv1));
+  }
   for (const p of ops) {
     if (p.kind !== 'win') continue;
     const wy0 = p.y0, wy1 = p.y1, face = c + (alongX ? n[1] : n[0]) * (th / 2 - 0.1), nsg = alongX ? n[1] : n[0];

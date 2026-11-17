@@ -21,6 +21,15 @@ function ribbon(u0, u1, y0, y1, o = {}) {
   }
   return out;
 }
+/** A column radiator under a window, on the inner face of a wall (centre line c, thickness th, outward sign nsg), from u0 to u1 (silver paint; the heating was central, docs §2). */
+function radiator(sk, alongX, c, nsg, th, u0, u1, floorY, sillY) {
+  if (u1 - u0 < 0.5) return;
+  const face = c - nsg * (th / 2), f2 = face - nsg * 0.08, f3 = face - nsg * 0.1, lo = Math.min(face, f2), hi = Math.max(face, f2), y1 = Math.min(floorY + 0.8, sillY - 0.12);
+  const box = (m, ua, ub, ya, yb, va, vb) => (alongX ? sk.b(m, ua, ya, va, ub, yb, vb) : sk.b(m, va, ya, ua, vb, yb, ub));
+  box('steel_chrome', u0, u1, floorY + 0.16, y1, lo, hi);
+  box('steel_grey', u0 - 0.02, u1 + 0.02, y1, y1 + 0.03, Math.min(face, f3), Math.max(face, f3));
+  for (let u = u0 + 0.1; u < u1 - 0.05; u += 0.2) box('steel_grey', u, u + 0.02, floorY + 0.18, y1 - 0.02, Math.min(f2, f2 - nsg * 0.015), Math.max(f2, f2 - nsg * 0.015));
+}
 /** One side of a rectangle's storey y0..y1: its wall with ribbon windows, plus the given doors ([u0, u1, height]). */
 function side(sk, rect, which, y0, y1, o = {}) {
   const [x0, z0, x1, z1] = rect, th = o.th ?? TH, h = which === 'n' || which === 's';
@@ -30,7 +39,8 @@ function side(sk, rect, which, y0, y1, o = {}) {
   const doors = (o.doors ?? []).map(([u0, u1, hh = DOOR_H]) => ({ u0, u1, y1: y0 + hh, kind: 'door' }));
   const u0 = h ? a[0] : a[1], u1 = h ? b[0] : b[1];
   const wins = o.win === false ? [] : ribbon(u0 + 0.2, u1 - 0.2, y0, y1, { ...(o.rib ?? {}), skip: [...doors.map((d) => [d.u0, d.u1]), ...(o.skip ?? [])] });
-  wall(sk, { a, b, th, y0, y1, mat: o.mat ?? WHITE, openings: [...doors, ...wins, ...(o.gaps ?? [])], out });
+  wall(sk, { a, b, th, y0, y1, mat: o.mat ?? WHITE, openings: [...doors, ...wins, ...(o.gaps ?? [])], out, leaf: 'car_red', doorFrame: 'steel_grey' });
+  if (o.rad !== false) for (const w of wins) radiator(sk, h, h ? a[1] : a[0], h ? out[1] : out[0], th, w.u0 + 0.25, w.u1 - 0.25, y0, w.y0);
 }
 /** An inner wall on x = c (z from a to b) or z = c, with doors ([u0, u1]) from the floor y to y + h. */
 function part(sk, axis, c, a, b, y, h, doors = [], o = {}) {
@@ -191,6 +201,7 @@ function bridge(sk) {
     chair(sk, -10.3, y, -3.6, 0); chair(sk, -12.5, y, -3.7, 0);
     cabinet(sk, -14.5, -9.6, -11.2, -9.0, y, 1.9, 'wood_painted', 's');
     pendant(sk, -10, FR - 0.3, -2, 0.7, true);
+    sk.b('paint_cab_yellow', x0 + 0.35, FR - 0.33, z0 + 0.45, x1 - 0.35, FR - 0.3, z1 - 0.45);        // the primrose ceiling of Gropius's office (docs §13)
   }
 }
 
@@ -273,6 +284,10 @@ function festBlock(sk) {
   }
   sk.s('steel_grey', 33.2, y, 14.4, 40.6, y + 1.0, 15.0); sk.b('steel_chrome', 33.2, y + 1.0, 14.4, 40.6, y + 1.05, 15.0);
   pendant(sk, 36, top - 0.1, 24, 0.7, true);
+  // the colours (Scheper's mural-painting workshop; the dining hall's ceiling was a hot orange, the Aula's walls charcoal under silver radiators): the canteen's ceiling,
+  // the charcoal dado of the Aula's north wall
+  sk.b('stucco_saffron', 33.2, top - 0.33, z0 + 0.45, x1 - 0.45, top - 0.3, z1 - 0.45);
+  sk.b('cloth_black', 7.15, y, z0 + 0.3, 24.85, y + 1.5, z0 + 0.33);
 }
 
 // ── the Prellerhaus ───────────────────────────────────────────────────────────────────────────

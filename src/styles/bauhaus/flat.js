@@ -36,19 +36,19 @@ export function flatSeats(fs) {
 }
 
 // ── walls ───────────────────────────────────────────────────────────────────────────────────────
-const wallU = (F, c, t, ua, ub, y0, y1, doors = []) => F.wall({ u0: ua, u1: ub, v: c, th: t, y0, y1, mat: PW, ops: doors.map(([a, b]) => ({ u0: a, u1: b, y1: y0 + 2.2 })) });
-function wallV(F, c, t, va, vb, y0, y1, doors = []) {
+export const wallU = (F, c, t, ua, ub, y0, y1, doors = []) => F.wall({ u0: ua, u1: ub, v: c, th: t, y0, y1, mat: PW, ops: doors.map(([a, b]) => ({ u0: a, u1: b, y1: y0 + 2.2 })) });
+export function wallV(F, c, t, va, vb, y0, y1, doors = []) {
   const cuts = [va, ...doors.flatMap(([a, b]) => [a, b]), vb].sort((p, q) => p - q);
   for (let i = 0; i + 1 < cuts.length; i += 2) F.s(PW, c, c + t, y0, y1, cuts[i], cuts[i + 1]);
   for (const [a, b] of doors) F.s(PW, c, c + t, y0 + 2.2, y1, a, b);
 }
 /** The architrave round a door in a wall along u (at v = c .. c + t) and in a wall along v (at u = c .. c + t). */
-const archU = (F, c, t, d0, d1, y) => { const e = 0.07, a = c - 0.02, b = c + t + 0.02; F.b('paint_white', d0 - e, d0, y, y + 2.28, a, b); F.b('paint_white', d1, d1 + e, y, y + 2.28, a, b); F.b('paint_white', d0, d1, y + 2.17, y + 2.28, a, b); };
-const archV = (F, c, t, d0, d1, y) => { const e = 0.07, a = c - 0.02, b = c + t + 0.02; F.b('paint_white', a, b, y, y + 2.28, d0 - e, d0); F.b('paint_white', a, b, y, y + 2.28, d1, d1 + e); F.b('paint_white', a, b, y + 2.17, y + 2.28, d0, d1); };
+export const archU = (F, c, t, d0, d1, y) => { const e = 0.07, a = c - 0.02, b = c + t + 0.02; F.b('paint_white', d0 - e, d0, y, y + 2.28, a, b); F.b('paint_white', d1, d1 + e, y, y + 2.28, a, b); F.b('paint_white', d0, d1, y + 2.17, y + 2.28, a, b); };
+export const archV = (F, c, t, d0, d1, y) => { const e = 0.07, a = c - 0.02, b = c + t + 0.02; F.b('paint_white', a, b, y, y + 2.28, d0 - e, d0); F.b('paint_white', a, b, y, y + 2.28, d1, d1 + e); F.b('paint_white', a, b, y + 2.17, y + 2.28, d0, d1); };
 
 // ── furniture ───────────────────────────────────────────────────────────────────────────────────
 /** A bed with its head at v = vh, the foot toward dir (±1 along v). */
-function bedV(F, uc, vh, dir, y, w, col, len = 2.0) {
+export function bedV(F, uc, vh, dir, y, w, col, len = 2.0) {
   const a = dir < 0 ? vh - len : vh, b = dir < 0 ? vh : vh + len, u0 = uc - w / 2, u1 = uc + w / 2;
   F.b('wood_painted', u0, u1, y + 0.25, y + 0.45, a, b);
   F.b('cloth_white', u0 + 0.03, u1 - 0.03, y + 0.45, y + 0.58, a + 0.03, b - 0.03);
@@ -60,19 +60,19 @@ function bedV(F, uc, vh, dir, y, w, col, len = 2.0) {
   F.k(u0, u1, y, y + 0.65, a, b);
 }
 /** A cupboard / wardrobe with its doors toward `face` ('v-' | 'v+' | 'u-' | 'u+'), a cornice and a door seam. */
-function cupboard(F, u0, u1, v0, v1, y, h, face, m = 'wood_painted') {
+export function cupboard(F, u0, u1, v0, v1, y, h, face, m = 'wood_painted') {
   F.s(m, u0, u1, y, y + h, v0, v1); F.b('wood_dark', u0 - 0.02, u1 + 0.02, y + h, y + h + 0.06, v0 - 0.02, v1 + 0.02);
   const um = (u0 + u1) / 2, vm = (v0 + v1) / 2;
   if (face === 'v-') F.b('wood_dark', um - 0.01, um + 0.01, y + 0.08, y + h - 0.08, v0 - 0.008, v0); else if (face === 'v+') F.b('wood_dark', um - 0.01, um + 0.01, y + 0.08, y + h - 0.08, v1, v1 + 0.008);
   else if (face === 'u-') F.b('wood_dark', u0 - 0.008, u0, y + 0.08, y + h - 0.08, vm - 0.01, vm + 0.01); else F.b('wood_dark', u1, u1 + 0.008, y + 0.08, y + h - 0.08, vm - 0.01, vm + 0.01);
 }
 /** A picture frame on a wall along u at depth v (toward dir ±1). */
-const pic = (F, u, v, dir, y0, y1, w, c, c2) => {          // a framed picture on a wall along u at depth v, facing dir (±1)
+export const pic = (F, u, v, dir, y0, y1, w, c, c2) => {          // a framed picture on a wall along u at depth v, facing dir (±1)
   const d = dir > 0 ? 1 : -1, f0 = v, f1 = v + d * 0.04, p1 = f1 + d * 0.02, p2 = p1 + d * 0.02, lo = (a, b) => [Math.min(a, b), Math.max(a, b)];
   F.b('wood_dark', u - w / 2 - 0.04, u + w / 2 + 0.04, y0 - 0.04, y1 + 0.04, ...lo(f0, f1));
   F.b(c, u - w / 2, u + w / 2, y0, y1, ...lo(f1, p1)); F.b(c2, u - w / 4, u + w / 4, y0 + (y1 - y0) * 0.25, y1 - (y1 - y0) * 0.25, ...lo(p1, p2));
 };
-const plant = (F, u, v, y) => { F.b('terracotta', u - 0.1, u + 0.1, y, y + 0.16, v - 0.1, v + 0.1); F.b('cloth_green', u - 0.17, u + 0.17, y + 0.16, y + 0.5, v - 0.17, v + 0.17); F.b('cloth_red', u - 0.06, u + 0.06, y + 0.5, y + 0.58, v - 0.06, v + 0.06); };
+export const plant = (F, u, v, y) => { F.b('terracotta', u - 0.1, u + 0.1, y, y + 0.16, v - 0.1, v + 0.1); F.b('cloth_green', u - 0.17, u + 0.17, y + 0.16, y + 0.5, v - 0.17, v + 0.17); F.b('cloth_red', u - 0.06, u + 0.06, y + 0.5, y + 0.58, v - 0.06, v + 0.06); };
 
 /** The stair from the ground floor to the first (through the hole in the floor) with its balusters and rail. */
 function stair(F, s) {
@@ -183,4 +183,40 @@ export function buildFlat(F, s, o) {
     if (u < mA - 0.2 || u > mA + 0.4) { F.b('cloth_white', u - w, u - w + open, y0 + 0.3, win.y1 - 0.05, FT + 0.03, FT + 0.06); F.b('cloth_white', u + w - open, u + w, y0 + 0.3, win.y1 - 0.05, FT + 0.03, FT + 0.06); }
     if (r() < 0.45 && y0 > y + 0.6) plant(F, u + (r() < 0.5 ? -0.3 : 0.3), FT + 0.16, y0);
   }
+}
+
+/**
+ * The upper floor of a Törten row house (SieTö I: one room to the street, two to the garden, reached by a stair): the floor with the stair's hole, the ceiling, the shaft,
+ * the street bedroom, the children's room and the garden bedroom, with a window on the garden side. g: { Y, YC, YB, TOP, pv, T, stairV0, n, run }.
+ */
+export function buildRowUp(F, g, r) {
+  const { YC, YB, TOP, pv, T, n, run } = g, W = F.W, D = F.D, y = YB + 0.025, v0 = pv + 0.3, vEnd = v0 + run, u0 = 0.36, u1 = 1.3, sk = F.sk, yR = TOP - 0.04, PWm = 'plaster_white';
+  const hole = F._r(u0, u1, v0, vEnd);
+  slab(sk, F._r(T, W - T, T, D - T), YB, [hole], { mat: PWm, th: 0.3, top: 'wood_ochre' });
+  F.b(PWm, T, W - T, yR, TOP, T, D - T);
+  const dv = run / n, rise = y - g.Y;
+  for (let i = 0; i < n; i++) F.b('timber', u0, u1, g.Y - 0.02, g.Y + rise * (i + 1) / n, v0 + i * dv, v0 + (i + 1) * dv);
+  sk.col.ramp(F._r(u0, u1, v0, vEnd), g.Y, y, { n: 's', s: 'n', w: 'e', e: 'w' }[F.f]);
+  F.rod('wood_dark', u1 - 0.04, g.Y + 0.95, v0, u1 - 0.04, y + 0.95, vEnd, 0.025, 5);
+  F.s(PWm, u1, u1 + 0.12, y, yR, v0 - 0.12, vEnd - 1.2); F.s(PWm, T, u1 + 0.12, y, yR, v0 - 0.12, v0);
+  // the partitions: P1 (street room | the rest) with a door at the east end, P2 (the children's room | the garden bedroom) with a door in the middle
+  const dP1 = [W - 1.6, W - 0.7], vP2 = 7.2, dP2 = [2.9, 3.8];
+  wallU(F, pv, 0.15, T, W - T, y, yR, [dP1]); archU(F, pv, 0.15, dP1[0], dP1[1], y);
+  wallU(F, vP2, 0.15, u1 + 0.12, W - T, y, yR, [dP2]); archU(F, vP2, 0.15, dP2[0], dP2[1], y);
+  // the street bedroom: the parents' bed against P1, a wardrobe, a chest, a rug, a chair, the window's curtains
+  bedV(F, 1.7, pv, -1, y, 1.5, ['cloth_red', 'cloth_green', 'paint_blue'][Math.floor(r() * 3)]);
+  cupboard(F, T, 0.85, 0.9, 2.5, y, 2.1, 'u+');
+  F.s('wood_painted', 2.9, 3.7, y, y + 0.5, 1.0, 1.5); F.b('cloth_grey', 2.92, 3.68, y + 0.5, y + 0.54, 1.02, 1.48);
+  rug(F, 0.9, 2.5, pv - 2.7, pv - 0.4, y, 'cloth_grey'); chr(F, W - 1.2, 2.4, 'u+', y);
+  pic(F, 3.2, pv, -1, y + 1.5, y + 2.0, 0.6, 'paint_blue', 'paint_white');
+  // the children's room: a child's bed against P2, a chest of drawers on the shaft wall, a table and a stool
+  bedV(F, 2.15, vP2, -1, y, 0.85, 'cloth_ochre', 1.7);
+  cupboard(F, u1 + 0.12, u1 + 0.6, pv + 0.5, pv + 1.3, y, 1.0, 'u+');
+  tbl(F, 4.0, 4.9, pv + 1.3, pv + 1.9, y, 0.62, 'wood_painted'); chr(F, 4.45, pv + 2.2, 'v-', y, 'wood_painted');
+  // the garden bedroom, reached from the stair's landing: a single bed at the back wall, a washstand under the window, a lamp
+  bedV(F, 4.3, D - T, -1, y, 0.9, ['cloth_green', 'cloth_red'][Math.floor(r() * 2)], 1.9);
+  F.s('wood_painted', 1.7, 2.7, y, y + 0.8, D - T - 0.55, D - T); F.b('tile_white', 1.68, 2.72, y + 0.8, y + 0.84, D - T - 0.57, D - T);
+  F.lathe('glaze_green', [[0.001, 0], [0.17, 0.02], [0.21, 0.1], [0.001, 0.1]], 2.2, y + 0.84, D - T - 0.3, 10);
+  rug(F, 1.9, 3.5, vP2 + 0.5, vP2 + 1.5, y, 'cloth_red');
+  pend(F, 1.8, yR, 5.9, false); pend(F, 3.0, yR, 8.5, false); pend(F, 2.6, yR, pv - 2.0, false);
 }
