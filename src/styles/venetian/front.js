@@ -69,7 +69,7 @@ function lunette(Lc, uc, y0, ys, R, kind, d, sc = 1) {
 }
 
 /** A crocket (a leaf curling up and out) at (u, y) on the right-hand edge's outward normal at angle th; sg -1 mirrors it for the left edge. */
-function crocket(Lc, u, y, th, sg, d) {
+export function crocket(Lc, u, y, th, sg, d) {
   const pts = [[0, 0], [0.22, 0.02], [0.34, 0.22], [0.3, 0.44], [0.2, 0.36], [0.2, 0.22], [0.08, 0.14]].map(([a, b]) => [sg * a, b]);
   const g = ext(pts, [], d, d + 0.3); g.rotateZ(sg > 0 ? th : -th); g.translate(u, y, 0);
   Lc.add(M, g);
