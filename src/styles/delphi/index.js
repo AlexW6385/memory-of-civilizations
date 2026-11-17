@@ -3,7 +3,7 @@
 // Pythia's tripod, the Serpent Column, the Naxian sphinx on its Ionic column, bronze offerings on their bases, a maiden (kore),
 // the stalls of the votive sellers. Style `delphi`: its elements fall back to the greek ones.
 import { registerStyle, orientedBox } from '../../core/build.js';
-import { box, lathe, rod, fromTriangles, quad, place } from '../../core/geom.js';
+import { box, lathe, rod, fromTriangles, quad, place, orientOutward } from '../../core/geom.js';
 import { greek } from '../greek/index.js';
 import '../greek/town.js';
 import '../greek/quarter.js';
@@ -13,6 +13,7 @@ import '../greek/ward.js';
 import './house.js';
 import { DRESS } from './dress.js';
 import { WORK } from './work.js';
+import { PEDIMENTS } from './pediment.js';
 import { human, placed, blob, limb } from '../greek/sculpture.js';
 import { merge } from '../greek/columns.js';
 
@@ -49,29 +50,52 @@ function polygonalWall(el, { bag, col }) {
   const th = el.th ?? 1.6, y0 = el.y0, y1 = el.y1, rand = rng(el.seed ?? 5);
   bag.add('rubble', orientedBox([ax, az], [bx, bz], th, y0, y1));
   col.segment([ax, az], [bx, bz], th, y0, y1);
-  const stones = [];
-  let y = y0;
-  while (y < y1 - 0.05) {
-    const hgt = Math.min(y1 - y, 0.55 + rand() * 0.6);
-    let s = -rand() * 0.8;
-    while (s < L) {
-      const w = 0.6 + rand() * 1.4, s0 = Math.max(0, s + 0.03), s1 = Math.min(L, s + w - 0.03);
-      if (s1 - s0 > 0.1) {
-        const o = th / 2 + 0.02 + rand() * 0.07, tilt = (rand() - 0.5) * 0.3;
-        const p0 = [ax + ux * s0 + nx * (o - 0.1), az + uz * s0 + nz * (o - 0.1)], p1 = [ax + ux * s1 + nx * (o - 0.1), az + uz * s1 + nz * (o - 0.1)];
-        // each stone fitted to its neighbours: its own height, its top and bottom edges slipped a little (the polygonal joints are not courses)
-        const yb = Math.max(y0, y + (rand() - 0.5) * 0.28), yt = Math.min(y1, y + hgt * (0.8 + rand() * 0.45));
-        if (yt - yb < 0.12) { s += w; continue; }
-        const st = orientedBox(p0, p1, 0.2, yb + 0.02, yt - 0.02);
-        stones.push(st); void tilt;
+  // the face: true polygonal masonry. A Voronoi tiling of the face from a jittered lattice of seed points fixed in the wall's own
+  // coordinates (distance along the whole run, height above the datum), so that the stones run on across the segments; each stone is
+  // the cell shrunk by the width of the joint, a pillow of its own depth, the joints open on the dark rubble core.
+  {
+    const PU = el.coarse ? 1.5 : 1.05, PV = el.coarse ? 1.0 : 0.72, JT = 0.016, gs = (el.gseed ?? el.seed ?? 5) | 0, u0 = el.u0 ?? 0, ug = el.ug ?? [0, L];
+    const H = (i, j, k) => { let h = Math.imul(i * 374761393 ^ j * 668265263 ^ (gs + k * 977) * 2147483647, 1274126177); h ^= h >>> 13; h = Math.imul(h, 1103515245); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+    const seedAt = (i, j) => [(i + 0.5 + (j & 1) * 0.5 + (H(i, j, 1) - 0.5) * 0.9) * PU, (j + 0.5 + (H(i, j, 2) - 0.5) * 0.8) * PV];
+    const clip = (poly, nx, nz, d) => {                                    // keep nx*x + nz*z <= d
+      const out = [];
+      for (let k = 0; k < poly.length; k++) {
+        const p = poly[k], q = poly[(k + 1) % poly.length], fp = nx * p[0] + nz * p[1] - d, fq = nx * q[0] + nz * q[1] - d;
+        if (fp <= 0) out.push(p);
+        if ((fp < 0 && fq > 0) || (fp > 0 && fq < 0)) { const t = fp / (fp - fq); out.push([p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]); }
       }
-      s += w;
+      return out;
+    };
+    const tris = { [el.mat ?? 'limestone']: [], limestone_yellow: [] };
+    const i0 = Math.floor((u0 - 1) / PU) - 1, i1 = Math.ceil((u0 + L + 1) / PU) + 1, j0 = Math.floor((y0 - 0.5) / PV) - 1, j1 = Math.ceil((y1 + 0.5) / PV) + 1;
+    const frontAt = (u, v, d) => { const su = u - u0, o = th / 2 + d; return [ax + ux * su + nx * o, v, az + uz * su + nz * o]; };
+    for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) {
+      const sd = seedAt(i, j);
+      if (sd[0] < u0 || sd[0] >= u0 + L || sd[1] < y0 - 0.3 || sd[1] > y1 + 0.3) continue;
+      let poly = [[sd[0] - 1.6 * PU, sd[1] - 1.6 * PV], [sd[0] + 1.6 * PU, sd[1] - 1.6 * PV], [sd[0] + 1.6 * PU, sd[1] + 1.6 * PV], [sd[0] - 1.6 * PU, sd[1] + 1.6 * PV]];
+      for (let a2 = i - 2; a2 <= i + 2 && poly.length > 2; a2++) for (let b2 = j - 2; b2 <= j + 2; b2++) {
+        if (a2 === i && b2 === j) continue;
+        const t = seedAt(a2, b2), dx = t[0] - sd[0], dz = t[1] - sd[1], dl = Math.hypot(dx, dz);
+        poly = clip(poly, dx / dl, dz / dl, (dx * sd[0] + dz * sd[1]) / dl + dl / 2 - JT);
+        if (poly.length < 3) break;
+      }
+      if (poly.length < 3) continue;
+      poly = clip(poly, 0, 1, y1 - 0.02); poly = clip(poly, 0, -1, -(y0 + 0.02));
+      poly = clip(poly, 1, 0, ug[1] - 0.02); poly = clip(poly, -1, 0, -(ug[0] + 0.02));
+      if (poly.length < 3) continue;
+      let cu = 0, cv = 0; for (const p of poly) { cu += p[0]; cv += p[1]; } cu /= poly.length; cv /= poly.length;
+      let area = 0; for (let k = 0; k < poly.length; k++) { const p = poly[k], q = poly[(k + 1) % poly.length]; area += p[0] * q[1] - q[0] * p[1]; }
+      if (Math.abs(area) < 0.02) continue;
+      const d = 0.075 + H(i, j, 3) * 0.05, bulge = 0.014, t = [];
+      const F = poly.map((p) => frontAt(p[0], p[1], d)), C = frontAt(cu, cv, d + bulge), B = poly.map((p) => frontAt(p[0], p[1], -0.04));
+      for (let k = 0; k < F.length; k++) { const m = (k + 1) % F.length; t.push(...C, ...F[k], ...F[m]); t.push(...F[k], ...B[k], ...B[m], ...F[k], ...B[m], ...F[m]); }
+      const tone = H(i, j, 4) < 0.1 ? 'limestone_yellow' : (el.mat ?? 'limestone');
+      tris[tone].push(...orientOutward(t));
     }
-    y += hgt;
+    for (const m in tris) if (tris[m].length) bag.add(m, fromTriangles(tris[m]));
   }
-  if (stones.length) bag.add(el.mat ?? 'limestone', merge(stones));
   // the weather on the face: the damp of the foot where the soil holds the rain, dark runs under the courses' edges, the pale patches where the sun dries it first
-  { const damp = [], run = [], o = th / 2 + 0.115;
+  { const damp = [], run = [], o = th / 2 + 0.14;
     for (let s = 0.6 + rand() * 1.5; s < L - 0.6; s += 1.6 + rand() * 2.4) {
       const w = 0.5 + rand() * 1.1, s1 = Math.min(L - 0.2, s + w), yb = y0 + 0.02 + rand() * 0.15, hh = 0.35 + rand() * 0.9;
       const a = [ax + ux * s + nx * o, az + uz * s + nz * o], b = [ax + ux * s1 + nx * o, az + uz * s1 + nz * o];
@@ -234,7 +258,7 @@ function hearth(el, { bag, col }) {
 
 export const delphi = {
   ...greek,
-  elements: Object.assign(Object.create(greek.elements), { ribbon, polygonal_wall: polygonalWall, adyton, hearth, serpent_column: serpentColumn, sphinx_column: sphinxColumn, ex_voto: exVoto, kore, stall, ...DRESS, ...WORK }),
+  elements: Object.assign(Object.create(greek.elements), { ribbon, polygonal_wall: polygonalWall, adyton, hearth, serpent_column: serpentColumn, sphinx_column: sphinxColumn, ex_voto: exVoto, kore, stall, ...DRESS, ...WORK, ...PEDIMENTS }),
   objects: greek.objects,
 };
 registerStyle('delphi', delphi);

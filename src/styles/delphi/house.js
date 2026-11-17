@@ -13,6 +13,8 @@ import { rangeRoof, kline, trapeza, krater, lampstand } from '../greek/house-int
 import { furnishShop } from '../greek/shops.js';
 import { vase } from '../greek/vessels.js';
 
+/** the rough head of a herm still in the stone: a squat ovoid */
+function blobLike(x, y, z) { return lathe([[0.001, -0.17], [0.13, -0.1], [0.17, 0.0], [0.12, 0.13], [0.001, 0.18]], 9, null, x, y, z); }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const T = 0.5, TI = 0.4, FR = 4.9, BK = 3.9, H = 3.2, DOOR = 0.95;
 const TONES = ['mud_plaster', 'mud_plaster', 'plaster_white', 'plaster_ochre', 'plaster_white', 'plaster_grey', 'mud_plaster'];
@@ -105,6 +107,13 @@ function delphiHouse(el, ctx) {
       fpiece('limestone', -0.1, L + 0.1, -0.22, 0.0, y + H - 0.3, y + H); fpiece('paint_blue', 0.1, L - 0.1, -0.12, -0.02, y + H - 0.62, y + H - 0.32);
     }
   }
+  if (vr === 4) {
+    // a timber porch the length of the front (the pent roof of tiles on a beam and two posts on stone bases), the lane under its shade
+    for (const u of [0.35, L - 0.35]) { const p = P(u, -1.0); bag.add('limestone', box(p[0] - 0.2, y, p[1] - 0.2, p[0] + 0.2, y + 0.22, p[1] + 0.2)); bag.add('timber', rod([p[0], y + 0.22, p[1]], [p[0], y + 2.75, p[1]], 0.1, 7)); col.circle(p[0], p[1], 0.2, y, y + 2.75); }
+    const bm = G.R(0.1, -1.15, L - 0.1, -0.85); bag.add('timber', box(bm[0], y + 2.7, bm[1], bm[2], y + 2.95, bm[3]));
+    const pr = G.R(-0.1, -1.3, L + 0.1, 0.0); bag.add('roof_tile', box(pr[0], y + 2.95, pr[1], pr[2], y + 3.08, pr[3]));
+    const rl = G.R(-0.1, -0.1, L + 0.1, 0.0); bag.add('timber', box(rl[0], y + 2.85, rl[1], rl[2], y + 3.1, rl[3]));
+  }
   rangeRoof(ctx, G.R(0, v2 - TI / 2, L, D), y, H);
   for (const [ri, r] of [G.R(-0.3, 0, L + 0.3, v1 + TI / 2), G.R(-0.3, v2 - TI / 2, L + 0.3, D)].entries()) {
     if (ri === 0 && vr === 2) continue;
@@ -118,12 +127,12 @@ function delphiHouse(el, ctx) {
     const fm = [G.R(u - 0.66, -0.1, u - 0.52, 0.12), G.R(u + 0.52, -0.1, u + 0.66, 0.12)];
     for (const q of fm) bag.add('timber', box(q[0], y + 0.05, q[1], q[2], y + 2.3, q[3]));
     const hd = G.R(u - 0.74, -0.12, u + 0.74, 0.14); bag.add('timber', box(hd[0], y + 2.2, hd[1], hd[2], y + 2.4, hd[3]));
-    const aw = G.R(so[0] - 0.1, -1.4, so[1] + 0.1, -0.1); bag.add('timber', frustum(aw, y + 2.15, y + 2.4, 0, 0, 0, 0));
-    for (const uu of [so[0] - 0.04, so[1] + 0.04]) { const p = P(uu, -1.35); bag.add('timber', rod([p[0], y, p[1]], [p[0], y + 2.17, p[1]], 0.04, 5)); }
+    if (vr !== 4) { const aw = G.R(so[0] - 0.1, -1.4, so[1] + 0.1, -0.1); bag.add('timber', frustum(aw, y + 2.15, y + 2.4, 0, 0, 0, 0));
+      for (const uu of [so[0] - 0.04, so[1] + 0.04]) { const p = P(uu, -1.35); bag.add('timber', rod([p[0], y, p[1]], [p[0], y + 2.17, p[1]], 0.04, 5)); } }
     const cb = G.R(so[0] + 0.1, -0.05, so[1] - 0.1, 0.5); bag.add('timber', box(cb[0], y + 0.05, cb[1], cb[2], y + 0.92, cb[3]));
     const bd = G.R(so[0] + 0.05, -0.34, so[1] - 0.05, 0.0); bag.add('wood_dark', box(bd[0], y + 0.88, bd[1], bd[2], y + 0.94, bd[3]));
     col.rect(cb, y, y + 0.92);
-    if (tier > 1) { const sg = G.R(so[0] + 0.3, -0.62, so[1] - 0.3, -0.56); bag.add('wood_ochre', box(sg[0], y + 2.65, sg[1], sg[2], y + 3.1, sg[3])); const em = G.R(so[0] + 0.7, -0.64, so[1] - 0.7, -0.62); bag.add(['paint_blue', 'wall_red', 'paint_ochre', 'pottery_dark'][(el.seed || 0) % 4], box(em[0], y + 2.75, em[1], em[2], y + 3.0, em[3])); }
+    if (tier > 1 && vr !== 4) { const sg = G.R(so[0] + 0.3, -0.62, so[1] - 0.3, -0.56); bag.add('wood_ochre', box(sg[0], y + 2.65, sg[1], sg[2], y + 3.1, sg[3])); const em = G.R(so[0] + 0.7, -0.64, so[1] - 0.7, -0.62); bag.add(['paint_blue', 'wall_red', 'paint_ochre', 'pottery_dark'][(el.seed || 0) % 4], box(em[0], y + 2.75, em[1], em[2], y + 3.0, em[3])); }
   }
   // the weathering of the four faces (shared with the walls of Athens)
   const rr = rng((el.seed || 1) + 5);
@@ -149,6 +158,36 @@ function delphiHouse(el, ctx) {
       const cl = G.R(ia + 0.6 + k * 1.8, vb - 0.58, ia + 1.5 + k * 1.8, vb - 0.52); bag.add(cs[Math.floor(rand() * 6)], box(cl[0], y + 0.9, cl[1], cl[2], y + 1.9, cl[3]));
       const wt = G.R(ia + 0.6 + k * 1.8, vb - 0.58, ia + 1.5 + k * 1.8, vb - 0.52); bag.add('linen', box(wt[0], y + 0.3, wt[1], wt[2], y + 0.9, wt[3])); col.rect(G.R(ia + 0.45 + k * 1.8, vb - 0.7, ia + 1.65 + k * 1.8, vb - 0.4), y, y + 2.0); }
     for (let k = 0; k < 3; k++) { const p = P(ia + 0.7 + k * 0.6, va + 0.9); bag.add(cs[k], box(p[0] - 0.2, y + 0.94, p[1] - 0.15, p[0] + 0.2, y + 1.06, p[1] + 0.15)); }
+  } else if (trade === 'baker') {
+    // the baker of the sacrificial cakes (pelanos, docs/settlements/delphi.md §13.3): the domed oven in the back corner with its mouth to the room and its glow,
+    // the kneading trough, the peel on the wall, flour in sacks, and on the counter board the round cakes and loaves for the consultants
+    const [ox, oz] = P(ib - 1.0, vb - 1.1), mo = G.R(ib - 1.0 - 0.22, vb - 1.1 - 0.84, ib - 1.0 + 0.22, vb - 1.1 - 0.7);
+    bag.add('rubble', lathe([[0.85, 0], [0.85, 0.85], [0.8, 0.9], [0.001, 0.9]], 14, null, ox, y, oz));
+    bag.add('mud_plaster', lathe([[0.8, 0.9], [0.72, 1.2], [0.5, 1.5], [0.2, 1.66], [0.001, 1.7]], 14, null, ox, y, oz));
+    bag.add('granite_black', box(mo[0], y + 0.95, mo[1], mo[2], y + 1.3, mo[3]));
+    bag.add('flame', box(mo[0] + 0.05, y + 0.97, mo[1] + 0.02, mo[2] - 0.05, y + 1.1, mo[3] - 0.02));
+    lights.push({ at: [ox, y + 1.2, oz], color: '#ff7a28', intensity: 1.8, distance: 5 }); col.circle(ox, oz, 0.88, y, y + 1.7);
+    const tr = G.R(ia + 0.5, vb - 1.6, ia + 1.7, vb - 0.9);
+    bag.add('timber', box(tr[0], y + 0.55, tr[1], tr[2], y + 0.8, tr[3])); bag.add('plaster_white', box(tr[0] + 0.06, y + 0.78, tr[1] + 0.06, tr[2] - 0.06, y + 0.82, tr[3] - 0.06));
+    for (const [qa, qb] of [[tr[0] + 0.08, tr[1] + 0.08], [tr[2] - 0.16, tr[1] + 0.08], [tr[0] + 0.08, tr[3] - 0.16], [tr[2] - 0.16, tr[3] - 0.16]]) bag.add('timber', box(qa, y, qb, qa + 0.08, y + 0.55, qb + 0.08));
+    col.rect(tr, y, y + 0.82);
+    const pl = P(ib - 0.15, vb - 0.12); bag.add('timber', rod([pl[0], y, pl[1]], [pl[0], y + 2.1, pl[1] + (G.mirror ? 0 : 0)], 0.025, 5)); { const pd = G.R(ib - 0.35, vb - 0.2, ib - 0.05, vb - 0.1); bag.add('wood_ochre', box(pd[0], y + 1.5, pd[1], pd[2], y + 2.1, pd[3])); }
+    for (let k = 0; k < 3; k++) { const q = G.R(ia + 0.15 + k * 0.42, vb - 0.5, ia + 0.5 + k * 0.42, vb - 0.15); bag.add('sacking', box(q[0], y, q[1], q[2], y + 0.5 + (k % 2) * 0.08, q[3])); col.rect(q, y, y + 0.55); }
+    for (let k = 0; k < 7; k++) { const p = P(ia + 0.5 + (k % 4) * 0.34, va + 0.2 + Math.floor(k / 4) * 0.22); bag.add(k % 3 === 0 ? 'wood_ochre' : 'thatch', lathe([[0.001, 0], [0.13, 0.0], [0.14, 0.03], [0.08, 0.05], [0.001, 0.055]], 9, null, p[0], y + 0.95, p[1])); }
+    { const p = P(ib - 0.55, va + 0.3); bag.add('terracotta', lathe([[0.001, 0], [0.2, 0.0], [0.22, 0.05], [0.001, 0.05]], 10, null, p[0], y + 0.95, p[1])); for (let k = 0; k < 4; k++) bag.add('wood_ochre', lathe([[0.001, 0.05 + k * 0.035], [0.11, 0.05 + k * 0.035], [0.11, 0.08 + k * 0.035], [0.001, 0.08 + k * 0.035]], 9, null, p[0], y + 0.95, p[1])); }
+  } else if (trade === 'mason') {
+    // the stone-cutter's: dedications for the Way cut to order (docs/settlements/delphi.md §13.3): a marble block squared on the floor, a herm half carved
+    // with its head still in the block, a stele on trestles with its first lines cut, the tool rack, the chips, and small finished stelai for sale on the counter
+    const b1 = G.R(ia + 0.3, vb - 1.5, ia + 1.3, vb - 0.8); bag.add('marble', box(b1[0], y, b1[1], b1[2], y + 0.55, b1[3])); col.rect(b1, y, y + 0.55);
+    const hm = G.R(ib - 1.0, vb - 1.3, ib - 0.65, vb - 0.95), [hx, hz] = P(ib - 0.825, vb - 1.125);
+    bag.add('limestone', box(hm[0], y, hm[1], hm[2], y + 1.15, hm[3])); bag.add('limestone', blobLike(hx, y + 1.3, hz)); col.rect(hm, y, y + 1.4);
+    for (const q of [G.R(ia + 1.6, vb - 1.7, ia + 1.68, vb - 1.5), G.R(ia + 1.6, vb - 0.8, ia + 1.68, vb - 0.6)]) bag.add('wood_dark', box(q[0], y, q[1], q[2], y + 0.6, q[3]));
+    const sl = G.R(ia + 1.55, vb - 1.8, ia + 2.2, vb - 0.5); bag.add('marble', box(sl[0], y + 0.6, sl[1], sl[2], y + 0.68, sl[3]));
+    for (let k = 0; k < 4; k++) { const q = G.R(ia + 1.62, vb - 1.7 + k * 0.1, ia + 1.62 + 0.4 - (k % 2) * 0.1, vb - 1.67 + k * 0.1); bag.add('granite_black', box(q[0], y + 0.68, q[1], q[2], y + 0.682, q[3])); }
+    const rk = G.R(ia + 0.05, va + 1.2, ia + 0.1, va + 2.6); bag.add('wood_dark', box(rk[0], y + 1.4, rk[1], rk[2], y + 1.5, rk[3]));
+    for (let k = 0; k < 5; k++) { const q = P(ia + 0.12, va + 1.35 + k * 0.28); bag.add('iron', rod([q[0], y + 1.4, q[1]], [q[0], y + 1.1, q[1]], 0.012, 4)); }
+    for (let k = 0; k < 11; k++) { const q = G.R(ia + 0.5 + rand() * 2.0, vb - 2.6 + rand() * 2.0, ia + 0.58 + rand() * 2.0, vb - 2.5 + rand() * 2.0), w = 0.03 + rand() * 0.05; const cx = (q[0] + q[2]) / 2, cz = (q[1] + q[3]) / 2; bag.add('marble', box(cx - w, y, cz - w, cx + w, y + w * 1.2, cz + w)); }
+    for (let k = 0; k < 4; k++) { const q = G.R(ia + 0.45 + k * 0.5, va + 0.15, ia + 0.8 + k * 0.5, va + 0.2); bag.add(k % 2 ? 'marble' : 'limestone', box(q[0], y + 0.94, q[1], q[2], y + 1.25 + (k % 3) * 0.06, q[3] + 0.04)); }
   } else { // the cook-shop: a stone hearth with a pot, bread on the counter, a bench
     const [hx, hz] = P(ib - 1.1, vb - 0.9);
     bag.add('rubble', lathe([[0.7, 0], [0.7, 0.55], [0.55, 0.6], [0.001, 0.6]], 12, null, hx, y, hz)); bag.add('lacquer_black', lathe([[0.5, 0.58], [0.001, 0.62]], 10, null, hx, y, hz));

@@ -13,7 +13,7 @@ export function retain(E, a, b, top, face, seed, o = {}) {
     const gs = [0, 0.5, 1].flatMap((t) => [1.6, 2.6].map((off) => height(p[0] + (q[0] - p[0]) * t + nx * off, p[1] + (q[1] - p[1]) * t + nz * off)));
     const g = Math.min(...gs, height(p[0], p[1]), height(q[0], q[1]));
     if (top - g < 0.3) continue;
-    E.push({ t: o.rough ? 'wall' : 'polygonal_wall', a: p, b: q, face, th: o.th ?? 1.6, y0: g - 0.6, y1: o.cap ? top + o.cap : top, mat: o.mat ?? 'limestone', seed: seed + i, ...(o.rough ? { } : {}) });
+    E.push({ t: o.rough ? 'wall' : 'polygonal_wall', a: p, b: q, face, th: o.th ?? 1.6, y0: g - 0.6, y1: o.cap ? top + o.cap : top, mat: o.mat ?? 'limestone', seed: seed + i, ...(o.rough ? {} : { u0: L * i / n, ug: [0, L], gseed: seed, coarse: !!o.coarse }) });
   }
 }
 
@@ -57,7 +57,11 @@ export function temple(E) {
   E.push({ t: 'metopes', ...DE, programme: { e: 'gigantomachy', w: 'amazonomachy' }, bg: 'wall_red', band: 'egyptian_blue' });
   const PR = [X[0] - FACE - 0.6, Z[0] - FACE - 0.6, X[14] + FACE + 0.6, Z[5] + FACE + 0.6];
   E.push({ t: 'pediment_roof', rect: PR, y: TOP, rise: 2.7, tympanumInset: 0.8, rakingGeison: 0.5, mat: 'marble', tileMat: 'roof_tile' });
-  for (const s of [-1, 1]) E.push({ t: 'acroterion', at: [s * (PR[2] - 0.7), cz], y: TOP + 2.7 + 0.8, h: 2.2, yaw: PI / 2 });
+  // the Alcmaeonid pediments (delphi.md §13.1): east, the arrival of Apollo; west, the Gigantomachy; a winged Nike on each apex
+  for (const dir of [1, -1]) {
+    E.push({ t: 'delphi_pediment', x: (dir > 0 ? PR[2] : PR[0]) - dir * 0.8, dir, zc: (PR[1] + PR[3]) / 2, half: (PR[3] - PR[1]) / 2, y: TOP, rise: 2.7, depth: 0.8, programme: dir > 0 ? 'east' : 'west' });
+    E.push({ t: 'nike_acroterion', at: [dir * (PR[2] - 0.7), (PR[1] + PR[3]) / 2], y: TOP + 3.5, h: 2.0, yaw: dir > 0 ? PI / 2 : -PI / 2 });
+  }
   // the ceilings of the pteron: timber coffers from the colonnade to the cella's walls
   const CW0 = cz - 7.3, CW1 = cz + 5.3, XE = 22.6;
   for (const [za, zb] of [[Z[0] + 0.5, CW0], [CW1, Z[5] - 0.5]]) E.push({ t: 'coffers', rect: [X[0] + 0.5, za, X[14] - 0.5, zb], y: FT, depth: 0.3, cell: 1.0, beam: 0.22, mat: 'cedar' });
@@ -194,6 +198,12 @@ export function terraceMonuments(E) {
   E.push({ t: 'block', rect: [ax - w - 0.25, az - d - 0.25, ax + w + 0.25, az + d + 0.25], y0: y + 0.5, y1: y + 0.95, mat: 'marble' });
   E.push({ t: 'block', rect: [ax - w, az - d, ax + w, az + d], y0: y + 0.95, y1: y + 2.55, mat: 'marble_dark' });
   E.push({ t: 'block', rect: [ax - w - 0.3, az - d - 0.3, ax + w + 0.3, az + d + 0.3], y0: y + 2.55, y1: y + 2.8, mat: 'marble' });
+  // the table of offerings on the top, in white marble; the dedication cut along the crowning's east face and the right of first consultation (promanteia) on the footing
+  E.push({ t: 'block', rect: [ax - w + 0.15, az - d + 0.15, ax + w - 0.15, az + d - 0.15], y0: y + 2.8, y1: y + 2.92, mat: 'marble_smooth', collide: false });
+  for (let i = 0; i < 9; i++) E.push({ t: 'block', rect: [ax + w + 0.3, az - d + 0.15 + i * 0.3, ax + w + 0.32, az - d + 0.15 + i * 0.3 + 0.2], y0: y + 2.62, y1: y + 2.72, mat: 'marble_dark', collide: false });
+  for (let i = 0; i < 11; i++) E.push({ t: 'block', rect: [ax + w + 1.6, az - d + 0.1 + i * 0.28, ax + w + 1.62, az - d + 0.1 + i * 0.28 + 0.18], y0: y + 0.1, y1: y + 0.17, mat: 'marble_dark', collide: false });
+  // the tithe of Rhodopis: iron spits in a heap behind the altar, opposite the temple
+  E.push({ t: 'spits', at: [ax + w + 5.6, az + 2.2], y, seed: 6 });
   E.push({ t: 'lamp', at: [ax, y + 3.1, az], color: '#ff9a50', intensity: 6, distance: 12 });
   E.push({ t: 'serpent_column', at: SERPENT, y });
   E.push({ t: 'sphinx_column', at: SPHINX, y });

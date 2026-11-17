@@ -59,4 +59,15 @@ function pen(el, { bag, col }) {
   bag.add('thatch', merge(st));
   bag.add('limestone', box(x0 + 0.4, y, z0 + 0.35, x0 + 1.5, y + 0.4, z0 + 0.75)); bag.add('water', box(x0 + 0.46, y + 0.34, z0 + 0.4, x0 + 1.44, y + 0.36, z0 + 0.7));
 }
-export const WORK = { mason_yard: masonYard, pen };
+/** spits: { at: [x, z], y, seed } — the iron spits (obeloi) of Rhodopis, a tithe laid in a heap: rods of iron lying crossed on a low stone slab (Herodotus 2.135). */
+function spits(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, rand = rng(el.seed ?? 6), rods = [];
+  bag.add('limestone', box(x - 0.9, y, z - 0.6, x + 0.9, y + 0.1, z + 0.6));
+  for (let k = 0; k < 70; k++) {
+    const a = rand() * Math.PI * 2, r = rand() * 0.45, h = 0.1 + (1 - r / 0.45) * 0.3 * rand() + rand() * 0.06, c = [x + Math.cos(a) * r * 1.5, z + Math.sin(a) * r], d = rand() * Math.PI, L = 0.55 + rand() * 0.2, dz = Math.sin(d) * L, dx = Math.cos(d) * L;
+    rods.push(rod([c[0] - dx / 2, y + h - 0.02 - rand() * 0.04, c[1] - dz / 2], [c[0] + dx / 2, y + h + 0.03 + rand() * 0.06, c[1] + dz / 2], 0.009, 4));
+  }
+  bag.add('iron', merge(rods));
+  col.rect([x - 0.9, z - 0.6, x + 0.9, z + 0.6], y, y + 0.1);
+}
+export const WORK = { mason_yard: masonYard, pen, spits };
