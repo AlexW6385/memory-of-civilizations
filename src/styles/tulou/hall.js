@@ -5,6 +5,7 @@ import { STYLES } from '../../core/build.js';
 import '../../objects/index.js';
 import { box, fromTriangles, lathe, rod } from '../../core/geom.js';
 import { hexa } from './geo.js';
+import { jbox, rnd } from './detail.js';
 
 /** A rectangular slab sloping in z: from zA (height yA) to zB (yB), x0…x1, thickness t. */
 export function zslab(x0, x1, zA, yA, zB, yB, t) {
@@ -57,6 +58,32 @@ export function tulouHall(el, { bag, col, lights }) {
     B('timber_red', x - 0.38, 3.8, z - 0.14, x + 0.38, 4.1, z + 0.14); B('timber_red', x - 0.26, 3.55, z - 0.12, x + 0.26, 3.8, z + 0.12);
     B('gilt_bronze', x - 0.2, 4.1, z - 0.15, x + 0.2, 4.14, z + 0.15);
     bag.add('granite_block', lathe([[0.001, 0], [0.31, 0], [0.34, 0.04], [0.3, 0.18], [0.001, 0.18]], 12, null, X(x), PY + 0.25, Z(z)));
+  }
+  // rows of cover tiles on both slopes, the eave-end tiles, rafters under the eaves, lattice windows on the side walls
+  for (const sz of [-1, 1]) for (let q = 0; q < 40; q++) {
+    const x = -ex + 0.2 + q * (2 * ex - 0.4) / 39, w = 0.06, zs = (z) => ye + (yr - ye) * (ez - Math.abs(z)) / ez;
+    const T = (z, ww, h, y0) => [[X(x - ww), y0 + h, Z(sz * z)], [X(x + ww), y0 + h, Z(sz * z)]];
+    const z0 = ez - 0.3, z1 = 0.42, hh = 0.07 + (rnd(q, sz + 3) - 0.5) * 0.004;
+    const top = [[X(x - w * 0.5), zs(z0) + hh, Z(sz * z0)], [X(x - w * 0.5), zs(z1) + hh, Z(sz * z1)], [X(x + w * 0.5), zs(z1) + hh, Z(sz * z1)], [X(x + w * 0.5), zs(z0) + hh, Z(sz * z0)]];
+    const bot = [[X(x - w), zs(z0) - 0.012, Z(sz * z0)], [X(x - w), zs(z1) - 0.012, Z(sz * z1)], [X(x + w), zs(z1) - 0.012, Z(sz * z1)], [X(x + w), zs(z0) - 0.012, Z(sz * z0)]];
+    bag.add('tile_dark', hexa(top, bot)); void T;
+    // the tile end at the eave
+    bag.add('tile_dark', hexa([[X(x - 0.04), ye + 0.07, Z(sz * (ez - 0.4))], [X(x + 0.04), ye + 0.07, Z(sz * (ez - 0.4))], [X(x + 0.04), ye + 0.0, Z(sz * (ez + 0.04))], [X(x - 0.04), ye + 0.0 + (rnd(q, 8) - 0.5) * 0.003, Z(sz * (ez + 0.04))]],
+      [[X(x - 0.06), ye - 0.03, Z(sz * (ez - 0.4))], [X(x + 0.06), ye - 0.03, Z(sz * (ez - 0.4))], [X(x + 0.06), ye - 0.06, Z(sz * (ez + 0.04))], [X(x - 0.06), ye - 0.06, Z(sz * (ez + 0.04))]]));
+    if (q % 2 === 0) bag.add('timber', hexa([[X(x - 0.04), ye - 0.2, Z(sz * (ez - 1.0))], [X(x + 0.04), ye - 0.2, Z(sz * (ez - 1.0))], [X(x + 0.04), ye - 0.2, Z(sz * (ez + 0.02))], [X(x - 0.04), ye - 0.2 + (rnd(q, 9) - 0.5) * 0.003, Z(sz * (ez + 0.02))]],
+      [[X(x - 0.04), ye - 0.28, Z(sz * (ez - 1.0))], [X(x + 0.04), ye - 0.28, Z(sz * (ez - 1.0))], [X(x + 0.04), ye - 0.28, Z(sz * (ez + 0.02))], [X(x - 0.04), ye - 0.28, Z(sz * (ez + 0.02))]]));
+  }
+  for (const sx of [-1, 1]) for (const zc of [-3.3, -1.5]) {
+    const xs = sx * (hw - 0.1), s0 = sx > 0 ? hw - 0.1 : -hw + 0.1;
+    void xs;
+    // a window in the plaster side wall: timber frame, lattice, a lime sill; stands 0.03 proud of the wall's outer face
+    const xo = sx > 0 ? hw - 0.1 : -hw + 0.1;
+    const side = sx > 0 ? 1 : -1;
+    const fb = (x0, y0, z0, x1, y1, z1, sd, m) => bag.add(m, jbox(cx, cz, 0, Math.min(x0, x1), y0, z0, Math.max(x0, x1), y1, z1, 40 + sd + zc * 3));
+    fb(xo, 1.55, zc - 0.55, xo + side * 0.04, 2.5, zc + 0.55, 1, 'lattice');
+    for (const [y0, y1, a, b] of [[1.5, 1.57, zc - 0.62, zc + 0.62], [2.5, 2.57, zc - 0.62, zc + 0.62]]) fb(xo, y0, a, xo + side * 0.07, y1, b, 2 + Math.round(y0), 'timber');
+    for (const zz of [zc - 0.62, zc + 0.55]) fb(xo, 1.5, zz, xo + side * 0.07, 2.57, zz + 0.07, 5 + Math.round(zz), 'timber');
+    void s0;
   }
   // the offering table before the altar, its red cloth, fruit and cups, kneeling cushions on the floor
   B('timber_red', -1.1, PY, zb + 2.1, 1.1, PY + 0.85, zb + 2.75); B('cloth_red', -1.15, PY + 0.8, zb + 2.05, 1.15, PY + 0.88, zb + 2.8);
