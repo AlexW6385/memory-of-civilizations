@@ -51,7 +51,9 @@ export function openDoor(F, uc, ver, w = 1.1) {
 export function weather(F, o, rand) {
   const { B } = F, { ver, py, h, W, g0, g1, uc, hut } = o;
   if (hut) return;
-  const free = [[0.25, Math.max(0.3, g0 - 0.35)], [Math.min(W - 0.3, g1 + 0.35), W - 0.25]].filter(([a, b]) => b - a > 0.45);
+  let free = [[0.25, Math.max(0.3, g0 - 0.35)], [Math.min(W - 0.3, g1 + 0.35), W - 0.25]];
+  for (const wu of o.wins ?? []) free = free.flatMap(([a, b]) => (wu + 0.7 <= a || wu - 0.7 >= b ? [[a, b]] : [[a, wu - 0.7], [wu + 0.7, b]]));   // (clear of the windows)
+  free = free.filter(([a, b]) => b - a > 0.45);
   if (!free.length) return;
   const at = () => { const [a, b] = free[Math.floor(rand() * free.length)], w = 0.25 + rand() * Math.min(1.1, b - a - 0.2); return [a + rand() * (b - a - w), w]; };
   for (let k = 0; k < 3; k++) { const [u, w] = at(); B('plaster_damp', u, py + 0.45, ver - 0.035, u + w, py + 0.8 + rand() * 0.55, ver + 0.02); }

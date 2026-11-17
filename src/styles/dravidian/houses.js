@@ -45,6 +45,22 @@ export function post(F, u, v, y0, yb, s = 1) {
   F.B('timber', u - 0.2, yb - 0.3, v - 0.1, u + 0.2, yb - 0.04, v + 0.1);
 }
 
+/** The verandah post by the street's ritual distance (docs/settlements/madurai.md §15): the inner streets' octagonal timber
+ *  posts on granite blocks, the middle streets' square granite pillars with a bracket, the outer streets' round poles. */
+function postBy(F, zone, u, v, y0, yb) {
+  if (zone === 'mid') {
+    const { bag } = F, [x, , z] = F.P(u, 0, v);
+    F.B(G, u - 0.17, y0 - 0.06, v - 0.17, u + 0.17, y0 + 0.28, v + 0.17);
+    F.B(G, u - 0.12, y0 + 0.28, v - 0.12, u + 0.12, yb - 0.42, v + 0.12);
+    bag.add(G, lathe([[0.001, 0], [0.12, 0], [0.15, 0.06], [0.19, 0.14], [0.15, 0.2], [0.001, 0.2]], 4, null, x, yb - 0.42, z));
+    F.B('timber', u - 0.22, yb - 0.22, v - 0.1, u + 0.22, yb - 0.04, v + 0.1);
+  } else if (zone === 'outer') {
+    const { bag } = F, [x, , z] = F.P(u, 0, v);
+    F.B(G, u - 0.15, y0 - 0.06, v - 0.15, u + 0.15, y0 + 0.14, v + 0.15);
+    bag.add('timber', lathe([[0.1, 0], [0.085, 0.1], [0.075, yb - y0 - 0.15], [0.09, yb - y0 - 0.1], [0.09, yb - y0]], 7, null, x, y0 + 0.14, z));
+  } else post(F, u, v, y0, yb);
+}
+
 const WASHES = ['plaster_white', 'stucco_cream', 'limewash_white', 'limewash_yellow', 'stucco_saffron', 'stucco_sky'];
 const pick = (r, a) => a[Math.floor(r() * a.length)];
 
@@ -147,7 +163,7 @@ function goods(F, trade, y, W, ver, rand, T) {
 }
 
 /** The painted door: cream frame, dark leaves with brass studs, a lintel and a panel of the goddess above. */
-function door(F, uc, ver, w = 1.0) {
+function door(F, uc, ver, w = 1.0, panel = true) {
   const { bag } = F;
   F.B('stucco_cream', uc - w / 2 - 0.25, 0.55, ver - 0.05, uc + w / 2 + 0.25, 2.55, ver);
   F.B('wood_dark', uc - w / 2, 0.58, ver - 0.09, uc - 0.02, 2.3, ver - 0.05);
@@ -158,6 +174,7 @@ function door(F, uc, ver, w = 1.0) {
     bag.add('gilt_bronze', lathe([[0.001, 0], [0.032, 0], [0.02, 0.02], [0.001, 0.025]], 5, null, x, 0.85 + r * 0.45, z));
   }
   // a panel of Gajalakshmi over the lintel: a rose field in a cream frame, a gilt disc
+  if (!panel) return;
   F.B('stucco_cream', uc - 0.4, 2.62, ver - 0.06, uc + 0.4, 3.12, ver);
   F.B('stucco_rose', uc - 0.33, 2.68, ver - 0.09, uc + 0.33, 3.06, ver - 0.06);
   const [gx, , gz] = F.P(uc, 0, ver - 0.12); bag.add('gilt_bronze', disc(0.13, 2.87, 10, gx, gz));
@@ -176,7 +193,9 @@ export function tamilHouse(el, ctx) {
   const rand = rng(el.seed || 1), kind = el.kind ?? 'house', shop = kind === 'shop', hut = kind === 'hut', agra = kind === 'agra';
   const ver = hut ? 1.3 : shop ? 2.3 : agra ? 1.7 : 1.9 + rand() * 0.3, py = hut ? 0.3 : shop ? 0.62 : agra ? 0.72 : 0.55;
   const h = hut ? 2.5 : shop ? 3.3 + rand() * 0.3 : 3.2 + rand() * 0.45, t = hut ? 0.62 : 0.4;
-  const wash = hut ? 'mud_plaster' : el.wash ?? pick(rand, WASHES), roof = hut ? 'thatch_palm' : 'roof_tile', uc = W / 2 + (W > 6 ? (rand() - 0.5) * 0.6 : 0);
+  const zone = hut ? 'outer' : el.row == null ? 'mid' : el.row === 20 ? 'mid' : el.row <= 1 ? 'inner' : el.row <= 3 ? 'mid' : 'outer';
+  const thatched = hut || (zone === 'outer' && !shop && (el.seed >>> 3) % 3 === 0);      // the outer streets: a third of the houses roofed in palm thatch
+  const wash = hut ? 'mud_plaster' : thatched ? 'limewash_yellow' : el.wash ?? pick(rand, WASHES), roof = thatched ? 'thatch_palm' : 'roof_tile', uc = W / 2 + (W > 6 ? (rand() - 0.5) * 0.6 : 0);
   const vm = (ver + D) / 2, fe = ver - 0.45, re = D + 0.45;
   // the platform (the thinnai) across the front, the core of the house behind it
   B(G, 0, -0.3, 0, W, py, ver); Fl(0, 0, W, ver, py);
@@ -190,7 +209,7 @@ export function tamilHouse(el, ctx) {
   // the lean-to over the platform on its posts
   const yb = shop ? 2.5 : 2.42, yEdge = shop ? 2.62 : 2.74, vf = shop ? -1.1 : -0.5;
   const yL = (v) => (h - 0.2) + (v - ver) * ((h - 0.2) - yEdge) / (ver - vf);
-  poly(shop && rand() < 0.65 || hut ? 'thatch_palm' : roof, [[0, yL(ver), ver], [W, yL(ver), ver], [W, yEdge, vf], [0, yEdge, vf]], [0, 1, 0]);
+  poly(shop && rand() < 0.65 || hut || thatched ? 'thatch_palm' : roof, [[0, yL(ver), ver], [W, yL(ver), ver], [W, yEdge, vf], [0, yEdge, vf]], [0, 1, 0]);
   poly('timber', [[0, yL(ver) - 0.1, ver], [W, yL(ver) - 0.1, ver], [W, yEdge - 0.1, vf], [0, yEdge - 0.1, vf]], [0, -1, 0]);
   B('timber', -0.03, yEdge - 0.2, vf - 0.02, W + 0.03, yEdge + 0.03, vf + 0.05);
   const nb = Math.max(1, 2 * Math.round((W / (shop ? 3 : 2.5) - 1) / 2) + 1);
@@ -198,9 +217,18 @@ export function tamilHouse(el, ctx) {
   for (let i = 0; i <= nb; i++) {
     const u = 0.25 + i * (W - 0.5) / nb;
     if (hut) { B('timber', u - 0.07, py, vp - 0.07, u + 0.07, yb, vp + 0.07); C(u - 0.07, vp - 0.07, u + 0.07, vp + 0.07, py, yb); }
-    else { post(F, u, vp, shop ? 0 : py, yb); C(u - 0.14, vp - 0.14, u + 0.14, vp + 0.14, 0, yb + 0.3); }
+    else { postBy(F, shop ? 'inner' : zone, u, vp, shop ? 0 : py, yb); C(u - 0.14, vp - 0.14, u + 0.14, vp + 0.14, 0, yb + 0.3); }
   }
   if (!hut) B('timber', 0.015, yb - 0.02, vp - 0.1, W - 0.015, yb + 0.22, vp + 0.1);
+  // the gabled porch (mukhamandapa) over the door bay of the wide houses (W > 7.4): two tile slopes and a gable on the lean-to
+  if (!hut && !shop && W > 7.4 && !thatched && nb >= 3) {
+    const pw = (W - 0.5) / nb / 2 + 0.05, pc = W / 2, rise = 0.75, vE = Math.min(ver + 1.8, vm - 0.3);   // (the slopes run on into the main roof)
+    poly(roof, [[pc - pw, yL(vf), vf], [pc, yL(vf) + rise, vf], [pc, yL(vE) + rise, vE], [pc - pw, yL(vE), vE]], [0, 1, 0]);
+    poly(roof, [[pc, yL(vf) + rise, vf], [pc + pw, yL(vf), vf], [pc + pw, yL(vE), vE], [pc, yL(vE) + rise, vE]], [0, 1, 0]);
+    poly('stucco_cream', [[pc - pw, yL(vf) - 0.02, vf + 0.03], [pc + pw, yL(vf) - 0.02, vf + 0.03], [pc, yL(vf) + rise, vf + 0.03]], [0, 0, -1]);
+    const [gx, , gz] = F.P(pc, 0, vf - 0.01); bag.add('gilt_bronze', disc(0.12, yL(vf) + rise * 0.38, 8, gx, gz));
+    B('timber', pc - pw - 0.02, yL(vf) - 0.1, vf - 0.03, pc + pw + 0.02, yL(vf) + 0.02, vf + 0.05);
+  }
   // the roof
   const yF = (v) => h + 0.1 + (v - ver) * t * (v <= vm ? 1 : -1) + (v > vm ? 2 * (vm - ver) * t : 0);
   const ry = h + 0.1 + (vm - ver) * t, yFe = h + 0.1 - 0.45 * t;
@@ -209,15 +237,16 @@ export function tamilHouse(el, ctx) {
   poly('timber', [[0, yFe - 0.1, fe], [W, yFe - 0.1, fe], [W, h, ver], [0, h, ver]], [0, -1, 0]);
   poly('timber', [[0, h, D], [W, h, D], [W, yFe - 0.1, re], [0, yFe - 0.1, re]], [0, -1, 0]);
   B('timber', -0.03, yFe - 0.14, fe - 0.02, W + 0.03, yFe + 0.04, fe + 0.04); B('timber', -0.03, yFe - 0.14, re - 0.04, W + 0.03, yFe + 0.04, re + 0.02);
-  B(hut ? 'thatch_palm' : 'terracotta', -0.03, ry - 0.04, vm - 0.2, W + 0.03, ry + 0.17, vm + 0.2);
+  B(hut || thatched ? 'thatch_palm' : 'terracotta', -0.03, ry - 0.04, vm - 0.2, W + 0.03, ry + 0.17, vm + 0.2);
   for (const u of [0, W]) {
     poly(wash, [[u, h, ver], [u, h, D], [u, h + 0.1, D], [u, ry, vm], [u, h + 0.1, ver]], [u === 0 ? -1 : 1, 0, 0]);
   }
   void yF;
   // the front
+  const wins = [];
   if (!shop) {
-    if (rich) IN.openDoor(F, uc, ver); else door(F, uc, ver);
-    if (W > 5.6) for (const u of [uc - Math.min(2.3, (uc - 0.4) * 0.62 + 0.5), uc + Math.min(2.3, (W - uc - 0.4) * 0.62 + 0.5)]) if (u > 0.7 && u < W - 0.7) window(F, u, ver);
+    if (rich) IN.openDoor(F, uc, ver); else door(F, uc, ver, 1.0, zone !== 'outer');
+    if (W > 5.6) for (const u of [uc - Math.min(2.3, (uc - 0.4) * 0.62 + 0.5), uc + Math.min(2.3, (W - uc - 0.4) * 0.62 + 0.5)]) if (u > 0.7 && u < W - 0.7) { window(F, u, ver); wins.push(u); }
     if (!hut && rand() < 0.5) kolam(F, uc, -1.05, rand);
     if (!hut) { const [lx, , lz] = F.P(uc + 1.0, 0, ver - 0.12); B('wood_dark', uc + 0.95, 1.5, ver - 0.12, uc + 1.2, 1.78, ver - 0.05); bag.add('lamp_glass', lathe([[0.001, 0], [0.03, 0.02], [0.001, 0.07]], 5, null, lx + (F.dv[0] * 0.0), 1.5, lz)); }
   } else {
@@ -231,7 +260,7 @@ export function tamilHouse(el, ctx) {
     if (!(shop && ['cloth', 'flowers'].includes(el.trade))) void 0;
   }
   if (rich) {
-    const o = { W, py, ver, uc, yb, h, yEdge, vf, hut, shop, trade: el.trade, g0: pl.g0, g1: pl.g1 };
+    const o = { W, py, ver, uc, yb, h, yEdge, vf, hut, shop, trade: el.trade, g0: pl.g0, g1: pl.g1, wins };
     IN.weather(F, o, rand); IN.thinnai(F, o, rand); if (shop) IN.nameBoard(F, o, rand);
     IN.furnish(F, { ...o, ...room, el, ctx }, rand, el.seed % 3 === 0);
   }

@@ -176,13 +176,44 @@ function nasiGeo(a, r, h, th) {
 }
 function vaultTris(pos) { const t = []; for (let i = 0; i < pos.length; i += 3) { t.push(...pos[i], ...pos[i + 1], ...pos[i + 2], ...pos[i], ...pos[i + 2], ...pos[i + 1]); } return fromTriangles(t); }
 
-/** prakara: a granite enclosure wall { a, b, h, th } with a coping. */
+/** prakara: a granite enclosure wall { a, b, h, th, nicheA, nicheB } (docs/settlements/madurai.md §15): a moulded plinth, pilasters
+ *  every 4 m on both faces up to a drip course (kapota), the coping above; where the wall meets a gopuram (nicheA /
+ *  nicheB) the first bay carries a niche for an icon on the outer face ("niches for icons, usually beside the
+ *  gopurams" [stated: imp-art.org, prakara]). */
 function prakara(el, { bag, col }) {
   const [ax, az] = el.a, [bx, bz] = el.b, th = el.th ?? 1.6, h = el.h ?? 8, y = el.y ?? 0;
   const r = [Math.min(ax, bx) - th / 2, Math.min(az, bz) - th / 2, Math.max(ax, bx) + th / 2, Math.max(az, bz) + th / 2];
   if (r[2] - r[0] < 0.1 || r[3] - r[1] < 0.1) return;
-  bag.add(el.mat || G, box(r[0], y - 0.3, r[1], r[2], y + h, r[3])); col.rect(r, y, y + h);
+  const M = el.mat || G;
+  bag.add(M, box(r[0], y - 0.3, r[1], r[2], y + h, r[3]));
+  { const pd = el.simple ? 0 : 0.15, alongX0 = (r[2] - r[0]) > (r[3] - r[1]); col.rect(alongX0 ? [r[0], r[1] - pd, r[2], r[3] + pd] : [r[0] - pd, r[1], r[2] + pd, r[3]], y, y + h); }   // (the pilasters and plinth stand within it)
   bag.add('stucco_cream', box(r[0] - 0.2, y + h, r[1] - 0.2, r[2] + 0.2, y + h + 0.5, r[3] + 0.2));
+  if (el.simple) return;
+  const alongX = (r[2] - r[0]) > (r[3] - r[1]), L = alongX ? r[2] - r[0] - th : r[3] - r[1] - th, t0 = alongX ? r[0] + th / 2 : r[1] + th / 2, c = alongX ? (r[1] + r[3]) / 2 : (r[0] + r[2]) / 2, hh = th / 2;
+  // (u along the wall from its start, d outward of a face: sg = −1 / +1 for the two faces)
+  const F = (u0, u1, d0, d1, sg, y0, y1, m = M) => {
+    const dd = [c + sg * (hh + d0), c + sg * (hh + d1)], dl = Math.min(...dd), dh = Math.max(...dd);
+    bag.add(m, alongX ? box(t0 + u0, y0, dl, t0 + u1, y1, dh) : box(dl, y0, t0 + u0, dh, y1, t0 + u1));
+  };
+  const yp = y + 0.7, yk = y + h - 0.6;
+  for (const sg of [-1, 1]) {
+    F(-th / 2, L + th / 2, 0, 0.14, sg, y - 0.3, y + 0.35); F(-th / 2, L + th / 2, 0, 0.07, sg, y + 0.35, yp);        // the moulded plinth
+    F(-th / 2, L + th / 2, 0, 0.1, sg, yk, yk + 0.25); F(-th / 2, L + th / 2, 0, 0.24, sg, yk + 0.25, y + h);          // the drip course (kapota)
+    const n = Math.max(1, Math.round(L / 4)), pitch = L / n;
+    for (let i = 0; i <= n; i++) {
+      const u = i * pitch; if (i === 0 && !el.nicheA && L < 3) continue;
+      F(u - 0.26, u + 0.26, 0, 0.14, sg, yp, yk);                                                              // the pilaster
+      F(u - 0.36, u + 0.36, 0, 0.14, sg, yp, yp + 0.18); F(u - 0.34, u + 0.34, 0, 0.14, sg, yk - 0.2, yk);    // its base and its cap
+    }
+    const niche = (u) => {       // the niche: a cream frame, a dark recess, the icon, on the outer face
+      if (sg !== (el.out ?? 1)) return;
+      F(u - 0.8, u + 0.8, 0.14, 0.2, sg, y + 1.4, y + 4.2, 'stucco_cream'); F(u - 0.6, u + 0.6, 0.2, 0.24, sg, y + 1.65, y + 3.8, 'wood_dark');
+      const pt = alongX ? [t0 + u, c + sg * (hh + 0.3)] : [c + sg * (hh + 0.3), t0 + u];
+      bag.add('bronze', lathe([[0.001, 0], [0.22, 0.03], [0.17, 0.3], [0.26, 0.75], [0.15, 1.1], [0.18, 1.5], [0.12, 1.65], [0.001, 1.75]], 8, null, pt[0], y + 1.75, pt[1]));
+    };
+    if (el.nicheA && n > 1) niche(pitch / 2);
+    if (el.nicheB && n > 1) niche(L - pitch / 2);
+  }
 }
 
 /** mandapa: a pillared hall { rect, y, h, step (pillar spacing), open ('nesw' sides without wall), roof walkable }.
@@ -208,14 +239,16 @@ function mandapa(el, { bag, col }) {
     if (el.simple && !edge) continue;
     const x = xs[i], z = zs[k];
     if (el.carved && !el.simple) carvedPillar(bag, x, z, y + 0.5, y + h, p);
-    else {
-      bag.add(G, box(x - p / 2, y + 0.5, z - p / 2, x + p / 2, y + h, z + p / 2));
-      bag.add(G, box(x - p * 0.85, y + h - 0.6, z - p * 0.85, x + p * 0.85, y + h, z + p * 0.85));
-    }
+    else plainPillar(bag, x, z, y + 0.5, y + h, p);
     col.rect([x - p / 2, z - p / 2, x + p / 2, z + p / 2], y, y + h);
   }
   bag.add(G, box(x0 - 0.6, y + h, z0 - 0.6, x1 + 0.6, y + h + 0.8, z1 + 0.6)); col.floor([x0, z0, x1, z1], y + h + 0.8);
   bag.add('stucco_cream', box(x0 - 0.3, y + h + 0.8, z0 - 0.3, x1 + 0.3, y + h + 1.3, z1 + 0.3));
+  if (!el.carved && !el.simple) {          // the beams on the pillar lines, the stone ceiling between
+    const yc = y + h;
+    for (const x of xs) bag.add(G, box(x - 0.26, yc - 0.42, z0 + 0.2, x + 0.26, yc - 0.01, z1 - 0.2));
+    for (const z of zs) bag.add(G, box(x0 + 0.2, yc - 0.3, z - 0.22, x1 - 0.2, yc - 0.01, z + 0.22));
+  }
   if (!el.carved || el.simple) return;
   const cx = (x0 + x1) / 2, yc = y + h;
   // the beams on the pillar lines, the ceiling between them painted: a lotus in every bay, the aisle's richer
@@ -246,6 +279,18 @@ function mandapa(el, { bag, col }) {
   }
   nataraja(bag, cx, y + 0.5, z0 + 2.4);
   col.rect([cx - 1.8, z0 + 0.8, cx + 1.8, z0 + 4], y, y + 5);
+}
+
+/** A plain hall pillar (the shrines' mandapas): a square foot block, an octagonal shaft with two bands and a
+ *  lotus-bud collar, the cushion and the bracket plank (a lighter form of the carved Nayaka pillar). */
+function plainPillar(bag, x, z, y0, y1, p) {
+  const H = y1 - y0, w = p / 2;
+  bag.add(G, box(x - w * 1.2, y0, z - w * 1.2, x + w * 1.2, y0 + 0.22, z + w * 1.2));
+  bag.add(G, box(x - w, y0 + 0.22, z - w, x + w, y0 + H * 0.22, z + w));
+  bag.add(G, lathe([[w * 0.92, 0], [w * 1.04, 0.05], [w * 0.88, 0.1], [w * 0.88, H * 0.56], [w * 1.0, H * 0.58], [w * 0.86, H * 0.6], [w * 0.8, H * 0.6 + 0.3], [w * 1.0, H * 0.6 + 0.4], [w * 0.62, H * 0.6 + 0.46]].map(([r, h2]) => [r, h2]), 8, null, x, y0 + H * 0.22 - 0.0, z));
+  const yc = y1 - 0.6;
+  bag.add(G, lathe([[w * 0.75, 0], [w * 0.95, 0.12], [w * 1.2, 0.26], [w * 0.9, 0.4]], 8, null, x, yc, z));
+  bag.add(G, box(x - w * 1.5, y1 - 0.2, z - w * 0.5, x + w * 1.5, y1, z + w * 0.5)); bag.add(G, box(x - w * 0.5, y1 - 0.2, z - w * 1.5, x + w * 0.5, y1, z + w * 1.5));
 }
 
 /** A Nayaka pillar from y0 to y1, section p: a moulded base, square blocks with relief panels
@@ -346,15 +391,106 @@ function nataraja(bag, x, y, z) {
   for (let k = 0; k < 6; k++) for (const s of [-1, 1]) { const a = (k / 5 - 0.5) * 0.9; bag.add(B, rod([x + s * 0.12, hd + 0.3, z - 0.05], [x + s * (0.25 + 0.75 * Math.cos(a)), hd + 0.3 + 0.75 * Math.sin(a), z - 0.08], 0.022, 4)); }
 }
 
-/** vimana: the gilded tower over a sanctum { c, s (side), h, y }: a square shrine, tiers, an octagonal dome. */
+/** A seated Nandi at (x, y, z) facing the yaw (0 = +x, π/2 = −z, π = −x, −π/2 = +z), s times the size of a 1.1 m bull. */
+function nandi(bag, x, y, z, yaw, s = 1, mat = 'stucco_cream') {
+  const P = [box(-0.5, 0, -0.26, 0.4, 0.14, 0.26), box(-0.42, 0.14, -0.22, 0.3, 0.52, 0.22), box(-0.3, 0.52, -0.12, 0.02, 0.66, 0.12)];
+  P.push(rod([0.22, 0.46, 0], [0.42, 0.76, 0], 0.13, 7), rod([0.4, 0.74, 0], [0.62, 0.66, 0], 0.1, 7), rod([0.62, 0.66, 0], [0.68, 0.56, 0], 0.07, 6));
+  for (const sd of [-1, 1]) {
+    P.push(rod([0.44, 0.86, sd * 0.07], [0.5, 0.96, sd * 0.16], 0.025, 5), rod([0.38, 0.8, sd * 0.1], [0.34, 0.8, sd * 0.2], 0.03, 5));
+    P.push(rod([0.3, 0.14, sd * 0.2], [0.55, 0.14, sd * 0.2], 0.06, 6));
+  }
+  P.push(lathe([[0.001, 0], [0.04, 0.02], [0.05, 0.12], [0.001, 0.16]], 6, null, 0.43, 0.46, 0.0));   // the bell at the neck
+  for (const g of P) bag.add(mat, place(g, x, y, z, yaw, s));
+}
+
+/** A small seated lion (simha), the goddess's mount, facing the yaw. */
+function simha(bag, x, y, z, yaw, s = 1, mat = 'stucco_cream') {
+  const P = [box(-0.45, 0, -0.24, 0.4, 0.12, 0.24), box(-0.4, 0.12, -0.2, 0.1, 0.6, 0.2)];
+  P.push(rod([0.1, 0.18, -0.15], [0.3, 0.18, -0.15], 0.07, 6), rod([0.1, 0.18, 0.15], [0.3, 0.18, 0.15], 0.07, 6));
+  P.push(lathe([[0.001, 0], [0.16, 0.05], [0.2, 0.3], [0.12, 0.55], [0.001, 0.6]], 8, null, 0.2, 0.12, 0));
+  P.push(lathe([[0.001, -0.3], [0.26, -0.2], [0.3, 0.0], [0.26, 0.2], [0.001, 0.3]], 8, null, 0.3, 0.8, 0));   // the mane
+  P.push(rod([0.3, 0.74, 0], [0.55, 0.7, 0], 0.11, 7), rod([-0.4, 0.2, 0], [-0.62, 0.34, 0], 0.04, 5));
+  for (const g of P) bag.add(mat, place(g, x, y, z, yaw, s));
+}
+
+/** One storey (tala) of a vimana at (cx, cz), side w, from y, height ht, in gilt: a core with a recessed panel on each
+ *  face, and the hara of little shrines on its ledge — a domed kuta at each corner, a barrel-roofed sala in the middle
+ *  of each face and two small panjara between them (the Dravidian tala, docs/settlements/madurai.md §15). */
+function vimanaTala(bag, cx, cz, w, y, ht) {
+  const M = 'gilt_bronze', b = w * 0.37, h2 = w / 2;
+  bag.add(M, box(cx - h2, y, cz - h2, cx + h2, y + ht * 0.1, cz + h2));
+  bag.add(M, box(cx - b, y + ht * 0.1, cz - b, cx + b, y + ht * 0.78, cz + b));
+  bag.add(M, box(cx - h2 * 0.9, y + ht * 0.78, cz - h2 * 0.9, cx + h2 * 0.9, y + ht, cz + h2 * 0.9));
+  const ya = y + ht * 0.1;
+  for (const [nx, nz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {      // a recessed bronze panel with a gilt frame on every face of the core
+    const q = [nx ? cx + nx * b : cx - b * 0.5, nz ? cz + nz * b : cz - b * 0.5, nx ? cx + nx * (b + 0.05) : cx + b * 0.5, nz ? cz + nz * (b + 0.05) : cz + b * 0.5];
+    bag.add('bronze', box(Math.min(q[0], q[2]), y + ht * 0.3, Math.min(q[1], q[3]), Math.max(q[0], q[2]), y + ht * 0.7, Math.max(q[1], q[3])));
+  }
+  const kw = w * 0.1, kh = ht * 0.3, ks = Math.max(0.12, w * 0.028);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {           // the corner kutas: a box, a dome, a pot
+    const ux = cx + sx * (h2 - kw), uz = cz + sz * (h2 - kw);
+    bag.add(M, box(ux - kw, ya, uz - kw, ux + kw, ya + kh, uz + kw));
+    bag.add(M, lathe([[kw * 1.15, 0], [kw * 1.05, kh * 0.18], [kw * 0.7, kh * 0.5], [kw * 0.3, kh * 0.7], [0.001, kh * 0.78]], 8, null, ux, ya + kh, uz));
+    kalasha(bag, ux, ya + kh + kh * 0.7, uz, ks);
+  }
+  for (const [nx, nz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    const along = nx ? [0, 1] : [1, 0];
+    const item = (u, hl, hd, kind) => {        // a sala (long) or panjara at u along the face, half-length hl, half-depth hd, flush with the edge
+      const px = cx + nx * (h2 - hd) + along[0] * u, pz = cz + nz * (h2 - hd) + along[1] * u, ex = nx ? hd : hl, ez = nx ? hl : hd, hh = kh * (kind === 'sala' ? 0.8 : 0.7);
+      bag.add(M, box(px - ex, ya, pz - ez, px + ex, ya + hh, pz + ez));
+      const sh = hd + 0.04;     // the barrel roof: a ridge along the long side
+      bag.add(M, frustum([px - ex - 0.04, pz - ez - 0.04, px + ex + 0.04, pz + ez + 0.04], ya + hh, ya + hh + kh * 0.4, nx ? sh : 0, nx ? sh : 0, nx ? 0 : sh, nx ? 0 : sh, { noBottom: true }));
+      const t = 0.03, o0 = nx ? px + nx * hd : pz + nz * hd, o1 = o0 + (nx || nz) * t * (nx ? 1 : 1) * 1;
+      const fa = Math.min(o0, o0 + (nx + nz) * t), fb = Math.max(o0, o0 + (nx + nz) * t);
+      if (nx) bag.add('bronze', box(fa, ya + hh * 0.2, pz - ez * 0.5, fb, ya + hh * 0.7, pz + ez * 0.5));
+      else bag.add('bronze', box(px - ex * 0.5, ya + hh * 0.2, fa, px + ex * 0.5, ya + hh * 0.7, fb));
+      void o1;
+    };
+    item(0, w * 0.15, w * 0.07, 'sala');
+    for (const sg of [-1, 1]) item(sg * w * 0.225, w * 0.05, w * 0.05, 'panjara');
+  }
+}
+
+/** vimana: the gold-plated tower over a sanctum { c, s (side), h, y } (gold-plated [stated: esamskriti, anantamias]; the
+ *  form inferred from the Dravidian vimana): a moulded granite base, the wall with pilasters and a niche for a deity on
+ *  each face, a cornice, three gilt storeys stepping in with their hara of shrines, the neck with a Nandi at each
+ *  corner, the octagonal domed crown and the pot. */
 function vimana(el, { bag, col }) {
-  const [x, z] = el.c, s = el.s, h = el.h, y = el.y ?? 0, b = h * 0.32;
-  bag.add(G, box(x - s / 2, y, z - s / 2, x + s / 2, y + b, z + s / 2)); col.rect([x - s / 2, z - s / 2, x + s / 2, z + s / 2], y, y + h);
-  const n = 3, th = (h - b) * 0.5 / n;
-  for (let i = 0; i < n; i++) { const w = s * (0.92 - i * 0.18), yy = y + b + i * th; bag.add('gilt_bronze', frustum([x - w / 2, z - w / 2, x + w / 2, z + w / 2], yy, yy + th, s * 0.05, s * 0.05, s * 0.05, s * 0.05)); }
-  const yd = y + b + n * th, r = s * 0.28;
-  bag.add('gilt_bronze', lathe([[r * 0.8, 0], [r * 1.1, r * 0.3], [r * 1.15, r * 0.7], [r * 0.9, r * 1.2], [r * 0.3, r * 1.5], [0.001, r * 1.55]], 8, null, x, yd, z));
-  kalasha(bag, x, yd + r * 1.5, z, 1.2);
+  const [x, z] = el.c, s = el.s, h = el.h, y = el.y ?? 0, ws = s - 0.9, hs = ws / 2;
+  col.rect([x - s / 2, z - s / 2, x + s / 2, z + s / 2], y, y + h);
+  // the base (adhisthana): plinth, recessed band, bulging cap
+  for (const [a, b, e] of [[0, 0.5, s / 2], [0.5, 0.8, s / 2 - 0.1], [0.8, 1.1, s / 2 - 0.3], [1.1, 1.4, s / 2 - 0.15]]) bag.add(G, box(x - e, y + a, z - e, x + e, y + b, z + e));
+  const y0 = y + 1.4, hw = 0.17 * h, yw = y0 + hw;
+  bag.add(G, box(x - hs, y0, z - hs, x + hs, yw, z + hs));
+  for (const [nx, nz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    const A = (u0, u1, d0, d1, ya, yb, m = G) => {       // a box on the face: u along it, d outward from the wall
+      const px = nx ? [x + nx * (hs + d0), x + nx * (hs + d1)] : [x + u0, x + u1], pz = nz ? [z + nz * (hs + d0), z + nz * (hs + d1)] : [z + u0, z + u1];
+      bag.add(m, box(Math.min(...px), ya, Math.min(...pz), Math.max(...px), yb, Math.max(...pz)));
+    };
+    for (const u of [-hs + 0.28, hs - 0.28]) A(u - 0.28, u + 0.28, 0, 0.22, y0, yw);                         // the corner pilasters
+    for (const u of [-ws * 0.3, ws * 0.3]) A(u - 0.2, u + 0.2, 0, 0.12, y0, yw);                              // the bay pilasters
+    A(-ws * 0.13, ws * 0.13, 0, 0.3, y0, yw);                                                                  // the central projection (bhadra)
+    A(-ws * 0.1, ws * 0.1, 0.3, 0.34, y0 + 0.5, yw - 0.5, 'stucco_cream');                                    // the niche's frame
+    A(-ws * 0.07, ws * 0.07, 0.34, 0.37, y0 + 0.75, yw - 0.75, 'wood_dark');                                  // the dark niche
+    const [fx, fz] = [x + nx * (hs + 0.35), z + nz * (hs + 0.35)];
+    bag.add('bronze', lathe([[0.001, 0], [0.16, 0.02], [0.12, 0.2], [0.17, 0.55], [0.1, 0.8], [0.11, 0.95], [0.001, 1.05]], 8, null, fx, y0 + 0.78, fz));   // the deity of the niche
+  }
+  bag.add(G, box(x - hs - 0.35, yw, z - hs - 0.35, x + hs + 0.35, yw + 0.25, z + hs + 0.35));                 // the cornice and its drip (kapota)
+  bag.add(G, frustum([x - hs - 0.55, z - hs - 0.55, x + hs + 0.55, z + hs + 0.55], yw + 0.25, yw + 0.5, 0.2, 0.2, 0.2, 0.2));
+  // three gilt storeys
+  let yy = yw + 0.5;
+  const T = 0.4 * h / 3;
+  const ws3 = [0.9, 0.74, 0.58];
+  for (let i = 0; i < 3; i++) { vimanaTala(bag, x, z, ws * ws3[i], yy, T); yy += T; }
+  // the neck (griva) with a Nandi facing out from each corner, the lotus-petalled octagonal crown, the pot
+  const gw = ws * 0.15, gh = 0.065 * h;
+  bag.add('gilt_bronze', box(x - gw, yy, z - gw, x + gw, yy + gh, z + gw));
+  const nw = ws * ws3[2] * 0.45;
+  [[1, 1, 0], [-1, 1, -Math.PI / 2], [-1, -1, Math.PI], [1, -1, Math.PI / 2]].forEach(([sx, sz, yaw]) => nandi(bag, x + sx * (nw - 0.55), yy - 0.001, z + sz * (nw - 0.55), yaw, Math.max(0.55, s / 16), 'stucco_cream'));
+  yy += gh;
+  const R = ws * 0.22;
+  bag.add('gilt_bronze', lathe([[R * 0.6, 0], [R * 1.0, 0.12 * R], [R * 1.04, 0.3 * R], [R * 0.9, 0.5 * R], [R * 0.95, 0.8 * R], [R * 0.75, 1.35 * R], [R * 0.4, 1.8 * R], [R * 0.12, 2.05 * R], [0.001, 2.1 * R]], 8, null, x, yy, z));
+  kalasha(bag, x, yy + 2.1 * R - 0.05, z, Math.max(0.8, (y + h - yy - 2.1 * R) / 1.6 + 0.2));
 }
 
 /** A painted panel on a wall face: the field at (px, pz) on the face (u along it, n out of it), from y, w × h:
@@ -655,8 +791,127 @@ function nayaka(bag, x, y, z, f, h, king) {
   bag.add(M, lathe([[0.001, 0], [0.04 * k, 0.03 * k], [0.03 * k, 0.16 * k], [0.001, 0.2 * k]], 6, null, x, y + 0.12 + 1.15 * k, z + f * 0.21 * k));
 }
 
-/** dhvaja: the gilded flagstaff before a shrine { c, h }. */
-function dhvaja(el, { bag, col }) { const [x, z] = el.c, h = el.h ?? 12; bag.add(G, box(x - 1, 0, z - 1, x + 1, 1.2, z + 1)); bag.add('gilt_bronze', lathe([[0.3, 0], [0.18, h]], 8, null, x, 1.2, z)); col.circle(x, z, 1, 0, h); }
+/** dhvaja: the gilded flagstaff before a shrine { c, h, vo, bo, vahana } (docs/settlements/madurai.md §15): a square granite base
+ *  with a deity on each face and a ring of lotus petals, the copper- and gold-sheathed teak shaft in bands with
+ *  collars, three perches (mekhala) hung with bells near the top, a Nandi for finial; before it, toward the shrine,
+ *  the mount of the deity (vo metres from the staff; a Nandi for Shiva, a lion for the goddess) on a pedestal, and
+ *  behind it the balipitha (bo metres), the altar of offerings, a lotus-petalled stone. */
+function dhvaja(el, { bag, col }) {
+  const [x, z] = el.c, h = el.h ?? 12, vo = el.vo ?? -2.3, bo = el.bo ?? 3.6;
+  // the base: three moulded courses, a niche with a deity on each face, a lotus ring
+  bag.add(G, box(x - 1, 0, z - 1, x + 1, 0.4, z + 1)); bag.add(G, box(x - 0.88, 0.4, z - 0.88, x + 0.88, 0.95, z + 0.88)); bag.add(G, box(x - 0.96, 0.95, z - 0.96, x + 0.96, 1.2, z + 0.96));
+  for (const [nx, nz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    const q = (a0, a1, d0, d1, y0, y1, m) => { const ex = nx ? [x + nx * (0.88 + d0), x + nx * (0.88 + d1)] : [x + a0, x + a1], ez = nz ? [z + nz * (0.88 + d0), z + nz * (0.88 + d1)] : [z + a0, z + a1]; bag.add(m, box(Math.min(...ex), y0, Math.min(...ez), Math.max(...ex), y1, Math.max(...ez))); };
+    q(-0.34, 0.34, 0, 0.04, 0.5, 0.88, 'stucco_cream'); q(-0.26, 0.26, 0.04, 0.06, 0.55, 0.83, 'wood_dark');
+    bag.add('gilt_bronze', lathe([[0.001, 0], [0.05, 0.01], [0.04, 0.12], [0.06, 0.22], [0.001, 0.28]], 6, null, x + nx * 0.96, 0.57, z + nz * 0.96));
+  }
+  bag.add(G, lathe([[0.33, 0], [0.5, 0.03], [0.55, 0.12], [0.45, 0.22], [0.3, 0.26], [0.27, 0.27]], 16, null, x, 1.2, z));
+  for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; bag.add(G, lathe([[0.001, 0], [0.09, 0.04], [0.001, 0.16]], 5, null, x + Math.cos(a) * 0.44, 1.2, z + Math.sin(a) * 0.44)); }
+  // the shaft in sheathed bands: gilt shaft, copper-red collars, taper 0.27 to 0.15 m
+  const yb = 1.47, r = (y) => 0.27 - 0.12 * (y - yb) / (h - yb);
+  bag.add('gilt_bronze', lathe([[r(yb), 0], [r(h - 1.5), h - 1.5 - yb]], 14, null, x, yb, z));
+  for (const f of [0.14, 0.32, 0.5, 0.68, 0.84]) { const yc = yb + (h - yb) * f; bag.add('bronze', lathe([[r(yc) * 1.0, 0], [r(yc) * 1.3, 0.04], [r(yc) * 1.3, 0.2], [r(yc) * 1.0, 0.24]], 14, null, x, yc, z)); }
+  // the top: three perches with bells, the finial Nandi
+  const yt = h - 1.5;
+  bag.add('gilt_bronze', lathe([[r(yt) * 1.0, 0], [r(yt) * 1.5, 0.1], [r(yt) * 1.2, 0.3], [0.16, 0.5], [0.16, 1.42], [0.42, 1.46], [0.42, 1.52], [0.001, 1.52]], 12, null, x, yt, z));
+  for (const [k, hl] of [[0.1, 0.8], [0.55, 0.62], [1.0, 0.44]]) {
+    bag.add('gilt_bronze', box(x - hl, yt + k, z - 0.03, x + hl, yt + k + 0.06, z + 0.03));
+    for (const sg of [-1, 1]) bag.add('bronze', lathe([[0.001, 0], [0.07, 0.04], [0.06, 0.12], [0.001, 0.14]], 6, null, x + sg * hl, yt + k - 0.14, z));
+  }
+  nandi(bag, x, h + 0.02, z, Math.PI, 0.4, 'gilt_bronze');
+  col.circle(x, z, 1, 0, h);
+  // the mount toward the shrine on a pedestal, and the balipitha beyond the staff
+  const mx = x + vo;
+  bag.add(G, box(mx - 0.62, 0, z - 0.42, mx + 0.62, 0.5, z + 0.42)); bag.add(G, box(mx - 0.7, 0.5, z - 0.48, mx + 0.7, 0.62, z + 0.48));
+  (el.vahana === 'simha' ? simha : nandi)(bag, mx, 0.62, z, el.faceyaw ?? Math.PI, 1.15, 'stucco_cream');
+  col.rect([mx - 0.7, z - 0.48, mx + 0.7, z + 0.48], 0, 1.9);
+  const bx = x + bo;
+  bag.add(G, box(bx - 0.5, 0, z - 0.5, bx + 0.5, 0.3, z + 0.5)); bag.add(G, box(bx - 0.4, 0.3, z - 0.4, bx + 0.4, 0.5, z + 0.4));
+  bag.add(G, lathe([[0.2, 0], [0.34, 0.03], [0.36, 0.1], [0.26, 0.2], [0.2, 0.3]], 12, null, bx, 0.5, z));
+  for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; bag.add(G, lathe([[0.001, 0], [0.07, 0.03], [0.001, 0.14]], 5, null, bx + Math.cos(a) * 0.3, 0.5, z + Math.sin(a) * 0.3)); }
+  bag.add(G, lathe([[0.2, 0], [0.26, 0.04], [0.22, 0.1], [0.001, 0.14]], 12, null, bx, 0.8, z));
+  col.rect([bx - 0.5, z - 0.5, bx + 0.5, z + 0.5], 0, 1.0);
+}
+
+/** A frame for the street furniture: map(u, v) from the object's own axes (u along its front, v toward the front,
+ *  the front facing the way of `rot` quarter turns) to the world, with box and collider helpers. */
+function quarterFrame(el, bag, col) {
+  const [x, z] = el.at, a = (el.rot ?? 0) * Math.PI / 2, ca = Math.round(Math.cos(a)), sa = Math.round(Math.sin(a));
+  const map = (u, v) => [x + u * ca - v * sa, z + u * sa + v * ca];
+  const B = (m, u0, y0, v0, u1, y1, v1) => { const [p, q] = map(u0, v0), [r2, t] = map(u1, v1); bag.add(m, box(Math.min(p, r2), y0, Math.min(q, t), Math.max(p, r2), y1, Math.max(q, t))); };
+  const C = (u0, v0, u1, v1, y0, y1) => { const [p, q] = map(u0, v0), [r2, t] = map(u1, v1); col.rect([Math.min(p, r2), Math.min(q, t), Math.max(p, r2), Math.max(q, t)], y0, y1); };
+  return { map, B, C, L: (m, prof, seg, u, y, v) => { const [p, q] = map(u, v); bag.add(m, lathe(prof, seg, null, p, y, q)); } };
+}
+
+/** wayside: a small shrine of Pillaiyar (Ganesha) at a street crossing { at, rot } (docs/settlements/madurai.md §15): a granite platform with steps,
+ *  a cell open to the front with the seated god on a pedestal, a cornice, two stepped tiers and a pot above, a lit lamp. */
+function wayside(el, { bag, col }) {
+  const { B, C, L, map } = quarterFrame(el, bag, col);
+  B(G, -1.7, -0.3, -1.7, 1.7, 0.18, 1.9); B(G, -1.55, 0.18, -1.55, 1.55, 0.4, 1.75);
+  B(G, -0.8, 0.0, 1.75, 0.8, 0.2, 2.1);                                                                // the steps
+  { const Fl = (u0, v0, u1, v1, y) => { const [p, q] = map(u0, v0), [r2, t] = map(u1, v1); col.floor([Math.min(p, r2), Math.min(q, t), Math.max(p, r2), Math.max(q, t)], y); };
+    Fl(-1.7, -1.7, 1.7, 1.9, 0.18); Fl(-1.55, -1.55, 1.55, 1.75, 0.4); Fl(-0.8, 1.75, 0.8, 2.1, 0.2); }
+  // the cell: three walls and a roof slab on two front pilasters
+  B(G, -1.15, 0.4, -1.15, 1.15, 2.1, -0.85); B(G, -1.15, 0.4, -0.85, -0.85, 2.1, 0.9); B(G, 0.85, 0.4, -0.85, 1.15, 2.1, 0.9);
+  B(G, -1.3, 2.1, -1.3, 1.3, 2.38, 1.1); B('stucco_cream', -1.1, 2.38, -1.1, 1.1, 2.58, 0.9);
+  B('wood_dark', -0.85, 0.4, -0.85, 0.85, 2.1, -0.8);                                                  // the dark back of the cell
+  C(-1.15, -1.15, 1.15, -0.85, 0.4, 2.1); C(-1.15, -0.85, -0.85, 0.9, 0.4, 2.1); C(0.85, -0.85, 1.15, 0.9, 0.4, 2.1); C(-1.1, 0.88, -0.9, 1.08, 0.4, 2.1); C(0.9, 0.88, 1.1, 1.08, 0.4, 2.1); C(-0.4, -0.7, 0.4, 0.2, 0.4, 1.8);
+  for (const sg of [-1, 1]) B('stucco_cream', sg * 1.0 - 0.1, 0.4, 0.88, sg * 1.0 + 0.1, 2.1, 1.08);
+  B('stucco_cream', -1.1, 2.0, 0.88, 1.1, 2.3, 1.08);
+  // the god on his pedestal: a belly, an elephant's head, the raised arms, the mouse before him
+  B(G, -0.4, 0.4, -0.7, 0.4, 0.75, 0.2);
+  L('stucco_cream', [[0.001, 0], [0.3, 0.02], [0.36, 0.2], [0.3, 0.45], [0.2, 0.62], [0.001, 0.66]], 10, 0, 0.75, -0.25);
+  L('stucco_cream', [[0.001, 0], [0.17, 0.04], [0.2, 0.2], [0.001, 0.34]], 8, 0, 1.4, -0.22);
+  L('bronze', [[0.001, 0], [0.12, 0.02], [0.1, 0.14], [0.001, 0.2]], 8, 0.0, 0.4, 0.55);
+  for (const sg of [-1, 1]) { const [px, pz] = el.at; void px; void pz; L('stucco_cream', [[0.001, 0], [0.07, 0.04], [0.05, 0.22], [0.001, 0.26]], 6, sg * 0.34, 1.05, -0.2); }
+  // two tiers and a pot above the cell
+  for (const [w, a0, a1] of [[1.0, 2.58, 3.1], [0.74, 3.1, 3.55]]) { const [p, q] = quarterFrame(el, bag, col).map(0, -0.1); bag.add('stucco_saffron', frustum([p - w, q - w, p + w, q + w], a0, a1, 0.18, 0.18, 0.18, 0.18)); }
+  { const [p, q] = quarterFrame(el, bag, col).map(0, -0.1); bag.add('stucco_cream', lathe([[0.001, 0], [0.5, 0], [0.45, 0.2], [0.2, 0.42], [0.001, 0.46]], 8, null, p, 3.55, q)); kalasha(bag, p, 4.0, q, 0.45); }
+  // the lit lamp before the god, a pair of clay lamps on the platform's edge
+  for (const sg of [-1, 1]) L('bronze', [[0.001, 0], [0.1, 0.0], [0.11, 0.04], [0.001, 0.05]], 8, sg * 0.7, 0.4, 1.4);
+  L('lamp_glass', [[0.001, 0], [0.03, 0.02], [0.001, 0.09]], 5, -0.7, 0.45, 1.4); L('lamp_glass', [[0.001, 0], [0.03, 0.02], [0.001, 0.09]], 5, 0.7, 0.45, 1.4);
+}
+
+/** well: a public well (kinaru) { at, rot }: a round granite parapet over a dark shaft, two stone posts with a
+ *  beam and pulley, a rope with a brass pot, a stone trough and a washing slab. */
+function well(el, { bag, col }) {
+  const { B, C, L, map } = quarterFrame(el, bag, col), [cx, cz] = map(0, 0);
+  bag.add(G, lathe([[1.35, 0], [1.35, 0.1], [1.2, 0.12], [1.2, 0.78], [1.3, 0.8], [1.3, 0.9], [0.9, 0.9], [0.9, 0.78]], 16, null, cx, 0, cz));
+  bag.add('opening', disc(0.9, 0.7, 16, cx, cz));
+  col.circle(cx, cz, 1.35, 0, 0.95);
+  for (const sg of [-1, 1]) { B(G, sg * 1.0 - 0.15, 0.9, -0.15, sg * 1.0 + 0.15, 3.0, 0.15); C(sg * 1.0 - 0.15, -0.15, sg * 1.0 + 0.15, 0.15, 0.9, 3.0); }
+  B('timber', -1.3, 2.9, -0.1, 1.3, 3.1, 0.1);
+  L('wood_dark', [[0.001, 0], [0.17, 0], [0.17, 0.08], [0.001, 0.08]], 10, 0, 2.55, 0.0);
+  B('timber', -0.04, 2.55, -0.04, 0.04, 2.9, 0.04);
+  { const a = map(0.17, 0), b = map(0.92, 0), c2 = map(-0.17, 0); bag.add('rope_fibre', rod([a[0], 2.55, a[1]], [b[0], 1.38, b[1]], 0.015, 5)); bag.add('rope_fibre', rod([c2[0], 2.55, c2[1]], [c2[0], 1.3, c2[1]], 0.015, 5)); }
+  L('bronze', [[0.001, 0], [0.07, 0], [0.1, 0.05], [0.17, 0.17], [0.18, 0.26], [0.12, 0.38], [0.07, 0.44], [0.1, 0.5], [0.07, 0.5]], 8, 0.92, 0.9, 0.0);
+  B(G, -0.95, 0, 1.5, 0.95, 0.4, 2.1); B('wood_dark', -0.85, 0.4, 1.58, 0.85, 0.44, 2.02); B(G, -0.95, 0.4, 1.5, 0.95, 0.5, 1.58); B(G, -0.95, 0.4, 2.02, 0.95, 0.5, 2.1);
+  C(-0.95, 1.5, 0.95, 2.1, 0, 0.5);
+  B(G, 1.5, 0, 1.2, 2.5, 0.16, 2.2);                                                                   // the washing slab
+  L('terracotta', [[0.001, 0], [0.12, 0], [0.2, 0.12], [0.22, 0.3], [0.12, 0.42], [0.1, 0.48]], 9, -1.55, 0, 1.0);
+}
+
+/** pandal: a thanneer pandal { at, rot }: a thatched shed on four posts where water and buttermilk are given
+ *  to the thirsty; a back wall of palm mats, a bench, a stand with water pots under cloth, brass cups, a ladle. */
+function pandal(el, { bag, col }) {
+  const { B, C, L, map } = quarterFrame(el, bag, col);
+  for (const [u, v] of [[-1.7, -1.1], [1.7, -1.1], [-1.7, 1.1], [1.7, 1.1]]) { B('timber', u - 0.07, 0, v - 0.07, u + 0.07, 2.35, v + 0.07); C(u - 0.1, v - 0.1, u + 0.1, v + 0.1, 0, 2.4); }
+  B('timber', -1.8, 2.3, -1.2, 1.8, 2.42, -1.0); B('timber', -1.8, 2.3, 1.0, 1.8, 2.42, 1.2);
+  B('reed_mat', -1.75, 0.0, -1.12, 1.75, 2.3, -1.06);                                                  // the mat wall at the back
+  { const [p, q] = map(0, 0); const ru = (el.rot ?? 0) % 2 === 0;
+    bag.add('thatch_palm', frustum([p - (ru ? 2.1 : 1.5), q - (ru ? 1.5 : 2.1), p + (ru ? 2.1 : 1.5), q + (ru ? 1.5 : 2.1)], 2.42, 3.3, ru ? 0 : 1.45, ru ? 0 : 1.45, ru ? 1.45 : 0, ru ? 1.45 : 0)); }
+  B(G, -1.5, 0, -0.95, 1.5, 0.12, -0.4);                                                               // the stone slab the pots stand on
+  for (let k = 0; k < 3; k++) {
+    const u = -1.0 + k * 1.0;
+    L('terracotta', [[0.001, 0], [0.22, 0], [0.36, 0.14], [0.42, 0.36], [0.34, 0.58], [0.22, 0.7], [0.26, 0.76]], 12, u, 0.12, -0.7);
+    L('cloth_white', [[0.001, 0.0], [0.27, 0], [0.29, 0.03], [0.001, 0.06]], 10, u, 0.88, -0.7);
+  }
+  C(-1.5, -0.95, 1.5, -0.4, 0, 0.9);
+  B('timber', 0.4, 0, 0.5, 1.5, 0.08, 0.7); B('timber', 0.4, 0.38, 0.5, 1.5, 0.46, 0.7);               // the bench
+  for (const u of [0.5, 1.4]) B('timber', u - 0.04, 0.08, 0.52, u + 0.04, 0.38, 0.68);
+  for (let k = 0; k < 3; k++) L('bronze', [[0.001, 0], [0.05, 0], [0.065, 0.1], [0.001, 0.1]], 8, 0.5 + k * 0.2, 0.46, 0.6);
+  L('bronze', [[0.001, 0], [0.16, 0], [0.2, 0.2], [0.19, 0.36], [0.001, 0.36]], 10, 1.25, 0.46, 0.6);
+}
 
 /** tamil_house: { rect, seed, facing ('n'|'s') }: one storey of plastered brick, a pillared verandah (thinnai) on the street, a hipped roof of terracotta tile. */
 function house(el, { bag, col }) {
@@ -674,6 +929,6 @@ function house(el, { bag, col }) {
 
 registerStyle('dravidian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.life.elements, gopuram, prakara, mandapa, vimana, tank, dhvaja, tamil_house: tamilHouse, court_house: courtHouse, ashta_shakti: ashtaShakti, elephant, ther, pudhu_mandapa: pudhu, rite },
+  elements: { ...STYLES.qing.elements, ...STYLES.life.elements, gopuram, prakara, mandapa, vimana, tank, dhvaja, tamil_house: tamilHouse, court_house: courtHouse, ashta_shakti: ashtaShakti, elephant, ther, pudhu_mandapa: pudhu, rite, wayside, well, pandal },
   objects: {},
 });

@@ -7,7 +7,7 @@
 // data from layout.js, no randomness outside a seeded generator.
 import { WALL, GATES, lots, lotMap, outside } from './layout.js';
 
-const NEAR = 105;                                   // m from the temple wall: the rows with the dressing
+const NEAR = 190;                                   // m from the temple wall: the rows with the dressing
 const base = (id, elements) => ({ id, style: 'dravidian', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-400, -400, 400, 400], entrance: { at: [-20, 200], facing: 'n' } });
 
 /** The kolam: a cross of white rice-flour lines in a ring of dots, flat on the ground (1.3 m across). */
