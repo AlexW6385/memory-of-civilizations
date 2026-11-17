@@ -2,12 +2,13 @@
 // South House (to four), the plaza and the creek with its log bridges, six kivas, the racks on the
 // plaza's north side, the perimeter wall.
 
-import { NORTH, SOUTH, CELL, KIVAS, WALL, CREEK, RADIUS, ROOMS, YARDS, bankY, creekZ, inCreek, roomsOf, isRoom, nearRoom, KEEP_ROUTE } from './layout.js';
+import { NORTH, SOUTH, CELL, KIVAS, WALL, CREEK, RADIUS, ROOMS, YARDS, bankY, creekZ, inCreek, roomsOf, isRoom, nearRoom, KEEP_ROUTE, upperOf, ladderOf, CLEAR } from './layout.js';
 import { dressItems, woodpiles } from './dress.js';
 
 const E = [];
-E.push({ t: 'pueblo_block', x0: NORTH.x0, z0: NORTH.z0, cell: CELL, heights: NORTH.heights, front: NORTH.front, seed: 7, rooms: roomsOf(NORTH) });
-E.push({ t: 'pueblo_block', x0: SOUTH.x0, z0: SOUTH.z0, cell: CELL, heights: SOUTH.heights, front: SOUTH.front, seed: 11, rooms: roomsOf(SOUTH) });
+const clearOf = (tag) => [...CLEAR].filter((k) => k[0] === tag).map((k) => k.slice(2).split(':').slice(0, 2).join(':'));
+E.push({ t: 'pueblo_block', x0: NORTH.x0, z0: NORTH.z0, cell: CELL, heights: NORTH.heights, front: NORTH.front, seed: 7, rooms: roomsOf(NORTH), upper: upperOf(NORTH), ladders: ladderOf(NORTH), clear: clearOf('N') });
+E.push({ t: 'pueblo_block', x0: SOUTH.x0, z0: SOUTH.z0, cell: CELL, heights: SOUTH.heights, front: SOUTH.front, seed: 11, rooms: roomsOf(SOUTH), upper: upperOf(SOUTH), ladders: ladderOf(SOUTH), clear: clearOf('S') });
 E.push({ t: 'water_cells', rect: [-RADIUS + 24, -30, RADIUS - 24, 30], y: CREEK.water, cell: 1, inside: (x, z) => inCreek(x, z, -0.3) });
 for (const [x, z, r] of KIVAS) E.push({ t: 'kiva', c: [x, z], r, gate: Math.atan2(-z, -x) });
 for (const x0 of [-60, -25, 10]) E.push({ t: 'rack', a: [x0, -44], b: [x0 + 24, -44], h: 3 });
@@ -47,7 +48,6 @@ for (const B of [NORTH, SOUTH]) for (const r of roomsOf(B)) { const x0 = B.x0 + 
 // from the gap in the south wall round by the South House's alley (x 10…15) to the plaza, to the log bridge and the North House
 const walks = [KEEP_ROUTE];
 walks[0].y0 = 0;
-
 export const pueblo = {
   id: 'taos-pueblo',
   name: { en: 'Taos Pueblo', zh: '陶斯普韦布洛' },

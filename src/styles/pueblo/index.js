@@ -48,10 +48,16 @@ function pueblo(el, ctx) {
   const { bag, col } = ctx, rand = rng(el.seed || 1), c = el.cell, H = el.heights, rows = H.length, cols = H[0].length;
   const at = (i, j) => (i >= 0 && i < rows && j >= 0 && j < cols ? H[i][j] : 0);
   const roomAt = (i, j) => (el.rooms ?? []).find((r) => r.i === i && r.j === j);
+  const upperAt = (i, j) => (el.upper ?? []).find((r) => r.i === i && r.j === j), clear = new Set(el.clear ?? []);
   for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) {
     const n = H[i][j]; if (!n) continue;
-    const x0 = el.x0 + j * c, z0 = el.z0 + i * c, x1 = x0 + c, z1 = z0 + c, top = n * ST, room = roomAt(i, j);
-    if (room) {
+    const x0 = el.x0 + j * c, z0 = el.z0 + i * c, x1 = x0 + c, z1 = z0 + c, top = n * ST, up = upperAt(i, j), room = roomAt(i, j) || up;
+    if (up) {
+      // a room of the top storey, opened and furnished, its doorway on the terrace in front (the lower cell's roof): the storeys under it solid
+      const lo = top - ST;
+      bag.add(A, box(x0, 0, z0, x1, lo, z1)); col.rect([x0, z0, x1, z1], 0, lo);
+      puebloRoom({ rect: [x0, z0, x1, z1], door: up.door, kind: up.kind, store: up.kind === 'store', seed: el.seed * 31 + j + i * 7, y0: lo, out: { n: at(i - 1, j) < n, s: at(i + 1, j) < n } }, ctx);
+    } else if (room) {
       // a ground-storey room opened and furnished (pueblo_room); any storeys over it solid
       puebloRoom({ rect: [x0, z0, x1, z1], door: room.door, store: room.store, kind: room.kind, seed: el.seed * 31 + j, out: { n: at(i - 1, j) < 1, s: at(i + 1, j) < 1 } }, ctx);
       if (n > 1) { bag.add(A, box(x0, ST, z0, x1, top, z1)); col.rect([x0, z0, x1, z1], ST, top); col.floor([x0, z0, x1, z1], top); }
@@ -122,10 +128,18 @@ function pueblo(el, ctx) {
       }
     }
     // a ladder on this roof up to the next storey; or a hatch in the roof with its ladder poking out
-    const f = el.front === 'n' ? -1 : 1, up = at(i - f, j);
-    if (room) continue;
-    if (up > n && rand() < 0.45) ladder(bag, x0 + c * (0.3 + rand() * 0.4), top, el.front === 'n' ? z0 + 1.1 : z1 - 1.1, ST + 0.5, 0, -f, 0.75, 1.4);
-    else if (n >= at(i + f, j) && n >= up && rand() < 0.28) hatch(bag, col, x0 + c * (0.35 + rand() * 0.3), top, z0 + c * (0.35 + rand() * 0.3), rand);
+    const f = el.front === 'n' ? -1 : 1, hi = at(i - f, j);
+    if (room || clear.has(i + ':' + j)) continue;
+    // a ladder leaning on the wall of the higher cell (its foot 0.8 m off the wall, between the viga ends), or a hatch in the roof
+    if (hi > n && rand() < 0.45) ladder(bag, x0 + (rand() < 0.5 ? 1.0 : 4.0), top, el.front === 'n' ? z1 - 0.8 : z0 + 0.8, ST, 0, -f, 0.8, 1.2);
+    else if (n >= at(i + f, j) && n >= hi && rand() < 0.28) hatch(bag, col, x0 + c * (0.35 + rand() * 0.3), top, z0 + c * (0.35 + rand() * 0.3), rand);
+  }
+  // the ladders up to the terraced rooms: each from the open ground or a roof up one storey, leaning on the wall of the next higher cell, its foot
+  // 0.8 m off the wall and its poles standing 1.2 m over the roof edge (they carry no collider: the visitor reaches the terraces by flight)
+  const d = el.front === 's' ? 1 : -1, v = -d;
+  for (const l of el.ladders ?? []) {
+    const zw = el.z0 + (l.ground ? l.i + (d > 0 ? 1 : 0) : l.i + (d > 0 ? 0 : 1)) * c, yb = l.ground ? 0 : H[l.i][l.j] * ST;
+    ladder(bag, el.x0 + l.j * c + 1.0, yb, zw - v * 0.8, ST, 0, v, 0.8, 1.2);
   }
 }
 
@@ -367,7 +381,16 @@ function drape(bag, mat, x, h, z, w, d, dirX = true) {
  * wall [inferred: blankets stated in the dossier, §4.2]; jars of water and for cooking, bowls, a
  * basket. The doorway is made a man's height so the room can be walked into [inferred: §4.2].
  */
-function puebloRoom(el, { bag, col, lights }) {
+function puebloRoom(el, ctx) {
+  // a room above the ground (el.y0): built as on the ground, every height raised by y0
+  if (el.y0) {
+    const dy = el.y0, { bag, col, lights } = ctx;
+    const B = { add: (m, g) => bag.add(m, g.translate(0, dy, 0)) };
+    const C = { rect: (r, a, b) => col.rect(r, a + dy, b + dy), floor: (r, y, t) => col.floor(r, y + dy, t), circle: (x, z, r, a, b) => col.circle(x, z, r, a + dy, b + dy), segment: (a, b, t, y0, y1) => col.segment(a, b, t, y0 + dy, y1 + dy) };
+    const Lt = lights && { push: (q) => lights.push({ ...q, at: [q.at[0], q.at[1] + dy, q.at[2]] }) };
+    return puebloRoom({ ...el, y0: 0 }, { ...ctx, bag: B, col: C, lights: Lt });
+  }
+  const { bag, col, lights } = ctx;
   const [x0, z0, x1, z1] = el.rect, T = 0.5, rand = rng(el.seed || 3), door = el.door ?? 's', kind = el.kind ?? (el.store ? 'store' : 'home'), store = kind === 'store', home = kind === 'home', fire = home || kind === 'sleep' || kind === 'weave';
   const ix0 = x0 + T, iz0 = z0 + T, ix1 = x1 - T, iz1 = z1 - T, cx = (ix0 + ix1) / 2, cz = (iz0 + iz1) / 2, F = 0.06, PL = 0.025, LIN = 'earth_wall';
   const dw = 0.8, dh = 1.95, du = (door === 's' || door === 'n') ? cx + 0.3 : cz - 0.3;     // the doorway, off the middle

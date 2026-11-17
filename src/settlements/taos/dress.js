@@ -1,6 +1,6 @@
 // Taos Pueblo — the dress of the houses' feet, the plaza, the creek and the fields (docs/settlements/taos.md §4.5): the list of
 // `pueblo_dress` items (styles/pueblo/dress.js) derived from layout.js — nothing hard-coded to a coordinate but the pens.
-import { NORTH, SOUTH, CELL, KIVAS, WALL, CREEK, RADIUS, YARDS, PENS, PLAZA, RACKS, ARRIVE, nearYard, creekZ, inCreek, inRect, isRoom, roomsOf, nearRoom, onKeep, bankY } from './layout.js';
+import { NORTH, SOUTH, CELL, KIVAS, WALL, CREEK, RADIUS, YARDS, PENS, PLAZA, RACKS, ARRIVE, nearYard, creekZ, inCreek, inRect, isRoom, roomsOf, nearRoom, onKeep, bankY, UPPER, LADDERS, CLEAR } from './layout.js';
 import { ground } from './ground.js';
 
 const ST = 2.7;
@@ -18,6 +18,18 @@ function faces(x0, z0) {
   ];
 }
 
+/** Does a ground ladder stand at the plaza face of this cell (its foot kept clear of benches, portals and woodpiles)? */
+const ladderFront = (B, i, j) => LADDERS.some((l) => l.ground && l.b === (B === NORTH ? 'N' : 'S') && l.i === i && l.j === j);
+
+/** Is (x, z) at the foot of a ground ladder (within `m` of the cell's width, 3 m out from its plaza face)? */
+const onLadderFoot = (x, z, m = 0) => LADDERS.some((l) => {
+  if (!l.ground) return false;
+  const B = l.b === 'N' ? NORTH : SOUTH, x0 = B.x0 + l.j * CELL, zf = B.z0 + (l.i + (l.b === 'N' ? 1 : 0)) * CELL;
+  return x > x0 - m && x < x0 + CELL + m && (l.b === 'N' ? z > zf - 0.2 && z < zf + 3 : z < zf + 0.2 && z > zf - 3);
+});
+/** The roof of a cell kept clear for a terraced room's way ('B:i:j')? */
+const onClearRoof = (x, z, y) => y > 0.5 && [[NORTH, 'N'], [SOUTH, 'S']].some(([B, t]) => CLEAR.has(`${t}:${Math.floor((z - B.z0) / CELL)}:${Math.floor((x - B.x0) / CELL)}`));
+
 /** The woodpiles at the feet of the plaza faces (about two cells in five, not beside a room): the elements, and the set of 'B:i:j' cells that carry one. */
 export function woodpiles() {
   const piles = [], wood = new Set();
@@ -33,7 +45,8 @@ export function woodpiles() {
       piles.push({ t: 'woodpile', at: [cx + (rand() - 0.5) * 1.2, cz], yaw: 0, len: 1.6 + rand() * 1.0, rows: 3 + Math.floor(rand() * 3), seed: i * 40 + j });
     }
   }
-  return { wood, piles };
+  const keep = (p) => !onLadderFoot(p.at[0], p.at[1], 0.5);
+  return { wood, piles: piles.filter(keep) };
 }
 
 export function dressItems() {
@@ -123,6 +136,17 @@ export function dressItems() {
     if (!(c.fields > 0.45) || ground.height(x, z) > 1.5) continue;
     add('watch', [x, z], ground.height(x, z), Math.atan2(-x, -z), 0, { reach: 200 }); w++;
   }
+  // the terrace items come from a stream of their own, so that nothing placed before them moves
+  const r3 = rng(7788), TI = [], T = (k, at, y, rot, v, o = {}) => TI.push({ k, at: [+at[0].toFixed(2), +at[1].toFixed(2)], y, rot, v, ...o });
+  // 2b. the terraces before the upper rooms' doorways (docs/settlements/taos.md §4.6): a rack of maize and squash, a mat of squash and ears drying,
+  // jars by the door — the daily life of "outer rooms, terraces" [stated: Smarthistory]; the way from the ladder to the door left free
+  for (const r of UPPER) {
+    const B = r.b === 'N' ? NORTH : SOUTH, tx = B.x0 + r.j * CELL, tz = B.z0 + r.terrace * CELL, y = (r.storey - 1) * ST, S = B === NORTH, rot = S ? 0 : Math.PI;
+    const P = (u, w) => [tx + u, S ? tz + w : tz + CELL - w];
+    T('roofrack', P(3.9, 2.7), y, rot, Math.floor(r3() * 2), { reach: 70 });
+    T('squash', P(1.7, 2.2), y, rot, Math.floor(r3() * 2), { reach: 60 });
+    T('jars', P(4.3, 0.8), y, rot, Math.floor(r3() * 4), { reach: 60 });
+  }
   void RADIUS; void CREEK;
-  return I;
+  return I.filter((it) => !(it.y > 0.5 ? onClearRoof(it.at[0], it.at[1], it.y) : onLadderFoot(it.at[0], it.at[1], 0.3))).concat(TI);
 }

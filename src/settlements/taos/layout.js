@@ -84,3 +84,53 @@ export const KEEP_ROUTE = [[0, 200], [0, 141], [0, 92], [12.5, 92], [12.5, 40], 
 export const KEEP = KEEP_ROUTE.slice(1).map((p, k) => [KEEP_ROUTE[k], p]);
 export const distSeg = (x, z, [[ax, az], [bx, bz]]) => { const dx = bx - ax, dz = bz - az, t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz))); return Math.hypot(x - ax - dx * t, z - az - dz * t); };
 export const onKeep = (x, z, m = 0) => KEEP.some((s) => distSeg(x, z, s) < m);
+
+// ---- the upper storeys opened (docs/settlements/taos.md §4.6) ---------------------------------------------------------------
+/**
+ * The terraced rooms: a room in the top storey of a cell, its doorway on the roof of the lower cell in front of it (the terrace, the
+ * "outer rooms, terraces and other easily reached rooms" of daily life — Smarthistory), reached from the plaza by the ladders of
+ * `LADDERS`, each leaning on the next higher wall (a column of cells whose heights step by one storey at a time).
+ * Chosen by rule: a cell of two storeys or more whose front neighbour is exactly one storey lower and not a room, that has a walkable
+ * chain of ladders down to the open ground, about one in two, never two side by side.
+ */
+const KINDS_UP = ['sleep', 'weave', 'home', 'store', 'work', 'pottery'];
+function terraces() {
+  const UP = [], LAD = [], CLEAR = new Set();
+  for (const [B, tag] of [[NORTH, 'N'], [SOUTH, 'S']]) {
+    const H = B.heights, d = B.front === 's' ? 1 : -1, v = -d, hh = (i, j) => (H[i]?.[j] ?? 0), taken = new Set();
+    // the ladders of a column from the terrace cell (ti, j) down to the open ground, or null
+    const chain = (ti, j) => {
+      const out = [], seen = [ti];
+      let i = ti;
+      for (let guard = 0; guard < 8; guard++) {
+        const h = hh(i, j), nh = hh(i + d, j);
+        if (isRoom(B, i, j) || (nh > 0 && isRoom(B, i + d, j) && nh === h - 1)) return null;
+        if (nh === 0) { if (h !== 1) return null; out.push({ b: tag, i, j, ground: true }); return { out, seen }; }
+        if (nh === h - 1) out.push({ b: tag, i: i + d, j, ground: false, onto: i });
+        else if (nh !== h) return null;
+        i += d; seen.push(i);
+      }
+      return null;
+    };
+    for (let i = 0; i < H.length; i++) for (let j = 0; j < H[0].length; j++) {
+      const n = hh(i, j), ti = i + d;
+      if (n < 2 || hh(ti, j) !== n - 1 || isRoom(B, i, j) || isRoom(B, ti, j) || taken.has(i + ':' + j) || taken.has(i + ':' + (j - 1)) || taken.has(i + ':' + (j + 1))) continue;
+      if (((i * 37 + j * 91 + (tag === 'N' ? 5 : 11)) % 100) >= 52) continue;
+      const c = chain(ti, j);
+      if (!c || CLEAR.has(tag + ':' + i + ':' + j) || c.seen.some((q) => taken.has(q + ':' + j))) continue;
+      taken.add(i + ':' + j);
+      UP.push({ b: tag, i, j, door: d > 0 ? 's' : 'n', kind: KINDS_UP[(i * 5 + j * 3) % KINDS_UP.length], storey: n, terrace: ti });
+      for (const q of c.seen) CLEAR.add(tag + ':' + q + ':' + j);
+      CLEAR.add(tag + ':' + i + ':' + j);
+      for (const l of c.out) if (!LAD.some((m) => m.b === l.b && m.i === l.i && m.j === l.j)) LAD.push({ ...l, v });
+    }
+  }
+  return { UP, LAD, CLEAR };
+}
+const T = terraces();
+/** The upper-storey rooms, the ladders that carry the visitor to them, and the cells ('B:i:j') whose roofs are kept clear for them. */
+export const UPPER = T.UP, LADDERS = T.LAD, CLEAR = T.CLEAR;
+export const upperOf = (B) => UPPER.filter((r) => r.b === (B === NORTH ? 'N' : 'S'));
+export const ladderOf = (B) => LADDERS.filter((r) => r.b === (B === NORTH ? 'N' : 'S'));
+/** The ladder's x within its cell, off the doorway (which stands at 2.4…3.2 m). */
+export const LADDER_X = 1.0;
