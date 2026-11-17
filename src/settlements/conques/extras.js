@@ -126,9 +126,9 @@ export function insides() {
   const cl = [O[0], O[1] + 9.7];                              // the cloister square's west-north corner (nave's outer wall at z = 9.7)
   const mk = (lx, lz, to, o = {}) => { const at = [cl[0] + lx, cl[1] + lz]; robe(at, 0.05, face(at, [cl[0] + to[0], cl[1] + to[1]]), { cloth: 'cloth_black', cloth2: 'cloth_black', hat: 'veil', hatMat: 'cloth_black', hair: 'shaven', over: 'cape', ...o }); };
   mk(9.7, 2.5, [14, 2.5]); mk(2.6, 9.7, [2.6, 15], { pose: 'staff' }); mk(16.8, 8.5, [16.8, 3]);
-  mk(7.6, 8.9, [9.7, 9.7], { pose: 'talk' }); mk(8.6, 10.6, [7.6, 8.9], { pose: 'talk' });
-  mk(13.2, 12.6, [9.7, 9.7], { pose: 'kneel', arms: 'hang', hat: 'none' });
-  mk(12.4, 4.6, [9.7, 6.0]);
+  mk(7.6, 10.4, [8.6, 10.6], { pose: 'talk' }); mk(8.6, 10.6, [7.6, 10.4], { pose: 'talk' });                // in talk on the cross path of the garth
+  mk(12.7, 12.6, [12.7, 11.0], { pose: 'kneel', arms: 'hang', hat: 'none' });       // on the path between two beds of the garth
+  mk(12.7, 4.6, [9.7, 6.0]);
   // the workers of the open shops
   for (const l of lots()) {
     if (l.open !== 'shop') continue;
