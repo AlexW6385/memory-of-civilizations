@@ -3,6 +3,7 @@ import '../../styles/greek/ward.js';
 import { RADIUS, lots, pathAt, WAY, RAMP, inRect, SLOPE, AGORA } from './layout.js';
 import { TRADES } from '../../styles/greek/shops.js';
 import { SIMON, lifePlan } from './life.js';
+import { houseRooms } from './houses.js';
 import { summitLife } from './summit.js';
 import { acropolisWorks, acropolisLife } from './works.js';
 import { fronts, crossings, openLife } from './fronts.js';
@@ -18,6 +19,7 @@ export async function town() {
   for (let g = 0; g < sorted.length; g += 4) {
     const grp = sorted.slice(g, g + 4), rooms = [];
     const els = grp.map(({ l, k }) => { const [X0, Z0, X1, Z1] = l.rect, t = 0.5, sz = Z1 - t - 3.1, xl = X0 + t + 4.3, xk = xl + 0.4 + 3.4, tr = OT[k % OT.length];
+      if (l.kind && l.kind !== 'simon') { rooms.push(...houseRooms(l)); return { t: 'athens_walk_house', rect: l.rect, front: l.front, y: l.y, seed: l.seed, kind: l.kind }; }
       rooms.push(
         { id: `shop (${tr})`, rect: [X0 + 0.5, Z0 + 0.5, X0 + 5, Z0 + 5.3], y: l.y, kind: 'inner', market: false },
         { id: 'andron', rect: [X0 + 7.4, Z0 + 0.5, X1 - 0.5, Z0 + 5.3], y: l.y, kind: 'inner' },
