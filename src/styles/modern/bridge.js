@@ -97,6 +97,24 @@ export function archBridge(el, { bag, col }) {
       bag.add('granite_grey', box(px - 4.2, py + 1.0, pz - 5.2, px + 4.2, py + 4.5, pz + 5.2));
       bag.add('granite_grey', box(px - 3.4, py + 4.5, pz - 4.4, px + 3.4, py + 6.5, pz + 4.4));
       bag.add('granite_grey', box(px - 3.7, py + 6.5, pz - 4.7, px + 3.7, py + 7.0, pz + 4.7));
+      // (§1l) the shaft's pilasters, battered with the wall (so they stand 0.25 m proud all the way up), the dentils under the
+      // cornice, the corner piers and the merlons of the crown
+      let jn = 0; const mm = () => ((jn++ * 7) % 13) * 0.0006;   // a millimetre's variation so the repeats merge rather than instance
+      { const fw = (yy) => (yy + 8) / (py + 8) * 0.5, y0 = -4, y1 = py - 10, d = fw(y1) - fw(y0), o0 = fw(y0), pr = 0.25;
+        const strip = (a, b, face) => {   // face 'x+' 'x-' 'z+' 'z-'; a, b the strip's span along the wall
+          const e = face[0] === 'x' ? 5 : 6, sg = face[1] === '+' ? 1 : -1, out = e - o0 + pr, c = face[0] === 'x' ? px : pz, cc = face[0] === 'x' ? pz : px;
+          const w7 = 0.7 + mm(), lo = sg > 0 ? c + out - w7 : c - out, hi = sg > 0 ? c + out : c - out + w7;
+          const g = face[0] === 'x' ? frustum([lo, cc + a, hi, cc + b], y0, y1, sg > 0 ? d : -d, sg > 0 ? -d : d, 0, 0) : frustum([cc + a, lo, cc + b, hi], y0, y1, 0, 0, sg > 0 ? d : -d, sg > 0 ? -d : d);
+          bag.add('granite_grey', g);
+        };
+        for (const dz of [-4.8, -1.2, 1.2, 4.8]) { strip(dz - 0.3, dz + 0.3, 'x+'); strip(dz - 0.3, dz + 0.3, 'x-'); }
+        for (const dx of [-4, 0, 4]) { strip(dx - 0.3, dx + 0.3, 'z+'); strip(dx - 0.3, dx + 0.3, 'z-'); }
+      }
+      for (let u = -4.6; u <= 4.61; u += 0.8) for (const sz of [-1, 1]) bag.add('granite_grey', box(px + u - 0.2 - mm(), py - 1.1, pz + sz * 6.0 - (sz < 0 ? 0.28 : 0), px + u + 0.2, py - 0.2, pz + sz * 6.0 + (sz > 0 ? 0.28 : 0)));
+      for (let u = -5.6; u <= 5.61; u += 0.8) for (const sx of [-1, 1]) bag.add('granite_grey', box(px + sx * 5.0 - (sx < 0 ? 0.28 : 0), py - 1.1, pz + u - 0.2 - mm(), px + sx * 5.0 + (sx > 0 ? 0.28 : 0), py - 0.2, pz + u + 0.2));
+      for (let u = -3.3; u <= 3.31; u += 1.1) for (const sz of [-1, 1]) bag.add('granite_grey', box(px + u - 0.35 - mm(), py + 7.0, pz + sz * 4.4 - 0.15, px + u + 0.35, py + 7.8, pz + sz * 4.4 + 0.15));
+      for (let u = -4.0; u <= 4.01; u += 1.1) for (const sx of [-1, 1]) bag.add('granite_grey', box(px + sx * 3.5 - 0.15, py + 7.0, pz + u - 0.35 - mm(), px + sx * 3.5 + 0.15, py + 7.8, pz + u + 0.35));
+      for (const sx of [-1, 1]) for (const sz of [-1, 1]) bag.add('granite_grey', box(px + sx * 3.5 - 0.6, py + 7.0, pz + sz * 4.4 - 0.6, px + sx * 3.5 + 0.6, py + 9.0, pz + sz * 4.4 + 0.6));
       const ins = (yy) => (yy + 8) / (py + 8) * 0.5 - 0.012, WN = [], y0 = py - 9, y1 = py - 2.5;
       for (const sz of [-1, 1]) for (const dx of [-2, 2]) { const za2 = pz + sz * (6 - ins(y0)), zb2 = pz + sz * (6 - ins(y1)); const A = [px + dx - 0.6, y0, za2], B = [px + dx + 0.6, y0, za2], C = [px + dx + 0.6, y1, zb2], D = [px + dx - 0.6, y1, zb2]; if (sz > 0) WN.push(...A, ...B, ...C, ...A, ...C, ...D); else WN.push(...A, ...C, ...B, ...A, ...D, ...C); }
       for (const sxx of [-1, 1]) for (const dz of [-2.4, 0, 2.4]) { const xa = px + sxx * (5 - ins(y0)), xb = px + sxx * (5 - ins(y1)); const A = [xa, y0, pz + dz - 0.5], B = [xa, y0, pz + dz + 0.5], C = [xb, y1, pz + dz + 0.5], D = [xb, y1, pz + dz - 0.5]; if (sxx < 0) WN.push(...A, ...B, ...C, ...A, ...C, ...D); else WN.push(...A, ...C, ...B, ...A, ...D, ...C); }
