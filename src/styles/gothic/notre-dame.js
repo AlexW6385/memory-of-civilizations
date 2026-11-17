@@ -85,6 +85,81 @@ function figureBase(bag, x, y, z, h, o = {}) {
   }
 }
 
+// ── the carved figure, version 2: a column-statue or relief figure with a draped robe, a mantle at the back,
+// shoulders, two arms with hands (a book or a scroll), a head with brow, nose, hair and (for the old men) a
+// beard; the seated ones on a throne with the knees forward. `lod` 1 (the small figures of the archivolts):
+// the robe, the head, the nose only.
+const _v = { sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]], cross: (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]] };
+const _norm = (a) => { const l = Math.hypot(...a) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
+/** A tapered limb of square section from a to b (half-widths w0, w1). */
+function limb(out, a, b, w0, w1) {
+  const d = _norm(_v.sub(b, a)), ref = Math.abs(d[1]) > 0.9 ? [1, 0, 0] : [0, 1, 0], u1 = _norm(_v.cross(d, ref)), u2 = _v.cross(d, u1);
+  const ring = (p, w) => [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([s, t]) => [p[0] + (u1[0] * s + u2[0] * t) * w, p[1] + (u1[1] * s + u2[1] * t) * w, p[2] + (u1[2] * s + u2[2] * t) * w]);
+  hexa(out, ring(a, w0), ring(b, w1));
+}
+function figureND(bag, x, y, z, h, o = {}) {
+  const m = o.mat || CARVE, f = o.face || [-1, 0], sd = [-f[1], f[0]], lod = o.lod ?? (h < 0.9 ? 1 : 0);
+  const P = (a, yy, b) => [x + f[0] * a + sd[0] * b, y + yy, z + f[1] * a + sd[1] * b];
+  const hash = Math.abs(Math.floor(x * 12.9 + z * 78.2 + y * 37.7 + h * 91)), head = o.mat ? 'ivory' : m, hair = o.mat ? 'hair_dark' : m;
+  const folds = (th, i) => (i > 0 && i < 6 ? 1 + 0.07 * Math.cos(7 * th + hash) + 0.035 * Math.cos(13 * th) : 1);
+  const seg = lod ? 8 : 14;
+  let shY;                                                   // the shoulder line
+  if (o.seat) {
+    const s = h * 0.62;
+    bag.add(m, box(x - 0.2 * h * Math.abs(f[1]) - 0.16 * h * Math.abs(f[0]), y, z - 0.2 * h * Math.abs(f[0]) - 0.16 * h * Math.abs(f[1]), x + 0.2 * h * Math.abs(f[1]) + 0.16 * h * Math.abs(f[0]), y + s * 0.5, z + 0.2 * h * Math.abs(f[0]) + 0.16 * h * Math.abs(f[1])));
+    const rb = 0.1 * h;
+    bag.add(m, lathe([[rb * 1.3, 0], [rb * 1.2, 0.08 * h], [rb * 0.95, 0.34 * h], [rb * 0.85, 0.42 * h], [rb * 0.55, 0.46 * h], [0.001, 0.47 * h]], seg, folds, x + f[0] * 0.08 * h, y + s * 0.46, z + f[1] * 0.08 * h));
+    bag.add(m, lathe([[rb * 1.0, 0], [rb * 1.25, s * 0.48], [0.001, s * 0.5]], seg, folds, x + f[0] * 0.15 * h, y, z + f[1] * 0.15 * h));
+    // the knees: two rounded blocks under the lap, the robe's fall between them
+    for (const sg of [-1, 1]) { const k0 = P(0.15 * h, s * 0.34, sg * 0.05 * h), k1 = P(0.24 * h, s * 0.12, sg * 0.05 * h); const t = []; limb(t, k0, k1, 0.045 * h, 0.04 * h); bag.add(m, fromTriangles(t)); }
+    shY = y + s * 0.46 + 0.39 * h;
+  } else {
+    const rb = 0.1 * h;
+    bag.add(m, lathe([[rb * 1.12, 0], [rb * 1.06, 0.05 * h], [rb * 0.9, 0.22 * h], [rb * 0.74, 0.46 * h], [rb * 0.86, 0.6 * h], [rb * 0.98, 0.7 * h], [rb * 0.78, 0.755 * h], [rb * 0.36, 0.795 * h], [0.001, 0.81 * h]], seg, folds, x, y, z));
+    shY = y + 0.72 * h;
+    if (o.wings) {
+      const sx = -f[1], sz = f[0], out = [];
+      for (const s of [-1, 1]) {
+        const base = [x - f[0] * rb * 0.7 + sx * s * rb * 0.5, y + 0.72 * h, z - f[1] * rb * 0.7 + sz * s * rb * 0.5];
+        const tip = [base[0] + sx * s * 0.28 * h - f[0] * 0.07 * h, y + 1.0 * h, base[2] + sz * s * 0.28 * h - f[1] * 0.07 * h];
+        const mid = [base[0] + sx * s * 0.22 * h - f[0] * 0.05 * h, y + 0.62 * h, base[2] + sz * s * 0.22 * h - f[1] * 0.05 * h];
+        const low = [base[0] + sx * s * 0.1 * h - f[0] * 0.05 * h, y + 0.28 * h, base[2] + sz * s * 0.1 * h - f[1] * 0.05 * h];
+        prism(out, [base, tip, mid, low], [-f[0] * 0.025 * h, 0, -f[1] * 0.025 * h]);
+      }
+      bag.add(m, fromTriangles(out));
+    }
+  }
+  // the head: a neck, the skull with a brow and a nose; hair over the crown and the nape
+  const hy = shY + 0.08 * h, hc = P(o.seat ? 0.08 * h : 0, 0, 0), hx = hc[0], hz = hc[2];
+  bag.add(head, lathe([[0.001, -0.02 * h], [0.034 * h, -0.02 * h], [0.034 * h, 0.012 * h], [0.05 * h, 0.03 * h], [0.058 * h, 0.075 * h], [0.05 * h, 0.125 * h], [0.001, 0.142 * h]], lod ? 6 : 10, null, hx, hy, hz));
+  { const nb = P(0.054 * h + (o.seat ? 0.08 * h : 0), 0.06 * h, 0);
+    const t = []; hexa(t, [[nb[0] - 0.008 * h, hy + 0.035 * h + 0.0, nb[2] - 0.008 * h], [nb[0] + 0.008 * h, hy + 0.035 * h, nb[2] - 0.008 * h], [nb[0] + 0.008 * h, hy + 0.035 * h, nb[2] + 0.008 * h], [nb[0] - 0.008 * h, hy + 0.035 * h, nb[2] + 0.008 * h]], [[nb[0] + f[0] * 0.016 * h - 0.004 * h, hy + 0.078 * h, nb[2] + f[1] * 0.016 * h - 0.004 * h], [nb[0] + f[0] * 0.016 * h + 0.004 * h, hy + 0.078 * h, nb[2] + f[1] * 0.016 * h - 0.004 * h], [nb[0] + f[0] * 0.016 * h + 0.004 * h, hy + 0.078 * h, nb[2] + f[1] * 0.016 * h + 0.004 * h], [nb[0] + f[0] * 0.016 * h - 0.004 * h, hy + 0.078 * h, nb[2] + f[1] * 0.016 * h + 0.004 * h]]);
+    bag.add(head, fromTriangles(t)); }
+  if (!lod) {
+    bag.add(hair, lathe([[0.062 * h, 0], [0.066 * h, 0.055 * h], [0.052 * h, 0.115 * h], [0.001, 0.148 * h]], 10, (t, i) => (i === 0 ? 1 + 0.05 * Math.cos(5 * t) : 1), hx - f[0] * 0.01 * h, hy + 0.03 * h, hz - f[1] * 0.01 * h));
+    if (!o.noBeard && (o.beard || hash % 3 !== 0)) { const t = [], c = P(0.045 * h + (o.seat ? 0.08 * h : 0), 0, 0), q = (a2, yy, b) => [c[0] + f[0] * a2 + sd[0] * b, hy + yy, c[2] + f[1] * a2 + sd[1] * b];
+      hexa(t, [q(0.004 * h, -0.05 * h, -0.012 * h), q(0.004 * h, -0.05 * h, 0.012 * h), q(0.016 * h, -0.05 * h, 0.012 * h), q(0.016 * h, -0.05 * h, -0.012 * h)], [q(-0.012 * h, 0.045 * h, -0.04 * h), q(-0.012 * h, 0.045 * h, 0.04 * h), q(0.022 * h, 0.045 * h, 0.04 * h), q(0.022 * h, 0.045 * h, -0.04 * h)]);
+      bag.add(hair, fromTriangles(t)); }
+    // the mantle hanging from the shoulders at the back
+    { const t = [], B = (a2, yy, b) => P(a2, yy - y, b);
+      hexa(t, [B(-0.112 * h, y + 0.07 * h, -0.115 * h), B(-0.112 * h, y + 0.07 * h, 0.115 * h), B(-0.095 * h, y + 0.07 * h, 0.115 * h), B(-0.095 * h, y + 0.07 * h, -0.115 * h)], [B(-0.095 * h, shY - 0.01 * h, -0.095 * h), B(-0.095 * h, shY - 0.01 * h, 0.095 * h), B(-0.078 * h, shY - 0.01 * h, 0.095 * h), B(-0.078 * h, shY - 0.01 * h, -0.095 * h)]);
+      bag.add(m, fromTriangles(t)); }
+    // the arms: the right (sd +) bent up to hold the book against the chest, the left hanging to the folds of the robe (or both clasped)
+    const arms = [], sh = (sg) => P(0, shY - y - 0.015 * h, sg * 0.1 * h);
+    const hold = o.book || o.scroll || hash % 2 === 0;
+    { const e = P(0.03 * h, shY - y - 0.16 * h, 0.115 * h), hnd = P(0.085 * h, shY - y - 0.13 * h, 0.04 * h); limb(arms, sh(1), e, 0.026 * h, 0.022 * h); limb(arms, e, hnd, 0.022 * h, 0.018 * h); limb(arms, [hnd[0] - 0.012 * h, hnd[1] - 0.012 * h, hnd[2]], [hnd[0] + 0.012 * h, hnd[1] + 0.012 * h, hnd[2]], 0.016 * h, 0.016 * h); }
+    if (hold) { const e = P(0.025 * h, shY - y - 0.17 * h, -0.118 * h), hnd = P(0.03 * h, shY - y - 0.3 * h, -0.108 * h); limb(arms, sh(-1), e, 0.026 * h, 0.022 * h); limb(arms, e, hnd, 0.022 * h, 0.018 * h); }
+    else { const e = P(0.04 * h, shY - y - 0.17 * h, -0.115 * h), hnd = P(0.09 * h, shY - y - 0.14 * h, -0.03 * h); limb(arms, sh(-1), e, 0.026 * h, 0.022 * h); limb(arms, e, hnd, 0.022 * h, 0.018 * h); }
+    bag.add(m, fromTriangles(arms));
+    if (o.book || o.scroll) { const t = [], c = P(0.1 * h, shY - y - 0.12 * h, 0.04 * h), q = (a2, yy, b) => [c[0] + f[0] * a2 + sd[0] * b, c[1] + yy, c[2] + f[1] * a2 + sd[1] * b];
+      hexa(t, [q(-0.014 * h, -0.05 * h, -0.045 * h), q(-0.014 * h, -0.05 * h, 0.045 * h), q(0.014 * h, -0.05 * h, 0.045 * h), q(0.014 * h, -0.05 * h, -0.045 * h)], [q(-0.01 * h, 0.05 * h, -0.045 * h), q(-0.01 * h, 0.05 * h, 0.045 * h), q(0.014 * h, 0.05 * h, 0.045 * h), q(0.014 * h, 0.05 * h, -0.045 * h)]);
+      bag.add(o.book ? 'paint_ochre' : m, fromTriangles(t)); }
+    // the folds of the hem: two ridges of drapery down the front
+    for (const b of [-0.035 * h, 0.04 * h]) { const t = [], a0 = P(0.085 * h, 0.04 * h, b), a1 = P(0.075 * h, 0.5 * h, b * 0.7); limb(t, a0, a1, 0.014 * h, 0.01 * h); if (!o.seat) bag.add(m, fromTriangles(t)); }
+  }
+  if (o.crown) bag.add(o.crownMat || 'paint_ochre', lathe([[0.058 * h, 0], [0.064 * h, 0.04 * h], [0.05 * h, 0.05 * h], [0.05 * h, 0.01 * h]], 8, (th, i) => (i === 1 ? 1 + 0.3 * Math.max(0, Math.cos(5 * th)) : 1), hx, hy + 0.1 * h, hz));
+}
+
 /** A crocketed pinnacle: a square shaft with a gablet on each face, a spirelet with crockets on its edges, a finial. */
 function pinnacle(bag, x, y, z, w, h, m = L) {
   const s = w / 2, hs = h * 0.34, hg = h * 0.16, out = [];
@@ -171,11 +246,11 @@ function roseND(bag, o, u, uc, yc, r, inSide, depth = 0.42) {
  * the lintels and the tympanum with their figures; the doors with their ironwork. The slices run back
  * to xBack, where the core of the front stands.
  */
-const figure = figureBase;
+const figure = figureND;
 // the 13th-century portals were painted: the figures' robes in reds, blues, ochres and greens, the tympanum's ground blue
 const PAINT = ['paint_robe', 'paint_blue', 'paint_ochre', 'cloth_red', 'paint_white', 'cloth_green'];
 function portal(bag, col, p0) {
-  const p = p0, figure = (b, x, y, z, h, o = {}) => figureBase(b, x, y, z, h, { mat: PAINT[Math.abs(Math.floor(z * 7.3 + y * 3.1 + h * 11)) % PAINT.length], ...o });
+  const p = p0, figure = (b, x, y, z, h, o = {}) => figureND(b, x, y, z, h, { mat: PAINT[Math.abs(Math.floor(z * 7.3 + y * 3.1 + h * 11)) % PAINT.length], ...o });
   const { x, z0, z1, y, W0, N, dw, dd, spring: S, xBack, top, f = 0.75 } = p;
   const zc = (z0 + z1) / 2, wN = W0 - N * dw, xEnd = x + N * dd;
   const o = [x, z0], u = [0, 1], uc = zc - z0;
@@ -195,11 +270,31 @@ function portal(bag, col, p0) {
     const zcol = zc + s * (W0 - (k + 1) * dw);
     bag.add(L, lathe([[0.08, 0], [0.08, S - p.base]], 8, null, x + (k + 1) * dd - 0.02, y + p.base, zcol));
     const zs = zc + s * (W0 - (k + 0.5) * dw), xs = xa - 0.27, hS = p.statue;
-    bag.add(L, lathe([[0.001, -0.26], [0.2, -0.06], [0.24, 0]], 8, null, xs, y + p.base + 0.26, zs));
+    bag.add(L, lathe([[0.001, -0.22], [0.13, -0.22], [0.2, -0.13], [0.25, -0.04], [0.27, 0]], 8, null, xs, y + p.base + 0.26, zs));
     figure(bag, xs, y + p.base + 0.26, zs, hS, { book: k % 2 === 0, crown: p.crowns && k % 3 === 1 });
     const cy = y + p.base + 0.26 + hS + 0.12;
     bag.add(L, box(xs - 0.26, cy, zs - 0.2, xs + 0.24, cy + 0.22, zs + 0.2));
     bag.add(L, frustum([xs - 0.26, zs - 0.2, xs + 0.24, zs + 0.2], cy + 0.22, cy + 0.62, 0.2, 0.2, 0.15, 0.15));
+  }
+  // the dado: a splayed course of ashlar along each jamb below the statues, carrying rows of quatrefoil medallions in relief
+  // (the Last Judgement portal: fourteen a side, the Virtues in women with their emblems, the Vices opposite; the side portals one row of months and signs)
+  for (const s of [-1, 1]) {
+    const A = [x, zc + s * W0], B = [xEnd, zc + s * wN], Ln = Math.hypot(B[0] - A[0], B[1] - A[1]), u = [(B[0] - A[0]) / Ln, (B[1] - A[1]) / Ln];
+    let nn = [-u[1], u[0]]; if (nn[1] * s > 0) nn = [-nn[0], -nn[1]];
+    const yT = y + p.base - 0.2, ex = (q) => [A[0] + u[0] * q, A[1] + u[1] * q];
+    const q0 = ex(0), q1 = ex(Ln), T = 0.07, G = (pt, yy, d) => [pt[0] + nn[0] * d, yy, pt[1] + nn[1] * d];
+    const sl = []; hexa(sl, [G(q0, y, 0), G(q1, y, 0), G(q1, y, T), G(q0, y, T)], [G(q0, yT, 0), G(q1, yT, 0), G(q1, yT, T), G(q0, yT, T)]); bag.add(L, fromTriangles(sl));
+    bag.add(L, box(Math.min(q0[0], q1[0]) - 0.01, yT - 0.01, Math.min(q0[1], q1[1]) - 0.01, Math.min(q0[0], q1[0]) + 0.01, yT, Math.min(q0[1], q1[1]) + 0.01));
+    const [rows, per] = p.dado, rr = 0.21, rel = [], back = [];
+    for (let r = 0; r < rows; r++) for (let i = 0; i < per; i++) {
+      const uu = 0.28 + i * (Ln - 0.56) / (per - 1), yc = y + (rows === 2 ? 0.58 + r * 0.4 : 0.8), c = ex(uu);
+      const ou = [c[0] + nn[0] * T, c[1] + nn[1] * T];
+      // the quatrefoil: four lobes, their outer arcs
+      for (let lb = 0; lb < 4; lb++) { const a = lb * Math.PI / 2 + Math.PI / 4; bars(rel, [ou[0], ou[1]], u, ringPts(Math.cos(a) * rr * 0.5, yc - y + y + Math.sin(a) * rr * 0.5, rr * 0.5, 6, a - Math.PI * 0.62, a + Math.PI * 0.62), 0.045, 0.06); }
+      { const hh = rr * 0.68; hexa(back, [G(ex(uu - hh), yc - hh, T), G(ex(uu + hh), yc - hh, T), G(ex(uu + hh), yc - hh, T + 0.025), G(ex(uu - hh), yc - hh, T + 0.025)], [G(ex(uu - hh), yc + hh, T), G(ex(uu + hh), yc + hh, T), G(ex(uu + hh), yc + hh, T + 0.025), G(ex(uu - hh), yc + hh, T + 0.025)]); }
+      figure(bag, ou[0] + nn[0] * 0.02, yc - 0.13, ou[1] + nn[1] * 0.02, 0.27, { face: nn, lod: 1 });
+    }
+    bag.add(CARVE, fromTriangles(rel)); bag.add('paint_blue', fromTriangles(back));
   }
   // the archivolts' figures: on each step above the springing, small seated figures one above another
   for (let k = 0; k < N; k++) {
@@ -263,6 +358,22 @@ function portal(bag, col, p0) {
     bag.add(L, box(xEnd - 0.4, ty + TH * 0.68, zc - 0.55, xEnd - 0.04, ty + TH * 0.76, zc + 0.55));
     for (const s of [-1, 1]) { figure(bag, xEnd - 0.16, ty + 0.15, zc + s * wN * 0.38, TH * 0.42, { wings: true }); figure(bag, xEnd - 0.16, ty + 0.1, zc + s * wN * 0.7, TH * 0.32, { crown: s > 0 }); }
   }
+  // the gable over the outer archivolt: a moulded raking edge on each side with crockets, a corbel under each foot, a ring of
+  // tracery in the apex, pinnacles at the feet and a finial (inferred: the portals' gables as restored; they stood in 1248)
+  { const crown = y + S + archRise({ r: W0, pointed: f }), yb = y + S + 0.6, ya = crown + (p.scheme === 'judgement' ? 2.7 : 2.9), hw = W0 + 0.1, gx = x - 0.17, gb = [], cr = [];
+    bars(gb, [gx, zc], [0, 1], [[-hw, yb], [0, ya], [hw, yb]], 0.42, 0.3);
+    bars(gb, [gx + 0.02, zc], [0, 1], [[-hw + 0.25, yb + 0.2], [0, ya - 0.5], [hw - 0.25, yb + 0.2]], 0.1, 0.34);
+    const rl = Math.hypot(hw, ya - yb);
+    for (const sg of [-1, 1]) {
+      for (let k = 1; k <= 7; k++) { const t = k / 8.2, py = yb + (ya - yb) * t, pz = zc + sg * hw * (1 - t), nz = sg * (ya - yb) / rl, ny = hw / rl; cr.push(...box(gx - 0.13, py + ny * 0.3 - 0.11, pz + nz * 0.3 - 0.09, gx + 0.13, py + ny * 0.3 + 0.11, pz + nz * 0.3 + 0.09).attributes.position.array); }
+      bag.add(L, box(gx - 0.2, yb - 0.7, zc + sg * hw - 0.26, gx + 0.2, yb - 0.05, zc + sg * hw + 0.26));
+      pinnacle(bag, gx, yb - 0.05, zc + sg * hw, 0.46, 1.5);
+    }
+    const ring = ringPts(0, ya - 1.25, 0.55, 20); bars(gb, [gx + 0.02, zc], [0, 1], ring, 0.1, 0.18);
+    for (let k = 0; k < 3; k++) { const a = Math.PI / 2 + k * 2 * Math.PI / 3; bars(gb, [gx + 0.02, zc], [0, 1], ringPts(Math.cos(a) * 0.24, ya - 1.25 + Math.sin(a) * 0.24, 0.2, 8), 0.06, 0.14); }
+    bag.add(L, fromTriangles(gb)); bag.add(CARVE, fromTriangles(cr));
+    pinnacle(bag, gx, ya - 0.2, zc, 0.5, 1.0);
+  }
   // the jambs and the splays are solid, the trumeau stands in the middle; the door opens through
   col.rect([x, z0, xBack, zc - wN], y, y + top); col.rect([x, zc + wN, xBack, z1], y, y + top);
   col.rect([xEnd - 0.84, zc - 0.36, xBack, zc + 0.36], y, doorTop);
@@ -293,7 +404,7 @@ function notreDame(el, ctx) {
     bag.add(L, fromTriangles(w));
     // a statue before the buttress on its corbel, under a gabled canopy (the four of the buttresses)
     const zm = Z((a + b) / 2);
-    bag.add(L, lathe([[0.001, -0.4], [0.3, -0.1], [0.36, 0]], 8, null, X0 - 1.75, Y(3.0), zm));
+    bag.add(L, lathe([[0.42, 0], [0.4, 0.2], [0.36, 0.32], [0.36, 2.7], [0.44, 2.82], [0.46, 3.0]], 10, null, X0 - 1.75, Y(0), zm));
     figure(bag, X0 - 1.75, Y(3.0), zm, 2.5, { book: a < 0 && a > -10, crown: a > 10 });
     bag.add(L, box(X0 - 2.15, Y(5.7), zm - 0.45, X0 - 1.39, Y(5.95), zm + 0.45));
     const g = []; prism(g, [[X0 - 2.15, Y(5.95), zm - 0.45], [X0 - 2.15, Y(5.95), zm + 0.45], [X0 - 2.15, Y(6.9), zm]], [0.76, 0, 0]); bag.add(L, fromTriangles(g));
@@ -302,9 +413,9 @@ function notreDame(el, ctx) {
     const arc = []; bars(arc, [X0 - 1.62, Z(a)], [0, 1], pointedPts((b - a) / 2, (b - a) / 2 - 0.55, Y(13.8), 0.8), 0.16, 0.12); bag.add(L, fromTriangles(arc));
   }
   // the three portals: the Virgin (north, the left), the Last Judgement (centre), Saint Anne (south)
-  const side = { W0: 4.0, N: 4, dw: 0.24, dd: 0.45, spring: 8.6, door: 5.6, lintel: 1.1, base: 2.4, statue: 2.2, top: 19.45 };
+  const side = { W0: 4.0, N: 4, dw: 0.24, dd: 0.45, spring: 8.6, door: 5.6, lintel: 1.1, base: 1.6, statue: 2.4, top: 19.45, dado: [1, 6] };
   portal(bag, col, { ...side, x: XF, z0: Z(-17.6), z1: Z(-7.4), y, xBack: XA, scheme: 'virgin', crowns: true });
-  portal(bag, col, { x: XF, z0: Z(-4.6), z1: Z(4.6), y, W0: 4.45, N: 6, dw: 0.24, dd: 0.42, spring: 9.5, door: 6.4, lintel: 1.15, base: 2.6, statue: 2.35, top: 19.45, xBack: XA, scheme: 'judgement' });
+  portal(bag, col, { x: XF, z0: Z(-4.6), z1: Z(4.6), y, W0: 4.45, N: 6, dw: 0.24, dd: 0.42, spring: 9.5, door: 6.4, lintel: 1.15, base: 1.6, statue: 2.6, dado: [2, 7], top: 19.45, xBack: XA, scheme: 'judgement' });
   portal(bag, col, { ...side, x: XF, z0: Z(7.4), z1: Z(17.6), y, xBack: XA, scheme: 'anne', trumeauCrown: false });
   // behind the central portal, the west bay of the nave between the towers, open to its high vault
   // (the rose in its west wall); the transverse wall to the nave with the nave's arch in it
@@ -693,4 +804,4 @@ function notreDame(el, ctx) {
 Object.assign(STYLES.gothic.elements, { notre_dame: notreDame });
 
 // the carving helpers, for the Sainte-Chapelle and the palace (src/buildings/sainte-chapelle/style.js, ./palace.js)
-export { prism, bars, pinnacle, figure, pointedPts, ringPts };
+export { prism, bars, pinnacle, figureBase as figure, pointedPts, ringPts };
