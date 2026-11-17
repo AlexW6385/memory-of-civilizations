@@ -156,8 +156,8 @@ add({ t: 'sc_fleche', at: [XA - 3.0, 0], y: RIDGE - 4.0, ridge: RIDGE, h: 33, r:
 // the tribune of the relics in the apse with its two narrow stairs (the north one's landing, the south one's), the Grande Châsse on it
 add({ t: 'sc_tribune', at: [30.6, 0], y: UP, w: 3.8, d: 2.5, h: 2.5 });
 for (const sz of [-1, 1]) {
-  add({ t: 'stair', rect: [27.9, Math.min(sz * 2.05, sz * 2.85), 31.0, Math.max(sz * 2.05, sz * 2.85)], dir: 'e', y0: UP, y1: UP + 2.5, riser: 0.19, base: UP, mat: 'limestone' });
-  add({ t: 'sc_trib_landing', rect: [31.0, Math.min(sz * 2.0, sz * 2.9), 31.95, Math.max(sz * 2.0, sz * 2.9)], bridge: [31.0, Math.min(sz * 1.8, sz * 2.0), 31.8, Math.max(sz * 1.8, sz * 2.0)], y: UP + 2.5 });
+  add({ t: 'stair', rect: [26.9, Math.min(sz * 2.05, sz * 2.85), 30.0, Math.max(sz * 2.05, sz * 2.85)], dir: 'e', y0: UP, y1: UP + 2.5, riser: 0.19, base: UP, mat: 'limestone' });
+  add({ t: 'sc_trib_landing', rect: [30.0, Math.min(sz * 2.0, sz * 2.9), 31.0, Math.max(sz * 2.0, sz * 2.9)], bridge: [30.0, Math.min(sz * 1.8, sz * 2.0), 31.0, Math.max(sz * 1.8, sz * 2.0)], y: UP + 2.5 });
 }
 // the altars: the high altar of the upper chapel before the tribune, the Virgin's altar in the lower chapel's apse
 add({ t: 'sc_altar', at: [25.8, 0], y: UP, face: [-1, 0], w: 2.4, kind: 'main' });
@@ -185,13 +185,15 @@ const rooms = [
 ];
 const walks = [
   // from the courtyard into the lower chapel and along it
-  [[-30, 0], [-12, 0], [-6, 0], [-2.5, 0], [1.5, 0], [10, 0], [24, 0], [30, 0]],
+  [[-30, 0], [-12, 0], [-6, 0], [-2.5, 0], [1.5, 0], [10, 0], [24, 0], [26.2, 0]],
   // up the stair to the upper porch and into the upper chapel, round to the apse (straight along the landing past the stair parapet's end post before turning in, not across its corner)
   [[-22, -8.6], [-18.5, -8.6], [-4.8, -8.6], [-3.2, -8.6], [-2.6, -7.2], [-2.6, 0], [1.5, 0], [12, 0], [12, -3.6], [24, -3.6], [24, 3.6], [12, 3.6], [12, 0]],
   // up the stair and along the king's gallery
-  [[-22, -8.6], [-18.5, -8.6], [-4.8, -8.6], [-2.9, -8.6], [-2.9, -12], [-2.9, -32]],
+  [[-22, -8.6], [-18.5, -8.6], [-4.8, -8.6], [-2.9, -8.6], [-2.9, -12], [-2.9, -32], [-2.9, -36.5], [-2.9, -42], [-12, -42], [-12, -50]],
+  // the same stair, the upper chapel, and up the tribune's south stair to the deck
+  [[-22, -8.6], [-18.5, -8.6], [-4.8, -8.6], [-3.2, -8.6], [-2.6, -7.2], [-2.6, 0], [1.5, 0], [12, 0], [24, 3.0], [27.4, 2.45], [30.5, 2.45], [30.5, 1.5]],
 ];
-walks[0].y0 = 0; walks[1].y0 = 0; walks[2].y0 = 0;
+walks[0].y0 = 0; walks[1].y0 = 0; walks[2].y0 = 0; walks[3].y0 = 0;
 
 export const sainteChapelle = {
   id: 'sainte-chapelle',

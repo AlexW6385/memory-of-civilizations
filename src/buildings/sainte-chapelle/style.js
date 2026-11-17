@@ -612,7 +612,7 @@ function tribune(el, { bag, col }) {
   arcade([x0, z0], [0, 1], [-1, 0], w, 3);
   arcade([x0, z0], [1, 0], [0, -1], d, 2);
   arcade([x0, z1], [1, 0], [0, 1], d, 2);
-  // the parapet of timber balusters round the deck, open at the stairs' landings on the sides' east ends
+  // the parapet of timber balusters round the deck, open between the two corner posts of each side, where the stairs' landings come in
   const rail = (a, b) => {
     const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(2, Math.round(L / 0.3));
     bag.add('wood_dark', rod([a[0], top + 0.9, a[1]], [b[0], top + 0.9, b[1]], 0.035, 4));
@@ -621,7 +621,7 @@ function tribune(el, { bag, col }) {
     col.segment(a, b, 0.14, top, top + 0.95);
   };
   rail([x0 + 0.06, z0 + 0.06], [x0 + 0.06, z1 - 0.06]);
-  rail([x0 + 0.06, z0 + 0.06], [x1 - 0.8, z0 + 0.06]); rail([x0 + 0.06, z1 - 0.06], [x1 - 0.8, z1 - 0.06]);
+  for (const zz of [z0 + 0.06, z1 - 0.06]) { rail([x0 + 0.06, zz], [cx - 0.6, zz]); rail([cx + 0.45, zz], [x1 - 0.06, zz]); }
   rail([x1 - 0.06, z0 + 0.06], [x1 - 0.06, z1 - 0.06]);
   // the baldachin: six posts of painted wood on gilt bases, capitals of leaves, cusped arches, gablets, the roof
   const px = [x0 + 0.3, x1 - 0.3], pz = [z0 + 0.3, cz, z1 - 0.3], PH = 3.0, ya = top + PH;
