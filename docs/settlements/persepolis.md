@@ -154,6 +154,13 @@ Sources added:
 - [Tol-e Ajori and Bagh-e Firuzi, Persepolis West (Askari Chaverdi et al. 2013)](https://unora.unior.it/retrieve/dfd1bedd-29f3-d55a-e053-3705fe0af723/askari-callieri-gondet-basello2013arta.pdf)
 - [Esther 1:6 (not fetched; cited from memory)](https://biblehub.com/esther/1-6.htm)
 
+## 21. The landmark seen close (round 2, 2026-11-17)
+
+- **The delegations.** The Apadana's tribute wing shows each delegation with its own gift: the Armenians a bridled stallion, the Babylonians a humped bull, the Arabs a dromedary, the Syrians rams [stated: Livius, Apadana east stairs, as §13]. Ours: new relief outlines `horse`, `zebu`, `camel` (with carved lines at mane, hump and legs) lead each delegation in turn instead of the single ram [inferred: the order and the silhouettes].
+- **Carved depth.** Relief figures of 0.55 m and more (parapet guards, the wings' registers, the jambs' scenes, the lion and the bull) are cut in two tiers: the figure on its ledge, the body standing higher than the ledge, so that edges catch the light as modelled forms, not cut-outs [inferred: the Persepolis reliefs are rounded within their outlines]. The lion-and-bull in the triangular panels of the stair is enlarged to 1.8 (it filled too little of the panel), with the lion's mane tufts and the bull's ribs and chest cut as raised lines.
+- **Coping and merlons.** Every run of stepped merlons (the stairways' parapets and the terrace's) stands on a coping course with a projecting fillet, as stone parapets are laid, instead of rising straight from the plain top [inferred].
+- **The Gate of All Nations' facades.** Its four outer faces (they were blank plaster) now carry the stone dado, two tiers of dark-framed niches and the glazed lapis frieze with rosettes running unbroken over the doorways, as the Apadana's porches (`porchDress`, §17); the niche frames follow the Tachara's [stated: ancient-history-sites, Tachara; inferred for the Gate].
+
 ## Sources
 
 - [Persian column — Wikipedia](https://en.wikipedia.org/wiki/Persian_column)

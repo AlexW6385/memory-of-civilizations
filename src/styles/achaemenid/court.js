@@ -82,15 +82,20 @@ export function porchDress(el, { bag }) {
   const R = (u0, u1, h0, h1, d) => { const a = sg < 0 ? w - d : w, b = sg < 0 ? w : w + d; return alongX ? box(u0, y + h0, a, u1, y + h1, b) : box(a, y + h0, u0, b, y + h1, u1); };
   const free = (u0, u1) => !(el.skip ?? []).some(([a, b]) => u1 > a && u0 < b);
   const place = (u, v, d) => (alongX ? [u, y + v, w + sg * d] : [w + sg * d, y + v, u]);
+  const frieze = (a, b) => {
+    const fy = h - 3.0;
+    bag.add('glaze_lapis', R(a, b, fy, h - 0.2, o * 0.8)); bag.add('glaze_white', R(a, b, fy, fy + 0.15, o * 1.6)); bag.add('glaze_white', R(a, b, h - 0.35, h - 0.2, o * 1.6));
+    const n = Math.floor((b - a) / 1.5);
+    for (let i = 0; i < n; i++) rosette(bag, 'glaze_yellow', place, a + (i + 0.5) * (b - a) / n, fy + 1.55, 0.4, o * 1.2);
+  };
+  if (el.fullFrieze) frieze(L0 + 0.3, L1 - 0.3);
   const spans = [], cuts = [L0 + 0.3, ...(el.skip ?? []).flatMap(([a, b]) => [a, b]), L1 - 0.3].sort((p, q) => p - q);
   for (let i = 0; i + 1 < cuts.length; i += 2) if (cuts[i + 1] - cuts[i] > 1) spans.push([cuts[i], cuts[i + 1]]);
   for (const [a, b] of spans) {
     bag.add('limestone_persian', R(a, b, 0, 1.1, o));
     bag.add('limestone_persian', R(a, b, 1.1, 1.25, o * 1.6));
     const fy = h - 3.0;
-    bag.add('glaze_lapis', R(a, b, fy, h - 0.2, o * 0.8)); bag.add('glaze_white', R(a, b, fy, fy + 0.15, o * 1.6)); bag.add('glaze_white', R(a, b, h - 0.35, h - 0.2, o * 1.6));
-    const n = Math.floor((b - a) / 1.5);
-    for (let i = 0; i < n; i++) rosette(bag, 'glaze_yellow', place, a + (i + 0.5) * (b - a) / n, fy + 1.55, 0.4, o * 1.2);
+    if (!el.fullFrieze) frieze(a, b);
     const m = Math.floor((b - a) / 4.4);
     for (let i = 0; i < m; i++) {
       const u = a + (i + 0.5) * (b - a) / m;
