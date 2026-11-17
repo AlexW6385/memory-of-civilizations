@@ -4,6 +4,7 @@
 // Everything is small, non-solid except the wells and the trunk; coordinates are the settlement's (absolute), y the height of the ground it stands on.
 import { box, lathe, frustum } from '../../core/geom.js';
 import { rng } from './kit.js';
+import { wedge, Pack } from './brickwork.js';
 
 const JAR = (s) => [[0.07 * s, 0], [0.2 * s, 0.12 * s], [0.24 * s, 0.3 * s], [0.19 * s, 0.5 * s], [0.1 * s, 0.6 * s], [0.12 * s, 0.66 * s], [0.001, 0.66 * s]];
 const jar = (bag, mat, x, y, z, s = 1) => bag.add(mat, lathe(JAR(s), 8, null, x, y, z), false);
@@ -42,7 +43,16 @@ export function outfall(el, ctx) {
 /** indus_pwell: { c: [x, z], y, seed } — a round well of wedge bricks with its parapet, a rope and pot on the curb, a trough at the foot, jars about it, a paved wet apron. */
 export function pwell(el, ctx) {
   const { bag, col } = ctx, [x, z] = el.c, y = el.y ?? 0, rand = rng(el.seed ?? 7), r = 0.62;
-  bag.add('brick', lathe([[r + 0.2, 0], [r + 0.2, 0.62], [r + 0.1, 0.72], [r - 0.14, 0.72], [r - 0.14, 0.3], [0.001, 0.3]], 20, null, x, y, z));
+  // the lining and the curb of wedge bricks (narrow at the inner face, broad at the outer, so that they lock in the ring [stated: Wikipedia "Mohenjo-daro": wells lined with wedge-shaped bricks]):
+  // courses of 20 laid as headers, each course turned half a brick on the one below; the dark core shows in the joints; a rope-worn lip of stretchers on top (docs §14)
+  {
+    const pk = new Pack(), rw = rng(100 + Math.floor(x * 7 + z * 13) % 997), N = 20, ro = r + 0.2, ri = r - 0.14, hb = 0.0925, nc = 7;
+    bag.add('bitumen', lathe([[ro - 0.02, 0], [ro - 0.02, nc * hb], [ri + 0.02, nc * hb], [ri + 0.02, 0.3], [0.001, 0.3]], 20, null, x, y, z));
+    for (let k = 0; k < nc; k++) for (let i = 0; i < N; i++) { const t0 = ((i + (k % 2) * 0.5) / N) * Math.PI * 2, t1 = ((i + 1 + (k % 2) * 0.5) / N) * Math.PI * 2; wedge(pk, 'brick', x, z, y + k * hb + 0.003, y + (k + 1) * hb - 0.003, t0, t1, ri, ro, rw); }
+    for (let i = 0; i < 14; i++) { const t0 = ((i + 0.5) / 14) * Math.PI * 2, t1 = ((i + 1.5) / 14) * Math.PI * 2; wedge(pk, 'brick', x, z, y + nc * hb, y + nc * hb + 0.075, t0, t1, ri + 0.03, ro + 0.07, rw); }
+    for (let i = 0; i < 14; i++) { const t0 = ((i + 0.5) / 14) * Math.PI * 2, t1 = ((i + 1.5) / 14) * Math.PI * 2; wedge(pk, 'brick', x, z, y - 0.0, y + 0.1, t0, t1, ro + 0.0, ro + 0.2, rw); }   // the foot: a ring of headers round the base
+    pk.flush(bag);
+  }
   bag.add('brick_buff', lathe([[r + 1.5, 0], [r + 1.5, 0.035], [r + 0.2, 0.05], [r + 0.2, 0]], 20, null, x, y, z), false);   // the paved apron
   bag.add('bitumen', lathe([[r + 1.0, 0.04], [r + 1.0, 0.045], [r + 0.2, 0.05], [r + 0.2, 0.04]], 18, null, x, y, z), false);   // wet where the water is spilt
   col.circle(x, z, r + 0.22, y, y + 0.7);

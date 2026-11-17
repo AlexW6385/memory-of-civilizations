@@ -4,6 +4,7 @@
 import { box, lathe, frustum } from '../../core/geom.js';
 import { Fr, rng, wellAt } from './kit.js';
 import { dressWall, furnishRoom } from './dress.js';
+import { rb, bondFace, Pack } from './brickwork.js';
 
 const jar = (bag, mat, x, y, z, s = 1) => bag.add(mat, lathe([[0.07 * s, 0], [0.2 * s, 0.12 * s], [0.24 * s, 0.3 * s], [0.19 * s, 0.5 * s], [0.1 * s, 0.6 * s], [0.12 * s, 0.66 * s], [0.001, 0.66 * s]], 8, null, x, y, z));
 /** The weathering of the four outer faces of a rectangle of walls from y: `gaps` are the doors' spans per side ('n' | 's' | 'w' | 'e') along each face. */
@@ -27,13 +28,15 @@ export function notchedBrick(bag, x, y, z, axis = 'x') {
 }
 /** The corbelled-arch mouth of the Bath's drain on the west wall's outer face: four courses each drawn in 0.08 m, a capstone, the dark back; hollow. */
 function corbelMouth(bag, col, ox0, y, zc) {
-  const w = 0.7, hc = 0.18, n = 4, d = 0.08, ext = 0.4, x0 = ox0 - 0.5, x1 = ox0;
+  const w = 0.7, hc = 0.185, n = 4, d = 0.08, ext = 0.4, x0 = ox0 - 0.5, x1 = ox0;
   bag.add('bitumen', box(x0, y + 0.0, zc - w / 2, x1, y + 0.012, zc + w / 2), false);
   for (let i = 0; i < n; i++) {
     const a = w / 2 - i * d;
     bag.add('brick', box(x0, y + i * hc, zc - w / 2 - ext, x1, y + (i + 1) * hc, zc - a), false); bag.add('brick', box(x0, y + i * hc, zc + a, x1, y + (i + 1) * hc, zc + w / 2 + ext), false);
   }
   bag.add('brick', box(x0, y + n * hc, zc - w / 2 - ext, x1, y + (n + 1) * hc, zc + w / 2 + ext), false);
+  // the face of the mouth in bonded brick: each corbel course is two brick courses of stretchers and headers, drawn in by 0.08 a course
+  { const rc = rng(23), pk = new Pack(); for (let i = 0; i <= n; i++) { const a = i < n ? w / 2 - i * d : 0; if (i < n) { bondFace(pk, () => 'brick', 'x', x0, -1, zc - w / 2 - ext, zc - a, y + i * hc, y + (i + 1) * hc, rc, { phase: i }); bondFace(pk, () => 'brick', 'x', x0, -1, zc + a, zc + w / 2 + ext, y + i * hc, y + (i + 1) * hc, rc, { phase: i }); } else bondFace(pk, () => 'brick', 'x', x0, -1, zc - w / 2 - ext, zc + w / 2 + ext, y + n * hc, y + (n + 1) * hc, rc, { phase: i }); }  pk.flush(bag); }
   bag.add('bitumen', box(x1 - 0.06, y + 0.012, zc - w / 2, x1, y + n * hc, zc + w / 2), false);
   col.rect([x0, zc - w / 2 - ext, x1, zc - w / 2], y, y + n * hc); col.rect([x0, zc + w / 2, x1, zc + w / 2 + ext], y, y + n * hc);
 }
@@ -167,8 +170,19 @@ export function bath(el, ctx) {
   };
   bstairs(pz0, pz0 + 3.4, -1);
   bstairs(pz1 - 3.4, pz1, 1);
-  // the lining's wet band above the water (darker, black-green) and the ledge's dark lip
-  bag.add('pottery_dark', box(px0 + 0.04, WL, pz0 + 3.4, px0 + 0.1, WL + 0.45, pz1 - 3.4), false); bag.add('pottery_dark', box(px1 - 0.1, WL, pz0 + 3.4, px1 - 0.04, WL + 0.45, pz1 - 3.4), false);
+  // the tank's long walls above the water: bricks on edge in English bond over the bitumen (the mortar shows black between), the wet courses dark; they stop where the stairs' flights
+  // stand against the wall (docs §14)
+  {
+    const rr = rng(77), n = 12, vs = 3.4, stepTop = (zc) => {
+      if (zc <= pz0 + vs) return yb + B.depth * (Math.min(n - 1, Math.floor((pz0 + vs - zc) / vs * n)) + 1) / n;
+      if (zc >= pz1 - vs) return yb + B.depth * (Math.min(n - 1, Math.floor((zc - (pz1 - vs)) / vs * n)) + 1) / n;
+      return yb;
+    };
+    const wet = () => 'brick', pk = new Pack();
+    bondFace(pk, wet, 'x', px0 + 0.06, 1, pz0 + 0.1, pz1 - 0.1, WL, y - 0.1, rr, { skip: (z, yy) => yy < stepTop(z) + 0.02 });
+    bondFace(pk, wet, 'x', px1 - 0.06, -1, pz0 + 0.1, pz1 - 0.1, WL, y - 0.1, rr, { skip: (z, yy) => yy < stepTop(z) + 0.02, phase: 1 });
+    pk.flush(bag);
+  }
   // the outlet at the south-west corner: the channel across the court under flat cover slabs, the corbelled-arch mouth against the wall's outer face,
   // the covered culvert running on westward flush with the platform to a settling pit with its heap of cleaned sand (docs §13)
   {
@@ -192,8 +206,34 @@ export function bath(el, ctx) {
       for (const [xa2, xb2] of [[px0 + 0.1, px0 + 0.28], [px1 - 0.28, px1 - 0.1]]) bag.add('wood_dark', box(xa2, top + 0.003, zt - 0.05, xb2, top + 0.015, zt + 0.05), false);
     }
   }
+  // the timber treads: planks laid across the steps, their ends in the sockets at the edges on every other step (dark where the water wets them)
+  {
+    const rt = rng(91), n = Math.round(B.depth / 0.2);
+    for (const [z0s, z1s, dv] of [[pz0, pz0 + 3.4, -1], [pz1 - 3.4, pz1, 1]]) {
+      const vs = z1s - z0s;
+      for (let i = 1; i < n - 1; i++) {
+        const top = yb + (B.depth * (i + 1)) / n, za = dv > 0 ? z0s + (vs * i) / n : z1s - (vs * (i + 1)) / n, zb = dv > 0 ? z0s + (vs * (i + 1)) / n : z1s - (vs * i) / n;
+        const bear = i % 2 === 1 ? 0.12 : 0.3, lo = dv > 0 ? za + 0.015 : za + 0.03, hi = dv > 0 ? zb - 0.03 : zb - 0.015;
+        rb(bag, 'timber', px0 + bear, top - 0.004, lo, px1 - bear, top + 0.05, hi, rt);
+      }
+    }
+  }
   // the gallery: stepped piers (a cross in plan) round the court on the north, east and south; beams and the flat roof
-  const GH = 3.3, pier = (x, z) => { bag.add('brick', box(x - 0.5, y, z - 0.3, x + 0.5, y + GH, z + 0.3)); bag.add('brick', box(x - 0.3, y, z - 0.5, x + 0.3, y + GH, z + 0.5)); bag.add('brick', box(x - 0.55, y, z - 0.55, x + 0.55, y + 0.3, z + 0.55)); col.rect([x - 0.55, z - 0.55, x + 0.55, z + 0.55], y, y + GH); };
+  const GH = 3.3, rp = rng(33), pier = (x, z) => {
+    // the pier's plan is stepped: a cross whose re-entrant corners are filled by a square, so that every edge is rebated twice (the "stepped edges" that held the screens),
+    // on a plinth, under a corbelled cap; courses stand a little proud, the three profiles' courses alternating
+    const top = GH - 0.14;
+    bag.add('brick', box(x - 0.3, y, z - 0.5, x + 0.3, y + top, z + 0.5)); bag.add('brick', box(x - 0.5, y, z - 0.3, x + 0.5, y + top - 0.003, z + 0.3)); bag.add('brick', box(x - 0.4, y, z - 0.4, x + 0.4, y + top - 0.006, z + 0.4));
+    bag.add('brick', box(x - 0.55, y, z - 0.55, x + 0.55, y + 0.3, z + 0.55)); bag.add('brick', box(x - 0.52, y + 0.3, z - 0.52, x + 0.52, y + 0.4, z + 0.52));
+    bag.add('brick', box(x - 0.52, y + top, z - 0.52, x + 0.52, y + top + 0.07, z + 0.52)); bag.add('brick', box(x - 0.6, y + top + 0.07, z - 0.6, x + 0.6, y + GH, z + 0.6));
+    const P = 0.37, hb = 0.0925;
+    for (let k = 0, yy = y + 0.46; yy + P < y + top - 0.02; k++, yy += P) {
+      rb(bag, 'brick', x - 0.312, yy, z - 0.512, x + 0.312, yy + hb, z + 0.512, rp);
+      rb(bag, 'brick', x - 0.512, yy + hb, z - 0.312, x + 0.512, yy + 2 * hb, z + 0.312, rp);
+      rb(bag, 'brick', x - 0.412, yy + 2 * hb, z - 0.412, x + 0.412, yy + 3 * hb, z + 0.412, rp);
+    }
+    col.rect([x - 0.6, z - 0.6, x + 0.6, z + 0.6], y, y + GH);
+  };
   const xs = Array.from({ length: 9 }, (_, i) => cx0 + 0.55 + (cx1 - cx0 - 1.1) * i / 8), zs = Array.from({ length: 10 }, (_, i) => cz0 - 0.55 + (cz1 - cz0 + 1.1) * i / 9);
   for (const x of xs) { pier(x, cz0 - 0.55); pier(x, cz1 + 0.55); }
   for (const z of zs.slice(1, -1)) pier(cx1 + 0.55, z);
@@ -246,7 +286,34 @@ export function granary(el, ctx) {
     const r = [x0 + m + i * (bw + ch), z0 + m + j * (bd + ch), x0 + m + i * (bw + ch) + bw, z0 + m + j * (bd + ch) + bd];
     bag.add('brick', box(r[0], y, r[1], r[2], y + PH, r[3])); col.rect(r, y, y + PH);
   }
-  for (const r of [[x0, z0, x1, z0 + m], [x0, z1 - m, x1, z1], [x0, z0, x0 + m, z1], [x1 - m, z0, x1, z1]]) { bag.add('brick', box(r[0], y, r[1], r[2], y + PH, r[3])); col.rect(r, y, y + PH); }
+  // the ring wall of the podium: the south, east and west faces are pierced by the air ducts of the channels between the blocks (narrow, with a corbelled head of two courses),
+  // laid in courses that stand out in turn, on a plinth and under a stepped cornice; the back (north) face is plain (docs §14)
+  {
+    const rg = rng(19), cxs = Array.from({ length: nx - 1 }, (_, i) => x0 + m + (i + 1) * bw + i * ch + ch / 2), czs = Array.from({ length: nz - 1 }, (_, j) => z0 + m + (j + 1) * bd + j * ch + ch / 2);
+    for (const r of [[x0, z0, x1, z0 + m], [x0, z1 - m, x1, z1], [x0, z0, x0 + m, z1], [x1 - m, z0, x1, z1]]) col.rect(r, y, y + PH);
+    const DW = 0.3, DH = 0.56, DY = 0.12;
+    // a face: `along` the axis of the face ('x' faces run along x), the face plane at `at` looking `out`, the wall's depth m, the ducts at `cs`
+    const face = (along, at, out, a0, a1, cs) => {
+      const R = (u0, v0, u1, v1, ya, yb, mat = 'brick') => (along === 'x' ? bag.add(mat, box(u0, y + ya, v0, u1, y + yb, v1)) : bag.add(mat, box(v0, y + ya, u0, v1, y + yb, u1)));
+      const d0 = out > 0 ? at - m : at, d1 = out > 0 ? at : at + m;
+      R(a0, d0, a1, d1, 0, DY); R(a0, d0, a1, d1, DY + DH, PH - 0.16);                       // the plinth course and the beam of brick over the ducts
+      let s = a0;
+      for (const c of cs) { R(s, d0, c - DW / 2, d1, DY, DY + DH); s = c + DW / 2; }
+      R(s, d0, a1, d1, DY, DY + DH);
+      for (const c of cs) {                                                                     // the corbelled head: two courses each drawn in 0.05, the dark channel behind
+        R(c - DW / 2, d0, c - DW / 2 + 0.05, d1, DY + DH - 0.14, DY + DH); R(c + DW / 2 - 0.05, d0, c + DW / 2, d1, DY + DH - 0.14, DY + DH);
+      }
+      const f0 = out > 0 ? at : at - 0.03, f1 = out > 0 ? at + 0.03 : at;
+      const bands = (ua, ub) => { for (let yy = 0.24; yy + 0.0925 < PH - 0.18; yy += 0.185) if (ub - ua > 0.2) { const q = [ua, f0, ub, f1], hh = yy + 0.0925; if (along === 'x') rb(bag, 'brick', q[0], y + yy, q[1], q[2], y + hh, q[3], rg); else rb(bag, 'brick', q[1], y + yy, q[0], q[3], y + hh, q[2], rg); } };
+      let u = a0; for (const c of cs) { bands(u, c - DW / 2 - 0.08); u = c + DW / 2 + 0.08; } bands(u, a1);
+      // the stepped cornice under the deck, and the plinth's offset foot
+      const o0 = out > 0 ? at : at - 0.12, o1 = out > 0 ? at + 0.12 : at, o2 = out > 0 ? at : at - 0.07, o3 = out > 0 ? at + 0.07 : at;
+      R(a0, o2, a1, o3, PH - 0.3, PH - 0.16); R(a0, o0, a1, o1, PH - 0.16, PH); R(a0, o0, a1, o1, 0, 0.18);
+    };
+    face('x', z1, 1, x0, x1, cxs);
+    face('z', x1, 1, z0 + m, z1 - m, czs); face('z', x0, -1, z0 + m, z1 - m, czs);
+    bag.add('brick', box(x0, y, z0, x1, y + PH, z0 + m));
+  }
   const dy = y + PH;
   bag.add('timber', box(x0, dy, z0, x1, dy + 0.18, z1)); col.floor([x0, z0, x1, z1], dy + 0.18); const fy = dy + 0.18;
   // the hall on the deck: walls on three sides, the south open on a verandah of posts, the flat roof
