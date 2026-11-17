@@ -66,6 +66,16 @@ function hangi(el, { bag, col }) {
   add('raupo', fromTriangles(orientOutward(t)));
   add('raupo', box(kx[0] - 0.1, -0.05, kz[0] - 0.08, kx[1] + 0.1, hb - 0.2, kz[0] + 0.02));
   for (const v of kz) { const hh = v === kz[1] ? hf : hb; add('timber', box(kx[0] - 0.2, hh - 0.1, v - 0.05, kx[1] + 0.2, hh, v + 0.05)); }
+  // under the roof: kete hung from the front beam on cords, a string of split fish drying on the back beam, a log to sit on with the stone
+  // for beating fern root (patu aruhe) on it, a bundle of leaves for lining the oven [inferred: the cook's things, §4b; Wikipedia "Hāngī": food wrapped in leaves]
+  for (const u of [-3.3, -2.5, -1.9]) {
+    add('rope_fibre', rod([u, hf - 0.1, kz[1]], [u, hf - 0.62, kz[1]], 0.01, 4));
+    add('wicker', lathe([[0.001, 0], [0.12, 0.01], [0.16, 0.14], [0.12, 0.26], [0.001, 0.26]], 8, null, u, hf - 0.88, kz[1]));
+  }
+  for (let k = 0; k < 4; k++) add('hide_grey', box(kx[0] + 0.3 + k * 0.3, hb - 0.75, kz[0] + 0.1, kx[0] + 0.4 + k * 0.3, hb - 0.12, kz[0] + 0.17));
+  add('bark_dark', rod([kx[0] + 0.2, 0.15, -1.95], [kx[1] - 0.2, 0.15, -1.95], 0.15, 7));
+  add('basalt', box(kx[0] + 0.5, 0.28, -2.0, kx[0] + 0.78, 0.36, -1.9));
+  add('lotus_leaf', box(kx[1] - 0.2, 0.0, kz[0] + 0.2, kx[1] + 0.35, 0.16, kz[0] + 0.7));
 }
 
 /** Flax: one leaf, unit length up +y, a stiff blade keeled down the middle, bending over near the tip. */

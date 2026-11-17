@@ -20,7 +20,7 @@ export async function town() {
   for (const h of v.houses.slice(1)) E.push({ t: 'whare', carved: false, walls: (h.c[0] * 7 + h.c[1] * 3) % 5 < 2 ? 'reed_mat' : 'raupo', roof: (h.c[0] * 3 + h.c[1] * 11) % 7 < 2 ? 'thatch' : 'raupo', ...h, ...(Math.hypot(h.c[0], h.c[1]) > 250 ? { furnished: false } : {}) });
   for (const p of v.pataka.slice(1)) E.push({ t: 'pataka', ...p });
   for (const p of v.pits) E.push({ t: 'rua', ...p });
-  for (const w of v.waka) E.push({ t: 'waka', ...w });
+  v.waka.forEach((w, k) => E.push({ t: k === 1 || k === 4 ? 'wharewaka' : 'waka', ...w }));     // two of the six drawn-up canoes lie under a canoe shed (docs/settlements/maori.md §4g)
   // the gardens south of the hill: plots of mounds in fences, paths between, the climbing path kept clear
   let seed = 1;
   for (let z0 = 154; z0 < RADIUS; z0 += 15) for (let x0 = -116; x0 < 116; x0 += 21) {
@@ -293,7 +293,7 @@ export async function town() {
   E.push({ t: 'pahu', c: [hx + 8, hz + 17], y: top, yaw: 0.5 });                      // the alarm gong on the summit
   // the shared street life (src/objects/life.js) keeps its figures off what it sees as footprints — a `c` with a radius `r`,
   // a rectangle or a line: give every house, store, oven, tree and post one, and mark the way in and the marae ātea as kept clear
-  const RAD = { whare: (e) => e.l / 2 + 0.7, pataka: () => 2.2, rua: () => 2.4, hangi: () => 2.8, waka_build: () => 5, waka: (e) => (e.l ?? 10) / 2, harakeke: () => 0.5, hinaki: () => 0.4, tikouka: () => 0.6, ponga: () => 0.5, pou: () => 0.4, yard: () => 1.4, weaving: () => 1.2, whakairo: () => 2.4, pahu: () => 1.6, kamaka: (e) => (e.r ?? 0.9) + 0.4 };
+  const RAD = { whare: (e) => e.l / 2 + 0.7, pataka: () => 2.2, rua: () => 2.4, hangi: () => 2.8, waka_build: () => 5, waka: (e) => (e.l ?? 10) / 2, wharewaka: (e) => (e.l ?? 10) / 2, harakeke: () => 0.5, hinaki: () => 0.4, tikouka: () => 0.6, ponga: () => 0.5, pou: () => 0.4, yard: () => 1.4, weaving: () => 1.2, whakairo: () => 2.4, pahu: () => 1.6, kamaka: (e) => (e.r ?? 0.9) + 0.4 };
   for (const e of E) if (RAD[e.t] && !e.r) { const at = e.c ?? e.at; if (!at) continue; e.r = RAD[e.t](e); if (!e.c) e.c = at; }
   E.push({ t: 'trim', rect: [-2.6, HILL.c[1] + HILL.ditch, 2.6, RADIUS - 20] });
   E.push({ t: 'trim', rect: [hxm - 10, 11, hxm + 10, 33] });
