@@ -52,7 +52,10 @@ function dryWall(el, { bag, col }) {
   const sect = (i) => {
     const [x, z] = path[i], [nx, nz] = fr[i], y = yOf(path[i]), H = top(i), st = stair(H);
     const P = (u, v) => [x + nx * u, y + v, z + nz * u];
-    return [P(th / 2, -1), ...st.map(([u, v]) => P(u, v)), ...st.map(([u, v]) => P(-u, v)).reverse(), P(-th / 2, -1)];
+    // each course of each face sits a little in or out of line from one stretch to the next (slabs of different
+    // thickness: the face is a relief of beds, not a ruled stair), within about 4 cm
+    const jt = (idx, sd) => (h >= 3.5 ? (hash(i * 17 + (idx >> 1), 90 + sd) - 0.4) * 0.07 : 0);
+    return [P(th / 2, -1), ...st.map(([u, v], idx) => P(u + jt(idx, 0), v)), ...st.map(([u, v], idx) => P(-u - jt(idx, 1), v)).reverse(), P(-th / 2, -1)];
   };
   const tri = [], S = path.map((_, i) => sect(i)), segs = closed ? n : n - 1;
   // each face turned by its own side of the wall (outer, top, inner): a curved wall's faces cannot be
@@ -137,11 +140,11 @@ function dryWall(el, { bag, col }) {
       const f = len[i] / total;
       if (f < ch[0] || f > ch[1]) continue;
       const a = path[i], b = path[(i + 1) % n], y = yOf(a), H = Math.min(top(i), top((i + 1) % n));
-      const off = (v) => faceW(v, H) + 0.03;
+      const off = (v) => faceW(v, H) + 0.07;
       const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz), ux = dx / L, uz = dz / L, nx = uz, nz = -ux;
       for (const v0 of [H - 1.55, H - 0.6]) {
         const o = off(v0);
-        bag.add('granite_grey', orientedBox([a[0] + nx * o, a[1] + nz * o], [b[0] + nx * o, b[1] + nz * o], 0.1, y + v0, y + v0 + 0.15, 0.02));
+        bag.add('granite_grey', orientedBox([a[0] + nx * o, a[1] + nz * o], [b[0] + nx * o, b[1] + nz * o], 0.2, y + v0, y + v0 + 0.2, 0.02));
       }
       const o = off(H - 1.0), mid = y + H - 1.0;
       for (let t = 0; t < L - 0.05; t += 0.4) {
@@ -150,8 +153,8 @@ function dryWall(el, { bag, col }) {
         const q0 = up ? mid - 0.32 : mid + 0.18, q1 = up ? mid + 0.18 : mid - 0.32;
         // one block on edge, sloping from q0 to q1 across the step: a thin parallelogram
         const P = (p, yy, d) => [p[0] + nx * d, yy, p[1] + nz * d];
-        const a0 = P(p0, q0, 0), a1 = P(p1, q1, 0), a2 = P(p1, q1 + 0.14, 0), a3 = P(p0, q0 + 0.14, 0);
-        const b0 = P(p0, q0, 0.09), b1 = P(p1, q1, 0.09), b2 = P(p1, q1 + 0.14, 0.09), b3 = P(p0, q0 + 0.14, 0.09);
+        const a0 = P(p0, q0, 0.02), a1 = P(p1, q1, 0.02), a2 = P(p1, q1 + 0.2, 0.02), a3 = P(p0, q0 + 0.2, 0.02);
+        const b0 = P(p0, q0, 0.15), b1 = P(p1, q1, 0.15), b2 = P(p1, q1 + 0.2, 0.15), b3 = P(p0, q0 + 0.2, 0.15);
         const blk = [], qd = (A, B, C, D) => blk.push(...A, ...B, ...C, ...A, ...C, ...D);
         qd(b0, b1, b2, b3); qd(a3, a2, b2, b3); qd(a0, b0, b3, a3); qd(a1, a2, b2, b1); qd(a0, a1, b1, b0);
         tris.push(...orientOutward(blk));     // each block by its own centre
@@ -168,7 +171,7 @@ function dryWall(el, { bag, col }) {
       if (f < f0 || f > f1) continue;
       const a = path[i], b = path[(i + 1) % n], y = yOf(a), H = Math.min(top(i), top((i + 1) % n)), L = Math.hypot(b[0] - a[0], b[1] - a[1]);
       if (L < 0.05) continue;
-      const ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = uz, nz = -ux, off = (v) => faceW(v, H) - 0.02;
+      const ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = uz, nz = -ux, off = (v) => faceW(v, H) + 0.0;
       for (const v0 of [H - 0.95, H - 0.45]) { const o = off(v0); bag.add(G, orientedBox([a[0] + nx * o, a[1] + nz * o], [b[0] + nx * o, b[1] + nz * o], 0.2, y + v0, y + v0 + 0.14, 0.02)); }
       const o = off(H - 0.8);
       for (let t = 0.06; t < L - 0.2; t += 0.46) {
@@ -189,7 +192,7 @@ function dryWall(el, { bag, col }) {
       const side = hash(j, 13) > 0.5 ? 1 : -1, kc = Math.min(K - 5, Math.floor(Math.pow(hash(j, 12), 1.7) * (K - 4)));
       if (kc < 0) continue;
       const H = top(i), y = yOf(path[i]), v0 = H * kc / K, vh = H / K, rw = 0.12 + hash(j, 14) * 0.5, rv = vh * (0.22 + hash(j, 15) * 0.2);
-      const cu = side * (faceW(v0 + 0.02, H) + 0.012), cx = path[i][0] + nx * cu, cz = path[i][1] + nz * cu, cy = y + v0 + vh * 0.5;
+      const cu = side * (faceW(v0 + 0.02, H) + 0.045), cx = path[i][0] + nx * cu, cz = path[i][1] + nz * cu, cy = y + v0 + vh * 0.5;
       const ring = [];
       for (let k = 0; k < 7; k++) { const t = k / 7 * Math.PI * 2, jr = 0.7 + 0.3 * hash(j * 7 + k, 16); ring.push([cx + tx * Math.cos(t) * rw * jr, cy + Math.sin(t) * rv * jr, cz + tz * Math.cos(t) * rw * jr]); }
       fan(hash(j, 17) < 0.2 ? oT : gT, [cx, cy, cz], ring, [nx * side, 0.1, nz * side]);
@@ -202,9 +205,9 @@ function dryWall(el, { bag, col }) {
   if (el.drains) for (const f of el.drains) {
     const i = Math.min(n - 2, Math.max(1, len.findIndex((l) => l >= f * total))), a = path[i], b = path[i + 1], L0 = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, tx = (b[0] - a[0]) / L0, tz = (b[1] - a[1]) / L0, nx = tz, nz = -tx, y = yOf(a), u = faceW(0.1);
     const P = (t, uu) => [a[0] + tx * t + nx * uu, a[1] + tz * t + nz * uu];
-    bag.add('opening', orientedBox(P(-0.17, u + 0.012), P(0.17, u + 0.012), 0.04, y, y + 0.34));
-    for (const t of [-0.27, 0.27]) bag.add('granite_grey', orientedBox(P(t - 0.09, u + 0.06), P(t + 0.09, u + 0.06), 0.2, y - 0.02, y + 0.4));
-    bag.add('granite_grey', orientedBox(P(-0.5, u + 0.07), P(0.5, u + 0.07), 0.28, y + 0.34, y + 0.46));
+    bag.add('opening', orientedBox(P(-0.17, u + 0.05), P(0.17, u + 0.05), 0.04, y, y + 0.34));
+    for (const t of [-0.27, 0.27]) bag.add('granite_grey', orientedBox(P(t - 0.09, u + 0.08), P(t + 0.09, u + 0.08), 0.2, y - 0.02, y + 0.4));
+    bag.add('granite_grey', orientedBox(P(-0.5, u + 0.09), P(0.5, u + 0.09), 0.28, y + 0.34, y + 0.46));
   }
   // monoliths: tall stones standing on the wall top, a few metres apart
   if (el.monoliths) {
@@ -225,19 +228,24 @@ function dryWall(el, { bag, col }) {
 function coneTower(el, { bag, col }) {
   const [x, z] = el.c, r = el.r ?? 2.7, h = el.h ?? 10, y = el.y ?? 0, rt = r * 0.58;
   const R = (t) => r + (rt - r) * t + r * 0.045 * Math.sin(Math.PI * t);
-  const prof = [[r + 0.04, -0.5], [r + 0.04, 0]];
-  for (let k = 1; k <= 10; k++) prof.push([R(k / 10), h * k / 10]);
-  prof.push([0.001, h]);
-  bag.add(G, lathe(prof, 28, null, x, y, z));
+  // laid in courses (zimfieldguide: sloping sides swelling slightly; the courses of the neighbouring walls): each course a
+  // step in, 0.33 m, its stones a little proud or sunk one from the next
+  const NC = Math.round(h / 0.33), NS = 40, prof = [[r + 0.08, -0.5], [r + 0.08, 0]];
+  for (let k = 0; k < NC; k++) {
+    const t0 = k / NC, t1 = (k + 1) / NC, rr = R((t0 + t1) / 2) + 0.045 * (1 - t0) - 0.02;
+    prof.push([rr, h * t0], [rr, h * t1 - 0.012]);
+  }
+  prof.push([R(1) - 0.02, h], [0.001, h]);
+  bag.add(G, lathe(prof, NS, (th, i) => 1 + 0.022 * (hash(Math.floor(i / 2) * 41 + Math.round(th / (Math.PI * 2) * NS) % NS, 5) - 0.45), x, y, z));
   if (el.dentelle !== false && h > 6) {
     // the dentelle 0.9 m below the top: a plain course standing out, the teeth, a plain course over them
     const yd = y + h - 0.9, rd = R((h - 0.9) / h);
-    bag.add(G, lathe([[0.001, 0], [rd + 0.06, 0], [rd + 0.06, 0.16], [0.001, 0.16]], 28, null, x, yd - 0.16, z));
-    bag.add(G, lathe([[0.001, 0], [rd + 0.04, 0], [rd + 0.04, 0.16], [0.001, 0.16]], 28, null, x, yd + 0.24, z));
+    bag.add(G, lathe([[0.001, 0], [rd + 0.16, 0], [rd + 0.16, 0.16], [0.001, 0.16]], 28, null, x, yd - 0.16, z));
+    bag.add(G, lathe([[0.001, 0], [rd + 0.15, 0], [rd + 0.15, 0.16], [0.001, 0.16]], 28, null, x, yd + 0.24, z));
     const n = Math.round(Math.PI * 2 * rd / 0.5);
     for (let k = 0; k < n; k++) {
       const a = k / n * Math.PI * 2, ux = Math.cos(a), uz = Math.sin(a), tx = -uz, tz = ux;
-      bag.add(G, orientedBox([x + ux * (rd - 0.15) - tx * 0.13, z + uz * (rd - 0.15) - tz * 0.13], [x + ux * (rd - 0.15) + tx * 0.13, z + uz * (rd - 0.15) + tz * 0.13], 0.42, yd, yd + 0.24));
+      bag.add(G, orientedBox([x + ux * (rd - 0.02) - tx * 0.13, z + uz * (rd - 0.02) - tz * 0.13], [x + ux * (rd - 0.02) + tx * 0.13, z + uz * (rd - 0.02) + tz * 0.13], 0.42, yd, yd + 0.24));
     }
   }
   col.circle(x, z, r, y, y + h);
@@ -263,6 +271,23 @@ function platform(el, { bag, col }) {
     }
   }
   col.circle(x, z, r, y, y + h); if (!el.tiers) col.floor([x - r * 0.7, z - r * 0.7, x + r * 0.7, z + r * 0.7], y + h);
+}
+/**
+ * entrance_steps: the stepped threshold of an entrance { c, r, y, a (the way in) }: concentric rounded treads of dressed granite
+ * (the entrances of the Great Enclosure had rounded, solid jambs and stepped, curved thresholds: zimfieldguide), three treads
+ * 0.14 m high, each a course of slabs with its edge worn round, the topmost faced with dhaka.
+ */
+function entranceSteps(el, { bag, col }) {
+  const [x, z] = el.c, r = el.r ?? 3.4, y = el.y ?? 0, a = el.a ?? 0;
+  for (let k = 0; k < 3; k++) {
+    const rk = r - k * 0.75, y0 = y + k * 0.14, y1 = y0 + 0.14 + (k ? 0 : 0.06);
+    const n = (th, i) => 1 + 0.012 * (hash(Math.round(th * 6 / Math.PI) % 12 + k * 13, 8 + i) - 0.5);
+    bag.add(G, lathe([[rk, y0 - 0.2], [rk, y1 - 0.025], [rk - 0.03, y1], [0.001, y1]], 36, n, x, 0, z).translate(0, 0, 0));
+    if (k === 2) bag.add('mud_plaster', lathe([[rk - 0.1, y1], [rk - 0.14, y1 + 0.02], [0.001, y1 + 0.02]], 36, null, x, 0, z));
+    col.circle(x, z, rk - 0.05, y0, y1);
+  }
+  col.floor([x - r * 0.4, z - r * 0.4, x + r * 0.4, z + r * 0.4], y + 0.42 + 0.02);
+  void a;
 }
 /**
  * soapstone_bird: a bird of soapstone on its column { at, rot, y, s, seed } (Zimbabwe Bird: ~40 cm
@@ -319,9 +344,14 @@ function termiteMound(el, { bag, col }) {
 }
 /** monolith: a tall natural slab of granite standing in a socket { at, rot, h, y }. */
 function monolith(el, { bag, col }) {
-  const [x, z] = el.at, y = el.y ?? 0, a = el.rot ?? 0, h = el.h ?? 2.2, ux = Math.cos(a), uz = Math.sin(a);
-  bag.add('granite_grey', frustum([-0.22, -0.11, 0.22, 0.11], -0.4, h, 0.06, 0.02, 0.03, 0.02).rotateY(-a).translate(x, y, z));
-  void ux; void uz;
+  const [x, z] = el.at, y = el.y ?? 0, a = el.rot ?? 0, h = el.h ?? 2.2, sd = Math.floor(x * 7 + z * 3);
+  // a split slab: broad at the foot, tapering, the top rounded and a little off true, the faces not flat; a ring of packing
+  // stones round its socket
+  const n = (th, i) => 1 + 0.07 * Math.sin(th * 2 + i * 1.3 + sd) + 0.03 * Math.sin(th * 5 + i + sd);
+  const g = lathe([[0.26, -0.4], [0.25, 0.05], [0.22, h * 0.35], [0.19, h * 0.7], [0.15, h * 0.92], [0.09, h * 0.985], [0.001, h]], 8, n);
+  g.scale(1, 1, 0.5); g.rotateY(-a); g.translate(x, y, z);
+  bag.add('granite_grey', g);
+  for (let k = 0; k < 5; k++) { const t = k * 1.26 + sd, c = Math.cos(t), s2 = Math.sin(t); bag.add('granite_grey', orientedBox([x + c * 0.3 - s2 * 0.1, z + s2 * 0.3 + c * 0.1], [x + c * 0.3 + s2 * 0.1, z + s2 * 0.3 - c * 0.1], 0.22, y - 0.05, y + 0.1 + (k % 2) * 0.06, 0.02)); }
   col.circle(x, z, 0.25, y, y + h);
 }
 /**
@@ -842,6 +872,6 @@ function daraHouse(el, { bag, col, lights }) {
 }
 registerStyle('zimbabwe', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, dry_wall: dryWall, cone_tower: coneTower, daga_hut: hut, platform, soapstone_bird: soapstoneBird, monolith, boulder, stone_steps: stoneSteps, daga_yard: dagaYard, thatch_roof: thatchRoof, kraal, trade_goods: tradeGoods, granary, compound, homestead_goods: homesteadGoods, millet_plot: milletPlot, smithy, stone_carver: stoneCarver, termite_mound: termiteMound, pottery_firing: potteryFiring, dara_house: daraHouse },
+  elements: { ...STYLES.qing.elements, dry_wall: dryWall, cone_tower: coneTower, daga_hut: hut, platform, soapstone_bird: soapstoneBird, monolith, boulder, stone_steps: stoneSteps, entrance_steps: entranceSteps, daga_yard: dagaYard, thatch_roof: thatchRoof, kraal, trade_goods: tradeGoods, granary, compound, homestead_goods: homesteadGoods, millet_plot: milletPlot, smithy, stone_carver: stoneCarver, termite_mound: termiteMound, pottery_firing: potteryFiring, dara_house: daraHouse },
   objects: {},
 });

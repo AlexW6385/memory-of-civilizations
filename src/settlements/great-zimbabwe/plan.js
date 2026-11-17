@@ -22,6 +22,8 @@ E.push({ t: 'platform', c: PLATFORM, r: 3.8, h: 0.9, step: Math.PI * 1.0, tiers:
 // (zimfieldguide: courtyards paved with dhaka "often with raised kerbs" [placing inferred]); two round platforms each with its monolith
 E.push({ t: 'daga_yard', c: TOWER.c, r: [5.4, 5.4], y: 0 });
 E.push({ t: 'daga_yard', c: [43, 85.5], r: [9, 5], y: 0 });
+// the stepped, rounded threshold in the mouth of the entrance, on the forecourt, across the way in (zimfieldguide: rounded entrances)
+E.push({ t: 'entrance_steps', c: [44.5, 86.5], r: 3.4, y: 0.06 });
 for (const [px, pz, pr, mh] of [[30.5, 97, 1.7, 2.1], [57.5, 97.5, 1.4, 1.8]]) {
   E.push({ t: 'platform', c: [px, pz], r: pr, h: 0.7, step: Math.PI * 0.5 });
   E.push({ t: 'monolith', at: [px, pz], y: 0.64, rot: px * 0.3, h: mh });
