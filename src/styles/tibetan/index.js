@@ -565,8 +565,8 @@ function house(el, ctx) {
     const rx = x0 + 1 + fr() * Math.max(0, W - 6), rz = z1 + 1.9;
     for (const ex of [rx, rx + 3.4]) for (const sg of [-1, 1]) bag.add('timber', rod([ex, y, rz + sg * 0.55], [ex, y + 1.9, rz], 0.045, 5));
     for (const hy of [0.8, 1.4, 1.9]) bag.add('timber', rod([rx, y + hy, rz], [rx + 3.4, y + hy, rz], 0.04, 5));
-    for (let i = 0; i < 9; i++) { const bx = rx + 0.2 + i * 0.36, hy = fr() < 0.5 ? 0.8 : 1.4; bag.add('thatch', frustum([bx - 0.14, rz - 0.1, bx + 0.14, rz + 0.1], y + hy - 0.65, y + hy + 0.05, 0, 0, 0, 0)); bag.add('rope_fibre', box(bx - 0.145, y + hy - 0.25, rz - 0.105, bx + 0.145, y + hy - 0.21, rz + 0.105)); }
-    col.rect([rx - 0.1, rz - 0.55, rx + 3.5, rz + 0.55], y, y + 1.9);
+    for (let i = 0; i < 9; i++) { const bx = rx + 0.2 + i * 0.36, hy = fr() < 0.5 ? 0.8 : 1.4; bag.add('thatch', frustum([bx - 0.14, rz - 0.1, bx + 0.14, rz + 0.1], y + hy - 0.65, y + hy + 0.05, 0, 0, 0, 0)); col.rect([bx - 0.14, rz - 0.1, bx + 0.14, rz + 0.1], y + hy - 0.65, y + hy + 0.05); bag.add('rope_fibre', box(bx - 0.145, y + hy - 0.25, rz - 0.105, bx + 0.145, y + hy - 0.21, rz + 0.105)); }
+    for (const ex of [rx, rx + 3.4]) col.rect([ex - 0.08, rz - 0.4, ex + 0.08, rz + 0.4], y, y + 1.0);
   }
   if (third) {
     const r3 = [x0 + 1.3, z0 + 1.0, x0 + 1.3 + Math.min(W - 2.6, 5 + rand() * 3), z0 + dn - 0.3];
@@ -1018,6 +1018,66 @@ function potalaHall(el, { bag, col }) {
   for (let i = 0; i + 1 < lines.length; i++) if (lines[i] * lines[i + 1] > 0) mid.push((lines[i] + lines[i + 1]) / 2);
   for (const c of mid) L(4.6, span - 2.5, c - 0.42, c + 0.42, y + 0.03, y + 0.2, 'cloth_red');
 }
+
+/**
+ * tomb_chapel: the hall of the Fifth Dalai Lama's funerary stupa in the Red Palace { rect, y, h, c: [x, z] (the stupa's centre),
+ * pillars: [[x, z], …], keep: [x0, z0, x1, z1] (the stair's shaft, left clear), seed }: a polished floor, the red pillars wrapped
+ * in brocade bands under painted capitals and brackets carrying the beams, joists and coffered boards; the north wall painted with
+ * scenes over a red dado, the others in the dado and a painted band; the stupa of gilded sandalwood on its stepped plinth — vase,
+ * harmika, thirteen rings, parasol and finial — hung with white scarves, the offering table before it with its butter lamps,
+ * the seven bowls of water and heaps of rice, and the lamps' light.
+ */
+function tombChapel(el, { bag, col, lights }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y, h = el.h, yc = y + h, yb = yc - 0.95, [cx, cz] = el.c, rand = rng(el.seed || 3), keep = el.keep;
+  bag.add('lacquer_chestnut', box(x0, y, z0, x1, y + 0.03, z1));
+  // pillars
+  for (const [x, z] of el.pillars) {
+    bag.add('granite_grey', box(x - 0.38, y + 0.03, z - 0.38, x + 0.38, y + 0.2, z + 0.38));
+    bag.add('lacquer_red', lathe([[0.27, 0], [0.26, yb - y - 1.3], [0.28, yb - y - 1.25]], 12, null, x, y + 0.2, z));
+    for (const v of [0.4, 0.4 + (yb - y) * 0.4, 0.4 + (yb - y) * 0.7]) bag.add('cloth_ochre', lathe([[0.282, 0], [0.282, 0.26]], 12, null, x, y + v, z));
+    bag.add('paint_dancheong', box(x - 0.36, yb - 1.25, z - 0.36, x + 0.36, yb - 0.85, z + 0.36));
+    bag.add('lacquer_red', frustum([x - 0.5, z - 0.22, x + 0.5, z + 0.22], yb - 0.85, yb - 0.55, -0.2, -0.2, 0, 0));
+    bag.add('paint_dancheong', frustum([x - 0.75, z - 0.22, x + 0.75, z + 0.22], yb - 0.55, yb, -0.6, -0.6, 0, 0));
+    col.circle(x, z, 0.32, y, yb);
+  }
+  // beams along x over the pillar rows, joists across, boards (the stair's shaft left open)
+  const seg = (a, b, f) => { const [kx0, , kx1] = keep; if (b <= kx0 || a >= kx1) { f(a, b); return; } if (a < kx0) f(a, kx0); if (b > kx1) f(kx1, b); };
+  for (const z of [...new Set(el.pillars.map((p) => p[1]))]) seg(x0, x1, (a, b) => { bag.add('lacquer_red', box(a, yb, z - 0.24, b, yb + 0.46, z + 0.24)); bag.add('paint_dancheong', box(a, yb + 0.11, z - 0.255, b, yb + 0.33, z + 0.255)); });
+  for (let x = x0 + 0.5; x < x1 - 0.2; x += 0.95) { if (x > keep[0] - 0.2 && x < keep[2] + 0.2) continue; bag.add('paint_caihua', box(x - 0.08, yb + 0.46, z0, x + 0.08, yb + 0.64, z1)); }
+  { const [kx0, kz0, kx1] = keep; bag.add('ceiling_coffer', box(x0, yb + 0.64, z0, kx0 - 0.05, yc - 0.02, z1)); bag.add('ceiling_coffer', box(kx1 + 0.05, yb + 0.64, z0, x1, yc - 0.02, z1)); bag.add('ceiling_coffer', box(kx0 - 0.05, yb + 0.64, z0, kx1 + 0.05, yc - 0.02, kz0 - 0.05)); }
+  // the walls: the north wall painted with scenes (three rows), the dado and a painted band round the rest
+  mural(bag, { a: [x0, z0], b: [x1, z0], y: y + 0.03, h: 5.4, seed: 4 });
+  for (const [a, b] of [[[x1, z1], [x0, z1]], [[x0, z1], [x0, z0]], [[x1, z0], [x1, z1]]]) {
+    const L = Math.hypot(b[0] - a[0], b[1] - a[1]), u = [(b[0] - a[0]) / L, (b[1] - a[1]) / L], n = [-u[1], u[0]], P = (s2, v) => [a[0] + u[0] * s2 + n[0] * 0.006, y + v, a[1] + u[1] * s2 + n[1] * 0.006];
+    for (const [m, v0, v1] of [['limewash_red', 0.03, 1.1], ['cloth_ochre', 1.1, 1.2], ['limewash_red', 5.0, 5.4], ['cloth_ochre', 4.95, 5.0]]) face(bag, m, n, P(0, v0), P(L, v0), P(L, v1), P(0, v1));
+    for (let i = 0; i < Math.round(L / 0.6); i++) { const s0 = i * 0.6 + 0.08, s1 = s0 + 0.44; face(bag, i % 2 ? 'cloth_green' : 'paint_blue', n, P(s0, 5.05), P(s1, 5.05), P(s1, 5.35), P(s0, 5.35)); }
+  }
+  // the stupa: a stepped plinth, the vase, the harmika, thirteen rings, the parasol and the finial, all gilt with bands of lapis and carnelian
+  const base = [[5.4, 0.45], [4.8, 0.4], [4.2, 0.4], [3.6, 0.45]];
+  let yy = y + 0.03;
+  base.forEach(([w, hh], i) => { bag.add(i % 2 ? 'gilt_bronze' : 'lacquer_red', box(cx - w / 2, yy, cz - w / 2, cx + w / 2, yy + hh, cz + w / 2)); bag.add('gilt_bronze', box(cx - w / 2 - 0.04, yy + hh - 0.06, cz - w / 2 - 0.04, cx + w / 2 + 0.04, yy + hh, cz + w / 2 + 0.04)); yy += hh; });
+  col.rect([cx - 2.7, cz - 2.7, cx + 2.7, cz + 2.7], y, yy + 0.1);
+  bag.add('gilt_bronze', lathe([[0.001, 0], [1.2, 0], [1.45, 0.3], [1.55, 1.0], [1.4, 1.8], [1.0, 2.3], [0.8, 2.5], [0.001, 2.5]], 16, null, cx, yy, cz));
+  for (const [v, r] of [[0.35, 1.47], [1.0, 1.565], [1.8, 1.41]]) bag.add('inlay_lapis', lathe([[r, v], [r, v + 0.07]], 16, null, cx, yy, cz));
+  for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2; bag.add(i % 2 ? 'inlay_carnelian' : 'inlay_jade', lathe([[0.001, 0], [0.09, 0.03], [0.001, 0.14]], 6, null, cx + Math.cos(a) * 1.56, yy + 1.0, cz + Math.sin(a) * 1.56)); }
+  const vy = yy + 2.5;
+  bag.add('gilt_bronze', box(cx - 0.62, vy, cz - 0.62, cx + 0.62, vy + 0.6, cz + 0.62));
+  for (const [ux, uz] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) { const fx = cx + ux * 0.625, fz = cz + uz * 0.625, n = [ux, uz]; face(bag, 'cloth_white', n, [fx - uz * 0.2 + ux * 0, vy + 0.22, fz + ux * 0.2], [fx + uz * 0.2, vy + 0.22, fz - ux * 0.2], [fx + uz * 0.2, vy + 0.3, fz - ux * 0.2], [fx - uz * 0.2, vy + 0.3, fz + ux * 0.2]); }
+  for (let i = 0; i < 13; i++) bag.add('gilt_bronze', lathe([[0.001, 0], [0.52 - i * 0.03, 0], [0.5 - i * 0.03, 0.13]], 12, null, cx, vy + 0.6 + i * 0.13, cz));
+  const ty = vy + 0.6 + 13 * 0.13;
+  bag.add('gilt_bronze', lathe([[0.001, 0], [0.7, 0], [0.8, 0.1], [0.2, 0.34], [0.001, 0.34]], 14, null, cx, ty, cz));
+  bag.add('gilt_bronze', lathe([[0.001, 0], [0.1, 0.02], [0.1, 0.2], [0.001, 0.34]], 8, null, cx, ty + 0.34, cz));
+  // scarves hung round the plinth's upper step and the vase's foot
+  for (let i = 0; i < 18; i++) { const a = (i + rand() * 0.6) / 18 * Math.PI * 2, r = 1.75, px = cx + Math.cos(a) * r, pz = cz + Math.sin(a) * r, ux = -Math.sin(a), uz = Math.cos(a); if (Math.abs(Math.cos(a)) < 0.2 && Math.sin(a) > 0) continue; face(bag, 'cloth_white', [Math.cos(a), Math.sin(a)], [px - ux * 0.1, yy + 0.25, pz - uz * 0.1], [px + ux * 0.1, yy + 0.25, pz + uz * 0.1], [px + ux * 0.1, yy + 0.25 + 0.5 + rand() * 0.2, pz + uz * 0.1], [px - ux * 0.1, yy + 0.25 + 0.5 + rand() * 0.2, pz - uz * 0.1]); }
+  // the offering table before the stupa (on the south side): lamps, water bowls, rice
+  const tz = cz + 3.4, tw = 3.2;
+  bag.add('lacquer_red', box(cx - tw, y + 0.03, tz - 0.4, cx + tw, y + 0.85, tz + 0.4)); bag.add('gilt_bronze', box(cx - tw - 0.03, y + 0.82, tz - 0.43, cx + tw + 0.03, y + 0.88, tz + 0.43)); bag.add('cloth_ochre', box(cx - tw + 0.1, y + 0.88, tz - 0.3, cx + tw - 0.1, y + 0.89, tz + 0.3));
+  col.rect([cx - tw, tz - 0.4, cx + tw, tz + 0.4], y, y + 0.9);
+  for (let i = 0; i < 21; i++) { const px = cx - tw + 0.3 + i * (2 * tw - 0.6) / 20; bag.add('gilt_bronze', lathe([[0.04, 0], [0.025, 0.08], [0.07, 0.14], [0.06, 0.17], [0.001, 0.17]], 8, null, px, y + 0.89, tz + 0.2)); bag.add('flame', lathe([[0.001, 0], [0.014, 0.016], [0.001, 0.05]], 5, null, px, y + 1.06, tz + 0.2)); }
+  for (let i = 0; i < 7; i++) { const px = cx - 0.9 + i * 0.3; bag.add('bronze', lathe([[0.001, 0], [0.04, 0], [0.06, 0.07], [0.055, 0.075], [0.001, 0.02]], 8, null, px, y + 0.89, tz - 0.1)); }
+  for (const sg of [-1, 1]) bag.add('limestone', lathe([[0.001, 0], [0.14, 0], [0.12, 0.1], [0.001, 0.26]], 8, null, cx + sg * 2.3, y + 0.89, tz - 0.1));
+  if (lights) for (const [dx, dz, i] of [[0, 3.0, 2.4], [-2.4, 2.8, 1.8], [2.4, 2.8, 1.8], [0, -3.0, 1.6]]) lights.push({ at: [cx + dx, y + 1.3, cz + dz], color: '#ffb46b', intensity: i, distance: 9 });
+}
 /** mani_wheel: a hand prayer wheel held upright { at: [x, z] (the fist), y }: the wooden handle, the embossed copper drum on its pin with its cap, the weight on its chain standing out from the drum. */
 function maniWheel(el, { bag }) {
   const [x, z] = el.at, y = el.y, a = el.rot ?? 0;
@@ -1182,6 +1242,6 @@ const { teaSeats: _ts, ...SHOPS } = makeShops({ face, doorway, win, thangka, san
 export const teaSeats = _ts;
 registerStyle('tibetan', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, dzong, dung_wall: dungWall, sang_khun: (el, { bag }) => sangkhun(bag, el.at[0], el.y ?? 0, el.at[1], el.dir), lapse: (el, { bag }) => twigs(bag, el.at[0], el.y ?? 0, el.at[1], rng(el.seed || 5)), golden_roof: goldenRoof, banner_pole: bannerPole, tibetan_house: house, round_tower: roundTower, zigzag, doring, sangkhang, stone_heap: stoneHeap, shol_gate: sholGate, triple_stair: tripleStair, koku, flight, landing, doorway, skas, potala_hall: potalaHall, parkhang, mani_wheel: maniWheel, lhakhang, mani_gallery: maniGallery, ...SHOPS },
+  elements: { ...STYLES.qing.elements, dzong, dung_wall: dungWall, sang_khun: (el, { bag }) => sangkhun(bag, el.at[0], el.y ?? 0, el.at[1], el.dir), lapse: (el, { bag }) => twigs(bag, el.at[0], el.y ?? 0, el.at[1], rng(el.seed || 5)), golden_roof: goldenRoof, banner_pole: bannerPole, tibetan_house: house, round_tower: roundTower, zigzag, doring, sangkhang, stone_heap: stoneHeap, shol_gate: sholGate, triple_stair: tripleStair, koku, flight, landing, doorway, skas, potala_hall: potalaHall, tomb_chapel: tombChapel, parkhang, mani_wheel: maniWheel, lhakhang, mani_gallery: maniGallery, ...SHOPS },
   objects: {},
 });
