@@ -85,6 +85,24 @@ const KINDS = {
     p.b('rope_fibre', -0.01, 1.1, -0.41, 0.01, 2.5, -0.39);
     p.round(0, 0, 0.85, 0, 0.55);
   },
+  // an ice well (bing jing) of the Ice Well Terrace: a round curb of dressed stone, half under a plank lid, a winch on two posts with its rope and basket, the cut blocks of ice
+  // packed in straw beside it
+  icewell(p, o) {
+    p.l('bluestone', [[1.1, 0], [1.1, 0.7], [0.8, 0.7], [0.8, 0.0]], 0, 0, 0, 12);
+    p.l('bluestone', [[1.16, 0.7], [1.16, 0.78], [0.76, 0.78], [0.76, 0.7]], 0, 0, 0, 12);
+    p.l('water', [[0.78, 0.16], [0.001, 0.16]], 0, 0, 0, 12);
+    for (let k = 0; k < 4; k++) p.b('timber', -0.75 + k * 0.38, 0.78, -0.78, -0.75 + k * 0.38 + 0.34, 0.84, -0.3);
+    for (const q of [-1, 1]) p.b('wood_dark', q * 1.3 - 0.07, 0, -0.07, q * 1.3 + 0.07, 2.1, 0.07);
+    p.b('wood_dark', -1.45, 1.98, -0.06, 1.45, 2.1, 0.06);
+    p.b('rope_fibre', -0.01, 0.95, 0.02, 0.01, 1.98, 0.04);
+    p.l('wicker', [[0.2, 0], [0.26, 0.2], [0.001, 0.2]], 0, 0.8, 0.03, 8);
+    for (let r = 0; r < 2; r++) for (let q = 0; q < 3 - r; q++) {
+      p.b('thatch', 1.7 + q * 0.62 + r * 0.31, r * 0.4, 0.6, 2.2 + q * 0.62 + r * 0.31, r * 0.4 + 0.04, 1.2);
+      p.b('chalk', 1.72 + q * 0.62 + r * 0.31, r * 0.4 + 0.04, 0.62, 2.18 + q * 0.62 + r * 0.31, r * 0.4 + 0.4, 1.18);
+    }
+    p.round(0, 0, 1.16, 0, 0.8); p.solid(1.7, 0, 0.6, 3.1, 0.8, 1.2);
+    for (const q of [-1, 1]) p.round(q * 1.3, 0, 0.1, 0, 2.1);
+  },
   bench(p, o) {
     const L = o.len ?? 1.8;
     p.b('wood_ochre', -L / 2, 0.42, -0.16, L / 2, 0.47, 0.16);

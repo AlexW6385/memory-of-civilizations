@@ -34,6 +34,20 @@ function weather(F, u0, u1, v0, H, wm, rand, P = 0.3, streaks = true) {
   F.b('mud_plaster', u0, P, v0 - 0.04, u0 + 0.45, P + 0.9, v0 - 0.01, false);
 }
 
+/** The gate-house (menlou) of a rich court or an office: over the gate's passage a plastered upper room under a hipped roof, resting on the wall tops either side (seen on the Han tomb models of houses); lattice windows on the lane, a hung lamp. */
+function gateHouse(F, gateU, gateW, h, gh, t, wm, rand) {
+  const hw = gateW / 2 + 0.95, y0 = h + 0.3, y1 = gh + 2.3;
+  // the side piers on the wall tops (the passage's width stays open to the lintel)
+  for (const sg of [-1, 1]) F.b(wm, gateU + sg * (gateW / 2 + 0.2) - (sg < 0 ? 0.75 : 0), y0, -0.12, gateU + sg * (gateW / 2 + 0.2) + (sg < 0 ? 0 : 0.75), gh, t + 0.12, false);
+  F.b(wm, gateU - hw, gh, -0.15, gateU + hw, y1, t + 0.15, false);
+  F.b('lime_plaster', gateU - hw - 0.03, gh, -0.18, gateU + hw + 0.03, gh + 0.7, -0.14, false);
+  F.b('lattice', gateU - gateW / 2 - 0.1, gh + 0.9, -0.19, gateU + gateW / 2 + 0.1, gh + 1.95, -0.14, false);
+  F.b('timber_red', gateU - hw - 0.2, y1 - 0.4, -0.3, gateU + hw + 0.2, y1, t + 0.3, false);
+  F.roof('hip_roof', gateU, t / 2, hw + 1.0, 1.9, y1, 1.9, { mat: 'tile_grey', soffit: 'timber_red', noChiwei: true, lift: 0.3, pow: 1.1 });
+  F.b('lacquer_red', gateU - 0.2, gh - 0.8, 0.05, gateU + 0.2, gh - 0.4, 0.45, false);
+  void rand;
+}
+
 function perimeter(F, W, D, h, gateU, gateW, wm, rand, o = {}) {
   const t = 0.5, capMat = o.thatch ? 'thatch' : 'tile_grey', capH = o.thatch ? 0.42 : 0.28;
   const cap = (u0, v0, u1, v1) => F.b(capMat, u0, h, v0, u1, h + capH, v1, false);
@@ -54,7 +68,8 @@ function perimeter(F, W, D, h, gateU, gateW, wm, rand, o = {}) {
   F.b('lacquer_black', gateU - gateW / 2 + 0.1, 0.14, -0.25, gateU - gateW / 2 + 0.2, h - 0.25, 0.9, false);
   if (o.shut) F.b('lacquer_black', gateU + gateW / 2 - 0.9, 0.14, 0.1, gateU + gateW / 2 - 0.1, h - 0.25, 0.2, false);
   F.b('bluestone', gateU - gateW / 2 - 0.3, 0, -0.55, gateU + gateW / 2 + 0.3, 0.14, 0.0, false);
-  F.roof('gable_roof_c', gateU, t / 2, gateW / 2 + 1.0, 1.7, gh + 0.02, 1.5, { mat: o.thatch ? 'thatch' : 'tile_grey', soffit: 'timber_red', noHorns: true });
+  if (rich) gateHouse(F, gateU, gateW, h, gh, t, wm, rand);
+  else F.roof('gable_roof_c', gateU, t / 2, gateW / 2 + 1.0, 1.7, gh + 0.02, 1.5, { mat: o.thatch ? 'thatch' : 'tile_grey', soffit: 'timber_red', noHorns: true });
   // the lamp bracket (a bronze lamp on an iron arm) and a hanging cloth over the door of the better houses; a bench and a mounting stone by the gate
   if (rand() < 0.5) F.b('iron', gateU + gateW / 2 + 0.25, h - 0.9, -0.14, gateU + gateW / 2 + 0.55, h - 0.86, -0.1, false);
   if (rand() < 0.5) prop(F, F.ctx, 'bench', Math.min(W - 1.4, gateU + gateW / 2 + 1.5), -0.45, { len: 1.6 });
@@ -163,6 +178,16 @@ function room(F, kind, u0, u1, v0, v1, du, rand, lights, P = 0.3) {
     put('wood_dark', u0 + 0.5, y + 1.15, v1 - 0.72, u0 + 3.0, y + 1.2, v1 - 0.66); put('wood_dark', u0 + 0.5, y, v1 - 0.72, u0 + 0.58, y + 1.2, v1 - 0.66); put('wood_dark', u0 + 2.92, y, v1 - 0.72, u0 + 3.0, y + 1.2, v1 - 0.66);
     { const p = F.pt(mu, v1 - 2.0); F.bag.add('lacquer_red', lathe([[0.001, 0], [0.5, 0.0], [0.55, 0.3], [0.5, 0.6], [0.001, 0.6]], 12, null, p[0], y + 0.7, p[1])); F.bag.add('wood_dark', lathe([[0.1, 0], [0.12, 0.7]], 6, null, p[0], y, p[1])); F.col.circle(p[0], p[1], 0.55, y, y + 1.3); }
     lamp(mu - 1.8, v0 + 3.4, y); lamp(mu + 1.8, v0 + 3.4, y);
+  } else if (kind === 'watch') {
+    // the watch-house's ground room (4.8 m square, door in the middle of the v0 wall): a plank bed under quilts at the back, two water jars, the guard's halberds on the east wall,
+    // a stack of brushwood and dung for the beacon fire by the door, a low table on a mat with a lamp
+    put('timber', u0 + 0.3, y, v1 - 1.9, u0 + 2.5, y + 0.4, v1 - 0.3, true); put('reed_mat', u0 + 0.35, y + 0.4, v1 - 1.85, u0 + 2.45, y + 0.43, v1 - 0.35); put('cloth_indigo', u0 + 0.5, y + 0.43, v1 - 1.8, u0 + 1.9, y + 0.52, v1 - 0.4);
+    for (const q of [[4.0, 4.2], [3.3, 4.3]]) { const p = F.pt(u0 + q[0], v0 + q[1]); F.bag.add('pottery_dark', lathe([[0.2, 0], [0.34, 0.3], [0.4, 0.6], [0.28, 0.95], [0.2, 1.0], [0.001, 1.0]], 9, null, p[0], y, p[1])); F.col.circle(p[0], p[1], 0.38, y, y + 1.0); }
+    for (let k = 0; k < 6; k++) { put('bamboo_culm', u1 - 0.55, y, v0 + 1.3 + k * 0.25, u1 - 0.5, y + 2.3, v0 + 1.35 + k * 0.25); put('iron', u1 - 0.57, y + 2.3, v0 + 1.28 + k * 0.25, u1 - 0.48, y + 2.7, v0 + 1.37 + k * 0.25); }
+    put('wood_dark', u1 - 0.6, y + 0.8, v0 + 1.25, u1 - 0.45, y + 0.86, v0 + 2.8); put('wood_dark', u1 - 0.6, y + 1.6, v0 + 1.25, u1 - 0.45, y + 1.66, v0 + 2.8);
+    for (let r = 0; r < 3; r++) put(r % 2 ? 'thatch' : 'wood_ochre', u1 - 1.5 + r * 0.05, y + r * 0.22, v0 + 0.4, u1 - 0.3, y + r * 0.22 + 0.22, v0 + 1.1, r === 0);
+    put('reed_mat', u0 + 0.2, y, v0 + 0.4, u0 + 1.9, y + 0.03, v0 + 1.5); put('lacquer_black', u0 + 0.5, y + 0.03, v0 + 0.6, u0 + 1.4, y + 0.38, v0 + 1.2, true);
+    lamp(u0 + 1.7, v0 + 1.3, y);
   } else if (kind === 'ice') {
     // the ice-keepers' store: blocks of ice from the Zhang packed in straw, coal in a heap, sacks of salt, jars of grain, tally sticks and the long tongs on the wall
     for (let r = 0; r < 3; r++) for (let q = 0; q < 4 - r; q++) { put('thatch', u1 - 3.8 + q * 0.95, y + r * 0.55, v1 - 2.0, u1 - 2.9 + q * 0.95 + 0.0, y + r * 0.55 + 0.05, v1 - 0.5, r === 0); put('chalk', u1 - 3.75 + q * 0.95, y + r * 0.55 + 0.05, v1 - 1.95, u1 - 2.95 + q * 0.95, y + r * 0.55 + 0.5, v1 - 0.55, false); }
@@ -183,12 +208,27 @@ function sideWing(F, u0, u1, v0, v1, H, wm, o) {
   F.roof('gable_roof_c', (u0 + u1) / 2, (v0 + v1) / 2, (u1 - u0) / 2 + 0.7, (v1 - v0) / 2 + 0.9, H + 0.05, 1.4, { mat: o.thatch ? 'thatch' : 'tile_grey', soffit: o.thatch ? 'timber' : 'timber_red', noHorns: true });
 }
 /** The two-storey watch-tower house (lou): plaster walls, a balcony of red rails under the upper eave, a hipped roof over a smaller upper storey. */
-function louBlock(F, cu, cv, a, H1, H2, wm, rand) {
+function louBlock(F, cu, cv, a, H1, H2, wm, rand, open = false) {
   const P = 0.3;
   F.b('brick_paving', cu - a - 0.4, 0, cv - a - 0.4, cu + a + 0.4, P, cv + a + 0.4, false);
-  F.b(wm, cu - a, P, cv - a, cu + a, P + H1, cv + a);
-  F.b('lime_plaster', cu - a - 0.03, P, cv - a - 0.03, cu + a + 0.03, P + 0.8, cv + a + 0.03, false);
-  F.b('lattice', cu - a * 0.4, P + 1.2, cv - a - 0.05, cu + a * 0.4, P + 2.5, cv - a + 0.03, false);
+  if (!open) {
+    F.b(wm, cu - a, P, cv - a, cu + a, P + H1, cv + a);
+    F.b('lime_plaster', cu - a - 0.03, P, cv - a - 0.03, cu + a + 0.03, P + 0.8, cv + a + 0.03, false);
+    F.b('lattice', cu - a * 0.4, P + 1.2, cv - a - 0.05, cu + a * 0.4, P + 2.5, cv - a + 0.03, false);
+  } else {
+    // the ground room is entered: the walls hollow, a door in the middle of the lane-side wall with a lattice window either side, the board floor, a plank ceiling under the upper storey
+    const t = 0.4, dw = 0.65, dh = 2.2;
+    F.floor(cu - a - 0.4, cv - a - 0.4, cu + a + 0.4, cv + a + 0.4, P);
+    F.b('wood_dark', cu - a + t, P, cv - a + t, cu + a - t, P + 0.03, cv + a - t, false);
+    F.b(wm, cu - a, P, cv + a - t, cu + a, P + H1, cv + a); F.b(wm, cu - a, P, cv - a + t, cu - a + t, P + H1, cv + a - t); F.b(wm, cu + a - t, P, cv - a + t, cu + a, P + H1, cv + a - t);
+    F.b(wm, cu - a, P, cv - a, cu - dw, P + H1, cv - a + t); F.b(wm, cu + dw, P, cv - a, cu + a, P + H1, cv - a + t); F.b(wm, cu - dw, P + dh, cv - a, cu + dw, P + H1, cv - a + t);
+    for (const sg of [-1, 1]) F.b('timber_red', cu + sg * dw - 0.08, P, cv - a - 0.05, cu + sg * dw + 0.08, P + dh, cv - a + t + 0.05, false);
+    F.b('lacquer_black', cu - dw + 0.05, P, cv - a + 0.05, cu - dw + 0.1, P + 2.1, cv - a + 0.8, false);
+    F.b('lime_plaster', cu - a - 0.03, P, cv - a - 0.03, cu - dw - 0.1, P + 0.8, cv - a + 0.0, false); F.b('lime_plaster', cu + dw + 0.1, P, cv - a - 0.03, cu + a + 0.03, P + 0.8, cv - a + 0.0, false);
+    for (const sg of [-1, 1]) F.b('lattice', cu + sg * 1.55 - 0.45, P + 1.1, cv - a - 0.04, cu + sg * 1.55 + 0.45, P + 2.3, cv - a + 0.03, false);
+    F.b('timber', cu - a, P + H1 - 0.25, cv - a, cu + a, P + H1, cv + a, false);
+    room(F, 'watch', cu - a + t, cu + a - t, cv - a + t, cv + a - t, 0, rand, F.ctx.lights, P);
+  }
   F.roof('hip_roof', cu, cv, a + 1.1, a + 1.1, P + H1, 1.1, { mat: 'tile_grey', soffit: 'timber_red', noChiwei: true, lift: 0.3, pow: 1.1 });
   const y2 = P + H1 + 0.5, b = a * 0.74;
   F.b('timber_red', cu - b - 0.1, y2, cv - b - 0.1, cu + b + 0.1, y2 + 0.18, cv + b + 0.1, false);
@@ -260,7 +300,7 @@ export function house(el, ctx) {
   perimeter(F, W, D, wallH, gateU, 1.8, wm, rand, o);
   if (kind === 'tower') {
     const a = Math.min(2.8, (W - 3.4) / 2);
-    louBlock(F, W - a - 1.0, 5.6 + a, a, 3.4, 3.0, wm, rand);
+    louBlock(F, W - a - 1.0, 5.6 + a, a, 3.4, 3.0, wm, rand, !!el.open);
     hallBlock(F, 1.0, W - 1.0, D - 7.0, D - 0.9, H - 0.2, wm, o, rand);
     if (el.open) room(F, room0 === 'dwelling' ? 'store' : room0, 1.0, W - 1.0, D - 7.0, D - 0.9, 0, rand, ctx.lights);
     yard(F, W, D, gateU, D - 7.0, rand, {});

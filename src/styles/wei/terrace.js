@@ -16,6 +16,76 @@ function steps(bag, col, rect, y0, y1, dir, mat, riser, base, mat2) {
   col.ramp(rect, y0, y1, dir);
 }
 
+/** A triangle added so that its normal points up (up = true) or down. */
+function triUp(out, a, b, c, up = true) {
+  const ux = c[0] - b[0], uy = c[1] - b[1], uz = c[2] - b[2], vx = a[0] - b[0], vy = a[1] - b[1], vz = a[2] - b[2];
+  const ny = uz * vx - ux * vz;
+  if ((ny > 0) === up) out.push(...a, ...b, ...c); else out.push(...a, ...c, ...b);
+}
+
+/**
+ * The timber lean-to (tai xie) of one lift of a terrace: on each face of the rammed earth a row of red pilasters carries a pent eave of grey tile that
+ * sheds the rain off the earth; faces are given as segments (corner ends mitred, cut ends straight). rect r = the lift's face, ya its foot, yb its top.
+ */
+function leanTo(bag, r, ya, yb, cuts, skip) {
+  const [xa, za, xb, zb] = r, O = 0.9, yi = yb - 0.3, yo = yi - 0.55, top = [], under = [], T = 0.17, Pd = 0.28;
+  // face: [fixed coordinate, outward normal, along-axis range, axis]
+  const faces = [
+    { k: 'N', ax: 'x', f: za, n: -1, a: xa, b: xb }, { k: 'S', ax: 'x', f: zb, n: 1, a: xa, b: xb },
+    { k: 'W', ax: 'z', f: xa, n: -1, a: za, b: zb }, { k: 'E', ax: 'z', f: xb, n: 1, a: za, b: zb },
+  ];
+  for (const F of faces) {
+    if (skip && skip.includes(F.k)) continue;
+    // cut the face by the gaps given for it into segments
+    let segs = [[F.a, F.b, true, true]];
+    for (const [c0, c1] of (cuts[F.k] ?? [])) {
+      const nx = [];
+      for (const [s0, s1, k0, k1] of segs) {
+        if (c1 <= s0 || c0 >= s1) { nx.push([s0, s1, k0, k1]); continue; }
+        if (c0 > s0 + 0.5) nx.push([s0, c0, k0, false]);
+        if (c1 < s1 - 0.5) nx.push([c1, s1, false, k1]);
+      }
+      segs = nx;
+    }
+    const P = (t, d, y) => (F.ax === 'x' ? [t, y, F.f + F.n * d] : [F.f + F.n * d, y, t]);
+    for (const [s0, s1, k0, k1] of segs) {
+      const A0 = P(s0, 0, yi), A1 = P(s1, 0, yi), B0 = P(s0 - (k0 ? O : 0), O, yo), B1 = P(s1 + (k1 ? O : 0), O, yo);
+      triUp(top, A0, A1, B1, true); triUp(top, A0, B1, B0, true);
+      const lo = (p) => [p[0], p[1] - 0.12, p[2]];
+      triUp(under, lo(A0), lo(A1), lo(B1), false); triUp(under, lo(A0), lo(B1), lo(B0), false);
+      // the pilasters, at about 3.3 m, from the foot of the lift to the eave
+      const L = s1 - s0, n = Math.max(1, Math.round((L - 1.8) / 3.3));
+      for (let q = 0; q <= n; q++) {
+        const t = s0 + 0.9 + (L - 1.8) * q / n;
+        const [bx0, bx1, bz0, bz1] = F.ax === 'x' ? [t - T, t + T, Math.min(F.f, F.f + F.n * Pd), Math.max(F.f, F.f + F.n * Pd)] : [Math.min(F.f, F.f + F.n * Pd), Math.max(F.f, F.f + F.n * Pd), t - T, t + T];
+        bag.add('timber_red', box(bx0, ya, bz0, bx1, yi - 0.02, bz1));
+        bag.add('bluestone', box(bx0 - 0.04, ya, bz0 - 0.04, bx1 + 0.04, ya + 0.22, bz1 + 0.04));
+      }
+    }
+  }
+  bag.add('tile_grey', fromTriangles(top)); bag.add('timber_red', fromTriangles(under));
+}
+
+/** The balustrade walls either side of a stair rising west (the stair's rect [x0, z0, x1, z1]): a plaster wall with a stone coping, stepped with the flight, a stone newel at the foot. */
+function stairFlanks(bag, col, rect, T, n) {
+  const [sx0, sz0, sx1, sz1] = rect, d = (sx1 - sx0) / n;
+  for (let i = 0; i < n; i += 2) {
+    const i2 = Math.min(n, i + 2), xa = sx1 - d * i2, xb = sx1 - d * i, yT = T * i2 / n + 0.85;
+    for (const [za, zb] of [[sz0 - 0.5, sz0], [sz1, sz1 + 0.5]]) {
+      bag.add('lime_plaster', box(xa, -0.4, za, xb, yT, zb));
+      bag.add('bluestone', box(xa - 0.03, yT, za - 0.07, xb + 0.03, yT + 0.1, zb + 0.07));
+      col.rect([xa, za, xb, zb], -0.4, yT + 0.1);
+    }
+  }
+  // the newels at the foot: a stone post with a bronze ball
+  for (const [za, zb] of [[sz0 - 0.55, sz0 + 0.05], [sz1 - 0.05, sz1 + 0.55]]) {
+    bag.add('bluestone', box(sx1, 0, za, sx1 + 0.6, 0.3, zb)); bag.add('bluestone', box(sx1 + 0.06, 0.3, za + 0.06, sx1 + 0.54, 1.45, zb - 0.06));
+    bag.add('bluestone', box(sx1 - 0.02, 1.45, za - 0.02, sx1 + 0.62, 1.57, zb + 0.02));
+    bag.add('bronze', lathe([[0.001, 0], [0.16, 0.04], [0.2, 0.2], [0.14, 0.34], [0.001, 0.4]], 8, null, sx1 + 0.3, 1.57, (za + zb) / 2));
+    col.rect([sx1, za, sx1 + 0.6, zb], 0, 1.6);
+  }
+}
+
 /** An open storeroom cut into the foot of the terrace: x the face, z its centre; a lined chamber with a timber ceiling, jars of grain and salt, sacks, a shelf and a lamp. */
 function storeroom(bag, col, lights, xf, z, W, D, H, seed) {
   const r = rng(seed + 11), a = z - W / 2, b = z + W / 2, xb = xf - D;
@@ -68,6 +138,12 @@ export function terrace(el, ctx) {
     }
     // the band of the lift: the plaster of mud at its top edge
     bag.add('mud_plaster', box(r[0] - 0.04, yb - 0.22, r[1] - 0.04, r[2] + 0.04, yb - 0.02, r[3] + 0.04));
+    // the timber lean-to of the lift (tai xie): pilasters and a pent eave; not over the storerooms' doors (the foot's east face), not in the stair's way, not at the skyways
+    if (el.leanTo !== false) {
+      const zc = (z0 + z1) / 2, cuts = { E: el.stair ? [[zc - 5.8, zc + 5.8]] : [], N: [], S: [], W: [] };
+      if (el.skyX !== undefined) { if (el.gapN) cuts.N.push([el.skyX - 5, el.skyX + 5]); if (el.gapS) cuts.S.push([el.skyX - 5, el.skyX + 5]); }
+      leanTo(bag, r, ya, yb, cuts, i === 0 && el.doors ? ['E'] : null);
+    }
     void a;
   }
   // weathering of the earthen face: rain streaks running down each lift from its band, the damp stain at the foot, the plaster's patches fallen away
@@ -105,6 +181,7 @@ export function terrace(el, ctx) {
   if (gap) { par([c[2] - t, c[1], c[2], gap[0]]); par([c[2] - t, gap[1], c[2], c[3]]); } else par([c[2] - t, c[1], c[2], c[3]]);
   // the stair up the east face
   if (el.stair) steps(bag, col, el.stair.rect, 0, T, sdir, 'bluestone', el.stair.riser ?? 0.25, -0.4, 'brick_paving');
+  if (el.stair && sdir === 'w') stairFlanks(bag, col, el.stair.rect, T, Math.max(1, Math.round(T / (el.stair.riser ?? 0.25))));
   // the storerooms: arched doors at the foot of the east face (shut; the stores of grain, salt, water, fuel, ice), between the stair and the ends
   if (el.doors) {
     const zc = (z0 + z1) / 2, zs = el.stair ? [el.stair.rect[1] - 1.5, el.stair.rect[3] + 1.5] : [zc, zc];
