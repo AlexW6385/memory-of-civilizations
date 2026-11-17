@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.9 — Giza, London, Himeji, Barcelona's doorways (2026-11-17)
+
+Giza: the casing's courses show on the pyramids, a granite false door with its offering table stands in the mortuary temple, five houses in six are furnished, with a loom, a fish rack or a potter's wheel in the court. London: the Victoria Tower with the Sovereign's Entrance, niches, tracery and turrets; 30 more houses and 6 shops to enter, with a parlour, a dining room or a lodging; horse troughs, dust bins, a knife-grinder, lamplighters and sweeps. Himeji: round eave tiles along every castle roof, closed gables, and the retainers' rows opened, each unit with its hearth, mats and sword rack. Barcelona: real doorways with tiled vestibules and a stair hall in 19 blocks, gargoyles and trefoils on the Sagrada Família's apse, masons' goods inside it, porters and gas lamps.
+
 ## v12.8 — Athens, Istanbul, Tang Chang'an, Machu Picchu, Cairo (2026-11-16)
 
 Athens: the Parthenon's west room is the treasury (chests, gold and silver bowls, a throne, shields, tripods) and its coffers are blue. Istanbul: the Süleymaniye's outer walls have their window frames, pilasters and cornice, the great door its muqarnas arch and open leaves; about 120 houses are entered, with yards of wells, arbors and hen coops. Tang Chang'an: the pagoda's arched doors, carved lintels, the two steles and a gilt finial; house gates by rank, four new rooms (shrine, reception, music, physician), wells and ox carts at the ward crossings, and a fire temple by the West Market (its form inferred). Machu Picchu: the Intihuatana as a carved pyramid with its stairs, houses by rank, interiors by use (spinner, brewer, mason), jars and seats before the gates. Cairo: nine town houses to enter, with the bent entrance, court and maq'ad.
