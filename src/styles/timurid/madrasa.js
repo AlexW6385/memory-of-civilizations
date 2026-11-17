@@ -12,6 +12,7 @@ import { B, LAP, TUR, CRE, WHI, solid, wallRun, bannai, tiledMinaret, pishtaqOf 
 import { nicheWall, domeBlock } from './monuments.js';
 import { frame } from './frame.js';
 import { prayerHall } from './interiors.js';
+import { domedHall, cornerHall } from './halls.js';
 
 const H1 = 6.5, TOP = 14.5, FLOOR2 = 7.0;
 
@@ -96,10 +97,9 @@ export function madrasa(el, ctx) {
     wallRun(bag, col, 'plaster_persian', 'z', rz0, rz1, rx0 - th / 2, th, 0, 5.8, [[rz0 + 1.4, 1.5, 2.8]]);
     solid(bag, col, B, [rx1, rz0, rx1 + 1.2, rz1 + 0.2], 0, 5.8);
     solid(bag, col, B, [rx0 - th, rz1, rx1 + 1.2, rz1 + 2.4], 0, TOP - 1.0);
-    bag.add('ceiling_painted', box(rx0, 5.8, rz0, rx1, 6.1, rz1));
-    solid(bag, null, B, [rx0 - th, rz0 - th, rx1 + 1.2, rz1 + 2.4], 6.1, TOP - 1.0); col.rect([rx0 - th, rz0, rx1 + 1.2, rz1 + 2.4], 5.8, TOP - 1.0);
+    const dome = domedHall(bag, col, { room: [rx0, rz0, rx1, rz1], mass: [rx0 - th, rz0, rx1 + 1.2, rz1], top: TOP - 1.0, doors: { W: [rz0 + 1.4, 1.5] } });
     bag.add('brick_paving', box(rx0, 0, rz0, rx1, 0.06, rz1));
-    F.carpet(bag, (rx0 + rx1) / 2, 0.06, (rz0 + rz1) / 2 - 0.5, (rx1 - rx0) - 2.0, (rz1 - rz0) - 2.6, Math.PI / 2, 'persian');
+    F.carpet(bag, (rx0 + rx1) / 2, 0.06, (rz0 + rz1) / 2 - 0.5, (rx1 - rx0) - 2.0, (rz1 - rz0) - 2.6, 0, 'persian');
     for (let i = 0; i < 5; i++) {
       const sx = rx0 + 0.5 + i * 2.1;
       bag.add('wood_dark', box(sx, 0.06, rz1 - 0.55, sx + 1.7, 2.3, rz1));
@@ -108,7 +108,7 @@ export function madrasa(el, ctx) {
     col.rect([rx0 + 0.5, rz1 - 0.55, rx0 + 0.5 + 4 * 2.1 + 1.7, rz1], 0, 2.3);
     for (let i = 0; i < 6; i++) { F.rahle(bag, rx0 + 1.6 + (i % 3) * 2.8, 0.08, rz0 + 1.8 + Math.floor(i / 3) * 1.9, Math.PI / 2); F.cushion(bag, rx0 + 1.0 + (i % 3) * 2.8, 0.08, rz0 + 1.8 + Math.floor(i / 3) * 1.9, 0.7, 0.5, 0.12, 0.2 * i, i % 2 ? 'cloth_indigo' : 'cloth_red'); }
     for (const [x, z] of [[rx0 + 2, rz0 + 0.5], [rx0 + 6, rz0 + 0.5], [rx0 + 10, rz0 + 0.5]]) F.oilLamp(bag, lights, x, 1.5, z, 'bronze', 1.2);
-    F.mosqueLamp(bag, lights, (rx0 + rx1) / 2, 3.3, (rz0 + rz1) / 2, 5.8, { k: 1.2, glow: 4, reach: 10 });
+    F.mosqueLamp(bag, lights, dome.c[0], 4.0, dome.c[1], dome.apex - 0.3, { k: 1.2, glow: 4, reach: 10 });
   }
   solid(bag, col, B, [cx1 - 0.5, cz1 - 0.1, X1 - 2.4, cz1 + 0.5], 0, TOP - 1.0);
   {
@@ -118,11 +118,10 @@ export function madrasa(el, ctx) {
     wallRun(bag, col, 'plaster_persian', 'x', rx0 - th, rx1 + 1.2, rz1 + th / 2, th, 0, 5.8);
     solid(bag, col, B, [rx1, rz0 - 0.2, rx1 + 1.2, rz1], 0, 5.8);
     solid(bag, col, B, [rx0 - th, rz0 - 2.4, rx1 + 1.2, rz0], 0, TOP - 1.0);
-    bag.add('ceiling_painted', box(rx0, 5.8, rz0, rx1, 6.1, rz1));
-    solid(bag, null, B, [rx0 - th, rz0 - 2.4, rx1 + 1.2, rz1 + th], 6.1, TOP - 1.0);
+    const dome = domedHall(bag, col, { room: [rx0, rz0, rx1, rz1], mass: [rx0 - th, rz0, rx1 + 1.2, rz1 + th], top: TOP - 1.0, doors: { W: [rz1 - 1.4, 1.5] } });
     bag.add('brick_paving', box(rx0, 0, rz0, rx1, 0.06, rz1));
     // a carpet over the floor, bolsters along the walls, the teacher's seat and the pupils' stands
-    F.carpet(bag, (rx0 + rx1) / 2, 0.06, (rz0 + rz1) / 2, (rx1 - rx0) - 1.2, (rz1 - rz0) - 1.0, Math.PI / 2, 'persian');
+    F.carpet(bag, (rx0 + rx1) / 2, 0.06, (rz0 + rz1) / 2, (rx1 - rx0) - 1.2, (rz1 - rz0) - 1.0, 0, 'persian');
     for (let i = 0; i < 5; i++) F.bolster(bag, rx0 + 1.3 + i * 2.0, 0.08, rz0 + 0.5, 1.2, 0.13, 0, i % 2 ? 'cloth_red' : 'cloth_indigo', 'cloth_ochre');
     for (let i = 0; i < 5; i++) F.rahle(bag, rx0 + 1.5 + i * 2.0, 0.08, (rz0 + rz1) / 2 + 0.6, Math.PI / 2);
     F.divan(bag, null, [rx1 - 0.6, rz0 + 0.8], [rx1 - 0.6, rz1 - 0.8], 0.06, [rx0, (rz0 + rz1) / 2], { h: 0.35, depth: 0.9, mattress: 'cloth_ochre' });
@@ -134,8 +133,10 @@ export function madrasa(el, ctx) {
     bag.add('lacquer_black', box(rx0 + 2.4, 2.46, rz0 + 0.12, rx0 + 5.0, 2.54, rz0 + 0.14));
     bag.add('lacquer_black', box(rx0 + 3.66, 1.7, rz0 + 0.12, rx0 + 3.74, 3.3, rz0 + 0.14));
     for (const [x, z] of [[rx0 + 2, rz1 - 0.6], [rx0 + 6, rz1 - 0.6], [rx0 + 10, rz1 - 0.6]]) F.oilLamp(bag, lights, x, 1.5, z, 'bronze', 1.2);
-    F.mosqueLamp(bag, lights, (rx0 + rx1) / 2, 3.3, (rz0 + rz1) / 2, 5.8, { k: 1.2, glow: 4, reach: 10 });
+    F.mosqueLamp(bag, lights, dome.c[0], 4.0, dome.c[1], dome.apex - 0.3, { k: 1.2, glow: 4, reach: 10 });
   }
+  // ---- the west corner halls, built into the rooms under their domes: a second lecture hall (north), the hall of the sciences (south)
+  for (const sg of [-1, 1]) cornerHall(bag, col, lights, { s: sg, x0: X0 + 3.6, x1: cx0 - 1.0, z0: sg < 0 ? Z0 + 3.6 : cz1, z1: sg < 0 ? cz0 : Z1 - 3.6, door: sg * 20.15, top: TOP - 1.0, kind: sg < 0 ? 'lecture' : 'astronomy' });
   // ---- domes over the corner halls and the mosque; the north-east hall's dome stands over the classroom
   domeBlock({ c: [(classroom[0] + classroom[2]) / 2 + 0.6, (classroom[1] + classroom[3]) / 2 - 1.2], half: 4.6, y: TOP - 1.5, walls: false, wallH: 1.0, trans: 1.4, drum: { r: 3.8, h: 4.6 }, dome: { r: 4.6, h: 5.8, ribs: 20 } }, ctx);
   domeBlock({ c: [cx1 + 5.6, cz1 + 4.2], half: 4.6, y: TOP - 1.5, walls: false, wallH: 1.0, trans: 1.4, drum: { r: 3.8, h: 4.6 }, dome: { r: 4.6, h: 5.8, ribs: 20 } }, ctx);

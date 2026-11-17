@@ -14,13 +14,22 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
 function homes(L) {
   const A = [14, 0];
   for (const h of houses()) {
-    if (h.garden || !h.full || Math.hypot((h.rect[0] + h.rect[2]) / 2 - A[0], (h.rect[1] + h.rect[3]) / 2 - A[1]) > 135) continue;
+    const dist = h.garden ? 1e9 : Math.hypot((h.rect[0] + h.rect[2]) / 2 - A[0], (h.rect[1] + h.rect[3]) / 2 - A[1]);
+    if (h.garden || !h.full || dist > 200) continue;
     const r = rng(h.seed + 4242), G = houseGeom(h), q = rng(h.seed + 7), W = G.W, D = G.D;
     q(); if (!h.rich) q();
     const rsgn = q() < 0.5 ? -1 : 1, dN = 4.8, dW = 4.3, dS = 4.6, zf = -D / 2 + dN, zs = D / 2 - dS, zb = zf - 2.5, xl = -W / 2 + dW, xr = W / 2 - dW, mid = (zb + zf) / 2;
     const o = G.toWorld(0, 0), dir = ([du, dv]) => { const p = G.toWorld(du, dv); return Math.atan2(-(p[0] - o[0]), -(p[1] - o[1])); };
     const man = (u, v, fc, ex = {}) => L.push({ t: 'figure', at: G.toWorld(u, v), y: 0.45, rot: dir(fc), seed: Math.floor(r() * 1e9), skin: r() < 0.7 ? 'skin_medium' : 'skin_light', dress: 'robe', cloth: ['cloth_green', 'cloth_ochre', 'cloth_indigo', 'cloth_white', 'cloth_brown', 'cloth_maroon'][Math.floor(r() * 6)], cloth2: 'cloth_white', over: 'sash', hat: 'turban', hatMat: r() < 0.6 ? 'cloth_white' : 'cloth_ochre', hair: 'short', beard: true, pose: 'cross', ...ex });
     const woman = (u, v, fc, ex = {}) => L.push({ t: 'figure', at: G.toWorld(u, v), y: 0.04, rot: dir(fc), seed: Math.floor(r() * 1e9), skin: 'skin_medium', dress: 'robe', cloth: ['cloth_indigo', 'cloth_maroon', 'cloth_green'][Math.floor(r() * 3)], cloth2: 'cloth_white', hat: 'veil', hair: 'long', pose: 'stand', ...ex });
+    // the craftsman at work in the room of his trade (houses.js: a guest room when the house is rich or its seed divides by three)
+    if (!(h.rich || h.seed % 3 === 0)) {
+      const ofx = rsgn < 0 ? -W / 2 + 0.5 : W / 2 - 0.5, dv = rsgn < 0 ? 1 : -1, zc = (zf + zs) / 2, P = (d, v) => [ofx + dv * d, zc + v];
+      const at = { potter: [1.1, -2.03, 'cross', [0, 1], 0.41], baker: [1.0, -0.95, 'stand', [0, -1], 0.08], smith: [1.9, 0.3, 'stand', [-dv, 0], 0.08], weaver: [1.05, 0, 'cross', [-dv, 0], 0.44], carpenter: [2.0, -1.3, 'stand', [-dv, 0], 0.08], papermaker: [1.0, -0.95, 'stand', [0, -1], 0.08], grocer: [1.5, -1.7, 'stand', [dv, 0], 0.08] }[h.trade];
+      const [d, v, pose, fc, y] = at, [u, w] = P(d, v);
+      man(u, w, fc, { y, pose, hat: 'none', cloth: ['cloth_brown', 'cloth_indigo', 'cloth_ochre', 'cloth_green'][h.seed % 4] });
+    }
+    if (dist > 135) continue;
     const t = r();
     if (t < 0.75) man(1.5, mid - 0.4, [0, 1]);                                                         // the host in the talar, facing the court
     if (t > 0.35) man(-1.2, mid + 0.65, [1, 0], { y: 0.45 });                                          // a guest across the tray

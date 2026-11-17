@@ -9,6 +9,7 @@ import * as F from '../mughal/furnish.js';
 import { houseGeom } from '../../settlements/timurid-samarkand/layout.js';
 import { frame } from './frame.js';
 import { laneItem } from './market.js';
+import { workshop } from './workshops.js';
 import { bannai, rng, B, LAP, TUR, CRE, WHI } from './kit.js';
 
 const bx = (bag, m, x0, y0, z0, x1, y1, z1) => bag.add(m, box(Math.min(x0, x1), y0, Math.min(z0, z1), Math.max(x0, x1), y1, Math.max(z0, z1)));
@@ -69,6 +70,14 @@ function trade(f, kind, s, rand, bag, col) {
       const p = at(1.6, 0.9); woodStack(bag, p[0], p[1], yaw + Math.PI / 2, 1.0, 4);
       const g = at(-1.8, 0.4); bx(bag, 'timber', g[0] - 0.6, 0, g[1] - 0.2, g[0] + 0.6, 0.7, g[1] + 0.2);
       for (let i = 0; i < 4; i++) bag.add('wood_painted', place(box(-0.04, 0, -0.4, 0.04, 1.5, 0.0), g[0] - 0.35 + i * 0.22, 0, g[1] + 0.35, yaw + 0.1));
+      break;
+    }
+    case 'papermaker': {
+      // sheets of paper hung to dry on a line between two posts, a heap of bark, a tub
+      const p = at(0, 0.7); for (const dx of [-1.4, 1.4]) { const q3 = at(dx, 0.7); bx(bag, 'timber', q3[0] - 0.04, 0, q3[1] - 0.04, q3[0] + 0.04, 2.1, q3[1] + 0.04); }
+      bag.add('timber', place(box(-1.45, 2.05, -0.03, 1.45, 2.12, 0.03), p[0], 0, p[1], yaw));
+      for (let i = 0; i < 7; i++) { const q2 = at(-1.2 + i * 0.4, 0.7); addCloth(bag, 'cloth_white', clothBox(q2[0] - 0.14, 1.25, q2[1] - 0.01, q2[0] + 0.14, 2.05, q2[1] + 0.01), 2.05); }
+      const g = at(2.2, 0.6); bag.add('limestone', lathe([[0.001, 0], [0.4, 0], [0.42, 0.5], [0.36, 0.52]], 12, null, g[0], 0, g[1])); col.circle(g[0], g[1], 0.43, 0, 0.5);
       break;
     }
     default: {
@@ -149,17 +158,20 @@ export function timHouse(el, ctx) {
       // the door leaf folded back, and the window on the lane
       bag.add('wood_dark', box(sg < 0 ? cw[0] - 0.02 : cw[1] - 0.02, 0, zc - 0.55, sg < 0 ? cw[0] + 0.05 : cw[1] + 0.05, 2.05, zc - 0.5)); void xin; void xout;
       bx(bag, 'lattice', sg < 0 ? x0 - 0.06 : x1, 1.6, zc - 0.4, sg < 0 ? x0 : x1 + 0.06, 2.4, zc + 0.4);
+      const kind = rich || h.seed % 3 === 0 ? 'guest' : ({ potter: 'pottery', baker: 'bakery', smith: 'smithy', weaver: 'loom', carpenter: 'joinery', grocer: 'store', papermaker: 'paper' })[h.trade];
+      if (kind === 'guest') {
       // the furnishing: a kilim, the quilts (korpa) in a stack on a chest, a tray table, a lamp
-      F.carpet(bag, ix, 0.08, zc, 3.0, 4.6, Math.PI / 2 + (sg < 0 ? 0 : 0), 'persian');
-      F.kilim(bag, ix, 0.1, zc + 1.6, 2.2, 1.0, 0, ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white']);
-      const wallx = sg < 0 ? ow[1] + 0.4 : ow[0] - 0.4;
-      F.chest(bag, wallx, 0.08, rz0 + 0.7, 0.5, 1.0, 0.55, ya, 'wood_painted');
-      ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green', 'cloth_maroon'].forEach((m, i) => bag.add(m, box(wallx - 0.28, 0.63 + i * 0.1, rz0 + 0.3, wallx + 0.28, 0.72 + i * 0.1, rz0 + 1.1)));
-      F.trayTable(bag, ix, 0.08, zc - 0.2, { seed: h.seed });
-      F.cushion(bag, ix + 0.8, 0.1, zc - 0.7, 0.7, 0.5, 0.12, 0.3, 'cloth_red'); F.cushion(bag, ix - 0.8, 0.1, zc + 0.5, 0.7, 0.5, 0.12, 2.4, 'cloth_indigo');
-      F.oilLamp(bag, lights, wallx, 1.2, rz1 - 0.3, 'terracotta', 1.1);
-      F.rahle(bag, ix, 0.1, rz1 - 0.9, ya + Math.PI);
-      for (let i = 0; i < 3; i++) bx(bag, 'wood_dark', wallx - 0.02, 1.0, rz1 - 1.6 - i * 0.9, wallx + 0.02, 1.7, rz1 - 1.0 - i * 0.9);       // niches, dark
+        F.carpet(bag, ix, 0.08, zc, 3.0, 4.6, Math.PI / 2 + (sg < 0 ? 0 : 0), 'persian');
+        F.kilim(bag, ix, 0.1, zc + 1.6, 2.2, 1.0, 0, ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white']);
+        const wallx = sg < 0 ? ow[1] + 0.4 : ow[0] - 0.4;
+        F.chest(bag, wallx, 0.08, rz0 + 0.7, 0.5, 1.0, 0.55, ya, 'wood_painted');
+        ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green', 'cloth_maroon'].forEach((m, i) => bag.add(m, box(wallx - 0.28, 0.63 + i * 0.1, rz0 + 0.3, wallx + 0.28, 0.72 + i * 0.1, rz0 + 1.1)));
+        F.trayTable(bag, ix, 0.08, zc - 0.2, { seed: h.seed });
+        F.cushion(bag, ix + 0.8, 0.1, zc - 0.7, 0.7, 0.5, 0.12, 0.3, 'cloth_red'); F.cushion(bag, ix - 0.8, 0.1, zc + 0.5, 0.7, 0.5, 0.12, 2.4, 'cloth_indigo');
+        F.oilLamp(bag, lights, wallx, 1.2, rz1 - 0.3, 'terracotta', 1.1);
+        F.rahle(bag, ix, 0.1, rz1 - 0.9, ya + Math.PI);
+        for (let i = 0; i < 3; i++) bx(bag, 'wood_dark', wallx - 0.02, 1.0, rz1 - 1.6 - i * 0.9, wallx + 0.02, 1.7, rz1 - 1.0 - i * 0.9);       // niches, dark
+      } else workshop(kind, { bag, col, lights, ofx: sg < 0 ? ix - 1.65 : ix + 1.65, dir: sg < 0 ? 1 : -1, zc, seed: h.seed, breads, melons });
       col.floor([ow[1], rz0, cw[0], rz1], 0.08);
     } else solid(fr, WALL, xa, zf, xb, zs, 0, H);
   };
@@ -208,11 +220,44 @@ export function timHouse(el, ctx) {
     const side = rand() < 0.5 ? -1 : 1, bl = 2.4;
     const bs = side < 0 ? Math.max(0.6, s - w2 - 0.6 - bl) : Math.min(W - 0.6 - bl, s + w2 + 0.6);
     if (Math.abs(bs + bl / 2 - s) > w2 + bl / 2 + 0.3) bench(S, bag, col, bs, bl, rand);
-    const ts = side < 0 ? Math.min(W - 2.6, s + 3.8) : Math.max(2.6, s - 3.8);
+    const ts = side < 0 ? Math.min(W - 2.6, s + 4.4) : Math.max(2.6, s - 4.4);
     if (ts > 2.4 && ts < W - 2.4 && Math.abs(ts - s) > 3) trade(S, h.trade, ts, rand, bag, col);
     // a water jar by the door; strings of dried gourds or peppers on a hook
     const jp = S.p(side < 0 ? s + w2 + 0.9 : s - w2 - 0.9, 0.4); F.waterJar(bag, jp[0], 0, jp[1], 0.8);
     addCloth(bag, 'cloth_red', clothBox(S.p(s + w2 + 0.55, 0)[0] - 0.03, 1.6, S.p(s + w2 + 0.55, 0.2)[1] - 0.03, S.p(s + w2 + 0.55, 0)[0] + 0.03, 2.4, S.p(s + w2 + 0.55, 0.2)[1] + 0.03), 2.4);
+  }
+  // ---- the front by rule (docs §17): a rich house has its banna'i portal and balcony; every other takes one of four forms by its seed:
+  // plain (the bare lintel), canopy (a timber porch, aivancha, on two posts), gate (the door's block raised over the roof, a lattice in it), arch (a pointed arch of stepped brick with a lunette of tile);
+  // and, for one in three of the others, a parapet of merlons
+  const front = rich ? 'portal' : ['plain', 'canopy', 'gate', 'arch'][h.seed % 4];
+  { const s = xd - x0, w2 = PW / 2;
+    if (front === 'arch') {
+      for (let i = 0; i < 6; i++) {
+        const w = (PW + 0.9) * (1 - i / 6.5), y0 = 3.05 + i * 0.2;
+        S.put(bag, 'brick_buff', s - w / 2, s + w / 2, y0, y0 + 0.2, 0, 0.16);
+        if (i < 5) S.put(bag, i % 2 ? 'tile_cream' : 'tile_turquoise', s - w * 0.3, s + w * 0.3, y0, y0 + 0.2, 0.16, 0.19);
+      }
+    } else if (front === 'canopy') {
+      const px = w2 + 0.55;
+      for (const sg of [-1, 1]) {
+        const p = S.p(s + sg * px, 1.05);
+        bag.add('limestone', lathe([[0.17, 0], [0.17, 0.14], [0.11, 0.18]], 8, null, p[0], 0, p[1]));
+        bag.add('wood_painted', lathe([[0.1, 0.18], [0.085, 1.5], [0.095, 2.95]], 8, null, p[0], 0, p[1]));
+        S.put(bag, 'wood_ochre', s + sg * px - 0.08, s + sg * px + 0.08, 2.95, 3.15, 0.14, 1.2);
+        col.circle(p[0], p[1], 0.13, 0, 3.15);
+      }
+      S.put(bag, 'wood_ochre', s - px - 0.1, s + px + 0.1, 2.95, 3.15, 1.0, 1.2);
+      S.put(bag, 'timber', s - px - 0.2, s + px + 0.2, 3.15, 3.2, 0.14, 1.3);
+      S.put(bag, 'reed_mat', s - px - 0.2, s + px + 0.2, 3.2, 3.24, 0.14, 1.3);
+      S.put(bag, 'wood_painted', s - px - 0.2, s + px + 0.2, 3.05, 3.2, 1.22, 1.3);
+    } else if (front === 'gate') {
+      const a = S.p(s - 1.9, -1.0), b = S.p(s + 1.9, 0.05);
+      const r0 = [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])];
+      bx(bag, WALL, r0[0], HS, r0[1], r0[2], HS + 1.15, r0[3]); col.rect(r0, HS, HS + 1.15);
+      S.put(bag, 'brick_buff', s - 2.0, s + 2.0, HS + 1.15, HS + 1.21, -1.05, 0.1);
+      S.put(bag, 'brick_buff', s - 0.55, s + 0.55, HS + 0.25, HS + 0.95, 0.05, 0.1); S.put(bag, 'lattice', s - 0.45, s + 0.45, HS + 0.32, HS + 0.88, 0.1, 0.14);
+    }
+    if (!rich && front !== 'gate' && h.seed % 3 === 1) for (let i = 0; i * 0.9 + 0.8 < W; i++) bx(bag, WALL, x0 + 0.35 + i * 0.9, HS + 0.71, z1 - 0.3, x0 + 0.8 + i * 0.9, HS + 1.05, z1);
   }
   // the roof of the street wing: a rich house's balcony of timber over the lane
   if (rich) {

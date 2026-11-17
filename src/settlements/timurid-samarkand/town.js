@@ -44,6 +44,13 @@ function aryk() {
       if (on && run === null) run = z; else if (!on && run !== null) flush(z);
     }
     flush(z);
+    // a plank footbridge (kupruk) where each cross lane meets the channel: a deck of boards on the two kerbs, battens across it
+    for (let c = -304; c < RADIUS - 30; c += 24) {
+      if (c < -RADIUS + 30 || !onAryk(ax, c - 1.6, 0.3) || !onAryk(ax, c, 0.3) || !onAryk(ax, c + 1.6, 0.3)) continue;
+      const hw = ARYK_W / 2 + 0.55;
+      E.push({ t: 'block', walk: true, rect: [ax - hw, c - 0.9, ax + hw, c + 0.9], y0: 0.26, y1: 0.33, mat: 'timber' });
+      for (let k = 0; k < 6; k++) E.push({ t: 'block', walk: true, rect: [ax - hw, c - 0.85 + k * 0.32, ax + hw, c - 0.77 + k * 0.32], y0: 0.33, y1: 0.35, mat: 'wood_dark' });
+    }
   }
   return base('samarkand-aryk', E, [-RADIUS, -RADIUS, RADIUS, RADIUS]);
 }
