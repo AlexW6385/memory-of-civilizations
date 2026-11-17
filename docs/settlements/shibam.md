@@ -77,3 +77,30 @@ The call from the Friday mosque; donkeys, goats, children; wind in palms; a ston
 - **Mosque.** The court gets benches, a mat shade, the sabil's water jars, the hall prayer rugs, Qur'an stands, a shoe rack, hanging brass lamps and a carved band on the qibla wall [inferred].
 - **Tower house.** Mangers and a hand quern on the ground floor, the oven (tannur) and pots of the kitchen floor, a Qur'an stand, a cradle, the majlis hung with plates, daggers and long guns, the desk with books, dates in baskets, lamps on the stair; the roof terrace with washing, jars, a sleeping mat, dates drying, a stove and a cote [inferred].
 - **Life.** Walkers about 66 by day (farmers with hoes, elders with staffs added), figures at the doors and counters, sparrows on the mastabas, pigeons on the parapets round the square; smoke from the coffee houses, smithies and spice shops.
+
+## 12. Detail pass 2 (toward L3): research and what is built
+
+Sources used for this pass (all fetched; where a page was silent the point is marked [inferred]):
+- The Global Dispatches, "Mud Brick Architecture of Yemen": https://www.theglobaldispatches.com/articles/mud-brick-architecture-of-yemen
+- Earth Architecture, "Shibam: Manhattan of the Desert": https://eartharchitecture.org/?p=1056
+- Architectural League of New York, "Wadi Hadramut: Cities of earth": https://archleague.org/article/cities-of-earth/
+- Koryo Group, "Visiting Shibam, Yemen": https://koryogroup.com/blog/shibam-the-manhattan-of-the-desert-yemen
+- Wikipedia, "Al-Muhdhar Mosque" (Tarim; the Hadhrami square adobe minaret): https://en.wikipedia.org/wiki/Al-Muhdhar_Mosque
+
+Facts taken:
+- **Bricks.** Earth from the wadi floor "after the rainy season", mixed with chopped straw and water, pressed into simple wooden moulds laid on the ground and dried in the sun; bricks about 45 × 30 cm, narrower ones for the upper storeys [stated: Global Dispatches]; "mixed by foot and adz and piled in rows", a brick-maker presses the mud into a small wooden form and strikes off the excess; bricks light enough to be carried up several storeys by scaffolding and the inner stairs [stated: Architectural League]. Built: a brickyard on the wadi floor beside the south gate (§12 Brickyard).
+- **Lime (nurah).** A fine lime render, built up in layers and polished with a shaped stone; on whole roof surfaces, parapets and "around windows and doors" [stated: Global Dispatches]; "walls are topped with white lime caps" [stated: Architectural League]. Built: lime caps (coping with a drip) on every parapet; stepped lime hoods and frames round windows and doors.
+- **Windows.** Small, placed out of the sun; "ornate wooden lattice provides shade and privacy" [stated: Global Dispatches]; carved wooden *mashrabiya* admit breezes and screen the house; small view ports in the roof deck "let women watch the street unseen" [stated: Architectural League]; shutters of wood, wooden frames set in the plastered wall [stated: Koryo; Earth Architecture: "many windows are carved into elegant arches"]. Built: windows with projecting lime frames, a stepped hood, carved two-leaf shutters with raised panels and a lattice fanlight of turned spindles above; view ports through the parapet on the street face [inferred: placing and count].
+- **Doors.** Carved, "chunky wooden locks" [stated: Koryo]. Built: lintel boards carved with a row of lozenges or dentils, a lime hood, a wooden lock-case on the leaf, the leaf of the enterable house standing open [inferred: the patterns].
+- **Ground storeys.** "The first and second floors are usually used for food storage and livestock stables", livestock kept inside in a siege [stated: Earth Architecture]; one family a house, living rooms from the third floor [stated: ibid.]. Built: the ground floors of ordinary houses far from the square are entered as stables, household stores, a builder's yard-store, a bakery and a mat-maker's room (§12 Houses).
+- **Stair shaft** acts as a chimney, drawing cool air up [stated: Global Dispatches]; light wells run through the houses [stated: Architectural League]. Built: roof stair-heads already stand on the roofs; not more.
+- **Minaret.** The Hadhrami minaret is a square tower of adobe with an inner stair to the top (Tarim's al-Muhdhar, about 50 m) [stated: Wikipedia]; the stages, tapering, openings and crown of Shibam's own are not given by any source reached [inferred: three tapering stages, pointed-arched openings, a muezzin's gallery on palm-trunk corbels under a lantern]. The mosque: a court and corridors with the qibla corridor largest [stated: Wikipedia, of Tarim's]; piers and arches in rows under a flat roof of palm beams [inferred].
+
+Built in this pass (all in `src/styles/hadhrami/` and `src/settlements/shibam/`):
+1. **Windows and doors with depth** (every house, instanced): frames, hoods, sills, carved shutters, lattice fanlights, carved lintels; the arrival's tower house gets a carved door with its leaf open.
+2. **Parapets**: lime caps with a drip, view ports on the street face.
+3. **The Friday mosque**: pointed lime arches between the piers of the hall (arcades along the rows), a moulded mihrab arch with recess, a rebuilt minaret (three stages, string courses, arched openings, corbelled gallery, lantern, finial).
+4. **Houses entered beyond 120 m**: fourteen ordinary ground floors in the east, west and south of the town, each with one of four fronts by rule and one of five rooms (stable with mangers and beasts, household store, builder's store, bakery, mat-maker's) [inferred: the trades of a ground floor, from the stated uses].
+5. **Brickyard** outside the south gate: moulds, rows of bricks drying on edge, a mud pit and trough, straw heaps, a donkey, workers [inferred: layout; the process is stated].
+
+Level reached: L2, parts of L3 (windows, doors, minaret, far interiors). Still missing for L3: the carved interior ceilings and wardrobe doors of the upper rooms of ordinary houses (only the one enterable house has upper floors), polished-lime decoration on the palace, weathering by streets (damp lines) beyond the arrival's quarter.
