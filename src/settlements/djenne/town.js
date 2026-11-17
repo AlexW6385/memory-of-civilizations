@@ -200,9 +200,23 @@ function crepissage() {
 
 /** The houses nearest the market and the mosque are enterable (docs §16): deep enough for the vestibule, court and back block. */
 function enterable(all) {
-  const ok = all.filter((h) => h.rect[2] - h.rect[0] >= 7 && h.rect[3] - h.rect[1] >= 10);
+  // every house of a width that holds the vestibule, court and back block (6 m and more across, 10 m deep, a front on a lane) in the
+  // old core about the market and the mosque, and beyond it more than half of them, by the house's seed (the rest stay shut shells)
+  const ok = all.filter((h) => (h.front === 'n' || h.front === 's') && h.rect[2] - h.rect[0] >= 6 && h.rect[3] - h.rect[1] >= 10);
   const d = (h) => Math.hypot((h.rect[0] + h.rect[2]) / 2 - 30, (h.rect[1] + h.rect[3]) / 2);
-  return new Set(ok.sort((a, b) => d(a) - d(b)).slice(0, 64));
+  return new Set(ok.filter((h) => d(h) < 105 || h.seed % 100 < 58));
+}
+/**
+ * The front of a house by rule (docs §17): in the old core within 110 m of the mosque the two-storey houses are Tukulor (the
+ * pre-1900 type with the covered porch); beyond it the quarter (a 52 m cell) decides between Tukulor, Moroccan and Plain, the
+ * one-storey houses on the outskirts are Plain; so a lane has one manner for a stretch and the manner changes at a quarter's edge.
+ */
+function kindOf(h) {
+  const cx = (h.rect[0] + h.rect[2]) / 2, cz = (h.rect[1] + h.rect[3]) / 2, d = Math.hypot(cx, cz);
+  const q = (((Math.floor(cx / 52) * 7 + Math.floor(cz / 52) * 3) % 3) + 3) % 3;
+  if (d < 110) return h.storeys > 1 ? (q === 1 && h.seed % 4 === 0 ? 'moroccan' : 'tukulor') : (h.seed % 5 === 0 ? 'plain' : 'tukulor');
+  if (h.storeys < 2) return d > 150 ? 'plain' : (q === 2 ? 'plain' : 'tukulor');
+  return ['tukulor', 'moroccan', 'plain'][q];
 }
 /** An elder on the vestibule's bench in half of the enterable houses, a woman on a mat in the court of some. */
 function homeLife(homes) {
@@ -244,12 +258,18 @@ function laneLife(all) {
   const pick = (a) => a[Math.floor(rand() * a.length)];
   for (const h of all) {
     const [x0, z0, x1, z1] = h.rect, f = h.front;
-    if (Math.hypot((x0 + x1) / 2 - 40, (z0 + z1) / 2) > 120 || rand() < 0.45 || (f !== 's' && f !== 'n' && f !== 'w')) continue;
+    const dm = Math.hypot((x0 + x1) / 2 - 40, (z0 + z1) / 2);
+    if (dm > 235 || rand() < (dm > 120 ? 0.72 : 0.45) || (f !== 's' && f !== 'n' && f !== 'w')) continue;
     const L = f === 'w' ? z1 - z0 : x1 - x0;
     if (L < 6) continue;
     const u = rand() < 0.5 ? 0.55 : L - 0.55, o = 0.55;
     const at = f === 's' ? [x0 + u, z1 + o] : f === 'n' ? [x1 - u, z0 - o] : [x0 - o, z0 + u], seed = Math.floor(rand() * 1e6), r = rand();
-    if (r < 0.35) P.push({ t: 'pot', kind: 'water_pot', at, y: 0, n: 3, seed });
+    if (r < 0.12) {
+      // a woman on a low stool at her door with a basket of millet to pick over (a quiet figure; her face to the lane)
+      const out = f === 's' ? [at[0], at[1] + 1] : f === 'n' ? [at[0], at[1] - 1] : [at[0] - 1, at[1]];
+      P.push({ t: 'stool', at, y: 0, rot: 0, seed });
+      P.push({ t: 'figure', at, y: 0, rot: face(at, out), seed: Math.floor(rand() * 1e9), dress: 'wrap', cloth: pick(W), cloth2: pick(W), skin: 'skin_dark', hat: 'turban', hatMat: pick(W), feet: 'bare', pose: 'sit_low' });
+    } else if (r < 0.35) P.push({ t: 'pot', kind: 'water_pot', at, y: 0, n: 3, seed });
     else if (r < 0.55) P.push({ t: 'firewood', at, y: 0, rot: f === 'w' ? Math.PI / 2 : 0, len: 1.3, seed });
     else if (r < 0.75) P.push({ t: 'basket', at, y: 0, seed });
     else if (r < 0.88) P.push({ t: 'animal', kind: 'goat', at, y: 0, rot: rand() * 6.28, seed });
@@ -302,7 +322,7 @@ export async function town() {
     plans.push({ ...base('djenne-yards-life', Pm), style: 'life' }); }
   plans.push(base('djenne-shops', [{ t: 'sahel_shops', rect: SHOPS, n: 8, seed: 3 }, { t: 'sahel_court_house', rect: COURT, seed: 9 }]));
   const all = houses(), homes = enterable(all);
-  for (let i = 0; i < all.length; i += 110) plans.push(base(`djenne-houses-${i / 110}`, all.slice(i, i + 110).map((h) => ({ t: homes.has(h) ? 'sahel_home' : 'sahel_house', ...h }))));
+  for (let i = 0; i < all.length; i += 110) plans.push(base(`djenne-houses-${i / 110}`, all.slice(i, i + 110).map((h) => ({ t: homes.has(h) ? 'sahel_home' : 'sahel_house', ...h, kind: kindOf(h) }))));
   plans.push({ ...base('djenne-home-life', [...homeLife(homes), ...frontsLife(all), ...laneLife(all), ...mosqueLife(), ...plain()]), style: 'life' });
   return plans;
 }

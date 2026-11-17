@@ -87,6 +87,25 @@ function roomContents(k, kind, far, s, v0, v1, rand) {
     slab(0.05, 0.5, 'timber', 0.45, v0 + 0.1, 0.5, v1 - 0.1);
     k.bx('timber', Math.min(U(1.5), U(1.9)), 0.28, vm - 0.2, Math.max(U(1.5), U(1.9)), 0.32, vm + 0.2);
     k.mat(Math.min(U(1.1), U(2.2)), vm - 0.6, Math.max(U(1.1), U(2.2)), vm + 0.6);
+  } else if (kind === 'smith') {
+    // the smith's forge (the Mande smiths' trade): a clay hearth block against the wall with its charcoal bed, the bellows (two skin bags on a
+    // timber stand) blowing through an iron tuyere, an anvil stone on a log, hoes and knives hung on the wall, a heap of charcoal
+    const m = (a, b) => [Math.min(U(a), U(b)), Math.max(U(a), U(b))];
+    { const [a, b] = m(0.05, 1.0); k.bx(BS, a, 0, vm - 0.5, b, 0.7, vm + 0.5, true); }
+    { const [a, b] = m(0.15, 0.9); k.bx('wood_dark', a, 0.7, vm - 0.3, b, 0.74, vm + 0.3); }
+    { const [a, b] = m(1.0, 1.15); k.bx('iron', a, 0.62, vm - 0.04, b, 0.67, vm + 0.04); }
+    { const [a, b] = m(1.15, 1.6); k.bx('timber', a, 0, vm - 0.45, b, 0.42, vm + 0.45, true); }
+    for (const dz of [-0.2, 0.2]) k.lathe_('hide_brown', [[0.001, 0.42], [0.15, 0.46], [0.16, 0.7], [0.07, 0.86], [0.001, 0.86]], 8, U(1.38), 0, vm + dz);
+    k.lathe_('timber', [[0.2, 0], [0.18, 0.3], [0.001, 0.3]], 8, U(2.0), 0, vm + 0.7); k.lathe_('granite_grey', [[0.001, 0.3], [0.16, 0.3], [0.12, 0.46], [0.001, 0.46]], 8, U(2.0), 0, vm + 0.7);
+    for (let i = 0; i < 4; i++) slab(0.05, 0.1, 'iron', 1.0 + (i % 2) * 0.2, v0 + 0.3 + i * Math.min(0.5, (span - 0.6) / 4), 1.5, v0 + 0.35 + i * Math.min(0.5, (span - 0.6) / 4));
+    k.heap('wood_dark', U(1.2), 0, v1 - 0.4, 0.3, 0.3);
+  } else if (kind === 'dyer') {
+    // the dyer's indigo: two vats (clay rims sunk in the floor, the dye dark on top), a pole across the room with strips of cloth hung to dry,
+    // balls of indigo paste on a mat
+    for (let i = 0; i < 2; i++) { k.lathe_(BS, [[0.001, 0], [0.5, 0], [0.55, 0.15], [0.5, 0.3], [0.001, 0.3]], 10, U(0.8), 0, vm - 0.7 + i * 1.4); k.lathe_('cloth_indigo', [[0.001, 0.28], [0.4, 0.28], [0.4, 0.31], [0.001, 0.31]], 10, U(0.8), 0, vm - 0.7 + i * 1.4); }
+    k.bx('timber', Math.min(U(1.9), U(1.96)), 1.9, v0 + 0.15, Math.max(U(1.9), U(1.96)), 1.96, v1 - 0.15);
+    for (let i = 0; i < Math.floor((span - 0.5) / 0.35); i++) k.bx(i % 2 ? 'cloth_indigo' : 'cloth_blue', Math.min(U(1.9), U(1.96)), 1.0, v0 + 0.3 + i * 0.35, Math.max(U(1.9), U(1.96)), 1.9, v0 + 0.3 + i * 0.35 + 0.22);
+    for (let i = 0; i < 4; i++) k.heap('cloth_indigo', U(1.2 + (i % 2) * 0.3), 0, vm - 0.3 + Math.floor(i / 2) * 0.4, 0.12, 0.14);
   } else {      // grain: a heap of sacks and the measuring bowls
     for (let r = 0; r < 3; r++) for (let i = 0; i < 3 - r; i++) k.sack(U(0.4 + r * 0.05), vm - 0.5 + i * 0.5 + r * 0.25, r * 0.5);
     for (let i = 0; i < 2; i++) k.bowl('hide_tan', U(1.6), 0, vm - 0.3 + i * 0.6, 0.26);
@@ -96,7 +115,7 @@ function roomContents(k, kind, far, s, v0, v1, rand) {
 
 /** The court's furniture on its east strip, in slots from the front to the back; the west strip holds the stair. */
 function courtContents(k, u0, u1, v0, v1, rand) {
-  const items = ['granary', 'hearth', 'mortar', 'jars', 'wood', 'hearth', 'jars'].sort(() => rand() - 0.5);
+  const items = ['granary', 'hearth', 'mortar', 'jars', 'wood', rand() < 0.35 ? 'vats' : 'hearth', rand() < 0.4 ? 'pens' : 'jars'].sort(() => rand() - 0.5);
   let v = v0 + 0.55;
   const ue = u1 - 0.75;
   for (const it of items) {
@@ -116,6 +135,16 @@ function courtContents(k, u0, u1, v0, v1, rand) {
       k.lathe_('timber', [[0.22, 0], [0.28, 0.4], [0.3, 0.7], [0.001, 0.7]], 9, ue, 0, v + 0.1); k.lathe_('wood_dark', [[0.17, 0.68], [0.001, 0.66]], 9, ue, 0, v + 0.1);
       const p = k.pt(ue, v + 0.1); k.col.circle(p[0], p[1], 0.3, 0, 0.7);
       v += 0.9;
+    } else if (it === 'vats') {
+      // a dyer's yard: indigo vats sunk in a low banco bench, cloth hanging on a pole above (the vats are set at the wall)
+      for (let i = 0; i < 2; i++) { k.lathe_(BS, [[0.001, 0], [0.5, 0], [0.55, 0.15], [0.5, 0.3], [0.001, 0.3]], 10, ue - 0.15, 0, v + 0.45 + i * 1.0); k.lathe_('cloth_indigo', [[0.001, 0.28], [0.4, 0.28], [0.4, 0.31], [0.001, 0.31]], 10, ue - 0.15, 0, v + 0.45 + i * 1.0); const p = k.pt(ue - 0.15, v + 0.45 + i * 1.0); k.col.circle(p[0], p[1], 0.55, 0, 0.3); }
+      v += 2.0;
+    } else if (it === 'pens') {
+      // a goat's tether post with a trough and a few hens' roosting basket
+      k.lathe_('timber', [[0.07, 0], [0.06, 1.0], [0.001, 1.0]], 6, ue - 0.2, 0, v + 0.2);
+      k.bx('timber', ue - 0.6, 0, v + 0.45, ue + 0.1, 0.2, v + 0.7);
+      k.lathe_('wicker', [[0.001, 0], [0.28, 0.02], [0.3, 0.3], [0.001, 0.32]], 9, ue - 0.1, 0, v + 1.0);
+      v += 1.3;
     } else if (it === 'jars') {
       for (let i = 0; i < 3; i++) k.jar('terracotta', ue - 0.5 + i * 0.5, 0.35, v + 0.2, 1.5);
       k.bx(BS, ue - 0.8, 0, v - 0.1, ue + 0.7, 0.35, v + 0.5, true);
@@ -162,7 +191,7 @@ export function home(el, ctx) {
     for (let i = 0; i < n; i++) k.bx(BS, stairU[0], 0, vc0 + len - (i + 1) * tread, stairU[1], (i + 1) * h, vc0 + len - i * tread);
     const r = k.R(stairU[0], vc0, stairU[1], vc0 + len); k.col.ramp(r, 0, H1, k.south ? 's' : 'n'); }
   // ── the vestibule (skifa): benches, mats, the school's boards or a craftsman's goods ──
-  const trade = ['loom', 'store', 'school', 'potter', 'grain', 'sleep'], pick = () => trade[Math.floor(rand() * trade.length)];
+  const trade = ['loom', 'store', 'school', 'potter', 'grain', 'sleep', 'smith', 'dyer'], pick = () => trade[Math.floor(rand() * trade.length)];
   if (partition) {
     for (const s of [-1, 1]) {
       const a = s < 0 ? mid - 1.4 : mid + 1.0, b = s < 0 ? mid - 1.0 : mid + 1.4;
