@@ -260,3 +260,37 @@ export function altar(ctx, { x, z, y }) {
   for (const s of [-1, 1]) { bag.add('gilt_bronze', lathe([[0.1, 0], [0.03, 0.08], [0.025, 0.4], [0.06, 0.44], [0.001, 0.46]], 8, null, x + 0.1, y + 1.42, z + s * 0.9)); bag.add('linen', lathe([[0.025, 0], [0.025, 0.25]], 6, null, x + 0.1, y + 1.88, z + s * 0.9)); }
   col.rect([x - 0.62, z - 1.66, x + 0.62, z + 1.66], y, y + 2.4);
 }
+
+/**
+ * A side altar against the outer wall of an aisle (the chapels between the buttresses, about 1235-50), at (x, z) on the wall's face,
+ * the front toward -s (the vessel): a step, the stone table with its painted frontal and linen, a gilt retable with three painted
+ * panels, a cross and two candlesticks lit, and a hanging lamp on a chain from the vault, lit.
+ */
+export function sideAltar(ctx, { x, z, y, s, seed = 0, vaultY }) {
+  const { bag, col, lights } = ctx, fz = -s, A = (d) => z + fz * d;
+  const zr = (d0, d1) => [Math.min(A(d0), A(d1)), Math.max(A(d0), A(d1))];
+  const R = (x0, d0, x1, d1, y0, y1, m = 'limestone') => { const [za, zb] = zr(d0, d1); bag.add(m, box(x0, y + y0, za, x1, y + y1, zb)); };
+  R(x - 1.2, 0.05, x + 1.2, 1.35, 0, 0.14);
+  R(x - 1.0, 0.1, x + 1.0, 0.8, 0.14, 1.0);
+  R(x - 0.88, 0.8, x + 0.88, 0.82, 0.26, 0.92, seed % 2 ? 'paint_fleur' : 'paint_robe');
+  R(x - 1.06, 0.05, x + 1.06, 0.86, 1.0, 1.04, 'limestone');
+  R(x - 1.02, 0.05, x + 1.02, 0.84, 1.04, 1.06, 'linen'); R(x - 1.02, 0.84, x + 1.02, 0.86, 0.82, 1.06, 'linen');
+  R(x - 0.85, 0.06, x + 0.85, 0.22, 1.06, 1.82, 'gilt_bronze');
+  for (let k = 0; k < 3; k++) R(x - 0.78 + k * 0.54, 0.22, x - 0.3 + k * 0.54, 0.235, 1.15, 1.7, ['paint_castle', 'paint_robe', 'paint_blue'][(k + seed) % 3]);
+  R(x - 0.9, 0.04, x + 0.9, 0.24, 1.82, 1.9, 'limestone');
+  R(x - 0.03, 0.3, x + 0.03, 0.34, 1.06, 1.74, 'gold'); R(x - 0.22, 0.3, x + 0.22, 0.34, 1.5, 1.56, 'gold');
+  for (const sx of [-1, 1]) {
+    const cx = x + sx * 0.58, cz = A(0.42);
+    bag.add('gilt_bronze', lathe([[0.001, 0], [0.09, 0], [0.04, 0.1], [0.025, 0.3], [0.05, 0.34], [0.001, 0.36]], 8, null, cx, y + 1.06, cz));
+    bag.add('ivory', lathe([[0.03, 0], [0.03, 0.22], [0.001, 0.22]], 6, null, cx, y + 1.4, cz));
+    bag.add('gold', lathe([[0.001, 0], [0.025, 0.04], [0.001, 0.1]], 5, null, cx, y + 1.64, cz));
+  }
+  // the lamp: a glass in an iron ring on a chain from the vault, a flame in it, hanging before the altar
+  const lx = x, lz = A(1.7), ly = y + 3.3, top = vaultY ?? y + 10.4;
+  bag.add('iron', lathe([[0.012, 0], [0.012, top - ly - 0.35]], 4, null, lx, ly + 0.35, lz));
+  bag.add('iron', lathe([[0.11, 0], [0.1, 0.05]], 8, null, lx, ly + 0.3, lz));
+  bag.add('stained_glass', lathe([[0.001, 0], [0.07, 0.03], [0.1, 0.16], [0.1, 0.3]], 8, null, lx, ly, lz));
+  bag.add('gold', lathe([[0.001, 0.02], [0.03, 0.08], [0.001, 0.2]], 5, null, lx, ly, lz));
+  lights.push({ at: [lx, ly + 0.15, lz], color: '#ffc27a', intensity: 1.8, distance: 9 });
+  const [za, zb] = zr(0, 1.35); col.rect([x - 1.2, za, x + 1.2, zb], y, y + 1.9);
+}
