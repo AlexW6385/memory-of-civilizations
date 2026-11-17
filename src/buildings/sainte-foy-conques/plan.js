@@ -330,12 +330,12 @@ const win = (uc, spring, sill, r = 0.45) => ({ uc, r, spring, sill });
   add({ t: 'water', rect: [4.65, RZ0 - 0.65, 6.25, RZ0 - 0.1], y: 0.92 });
   add({ t: 'block', rect: [5.4, RZ0 - 0.05, 5.5, RZ0 + 0.0], y0: 1.1, y1: 1.4, mat: 'bronze', collide: false });
   // within: a table and its bench along each long wall (the monks sat with their backs to the wall), the abbot's table across the east end on a dais
-  const wt = (x0, x1, zb, zt, bz0, bz1) => { furn([x0, bz0, x1, bz1], 0, 0.45); furn([x0, zb, x1, zt], 0.72, 0.8); for (let x = x0 + 0.2; x < x1; x += 2.3) for (const z of [zb + 0.08, zt - 0.14]) furn([x, z, x + 0.07, z + 0.07], 0, 0.72, 'timber', false); };
+  const wt = (x0, x1, zb, zt, bz0, bz1) => { furn([x0, bz0, x1, bz1], 0, 0.45); furn([x0, zb, x1, zt], 0.72, 0.8); for (let x = x0 + 0.2; x < x1; x += 2.3) for (const z of [zb + 0.08, zt - 0.14]) furn([x, z, x + 0.07, z + 0.07], 0, 0.72, 'timber'); };
   wt(5.2, 15.0, 30.65, 31.45, 30.15, 30.6);
   wt(7.8, 15.0, 34.85, 35.65, 35.7, 36.15);
   add({ t: 'slab', rect: [15.6, 31.2, 18.45, 35.1], y0: FY, y1: 0.3, mat: 'limestone_yellow', walk: true });
   add({ t: 'slab', rect: [15.3, 31.2, 15.6, 35.1], y0: FY, y1: 0.17, mat: 'limestone_yellow', walk: true });
-  furn([16.45, 31.7, 17.35, 34.6], 0.3 + 0.72, 0.3 + 0.8); for (const [x, z] of [[16.5, 31.75], [17.2, 31.75], [16.5, 34.45], [17.2, 34.45]]) furn([x, z, x + 0.1, z + 0.1], 0.3, 0.3 + 0.72, 'timber', false);
+  furn([16.45, 31.7, 17.35, 34.6], 0.3 + 0.72, 0.3 + 0.8); for (const [x, z] of [[16.5, 31.75], [17.2, 31.75], [16.5, 34.45], [17.2, 34.45]]) furn([x, z, x + 0.1, z + 0.1], 0.3, 0.3 + 0.72, 'timber');
   furn([17.5, 31.7, 18.0, 34.6], 0.3, 0.3 + 0.45);
   add({ t: 'block', rect: [18.33, 31.8, 18.45, 34.5], y0: 1.4, y1: 3.9, mat: 'cloth_red', collide: false });
   add({ t: 'block', rect: [18.29, 31.7, 18.33, 34.6], y0: 3.85, y1: 3.95, mat: 'wood_dark', collide: false });

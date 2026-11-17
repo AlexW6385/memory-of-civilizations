@@ -197,7 +197,7 @@ for (const z0 of [0, -5.04, 5.04]) for (const k of [-1, 1]) add({ t: 'tang_lamp'
 
 // the hall's offerings and ritual furniture [inferred: usual in a Tang hall of worship; no source for this hall's]: two bronze incense burners on stone
 // stands to either side of the central way, a wooden fish and a bowl-gong on the side mats, a plate of fruit and a pair of vases at the foot of each Buddha
-for (const z of [-2.7, 2.7]) { block([-5.55, z - 0.5, -4.45, z + 0.5], F, F + 0.5, 'limestone'); block([-5.65, z - 0.6, -4.35, z + 0.6], F + 0.5, F + 0.56, 'granite_grey', { collide: false }); obj('censer', -5.0, z, F + 0.56); }
+for (const z of [-2.7, 2.7]) { block([-5.9, z - 0.5, -4.8, z + 0.5], F, F + 0.5, 'limestone'); block([-6.0, z - 0.6, -4.7, z + 0.6], F + 0.5, F + 0.56, 'granite_grey', { collide: false }); obj('censer', -5.35, z, F + 0.56); }
 for (const z0 of [-5.04, 5.04]) {
   block([-4.12, z0 - 0.14, -3.82, z0 + 0.14], F + 0.05, F + 0.2, 'lacquer_red', { collide: false });
   block([-4.1, z0 + 0.22, -3.86, z0 + 0.34], F + 0.05, F + 0.13, 'bronze', { collide: false });
