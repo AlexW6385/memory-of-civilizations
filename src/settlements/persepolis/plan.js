@@ -39,27 +39,52 @@ E.push({ t: 'lamassu_gate', c: [-112, STAIR.z], s: 25, h: 17, y: T });
 E.push({ t: 'hall', rect: [-60, -90, 0, -30], y: T, plinth: 2.6, h: 20, grid: [6, 6], porticoes: 'nwe', portDepth: 17, walls: 5, towers: 20, doors: 'nwe', dress: true,
   stairs: [{ face: 'w', W: 26, flight: 9, D: 6, wings: ['nobles', 'nobles'], c: -60 }] });   // the west porch's stair (the visitor's side) [inferred]
 E.push({ t: 'audience', c: [-30, -40], y: T + 2.75, dir: [0, -1], aisle: 44 });
+// the throne in the Hundred-Column Hall, at the south end of its middle aisle between two rows of columns (the aisle's 4.7 m, the dais 4.6 m)
+const HY = T + 0.95;
+E.push({ t: 'audience', c: [75, -67], y: HY, dir: [0, -1], aisle: 56, half: 2.3, depth: 2.2, burners: false });
+for (const x of [73.1, 76.9]) E.push({ t: 'incense_stand', at: [x, -73.2], y: HY });
+// lamp stands along the aisle, each beside a column's plinth
+const HS = [];
+for (const z of [-119.5, -105.5, -91.5]) for (const x of [72.95, 77.05]) HS.push(['stand', x, z, 0, { light: z === -91.5 }]);
+E.push({ t: 'furnish', y: HY, items: HS });
+// the Tachara's and the Hadish's rooms: couches facing across a low table on carpets, chests and lamps along the walls, braziers
+const banquet = (x, z, _y, wide = 4.6) => [['carpet', x, z, 0, { l: wide, w: 3.4 }], ['couch', x - 1.1, z, Math.PI / 2, {}], ['couch', x + 1.15, z, -Math.PI / 2, { cloth: 'cloth_indigo', cloth2: 'cloth_red' }], ['table', x, z, Math.PI / 2, {}], ['stool', x - 1.1, z - 1.6, 0, {}], ['stool', x + 1.15, z + 1.6, 0, {}]];
+E.push({ t: 'furnish', y: T + 3.15, items: [
+  ...banquet(-58.5, 17.3), ...banquet(-49.5, 17.3),
+  ['carpet', -54, 20, Math.PI / 2, { l: 13.2, w: 1.4, border: 'cloth_red', field: 'cloth_indigo' }],
+  ['chest', -61.5, 22.4, Math.PI / 2], ['chest', -61.5, 23.8, Math.PI / 2, { l: 0.9 }], ['chest', -46.5, 22.4, Math.PI / 2], ['chest', -46.5, 23.8, Math.PI / 2, { l: 0.9 }],
+  ['stand', -60.5, 21.6, 0, {}], ['stand', -47.5, 21.6, 0, {}], ['brazier', -58.5, 22.7, 0, { light: true }], ['brazier', -49.5, 22.7, 0, { light: true }],
+] });
+E.push({ t: 'furnish', y: T + 3.65, items: [
+  ...[[-20, 81.67], [0, 81.67], [-20, 108.33], [0, 108.33]].flatMap(([x, z]) => banquet(x, z, 0, 5.6)),
+  ['carpet', -10, 95, Math.PI / 2, { l: 39, w: 2, border: 'cloth_red', field: 'cloth_indigo' }],
+  ['carpet', -20.5, 95, 0, { l: 18, w: 2, border: 'cloth_red', field: 'cloth_indigo' }], ['carpet', 0.5, 95, 0, { l: 18, w: 2, border: 'cloth_red', field: 'cloth_indigo' }],
+  ['brazier', -12.1, 92.9, 0, { light: true }], ['brazier', -7.9, 92.9, 0], ['brazier', -12.1, 97.1, 0], ['brazier', -7.9, 97.1, 0, { light: true }],
+  ['chest', -29.4, 88.3, Math.PI / 2, { l: 1.2 }], ['chest', -29.4, 101.7, Math.PI / 2, { l: 1.2 }], ['chest', 9.4, 88.3, Math.PI / 2, { l: 1.2 }], ['chest', 9.4, 101.7, Math.PI / 2, { l: 1.2 }],
+  ['stand', -28.4, 91.2, 0, {}], ['stand', -28.4, 98.8, 0, {}], ['stand', 8.4, 91.2, 0, {}], ['stand', 8.4, 98.8, 0, {}],
+] });
 // its two stairways, north and east, with their reliefs: the nobles on the north, the delegations on the east stair's south wing
 E.push({ t: 'apadana_stair', face: 'n', line: -110, span: [-67, 7], c: -30, W: 32, D: 7.5, y: T, h: 2.6, wings: ['nobles', 'nobles'] });
 E.push({ t: 'apadana_stair', face: 'e', line: 20, span: [-97, -40], c: -68.5, W: 32, D: 7.5, y: T, h: 2.6, wings: ['nobles', 'tribute'] });
 // the Hall of a Hundred Columns, 70 × 70 m, 10 × 10 columns, a portico north
 // (its platform 0.8 m high, a flight of 10 cm steps before the portico and before each other door)
 E.push({ t: 'hall', rect: [40, -130, 110, -60], y: T, plinth: 0.8, h: 13, grid: [10, 10], porticoes: 'n', portDepth: 14, walls: 3.5, doors: 'nesw', reliefs: true, bulls: true,
+  interior: true, hangings: true, niches: 'esw', windows: { n: 6, e: 6, s: 6, w: 6 }, windowW: 1.5, windowH: 2.4, sill: 1.1,
   stairs: [{ face: 'n', kind: 'flight', W: 24 }, { face: 's', kind: 'flight', W: 8 }, { face: 'e', kind: 'flight', W: 8 }, { face: 'w', kind: 'flight', W: 8 }] });
 // the Tripylon, the Tachara (palace of Darius), the Hadish (palace of Xerxes)
-E.push({ t: 'hall', rect: [5, -12, 25, 12], y: T, plinth: 1.2, h: 9, grid: [2, 2], walls: 2.5, doors: 'nesw', stairs: [{ face: 'w', kind: 'flight', W: 5 }, { face: 's', kind: 'flight', W: 5 }] });
+E.push({ t: 'hall', rect: [5, -12, 25, 12], y: T, plinth: 1.2, h: 9, grid: [2, 2], walls: 2.5, doors: 'nesw', reliefs: true, scenes: { n: 'king', s: 'king', e: 'audience' }, stairs: [{ face: 'w', kind: 'flight', W: 5 }, { face: 's', kind: 'flight', W: 5 }] });
 // the Tachara on its own platform: the hall of 3 × 4 columns about 15.5 m square, the portico of eight on the south;
 // walls 1.7 m thick, every window a single stone frame 2.65 m high through them; the king leaving the palace with his
 // parasol- and towel-bearers on the main doorways' jambs, the king and the lion on the side doors; the double stair
 // up to the portico from the south court, servants carrying up food and kids on it, the inscription at its middle
 E.push({ t: 'hall', rect: [-62, 12, -46, 28], y: T, plinth: 3, margin: 6, h: 8.5, grid: [4, 3], porticoes: 's', portDepth: 8, walls: 1.7, doors: 'nesw',
-  reliefs: true, scenes: { n: 'king', s: 'king' }, windows: { n: 2, s: 2, e: 2, w: 2 },
+  reliefs: true, interior: true, scenes: { n: 'king', s: 'king' }, windows: { n: 2, s: 2, e: 2, w: 2 },
   stairs: [{ face: 's', W: 22, flight: 8, D: 6, wings: ['servants', 'servants'], climbers: 'bearer', centre: 'inscription' }] });
 // the Hadish on its higher platform: 36 columns, the portico of twelve on the north, windows all round (servants
 // with vessels and goats on their inner faces), the king and his attendants on the jambs; two double stairs, up from
 // the courts west and east
 E.push({ t: 'hall', rect: [-30, 75, 10, 115], y: T, plinth: 3.5, h: 8, grid: [6, 6], porticoes: 'n', portDepth: 9, walls: 3, doors: 'nesw',
-  reliefs: true, scenes: { n: 'king', s: 'king' }, windows: { n: 4, s: 4, e: 4, w: 4 }, windowReliefs: true,
+  reliefs: true, interior: true, scenes: { n: 'king', s: 'king' }, windows: { n: 4, s: 4, e: 4, w: 4 }, windowReliefs: true,
   stairs: [{ face: 'w', W: 28, flight: 10, wings: ['servants', 'servants'], climbers: 'bearer' }, { face: 'e', W: 28, flight: 10, wings: ['servants', 'servants'], climbers: 'bearer' }] });
 // the Treasury: its two great halls of wooden columns, the court with the audience reliefs, the storerooms
 E.push({ t: 'treasury', rect: [50, 60, 130, 200], y: T, h: 7, th: 3 });
