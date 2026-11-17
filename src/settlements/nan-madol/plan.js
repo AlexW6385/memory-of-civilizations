@@ -30,8 +30,11 @@ E.push({ t: 'crib_wall', a: [ix0, iz0], b: [ix0, iz1], th: ith, top: innerTop, s
 E.push({ t: 'crib_wall', a: [ix0, iz1], b: [INNER_GATE[0], iz1], th: ith, top: (u, L) => 3.6 + 1.0 * (1 - sm(0, 6, u)), seed: 24, proj: 0, ends: [ith / 2, 0] });
 E.push({ t: 'crib_wall', a: [INNER_GATE[1], iz1], b: [ix1, iz1], th: ith, top: (u, L) => 3.6 + 1.0 * (1 - sm(0, 6, L - u)), seed: 25, proj: 0, ends: [0, ith / 2] });
 // from the canal the walls must read: the log-cabin corners' columns run well past each other (0.55 m on the outer wall), the faces' headers stand proud by uneven amounts, the crown is skinned in pale coral
-for (const e of E) if (e.t === 'crib_wall') Object.assign(e, { jut: e.th > 2 ? 0.55 : 0.4, rough: 0.12, cap: true });
-E.push({ t: 'tomb', ...TOMB, seed: 31 });
+for (const e of E) if (e.t === 'crib_wall') Object.assign(e, { jut: e.th > 2 ? 0.55 : 0.4, rough: 0.12, cap: true, fine: true, flare: e.th > 2 ? 0.08 : 0.05 });
+// the entrances with their steps: a sill of laid columns through each wall, a flight of column treads each side
+E.push({ t: 'gate', c: [(OUTER_GATE[0] + OUTER_GATE[1]) / 2, oz1], w: OUTER_GATE[1] - OUTER_GATE[0], th, n: 2, seed: 61 });
+E.push({ t: 'gate', c: [(INNER_GATE[0] + INNER_GATE[1]) / 2, iz1], w: INNER_GATE[1] - INNER_GATE[0], th: ith, n: 1, seed: 62 });
+E.push({ t: 'tomb', ...TOMB, seed: 31, fine: true });
 for (const [x, z, yaw] of SAKAU) E.push({ t: 'sakau', c: [x, z], yaw });
 // heaps of coral gravel against the inner court's walls, where the floor is raked
 for (const [x, z] of [[-20.5, -30], [-20.5, -46], [0.5, -47]]) E.push({ t: 'pile', c: [x, z], r: 1.0 });
@@ -42,6 +45,10 @@ E.push({ t: 'court', kind: 'rake', rect: [ox0 + 1.8, oz0 + 1.8, ox1 - 1.8, oz1 -
   skip: [sk(INNER, 1.8), [-12, -18.5, 3.5, -13], [-12, -18.5, -8, -6.5], ...SAKAU.map(([x, z, yw]) => (Math.abs(Math.sin(yw)) > 0.5 ? [x - 3.2, z - 4, x + 3.2, z + 4] : [x - 4, z - 3.2, x + 4, z + 3.2]))] });
 E.push({ t: 'court', kind: 'rake', rect: [ix0 + 1.2, iz0 + 1.2, ix1 - 1.2, iz1 - 1.2], step: 1.3,
   skip: [sk(TOMB.rect, 1.6), [TOMB.stair[0] - 1.5, TOMB.stair[1], TOMB.stair[2] + 1.5, TOMB.stair[3] + 0.8], [ix0, -28.6, ix1, -24.2]] });
+// lumps of coral rubble on the courts' floors, thick at the walls' feet (the floors are coral rubble raked into lines)
+[[E[E.length - 2], 850, [[OUTER_GATE[0] - 0.5, oz1 - th / 2 - 1.4, OUTER_GATE[1] + 0.5, oz1 + th / 2 + 1.4]]], [E[E.length - 1], 260, [[INNER_GATE[0] - 0.5, iz1 - ith / 2 - 1, INNER_GATE[1] + 0.5, iz1 + ith / 2 + 1]]]].forEach(([r, n, sk2], i) => E.push({ t: 'court', kind: 'rubble', rect: r.rect, skip: [...r.skip, ...sk2], n, seed: 90 + i }));
+{ const [tx0, tz0, tx1, tz1] = TOMB.rect, [qx0, qz0, qx1, qz1] = TOMB.pit;
+  E.push({ t: 'court', kind: 'rubble', rect: [tx0 + 0.3, tz0 + 0.3, tx1 - 0.3, tz1 - 0.3], y: TOMB.h, n: 120, seed: 93, skip: [[qx0 - 1.3, qz0 - 0.7, qx1 + 1.3, qz1 + 0.7], [TOMB.stair[0] - 0.5, TOMB.stair[1] - 1, TOMB.stair[2] + 0.5, TOMB.stair[3]]] }); }
 // the apron between the causeway and the gate: gravel raked in lines up to the way, a seat of columns each side of the gate
 E.push({ t: 'court', kind: 'rake', rect: [-38.5, -5.5, 18.5, -2.9], skip: [[-12.4, -6, -7.6, -2.4]], step: 1.3 });
 for (const [a, b] of [[[-19.5, -4.2], [-14.2, -4.2]], [[-5.8, -4.2], [-0.5, -4.2]]]) E.push({ t: 'court', kind: 'seat', a, b });
