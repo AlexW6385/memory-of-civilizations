@@ -7,7 +7,7 @@ import { box, lathe, rod, frustum, disc } from '../../core/geom.js';
 import { rng } from '../../settlements/ajanta/layout.js';
 
 /** A local frame on a rect: u along the front (0…W), v into the house from the front face (0…D); worlds axis-aligned. */
-function frame(rect, front) {
+export function frame(rect, front) {
   const [x0, z0, x1, z1] = rect, f = front ?? 's';
   const W = f === 's' || f === 'n' ? x1 - x0 : z1 - z0, D = f === 's' || f === 'n' ? z1 - z0 : x1 - x0;
   const xz = (u, v) => (f === 's' ? [x0 + u, z1 - v] : f === 'n' ? [x1 - u, z0 + v] : f === 'e' ? [x1 - v, z0 + u] : [x0 + v, z1 - u]);
@@ -15,11 +15,11 @@ function frame(rect, front) {
   const yaw = f === 's' ? 0 : f === 'n' ? Math.PI : f === 'e' ? -Math.PI / 2 : Math.PI / 2;
   return { W, D, xz, rect4, yaw, f };
 }
-const B = (F, bag, mat, u0, y0, v0, u1, y1, v1) => { const [a, b, c, d] = F.rect4(u0, v0, u1, v1); bag.add(mat, box(a, y0, b, c, y1, d)); };
-const C = (F, col, u0, v0, u1, v1, y0, y1) => col.rect(F.rect4(u0, v0, u1, v1), y0, y1);
-const pot = (bag, x, y, z, r, h, mat = 'terracotta') => bag.add(mat, lathe([[0.001, 0], [r * 0.55, 0.02], [r, h * 0.45], [r * 0.82, h * 0.8], [r * 0.5, h * 0.92], [r * 0.58, h], [r * 0.45, h], [r * 0.001, h * 0.9]], 10, null, x, y, z));
+export const B = (F, bag, mat, u0, y0, v0, u1, y1, v1) => { const [a, b, c, d] = F.rect4(u0, v0, u1, v1); bag.add(mat, box(a, y0, b, c, y1, d)); };
+export const C = (F, col, u0, v0, u1, v1, y0, y1) => col.rect(F.rect4(u0, v0, u1, v1), y0, y1);
+export const pot = (bag, x, y, z, r, h, mat = 'terracotta') => bag.add(mat, lathe([[0.001, 0], [r * 0.55, 0.02], [r, h * 0.45], [r * 0.82, h * 0.8], [r * 0.5, h * 0.92], [r * 0.58, h], [r * 0.45, h], [r * 0.001, h * 0.9]], 10, null, x, y, z));
 /** A wall run along u at depth v0…v1 from u0 to u1, full height H, with openings [uc, half, y0, y1]. */
-function wallRun(F, bag, col, mat, u0, u1, v0, v1, H, ops) {
+export function wallRun(F, bag, col, mat, u0, u1, v0, v1, H, ops) {
   const O = ops.filter((o) => o[0] + o[1] > u0 && o[0] - o[1] < u1).sort((a, b) => a[0] - b[0]);
   let u = u0;
   const put = (a, b, y0, y1) => { if (b - a < 0.01 || y1 - y0 < 0.01) return; B(F, bag, mat, a, y0, v0, b, y1, v1); C(F, col, a, v0, b, v1, y0, y1); };
