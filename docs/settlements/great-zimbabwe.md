@@ -146,3 +146,12 @@ Sources: Zimbabwe Field Guide, "The Great Enclosure in photographs" (mail.zimfie
 ## Round 5: the houses nearest the arrival are walk-in
 
 [inferred, from later Shona practice] Every house of the nine homesteads nearest the arrival is an open (furnished) daga house: the hearth of three stones with its glow, the rukuva with pots, the shelf, the mat, the grinding stones, a woman at the hearth in every second one. The eaves of open houses now have a soffit (the walker is not caught under a roof's slope on the way in) and the doorway is 1.3 m wide. The men's meeting house of a homestead (dara; `dara_house`: a low daga wall with three openings, six poles, a thatched cone, stools, a drum, a fire) stands outside the gate of four of them, men seated on the stools.
+
+## Round 2: the landmark seen first and close (2026-11-17)
+
+Sources as §15 and §18 (zimfieldguide, Great Enclosure in photographs: rounded jambs and stepped thresholds of the entrances, dentelle on the conical tower, "each layer slightly recessed"). Draw count at the arrival unchanged (main 191 draws; main 0.97 M to 0.98 M triangles).
+- **Wall faces as a relief of beds.** Each course of each face of every wall over 3.5 m now sits a few centimetres in or out from one stretch to the next (slabs of different thickness), not a ruled stair [amount inferred].
+- **Chevron band in relief.** The band's rails and herringbone slabs now stand 15 cm proud of the face (they were 9 cm), the slabs 20 cm tall, so the zigzag casts shadow from afar [depth inferred; the pattern stated].
+- **The conical tower laid in courses.** The solid cone is no longer a smooth lathe: 30 courses of 0.33 m, each stepping in, with its stones proud or sunk by a few centimetres; the dentelle stands out from them [coursing inferred from the neighbouring walls].
+- **The stepped threshold.** Three concentric rounded treads (0.14 m each) of dressed granite, the top faced with dhaka, on the forecourt in the entrance's mouth (`entrance_steps`) [the real thresholds are stated stepped and rounded; their placing here inferred]. The gap itself stays open, as in §18.
+- **Monoliths** are split slabs: tapering, a rounded, off-true top, the faces uneven, packing stones round the socket [form inferred].
