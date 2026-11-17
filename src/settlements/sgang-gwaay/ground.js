@@ -3,6 +3,7 @@
 // low cloud, drizzle and rain, the damp at its highest (docs/settlements/sgang-gwaay.md §6–§8).
 
 import { RADIUS, SEA, RIM, G, height, shoreX, inSea, inHouse, village } from './layout.js';
+import { yards } from './yards.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0, grass: 0.45, rock: 0, soil: 0.35, fields: 0, dry: 0, warmth: 0.1, red: 0, road: 0, snow: 0, forest: 0.5 };
@@ -24,6 +25,7 @@ function planting(x, z) {
   if (inHouse(x, z, -4)) return null;
   const v = village();
   if (v.poles.some((p) => Math.hypot(p.c[0] - x, p.c[1] - z) < 3) || v.canoes.some((c) => !c.moored && Math.hypot(c.c[0] - x, c.c[1] - z) < c.l / 2 + 1.5)) return null;
+  if (yards().runs.some((r) => Math.abs(z - r.z) < 2.3 && x > r.x0 - 1.5 && x < r.x1 + 1)) return null;   // the canoe runs are cleared lanes
   if (h < 0.9) return h > 0.15 ? { boulder: 0.1, grass: 5 } : { boulder: 0.1 };    // the beach top: drift boulders and sea-rye tufts
   if (dE < 14 && dE > 4) return { grass: 2.2 };                                        // the street: sparse tufts of sea-rye and plantain on the trampled ground
   if (dE < 30) return null;                                                           // the houses

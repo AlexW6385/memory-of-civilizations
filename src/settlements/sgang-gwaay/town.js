@@ -16,7 +16,7 @@ export async function town() {
   // the lowest ground under a house's walls: a house at the end of the arc stands over the shore's drop, and its walls then rest on a log crib down to it
   const footOf = (h) => { let m = 1e9; for (const [u, v] of [[-1, -1], [1, -1], [-1, 1], [1, 1], [0, -1], [0, 1], [-1, 0], [1, 0]]) { const [x, z] = toWorld(h, u * h.w / 2, v * h.d / 2); m = Math.min(m, height(x, z)); } return m; };
   const nearest = (x, z) => { let b = 0, bd = 1e9; H.forEach((h, k) => { const d = Math.hypot(h.c[1] - z, (h.c[0] - x) * 0.3); if (d < bd) { bd = d; b = k; } }); return b; };
-  for (const p of Y.props) { const g = grp[nearest(...p.c)]; g.E.push({ t: 'haida_prop', kind: p.kind, c: p.c, yaw: p.yaw, y: p.y, w: p.w, seed: p.seed }); g.pts.push(p.c, [p.c[0] + 5, p.c[1] + 5], [p.c[0] - 5, p.c[1] - 5]); }
+  for (const p of Y.props) { const g = grp[nearest(...p.c)]; g.E.push({ t: 'haida_prop', kind: p.kind, c: p.c, yaw: p.yaw, y: p.y, w: p.w, seed: p.seed, ys: p.ys, dz: p.dz }); g.pts.push(p.c, [p.c[0] + 5, p.c[1] + 5], [p.c[0] - 5, p.c[1] - 5]); if (p.kind === 'canoerun') g.pts.push([p.c[0] + p.w + 2, p.c[1] + 3], [p.c[0] - 3, p.c[1] - 3]); }
   for (const r of Y.racks) { const g = grp[nearest(...r.c)]; g.E.push({ t: 'haida_rack', c: r.c, yaw: r.yaw, w: r.w, seed: r.seed, y: height(...r.c) }); g.pts.push(r.c); }
   // each house its own plan with its yard (culled by its own bounds); every house is open and furnished (the pit is dug in
   // layout.js's ground; tiers are its floors)
