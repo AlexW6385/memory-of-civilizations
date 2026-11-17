@@ -1,5 +1,6 @@
 // Çatalhöyük style kit: the shared pieces (ladders, ovens, baskets, jars, wall paint, bucrania, hatches).
 import { box, lathe, fromTriangles, rod, place } from '../../core/geom.js';
+import { blob, oval, roundRect, tube } from './soft.js';
 
 const WALL = 'mudbrick', MUD = 'mud_plaster', PLS = 'plaster_white', LIME = 'lime_plaster', RED = 'paint_minoan_red', BLK = 'paint_minoan_black';
 const LOG = 'log_pine', REED = 'reed_mat', BONE = 'chalk', HORN = 'ivory', ASH = 'pottery_dark';
@@ -97,25 +98,29 @@ function hands(bag, F, a, y, n, k = 1) {
  * its base at (x, y, z) on a wall whose normal into the room is `yaw` (local +z outward). Horns 0.9 m across.
  */
 function bucranium(bag, x, y, z, yaw, k = 1, ped = true) {
-  const parts = [];
-  if (ped) parts.push([PLS, box(-0.2 * k, -0.45 * k, -0.02, 0.2 * k, 0.04 * k, 0.26 * k)]);       // the pedestal built out of the wall
-  parts.push([BONE, lathe([[0.001, -0.1], [0.12, -0.08], [0.16, 0.06], [0.1, 0.2], [0.05, 0.3], [0.001, 0.31]], 10).scale(1.0 * k, 1, 0.75 * k).translate(0, 0.04 * k, 0.2 * k)]);
+  const P = (g) => place(g, x, y, z, yaw), sd = Math.round(x * 31 + z * 17) % 7;
+  // the pedestal: a boss of plaster built out of the wall, its edge rolled
+  if (ped) bag.add(PLS, P(blob(roundRect(-0.22 * k, -0.47 * k, 0.22 * k, 0.07 * k, 0.07 * k), 0.22 * k, { rings: 3, wob: 0.03, seed: sd })));
+  // the cow's skull modelled in plaster: the brow, the long face and the muzzle
+  const sz = ped ? 0.14 * k : 0.04 * k;
+  bag.add(BONE, P(blob([[0, 0.17], [0.11, 0.13], [0.14, 0.05], [0.1, -0.06], [0.075, -0.18], [0.04, -0.24], [-0.04, -0.24], [-0.075, -0.18], [-0.1, -0.06], [-0.14, 0.05], [-0.11, 0.13]].map(([u, v]) => [u * k, v * k]), 0.17 * k, { rings: 3, z0: sz, wob: 0.04, seed: sd + 1 })));
+  bag.add(BONE, P(blob(oval(0, 0.1 * k, 0.17 * k, 0.04 * k, 10), 0.09 * k, { rings: 2, z0: sz + 0.12 * k })));
+  bag.add(BONE, P(blob(oval(0, -0.2 * k, 0.065 * k, 0.05 * k, 8), 0.08 * k, { rings: 2, z0: sz + 0.1 * k })));
+  // the horns, thick at the root, curving out and then up and a little forward
   for (const s of [-1, 1]) {
-    let prev = null;
-    for (let i = 0; i <= 6; i++) {
-      const t = i / 6, p = [s * (0.1 + 0.4 * Math.sin(t * 1.25)) * k, (0.2 + 0.05 * t + 0.22 * t * t) * k, (0.22 + 0.05 * Math.sin(t * 3.1)) * k];
-      if (prev) parts.push([HORN, rod(prev, p, (0.055 - 0.04 * t) * k, 7)]);
-      prev = p;
-    }
+    const path = [];
+    for (let i = 0; i <= 8; i++) { const t = i / 8; path.push([s * (0.11 + 0.4 * Math.sin(t * 1.45)) * k, (0.11 + 0.04 * t + 0.5 * Math.pow(t, 2.2)) * k, sz + (0.12 + 0.12 * Math.sin(t * 2.4)) * k]); }
+    for (let c = 0; c < 8; c += 2) bag.add(HORN, P(tube(path.slice(c, c + 3), (t) => (0.062 - 0.05 * (c + t * 2) / 8) * k, 7, c === 0 || c === 6)));   // in short lengths: fine pieces, drawn near
   }
-  for (const [m, g] of parts) bag.add(m, place(g, x, y, z, yaw));
 }
 
 /** A hatch on a roof at (x, z): a low coaming of mud round the hole, soot on its inner face, the ladder standing up out of it. */
 function hatch(bag, x, top, z, rand, lean) {
-  const r = 0.45, t = 0.16, hc = 0.2;
-  for (const [x0, z0, x1, z1] of [[x - r - t, z - r - t, x + r + t, z - r], [x - r - t, z + r, x + r + t, z + r + t], [x - r - t, z - r, x - r, z + r], [x + r, z - r, x + r + t, z + r]]) bag.add(MUD, box(x0, top - 0.03, z0, x1, top + hc, z1));
-  bag.add('opening', box(x - r, top - 0.3, z - r, x + r, top + 0.02, z + r));
+  const r = 0.55, ring = [];
+  for (const [cx, cz, a0] of [[x + r - 0.1, z + r - 0.1, 0], [x - r + 0.1, z + r - 0.1, Math.PI / 2], [x - r + 0.1, z - r + 0.1, Math.PI], [x + r - 0.1, z - r + 0.1, Math.PI * 1.5]]) for (let k = 0; k <= 1; k++) { const a = a0 + k * Math.PI / 2; ring.push([cx + Math.cos(a) * 0.1, top + 0.1, cz + Math.sin(a) * 0.1]); }
+  ring.push(ring[0]);
+  bag.add(MUD, tube(ring.map((p, i) => [p[0], p[1] + 0.015 * Math.sin(i * 2.1 + x), p[2]]), (t) => 0.105 * (1 + 0.12 * Math.sin(t * 17 + z)), 5, false));   // a collar of mud rolled round the hole
+  bag.add('opening', box(x - 0.45, top - 0.3, z - 0.45, x + 0.45, top + 0.02, z + 0.45));
   const d = rand() < 0.5 ? 1 : -1;
   ladder(bag, x - 0.1, top - 1.9, z + d * (lean ? 0.35 : 0.1), 1.9, 0, -d, 0.35, 1.05);
 }

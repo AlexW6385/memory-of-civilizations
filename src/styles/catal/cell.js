@@ -5,6 +5,7 @@
 // the layout's ENTER list; everything is placed in the cell's own (u, v): u along the north wall from the corner the platforms start in,
 // v south from the north wall.
 import { box, lathe, rod, place } from '../../core/geom.js';
+import { blob, oval } from './soft.js';
 import { vultureWall, townMap, breast, hornPlinth, post } from './murals.js';
 import { WALL, MUD, PLS, LIME, RED, BLK, LOG, REED, BONE, ASH, rng, ladder, dome, basket, jar, frame, flat, zigzag, diamonds, hands, bucranium, aurochs } from './kit.js';
 
@@ -16,15 +17,28 @@ export function cellGeom(rect, mirror = false) {
   return { T, x0, z0, x1, z1, ix0, iz0, ix1, iz1, W, D, S, XO, lx, lz, ur, PH: 0.45, hole: ur(0.8, D - 2.35, 2.5, D - 0.45), hearth: [lx(1.1), lz(D - 1.6)], oven: [lx(0.7), lz(D - 0.6)], room: [ix0 + 0.3, iz0 + 0.3, ix1 - 0.3, iz1 - 0.3] };
 }
 
-/** A leopard in plaster relief on a wall (local +z out of it), the head toward +x·s. */
+/**
+ * A leopard in plaster relief on a wall (local +z out of it), the head toward +x·s, about 1.15 k long: the long body with its shoulder and
+ * haunch swelling out of it, the head with brow, ears and muzzle, two legs on the near side and two behind, the tail rising and curling over
+ * the back, rosettes of black on the flank. Modelled as soft blobs, the way the plaster was worked by hand.
+ */
 export function leopard(bag, x, y, z, yaw, s, k = 1) {
-  const P = (g) => place(g, x, y, z, yaw);
-  bag.add(PLS, P(lathe([[0.001, -1], [0.7, -0.75], [1, 0], [0.7, 0.75], [0.001, 1]], 10).rotateZ(Math.PI / 2).scale(0.46 * k, 0.17 * k, 0.07 * k)));
-  bag.add(PLS, P(lathe([[0.001, -1], [0.8, -0.5], [1, 0], [0.7, 0.6], [0.001, 1]], 9).scale(0.11 * k, 0.12 * k, 0.07 * k).translate(s * 0.5 * k, 0.1 * k, 0)));
-  for (const [a, b] of [[0.3, 0.36], [-0.3, -0.36]]) bag.add(PLS, P(rod([s * a * k, -0.05 * k, 0.03], [s * b * k, -0.34 * k, 0.03], 0.045 * k, 6)));
-  let prev = [-s * 0.44 * k, 0.02 * k, 0.03];
-  for (let i = 1; i <= 5; i++) { const t = i / 5, p = [-s * (0.44 + 0.3 * Math.sin(t * 1.6)) * k, (0.02 + 0.5 * t * t) * k, 0.03]; bag.add(PLS, P(rod(prev, p, (0.035 - 0.018 * t) * k, 5))); prev = p; }
-  for (const [a, b] of [[-0.25, 0.06], [-0.1, -0.04], [0.05, 0.08], [0.2, -0.02], [0.3, 0.08], [-0.35, -0.05]]) bag.add(BLK, P(lathe([[0.03 * k, 0], [0.001, 0.012]], 5).rotateX(Math.PI / 2).translate(s * a * k, b * k, 0.075 * k)));
+  const P = (g) => place(g, x, y, z, yaw), Q = (pts) => pts.map(([u, v]) => [s * u * k, v * k]);
+  const B = (mat, pts, h, o = {}) => bag.add(mat, P(blob(Q(pts), h * k, { rings: 3, wob: 0.04, ...o, z0: (o.z0 || 0) * k })));
+  const dome2 = (u, v, cx, cy, rx, ry, h, z0 = 0) => { const q = 1 - ((u - cx) / rx) ** 2 - ((v - cy) / ry) ** 2; return q > 0 ? z0 + h * Math.sqrt(q) : 0; };
+  const surf = (u, v) => Math.max(dome2(u, v, -0.02, 0.02, 0.43, 0.125, 0.07), dome2(u, v, -0.27, -0.02, 0.15, 0.15, 0.045, 0.035), dome2(u, v, 0.2, -0.01, 0.13, 0.14, 0.045, 0.035));
+  const sx = s < 0 ? -1 : 1, O = (cx, cy, rx, ry, n = 10, rot = 0) => oval(cx, cy, rx, ry, n, rot * sx);
+  B(PLS, O(-0.02, 0.02, 0.43, 0.125, 14), 0.07);                                 // the body
+  B(PLS, O(-0.27, -0.02, 0.15, 0.15, 12), 0.045, { z0: 0.035, seed: 2 });                // the haunch
+  B(PLS, O(0.2, -0.01, 0.13, 0.14, 12), 0.045, { z0: 0.035, seed: 3 });                   // the shoulder
+  B(PLS, O(0.35, 0.09, 0.07, 0.1, 8, -0.5), 0.07, { z0: 0.01 });                   // the neck
+  B(PLS, O(0.5, 0.12, 0.1, 0.075, 10, -0.15), 0.085, { z0: 0.02, seed: 4 });       // the head
+  B(PLS, O(0.6, 0.1, 0.055, 0.04, 8, -0.15), 0.075, { z0: 0.04 });                 // the muzzle
+  for (const u of [0.47, 0.55]) B(PLS, O(u, 0.2, 0.028, 0.032, 6), 0.05, { z0: 0.04, rings: 2 });   // the ears
+  for (const [u, v, rot, h] of [[0.27, -0.17, 0.08, 0.06], [0.17, -0.19, -0.14, 0.045], [-0.31, -0.17, -0.06, 0.06], [-0.2, -0.19, 0.14, 0.045]]) B(PLS, O(u, v, 0.048, 0.12, 8, rot), h, { z0: 0.01, rings: 2 });
+  for (let i = 0; i < 12; i++) { const t = i / 11, u = -0.42 - 0.2 * Math.sin(t * 1.7), v = 0.03 + 0.42 * t * t; B(PLS, O(u, v, 0.03 - 0.01 * t, 0.035, 6), 0.04 - 0.01 * t, { z0: 0.008, rings: 2, seed: i }); }   // the tail
+  for (const [u, v] of [[-0.3, 0.07], [-0.18, -0.02], [-0.06, 0.07], [0.05, -0.01], [0.15, 0.07], [0.26, -0.03], [-0.38, -0.08], [0.0, -0.08]]) bag.add(BLK, P(blob(Q(O(u, v, 0.026, 0.022, 6)), 0.016 * k, { rings: 2, z0: (surf(u, v) - 0.012) * k })));   // rosettes
+  B(BLK, O(0.52, 0.135, 0.014, 0.01, 5), 0.012, { rings: 2, z0: 0.09 });      // the eye
 }
 /** The seated woman of the figurines: clay, ochre, a hand on each of the two cats that flank her; 0.2 m high. */
 export function seated(bag, x, y, z, yaw) {
@@ -97,7 +111,7 @@ export function cell(el, { bag, col, lights }) {
   if (V === 0) { wash(); for (const u of W > 4.6 ? [0.9, W / 2, W - 0.9] : [1.1, W - 1.1]) bucranium(bag, lx(u), 1.15, iz0 + PL, 0, 0.95); hands(bag, FN, 0.3, 0.8, 3, 1); }
   else if (V === 1) {
     flat(bag, RED, FN, [[0, PH], [W, PH], [W, 1.6], [0, 1.6]], 0.008);
-    leopard(bag, lx(W / 2 - 0.65), 1.15, iz0 + PL, 0, S, 1.1); leopard(bag, lx(W / 2 + 0.65), 1.15, iz0 + PL, 0, -S, 1.1);
+    leopard(bag, lx(W / 2 - 0.78), 1.15, iz0 + PL, 0, S, 0.95); leopard(bag, lx(W / 2 + 0.78), 1.15, iz0 + PL, 0, -S, 0.95);
     bucranium(bag, lx(W / 2), 1.25, iz0 + PL, 0, 0.85); zigzag(bag, BLK, FN, 0.1, W - 0.1, 1.7, 1.95, Math.round(W * 4));
   } else if (V === 2) {
     wash(); diamonds(bag, FE, 1.3, Math.max(3, D - 2.6), 0.9, 1.85, 4); seated(bag, lx(W / 2), PH + 0.005, iz0 + 0.35, 0);
