@@ -42,22 +42,32 @@ function house(el, ctx) {
   const [lo, up] = WALLS[Math.floor(rand() * WALLS.length)], T = 0.55;
   const hw = w / 2, hd = d / 2;
   const ox = (rand() < 0.5 ? -1 : 1) * Math.min(w / 4, 3.2);       // the doorway's offset from the front's middle
+  // the front by rule (docs §13): a second stream of the seed, so the door's place (fronts.js doorOf) stays as it was. Wealth from the lot's area,
+  // its storeys and a wind tower; the door's form from wealth and the stream: arch, flat lintel under a lattice transom, arch under a brick hood, wide gate.
+  const fr = rng(((el.seed ?? 1) * 7919 + 13) >>> 0), tier = (w * d > 230 ? 1 : 0) + (storeys === 2 ? 1 : 0) + (el.tower ? 1 : 0) > 1 ? 2 : (w * d > 170 || storeys === 2 ? 1 : 0);
+  let dk = fr(); dk = dk < 0.38 ? 'arch' : dk < 0.62 ? 'lintel' : dk < 0.84 ? 'porch' : 'gate';
+  if (tier === 0 && dk === 'porch') dk = 'arch';
+  if (tier === 2 && dk === 'lintel') dk = 'porch';
+  const DOOR = { arch: [1.5, 2.7], lintel: [1.4, 2.3], porch: [1.6, 2.9], gate: [2.0, 3.3] }[dk], dw = DOOR[0], dh = DOOR[1], pk = fr(), parapet = tier === 0 ? (pk < 0.7 ? 'solid' : 'merlon') : (pk < 0.3 ? 'solid' : pk < 0.65 ? 'merlon' : 'frieze');
   local(ctx, [cx, cz], YAW[face], (c) => {
     const { bag, col } = c, mat = lo, top = up;
     const roof = (a, b, c2, dd, h) => { bag.add('mud_plaster', box(a, y + h, b, c2, y + h + 0.14, dd)); };
     // the perimeter: the front with the doorway (arch 1.5 × 2.7), the other three plain with small high windows in the upper storey
     const win = (at, yy, n = 1) => ({ at, w: 0.5, h: 0.7, y0: yy, flat: true, n });
-    const frontOps = [{ at: hw + ox, w: 1.5, h: 2.7 }];
+    const frontOps = [{ at: hw + ox, w: dw, h: dh, flat: dk === 'lintel' }];
     wallRun(c, { a: [-hw, hd - T / 2], b: [hw, hd - T / 2], th: T, y0: y, y1: y + H, mat, ops: frontOps });
-    if (!simple) archBand(bag, { O: [ox - 0.75, hd - T / 2], U: [1, 0], N: [0, 1] }, 0, y, 1.5, 2.7, 0.3, T / 2, T / 2 + 0.07, ['brick_baked', 'brick_buff']);
-    if (!simple) dressFront(c, { hw, hd, T, y, H, ox, mat, top, rand, storeys });
+    if (!simple && dk !== 'lintel') archBand(bag, { O: [ox - dw / 2, hd - T / 2], U: [1, 0], N: [0, 1] }, 0, y, dw, dh, dk === 'gate' ? 0.4 : 0.3, T / 2, T / 2 + 0.07, ['brick_baked', 'brick_buff']);
+    if (!simple) dressFront(c, { hw, hd, T, y, H, ox, mat, top, rand, storeys, door: { kind: dk, w: dw, h: dh }, tier, parapet });
     const sideOps = (L) => (simple ? [] : [0.25, 0.5, 0.75].map((f) => win(L * f, y + 2.3)));
     wallRun(c, { a: [hw - T / 2, hd], b: [hw - T / 2, -hd], th: T, y0: y, y1: y + H, mat });
     wallRun(c, { a: [-hw + T / 2, -hd], b: [-hw + T / 2, hd], th: T, y0: y, y1: y + H, mat });
     wallRun(c, { a: [hw, -hd + T / 2], b: [-hw, -hd + T / 2], th: T, y0: y, y1: y + H, mat, ops: sideOps(w) });
     // an upper-storey band and a parapet round the roof
     if (storeys === 2 && top !== mat) for (const [a, b] of [[[-hw, hd - T / 2], [hw, hd - T / 2]], [[hw - T / 2, hd], [hw - T / 2, -hd]], [[-hw + T / 2, -hd], [-hw + T / 2, hd]], [[hw, -hd + T / 2], [-hw, -hd + T / 2]]]) bag.add(top, orientedBox(a, b, T + 0.04, y + Hs, y + H));
-    for (const [a, b] of [[[-hw, hd - T / 2], [hw, hd - T / 2]], [[hw - T / 2, hd], [hw - T / 2, -hd]], [[-hw + T / 2, -hd], [-hw + T / 2, hd]], [[hw, -hd + T / 2], [-hw, -hd + T / 2]]]) { bag.add(top, orientedBox(a, b, T * 0.7, y + H, y + H + 0.5)); }
+    for (const [a, b] of [[[-hw, hd - T / 2], [hw, hd - T / 2]], [[hw - T / 2, hd], [hw - T / 2, -hd]], [[-hw + T / 2, -hd], [-hw + T / 2, hd]], [[hw, -hd + T / 2], [-hw, -hd + T / 2]]]) {
+      if (parapet === 'merlon' && !simple) { bag.add(top, orientedBox(a, b, T * 0.7, y + H, y + H + 0.3)); merlons(bag, top, a, b, T * 0.7, y + H + 0.3, { w: 0.62, gap: 0.5, h: 0.5 }); }
+      else bag.add(top, orientedBox(a, b, T * 0.7, y + H, y + H + 0.5));
+    }
     // the court: ranges 3.6 (front), 3.4 (sides), 4.8 (north, with the iwan)
     const fd = Math.min(3.6, d * 0.25), sdp = Math.min(3.4, w * 0.22), bd = Math.min(4.8, d * 0.3);
     const hollow = !!el.open;
@@ -65,13 +75,13 @@ function house(el, ctx) {
     if (cx1 - cx0 < 3 || cz1 - cz0 < 3) { bag.add(top, box(-hw + T, y, -hd + T, hw - T, y + H, hd - T)); col.rect([-hw, -hd, hw, hd], y, y + H); roof(-hw, -hd, hw, hd, H); return; }
     // the front range: solid, but a bent passage: from the door at ox to the court at the other side
     const dog = -Math.sign(ox) * Math.min(1.8, (cx1 - cx0) / 4);
-    const passX0 = Math.min(ox, dog) - 0.8, passX1 = Math.max(ox, dog) + 0.8;
+    const pm = dw / 2 + 0.05, pc = Math.min(H - 0.2, Math.max(3.0, dh + 0.1)), passX0 = Math.min(ox, dog) - pm, passX1 = Math.max(ox, dog) + pm;
     for (const [a0, a1] of [[-hw + T, passX0], [passX1, hw - T]]) if (a1 - a0 > 0.05) { bag.add(mat, box(a0, y, cz1, a1, y + H, hd - T)); col.rect([a0, cz1, a1, hd - T], y, y + H); }
     // the passage: a ceiling over it at 3.2 m, a floor of brick, a roof above; its inner arch to the court
-    bag.add('brick_buff', box(passX0, y + 3.0, cz1, passX1, y + H, hd - T)); col.rect([passX0, cz1, passX1, hd - T], y + 3.0, y + H);
+    bag.add('brick_buff', box(passX0, y + pc, cz1, passX1, y + H, hd - T)); col.rect([passX0, cz1, passX1, hd - T], y + pc, y + H);
     // the passage's inner wall (the bend): solid on the entrance's side, the way into the court on the far side
-    const bendX = dog > ox ? [passX0, dog - 0.8] : [dog + 0.8, passX1];
-    bag.add(mat, box(bendX[0], y, cz1 + 0.6, bendX[1], y + 3.0, cz1 + 0.6 + T)); col.rect([bendX[0], cz1 + 0.6, bendX[1], cz1 + 0.6 + T], y, y + 3.0);
+    const bendX = dog > ox ? [passX0, dog - pm] : [dog + pm, passX1];
+    bag.add(mat, box(bendX[0], y, cz1 + 0.6, bendX[1], y + pc, cz1 + 0.6 + T)); col.rect([bendX[0], cz1 + 0.6, bendX[1], cz1 + 0.6 + T], y, y + pc);
     // the side ranges: solid blocks; their court faces with blind arched recesses and doors
     const faceStuff = (fr, len, hRange, doorAt) => {
       if (simple) return;
@@ -107,7 +117,7 @@ function house(el, ctx) {
     // the front range's court face
     faceStuff({ O: [cx1, cz1], U: [-1, 0], N: [0, -1] }, cx1 - cx0, H, -1);
     // the north range: the iwan (3.2 m wide, a vault 4.2 m high for one storey, up to 6.6 for two), rooms either side
-    const iw = Math.min(3.4, (cx1 - cx0) * 0.4), iwh = storeys === 2 ? 6.4 : 4.4, spring = archCurve(iw, iwh).spring;
+    const iw = Math.min(3.4, (cx1 - cx0) * 0.4), iwh = storeys === 2 ? 6.4 : H - 0.5, spring = archCurve(iw, iwh).spring;
     const nx0 = -hw + T, nx1 = hw - T, nz0 = -hd + T, nz1 = cz0;
     if (hollow) {
       // rooms either side of the iwan, hollow, with a door each on the court; ceilings of timber, a roof over

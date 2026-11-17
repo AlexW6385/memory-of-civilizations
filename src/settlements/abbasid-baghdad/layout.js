@@ -117,6 +117,7 @@ function rows({ x0, x1, z0, z1, dir = 1, dep = [16, 21], wd = [11, 17], lane = 3
 const rectsOverlap = (a, b, m = 0) => a[0] < b[2] + m && a[2] > b[0] - m && a[1] < b[3] + m && a[3] > b[1] - m;
 const corners = (r) => [[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]];
 let LOTS = null;
+export const MASJIDS = [];
 /** The houses of the whole settlement. */
 export function lots() {
   if (LOTS) return LOTS;
@@ -138,6 +139,17 @@ export function lots() {
   all.push(...rows({ x0: riverX(0) + 60, x1: 470, z0: -220, z1: 200, dir: 1, seed: 801, ok: (r) => corners(r).every(([x, z]) => x > riverX(z) + RIVER.w / 2 + 8 && Math.hypot(x, z) < RADIUS - 26) && !(r[1] < C[1] + 12 && r[3] > C[1] - 12) && !(r[1] < 392 + 12 && r[3] > 392 - 12), wd: [11, 17] }));
   // the esplanade's service courts
   for (const s of SERVICE) all.push({ rect: s.rect, face: s.face, seed: Math.round(s.rect[0] * 7 + s.rect[1]), y: 0, storeys: s.storeys, tower: s.use === 'children', plot: -1, use: s.use });
+  // the small mosques of the quarters (docs §13): two neighbouring lots of a row facing north, joined (the mihrab's wall then looks south-south-west, as Baghdad's qibla does)
+  const MASJID_AT = [[-230, 420], [60, 440], [C[0] - 150, C[1] + 205], [C[0] + 150, C[1] - 205]], taken = new Set();
+  for (const want of MASJID_AT) {
+    const cands = all.filter((l) => l.plot >= 0 && l.face === 'n' && !taken.has(l)).map((l) => ({ l, m: all.find((q) => q !== l && !taken.has(q) && q.face === 'n' && Math.abs(q.rect[1] - l.rect[1]) < 0.01 && Math.abs(q.rect[0] - l.rect[2]) < 0.01) }))
+      .filter((o) => o.m && o.m.rect[2] - o.l.rect[0] >= 19 && o.l.rect[3] - o.l.rect[1] >= 13).sort((a, b) => Math.hypot(a.l.rect[0] - want[0], a.l.rect[1] - want[1]) - Math.hypot(b.l.rect[0] - want[0], b.l.rect[1] - want[1]));
+    if (!cands.length) continue;
+    const { l, m } = cands[0]; taken.add(l); taken.add(m);
+    MASJIDS.push({ rect: [l.rect[0], l.rect[1], Math.min(m.rect[2], l.rect[0] + 24), l.rect[3]], face: 'n', seed: l.seed, y: 0, storeys: 1, tower: false, plot: -2, masjid: true });
+  }
+  for (const l of all.slice()) if (taken.has(l)) all.splice(all.indexOf(l), 1);
+  all.push(...MASJIDS);
   // tidy: a lot must not overlap another (the rows do not; the clipped edges might) — drop later ones that do
   LOTS = [];
   for (const l of all) if (!LOTS.some((m) => rectsOverlap(l.rect, m.rect, 0.2))) LOTS.push(l);

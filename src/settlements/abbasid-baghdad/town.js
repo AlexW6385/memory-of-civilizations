@@ -6,7 +6,7 @@ import '../../styles/abbasid/index.js';
 import '../../objects/index.js';
 import { suqKeepers } from '../../styles/abbasid/market.js';
 import { khanRooms, hammamRooms, worldRect, KHAN, HAMMAM } from '../../styles/abbasid/khan.js';
-import { ESPLANADE, KHAN_RECT, HAMMAM_RECT, WORKSHOPS, ALL_SUQS, RADIUS, RC, GATE, C, PALACE, MOSQUE, LIBRARY, SUQS, SHOP, RIVER, CANAL, CANAL_BRIDGES, BRIDGES, WATER, JETTIES, lots, moored, jettyAt, riverX, canalEnd, inRect } from './layout.js';
+import { MASJIDS, ESPLANADE, KHAN_RECT, HAMMAM_RECT, WORKSHOPS, ALL_SUQS, RADIUS, RC, GATE, C, PALACE, MOSQUE, LIBRARY, SUQS, SHOP, RIVER, CANAL, CANAL_BRIDGES, BRIDGES, WATER, JETTIES, lots, moored, jettyAt, riverX, canalEnd, inRect } from './layout.js';
 import { lifePlan } from './life.js';
 
 const base = (id, elements, style = 'abbasid') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [C[0], C[1] + 60], facing: 'n' } });
@@ -36,7 +36,15 @@ function bigTiles(id, style, elements, { near = 270, R = 460, entrance, size = 2
 const norm = (a, b) => [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])];
 
 /** The houses kept open: ring houses on the south avenue and in Karkh, each with its north range and both side ranges hollow and furnished (§10). */
-const OPEN_AT = [[C[0] + 24, C[1] + 232], [C[0] - 30, C[1] + 232], [C[0] + 232, C[1] + 30], [C[0] - 232, C[1] - 30], [-60, 352], [-190, 355], [30, 430], [-60, 520]];
+const OPEN_AT = [
+  // the ring, round its avenues and diagonals (the first four are the oldest open houses)
+  [C[0] + 24, C[1] + 232], [C[0] - 30, C[1] + 232], [C[0] + 232, C[1] + 30], [C[0] - 232, C[1] - 30],
+  [C[0] + 40, C[1] - 236], [C[0] - 236, C[1] + 62], [C[0] + 236, C[1] + 100], [C[0] + 168, C[1] + 168], [C[0] - 168, C[1] - 168],
+  // Karkh, between and behind the suqs
+  [-60, 352], [-190, 355], [30, 430], [-60, 520], [-200, 430], [100, 360], [165, 445], [-280, 450], [0, 470],
+  // the Karkh bank north of the canal, the river suburb, the east bank
+  [-250, 285], [120, 285], [240, -100], [245, 60], [400, -100],
+];
 export function openHouses() {
   const used = new Set(), out = [];
   for (const want of OPEN_AT) {
@@ -64,16 +72,28 @@ export async function town() {
   }
   plans.push({ ...base('abbasid-baghdad-walls', walls), bounds: [C[0] - 330, C[1] - 330, C[0] + 330, C[1] + 330] });
   // ── the houses, near and far ──
-  const houses = all.filter((l) => !opens.includes(l)).map((l) => ({ t: 'abbasid_house', ...l }));
+  const houses = all.filter((l) => !opens.includes(l) && !l.masjid).map((l) => ({ t: 'abbasid_house', ...l }));
   plans.push(...bigTiles('abbasid-baghdad-houses', 'abbasid', houses, { R: RADIUS, entrance: { at: [C[0], C[1] + 60], facing: 'n' } }));
-  // the open houses: court, north range and the side ranges, furnished
-  opens.forEach((open, i) => {
+  // the open houses: court, north range and the side ranges, furnished; the houses of one quarter (a 160 m cell) share a plan, so they share their materials' meshes
+  const quarters = new Map();
+  opens.forEach((open) => {
     const w = (a, b) => houseToWorld(open, a, b), turned = open.face === 's' || open.face === 'n', sw = turned ? open.rect[2] - open.rect[0] : open.rect[3] - open.rect[1], sd = turned ? open.rect[3] - open.rect[1] : open.rect[2] - open.rect[0];
     const hw = sw / 2, hd = sd / 2, bd = Math.min(4.8, sd * 0.3), sdp = Math.min(3.4, sw * 0.22), fd = Math.min(3.6, sd * 0.25);
     const court = norm(w(-hw + sdp, -hd + bd), w(hw - sdp, hd - fd)), north = norm(w(-hw + 0.6, -hd + 0.6), w(hw - 0.6, -hd + bd));
     const west = norm(w(-hw + 0.6, -hd + 0.6), w(-hw + sdp, hd - fd)), east = norm(w(hw - sdp, -hd + 0.6), w(hw - 0.6, hd - fd));
-    plans.push({ ...base(`abbasid-baghdad-open-house${i ? i : ''}`, [{ t: 'abbasid_house', ...open, open: true, storeys: 2, tower: i % 2 === 0 }]), bounds: [open.rect[0] - 3, open.rect[1] - 3, open.rect[2] + 3, open.rect[3] + 3],
-      rooms: [{ id: 'house court', rect: court, y: 0, kind: 'open' }, { id: 'court room', rect: north, y: 0, kind: 'hall' }, { id: 'west range', rect: west, y: 0, kind: 'hall' }, { id: 'east range', rect: east, y: 0, kind: 'hall' }] });
+    const key = `${Math.floor((open.rect[0] + open.rect[2]) / 2 / 160)},${Math.floor((open.rect[1] + open.rect[3]) / 2 / 160)}`;
+    if (!quarters.has(key)) quarters.set(key, { elements: [], rooms: [], bounds: [1e9, 1e9, -1e9, -1e9] });
+    const q = quarters.get(key);
+    q.elements.push({ t: 'abbasid_house', ...open, open: true, tower: open.seed % 5 === 0 });
+    q.rooms.push({ id: 'house court', rect: court, y: 0, kind: 'open' }, { id: 'court room', rect: north, y: 0, kind: 'hall' }, { id: 'west range', rect: west, y: 0, kind: 'hall' }, { id: 'east range', rect: east, y: 0, kind: 'hall' });
+    q.bounds = [Math.min(q.bounds[0], open.rect[0] - 3), Math.min(q.bounds[1], open.rect[1] - 3), Math.max(q.bounds[2], open.rect[2] + 3), Math.max(q.bounds[3], open.rect[3] + 3)];
+  });
+  [...quarters.entries()].sort().forEach(([key, q], i) => plans.push({ ...base(`abbasid-baghdad-open-houses${i}`, q.elements), bounds: q.bounds, rooms: q.rooms }));
+  // ── the small mosques of the quarters: court with its basin, the hall behind it on the qibla side ──
+  MASJIDS.forEach((m, i) => {
+    const [x0, z0, x1, z1] = m.rect, T = 0.6, d = z1 - z0, hallD = Math.min(11.5, d * 0.55), zs = z1 - hallD;
+    plans.push({ ...base(`abbasid-baghdad-masjid${i}`, [{ t: 'quarter_masjid', rect: m.rect, face: m.face, seed: m.seed, y: 0 }]), bounds: [x0 - 3, z0 - 3, x1 + 3, z1 + 3],
+      rooms: [{ id: 'masjid court', rect: [x0 + T, z0 + T, x1 - T, zs], y: 0, kind: 'open' }, { id: 'masjid hall', rect: [x0 + T, zs, x1 - T, z1 - T], y: 0, kind: 'hall' }] });
   });
   // ── the markets: the suq rows, the bookseller's shop ──
   ALL_SUQS.forEach((s, i) => plans.push({ ...base(`abbasid-baghdad-suq${i}`, [{ t: 'suq_row', rect: s.rect, trades: s.trades, seed: 773 + i * 17, axis: s.rect[2] - s.rect[0] > s.rect[3] - s.rect[1] ? 'x' : 'z' }]), bounds: [s.rect[0] - 3, s.rect[1] - 3, s.rect[2] + 3, s.rect[3] + 3] }));
