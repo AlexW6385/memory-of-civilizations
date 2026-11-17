@@ -6,6 +6,7 @@ import { faceFrame, prism, fbox, outline, ngon, arch } from './facade.js';
 import { townHallInterior } from './townhall.js';
 import { churchInterior } from './church.js';
 import { relief } from '../norse/carving.js';
+import { jit } from './gables.js';
 import { Shape, Path } from '../../core/three.js';
 
 const ST = 'sandstone_dressed', RL = 'sandstone_relief';
@@ -267,7 +268,7 @@ export function townHall(el, { bag, col, lights }) {
         }
         if (k === 0) A(ST, a0 - 0.45, a1 + 0.45, v1 + 0.26, v1 + 0.56, p, p + 0.44);                                                                   // the cornice over the ground windows
         else if (k === 2) {
-          const cw = ww + 0.5, vb = v1 + 0.26, ph2 = cw * 0.55;
+          const cw = ww + 0.5 - 0.1, vb = v1 + 0.26, ph2 = cw * 0.55 + jit();
           A(ST, um - cw - 0.1, um + cw + 0.1, vb, vb + 0.16, p, p + 0.46);
           if (i % 2) bag.add(ST, prism(F, y, [[um - cw, vb + 0.16], [um + cw, vb + 0.16], [um, vb + 0.16 + ph2]], p, p + 0.4));                          // the triangular pediment
           else for (let q = 0; q < 6; q++) { const t0 = -1 + q / 3, t1 = -1 + (q + 1) / 3, hh = (t) => ph2 * Math.sqrt(Math.max(0, 1 - t * t)); bag.add(ST, prism(F, y, [[um + t0 * cw, vb + 0.16], [um + t1 * cw, vb + 0.16], [um + t1 * cw, vb + 0.16 + hh(t1) + 0.04], [um + t0 * cw, vb + 0.16 + hh(t0) + 0.04]], p, p + 0.4)); }   // the segmental one, in strips

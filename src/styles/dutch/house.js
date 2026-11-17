@@ -11,7 +11,7 @@ import { faceFrame, prism, fbox, outline, ngon, slab4, sideprism, bar } from './
 import { canalInterior } from './interior.js';
 import { frontDress } from './dress.js';
 import { wallHoles } from './reveal.js';
-import { volute, urn, obelisk } from './gables.js';
+import { volute, urn, obelisk, jit } from './gables.js';
 
 const ST = 'sandstone_dressed';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -163,14 +163,14 @@ export function canalHouse(el, { bag, col }) {
     const P3 = (uu, v, d) => { const [x, z] = F.at(uu, d); return [x, y + v, z]; }, RH = 0.92, dEnd = L + steps * 0.3, vEnd = base - (steps + 1) * rise + 0.0;
     for (const sg of [-1, 1]) {
       const ue = u + sg * 0.875, lo = Math.min(u + sg * 0.8, u + sg * 0.95), hi = Math.max(u + sg * 0.8, u + sg * 0.95);
-      bag.add(ST, sideprism(F, y, [[L, -0.2], [dEnd, -0.2], [dEnd, 0.25], [L, base + 0.1]], lo, hi));                                    // the cheek wall of the steps, sloping with them
+      bag.add(ST, sideprism(F, y, [[L, -0.2], [dEnd + jit(), -0.2], [dEnd + jit(), 0.25], [L, base + 0.1 + jit()]], lo, hi));                                    // the cheek wall of the steps, sloping with them
       A(ST, lo, hi, base - 0.02, base + 0.1, 0, L);                                                                                       // the kerb of the landing
       bag.add('iron', bar(P3(ue, base + 0.1 + RH, 0), P3(ue, base + 0.1 + RH, L), 0.045, 0.03));                                         // the handrail: level over the landing,
       bag.add('iron', bar(P3(ue, base + 0.1 + RH, L), P3(ue, vEnd + 0.25 + RH, dEnd), 0.045, 0.03));                                    // raking down beside the steps
       for (let d = 0.2; d < L - 0.03; d += 0.34) A('iron', ue - 0.012, ue + 0.012, base + 0.1, base + 0.1 + RH, d - 0.012, d + 0.012);      // the balusters
       for (let k = 0; k < steps; k++) { const d = L + k * 0.3 + 0.15, top = Math.max(base - (k + 1) * rise, 0) + 0.15, rail = base + 0.1 + RH + (vEnd + 0.25 - base - 0.1) * (d - L) / (dEnd - L); A('iron', ue - 0.012, ue + 0.012, top, rail, d - 0.012, d + 0.012); }
-      for (const [d, v] of [[0.04, base + 0.1 + RH + 0.04], [dEnd, vEnd + 0.25 + RH + 0.04]]) { A('iron', ue - 0.022, ue + 0.022, v - RH - 0.04, v, d - 0.022, d + 0.022); const [bx, bz] = F.at(ue, d); bag.add('iron', lathe([[0.04, 0], [0.05, 0.07], [0.001, 0.15]], 5, null, bx, y + v, bz)); }   // the newels with their balls
-      { const [ox, oz] = F.at(ue, 0), [qx, qz] = F.at(ue + 1, 0), cd = dEnd + 0.1, cv = vEnd + 0.25 + RH - 0.16, pts = spiral([-cd, cv], sg > 0 ? Math.PI * 0.1 : Math.PI * 0.1, 0.13, 1.1, 1, 0.3, 7);   // the curl at the foot of the rail
+      for (const [d, v] of [[0.04, base + 0.1 + RH + 0.04], [dEnd, vEnd + 0.25 + RH + 0.04]]) { A('iron', ue - 0.022, ue + 0.022, v - RH - 0.04, v, d - 0.022, d + 0.022); const [bx, bz] = F.at(ue, d); bag.add('iron', lathe([[0.04 + jit(), 0], [0.05, 0.07], [0.001, 0.15 + jit()]], 5, null, bx, y + v, bz)); }   // the newels with their balls
+      { const [ox, oz] = F.at(ue, 0), [qx, qz] = F.at(ue + 1, 0), cd = dEnd + 0.1, cv = vEnd + 0.25 + RH - 0.16, pts = spiral([-cd, cv], sg > 0 ? Math.PI * 0.1 : Math.PI * 0.1, 0.13 + jit(), 1.1, 1, 0.3, 7);   // the curl at the foot of the rail
         bag.add('iron', relief(ribbon(pts, 0.022), [ox, y, oz], [qx - ox, qz - oz], -0.012, 0.012, 3)); }
     }
     if (open) {                                                                                                     // walkable: the landing, the flight down to the quay
