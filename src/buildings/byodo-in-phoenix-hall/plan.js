@@ -101,7 +101,7 @@ obj('byodo_amida', -0.9, 0, F + 1.0, { h: 2.77, dir: [1, 0] });
     cols.push({ at: [x, z], y: F, h: CH, d: 0.5, dirs });
   }
   add({ t: 'byodo_pillars', cols });
-  add({ t: 'byodo_offering', at: [1.75, 0], y: F, dir: [-1, 0] });
+  add({ t: 'byodo_offering', at: [1.5, 0], y: F, dir: [-1, 0] });
 }
 obj('byodo_canopy', -0.9, 0, F + 8.4, { half: 1.85, depth: 0.62 });
 // the sixty-six bronze mirrors: on the high ceiling round the canopy and on the lower ceilings either side

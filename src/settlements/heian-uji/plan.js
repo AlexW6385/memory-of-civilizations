@@ -101,7 +101,7 @@ function worship() {
   person(41.2, 3.0, W, { cloth: 'cloth_black', cloth2: 'cloth_ochre', hair: 'shaven', carry: 'staff', over: 'sash' });
   person(46.4, 1.5, W, { cloth: 'cloth_white', cloth2: 'cloth_white', hat: 'cap', hatMat: 'lacquer_black', dress: 'trousers' });
   // in the hall: two monks kneeling before the dais, chanting
-  for (const sz of [-1, 1]) person(hx + 2.75, sz * 0.75, W, { y: HF, pose: 'seiza', arms: 'pray', cloth: 'cloth_black', cloth2: 'cloth_ochre', hair: 'shaven', over: 'sash' });
+  for (const sz of [-1, 1]) person(hx + 2.3, sz * 0.75, W, { y: HF, pose: 'seiza', arms: 'pray', cloth: 'cloth_black', cloth2: 'cloth_ochre', hair: 'shaven', over: 'sash' });
   return [
     { id: 'heian-uji-worship', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], elements: L, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 'e' } },
     { id: 'heian-uji-mats', style: 'japanese', origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], elements: E, bounds: [40, -10, 47, 10], entrance: { at: [48, 0], facing: 'w' } },

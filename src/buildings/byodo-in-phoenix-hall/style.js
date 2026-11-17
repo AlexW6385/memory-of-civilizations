@@ -400,13 +400,13 @@ function hexaBox(out, top, t) { hexa(out, top.map((p) => [p[0], p[1] - t, p[2]])
  * hōsōge and mother-of-pearl through the interior — MLIT 001553422; inferred: the pattern's layout]
  */
 function byodoPillars(el, { bag }) {
-  const G = [], S = [], H = [];
+  const G = [], S = [], H = [], GB = [];
   for (const c of el.cols) {
     const [cx, cz] = c.at, r = c.d / 2, y0 = c.y + 0.06, top = c.h - 0.06, mid = c.h * 0.5;
     const rad = (t) => (t <= mid ? r : r * (1 - 0.07 * (t - mid) / (top - mid)));
     const at = (phi, t, off) => { const rr = rad(t) + off; return [cx + Math.cos(phi) * rr, y0 + t, cz + Math.sin(phi) * rr]; };
     // the gilt collars: a broad band at the foot with a lotus-petal row above it, narrow bands under the capital
-    const band = (t0, t1, w) => G.push(lathe([[rad(t0) + 0.002, t0], [rad(t0) + w, t0 + w * 0.6], [rad(t1) + w, t1 - w * 0.6], [rad(t1) + 0.002, t1]], 20, null, cx, y0, cz));
+    const band = (t0, t1, w) => GB.push(lathe([[rad(t0) + 0.002, t0], [rad(t0) + w, t0 + w * 0.6], [rad(t1) + w, t1 - w * 0.6], [rad(t1) + 0.002, t1]], 20, null, cx, y0, cz));
     band(0.3, 0.42, 0.012); band(0.46, 0.49, 0.009);
     band(top - 0.78, top - 0.72, 0.009); band(top - 0.42, top - 0.34, 0.011); band(top - 0.1, top - 0.02, 0.012);
     for (let k = 0; k < 16; k++) {                                  // upright petals of the lotus collar, each a pointed leaf on the column's face
@@ -433,7 +433,7 @@ function byodoPillars(el, { bag }) {
     }
   }
   bag.add('clay_gilt', fromTriangles(G)); bag.add('shell_inlay', fromTriangles(S));
-  for (const g of H) bag.add('clay_gilt', g);
+  for (const g of [...GB, ...H]) bag.add('clay_gilt', g);
 }
 
 /**
@@ -447,13 +447,13 @@ function byodoOffering(el, { bag, col }) {
   const P = (a, b, h) => [x + d[0] * a + u[0] * b, y + h, z + d[1] * a + u[1] * b];   // a along dir, b across it
   const T = 0.46, L = [], G = [], B = [], F = [];
   const slab = (a0, b0, a1, b1, h0, h1, out) => { const p = [P(a0, b0, h0), P(a1, b0, h0), P(a1, b1, h0), P(a0, b1, h0)], q = [P(a0, b0, h1), P(a1, b0, h1), P(a1, b1, h1), P(a0, b1, h1)]; hexa(out, p, q); };
-  { const a = P(-0.275, -0.535, 0), b = P(0.275, 0.535, 0); col?.rect([Math.min(a[0], b[0]), Math.min(a[2], b[2]), Math.max(a[0], b[0]), Math.max(a[2], b[2])], y, y + T + 0.05); }
-  slab(-0.26, -0.52, 0.26, 0.52, T - 0.05, T, L);                                    // the top
-  slab(-0.275, -0.535, 0.275, 0.535, T - 0.012, T + 0.012, G);                        // its gilt rim
-  slab(-0.2, -0.46, 0.2, 0.46, T - 0.09, T - 0.05, L);                                // the apron
+  { const a = P(-0.23, -0.535, 0), b = P(0.23, 0.535, 0); col?.rect([Math.min(a[0], b[0]), Math.min(a[2], b[2]), Math.max(a[0], b[0]), Math.max(a[2], b[2])], y, y + T + 0.05); }
+  slab(-0.21, -0.52, 0.21, 0.52, T - 0.05, T, L);                                    // the top
+  slab(-0.225, -0.535, 0.225, 0.535, T - 0.012, T + 0.012, G);                        // its gilt rim
+  slab(-0.16, -0.46, 0.16, 0.46, T - 0.09, T - 0.05, L);                                // the apron
   for (const sa of [-1, 1]) for (const sb of [-1, 1]) {
-    slab(sa * 0.2 - 0.03, sb * 0.46 - 0.03, sa * 0.2 + 0.03, sb * 0.46 + 0.03, 0, T - 0.09, L);
-    slab(sa * 0.2 - 0.036, sb * 0.46 - 0.036, sa * 0.2 + 0.036, sb * 0.46 + 0.036, 0.0, 0.03, G);      // the gilt foot
+    slab(sa * 0.16 - 0.03, sb * 0.46 - 0.03, sa * 0.16 + 0.03, sb * 0.46 + 0.03, 0, T - 0.09, L);
+    slab(sa * 0.16 - 0.036, sb * 0.46 - 0.036, sa * 0.16 + 0.036, sb * 0.46 + 0.036, 0.0, 0.03, G);      // the gilt foot
   }
   bag.add('lacquer_black', fromTriangles(L)); bag.add('gilt_bronze', fromTriangles(G));
   // the incense burner in the middle: a bowl on three feet, a lid pierced with a ring of holes, a lotus-bud finial

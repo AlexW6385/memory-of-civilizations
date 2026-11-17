@@ -93,3 +93,7 @@ The music of the Heian court, *gagaku* (*tōgaku*): the mouth organ *shō* holdi
 - Japan Tourism Agency, "Art of Byodoin". https://www.mlit.go.jp/tagengo-db/en/R1-00386.html
 - National Art Center Tokyo, art commons, Byōdō-in (Unchū Kuyō Bosatsu, the pedestal's garlands). https://www.nact.jp/english/artcommons/user/detail/30422
 - Onmark Productions, "Bosatsu on clouds" (catalogue excerpts, sizes). https://onmarkproductions.com/html/bosatsu-on-clouds-apsaras.shtml
+
+## Pillar paintings and offering table (fourth pass)
+
+See `docs/settlements/heian-uji.md` §17: `byodo_pillars` (gilt collars, lotus petals, hōsōge rosettes of mother-of-pearl, vines on the ten core columns) and `byodo_offering` (lacquer table, incense burner, vases, candlesticks) in `style.js`; both [inferred] in form, grounded in the stated pillar paintings, hōsōge and mother-of-pearl decoration.

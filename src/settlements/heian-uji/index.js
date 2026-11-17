@@ -10,7 +10,8 @@ import { houses, homeFolkPlans } from './town.js';
 import { lanesPlan } from './street.js';
 import { garden, belfry } from './garden.js';
 import { lotusCoves, viewPier, courtBoat, courtBoatPeople, shoreFolk } from './shore.js';
+import { shrine, shrineFolk } from './shrine.js';
 import { villaPlan, noblePlan, villaFolk, pier, players, precinct } from './compound.js';
 export { music };
 export const landmarks = [{ plan: hall, music }];
-export async function town() { return [bridge, garden, belfry, weirs, riverPeople, dais, worshippers, mats, villaPlan, noblePlan, villaFolk, pier, players, precinct, viewPier, lotusCoves, courtBoat, courtBoatPeople, shoreFolk, ...(await houses()), ...homeFolkPlans(), ...lanesPlan()]; }
+export async function town() { return [bridge, garden, belfry, weirs, riverPeople, dais, worshippers, mats, villaPlan, noblePlan, villaFolk, pier, players, precinct, shrine, shrineFolk, viewPier, lotusCoves, courtBoat, courtBoatPeople, shoreFolk, ...(await houses()), ...homeFolkPlans(), ...lanesPlan()]; }
