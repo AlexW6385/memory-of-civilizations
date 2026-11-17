@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.8 — Athens, Istanbul, Tang Chang'an, Machu Picchu, Cairo (2026-11-16)
+
+Athens: the Parthenon's west room is the treasury (chests, gold and silver bowls, a throne, shields, tripods) and its coffers are blue. Istanbul: the Süleymaniye's outer walls have their window frames, pilasters and cornice, the great door its muqarnas arch and open leaves; about 120 houses are entered, with yards of wells, arbors and hen coops. Tang Chang'an: the pagoda's arched doors, carved lintels, the two steles and a gilt finial; house gates by rank, four new rooms (shrine, reception, music, physician), wells and ox carts at the ward crossings, and a fire temple by the West Market (its form inferred). Machu Picchu: the Intihuatana as a carved pyramid with its stairs, houses by rank, interiors by use (spinner, brewer, mason), jars and seats before the gates. Cairo: nine town houses to enter, with the bent entrance, court and maq'ad.
+
 ## v12.7 — Beijing's courtyards entered, Barcelona lighter, Petra's water (2026-11-16)
 
 Beijing: 72 courtyard houses are entered (each was one solid block before), with lattices, ridges and walls varied by rule, family, ancestors' and reception halls, kitchens and school rooms, oil lamps, and a footing and corbel course on the palace wall. Barcelona: the arrival view is lighter (counted in Node: 4.08 to 2.91 M triangles, 458 to 379 draws, the shadow cascades a quarter to a third fewer) by hidden faces not built, shared shapes and plainer far blocks, and the Sagrada Família's belfry slots are real openings with their stone louvres. Petra: a stone conduit and nine rock-cut cisterns on the north side, and the triclinium's outcrop collides where it is drawn.
