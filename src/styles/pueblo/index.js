@@ -12,6 +12,7 @@ import '../qing/index.js';
 import { YARD_ELEMENTS } from './yards.js';
 import { dress } from './dress.js';
 
+const RAMP_DROP = 0.5;
 const A = 'adobe_taos', V = 'viga';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const ST = 2.7;
@@ -48,6 +49,10 @@ function pueblo(el, ctx) {
   const { bag, col } = ctx, rand = rng(el.seed || 1), c = el.cell, H = el.heights, rows = H.length, cols = H[0].length;
   const at = (i, j) => (i >= 0 && i < rows && j >= 0 && j < cols ? H[i][j] : 0);
   const roomAt = (i, j) => (el.rooms ?? []).find((r) => r.i === i && r.j === j);
+  // the walked ladders lean on a face between its viga ends: where one stands, the vigas within 0.8 m of it are left out (the ends would
+  // catch the climber's head), and the x of the ladder is kept to place the ramp
+  const fd = el.front === 's' ? 1 : -1, ladderAt = new Map();
+  for (const l of el.ladders ?? []) ladderAt.set((l.ground ? l.i : l.i - fd) + ':' + l.j, el.x0 + l.j * c + 1.0);
   const upperAt = (i, j) => (el.upper ?? []).find((r) => r.i === i && r.j === j), clear = new Set(el.clear ?? []);
   for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) {
     const n = H[i][j]; if (!n) continue;
@@ -66,12 +71,19 @@ function pueblo(el, ctx) {
     for (const [di, dj, a, b, nx, nz] of [[-1, 0, [x0, z0], [x1, z0], 0, -1], [1, 0, [x0, z1], [x1, z1], 0, 1], [0, -1, [x0, z0], [x0, z1], -1, 0], [0, 1, [x1, z0], [x1, z1], 1, 0]]) {
       const m = at(i + di, j + dj);
       if (m >= n) continue;
-      const t = []; beamTris(t, [a[0] - nx * 0.15, top, a[1] - nz * 0.15], [b[0] - nx * 0.15, top, b[1] - nz * 0.15], 0.15, 0.5); bag.add(A, fromTriangles(t));
+      // (the parapet's beam, broken for 1.2 m where a ladder comes up over this edge)
+      const t = [], lxp = nz === fd ? ladderAt.get(i + ':' + j) : undefined, cuts = lxp === undefined ? [[a[0], b[0]]] : [[a[0], lxp - 0.6], [lxp + 0.6, b[0]]];
+      for (const [u0, u1] of cuts) if (nz === 0 || u1 - u0 > 0.05) {
+        const A0 = nz === 0 ? a : [u0, a[1]], B0 = nz === 0 ? b : [u1, b[1]];
+        beamTris(t, [A0[0] - nx * 0.15, top, A0[1] - nz * 0.15], [B0[0] - nx * 0.15, top, B0[1] - nz * 0.15], 0.15, 0.5);
+      }
+      bag.add(A, fromTriangles(t));
       for (let s = m + 1; s <= n; s++) {
         const y = s * ST - 0.3;
         // the vigas: 15–25 cm logs about a metre apart, their ends left long and uneven [stated: Wikipedia "Viga"]
         if (nz && !room) for (let k = 0; k < 5; k++) {
           const f = (k + 0.5) / 5 + (rand() - 0.5) * 0.05, out = 0.25 + rand() * 0.65, r = 0.08 + rand() * 0.04, px = a[0] + (b[0] - a[0]) * f, pz = a[1] + (b[1] - a[1]) * f;
+          if (nz === fd && Math.abs(px - (ladderAt.get(i + ':' + j) ?? 1e9)) < 0.8) continue;
           bag.add(V, rod([px, y, pz - nz * 0.3], [px, y - out * 0.03, pz + nz * out], r, 7));
           // rain running off the viga ends washes a pale streak down the plaster under them
           if (rand() < 0.5) { const sx = nx ? 0 : 0.07; void sx; bag.add('kahgel', box(Math.min(px - 0.07, px + 0.07), y - 0.5 - rand() * 0.9, Math.min(pz, pz + nz * 0.014), Math.max(px - 0.07, px + 0.07), y - 0.18, Math.max(pz, pz + nz * 0.014))); }
@@ -135,11 +147,15 @@ function pueblo(el, ctx) {
     else if (n >= at(i + f, j) && n >= hi && rand() < 0.28) hatch(bag, col, x0 + c * (0.35 + rand() * 0.3), top, z0 + c * (0.35 + rand() * 0.3), rand);
   }
   // the ladders up to the terraced rooms: each from the open ground or a roof up one storey, leaning on the wall of the next higher cell, its foot
-  // 0.8 m off the wall and its poles standing 1.2 m over the roof edge (they carry no collider: the visitor reaches the terraces by flight)
+  // 0.8 m off the wall and its poles standing 1.2 m over the roof edge (they carry no collider; a ramp under each is the way up)
   const d = el.front === 's' ? 1 : -1, v = -d;
   for (const l of el.ladders ?? []) {
     const zw = el.z0 + (l.ground ? l.i + (d > 0 ? 1 : 0) : l.i + (d > 0 ? 0 : 1)) * c, yb = l.ground ? 0 : H[l.i][l.j] * ST;
     ladder(bag, el.x0 + l.j * c + 1.0, yb, zw - v * 0.8, ST, 0, v, 0.8, 1.2);
+    // the way up: a ramp under the rungs, from the foot to the wall's top, 0.25 m under the rung plane (the engine's roof-shell test
+    // refuses a ramp that runs above the ladder poles' tops; the rungs themselves carry no collider)
+    const lx = el.x0 + l.j * c + 1.0, zf = zw - v * 0.8;
+    col.ramp([lx - 0.7, Math.min(zf, zw), lx + 0.7, Math.max(zf, zw)], yb - RAMP_DROP, yb + ST, v < 0 ? 'n' : 's');
   }
 }
 
