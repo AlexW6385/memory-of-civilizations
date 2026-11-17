@@ -163,3 +163,15 @@ Built:
 - **Steam baths** (`temazcal`, houses.js): in about a quarter of the commoner patios that are wide enough, a temazcalli: a footing of stone, a ring of twelve plastered walls with a low door of stone jambs and lintel toward the middle of the patio, the dome with its smoke-hole, and behind it the stone firebox with its fire, a heating stone and firewood [stated: the form; inferred: the dimensions and the share].
 
 Level: L2+ toward L3. Still missing for L3: the carved relief and painted panels on the Templo Mayor's other terraces and east face; the interiors of the calpulli's temples are the generic shrine; no lamp or coloured light in the houses; the lords' houses have one upper room, not whole upper ranges.
+
+## 18. The landmark pass (round 2): roof combs, balustrades, terrace lips, the Coyolxauhqui stone
+
+Sources as §10 and §17 ([World History Encyclopedia](https://www.worldhistory.org/Templo_Mayor), [ancient-history-sites](https://www.ancient-history-sites.com/?p=133719), [Wikipedia, Coyolxauhqui](https://en.wikipedia.org/wiki/Coyolxauhqui)): the stairways' balustrades ended in serpents [stated]; the Coyolxauhqui disc about 3.4 m across, the goddess dismembered, head with bells and headdress, serpent belt with a skull buckle, skulls on the joints, a rim band with ties [stated: the composition].
+
+Built (`src/styles/aztec/index.js`):
+- **Roof combs** on both shrines (`roofComb`): a low wall of emblem bays over the door side, stepped pylons with open gaps, a taller stepped crown with a great disc (Tlaloc's chalchihuitl rings, Huitzilopochtli's sun); stepped almenas on the other edges; a plinth round each shrine's foot [inferred: after the codex pictures of the twin temple and the stepped almenas of Tenayuca].
+- **Balustrades** (`balustradeRelief`): a framed dado with the god's emblem and a moulded cap at each head, two rows of serpent scales on both faces along the slope [inferred].
+- **Terrace lips**: a moulded cornice (red band under a white course) along each of the four terraces [inferred].
+- **Coyolxauhqui stone**: rebuilt in two relief levels with head, bell, headdress, belt, skull-jointed limbs and the knotted rim [stated composition; inferred placing].
+
+Arrival frame (draw-count): before main 3.52 M tris / 558 draws; after 3.64 M / 554.
