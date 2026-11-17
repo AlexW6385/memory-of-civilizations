@@ -7,6 +7,7 @@
 
 import { box, fromTriangles, rod, lathe } from '../../core/geom.js';
 import { terraceInterior } from './rooms.js';
+import { Quads, letters, textLen, fitCell, readDir } from '../artdeco/dress.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const both = (t) => { const o = [...t]; for (let i = 0; i < t.length; i += 9) o.push(...t.slice(i, i + 3), ...t.slice(i + 6, i + 9), ...t.slice(i + 3, i + 6)); return o; };
@@ -28,7 +29,7 @@ export function rocksTerrace(el, { bag, col, lights }) {
   if (el.kind === 'store') return store(el, { bag, col }, { B, W, T, L, Dp, y, rand });
   const n = Math.max(1, Math.round(L / 4.6)), fw = L / n, wall = WALLS[Math.floor(rand() * WALLS.length)], H1 = 3.5, H2 = 3.2, top = y + 0.5 + H1 + H2;
   const balcony = rand() < 0.55, roofM = 'iron_galv';
-  const enter = el.enter ?? -1, fwE = L / n;
+  const enter = el.enter ?? -1, fwE = L / n, rb = rng(((el.seed || 1) ^ 0x5a5a) >>> 0);
   if (enter < 0) { bag.add(wall, B(0, L, 0.3, Dp, y + 0.5, top)); col.rect(el.rect, y0 - 0.4, top + 3); }
   else for (let i = 0; i < n; i++) {
     // the house `enter` is hollow on its ground floor (rooms.js); its neighbours are solid
@@ -64,7 +65,7 @@ export function rocksTerrace(el, { bag, col, lights }) {
       bag.add('paint_white', B(da, db, PR - 0.12, PR - 0.06, y + 2.25, y + 2.3)); bag.add('glass_outer', B(da, db, PR - 0.12, PR - 0.08, y + 2.3, y + 2.75));
       for (let k = 0; k < nn; k++) { bag.add('sandstone_dressed', B(da - 0.15, db + 0.15, -0.3 * (k + 1), -0.3 * k, gy - 0.4, gy + hh * (nn - k))); col.floor(R_(da - 0.15, db + 0.15, -0.3 * (k + 1), -0.3 * k), gy + hh * (nn - k)); }
       col.floor(R_(da, db, 0, PR), y + 0.5);
-      terraceInterior({ bag, col, lights, B, W, R: R_, u0, u1: u0 + fw, PR, Dp, F: y + 0.5, H1, top, wall, door: da, doorMat: dm });
+      terraceInterior({ variant: el.vari ?? 0, bag, col, lights, B, W, R: R_, u0, u1: u0 + fw, PR, Dp, F: y + 0.5, H1, top, wall, door: da, doorMat: dm });
     } else {
     bag.add(dm, B(da, db, PR - 0.12, PR - 0.08, y + 0.5, y + 2.25)); bag.add('glass_outer', B(da, db, PR - 0.12, PR - 0.08, y + 2.3, y + 2.75));
     bag.add('paint_white', B(da, db, PR - 0.12, PR - 0.06, y + 2.25, y + 2.3));
@@ -119,6 +120,13 @@ export function rocksTerrace(el, { bag, col, lights }) {
       if (rand() < 0.6) { const p = W(u0 + 0.3, -0.7, by); bag.add('terracotta', lathe([[0.001, 0], [0.13, 0.01], [0.17, 0.3], [0.001, 0.3]], 8, null, p[0], p[1], p[2])); bag.add('palm_leaf', lathe([[0.001, 0.28], [0.26, 0.42], [0.3, 0.66], [0.001, 0.85]], 8, null, p[0], p[1], p[2])); }
       if (rand() < 0.35) bag.add('wicker', B(u0 + fw - 0.9, u0 + fw - 0.4, -0.95, -0.45, by + 0.42, by + 0.47)), bag.add('wicker', B(u0 + fw - 0.9, u0 + fw - 0.4, -0.5, -0.45, by + 0.47, by + 0.95));
       if (rand() < 0.4 && (el.lane ?? 0) > 3.4) for (let k = 0; k < 2 + Math.floor(rand() * 3); k++) { const uu = u0 + 0.35 + k * 0.4 + rand() * 0.03; bag.add(['cloth_white', 'cloth_blue', 'cloth_red', 'cloth_ochre', 'cloth_grey'][Math.floor(rand() * 5)], B(uu, uu + 0.33, -1.27, -1.225, by + 0.2 + rand() * 0.1, by + 1.18)); }
+      // a bedsheet hung over the rail, lettered by hand: the residents' protest of 1971–73 (§1j)
+      if (rb() < 0.22 && fw > 3) {
+        const cell = fitCell('SAVE OUR', fw - 0.7, 0.075), Q = new Quads(), rs = readDir(f), mid = u0 + fw / 2, yb0 = by + 0.12;
+        bag.add('cloth_white', B(u0 + 0.3, u0 + fw - 0.3, -1.32, -1.3, yb0, yb0 + 0.88)); bag.add('cloth_white', B(u0 + 0.3, u0 + fw - 0.3, -1.32, -1.1, yb0 + 0.88, yb0 + 0.91));      // (its top folded over the rail)
+        for (const [txt, v0] of [['SAVE OUR', yb0 + 0.46], ['ROCKS', yb0 + 0.06]]) { const tl = textLen(txt, cell); letters(Q.t('car_red'), txt, cell, (h, v) => W(mid - rs * tl / 2 + rs * h, -1.335, v0 + v), 0, 0); }
+        for (const [m, T2] of Q.m) bag.add(m, fromTriangles(T2));
+      }
       // the side screens of the balcony, boarded
       for (const u of [u0 + 0.04, u0 + fw - 0.04]) bag.add(wall, B(u - 0.04, u + 0.04, -1.2, 0, by, ry + 0.4));
     }

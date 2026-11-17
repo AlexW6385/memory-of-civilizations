@@ -4,7 +4,8 @@
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import { frame, chair } from './rooms.js';
 import { milkbar, butcher, chemist, barber } from './shops2.js';
-import { Quads, letters, textLen, fitCell } from '../artdeco/dress.js';
+import { fishChips, hardware, bakery } from './shops3.js';
+import { Quads, letters, textLen, fitCell, readDir } from '../artdeco/dress.js';
 
 const both = (t) => { const o = [...t]; for (let i = 0; i < t.length; i += 9) o.push(...t.slice(i, i + 3), ...t.slice(i + 6, i + 9), ...t.slice(i + 3, i + 6)); return o; };
 const KINDS = {
@@ -14,6 +15,9 @@ const KINDS = {
   butcher: { name: 'BUTCHER', wall: 'brick', floor: 'tile_white', riser: 'tile_white', fascia: 'cloth_maroon', letter: 'paint_white', awning: ['cloth_red', 'cloth_white'], door: 0.7, H1: 3.6, top: 8.0, parapet: 'cornice' },
   chemist: { name: 'CHEMIST', wall: 'facade_buff', floor: 'tile_cream', riser: 'granite_black', fascia: 'glaze_green', letter: 'paint_white', awning: ['cloth_green', 'cloth_white'], door: 0.5, H1: 3.8, top: 9.0, parapet: 'cornice', blade: 'glaze_green' },
   barber: { name: 'BARBER', wall: 'facade_brick', floor: 'tile_grey', riser: 'glaze_blue', fascia: 'car_blue', letter: 'paint_white', awning: ['cloth_blue', 'cloth_white'], door: 0.3, H1: 3.3, top: 7.2, parapet: 'step', pole: true },
+  fish_chips: { name: 'FISH & CHIPS', wall: 'stucco_cream', floor: 'tile_grey', riser: 'tile_white', fascia: 'car_blue', letter: 'paint_white', awning: ['cloth_blue', 'cloth_white'], door: 0.3, H1: 3.4, top: 7.4, parapet: 'step' },
+  hardware: { name: 'HARDWARE', wall: 'brick', floor: 'concrete_light', riser: 'wood_painted', fascia: 'shutter_brown', letter: 'paint_cab_yellow', awning: ['cloth_ochre', 'cloth_brown'], door: 0.5, H1: 3.8, top: 8.6, parapet: 'cornice' },
+  bakery: { name: 'BAKERY', wall: 'facade_buff', floor: 'tile_cream', riser: 'tile_cream', fascia: 'cloth_maroon', letter: 'paint_white', awning: ['cloth_maroon', 'cloth_white'], door: 0.3, H1: 3.5, top: 7.8, parapet: 'step' },
   greengrocer: { name: 'FRUIT VEG', wall: 'brick', floor: 'concrete_light', riser: 'wood_painted', fascia: 'shutter_green', letter: 'paint_white', awning: ['cloth_green', 'cloth_white'], door: 0.5, H1: 3.5 },
 };
 
@@ -43,7 +47,8 @@ export function shopRoom(el, { bag, col, lights }) {
   col.floor(R(du - dw / 2, du + dw / 2, 0.05, T), F);
   bag.add(K.fascia, B(0.45, L - 0.45, -0.04, 0.3, fy1 + 0.05, F + H1)); bag.add('plaster_white', B(0.45, L - 0.45, -0.06, -0.04, fy1 + 0.03, fy1 + 0.08));
   const name = el.name ?? K.name, cell = fitCell(name, Math.min(L - 3, 7), 0.13), tl = textLen(name, cell), Q = new Quads(), v0 = fy1 + 0.1 + ((F + H1 - fy1 - 0.1) - 5 * cell) / 2;
-  letters(Q.t(K.letter), name, cell, (h, v) => W((L - tl) / 2 + h, -0.08, v), 0, v0 - 0); // (v is the height above the base v0)
+  const rs = readDir(el.front ?? 'n');   // (the lettering reads toward −u on the n and e fronts, as seen from the street)
+  letters(Q.t(K.letter), name, cell, (h, v) => W(L / 2 - rs * tl / 2 + rs * h, -0.08, v), 0, v0 - 0); // (v is the height above the base v0)
   for (const [m, T2] of Q.m) bag.add(m, fromTriangles(T2));
   const aw = el.kind === 'pub' ? 1.6 : 1.4;
   for (let k = 0; k < 9; k++) { const u0 = 0.45 + k * (L - 0.9) / 9, u1 = u0 + (L - 0.9) / 9, A = [W(u0, 0, F + H1 - 0.1), W(u1, 0, F + H1 - 0.1), W(u1, -aw, fy1 + 0.25), W(u0, 0, F + H1 - 0.1), W(u1, -aw, fy1 + 0.25), W(u0, -aw, fy1 + 0.25)]; bag.add(K.awning[k % 2], fromTriangles(both(A.flat()))); }
@@ -66,8 +71,8 @@ export function shopRoom(el, { bag, col, lights }) {
   if (K.pole) for (let k = 0; k < 8; k++) bag.add(['car_red', 'paint_white', 'car_blue', 'paint_white'][k % 4], B(L - 0.5, L - 0.38, -0.5, -0.38, F + 0.9 + k * 0.17, F + 1.07 + k * 0.17));
   const pend = (u, d, h = 0.7, m = 'lamp_white') => { const p = W(u, d, F + H1 - h); bag.add(m, lathe([[0.001, 0], [0.18, 0.1], [0.2, 0.25], [0.1, 0.42], [0.001, 0.42]], 12, null, p[0], p[1], p[2])); bag.add('iron', rod([p[0], F + H1 - 0.3, p[2]], [p[0], p[1] + 0.42, p[2]], 0.01, 4)); };
   const light = (u, d, color = '#ffe2b0') => lights.push({ at: W(u, d, F + H1 - 0.8), color, intensity: 1.5, distance: 6 });
-  const fit = { pub, newsagent, greengrocer, milkbar, butcher, chemist, barber }[el.kind] ?? newsagent;
-  fit({ bag, col, lights, B, W, R, S, rc, L, Dp, F, T, H1, du, dw, pend, light });
+  const fit = { pub, newsagent, greengrocer, milkbar, butcher, chemist, barber, fish_chips: fishChips, hardware, bakery }[el.kind] ?? newsagent;
+  fit({ rs, bag, col, lights, B, W, R, S, rc, L, Dp, F, T, H1, du, dw, pend, light });
 }
 
 /** The public bar: a long timber counter with its brass rail and hand pumps, bottle shelves and a mirror, stools, round tables and stools, a dartboard, a pool table, a jukebox. */

@@ -25,7 +25,7 @@ let CACHE = null;
 /** What the streets hold: footpaths, kerbs and curb items by tile (modern style), the life of the roads by tile (life style). */
 export function streets() {
   if (CACHE) return CACHE;
-  const L = lots(), rand = rng(1973), { xs, zs } = streetCells();
+  const L = lots(), rand = rng(1973), rb = rng(7331), { xs, zs } = streetCells();
   const city = L.filter((l) => !l.t || l.t === 'shop_room'), rocks = L.filter((l) => l.t === 'rocks_terrace');
   const tiles = new Map(), life = new Map();
   const T = (k) => { if (!tiles.has(k)) tiles.set(k, { segs: [], flag: [], curbs: [], items: [], kit: [] }); return tiles.get(k); };
@@ -71,6 +71,11 @@ export function streets() {
         const at = onFace(l.rect, f, u, D - 0.3);
         if (inCrossing(at[0], at[1], 2) || !free(at[0], at[1], 6)) continue;
         mark(at[0], at[1]); t.kit.push({ t: 'street_kit', kind: 'cobra', at, y: yp + 0.04, rot: { n: Math.PI, s: 0, w: -Math.PI / 2, e: Math.PI / 2 }[f], seed: Math.floor(rand() * 1e6) });
+      }
+      // a bubbler (the drinking fountain) on some of the longer faces — its own stream, so as not to move what the others hold
+      if (roadside && len > 12 && rb() < 0.07) {
+        const at = onFace(l.rect, f, len * (0.25 + rb() * 0.5), D - 0.55);
+        if (!inCrossing(at[0], at[1], 2) && free(at[0], at[1], 5)) { mark(at[0], at[1]); t.kit.push({ t: 'street_kit', kind: 'bubbler', at, y: yp + 0.04, rot: rotFace + Math.PI, seed: 1 }); }
       }
       if (roadside && len > 12 && rand() < 0.12) {
         const at = onFace(l.rect, f, len * (0.3 + rand() * 0.4), D - 0.5);

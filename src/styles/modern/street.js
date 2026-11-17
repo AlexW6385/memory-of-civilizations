@@ -2,7 +2,7 @@
 // the bus stop with its sign and shelter, the litter bin of mesh and wire.
 import { box, lathe, rod } from '../../core/geom.js';
 
-/** street_kit: { kind ('cobra' | 'pillar' | 'busstop' | 'bin'), at: [x, z], y, rot (the front or the arm toward +z turned by rot), seed } */
+/** street_kit: { kind ('cobra' | 'pillar' | 'busstop' | 'bin' | 'bubbler'), at: [x, z], y, rot (the front or the arm toward +z turned by rot), seed } */
 export function streetKit(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0, rot = el.rot ?? 0, c = Math.cos(rot), s = Math.sin(rot);
   const W = (lx, ly, lz) => [x + lx * c + lz * s, y + ly, z - lx * s + lz * c];
@@ -29,6 +29,14 @@ export function streetKit(el, { bag, col }) {
       B('steel_grey', 1.7, 0, 0.35, 1.76, 2.9, 0.41);
       bag.add('paint_cab_yellow', lathe([[0.001, 0], [0.24, 0], [0.24, 0.03], [0.001, 0.03]], 14, null, 0, 0, 0).rotateZ(Math.PI / 2).translate(...W(1.7, 2.65, 0.45)));
       col.rect([Math.min(...[W(-1.6, 0, -0.7), W(1.6, 0, 0.7)].map((p) => p[0])), Math.min(...[W(-1.6, 0, -0.7), W(1.6, 0, 0.7)].map((p) => p[2])), Math.max(...[W(-1.6, 0, -0.7), W(1.6, 0, 0.7)].map((p) => p[0])), Math.max(...[W(-1.6, 0, -0.7), W(1.6, 0, 0.7)].map((p) => p[2]))], y, y + 2.5);
+      break;
+    }
+    case 'bubbler': {                                                  // a drinking fountain: a tapering concrete pedestal, the granite bowl, the steel spout with its arc of water, a pedal at the foot
+      bag.add('concrete_light', lathe([[0.2, 0], [0.18, 0.1], [0.13, 0.5], [0.15, 0.95], [0.001, 0.95]], 10, null, x, y, z));
+      bag.add('granite_grey', lathe([[0.001, 0.95], [0.26, 0.95], [0.28, 1.0], [0.28, 1.04], [0.2, 1.04], [0.19, 1.0], [0.001, 1.0]], 12, null, x, y, z));
+      bag.add('steel_chrome', rod(W(0, 1.0, 0.1), W(0, 1.2, 0.1), 0.02, 5)); bag.add('steel_chrome', rod(W(0, 1.2, 0.1), W(0, 1.18, 0.02), 0.015, 5));
+      B('steel_grey', -0.04, 0.0, 0.17, 0.04, 0.05, 0.3);
+      col.circle(x, z, 0.3, y, y + 1.1);
       break;
     }
     case 'bin': {                                                      // a wire-mesh litter bin on a post
