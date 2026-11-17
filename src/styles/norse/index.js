@@ -13,6 +13,7 @@ import { dragonHead, ridgeCrest, westPortal, staveMask, relief, poly, ribbon, sp
 import { stueInside } from './stue.js';
 import { makeShore } from './shore.js';
 import { makeFarm } from './farm.js';
+import { shinglePlane, shinglePyramid, shingleCone } from './shingles.js';
 import { southPortal, doorIron, crossLeaves, bellFrame } from './church2.js';
 
 const W = 'tar_wood', SH = 'tar_shingle', LOG = 'log_pine';
@@ -59,6 +60,17 @@ export function pitched(bag, mat, wall, [x0, z0, x1, z1], y, pitch, o = 0.3, alo
     if (wall) bag.add(wall, frustum([x0, z0, x1, z1], y - 0.01, yr - t - 0.04, hh, hh, 0, 0, { noBottom: true }));
   }
   return yr;
+}
+/** `pitched` with its two roof planes clad in courses of pointed shingles (the church's roofs). */
+function pitchedS(bag, mat, wall, rect, y, pitch, o = 0.3, alongX = null, t = 0.16) {
+  const [x0, z0, x1, z1] = rect, ax = alongX ?? (x1 - x0 >= z1 - z0), r = pitched(bag, mat, wall, rect, y, pitch, o, ax, t), ye = y - o * pitch;
+  if (ax) { const zm = (z0 + z1) / 2, A = x0 - o, B = x1 + o;
+    shinglePlane(bag, mat, [A, ye, z0 - o], [B, ye, z0 - o], [B, r, zm], [A, r, zm], [0, 1, -1], { seed: 3 });
+    shinglePlane(bag, mat, [B, ye, z1 + o], [A, ye, z1 + o], [A, r, zm], [B, r, zm], [0, 1, 1], { seed: 4 }); }
+  else { const xm = (x0 + x1) / 2, A = z0 - o, B = z1 + o;
+    shinglePlane(bag, mat, [x0 - o, ye, B], [x0 - o, ye, A], [xm, r, A], [xm, r, B], [-1, 1, 0], { seed: 5 });
+    shinglePlane(bag, mat, [x1 + o, ye, A], [x1 + o, ye, B], [xm, r, B], [xm, r, A], [1, 1, 0], { seed: 6 }); }
+  return r;
 }
 /** A square pyramid or frustum with its sides parallel to the axes: half-widths a0 at y0, a1 at y1. */
 export function pyr(x, z, a0, y0, a1, y1) { return lathe([[a0 * Math.SQRT2, 0], [Math.max(a1, 0.001) * Math.SQRT2, y1 - y0], [0.001, y1 - y0]], 4).rotateY(Math.PI / 4).translate(x, y0, z); }
@@ -152,6 +164,7 @@ function leanTo(bag, O, I, yo, yi, cut = null) {
       const dn = (p, t) => [p[0], p[1] - t, p[2]];
       bag.add(mat, hexa([dn(a, t1), dn(b, t1), dn(c, t1), dn(d, t1), dn(a, t0), dn(b, t0), dn(c, t0), dn(d, t0)]));
     }
+    shinglePlane(bag, SH, a, b, c, d, [0, 1, 0], { seed: 9 });
   };
   const o = (x, z) => [x, yo, z], i = (x, z) => [x, yi, z];
   piece(o(O[0], O[1]), o(O[2], O[1]), i(I[2], I[1]), i(I[0], I[1]));
@@ -225,7 +238,7 @@ function staveChurch(el, { bag, col, lights }) {
     bag.add(W, box(xx - 0.06, F, sk[1], xx + 0.06, F + 0.75, sk[3])); col.rect([xx - 0.06, sk[1], xx + 0.06, sk[3]], F, F + 1.8);
     bag.add(W, box(xx - 0.08, F, sk[3] - 0.16, xx + 0.08, U(2.5), sk[3]));
   }
-  const skr = pitched(bag, SH, W, [sk[0] - 0.08, sk[1] - 0.3, sk[2] + 0.08, sk[3]], U(2.5), 1.3, 0.2, false);
+  const skr = pitchedS(bag, SH, W, [sk[0] - 0.08, sk[1] - 0.3, sk[2] + 0.08, sk[3]], U(2.5), 1.3, 0.2, false);
   bag.add(W, box(sk[0] - 0.02, U(2.5) - 0.06, sk[1] - 0.3, sk[2] + 0.02, U(2.5), sk[3] - 0.16));       // its boarded ceiling
   { const sh = new Shape(), L = sk[2] - sk[0] + 0.16, r = L / 2 - 0.1; sh.moveTo(0, 0); sh.lineTo(0.1, 0); sh.absarc(L / 2, 0, r, Math.PI, 0, true); sh.lineTo(L, 0); sh.lineTo(L, 0.55); sh.lineTo(0, 0.55); sh.lineTo(0, 0); bag.add(W, slab(sh, 0.12, [sk[0] - 0.08, sk[3] - 0.08], [sk[2] + 0.08, sk[3] - 0.08], U(2.5) - 0.55, 10)); }
   cross(bag, (sk[0] + sk[2]) / 2, skr - 0.1, sk[3] + 0.1, s * 0.6);
@@ -353,7 +366,7 @@ function staveChurch(el, { bag, col, lights }) {
   bag.add(W, slab(wallShape(cl, Yc - U(7.4), [], glug), T, [co[0], co[1] + T / 2], [co[2], co[1] + T / 2], U(7.4), 12));
   bag.add(W, slab(wallShape(cl, Yc - U(7.4), [], glug), T, [co[0], co[3] - T / 2], [co[2], co[3] - T / 2], U(7.4), 12));
   for (const xx of [co[0] + T / 2, co[2] - T / 2]) bag.add(W, slab(wallShape(cw - 2 * T, Yc - U(7.4)), T, [xx, co[1] + T], [xx, co[3] - T], U(7.4), 2));
-  const rise = (cw / 2) * 1.55, ridge = pitched(bag, SH, null, co, Yc, 1.55, 0.35 * s, true, 0.18);
+  const rise = (cw / 2) * 1.55, ridge = pitchedS(bag, SH, null, co, Yc, 1.55, 0.35 * s, true, 0.18);
   { const tri = new Shape(); tri.moveTo(0, 0); tri.lineTo(cw, 0); tri.lineTo(cw / 2, rise - 0.06); tri.lineTo(0, 0);
     for (const xx of [co[0] + T / 2, co[2] - T / 2]) bag.add(W, slab(tri, T, [xx, co[1]], [xx, co[3]], Yc, 2)); }
   // under the roof: the boarding, the rafters and the scissor beams crossing the room
@@ -383,11 +396,11 @@ function staveChurch(el, { bag, col, lights }) {
   bag.add(W, slab(wallShape(po[3] - po[1], pH - F, [{ u: cz - po[1], ...wDoor }]), T, [po[0] + T / 2, po[1]], [po[0] + T / 2, po[3]], F, 12));
   for (const [z0, z1] of [[po[1], cz - wDoor.w / 2], [cz + wDoor.w / 2, po[3]]]) col.segment([po[0] + T / 2, z0], [po[0] + T / 2, z1], T, F, pH);
   bag.add(W, box(po[0] + T, pH - 0.05, po[1] + T, po[2], pH, po[3] - T));                                  // its boarded ceiling
-  const pr = pitched(bag, SH, W, po, pH, 1.2, 0.25, true);
+  const pr = pitchedS(bag, SH, W, po, pH, 1.2, 0.25, true);
   const pu = [po[0] + 0.45, Z(-1.05), po[2] + 0.2, Z(1.05)];
   bag.add(W, box(pu[0], pr - 0.9, pu[1], pu[2], pr + 1.1 * s, pu[3]));
   for (const zz of [-0.45, 0.45]) { bag.add('opening', box(pu[0] - 0.03, pr + 0.1 * s, cz + zz * s - 0.17 * s, pu[0], pr + 0.75 * s, cz + zz * s + 0.17 * s)); bag.add('opening', lathe([[0.17 * s, 0], [0.17 * s, 0.03], [0.001, 0.03]], 10).rotateZ(Math.PI / 2).translate(pu[0] - 0.003, pr + 0.75 * s, cz + zz * s)); }
-  const pur = pitched(bag, SH, W, pu, pr + 1.1 * s + 0.2 * 1.4, 1.4, 0.2, true);
+  const pur = pitchedS(bag, SH, W, pu, pr + 1.1 * s + 0.2 * 1.4, 1.4, 0.2, true);
   cross(bag, pu[0] - 0.12, pur - 0.15, cz, s * 0.8);
   // the portal: the broad carved side panels and the field over the arch (the vine and dragon work), the half-columns; the door leaf stands open inward
   { const hh = (po[3] - po[1]) / 2, yr = pH + hh * 1.2;
@@ -405,8 +418,12 @@ function staveChurch(el, { bag, col, lights }) {
   for (const [z0, z1] of [[ch[1] + T, cz - aW / 2], [cz + aW / 2, ch[3] - T]]) col.segment([ch[2] - T / 2, z0], [ch[2] - T / 2, z1], T, F, cH);
   bag.add(W, box(ch[0], cH - 0.06, ch[1] + T, ch[2] - T, cH, ch[3] - T));
   bag.add(SH, frustum([sv[2] - 0.3, ch[1] - 0.3, ch[2] + 0.3, ch[3] + 0.3], cH, U(6), 0.3, 0.3, 0.9, 0.9, { noBottom: true }));
+  { const x0 = sv[2] - 0.3, x1 = ch[2] + 0.3, z0 = ch[1] - 0.3, z1 = ch[3] + 0.3, yt = U(6);
+    shinglePlane(bag, SH, [x0, cH, z0], [x1, cH, z0], [x1 - 0.3, yt, z0 + 0.9], [x0 + 0.3, yt, z0 + 0.9], [0, 1, -1], { seed: 11 });
+    shinglePlane(bag, SH, [x1, cH, z1], [x0, cH, z1], [x0 + 0.3, yt, z1 - 0.9], [x1 - 0.3, yt, z1 - 0.9], [0, 1, 1], { seed: 12 });
+    shinglePlane(bag, SH, [x1, cH, z0], [x1, cH, z1], [x1 - 0.3, yt, z1 - 0.9], [x1 - 0.3, yt, z0 + 0.9], [1, 1, 0], { seed: 13 }); }
   bag.add(W, box(sv[2] + 0.5, U(6), Z(-1.8), ch[2] - 0.3, U(7.6) + 0.3 * 1.4, Z(1.8)));
-  const cr = pitched(bag, SH, W, [sv[2] + 0.5, Z(-1.8), ch[2] - 0.3, Z(1.8)], U(7.6) + 0.3 * 1.4, 1.4, 0.3, true);
+  const cr = pitchedS(bag, SH, W, [sv[2] + 0.5, Z(-1.8), ch[2] - 0.3, Z(1.8)], U(7.6) + 0.3 * 1.4, 1.4, 0.3, true);
   cross(bag, sv[2] + 0.2, cr - 0.15, cz, s * 0.9);
   // the round apse: its wall in staves round a half circle, its conical roof (its underside the apse's ceiling), the little tower and its cap, the cross
   const aTop = U(4.2), nA = 7;
@@ -418,8 +435,10 @@ function staveChurch(el, { bag, col, lights }) {
   }
   bag.add(W, halfLathe([[ra - 0.02, 0], [ra - 0.02, 0.04]], 10, ac, aTop - 0.04, cz, -Math.PI / 2));
   bag.add(SH, halfLathe([[2.3 * s, 0], [0.7 * s, 2.2 * s], [0.001, 2.4 * s]], 12, ac, aTop, cz, -Math.PI / 2));
+  shingleCone(bag, SH, ac, cz, 2.3 * s, aTop, 0.7 * s, aTop + 2.2 * s, -Math.PI / 2, Math.PI, { seed: 21, tMax: 1 });
   bag.add(W, lathe([[0.6 * s, 0], [0.6 * s, 1.4 * s], [0.001, 1.4 * s]], 8, null, ac + 0.25, aTop + 2.1 * s, cz));
   bag.add(SH, lathe([[0.8 * s, 0], [0.001, 2.6 * s]], 8, null, ac + 0.25, aTop + 3.5 * s, cz));
+  shingleCone(bag, SH, ac + 0.25, cz, 0.8 * s, aTop + 3.5 * s, 0.01, aTop + 3.5 * s + 2.6 * s, 0, Math.PI * 2, { seed: 22, w: 0.12, e: 0.14, L: 0.34, tip: 0.06 });
   cross(bag, ac + 0.25, aTop + 3.5 * s + 2.45 * s, cz, s * 0.7);
   // the altar at the apse's mouth: two stacked stone blocks and the slab (about 1.33 × 0.65 × 0.92 m), the linen, the painted frontal, the candles
   { const xa = ac + 0.45, h = 0.92, hw = 0.665, hd = 0.325;
@@ -449,8 +468,8 @@ function staveChurch(el, { bag, col, lights }) {
   const b0 = 1.25 * s, ty = ridge - 1.2 * s, yb0 = ridge - b0 * 1.55 - 0.03;
   { const sh = new Shape(); sh.moveTo(0, 0); sh.lineTo(b0, b0 * 1.55 - 0.08); sh.lineTo(2 * b0, 0); sh.lineTo(2 * b0, ty + 2.1 * s - yb0); sh.lineTo(0, ty + 2.1 * s - yb0); sh.lineTo(0, 0);
     bag.add(W, slab(sh, 2 * b0, [cx, cz - b0], [cx, cz + b0], yb0, 2)); }
-  const g1 = pitched(bag, SH, W, [cx - b0, cz - b0, cx + b0, cz + b0], ty + 2.1 * s, 1.1, 0.25, true);
-  pitched(bag, SH, W, [cx - b0, cz - b0, cx + b0, cz + b0], ty + 2.1 * s, 1.1, 0.25, false);
+  const g1 = pitchedS(bag, SH, W, [cx - b0, cz - b0, cx + b0, cz + b0], ty + 2.1 * s, 1.1, 0.25, true);
+  pitchedS(bag, SH, W, [cx - b0, cz - b0, cx + b0, cz + b0], ty + 2.1 * s, 1.1, 0.25, false);
   // the turret's crests on the four short ridges outside its first storey, the dragon heads over its east and west gables
   { const e = b0 + 0.25, a = 0.85 * s;
     for (const sg of [-1, 1]) {
@@ -469,11 +488,14 @@ function staveChurch(el, { bag, col, lights }) {
   const a1 = 0.85 * s, y1 = g1 - 0.6 * s;
   storey(a1, y1, 1.6 * s);
   bag.add(SH, pyr(cx, cz, a1 + 0.35 * s, y1 + 1.6 * s, a1 * 0.7, y1 + 2.1 * s));
+  shinglePyramid(bag, SH, cx, cz, a1 + 0.35 * s, y1 + 1.6 * s, a1 * 0.7, y1 + 2.1 * s, { seed: 31 });
   const a2 = 0.62 * s, y2 = y1 + 1.95 * s;
   storey(a2, y2, 1.2 * s);
   bag.add(SH, pyr(cx, cz, a2 + 0.4 * s, y2 + 1.2 * s, 0.4 * s, y2 + 2.4 * s));
+  shinglePyramid(bag, SH, cx, cz, a2 + 0.4 * s, y2 + 1.2 * s, 0.4 * s, y2 + 2.4 * s, { seed: 32, w: 0.13, e: 0.15, L: 0.38 });
   bag.add(W, box(cx - 0.36 * s, y2 + 2.3 * s, cz - 0.36 * s, cx + 0.36 * s, y2 + 2.9 * s, cz + 0.36 * s));
   bag.add(SH, pyr(cx, cz, 0.52 * s, y2 + 2.9 * s, 0, y2 + 8 * s));
+  shinglePyramid(bag, SH, cx, cz, 0.52 * s, y2 + 2.9 * s, 0, y2 + 8 * s, { seed: 33, w: 0.12, e: 0.15, L: 0.38 });
   bag.add('iron', box(cx - 0.035, y2 + 7.8 * s, cz - 0.035, cx + 0.035, y2 + 8.9 * s, cz + 0.035));
   bag.add('iron', box(cx - 0.02, y2 + 8.45 * s, cz - 0.03, cx + 0.42 * s, y2 + 8.7 * s, cz + 0.03));   // the vane
 }
@@ -503,6 +525,7 @@ function bellHouse(el, { bag, col }) {
   col.rect([x - h - 0.35, z - h - 0.35, x + h + 0.35, z + h + 0.35], y, y + 8);
   const a = h - 0.75;
   bag.add(SH, frustum([x - h - 0.1, z - h - 0.1, x + h + 0.1, z + h + 0.1], y + 0.55, y + 5.2, h + 0.1 - a, h + 0.1 - a, h + 0.1 - a, h + 0.1 - a));
+  shinglePyramid(bag, SH, x, z, h + 0.1, y + 0.55, a, y + 5.2, { seed: 41 });
   bag.add('opening', box(x - 0.45, y + 0.55, z + h - 0.02, x + 0.45, y + 2.3, z + h + 0.14));    // the low door in the skirt
   bag.add(W, box(x - 0.55, y + 2.3, z + h - 0.02, x + 0.55, y + 2.45, z + h + 0.2));
   // the belfry is hollow: four boarded walls, each with two round-headed sound openings cut through, the bell hung inside
@@ -525,6 +548,8 @@ function bellHouse(el, { bag, col }) {
   }
   bag.add(SH, pyr(x, z, a + 0.75, y + 7.75, a + 0.1, y + 8.25));
   bag.add(SH, pyr(x, z, a + 0.15, y + 8.2, 0, y + 12));
+  shinglePyramid(bag, SH, x, z, a + 0.75, y + 7.75, a + 0.1, y + 8.25, { seed: 42 });
+  shinglePyramid(bag, SH, x, z, a + 0.15, y + 8.2, 0, y + 12, { seed: 43 });
   cross(bag, x, y + 11.85, z, 0.7);
 }
 /** Round-log walls on rect from y to y + H: the courses of the long and the short walls half a log apart, crossing and standing out at the notched corners. */
@@ -690,6 +715,14 @@ function logHouse(el, ctx) {
   const top = pitched(bag, roof, LOG, el.rect, yt, pitch, o, alongX, roof === 'sod' ? 0.28 : 0.16);
   logGables(bag, el.rect, y + H, span / 2 * pitch + o * pitch - 0.28, alongX, d);
   roofTrim(bag, el.rect, yt, pitch, o, alongX, roof === 'sod');
+  if (roof === 'sod') {                       // the turf rolled over the ridge, held down by crossed poles at every pace (the ridge's cross-staves)
+    const L0 = (alongX ? x0 : z0) - o, L1 = (alongX ? x1 : z1) + o, mid = alongX ? (z0 + z1) / 2 : (x0 + x1) / 2, rr = 0.15 + rand() * 0.01;
+    bag.add('sod', alongX ? logRod([L0 + 0.1, top + 0.02, mid], [L1 - 0.1, top + 0.02, mid], rr, 6) : logRod([mid, top + 0.02, L0 + 0.1], [mid, top + 0.02, L1 - 0.1], rr, 6));
+    for (let q = L0 + 0.6; q < L1 - 0.4; q += 1.3) for (const sg of [-1, 1]) {
+      const a = alongX ? [q - 0.04 * sg, top + 0.17, mid + sg * 0.05] : [mid + sg * 0.05, top + 0.17, q - 0.04 * sg], yb = top - pitch * 0.72 + 0.045;
+      bag.add(LOG, beam(a, alongX ? [q + 0.1 * sg, yb, mid + sg * 0.72] : [mid + sg * 0.72, yb, q + 0.1 * sg], 0.07, 0.07));
+    }
+  }
   // the stue's smoke-hole (ljore) on the ridge: a little boarded hood with its own roof — no chimney yet
   if (kind === 'stue' || kind === 'smithy') {
     const mx = (x0 + x1) / 2 - (alongX ? 0.6 : 0), mz = (z0 + z1) / 2 - (alongX ? 0 : 0.6);
@@ -761,7 +794,7 @@ function lychgate(el, { bag, col }) {
     col.segment([xx - sx * 0.2, z - hd + 0.28], [xx - sx * 0.2, z + hd - 0.28], 0.5, y, y + 0.5);
   }
   for (const sz of [-1, 1]) bag.add(W, box(x - hw, y + H - 0.2, z + sz * (hd - 0.15) - 0.09, x + hw, y + H, z + sz * (hd - 0.15) + 0.09));   // the tie beams over the way
-  const top = pitched(bag, SH, W, [x - hw - 0.1, z - hd - 0.1, x + hw + 0.1, z + hd + 0.1], y + H, 1.05, 0.35, false);
+  const top = pitchedS(bag, SH, W, [x - hw - 0.1, z - hd - 0.1, x + hw + 0.1, z + hd + 0.1], y + H, 1.05, 0.35, false);
   bag.add(W, box(x - hw + 0.12, y + H - 0.03, z - hd - 0.05, x + hw - 0.12, y + H, z + hd + 0.05));                                       // the boarded ceiling
   roofTrim(bag, [x - hw - 0.1, z - hd - 0.1, x + hw + 0.1, z + hd + 0.1], y + H, 1.05, 0.35, false, false);
   cross(bag, x, top - 0.1, z + hd + 0.5, 0.75);
