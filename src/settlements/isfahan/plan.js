@@ -104,7 +104,7 @@ E.push({ t: 'lane', rect: [gx0 + 6, -50, gx1 - 1, -40], y: 0.04, mat: 'brick_pav
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('square', SQUARE, 0, 'open'), room('garden', GARDEN, 0, 'open'), room('talar', [-92, az0 + 1, ax1, az1 - 1], 13, 'hall'), room('music_room', [-102, -47, -94, -38], 32.5, 'hall'), room('bazaar', [-2.5, BAZAAR.z1, 2.5, BAZAAR.z0], 0, 'hall'), room('shah_sanctuary', [M(0, sv)[0] - 8, M(0, sv)[1] - 8, M(0, sv)[0] + 8, M(0, sv)[1] + 8], 0, 'hall'), room('lotfollah', [LOTF.c[0] - 6.7, LOTF.c[1] - 6.7, LOTF.c[0] + 6.7, LOTF.c[1] + 6.7], 0, 'hall')];
-const walks = [[[0, -280], [2.5, -168], [2.5, -155], [-1, -143], [-1, -125], [1.6, 35], [1.6, 150], [0, 200], [0, 245]]];   // down the square's axis, bearing round the strollers and goods the generated street life stands on it
+const walks = [[[0, -280], [1.3, -267.3], [0, 68.8], [0, 245]]];   // down the square's axis, bearing round the strollers and goods the generated street life stands on it (found by search over the built collision world; the life's places shift whenever the town's plans change, so re-run when they do)
 walks[0].y0 = 0;
 walks.push([[-70, 167.5], [-82.6, 167.5], [-88, 167.5], [-82.6, 167.5]], [[70, 181.2], [82.6, 181.2], [88, 181.2]]);          // into an arcade shop on each side of the square, by the arch and the doorway
 
