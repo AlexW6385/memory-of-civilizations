@@ -136,6 +136,25 @@ Sources added:
 - [Sugar palms on rice field dykes provide many benefits — WOCAT](https://qcat.wocat.net/th/summary/4483/?as=html)
 - **Weathering at 1150.** The temple is newly finished: no lichen, moss or black crusts yet (those of today's photographs belong to eight centuries of monsoons); the sandstone keeps its fresh grey, darkened only at the foot of walls by the climate's damp, as the materials draw it [inferred].
 
+## 27. Round 2: Angkor Wat itself carved (2026-11-17)
+
+The galleries, towers, doorways and balustrades of the temple were masses of plain stone. `src/settlements/angkor/dress.js` lays carving over the khmer style's masses (elements `ak_gdress`, `ak_tdress`, `ak_ndress`, `ak_cdress`, added in `plan.js` after each gallery, tower, naga rail and the cloister, with the same parameters).
+
+| Feature | What we build | Basis |
+|---|---|---|
+| Square pillars | Every pillar of the galleries and the cloister: a moulded base, a ringed neck, lotus petals under the capital, and up each face a stem with faceted lotus medallions between two lines | pillars carved in bands of lotus and foliage; "no empty spaces" on Angkor Wat-style carving [stated: Lucas Varro, Angkor lintel styles]; our pattern [inferred] |
+| Cloister | Praying ascetics seated in pointed niches on the bases of the cloister's pillars; reliefs in the four pediments of the crossing | "praying ascetics carved on the pillar bases" [stated: helloangkor, §11] |
+| Wall faces | Moulded plinth, cornice, a frieze of lotus petals; on the third gallery's court face blind windows of five turned balusters under small pediments with devatas in pointed niches on the piers; devatas on the Bakan's piers and on the enclosure gopura's wings; pilasters between the devata groups of the second gallery | balusters "turned as if made of wood", windows on the gallery walls, devatas "in twos and threes" (§10) [stated]; their placement on the court face [inferred] |
+| Lintels | A carved lintel over every doorway of the gate pavilions, the corner towers and the porticoes: a lotus medallion in the middle, garlands in swags with a leaf pendant at each junction, a bead band above and below, a volute and curling leaf at each end | the Angkor Wat lintel style (c. 1080-1175): "centred, framed and linked by garlands", tight prominent curls of foliage, "no empty spaces" [stated: Lucas Varro]; the composition [inferred] |
+| Pediments | The tympanum of each portico and of the cloister's crossing carries two ribs along the arch with flame teeth, a seated deity in a halo on a lotus, and sprays of leaves either side; the taller back pediment only its ribs above the front one | pediments carved with scenes and foliage [inferred from the Khmer pediment type] |
+| Towers | A pointed niche in each tier's four faces (all towers) | each tier a storey in miniature (§10) [stated]; niches [inferred] |
+| Naga balustrade | Diamond scales in two staggered rows on each flank of every serpent's body, and a crest of flame-shaped lobes along its back, clear of the rings and of the rising ends | nagas with scaled bodies and a crest [inferred from photographs] |
+
+Ours: carving in faceted low relief (pyramidal bosses: lit in facets, cheap in triangles), 3-8 cm proud; every copy a hair different in scale (+-1%), as hand-cut, which also lets the engine merge the pieces into the meshes already drawn (no extra draws at the arrival). The recess of the windows and niches is stone one step back, not a dark opening, for the same reason (a new material would add a mesh to the arrival frame).
+
+Sources added:
+- [Angkor lintel styles — Lucas Varro](https://lucasvarro.com/blogs/angkorpedia/angkor-lintel-styles)
+
 ## Sources
 
 - [Angkor Wat — wondermondo](https://wondermondo.com/angkor-wat)
