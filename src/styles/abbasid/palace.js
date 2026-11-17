@@ -5,6 +5,8 @@
 
 import { box, fromTriangles, lathe } from '../../core/geom.js';
 import { furnish, buildRooms, zir } from './dress.js';
+import { greenDome, ceilY, HS } from './dome.js';
+import { wallArcade, goldenGateFront, towerDetail } from './facade.js';
 import { mosqueExterior, mihrab, minbar, rahla, hangLamp, MOSQUE_BAYS } from './mosque.js';
 import { gardenTree, local, wallRun, barrel, domeShell, archBand, spandrel, stuccoPanel, merlons, lineFrame, rng, archCurve, archPoly, orientedBox, polyGeo, D2R } from './kit.js';
 
@@ -50,55 +52,6 @@ export const cushion = (bag, mat, x, z, y, w = 0.6, d = 0.6, h = 0.16) => bag.ad
 
 // ── the palace ──────────────────────────────────────────────────────────────
 
-/** The Green Dome: the audience chamber's tower, drum and dome, the horseman on its spire. Centred on (0, 0), on the floor y. */
-function greenDome({ bag, col }, y, S = 7.6, hole = 6.0) {
-  const T0 = 18, T1 = 32;
-  // the square tower to T0, hollow: south wall open to the iwan, side doors, loops
-  const wall = (a, b, ops = [], collide = true) => wallRun({ bag, col }, { a, b, th: S - hole, y0: y, y1: y + T0, mat: 'brick_buff', ops, collide });
-  wall([-S + (S - hole) / 2, -S + (S - hole) / 2], [S - (S - hole) / 2, -S + (S - hole) / 2]);                               // north
-  wall([S - (S - hole) / 2, -S + (S - hole) / 2], [S - (S - hole) / 2, S - (S - hole) / 2], [{ at: S, w: 3.4, h: 5.6 }]);   // east, a door
-  wall([-S + (S - hole) / 2, S - (S - hole) / 2], [-S + (S - hole) / 2, -S + (S - hole) / 2], [{ at: S, w: 3.4, h: 5.6 }]); // west, a door
-  wall([S - (S - hole) / 2, S - (S - hole) / 2], [-S + (S - hole) / 2, S - (S - hole) / 2], [{ at: S, w: 7.4, h: 11.2 }]);   // south: the great arch into the iwan
-  // the cornice of the tower and the transition to the octagon
-  bag.add('plaster', box(-S - 0.5, y + T0 - 0.5, -S - 0.5, S + 0.5, y + T0, S + 0.5));
-  for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
-    // corner fills between the square and the octagon (a squinch's flat soffit and a hood above)
-    const k = 3.3, P = (u, v) => [sx * (S - 0.8 - u), y + T0, sz * (S - 0.8 - v)];
-    void P; const a = [sx * hole, sz * (hole - k)], b = [sx * (hole - k), sz * hole], c = [sx * hole, sz * hole];
-    bag.add('brick_buff', fromTriangles([a[0], y + T0 - 0.02, a[1], b[0], y + T0 - 0.02, b[1], c[0], y + T0 - 0.02, c[1], a[0], y + T0 - 0.02, a[1], c[0], y + T0 - 0.02, c[1], b[0], y + T0 - 0.02, b[1]]));
-  }
-  // the octagonal drum: eight facets, each with a pointed window over a plastered sill, a stucco panel under it
-  const ap = 6.9, N = 8;
-  for (let i = 0; i < N; i++) {
-    const a0 = (i / N + 1 / 16) * Math.PI * 2, a1 = ((i + 1) / N + 1 / 16) * Math.PI * 2, R = ap / Math.cos(Math.PI / N);
-    const A = [Math.cos(a0) * R, Math.sin(a0) * R], B = [Math.cos(a1) * R, Math.sin(a1) * R];
-    const fr = wallRun({ bag, col }, { a: A, b: B, th: 1.3, y0: y + T0, y1: y + T1, mat: 'plaster_white', ops: [{ at: Math.hypot(B[0] - A[0], B[1] - A[1]) / 2, w: 2.4, h: 6.4, y0: y + T0 + 3.4 }], collide: false });
-    // the window's glass: the daylight pane on the inner side
-    const mx = (A[0] + B[0]) / 2, mz = (A[1] + B[1]) / 2, nx = -mx / Math.hypot(mx, mz), nz = -mz / Math.hypot(mx, mz);
-    bag.add('daylight', polyGeo({ O: [mx - nz * 1.2 - nx * 0.4, mz + nx * 1.2 - nz * 0.4], U: [nz, -nx], N: [nx, nz] }, [[0, y + T0 + 3.4], [2.4, y + T0 + 3.4], [2.4, y + T0 + 7.0], [0, y + T0 + 7.0]], 0, 0.02));
-    void fr;
-  }
-  bag.add('tile_turquoise', lathe([[ap / Math.cos(Math.PI / 8) + 0.4, 0], [ap / Math.cos(Math.PI / 8) + 0.5, 0.18], [ap / Math.cos(Math.PI / 8) + 0.2, 0.34]], 8, (th) => 1, 0, y + T0 + 2.6, 0));
-  bag.add('plaster_white', lathe([[ap / Math.cos(Math.PI / 8) + 0.5, 0], [ap / Math.cos(Math.PI / 8) + 0.5, 0.35], [ap / Math.cos(Math.PI / 8) - 0.6, 0.45]], 8, null, 0, y + T1, 0));
-  // the green dome, slightly pointed, on its ring; the lead-sheathed top, the finial, the horseman with his lance
-  const Rd = ap / Math.cos(Math.PI / 8) + 0.1;
-  domeShell(bag, 'tile_green', 0, 0, Rd, y + T1 + 0.4, { pointed: 0.42, seg: 32, rows: 12, cap: 0 });
-  const top = y + T1 + 0.4 + Rd * 1.42;
-  bag.add('gilt_bronze', lathe([[0.001, 0], [0.7, 0.1], [0.8, 0.5], [0.55, 0.9], [0.2, 1.2], [0.001, 1.3]], 12, null, 0, top - 0.2, 0));
-  bag.add('gilt_bronze', lathe([[0.12, 0], [0.09, 2.6], [0.001, 2.7]], 8, null, 0, top + 1.0, 0));
-  // the horseman: a horse (barrel, neck, head, legs) and a rider with a lance couched forward; on a swivelling arm
-  const hy = top + 3.6;
-  bag.add('bronze', lathe([[0.001, -1.1], [0.38, -0.8], [0.45, -0.3], [0.45, 0.4], [0.33, 0.9], [0.001, 1.15]], 10, null, 0, 0, 0).rotateX(Math.PI / 2).translate(0, hy, 0));
-  bag.add('bronze', box(-0.1, -0.325, -0.275, 0.1, 0.325, 0.275).rotateX(-0.4).translate(0, hy + 0.225 + 0.2, -1.275 + 0.2));
-  bag.add('bronze', box(-0.16, hy - 0.04, -1.9, 0.16, hy + 0.2, -1.4));
-  for (const [lx, lz] of [[-0.18, -0.75], [0.18, -0.75], [-0.18, 0.8], [0.18, 0.8]]) bag.add('bronze', box(lx - 0.07, hy - 0.9, lz - 0.07, lx + 0.07, hy - 0.2, lz + 0.07));
-  bag.add('bronze', box(-0.2, hy + 0.35, -0.2, 0.2, hy + 1.1, 0.2));
-  bag.add('bronze', lathe([[0.12, 0], [0.12, 0.2], [0.001, 0.2]], 8, null, 0, hy + 1.1, 0));
-  bag.add('iron', box(-0.025, hy + 0.7, -2.4, 0.025, hy + 0.75, 1.0));
-  bag.add('gilt_bronze', fromTriangles([0, hy + 0.7, -2.7, -0.07, hy + 0.7, -2.4, 0.07, hy + 0.7, -2.4, 0, hy + 0.7, -2.7, 0.07, hy + 0.7, -2.4, -0.07, hy + 0.7, -2.4]));
-}
-
-
 /** The ranges of rooms round the palace's court (local frame, w the compound's half-width): rects with the side their door is on and their use. */
 export function palaceRooms(w) {
   const out = [];
@@ -122,6 +75,8 @@ function palace(el, ctx) {
     const wallOf = (a, b, ops) => { wallRun(c, { a, b, th: T, y0: y, y1: y + Hw, mat: 'brick_buff', ops }); merlons(bag, 'brick_buff', [a[0], a[1]], [b[0], b[1]], T, y + Hw, { w: 0.9, gap: 0.8, h: 1.0 }); };
     wallOf([-w, -w], [w, -w]); wallOf([w, -w], [w, w]); wallOf([-w, w], [-w, -w]);
     wallOf([-w, w], [-5.4, w]); wallOf([5.4, w], [w, w]);
+    wallArcade(bag, w, T, y, 5.4 + 0.9, w - 3.8); wallArcade(bag, w, T, y, -w + 3.8, -5.4 - 0.9);
+    goldenGateFront(bag, w, T, y);
     // the Golden Gate: a gate-hall of 10.8 m across, arch 5.2 wide and 7.4 high, a gilt band and gilt-plated doors thrown open
     archway(c, { x: 0, w: 5.2, hh: 7.4, z0: w - T / 2 - 0.0, z1: w + T / 2 + 0.0, top: y + 12.5, mat: 'brick_buff', vault: 'plaster' });
     bag.add('brick_buff', box(-5.4, y, w - T / 2, -2.6, y + 12.5, w + T / 2)); bag.add('brick_buff', box(2.6, y, w - T / 2, 5.4, y + 12.5, w + T / 2));
@@ -133,6 +88,7 @@ function palace(el, ctx) {
       const tx = sx * w, tz = sz * w, R = 3.4, H = Hw + 4;
       bag.add('brick_buff', lathe([[R, -1], [R, H], [R + 0.35, H + 0.01], [R + 0.35, H + 0.4], [R - 0.2, H + 0.4]], 14, null, tx, y, tz));
       for (let j = 0; j < 10; j++) { const a = j / 10 * Math.PI * 2 + 0.1, x = tx + Math.cos(a) * (R + 0.1), z = tz + Math.sin(a) * (R + 0.1); bag.add('brick_buff', box(x - 0.3, y + H + 0.4, z - 0.3, x + 0.3, y + H + 1.4, z + 0.3)); }
+      towerDetail(bag, tx, tz, R, H, y);
       col.circle(tx, tz, R, y, y + H);
     }
     // the forecourt: paved, a pool with a rim at its middle, the way from the gate to the iwan; flower beds either side
@@ -145,28 +101,34 @@ function palace(el, ctx) {
     for (const sd of [-1, 1]) {
       const x0 = sd < 0 ? -18 : 4.55, x1 = sd < 0 ? -4.55 : 18;
       bag.add('brick_buff', box(x0, y - 0.5, -2, x1, y + FH, FZ)); col.rect([x0, -2, x1, FZ], y, y + FH);
-      // blind pointed arches in two ranks along the face, recessed, their frames in baked brick
-      const n = 3, bw = (x1 - x0 - 1.0) / n;
+      // beside the great arch a framed field of carved stucco 3 m wide (the pishtaq's pier); beyond it blind pointed arches in two ranks, their frames in baked brick
+      const near = sd < 0 ? x1 : x0, pu0 = sd < 0 ? near - 3.0 : near + 0.25, pu1 = sd < 0 ? near - 0.25 : near + 3.0, ffr = { O: [0, FZ], U: [1, 0], N: [0, 1] };
+      stuccoPanel(bag, ffr, pu0 + 0.2, pu1 - 0.2, y + 0.6, y + 7.3, 0.06, 'stucco', 0.62);
+      stuccoPanel(bag, ffr, pu0 + 0.2, pu1 - 0.2, y + 7.9, y + 14.0, 0.06, 'stucco', 0.85);
+      bag.add('plaster_white', box(pu0, y, FZ, pu0 + 0.2, y + 14.4, FZ + 0.16)); bag.add('plaster_white', box(pu1 - 0.2, y, FZ, pu1, y + 14.4, FZ + 0.16));
+      bag.add('plaster_white', box(pu0, y + 7.3, FZ, pu1, y + 7.9, FZ + 0.16)); bag.add('plaster_white', box(pu0, y + 14.0, FZ, pu1, y + 14.4, FZ + 0.16)); bag.add('plaster_white', box(pu0, y, FZ, pu1, y + 0.6, FZ + 0.16));
+      const ax0 = sd < 0 ? x0 : near + 3.4, ax1 = sd < 0 ? near - 3.4 : x1, n = 3, bw = (ax1 - ax0 - 0.8) / n;
       for (let k = 0; k < n; k++) {
-        const u0 = x0 + 0.5 + k * bw + 0.45, w2 = bw - 0.9, fr = { O: [u0, FZ], U: [1, 0], N: [0, 1] };
-        bag.add('opening', polyGeo(fr, [[0, y + 0.8], [w2, y + 0.8], [w2, y + 5.4], [0, y + 5.4]], 0, 0.06));
+        const u0 = ax0 + 0.4 + k * bw + 0.45, w2 = bw - 0.9, fr = { O: [u0, FZ], U: [1, 0], N: [0, 1] };
+        bag.add('brick_baked', polyGeo(fr, archPoly(0, y + 0.8, w2, 5.0), 0, 0.04));
         archBand(bag, fr, 0, y + 0.8, w2, 5.0, 0.35, 0.0, 0.12, ['brick_baked', 'brick_buff']);
-        bag.add('opening', polyGeo(fr, [[0, y + 8.4], [w2, y + 8.4], [w2, y + 12.4], [0, y + 12.4]], 0, 0.06));
+        bag.add('brick_baked', polyGeo(fr, archPoly(0, y + 8.4, w2, 4.0), 0, 0.04));
         archBand(bag, fr, 0, y + 8.4, w2, 4.0, 0.3, 0.0, 0.12, ['brick_baked', 'brick_buff']);
+        stuccoPanel(bag, fr, 0.2, w2 - 0.2, y + 6.0, y + 7.2, 0.045, 'stucco', 0.34);
       }
-      bag.add('plaster_white', box(x0 - 0.1, y + FH - 1.6, -2, x1 + 0.1, y + FH, FZ + 0.25));
+      bag.add('plaster_white', box(x0 - 0.1, y + FH - 0.5, -2, x1 + 0.1, y + FH, FZ + 0.25));
+      stuccoPanel(bag, ffr, x0 + 0.2, x1 - 0.2, y + FH - 1.5, y + FH - 0.7, 0.045, 'stucco', 0.3);
     }
     merlons(bag, 'plaster_white', [-18, FZ], [18, FZ], 0.9, y + FH, { w: 1.0, gap: 0.9, h: 1.2 });
     // the great iwan: 9.1 m wide, its arch 14 m high; a deep barrel vault, its back wall the tower's south face; floor of marble
     archway(c, { x: 0, w: 9.1, hh: 14, z0: -2, z1: FZ, top: y + FH, mat: 'brick_buff', vault: 'plaster_white' });
-    { const fr = { O: [-4.55, FZ], U: [1, 0], N: [0, 1] }; stuccoPanel(bag, fr, -4.55 - 1.2, -4.55 - 0.45, y + 0.4, y + 11.6, 0.05, 'stucco', 0.36); stuccoPanel(bag, { O: [4.55, FZ], U: [1, 0], N: [0, 1] }, 0.45, 1.2, y + 0.4, y + 11.6, 0.05, 'stucco', 0.36); }
     bag.add('marble_floor', box(-4.55, y - 0.2, -2, 4.55, y + 0.05, FZ));
     col.floor([-4.55, -2, 4.55, FZ], y + 0.05);
     bag.add('gilt_bronze', box(-4.65, y + 14.2, FZ + 0.05, 4.65, y + 14.5, FZ + 0.14));
     // the tower at the iwan's back (the audience chamber, drum, dome)
-    local(c, [0, -9.6], 0, (t) => {
+    local(c, [0, -9.0], 0, (t) => {
       greenDome(t, y);
-      t.bag.add('marble_floor', box(-hole(), y - 0.2, -hole(), hole(), y + 0.4, hole())); t.col.floor([-hole(), -hole(), hole(), hole()], y + 0.4);
+      t.bag.add('marble_floor', box(-HS, y - 0.2, -HS, HS, y + 0.4, HS)); t.col.floor([-HS, -HS, HS, HS], y + 0.4);
       // the furnishing of the chamber: the throne on a stepped dais against the north wall, rugs, cushions, hanging lamps, curtains
       furnishChamber(t, y + 0.4);
     });
@@ -192,36 +154,32 @@ function palace(el, ctx) {
     void rand;
   });
 }
-const hole = () => 6.0;
 
 function furnishChamber({ bag, col, lights }, y) {
-  // the dais: three steps up to a platform 1.4 m deep carpeted in maroon; the throne a low seat with a high back; beyond, a curtain of black silk
-  for (let k = 0; k < 3; k++) { bag.add('marble', box(-3.2 + k * 0.3, y, -6.0 + (2 - k) * 0.3 - 0.0, 3.2 - k * 0.3, y + 0.18 * (k + 1), -4.0)); }
-  col.rect([-3.2, -6.0, 3.2, -4.0], y, y + 0.54);
-  rug(bag, 0, -5.0, 5.4, 1.8, y + 0.54, 'cloth_maroon', 'cloth_indigo', 'gilt_bronze');
-  bag.add('cedar', box(-0.9, y + 0.54, -5.8, 0.9, y + 1.0, -4.6)); bag.add('cedar', box(-0.9, y + 1.0, -5.9, 0.9, y + 2.0, -5.7)); bag.add('gilt_bronze', box(-0.95, y + 1.95, -5.95, 0.95, y + 2.05, -5.65));
-  cushion(bag, 'cloth_maroon', 0, -5.2, y + 1.0, 1.6, 1.0, 0.18);
-  for (const sx of [-1, 1]) bag.add('cedar', box(sx * 0.9 - 0.06 * sx - 0.03, y + 0.54, -5.8, sx * 0.9 + 0.06 * sx, y + 1.5, -5.7));
-  // curtains (sitr) of black silk with a gilt border hung either side of the great arch
-  for (const sx of [-1, 1]) { bag.add('cloth_black', box(sx * 3.7 - 0.5, y + 0.2, 5.78, sx * 3.7 + 0.5, y + 9.4, 5.84)); bag.add('gilt_bronze', box(sx * 3.7 - 0.5, y + 9.2, 5.78, sx * 3.7 + 0.5, y + 9.4, 5.85)); }
-  // the floor: great rugs, rows of cushions along the walls for the officials
-  rug(bag, 0, 0.5, 8.0, 7.0, y, 'cloth_indigo', 'cloth_maroon', 'cloth_ochre');
-  for (const sx of [-1, 1]) for (let k = 0; k < 4; k++) { cushion(bag, k % 2 ? 'cloth_maroon' : 'cloth_green', sx * 5.4, -3.2 + k * 1.8, y, 0.9, 0.9, 0.22); }
-  // hanging lamps of glass and bronze from the dome's ring (long chains); each lit
-  for (const [lx, lz] of [[-3, -2], [3, -2], [0, 2], [-3.4, 3.4], [3.4, 3.4]]) {
+  // the dais: three steps up to a platform 2 m deep carpeted in maroon against the north wall; the throne a low seat with a high back; the curtains of black silk by the great arch
+  for (let k = 0; k < 3; k++) { bag.add('marble', box(-3.2 + k * 0.3, y, -5.0 + (2 - k) * 0.3, 3.2 - k * 0.3, y + 0.18 * (k + 1), -3.0)); }
+  col.rect([-3.2, -5.0, 3.2, -3.0], y, y + 0.54);
+  rug(bag, 0, -4.0, 5.4, 1.8, y + 0.54, 'cloth_maroon', 'cloth_indigo', 'gilt_bronze');
+  bag.add('cedar', box(-0.9, y + 0.54, -4.8, 0.9, y + 1.0, -3.6)); bag.add('cedar', box(-0.9, y + 1.0, -4.9, 0.9, y + 2.0, -4.7)); bag.add('gilt_bronze', box(-0.95, y + 1.95, -4.95, 0.95, y + 2.05, -4.65));
+  cushion(bag, 'cloth_maroon', 0, -4.2, y + 1.0, 1.6, 1.0, 0.18);
+  for (const sx of [-1, 1]) bag.add('cedar', box(sx * 0.9 - 0.06 * sx - 0.03, y + 0.54, -4.8, sx * 0.9 + 0.06 * sx, y + 1.5, -4.7));
+  for (const sx of [-1, 1]) { bag.add('cloth_black', box(sx * 3.7 - 0.5, y + 0.2, 4.78, sx * 3.7 + 0.5, y + 9.4, 4.84)); bag.add('gilt_bronze', box(sx * 3.7 - 0.5, y + 9.2, 4.78, sx * 3.7 + 0.5, y + 9.4, 4.85)); }
+  rug(bag, 0, 0.8, 7.0, 6.0, y, 'cloth_indigo', 'cloth_maroon', 'cloth_ochre');
+  for (const sx of [-1, 1]) for (let k = 0; k < 4; k++) { cushion(bag, k % 2 ? 'cloth_maroon' : 'cloth_green', sx * 4.4, -2.2 + k * 1.7, y, 0.9, 0.9, 0.22); }
+  // hanging lamps of glass and bronze on chains from the dome (each lit)
+  for (const [lx, lz] of [[-2.6, -1.4], [2.6, -1.4], [0, 1.6], [-2.6, 3.0], [2.6, 3.0]]) {
     bag.add('bronze', lathe([[0.2, 0], [0.12, 0.2], [0.04, 0.26]], 10, null, lx, y + 7.2, lz)); bag.add('lamp_glass', lathe([[0.001, 0], [0.12, 0.05], [0.14, 0.2], [0.001, 0.3]], 10, null, lx, y + 7.3, lz));
-    bag.add('iron', box(lx - 0.01, y + 7.6, lz - 0.01, lx + 0.01, y + 17.5, lz + 0.01));
+    bag.add('iron', box(lx - 0.01, y + 7.6, lz - 0.01, lx + 0.01, ceilY(y, lx, lz) + 0.05, lz + 0.01));
     lights.push({ at: [lx, y + 7.5, lz], color: '#ffc27a', intensity: 6, distance: 12 });
   }
-  // (the chains hang from tie beams of cedar across the chamber, from wall to wall under the tower's cornice)
-  for (const bz of [-2, 2, 3.4]) bag.add('cedar', box(-6.1, y + 17.3, bz - 0.14, 6.1, y + 17.7, bz + 0.14));
-  // stucco dado round the chamber walls (style C), 2.6 m high, and a frieze of the blue band of tiles
-  const S = 6.0;
+  // stucco dado round the chamber walls (style C), 2.6 m high, with a band of lapis tile over it
+  const S = HS;
   for (const [a, b, ox, oz] of [[[-S, -S], [S, -S], 0, 1], [[-S, -S], [-S, S], 1, 0], [[S, -S], [S, S], -1, 0]]) {
-    const fr = lineFrame(a, b, ox ? (ox > 0 ? 1 : -1) : 1);
-    const f2 = { O: [a[0] + 0.0, a[1]], U: [(b[0] - a[0]) / (2 * S), (b[1] - a[1]) / (2 * S)], N: [ox, oz] };
-    void fr; stuccoPanel(bag, f2, 0.0, 2 * S, y + 0.0, y + 2.6, 0.04, 'stucco', 0.4);
-    bag.add('tile_lapis', box(Math.min(a[0], b[0]) - (ox ? 0 : 0), y + 2.6, Math.min(a[1], b[1]), Math.max(a[0], b[0]) + (ox ? 0.04 : 0), y + 2.9, Math.max(a[1], b[1]) + (oz ? 0.04 : 0)));
+    const f2 = { O: [a[0], a[1]], U: [(b[0] - a[0]) / (2 * S), (b[1] - a[1]) / (2 * S)], N: [ox, oz] };
+    const door = ox !== 0;                                              // the east and west walls have a door in the middle (3.4 m, apex 5.6)
+    if (door) { for (const [u0, u1] of [[0, S - 1.8], [S + 1.8, 2 * S]]) stuccoPanel(bag, f2, u0, u1, y, y + 2.6, 0.04, 'stucco', 0.4); stuccoPanel(bag, f2, 0, 2 * S, y + 5.9, y + 8.6, 0.03, 'stucco', 0.85); for (const [u0, u1] of [[0, S - 1.8], [S + 1.8, 2 * S]]) stuccoPanel(bag, f2, u0, u1, y + 3.1, y + 5.8, 0.03, 'stucco', 0.85); }
+    else { stuccoPanel(bag, f2, 0.0, 2 * S, y, y + 2.6, 0.04, 'stucco', 0.4); stuccoPanel(bag, f2, 0.0, 2 * S, y + 3.1, y + 8.6, 0.03, 'stucco', 0.85); }
+    for (const [s0, s1] of door ? [[-S, -1.7], [1.7, S]] : [[-S, S]]) bag.add('tile_lapis', door ? box(ox > 0 ? -S : S - 0.04, y + 2.6, s0, ox > 0 ? -S + 0.04 : S, y + 2.9, s1) : box(s0, y + 2.6, -S, s1, y + 2.9, -S + 0.04));
   }
   lights.push({ at: [0, y + 4, 0], color: '#fff0d0', intensity: 3, distance: 16 });
 }
