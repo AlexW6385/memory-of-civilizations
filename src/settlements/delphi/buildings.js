@@ -195,11 +195,8 @@ export function terraceMonuments(E) {
   const [ax, az] = ALTAR.c, w = ALTAR.w / 2, d = ALTAR.d / 2, y = TT_Y;
   E.push({ t: 'block', rect: [ax - w - 1.6, az - d - 1.6, ax + w + 1.6, az + d + 1.6], y0: y - 0.6, y1: y + 0.25, mat: 'marble', walk: true });
   E.push({ t: 'block', rect: [ax - w - 0.8, az - d - 0.8, ax + w + 0.8, az + d + 0.8], y0: y + 0.25, y1: y + 0.5, mat: 'marble', walk: true });
-  E.push({ t: 'block', rect: [ax - w - 0.25, az - d - 0.25, ax + w + 0.25, az + d + 0.25], y0: y + 0.5, y1: y + 0.95, mat: 'marble' });
-  E.push({ t: 'block', rect: [ax - w, az - d, ax + w, az + d], y0: y + 0.95, y1: y + 2.55, mat: 'marble_dark' });
-  E.push({ t: 'block', rect: [ax - w - 0.3, az - d - 0.3, ax + w + 0.3, az + d + 0.3], y0: y + 2.55, y1: y + 2.8, mat: 'marble' });
-  // the table of offerings on the top, in white marble; the dedication cut along the crowning's east face and the right of first consultation (promanteia) on the footing
-  E.push({ t: 'block', rect: [ax - w + 0.15, az - d + 0.15, ax + w - 0.15, az + d - 0.15], y0: y + 2.8, y1: y + 2.92, mat: 'marble_smooth', collide: false });
+  // the altar proper (base, orthostat shaft, crowning, table with its scrolls): one moulded element
+  E.push({ t: 'chian_altar', c: [ax, az], w: ALTAR.w, d: ALTAR.d, y });
   for (let i = 0; i < 9; i++) E.push({ t: 'block', rect: [ax + w + 0.3, az - d + 0.15 + i * 0.3, ax + w + 0.32, az - d + 0.15 + i * 0.3 + 0.2], y0: y + 2.62, y1: y + 2.72, mat: 'marble_dark', collide: false });
   for (let i = 0; i < 11; i++) E.push({ t: 'block', rect: [ax + w + 1.6, az - d + 0.1 + i * 0.28, ax + w + 1.62, az - d + 0.1 + i * 0.28 + 0.18], y0: y + 0.1, y1: y + 0.17, mat: 'marble_dark', collide: false });
   // the tithe of Rhodopis: iron spits in a heap behind the altar, opposite the temple

@@ -3,7 +3,7 @@
 // Pythia's tripod, the Serpent Column, the Naxian sphinx on its Ionic column, bronze offerings on their bases, a maiden (kore),
 // the stalls of the votive sellers. Style `delphi`: its elements fall back to the greek ones.
 import { registerStyle, orientedBox } from '../../core/build.js';
-import { box, lathe, rod, fromTriangles, quad, place, orientOutward } from '../../core/geom.js';
+import { box, lathe, rod, fromTriangles, quad, place, orientOutward, frustum } from '../../core/geom.js';
 import { greek } from '../greek/index.js';
 import '../greek/town.js';
 import '../greek/quarter.js';
@@ -83,6 +83,16 @@ function polygonalWall(el, { bag, col }) {
       poly = clip(poly, 0, 1, y1 - 0.02); poly = clip(poly, 0, -1, -(y0 + 0.02));
       poly = clip(poly, 1, 0, ug[1] - 0.02); poly = clip(poly, -1, 0, -(ug[0] + 0.02));
       if (poly.length < 3) continue;
+      // the joints of the real wall are curved, each stone's corners worn round: cut every corner once (Chaikin), the long sides kept straight
+      const edge = poly.some((p) => p[1] > y1 - 0.05 || p[1] < y0 + 0.05 || p[0] < ug[0] + 0.05 || p[0] > ug[1] - 0.05);
+      if (poly.length <= 8 && !edge) {
+        const r = [];
+        for (let k = 0; k < poly.length; k++) {
+          const p = poly[k], q = poly[(k + 1) % poly.length], sl = Math.hypot(q[0] - p[0], q[1] - p[1]), f = Math.min(0.3, 0.07 / (sl || 1));
+          r.push([p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f], [q[0] - (q[0] - p[0]) * f, q[1] - (q[1] - p[1]) * f]);
+        }
+        poly = r;
+      }
       let cu = 0, cv = 0; for (const p of poly) { cu += p[0]; cv += p[1]; } cu /= poly.length; cv /= poly.length;
       let area = 0; for (let k = 0; k < poly.length; k++) { const p = poly[k], q = poly[(k + 1) % poly.length]; area += p[0] * q[1] - q[0] * p[1]; }
       if (Math.abs(area) < 0.02) continue;
@@ -153,6 +163,49 @@ function adyton(el, { bag, col }) {
   col.rect([ax - 0.55, az - 0.45, ax + 0.55, az + 0.45], y, y + 0.9);
 }
 
+/**
+ * chian_altar: { c: [x, z], w, d (full length and depth), y (the euthynteria's top) } — the altar of the Chians: a moulded white
+ * base (plinth, torus, cyma), a shaft of dark Eleusinian limestone in raised orthostat panels with open joints, a crowning of
+ * fascia, cyma recta and cymatium with its painted tongues, and the white table with its two bolsters ending in scrolls.
+ */
+function chianAltar(el, { bag, col }) {
+  const [cx, cz] = el.c, w = el.w / 2, d = el.d / 2, y = el.y, W = [], D = [], B = [], T = [];
+  // the base, 0.5 → 0.95: plinth, a torus of three slices, a cyma reversa drawing in to the shaft
+  const prof = [[0.5, 0.6, 0.25, 0.25], [0.6, 0.66, 0.2, 0.17], [0.66, 0.72, 0.17, 0.17], [0.72, 0.78, 0.17, 0.2 - 0.06], [0.78, 0.85, 0.15, 0.1], [0.85, 0.91, 0.1, 0.07], [0.91, 0.95, 0.07, 0.04]];
+  for (const [a, b, o0, o1] of prof) W.push(frustum([cx - w - o0, cz - d - o0, cx + w + o0, cz + d + o0], y + a, y + b, o0 - o1, o0 - o1, o0 - o1, o0 - o1));
+  // the shaft
+  D.push(box(cx - w, y + 0.95, cz - d, cx + w, y + 2.55, cz + d));
+  // raised orthostat panels with open joints: five on each long side, three on each end
+  const nL = 5, nE = 3, gap = 0.05, ph = 1.3, py = y + 1.1;
+  for (let i = 0; i < nL; i++) for (const s of [-1, 1]) {
+    const u0 = cx - w + 0.1 + i * (2 * w - 0.2) / nL + gap / 2, u1 = cx - w + 0.1 + (i + 1) * (2 * w - 0.2) / nL - gap / 2, k = i % 2 ? 0.001 : 0;
+    D.push(box(u0, py, s > 0 ? cz + d : cz - d - 0.06 - k, u1, py + ph, s > 0 ? cz + d + 0.06 + k : cz - d));
+    B.push(box(u0 + 0.06, py + 0.06, s > 0 ? cz + d + 0.06 + k : cz - d - 0.064 - k, u1 - 0.06, py + ph - 0.06, s > 0 ? cz + d + 0.064 + k : cz - d - 0.06 - k));
+  }
+  for (let i = 0; i < nE; i++) for (const s of [-1, 1]) {
+    const u0 = cz - d + 0.1 + i * (2 * d - 0.2) / nE + gap / 2, u1 = cz - d + 0.1 + (i + 1) * (2 * d - 0.2) / nE - gap / 2, k = i % 2 ? 0.001 : 0;
+    D.push(box(s > 0 ? cx + w : cx - w - 0.06 - k, py, u0, s > 0 ? cx + w + 0.06 + k : cx - w, py + ph, u1));
+    B.push(box(s > 0 ? cx + w + 0.06 + k : cx - w - 0.064 - k, py + 0.06, u0 + 0.06, s > 0 ? cx + w + 0.064 + k : cx - w - 0.06 - k, py + ph - 0.06, u1 - 0.06));
+  }
+  // the crowning, 2.55 → 2.8: fascia, cyma recta, the lip of the cymatium
+  for (const [a, b, o0, o1] of [[2.55, 2.6, 0.1, 0.1], [2.6, 2.66, 0.1, 0.15], [2.66, 2.72, 0.15, 0.23], [2.72, 2.8, 0.3, 0.3]]) W.push(frustum([cx - w - o1, cz - d - o1, cx + w + o1, cz + d + o1], y + a, y + b, 0, 0, 0, 0));
+  // painted tongues of the cymatium, along the lip's four faces
+  const tg = 0.2;
+  for (let u = cx - w + 0.05; u < cx + w - 0.1; u += tg) for (const s of [-1, 1]) T.push(box(u, y + 2.735, s > 0 ? cz + d + 0.3 : cz - d - 0.318, u + 0.11, y + 2.79, s > 0 ? cz + d + 0.318 : cz - d - 0.3));
+  for (let u = cz - d + 0.05; u < cz + d - 0.1; u += tg) for (const s of [-1, 1]) T.push(box(s > 0 ? cx + w + 0.3 : cx - w - 0.318, y + 2.735, u, s > 0 ? cx + w + 0.318 : cx - w - 0.3, y + 2.79, u + 0.11));
+  // the table and its two bolsters (pulvini) ending in scrolls on the long faces
+  const tb = [box(cx - w + 0.15, y + 2.8, cz - d + 0.15, cx + w - 0.15, y + 2.92, cz + d - 0.15)];
+  const sc = [], zL = d - 0.15;
+  for (const sx of [-1, 1]) {
+    const bx = cx + sx * (w - 0.45);
+    tb.push(rod([bx, y + 3.08, cz - zL], [bx, y + 3.08, cz + zL], 0.16, 10), box(bx - 0.2, y + 2.92, cz - zL, bx + 0.2, y + 3.08, cz + zL));
+    for (const sz of [-1, 1]) for (const [r, e] of [[0.27, 0.05], [0.2, 0.09], [0.13, 0.13], [0.06, 0.16]]) sc.push(rod([bx, y + 3.08, cz + sz * zL], [bx, y + 3.08, cz + sz * (zL + e)], r, 14));
+  }
+  bag.add('marble', merge(W)); bag.add('marble_dark', merge(D)); bag.add('marble_dark', merge(B)); bag.add('marble_dark', merge(T));
+  bag.add('marble_smooth', merge([...tb, ...sc]));
+  col.rect([cx - w - 0.3, cz - d - 0.3, cx + w + 0.3, cz + d + 0.3], y + 0.5, y + 2.92);
+}
+
 /** serpent_column: { at, y } — the bronze of the Plataean dedication: three serpents intertwined in coils, their heads spread under the gilded tripod. 8 m in all. */
 function serpentColumn(el, { bag, col }) {
   const [cx, cz] = el.at, y = el.y;
@@ -164,20 +217,20 @@ function serpentColumn(el, { bag, col }) {
   for (let k = 0; k < 3; k++) {
     let prev = null;
     for (let i = 0; i <= 54; i++) {
-      const t = i / 54, yy = base + 0.15 + t * (H - 0.4), rr = 0.28 - 0.06 * t + 0.04 * Math.sin(t * Math.PI), a = k * Math.PI * 2 / 3 + t * 9 * Math.PI * 2 / 3 * 3;
+      const t = i / 54, yy = base + 0.15 + t * (H - 0.4), rr = 0.3 - 0.07 * t + 0.05 * Math.sin(t * Math.PI), a = k * Math.PI * 2 / 3 + t * 9 * Math.PI * 2 / 3 * 3;
       const p = [cx + Math.cos(a) * rr, yy, cz + Math.sin(a) * rr];
-      if (prev) rods.push(rod(prev, p, 0.075 - 0.02 * t, 6));
+      if (prev) rods.push(rod(prev, p, 0.12 - 0.045 * t, 8));
       prev = p;
     }
     // the head, raised, turned out
-    const a = k * Math.PI * 2 / 3 + 0.4, hx = cx + Math.cos(a) * 0.5, hz = cz + Math.sin(a) * 0.5;
-    rods.push(limb([cx + Math.cos(a) * 0.2, base + H - 0.5, cz + Math.sin(a) * 0.2], [hx, base + H + 0.1, hz], 0.07, 0.05, 6), blob([hx + Math.cos(a) * 0.08, base + H + 0.2, hz + Math.sin(a) * 0.08], 0.1, [1.3, 0.8, 1], 7));
+    const a = k * Math.PI * 2 / 3 + 0.4, hx = cx + Math.cos(a) * 0.34, hz = cz + Math.sin(a) * 0.34;
+    rods.push(limb([cx + Math.cos(a) * 0.2, base + H - 0.5, cz + Math.sin(a) * 0.2], [hx, base + H + 0.22, hz], 0.1, 0.08, 8), blob([hx + Math.cos(a) * 0.05, base + H + 0.3, hz + Math.sin(a) * 0.05], 0.14, [1.4, 0.8, 1], 8));
   }
   bag.add('bronze', merge(rods));
-  const g = [];
-  for (let i = 0; i < 3; i++) { const a = i / 3 * Math.PI * 2 + 0.3; g.push(rod([cx + Math.cos(a) * 0.5, base + H + 0.1, cz + Math.sin(a) * 0.5], [cx + Math.cos(a) * 0.4, base + H + 1.7, cz + Math.sin(a) * 0.4], 0.04, 5)); }
-  g.push(lathe([[0.001, 0], [0.3, 0.05], [0.5, 0.25], [0.52, 0.5], [0.44, 0.62], [0.001, 0.62]], 16, null, cx, base + H + 1.6, cz));
-  g.push(lathe([[0.3, 0], [0.4, 0.04], [0.4, 0.08], [0.2, 0.1]], 12, null, cx, base + H + 2.22, cz));
+  // the golden bowl of the tripod rests on the three heads
+  const g = [], by = base + H + 0.3;
+  g.push(lathe([[0.001, 0], [0.3, 0.02], [0.5, 0.2], [0.55, 0.45], [0.5, 0.62], [0.4, 0.68], [0.001, 0.66]], 18, null, cx, by, cz));
+  g.push(lathe([[0.5, 0.6], [0.56, 0.64], [0.56, 0.7], [0.5, 0.7]], 18, null, cx, by, cz));
   bag.add('gilt_bronze', merge(g));
 }
 
@@ -214,7 +267,8 @@ function exVoto(el, { bag, col }) {
     for (const [px, pz] of [[0.8, 0.28], [0.8, -0.28], [-0.8, 0.28], [-0.8, -0.28]]) B.push(limb([px, bh + 0.12 + 0.75, pz], [px, bh + 0.12, pz], 0.1, 0.06, 6));
     B.push(limb([1.55, bh + 0.12 + 1.3, 0.18], [1.5, bh + 0.12 + 1.6, 0.34], 0.04, 0.02, 4), limb([1.55, bh + 0.12 + 1.3, -0.18], [1.5, bh + 0.12 + 1.6, -0.34], 0.04, 0.02, 4));
   } else for (let i = 0; i < n; i++) {
-    const f = human({ pose: i % 2 ? 'ease' : 'stand', drape: 'nude', h: h * (0.9 + rand() * 0.2), n: 7 }), g = placed(f, -W / 2 + 0.45 + i * 1.3, bh + 0.12, 0, 0);
+    const k = rand(), arms = k < 0.34 ? { r: [[0.16, 0.66, 0.04], [0.15, 0.82, 0.1]] } : null;                 // a victor's raised hand, or the hero at arms
+      const f = human({ pose: i % 2 ? 'ease' : 'stand', drape: 'nude', h: h * (0.9 + rand() * 0.2), n: 9, ...(k > 0.6 ? { helmet: true, shield: 'l', spear: 'r' } : {}), ...(arms ? { arms } : {}) }), g = placed(f, -W / 2 + 0.45 + i * 1.3, bh + 0.12, 0, 0);
     B.push(...[g.stone, g.metal].filter(Boolean));
   }
   bag.add('bronze', m(merge(B)));
@@ -258,7 +312,7 @@ function hearth(el, { bag, col }) {
 
 export const delphi = {
   ...greek,
-  elements: Object.assign(Object.create(greek.elements), { ribbon, polygonal_wall: polygonalWall, adyton, hearth, serpent_column: serpentColumn, sphinx_column: sphinxColumn, ex_voto: exVoto, kore, stall, ...DRESS, ...WORK, ...PEDIMENTS }),
+  elements: Object.assign(Object.create(greek.elements), { ribbon, polygonal_wall: polygonalWall, adyton, hearth, serpent_column: serpentColumn, sphinx_column: sphinxColumn, ex_voto: exVoto, chian_altar: chianAltar, kore, stall, ...DRESS, ...WORK, ...PEDIMENTS }),
   objects: greek.objects,
 };
 registerStyle('delphi', delphi);
