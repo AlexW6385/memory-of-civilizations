@@ -1,7 +1,7 @@
 // Eye-level detail of Pagan (docs/settlements/bagan.md §6): what stands at the doors, in the yards and by the roads — the water-pot stand under its little roof (yay-zayat),
 // firewood, a loom, the foot-lever rice pounder, drying mats of chillies and grain, laundry, hammocks, hanging baskets, the spirit shelf, signs, the guardian lions (chinthe)
 // and the festival poles with their streamers. Every helper takes a frame F (kit.js) and local (u, v); all geometry is small and merged by the bag.
-import { lathe } from '../../core/geom.js';
+import { lathe, box } from '../../core/geom.js';
 import { rng, Fr, miniStupa } from './kit.js';
 
 export const POT = [[0.1, 0], [0.22, 0.1], [0.26, 0.26], [0.16, 0.42], [0.12, 0.5], [0.15, 0.54], [0.001, 0.54]];
@@ -162,11 +162,20 @@ export function wayShrine(F, u, v, r = rng(7)) {
   F.b(r() < 0.5 ? 'cloth_ochre' : 'cloth_red', u - 0.3, 0.35, v + 0.6, u + 0.3, 0.45, v + 0.85, false);
 }
 
+/** One votive stupa seen close: a two-step plinth (brick, then the body), a petalled base, the bell with its ring mouldings, the banded cone, the bud and the finial. */
+function votiveStupa(bag, x, z, h, body, gilt) {
+  const s = h / 6, top = gilt ? 'gilt_bronze' : body;
+  bag.add('brick', box(x - 0.95 * s, 0, z - 0.95 * s, x + 0.95 * s, 0.34 * s, z + 0.95 * s));
+  bag.add(body, box(x - 0.8 * s, 0.34 * s, z - 0.8 * s, x + 0.8 * s, 0.62 * s, z + 0.8 * s));
+  bag.add(body, lathe([[0.62 * s, 0.62 * s], [0.66 * s, 0.82 * s], [0.54 * s, 0.94 * s], [0.54 * s, 1.2 * s], [0.7 * s, 1.45 * s], [0.78 * s, 1.9 * s], [0.72 * s, 2.5 * s], [0.55 * s, 3.3 * s], [0.36 * s, 3.95 * s]], 10, (th, i) => (i === 2 ? 1 + 0.08 * Math.cos(th * 5) : 1), x, 0, z));
+  bag.add(top, lathe([[0.36 * s, 3.95 * s], [0.46 * s, 4.05 * s], [0.3 * s, 4.18 * s], [0.42 * s, 4.3 * s], [0.26 * s, 4.42 * s], [0.2 * s, 5.0 * s], [0.1 * s, 5.6 * s], [0.001, 6 * s]], 8, null, x, 0, z));
+}
+
 /** A row of votive stupas (miniature, brick or limewash) along u. */
 export function votiveRow(F, u0, v, n, gap = 1.6, h = 2.2, r = rng(8), gilt = false) {
   for (let i = 0; i < n; i++) {
     const [x, z] = F.pt(u0 + i * gap, v), body = r() < 0.5 ? 'limewash_white' : 'brick';
-    miniStupa(F.bag, x, 0, z, h * (0.85 + r() * 0.3), body, gilt && r() < 0.3, 8);
+    votiveStupa(F.bag, x, z, h * (0.85 + r() * 0.3), body, gilt && r() < 0.3);
     F.col.circle(x, z, h / 6, 0, h * 0.8);
   }
 }

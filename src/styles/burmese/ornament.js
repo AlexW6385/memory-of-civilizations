@@ -2,6 +2,7 @@
 // each in its own pilastered frame with the small stone images above, the glazed plaques as single tiles, the pierced stone windows, the carved teak doors and the finials of the roofs.
 // Every helper draws into the frame's bag; local (u, v) of a frame F (kit.js).
 import { lathe, frustum, box } from '../../core/geom.js';
+import { pointedNiche } from './flame.js';
 
 const CREAM = 'stucco_cream', GILT = 'gilt_bronze';
 
@@ -37,15 +38,8 @@ export function plaqueRow(F, u0, u1, y0, hgt, v, dir = 1) {
 }
 
 /** A blind arched niche of a wall's frieze: the dark recess, a cream frame and a pointed cap (the kudu arch); face at v looking toward `dir`. */
-export function kuduNiche(F, u, y, v, dir, w = 0.8, h = 1.1, mat = 'wood_dark') {
-  const t = 0.05, a = dir > 0 ? v : v - t, b = dir > 0 ? v + t : v;
-  F.b(mat, u - w / 2, y, dir > 0 ? v + t : v - 2 * t, u + w / 2, y + h, dir > 0 ? v + 2 * t : v - t, false);
-  F.b(CREAM, u - w / 2 - 0.1, y - 0.05, a, u - w / 2, y + h, dir > 0 ? v + 3 * t : v - 2 * t + t * 0, false);
-  F.b(CREAM, u + w / 2, y - 0.05, a, u + w / 2 + 0.1, y + h, dir > 0 ? v + 3 * t : v - 2 * t + t * 0, false);
-  const z0 = dir > 0 ? v : v - 3 * t, z1 = dir > 0 ? v + 3 * t : v;
-  F.b(CREAM, u - w / 2 - 0.1, y + h, z0, u + w / 2 + 0.1, y + h + 0.1, z1, false);
-  F.b(CREAM, u - w * 0.32, y + h + 0.1, z0, u + w * 0.32, y + h + 0.2, z1, false);
-  F.b(CREAM, u - w * 0.14, y + h + 0.2, z0, u + w * 0.14, y + h + 0.32, z1, false);
+export function kuduNiche(F, u, y, v, dir, w = 0.8, h = 1.1, mat = 'lacquer_black') {
+  pointedNiche(F, u, y, v, dir, w, h + 0.32, mat, 'stucco_ochre');
 }
 
 /**
