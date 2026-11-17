@@ -3,7 +3,7 @@
 // workers in the open shops (baker, smith, weaver, host), the tribune's vigil and the cloister's monks, the washing-place
 // and fishing at the Dourdou, the beasts at the doors and in the gardens. Everything placed from layout.js.
 
-import { RADIUS, ABBEY, RIVER, BRIDGE, HOSTEL, FOUNTAINS, STAIRS, lots, gardens, laneZ, level, height, bandZ, BAND } from './layout.js';
+import { RADIUS, ABBEY, RIVER, BRIDGE, HOSTEL, FOUNTAINS, STAIRS, TANNERY, MILL, worksLevel, lots, gardens, laneZ, level, height, bandZ, BAND } from './layout.js';
 import { shopPoint } from '../../styles/romanesque/village.js';
 
 const base = (id, elements, style = 'life') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-40, 0], facing: 'e' } });
@@ -53,7 +53,7 @@ export function laneLife() {
       if (u > 0.3 && u < L - 0.3) E.push({ t: 'lantern', kind: 'iron', h: 2.3, at: P(u, -0.12), y: l.y, rot: out, seed: l.seed });
     }
     // the door's front of a house: what a household keeps there (the shops have their goods)
-    if (!l.shop && !l.hostel && L > 3.6 && rand() < 0.62) {
+    if (!l.shop && !l.hostel && !l.open && L > 3.6 && rand() < 0.62) {
       const u = rand() < 0.5 ? 0.45 : L - 0.45, pick = rand();
       if (pick < 0.22) E.push({ t: 'ladder', at: P(u, -0.12), y: l.y, rot: out, len: 3.2 });
       else if (pick < 0.4) E.push({ t: 'barrow', kind: 'front', at: P(L / 2 + 0.6, -0.9), y: l.y, rot: out + Math.PI / 2, seed: l.seed });
@@ -126,9 +126,9 @@ export function insides() {
   const cl = [O[0], O[1] + 9.7];                              // the cloister square's west-north corner (nave's outer wall at z = 9.7)
   const mk = (lx, lz, to, o = {}) => { const at = [cl[0] + lx, cl[1] + lz]; robe(at, 0.05, face(at, [cl[0] + to[0], cl[1] + to[1]]), { cloth: 'cloth_black', cloth2: 'cloth_black', hat: 'veil', hatMat: 'cloth_black', hair: 'shaven', over: 'cape', ...o }); };
   mk(9.7, 2.5, [14, 2.5]); mk(2.6, 9.7, [2.6, 15], { pose: 'staff' }); mk(16.8, 8.5, [16.8, 3]);
-  mk(7.6, 8.9, [9.7, 9.7], { pose: 'talk' }); mk(8.6, 10.6, [7.6, 8.9], { pose: 'talk' });
-  mk(13.2, 12.6, [9.7, 9.7], { pose: 'kneel', arms: 'hang', hat: 'none' });
-  mk(12.4, 4.6, [9.7, 6.0]);
+  mk(7.6, 10.4, [8.6, 10.6], { pose: 'talk' }); mk(8.6, 10.6, [7.6, 10.4], { pose: 'talk' });                // in talk on the cross path of the garth
+  mk(12.7, 12.6, [12.7, 11.0], { pose: 'kneel', arms: 'hang', hat: 'none' });       // on the path between two beds of the garth
+  mk(12.7, 4.6, [9.7, 6.0]);
   // the workers of the open shops
   for (const l of lots()) {
     if (l.open !== 'shop') continue;
@@ -142,6 +142,9 @@ export function insides() {
     else f(Math.min(W - 1, Math.max(1, shopPoint(l).a0 + 0.9)), 1.4, W / 2, -2, { ...apron });
     void out;
   }
+  // the tanner at his beam between the two, scraping a hide; the miller by his stones
+  { const [tx0, tz0] = TANNERY.rect, yt = worksLevel().tannery, at = [tx0 + 8.4, tz0 + 5.1]; robe(at, yt, face(at, [at[0], at[1] - 1]), { cloth: 'cloth_brown', cloth2: 'cloth_grey', hat: 'cap', hatMat: 'cloth_brown', over: 'apron', pose: 'talk', beard: true }); }
+  { const [mx0, mz0] = MILL.rect, ym = worksLevel().mill + 0.1, at = [mx0 + 2.0, mz0 + 2.3]; robe(at, ym, face(at, [mx0 + MILL.w * 0.58, mz0 + MILL.d * 0.5]), { cloth: 'cloth_white', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_white', over: 'apron', pose: 'stand', beard: true }); }
   return [base('conques-insides', L)];
 }
 
@@ -181,7 +184,7 @@ export function beasts() {
   let n = 0;
   for (const l of all) {
     const { P, out } = frameOf(l), cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2;
-    if (!near(cx, cz, 95) || l.hostel || rand() > 0.045) continue;
+    if (!near(cx, cz, 95) || l.hostel || l.open || rand() > 0.045) continue;
     L.push({ t: 'animal', kind: n++ % 5 === 4 ? 'pig' : 'dog', at: P(1.0 + rand() * 2, -0.8), y: l.y, rot: out + Math.PI * (0.5 + rand()), seed: Math.floor(rand() * 1e9) });
   }
   const [hx0, hz0, hx1, hz1] = HOSTEL.rect;

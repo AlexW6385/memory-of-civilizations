@@ -292,10 +292,102 @@ function orientUp(T) {
   return T;
 }
 
+
+/**
+ * corbel_row / corbel_arc: a corbel table (modillons) under an eave (docs/settlements/conques.md §1k). Each modillon is a
+ * wedge standing out from the wall, its underside rising to the wall, set at even spacing under a thin cap course.
+ * corbel_row { a [x, z], b [x, z], n [nx, nz] (the way out from the wall), y (the modillons' feet), h, out, w, step, skip: [[s0, s1]] (distances along a→b) };
+ * corbel_arc { c [x, z], r (the wall face), a0, a1 (degrees), y, h, out, w, step, skip: [[a0, a1]] }.
+ */
+function corbelCommon(el) { return { o: el.out ?? 0.4, w: el.w ?? 0.3, h: el.h ?? 0.3, y: el.y, mat: el.mat ?? 'limestone_yellow' }; }
+function wedge(out, P, { o, w, h, y }) {
+  hexa(out, [P(-w / 2, 0, y + h * 0.45), P(w / 2, 0, y + h * 0.45), P(w * 0.35, o, y), P(-w * 0.35, o, y)], [P(-w / 2, 0, y + h), P(w / 2, 0, y + h), P(w * 0.35, o, y + h), P(-w * 0.35, o, y + h)]);
+}
+function corbelRow(el, { bag }) {
+  const k = corbelCommon(el), out = [], [ax, az] = el.a, [bx, bz] = el.b, L = Math.hypot(bx - ax, bz - az), t = [(bx - ax) / L, (bz - az) / L], n = el.n;
+  const P = (s, d, yy) => [ax + t[0] * s + n[0] * d, yy, az + t[1] * s + n[1] * d];
+  const cnt = Math.max(1, Math.floor(L / (el.step ?? 0.6)));
+  for (let i = 0; i < cnt; i++) {
+    const s = (i + 0.5) * L / cnt;
+    if ((el.skip || []).some(([s0, s1]) => s > s0 - k.w / 2 && s < s1 + k.w / 2)) continue;
+    wedge(out, (u, d, yy) => P(s + u, d, yy), k);
+  }
+  hexa(out, [P(0, -0.02, k.y + k.h), P(L, -0.02, k.y + k.h), P(L, k.o + 0.05, k.y + k.h), P(0, k.o + 0.05, k.y + k.h)], [P(0, -0.02, k.y + k.h + 0.07), P(L, -0.02, k.y + k.h + 0.07), P(L, k.o + 0.05, k.y + k.h + 0.07), P(0, k.o + 0.05, k.y + k.h + 0.07)]);
+  bag.add(k.mat, fromTriangles(out));
+}
+function corbelArc(el, { bag }) {
+  const k = corbelCommon(el), out = [], [cx, cz] = el.c, a0 = el.a0 * Math.PI / 180, a1 = el.a1 * Math.PI / 180, r = el.r;
+  const cnt = Math.max(1, Math.floor(r * (a1 - a0) / (el.step ?? 0.6)));
+  const at = (a, rr, yy) => [cx + Math.cos(a) * rr, yy, cz + Math.sin(a) * rr];
+  for (let i = 0; i < cnt; i++) {
+    const a = a0 + (a1 - a0) * (i + 0.5) / cnt, deg = a * 180 / Math.PI;
+    if ((el.skip || []).some(([d0, d1]) => deg > d0 && deg < d1)) continue;
+    const c = Math.cos(a), s = Math.sin(a);
+    wedge(out, (u, d, yy) => [cx + c * (r + d) - s * u, yy, cz + s * (r + d) + c * u], k);
+  }
+  const seg = Math.max(2, Math.ceil(cnt / 2));
+  for (let i = 0; i < seg; i++) {
+    const a = a0 + (a1 - a0) * i / seg, b = a0 + (a1 - a0) * (i + 1) / seg, y1 = k.y + k.h, y2 = y1 + 0.07;
+    hexa(out, [at(a, r - 0.02, y1), at(a, r + k.o + 0.05, y1), at(b, r + k.o + 0.05, y1), at(b, r - 0.02, y1)], [at(a, r - 0.02, y2), at(a, r + k.o + 0.05, y2), at(b, r + k.o + 0.05, y2), at(b, r - 0.02, y2)]);
+  }
+  bag.add(k.mat, fromTriangles(out));
+}
+
+/**
+ * garth { rect [x0, z0, x1, z1] (the open garden inside the walks), y, seed }: the cloister garth as the St Gall plan has it —
+ * four paths of flags from the middle of each walk to the basin at the centre, and in the four quarters beds of herbs edged with
+ * boards: sage and mint, fennel and lovage, iris, roses and lilies (docs/settlements/conques.md §1k).
+ */
+function garth(el, { bag }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, [cx, cz] = el.c ?? [(x0 + x1) / 2, (z0 + z1) / 2], pw = 0.5;
+  let s = (el.seed ?? 1) >>> 0 || 1;
+  const rand = () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296);
+  // the four paths, from the walks to the basin's kerb
+  bag.add('flagstone', box(x0, y - 0.05, cz - pw, cx - 1.5, y + 0.04, cz + pw));
+  bag.add('flagstone', box(cx + 1.5, y - 0.05, cz - pw, x1, y + 0.04, cz + pw));
+  bag.add('flagstone', box(cx - pw, y - 0.05, z0, cx + pw, y + 0.04, cz - 1.5));
+  bag.add('flagstone', box(cx - pw, y - 0.05, cz + 1.5, cx + pw, y + 0.04, z1));
+  const KIND = [['mound', 'flax_leaf', 'mound', 'palm_leaf', 'mound', 'cloth_green'], ['tall', 'cloth_ochre', 'tall', 'palm_leaf', 'tall', 'cloth_ochre'], ['iris', 'cloth_indigo', 'iris', 'cloth_indigo', 'iris', 'cloth_white'], ['rose', 'cloth_red', 'lily', 'cloth_white', 'rose', 'cloth_red']];
+  const plant = (kind, mat, x, z) => {
+    const h = 0.18 + rand() * 0.1;
+    if (kind === 'mound') bag.add(mat, lathe([[0.001, 0], [0.17, 0.03], [0.2, h * 0.6], [0.1, h], [0.001, h + 0.02]], 7, null, x, y + 0.04, z));
+    else if (kind === 'rose') {
+      bag.add('palm_leaf', lathe([[0.001, 0], [0.22, 0.06], [0.2, 0.34], [0.09, 0.5], [0.001, 0.52]], 7, null, x, y + 0.04, z));
+      for (let k = 0; k < 3; k++) { const a = rand() * 6.28, d = 0.1 + rand() * 0.07; bag.add(mat, lathe([[0.001, 0], [0.04, 0.02], [0.001, 0.07]], 5, null, x + Math.cos(a) * d, y + 0.3 + rand() * 0.2, z + Math.sin(a) * d)); }
+    } else if (kind === 'tall') {
+      const hh = 0.8 + rand() * 0.35;
+      bag.add('palm_leaf', lathe([[0.001, 0], [0.012, 0.01], [0.012, hh]], 5, null, x, y + 0.04, z));
+      bag.add('palm_leaf', lathe([[0.001, 0], [0.12, 0.02], [0.1, 0.3], [0.001, 0.4]], 6, null, x, y + 0.04, z));
+      bag.add(mat, lathe([[0.001, 0], [0.11, 0.015], [0.1, 0.04], [0.001, 0.05]], 7, null, x, y + 0.04 + hh - 0.02, z));
+    } else if (kind === 'iris') {
+      for (let k = 0; k < 3; k++) { const a = k * 2.1 + rand(), d = 0.04; bag.add('flax_leaf', lathe([[0.03, 0], [0.012, 0.3], [0.001, 0.52 + rand() * 0.1]], 4, null, x + Math.cos(a) * d, y + 0.04, z + Math.sin(a) * d)); }
+      bag.add(mat, lathe([[0.001, 0], [0.05, 0.03], [0.035, 0.09], [0.001, 0.1]], 6, null, x, y + 0.04 + 0.56, z));
+    } else if (kind === 'lily') {
+      bag.add('palm_leaf', lathe([[0.001, 0], [0.012, 0.01], [0.012, 0.75]], 5, null, x, y + 0.04, z));
+      bag.add(mat, lathe([[0.001, 0], [0.025, 0.02], [0.06, 0.1], [0.05, 0.12], [0.001, 0.1]], 7, null, x, y + 0.04 + 0.72, z));
+    }
+  };
+  const qx = [[x0 + 0.5, cx - pw - 0.45], [cx + pw + 0.45, x1 - 0.5]], qz = [[z0 + 0.5, cz - pw - 0.45], [cz + pw + 0.45, z1 - 0.5]];
+  let qi = 0;
+  for (const zz of qz) for (const xx of qx) {
+    const kinds = KIND[qi++ % 4], wq = xx[1] - xx[0], nb = 3, bw = (wq - 0.55 * (nb - 1)) / nb;
+    for (let b = 0; b < nb; b++) {
+      const bx0 = xx[0] + b * (bw + 0.55), bx1 = bx0 + bw, bz0 = zz[0], bz1 = zz[1];
+      // the board edging and the dark soil
+      bag.add('wood_dark', box(bx0 - 0.04, y, bz0 - 0.04, bx1 + 0.04, y + 0.15, bz0 + 0.02)); bag.add('wood_dark', box(bx0 - 0.04, y, bz1 - 0.02, bx1 + 0.04, y + 0.15, bz1 + 0.04));
+      bag.add('wood_dark', box(bx0 - 0.04, y, bz0 + 0.02, bx0 + 0.02, y + 0.15, bz1 - 0.02)); bag.add('wood_dark', box(bx1 - 0.02, y, bz0 + 0.02, bx1 + 0.04, y + 0.15, bz1 - 0.02));
+      bag.add('earth_wall', box(bx0 + 0.02, y, bz0 + 0.02, bx1 - 0.02, y + 0.1, bz1 - 0.02));
+      const kind = kinds[b * 2], mat = kinds[b * 2 + 1];
+      const nz = Math.floor((bz1 - bz0 - 0.4) / 0.5), nr = bw > 1.2 ? 2 : 1;
+      for (let i = 0; i <= nz; i++) for (let r = 0; r < nr; r++) plant(kind, mat, bx0 + bw * (r + 0.5) / nr + (rand() - 0.5) * 0.1, bz0 + 0.25 + i * (bz1 - bz0 - 0.5) / Math.max(1, nz) + (rand() - 0.5) * 0.1);
+    }
+  }
+}
+
 const base = STYLES.romanesque;
 registerStyle('romanesque-foy', {
   ...base,
   column,
-  elements: { ...base.elements, pier, foy_treasure: treasure, worn_sill: wornSill },
+  elements: { ...base.elements, pier, foy_treasure: treasure, worn_sill: wornSill, corbel_row: corbelRow, corbel_arc: corbelArc, garth },
   objects: { ...base.objects, reliquary: majesty },
 });

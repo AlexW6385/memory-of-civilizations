@@ -272,6 +272,7 @@ for (const sz of [-1, 1]) add({ t: 'lamp', at: [TE1 + 1.0, 2.6, sz * APSIDIOLE_Z
 // ── the cloister of Bégon south of the nave, its basin; the refectory, the chapter house ─
 const CL = [0, WZ, TW0, WZ + TW0];              // the cloister square (x0, z0, x1, z1): 19.45 m
 const GW = 3.0;                                 // galleries' width
+const GC = [CL[0] + GW + 5.5 * (CL[2] - CL[0] - 2 * GW) / 10, CL[1] + GW + 5.5 * (CL[3] - CL[1] - 2 * GW) / 10];   // the garth's centre: the openings in the middle of the four walks (the sixth of ten bays)
 floor([CL[0], CL[1], CL[2], CL[1] + GW], 0.05, 'flagstone', { th: 0.3 });
 floor([CL[0], CL[3] - GW, CL[2], CL[3]], 0.05, 'flagstone', { th: 0.3 });
 floor([CL[0], CL[1], CL[0] + GW, CL[3]], 0.05, 'flagstone', { th: 0.3 });
@@ -293,15 +294,125 @@ floor([CL[2] - GW, CL[1], CL[2], CL[3]], 0.05, 'flagstone', { th: 0.3 });
   add({ t: 'lean_roof', rect: [CL[0], iz1 - 0.4, CL[2], CL[3]], low: 'n', y0: 3.4, y1: 5.2 });
   add({ t: 'lean_roof', rect: [CL[0], iz0 + 0.4, ix0 + 0.4, iz1 - 0.4], low: 'e', y0: 3.4, y1: 5.2 });
   add({ t: 'lean_roof', rect: [ix1 - 0.4, iz0 + 0.4, CL[2], iz1 - 0.4], low: 'w', y0: 3.4, y1: 5.2 });
-  add({ t: 'obj', kind: 'basin', at: [(CL[0] + CL[2]) / 2, (CL[1] + CL[3]) / 2], y: 0, d: 2.72 });
+  add({ t: 'obj', kind: 'basin', at: [GC[0], GC[1]], y: 0, d: 2.72 });
 }
-// the outer walls of the cloister: west (toward the parvis, with a door), south (the refectory)
+// the outer walls of the cloister: west (toward the parvis, with a door), its coping and buttresses
 pwall({ o: [CL[0] - 0.35, CL[1]], u: [0, 1], th: 0.7, u0: 0, u1: CL[3] - CL[1], y0: 0, y1: 5.2, holes: [{ u0: 6.0, u1: 7.8, y0: 0, y1: 2.8 }], mat: 'schist_rubble' });
-// the refectory (later the treasury) south of the cloister, and the chapter house to the east
-add({ t: 'block', rect: [CL[0] - 0.7, CL[3], CL[2], CL[3] + 8.0], y0: 0, y1: 8.5, mat: 'schist_rubble' });
-add({ t: 'gable_roof', x0: CL[0] - 1.0, x1: CL[2] + 0.3, z0: CL[3] - 0.3, z1: CL[3] + 8.3, y: 8.5, ridge: 12.0 });
-add({ t: 'block', rect: [CL[2], TZO, CL[2] + 11.0, CL[3]], y0: 0, y1: 7.5, mat: 'schist_rubble' });
-add({ t: 'gable_roof', axis: 'z', x0: CL[2] - 0.3, x1: CL[2] + 11.3, z0: TZO, z1: CL[3] + 0.3, y: 7.5, ridge: 10.8 });
+for (const z of [CL[1] + 3.2, CL[1] + 10.0, CL[1] + 16.4]) add({ t: 'block', rect: [CL[0] - 1.0, z - 0.3, CL[0] - 0.7, z + 0.3], y0: 0, y1: 4.4, mat: 'limestone_yellow' });
+add({ t: 'block', rect: [CL[0] - 0.45, CL[1], CL[0] + 0.1, CL[3]], y0: 5.2, y1: 5.32, mat: 'limestone_yellow', collide: false });
+
+// ── the monastic range (docs/settlements/conques.md §1k): the refectory south of the cloister, the chapter house east of it ─
+const WH = 7.0, FY = 0.05;                         // the walls' top; the floors, level with the cloister's walks
+const lamp = (x, y, z, i = 6, d = 11) => add({ t: 'lamp', at: [x, y, z], intensity: i, distance: d });
+const timberTop = (r, y0, th) => add({ t: 'slab', rect: r, y0, y1: y0 + th, mat: 'timber' });
+const beamsAcross = (x0, x1, z0, z1, y, alongZ, step) => {
+  if (alongZ) for (let x = x0 + step / 2; x < x1; x += step) add({ t: 'block', rect: [x - 0.14, z0, x + 0.14, z1], y0: y - 0.34, y1: y, mat: 'wood_dark', collide: false });
+  else for (let z = z0 + step / 2; z < z1; z += step) add({ t: 'block', rect: [x0, z - 0.14, x1, z + 0.14], y0: y - 0.34, y1: y, mat: 'wood_dark', collide: false });
+};
+const furn = (rect, y0, y1, mat = 'timber', collide = true) => add({ t: 'block', rect, y0, y1, mat, collide });
+const win = (uc, spring, sill, r = 0.45) => ({ uc, r, spring, sill });
+{
+  // the refectory: a hall of 18 x 6 m, floor at the cloister's level; its door from the south walk at the west end
+  const RX0 = CL[0] - 0.7, RX1 = CL[2], RZ0 = CL[3], RZ1 = CL[3] + 8.0, CEIL = 6.6;
+  pwall({ o: [RX0, RZ0 + 0.5], u: [1, 0], th: 1.0, u0: 0, u1: RX1 - RX0, y0: 0, y1: WH, arches: [{ uc: 3.0 - RX0, r: 0.85, spring: 2.2, sill: 0 }, win(6.4 - RX0, 5.8, 5.3, 0.4), win(10.4 - RX0, 5.8, 5.3, 0.4), win(14.4 - RX0, 5.8, 5.3, 0.4)], mat: 'schist_rubble' });
+  pwall({ o: [RX0, RZ1 - 0.5], u: [1, 0], th: 1.0, u0: 0, u1: RX1 - RX0, y0: 0, y1: WH, arches: [6.4, 9.8, 13.2, 16.6].map((x) => win(x - RX0, 4.2, 2.4, 0.5)), mat: 'schist_rubble' });
+  pwall({ o: [RX0 + 0.5, RZ0 + 1.0], u: [0, 1], th: 1.0, u0: 0, u1: RZ1 - RZ0 - 2.0, y0: 0, y1: WH, arches: [win(4.0, 4.2, 2.4, 0.5)], mat: 'schist_rubble' });
+  pwall({ o: [RX1 - 0.5, RZ0 + 1.0], u: [0, 1], th: 1.0, u0: 0, u1: RZ1 - RZ0 - 2.0, y0: 0, y1: WH, arches: [win(4.0, 4.2, 2.4, 0.5)], mat: 'schist_rubble' });
+  floor([RX0 + 1.0, RZ0 + 1.0, RX1 - 1.0, RZ1 - 1.0], FY, 'flagstone', { th: 0.3 });
+  floor([2.1, RZ0, 3.9, RZ0 + 1.0], FY, 'flagstone', { th: 0.3 });                 // the threshold of the door
+  timberTop([RX0 + 1.0, RZ0 + 1.0, RX1 - 1.0, RZ1 - 1.0], CEIL - 0.2, 0.2);
+  beamsAcross(RX0 + 1.0, RX1 - 1.0, RZ0 + 1.0, RZ1 - 1.0, CEIL - 0.2, true, 1.9);
+  add({ t: 'gable_roof', x0: RX0 - 0.3, x1: RX1 + 0.3, z0: RZ0 - 0.3, z1: RZ1 + 0.3, y: WH, ridge: 11.0 });
+  for (const x of [3.0, 8.0, 13.0]) { add({ t: 'block', rect: [x - 0.3, RZ1, x + 0.3, RZ1 + 0.55], y0: 0, y1: 5.8, mat: 'limestone_yellow' }); add({ t: 'block', rect: [x - 0.25, RZ1 + 0.05, x + 0.25, RZ1 + 0.5], y0: 5.8, y1: 6.2, mat: 'limestone_yellow', batter: [0, 0, 0, 0.3], collide: false }); }
+  // the lavabo against the wall beside the door, in the south walk: a trough of stone on a pedestal with its water and a bronze spout
+  furn([4.6, RZ0 - 0.7, 6.3, RZ0], 0, 0.8, 'limestone_yellow');
+  for (const r of [[4.55, RZ0 - 0.75, 6.35, RZ0 - 0.65], [4.55, RZ0 - 0.1, 6.35, RZ0], [4.55, RZ0 - 0.65, 4.65, RZ0 - 0.1], [6.25, RZ0 - 0.65, 6.35, RZ0 - 0.1]]) furn(r, 0.8, 1.0, 'limestone_yellow', false);
+  add({ t: 'water', rect: [4.65, RZ0 - 0.65, 6.25, RZ0 - 0.1], y: 0.92 });
+  add({ t: 'block', rect: [5.4, RZ0 - 0.05, 5.5, RZ0 + 0.0], y0: 1.1, y1: 1.4, mat: 'bronze', collide: false });
+  // within: a table and its bench along each long wall (the monks sat with their backs to the wall), the abbot's table across the east end on a dais
+  const wt = (x0, x1, zb, zt, bz0, bz1) => { furn([x0, bz0, x1, bz1], 0, 0.45); furn([x0, zb, x1, zt], 0.72, 0.8); for (let x = x0 + 0.2; x < x1; x += 2.3) for (const z of [zb + 0.08, zt - 0.14]) furn([x, z, x + 0.07, z + 0.07], 0, 0.72, 'timber', false); };
+  wt(5.2, 15.0, 30.65, 31.45, 30.15, 30.6);
+  wt(7.8, 15.0, 34.85, 35.65, 35.7, 36.15);
+  add({ t: 'slab', rect: [15.6, 31.2, 18.45, 35.1], y0: FY, y1: 0.3, mat: 'limestone_yellow', walk: true });
+  add({ t: 'slab', rect: [15.3, 31.2, 15.6, 35.1], y0: FY, y1: 0.17, mat: 'limestone_yellow', walk: true });
+  furn([16.45, 31.7, 17.35, 34.6], 0.3 + 0.72, 0.3 + 0.8); for (const [x, z] of [[16.5, 31.75], [17.2, 31.75], [16.5, 34.45], [17.2, 34.45]]) furn([x, z, x + 0.1, z + 0.1], 0.3, 0.3 + 0.72, 'timber', false);
+  furn([17.5, 31.7, 18.0, 34.6], 0.3, 0.3 + 0.45);
+  add({ t: 'block', rect: [18.33, 31.8, 18.45, 34.5], y0: 1.4, y1: 3.9, mat: 'cloth_red', collide: false });
+  add({ t: 'block', rect: [18.29, 31.7, 18.33, 34.6], y0: 3.85, y1: 3.95, mat: 'wood_dark', collide: false });
+  // the reader's pulpit on the south wall, a platform on stone corbels with a parapet, its stair rising along the wall
+  add({ t: 'block', rect: [3.0, RZ1 - 1.55, 4.4, RZ1 - 1.0], y0: 1.3, y1: 1.9, mat: 'limestone_yellow', collide: false });
+  add({ t: 'slab', rect: [3.0, RZ1 - 2.0, 4.4, RZ1 - 1.0], y0: 1.9, y1: 2.1, mat: 'limestone_yellow', walk: true });
+  furn([3.0, RZ1 - 2.0, 4.4, RZ1 - 1.9], 2.1, 3.0, 'limestone_yellow'); furn([3.0, RZ1 - 1.9, 3.1, RZ1 - 1.0], 2.1, 3.0, 'limestone_yellow');
+  add({ t: 'stair', rect: [4.4, RZ1 - 1.6, 7.0, RZ1 - 1.0], dir: 'w', y0: FY, y1: 2.1, riser: 0.19, mat: 'limestone_yellow' });
+  add({ t: 'block', rect: [3.35, RZ1 - 1.45, 3.75, RZ1 - 1.15], y0: 2.1, y1: 2.14, mat: 'wood_dark', collide: false });      // the reader's desk, with its book
+  add({ t: 'block', rect: [3.4, RZ1 - 1.4, 3.7, RZ1 - 1.2], y0: 2.14, y1: 2.2, mat: 'cloth_red', collide: false });
+  lamp(7.0, 5.0, 33.1); lamp(12.5, 5.0, 33.1); lamp(17.0, 3.2, 33.1, 4, 8);
+
+  // the chapter house: a hall of 9 x 10 m, the door and two openings on the east walk, the north wall made good against the transept
+  const CX0 = CL[2], CX1 = CL[2] + 11.0, CZ0 = TZO, CZ1 = CL[3], CEIL2 = 6.3;
+  pwall({ o: [CX0 + 0.5, CZ0], u: [0, 1], th: 1.0, u0: 0, u1: CZ1 - CZ0, y0: 0, y1: WH, arches: [{ uc: 23.3 - CZ0, r: 0.85, spring: 2.3, sill: 0 }, { uc: 20.8 - CZ0, r: 0.9, spring: 2.4, sill: 0.5 }, { uc: 25.8 - CZ0, r: 0.9, spring: 2.4, sill: 0.5 }], mat: 'schist_rubble' });
+  pwall({ o: [CX0 + 1.0, CZ0 + 0.4], u: [1, 0], th: 0.8, u0: 0, u1: 9.0, y0: 0, y1: WH, mat: 'schist_rubble' });
+  pwall({ o: [CX1 - 0.5, CZ0], u: [0, 1], th: 1.0, u0: 0, u1: CZ1 - 1.0 - CZ0, y0: 0, y1: WH, arches: [win(20.8 - CZ0, 3.8, 2.6), win(23.3 - CZ0, 3.9, 2.9, 0.55), win(25.8 - CZ0, 3.8, 2.6)], mat: 'schist_rubble' });
+  pwall({ o: [CX0 + 1.0, CZ1 - 0.5], u: [1, 0], th: 1.0, u0: 0, u1: CX1 - CX0 - 1.0, y0: 0, y1: WH, arches: [win(5.0, 3.8, 2.6, 0.5)], mat: 'schist_rubble' });
+  floor([CX0 + 1.0, CZ0 + 0.8, CX1 - 1.0, CZ1 - 1.0], FY, 'flagstone', { th: 0.3 });
+  floor([CX0, 22.45, CX0 + 1.0, 24.15], FY, 'flagstone', { th: 0.3 });
+  timberTop([CX0 + 1.0, CZ0 + 0.8, CX1 - 1.0, CZ1 - 1.0], CEIL2 - 0.2, 0.2);
+  beamsAcross(CX0 + 1.0, CX1 - 1.0, CZ0 + 0.8, CZ1 - 1.0, CEIL2 - 0.2, true, 2.0);
+  add({ t: 'gable_roof', axis: 'z', x0: CX0 - 0.3, x1: CX1 + 0.3, z0: CZ0, z1: CZ1 + 0.3, y: WH, ridge: 11.4 });
+  // two tiers of stone benches round the walls (the community sat in order of rank), the abbot's seat of stone in the middle of the east wall
+  const tiers = (rect, axis, dirSign) => { // rect = the bench's footprint along a wall; the upper tier at the wall, the lower in front
+    const [x0, z0, x1, z1] = rect, d = 0.5;
+    if (axis === 'x') { const zw = dirSign > 0 ? z0 : z1; furn([x0, Math.min(zw, zw + dirSign * d), x1, Math.max(zw, zw + dirSign * d)], 0, 0.85, 'limestone_yellow'); const zf = zw + dirSign * d; furn([x0, Math.min(zf, zf + dirSign * d), x1, Math.max(zf, zf + dirSign * d)], 0, 0.42, 'limestone_yellow'); }
+    else { const xw = dirSign > 0 ? x0 : x1; furn([Math.min(xw, xw + dirSign * d), z0, Math.max(xw, xw + dirSign * d), z1], 0, 0.85, 'limestone_yellow'); const xf = xw + dirSign * d; furn([Math.min(xf, xf + dirSign * d), z0, Math.max(xf, xf + dirSign * d), z1], 0, 0.42, 'limestone_yellow'); }
+  };
+  const IX0 = CX0 + 1.0, IX1 = CX1 - 1.0, IZ0 = CZ0 + 0.8, IZ1 = CZ1 - 1.0;
+  tiers([IX0 + 0.6, IZ0, IX1 - 0.6, IZ0 + 1.0], 'x', 1);                         // north
+  tiers([IX0 + 0.6, IZ1 - 1.0, IX1 - 0.6, IZ1], 'x', -1);                        // south
+  tiers([IX1 - 1.0, IZ0 + 1.0, IX1, 22.55], 'z', -1); tiers([IX1 - 1.0, 24.05, IX1, IZ1 - 1.0], 'z', -1);   // east, either side of the seat
+  tiers([IX0, IZ0 + 1.0, IX0 + 1.0, 21.9], 'z', 1); tiers([IX0, 24.7, IX0 + 1.0, IZ1 - 1.0], 'z', 1);       // west, either side of the door
+  furn([IX1 - 0.9, 22.7, IX1, 23.9], 0, 0.55, 'limestone_yellow');                // the abbot's seat: the seat, the high back with arms, a canopy on corbels, a step before it
+  furn([IX1 - 0.3, 22.6, IX1, 24.0], 0.55, 2.05, 'limestone_yellow');
+  for (const z of [22.6, 23.75]) furn([IX1 - 0.9, z, IX1, z + 0.25], 0.55, 0.9, 'limestone_yellow', false);
+  furn([IX1 - 1.0, 22.5, IX1, 24.1], 2.05, 2.3, 'limestone_yellow', false);
+  furn([IX1 - 1.45, 22.9, IX1 - 0.9, 23.7], 0, 0.2, 'limestone_yellow', false);
+  // the lectern at the middle of the floor, with the book of the Rule; a lamp
+  const LX = (IX0 + IX1) / 2, LZ = (IZ0 + IZ1) / 2;
+  furn([LX - 0.08, LZ - 0.08, LX + 0.08, LZ + 0.08], 0, 1.15, 'wood_dark'); furn([LX - 0.3, LZ - 0.3, LX + 0.3, LZ + 0.3], 0, 0.06, 'wood_dark', false);
+  add({ t: 'block', rect: [LX - 0.3, LZ - 0.25, LX + 0.3, LZ + 0.25], y0: 1.15, y1: 1.2, mat: 'wood_dark', collide: false });
+  add({ t: 'block', rect: [LX - 0.22, LZ - 0.18, LX + 0.22, LZ + 0.18], y0: 1.2, y1: 1.26, mat: 'cloth_red', collide: false });
+  lamp(LX, 4.4, LZ); lamp(IX1 - 0.9, 2.7, 23.3, 3, 6);
+  // the eaves of both: corbel tables
+  const eaves = [[[RX0 - 0.05, RZ0 + 0.0], [RX1, RZ0 + 0.0], [0, -1]], [[RX0, RZ1], [RX1, RZ1], [0, 1]]];
+  for (const [a, b, n] of eaves) add({ t: 'corbel_row', a, b, n, y: 6.35, h: 0.3, out: 0.28, w: 0.26, step: 0.55 });
+  add({ t: 'corbel_row', a: [CX1, CZ0 + 0.3], b: [CX1, CZ1], n: [1, 0], y: 6.35, h: 0.3, out: 0.28, w: 0.26, step: 0.55 });
+  add({ t: 'corbel_row', a: [CX0, CZ0 + 0.3], b: [CX0, CZ1], n: [-1, 0], y: 6.35, h: 0.3, out: 0.28, w: 0.26, step: 0.55 });
+}
+
+// ── the cloister's garth: paths from the walks to the basin, the four quarters planted (docs/settlements/conques.md §1k) ─
+add({ t: 'garth', rect: [CL[0] + GW + 0.28, CL[1] + GW + 0.28, CL[2] - GW - 0.28, CL[3] - GW - 0.28], y: 0, seed: 1120, c: GC });
+
+// ── the corbel tables under the eaves of the church ──────────────────────────
+for (const sz of [-1, 1]) {
+  const row = (a, b, n, y, o = 0.5, skip) => add({ t: 'corbel_row', a, b, n, y, h: 0.3, out: o, w: 0.3, step: 0.6, skip });
+  // the aisle and tribune walls' eaves, between the buttresses
+  row([1.2, sz * 9.7], [TW0 - 0.1, sz * 9.7], [0, sz], 14.82, 0.5, NAVE_P.slice(0, 4).map((x) => [x - 1.2 - 0.5, x - 1.2 + 0.5]));
+  // the arms' west and east walls' eaves
+  row([TW0, sz * 9.9], [TW0, sz * 17.2], [-1, 0], 14.82, 0.5);
+  row([TE1, sz * 9.9], [TE1, sz * 17.2], [1, 0], 14.82, 0.5);
+  // the nave's and the choir's high walls under the roofs' edges, the arms' high walls
+  row([6.1, sz * 4.7], [XC0 - PS, sz * 4.7], [0, sz], 22.55, 0.25);
+  row([XC1 + PS, sz * 4.7], [XH, sz * 4.7], [0, sz], 22.55, 0.25);
+  row([XC0 - PS, sz * 5.9], [XC0 - PS, sz * 17.2], [-1, 0], 22.55, 0.25);
+  row([XC1 + PS, sz * 5.9], [XC1 + PS, sz * 17.2], [1, 0], 22.55, 0.25);
+  // the choir's aisle wall, under its lean-to
+  row([TE1 + 0.4, sz * 9.7], [XH, sz * 9.7], [0, sz], 10.3, 0.5);
+  // the apsidiole off each arm
+  add({ t: 'corbel_arc', c: [TE1, sz * APSIDIOLE_Z], r: rch + 0.8, a0: -90, a1: 90, y: 6.2, h: 0.3, out: 0.28, w: 0.26, step: 0.5 });
+}
+// the chevet: the drum of the hemicycle above the ambulatory, the ambulatory's outer wall, the three radiating chapels
+add({ t: 'corbel_arc', c: [XH, 0], r: RH + 0.45, a0: -90, a1: 90, y: 22.6, h: 0.3, out: 0.35, w: 0.3, step: 0.55 });
+add({ t: 'corbel_arc', c: [XH, 0], r: RAO, a0: -90, a1: 90, y: 10.3, h: 0.3, out: 0.5, w: 0.3, step: 0.6 });
+for (const a of CHAPELS) add({ t: 'corbel_arc', c: [XH + Math.cos(a * D2R) * RCH, Math.sin(a * D2R) * RCH], r: rch + 0.8, a0: a - 90, a1: a + 90, y: 6.4, h: 0.3, out: 0.28, w: 0.26, step: 0.5 });
 
 // ── rooms and walks ──────────────────────────────────────────────────────────
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
@@ -314,6 +425,8 @@ const rooms = [
   room('choir', [33.5, -2, 39.5, 2], 0, 'sanctuary'),
   room('ambulatory', [XH + 5, -2, XH + 7.5, 2], 0, 'hall'),
   room('cloister', [1, 11, 18, 12.5], 0.05, 'open'),
+  room('refectory', [2, 31, 15, 35], 0.05, 'hall'),
+  room('chapter-house', [21.5, 20, 28, 27], 0.05, 'hall'),
   room('tribune', [6, -7.8, 15, -5.4], TRIB, 'hall'),
 ];
 const amb = Array.from({ length: 13 }, (_, k) => { const a = (-90 + 15 * k) * D2R; return [XH + Math.cos(a) * 6.4, Math.sin(a) * 6.4]; });
@@ -325,8 +438,11 @@ const walks = [
   // out by the south aisle into the cloister, round its galleries
   [[12, 0], [12, 6.6], [9.4, 6.6], [8.2, 6.6], [8.2, 11.2], [1.5, 11.2], [1.5, 27.6], [17.9, 27.6], [17.9, 11.2], [8.2, 11.2]],
 ];
+walks.push([[1.5, 27.6], [3.0, 28.8], [3.0, 31.0], [9, 33.1], [14.5, 33.1]]);   // from the south walk into the refectory
+walks.push([[17.9, 23.3], [19.9, 23.3], [24.0, 23.3], [24.0, 20.5]]);              // from the east walk into the chapter house
+walks.push([[9, 33.1], [7.4, 34.6], [7.2, 35.85], [4.6, 35.85], [3.7, 35.65]]);          // up the reader's stair to the pulpit
 walks.push([[4.4, -6.6], [16, -6.6], [20.1, -6.6], [20.1, -7.9], [12, -7.9], [6, -7.9]]);   // up the stair to the tribune and along it
-walks[3].y0 = 0;
+walks.forEach((w) => { w.y0 = 0; });
 walks[0].y0 = 0; walks[1].y0 = 0; walks[2].y0 = 0;
 
 export const sainteFoy = {

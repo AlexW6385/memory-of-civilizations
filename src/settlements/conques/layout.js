@@ -80,6 +80,17 @@ const reserved = () => [HOSTEL.rect, [97, bandZ(8) + BAND.lane[1] + 0.2, 101.4, 
 /** The Rue Charlemagne's gate, a barrel-vaulted passage over the stair street below the last shelf (Porte du Barry). */
 export const GATE = { x: STAIRS[1], z: bandZ(BAND.n) - 8, w: 4.6 };
 
+/** The lower suburb's works (docs/settlements/conques.md §1k): a tanner's yard west of the road, a mill on the bank upstream of the washing-place. */
+export const TANNERY = { rect: [-112, 195, -97, 205] };
+const MILL_X = -27;
+export const MILL = { cx: MILL_X, w: 6.4, d: 5.6, z1: riverZ(MILL_X) - 10.9, wheelR: 2.1 };
+MILL.rect = [MILL_X - MILL.w / 2, MILL.z1 - MILL.d, MILL_X + MILL.w / 2, MILL.z1];
+const maxH = (r, m = 0) => { let h = -Infinity; for (let x = r[0] - m; x <= r[2] + m; x += 1) for (let z = r[1] - m; z <= r[3] + m; z += 1) h = Math.max(h, height(x, z)); return h; };
+/** The level of each yard: the highest ground in it and a margin north, so the terrace stands flush with the slope above it. */
+export const worksLevel = () => ({ tannery: maxH([TANNERY.rect[0], TANNERY.rect[1] - 1.5, TANNERY.rect[2], TANNERY.rect[3]]) + 0.1, mill: maxH([MILL.rect[0] - 0.5, MILL.rect[1] - 3.0, MILL.rect[2] + 0.5, MILL.rect[3] - 1.0]) + 0.1 });
+/** Places where nothing is planted: the works with their margins. */
+export const WORKS = [[TANNERY.rect[0] - 1.5, TANNERY.rect[1] - 2.5, TANNERY.rect[2] + 2, TANNERY.rect[3] + 1.5], [MILL.rect[0] - 2.5, MILL.rect[1] - 4, MILL.rect[2] + 2.5, MILL.rect[3] + 0.5]];
+
 const overlap = (a, b, m = 0) => a[0] < b[2] + m && a[2] > b[0] - m && a[1] < b[3] + m && a[3] > b[1] - m;
 let LOTS = null, GARDENS = null;
 function build() {
@@ -110,7 +121,7 @@ function build() {
         if (reserved().some((q) => overlap(rect, q, 0.2))) continue;
         const dens = r < 100 ? 1 : 1 - 0.62 * smooth(100, VILLAGE_R, r);
         const seed = Math.floor(rand() * 1e9);
-        if (rand() > dens) { if (r > 110) GARDENS.push({ rect: [rect[0], rect[1], rect[2], rect[3]], front, y, seed }); continue; }
+        if (rand() > dens) { if (r > 110) GARDENS.push({ rect: [rect[0], rect[1], rect[2], rect[3]], front, y, seed, k }); continue; }
         const Lw = rect[2] - rect[0], poor = r > 115 || rand() < 0.2;
         let storeys = poor ? (rand() < 0.5 ? 1 : 2) : rand() < 0.7 ? 2 : rand() < 0.5 ? 3 : 1;
         const near = route(cx, cz), shop = near < 36 && Lw >= 4.4 && rand() < 0.8;
@@ -128,6 +139,38 @@ function build() {
   // the hostel: a long hall of two floors
   const [hx0, hz0, hx1, hz1] = HOSTEL.rect;
   LOTS.push({ rect: [hx0, hz0, hx1, hz1], y: level(6), foot: level(6), front: 's', seed: 77, storeys: 2, k: 6, G: 3.1, G2: 2.5, pitch: 0.9, ridgeAlong: true, stone: 'schist_rubble', twin: true, gallery: false, dormer: false, shop: false, hostel: true });
+  // the plots left between the houses (under the terrace's slope, and where a lot was too narrow): kitchen gardens where the shelf is flat
+  const rowsOf = new Map();
+  for (const l of [...LOTS, ...GARDENS]) { const key = l.k !== undefined ? l.k * 2 + (l.front === 's' ? 0 : 1) : null; if (key === null) continue; if (!rowsOf.has(key)) rowsOf.set(key, []); rowsOf.get(key).push(l); }
+  for (const [key, list] of rowsOf) {
+    list.sort((a, b) => a.rect[0] - b.rect[0]);
+    for (let i = 0; i + 1 < list.length; i++) {
+      const a = list[i], b = list[i + 1], g0 = a.rect[2], g1 = b.rect[0], W = g1 - g0, north = a.front === 's', zf = north ? a.rect[3] : a.rect[1];
+      if (W < 5.6) continue;
+      const n = Math.ceil(W / 9), w = W / n;
+      for (let q = 0; q < n; q++) {
+        const rect = north ? [g0 + q * w + 0.2, zf - 7.2, g0 + (q + 1) * w - 0.2, zf] : [g0 + q * w + 0.2, zf, g0 + (q + 1) * w - 0.2, zf + 7.2];
+        const cx = (rect[0] + rect[2]) / 2, cz = (rect[1] + rect[3]) / 2;
+        if (Math.hypot(cx, cz) > 150 || STAIRS.some((sx) => sx + STAIR.gap + 0.3 > rect[0] && sx - STAIR.gap - 0.3 < rect[2])) continue;
+        let flat = true;
+        for (let u = 0; u <= 4 && flat; u++) for (let v = 0; v <= 2; v++) if (Math.abs(height(rect[0] + (rect[2] - rect[0]) * u / 4, rect[1] + (rect[3] - rect[1]) * v / 2) - a.y) > 0.3) flat = false;
+        if (flat && !inRect(ABBEY.terrace, cx, cz, 2)) GARDENS.push({ rect, front: north ? 's' : 'n', y: a.y, seed: Math.floor(rand() * 1e9) });
+      }
+    }
+  }
+  // the kinds of house, by their place (docs/settlements/conques.md §1k): rich ashlar houses near the church, barn-houses on the outer rows,
+  // vintners' houses (the vine country, cellars in the rock) among them, herders on the high rows, fishers on the low rows toward the river
+  const rk = rng(2718);
+  for (const l of LOTS) {
+    if (l.hostel || l.shop) continue;
+    const [x0, z0, x1, z1] = l.rect, Lw = x1 - x0, cz = (z0 + z1) / 2, r = Math.hypot((x0 + x1) / 2, cz), roll = rk();
+    if (l.perron) continue;
+    if (r < 92 && Lw >= 7.0 && roll < 0.5) { l.kind = 'ashlar'; l.stone = 'limestone_yellow'; l.twin = true; l.storeys = Math.max(2, l.storeys); }
+    else if (r >= 95 && Lw >= 6.2 && roll < 0.3) { l.kind = 'grange'; l.storeys = 2; l.G = 3.7; l.gallery = false; l.twin = false; }
+    else if (r >= 50 && Lw >= 5.6 && roll >= 0.3 && roll < 0.5) l.kind = 'vintner';
+    else if (cz < 30 && r > 70 && Lw >= 5.2 && roll >= 0.5 && roll < 0.66) l.kind = 'herder';
+    else if (cz > 90 && Lw >= 5.2 && roll >= 0.5 && roll < 0.72) l.kind = 'fisher';
+  }
   // chimneys: a stack at one end of the roof, set against the gable
   for (const l of LOTS) {
     const [x0, z0, x1, z1] = l.rect, f = l.front, along = f === 's' || f === 'n', Lw = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0;
@@ -149,6 +192,17 @@ function build() {
   for (const l of shops) l.open = 'shop';
   homes.forEach((l, i) => { l.open = 'home'; l.homeKind = i % 3; });
   LOTS.find((l) => l.hostel).open = 'hostel';
+  // beyond the first rows: the houses with a trade of their own, and a share of the others, can be entered too, furnished by their kind
+  const KINDHOME = { grange: 4, vintner: 3, herder: 5, fisher: 6 }, ro = rng(3141);
+  let more = 0, plain = 0;
+  for (const l of LOTS) {
+    if (l.open || l.hostel || l.shop || l.perron) continue;
+    const [x0, z0, x1, z1] = l.rect, r = Math.hypot((x0 + x1) / 2, (z0 + z1) / 2), roll = ro();
+    if (r > 150 || x1 - x0 < (l.kind === 'grange' ? 6.2 : 4.8) || z1 - z0 < 6.6) continue;
+    const want = l.kind ? roll < 0.8 : roll < 0.2;
+    if (!want || more >= 70) continue;
+    l.open = 'home'; l.homeKind = KINDHOME[l.kind] ?? plain++ % 3; more++;
+  }
 }
 /** The houses (and the hostel) on the shelves. */
 export function lots() { if (!LOTS) build(); return LOTS; }

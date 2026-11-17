@@ -2,12 +2,12 @@
 // vines below the village, chestnut and oak woods on the slopes (oak stands in), the Dourdou's
 // rocky bed; the mild, often misty sky of the Rouergue.
 
-import { RADIUS, ABBEY, RIVER, height, inRiver, inRect, inLot, inStreet, gardens } from './layout.js';
+import { RADIUS, ABBEY, RIVER, WORKS, height, inRiver, inRect, inLot, inStreet, gardens } from './layout.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0, grass: 0.5, rock: 0, soil: 0.4, fields: 0, dry: 0.3, warmth: 0.45, red: 0.15, road: 0, snow: 0, forest: 0.2 };
   if (inRect(ABBEY.terrace, x, z)) { c.road = 0.8; return c; }
-  if (inStreet(x, z, 0.3)) { c.road = 0.9; c.grass = 0.1; return c; }
+  if (inStreet(x, z, 0.3) || WORKS.some((r) => inRect(r, x, z))) { c.road = 0.9; c.grass = 0.1; return c; }
   if (ny < 0.8) { c.rock = 0.6; c.grass = 0.3; return c; }
   if (h < RIVER.level + 2) { c.rock = 0.5; c.sand = 0.3; return c; }
   return c;
@@ -16,7 +16,7 @@ function water(x, z, y) { return inRiver(x, z) && y < RIVER.level + 0.3; }
 function waterLevel(x, z) { return inRiver(x, z) ? RIVER.level : -Infinity; }
 function fromWater(x, z) { return inRiver(x, z) ? -2 : Math.max(-5, Math.min(40, height(x, z) - RIVER.level)); }
 function planting(x, z) {
-  if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z) || inRect(ABBEY.terrace, x, z, 3) || inLot(x, z, 1) || inStreet(x, z, 1.5)) return null;
+  if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z) || inRect(ABBEY.terrace, x, z, 3) || inLot(x, z, 1) || inStreet(x, z, 1.5) || WORKS.some((r) => inRect(r, x, z))) return null;
   if (gardens().some((g) => inRect(g.rect, x, z, 0.5))) return { apple: 0.09, grass: 10 };
   const r = Math.hypot(x, z);
   // by the Dourdou: willows and reeds at the water, poplars on the flat of the bank

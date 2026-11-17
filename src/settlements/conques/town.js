@@ -3,8 +3,8 @@ import { openLots, lodTiles } from '../lod.js';
 // along the cobbled lanes of the terraced shelves, stair streets between them, retaining walls, walled gardens, the
 // pilgrims' hostel, the shops along the pilgrims' way with their goods, the fountains, the gate; and its people
 // (§5a): pilgrims on the road to Santiago before the west portal, monks of the abbey, the hostel's guests.
-import { RADIUS, ABBEY, BAND, STAIRS, STAIR, GATE, FOUNTAINS, HOSTEL, PILGRIM_WAY, lots, gardens, lanes, stairs, level, laneZ, bandZ, shelf, height, inRect } from './layout.js';
-import { shopPoint } from '../../styles/romanesque/village.js';
+import { RADIUS, ABBEY, RIVER, BAND, STAIRS, STAIR, GATE, FOUNTAINS, HOSTEL, PILGRIM_WAY, TANNERY, MILL, worksLevel, lots, gardens, lanes, stairs, level, laneZ, bandZ, shelf, height, inRect } from './layout.js';
+import { shopPoint, doorU } from '../../styles/romanesque/village.js';
 
 const base = (id, elements, style = 'vernacular') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-40, 0], facing: 'e' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -47,6 +47,13 @@ function works() {
   // the road from the gate down the slope to the bridge's abutment, laid on the ground
   const pts = []; for (let z = GATE.z + 1.9; z < 205.4; z += 2.5) pts.push([GATE.x, z, height(GATE.x, z)]);
   E.push({ t: 'strip', pts, w: 2.4 });
+  // the lower suburb's works (§1k): the tanner's yard on its terrace west of the road, the mill's quay and its wheel in the Dourdou
+  const W = worksLevel(), [tx0, tz0, tx1, tz1] = TANNERY.rect, T = 0.4;
+  E.push({ t: 'block', rect: [tx0 - T, tz0 - T, tx1 + T, tz1 + T], y0: height(tx0, tz1) - 2, y1: W.tannery, mat: 'schist_rubble', walk: true });
+  E.push({ t: 'tannerie', rect: TANNERY.rect, y: W.tannery, seed: 41 });
+  const [mx0, mz0, mx1, mz1] = MILL.rect, wy = RIVER.level + MILL.wheelR - 0.1;
+  E.push({ t: 'block', rect: [mx0 - 0.5, mz0 - 2.2, mx1 + 0.5, mz1 + 0.2], y0: RIVER.bed - 1, y1: W.mill - 0.05, mat: 'schist_rubble', walk: true });
+  E.push({ t: 'roue', c: [MILL.cx, mz1 + 0.3], y: wy, r: MILL.wheelR, w: 1.2, wall: mz1 - 0.2, pier: mz1 + 2.0, bed: RIVER.bed - 1 });
   return { id: 'conques-works', style: 'romanesque', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: E, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-40, 0], facing: 'e' } };
 }
 
@@ -72,7 +79,12 @@ function goods() {
       L.push({ t: 'shop_sign', at: P(a0 + dir * 1.72, 0), y: l.y, h: 2.85, rot: out, cloth: ['cloth_red', 'cloth_indigo', 'cloth_green', 'cloth_ochre'][l.seed % 4], len: 0.8, out: 0.9, letters: 2 });
       // staffs for sale, stood against the pier beside the arch
       for (let k = 0; k < 4; k++) { const [px, pz] = P(a0 - dir * 1.62 - k * 0.07, -0.18 - (k % 2) * 0.06); S.push({ t: 'bourdon', at: [px, pz], y: l.y, h: 1.7 + rand() * 0.25 }); }
-    } else if (!l.hostel && Lw > 4 && rand() < 0.4) {
+    } else if (l.kind === 'vintner' && !l.open) {
+      // the cellar's mouth at the end of the front: casks standing before it, a trough of must beside
+      const u = doorU(l).cellar;
+      L.push({ t: 'barrel', at: P(u + 0.15, -0.55), y: l.y, rot: out, n: 2, seed: l.seed });
+      L.push({ t: 'barrel', at: P(u + (doorU(l).du < Lw / 2 ? -0.75 : 0.75), -0.6), y: l.y, rot: out, n: 1, seed: l.seed + 3 });
+    } else if (!l.hostel && !l.open && Lw > 4 && rand() < 0.4) {
       // the door's front: firewood stacked against the wall, a tub, a bench, a barrow, hens
       const u = rand() < 0.5 ? 0.5 : Lw - 0.5, pick = rand();
       if (pick < 0.35) L.push({ t: 'firewood', at: P(u, -0.3), y: l.y, rot: out + Math.PI / 2, len: 1.2, seed: l.seed });
@@ -128,7 +140,8 @@ function people() {
 }
 
 export async function houses() {
-  const all = lots(), open = new Map(all.filter((l) => l.open).map((l) => [l, l.open]));
+  const mill = { rect: MILL.rect, y: worksLevel().mill, foot: worksLevel().mill, front: 'n', seed: 313, storeys: 2, k: 99, G: 3.2, G2: 2.4, pitch: 1.0, ridgeAlong: true, stone: 'schist_rubble', twin: false, gallery: false, dormer: false, shop: false, open: 'mill' };
+  const all = [...lots(), mill], open = new Map(all.filter((l) => l.open).map((l) => [l, l.open]));
   void openLots; void PILGRIM_WAY; void inRect;
   return lodTiles('conques-houses', 'romanesque', all.map((l) => ({ t: 'maison', ...l, ...(open.has(l) ? { open: l.open } : {}) })), { R: RADIUS, near: 230, entrance: { at: [-40, 0], facing: 'e' } });
 }
