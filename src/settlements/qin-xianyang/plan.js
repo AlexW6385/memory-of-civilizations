@@ -33,7 +33,7 @@ export const pit = {
 // ── the palace ──
 const x = STAIR.x;
 const PL = [
-  { t: 'qin_terrace' },
+  { t: 'qin_terrace' }, { t: 'qin_terrace_detail' },
   { t: 'stair', rect: [x - STAIR.w / 2, TERRACE.z1, x + STAIR.w / 2, TERRACE.z1 + STAIR.run], y0: 0, y1: TERRACE.h, dir: 'n', riser: TERRACE.h / Math.round(TERRACE.h / 0.16), mat: 'brick_grey' },
   { t: 'qin_hall' }, { t: 'qin_court' },
   { t: 'qin_que', at: [x - QUE.off - QUE.w / 2, QUE.z] }, { t: 'qin_que', at: [x + QUE.off + QUE.w / 2, QUE.z] },

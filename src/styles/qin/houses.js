@@ -6,6 +6,7 @@
 // Furnished interiors (a lot with `open`): the family room, the weaver's, the smith's, the potter's, the cook's.
 import { box, lathe, fromTriangles, quad, rod, frustum } from '../../core/geom.js';
 import { rng } from '../../objects/kit.js';
+import { animal } from '../../objects/animals.js';
 
 export function frame(rect, front, bag, col, lights) {
   const [x0, z0, x1, z1] = rect, zs = front === 's' ? z1 : z0, sg = front === 's' ? -1 : 1, Z = (v) => zs + sg * v;
@@ -154,6 +155,37 @@ function furnish(F, rand, u0, v0, u1, v1, kind = 'family') {
     F.b('mud_plaster', u0 + 0.5, 0, v0 + 0.5, u0 + 1.8, 0.8, v0 + 1.8);
     for (let i = 0; i < 8; i++) F.lathe('terracotta', JAR(0.14 + 0.03 * (i % 3)), u1 - 3.2 + (i % 4) * 0.6, 0, v1 - 1.3 + Math.floor(i / 4) * 0.6, 8);
     jars(u0 + 0.4, v1 - 0.8, 3); stove(u1 - 1.8, v0 + 0.4);
+  } else if (kind === 'scribe') {
+    // the scribe's: a low desk on a mat with a brush, an ink stone and a bundle of bamboo slips (jian) tied with cords, a knife for scraping
+    // errors, a clay-sealed bundle, shelves of rolled slips along the back wall, a basket of loose slips, a lamp, a chest (the Qin kept its
+    // law and accounts on bamboo slips: Shuihudi, Liye)
+    const roll = (u, y, v, len = 0.5) => { F.rod('bamboo_culm', [u, y, v], [u + len, y, v], 0.05, 6); for (const q of [0.1, len - 0.1]) F.rod('rope_fibre', [u + q, y, v], [u + q + 0.03, y, v], 0.058, 6); };
+    const du = u0 + 1.0, dv = v0 + 1.8;
+    F.b('timber', du, 0.08, dv, du + 1.5, 0.12, dv + 0.7, false);
+    F.b('timber', du + 0.1, 0, dv + 0.05, du + 0.2, 0.08, dv + 0.65, false); F.b('timber', du + 1.3, 0, dv + 0.05, du + 1.4, 0.08, dv + 0.65, false);
+    F.b('lacquer_black', du, 0.12, dv, du + 1.5, 0.4, dv + 0.7);
+    for (let k = 0; k < 5; k++) F.b('bamboo_culm', du + 0.2 + k * 0.045, 0.4, dv + 0.12, du + 0.23 + k * 0.045, 0.43, dv + 0.55, false);     // an open string of slips
+    roll(du + 0.8, 0.45, dv + 0.2); roll(du + 0.8, 0.45, dv + 0.35, 0.45);
+    F.b('granite_black', du + 1.15, 0.4, dv + 0.2, du + 1.35, 0.45, dv + 0.45, false); F.rod('timber', [du + 1.0, 0.43, dv + 0.55], [du + 1.2, 0.58, dv + 0.62], 0.012, 4);   // the ink stone, a brush
+    F.b('iron', du + 0.55, 0.4, dv + 0.55, du + 0.75, 0.42, dv + 0.58, false);
+    F.b('mud_plaster', du + 0.2, 0.4, dv + 0.05, du + 0.32, 0.47, dv + 0.1, false);                                   // a clay seal
+    F.b('cloth_ochre', du + 0.4, 0.06, dv - 0.8, du + 1.1, 0.14, dv - 0.2, false);                                      // the scribe's cushion
+    for (let sh = 0; sh < 3; sh++) { F.b('timber', mid - 1.6, 0.5 + sh * 0.5, v1 - 0.45, mid + 1.6, 0.54 + sh * 0.5, v1 - 0.05, false); for (let k = 0; k < 6; k++) roll(mid - 1.5 + k * 0.5, 0.58 + sh * 0.5, v1 - 0.25 - (k % 2) * 0.1, 0.4); }
+    for (const ex of [-1.6, 1.6]) F.b('timber', mid + ex - 0.04, 0, v1 - 0.45, mid + ex + 0.04, 1.6, v1 - 0.05, false);
+    F.lathe('wicker', [[0.001, 0], [0.22, 0.03], [0.26, 0.3], [0.001, 0.32]], u1 - 0.9, 0, v0 + 1.0, 8);
+    for (let k = 0; k < 7; k++) F.rod('bamboo_culm', [u1 - 0.95 + k * 0.03, 0.3, v0 + 1.0], [u1 - 0.95 + k * 0.03, 0.6, v0 + 1.0], 0.012, 4);
+    lamp(u0 + 3.0, v0 + 1.4); chest(u1 - 2.0, v1 - 1.0); jars(u0 + 0.4, v1 - 0.7, 2);
+  } else if (kind === 'grain') {
+    // the grain store: plank bins with the grain in them, sacks, big jars, a dou measure and a balance, a stone mortar and its pestle, a tally board
+    for (let i = 0; i < 3; i++) { const bu = u0 + 0.4 + i * 1.5; F.b('timber', bu, 0, v1 - 1.5, bu + 1.2, 0.8, v1 - 0.3); F.b('paint_ochre', bu + 0.06, 0.78, v1 - 1.44, bu + 1.14, 0.82, v1 - 0.36, false); }
+    for (let i = 0; i < 4; i++) F.b('sacking', u1 - 1.4 + (i % 2) * 0.6, Math.floor(i / 2) * 0.35, v0 + 0.9, u1 - 0.9 + (i % 2) * 0.6, 0.35 + Math.floor(i / 2) * 0.35, v0 + 1.5);
+    jars(u1 - 2.5, v1 - 0.8, 4);
+    F.b('bronze', mid - 0.4, 0, v0 + 2.0, mid - 0.1, 0.22, v0 + 2.3); F.b('bronze', mid + 0.1, 0, v0 + 2.0, mid + 0.35, 0.16, v0 + 2.25);
+    F.rod('timber', [mid + 0.9, 0, v0 + 2.2], [mid + 0.9, 1.0, v0 + 2.2], 0.03, 5); F.rod('bronze', [mid + 0.5, 1.0, v0 + 2.2], [mid + 1.3, 1.0, v0 + 2.2], 0.012, 5);
+    for (const q of [0.55, 1.25]) { F.rod('rope_fibre', [mid + q, 1.0, v0 + 2.2], [mid + q, 0.7, v0 + 2.2], 0.006, 3); F.lathe('bronze', [[0.001, 0], [0.09, 0.02], [0.1, 0.045], [0.001, 0.03]], mid + q, 0.66, v0 + 2.2, 8); }
+    F.lathe('granite_grey', [[0.28, 0], [0.3, 0.2], [0.24, 0.4], [0.001, 0.4]], u0 + 0.6, 0, v0 + 1.0, 10); F.rod('timber', [u0 + 0.6, 0.35, v0 + 1.0], [u0 + 0.8, 1.2, v0 + 1.1], 0.04, 5);
+    F.b('planks_grey', u0 + 0.3, 1.0, v1 - 1.55, u0 + 1.3, 1.9, v1 - 1.5, false); F.b('paint_white', u0 + 0.4, 1.15, v1 - 1.56, u0 + 1.2, 1.75, v1 - 1.55, false);
+    lamp(u0 + 3.2, v0 + 0.8);
   } else {
     // the cook's: a long table with a board and a cleaver, a big stove with two pots and a steamer, jars of salt and meal, strings of dried fish
     stove(u0 + 0.4, v1 - 1.3); F.b('brick_grey', u0 + 2.1, 0, v1 - 1.3, u0 + 3.6, 0.72, v1 - 0.3); F.lathe('pottery_dark', [[0.001, 0.72], [0.34, 0.78], [0.4, 1.0], [0.001, 1.1]], u0 + 2.85, 0, v1 - 0.8, 10);
@@ -164,26 +196,30 @@ function furnish(F, rand, u0, v0, u1, v1, kind = 'family') {
   }
 }
 /** Which household: by seed. */
-const HOUSEHOLDS = ['family', 'family', 'weaver', 'smith', 'potter', 'cook', 'family', 'weaver'];
+const HOUSEHOLDS = ['family', 'scribe', 'weaver', 'smith', 'potter', 'cook', 'family', 'grain', 'family', 'weaver'];
 
 /** The doors' places in a lot's frame (u), for dressing laid outside by town.js: { u, w, kind }. */
 export function doorOf(el) {
   const rand = rng(el.seed), W = el.rect[2] - el.rect[0];
   if (el.kind === 'row') { rand(); rand(); return { u: W * (0.3 + rand() * 0.4), w: 1.0 }; }
-  if (el.kind === 'court') { rand(); return { u: W * (0.25 + rand() * 0.5), w: 1.8 }; }
+  if (el.kind === 'court') { rand(); rand(); return { u: W * (0.25 + rand() * 0.5), w: 1.8 }; }
   if (el.kind === 'official') return { u: W / 2, w: 3.2 };
   return { u: W / 2, w: 1.2 };
 }
 
 /** qin_row_house: { rect, front, seed, open } — the workman's house: door and one room, a back room, a roof of grey tile, of thatch or flat. */
 export function rowHouse(el, ctx) {
-  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col, ctx.lights), W = F.W, D = F.D, th = 0.55, H = 3.0 + rand() * 0.3, wm = WALLS[Math.floor(rand() * WALLS.length)], open = !!el.open;
-  const uD = W * (0.3 + rand() * 0.4), rk = rand(), roof = rk < 0.42 ? 'tile' : rk < 0.72 ? 'thatch' : 'flat', rise = 1.5 + rand() * 0.5;
+  const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col, ctx.lights), W = F.W, D = F.D, th = 0.55, tier = el.tier ?? 1, H = [3.4, 3.0, 2.65][tier] + rand() * 0.3, wm0 = WALLS[Math.floor(rand() * WALLS.length)], wm = tier === 0 ? 'mud_plaster' : tier === 2 ? 'earth_wall' : wm0, open = !!el.open;
+  // the rule of the fronts: the rows by the road are taller, smoothed with clay, mostly tiled, with a wide door under a hood and two windows; the middle rows as the town runs; the outer rows low, raw earth, thatch or flat, a narrow door without a hood and one small window
+  const uD = W * (0.3 + rand() * 0.4), rk = rand(), roof = rk < [0.82, 0.42, 0.1][tier] ? 'tile' : rk < [0.9, 0.72, 0.62][tier] ? 'thatch' : 'flat', rise = 1.5 + rand() * 0.5;
+  const dW = [1.2, 1.0, 0.85][tier], dHt = [2.15, 1.95, 1.8][tier];
   const uW = uD < W / 2 ? W * 0.5 + (W - W * 0.5) * 0.5 : W * 0.25;
   const wk = rand() < 0.5 ? 'lattice' : 'shutter', hh = HOUSEHOLDS[Math.floor(rand() * HOUSEHOLDS.length)];
-  frontWall(F, wm, 0, th, H, [{ u: uD, w: 1.0, y0: 0, y1: 1.95 }, { u: Math.min(W - 0.9, Math.max(0.9, uW)), w: 0.8, y0: 1.2, y1: 1.95 }]);
-  doorFit(F, uD, 1.0, 1.95, 0, th, open, rand);
-  windowFit(F, Math.min(W - 0.9, Math.max(0.9, uW)), 1.2, 0.8, 0.75, 0, th, wk, open);
+  const wu = Math.min(W - 0.9, Math.max(0.9, uW)), ww = tier === 2 ? 0.55 : 0.8, u2 = W - wu, two = tier === 0 && Math.abs(u2 - uD) > 1.4 && Math.abs(u2 - wu) > 1.6;
+  frontWall(F, wm, 0, th, H, [{ u: uD, w: dW, y0: 0, y1: dHt }, { u: wu, w: ww, y0: 1.2, y1: 1.95 }, ...(two ? [{ u: u2, w: ww, y0: 1.2, y1: 1.95 }] : [])]);
+  doorFit(F, uD, dW, dHt, 0, th, open, rand, tier !== 2);
+  windowFit(F, wu, 1.2, ww, 0.75, 0, th, tier === 2 ? 'shutter' : wk, open);
+  if (two) windowFit(F, u2, 1.2, ww, 0.75, 0, th, wk, open);
   F.b(wm, 0, 0, th, th, H, D); F.b(wm, W - th, 0, th, W, H, D); F.b(wm, 0, 0, D - th, W, H, D);
   F.b('opening', W * 0.7, 2.2, D - th - 0.02, W * 0.7 + 0.4, 2.55, D - th + 0.02, false);                                 // the back's vent
   frontWear(F, rand, W, H, uD);
@@ -205,9 +241,9 @@ export function rowHouse(el, ctx) {
 /** qin_court_house: { rect, front, seed, open } — a walled court with a gate, the house of two rooms behind, a shed, the court's furniture. */
 export function courtHouse(el, ctx) {
   const { bag, col } = ctx, rand = rng(el.seed), F = frame(el.rect, el.front, bag, col, ctx.lights), W = F.W, D = F.D, th = 0.55, wm = WALLS[Math.floor(rand() * WALLS.length)], open = !!el.open;
-  const cv = 5.8 + rand() * 1.6, uD = W * (0.25 + rand() * 0.5), H = 3.3 + rand() * 0.4, HW = 2.6, tile = rand() < 0.7;
-  frontWall(F, wm, 0, th, HW, [{ u: uD, w: 1.8, y0: 0, y1: 2.3 }]);
-  doorFit(F, uD, 1.8, 2.3, 0, th, open, rand, false);
+  const tier = el.tier ?? 1, cv = 5.8 + rand() * 1.6, uD = W * (0.25 + rand() * 0.5), H = [3.6, 3.3, 3.0][tier] + rand() * 0.4, HW = [2.9, 2.6, 2.3][tier], tile = rand() < [1.1, 0.7, 0.3][tier];
+  frontWall(F, wm, 0, th, HW, [{ u: uD, w: 1.8, y0: 0, y1: tier === 2 ? 2.1 : 2.3 }]);
+  doorFit(F, uD, 1.8, tier === 2 ? 2.1 : 2.3, 0, th, open, rand, false);
   F.b(wm, 0, 0, th, th, HW, cv); F.b(wm, W - th, 0, th, W, HW, cv);
   frontWear(F, rand, W, HW, uD);
   gable(F, uD - 1.4, -0.1, uD + 1.4, th + 0.2, HW, 0.7, 'tile_grey', 0.5);                               // the little roof over the gate
@@ -238,7 +274,18 @@ export function courtHouse(el, ctx) {
   F.lathe('granite_grey', [[0.55, 0], [0.55, 0.3], [0.5, 0.3]], mu, 0, 4.4, 14); F.lathe('granite_grey', [[0.5, 0.3], [0.5, 0.5], [0.001, 0.5]], mu, 0.0, 4.4, 14); F.rod('timber', [mu, 0.5, 4.4], [mu + 0.5, 0.9, 4.4], 0.025, 4);   // the quern
   col.circle(F.X(mu), F.Z(4.4), 0.6, 0, 0.55);
   F.b('lattice', W * 0.5 - 1.2, 0, 1.0, W * 0.5 + 1.2, 0.9, 1.1, false);                                               // a wicker hurdle behind the gate
-  if (rand() < 0.6) F.lathe('thatch', [[1.0, 0], [1.1, 0.5], [0.95, 1.2], [0.6, 1.8], [0.001, 2.1]], side > 0 ? 3.5 : W - 3.5, 0, cv - 1.5, 10);                     // a stack of straw
+  // the pigsty with its privy (the Han models of houses have both, and the pig below the privy): a low pen of beaten earth against the court's side
+  // wall on the well's side, a pig in it, a raised squat platform in the corner under a little thatched roof [inferred: Qin–Han practice]
+  { const pu0 = side > 0 ? W - th - 2.9 : th + 0.1, pu1 = pu0 + 2.8, pv0 = 3.6, pv1 = cv - 0.4, wl = 0.2, pw = side > 0 ? pu1 - wl : pu0 + wl, ps = side > 0 ? -1 : 1;
+    F.b('earth_wall', pu0, 0, pv0, pu1, 0.9, pv0 + wl); F.b('earth_wall', pu0, 0, pv1 - wl, pu1, 0.9, pv1);
+    F.b('earth_wall', pu0, 0, pv0 + wl, pu0 + wl, 0.9, pv1 - wl); F.b('earth_wall', pu1 - wl, 0, pv0 + wl, pu1, 0.9, pv1 - wl);
+    const a0 = Math.min(pw, pw + ps * 1.0), a1 = Math.max(pw, pw + ps * 1.0), b0 = pv1 - wl - 1.1, b1 = pv1 - wl;
+    F.b('timber', a0, 0, b0, a1, 0.55, b1); F.b('opening', (a0 + a1) / 2 - 0.12, 0.55, (b0 + b1) / 2 - 0.08, (a0 + a1) / 2 + 0.12, 0.57, (b0 + b1) / 2 + 0.08, false);
+    for (const [u, v] of [[a0 + 0.04, b0 + 0.04], [a1 - 0.04, b0 + 0.04], [a0 + 0.04, b1 - 0.04], [a1 - 0.04, b1 - 0.04]]) F.b('timber', u - 0.04, 0.55, v - 0.04, u + 0.04, 1.9, v + 0.04, false);
+    F.b('thatch', a0 - 0.15, 1.9, b0 - 0.15, a1 + 0.15, 2.05, b1 + 0.15, false);
+    F.b('planks_grey', a0 + (ps > 0 ? 0 : 0.9), 0.55, b0, a0 + (ps > 0 ? 0.1 : 1.0), 1.9, b1, false);
+    animal({ kind: 'pig', at: [F.X((pu0 + pu1) / 2 - ps * 0.2), F.Z(pv0 + 0.65)], y: 0.02, rot: (el.seed % 6), seed: el.seed % 997, gear: false, graze: false }, ctx);
+  }
 }
 
 /** qin_official: { rect, front, seed, open } — an official's house on a raised earth platform, a gate with a plaque, a hall with a porch of columns. */
@@ -279,7 +326,7 @@ export function official(el, ctx) {
     for (let k = 0; k < 4 && hu0 + th + 0.2 + k * 2.2 < hu1 - th - 0.3; k++) F.rod('timber', [hu0 + th + 0.2 + k * 2.2, P + wallsH - 0.2, hv0 + th + 0.1], [hu0 + th + 0.2 + k * 2.2, P + wallsH - 0.2, hv1 - th - 0.1], 0.07, 5);
   }
   F.lathe('bronze', [[0.001, 0], [0.4, 0.05], [0.5, 0.5], [0.001, 0.55]], dc + 4, 0, 3.4, 12);
-  F.b('granite_grey', dc - 7, 0, 3.2, dc - 6.2, 0.8, 4.0);                                                              // a horse-block
+  { const hb = Math.max(0.6, dc - 7); F.b('granite_grey', hb, 0, 3.2, hb + 0.8, 0.8, 4.0); }                                                              // a horse-block
   void rand;
 }
 

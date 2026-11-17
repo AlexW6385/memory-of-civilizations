@@ -36,6 +36,11 @@ export function qinPit(el, { bag, col, lights }) {
     for (let x = CORR.x0 + 3; x < CORR.x1; x += 7.0) for (const zz of [pa - 0.16, pb + 0.16]) { bag.add('timber', box(x - 0.15, FL, zz - 0.15, x + 0.15, PT, zz + 0.15)); col.rect([x - 0.15, zz - 0.15, x + 0.15, zz + 0.15], FL, PT); }
   }
   for (let x = CORR.x0 + 3; x < CORR.x1; x += 7.0) for (const zz of [z0 + wall + 0.16, z1 - wall - 0.16]) bag.add('timber', box(x - 0.15, FL, zz - 0.15, x + 0.15, PT, zz + 0.15));
+  // the ramming courses on the partitions' faces along the three aisles that can be entered (2, 5, 8): light clay ledges every 0.4 m
+  for (const k of RAMP.zs) for (const f of [-1, 1]) {
+    const face = corrZ(k) + f * CORR.w / 2;
+    for (let y = FL + 0.4; y < PT - 0.15; y += 0.4) bag.add('mud_plaster', box(CORR.x0, y, f < 0 ? face : face - 0.03, CORR.x1, y + 0.04, f < 0 ? face + 0.03 : face));
+  }
   // the gallery's cross beam at the corridors' mouths
   bag.add('timber', box(GALLERY[0] - 0.2, PT - 0.5, z0 + wall, GALLERY[0] + 0.2, PT, z1 - wall));
   // the roof: one log for each corridor and each 0.42 m, laid across the partitions (a log 5.46 m, from partition middle to middle)
