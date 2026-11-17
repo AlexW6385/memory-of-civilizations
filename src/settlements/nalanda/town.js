@@ -1,5 +1,5 @@
 // The row of monasteries and temples, the tanks, the votive stupas, the village and the people of Nalanda (docs/settlements/nalanda.md §3, §9).
-import { openLots, lodTiles } from '../lod.js';
+import { lodTiles } from '../lod.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
 import { RADIUS, MONASTERIES, TEMPLES, TANKS, LEVEL, WAY, T3, M1, LIBRARY, mgate, lots, yards, tankD, WAY_LAMPS, BOOTHS, JALS, OTLAS, ANNEXES, GATE, STUPA_END } from './layout.js';
 import { HALL, TOWERS } from './plan.js';
@@ -10,16 +10,6 @@ import '../../objects/index.js';
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 40], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const face = ([dx, dz]) => Math.atan2(-dx, -dz);
-
-const AR = [ARRIVALS['nalanda'][0], ARRIVALS['nalanda'][2]];
-/** The village houses that stand open (the nearest to the arrival), with a map from a point of the house's own frame (u along the front from its low corner, v inward from the front, as the open house is built: styles/vernacular) to the world. */
-function openHouses() {
-  const all = lots(), open = openLots(all, AR, 16);
-  return all.filter((l) => open.has(l)).map((l) => {
-    const [x0, z0, x1, z1] = l.rect, n = l.front === 'n', L = n ? x1 - x0 : z1 - z0, D = n ? z1 - z0 : x1 - x0;
-    return { l, use: open.get(l), L, D, at: (u, v) => (n ? [x0 + u, z0 + v] : [x0 + v, z1 - u]), toward: n ? [0, -1] : [-1, 0] };
-  });
-}
 
 /** The votive stupas: lining the way on both sides, and ringing the temples. */
 function votives() {
@@ -134,13 +124,6 @@ function people() {
   lay([-1.5, GATE.c[1] + 9], 0, [0, -1], { pose: 'stand', carry: 'bundle' }); woman([1.8, GATE.c[1] + 11], 0, [0, -1], { pose: 'stand', carry: 'basket' });
   // the yards: zebu and goats in the pens, hay
   yards().forEach((y, i) => { const [a0, b0, a1, b1] = y.rect; if (i % 3 === 2) return; P.push({ t: 'animal', kind: 'zebu', at: [(a0 + a1) / 2 - 1, (b0 + b1) / 2], y: 0, rot: r() * 6, seed: 300 + i }, { t: 'animal', kind: i % 2 ? 'goat' : 'zebu', at: [(a0 + a1) / 2 + 1.5, (b0 + b1) / 2 + 1], y: 0, rot: r() * 6, seed: 400 + i }); });
-  // inside the open houses: the woman of the house at her clay stove, the man resting on a string bed, in the inn the keeper at the door's side
-  openHouses().forEach((h, i) => {
-    const T = 0.3, fy = 0.45;
-    const back = [-h.toward[0], -h.toward[1]];
-    if (i % 3 !== 1) woman(h.at(h.L - T - 0.6, h.D - T - 1.15), fy, back, { pose: 'stand', carry: 'none' });
-    if (i % 2 === 0) lay(h.at(h.L - T - 1.1, T + 1.05), fy + 0.46, h.toward, { pose: 'cross', carry: 'none', hat: 'none' });
-  });
   void LEVEL;
   return base('nalanda-people', 'life', P);
 }
@@ -239,10 +222,16 @@ export async function town() {
   for (const a of ANNEXES) E.push({ t: 'annex', ...a });
   E.push({ t: 'gate', ...GATE, c: GATE.c });
   E.push({ t: 'village', items: villageItems() });
-  const all = lots(), houses = [], open = openLots(all, [ARRIVALS['nalanda'][0], ARRIVALS['nalanda'][2]], 16);
-  const hl = all.map((l) => ({ t: 'house_india', ...l, ...(open.has(l) ? { open: true } : {}) }));
-  houses.push(...lodTiles('nalanda-houses', 'vernacular', hl, { near: 130, R: RADIUS, entrance: { at: [0, 40], facing: 'n' } }));
-  // the lit rooms: an oil lamp (diya) in a niche over each open house's stove, alight
-  const lamps = openHouses().map(({ at, L, D }) => { const [x, z] = at(L - 0.3 - 0.9, D - 0.3 - 0.3); return { t: 'block', rect: [x - 0.05, z - 0.05, x + 0.05, z + 0.05], y0: 0.8, y1: 0.93, mat: 'lamp_glass', collide: false }; });
-  return [base('nalanda-town', 'nalanda', E), base('nalanda-hearths', 'nalanda', lamps), people(), ...wayLife(), ...houses];
+  const all = lots(), houses = [], rr = rng(5), AR2 = [ARRIVALS['nalanda'][0], ARRIVALS['nalanda'][2]];
+  // every house is built by rule (style nalanda: kind from the lot's size, the front by its bays); those within 175 m of the arrival stand open, each with the use of its hall
+  const uses = ['home', 'weaver', 'grain', 'home', 'oil', 'garland', 'scribe', 'rest', 'home', 'garland'];
+  let ui = 0;
+  const hl = all.map((l) => {
+    const d = Math.hypot((l.rect[0] + l.rect[2]) / 2 - AR2[0], (l.rect[1] + l.rect[3]) / 2 - AR2[1]);
+    const ok = d < 175 && l.rect[2] - l.rect[0] >= 6.5 && l.rect[3] - l.rect[1] >= 6;
+    return { t: 'house_bihar', ...l, ...(ok ? { open: true, use: uses[(ui++ + Math.floor(rr() * 3)) % uses.length] } : {}) };
+  });
+  houses.push(...lodTiles('nalanda-houses', 'nalanda', hl, { near: 130, R: RADIUS, entrance: { at: [0, 40], facing: 'n' } }));
+  const wells = [[127, 40], [127, -50], [100, 102]].map(([x, z]) => ({ t: 'well', at: [x, z], y: 0, mat: 'brick_baked' }));
+  return [base('nalanda-town', 'nalanda', E), base('nalanda-wells', 'vernacular', wells), people(), ...wayLife(), ...houses];
 }

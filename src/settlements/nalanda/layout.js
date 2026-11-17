@@ -13,7 +13,7 @@ export const mgate = (m) => [m.rect[0], (m.rect[1] + m.rect[3]) / 2];
 /** The temples west of the way: the great temple (Śāriputra's, Temple 3) and others in the line. */
 export const TEMPLES = [
   { id: 't3', c: [-44, 0], half: 25, tiers: 4, tierH: 5, shrine: true, shrineH: 5.2, seed: 3 },
-  { id: 't2', c: [-44, 66], half: 13, tiers: 3, tierH: 3.5, shrine: true, shrineH: 4.4, seed: 4 },
+  { id: 't2', c: [-44, 66], half: 13, tiers: 3, tierH: 3.5, shrine: true, shrineH: 4.4, seed: 4, panels: true },
   { id: 't12', c: [-44, -66], half: 13, tiers: 3, tierH: 3.5, shrine: true, shrineH: 4.4, seed: 5 },
   { id: 't13', c: [-44, 104], half: 11, tiers: 3, tierH: 3.2, seed: 6 },
 ];
