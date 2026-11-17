@@ -69,9 +69,13 @@ function athenaParthenosRich(el, { bag, col }) {
     const kind = i === 10 ? 'maiden' : ['walker', 'maiden', 'god', 'maiden'][i % 4];
     gold.push(relief(kind, i, { p: [-PW / 2 + 0.45 + i * (PW - 0.9) / 19, 0.34, PD / 2 - 0.1 + 0.002], u: [1, 0, 0], o: [0, 0, 1], s: 0.6, d: 0.045, flip: i > 10 }));
   }
+  // the shield's size and lean fix where her left hand rests: on the rim's top, the rim's foot on the pedestal
+  const R = 2.25, n = new Vector3(0.34, 0.2, 0.92).normalize();
+  const topDir = UP.clone().sub(n.clone().multiplyScalar(n.y)).normalize();             // the shield's highest rim point, from its centre
+  const hl = [0.185 * H, 0.03 + R * topDir.y * 1.995, 0.09 * H];                         // her left hand (above the pedestal's top F)
   // ── the goddess
   const fig = peplosFigure({ weight: 'r', hair: 'long', helmet: true, n: 18, folds: 18,
-    arms: { r: [[-0.152, 0.63, 0.06], [-0.17, 0.6, 0.215]], l: [[0.15, 0.625, 0.025], [0.2, 0.495, 0.09]] } });
+    arms: { r: [[-0.152, 0.63, 0.06], [-0.17, 0.6, 0.215]], l: [[0.15, 0.6, 0.025], [hl[0] / H, hl[1] / H + 0.0, hl[2] / H]] } });
   const g = aegis(F, H);
   const body = placeFigure(fig, H, 0, F, 0);
   const put = (list, geom) => { if (geom) list.push(geom); };
@@ -93,9 +97,7 @@ function athenaParthenosRich(el, { bag, col }) {
   put(gold, nk.cloth); put(ivory, nk.skin); put(gold, nk.hair); put(gold, nk.trim); put(eye, nk.dark);
   stone.push(lathe([[0.34, 0], [0.34, 0.22], [0.27, 0.28], [0.25, 0.5], [0.255, hand[1] - F - 0.4], [0.33, hand[1] - F - 0.2], [0.35, hand[1] - F - 0.1], [0.001, hand[1] - F - 0.1]], 24, (th, i) => (i >= 3 && i <= 4 ? 1 + 0.03 * Math.cos(th * 16) : 1), hand[0], F, hand[2]));
   // ── the shield: leaning at her left, her hand on its rim; the outer face turned forward, the Amazonomachy in relief about the gorgon's head
-  const R = 2.4, n = new Vector3(0.34, 0.2, 0.92).normalize();
-  const topDir = UP.clone().sub(n.clone().multiplyScalar(n.y)).normalize();             // the shield's highest rim point, from its centre
-  const handL = new Vector3(0.2 * H, F + 0.495 * H - 0.08, 0.09 * H);                    // her left hand, resting on the rim
+  const handL = new Vector3(hl[0], F + hl[1], hl[2]);
   const centre = handL.clone().sub(topDir.clone().multiplyScalar(R * 0.995));
   const place = new Matrix4().compose(centre, new Quaternion().setFromUnitVectors(UP, n), new Vector3(1, 1, 1));
   const shield = [], shieldRim = [], shieldRel = [], shieldBoss = [];
@@ -104,9 +106,9 @@ function athenaParthenosRich(el, { bag, col }) {
   shieldRim.push(lathe([[R * 0.5, 0.082], [R * 0.52, 0.12], [R * 0.54, 0.12], [R * 0.56, 0.082]], 48));
   for (let k = 0; k < 11; k++) {                                            // the fighters round the field
     const a = (k / 11) * Math.PI * 2, kind = k % 3 === 0 ? 'centaurR' : k % 2 ? 'foe' : 'fighter';
-    const r = relief(kind, k, { p: [0, 0, 0], u: [1, 0, 0], o: [0, 0, 1], s: 0.78, d: 0.12 });
+    const r = relief(kind, k, { p: [0, 0, 0], u: [1, 0, 0], o: [0, 0, 1], s: R * 0.325, d: 0.12 });
     // into the shield's frame (its axis y): the relief's depth up the axis, its height outward along −z, then round the ring
-    r.applyMatrix4(new Matrix4().makeRotationX(-Math.PI / 2).premultiply(new Matrix4().makeTranslation(0, 0.05, -1.3)).premultiply(new Matrix4().makeRotationY(a)));
+    r.applyMatrix4(new Matrix4().makeRotationX(-Math.PI / 2).premultiply(new Matrix4().makeTranslation(0, 0.05, -R * 0.58)).premultiply(new Matrix4().makeRotationY(a)));
     shieldRel.push(r);
   }
   // the gorgon's head as the boss: a face, the staring eyes, the snakes

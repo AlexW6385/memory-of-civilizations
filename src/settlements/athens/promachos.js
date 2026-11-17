@@ -23,8 +23,11 @@ function athensPromachos(el, { bag, col }) {
   const dk = [];
   for (let i = 0; i < 18; i++) dk.push(box(-1.5 + i * 0.17, b - 0.62, 1.85, -1.5 + i * 0.17 + 0.08, b - 0.5, 1.865));      // the letters of the dedication
   // ── the goddess, in bronze
+  const R = 1.75, n = new Vector3(0.3, 0.12, 0.95).normalize();
+  const topDir = UP.clone().sub(n.clone().multiplyScalar(n.y)).normalize();
+  const hl = [0.17 * h, 0.03 + R * topDir.y * 1.995, 0.085 * h];                           // her left hand on the shield's top rim, its foot on the base
   const fig = peplosFigure({ weight: 'r', hair: 'long', helmet: true, n: 16, folds: 16,
-    arms: { r: [[-0.16, 0.66, 0.03], [-0.17, 0.79, 0.09]], l: [[0.15, 0.62, 0.02], [0.195, 0.5, 0.085]] } });
+    arms: { r: [[-0.16, 0.66, 0.03], [-0.17, 0.79, 0.09]], l: [[0.15, 0.6, 0.02], [hl[0] / h, hl[1] / h, hl[2] / h]] } });
   const body = placeFigure(fig, h, 0, b, 0);
   const bronze = [body.cloth, body.skin, body.hair, body.trim, body.metal].filter(Boolean);
   const H = h;
@@ -42,16 +45,14 @@ function athensPromachos(el, { bag, col }) {
   const hand = [-0.17 * H, b + 0.79 * H, 0.09 * H];
   sn.push(rod([hand[0], b + 0.05, hand[2]], [hand[0] + 0.05, b + 1.28 * H, hand[2]], 0.07, 8), limb([hand[0] + 0.05, b + 1.28 * H, hand[2]], [hand[0] + 0.052, b + 1.28 * H + 0.55, hand[2]], 0.12, 0.01, 6));
   // the shield: standing on its rim at her left, her hand on it; the Centauromachy in relief
-  const R = 1.2, n = new Vector3(0.3, 0.12, 0.95).normalize();
-  const topDir = UP.clone().sub(n.clone().multiplyScalar(n.y)).normalize();
-  const handL = new Vector3(0.2 * H, b + 0.495 * H - 0.05, 0.085 * H);
+  const handL = new Vector3(hl[0], b + hl[1], hl[2]);
   const centre = handL.clone().sub(topDir.clone().multiplyScalar(R * 0.995));
   const place = new Matrix4().compose(centre, new Quaternion().setFromUnitVectors(UP, n), new Vector3(1, 1, 1));
   const sh = [lathe([[0.001, 0.1], [0.15, 0.095], [0.33, 0.07], [R * 0.45, 0.05], [R * 0.52, 0.03], [R * 0.9, 0.015], [R * 0.99, 0.0], [R * 0.99, -0.06], [R * 0.85, -0.03], [0.001, 0.0]], 48),
     lathe([[R * 0.9, 0.015], [R * 0.99, 0.0], [R, 0.0], [R, 0.05], [R * 0.985, 0.08], [R * 0.9, 0.05]], 48)];
   for (let k = 0; k < 8; k++) {
-    const a = (k / 8) * Math.PI * 2, r = relief(k % 2 ? 'centaurR' : 'foe', k, { p: [0, 0, 0], u: [1, 0, 0], o: [0, 0, 1], s: 0.4, d: 0.06 });
-    r.applyMatrix4(new Matrix4().makeRotationX(-Math.PI / 2).premultiply(new Matrix4().makeTranslation(0, 0.03, -0.68)).premultiply(new Matrix4().makeRotationY(a)));
+    const a = (k / 8) * Math.PI * 2, r = relief(k % 2 ? 'centaurR' : 'foe', k, { p: [0, 0, 0], u: [1, 0, 0], o: [0, 0, 1], s: R / 3, d: 0.06 });
+    r.applyMatrix4(new Matrix4().makeRotationX(-Math.PI / 2).premultiply(new Matrix4().makeTranslation(0, 0.03, -R * 0.57)).premultiply(new Matrix4().makeRotationY(a)));
     sh.push(r);
   }
   sh.push(blob([0, 0.14, 0], 0.2, [1, 0.45, 1], 10));

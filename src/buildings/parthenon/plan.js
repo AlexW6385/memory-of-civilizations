@@ -42,7 +42,7 @@ add({ t: 'pediment_roof', rect: [X[0] - FACE - 0.7, Z[0] - FACE - 0.7, X[16] + F
 
 // the sima with its lion-head spouts and anthemion, the painted leaf moulding at the head of the frieze, the floral acroteria
 const XE = X[16] + FACE + 0.7, ZE = Z[7] + FACE + 0.7;
-add({ t: 'parthenon_cornice', x: X.flatMap((x, i) => (i < 16 ? [x, (x + X[i + 1]) / 2] : [x])), xe: XE, ze: ZE, y: TOP, rise: 3.45, rg: 0.55, O: [X[0] - FACE, Z[0] - FACE, X[16] + FACE, Z[7] + FACE], yF: FRIEZE_TOP });
+add({ t: 'parthenon_cornice', x: X, xe: XE, ze: ZE, y: TOP, rise: 3.45, rg: 0.55, O: [X[0] - FACE, Z[0] - FACE, X[16] + FACE, Z[7] + FACE], yF: FRIEZE_TOP });
 add({ t: 'parthenon_acroteria', xe: XE, y: TOP + 3.45 + 0.55 + 0.3, yc: TOP + 0.58, zc: ZE - 0.35, h: 3.6, hc: 1.9 });
 
 // marble coffered ceilings over the pteron, from the entablature to the cella walls
