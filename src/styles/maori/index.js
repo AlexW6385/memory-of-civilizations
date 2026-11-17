@@ -23,6 +23,7 @@ import { WORKS } from './works.js';
 const K = 'kokowai', P = 'palisade', TH = 'raupo', PAUA = 'shell_inlay';
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+const RING = lathe([[1, 0], [1, 1]], 7);                          // a lashing of fibre round a post, unit radius and height (instanced)
 const POST = lathe([[1, 0], [0.9, 1], [0.001, 1.07]], 7);       // one post at unit size, instanced at each place (the palisade has some five thousand)
 const post = (bag, x, y, z, r, h, mat = P) => {
   if (!bag.addInstance) return bag.add(mat, lathe([[r, 0], [r * 0.9, h], [0.001, h + r]], 7, null, x, y, z));
@@ -154,6 +155,12 @@ function figure(bag, kind, x, y, z, h, yaw = 0, reach = 400) {
   }
 }
 
+/** A cord lashing round a post at (x, y, z), radius r, 6 cm tall. */
+function lash(bag, x, y, z, r) {
+  if (bag.addInstance) bag.addInstance('rope_fibre', RING, new Matrix4().makeTranslation(x, y, z).multiply(new Matrix4().makeScale(r, 0.14, r)), { reach: 120 });
+  else bag.add('rope_fibre', lathe([[r, 0], [r, 0.14]], 7, null, x, y, z));
+}
+
 /** palisade: { a, b, y, h } — close-set posts, every ninth a tall post crowned by a carved figure, two rails lashed across. */
 function palisade(el, { bag, col }) {
   const [ax, az] = el.a, [bx, bz] = el.b, y = el.y ?? 0, h = el.h ?? 4, L = Math.hypot(bx - ax, bz - az);
@@ -167,7 +174,11 @@ function palisade(el, { bag, col }) {
       post(bag, x, y - 0.5, z, 0.22, h + 0.8, K);
       figure(bag, 'post', x, y + h + 0.25, z, 1.3, out);
       for (const yy of [y + 1.0, y + h - 0.6]) bag.add('rope_fibre', lathe([[0.235, 0], [0.235, 0.08]], 6, null, x, yy - 0.02, z));   // the rails' lashings
-    } else post(bag, x, y - 0.5, z, big ? 0.22 : 0.12, (big ? h + 1.4 : h) + 0.5 + ((i * 37) % 5) * 0.06, big ? K : P);
+    } else {
+      post(bag, x, y - 0.5, z, big ? 0.22 : 0.12, (big ? h + 1.4 : h) + 0.5 + ((i * 37) % 5) * 0.06, big ? K : P);
+      // every third post is lashed to each rail with fibre cord, the binding standing proud of the post [inferred: lashed, not nailed — no metal before contact]
+      if (i % 3 === 1) for (const yy of [y + 1.0, y + h - 0.6]) lash(bag, x, yy - 0.01, z, 0.135);
+    }
   }
   for (const yy of [y + 1.0, y + h - 0.6]) bag.add(P, orientedBox(el.a, el.b, 0.12, yy, yy + 0.12));
   col.segment(el.a, el.b, 0.4, y - 0.5, y + h);
@@ -194,6 +205,9 @@ function commonHouse(add, { w, l, h, t, zf, e, under, trade }) {
     for (let k = 0; k < 3; k++) { const z0 = zi0 + 0.6 + k * (zi1 - zi0 - 1.2) / 2.4; add(k === 1 ? 'hide_tan' : 'cloth_brown', box(x0 + 0.1, 0.15, z0, x1 - 0.1, 0.27, z0 + 0.5)); }
     add('timber', box(s > 0 ? xi - 0.1 : -xi, 0.15, zi0 + 0.25, s > 0 ? xi : -xi + 0.1, 0.36, zi1 - 0.05));     // the head-board
   }
+  // the roof's frame seen from below: a rafter (heke) every 0.95 m from the wall's top to the ridge beam, two purlins (kaho) along the slopes, all lashed with fibre [inferred: after the porch's heke; Te Ara "Māori housing" — a wooden frame covered with raupō]
+  for (let zz = zi0 + 0.1; zz < zi1; zz += 0.95) for (const s of [-1, 1]) add('timber', rod([s * (w / 2 - 0.05), under(w / 2 - 0.05) - 0.07, zz], [s * 0.1, under(0.1) - 0.07, zz], 0.032, 4));
+  for (const x of [-w / 4, w / 4]) add('timber', rod([x, under(Math.abs(x)) - 0.075, zi0], [x, under(Math.abs(x)) - 0.075, zi1], 0.028, 4));
   // the hearth: a ring of stones, the ash and the coals, brands across
   add('opening', box(-0.32, 0.036, zm - 0.32, 0.32, 0.05, zm + 0.32));
   for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; add('basalt', box(Math.cos(a) * 0.4 - 0.08, 0.0, zm + Math.sin(a) * 0.4 - 0.08, Math.cos(a) * 0.4 + 0.08, 0.12, zm + Math.sin(a) * 0.4 + 0.08)); }
@@ -237,6 +251,30 @@ function commonHouse(add, { w, l, h, t, zf, e, under, trade }) {
   // the earth banked against the outside of the side walls and round the back
   for (const s of [-1, 1]) add('sod', prism([[s * (w / 2 + 0.01), 0.6], [s * (w / 2 + 0.01), -0.2], [s * (w / 2 + 0.95), -0.2], [s * (w / 2 + 0.5), 0.2]], zf + 0.4, l / 2 - 0.1));
   void e; void h;
+}
+
+/**
+ * One tukutuku panel standing against a wall between two poupou: upright reed stems behind (the backing), dark
+ * laths (kaho) across them at 7.5 cm, the stitches in cells on the laths — "poutama", the stairway (steps rising
+ * two cells by two), or "pātiki", the flounder (stacked diamonds) — in kōkōwai red and pale kiekie/pīngao. The
+ * wall's own `tukutuku` surface (the kaokao chevrons) shows in the panels left bare. The face of the wall is at
+ * x = xf, the room on the side of −s. (docs/settlements/maori.md §4g)
+ */
+function tukutukuPanel(add, s, xf, zA, zB, kind) {
+  const X = (d0, d1) => { const a = xf - s * d0, b = xf - s * d1; return [Math.min(a, b), Math.max(a, b)]; };
+  const bx = (mat, d0, d1, z0, y0, z1, y1) => { const [xa, xb] = X(d0, d1); add(mat, box(xa, y0, z0, xb, y1, z1)); };
+  const y0 = 0.1, y1 = 1.15, nr = 14, nc = Math.max(4, Math.round((zB - zA) / 0.076)), cw = (zB - zA) / nc, ch = (y1 - y0) / nr;
+  bx('reed_mat', 0, 0.016, zA, y0, zB, y1);
+  for (let r = 0; r < nr; r++) bx('wood_dark', 0.016, 0.032, zA, y0 + r * ch + ch * 0.36, zB, y0 + r * ch + ch * 0.64);
+  for (let r = 0; r < nr; r++) for (let c = 0; c < nc; c++) {
+    let m = null;
+    if (kind === 'poutama') { const b = (((Math.floor(r / 2) - Math.floor(c / 2)) % 4) + 4) % 4; m = b === 0 ? K : b === 2 ? 'cloth_ochre' : null; }
+    else {
+      const d = Math.abs(c - (nc - 1) / 2) / (nc / 2) + Math.abs((r % 7) - 3) / 3.5;
+      m = d >= 0.78 && d < 1.15 ? K : d < 0.5 ? 'cloth_ochre' : null;
+    }
+    if (m) bx(m, 0.032, 0.048, zA + (c + 0.22) * cw, y0 + (r + 0.2) * ch, zA + (c + 0.78) * cw, y0 + (r + 0.8) * ch);
+  }
 }
 
 /**
@@ -349,6 +387,7 @@ function whare(el, ctx) {
         const zz = zi0 + (zi1 - zi0) * k / n;
         fig('slab', s * (w / 2 - t - 0.08), 0, zz, h - 0.02, s * Math.PI / 2);
         add('kowhaiwhai', board([s * (w / 2 - t - 0.1), h - 0.02], [s * 0.15, under(0.15) - 0.07], 0.12, zz - 0.05, zz + 0.05));   // heke painted with kōwhaiwhai
+        if (k < n) { const kind = [null, 'poutama', 'patiki'][(k + (s > 0 ? 0 : 1)) % 3]; if (kind) tukutukuPanel(add, s, s * (w / 2 - t - 0.03), zz + 0.27, zz + (zi1 - zi0) / n - 0.27, kind); }
       }
     }
     add('reed_mat', box(-w / 2 + t + 0.15, -0.2, zf + 1.2, w / 2 - t - 0.15, 0.03, l / 2 - t - 0.15));
@@ -423,22 +462,56 @@ function pataka(el, ctx) {
     const q = P2(s * (w / 2 + 0.01), z);
     figure(bag, 'slab', q[0], y0 + lift + 0.04, q[1], 0.86, yaw - s * Math.PI / 2, 200);
   }
+  // the deck's front edge carved in a band of rauponga, and at the pole's foot kete of kūmara and a gourd, a stack of dried fish on a board [inferred: the carved front is the same builder's as the house's, §4c]
+  for (const g of rauponga([-w / 2 - 0.02, lift - 0.04], [w / 2 + 0.02, lift - 0.04], 0.1, -l / 2 - 0.15)) add(K, g);
+  for (const [bx, bz, r] of [[-0.45, -l / 2 - 0.85, 0.2], [-0.9, -l / 2 - 0.55, 0.17]]) {
+    const [qx, qz] = P2(bx, bz);
+    bag.add('wicker', lathe([[0.001, 0], [r * 0.8, 0.005], [r, r * 0.45], [r * 0.95, r * 0.9], [0.001, r * 0.9]], 9, null, qx, y0, qz));
+    bag.add('terracotta', lathe([[r * 0.9, r * 0.82], [r * 0.6, r * 1.05], [0.001, r * 1.15]], 9, null, qx, y0, qz));
+  }
+  { const [qx, qz] = P2(0.95, -l / 2 - 0.7); bag.add('wood_ochre', lathe([[0.001, 0], [0.12, 0.02], [0.17, 0.12], [0.1, 0.22], [0.05, 0.3], [0.001, 0.3]], 9, null, qx, y0, qz)); }
   // the notched pole (arawhata) leaning to the deck's front
   const z0 = -l / 2 - lift * 0.55, z1 = -l / 2 - 0.1;
   add('timber', rod([0.45, -0.1, z0], [0.45, lift, z1], 0.07, 7));
   for (let k = 1; k < 5; k++) { const t = k / 5; add('timber', box(0.36, -0.1 + (lift + 0.1) * t, z0 + (z1 - z0) * t - 0.07, 0.54, -0.1 + (lift + 0.1) * t + 0.04, z0 + (z1 - z0) * t + 0.03)); }
 }
 
-/** stage: a fighting stage (pūwhara) { c, h, s } — a platform on tall posts by the palisade. */
+/**
+ * stage: a fighting stage (pūwhara) { c, h, s } — a platform on four tall posts by the palisade: the posts tied
+ * with cross-rails and braced with diagonals, the deck of boards on bearers and joists, a woven breastwork of
+ * brushwood (wicker) on stakes round its outer edges, a ladder of one notched log, throwing stones and spears.
+ */
 function stage(el, { bag, col }) {
-  const [x, z] = el.c, h = el.h ?? 6, s = el.s ?? 2.4, y0 = el.y ?? 0;
-  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { post(bag, x + dx * s / 2, y0 - 0.5, z + dz * s / 2, 0.15, h + 1.6); col.circle(x + dx * s / 2, z + dz * s / 2, 0.16, y0, y0 + h); }
-  bag.add('timber', box(x - s / 2 - 0.3, y0 + h - 0.15, z - s / 2 - 0.3, x + s / 2 + 0.3, y0 + h, z + s / 2 + 0.3));
-  for (const [a, b] of [[[x - s / 2, z - s / 2], [x + s / 2, z - s / 2]], [[x - s / 2, z + s / 2], [x + s / 2, z + s / 2]]]) bag.add(P, orientedBox(a, b, 0.1, y0 + h, y0 + h + 0.9));
+  const [x, z] = el.c, h = el.h ?? 6, s = el.s ?? 2.4, y0 = el.y ?? 0, q = s / 2;
+  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { post(bag, x + dx * q, y0 - 0.5, z + dz * q, 0.15, h + 1.6); col.circle(x + dx * q, z + dz * q, 0.16, y0, y0 + h); }
+  // the frame: a cross-rail at mid-height on all four sides, a diagonal brace in each side, cords at the joints [inferred: the form of a lashed timber frame]
+  const ym = y0 + h * 0.45, yb = y0 + h - 0.35;
+  const corners = [[x - q, z - q], [x + q, z - q], [x + q, z + q], [x - q, z + q]];
+  for (let i = 0; i < 4; i++) {
+    const a = corners[i], b = corners[(i + 1) % 4];
+    bag.add('timber', rod([a[0], ym, a[1]], [b[0], ym, b[1]], 0.05, 5));
+    bag.add('timber', rod([a[0], ym - 0.05, a[1]], [b[0], yb, b[1]], 0.04, 5));
+    lash(bag, a[0], ym - 0.04, a[1], 0.18); lash(bag, a[0], yb - 0.04, a[1], 0.18);
+  }
+  // the deck: bearers along the posts' tops, joists across them, boards laid over
+  for (const dz of [-1, 1]) bag.add('timber', box(x - q - 0.3, y0 + h - 0.34, z + dz * q - 0.07, x + q + 0.3, y0 + h - 0.2, z + dz * q + 0.07));
+  for (let k = 0; k < 5; k++) { const jx = x - q + k * s / 4; bag.add('timber', box(jx - 0.05, y0 + h - 0.2, z - q - 0.3, jx + 0.05, y0 + h - 0.12, z + q + 0.3)); }
+  bag.add('timber', box(x - q - 0.3, y0 + h - 0.12, z - q - 0.3, x + q + 0.3, y0 + h - 0.04, z + q + 0.3));
+  const nb = 10, bw = (s + 0.6) / nb;
+  for (let k = 0; k < nb; k++) bag.add('timber', box(x - q - 0.3 + k * bw + 0.005, y0 + h - 0.04, z - q - 0.3, x - q - 0.3 + (k + 1) * bw - 0.005, y0 + h, z + q + 0.3));
+  // the breastwork: stakes round the outer edges (the ladder's side left open), a screen of woven brushwood between them, a rail on top
+  const bz0 = y0 + h, ex = q + 0.3;
+  const screen = (a, b) => {
+    const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(2, Math.round(L / 0.7));
+    for (let i = 0; i <= n; i++) bag.add('timber', rod([a[0] + (b[0] - a[0]) * i / n, bz0, a[1] + (b[1] - a[1]) * i / n], [a[0] + (b[0] - a[0]) * i / n, bz0 + 1.05, a[1] + (b[1] - a[1]) * i / n], 0.03, 5));
+    bag.add('wicker', orientedBox(a, b, 0.06, bz0 + 0.12, bz0 + 0.8));
+    bag.add('timber', orientedBox(a, b, 0.07, bz0 + 0.95, bz0 + 1.03));
+  };
+  screen([x - ex + 0.05, z - ex], [x + ex, z - ex]); screen([x - ex + 0.05, z + ex], [x + ex, z + ex]); screen([x + ex, z - ex], [x + ex, z + ex]);
   // a heap of throwing stones on the platform and spears (tao) leaning at the breastwork [inferred]
   for (let k = 0; k < 7; k++) bag.add('basalt', box(x - 0.8 + (k % 4) * 0.22 + (k > 3 ? 0.1 : 0), y0 + h, z + 0.1 + Math.floor(k / 4) * 0.2, x - 0.62 + (k % 4) * 0.22 + (k > 3 ? 0.1 : 0), y0 + h + 0.14 + (k > 3 ? 0.1 : 0), z + 0.27 + Math.floor(k / 4) * 0.2));
-  for (const u of [0.3, 0.45, 0.6]) bag.add('wood_dark', rod([x + u, y0 + h, z + s / 2 - 0.1], [x + u + 0.08, y0 + h + 1.9, z + s / 2 - 0.05], 0.018, 5));
-  // the ladder up one side
+  for (const u of [0.3, 0.45, 0.6]) bag.add('wood_dark', rod([x + u, y0 + h, z + ex - 0.12], [x + u + 0.08, y0 + h + 1.9, z + ex - 0.07], 0.018, 5));
+  // the ladder up the open side: a log leaning to the deck's edge with a step cut every metre [inferred: the notched pole, as of the storehouse]
   bag.add('timber', rod([x - s / 2 - 0.9, y0, z], [x - s / 2 - 0.05, y0 + h, z], 0.07, 6));
   for (let k = 1; k < 9; k++) { const t = k / 9; bag.add('timber', box(x - s / 2 - 0.9 + 0.85 * t - 0.03, y0 + h * t, z - 0.1, x - s / 2 - 0.9 + 0.85 * t + 0.05, y0 + h * t + 0.04, z + 0.1)); }
 }
@@ -478,6 +551,21 @@ function rua(el, { bag }) {
   bag.add('timber', prism([[-w / 2 + 0.05, -0.05], [w / 2 - 0.05, -0.05], [0, 0.78]].map(([a, b]) => [x + a, y0 + b]), z + l / 2 - 0.08, z + l / 2 - 0.02));
   bag.add('timber', prism([[-w / 2 + 0.05, -0.05], [w / 2 - 0.05, -0.05], [0, 0.78]].map(([a, b]) => [x + a, y0 + b]), z - l / 2 + 0.02, z - l / 2 + 0.08));
   bag.add('opening', box(x - 0.2, y0 - 0.05, z - l / 2 + 0.005, x + 0.2, y0 + 0.4, z - l / 2 + 0.02));
+  // the door's frame of two jambs and a lintel, standing out of the end board
+  bag.add('timber', box(x - 0.28, y0 - 0.1, z - l / 2 - 0.05, x - 0.2, y0 + 0.46, z - l / 2 + 0.03)); bag.add('timber', box(x + 0.2, y0 - 0.1, z - l / 2 - 0.05, x + 0.28, y0 + 0.46, z - l / 2 + 0.03));
+  bag.add('timber', box(x - 0.3, y0 + 0.4, z - l / 2 - 0.06, x + 0.3, y0 + 0.48, z - l / 2 + 0.03));
+  // the roof's ridge capped with a roll of raupō and the thatch tied down with fibre cords across each slope [stated: pitched roofs on poles over the larger pits, Te Ara "Storage pit designs"; inferred: the cords, the cap]
+  bag.add(TH, rod([x, y0 + 0.82, z - l / 2 - 0.02], [x, y0 + 0.82, z + l / 2 + 0.02], 0.07, 6));
+  for (const s of [-1, 1]) for (let k = 0; k < 4; k++) {
+    const zz = z - l / 2 + 0.35 + k * (l - 0.7) / 3;
+    bag.add('rope_fibre', rod([x + s * (w / 2 + 0.02), y0 - 0.04, zz], [x + s * 0.03, y0 + 0.84, zz], 0.017, 4));
+  }
+  // earth banked against both eaves (the pit's roof sits in the ground), and before the door a heap of kūmara in a kete and a mat to sort them on
+  for (const s of [-1, 1]) bag.add('banco', prism([[s * (w / 2 - 0.1), 0.3], [s * (w / 2 - 0.1), -0.08], [s * (w / 2 + 0.6), -0.08], [s * (w / 2 + 0.3), 0.08]].map(([a, b]) => [x + a, y0 + b]), z - l / 2 + 0.25, z + l / 2 - 0.1));
+  bag.add('reed_mat', box(x - 0.55, y0 - 0.02, z - l / 2 - 1.15, x + 0.55, y0 + 0.02, z - l / 2 - 0.35));
+  bag.add('wicker', lathe([[0.001, 0], [0.18, 0.005], [0.22, 0.1], [0.2, 0.22], [0.001, 0.22]], 9, null, x + 0.85, y0, z - l / 2 - 0.7));
+  bag.add('terracotta', lathe([[0.2, 0.18], [0.14, 0.28], [0.001, 0.3]], 9, null, x + 0.85, y0, z - l / 2 - 0.7));
+  for (let k = 0; k < 6; k++) bag.add('terracotta', lathe([[0.001, 0], [0.05, 0.03], [0.045, 0.2], [0.001, 0.26]], 6, null, x - 0.35 + (k % 3) * 0.28 + (k > 2 ? 0.1 : 0), y0 + 0.02, z - l / 2 - 0.55 - Math.floor(k / 3) * 0.3));
 }
 
 // ---- canoes --------------------------------------------------------------------------------
@@ -531,7 +619,45 @@ function waka(el, { bag, col }) {
   add(K, hull([[-0.05, hs - 0.3, us - 0.15], [0.05, hs - 0.3, us - 0.15], [0.05, hs - 0.3, us + 0.25], [-0.05, hs - 0.3, us + 0.25], [-0.05, hs + 2.6, us + 0.45], [0.05, hs + 2.6, us + 0.45], [0.05, hs + 2.6, us + 0.75], [-0.05, hs + 2.6, us + 0.75]]));
   for (const k of [0, 1]) add(K, lathe([[0.28, -0.05], [0.33, 0], [0.28, 0.05], [0.23, 0]], 14, null, 0, 0, 0).rotateZ(Math.PI / 2).translate(0, hs + 0.75 + k * 1.05, us + 0.2 + (0.5 * (0.75 + k * 1.05) / 2.9)));
   fig('slab', 0, hs - 0.25, us - 0.18, 0.55, Math.PI);
+  // the washstrakes are sewn to the hull: a cord lashing every half metre, standing proud of the board's outer face [inferred: after Parkinson's engraving, §4a]
+  for (let u = -L / 2 + 0.9; u < L / 2 - 0.9; u += 0.5) for (const sd of [-1, 1]) { const b = beam(u) + 0.02; add('rope_fibre', box(sd > 0 ? b : -b - 0.018, sheer(u) - 0.06, u - 0.015, sd > 0 ? b + 0.018 : -b, sheer(u) + 0.27, u + 0.015)); }
+  // the tuft of white feathers at the sternpost's head, hanging back and down in a fan of strands [inferred]
+  for (let k = -3; k <= 3; k++) add('hide_white', rod([0, hs + 2.6, us + 0.62], [k * 0.07, hs + 2.12 - Math.abs(k) * 0.03, us + 0.9 + Math.abs(k) * 0.02], 0.011, 4));
   col.segment([x - sa * L / 2, z - ca * L / 2], [x + sa * L / 2, z + ca * L / 2], B, y0, y0 + D);
+}
+
+/**
+ * wharewaka: a canoe shed { c, y, yaw, l } — a canoe (as `waka`) drawn up under a long roof of raupō on two rows of posts joined by rafter-and-tie frames (no post stands in the canoe's line),
+ * open at the sides and at both ends, the prow and the sternpost standing out beyond the roof: ridge pole and rafters
+ * lashed, the roof edged with a roll of raupō. [inferred: the form; a roofed shelter to keep the sun off the hull — docs/settlements/maori.md §4g]
+ */
+function wharewaka(el, ctx) {
+  waka(el, ctx);
+  const { bag, col } = ctx, [x, z] = el.c, L = el.l ?? 12, yaw = el.yaw ?? 0, y0 = el.y ?? 0, ca = Math.cos(yaw), sa = Math.sin(yaw);
+  const M = new Matrix4().makeRotationY(yaw).setPosition(x, y0, z), add = (mat, g) => { g.applyMatrix4(M); bag.add(mat, g); };
+  const W = 1.95, he = 1.75, hr = 3.2, z0 = -L / 2 + 1.1, z1 = L / 2 - 1.2, np = Math.max(3, Math.round((z1 - z0) / 2.4));
+  const P2 = (px, pz) => [x + px * ca + pz * sa, z - px * sa + pz * ca];
+  for (let i = 0; i <= np; i++) {
+    const zz = z0 + (z1 - z0) * i / np;
+    for (const sd of [-1, 1]) { const [qx, qz] = P2(sd * W, zz); post(bag, qx, y0 - 0.4, qz, 0.1, he + 0.4); col.circle(qx, qz, 0.12, y0, y0 + he); }
+    for (const sd of [-1, 1]) add('timber', rod([sd * (W + 0.05), he, zz], [0, hr - 0.08, zz], 0.045, 5));             // the rafters
+    add('timber', box(-W - 0.1, he - 0.12, zz - 0.05, W + 0.1, he - 0.04, zz + 0.05));                             // the tie across the posts
+    add('rope_fibre', box(-W - 0.12, he - 0.14, zz - 0.07, -W + 0.12, he - 0.02, zz + 0.07));
+  }
+  add('timber', rod([0, hr - 0.08, z0 - 0.5], [0, hr - 0.08, z1 + 0.5], 0.06, 6));
+  for (const sd of [-1, 1]) add('timber', rod([sd * (W + 0.05), he - 0.02, z0 - 0.5], [sd * (W + 0.05), he - 0.02, z1 + 0.5], 0.05, 6));   // the eave pole
+  // the roof: two slopes of thick raupō over the poles, overhanging a little
+  const rt = [], zr0 = z0 - 0.6, zr1 = z1 + 0.6, xo = W + 0.4, eo = he - 0.22;
+  for (const sd of [-1, 1]) {
+    const a = [sd * xo, eo, zr0], b = [sd * xo, eo, zr1], c = [0, hr + 0.1, zr1], d = [0, hr + 0.1, zr0];
+    rt.push(...a, ...b, ...c, ...a, ...c, ...d, ...a, ...c, ...b, ...a, ...d, ...c);
+  }
+  add(TH, fromTriangles(rt));
+  add(TH, rod([0, hr + 0.14, zr0], [0, hr + 0.14, zr1], 0.1, 6));
+  for (const sd of [-1, 1]) for (let zz = zr0 + 0.5; zz < zr1 - 0.2; zz += 1.2) add('rope_fibre', rod([sd * (xo - 0.05), eo + 0.04, zz], [sd * 0.1, hr + 0.12, zz], 0.02, 4));
+  // chocks of timber under the hull's ends keep it off the wet ground, a roll of flax cord and a bailer lie by
+  for (const u of [-L / 4, L / 4]) add('timber', box(-0.5, -0.08, u - 0.12, 0.5, 0.02, u + 0.12));
+  add('rope_fibre', lathe([[0.2, 0], [0.22, 0.08], [0.2, 0.16], [0.09, 0.16], [0.09, 0]], 10, null, W - 0.5, 0, z1 - 0.8));
 }
 
 /** pou: a carved post standing alone { at, y, h, yaw } — a figure on a shaft, red ochre (boundary and ancestor posts on the marae ātea and by the paths). */
@@ -550,6 +676,15 @@ function pou(el, { bag, col }) {
 const STAKES = [1.25, 1.4, 1.55].map((hh) => lathe([[0.04, 0], [0.03, hh], [0.001, hh + 0.03]], 5));
 /** The kūmara mound at unit size. */
 const PUKE = lathe([[1, -0.3], [1, 0], [0.8, 0.28], [0.45, 0.42], [0.001, 0.46]], 8);
+/** A kūmara's vine at unit size: five heart-shaped leaves spread over the mound's top, each a pair of triangles seen from both sides. */
+const VINE = (() => {
+  const t = [];
+  for (let k = 0; k < 5; k++) {
+    const a = k * 1.2566 + 0.3, p = (r, da, y) => [Math.cos(a + da) * r, y, Math.sin(a + da) * r], tip = p(0.2, 0, 0.075), l = p(0.11, -0.5, 0.05), r = p(0.11, 0.5, 0.05), o = [0, 0.02, 0];
+    t.push(...o, ...l, ...tip, ...o, ...tip, ...r, ...o, ...tip, ...l, ...o, ...r, ...tip);
+  }
+  return fromTriangles(t);
+})();
 /**
  * mara: a kūmara garden { rect, y (a function (x, z) → ground height, or a number), seed } — mounds
  * (puke) of loosened soil in a quincunx, each with its sprouting vine; a fence of brushwood round
@@ -563,6 +698,8 @@ function mara(el, { bag }) {
     for (let xx = x0 + 1 + (row % 2) * sp / 2; xx < x1 - 0.8; xx += sp) {
       const r = 0.36 + rand() * 0.08;
       put('banco', PUKE, new Matrix4().makeTranslation(xx, gy(xx, zz), zz).multiply(new Matrix4().makeScale(r, r, r)));
+      // the vine on each mound, a few leaves spread, each rotated differently
+      put('flax_leaf', VINE, new Matrix4().makeTranslation(xx, gy(xx, zz) + 0.46 * r - 0.01, zz).multiply(new Matrix4().makeRotationY(rand() * 6.28)).multiply(new Matrix4().makeScale(0.8 + rand() * 0.5, 1, 0.8 + rand() * 0.5)));
     }
   }
   // the brushwood fence: stakes with a rail, gaps for the path
@@ -571,6 +708,8 @@ function mara(el, { bag }) {
     for (let i = 0; i <= n; i++) { const px = a[0] + (b[0] - a[0]) * i / n, pz = a[1] + (b[1] - a[1]) * i / n; put(P, STAKES[Math.floor(rand() * 3)], new Matrix4().makeTranslation(px, gy(px, pz) - 0.2, pz)); }
     const ya = gy(a[0], a[1]), yb = gy(b[0], b[1]);
     bag.add(P, rod([a[0], ya + 0.85, a[1]], [b[0], yb + 0.85, b[1]], 0.035, 5));
+    bag.add('wicker', rod([a[0], ya + 0.55, a[1]], [b[0], yb + 0.55, b[1]], 0.028, 4));      // brushwood woven between the stakes, two more courses
+    bag.add('wicker', rod([a[0], ya + 0.25, a[1]], [b[0], yb + 0.25, b[1]], 0.028, 4));
   };
   fence([x0, z0], [x1, z0]); fence([x1, z0], [x1, z1]); fence([x1, z1], [x0, z1]);
   fence([x0, z1], [x0, (z0 + z1) / 2 + 1.2]); fence([x0, (z0 + z1) / 2 - 1.2], [x0, z0]);
@@ -582,6 +721,6 @@ function mara(el, { bag }) {
 
 registerStyle('maori', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, palisade, whare, pataka, stage, waharoa, rua, waka, mara, pou, ...SCENES, ...YARDS, ...WORKS },
+  elements: { ...STYLES.qing.elements, palisade, whare, pataka, stage, waharoa, rua, waka, wharewaka, mara, pou, ...SCENES, ...YARDS, ...WORKS },
   objects: {},
 });
