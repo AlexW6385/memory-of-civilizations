@@ -13,11 +13,11 @@ const T = 'travertine', L = 'lead', GB = 'gilt_bronze';
 
 /** The column's profile [r, y] for height h: plinth, torus, a tapering shaft with entasis, astragal, neck, echinus, abacus. */
 function columnProfile(h, r0) {
-  const yb = 0.72, yt = h - 1.4, rt = r0 * 0.82, p = [[r0 * 1.28, 0], [r0 * 1.28, 0.3], [r0 * 1.16, 0.34], [r0 * 1.22, 0.45], [r0 * 1.24, 0.56], [r0 * 1.2, 0.66], [r0 * 1.02, yb]];
-  for (const t of [0, 0.2, 0.45, 0.7, 0.9, 1]) p.push([r0 - (r0 - rt) * t + r0 * 0.035 * Math.sin(Math.PI * t), yb + (yt - yb) * t]);   // (entasis: a swelling of 3.5 % in the lower third)
-  p.push([rt * 1.12, yt + 0.06], [rt * 1.12, yt + 0.16], [rt * 0.98, yt + 0.2], [rt * 0.98, yt + 0.36],          // astragal, neck
-    [rt * 1.12, yt + 0.5], [rt * 1.3, yt + 0.72], [rt * 1.4, yt + 0.9], [rt * 1.4, yt + 0.95],                     // echinus
-    [r0 * 1.5, yt + 0.95], [r0 * 1.5, h], [0.001, h]);                                                              // abacus (round: the square is lost at this distance)
+  const yb = 0.72, yt = h - 1.4, rt = r0 * 0.82, p = [[r0 * 1.28, 0], [r0 * 1.28, 0.3], [r0 * 1.16, 0.36], [r0 * 1.24, 0.56], [r0 * 1.02, yb]];
+  for (const t of [0, 0.35, 0.75, 1]) p.push([r0 - (r0 - rt) * t + r0 * 0.035 * Math.sin(Math.PI * t), yb + (yt - yb) * t]);   // (entasis: a swelling of 3.5 % in the lower third)
+  p.push([rt * 1.12, yt + 0.1], [rt * 0.98, yt + 0.2], [rt * 0.98, yt + 0.36],          // astragal, neck
+    [rt * 1.15, yt + 0.55], [rt * 1.35, yt + 0.8], [rt * 1.4, yt + 0.95],                // echinus
+    [r0 * 1.5, yt + 0.95], [r0 * 1.5, h], [0.001, h]);                                    // abacus (round: the square is lost at this distance)
   return p;
 }
 
@@ -39,8 +39,8 @@ export function colonnade(el, { bag, col }) {
       const a = a0 + (a1 - a0) * i / n;
       for (let r = 0; r < rows; r++) {
         const [x, z] = pt(a, r * depth / (rows - 1));
-        bag.add(T, lathe(prof, 12, null, x, y, z)); col.circle(x, z, 0.8, y, y + h);
-        bag.add('plaster_damp', lathe(damp, 12, null, x, y, z));
+        bag.add(T, lathe(prof, 10, null, x, y, z)); col.circle(x, z, 0.8, y, y + h);
+        bag.add('plaster_damp', lathe(damp, 10, null, x, y, z));
       }
       if (i < n) {
         const b = a0 + (a1 - a0) * (i + 1) / n, [px, pz] = pt(a, depth / 2), [qx, qz] = pt(b, depth / 2), P = [px, pz], Q = [qx, qz];
@@ -60,7 +60,7 @@ export function colonnade(el, { bag, col }) {
         bag.add(T, orientedBox([sx, sz], [tx, tz], 0.45, yt, yt + 0.2, 0.02)); bag.add(T, orientedBox([sx, sz], [tx, tz], 0.4, yt + 1.0, yt + 1.15, 0.02));
         for (let j = 1; j < 8; j++) { const t = j / 8; bag.add(T, lathe([[0.09, 0], [0.15, 0.3], [0.08, 0.6], [0.11, 0.78], [0.1, 0.8]], 6, null, sx + (tx - sx) * t, yt + 0.2, sz + (tz - sz) * t)); }
         // the pedestal: plinth, die, cap (the saints a fifth over life size so that the line against the sky reads from the oval's mouth)
-        bag.add(T, box(sx - 0.62, yt, sz - 0.62, sx + 0.62, yt + 0.28, sz + 0.62)); bag.add(T, box(sx - 0.5, yt + 0.28, sz - 0.5, sx + 0.5, yt + 1.3, sz + 0.5)); bag.add(T, box(sx - 0.6, yt + 1.3, sz - 0.6, sx + 0.6, yt + 1.55, sz + 0.6));
+        bag.add(T, merge([box(sx - 0.62, yt, sz - 0.62, sx + 0.62, yt + 0.28, sz + 0.62), box(sx - 0.5, yt + 0.28, sz - 0.5, sx + 0.5, yt + 1.3, sz + 0.5), box(sx - 0.6, yt + 1.3, sz - 0.6, sx + 0.6, yt + 1.55, sz + 0.6)]));   // (one piece, so that it is drawn as one instance)
         const yaw = Math.atan2(ox - sx, oz - sz), k = (i * 7 + (a0 < 0 ? 3 : 0)) % 20;
         const fig = merge(saint(k)); fig.scale(1.2, 1.2, 1.2); fig.rotateY(yaw); fig.translate(sx, yt + 1.55, sz); bag.add('limestone_carved', fig);
       }

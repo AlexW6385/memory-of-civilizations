@@ -21,7 +21,7 @@ export function cupola(bag, { cx, cz, dy, R0, IN }) {
   const col = [[1.0, 0], [1.0, 0.3], [0.8, 0.38], [0.88, 0.5], [0.8, 0.62], [0.66, 0.7], [0.62, 7], [0.58, 14.1], [0.7, 14.2], [0.78, 14.55], [0.9, 15.0], [1.0, 15.45], [1.05, 15.55], [1.12, 15.55], [1.12, 15.8], [0.001, 15.8]];
   for (let k = 0; k < 16; k++) {
     const a = k / 16 * Math.PI * 2;
-    for (const d of [-0.052, 0.052]) bag.add(T, lathe(col, 10, null, cx + Math.cos(a + d) * Rc, dy + 6.1, cz + Math.sin(a + d) * Rc));
+    for (const d of [-0.052, 0.052]) bag.add(T, lathe(col, 10, (th) => 1 + 0.0007 * (k % 4), cx + Math.cos(a + d) * Rc, dy + 6.1, cz + Math.sin(a + d) * Rc));
     // between the pairs a window under a triangular or a segmental pediment, framed by pilasters and a hood
     const aw = a + Math.PI / 16, wy = 9.6, wh = 8.6, ww = 2.7, hw = ww / 2, zf = Rw;
     const add = (m, g) => bag.add(m, bay(g, aw, cx, dy, cz));
@@ -67,7 +67,7 @@ export function cupola(bag, { cx, cz, dy, R0, IN }) {
   const lc = [[0.38, 0], [0.38, 0.22], [0.3, 0.3], [0.27, 0.45], [0.25, 6.8], [0.31, 6.9], [0.35, 7.35], [0.43, 7.6], [0.001, 7.6]];
   for (let k = 0; k < 16; k++) {
     const a = k / 16 * Math.PI * 2, ca = Math.cos(a), sa = Math.sin(a);
-    bag.add(T, lathe(lc, 8, null, cx + ca * (rl - 0.4), ly + 2.6, cz + sa * (rl - 0.4)));
+    bag.add(T, lathe(lc, 8, () => 1 + 0.001 * (k % 2), cx + ca * (rl - 0.4), ly + 2.6, cz + sa * (rl - 0.4)));
     const ab = a + Math.PI / 16, wb = box(-0.55, 2.9, -0.06, 0.55, 9.4, 0.06);
     wb.translate(0, 0, rl - 1.12); wb.rotateY(Math.PI / 2 - ab); wb.translate(cx, ly, cz); bag.add(O, wb);       // (the window between the columns)
   }

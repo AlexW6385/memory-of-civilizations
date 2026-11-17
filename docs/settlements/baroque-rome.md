@@ -56,6 +56,12 @@ Travertine walls, lead roofs and a ribbed lead dome; Tuscan columns in the colon
 
 **More houses to enter (L3, built).** The five houses nearest the arrival stay the open ones; `openHomes()` in layout.js can open eight more in the ring 120–240 m away (two inns), switched off by `EXTRA_HOMES = 0` until their furniture collides [inferred]; the the extra homes and the wider Borgo fronts were tried and left off (see the report: EXTRA_HOMES in layout.js).
 
+**The landmark seen close (round 2, L3, built: `cupola.js`, `colonnade.js`, `block.js`, `piazza.js`).**
+- *The dome:* the drum on a base with sixteen pairs of Corinthian columns, sixteen windows between them under alternating triangular and segmental pediments, an entablature and attic; della Porta's outer shell more pointed than Michelangelo's hemisphere [stated: archeoroma.org/?p=3822], in lead with sixteen tapering ribs (the ribs are Michelangelo's, per the same page); three tiers of dormers between the ribs and a lantern with sixteen columns, scroll buttresses, a ribbed cupola, ball and cross [inferred: counts and the dormer tiers from photographs]. Total 136.6 m to the cross's tip [stated: Wikipedia "St. Peter's Basilica"; ours measured from the piazza]; the outer drum is 29 m, the inner dome still springs at 24 m, the gap being the double shell [inferred].
+- *The colonnade:* Doric/Tuscan order, 284 columns and 88 pilasters, 140 statues [stated: aviewoncities.com]; ours a column with plinth, torus, entasis, astragal, echinus and abacus, an entablature of architrave in two fasciae, plain frieze, mutules, corona and cymatium, pedestals with base and cap, and at each mouth a pavilion with pilasters, framed panels and the Chigi arms (mounts and star) [inferred: the frieze is shown plain, the pavilions' arrangement from photographs].
+- *The church's sides:* Michelangelo's giant order of pilasters with a full entablature, and in each bay a tall niche, a window under a pediment and a small window above, on the nave, the arms, the corner chapels and round the three apses [inferred: from the building as it stands].
+- *The obelisk's die:* each face with a framed tablet and a cornice [inferred].
+
 ## 5. The town
 
 The Borgo's stuccoed houses of three or four storeys with tiled roofs, between the two Borgo streets and in the lanes. [stated: the houses; their number ours — inferred]
