@@ -19,6 +19,7 @@ const rooms1 = [
   room('chamber', [BOWL.c[0] - 20, BOWL.c[1] - 20, BOWL.c[0] + 20, BOWL.c[1] + 20], DECK, 'hall'),
   room('praca', [PRACA[0] + 4, -60, PRACA[2] - 4, 60], 0, 'open'),
   room('salao', [-10, -106, 26, -80], 0, 'hall'),
+  room('salao_verde', [-10, 80, 26, 106], 0, 'hall'),
 ];
 // from the lawn up the ramp, across the deck, into the Chamber by its west door and down the tiers to the table; and the Senate's
 const walks1 = [
@@ -26,6 +27,7 @@ const walks1 = [
   Object.assign([[-110, 0], [-104, -60], [-104, -93], [-20, -93], [-6, -92], [10, -92], [20, -92]], { y0: 0 }),
   Object.assign([[-110, 0], [-104, 60], [-60, 114], [80, 114], [120, 110], [200, 125], [200, 150], [200, 158]], { y0: 0 }),
   Object.assign([[-110, 0], [-104, 60], [-60, 114], [80, 114], [112, 50], [149, -10], [149, -26], [149, -40]], { y0: 0 }),
+  Object.assign([[-110, 0], [-104, 60], [-104, 93], [-20, 93], [-6, 93], [10, 93], [20, 93]], { y0: 0 }),
   Object.assign([[-110, 0], [-96, 0], [-52, 0], [-12, 0], [0, 0], [0, 72], [8, 72], [20, 72], [30, 72]], { y0: 0 }),
   Object.assign([[-110, 0], [-12, 0], [0, 0], [0, -72], [10, -72], [22, -72]], { y0: 0 }),
 ];
