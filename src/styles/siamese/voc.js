@@ -277,7 +277,7 @@ function grounds(el, ctx) {
   if (el.cemetery) {
     const [a, b, c, d] = el.cemetery;
     for (const [p, q] of [[[a, b], [c, b]], [[a, d], [c, d]], [[a, b], [a, d]], [[c, b], [c, d]]]) wallSeg(ctx, p, q, 0.3, 0, 1.0, 'brick', p[1] === d && q[1] === d ? [{ at: (c - a) / 2, w: 1.2, h: 1.0, y0: 0 }] : []);
-    for (let x = a + 2; x < c - 1.5; x += 2.4) for (let z = b + 1.8; z < d - 1.5; z += 2.6) { if (r() < 0.2) continue; bag.add('lime_plaster', box(x - 0.5, 0, z - 0.25, x + 0.5, 0.22, z + 1.1)); bag.add('plaster_white', box(x - 0.4, 0.22, z - 0.15, x + 0.4, 0.3, z + 1.0)); bag.add('limestone', box(x - 0.32, 0.3, z - 0.15, x + 0.32, 1.0, z - 0.07)); col.rect([x - 0.5, z - 0.25, x + 0.5, z + 1.1], 0, 1.0); }
+    for (let x = a + 2; x < c - 1.5; x += 2.4) for (let z = b + 1.8; z < d - 1.5; z += 2.6) { if (r() < 0.2) continue; bag.add('lime_plaster', box(x - 0.5, 0, z - 0.25, x + 0.5, 0.22, z + 1.1)); bag.add('plaster_white', box(x - 0.4, 0.22, z - 0.15, x + 0.4, 0.3, z + 1.0)); bag.add('limestone', box(x - 0.32, 0.3, z - 0.15, x + 0.32, 1.0, z - 0.07)); col.rect([x - 0.32, z - 0.17, x + 0.32, z - 0.05], 0, 1.0); }
   }
   // the flagstaff: a tall mast with the prince's flag, orange, white and blue
   if (el.flag) {
