@@ -7,51 +7,6 @@ import { tube } from '../../objects/kit.js';
 import { rng, gable, armillary, orderCross, ropeColumn, wallRun, addBox, pinnacle, prism } from './util.js';
 
 const LIME = 'limestone', WALL = 'limewash_white';
-/** An arcaded face: wall of thickness th on the line from a to b (a, b plan), y0..y1, round openings; dark panel behind. */
-function arcade(ctx, a, b, th, y0, y1, openings, mat, dark = true) {
-  const { bag } = ctx, L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, nx = uz, nz = -ux;
-  const T = [];
-  archWall(T, (u, yy, d) => [a[0] + ux * u - nx * d, yy, a[1] + uz * u - nz * d], { u0: 0, u1: L, d0: 0, d1: th, y0, y1, openings, n: 8 });
-  bag.add(mat, fromTriangles(T));
-  if (dark) for (const o of openings) { const c = [a[0] + ux * o.uc - nx * (th + 0.02), a[1] + uz * o.uc - nz * (th + 0.02)]; const w = o.r; bag.add('opening', box(Math.min(c[0] - Math.abs(ux) * w, c[0] - 0.04), o.sill, Math.min(c[1] - Math.abs(uz) * w, c[1] - 0.04), Math.max(c[0] + Math.abs(ux) * w, c[0] + 0.04), o.spring + o.r, Math.max(c[1] + Math.abs(uz) * w, c[1] + 0.04))); }
-}
-export function palace(el, ctx) {
-  const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, rand = rng(el.seed ?? 7), H = 14.5;
-  const wings = [[x1 - 16, z0, x1, z1, 'e'], [x0, z1 - 14, x1, z1, 's'], [x0, z0, x0 + 16, z1, 'w'], [x0, z0, x1, z0 + 14, 'n']];
-  for (const [a, b, c, d, f] of wings) {
-    bag.add(WALL, box(a, y - 1, b, c, y + H, d)); col.rect([a, b, c, d], y - 1, y + H + 3);
-    gable(bag, 'roof_tile', [a, b, c, d], y + H, 4.2, f === 'n' || f === 's', 0.9);
-    bag.add(LIME, box(a - 0.08, y + H - 0.4, b - 0.08, c + 0.08, y + H + 0.1, d + 0.08));
-  }
-  // the courtyard (shut): paved, with a fountain
-  bag.add('flagstone', box(x0 + 16, y - 0.2, z0 + 14, x1 - 16, y, z1 - 14));
-  // the east front on the Terreiro: ground storey with arched doors, the loggia above (nine arches on slender columns), stone window courses
-  const n = 9, len = z1 - z0 - 8, pitch = len / n, ops = Array.from({ length: n }, (_, k) => ({ uc: 4 + pitch * (k + 0.5), r: pitch * 0.32, sill: y, spring: y + 3.2, f: 0.5 }));
-  const east = [x1 + 0.0, z0];
-  arcade(ctx, [x1 + 0.9, z0 + 0.0], [x1 + 0.9, z1], 0.6, y - 0.2, y + 6.4, ops.map((o) => ({ ...o, uc: o.uc })), LIME, true);
-  const up = Array.from({ length: n }, (_, k) => ({ uc: 4 + pitch * (k + 0.5), r: pitch * 0.34, sill: y + 8.0, spring: y + 9.6, f: 0.5 }));
-  arcade(ctx, [x1 + 0.9, z0], [x1 + 0.9, z1], 0.6, y + 6.4, y + 12.6, up, LIME, true);
-  bag.add(LIME, box(x1, y + 6.2, z0, x1 + 1.5, y + 6.6, z1)); bag.add(LIME, box(x1, y + 12.6, z0, x1 + 1.5, y + 13.0, z1));
-  // the ground arches stand open: the palace's face behind them, and the piers between (not a block across the doorways)
-  col.rect([x1, z0, x1 + 0.3, z1], y, y + 13);
-  { let a = z0; for (const o of ops) { if (z0 + o.uc - o.r > a + 0.05) col.rect([x1 + 0.3, a, x1 + 0.9, z0 + o.uc - o.r], y, y + 6.4); a = z0 + o.uc + o.r; } if (z1 > a + 0.05) col.rect([x1 + 0.3, a, x1 + 0.9, z1], y, y + 6.4); }
-  void east; void rand;
-  for (let k = 0; k < n; k++) { const zc = z0 + 4 + pitch * (k + 0.5); if (k % 2 === 0) armillary(bag, 'limestone_carved', x1 + 1.55, y + 12.0, zc, 0.4); }
-  // window rows on the south front facing the river, with the great arms over the middle
-  for (let u = x0 + 3; u < x1 - 20; u += 4.2) { for (const yy of [1.4, 7.4]) { addBox(bag, 'opening', u, y + yy, z1, u + 1.2, y + yy + 2.2, z1 + 0.1); addBox(bag, LIME, u - 0.2, y + yy + 2.2, z1, u + 1.4, y + yy + 2.5, z1 + 0.18); } }
-  for (let u = x0 + 3; u < x1 - 20; u += 8.4) { addBox(bag, 'wood_dark', u, y, z1, u + 2.6, y + 3.4, z1 + 0.12); addBox(bag, LIME, u - 0.3, y + 3.4, z1, u + 2.9, y + 3.8, z1 + 0.2); }
-  // the Tower of the King (the Casa da Índia): three storeys over the river corner, a loggia, a hipped roof, the royal arms on the river face
-  const tx0 = x1 - 24, tx1 = x1 + 1.0, tz0 = z1 - 24, tz1 = z1 + 1.0, TH = 21;
-  bag.add(WALL, box(tx0, y - 1, tz0, tx1, y + TH, tz1)); col.rect([tx0, tz0, tx1, tz1], y - 1, y + TH + 4);
-  for (const yy of [6.8, 13.6]) bag.add('limestone_carved', box(tx0 - 0.1, y + yy, tz0 - 0.1, tx1 + 0.1, y + yy + 0.4, tz1 + 0.1));
-  bag.add('roof_tile', frustum([tx0 - 1, tz0 - 1, tx1 + 1, tz1 + 1], y + TH, y + TH + 7, 11, 11, 11, 11));
-  const lg = Array.from({ length: 5 }, (_, k) => ({ uc: 4.2 + k * 4.2, r: 1.2, sill: y + 15.3, spring: y + 17.2, f: 0.5 }));
-  arcade(ctx, [tx0 + 0.0, tz1 + 0.35], [tx1 - 0.0, tz1 + 0.35], 0.45, y + 14.0, y + 20.6, lg, 'limestone_carved', true);
-  for (let u = tx0 + 3; u < tx1 - 2; u += 4.2) for (const yy of [1.8, 8.6]) { addBox(bag, 'opening', u, y + yy, tz1, u + 1.3, y + yy + 2.4, tz1 + 0.1); addBox(bag, LIME, u - 0.2, y + yy + 2.4, tz1, u + 1.5, y + yy + 2.7, tz1 + 0.18); }
-  addBox(bag, 'limestone_carved', (tx0 + tx1) / 2 - 2.2, y + 3.0, tz1, (tx0 + tx1) / 2 + 2.2, y + 6.4, tz1 + 0.2);                 // the royal arms
-  orderCross(bag, 'wall_red', (tx0 + tx1) / 2 - 1.0, y + 4.7, tz1 + 0.22, 0.7, 's', 0.04); armillary(bag, 'limestone_carved', (tx0 + tx1) / 2 + 1.1, y + 4.7, tz1 + 0.35, 0.8);
-  addBox(bag, 'wood_dark', (tx0 + tx1) / 2 - 1.4, y, tz1, (tx0 + tx1) / 2 + 1.4, y + 3.0, tz1 + 0.1);                                // the Casa da Índia's door on the quay
-}
 export function castle(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, rand = rng(el.seed ?? 3);
   bag.add('limestone', box(x0 - 3, y - 9, z0 - 3, x1 + 3, y - 0.2, z1 + 3));
