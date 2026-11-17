@@ -74,6 +74,33 @@ function libraryHall(el, ctx) {
   R(L / 2 - 6.4, -3.7, L / 2 - 6.4 + 0.5, 0, colH, colH + 1.2, 'marble', false); R(L / 2 + 5.9, -3.7, L / 2 + 6.4, 0, colH, colH + 1.2, 'marble', false);
   R(L / 2 - 6.4, -2.7, L / 2 + 6.4, -0.1, colH + 1.2, colH + 1.5, 'timber', false);
   G.pediment_roof({ rect: F.R(L / 2 - 6.7, -4.1, L / 2 + 6.7, 0.1), y: y + colH + 1.5, rise: 1.5, tympanumInset: 0.3, rakingGeison: 0.3, mat: 'marble', ridge: F.alongX ? 'z' : 'x' }, ctx);
+  // the hall's outside, dressed (all in the materials already used here, so nothing is added to the draw count): a plinth course, antae at the
+  // corners and pilasters along the sides (a capital block on each), the entablature carried all round — architrave, frieze, and the Egyptian
+  // cavetto cornice rolling out under the eaves — and hoods over the two front windows. [inferred: Hellenistic hall fronts with the Ptolemaic cornice]
+  R(-0.3, -0.3, L + 0.3, 0.0, 0, 0.45, 'sandstone_dressed', false); R(-0.3, 0, 0.0, D + 0.3, 0, 0.45, 'sandstone_dressed', false);
+  R(L, 0, L + 0.3, D + 0.3, 0, 0.45, 'sandstone_dressed', false); R(0, D, L, D + 0.3, 0, 0.45, 'sandstone_dressed', false);
+  const pil = (u, v, alongV) => {                                     // a pilaster 0.8 wide on a wall, 0.22 out; its capital and base blocks
+    const w = 0.4, o = 0.22, hp = H - 2.0;
+    if (alongV) {                                                     // on a side wall (u = 0 or L): extends along v
+      const out = u === 0 ? -o : 0, out1 = u === 0 ? 0 : o, x0 = u + out, x1 = u + out1;
+      R(x0, v - w, x1, v + w, 0.45, hp, 'sandstone_white', false); R(x0 - (u === 0 ? 0.06 : 0), v - w - 0.06, x1 + (u === 0 ? 0 : 0.06), v + w + 0.06, hp, hp + 0.3, 'sandstone_dressed', false);
+    } else {
+      const out = v === 0 ? -o : 0, out1 = v === 0 ? 0 : o;
+      R(u - w, v + out, u + w, v + out1, 0.45, hp, 'sandstone_white', false); R(u - w - 0.06, v + out - (v === 0 ? 0.06 : 0), u + w + 0.06, v + out1 + (v === 0 ? 0 : 0.06), hp, hp + 0.3, 'sandstone_dressed', false);
+    }
+  };
+  for (const u of [0.45, L - 0.45]) for (const v of [0, D]) { pil(u, v, false); }
+  for (const u of [0, L]) for (const v of [0.45, D - 0.45]) pil(u, v, true);
+  for (const u of [0, L]) for (let v = 5.2; v < D - 3; v += 5.5) pil(u, v, true);
+  for (const u of [5.2, 10.7, 16.2, 21.7, 27.2]) if (u < L - 3) pil(u, D, false);
+  const eh = H - 1.7;                                                  // the entablature: architrave, frieze, cornice
+  R(-0.15, -0.15, L + 0.15, D + 0.15, eh, eh + 0.5, 'sandstone_dressed', false);
+  R(-0.05, -0.05, L + 0.05, D + 0.05, eh + 0.5, eh + 1.1, 'sandstone_white', false);
+  for (let k = 0; k < 4; k++) { const o = 0.12 + 0.13 * (k + 1) * (1 + 0.3 * Math.sin(k / 3 * Math.PI / 2)); R(-o, -o, L + o, D + o, eh + 1.1 + k * 0.15, eh + 1.1 + (k + 1) * 0.15, k === 3 ? 'marble' : 'sandstone_dressed', false); }
+  for (const u of [L / 2 - 9, L / 2 + 9]) {                              // the front windows' hoods and jambs
+    R(u - 1.15, -0.14, u - 0.95, 0.1, 5.2, 7.8, 'marble', false); R(u + 0.95, -0.14, u + 1.15, 0.1, 5.2, 7.8, 'marble', false);
+    for (let k = 0; k < 3; k++) R(u - 1.3 - 0.12 * k, -0.2 - 0.07 * k, u + 1.3 + 0.12 * k, 0.1, 7.8 + k * 0.12, 7.92 + k * 0.12, 'sandstone_dressed', false);
+  }
   // the roof of the hall: coffers under, tile over, the ridge along the front
   G.coffers({ rect: F.R(T, T, L - T, D - T), y: y + H - 0.4, depth: 0.35, cell: 1.6, beam: 0.2, mat: 'cedar' }, ctx);
   R(T - 0.05, T - 0.05, L - T + 0.05, D - T + 0.05, H - 0.1, H, 'timber', false);

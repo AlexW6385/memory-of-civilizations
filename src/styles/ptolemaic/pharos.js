@@ -6,7 +6,7 @@
 
 import { box, lathe, rod, frustum, fromTriangles } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
-import { stageOne, stageTwo, stageThree, triton as tritonFig, fire, zeus } from './pharos-detail.js';
+import { doorway, stageOne, stageTwo, stageThree, triton as tritonFig, fire, zeus, lantern } from './pharos-detail.js';
 
 /** An eight-sided tapering prism (flat across `w` at the foot, `w2` at the top), turned so that a face looks along +z. */
 function octagon(x, y0, y1, z, w, w2) {
@@ -76,6 +76,7 @@ function pharos(el, ctx) {
     bag.add('limestone', box(dx - 4.0, y0 + 7.4, zf, dx + 4.0, y0 + 7.9, zf + 1.3));
     for (const sd of [-1, 1]) { bag.add('cedar', box(dx + sd * 2.4 - (sd > 0 ? 0 : 0.0) - 0.0, y0, cz + IN - 0.3, dx + sd * 2.4 + sd * 2.4, y0 + 6.1, cz + IN - 0.15)); for (let k = 0; k < 3; k++) bag.add('bronze', box(dx + sd * 3.6 - 0.3, y0 + 1.4 + k * 1.7, cz + IN - 0.32, dx + sd * 3.6 + 0.3, y0 + 1.8 + k * 1.7, cz + IN - 0.3)); }
   }
+  doorway(bag, { dx: cx, zf: cz + h + 0.5, y0 });
   // the Zeus inscription over the door, a band of lettered stone on the seaward face
   bag.add('marble_smooth', box(cx - 5, y0 + 9.0, cz + h - lean(y0 + 9.0) + 0.0, cx + 5, y0 + 9.9, cz + h - lean(y0 + 9.0) + 0.14));
   // the platform on the tier: a slab with a hole over the last leg of the ramp, a parapet round it, a Triton on each corner
@@ -83,7 +84,7 @@ function pharos(el, ctx) {
     for (const r of P) { bag.add('limestone', box(r[0], yt, r[1], r[2], yt + 0.5, r[3])); col.floor(r, yt + 0.5); }
     const pt = 0.35, ph = 1.1;
     for (const r of [[cx - e, cz - e, cx + e, cz - e + pt], [cx - e, cz + e - pt, cx + e, cz + e], [cx - e, cz - e, cx - e + pt, cz + e], [cx + e - pt, cz - e, cx + e, cz + e]]) { bag.add('limestone', box(r[0], yt + 0.5, r[1], r[2], yt + 0.5 + ph, r[3])); col.rect(r, yt + 0.5, yt + 0.5 + ph); }
-    for (const sx of [-1, 1]) for (const sz of [-1, 1]) tritonFig(bag, cx + sx * (e - 1.1), yt + 0.5, cz + sz * (e - 1.1), Math.atan2(sx, sz), 1.5);
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) tritonFig(bag, cx + sx * (e - 1.9), yt + 0.5, cz + sz * (e - 1.9), Math.atan2(sx, sz), 1.2);
     col.circle(cx, cz, 8.4, yt + 0.5, yt + 9); }
   void yTop;
   // tier 2: the octagon, 16.4 m across at the foot; windows in four faces; a cornice
@@ -102,9 +103,7 @@ function pharos(el, ctx) {
   stageThree(bag, { cx, cz, y3, H3 });
   // the lantern: eight columns of marble round the fire, a dome of lead; the fire's bowl, the flame, the bronze mirror
   const yl = y3 + H3 + 0.4, HL = 4.2;
-  for (let a = 0; a < 8; a++) { const ang = a * Math.PI / 4; bag.add('marble_column', lathe([[0.2, 0], [0.17, HL]], 8, null, cx + Math.sin(ang) * 2.0, yl, cz + Math.cos(ang) * 2.0)); }
-  bag.add('marble', lathe([[2.5, HL], [2.5, HL + 0.35], [0.001, HL + 0.35]], 16, null, cx, yl, cz));
-  bag.add('lead', lathe([[2.5, HL + 0.35], [2.2, HL + 0.9], [1.2, HL + 1.8], [0.4, HL + 2.3], [0.001, HL + 2.4]], 16, null, cx, yl, cz));
+  lantern(bag, { cx, cz, yl, HL });
   fire(bag, { cx, cz, yl });
   if (ctx.lights) ctx.lights.push({ at: [cx, yl + 1.6, cz], color: '#ffb260', intensity: 60, distance: 140 });
   // on the dome, the statue of Zeus Soter: a standing figure on a drum, the cloak, the raised arm with the sceptre

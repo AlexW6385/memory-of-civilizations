@@ -58,6 +58,38 @@ function sail(w, y0, y1, z, bulge = 0.5, nx = 6, ny = 4) {
   }
   return fromTriangles(T);
 }
+
+/** A two-faced strip standing on the gunwale along stations i0..i1 of a hull: a bulwark (inboard of the side by k), from the gunwale up by hgt. */
+function bulwark(H, s, i0, i1, hgt, k = 0.97) {
+  const T = [];
+  for (let i = i0; i < i1; i++) {
+    const a = H.st[i], b = H.st[i + 1], xa = a.b * s * k, xb = b.b * s * k;
+    T.push(xa, a.h, a.z, xb, b.h, b.z, xb, b.h + hgt, b.z, xa, a.h, a.z, xb, b.h + hgt, b.z, xa, a.h + hgt, a.z);
+    T.push(xa, a.h, a.z, xb, b.h + hgt, b.z, xb, b.h, b.z, xa, a.h, a.z, xa, a.h + hgt, a.z, xb, b.h + hgt, b.z);
+  }
+  return fromTriangles(T);
+}
+/** A curved post of rods along the points (radius r tapering to 0.6 r), the way a swan-neck stern or a curled stem was drawn. */
+function curl(add, mat, pts, r) {
+  for (let i = 0; i < pts.length - 1; i++) add(mat, rod(pts[i], pts[i + 1], r * (1 - 0.4 * i / (pts.length - 1)), 5));
+}
+/** Standing rigging for a one-masted ship: forestay, backstay, three shrouds a side to the gunwale, lines up the sail's face. */
+function rigging(add, H, S, mz, top, L, sailOpts) {
+  const bow = H.st[1], stern = H.st[H.st.length - 2];
+  add('timber', rod([0, top, mz], [0, bow.h + 0.5 * S, bow.z], 0.025 * S + 0.01, 3));
+  add('timber', rod([0, top, mz], [0, stern.h + 0.5 * S, stern.z], 0.025 * S + 0.01, 3));
+  for (const s of [-1, 1]) for (let k = 0; k < 3; k++) {
+    const st = H.st[Math.max(2, Math.min(H.st.length - 3, Math.round((mz + L / 2) / L * (H.st.length - 1)) + k - 1))];
+    add('timber', rod([0, top - 0.3 * S, mz + (k - 1) * 0.1], [s * st.b * 1.0, st.h + 0.1, st.z], 0.02 * S + 0.008, 3));
+  }
+  if (sailOpts) {
+    const { w, y0, y1, z, bulge } = sailOpts;
+    for (const u of [-0.66, -0.33, 0, 0.33, 0.66]) {
+      const P = (v) => [u * w / 2 * (1 - 0.12 * v), y1 + (y0 - y1) * v, z - bulge * (1 - u * u) * Math.sin(Math.PI * (0.15 + 0.7 * v)) - 0.04];
+      for (let j = 0; j < 4; j++) add('timber', rod(P(j / 4), P((j + 1) / 4), 0.014 * S + 0.006, 3));
+    }
+  }
+}
 export function shipParts(kind, L, seed = 1) {
   const rand = rng(seed), S = L / 26, out = [];
   const add = (m, g) => out.push([m, g]);
@@ -68,6 +100,21 @@ export function shipParts(kind, L, seed = 1) {
     for (const s of [-1, 1]) for (let k = 0; k < 16; k++) { const z = -L * 0.3 + k * (L * 0.56 / 15); const w = H.st[Math.round((z / L + 0.5) * 16)]?.b ?? 0.8; add('wood_ochre', rod([s * (w - 0.05), 1.1 * S, z], [s * (w + 2.6 * S), -0.1, z + 0.5], 0.035, 4)); }
     add('timber', rod([0, 0.4, 0.5 * S], [0, 7.5 * S, 0.5 * S], 0.1 * S, 6)); add('timber', rod([-4.2 * S, 6.6 * S, 0.5 * S], [4.2 * S, 6.6 * S, 0.5 * S], 0.06 * S, 6));
     add('linen', sail(8.2 * S, 2.6 * S, 6.5 * S, 0.5 * S, 0.5 * S));
+    // the bulwark with a row of round shields along it, the outrigger (parexeiresia) the oars work through, the stern's fan and the helmsman's shelter, the stays
+    for (const s of [-1, 1]) {
+      add('wood_ochre', bulwark(H, s, 3, 14, 0.55 * S));
+      for (let i = 3; i < 14; i++) { const a = H.st[i], b = H.st[i + 1]; add('wood_ochre', rod([s * a.b * 0.97, a.h + 0.55 * S, a.z], [s * b.b * 0.97, b.h + 0.55 * S, b.z], 0.05 * S + 0.02, 4)); }
+      for (let i = 4; i < 14; i++) { const a = H.st[i]; const d = lathe([[0.001, 0], [0.34 * S, 0.0], [0.3 * S, 0.06], [0.001, 0.1]], 8); d.rotateZ(-s * Math.PI / 2); d.translate(s * (a.b * 0.97 + 0.04), a.h + 0.28 * S, a.z); add(i % 2 ? 'bronze' : 'wood_ochre', d); }
+      add('wood_ochre', box(s * (H.st[8].b + 0.05) - 0.12, 1.0 * S, -L * 0.34, s * (H.st[8].b + 0.9 * S) + 0.12, 1.14 * S, L * 0.3));
+      for (let k = 0; k < 6; k++) { const z = -L * 0.32 + k * L * 0.11; add('timber', rod([s * (H.st[8].b + 0.5 * S), 0.2, z], [s * (H.st[8].b + 2.3 * S), 1.0 * S, z], 0.04 * S + 0.01, 4)); }
+    }
+    const st16 = H.st[16];
+    curl(add, 'wood_ochre', [[0, st16.h, st16.z - 0.1], [0, st16.h + 1.2 * S, st16.z + 0.3 * S], [0, st16.h + 2.4 * S, st16.z + 0.1 * S], [0, st16.h + 3.0 * S, st16.z - 0.6 * S], [0, st16.h + 2.5 * S, st16.z - 1.3 * S]], 0.1 * S + 0.03);
+    for (let f = -2; f <= 2; f++) add('bronze', rod([0, st16.h + 2.2 * S, st16.z - 0.2 * S], [f * 0.45 * S, st16.h + 3.2 * S - Math.abs(f) * 0.25 * S, st16.z - 0.7 * S], 0.03 * S + 0.012, 4));
+    for (const x of [-1, 1]) add('timber', rod([x * 0.7 * S, H.st[13].h, L * 0.3], [x * 0.7 * S, H.st[13].h + 2.2 * S, L * 0.3], 0.05 * S + 0.02, 4));
+    add('timber', box(-0.9 * S, H.st[13].h + 2.2 * S, L * 0.26, 0.9 * S, H.st[13].h + 2.4 * S, L * 0.4));
+    for (const p of [[0.3, 0.12], [0.5, 0.2]]) add('bronze', rod([0, 0.2, -L / 2 + 0.2], [0, 0.1 + p[0], -L / 2 - 1.8 * S], 0.03 * S + 0.02 + p[1] * 0, 4));
+    rigging(add, H, S, 0.5 * S, 7.5 * S, L, { w: 8.2 * S, y0: 2.6 * S, y1: 6.5 * S, z: 0.5 * S, bulge: 0.5 * S });
     return out;
   }
   const lighter = kind === 'lighter';
@@ -101,6 +148,22 @@ export function shipParts(kind, L, seed = 1) {
     for (let k = 0; k < 6; k++) vase(mk, 'amphora', ((k % 2) - 0.5) * 0.9 * S, H.st[7].h * 0.7, -L * 0.2 + Math.floor(k / 2) * 0.9 * S, { s: 1.0, dark: false, seg: 8 });
     add('sacking', box(-0.9 * S, 0.3 * S, L * 0.12, 0.9 * S, 0.9 * S, L * 0.3));
   }
+  // the bulwark and its rail, the curled stem and the swan-neck stern (with the goose-head), the hatch, bitts and the anchor at the bow, the stays and the lines on the sail
+  for (const s of [-1, 1]) {
+    add('wood_ochre', bulwark(H, s, 2, 15, (lighter ? 0.45 : 0.8) * S));
+    for (let i = 2; i < 15; i++) { const a = H.st[i], b = H.st[i + 1], q = (lighter ? 0.45 : 0.8) * S; add('wood_ochre', rod([s * a.b * 0.97, a.h + q, a.z], [s * b.b * 0.97, b.h + q, b.z], 0.05 * S + 0.02, 4)); }
+  }
+  { const sb = H.st[1], se = H.st[15];
+    curl(add, 'wood_ochre', [[0, sb.h, sb.z + 0.1], [0, sb.h + 0.7 * S, sb.z - 0.5 * S], [0, sb.h + 1.5 * S, sb.z - 0.5 * S], [0, sb.h + 1.9 * S, sb.z - 0.1 * S]], 0.1 * S + 0.03);
+    curl(add, 'wood_ochre', [[0, se.h, se.z + 0.1], [0, se.h + 1.0 * S, se.z + 0.5 * S], [0, se.h + 2.2 * S, se.z + 0.2 * S], [0, se.h + 3.2 * S, se.z - 0.5 * S], [0, se.h + 3.6 * S, se.z - 1.3 * S]], 0.11 * S + 0.03);
+    add('wood_ochre', lathe([[0.001, -0.18 * S], [0.16 * S, -0.1 * S], [0.14 * S, 0.12 * S], [0.001, 0.18 * S]], 6, null, 0, se.h + 3.55 * S, se.z - 1.5 * S));   // the goose-head
+    if (!lighter) {
+      add('timber', box(-0.7 * S, H.st[8].h, L * 0.04, 0.7 * S, H.st[8].h + 0.35 * S, L * 0.14)); add('wood_ochre', box(-0.8 * S, H.st[8].h + 0.35 * S, L * 0.035, 0.8 * S, H.st[8].h + 0.42 * S, L * 0.145));   // the hatch
+      for (const x of [-1, 1]) add('wood_ochre', box(x * 0.9 * S - 0.1, H.st[4].h, -L * 0.3, x * 0.9 * S + 0.1, H.st[4].h + 0.6 * S, -L * 0.3 + 0.2));
+      add('timber', rod([-0.5 * S, H.st[2].h, sb.z + 0.6], [-0.7 * S, H.st[2].h - 1.4 * S, sb.z + 1.0], 0.04 * S + 0.015, 4)); add('timber', rod([-1.0 * S, H.st[2].h - 1.2 * S, sb.z + 1.0], [-0.4 * S, H.st[2].h - 1.2 * S, sb.z + 1.0], 0.04 * S + 0.015, 4));   // the anchor hung at the cathead
+    }
+  }
+  if (!lighter) rigging(add, H, S, mz, (lighter ? 7 : 11) * S, L, { w: 9.6 * S, y0: 3.2 * S, y1: (lighter ? 6 : 9.5) * S, z: mz - 0.1, bulge: 0.9 * S });
   void rand;
   return out;
 }
