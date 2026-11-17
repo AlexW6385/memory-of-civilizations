@@ -29,6 +29,8 @@ export const CAMP = [-36, 31.5, 10.4, 140];
 export const MARKET = [-36, 37.4, 10.4, 42.2];
 /** The yard of the round granaries (no houses on it). */
 export const GRAN_YARD = [-2.4, 74.4, 10.4, 87.6];
+/** The chapel of the camp with its forecourt (no houses on it): the chapel at the west end, the gate on the east wall. */
+export const CHAPEL = [-36, 122.4, -18, 135];
 /** The quay's store (a mud shed) and the fields on the bank, as rects. */
 export const FIELDS = [[14, -58, 30, -14], [14, 14, 30, 58]];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
@@ -61,8 +63,10 @@ export function lots() {
     segs.forEach(([a, b], si) => split(a, b, target, rand).forEach(([x0, x1], k) => {
       const rect = [x0, z0, x1, z0 + d], seed = Math.floor(rand() * 1e6), kind = pick ? pick(si, k, x0, x1) : null;
       if (inRect(GRAN_YARD, (x0 + x1) / 2, z0 + d / 2, 0.8) || (rect[0] < GRAN_YARD[2] && rect[2] > GRAN_YARD[0] && rect[1] < GRAN_YARD[3] && rect[3] > GRAN_YARD[1])) return;
+      if (rect[0] < CHAPEL[2] && rect[2] > CHAPEL[0] && rect[1] < CHAPEL[3] && rect[3] > CHAPEL[1]) return;
       if (Math.hypot(Math.max(Math.abs(x0), Math.abs(x1)), Math.max(Math.abs(z0), Math.abs(z0 + d))) > RADIUS - 40) return;
-      const base = { rect, front, seed, quarter, kind: 'house', furnish: quarter === 'priests' || z0 < 100 || rand() < 0.45 };
+      if (!(quarter === 'priests' || z0 < 100)) rand();   // (the dice of the old furnishing rule, kept so that the lots' seeds do not move: every house is now furnished and enterable)
+      const base = { rect, front, seed, quarter, kind: 'house', furnish: true, dm: quarter === 'priests' || seed % 3 !== 0 };
       LOTS.push(kind ? { ...base, ...kind } : base);
     }));
   };

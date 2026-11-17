@@ -2,7 +2,7 @@
 // goods and boats, the priests' lanes, the camp's rows of houses back to back with the market street and its shops, the bakeries and granaries, the masons' yard,
 // the fields and shadufs of the bank, the people of terrace, market, lanes, quay and yard.
 
-import { RADIUS, FX, FXS, ZS, WATER, BANK_X, QUAY, QUAY_Y, TERRACE, GATE, SGATE, ALTAR, MARKET, FIELDS, GRAN_YARD, WAY, cliffFace, lots, lanes, granaries as granaryList } from './layout.js';
+import { RADIUS, FX, FXS, ZS, WATER, BANK_X, QUAY, QUAY_Y, TERRACE, GATE, SGATE, ALTAR, MARKET, FIELDS, GRAN_YARD, CHAPEL, WAY, cliffFace, lots, lanes, granaries as granaryList } from './layout.js';
 import { ground } from './ground.js';
 import { cliffTop } from '../../styles/ramesside/dims.js';
 
@@ -81,6 +81,13 @@ function people() {
   }
   // ── in the houses: the woman at the quern in the court of one furnished house in two, a man on the bench of another (the house's own dice: layout of styles/oldkingdom mud_house)
   for (const l of L) {
+    if (l.kind === 'house' && l.dm) {
+      // the Deir el-Medina plan (styles/ramesside dmhouse.js): the woman squatting at the oven in the back room, a man on the raised bed of the front room
+      const [x0, z0, x1, z1] = l.rect, r = rng((l.seed || 1) * 5 + 3), left = r() < 0.5, ix1 = x1 - 0.225, iz0 = z0 + 0.225, iz1 = z1 - 0.225, fd = z1 - z0 > 6.8 ? 2.9 : 2.6, W2 = (p) => toWorld(l, p);
+      if (l.seed % 2 === 0 && ix1 - 0.7 > x0 + 4.2) { const a = W2([ix1 - 0.7, iz0 + 1.9]), to = W2([ix1 - 0.7, iz0 + 0.7]); woman(a, 0, face(a, to), { pose: 'squat' }); }
+      else if (l.seed % 3 === 1) { const zA = iz1 - fd + 0.4, zm = (zA + Math.min(iz1 - 0.55, zA + 1.95)) / 2, a = W2([left ? ix1 - 0.5 : x0 + 0.225 + 0.5, zm]), to = W2([left ? x0 + 3 : x1 - 3, zm]); man(a, 0.57, face(a, to), { pose: 'sit', hair: 'short' }); }
+      continue;
+    }
     if (l.kind !== 'house' || !l.furnish || Math.hypot((l.rect[0] + l.rect[2]) / 2 + 4, (l.rect[1] + l.rect[3]) / 2 - 17) > 125) continue;
     const [x0, z0, x1, z1] = l.rect, d = rng(l.seed || 1); d(); const court = d() < 0.7, split = court ? x0 + (x1 - x0) * (0.45 + d() * 0.2) : x1, W2 = (p) => toWorld(l, p);
     if (court && l.seed % 2 === 0) { const qz = Math.min(z1 - 1.6, z0 + 0.225 + 1.9); if (qz > z0 + 1.9) woman(W2([split + 0.225 + 0.45 + 0.75, qz]), 0, Math.PI / 2, { pose: 'kneel' }); }
@@ -124,6 +131,8 @@ function people() {
     for (let k = 0; k < 3; k++) man([x0 + 11 - k * 1.2, z1 - 5.5 + (k % 2) * 0.4], 0, Math.PI / 2, { pose: 'pull', hair: 'short' });
     man([x0 + 20, z0 + 8], 0, 2, { pose: 'staff', carry: 'staff', len: 1.7, dress: 'wrap', over: 'sash', hair: 'wig' });
   }
+  // ── the chapel of the camp: a priest at the offering table before the stela, a woman kneeling in the forecourt at the stelae, a man at the basin
+  { const zc = (CHAPEL[1] + CHAPEL[3]) / 2; priest([-32.8, zc + 0.1], 0, face([-32.8, zc], [-34, zc]), { pose: 'kneel' }); woman([-24.5, zc + 4.2], 0, Math.PI, { pose: 'kneel', arms: 'pray' }); man([-24.2, zc - 1.6], 0, face([-24.2, zc - 1.6], [-25.8, zc - 0.2]), { pose: 'squat' }); }
   // ── the fields: the hoers and the man at the shaduf
   for (const [x, z] of [[22, -30], [26, -40], [24, 30], [27, 42]]) man([x, z], h(x, z), rand() * 6.28, { carry: 'hoe', hair: 'short', dress: 'loincloth', over: 'none' });
   // ── a procession across the terrace to the door, in the arrival's view: priests with the offerings for the morning rite, bearers behind them, a boy with a goose
@@ -205,7 +214,9 @@ export async function town() {
   }
   // the houses of the priests' lanes (whitewashed fronts), the camp's rows back to back
   const L = lots();
-  const house = (l) => ({ t: 'ram_house', rect: l.rect, seed: l.seed, furnish: l.furnish, front: l.front, wash: l.quarter === 'priests' || l.seed % 5 < 2 });
+  const house = (l) => (l.dm
+    ? { t: 'dm_house', rect: l.rect, seed: l.seed, furnish: l.furnish, front: l.front, wash: l.quarter === 'priests' || l.seed % 5 < 2, variant: l.quarter === 'priests' ? 1 + (l.seed % 2) : l.seed % 4, rich: (l.rect[3] - l.rect[1]) > 6.8 }
+    : { t: 'ram_house', rect: l.rect, seed: l.seed, furnish: l.furnish, front: l.front, wash: l.quarter === 'priests' || l.seed % 5 < 2 });
   plans.push(base('abu-simbel-priests', L.filter((l) => l.quarter === 'priests').map(house)));
   const camp = L.filter((l) => l.quarter === 'camp'), market = camp.filter((l) => l.kind !== 'house' || l.rect[1] < 55), rest = camp.filter((l) => !market.includes(l));
   // the market: the shops and bakeries on the street, the lanes' washing and the shades over the street
@@ -216,6 +227,7 @@ export async function town() {
   const shopsAt = (l) => (l.kind === 'shop' ? { t: 'ram_shop', rect: l.rect, seed: l.seed, front: l.front, trade: l.trade, shop: true } : l.kind === 'bakery' ? { t: 'bakery', rect: l.rect, seed: l.seed, front: 'n' } : house(l));
   for (let i = 0; i < rest.length; i += 14) plans.push(base(`abu-simbel-camp-${i / 14}`, rest.slice(i, i + 14).map(shopsAt)));
   plans.push(base('abu-simbel-lanes', [{ t: 'lane_dress', lanes: lanes().filter((x) => x.r[1] >= 60 && x.kind !== 'cross'), seed: 24 }]));
+  plans.push(base('abu-simbel-chapel', [{ t: 'camp_chapel', rect: CHAPEL, seed: 71 }]));
   plans.push(base('abu-simbel-granaries', [{ t: 'granaries', list: granaryList(), y: 0 }]));
   if (yardHere) plans.push(base('abu-simbel-yard', [{ t: 'masons_yard', rect: YARD, y: 0, seed: 53 }]));
   plans.push({ ...base('abu-simbel-people', people()), style: 'life' });

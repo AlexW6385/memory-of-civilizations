@@ -9,6 +9,7 @@ import { wallReliefs } from '../egyptian/objects.js';
 import { royalStatue, standing, hathorHead, hathorCow } from './statues.js';
 import { rockWithRooms, extrudeProfile, carve } from './util.js';
 import { put } from './great.js';
+import { carveSmall } from './carve.js';
 import { smallRooms, SMALL_PILLARS, SMALL_CHAMBERS, SMALL_FACADE, FLOOR, cliffTop } from './dims.js';
 
 const EAST = -Math.PI / 2;
@@ -104,5 +105,6 @@ export function smallTemple(el, { bag, col, lights }) {
     bag.add('bronze', lathe([[0.2, 0], [0.18, 0.04], [0.05, 0.12], [0.035, 0.3], [0.035, 1.05], [0.07, 1.09], [0.16, 1.17], [0.14, 1.19]], 12, null, X(23.5), yS, ZS + 1.4)); col.circle(X(23.5), ZS + 1.4, 0.2, yS, yS + 1.3);
   }
   lights.push({ at: [X(10), yF + 2.6, ZS + 3.4], color: '#ffb46b', intensity: 3, distance: 8 }, { at: [X(10), yF + 2.6, ZS - 3.4], color: '#ffb46b', intensity: 3, distance: 8 });
+  carveSmall(bag, FX, ZS);
   void place;
 }

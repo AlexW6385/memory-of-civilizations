@@ -9,6 +9,7 @@ import { figure, wallReliefs, astroCeiling } from '../egyptian/objects.js';
 import { colossus, royalStatue, baboon, uraeus, osiride, seatedGod, standing } from './statues.js';
 import { kadesh, campaigns } from './reliefs.js';
 import { rockWithRooms, extrudeProfile, turnedBag, rng, carve } from './util.js';
+import { carveGreat } from './carve.js';
 import { greatRooms, greatChambers, HALL1, HALL2, GREAT_FACADE, FLOOR, cliffTop } from './dims.js';
 
 /** Place a statue's parts (material → geometries) at (x, y, z) turned by yaw (a fresh copy each time: build the statue anew). */
@@ -141,6 +142,7 @@ export function greatTemple(el, { bag, col, lights }) {
     const MAT = ['egyptian_blue', 'limewash_red', 'fresco_green', 'paint_ochre'];
     for (const sg of [-1, 1]) for (let k = 0, x = X(8.5); x > X(25.5); x -= 0.3, k++) bag.add(MAT[k % 4], box(x - 0.27, y + 0.05, sg > 0 ? 8.32 : -8.35, x - 0.03, y + 0.35, sg > 0 ? 8.35 : -8.32));
   }
+  carveGreat(bag, col, FX);
   // lamps in the aisles
   for (const [d, s] of [[13, 1], [13, -1], [22, 1], [22, -1]]) lamp(bag, col, lights, X(d), s * 6.9, F.hall1, 1.5, 4);
 
