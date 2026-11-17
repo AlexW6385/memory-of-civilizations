@@ -1,16 +1,25 @@
 // Brasília style — the Planalto Palace and the Supreme Federal Court: a glass box behind two files of Alvorada columns under a white
 // roof slab; the ground floor is a lobby one can enter (reception, sofas, flags, a tapestry wall), a stair climbs to the first floor's
 // hall (a long table with chairs, bookcases, flags), the upper floors stay closed.
-import { box, lathe } from '../../core/geom.js';
+import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { rngOf, solidBox, shrub, stool } from './kit.js';
 import { wedgeZ } from './util.js';
 
 const WHITE = 'plaster_white', CONC = 'concrete_light', FH = 4.4;
-/** The Alvorada column: its bow-like swelling profile, flat across its width (1 : 0.38). */
+/** The Alvorada column: a pointed lens section (two arcs meeting in crisp edges, 1 : 0.34) whose breadth swells along a smooth curve, narrow at the foot, widest near the third, pinched, then flaring to the beam. */
+const ALV = [[0.08, 0], [0.22, 0.14], [0.4, 0.34], [0.34, 0.55], [0.27, 0.74], [0.36, 0.92], [0.46, 1.0]];
+const alvR = (t) => { let i = 0; while (i < ALV.length - 2 && t > ALV[i + 1][1]) i++; const [r0, t0] = ALV[i], [r1, t1] = ALV[i + 1], u = Math.min(1, Math.max(0, (t - t0) / (t1 - t0))), m = (1 - Math.cos(u * Math.PI)) / 2; return r0 + (r1 - r0) * m; };
 function alvorada(bag, x, z, h, yaw, y = 0) {
-  const prof = [[0.08, 0], [0.22, 0.14], [0.4, 0.34], [0.34, 0.55], [0.27, 0.74], [0.36, 0.92], [0.46, 1.0]].map(([r, k]) => [r, k * h]);
-  const c = Math.cos(yaw), s = Math.sin(yaw);
-  bag.add(WHITE, lathe(prof, 14, (th) => { const a = Math.cos(th) * c + Math.sin(th) * s, b = -Math.cos(th) * s + Math.sin(th) * c; return 1 / Math.hypot(a / 1.0, b / 0.38) * 1.0; }, x, y, z));
+  const K = 26, U = 8, c = Math.cos(yaw), s = Math.sin(yaw), T = [];
+  const P = (k, j) => { const t = k / K, a = alvR(t) * 1.7, u = -1 + 2 * j / U, b = 0.2 * a * (1 - u * u), side = 1; void side; return [a * u, b]; };
+  const W = (k, j, sg) => { const [lx, lz] = P(k, j); const zz = lz * sg; return [x + lx * c - zz * s, y + k / K * h, z + lx * s + zz * c]; };
+  for (let k = 0; k < K; k++) for (let j = 0; j < U; j++) for (const sg of [1, -1]) {
+    const a = W(k, j, sg), b = W(k, j + 1, sg), d = W(k + 1, j, sg), e = W(k + 1, j + 1, sg);
+    if (sg > 0) T.push(...a, ...d, ...e, ...a, ...e, ...b); else T.push(...a, ...e, ...d, ...a, ...b, ...e);
+  }
+  const top = []; for (let j = 0; j <= U; j++) top.push(W(K, j, 1)); for (let j = U - 1; j > 0; j--) top.push(W(K, j, -1));
+  for (let q = 1; q < top.length - 1; q++) T.push(...top[0], ...top[q], ...top[q + 1]);
+  bag.add(WHITE, fromTriangles(T));
 }
 /** colonnade_palace: { rect, floors, name, door ('z0' | 'z1': the long side where the lobby opens) } */
 export function colonnadePalace(el, { bag, col, lights }) {
