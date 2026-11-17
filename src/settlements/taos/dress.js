@@ -136,6 +136,20 @@ export function dressItems() {
     if (!(c.fields > 0.45) || ground.height(x, z) > 1.5) continue;
     add('watch', [x, z], ground.height(x, z), Math.atan2(-x, -z), 0, { reach: 200 }); w++;
   }
+  // the plots of the fields about each watcher's platform (§4.6): grid gardens of maize, beans and squash, four to a platform, on field ground only
+  {
+    const r4 = rng(9191); w = 0;
+    for (let a = 0.3; a < 6.28 && w < 8; a += 0.77) {
+      const r = 205 + (w % 3) * 18, x = Math.cos(a) * r, z = Math.sin(a) * r, c = ground.cover(x, z);
+      if (!(c.fields > 0.45) || ground.height(x, z) > 1.5) continue;
+      w++;
+      for (const [dx, dz] of [[-9.5, -3], [9.5, 3], [-3, 9.5], [3, -9.5]]) {
+        const px = x + dx, pz = z + dz, rr = Math.hypot(px, pz);
+        if (rr > RADIUS - 34 || rr < 182 || ground.height(px, pz) > 1.2 || inCreek(px, pz, 8)) continue;
+        I.push({ k: 'cornplot', at: [+px.toFixed(1), +pz.toFixed(1)], y: ground.height(px, pz), rot: Math.floor(r4() * 4) * Math.PI / 2, v: Math.floor(r4() * 3), reach: 190 });
+      }
+    }
+  }
   // the terrace items come from a stream of their own, so that nothing placed before them moves
   const r3 = rng(7788), TI = [], T = (k, at, y, rot, v, o = {}) => TI.push({ k, at: [+at[0].toFixed(2), +at[1].toFixed(2)], y, rot, v, ...o });
   // 2b. the terraces before the upper rooms' doorways (docs/settlements/taos.md §4.6): a rack of maize and squash, a mat of squash and ears drying,

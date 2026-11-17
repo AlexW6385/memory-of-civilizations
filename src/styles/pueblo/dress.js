@@ -176,6 +176,40 @@ const KINDS = {
     for (let k = 0; k < 4; k++) strings(P, -W + 0.3 + k * 0.5, H, 0, 0.6 + rand() * 0.4, rand);
     P.add('hide_tan', box(-0.2, H - 0.7, 0.01, 0.3, H - 0.02, 0.035));
   },
+  /**
+   * A plot of the fields: a grid garden [stated: "grid gardens, with low walls that catch rainwater", Ancestral Puebloan — Albuquerque Museum,
+   * "Pueblo Agriculture"] of four beds in a square, low earth borders round and between; in each bed nine hills of maize with beans and squash
+   * planted close together, "the Three Sisters" [stated: same]; squash leaves shade the ground between. v: 0 young plants, 1 growing, 2 tall and
+   * ripening [inferred: the season, the spacing, the hills].
+   */
+  cornplot(P, rand, v) {
+    const E = 4.1, T = 0.11, BH = 0.13, H = [0.4, 1.15, 1.85][v % 3];
+    for (const c of [-E, 0, E]) { P.add('adobe_taos', box(-E - T, 0, c - T, E + T, BH, c + T)); P.add('adobe_taos', box(c - T, 0, -E - T, c + T, BH, E + T)); }
+    const tri2 = (a, b, c) => [...a, ...b, ...c, ...a, ...c, ...b];
+    for (const bx of [-2.05, 2.05]) for (const bz of [-2.05, 2.05]) for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) {
+      const x = bx + i * 1.15 + (rand() - 0.5) * 0.12, z = bz + j * 1.15 + (rand() - 0.5) * 0.12;
+      P.add('mud_plaster', lathe([[0.001, 0], [0.3, 0], [0.22, 0.07], [0.001, 0.1]], 7, null, x, 0, z));
+      for (let k = 0; k < 3; k++) {
+        const a = rand() * 6.28, lean = (rand() - 0.5) * 0.14, sx = x + Math.cos(a) * 0.1, sz = z + Math.sin(a) * 0.1, h = H * (0.85 + rand() * 0.3);
+        const tx = sx + Math.cos(a) * lean * h, tz = sz + Math.sin(a) * lean * h;
+        P.add(v === 2 && k === 1 ? 'thatch' : 'papyrus', rod([sx, 0.06, sz], [tx, h, tz], 0.013 + 0.005 * v, 4));
+        // the blades: long, arching out and down from the stalk, higher ones shorter
+        const g = [];
+        for (let q = 0; q < 3; q++) {
+          const f = 0.3 + q * 0.22, px = sx + (tx - sx) * f, pz = sz + (tz - sz) * f, py = 0.06 + (h - 0.06) * f, aa = a + q * 2.1 + k, L = (0.16 + 0.3 * H * 0.5) * (1 - q * 0.2);
+          const ex = Math.cos(aa), ez = Math.sin(aa), w = 0.012 + 0.012 * H;
+          const mid = [px + ex * L * 0.55, py + L * 0.18, pz + ez * L * 0.55], tip = [px + ex * L, py - L * 0.25, pz + ez * L];
+          g.push(...tri2([px - ez * w, py, pz + ex * w], [px + ez * w, py, pz - ex * w], [mid[0] - ez * w * 1.4, mid[1], mid[2] + ex * w * 1.4]), ...tri2([px + ez * w, py, pz - ex * w], [mid[0] + ez * w * 1.4, mid[1], mid[2] - ex * w * 1.4], [mid[0] - ez * w * 1.4, mid[1], mid[2] + ex * w * 1.4]), ...tri2([mid[0] - ez * w * 1.4, mid[1], mid[2] + ex * w * 1.4], [mid[0] + ez * w * 1.4, mid[1], mid[2] - ex * w * 1.4], tip));
+        }
+        P.add(v === 2 && k === 1 ? 'thatch' : 'cloth_green', fromTriangles(g));
+        if (v >= 1 && k === 0) P.add(v === 2 ? 'cloth_ochre' : 'papyrus', lathe([[0.001, 0], [0.03, 0.03], [0.04, 0.1], [0.025, 0.17], [0.001, 0.2]], 5, null, sx + (tx - sx) * 0.55 + 0.04, 0.06 + (h - 0.06) * 0.55, sz + (tz - sz) * 0.55));
+        if (v === 2) for (let q = 0; q < 3; q++) P.add('thatch', rod([tx, h, tz], [tx + (q - 1) * 0.07, h + 0.22, tz + ((q + 1) % 3 - 1) * 0.07], 0.005, 3));
+      }
+      // beans climbing the stalks and the squash vine's leaf over the ground between the hills
+      if (v >= 1) P.add('cloth_green', rod([x + 0.1, 0.05, z - 0.1], [x + 0.14, H * 0.55, z - 0.08], 0.006, 3));
+      P.add('cloth_green', lumpG(0.26 + rand() * 0.1, 0.04, 0.24 + rand() * 0.1, rand() * 6, x + 0.55, 0.1, z + 0.55, 6));
+    }
+  },
   /** A watcher's platform in the fields: four posts, a floor of poles, a brush shade over it, a ladder. */
   watch(P, rand) {
     const W = 1.3, H = 2.2;

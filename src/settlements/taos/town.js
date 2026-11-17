@@ -2,7 +2,7 @@
 // §5). This adds the life of the plaza and the roofs (§4.2): women grinding at the mealing bins, the
 // grinder inside the furnished room, people on the terraces and the plaza, firewood, jars and baskets
 // on the roofs, dogs and turkeys about the plaza.
-import { NORTH, SOUTH, CELL, RADIUS, ROOMS, YARDS, PENS, ARRIVE, nearYard, creekZ, inCreek, isRoom, roomsOf, CLEAR, UPPER } from './layout.js';
+import { NORTH, SOUTH, CELL, RADIUS, ROOMS, YARDS, PENS, ARRIVE, nearYard, creekZ, inCreek, isRoom, roomsOf, CLEAR, UPPER, onKeep } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const ST = 2.7;
@@ -96,7 +96,8 @@ export async function town() {
   for (const [px, pz] of PENS) for (let k = 0; k < 5; k++) { const a = rand() * 6.28, r = 0.4 + rand() * 0.9; T.push({ t: 'turkey', at: [px + Math.cos(a) * r - 0.2, pz + Math.sin(a) * r], y: 0, rot: rand() * 6.28, tom: k === 0 }); }
   // (the roofs kept clear for the terraced rooms' ways lose what the random scatter put on them)
   const clearRoof = (e) => e.y > 0.5 && [[NORTH, 'N'], [SOUTH, 'S']].some(([B, t]) => CLEAR.has(`${t}:${Math.floor((e.at[1] - B.z0) / CELL)}:${Math.floor((e.at[0] - B.x0) / CELL)}`));
-  P.splice(0, P.length, ...P.filter((e) => !clearRoof(e))); E.splice(0, E.length, ...E.filter((e) => !clearRoof(e)));
+  // (and the figures the scatter stood on the visitor's way: the way stays open)
+  P.splice(0, P.length, ...P.filter((e) => !clearRoof(e) && !(e.y === 0 && onKeep(e.at[0], e.at[1], 1.4)))); E.splice(0, E.length, ...E.filter((e) => !clearRoof(e)));
   // the terraces before the upper rooms' doors (§4.6): a woman at the mat of drying squash, in about two terraces in three, and by some a man
   // seated at the door
   for (const r of UPPER) {
