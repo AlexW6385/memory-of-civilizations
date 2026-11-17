@@ -208,18 +208,70 @@ function court(T, rect, cx, zc, rand, kinds) {
       for (const dx of [0, 2.4]) T.B('timber', fx + dx, 0.03, fz, fx + dx + 0.07, 1.8, fz + 0.07);
       T.bag.add('bamboo_culm', rod([fx, 1.75, fz + 0.03], [fx + 2.4, 1.75, fz + 0.03], 0.03, 5));
       for (let i = 0; i < 5; i++) hangingBraid(T, fx + 0.3 + i * 0.45, 1.72, fz + 0.04, 0.55 + rand() * 0.45, i % 3 === 1 ? 'pepper' : 'corn');
-    } else if (k === 'basket') {
+    } else if (k === 'thresh') threshing(T, cx - 0.6, zc, rand);
+    else if (k === 'basket') {
       for (let i = 0; i < 3; i++) { const bx = cx - 1.2 + i * 1.4, bz = zc + 3.6; T.L('wicker', [[0.001, 0], [0.55, 0.0], [0.62, 0.05], [0.001, 0.05]], 10, bx, 0.03, bz); for (let j = 0; j < 7; j++) T.B(i === 1 ? 'cloth_red' : 'cloth_ochre', bx - 0.3 + (j % 3) * 0.2, 0.08, bz - 0.3 + Math.floor(j / 3) * 0.2, bx - 0.2 + (j % 3) * 0.2, 0.13, bz - 0.2 + Math.floor(j / 3) * 0.2); T.B('timber', bx - 0.55, 0.0, bz - 0.55, bx - 0.5, 0.2, bz - 0.5); }
     }
   }
 }
 
+
+/** The stable (east house of a house that keeps a beast): the long manger of wood along the wall with its fodder, a heap of straw, the tether post with its stone ring, the harness and the yoke on the wall, a sack of bran. */
+export function stable(T, [x0, z0, x1, z1], y, rand) {
+  T.B('wood_dark', x1 - 0.95, y, z0 + 0.45, x1 - 0.3, y + 0.5, z0 + 3.1, true);
+  T.B('thatch', x1 - 0.88, y + 0.38, z0 + 0.52, x1 - 0.37, y + 0.55, z0 + 3.03);
+  T.B('thatch', x1 - 1.6, y, z1 - 2.4, x1 - 0.3, y + 1.1 + rand() * 0.3, z1 - 0.4, true);             // the heap of straw
+  T.B('granite_grey', x0 + 1.4, y, z0 + 1.7, x0 + 1.65, y + 0.9, z0 + 1.95, true);                      // the tether post
+  T.B('iron', x0 + 1.3, y + 0.8, z0 + 1.62, x0 + 1.75, y + 0.86, z0 + 1.68);
+  for (let k = 0; k < 3; k++) T.bag.add('rope_fibre', rod([x0 + 0.5, y + 2.0 - k * 0.1, z0 + 0.3 + k * 0.7], [x0 + 0.5, y + 1.3, z0 + 0.5 + k * 0.7], 0.03, 5));        // the harness hung on the pegs
+  T.bag.add('timber', rod([x0 + 0.5, y + 2.1, z0 + 0.25], [x0 + 0.5, y + 2.1, z0 + 2.4], 0.035, 5));                                                 // the pole they hang from
+  T.B('wood_ochre', x0 + 0.35, y + 1.2, z0 + 3.0, x0 + 0.55, y + 1.5, z0 + 4.4);                         // the yoke
+  T.L('sacking', [[0.001, 0], [0.26, 0.03], [0.3, 0.3], [0.22, 0.6], [0.13, 0.66], [0.001, 0.62]], 8, x0 + 0.7, y, z1 - 0.7);
+  T.col.circle(x0 + 0.7, z1 - 0.7, 0.3, y, y + 0.6);
+  T.B('plaster_damp', x0 + 1.0, y + 0.003, z0 + 3.4, x1 - 1.8, y + 0.012, z1 - 2.6);                            // the wet of the floor
+}
+/** The weaving room (east house): the plain loom of homespun cloth — frame, warp, cloth beam, heddle frame, treadles, the weaver's bench — with the spinning wheel and the baskets of cotton. */
+export function loom(T, [x0, z0, x1, z1], y, rand) {
+  const lz0 = z0 + 0.7, lz1 = z0 + 2.7, lx0 = x0 + 0.9, lx1 = x1 - 0.7;
+  for (const x of [lx0, lx1]) for (const z of [lz0, lz1]) T.B('timber', x - 0.05, y, z - 0.05, x + 0.05, y + 1.55, z + 0.05, true);
+  for (const x of [lx0, lx1]) { T.B('timber', x - 0.04, y + 1.5, lz0, x + 0.04, y + 1.58, lz1); T.B('timber', x - 0.04, y + 0.5, lz0, x + 0.04, y + 0.56, lz1); }
+  const w = lx1 - lx0 - 0.15;
+  T.bag.add('timber', (() => { const g = lathe([[0.07, 0], [0.07, w]], 8); g.rotateZ(Math.PI / 2); g.translate(lx0 + 0.07, y + 1.3, lz0); return g; })());                 // the warp beam
+  T.bag.add('cloth_white', (() => { const g = lathe([[0.1, 0], [0.1, w - 0.1]], 10); g.rotateZ(Math.PI / 2); g.translate(lx0 + 0.12, y + 1.0, lz1); return g; })());   // the cloth beam, the cloth rolled on it
+  for (let k = 0; k < 16; k++) T.B('cloth_white', lx0 + 0.1 + k * (w - 0.2) / 15, y + 1.0, lz0, lx0 + 0.11 + k * (w - 0.2) / 15, y + 1.3, lz1 - 0.1);        // the warp, a sheet of threads between the beams (thin)
+  T.B('timber', lx0 + 0.1, y + 1.0, (lz0 + lz1) / 2 - 0.03, lx1 - 0.1, y + 1.5, (lz0 + lz1) / 2 + 0.03);       // the heddle frame
+  T.B('wood_dark', lx0 + 0.4, y, lz1 + 0.5, lx1 - 0.4, y + 0.1, lz1 + 0.8); T.B('wood_dark', lx0 + 0.4, y, lz1 + 0.9, lx1 - 0.4, y + 0.1, lz1 + 1.2);   // the two treadles
+  T.B('wood_ochre', lx0 + 0.6, y + 0.4, lz1 + 0.35, lx1 - 0.6, y + 0.46, lz1 + 0.8, true);                         // the weaver's bench
+  for (const x of [lx0 + 0.7, lx1 - 0.7]) T.B('wood_ochre', x - 0.03, y, lz1 + 0.4, x + 0.03, y + 0.4, lz1 + 0.75);
+  // the spinning wheel against the west wall's end, the baskets of cotton
+  const sx = x0 + 0.6, sz = z1 - 1.3;
+  T.bag.add('timber', (() => { const g = lathe([[0.4, -0.02], [0.4, 0.02], [0.37, 0.02], [0.37, -0.02], [0.4, -0.02]], 20); g.rotateZ(Math.PI / 2); g.translate(sx, y + 0.65, sz); return g; })());
+  T.B('timber', sx - 0.1, y, sz - 0.5, sx + 0.1, y + 0.1, sz + 0.5, true); T.B('timber', sx - 0.04, y + 0.1, sz - 0.4, sx + 0.04, y + 0.65, sz - 0.36);
+  for (let k = 0; k < 3; k++) { T.L('wicker', [[0.001, 0], [0.3, 0.02], [0.38, 0.35], [0.001, 0.35]], 10, x1 - 0.7, y, z1 - 0.8 - k * 0.8); T.L('cloth_white', [[0.001, 0.3], [0.3, 0.33], [0.2, 0.5], [0.001, 0.52]], 8, x1 - 0.7, y, z1 - 0.8 - k * 0.8); T.col.circle(x1 - 0.7, z1 - 0.8 - k * 0.8, 0.36, y, y + 0.5); }
+  void rand;
+}
+/** The threshing floor and the straw of a poor court: the beaten-earth ring, the stone roller (lu zhou), a sheaf of grain drying on a mat, the conical straw stack. */
+function threshing(T, cx, zc, rand) {
+  const rx = cx - 3.2, rz = zc - 0.5;
+  T.bag.add('mud_plaster', lathe([[0.001, 0.0], [2.8, 0.0], [2.8, 0.035], [0.001, 0.035]], 16, null, rx, 0.03, rz));
+  T.bag.add('granite_grey', (() => { const g = lathe([[0.001, -0.5], [0.34, -0.5], [0.36, -0.44], [0.36, 0.44], [0.34, 0.5], [0.001, 0.5]], 14); g.rotateZ(Math.PI / 2); g.translate(rx + 0.5, 0.4, rz + 0.6); return g; })());
+  T.B('wood_dark', rx - 0.15, 0.36, rz + 0.54, rx + 0.15, 0.44, rz + 0.66);
+  T.col.rect([rx - 0.2, rz + 0.1, rx + 1.2, rz + 1.1], 0.03, 0.8);
+  T.B('reed_mat', rx - 2.3, 0.06, rz - 1.6, rx - 0.6, 0.075, rz - 0.4);
+  for (let k = 0; k < 24; k++) T.B(k % 3 ? 'cloth_ochre' : 'wood_ochre', rx - 2.25 + (k % 8) * 0.2, 0.075, rz - 1.55 + Math.floor(k / 8) * 0.35, rx - 2.12 + (k % 8) * 0.2, 0.12 + 0.02 * (k % 3), rz - 1.3 + Math.floor(k / 8) * 0.35);
+  const sx = cx + 5.8, sz = zc + 4.4;
+  T.bag.add('thatch', lathe([[0.001, 0.0], [1.3, 0.0], [1.15, 0.8], [0.8, 1.6], [0.35, 2.3], [0.001, 2.7]], 12, null, sx, 0.03, sz));
+  T.B('timber', sx - 0.04, 2.6, sz - 0.04, sx + 0.04, 3.1, sz + 0.04);
+  T.col.circle(sx, sz, 1.3, 0.03, 1.6);
+  void rand;
+}
+
 /** The far shell of a house (lod 2): one box of wall and one gable of grey tile, no windows, no doors, no ornament. ridge along x unless `alongZ`. */
-function shellBlock(T, rect, y, H, rise, ov, alongZ = false) {
+function shellBlock(T, rect, y, H, rise, ov, alongZ = false, pal = HOUSE) {
   const [x0, z0, x1, z1] = rect;
-  T.B('brick_grey', x0, y, z0, x1, y + H, z1, true);
+  T.B(pal.plaster, x0, y, z0, x1, y + H, z1, true);
   const hx = (x1 - x0 + 2 * ov) / 2, hz = (z1 - z0 + 2 * ov) / 2;
-  T.bag.add('tile_grey', frustum([x0 - ov, z0 - ov, x1 + ov, z1 + ov], y + H, y + H + rise, alongZ ? hx : 0, alongZ ? hx : 0, alongZ ? 0 : hz, alongZ ? 0 : hz, { noBottom: true }));
+  T.bag.add(pal.roof, frustum([x0 - ov, z0 - ov, x1 + ov, z1 + ov], y + H, y + H + rise, alongZ ? hx : 0, alongZ ? hx : 0, alongZ ? 0 : hz, alongZ ? 0 : hz, { noBottom: true }));
 }
 
 // ── the element ──────────────────────────────────────────────────────────────────────────────
@@ -229,64 +281,95 @@ function shellBlock(T, rect, y, H, rise, ov, alongZ = false) {
  */
 export function luHouse(el, ctx) {
   const T = tools(ctx), { bag, col } = ctx, rand = rng(el.seed || 1);
-  const [x0, z0, x1, z1] = el.rect, W = x1 - x0, D = z1 - z0, lod = el.lod ?? 0, pal = HOUSE, cx = (x0 + x1) / 2;
-  const rich = (el.wealth ?? 0) > 0.55;
+  const [x0, z0, x1, z1] = el.rect, W = x1 - x0, D = z1 - z0, lod = el.lod ?? 0, cx = (x0 + x1) / 2;
+  // the rank of the house by rule (wealth with the lot's own luck): 2 grey brick under grey tile, tall front range and hooded gate; 1 grey-brick foot under
+  // mud-plastered walls, grey tile, the lower gate hood; 0 mud-brick and thatch behind a low earth wall with a plank gate (no front range). [inferred: docs §11]
+  const luck = rng((el.seed || 1) * 7919 + 13)(), score = (el.wealth ?? 0) + (luck - 0.5) * 0.26;
+  const tier = score > 0.55 ? 2 : score > 0.3 ? 1 : 0;
+  const pal = [{ ...HOUSE, wood: 'timber', column: 'timber', soffit: 'timber', plaster: 'mudbrick', plinth: 'granite_block', roof: 'thatch', lattice: 'lattice' }, { ...HOUSE, plaster: 'mud_plaster', plinth: 'brick_grey', roof: 'tile_grey' }, HOUSE][tier];
+  const HM = [3.0, 3.3, 3.5][tier], HW = [3.0, 3.1, 3.2][tier], WH = [2.4, 2.8, 3.0][tier];
+  const rich = tier === 2, shopOn = !!el.shop && tier > 0, yb = tier ? 0.3 : 0.0;
   // the walls: north, west and east (the lot's front is the front range, whole)
   const far = lod >= 2;
-  const wall = (a, b) => (far ? T.B('brick_grey', Math.min(a[0], b[0]) - 0.2, 0, Math.min(a[1], b[1]) - 0.2, Math.max(a[0], b[0]) + 0.2, 3.0, Math.max(a[1], b[1]) + 0.2, true) : Wall({ a, b, y: 0, h: 3.0, th: 0.42, gates: [], pal, simple: true }, ctx));
+  const wall = (a, b) => (far ? T.B(pal.plaster, Math.min(a[0], b[0]) - 0.2, 0, Math.min(a[1], b[1]) - 0.2, Math.max(a[0], b[0]) + 0.2, WH, Math.max(a[1], b[1]) + 0.2, true) : Wall({ a, b, y: 0, h: WH, th: tier ? 0.42 : 0.5, gates: [], pal, simple: true }, ctx));
   wall([x0, z0], [x1, z0]); wall([x0, z0], [x0, z1]); wall([x1, z0], [x1, z1]);
   const Hall = far ? () => {} : Hall0;
   // the front range along the lane, in one run but for the gate
   const dS = 4.4, fz0 = z1 - 0.35 - dS, fz1 = z1 - 0.35;
-  const gw = el.shop ? 1.9 : 1.7, gx = x0 + 3.6 + (el.shop ? (rand() < 0.5 ? 0.25 : 0.7) : rand()) * Math.max(0, W - 7.2);
-  const hallOpts = { y: 0.3, H: 3.3, four: false, roof: 'gable', plat: 0.3, pal, eave: 0.75, platMargin: 0.35, winWall: false, simple: true };
+  const gw = shopOn ? 1.9 : tier ? 1.7 : 1.3, gx = x0 + 3.6 + (shopOn ? (rand() < 0.5 ? 0.25 : 0.7) : rand()) * Math.max(0, W - 7.2);
+  const hallOpts = { y: 0.3, H: HW + 0.2, four: false, roof: 'gable', plat: 0.3, pal, eave: 0.75, platMargin: 0.35, winWall: false, simple: true };
   const runs = [[x0 + 0.35, gx - gw - 1.0], [gx + gw + 1.0, x1 - 0.35]];
-  const shopRun = el.shop ? (runs[0][1] - runs[0][0] >= runs[1][1] - runs[1][0] ? 0 : 1) : -1;
+  const shopRun = shopOn ? (runs[0][1] - runs[0][0] >= runs[1][1] - runs[1][0] ? 0 : 1) : -1;
   for (let i = 0; i < 2; i++) {
     const [a, b] = runs[i];
-    if (b - a < 3.2) continue;
+    if (b - a < 3.2 || !tier) continue;
     const nb = Math.max(1, 2 * Math.round(((b - a) / 3.4 - 1) / 2) + 1);
     if (i === shopRun) Hall({ ...hallOpts, rect: [a, fz0, b, fz1], front: 's', bays: [nb, 1], eave: 1.0, platMargin: 0.5 }, ctx);
     else Hall({ ...hallOpts, rect: [a, fz0, b, fz1], front: 'n', bays: [nb, 1] }, ctx);
   }
-  // the gate: the hood over the passage and the doors standing open into the court
-  Hall({ rect: [gx - gw - 0.9, fz0 - 0.2, gx + gw + 0.9, fz1 + 0.1], y: 0.35, H: 3.5, front: 's', four: false, roof: 'gable', plat: 0.35, bays: [1, 1], pal, eave: 0.8, platMargin: 0.3 }, ctx);
-  if (!far) for (const sx of [-1, 1]) bag.add('lacquer_red', box(gx + sx * gw * 0.5 - 0.03, 0.35, fz0 + 0.2, gx + sx * gw * 0.5 + 0.03, 2.5, fz0 + 1.1));
-  // the screen wall inside the gate
-  if (!far) Wall({ a: [gx - 2.0, fz0 - 2.4], b: [gx + 2.0, fz0 - 2.4], y: 0, h: 2.5, th: 0.36, pal, simple: true }, ctx);
+  // the gate: rank 2 the hooded gate hall (tall, or low by the lot's luck), rank 1 the low hood, rank 0 a gap in the earth wall with a plank gate under a little thatched roof
+  const gateH = tier === 2 ? (luck > 0.5 ? 4.1 : 3.6) : 3.2;
+  if (tier) {
+    Hall({ rect: [gx - gw - 0.9, fz0 - 0.2, gx + gw + 0.9, fz1 + 0.1], y: 0.35, H: gateH, front: 's', four: false, roof: 'gable', plat: 0.35, bays: [1, 1], pal, eave: tier === 2 ? 0.8 : 0.65, platMargin: 0.3 }, ctx);
+    if (!far) for (const sx of [-1, 1]) bag.add('lacquer_red', box(gx + sx * gw * 0.5 - 0.03, 0.35, fz0 + 0.2, gx + sx * gw * 0.5 + 0.03, 2.5, fz0 + 1.1));
+    // the screen wall inside the gate
+    if (!far) Wall({ a: [gx - 2.0, fz0 - 2.4], b: [gx + 2.0, fz0 - 2.4], y: 0, h: 2.5, th: 0.36, pal, simple: true }, ctx);
+  } else {
+    const wz = fz1 - 0.1, a0 = x0 + 0.35, a1 = x1 - 0.35;
+    if (far) T.B(pal.plaster, a0, 0, wz - 0.25, a1, WH, wz + 0.25, true);
+    else Wall({ a: [a0, wz], b: [a1, wz], y: 0, h: WH, th: 0.5, gates: [{ at: gx - a0, w: gw * 1.2, h: 2.2 }], pal, simple: true }, ctx);
+    for (const sx of [-1, 1]) T.B('timber', gx + sx * (gw * 0.6 + 0.12) - 0.1, 0, wz - 0.1, gx + sx * (gw * 0.6 + 0.12) + 0.1, 2.5, wz + 0.1, true);
+    T.B('timber', gx - gw * 0.6 - 0.3, 2.2, wz - 0.12, gx + gw * 0.6 + 0.3, 2.4, wz + 0.12);
+    T.bag.add('thatch', frustum([gx - gw * 0.6 - 0.7, wz - 0.9, gx + gw * 0.6 + 0.7, wz + 0.9], 2.4, 3.05, 0, 0, 0.88, 0.88, { noBottom: true }));
+    if (!far) for (const sx of [-1, 1]) T.B('wood_dark', gx + sx * gw * 0.5 - 0.04, 0, wz - 1.0, gx + sx * gw * 0.5 + 0.04, 2.0, wz - 0.1);        // the plank leaves swung open
+  }
   // the main house: three, five or seven bays, raised a little, a gable roof; its partitions and doors
-  const nbm = W > 30 || rich ? 7 : W > 25 ? 5 : 3, dN = Math.min(7.6, D * 0.28), dE = Math.min(4.6, W * 0.2);
+  const nbm = tier === 2 ? (W > 30 ? 7 : 5) : tier === 1 ? (W > 27 ? 5 : 3) : 3, dN = Math.min(7.6, D * 0.28), dE = Math.min(4.6, W * 0.2);
   const main = [x0 + dE * 0.35, z0 + 0.6, x1 - dE * 0.35, z0 + 0.6 + dN];
-  Hall({ rect: main, y: 0.6, H: 3.5, front: 's', four: false, roof: 'gable', plat: 0.6, bays: [nbm, 2], pal, eave: 0.95, platMargin: 1.1 }, ctx);
+  Hall({ rect: main, y: 0.6, H: HM, front: 's', four: false, roof: 'gable', plat: 0.6, bays: [nbm, 2], pal, eave: tier ? 0.95 : 1.1, platMargin: 1.1 }, ctx);
   const bw = (main[2] - main[0]) / nbm, mz0 = main[1], mz1 = main[3];
   // east and west houses and the court
   const sz0 = mz1 + 1.8, sz1 = fz0 - 3.0;
   const west = [x0 + 0.6, sz0, x0 + 0.6 + dE, sz1], east = [x1 - 0.6 - dE, sz0, x1 - 0.6, sz1];
   if (sz1 - sz0 > 4) {
-    Hall({ rect: west, y: 0.4, H: 3.2, front: 'e', four: false, roof: 'gable', plat: 0.4, bays: [3, 1], pal, eave: 0.8, platMargin: 0.8 }, ctx);
-    Hall({ rect: east, y: 0.4, H: 3.2, front: 'w', four: false, roof: 'gable', plat: 0.4, bays: [3, 1], pal, eave: 0.8, platMargin: 0.8 }, ctx);
+    Hall({ rect: west, y: 0.4, H: HW, front: 'e', four: false, roof: 'gable', plat: 0.4, bays: [3, 1], pal, eave: 0.8, platMargin: 0.8 }, ctx);
+    Hall({ rect: east, y: 0.4, H: HW, front: 'w', four: false, roof: 'gable', plat: 0.4, bays: [3, 1], pal, eave: 0.8, platMargin: 0.8 }, ctx);
   }
   if (far) {
     // the far shell: the runs of the front range, the gate hood over the passage, the main house, the two wings
-    for (const [a, b] of runs) if (b - a > 3.2) shellBlock(T, [a, fz0, b, fz1], 0.3, 3.3, 1.5, 0.6);
-    shellBlock(T, [gx - gw - 0.9, fz0 - 0.2, gx + gw + 0.9, fz1 + 0.1], 0.35, 3.5, 1.5, 0.5);
-    shellBlock(T, main, 0.6, 3.5, 1.9, 0.9);
-    if (sz1 - sz0 > 4) { shellBlock(T, west, 0.4, 3.2, 1.3, 0.6, true); shellBlock(T, east, 0.4, 3.2, 1.3, 0.6, true); }
+    for (const [a, b] of runs) if (b - a > 3.2 && tier) shellBlock(T, [a, fz0, b, fz1], 0.3, 3.3, 1.5, 0.6, false, pal);
+    if (tier) shellBlock(T, [gx - gw - 0.9, fz0 - 0.2, gx + gw + 0.9, fz1 + 0.1], 0.35, gateH, 1.5, 0.5, false, pal);
+    shellBlock(T, main, 0.6, HM, 1.9, 0.9, false, pal);
+    if (sz1 - sz0 > 4) { shellBlock(T, west, 0.4, HW, 1.3, 0.6, true, pal); shellBlock(T, east, 0.4, HW, 1.3, 0.6, true, pal); }
   }
-  bag.add('brick_paving', box(x0 + 0.3, -0.2, z0 + 0.3, x1 - 0.3, 0.03, z1 - 0.3));
+  bag.add(tier ? 'brick_paving' : 'mud_plaster', box(x0 + 0.3, -0.2, z0 + 0.3, x1 - 0.3, 0.03, z1 - 0.3));
   col.floor([x0 + 0.3, z0 + 0.3, x1 - 0.3, z1 - 0.3], 0.03);
   // the paths: from the gate to the main house, across the court
   const pz0 = mz1 + 1.1;
-  if (!far) { bag.add('bluestone', box(cx - 0.6, 0.0, pz0, cx + 0.6, 0.06, fz0 - 0.4)); bag.add('bluestone', box(gx - 1.0, 0.0, fz0 - 3.4, gx + 1.0, 0.06, fz1 + 0.2)); }
+  if (!far && tier) { bag.add('bluestone', box(cx - 0.6, 0.0, pz0, cx + 0.6, 0.06, fz0 - 0.4)); bag.add('bluestone', box(gx - 1.0, 0.0, fz0 - 3.4, gx + 1.0, 0.06, fz1 + 0.2)); }
   const zc = (sz0 + sz1) / 2;
   // ── the facade at the lane (lod < 2): drum stones, lanterns, couplets, damp band, streaks, goods ──
   const zf = z1 - 0.35 + 0.14;                                  // the lane face of the front range's wall (the wall line plus its half thickness)
-  if (!far) for (const sx of [-1, 1]) drumStone(T, gx + sx * (gw + 1.25), 0.3, zf + 0.5);
-  if (!far) for (const sx of [-1, 1]) {
+  if (!far && tier === 2) for (const sx of [-1, 1]) drumStone(T, gx + sx * (gw + 1.25), 0.3, zf + 0.5);
+  if (!far && tier) for (const sx of [-1, 1]) {
     T.B('cloth_red', gx + sx * (gw + 0.55) - 0.12, 1.0, zf + 0.04, gx + sx * (gw + 0.55) + 0.12, 2.4, zf + 0.06);
     for (let k = 0; k < 5; k++) T.B('lacquer_black', gx + sx * (gw + 0.55) - 0.05, 2.2 - k * 0.24, zf + 0.06, gx + sx * (gw + 0.55) + 0.05, 2.2 - k * 0.24 + 0.12, zf + 0.07);
   }
-  if (lod < 2) {
+  if (lod < 2 && !tier) {
+    // the low earth wall of a poor house: the damp at its foot, the things leant against it, a bench by the gate
+    for (const [a, b] of [[x0 + 0.35, gx - gw - 0.9], [gx + gw + 0.9, x1 - 0.35]]) {
+      if (b - a < 2.4) continue;
+      for (let u = a + 0.2; u < b - 0.6; u += 1.8 + rand() * 2.4) bag.add('plaster_damp', box(u, 0.0, zf - 0.0, Math.min(u + 0.9 + rand() * 1.4, b - 0.1), 0.35 + rand() * 0.4, zf + 0.012));
+      const u = a + 0.3 + rand() * Math.max(0, b - a - 2.4), what = ['wood', 'jar', 'ladder', 'basket', 'bench'][Math.floor(rand() * 5)];
+      if (what === 'wood') firewood({ ...T }, u, 0.0, zf, 1.5, 3 + Math.floor(rand() * 3), 'x', rand);
+      else if (what === 'jar') { jar(T, u + 0.3, 0.0, zf + 0.4, 1.0); jar(T, u + 0.95, 0.0, zf + 0.35, 0.8); T.col.circle(u + 0.3, zf + 0.4, 0.38, 0, 1.0); T.col.circle(u + 0.95, zf + 0.35, 0.3, 0, 0.8); }
+      else if (what === 'ladder') leant(T, u + 0.4, 0.0, zf, 'ladder', rand);
+      else if (what === 'basket') leant(T, u + 0.6, 0.0, zf, 'basket', rand);
+      else stoneBench(T, u + 0.9, 0.0, zf + 0.5, 1.8, 'x');
+    }
+    lantern(T, gx + gw * 0.6 + 0.6, 2.04, zf + 0.3, 'lamp_paper');
+  }
+  if (lod < 2 && tier) {
     lantern(T, gx - 0.9, 2.55, zf + 0.5, 'lamp_paper'); lantern(T, gx + 0.9, 2.55, zf + 0.5, 'lamp_paper');
     // the damp at the foot of the wall and the streaks under the eaves, in short runs by the bays
     for (const [a, b] of runs) {
@@ -314,29 +397,36 @@ export function luHouse(el, ctx) {
     }
   }
   // ── the shop in the front range ──
-  if (el.shop && shopRun >= 0 && !far) shopCounter(T, runs[shopRun], zf, fz0, fz1, el.trade ?? 0, rand, lod);
-  // ── the interiors and the court (lod 0) ──
-  if (lod === 0) {
-    const y = 0.6, zb = mz0 + 0.17, mid = (nbm - 1) / 2;
+  if (shopOn && shopRun >= 0 && !far) shopCounter(T, runs[shopRun], zf, fz0, fz1, el.trade ?? 0, rand, lod);
+  // ── the interiors and the court (lod 0 and 1: every house but the far shut ones is enterable and furnished) ──
+  if (lod <= 1) {
+    const y = 0.6, zb = mz0 + 0.17, mid = (nbm - 1) / 2, PH = HM - 0.4, wallM = tier === 2 ? 'brick_grey' : 'mud_plaster';
     // partitions at the bay lines either side of the middle bay, a door through each near the front
     for (const k of [mid, mid + 1]) {
       const x = main[0] + bw * k;
-      T.B('brick_grey', x - 0.12, y, zb, x + 0.12, y + 3.1, zb + 3.0, true);
-      T.B('brick_grey', x - 0.12, y, zb + 4.1, x + 0.12, y + 3.1, mz1 - 0.2, true);
-      T.B('brick_grey', x - 0.12, y + 2.2, zb + 3.0, x + 0.12, y + 3.1, zb + 4.1);
+      T.B(wallM, x - 0.12, y, zb, x + 0.12, y + PH, zb + 3.0, true);
+      T.B(wallM, x - 0.12, y, zb + 4.1, x + 0.12, y + PH, mz1 - 0.2, true);
+      T.B(wallM, x - 0.12, y + 2.2, zb + 3.0, x + 0.12, y + PH, zb + 4.1);
       T.B('lacquer_red', x - 0.13, y, zb + 2.97, x + 0.13, y + 2.2, zb + 3.03); T.B('lacquer_red', x - 0.13, y, zb + 4.07, x + 0.13, y + 2.2, zb + 4.13);
     }
     tang(T, main[0] + bw * (mid + 0.5), y, zb, bw, rand);
     const sideL = [main[0] + 0.2, main[0] + bw * mid - 0.15], sideR = [main[0] + bw * (mid + 1) + 0.15, main[2] - 0.2];
     chamber(T, sideL, y, zb, mz1, rand() < 0.5 ? 0 : 1, rand);
     chamber(T, sideR, y, zb, mz1, 0, rand);
-    lanternIn(T, main[0] + bw * (mid + 0.5), y + 3.0, mz0 + 2.5);
-    if (sz1 - sz0 > 4) { kitchen(T, west, 0.4, rand); store(T, east, 0.4, rand); }
+    lanternIn(T, main[0] + bw * (mid + 0.5), y + Math.min(3.0, HM - 0.35), mz0 + 2.5);
+    if (sz1 - sz0 > 4) {
+      // the west house the kitchen; the east house by the lot's seed: the store, the stable of a household that keeps a beast, the weaving room (rank 0 never the loom)
+      const kind = (el.seed >> 2) % (tier ? 3 : 2);
+      kitchen(T, west, 0.4, rand);
+      if (kind === 0) store(T, east, 0.4, rand); else if (kind === 1) stable(T, east, 0.4, rand); else loom(T, east, 0.4, rand);
+    }
     // strings of corn and peppers under the main house's eaves; a few pots of flowers at its steps
     for (let k = 0; k < 8; k++) hangingBraid(T, main[0] + 1.2 + k * ((main[2] - main[0] - 2.4) / 7), 3.05, mz1 + 0.5, 0.6 + rand() * 0.5, ['corn', 'pepper', 'corn', 'garlic'][k % 4]);
     for (let k = 0; k < 4; k++) T.L(k % 2 ? 'terracotta' : 'pottery_dark', [[0.001, 0], [0.12, 0], [0.19, 0.28], [0.21, 0.3], [0.001, 0.3]], 8, main[0] + 1.0 + k * 0.7, 0.6, mz1 + 0.9);
-    const kinds = ['table', 'basket'];
-    if (rand() < 0.5) kinds.push('well'); else kinds.push('mill');
+    const kinds = ['basket'];
+    if (tier || rand() < 0.5) kinds.push('table');
+    if (tier < 2 && rand() < 0.65) kinds.push('thresh');
+    else if (rand() < 0.5) kinds.push('well'); else kinds.push('mill');
     if (rand() < 0.6) kinds.push('coop');
     if (rand() < 0.6) kinds.push('frame');
     court(T, el.rect, cx, zc, rand, kinds);

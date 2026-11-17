@@ -80,11 +80,19 @@ function streetLife() {
   for (const a of S.hitches) E.push({ t: 'lu_hitch', ...a });
   for (const a of S.carts) E.push({ t: 'lu_handcart', ...a });
   for (const [px, pz] of OLD) if (Math.abs(px) < 90 && pz > -232 && pz < 118) E.push({ t: 'lu_treeguard', at: [px, pz], w: 1.4, bench: pz > -60 });
+  // the single-wheel barrows of the carriers resting in Queli Street, the threshing yards on the road outside the south wall, each with its beast at the roller
+  for (const [i, [bx, bz]] of BARROWS.entries()) E.push({ t: 'lu_barrow', at: [bx, bz], rot: i % 2 ? Math.PI / 2 : 0, seed: 40 + i });
+  for (const [i, [yx, yz]] of YARDS.entries()) E.push({ t: 'lu_yard', at: [yx, yz], r: 4.4, seed: 60 + i });
   let k = 1;
+  for (const [yx, yz] of YARDS) L.push({ t: 'animal', kind: 'donkey', at: [yx - 0.9, yz + 5.4], y: 0, rot: Math.PI, gear: true, graze: false, seed: k++ });
   for (const a of S.hitches) L.push({ t: 'animal', kind: 'donkey', at: [a.at[0], a.at[1] + 1.8], y: 0, rot: 0, gear: true, graze: false, seed: k++ });
   for (const a of S.carts.slice(0, 6)) L.push({ t: 'animal', kind: 'donkey', at: [a.at[0] + 2.2, a.at[1]], y: 0, rot: a.seed % 6, gear: false, graze: true, seed: k++ });
   return [base('qufu-street', E), { ...base('qufu-street-animals', L), style: 'life' }];
 }
+
+/** The carriers' barrows in Queli Street and the threshing yards on the road outside the south wall (the wall's outer face at z 265.5; the road band z 262…276 is free of crops). */
+const BARROWS = [[-3.8, 190], [4.0, 206], [-3.6, 231], [3.9, 247]];
+const YARDS = [-132, -84, -34, 24, 74, 124].map((x) => [x, 271]);
 
 function houses() {
   const L = lots(), out = [];
@@ -161,6 +169,8 @@ function people() {
   for (const [x, z] of [[-9.5, -44], [9.5, -44], [0, ALTAR.c[1] + 7]]) fig([x + 1.6, z + 0.2], Math.PI / 2, { pose: 'kneel', arms: 'pray', cloth: pick(CL) });
   for (let k = 0; k < 18; k++) { const at = [-50 + rand() * 100, -96 + rand() * 40]; if (Math.hypot(at[0], at[1] - ALTAR.c[1]) < 10 || Math.abs(at[0]) < 4.5) continue; fig(at, rand() * 6.28, { cloth: pick(['cloth_blue', 'cloth_white', 'cloth_indigo']), pose: rand() < 0.4 ? 'talk' : 'stand' }); }
   for (let k = 0; k < 12; k++) { const at = [-14 + rand() * 28, -16 + rand() * 40]; if (Math.abs(at[0]) < 4.5) continue; fig(at, rand() * 6.28, { cloth: pick(CL), pose: 'stand', carry: rand() < 0.2 ? 'staff' : 'none' }); }
+  // the farmers at the threshing yards outside the wall: one forking the straw, one by the roller
+  for (const [yx, yz] of YARDS) { fig([yx + 1.6, yz - 1.6], rand() * 6.28, { dress: 'trousers', hat: 'straw', cloth: 'cloth_brown', pose: 'staff', carry: 'staff', len: 1.8 }); fig([yx - 3.0, yz + 3.2], 0, { dress: 'trousers', hat: 'straw', cloth: 'cloth_grey', pose: 'stand' }); }
   // the Duke's household: guards at the mansion's gate, the Duke at his table in the great hall, clerks at their desks, servants in the court
   for (const sx of [-1, 1]) fig([MX + sx * 4.5, 114], Math.PI, { pose: 'staff', carry: 'staff', len: 2.0, cloth: 'cloth_red', over: 'sash' });
   const dt = MANSION_HALLS[3];

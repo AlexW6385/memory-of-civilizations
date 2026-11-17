@@ -6,7 +6,7 @@ import { rng, lotFrame } from './kit.js';
 
 
 // ── the writing on the boards: a few characters as tapered brush strokes [kind, x0, y0, x1, y1] on a 100-unit grid ──
-const GLYPHS = {
+export const GLYPHS = {
   茶: [['h', 12, 92, 88, 92], ['s', 34, 100, 34, 82], ['s', 66, 100, 66, 82], ['p', 50, 80, 22, 54], ['n', 50, 80, 80, 54], ['h', 16, 40, 84, 40], ['s', 50, 52, 50, 4], ['p', 46, 34, 16, 8], ['n', 54, 34, 84, 8]],
   布: [['h', 10, 80, 90, 80], ['p', 46, 92, 16, 18], ['s', 28, 58, 28, 8], ['h', 28, 58, 80, 58], ['s', 80, 58, 80, 18], ['s', 54, 76, 54, 4]],
   书: [['h', 12, 78, 66, 78], ['s', 66, 78, 66, 56], ['h', 8, 56, 90, 56], ['s', 48, 98, 48, 8], ['d', 72, 88, 82, 76], ['h', 10, 30, 48, 30]],
@@ -24,7 +24,7 @@ function stroke(out, [k, ax, ay, bx, by]) {
   for (let i = 1; i < 5; i++) out.push(P[0][0], P[0][1], 0, P[i][0], P[i][1], 0, P[i + 1][0], P[i + 1][1], 0);
 }
 /** A gilt character on a board at (x, y, z) facing the direction of `yaw` (0: +z), size s. */
-function glyph(bag, ch, x, y, z, yaw, s) {
+export function glyph(bag, ch, x, y, z, yaw, s) {
   const t = []; for (const st of GLYPHS[ch]) stroke(t, st);
   const g = fromTriangles(t); g.scale(s, s, 1); g.rotateY(yaw); g.translate(x, y, z); bag.add('gilt_bronze', g);
 }
