@@ -13,6 +13,7 @@ import '../greek/ward.js';
 import './house.js';
 import { DRESS } from './dress.js';
 import { WORK } from './work.js';
+import { PEDIMENTS } from './pediment.js';
 import { human, placed, blob, limb } from '../greek/sculpture.js';
 import { merge } from '../greek/columns.js';
 
@@ -234,7 +235,7 @@ function hearth(el, { bag, col }) {
 
 export const delphi = {
   ...greek,
-  elements: Object.assign(Object.create(greek.elements), { ribbon, polygonal_wall: polygonalWall, adyton, hearth, serpent_column: serpentColumn, sphinx_column: sphinxColumn, ex_voto: exVoto, kore, stall, ...DRESS, ...WORK }),
+  elements: Object.assign(Object.create(greek.elements), { ribbon, polygonal_wall: polygonalWall, adyton, hearth, serpent_column: serpentColumn, sphinx_column: sphinxColumn, ex_voto: exVoto, kore, stall, ...DRESS, ...WORK, ...PEDIMENTS }),
   objects: greek.objects,
 };
 registerStyle('delphi', delphi);

@@ -57,7 +57,11 @@ export function temple(E) {
   E.push({ t: 'metopes', ...DE, programme: { e: 'gigantomachy', w: 'amazonomachy' }, bg: 'wall_red', band: 'egyptian_blue' });
   const PR = [X[0] - FACE - 0.6, Z[0] - FACE - 0.6, X[14] + FACE + 0.6, Z[5] + FACE + 0.6];
   E.push({ t: 'pediment_roof', rect: PR, y: TOP, rise: 2.7, tympanumInset: 0.8, rakingGeison: 0.5, mat: 'marble', tileMat: 'roof_tile' });
-  for (const s of [-1, 1]) E.push({ t: 'acroterion', at: [s * (PR[2] - 0.7), cz], y: TOP + 2.7 + 0.8, h: 2.2, yaw: PI / 2 });
+  // the Alcmaeonid pediments (delphi.md §13.1): east, the arrival of Apollo; west, the Gigantomachy; a winged Nike on each apex
+  for (const dir of [1, -1]) {
+    E.push({ t: 'delphi_pediment', x: (dir > 0 ? PR[2] : PR[0]) - dir * 0.8, dir, zc: (PR[1] + PR[3]) / 2, half: (PR[3] - PR[1]) / 2, y: TOP, rise: 2.7, depth: 0.8, programme: dir > 0 ? 'east' : 'west' });
+    E.push({ t: 'nike_acroterion', at: [dir * (PR[2] - 0.7), (PR[1] + PR[3]) / 2], y: TOP + 3.5, h: 2.0, yaw: dir > 0 ? PI / 2 : -PI / 2 });
+  }
   // the ceilings of the pteron: timber coffers from the colonnade to the cella's walls
   const CW0 = cz - 7.3, CW1 = cz + 5.3, XE = 22.6;
   for (const [za, zb] of [[Z[0] + 0.5, CW0], [CW1, Z[5] - 0.5]]) E.push({ t: 'coffers', rect: [X[0] + 0.5, za, X[14] - 0.5, zb], y: FT, depth: 0.3, cell: 1.0, beam: 0.22, mat: 'cedar' });
