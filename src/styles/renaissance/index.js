@@ -17,41 +17,14 @@ import { bottega, tintoria, tiratoio } from './craft.js';
 import { casa } from './casa.js';
 import { campanileDetail } from './campanile.js';
 import { drumDetail, lantern } from './dome.js';
+import { skin, westFront, ribbedDome, drumSkin } from './duomo-skin.js';
 
 const M = 'marble', G = 'verde_antico', R = 'roof_tile', ST = 'limestone_yellow';
 const oct = (bag, mat, cx, y, cz, r, h) => bag.add(mat, lathe([[r, 0], [r, h], [0.001, h]], 8, null, cx, y, cz));
 
 
-/**
- * The Florentine marble skin on a wall from a to b (outward normal to the right of a→b): green
- * pilaster strips, green bands at the storeys, white fields framed in green with pink inner panels,
- * tall pointed windows with white mullions in some bays — the cathedral's, campanile's and
- * Baptistery's manner.
- */
-function inlay(bag, a, b, y0, y1, { pitch = 4.2, bands = 3, windows = 0, pink = true } = {}) {
-  const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz), ux = dx / L, uz = dz / L, nx = uz, nz = -ux;
-  const at = (u, d) => [a[0] + ux * u + nx * d, a[1] + uz * u + nz * d];
-  const strip = (mat, u0, u1, v0, v1, d) => bag.add(mat, orientedBox(at(u0, d), at(u1, d), 0.05, v0, v1));
-  const n = Math.max(1, Math.round(L / pitch)), p = L / n, h = (y1 - y0) / bands;
-  for (let i = 0; i <= n; i++) strip(G, i * p - 0.3, i * p + 0.3, y0, y1, 0.04);
-  for (let k = 0; k <= bands; k++) strip(G, 0, L, y0 + k * h - 0.25, y0 + k * h + 0.25, 0.05);
-  for (let i = 0; i < n; i++) for (let k = 0; k < bands; k++) {
-    const u0 = i * p + 0.3, u1 = (i + 1) * p - 0.3, v0 = y0 + k * h + 0.25, v1 = y0 + (k + 1) * h - 0.25, m = 0.35;
-    const win = windows && k === bands - 2 + (bands > 2 ? 0 : 1) && i % windows === 1 % windows;
-    if (win) {
-      const c = (u0 + u1) / 2, w = Math.min(1.6, (u1 - u0) * 0.4), wh = (v1 - v0) * 0.85;
-      strip(M, c - w / 2 - 0.3, c + w / 2 + 0.3, v0 + 0.2, v0 + wh + 0.5, 0.06);
-      strip('stained_glass', c - w / 2, c + w / 2, v0 + 0.4, v0 + wh, 0.08);
-      strip(M, c - 0.06, c + 0.06, v0 + 0.4, v0 + wh, 0.1);
-      strip(G, c - w / 2 - 0.35, c + w / 2 + 0.35, v0 + wh + 0.2, v0 + wh + 0.45, 0.09);
-      continue;
-    }
-    // a green frame and, inside, a pink (or green) panel
-    strip(G, u0 + m, u1 - m, v0 + m, v0 + m + 0.12, 0.06); strip(G, u0 + m, u1 - m, v1 - m - 0.12, v1 - m, 0.06);
-    strip(G, u0 + m, u0 + m + 0.12, v0 + m, v1 - m, 0.06); strip(G, u1 - m - 0.12, u1 - m, v0 + m, v1 - m, 0.06);
-    if (pink && (u1 - u0) > 2) strip((i + k) % 2 ? 'marble_pink' : G, u0 + m + 0.6, u1 - m - 0.6, v0 + m + 0.6, v1 - m - 0.6, 0.055);
-  }
-}
+/** The Florentine marble skin on a wall from a to b in relief (duomo-skin.js): pilasters, string courses, framed panels, pointed two-light windows. */
+const inlay = (bag, a, b, y0, y1, o = {}, col = null) => skin(bag, a, b, y0, y1, o, col);
 /**
  * duomo: { c (the crossing), nave (length west), w, h (nave), d (dome diameter), y, interior } — the
  * church faces west. The crossing is an octagon with a face toward the nave and each apse.
@@ -74,10 +47,12 @@ function duomo(el, { bag, col }) {
   bag.add(R, frustum([nave[0], cz - W * 0.27, nave[2], cz + W * 0.27], y + H, y + H + W * 0.15, 0, 0, W * 0.26, W * 0.26));
   for (const s of [-1, 1]) bag.add(R, frustum([nave[0], s < 0 ? nave[1] : cz + W * 0.25, nave[2], s < 0 ? cz - W * 0.25 : nave[3]], y + H * 0.7, y + H * 0.76, 0, 0, s < 0 ? 0 : W * 0.24, s < 0 ? W * 0.24 : 0));
   // the marble skin of the aisles' walls (north and south), with the tall windows of the bays
-  inlay(bag, [nave[0], nave[1]], [nave[2], nave[1]], y, y + H * 0.7, { pitch: 4.4, bands: 3, windows: 2 });
-  inlay(bag, [nave[2], nave[3]], [nave[0], nave[3]], y, y + H * 0.7, { pitch: 4.4, bands: 3, windows: 2 });
-  inlay(bag, [nave[0], cz - W * 0.25], [nave[2], cz - W * 0.25], y + H * 0.7 + 0.3, y + H, { pitch: 4.4, bands: 1, pink: false });
-  inlay(bag, [nave[2], cz + W * 0.25], [nave[0], cz + W * 0.25], y + H * 0.7 + 0.3, y + H, { pitch: 4.4, bands: 1, pink: false });
+  // the side portals under their gables (Porta dei Canonici and Porta della Mandorla on the north, the Cornacchini and the Campanile doors on the south)
+  const pN = [{ u: 24 }, { u: 75, v: 1 }], pS = [{ u: 17 }, { u: 62 }].map((q) => ({ ...q, gw: 3.5 }));
+  inlay(bag, [nave[0], nave[1]], [nave[2], nave[1]], y, y + H * 0.7, { pitch: 4.4, bands: 3, windows: 2, plinth: true, frieze: 3, portals: pN }, col);
+  inlay(bag, [nave[2], nave[3]], [nave[0], nave[3]], y, y + H * 0.7, { pitch: 4.4, bands: 3, windows: 2, plinth: true, frieze: 3, portals: pS }, col);
+  inlay(bag, [nave[0], cz - W * 0.25], [nave[2], cz - W * 0.25], y + H * 0.7 + 0.3, y + H, { pitch: 4.4, bands: 1, pink: false, frieze: 3 });
+  inlay(bag, [nave[2], cz + W * 0.25], [nave[0], cz + W * 0.25], y + H * 0.7 + 0.3, y + H, { pitch: 4.4, bands: 1, pink: false, frieze: 3 });
   // the west front (as it stood in 1480: Arnolfo's lower third in marble with its three portals and niches, the rough wall above);
   // with the interior, the central portal goes through
   const pw = 4.6, ph = pw * 2.1, cut = (x0, x1, mat, y1) => {
@@ -90,6 +65,12 @@ function duomo(el, { bag, col }) {
   cut(nave[0] - 1.5, nave[0], 'sandstone', y + H * 0.74);
   roughFront(bag, nave, cz, y, H, W);
   cut(nave[0] - 1.9, nave[0] - 1.45, M, y + H * 0.38);
+  if (IN) {
+    // the west front in relief (duomo-skin.js): the portals, the niches with their statues, the lunette; the central passage open with its leaves and floor
+    westFront(bag, col, nave, cz, y, H, W, IN);
+    for (const sg of [-1, 1]) bag.add('wood_dark', box(nave[0] - 0.1, y, cz + sg * pw / 2 - (sg > 0 ? 0.12 : 0), nave[0] + 2.3, y + pw * 2.05, cz + sg * pw / 2 + (sg < 0 ? 0.12 : 0)));
+    bag.add('cotto_floor', box(nave[0] - 3.2, y - 0.3, cz - pw / 2, nave[0] + 2.5, y + 0.05, cz + pw / 2)); col.floor([nave[0] - 3.2, cz - pw / 2, nave[0] + 2.5, cz + pw / 2], y + 0.05);
+  } else {
   inlay(bag, [nave[0] - 1.9, nave[3] + 0.4], [nave[0] - 1.9, nave[1] - 0.4], y, y + H * 0.38, { pitch: 4.6, bands: 2, pink: true });
   for (const [k, w] of [[-W * 0.3, 3.2], [0, pw], [W * 0.3, 3.2]]) {
     if (IN && k === 0) {
@@ -104,24 +85,33 @@ function duomo(el, { bag, col }) {
     bag.add(G, box(nave[0] - 2.8, y + w * 2.1 + 0.2, cz + k - w / 2 - 0.6, nave[0] - 2.65, y + w * 2.1 + 0.6, cz + k + w / 2 + 0.6));
   }
   for (let i = 0; i < 6; i++) { const zz = cz - W * 0.45 + i * W * 0.18; if (Math.abs(zz - cz) < 4 || Math.abs(Math.abs(zz - cz) - W * 0.3) < 2.6) continue; bag.add(M, box(nave[0] - 2.4, y + H * 0.2, zz - 0.9, nave[0] - 1.85, y + H * 0.33, zz + 0.9)); bag.add('opening', box(nave[0] - 2.45, y + H * 0.21, zz - 0.6, nave[0] - 2.38, y + H * 0.32, zz + 0.6)); bag.add('marble', lathe([[0.35, 0], [0.3, 1.4], [0.18, 1.6], [0.001, 1.9]], 8, null, nave[0] - 2.1, y + H * 0.21, zz)); }
+  }
   // the crossing: the octagon and three apses with their small domes
   const apses = [[cx + R0 + 9, cz, 0], [cx, cz - R0 - 9, -Math.PI / 2], [cx, cz + R0 + 9, Math.PI / 2]];
   if (!IN) { oct(TB, M, cx, y - 0.5, cz, R0 + 2, H + 0.5); col.circle(cx, cz, R0 + 2, y, y + H); }
   const octInlay = (b2, ox, oz, r, y0, y1, o, skip) => { for (let k = 0; k < 8; k++) { const a0 = k / 8 * Math.PI * 2, a1 = (k + 1) / 8 * Math.PI * 2; if (skip && skip((a0 + a1) / 2)) continue; inlay(b2, [ox + Math.cos(a0) * r * 0.99, oz + Math.sin(a0) * r * 0.99], [ox + Math.cos(a1) * r * 0.99, oz + Math.sin(a1) * r * 0.99], y0, y1, o); } };
   // (with the interior, not on the tribune's open side toward the crossing: the face's centre after the π/8 turn, against the crossing's direction)
   const openSide = (ax, az) => (am) => { if (!IN) return false; const dx = Math.cos(am), dz = Math.sin(am), c = Math.cos(Math.PI / 8), sn = Math.sin(Math.PI / 8), tx = dx * c + dz * sn, tz = -dx * sn + dz * c, toC = Math.atan2(cz - az, cx - ax); return Math.abs(Math.atan2(Math.sin(Math.atan2(tz, tx) - toC), Math.cos(Math.atan2(tz, tx) - toC))) < Math.PI * 0.3; };
-  for (const [ax, az] of apses) octInlay(turned(ax, az), ax, az, 11, y, y + H * 0.75, { pitch: 4, bands: 3, windows: 2 }, openSide(ax, az));
-  octInlay(TB, cx, cz, R0 + 1.5, y + H, y + H + 13, { pitch: 6, bands: 1, pink: false });
-  for (const [ax, az] of apses) { const AB = turned(ax, az); if (!IN) { oct(AB, M, ax, y - 0.5, az, 11, H * 0.75); col.circle(ax, az, 11, y, y + H * 0.75); } AB.add(R, lathe([[11.5, 0], [6, 4], [0.001, 6]], 8, null, ax, y + H * 0.75, az)); }
+  for (const [ax, az] of apses) octInlay(turned(ax, az), ax, az, 11, y, y + H * 0.75, { pitch: 4, bands: 3, windows: 2, plinth: true, frieze: 2 }, openSide(ax, az));
+  drumSkin(TB, cx, cz, R0, y + H, 13);
+  for (const [ax, az] of apses) { const AB = turned(ax, az); if (!IN) { oct(AB, M, ax, y - 0.5, az, 11, H * 0.75); col.circle(ax, az, 11, y, y + H * 0.75); } tribuneDome(AB, R, ax, y + H * 0.75, az); }
   // the drum with its round windows, the dome in eight ribbed sails, the lantern
   const dy = y + H + 4;
   if (!IN) oct(TB, M, cx, y + H, cz, R0 + 1.5, 13);
   drumDetail(TB, cx, cz, R0, dy);
-  const dome = [[R0 + 1, 0], [R0 + 0.6, R0 * 0.35], [R0 * 0.92, R0 * 0.62], [R0 * 0.72, R0 * 0.88], [R0 * 0.42, R0 * 1.08], [R0 * 0.16, R0 * 1.18]];
-  TB.add(R, lathe(dome, 8, null, cx, y + H + 13, cz));
-  for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; for (let i = 0; i + 1 < dome.length; i++) { const [r0, h0] = dome[i], [r1, h1] = dome[i + 1]; const g = box(-0.7, 0, -0.7, 0.7, Math.hypot(r1 - r0, h1 - h0) + 0.3, 0.7); g.rotateZ(Math.atan2(r0 - r1, h1 - h0)); g.translate(r0 + 0.2, h0, 0); g.rotateY(-a); g.translate(cx, y + H + 13, cz); TB.add(M, g); } }
-  lantern(TB, bag, cx, cz, y + H + 13 + R0 * 1.18, R0);
+  // the dome: a pointed profile of the quinto acuto (an arch of 0.8 of the span), eight white ribs, the brick of the sails in herringbone
+  const Rb = R0 + 1, rho = 1.6 * Rb, off = rho - Rb, rl = R0 * 0.19, hm = Math.sqrt(rho * rho - (rl + off) ** 2);
+  const DF = [0, 0.09, 0.21, 0.33, 0.45, 0.58, 0.7, 0.82, 0.92, 1], hs = DF.map((f) => hm * f), rs = hs.map((h, i) => (i ? Math.sqrt(Math.max(0, rho * rho - h * h)) - off : Rb));
+  ribbedDome(TB, R, cx, y + H + 13, cz, rs, hs, { ribW: 1.05, ribH: 0.5, herring: { nc: 10, ds: 0.34, s0: 0.3, s1: 8.5 } });
+  lantern(TB, bag, cx, cz, y + H + 13 + hm, R0);
   if (IN) crossingHollow(bag, col, cx, cz, y, H, R0, apses);
+}
+
+/** A tribune's pointed half-dome of red tile with eight white ribs and a small marble lantern, its foot at (ax, y0, az). */
+function tribuneDome(AB, mat, ax, y0, az) {
+  const rs = [11.5, 11.2, 10.4, 9.0, 7.0, 4.6, 2.2, 0.9], hs = [0, 1.5, 3.1, 4.6, 5.9, 7.0, 7.8, 8.2];
+  ribbedDome(AB, mat, ax, y0, az, rs, hs, { ribW: 0.55, ribH: 0.28 });
+  AB.add(M, lathe([[1.1, 0], [1.1, 0.3], [0.85, 0.35], [0.85, 2.0], [1.25, 2.1], [0.001, 3.6]], 8, null, ax, y0 + 8.1, az));
 }
 
 /** The cathedral's unfinished west front above Arnolfo's marble (1480): the nave's wall in rough stone, brick patches, putlog holes and timber stubs, a ragged top, the round window framed. */
@@ -185,6 +175,8 @@ function ribVault(bag, x0, z0, x1, z1, ys, rx, rz) {
   for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) t.push(...V(i, j), ...V(i + 1, j), ...V(i + 1, j + 1), ...V(i, j), ...V(i + 1, j + 1), ...V(i, j + 1));
   bag.add('stucco', dbl(t));
   for (const [ia, ja, ib, jb] of [[0, 0, 1, 1], [0, 1, 1, 0]]) for (let k = 0; k < N; k++) { const f0 = k / N, f1 = (k + 1) / N; const p0 = [x0 + (x1 - x0) * (ia + (ib - ia) * f0), 0, z0 + (z1 - z0) * (ja + (jb - ja) * f0)], p1 = [x0 + (x1 - x0) * (ia + (ib - ia) * f1), 0, z0 + (z1 - z0) * (ja + (jb - ja) * f1)]; p0[1] = h(p0[0], p0[2]) - 0.15; p1[1] = h(p1[0], p1[2]) - 0.15; bag.add('pietra_serena', rod(p0, p1, 0.2, 5)); }
+  // the boss at the crossing of the ribs: a gilt rose on a stone ring
+  { const bx = (x0 + x1) / 2, bz = (z0 + z1) / 2, by = ys + Math.max(rx, rz) - 0.2; bag.add('pietra_serena', lathe([[0.65, 0.1], [0.65, -0.05], [0.35, -0.25], [0.001, -0.3]], 10, null, bx, by, bz)); bag.add('gilt_bronze', lathe([[0.42, -0.02], [0.3, -0.3], [0.001, -0.42]], 8, null, bx, by - 0.05, bz)); }
   for (const z of [z0 + 0.05, z1 - 0.05]) for (let k = 0; k < N; k++) { const xa = x0 + (x1 - x0) * k / N, xb = x0 + (x1 - x0) * (k + 1) / N; bag.add('pietra_serena', rod([xa, h(xa, z0 + (z1 - z0) / 2) * 0 + ys + rx * pointed(Math.abs(2 * (xa - x0) / (x1 - x0) - 1)) - 0.2, z], [xb, ys + rx * pointed(Math.abs(2 * (xb - x0) / (x1 - x0) - 1)) - 0.2, z], 0.22, 5)); }
   for (const x of [x0 + 0.05, x1 - 0.05]) for (let k = 0; k < N; k++) { const za = z0 + (z1 - z0) * k / N, zb = z0 + (z1 - z0) * (k + 1) / N; bag.add('pietra_serena', rod([x, ys + rz * pointed(Math.abs(2 * (za - z0) / (z1 - z0) - 1)) - 0.2, za], [x, ys + rz * pointed(Math.abs(2 * (zb - z0) / (z1 - z0) - 1)) - 0.2, zb], 0.22, 5)); }
 }
@@ -199,6 +191,10 @@ function naveHollow(bag, col, nave, cx, cz, y, H, W) {
   bag.add(M, box(x0, y + 9.66, cz - 2.3, xa, y + H, cz + 2.3)); col.rect([x0, cz - 2.3, xa, cz + 2.3], y + 9.66, y + H);
   // the floor of brick
   bag.add('cotto_floor', box(xa, y - 0.3, z0 + T, xb + 3, y + 0.05, z1 - T)); col.floor([xa, z0 + T, xb + 3, z1 - T], y + 0.05);
+  // the floor of 1480: brick laid in a field, with bands of grey pietra serena along the pier lines and across at each pier, a rosette in the middle of each nave bay [inferred]
+  for (let i = 0; i <= nb; i++) bag.add(PS, box(xa + i * bay - 0.14, y + 0.05, z0 + T, xa + i * bay + 0.14, y + 0.075, z1 - T));
+  for (const zz of [cz - zp, cz + zp]) bag.add(PS, box(xa, y + 0.05, zz - 0.14, xb + 3, y + 0.075, zz + 0.14));
+  for (let i = 0; i < nb; i++) { const rx = xa + (i + 0.5) * bay; bag.add(PS, lathe([[2.5, 0], [2.5, 0.025], [2.2, 0.025], [2.2, 0]], 16, null, rx, y + 0.05, cz)); bag.add('marble_pink', lathe([[2.2, 0], [2.2, 0.03], [0.001, 0.03]], 8, null, rx, y + 0.05, cz)); bag.add('verde_antico', lathe([[1.0, 0], [1.0, 0.045], [0.001, 0.045]], 8, null, rx, y + 0.05, cz)); }
   // the arcades and the clerestory above them: one wall each side at the piers' line, arched in every bay
   for (const s of [-1, 1]) {
     const zl = cz + s * zp;
@@ -229,7 +225,7 @@ function naveHollow(bag, col, nave, cx, cz, y, H, W) {
     const x = xa + i * bay, z = cz + s * zp, end = i === 0 || i === nb, hw = 1.7;
     bag.add(PS, box(x - (i === 0 ? 0 : hw), y, z - hw, x + (end && i === nb ? 0 : hw), y + 0.6, z + hw));
     bag.add(PS, box(x - (i === 0 ? 0 : 1.2), y + 0.6, z - 1.2, x + (i === nb ? 0 : 1.2), y + 17.2, z + 1.2));
-    for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { if ((i === 0 && dx < 0) || (i === nb && dx > 0)) continue; const top = dz === -s ? y + 29 : y + 17.2; bag.add(PS, lathe([[0.55, 0], [0.55, top - y - 0.6]], 12, null, x + dx * 1.2, y + 0.6, z + dz * 1.2)); }
+    for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { if ((i === 0 && dx < 0) || (i === nb && dx > 0)) continue; const top = dz === -s ? y + 29 : y + 17.2; bag.add(PS, lathe([[0.55, 0], [0.55, top - y - 0.6]], 12, null, x + dx * 1.2, y + 0.6, z + dz * 1.2)); bag.add(PS, lathe([[0.78, 0], [0.78, 0.28], [0.6, 0.45]], 12, null, x + dx * 1.2, y + 0.6, z + dz * 1.2)); bag.add(PS, lathe([[0.55, 0], [0.62, 0.15], [0.85, 0.35], [0.9, 0.5]], 12, null, x + dx * 1.2, top - 0.5, z + dz * 1.2)); }
     bag.add(PS, frustum([x - (i === 0 ? 0 : 1.9), z - 1.9, x + (i === nb ? 0 : 1.9), z + 1.9], y + 17.2, y + 18.2, 0.4, 0.4, 0.4, 0.4));
     bag.add(PS, box(x - (i === 0 ? 0 : 2), y + 18.2, z - 2, x + (i === nb ? 0 : 2), y + 18.5, z + 2));
     col.rect([x - (i === 0 ? 0 : 1.75), z - 1.75, x + (i === nb ? 0 : 1.75), z + 1.75], y, y + 18.5);
@@ -278,11 +274,12 @@ function crossingHollow(bag, col, cx, cz, y, H, R0, apses) {
   }
   // the inner shell: an octagonal vault, white between eight ribs, open at the top to the lantern
   const yd = y + H + 13, rv = ai / Math.cos(Math.PI / 8);
-  const inner = [[rv * 0.12, 25.6], [rv * 0.38, 24.2], [rv * 0.66, 20], [rv * 0.86, 14], [rv * 0.97, 7], [rv, 0]];
+  const rhoI = 1.6 * rv, offI = rhoI - rv, hmI = Math.sqrt(rhoI * rhoI - (rv * 0.12 + offI) ** 2);
+  const inner = [0, 0.09, 0.21, 0.33, 0.45, 0.58, 0.7, 0.82, 0.92, 1].map((f, i) => { const h = hmI * f; return [i ? Math.sqrt(Math.max(0, rhoI * rhoI - h * h)) - offI : rv, h]; }).reverse();
   bag.add('stucco', lathe(inner, 8, null, 0, 0, 0).rotateY(Math.PI / 8).translate(cx, yd, cz));
   for (let k = 0; k < 8; k++) { const a = Math.PI / 8 + k * Math.PI / 4; for (let i = 0; i + 1 < inner.length; i++) { const [r0, h0] = inner[i], [r1, h1] = inner[i + 1]; bag.add(PS, rod([cx + Math.cos(a) * (r0 - 0.25), yd + h0 - 0.2, cz + Math.sin(a) * (r0 - 0.25)], [cx + Math.cos(a) * (r1 - 0.25), yd + h1 - 0.2, cz + Math.sin(a) * (r1 - 0.25)], 0.35, 6)); } }
-  bag.add('stained_glass', disc(rv * 0.12, yd + 25.55, 16, cx, cz, false));
-  bag.add(PS, lathe([[rv * 0.12, 0], [rv * 0.12 + 0.5, 0], [rv * 0.12 + 0.5, 0.5], [rv * 0.12, 0.5]], 16, null, cx, yd + 25.1, cz));
+  bag.add('stained_glass', disc(rv * 0.12, yd + hmI - 0.05, 16, cx, cz, false));
+  bag.add(PS, lathe([[rv * 0.12, 0], [rv * 0.12 + 0.5, 0], [rv * 0.12 + 0.5, 0.5], [rv * 0.12, 0.5]], 16, null, cx, yd + hmI - 0.5, cz));
   // the floor under the dome and the tribunes
   bag.add('cotto_floor', box(cx - ai, y - 0.3, cz - ai, cx + ai, y + 0.05, cz + ai)); col.floor([cx - ai, cz - ai, cx + ai, cz + ai], y + 0.05);
   // the choir: an octagon of wooden panels between posts, open to the west, round the high altar

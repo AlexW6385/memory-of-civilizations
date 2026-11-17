@@ -109,6 +109,19 @@ More sources searched, not fetched:
 - [The dome of S. Maria del Fiore - Brunelleschi itineraries (Museo Galileo)](https://brunelleschi.imss.fi.it/itineraries/multimedia/TheDomeOfMariaFiore.html)
 - [Work: Dome of Florence Cathedral - museoomero.it](https://museoomero.it/en/?p=2573)
 
+## 13. Round 7: the cathedral seen first and close
+
+Code: `src/styles/renaissance/duomo-skin.js`, called from `index.js` (`duomo`) and `baptistery.js`.
+
+- **Marble walls.** Relief, no longer flat strips: green pilasters with white bases and capitals, string courses (green band, white drip and cornice), framed panels (white frame, a green line, a pink or green field, a lozenge of the other colour, a small white lozenge at the centre), pointed windows with a frame, jamb colonnettes, a mullion, two small pointed lights and a ring in the head, and an arcaded frieze of small pointed arches under the top cornice [inferred: the Florentine pattern generalised; the cathedral's polychrome marble of white Carrara, green Prato and red Maremma is stated above and in Wikipedia "Florence Cathedral"].
+- **Side portals.** Two on each flank (north: Porta dei Canonici and Porta della Mandorla; south: the Cornacchini and the Campanile doors), each a pointed doorway in three stepped orders with colonnettes, a lintel, a pink tympanum with a mandorla, under a steep gable with a raking cornice, crockets, a finial and pinnacles [stated: gabled Gothic portals; inferred: their places along the flanks and the common design, in place of each door's own sculpture].
+- **Dome.** The profile is the pointed arch (quinto acuto) of 0.8 of the span, so the outer shell rises about 33 m above the drum and the cross stands near 110 m (the real dome is about 34 m high, the lantern's top about 114 m: Museo Omero, Wikipedia) [stated]. Eight white marble ribs at the corners, broad at the foot and narrower toward the crown, over sails of red terracotta; of the 24 ribs only these eight show [stated: museoomero.it/en/?p=2573]. The brick laid in herringbone is shown as rows of shallow V-shaped ridges on each sail, columns and rows by rule [stated: herringbone; inferred: the pattern's scale]. The inner shell is the same arch, lower, open at the top to the lantern [stated: two shells].
+- **Drum and tribunes (exedrae).** The drum's eight faces in relief: banded white and green corner pilasters, a square frame round each round window, pink and green panels, a course of rough brick under the cornice with a row of holes where the gallery (ballatoio) was to run: the gallery was begun only in 1507 and is not built here [stated: §12; inferred: the rough course]. The three tribunes: arcaded frieze, pointed half-domes of red tile on eight white ribs, a small marble lantern.
+- **West front, about 1480.** Arnolfo's lower order on the thin marble shell: three portals (the middle one the passage, with a lunette of the Virgin in a mandorla over the apostles, under three rings of white and green; the side ones gabled), four columns of statues in pointed niches (two to a column), corner piers banded white and green with pinnacles, a string course and a modillion cornice; the portals had lunettes with sculpture (the Dormitio Virginis for the right one) and the front carried statues of saints, prophets, angels, mosaics and marble facing [stated: Opera di Santa Maria del Fiore, "Facade stories", duomo.firenze.it/en/opera-magazine/post/11202/facade-stories]; the number and places of the niches are inferred from the Poccetti drawing of 1587 as commonly described, not re-checked.
+- **Interior.** The brick floor with bands of grey pietra serena at the pier lines and across at each pier and a rosette in each nave bay [inferred]; the vault ribs meet in a gilt boss; the half-columns of the piers have bases and leaf capitals.
+- **Baptistery.** The Gate of Paradise reads as ten gilt panels in a gilt frame on a darker bronze ground, the panels near square (the real ones are about 80 cm square) [stated: Wikipedia "Gates of Paradise"; general knowledge].
+- Not found by search: any measured drawing of the 1480 front; the details above are of the type.
+
 ## Sources
 
 - [The Bottega (Shop) and the Street — yourwaytoflorence.com](https://www.yourwaytoflorence.com/db/brunell/bottega.htm)
@@ -118,6 +131,8 @@ More sources searched, not fetched:
 - [The stained glass windows of the drum — Opera magazine](https://duomo.firenze.it/en/opera-magazine/post/6520/the-stained-glass-windows-of-the-drum-of-the-dome-of-santa-maria-del-fiore)
 - [Florence Cathedral interior — buffaloah](https://buffaloah.com/a/virtual/italy/flor/cath/int/index.html)
 - [Walks in Florence (Horner, 1877)](https://florin.ms/hwalks4.html)
+- [Work: Dome of Florence Cathedral — museoomero.it](https://museoomero.it/en/?p=2573)
+- [Facade stories — Opera di Santa Maria del Fiore](https://duomo.firenze.it/en/opera-magazine/post/11202/facade-stories)
 
 - [Florence Cathedral — Wikipedia](https://en.wikipedia.org/wiki/Florence_Cathedral)
 - [Giotto's Campanile — Wikipedia](https://en.wikipedia.org/wiki/Giotto%27s_Campanile)

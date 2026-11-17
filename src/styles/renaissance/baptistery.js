@@ -59,7 +59,7 @@ function head(Lc, mat, x, y, z, r) {
 
 /** The Gate of Paradise in face frame Lc, centred at uc, from y0; the leaves 2 × w0 by hh. Everything gilt. */
 function gateOfParadise(Lc, uc, y0, w0, hh) {
-  const W = 2 * w0, rows = 5, bar = 0.17, side = 0.2, ph = (hh - (rows + 1) * bar) / rows;
+  const W = 2 * w0, rows = 5, bar = 0.19, side = 0.3, ph = (hh - (rows + 1) * bar) / rows;
   // the outer frame of foliage and fruit, its heads at the corners
   const fw = 0.3, fo = 0.06;
   Lc.box(GB, uc - W / 2 - fw, y0, fo, uc - W / 2, y0 + hh + fw, 0.16);
@@ -70,7 +70,7 @@ function gateOfParadise(Lc, uc, y0, w0, hh) {
   for (let uu = uc - W / 2 + 0.05, k = 0; uu < uc + W / 2; uu += 0.25, k++) leafy(uu + 0.03, y0 + hh + fw / 2, k);
   for (const leaf of [0, 1]) {
     const u0 = uc - W / 2 + leaf * w0, u1 = u0 + w0;
-    Lc.box(GB, u0, y0, 0, u1, y0 + hh, 0.06);                                              // the ground of the leaf
+    Lc.box(BR, u0, y0, 0, u1, y0 + hh, 0.06);                                              // the ground of the leaf (darker bronze, so that the gilt frame and scenes read)
     Lc.box(GB, u0, y0, 0.06, u0 + side, y0 + hh, 0.14); Lc.box(GB, u1 - side, y0, 0.06, u1, y0 + hh, 0.14);
     for (let r = 0; r <= rows; r++) { const yb = y0 + r * (ph + bar); Lc.box(GB, u0 + side, yb, 0.06, u1 - side, yb + bar, 0.13); }
     for (let r = 0; r < rows; r++) {
