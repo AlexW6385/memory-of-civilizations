@@ -2,7 +2,7 @@
 // in groups and the guards lining the paved way of the forecourt; the sellers behind their counters and the customers in the market lanes, the stalls
 // of the cross lanes; the palace quarters' lanes with their benches, wells and woodpiles; the keepers at the ward gates; ox-carts on the great
 // avenue. Plans of style 'life' (src/objects/index.js), placed from layout.js.
-import { CROWN, TIERS, HALL, RADIUS, AX, PALACE, WEST_MARKET, EAST_MARKET, WARDS, WARD_WALL, AVENUE, QUARTERS, QUARTER_LANES, lots, inService, serviceKind, MARKET_WALL, marketShops, GATE_S, GATE_W, WALL_W, WALL_S, LAKE, LAKE_Y, GARDEN_POND, POND_Y, inLake, ACADEMY } from './layout.js';
+import { CROWN, TIERS, HALL, RADIUS, AX, PALACE, WEST_MARKET, EAST_MARKET, WARDS, WARD_WALL, AVENUE, QUARTERS, QUARTER_LANES, lots, inService, serviceKind, enterable, wardKind, MARKET_WALL, marketShops, GATE_S, GATE_W, WALL_W, WALL_S, LAKE, LAKE_Y, GARDEN_POND, POND_Y, inLake, ACADEMY } from './layout.js';
 import { chariotSpots } from '../../styles/han/court.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -130,12 +130,38 @@ function quarters() {
   return L;
 }
 
+/**
+ * The wards' lanes (docs §6d): along the middle of each of the two lanes of every ward a well with its windlass, a bench with sitters, a woodpile
+ * with its splitter, a water vat with a woman, a mat of drying grain with hens, a rain tub; children at their game and a dog. Kept to the lane's
+ * middle so that no gate or door is blocked, and clear of the ward gates at either end.
+ */
+function wardLanes() {
+  const rand = rng(8801), L = [];
+  for (const w of WARDS) {
+    const [x0, z0, x1] = w;
+    for (const lz of [z0 + WARD_WALL + 24.85, z0 + WARD_WALL + 72.85]) {
+      for (let x = x0 + 14; x < x1 - 14; x += 15 + rand() * 9) {
+        const t = rand(), z = lz + (rand() - 0.5) * 0.5, sd = Math.floor(rand() * 1e9);
+        if (t < 0.16) L.push({ t: 'well', at: [x, lz], y: 0, rot: 0, seed: sd, kind: 'windlass', mat: 'bluestone' }, figure(rand, [x + 1.5, lz + 0.3], rand() * 6, 'woman'));
+        else if (t < 0.34) { L.push({ t: 'bench', at: [x, z], y: 0, rot: 0, seed: sd, len: 1.8 }); L.push(figure(rand, [x - 0.45, z], 0, rand() < 0.5 ? 'official' : 'seller', { pose: 'sit', carry: 'none' })); if (rand() < 0.6) L.push(figure(rand, [x + 0.45, z], 0, 'woman', { pose: 'sit', carry: 'none' })); }
+        else if (t < 0.5) { L.push({ t: 'firewood', at: [x, z], y: 0, rot: 0, seed: sd, len: 1.4 }); L.push(figure(rand, [x + 1.3, z], rand() * 6, 'labourer', { pose: 'squat' })); }
+        else if (t < 0.64) { L.push({ t: 'pot', at: [x, z], y: 0, rot: 0, seed: sd, kind: 'vat' }, { t: 'pot', at: [x + 0.9, z + 0.2], y: 0, rot: 0, seed: sd + 1, kind: 'dark_pot', n: 2 }); L.push(figure(rand, [x + 0.3, z - 0.9], rand() * 6, 'woman')); }
+        else if (t < 0.78) { L.push({ t: 'drying_tray', at: [x, z], y: 0, rot: 0, seed: sd }); L.push({ t: 'chickens', at: [x + 1.6, lz], y: 0, rot: rand() * 6, seed: sd + 2 }); }
+        else if (t < 0.9) { L.push(figure(rand, [x, lz - 0.3], 0, 'boy'), figure(rand, [x + 1.1, lz + 0.2], Math.PI, 'boy', { pose: 'squat' })); L.push({ t: 'animal', kind: 'dog', at: [x + 2.4, lz], y: 0, rot: rand() * 6, seed: sd }); }
+        else L.push(figure(rand, [x, lz], Math.PI / 2, 'official', { pose: 'talk' }), figure(rand, [x + 1.2, lz + 0.2], -Math.PI / 2, 'seller', { pose: 'talk' }));
+      }
+    }
+  }
+  return L;
+}
+
 /** The households at home: someone inside the hall of each open house of the palace quarters near the ramp (a clerk at his desk, a woman at the loom or the stove, a guard off duty). */
 function households() {
   const rand = rng(133), L = [], roles = ['official', 'woman', 'guard', 'woman', 'seller'];
   for (const l of lots()) {
-    if (!inService(l)) continue;
-    const [x0, z0, x1, z1] = l.rect, W = x1 - x0, D = z1 - z0, s = l.front === 's', k = serviceKind(l);
+    const sv = inService(l);
+    if (!sv && !(enterable(l) && l.seed % 3 !== 1)) continue;
+    const [x0, z0, x1, z1] = l.rect, W = x1 - x0, D = z1 - z0, s = l.front === 's', k = sv ? serviceKind(l) : wardKind(l);
     const u = W * 0.4 + (k === 'shop' ? 0.8 : 0), v = k === 'row' ? 4.6 : k === 'shop' ? 4.9 : D - 4.5;
     const x = x0 + u, z = s ? z1 - v : z0 + v, rot = s ? 0 : Math.PI;
     L.push(figure(rand, [x, z], rot, roles[Math.floor(rand() * roles.length)], { pose: 'stand', carry: 'none' }));
@@ -195,5 +221,5 @@ function academy() {
 }
 
 export function lifePlans() {
-  return [plan('han-life-court', forecourt()), plan('han-life-crown', crown()), plan('han-life-west', market(WEST_MARKET, 600)), plan('han-life-east', market(EAST_MARKET, 700)), plan('han-life-quarters', quarters()), plan('han-life-households', households()), plan('han-life-gates', gates()), plan('han-life-lake', lake()), plan('han-life-academy', academy())];
+  return [plan('han-life-court', forecourt()), plan('han-life-crown', crown()), plan('han-life-west', market(WEST_MARKET, 600)), plan('han-life-east', market(EAST_MARKET, 700)), plan('han-life-quarters', quarters()), plan('han-life-households', households()), plan('han-life-lanes', wardLanes()), plan('han-life-gates', gates()), plan('han-life-lake', lake()), plan('han-life-academy', academy())];
 }

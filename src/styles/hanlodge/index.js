@@ -13,6 +13,8 @@ import { rng, lotFrame, eaveTilesGable } from '../han/kit.js';
 import { furnish, KINDS } from '../han/interiors.js';
 import { frontDress, yardDress } from '../han/dress.js';
 import { hall as hanlHall } from './hall.js';
+import { que as hanlQue } from './que.js';
+import { terraceDress } from './terrace.js';
 
 const WALLS = ['earth_wall', 'lime_plaster', 'mud_plaster', 'earth_wall', 'lime_plaster'];
 
@@ -140,7 +142,7 @@ function house(el, ctx) {
   // lou: the hall with a second storey over its back half (not entered), a balcony of red rails under the upper eave
   perimeter(F, W, D, wh, gateU, gw, wm, false, rank);
   frontDress(F, W, D, gateU, gw, wh, el.seed, 'court');
-  const hv = D - 8.2, P = 0.3, hb = hv + 3.4;
+  const hv = D - 8.2, P = 0.3, hb = hv + 3.43;
   hall(F, 1.0, W - 1.0, hv, D - 0.9, H, wm, { hip: false, tile }, rand);
   furnish(F, room, 1.4, W - 1.4, hv + 0.4, D - 1.3, 0.33, el.seed, ctx.lights, true);
   const y2 = H + 0.5, b0 = 2.4, b1 = W - 2.4;
@@ -156,6 +158,6 @@ function house(el, ctx) {
 
 registerStyle('hanlodge', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.han.elements, hanl_house: house, hanl_hall: hanlHall },
+  elements: { ...STYLES.han.elements, hanl_house: house, hanl_hall: hanlHall, hanl_que: hanlQue, hanl_terrace_dress: terraceDress },
   objects: {},
 });
