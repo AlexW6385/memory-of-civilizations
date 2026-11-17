@@ -181,6 +181,7 @@ function house(el, ctx) {
   // ── the front's dressing: shutters, the loggia, benches, jars, a pot of basil, a lamp bracket, washing ──
   const pu = du + dw + 0.5;
   weatherFront(R, rand, L, aShop);
+  frontType(el)(R, bag, { L, du, dw, wA, aShop, H1, H, two });
   if (two) {
     for (let u = 1.6; u < L - 1.6; u += 3.0) { if (Math.abs(u - du) < 1.2) continue; R(u, -0.06, u + 0.9, 0.1, 4.6, 5.9, 'wood_dark', false); R(u - 0.15, -0.14, u + 1.05, 0.1, 5.9, 6.05, 'limestone', false); R(u - 0.1, -0.12, u + 1.0, 0.1, 4.5, 4.6, 'limestone', false); R(u + 0.1, -0.07, u + 0.4, 0.0, 4.7, 5.8, 'shutter_brown', false); R(u + 0.5, -0.07, u + 0.8, 0.0, 4.7, 5.8, 'shutter_brown', false); }
     if (rand() < 0.35) {          // a timber loggia over the street
@@ -201,6 +202,40 @@ function house(el, ctx) {
   void H;
 }
 
+/**
+ * The front's architecture by rule (docs §14): a house's type follows its quarter and its seed — a painted frieze of Masonry-style blocks, corner
+ * pilasters under a dentilled cornice, the Egyptian cavetto cornice on the roofline, or a door framed as an aedicule (half-columns and a stepped pediment);
+ * the rest keep the plain front. The Jewish quarter takes no aedicules (the door framing of Greek temples). [inferred: Hellenistic house fronts of Delos and Priene,
+ * the Alexandrian tombs' painted Masonry style and cavetto cornices]
+ */
+export function frontType(el) {
+  const kinds = el.quarter === 'jewish' ? ['frieze', 'cavetto', 'plain', 'frieze', 'plain', 'cavetto'] : ['frieze', 'pilaster', 'cavetto', 'aedicule', 'pilaster', 'plain'];
+  const k = kinds[(el.seed >> 3) % 6], PAINT = ['wall_red', 'egyptian_blue', 'plaster_ochre', 'plaster_white'];
+  return (R, bag, { L, du, dw, wA, aShop, H1, H, two }) => {
+    if (k === 'frieze') {
+      let i = 0;
+      for (let u = 0.5; u + 0.85 < L - 0.4; u += 1.0, i++) {
+        const a = u, b = u + 0.85;
+        if (b > du - 0.55 && a < du + dw + 0.55) continue;
+        if (aShop && a < wA + 0.1) continue;
+        R(a, -0.04, b, 0.05, 3.12, 3.5, PAINT[(i + (el.seed & 3)) % 3], false);
+      }
+      R(0.2, -0.05, L - 0.2, 0.05, 3.5, 3.56, 'plaster_white', false);
+    } else if (k === 'pilaster') {
+      const top = two ? H : H1;
+      for (const u of [-0.05, L - 0.55]) { R(u, -0.12, u + 0.6, 0.1, 0.0, top, 'limestone', false); R(u - 0.06, -0.18, u + 0.66, 0.1, top - 0.2, top, 'sandstone', false); R(u - 0.04, -0.16, u + 0.64, 0.1, 0, 0.3, 'sandstone', false); }
+      for (let u = 0.8; u + 0.2 < L - 0.8; u += 0.4) R(u, -0.1, u + 0.2, 0.1, top - 0.34, top - 0.2, 'plaster_white', false);          // the dentils
+    } else if (k === 'cavetto') {
+      R(-0.14, -0.3, L + 0.14, 0.12, H, H + 0.12, 'sandstone', false); R(-0.1, -0.22, L + 0.1, 0.12, H + 0.12, H + 0.22, 'sandstone', false);
+      R(-0.06, -0.12, L + 0.06, 0.12, H + 0.22, H + 0.3, 'egyptian_blue', false); R(-0.14, -0.34, L + 0.14, -0.3, H - 0.12, H, 'egyptian_blue', false);
+    } else if (k === 'aedicule') {
+      const a = du - 0.7, b = du + dw + 0.7;
+      for (const [p, q] of [[a, du - 0.4], [du + dw + 0.4, b]]) { R(p, -0.16, q, 0.1, 0, 2.6, 'limestone', false); R(p - 0.05, -0.2, q + 0.05, 0.1, 2.6, 2.72, 'sandstone', false); R(p - 0.05, -0.2, q + 0.05, 0.1, 0, 0.18, 'sandstone', false); }
+      R(a - 0.08, -0.3, b + 0.08, 0.1, 3.05, 3.2, 'limestone', false); R(a + 0.1, -0.26, b - 0.1, 0.1, 3.2, 3.36, 'limestone', false);
+      R(a + 0.4, -0.22, b - 0.4, 0.1, 3.36, 3.5, 'limestone', false); R(du - 0.1, -0.2, du + dw + 0.1, 0.1, 3.5, 3.6, 'egyptian_blue', false);
+    }
+  };
+}
 function weatherFront(R, rand, L, aShop) {
   R(0.2, -0.015, L - 0.2, 0.02, 0.5, 1.0, 'plaster_damp', false);
   for (let i = 0, n = 2 + Math.floor(rand() * 3); i < n; i++) { const u = 0.5 + rand() * (L - 2.4), w = 0.4 + rand() * 0.9, y0 = 1.4 + rand() * 1.6; if (aShop && u < 5) continue; R(u, -0.02, u + w, 0.01, y0, y0 + 0.3 + rand() * 0.7, 'mudbrick', false); }

@@ -45,7 +45,7 @@ function shopStoas() {
       for (let i = 0; i < n; i++) {
         const x = a + i * len, x1 = x + len, cx = x + len / 2;
         if (wet(x + 3, z0) < 3 || wet(x1 - 3, z0) < 3 || Math.hypot(cx, z0) > RADIUS - 70) continue;
-        const full = Math.abs(cx - 60) < 150;
+        const full = Math.abs(cx - 60) < 190;
         els.push({ t: 'stoa', rect: [x, z0, x1, z1], front, y: g, h: 4.4, d: 0.6, sp: 2.5, flutes: 0, simple: true, mat: 'limestone', wall: 'plaster_white', triglyphMat: 'egyptian_blue', ...(full ? { rooms: { n: 5, depth: 6, trades: TRADES } } : {}), seed: 40 + Math.round(x / 10) });
         if (full) {
           const F = frame([x, z0, x1, z1], front), wt = 0.7, rw = (len - 2 * wt) / 5;
