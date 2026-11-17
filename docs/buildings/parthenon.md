@@ -70,6 +70,14 @@ Post and lintel in marble: architraves (epistyle) of three parallel beams spanni
 4. **West room ("the parthenon"):** treasury of the Delian League, entered only from the west porch (opisthodomos); four Ionic columns carry its ceiling. [stated: Wikipedia]
 5. **Pteron:** the walkway under the peristyle ceiling, along which the Ionic frieze of the Panathenaic procession could be seen. [stated: theartnewbie; type]
 
+
+## 6a. The west room as the treasury, and painted coffers (detail pass, 2026-11-16)
+
+- **What the sources give.** The west room ("the Parthenon") held the League of Delos treasure and other offerings [stated: Wikipedia "Athena Parthenos"]; "Parthenon" is one of the treasuries named in the 5th/4th-century inventories of Athena's wealth, usually identified with the west room (the identification is contested: van Rookhuijzen, *AJA* 124 (2020) 3-35, would put it in the Erechtheion) [stated: abstract at dspace.library.uu.nl]. The Hekatompedon inventory of 418/7 (IG I3 329) lists only gold and silver (crowns, phialai, a ewer-type vessel, an incense burner); thrones, couches, chests and weapons are not in it and belong to the "parthenon" inventories [stated: atticinscriptions.com/inscription/IGI3/329 notes]. Furniture forms: klismos with cushion, kline, trapeza, diphros; chest with hinged lid and bronze fittings [stated: Yale Alumni Magazine "At home in ancient Athens"; Wikipedia "Ancient furniture" mirror].
+- **Persian spoils** (the silver-footed throne of Xerxes, the akinakes of Mardonius, the cuirass of Masistios) are known to me from Herodotus 9.20-22 and Demosthenes 24.129; not re-fetched here, so **[inferred]** that they stood in this room.
+- **Built** (`src/buildings/parthenon/treasury.js`): nine chests with bronze bands along the north and south walls, a cupboard, a table of seven gold and silver phialai and a ewer, a throne with silver feet and a footstool, a klismos, a gilt cuirass on its post and a sword on a stand, seven round shields on the cross wall, two bronze tripods in the west corners, a lamp on its stand (the room's only light) [inferred: arrangement and forms]. The walking route of the plan is kept clear.
+- **Ceilings:** the marble coffers of the pteron now have a blue ground (Egyptian blue, as for the metopes' band) [inferred: painted coffers are stated by Wikipedia "Parthenon"; the colour after the pigment finds].
+
 ## 7. Materials and finishes
 
 - Pentelic marble throughout the visible building; limestone foundations. [stated: Wikipedia]

@@ -13,13 +13,19 @@ export async function town() {
   const all = lots(), plans = [], closed = all.filter((l) => !l.open), opened = all.filter((l) => l.open);
   for (let i = 0; i < closed.length; i += 120) plans.push(base(`athens-houses-${i / 120}`, closed.slice(i, i + 120).map((l) => ({ t: 'athens_house', rect: l.rect, front: l.front, seed: l.seed, y: l.y, tier: l.tier, fall: l.fall }))));
   // the walk-in houses (§5d): the same plan as Simon's, each with another trade in the shop on the street
-  opened.forEach((l, k) => { const [X0, Z0, X1, Z1] = l.rect, t = 0.5, sz = Z1 - t - 3.1, xl = X0 + t + 4.3, xk = xl + 0.4 + 3.4;
-    plans.push({ ...base(`athens-open-${k}`, [{ t: 'athens_open_house', rect: l.rect, y: l.y, seed: l.seed, trade: OPEN_TRADES[k % OPEN_TRADES.length] }]), rooms: [
-      { id: `shop (${OPEN_TRADES[k % OPEN_TRADES.length]})`, rect: [X0 + 0.5, Z0 + 0.5, X0 + 5, Z0 + 5.3], y: l.y, kind: 'inner', market: false },
-      { id: 'andron', rect: [X0 + 7.4, Z0 + 0.5, X1 - 0.5, Z0 + 5.3], y: l.y, kind: 'inner' },
-      { id: 'loom room', rect: [X0 + 0.5, sz, xl, Z1 - 0.5], y: l.y, kind: 'inner' },
-      { id: 'kitchen', rect: [xl + 0.4, sz, xk, Z1 - 0.5], y: l.y, kind: 'inner' },
-      { id: 'store', rect: [xk + 0.4, sz, X1 - 0.5, Z1 - 0.5], y: l.y, kind: 'inner' }] }); });
+  // grouped four to a plan (each distinct material of a plan is a mesh), neighbours together
+  const OT = OPEN_TRADES, sorted = opened.map((l, k) => ({ l, k })).sort((p, q) => Math.round(p.l.rect[1] / 60) - Math.round(q.l.rect[1] / 60) || p.l.rect[0] - q.l.rect[0]);
+  for (let g = 0; g < sorted.length; g += 4) {
+    const grp = sorted.slice(g, g + 4), rooms = [];
+    const els = grp.map(({ l, k }) => { const [X0, Z0, X1, Z1] = l.rect, t = 0.5, sz = Z1 - t - 3.1, xl = X0 + t + 4.3, xk = xl + 0.4 + 3.4, tr = OT[k % OT.length];
+      rooms.push(
+        { id: `shop (${tr})`, rect: [X0 + 0.5, Z0 + 0.5, X0 + 5, Z0 + 5.3], y: l.y, kind: 'inner', market: false },
+        { id: 'andron', rect: [X0 + 7.4, Z0 + 0.5, X1 - 0.5, Z0 + 5.3], y: l.y, kind: 'inner' },
+        { id: 'loom room', rect: [X0 + 0.5, sz, xl, Z1 - 0.5], y: l.y, kind: 'inner' },
+        { id: 'kitchen', rect: [xl + 0.4, sz, xk, Z1 - 0.5], y: l.y, kind: 'inner' },
+        { id: 'store', rect: [xk + 0.4, sz, X1 - 0.5, Z1 - 0.5], y: l.y, kind: 'inner' });
+      return { t: 'athens_open_house', rect: l.rect, y: l.y, seed: l.seed, trade: tr }; });
+    plans.push({ ...base(`athens-open-${g / 4}`, els), rooms }); }
   // the house and shop by the south-west corner of the Agora that the finds name Simon the shoemaker's (§5b), walked into
   plans.push({ ...base('athens-simon', [{ t: 'simon_house', rect: SIMON, y: 0, seed: 410 }]), rooms: [
     { id: 'shoemaker shop', rect: [SIMON[0] + 0.5, SIMON[1] + 0.5, SIMON[0] + 5, SIMON[1] + 5.3], y: 0, kind: 'inner', market: false },
