@@ -4,6 +4,7 @@
 // the arcades, the drum's framed windows, and the wooden screen round the Rock. docs/buildings/dome-of-the-rock.md §4, §7, §8.
 
 import '../../styles/islamic/index.js';
+import '../../styles/islamic/furnish.js';
 import { STYLES, registerStyle } from '../../core/build.js';
 import { lathe, fromTriangles, box } from '../../core/geom.js';
 import { hexa } from '../../styles/chinese/index.js';
@@ -348,9 +349,87 @@ function sakhra(el, { bag, col, lights }) {
   lights?.push({ at: [c0 + 2.15, F + 1.35, d0 + 0.35], color: '#ffae5e', intensity: 1.6, distance: 5 });
 }
 
+// ── the furnishing of the shrine (docs/settlements/jerusalem.md §1g) ───────────────────────────────
+// What hung and lay in the Dome under ʿAbd al-Malik: a chain from the middle of the dome, curtains woven with gold
+// between the pillars round the Rock, lamps of glass, the carpets of the worshippers.
+
+/** A thin bar from a to b (radius r), as a box turned to the direction. */
+function rod(a, b, r) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2], len = Math.hypot(dx, dy, dz);
+  const g = box(-r, 0, -r, r, len, r);
+  g.rotateX(Math.acos(dy / len)); g.rotateY(Math.atan2(dx, dz));
+  return g.translate(a[0], a[1], a[2]);
+}
+/** A glass lamp in its bronze ring, its top at (x, y, z) and the little chain above it up to (x, y + up, z). */
+function glassLamp(bag, x, y, z, up) {
+  bag.add('bronze', lathe([[0.001, 0], [0.12, 0], [0.13, 0.03], [0.11, 0.05], [0.001, 0.02]], 14, null, x, y - 0.05, z));
+  bag.add('lamp_glass', lathe([[0.001, 0], [0.06, 0.02], [0.095, 0.1], [0.075, 0.2], [0.11, 0.24], [0.001, 0.24]], 12, null, x, y - 0.22, z));
+  for (let j = 0; j < up / 0.09; j++) bag.add('iron', box(x - 0.008, y + j * 0.09, z - 0.008 + (j % 2) * 0.004, x + 0.008, y + (j + 1) * 0.09 - 0.01, z + 0.008 + (j % 2) * 0.004));
+}
+/**
+ * dotr_corona: { at, hook, y (the ring), r, n } — the great chain hung from the middle of the dome (links of bronze, a boss
+ * against the dome's crown) carrying a bronze crown of glass lamps: four chains from a boss to the ring, the ring, and n lamps
+ * on short chains from it, alternately long and short.
+ */
+function dotrCorona(el, { bag, lights }) {
+  const [x, z] = el.at, hook = el.hook, yr = el.y, R = el.r, n = el.n ?? 16, yb = yr + 3.2;
+  bag.add('bronze', lathe([[0.2, 0], [0.2, 0.1], [0.07, 0.14], [0.001, 0.14]], 12, null, x, hook - 0.1, z));
+  for (let y = hook - 0.14, k = 0; y > yb + 0.3; y -= 0.17, k++) {
+    bag.add('bronze', k % 2 ? box(x - 0.016, y - 0.2, z - 0.006, x + 0.016, y, z + 0.006) : box(x - 0.006, y - 0.2, z - 0.016, x + 0.006, y, z + 0.016));
+  }
+  bag.add('bronze', lathe([[0.001, 0], [0.09, 0.03], [0.1, 0.12], [0.05, 0.22], [0.001, 0.26]], 10, null, x, yb - 0.1, z));
+  for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + 0.4; bag.add('bronze', rod([x, yb, z], [x + Math.cos(a) * R, yr + 0.02, z + Math.sin(a) * R], 0.011)); }
+  const tube = []; for (let j = 0; j < 10; j++) { const t = j / 10 * 6.2832; tube.push([R + Math.cos(t) * 0.035, Math.sin(t) * 0.035]); } tube.push(tube[0]);
+  bag.add('gilt_bronze', lathe(tube, 40, null, x, yr, z));
+  for (let k = 0; k < n; k++) {
+    const a = k * Math.PI * 2 / n, drop = k % 2 ? 0.4 : 0.75;
+    glassLamp(bag, x + Math.cos(a) * R, yr - drop, z + Math.sin(a) * R, drop - 0.04);
+  }
+  lights?.push({ at: [x, yr - 0.4, z], color: '#ffae5e', intensity: 6, distance: 17 });
+}
+/**
+ * dotr_curtains: { a, b (the two supports), y0, y1, off, w, mat } — a curtain woven with gold, hung in two gathered panels from the
+ * ring beam between two supports of the circular arcade, on its outer side, leaving the middle open: pleated, with a gilt band
+ * at the hem and another under the beam.
+ */
+function dotrCurtains(el, { bag }) {
+  const [ax, az] = el.a, [bx, bz] = el.b, L = Math.hypot(bx - ax, bz - az), u = [(bx - ax) / L, (bz - az) / L], n = [u[1], -u[0]];
+  const o = el.off ?? 0.16, w = el.w ?? 1.1, y0 = el.y0, y1 = el.y1, cloth = [], gold = [];
+  const P = (uu, d, y) => [ax + u[0] * uu + n[0] * d, y, az + u[1] * uu + n[1] * d];
+  const strip = (T, ua, ub, da, db, ya, yb2) => { const a = P(ua, da, ya), b = P(ub, db, ya), c = P(ub, db, yb2), d = P(ua, da, yb2); T.push(...a, ...b, ...c, ...a, ...c, ...d, ...a, ...c, ...b, ...a, ...d, ...c); };
+  const e0 = el.s0 ?? 0.45;
+  for (const [s0, s1] of [[e0, e0 + w], [L - e0 - w, L - e0]]) {
+    const m = Math.max(2, Math.round(w / 0.17));
+    for (let j = 0; j < m; j++) {
+      const ua = s0 + (s1 - s0) * j / m, ub = s0 + (s1 - s0) * (j + 1) / m;
+      strip(cloth, ua, ub, o + (j % 2) * 0.07, o + ((j + 1) % 2) * 0.07, y0, y1);
+      strip(gold, ua, ub, o + (j % 2) * 0.07 + 0.004, o + ((j + 1) % 2) * 0.07 + 0.004, y0, y0 + 0.14);
+      strip(gold, ua, ub, o + (j % 2) * 0.07 + 0.004, o + ((j + 1) % 2) * 0.07 + 0.004, y0 + 0.32, y0 + 0.36);
+      strip(gold, ua, ub, o + (j % 2) * 0.07 + 0.004, o + ((j + 1) % 2) * 0.07 + 0.004, y1 - 0.3, y1);
+    }
+  }
+  bag.add(el.mat ?? 'cloth_maroon', fromTriangles(cloth));
+  bag.add('gilt_bronze', fromTriangles(gold));
+}
+/**
+ * dotr_carpet: { at, along (unit direction of the long side), len, wid } — a carpet on the marble floor: a border, a field, a
+ * medallion and two small ones, laid in layers a hair thick.
+ */
+function dotrCarpet(el, { bag }) {
+  const [cx, cz] = el.at, [ux, uz] = el.along, rot = Math.atan2(ux, uz), hl = el.len / 2, hw = el.wid / 2, y = 0.03;
+  const piece = (mat, l, w, y0, y1, du = 0) => bag.add(mat, box(-w, y0, -l + du, w, y1, l + du).rotateY(rot).translate(cx, 0, cz));
+  piece('cloth_red', hl, hw, y, y + 0.012);
+  piece('cloth_indigo', hl - 0.14, hw - 0.14, y + 0.012, y + 0.02);
+  piece('cloth_ochre', hl - 0.3, hw - 0.3, y + 0.02, y + 0.024);
+  piece('cloth_red', hl - 0.4, hw - 0.4, y + 0.024, y + 0.028);
+  piece('cloth_indigo', 0.7, hw - 0.5, y + 0.028, y + 0.032);
+  for (const s of [-1, 1]) piece('cloth_ochre', 0.22, hw - 0.62, y + 0.028, y + 0.032, s * (hl * 0.55));
+  for (const s of [-1, 1]) { const f = box(-hw, y, 0, hw, y + 0.012, 0.12).translate(0, 0, s * (hl + 0.06)).rotateY(rot).translate(cx, 0, cz); bag.add('cloth_white', f); }   // the fringe
+}
+
 const base = STYLES.islamic;
 registerStyle('islamic-dotr', {
   ...base,
-  elements: { ...base.elements, dotr_face: dotrFace, ablaq, drum_frames: drumFrames, dotr_mosaic: dotrMosaic, drum_mosaic: drumMosaic },
+  elements: { ...base.elements, dotr_face: dotrFace, ablaq, drum_frames: drumFrames, dotr_mosaic: dotrMosaic, drum_mosaic: drumMosaic, dotr_corona: dotrCorona, dotr_curtains: dotrCurtains, dotr_carpet: dotrCarpet },
   objects: { ...base.objects, rock_screen: rockScreen, sakhra },
 });

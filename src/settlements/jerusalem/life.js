@@ -35,6 +35,7 @@ export function houseLife(houses) {
     person([cx1 - 1.4, cz1 - 1.0], F, -2.4, { pose: 'squat', hat: 'veil', hatMat: pick(['cloth_white', 'cloth_indigo', 'cloth_black']) });
     if (i % 2) person([cx1 - 1.3, cz0 + 2.2], F, 0.4, { hat: 'veil', hatMat: 'cloth_white', carry: 'pot' });
     person([(rx0 + rx1) / 2 + 1.1, rz1 + 1.3], F, Math.PI * 0.95, { hat: 'turban', beard: true, pose: rand() < 0.5 ? 'talk' : 'stand' });
+    if (h.trade) person([rx0 + 2.2, rz1 - 0.3], F, 0, { pose: h.trade === 'weaver' || h.trade === 'potter' ? 'sit_ground' : 'stand', cloth: pick(['cloth_brown', 'cloth_grey', 'linen']), hat: 'cap', hatMat: 'cloth_white' });
     if (i % 2 === 0) person([(cx0 + cx1) / 2 - 0.6, (cz0 + cz1) / 2 + 0.3], F, rand() * 6, { child: true });
     // in the main room, seated on the mattress at the back
     person([(rx0 + rx1) / 2 + 1.2, rz0 + 0.5], F + 0.16, Math.PI, { pose: 'sit_ground', hat: i % 2 ? 'turban' : 'veil', hatMat: 'cloth_white' });
@@ -149,4 +150,28 @@ export function lodgeFront() {
     if (use === 'gate') for (const s of [-1, 1]) E.push({ t: 'block', rect: [dx + s * 1.9 - 0.06, dz + 0.0, dx + s * 1.9 + 0.06, dz + 0.9], y0: F, y1: F + 0.45, mat: 'limestone', collide: false });
   });
   return E;
+}
+
+/**
+ * Inside the Dome of the Rock (docs/settlements/jerusalem.md §1g): the attendants and the few who came on a day the shrine was open —
+ * a man at each censer, one sweeping the outer ambulatory, a reader on a carpet with a boy, rows at prayer on the carpets of the
+ * east and west sides, pilgrims walking the inner ambulatory. World coordinates (the Dome stands at (0, −20), its floor at HARAM.top + 4).
+ */
+export function domeLife() {
+  const L = [], rand = rng(691), pick = (a) => a[Math.floor(rand() * a.length)], Y = HARAM.top + 4 + 0.03, OZ = -20;
+  const MU = ['cloth_white', 'cloth_white', 'linen', 'cloth_brown', 'cloth_indigo'];
+  const p = (x, z, rot, o = {}) => L.push({ t: 'figure', at: [x, z + OZ], y: Y, rot, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: pick(MU), cloth2: pick(MU), skin: 'skin_medium', hat: 'turban', hatMat: 'cloth_white', hair: 'short', beard: rand() < 0.6, feet: 'bare', ...o });
+  const D2R = Math.PI / 180;
+  // the attendants at the four censers in the inner ambulatory, in white
+  for (let k = 0; k < 4; k++) { const a = (45 + 90 * k) * D2R, r = 15.9; p(Math.cos(a) * r, Math.sin(a) * r, Math.PI / 2 - a, { cloth: 'cloth_white', cloth2: 'cloth_green', pose: 'stand' }); }
+  // one sweeping the outer ambulatory on the north-east, another on the south-west
+  p(13.0, -13.0, 2.3, { carry: 'broom', cloth: 'cloth_grey', hat: 'cap' }); p(-13.0, 13.0, -0.8, { carry: 'broom', cloth: 'cloth_brown', hat: 'cap' });
+  // the east and west carpets: rows at prayer facing south, qibla
+  for (const [cx, cz] of [[20.9, -3.4], [-20.9, -3.4], [20.9, 3.4]]) for (let k = 0; k < 3; k++) if (rand() > 0.15) p(cx + (k - 1) * 0.9, cz + (rand() - 0.5) * 0.3, Math.PI, { y: Y + 0.032, pose: k % 2 ? 'kneel' : 'pray', arms: 'pray', cloth: pick(['cloth_white', 'linen']) });
+  // a reader on a carpet on the north side with a boy beside him
+  p(-3.2, -20.9, 0, { y: Y + 0.032, pose: 'cross', cloth: 'cloth_white' }); p(-4.4, -21.5, 0.3, { y: Y + 0.032, pose: 'cross', child: true, hat: 'cap' });
+  // pilgrims walking the inner ambulatory: a pair, a veiled woman with a child
+  p(6.0, 14.2, 3.8, { pose: 'talk' }); p(7.1, 13.8, 0.8, { pose: 'talk' });
+  p(-14.2, -6.0, 1.5, { hat: 'veil', hatMat: 'cloth_indigo', cloth: 'cloth_indigo', beard: false, hair: 'long' }); p(-14.5, -4.9, 1.4, { child: true, hat: 'cap', beard: false });
+  return L;
 }
