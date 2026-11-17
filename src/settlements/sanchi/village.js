@@ -16,7 +16,7 @@ const faceDir = ([dx, dz]) => Math.atan2(-dx, -dz), awayDir = ([dx, dz]) => Math
 export const stairY = (z) => TOP * Math.max(0, Math.min(1, (STAIR.z1 - z) / (STAIR.z1 - STAIR.z0)));
 
 export function village() {
-  return lodTiles('sanchi-houses', 'indian', lots().map((l) => ({ t: 'village_house', rect: l.rect, front: l.front, y: 0, foot: -0.2, seed: l.seed, kind: l.kind, open: l.open, trade: l.trade })), { near: 125, R: RADIUS, entrance: { at: [0, -180], facing: 's' } });
+  return lodTiles('sanchi-houses', 'indian', lots().map((l) => ({ t: 'village_house', rect: l.rect, front: l.front, y: 0, foot: -0.2, seed: l.seed, kind: l.kind, open: l.open, fr: l.fr, rg: l.rg, trade: l.trade })), { near: 125, R: RADIUS, entrance: { at: [0, -180], facing: 's' } });
 }
 
 /** The stalls round the plaza at the stair's foot: [centre x, z, front, trade]. */
@@ -111,7 +111,7 @@ export function dressing() {
     if (l.farm) continue;
     const out = OUT[l.front], Lw = (l.front === 's' || l.front === 'n') ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1];
     const P = (u, v) => frontPoint(l, u, v), yPl = 0.4, rotOut = awayDir(out);
-    const at = (u, v) => P(Math.max(0.4, Math.min(Lw - 0.4, u)), v);
+    const at = (u, v) => P(Math.max(0.4, Math.min(Lw - 0.4, u)), l.fr === 'hood' && v < 0 && v > -1.2 ? v * 0.55 : v);
     const u1 = Lw * (0.2 + rand() * 0.2), u2 = Lw * (0.6 + rand() * 0.2);
     const kind = l.kind;
     if (kind === 'shop') {
@@ -130,10 +130,15 @@ export function dressing() {
       if (rand() < 0.3) F(at(u2, -2.4), 0, [out[1] * 0.5 - out[0] * 0.2, out[0] * 0.5], { carry: pickOf(['basket', 'none']), cloth: pickOf(['cloth_white', 'cloth_ochre']) });
       if (rand() < 0.18) L.push({ t: 'animal', kind: 'dog', at: at(Lw * 0.6, -2.8), y: 0, rot: rotOut + 2, seed: seed++ });
     } else if (kind === 'shed') {
-      L.push({ t: 'animal', kind: pickOf(['zebu', 'zebu', 'buffalo']), at: at(Lw * 0.35, 1.2), y: 0.42, rot: rotOut + 1.57, seed: seed++, graze: false, mat: pickOf(['hide_white', 'hide_grey', 'hide_tan']) });
+      L.push({ t: 'animal', kind: pickOf(['zebu', 'zebu', 'buffalo']), at: l.open ? at(Lw * 0.35, 1.2) : at(Lw * 0.35, -1.9), y: l.open ? 0.42 : 0, rot: rotOut + 1.57, seed: seed++, graze: false, mat: pickOf(['hide_white', 'hide_grey', 'hide_tan']) });
       L.push({ t: 'haystack', at: P(Lw + 1.4, 4), y: 0, kind: 'rick', seed: seed++, rot: 0 });
       L.push({ t: 'trough', at: at(Lw * 0.75, -1.0), y: 0, rot: rotOut, seed: seed++ });
     } else {
+      // inside an open home: the housewife squatting at the clay stove in the back corner, turned to it (the furnishing of the style's 'home')
+      if (l.open && (kind === 'home' || kind === 'mud' || kind === 'hut')) {
+        const Dl = (l.front === 's' || l.front === 'n') ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0], vo = l.fr === 'court' && Dl >= 7 ? 1.6 : 0;
+        woman(P(Lw - 0.3 - 0.6, -(vo + Dl - vo - 0.3 - 1.1)), 0.42, [-out[0], -out[1]], { pose: 'sit_low', carry: 'none' });
+      }
       L.push({ t: 'pot', at: at(u1, -0.7), y: yPl, seed: seed++, kind: 'matka', n: 2 });
       if (rand() < 0.6) L.push({ t: 'bench', at: at(u2, -0.7), y: 0.0, rot: rotOut + 1.57, seed: seed++, len: 1.4 });
       if (rand() < 0.5) L.push({ t: 'firewood', at: P(Lw - 0.2, -0.1), y: yPl, rot: rotOut + 1.57, seed: seed++, len: 0.9 });

@@ -39,6 +39,29 @@ function railRing(bag, col, c, r, y, h, gaps = [], gap = 1.8, mat = RAIL, walls 
     // the coping (uṣṇīṣa) rounded on top, as the timber rail it copies
     { const w = post * 0.8, y0 = y + h * 0.93 - y, ch = h * 0.07, L2 = L + 0.02;
       relief(bars, [[[-w, y0], [w, y0], [w, y0 + ch * 0.35], [w * 0.75, y0 + ch * 0.75], [0, y0 + ch], [-w * 0.75, y0 + ch * 0.75], [-w, y0 + ch * 0.35]]], [m[0] - uu[0] * L2, y, m[1] - uu[1] * L2], nn, uu, 2 * L2); }
+    // the donors' inscriptions: columns of short incised-looking Brahmi-like signs on the faces of two posts in three, alternately outer and inner,
+    // and a line of them along the coping's face every fourth bay [stated: over a thousand donative inscriptions on the railings and gateways;
+    // the signs' forms are ours — inferred]
+    if (h >= 2.5 && k % 3 !== 2) {
+      const sd = k % 2 ? 1 : -1, g0 = h / 3.1, cx0 = px + n[0] * sd * (post + 0.002), cz0 = pz + n[1] * sd * (post + 0.002);
+      for (let j = 0; j < 9; j++) {
+        const v = (k * 7 + j * 3) % 4, yy = y + (0.95 + j * 0.12) * g0, gu = (j % 2 ? 0.02 : -0.02);
+        obox(posts, [cx0 + u[0] * gu, cz0 + u[1] * gu], u, n, 0.012, 0.012, yy, yy + 0.07 * g0);
+        if (v === 0) obox(posts, [cx0 + u[0] * gu, cz0 + u[1] * gu], u, n, 0.04, 0.012, yy + 0.06 * g0, yy + 0.075 * g0);
+        else if (v === 1) obox(posts, [cx0 + u[0] * gu, cz0 + u[1] * gu], u, n, 0.04, 0.012, yy, yy + 0.015 * g0);
+        else if (v === 2) obox(posts, [cx0 + u[0] * (gu + 0.05), cz0 + u[1] * (gu + 0.05)], u, n, 0.012, 0.012, yy, yy + 0.07 * g0);
+        else obox(posts, [cx0 + u[0] * (gu + 0.03), cz0 + u[1] * (gu + 0.03)], u, n, 0.03, 0.012, yy + 0.03 * g0, yy + 0.045 * g0);
+      }
+    }
+    if (h >= 2.5 && k % 4 === 1) {
+      const sd = k % 8 === 1 ? 1 : -1, yy = y + h * 0.87;
+      for (let j = 0; j < 12; j++) {
+        const t = (j + 0.5) / 12 * 2 * L - L, cxx = m[0] + uu[0] * t + nn[0] * sd * (post * 1.05 + 0.002), czz = m[1] + uu[1] * t + nn[1] * sd * (post * 1.05 + 0.002);
+        if (Math.abs(t) > L * 0.85) continue;
+        obox(bars, [cxx, czz], uu, nn, 0.012, 0.012, yy, yy + 0.07);
+        if ((k + j) % 3) obox(bars, [cxx + uu[0] * 0.025, czz + uu[1] * 0.025], uu, nn, 0.03, 0.012, yy + (j % 2 ? 0.055 : 0), yy + (j % 2 ? 0.07 : 0.015));
+      }
+    }
     if (walls && col) col.segment([px, pz], [qx, qz], post * 2, y, y + h);
   }
   bag.add(mat, fromTriangles(posts));
@@ -95,6 +118,30 @@ function yakshiFig() {
   g.push(rod([0.0, 1.5, 0.14], [0.14, 1.78, 0.18], 0.04, 5)); g.push(rod([0.14, 1.78, 0.18], [0.28, 2.06, 0.1], 0.035, 5));
   g.push(rod([0.0, 1.5, -0.14], [-0.1, 1.28, -0.14], 0.04, 5)); g.push(rod([-0.1, 1.28, -0.14], [-0.2, 1.3, -0.02], 0.035, 5));
   return g;
+}
+/** A rider seated astride at (x, y) (his seat), facing +x: a torso, a turbaned head, the legs hanging down the animal's flanks, the arms forward on the goad or reins: 0.5 m above the seat. */
+function riderParts(x, y) {
+  const g = [];
+  g.push(lathe([[0.001, 0], [0.11, 0.02], [0.13, 0.12], [0.1, 0.3], [0.07, 0.38], [0.001, 0.4]], 8, null, x, y, 0));
+  g.push(ell(0.065, 0.07, x + 0.01, y + 0.44, 0, 8));
+  g.push(lathe([[0.001, 0], [0.075, 0.02], [0.07, 0.07], [0.001, 0.1]], 8, null, x + 0.01, y + 0.5, 0));
+  for (const z of [-1, 1]) {
+    g.push(rod([x, y + 0.03, z * 0.1], [x + 0.14, y - 0.06, z * 0.17], 0.05, 5)); g.push(rod([x + 0.14, y - 0.06, z * 0.17], [x + 0.1, y - 0.32, z * 0.2], 0.04, 5));
+    g.push(rod([x + 0.02, y + 0.34, z * 0.12], [x + 0.17, y + 0.22, z * 0.07], 0.035, 5));
+  }
+  return g;
+}
+/** An elephant with its rider on the neck (the mahout with his goad): 1.4 m to the rider's head. */
+function elephantRiderFig() { return [...elephantFig(), ...riderParts(0.2, 0.93)]; }
+/** A horse standing, its neck arched, the tail hanging, a rider in the saddle: 1.4 m to the rider's head. */
+function horseRiderFig() {
+  const g = [], body = lathe([[0.001, -0.42], [0.12, -0.36], [0.17, -0.15], [0.17, 0.1], [0.15, 0.3], [0.001, 0.42]], 8, null, 0, 0, 0);
+  body.rotateZ(-Math.PI / 2).translate(0, 0.62, 0); g.push(body);
+  for (const [x, z] of [[0.28, 0.08], [0.28, -0.08], [-0.28, 0.08], [-0.28, -0.08]]) g.push(rod([x, 0.58, z], [x + (x > 0 ? 0.02 : -0.02), 0, z], 0.035, 5));
+  g.push(rod([0.3, 0.68, 0], [0.5, 0.98, 0], 0.075, 6)); g.push(rod([0.5, 0.98, 0], [0.68, 0.88, 0], 0.05, 6));
+  for (const z of [-0.025, 0.025]) g.push(lathe([[0.001, 0], [0.025, 0.02], [0.001, 0.07]], 5, null, 0.5, 1.0, z));
+  g.push(rod([-0.4, 0.74, 0], [-0.5, 0.3, 0], 0.03, 5));
+  return [...g, ...riderParts(0.02, 0.77)];
 }
 /** Place a figure's parts: feet at (x, y, z), +x turned to (dx, dz), leaning outward by `lean`, scale s. */
 function fig(bag, mat, parts, x, y, z, dx, dz, s = 1, lean = 0) {
@@ -223,10 +270,15 @@ function torana(bag, col, at, dir, y, s = 1, kind = 'elephant') {
       const dd = k * W * (Math.abs(k) === 1 ? 1 : 1.3), tt = dd / half;
       obox(out, at2(dd), u, dir, 0.22 * s, 0.22 * s, yb + rise * tt * tt + 0.55 * s, yb + 1.55 * s);
     }
-    if (b < 2) for (const k of [-0.66, 0, 0.66]) {
-      const dd = k * W * 1.15, tt = dd / half;
-      obox(carve, at2(dd), u, dir, 0.12 * s, 0.14 * s, yb + rise * tt * tt + 0.6 * s, yb + 1.35 * s);
-      bag.add(RAIL, lathe([[0.001, -0.1 * s], [0.1 * s, 0], [0.001, 0.1 * s]], 8, null, ...((p) => [p[0], yb + 1.42 * s, p[1]])(at2(dd))));
+    // the interspaces are filled with elephant- and horse-riders and, beyond the posts, lions or elephant-riders [stated: indianetzone,
+    // "Gateways, Sanchi"]; in the round, back to back, so that each face has its own
+    if (b < 2) for (const dd of [-1.5 * W / 2.1, 0, 1.5 * W / 2.1, -(W + 1.4 * s), W + 1.4 * s]) {
+      const tt = dd / half, base = yb + rise * tt * tt + 0.58 * s, outer = Math.abs(dd) > W + 0.5 * s;
+      for (const f of [-1, 1]) {
+        const p = at2(dd, f * 0.1 * s);
+        if (outer) fig(bag, RAIL, b === 0 ? elephantRiderFig() : lionFig(), p[0], base, p[1], dir[0] * f, dir[1] * f, (b === 0 ? 0.55 : 0.6) * s);
+        else fig(bag, RAIL, b === 0 ? elephantRiderFig() : horseRiderFig(), p[0], base, p[1], dir[0] * f, dir[1] * f, 0.55 * s);
+      }
     }
   }
   // the emblems on top: a wheel in the middle, a triratna over each post
