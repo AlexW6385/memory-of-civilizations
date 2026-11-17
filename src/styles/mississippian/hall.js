@@ -9,6 +9,7 @@
 import { box, frustum, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { WALL, TH, rng, tri, thatchHip } from './kit.js';
 import { slab } from './dress.js';
+import { bankRing } from './front.js';
 
 /** The inside of a hip roof: woven mats lined on the slopes, facing in, the rafters and ridge beam along them. */
 function lining(bag, [x0, z0, x1, z1], y, rise) {
@@ -104,6 +105,28 @@ export function chiefHall(el, { bag, col, lights }) {
     for (const r of [[x0 - o, z0 - o, x1 + o, z0], [x0 - o, z0, x0, z1], [x1, z0, x1 + o, z1], [x0 - o, z1, cx - dw / 2, z1 + o], [cx + dw / 2, z1, x1 + o, z1 + o]]) {
       bag.add('paint_ochre', box(r[0], yb, r[1], r[2], yb + 0.8, r[3]));
       bag.add('paint_white', box(r[0] - (r[2] - r[0] < 0.1 ? 0.012 : 0), yb + 0.3, r[1] - (r[3] - r[1] < 0.1 ? 0.012 : 0), r[2] + (r[2] - r[0] < 0.1 ? 0.012 : 0), yb + 0.5, r[3] + (r[3] - r[1] < 0.1 ? 0.012 : 0)));
+    } }
+  // the walls' outer frame (docs §5.14): the wall-trench posts standing proud of the daub every ~2.2 m, two lashed rails along each wall, earth banked against the foot; a hide rolled above the door
+  { const pf = 0.02, rp = 0.11, pitch = 2.2, yb = y - 0.4, yt = y + h - 0.36, skip = (x) => Math.abs(x - cx) < dw / 2 + 0.95;
+    const nx = Math.max(2, Math.round(L / pitch)), nz = Math.max(2, Math.round(D / pitch));
+    for (let k = 0; k <= nx; k++) { const x = x0 + L * k / nx; bag.add('timber', rod([x, yb, z0 - pf], [x, yt, z0 - pf], rp, 8)); if (!skip(x)) bag.add('timber', rod([x, yb, z1 + pf], [x, yt, z1 + pf], rp, 8)); }
+    for (let k = 1; k < nz; k++) { const z = z0 + D * k / nz; bag.add('timber', rod([x0 - pf, yb, z], [x0 - pf, yt, z], rp, 8)); bag.add('timber', rod([x1 + pf, yb, z], [x1 + pf, yt, z], rp, 8)); }
+    for (const ry of [y + 1.0, y + h - 1.75]) {
+      const o = pf + rp + 0.03;
+      bag.add('timber', rod([x0 - o, ry, z0 - o], [x1 + o, ry, z0 - o], 0.05, 6));
+      bag.add('timber', rod([x0 - o, ry, z0 - o], [x0 - o, ry, z1 + o], 0.05, 6)); bag.add('timber', rod([x1 + o, ry, z0 - o], [x1 + o, ry, z1 + o], 0.05, 6));
+      bag.add('timber', rod([x0 - o, ry, z1 + o], [cx - dw / 2 - 1.0, ry, z1 + o], 0.05, 6)); bag.add('timber', rod([cx + dw / 2 + 1.0, ry, z1 + o], [x1 + o, ry, z1 + o], 0.05, 6));
+    }
+    if (!el.porch) bankRing(bag, el.rect, y - 0.6, y + 0.5, 0.7, 's', cx, dw / 2 + 0.3);
+    else { const e = 0.7, add = (r, ins) => bag.add('silt', frustum(r, y - 0.6, y + 0.5, ...ins)); add([x0 - e, z0 - e, x1 + e, z0], [e, e, e, 0]); add([x0 - e, z0, x0, z1], [e, 0, 0, 0]); add([x1, z0, x1 + e, z1], [0, e, 0, 0]); }
+    bag.add('hide_tan', rod([cx - dw / 2 + 0.15, y + dh - 0.18, z1 + 0.08], [cx + dw / 2 - 0.15, y + dh - 0.18, z1 + 0.08], 0.1, 8));
+  }
+  // smoke-hoods on the ridge over the hearths: four short posts and a small thatched hip, the gap under it the smoke's way out
+  { const ry = b[1], len = b[0] - a[0];
+    for (const u of len > 12 ? [0.25, 0.75] : [0.5]) {
+      const hx = a[0] + len * u, hz = a[2];
+      for (const [dx, dz] of [[-0.9, -0.5], [0.9, -0.5], [0.9, 0.5], [-0.9, 0.5]]) bag.add('timber', rod([hx + dx, ry - 0.75, hz + dz], [hx + dx, ry + 0.95, hz + dz], 0.07, 6));
+      thatchHip(bag, [hx - 1.0, hz - 0.6, hx + 1.0, hz + 0.6], ry + 0.95, 0.75, 0.25, 2);
     } }
   lining(bag, el.rect, top, rise - 0.25);
   // the two rows of great posts that carry the roof, tied by beams along and across
