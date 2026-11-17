@@ -6,6 +6,7 @@ import { buddha } from '../chinese/index.js';
 import { XF, FLOOR } from '../../settlements/dunhuang/layout.js';
 import { Panel, wallPanel, PAL, tableauM, friezeM, apsaraM, lotusM, thousandM } from './paint.js';
 import { oilLamp } from './caves.js';
+import { Acc, trisOf, jit, skirtRolls, tileRoll, corbel, balustrade, windowBars, chiwen } from './roofwork.js';
 
 /** The hall inside the rock: the lining, the paintings on its long walls, the Buddha on his throne, lamps before him. */
 export function greatCave(ctx, c) {
@@ -82,7 +83,7 @@ const smoothS = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e
  * Tang eave), a fascia board and a row of round rafter heads along the rim, hip ridges to a finial at each corner, a bell
  * on each lifted tip. The rim is sampled every ~0.8 m so that the skirt is a warped surface, not three flat quads.
  */
-function eave(ctx, x0, x1, z0, z1, y, out, drop, lift = 0.5) {
+function eave(ctx, x0, x1, z0, z1, y, out, drop, lift = 0.5, acc = null) {
   const { bag } = ctx;
   // three runs: north wing (A→D along +x), front (D→C along +z), south wing (C→B along −x); inner points on the wall line, outer on the rim
   const runs = [
@@ -91,7 +92,7 @@ function eave(ctx, x0, x1, z0, z1, y, out, drop, lift = 0.5) {
     { I: [x1, z1], I2: [x0, z1], O: [x1 + out, z1 + out], O2: [x0, z1 + out], c0: true },
   ];
   const rimY = (e) => y - drop + lift * (1 - smoothS(0, 3.2, e));         // e: distance along the rim from the nearest lifted corner
-  const up = [], dn = [], rim = [], lw = (p) => [p[0], p[1] - 0.24, p[2]];
+  const up = [], dn = [], rim = [], rimP = [], lw = (p) => [p[0], p[1] - 0.24, p[2]];
   for (const R of runs) {
     const L = Math.hypot(R.O2[0] - R.O[0], R.O2[1] - R.O[1]), n = Math.max(2, Math.round(L / 0.8)), P = [], Q = [];
     for (let k = 0; k <= n; k++) {
@@ -100,7 +101,7 @@ function eave(ctx, x0, x1, z0, z1, y, out, drop, lift = 0.5) {
       Q.push([R.O[0] + (R.O2[0] - R.O[0]) * t, e > 1e8 ? y - drop : rimY(e), R.O[1] + (R.O2[1] - R.O[1]) * t]);
     }
     for (let k = 0; k < n; k++) { quad(up, P[k], P[k + 1], Q[k + 1], Q[k]); quad(dn, lw(Q[k]), lw(Q[k + 1]), lw(P[k + 1]), lw(P[k])); }
-    rim.push(Q);
+    rim.push(Q); rimP.push(P);
   }
   quad(up, [x0, y, z0], [x1, y, z0], [x1, y, z1], [x0, y, z1]);              // the inner deck
   const flip = (t, upward) => {
@@ -129,6 +130,8 @@ function eave(ctx, x0, x1, z0, z1, y, out, drop, lift = 0.5) {
       bag.add('lacquer_black', box(Math.min(px, qx) - (o[0] ? 0 : 0.045), py - 0.045, Math.min(pz, qz) - (o[1] ? 0 : 0.045), Math.max(px, qx) + (o[0] ? 0 : 0.045), py + 0.045, Math.max(pz, qz) + (o[1] ? 0 : 0.045)));
     }
   });
+  // cover-tile rolls down the skirt with a round end disc each (dossier §14)
+  rimP.forEach((P, ri) => skirtRolls(acc, P, rim[ri], ri === 0 ? [0, -1] : ri === 1 ? [1, 0] : [0, 1]));
   // hip ridges from the inner corners to the lifted tips, a finial on each tip and its bell below
   const corners = [[[x1, z0], rim[0][rim[0].length - 1]], [[x1, z1], rim[2][0]]];
   for (const [I, T] of corners) {
@@ -150,7 +153,7 @@ export function bracketSet(ctx, xc, zc, yb, k = 1) {
 }
 
 export function nineStorey(ctx) {
-  const { bag, col } = ctx;
+  const { bag, col } = ctx, acc = new Acc();
   LV.forEach((s, i) => {
     const x0 = XF, x1 = XF + s.d, z0 = -s.w, z1 = s.w, y = s.y, top = y + s.h;
     const bays = Math.max(3, Math.round((2 * s.w) / 3.6) | 1), bw = (2 * s.w) / bays;
@@ -175,6 +178,8 @@ export function nineStorey(ctx) {
     for (let b = 0; b <= bays; b++) {
       const z = z0 + b * bw;
       bag.add('timber_red', lathe([[0.3, 0], [0.3, 0.12], [0.25, 0.2], [0.23, s.h - 0.5], [0.26, s.h]], 10, null, x1 - 0.3, y, z));
+      if (i === 0) bag.add('granite_grey', lathe([[0.001, 0], [0.52 * jit(), 0], [0.52, 0.1], [0.46, 0.16], [0.5, 0.24], [0.4, 0.3], [0.33, 0.34], [0.001, 0.34]], 12, null, x1 - 0.3, y, z));     // the lotus plinth
+      if (i > 0 || b % 2 === 0) { corbel(acc, x1 - 0.3, top - 0.6, z, 1); corbel(acc, x1 - 0.3, top - 0.6, z, -1); }
       if (i === 0 || b % 2 === 0) col.circle(x1 - 0.3, z, 0.28, y, top);
       if (i > 0 || b === 0 || b === bays) bag.add('timber_red', box(x0, y, z - 0.25, x1 - 0.3, top, z + 0.25));     // the side walls' frames
     }
@@ -188,6 +193,7 @@ export function nineStorey(ctx) {
     }
     bag.add('paint_ochre', box(x1 + 0.05, top - 0.57, z0 - 0.3, x1 + 0.075, top - 0.53, z1 + 0.3)); bag.add('paint_ochre', box(x1 + 0.05, top - 0.1, z0 - 0.3, x1 + 0.075, top - 0.06, z1 + 0.3));
     if (i > 0) {
+      const fields = [];
       for (let b = 0; b < bays; b++) {
         const za = z0 + b * bw + 0.3, zb = z0 + (b + 1) * bw - 0.3, mid = (za + zb) / 2;
         bag.add('lime_plaster', box(x1 - 0.5, y + 0.0, za, x1 - 0.3, y + 1.0, zb));
@@ -195,16 +201,21 @@ export function nineStorey(ctx) {
         bag.add('lime_plaster', box(x1 - 0.5, y + 1.0, za, x1 - 0.3, top - 0.7, mid - 0.9));
         bag.add('lime_plaster', box(x1 - 0.5, y + 1.0, mid + 0.9, x1 - 0.3, top - 0.7, zb));
         bag.add('lime_plaster', box(x1 - 0.5, top - 0.7, za, x1 - 0.3, top - 0.6, zb));
-      }
+        windowBars(acc, x1 - 0.39, mid, 0.9, y + 1.0, top - 0.7);
+        // the apron panel: a red frame on the plaster with a green field
+        bag.add('lacquer_red', box(x1 - 0.31, y + 0.08, za + 0.12, x1 - 0.29, y + 0.14, zb - 0.12)); bag.add('lacquer_red', box(x1 - 0.31, y + 0.86, za + 0.12, x1 - 0.29, y + 0.92, zb - 0.12));
+        bag.add('lacquer_red', box(x1 - 0.31, y + 0.14, za + 0.12, x1 - 0.29, y + 0.86, za + 0.18)); bag.add('lacquer_red', box(x1 - 0.31, y + 0.14, zb - 0.18, x1 - 0.29, y + 0.86, zb - 0.12));
+        fields.push(...trisOf(box(x1 - 0.31, y + 0.14, za + 0.18, x1 - 0.295, y + 0.86, zb - 0.18)));      }
+      bag.add('clay_green', fromTriangles(fields));
       // the deck's rail
-      bag.add('timber_red', box(x1 + 0.6, y + 0.9, z0 - 0.5, x1 + 0.7, y + 1.0, z1 + 0.5));
+      balustrade(acc, x1 + 0.65, y - 0.12, z0 - 0.5, z1 + 0.5);
     } else {
       // the lowest storey: the doorway into the hall, a great painted lintel; blind side bays of plaster
       bag.add('lacquer_red', box(x0, y + s.h - 1.6, z0, x0 + 0.5, top, z1));
       bag.add('lime_plaster', box(x0, y, z0, x0 + 0.5, y + s.h - 1.6, -7.5)); bag.add('lime_plaster', box(x0, y, 7.5, x0 + 0.5, y + s.h - 1.6, z1));
       col.rect([x0, z0, x0 + 0.5, -7.5], y, top); col.rect([x0, 7.5, x0 + 0.5, z1], y, top);
     }
-    eave(ctx, x0, x1 + 0.2, z0, z1, top, 2.2, 0.95);
+    eave(ctx, x0, x1 + 0.2, z0, z1, top, 2.2, 0.95, 0.5, acc);
     // the deck over the eave: the next storey's platform (tile) — drawn by the next level
   });
   // the crowning roof: a hip over the top storey with a ridge along z, hip ridges, end finials and the gilt finial on the ridge
@@ -217,9 +228,13 @@ export function nineStorey(ctx) {
     bag.add('tile_grey', fromTriangles(t));
     bag.add('roof_ridge', box(xr - 0.18, yr - 0.02, -zr - 0.1, xr + 0.18, yr + 0.3, zr + 0.1));
     for (const [I, T] of [[D, R0], [A, R0], [C, R1], [B, R1]]) bag.add('roof_ridge', rod([I[0], I[1] + 0.05, I[2]], [T[0], T[1] + 0.12, T[2]], 0.11, 6));
-    for (const z of [-zr, zr]) bag.add('gilt_bronze', lathe([[0.001, 0], [0.2, 0], [0.26, 0.22], [0.14, 0.5], [0.2, 0.7], [0.001, 0.9]], 8, null, xr, yr + 0.2, z));   // the ridge-end finials
+    const mix = (a, b, f) => [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
+    for (let k = 0; k <= 15; k++) { const f = (k + 0.5) / 16; tileRoll(acc, mix(R0, R1, f), mix(D, C, f), [1, 0]); }
+    for (const [E0, E1, Rt, dir] of [[A, D, R0, [0, -1]], [B, C, R1, [0, 1]]]) for (let k = 0; k < 5; k++) { const f = (k + 0.5) / 5; tileRoll(acc, mix(Rt, E0, 0.04), mix(E0, E1, f * 0.97), [dir[0] * 0.3 + (E1[0] - E0[0]) * 0, dir[1]]); }
+    for (const z of [-zr, zr]) { chiwen(acc, xr, yr + 0.3, z, Math.sign(z), 1.0); }   // the owl-tail ridge ends
     bag.add('gilt_bronze', lathe([[0.001, 0], [0.4, 0], [0.25, 0.3], [0.4, 0.6], [0.08, 1.1], [0.001, 1.4]], 10, null, xr, yr + 0.3, 0));
   }
+  acc.flush(bag);
   // painted cloth banners and a lamp at the porch
   for (const z of [-9, 9]) { bag.add('cloth_red', box(XF + 9.9, FLOOR[0] + 4.5, z - 0.35, XF + 9.95, FLOOR[0] + 7.5, z + 0.35)); }
 }
