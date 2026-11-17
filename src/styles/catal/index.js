@@ -6,6 +6,7 @@
 
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, rod } from '../../core/geom.js';
+import { blob, oval, tube, bead } from './soft.js';
 import '../qing/index.js';
 import { cell, cellGeom, leopard, seated, knapper } from './cell.js';
 import { court2, yard, edge, landing, shade, screen, reedStack } from './yard.js';
@@ -22,7 +23,7 @@ function quarter(el, { bag, col, lights }) {
   const ENTER = new Map((el.enter || []).map((e) => [e.i + ',' + e.j, e]));
   const rand = rng(el.seed || 1), C = el.cols, R = el.rows, K = el.kind, T = el.tops;
   const X = (j) => el.x0 + C.slice(0, j).reduce((a, b) => a + b, 0), Z = (i) => el.z0 + R.slice(0, i).reduce((a, b) => a + b, 0);
-  const butt = new Set();
+  const butt = new Set(), freeF = new Set();
   const topAt = (i, j) => (K[i]?.[j] === 'h' || K[i]?.[j] === 'L' ? T[i][j] : 0);
   for (let i = 0; i < R.length; i++) for (let j = 0; j < C.length; j++) {
     const k = K[i][j];
@@ -43,7 +44,7 @@ function quarter(el, { bag, col, lights }) {
       const m = topAt(i + di, j + dj), L = Math.hypot(b[0] - a[0], b[1] - a[1]);
       if (m >= top - 0.3 && m > 0) continue;
       // the lip along an edge with a drop beyond it
-      const t = 0.18; onFace(bag, MUD, a, b, -nx, -nz, 0, L, top + 0.05, top + 0.2, t);
+      { const ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, sd = i * 7 + j * 3 + nx * 2 + nz * 5; bag.add(MUD, bead([a[0] - nx * 0.09 - ux * 0.02, a[1] - nz * 0.09 - uz * 0.02], [b[0] - nx * 0.09 + ux * 0.02, b[1] - nz * 0.09 + uz * 0.02], top + 0.14, 0.085 + 0.01 * Math.sin(sd), sd, 1.6, 5)); freeF.add(i + ',' + j + ',' + nx + ',' + nz); }
       onFace(bag, 'banco_rough', a, b, nx, nz, 0, L, -0.3, 0.3 + rand() * 0.25, 0.05);                       // eroded and re-mudded foot
       for (let u = 0.35 + rand() * 0.3; u < L - 0.2; u += 0.78 + rand() * 0.1) onFace(bag, LOG, a, b, nx, nz, u, u + 0.09, top - 0.25, top - 0.16, 0.26);        // the beam ends standing out under the roof's edge
       for (let g = 0; g < 2; g++) { const u = rand() * (L - 0.2); onFace(bag, 'silt', a, b, nx, nz, u, u + 0.07 + rand() * 0.06, top - 0.3 - rand() * 1.1, top - 0.05, 0.04); }   // rain gullies
@@ -68,6 +69,12 @@ function quarter(el, { bag, col, lights }) {
         const g = lathe([[0.001, -0.02], [0.9, 0], [1, 0.2], [0.6, 0.7], [0.001, 1]], 6); g.scale(0.45, 0.2, 0.3).rotateY(rand() * 6).translate(a[0] + ux * u + nx * 0.4, 0, a[1] + uz * u + nz * 0.4); bag.add('banco_rough', g);
       }
     }
+    // the free corners rounded by hand: a bead of plaster up the angle, uneven, thicker at the foot
+    for (const [cxx, czz, p, q, ox, oz] of [[x0, z0, '0,-1', '-1,0', -1, -1], [x1, z0, '0,-1', '1,0', 1, -1], [x0, z1, '0,1', '-1,0', -1, 1], [x1, z1, '0,1', '1,0', 1, 1]]) {
+      if (!freeF.has(i + ',' + j + ',' + p) || !freeF.has(i + ',' + j + ',' + q)) continue;
+      const sd = i * 5 + j * 11 + ox * 3 + oz, wob = Math.sin(sd * 3.1) * 0.02;
+      bag.add(MUD, tube([[cxx + ox * (0.01 + wob), -0.25, czz + oz * 0.01], [cxx + ox * (0.015 - wob), top * 0.35, czz + oz * (0.015 + wob)], [cxx + ox * 0.01, top * 0.7, czz + oz * 0.01], [cxx, top + 0.05, czz]], (t) => 0.15 - 0.045 * t, 5));
+    }
     // on the roof: the hatch with its ladder, and what a household keeps up there
     const gh = en && cellGeom([x0, z0, x1, z1], en.mirror);
     const hx = gh ? (gh.hole[0] + gh.hole[2]) / 2 : x0 + C[j] * (0.3 + rand() * 0.35), hz = gh ? (gh.hole[1] + gh.hole[3]) / 2 : z0 + R[i] * (0.3 + rand() * 0.35), ty = top + 0.09;
@@ -78,6 +85,8 @@ function quarter(el, { bag, col, lights }) {
     else if (r < 0.65) { for (let q = 0; q < 6; q++) bag.add('thatch', rod([px + q * 0.09, ty, pz], [px + q * 0.09 + 0.15, ty + 1.3, pz + 0.08], 0.03, 5)); bag.add('rope_fibre', rod([px - 0.05, ty + 0.6, pz], [px + 0.6, ty + 0.65, pz + 0.05], 0.015, 4)); }   // a bundle of reeds
     else if (r < 0.78) { for (const [dx, dz, m] of [[0, 0, 'hide_tan'], [0.9, 0.3, 'hide_brown'], [0.2, 0.9, 'hide_white']]) bag.add(m, box(px + dx, ty, pz + dz, px + dx + 0.8, ty + 0.025, pz + dz + 0.55)); }          // hides pegged to dry
     else if (r < 0.9) { jar(bag, px, ty, pz, 1.1); jar(bag, px + 0.55, ty, pz + 0.1, 0.8, 'pottery_dark'); }
+    // patches of fresh plaster laid on the roof by hand: low soft blobs, a little different in tone
+    { const rp = rng(i * 53 + j * 17 + 9); for (let q = 0; q < 2; q++) bag.add(q ? 'banco' : 'banco_smooth', blob(oval(0, 0, 0.5 + rp() * 0.5, 0.4 + rp() * 0.4, 8, rp() * 3), 0.022, { rings: 2, wob: 0.05, seed: q }).rotateX(-Math.PI / 2).translate(x0 + 0.8 + rp() * (C[j] - 1.6), ty, z0 + 0.8 + rp() * (R[i] - 1.6))); }
     // a second thing kept on the roof, in the half away from the hatch: dung cakes, firewood, a sleeping mat under a reed awning, a heap of grain, a strainer
     {
       const qx = x0 + 0.9 + rand() * Math.max(0.2, C[j] - 2.4), qz = hz < cz ? z1 - 1.1 : z0 + 1.1, q = rand();
@@ -195,7 +204,10 @@ function house(el, { bag, col, lights }) {
   for (const r of rim) { bag.add(MUD, box(r[0], ST + 0.05, r[1], r[2], ST + 0.27, r[3])); col.rect(r, ST + 0.09, ST + 0.27); }
   for (const [a, b, c, d] of [[hole[0], hole[1] - 0.02, hole[2], hole[1] - 0.01]]) bag.add('pottery_dark', box(a, CH + 0.1, b, c, ST + 0.05, d));   // soot on the hatch's inner face
   // the roof's edge: a low lip
-  for (const [a, b, c, d] of [[x0, z0, x1, z0 + 0.18], [x0, z1 - 0.18, x1, z1], [x0, z0, x0 + 0.18, z1], [x1 - 0.18, z0, x1, z1]]) bag.add(MUD, box(a, ST + 0.09, b, c, ST + 0.2, d));
+  [[[x0 + 0.09, z0 + 0.09], [x1 - 0.09, z0 + 0.09]], [[x1 - 0.09, z0 + 0.09], [x1 - 0.09, z1 - 0.09]], [[x1 - 0.09, z1 - 0.09], [x0 + 0.09, z1 - 0.09]], [[x0 + 0.09, z1 - 0.09], [x0 + 0.09, z0 + 0.09]]].forEach(([a, b], n) => bag.add(MUD, bead(a, b, ST + 0.18, 0.09, n + 3, 1.4, 6)));   // the roof's edge rolled by hand
+  // the beam ends standing out of the north and south walls under the roof, and the four corners rounded in plaster
+  for (let u = 0.35; u < 7.3; u += 0.78) for (const [zz, dz] of [[z0, -1], [z1, 1]]) bag.add(LOG, rod([lx(u), CH - 0.07, zz - dz * 0.1], [lx(u) + (rand() - 0.5) * 0.02, CH - 0.07, zz + dz * (0.14 + rand() * 0.08)], 0.085, 7));
+  for (const [cx, cz, ox, oz] of [[x0, z0, -1, -1], [x1, z0, 1, -1], [x0, z1, -1, 1], [x1, z1, 1, 1]]) bag.add(MUD, tube([[cx + ox * 0.01, -0.25, cz + oz * 0.01], [cx + ox * 0.02, ST * 0.4, cz + oz * 0.015], [cx + ox * 0.012, ST * 0.75, cz + oz * 0.01], [cx, ST + 0.1, cz]], (t) => 0.17 - 0.05 * t, 6));
   // the ladder inside under the hatch, standing up through it; and the ramp one climbs it by
   ladder(bag, lx(1.95), F, hole[3] - 0.08, ST - F, 0, -1, 0.98, 0.9);
   col.ramp([lx(1.5), hole[1], lx(2.4), hole[3]], F, ST + 0.09, 'n');
@@ -208,6 +220,10 @@ function house(el, { bag, col, lights }) {
   const PH = 0.45;
   const plat = [[ix0, iz0, mx1, lz(1.5)], [lx(3.5), lz(1.5), mx1, lz(3.7)]];
   for (const r of plat) { bag.add(PLS, box(r[0], F, r[1], r[2], PH, r[3])); bag.add(LIME, box(r[0] - 0.02, PH - 0.03, r[1] - 0.02, r[2], PH + 0.005, r[3] + 0.02)); col.rect(r, F, PH); }
+  // the platforms' edges rolled in plaster, as the hand left them: along the exposed top edges, and a foot-moulding at their base
+  { const pb = (a, b, y, r, n) => bag.add(PLS, bead(a, b, y, r, n, 1.2, 6)), Y = PH - 0.015;
+    pb([ix0 + 0.03, lz(1.5)], [lx(3.5), lz(1.5)], Y, 0.045, 1); pb([lx(3.5), lz(1.5)], [lx(3.5), lz(3.7)], Y, 0.045, 2); pb([lx(3.5), lz(3.7)], [mx1 - 0.03, lz(3.7)], Y, 0.045, 3);
+    pb([ix0 + 0.03, lz(1.5) + 0.03], [lx(3.5), lz(1.5) + 0.03], F + 0.06, 0.06, 4); pb([lx(3.5) - 0.03, lz(1.5)], [lx(3.5) - 0.03, lz(3.7)], F + 0.06, 0.06, 5); pb([lx(3.5), lz(3.7) + 0.03], [mx1 - 0.03, lz(3.7) + 0.03], F + 0.06, 0.06, 6); }
   for (const [a, b, c, d, m] of [[lx(0.3), lz(0.2), lx(2.0), lz(1.2), REED], [lx(2.2), lz(0.25), lx(4.5), lz(1.25), REED], [lx(3.7), lz(1.8), lx(4.7), lz(3.4), REED]]) bag.add(m, box(a, PH + 0.005, b, c, PH + 0.03, d));
   bag.add('hide_tan', box(lx(0.35), PH + 0.03, lz(0.25), lx(1.1), PH + 0.07, lz(1.1)));
   bag.add('hide_white', box(lx(3.8), PH + 0.03, lz(1.9), lx(4.5), PH + 0.06, lz(3.0)));
@@ -218,8 +234,11 @@ function house(el, { bag, col, lights }) {
   bag.add(RED, lathe([[0.097, 0.1], [0.097, 0.13], [0.092, 0.13], [0.092, 0.1]], 10, null, lx(4.45), PH + 0.03, lz(3.5)));
   // the pillar, plastered, at the corner of the platforms, with a bucranium on its south face
   const pil = [lx(3.15), lz(1.5), lx(3.5), lz(1.85)];
-  bag.add(PLS, box(pil[0], F, pil[1], pil[2], CH, pil[3])); col.rect(pil, F, CH);
-  bucranium(bag, (pil[0] + pil[2]) / 2, 1.55, pil[3], 0, 0.9);
+  { const px = (pil[0] + pil[2]) / 2, pz = (pil[1] + pil[3]) / 2;   // the pillar: a plastered post, round, swelling at the foot and under the beams, with a red band; bucrania on two faces
+    bag.add(PLS, lathe([[0.001, 0], [0.24, 0], [0.215, 0.12], [0.185, 0.3], [0.175, 1.0], [0.19, 1.6], [0.205, 1.85], [0.23, CH - F - 0.02], [0.001, CH - F]], 12, (t, i) => 1 + 0.03 * Math.sin(t * 3 + i * 1.7), px, F, pz));
+    bag.add(RED, lathe([[0.2, 1.05 - F], [0.2, 1.2 - F], [0.195, 1.2 - F], [0.195, 1.05 - F]], 12, null, px, F, pz));
+    col.circle(px, pz, 0.26, F, CH);
+    bucranium(bag, px, 1.5, pz + 0.17, 0, 0.8, false); bucranium(bag, px + 0.17, 1.5, pz, Math.PI / 2, 0.8, false); }
   // the north wall: red wash with white margins, a zig-zag band, three bucrania on pedestals above the platform
   const FN = frame([ix0, iz0], [1, 0], [0, 1]);
   flat(bag, RED, FN, [[0, PH], [4.9, PH], [4.9, 1.72], [0, 1.72]], 0.008);
@@ -240,8 +259,8 @@ function house(el, { bag, col, lights }) {
   flat(bag, RED, FS, [[0.1, 0.9], [1.5, 0.9], [1.5, 1.7], [0.1, 1.7]], 0.008);
   bucranium(bag, lx(4.3), 1.3, iz1 - PL, Math.PI, 0.8);
   // a pair of leopards in plaster relief on the south wall, facing each other across a red band (the facing lionesses of the shrines)
-  flat(bag, RED, FS, [[1.7, 0.55], [3.5, 0.55], [3.5, 1.7], [1.7, 1.7]], 0.008);
-  leopard(bag, lx(2.1), 1.1, iz1 - PL, Math.PI, -1, 1.0); leopard(bag, lx(3.1), 1.1, iz1 - PL, Math.PI, 1, 1.0);
+  flat(bag, RED, FS, [[1.6, 0.55], [3.8, 0.55], [3.8, 1.7], [1.6, 1.7]], 0.008);
+  leopard(bag, lx(2.15), 1.0, iz1 - PL, Math.PI, -1, 0.78); leopard(bag, lx(3.3), 1.0, iz1 - PL, Math.PI, 1, 0.78);
   zigzag(bag, BLK, FS, 0.1, 4.8, 1.76, 2.04, 20);
   // plaster breasts with a vulture's beak on the partition's face over the platform's north end, a row of two
   for (const v of [0.55, 1.1]) breast(bag, mx1 - PL, 1.42, lz(v), -Math.PI / 2, 1.0);
