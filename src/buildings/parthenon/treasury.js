@@ -7,6 +7,7 @@
 import { STYLES } from '../../core/build.js';
 import { box, lathe, rod } from '../../core/geom.js';
 import '../../styles/greek/index.js';
+import '../../styles/greek/slope.js';   // votive (the tripods)
 
 /** A chest (kiste): a body of boards on a plinth, a lid a little arched, bronze corner bands and a ring. */
 function chest(bag, col, x, z, y, w, d, h, along) {
