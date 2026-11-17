@@ -134,6 +134,12 @@ export function scissor(sk, { l1, l2, za, zb, ys, mat = 'concrete_light', rails 
     // the stringer's handrail on the open side
     const hx = lane === l1 ? lane[0] + 0.03 : lane[1] - 0.03;
     sk.rod('steel_chrome', up === 'n' ? [hx, y0 + 0.95, zb] : [hx, y0 + 0.95, za], up === 'n' ? [hx, y1 + 0.95, za] : [hx, y1 + 0.95, zb], 0.025, 5);
+    // balusters of tube steel under the handrail, one every third tread, and a lower rail, so the stair reads as a flight with a guard
+    for (let i = 0; i < n; i += 3) {
+      const t = y0 + rise * (i + 1) / n, zz = up === 'n' ? zb - (i + 0.5) * tr : za + (i + 0.5) * tr;
+      sk.rod('steel_chrome', [hx, t, zz], [hx, t + 0.93 + ((i * 7 + k * 3) % 11) * 0.0002, zz], 0.011, 4);
+    }
+    sk.rod('steel_chrome', up === 'n' ? [hx, y0 + 0.5, zb] : [hx, y0 + 0.5, za], up === 'n' ? [hx, y1 + 0.5, za] : [hx, y1 + 0.5, zb], 0.014, 4);
     holes[k + 1] = [lane[0], za, lane[1], zb];
     // the guards round the hole at floor k+1: its west side, and the end away from the arrival
     if (rails) {
