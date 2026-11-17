@@ -11,6 +11,8 @@ import { hearthKit, ollaKit, metateKit, waterJarKit, bedKit, storeJarKit, put, p
 import { frame, slab, frust, flipGeo, hex, flight, rng, L, RED, LIME } from './kit.js';
 import { tapesco, midden, hives } from './yard.js';
 import { roofComb, shrineDoor, frontPanels } from './comb.js';
+import { stela } from './carve.js';
+import { crossPrism, crossRects } from './tiers.js';
 import { DRESS, tierWeather, wallWeather, curtain, hammock } from './dress.js';
 
 const TIM = 'timber';
@@ -87,12 +89,17 @@ function pyramid(el, ctx) {
   for (let k = 0; k < n; k++) {
     const [a0, b0] = A(k), [a1, b1] = A(k + 1), y0 = Y + k * th, d = Math.min(a0 - a1, b0 - b1);
     const af = a0 - (a0 - a1) * 0.2, bf = b0 - (b0 - b1) * 0.2;
-    frust(bag, RED, cx, cz, a0, b0, af, bf, y0, y0 + th * 0.86);                                                // the battered face
-    frust(bag, L, cx, cz, af + 0.2, bf + 0.2, af + 0.2, bf + 0.2, y0 + th * 0.86, y0 + th);                         // the moulding
-    frust(bag, 'maya_blue', cx, cz, af + 0.05, bf + 0.05, af + 0.05, bf + 0.05, y0 + th * 0.58, y0 + th * 0.66);    // a painted band
+    const nn = Math.min(1.3, a1 * 0.16), mh = th * 0.14, hf = th * 0.86, gx = (yy) => (a0 - af) * (yy / hf), gz = (yy) => (b0 - bf) * (yy / hf);
+    crossPrism(bag, RED, cx, cz, a0, b0, nn, af, bf, nn, y0, y0 + hf);                                           // the battered face, its corners inset
+    crossPrism(bag, L, cx, cz, af, bf, nn, af + 0.38, bf + 0.38, nn, y0 + hf, y0 + hf + mh * 0.42);                // the apron moulding: a cove flaring out ...
+    crossPrism(bag, L, cx, cz, af + 0.38, bf + 0.38, nn, af + 0.38, bf + 0.38, nn, y0 + hf + mh * 0.42, y0 + th);     // ... under a vertical fillet
+    { const yb = y0 + hf * 0.62, pa = a0 - gx(hf * 0.62) + 0.07, pb = b0 - gz(hf * 0.62) + 0.07;                    // the painted band, proud of the face
+      crossPrism(bag, 'maya_blue', cx, cz, pa, pb, nn, pa, pb, nn, yb, yb + hf * 0.08);
+      const ya = y0 + hf * 0.16, qa = a0 - gx(hf * 0.16) + 0.04, qb = b0 - gz(hf * 0.16) + 0.04;                      // and a ochre dado line low on the face
+      crossPrism(bag, L, cx, cz, qa, qb, nn, qa, qb, nn, ya, ya + hf * 0.03); }
     void d;
     tierWeather(bag, cx, cz, a0, b0, af, bf, y0, th, wr, { nx: -dir[0], nz: -dir[1], w: sw + 1 });
-    for (const r of subtractRects([cx - a0, cz - b0, cx + a0, cz + b0], [hole])) col.rect(r, y0 - 0.3, y0 + th - 0.31);
+    for (const rr of crossRects(cx, cz, a0, b0, nn)) for (const r of subtractRects(rr, [hole])) col.rect(r, y0 - 0.3, y0 + th - 0.31);
     col.floor([cx - a1 - 0.2, cz - b1 - 0.2, cx + a1 + 0.2, cz + b1 + 0.2], y0 + th);
   }
   if (el.masks) for (let k = 1; k < n; k++) {                                                    // the stucco masks flanking the stair, one pair on each tier
@@ -217,19 +224,6 @@ function eshrine(el, ctx) {
   const sl = F.R(-1.0, -0.2, 1.45, 2.65); bag.add(L, box(sl[0], H, sl[1], sl[2], H + 0.07, sl[3]));                        // the flat stone over the burial
   const sl2 = F.R(-0.8, -0.4, 1.8, 2.3); bag.add('limestone_carved', box(sl2[0], H + 0.07, sl2[1], sl2[2], H + 0.09, sl2[3]));
   const bp = F.P(-0.6, 2.05); bag.add('pottery_dark', lathe([[0.001, 0], [0.12, 0], [0.15, 0.08], [0.11, 0.14], [0.001, 0.14]], 8, null, bp[0], H + 0.09, bp[1]));
-}
-
-/** A stela and its altar { at [x, z], face, h, seed }: a tall slab of carved limestone on a footing, the round altar before it. */
-function stela(el, { bag, col }) {
-  const [x, z] = el.at, F = frame(el.face ?? 's', x, z), h = el.h ?? 3.2, w = el.w ?? 1.3, rand = rng(el.seed ?? 3);
-  const b = F.R(-0.6, 0.6, -w / 2 - 0.35, w / 2 + 0.35); bag.add(L, box(b[0], 0, b[1], b[2], 0.3, b[3]));
-  const s = F.R(-0.2, 0.2, -w / 2, w / 2); bag.add(L, box(s[0], 0.3, s[1], s[2], 0.3 + h, s[3])); col.rect(s, 0, h);
-  // the ruler carved in relief on the face (toward the plaza), a frame round it, the glyph column beside
-  const f = F.R(-0.26, -0.2, -w / 2 + 0.12, w / 2 - 0.12); bag.add('limestone_carved', box(f[0], 0.7, f[1], f[2], 0.3 + h - 0.35, f[3]));
-  const hd = F.R(-0.31, -0.2, -0.28, 0.28); bag.add(L, box(hd[0], 0.3 + h * 0.62, hd[1], hd[2], 0.3 + h * 0.62 + 0.55, hd[3]));
-  const cr = F.R(-0.34, -0.2, -0.42, 0.42); bag.add('maya_blue', box(cr[0], 0.3 + h * 0.62 + 0.5, cr[1], cr[2], 0.3 + h * 0.62 + 0.7, cr[3]));
-  for (let i = 0; i < 4; i++) { const g = F.R(-0.22, -0.2, w / 2 - 0.3 + 0.0, w / 2 - 0.12); bag.add(L, box(g[0], 0.9 + i * 0.5 + rand() * 0.05, g[1], g[2], 1.2 + i * 0.5, g[3])); }
-  const a = F.P(-1.6, 0); bag.add(L, lathe([[0.001, 0], [0.8, 0], [0.82, 0.12], [0.8, 0.5], [0.001, 0.5]], 14, null, a[0], 0, a[1])); col.circle(a[0], a[1], 0.8, 0, 0.5);
 }
 
 /** A raised causeway of plastered limestone { pts, w, h }: a trapezoid in section, its ends and its sides sloping (walked up anywhere). */

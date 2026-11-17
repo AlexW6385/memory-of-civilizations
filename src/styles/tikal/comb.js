@@ -5,6 +5,7 @@
 
 import { box } from '../../core/geom.js';
 import { L, RED } from './kit.js';
+import { lintelRelief } from './carve.js';
 
 /** A box in a frame: u (depth), v (breadth), y (absolute). */
 export const fbox = (bag, F, m, u0, u1, v0, v1, y0, y1) => { const r = F.R(u0, u1, v0, v1); bag.add(m, box(r[0], y0, r[1], r[2], y1, r[3])); };
@@ -94,11 +95,11 @@ export function roofComb(bag, F, y, D, W, cmb, rr) {
 export function shrineDoor(bag, F, y, u0, u1, dw, dh, front) {
   const t = (u1 - u0 + 0.1) / 4;
   for (let p = 0; p < 4; p++) fbox(bag, F, 'timber', u0 - 0.05 + p * t, u0 - 0.05 + (p + 1) * t, -dw / 2 - 0.2, dw / 2 + 0.2, y + dh - 0.3 + (p % 2) * 0.02, y + dh);
+  const Fu = { R: (a, b, c, d) => F.R(a + u0, b + u0, c, d) };
+  lintelRelief(bag, Fu, y + dh + 0.6, y + dh + 1.95, dw / 2 + 0.3);                                                                   // the carved lintel above: the ruler on his throne
   if (!front) return;
   for (const sg of [-1, 1]) fbox(bag, F, L, -0.14, 0, sg > 0 ? dw / 2 : -dw / 2 - 0.3, sg > 0 ? dw / 2 + 0.3 : -dw / 2, y, y + dh);   // the stone jambs
   fbox(bag, F, L, -0.14, 0, -dw / 2 - 0.3, dw / 2 + 0.3, y + dh, y + dh + 0.14);                                                       // their cap
-  fbox(bag, F, 'limestone_carved', -0.12, -0.02, -dw / 2 - 0.1, dw / 2 + 0.1, y + dh + 0.2, y + dh + 0.7);                                // the carved panel over the door
-  fbox(bag, F, 'maya_blue', -0.15, -0.1, -dw / 2 - 0.3, dw / 2 + 0.3, y + dh + 0.14, y + dh + 0.2);
 }
 
 /** The front of a shrine between the door and the corners: panels framed in red, a blue field and a row of glyph blocks. v range of each side given. */

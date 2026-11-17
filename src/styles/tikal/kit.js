@@ -60,6 +60,16 @@ export function flight(bag, col, o) {
   }
   bag.add(bmat, fromTriangles(t));
   for (const s of [-1, 1]) prism(bmat, [[0, 0], [-0.4, 0], [-0.4, 1.0], [Lr, H + 0.9], [Lr, H - 0.02]], s < 0 ? -(hw + bw) : hw, s < 0 ? -hw : hw + bw);
+  // the balustrades' faces: a blue panel between two limestone fillets along the slope; the flanks of a high stair carry sloped bands
+  for (const s of [-1, 1]) {
+    const o0 = s < 0 ? -(hw + bw) - 0.05 : hw + bw, o1 = s < 0 ? -(hw + bw) : hw + bw + 0.05, o2 = s < 0 ? -(hw + bw) - 0.08 : hw + bw, o3 = s < 0 ? -(hw + bw) : hw + bw + 0.08;
+    prism('maya_blue', [[0, 0.3], [Lr, H + 0.3], [Lr, H + 0.62], [0, 0.62]], o0, o1);
+    for (const q of [0.12, 0.7]) prism(bmat, [[0, q], [Lr, H + q], [Lr, H + q + 0.14], [0, q + 0.14]], o2, o3);
+    if (H > 6) for (const f of [0.16, 0.34, 0.52, 0.7]) {
+      const q = H * f, d0 = q * Lr / H;
+      prism(f === 0.34 || f === 0.7 ? bmat : bmat, [[d0, 0], [Lr, H - q], [Lr, H - q + 0.5], [d0, 0.5]], o2, o3);
+    }
+  }
   const ex = foot[0] + dx * Lr, ez = foot[1] + dz * Lr;
   const r = [Math.min(foot[0], ex) - (dx ? 0 : hw), Math.min(foot[1], ez) - (dz ? 0 : hw), Math.max(foot[0], ex) + (dx ? 0 : hw), Math.max(foot[1], ez) + (dz ? 0 : hw)];
   col.ramp(r, y0, y0 + H, dx > 0 ? 'e' : dx < 0 ? 'w' : dz > 0 ? 's' : 'n');
