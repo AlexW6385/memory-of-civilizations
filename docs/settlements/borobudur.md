@@ -168,6 +168,19 @@ Sources added:
 
 Level: L2, near L3 in the houses; for L3 still missing: the carved detail of the terraces' walls beyond panels (the foot and cornice carvings), the 2,672 panels each their own subject, a measured profile of the real mouldings, Mendut and Pawon, the volcanoes.
 
+## 19. Ninth pass: the landmark seen close (2026-11)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| Relief panels in depth | Each panel a field with a raised frame of two stepped mouldings and corner rosettes; on it layered figures (each piece bevelled so that its sides catch the light): standing figures in tribhanga with kain, hem, pleat, belt, sash, collar, haloes and tiered crowns, lotus or fly-whisk in hand; lords throned in tiered-roof pavilions with attendants and kneeling worshippers; flying apsaras; trees in layered canopies; a hermit with a deer | the subjects, houses, pavilions and dress of the reliefs [stated in outline: skylineaparthistory; arisguide]; the poses and details [inferred from photographs] |
+| Kala-makara gateways | The kala's face in bevelled layers (crown, brow, bulging eyes with pupils, nose, forehead jewel, upper jaw with fangs and teeth, hands with claws raised beside the jaw, scrolls); makaras in profile with ear-scroll, lower jaw, snout with fangs, trunk curled to a ball, brow, eye, mane scales; a framed relief of a guardian on each jamb face | [stated: arisguide; skylineaparthistory for the kala and makara at the gates]; the forms [inferred] |
+| Makara spouts | The corner spout a channel block with the same makara head jutting from it | 100 makara spouts at the tiers' corners [stated: arisguide] |
+| Stair piers | At the foot of each flight's cheeks a pier on a moulded foot, capped, with a small stupa | [inferred] |
+| Base mouldings | The base wall gets a foot course, a belt of three courses and a cornice, the plinth a stepped cap | [inferred from photographs; see §18] |
+| Balustrade stupas | Ten-sided bells | [inferred] |
+
+Draw count kept by quantising the main panels' heights to 0.2 m, so that panels repeat as instances.
+
 
 ## Sources
 
