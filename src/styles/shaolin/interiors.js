@@ -7,11 +7,11 @@ import { sumeru } from '../qing/carving.js';
 import { buddha } from '../chinese/index.js';
 import { statue } from '../chinese/statues.js';
 import {
-  brickFloor, longTable, table, armchair, stand, candleStand, lantern, lampStand, carpet, books, bolster, hangingScroll, couch, deskThings, plumVase, teaSet,
+  brickFloor, longTable, table, armchair, stand, candleStand, lantern, lampStand, carpet, books, bolster, hangingScroll, couch, deskThings, plumVase, teaSet, backScreen, scrollsOnTable,
   rng, W,
 } from '../../settlements/ming-suzhou/props.js';
 
-const HALL = { tianwang: tianwang, mahavira, fatang, qianfo, cell };
+const HALL = { tianwang: tianwang, mahavira, fatang, qianfo, cell, fangzhang, lixue };
 
 export function shaolinInterior(el, ctx) {
   const fn = HALL[el.kind];
@@ -203,4 +203,70 @@ function cell(el, ctx) {
   { const P = new Parts(); hangingScroll(P, 0.7, 1.4, 6); f.put(P, x0 + 0.5, cz, Math.PI / 2, 1.0); }
   f.light((x0 + x1) / 2 + 1.5, 1.4, z1 - 1, '#ffc07a', 1.2, 6);
   f.done();
+}
+
+// ── the abbot's hall (Fangzhang): the reception hall (docs §6d). The doors stand in the middle bay on the axis, front and back: the aisle between them stays free ──
+function fangzhang(el, ctx) {
+  const f = frame(el, ctx), { x0, z0, x1, z1, cx, y } = f;
+  brickFloor(f.S, x0 + 0.4, z0 + 0.4, x1 - 0.4, z1 - 0.4, 41);
+  // the abbot's seat: a low dais at the back, west of the aisle, the great armchair on it, a painted screen behind and a carpet before it
+  { const dx = cx - 4.4, P = new Parts(); P.add('lacquer_black', box(-2.0, 0, -0.85, 2.0, 0.22, 0.85)); P.add('cloth_red', box(-1.9, 0.22, -0.75, 1.9, 0.235, 0.75));
+    const A = new Parts(); armchair(A); A.emit(P, 0, 0.235, 0.05, Math.PI, 1.25); P.add('cloth_ochre', box(-0.3, 0.7, -0.2, 0.3, 0.74, 0.2).translate(0, 0, 0.02));
+    f.put(P, dx, z0 + 1.45); f.col.rect([dx - 2.0, z0 + 0.6, dx + 2.0, z0 + 2.3], y, y + 0.22);
+    const S2 = new Parts(); backScreen(S2, 3.6, 2.7); f.put(S2, dx, z0 + 0.42);
+    const C = new Parts(); carpet(C, 3.2, 1.6); f.put(C, dx, z0 + 3.2); }
+  // the altar table at the back, east of the aisle: the portrait of Bodhidharma over it, a censer between two candlesticks, a vase
+  { const ax = cx + 4.4, P = new Parts(), h = 0.95; longTable(P, 2.6, 0.55, h); const C = new Parts(); censer(C, 0.9); C.emit(P, 0, h, 0);
+    for (const s of [-1, 1]) { const Cd = new Parts(); candleStand(Cd, 0.5); Cd.emit(P, s * 0.85, h - 0.35, 0.02); const V = new Parts(); plumVase(V, 12 + s); V.emit(P, s * 1.1, h, 0); }
+    f.put(P, ax, z0 + 0.95); f.col.rect([ax - 1.4, z0 + 0.6, ax + 1.4, z0 + 1.3], y, y + 1.1);
+    const Sc = new Parts(); hangingScroll(Sc, 1.1, 2.3, 9); f.put(Sc, ax, z0 + 0.42, 0, 1.1);
+    for (const s of [-1, 1]) { const Cp = new Parts(); hangingScroll(Cp, 0.34, 2.1, 4 + s); f.put(Cp, ax + s * 1.5, z0 + 0.42, 0, 1.2); } }
+  // the chairs of the guests along both side walls, in pairs with a tea table between each pair, facing across the hall
+  for (const side of [-1, 1]) {
+    const wx = side < 0 ? x0 + 0.95 : x1 - 0.95, yaw = side < 0 ? -Math.PI / 2 : Math.PI / 2;
+    const zs = side < 0 ? [z0 + 3.5, z0 + 4.9] : [z0 + 2.3, z0 + 3.9], zt = (zs[0] + zs[1]) / 2;
+    for (const z of zs) { const P = new Parts(); armchair(P); f.put(P, wx, z, yaw); f.col.rect([wx - 0.32, z - 0.32, wx + 0.32, z + 0.32], y, y + 1.1); }
+    { const P = new Parts(), h = 0.7; table(P, 0.5, 0.5, h); const T2 = new Parts(); teaSet(T2); T2.emit(P, 0, h, 0); f.put(P, wx, zt); f.col.rect([wx - 0.28, zt - 0.28, wx + 0.28, zt + 0.28], y, y + 0.8); }
+  }
+  // the writing desk with brush and sutras, by the east front wall; a cabinet of sutras on the west front wall
+  { const dx = cx + 4.6, dz = z1 - 1.2, P = new Parts(), h = 0.8; table(P, 1.6, 0.7, h); const D = new Parts(); deskThings(D, 0); D.emit(P, 0.3, h, 0); const B = new Parts(); scrollsOnTable(B, 5); B.emit(P, -0.35, h, 0);
+    f.put(P, dx, dz); f.col.rect([dx - 0.85, dz - 0.4, dx + 0.85, dz + 0.4], y, y + 0.9); const Ch = new Parts(); armchair(Ch); f.put(Ch, dx, dz + 0.75, Math.PI); f.col.rect([dx - 0.3, dz + 0.45, dx + 0.3, dz + 1.05], y, y + 1.1); }
+  { const x = x0 + 1.1, z = z1 - 1.0, P = new Parts(), d = 0.5, h = 2.0; P.add('lacquer_red', box(-0.8, 0, -d / 2, 0.8, h, d / 2));
+    P.add('lacquer_black', box(-0.74, 0.1, d / 2, 0.74, h - 0.1, d / 2 + 0.012)); for (let k = 0; k < 4; k++) P.add('paint_white', box(-0.7, 0.3 + k * 0.45, d / 2 + 0.012, 0.7, 0.34 + k * 0.45, d / 2 + 0.02));
+    const B = new Parts(); books(B, 8, 77, 0.3, 0.3); B.emit(P, 0, 0.95, d / 2); f.put(P, x, z); f.col.rect([x - 0.82, z - 0.27, x + 0.82, z + 0.27], y, y + h); }
+  f.put((() => { const P = new Parts(); lampStand(P, 1.35); return P; })(), cx - 2.0, z0 + 1.0); f.col.circle(cx - 2.0, z0 + 1.0, 0.22, y, y + 1.7);
+  lanterns(f, [-6, -3, 3, 6].map((d) => cx + d), z0 + 2.6);
+  f.light(cx - 4, 1.6, z0 + 2.4, '#ffc07a', 1.2, 7); f.light(cx + 4, 1.6, z0 + 2.4, '#ffc07a', 1.0, 7);
+  void z1; f.done();
+}
+
+// ── the Lixue Pavilion: Bodhidharma in bronze, Huike standing in the snow before him (docs §6d); the aisle between the doors stays free ──
+function lixue(el, ctx) {
+  const f = frame(el, ctx), { x0, z0, x1, z1, cx, y } = f;
+  brickFloor(f.S, x0 + 0.4, z0 + 0.4, x1 - 0.4, z1 - 0.4, 53);
+  // Bodhidharma, seated in meditation, cast in bronze, on a high sumeru base at the back west of the aisle; the halo-board behind him
+  const bx = cx - 3.0;
+  pedestal(f, bx - 1.1, z0 + 0.6, bx + 1.1, z0 + 2.2, 0.9);
+  statue({ at: [bx, z0 + 1.4], y: y + 0.9, h: 2.2, dir: [0, 1], type: 'disciple', robe: 'bronze', robe2: 'bronze', flesh: 'bronze', seed: 611 }, ctx);
+  { const P = new Parts(); P.add('lacquer_red', box(-0.9, 0, 0, 0.9, 2.1, 0.06)); P.add('gilt_bronze', lathe([[0.001, 0], [0.56, 0], [0.56, 0.02], [0.001, 0.02]], 20).rotateX(Math.PI / 2).translate(0, 1.55, 0.07)); f.put(P, bx, z0 + 0.5, 0, 0.9); }
+  // Huike, the Second Patriarch, standing before him on a low base, snow drifted at his feet (a white drift of lumps), his hands joined
+  const hx = bx, hz = z0 + 3.9;
+  { const P = new Parts(); P.add('plaster_white', T(ball(0.95, 0.1, 0.8, 12, 4), 0, 0.03, 0)); for (const [dx, dz, r] of [[-0.55, 0.35, 0.28], [0.5, -0.3, 0.24], [0.15, 0.6, 0.2], [-0.3, -0.55, 0.22]]) P.add('plaster_white', T(ball(r, r * 0.4, r, 8, 4), dx, 0.06, dz));
+    f.put(P, hx, hz); f.col.circle(hx, hz, 0.8, y, y + 0.15); }
+  statue({ at: [hx, hz], y: y + 0.1, h: 1.95, dir: [0, -1], type: 'disciple', robe: 'cloth_grey', robe2: 'cloth_ochre', seed: 612 }, ctx);
+  f.col.circle(hx, hz, 0.45, y, y + 2.0);
+  // the altar east of the aisle: censer, candlesticks, offerings, the red tablet of the story hung over it; a wooden fish
+  { const ax = cx + 3.2, P = new Parts(), h = 0.95; longTable(P, 2.4, 0.55, h); const C = new Parts(); censer(C, 1.0); C.emit(P, 0, h, 0);
+    for (const s of [-1, 1]) { const Cd = new Parts(); candleStand(Cd, 0.5); Cd.emit(P, s * 0.8, h - 0.35, 0.02); }
+    const F = new Parts(); woodenFish(F); F.emit(P, 1.0, h + 0.17, 0.0);
+    f.put(P, ax, z0 + 0.9); f.col.rect([ax - 1.3, z0 + 0.6, ax + 1.3, z0 + 1.2], y, y + 1.1);
+    const T2 = new Parts(); T2.add('lacquer_red', box(-1.0, 0, 0, 1.0, 0.7, 0.04)); T2.add('gilt_bronze', box(-0.95, -0.0, 0.04, 0.95, 0.04, 0.05)); T2.add('gilt_bronze', box(-0.95, 0.66, 0.04, 0.95, 0.7, 0.05));
+    for (let k = 0; k < 4; k++) T2.add('gilt_bronze', box(-0.78 + k * 0.42, 0.14, 0.04, -0.5 + k * 0.42, 0.55, 0.048)); f.put(T2, ax, z0 + 0.42, 0, 2.0); }
+  // cushions of the worshippers before the patriarch, banners, a pair of candle stands at the aisle's foot
+  for (let k = 0; k < 3; k++) { const P = new Parts(); cushion(P, k === 1 ? 'cloth_ochre' : 'cloth_grey'); f.put(P, bx - 1.2 + k * 1.2, z0 + 4.9 + (k % 2) * 0.15); }
+  for (let k = 0; k < 4; k++) { const P = new Parts(); banner(P, 2.0, k % 2 ? 'cloth_ochre' : 'cloth_red'); f.put(P, x0 + 1.2 + k * 3.2, z0 + 3.0, 0, f.H - 1.2); }
+  for (const s of [-1, 1]) { const P = new Parts(); candleStand(P, 1.2); f.put(P, cx + s * 1.9, z0 + 2.2); f.col.circle(cx + s * 1.9, z0 + 2.2, 0.22, y, y + 1.3); }
+  lanterns(f, [-4.5, -1.5, 1.5, 4.5].map((d) => cx + d), z0 + 3.2);
+  f.light(bx, 1.6, z0 + 3.0, '#ffb46b', 1.4, 7); f.light(cx + 3.2, 1.6, z0 + 2.4, '#ffc07a', 1.0, 6);
+  void z1; f.done();
 }

@@ -39,6 +39,9 @@ export const FOREST = [-172, 22, -108, 118];                     // the Pagoda F
 export const FOREST_PATH = [[-62, 70], [-106, 70], [-125, 68], [-140, 70], [-160, 66]];
 const segD = (x, z, a, b) => { const vx = b[0] - a[0], vz = b[1] - a[1], t = Math.max(0, Math.min(1, ((x - a[0]) * vx + (z - a[1]) * vz) / (vx * vx + vz * vz || 1))); return Math.hypot(x - a[0] - vx * t, z - a[1] - vz * t); };
 export const pathNear = (x, z, m) => FOREST_PATH.some((p, i) => i && segD(x, z, FOREST_PATH[i - 1], p) < m);
+/** The pilgrims' path from the north gate up the slope of Mount Song (docs §6d): treads from z = -125, wayside shrines beside it. */
+export const MOUNT_PATH = [[0, -113], [0, -126], [4, -140], [-2, -156], [3, -172]];
+export const mountPathNear = (x, z, m) => MOUNT_PATH.some((p, i) => i && segD(x, z, MOUNT_PATH[i - 1], p) < m);
 export const hw = (name) => (AXIS[name][2] - AXIS[name][0]) / 2;
 /** Where a cross wall's side gate stands (distance from the axis). */
 export const gateX = (name) => hw(name) + 1.2 + 3.0;

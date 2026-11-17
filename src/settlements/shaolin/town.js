@@ -204,6 +204,7 @@ export async function town() {
   for (let k = 0; k < 22; k++) {
     const side = rand() < 0.5 ? -1 : 1, x = side * (6 + rand() * 40), z = 70 + rand() * 50;
     const r = rand(), at = [x, z];
+    if (Math.abs(Math.abs(x) - 21) < 2.4 && z > 77 && z < 84) at[0] = side * (Math.abs(x) + 4.4);   // the mouths of the tower passages stay clear
     if (r < 0.45) man(at, 0.04, rand() * 6.28); else if (r < 0.8) woman(at, 0.04, rand() * 6.28); else man(at, 0.04, rand() * 6.28, { pose: 'talk' });
   }
   // the village and the plaza: static people near the arrival — vendors at the stalls, pilgrims buying incense and praying toward the gate,

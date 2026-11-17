@@ -1,6 +1,6 @@
 // Shaolin — the ground: the flat of the compound, the village plain south, the foothills round, Mount
 // Song rising in the north; cypress and pine; the dry, hazy sky of the Zhongyuan (docs/settlements/shaolin.md §4, §7).
-import { RADIUS, WALL, FOREST, STUPAS, RANGES, AXIS, HOUSES, YARDS, GEAR, ROADS, MOUNT, inRect, onRoad, smooth as sm, pathNear } from './layout.js';
+import { RADIUS, WALL, FOREST, STUPAS, RANGES, AXIS, HOUSES, YARDS, GEAR, ROADS, MOUNT, mountPathNear, inRect, onRoad, smooth as sm, pathNear } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 function vnoise(x, z) {
@@ -50,6 +50,7 @@ function planting(x, z, p) {
   }
   if (inForest(x, z, 3)) return { cypress: 0.35 * sm(0.1, 0.6, vnoise(x * 0.09, z * 0.09)), grass_dry: 3 };
   if (z < -112) {
+    if (mountPathNear(x, z, 3.2)) return { grass_dry: 3 };
     const t = sm(0, 40, p.h);
     return { chinese_pine: 0.5 * (0.4 + t), arborvitae: 0.2, oak: 0.2 * t, grass_dry: 14, maquis: 0.4 };
   }
