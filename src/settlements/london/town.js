@@ -164,7 +164,26 @@ function openSet(all) {
   const A = [60, BRIDGE.z];
   near(A, (l) => l.pub, 1); near(A, (l) => l.shop, 3, 1);
   near([30, BRIDGE.z - 40], (l) => !l.shop && !l.pub, 2);
+  // beyond the first 120 m (dossier §8): through the rest of the town within 340 m of the arrival, a house in each 100 m cell and a shop in each
+  // 160 m cell stands open too, so that every quarter has its doors to try; the kinds of room follow the quarter (variantOf)
+  const spread = (f, cell, rmax, cap) => { const taken = new Map(); for (const l of all.filter((q) => ok(q) && f(q) && !out.has(q) && d(q, ARRIVAL) < rmax && d(q, ARRIVAL) >= 118).sort((a, b) => a.seed - b.seed)) { const k = Math.floor(cx(l) / cell) + ',' + Math.floor(cz(l) / cell); if (!taken.has(k) && taken.size < cap) taken.set(k, l); } for (const l of taken.values()) out.add(l); };
+  spread((l) => !l.shop && !l.pub, 120, 340, 30); spread((l) => l.shop, 200, 340, 6);
   return out;
+}
+/** The doors of a terrace come in pairs (the houses built two and two, mirrored about their party wall); the rooms of an open house follow
+ *  its quarter: the better streets about Bridge Street and the square have the parlour or the dining room, the Lambeth side and the far streets
+ *  a working family's lodging. */
+function mirrors(all) {
+  const rows = new Map();
+  for (const l of all) { const k = l.front + l.rect[1].toFixed(1); if (!rows.has(k)) rows.set(k, []); rows.get(k).push(l); }
+  for (const row of rows.values()) { row.sort((a, b) => a.rect[0] - b.rect[0]); row.forEach((l, i) => { l.mirror = i % 2 === 1; }); }
+}
+function variantOf(l) {
+  const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, r = Math.hypot(cx - 60, cz - BRIDGE.z), k = l.seed % 6;
+  if (cx > 262) return k < 4 ? 'lodging' : 'parlour';
+  if (r < 130) return k % 2 ? 'dining' : 'parlour';
+  if (r < 260) return ['parlour', 'lodging', 'dining', 'lodging', 'parlour', 'lodging'][k];
+  return k < 4 ? 'lodging' : k === 4 ? 'parlour' : 'dining';
 }
 /** The terraces cut into TILE-metre tiles, each built in full (near) and simple (far) like ../lod.js lodTiles, but larger: a plan costs one mesh
  *  per material, so fewer, larger tiles keep the mesh count down (the geometry budget); `near` grows with the tile so the same ground shows in full. */
@@ -186,7 +205,8 @@ function terraceTiles(id, elements) {
 }
 export async function houses() {
   const all = lots(), plans = [], open = openSet(all);
-  plans.push(...terraceTiles('london-terraces', all.map((l) => ({ t: l.pub ? 'pub' : l.shop ? 'shop_house' : 'terrace_house', ...l, ...(open.has(l) ? { open: true } : {}) }))));
+  mirrors(all);
+  plans.push(...terraceTiles('london-terraces', all.map((l) => ({ t: l.pub ? 'pub' : l.shop ? 'shop_house' : 'terrace_house', ...l, ...(open.has(l) ? { open: true, variant: variantOf(l) } : {}) }))));
   const sq = square();
   return [...plans, base('london-square', sq), base('london-square-life', sq.flatMap(ridersOf), 'life'), ...traffic(), ...furniture(), base('london-street-folk', streetFolk(), 'life'), base('london-river-folk', riverFolk(), 'life')];
 }

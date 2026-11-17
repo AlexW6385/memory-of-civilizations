@@ -9,6 +9,7 @@
 import { box, lathe, rod } from '../../core/geom.js';
 import { hexa } from './street.js';
 import { shopInterior, pubInterior } from './inside.js';
+import { terraceInterior } from './houseinside.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const pick = (rand, a) => a[Math.floor(rand() * a.length)];
@@ -117,26 +118,36 @@ function dress(F, rand, wins, { H, uD = null, brick = 'brick', dormers = true })
  * carrying an iron balcony; area railings, a chimney stack on each party wall with its pots.
  */
 export function terraceRich(el, ctx, base) {
-  if (el.open && !el.simple && (el.front === 'n' || el.front === 's')) pavement(frameOf(el, ctx), el.pw ?? 1.9);
-  if (el.open || el.simple || (el.front !== 'n' && el.front !== 's')) return base(el, ctx);
-  const F = frameOf(el, ctx), rand = rng(el.seed || 1), { B, C, bag, col, Wd, D, y, x0, z0, x1, z1 } = F;
-  const n = el.storeys ?? 3, st = 3.2, H = n * st, mat = brickOf(rand), type = rand() < 0.33 ? 'bay' : rand() < 0.3 ? 'stucco' : 'plain';
-  const uD = Wd / 4, uW = 3 * Wd / 4, doorMat = pick(rand, DOORS), wins = [];
-  bag.add(mat, box(x0, y - 0.5, z0, x1, y + H, z1)); col.rect(el.rect, y - 0.5, y + H);
+  if (el.simple || (el.front !== 'n' && el.front !== 's')) return base(el, ctx);
+  const F = frameOf(el, ctx), rand = rng(el.seed || 1), { B, C, bag, col, Wd, D, y, x0, z0, x1, z1 } = F, open = !!el.open;
+  const n = el.storeys ?? 3, st = 3.2, H = n * st, mat = brickOf(rand), type0 = rand() < 0.33 ? 'bay' : rand() < 0.3 ? 'stucco' : 'plain', type = open && type0 === 'bay' ? (el.seed % 3 ? 'plain' : 'stucco') : type0;
+  const uD = el.mirror ? 3 * Wd / 4 : Wd / 4, uW = el.mirror ? Wd / 4 : 3 * Wd / 4, doorMat = pick(rand, DOORS), wins = [];
+  // an open house is hollow on its ground floor (houseinside.js: the doorway and the window are real openings in the front wall, so the
+  // surrounds are strips round them and the rusticating is laid in the piers between)
+  if (open) { bag.add(mat, box(x0, y + st, z0, x1, y + H, z1)); col.rect(el.rect, y + st, y + H); terraceInterior(el, ctx, mat, st); }
+  else { bag.add(mat, box(x0, y - 0.5, z0, x1, y + H, z1)); col.rect(el.rect, y - 0.5, y + H); }
   pavement(F, el.pw ?? 1.9);
+  const piers = (fn) => { const o = [[uD - 0.65, uD + 0.65], [uW - 0.65, uW + 0.65]].sort((a, b) => a[0] - b[0]); let u = 0; for (const [a, b] of o) { if (a - u > 0.02) fn(u, a); u = b; } if (Wd - u > 0.02) fn(u, Wd); };
   if (type === 'stucco') {
     // the ground floor rusticated in stucco, a banded plinth
-    B('stucco_cream', 0, Wd, y - 0.1, y + st, 0, 0.06);
-    for (let b = 0.5; b < st - 0.3; b += 0.42) B('plaster_white', 0, Wd, y + b, y + b + 0.03, 0.06, 0.075);
+    if (open) { piers((a, b) => { B('stucco_cream', a, b, y - 0.1, y + st, 0, 0.06); for (let q = 0.5; q < st - 0.3; q += 0.42) B('plaster_white', a, b, y + q, y + q + 0.03, 0.06, 0.075); }); }
+    else { B('stucco_cream', 0, Wd, y - 0.1, y + st, 0, 0.06); for (let b = 0.5; b < st - 0.3; b += 0.42) B('plaster_white', 0, Wd, y + b, y + b + 0.03, 0.06, 0.075); }
   } else B('limestone', 0, Wd, y - 0.1, y + 0.5, 0, 0.05);
   // string courses at the floors
   for (let s = 1; s < n; s++) B(type === 'stucco' && s === 1 ? 'stucco_cream' : 'plaster_white', 0, Wd, y + s * st - 0.1, y + s * st + 0.1, 0, 0.07);
   // the door: surround, panelled leaf, the fanlight, a brass knocker; two steps
+  if (open) {
+    // the doorway is open (the leaf folded back inside): its stucco reveals, the lintel over the fanlight, the fanlight's bar
+    B('plaster_white', uD - 0.65, uD - 0.55, y + 0.4, y + 3.15, -0.02, 0.05); B('plaster_white', uD + 0.55, uD + 0.65, y + 0.4, y + 3.15, -0.02, 0.05); B('plaster_white', uD - 0.65, uD + 0.65, y + 3.0, y + 3.15, -0.02, 0.05);
+    B(doorMat, uD - 0.55, uD - 0.5, y + 0.4, y + 2.6, 0.0, 0.14); B(doorMat, uD + 0.5, uD + 0.55, y + 0.4, y + 2.6, 0.0, 0.14);     // the leaf's case
+    B('plaster_white', uD - 0.025, uD + 0.025, y + 2.45, y + 3.0, 0.05, 0.07); B('gold', uD + (el.mirror ? -0.2 : 0.2), uD + (el.mirror ? -0.15 : 0.25), y + 1.7, y + 1.82, 0.0, 0.03);
+  } else {
   B('plaster_white', uD - 0.65, uD + 0.65, y + 0.4, y + 3.15, -0.02, 0.05);
   B(doorMat, uD - 0.5, uD + 0.5, y + 0.4, y + 2.45, 0.05, 0.1);
   for (const [a, b] of [[0.55, 1.2], [1.3, 2.3]]) for (const sd of [-1, 1]) B(doorMat, sd < 0 ? uD - 0.4 : uD + 0.04, sd < 0 ? uD - 0.04 : uD + 0.4, y + 0.4 + a, y + 0.4 + b, 0.1, 0.13);
   B('opening', uD - 0.5, uD + 0.5, y + 2.5, y + 2.95, 0.05, 0.08); B('plaster_white', uD - 0.025, uD + 0.025, y + 2.5, y + 2.95, 0.08, 0.1);
   B('gold', uD - 0.04, uD + 0.04, y + 1.7, y + 1.82, 0.13, 0.16);
+  }
   B('limestone', uD - 0.7, uD + 0.7, y - 0.3, y + 0.2, 0, 0.95); B('limestone', uD - 0.7, uD + 0.7, y - 0.3, y + 0.4, 0, 0.5);
   if (type === 'stucco') {
     // the porch: two columns, an entablature, the iron balcony round its flat roof, the first-floor window to the floor
@@ -152,6 +163,13 @@ export function terraceRich(el, ctx, base) {
   for (let s = 0; s < n; s++) for (let i = 0; i < 2; i++) {
     const u = i === 0 ? uD : uW, hh = s === 0 ? 1.8 : s === 1 ? 2.2 : 1.8, y0 = y + s * st + (s === 0 ? 0.6 : 0.9);
     if (s === 0 && i === 0) continue;
+    if (s === 0 && open) {
+      // the parlour's window: a real opening; stucco reveals and sill, the meeting rail and the middle bar over the glass
+      B('plaster_white', u - 0.65, u - 0.55, y0 - 0.1, y0 + hh + 0.12, -0.02, 0.05); B('plaster_white', u + 0.55, u + 0.65, y0 - 0.1, y0 + hh + 0.12, -0.02, 0.05);
+      B('plaster_white', u - 0.65, u + 0.65, y0 + hh, y0 + hh + 0.12, -0.02, 0.05); B('limestone', u - 0.7, u + 0.7, y0 - 0.12, y0 - 0.04, 0, 0.14);
+      B('plaster_white', u - 0.025, u + 0.025, y0, y0 + hh, 0.0, 0.03); B('plaster_white', u - 0.55, u + 0.55, y0 + hh / 2 - 0.03, y0 + hh / 2 + 0.03, 0.0, 0.03);
+      continue;
+    }
     if (s === 0 && type === 'bay') {
       // a square bay: stucco dado, three glazed faces between posts, a lead roof
       B('plaster_white', u - 1.05, u + 1.05, y, y + 0.75, 0, 0.8);
