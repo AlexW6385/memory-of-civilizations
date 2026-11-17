@@ -10,6 +10,7 @@ import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { hexa } from '../../styles/chinese/index.js';
 import { god, cofferRosettes } from './statues.js';
 import { pantheonColumn } from './column.js';
+import { friezeLetters, eagleRelief } from './relief.js';
 
 const D2R = Math.PI / 180;
 /** A frame in a vertical plane: origin o [x, z], u along, n out (toward the viewer). W(u, y, d) → [x, y, z]. */
@@ -315,6 +316,6 @@ function porticoTruss(el, { bag }) {
 registerStyle('roman-pantheon', {
   ...base,
   column: (el, ctx) => (el.lod ? pantheonColumn(el, ctx) : base.column(el, ctx)),
-  elements: { ...base.elements, aedicula, attic, eagle_wreath: eagleWreath, rotunda_floor: rotundaFloor, oculus_light: oculusLight, portico_truss: porticoTruss, god, coffer_rosettes: cofferRosettes },
+  elements: { ...base.elements, aedicula, attic, eagle_wreath: eagleWreath, eagle_relief: eagleRelief, frieze_letters: friezeLetters, rotunda_floor: rotundaFloor, oculus_light: oculusLight, portico_truss: porticoTruss, god, coffer_rosettes: cofferRosettes },
   objects: { ...base.objects, pantheon_door: pantheonDoor },
 });
