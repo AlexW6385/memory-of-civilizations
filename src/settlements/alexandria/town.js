@@ -5,7 +5,7 @@ import { lodTiles } from '../lod.js';
 import { frame } from '../../styles/greek/agora.js';
 import { TRADES } from '../../styles/greek/shops.js';
 import { streetPlans } from './streets.js';
-import { houseRooms } from '../../styles/ptolemaic/house.js';
+import { houseRooms, egyptianRooms } from '../../styles/ptolemaic/house.js';
 import { RADIUS, GROUND, SEA, QUAYS, CHANNELS, SHIPS, CANOPIC, QUAY, SOMA, AGORA, GYM, SEROUTE, HILL, JEWISH, OPEN_HOUSE, ROYAL, MOLE, PHAROS, ISLAND, inRect, wet, height, lots, isle } from './layout.js';
 
 const base = (id, elements, extra = {}) => ({ id, style: 'ptolemaic', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [100, -86], facing: 'e' }, ...extra });
@@ -45,7 +45,7 @@ function shopStoas() {
       for (let i = 0; i < n; i++) {
         const x = a + i * len, x1 = x + len, cx = x + len / 2;
         if (wet(x + 3, z0) < 3 || wet(x1 - 3, z0) < 3 || Math.hypot(cx, z0) > RADIUS - 70) continue;
-        const full = Math.abs(cx - 60) < 150;
+        const full = Math.abs(cx - 60) < 190;
         els.push({ t: 'stoa', rect: [x, z0, x1, z1], front, y: g, h: 4.4, d: 0.6, sp: 2.5, flutes: 0, simple: true, mat: 'limestone', wall: 'plaster_white', triglyphMat: 'egyptian_blue', ...(full ? { rooms: { n: 5, depth: 6, trades: TRADES } } : {}), seed: 40 + Math.round(x / 10) });
         if (full) {
           const F = frame([x, z0, x1, z1], front), wt = 0.7, rw = (len - 2 * wt) / 5;
@@ -106,9 +106,9 @@ function houses() {
     : { t: 'ptol_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front, quarter: l.quarter, lamp: lamp.has(l) }));
   const plans = lodTiles('alexandria-houses', 'ptolemaic', els, { R: RADIUS, near: 150 });
   for (const e of els) {
-    if (e.t !== 'ptol_house') continue;
+    if (e.t !== 'ptol_house' && e.t !== 'egyptian_house') continue;
     const [x, z] = [(e.rect[0] + e.rect[2]) / 2, (e.rect[1] + e.rect[3]) / 2], id = `alexandria-houses-${Math.floor(x / 100)},${Math.floor(z / 100)}`;
-    plans.find((p) => p.id === id).rooms.push(...houseRooms(e, e.y));
+    plans.find((p) => p.id === id).rooms.push(...(e.t === 'ptol_house' ? houseRooms(e, e.y) : egyptianRooms(e, e.y)));
   }
   return plans;
 }

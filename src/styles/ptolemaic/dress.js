@@ -80,8 +80,9 @@ export function lampBracket(bag, x, y, z, nx, nz) {
 export function washLine(bag, [x0, z0], [x1, z1], y, rand, drop = 0.9) {
   bag.add('rope_fibre', rod([x0, y, z0], [x1, y, z1], 0.012, 3));
   const L = Math.hypot(x1 - x0, z1 - z0), ux = (x1 - x0) / L, uz = (z1 - z0) / L;
-  for (let t = 0.4; t < L - 0.8; t += 0.7 + rand() * 0.6) {
-    const w = 0.5 + rand() * 0.4, d = drop * (0.6 + rand() * 0.5), m = pick(rand, ['linen', 'cloth_white', 'cloth_ochre', 'linen', 'cloth_red', 'cloth_indigo']);
+  for (let t = 0.4, w = 0; t < L - 0.8; t += w + 0.15 + rand() * 0.4) {
+    w = 0.5 + rand() * 0.4;
+    const d = drop * (0.6 + rand() * 0.5), m = pick(rand, ['linen', 'cloth_white', 'cloth_ochre', 'linen', 'cloth_red', 'cloth_indigo']);
     const px = x0 + ux * t, pz = z0 + uz * t;
     bag.add(m, box(Math.min(px, px + ux * w) - 0.01, y - d, Math.min(pz, pz + uz * w) - 0.01, Math.max(px, px + ux * w) + 0.01, y - 0.02, Math.max(pz, pz + uz * w) + 0.01));
   }

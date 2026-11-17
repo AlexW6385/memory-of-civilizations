@@ -181,6 +181,7 @@ function house(el, ctx) {
   // ── the front's dressing: shutters, the loggia, benches, jars, a pot of basil, a lamp bracket, washing ──
   const pu = du + dw + 0.5;
   weatherFront(R, rand, L, aShop);
+  frontType(el)(R, bag, { L, du, dw, wA, aShop, H1, H, two });
   if (two) {
     for (let u = 1.6; u < L - 1.6; u += 3.0) { if (Math.abs(u - du) < 1.2) continue; R(u, -0.06, u + 0.9, 0.1, 4.6, 5.9, 'wood_dark', false); R(u - 0.15, -0.14, u + 1.05, 0.1, 5.9, 6.05, 'limestone', false); R(u - 0.1, -0.12, u + 1.0, 0.1, 4.5, 4.6, 'limestone', false); R(u + 0.1, -0.07, u + 0.4, 0.0, 4.7, 5.8, 'shutter_brown', false); R(u + 0.5, -0.07, u + 0.8, 0.0, 4.7, 5.8, 'shutter_brown', false); }
     if (rand() < 0.35) {          // a timber loggia over the street
@@ -201,6 +202,40 @@ function house(el, ctx) {
   void H;
 }
 
+/**
+ * The front's architecture by rule (docs §14): a house's type follows its quarter and its seed — a painted frieze of Masonry-style blocks, corner
+ * pilasters under a dentilled cornice, the Egyptian cavetto cornice on the roofline, or a door framed as an aedicule (half-columns and a stepped pediment);
+ * the rest keep the plain front. The Jewish quarter takes no aedicules (the door framing of Greek temples). [inferred: Hellenistic house fronts of Delos and Priene,
+ * the Alexandrian tombs' painted Masonry style and cavetto cornices]
+ */
+export function frontType(el) {
+  const kinds = el.quarter === 'jewish' ? ['frieze', 'cavetto', 'plain', 'frieze', 'plain', 'cavetto'] : ['frieze', 'pilaster', 'cavetto', 'aedicule', 'pilaster', 'plain'];
+  const k = kinds[(el.seed >> 3) % 6], PAINT = ['wall_red', 'egyptian_blue', 'plaster_ochre', 'plaster_white'];
+  return (R, bag, { L, du, dw, wA, aShop, H1, H, two }) => {
+    if (k === 'frieze') {
+      let i = 0;
+      for (let u = 0.5; u + 0.85 < L - 0.4; u += 1.0, i++) {
+        const a = u, b = u + 0.85;
+        if (b > du - 0.55 && a < du + dw + 0.55) continue;
+        if (aShop && a < wA + 0.1) continue;
+        R(a, -0.04, b, 0.05, 3.12, 3.5, PAINT[(i + (el.seed & 3)) % 3], false);
+      }
+      R(0.2, -0.05, L - 0.2, 0.05, 3.5, 3.56, 'plaster_white', false);
+    } else if (k === 'pilaster') {
+      const top = two ? H : H1;
+      for (const u of [-0.05, L - 0.55]) { R(u, -0.12, u + 0.6, 0.1, 0.0, top, 'limestone', false); R(u - 0.06, -0.18, u + 0.66, 0.1, top - 0.2, top, 'sandstone', false); R(u - 0.04, -0.16, u + 0.64, 0.1, 0, 0.3, 'sandstone', false); }
+      for (let u = 0.8; u + 0.2 < L - 0.8; u += 0.4) R(u, -0.1, u + 0.2, 0.1, top - 0.34, top - 0.2, 'plaster_white', false);          // the dentils
+    } else if (k === 'cavetto') {
+      R(-0.14, -0.3, L + 0.14, 0.12, H, H + 0.12, 'sandstone', false); R(-0.1, -0.22, L + 0.1, 0.12, H + 0.12, H + 0.22, 'sandstone', false);
+      R(-0.06, -0.12, L + 0.06, 0.12, H + 0.22, H + 0.3, 'egyptian_blue', false); R(-0.14, -0.34, L + 0.14, -0.3, H - 0.12, H, 'egyptian_blue', false);
+    } else if (k === 'aedicule') {
+      const a = du - 0.7, b = du + dw + 0.7;
+      for (const [p, q] of [[a, du - 0.4], [du + dw + 0.4, b]]) { R(p, -0.16, q, 0.1, 0, 2.6, 'limestone', false); R(p - 0.05, -0.2, q + 0.05, 0.1, 2.6, 2.72, 'sandstone', false); R(p - 0.05, -0.2, q + 0.05, 0.1, 0, 0.18, 'sandstone', false); }
+      R(a - 0.08, -0.3, b + 0.08, 0.1, 3.05, 3.2, 'limestone', false); R(a + 0.1, -0.26, b - 0.1, 0.1, 3.2, 3.36, 'limestone', false);
+      R(a + 0.4, -0.22, b - 0.4, 0.1, 3.36, 3.5, 'limestone', false); R(du - 0.1, -0.2, du + dw + 0.1, 0.1, 3.5, 3.6, 'egyptian_blue', false);
+    }
+  };
+}
 function weatherFront(R, rand, L, aShop) {
   R(0.2, -0.015, L - 0.2, 0.02, 0.5, 1.0, 'plaster_damp', false);
   for (let i = 0, n = 2 + Math.floor(rand() * 3); i < n; i++) { const u = 0.5 + rand() * (L - 2.4), w = 0.4 + rand() * 0.9, y0 = 1.4 + rand() * 1.6; if (aShop && u < 5) continue; R(u, -0.02, u + w, 0.01, y0, y0 + 0.3 + rand() * 0.7, 'mudbrick', false); }
@@ -255,6 +290,16 @@ function shopGoods(ctx, F, y, trade, rand, u0, u1, vBack, vFront, SIGN) {
   void vb; void col; void rand; void SIGN;
 }
 
+/** Whether the Rhakotis house has a room on its roof, and where it stands (local u0, v0, u1, v1). Pure: the room list and the builder agree. */
+export const roofRoomOf = (el) => el.seed % 5 < 3;
+export const roofRoomRect = (L, hd) => [0.7, 0.7, Math.min(3.6, L * 0.38 + 0.4), 0.7 + Math.min(2.8, hd * 0.4 + 0.2)];
+/** The rooms of an egyptian_house for its plan: the ground room, and the roof room if there is one. */
+export function egyptianRooms(el, y = 0) {
+  const F = frame(el.rect, el.front ?? 's'), { L, D } = F, rand = rng(el.seed || 1);
+  rand(); const hd = Math.min(D - 4.5, 8.6 + rand() * 2);
+  const id = `rhakotis ${Math.round(el.rect[0])},${Math.round(el.rect[1])}`, out = [{ id: `${id}: room`, rect: F.R(0.7, 0.7, L - 0.7, hd - 0.7), y, kind: 'inner', market: false }];
+  void D; return out;
+}
 /**
  * egyptian_house: { rect (the lot), seed, y, front ('n' | 's': the street) } — a house of Rhakotis on the street: its front the whole width
  * of the lot, mudbrick battering in, 2–3 storeys, the ground room furnished and entered by the street door, an outside stair to the
@@ -284,8 +329,17 @@ function egyptianHouse(el, ctx) {
   bag.add('mudbrick', frustum(F.R(0, 0, L, hd), y + sh, y + H, b * 0.7, b * 0.7, b * 0.7, b * 0.7)); col.rect(F.R(0, 0, L, hd), y + sh, y + H);
   bag.add(wl, frustum(F.R(b * 0.5, b * 0.5, L - b * 0.5, hd - b * 0.5), y + H - sh * 0.45, y + H + 0.02, b * 0.1, b * 0.1, b * 0.1, b * 0.1));
   R(0, 0, L, hd, H, H + 0.1, 'mudbrick'); R(0, 0, L, 0.25, H + 0.1, H + 0.6, 'mudbrick'); R(0, hd - 0.25, L, hd, H + 0.1, H + 0.6, 'mudbrick'); R(0, 0, 0.25, hd, H + 0.1, H + 0.6, 'mudbrick'); R(L - 0.25, 0, L, hd, H + 0.1, H + 0.6, 'mudbrick');
-  if (rand() < 0.6) { R(0.7, 0.7, Math.min(3.4, L * 0.35), 0.7 + Math.min(2.6, hd * 0.4), H + 0.1, H + 2.3, 'mud_plaster'); }
-  { const [x0, z0] = F.P(L * 0.55, 1.3), [x1, z1] = F.P(L * 0.9, 1.3); const G = []; washLine({ add: (m, g) => G.push([m, g]) }, [x0, z0], [x1, z1], y + H + 1.6, rand, 0.8); for (const [m, g] of G) bag.add(m, g); }
+  if (roofRoomOf(el)) {         // the room on the roof: walls of mudbrick, the door on the roof side, palm beams and a flat roof, a mat bed, a jar and a lamp inside (docs §14)
+    const rr = roofRoomRect(L, hd), [a, b, c, d] = rr, w = 0.25, yb = H + 0.1, yt2 = H + 2.35, dm = (a + c) / 2;
+    R(a, b, c, b + w, yb, yt2, 'mudbrick', true); R(a, b, a + w, d, yb, yt2, 'mudbrick', true); R(c - w, b, c, d, yb, yt2, 'mudbrick', true);
+    R(a, d - w, dm - 0.45, d, yb, yt2, 'mudbrick', true); R(dm + 0.45, d - w, c, d, yb, yt2, 'mudbrick', true); R(dm - 0.45, d - w, dm + 0.45, d, yb + 1.9, yt2, 'mudbrick', false);
+    R(dm - 0.5, d - 0.3, dm + 0.5, d + 0.05, yb, yb + 0.04, 'limestone', false);
+    R(a - 0.1, b - 0.1, c + 0.1, d + 0.1, yt2, yt2 + 0.1, 'palm_trunk', false); R(a - 0.05, b - 0.05, c + 0.05, d + 0.05, yt2 + 0.1, yt2 + 0.2, 'mud_plaster', false);
+    { const [mx, mz] = F.P(a + 0.6, b + 1.0); bag.add('reed_mat', box(-0.4, y + yb, -0.9, 0.4, y + yb + 0.1, 0.9).rotateY(F.yaw).translate(mx, 0, mz)); }
+    { const [jx, jz] = F.P(c - 0.55, b + 0.55); pithos(bag, col, jx, y + yb, jz, 0.55); const [lx, lz] = F.P(a + 0.5, d - 0.5); basket(bag, lx, y + yb, lz, 0.24, 0.28, null); }
+    { const [lx, lz] = F.P(c - 0.45, d - 0.6); bag.add('terracotta', lathe([[0.001, 0], [0.05, 0.005], [0.055, 0.025], [0.001, 0.04]], 6, null, lx, y + yb + 0.9, lz)); bag.add('flame', lathe([[0.001, 0], [0.01, 0.01], [0.001, 0.05]], 5, null, lx, y + yb + 0.94, lz)); R(c - 0.6, d - 0.7, c - 0.3, d - 0.5, yb + 0.85, yb + 0.9, 'limestone', false); }
+  }
+  { const [x0, z0] = F.P(L * 0.55, 1.3), [x1, z1] = F.P(L * 0.9, 1.3); const G = []; washLine({ add: (m, g) => G.push([m, g]) }, [x0, z0], [x1, z1], y + H + 1.6, rng((el.seed || 1) + 17), 0.8); for (const [m, g] of G) bag.add(m, g); }
   // the door and the front's dressing: the palm lintel, little high windows with a grille, the beams ending in the wall
   R(du - 0.1, -0.1, du + dw + 0.1, 0.08, 0, 2.15, 'palm_trunk'); R(du + 0.04, 0.55, du + 0.1, 0.55 + dw * 0.9, 0, 2.0, 'wood_dark');
   R(du - 0.1, -0.12, du + dw + 0.1, 0.08, 2.1, 2.25, 'limestone');
