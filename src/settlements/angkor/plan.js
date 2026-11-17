@@ -44,7 +44,8 @@ for (const s of [-1, 1]) {
 }
 
 // ── libraries and basins ──
-for (const r of LIBRARIES) E.push({ t: 'k_library', rect: r, y: 1.4, h: 4.8 });
+// (the libraries are hollow: a passage through each end, manuscripts, a fire pit; library.js, docs §23)
+LIBRARIES.forEach((r, i) => E.push({ t: 'ak_library', rect: r, y: 1.4, h: 4.8, side: r[1] < 0 ? 'n' : 's', seed: 40 + i }));
 for (const b of BASINS) {
   E.push({ t: 'water_rect', rect: b, y: LEVEL.basin });
   for (const [a, c] of [[[b[0], b[1]], [b[2], b[1]]], [[b[0], b[3]], [b[2], b[3]]], [[b[0], b[1]], [b[0], b[3]]], [[b[2], b[1]], [b[2], b[3]]]]) E.push({ t: 'canal_wall', a, b: c, y: 0.1, bed: LEVEL.basinBed, th: 0.8 });
@@ -106,6 +107,7 @@ const rooms = [
   room('second', T.second.terrace, T.second.y, 'open'),
   room('court', T.base.rect, T.base.y, 'open'),
   room('hall-of-echoes', [CL.rect[0] + 1, -18, CL.rect[2] - 1, -15], T.base.y + 0.4, 'hall'),
+  ...LIBRARIES.map((r, i) => room(`library-${i}`, [r[0] + 0.9, r[1] + 0.9, r[2] - 0.9, r[3] - 0.9], 1.4 + 0.6, 'hall')),
   room('enclosure', ENCLOSURE, 0, 'open'),
 ];
 const walks = [[[-205, 0], [-196, 0], [-150, 0], [-80, 0], [-74, 0], [-60, 0], [-45, 0], [-33, 0], [-20, 0], [-8, 0]]];
