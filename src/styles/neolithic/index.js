@@ -80,6 +80,21 @@ function bumps(rand, n = 5) {
 }
 
 /**
+ * The faults of a real stone that a box has not: weathering and solution pits (hollows a hand to a forearm across, a
+ * few centimetres deep, mostly on the old crust), a swelling of the shaft (entasis) and a slight twist of the
+ * section up the stone. Returns { pit(t, y, per) -> depth, bulge(f) -> scale, twist(f) -> radians }.
+ */
+function faults(rand, h, n, depth) {
+  const P = Array.from({ length: n }, () => ({ t: rand() * Math.PI * 2, y: rand() * h, r: 0.1 + rand() * 0.22, d: depth * (0.3 + rand() * 0.7) }));
+  const bl = 0.025 + rand() * 0.04, tw = (rand() - 0.5) * 0.09;
+  return {
+    pit: (t, y, per) => { let a = 0; for (const q of P) { let dt = Math.abs(t - q.t); if (dt > Math.PI) dt = Math.PI * 2 - dt; const ds = dt / (Math.PI * 2) * per, dy = y - q.y; if (ds > 2.2 * q.r || Math.abs(dy) > 2.2 * q.r) continue; a += q.d * Math.exp(-(ds * ds + dy * dy) / (q.r * q.r)); } return a; },
+    bulge: (f) => 1 + bl * Math.sin(Math.PI * Math.min(1, Math.max(0, f))),
+    twist: (f) => tw * f,
+  };
+}
+
+/**
  * standing_stone: { at, y (the ground there), yaw (direction of the stone's thickness, outward), h (height above
  * the ground) or top (the absolute level of its top), w0/w1 (width at the ground / at the top), d0/d1 (thickness),
  * bury (depth set below ground), rough (m), dress (1: the inner face dressed smooth), cap ('flat' | 'round' | 'peak'),
@@ -97,13 +112,14 @@ function standingStone(el, ctx) {
   for (let i = 1; i <= nr; i++) ys.push(h * (i / nr) * (cap === 'flat' ? 0.97 : cap === 'round' ? 0.86 : 0.8));
   // the shoulders and the top
   if (cap === 'flat') ys.push(h);
-  const sec = section(1, 1, N, el.natural ? 2.6 : 4.5);
-  const skew = (rand() - 0.5) * 0.12;                                   // tops are rarely quite square to the sides
+  const sec = section(1, 1, N, el.natural ? 2.6 : el.facet ? 2.8 + rand() * 1.2 : 4.5), flt = faults(rand, h, el.natural ? 16 : 9, 0.03);
+  const skew = (rand() - 0.5) * 0.12, slope = (rand() - 0.5) * 0.7;                // tops are rarely quite square to the sides
   const ring = (yy, k) => sec.map(([sx, sz, t]) => {
     const f = Math.max(0, Math.min(1, yy / h)), w = (w0 + (w1 - w0) * f) / 2, d = (d0 + (d1 - d0) * f) / 2;
     const inner = sz < 0 && el.dress ? 0.3 : 1;                       // the inner face (toward the centre) dressed smoothest
-    const r = 1 + rough / Math.max(0.3, Math.min(w, d)) * inner * (0.7 * wave(t, yy) + 0.3 * wave2(t * 2, yy * 2));
-    return [sx * w * r * k, yy, sz * d * r * k];
+    const r = 1 + rough / Math.max(0.3, Math.min(w, d)) * inner * (0.7 * wave(t, yy) + 0.3 * wave2(t * 2, yy * 2)) - (yy > -0.2 ? flt.pit(t, yy, (w0 + d0) * 2.1) * inner / Math.max(0.3, Math.min(w, d)) : 0);
+    const bg = flt.bulge(f) * r * k, tw = flt.twist(f), ct = Math.cos(tw), st = Math.sin(tw), X = sx * w * bg, Z = sz * d * bg;
+    return [X * ct - Z * st, yy, X * st + Z * ct];
   });
   for (const yy of ys) rows.push(ring(yy, 1));
   if (cap === 'flat') {
@@ -112,7 +128,7 @@ function standingStone(el, ctx) {
     rows[rows.length - 1] = last.map((p) => [p[0] * 0.97, h, p[2] * 0.95]);
   } else {
     const tops = cap === 'round' ? [[0.92, 0.75], [0.97, 0.45], [1, 0.12]] : [[0.88, 0.7], [0.95, 0.35], [1, 0.08]];
-    for (const [fy, k] of tops) rows.push(ring(h * fy, k).map((p, j) => [p[0] + (cap === 'peak' ? skew * h * 0.4 : 0), p[1] + (j % 3) * 0.01 * h * (1 - k), p[2]]));
+    for (const [fy, k] of tops) rows.push(ring(h * fy, k).map((p, j) => [p[0] + (cap === 'peak' ? skew * h * 0.4 : 0), p[1] + (j % 3) * 0.01 * h * (1 - k) + (el.facet ? slope * p[0] * (1 - k * 0.5) + 0.04 * h * (1 - k) * Math.sin(j * 1.7 + skew * 40) : 0), p[2]]));
   }
   // to the plan: lean, turn, place (and for a lying stone, its length laid across)
   const lt = el.lean?.[1] ?? 0, ln = el.lean?.[0] ?? 0, ca = Math.cos(a), sa = Math.sin(a);
@@ -178,10 +194,10 @@ function tooledStone(el, { bag, col }) {
   // the lanes of the tooling: oblique bands a hand wide, their direction and pitch varying from stone to stone
   const phi = (rand() - 0.5) * 1.4 + (rand() < 0.5 ? 0 : Math.PI / 2), lane = 0.16 + rand() * 0.08, per = (w0 + d0) * 2.1;
   const ys = [-bury, -bury * 0.3, 0];
-  const top0 = h * (cap === 'flat' ? 0.97 : cap === 'round' ? 0.86 : 0.8), nr = Math.max(8, Math.round(top0 / 0.14));
+  const top0 = h * (cap === 'flat' ? 0.97 : cap === 'round' ? 0.86 : 0.8), nr = Math.max(8, Math.round(top0 / 0.17));
   for (let i = 1; i <= nr; i++) ys.push(top0 * (i / nr));
   if (cap === 'flat') ys.push(h);
-  const skew = (rand() - 0.5) * 0.12, cls = [];
+  const skew = (rand() - 0.5) * 0.12, cls = [], flt = faults(rand, h, el.natural ? 44 : 34, el.natural ? 0.08 : 0.06);
   const ring = (yy, k, row) => sec.map(([sx, sz, t], j) => {
     const f = Math.max(0, Math.min(1, yy / h)), w = (w0 + (w1 - w0) * f) / 2, d = (d0 + (d1 - d0) * f) / 2;
     const dressed = dressedAt(sz) && yy > -0.25, m = Math.max(0.3, Math.min(w, d));
@@ -192,7 +208,9 @@ function tooledStone(el, { bag, col }) {
       r = 1 + (rough * 0.3 * (0.7 * wave(t, yy) + 0.3 * wave2(t * 2, yy * 2)) - 0.006 * groove + 0.0025 * wave3(t * 37, yy * 41)) / m;
     } else r = 1 + (0.02 + rough * 1.5 * (0.6 * wave(t, yy) + 0.25 * wave2(t * 2, yy * 2) + 0.15 * wave3(t * 9, yy * 9))) / m;
     if (row !== undefined) (cls[row] ||= [])[j] = dressed ? 0 : 1;
-    return [sx * w * r * k, yy, sz * d * r * k];
+    if (yy > -0.2) r -= flt.pit(t, yy, per) * (dressed ? 0.35 : 1) / m;
+    const bg = flt.bulge(f) * r * k, tw = flt.twist(f), ct = Math.cos(tw), st = Math.sin(tw), X = sx * w * bg, Z = sz * d * bg;
+    return [X * ct - Z * st, yy, X * st + Z * ct];
   });
   const rows = ys.map((yy, i) => ring(yy, 1, i));
   if (cap === 'flat') rows[rows.length - 1] = rows[rows.length - 1].map((p) => [p[0] * 0.97, h, p[2] * 0.95]);
@@ -254,15 +272,15 @@ function tooledStone(el, { bag, col }) {
  */
 function lintelRing(el, { bag }) {
   const [cx, cz] = el.c, R = el.r, n = el.n, y = el.y, w = el.w ?? 1, hh = el.h ?? 0.8, rand = rng(el.seed || 3);
-  const sec = section(w / 2, hh / 2, 16, 5), M = 9;
+  const sec = section(w / 2, hh / 2, 28, 9), M = 9;
   for (let i = 0; i < n; i++) {
-    const A0 = el.a0 + (i / n) * Math.PI * 2, A1 = el.a0 + ((i + 1) / n) * Math.PI * 2, gap = 0.012 / R;
+    const A0 = el.a0 + (i / n) * Math.PI * 2, A1 = el.a0 + ((i + 1) / n) * Math.PI * 2, gap = 0.02 / R;
     const wave = bumps(rand, 4), sag = (rand() - 0.5) * 0.02, dw = (rand() - 0.5) * 0.06;
     const rings = [];
     for (let k = 0; k <= M; k++) {
       const f = k / M, t = A0 + gap + (A1 - A0 - 2 * gap) * f, ct = Math.cos(t), st = Math.sin(t);
       // the ends squared off; along the length a slight unevenness of the pounded faces
-      const end = k === 0 || k === M ? 0.985 : 1;
+      const end = k === 0 || k === M ? 0.97 : 1;
       rings.push(sec.map(([sr, sy, th]) => {
         const rr = 1 + 0.025 * wave(th, f * 4) * (sy > 0 ? 0.4 : 1);
         const rad = R + sr * (1 + dw) * rr * end, yy = y + hh / 2 + sy * rr * end + sag * Math.sin(f * Math.PI) * (sy < 0 ? 1 : 0);
@@ -277,7 +295,7 @@ function lintelRing(el, { bag }) {
 function lintel(el, { bag }) {
   const [ax, az] = el.a, [bx, bz] = el.b, y = el.y, w = el.w ?? 1.1, hh = el.h ?? 1, rand = rng(el.seed || 5);
   const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, nx = -uz, nz = ux;
-  const sec = section(w / 2, hh / 2, 16, 4.2), wave = bumps(rand, 4), M = 8;
+  const sec = section(w / 2, hh / 2, 28, 8), wave = bumps(rand, 4), M = 8;
   const rings = [];
   for (let k = 0; k <= M; k++) {
     const f = k / M, s = L * f, end = k === 0 || k === M ? 0.95 : 1;
