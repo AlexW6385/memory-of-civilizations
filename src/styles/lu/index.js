@@ -4,7 +4,8 @@
 import { registerStyle, STYLES } from '../../core/build.js';
 import '../qing/index.js';
 import { dacheng } from './dacheng.js';
-import { pailou, stele, stelePavilion, altar, tomb } from './ritual.js';
+import { pailou, stele, stelePavilion, tomb } from './ritual.js';
+import { altar } from './altar.js';
 import { shopRow } from './shops.js';
 import { inside } from './inside.js';
 import { luHouse } from './house.js';

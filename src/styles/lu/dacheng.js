@@ -9,6 +9,7 @@ import { dragon, cloud } from '../qing/throne.js';
 import { dougongHeight } from '../qing/caihua.js';
 import { rng } from './kit.js';
 import { glyph } from './plaques.js';
+import { tileCourses } from './tiles.js';
 
 const PAL = { ...IMPERIAL, column: 'granite_grey', base: 'marble' };
 
@@ -65,7 +66,31 @@ export function seatedSage(P, robe, s, crown) {
  */
 export function dacheng(el, ctx) {
   const { bag, col, lights } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 2.1, H = el.H ?? 8.4, cx = (x0 + x1) / 2, rand = rng(el.seed ?? 3);
-  STYLES.qing.elements.qing_hall({ t: 'qing_hall', rect: el.rect, y, H, double: el.double ?? 7.2, roof: 'hip', bays: [9, 5], front: 's', four: false, platform: false, doors: ['n'], eave: 3.4, rise: 9.4, sweep: 0.8, pal: PAL, orn: { figures: 9 } }, ctx);
+  STYLES.qing.elements.qing_hall({ t: 'qing_hall', rect: el.rect, y, H, double: el.double ?? 7.2, roof: 'xieshan', bays: [9, 5], front: 's', four: false, platform: false, doors: ['n'], eave: 3.4, rise: 9.4, sweep: 0.8, pal: PAL, orn: { figures: 9 } }, ctx);
+  // the cover tiles of both roofs, laid over the smooth sheets with the same figures qing_hall gave them (docs §12)
+  {
+    const bk0 = dougongHeight({ tiers: H > 8 ? 3 : 2 }), W0 = x1 - x0, D0 = z1 - z0, inset = Math.min(W0, D0) / 5.5, o = 3.4, yb0 = y + H + bk0, Dd = el.double ?? 7.2;
+    tileCourses(bag, { c: [cx, (z0 + z1) / 2], A: W0 / 2 + o, B: D0 / 2 + o, y: y + H - 0.25 + bk0, rise: (inset + o) * 0.55, p: 1.25, kind: 'hip', sweep: 0.8 }, { reach: inset + o - 0.3, seed: 1 });
+    tileCourses(bag, { c: [cx, (z0 + z1) / 2], A: (W0 - 2 * inset) / 2 + o * 1.1, B: (D0 - 2 * inset) / 2 + o * 1.1, y: yb0 + Dd - 0.25 + bk0, rise: 9.4, kind: 'xieshan', gableAt: 0.45, sweep: 0.8 }, { seed: 2 });
+  }
+  // the two gable faces of the upper roof (the xieshan's "nine ridges"): red boards with vertical battens in painted green-blue, a gilt medallion of
+  // clouds at the middle (the hanging fish and the carved gable of the Qing halls, schematic)
+  {
+    const bk0 = dougongHeight({ tiers: H > 8 ? 3 : 2 }), W0 = x1 - x0, D0 = z1 - z0, inset = Math.min(W0, D0) / 5.5, o = 3.4, yb0 = y + H + bk0, Dd = el.double ?? 7.2;
+    const A2 = (W0 - 2 * inset) / 2 + o * 1.1, B2 = (D0 - 2 * inset) / 2 + o * 1.1, yu = yb0 + Dd - 0.25 + bk0, Rr = 9.4, gAt = 0.45, xg = A2 - gAt * B2, zc = (z0 + z1) / 2, p = 1.7;
+    const hAt = (zz) => yu + Rr * Math.pow(Math.max(0, Math.min(1, (B2 - Math.abs(zz)) / B2)), p), yLow = yu + Rr * Math.pow(gAt, p);
+    for (const sx of [-1, 1]) {
+      const xf = cx + sx * (xg + 0.05), zr = B2 * (1 - gAt) - 0.5;
+      for (let k = -Math.floor(zr / 0.5); k <= Math.floor(zr / 0.5); k++) {
+        const zz = k * 0.5 + 0.0007 * k * sx, top = hAt(zz) - 0.55, bot = yLow + 0.25;
+        if (top - bot > 0.4) bag.add('paint_caihua', box(xf - 0.03, bot, zc + zz - 0.07, xf + 0.03, top, zc + zz + 0.07).translate(0, 0, 0));
+      }
+      const my = yLow + (Rr * 0.52 - Rr * Math.pow(gAt, p)) * 0.5 + 1.2;
+      bag.add('gilt_bronze', T(ball(0.07, 1.4, 1.4, 4, 16), xf + sx * 0.06, my, zc));
+      bag.add('paint_blue', T(ball(0.07, 0.95, 0.95, 4, 16), xf + sx * 0.1, my, zc));
+      bag.add('gilt_bronze', T(ball(0.08, 0.42, 0.42, 4, 12), xf + sx * 0.14, my, zc));
+    }
+  }
   // the ten dragon columns before the front wall: on the front column line, the stone thicker than the posts behind
   const bw = (x1 - x0) / 9, hc = H - 0.4;
   for (let i = 0; i <= 9; i++) {
@@ -150,7 +175,7 @@ export function dacheng(el, ctx) {
     pts[0] = [pts[1][0] * 0.7, pts[1][1] * 0.7, 0.1];
     dragon(Cq, 'gilt_bronze', pts, 0.16, { up: [0, 0, 1], flat: 0.55, head: 1.2 });
     for (const [mat, list] of Cq.m) for (const g of list) { g.rotateX(Math.PI / 2); g.translate(kx, cy - 0.3, kz); bag.add(mat, g); }   // laid flat, its face to the floor
-    bag.add('silver', lathe([[0.001, -0.7], [0.2, -0.62], [0.28, -0.45], [0.2, -0.28], [0.001, -0.22]], 10, null, kx, cy - 0.34, kz));           // the pearl hanging from the mouth
+    bag.add('gilt_bronze', lathe([[0.001, -0.7], [0.2, -0.62], [0.28, -0.45], [0.2, -0.28], [0.001, -0.22]], 10, null, kx, cy - 0.34, kz));           // the pearl hanging from the mouth
     bag.add('gilt_bronze', lathe([[0.012, -0.22], [0.012, 0]], 4, null, kx, cy - 0.34, kz));
     // the plaques of the emperors hung on the beams before the shrine, facing the door: gilt frame, black field, the characters
     for (const [px, pz, w, hgt, chs] of [[cx, zb + 12.6, 3.8, 1.5, ['万', '世', '师', '表']], [cx - 9.5, zb + 12.6, 2.9, 1.2, ['至', '圣']], [cx + 9.5, zb + 12.6, 2.9, 1.2, ['大', '成']]]) {

@@ -1,7 +1,7 @@
 // The stone and tile of the Temple's courts (docs/settlements/lu-qufu.md §2, §5): the stone portals (Lingxing Gate, the archways), the
 // stele pavilions with their tortoises, the Apricot Altar, a stele on its tortoise, the tomb mound of the Forest's edge.
 import { box, lathe, fromTriangles } from '../../core/geom.js';
-import { rectRoof, pyramidRoof, withPal, mingPavilion } from '../ming/index.js';
+import { rectRoof, withPal, mingPavilion } from '../ming/index.js';
 import { IMPERIAL } from '../qing/index.js';
 import { Parts, tortoise, ball, T } from '../qing/carving.js';
 
@@ -66,33 +66,6 @@ export function stelePavilion(el, ctx) {
   bag.add('reed_mat', box(cx - 0.5, y + 0.005, sz + 0.5, cx + 0.5, y + 0.02, sz + 1.0));
   bag.add('lamp_paper', lathe([[0.001, 0], [0.09, 0.02], [0.17, 0.12], [0.17, 0.22], [0.09, 0.32], [0.001, 0.34]], 10, null, cx, y + 3.2, cz + (big ? 2.4 : 1.6)));
   bag.add('cloth_red', lathe([[0.012, 0], [0.012, 0.7]], 4, null, cx, y + 3.54, cz + (big ? 2.4 : 1.6)));
-}
-
-/** lu_altar: the Apricot Altar { c, y } — a square pavilion of double eaves, the roofs cross-ridged, open on four sides, on a stone platform. */
-export function altar(el, { bag, col }) {
-  const [cx, cz] = el.c, y = el.y ?? 0.6, a = 4.1, H = 5.2;
-  bag.add('marble', box(cx - 6.2, y - 0.7, cz - 6.2, cx + 6.2, y - 0.1, cz + 6.2));
-  bag.add('marble_smooth', box(cx - 6.3, y - 0.12, cz - 6.3, cx + 6.3, y, cz + 6.3));
-  bag.add('brick_paving', box(cx - 5.9, y - 0.02, cz - 5.9, cx + 5.9, y + 0.02, cz + 5.9));
-  col.rect([cx - 6.3, cz - 6.3, cx + 6.3, cz + 6.3], -0.7, y - 0.15); col.floor([cx - 6.3, cz - 6.3, cx + 6.3, cz + 6.3], y);
-  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
-    bag.add('granite_block', lathe([[0.5, 0], [0.5, 0.12], [0.4, 0.3]], 8, null, cx + sx * a, y, cz + sz * a));
-    bag.add('lacquer_red', lathe([[0.3, 0.3], [0.28, H * 0.5], [0.25, H]], 8, null, cx + sx * a, y, cz + sz * a));
-    col.circle(cx + sx * a, cz + sz * a, 0.32, y, y + H);
-  }
-  // the beam round the posts, painted; the lower eave, the upper hall's frame, the upper eave
-  bag.add('paint_caihua', box(cx - a - 0.3, y + H - 0.7, cz - a - 0.3, cx + a + 0.3, y + H, cz + a + 0.3));
-  const sq = (r) => [[cx - r, cz - r], [cx + r, cz - r], [cx + r, cz + r], [cx - r, cz + r]];
-  pyramidRoof(sq(a + 1.9), y + H - 0.1, 1.9, 0.6, bag, TILE, 'paint_caihua');
-  bag.add('lacquer_red', box(cx - 2.2, y + H + 1.1, cz - 2.2, cx + 2.2, y + H + 2.6, cz + 2.2));
-  bag.add('paint_caihua', box(cx - 2.4, y + H + 2.6, cz - 2.4, cx + 2.4, y + H + 3.0, cz + 2.4));
-  pyramidRoof(sq(4.0), y + H + 2.9, 2.6, 0.7, bag, TILE, 'paint_caihua');
-  bag.add('gilt_bronze', lathe([[0.2, 0], [0.12, 0.3], [0.2, 0.6], [0.001, 1.2]], 8, null, cx, y + H + 5.5, cz));
-  // the stele inside, a plaque "Apricot Altar" over the lower eave's centre, an incense burner before it
-  bag.add('marble', box(cx - 3.2, y, cz - 0.2, cx - 1.6, y + 2.6, cz + 0.2)); col.rect([cx - 3.25, cz - 0.25, cx - 1.55, cz + 0.25], y, y + 2.6);
-  for (const [dx, dz, r] of [[0, 4.6, 0], [0, -4.6, 0], [4.6, 0, 1], [-4.6, 0, 1]]) bag.add('lacquer_black', box(cx + dx - (r ? 0.04 : 0.6), y + H - 1.8, cz + dz - (r ? 0.6 : 0.04), cx + dx + (r ? 0.04 : 0.6), y + H - 0.8, cz + dz + (r ? 0.6 : 0.04)));
-  bag.add('bronze', lathe([[0.001, 0], [0.5, 0.05], [0.55, 0.45], [0.001, 0.5]], 10, null, cx + 2.4, y, cz + 2.6));
-  col.circle(cx + 2.4, cz + 2.6, 0.55, y, y + 0.5);
 }
 
 /** lu_tomb: a conical mound with a stele before it and a stone table { c, r, h, face: [fx, fz] } — the Forest's edge. */
