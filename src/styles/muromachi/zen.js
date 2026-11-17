@@ -12,6 +12,7 @@ function screenZ(B, col, x0, x1, z, y0, y1, open = null, mat = 'shoji', th = 0.0
     if (open && a >= open[0] - 1e-6 && b <= open[1] + 1e-6) continue;
     B(mat, a + 0.02, y0 + 0.05, z - th * 0.5, b - 0.02, y1 - 0.12, z + th * 0.5);
     B(WD, a, y0 + 0.05, z - th, a + 0.03, y1 - 0.12, z + th);
+    if (mat === 'linen') { B('lacquer_black', a + 0.05, y0 + 0.05, z - th - 0.004, b - 0.05, y0 + 0.11, z + th + 0.004); B('lacquer_black', a + 0.05, y1 - 0.18, z - th - 0.004, b - 0.05, y1 - 0.12, z + th + 0.004); B('bronze', a + 0.09, y0 + 0.88, z - th - 0.012, a + 0.15, y0 + 0.98, z + th + 0.012); }
     col.rect([a, z - th, b, z + th], y0, y1);
   }
   if (open) { col.rect([x0, z - th, open[0], z + th], y0, y1); col.rect([open[1], z - th, x1, z + th], y0, y1); }
@@ -24,6 +25,7 @@ function screenX(B, col, z0, z1, x, y0, y1, open = null, mat = 'shoji', th = 0.0
     if (open && a >= open[0] - 1e-6 && b <= open[1] + 1e-6) continue;
     B(mat, x - th * 0.5, y0 + 0.05, a + 0.02, x + th * 0.5, y1 - 0.12, b - 0.02);
     B(WD, x - th, y0 + 0.05, a, x + th, y1 - 0.12, a + 0.03);
+    if (mat === 'linen') { B('lacquer_black', x - th - 0.004, y0 + 0.05, a + 0.05, x + th + 0.004, y0 + 0.11, b - 0.05); B('lacquer_black', x - th - 0.004, y1 - 0.18, a + 0.05, x + th + 0.004, y1 - 0.12, b - 0.05); B('bronze', x - th - 0.012, y0 + 0.88, a + 0.09, x + th + 0.012, y0 + 0.98, a + 0.15); }
     col.rect([x - th, a, x + th, b], y0, y1);
   }
   if (open) { col.rect([x - th, z0, x + th, open[0]], y0, y1); col.rect([x - th, open[1], x + th, z1], y0, y1); }
@@ -60,7 +62,7 @@ function ink(B, T, axis, c, a0, a1, y0, y1, open, seed) {
 }
 
 function togudo(el, ctx) {
-  local(el, ctx, ({ bag, col, B, L }, y0) => {
+  local(el, ctx, ({ bag, col, B, L, T }, y0) => {
     const h = 3.5, F = 0.7, H = 2.7, y1 = y0 + F, yc = y1 + H;
     // plinth stones and posts, the floor, the shell
     for (let i = 0; i <= 4; i++) for (let j = 0; j <= 4; j++) { const x = -h + i * 1.75, z = -h + j * 1.75; B('granite_block', x - 0.2, y0, z - 0.2, x + 0.2, y0 + 0.34, z + 0.2); B(WD, x - 0.1, y0 + 0.34, z - 0.1, x + 0.1, yc + 0.2, z + 0.1); }
@@ -88,9 +90,9 @@ function togudo(el, ctx) {
     col.ramp([-0.9, h + 1.3, 0.9, h + 2.0], y0, y1 - 0.14, 'n');
     col.floor([-h + 0.1, -h + 0.1, h - 0.1, h - 0.1], y1);
     // ---- the rooms: butsuma (west), san-no-ma (front), Dōjinsai (east middle), ni-no-ma (back) [dossier §3.1]
-    screenX(B, col, -h + 0.1, h - 0.1, -0.4, y1, yc, [1.5, 2.7]);                                // butsuma | rest
-    screenZ(B, col, -0.4, h - 0.1, 1.0, y1, yc, [1.0, 3.3]);                                      // san-no-ma | Dōjinsai (drawn back)
-    screenZ(B, col, -0.4, h - 0.1, -1.7, y1, yc, [1.3, 2.5]);                                     // Dōjinsai | ni-no-ma
+    screenX(B, col, -h + 0.1, h - 0.1, -0.4, y1, yc, [1.5, 2.7], 'linen'); ink(B, T, 'x', -0.4, -h + 0.1, h - 0.1, y1, yc, [1.5, 2.7], 61);                                // butsuma | rest
+    screenZ(B, col, -0.4, h - 0.1, 1.0, y1, yc, [1.0, 3.3], 'linen'); ink(B, T, 'z', 1.0, -0.4, h - 0.1, y1, yc, [1.0, 3.3], 62);                                      // san-no-ma | Dōjinsai (drawn back)
+    screenZ(B, col, -0.4, h - 0.1, -1.7, y1, yc, [1.3, 2.5], 'linen'); ink(B, T, 'z', -1.7, -0.4, h - 0.1, y1, yc, [1.3, 2.5], 63);                                     // Dōjinsai | ni-no-ma
     screenX(B, col, -1.7, 1.0, 0.8, y1, yc, null, PL);                                             // the closet beside the Dōjinsai
     tatami(B, -0.4, h - 0.1, 1.0, h - 0.1, y1, true);                                             // san-no-ma
     tatami(B, 0.8, h - 0.1, -1.7, 1.0, y1, true);                                                 // Dōjinsai, 4½ mats
@@ -121,6 +123,20 @@ function togudo(el, ctx) {
       B(WD, x0 + 0.04, y1 + 0.58, z + 0.02, x0 + 0.34, y1 + 0.61, z + 0.34); }
     B('cloth_ochre', 0.82, y1 + 0.5, -1.2, 0.87, y1 + 2.0, -0.6); B('linen', 0.87, y1 + 0.6, -1.15, 0.88, y1 + 1.9, -0.65);
     col.rect([0.8, -1.7, 1.2, 1.0], y1, y1 + 0.01);
+
+    // the lintel (nageshi) round the rooms, the coffered ceiling of the Dōjinsai and its neighbours: rails on a lacquered ground
+    B(WD, -h + 0.13, yc - 0.42, -h + 0.13, h - 0.13, yc - 0.3, -h + 0.2); B(WD, -h + 0.13, yc - 0.42, -h + 0.13, -h + 0.2, yc - 0.3, h - 0.13); B(WD, h - 0.2, yc - 0.42, -h + 0.13, h - 0.13, yc - 0.3, h - 0.13);
+    B('ceiling_coffer', -h + 0.1, yc - 0.03, -h + 0.1, h - 0.1, yc, h - 0.1);
+    for (let x = -h + 0.1 + 0.9; x < h - 0.2; x += 0.9) B('lacquer_black', x - 0.03, yc - 0.08, -h + 0.1, x + 0.03, yc - 0.03, h - 0.1);
+    for (let z = -h + 0.1 + 0.9; z < h - 0.2; z += 0.9) B('lacquer_black', -h + 0.1, yc - 0.08, z - 0.03, h - 0.1, yc - 0.03, z + 0.03);
+    // the writing bay's window: a moulded frame, its two sliding shoji leaves on their tracks
+    B(WD, h - 0.16, y1 + 0.5, -1.0, h - 0.0, y1 + 0.56, 0.4); B(WD, h - 0.16, y1 + 1.55, -1.0, h - 0.0, y1 + 1.62, 0.4); B(WD, h - 0.16, y1 + 0.56, -1.0, h - 0.0, y1 + 1.55, -0.94); B(WD, h - 0.16, y1 + 0.56, 0.34, h - 0.0, y1 + 1.55, 0.4);
+    // the little cabinet's doors over the shelves
+    { const x0 = 2.55, z = -1.7 + 0.06 + 0.38; for (let k = 0; k < 2; k++) { const xa = x0 + 0.54 + k * 0.28; B('paint_white', xa, y1 + 0.98, z, xa + 0.26, y1 + 1.46, z + 0.012); B('bronze', xa + (k ? 0.03 : 0.2), y1 + 1.18, z + 0.012, xa + (k ? 0.06 : 0.23), y1 + 1.26, z + 0.02); } }
+    // the eaves: the ends of the rafters (in two rows) and the board closing them, following the eave's lift at the corners
+    { const A = 4.8, Bz = 4.9, cz = 0.4, ye = yc + 0.35, U = 0.6, q = (d) => Math.max(0, 1 - d / 4.5), eav = (x, z) => ye + U * q(A - Math.abs(x)) ** 2 * q(Bz - Math.abs(z - cz)) ** 2 * 0 + U * (q(A - Math.abs(x)) * q(Bz - Math.abs(z - cz))) ** 2;
+      for (let x = -A + 0.3; x <= A - 0.2; x += 0.3) for (const [z, sg] of [[cz + Bz, 1], [cz - Bz, -1]]) { const e = eav(x, z); B(WD, x - 0.04, e - 0.46, z - (sg > 0 ? 0.3 : -0.05), x + 0.04, e - 0.3, z + (sg > 0 ? 0.05 : -0.3)); B('lacquer_black', x - 0.05, e - 0.3, z - 0.0 * sg + (sg > 0 ? -0.02 : -0.04), x + 0.05, e - 0.12, z + (sg > 0 ? 0.04 : 0.02)); }
+      for (let z = cz - Bz + 0.3; z <= cz + Bz - 0.2; z += 0.3) for (const sg of [1, -1]) { const x = sg * A, e = eav(x, z); B(WD, x - (sg > 0 ? 0.3 : -0.05), e - 0.46, z - 0.04, x + (sg > 0 ? 0.05 : -0.3), e - 0.3, z + 0.04); B('lacquer_black', x + (sg > 0 ? -0.02 : -0.04), e - 0.3, z - 0.05, x + (sg > 0 ? 0.04 : 0.02), e - 0.12, z + 0.05); } }
     // the roof (hip-and-gable, cypress bark) — the eaves reach out over the verandah
     STYLES.japanese.elements.irimoya({ c: [0, 0.4], A: 4.8, B: 4.9, y: yc + 0.35, rise: 3.0, lift: 0.6, gable: 0.4, mat: BARK, soffit: TM }, { bag, col });
   });
