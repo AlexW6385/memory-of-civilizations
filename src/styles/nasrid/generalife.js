@@ -189,8 +189,9 @@ function acequia(el, ctx) {
   // (the wall above the orchard terrace stands on the walks' level too: solid from there up, but for the mirador's opening)
   col.rect([w0, z0, w1, mzc - hw], y - 0.6, y + Hw); col.rect([w0, mzc + hw, w1, z1], y - 0.6, y + Hw); col.rect([w0, mzc - hw, w1, mzc + hw], y + 3.8, y + Hw);
   bag.add('brick', box(w0 - 0.04, y + Hw, z0, w1 + 0.04, y + Hw + 0.09, z1));
-  tileFloor(bag, col, [m0 + 0.5, mz0 + 0.5, w1, mz1 - 0.5], y);
-  bag.add(PL, box(m0, el.orchardY - 0.5, mz0, w0, y - 0.3, mz1)); col.rect([m0, mz0, w0, mz1], el.orchardY - 0.5, y - 0.3);
+  // (the floor's top is flush with the court's walks, y: a 5 cm lip at the wall's face read as a wall to the walker's shell test under the doorway's arch)
+  tileFloor(bag, col, [m0 + 0.5, mz0 + 0.5, w1, mz1 - 0.5], y - 0.05);
+  bag.add(PL, box(m0, el.orchardY - 0.5, mz0, w0, y - 0.35, mz1)); col.rect([m0, mz0, w0, mz1], el.orchardY - 0.5, y - 0.35);
   // its three sides, three little arched windows low in each, to sit and look out over the orchards to the Alhambra
   const Hm = 3.6, win = (u0, u1) => { const out = [], n = 3, s = (u1 - u0) / n; for (let i = 0; i < n; i++) { const u = u0 + (i + 0.5) * s; out.push([u - 0.3, u + 0.3, y + 0.35, y + 1.95]); } return out; };
   const wW = win(mz0 + 0.5, mz1 - 0.5), wN = win(m0 + 0.5, w0), wS = wN;
