@@ -123,6 +123,13 @@ function village() {
     else if (h.enter === 'brewer') put(1.5, 1.55, [2.1, 1.5], 'stand', man);
     else if (h.enter === 'scribe') put(1.5, 1.6, [2.0, 0.7], 'sit_ground', { ...man, hat: 'turban', hatMat: 'cloth_white', beard: true });
     else if (h.enter === 'store') put(-1.0, 1.4, [-1.6, 0.7], 'stand', man);
+    else if (h.enter === 'smith') put(1.0, 1.65, [0.95, 2.15], 'stand', { ...man, over: 'none', hat: 'none' });
+    else if (h.enter === 'mason') put(1.55, 1.55, [2.1, 1.1], 'squat', { ...man, hat: 'turban', hatMat: 'cloth_white' });
+    else if (h.enter === 'potter') put(-1.2, 1.6, [-1.2, 2.3], 'squat', woman);
+    else if (h.enter === 'school') {
+      put(-1.0, 1.9, [1.9, 0.9], 'sit_low', { ...man, hat: 'turban', hatMat: 'cloth_white', beard: true });
+      for (const [sx, sd] of [[2.1, 0.0], [2.25, 1.15], [1.35, 2.0]]) put(sx, sd, [-1.0, 1.9], 'sit_ground', { h: 1.05, over: 'none', hair: 'short', cloth: 'cloth_white' });
+    }
     else put(-1.25, 0.95, [0, 1.15], 'sit_low', woman);
   }
   for (let k = 0; k < 4; k++) P.push(base(`lalibela-hamlet-life-${k}`, out[k], 'life'));

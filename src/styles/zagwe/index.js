@@ -14,6 +14,7 @@ import { hut } from './hut.js';
 import { umbrella, procCross } from './liturgy.js';
 import { rod } from './hut.js';
 import { yardEl, terraceEl, courtEl, clothPile, lampEl } from './compound.js';
+import { faceFrame, rockCross, horsemen, shackles, ridgeCross } from './relief.js';
 
 const TU = 'tuff_red', TH = 'tuff_hewn';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -306,6 +307,24 @@ function basilica(el, { bag, col }) {
   const t = [], yb = y0 + h - 0.6, yr = y0 + h, zm = (z0 + z1) / 2;
   t.push(x0, yb, z0, x1, yb, z0, x1, yr, zm, x0, yb, z0, x1, yr, zm, x0, yr, zm, x0, yb, z1, x0, yr, zm, x1, yr, zm, x0, yb, z1, x1, yr, zm, x1, yb, z1, x0, yb, z0, x0, yr, zm, x0, yb, z1, x1, yb, z0, x1, yb, z1, x1, yr, zm);
   bag.add(TH, fromTriangles(t));
+  // the carved gable roof (docs §17: "covered with a carved gable roof"): ribs running from each eave up to the ridge every 1.2 m, a cap along the
+  // ridge, a stepped cornice round the slab, a lobed cross standing on each end of the ridge
+  { const rb = [], n = Math.round((x1 - x0 - 1.0) / 1.2);
+    for (let i = 0; i <= n; i++) { const x = x0 + 0.5 + (x1 - x0 - 1.0) * i / n; beamTris(rb, [x, yb - 0.02, z0 + 0.1], [x, yr - 0.02, zm], 0.07, 0.1); beamTris(rb, [x, yb - 0.02, z1 - 0.1], [x, yr - 0.02, zm], 0.07, 0.1); }
+    bag.add(TH, fromTriangles(rb));
+    bag.add(TH, box(x0 + 0.1, yr - 0.05, zm - 0.2, x1 - 0.1, yr + 0.14, zm + 0.2));
+    for (const [a, b, c2, d] of [[x0 - 0.14, z0 - 0.14, x1 + 0.14, z0], [x0 - 0.14, z1, x1 + 0.14, z1 + 0.14], [x0 - 0.14, z0, x0, z1], [x1, z0, x1 + 0.14, z1]]) bag.add(TH, box(a, yb - 0.22, b, c2, yb, d));
+    ridgeCross(bag, x0 + 0.9, zm, yr + 0.14, 0.55); ridgeCross(bag, x1 - 0.9, zm, yr + 0.14, 0.55); }
+  // the beam ends under the roof slab, "monkey heads" every 1.1 m along its four faces, between the capitals
+  { const yk = yTop + 0.42, bs = [];
+    const rowAlong = (ax, az, bx, bz, nx, nz) => { const L = Math.hypot(bx - ax, bz - az), k = Math.floor(L / 1.1); for (let i = 0; i < k; i++) { const f = (i + 0.5) / k, px = ax + (bx - ax) * f, pz = az + (bz - az) * f; bs.push([px, pz, nx, nz]); } };
+    rowAlong(x0, z0, x1, z0, 0, -1); rowAlong(x0, z1, x1, z1, 0, 1); rowAlong(x0, z0, x0, z1, -1, 0); rowAlong(x1, z0, x1, z1, 1, 0);
+    for (const [px, pz, nx, nz] of bs) {
+      if (ring.some(([rx, rz]) => Math.hypot(rx - px, rz - pz) < 0.72)) continue;
+      bag.add(TH, nz ? box(px - 0.14, yk - 0.14, Math.min(pz, pz + nz * 0.2), px + 0.14, yk + 0.14, Math.max(pz, pz + nz * 0.2)) : box(Math.min(px, px + nx * 0.2), yk - 0.14, pz - 0.14, Math.max(px, px + nx * 0.2), yk + 0.14, pz + 0.14));
+    } }
+  // capitals and bases of the ring pillars
+  for (const [x, z] of ring) { bag.add(TH, box(x - 0.7, yTop - 0.42, z - 0.7, x + 0.7, yTop, z + 0.7)); bag.add(TH, box(x - 0.67, yf, z - 0.67, x + 0.67, yf + 0.3, z + 0.67)); }
   // steps up onto the plinth before each door
   for (const [side, u, w] of doors) doorSteps(bag, col, side, [x0 - 0.5, z0 - 0.5, x1 + 0.5, z1 + 0.5], u, w + 0.6, y0, yf);
 }
@@ -335,7 +354,6 @@ function maryam(el, { bag, col }) {
   }
   holes.e.push(...crossHoles(cz, yf + 4.6, 1.0, 1.5, 0.3));
   for (const z of [cz - 2.4, cz + 2.4]) { const p = { side: 'e', c: [bx1, z], u: [0, 1], n: [1, 0], y: yf + 2.2, w: 0.8, h: 1.5 }; aks.push(p); holes.e.push(holeOf(p)); }
-  holes.w.push(...crossHoles(cz, yf + 5.2, 0.8, 1.2, 0.24));
   hollowWalls(bag, col, TH, body, yf, yTop, T, holes);
   for (const p of aks) aksWindow(bag, p.c, p.y, p.u, p.n, p.w, p.h, true);
   // a raised hewn border round each cross window, outside
@@ -374,6 +392,8 @@ function maryam(el, { bag, col }) {
     bag.add(TH, fromTriangles(A)); bag.add(TH, fromTriangles(S));
   };
   porch('w'); porch('n'); porch('s');
+  // over the west porch: the relief of the two horsemen and the dragon (docs §17), on a panel in the wall above the porch's roof
+  horsemen(bag, faceFrame([bx0, cz], [-1, 0]), yf + 5.3, 4.0, 2.1);
   // the interior: two rows of six pillars, round arches along them, painted soffits; cross arches
   // from each pillar to the side wall over the aisles
   const ix0 = bx0 + T, ix1 = bx1 - T, iz0 = bz0 + T, iz1 = bz1 - T, P = 0.75, rows = [cz - 1.75, cz + 1.75];
@@ -640,6 +660,6 @@ function curtain(el, { bag, col }) {
 
 registerStyle('zagwe', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, rock_cut: rockCut, giyorgis, basilica, aksumite, maryam, tukul, hut, umbrella, proc_cross: procCross, cave, hand_cross: handCross, sistrum, kebero, floor_mat: floorMat, curtain, yard: yardEl, terrace: terraceEl, court: courtEl, cloth_pile: clothPile, lamp: lampEl },
+  elements: { ...STYLES.qing.elements, rock_cut: rockCut, giyorgis, basilica, aksumite, maryam, tukul, hut, umbrella, proc_cross: procCross, cave, rock_cross: rockCross, shackles, hand_cross: handCross, sistrum, kebero, floor_mat: floorMat, curtain, yard: yardEl, terrace: terraceEl, court: courtEl, cloth_pile: clothPile, lamp: lampEl },
   objects: {},
 });

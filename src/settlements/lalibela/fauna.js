@@ -15,7 +15,7 @@ const flights = [
 ];
 const perches = [];
 const rim = (p, k, o = 1.2) => { const [x0, z0, x1, z1] = p.rect; return [[x0 + (x1 - x0) * k, z0 - o], [x0 + (x1 - x0) * (1 - k), z1 + o], [x0 - o, z0 + (z1 - z0) * k], [x1 + o, z0 + (z1 - z0) * (1 - k)]]; };
-for (const [id, k] of [['giyorgis', 0.3], ['medhane', 0.25], ['maryam', 0.4], ['golgotha', 0.3], ['amanuel', 0.4], ['gabriel', 0.5]]) for (const [x, z] of rim(PITS[id], k)) perches.push({ kind: 'sparrow', x, z, y: 0.12, rot: x * 3 % 3, range: [1.6, 1.4] });
+for (const [id, k] of [['giyorgis', 0.3], ['medhane', 0.25], ['maryam', 0.4], ['golgotha', 0.3], ['amanuel', 0.4], ['gabriel', 0.5], ['mercoreus', 0.4]]) for (const [x, z] of rim(PITS[id], k)) perches.push({ kind: 'sparrow', x, z, y: 0.12, rot: x * 3 % 3, range: [1.6, 1.4] });
 // on Medhane Alem's roof (its ridge at the precinct's level less a hand) and Maryam's
 for (const [x, z] of [[-4, -90], [24, -92], [8, -100]]) perches.push({ kind: 'sparrow', x, z, y: -0.35, rot: 0.4, range: [1.2, 0.8] });
 // in the village, by the houses at the edge of the level ground
