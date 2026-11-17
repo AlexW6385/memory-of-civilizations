@@ -129,6 +129,33 @@ function operaHouse(el, { bag, col, lights }) {
     for (let zz = z0 + 6; zz < z1 - 6; zz += 7) bag.add('glass_outer', box(sg < 0 ? xa - 0.06 : xa, y + 1.2, zz, sg < 0 ? xa : xa + 0.06, y + h / 2 - 0.4, zz + 5.4));
   }
   for (let xx = x0 + 6; xx < x1 - 6; xx += 7) bag.add('glass_outer', box(xx, y + 1.2, z0 - 0.06, xx + 5.4, y + h / 2 - 0.4, z0));
+  // the podium's skin (§1j): "aggregate panels composed of pink granite quarried at Tarana" — the panels' joints in the solid
+  // courses over the glazing, a fin on each pier between the panes, a plinth course at the foot, and a coping with a drip
+  const jt = (xa, za, xb, zb, ya, yb) => bag.add('granite_grey', box(xa, ya, za, xb, yb, zb));
+  for (const [xa, sg] of [[x0, -1], [x1, 1]]) {
+    const o0 = sg < 0 ? xa - 0.05 : xa, o1 = sg < 0 ? xa : xa + 0.05;
+    for (let zz = z0 + 6; zz < z1 - 6; zz += 7) {
+      for (const v of [zz + 5.4 + 0.8]) bag.add('granite_grey', box(sg < 0 ? xa - 0.22 : xa, y + 0.2, v - 0.15, sg < 0 ? xa : xa + 0.22, y + h, v + 0.15));          // the fin on the pier between two panes
+      for (let k = 1; k < 3; k++) jt(o0, zz + 1.8 * k, o1, zz + 1.8 * k + 0.04, y + h / 2 - 0.3, y + h - 0.3);            // the joints of the panels above the glass
+    }
+    bag.add('granite_grey', box(sg < 0 ? xa - 0.14 : xa, y + 0.2, z0, sg < 0 ? xa : xa + 0.14, y + 1.0, z1));            // the plinth course
+  }
+  for (let xx = x0 + 6; xx < x1 - 6; xx += 7) {
+    bag.add('granite_grey', box(xx + 5.4 + 0.65, y + 0.2, z0 - 0.22, xx + 5.4 + 0.95, y + h, z0));
+    for (let k = 1; k < 3; k++) jt(xx + 1.8 * k, z0 - 0.05, xx + 1.8 * k + 0.04, z0, y + h / 2 - 0.3, y + h - 0.3);
+  }
+  bag.add('granite_grey', box(x0, y + 0.2, z0 - 0.14, x1, y + 1.0, z0));
+  // the coping of the podium's edge and the parapet round it (the stair's opening on the south left free; its cheeks are as high)
+  const pt = 0.35, ph = 1.0, cp = (xa, za, xb, zb) => { bag.add('granite_podium', box(xa, y + h, za, xb, y + h + ph, zb)); bag.add('granite_grey', box(xa - 0.05, y + h + ph, za - 0.05, xb + 0.05, y + h + ph + 0.07, zb + 0.05)); col.rect([xa, za, xb, zb], y + h, y + h + ph + 0.1); };
+  cp(x0, z0, x1, z0 + pt); cp(x0, z0 + pt, x0 + pt, z1); cp(x1 - pt, z0 + pt, x1, z1);
+  cp(x0 + pt, z1 - pt, x0 + 6.6, z1); cp(x1 - 6.6, z1 - pt, x1 - pt, z1);
+  // the paving of the broadwalk on the podium's top: the slabs' joints where the shells leave it bare — the gap between the halls, the north apron, the strip before the stair
+  const paved = (xa, za, xb, zb) => {
+    for (let xx = xa; xx <= xb + 0.01; xx += 2.4) bag.add('granite_grey', box(xx - 0.015, y + h, za, xx + 0.015, y + h + 0.012, zb));
+    for (let zz = za; zz <= zb + 0.01; zz += 2.4) bag.add('granite_grey', box(xa, y + h, zz - 0.015, xb, y + h + 0.012, zz + 0.015));
+  };
+  { const hs = el.halls ?? [], gx0 = hs[0] ? hs[0].x + hs[0].hw : x0 + 40, gx1 = hs[1] ? hs[1].x - hs[1].hw : x1 - 40;
+    paved(gx0 + 0.3, z0 + pt + 0.3, gx1 - 0.3, z1 - pt - 0.3); paved(x0 + pt + 0.3, z0 + pt + 0.3, x1 - pt - 0.3, z0 + 9); paved(x0 + 6.8, z1 - 6, x1 - 6.8, z1 - pt - 0.3); }
   // the broadwalk round the podium's foot
   bag.add('granite_grey', box(x0 - 6, y - 4, z0 - 6, x1 + 6, y + 0.2, z1 + st + 2));
   for (const hall of el.halls ?? []) {

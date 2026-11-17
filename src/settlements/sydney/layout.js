@@ -151,7 +151,9 @@ export function lots() {
     && l.y + 0.5 - height(l.rect[0] + 0.85, l.front === 'n' ? l.rect[1] - 1.2 : l.rect[3] + 1.2) < 1.4), -170, 10);
   const okT = (l) => l.t === 'rocks_terrace' && l.kind === 'terrace' && clearR(l, strip(l, l.front)) && shore((l.rect[0] + l.rect[2]) / 2, l.front === 'n' ? l.rect[1] - 2 : l.rect[3] + 2) > 8 && l.y + 0.5 - height(l.rect[0] + 0.85, l.front === 'n' ? l.rect[1] - 1.2 : l.rect[3] + 1.2) < 1.4;
   const terrs = [terr];
-  for (const [tx, tz] of [[-250, -40], [-150, -80], [-220, 50]]) { const t2 = best(LOTS.filter((l) => okT(l) && !terrs.includes(l)), tx, tz); if (t2) terrs.push(t2); }
+  for (const [tx, tz] of [[-250, -40], [-150, -80], [-220, 50], [-120, 40], [-200, -100], [-265, -10], [-130, -30], [-185, 62], [-240, -95], [-165, 30]]) { const t2 = best(LOTS.filter((l) => okT(l) && !terrs.includes(l)), tx, tz); if (t2) terrs.push(t2); }
+  // (the terraces one can walk into, each household furnished its own way: rooms.js, `vari`)
+  terrs.filter(Boolean).forEach((t, i) => { t.vari = i % 4; });
   for (const t of terrs) if (t) { t.enter = 0; t.gy = height(t.rect[0] + 0.85, t.front === 'n' ? t.rect[1] - 1.2 : t.rect[3] + 1.2); }
   // the eight rooms one can walk into near the arrival (rooms: styles/modern shops.js, shops2.js, rooms.js): on the Domain's edge east of the Point
   // (a hotel, a milk bar, a butcher, a greengrocer) and along Macquarie Street's side across the cove's mouth (an espresso bar, a newsagent, a chemist, a barber)
@@ -167,6 +169,17 @@ export function lots() {
     const f = clearR(c, strip(c, 'n')) ? 'n' : 's', [x0, z0, x1, z1] = c.rect;
     if (kind === 'espresso') { Object.assign(c, { t: 'espresso_bar', front: f, gy: height(x0 + (x1 - x0) * 0.62, f === 'n' ? z0 - 1.2 : z1 + 1.2), wall: 'brick' }); continue; }
     const du = (x1 - x0) * (kind === 'pub' || kind === 'chemist' || kind === 'greengrocer' ? 0.5 : kind === 'butcher' ? 0.7 : 0.3) + 0.3;
+    Object.assign(c, { t: 'shop_room', kind, name, front: f, gy: height(x0 + du, f === 'n' ? z0 - 1.2 : z1 + 1.2), ...(wall ? { wall } : {}) });
+  }
+  // the shops of the city's streets beyond the arrival's ground (§1k): more of the trades, and three new ones — a fish-and-chip shop, a hardware store and a bakery
+  const FAR = [['fish_chips', -40, 100, null, 'FISH & CHIPS'], ['hardware', 30, 170, null, 'HARDWARE'], ['bakery', -110, 240, null, 'BAKERY'], ['newsagent', -180, 190, null, 'NEWSAGENT'],
+    ['greengrocer', 100, 260, null, 'FRUIT VEG'], ['butcher', 30, 330, null, 'BUTCHER'], ['fish_chips', -250, 300, null, 'FISH & CHIPS'], ['milkbar', -100, 330, null, 'MILK BAR']];
+  for (const [kind, tx, tz, wall, name] of FAR) {
+    const c = best(LOTS.filter((l) => !l.t && !used.has(l) && Math.hypot(...mid(l).map((v, i) => v - ARR[i])) > 130 && ['n', 's'].some((f) => clearR(l, strip(l, f))) && l.rect[2] - l.rect[0] >= 11 && l.rect[3] - l.rect[1] >= 11 && l.h <= 30), tx, tz);
+    if (!c) continue;
+    used.add(c);
+    const f = clearR(c, strip(c, 'n')) ? 'n' : 's', [x0, z0, x1, z1] = c.rect;
+    const du = (x1 - x0) * (kind === 'hardware' || kind === 'chemist' || kind === 'greengrocer' ? 0.5 : kind === 'butcher' ? 0.7 : 0.3) + 0.3;
     Object.assign(c, { t: 'shop_room', kind, name, front: f, gy: height(x0 + du, f === 'n' ? z0 - 1.2 : z1 + 1.2), ...(wall ? { wall } : {}) });
   }
   return LOTS;

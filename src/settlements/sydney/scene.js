@@ -162,6 +162,21 @@ export function roomPeople() {
     } else if (l.kind === 'chemist') {
       at(Wd / 2 + 0.4, Dp - T - 1.4, 0, -1, { cloth: 'cloth_white', cloth2: 'cloth_white' }, false);   // the chemist in his white coat
       at(Wd / 2 - 0.5, Dp - T - 3.4, 0, -1, {}, rand() < 0.6);
+    } else if (l.kind === 'fish_chips') {
+      const cd = Math.min(6.0, Dp - T - 3.2);
+      at(Wd * 0.3 + 0.55, cd + 1.1, 0, -1, { cloth: 'cloth_white', over: 'belt' }, false);        // the Greek owner at the fryers in his white apron
+      at(Wd * 0.3 + 2.4, cd + 1.1, 0, -1, { cloth: 'cloth_white', over: 'belt' }, true);         // his wife at the wrapping
+      at(Wd * 0.3 + 1.2, cd - 0.7, 0, 1, {}, rand() < 0.5); at(Wd * 0.3 + 3.3, cd - 0.7, 0, 1, {}, false);   // two customers at the counter
+      at(T + 0.35, T + 2.4, 1, 0, { pose: 'sit' }, false);                                         // one waiting on the bench
+    } else if (l.kind === 'hardware') {
+      const cd = Math.min(Dp - T - 2.8, 7.4);
+      at(Wd / 2 - 0.5, cd + 1.3, 0, -1, { cloth: 'cloth_brown', over: 'belt' }, false);            // the storekeeper behind the counter in his brown dustcoat
+      at(Wd / 2 + 0.5, cd - 0.7, 0, 1, {}, false);                                                 // a man at the counter
+      at(Wd / 2 - 2.5, 5.2, 0, 1, {}, false);                                                      // another at the bins
+    } else if (l.kind === 'bakery') {
+      const d0 = T + 1.8;
+      at(Wd - T - 1.2, d0 + 2.5, -1, 0, { cloth: 'cloth_white', over: 'belt' }, true);             // the baker's wife behind the case in her white apron
+      at(Wd - T - 3.0, d0 + 2.2, 1, 0, {}, true); at(Wd - T - 3.0, d0 + 4.0, 1, 0, {}, rand() < 0.5);   // two at the case
     } else if (l.kind === 'barber') {
       at(T + 1.15, T + 2.2, -1, 0, { pose: 'sit' }, false);                                       // a man in the first chair
       at(T + 1.9, T + 2.2, -1, 0, { cloth: 'cloth_white', cloth2: 'cloth_grey' }, false);        // the barber at his shoulder
