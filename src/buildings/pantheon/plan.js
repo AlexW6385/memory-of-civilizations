@@ -27,18 +27,32 @@ add({ t: 'stair', rect: [-17.1, -51.2, 17.1, -49.1], dir: 's', y0: 0, y1: F, ris
   add({ t: 'floor', rect: [-BACK, N0, BACK, -110], y: 0, mat: 'travertine' });
   add({ t: 'floor', rect: [-BACK, -110, -40, -51.2], y: 0, mat: 'travertine' });
   add({ t: 'floor', rect: [40, -110, BACK, -51.2], y: 0, mat: 'travertine' });
+  const EH0 = 1.5;                                   // the colonnades' entablature (a fifth of the column)
+  // a pilaster on the back wall behind each column: base, shaft, capital block
+  const PIL = [];                                    // rects of pilasters, built together as one element (no copies to instance)
+  const pil = (x0, z0, x1, z1) => PIL.push([x0, z0, x1, z1]);
   for (const s of [-1, 1]) {
-    for (let z = N0 + 10.5; z < -53; z += 3.8) column(s * IN, z, 0, PH, PD, { shaftMat: 'granite_grey' });
-    add({ t: 'beam', a: [s * IN, N0 + 6.6], b: [s * IN, -53], y: PH, w: 1.0, h: 1.1, mat: 'marble' });
-    add({ t: 'wall', a: [s * (BACK - 0.5), N0], b: [s * (BACK - 0.5), -51.2], th: 1.0, y0: 0, y1: PH + 2.4, openings: [], mat: 'stucco' });
-    add({ t: 'slab', rect: [Math.min(s * (IN - 0.6), s * BACK), N0 + 6, Math.max(s * (IN - 0.6), s * BACK), -51.2], y0: PH + 1.1, y1: PH + 1.5, mat: 'gilt_bronze', holes: [] });
+    for (let z = N0 + 10.5; z < -53; z += 3.8) {
+      column(s * IN, z, 0, PH, PD, { shaftMat: 'granite_grey', lod: 1 });
+      const fx = s * (BACK - 1.0);
+      pil(Math.min(fx, fx + s * -0.22) , z - 0.28, Math.max(fx, fx - s * 0.22), z + 0.28);
+    }
+    add({ t: 'roman_entablature', a: [s * IN, N0 + 6.6], b: [s * IN, -53], y: PH, w: 1.0, h: EH0, mat: 'marble', faces: [s] });
+    add({ t: 'wall', a: [s * (BACK - 0.5), N0], b: [s * (BACK - 0.5), -51.2], th: 1.0, y0: 0, y1: PH + 3.0, openings: [], mat: 'stucco' });
+    add({ t: 'slab', rect: [Math.min(s * (IN - 0.5), s * BACK), N0 + 6, Math.max(s * (IN - 0.5), s * BACK), -51.2], y0: PH + EH0, y1: PH + EH0 + 0.4, mat: 'gilt_bronze', holes: [] });
   }
-  // north portico, with the gateway on the axis
+  // north portico, with the gateway on the axis: a round arch in the wall, framed by two columns and an entablature and pediment
   const NZ = N0 + 6.6;
-  for (let x = -IN; x <= IN + 0.01; x += 3.95) if (Math.abs(x) > 4.5) column(x, NZ, 0, PH, PD, { shaftMat: 'granite_grey' });
-  add({ t: 'beam', a: [-IN, NZ], b: [IN, NZ], y: PH, w: 1.0, h: 1.1, mat: 'marble' });
-  add({ t: 'wall', a: [-BACK, N0 + 0.5], b: [BACK, N0 + 0.5], th: 1.0, y0: 0, y1: PH + 2.4, openings: [{ at: BACK, w: 7.2, h: PH, y0: 0 }], mat: 'stucco' });
-  add({ t: 'slab', rect: [-BACK, N0, BACK, NZ + 0.6], y0: PH + 1.1, y1: PH + 1.5, mat: 'gilt_bronze', holes: [] });
+  for (let x = -IN; x <= IN + 0.01; x += 3.95) if (Math.abs(x) > 4.5) column(x, NZ, 0, PH, PD, { shaftMat: 'granite_grey', lod: 1 });
+  add({ t: 'roman_entablature', a: [-IN, NZ], b: [IN, NZ], y: PH, w: 1.0, h: EH0, mat: 'marble', faces: [1] });
+  add({ t: 'wall', a: [-BACK, N0 + 0.5], b: [BACK, N0 + 0.5], th: 1.0, y0: 0, y1: PH + 3.0, openings: [{ at: BACK, w: 7.2, h: 9.0, y0: 0 }], mat: 'stucco' });
+  add({ t: 'slab', rect: [-BACK, N0, BACK, NZ + 0.5], y0: PH + EH0, y1: PH + EH0 + 0.4, mat: 'gilt_bronze', holes: [] });
+  for (let x = -IN + 3.95 * 0; x <= IN + 0.01; x += 3.95) if (Math.abs(x) > 4.5) pil(x - 0.28, N0 + 1.0, x + 0.28, N0 + 1.22);
+  add({ t: 'pilasters', rects: PIL, h: PH });
+  add({ t: 'gate_arch', at: [0, N0 + 0.5], th: 1.0, r: 3.6, spring: 3.4, top: 9.0, bw: 0.6 });
+  for (const s of [-1, 1]) column(s * 5.6, N0 + 1.55, 0, PH, PD, { shaftMat: 'granite_grey', lod: 1 });
+  add({ t: 'roman_entablature', a: [-7.2, N0 + 1.55], b: [7.2, N0 + 1.55], y: PH, w: 1.1, h: EH0, mat: 'marble', faces: [1] });
+  add({ t: 'pediment_roof_z', rect: [-7.4, N0 + 0.96, 7.4, N0 + 2.16], y: PH + EH0, rise: 2.4, tympanumInset: 0.3, rakingGeison: 0.3, mat: 'marble', tileMat: 'gilt_bronze' });
 }
 add({ t: 'floor', rect: [-17.1, -49.1, 17.1, -20], y: F, mat: 'marble_floor', th: F + 0.3 });
 add({ t: 'floor', rect: [-R - 5.2, -R - 1.0, R + 5.2, R + 5.6], y: F, mat: 'opus_sectile', th: F + 0.3 });
@@ -71,6 +85,7 @@ add({ t: 'ring_wall', c: [0, 0], r0: R - 0.85, r1: R - 0.5, y0: CORNICE1 - 0.35,
 add({ t: 'ring_wall', c: [0, 0], r0: R - 0.4, r1: R + 0.1, y0: SPRING - 0.5, y1: SPRING, gaps: [], mat: 'marble' });
 // aediculae between the niches: podium, two porphyry columns, entablature, triangular and segmental pediments in turn
 for (let k = 0; k < 8; k++) add({ t: 'aedicula', c: [0, 0], R, bearing: 22.5 + k * 45, kind: k % 2 ? 'seg' : 'tri', y: F });
+add({ t: 'revetment_panels', c: [0, 0], R, y: F, top: CORNICE1 - 2.2, aed: [0, 1, 2, 3, 4, 5, 6, 7].map((k) => 22.5 + k * 45), gaps: [{ b: 0, w: 7.6 }, ...NICHES.map((n) => ({ b: n.b, w: n.w }))] });
 // the attic as first faced: porphyry pilasters, framed blind windows, panels (none over the apse, which rises into it)
 add({ t: 'attic', c: [0, 0], R, y0: CORNICE1, y1: SPRING - 0.5, skip: [180] });
 
@@ -101,7 +116,7 @@ add({
 // a gilt rosette in the back of every coffer (docs/buildings/pantheon.md §8b)
 add({ t: 'coffer_rosettes', c: [0, 0], y: SPRING, R, n: 28, step: 0.24, rings: [[7, 17.5], [17.5, 28], [28, 38], [38, 47.5], [47.5, 56.5]] });
 // exterior cornices dividing the drum into its three zones
-for (const y of [F + 10.6, F + 21.0, F + 30.4]) add({ t: 'ring_wall', c: [0, 0], r0: RO - 0.2, r1: RO + 0.55, y0: y - 0.7, y1: y, gaps: [{ a: 0, w: 30 }], mat: 'marble' });
+add({ t: 'drum_exterior', c: [0, 0], RO, y0: F + 10.6, zones: [F + 10.6, F + 21.0, F + 30.4], gap: 33 });
 
 // ── intermediate block and the bronze doors ──────────────────────────────────
 const BZ0 = -33.5, BZ1 = -22.5;
@@ -119,8 +134,8 @@ add({ t: 'pediment_roof_z', rect: [-17.1, BZ0, 17.1, BZ1], y: F + 24.5, rise: 7.
 const CH = 14.15, CD = 1.5;
 const FX = [-15.47, -11.05, -6.63, -2.21, 2.21, 6.63, 11.05, 15.47];
 const FZ = -47.6;
-for (const x of FX) column(x, FZ, F, CH, CD, { shaftMat: 'granite_grey' });
-for (const x of [-11.05, -6.63, 6.63, 11.05]) for (const z of [-42.6, -37.7]) column(x, z, F, CH, CD, { shaftMat: 'granite_red' });
+for (const x of FX) column(x, FZ, F, CH, CD, { shaftMat: 'granite_grey', lod: 2 });
+for (const x of [-11.05, -6.63, 6.63, 11.05]) for (const z of [-42.6, -37.7]) column(x, z, F, CH, CD, { shaftMat: 'granite_red', lod: 2 });
 const ET = F + CH, EH = 3.5;
 add({ t: 'roman_entablature', a: [-17.1, FZ], b: [17.1, FZ], y: ET, w: 1.7, h: EH, mat: 'marble' });
 for (const x of [-15.47, 15.47]) add({ t: 'roman_entablature', a: [x, FZ - 0.85], b: [x, BZ0], y: ET, w: 1.7, h: EH, mat: 'marble' });
@@ -132,7 +147,9 @@ for (const s of [-1, 1]) {
 }
 add({ t: 'pediment_roof_z', rect: [-17.1, FZ - 1.6, 17.1, BZ0], y: ET + EH, rise: 7.6, tympanumInset: 0.85, rakingGeison: 0.7, mat: 'marble', tileMat: 'gilt_bronze' });
 // the eagle in its wreath on the tympanum, in gilded bronze (the clamp holes; dossier §8)
-add({ t: 'eagle_wreath', at: [0, FZ - 1.6 + 0.88], y: ET + EH + 2.9, r: 2.0, face: -1 });
+add({ t: 'eagle_relief', at: [0, FZ - 1.6 + 0.88], y: ET + EH + 2.9, r: 2.0, base: ET + EH });
+// the dedication in raised bronze letters on the frieze: M·AGRIPPA·L·F·COS·TERTIVM·FECIT (the letters 0.78 m on a frieze 1.05 m high)
+add({ t: 'frieze_letters', at: [0, FZ - 0.85], y: ET + 0.36 * EH + (0.3 * EH - 0.78) / 2, h: 0.78, text: 'M·AGRIPPA·L·F·COS·TERTIVM·FECIT' });
 // the bronze roof truss under the portico's roof, at five stations between the front and the block (docs/settlements/rome.md §4.3)
 add({ t: 'portico_truss', zs: [-46.1, -43.6, -41.1, -38.6, -36.1], y: ET + EH, yb: ET + 1.6, xs: [-11.05, -6.63, 6.63, 11.05], span: 15.5, rise: 6.7 });
 
