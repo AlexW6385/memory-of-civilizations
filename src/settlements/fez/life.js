@@ -53,7 +53,7 @@ export function life() {
   for (let c = 0; c < 3; c++) { const x = sahnX + 5 + c * 9, z = q[1] + 3.5 + 1.4; man([x, z], yq, Math.PI, { pose: 'cross', hat: 'turban', cloth: 'cloth_white' }); for (let k = 0; k < 4; k++) man([x - 1.6 + k * 1.1, z + 1.5], yq, 0, { pose: 'cross' }); }
   for (let k = 0; k < 14; k++) { const x = q[0] + qn * (1 + (k % 13)) + qn / 2 - 0.4, z = q[3] - 5 - Math.floor(k / 7) * 1.6; man([x, z], yq, Math.PI, { pose: 'kneel', arms: 'pray' }); }
   for (let k = 0; k < 6; k++) man([q[0] + qn * (4.5 + k) + 0.3, q[1] + 30 + rand() * 14], yq, rand() * 6, { pose: 'cross', hat: 'turban' });
-  man([q[0] + 6, -21], yq, 0); woman([q[0] - 8, -22], ground0(q[0] - 8, -22), 0);
+  man([q[0] + 6, -23.0], yq, 0); woman([q[0] - 8, -22], ground0(q[0] - 8, -22), 0);
   // the souks: a merchant in nearly every shop, seated cross-legged behind his goods; customers in the lane
   for (const s of SOUKS) for (const [i, sh] of soukShops(s).entries()) {
     if (i % 2 === 0 && s.covered) { const alongX = Math.abs(s.a[1] - s.b[1]) < 0.1, c = alongX ? s.a[1] : s.a[0], side = Math.sign((alongX ? sh.z : sh.x) - c) || 1, e = c + side * (s.w / 2 - 0.5); L.push({ t: 'hang_lantern', at: alongX ? [sh.x, e] : [e, sh.z], y: sh.y + 4.55, rot: 0, kind: 'white', drop: 0.2, seed: i }); }
@@ -122,6 +122,8 @@ const base = (id, elements) => ({ id, style: 'life', origin: [0, 0], base: 0, ya
 /** The still life of the landmarks and the lanes, in tiles of 100 m each shown within 230 m. */
 export function lifePlans() {
   const tiles = new Map();
-  for (const e of life()) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
+  for (const e of life()) {
+    if (e.t === 'figure' && e.at[0] > 116 && e.at[0] < 131 && e.at[1] > -23.8 && e.at[1] < -18.2) continue;    /* the way into the Qarawiyyin's door stays clear */
+    const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
   return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`fez-life-${k}`, list), center: [i * 100 + 50, j * 100 + 50], near: 230 }; });
 }

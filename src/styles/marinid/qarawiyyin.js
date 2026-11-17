@@ -6,6 +6,9 @@ import { face, holedWall, archHead, dbl, dado, dadoFlat, stucco, canopy, basin, 
 import { minaret } from './minaret.js';
 import { archRunLite } from './madrasa.js';
 import * as F from '../mughal/furnish.js';
+import { script } from '../nasrid/halls.js';
+import { pier, arcade, greatArch, muqarnas, bellLamp, minbar } from './nave.js';
+import { minaretWhite } from './minaret.js';
 
 export function qarawiyyin(el, { bag, col, lights }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y, W = x1 - x0, D = z1 - z0, t = 1.2, HW = 9.6, NV = 14, nw = W / NV, rand = rng(el.seed || 17);
@@ -19,18 +22,20 @@ export function qarawiyyin(el, { bag, col, lights }) {
   col.floor(el.rect, y + 0.02);
   // the outer walls: the west with the great door to the Talaa Kebira, the others blind with bronze-clad doors in stucco frames
   const doorZ = -21 - 0.0, dz0 = doorZ - 1.7, dz1 = doorZ + 1.7;
-  const outer = [[x0, z0, x1, z0 + t, true, [], 'z', z0, -1], [x0, z1 - t, x1, z1, true, [[cx - 1.6, cx + 1.6, y, y + 4.2]], 'z', z1, 1], [x0, z0 + t, x0 + t, z1 - t, false, [[dz0, dz1, y, y + 4.4]], 'x', x0, -1], [x1 - t, z0 + t, x1, z1 - t, false, [], 'x', x1, 1]];
+  const outer = [[x0, z0, x1, z0 + t, true, [], 'z', z0, -1], [x0, z1 - 0.3, x1, z1, true, [], 'z', z1, 1], [x0, z0 + t, x0 + t, z1 - t, false, [[dz0, dz1, y, y + 4.4]], 'x', x0, -1], [x1 - t, z0 + t, x1, z1 - t, false, [], 'x', x1, 1]];
   for (const [a, b, c, d, alongX, holes, ax, at, n] of outer) {
     holedWall(bag, col, 'limewash_white', [a, b, c, d], y - 0.8, y + HW + 1.0, holes, alongX);
     const f = face(ax, at, n);
     for (const h of holes) archHead(bag, face(ax, ax === 'x' ? (n < 0 ? x0 : x1) : at, -n * -1 * (n < 0 ? 1 : 1)), h[0], h[1], y + 2.9, h[3], t, 'horseshoe', { alfiz: true, side: 'near' });
     void f;
   }
+  // the qibla wall's inner leaf, 0.9 m thick, with the mihrab's recess cut in it (the back 0.3 m stays solid)
+  holedWall(bag, col, 'limewash_white', [x0, z1 - t, x1, z1 - 0.3], y - 0.8, y + HW + 1.0, [[cx - 1.3, cx + 1.3, y, y + 4.6]], true);
   // the doors: leaves of bronze set against the jamb inside; stucco frames and cedar canopies, and the blind doors drawn flush
   for (const [f, u, w] of [[face('x', x0, -1), doorZ, 3.4], [face('z', z1, 1), cx, 3.2], [face('z', z0, -1), cx - 16, 3.0], [face('x', x1, 1), z0 + 38, 3.0]]) {
     const fr = f.R(0, 0.14, u - w / 2 - 0.45, u + w / 2 + 0.45); bag.add('stucco_cream', box(fr[0], y, fr[1], fr[2], y + 5.4, fr[3]));
     canopy(bag, f, u - w / 2 - 0.9, u + w / 2 + 0.9, y + 5.9, 1.2);
-    const blind = !(f.ax === 'x' && f.n < 0 || f.ax === 'z' && f.n > 0 && Math.abs(u - cx) < 0.1);
+    const blind = !(f.ax === 'x' && f.n < 0);
     if (blind) { const d = f.R(0.14, 0.2, u - w / 2, u + w / 2); bag.add('bronze', box(d[0], y, d[1], d[2], y + 4.0, d[3])); for (let k = 0; k < 5; k++) for (let j = 0; j < 4; j++) { const dd = f.R(0.2, 0.23, u - w / 2 + 0.25 + k * (w - 0.5) / 4 - 0.03, u - w / 2 + 0.25 + k * (w - 0.5) / 4 + 0.03); bag.add('gilt_bronze', box(dd[0], y + 0.5 + j * 0.9, dd[1], dd[2], y + 0.56 + j * 0.9, dd[3])); } }
   }
   // blind panels (recessed arches) along the outer walls, in the limewash
@@ -40,10 +45,15 @@ export function qarawiyyin(el, { bag, col, lights }) {
   const stations = (a, b) => { const n = Math.max(2, Math.round((b - a) / 4.4)), st = []; for (let i = 0; i <= n; i++) st.push(a + (b - a) * i / n); return st; };
   for (let k = 1; k < NV; k++) {
     const inSahn = k > 4 && k < 10, a = inSahn ? hallZ0 : z0 + t, b = z1 - t, X = uX(k);
-    const zs = stations(a + 0.45, b - 0.45), st = zs.map((z) => ({ u: z - a, w: 0.45 }));
-    for (const z of zs) { bag.add('stucco_cream', box(X - 0.45, y, z - 0.45, X + 0.45, y + 4.3, z + 0.45)); col.rect([X - 0.45, z - 0.45, X + 0.45, z + 0.45], y, y + 4.4); bag.add('tile_cream', box(X - 0.47, y + 0.02, z - 0.47, X + 0.47, y + 1.3, z + 0.47)); }
-    archRunLite(bag, [X, a], [X, b], st.map((s) => ({ u: s.u, w: s.w })), y, 4.2, 6.4);
+    if (k === 7) continue;                                // the central nave is two bays wide: no arcade on the axis
+    const zs = stations(a + 0.45, b - 0.45);
+    for (const z of zs) pier(bag, col, X, z, y);
+    arcade(bag, X, a, b, zs, y, 4.2, 6.4);
   }
+  // the great arch before the cupola, across the central nave at the last but one station, and the muqarnas cupola behind it
+  const zCup = (() => { const a = hallZ0, b = z1 - t, zs = stations(a + 0.45, b - 0.45); return zs[zs.length - 3]; })();
+  greatArch(bag, uX(6) + 0.45, uX(8) - 0.45, zCup, y + 4.3, y + 9.45);
+  const cupTop = muqarnas(bag, [uX(6) + 0.25, zCup + 0.3, uX(8) - 0.25, z1 - t], y + 6.5);
   // the sahn's walls: its north gallery (a pent roof on piers), the sahn's own two arcades are the lines k = 4 and 10 above
   const gal = [sahn[0], z0 + t, sahn[2], sahn[1]];
   bag.add('wood_dark', box(gal[0], y + 3.5, gal[1], gal[2], y + 3.7, gal[3]));
@@ -54,26 +64,34 @@ export function qarawiyyin(el, { bag, col, lights }) {
   basin(bag, col, cx, (sahn[1] + sahn[3]) / 2, y, 2.0);
   for (const s of [-1, 1]) bag.add('marble_smooth', box(cx + s * 0.28 - 0.06, y, (sahn[1] + sahn[3]) / 2 + 2.3, cx + s * 0.28 + 0.06, y + 0.14, sahn[3])); bag.add('water', box(cx - 0.22, y + 0.01, (sahn[1] + sahn[3]) / 2 + 2.3, cx + 0.22, y + 0.1, sahn[3]));
   // ——— the minaret over the north side of the court
-  minaret(bag, col, [cx - 2.2, z0 + t, cx + 2.2, z0 + t + 4.4], y, 26.75);
-  // ——— the qibla wall inside: dado, stucco, the mihrab at the centre with its arch, a minbar beside
-  { const f = face('z', z1 - t, -1), mh = [cx - 1.3, cx + 1.3]; dadoFlat(bag, f, x0 + t, x1 - t, y, 1.8, [[mh[0], mh[1], y, y + 3.6]]); stucco(bag, f, x0 + t, x1 - t, y + 2.2, y + 6.4, [[mh[0] - 0.1, mh[1] + 0.1, y, y + 4.2]], { cell: 0.45 });
-    bag.add('opening', box(mh[0], y + 0.02, z1 - t - 0.01, mh[1], y + 3.5, z1 - t + 0.0)); archHead(bag, f, mh[0], mh[1], y + 2.4, y + 3.6, 0.5, 'horseshoe', { alfiz: true });
-    for (let k = 0; k < 7; k++) bag.add('timber', box(mh[1] + 0.8, y + k * 0.24, z1 - t - 0.8 - 0.3 * (6 - k), mh[1] + 1.9, y + (k + 1) * 0.24, z1 - t - 0.01)); bag.add('timber', box(mh[1] + 0.8, y + 1.6, z1 - t - 0.9, mh[1] + 1.9, y + 2.9, z1 - t - 0.01)); col.rect([mh[1] + 0.8, z1 - t - 2.2, mh[1] + 1.9, z1 - t], y, y + 2.9);
+  minaretWhite(bag, col, [cx - 2.2, z0 + t, cx + 2.2, z0 + t + 4.4], y, 26.75);
+  // ——— the qibla wall inside: dado, stucco, the mihrab recess (2.6 m wide, 0.9 deep) with a horseshoe arch, polylobed frame, colonnettes and a script band; the minbar beside
+  { const f = face('z', z1 - t, -1), mh = [cx - 1.3, cx + 1.3], zn = z1 - 0.3; dadoFlat(bag, f, x0 + t, x1 - t, y, 1.8, [[mh[0], mh[1], y, y + 4.6]]); stucco(bag, f, x0 + t, x1 - t, y + 2.2, y + 6.4, [[mh[0] - 0.1, mh[1] + 0.1, y, y + 4.6]], { cell: 0.45 });
+    archHead(bag, f, mh[0], mh[1], y + 2.7, y + 4.6, 0.4, 'horseshoe', { alfiz: true });
+    archHead(bag, f, mh[0] - 0.5, mh[1] + 0.5, y + 4.6, y + 5.9, 0.05, 'lobed', { alfiz: false, side: 'near' });
+    script(bag, 'tile_cream', f, mh[0] - 0.9, mh[1] + 0.9, y + 5.9, 0.3, 0.06, 0.1, 5);
+    // the recess: tiled sides and back, a floor of marble, a shell of stucco cells at the head, colonnettes either side of the opening
+    dadoFlat(bag, face('x', mh[0], 1), z1 - t, zn, y, 2.0, []); dadoFlat(bag, face('x', mh[1], -1), z1 - t, zn, y, 2.0, []); dadoFlat(bag, face('z', zn, -1), mh[0], mh[1], y, 2.4, []);
+    stucco(bag, face('z', zn, -1), mh[0], mh[1], y + 2.4, y + 4.6, [], { cell: 0.3, cornice: false });
+    for (const xx of [mh[0] - 0.12, mh[1] + 0.12]) { bag.add('marble_smooth', rod([xx, y + 0.2, z1 - t - 0.12], [xx, y + 2.6, z1 - t - 0.12], 0.07, 8)); bag.add('stucco_warm', box(xx - 0.11, y + 2.6, z1 - t - 0.23, xx + 0.11, y + 2.8, z1 - t - 0.01)); bag.add('marble_smooth', box(xx - 0.11, y, z1 - t - 0.23, xx + 0.11, y + 0.2, z1 - t - 0.01)); }
+    minbar(bag, col, mh[1] + 0.8, mh[1] + 1.9, z1 - t, y);
     for (const side of [[x0 + t, 1], [x1 - t, -1]]) { const ff = face('x', side[0], side[1]); dadoFlat(bag, ff, hallZ0, z1 - t, y, 1.6, []); }
   }
   // ——— the ceilings over the naves and the roofs: a painted cedar ceiling at the springing, a green-tiled gable per nave
   for (let k = 0; k < NV; k++) {
-    const a = uX(k) + 0.1, b = uX(k + 1) - 0.1, zA = (k >= 4 && k < 10) ? hallZ0 : z0 + t, zB = z1 - t, zc = (a + b) / 2, ys = y + 6.5, rise = 1.6, tr = [];
+    const a = uX(k) + 0.1, b = uX(k + 1) - 0.1, zA = (k >= 4 && k < 10) ? hallZ0 : z0 + t, zB = (k === 6 || k === 7) ? zCup - 0.3 : z1 - t, zc = (a + b) / 2, ys = y + 6.5, rise = 1.6, tr = [];
     q4(tr, [a, ys, zA], [a, ys, zB], [zc, ys + rise, zB], [zc, ys + rise, zA]); q4(tr, [b, ys, zB], [b, ys, zA], [zc, ys + rise, zA], [zc, ys + rise, zB]);
     bag.add('ceiling_painted', dbl(tr));
-    gable(bag, [a - 0.15, zA, b + 0.15, zB], y + HW + 1.2, 1.7, 0.4, 'z', { ends: false });
+    gable(bag, [a - 0.15, zA, b + 0.15, z1 - t], y + HW + 1.2, 1.7, 0.4, 'z', { ends: false });
   }
   // the gallery's roof and the cloister roofs: flat plastered terraces for the rest
   bag.add('tile_green', box(gal[0] - 0.2, y + HW - 0.2, gal[1], gal[2] + 0.2, y + HW - 0.05, gal[3] + 0.3));
   // ——— lamps: the great chandeliers in the central nave, smaller ones down the aisles; mats' rows of prayer rugs
-  for (const z of [hallZ0 + 8, hallZ0 + 20, z1 - 6]) F.mosqueLamp(bag, lights, cx, y + 3.6, z, y + 6.5, { k: 1.8, glow: 3, reach: 12 });
+  bellLamp(bag, lights, cx, hallZ0 + 20, y + 6.5, y + 3.7, 1.3);          // the great chandelier of 1337, cast from a bell
+  bellLamp(bag, lights, cx, hallZ0 + 8, y + 6.5, y + 3.8, 0.95);
+  bellLamp(bag, lights, cx, (zCup + z1 - t) / 2, cupTop - 0.1, y + 4.6, 1.0);
   for (let k = 0; k < 6; k++) F.mosqueLamp(bag, lights, uX(2 + k * 2) + nw / 2, y + 3.6, z0 + 14 + rand() * 30, y + 6.5, { k: 1, glow: 2, reach: 8 });
-  for (let k = 0; k < 12; k++) F.prayerRug(bag, uX(1 + (k % 12)) + nw / 2 - 0.4, y + 0.025, z1 - 4, 0, 'persian');
+  for (let k = 0; k < 12; k++) if (!(uX(1 + k) + nw / 2 - 0.4 > cx + 0.9 && uX(1 + k) + nw / 2 - 0.4 < cx + 3.9)) F.prayerRug(bag, uX(1 + (k % 12)) + nw / 2 - 0.4, y + 0.025, z1 - 4, 0, 'persian');
   // ——— the teaching: rahles (folding Quran stands) with cushions where the circles of students sit along the naves and the sahn's gallery, jars of drinking water at the piers, cupboards of books against the west wall
   for (let k = 0; k < 14; k++) { const x = uX(1 + (k % 13)) + nw / 2 + 0.6 * ((k % 3) - 1), z = hallZ0 + 3 + Math.floor(k / 7) * 9 + (k % 4) * 1.3; F.rahle(bag, x, y + 0.03, z, (k % 5) * 0.3 - 0.6); F.cushion(bag, x + 0.1, y + 0.03, z + 0.7, 0.6, 0.6, 0.1, 0.2, ['cloth_green', 'cloth_indigo', 'cloth_red', 'cloth_ochre'][k % 4]); }
   for (let k = 0; k < 8; k++) F.waterJar(bag, gal[0] + 1.4 + k * 3.2, y, gal[3] - 0.7, 1.0);

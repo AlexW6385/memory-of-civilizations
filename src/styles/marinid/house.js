@@ -118,7 +118,7 @@ export function house(el, ctx) {
     // a doorway to a room in the middle of each side but the one the passage enters, and a pair of narrow ones on wide sides
     if (!(i === 1 && !salon && false)) holes.push([uc - 0.55, uc + 0.55, y, y + 2.5]);
     if (salon && i === 1 && f.at === court[3]) holes.length = 0;
-    for (const h of holes) { const rr = f.R(0, 0.04, h[0], h[1]); bag.add('opening', box(rr[0], h[2], rr[1], rr[2], h[3], rr[3])); door(bag, f, h[0] + 0.02, h[1] - 0.02, h[2], 2.3, 0.04, { studs: false }); }
+    for (const h of holes) { const rr = f.R(0, 0.04, h[0], h[1]); bag.add('opening', box(rr[0], h[2], rr[1], rr[2], h[3], rr[3])); door(bag, f, h[0] + 0.02, h[1] - 0.02, h[2] + 0.012, 2.3, 0.04, { studs: false }); }
     if (el.rich) dado(bag, f, a, b, y, 1.35, salon && i === 1 ? [] : holes, { ribbon: true }); else dadoFlat(bag, f, a, b, y, 1.35, salon && i === 1 ? [] : holes);
     for (let k = 1; k < n; k++) {
       const yk = yF + UPPER * (k - 1);
@@ -154,6 +154,22 @@ export function house(el, ctx) {
   bag.add('stucco_cream', box(fb[2][0], y + 2.5, fb[2][1], fb[2][2], y + 2.7, fb[2][3]));
   // the leaves, opened against the passage's side
   { const lf = fo.R(-0.55, -0.4, ua, ua + 0.1); bag.add('cedar', box(lf[0], y + 0.02, lf[1], lf[2], y + 2.45, lf[3])); }
+  // the door's dressing by rule of the house's rank and seed (never by add-ons at random): 0 plain frame, 1 horseshoe door with a tile alfiz,
+  // 2 carved cedar lintel on corbels with a worn threshold step, 3 dressed-stone surround with a zellij plaque
+  const fk = el.rich ? 1 + (el.seed >> 2) % 3 : (el.seed % 5 < 2 ? 0 : 1 + (el.seed >> 3) % 3), bx = (a, b, c, d, y0, y1, m) => { const q = FR(a, b, c, d); bag.add(m, box(q[0], y + y0, q[1], q[2], y + y1, q[3])); };
+  if (fk === 1) {
+    for (const [s0, s1] of [[ua, ua + 0.3], [ub - 0.3, ub]]) bx(0.12, 0.2, s0, s1, 2.05, 2.5, 'stucco_cream');
+    for (const [s0, s1] of [[ua, ua + 0.15], [ub - 0.15, ub]]) bx(0.12, 0.2, s0, s1, 1.85, 2.05, 'stucco_cream');
+    bx(0.12, 0.16, ua - 0.3, ua - 0.2, 0, 3.05, 'tile_green'); bx(0.12, 0.16, ub + 0.2, ub + 0.3, 0, 3.05, 'tile_green'); bx(0.12, 0.16, ua - 0.3, ub + 0.3, 2.95, 3.05, 'tile_green');
+    bx(0.12, 0.14, ua - 0.2, ub + 0.2, 2.7, 2.95, 'stucco_warm');
+  } else if (fk === 2) {
+    bx(0, 0.32, ua - 0.4, ub + 0.4, 2.7, 3.0, 'cedar'); bx(0.02, 0.3, ua - 0.4, ua - 0.2, 2.4, 2.7, 'cedar'); bx(0.02, 0.3, ub + 0.2, ub + 0.4, 2.4, 2.7, 'cedar');
+    for (let k = 0; k < 5; k++) bx(0.32, 0.35, ua - 0.3 + k * (ub - ua + 0.6) / 4 - 0.04, ua - 0.3 + k * (ub - ua + 0.6) / 4 + 0.04, 2.74, 2.96, 'wood_dark');
+    bx(0, 0.45, ua - 0.1, ub + 0.1, 0, 0.1, 'limestone');
+  } else if (fk === 3) {
+    bx(0, 0.2, ua - 0.32, ua - 0.2, 0, 2.7, 'limestone'); bx(0, 0.2, ub + 0.2, ub + 0.32, 0, 2.7, 'limestone'); bx(0, 0.24, ua - 0.38, ub + 0.38, 2.7, 2.95, 'sandstone');
+    const um = (ua + ub) / 2; bx(0.03, 0.06, um - 0.55, um + 0.55, 3.0, 3.62, 'tile_cream'); bx(0.06, 0.08, um - 0.3, um + 0.3, 3.15, 3.5, 'glaze_blue'); bx(0.08, 0.1, um - 0.12, um + 0.12, 3.25, 3.4, 'glaze_green');
+  }
   const sill = FR(0, 0.25, ua, ub); bag.add('limestone', box(sill[0], y - 0.05, sill[1], sill[2], y + 0.06, sill[3]));
   // eye level on the lane: the foot of the wall, the lamp and the bench by the door, beam ends under the first floor, spouts at the roof
   { const holes = [[ua - 0.3, ub + 0.3], ...bays.map((q) => [base + q.u0 - 0.3, base + q.u1 + 0.3])];
@@ -164,7 +180,7 @@ export function house(el, ctx) {
     if (!holes.slice(1).some(([h0, h1]) => lampU > h0 && lampU < h1)) wallLamp(bag, fo, lampU, y + 2.35);
     if ((el.laneW ?? 0) >= 2.6 && (el.seed % 5) < 2 && ub + 2.2 < base + Lw && !bays.length) bench(bag, col, fo, ub + 0.4, ub + 1.9, y);
   }
-  if (rand() < 0.5 || el.rich) { const canW = 1.2; void canW; import_canopy(bag, fo, ua - 0.4, ub + 0.4, y + 3.0); }
+  if (fk === 0 && (rand() < 0.5 || el.rich)) { const canW = 1.2; void canW; import_canopy(bag, fo, ua - 0.4, ub + 0.4, y + 3.0); }
   // windows: dark openings with cedar lattices high on the facade and the other faces, one or two a storey
   const faces = [fo, ...(along ? [face('x', x0, -1), face('x', x1, 1), face(e === 's' ? 'z' : 'z', e === 's' ? z0 : z1, e === 's' ? -1 : 1)] : [face('z', z0, -1), face('z', z1, 1), face('x', e === 'e' ? x0 : x1, e === 'e' ? -1 : 1)])];
   for (const f of faces) {

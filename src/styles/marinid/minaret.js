@@ -39,3 +39,51 @@ export function minaret(bag, col, r, y, h, o = {}) {
   for (const [k, rr] of [[0.15, 0.2], [0.75, 0.15], [1.25, 0.11]]) bag.add('gilt_bronze', lathe([[0.001, -rr], [rr, 0], [0.001, rr]], 8, null, cx, yb + k + rr * 0.5, cz));
   void q4;
 }
+
+/**
+ * The Qarawiyyin's minaret (docs/settlements/fez.md §13): a limewashed square shaft on a stone footing, string courses, slit windows
+ * staggered up the faces in stucco frames, a band of blind horseshoe niches under the top, a gallery with a merlon parapet, a lantern, the three balls.
+ */
+export function minaretWhite(bag, col, r, y, h) {
+  const [x0, z0, x1, z1] = r;
+  bag.add('limewash_white', box(x0, y - 2, z0, x1, y + h, z1)); col.rect(r, y - 2, y + h);
+  bag.add('limestone', box(x0 - 0.08, y - 2, z0 - 0.08, x1 + 0.08, y + 1.6, z1 + 0.08));
+  bag.add('stucco_warm', box(x0 - 0.12, y + 1.6, z0 - 0.12, x1 + 0.12, y + 1.72, z1 + 0.12));
+  const fs = [face('z', z0, -1), face('z', z1, 1), face('x', x0, -1), face('x', x1, 1)];
+  for (const yy of [0.34, 0.62]) bag.add('stucco_cream', box(x0 - 0.06, y + h * yy, z0 - 0.06, x1 + 0.06, y + h * yy + 0.16, z1 + 0.06));
+  fs.forEach((f, fi) => {
+    const [a, b] = f.ax === 'z' ? [x0, x1] : [z0, z1], uc = (a + b) / 2;
+    // slit windows staggered from face to face, each in a stucco frame
+    for (const [k, yy] of [0.14, 0.24, 0.43, 0.52, 0.7, 0.78].entries()) {
+      const u = uc + ((k + fi) % 3 - 1) * 0.9, rr = f.R(0, 0.06, u - 0.11, u + 0.11); bag.add('opening', box(rr[0], y + h * yy, rr[1], rr[2], y + h * yy + 1.0, rr[3]));
+      const fr = f.R(0, 0.04, u - 0.2, u + 0.2); bag.add('stucco_cream', box(fr[0], y + h * yy - 0.08, fr[1], fr[2], y + h * yy + 1.1, fr[3]));
+      const fr2 = f.R(0.04, 0.07, u - 0.16, u + 0.16); bag.add('opening', box(fr2[0], y + h * yy, fr2[1], fr2[2], y + h * yy + 1.0, fr2[3]));
+    }
+    // the band of blind niches
+    for (let i = 0; i < 4; i++) {
+      const u = a + 0.5 + i * (b - a - 1.0) / 3, q = f.R(0, 0.05, u - 0.28, u + 0.28), yb = y + h * 0.86;
+      bag.add('stucco_cream', box(q[0], yb, q[1], q[2], yb + 1.4, q[3]));
+      const n = f.R(0.05, 0.09, u - 0.2, u + 0.2); bag.add('plaster_damp', box(n[0], yb + 0.1, n[1], n[2], yb + 1.15, n[3]));
+      const hd = f.R(0.05, 0.09, u - 0.14, u + 0.14); bag.add('plaster_damp', box(hd[0], yb + 1.15, hd[1], hd[2], yb + 1.3, hd[3]));
+    }
+  });
+  bag.add('stucco_warm', box(x0 - 0.1, y + h * 0.84, z0 - 0.1, x1 + 0.1, y + h * 0.84 + 0.12, z1 + 0.1));
+  // the gallery and its merlons
+  const e = 0.35, g = [x0 - e, z0 - e, x1 + e, z1 + e];
+  bag.add('stucco_cream', box(g[0], y + h, g[1], g[2], y + h + 0.3, g[3]));
+  bag.add('stucco_warm', box(g[0] + 0.05, y + h - 0.12, g[1] + 0.05, g[2] - 0.05, y + h, g[3] - 0.05));
+  for (const [u0, u1, alongX, at] of [[g[0], g[2], true, g[1]], [g[0], g[2], true, g[3] - 0.22], [g[1], g[3], false, g[0]], [g[1], g[3], false, g[2] - 0.22]]) {
+    bag.add('limewash_white', alongX ? box(u0, y + h + 0.3, at, u1, y + h + 0.95, at + 0.22) : box(at, y + h + 0.3, u0, at + 0.22, y + h + 0.95, u1));
+    for (let u = u0 + 0.1; u + 0.3 < u1; u += 0.62) bag.add('limewash_white', alongX ? box(u, y + h + 0.95, at, u + 0.34, y + h + 1.35, at + 0.22) : box(at, y + h + 0.95, u, at + 0.22, y + h + 1.35, u + 0.34));
+  }
+  const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, L = (x1 - x0) * 0.44, yl = y + h + 0.3;
+  bag.add('plaster_white', box(cx - L, yl, cz - L, cx + L, yl + 3.2, cz + L));
+  for (const f of [face('z', cz - L, -1), face('z', cz + L, 1), face('x', cx - L, -1), face('x', cx + L, 1)]) { const R = f.R(0, 0.05, f.ax === 'z' ? cx - 0.4 : cz - 0.4, f.ax === 'z' ? cx + 0.4 : cz + 0.4); bag.add('opening', box(R[0], yl + 0.9, R[1], R[2], yl + 2.4, R[3])); }
+  bag.add('stucco_warm', box(cx - L - 0.1, yl + 3.2, cz - L - 0.1, cx + L + 0.1, yl + 3.35, cz + L + 0.1));
+  const t = [], P = [[cx - L - 0.25, cz - L - 0.25], [cx + L + 0.25, cz - L - 0.25], [cx + L + 0.25, cz + L + 0.25], [cx - L - 0.25, cz + L + 0.25]], ya = yl + 3.35, top = [cx, ya + 1.5, cz];
+  for (let i = 0; i < 4; i++) { const A = P[i], B = P[(i + 1) % 4]; t.push(A[0], ya, A[1], ...top, B[0], ya, B[1]); }
+  bag.add('tile_green', dbl(t));
+  const yb = ya + 1.5;
+  bag.add('gilt_bronze', rod([cx, yb, cz], [cx, yb + 1.7, cz], 0.03, 5));
+  for (const [k, rr] of [[0.15, 0.2], [0.7, 0.15], [1.15, 0.11]]) bag.add('gilt_bronze', lathe([[0.001, -rr], [rr, 0], [0.001, rr]], 8, null, cx, yb + k + rr * 0.5, cz));
+}
