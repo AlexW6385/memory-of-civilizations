@@ -3,7 +3,7 @@
 // workers in the open shops (baker, smith, weaver, host), the tribune's vigil and the cloister's monks, the washing-place
 // and fishing at the Dourdou, the beasts at the doors and in the gardens. Everything placed from layout.js.
 
-import { RADIUS, ABBEY, RIVER, BRIDGE, HOSTEL, FOUNTAINS, STAIRS, lots, gardens, laneZ, level, height, bandZ, BAND } from './layout.js';
+import { RADIUS, ABBEY, RIVER, BRIDGE, HOSTEL, FOUNTAINS, STAIRS, TANNERY, MILL, worksLevel, lots, gardens, laneZ, level, height, bandZ, BAND } from './layout.js';
 import { shopPoint } from '../../styles/romanesque/village.js';
 
 const base = (id, elements, style = 'life') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-40, 0], facing: 'e' } });
@@ -142,6 +142,9 @@ export function insides() {
     else f(Math.min(W - 1, Math.max(1, shopPoint(l).a0 + 0.9)), 1.4, W / 2, -2, { ...apron });
     void out;
   }
+  // the tanner at his beam between the two, scraping a hide; the miller by his stones
+  { const [tx0, tz0] = TANNERY.rect, yt = worksLevel().tannery, at = [tx0 + 8.4, tz0 + 5.1]; robe(at, yt, face(at, [at[0], at[1] - 1]), { cloth: 'cloth_brown', cloth2: 'cloth_grey', hat: 'cap', hatMat: 'cloth_brown', over: 'apron', pose: 'talk', beard: true }); }
+  { const [mx0, mz0] = MILL.rect, ym = worksLevel().mill + 0.1, at = [mx0 + 2.0, mz0 + 2.3]; robe(at, ym, face(at, [mx0 + MILL.w * 0.58, mz0 + MILL.d * 0.5]), { cloth: 'cloth_white', cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_white', over: 'apron', pose: 'stand', beard: true }); }
   return [base('conques-insides', L)];
 }
 

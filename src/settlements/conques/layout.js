@@ -80,6 +80,17 @@ const reserved = () => [HOSTEL.rect, [97, bandZ(8) + BAND.lane[1] + 0.2, 101.4, 
 /** The Rue Charlemagne's gate, a barrel-vaulted passage over the stair street below the last shelf (Porte du Barry). */
 export const GATE = { x: STAIRS[1], z: bandZ(BAND.n) - 8, w: 4.6 };
 
+/** The lower suburb's works (docs/settlements/conques.md §1k): a tanner's yard west of the road, a mill on the bank upstream of the washing-place. */
+export const TANNERY = { rect: [-112, 195, -97, 205] };
+const MILL_X = -27;
+export const MILL = { cx: MILL_X, w: 6.4, d: 5.6, z1: riverZ(MILL_X) - 10.9, wheelR: 2.1 };
+MILL.rect = [MILL_X - MILL.w / 2, MILL.z1 - MILL.d, MILL_X + MILL.w / 2, MILL.z1];
+const maxH = (r, m = 0) => { let h = -Infinity; for (let x = r[0] - m; x <= r[2] + m; x += 1) for (let z = r[1] - m; z <= r[3] + m; z += 1) h = Math.max(h, height(x, z)); return h; };
+/** The level of each yard: the highest ground in it and a margin north, so the terrace stands flush with the slope above it. */
+export const worksLevel = () => ({ tannery: maxH([TANNERY.rect[0], TANNERY.rect[1] - 1.5, TANNERY.rect[2], TANNERY.rect[3]]) + 0.1, mill: maxH([MILL.rect[0] - 0.5, MILL.rect[1] - 3.0, MILL.rect[2] + 0.5, MILL.rect[3] - 1.0]) + 0.1 });
+/** Places where nothing is planted: the works with their margins. */
+export const WORKS = [[TANNERY.rect[0] - 1.5, TANNERY.rect[1] - 2.5, TANNERY.rect[2] + 2, TANNERY.rect[3] + 1.5], [MILL.rect[0] - 2.5, MILL.rect[1] - 4, MILL.rect[2] + 2.5, MILL.rect[3] + 0.5]];
+
 const overlap = (a, b, m = 0) => a[0] < b[2] + m && a[2] > b[0] - m && a[1] < b[3] + m && a[3] > b[1] - m;
 let LOTS = null, GARDENS = null;
 function build() {

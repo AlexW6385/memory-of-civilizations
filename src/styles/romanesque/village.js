@@ -428,6 +428,26 @@ function furnish(c, kind, o) {
     B('wood_dark', 0.55, dep + 2.2, 1.45, dep + 2.8, fy, fy + 0.5);
     return;
   }
+  if (kind === 'mill') {
+    // the mill: the stones in their wooden casing at the middle, the hopper above on four posts with its shoe, the meal chest under the spout, sacks of grain and flour, a ladder to the loft
+    const cu = L * 0.58, cv = D * 0.5, p = c.P(cu, cv);
+    c.col.rect(c.R(cu - 0.95, cv - 0.95, cu + 0.95, cv + 0.95), fy, fy + 1.0);
+    bag.add('timber', lathe([[0.001, 0], [0.95, 0], [0.95, 0.62], [0.001, 0.62]], 14, null, p[0], fy, p[1]));
+    bag.add('iron', lathe([[0.95, 0.12], [0.97, 0.12], [0.97, 0.17], [0.95, 0.17]], 14, null, p[0], fy, p[1])); bag.add('iron', lathe([[0.95, 0.46], [0.97, 0.46], [0.97, 0.51], [0.95, 0.51]], 14, null, p[0], fy, p[1]));
+    bag.add('flagstone', lathe([[0.001, 0], [0.82, 0], [0.82, 0.2], [0.2, 0.27], [0.12, 0.26], [0.001, 0.26]], 18, null, p[0], fy + 0.62, p[1]));
+    for (const [a, b] of [[-0.7, -0.7], [0.7, -0.7], [-0.7, 0.7], [0.7, 0.7]]) { const q = c.P(cu + a, cv + b); bag.add('wood_dark', box(q[0] - 0.05, fy + 0.62, q[1] - 0.05, q[0] + 0.05, fy + 1.95, q[1] + 0.05)); }
+    const hq = c.P(cu, cv); const top = [[-0.8, -0.8], [0.8, -0.8], [0.8, 0.8], [-0.8, 0.8]].map(([a, b]) => { const q = c.P(cu + a, cv + b); return [q[0], fy + 2.05, q[1]]; });
+    const bot = [[-0.18, -0.18], [0.18, -0.18], [0.18, 0.18], [-0.18, 0.18]].map(([a, b]) => { const q = c.P(cu + a, cv + b); return [q[0], fy + 1.3, q[1]]; });
+    const hop = []; hexa(hop, bot, top); bag.add('timber', fromTriangles(hop)); void hq;
+    const sh = c.P(cu, cv + 0.05); bag.add('wood_dark', box(sh[0] - 0.05, fy + 1.15, sh[1] - 0.45, sh[0] + 0.05, fy + 1.3, sh[1] + 0.05));
+    c.B('wood_dark', cu + 1.1, cv - 0.4, cu + 2.0, cv + 0.4, fy, fy + 0.65, true); c.B('timber', cu + 1.05, cv - 0.45, cu + 2.05, cv + 0.45, fy + 0.65, fy + 0.7, false);
+    c.B('timber', cu + 0.95, cv - 0.06, cu + 1.15, cv + 0.06, fy + 0.35, fy + 0.4, false);
+    for (let k = 0; k < 5; k++) c.B('sacking', 0.6 + (k % 3) * 0.55, dep + 0.2 + Math.floor(k / 3) * 0.5, 1.05 + (k % 3) * 0.55, dep + 0.62 + Math.floor(k / 3) * 0.5, fy, fy + 0.6, true);
+    for (let k = 0; k < 4; k++) c.B('linen', L - 1.3, D - 0.5 - 0.55 * (k + 1), L - 0.6, D - 0.5 - 0.55 * k - 0.05, fy, fy + 0.55, true);
+    for (let k = 0; k < 7; k++) c.B('wood_dark', 0.55, D - 2.4, 0.62, D - 2.36, fy + k * 0.3, fy + k * 0.3 + 0.04, false);
+    c.B('wood_dark', 0.54, D - 2.45, 0.58, D - 2.4, fy, ceil, false); c.B('wood_dark', 0.54, D - 1.8, 0.58, D - 1.75, fy, ceil, false);
+    return;
+  }
   if (kind === 'shop' && ['baker', 'bread', 'smith', 'tavern', 'weaver'].includes(o.trade)) { trade(c, o.trade === 'bread' ? 'baker' : o.trade, { ...o, B, bag, hearth }); return; }
   if (kind === 'shop') {
     const a0 = shopA ? shopA[0] : L / 2, side = du !== null && du > a0 ? -1 : 1;
@@ -702,4 +722,91 @@ function porte(el, { bag, col }) {
   void rod; void lathe;
 }
 
-export const villageElements = { maison, calade, stairs, retain, strip, jardin, croix, fontaine, porte };
+
+/**
+ * roue { c: [x, z] (the wheel's middle, at its nearer face), y (the axle), r, w (the width along z), pier: z (where the axle's far end rests), wall: z (the mill wall it leaves),
+ * bed: y (the foot of the pier and the cheeks) }: an undershot waterwheel in the stream, flat against the mill's wall — two rims, eight spokes
+ * at each, boards between; the axle through the wall to a stone pier; stone cheeks either side. The stream runs along x (docs/settlements/conques.md §1k).
+ */
+function roue(el, { bag, col }) {
+  const [cx, cz] = el.c, y = el.y, r = el.r ?? 2.1, w = el.w ?? 1.2, z0 = cz, z1 = cz + w, out = [], N = 20;
+  const P = (a, rr, s, z) => [cx + Math.cos(a) * rr - Math.sin(a) * s, y + Math.sin(a) * rr + Math.cos(a) * s, z];
+  for (const [za, zb] of [[z0, z0 + 0.1], [z1 - 0.1, z1]]) for (let i = 0; i < N; i++) {
+    const a = Math.PI * 2 * i / N, b = Math.PI * 2 * (i + 1) / N;
+    hexa(out, [P(a, r - 0.14, 0, za), P(a, r, 0, za), P(b, r, 0, za), P(b, r - 0.14, 0, za)], [P(a, r - 0.14, 0, zb), P(a, r, 0, zb), P(b, r, 0, zb), P(b, r - 0.14, 0, zb)]);
+  }
+  for (const [za, zb] of [[z0 + 0.1, z0 + 0.16], [z1 - 0.16, z1 - 0.1]]) for (let k = 0; k < 8; k++) {
+    const a = Math.PI * 2 * k / 8;
+    hexa(out, [P(a, 0.14, -0.05, za), P(a, r - 0.14, -0.05, za), P(a, r - 0.14, 0.05, za), P(a, 0.14, 0.05, za)], [P(a, 0.14, -0.05, zb), P(a, r - 0.14, -0.05, zb), P(a, r - 0.14, 0.05, zb), P(a, 0.14, 0.05, zb)]);
+  }
+  bag.add('timber', fromTriangles(out));
+  const pad = [];
+  for (let k = 0; k < 16; k++) { const a = Math.PI * 2 * (k + 0.5) / 16; hexa(pad, [P(a, r - 0.2, -0.03, z0 + 0.1), P(a, r + 0.12, -0.03, z0 + 0.1), P(a, r + 0.12, 0.03, z0 + 0.1), P(a, r - 0.2, 0.03, z0 + 0.1)], [P(a, r - 0.2, -0.03, z1 - 0.1), P(a, r + 0.12, -0.03, z1 - 0.1), P(a, r + 0.12, 0.03, z1 - 0.1), P(a, r - 0.2, 0.03, z1 - 0.1)]); }
+  bag.add('wood_dark', fromTriangles(pad));
+  const wallZ = el.wall ?? z0 - 0.05, pierZ = el.pier ?? z1 + 0.5;
+  bag.add('wood_dark', rod([cx, y, wallZ], [cx, y, pierZ + 0.3], 0.13, 10));
+  bag.add('iron', rod([cx, y, z0 + 0.06], [cx, y, z0 + 0.1], 0.2, 10)); bag.add('iron', rod([cx, y, z1 - 0.1], [cx, y, z1 - 0.06], 0.2, 10));
+  const bed = el.bed ?? y - 6;
+  bag.add('schist_rubble', box(cx - 0.35, bed, pierZ, cx + 0.35, y + 0.55, pierZ + 0.6)); col.rect([cx - 0.35, pierZ, cx + 0.35, pierZ + 0.6], bed, y + 0.55);
+  bag.add('limestone_yellow', box(cx - 0.42, y + 0.55, pierZ - 0.04, cx + 0.42, y + 0.65, pierZ + 0.64));
+  for (const sg of [-1, 1]) {
+    const xa = cx + sg * (r + 0.3), x0 = Math.min(xa, xa + sg * 0.35), x1 = Math.max(xa, xa + sg * 0.35);
+    bag.add('schist_rubble', box(x0, bed, wallZ, x1, y + 0.6, pierZ + 0.6)); col.rect([x0, wallZ, x1, pierZ + 0.6], bed, y + 0.6);
+  }
+  col.rect([cx - r - 0.3, wallZ, cx + r + 0.3, z1 + 0.1], y - r + 0.3, y + r);
+}
+
+/**
+ * tannerie { rect: [x0, z0, x1, z1], y }: a tanner's yard on its terrace — a parapet round it with the gate at the north-east corner, stone-curbed tanks of liquor with hides in them,
+ * two wooden tubs, scraping beams with a hide over each, frames of hides drying, stacks of oak bark, a lean-to shed with the hearth and the copper (docs/settlements/conques.md §1k).
+ */
+function tannerie(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y, rand = rng(el.seed || 7);
+  const B = (m, a, b, c, d, ya, yb, k = false) => { bag.add(m, box(a, ya, b, c, yb, d)); if (k) col.rect([a, b, c, d], ya, yb); };
+  const rodC = (m, a, b, r2, n = 8) => bag.add(m, rod(a, b, r2, n));
+  const tank = (cx, cz, w, d) => {
+    B('schist_rubble', cx - w / 2, cz - d / 2, cx + w / 2, cz - d / 2 + 0.16, y, y + 0.6, true); B('schist_rubble', cx - w / 2, cz + d / 2 - 0.16, cx + w / 2, cz + d / 2, y, y + 0.6, true);
+    B('schist_rubble', cx - w / 2, cz - d / 2 + 0.16, cx - w / 2 + 0.16, cz + d / 2 - 0.16, y, y + 0.6, true); B('schist_rubble', cx + w / 2 - 0.16, cz - d / 2 + 0.16, cx + w / 2, cz + d / 2 - 0.16, y, y + 0.6, true);
+    B('hide_brown', cx - w / 2 + 0.16, cz - d / 2 + 0.16, cx + w / 2 - 0.16, cz + d / 2 - 0.16, y, y + 0.46);
+    B('limestone_yellow', cx - w / 2 - 0.04, cz - d / 2 - 0.04, cx + w / 2 + 0.04, cz - d / 2 + 0.2, y + 0.6, y + 0.66);
+    if (rand() < 0.7) { const hx = cx - w / 2 + 0.3 + rand() * (w - 0.9); B(rand() < 0.5 ? 'hide_tan' : 'hide_grey', hx, cz - d / 2 + 0.25, hx + 0.5, cz + d / 2 - 0.25, y + 0.46, y + 0.5); }
+  };
+  // the parapet, with the gate at the north-east corner (the way in from the road)
+  const T = 0.4, H = 0.9, gz = z0 + 2.4;
+  B('schist_rubble', x0 - T, z0 - T, x0, z1 + T, y, y + H, true);                                     // west
+  B('schist_rubble', x0, z1, x1 + T, z1 + T, y, y + H, true);                                         // south
+  B('schist_rubble', x0, z0 - T, x1 + T, z0, y, y + H, true);                                         // north
+  B('schist_rubble', x1, gz, x1 + T, z1, y, y + H, true);                                             // east, below the gate
+  // tanks of two sizes along the south wall, two round tubs
+  for (let k = 0; k < 4; k++) tank(x0 + 1.3 + k * 2.2, z1 - 1.0, 1.8, 1.3);
+  for (const [dx, dz] of [[1.5, 3.6], [3.7, 3.7]]) {
+    const q = [x0 + dx, z1 - dz]; bag.add('timber', lathe([[0.7, 0], [0.74, 0.5], [0.72, 0.9], [0.64, 0.9], [0.64, 0.8], [0.001, 0.8]], 14, null, q[0], y, q[1]));
+    bag.add('iron', lathe([[0.74, 0.2], [0.76, 0.2], [0.76, 0.26], [0.74, 0.26]], 14, null, q[0], y, q[1])); col.circle(q[0], q[1], 0.76, y, y + 0.9);
+  }
+  // two scraping beams: a half-round log on trestles, sloping, a hide laid over it
+  for (const [bx, bz] of [[x0 + 7.4, z0 + 4.2], [x0 + 7.4, z0 + 6.0]]) {
+    rodC('wood_dark', [bx, y + 0.35, bz], [bx + 1.9, y + 1.05, bz], 0.15, 8);
+    for (const [e, h] of [[0.2, 0.45], [1.7, 0.95]]) { B('wood_dark', bx + e - 0.04, bz - 0.2, bx + e + 0.04, bz - 0.12, y, y + h); B('wood_dark', bx + e - 0.04, bz + 0.12, bx + e + 0.04, bz + 0.2, y, y + h); }
+    col.rect([bx - 0.1, bz - 0.25, bx + 2.0, bz + 0.25], y, y + 1.15);
+    B('hide_grey', bx + 0.6, bz - 0.24, bx + 1.5, bz + 0.24, y + 0.72, y + 0.76);
+  }
+  // frames of hides drying: two posts, two poles, hides hung from the upper one
+  for (const [fx, fz] of [[x0 + 1.4, z0 + 1.2], [x0 + 5.6, z0 + 1.2]]) {
+    for (const e of [0, 3.2]) B('wood_dark', fx + e - 0.06, fz - 0.06, fx + e + 0.06, fz + 0.06, y, y + 2.3, true);
+    B('wood_dark', fx - 0.08, fz - 0.04, fx + 3.28, fz + 0.04, y + 2.2, y + 2.28); B('wood_dark', fx - 0.08, fz - 0.04, fx + 3.28, fz + 0.04, y + 1.45, y + 1.52);
+    for (let k = 0; k < 5; k++) B(['hide_brown', 'hide_tan', 'hide_brown', 'hide_grey', 'hide_tan'][k], fx + 0.2 + k * 0.58, fz - 0.03, fx + 0.7 + k * 0.58, fz + 0.03, y + 1.05 + (k % 2) * 0.12, y + 2.2);
+  }
+  // stacks of oak bark by the gate
+  for (const [bx, bz] of [[x1 - 3.4, z0 + 4.2]]) for (let lv = 0; lv < 3; lv++) for (let k = 0; k < 3 - lv; k++) B('bark_dark', bx + lv * 0.5 + k * 1.0, bz, bx + lv * 0.5 + k * 1.0 + 0.95, bz + 1.4, y + lv * 0.4, y + 0.4 + lv * 0.4, lv === 0);
+  // the shed at the south-east corner: four posts, a sloping roof of lauze, the hearth with the copper, a bench
+  const sx0 = x1 - 4.2, sz0 = z1 - 3.6, sx1 = x1 - 0.2, sz1 = z1 - 0.2;
+  for (const [a, b, h] of [[sx0, sz0, 2.4], [sx1 - 0.12, sz0, 2.4], [sx0, sz1 - 0.12, 1.9], [sx1 - 0.12, sz1 - 0.12, 1.9]]) B('wood_dark', a, b, a + 0.12, b + 0.12, y, y + h, true);
+  const rf = []; hexa(rf, [[sx0 - 0.3, y + 2.4, sz0 - 0.3], [sx1 + 0.3, y + 2.4, sz0 - 0.3], [sx1 + 0.3, y + 1.9, sz1 + 0.3], [sx0 - 0.3, y + 1.9, sz1 + 0.3]], [[sx0 - 0.3, y + 2.55, sz0 - 0.3], [sx1 + 0.3, y + 2.55, sz0 - 0.3], [sx1 + 0.3, y + 2.05, sz1 + 0.3], [sx0 - 0.3, y + 2.05, sz1 + 0.3]]);
+  bag.add('lauze', fromTriangles(rf));
+  B('schist_rubble', sx0 + 0.6, sz0 + 0.5, sx0 + 2.0, sz0 + 1.4, y, y + 0.55, true);
+  bag.add('iron', lathe([[0.001, 0], [0.32, 0.05], [0.42, 0.22], [0.4, 0.4], [0.34, 0.42], [0.001, 0.38]], 12, null, sx0 + 1.3, y + 0.55, sz0 + 0.95));
+  B('flame', sx0 + 0.75, sz0 + 1.4, sx0 + 1.85, sz0 + 1.45, y + 0.12, y + 0.4);
+  B('wood_dark', sx0 + 2.5, sz0 + 0.5, sx0 + 3.7, sz0 + 0.9, y, y + 0.45, true);
+  void gz;
+}
+export const villageElements = { maison, calade, stairs, retain, strip, jardin, croix, fontaine, porte, roue, tannerie };
