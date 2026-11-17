@@ -367,11 +367,9 @@ export function nColumn(bag, col, x, z, y, hc) {
   const cy0 = y + s + 0.2, cy1 = y + hc - 0.14, my = (cy0 + cy1) / 2;
   bag.add(MS, box(x - 0.15, cy0, z - 0.15, x + 0.15, cy1, z + 0.15));
   for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-    const px = x + dx * 0.15, pz = z + dz * 0.15, w = 0.095, t = 0.004;
+    const px = x + dx * 0.15, pz = z + dz * 0.15, w = 0.095, t = 0.012;
     const R = (a, b) => [px + dx * a + (dz ? -w : 0), my - 0.1, pz + dz * a + (dx ? -w : 0), px + dx * b + (dz ? w : 0), my + 0.1, pz + dz * b + (dx ? w : 0)];
-    const r = R(0, t); bag.add('marble_dark', box(Math.min(r[0], r[3]), r[1], Math.min(r[2], r[5]), Math.max(r[0], r[3]), r[4], Math.max(r[2], r[5])));
-    const q = (u, v) => [px + dx * (t + 0.003) + (dz ? u : 0), my + v, pz + dz * (t + 0.003) + (dx ? u : 0)];
-    bag.add(MS, rod(q(-w, -0.1), q(w, 0.1), 0.007, 4)); bag.add(MS, rod(q(-w, 0.1), q(w, -0.1), 0.007, 4));
+    const r = R(0, t); bag.add(MS, box(Math.min(r[0], r[3]), r[1], Math.min(r[2], r[5]), Math.max(r[0], r[3]), r[4], Math.max(r[2], r[5])));
   }
   col.circle(x, z, 0.13, y, y + hc);
 }
