@@ -216,3 +216,13 @@ Before this pass the plain houses and cottages beyond the sights (about 1,030 lo
 ## The Kaibao court's fair and furniture, deepening pass (2026-11-12)
 - The great temples of the capital held markets in their courts [stated: Dongjing menghua lu on the Xiangguo Temple's market; the Kaibao's own fair is inferred]: four rows of hawkers' stalls with buyers either side of the flagstone field, seated vendors on mats at the cloister's foot.
 - Stone benches under the cloisters with resting monks and pilgrims, water tubs against fire at the halls' corners, incense sellers' tables at the great censer's foot, swallows round the pagoda's eaves [inferred].
+
+## 17. The landmark seen close (round 2)
+
+Code: `ironpagoda.js` (the Iron Pagoda's builder, a working copy of the song style's `pagoda_oct` for this tower), `ironskin.js` (its glazed skin), `caimen2.js`, `bridge2.js`; registered in `style.js`. No new source; all [inferred] from the sources of §10 and the tower as it stands.
+
+- **Round-headed doorways.** The doors (four faces) and windows were rectangular holes under a blind arch. Now the opening's crown is the arch's top: the passage's corners are filled through the wall's depth so the way in is round-headed all the way, and the surround is two rolls of glazed brick (the inner 9 cm proud, the outer 5 cm and 11 cm wider) round the jambs and arch [stated: doors on four sides, arched openings: ancient-history-sites 133351; the two rolls inferred].
+- **Eave edges.** A fascia board along each face of every eave and a row of round tile-ends (wadang) 0.4 m apart on it, as on the timber-roof eaves the brick tower copies [inferred].
+- **Rainbow Bridge.** Rope lashings (three turns) on the three outer ribs of each face at each transverse beam, iron-banded and pegged beam heads, bolster beams under the arch's feet [stated: the arch is bound with rope and locked by transverse beams, happypontist/Yang; the bands and pegs inferred].
+- **Wine shops' colour gates.** Silk awnings sloping out from the two upper rails with scalloped hems, lattice wings closing the ends above head height, a silk hood over the pointed lintel, a second taller crest with bound balls and streamers over the middle bay [stated: the gates were bound scaffolds of coloured silk, the grander the richer the house: rujiazg 3505; the forms inferred].
+- **Not done:** the brackets' proportions (still the style's at 0.7 scale), door leaves, the masts of boats lowering under the bridge (unchanged).
