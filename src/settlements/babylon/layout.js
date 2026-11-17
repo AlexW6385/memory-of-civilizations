@@ -133,6 +133,10 @@ function build() {
     else if (q < (way ? 0.78 : 0.13) && nShop < 26 && (way || dist(l) < 200)) { l.shop = TRADES[nShop++ % TRADES.length]; }
     else if (!way && q > 0.93 && nOpen < 16) { l.open = true; nOpen++; }
   }
+  // the ordinary houses beyond those (§15.4): of the other lots that fit a furnished plan within 340 m of the core, about one in
+  // three (nearer) or four (farther) stands open (a second stream of numbers, so the choices above stay as they were); the same plan, so the same rooms
+  { const r2 = rng(7351), far = LOTS.filter((l) => !l.open && !l.shop && l.col !== 'precinct' && l.col !== 'way' && dist(l) < 340 && dims(l)[0] >= 11 && dims(l)[1] >= 10.5);
+    for (const l of far) if (r2() < (dist(l) < 230 ? 0.3 : 0.26)) l.open = true; }
   // (the ones east of the Way are given the lane's first houses as shops too)
   // the gate quarter (docs/settlements/babylon.md §13.7): outside the inner wall, where the Way leaves the open ground for the Ishtar Gate, the caravans that came in at the northern roads stood and were
   // taxed; the houses of the people who lived by them stand in two double rows either side of the Way's mouth, on lanes of their own, fronts to the lane, the ale-houses and bakers, the smiths who shod the

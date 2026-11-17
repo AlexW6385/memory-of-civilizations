@@ -83,6 +83,24 @@ function wayProps() {
   [[-1, -374], [-1, -356], [-1, -332], [1, -350], [1, -326], [1, -372]].forEach(([s, z], i) => P.push({ kind: wayKinds[i % wayKinds.length], at: [WAY.x + s * 9.5, z], rot: s > 0 ? -Math.PI / 2 : Math.PI / 2, y: 0.12, seed: 300 + i }));
   return P;
 }
+/**
+ * Etemenanki's court (docs/settlements/babylon.md §15.5): the standards and braziers along the gate's approach to the tower, and before the stair's
+ * foot offering tables, water stands, benches, the altar of burnt offerings and the washing basin. [inferred]
+ */
+export const COURT_PAVING = [[-90, -40, 90, 130], [-52, -62, -28, -40], [-14, 130, 14, 148]];
+function courtProps() {
+  const P = [], y = 0.045;
+  for (const z of [-50, -30, -14]) for (const s of [-1, 1]) P.push({ kind: 'standard', at: [WAY.x + s * 9.0, z], rot: s > 0 ? Math.PI / 2 : -Math.PI / 2, y, seed: 50 + z });
+  for (const s of [-1, 1]) P.push({ kind: 'brazier', at: [WAY.x + s * 5, -38], rot: 0, y, seed: 60 + s });
+  for (const s of [-1, 1]) {
+    const r = s > 0 ? Math.PI / 2 : -Math.PI / 2;
+    P.push({ kind: 'standard', at: [s * 11.5, 138], rot: r, y, seed: 70 + s }, { kind: 'standard', at: [s * 11.5, 120], rot: r, y, seed: 72 + s });
+    P.push({ kind: 'offering', at: [s * 12.5, 128], rot: r, y, seed: 80 + s }, { kind: 'zir', at: [s * 16, 112], rot: r, y, seed: 82 + s }, { kind: 'bench', at: [s * 20, 120], rot: r, y, seed: 84 + s });
+    P.push({ kind: 'brazier', at: [s * 6.5, 146], rot: 0, y, seed: 86 + s });
+  }
+  P.push({ kind: 'altar', at: [-34, 116], rot: -Math.PI / 2, y, seed: 90 }, { kind: 'basin', at: [34, 116], rot: 0, y, seed: 91 });
+  return P;
+}
 /** Shadufs on the west bank, lifting the river to the gardens. */
 function bankProps() {
   const P = [];
@@ -96,9 +114,10 @@ export async function houses() {
   // the houses in plans by tile of 150 m (each culls apart), the open ones and the shops of the core in plans of their own
   for (const l of all) {
     const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, key = `${Math.floor(cx / 150)},${Math.floor(cz / 150)}`;
-    const lite = !l.gate && Math.hypot(cx - CORE_C[0], cz - CORE_C[1]) > 150;
+    const dc = Math.hypot(cx - CORE_C[0], cz - CORE_C[1]), lite = !l.gate && !l.open && dc > 150;
+    const grade = l.col === 'way' ? 2 : l.gate || dc < 150 ? 1 : 0;       // the front's grade: the Way's frontage 2, the rest of the core and the gate quarter 1, the outer city 0 (docs/settlements/babylon.md §15.3)
     const e = l.shop ? { t: 'babylon_shop', rect: l.rect, door: l.door, seed: l.seed, trade: l.shop, shop: true, storeys: 1, front: l.door }
-      : { t: 'babylon_house', rect: l.rect, seed: l.seed, door: l.door, open: !!l.open, school: !!l.school, white: l.open && l.seed % 3 === 0, storeys: l.open ? 1 : storeysOf(l.seed), front: l.door, lite };
+      : { t: 'babylon_house', rect: l.rect, seed: l.seed, door: l.door, open: !!l.open, school: !!l.school, white: l.open && l.seed % 3 === 0, storeys: l.open ? 1 : storeysOf(l.seed), front: l.door, lite, grade };
     if (!tiles.has(key)) tiles.set(key, []);
     tiles.get(key).push(e);
   }
@@ -110,7 +129,7 @@ export async function houses() {
   // the walled yards of the blocks
   plans.push(base('babylon-yards', yards().map((y) => ({ t: 'babylon_yard', rect: y.rect, door: y.door, kind: y.kind, seed: y.seed, front: y.door }))));
   // the paving of the lanes in the core, the alleys' gutters, the street shrines, troughs, benches and water stands
-  plans.push(base('babylon-lanes', [{ t: 'babylon_lanes', rects: laneRects(), alleys: alleys().filter((r) => Math.hypot((r[0] + r[2]) / 2 + 40, (r[1] + r[3]) / 2 + 60) < 250), props: [...laneProps(), ...wayProps(), ...bankProps()] }]));
+  plans.push(base('babylon-lanes', [{ t: 'babylon_lanes', rects: [...laneRects(), ...COURT_PAVING], alleys: alleys().filter((r) => Math.hypot((r[0] + r[2]) / 2 + 40, (r[1] + r[3]) / 2 + 60) < 250), props: [...laneProps(), ...wayProps(), ...courtProps(), ...bankProps()] }]));
   plans.push(...lifePlans(base));
   // the market (a market room: the generic life pass adds to it) and the scribes' mats on the quay
   const z = 103, x = riverX(z) + QUAY.d0 + 6.5;

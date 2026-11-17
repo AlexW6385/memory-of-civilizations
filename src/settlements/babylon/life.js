@@ -141,6 +141,18 @@ export function lifeElements() {
   }
   // the precinct gate: priests of Marduk in white linen with the staff, two at each side of the way
   for (const [dx, dz] of [[-7, -64], [7, -64], [-7.8, -68], [7.8, -68]]) man([WAY.x + dx, dz], 0.12, Math.PI / 2 * (dx < 0 ? -1 : 1) + Math.PI, { cloth: 'linen', cloth2: 'cloth_white', over: 'sash', pose: 'staff', carry: 'staff', len: 1.7, hair: 'shaven', beard: false });
+  // ---- Etemenanki's court (§15.5): priests at the altar and the basin, pilgrims kneeling either side of the stair's foot, priests with the staff
+  // at the standards; clear of the props of town.js (courtProps)
+  {
+    const pr = (at, to, o = {}) => man(at, 0.045, face(at, to), { cloth: 'linen', cloth2: 'cloth_white', over: 'sash', hair: 'shaven', beard: false, ...o });
+    pr([-31.0, 116], [-34, 116], { pose: 'stand', carry: 'none' }); animal('sheep', [-36.4, 112.8], 0.045, 0.6, {}); pr([-34, 119.2], [-34.4, 112.8], { pose: 'stand', carry: 'staff', len: 1.7 });
+    pr([34, 118.6], [34, 116], { pose: 'stand', carry: 'pot' });
+    for (const s of [-1, 1]) {
+      for (const z of [136, 139.5]) woman([s * 7.5, z], 0.045, face([s * 7.5, z], [0, z]), { pose: 'pray', cloth: pick(['cloth_white', 'cloth_ochre', 'cloth_indigo']) });
+      pr([s * 9.5, 128], [s * 9.5, 120], { pose: 'staff', carry: 'staff', len: 1.9 });
+    }
+    man([4 + 3.2, 134.6], 0.045, face([7.2, 134.6], [0, 134.6]), { pose: 'pray' });
+  }
   void RADIUS; void PALACE; void WALL_Z; void RIVER; void MARKET;
   return L;
 }
