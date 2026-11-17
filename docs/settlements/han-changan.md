@@ -3,7 +3,7 @@
 Settlement id: `han-changan` · Styles: `han` (own) and `life` · Region: east Asia (the Wei River plain, Shaanxi) · Code: `src/settlements/han-changan/`, `src/styles/han/`
 Status: built from nothing in this batch: the Weiyang Palace front hall on its stepped rammed-earth terrace (enterable, with the throne dais), the palace walls and the que gate towers, a city gate with three passageways, the walled lǐ wards with their houses, the West and East Markets with their market towers, the Changle Palace, the Kunming Lake, the Imperial Academy, people in Han dress, Silk Road caravans, sound.
 
-Deepening pass (Suzhou standard): see §5b, §6b, §9b. Still not built: the city's east and north gates (outside or at the edge of the disc), upper floors of the ward watch-tower houses, the interiors of the Changle Palace's side halls beyond the furnished halls, the Stone Ditch and Heavenly Fortune pavilions' interiors, wooden bracket-arm cascades (the Han dougong is shown as a cap block and a straight arm).
+Deepening pass (Suzhou standard): see §5b, §6b, §9b. Still not built: the city's east and north gates (outside or at the edge of the disc), upper floors of the ward watch-tower houses, the interiors of the Changle Palace's side halls beyond the furnished halls, the Stone Ditch and Heavenly Fortune pavilions' interiors, (the bracket cascades are now built, §4b).
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -104,3 +104,32 @@ Rain streaks (plaster_streak) down the earth walls from the coping and patches o
 ## 6c. The service quarters below the ramp (release pass)
 
 Two blocks of the palace's service quarters (clerks, guards, stewards) lie west and east of the paved court at the ramp's foot, 25-80 m from the arrival: fourteen houses in four fronts (walled court, row on the lane, open-fronted store under an awning, two-storey lou). The wards' houses (`han_house`) have solid halls, so these are built by their own style, `src/styles/hanlodge` (`hanl_house`), from the same kit: the hall has a doorway, a floor, a ceiling and a lit room furnished as a dwelling, kitchen, weaver's, scholar's, granary or workshop, with someone at home (`han-life-households`). The ceiling slab keeps the eave over the platform kerb from shutting the doorway in the walker's collision.
+
+## 4b. The hall's bracket zone, frieze and ridge (detail pass, `src/styles/hanlodge/hall.js`)
+
+- **Brackets:** over every column of the outer lines a cascade of two tiers of projecting arms with cap blocks (the chinese `bracket_set`, read-only, set to two tiers of 0.45 m), the columns tied by a plate on top of the architrave; between the columns the man-shaped brace (renzi, two struts meeting at a cap block with a short arm over it). The Han bracket set is attested from tomb models and que as a stepped set of arms under the eaves, "complex bracket sets" under a tile roof of several eaves on the watchtower model. [stated: Smarthistory, "Tomb model of a watchtower" — complex bracket sets, three sets of eaves, round roof tiles; the number of tiers, the 0.45 m step and the renzi brace are [inferred] from Han tomb models and the Han bracket literature (Cambridge, *The Origin and Development of Dougong and Zaojing in Early China*, "Development of column and bracket sets in the Han dynasty", not read in full)]
+- **Frieze:** the wall is closed above the architrave by a plastered frieze up to the roof (red foot, ochre head, teal cloud panels with gilt bosses at the middle of each bay). Colours [inferred]: red and white with blue-green is the commonest reading of Han palace painting.
+- **Roof raised:** the eave now stands 2.7 m higher over the architrave to make room for the bracket zone; the ridge ends run out and up; on the ridge's centre the bronze phoenix (zhuque), wings spread, tail raised, looking south. [inferred: Han palace roofs carried a bronze phoenix on the ridge — the Jianzhang Palace's is the famous case; the form is ours]
+- **Gilt rings (jin gang)** round each column under the architrave and above its foot. [inferred: Han texts describe gilt-bronze "gang" fittings on the palace columns and beams; the exact placement is ours]
+- **Lotus caisson over the throne:** a red frame with gilt edges, a patterned panel and a three-ring gilt lotus hung from the ceiling over the dais. [inferred: the lotus caisson (zaojing) is a Han ceiling form, the hanging frame is ours]
+- **Terrace faces (`terrace.js`):** timber ribs every 7.5 m up each tier (the posts of the rammed-earth formwork left in the face), rain gullies down from the coping, gilt finials on the ramp's balustrade posts. [inferred: ribs of timber in Han platforms are attested at the sites; spacing and the gullies are ours]
+- The Front Hall, the two chambers on the crown, the Jiaofang Hall and the Changle halls are built by `hanl_hall`; the offices, the Academy and the wards' halls keep the plain `han_hall`.
+
+## 5c. The que (`src/styles/hanlodge/que.js`)
+
+The east gate's pair of que: the earth shaft on a two-step stone plinth, red at its foot, two timber belts and ribs on each face, the skirt roof (a pent of grey tile with round eave-ends) at two thirds of its height, the open railed pavilion above, the phoenix on its ridge; the subsidiary tower built against its side (touching, 4.6 m from the main axis, so that the passage between the pair is clear), its own hipped roof and finial. [stated: Wikipedia "Que (tower)" — the que "developed from gate towers", a lower subsidiary tower beside the main one; the skirt roof and the proportions [inferred] from the que reliefs and the tomb models of watchtowers (Smarthistory, above)]
+
+## 6d. Houses of the wards, by standing, and the lanes (detail pass)
+
+- **Enterable share:** 110 of the 330 lots (the ones left open and every fourth of the rest by seed) are built as `hanl_house`: a doorway, a lit furnished hall (dwelling, kitchen, weaver's, scholar's, granary or workshop by the seed), a household at home in two of three. The rest keep the shut shell.
+- **Fronts by rule (`rankOf`, layout.js):** the standing of a lot by its distance from the great avenue. Rank 2 (within 120 m of it: officials and merchants): wall 2.7 m in lime plaster, a gate-house room over the passage with a lattice window and a hipped tile roof, red leaves, stone drums at the jambs (at the door of a row house). Rank 1: the 2.5 m wall under tile coping and the small roofed gate. Rank 0 (far wards): a 2.0 m wall of earth or mud plaster under a thatched coping, a brushwood gate with a wicker leaf, dark tile on the hall. Beside the standing, the kind of lot gives the plan (court, row, lou) and the seed the gate's place, the room and the wing. [inferred: the Han tomb models show gatehouses and watchtower houses; the ranking is ours, from the Han wards' division by rank]
+- **The lanes:** along each ward lane's middle a well with windlass, a bench with sitters, a woodpile and its splitter, vats with a woman, a drying tray with hens, children and a dog, two men talking; kept to the lane's middle clear of doors and the ward's gates. [inferred: Han tomb models show wells, hens, dogs and granary yards]
+
+## 11. Level
+
+L2 → between L2 and L3 in the landmark (hall, que and terrace carry the full programme of §5 except for the bracket arms' curved ends, the painted ceilings of the side halls, the floor's wear and the hall's doors) and L2 in the townscape (a third of the wards' houses enterable and furnished, lanes with life; the shells of the rest and the avenue's offices are still shut, the markets' and academy's interiors as before).
+
+## 12. Sources added
+
+- https://smarthistory.org/tomb-model-of-a-watchtower
+- https://www.cambridge.org/core/books/abs/origin-and-development-of-dougong-and-zaojing-in-early-china/development-of-column-and-bracket-sets-in-the-han-dynasty/540B508E57EA10E85A8CCF0F04297D91
