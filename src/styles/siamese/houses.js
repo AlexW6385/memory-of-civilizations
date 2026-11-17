@@ -104,7 +104,11 @@ function stilt(el, ctx) {
   const win = (c, w = 0.46) => ({ a: c - w, b: c + w, sill: up + 0.9, head: up + 1.7 });
   wallV(wallM, -hF, vb, -hS, th, up, top, [win((-hF + vb) / 2 + (rand() - 0.5))]);
   wallV(wallM, -hF, vb, hS, th, up, top, vb - -hF > 3.4 ? [win((-hF + vb) / 2 + (rand() - 0.5))] : []);
-  wallU(wallM, -hS, hS, -hF, th, up, top, rand() < 0.6 ? [{ a: -0.4, b: 0.4, sill: up + 0.9, head: up + 1.6 }] : []);
+  // the fronts and backs vary by rule (docs §12.4): the canal-front great houses close the terrace with a slatted screen, the plain canal-front ones keep a stall on it,
+  // and a share of the larger houses have a kitchen house behind, entered by a door in the back wall (the household's hearth is not in the sleeping room)
+  const vr = rng((el.seed || 1) * 31 + 7), kitchen = !!el.kitchen && !small, kw = Math.min(hS * 0.75, 1.5);
+  const fvar = big ? (el.row === 0 || vr() < 0.3 ? 'lattice' : 'open') : small ? 'open' : (el.row === 0 && vr() < 0.5 ? 'stall' : 'open');
+  { const bw = rand() < 0.6; wallU(wallM, -hS, hS, -hF, th, up, top, kitchen ? [{ a: -0.45, b: 0.45, sill: up, head: up + 1.9 }] : bw ? [{ a: -0.4, b: 0.4, sill: up + 0.9, head: up + 1.6 }] : []); }
   const dOp = { a: door - 0.5, b: door + 0.5, sill: up, head: up + 1.9 };
   const wOp = { a: -door * 0.55 - 0.42, b: -door * 0.55 + 0.42, sill: up + 0.9, head: up + 1.65 };
   wallU(wallM, -hS, hS, vb, th, up, top, [dOp, ...(hS > 2.0 ? [wOp] : [])]);
@@ -143,12 +147,49 @@ function stilt(el, ctx) {
     if (rand() < 0.7) { const c = W(hS * 0.5, vb + 0.5); bag.add('wicker', lathe([[0.001, 0], [0.16, 0.0], [0.2, 0.25], [0.12, 0.5], [0.001, 0.52]], 8, null, c[0], up + 1.35, c[1])); bag.add('timber', rod([c[0], up + 1.8, c[1]], [c[0], up + 2.35, c[1]], 0.01, 3)); }
   }
   // laundry: a bamboo pole across the terrace's front posts with the family's cloths and a sash hung over it
-  if (rand() < 0.75) {
+  if (rand() < 0.75 && fvar !== 'stall') {
     const u0 = -hS + 0.2, u1 = hS - 0.2, n = 2 + Math.floor(rand() * 3);
     { const p = W(u0, hF + 0.12), q = W(u1, hF + 0.12); bag.add('bamboo_culm', rod([p[0], up + 1.55, p[1]], [q[0], up + 1.55, q[1]], 0.025, 4)); }
     for (let n2 = 0; n2 < n; n2++) { const uu = u0 + (u1 - u0) * (n2 + 0.5) / n; sheet(CLOTH[Math.floor(rand() * CLOTH.length)], uu - 0.2, hF + 0.12, uu + 0.2, hF + 0.12, up + 1.53, up + 0.75 + rand() * 0.3); }
   }
   if (!small) { const c = W(door, hF + 0.05); bag.add('lamp_paper', lathe([[0.001, 0], [0.12, 0.05], [0.14, 0.18], [0.1, 0.32], [0.001, 0.34]], 8, null, c[0], up + 1.95 - 0.3, c[1])); bag.add('timber', rod([c[0], up + 2.1, c[1]], [c[0], up + 2.3, c[1]], 0.008, 3)); }
+  // ── the front by rule: the slatted screen of the great house, the stall of the plain one
+  if (fvar === 'lattice') {
+    for (const [a, b] of [[-hS + 0.08, -0.62], [0.62, hS - 0.08]]) { for (let u = a; u <= b + 0.001; u += 0.11) B('timber', u - 0.02, u + 0.02, hF + 0.02, hF + 0.06, up + 0.2, up + 1.92); B('timber', a - 0.02, b + 0.02, hF, hF + 0.08, up + 1.0, up + 1.05); B('timber', a - 0.02, b + 0.02, hF, hF + 0.08, up + 1.92, up + 1.98); k.col.segment(W(a, hF + 0.04), W(b, hF + 0.04), 0.08, up, up + 1.95); }
+    for (const s of [-1, 1]) B('timber', s * 0.62 - 0.05, s * 0.62 + 0.05, hF - 0.02, hF + 0.1, up, up + 1.98);
+  } else if (fvar === 'stall') {
+    const su = (vr() < 0.5 ? -1 : 1) * hS * 0.55, sw = Math.min(1.1, hS * 0.45);
+    for (const s of [-1, 1]) { const q = [su + s * (sw - 0.1), hF + 0.05], q2 = [su + s * (sw - 0.1), hF + 0.62]; const a = W(...q), b = W(...q2); bag.add('timber', rod([a[0], up + 0.7, a[1]], [b[0], up + 0.95, b[1]], 0.025, 4)); }
+    B('planks_grey', su - sw, su + sw, hF + 0.02, hF + 0.62, up + 0.95, up + 1.0);
+    const stock = [['wicker', 'glaze_yellow'], ['terracotta', 'cloth_green'], ['wicker', 'cloth_red']][Math.floor(vr() * 3)];
+    for (let i = 0; i < 4; i++) { const u = su - sw + 0.3 + i * (sw * 2 - 0.6) / 3; L(stock[0], [[0.001, 0], [0.14, 0], [0.19, 0.12], [0.001, 0.14]], u, hF + 0.34, up + 1.0, 8); for (let f = 0; f < 3; f++) L(stock[1], [[0.001, 0], [0.05, 0.02], [0.001, 0.09]], u + (f - 1) * 0.07, hF + 0.34 + (f % 2) * 0.05, up + 1.13, 5); }
+    { const a = W(su - sw, hF + 0.1), b = W(su + sw, hF + 0.1); bag.add('bamboo_culm', rod([a[0], up + 1.85, a[1]], [b[0], up + 1.85, b[1]], 0.02, 4)); for (let i = 0; i < 5; i++) { const u = su - sw + 0.25 + i * (sw * 2 - 0.5) / 4, p = W(u, hF + 0.1); bag.add('rope_fibre', rod([p[0], up + 1.85, p[1]], [p[0], up + 1.55, p[1]], 0.005, 3)); bag.add(i % 2 ? 'silver' : 'glaze_yellow', lathe([[0.001, 0], [0.04, 0.02], [0.05, 0.12], [0.001, 0.18]], 6, null, p[0], up + 1.4, p[1])); } }
+    sheet('cloth_red', su - 0.18, hF + 0.66, su + 0.18, hF + 0.66, up + 1.5, up + 1.08);
+  }
+  // ── the kitchen house behind: a raised floor on posts, low walls of woven bamboo, a lean-to roof, the hearth, jars, firewood, steps down to the back yard
+  if (kitchen) {
+    const kv0 = -hF - 1.5, ky = up;
+    B('timber', -kw, kw, kv0, -hF, ky - 0.15, ky); F(-kw, kw, kv0, -hF, ky);
+    for (const [u, v] of [[-kw + 0.05, kv0 + 0.05], [kw - 0.05, kv0 + 0.05]]) { post(u, v, 0, ky + 2.0, 0.07); foot(u, v, 0.07); }
+    wallU('reed_mat', -kw, kw - 1.0, kv0, 0.06, ky, ky + 1.25, []); wallV('reed_mat', kv0, -hF, -kw, 0.06, ky, ky + 1.25, []); wallV('reed_mat', kv0, -hF, kw, 0.06, ky, ky + 1.25, []);
+    B('timber', -kw, kw, kv0 - 0.03, kv0 + 0.03, ky + 1.2, ky + 1.28);
+    leanTo(k, tile ? 'roof_tile' : 'thatch_palm', -kw - 0.25, kw + 0.25, -hF + 0.15, kv0 - 0.45, top - 0.15, ky + 1.75);
+    // the steps at the right of the back wall's opening
+    { const n = Math.ceil(ky / 0.3), rs = ky / n, run2 = 0.34, su0 = kw - 0.5;
+      for (let i = 1; i < n; i++) { const v0 = kv0 - (i - 1) * run2 - 0.1, y = ky - i * rs; B('timber', su0 - 0.4, su0 + 0.4, v0 - run2 - 0.02, v0, y - 0.05, y); F(su0 - 0.4, su0 + 0.4, v0 - run2 - 0.02, v0, y); }
+      F(su0 - 0.4, su0 + 0.4, kv0 - 0.1, kv0 + 0.02, ky); F(su0 - 0.4, su0 + 0.4, kv0 - (n - 1) * run2 - 0.5, kv0 - (n - 1) * run2 - 0.1 + 0.02, 0);
+      for (const s of [-1, 1]) { const a = W(su0 + s * 0.4, kv0 - 0.1), b = W(su0 + s * 0.4, kv0 - (n - 1) * run2 - 0.2); const t = []; beamTris(t, [a[0], ky - 0.05, a[1]], [b[0], 0.1, b[1]], 0.03, 0.14); bag.add('timber', fromTriangles(t)); } }
+    // the hearth: a tray of clay with three stones, a pot on it, firewood stacked, jars at the post, a rack of pots, a winnowing tray
+    B('terracotta', -kw + 0.15, -kw + 0.95, kv0 + 0.2, kv0 + 1.0, ky, ky + 0.1); for (const [u, v] of [[-kw + 0.3, kv0 + 0.35], [-kw + 0.8, kv0 + 0.35], [-kw + 0.55, kv0 + 0.85]]) L('laterite', [[0.001, 0], [0.07, 0], [0.07, 0.16], [0.001, 0.16]], u, v, ky + 0.1, 6);
+    L('pottery_dark', [[0.001, 0.26], [0.14, 0.3], [0.22, 0.45], [0.18, 0.62], [0.2, 0.66]], -kw + 0.55, kv0 + 0.55, ky + 0.0, 9); L('flame', [[0.001, 0], [0.025, 0.08], [0.001, 0.16]], -kw + 0.55, kv0 + 0.3, ky + 0.1, 4);
+    C(-kw + 0.12, -kw + 0.98, kv0 + 0.18, kv0 + 1.02, ky, ky + 0.7);
+    for (let i = 0; i < 6; i++) B('wood_ochre', 0.55 + (i % 3) * 0.15, 0.67 + (i % 3) * 0.15, -hF - 0.7, -hF - 0.08, ky + 0.0 + Math.floor(i / 3) * 0.12, ky + 0.11 + Math.floor(i / 3) * 0.12);
+    C(0.5, 1.05, -hF - 0.7, -hF - 0.08, ky, ky + 0.25);
+    L('terracotta', [[0.001, 0], [0.2, 0.01], [0.3, 0.2], [0.24, 0.42], [0.14, 0.5]], 0, kv0 + 0.4, ky, 8); L('terracotta', [[0.001, 0], [0.15, 0.01], [0.23, 0.15], [0.17, 0.32]], 0.5, kv0 + 0.35, ky, 8); C(-0.3, 0.7, kv0 + 0.1, kv0 + 0.65, ky, ky + 0.55);
+    for (let i = 0; i < 3; i++) L(i % 2 ? 'pottery_dark' : 'terracotta', [[0.001, 0], [0.1, 0], [0.14, 0.1], [0.11, 0.2]], -kw + 1.2 + i * 0.35 - 0.2, kv0 + 0.2, ky, 7);
+    L('wicker', [[0.3, 0], [0.34, 0.03], [0.001, 0.03]], 0.1, -hF - 0.4, ky, 9);
+    if (ctx.lights) { const [lx, lz] = W(-kw + 0.55, kv0 + 0.5); ctx.lights.push({ at: [lx, ky + 0.7, lz], color: '#ff9a45', intensity: 1.6, distance: 4.5 }); }
+  }
   // the roof over the block (thatch or tile), horns, a lean-to over the terrace on the big house
   const rb = R(-hS, hS, -hF, vb), long = rb[2] - rb[0] >= rb[3] - rb[1], c0 = [(rb[0] + rb[2]) / 2, (rb[1] + rb[3]) / 2];
   const A = (long ? rb[2] - rb[0] : rb[3] - rb[1]) / 2 + 0.85, Bh = (long ? rb[3] - rb[1] : rb[2] - rb[0]) / 2 + 0.95, rise2 = Bh * (tile ? 0.85 : 1.15);

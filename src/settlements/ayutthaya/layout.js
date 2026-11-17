@@ -129,8 +129,22 @@ export function lots() {
   // along the river's east bank (the bank road runs between them and the water) and the south bank
   for (let z = -230; z < 215;) { const w = 5 + Math.floor(rand() * 3), dp = 5 + Math.floor(rand() * 3); place([-235 + 12, z, -235 + 12 + w, z + dp], 'w', 0); z += dp + 1.4 + (rand() < 0.1 ? 4 : 0); }
   for (let x = -220; x < 290;) { const w = 5 + Math.floor(rand() * 4), dp = 5 + Math.floor(rand() * 3); place([x, 225 - 12 - dp, x + w, 225 - 12], 's', 0); x += w + 1.4 + (rand() < 0.1 ? 4 : 0); }
+  // the kitchen house behind a larger house, by its seed, where its footprint and the steps down (4.5 m behind the back wall) are clear of other lots, water, ways and bridges
+  const FB = { n: [0, 1], s: [0, -1], e: [-1, 0], w: [1, 0] };
+  for (const l of LOTS) {
+    l.kitchen = false;
+    if (l.kind === 'shop' || l.kind === 'small' || ((l.seed >>> 3) % 5) >= 2) continue;
+    const [x0, z0, x1, z1] = l.rect, b = FB[l.front], cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+    const zone = b[0] ? (b[0] > 0 ? [x1, z0, x1 + 5, z1] : [x0 - 5, z0, x0, z1]) : (b[1] > 0 ? [x0, z1, x1, z1 + 5] : [x0, z0 - 5, x1, z0]);
+    void cx; void cz;
+    const clear = !LOTS.some((o) => o !== l && o.rect[0] < zone[2] + 1 && o.rect[2] > zone[0] - 1 && o.rect[1] < zone[3] + 1 && o.rect[3] > zone[1] - 1)
+      && [[zone[0], zone[1]], [zone[2], zone[1]], [zone[0], zone[3]], [zone[2], zone[3]], [(zone[0] + zone[2]) / 2, (zone[1] + zone[3]) / 2]].every(([px, pz]) => wetCanal(px, pz) > 2 && wetRiver(px, pz) > 6 && !onBridge(px, pz, 3) && !inRect(VOC, px, pz, 2));
+    l.kitchen = clear;
+  }
   return LOTS;
 }
+/** Whether the lot's house has a kitchen house behind it (the larger houses, by their seed). */
+export const kitchenOf = (l) => !!l.kitchen;
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
 
 /** The strips of the ways on foot along the canals' banks and the river's, cut where they would cross water. */

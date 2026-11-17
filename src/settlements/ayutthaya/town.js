@@ -3,7 +3,7 @@
 // pots, rice and fish, the vendors sitting in them); sugar palms and the granaries; the monks and the people of the banks.
 import { lodTiles } from '../lod.js';
 import { frame } from '../../styles/khmer/village.js';
-import { RADIUS, WATER, CANALS, BRIDGES, MARKET, RIVER_W, ISLAND, inRect, wet, lots, onBridge, onPath, paths, inLot, WAT, PALACE, UBOSOT, wetRiver, VOC, VOC_MAIN } from './layout.js';
+import { RADIUS, WATER, CANALS, BRIDGES, MARKET, RIVER_W, ISLAND, inRect, wet, lots, kitchenOf, onBridge, onPath, paths, inLot, WAT, PALACE, UBOSOT, wetRiver, VOC, VOC_MAIN } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const plan = (id, style, elements, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [10, -90], facing: 'n' }, ...extra });
@@ -84,7 +84,7 @@ function garden() {
     const [x0, z0, x1, z1] = l.rect, f = FR[l.front], cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, hb = Math.abs(f[0]) ? (x1 - x0) / 2 : (z1 - z0) / 2;
     const at = (u, v) => [cx - f[0] * (hb + v) + -f[1] * u, cz - f[1] * (hb + v) + f[0] * u];
     const ok = (p) => wet(p[0], p[1]) > 3 && !inLot(p[0], p[1], 0.8) && !onPath(p[0], p[1], 0.6) && !onBridge(p[0], p[1], 3) && !inRect(WAT.wall, p[0], p[1], 3) && !inRect(PALACE.wall, p[0], p[1], 3) && !inRect(VOC, p[0], p[1], 3) && wetRiver(p[0], p[1]) > 8 && Math.hypot(p[0], p[1]) < RADIUS - 46;
-    const r = yr();
+    const r = kitchenOf(l) ? (yr(), 0.99) : yr();
     if (r < 0.5) { const p = at((yr() - 0.5) * 3, 1.6 + yr()); if (ok(p)) E.push({ t: 'k_banana', at: p, y: 0, s: 0.9 + yr() * 0.3, seed: l.seed }); }
     if (r < 0.3) { const p = at((yr() - 0.5) * 2, 3.4); if (ok(p)) E.push({ t: 'k_areca', at: p, y: 0, s: 0.9 + yr() * 0.2, seed: l.seed + 1 }); }
     if (r > 0.55 && r < 0.7) { const p = at(1.2, 2.2); if (ok(p)) E.push({ t: 'k_rack', at: p, y: 0, rot: Math.atan2(f[0], f[1]), kind: yr() < 0.6 ? 'fish' : 'cloth', seed: l.seed }); }
@@ -178,7 +178,7 @@ function people() {
 }
 export async function town() {
   const plans = [water(), garden(), people(), voc()];
-  const els = lots().map((l) => ({ t: 'thai_house', rect: l.rect, front: l.front, seed: l.seed, kind: l.kind }));
+  const els = lots().map((l) => ({ t: 'thai_house', rect: l.rect, front: l.front, seed: l.seed, kind: l.kind, row: l.row, kitchen: kitchenOf(l) }));
   plans.push(...lodTiles('ayutthaya-houses', 'siamese', els, { R: RADIUS, near: 150 }));
   void UBOSOT;
   return plans;
