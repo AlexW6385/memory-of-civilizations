@@ -11,6 +11,8 @@ import { KULLIYE } from './kulliye.js';
 import { prayerHall } from './prayerhall.js';
 import { kahvehane } from './kahve.js';
 import { carsi } from './bazaar.js';
+import { yardDress } from './yards.js';
+import { hallExterior, weightTower, portal } from './exterior.js';
 import { cesme } from './cesme.js';
 import { ottomanHouse } from './konak.js';
 import { mescit, courtDress } from './quarter.js';
@@ -37,12 +39,13 @@ function mosque(el, ctx) {
   bag.add(S, box(cx - dw, y + dh, hz0, cx + dw, y + wallH, hz0 + T));
   bag.add('opening', box(cx - dw * 0.8, y, hz0 + T - 0.05, cx + dw * 0.8, y + dh, hz0 + T - 0.02));
   // the windows: rows in the walls, seen from both sides (the qibla wall's are its own, in src/styles/ottoman/prayerhall.js)
-  for (const f of 'new') { const along = f === 'n', Lw = along ? W : Dp, n = Math.floor(Lw / 4); for (let i = 1; i < n; i++) for (const yy of [y + 3, y + 12.2]) { const u = (along ? hx0 : hz0) + i * Lw / n; if (f === 'n' && Math.abs(u - cx) < dw + 1) continue; for (const [o0, o1, wm] of [[-0.06, 0.02, 'opening'], [T - 0.02, T + 0.02, 'daylight']]) { const q = f === 'n' ? [u - 0.8, hz0 + o0, u + 0.8, hz0 + o1] : f === 'w' ? [hx0 + o0, u - 0.8, hx0 + o1, u + 0.8] : [hx1 - o1, u - 0.8, hx1 - o0, u + 0.8]; bag.add(wm, box(q[0], yy, q[1], q[2], yy + 2.6, q[3])); } } }
+  hallExterior(bag, col, { hall, y, T, wallH, cx, dw });
+  portal(bag, { cx, hz0, T, y, dw, dh });
   bag.add('marble', box(hx0 + T, y - 0.3, hz0 + T, hx1 - T, y + 0.05, hz1 - T)); col.floor([hx0 + T, hz0 + T, hx1 - T, hz1 - T], y + 0.05);
   // inside: the piers, arches, pendentives, drum and dome, the semidomes, tympana and aisles; the mihrab, minbar, loges, lamps, carpets
   prayerHall(bag, col, { cx, cz, y, R, Hi: W / 2 - T, T, yp, yr: yp + R * 0.26, ys });
   // outside: the weight towers at the corners of the central square
-  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const tx = cx + sx * (R + 1.5), tz = cz + sz * (R + 1.5); bag.add(S, box(tx - 2, y + wallH, tz - 2, tx + 2, y + dy + 1, tz + 2)); bag.add(L, lathe([[2.2, 0], [0.001, 3.5]], 8, null, tx, y + dy + 1, tz)); }
+  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const tx = cx + sx * (R + 1.5), tz = cz + sz * (R + 1.5); bag.add(S, box(tx - 2, y + wallH, tz - 2, tx + 2, y + dy + 1, tz + 2)); weightTower(bag, tx, tz, y + wallH, y + dy + 1); }
   // the courtyard and its four minarets at its corners: those by the mosque with three balconies, those at the far end with two
   const court = [cx - W * 0.42, hall[1] - cd, cx + W * 0.42, hall[1]];
   courtyard(bag, col, court, y, 9, 7);
@@ -394,6 +397,6 @@ function graves(el, { bag, col }) {
 
 registerStyle('ottoman', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, sinan_mosque: mosque, minaret, madrasa, turbe, graves, kahvehane, carsi, cesme, ottoman_house: ottomanHouse, mescit, court_dress: courtDress, ...KULLIYE },
+  elements: { ...STYLES.qing.elements, sinan_mosque: mosque, minaret, madrasa, turbe, graves, kahvehane, carsi, cesme, ottoman_house: ottomanHouse, mescit, court_dress: courtDress, yard_dress: yardDress, ...KULLIYE },
   objects: {},
 });
