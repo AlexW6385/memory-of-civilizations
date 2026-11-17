@@ -12,7 +12,12 @@ E.push(terr(SPARROW, { gapN: true, gapS: true, dais: { r: SPARROW.dais, top: SPA
 E.push(terr(TIGER, { gapN: true }));
 E.push({ t: 'wei_tower', c: TOWER.c, half: TOWER.half, floor: TOWER.floor, seed: 5 });
 const [dx0, dz0, dx1, dz1] = SPARROW.dais;
-for (const [x, z] of [[dx0 + 6, dz0 + 6], [dx1 - 6, dz0 + 6], [dx0 + 6, dz1 - 6], [dx1 - 6, dz1 - 6]]) E.push({ t: 'han_pavilion', c: [x, z], A: 3, B: 3, y: SPARROW.daisTop, h: 3.4, walls: false });
+for (const [k, [x, z]] of [[dx0 + 6, dz0 + 6], [dx1 - 6, dz0 + 6], [dx0 + 6, dz1 - 6], [dx1 - 6, dz1 - 6]].entries()) {
+  E.push({ t: 'han_pavilion', c: [x, z], A: 3, B: 3, y: SPARROW.daisTop, h: 3.4, walls: false });
+  // the poets' seat under each: a reed mat with its low table, the cups, the wine and the zither (or the slips), a jar of wine by a column
+  E.push({ t: 'wei_prop', kind: 'mat', at: [x, z], y: SPARROW.daisTop, yaw: k % 2 ? Math.PI : 0, seed: 40 + k, zither: k % 2 === 0 });
+  E.push({ t: 'wei_prop', kind: 'jars', at: [x + 1.4 * (k % 2 ? -1 : 1), z + 1.5], y: SPARROW.daisTop, seed: 50 + k, n: 2 });
+}
 for (const [t, sd] of [[ICE, 71], [TIGER, 73]]) {
   const zc = t.r[3] - 8;
   E.push({ t: 'han_hall', cx: -196, z1: zc, bays: 5, bayW: 6, depth: 2, depthW: 6, floor: t.top + 0.6, base: 0.6, h: 5.4, roof: 'hip', rise: 4.4, overhang: 2.6, ap: 2.2, furnish: 'court', open: [2, 2], seed: sd });
@@ -25,7 +30,7 @@ for (const t of [ICE, SPARROW, TIGER]) {
     E.push({ t: 'wei_prop', kind: 'flag', at: [fx + 3.5, zc + sg * 7.2], yaw: sg > 0 ? 0 : Math.PI, h: 7.2, cloth: sg > 0 ? 'cloth_red' : 'cloth_black', long: t === SPARROW });
     E.push({ t: 'wei_prop', kind: 'brazier', at: [fx + 1.8, zc + sg * 5.4] });
     E.push({ t: 'wei_prop', kind: 'rack', at: [fx + 7, zc + sg * 6.4], yaw: Math.PI / 2, n: 7 });
-    E.push({ t: 'wei_prop', kind: 'brazier', at: [st[0] + 1.5, zc + sg * 5.2], y: t.top });
+    E.push({ t: 'wei_prop', kind: 'brazier', at: [st[0] - 1.5, zc + sg * 5.2], y: t.top });
     E.push({ t: 'wei_prop', kind: 'ding', at: [fx - 4, zc + sg * 8.2], s: 1.1 });
   }
   E.push({ t: 'wei_prop', kind: 'block', at: [fx + 1.6, zc + 10.5], yaw: Math.PI / 2 });
@@ -54,6 +59,8 @@ for (const [t, sd] of [[ICE, 1], [TIGER, 2]]) {
   E.push({ t: 'wei_prop', kind: 'bench', at: [-204, zc + 4.2], y: t.top, len: 3 });
   E.push({ t: 'wei_prop', kind: 'brazier', at: [-186, zc + 4.4], y: t.top });
 }
+// the Ice Well's crown north of its hall: three ice wells in a row, the terrace's namesake (the ice was cut on the Zhang in winter and stored under it)
+for (const x of [-208, -196, -184]) E.push({ t: 'wei_prop', kind: 'icewell', at: [x, -161], y: ICE.top, yaw: 0 });
 void faceX; void POND; void POND_Y;
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
