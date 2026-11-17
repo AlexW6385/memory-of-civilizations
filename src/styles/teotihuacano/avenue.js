@@ -23,7 +23,7 @@ export const brazierKit = () => carved('tt-brazier', (k) => {
   k.geo('cloth_black', lathe([[0.001, 0.62], [0.12, 0.62], [0.001, 0.65]], 8).translate(0.04, 0, 0));
 });
 /** A stone drain slab: a block with four slots, flush in the floor, 1 × 0.5 m. */
-const drainKit = () => carved('tt-drain', (k) => {
+export const drainKit = () => carved('tt-drain', (k) => {
   k.bx('andesite', -0.5, 0.5, 0, 0.05, -0.25, 0.25);
   for (let i = 0; i < 4; i++) k.bx('paint_minoan_black', -0.4 + i * 0.22, -0.4 + i * 0.22 + 0.1, 0.045, 0.07, -0.18, 0.18);
 });
@@ -154,6 +154,87 @@ export function weatherPyramid(bag, el) {
         const mat = spall ? 'rubble_teo' : red ? RD : 'plaster_damp';
         patch(bag, mat, c, [fx, 0, fz], w, Math.min(h, hh * 0.9), Math.floor(rand() * 1e6), spall ? 0.006 : 0.004, tilt);
         if (spall && rand() < 0.6) patch(bag, 'lime_plaster', [c[0] + (fx ? 0 : w * 0.7), Math.min(yt - 0.2, y + hp * 0.2), c[2] + (fx ? w * 0.7 : 0)], [fx, 0, fz], w * 0.8, hp * 0.7, Math.floor(rand() * 1e6), 0.009, tilt);
+      }
+    }
+  }
+}
+
+// ---- the Sun's painted bands -----------------------------------------------------------------------------------
+/**
+ * One painted motif of the Sun's red bands, drawn flat on the slope of the band (its frame: x across, y up the slope's face,
+ * z out of it — the face leaning back by `phi` from the vertical, so a point (u, w) on the face stands at (u, w cos phi, −w sin phi)).
+ * kind 'paw' (a jaguar's print: the pad, four toes, the claws), 'star' (a five-rayed star in a ring), 'rattle' (a rattlesnake's rattle, its
+ * segments in a chain). [inferred: the drawing after the subjects the sources name]
+ */
+const sunMotif = (kind, phi) => carved(`tt-sunpaint:${kind}:${Math.round(phi * 100)}`, (k) => {
+  const c = Math.cos(phi), s = Math.sin(phi);
+  const Y = 'paint_cab_yellow', W = 'stucco_pale', B = 'paint_minoan_black';
+  // a thin convex quad lying on the face: corners [u, w] in order, from n0 to n1 above it
+  const quad = (mat, q, n0 = 0.006, n1 = 0.026) => {
+    const P = (n) => q.map(([u, w]) => [u, w * c + n * s, -w * s + n * c]);
+    k.hex(mat, [...P(n0), ...P(n1)]);
+  };
+  const ngon = (mat, cu, cw, r, n, rot = 0, n0 = 0.006, n1 = 0.026) => {   // a fan of quads: a regular polygon
+    for (let i = 0; i < n; i += 2) {
+      const a = (j) => [cu + r * Math.sin(rot + (j / n) * 6.2832), cw + r * Math.cos(rot + (j / n) * 6.2832)];
+      quad(mat, [[cu, cw], a(i), a(i + 1), a(i + 2)], n0, n1);
+    }
+  };
+  if (kind === 'star') {
+    const R = 1.5, r = 0.55;
+    for (let i = 0; i < 5; i++) {
+      const a = i * 1.2566, v = (da, rr) => [rr * Math.sin(a + da), rr * Math.cos(a + da)];
+      quad(Y, [[0, 0], v(-0.6283, r), v(0, R), v(0.6283, r)]);
+    }
+    for (let i = 0; i < 5; i++) {                                                   // a white ridge down each ray
+      const a = i * 1.2566, v = (da, rr) => [rr * Math.sin(a + da), rr * Math.cos(a + da)];
+      quad(W, [[0, 0], v(-0.12, 0.45), v(0, 1.25), v(0.12, 0.45)], 0.026, 0.034);
+    }
+    ngon(B, 0, 0, 0.3, 8, 0.2, 0.026, 0.036);
+    ngon(W, 0, 0, 0.14, 4, 0.8, 0.036, 0.044);
+  } else if (kind === 'paw') {
+    quad(Y, [[-0.62, -0.95], [0.62, -0.95], [0.46, 0.1], [-0.46, 0.1]]);            // the pad
+    quad(Y, [[-0.62, -0.95], [-0.2, -1.12], [0.2, -1.12], [0.62, -0.95]]);          // its lobed foot
+    quad(B, [[-0.32, -0.7], [0.32, -0.7], [0.24, -0.2], [-0.24, -0.2]], 0.026, 0.034);   // the dark centre
+    for (const [u, w, t] of [[-0.95, 0.45, -0.35], [-0.34, 0.95, -0.1], [0.34, 0.95, 0.1], [0.95, 0.45, 0.35]]) {      // the four toes with their claws
+      const du = Math.sin(t), dw = Math.cos(t), pu = dw, pw = -du;
+      const T = (a, b) => [u + du * a + pu * b, w + dw * a + pw * b];
+      quad(Y, [T(-0.3, -0.27), T(-0.3, 0.27), T(0.3, 0.2), T(0.3, -0.2)]);
+      quad(W, [T(0.3, -0.07), T(0.3, 0.07), T(0.62, 0.02), T(0.62, -0.02)], 0.006, 0.03);
+    }
+  } else {
+    // the rattle: eight segments in a chain, the topmost the broadest and the lowest a bead; a band of white between each
+    for (let i = 0; i < 8; i++) {
+      const w1 = 1.55 - i * 0.4, w0 = w1 - 0.34, h0 = 0.55 - i * 0.045, h1 = 0.6 - i * 0.045;
+      quad(i % 2 ? W : Y, [[-h0, w0], [h0, w0], [h1, w1], [-h1, w1]]);
+      quad(B, [[-h0 * 0.5, w0 + 0.1], [h0 * 0.5, w0 + 0.1], [h1 * 0.5, w1 - 0.1], [-h1 * 0.5, w1 - 0.1]], 0.026, 0.032);
+    }
+  }
+});
+
+/**
+ * The red band under each ledge of the Sun painted with its figures: "the pyramid was finished with lime plaster … and painted with murals"; jaguar
+ * heads and paws, stars and snake rattles are among the few images that survive [stated: Wikipedia, Pyramid of the Sun]. Ours: along every
+ * face of every stage a row of paws, stars and rattles in turn, one every 6.4 m, in yellow and white with black on the red band (not across
+ * the great stair's flights nor where the Adosada stands against the foot). `el` is the tt_pyramid element (plain stages with a `band`).
+ */
+export function paintBands(bag, el) {
+  const [cx, cz] = el.c, n = el.levels, H = el.h, y0b = el.y ?? 0, band = el.band ?? 0.22;
+  const kinds = ['paw', 'star', 'rattle', 'star'];
+  for (let k = 0; k < n; k++) {
+    const t0 = k / n, t1 = (k + 1) / n, ya = y0b + H * t0, yb = y0b + H * t1, ht = yb - ya;
+    const a = [(el.w - (el.w - el.tw) * t0) / 2, (el.d - (el.d - el.td) * t0) / 2], b = [(el.w - (el.w - el.tw) * t1) / 2, (el.d - (el.d - el.td) * t1) / 2];
+    const sx = (a[0] - b[0]) * 0.85, sz = (a[1] - b[1]) * 0.85;
+    const ymid = ya + ht * (1 - band / 2), f = (ymid - ya) / ht;
+    for (const [fx, fz, fi] of [[-1, 0, 0], [1, 0, 1], [0, -1, 2], [0, 1, 3]]) {
+      const half = (fx ? a[1] - sz * f : a[0] - sx * f) - 2.5, ext = fx ? a[0] - sx * f : a[1] - sz * f, phi = Math.round(Math.atan2(fx ? sx : sz, ht) * 50) / 50;
+      const count = Math.floor(2 * half / 6.4), yaw = Math.atan2(fx, fz);
+      for (let i = 0; i < count; i++) {
+        const u = -half + (2 * half) * (i + 0.5) / count;
+        if (fx < 0 && el.stair === 'w' && k > 0 && Math.abs(u) < (el.stairW ?? 12) / 2 + 2.2) continue;           // the great stair's flight
+        if (fx < 0 && k === 0 && Math.abs(u) < (el.hide ?? 0)) continue;                                           // the Adosada against the foot
+        const kind = kinds[(i + fi + k) % 4];
+        inst(bag, sunMotif(kind, phi), fx ? cx + fx * ext : cx + u, ymid, fx ? cz + u : cz + fz * ext, yaw, 1.15, 120);
       }
     }
   }
