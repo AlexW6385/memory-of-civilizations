@@ -27,6 +27,8 @@ const rooms = [
   room('classroom', [-58, -25.6, -47.4, -18.5], 0, 'hall'),
   room('khanqah hall', [KHANQAH.rect[2] - 17, -6, KHANQAH.rect[2] - 5, 6], 0, 'hall'),
   room('library', [-58, 18.5, -47.4, 25.6], 0, 'hall'),
+  room('lecture hall', [-117.4, -24.4, -108, -18], 0, 'hall'),
+  room('hall of the sciences', [-117.4, 18, -108, 24.4], 0, 'hall'),
   room('mosque', [-117.4, -17.4, -114, 17.4], 0, 'hall'),
   room('pishtaq passage', [-59, zm - 6, -45, zm + 6], 0, 'hall'),
 ];
