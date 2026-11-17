@@ -11,6 +11,7 @@
 import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { Matrix4 } from '../../core/three.js';
 import { raise, strip } from '../achaemenid/reliefs.js';
+import { acanthusCapital, obeliskBase, dentilsAlong, tholosDress, urnDress, lowerMouldings, aedicule, pavilionMouldings, bedding } from './khazneh-detail.js';
 
 const R = 'sandstone_rose';
 // the dressed order (columns, entablatures, pediments) in the paler stone, the recesses behind it in the deep rose: the façade is lit from the side and in shade by afternoon, so the order must stand out from the cliff by its tone as well as its relief
@@ -26,12 +27,16 @@ export function frame(x, z, dir) {
 
 // ---- outlines (facing +u, feet at 0, height 1)
 const O = {
-  youth: [[-0.09, 0], [0.08, 0], [0.06, 0.03], [0.05, 0.25], [0.06, 0.48], [0.09, 0.55], [0.07, 0.62], [0.075, 0.72], [0.06, 0.8], [0.12, 0.85], [0.2, 0.82],
-    [0.21, 0.86], [0.12, 0.9], [0.06, 0.88], [0.07, 0.92], [0.08, 0.96], [0.05, 1.0], [-0.04, 0.99], [-0.06, 0.93], [-0.05, 0.88], [-0.09, 0.82],
-    [-0.13, 0.7], [-0.14, 0.45], [-0.1, 0.42], [-0.07, 0.5], [-0.05, 0.25], [-0.07, 0.03]],
-  horse: [[-0.5, 0], [-0.44, 0], [-0.4, 0.3], [-0.35, 0.45], [0.2, 0.45], [0.24, 0.3], [0.22, 0], [0.28, 0], [0.3, 0.32], [0.33, 0.55], [0.38, 0.7],
-    [0.46, 0.8], [0.55, 0.8], [0.6, 0.84], [0.58, 0.9], [0.48, 0.97], [0.45, 1.0], [0.42, 0.95], [0.36, 0.9], [0.25, 0.72], [-0.3, 0.68], [-0.45, 0.62],
-    [-0.55, 0.5], [-0.58, 0.3], [-0.54, 0.3], [-0.5, 0.5], [-0.46, 0.45], [-0.47, 0.3], [-0.52, 0.02]],
+  // the Dioscurus: nude, the pilos on his head, the chlamys falling from the shoulder behind him, the spear held out at his side
+  youth: [[0.09, 0], [0.09, 0.03], [0.05, 0.06], [0.055, 0.22], [0.07, 0.3], [0.06, 0.46], [0.075, 0.5], [0.07, 0.6], [0.075, 0.7], [0.085, 0.78],
+    [0.06, 0.82], [0.065, 0.86], [0.075, 0.9], [0.065, 0.93], [0.07, 0.95], [0.03, 1.0], [-0.04, 0.97], [-0.065, 0.92], [-0.05, 0.86], [-0.09, 0.8],
+    [-0.13, 0.76], [-0.17, 0.6], [-0.19, 0.42], [-0.155, 0.36], [-0.13, 0.43], [-0.085, 0.52], [-0.07, 0.46], [-0.065, 0.3], [-0.05, 0.22],
+    [-0.045, 0.06], [-0.085, 0.03]],
+  // the horse standing, the arched neck with its mane, the ears pricked, the legs apart
+  horse: [[-0.46, 0], [-0.37, 0], [-0.385, 0.12], [-0.36, 0.3], [-0.3, 0.43], [-0.2, 0.43], [-0.1, 0.42], [0.05, 0.42], [0.15, 0.44], [0.17, 0.3],
+    [0.16, 0.2], [0.16, 0.04], [0.14, 0], [0.25, 0], [0.245, 0.05], [0.24, 0.2], [0.26, 0.34], [0.3, 0.46], [0.33, 0.58], [0.38, 0.68], [0.46, 0.76],
+    [0.55, 0.76], [0.6, 0.8], [0.62, 0.86], [0.57, 0.9], [0.5, 0.95], [0.46, 1.0], [0.43, 0.95], [0.4, 0.97], [0.33, 0.88], [0.2, 0.76], [0.1, 0.7],
+    [-0.1, 0.7], [-0.28, 0.72], [-0.42, 0.7], [-0.5, 0.62], [-0.53, 0.52], [-0.5, 0.42], [-0.47, 0.3], [-0.5, 0.15], [-0.5, 0.05]],
   amazon: [[-0.1, 0], [0.08, 0], [0.06, 0.03], [0.05, 0.3], [0.08, 0.38], [0.06, 0.55], [0.07, 0.7], [0.06, 0.8], [0.07, 0.86], [0.08, 0.93], [0.03, 1.0],
     [0.05, 1.15], [0.12, 1.13], [0.13, 1.25], [0.05, 1.22], [0.0, 1.26], [-0.07, 1.25], [-0.06, 1.13], [0.0, 1.15], [-0.01, 1.0], [-0.05, 0.95],
     [-0.05, 0.86], [-0.08, 0.8], [-0.07, 0.55], [-0.1, 0.38], [-0.06, 0.3], [-0.07, 0.03]],
@@ -50,8 +55,8 @@ const O = {
     [0.35, 0.85], [0.25, 0.72], [-0.45, 0.62], [-0.6, 0.55], [-0.7, 0.66], [-0.74, 0.64], [-0.62, 0.45], [-0.58, 0.3]],
 };
 const D = {
-  youth: [[-0.13, 0.7, 0.04, 0.8], [0.0, 0.03, 0.0, 0.45]],
-  horse: [[0.25, 0.72, 0.36, 0.9], [-0.3, 0.45, -0.28, 0.66], [0.46, 0.8, 0.5, 0.9]],
+  youth: [[0.07, 0.72, 0.17, 0.6], [0.17, 0.0, 0.17, 1.08], [0.0, 0.05, 0.0, 0.4]],
+  horse: [[0.4, 0.97, 0.2, 0.76], [0.57, 0.86, 0.5, 0.93], [-0.5, 0.66, -0.6, 0.3], [-0.05, 0.43, -0.05, 0.05]],
   amazon: [[-0.08, 0.38, 0.08, 0.38], [-0.06, 0.62, 0.06, 0.62]],
   victory: [[-0.12, 0.6, -0.28, 0.95], [-0.02, 0.05, 0.0, 0.5]],
   goddess: [[0.0, 0.05, 0.0, 0.55], [-0.08, 0.62, 0.08, 0.62]],
@@ -88,11 +93,15 @@ export function floralCapital(bag, mat, x, y, z, r, h) {
   bag.add(mat, box(x - r * 1.42, y + 0.82 * h, z - r * 1.42, x + r * 1.42, y + h, z + r * 1.42));
 }
 /** A column of the façade: Attic base, smooth shaft, floral capital. */
-function column(bag, x, z, y, h, r, C, coll = true) {
+function column(bag, x, z, y, h, r, C, coll = true, full = true) {
   bag.add(L, lathe([[r * 1.42, 0], [r * 1.42, 0.12], [r * 1.3, 0.2], [r * 1.18, 0.28], [r * 1.26, 0.38], [r * 1.12, 0.48], [r * 1.0, 0.55]], 16, null, x, y, z));
   const capH = Math.min(1.45, h * 0.12);
   bag.add(L, lathe([[r, 0], [r * 0.9, h - 0.55 - capH]], 16, null, x, y + 0.55, z));
-  floralCapital(bag, L, x, y + h - capH, z, r * 0.9, capH);
+  // the joints of the drums, a ring each and the astragal under the capital
+  const nd = Math.max(2, Math.round(h / 2.9)), jt = 1 + (Math.abs(Math.round(x * 7 + z * 13)) % 11) * 0.0015;   // (a millimetre or two apart, so that the columns' rings merge and are not instanced)
+  for (let k = 1; k < nd; k++) bag.add(L, lathe([[r * 0.93 * jt, 0], [r * 0.97 * jt, 0.03], [r * 0.97 * jt, 0.07], [r * 0.93 * jt, 0.1]], 16, null, x, y + 0.55 + (h - 0.55 - capH) * k / nd, z));
+  bag.add(L, lathe([[r * 0.9 * jt, 0], [r * 0.99 * jt, 0.05], [r * 0.99 * jt, 0.12], [r * 0.9 * jt, 0.17]], 16, null, x, y + h - capH - 0.17, z));
+  acanthusCapital(bag, L, x, y + h - capH, z, r * 0.9, capH, full);
   if (coll) C.circle(x, z, r, y, y + h);
 }
 /** A prism of the convex outline [[u, y], …] in the façade plane, from v0 to v1. */
@@ -217,15 +226,17 @@ export function khazneh(el, { bag, col: C, lights }) {
   for (const s of [-1, 1]) {
     bag.add(RC, B(s < 0 ? -hw : pu, 0, s < 0 ? -pu : hw, 1.75, yb, 13.5)); C.rect(Rc(s < 0 ? -hw : pu, 0, s < 0 ? -pu : hw, 1.75), yb, 13.5);
     const face = (u, v, w) => { const [px, pz] = P(u, 1.75 + w); return [px, yb + 0.6 + v, pz]; };
-    fig(bag, 'horse', face, s * 9.35, 0.4, 2.6, -s, 0.28);
-    fig(bag, 'youth', face, s * 9.0, 0, 3.0, -s, 0.45);
-    bag.add(R, B(s * 9.35 - 0.9, 1.75, s * 9.35 + 0.9, 2.1, yb, yb + 0.6));            // the figures' plinth
+    fig(bag, 'horse', face, s * 9.9, 0, 2.5, -s, 0.28);
+    fig(bag, 'youth', face, s * 8.1, 0, 3.2, -s, 0.45);
+    bag.add(R, B(s * 9.35 - 2.4, 1.75, s * 9.35 + 2.4, 2.15, yb, yb + 0.6));            // the figures' plinth
+    aedicule(bag, { L }, P, B, prismUY, s, yb, 6.4);
   }
   // the entablature: architrave in three fasciae, the frieze, the cornice on its dentils
   for (const [y0, y1, dv] of [[13.44, 13.78, 2.86], [13.78, 14.08, 2.92], [14.08, 14.4, 2.98]]) bag.add(L, B(-hw - 0.15, -0.3, hw + 0.15, dv, y0, y1));
   bag.add(L, B(-hw - 0.15, -0.3, hw + 0.15, 2.88, 14.4, 15.4));
   for (let u = -hw + 0.2; u < hw - 0.1; u += 0.38) bag.add(L, B(u, 2.88, u + 0.2, 3.1, 15.22, 15.4));
   bag.add(L, B(-hw - 0.45, -0.3, hw + 0.45, 3.3, 15.4, 16.2));
+  lowerMouldings(bag, { L, R }, B, hw);
   // the shadow line under the great cornice and the dark of the frieze's ground, so that the griffins and vases read
   bag.add(RC, B(-hw + 0.1, 2.9, hw - 0.1, 3.0, 14.42, 15.2));
   const frieze = (u, v, w) => { const [px, pz] = P(u, 2.88 + w); return [px, 14.45 + v, pz]; };
@@ -237,6 +248,7 @@ export function khazneh(el, { bag, col: C, lights }) {
   const pw = 7.9, pr = 3.0, py = 16.2;
   prismUY(bag, P, [[-pw, py], [pw, py], [0, py + pr]], -0.2, 2.9, RC);
   rake(bag, P, -pw - 0.35, py, 0, py + pr + 0.05, 0.42, -0.2, 3.4); rake(bag, P, 0, py + pr + 0.05, pw + 0.35, py, 0.42, -0.2, 3.4);
+  dentilsAlong(bag, L, P, prismUY, -pw - 0.35, py, 0, py + pr + 0.05, 0.38, 0.2, 0.22, 2.85, 3.3); dentilsAlong(bag, L, P, prismUY, 0, py + pr + 0.05, pw + 0.35, py, 0.38, 0.2, 0.22, 2.85, 3.3);
   const tym = (u, v, w) => { const [px, pz] = P(u, 2.9 + w); return [px, py + v, pz]; };
   for (const s of [-1, 1]) for (let k = 0; k < 6; k++) {
     const u0 = s * (0.8 + k * 1.05), u1 = s * (1.3 + k * 1.05), v0 = 0.45 + 0.4 * Math.sin(k * 1.7), v1 = 0.45 + 0.4 * Math.sin(k * 1.7 + 1.4);
@@ -258,7 +270,7 @@ export function khazneh(el, { bag, col: C, lights }) {
   for (const s of [-1, 1]) {
     const uo = s * hw, ui = s * (hw - 6.2), ue = s * (hw + 0.3);                                  // (ue: into the flank's rock)
     bag.add(RC, B(Math.min(ue, ui), 0, Math.max(ue, ui), 0.18, ya, yt));                      // the dark recess behind the pavilion's columns
-    for (const u of [s * (hw - 0.9), s * (hw - 5.3)]) { const [cx, cz] = P(u, 1.5); column(bag, cx, cz, ya, uc, ur, C); }
+    for (const u of [s * (hw - 0.9), s * (hw - 5.3)]) { const [cx, cz] = P(u, 1.5); column(bag, cx, cz, ya, uc, ur, C, true, false); }
     const back = (u, v, w) => { const [px, pz] = P(u, w); return [px, ya + 0.3 + v, pz]; };
     fig(bag, 'amazon', back, s * (hw - 3.1), 0, 4.6, -s, 0.35);
     fig(bag, 'victory', back, s * 4.9, 0, 4.8, -s, 0.3);
@@ -268,19 +280,23 @@ export function khazneh(el, { bag, col: C, lights }) {
     const yp = yt + 1.4;
     prismUY(bag, P, [[uo, yp], [ui, yp], [ui, yp + 2.2]], -0.2, 2.0, RC);
     rake(bag, P, s < 0 ? uo - 0.3 : ui, s < 0 ? yp : yp + 2.25, s < 0 ? ui : uo + 0.3, s < 0 ? yp + 2.25 : yp, 0.38, -0.2, 2.45);
-    const ef = (u, v, w) => { const [px, pz] = P(u, 0.5 + w); return [px, yp + 2.2 + v, pz]; };
-    fig(bag, 'eagle', ef, ui - s * 1.1, 0, 2.3, 1, 1.0);
+    const ef = (u, v, w) => { const [px, pz] = P(u, 0.5 + w); return [px, yp + 1.95 + v, pz]; };
+    raise(bag, L, O.eagle, 'nab-eagle', ef, ui + s * 1.9, 0, 2.3, 1, 0.3, D.eagle);
     // the base of the obelisk above, running up into the rock
-    bag.add(R, B(ui - s * 1.7 - 0.6, -0.2, ui - s * 1.7 + 0.6, 0.6, yp + 2.2, yp + 4.4));
+    obeliskBase(bag, L, P, ui - s * 0.1, 0.28, yp + 2.62, 36.9, 1.3, 0.96, 1.0, 0.6);
+    pavilionMouldings(bag, { L, R }, P, prismUY, B, s, ue, ui, yt, yp);
   }
   // the tholos: its drum, the ring of columns, Isis-Tyche before the drum, the entablature, the conical roof, the capital and the urn
   const [tx, tz] = P(0, -0.3), tr = 3.3;
   bag.add(RC, lathe([[2.4, 0], [2.4, uc]], 24, null, tx, ya, tz));
-  for (const a of [-90, -55, -20, 20, 55, 90]) { const t = a * Math.PI / 180, [cx, cz] = P(Math.sin(t) * tr, -0.3 + Math.cos(t) * tr); column(bag, cx, cz, ya, uc, ur, C); }
+  for (const a of [-90, -55, -20, 20, 55, 90]) { const t = a * Math.PI / 180, [cx, cz] = P(Math.sin(t) * tr, -0.3 + Math.cos(t) * tr); column(bag, cx, cz, ya, uc, ur, C, true, false); }
   fig(bag, 'goddess', (u, v, w) => { const [px, pz] = P(u, 2.0 + w); return [px, ya + 0.4 + v, pz]; }, 0, 0, 3.6, 1, 0.35);
   bag.add(L, lathe([[2.3, 0], [tr + 0.5, 0], [tr + 0.5, 0.8], [tr + 0.75, 0.9], [tr + 0.75, 1.4], [0.001, 1.4]], 28, null, tx, yt, tz));
   bag.add(L, lathe([[tr + 0.3, 0], [tr + 0.1, 0.3], [0.9, 4.0], [0.001, 4.0]], 28, null, tx, yt + 1.4, tz));
-  floralCapital(bag, L, tx, yt + 5.4, tz, 0.62, 1.2);
+  acanthusCapital(bag, L, tx, yt + 5.4, tz, 0.62, 1.2);
+  tholosDress(bag, { L, RC }, P, tx, tz, ya, yt, tr);
+  urnDress(bag, L, tx, tz, yt + 6.6);
+  bedding(bag, R, B, hw, 32.55, 37.6);
   bag.add(L, lathe([[0.55, 0], [0.38, 0.35], [0.85, 1.1], [1.0, 1.9], [0.8, 2.6], [0.42, 2.95], [0.58, 3.2], [0.001, H - (yt + 6.6) ]], 16, null, tx, yt + 6.6, tz));
   // ---- the portico: the great door under its pediment; the side chambers' doors, round windows above
   for (const s of [-1, 1]) bag.add(L, B(s * 1.5 - (s > 0 ? 0 : 0.5), pv, s * 1.5 + (s > 0 ? 0.5 : 0), pv + 0.3, yb, yb + 7.5));

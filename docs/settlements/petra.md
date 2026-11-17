@@ -173,6 +173,11 @@ Sources added:
 - [Nymphaeum — Petra Development and Tourism Region Authority](https://padc.pdtra.gov.jo/en/sitesdtls/20/Nymphaeum)
 - [Research Unearths Terrace Farming at Ancient Desert City of Petra — University of Cincinnati](https://uc.edu/news/articles/legacy/enews/2013/01/e17078.html)
 
+## 21. The Khazneh seen close (round 2, 2026-11-17; `src/styles/nabataean/khazneh-detail.js`)
+
+- **Sources.** Smarthistory and Rough Guides as in §10: Corinthian columns, the Dioscuri at ground level, Amazons and Victories, eagles on the broken pediments, the obelisk bases above them running into the rock, the tholos with Isis-Tyche under the urn, vine scrolls, kantharoi and rosettes [stated]. The Nabataean capitals are floral/acanthus Corinthian variants, with two rows of leaves, corner volutes and an abacus with concave sides [stated: Smarthistory; Wikipedia "Corinthian order" for the parts]. The tholos's conical roof is tiered, the urn gadrooned with loop handles in photographs [inferred from photographs, not a cited text].
+- **Ours.** The sixteen columns' capitals (acanthus: two rows of eight three-lobed leaves with curling tips, eight volutes, four helices, an abacus with concave sides and a flower on each face; lighter on the small upper columns), astragals and drum joints on the shafts; the tholos on a two-step stylobate with its drum's base and cornice, a frieze of upright bands and a dentil course, the roof in six stepped tiers with fourteen ribs and a collar of leaves under its capital; the urn with twelve gadroons and two loop handles; dentils under the raking cornices of the central pediment, dentils and cornice returns on the broken half-pediments, the eagles in the pale stone on their slopes and tapering obelisk bases standing on the returns; an aedicule (pilasters, architrave, cornice, pediment) round each Dioscurus, the figures redrawn larger (the nude youth in the pilos with the chlamys and spear, the horse with its arched neck and mane) and standing between the columns; an egg-and-dart on the architrave, a sima with antefixes over the great cornice; ledges of bedding across the dressed rock above the pavilions [inferred: sizes, proportions and the figures' poses].
+
 ## Sources
 
 - [Carved in Stone: The Ancient City of Petra — Live Science](https://www.livescience.com/59707-google-maps-of-petra-photos.html)
