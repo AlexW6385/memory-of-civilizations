@@ -145,6 +145,11 @@ function house(el, ctx) {
     if (c < doorK) { add(m, box(-hw - o, a, -hd - o, -dw, b, -hd + wt)); add(m, box(dw, a, -hd - o, hw + o, b, -hd + wt)); }
     else add(m, box(-hw - o, a, -hd - o, hw + o, b, -hd + wt));
   }
+  // the wall posts: a stout post at each corner and paired uprights between which the wall boards are slotted, a hand proud of the boards
+  for (const su of [-1, 1]) for (const sv of [-1, 1]) add('log_pine', box(su > 0 ? hw - 0.22 : -hw - 0.08, y0, sv > 0 ? hd - 0.22 : -hd - 0.08, su > 0 ? hw + 0.08 : -hw + 0.22, yTop - 0.02, sv > 0 ? hd + 0.08 : -hd + 0.22));
+  { const nS = Math.max(2, Math.floor(el.d / 3.2)), nB = Math.max(2, Math.floor(el.w / 3.2));
+    for (let i = 1; i < nS; i++) for (const dv of [-0.17, 0.17]) { const v = -hd + i * el.d / nS + dv; for (const su of [-1, 1]) add('log_pine', box(su > 0 ? hw - 0.02 : -hw - 0.07, y0, v - 0.05, su > 0 ? hw + 0.07 : -hw + 0.02, yTop - 0.02, v + 0.05)); }
+    for (let i = 1; i < nB; i++) for (const du of [-0.17, 0.17]) { const u = -hw + i * el.w / nB + du; add('log_pine', box(u - 0.05, y0, hd - 0.02, u + 0.05, yTop - 0.02, hd + 0.07)); } }
   // the gable ends over the walls: a triangle of boards, split by thin battens
   for (const s of [-1, 1]) {
     const v0 = s > 0 ? hd - wt : -hd, v1 = s > 0 ? hd : -hd + wt;
@@ -206,9 +211,34 @@ function house(el, ctx) {
   const slabs = (rs, y, m) => { for (const r of rs) { add(m, box(r[0], y - 0.4, r[1], r[2], y, r[3])); floorL(r, y); } };
   slabs(T.ledge, yL, 'timber'); slabs(T.low, yLo, 'planks_grey');
   floorL([-dw, -hd, dw, -hd + 0.4], g); add('timber', box(-dw, g - 0.1, -hd - 0.05, dw, g, -hd + 0.4));          // the sill
+  // the lips of the tiers: upright planks facing each drop, a squared timber along the top edge, dark battens at the seams
+  { const lipU = (e, sg, v0, v1, yT) => {
+      const a = sg > 0 ? e : e - 0.03, b = sg > 0 ? e + 0.03 : e;
+      add('cedar', box(a, yT - 0.4, v0, b, yT, v1)); add('timber', box(sg > 0 ? e - 0.14 : e - 0.03, yT, v0, sg > 0 ? e + 0.03 : e + 0.14, yT + 0.07, v1));
+      for (let v = v0 + 0.9; v < v1 - 0.3; v += 1.1) add('wood_dark', box(sg > 0 ? e + 0.03 : e - 0.042, yT - 0.4, v - 0.02, sg > 0 ? e + 0.042 : e - 0.03, yT, v + 0.02));
+    };
+    const lipV = (e, sg, u0, u1, yT) => {
+      const a = sg > 0 ? e : e - 0.03, b = sg > 0 ? e + 0.03 : e;
+      add('cedar', box(u0, yT - 0.4, a, u1, yT, b)); add('timber', box(u0, yT, sg > 0 ? e - 0.14 : e - 0.03, u1, yT + 0.07, sg > 0 ? e + 0.03 : e + 0.14));
+      for (let u = u0 + 0.9; u < u1 - 0.3; u += 1.1) add('wood_dark', box(u - 0.02, yT - 0.4, sg > 0 ? e + 0.03 : e - 0.042, u + 0.02, yT, sg > 0 ? e + 0.042 : e - 0.03));
+    };
+    const t1 = 2.0, t2 = 3.4, fr = 1.4, HW = T.hw, HD = T.hd;
+    lipU(-HW + t1, 1, -HD + fr, HD - t1, yL); lipU(HW - t1, -1, -HD + fr, HD - t1, yL);
+    lipV(HD - t1, -1, -HW + t1, HW - t1, yL); lipV(-HD + fr, 1, -HW + t1, HW - t1, yL);
+    lipU(-HW + t2, 1, -HD + fr + 1.4, HD - t2 + 0.6, yLo); lipU(HW - t2, -1, -HD + fr + 1.4, HD - t2 + 0.6, yLo);
+    lipV(HD - t2 + 0.6, -1, -HW + t2, HW - t2, yLo); lipV(-HD + fr + 1.4, 1, -HW + t2, HW - t2, yLo);
+  }
   // the pit's floor of beaten earth is the ground itself; the hearth: a ring of boulders, the fire, the stacked wood
   const hs = 1.1;
-  for (const [a, b, c2, d] of [[-hs, -hs, hs, -hs + 0.28], [-hs, hs - 0.28, hs, hs], [-hs, -hs, -hs + 0.28, hs], [hs - 0.28, -hs, hs, hs]]) add('rock_boulder', box(a, yP, b, c2, yP + 0.34, d));
+  // a ring of rounded fire stones round a bed of ash, the burnt ends of logs laid radially
+  { const hr = rng(el.seed + 21), n = 24;
+    for (let k = 0; k < n; k++) {
+      const t = k / n * 4, sd = Math.floor(t), f = (t - sd) * 2 * hs, x = [-hs + f, hs, hs - f, -hs][sd], z = [-hs, -hs + f, hs, hs - f][sd], q = 0.75 + hr() * 0.55;
+      add('rock_boulder', lathe([[0.27 * q, -0.04], [0.26 * q, 0.08 * q], [0.18 * q, 0.22 * q], [0.001, 0.27 * q]], 7, null, x, yP, z));
+    }
+    add('bitumen', lathe([[0.95, 0], [0.9, 0.035], [0.001, 0.045]], 12, null, 0, yP, 0));
+    for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + 0.4; add('wood_dark', rod([Math.cos(a) * 0.12, yP + 0.1, Math.sin(a) * 0.12], [Math.cos(a) * 0.8, yP + 0.17, Math.sin(a) * 0.8], 0.065, 5)); }
+  }
   add('flame', lathe([[0.28, 0], [0.22, 0.2], [0.001, 0.5]], 7, null, 0, yP + 0.05, 0)); add('wood_dark', box(-0.5, yP, -0.12, 0.5, yP + 0.14, 0.12));
   for (let k = 0; k < 8; k++) add('log_pine', rod([-hs - 0.9 + (k % 2) * 0.05, yP + 0.14 + Math.floor(k / 2) * 0.14, -hs + 0.3 * k * 0.3 - 0.3], [-hs - 0.9 + (k % 2) * 0.05, yP + 0.14 + Math.floor(k / 2) * 0.14, -hs + 0.3 * k * 0.3 + 0.8], 0.06, 6));
   if (lights) { const [lx, lz] = W(0, 0); lights.push({ at: [lx, yP + 0.7, lz], color: '#ff9a4a', intensity: 3.4, distance: 9 }); const [hx, hz] = W(2.2, 0); lights.push({ at: [hx, g + 3.6, hz], color: '#d9e4f2', intensity: 1.0, distance: 7 }); }
@@ -228,11 +258,33 @@ function house(el, ctx) {
   }
   add('timber', rod([0, ridgeY - 0.35, -hd + 0.3], [0, ridgeY - 0.35, hd - 0.3], 0.16, 7));
   for (const v of [-pv, pv]) add('timber', rod([-pu, bY, v], [pu, bY, v], 0.2, 7));
+  // the six beams' company: the wall plates on the tops of the side walls, the rafters from the ridge down over purlin, beam and plate
+  // (their tails showing under the eaves), and the frame over the fire on which split salmon hang in the smoke
+  for (const s2 of [-1, 1]) add('timber', rod([s2 * (hw - wt / 2), yTop, -hd + 0.3], [s2 * (hw - wt / 2), yTop, hd - 0.3], 0.13, 7));
+  for (let v = vF + 0.25; v < vB - 0.2; v += 0.95) {
+    const near = hole && Math.abs(v) < hole.v + 0.1, u0 = near ? hole.u + 0.15 : 0.2;
+    for (const s2 of [-1, 1]) add('log_pine', rod([s2 * u0, yAt(u0) - 0.14, v], [s2 * (R - 0.15), yAt(R - 0.15) - 0.14, v], 0.045, 5));
+  }
+  { const fr = rng(el.seed + 33), py = bY - 0.75;
+    for (const v of [-0.5, 0.5]) {
+      add('timber', rod([-pu + 0.2, py, v], [pu - 0.2, py, v], 0.04, 5));
+      for (const s2 of [-1, 1]) add('rope_fibre', rod([s2 * (pu - 0.25), bY, v], [s2 * (pu - 0.25), py, v], 0.012, 3));
+      for (let u = -pu + 0.5; u < pu - 0.4; u += 0.3) {
+        const l = 0.5 + fr() * 0.25;
+        add(fr() < 0.55 ? 'hide_brown' : 'cloth_ochre', ellipse(u, py - 0.3 + 0.02 - (l - 0.6) / 2, 0.075, l / 2, v - 0.025, v + 0.025, 8));
+        add('wood_dark', rod([u - 0.1, py - 0.3, v], [u + 0.1, py - 0.3, v], 0.008, 3));
+      }
+    }
+  }
   // the sleeping places: platforms on the ledge along the left, right and back, divided by upright plank screens;
   // mats and hides on them; the chief's quarter behind the painted screen at the back
   const beds = [[-hwI, -hdI + 1.5, -hwI + 1.5, hdI - 2.0], [hwI - 1.5, -hdI + 1.5, hwI, hdI - 2.0]];
   for (const [u0, v0, u1, v1] of beds) {
     add('timber', box(u0, yL, v0, u1, yL + 0.3, v1)); rectL(u0, v0, u1, v1, yL, yL + 0.3);
+    // the platform's front: a plank face with seams, capped with a squared timber
+    { const left = u0 < 0, e = left ? u1 : u0, a = left ? e : e - 0.04, b = left ? e + 0.04 : e;
+      add('cedar', box(a, yL, v0, b, yL + 0.3, v1)); add('timber', box(left ? e - 0.02 : e - 0.07, yL + 0.3, v0, left ? e + 0.07 : e + 0.02, yL + 0.34, v1));
+      for (let v = v0 + 0.9; v < v1 - 0.3; v += 0.9) add('wood_dark', box(left ? e + 0.04 : e - 0.052, yL, v - 0.015, left ? e + 0.052 : e - 0.04, yL + 0.3, v + 0.015)); }
     const n = 4, L = (v1 - v0) / n;
     for (let k = 0; k < n; k++) {
       const va = v0 + k * L, vb = va + L;
@@ -266,6 +318,8 @@ function house(el, ctx) {
     }
   }
   add('timber', box(-hwI + 1.5, yL, sv + 0.2, hwI - 1.5, yL + 0.3, hdI)); rectL(-hwI + 1.5, sv + 0.2, hwI - 1.5, hdI, yL, yL + 0.3);
+  add('cedar', box(-hwI + 1.5, yL, sv + 0.16, hwI - 1.5, yL + 0.3, sv + 0.2)); add('timber', box(-hwI + 1.5, yL + 0.3, sv + 0.13, hwI - 1.5, yL + 0.34, sv + 0.22));
+  for (let u = -hwI + 2.4; u < hwI - 1.8; u += 0.9) add('wood_dark', box(u - 0.015, yL, sv + 0.148, u + 0.015, yL + 0.3, sv + 0.16));
   add('hide_brown', box(-hwI + 1.9, yL + 0.3, sv + 0.4, 0, yL + 0.4, hdI - 0.2));
   // pigments (red ochre, black) and the grinding stone by the screen; the carved dish
   add(RED, lathe([[0.1, 0], [0.08, 0.08], [0.001, 0.1]], 8, null, 1.3, yL + 0.3, sv + 0.6)); add(BLK, lathe([[0.1, 0], [0.08, 0.08], [0.001, 0.1]], 8, null, 1.6, yL + 0.3, sv + 0.7));
@@ -275,6 +329,10 @@ function house(el, ctx) {
     const B = placer(bag, sub(M, u, yy, v, yaw2)); B('cedar', box(-w / 2, 0, -d / 2, w / 2, hh, d / 2));
     B(BLK, box(-w / 2 + 0.06, hh * 0.35, -d / 2 - 0.015, w / 2 - 0.06, hh * 0.85, -d / 2)); B(RED, ellipse(0, hh * 0.6, w * 0.22, hh * 0.18, -d / 2 - 0.03, -d / 2 - 0.005));
     B('timber', box(-w / 2 - 0.02, hh, -d / 2 - 0.02, w / 2 + 0.02, hh + 0.04, d / 2 + 0.02));
+    // the kerf round the foot (the plank was steamed and bent at three corners), the lid's painted panel
+    B('wood_dark', box(-w / 2 - 0.006, hh * 0.1, -d / 2 - 0.006, w / 2 + 0.006, hh * 0.1 + 0.02, -d / 2)); B('wood_dark', box(-w / 2 - 0.006, hh * 0.1, d / 2, w / 2 + 0.006, hh * 0.1 + 0.02, d / 2 + 0.006));
+    B('wood_dark', box(-w / 2 - 0.006, hh * 0.1, -d / 2, -w / 2, hh * 0.1 + 0.02, d / 2)); B('wood_dark', box(w / 2, hh * 0.1, -d / 2, w / 2 + 0.006, hh * 0.1 + 0.02, d / 2));
+    B(BLK, box(-w * 0.3, hh + 0.02, -d * 0.26, w * 0.3, hh + 0.056, d * 0.26)); B(RED, box(-w * 0.17, hh + 0.02, -d * 0.14, w * 0.17, hh + 0.066, d * 0.14));
   };
   for (let k = 0; k < 9; k++) {
     const side = k % 2 ? 1 : -1, v = -hdI + 2.0 + (k >> 1) * 1.7 + rand() * 0.3, u = side * (hwI - 0.45), yy = yL + 0.36;
@@ -535,6 +593,13 @@ function canoe(el, ctx) {
   const zb = -L / 2, yb = sheer(-1) + 0.0;
   add(BLK, sideprism([[zb + 0.55, yb - 0.1], [zb - 0.1, yb + 0.1], [zb - 0.5, yb + Dp * 1.2], [zb - 0.25, yb + Dp * 1.5], [zb + 0.05, yb + Dp * 1.25], [zb + 0.5, yb + 0.25]], -0.13, 0.13));
   add(RED, sideprism([[zb - 0.1, yb + Dp * 0.6], [zb - 0.35, yb + Dp * 1.1], [zb - 0.18, yb + Dp * 1.18], [zb + 0.1, yb + Dp * 0.72]], -0.14, 0.14));
+  // the painted eye of the formline on each cheek of the bow piece (black ovoid, red within, black pupil), generic
+  { const zc = zb - 0.02, yc = yb + Math.max(0.3, Dp * 0.62), side = (x0, x1, m, rx, ry) => add(m, ellipse(-zc, yc, rx, ry, x0, x1, 12).rotateY(Math.PI / 2));
+    for (const sg of [-1, 1]) {
+      const f = (a, b) => (sg > 0 ? [a, b] : [-b, -a]);
+      side(...f(0.13, 0.15), BLK, 0.17, 0.12); side(...f(0.15, 0.165), RED, 0.1, 0.07); side(...f(0.165, 0.175), BLK, 0.035, 0.035);
+      add(BLK, board([-zc - 0.2, yc + 0.17], [-zc + 0.15, yc + 0.2], 0.04, ...f(0.13, 0.15)).rotateY(Math.PI / 2));
+    } }
   const zs = L / 2, ys = sheer(1);
   add(wood, sideprism([[zs - 0.5, ys - 0.1], [zs + 0.1, ys + 0.05], [zs + 0.3, ys + Dp * 0.5], [zs + 0.05, ys + Dp * 0.55], [zs - 0.4, ys + 0.2]], -0.1, 0.1));
   // thwarts, a bailer, paddles laid in
@@ -544,15 +609,32 @@ function canoe(el, ctx) {
   col.circle(el.c[0], el.c[1], 0.4, el.y, el.y + 0.01);
 }
 
-/** haida_rack: a drying rack of two posts and two rails, strings of split halibut and salmon hanging on it. { c, yaw, w, y, seed } */
+/**
+ * haida_rack: a drying rack: two forked posts braced with leaning props, three rails lashed on with cord; on the top rail split salmon, each
+ * held open by a spreader stick; on the middle rail halibut in wide strips; on the low rail a few strings of smaller fish; a basket below
+ * the catch. { c, yaw, w, y, seed } [inferred: the rack's form; the dossier §5c]
+ */
 function rack(el, { bag, col }) {
   const rand = rng(el.seed), add = placer(bag, frame(el.c[0], el.y, el.c[1], el.yaw)), w = el.w;
-  for (const s of [-1, 1]) add('log_pine', rod([s * w / 2, -0.3, 0], [s * w / 2, 2.8, 0], 0.09, 6));
-  for (const yy of [1.8, 2.6]) add('log_pine', rod([-w / 2 - 0.1, yy, 0], [w / 2 + 0.1, yy, 0], 0.05, 6));
-  for (let u = -w / 2 + 0.2; u < w / 2 - 0.1; u += 0.2) for (const yy of [1.8, 2.6]) {
-    const l = 0.4 + rand() * 0.35;
-    add(rand() < 0.6 ? 'hide_tan' : 'hide_brown', ellipse(u, yy - 0.02 - l / 2, 0.06, l / 2, -0.015, 0.015, 7));
+  const rails = [1.35, 2.0, 2.65];
+  for (const s of [-1, 1]) {
+    const x = s * w / 2;
+    add('log_pine', rod([x, -0.3, 0], [x, 2.7, 0], 0.09, 6));
+    for (const d of [-1, 1]) add('log_pine', rod([x, 2.5, 0], [x + d * 0.1, 3.0, d * 0.1], 0.04, 4));                       // the fork
+    for (const d of [-1, 1]) add('log_pine', rod([x, 1.7, 0], [x + s * 0.55, -0.1, d * 0.7], 0.05, 5));                       // the leaning props
+    for (const yy of rails) add('rope_fibre', box(x - 0.11, yy - 0.12, -0.11, x + 0.11, yy - 0.06, 0.11));                    // the lashings
   }
+  for (const yy of rails) add('log_pine', rod([-w / 2 - 0.15, yy, 0], [w / 2 + 0.15, yy, 0], 0.05, 6));
+  for (let u = -w / 2 + 0.25; u < w / 2 - 0.15; u += 0.24) {
+    // top: a split salmon open on its spreader stick; the flesh dark red, the skin side to the front
+    const l = 0.55 + rand() * 0.2;
+    add(rand() < 0.5 ? 'hide_brown' : 'cloth_ochre', ellipse(u, rails[2] - 0.05 - l / 2 + 0.03, 0.085, l / 2, -0.03, 0.03, 8));
+    add('wood_dark', rod([u - 0.11, rails[2] - 0.05 - l * 0.55, 0], [u + 0.11, rails[2] - 0.05 - l * 0.55, 0], 0.008, 3));
+    // middle: halibut strips, broad and pale
+    if (rand() < 0.8) { const h = 0.5 + rand() * 0.25; add(rand() < 0.6 ? 'hide_white' : 'hide_tan', ellipse(u + 0.04, rails[1] - 0.04 - h / 2 + 0.03, 0.1, h / 2, -0.018, 0.018, 8)); }
+  }
+  for (let u = -w / 2 + 0.3; u < w / 2 - 0.2; u += 0.42) if (rand() < 0.7) { const l = 0.25 + rand() * 0.18; add('hide_tan', ellipse(u, rails[0] - 0.03 - l / 2 + 0.02, 0.05, l / 2, -0.015, 0.015, 7)); }
+  add('wicker', lathe([[0.2, 0], [0.3, 0.2], [0.27, 0.4], [0.001, 0.4]], 9, null, 0.2, 0, 0.6));
   col.circle(...[el.c[0] + Math.cos(el.yaw) * w / 2, el.c[1] - Math.sin(el.yaw) * w / 2], 0.12, el.y, el.y + 2.8);
   col.circle(...[el.c[0] - Math.cos(el.yaw) * w / 2, el.c[1] + Math.sin(el.yaw) * w / 2], 0.12, el.y, el.y + 2.8);
 }
@@ -735,6 +817,37 @@ function prop(el, ctx) {
       add('chalk', box(-0.5, 0.0, 0, -0.42, 0.03, L)); add('chalk', box(0.42, 0.0, 0, 0.5, 0.03, L));
       for (let z = 0.3; z < L; z += 0.9 + rand() * 0.8) add('rock_boulder', lathe([[0.13, 0], [0.1, 0.05], [0.001, 0.08]], 6, null, (rand() - 0.5) * 0.5, 0.0, z));
       for (let z = 0.5; z < L; z += 1.6 + rand() * 1.4) add('sod', lathe([[0.3, 0], [0.22, 0.05], [0.001, 0.08]], 7, null, (rand() < 0.5 ? -1 : 1) * (0.7 + rand() * 0.3), 0, z)); break;
+    }
+    case 'canoerun': {
+      // a canoe run: the lane of the beach cleared of stones for the hulls, the stones heaped along both edges, log rollers laid across it, a post each
+      // side at the top for the hauling line and a coil of it on the ground. el.ys: the ground's height every el.dz along the run (local +z, land to water)
+      const ys = el.ys, dz = el.dz ?? 0.75, L = (ys.length - 1) * dz;
+      const yy = (z) => { const t = Math.max(0, Math.min(ys.length - 1, z / dz)), i = Math.min(ys.length - 2, Math.floor(t)); return ys[i] + (ys[i + 1] - ys[i]) * (t - i) - el.y; };
+      for (let z = 0.2; z < L; z += 0.5 + rand() * 0.5) for (const sg of [-1, 1]) {
+        const q = 0.5 + rand() * 0.8, u = sg * (1.5 + rand() * 0.5);
+        add(rand() < 0.7 ? 'rock_boulder' : 'pebbles', lathe([[0.3 * q, -0.12], [0.29 * q, 0.04 * q], [0.19 * q, 0.19 * q], [0.001, 0.25 * q]], 6, null, u, yy(z), z));
+      }
+      for (let z = 1.2; z < L - 0.5; z += 1.6 + rand() * 0.5) add('log_pine', rod([-1.15, yy(z) + 0.08, z], [1.15, yy(z) + 0.08, z], 0.1, 6));
+      for (const sg of [-1, 1]) {
+        add('log_pine', rod([sg * 1.75, yy(0) - 0.25, -0.4], [sg * 1.75, yy(0) + 1.2, -0.4], 0.08, 6)); add('rope_fibre', box(sg * 1.75 - 0.1, yy(0) + 0.95, -0.5, sg * 1.75 + 0.1, yy(0) + 1.02, -0.3));
+        col.circle(el.c[0] + sg * 1.75 * Math.cos(el.yaw) - 0.4 * Math.sin(el.yaw), el.c[1] - sg * 1.75 * Math.sin(el.yaw) - 0.4 * Math.cos(el.yaw), 0.1, el.y - 0.3, el.y + 1.2);
+      }
+      add('rope_fibre', lathe([[0.3, 0], [0.3, 0.1], [0.18, 0.1], [0.18, 0]], 10, null, 2.5, yy(0.2), 0.3));
+      break;
+    }
+    case 'tidepool': {
+      // rocks of the shore: a dome of dark stone with barnacles on its crown, mussels at its foot, wrack hanging from its flank, smaller rocks about it
+      const n = 3 + Math.floor(rand() * 3);
+      for (let k = 0; k < n; k++) {
+        const a = rand() * 6.28, d = k ? 0.6 + rand() * w * 0.3 : 0, r = k ? 0.35 + rand() * 0.4 : 0.8 + rand() * 0.35, x = Math.cos(a) * d, z = Math.sin(a) * d;
+        add('rock_boulder', lathe([[r * 0.85, -0.3], [r, 0.02], [r * 0.82, 0.28 * r + 0.1], [r * 0.45, 0.55 * r + 0.15], [0.001, 0.62 * r + 0.2]], 8, null, x, 0, z));
+        const hAt = (q) => (q > 0.45 * r ? 0.28 * r + 0.1 + (0.82 * r - q) / (0.37 * r) * (0.27 * r + 0.05) : 0.55 * r + 0.15 + (0.45 * r - q) / (0.45 * r) * (0.07 * r + 0.05));
+        for (let j = 0; j < 7; j++) { const b = rand() * 6.28, q = r * (0.1 + rand() * 0.65); add('chalk', lathe([[0.04, 0], [0.03, 0.025], [0.001, 0.035]], 5, null, x + Math.cos(b) * q, hAt(q) - 0.02, z + Math.sin(b) * q)); }
+        for (let j = 0; j < 6; j++) { const b = rand() * 6.28; add('hide_black', lathe([[0.05, 0], [0.04, 0.05], [0.001, 0.08]], 5, null, x + Math.cos(b) * r * 0.97, -0.02, z + Math.sin(b) * r * 0.97)); }
+        for (let j = 0; j < 2; j++) { const b = rand() * 6.28, l = 0.4 + rand() * 0.5; add('flax_leaf', ellipse(0, -l / 2, 0.05, l / 2, -0.01, 0.01, 6).rotateY(b).translate(x + Math.cos(b + 1.57) * r * 0.86, 0.28 * r + 0.1, z - Math.sin(b + 1.57) * r * 0.86)); }
+        if (!k) col.circle(el.c[0], el.c[1], r * 0.9, el.y - 0.4, el.y + 0.9);
+      }
+      break;
     }
     case 'toy': {
       // the children's play: a toy canoe of cedar bark with a paddle, a ring of small stones, a doll of rushes

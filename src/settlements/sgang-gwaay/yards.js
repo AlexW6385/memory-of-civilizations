@@ -86,12 +86,36 @@ export function yards() {
   { const zn = H[0].c[1] - 16, [nx] = frontOf(zn); for (const dz of [-17, 18]) { const c = [arc(zn + dz) - 9 * nx, zn + dz]; put('cradle', c[0], c[1], Math.PI / 2 + 0.05, { w: 8 + rand() * 3, r: 2.2 }); } }
   for (const z of [-118, -62, -14, 52, 104, 140]) { const x = shoreX(z) + 8.5 + rand() * 1.5; if (inSea(x + 3, z) || height(x, z) < SEA) props.push({ kind: 'weir', c: [x, z], yaw: Math.PI / 2 + (rand() - 0.5) * 0.4, y: height(x, z), seed: Math.floor(rand() * 1e6) }); }
   for (let z = -150; z <= 150; z += 19 + rand() * 12) for (let k = 0; k < 2; k++) { const x = shoreX(z) + 9 + rand() * 18; if (inSea(x, z)) props.push({ kind: 'kelp', c: [x, z], yaw: rand() * 6, y: SEA, w: 3 + rand() * 3, seed: Math.floor(rand() * 1e6) }); }
+  // canoe runs: lanes of the beach cleared of stones between the beached canoes, from just above the beach top to the water's edge (docs §5c)
+  const runs = [];
+  for (let z0 = -140; z0 <= 140; z0 += 9) {
+    if (runs.some((r) => Math.abs(r.z - z0) < 14)) continue;
+    const z = z0 + (rand() - 0.5) * 3, x0 = shoreX(z) - 4.5;
+    let x1 = x0; while (x1 < x0 + 16 && height(x1, z) > SEA + 0.1) x1 += 0.5;
+    const near = (a) => Math.abs(a - z);
+    if (x1 - x0 < 6) continue;
+    if (V.canoes.some((c) => near(c.c[1]) < 2.6) || V.logs.some((l) => near(l.c[1]) < 2.6) || near(V.hollow.c[1]) < 7 || [-118, -62, -14, 52, 104, 140].some((q) => near(q) < 4.8)) continue;
+    if (props.some((p) => ['clams', 'floats', 'cradle', 'tub', 'midden', 'chopblock', 'bark'].includes(p.kind) && near(p.c[1]) < 2.4 && p.c[0] > x0 - 2 && p.c[0] < x1 + 2)) continue;
+    if (Math.hypot(x0 - ARRIVAL[0], z - ARRIVAL[1]) < 9) continue;
+    const dz = 0.75, n = Math.ceil((x1 - x0) / dz) + 1, ys = [];
+    for (let i = 0; i < n; i++) ys.push(height(x0 + i * dz, z));
+    props.push({ kind: 'canoerun', c: [x0, z], yaw: Math.PI / 2, y: ys[0], ys, dz, w: x1 - x0, seed: Math.floor(rand() * 1e6) });
+    runs.push({ z, x0, x1 });
+  }
+  // the tide's wrack is swept off the lanes
+  for (let i = props.length - 1; i >= 0; i--) { const p = props[i]; if (p.kind === 'wrack' && runs.some((r) => Math.abs(r.z - p.c[1]) < 2.6 && p.c[0] > r.x0 - 1 && p.c[0] < r.x1 + 1)) props.splice(i, 1); }
+  // the rocks of the shore: domes of dark stone with barnacles and wrack, in the shallows and on the beach between the runs
+  for (let z = -150; z <= 150; z += 5 + rand() * 6) {
+    if (runs.some((r) => Math.abs(r.z - z) < 3.4)) continue;
+    const x = shoreX(z) + 3.2 + rand() * 4.5;
+    put('tidepool', x, z, rand() * 6, { r: 1.7, w: 2.2 + rand() * 1.4, minH: -1.7 });
+  }
   // boats at their moorings with their crews, fishing in the bay
   for (const z of [-112, -50, 28, 92, 138]) {
     const x = shoreX(z) + 19 + rand() * 6, l = 7 + rand() * 5;
     if (!inSea(x, z) || !inSea(x + 4, z)) continue;
     boats.push({ c: [x, z], yaw: Math.PI / 2 + (rand() - 0.5) * 0.5, l, seed: 800 + z, crew: 2 + (rand() < 0.5 ? 1 : 0) });
   }
-  return (FIT = { props, sit, folk, boats, racks });
+  return (FIT = { props, sit, folk, boats, racks, runs });
 }
 export const footprintsY = () => yards().props.map((p) => p.c);
