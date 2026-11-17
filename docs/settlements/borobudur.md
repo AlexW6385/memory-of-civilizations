@@ -150,6 +150,24 @@ Sources added:
 | The precinct wall and the way's kerb | A low brick wall with an andesite coping running 38 m off each side of the gate's pylons; a kerb of andesite along both edges of the paved way | a bounded precinct round the monument [inferred]; the kerb and the wall [inferred] |
 | Incense and mist | Incense before the offering stalls and at the gate; the morning mist and shower fog lighter so that the monument stays legible from the arrival | [inferred] |
 
+## 18. Eighth pass: the walls' mouldings, the stairs' cheeks, the houses by rule (2026-11)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| Wall mouldings | On each of the five square terraces' walls a foot course (two steps, 0.17 and 0.1 m out) above the gallery floor and, under the balustrade, a cornice of three stepped courses (0.12, 0.22 and 0.32 m out) running round the redented outline with mitred corners and stopping at each stair's passage; on the three round terraces a flared foot and a stepped cornice ring | the galleries' walls are closed by a balustrade at their edge and carry reliefs [stated: arisguide; Universalis]; the foot and the cornice as the framing of a stone wall of this kind [inferred from photographs; no source consulted gives the profile] |
+| Stair cheeks | Along both sides of every flight of the four stairs of the base and the square terraces a wall 0.35 m thick, its top rising with the flight from 0.9 m over the low end to 1.3 m over the high, a coping on it, meeting the wall where the kala–makara gateway stands; solid to walkers | the stairs climb through arched gates in the middle of each side [stated: arisguide, skylineaparthistory]; the side walls and their coping [inferred] |
+| Fronts and roofs by rule | Each house takes, from its own seed, a veranda depth (1.0–1.7 m, 1.45 m in the furnished), one of three rails (rungs, upright bamboo slats, a low bar only), a wall (plaited bamboo, grey planks, or planks to waist height under bamboo) and a roof (the saddle with flared ridge ends, or a thatched hip roof on a short ridge where the plan is longer than wide by a metre) | the reliefs show a range of roof forms on wooden buildings [stated: title only, "Roof typology of wooden-constructed buildings on the reliefs of Borobudur Temple", Berkala Arkeologi — the article not read]; the hip form, rails and walls [inferred] |
+| Furnished houses | Beyond the first three of each hamlet about two houses in five more are furnished (about seventy in all with the lodgings), in five ways: the three before (hearth and bed; hearth, loom and rice; bed and household shrine) and two new — a kitchen and store (hearth, a shelf of bowls on the back wall, two lidded vats, stacked baskets, a winnowing tray, bananas hung to ripen) and a smith's (a clay forge with its charcoal, two upright bamboo bellows with piston rods, a stone anvil on a log, tools on the wall, a quenching jar, a basket of charcoal, bronze bowls); the first eleven lodgings by the way use all five | fine gold- and metalwork in Central Java in the 9th c. [stated: Wikipedia, Wonoboyo hoard, c. 899–911, near Prambanan]; upright bamboo piston bellows are the bellows of Southeast Asian smiths [inferred, not sourced here]; the kitchen [inferred: ethnographic Javanese house] |
+| At home | In about three furnished hamlet houses in five a person on the matted floor at the middle of the room: a weaver at the loom house, the others seated or standing | [inferred] |
+| Stairs of the houses | The flights up to the verandas are gentler (a run of 1.3 times the floor's height), the walkers' flood-fill having failed on the steeper ones | ours |
+
+Sources added:
+- [Wonoboyo hoard — Wikipedia](https://en.wikipedia.org/wiki/Wonoboyo_hoard)
+- [Roof typology of wooden-constructed buildings on the reliefs of Borobudur Temple — Berkala Arkeologi](https://berkalaarkeologi.kemdikbud.go.id/index.php/berkalaarkeologi/article/view/983/948)
+- [Borobudur: architecture and sculpture — Universalis](https://www.universalis.fr/encyclopedie/borobudur-barabudur/2-l-architecture-et-la-sculpture/)
+
+Level: L2, near L3 in the houses; for L3 still missing: the carved detail of the terraces' walls beyond panels (the foot and cornice carvings), the 2,672 panels each their own subject, a measured profile of the real mouldings, Mendut and Pawon, the volcanoes.
+
 
 ## Sources
 
