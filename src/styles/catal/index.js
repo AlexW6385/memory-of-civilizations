@@ -9,6 +9,7 @@ import { box, lathe, rod } from '../../core/geom.js';
 import '../qing/index.js';
 import { cell, cellGeom, leopard, seated, knapper } from './cell.js';
 import { court2, yard, edge, landing, shade, screen, reedStack } from './yard.js';
+import { vultureWall, townMap, breast } from './murals.js';
 import { WALL, MUD, PLS, LIME, RED, BLK, LOG, REED, BONE, HORN, ASH, rng, flip, ladder, dome, basket, jar, frame, flat, ellipse, aurochs, zigzag, diamonds, hands, bucranium, hatch, onFace } from './kit.js';
 
 /**
@@ -21,6 +22,7 @@ function quarter(el, { bag, col, lights }) {
   const ENTER = new Map((el.enter || []).map((e) => [e.i + ',' + e.j, e]));
   const rand = rng(el.seed || 1), C = el.cols, R = el.rows, K = el.kind, T = el.tops;
   const X = (j) => el.x0 + C.slice(0, j).reduce((a, b) => a + b, 0), Z = (i) => el.z0 + R.slice(0, i).reduce((a, b) => a + b, 0);
+  const butt = new Set();
   const topAt = (i, j) => (K[i]?.[j] === 'h' || K[i]?.[j] === 'L' ? T[i][j] : 0);
   for (let i = 0; i < R.length; i++) for (let j = 0; j < C.length; j++) {
     const k = K[i][j];
@@ -47,6 +49,20 @@ function quarter(el, { bag, col, lights }) {
       for (let g = 0; g < 2; g++) { const u = rand() * (L - 0.2); onFace(bag, 'silt', a, b, nx, nz, u, u + 0.07 + rand() * 0.06, top - 0.3 - rand() * 1.1, top - 0.05, 0.04); }   // rain gullies
       if (rand() < 0.7) { const u0 = rand() * L * 0.6, u1 = Math.min(L, u0 + 0.8 + rand() * 1.6), y0 = 0.5 + rand() * (top - 1.5); onFace(bag, rand() < 0.6 ? WALL : 'earth_wall', a, b, nx, nz, u0, u1, y0, Math.min(top - 0.1, y0 + 0.5 + rand() * 0.9), 0.014); }
       if (rand() < 0.3) { const u0 = rand() * (L - 0.3); onFace(bag, 'pottery_dark', a, b, nx, nz, u0, u0 + 0.25, top - 1.2 - rand() * 0.6, top - 0.02, 0.012); }   // soot streak from a roof vent
+      // the front by rule: bare brick in courses, a skin of plaster with fallen patches, or a stepped bank of mud at the foot; else the plain eroded face
+      {
+        const side = nz < 0 ? 'n' : nz > 0 ? 's' : nx < 0 ? 'w' : 'e', rf = rng(i * 131 + j * 29 + (nz ? 3 : 5) * (nx + nz + 2) + 7), q = rf();
+        if (q < 0.26) { for (let y = 0.62; y < Math.min(top - 0.42, 2.0); y += 0.105) onFace(bag, 'silt', a, b, nx, nz, 0.05, L - 0.05, y, y + 0.012, 0.018); }
+        else if (q < 0.48) {
+          const cut = [0.62 + rf() * 0.25, 0.7 + rf() * 0.3, 0.55 + rf() * 0.3];
+          for (let c = 0; c < 3; c++) onFace(bag, LIME, a, b, nx, nz, 0.1 + (L - 0.2) * c / 3, 0.1 + (L - 0.2) * (c + 1) / 3 - 0.04, cut[c], Math.min(top - 0.33, 2.04), 0.011);
+        } else if (q < 0.68 && m === 0 && L > 4) {
+          const u0 = L * (0.12 + rf() * 0.3), w = 1.5 + rf() * 1.2, u1 = Math.min(L - 0.3, u0 + w), ox = 0.45, ox2 = 0.22;
+          onFace(bag, MUD, a, b, nx, nz, u0, u1, -0.3, 0.55, ox); onFace(bag, MUD, a, b, nx, nz, u0 + 0.12, u1 - 0.12, -0.3, 1.05, ox2);
+          const ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, e = (o) => [Math.min(a[0] + ux * u0, a[0] + ux * u1 + nx * o), Math.min(a[1] + uz * u0, a[1] + uz * u1 + nz * o), Math.max(a[0] + ux * u0, a[0] + ux * u1 + nx * o), Math.max(a[1] + uz * u0, a[1] + uz * u1 + nz * o)];
+          col.rect(e(ox), 0, 1.05); butt.add(i + ',' + j + ',' + side);
+        }
+      }
       if (m === 0 && rand() < 0.35) {                                                                       // fallen mud brick at the foot
         const u = rand() * (L - 0.6), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
         const g = lathe([[0.001, -0.02], [0.9, 0], [1, 0.2], [0.6, 0.7], [0.001, 1]], 6); g.scale(0.45, 0.2, 0.3).rotateY(rand() * 6).translate(a[0] + ux * u + nx * 0.4, 0, a[1] + uz * u + nz * 0.4); bag.add('banco_rough', g);
@@ -84,6 +100,7 @@ function quarter(el, { bag, col, lights }) {
     for (const [di, dj, side] of [[1, 0, 's'], [-1, 0, 'n'], [0, 1, 'e'], [0, -1, 'w']]) {
       if (!free(di, dj) || K[i + di]?.[j + dj] !== undefined && K[i + di][j + dj] !== '.') continue;
       if (rand() > 0.3) continue;
+      if (butt.has(i + ',' + j + ',' + side)) continue;
       const len = 1.2;
       const f = side === 's' ? { x: x0 + C[j] * (0.2 + rand() * 0.6), z: z1, dx: 0, dz: 1, rect: (x) => [x - 0.45, z1, x + 0.45, z1 + len], dir: 'n' }
         : side === 'n' ? { x: x0 + C[j] * (0.2 + rand() * 0.6), z: z0, dx: 0, dz: -1, rect: (x) => [x - 0.45, z0 - len, x + 0.45, z0], dir: 's' }
@@ -226,6 +243,11 @@ function house(el, { bag, col, lights }) {
   flat(bag, RED, FS, [[1.7, 0.55], [3.5, 0.55], [3.5, 1.7], [1.7, 1.7]], 0.008);
   leopard(bag, lx(2.1), 1.1, iz1 - PL, Math.PI, -1, 1.0); leopard(bag, lx(3.1), 1.1, iz1 - PL, Math.PI, 1, 1.0);
   zigzag(bag, BLK, FS, 0.1, 4.8, 1.76, 2.04, 20);
+  // plaster breasts with a vulture's beak on the partition's face over the platform's north end, a row of two
+  for (const v of [0.55, 1.1]) breast(bag, mx1 - PL, 1.42, lz(v), -Math.PI / 2, 1.0);
+  // the storeroom's walls: the vultures over their headless people on the north wall, the painted map of the volcano and the houses on the east
+  vultureWall(bag, frame([sx0 + PL, iz0], [1, 0], [0, 1]), 0.05, 2.05, 1.55, 1, 0.78);
+  townMap(bag, frame([ix1, iz0], [0, 1], [-1, 0]), 1.45, 1.0, 3.4, 0.95);
   // the seated woman between her cats, on the east platform at the north end; a knapper's kit on the floor by the pillar
   seated(bag, lx(4.45), PH + 0.005, lz(0.35), 0);
   knapper(bag, lx(3.2), F, lz(4.0), rand);

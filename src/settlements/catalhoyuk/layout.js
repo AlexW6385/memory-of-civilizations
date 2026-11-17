@@ -39,7 +39,7 @@ export const TOP = KIND.map((row, i) => row.map((k, j) => {
   const r = rng(i * 97 + j * 13 + 5)();
   return ST + (Math.floor(r * 3) - 1) * 0.2;
 }));
-/** The houses one can go down into (besides the landmark): nearest the arrival first, the rest spread through the town; each a trade (variant 0–4: painted bands and bucrania, leopards in relief, seated figurine, knapper, baker) and a side (mirror). */
+/** The houses one can go down into (besides the landmark): nearest the arrival first, the rest spread through the town; each a trade (variant 0–6: painted bands and bucrania, leopards in relief, seated figurine, knapper, baker, vultures, the map) and a side (mirror). */
 export const ENTER = (() => {
   const out = [];
   const cands = [];
@@ -50,7 +50,7 @@ export const ENTER = (() => {
     if (out.length >= 14) break;
     if ([[0, 1], [1, 0], [0, -1], [-1, 0]].some(([a, b]) => used.has((c.i + a) + ',' + (c.j + b)))) continue;   // no two side by side: the rest stay solid
     used.add(c.i + ',' + c.j);
-    out.push({ i: c.i, j: c.j, variant: (c.i * 3 + c.j * 5) % 5, mirror: (c.i + c.j) % 2 === 1 });
+    out.push({ i: c.i, j: c.j, variant: [5, 0, 6, 1, 2, 4, 3][out.length % 7], mirror: (c.i + c.j) % 2 === 1 });
   }
   return out;
 })();
