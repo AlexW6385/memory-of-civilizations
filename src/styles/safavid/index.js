@@ -47,16 +47,18 @@ function awayFrom(a, b, from) {
 }
 
 /** The profile of a Safavid dome of radius r and height h: swelling a little (bulge) past the drum, drawn to a point. */
-function domeProfile(r, h, bulge = 0.07) {
+function domeProfile(r, h, bulge = 0.07, pointed = false) {
   const p = [];
   for (let i = 0; i <= 20; i++) {
     const t = i / 20, a = t * Math.PI / 2;
-    p.push([Math.max(0.001, r * (1 + bulge * Math.sin(Math.min(1, t * 1.8) * Math.PI)) * Math.cos(a) ** 0.8), h * Math.sin(a) ** 1.05]);
+    // pointed: the swelling double dome of the Shah Mosque — near-vertical at the drum, the greatest girth a third of the way up, drawn in to a point
+    if (pointed) p.push([Math.max(0.001, r * (1 + bulge * Math.sin(Math.min(1, t * 1.7) * Math.PI)) * Math.max(0, 1 - t ** 2.3) ** 0.9), h * t]);
+    else p.push([Math.max(0.001, r * (1 + bulge * Math.sin(Math.min(1, t * 1.8) * Math.PI)) * Math.cos(a) ** 0.8), h * Math.sin(a) ** 1.05]);
   }
   return p;
 }
-function safDome(bag, mat, x, y, z, r, h, bulge) {
-  bag.add(mat, lathe(domeProfile(r, h, bulge), 40, null, x, y, z));
+function safDome(bag, mat, x, y, z, r, h, bulge, pointed) {
+  bag.add(mat, lathe(domeProfile(r, h, bulge, pointed), 40, null, x, y, z));
   bag.add('gilt_bronze', lathe([[r * 0.05, 0], [r * 0.06, r * 0.05], [r * 0.025, r * 0.12], [r * 0.05, r * 0.2], [0.001, r * 0.32]], 8, null, x, y + h - r * 0.02, z));
 }
 
@@ -379,13 +381,13 @@ function portal(el, { bag, col }) {
 /**
  * A field of eight-pointed star tiles in low relief over a flat wall, the tile pattern of the Safavid
  * revetment: in each cell of a square grid a cream star (two squares turned against each other), a turquoise
- * octagon on it, a yellow dot at its heart, a lapis lozenge between four stars; edged in a cream line.
+ * octagon on it; edged in a cream line.
  * Pt(s, v) is the point of the wall plane at s along and v up; nrm the unit normal toward the viewer; the
  * relief stands 0.035 and 0.06 out. put(mat, triangles) collects.
  */
 function starTiles(put, Pt, nrm, s0, s1, v0, v1, sz = 0.9) {
   const ns = Math.max(1, Math.floor((s1 - s0) / sz)), nv = Math.max(1, Math.floor((v1 - v0) / sz)), ws = (s1 - s0) / ns, wv = (v1 - v0) / nv;
-  const T = { tile_cream: [], tile_turquoise: [], tile_yellow: [], tile_white: [] };
+  const T = { tile_cream: [], tile_turquoise: [] };
   const lift = (p, o) => [p[0] + nrm[0] * o, p[1] + nrm[1] * o, p[2] + nrm[2] * o];
   const poly = (m, pts, o) => { const c = lift(Pt(...pts[0]), o), from = [c[0] - nrm[0] * 5, c[1] - nrm[1] * 5, c[2] - nrm[2] * 5]; const q = pts.slice(1).map((x) => lift(Pt(...x), o)); for (let i = 0; i + 1 < q.length; i++) tri(T[m], from, c, q[i], q[i + 1]); };
   const fan = (m, cs, cv, rs, rv, n, rot, o) => { const pts = [[cs, cv]]; for (let i = 0; i <= n; i++) { const an = rot + i / n * Math.PI * 2; pts.push([cs + Math.cos(an) * rs, cv + Math.sin(an) * rv]); } poly(m, pts, o); };
@@ -395,9 +397,6 @@ function starTiles(put, Pt, nrm, s0, s1, v0, v1, sz = 0.9) {
     const pts = [[cs, cv]]; for (let k = 0; k <= 16; k++) { const an = k / 16 * Math.PI * 2 + Math.PI / 8, long = k % 2 === 0; pts.push([cs + Math.cos(an) * rs * (long ? 1 : 0.62), cv + Math.sin(an) * rv * (long ? 1 : 0.62)]); }
     poly('tile_cream', pts, 0.035);
     fan('tile_turquoise', cs, cv, rs * 0.4, rv * 0.4, 8, Math.PI / 8, 0.06);
-    fan('tile_yellow', cs, cv, rs * 0.14, rv * 0.14, 6, 0, 0.075);
-    // a white lozenge in the gap between four stars
-    if (i + 1 < ns && j + 1 < nv) poly('tile_white', [[cs + ws / 2, cv + wv / 2], [cs + ws / 2 + rs * 0.2, cv + wv / 2], [cs + ws / 2, cv + wv / 2 + rv * 0.2], [cs + ws / 2 - rs * 0.2, cv + wv / 2], [cs + ws / 2, cv + wv / 2 - rv * 0.2], [cs + ws / 2 + rs * 0.2, cv + wv / 2]], 0.045);
   }
   // the edge: a cream line round the field
   const e = 0.1, line = (a0, a1, b0, b1) => poly('tile_cream', [[a0, b0], [a1, b0], [a1, b1], [a0, b1]], 0.03);
@@ -410,21 +409,20 @@ function starTiles(put, Pt, nrm, s0, s1, v0, v1, sz = 0.9) {
 // cell on its tier's path; e along the path; m into the void; width cw, height hh.
 let CELL = null;
 function cellTemplate() {
-  const arch = (hw, y0, y1, sp) => { const pts = [[-hw, y0], [hw, y0], [hw, y0 + (y1 - y0) * sp]]; for (let i = 1; i < 6; i++) { const t = i / 6; pts.push([hw * (1 - t ** 1.6), y0 + (y1 - y0) * (sp + (1 - sp) * t)]); } pts.push([0, y1]); for (let i = 5; i >= 1; i--) { const t = i / 6; pts.push([-hw * (1 - t ** 1.6), y0 + (y1 - y0) * (sp + (1 - sp) * t)]); } pts.push([-hw, y0 + (y1 - y0) * sp]); return pts; };
-  const tris = (outer, hole, depth) => { const sh = new Shape(); sh.moveTo(...outer[0]); for (const q of outer.slice(1)) sh.lineTo(...q); if (hole) { const hp = new Path(); hp.moveTo(...hole[0]); for (const q of hole.slice(1)) hp.lineTo(...q); sh.holes.push(hp); } const g = new ExtrudeGeometry(sh, { depth, bevelEnabled: false }).toNonIndexed(); return Array.from(g.attributes.position.array); };
+  const arch = (hw, y0, y1, sp) => { const pts = [[-hw, y0], [hw, y0], [hw, y0 + (y1 - y0) * sp]]; for (let i = 1; i < 4; i++) { const t = i / 4; pts.push([hw * (1 - t ** 1.6), y0 + (y1 - y0) * (sp + (1 - sp) * t)]); } pts.push([0, y1]); for (let i = 3; i >= 1; i--) { const t = i / 4; pts.push([-hw * (1 - t ** 1.6), y0 + (y1 - y0) * (sp + (1 - sp) * t)]); } pts.push([-hw, y0 + (y1 - y0) * sp]); return pts; };
+  const tris = (outer, hole, depth) => { const sh = new Shape(); sh.moveTo(...outer[0]); for (const q of outer.slice(1)) sh.lineTo(...q); if (hole) { const hp = new Path(); hp.moveTo(...hole[0]); for (const q of hole.slice(1)) hp.lineTo(...q); sh.holes.push(hp); } const g = new ExtrudeGeometry(sh, { depth, bevelEnabled: false }); return Array.from(g.attributes.position.array); };
   const O = arch(0.5, 0, 1, 0.55), Hh = arch(0.31, 0.13, 0.8, 0.5), R2 = arch(0.355, 0.1, 0.84, 0.5);
   CELL = { plate: tris(O, Hh, 1), ring: tris(R2, Hh, 1), back: tris(Hh, null, 1) };
 }
-function cell(put, q, e, m, ya, cw, hh, mat, backMat) {
+function cell(put, q, e, m, ya, cw, hh, mat, backMat, D = 0.34, edge = true) {
   if (!CELL) cellTemplate();
-  const D = 0.34;
   const cross = e[1] * m[0] - e[0] * m[1];                // sign of (e × up)·m in the (x, z) plane
   const flip = cross > 0;
   const X = (p, dep, off) => [q[0] + e[0] * p[0] * cw + m[0] * (p[2] * dep + off), ya + p[1] * hh, q[1] + e[1] * p[0] * cw + m[1] * (p[2] * dep + off)];
   const map = (arr, dep, off) => { const o = []; for (let i = 0; i < arr.length; i += 9) { const A = X(arr.slice(i, i + 3), dep, off), B = X(arr.slice(i + 3, i + 6), dep, off), Cc = X(arr.slice(i + 6, i + 9), dep, off); if (flip) o.push(...A, ...Cc, ...B); else o.push(...A, ...B, ...Cc); } return o; };
   put(mat, map(CELL.plate, D, -0.06));
-  put('tile_white', map(CELL.ring, 0.02, D - 0.06 + 0.005));
-  put(backMat, map(CELL.back, 0.02, -0.06 + 0.05));
+  if (edge) put('tile_white', map(CELL.ring, 0.02, D - 0.06 + 0.005));
+  if (backMat) put(backMat, map(CELL.back, 0.02, -0.06 + 0.05));
 }
 
 /**
@@ -437,7 +435,7 @@ function cell(put, q, e, m, ya, cw, hh, mat, backMat) {
 function iwanHood(bag, c, u, n, w, depth, y, h) {
   const rise = Math.sqrt((0.8 * w) ** 2 - (0.3 * w) ** 2), ys = y + Math.max(0.3, h - rise), K = h > 18 ? 10 : 8, top = y + h - 0.4;
   const P = (su, sd) => [c[0] + u[0] * su + n[0] * sd, c[1] + u[1] * su + n[1] * sd];
-  const mats = ['tile_cream', 'tile_lapis', 'tile_turquoise', 'tile_lapis'], back = ['tile_lapis', 'tile_cream', 'tile_cream', 'tile_turquoise'];
+  const mats = ['stucco_cream', 'tile_turquoise', 'stucco_cream', 'tile_turquoise'], back = ['tile_turquoise', 'stucco_cream', 'tile_turquoise', 'stucco_cream'];
   const bucket = new Map(), put = (m, t) => { if (!bucket.has(m)) bucket.set(m, []); const A = bucket.get(m); for (let i = 0; i < t.length; i++) A.push(t[i]); };
   // the hood is a half-dome seen in plan: straight sides to c0, then a half-ellipse round the back; its tiers
   // take the width of the great arch at their height, so the outline of the cells follows the arch exactly
@@ -457,7 +455,7 @@ function iwanHood(bag, c, u, n, w, depth, y, h) {
       const f = sd / seg[i], [u0, d0] = pts[i], [u1, d1] = pts[i + 1], eu = (u1 - u0) / seg[i], ed = (d1 - d0) / seg[i];
       const q = P(u0 + (u1 - u0) * f, d0 + (d1 - d0) * f), pe = [u[0] * eu + n[0] * ed, u[1] * eu + n[1] * ed], pm = [u[0] * ed - u[0] * 0 + n[0] * -eu, u[1] * ed + n[1] * -eu];
       const m = (j * 5 + k * 3) % 4;
-      cell(put, q, pe, pm, ya, cwid * 0.97, dh + 0.02, mats[m], back[m]);
+      cell(put, q, pe, pm, ya, cwid * 0.97, dh + 0.02, mats[m], back[m], 0.34, false);
     }
   }
   // the shell behind the cells: bands joining the tiers' backs, so no gap shows between them
@@ -467,7 +465,7 @@ function iwanHood(bag, c, u, n, w, depth, y, h) {
         const va = [pa[0], yA, pa[1]], vb = [pb[0], yA, pb[1]], vc = Bq ? [pc[0], yB, pc[1]] : [axis[0], yB, axis[1]], vd = Bq ? [pd[0], yB, pd[1]] : vc;
         const cen = [(va[0] + vb[0] + vc[0] + vd[0]) / 4, (va[1] + vb[1] + vc[1] + vd[1]) / 4, (va[2] + vb[2] + vc[2] + vd[2]) / 4], fr = [cen[0] * 2 - axis[0], cen[1], cen[2] * 2 - axis[1]];
         tri(T, fr, va, vb, vc); tri(T, fr, va, vc, vd); } }
-    bag.add('plaster_ochre', fromTriangles(T)); }
+    bag.add(B, fromTriangles(T)); }
   // the walls of the iwan: panels of star tiles between the dado and the band of letters
   { const v0 = 2.6, v1 = ys - y - 1.6, wp = w / 2 + 0.13;
     if (v1 - v0 > 1.5) {
@@ -522,13 +520,25 @@ function domeChamber(el, ctx) {
   }
   const y1 = y + H + A * 0.35;
   bag.add(el.drumMat ?? T, lathe([[dr, 0], [dr, dh], [dr * 1.04, dh + 0.3], [r, dh + 0.5]], 32, null, cx, y1, cz));
+  if (el.dome.pointed) {
+    // the zone of transition: a tall pointed arch of tile, its field lapis, on each of the octagon's eight faces
+    const B = new Map(), ap = dr * 1.06 - 0.05;
+    for (let k = 0; k < 8; k++) { const an = rot + k * Math.PI / 4, m = [Math.cos(an), Math.sin(an)];
+      cell((m2, t) => { if (!B.has(m2)) B.set(m2, []); B.get(m2).push(...t); }, [cx + m[0] * ap, cz + m[1] * ap], [-m[1], m[0]], m, y + H + 0.45, 6.4, A * 0.35 - 0.6, k % 2 ? Q : 'stucco_cream', T, 0.9); }
+    for (const [m2, t] of B) bag.add(m2, fromTriangles(t));
+  }
+  const wy0 = dh * 0.3, whh = dh * 0.37;
   for (let k = 0; k < 16; k++) {
     const a = k / 16 * Math.PI * 2, wx = cx + Math.cos(a) * (dr + 0.02), wz = cz + Math.sin(a) * (dr + 0.02), t = [];
-    beamTris(t, [wx - Math.sin(a) * 0.6, y1 + dh * 0.3, wz + Math.cos(a) * 0.6], [wx + Math.sin(a) * 0.6, y1 + dh * 0.3, wz - Math.cos(a) * 0.6], 0.06, dh * 0.45);
+    beamTris(t, [wx - Math.sin(a) * 0.6, y1 + wy0, wz + Math.cos(a) * 0.6], [wx + Math.sin(a) * 0.6, y1 + wy0, wz - Math.cos(a) * 0.6], 0.06, whh);
     bag.add('lacquer_black', fromTriangles(t));
+    // the window in a pointed arch of tile standing out of the drum: a turquoise frame, a white edge
+    { const fq = [cx + Math.cos(a) * (dr + 0.02), cz + Math.sin(a) * (dr + 0.02)], fm = [Math.cos(a), Math.sin(a)], fe = [-Math.sin(a), Math.cos(a)], B = new Map();
+      cell((m2, t) => { if (!B.has(m2)) B.set(m2, []); B.get(m2).push(...t); }, fq, fe, fm, y1 + 0.228 * dh, 2.13, 0.552 * dh, Q, null);
+      for (const [m2, t] of B) bag.add(m2, fromTriangles(t)); }
     if (el.grilles) {
       // the window's grille: a frame of tile and a lattice of bars, standing a little out of the drum
-      const gx = cx + Math.cos(a) * (dr + 0.07), gz = cz + Math.sin(a) * (dr + 0.07), tx = -Math.sin(a), tz = Math.cos(a), y0 = y1 + dh * 0.3, hh = dh * 0.45;
+      const gx = cx + Math.cos(a) * (dr + 0.07), gz = cz + Math.sin(a) * (dr + 0.07), tx = -Math.sin(a), tz = Math.cos(a), y0 = y1 + wy0, hh = whh;
       const bar = (u0, v0, u1, v1, w) => { const g = []; if (Math.abs(u1 - u0) < 1e-6) beamTris(g, [gx + tx * u0, y0 + v0, gz + tz * u0], [gx + tx * u0 + Math.cos(a) * 0.001, y0 + v0, gz + tz * u0 + Math.sin(a) * 0.001], w, v1 - v0); else beamTris(g, [gx + tx * u0, y0 + v0, gz + tz * u0], [gx + tx * u1, y0 + v0, gz + tz * u1], 0.06, w); return g; };
       const T = [...bar(-0.66, -0.06, 0.66, 0, 0.08), ...bar(-0.66, hh - 0.02, 0.66, 0, 0.08)];
       for (const u of [-0.62, -0.31, 0, 0.31, 0.62]) T.push(...vbar(gx + tx * u, gz + tz * u, a, y0, hh, 0.05));
@@ -547,8 +557,8 @@ function domeChamber(el, ctx) {
     }
     bag.add('tile_white', fromTriangles(T));
   }
-  safDome(bag, el.domeMat ?? Q, cx, y1 + dh + 0.5, cz, r, el.dome.h, el.dome.bulge);
-  if (el.net) domeNet(bag, el.net, cx, y1 + dh + 0.5, cz, r, el.dome.h, el.dome.bulge);
+  safDome(bag, el.domeMat ?? Q, cx, y1 + dh + 0.5, cz, r, el.dome.h, el.dome.bulge, el.dome.pointed);
+  if (el.net) domeNet(bag, el.net, cx, y1 + dh + 0.5, cz, r, el.dome.h, el.dome.bulge, el.dome.pointed);
   col.circle(cx, cz, A * 1.4, y + H, y1 + dh + el.dome.h);
 }
 
@@ -868,8 +878,8 @@ function vbar(x, z, a, y0, h, w) {
  * pale line along the middle of each band and a medallion at each crossing. net: { n (bands each
  * way), turn (sectors each band sweeps), band, line, knot (materials) }.
  */
-function domeNet(bag, net, x, y, z, r, h, bulge) {
-  const prof = domeProfile(r, h, bulge), N = net.n ?? 16, K = net.turn ?? 3, t0 = 0.05, t1 = 0.86, steps = 44;
+function domeNet(bag, net, x, y, z, r, h, bulge, pointed) {
+  const prof = domeProfile(r, h, bulge, pointed), N = net.n ?? 16, K = net.turn ?? 3, t0 = 0.05, t1 = 0.86, steps = 44;
   const at = (t, phi, off) => {
     const f = t * 20, i = Math.min(19, Math.floor(f)), u = f - i, [r0, y0] = prof[i], [r1, y1] = prof[i + 1];
     const rr = r0 + (r1 - r0) * u, yy = y0 + (y1 - y0) * u, dl = Math.hypot(r1 - r0, y1 - y0) || 1, nr = (y1 - y0) / dl, ny = -(r1 - r0) / dl;
@@ -905,6 +915,22 @@ function domeNet(bag, net, x, y, z, r, h, bulge) {
     for (const [p0, p1] of [[e, w], [w, q], [q, sth], [sth, e]]) tri(TK, axis, c0, p1, p0);
   }
   bag.add(net.knot_mat ?? Q, fromTriangles(TK));
+  // a rosette in the middle of every lozenge: eight cream petals round a yellow heart, a turquoise ring between
+  if (net.rosette !== false) {
+    const TR = [], TQ = [];
+    for (let w = 1; w < 2 * K; w++) {
+      const tt = t0 + w / (2 * K) * (t1 - t0), rr = Math.max(0.6, at(tt, 0, 0)[0] - x);
+      if (rr < 2.2) continue;
+      const s = Math.min(0.95, Math.PI * rr / N * 0.52), sv = s * 1.1;
+      for (let i = 0; i < N; i++) {
+        const phi = (2 * i + w + 1) * Math.PI / N, P = (rad, an, o) => at(tt + Math.sin(an) * rad * sv / h, phi + Math.cos(an) * rad * s / rr, o);
+        const c = at(tt, phi, 0.12), inner = at(tt, phi, -1);
+        for (let k = 0; k < 16; k++) { const a0 = k / 16 * Math.PI * 2, a1 = (k + 1) / 16 * Math.PI * 2, r0 = k % 2 ? 0.55 : 1, r1 = (k + 1) % 2 ? 0.55 : 1; tri(TR, inner, c, P(r0, a0, 0.1), P(r1, a1, 0.1)); }
+        for (let k = 0; k < 8; k++) { const a0 = k / 8 * Math.PI * 2, a1 = (k + 1) / 8 * Math.PI * 2; tri(TQ, inner, at(tt, phi, 0.14), P(0.34, a0, 0.13), P(0.34, a1, 0.13)); }
+      }
+    }
+    bag.add('stucco_cream', fromTriangles(TR)); bag.add('glaze_yellow', fromTriangles(TQ));
+  }
 }
 /** Push the triangle a b c into T, wound to face away from the point `from`. */
 function tri(T, from, a, b, c) {

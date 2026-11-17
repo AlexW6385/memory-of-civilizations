@@ -59,7 +59,7 @@ E.push({ t: 'mass', a: M(0, -13), b: M(0, 13), th: 18, h: 0.4, mat: 'marble' });
 E.push({ t: 'mass', a: M(0, -12), b: M(0, 12), y: 0.3, th: 16, h: 0.12, mat: 'water' });
 // the sanctuary (22.5 m inside) under the dome (52 m high, 26 m across), the winter halls either side
 const sv = ch + ring + 12.1;                                          // its entrance wall abuts the qibla iwan's back wall
-E.push({ t: 'dome_chamber', c: M(0, sv), half: 12.5, rot: Math.PI / 4, wallH: 24, drum: { r: 12, h: 7 }, dome: { r: 13, h: 17, bulge: 0.08 }, wallMat: 'brick_buff', drumMat: 'tile_lapis', domeMat: 'tile_turquoise',
+E.push({ t: 'dome_chamber', c: M(0, sv), half: 12.5, rot: Math.PI / 4, wallH: 24, drum: { r: 12, h: 7 }, dome: { r: 13, h: 17, bulge: 0.08, pointed: true }, wallMat: 'brick_buff', drumMat: 'tile_lapis', domeMat: 'tile_turquoise',
   inscription: true, grilles: true, net: { n: 24, turn: 3, width: 0.45, band: 'tile_cream', line: 'tile_white', knot_mat: 'tile_lapis', knot: 0.55 },
   interior: { door: 2.5, doorH: 6.5, ah: 17, mihrab: 1.45 } });   // the sanctuary walkable: the inner dome under the outer one (docs/settlements/isfahan.md §17)
 for (const s of [-1, 1]) E.push({ t: 'mass', a: M(s * 30.25, ch + ring), b: M(s * 30.25, ch + ring + 25), th: 35.5, h: 15 });
