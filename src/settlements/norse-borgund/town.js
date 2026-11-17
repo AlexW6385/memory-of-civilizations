@@ -72,7 +72,12 @@ export function life() {
     const [x0, z0, x1, z1] = b.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, alongX = x1 - x0 >= z1 - z0, fl = b.y + 0.17, wt = 0.19;
     const A0 = alongX ? x0 + wt : z0 + wt, A1 = alongX ? x1 - wt : z1 - wt, B0 = alongX ? z0 + wt : x0 + wt, B1 = alongX ? z1 - wt : x1 - wt, am = alongX ? cx : cz, bm = alongX ? cz : cx;
     const W = (a, bb) => (alongX ? [a, bb] : [bb, a]), doorB = b.front ? B0 : B1, far = doorB === B0 ? B1 : B0, sg = far === B1 ? -1 : 1;
-    if (b.kind === 'stue') {
+    if (b.kind === 'stue' && b.use) {
+      // the cook-house: the farm wife at the worktable; the weaving house: the weaver at her loom (both stand a pace in front of the gable's work)
+      const dirA = alongX ? [1, 0] : [0, 1];
+      fig(W(A1 - (b.use === 'cook' ? 1.35 : 1.15), bm), face(...dirA), { y: fl, pose: 'stand', dress: 'robe', hair: 'long', beard: 0, hat: 'none', cloth: b.use === 'cook' ? 'cloth_brown' : 'cloth_indigo', cloth2: 'cloth_white', ...(b.use === 'cook' ? { over: 'apron' } : {}) });
+      if (b.use === 'cook') fig(W(am - 1.45, bm - 0.75), face(...(alongX ? [0, 1] : [1, 0])), { y: fl, pose: 'squat', dress: 'robe', hair: 'long', beard: 0, cloth: 'cloth_red' });
+    } else if (b.kind === 'stue') {
       if (rand() < 0.8) fig(W(am - 0.3, bm + 0.62), face(...(alongX ? [0, -1] : [-1, 0])), { y: fl, pose: 'squat', dress: 'robe', hair: 'long', beard: 0, cloth: 'cloth_red' });
       if (rand() < 0.55) { const bb = far + sg * 0.5; fig(W(am - 2.0, bb), face(...(alongX ? [0, -sg] : [-sg, 0])), { y: fl + 0.01, pose: 'sit', dress: 'tunic', hair: 'short', beard: 1, hat: 'none', cloth: 'cloth_brown' }); }
     } else if (b.kind === 'smithy') {
