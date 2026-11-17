@@ -17,7 +17,7 @@ export function nkPylon(el, ctx) {
     const rect = s < 0 ? [-half, z0, -g, z1] : [g, z0, half, z1], tw = half - g;
     const niches = el.flags ? [0.28, 0.72].map((f) => ({ x: s * (g + tw * f), w: 1.6, depth: 0.7, top: h * 0.68 })) : [];
     pylonTower({ rect, y0, h, batter: b, front: 'zp', batterEnds: s < 0 ? [b, 0] : [0, b], niches, trim: { torus: 0.45, cornice: Math.min(2.4, h * 0.07) }, mat, towardDoor: -s, simple, reliefs: !simple }, ctx);
-    for (const n of niches) flagstaff({ at: [n.x, z1 - 0.15], y: y0, h: el.poleH ?? 40, side: s }, ctx);
+    for (const n of niches) flagstaff({ at: [n.x, z1 - 0.15], y: y0, h: el.poleH ?? 40, side: s, wall: (v) => z1 - b * (v / h), clamps: [h * 0.74, h * 0.88] }, ctx);
   }
   // the gate: the passage between the towers, the lintel mass over it, its own cornice
   const top = Math.round(h * 0.86);
