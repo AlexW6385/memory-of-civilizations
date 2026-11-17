@@ -509,13 +509,14 @@ function furnish(c, kind, o) {
     // a vintner's: the casks in a row along the back wall, a wine press of beams and a screw at the front, a tub for the must
     for (let u = 2.5; u < L - 2.2; u += 0.75) barrelAt(bag, c, u, D - 1.15, fy);
     const pv = dep + 1.5;
-    c.B('timber', 0.6, pv, 1.8, pv + 1.2, fy + 0.12, fy + 0.3, true);
-    for (const e of [0.62, 1.68]) for (const f of [pv + 0.05, pv + 1.05]) c.B('wood_dark', e, f, e + 0.12, f + 0.1, fy + 0.3, fy + 1.9, false);
-    c.B('wood_dark', 0.62, pv + 0.05, 1.8, pv + 0.15, fy + 1.8, fy + 1.95, false); c.B('wood_dark', 0.62, pv + 1.05, 1.8, pv + 1.15, fy + 1.8, fy + 1.95, false);
-    const sp = c.P(1.2, pv + 0.6); c.bag.add('wood_dark', lathe([[0.001, 0], [0.07, 0], [0.07, 0.95], [0.001, 0.95]], 8, null, sp[0], fy + 0.9, sp[1]));
-    c.B('timber', 0.85, pv + 0.25, 1.55, pv + 0.95, fy + 0.3, fy + 0.8, false); c.B('timber', 0.8, pv + 0.2, 1.6, pv + 1.0, fy + 0.8, fy + 0.88, false);
-    c.B('wood_dark', 0.65, pv + 0.56, 1.75, pv + 0.64, fy + 1.45, fy + 1.52, false);
-    barrelAt(bag, c, 1.2, pv + 1.6, fy);
+    c.B('timber', 0.55, pv, 1.35, pv + 1.1, fy + 0.12, fy + 0.3, true);
+    for (const e of [0.57, 1.23]) for (const f of [pv + 0.03, pv + 0.97]) c.B('wood_dark', e, f, e + 0.1, f + 0.1, fy + 0.3, fy + 1.9, false);
+    c.B('wood_dark', 0.57, pv + 0.03, 1.33, pv + 0.13, fy + 1.8, fy + 1.95, false); c.B('wood_dark', 0.57, pv + 0.97, 1.33, pv + 1.07, fy + 1.8, fy + 1.95, false);
+    const sp = c.P(0.95, pv + 0.55); c.bag.add('wood_dark', lathe([[0.001, 0], [0.07, 0], [0.07, 0.95], [0.001, 0.95]], 8, null, sp[0], fy + 0.9, sp[1]));
+    c.B('timber', 0.7, pv + 0.2, 1.2, pv + 0.9, fy + 0.3, fy + 0.8, false); c.B('timber', 0.62, pv + 0.15, 1.28, pv + 0.95, fy + 0.8, fy + 0.88, false);
+    c.B('wood_dark', 0.6, pv + 0.52, 1.32, pv + 0.58, fy + 1.45, fy + 1.52, false);
+    c.col.rect(c.R(0.55, pv, 1.35, pv + 1.1), fy, fy + 1.9);
+    barrelAt(bag, c, 0.95, pv + 1.65, fy);
   } else if (hk === 5) {
     // a herder's: a rail of fleeces along the wall, a rack of cheeses on a board, a churn and a pail
     c.B('wood_dark', 0.5, dep + 1.2, 0.56, dep + 3.0, fy + 1.5, fy + 1.56, false);

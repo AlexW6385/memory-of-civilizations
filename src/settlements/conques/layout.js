@@ -121,7 +121,7 @@ function build() {
         if (reserved().some((q) => overlap(rect, q, 0.2))) continue;
         const dens = r < 100 ? 1 : 1 - 0.62 * smooth(100, VILLAGE_R, r);
         const seed = Math.floor(rand() * 1e9);
-        if (rand() > dens) { if (r > 110) GARDENS.push({ rect: [rect[0], rect[1], rect[2], rect[3]], front, y, seed }); continue; }
+        if (rand() > dens) { if (r > 110) GARDENS.push({ rect: [rect[0], rect[1], rect[2], rect[3]], front, y, seed, k }); continue; }
         const Lw = rect[2] - rect[0], poor = r > 115 || rand() < 0.2;
         let storeys = poor ? (rand() < 0.5 ? 1 : 2) : rand() < 0.7 ? 2 : rand() < 0.5 ? 3 : 1;
         const near = route(cx, cz), shop = near < 36 && Lw >= 4.4 && rand() < 0.8;
@@ -139,6 +139,25 @@ function build() {
   // the hostel: a long hall of two floors
   const [hx0, hz0, hx1, hz1] = HOSTEL.rect;
   LOTS.push({ rect: [hx0, hz0, hx1, hz1], y: level(6), foot: level(6), front: 's', seed: 77, storeys: 2, k: 6, G: 3.1, G2: 2.5, pitch: 0.9, ridgeAlong: true, stone: 'schist_rubble', twin: true, gallery: false, dormer: false, shop: false, hostel: true });
+  // the plots left between the houses (under the terrace's slope, and where a lot was too narrow): kitchen gardens where the shelf is flat
+  const rowsOf = new Map();
+  for (const l of [...LOTS, ...GARDENS]) { const key = l.k !== undefined ? l.k * 2 + (l.front === 's' ? 0 : 1) : null; if (key === null) continue; if (!rowsOf.has(key)) rowsOf.set(key, []); rowsOf.get(key).push(l); }
+  for (const [key, list] of rowsOf) {
+    list.sort((a, b) => a.rect[0] - b.rect[0]);
+    for (let i = 0; i + 1 < list.length; i++) {
+      const a = list[i], b = list[i + 1], g0 = a.rect[2], g1 = b.rect[0], W = g1 - g0, north = a.front === 's', zf = north ? a.rect[3] : a.rect[1];
+      if (W < 5.6) continue;
+      const n = Math.ceil(W / 9), w = W / n;
+      for (let q = 0; q < n; q++) {
+        const rect = north ? [g0 + q * w + 0.2, zf - 7.2, g0 + (q + 1) * w - 0.2, zf] : [g0 + q * w + 0.2, zf, g0 + (q + 1) * w - 0.2, zf + 7.2];
+        const cx = (rect[0] + rect[2]) / 2, cz = (rect[1] + rect[3]) / 2;
+        if (Math.hypot(cx, cz) > 150 || STAIRS.some((sx) => sx + STAIR.gap + 0.3 > rect[0] && sx - STAIR.gap - 0.3 < rect[2])) continue;
+        let flat = true;
+        for (let u = 0; u <= 4 && flat; u++) for (let v = 0; v <= 2; v++) if (Math.abs(height(rect[0] + (rect[2] - rect[0]) * u / 4, rect[1] + (rect[3] - rect[1]) * v / 2) - a.y) > 0.3) flat = false;
+        if (flat && !inRect(ABBEY.terrace, cx, cz, 2)) GARDENS.push({ rect, front: north ? 's' : 'n', y: a.y, seed: Math.floor(rand() * 1e9) });
+      }
+    }
+  }
   // the kinds of house, by their place (docs/settlements/conques.md §1k): rich ashlar houses near the church, barn-houses on the outer rows,
   // vintners' houses (the vine country, cellars in the rock) among them, herders on the high rows, fishers on the low rows toward the river
   const rk = rng(2718);

@@ -400,7 +400,7 @@ for (const sz of [-1, 1]) {
   row([TW0, sz * 9.9], [TW0, sz * 17.2], [-1, 0], 14.82, 0.5);
   row([TE1, sz * 9.9], [TE1, sz * 17.2], [1, 0], 14.82, 0.5);
   // the nave's and the choir's high walls under the roofs' edges, the arms' high walls
-  row([3.2, sz * 4.7], [XC0 - PS, sz * 4.7], [0, sz], 22.55, 0.25);
+  row([6.1, sz * 4.7], [XC0 - PS, sz * 4.7], [0, sz], 22.55, 0.25);
   row([XC1 + PS, sz * 4.7], [XH, sz * 4.7], [0, sz], 22.55, 0.25);
   row([XC0 - PS, sz * 5.9], [XC0 - PS, sz * 17.2], [-1, 0], 22.55, 0.25);
   row([XC1 + PS, sz * 5.9], [XC1 + PS, sz * 17.2], [1, 0], 22.55, 0.25);
@@ -440,6 +440,7 @@ const walks = [
 ];
 walks.push([[1.5, 27.6], [3.0, 28.8], [3.0, 31.0], [9, 33.1], [14.5, 33.1]]);   // from the south walk into the refectory
 walks.push([[17.9, 23.3], [19.9, 23.3], [24.0, 23.3], [24.0, 20.5]]);              // from the east walk into the chapter house
+walks.push([[9, 33.1], [7.4, 34.6], [7.2, 35.85], [4.6, 35.85], [3.7, 35.65]]);          // up the reader's stair to the pulpit
 walks.push([[4.4, -6.6], [16, -6.6], [20.1, -6.6], [20.1, -7.9], [12, -7.9], [6, -7.9]]);   // up the stair to the tribune and along it
 walks.forEach((w) => { w.y0 = 0; });
 walks[0].y0 = 0; walks[1].y0 = 0; walks[2].y0 = 0;
