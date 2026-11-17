@@ -13,6 +13,7 @@ import { fortification, guardGear, gift } from './fort.js';
 import { terracePaving, towerDress, porchDress } from './court.js';
 import { incenseStand, courtAwning, courtWear, parasol } from './set.js';
 import { nicheCut, wallDress, furnish } from './interior.js';
+import { terraceWorks } from './works.js';
 import { house, workshops, streetChannel, flagApron, gardenPlot } from './town.js';
 import '../qing/index.js';
 import { scribeKit } from '../sumerian/house.js';
@@ -815,6 +816,6 @@ function audience(el, { bag, col }) {
 
 registerStyle('achaemenid', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, furnish, terrace, hall, lamassu_gate: gate, audience, persian_house: house, street_channel: streetChannel, flag_apron: flagApron, garden_plot: gardenPlot, royal_workshops: workshops, apadana_stair: apadanaStair, treasury, fortification, guard_gear: guardGear, gift, terrace_paving: terracePaving, tower_dress: towerDress, incense_stand: incenseStand, court_awning: courtAwning, court_wear: courtWear, parasol, scribe_kit: scribeKit },
+  elements: { ...STYLES.qing.elements, furnish, terrace_works: terraceWorks, terrace, hall, lamassu_gate: gate, audience, persian_house: house, street_channel: streetChannel, flag_apron: flagApron, garden_plot: gardenPlot, royal_workshops: workshops, apadana_stair: apadanaStair, treasury, fortification, guard_gear: guardGear, gift, terrace_paving: terracePaving, tower_dress: towerDress, incense_stand: incenseStand, court_awning: courtAwning, court_wear: courtWear, parasol, scribe_kit: scribeKit },
   objects: {},
 });

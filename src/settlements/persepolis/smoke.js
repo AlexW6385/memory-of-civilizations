@@ -17,6 +17,8 @@ export function emitters() {
   workshopVents(WORKSHOPS).forEach((p, i) => E.push({ p, kind: 'kitchen', thr: 0, seed: 30 + i }));
   // the incense burners before the throne in the Apadana (audience: c [-30, -40] facing north, 2.75 m plinth, stands 2.1 m)
   for (const x of [-33.6, -26.4]) E.push({ p: [x, TERRACE.h + 2.75 + 2.15, -43.2], kind: 'incense', thr: 0, seed: Math.floor(x) + 90 });
+  // the stands before the throne in the Hundred-Column Hall (plan.js: dais at z -67, floor 0.95 m over the terrace)
+  for (const x of [73.1, 76.9]) E.push({ p: [x, TERRACE.h + 0.95 + 1.25, -73.2], kind: 'incense', thr: 0, seed: Math.floor(x) + 200 });
   // the stands at the head of the royal way, burning all day
   COURT.stands.forEach(([x, z], i) => E.push({ p: [x, TERRACE.h + 1.25, z], kind: 'incense', thr: 0, seed: 120 + i }));
   return E;

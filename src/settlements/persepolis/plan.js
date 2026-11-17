@@ -93,6 +93,10 @@ E.push({ t: 'treasury', rect: [50, 60, 130, 200], y: T, h: 7, th: 3 });
 E.push({ t: 'fortification', x0: tx1 - 10, x1: tx1, z0: tz0 + 0.5, z1: tz1 - 0.5, y: T, h: 10, foot: 0, towers: { every: 38, size: 13, out: 2.5 },
   climbs: [{ z: tz0 + 3, x1: 232, from: 2.5 }, { z: tz1 - 3, x1: 232, from: 2.5 }], ground: mountain });
 
+// the works yard south-west of the Tachara's platform, where the stone for the halls still building was dressed
+E.push({ t: 'terrace_works', at: [-134, 18], y: T });
+E.push({ t: 'court_awning', rect: [-103.5, 30, -98, 34.5], y: T, h: 2.8, cloth: 'cloth_ochre', trim: 'cloth_indigo' });
+
 // the gear of the guards, ushers and bearers placed in town.js (headdresses, spears, quivers, vessels)
 E.push(...people().gear);
 
