@@ -113,6 +113,15 @@ export function life() {
     if (kind === 'home') { const a = at(F.L / 2 - 1.1, F.D - 2.1); woman(a, look(a, F.L / 2, F.D - 1.2), { y: y0, pose: 'squat' }); if (R2() < 0.6) { const b = at(F.L / 2 + 1.0, 1.5 + T0); man(b, look(b, F.L / 2, 6), { y: y0, pose: 'sit_ground', child: true, h: 1.1 }); } }
     else if (kind === 'weaver') { const a = at(F.L / 2, F.D - 1.5); woman(a, look(a, F.L / 2, F.D), { y: y0, pose: 'stand', cloth: 'cloth_red' }); }
     else if (kind === 'shop') { const a = at(F.L / 2 + 0.4, 2.0 + T0 - 0.2 + 1.2 + 0.7); man(a, look(a, F.L / 2, 1), { y: y0, pose: 'stand', dress: 'shendyt', cloth: 'cloth_white' }); if (R2() < 0.5) { const b = at(F.L / 2 - 1.2, 1.4); woman(b, look(b, F.L / 2 - 1.2, 4), { y: y0, pose: 'talk' }); } }
+    else if (['potter', 'dyer', 'smith', 'press', 'sealcutter'].includes(kind)) {
+      // the workers of the town's trades (§4h) at their stations, as the furniture of the trade is set in styles/minoan/town.js
+      const sg = F.du < F.L / 2 ? 1 : -1, far0 = sg > 0 ? F.L - 1.2 : 1.2, vB = F.D - 0.65, hv = vB - 0.9;
+      if (kind === 'potter') { const wu = far0, wv = 0.65 + 3.2, a = at(wu - sg * 0.85, wv); man(a, look(a, wu, wv), { y: y0, pose: 'sit_low', dress: 'loincloth', cloth: 'cloth_white' }); }
+      else if (kind === 'dyer') { const a = at(F.L / 2, vB - 2.2); woman(a, look(a, F.L / 2, vB - 1.0), { y: y0, pose: 'stand', cloth: 'cloth_maroon', cloth2: 'cloth_white' }); }
+      else if (kind === 'smith') { const a = at(far0 - sg * 1.0, hv - 0.3); man(a, look(a, far0 - sg * 1.7, hv - 0.3), { y: y0, pose: 'stand', dress: 'loincloth', cloth: 'cloth_brown', top: 'bare' }); }
+      else if (kind === 'press') { const hu = sg > 0 ? F.L - 1.6 : 1.6, a = at(hu - sg * 1.25, vB - 1.5); man(a, look(a, hu, vB - 1.5), { y: y0, pose: 'stand', dress: 'loincloth', cloth: 'cloth_ochre', carry: 'basket' }); }
+      else { const bu = F.L / 2 - 0.3, a = at(bu, vB - 1.2); man(a, look(a, bu, vB - 0.4), { y: y0, pose: 'sit_low', dress: 'shendyt', cloth: 'cloth_indigo' }); }
+    }
     else { const a = at(F.L / 2, F.D / 2); man(a, look(a, F.L / 2, F.D - 1), { y: y0, pose: 'stand', dress: 'loincloth', cloth: 'cloth_brown', carry: 'sack' }); }
   }
   // the lanes: people by the doors and on the way, a donkey with its driver, children at play, dogs and cats
@@ -145,6 +154,28 @@ export function life() {
   for (let k = 0; k < 6; k++) { const x = 118 + rand() * 20, z = 40 + rand() * 18; L.push({ t: 'animal', kind: k < 4 ? 'goat' : 'sheep', at: [x, z], y: height(x, z), rot: rand() * 6.28, seed: seed() }); }
   man([128, 36], 0.6, { y: height(128, 36), pose: 'staff', child: true, h: 1.3, carry: 'staff' });
   void n;
+  // ── the street furniture and the goods of the town (§4h) ──
+  // the West Court's exchange: the stalls of the town's goods along its south side under their awnings, each with its seller behind and a buyer at the table; a well with its curb and a trough for the donkey train at the west
+  [[-112, ['pottery'], 'cloth_ochre'], [-103.5, ['bread'], 'cloth_white'], [-95, ['bolts'], 'cloth_red'], [-86.5, ['heap'], 'cloth_indigo']].forEach(([x, goods, aw], i) => {
+    L.push({ t: 'stall', at: [x, 44.6], y: Y0, rot: Math.PI, seed: seed(), w: 2.6, d: 1.4, awning: aw, goods });
+    (i % 2 ? man : woman)([x + (i % 2 ? 0.3 : -0.3), 45.35], 0, { y: Y0, pose: 'stand' });
+    (i % 2 ? woman : man)([x + 0.9, 42.4], Math.PI + 0.3, { y: Y0, pose: 'stand', carry: i % 2 ? 'basket' : 'pot' });
+  });
+  L.push({ t: 'well', kind: 'open', at: [-114, 33.6], y: Y0, seed: seed() }, { t: 'trough', at: [-113.2, 27.4], y: Y0, rot: Math.PI / 2, seed: seed() });
+  woman([-112.2, 34.6], Math.PI + 0.5, { y: Y0, carry: 'pot' });
+  // the doorsteps of the outer town: a pair of water pots, an amphora, sacks or a stack of firewood beside the door, on the side away from the bench
+  for (const l of lots()) {
+    if (l.r < 105 || l.r > 235 || rand() > 0.24) continue;
+    const F = dwellingFrame({ rect: l.rect, front: l.front, seed: l.seed }), [x, z] = F.P(F.du - 1.35, -0.4), y = height(x, z) + 0.07, k = Math.floor(rand() * 4);
+    if (k === 0) L.push({ t: 'pot', kind: 'water_pot', at: [x, z], y, n: 2, seed: seed() });
+    else if (k === 1) L.push({ t: 'pot', kind: 'amphora', at: [x, z], y, n: 2, seed: seed() });
+    else if (k === 2) L.push({ t: 'sacks', at: [x, z], y, rot: 0, n: 2, seed: seed() });
+    else L.push({ t: 'firewood', at: [x, z], y, rot: 0, seed: seed(), len: 1.2 });
+  }
+  // the Kairatos: a stone trough at the bank where the donkeys drink, one drinking at it with its driver
+  { const zz = -30, b = bank(zz, -1), y = height(b[0], b[1]);
+    L.push({ t: 'trough', at: [b[0] - 0.4, b[1]], y, rot: Math.PI / 2, seed: seed() }, { t: 'animal', kind: 'donkey', at: [b[0] - 1.6, b[1] + 0.2], y, rot: -Math.PI / 2, seed: seed(), gear: true });
+    man([b[0] - 2.2, b[1] + 1.6], -Math.PI / 2 - 0.5, { y, carry: 'staff' }); }
   return L;
 }
 

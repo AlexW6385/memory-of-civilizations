@@ -17,7 +17,7 @@ export function emitters() {
     if (l.r < 220 && r() < 0.32) {
       const [x0, z0, x1, z1] = l.rect, x = x0 + (x1 - x0) * (0.25 + 0.5 * r()), z = z0 + (z1 - z0) * (0.25 + 0.5 * r());
       const low = Math.min(height(x0, z0), height(x1, z0), height(x0, z1), height(x1, z1));
-      E.push({ p: [x, low + dwellingStoreys(l.seed) * 2.9 + 0.5, z], kind: 'kitchen', thr: 0.3 + 0.5 * r(), seed: l.seed + 1 });
+      E.push({ p: [x, low + dwellingStoreys(l.seed, l.r) * 2.9 + 0.5, z], kind: 'kitchen', thr: 0.3 + 0.5 * r(), seed: l.seed + 1 });
     }
   }
   // the ovens in the yards behind the shorter houses, baking at the morning meal
