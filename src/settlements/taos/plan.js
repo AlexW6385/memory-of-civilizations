@@ -2,7 +2,7 @@
 // South House (to four), the plaza and the creek with its log bridges, six kivas, the racks on the
 // plaza's north side, the perimeter wall.
 
-import { NORTH, SOUTH, CELL, KIVAS, WALL, CREEK, RADIUS, ROOMS, YARDS, bankY, creekZ, inCreek, roomsOf, isRoom, nearRoom, KEEP_ROUTE, upperOf, ladderOf, CLEAR } from './layout.js';
+import { NORTH, SOUTH, CELL, KIVAS, WALL, CREEK, RADIUS, ROOMS, YARDS, bankY, creekZ, inCreek, roomsOf, isRoom, nearRoom, KEEP_ROUTE, upperOf, ladderOf, CLEAR, UPPER, LADDERS } from './layout.js';
 import { dressItems, woodpiles } from './dress.js';
 
 const E = [];
@@ -48,6 +48,20 @@ for (const B of [NORTH, SOUTH]) for (const r of roomsOf(B)) { const x0 = B.x0 + 
 // from the gap in the south wall round by the South House's alley (x 10…15) to the plaza, to the log bridge and the North House
 const walks = [KEEP_ROUTE];
 walks[0].y0 = 0;
+// the ladders walked (docs/settlements/taos.md §4.7): for each terraced room a route from the plaza (or the block's end) up its column's ladders,
+// across the terrace to the doorway and into the room — walk-check must bring the walker to every waypoint
+for (const u of UPPER) {
+  const B = u.b === 'N' ? NORTH : SOUTH, d = B.front === 's' ? 1 : -1, v = -d, x = B.x0 + u.j * CELL + 1.0;
+  const zOf = (l) => B.z0 + (l.ground ? l.i + (d > 0 ? 1 : 0) : l.i + (d > 0 ? 0 : 1)) * CELL;
+  const col = LADDERS.filter((l) => l.b === u.b && l.j === u.j && (d > 0 ? l.i > u.i : l.i < u.i)).sort((a, b) => d * (b.i - a.i));
+  if (!col.length) continue;
+  const r = [[x, zOf(col[0]) - v * 2]];
+  for (const l of col) r.push([x, zOf(l) - v * 0.8], [x, zOf(l) + v * 0.7]);
+  const zd = B.z0 + (u.i + (d > 0 ? 1 : 0)) * CELL, dx = B.x0 + u.j * CELL + CELL / 2 + 0.3;
+  r.push([x, zd + d * 1.0], [dx, zd + d * 1.0], [dx, zd - d * 1.6]);
+  r.y0 = 0;
+  walks.push(r);
+}
 export const pueblo = {
   id: 'taos-pueblo',
   name: { en: 'Taos Pueblo', zh: '陶斯普韦布洛' },
