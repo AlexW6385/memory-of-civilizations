@@ -119,3 +119,14 @@ Sources: Wikipedia "Lighthouse of Alexandria" (the ramp wide enough for riders, 
 - Fix: laundry sheets on the lines no longer overlap (the old step could be shorter than a sheet).
 
 Level: L2, with the Pharos and the Museion interiors and the house fronts moving toward L3. Still missing for L3: the Pharos' octagon and cylinder are solid (the stair to the lantern), the upper storeys of the houses are solid, the Serapeum's daughter library and subterranean galleries, the Gymnasium and palaces as masses.
+
+## 15. Round 2: the landmark seen first and seen close
+
+Sources: Wikipedia "Lighthouse of Alexandria" (Tritons at the corners from the coins; statue of Zeus Soter or Poseidon; fire and mirror; lantern chamber 4.3 m) https://en.wikipedia.org/wiki/Lighthouse_of_Alexandria ; Strabo 17.1.6-10; the forms of the rest are [inferred] from Hellenistic practice.
+
+- **Tritons** rebuilt (about 4 m): torso leaning back on a looped fish tail ending in a fluke on the plinth, one hand to the conch, one on the coils; set inside the parapet (before, stacked blobs overhanging the platform edge). [stated: Tritons at the corners; the pose inferred]
+- **Zeus Soter** rebuilt (6 m on a moulded drum): himation skirt in folds, bare chest, a diagonal band over the left shoulder, bearded head with heavy hair, thunderbolt raised, long sceptre, an eagle at his foot. [inferred]
+- **Lantern**: stylobate, eight columns with bases and capitals, a closed architrave with a painted band, a ribbed lead dome with finial plate (the old dome was an open shell with bare columns). [stated: lantern chamber 4.3 m across]
+- **Door**: torus rolls up the jambs, the winged sun with tiers of feathers on the lintel frieze, a five-step cavetto cornice and corona. [inferred: Egyptian temple door]
+- **Ships**: bulwarks and rails, curled stem and swan-neck stern with goose-head, hatch, bitts, anchor, stays, shrouds and lines up the sail; galleys with shield row, outrigger, stern fan and helmsman's shelter.
+- **Library hall exteriors**: plinth course, antae and pilasters, architrave, frieze and cavetto cornice carried round, window hoods and jambs (existing materials only).
