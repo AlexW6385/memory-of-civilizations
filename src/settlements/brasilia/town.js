@@ -2,14 +2,16 @@
 // and the Justice palaces at the Congress end, the superquadra's eight blocks on pilotis with the commercial strip, the carriageways'
 // and the avenue's traffic of cars and buses, the lamps and benches, and the people of the lawn, the pavements, the square and the
 // plaza. Everything is placed from layout.js.
-import { RADIUS, LAWN, ROAD_N, ROAD_S, AVENUE, SQ, SQ2, SQS, RING, MINISTRIES, ITAMARATY, JUSTICE, ALL_BLOCKS, SHOPS, SERV, CATH, PRACA, TUNNEL, POOLS, RAMP, PLATFORM, PARKS, CHAPEL, MUSEU, PLAYS, PITCH_AT, CAMP, CAMP_FIRES, KIOSKS, CARTS, inRect, inBuilding, rng } from './layout.js';
+import { RADIUS, LAWN, ROAD_N, ROAD_S, AVENUE, SQ, SQ2, SQS, RING, MINISTRIES, ITAMARATY, JUSTICE, ALL_BLOCKS, SHOPS, SERV, CATH, PRACA, TUNNEL, POOLS, RAMP, PLATFORM, PARKS, CHAPEL, MUSEU, SCHOOL, PLAYS, PITCH_AT, CAMP, CAMP_FIRES, KIOSKS, CARTS, inRect, inBuilding, rng } from './layout.js';
 
+const LAWN_PICNICS = [];
 const base = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-110, 0], facing: 'e' } });
 const N = -Math.PI / 2, S = Math.PI / 2;   // heading east (rot −π/2) and west (π/2); north 0, south π
 const CAR = ['car_cream', 'car_blue', 'car_red', 'car_black', 'car_cream', 'paint_white', 'car_blue'];
 const KIND = ['beetle', 'beetle', 'beetle', 'aero', 'kombi'];
 
 export async function town() {
+  LAWN_PICNICS.length = 0;
   const rand = rng(1970), pick = (a) => a[Math.floor(rand() * a.length)];
   const B = [], L = [], P = [];
   // ── the buildings ──
@@ -18,13 +20,16 @@ export async function town() {
   B.push({ t: 'arcade_palace', rect: JUSTICE, variant: 'curtain', front: 's' });
   for (const b of ALL_BLOCKS) B.push({ t: 'superblock', rect: b.rect, h: 21.6, pilotis: 3.6, seed: b.seed, tile: b.tile });
   B.push({ t: 'shops_row', rect: SHOPS, floors: 2, seed: 5 }, { t: 'shops_row', rect: SERV, floors: 2, seed: 12 });
-  B.push({ t: 'chapel' }, { t: 'museu' }, { t: 'roadmarks' }, { t: 'apron' }, { t: 'camp' });
+  B.push({ t: 'chapel' }, { t: 'museu' }, { t: 'school' }, { t: 'roadmarks' }, { t: 'apron' }, { t: 'camp' });
   // the Esplanade's kerbside furniture: a litter bin at every second lamp, a drinking fountain and a street-name plate at the bus stops
   { const items = [];
     for (let x = -450, k = 0; x < -20; x += 36, k++) for (const z of [-116.2, 116.2]) { if (k % 2 === 0) items.push({ k: 'bin', at: [x + 1.2, z] }); if (k % 5 === 1) items.push({ k: 'sign', at: [x + 4, z] }); }
     for (const x of [-405, -310, -215, -130, -40]) items.push({ k: 'fountain', at: [x + 5, -103.5] }, { k: 'fountain', at: [x - 25, 103.5] }, { k: 'seat', at: [x + 9, -104.5], r: 1 }, { k: 'seat', at: [x - 21, 104.5], r: 1 });
     B.push({ t: 'lawn_kit', items, seed: 71 }); }
   for (const pk of PARKS) B.push({ t: 'parking', rect: pk.rect, side: pk.side });
+  // the lawn at leisure: families on blankets by the paths, a kick-about between two frames (docs §12); all clear of the lawn's centre path and the arrival's sight line
+  { const picnics = [[-410, -52, 0], [-380, 70, 0], [-340, -75, 0], [-300, 46, 0], [-250, -64, 0], [-215, 82, 0], [-175, -48, 0], [-150, 66, 0], [-135, -80, 0]];
+    B.push({ t: 'lawn_life', picnics, games: [[-280, -30, 0], [-200, 25, 1]], seed: 61 }); LAWN_PICNICS.push(...picnics); }
   for (const r of PLAYS) B.push({ t: 'playground', rect: r });
   B.push({ t: 'pitch', rect: PITCH_AT });
   // the street furniture: bus shelters on the lawn's kerbs and the avenue's pavements, kiosks and vendors' carts where people gather
@@ -108,6 +113,8 @@ export async function town() {
   }
   // the Salão Negro under the deck: visitors in twos before the busts and panels, guards at the door; on the deck: tourists, photographers, clerks at their lunch
   for (let k = 0; k < 10; k++) person(-6 + rand() * 38, -104 + rand() * 22, rand() * 6.28, { inside: true, kind: k < 2 ? 'student' : undefined });
+  for (let k = 0; k < 9; k++) person(-4 + rand() * 28, 82 + rand() * 22, rand() * 6.28, { inside: true, kind: k < 2 ? 'student' : undefined });
+  person(-7.5, 88.5, Math.PI / 2, { inside: true, kind: 'worker', w: false }); person(-7.5, 97.5, Math.PI / 2, { inside: true, kind: 'worker', w: false });
   person(-7.5, -95.5, Math.PI / 2, { inside: true, kind: 'worker', w: false }); person(-7.5, -88.5, Math.PI / 2, { inside: true, kind: 'worker', w: false });
   for (let k = 0; k < 30; k++) { const x = -6 + rand() * 70, z = -100 + rand() * 200; if (Math.hypot(x - 38, z + 72) < 28 || Math.hypot(x - 38, z - 72) < 38 || (x > 28 && x < 48 && Math.abs(Math.abs(z) - 32) < 16) || Math.abs(z) < 3.5) continue; person(x, z, rand() * 6.28, { inside: true, y: 6.5, kind: rand() < 0.12 ? 'student' : undefined }); }
   // the palaces' lobbies: clerks and visitors at the reception, a guard at each door; sentries at the Planalto's ramp
@@ -142,6 +149,18 @@ export async function town() {
     for (let k = 0; k < 4; k++) { const a = k; L.push({ t: 'chickens', at: [cx0 + 8 + k * 6, (cz0 + cz1) / 2 + (k % 2 ? 4 : -5)], y: 0, rot: a, n: 4, kind: 'hen' }); }
     for (let k = 0; k < 3; k++) P.push({ t: 'animal', kind: 'dog', at: [cx0 + 10 + k * 8, (cz0 + cz1) / 2 + 2 + k], y: 0, rot: rand() * 6.28, seed: 31 + k });
     L.push({ t: 'barrow', at: [cx1 - 14, (cz0 + cz1) / 2 + 1], y: 0, rot: 0.6 }); }
+  // the families on their blankets (two or three each, one sitting) and the kick-about's six players
+  for (const [px, pz] of LAWN_PICNICS) { person(px - 0.6, pz + 0.2, 0.5, { inside: true, pose: 'sit_ground' }); person(px + 0.5, pz - 0.3, -0.5, { inside: true, pose: 'sit_ground' }); if (rand() < 0.7) person(px + 1.6, pz + 0.5, rand() * 6.28, { inside: true, kind: 'student' }); }
+  for (const [gx, gz, rot] of [[-280, -30, 0], [-200, 25, 1]]) for (let k = 0; k < 6; k++) person(gx + (rot ? (rand() - 0.5) * 8 : (rand() - 0.5) * 11), gz + (rot ? (rand() - 0.5) * 11 : (rand() - 0.5) * 8), rand() * 6.28, { inside: true, kind: 'student', w: false });
+  // the Escola Classe: a teacher and twelve to fourteen children in each classroom, the secretary in her office, the cooks and the children's meal in the cantina, children at the gallery's benches
+  { const [sx0, sz0] = SCHOOL, T = 0.25;
+    for (let k = 0; k < 5; k++) { const a = sz0 + k * 9 + (k ? T / 2 : T);
+      person(sx0 + 4.5, a + 1.5, Math.PI, { inside: true, y: 0.05, w: true });
+      for (let c = 0; c < 3; c++) for (let r = 0; r < 4; r++) if (rand() < 0.6) person(sx0 + 0.9 + c * 1.6 + (rand() < 0.5 ? 0 : 0.5), a + 3.5 + r * 1.5, (rand() - 0.5) * 0.4, { inside: true, y: 0.05, kind: 'student', w: rand() < 0.5 }); }
+    person(sx0 + 4.6, sz0 + 48.5, Math.PI / 2, { inside: true, y: 0.05, w: true });
+    person(sx0 + 2.1, sz0 + 54.5, Math.PI / 2, { inside: true, y: 0.05, w: true, kind: 'worker' }); person(sx0 + 3.6, sz0 + 57.0, 0, { inside: true, y: 0.05, kind: 'student' });
+    for (let k = 0; k < 5; k++) person(sx0 + 8.9 + rand() * 6, sz0 + 3 + rand() * 50, rand() * 6.28, { inside: true, kind: 'student' });
+    L.push({ t: 'chickens', at: [sx0 + 8, sz0 - 5], y: 0, rot: 1, n: 5, kind: 'pigeon' }); }
   // the apron and the squares: pigeons, and dogs asleep in the shade of the pilotis and by the kiosks
   L.push({ t: 'chickens', at: [-104, -13], y: 0, rot: 0.3, n: 7, kind: 'pigeon' }, { t: 'chickens', at: [-103, 14], y: 0, rot: 1.4, n: 6, kind: 'pigeon' }, { t: 'chickens', at: [PRACA[0] + 60, 6], y: 0, rot: 0.5, n: 8, kind: 'pigeon' }, { t: 'chickens', at: [PRACA[0] + 130, -12], y: 0, rot: 2.0, n: 8, kind: 'pigeon' }, { t: 'chickens', at: [PRACA[0] + 130, 20], y: 0, rot: 3.0, n: 7, kind: 'pigeon' });
   for (const b of ALL_BLOCKS.slice(0, 5)) P.push({ t: 'animal', kind: 'dog', at: [b.rect[0] + 12 + rand() * 20, (b.rect[1] + b.rect[3]) / 2 + 3], y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 999) });

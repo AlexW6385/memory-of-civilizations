@@ -3,6 +3,7 @@
 // benches, planters and the flag under the pilotis.
 import { box, lathe, rod } from '../../core/geom.js';
 import { ministryVerge } from './dressing.js';
+import { coreRoom, CORE_KINDS } from './offices.js';
 import { rngOf, solidBox, shrub, stool, letters } from './kit.js';
 
 const WHITE = 'plaster_white', CONC = 'concrete_light';
@@ -35,7 +36,8 @@ export function ministry(el, { bag, col, lights }) {
   const zcs = [z0 + (z1 - z0) * 0.3, z0 + (z1 - z0) * 0.7], cx0 = x0 + 5, cx1 = x1 - 5, T = 0.3;
   // (the cores are closed boxes of 6 m; the lobby is entered from the side of the nearer end)
   const stair = (zc) => { solidBox(bag, col, WHITE, cx0, 0, zc - 3, cx1, y0, zc + 3); bag.add('glass_outer', box(cx0 + 0.5, 0.1, zc - 3.04, cx1 - 0.5, 3.0, zc - 3)); bag.add('glass_outer', box(cx0 + 0.5, 0.1, zc + 3, cx1 - 0.5, 3.0, zc + 3.04)); };
-  stair(zcs[1]);
+  // the second core is a room of its own use (canteen, library, post and bank agency, press room), by the seed
+  coreRoom(bag, col, lights, { x0: cx0, x1: cx1, zc: zcs[1], y0, kind: CORE_KINDS[el.seed % 4], rand }); void stair;
   {
     const zc = zcs[0], zs = zc - 3, ze = zc + 3, dxm = (cx0 + cx1) / 2;
     const door = [dxm - 0.9, dxm + 0.9];

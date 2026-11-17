@@ -4,6 +4,7 @@
 import { box, lathe, rod, fromTriangles, frustum } from '../../core/geom.js';
 import { congressWeather } from './dressing.js';
 import { revSurf, ring, wedgeX, turnedBox, ringSegments, dAng, tri2, TAU, quad2 } from './util.js';
+import { salaoVerde } from './salao.js';
 import { DECK, PLATFORM, RAMP, POOLS, DOME, BOWL, TOWERS } from '../../settlements/brasilia/layout.js';
 
 const WHITE = 'plaster_white', CONC = 'concrete_light';
@@ -87,14 +88,18 @@ export function congress(el, { bag, col, lights }) {
   // the mass is cut for the Salão Negro, the black hall under the deck north of the pool (36 × 26 m, 4.8 m high), entered by a glazed door in the west face
   const HALL = [x0, -106, x0 + 36, -80], hy = 4.8;
   const mass = (a, b, c, d) => { bag.add(CONC, box(a, -1, b, c, y - 0.35, d)); col.rect([a, b, c, d], -1, y); };
-  mass(x0, z0, x1, HALL[1]); mass(x0, HALL[3], x1, z1); mass(HALL[2], HALL[1], x1, HALL[3]);
-  bag.add(CONC, box(HALL[0], hy, HALL[1], HALL[2], y - 0.35, HALL[3])); col.rect([HALL[0], HALL[1], HALL[2], HALL[3]], hy, y);
+  // its twin, the Salão Verde, lies south of the pools, the mirror of the black hall (docs §12)
+  const HALL2 = [x0, 80, x0 + 36, 106];
+  mass(x0, z0, x1, HALL[1]); mass(x0, HALL[3], x1, HALL2[1]); mass(HALL[2], HALL[1], x1, HALL[3]);
+  mass(x0, HALL2[3], x1, z1); mass(HALL2[2], HALL2[1], x1, HALL2[3]);
+  for (const Hh of [HALL, HALL2]) { bag.add(CONC, box(Hh[0], hy, Hh[1], Hh[2], y - 0.35, Hh[3])); col.rect([Hh[0], Hh[1], Hh[2], Hh[3]], hy, y); }
   bag.add('marble', box(x0, y - 0.35, z0, x1, y, z1));
   col.floor(PLATFORM, y);
-  salaoNegro(bag, col, lights, HALL, hy);
+  salaoNegro(bag, col, lights, HALL, hy); salaoVerde(bag, col, lights, HALL2, hy);
   for (let z = z0 + 2; z + 4.4 <= z1 - 0.4; z += 4.4) {
     if (z > RAMP.z0 - 4.4 && z < RAMP.z1 + 0.2) continue;
     if (z + 4.4 > HALL[1] && z < HALL[3]) continue;
+    if (z + 4.4 > HALL2[1] && z < HALL2[3]) continue;
     bag.add('glass_outer', box(x0 - 0.12, 0.8, z, x0, y - 1.6, z + 3.8));
     bag.add(CONC, box(x0 - 0.2, 0.4, z + 3.8, x0 + 0.05, y - 1.0, z + 4.4));
     col.rect([x0 - 0.22, z, x0, z + 4.4], 0, y - 1.0);                                                       // the band, glass and mullion
