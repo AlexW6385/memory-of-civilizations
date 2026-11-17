@@ -99,3 +99,13 @@ Sources read this pass: JAANUS, kanban (https://projects.mcah.columbia.edu/jaanu
 - **Cloth shops** now have the collision of what stands (the bolts for two metres, the board beyond), not a block across the room.
 
 Level: L2, with parts of L3 (the landmark's upper storey and the hōjō's screens; every open house furnished and varied by rule). Missing for L3: the lower floor's shutters of the Kannon-den and its interior's ranma and ceiling, the Tōgu-dō's eaves and fusuma, the Ryōan-ji kitchen's inside, the figures in the second storeys of houses, wear on thresholds and wet ground after rain.
+
+## 10c. Landmark pass (seen first, seen close)
+
+No new sources; everything builds on §3, §3.1, §4 and §10b.
+- **Kannon-den lower floor.** Shoin-style front: shoji leaves of stiles, rails, a boarded foot and a lattice of thin bars; sliding board doors (sugido) in the outer bays; each bay with a lintel and a slatted transom (ranma) over a dark ground [stated: MLIT, shoji below and bell windows above; the pattern of ranma and board panels is inferred].
+- **Pent roof.** Cypress-bark shingles laid in courses, concave in section, the eave swept up at the hip corners, hip caps and rafter ends that follow the lift [inferred: standard hiwadabuki; the Agency for Cultural Affairs describes the roof as shingle].
+- **Bell windows (katōmado)** with stepped lacquered mouldings, a lattice clipped to the outline and a sill [inferred from the Zen-hall type].
+- **Tōgu-dō.** Fusuma with lacquered borders, pulls and ink landscapes; lintel round the rooms; a ceiling of rails; two rows of rafter ends along the eaves; the cabinet doors of the shelves [inferred; the Dōjinsai's furnishings stay as in §3.1].
+- **Garden.** The Ginshadan's lines are continuous ridges that stop short of the cone's rings; a moss islet, a stone bridge of granite slabs and stones set along the pond's bank [stated: the sand platform and cone are later additions, kept at the brief's request]; the approach from the gate between a clipped camellia hedge and a bamboo fence [inferred: present-day arrangement, kept at the brief's request].
+- **Ryōan-ji.** The clay wall carries the seams of its tamped layers, bands and runs of oil stain in brown-orange, a stone plinth and a stepped coping [stated: Wikipedia, §4]; gravel lines are continuous ridges; the veranda shows its board joints and edge board.

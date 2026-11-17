@@ -49,6 +49,7 @@ function planting(x, z, p) {
   if (inRect(SHRINE.rect, x, z)) return Math.abs(x - SHRINE.torii[0]) < 5 || Math.hypot(x - SHRINE.noh[0] + 5, z - SHRINE.noh[1] - 2) < 15 || Math.hypot(x - SHRINE.hall[0], z - SHRINE.hall[1]) < 9 ? null : { sugi: 0.03, grass: 8 };
   if (inRect(GINKAKU.rect, x, z)) {
     const n = vnoise(x * 0.05 + 3, z * 0.05), pd = Math.hypot((x - GINKAKU.pond.c[0]) / GINKAKU.pond.r[0], (z - GINKAKU.pond.c[1]) / GINKAKU.pond.r[1]);
+    if (Math.abs(x - GINKAKU.gate[0]) < 5 && z > 48 && z < GINKAKU.rect[3]) return { grass: 1 };                                 // the hedged approach
     if (Math.hypot(x - GINKAKU.kannon[0], z - GINKAKU.kannon[1] - 12) < 20 && x > 160 && x < 240) return { grass: 1 };       // the court before the pavilion
     if (inRect([150, -31, 183, -15], x, z, 4)) return { grass: 1 };                                                              // the sand platform
     if (Math.abs(x - 200) < 16 && z > -26 && z < 40) return { grass: 6 };                                                      // the view from the arrival stays open
