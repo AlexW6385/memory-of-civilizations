@@ -4,6 +4,7 @@
 
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { orientedBox, STYLES } from '../../core/build.js';
+import { archPanel } from './relief.js';
 
 /** The pishtaq builder, reached at build time (the style registers it; this file cannot import it back). */
 export const pishtaqOf = (el, ctx) => STYLES.timurid.elements.tim_pishtaq(el, ctx);
@@ -56,7 +57,20 @@ export function bannai(bag, o) {
   const out = new Map();
   const tri = (m, p, q, r) => { if (!out.has(m)) out.set(m, []); out.get(m).push(...(flip ? [...p, ...r, ...q] : [...p, ...q, ...r])); };
   const quad = (m, S0, S1, V0, V1, off) => { const A = P(S0, V0, off), Bq = P(S1, V0, off), C = P(S1, V1, off), D = P(S0, V1, off); tri(m, A, Bq, C); tri(m, A, C, D); };
-  const diam = (m, cs, cv, r, off) => { const L = P(cs - r, cv, off), R = P(cs + r, cv, off), T = P(cs, cv + r, off), Bm = P(cs, cv - r, off); tri(m, L, Bm, R); tri(m, L, R, T); };
+  const rel = o.relief ?? 0, Pp = (s, off) => [a[0] + ux * s + n[0] * (d + off), a[1] + uz * s + n[1] * (d + off)];
+  // a stroke of brick standing `dep` out of the field (a real prism), for the Kufic in relief
+  const prism = (m, S0, S1, V0, V1, dep) => {
+    const f = (S, V, off) => P(S, V, 0.03 + off), q4 = (A, Bq, C, D) => { tri(m, A, Bq, C); tri(m, A, C, D); };
+    q4(f(S0, V0, dep), f(S1, V0, dep), f(S1, V1, dep), f(S0, V1, dep));                  // front
+    q4(f(S1, V0, 0), f(S1, V1, 0), f(S1, V1, dep), f(S1, V0, dep));                      // right
+    q4(f(S0, V0, 0), f(S0, V0, dep), f(S0, V1, dep), f(S0, V1, 0));                      // left
+    q4(f(S0, V1, 0), f(S0, V1, dep), f(S1, V1, dep), f(S1, V1, 0));                      // top
+  };
+  const diam = (m, cs, cv, r, off) => {
+    const L = P(cs - r, cv, off), R = P(cs + r, cv, off), T = P(cs, cv + r, off), Bm = P(cs, cv - r, off);
+    if (rel && m === (o.ink ?? TUR)) { const Ap = P(cs, cv, off + rel); tri(m, L, Bm, Ap); tri(m, Bm, R, Ap); tri(m, R, T, Ap); tri(m, T, L, Ap); return; }
+    tri(m, L, Bm, R); tri(m, L, R, T);
+  };
   const inHole = (cs, cv, r) => holes.some((h) => {
     const w = h.w / 2 + r + 0.05, top = (h.sill ?? 0) + h.h + r + 0.05;
     return Math.abs(cs - h.at) < w && cv > (h.sill ?? 0) - r - 0.05 && (cv < top - Math.max(0, Math.abs(cs - h.at) - w * 0.35) * 1.6);
@@ -71,7 +85,7 @@ export function bannai(bag, o) {
     if (holes.length) quad(base, x0, x1, y0, y1, 0.02);
     if (kind === 'diamond') {
       diam(ink, xm, ym, Math.min(cs, cv) * 0.46, 0.04);
-      diam(alt, xm, ym, Math.min(cs, cv) * 0.2, 0.06);
+      diam(alt, xm, ym, Math.min(cs, cv) * 0.2, rel ? 0.044 + rel * 0.57 : 0.06);
       if (i + 1 < ns && j + 1 < nv && !holes.length) diam(ink2, x1, y1, Math.min(cs, cv) * 0.18, 0.04);
     } else if (kind === 'checker') {
       if ((i + j) % 2 === 0) quad(ink, x0, x1, y0, y1, 0.04); else quad(alt, x0 + cs * 0.15, x1 - cs * 0.15, y0 + cv * 0.15, y1 - cv * 0.15, 0.04);
@@ -81,6 +95,13 @@ export function bannai(bag, o) {
     } else {
       // square Kufic: a stroke up each column, a bar across now and then, a dot
       const r = rnd();
+      if (rel) {
+        prism(ink, x0 + cs * 0.38, x0 + cs * 0.62, y0 + cv * 0.08, y1 - cv * 0.08, rel);
+        if (r < 0.4) prism(alt, x0 + cs * 0.1, x1 - cs * 0.1, ym - cv * 0.09, ym + cv * 0.09, rel * 1.4);
+        else if (r < 0.7) prism(ink2, x0 + cs * 0.1, xm, y0 + cv * 0.18, y0 + cv * 0.34, rel * 1.4);
+        else prism(alt, xm + cs * 0.12, x1 - cs * 0.08, y1 - cv * 0.34, y1 - cv * 0.16, rel * 1.4);
+        continue;
+      }
       quad(ink, x0 + cs * 0.38, x0 + cs * 0.62, y0 + cv * 0.08, y1 - cv * 0.08, 0.04);
       if (r < 0.4) quad(alt, x0 + cs * 0.1, x1 - cs * 0.1, ym - cv * 0.09, ym + cv * 0.09, 0.06);
       else if (r < 0.7) quad(ink2, x0 + cs * 0.1, xm, y0 + cv * 0.18, y0 + cv * 0.34, 0.06);
@@ -139,6 +160,14 @@ export function tiledMinaret(bag, col, el) {
   const foot = h * 0.14;
   bag.add(B, lathe([[r * 1.55, 0], [r * 1.55, foot * 0.55], [r * 1.3, foot * 0.62], [r * 1.3, foot]], 8, null, x, y, z));
   bag.add(LAP, lathe([[r * 1.58, foot * 0.5], [r * 1.58, foot * 0.58]], 8, null, x, y, z));
+  // the foot's eight faces: a pointed panel of lapis in a turquoise frame, standing out of each (real relief)
+  for (let k = 0; k < 8; k++) {
+    const ang = (k + 0.5) * Math.PI / 4, nx = Math.cos(ang), nz = Math.sin(ang), ap = r * 1.55 * Math.cos(Math.PI / 8) - 0.02, c = [x + nx * ap, z + nz * ap];
+    const jt = ((k * 7 + Math.round(x * 3 + z * 5)) % 11) * 0.004;
+    archPanel(bag, TUR, c, y + 0.45, nx, nz, 2.1, 2.0 + jt, 0.1); archPanel(bag, LAP, c, y + 0.6, nx, nz, 1.7, 1.75 + jt, 0.16);
+    const c2 = [x + nx * (r * 1.3 * Math.cos(Math.PI / 8) - 0.02), z + nz * (r * 1.3 * Math.cos(Math.PI / 8) - 0.02)];
+    archPanel(bag, CRE, c2, y + foot * 0.7, nx, nz, 1.3, foot * 0.27 + jt, 0.08);
+  }
   const R0 = r * 1.12, R1 = r * 0.86;
   const rad = (t) => R0 + (R1 - R0) * t;
   bag.add(B, lathe([[rad(0), foot], [rad(1), top]], 28, null, x, y, z));
@@ -159,9 +188,23 @@ export function tiledMinaret(bag, col, el) {
   bag.add(B, lathe([[R1, 0], [R1 * 1.12, 0.35], [R1 * 1.25, 0.7], [R1 * 1.4, 1.05], [R1 * 1.42, 1.3], [R1 * 1.42, 1.9]], 28, null, x, y + gy - 0.2, z));
   bag.add(TUR, lathe([[R1 * 1.1, 0.35], [R1 * 1.12, 0.48]], 28, null, x, y + gy - 0.2, z));
   bag.add(LAP, lathe([[R1 * 1.44, 1.2], [R1 * 1.44, 1.5]], 28, null, x, y + gy - 0.2, z));
+  // the muqarnas of the gallery in real cells: three rings, each set over the joints of the one below
+  { const gy0 = y + gy - 0.2;
+    for (const [ring, yy, ya, rr, wc, nc] of [[0, 0.02, 0.4, R1 * 1.14, 0.3, 28], [1, 0.4, 0.38, R1 * 1.3, 0.38, 26], [2, 0.76, 0.34, R1 * 1.46, 0.44, 24]]) {
+      for (let i = 0; i < nc; i++) {
+        const a0 = (i + (ring % 2) * 0.5) / nc * Math.PI * 2, hw = Math.PI / nc * 0.8, ex = rr * Math.cos(hw);
+        const p0 = [x + Math.cos(a0 - hw) * rr * 1.0, z + Math.sin(a0 - hw) * rr], p1 = [x + Math.cos(a0 + hw) * rr, z + Math.sin(a0 + hw) * rr];
+        bag.add(ring === 1 ? CRE : B, orientedBox(p0, p1, wc, gy0 + yy, gy0 + yy + ya));
+        void ex;
+      }
+    }
+  }
   const ly = y + gy + 1.7, lh = h - gy - 1.7 - R1 * 0.9;
   bag.add(B, lathe([[R1 * 0.8, 0], [R1 * 0.78, Math.max(0.5, lh)]], 20, null, x, ly, z));
-  bag.add(TUR, lathe([[R1 * 0.95, Math.max(0.5, lh)], [R1 * 0.95, Math.max(0.5, lh) + 0.3], [R1 * 0.5, Math.max(0.5, lh) + R1 * 0.6], [0.001, Math.max(0.5, lh) + R1 * 1.2]], 20, null, x, ly, z));
+  // eight slender colonnettes round the lantern, a lapis band, a ribbed cap
+  bag.add('marble', lathe([[R1 * 0.8, 0.05], [R1 * 0.8, Math.max(0.5, lh) - 0.05]], 48, (th) => 1 + 0.2 * Math.max(0, Math.cos(8 * th)) ** 6, x, ly, z));
+  bag.add(LAP, lathe([[R1 * 0.9, Math.max(0.5, lh) * 0.5], [R1 * 0.9, Math.max(0.5, lh) * 0.5 + 0.25]], 20, null, x, ly, z));
+  bag.add(TUR, lathe([[R1 * 0.95, Math.max(0.5, lh)], [R1 * 0.95, Math.max(0.5, lh) + 0.3], [R1 * 0.5, Math.max(0.5, lh) + R1 * 0.6], [0.001, Math.max(0.5, lh) + R1 * 1.2]], 32, (th, i) => 1 + (i > 1 ? 0.04 : 0) * Math.cos(12 * th), x, ly, z));
   bag.add('gilt_bronze', lathe([[0.04, 0], [0.04, 0.9], [0.1, 1.0], [0.001, 1.25]], 6, null, x, ly + Math.max(0.5, lh) + R1 * 1.2 - 0.05, z));
   if (col) col.circle(x, z, r * 1.58, y, y + h);
 }
