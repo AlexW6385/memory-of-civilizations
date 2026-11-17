@@ -6,23 +6,14 @@
 import { box, lathe, clothBox, addCloth } from '../../core/geom.js';
 import { XF, FLOOR, C1, C19 } from '../../settlements/ajanta/layout.js';
 import { PAL, wall, lotusBand } from './paint.js';
+import { horseshoe, seatedBuddha, pilaster } from './carving.js';
 
 const W = 'sandstone_white', S = 'sandstone_carved', OCH = 'plaster_ochre', RED = 'clay_robe';
 
-/** A horseshoe-arch relief on the plane x = x0 centred at z = zc: centre height yc, inner radius r, band bw, standing t out; legs drop below yc; a dark fill and a white seated figure inside. */
-function arch(bag, x0, zc, yc, r, bw, t, drop, fig = true) {
-  const R = r + bw, n = 12, dz = (2 * R) / n;
-  for (let i = 0; i < n; i++) {
-    const z = -R + i * dz, m = Math.abs(z + dz / 2);
-    if (m >= R) continue;
-    const top = yc + Math.sqrt(R * R - m * m), bot = m < r ? yc + Math.sqrt(r * r - m * m) : yc - drop;
-    bag.add(W, box(x0, bot, zc + z, x0 + t, top, zc + z + dz));
-    if (m < r) bag.add(RED, box(x0, yc - drop, zc + z, x0 + t * 0.4, bot, zc + z + dz));
-  }
-  if (fig) {
-    const s = r * 0.9;
-    bag.add('paint_white', lathe([[0.001, 0], [0.34 * s, 0.02], [0.3 * s, 0.26 * s], [0.15 * s, 0.5 * s], [0.12 * s, 0.62 * s], [0.001, 0.74 * s]], 8, null, x0 + t * 0.5, yc - drop, zc));
-  }
+/** A moulded horseshoe arch on the plane x = x0 centred at z = zc: centre height yc, inner radius r, legs down by `drop`, a dark ground and, with fig, a seated Buddha on a lotus inside. */
+function arch(bag, x0, zc, yc, r, bw, t, drop, fig = true, i = 0) {
+  horseshoe(bag, W, x0, zc, yc, yc - drop, [[r, r + bw * 0.45, t * 0.3], [r + bw * 0.45, r + bw, t]], { n: r > 0.5 ? 14 : 10, fill: PAL.red, seed: i });
+  if (fig) seatedBuddha(bag, x0 + 0.17, yc - drop + 0.03, zc, drop * 0.9 + r * 0.1, i);
 }
 
 /** Cave 1: the carved frame of the painted vihara's porch. */
@@ -37,7 +28,8 @@ function facade1(ctx) {
   }
   bag.add(W, box(xi, y + 5.6, zc - 13.6, xo, y + 6.5, zc + 13.6));               // architrave
   bag.add(OCH, box(xi, y + 6.5, zc - 13.6, xo, y + 8.7, zc + 13.6));             // the ground of the frieze
-  for (let i = 0; i < 11; i++) arch(bag, xo, zc - 11 + i * 2.2, y + 7.6, 0.62, 0.3, 0.22, 0.95);
+  for (let i = 0; i < 11; i++) arch(bag, xo, zc - 11 + i * 2.2, y + 7.6, 0.62, 0.3, 0.22, 0.95, true, i);
+  for (const s of [-1, 1]) pilaster(bag, xo, zc + s * 13.0, y + 0.6, y + 8.5, 0.45, s);
   for (let i = 0; i <= 11; i++) bag.add(S, box(xo, y + 6.6, zc - 12.1 + i * 2.2 - 0.07, xo + 0.12, y + 8.6, zc - 12.1 + i * 2.2 + 0.07));
   bag.add(W, box(xi, y + 8.7, zc - 14.0, xo + 0.9, y + 9.25, zc + 14.0));         // cornice
   bag.add('tuff_moai', box(xi, y + 8.5, zc - 14.0, xo + 0.7, y + 8.7, zc + 14.0));
@@ -59,18 +51,16 @@ function facade19(ctx) {
   bag.add(W, box(xi, y, zc - SW, xo, y + 10.2, zc - hw)); bag.add(W, box(xi, y, zc + hw, xo, y + 10.2, zc + SW));
   bag.add(W, box(xi, y + 7.9, zc - hw, xo, y + 10.2, zc + hw));
   for (const s of [-1, 1]) { bag.add(S, box(xi, y + 9.6, zc + (s > 0 ? hw : -SW - 0.25), xo + 0.2, y + 10.2, zc + (s > 0 ? SW + 0.25 : -hw))); col.rect([xi, zc + (s > 0 ? hw : -SW), xo, zc + (s > 0 ? SW : -hw)], y, y + 10.2); }
-  // six niches with seated Buddhas on the flanks
+  // six niches with seated Buddhas on the flanks: a moulded horseshoe head over a dark ground, the Buddha on his lotus
   for (const s of [-1, 1]) for (let k = 0; k < 3; k++) {
-    const z = zc + s * (hw + SW) / 2, y0 = y + 1.2 + k * 2.6;
-    bag.add(RED, box(xo, y0, z - 0.95, xo + 0.1, y0 + 1.8, z + 0.95));
-    bag.add(S, box(xo, y0 - 0.12, z - 1.1, xo + 0.22, y0, z + 1.1)); bag.add(S, box(xo, y0 + 1.8, z - 1.1, xo + 0.22, y0 + 1.95, z + 1.1));
-    for (const q of [-1, 1]) bag.add(S, box(xo, y0, z + q * 1.0 - 0.08, xo + 0.22, y0 + 1.8, z + q * 1.0 + 0.08));
-    bag.add('paint_white', lathe([[0.001, 0], [0.55, 0.02], [0.5, 0.45], [0.26, 0.9], [0.2, 1.1], [0.001, 1.3]], 9, null, xo + 0.35, y0 + 0.05, z));
-    bag.add(PAL.ochre, lathe([[0.001, 0], [0.18, 0.02], [0.2, 0.18], [0.001, 0.22]], 8, null, xo + 0.34, y0 + 1.1, z));
+    const z = zc + s * (hw + SW) / 2, y0 = y + 1.2 + k * 2.6, i = k + (s > 0 ? 3 : 0);
+    horseshoe(bag, W, xo, z, y0 + 1.0, y0, [[0.78, 0.9, 0.05], [0.9, 1.06, 0.14]], { fill: PAL.red, seed: i });
+    bag.add(S, box(xo, y0 - 0.12, z - 1.1, xo + 0.22, y0, z + 1.1));
+    seatedBuddha(bag, xo + 0.3, y0 + 0.04, z, 1.15, i);
   }
   // over the arch: an ochre band with seven small chaitya windows, then the cornice
   bag.add(OCH, box(xo, y + 8.0, zc - 5.4, xo + 0.08, y + 9.5, zc + 5.4));
-  for (let i = 0; i < 7; i++) arch(bag, xo + 0.08, zc - 4.5 + i * 1.5, y + 8.75, 0.45, 0.2, 0.18, 0.6, false);
+  for (let i = 0; i < 7; i++) arch(bag, xo + 0.08, zc - 4.5 + i * 1.5, y + 8.75, 0.45, 0.2, 0.18, 0.6, false, i);
   bag.add(W, box(xi, y + 10.2, zc - 8.2, xo + 1.3, y + 10.75, zc + 8.2));
   bag.add('tuff_moai', box(xi, y + 10.0, zc - 8.2, xo + 1.1, y + 10.2, zc + 8.2));
   for (let z = zc - 7.9; z < zc + 7.9; z += 0.55) bag.add(S, box(xo, y + 9.8, z, xo + 1.0, y + 10.0, z + 0.26));

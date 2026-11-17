@@ -8,6 +8,7 @@ import { vihara, viharaGeo, chaitya, chaityaGeo, cellHall, cellGeo, hole } from 
 import { Panel, PAL, wall, buddhaM, figM, lotusBand } from './paint.js';
 import { ledgeFoot, cliffSkin } from './rockface.js';
 import { facades } from './facades.js';
+import { rockMarks } from './carving.js';
 
 const MATS = ['sandstone_relief', 'sandstone_carved', 'sandstone_relief', 'rubble'];   // the basalt's warm brown-grey, not a grey wall
 const STONE = 'sandstone_dressed', PLASTER = 'plaster_ochre';
@@ -24,10 +25,11 @@ function faceRock(ctx, F, holes, seed) {
     if (sb - sa < 0.02) continue;
     const here = holes.filter((h) => sm > h.s0 && sm < h.s1);
     const top = F.top(sm) + (rand() - 0.5) * 1.4;
-    const off = here.length || (F.id === 'main' && Math.abs(sm) > ZW - 1) ? 0 : [0, 0.35, 0.3, 0.8, 0.15][Math.floor(rand() * 5)];
+    const flat = F.id === 'main' && (Math.abs(sm - C1.z) < 14.6 || Math.abs(sm - 24) < 8.3);        // the carved facades stand on a plane
+    const off = flat || here.length || (F.id === 'main' && Math.abs(sm) > ZW - 1) ? 0 : [0, 0.35, 0.3, 0.8, 0.15][Math.floor(rand() * 5)];
     const matAt = (k) => MATS[Math.floor(Math.abs(Math.sin(sm * 12.9898 + seed + k * 3.1)) * 43758) % 4];
     // a slice without a cave is laid in strata of the basalt flows: layers of differing hardness, each standing a little out or in
-    const layers = [], lo = F.id === 'main' && Math.abs(sm) > ZW - 1 ? 0 : 1;
+    const layers = [], lo = flat || F.id === 'main' && Math.abs(sm) > ZW - 1 ? 0 : 1;
     if (!here.length) { const ys = [-0.6, 6 + rand() * 3, 12 + rand() * 3, 19 + rand() * 3, 25 + rand() * 2, top]; for (let k = 0; k < ys.length - 1; k++) if (ys[k + 1] < top + 0.01 && ys[k + 1] > ys[k]) layers.push([ys[k], Math.min(ys[k + 1], top), lo * ([0, 0.35, -0.2, 0.5, 0.1][Math.floor(rand() * 5)] + (ys[k] > 11 && rand() < 0.35 ? 0.8 + rand() * 2.2 : 0)) + off]); if (ys[4] < top) layers.push([ys[4], top, off + lo * rand() * 0.3]); }
     const pieces = layers.length ? layers.map(([ya, yb, o]) => [-o, ya, ROCK, yb]) : subtractRects([-off, -0.6, ROCK, top], here.map((h) => [h.d0, h.y0, h.d1, h.y1]));
     for (const [d0, y0, d1, y1] of pieces) {
@@ -121,5 +123,8 @@ export function cliff(el, ctx) {
     if (Math.abs(z - CAVES.find((c) => c.id === 'c19').s) < 7 && y < 18) continue;
     bag.add(k % 3 ? 'tuff_red' : 'sandstone_white', box(XF - 0.02, y, z, XF + 0.012, y + hh, z + 0.12 + r2() * 0.35));
   }
+  // bedding lips, joints and chisel marks on the bare rock between the carved frames
+  rockMarks(bag, XF, rng(23), (z, y) => Math.abs(z - c1.s) < 15.2 && y < 19 || Math.abs(z - c19.s) < 9 && y < 21 || Math.abs(z) > ZW - 2
+    || CAVES.some((c) => c.face === 'main' && Math.abs(c.s - z) < (c.w ?? 14) / 2 + 1.5 && y < FLOOR[c.tier] + (c.h ?? 8) + 1.5 && y > FLOOR[c.tier] - 1));
   void WX1; void lathe; void Panel; void lotusBand;
 }
