@@ -13,6 +13,9 @@ import '../qing/index.js';
 import '../../objects/index.js';
 
 const A = 'andesite';
+/** A repeatable pseudo-random number in [0, 1) from a place (so that pieces of one kind differ a little and are not drawn as copies of one shape). */
+const jit = (x, z) => { const v = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return v - Math.floor(v); };
+const RND = (cu, cv, r, m = 8, sx = 1) => Array.from({ length: m }, (_, i) => [cu + Math.cos(i / m * Math.PI * 2) * r * sx, cv + Math.sin(i / m * Math.PI * 2) * r]);
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 function roof(bag, [x0, z0, x1, z1], y, o, kind, rise, mat, alongZ, hole) {
   const w = x1 - x0 + 2 * o, d = z1 - z0 + 2 * o, az = alongZ ?? d > w;
@@ -64,6 +67,15 @@ function cheeks(bag, col, rect, y0, y1, dir) {
     bag.add(A, fromTriangles(hexa([at(0, a, y0), at(1, a, y0), at(1, b, y0), at(0, b, y0), at(0, a, top(0)), at(1, a, top(1)), at(1, b, top(1)), at(0, b, top(0))])));
     const ca = s * (hw - 0.07), cb = s * (hw + 0.42);
     bag.add(A, fromTriangles(hexa([at(0, ca, top(0)), at(1, ca, top(1)), at(1, cb, top(1)), at(0, cb, top(0)), at(0, ca, top(0) + 0.1), at(1, ca, top(1) + 0.1), at(1, cb, top(1) + 0.1), at(0, cb, top(0) + 0.1)])));
+    // at the low end a pier (newel) on a moulded foot, capped, a small stupa on it, where the cheek begins
+    {
+      const len = Math.hypot(hi - lo), t0 = -0.62 / len, la = s * (hw - 0.08), lb = s * (hw + 0.4), pt = top(0) + 0.4 + 0.2 * jit(lo + mid, hi), R = (t1, t2, l1, l2, ya, yb) => hexa([at(t1, l1, ya), at(t2, l1, ya), at(t2, l2, ya), at(t1, l2, ya), at(t1, l1, yb), at(t2, l1, yb), at(t2, l2, yb), at(t1, l2, yb)]);
+      bag.add(A, fromTriangles([...R(t0 - 0.02 / len, 0.01, la - s * 0.04, lb + s * 0.04, y0, y0 + 0.22), ...R(t0, 0, la, lb, y0 + 0.22, pt), ...R(t0 - 0.05 / len, 0.05 / len, la - s * 0.06, lb + s * 0.06, pt, pt + 0.12), ...R(t0 + 0.08 / len, -0.08 / len, la + s * 0.08, lb - s * 0.08, pt + 0.12, pt + 0.2)]));
+      const c0 = at(t0 / 2, (la + lb) / 2, 0);
+      stupa(bag, c0[0], pt + 0.2, c0[2], 0.18 + 0.04 * jit(c0[0], c0[2]));
+      const q = [at(t0, la, 0), at(0, lb, 0)];
+      col.rect([Math.min(q[0][0], q[1][0]), Math.min(q[0][2], q[1][2]), Math.max(q[0][0], q[1][0]), Math.max(q[0][2], q[1][2])], y0, pt + 0.2);
+    }
     for (let i = 0; i < 4; i++) {
       const p = at(i / 4, a, 0), q = at((i + 1) / 4, b, 0);
       col.rect([Math.min(p[0], q[0]), Math.min(p[2], q[2]), Math.max(p[0], q[0]), Math.max(p[2], q[2])], y0, top((i + 1) / 4));
@@ -73,7 +85,7 @@ function cheeks(bag, col, rect, y0, y1, dir) {
 /** A small stupa (bell, harmika, spire) of radius r at (x, y, z); `lattice` for the pierced ones. */
 function stupa(bag, x, y, z, r, lattice = false, face = null) {
   if (lattice) return latticeStupa(bag, x, y, z, r, lattice, face);
-  const S = r < 1 ? 8 : r < 3 ? 14 : 32, NR = r < 1 ? 4 : 10;
+  const S = r < 0.35 ? 8 : r < 1 ? 10 : r < 3 ? 14 : 32, NR = r < 0.35 ? 4 : r < 1 ? 5 : 10;
   bag.add(A, lathe([[r * 1.18, 0], [r * 1.18, r * 0.18], [r * 1.05, r * 0.3], [r * 1.0, r * 0.32]], S, null, x, y, z));
   const bell = []; for (let i = 0; i <= NR; i++) { const t = i / NR; bell.push([Math.max(0.001, r * (1 - 0.18 * t) * Math.cos(t * Math.PI / 2) ** 0.7), r * 0.32 + r * 1.25 * Math.sin(t * Math.PI / 2)]); }
   bag.add(A, lathe(bell, S, null, x, y, z));
@@ -184,19 +196,40 @@ function prism(out, outline, O, U, N, t) {
   for (const v of orientOutward(T)) out.push(v);
   return out;
 }
-/** The kala's face (width 1, height 1, centred): brow and crown, bulging eyes, the broad nose, the upper jaw with its fangs (it has no lower jaw). */
+/** The kala's face (width 1, height 1, centred), as layers [outline, from, to] (metres: the plate, then the features rising from it): the crown and brow, bulging eyes, the broad nose, the upper jaw with its fangs (it has no lower jaw), the hands beside it, the scrolls. */
 const KALA = [
-  [[-0.5, 0.55], [0.5, 0.55], [0.42, 0.82], [0.2, 0.98], [-0.2, 0.98], [-0.42, 0.82]],
-  [[-0.46, 0.18], [0.46, 0.18], [0.5, 0.55], [-0.5, 0.55]],
-  [[-0.38, -0.02], [0.38, -0.02], [0.46, 0.18], [-0.46, 0.18]],
+  [[[-0.5, 0.55], [0.5, 0.55], [0.42, 0.82], [0.2, 0.98], [-0.2, 0.98], [-0.42, 0.82]], 0, 0.2],
+  [[[-0.46, 0.18], [0.46, 0.18], [0.5, 0.55], [-0.5, 0.55]], 0, 0.2],
+  [[[-0.38, -0.02], [0.38, -0.02], [0.46, 0.18], [-0.46, 0.18]], 0, 0.2],
+  [[[-0.12, 0.3], [0.12, 0.3], [0.1, 0.5], [-0.1, 0.5]], 0.1, 0.34],                                    // the nose
+  [[[-0.36, 0.44], [-0.18, 0.44], [-0.16, 0.6], [-0.38, 0.6]], 0.1, 0.3], [[[0.18, 0.44], [0.36, 0.44], [0.38, 0.6], [0.16, 0.6]], 0.1, 0.3],   // the eyes
+  [[[-0.3, 0.47], [-0.24, 0.47], [-0.24, 0.55], [-0.3, 0.55]], 0.28, 0.35], [[[0.24, 0.47], [0.3, 0.47], [0.3, 0.55], [0.24, 0.55]], 0.28, 0.35],   // the pupils
+  [[[-0.42, 0.62], [0.42, 0.62], [0.3, 0.74], [-0.3, 0.74]], 0.1, 0.3],                                  // the brow
+  [[[-0.12, 0.76], [0.12, 0.76], [0.08, 0.92], [-0.08, 0.92]], 0.1, 0.27],                              // the jewel of the forehead
+  [[[-0.3, 0.12], [0.3, 0.12], [0.26, 0.24], [-0.26, 0.24]], 0.1, 0.28],                                 // the upper lip and teeth
+  [[[-0.3, 0.05], [-0.2, 0.05], [-0.23, -0.15], [-0.27, -0.15]], 0.1, 0.27], [[[0.2, 0.05], [0.3, 0.05], [0.27, -0.15], [0.23, -0.15]], 0.1, 0.27],   // fangs
+  [[[-0.12, 0.05], [-0.07, 0.05], [-0.09, -0.07]], 0.1, 0.25], [[[0.07, 0.05], [0.12, 0.05], [0.09, -0.07]], 0.1, 0.25],
+  [[[-0.7, 0.0], [-0.5, 0.05], [-0.5, 0.3], [-0.72, 0.32]], 0.04, 0.24], [[[0.5, 0.05], [0.7, 0.0], [0.72, 0.32], [0.5, 0.3]], 0.04, 0.24],         // the hands raised beside the jaw
+  [[[-0.74, 0.32], [-0.52, 0.34], [-0.58, 0.52], [-0.76, 0.5]], 0.1, 0.28], [[[0.52, 0.34], [0.74, 0.32], [0.76, 0.5], [0.58, 0.52]], 0.1, 0.28],  // their claws
+  [RND(-0.62, 0.68, 0.11, 7), 0.04, 0.22], [RND(0.62, 0.68, 0.11, 7), 0.04, 0.22],                         // the scrolls
 ];
-const KALA_FRONT = [
-  { o: [[-0.12, 0.3], [0.12, 0.3], [0.1, 0.5], [-0.1, 0.5]], d: 0.16 },                           // the nose
-  { o: [[-0.36, 0.44], [-0.18, 0.44], [-0.16, 0.6], [-0.38, 0.6]], d: 0.12 }, { o: [[0.18, 0.44], [0.36, 0.44], [0.38, 0.6], [0.16, 0.6]], d: 0.12 }, // the eyes
-  { o: [[-0.42, 0.62], [0.42, 0.62], [0.3, 0.72], [-0.3, 0.72]], d: 0.08 },                          // the brow
-  { o: [[-0.3, 0.05], [-0.22, 0.05], [-0.24, -0.12], [-0.27, -0.12]], d: 0.06 }, { o: [[0.22, 0.05], [0.3, 0.05], [0.27, -0.12], [0.24, -0.12]], d: 0.06 }, // fangs
-  { o: [[-0.3, 0.12], [0.3, 0.12], [0.26, 0.22], [-0.26, 0.22]], d: 0.07 },                          // the upper lip and teeth
-];
+/**
+ * A makara in profile (docs/settlements/borobudur.md §19): at O (its rear foot), its head turned along the horizontal unit F, thick along
+ * the unit N, at scale s (about 1.3 s long): body and ear-scroll, the lower jaw hanging, the upper snout with fangs, the trunk curled up
+ * to a ball, brow, eye and mane scales; every layer rising from the one plane and bevelled.
+ */
+function makara(t, O, F, N, s) {
+  const L = [
+    [[[-0.15, 0], [0.5, -0.03], [0.58, 0.52], [-0.15, 0.58]], 0.3], [[[0.45, -0.02], [1.02, 0.04], [1.04, 0.22], [0.5, 0.26]], 0.24],      // the body, the lower jaw
+    [[[0.5, 0.3], [1.1, 0.3], [1.22, 0.44], [1.12, 0.56], [0.5, 0.6]], 0.26], [[[1.1, 0.5], [1.24, 0.5], [1.34, 0.66], [1.3, 0.86], [1.16, 0.92], [1.1, 0.78]], 0.2],   // the snout, the trunk
+    [RND(1.22, 0.92, 0.09, 6), 0.28], [[[0.52, 0.6], [0.92, 0.62], [0.9, 0.72], [0.52, 0.7]], 0.36], [RND(0.7, 0.47, 0.065, 6), 0.38],       // its ball, the brow, the eye
+    [RND(0.1, 0.42, 0.2, 8), 0.4], [RND(0.1, 0.42, 0.1, 6), 0.46],                                                                          // the ear-scroll
+    [[[0.7, 0.3], [0.78, 0.3], [0.74, 0.16]], 0.32], [[[0.85, 0.3], [0.93, 0.3], [0.89, 0.15]], 0.32], [[[0.97, 0.3], [1.03, 0.3], [1.0, 0.18]], 0.3],   // fangs
+    [RND(0.2, 0.15, 0.08, 6), 0.36], [RND(0.35, 0.3, 0.08, 6), 0.36], [RND(0.02, 0.3, 0.08, 6), 0.36],                                     // scales of the mane
+  ];
+  for (const [o, b] of L) bev(t, o.map(([u, v]) => [u * s, v * s]), O, F, N, 0, b * s, b * s * 0.4, true);
+  return t;
+}
 /**
  * A kala–makara gateway across a stair where it passes a balustrade: at c, its faces along ±N, the
  * passage w wide. Jambs, a corbelled arch stepping in over the passage, the mass above it with the
@@ -219,18 +252,18 @@ function gateway(bag, col, c, N, y, bh = 1.5, w = 3.4, th = 1.1) {
   const kw = Math.min(1.6, w * 0.62), kh = 1.25, ky = y + H0 + steps * sh - 0.35;
   for (const f of [1, -1]) {
     const Nf = [N[0] * f, N[1] * f], Uf = [-Nf[1], Nf[0]], O = [c[0] + Nf[0] * (th / 2 - 0.05), ky, c[1] + Nf[1] * (th / 2 - 0.05)], t = [];
-    for (const o of KALA) prism(t, o.map(([u, v]) => [u * kw, v * kh]), O, Uf, Nf, 0.2);
-    for (const { o, d } of KALA_FRONT) prism(t, o.map(([u, v]) => [u * kw, v * kh]), [O[0] + Nf[0] * 0.15, ky, O[2] + Nf[1] * 0.15], Uf, Nf, d + 0.05);
+    for (const [o, a0, b0] of KALA) bev(t, o.map(([u, v]) => [u * kw, v * kh]), O, Uf, Nf, a0, b0, (b0 - a0) * 0.8, true);
     bag.add(A, fromTriangles(t));
     // on the outer face, the makaras turned outward from the jambs, resting on the balustrade, trunks curled up
     if (f > 0) for (const s of [-1, 1]) {
-      const m = [], mo = [c[0] + U[0] * s * (hw + jw - 0.1) + Nf[0] * (th / 2 - 0.1), y + bh - 0.02, c[1] + U[1] * s * (hw + jw - 0.1) + Nf[1] * (th / 2 - 0.1)];
-      const Us = [U[0] * s, U[1] * s];
-      prism(m, [[0, 0], [0.55, 0.08], [0.7, 0.3], [0.55, 0.5], [0, 0.55]], mo, Us, Nf, 0.32);                       // the head
-      prism(m, [[0.55, 0.32], [0.72, 0.36], [0.8, 0.7], [0.66, 0.78], [0.6, 0.5]].slice(0, 4), mo, Us, Nf, 0.22);    // the trunk rising
-      prism(m, [[0.66, 0.7], [0.8, 0.7], [0.72, 0.86], [0.58, 0.84]], mo, Us, Nf, 0.18);                              // its curl
-      prism(m, [[0.2, 0.3], [0.32, 0.3], [0.32, 0.42], [0.2, 0.42]], [mo[0] + Nf[0] * 0.3, mo[1], mo[2] + Nf[1] * 0.3], Us, Nf, 0.06); // the eye
+      const m = [], mo = [c[0] + U[0] * s * (hw + jw - 0.1) + Nf[0] * (th / 2 - 0.12), y + bh - 0.02, c[1] + U[1] * s * (hw + jw - 0.1) + Nf[1] * (th / 2 - 0.12)];
+      makara(m, mo, [U[0] * s, U[1] * s], Nf, 0.8 + 0.1 * jit(mo[0], mo[2]));
       bag.add(A, fromTriangles(m));
+    }
+    // on each jamb's face a tall framed relief of a guardian
+    for (const s of [-1, 1]) {
+      const pc = [c[0] + U[0] * s * (hw + jw / 2) + Nf[0] * (th / 2), c[1] + U[1] * s * (hw + jw / 2) + Nf[1] * (th / 2)], r = jit(pc[0], pc[1]);
+      panel(bag, pc, Nf, y + 0.5, jw - 0.14, 2.0 + 0.1 * r, () => stand(0, 0.96 + 0.06 * jit(pc[1], pc[0]), s, r < 0.5 ? 'lotus' : 'whisk', true), true);
     }
   }
   // the stupikas on top
@@ -240,10 +273,9 @@ function gateway(bag, col, c, N, y, bh = 1.5, w = 3.4, th = 1.1) {
 function spout(bag, p, y, dir) {
   const U = [-dir[1], dir[0]], t = [];
   prism(t, [[-0.3, -0.18], [0.3, -0.18], [0.32, 0.12], [-0.32, 0.12]], [p[0] - dir[0] * 0.3, y, p[1] - dir[1] * 0.3], U, dir, 1.0);  // the channel's block
-  prism(t, [[-0.26, 0.12], [0.26, 0.12], [0.2, 0.32], [-0.2, 0.32]], [p[0] + dir[0] * 0.1, y, p[1] + dir[1] * 0.1], U, dir, 0.6);    // the brow
-  prism(t, [[-0.2, -0.36], [0.2, -0.36], [0.24, -0.18], [-0.24, -0.18]], [p[0] + dir[0] * 0.2, y, p[1] + dir[1] * 0.2], U, dir, 0.42); // the lower jaw, hanging
-  for (const s of [-1, 1]) prism(t, [[s * 0.1, 0.32], [s * 0.2, 0.32], [s * 0.15, 0.44]], [p[0] + dir[0] * 0.35, y, p[1] + dir[1] * 0.35], U, dir, 0.12); // the eyes
-  prism(t, [[-0.12, -0.08], [0.12, -0.08], [0.12, 0.3], [-0.12, 0.3]], [p[0] + dir[0] * 0.7, y, p[1] + dir[1] * 0.7], U, dir, 0.25);   // the snout, rising
+  // the makara's head jutting out of it, seen from the side (thick across the spout), its mouth the outlet
+  const q = [p[0] + dir[0] * 0.55 - U[0] * 0.16, y - 0.12, p[1] + dir[1] * 0.55 - U[1] * 0.16];
+  makara(t, q, dir, U, 0.7 + 0.1 * jit(p[0], p[1]));
   bag.add(A, fromTriangles(t));
 }
 
@@ -368,56 +400,138 @@ function niche(bag, p, N, y0, w, h, mudra) {
   buddha(bag, mudra, p[0] + N[0] * 0.2, y0 + 0.1, p[1] + N[1] * 0.2, N, s);
 }
 
-// the narrative panels: compositions of figures in low relief (u across the panel from −0.5 to 0.5, v up from 0 to 1)
-const RND = (cu, cv, r, m = 8, sx = 1) => Array.from({ length: m }, (_, i) => [cu + Math.cos(i / m * Math.PI * 2) * r * sx, cv + Math.sin(i / m * Math.PI * 2) * r]);
-const MOVE = (o, du, k = 1) => o.map(([u, v]) => [du + u * k, v * k]);
-function standing(u, k = 1) {
-  return [
-    [[-0.05, 0.04], [0.05, 0.04], [0.065, 0.42], [-0.065, 0.42]],                       // the kain, to the ankles
-    [[-0.06, 0], [0.06, 0], [0.05, 0.04], [-0.05, 0.04]],                              // the feet
-    [[-0.06, 0.42], [0.06, 0.42], [0.08, 0.62], [-0.08, 0.62]],                        // the body
-    [[0.075, 0.61], [0.105, 0.58], [0.095, 0.43], [0.07, 0.45]], [[-0.075, 0.61], [-0.07, 0.45], [-0.095, 0.43], [-0.105, 0.58]],   // the arms
-    RND(0, 0.675, 0.048),                                                                // the head
-    [[-0.042, 0.71], [0.042, 0.71], [0.024, 0.81], [-0.024, 0.81]],                     // the tall headdress
-  ].map((o) => MOVE(o, u, k));
+/**
+ * A convex outline [[u, v]] stood at O (u along the horizontal unit U, v up) from a to b along N, its top drawn in from its foot by
+ * d (a bevel, so that the sides catch the light and a form in low relief reads); the face at a is left out unless `back`.
+ */
+function bev(t, o, O, U, N, a, b, d = (b - a) * 0.9, back = false) {
+  const m = o.length, cu = o.reduce((q, v) => q + v[0], 0) / m, cv = o.reduce((q, v) => q + v[1], 0) / m;
+  const top = o.map(([u, v]) => { const r = Math.hypot(u - cu, v - cv) || 1, f = Math.min(0.4, d / r); return [u + (cu - u) * f, v + (cv - v) * f]; });
+  const Q = (q, w) => [O[0] + U[0] * q[0] + N[0] * w, O[1] + q[1], O[2] + U[1] * q[0] + N[1] * w], T = [];
+  for (let i = 1; i + 1 < m; i++) T.push(...Q(o[0], a), ...Q(o[i], a), ...Q(o[i + 1], a), ...Q(top[0], b), ...Q(top[i], b), ...Q(top[i + 1], b));
+  for (let i = 0; i < m; i++) { const j = (i + 1) % m; T.push(...Q(o[i], a), ...Q(o[j], a), ...Q(top[j], b), ...Q(o[i], a), ...Q(top[j], b), ...Q(top[i], b)); }
+  const S = orientOutward(T), base = O[0] * N[0] + O[2] * N[1] + a;
+  for (let i = 0; i < S.length; i += 9) if (back || Math.abs(S[i] * N[0] + S[i + 2] * N[1] - base) + Math.abs(S[i + 3] * N[0] + S[i + 5] * N[1] - base) + Math.abs(S[i + 6] * N[0] + S[i + 8] * N[1] - base) > 1e-6) for (let j = 0; j < 9; j++) t.push(S[i + j]);
+  return t;
 }
-function seated(u, k = 1) {
-  return [
-    [[-0.13, 0], [0.13, 0], [0.11, 0.1], [-0.11, 0.1]],                                 // the crossed legs
-    [[-0.06, 0.1], [0.06, 0.1], [0.075, 0.32], [-0.075, 0.32]],
-    [[0.07, 0.31], [0.1, 0.29], [0.09, 0.14], [0.065, 0.16]], [[-0.07, 0.31], [-0.065, 0.16], [-0.09, 0.14], [-0.1, 0.29]],
-    RND(0, 0.375, 0.046), [[-0.04, 0.41], [0.04, 0.41], [0.022, 0.5], [-0.022, 0.5]],
-  ].map((o) => MOVE(o, u, k));
+
+// the narrative panels: compositions of figures in layered relief (u across a scene from −0.5 to 0.5, v up from 0 to ~0.85; depths in metres
+// above the field). Each piece is a convex outline with the heights it rises between; its back face (against the one below) is left out.
+const Pc = (o, a, b) => ({ o, a, b });
+const mv = (G, du, k = 1, dv = 0) => G.map(({ o, a, b }) => ({ o: o.map(([u, v]) => [du + u * k, dv + v * k]), a, b }));
+const sh = (o, d) => o.map(([u, v]) => [u + d, v]);
+/** A standing figure in tribhanga (hips swung one way, shoulders the other, head over them): kain with its hem and pleat, belt and sash, collar, a raised arm with a lotus or a whisk, halo, tiered crown. lite drops the finest pieces. */
+function stand(u, k = 1, L = 1, hold = 'lotus', lite = false) {
+  const d = 0.014 * L, e = -0.012 * L, f = e + 0.012 * L, hx = e + f;
+  const G = [
+    Pc([[-0.07, 0], [0.07, 0], [0.062, 0.03], [-0.062, 0.03]], 0.04, 0.06),                           // the feet
+    Pc([[-0.062, 0.03], [0.062, 0.03], [0.048 + d, 0.4], [-0.048 + d, 0.4]], 0.04, 0.07),               // the kain
+    Pc([[-0.046 + d, 0.4], [0.046 + d, 0.4], [0.058 + e, 0.58], [-0.058 + e, 0.58]], 0.05, 0.08),      // the body
+    Pc([[0.05 + e, 0.57], [0.068 + e, 0.58], [0.115 + e, 0.52], [0.1 + e, 0.5]], 0.06, 0.085),         // the raised arm
+    Pc([[0.1 + e, 0.5], [0.12 + e, 0.52], [0.13 + e, 0.64], [0.113 + e, 0.64]], 0.07, 0.095),           // its forearm
+    Pc([[-0.058 + e, 0.57], [-0.04 + e, 0.57], [-0.068 + e, 0.43], [-0.09 + e, 0.44]], 0.06, 0.085),   // the other arm, down
+    Pc(RND(hx, 0.64, 0.042, 6), 0.06, 0.095),                                                          // the head
+    Pc([[-0.045 + hx, 0.675], [0.045 + hx, 0.675], [0.036 + hx, 0.705], [-0.036 + hx, 0.705]], 0.07, 0.1),   // the crown, its first tier
+    Pc([[-0.026 + hx, 0.705], [0.026 + hx, 0.705], [0.016 + hx, 0.76], [-0.016 + hx, 0.76]], 0.07, 0.1),
+  ];
+  if (hold === 'lotus') G.push(Pc(RND(0.123 + e, 0.68, 0.03, 6), 0.09, 0.115));
+  else if (hold === 'whisk') G.push(Pc([[0.11 + e, 0.65], [0.15 + e, 0.65], [0.17 + e, 0.8], [0.1 + e, 0.8]], 0.09, 0.105));
+  if (!lite) G.push(
+    Pc(RND(hx, 0.645, 0.082, 10), 0.04, 0.055),                                                       // the halo
+    Pc([[-0.066, 0.03], [0.066, 0.03], [0.064, 0.06], [-0.064, 0.06]], 0.07, 0.085),                  // the hem
+    Pc([[-0.014, 0.06], [0.014, 0.06], [0.018 + d, 0.38], [-0.018 + d, 0.38]], 0.07, 0.088),          // the pleat
+    Pc([[-0.052 + d, 0.38], [0.052 + d, 0.38], [0.05 + d, 0.42], [-0.05 + d, 0.42]], 0.07, 0.09),      // the belt
+    Pc([[0.03 + d, 0.4], [0.1 + d, 0.32], [0.1 + d, 0.26], [0.045 + d, 0.37]], 0.08, 0.095),          // the sash's flying end
+    Pc([[-0.04 + e, 0.575], [0.04 + e, 0.575], [e, 0.5]], 0.08, 0.095),                                // the collar
+    Pc([[-0.016 + hx, 0.585], [0.016 + hx, 0.585], [0.014 + hx, 0.605], [-0.014 + hx, 0.605]], 0.06, 0.08),   // the neck
+    Pc([[-0.012 + hx, 0.705], [0.012 + hx, 0.705], [hx, 0.79]], 0.09, 0.11),                           // the finial
+  );
+  return mv(G, u, k);
 }
-function tree(u, k = 1) {
-  return [[[-0.022, 0], [0.022, 0], [0.016, 0.55], [-0.016, 0.55]], RND(0, 0.66, 0.15, 10, 1.1), RND(-0.13, 0.55, 0.08, 8), RND(0.13, 0.57, 0.08, 8)].map((o) => MOVE(o, u, k));
+/** A figure seated on a lotus, legs crossed, hands folded, haloed and crowned; dv lifts it (on a throne). */
+function seated(u, k = 1, dv = 0, lite = false) {
+  const G = [
+    Pc([[-0.17, 0], [0.17, 0], [0.15, 0.04], [-0.15, 0.04]], 0.04, 0.07),                              // the lotus seat
+    Pc([[-0.15, 0.04], [0.15, 0.04], [0.11, 0.12], [-0.11, 0.12]], 0.04, 0.085),                       // the crossed legs
+    Pc([[-0.065, 0.12], [0.065, 0.12], [0.075, 0.31], [-0.075, 0.31]], 0.05, 0.085),                  // the body
+    Pc([[0.07, 0.3], [0.092, 0.28], [0.09, 0.15], [0.066, 0.16]], 0.07, 0.095), Pc([[-0.07, 0.3], [-0.066, 0.16], [-0.09, 0.15], [-0.092, 0.28]], 0.07, 0.095),   // the arms
+    Pc([[-0.05, 0.14], [0.05, 0.14], [0.04, 0.19], [-0.04, 0.19]], 0.09, 0.11),                          // the folded hands
+    Pc(RND(0, 0.37, 0.044, 6), 0.06, 0.095),                                                           // the head
+    Pc([[-0.04, 0.405], [0.04, 0.405], [0.03, 0.435], [-0.03, 0.435]], 0.07, 0.1), Pc([[-0.02, 0.435], [0.02, 0.435], [0, 0.5]], 0.07, 0.1),
+  ];
+  if (!lite) G.push(Pc(RND(0, 0.375, 0.09, 10), 0.04, 0.055), Pc([[-0.13, 0.05], [0.13, 0.05], [0.1, 0.09], [-0.1, 0.09]], 0.085, 0.1));
+  return mv(G, u, k, dv);
 }
-function pavilion(u, k = 1) {
-  return [
-    [[-0.2, 0], [0.2, 0], [0.19, 0.06], [-0.19, 0.06]],                                 // its platform
-    [[-0.18, 0.06], [-0.155, 0.06], [-0.155, 0.6], [-0.18, 0.6]], [[0.155, 0.06], [0.18, 0.06], [0.18, 0.6], [0.155, 0.6]],
-    [[-0.24, 0.6], [0.24, 0.6], [0.2, 0.66], [-0.2, 0.66]], [[-0.2, 0.66], [0.2, 0.66], [0.07, 0.86], [-0.07, 0.86]],   // the eave, the steep roof
-  ].map((o) => MOVE(o, u, k));
+/** A worshipper kneeling, palms joined. */
+function kneel(u, k = 1) {
+  return mv([
+    Pc([[-0.1, 0], [0.1, 0], [0.08, 0.1], [-0.1, 0.1]], 0.04, 0.075),
+    Pc([[-0.05, 0.1], [0.07, 0.1], [0.1, 0.3], [0, 0.3]], 0.05, 0.085),
+    Pc([[0.1, 0.24], [0.15, 0.26], [0.15, 0.32], [0.1, 0.3]], 0.08, 0.105),
+    Pc(RND(0.07, 0.345, 0.04, 6), 0.06, 0.095), Pc([[0.04, 0.38], [0.1, 0.38], [0.07, 0.44]], 0.07, 0.1),
+  ], u, k);
 }
-/** The compositions: an audience (a lord seated in a pavilion, attendants), a procession under a tree, a hermitage in the forest. */
+/** A tree: trunk and bough, a canopy of clusters in three layers, fruits. */
+function tree(u, k = 1, lite = false) {
+  const G = [
+    Pc([[-0.024, 0], [0.024, 0], [0.015, 0.5], [-0.015, 0.5]], 0.04, 0.07), Pc([[-0.01, 0.34], [0.012, 0.34], [0.14, 0.56], [0.12, 0.6]], 0.04, 0.065),
+    Pc(RND(0, 0.66, 0.15, 8, 1.1), 0.04, 0.06), Pc(RND(-0.13, 0.55, 0.085, 6), 0.06, 0.08), Pc(RND(0.13, 0.57, 0.085, 6), 0.06, 0.08), Pc(RND(-0.05, 0.74, 0.08, 6), 0.06, 0.08),
+  ];
+  if (!lite) for (const [a, b] of [[-0.11, 0.5], [0.0, 0.6], [0.13, 0.52], [-0.02, 0.76]]) G.push(Pc(RND(a, b, 0.02, 5), 0.08, 0.1));
+  return mv(G, u, k);
+}
+/** A pavilion on a stepped platform: four posts, three tiers of roof with upturned eaves, a finial, swags. */
+function pavilion(u, k = 1, lite = false) {
+  const G = [
+    Pc([[-0.24, 0], [0.24, 0], [0.23, 0.04], [-0.23, 0.04]], 0.04, 0.075), Pc([[-0.21, 0.04], [0.21, 0.04], [0.2, 0.08], [-0.2, 0.08]], 0.04, 0.08),
+    Pc([[-0.27, 0.52], [0.27, 0.52], [0.23, 0.58], [-0.23, 0.58]], 0.05, 0.1), Pc([[-0.21, 0.58], [0.21, 0.58], [0.17, 0.66], [-0.17, 0.66]], 0.05, 0.095),
+    Pc([[-0.14, 0.66], [0.14, 0.66], [0.09, 0.76], [-0.09, 0.76]], 0.05, 0.09), Pc([[-0.012, 0.76], [0.012, 0.76], [0, 0.85]], 0.05, 0.09),
+    Pc([[-0.27, 0.52], [-0.31, 0.57], [-0.25, 0.54]], 0.05, 0.1), Pc([[0.27, 0.52], [0.25, 0.54], [0.31, 0.57]], 0.05, 0.1),
+  ];
+  for (const x of [-0.17, 0.17]) G.push(Pc([[x - 0.014, 0.08], [x + 0.014, 0.08], [x + 0.014, 0.52], [x - 0.014, 0.52]], 0.04, 0.075));
+  if (!lite) for (const x of [-0.13, 0, 0.13]) G.push(Pc([[x - 0.06, 0.52], [x + 0.06, 0.52], [x, 0.45]], 0.05, 0.075));
+  return mv(G, u, k);
+}
+/** An apsara flying with a flower, her scarf streaming. */
+function apsara(u, k = 1, dv = 0.76) {
+  return mv([
+    Pc([[-0.03, 0], [0.04, 0.02], [0.06, 0.1], [0, 0.1]], 0.05, 0.085), Pc(RND(0.07, 0.13, 0.035, 6), 0.06, 0.09), Pc([[0.03, 0.15], [0.07, 0.15], [0.06, 0.19]], 0.07, 0.095),
+    Pc([[-0.12, -0.03], [-0.02, 0], [-0.02, 0.05], [-0.13, 0.03]], 0.05, 0.08), Pc([[-0.26, 0.04], [-0.1, 0.0], [-0.1, 0.07]], 0.05, 0.075),
+    Pc([[0.06, 0.1], [0.12, 0.12], [0.1, 0.07]], 0.07, 0.09), Pc(RND(0.14, 0.12, 0.022, 5), 0.07, 0.1),
+  ], u, k, dv);
+}
+/** A deer. */
+function deer(u, k = 1) {
+  return mv([
+    Pc(RND(0, 0.12, 0.05, 8, 1.7), 0.04, 0.075), Pc([[0.06, 0.12], [0.1, 0.12], [0.12, 0.22], [0.09, 0.22]], 0.05, 0.075), Pc([[0.08, 0.2], [0.15, 0.2], [0.14, 0.25], [0.08, 0.25]], 0.05, 0.08),
+    ...[-0.07, -0.04, 0.045, 0.07].map((x) => Pc([[x - 0.008, 0], [x + 0.008, 0], [x + 0.008, 0.1], [x - 0.008, 0.1]], 0.04, 0.065)),
+    Pc([[0.1, 0.25], [0.12, 0.25], [0.16, 0.34], [0.14, 0.34]], 0.06, 0.08), Pc([[0.11, 0.25], [0.12, 0.25], [0.09, 0.33]], 0.06, 0.08),
+  ], u, k);
+}
+/** The compositions: an audience (a lord throned in a pavilion, attendants, a worshipper, apsaras above), a procession under a tree, a hermitage in the forest. */
 const SCENES = [
-  [...pavilion(-0.25), ...seated(-0.25, 1).map((o) => o.map(([u, v]) => [u, v + 0.06])), ...standing(0.05, 0.85), ...standing(0.2, 0.85), ...seated(0.38, 0.9)],
-  [...standing(-0.38), ...standing(-0.22), ...standing(-0.06, 0.95), ...standing(0.1), ...tree(0.33, 1.05)],
-  [...tree(-0.32), ...seated(-0.05, 1.1), ...standing(0.17, 0.9), ...tree(0.36, 0.9)],
+  (lite) => [...pavilion(-0.22, 1, lite), ...seated(-0.22, 0.85, 0.08, lite), ...stand(0.08, 0.8, -1, 'whisk', lite), ...stand(0.22, 0.8, 1, 'lotus', lite), ...kneel(0.38, 0.85), ...(lite ? [] : [...apsara(0.18, 0.9), ...apsara(0.34, 0.8, 0.7)])],
+  (lite) => [...stand(-0.4, 1, 1, 'lotus', lite), ...stand(-0.24, 1, -1, 'none', lite), ...stand(-0.08, 0.96, 1, 'whisk', lite), ...stand(0.08, 1, -1, 'lotus', lite), ...tree(0.34, 1.05, lite)],
+  (lite) => [...tree(-0.34, 1, lite), ...seated(-0.1, 1.1, 0, lite), ...deer(0.12, 1), ...stand(0.3, 0.9, -1, 'lotus', lite), ...tree(0.45, 0.8, lite)],
 ];
 /**
- * A relief panel on a face at c looking along N (its plane at c), w wide and h high from y0: the
- * panel stands a little proud, in a frame of flat bands, with the scene's figures standing out of it.
+ * A relief panel on a face at c looking along N (its plane at c), w wide and h high from y0: a field with a raised frame of two
+ * stepped mouldings and rosettes at the corners; on the field the scenes in relief, figures in layers standing out of it. lite
+ * drops the finest pieces (the balustrades' panels, seen only from the gallery).
  */
-function panel(bag, c, N, y0, w, h, scene) {
+function panel(bag, c, N, y0, w, h, scene, lite = false) {
   const U = [-N[1], N[0]], t = [];
-  prism(t, [[-w / 2, 0], [w / 2, 0], [w / 2, h], [-w / 2, h]], [c[0], y0, c[1]], U, N, 0.05);
-  for (const o of [[[-w / 2, 0], [w / 2, 0], [w / 2, 0.07], [-w / 2, 0.07]], [[-w / 2, h - 0.07], [w / 2, h - 0.07], [w / 2, h], [-w / 2, h]], [[-w / 2, 0.07], [-w / 2 + 0.07, 0.07], [-w / 2 + 0.07, h - 0.07], [-w / 2, h - 0.07]], [[w / 2 - 0.07, 0.07], [w / 2, 0.07], [w / 2, h - 0.07], [w / 2 - 0.07, h - 0.07]]]) prism(t, o, [c[0] + N[0] * 0.04, y0, c[1] + N[1] * 0.04], U, N, 0.09);
-  // the scene as tall as the panel; a wide panel holds two or three scenes side by side
-  const sv = (h - 0.16) / 0.86, iw = w - 0.16, nC = Math.max(1, Math.round(iw / (sv * 1.15))), su = iw / nC;
+  const rel = (o, a, b) => bev(t, o, [c[0], y0, c[1]], U, N, a, b);
+  rel([[-w / 2, 0], [w / 2, 0], [w / 2, h], [-w / 2, h]], 0, 0.04);                                       // the field
+  const b1 = 0.09, b2 = 0.04;
+  for (const o of [[[-w / 2, 0], [w / 2, 0], [w / 2, b1], [-w / 2, b1]], [[-w / 2, h - b1], [w / 2, h - b1], [w / 2, h], [-w / 2, h]], [[-w / 2, b1], [-w / 2 + b1, b1], [-w / 2 + b1, h - b1], [-w / 2, h - b1]], [[w / 2 - b1, b1], [w / 2, b1], [w / 2, h - b1], [w / 2 - b1, h - b1]]]) rel(o, 0.04, 0.12);
+  for (const o of [[[-w / 2 + b1, b1], [w / 2 - b1, b1], [w / 2 - b1, b1 + b2], [-w / 2 + b1, b1 + b2]], [[-w / 2 + b1, h - b1 - b2], [w / 2 - b1, h - b1 - b2], [w / 2 - b1, h - b1], [-w / 2 + b1, h - b1]], [[-w / 2 + b1, b1 + b2], [-w / 2 + b1 + b2, b1 + b2], [-w / 2 + b1 + b2, h - b1 - b2], [-w / 2 + b1, h - b1 - b2]], [[w / 2 - b1 - b2, b1 + b2], [w / 2 - b1, b1 + b2], [w / 2 - b1, h - b1 - b2], [w / 2 - b1 - b2, h - b1 - b2]]]) rel(o, 0.04, 0.075);
+  if (!lite) for (const x of [-1, 1]) for (const y of [b1 / 2, h - b1 / 2]) rel(RND(x * (w / 2 - b1 / 2), y, 0.05, 8), 0.12, 0.15);   // the corner rosettes
+  // the scenes as tall as the field allows; a wide panel holds two or three side by side
+  const hi = h - 2 * (b1 + b2) - 0.04, sv = hi / 0.86, iw = w - 2 * (b1 + b2), one = typeof scene === 'function', nC = one ? 1 : Math.max(1, Math.round(iw / (sv * 1.15))), su = iw / nC, ku = one ? sv : Math.min(su, sv * 1.1);
   for (let i = 0; i < nC; i++) {
     const du = -iw / 2 + (i + 0.5) * su;
-    for (const o of SCENES[(scene + i) % SCENES.length]) prism(t, o.map(([u, v]) => [du + u * su, 0.08 + v * sv]), [c[0] + N[0] * 0.04, y0, c[1] + N[1] * 0.04], U, N, 0.085);
+    for (const p of (one ? scene() : SCENES[(scene + i) % SCENES.length](lite))) rel(p.o.map(([u, v]) => [du + u * ku, b1 + b2 + 0.02 + v * sv]), p.a, p.b);
   }
   bag.add(A, fromTriangles(t));
 }
@@ -437,6 +551,13 @@ function borobudur(el, { bag, col }) {
     }
   };
   level(B.a + B.foot, 0, 1.5); level(B.a, 1.5, B.h);
+  {
+    // the base's own mouldings: a stepped cap on the plinth, a foot course, a belt and a cornice on the wall
+    const Pp = redent(cx, cz, B.a + B.foot, p), Pw = redent(cx, cz, B.a, p);
+    band(bag, Pp, 0.1, 1.28, 1.36, cx, cz); band(bag, Pp, 0.18, 1.36, 1.44, cx, cz); band(bag, Pp, 0.26, 1.44, 1.5, cx, cz);
+    mouldWall(bag, Pw, cx, cz, 1.5, B.h);
+    band(bag, Pw, 0.1, 2.5, 2.62, cx, cz); band(bag, Pw, 0.18, 2.62, 2.7, cx, cz); band(bag, Pw, 0.1, 2.7, 2.78, cx, cz);
+  }
   // balustrade round an outline at height y, broken for the four stairs; niches and small stupas on it
   const balustrade = (a, y, h = 1.7, withSpouts = true) => {
     const P = redent(cx, cz, a, p);
@@ -459,7 +580,7 @@ function borobudur(el, { bag, col }) {
         const nin = [-uz, ux], L2 = s1 - s0 - 1.4, np2 = Math.floor((L2 + 0.3) / 2.3);
         for (let i = 0; i < np2 && withSpouts !== 'plain'; i++) {
           const sm = s0 + 0.7 + (L2 - np2 * 2.3 + 0.3) / 2 + i * 2.3 + 1.0;
-          panel(bag, [q0[0] + ux * sm + nin[0] * 0.45, q0[1] + uz * sm + nin[1] * 0.45], nin, y + 0.2, 2.0, h - 0.5, i & 1);
+          { const pc = [q0[0] + ux * sm + nin[0] * 0.45, q0[1] + uz * sm + nin[1] * 0.45]; panel(bag, pc, nin, y + 0.2, 2.0, h - 0.5, i & 1, true); }
         }
         const n = Math.floor((s1 - s0) / 3.6);
         for (let i = 0; i < n; i++) { const s = s0 + (i + 0.5) * (s1 - s0) / n, c = [q0[0] + ux * s, q0[1] + uz * s]; stupa(bag, c[0], y + h, c[1], 0.42); }
@@ -486,7 +607,7 @@ function borobudur(el, { bag, col }) {
         niche(bag, [cx + sx * u + nx * d, cz + sz * u + nz * d], N, s.y - nh - 0.4, 1.15, nh, mudra);
       }
       // the narrative reliefs below them: one or two registers of framed panels, a scene in each
-      const regs = H - nh > 2.4 ? 2 : 1, rh = (H - nh - 0.4 - 0.45) / regs - 0.12;
+      const regs = H - nh > 2.4 ? 2 : 1, rh = Math.floor(((H - nh - 0.4 - 0.45) / regs - 0.12) * 5) / 5;
       if (rh < 0.5) continue;
       for (let r2 = 0; r2 < regs; r2++) {
         const y0 = prevY + 0.35 + r2 * (rh + 0.12);
@@ -494,7 +615,7 @@ function borobudur(el, { bag, col }) {
         for (let u = -s.a + 1.6; u < s.a - 1.6; u += 2.7) {
           const d = face(u, 1.35);
           if (d == null || Math.abs(u) < 2.4) continue;                      // the stair passes in the middle
-          panel(bag, [cx + sx * u + nx * d, cz + sz * u + nz * d], N, y0, 2.5, rh, (k++ & 1) + r2);
+          panel(bag, [cx + sx * u + nx * d, cz + sz * u + nz * d], N, y0, 2.5, rh, (k++ & 1) + r2, true);
         }
       }
     }
