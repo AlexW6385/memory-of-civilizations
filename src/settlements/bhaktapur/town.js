@@ -2,7 +2,7 @@
 // four plans (each builds in turn while the visitor already walks), and the people and animals of the squares and lanes:
 // the potters at their wheels, the market's sellers and buyers, women with water pots and baskets, children, dogs, a cow or two.
 
-import { RADIUS, lots, PAVED, SQ, POT, KEEP, HOUSE, STALLS, inRect, onStreet, inLot, STREETS, fp, frontRot, NYA } from './layout.js';
+import { RADIUS, lots, waysides, PAVED, SQ, POT, KEEP, HOUSE, STALLS, inRect, onStreet, inLot, STREETS, fp, frontRot, NYA } from './layout.js';
 import taumadhi, { POT_WHEELS, POT_KILNS } from './plan.js';
 import './../../styles/newar/index.js';
 
@@ -22,6 +22,8 @@ export async function town() {
   const out = [];
   // the streets' brick paving, and the small stupas at some crossings
   out.push(base('bhaktapur-streets', 'newar', [...PAVED.map((rect) => ({ t: 'newar_paving', rect, y: 0.05, th: 0.3, mat: 'cotto_floor' })), ...PAVED.map((rect, i) => ({ t: 'newar_lane', rect, y: 0.05, seed: i + 3 }))]));
+  const WAY = waysides();
+  out.push(base('bhaktapur-wayside', 'newar', [{ t: 'newar_wayside', items: WAY }]));
   const stupas = [];
   for (const [x, z] of [[8, -72], [8, 44], [-52, 0], [60, 0], [-52, -72], [60, 44], [-82, 0], [94, 0], [8, -106], [8, 78]]) if (Math.hypot(x, z) < 150) stupas.push({ t: 'newar_chaitya', c: [x, z], s: 0.9 });
   out.push(base('bhaktapur-shrines', 'newar', stupas));
@@ -51,7 +53,7 @@ export async function town() {
   const { man, woman } = newar(rand), P = [];
   // the walk-check's routes are kept clear of figures (they stand as obstacles)
   const nearRoute = (x, z) => taumadhi.walks.some((w) => w.some((a, i) => { if (!i) return false; const b = w[i - 1], dx = a[0] - b[0], dz = a[1] - b[1], t = Math.max(0, Math.min(1, ((x - b[0]) * dx + (z - b[1]) * dz) / (dx * dx + dz * dz || 1))); return Math.hypot(x - b[0] - dx * t, z - b[1] - dz * t) < 1.4; }));
-  const free = (x, z, m = 1.3) => !nearRoute(x, z) && !KEEP.some((k) => inRect(k, x, z, m)) && !inLot(x, z, 0.6) && !inRect(HOUSE.rect, x, z, 0.6) && !STALLS.some(([sx, sz]) => Math.hypot(x - sx, z - sz) < 2) && !P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 1.3) && !POT_KILNS.some(([kx, kz]) => Math.hypot(x - kx, z - kz) < 5);
+  const free = (x, z, m = 1.3) => !nearRoute(x, z) && !KEEP.some((k) => inRect(k, x, z, m)) && !inLot(x, z, 0.6) && !inRect(HOUSE.rect, x, z, 0.6) && !STALLS.some(([sx, sz]) => Math.hypot(x - sx, z - sz) < 2) && !WAY.some(([wx, wz]) => Math.hypot(x - wx, z - wz) < 1.5) && !P.some((p) => Math.hypot(p.at[0] - x, p.at[1] - z) < 1.3) && !POT_KILNS.some(([kx, kz]) => Math.hypot(x - kx, z - kz) < 5);
   const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));
   // the potters at their wheels (seated north of each wheel, facing it), and the pot-sellers by the drying ground
   for (const [x, z] of POT_WHEELS) P.push(man([x + 0.1, z - 0.55], 0, Math.PI, { pose: 'sit_low', hat: 'cap', hatMat: 'cloth_ochre', hair: 'short' }));

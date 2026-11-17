@@ -63,6 +63,23 @@ export const PAVED = (() => {
   }
   return out;
 })();
+/**
+ * The corners of the street crossings within 118 m (not on the squares): at two of the four corners of each a wayside object stands —
+ * a vermilion-smeared stone of a deity, baskets set down on their pole, sheaves of straw, a stone seat with water jars, or potters' ware drying on a mat
+ * [inferred: the lanes' devotional stones and the day's goods]. [x, z, type 0–4].
+ */
+export function waysides() {
+  const out = [];
+  VX.forEach(([x, wv], ix) => HZ.forEach(([z, wh], iz) => {
+    if (Math.hypot(x, z) > 118 || inRect(SQ, x, z, 6) || inRect(POT, x, z, 6)) return;
+    const h = (ix * 7 + iz * 13) % 4;
+    for (const k of [h, (h + 2) % 4]) {
+      const cx = x + (k & 1 ? 1 : -1) * (wv / 2 - 0.65), cz = z + (k & 2 ? 1 : -1) * (wh / 2 - 0.65);
+      out.push([cx, cz, (ix * 3 + iz * 5 + k * 2) % 5]);
+    }
+  }));
+  return out;
+}
 export const onStreet = (x, z, m = 0) => STREETS.some((s) => inRect(s, x, z, m)) || inRect(SQ, x, z, m) || inRect(POT, x, z, m);
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
