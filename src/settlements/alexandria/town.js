@@ -5,7 +5,7 @@ import { lodTiles } from '../lod.js';
 import { frame } from '../../styles/greek/agora.js';
 import { TRADES } from '../../styles/greek/shops.js';
 import { streetPlans } from './streets.js';
-import { houseRooms } from '../../styles/ptolemaic/house.js';
+import { houseRooms, egyptianRooms } from '../../styles/ptolemaic/house.js';
 import { RADIUS, GROUND, SEA, QUAYS, CHANNELS, SHIPS, CANOPIC, QUAY, SOMA, AGORA, GYM, SEROUTE, HILL, JEWISH, OPEN_HOUSE, ROYAL, MOLE, PHAROS, ISLAND, inRect, wet, height, lots, isle } from './layout.js';
 
 const base = (id, elements, extra = {}) => ({ id, style: 'ptolemaic', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [100, -86], facing: 'e' }, ...extra });
@@ -106,9 +106,9 @@ function houses() {
     : { t: 'ptol_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front, quarter: l.quarter, lamp: lamp.has(l) }));
   const plans = lodTiles('alexandria-houses', 'ptolemaic', els, { R: RADIUS, near: 150 });
   for (const e of els) {
-    if (e.t !== 'ptol_house') continue;
+    if (e.t !== 'ptol_house' && e.t !== 'egyptian_house') continue;
     const [x, z] = [(e.rect[0] + e.rect[2]) / 2, (e.rect[1] + e.rect[3]) / 2], id = `alexandria-houses-${Math.floor(x / 100)},${Math.floor(z / 100)}`;
-    plans.find((p) => p.id === id).rooms.push(...houseRooms(e, e.y));
+    plans.find((p) => p.id === id).rooms.push(...(e.t === 'ptol_house' ? houseRooms(e, e.y) : egyptianRooms(e, e.y)));
   }
   return plans;
 }

@@ -17,6 +17,7 @@ export const pharos = {
   bakeTop: 110,
   elements: [
     { t: 'pharos', c: PH, y: g, base: PHAROS.base },
+    { t: 'pharos_fit', c: PH, y: g, seed: 9 },
     // the island's paved court round the tower
     { t: 'floor', rect: [PH[0] - 36, PH[1] - 36, PH[0] + 36, PH[1] + 36], y: g + 0.05, th: 0.2, mat: 'travertine' },
   ],
@@ -37,6 +38,9 @@ const E = [
   { t: 'stoa', rect: [296, -66, 328, -36], front: 'w', y: g, h: 5.2, d: 0.7, sp: 2.8, flutes: 12, mat: 'limestone', wall: 'plaster_white', triglyphMat: 'egyptian_blue', rooms: { n: 1, depth: 14 }, seed: 12 },
   { t: 'exedra', c: [206, -51], r: 5, y: g, face: -Math.PI / 2 },
   ...halls.map((r, i) => ({ t: 'library_hall', rect: r, front: 'n', y: g, seed: 20 + i })),
+  ...halls.map((r, i) => ({ t: 'reading_fit', rect: r, front: 'n', y: g, seed: 40 + i })),
+  { t: 'dining_fit', c: [321, -51], y: g },
+  { t: 'garden_fit', y: g, seed: 3 },
   // the royal quarter's fronts on the harbour: long colonnades, the palace on the Lochias
   { t: 'palace_front', rect: [128, -80, 168, -64], front: 'n', y: g, seed: 31 },
   { t: 'palace_front', rect: [302, -80, 330, -67], front: 'n', y: g, seed: 35 },
