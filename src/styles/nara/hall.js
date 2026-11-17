@@ -12,18 +12,14 @@
 
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { orientedBox } from '../../core/build.js';
-import { tangBracket, hipRoof, chineseColumn, hexa } from '../chinese/index.js';
+import { hipRoof, chineseColumn, hexa } from '../chinese/index.js';
+import { naraBracket } from './bracket.js';
 import { tangDoor, tangWindow } from '../chinese/hallwork.js';
 
 const S = 0.3, PW = 1.6;                 // the hip roof's eave slope and profile power (chinese/index.js hipRoofX, as the Tang halls call it)
 
-/** A bracket set of the chinese style, scaled by k about its base point (x, yBase, z). */
-function bracket(el, ctx, k, yBase) {
-  const list = [];
-  tangBracket(el, { bag: { add: (m, g) => list.push([m, g]) } });
-  const [x, z] = el.at;
-  for (const [m, g] of list) { g.translate(-x, -yBase, -z); g.scale(k, k, k); g.translate(x, yBase, z); ctx.bag.add(m, g); }
-}
+/** A Nara bracket set (bracket.js), scaled by k. */
+function bracket(el, ctx, k) { naraBracket(el, ctx, k); }
 
 /** A gilt-bronze owl-tail finial (shibi) at a ridge end: a fin rising from the ridge, curling inward, its back serrated. */
 function shibi(bag, x, z, y, inward, H) {
@@ -73,9 +69,9 @@ export function naraHall(el, ctx) {
     sets.push(corner ? { at: [xs[i], zs[j]], dir: [(i ? 1 : -1) * SQ, d[1] * SQ], kind: 'corner' } : { at: [xs[i], zs[j]], dir: d, kind: 'column' });
   }
   for (let j = 1; j < nz; j++) for (const [i, d] of [[0, [-1, 0]], [nx, [1, 0]]]) sets.push({ at: [xs[i], zs[j]], dir: d, kind: 'column' });
-  for (let i = 0; i < nx; i++) for (const [j, d] of (el.betweenAll ? [[0, [0, -1]], [nz, [0, 1]]] : [[nz, [0, 1]]])) sets.push({ at: [(xs[i] + xs[i + 1]) / 2, zs[j]], dir: d, kind: 'between', post: 0.82 });
-  if (el.betweenAll) for (let j = 0; j < nz; j++) for (const [i, d] of [[0, [-1, 0]], [nx, [1, 0]]]) sets.push({ at: [xs[i], (zs[j] + zs[j + 1]) / 2], dir: d, kind: 'between', post: 0.82 });
-  for (const s of sets) bracket({ ...s, y: yb + (s.post ? 0.82 : 0) }, ctx, k, yb);
+  for (let i = 0; i < nx; i++) for (const [j, d] of (el.betweenAll ? [[0, [0, -1]], [nz, [0, 1]]] : [[nz, [0, 1]]])) sets.push({ at: [(xs[i] + xs[i + 1]) / 2, zs[j]], dir: d, kind: 'between' });
+  if (el.betweenAll) for (let j = 0; j < nz; j++) for (const [i, d] of [[0, [-1, 0]], [nx, [1, 0]]]) sets.push({ at: [xs[i], (zs[j] + zs[j + 1]) / 2], dir: d, kind: 'between' });
+  for (const s of sets) bracket({ ...s, y: yb }, ctx, k);
 
   // walls between the columns: plaster, plank doors in the named bays, windows in the rest
   const wallRun = (a, b, ops, yTop) => {
@@ -173,7 +169,7 @@ export function naraHall(el, ctx) {
     usets.push(corner ? { at: [uxs[i], uzs[j]], dir: [(i ? 1 : -1) * SQ, d[1] * SQ], kind: 'corner' } : { at: [uxs[i], uzs[j]], dir: d, kind: 'column' });
   }
   for (let j = 1; j < mz; j++) for (const [i, d] of [[0, [-1, 0]], [mx, [1, 0]]]) usets.push({ at: [uxs[i], uzs[j]], dir: d, kind: 'column' });
-  for (const s of usets) bracket({ ...s, y: yTop }, ctx, uk, yTop);
+  for (const s of usets) bracket({ ...s, y: yTop }, ctx, uk);
   const out2 = up.out ?? 3.0 * uk, eave2 = yTop + 2.4 * uk, A2 = (ux1 - ux0) / 2 + out2, B2 = (uz1 - uz0) / 2 + out2, top = el.top ?? eave2 + 0.4 * B2, rise2 = top - eave2;
   roof([cx, cz], A2, B2, eave2, rise2, out2, uk);
   ridge([cx, cz], A2, B2, eave2, rise2, uk, el.shibi);
