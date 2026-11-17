@@ -167,3 +167,18 @@ Nothing is known; pipes, drums and voices stand in, under the wind. [inferred]
 - [Rethinking Durrington Walls — Current Archaeology](https://archaeology.co.uk/articles/features/rethinking-durrington-walls-a-long-lost-monument-revealed.htm)
 - [Long barrow NE of Winterbourne Stoke crossroads — Historic England 1011841](https://historicengland.org.uk/listing/the-list/list-entry/1011841)
 - [Round barrow cemetery on Winterbourne Stoke Down — Historic England 1011047](https://historicengland.org.uk/listing/the-list/list-entry/1011047)
+
+## 1e. How the stones were raised, and the earthwork's leavings (2026-11 L3; `stone_setting`, `litter` kinds `ditchfind` and `rubble`, placed in `plan.js`)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| Stone settings | At the foot of every sarsen upright and trilithon upright a low collar of rammed chalk rubble, longer across the stone's width, with 9-12 packing stones of broken sarsen and flint wedged in it and chalk lumps tamped round | Uprights were "hauled upright using plant fibre ropes and probably a wooden A-frame"; the hole "lined with wooden stakes and then packed securely with rubble" [stated: EH "Building Stonehenge"]; the collar's form and the stone types in it [inferred] |
+| Joints | Lintels end to end with a hairline seam; mortise-and-tenon at the trilithons (tenon on the upright's top). The tongue-and-groove is inside the joint and is not drawn | Mortice holes and tenons cut so uprights take the lintels; the lintels "slotted together using tongue and groove joints", normally a woodworking joint [stated: EH "Building Stonehenge"] |
+| Ditch finds | At each end of a ditch segment (the dug segments meet where the ditch is shallowest): 2-3 red deer antler picks dropped on the floor, in half of them a cattle skull and jaw, chalk blocks | The first ditch was dug "with simple antler tools" and the chalk "piled up to make an inner and an outer bank" [stated: EH]; discarded antler picks lower in the fill of a Neolithic henge ditch [stated: TVAS Kendrew Quadrangle report, a different site, used only as a parallel]; the skull deposits at segment ends and the exact places [inferred] |
+| Spoil | 46 scatters of chalk lumps, blocks and flints on the bank and the lips of the ditch | [inferred: raw spoil of a fresh dig] |
+
+## 5c. The houses' roofs and fronts (2026-11 L3; `neolithic_house` in `src/styles/neolithic/index.js`)
+
+- Roofs: each thatch face is banded by 8-11 courses (the lip of each course's butt-ends), a hazel spar bound over every other course, the four hips bound with a rope of straw, and one face patched with fresh golden straw; counts and patch by the house's seed. Straw thatch on a woven hazel frame [stated: EH "Neolithic Houses"]; the coursing, spars, hip bindings and patches follow thatching practice [inferred].
+- Fronts by rule (house seed div 5, mod 5): a bare doorway; a hide curtain rolled up over the door and tied down the jambs; a panel of daub fallen from the front wall with the woven hazel bared and the broken daub edged with chalk lumps; an ox skull with horns on a peg by the door; a split-log bench with antler picks on pegs above it. All but the first have a worn threshold slab of white sarsen-coloured stone. Cattle bones dominated the feasting deposits with pigs [stated: EH "Monumental feasts"]; everything about the fronts is [inferred]; no door fittings are preserved at Durrington.
+- Web research limits: WebFetch was refused partway; the Wikipedia "Stonehenge" page was not read this pass, so the ditch segment-end deposits are marked [inferred].

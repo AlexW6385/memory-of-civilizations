@@ -93,6 +93,25 @@ for (const s of STATIONS) stone(s.at, AXIS + rand() * 0.5, { h: s.n === 91 ? 2.7
   }
 }
 
+// ── how the stones were raised (§1e): each upright's foot in its collar of rammed chalk with the packing stones; the earthwork: chalk
+// spoil lying on the bank and the ditch's lips, and at each end of a ditch segment the antler picks, a skull and chalk blocks left on the floor ──
+{
+  for (const e of E.slice()) if (e.t === 'standing_stone' && e.dress && !e.lying && e.bury >= 1.3) E.push({ t: 'stone_setting', c: e.at, y: height(e.at[0], e.at[1]), yaw: e.yaw, w: Math.max(e.w0, e.w1), d: Math.max(e.d0, e.d1), seed: Math.floor(rand() * 1e9) });
+  const Rd = 55;
+  for (let k = -40; k < 40; k++) {
+    const a = (k * Math.PI - 0.7) / 23.5, rel = Math.atan2(Math.sin(a - AXIS), Math.cos(a - AXIS)), sth = Math.atan2(Math.sin(a - Math.PI / 2 - 0.15), Math.cos(a - Math.PI / 2 - 0.15));
+    if (a < 0 || a > Math.PI * 2 || Math.abs(rel) < 0.25 || Math.abs(sth) < 0.08) continue;
+    const at = [Math.cos(a) * Rd, Math.sin(a) * Rd];
+    E.push({ t: 'litter', kind: 'ditchfind', c: at, y: height(at[0], at[1]), seed: Math.floor(rand() * 1e6) });
+  }
+  for (let i = 0; i < 46; i++) {
+    const a = AXIS + (i + rand()) / 46 * Math.PI * 2, rel = Math.atan2(Math.sin(a - AXIS), Math.cos(a - AXIS)), r = [49, 52.5, 58.2][i % 3];
+    if (Math.abs(rel) < 0.22) continue;
+    const at = [Math.cos(a) * r, Math.sin(a) * r];
+    E.push({ t: 'litter', kind: 'rubble', c: at, y: height(at[0], at[1]), r: 3.2, n: 26, seed: Math.floor(rand() * 1e6) });
+  }
+}
+
 export const henge = {
   id: 'stonehenge-henge',
   name: { en: 'Stonehenge', zh: '巨石阵' },
