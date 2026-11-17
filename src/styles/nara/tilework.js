@@ -40,7 +40,7 @@ export function tileWork(bag, o, K) {
     if (xEnd < 1) continue;
     for (const s of [-1, 1]) row(line([cx + s * (A - 0.2), z], [cx + s * (A - xEnd), z]));
   }
-  bag.add('tile_dark', fromTriangles(orientOutward(T)));
+  bag.add('tile_grey', fromTriangles(orientOutward(T)));
   discRing(bag, o.c, A, B, h, K);
 }
 
@@ -68,5 +68,5 @@ export function discRing(bag, c, A, B, h, K) {
     for (let i = 0; i < 8; i++) { const j = (i + 1) % 8; tri.push(...bossR[i], ...cf2, ...bossR[j]); }
     D.push(...orientOutward(tri));
   }
-  bag.add('plaster_grey', fromTriangles(D));
+  bag.add('tile_grey', fromTriangles(D));
 }

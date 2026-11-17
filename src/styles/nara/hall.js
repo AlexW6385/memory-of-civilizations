@@ -54,6 +54,33 @@ export function naraHall(el, ctx) {
     bag.add('granite_block', box(x0 - pm, y - el.plat - 0.05, z0 - pm, x1 + pm, y, z1 + pm));
     col.rect([x0 - pm, z0 - pm, x1 + pm, z1 + pm], y - el.plat - 0.05, y);
     col.floor([x0 - pm, z0 - pm, x1 + pm, z1 + pm], y);
+    if (el.rail) {
+      const RED = [], GILT = [];
+      // the railing round the platform's edge (kōran): vermilion posts every 3.3 m with a gilt cap, a top rail, a middle rail and a low one; open at the stairs
+      const rx0 = x0 - pm + 0.15, rx1 = x1 + pm - 0.15, rz0 = z0 - pm + 0.15, rz1 = z1 + pm - 0.15, sp = 3.3, gap = 7.2;
+      const runs = [[[rx0, rz0], [rx1, rz0]], [[rx1, rz0], [rx1, rz1]], [[rx1, rz1], [rx0, rz1]], [[rx0, rz1], [rx0, rz0]]];
+      for (const [a, b] of runs) {
+        const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.round(L / sp), u = [(b[0] - a[0]) / L, (b[1] - a[1]) / L];
+        for (let i = 0; i <= n; i++) {
+          const p = [a[0] + u[0] * L * i / n, a[1] + u[1] * L * i / n];
+          const open = (q) => q[1] > cz && Math.abs(q[0]) < gap;
+          if (open(p)) continue;
+          const dh = ((i * 7 + p[0] * 3 + p[1]) % 5) * 0.004;      // posts of slightly different height
+          RED.push(box(p[0] - 0.13, y, p[1] - 0.13, p[0] + 0.13, y + 1.05 + dh, p[1] + 0.13));
+          GILT.push(box(p[0] - 0.17, y + 1.05 + dh, p[1] - 0.17, p[0] + 0.17, y + 1.3 + dh, p[1] + 0.17));
+          if (i < n) {
+            const q = [a[0] + u[0] * L * (i + 1) / n, a[1] + u[1] * L * (i + 1) / n];
+            if (open(q) || open([(p[0] + q[0]) / 2, (p[1] + q[1]) / 2])) continue;
+            RED.push(orientedBox(p, q, 0.2, y + 0.9, y + 1.05 + dh));
+            RED.push(orientedBox(p, q, 0.14, y + 0.5, y + 0.6 + dh));
+            RED.push(orientedBox(p, q, 0.14, y + 0.12, y + 0.22 + dh));
+          }
+        }
+      }
+      // one merged piece per material (identical boxes would otherwise form instanced draws of their own)
+      const merge = (list) => fromTriangles(list.flatMap((g) => Array.from(g.attributes.position.array)));
+      bag.add('timber_red', merge(RED)); bag.add('gilt_bronze', merge(GILT));
+    }
   }
   // the ring of columns, and the tie beam on their heads
   const ring = [];
