@@ -222,11 +222,11 @@ export async function town() {
   // the market: the shops and bakeries on the street, the lanes' washing and the shades over the street
   plans.push(base('abu-simbel-market', [
     ...market.map((l) => (l.kind === 'shop' ? { t: 'ram_shop', rect: l.rect, seed: l.seed, front: l.front, trade: l.trade, shop: true } : l.kind === 'bakery' ? { t: 'bakery', rect: l.rect, seed: l.seed, front: 'n' } : house(l))),
-    { t: 'lane_dress', lanes: lanes().filter((x) => x.r[1] < 60 || x.kind === 'cross'), market: MARKET, seed: 23 },
+    { t: 'lane_dress', lanes: lanes().filter((x) => x.r[1] < 60 || x.kind === 'cross'), gaps: lanes().filter((x) => x.kind === 'cross').map((x) => [x.r[0], x.r[2]]), market: MARKET, seed: 23 },
   ], 0, [{ id: 'the market street', kind: 'open', rect: MARKET, y: 0, market: true }]));
   const shopsAt = (l) => (l.kind === 'shop' ? { t: 'ram_shop', rect: l.rect, seed: l.seed, front: l.front, trade: l.trade, shop: true } : l.kind === 'bakery' ? { t: 'bakery', rect: l.rect, seed: l.seed, front: 'n' } : house(l));
   for (let i = 0; i < rest.length; i += 14) plans.push(base(`abu-simbel-camp-${i / 14}`, rest.slice(i, i + 14).map(shopsAt)));
-  plans.push(base('abu-simbel-lanes', [{ t: 'lane_dress', lanes: lanes().filter((x) => x.r[1] >= 60 && x.kind !== 'cross'), seed: 24 }]));
+  plans.push(base('abu-simbel-lanes', [{ t: 'lane_dress', lanes: lanes().filter((x) => x.r[1] >= 60 && x.kind !== 'cross'), gaps: lanes().filter((x) => x.kind === 'cross').map((x) => [x.r[0], x.r[2]]), seed: 24 }]));
   plans.push(base('abu-simbel-chapel', [{ t: 'camp_chapel', rect: CHAPEL, seed: 71 }]));
   plans.push(base('abu-simbel-granaries', [{ t: 'granaries', list: granaryList(), y: 0 }]));
   if (yardHere) plans.push(base('abu-simbel-yard', [{ t: 'masons_yard', rect: YARD, y: 0, seed: 53 }]));

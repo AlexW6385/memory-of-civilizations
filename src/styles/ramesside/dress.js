@@ -169,6 +169,7 @@ export function laneDress(el, { bag }) {
       }
     } else if (L.kind === 'lane') {
       for (let x = x0 + 7 + rand() * 6; x < x1 - 4; x += 16 + rand() * 8) {
+        if ((el.gaps ?? []).some(([a, b]) => x > a - 0.4 && x < b + 0.4)) continue;      // (not across the gap of a cross lane: no wall holds the line there)
         const y = 2.45, za = z0 + 0.15, zb = z1 - 0.15;
         bag.add('rope_fibre', box(x - 0.008, y, za, x + 0.008, y + 0.016, zb));
         for (let z = za + 0.3; z < zb - 0.7; z += 0.9) addCloth(bag, ['cloth_white', 'linen', 'cloth_ochre', 'cloth_white'][Math.floor(rand() * 4)], clothBox(x - 0.015, y - 0.45 - rand() * 0.5, z, x + 0.015, y, z + 0.7), y);
