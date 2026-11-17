@@ -24,7 +24,7 @@ function face(bag, mat, n, a, b, c, d) {
   const dot = cx * n[0] + cy * (n[2] ?? 0) + cz * n[1];
   bag.add(mat, fromTriangles(dot >= 0 ? [...a, ...b, ...c, ...a, ...c, ...d] : [...a, ...c, ...b, ...a, ...d, ...c]));
 }
-const SHAMBU = [['paint_blue', 'cloth_white'], ['cloth_red', 'cloth_white'], ['cloth_ochre', 'cloth_white'], ['cloth_red', 'cloth_ochre'], ['cloth_indigo', 'cloth_white'], ['paint_blue', 'cloth_white']];
+const SHAMBU = [['cloth_indigo', 'cloth_white'], ['cloth_red', 'cloth_white'], ['cloth_ochre', 'cloth_white'], ['cloth_red', 'cloth_ochre'], ['cloth_indigo', 'cloth_white'], ['cloth_indigo', 'cloth_ochre']];
 /**
  * A Tibetan window on a wall face at (px, pz), u along the face (to the right seen from outside), n
  * out of it, its sill at y: the black trapezoid surround (wider at the foot, reaching below the sill),
@@ -41,6 +41,24 @@ function win(bag, [px, pz], [ux, uz], [nx, nz], y, s = 1, rand = Math.random, o 
   face(bag, 'lacquer_black', n, P(-ow - 0.55 * s, -0.22 * s, 0.03), P(ow + 0.55 * s, -0.22 * s, 0.03), P(ow + 0.24 * s, h + 0.06, 0.03), P(-ow - 0.24 * s, h + 0.06, 0.03));
   Q('limewash_red', -ow - 0.08, 0.04, ow + 0.08, h - 0.02, 0.05);
   Q('opening', -ow, 0.12, ow, h - 0.1, 0.065);
+  // the reveal: a black timber frame standing out of the wall (0.2 m) with its returns, the lattice set back behind it, a stone sill under
+  // (one piece per material, its sizes jittered by the place, so the plan's instancing leaves it merged)
+  if (o.sink) { const hj = Math.abs(Math.sin(px * 12.9898 + pz * 78.233 + y * 3.17) * 43758.5453) % 1, fo = (0.18 + 0.05 * hj) * Math.min(1, s + 0.2), iu = ow + 0.02, ou = ow + 0.13 + 0.03 * hj, v0 = -0.05 - 0.02 * hj, v1 = h + 0.05 + 0.02 * hj, fo2 = fo + 0.004 + 0.01 * hj;
+    const T = { black: [], red: [], white: [] };
+    const F = (list, nn, a, b, c, d) => { const g = []; face({ add: (m, geo) => g.push(geo.attributes.position.array) }, 'x', nn, a, b, c, d); for (const arr of g) list.push(...arr); };
+    const uu = [ux, uz, 0], uv = [-ux, -uz, 0];
+    F(T.black, n, P(-ou, v0, fo), P(-iu, v0, fo), P(-iu, v1, fo2), P(-ou, v1, fo2));
+    F(T.black, n, P(iu, v0, fo), P(ou, v0, fo), P(ou, v1, fo2), P(iu, v1, fo2));
+    F(T.white, n, P(-iu, v0, fo), P(iu, v0, fo), P(iu, 0.03, fo2), P(-iu, 0.03, fo2));
+    F(T.white, n, P(-iu, h - 0.03, fo), P(iu, h - 0.03, fo), P(iu, v1, fo2), P(-iu, v1, fo2));
+    const near = y < 60;                                                 // (the returns and the sill only where they are seen from the ways up)
+    if (near) F(T.red, uu, P(-iu, 0.03, 0.05), P(-iu, 0.03, fo), P(-iu, h - 0.03, fo), P(-iu, h - 0.03, 0.05));
+    if (near) F(T.red, uv, P(iu, 0.03, fo), P(iu, 0.03, 0.05), P(iu, h - 0.03, 0.05), P(iu, h - 0.03, fo));
+    if (near) F(T.red, [0, 0, 1], P(-iu, 0.03, 0.05), P(iu, 0.03, 0.05), P(iu, 0.03, fo), P(-iu, 0.03, fo));
+    if (near) F(T.red, [0, 0, -1], P(-iu, h - 0.03, 0.05), P(iu, h - 0.03, 0.05), P(iu, h - 0.03, fo), P(-iu, h - 0.03, fo));
+    if (near) F(T.white, [0, 0, 1], P(-ou - 0.1, v0, 0.03), P(ou + 0.1, v0, 0.03), P(ou + 0.1, v0, fo + 0.14), P(-ou - 0.1, v0, fo + 0.14));
+    if (near) F(T.white, n, P(-ou - 0.1, v0 - 0.07, fo + 0.14), P(ou + 0.1, v0 - 0.07, fo + 0.14), P(ou + 0.1, v0, fo + 0.14), P(-ou - 0.1, v0, fo + 0.14));
+    for (const m of ['black', 'red', 'white']) o.sink[m].push(...T[m]); }
   const bars = lights * 3 - 1;
   for (let i = 1; i <= bars; i++) { const u = -ow + 2 * ow * i / (bars + 1); Q('limewash_red', u - 0.025, 0.12, u + 0.025, h - 0.1, 0.075); }
   Q('limewash_red', -ow, 0.6 * h - 0.025, ow, 0.6 * h + 0.025, 0.076);
@@ -79,6 +97,7 @@ function windows(bag, rect, y0, y1, b, faces, rand, o = {}) {
     const band = []; { let on = rand() < 0.7, left = 2 + Math.floor(rand() * 4); for (let i = 0; i < cols.length; i++) { band.push(on); if (--left <= 0) { on = !on; left = on ? 3 + Math.floor(rand() * 6) : 1 + Math.floor(rand() * 3); } } }
     const rows = []; for (let yy = Math.max(y0 + 3.2, o.from ?? y0); yy < y1 - 2.6; yy += (o.rowH ?? 3.3) * (0.9 + rand() * 0.25)) rows.push(yy);
     const bay = o.bay && f === 's' ? [o.bay[0] * L, o.bay[1] * L] : null;
+    const sink = { black: [], red: [], white: [] };
     rows.forEach((yr, r) => {
       const fr = (yr - y0) / H, top = r === rows.length - 1, jit = (rand() - 0.5) * 0.7;
       let s = 0.62 + 0.5 * fr; if (top) s *= 1.08;
@@ -87,7 +106,7 @@ function windows(bag, rect, y0, y1, b, faces, rand, o = {}) {
         if (o.skip && f === 's' && o.skip.some(([xa, xb, yt]) => wx > xa - 2 && wx < xb + 2 && yy < yt)) return;
         if (o.avoid && o.avoid.some(([xa, za, xb, zb, ya, yb]) => wx > xa && wx < xb && wz > za && wz < zb && yy + 1.6 * sc > ya && yy < yb)) return;
         const ins = b * (yy - y0) / H - 0.01;
-        win(bag, [wx - nx * ins, wz - nz * ins], [ux, uz], [nx, nz], yy, sc, rand, { k, lights });
+        win(bag, [wx - nx * ins, wz - nz * ins], [ux, uz], [nx, nz], yy, sc, rand, { k, lights, sink });
       };
       if (bay && fr > 0.5) for (let u = bay[0] + 2.5; u < bay[1] - 2.5; u += 5.2) put(u, yr, s * 1.05, 3);
       for (let i = 0; i < cols.length; i++) {
@@ -102,6 +121,8 @@ function windows(bag, rect, y0, y1, b, faces, rand, o = {}) {
         put(u, yy, s);
       }
     });
+    // the reveals of the face's windows, one piece per material (large and unique: a mesh of the landmark, not an instanced detail)
+    for (const [m, t] of [['lacquer_black', sink.black], ['limewash_red', sink.red], ['limewash_white', sink.white]]) if (t.length) bag.add(m, fromTriangles(t));
   }
 }
 /**
@@ -119,22 +140,47 @@ function gyaltsen(bag, x, y, z, kind = 'gilt', s = 1) {
   }
   bag.add('gilt_bronze', lathe(S([[0.08, 0], [0.08, 0.45], [0.36, 0.45], [0.36, 0.58], [0.29, 0.63], [0.29, 1.45], [0.38, 1.5], [0.38, 1.62], [0.31, 1.66], [0.31, 2.15], [0.44, 2.22], [0.44, 2.3], [0.12, 2.42], [0.1, 2.6], [0.17, 2.72], [0.1, 2.88], [0.001, 3.05]]), 12, (th, i) => (i >= 5 && i <= 9 ? 1 + 0.05 * Math.cos(th * 12) : 1), x, y, z));
 }
-/** Gilt roundels (melong) along the frieze of a face: discs standing out of it. */
+/** Gilt roundels (melong) along the frieze of a face: domed mirrors with a rim of lotus petals, standing out of it. */
 function roundels(bag, [ax, az, bx, bz, nx, nz], y, d, r, step = 3.6) {
-  const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, n = Math.max(1, Math.floor(L / step));
+  const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, n = Math.max(1, Math.floor(L / step)), S = 12, g = [];
+  if (L < 7) return;
+  const tri = (p, q, w) => {                                            // turned to face out (n)
+    const e1 = [q[0] - p[0], q[1] - p[1], q[2] - p[2]], e2 = [w[0] - p[0], w[1] - p[1], w[2] - p[2]];
+    const cxn = e1[1] * e2[2] - e1[2] * e2[1], czn = e1[0] * e2[1] - e1[1] * e2[0];
+    if (cxn * nx + czn * nz >= 0) g.push(...p, ...q, ...w); else g.push(...p, ...w, ...q);
+  };
   for (let i = 0; i < n; i++) {
-    const u = (i + 0.5) * L / n, cx = ax + ux * u + nx * d, cz = az + uz * u + nz * d, t = [];
-    for (let j = 0; j < 10; j++) {
-      const a0 = j / 10 * Math.PI * 2, a1 = (j + 1) / 10 * Math.PI * 2;
-      t.push(cx, y, cz, cx + ux * Math.cos(a0) * r, y + Math.sin(a0) * r, cz + uz * Math.cos(a0) * r, cx + ux * Math.cos(a1) * r, y + Math.sin(a1) * r, cz + uz * Math.cos(a1) * r);
+    const u = (i + 0.5) * L / n, cx = ax + ux * u + nx * d, cz = az + uz * u + nz * d;
+    const Pt = (a, rad, h) => [cx + ux * Math.cos(a) * rad + nx * h, y + Math.sin(a) * rad, cz + uz * Math.cos(a) * rad + nz * h];
+    const rings = [[r, 0], [r * 0.82, r * 0.1], [r * 0.5, r * 0.26]];
+    for (let j = 0; j < S; j++) {
+      const a0 = j / S * Math.PI * 2, a1 = (j + 1) / S * Math.PI * 2, am = (a0 + a1) / 2;
+      for (let k = 0; k + 1 < rings.length; k++) {
+        const [r0, h0] = rings[k], [r1, h1] = rings[k + 1];
+        tri(Pt(a0, r0, h0), Pt(a1, r0, h0), Pt(a1, r1, h1)); tri(Pt(a0, r0, h0), Pt(a1, r1, h1), Pt(a0, r1, h1));
+      }
+      tri(Pt(a0, rings[2][0], rings[2][1]), Pt(a1, rings[2][0], rings[2][1]), Pt(0, 0, r * 0.42));
+      tri(Pt(a0, r * 1.0, 0), Pt(a1, r * 1.0, 0), Pt(am, r * 1.32, 0));                // a petal
     }
-    const g = []; for (let q = 0; q < t.length; q += 9) {               // turn each triangle to face out (n)
-      const e1 = [t[q + 3] - t[q], t[q + 4] - t[q + 1], t[q + 5] - t[q + 2]], e2 = [t[q + 6] - t[q], t[q + 7] - t[q + 1], t[q + 8] - t[q + 2]];
-      const cxn = e1[1] * e2[2] - e1[2] * e2[1], czn = e1[0] * e2[1] - e1[1] * e2[0];
-      if (cxn * nx + czn * nz >= 0) g.push(...t.slice(q, q + 9)); else g.push(...t.slice(q, q + 3), ...t.slice(q + 6, q + 9), ...t.slice(q + 3, q + 6));
-    }
-    bag.add('gilt_bronze', fromTriangles(g));
   }
+  bag.add('gilt_bronze', fromTriangles(g));
+}
+/** The pembe's relief on a face: bundles of tamarisk twigs set upright side by side, each a ridge, between ya and yb, d out of the face. */
+function pembeBundles(bag, [ax, az, bx, bz, nx, nz], ya, yb, d, w = 0.34) {
+  const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, n = Math.max(2, Math.floor((L - 0.4) / w)), t = [];
+  const P = (u, y, o) => [ax + ux * u + nx * (d + o), y, az + uz * u + nz * (d + o)];
+  for (let i = 0; i < n; i++) {
+    const u0 = 0.2 + (L - 0.4) * i / n, u1 = 0.2 + (L - 0.4) * (i + 1) / n, um = (u0 + u1) / 2, pk = 0.1 + (i % 3) * 0.015;
+    const a = P(u0, ya, 0), b = P(um, ya, pk), c = P(u1, ya, 0), a2 = P(u0, yb, 0), b2 = P(um, yb, pk), c2 = P(u1, yb, 0);
+    t.push(...a, ...b, ...b2, ...a, ...b2, ...a2, ...b, ...c, ...c2, ...b, ...c2, ...b2);
+  }
+  const out = [];
+  for (let q = 0; q < t.length; q += 9) {
+    const e1 = [t[q + 3] - t[q], t[q + 4] - t[q + 1], t[q + 5] - t[q + 2]], e2 = [t[q + 6] - t[q], t[q + 7] - t[q + 1], t[q + 8] - t[q + 2]];
+    const cxn = e1[1] * e2[2] - e1[2] * e2[1], czn = e1[0] * e2[1] - e1[1] * e2[0];
+    if (cxn * nx + czn * nz >= 0) out.push(...t.slice(q, q + 9)); else out.push(...t.slice(q, q + 3), ...t.slice(q + 6, q + 9), ...t.slice(q + 3, q + 6));
+  }
+  bag.add('pembe', fromTriangles(out));
 }
 /**
  * One layer (ya to yb) of a hollowed block on the rect R, its outer faces set in by iA at the foot
@@ -209,10 +255,14 @@ function dzong(el, { bag, col }) {
     if (pe >= 2.2) {
       const m = yw + 0.06 + (pe - 0.06) * 0.42;
       RB('pembe', grow(r1, po), yw + 0.06, m - 0.12); RB('limewash_white', grow(r1, po + 0.07), m - 0.12, m + 0.12); RB('pembe', grow(r1, po), m + 0.12, y1 - cap);
-      if (el.gilt) { const F = FACES(...r1), yc = (m + 0.12 + y1 - cap) / 2, rr = Math.min(0.42, (y1 - cap - m) * 0.3); for (const f of el.windows || 's') roundels(bag, F[f], yc, po + 0.025, rr); }
+      const F = FACES(...r1);
+      if (!el.joint && !roofVoids.length) for (const f of el.windows || 's') { pembeBundles(bag, F[f], yw + 0.1, m - 0.16, po); pembeBundles(bag, F[f], m + 0.16, y1 - cap - 0.04, po); }
+      if (el.gilt) { const yc = (m + 0.12 + y1 - cap) / 2, rr = Math.min(0.5, (y1 - cap - m) * 0.3); for (const f of el.windows || 's') roundels(bag, F[f], yc, po + 0.14, rr); }
     } else {
       RB('pembe', grow(r1, po), yw + 0.06, y1 - cap);
-      if (el.gilt) { const F = FACES(...r1), yc = (yw + y1 - cap) / 2 + 0.03, rr = Math.min(0.36, pe * 0.22); for (const f of el.windows || 's') roundels(bag, F[f], yc, po + 0.025, rr); }
+      const F = FACES(...r1);
+      if (!el.joint && !roofVoids.length && pe >= 1.0) for (const f of el.windows || 's') pembeBundles(bag, F[f], yw + 0.1, y1 - cap - 0.04, po);
+      if (el.gilt) { const yc = (yw + y1 - cap) / 2 + 0.03, rr = Math.min(0.4, pe * 0.22); for (const f of el.windows || 's') roundels(bag, F[f], yc, po + 0.14, rr); }
     }
     if (roofVoids.length) for (const q of cells(bag, null, el.capMat || 'limewash_white', grow(r1, led), y1 - cap, y1, 0, 0, voids, { top: true })) col.floor(q, y1);
     else bx(el.capMat || 'limewash_white', grow(r1, led), y1 - cap, y1);
@@ -242,12 +292,38 @@ function goldenRoof(el, { bag, col }) {
   const A = (az ? d : w) / 2 + 1.2, B = (az ? w : d) / 2 + 1.2, rise = Math.min(w, d) * 0.4, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
   rectRoof({ c: [cx, cz], A, B, y: y + 2.1, rise, kind: 'xieshan', sweep: 0.8, p: 1.4, alongZ: az, curl: true, mat: 'gilt_bronze', soffit: 'limewash_red' }, bag);
   const top = y + 2.1 + rise + 0.28, gs = Math.min(1.4, Math.min(w, d) / 7);
-  bag.add('gilt_bronze', lathe([[0.32, 0], [0.42, 0.12], [0.3, 0.3], [0.5, 0.75], [0.52, 1.0], [0.3, 1.35], [0.18, 1.5], [0.28, 1.62], [0.12, 1.8], [0.16, 2.0], [0.06, 2.3], [0.001, 2.6]].map(([r, h]) => [r * gs, h * gs]), 12, null, cx, top, cz));
+  const gan = (x, z, k) => bag.add('gilt_bronze', lathe([[0.32, 0], [0.42, 0.12], [0.3, 0.3], [0.5, 0.75], [0.52, 1.0], [0.3, 1.35], [0.18, 1.5], [0.28, 1.62], [0.12, 1.8], [0.16, 2.0], [0.06, 2.3], [0.001, 2.6]].map(([r, h]) => [r * k, h * k]), 12, null, x, top, z));
+  // the drum's pembe band set with gilt mirrors (melong) on every face, a row of painted beam ends under it
+  { const F = FACES(x0 - 0.08, z0 - 0.08, x1 + 0.08, z1 + 0.08); for (const f of 'snew') roundels(bag, F[f], y + 1.75, 0.22, 0.27, 2.1); }
+  // local frame of the roof: a along the ridge, b across it (b > 0 toward the front)
+  const mapx = (la, lb) => (az ? [cx - lb, cz + la] : [cx + la, cz + lb]), nF = az ? [-1, 0] : [0, 1], uF = az ? [0, 1] : [1, 0];
+  const L = A - 0.42 * B - 0.3;
+  if (Math.min(w, d) >= 8) {
+    // the wheel of the law between two deer on the ridge's middle; a small ganjira at each end of the ridge
+    for (const sg of [-1, 1]) { const [gx, gz] = mapx(sg * L, 0); gan(gx, gz, gs * 0.55); }
+    const [wx, wz] = mapx(0, 0), K = gs, ry = top + 0.55 * K + 0.9 * K, R0 = 0.95 * K, R1 = 0.76 * K, N = 20, P = (a, r, o) => [wx + uF[0] * Math.cos(a) * r + nF[0] * o, ry + Math.sin(a) * r, wz + uF[1] * Math.cos(a) * r + nF[1] * o];
+    bag.add('gilt_bronze', lathe([[0.9 * K, 0], [0.7 * K, 0.18 * K], [0.5 * K, 0.4 * K], [0.18 * K, 0.5 * K], [0.001, 0.55 * K]].map(([r, h]) => [r, h]), 12, (th, i) => (i === 0 ? 1 + 0.08 * Math.cos(th * 8) : 1), wx, top - 0.02, wz));
+    bag.add('gilt_bronze', lathe([[0.1 * K, 0.5 * K], [0.1 * K, 0.5 * K + 0.5 * K], [0.001, 0.5 * K + 0.5 * K]], 8, null, wx, top, wz));
+    for (const o of [0.05 * K, -0.05 * K]) {
+      const m = o > 0 ? nF : [-nF[0], -nF[1]];
+      for (let i = 0; i < N; i++) { const a0 = i / N * Math.PI * 2, a1 = (i + 1) / N * Math.PI * 2; face(bag, 'gilt_bronze', m, P(a0, R1, o), P(a1, R1, o), P(a1, R0, o), P(a0, R0, o)); }
+      for (let q = 0; q < 8; q++) { const a = q / 8 * Math.PI * 2, c = Math.cos(a), sn = Math.sin(a), pw = 0.05 * K; face(bag, 'gilt_bronze', m, P(a - pw / R1, 0.13 * K, o), P(a + pw / R1, 0.13 * K, o), P(a + pw / R1, R1, o), P(a - pw / R1, R1, o)); }
+      for (let i = 0; i < 12; i++) { const a0 = i / 12 * Math.PI * 2, a1 = (i + 1) / 12 * Math.PI * 2; face(bag, 'gilt_bronze', m, P(a0, 0.13 * K, o * 1.4), P(a1, 0.13 * K, o * 1.4), P(a1, 0.001, o * 1.4), P(a0, 0.001, o * 1.4)); }
+    }
+    const bxl = (la0, la1, y0_, y1_, lb0, lb1) => { const p = mapx(la0, lb0), q = mapx(la1, lb1); bag.add('gilt_bronze', box(Math.min(p[0], q[0]), y0_, Math.min(p[1], q[1]), Math.max(p[0], q[0]), y1_, Math.max(p[1], q[1]))); };
+    for (const sg of [-1, 1]) {                                          // a kneeling deer, its head turned to the wheel
+      const a0 = sg * 1.9 * K, dir = -sg, yb = top - 0.02 + 0.05 * K;
+      bxl(a0 - 0.45 * K, a0 + 0.45 * K, yb, yb + 0.34 * K, -0.1 * K, 0.1 * K);
+      bxl(a0 + dir * 0.4 * K - 0.08 * K, a0 + dir * 0.4 * K + 0.08 * K, yb + 0.3 * K, yb + 0.78 * K, -0.07 * K, 0.07 * K);
+      bxl(a0 + dir * (0.4 * K) - (dir > 0 ? 0 : 0.3 * K), a0 + dir * (0.4 * K) + (dir > 0 ? 0.3 * K : 0), yb + 0.72 * K, yb + 0.88 * K, -0.06 * K, 0.06 * K);
+      for (const t of [-0.12, 0.12]) bag.add('gilt_bronze', rod(...[mapx(a0 + dir * (0.52 * K) , t * K), mapx(a0 + dir * (0.75 * K), t * K * 2)].map((p, i) => [p[0], yb + (i ? 1.18 : 0.86) * K, p[1]]), 0.015 * K, 4));
+    }
+  } else gan(...mapx(0, 0), gs);
   for (const [x, z] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) gyaltsen(bag, x, y + 2.2, z, 'gilt', 0.8);
 }
 /** round_tower: a round battered bastion { c, r, y0, y1, batter, pembe, seed } with a few windows on its outer side. */
 function roundTower(el, { bag, col }) {
-  const [x, z] = el.c, r = el.r, y0 = el.y0, H = el.y1 - y0, pe = el.pembe ?? 1.2, cap = 0.4, yw = H - pe - cap, b = el.batter ?? yw * 0.1, rt = r - b, rand = rng(el.seed || 3);
+  const [x, z] = el.c, r = el.r, y0 = el.y0, H = el.y1 - y0, pe = el.pembe ?? 1.2, cap = 0.4, yw = H - pe - cap, b = el.batter ?? yw * 0.1, rt = r - b, rand = rng(el.seed || 3), sink = { black: [], red: [], white: [] };
   bag.add('limewash_white', lathe([[r, 0], [rt, yw], [0.001, yw]], 36, null, x, y0, z));
   bag.add('limewash_white', lathe([[rt - 0.05, yw - 0.14], [rt + 0.2, yw - 0.14], [rt + 0.2, yw + 0.06], [0.001, yw + 0.06]], 36, null, x, y0, z));
   bag.add('pembe', lathe([[rt + 0.12, yw + 0.06], [rt + 0.12, H - cap]], 36, null, x, y0, z));
@@ -257,8 +333,9 @@ function roundTower(el, { bag, col }) {
   for (let v = Math.max(4, yw * 0.45); v < yw - 2.4; v += 3.4) for (let a = a0 + rand() * 0.3; a < a1; a += 0.42 + rand() * 0.25) {
     if (rand() < 0.35) continue;
     const nx = Math.cos(a), nz = Math.sin(a), rr = r - k * v + 0.04;
-    win(bag, [x + nx * rr, z + nz * rr], [nz, -nx], [nx, nz], y0 + v, 0.6 + 0.4 * v / yw, rand, { k });
+    win(bag, [x + nx * rr, z + nz * rr], [nz, -nx], [nx, nz], y0 + v, 0.6 + 0.4 * v / yw, rand, { k, sink });
   }
+  for (const [m, t] of [['lacquer_black', sink.black], ['limewash_red', sink.red], ['limewash_white', sink.white]]) if (t.length) bag.add(m, fromTriangles(t));
 }
 /**
  * zigzag: the stairs up the face of a terrace { x0, x1, zf (the face they lean on, they stand south
@@ -304,6 +381,18 @@ function zigzag(el, { bag, col }) {
       col.segment([a, (zi + zB) / 2], [c, (zi + zB) / 2], T, Math.min(ya, yc) - 0.3, Math.max(ya, yc) + ph);
     }
     bag.add('limewash_white', fromTriangles(fixOut(par)));
+    // a stone coping along the parapet's top, and newel posts with capstones at its ends and middles
+    { const cop = []; const zc = (zi + zB) / 2;
+      for (let i = 0; i + 1 < xs.length; i++) {
+        const a = xs[i], c = xs[i + 1], ya = lo(a) + ph, yc = lo(c) + ph, z0c = zi - 0.07, z1c = zB + 0.07;
+        const P = [[a, ya, z0c], [c, yc, z0c], [c, yc, z1c], [a, ya, z1c]], U = P.map(([px, py, pz]) => [px, py + 0.13, pz]);
+        const q = (p1, p2, p3, p4) => cop.push(...p1, ...p2, ...p3, ...p1, ...p3, ...p4);
+        q(U[0], U[1], U[2], U[3]); q(P[0], P[1], U[1], U[0]); q(P[3], U[3], U[2], P[2]); q(P[0], U[0], U[3], P[3]); q(P[1], P[2], U[2], U[1]);
+        const nn = Math.max(1, Math.round(Math.abs(c - a) / 4.5));
+        for (let j = 0; j <= nn; j++) { if (i > 0 && j === 0) continue; const x = a + (c - a) * j / nn, yb = lo(x) + ph;
+          bag.add('limewash_white', box(x - 0.3, yb - 1.3, zc - 0.3, x + 0.3, yb + 0.3, zc + 0.3)); bag.add('limewash_white', box(x - 0.4, yb + 0.3, zc - 0.4, x + 0.4, yb + 0.42, zc + 0.4)); bag.add('limewash_white', box(x - 0.22, yb + 0.42, zc - 0.22, x + 0.22, yb + 0.56, zc + 0.22)); }
+      }
+      bag.add('limewash_white', fromTriangles(fixOut(cop))); }
     // the end walls across the band at the outer ends of the landings
     const endX = east ? e0[1] - T : e0[0], top = k === n - 1 && el.bridge;
     { bag.add('limewash_white', box(endX, h1, zA, endX + T, h1 + ph, zi)); col.rect([endX, zA, endX + T, zi], h1 - 0.3, h1 + ph); }
@@ -326,6 +415,32 @@ function fixOut(t) {
     }
   }
   return out;
+}
+/**
+ * chorten: a whitewashed stupa { at, y, k (scale, 1 = 6 m) } — a three-tiered square plinth, the round vase (bumpa) with its
+ * niche on the south face, the red-banded square harmika, thirteen rings of the spire, the gilt parasol, crescent and jewel.
+ */
+function chorten(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, k = el.k ?? 1, bx = (m, hw, ya, yb, d = hw) => bag.add(m, box(x - hw * k, y + ya * k, z - d * k, x + hw * k, y + yb * k, z + d * k));
+  bx('limewash_white', 2.3, -0.4, 0.45); bx('granite_grey', 2.38, 0.45, 0.52); bx('limewash_white', 2.0, 0.52, 0.98); bx('granite_grey', 2.08, 0.98, 1.04); bx('limewash_white', 1.7, 1.04, 1.5);
+  bx('limewash_red', 1.76, 1.5, 1.62);
+  const prof = [[1.05, 1.62], [1.4, 1.85], [1.52, 2.5], [1.3, 3.15], [1.0, 3.3]].map(([r, h]) => [r * k, y + h * k]);
+  bag.add('limewash_white', lathe(prof, 20, null, x, 0, z));
+  bag.add('limewash_red', lathe([[1.0 * k, y + 3.3 * k], [1.05 * k, y + 3.3 * k], [1.05 * k, y + 3.42 * k], [0.98 * k, y + 3.42 * k]], 20, null, x, 0, z));
+  // the niche on the south face of the vase, framed in black, a gilt figure's glow in it
+  const nz = z + 1.5 * k - 0.04 * k;
+  face(bag, 'lacquer_black', [0, 1], [x - 0.5 * k, y + 2.0 * k, nz], [x + 0.5 * k, y + 2.0 * k, nz], [x + 0.4 * k, y + 3.0 * k, nz], [x - 0.4 * k, y + 3.0 * k, nz]);
+  face(bag, 'opening', [0, 1], [x - 0.38 * k, y + 2.08 * k, nz + 0.02], [x + 0.38 * k, y + 2.08 * k, nz + 0.02], [x + 0.3 * k, y + 2.9 * k, nz + 0.02], [x - 0.3 * k, y + 2.9 * k, nz + 0.02]);
+  face(bag, 'gilt_bronze', [0, 1], [x - 0.14 * k, y + 2.2 * k, nz + 0.04], [x + 0.14 * k, y + 2.2 * k, nz + 0.04], [x + 0.1 * k, y + 2.7 * k, nz + 0.04], [x - 0.1 * k, y + 2.7 * k, nz + 0.04]);
+  bx('limewash_white', 0.62, 3.42, 4.0); bx('limewash_red', 0.66, 3.82, 3.94);
+  // the spire: thirteen rings narrowing upward
+  const sp = [[0.5, 4.0]]; for (let i = 0; i < 13; i++) { const r = 0.5 - i * 0.027, h = 4.0 + i * 0.13; sp.push([r, h + 0.1], [r - 0.04, h + 0.13]); }
+  bag.add('limewash_white', lathe(sp.map(([r, h]) => [r * k, y + h * k]), 16, null, x, 0, z));
+  const t = 4.0 + 13 * 0.13 + 0.1;
+  bag.add('gilt_bronze', lathe([[0.62, t], [0.7, t + 0.05], [0.4, t + 0.12], [0.001, t + 0.3]].map(([r, h]) => [r * k, y + h * k]), 20, null, x, 0, z));       // the parasol
+  bag.add('gilt_bronze', lathe([[0.08, t + 0.3], [0.12, t + 0.4], [0.2, t + 0.5], [0.12, t + 0.58], [0.04, t + 0.75], [0.001, t + 0.95]].map(([r, h]) => [r * k, y + h * k]), 10, null, x, 0, z));
+  col.rect([x - 2.3 * k, z - 2.3 * k, x + 2.3 * k, z + 2.3 * k], y - 0.4 * k, y + 1.62 * k);
+  col.circle(x, z, 1.4 * k, y + 1.62 * k, y + 3.4 * k);
 }
 /**
  * doring: an inscribed stone pillar { at, y, h } — a brick-laid base, three stone steps, the tall
@@ -1242,6 +1357,6 @@ const { teaSeats: _ts, ...SHOPS } = makeShops({ face, doorway, win, thangka, san
 export const teaSeats = _ts;
 registerStyle('tibetan', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, dzong, dung_wall: dungWall, sang_khun: (el, { bag }) => sangkhun(bag, el.at[0], el.y ?? 0, el.at[1], el.dir), lapse: (el, { bag }) => twigs(bag, el.at[0], el.y ?? 0, el.at[1], rng(el.seed || 5)), golden_roof: goldenRoof, banner_pole: bannerPole, tibetan_house: house, round_tower: roundTower, zigzag, doring, sangkhang, stone_heap: stoneHeap, shol_gate: sholGate, triple_stair: tripleStair, koku, flight, landing, doorway, skas, potala_hall: potalaHall, tomb_chapel: tombChapel, parkhang, mani_wheel: maniWheel, lhakhang, mani_gallery: maniGallery, ...SHOPS },
+  elements: { ...STYLES.qing.elements, dzong, chorten, dung_wall: dungWall, sang_khun: (el, { bag }) => sangkhun(bag, el.at[0], el.y ?? 0, el.at[1], el.dir), lapse: (el, { bag }) => twigs(bag, el.at[0], el.y ?? 0, el.at[1], rng(el.seed || 5)), golden_roof: goldenRoof, banner_pole: bannerPole, tibetan_house: house, round_tower: roundTower, zigzag, doring, sangkhang, stone_heap: stoneHeap, shol_gate: sholGate, triple_stair: tripleStair, koku, flight, landing, doorway, skas, potala_hall: potalaHall, tomb_chapel: tombChapel, parkhang, mani_wheel: maniWheel, lhakhang, mani_gallery: maniGallery, ...SHOPS },
   objects: {},
 });
