@@ -11,7 +11,7 @@ import '../qing/index.js';
 import { houseParts } from './house.js';
 import { pagoda, shikhara, chaitya } from './temples.js';
 import { potCourt, potterWheel, kiln, pot } from './pottery.js';
-import { lane, makeCourt, yard } from './street.js';
+import { lane, makeCourt, yard, wayside } from './street.js';
 import { inlay, offerings, trisul, bunting } from './dress.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -134,7 +134,7 @@ registerStyle('newar', {
     newar_house: (el, ctx) => houseParts(el, ctx, { hipRoof }),
     newar_dabali: dabali, newar_pati: pati, newar_dhara: dhara, newar_stall: stall, newar_tree: pipalTree,
     newar_inlay: inlay, newar_offerings: offerings, newar_trisul: trisul, newar_bunting: bunting,
-    newar_lane: lane, newar_yard: yard, newar_court: newarCourt, newar_pot_court: potCourt, newar_wheel: potterWheel, newar_kiln: kiln,
+    newar_lane: lane, newar_wayside: wayside, newar_yard: yard, newar_court: newarCourt, newar_pot_court: potCourt, newar_wheel: potterWheel, newar_kiln: kiln,
   },
   objects: {},
 });

@@ -24,11 +24,13 @@ export function houseParts(el, ctx, { hipRoof }) {
   const RODL = (p, q, r, mat, seg = 5) => { const a = toW(p[0], p[2]), b = toW(q[0], q[2]); bag.add(mat, rod([a[0], p[1], a[1]], [b[0], q[1], b[1]], r, seg)); };
   const Y = [0]; for (let i = 0; i < n; i++) Y.push(Y[i] + HS[i]);
   const H = Y[n], open = !!el.open;
-  const up = open && !!el.light && n >= 2 && (el.trade || 'home') !== 'curd';       // the stair leads up to a furnished first floor (the lit shop-houses)
+  const home = open && !!el.door;                                                          // a dwelling's ground floor (chidi), entered by a low door (layout.js homes)
+  const up = open && (!!el.light || !!el.upper) && n >= 2 && (el.trade || 'home') !== 'curd';       // the stair leads up to a furnished first floor (the lit shop-houses)
   // the brick of this house: mostly the red, some darker-baked, an old one greyed [inferred]; the plan's own door place and kinds (layout.js lots())
   const wm = el.wall ?? ['brick', 'brick', 'brick', 'brick_baked', 'brick', 'brick_grey'][Math.floor(rand() * 6)];
   const damp = el.damp ?? rand();
-  const OW = Math.min(4.6, W - 2.4), ox = (W - OW) / 2, T = 0.55;
+  const T = 0.55, OW = home ? 1.3 : Math.min(4.6, W - 2.4), dh = home ? 1.95 : 2.5;
+  const ox = home ? Math.max(T + 0.45, Math.min(el.dpos ?? 1.2, W - T - 3.65 - OW)) : (W - OW) / 2;
 
   // the walls
   if (!open) { B(0, 0, 0, W, H, D, wm); RC(0, 0, 0, W, H, D); }
@@ -39,9 +41,9 @@ export function houseParts(el, ctx, { hipRoof }) {
     B(W - T, 0, 0, W, H, D, wm); RC(W - T, 0, 0, W, h0, D);
     B(0, 0, 0, ox, H, T, wm); RC(0, 0, 0, ox, h0, T);
     B(ox + OW, 0, 0, W, H, T, wm); RC(ox + OW, 0, 0, W, h0, T);
-    B(ox, 2.5, 0, ox + OW, H, T, wm);                                                // over the opening
-    B(ox - 0.02, 2.2, -0.14, ox + OW + 0.02, 2.5, T + 0.02, 'timber');                      // its lintel beam
-    for (const x of [ox - 0.12, ox + OW - 0.1]) { B(x, 0.03, -0.14, x + 0.22, 2.5, 0.2, 'timber'); RC(x, 0, -0.14, x + 0.22, 2.5, 0.2); }
+    B(ox, dh, 0, ox + OW, H, T, wm);                                                // over the opening
+    B(ox - 0.02, dh - 0.3, -0.14, ox + OW + 0.02, dh, T + 0.02, 'timber');                      // its lintel beam
+    for (const x of [ox - 0.12, ox + OW - 0.1]) { B(x, 0.03, -0.14, x + 0.22, dh, 0.2, 'timber'); RC(x, 0, -0.14, x + 0.22, dh, 0.2); }
     // the floor, the ceiling of joists and planks (the upper storeys solid above it)
     const f0 = toW(T, T), f1 = toW(W - T, D - T);
     B(T, 0, T, W - T, 0.1, D - T, 'plaster_ochre'); col.floor([Math.min(f0[0], f1[0]), Math.min(f0[1], f1[1]), Math.max(f0[0], f1[0]), Math.max(f0[1], f1[1])], 0.1);
@@ -169,6 +171,35 @@ export function houseParts(el, ctx, { hipRoof }) {
     }
     if (det > 1 && n > 2 && rand() < 0.5) for (let k = 0; k < 2; k++) { const px = W / 2 - 0.6 + k * 1.2, p = toW(px, -0.14); pot(bag, p[0], Y[1] + 0.48, p[1], 'round', 0.7); bag.add('cloth_ochre', lathe([[0.001, 0], [0.1, 0.06], [0.1, 0.14], [0.001, 0.2]], 6, null, p[0], Y[1] + 0.48 + 0.3, p[1])); }
   }
+  // ── the front of a dwelling's open ground floor: a low door, and by rule one of four fronts (the seed picks it) [inferred; stated: doors deliberately low so visitors bow — bhaktapur.com] ──
+  if (home) {
+    const dR = ox + OW, kind = Math.floor((el.seed || 1) / 7) % 4, big = ox > W - dR ? 'L' : 'R', sp = big === 'L' ? [0.1, ox - 0.15] : [dR + 0.15, W - 0.1], span = sp[1] - sp[0], mid = (sp[0] + sp[1]) / 2;
+    const other = big === 'L' ? [dR + 0.15, W - 0.1] : [0.1, ox - 0.15];
+    B(ox - 0.1, dh, -0.12, dR + 0.1, dh + 0.3, -0.02, 'wood_painted');                    // the carved lintel board
+    B(ox + OW / 2 - 0.14, dh + 0.05, -0.15, ox + OW / 2 + 0.14, dh + 0.27, -0.12, 'gilt_bronze');
+    B(ox - 0.14, 0, -0.12, ox - 0.02, dh + 0.02, 0.05, 'wood_painted'); B(dR + 0.02, 0, -0.12, dR + 0.14, dh + 0.02, 0.05, 'wood_painted');
+    const seat = (a, b) => { if (b - a < 0.9) return; B(a, 0, -0.78, b, 0.4, -0.02, 'brick'); B(a - 0.04, 0.4, -0.82, b + 0.04, 0.46, 0.0, 'wood_ochre'); RC(a - 0.04, 0, -0.82, b + 0.04, 0.46, 0); };
+    if (kind === 0) {
+      // a lattice window of the ground floor beside the door, a seat on the other side
+      if (span > 1.5) lattice(mid - 0.4, 0.95, 0.8, 0.8, det);
+      seat(other[0], other[1]);
+    } else if (kind === 1) {
+      // a seat on either side, a lamp niche, cushions
+      seat(sp[0], sp[1]); seat(other[0], other[1]);
+      B(dR + 0.2, 1.25, -0.1, dR + 0.45, 1.6, 0.0, 'wood_dark'); B(dR + 0.24, 1.3, -0.12, dR + 0.41, 1.5, -0.04, 'opening');
+      for (const [a, b] of [sp, other]) if (b - a > 0.9) B(a + 0.1, 0.46, -0.5, a + 0.7, 0.5, -0.1, 'cloth_red');
+    } else if (kind === 2) {
+      // firewood stacked end-out and a stand of water pots
+      if (span > 1.3) { for (let i = 0; i < 4; i++) for (let j = 0; j < 4 - (i > 1 ? 1 : 0); j++) RODL([sp[0] + 0.2 + i * 0.16, 0.1 + j * 0.15, -0.04], [sp[0] + 0.2 + i * 0.16, 0.1 + j * 0.15, -0.5], 0.062, 'timber', 5); RC(sp[0] + 0.1, 0, -0.52, sp[0] + 0.9, 0.65, 0); }
+      if (other[1] - other[0] > 0.7) { const p = toW((other[0] + other[1]) / 2, -0.28); pot(bag, p[0], 0, p[1], 'jar', 1); pot(bag, p[0], 0.5, p[1], 'round', 0.8); }
+    } else {
+      // grain and chillies spread on a reed mat before the front, two baskets, a Ganesh niche
+      if (span > 1.6) { const a = toW(sp[0] + 0.1, -1.0), b = toW(Math.min(sp[1], sp[0] + 1.7), -0.1); bag.add('reed_mat', bx(a[0], 0.05, a[1], b[0], 0.065, b[1])); const c = toW(sp[0] + 0.9, -0.55); bag.add(['cloth_red', 'cloth_ochre'][(el.seed || 0) % 2], lathe([[0.55, 0.0], [0.44, 0.05], [0.26, 0.1], [0.001, 0.14]], 7, null, c[0], 0.065, c[1])); }
+      for (let k = 0; k < 2; k++) { const p = toW(other[0] + 0.35 + k * 0.45, -0.3); if (other[1] - other[0] > 1.1) bag.add('wicker', lathe([[0.2, 0], [0.26, 0.2], [0.3, 0.32], [0.26, 0.32], [0.001, 0.05]], 7, null, p[0], 0, p[1])); }
+      B(dR + 0.25, 1.2, -0.1, dR + 0.7, 1.9, 0.0, 'wood_dark'); B(dR + 0.31, 1.28, -0.12, dR + 0.64, 1.82, -0.04, 'opening');
+    }
+    if (rand() < 0.55) for (let k = 0; k < 5; k++) B(ox + 0.1 + k * 0.2, 1.55 - 0.08 * Math.sin(k * 0.8), -0.1, ox + 0.2 + k * 0.2, 1.67 - 0.08 * Math.sin(k * 0.8), -0.04, 'cloth_ochre');
+  }
   // the roof: low, hipped, its ridge along the front; the eaves deeper on the street side and held by struts
   const fo = 1.15, bo = 0.6, so = 0.08, r = [x0, z0, x1, z1];
   const ovl = [so, so, so, so]; ovl[{ s: 3, n: 1, e: 2, w: 0 }[f]] = fo; ovl[{ s: 1, n: 3, e: 0, w: 2 }[f]] = bo;
@@ -292,6 +323,36 @@ export function houseParts(el, ctx, { hipRoof }) {
       for (const y of [0.6, 1.2]) { shelf(y, T + 0.2, W - T - 2.7, 0.55); rowPots(y, T + 0.5, W - T - 2.8, y > 0.9 ? 'bowl' : 'round', 0.3, true); }
       for (let r = 0; r < 3; r++) for (let x = T + 0.6; x < W - T - 3.0; x += 0.55) { const p = toW(x + (r % 2) * 0.27, 2.2 + r * 0.55); pot(bag, p[0], 0.1, p[1], r === 0 ? 'jar' : r === 1 ? 'round' : 'cup', r === 0 ? 1.2 : 1.3, (x * 5) % 3 < 1); }
       for (let k = 0; k < 3; k++) { const p = toW(T + 0.7 + k * 0.9, bk - 0.55); pot(bag, p[0], 0.1, p[1], 'jar', 1.8, k === 1); col.circle(p[0], p[1], 0.5, 0.1, 1.0); }
+    } else if (kind === 'store') {
+      // the chidi of a farming house [stated: it keeps the farm tools and manure — bhaktapur.com]: wicker grain bins under straw lids along the back, a plough and hoes against the left wall, doko baskets, a heap of manure and bundles of straw in the corner
+      for (let k = 0; k < 3; k++) { const x = T + 2.3 + k * 1.25; if (x + 0.55 > W - T - 0.1) break; const p = toW(x, bk - 0.65); bag.add('wicker', lathe([[0.001, 0.1], [0.46, 0.1], [0.55, 0.55], [0.5, 1.05], [0.001, 1.05]], 9, null, p[0], 0, p[1])); bag.add('thatch', lathe([[0.58, 1.05], [0.36, 1.3], [0.001, 1.48]], 9, null, p[0], 0, p[1])); col.circle(p[0], p[1], 0.56, 0.1, 1.5); }
+      bag.add('mud_plaster', (() => { const p = toW(T + 0.95, bk - 0.9); return lathe([[0.85, 0], [0.7, 0.18], [0.42, 0.36], [0.001, 0.48]], 9, null, p[0], 0.1, p[1]); })()); { const p = toW(T + 0.95, bk - 0.9); col.circle(p[0], p[1], 0.8, 0.1, 0.5); }
+      for (let k = 0; k < 3; k++) { const a = toW(T + 0.12 + k * 0.07, 1.2 + k * 0.45), b = toW(T + 0.12 + k * 0.07 + 0.34, 1.2 + k * 0.45); bag.add('wood_dark', rod([a[0], 0.1, a[1]], [a[0], 2.0, a[1]], 0.022, 5)); bag.add('iron', bx(a[0] - 0.02, 0.1, a[1] - 0.09, a[0] + 0.02, 0.32, a[1] + 0.09)); void b; }
+      { const a = toW(T + 0.2, 2.7), b = toW(T + 0.75, 2.7); bag.add('wood_dark', rod([a[0], 0.1, a[1]], [b[0], 1.9, b[1]], 0.035, 5)); const c = toW(T + 0.45, 2.7); bag.add('wood_dark', rod([c[0], 0.1, c[1]], [c[0], 1.0, c[1]], 0.03, 5)); bag.add('iron', bx(a[0] - 0.02, 0.1, a[1] - 0.05, a[0] + 0.14, 0.2, a[1] + 0.05)); }
+      for (let k = 0; k < 3; k++) { const p = toW(T + 1.1 + k * 0.45, 2.5 + (k % 2) * 0.35); bag.add('wicker', lathe([[0.12, 0.1], [0.26, 0.45], [0.31, 0.65], [0.27, 0.65], [0.001, 0.14]], 8, null, p[0], 0, p[1])); col.circle(p[0], p[1], 0.3, 0.1, 0.7); }
+      for (let k = 0; k < 4; k++) { const p = toW(T + 0.25 + k * 0.22, bk - 0.2); bag.add('thatch', rod([p[0], 0.1, p[1]], [p[0] + 0.05, 1.35, p[1]], 0.1, 6)); }
+    } else if (kind === 'mill') {
+      // the grain mill of a house: a stone hand quern on a mat, the rice pounder (dhiki: a pivoted beam, a pestle, a stone mortar), winnowing trays leaning on the wall, sacks of rice [inferred]
+      B(T + 1.25, 0.1, 2.0, T + 2.4, 0.12, 3.4, 'reed_mat');
+      { const p = toW(T + 1.82, 2.7); bag.add('granite_grey', lathe([[0.001, 0.12], [0.4, 0.12], [0.42, 0.2], [0.001, 0.2]], 10, null, p[0], 0, p[1])); bag.add('granite_grey', lathe([[0.001, 0.2], [0.38, 0.2], [0.36, 0.3], [0.001, 0.3]], 10, null, p[0], 0, p[1])); bag.add('wood_dark', rod([p[0], 0.3, p[1]], [p[0], 0.52, p[1]], 0.018, 5)); col.circle(p[0], p[1], 0.42, 0.1, 0.32); }
+      B(T + 0.25, 0.1, 2.0, T + 0.33, 0.62, 2.1, 'wood_dark'); B(T + 0.55, 0.1, 2.0, T + 0.63, 0.62, 2.1, 'wood_dark');
+      RODL([T + 0.44, 0.46, 1.1], [T + 0.44, 0.72, 3.3], 0.07, 'wood_dark', 6); RODL([T + 0.44, 0.72, 3.3], [T + 0.44, 0.2, 3.3], 0.05, 'wood_ochre', 6);
+      { const p = toW(T + 0.44, 3.3); bag.add('granite_grey', lathe([[0.001, 0.1], [0.26, 0.1], [0.3, 0.3], [0.22, 0.4], [0.001, 0.4]], 8, null, p[0], 0, p[1])); }
+      RC(T + 0.15, 0.1, 1.0, T + 0.75, 0.8, 3.6);
+      for (let k = 0; k < 3; k++) { const x = T + 2.0 + k * 0.85; if (x + 0.4 > W - T - 3.5 && k > 0) break; const a = toW(x, bk - 0.1); bag.add('wicker', rod([a[0], 0.45, a[1]], [a[0], 0.5, a[1] - 0.05], 0.36, 10)); }
+      for (let k = 0; k < 4; k++) { const p = toW(T + 0.5 + k * 0.5, bk - 0.6); bag.add(k % 2 ? 'sacking' : 'cloth_white', lathe([[0.001, 0.1], [0.24, 0.1], [0.28, 0.4], [0.18, 0.62], [0.001, 0.66]], 8, null, p[0], 0, p[1])); col.circle(p[0], p[1], 0.28, 0.1, 0.7); }
+      for (let k = 0; k < 2; k++) { const p = toW(W - T - 0.5 - k * 0.5, bk - 0.5); pot(bag, p[0], 0.1, p[1], 'jar', 1.5, k === 1); col.circle(p[0], p[1], 0.35, 0.1, 1.0); }
+    } else if (kind === 'weaver') {
+      // a weaver's floor loom: four posts, two beams, the warp and the cloth woven so far, the weaver's seat, spools and folded lengths [inferred: the Newar cotton weaving]
+      for (const [a, b] of [[T + 0.8, 1.7], [T + 2.2, 1.7], [T + 0.8, 3.1], [T + 2.2, 3.1]]) B(a - 0.05, 0.1, b - 0.05, a + 0.05, 1.05, b + 0.05, 'wood_dark');
+      RODL([T + 0.75, 1.0, 1.7], [T + 2.25, 1.0, 1.7], 0.04, 'wood_ochre', 6); RODL([T + 0.75, 1.0, 3.1], [T + 2.25, 1.0, 3.1], 0.04, 'wood_ochre', 6);
+      B(T + 0.85, 0.99, 1.7, T + 2.15, 1.0, 3.1, 'cloth_white'); B(T + 0.85, 1.0, 1.7, T + 2.15, 1.012, 2.3, 'cloth_red'); B(T + 0.85, 1.0, 2.3, T + 2.15, 1.012, 2.4, 'cloth_black');
+      RC(T + 0.7, 0.1, 1.6, T + 2.3, 1.06, 3.2);
+      B(T + 1.0, 0.1, 3.3, T + 1.9, 0.42, 3.65, 'wood_ochre'); RC(T + 1.0, 0.1, 3.3, T + 1.9, 0.45, 3.65);
+      for (let k = 0; k < 4; k++) { const p = toW(T + 1.2 + k * 0.3, 3.9); bag.add(['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white'][k], lathe([[0.001, 0.1], [0.05, 0.1], [0.05, 0.22], [0.001, 0.22]], 6, null, p[0], 0, p[1])); }
+      for (let k = 0; k < 4; k++) B(W * 0.5 + 0.1, 0.1 + k * 0.11, 4.55, W * 0.5 + 0.9, 0.2 + k * 0.11, 5.0, ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white'][k]);
+      RC(W * 0.5 + 0.1, 0.1, 4.55, W * 0.5 + 0.9, 0.55, 5.0);
+      for (let k = 0; k < 4; k++) { const p = toW(T + 0.6 + k * 0.85, bk - 0.45); pot(bag, p[0], 0.1, p[1], 'jar', 1.5, k === 2); col.circle(p[0], p[1], 0.38, 0.1, 1.0); }
     } else {
       // 'home' and 'grain': jars along the back, the grain bin with its heap, sacks, a bench and a mat
       for (let k = 0; k < 5; k++) { const p = toW(T + 0.6 + k * 0.85, bk - 0.45); pot(bag, p[0], 0.1, p[1], 'jar', 1.5 + (k % 2) * 0.2, k === 3); col.circle(p[0], p[1], 0.38, 0.1, 1.0); }

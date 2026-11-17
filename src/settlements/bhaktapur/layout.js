@@ -23,7 +23,7 @@ export const STALLS = [[-8, 5, 0, 'pots'], [-2, 6.6, 0, 'fruit'], [3, 5.6, 0, 'g
 export const NYATAPOLA = {
   c: NYA.c, front: 'e', plinth: { hw: [8.2, 7.3, 6.4, 5.5, 4.6], h: 1.0, tread: 2.2, top: 1.0, stair: 4.4 },
   roofs: [{ hw: 7.5, core: 4.0, wall: 2.6, rise: 2.0 }, { hw: 6.4, core: 3.3, wall: 2.6, rise: 2.0 }, { hw: 5.3, core: 2.6, wall: 2.6, rise: 2.0 }, { hw: 4.2, core: 1.9, wall: 2.6, rise: 1.9 }, { hw: 3.1, core: 1.3, wall: 2.6, rise: 1.6 }],
-  bells: [80, 68, 56, 44, 32],
+  bells: [80, 68, 56, 44, 32], struts: [7, 6, 6, 5, 3],              // 108 struts in all [stated: nepalitimes]
 };
 export const BHAIRAB = {
   c: BHA.c, front: 'w', chamber: true, plinth: { hw: [5.4, 4.6, 3.8], h: 0.9, tread: 1.8, top: 1.2, stair: 3.6 }, guard: [],
@@ -63,6 +63,23 @@ export const PAVED = (() => {
   }
   return out;
 })();
+/**
+ * The corners of the street crossings within 118 m (not on the squares): at two of the four corners of each a wayside object stands —
+ * a vermilion-smeared stone of a deity, baskets set down on their pole, sheaves of straw, a stone seat with water jars, or potters' ware drying on a mat
+ * [inferred: the lanes' devotional stones and the day's goods]. [x, z, type 0–4].
+ */
+export function waysides() {
+  const out = [];
+  VX.forEach(([x, wv], ix) => HZ.forEach(([z, wh], iz) => {
+    if (Math.hypot(x, z) > 118 || inRect(SQ, x, z, 6) || inRect(POT, x, z, 6)) return;
+    const h = (ix * 7 + iz * 13) % 4;
+    for (const k of [h, (h + 2) % 4]) {
+      const cx = x + (k & 1 ? 1 : -1) * (wv / 2 - 0.65), cz = z + (k & 2 ? 1 : -1) * (wh / 2 - 0.65);
+      out.push([cx, cz, (ix * 3 + iz * 5 + k * 2) % 5]);
+    }
+  }));
+  return out;
+}
 export const onStreet = (x, z, m = 0) => STREETS.some((s) => inRect(s, x, z, m)) || inRect(SQ, x, z, m) || inRect(POT, x, z, m);
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -125,6 +142,16 @@ export function lots() {
     l.shop = l.shop ?? r2() < 0.3;
     l.dx = r2() < 0.5 ? W / 2 - 0.6 : 0.7 + r2() * Math.max(0.1, W - 2.4);
     l.pid = !l.shop && r2() < 0.35;
+  }
+  // the third stream: the dwellings whose ground floor (the chidi: tools, grain, the loom) stands open by a low door, from the middle of the town out to its edge; each has the stair to the first floor
+  const r3 = rng(9100), HT = ['store', 'mill', 'weaver', 'home', 'store', 'grain', 'mill', 'weaver'];
+  let nHome = 0;
+  for (const l of out) {
+    if (l.use || l.open) continue;
+    const d = dist(l), W = wOf(l);
+    if (W < 7 || dOf(l) < 6.5 || d < 45 || d > 150 || nHome >= 140 || r3() > (d < 100 ? 0.4 : 0.55)) continue;
+    l.open = true; l.home = true; l.door = true; l.shop = false; l.pid = false; l.upper = true; l.light = d < 135;
+    l.trade = HT[Math.floor(r3() * HT.length)]; l.dpos = 0.7 + r3() * Math.max(0.1, W - 5.6); nHome++;
   }
   return (_lots = out);
 }

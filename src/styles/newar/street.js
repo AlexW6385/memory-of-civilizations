@@ -4,6 +4,7 @@
 import { box, lathe, rod } from '../../core/geom.js';
 import { shikhara, chaitya } from './temples.js';
 import { pot } from './pottery.js';
+import { garland, heap } from './dress.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const bx = (x0, y0, z0, x1, y1, z1) => box(Math.min(x0, x1), Math.min(y0, y1), Math.min(z0, z1), Math.max(x0, x1), Math.max(y0, y1), Math.max(z0, z1));
@@ -68,4 +69,42 @@ export function yard(el, { bag, col }) {
   for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) bag.add('timber', rod([cx + 1.8 + i * 0.17, 0.1 + j * 0.15, cz - 0.9], [cx + 1.8 + i * 0.17, 0.1 + j * 0.15, cz - 1.7], 0.065, 5));
   col.rect([cx + 1.7, cz - 1.75, cx + 2.55, cz - 0.85], 0, 0.5);
   void rand;
+}
+
+/**
+ * newar_wayside { items: [[x, z, type] ...] }: what stands at the corners of the crossings [inferred]: 0 a stone of a deity smeared with vermilion on a plinth,
+ * a marigold garland and a lamp; 1 two baskets set down with the carrying pole across them; 2 three sheaves of straw; 3 a stone seat with two water jars;
+ * 4 a mat of potters' ware set out to dry.
+ */
+export function wayside(el, { bag, col }) {
+  const Y = 0.05;
+  for (const [x, z, type] of el.items) {
+    if (type === 0) {
+      bag.add('sandstone', bx(x - 0.4, Y, z - 0.4, x + 0.4, Y + 0.3, z + 0.4)); col.rect([x - 0.4, z - 0.4, x + 0.4, z + 0.4], Y, Y + 1.0);
+      bag.add('granite_grey', lathe([[0.001, 0.3], [0.2, 0.3], [0.2, 0.6], [0.12, 0.78], [0.001, 0.82]], 8, null, x, Y, z));
+      bag.add('cloth_red', lathe([[0.205, 0.62], [0.135, 0.76], [0.001, 0.8]], 8, null, x, Y, z));
+      garland(bag, x, Y + 0.3, z, 0.26);
+      heap(bag, x + 0.28, Y + 0.3, z - 0.1, 0.1, 'cloth_ochre');
+      bag.add('bronze', lathe([[0.001, 0], [0.06, 0], [0.05, 0.03], [0.001, 0.03]], 6, null, x - 0.27, Y + 0.3, z + 0.12));
+      bag.add('flame', lathe([[0.012, 0], [0.001, 0.035]], 4, null, x - 0.27, Y + 0.34, z + 0.12));
+    } else if (type === 1) {
+      for (const dx of [-0.38, 0.38]) bag.add('wicker', lathe([[0.12, 0], [0.26, 0.3], [0.31, 0.5], [0.27, 0.5], [0.001, 0.03]], 8, null, x + dx, Y, z));
+      bag.add('timber', rod([x - 0.95, Y + 0.52, z], [x + 0.95, Y + 0.52, z], 0.025, 5));
+      for (const dx of [-0.38, 0.38]) bag.add('rope_fibre', lathe([[0.2, 0.3], [0.21, 0.33], [0.2, 0.36]], 6, null, x + dx, Y, z));
+      col.rect([x - 0.7, z - 0.3, x + 0.7, z + 0.3], Y, Y + 0.55);
+    } else if (type === 2) {
+      for (const [dx, dz, k] of [[-0.35, 0, 1.0], [0.1, 0.25, 0.9], [0.3, -0.25, 1.05]]) {
+        bag.add('thatch', lathe([[0.3, 0], [0.26, 0.4 * k], [0.17, 0.8 * k], [0.001, 1.05 * k]], 8, null, x + dx, Y, z + dz));
+        bag.add('rope_fibre', lathe([[0.265, 0.36 * k], [0.275, 0.4 * k], [0.265, 0.44 * k]], 8, null, x + dx, Y, z + dz));
+        col.circle(x + dx, z + dz, 0.3, Y, Y + 1.0);
+      }
+    } else if (type === 3) {
+      bag.add('sandstone', bx(x - 0.5, Y, z - 0.22, x + 0.5, Y + 0.4, z + 0.22)); col.rect([x - 0.5, z - 0.22, x + 0.5, z + 0.22], Y, Y + 0.4);
+      pot(bag, x - 0.22, Y + 0.4, z, 'jar', 1); pot(bag, x + 0.22, Y + 0.4, z, 'round', 0.9);
+      bag.add('bronze', lathe([[0.001, 0], [0.1, 0], [0.12, 0.1], [0.001, 0.1]], 7, null, x, Y + 0.4, z));
+    } else {
+      bag.add('reed_mat', bx(x - 0.7, Y, z - 0.5, x + 0.7, Y + 0.015, z + 0.5));
+      for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) pot(bag, x - 0.5 + i * 0.33, Y + 0.015, z - 0.33 + j * 0.33, (i + j) % 2 ? 'bowl' : 'cup', 0.9, (i * 3 + j) % 5 === 0);
+    }
+  }
 }
