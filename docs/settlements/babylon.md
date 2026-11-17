@@ -1,7 +1,7 @@
 # Babylon (Nebuchadnezzar's inner city), about 570 BC — dossier
 
 Settlement id: `babylon` · Style: `babylonian` (the sumerian mud-brick vocabulary with baked and glazed brick) · Region: Mesopotamia (the Euphrates) · Code: `src/settlements/babylon/`
-Status of this dossier: L4 (deepening pass: the blocks of houses on a lane grid, seven trades of shops, furnished houses, Esagila's chambers, the throne room, walled yards, people at work — §13); before that L3 for the gate's dedication, the reed layers of the walls, two furnished houses, the market, a caravan and scribes (§4.9, §4.10, §5.1, §5.2); before that L2–L3 (Esagila with its court, altars and Marduk's golden cella; Etemenanki's blue-glazed summit temple; the bridge, the quay wall and the round boats; people — §4.5–4.8); before that L2 (the Processional Way paved and its walls towered and ornamented, the Ishtar Gate's beasts in rows, the Southern Palace with the throne-room facade — §4.1–4.4); before that L1–L2 (Etemenanki in seven stages in its walled precinct; Esagila south of it; the double northern wall with towers and the Ishtar Gate in blue glazed brick; the Processional Way between glazed walls with lions; the Southern Palace; the Euphrates; courtyard houses; ground, planting, weather, music). L3 recorded for later: the gate's inscription panel, the beasts' brick courses in relief, the Hanging Gardens question, the other gates and temples, the outer wall, the New Year procession.
+Status of this dossier: L4 plus the detail pass of §15 (the Ishtar Gate's passages, the glazed front of the summit temple, house fronts by rule, 137 furnished houses, the tower's court); before that L4 (deepening pass: the blocks of houses on a lane grid, seven trades of shops, furnished houses, Esagila's chambers, the throne room, walled yards, people at work — §13); before that L3 for the gate's dedication, the reed layers of the walls, two furnished houses, the market, a caravan and scribes (§4.9, §4.10, §5.1, §5.2); before that L2–L3 (Esagila with its court, altars and Marduk's golden cella; Etemenanki's blue-glazed summit temple; the bridge, the quay wall and the round boats; people — §4.5–4.8); before that L2 (the Processional Way paved and its walls towered and ornamented, the Ishtar Gate's beasts in rows, the Southern Palace with the throne-room facade — §4.1–4.4); before that L1–L2 (Etemenanki in seven stages in its walled precinct; Esagila south of it; the double northern wall with towers and the Ishtar Gate in blue glazed brick; the Processional Way between glazed walls with lions; the Southern Palace; the Euphrates; courtyard houses; ground, planting, weather, music). L3 recorded for later: the gate's inscription panel, the beasts' brick courses in relief, the Hanging Gardens question, the other gates and temples, the outer wall, the New Year procession.
 
 Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next to it.
 
@@ -186,8 +186,40 @@ Upper storeys of the ordinary houses are shut (the open houses are one-storey); 
 | More open houses | Furnished houses opened on the lanes beside the Way as far as the gate (up to 12) | [inferred] |
 
 
+## 15. Detail pass (2026-11-16): passages, summit temple, fronts, open houses, the court
+
+Sources used in this pass:
+- [Ishtar Gate — World History Encyclopedia](https://www.worldhistory.org/Ishtar_Gate/): the dedication plaque, "I hung doors of cedar adorned with bronze at all the gate openings" and "I covered their roofs by laying majestic cedars length-wise over them"; the bulls and dragons "placed in the gateways", the lions on the Way's walls [stated]. (Fetched; the Madain Project inscription page was refused in this pass, §4.9's quotation of it was made earlier.)
+- Koldewey's account of the gate (§4.2 above): bulls and dragons in rows, each figure 13 courses high with 11 plain courses between, "at least 575 animals" [stated, read earlier; not re-fetched here, the Gutenberg host refused the connection].
+- Herodotus 1.180 (houses of three and four storeys), 1.181–182 (the summit temple), as above.
+
+### 15.1 The gates' passages (L3, built)
+
+Fact: the animals stood "in the gateways" (World History Encyclopedia) and the doors were of cedar adorned with bronze at every opening of the gate [stated]. Before this pass our passages had bare blue walls and no doors. Ours (`passageWalls`, src/styles/babylonian/index.js): on both walls of both gates' passages rows of bulls and dragons by turn, every 2 m up to the springing of the arch (two rows in the front gate, five in the rear), 2.4 m apart, walking south, a rosette band and white–black–white bands at the foot and under the springing; and at the northern mouth of each passage two leaves of cedar 2.25 m broad, 0.2 m thick and 6.6 m high turned back flat against the walls (set 0.2 m clear of the reliefs), with five bronze bands, two vertical straps and rows of bronze studs, on a bronze-shod pivot post at the hinge [inferred: the leaves' size and construction, the direction of the beasts, which rows the passage walls carry; the leaves stand open because the Way is walked].
+
+### 15.2 The summit temple's front (L3, built)
+
+Fact: the summit temple was of blue glazed brick ([stated], §4.6); the glazed beasts of the gate are Marduk's dragon and Adad's bull, the gods of the city's great temples [stated: the gate's programme, §4.2]. Ours (`etemenanki`, src/styles/babylonian/temple.js): on the faces of the two towers either side of the door rows of dragons and bulls by turn, walking toward the door, between white–black–white bands and rosettes at the foot and under the top; round the walls under the parapet a cornice of three courses (white, black, white) standing out 0.5 m, broken where the towers stand [inferred: the application of the gate's programme to the temple's front, the cornice].
+
+### 15.3 House fronts by rule (L3, built)
+
+Fact: the Neo-Babylonian house was a courtyard house of one to several storeys, of mud brick with baked brick where exposed, flat roofs with beams of palm [stated: ancient-history-sites.com, §13.1; Herodotus 1.180 for the storeys]. The rule of fronts is ours [inferred]: a front's grade is set from the lot's place (`grade` in town.js: 2 on the Way's frontage, 1 in the rest of the core and the gate quarter, 0 in the outer city) and its storeys. Grade 2, one storey: pilasters of baked brick in a rhythm along the front, clear of the door, a stepped parapet of merlons. Grade 2, two storeys: the merlons, a dentil course (projecting brick ends under the parapet) and a timber oriel on palm brackets with a lattice screen. Grade 1, two storeys: the dentil course, and on three houses in four the oriel. Grade 1, one storey: on seven in ten a doorway of baked brick with jambs, a stepped head and a palm lintel. Grade 0: the plain front of §13.2. Where the oriel stands, which pilasters and the like come from the lot's seed. The oriel and its screen follow the lattice windows of the Near Eastern house in general [inferred; no source read for Babylon itself].
+
+### 15.4 More furnished houses (L3, built)
+
+The open houses (Woolley's plan, §5.1) were 22 of 1 259 lots; now 137: of the lots that fit the plan within 340 m of the core, about three in ten within 230 m and one in four beyond stand open, chosen from a second stream so the earlier choices stand; open houses take the full front dress however far out. [inferred: the share]
+
+### 15.5 Etemenanki's court (L3, built)
+
+Fact: the precinct of Etemenanki, walled, with the Processional Way entering from the north and the stair rising from the south (§2, §4.4); standards of Marduk and braziers along the Way (§13.6). Ours: the court paved in baked brick (the open court between the priests' houses and the tower, a strip through the north gate and another to the stair's foot); standards and braziers on the gate's approach to the tower; before the stair's foot standards, braziers, offering tables, water stands and benches (the props of §14), a great altar of burnt offerings on the west (brick, horned at the corners, three steps on its front, a blackened hearth) with a priest, a tethered sheep and a second priest; on the east the washing basin (limestone, 3.4 m, bitumen-lined); pilgrims kneeling either side of the stair and priests with the staff at the standards [inferred: Mesopotamian temple courts had altars and basins for ablution (the Abzu/apsû); no source places them in Etemenanki's court].
+
+### 15.6 Still below Suzhou
+
+Upper storeys of the open houses are shut (they are one-storey); the oriels and dentils are visual only (no colliders); the leaves of the gate stand open only; the shrine's own door is still the Ur shrine's 1.6 × 2.9 m; the Hanging Gardens are undecided; the passages' arches have no cedar roof (a vault stands there).
+
 ## Sources
 
+- [Ishtar Gate — World History Encyclopedia](https://www.worldhistory.org/Ishtar_Gate/)
 - [Etemenanki — Wikipedia](https://en.wikipedia.org/wiki/Etemenanki)
 - [Esagila — Wikipedia](https://en.wikipedia.org/wiki/Esagila)
 - [Ishtar Gate — Wikipedia](https://en.wikipedia.org/wiki/Ishtar_Gate)
