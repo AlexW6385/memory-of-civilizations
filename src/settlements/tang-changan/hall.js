@@ -91,7 +91,7 @@ function balustrade(L, y, a, b, o, gaps = [], ends = true) {
       R(p0, p1, 0.07, 0.22, 0.88, 'limestone'); R(p0, p1, 0.1, 0.88, 1.0, 'limestone'); R(p0, p1, 0.09, 0.14, 0.22, 'limestone');   // the panel, the top rail, the bottom rail
       for (const [q0, q1] of [[p0, p0 + 0.08], [p1 - 0.08, p1]]) R(q0, q1, 0.095, 0.24, 0.86, 'limestone');                             // the border's sides
       R(p0, p1, 0.095, 0.24, 0.31, 'limestone'); R(p0, p1, 0.095, 0.79, 0.86, 'limestone');
-      const m = (p0 + p1) / 2; R(m - 0.3, m + 0.3, 0.09, 0.45, 0.69, 'bluestone');                                                         // the lozenge field
+      const m = (p0 + p1) / 2; R(m - 0.3, m + 0.3, 0.09, 0.45, 0.69, 'granite_block');                                                         // the lozenge field
     }
     const q0 = alongX ? [s0 + r0, c0] : [c0, s0 + r0], q1 = alongX ? [s0 + r1, c0] : [c0, s0 + r1];
     col.segment(q0, q1, 0.3, y, y + 1.1);
@@ -196,20 +196,20 @@ export function buildDaciHall(L, p) {
         bag.add('wood_dark', box(lx - 0.05, F + 0.1, lz1, lx + 0.05, F + 0.1 + hh, lz0));
         for (let q = 0; q < 4; q++) for (let r = 0; r < 6; r++) {   // the studs, in rows
           const zz = lz0 - 0.2 - q * (lz0 - lz1 - 0.3) / 3, yy = F + 0.5 + r * (hh - 0.7) / 5, sg = s > 0 ? 1 : -1;
-          bag.add('gilt_bronze', box(lx - 0.075 * 1 - 0.0, yy, zz - 0.045, lx + 0.075, yy + 0.09, zz + 0.045)); void sg;
+          bag.add('paint_ochre', box(lx - 0.075 * 1 - 0.0, yy, zz - 0.045, lx + 0.075, yy + 0.09, zz + 0.045)); void sg;
         }
         col.segment([lx, lz0], [lx, lz1], 0.1, F, F + hh);
       }
       const bw = Math.min(2.6, hd * 1.5);   // the name board (bian): black lacquer, a gilt rim, three gilt marks
       bag.add('wood_dark', box(x - bw / 2, top + 0.18, z + 0.13, x + bw / 2, top + bh - 0.3, z + 0.2));
-      for (const [a0, a1, b0, b1] of [[-bw / 2, bw / 2, 0.18, 0.24], [-bw / 2, bw / 2, bh - 0.36, bh - 0.3]]) bag.add('gilt_bronze', box(x + a0, top + b0, z + 0.2, x + a1, top + b1, z + 0.23));
-      for (const s of [-1, 1]) bag.add('gilt_bronze', box(x + s * bw / 2 - (s > 0 ? 0.06 : 0), top + 0.18, z + 0.2, x + s * bw / 2 + (s > 0 ? 0 : 0.06), top + bh - 0.3, z + 0.23));
-      for (let q = -1; q <= 1; q++) bag.add('gilt_bronze', box(x + q * bw * 0.28 - 0.17, top + 0.38, z + 0.2, x + q * bw * 0.28 + 0.17, top + bh - 0.5, z + 0.22));
+      for (const [a0, a1, b0, b1] of [[-bw / 2, bw / 2, 0.18, 0.24], [-bw / 2, bw / 2, bh - 0.36, bh - 0.3]]) bag.add('paint_ochre', box(x + a0, top + b0, z + 0.2, x + a1, top + b1, z + 0.23));
+      for (const s of [-1, 1]) bag.add('paint_ochre', box(x + s * bw / 2 - (s > 0 ? 0.06 : 0), top + 0.18, z + 0.2, x + s * bw / 2 + (s > 0 ? 0 : 0.06), top + bh - 0.3, z + 0.23));
+      for (let q = -1; q <= 1; q++) bag.add('paint_ochre', box(x + q * bw * 0.28 - 0.17, top + 0.38, z + 0.2, x + q * bw * 0.28 + 0.17, top + bh - 0.5, z + 0.22));
       if (p.lanterns) for (const s of [-1, 1]) {   // two great red lanterns hung from the architrave beside the door
         const lx = x + s * (hd + 0.2), lz = d / 2 + 0.8;
-        bag.add('iron', box(lx - 0.01, F + H - 0.9, lz - 0.01, lx + 0.01, top - 0.4, lz + 0.01));
+        bag.add('wood_dark', box(lx - 0.01, F + H - 0.9, lz - 0.01, lx + 0.01, top - 0.4, lz + 0.01));
         bag.add('lamp_paper', lathe([[0.001, 0], [0.22, 0.05], [0.34, 0.3], [0.36, 0.45], [0.3, 0.7], [0.16, 0.8], [0.001, 0.82]], 12, null, lx, F + H - 1.7, lz));
-        bag.add('lacquer_red', box(lx - 0.2, F + H - 0.95, lz - 0.2, lx + 0.2, F + H - 0.9, lz + 0.2)); bag.add('lacquer_red', box(lx - 0.16, F + H - 1.75, lz - 0.16, lx + 0.16, F + H - 1.7, lz + 0.16));
+        bag.add('timber_red', box(lx - 0.2, F + H - 0.95, lz - 0.2, lx + 0.2, F + H - 0.9, lz + 0.2)); bag.add('timber_red', box(lx - 0.16, F + H - 1.75, lz - 0.16, lx + 0.16, F + H - 1.7, lz + 0.16));
       }
     }
   }
@@ -223,7 +223,7 @@ export function buildDaciHall(L, p) {
   const Yr = yE + rise, Lr = gable ? Ar : Math.max(0.2, Ar - B), chi = p.chi ?? Math.min(1.5, 0.7 + rise * 0.15);
   for (const s of [-1, 1]) owlTail(bag, ridge, s * (gable ? Ar - 0.4 : Lr + 0.1), s, Yr + 0.12, chi * 1.15, 0.36 + chi * 0.07);
   if (p.wadang) {
-    const tm = 'tile_dark', ds = 0.5;
+    const tm = ridge, ds = 0.5;
     for (let x = -Ar + 0.3; x < Ar - 0.2; x += ds) for (const sz of [-1, 1]) bag.add(tm, box(x - 0.09, yE - 0.22, sz > 0 ? B : B * -1 - 0.05, x + 0.09, yE - 0.03, sz > 0 ? B + 0.05 : -B));
     if (!gable) for (let z = -B + 0.3; z < B - 0.2; z += ds) for (const sx of [-1, 1]) bag.add(tm, box(sx > 0 ? Ar : -Ar - 0.05, yE - 0.22, z - 0.09, sx > 0 ? Ar + 0.05 : -Ar, yE - 0.03, z + 0.09));
   }
