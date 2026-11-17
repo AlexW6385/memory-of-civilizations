@@ -104,3 +104,17 @@ Built in this pass (all in `src/styles/hadhrami/` and `src/settlements/shibam/`)
 5. **Brickyard** outside the south gate: moulds, rows of bricks drying on edge, a mud pit and trough, straw heaps, a donkey, workers [inferred: layout; the process is stated].
 
 Level reached: L2, parts of L3 (windows, doors, minaret, far interiors). Still missing for L3: the carved interior ceilings and wardrobe doors of the upper rooms of ordinary houses (only the one enterable house has upper floors), polished-lime decoration on the palace, weathering by streets (damp lines) beyond the arrival's quarter.
+
+## 13. Landmark pass (round 2): the arrival's tower house, seen first and close
+
+No new source was fetched this round; the pass works from §4 and §12 (lime caps, "walls are topped with white lime caps" [stated: Architectural League]; lime around windows and doors [stated: Global Dispatches]; chunky carved doors [stated: Koryo]; palm-trunk spouts and the flat terrace with parapet [stated: Aramco World]). The forms below are [inferred]. Code: `src/styles/hadhrami/crown.js`, called from `open.js` (`tower_open`).
+
+Built (all in materials the plan already has, merged into one geometry per material; no new draw at the arrival: main 315 draws before and after, main triangles 2.08 M → 2.09 M):
+1. **The skyline.** A lime cap with a drip over the whole parapet, small stepped teeth along it, the four corner piers stepped and capped with a horn, and a roofed stair-head standing over the stair (open to the south, a lime-capped slab with corner horns): the tower no longer ends in a flat box.
+2. **Spouts.** The two stray timber stubs are replaced by five palm-trunk spouts (three north, two west) through lime-framed holes in the parapet, each with a lime runnel down the wall under it.
+3. **The footing.** Four rows of joggled rubble stones set proud of the plinth, and a lime ledge on its head, either side of the door and along the north face.
+4. **The façade's lines.** A lime string course at each floor line with its drip, and lime edging up the north-west corner, stepped with the batter.
+5. **The street door.** Carved cedar jamb posts with rows of bosses, a three-step lime crest over the hood with two rows of dentils and a lozenge of dark wood.
+
+Departure from §4: none. Tried and dropped: two more windows per storey on the west face (a fourth and third column over the stair), which added a draw at the arrival.
+Still missing for L3: carved interior ceilings, the mastabas at the door (the square's props stand there, `town.js`), a polished-lime pattern on the top storeys.

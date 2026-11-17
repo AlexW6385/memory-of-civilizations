@@ -7,6 +7,7 @@ import { subtractRects } from '../../core/build.js';
 import { GH, SH, K, T, SW, PT, RUN, F0, ys, fl, topOf, houseDims } from './dims.js';
 import { windowPieces } from './parts.js';
 import { Matrix4 } from '../../core/three.js';
+import { crown } from './crown.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 /** Boxes for a wall along one axis with openings cut: { along, u0, u1, t0, t1, y0, y1, holes: [{ a, b, lo, hi }] }. */
@@ -106,7 +107,6 @@ function towerOpen(el, ctx) {
   const t = K * top, pt = 0.34, [a0, b0, a1, b1] = [X0 + t, Z0 + t, X1 - t, Z1 - t];
   for (const r of [[a0, b0, a1, b0 + pt], [a0, b1 - pt, a1, b1], [a0, b0 + pt, a0 + pt, b1 - pt], [a1 - pt, b0 + pt, a1, b1 - pt]]) { bag.add('lime_plaster', box(r[0], top, r[1], r[2], top + 1.0, r[3])); col.rect(r, top, top + 1.0); }
   for (const [cx, cz] of [[a0, b0], [a1 - 0.6, b0], [a0, b1 - 0.6], [a1 - 0.6, b1 - 0.6]]) bag.add('lime_plaster', box(cx, top, cz, cx + 0.6, top + 1.5, cz + 0.6));
-  for (const x of [a0 + 2.5, a0 + 6.5]) bag.add('timber', box(x, top + 0.05, b0 - 0.35, x + 0.12, top + 0.17, b0 + pt));
   // the outer bands and the whitewash on the outside of the north and west faces, as in the town's towers
   for (const [y, hh] of [[ys(n - 2) - 0.01, 0.16], [top - 0.3, 0.3]]) {
     const q = K * y;
@@ -114,6 +114,7 @@ function towerOpen(el, ctx) {
   }
   furnish(ctx, el, D, rand);
   extras(ctx, el, D, rand, top);
+  crown(ctx, el, D, top);
   void GH; void SH; void T;
 }
 
