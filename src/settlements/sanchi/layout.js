@@ -110,8 +110,13 @@ export function lots() {
           placed.push(r);
           if (keep) {
             const seed = Math.floor(rand() * 1e6);
-            const open = (kind === 'shop' || kind === 'home' || kind === 'merchant') && dc < 110 && rand() < (kind === 'shop' ? 0.75 : 0.4);
-            LOTS.push({ rect: r, seed, y: 0, foot: -0.2, front, kind, open, street: s.id, main, trade: TRADES[seed % TRADES.length] });
+            // enterable by kind (by the seed's hash, not the random stream, so that the lots stay where they were); fronts and roofs by rule
+            const hh = hash(seed * 31 + 7), open = dc < 190 && hh < { shop: 0.9, merchant: 0.95, home: 0.7, mud: 0.6, hut: 0.55, shed: 0.6 }[kind];
+            const h2 = hash(seed * 17 + 3);
+            // front rule: shops and merchants keep the verandah (a third of the merchants a stone colonnade); homes and mud houses take a hooded blank front or a forecourt behind a wall
+            const fr = kind === 'shop' ? (h2 < 0.3 ? 'portico' : 'veranda') : kind === 'merchant' ? (h2 < 0.45 ? 'portico' : 'veranda') : kind === 'home' ? (h2 < 0.3 ? 'veranda' : h2 < 0.62 ? 'hood' : 'court') : kind === 'mud' ? (h2 < 0.5 ? 'hood' : 'court') : 'veranda';
+            const rg = (kind === 'home' || kind === 'hut') && hash(seed * 13 + 1) < 0.4 ? 'across' : 'along';
+            LOTS.push({ rect: r, seed, y: 0, foot: -0.2, front, kind, open, fr, rg, street: s.id, main, trade: TRADES[seed % TRADES.length] });
           }
         }
         t = ok ? u1 + 0.15 + (rand() < 0.08 ? 2.5 : 0) : t + 0.8;
