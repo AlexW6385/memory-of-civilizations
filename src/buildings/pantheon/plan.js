@@ -87,6 +87,7 @@ add({ t: 'ring_wall', c: [0, 0], r0: R - 0.85, r1: R - 0.5, y0: CORNICE1 - 0.35,
 add({ t: 'ring_wall', c: [0, 0], r0: R - 0.4, r1: R + 0.1, y0: SPRING - 0.5, y1: SPRING, gaps: [], mat: 'marble' });
 // aediculae between the niches: podium, two porphyry columns, entablature, triangular and segmental pediments in turn
 for (let k = 0; k < 8; k++) add({ t: 'aedicula', c: [0, 0], R, bearing: 22.5 + k * 45, kind: k % 2 ? 'seg' : 'tri', y: F });
+add({ t: 'revetment_panels', c: [0, 0], R, y: F, top: CORNICE1 - 2.2, aed: [0, 1, 2, 3, 4, 5, 6, 7].map((k) => 22.5 + k * 45), gaps: [{ b: 0, w: 7.6 }, ...NICHES.map((n) => ({ b: n.b, w: n.w }))] });
 // the attic as first faced: porphyry pilasters, framed blind windows, panels (none over the apse, which rises into it)
 add({ t: 'attic', c: [0, 0], R, y0: CORNICE1, y1: SPRING - 0.5, skip: [180] });
 

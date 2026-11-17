@@ -12,6 +12,7 @@ import { god, cofferRosettes } from './statues.js';
 import { pantheonColumn } from './column.js';
 import { drumExterior } from './drum.js';
 import { gateArch } from './forecourt.js';
+import { revetmentPanels } from './interior.js';
 import { friezeLetters, eagleRelief } from './relief.js';
 
 const D2R = Math.PI / 180;
@@ -272,14 +273,27 @@ const base = STYLES.roman;
  */
 function rotundaFloor(el, { bag }) {
   const [cx, cz] = el.c, y = el.y, cell = el.cell ?? 3.6, n = Math.floor(el.R / cell);
+  const disc = (r, y0, h, x, z, seg = 32) => lathe([[r, 0], [r, h], [0.001, h]], seg, null, x, y0, z);
+  const sq = (c, h, y0, x, z, y1) => box(x - c, y0, z - c, x + c, y1, z + c);
   for (let i = -n; i <= n; i++) for (let j = -n; j <= n; j++) {
-    const x = cx + i * cell, z = cz + j * cell;
+    const x = cx + i * cell, z = cz + j * cell, hs = cell / 2;
     if (Math.hypot(i * cell, j * cell) > el.R - cell * 0.95) continue;
     const alt = (i + j) % 2 === 0;
-    bag.add('marble', box(x - cell / 2 + 0.03, y + 0.004, z - cell / 2 + 0.03, x + cell / 2 - 0.03, y + 0.009, z + cell / 2 - 0.03));
-    bag.add('pavonazzetto', box(x - cell / 2 + 0.17, y + 0.009, z - cell / 2 + 0.17, x + cell / 2 - 0.17, y + 0.014, z + cell / 2 - 0.17));
-    bag.add('granite_grey', lathe([[cell * 0.34, 0], [cell * 0.34, 0.004], [0.001, 0.004]], 28, null, x, y + 0.014, z));
-    bag.add(alt ? 'porphyry' : 'giallo', lathe([[cell * 0.3, 0], [cell * 0.3, 0.004], [0.001, 0.004]], 28, null, x, y + 0.018, z));
+    bag.add('marble', sq(hs - 0.03, 0, y + 0.004, x, z, y + 0.009));                       // the white frame, a plate under each cell
+    if (alt) {
+      // a circle in a square: a grey granite square, a white ring, a disc of porphyry or giallo, a boss
+      bag.add('granite_grey', sq(hs - 0.15, 0, y + 0.009, x, z, y + 0.0135));
+      bag.add('marble', disc(cell * 0.375, y + 0.0135, 0.0035, x, z, 40));
+      bag.add(((i + 2 * j) % 3 === 0) ? 'giallo' : 'porphyry', disc(cell * 0.335, y + 0.017, 0.0035, x, z, 40));
+      bag.add('marble', disc(cell * 0.08, y + 0.0205, 0.003, x, z, 16));
+    } else {
+      // a square in a square: pavonazzetto, a giallo frame, a white diamond, a disc at its heart
+      bag.add('pavonazzetto', sq(hs - 0.15, 0, y + 0.009, x, z, y + 0.0135));
+      bag.add('giallo', sq(hs - 0.34, 0, y + 0.0135, x, z, y + 0.017));
+      bag.add('pavonazzetto', sq(hs - 0.42, 0, y + 0.017, x, z, y + 0.0195));
+      bag.add('marble', lathe([[hs - 0.5, 0], [hs - 0.5, 0.0035], [0.001, 0.0035]], 4, null, x, y + 0.0195, z));
+      bag.add('porphyry', disc(cell * 0.14, y + 0.023, 0.0035, x, z, 28));
+    }
   }
 }
 /**
@@ -318,6 +332,6 @@ function porticoTruss(el, { bag }) {
 registerStyle('roman-pantheon', {
   ...base,
   column: (el, ctx) => (el.lod ? pantheonColumn(el, ctx) : base.column(el, ctx)),
-  elements: { ...base.elements, aedicula, attic, eagle_wreath: eagleWreath, eagle_relief: eagleRelief, drum_exterior: drumExterior, gate_arch: gateArch, frieze_letters: friezeLetters, rotunda_floor: rotundaFloor, oculus_light: oculusLight, portico_truss: porticoTruss, god, coffer_rosettes: cofferRosettes },
+  elements: { ...base.elements, aedicula, attic, eagle_wreath: eagleWreath, eagle_relief: eagleRelief, drum_exterior: drumExterior, revetment_panels: revetmentPanels, gate_arch: gateArch, frieze_letters: friezeLetters, rotunda_floor: rotundaFloor, oculus_light: oculusLight, portico_truss: porticoTruss, god, coffer_rosettes: cofferRosettes },
   objects: { ...base.objects, pantheon_door: pantheonDoor },
 });
