@@ -14,7 +14,19 @@ import { furnish, KINDS } from '../han/interiors.js';
 import { frontDress, yardDress } from '../han/dress.js';
 import { hall as hanlHall } from './hall.js';
 import { que as hanlQue } from './que.js';
-import { terraceDress } from './terrace.js';
+import { terrace as hanlTerrace } from './terrace.js';
+import { Mesh, horse } from './detail.js';
+
+/** hanl_horses: { at: [x, z], y, face: [fx, fz] } — a gilt-bronze horse on a stone plinth (the Dayuan horse Emperor Wu had cast, docs §4c). */
+function horses(el, ctx) {
+  const { bag, col } = ctx, M = new Mesh(), [x, z] = el.at, y = el.y ?? 0, [fx, fz] = el.face ?? [0, 1], ax = Math.abs(fx) > Math.abs(fz);
+  const hw = ax ? 2.2 : 1.0, hd = ax ? 1.0 : 2.2;
+  M.box('bluestone', x - hw - 0.15, y, z - hd - 0.15, x + hw + 0.15, y + 0.3, z + hd + 0.15);
+  M.box('granite_grey', x - hw, y + 0.3, z - hd, x + hw, y + 0.62, z + hd);
+  M.box('gilt_bronze', x - hw + 0.05, y + 0.62, z - hd + 0.05, x + hw - 0.05, y + 0.66, z + hd - 0.05);
+  M.flush(bag); col.rect([x - hw - 0.15, z - hd - 0.15, x + hw + 0.15, z + hd + 0.15], y, y + 2.4);
+  horse(bag, x, y + 0.66, z, fx, fz, 1.2);
+}
 
 const WALLS = ['earth_wall', 'lime_plaster', 'mud_plaster', 'earth_wall', 'lime_plaster'];
 
@@ -158,6 +170,6 @@ function house(el, ctx) {
 
 registerStyle('hanlodge', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.han.elements, hanl_house: house, hanl_hall: hanlHall, hanl_que: hanlQue, hanl_terrace_dress: terraceDress },
+  elements: { ...STYLES.han.elements, hanl_house: house, hanl_hall: hanlHall, hanl_que: hanlQue, hanl_terrace: hanlTerrace, hanl_horses: horses },
   objects: {},
 });

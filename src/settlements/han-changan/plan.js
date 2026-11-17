@@ -7,9 +7,8 @@ import '../../styles/hanlodge/index.js';
 import { AX, TIERS, CROWN, RAMP, HALL, SIDE_HALLS, EAST_GATE, PALACE, CHANGLE_HALL, PALACE_WALL } from './layout.js';
 
 const E = [];
-E.push({ t: 'han_terrace', tiers: TIERS, ramp: { x: RAMP.x, z0: RAMP.z0, z1: RAMP.z1 } });
-E.push({ t: 'hanl_terrace_dress', tiers: TIERS, ramp: { x: RAMP.x, z0: RAMP.z0, z1: RAMP.z1 }, seed: 3 });
-E.push({ t: 'hanl_hall', cx: AX, z1: HALL.z1, bays: HALL.bays, bayW: HALL.bayW, depth: HALL.depth, depthW: HALL.depthW, floor: HALL.floor, base: HALL.base, h: HALL.h, roof: 'hip', rise: 6.6, rafters: true, furnish: 'throne', open: [3, 5], seed: 3 });
+E.push({ t: 'hanl_terrace', tiers: TIERS, ramp: { x: RAMP.x, z0: RAMP.z0, z1: RAMP.z1 }, seed: 3 });
+E.push({ t: 'hanl_hall', cx: AX, z1: HALL.z1, bays: HALL.bays, bayW: HALL.bayW, depth: HALL.depth, depthW: HALL.depthW, floor: HALL.floor, base: HALL.base, h: HALL.h, roof: 'hip', rise: 6.6, rafters: true, furnish: 'throne', open: [3, 5], glyphs: 's', seed: 3 });
 for (const [i, [cx]] of SIDE_HALLS.entries()) {
   E.push({ t: 'hanl_hall', cx: cx + (i ? -2 : 2), z1: HALL.z1, bays: 3, bayW: 6, depth: 2, depthW: 7, floor: CROWN + 0.6, base: 0.6, h: 5.6, roof: 'hip', rise: 4.2, overhang: 2.6, ap: 1.0, furnish: 'court', open: [1, 1], seed: 11 + i });
 }
@@ -21,6 +20,7 @@ E.push({ t: 'hanl_hall', cx: CH.cx, z1: CH.z1, bays: 7, bayW: 6, depth: 3, depth
 const wx = PALACE[2], gz = EAST_GATE.z;
 for (const [dz, s] of [[-14, 1], [14, -1]]) E.push({ t: 'hanl_que', at: [wx + PALACE_WALL.th / 2 + 6, gz + dz], sub: [0, s], h: 11, face: [1, 0] });
 
+for (const sd of [-1, 1]) E.push({ t: 'hanl_horses', at: [AX + sd * 11.7, -154.5], y: CROWN + 0.03, face: [0, 1] });
 E.push({ t: 'han_crown', ax: AX, top: CROWN, z0: TIERS[TIERS.length - 1].r[3], z1: HALL.z1, seed: 5 });
 E.push({ t: 'han_court', ax: AX, z0: RAMP.z1, z1: PALACE[3] - 2, seed: 5 });
 
