@@ -1,11 +1,11 @@
 // The city round the temple (docs/settlements/madurai.md §5): single-storey houses with verandahs
 // and tiled roofs in the blocks between the ring streets.
-import { RADIUS, TANK, WALL, GATES, PUDHU, SUNDARA, MEENAKSHI, HALL, lots, lotMap, outside } from './layout.js';
+import { RADIUS, TANK, WALL, GATES, PUDHU, SUNDARA, MEENAKSHI, HALL, lots, lotMap, outside, inLot, inRect } from './layout.js';
 import { pudhuMandapam } from './plan.js';
 import { frontage } from './frontage.js';
 const base = (id, elements) => ({ id, style: 'dravidian', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-20, 200], facing: 'n' } });
 /** How far from the temple wall the houses and shops are hollow and furnished (the first four streets' rows). */
-export const RICH = 125;
+export const RICH = 200;
 const TILE = 160;   // m: one plan per tile and material, so larger tiles mean fewer meshes (geometry budget)
 export async function town() {
   const plans = [], tiles = new Map();
@@ -17,8 +17,35 @@ export async function town() {
   }
   for (const [k, list] of tiles) plans.push({ ...base(`madurai-houses-${k}`, list) });
   plans.push(...shopLife(), ...frontage());
-  plans.push(festival(), pudhuMandapam, { ...street(), style: 'life', center: [0, 60], near: 260 });
+  plans.push(amenities(), festival(), pudhuMandapam, { ...street(), style: 'life', center: [0, 60], near: 260 });
   return plans;
+}
+
+/**
+ * The street furniture at the crossings of the axial streets with the three ring streets (docs/settlements/madurai.md §15):
+ * a thanneer pandal (the shed where water and buttermilk are given) at each crossing of the Chitrai street and the
+ * South Masi street, a small shrine of Pillaiyar at each crossing of the Avani Moola street, a public well at each
+ * crossing of the Masi street, each at the edge of the axial street clear of the lanes; with the people who use them.
+ */
+function amenities() {
+  const E = [], faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
+  let seed = 9100;
+  const fig = (at, dir, o = {}) => E.push({ t: 'figure', at, y: 0, rot: faceTo(dir), seed: seed++ * 7919, feet: 'bare', hat: 'none', carry: 'none', pose: 'stand', skin: seed % 3 ? 'skin_dark' : 'skin_medium', dress: 'wrap', cloth: ['cloth_red', 'cloth_green', 'cloth_indigo', 'cloth_ochre', 'cloth_maroon'][seed % 5], cloth2: 'cloth_ochre', over: 'shawl', hair: 'bun', h: 1.48, ...o });
+  const man = (at, dir, o = {}) => fig(at, dir, { cloth: 'cloth_white', cloth2: 'cloth_white', over: 'none', top: seed % 2 ? 'bare' : '', hair: 'short', h: undefined, ...o });
+  const cross = (side, o, dg) => side === 'n' ? [GATES.n[0] + dg, WALL[1] - o] : side === 's' ? [GATES.s[0] + dg, WALL[3] + o] : side === 'e' ? [WALL[2] + o, GATES.e[1] + dg] : [WALL[0] - o, GATES.w[1] + dg];
+  const free = (p) => !inLot(p[0], p[1], 3) && !inRect(PUDHU, p[0], p[1], 8) && Math.hypot(p[0], p[1]) < RADIUS - 30;
+  const rotFront = (side) => (side === 'n' || side === 's' ? 1 : 2);          // the pandal's front toward the axial street's middle
+  for (const side of ['n', 's', 'e', 'w']) {
+    const pg = side === 's' ? 5.0 : 4.4, mark = { n: 1, s: 0, e: 1, w: 0 }[side];
+    // the pandal at the Chitrai street's crossing (not the south one: its arches stand there) and at the Masi crossing of the south street, by the car's route
+    if (side !== 's') { const p = cross(side, 19, pg); if (free(p)) { E.push({ t: 'pandal', at: p, rot: rotFront(side), seed: seed++ }); const [x, z] = p, f = side === 'n' ? [-1, 0] : [0, -1]; man([x + f[0] * 2.2 + (f[0] ? 0 : 0.6), z + f[1] * 2.2 + (f[1] ? 0 : 0.6)], [-f[0], -f[1]], { carry: 'pot' }); } }
+    if (side === 's') { const p = cross('s', 157, -5.0); if (free(p)) { E.push({ t: 'pandal', at: p, rot: 3, seed: seed++ }); fig([p[0] + 0.1, p[1] + 1.0], [1, 0], { carry: 'pot' }); man([p[0] + 2.2, p[1] + 0.5], [-1, 0]); } }
+    // the shrine of Pillaiyar at the Avani Moola crossing, its front to the east, a devotee before it
+    { const p = cross(side, 75, pg - (mark ? 0 : 0)); if (free(p)) { E.push({ t: 'wayside', at: p, rot: 3, seed: seed++ }); fig([p[0] + 3.2, p[1] + 0.4], [-1, 0], { arms: 'pray' }); } }
+    // the well at the Masi crossing, women at the water
+    if (side !== 's') { const p = cross(side, 157, pg); if (free(p)) { E.push({ t: 'well', at: p, rot: 0, seed: seed++ }); fig([p[0] + 0.2, p[1] + 2.6], [0, -1], { carry: 'pot' }); fig([p[0] - 2.3, p[1] + 0.2], [1, 0], { pose: 'squat' }); } }
+  }
+  return { id: 'madurai-street-furniture', style: 'dravidian', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: E, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-20, 200], facing: 'n' } };
 }
 
 /**

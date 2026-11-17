@@ -9,16 +9,16 @@ const E = [];
 const wallLoop = (r, gates, h, th) => {
   const [x0, z0, x1, z1] = r, sides = [['n', [x0, z0], [x1, z0]], ['e', [x1, z0], [x1, z1]], ['s', [x0, z1], [x1, z1]], ['w', [x0, z0], [x0, z1]]];
   for (const [s, a, b] of sides) {
-    const g = gates.filter((q) => q.s === s);
-    if (!g.length) { E.push({ t: 'prakara', a, b, h, th }); continue; }
+    const g = gates.filter((q) => q.s === s), out = s === 'n' || s === 'w' ? -1 : 1;     // out: the face away from the court
+    if (!g.length) { E.push({ t: 'prakara', a, b, h, th, out }); continue; }
     const alongX = s === 'n' || s === 's', i = alongX ? 0 : 1;
-    let cur = a[i];
+    let cur = a[i], first = true;
     for (const q of g.sort((p, o) => p.at - o.at)) {
       const e0 = q.at - q.w / 2, e1 = q.at + q.w / 2;
-      if (e0 > cur) E.push({ t: 'prakara', a: alongX ? [cur, a[1]] : [a[0], cur], b: alongX ? [e0, a[1]] : [a[0], e0], h, th });
-      cur = e1;
+      if (e0 > cur) E.push({ t: 'prakara', a: alongX ? [cur, a[1]] : [a[0], cur], b: alongX ? [e0, a[1]] : [a[0], e0], h, th, out, nicheA: !first, nicheB: true });
+      cur = e1; first = false;
     }
-    if (b[i] > cur) E.push({ t: 'prakara', a: alongX ? [cur, a[1]] : [a[0], cur], b, h, th });
+    if (b[i] > cur) E.push({ t: 'prakara', a: alongX ? [cur, a[1]] : [a[0], cur], b, h, th, out, nicheA: true });
   }
 };
 // the outer wall and its four great gopurams
@@ -38,7 +38,7 @@ for (const g of OG) E.push({ t: 'gopuram', c: g.c, dir: g.s === 'n' || g.s === '
   for (const g of IG) E.push({ t: 'gopuram', c: g.c, dir: g.s === 'n' || g.s === 's' ? 'ns' : 'ew', w: g.w, d: g.d, h: g.h, tiers: g.n });
   E.push({ t: 'mandapa', rect: [x0 + 10, z0 + 14, x1 - 12, z1 - 14], h: 6.5, step: 3.4 });
   E.push({ t: 'vimana', c: [cx - 10, cz], s: 11, h: 22, y: 7.3 });
-  E.push({ t: 'dhvaja', c: [x1 + 10, cz], h: 14 });
+  E.push({ t: 'dhvaja', c: [x1 + 10, cz], h: 14, vo: -2.2, bo: 3.6, vahana: 'nandi' });
   E.push({ t: 'mandapa', rect: [x1 + 3, cz - 8, GATES.e[0] - 12, cz + 8], h: 7, step: 3.4 });          // the corridor from the east gate
 }
 // Meenakshi's enclosure: its gopuram east, the vimana, the flagstaff
@@ -49,7 +49,7 @@ for (const g of OG) E.push({ t: 'gopuram', c: g.c, dir: g.s === 'n' || g.s === '
   E.push({ t: 'gopuram', c: IG[0].c, dir: 'ew', w: 14, d: 9, h: 18, tiers: 3 });
   E.push({ t: 'mandapa', rect: [x0 + 8, z0 + 10, x1 - 10, z1 - 10], h: 6, step: 3.4 });
   E.push({ t: 'vimana', c: [cx - 6, cz], s: 9, h: 18, y: 6.8 });
-  E.push({ t: 'dhvaja', c: [x1 + 8, cz], h: 12 });
+  E.push({ t: 'dhvaja', c: [x1 + 8, cz], h: 12, vo: 2.4, bo: 5.3, vahana: 'simha' });
 }
 // the Golden Lotus tank and the Thousand-Pillar Hall
 E.push({ t: 'tank', rect: TANK, depth: 4, water: 2.4 });
