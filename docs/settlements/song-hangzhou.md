@@ -201,6 +201,23 @@ Marks as elsewhere: [stated] has a source in the dossier; [inferred] is our read
 
 From the upper terrace of Kaihua Temple a stair of granite treads (2.4 m wide, kerbs both sides, landings at the three turns, every tread within 0.22 m of the last) zigzags 230 treads up the hill's face to a hexagonal pavilion on the summit shoulder; a square rest pavilion on a levelled shelf at the second turn; pilgrims, monks and a woman with her basket on it (`hill.js`, `hillpath.js`; the pads are in `layout.js` `hill()`). The woods keep clear of the path [inferred: hill temples and their stairs are recorded for later in §12; no Song source for this one's layout].
 
+## 27. Upper-pagoda dress (`pagoda-upper.js`, element `hz_pagoda_upper`)
+
+The Liuhe Pagoda's tiers above the second were plain brick prisms. Each now has a brick-grey plinth (0.95 m shrinking to 0.7 m with height, granite cap), corner pilasters, a frieze of recessed brick panels with lotus bosses under the eave, studded lacquer doors on face 0, lattice windows on the odd faces (narrower with height), and balusters with lattice rail panels. [stated] The Song brick pagoda is an octagon of brick with wooden eaves and carved brick dougong and panels (the sources above on the 1156 rebuild). [inferred] The panel count, the lotus bosses and the taper of the plinth are chosen to read at 1 m, not measured.
+
+## 28. Dwellings of the lanes (`dwellings.js`, 90 lots beyond 125 m of the arrival)
+
+Lots more than 125 m from the arrival, off the Imperial Way and 19 m apart, are built as enterable, furnished dwellings (shell `hz_dwelling`, furniture `hz_dwelling_in`, in 150 m tiles that stream). No lot repeats: the spec is drawn from the lot's seed.
+
+- Fronts, by rule: a shop lot gets boards (shutters taken down by day) or an open timber front; a house gets a plain door, a lattice (geshan) front under a pent eave, or, when deep and wide enough (D >= 13.5 m, L >= 6.5 m), a walled court behind a gated wall (45 / 30 / 25 %). [stated] Lin'an houses and shops fronted the street in narrow deep plots, with removable shop boards; wealthy ones had courts (Wu Zimu, Mengliang lu; Gernet, Daily Life in China). [inferred] The percentages and widths (door 1.4, boards 2.1, open 2.5, lattice 1.7 m) are design choices.
+- Plan: party walls, a partition with a doorway between front and rear rooms, tie beams, a gable roof, and for deep lots a walled back yard (jar, firewood, a vegetable bed) reached by a back door and two treads.
+- Households, by the lot's seed: kitchen (range, water jar, logs, chopping block, fish on a string), bedchamber (bed with curtains, chest, wash stand, mirror stand, lamp stand), hall (altar facing the room), and workrooms. [stated] Silk-reeling and weaving in Lin'an households, with the loom, reel and reeling stove as in Lou Shou's Gengzhi tu (conceived in Hangzhou c. 1145). [inferred] The printer, bamboo worker, lantern maker and cooper rooms follow the trades the sources list for the city; their tools are generic.
+- A bug in the older `interiors.js` house is fixed: its altar and chest faced the wall.
+
+## 29. Collision rules of the dwellings
+
+Wall colliders stand 0.2 m proud of the drawn wall so that no free spot lies within a 0.5 m float-check cell of it; jambs of a doorway are not inflated, so that a 1.4 m door stays 1.4 m. Items use plain colliders. Door steps are 0.12 m, because a step of 0.25 m put the walker's head into the eave of a neighbouring roof shell. A dwelling shop gets no goods apron across its door, and one lot whose door a city planter blocks is dropped.
+
 ## Sources
 
 - [Disembodied historicity: Southern Song Imperial Street in Hangzhou — Univ. of Nottingham](https://nottingham-repository.worktribe.com/OutputFile/794882)
