@@ -108,7 +108,7 @@ function recess(ctx, c) {
 }
 
 export function cliff(el, ctx) {
-  const { bag, col } = ctx, rand = rng(7);
+  const { bag, col } = ctx, rand = rng(7), lr = rng(33);       // (lr: the ledges' own stream, so that the face's silhouette keeps its earlier shape)
   const H = [];
   for (const c of CAVES) for (const h of holes(c)) H.push({ ...h, cave: c });
   // cut planes in z: every hole's edges, and rhythm cuts (so that the face is not one slab)
@@ -130,9 +130,9 @@ export function cliff(el, ctx) {
     // the bedding of the conglomerate: two to four horizontal ledges across a slab without a hole, standing 8–22 cm proud, from 3 m up
     // (above the reach of the walkways; the Nine-Storey building hides the face's middle)
     if (!here.length && Math.abs(zm) > 16) {
-      const nb = 2 + Math.floor(rand() * 3);
+      const nb = 2 + Math.floor(lr() * 3);
       for (let q = 0; q < nb; q++) {
-        const yb = 3 + rand() * (top - 5), tb = 0.12 + rand() * 0.34, pb = 0.08 + rand() * 0.14, m = ['sandstone_white', 'sandstone_yellow', 'rubble', 'sandstone_relief'][Math.floor(rand() * 4)];
+        const yb = 3 + lr() * (top - 5), tb = 0.12 + lr() * 0.34, pb = 0.08 + lr() * 0.14, m = ['sandstone_white', 'sandstone_yellow', 'rubble', 'sandstone_relief'][Math.floor(lr() * 4)];
         if (zm > -138 && zm < 114 && yb < FLOOR[1] + 2.6) continue;                      // the gallery and the stair keep their reach clear
         if (CAVES.some((c) => c.kind === 'recess' && Math.abs(c.z - zm) < c.w / 2 + 0.3 && FLOOR[c.tier] - 0.3 < yb + tb && yb < FLOOR[c.tier] + c.h + 0.5)) continue;
         bag.add(m, box(XF + off - 0.02, yb, za + 0.05, XF + off + pb, yb + tb, zb - 0.05));
