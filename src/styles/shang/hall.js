@@ -3,7 +3,7 @@
 // inside, the altar with its bronzes, the stone chime, the drum and the bells, the diviners' mats and fire. The gate on its two
 // bastions of beaten earth.
 import { box, lathe, frustum, rod } from '../../core/geom.js';
-import { platform, steps, thatch, vessel, KINDS } from './geo.js';
+import { platform, steps, thatch, thatchCourses, vessel, KINDS } from './geo.js';
 
 /**
  * shang_hall: { plat [x0, z0, x1, z1], h (platform height), rot (0: the hall's length along x, front on +z; 1: along z, front on +x),
@@ -43,6 +43,8 @@ export function shangHall(el, { bag, col, lights }) {
     B('timber', dc - dw / 2 - 0.12, y, vf - 0.05, dc - dw / 2 + 0.02, y + 2.5, vf + tw + 0.05, false); B('timber', dc + dw / 2 - 0.02, y, vf - 0.05, dc + dw / 2 + 0.12, y + 2.5, vf + tw + 0.05, false);
   }
   B('mud_plaster', u, y, vf, BL / 2, y + WH, vf + tw);
+  // taotie plaques over the doors (the carved and painted lintel boards)
+  for (const k of dbays) taotie(B, -BL / 2 + (k + 0.5) * bw, y + 2.5, vf + tw, 3.0 + k * 0.0031 + Math.abs(Math.sin(cx * 3.7 + cz)) * 0.01, 0.9 + k * 0.0017 + Math.abs(Math.sin(cx * 1.3 + cz * 2.1)) * 0.008);
   // a red band at the foot of the walls outside, a white plaster above (the dado of cinnabar), window slits high in the front wall
   B('paint_ochre', -BL / 2 - 0.02, y, vb - 0.03, BL / 2 + 0.02, y + 0.7, vb, false);
   for (let k = 0; k < bays; k++) if (!dbays.includes(k)) { const c = -BL / 2 + (k + 0.5) * bw; B('opening', c - 0.5, y + 2.2, vf + tw - 0.02, c + 0.5, y + 2.9, vf + tw + 0.03, false); }
@@ -51,15 +53,32 @@ export function shangHall(el, { bag, col, lights }) {
   const post = (uu, vv, ph, r = 0.27) => {
     L('granite_grey', [[r + 0.12, 0], [r + 0.12, 0.14], [r + 0.02, 0.17]], uu, y, vv, 9);
     L('timber', [[r, 0], [r * 0.92, ph - 0.17]], uu, y + 0.17, vv, 9);
+    if (el.rich) L('bronze', [[r + 0.015, 0.0], [r + 0.03, 0.02], [r + 0.03, 0.3 + Math.abs(Math.sin(uu * 12.9898)) * 0.004], [r + 0.015, 0.33 + Math.abs(Math.sin(uu * 12.9898)) * 0.004]], uu, y + 0.17, vv, 9);
     const p = M(uu, vv); col.circle(p[0], p[1], r + 0.04, y, y + ph);
   };
   for (let k = 0; k <= bays; k++) post(-BL / 2 + k * bw, vp, WH);
   B('timber', -BL / 2 - 0.3, y + WH, vp - 0.22, BL / 2 + 0.3, y + WH + 0.4, vp + 0.22, false);
   B('timber', -BL / 2 - 0.3, y + WH, vb - 0.1, BL / 2 + 0.3, y + WH + 0.35, vb + 0.35, false);
+  // the front beam painted with a band of leiwen (square spirals) in cinnabar, each unit turned against its neighbour
+  { const nU = Math.round((BL + 0.6) / 0.5), u0 = -BL / 2 - 0.3, t = 0.05 + (bays % 3) * 0.0004, vq = vp + 0.22;
+    for (let k = 0; k < nU; k++) {
+      const a = u0 + k * 0.5, fl = k % 2, X = (a0, a1) => (fl ? [a + 0.5 - a1 - 0.05, a + 0.5 - a0 - 0.05] : [a + a0 + 0.05, a + a1 + 0.05]);
+      const bars = [[0, 0.4, 0, t], [0.35, 0.4, 0, 0.3], [0.1, 0.4, 0.25, 0.3], [0.1, 0.15, 0.1, 0.3], [0.1, 0.3, 0.1, 0.15]];
+      for (const [a0, a1, b0, b1] of bars) { const [ua, ub] = X(a0, a1); B('mud_plaster', ua, y + WH + 0.05 + b0, vq - 0.002, ub, y + WH + 0.05 + b1, vq + 0.03 + Math.abs(Math.sin(k * 12.9898 + cx * 7.1 + cz)) * 0.004, false); }
+    } }
   // inner posts: two rows down the hall
   if (el.rich) for (let k = 1; k < bays; k++) for (const vv of [vb + D * 0.33, vb + D * 0.7]) post(-BL / 2 + k * bw, vv, WH + 0.4, 0.25);
   // the roof: a hip of thatch, ends and sides, deep eaves on the porch side; the ridge carried by the posts
-  { const r = R(-BL / 2, vb, BL / 2, vb + D + Pd - 0.5); thatch(bag, r, y + WH + 0.35, RISE, O, true, 'thatch'); }
+  { const r = R(-BL / 2, vb, BL / 2, vb + D + Pd - 0.5); thatch(bag, r, y + WH + 0.35, RISE, O, true, 'thatch');
+    // the second eave of the double-eaved hall (zhongwu): a lower skirt of thatch, shallower, standing out beyond the upper roof's eave, its top tucked under the upper roof;
+    // and the bound courses of the thatch on both tiers
+    const e = y + WH + 0.35, ex = O + 1.4, sk = [r[0] - ex, r[1] - ex, r[2] + ex, r[3] + ex];
+    bag.add('thatch', frustum(sk, e - 0.8, e - 0.48, 0, 0, 0, 0, { noTop: true, noBottom: true }));
+    bag.add('thatch', frustum(sk, e - 0.5, e + 0.7, 2.8, 2.8, 2.8, 2.8, { noTop: true, noBottom: true }));
+    // its underside: a ring of slabs (no plate across the hall)
+    for (const q of [[sk[0], sk[1], sk[2], sk[1] + 2.8], [sk[0], sk[3] - 2.8, sk[2], sk[3]], [sk[0], sk[1] + 2.8, sk[0] + 2.8, sk[3] - 2.8], [sk[2] - 2.8, sk[1] + 2.8, sk[2], sk[3] - 2.8]]) bag.add('thatch', box(q[0], e - 0.8, q[1], q[2], e - 0.76, q[3]));
+    thatchCourses(bag, r, e, RISE, O, 6);
+    for (let k = 1; k <= 3; k++) { const t = k / 4, i0 = 0.05 + k * 0.004, dd = 2.8 * 0.17; bag.add('thatch', frustum([sk[0] + 2.8 * t - i0, sk[1] + 2.8 * t - i0, sk[2] - 2.8 * t + i0, sk[3] - 2.8 * t + i0], e - 0.5 + 1.2 * t - 0.02, e - 0.5 + 1.2 * (t + 0.17), dd, dd, dd, dd, { noTop: true, noBottom: true })); } }
   // the ends of the rafters: a row of small posts under the porch eave (bundles of reed)
   // ── inside ──
   const vi0 = vb + tw, vi1 = vf;
@@ -117,7 +136,7 @@ export function shangHall(el, { bag, col, lights }) {
   // the porch: lamps (bronze tripods with a flame) between the posts, banners hung from the front beam, offerings on low stands before the doors
   if (el.rich) {
     for (const k of [1, 3, 5, 7]) { const p = M(-BL / 2 + (k + 0.5) * bw, vp + 0.8); bag.add('bronze', lathe([[0.001, 0], [0.15, 0.02], [0.04, 0.5], [0.04, 0.9], [0.14, 1.0], [0.001, 1.02]], 8, null, p[0], y + 0.17, p[1])); bag.add('flame', lathe([[0.001, 0], [0.07, 0.04], [0.001, 0.26]], 6, null, p[0], y + 1.17, p[1])); }
-    for (const k of [0, 2, 4, 6, 8]) B('cloth_red', -BL / 2 + (k + 0.5) * bw - 0.35, y + WH - 1.5, vp + 0.24, -BL / 2 + (k + 0.5) * bw + 0.35, y + WH + 0.02, vp + 0.28, false);
+    for (const k of [1, 3, 5, 7]) B('cloth_red', -BL / 2 + (k + 0.5) * bw - 0.35, y + WH - 1.5, vp + 0.24, -BL / 2 + (k + 0.5) * bw + 0.35, y + WH + 0.02, vp + 0.28, false);
     for (const k of [2, 6]) { const p = M(-BL / 2 + (k + 0.5) * bw, vp + 2.2); bag.add('granite_grey', lathe([[0.4, 0], [0.36, 0.45], [0.001, 0.46]], 10, null, p[0], y + 0.17, p[1])); vessel('ding', bag, p[0], y + 0.6, p[1], 1.0); col.circle(p[0], p[1], 0.42, y, y + 0.7); }
     // inside: two rows of mats for the officials, tablets of the ancestors on the altar, wine jars on stands, a second row of tables bearing food vessels
     for (const s of [-1, 1]) for (let r = 0; r < 3; r++) mat(s * (8 + r * 3.4) - 1.2, vi0 + 8.0, s * (8 + r * 3.4) + 1.2, vi0 + 9.4);
@@ -151,4 +170,24 @@ export function shangGate(el, { bag, col }) {
   for (const s of [-1, 1]) bag.add('timber', box(a + s * pw - 0.15, 0, z0 + 1.2, a + s * pw + 0.15, 2.6, z0 + 2.0));
   // the low rammed walls of the zone, running out to either side
   for (const r of [[x0 - 22, z0 + 3, x0, z0 + 4.6], [x1, z0 + 3, x1 + 22, z0 + 4.6]]) { bag.add('earth_wall', frustum(r, 0, 2.2, 0.2, 0.2, 0.2, 0.2, { noBottom: true })); col.rect(r, 0, 2.2); bag.add('thatch', box(r[0], 2.2, r[1] - 0.15, r[2], 2.45, r[3] + 0.15)); }
+}
+
+/**
+ * A taotie plaque, frontal, cut in relief on a black-lacquered board: the nose ridge, the two pill-shaped eyes under horned brows, the
+ * jaw with a row of teeth, and either side the body of the dragon in leiwen hooks. B is the hall's box helper (mat, u0, y0, v0, u1, y1, v1, solid);
+ * (u, y) the board's lower centre, v its face; w by h.
+ */
+function taotie(B, u, y, v, w, h) {
+  const q = (a0, b0, a1, b1, m, d, t = 0.03) => B(m, u + a0 * w, y + b0 * h, v + d, u + a1 * w, y + b1 * h, v + d + t, false);
+  q(-0.5, 0, 0.5, 1, 'timber', 0.0, 0.03);
+  q(-0.5, 0, 0.5, 0.05, 'mud_plaster', 0.03, 0.01); q(-0.5, 0.95, 0.5, 1, 'mud_plaster', 0.03, 0.01);
+  q(-0.04, 0.2, 0.04, 0.9, 'mud_plaster', 0.03, 0.03);                                   // the nose ridge
+  for (const s of [-1, 1]) {
+    const S = (a0, b0, a1, b1, m, d, t) => q(s > 0 ? a0 : -a1, b0, s > 0 ? a1 : -a0, b1, m, d, t);
+    S(0.08, 0.45, 0.2, 0.7, 'mud_plaster', 0.03, 0.025); S(0.12, 0.52, 0.17, 0.63, 'timber', 0.055, 0.015);   // the eye, a bright pill with its pupil
+    S(0.07, 0.74, 0.3, 0.8, 'mud_plaster', 0.03, 0.03); S(0.25, 0.7, 0.3, 0.8, 'mud_plaster', 0.03, 0.03); S(0.25, 0.6, 0.36, 0.66, 'mud_plaster', 0.03, 0.03);   // the brow and the horn curling down
+    S(0.04, 0.12, 0.2, 0.2, 'mud_plaster', 0.03, 0.02); for (let k = 0; k < 3; k++) S(0.05 + k * 0.05, 0.2, 0.07 + k * 0.05, 0.3, 'mud_plaster', 0.03, 0.02);   // the jaw's teeth
+    // the body of the dragon: hooks of leiwen to the board's end
+    for (let k = 0; k < 3; k++) { const a = 0.38 + k * 0.04 + k * 0.03; S(a, 0.15, a + 0.07, 0.2, 'mud_plaster', 0.03, 0.025); S(a + 0.05, 0.15, a + 0.07, 0.85, 'mud_plaster', 0.03, 0.025 + k * 0.0002); S(a, 0.8, a + 0.07, 0.85, 'mud_plaster', 0.03, 0.025); }
+  }
 }

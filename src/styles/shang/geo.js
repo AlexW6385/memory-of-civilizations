@@ -111,6 +111,8 @@ function refine(P, step) {
  * bands); `fl` { n, h0, h1, prot } vertical flanges, notched (every other course shorter); `eyes` { h0, h1, prot } the bosses of the
  * taotie's eyes, either side of each flange; `ribs` { n, h0, h1, prot } low vertical ribs. Heights are those of the unscaled profile.
  */
+// the leiwen ground: a tile of four by four cells, a square spiral
+const LEI = [[1, 1, 1, 1], [0, 0, 0, 1], [1, 1, 0, 1], [1, 0, 0, 1]];
 function ornate(bag, prof, s, x, y, z, o = {}) {
   const step = o.step ?? 0.03, seg = o.seg ?? 32, P = refine(prof, step), TAU = Math.PI * 2, eyeA = TAU / 16, T = step * 0.5 + 1e-6;
   const near = (th, n, off = 0) => { const q = (th - off) / (TAU / n), d = Math.abs(q - Math.round(q)) * (TAU / n); return d < 0.01; };
@@ -123,6 +125,8 @@ function ornate(bag, prof, s, x, y, z, o = {}) {
     if (f && h >= f.h0 - T && h <= f.h1 + T && near(th, f.n)) p = Math.max(p, odd ? f.prot * 0.45 : f.prot);
     const e = o.eyes;
     if (e && h >= e.h0 - T && h <= e.h1 + T && (near(th, 4, eyeA) || near(th, 4, -eyeA))) p = Math.max(p, e.prot);
+    const le = o.lei;
+    if (le && h >= le.h0 - T && h <= le.h1 + T) { const c = Math.floor(Math.round(th / (TAU / seg)) / 2), r2 = Math.floor(Math.round(h / step) / 2); if (LEI[((r2 % 4) + 4) % 4][((c % 4) + 4) % 4]) p = Math.max(p, le.prot); }
     const rb = o.ribs;
     if (rb && h >= rb.h0 - T && h <= rb.h1 + T && near(th, rb.n)) p = Math.max(p, rb.prot);
     return 1 + (p * s) / r;
@@ -133,15 +137,16 @@ const V = {
   // ding: a round tripod cauldron with two loop handles; the belly carries a taotie band: flanges at four points, an eye either side, bowstring bands
   ding(bag, x, y, z, s = 1) {
     ornate(bag, [[0.001, 0.32], [0.26, 0.34], [0.30, 0.40], [0.34, 0.5], [0.335, 0.64], [0.36, 0.68], [0.36, 0.72], [0.001, 0.72]], s, x, y, z,
-      { bands: [[0.52, 0.52, 0.012], [0.58, 0.58, 0.012], [0.70, 0.70, 0.01]], fl: { n: 4, h0: 0.46, h1: 0.64, prot: 0.032 }, eyes: { h0: 0.52, h1: 0.58, prot: 0.02 } });
+      { seg: s >= 1.4 ? 64 : 32, lei: s >= 1.4 ? { h0: 0.40, h1: 0.66, prot: 0.02 } : null, bands: [[0.52, 0.52, 0.012], [0.58, 0.58, 0.012], [0.70, 0.70, 0.01]], fl: { n: 4, h0: 0.46, h1: 0.64, prot: 0.032 }, eyes: { h0: 0.52, h1: 0.58, prot: 0.02 } });
     for (const a of [0.4, 2.5, 4.6]) {
-      bag.add('bronze', rod([x + Math.cos(a) * 0.22 * s, y, z + Math.sin(a) * 0.22 * s], [x + Math.cos(a) * 0.28 * s, y + 0.38 * s, z + Math.sin(a) * 0.28 * s], 0.05 * s, 6));
+      bag.add('bronze', rod([x + Math.cos(a) * 0.22 * s, y, z + Math.sin(a) * 0.22 * s], [x + Math.cos(a) * 0.28 * s, y + 0.38 * s, z + Math.sin(a) * 0.28 * s], 0.058 * s, 8));
+      if (s >= 1.4) { const hx = x + Math.cos(a) * 0.3 * s, hz = z + Math.sin(a) * 0.3 * s, e = 0.045 * s; bag.add('bronze', box(hx - e, y + 0.3 * s, hz - e, hx + e, y + 0.4 * s, hz + e)); for (const d of [-1, 1]) bag.add('bronze', box(hx - e * 0.9 + d * e * 0.4, y + 0.34 * s, hz - e * 0.9, hx - e * 0.9 + d * e * 0.4 + 0.012 * s, y + 0.36 * s, hz + e * 0.9)); }
       bag.add('bronze', rod([x + Math.cos(a) * 0.22 * s, y + 0.3 * s, z + Math.sin(a) * 0.22 * s], [x + Math.cos(a) * 0.27 * s, y + 0.33 * s, z + Math.sin(a) * 0.27 * s], 0.065 * s, 6));   // the ring of the leg's head
     }
     for (const sd of [-1, 1]) {
-      bag.add('bronze', box(x + sd * 0.36 * s - 0.035 * s, y + 0.68 * s, z - 0.05 * s, x + sd * 0.36 * s + 0.035 * s, y + 0.86 * s, z + 0.05 * s));
-      bag.add('bronze', box(x + sd * 0.36 * s - 0.035 * s, y + 0.82 * s, z - 0.05 * s, x + sd * 0.36 * s + 0.035 * s, y + 0.86 * s, z + 0.05 * s));
-      bag.add('bronze', box(x + sd * 0.45 * s - 0.03 * s, y + 0.8 * s, z - 0.05 * s, x + sd * 0.45 * s + 0.03 * s, y + 0.86 * s, z + 0.05 * s));   // the loop: two posts and a bar
+      // the ear: a loop standing on the rim, two posts and a bar over them, a notch of ornament on the bar
+      for (const o of [0.33, 0.45]) bag.add('bronze', box(x + sd * o * s - 0.03 * s, y + 0.66 * s, z - 0.05 * s, x + sd * o * s + 0.03 * s, y + 0.86 * s, z + 0.05 * s));
+      bag.add('bronze', box(x + sd * 0.39 * s - 0.09 * s, y + 0.82 * s, z - 0.055 * s, x + sd * 0.39 * s + 0.09 * s, y + 0.87 * s, z + 0.055 * s));
     }
   },
   // gui: a bowl on a ring foot with two handles; vertical ribs on the belly, a band at the lip
@@ -185,5 +190,14 @@ export function wheel(bag, x, y, z, r, ax = 'x', spokes = 18) {
     const a = i / spokes * Math.PI * 2, c = Math.cos(a), s = Math.sin(a);
     const p = ax === 'x' ? [[x, y + c * 0.1, z + s * 0.1], [x, y + c * (r - 0.03), z + s * (r - 0.03)]] : [[x + c * 0.1, y + s * 0.1, z], [x + c * (r - 0.03), y + s * (r - 0.03), z]];
     bag.add('timber', rod(p[0], p[1], 0.018, 4));
+  }
+}
+
+/** Proud courses of bound thatch up the lower tier of a hip: thin rings, each a few millimetres different in proudness so they merge, not instance. */
+export function thatchCourses(bag, r, y, rise, o, n = 6, mat = 'thatch') {
+  const x0 = r[0] - o, z0 = r[1] - o, x1 = r[2] + o, z1 = r[3] + o, m = Math.min(x1 - x0, z1 - z0) / 2, f = 0.3 * m, H = rise * 0.55;
+  for (let k = 1; k <= n; k++) {
+    const t0 = (k - 0.5) / (n + 0.5), t1 = t0 + 0.07, pr = 0.07 + k * 0.003, i0 = t0 * f - pr, d = (t1 - t0) * f;
+    bag.add(mat, frustum([x0 + i0, z0 + i0, x1 - i0, z1 - i0], y + t0 * H, y + t1 * H, d, d, d, d, { noTop: true, noBottom: true }));
   }
 }
