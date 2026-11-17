@@ -40,12 +40,13 @@ function dress() {
     const v0 = l.court ? -0.55 : -0.62;
     // pots by the door
     const kinds = ['pithos', 'amphora', 'water_pot', 'dark_pot'];
-    if (l.kind !== 'cult') put('pot', at(du + side * (dw / 2 + 0.75), v0), 0, { kind: kinds[Math.floor(rand() * 4)], n: 1 + Math.floor(rand() * 3) });
-    if (rand() < 0.55) put('pot', at(du - side * (dw / 2 + 0.7), v0 - 0.1), 0, { kind: rand() < 0.5 ? 'water_pot' : 'amphora', n: 2 });
-    if (rand() < 0.55) { const uu = du - side * (dw / 2 + 1.9); if (near(uu)) put('bench', at(uu, v0 - 0.1), fr.rot, { len: 1.5, mat: 'mudbrick' }); }
+    const porch = l.front === 'porch';
+    if (l.kind !== 'cult' && !porch) put('pot', at(du + side * (dw / 2 + 0.75), v0), 0, { kind: kinds[Math.floor(rand() * 4)], n: 1 + Math.floor(rand() * 3) });
+    if (rand() < 0.55 && !porch) put('pot', at(du - side * (dw / 2 + 0.7), v0 - 0.1), 0, { kind: rand() < 0.5 ? 'water_pot' : 'amphora', n: 2 });
+    if (rand() < 0.55 && !porch) { const uu = du - side * (dw / 2 + 1.9); if (near(uu)) put('bench', at(uu, v0 - 0.1), fr.rot, { len: 1.5, mat: 'mudbrick' }); }
     if (rand() < 0.5) { const uu = side > 0 ? W - 1.1 : 1.1; if (near(uu)) put('firewood', at(uu, v0 + 0.1), fr.rot, { len: 1.2 }); }
     if (rand() < 0.5) { const uu = du + side * (dw / 2 + 2.0); if (near(uu)) put(rand() < 0.5 ? 'basket' : 'sacks', at(uu, v0), fr.rot, { n: 2 }); }
-    if (W > 7 && rand() < 0.3) put('laundry', at(W / 2 + (rand() - 0.5), -1.25), fr.rot, { len: 3 });
+    if (W > 7 && rand() < 0.3 && !porch) put('laundry', at(W / 2 + (rand() - 0.5), -1.25), fr.rot, { len: 3 });
     if (rand() < 0.28) { const uu = du + side * (dw / 2 + 3.0); if (near(uu)) put('chickens', at(uu, -1.0), rand() * 6, { kind: 'hen' }); }
     if (rand() < 0.2) { const uu = du - side * (dw / 2 + 2.9); if (near(uu)) put('drying_tray', at(uu, -0.9), rand() * 6); }
     // the trade's goods before the shop
@@ -274,7 +275,7 @@ export async function town() {
     const els = [], rooms = [];
     for (const l of list) {
       const fr = frame(l), door = fr.P(l.du, -1.3), gd = ground.height(...door);
-      els.push({ t: 'house', rect: l.rect, y: l.y, face: l.face, storeys: l.storeys, seed: l.seed, kind: l.kind, trade: l.trade, du: l.du, gd, lit: l.lit, ...(l.inside ? { low: l.y - 2.5 } : {}) });
+      els.push({ t: 'house', rect: l.rect, y: l.y, face: l.face, storeys: l.storeys, seed: l.seed, kind: l.kind, trade: l.trade, du: l.du, gd, lit: l.lit, front: l.front, ...(l.inside ? { low: l.y - 2.5 } : {}) });
       if (l.court) els.push({ t: 'forecourt', rect: l.court, face: l.face, y: l.y, du: l.du, seed: l.seed });
       const [x0, z0, x1, z1] = l.rect, st = l.kind === 'house' ? l.storeys : 1;
       const name = l.kind === 'store' ? 'a storehouse' : l.kind === 'workshop' ? `a ${l.trade}'s workshop` : l.kind === 'cult' ? 'a shrine' : l.kind === 'guard' ? 'the guard-room' : 'a house';

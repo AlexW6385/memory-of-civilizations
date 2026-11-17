@@ -135,6 +135,51 @@ export function house(el, ctx) {
     for (let j = 1; j < n; j++) add('limestone_yellow', B(du - w2 / 2, y - rise - 0.4, -j * tread - 0.45, du + w2 / 2, y - j * (rise / n), -(j - 1) * tread - 0.45));
     col.ramp(R(du - w2 / 2, -n * tread - 0.45, du + w2 / 2, -0.0), y - rise, y, m.dirV);
   }
+  // ── the front by rule (docs/settlements/mycenae.md §13): porch, quoins, dado, frieze ──
+  const fk = el.front ?? 'plain';
+  if (fk === 'porch') {
+    // two posts of painted timber tapering downward on stone bases, a beam and a clay canopy over the door; a bench of mudbrick and a water jar in its shade
+    const u1 = du - dw / 2 - 1.0, u2 = du + dw / 2 + 1.0, vp = -1.35, ph = 2.42, posts = [], caps = [], yb0 = Math.min(y - 0.1, (el.gd ?? y - 0.1) - 0.3);
+    for (const u of [u1, u2]) {
+      const [x, z] = m.P(u, vp);
+      add('limestone_yellow', lathe([[0.27, 0], [0.27, y + 0.16 - yb0], [0.2, y + 0.2 - yb0], [0.001, y + 0.2 - yb0]], 8, null, x, yb0, z));
+      posts.push(lathe([[0.001, 0], [0.085, 0.01], [0.09, 0.2], [0.115, ph - 0.25], [0.001, ph - 0.25]], 10, null, x, y + 0.15, z));
+      caps.push(lathe([[0.1, 0], [0.17, 0.05], [0.2, 0.12], [0.17, 0.17], [0.001, 0.17]], 10, null, x, y + 0.15 + ph - 0.25, z));
+      col.circle(x, z, 0.28, yb0, y + ph + 0.2);
+    }
+    add('paint_minoan_red', mergeG(posts)); add('pottery_dark', mergeG(caps));
+    add('timber', B(u1 - 0.25, y + ph + 0.1, vp - 0.12, u2 + 0.25, y + ph + 0.34, vp + 0.12));
+    add('earth_wall', B(u1 - 0.4, y + ph + 0.34, vp - 0.35, u2 + 0.4, y + ph + 0.52, 0.04));
+    add(wallMat, mergeG([B(u1 - 0.4, y + ph + 0.52, vp - 0.35, u2 + 0.4, y + ph + 0.7, vp - 0.2), B(u1 - 0.4, y + ph + 0.52, vp - 0.35, u1 - 0.25, y + ph + 0.7, 0.04), B(u2 + 0.25, y + ph + 0.52, vp - 0.35, u2 + 0.4, y + ph + 0.7, 0.04)]));
+    const ends = []; for (let v = vp + 0.1; v < -0.05; v += 0.5) ends.push(B(u1 - 0.45, y + ph + 0.12, v - 0.05, u1 - 0.25, y + ph + 0.3, v + 0.05), B(u2 + 0.25, y + ph + 0.12, v - 0.05, u2 + 0.45, y + ph + 0.3, v + 0.05));
+    add('timber', mergeG(ends));
+    const bu0 = du > W / 2 ? u1 + 0.1 : u2 - 0.65;
+    add('mudbrick', B(bu0, yb0, -0.62, bu0 + 0.55, y + 0.42, -0.2)); solid(bu0, -0.62, bu0 + 0.55, -0.2, yb0, y + 0.42);
+    const [jx, jz] = m.P(bu0 + 0.27, -0.41); add('terracotta', lathe([[0.001, 0], [0.1, 0.02], [0.17, 0.2], [0.11, 0.38], [0.08, 0.42], [0.001, 0.42]], 8, null, jx, y + 0.42, jz));
+  } else if (fk === 'quoin' || fk === 'both') {
+    // dressed corner stones, long and short in turn, up the front's two ends (and round the corner a little)
+    const q = [], hq = H - 0.45;
+    for (let k = 0, ya = y + 0.55; ya < y + hq; k++, ya += 0.44) {
+      const a = k % 2 ? 0.95 : 0.5, b = k % 2 ? 0.5 : 0.95;
+      q.push(B(-0.05, ya, -0.05, a, ya + 0.41, 0.0), B(-0.05, ya, 0.0, 0.0, ya + 0.41, b * 0.6), B(W - a, ya, -0.05, W + 0.05, ya + 0.41, 0.0), B(W, ya, 0.0, W + 0.05, ya + 0.41, b * 0.6));
+    }
+    add('limestone_yellow', mergeG(q));
+  }
+  if (fk === 'dado' || fk === 'both') {
+    // a painted band along the front above the socle, broken by the door, one to a storey
+    const bands = [];
+    for (let s2 = 0; s2 < st; s2++) { const ya = y + 0.78 + s2 * SH; bands.push(B(0.12, ya, -0.02, du - dw / 2 - 0.35, ya + 0.14, 0.0), B(du + dw / 2 + 0.35, ya, -0.02, W - 0.12, ya + 0.14, 0.0)); }
+    add(rand() < 0.5 ? 'paint_minoan_red' : 'paint_ochre', mergeG(bands));
+  }
+  if (fk === 'frieze') {
+    // the painted frieze under the parapet: blue and ochre blocks between white joints, as on the palaces' walls
+    const blue = [], och = [], wh = [], yf = top - 0.88;
+    for (let u = 0.3; u < W - 0.55; u += 0.56) {
+      if (Math.abs(u + 0.28 - du) < dw / 2 + 0.5) continue;
+      blue.push(B(u, yf, -0.02, u + 0.26, yf + 0.38, 0.0)); och.push(B(u + 0.32, yf, -0.02, u + 0.5, yf + 0.38, 0.0)); wh.push(B(u + 0.26, yf, -0.02, u + 0.32, yf + 0.38, 0.0), B(u + 0.5, yf, -0.02, u + 0.56, yf + 0.38, 0.0));
+    }
+    if (blue.length) { add('egyptian_blue', mergeG(blue)); add('paint_ochre', mergeG(och)); add('plaster_white', mergeG(wh)); }
+  }
   // window frames and open shutters on the front
   const wf = [], sh = [];
   for (const o of fwin) {
