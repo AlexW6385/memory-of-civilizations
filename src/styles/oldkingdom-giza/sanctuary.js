@@ -32,3 +32,31 @@ export function falseDoor(bag, col, { rect, th, s }) {
   for (const k of [-1, 1]) bag.add('terracotta', lathe([[0.04, 0], [0.1, 0.07], [0.14, 0.28], [0.11, 0.5], [0.06, 0.58], [0.07, 0.61], [0.001, 0.61]], 10, null, tx + 0.05, 0.27, zc + k * 0.7));
   col.rect([tx - 0.42, zc - 0.42, tx + 0.42, zc + 0.42], 0.27, 0.8);
 }
+
+/** The northern niche of a mastaba's east face { c, a, b, h, cased } (docs/settlements/giza.md §17): the two-niche offering place
+ *  of the Giza tombs — a false door of limestone at 2.6 m from the north end (the slab stela and the chapel are at the south end): the
+ *  frame in two orders, the dark door with the rolled mat over it, the lintel with its roll, above it the panel with the owner
+ *  at the table of offerings and the columns of the list in blue and green. */
+export function northernNiche(bag, { c, a, b, h, cased }) {
+  const [cx, cz] = c, X = cx + a + 0.06 * (cased ? 1 : 0.4), zc = cz - b + 2.6, y0 = 0.15;
+  void h;
+  const S = (mat, z0, z1, ya, yb, d0, d1) => bag.add(mat, box(X + d0, y0 + ya, zc + z0, X + d1, y0 + yb, zc + z1));
+  S('limestone_carved', -0.72, 0.72, 0, 2.35, -0.55, 0);                        // the slab, sunk into the battered face
+  for (const k of [-1, 1]) {
+    S('tura_limestone', Math.min(k * 0.55, k * 0.72), Math.max(k * 0.55, k * 0.72), 0, 2.2, 0, 0.09);      // the outer jambs
+    S('tura_limestone', Math.min(k * 0.36, k * 0.55), Math.max(k * 0.36, k * 0.55), 0, 1.5, 0, 0.05);      // the inner jambs
+    S('egyptian_blue', k * 0.635 - 0.035, k * 0.635 + 0.035, 0.2, 2.05, 0.09, 0.1);                         // the offering formula down the jamb
+  }
+  S('granite_black', -0.36, 0.36, 0, 1.4, 0, 0.03);                                                          // the door, recessed in the dark
+  bag.add('limewash_yellow', lathe([[0.001, -0.36], [0.1, -0.36], [0.1, 0.36], [0.001, 0.36]], 10).rotateX(Math.PI / 2).translate(X + 0.09, y0 + 1.5, zc));   // the rolled mat
+  S('tura_limestone', -0.72, 0.72, 2.2, 2.35, 0, 0.12);                                                      // the lintel
+  bag.add('tura_limestone', lathe([[0.001, -0.74], [0.07, -0.74], [0.07, 0.74], [0.001, 0.74]], 8).rotateX(Math.PI / 2).translate(X + 0.08, y0 + 2.42, zc));   // the roll
+  // the panel over the door: the owner seated at the table of loaves, the columns of the offering list
+  S('plaster_white', -0.36, 0.36, 1.58, 2.15, 0.03, 0.05);
+  const R = (mat, z0, z1, ya, yb, d = 0.07) => S(mat, z0, z1, ya, yb, 0.05, d);
+  R('paint_robe', 0.2, 0.3, 1.76, 2.0); R('paint_robe', 0.22, 0.29, 2.0, 2.1); R('lacquer_black', 0.2, 0.3, 2.06, 2.12, 0.075);   // the owner, the head, the wig
+  R('plaster_white', 0.17, 0.32, 1.7, 1.78); R('timber', 0.18, 0.31, 1.62, 1.7); R('paint_robe', 0.05, 0.2, 1.88, 1.93);            // the kilt, the seat, the arm reaching out
+  R('paint_ochre', -0.04, 0.0, 1.66, 1.88); R('paint_ochre', -0.1, 0.06, 1.88, 1.92);                                              // the table
+  for (let k = 0; k < 5; k++) R('limewash_yellow', -0.1 + k * 0.032, -0.07 + k * 0.032, 1.92, 2.0 + 0.04 * Math.sin(k / 4 * Math.PI), 0.075);   // the loaves
+  for (let k = 0; k < 4; k++) R(k % 2 ? 'fresco_green' : 'egyptian_blue', -0.32 + k * 0.05, -0.28 + k * 0.05, 1.66, 2.1);             // the columns
+}
