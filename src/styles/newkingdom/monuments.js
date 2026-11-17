@@ -51,7 +51,11 @@ export function obelisk(el, { bag, col }) {
   }
   if (T.length) bag.add('lacquer_black', fromTriangles(T));
   if (F.length) bag.add('lacquer_black', fromTriangles(F));
-  col.rect([x - w * 1.25, z - w * 1.25, x + w * 1.25, z + w * 1.25], y, y + h);
+  col.rect([x - w * 1.25, z - w * 1.25, x + w * 1.25, z + w * 1.25], y, y + st);
+  col.rect([x - w * 0.95, z - w * 0.95, x + w * 0.95, z + w * 0.95], y + st, y + st * 2);
+  const sh = h - ph - st * 2;                                                                       // the shaft's colliders follow its taper in two steps
+  col.rect([x - w * 0.46, z - w * 0.46, x + w * 0.46, z + w * 0.46], y + st * 2, y + st * 2 + sh * 0.5);
+  col.rect([x - w * 0.36, z - w * 0.36, x + w * 0.36, z + w * 0.36], y + st * 2 + sh * 0.5, y + h - ph);
 }
 /** A ribbon of cloth hanging from `top`, `L` long, tapering from w0 to w1, its end cut in a swallow-tail; the plane faces +z (both sides drawn). */
 function streamer(x, z, top, L, w0, w1) {

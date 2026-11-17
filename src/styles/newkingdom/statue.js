@@ -101,5 +101,7 @@ export function colossus(el, { bag, col }) {
     col.rect([Math.min(P[0][0], P[1][0]), Math.min(P[0][1], P[1][1]), Math.max(P[0][0], P[1][0]), Math.max(P[0][1], P[1][1])], y + ya * H, y + yb * H);
   };
   rect(-0.19, -0.20, 0.19, 0.30, 0, 0.03);                                                   // the base
-  rect(-0.125, -0.105, 0.125, 0.16, 0.03, 0.9);                                              // the king on it, back pillar to the knee and the crowns' base
+  rect(-0.10, -0.105, 0.10, 0.16, 0.03, 0.31);                                               // the legs, the pillar, the princess
+  rect(-0.125, -0.105, 0.125, 0.10, 0.31, 0.74);                                             // the kilt, the torso and arms
+  rect(-0.075, -0.105, 0.075, 0.075, 0.74, 1.0);                                             // the head, the crowns, the pillar
 }
