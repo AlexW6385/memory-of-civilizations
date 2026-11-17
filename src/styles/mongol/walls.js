@@ -150,7 +150,9 @@ export function mosque(el, { bag, col, lights }) {
   bag.add('brick_buff', box(cx + 1.2, 0, hz1, cx + pw / 2, hallH + 1.6, hz1 + 0.5)); col.rect([cx + 1.2, hz1, cx + pw / 2, hz1 + 0.5], 0, hallH + 1.6);
   bag.add('brick_buff', box(cx - 1.2, 4.6, hz1, cx + 1.2, hallH + 1.6, hz1 + 0.5)); col.rect([cx - 1.2, hz1, cx + 1.2, hz1 + 0.5], 4.6, hallH + 1.6);
   bag.add('tile_turquoise', box(cx - pw / 2 + 0.2, hallH - 0.4, hz1 + 0.5, cx + pw / 2 - 0.2, hallH + 1.2, hz1 + 0.53));
-  bag.add('tile_turquoise', box(cx - 1.2, 4.3, hz1 + 0.5, cx + 1.2, 4.6, hz1 + 0.53)); for (const s of [-1, 1]) bag.add('wood_dark', box(cx + s * 1.1 - 0.06, 0, hz1 + 0.3, cx + s * 1.1 + 0.06, 4.3, hz1 + 0.5));
+  bag.add('tile_turquoise', box(cx - 1.2, 4.3, hz1 + 0.5, cx + 1.2, 4.6, hz1 + 0.53));
+  // a three-tier muqarnas hood of small brick cells under the lintel, narrowing toward the door [inferred]
+  for (const [y, n] of [[4.05, 6], [3.8, 5], [3.58, 4]]) { const cw = 2.4 / n; for (let k = 0; k < n; k++) bag.add(k % 2 ? 'tile_turquoise' : 'brick_buff', box(cx - 1.2 + k * cw + 0.03, y, hz1 + 0.5, cx - 1.2 + (k + 1) * cw - 0.03, y + 0.22, hz1 + 0.5 + 0.14 + (4.05 - y) * 0.3)); } for (const s of [-1, 1]) bag.add('wood_dark', box(cx + s * 1.1 - 0.06, 0, hz1 + 0.3, cx + s * 1.1 + 0.06, 4.3, hz1 + 0.5));
   for (const s of [-1, 1]) bag.add('tile_turquoise', box(cx + s * (pw / 2 - 0.45) - 0.12, 0, hz1 + 0.5, cx + s * (pw / 2 - 0.45) + 0.12, hallH + 1.2, hz1 + 0.53));
   // the dome behind it, on a drum, turquoise
   const dr = Math.min(hw, hz1 - z0) * 0.3, dcx = cx, dcz = (z0 + T + hz1) / 2;
@@ -160,7 +162,11 @@ export function mosque(el, { bag, col, lights }) {
   // the minaret at the corner: a square shaft tapering, bands of tile, a balcony, a lantern
   const mx = x1 - T - 1.0, mz = hz1 + 1.4;
   bag.add('brick_buff', frustum([mx - 1.2, mz - 1.2, mx + 1.2, mz + 1.2], 0, 13, 0.35, 0.35, 0.35, 0.35, { noBottom: true })); col.rect([mx - 1.2, mz - 1.2, mx + 1.2, mz + 1.2], 0, 13);
-  for (const y of [4, 8, 11.4]) bag.add('tile_turquoise', frustum([mx - 1.05 + y * 0.0265, mz - 1.05 + y * 0.0265, mx + 1.05 - y * 0.0265, mz + 1.05 - y * 0.0265], y, y + 0.5, 0, 0, 0, 0));
+  // bands of glazed turquoise proud of the shaft (its half-width is 1.2 - 0.0269 y), thin courses of dark brick between them, and a stepped corbel under the balcony (muqarnas in brick)
+  const mhw = (y) => 1.2 - 0.0269 * y;
+  for (const y of [4, 8, 11.4]) { const h = mhw(y) + 0.06; bag.add('tile_turquoise', frustum([mx - h, mz - h, mx + h, mz + h], y, y + 0.5, 0, 0, 0, 0)); }
+  for (const y of [1.2, 2.0, 2.8, 3.4, 5.0, 5.8, 6.6, 7.4, 8.8, 9.6, 10.4]) { const h = mhw(y) + 0.04; bag.add('brick_grey', frustum([mx - h, mz - h, mx + h, mz + h], y, y + 0.18, 0, 0, 0, 0)); }
+  for (const [y, k] of [[12.4, 0.95], [12.6, 1.05], [12.8, 1.15]]) bag.add('brick_buff', box(mx - k, y, mz - k, mx + k, y + 0.2, mz + k));
   bag.add('brick_buff', box(mx - 1.2, 13, mz - 1.2, mx + 1.2, 13.25, mz + 1.2)); bag.add('brick_buff', lathe([[0.7, 0], [0.7, 1.6], [0.001, 2.4]], 8, null, mx, 13.25, mz));
   // the ablution pool in the court
   const px = cx, pz = (hz1 + z1) / 2 + 0.8;
