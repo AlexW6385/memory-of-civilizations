@@ -37,6 +37,8 @@ function envOf(hall, xx, zz) {
 }
 /** Where shells must not be drawn: inside the Concert Hall's room (the bases of the later shells cross it). */
 let CLIP = null;
+/** The tile lids' cream bands of every shell, added once (one geometry for the element, not one per shell). */
+let crest = [];
 // (a triangle crossing the room's walls is split until its pieces lie inside or outside: the glass walls' long
 // triangles, kept or dropped whole by their centre, stood in the room as dark slivers)
 const clipped = (T) => {
@@ -73,19 +75,35 @@ function shell(bag, cx, z0, z1, hw, H, y) {
   for (let i = 0; i < nu; i++) { tri2(E, P(i, nv), P(i + 1, nv), Q(i + 1, nv)); tri2(E, P(i, nv), Q(i + 1, nv), Q(i, nv)); }
   bag.add('concrete_light', fromTriangles(clipped(U))); bag.add('concrete_light', fromTriangles(clipped(E)));
   for (let i = 1; i < nu; i++) for (let j = 1; j < nv; j++) { const a = Q(i, j), b = Q(i, j + 1); if (a[1] - y < 1.2 || hits(a, b)) continue; bag.add('concrete_light', rod([a[0], a[1] - 0.12, a[2]], [b[0], b[1] - 0.12, b[2]], 0.2, 4)); }
-  // the ridge: a rib of the cream tiles along the top, and the ribs fanning down the shell's face
-  const rib = [];
-  for (let j = 0; j < nv; j++) { const a = P(nu / 2, j), b = P(nu / 2, j + 1); if (hits(a, b)) continue; rib.push(rod([a[0], a[1] + 0.05, a[2]], [b[0], b[1] + 0.05, b[2]], 0.4, 6)); }
-  for (const i of [2, 4, 6, 8, 12, 14, 16, 18]) for (let j = 2; j < nv; j++) { const a = P(i, j), b = P(i, j + 1); if (hits(a, b)) continue; rib.push(rod(a, b, 0.1, 4)); }
-  for (const g of rib) bag.add('tile_cream', g);
-  // the chevrons of the tile lids: V-shaped joints of the cream tiles between the ribs, pointing up the shell
-  const ch = [];
-  for (const [ia, ib] of [[0, 4], [4, 8], [8, 10], [10, 12], [12, 16], [16, 20]]) for (let j = 2; j < nv - 1; j += 2) {
-    const im = Math.round((ia + ib) / 2), a = P(ia, j), m = P(im, j + 1), b = P(ib, j);
-    if (hits(a, m) || hits(m, b)) continue;
-    ch.push(rod(a, m, 0.16, 5), rod(m, b, 0.16, 5));
+  // the tile lids (§1k): the shell is cut by its ribs into gores; across each gore run rows of chevron lids, each of
+  // glossy white tiles framed by a raised matte-cream band (a low trapezoid: sloped sides, a flat crest, 0.05 m proud),
+  // the rows' V pointing up the shell; the ribs are raised cream bands too, wider toward the ridge
+  const Pf = (i, j) => {
+    const s = -1 + 2 * i / nu, t = Math.max(0, Math.min(1, j / nv)), h = H * ridgeOf(t), w = widthOf(hw, t);
+    return [cx + s * w, y + h * secOf(s), z0 + (z1 - z0) * t + (z1 - z0) * 0.2 * t * t * (1 - Math.abs(s))];
+  };
+  const up = (i, j) => {
+    const e = 0.02, a = Pf(i + e, j), b = Pf(i - e, j), c = Pf(i, j + e), d = Pf(i, j - e), u = [a[0] - b[0], a[1] - b[1], a[2] - b[2]], v = [c[0] - d[0], c[1] - d[1], c[2] - d[2]];
+    let n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]]; const l = Math.hypot(...n) || 1; n = n.map((q) => q / l);
+    return n[1] < 0 ? n.map((q) => -q) : n;
+  };
+  // a raised band along a path of (i, j) points, w wide, h proud: slopes at the sides, a flat crest
+  const band = (pts, wd, hh) => {
+    const rows = pts.map(([i, j], k) => {
+      const A = pts[Math.max(0, k - 1)], B = pts[Math.min(pts.length - 1, k + 1)], p0 = Pf(...A), p1 = Pf(...B), n = up(i, j), t = [p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]];
+      let sd = [t[1] * n[2] - t[2] * n[1], t[2] * n[0] - t[0] * n[2], t[0] * n[1] - t[1] * n[0]]; const l = Math.hypot(...sd) || 1; sd = sd.map((q) => q / l);
+      const p = Pf(i, j), at = (o, e) => [p[0] + sd[0] * o + n[0] * e, p[1] + sd[1] * o + n[1] * e, p[2] + sd[2] * o + n[2] * e];
+      return [at(-wd / 2, 0.004), at(-wd * 0.32, hh), at(wd * 0.32, hh), at(wd / 2, 0.004)];
+    });
+    for (let k = 0; k + 1 < rows.length; k++) for (let q = 0; q < 3; q++) { const a = rows[k][q], b = rows[k][q + 1], c = rows[k + 1][q + 1], d = rows[k + 1][q]; if (hits(a, c)) continue; crest.push(...a, ...b, ...c, ...a, ...c, ...d); }
+  };
+  const seg = (A, B, n) => Array.from({ length: n + 1 }, (_, k) => [A[0] + (B[0] - A[0]) * k / n, A[1] + (B[1] - A[1]) * k / n]);
+  band(seg([nu / 2, 0.6], [nu / 2, nv], 16), 0.5, 0.07);
+  for (const i of [2, 4, 6, 8, 12, 14, 16, 18]) band(seg([i, 1.6], [i, nv], 12), i === 4 || i === 16 ? 0.3 : 0.2, 0.05);
+  for (const [ia, ib] of [[0, 4], [4, 8], [8, 10], [10, 12], [12, 16], [16, 20]]) {
+    const im = (ia + ib) / 2, rise = (ib - ia) * 0.2;
+    for (let j = 1.4; j < nv - 0.4; j += 1.05 - 0.35 * (j / nv)) { band([...seg([ia, j], [im, j + rise], 3), ...seg([im, j + rise], [ib, j], 3).slice(1)], 0.16, 0.05); }
   }
-  for (const g of ch) bag.add('tile_cream', g);
   // the glass wall hung in the mouth: pleated, its folds running down from the shell's edge to the podium,
   // on steel mullions, with transoms every few metres
   const G = [], depth = (z0 - z1) * 0.07, foot = (i) => { const a = P(i, nv); return [a[0], y, z1 + depth + (i % 2 ? 1.1 : -0.2) + (z1 - z0) * 0.2 * (1 - Math.abs(-1 + 2 * i / nu)) * 0.7]; };
@@ -204,6 +222,7 @@ function operaHouse(el, { bag, col, lights }) {
   // the small restaurant shells at the south-west corner
   shell(bag, x0 + 14, z1 - 4, z1 - 20, 9, 12, y + h);
   shell(bag, x0 + 14, z1 - 18, z1 - 30, 8, 9, y + h);
+  bag.add('tile_cream', fromTriangles(crest)); crest = [];
 }
 /** round_tower: { c, r, h, y } — a round office tower of concrete fins and glass (Australia Square). */
 function roundTower(el, { bag, col }) {
