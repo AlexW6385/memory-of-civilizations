@@ -20,6 +20,65 @@ function taper(bag, x, z, y0, y1, r0, r1, cap = 0) {
   if (cap > 0) bag.add(B, lathe([[r1 * 1.05, 0], [r1 * 0.6, cap * 0.6], [0.05, cap]], 8, null, x, y1, z));
 }
 
+/** The rounded-square factor of a radius at angle th (exponent n), blended by w from a circle (0) to the full shape (1). */
+const sq = (th, w = 1, n = 4) => { const c = Math.abs(Math.cos(th)), s = Math.abs(Math.sin(th)); return 1 + (1 / Math.pow(Math.pow(c, n) + Math.pow(s, n), 1 / n) - 1) * w; };
+/** An ostrich egg on a pinnacle's tip (the finials of the mosque carry them): e scales it, about 0.45 m tall at 1. */
+function egg(bag, x, y, z, e = 1) {
+  e *= 1 + 0.004 * Math.sin(x * 12.9898 + z * 78.233 + y * 3.1);   // a millimetre apart, so that the eggs merge in one mesh and are not instanced
+  bag.add('tura_limestone', lathe([[0.001, 0], [0.1 * e, 0.07 * e], [0.15 * e, 0.2 * e], [0.13 * e, 0.34 * e], [0.06 * e, 0.43 * e], [0.001, 0.47 * e]], 8, null, x, y, z));
+}
+/**
+ * A hand-shaped buttress or pinnacle pier (docs/settlements/djenne.md §18): a column of banco with rounded
+ * corners (a squared circle), slightly irregular, flared at the foot, narrowing from r0 to r1 over h, then
+ * rounding into a cone finial of height cap topped by an ostrich egg. Each is a little different (seeded
+ * by its place) so the copies merge rather than instance.
+ */
+function roundCol(bag, x, z, y0, h, r0, r1, cap, o = {}) {
+  const ph = Math.abs(x * 12.9898 + z * 7.233) % 6.28, k1 = 0.03 + (ph % 1) * 0.02, hh = h * (0.99 + (ph % 0.7) * 0.015), cc = cap * (0.96 + (ph % 0.9) * 0.05);
+  const prof = [[r0 * 1.1, 0], [r0, 0.28], [(r0 + r1) * 0.51, hh * 0.5], [r1, hh * 0.95], [r1 * 1.2, hh], [r1 * 1.1, hh + cc * 0.1], [r1 * 0.82, hh + cc * 0.35], [r1 * 0.5, hh + cc * 0.65], [r1 * 0.22, hh + cc * 0.9], [0.05, hh + cc]];
+  const mod = (th, i, r, y) => sq(th, y <= hh ? 1 : Math.max(0, 1 - (y - hh) / (cc * 0.35 + 0.01))) * (1 + k1 * Math.sin(2 * th + ph + i * 0.9) + 0.02 * Math.sin(3 * th + ph * 1.7 - i * 1.3));
+  bag.add(B, lathe(prof, 10, mod, x, y0, z));
+  if (o.egg !== false) egg(bag, x, y0 + hh + cc - 0.03, z, o.egg ?? 0.75);
+}
+/**
+ * A soft rib or corner shaft: a rounded section (half-width hw along the face, hd out of it, a squared
+ * ellipse) of banco from y0 to y1 whose centre at height y is at(y) = [x, z]; along is the axis hw lies on.
+ */
+function softCol(bag, y0, y1, rows, at, hw, hd, along, jr = 0) {
+  const N = 10, loc = [];
+  const ring = (y) => { const [cx, cz] = at(y), out = []; for (let s = 0; s < N; s++) { const th = (s / N) * Math.PI * 2, k = sq(th, 1, 3.2) * (1 + 0.03 * Math.sin(3 * th + y * 0.9 + jr)), u = Math.cos(th) * hw * k, v = Math.sin(th) * hd * k; out.push(along === 'z' ? [cx + v, y, cz + u] : [cx + u, y, cz + v]); } return out; };
+  let prev = ring(y0);
+  for (let r = 1; r <= rows; r++) {
+    const cur = ring(y0 + ((y1 - y0) * r) / rows);
+    for (let s = 0; s < N; s++) { const a = prev[s], b = prev[(s + 1) % N], c = cur[(s + 1) % N], d = cur[s]; loc.push(...a, ...b, ...c, ...a, ...c, ...d); }
+    prev = cur;
+  }
+  orientBy(loc, (c) => { const [cx, cz] = at(c[1]); return [c[0] - cx, 0, c[2] - cz]; });
+  bag.add(B, fromTriangles(loc));
+}
+/** A rounded roll (the coping of a wall) along the horizontal segment p→q at height y, radius r, its section a little uneven along it. */
+function roll(bag, mat, p, q, y, r, seed = 1) {
+  const L = Math.hypot(q[0] - p[0], q[1] - p[1]); if (L < 0.1) return;
+  const d = [(q[0] - p[0]) / L, (q[1] - p[1]) / L], ex = [-d[1], d[0]], n = Math.max(1, Math.ceil(L / 1.6)), N = 8, loc = [], rand = rng(seed);
+  const ring = (s, rr) => { const o = []; for (let i = 0; i < N; i++) { const a = (i / N) * Math.PI * 2; o.push([p[0] + d[0] * s + ex[0] * Math.cos(a) * rr, y + Math.sin(a) * rr * 0.85, p[1] + d[1] * s + ex[1] * Math.cos(a) * rr]); } return o; };
+  let prev = ring(0, r), s0 = 0;
+  for (let k = 1; k <= n; k++) {
+    const s = (L * k) / n, cur = ring(s, r * (0.9 + rand() * 0.22));
+    for (let i = 0; i < N; i++) { const a = prev[i], b = prev[(i + 1) % N], c = cur[(i + 1) % N], e = cur[i]; loc.push(...a, ...b, ...c, ...a, ...c, ...e); }
+    prev = cur; s0 = s;
+  }
+  orientBy(loc, (c) => { const t = (c[0] - p[0]) * d[0] + (c[2] - p[1]) * d[1]; return [c[0] - (p[0] + d[0] * t), c[1] - y, c[2] - (p[1] + d[1] * t)]; });
+  bag.add(mat, fromTriangles(loc));
+}
+/** A bundle of three toron (rodier palm sticks, tied) standing out from a wall at p along the unit d = [dx, dz], length len: the sticks of unequal length. */
+function toronBundle(out, p, d, len, rand) {
+  const ex = [-d[1], d[0]];
+  for (const [lat, dy, l] of [[0, 0.045, 1], [-0.085, -0.04, 0.84], [0.085, -0.04, 0.93]]) {
+    const L = len * l * (0.93 + rand() * 0.14), a = [p[0] + ex[0] * lat, p[1] + dy, p[2] + ex[1] * lat];
+    beamTris(out, a, [a[0] + d[0] * L, a[1] + 0.025, a[2] + d[1] * L], 0.04, 0.08);
+  }
+}
+
 /** Flip each triangle so that it faces along want(centroid). */
 export function orientBy(tris, want) {
   for (let i = 0; i < tris.length; i += 9) {
@@ -131,14 +190,14 @@ function bancoWall(bag, col, a, b, y, h, th, opts = {}) {
     const s = k * L / n, x = a[0] + ux * s + nx * (th / 2 + pd / 2) * out, z = a[1] + uz * s + nz * (th / 2 + pd / 2) * out;
     if (!free(s, pw * 0.8 + 0.1)) continue;
     // the pilaster, battered: wider at its foot
-    taper(bag, x, z, y, y + h, pw * 0.8, pw * 0.6, ph);
+    if (opts.round) roundCol(bag, x, z, y, h, pw * 0.82, pw * 0.58, ph, { egg: opts.eggs ?? 0.75 }); else taper(bag, x, z, y, y + h, pw * 0.8, pw * 0.6, ph);
     // toron: palm sticks standing out in rows
     if (opts.toron !== false) {
       const tt = [];
       for (let r = 1; r <= Math.floor(h / 1.5); r++) for (const f of [0.25, 0.5, 0.75]) {
         if (rand() < 0.15 || s + step * f > L || !free(s + step * f, 0.15)) continue;
         const ty = y + r * 1.5 - 0.35 + (rand() - 0.5) * 0.12, tx = a[0] + ux * (s + step * f) + nx * (th / 2) * out, tz = a[1] + uz * (s + step * f) + nz * (th / 2) * out, len = 0.75 + rand() * 0.35;
-        beamTris(tt, [tx, ty, tz], [tx + nx * len * out, ty + 0.03, tz + nz * len * out], 0.06, 0.1);
+        if (opts.bundles) toronBundle(tt, [tx, ty, tz], [nx * out, nz * out], len, rand); else beamTris(tt, [tx, ty, tz], [tx + nx * len * out, ty + 0.03, tz + nz * len * out], 0.06, 0.1);
       }
       if (tt.length) bag.add('timber', fromTriangles(tt));
     }
@@ -247,27 +306,20 @@ function stairTower(bag, col, { r, py, top, door, exit }) {
  * leaning with the face, rising through the top as small pinnacles; toron in rows between them.
  */
 function faceRibs(bag, cx, cz, y0, y1, r0, r1, faces, ks = [-0.5, 0, 0.5], cap = 1.6) {
-  const d = r0 - r1, tt = [];
+  const d = r0 - r1, tt = [], h = (y) => r0 - d * (y - y0) / (y1 - y0), tr = rng(Math.round(cx * 7 + cz * 3 + 99));
   for (const f of faces) {
     const sx = f === 'e' ? 1 : f === 'w' ? -1 : 0, sz = f === 's' ? 1 : f === 'n' ? -1 : 0;
     for (const k of ks) {
-      const sh = -k * d;   // the rib's lateral drift with the batter
-      if (sz) {
-        const r = sz < 0 ? [cx + k * r0 - 0.3, cz - r0 - 0.32, cx + k * r0 + 0.3, cz - r0 + 0.05] : [cx + k * r0 - 0.3, cz + r0 - 0.05, cx + k * r0 + 0.3, cz + r0 + 0.32];
-        bag.add(B, frustum(r, y0, y1, sh + 0.06, -sh + 0.06, sz < 0 ? d + 0.08 : -d, sz < 0 ? -d : d + 0.08));
-        bag.add(B, lathe([[0.26, 0], [0.18, cap * 0.7], [0.04, cap]], 8, null, cx + k * r1, y1, cz + sz * (r1 + 0.1)));
-      } else {
-        const r = sx < 0 ? [cx - r0 - 0.32, cz + k * r0 - 0.3, cx - r0 + 0.05, cz + k * r0 + 0.3] : [cx + r0 - 0.05, cz + k * r0 - 0.3, cx + r0 + 0.32, cz + k * r0 + 0.3];
-        bag.add(B, frustum(r, y0, y1, sx < 0 ? d + 0.08 : -d, sx < 0 ? -d : d + 0.08, sh + 0.06, -sh + 0.06));
-        bag.add(B, lathe([[0.26, 0], [0.18, cap * 0.7], [0.04, cap]], 8, null, cx + sx * (r1 + 0.1), y1, cz + k * r1));
-      }
+      if (sz) softCol(bag, y0, y1, 2, (y) => [cx + k * h(y), cz + sz * (h(y) + 0.13)], 0.3, 0.2, 'x', k * 4 + sz);
+      else softCol(bag, y0, y1, 2, (y) => [cx + sx * (h(y) + 0.13), cz + k * h(y)], 0.3, 0.2, 'z', k * 4 + sx);
+      roundCol(bag, sz ? cx + k * r1 : cx + sx * (r1 + 0.13), sz ? cz + sz * (r1 + 0.13) : cz + k * r1, y1, 0.3, 0.3, 0.26, cap - 0.3, { egg: 0.6 });
     }
     for (let r = 1; r < Math.floor((y1 - y0) / 1.6); r++) {
-      const yy = y0 + r * 1.6, h = r0 - d * (yy - y0) / (y1 - y0);
+      const yy = y0 + r * 1.6, hh = h(yy);
       for (let i = 0; i < ks.length - 1; i++) {
         const k = (ks[i] + ks[i + 1]) / 2;
-        if (sz) beamTris(tt, [cx + k * h, yy, cz + sz * (h - 0.05)], [cx + k * h, yy + 0.03, cz + sz * (h + 0.8)], 0.06, 0.1);
-        else beamTris(tt, [cx + sx * (h - 0.05), yy, cz + k * h], [cx + sx * (h + 0.8), yy + 0.03, cz + k * h], 0.06, 0.1);
+        if (sz) toronBundle(tt, [cx + k * hh, yy, cz + sz * (hh - 0.05)], [0, sz], 0.8, tr);
+        else toronBundle(tt, [cx + sx * (hh - 0.05), yy, cz + k * hh], [sx, 0], 0.8, tr);
       }
     }
   }
@@ -316,9 +368,25 @@ function greatMosque(el, { bag, col }) {
       taper(bag, uf[0] + (alongZ ? 0 : inward * 0.3), uf[1] + (alongZ ? inward * 0.3 : 0), tf, tf + 0.7, 0.3, 0.24, 0.9);
     }
   }
+  // the platform's edge, hand-plastered (docs/settlements/djenne.md §18): a rounded coping roll along the top of its face and a low
+  // foot course a hand's breadth proud of it, both broken where the flights of steps reach it
+  { const D = 0.3, halves = (g) => [[0, A - g], [A + g, 2 * A]];
+    const edges = [
+      { x: true, c: cz + A, sg: 1, runs: halves(6.6) }, { x: true, c: cz - A, sg: -1, runs: halves(6.6) },
+      { x: false, c: cx - A, sg: -1, runs: halves(5.6) }, { x: false, c: cx + A, sg: 1, runs: [[0, 2 * A]] },
+    ];
+    edges.forEach((e, i) => {
+      for (const [t0, t1] of e.runs) {
+        const p = e.x ? [cx - A + t0, e.c] : [e.c, cz - A + t0], q = e.x ? [cx - A + t1, e.c] : [e.c, cz - A + t1];
+        roll(bag, 'banco_smooth', p, q, py - 0.2, 0.27, 61 + i * 7);
+        const lo = e.sg > 0 ? e.c : e.c - D, hi = e.sg > 0 ? e.c + D : e.c;
+        bag.add('banco_smooth', e.x ? box(p[0], -0.4, lo, q[0], 0.45, hi) : box(lo, -0.4, p[1], hi, 0.45, q[1]));
+      }
+    });
+  }
   // the walls: the hall (east part) and the court (west part)
   const x0 = cx - A + 4, x1 = cx + A - 4, z0 = cz - A + 8, z1 = cz + A - 8, xm = cx + 2, H = 10;
-  const w = (a, b, opts = {}) => bancoWall(bag, col, a, b, py, opts.h ?? H, 0.9, { step: 3, ph: 2.2, ...opts });
+  const w = (a, b, opts = {}) => bancoWall(bag, col, a, b, py, opts.h ?? H, 0.9, { step: 3, ph: 2.2, round: true, ...opts });
   // the hall's piers in nine arcaded rows between its west wall and the qibla wall, evenly spaced
   const rowX = (i) => xm + 0.45 + (x1 - xm - 0.9) * (i + 0.5) / 9, bayZ = (j) => z0 + (z1 - z0) * (j + 0.5) / 10;
   // the main entrance on the north side (Wikipedia: "The main entrance is on the northern side"),
@@ -329,7 +397,7 @@ function greatMosque(el, { bag, col }) {
   // the qibla wall carries the three mihrabs and the minbar's niche (below, in the towers); the north and south walls of the hall the
   // "small, irregularly-positioned windows" that let in little light (Wikiwand): one in most bays, at uneven heights, a palm-wood lintel over each
   const NICHES = [[cz, 1.2], [cz + 2.6, 0.75], [cz - 13, 0.9], [cz + 13, 0.9]];
-  w([x1, z0], [x1, z1], { out: -1, h: 11, gaps: NICHES.map(([zc, hw]) => ({ s0: zc - hw - z0, s1: zc + hw - z0, top: 2.6, arch: true })) });   // the qibla wall (east), pilasters outside
+  w([x1, z0], [x1, z1], { out: -1, h: 11, skip: [[cz - 4.7 - z0, cz + 4.7 - z0], [cz - 13 - 3.9 - z0, cz - 13 + 3.9 - z0], [cz + 13 - 3.9 - z0, cz + 13 + 3.9 - z0]], gaps: NICHES.map(([zc, hw]) => ({ s0: zc - hw - z0, s1: zc + hw - z0, top: 2.6, arch: true })) });   // the qibla wall (east), pilasters outside
   const winRand = rng(2207), bayN = Math.max(1, Math.round((x1 - x0) / 3));
   const windows = (south) => {
     const out = [];
@@ -415,8 +483,39 @@ function greatMosque(el, { bag, col }) {
   col.floor([xm, z0, x1, z1], py + 10.5);
   for (let i = 0; i < 4; i++) for (let j = 0; j < 6; j++) {
     const x = xm + (x1 - xm) * (i + 1) / 5, z = z0 + (z1 - z0) * (j + 1) / 7;
-    bag.add('banco_smooth', lathe([[0.4, -0.05], [0.4, 0.22], [0.34, 0.26], [0.001, 0.26]], 10, null, x, py + 10.5, z));      // the vent's collar
-    bag.add('terracotta', lathe([[0.001, 0.25], [0.44, 0.25], [0.44, 0.31], [0.4, 0.42], [0.3, 0.52], [0.16, 0.57], [0.001, 0.58]], 12, null, x, py + 10.5, z));   // the inverted bowl
+    // the vent: a hand-built banco chimney, flared at the foot and shouldered at the mouth, under an inverted fired bowl (slightly different each)
+    const vr = rng(900 + i * 7 + j), k = 0.94 + vr() * 0.12, hv = 0.62 + vr() * 0.1;
+    bag.add('banco_smooth', lathe([[0.5 * k, -0.05], [0.44 * k, 0.12], [0.37 * k, hv * 0.55], [0.34 * k, hv * 0.9], [0.4 * k, hv]], 12, (th) => 1 + 0.03 * Math.sin(2 * th + i + j * 1.7), x, py + 10.5, z));
+    bag.add('terracotta', lathe([[0.001, hv - 0.01], [0.45 * k, hv - 0.01], [0.45 * k, hv + 0.06], [0.4 * k, hv + 0.17], [0.3 * k, hv + 0.27], [0.16 * k, hv + 0.32], [0.001, hv + 0.33]], 12, null, x, py + 10.5, z));   // the inverted bowl
+  }
+  // the roof's parapet (docs/settlements/djenne.md §18): a low wall round the edge of the hall's roof under a rounded coping, a pinnacle with its
+  // ostrich egg every 3 m and at each end of a run; the north tower pair, the stair tower and the qibla wall (which stands higher) interrupt it,
+  // and the clay scuppers' mouths are left open
+  { const yR = py + 10.5, T = 0.36, hP = 0.75, xa = xm - 0.5, xb = x1 + 0.5, za = z0 - 0.5, zb = z1 + 0.5;
+    const nSp = Math.max(1, Math.round((x1 - x0) / 3)), scup = [];
+    for (let k = 0; k < nSp; k += 2) { const x = x0 + (k + 0.5) * (x1 - x0) / nSp; if (x > xm + 0.8) scup.push([x - 0.25, x + 0.25]); }
+    const edge = (axisX, c, a0, a1, skips, scups, seed) => {
+      const cuts = [...skips.map(([p0, q0]) => [p0, q0, true]), ...scups.map(([p0, q0]) => [p0, q0, false])].sort((m, n) => m[0] - n[0]), runs = [];
+      let t = a0; for (const [p0, q0, big] of cuts) { if (p0 > t) runs.push([t, p0, big]); t = Math.max(t, q0); } if (a1 > t) runs.push([t, a1]);
+      const V = (u, v) => (axisX ? [u, v] : [v, u]);
+      runs.forEach(([u0, u1], r) => {
+        if (u1 - u0 < 0.2) return;
+        const p = V(u0, c), q = V(u1, c), lo = c - T / 2, hi = c + T / 2;
+        bag.add('banco_smooth', axisX ? box(u0, yR, lo, u1, yR + hP, hi) : box(lo, yR, u0, hi, yR + hP, u1));
+        col.rect(axisX ? [u0, lo, u1, hi] : [lo, u0, hi, u1], yR, yR + hP + 0.2);
+        roll(bag, 'banco_smooth', p, q, yR + hP, 0.25, seed + r);
+      });
+      const n = Math.max(1, Math.round((a1 - a0) / 3)), at = [];
+      for (let k = 0; k <= n; k++) at.push(a0 + (a1 - a0) * k / n);
+      for (const [p0, q0, big] of cuts) if (big) at.push(p0 - 0.3, q0 + 0.3);
+      at.forEach((u, k) => {
+        if (cuts.some(([p0, q0, big]) => (big ? u > p0 - 0.1 && u < q0 + 0.1 : u > p0 - 0.6 && u < q0 + 0.6)) && !(k >= n + 1)) return;
+        const [px, pz] = V(u, c); roundCol(bag, px, pz, yR, hP + 0.1, 0.34, 0.28, 1.1, { egg: k % 2 ? 0.55 : 0.7 });
+      });
+    };
+    edge(true, za + T / 2, xa, xb, [[towersX[0] - 2.65, towersX[0] + 2.65], [towersX[1] - 2.65, towersX[1] + 2.65]], scup, 71);
+    edge(true, zb - T / 2, xa, xb, [[ST[0] - 0.3, ST[2] + 0.3]], scup, 81);
+    edge(false, xa + T / 2, za + 0.6, zb - 0.6, [], [], 91);
   }
   // ceramic half-pipes along the roof's edge, throwing the rain clear of the north and south walls (between the pilasters)
   { const L = x1 - x0, n = Math.max(1, Math.round(L / 3));
@@ -449,32 +548,33 @@ function greatMosque(el, { bag, col }) {
   for (const [zz, s] of [[cz, 1.2], [cz - 13, 1], [cz + 13, 1]]) {
     const tw = 3.2 * s, th = 16 * s;
     qiblaFoot(zz, tw, th, zz === cz ? [NICHES[0], NICHES[1]] : [[zz, 0.9]]);
-    bag.add('banco_smooth', box(x1 + 1.6 - tw - 0.15, py + th - 0.4, zz - tw - 0.15, x1 + 1.6 + tw + 0.15, py + th, zz + tw + 0.15));
-    for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1], [0, 0]]) {
-      const px = x1 + 1.6 + dx * tw * 0.75, pz = zz + dz * tw * 0.75, ph = dx || dz ? 3 : 4.5;
-      bag.add(B, lathe([[0.55, 0], [0.4, ph * 0.7], [0.08, ph]], 8, null, px, py + th, pz));
-      bag.add('tura_limestone', lathe([[0.001, 0], [0.18, 0.12], [0.2, 0.28], [0.001, 0.48]], 8, null, px, py + th + ph, pz));     // the ostrich egg
+    const tx = x1 + 1.6, fAt = (y) => tw * (1.2 - 0.2 * (y - py) / th), yR = py + th + 0.05, tr = rng(500 + Math.round(zz));
+    // the cornice, a rounded roll along its top edge, and the crown of pinnacles each with its egg: the corners and the middle tall,
+    // a shorter one at the middle of each side
+    bag.add('banco_smooth', box(tx - tw - 0.15, py + th - 0.4, zz - tw - 0.15, tx + tw + 0.15, py + th, zz + tw + 0.15));
+    { const e = tw + 0.02, y = py + th + 0.04;
+      roll(bag, B, [tx - e, zz - e], [tx + e, zz - e], y, 0.24, 11); roll(bag, B, [tx + e, zz - e], [tx + e, zz + e], y, 0.24, 12);
+      roll(bag, B, [tx + e, zz + e], [tx - e, zz + e], y, 0.24, 13); roll(bag, B, [tx - e, zz + e], [tx - e, zz - e], y, 0.24, 14); }
+    for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1], [0, 0], [-1, 0], [1, 0], [0, -1], [0, 1]]) {
+      const mid = (dx === 0) !== (dz === 0), ph = !dx && !dz ? 4.5 : mid ? 2.1 : 3, r = mid ? 0.42 : 0.55;
+      roundCol(bag, tx + dx * tw * 0.75, zz + dz * tw * 0.75, py + th, 0.7, r, r * 0.78, ph - 0.7, { egg: ph > 4 ? 1.1 : 0.85 });
     }
-    // engaged ribs on the three outer faces, battered with the face, rising through the cornice as pinnacles
-    const tx = x1 + 1.6, fA = tw * 1.2, yR = py + th + 0.05, fB = tw * (1.2 - 0.2 * (yR - py) / th), dF = fA - fB;
+    // soft ribs on the three outer faces, battered with the face, rising through the cornice as pinnacles; round corner shafts at the two outer corners
     for (const k of [-0.33, 0.33]) {
-      const sh = k * (fB - fA);
-      bag.add(B, frustum([tx + fA - 0.05, zz + k * fA - 0.3, tx + fA + 0.32, zz + k * fA + 0.3], py, yR, -dF, dF + 0.08, sh + 0.06, -sh + 0.06));
-      bag.add(B, lathe([[0.26, 0], [0.18, 1.1], [0.04, 1.6]], 8, null, tx + fB + 0.1, yR, zz + k * fB));
-      for (const sz of [-1, 1]) {
-        const r0 = sz < 0 ? [tx + k * fA - 0.3, zz - fA - 0.32, tx + k * fA + 0.3, zz - fA + 0.05] : [tx + k * fA - 0.3, zz + fA - 0.05, tx + k * fA + 0.3, zz + fA + 0.32];
-        bag.add(B, frustum(r0, py, yR, sh + 0.06, -sh + 0.06, sz < 0 ? dF + 0.08 : -dF, sz < 0 ? -dF : dF + 0.08));
-        bag.add(B, lathe([[0.26, 0], [0.18, 1.1], [0.04, 1.6]], 8, null, tx + k * fB, yR, zz + sz * (fB + 0.1)));
-      }
+      softCol(bag, py, yR, 2, (y) => [tx + fAt(y) + 0.13, zz + k * fAt(y)], 0.3, 0.2, 'z', k * 5);
+      for (const sz of [-1, 1]) softCol(bag, py, yR, 2, (y) => [tx + k * fAt(y), zz + sz * (fAt(y) + 0.13)], 0.3, 0.2, 'x', k * 3 + sz);
+      const f = fAt(yR);
+      for (const [rx, rz] of [[tx + f + 0.13, zz + k * f], [tx + k * f, zz - f - 0.13], [tx + k * f, zz + f + 0.13]]) { roundCol(bag, rx, rz, yR, 0.3, 0.3, 0.26, 1.3, { egg: 0.6 }); }
     }
-    // toron on the tower's three outer faces, following the batter
+    for (const sz of [-1, 1]) softCol(bag, py, yR, 2, (y) => [tx + fAt(y) + 0.02, zz + sz * (fAt(y) + 0.02)], 0.4, 0.4, 'x', sz * 2);
+    // toron on the tower's three outer faces, following the batter: bundles of three sticks
     const tt = [];
     for (let r = 1; r < Math.floor(th / 1.6); r++) {
-      const yy = py + r * 1.6, f = tw * (1.2 - 0.2 * (yy - py) / th);
+      const yy = py + r * 1.6, f = fAt(yy);
       for (const k of [-0.66, 0, 0.66]) {
-        beamTris(tt, [tx + f - 0.05, yy, zz + k * f], [tx + f + 0.85, yy + 0.03, zz + k * f], 0.06, 0.1);
+        toronBundle(tt, [tx + f - 0.05, yy, zz + k * f], [1, 0], 0.85, tr);
         if (tx + k * f < x1 + 0.6 && yy < py + 10.6) continue;     // (not into the hall: the tower's foot starts at the wall's outer face)
-        for (const sz of [-1, 1]) beamTris(tt, [tx + k * f, yy, zz + sz * (f - 0.05)], [tx + k * f, yy + 0.03, zz + sz * (f + 0.85)], 0.06, 0.1);
+        for (const sz of [-1, 1]) toronBundle(tt, [tx + k * f, yy, zz + sz * (f - 0.05)], [0, sz], 0.85, tr);
       }
     }
     bag.add('timber', fromTriangles(tt));
@@ -486,7 +586,12 @@ function greatMosque(el, { bag, col }) {
     taper(bag, xx, zc, py, py + 13, 2.4, 2);
     // the crown: a cornice, pinnacles at the corners and a taller one in the middle
     bag.add('banco_smooth', box(xx - 2.15, py + 12.6, zc - 2.15, xx + 2.15, py + 13.0, zc + 2.15));
-    for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1], [0, 0]]) bag.add(B, lathe([[0.5, 0], [0.36, (dx || dz ? 2.2 : 3.2) * 0.7], [0.07, dx || dz ? 2.2 : 3.2]], 8, null, xx + dx * 1.5, py + 13.0, zc + dz * 1.5));
+    { const e = 2.17, y = py + 13.04;
+      roll(bag, B, [xx - e, zc - e], [xx + e, zc - e], y, 0.22, 21); roll(bag, B, [xx + e, zc - e], [xx + e, zc + e], y, 0.22, 22);
+      roll(bag, B, [xx + e, zc + e], [xx - e, zc + e], y, 0.22, 23); roll(bag, B, [xx - e, zc + e], [xx - e, zc - e], y, 0.22, 24); }
+    for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1], [0, 0]]) roundCol(bag, xx + dx * 1.5, zc + dz * 1.5, py + 13.0, 0.6, 0.5, 0.4, (dx || dz ? 2.2 : 3.2) - 0.6, { egg: dx || dz ? 0.8 : 1 });
+    // the corners of the shaft rounded by round shafts leaning with it
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) softCol(bag, py, py + 13.0, 2, (y) => [xx + sx * (2.4 - 0.4 * (y - py) / 13), zc + sz * (2.4 - 0.4 * (y - py) / 13)], 0.36, 0.36, 'x', sx + sz * 2);
     faceRibs(bag, xx, zc, py, py + 12.6, 2.4, 2.4 - 0.4 * 12.6 / 13, ['n', xx < mainX ? 'w' : 'e'], [-0.5, 0.5], 1.4);
     col.rect([xx - 2.4, zc - 2.4, xx + 2.4, zc + 2.4], py, py + 13);
   }

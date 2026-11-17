@@ -130,6 +130,15 @@ Level: L3 in part. Missing for L3: the crier's room; the six stairs (three drawn
 
 Sources added: [Wikiwand](https://www.wikiwand.com/en/articles/Great_Mosque_of_Djenne) (niches, minbar, windows); [Aramco World 1990](https://archive.aramcoworld.com/issue/199006/djenn.-living.tradition.htm) (crier's opening, male and female parts of the house); [Springer 2021](https://link.springer.com/10.1186/s43238-021-00040-y) (typologies).
 
+## 18. The landmark seen close: hand-shaped buttresses, crowns, parapet, platform edge (2026-11-17)
+
+- **Faults found:** the buttresses were square tapered boxes with plain cones; the qibla wall's buttresses stood buried inside the towers; the tower ribs were flat-faced blocks with hard corners; toron were single square bars; the hall's roof had no parapet; the platform was a plain box; the roof vents were flat collars.
+- **Buttresses.** "pilaster-like buttresses ending in pinnacles" [stated: Wikipedia, Djenné; New World Encyclopedia: eighteen buttresses] and ostrich eggs on the pinnacles of the mosque [stated: Designing Buildings; Wikiwand]. Ours (`roundCol`): a column with a squared-circle section (rounded corners), flared at the foot, narrowing upward, ending in a cone finial with an ostrich egg; each differs a little (section wobble, height) as hand-plastered work does. On every wall of the hall and court; buried ones on the qibla wall removed. Egg on every finial [inferred from photographs; sizes ours, eggs enlarged to be seen].
+- **Towers.** Ribs and the two outer corners of each qibla tower and the entrance towers are soft shafts (`softCol`) leaning with the batter; the cornice carries a rounded roll and nine pinnacles with eggs (corners and centre tall, middle of each side shorter) [number inferred]. Toron in bundles of three tied sticks of unequal length [stated: Studio Matrx, bundles of palm sticks; the three inferred].
+- **Parapet.** A low wall (0.75 m) with a rounded coping round the hall's roof, a pinnacle with an egg every 3 m, broken at the towers, the stair tower and the scuppers [form inferred from photographs of the roofline].
+- **Platform edge.** A rounded coping roll along the top of the 3 m face and a foot course a hand's breadth proud, broken where the flights meet it [inferred].
+- **Roof vents.** Banco chimneys, flared and shouldered, each slightly different, under the inverted fired bowls [stated: Wikiwand, bowls; chimney form inferred].
+
 ## Sources
 
 - [Great Mosque of Djenne — Designing Buildings Wiki](https://designingbuildings.co.uk/wiki/Great_Mosque_of_Djenne)
