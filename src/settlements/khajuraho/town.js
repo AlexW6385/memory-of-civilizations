@@ -14,6 +14,35 @@ export function frontPoint(l, u, v) {
 }
 const faceDir = ([dx, dz]) => Math.atan2(-dx, -dz), awayDir = ([dx, dz]) => Math.atan2(dx, dz);
 
+
+const hashN = (a) => { let h = Math.imul(a | 0, 2654435761) >>> 0; h ^= h >>> 15; h = Math.imul(h, 2246822519) >>> 0; return (h >>> 0) / 4294967296; };
+let SPOTS = null;
+/** The village's wayside things (docs/settlements/khajuraho.md §15): in the open gaps between the rows beyond the first 120 m from the arrival,
+ *  a shrine of the village goddess, an ox-cart standing with its beast, a potter's kiln — found by rule, not placed by hand: along each lane,
+ *  the stretches of its side where no house, yard or other lane stands, picked by a hash and kept 24 m apart. */
+function waysideSpots() {
+  if (SPOTS) return SPOTS;
+  SPOTS = [];
+  const HALF = { shrine: 2.4, kiln: 4.0, cart: 3.5 }, KINDS = ['shrine', 'cart', 'kiln', 'cart', 'shrine', 'cart'];
+  const L = lots(), Y = yards(), cands = [];
+  const hit = (a, b, m) => a[0] < b[2] + m && a[2] > b[0] - m && a[1] < b[3] + m && a[3] > b[1] - m;
+  for (const s of STREETS) for (const side of [-1, 1]) for (let t = s.a + 6; t < s.b - 6; t += 3) cands.push({ s, side, t, k: hashN(Math.floor(t) * 7919 + Math.floor(s.c) * 104729 + (side + 2) * 31) });
+  cands.sort((p, q) => p.k - q.k);
+  for (const cd of cands) {
+    if (SPOTS.length >= 30) break;
+    const kind = KINDS[SPOTS.length % KINDS.length], h = HALF[kind], s = cd.s, off = s.w / 2 + 0.5 + h;
+    const c = s.axis === 'x' ? [cd.t, s.c + cd.side * off] : [s.c + cd.side * off, cd.t], [x, z] = c, r = [x - h, z - h, x + h, z + h];
+    if (Math.hypot(x + 14, z + 60) < 120 || Math.hypot(x, z) > RADIUS - 60 || tankD(x, z) < 20) continue;
+    if (SPOTS.some((q) => Math.hypot(q.c[0] - x, q.c[1] - z) < 24)) continue;
+    if (L.some((l) => hit(r, l.rect, 0.8)) || Y.some((y) => hit(r, y.rect, 1.5))) continue;
+    if (STREETS.some((o) => o !== s && hit(r, streetRect(o), 0.6)) || TEMPLES_BLOCK.some((b) => hit(r, b, 4))) continue;
+    const rot = s.axis === 'x' ? (cd.side < 0 ? 0 : Math.PI) : (cd.side < 0 ? Math.PI / 2 : -Math.PI / 2);
+    SPOTS.push({ kind, c, rot, seed: Math.floor(cd.k * 1e6), axis: s.axis });
+  }
+  return SPOTS;
+}
+const TEMPLES_BLOCK = [[-110, -125, 80, 55], [0, -110, 80, 10]];
+
 export function village() {
   return lodTiles('khajuraho-houses', 'nagara', lots().map((l) => ({ t: 'bazaar_house', rect: l.rect, front: l.front, y: 0, foot: -0.2, seed: l.seed, kind: l.kind, open: l.open, trade: l.trade })), { near: 150, R: RADIUS, entrance: { at: [0, 0], facing: 'w' } });
 }
@@ -27,6 +56,7 @@ export function extras() {
   }
   E.push({ t: 'rest_house', rect: [-20, 17, -3, 26], plinth: 0.7, h: 3.2 });
   E.push(...laneRites());
+  for (const w of waysideSpots()) if (w.kind === 'shrine') E.push({ t: 'wayside_shrine', c: w.c, y: 0, rot: w.rot, seed: w.seed }); else if (w.kind === 'kiln') E.push({ t: 'kiln', c: w.c, y: 0, rot: w.rot, seed: w.seed });
   // the forecourt before Kandariya's stair, flagged in sandstone between the lane's end and the flight (a flush slab: it reads as stone, not earth, from the lane)
   E.push({ t: 'block', rect: [-33.2, -66.4, -24.4, -53.6], y0: -0.3, y1: 0.03, mat: 'sandstone_floor', walk: true });
   // the ghat: steps down the tank's north bank, their tops following the ground, a landing at each end with a kiosk
@@ -129,6 +159,8 @@ export function dressing() {
     } else if (kind === 'shed') {
       L.push({ t: 'animal', kind: 'zebu', at: at(Lw * 0.35, -0.7), y: 0.42, rot: rotOut + 1.57, seed: seed++, graze: false, mat: pickOf(['hide_white', 'hide_grey', 'hide_tan']) });
       L.push({ t: 'trough', at: at(Lw * 0.75, -1.0), y: 0, rot: rotOut, seed: seed++ });
+      // an open shed: the zebu stands tied to its stakes inside, a boy beside it
+      if (l.open) { const Dd = (l.front === 's' || l.front === 'n') ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0]; L.push({ t: 'animal', kind: 'zebu', at: P(Lw * 0.5, Dd * 0.45), y: 0.42, rot: rotOut, seed: seed++, graze: false, mat: pickOf(['hide_white', 'hide_grey', 'hide_tan']) }); }
     } else {
       // homes: water pots by the door, a stool or a bench on the platform, firewood and dung cakes, a drying tray, hens
       L.push({ t: 'pot', at: at(u1, -0.7), y: yPl, seed: seed++, kind: 'matka', n: 2 });
@@ -140,6 +172,13 @@ export function dressing() {
       if (rand() < 0.35) F(at(u2, -0.6), yPl, out, { pose: 'sit_low', dress: 'wrap', cloth: pickOf(['cloth_red', 'cloth_green', 'cloth_indigo', 'cloth_ochre']), cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5 });
       if (rand() < 0.15) L.push({ t: 'animal', kind: 'zebu', at: at(u1, -2.6), y: 0, rot: rotOut + 1.0, seed: seed++, graze: false, mat: pickOf(['hide_white', 'hide_grey']) });
     }
+  }
+  // the wayside: an ox-cart standing in its lane's side, heavy with sacks or hay; a woman at the shrine; the potter by his kiln
+  for (const w of waysideSpots()) {
+    const [x, z] = w.c;
+    if (w.kind === 'cart') L.push({ t: 'cart', at: [x, z], y: 0, rot: w.axis === 'x' ? 1.5708 : 0, seed: w.seed, kind: 'two', load: pickOf(['sacks', 'hay', 'sacks', 'barrels']), beast: 'ox' });
+    else if (w.kind === 'shrine') { const q = [Math.sin(w.rot) * 1.8, Math.cos(w.rot) * 1.8]; F([x + q[0], z + q[1]], 0.4, [-q[0], -q[1]], { dress: 'wrap', cloth: pickOf(['cloth_red', 'cloth_green', 'cloth_indigo']), cloth2: 'cloth_ochre', hair: 'bun', over: 'shawl', h: 1.5, arms: 'pray' }); }
+    else { const q = [Math.sin(w.rot) * 3.1, Math.cos(w.rot) * 3.1]; F([x + q[0], z + q[1]], 0, [-q[0], -q[1]], { pose: 'squat', dress: 'wrap', top: 'bare', hair: 'short', hat: 'turban', cloth: 'cloth_ochre' }); L.push({ t: 'firewood', at: [x + Math.cos(w.rot) * 2.6, z - Math.sin(w.rot) * 2.6], y: 0, rot: w.rot, seed: seed++, len: 1.1 }); }
   }
   // wells at the crossings of the main lanes, a stone lamp by each
   for (const s of STREETS) if (s.axis === 'z' && s.kind === 'lane') {

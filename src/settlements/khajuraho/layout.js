@@ -82,7 +82,10 @@ export function lots() {
           placed.push(r);
           if (keep) {
             const seed = Math.floor(rand() * 1e6), dTemple = Math.hypot(cx - 30, cz - 10);
-            const open = s.id === 'approach' ? kind === 'shop' : (kind === 'shop' || kind === 'home' || kind === 'haveli') && dTemple < 150 && rand() < (kind === 'shop' ? 0.8 : 0.45);
+            // beyond the first 120 m the houses are walked into as well: most of the shops, and half of the homes, huts, merchants' houses and cattle sheds, to the village's edge
+            const share = { shop: 0.85, home: 0.6, haveli: 0.55, mud: 0.5, hut: 0.5, shed: 0.6 }[kind] ?? 0;
+            const legacy = (kind === 'shop' || kind === 'home' || kind === 'haveli') && dTemple < 150 && rand() < (kind === 'shop' ? 0.8 : 0.45);   // (kept so the random stream, and with it the plan of the village, stays as it was)
+            const open = s.id === 'approach' ? kind === 'shop' : legacy || (dTemple < 330 && hash(seed + 17) < share * (dTemple < 150 ? 1 : 0.85));
             LOTS.push({ rect: r, seed, y: 0, foot: -0.2, front, kind, open, street: s.id, main, trade: s.id === 'approach' ? APPROACH_TRADES[seed % 8] : ['grain', 'potter', 'cloth', 'oil', 'sweets', 'smith', 'flowers', 'grain', 'potter', 'cloth'][seed % 10] });
           }
         }
@@ -97,7 +100,8 @@ export function lots() {
     const w = 5 + rand() * 2, r = [x, z, x + w, z + 6.5];
     if (placed.some((p) => overlap(r, p, 14)) || STREETS.some((s) => overlap(r, streetRect(s, 8)))) continue;
     placed.push(r);
-    LOTS.push({ rect: r, seed: Math.floor(rand() * 1e6), y: 0, foot: -0.2, front: ['n', 's', 'e', 'w'][Math.floor(rand() * 4)], kind: rand() < 0.5 ? 'mud' : 'hut', farm: true });
+    const fseed = Math.floor(rand() * 1e6);
+    LOTS.push({ rect: r, seed: fseed, y: 0, foot: -0.2, front: ['n', 's', 'e', 'w'][Math.floor(rand() * 4)], kind: rand() < 0.5 ? 'mud' : 'hut', farm: true, open: hash(fseed + 5) < 0.5 });
     if (LOTS.length > 600) break;
   }
   // the yards between the rows: cells of the 48 m grid not covered by a building

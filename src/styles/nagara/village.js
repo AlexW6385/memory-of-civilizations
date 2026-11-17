@@ -21,6 +21,8 @@ function building(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, f = el.front, y = el.y ?? 0, simple = !!el.simple, kind = el.kind || 'home';
   const rand = rng((el.seed || 1) + 5), along = f === 's' || f === 'n', L = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0;
   const open = !!el.open && !simple, fy = y + 0.42, T = 0.3;
+  // the front's rule: each house takes its post, eave, parapet, dado, window and doorway from its own seed (a separate stream, so the plan stays the same)
+  const vr = rng((el.seed || 1) * 977 + 13), pS = Math.floor(vr() * 3), fS = Math.floor(vr() * 3), parS = Math.floor(vr() * 3), dadoS = vr(), winS = Math.floor(vr() * 3), doorS = Math.floor(vr() * 3), vS = Math.floor(vr() * 4);
   const P = (u, v) => (f === 's' ? [x1 - u, z1 - v] : f === 'n' ? [x0 + u, z0 + v] : f === 'e' ? [x1 - v, z0 + u] : [x0 + v, z1 - u]);
   const R = (u0, v0, u1, v1) => { const a = P(u0, v0), b = P(u1, v1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
   const B = (m, u0, v0, u1, v1, ya, yb, c = false) => { const r = R(u0, v0, u1, v1); bag.add(m, box(r[0], ya, r[1], r[2], yb, r[3])); if (c) col.rect(r, ya, yb); };
@@ -50,10 +52,12 @@ function building(el, ctx) {
     B(wall, 0, D - T, L, D, fy, top, true); B(wall, 0, T, T, D - T, fy, top, true); B(wall, L - T, T, L, D - T, fy, top, true);
     B(wall, 0, 0, du - dw / 2, T, fy, top, true); B(wall, du + dw / 2, 0, L, T, fy, top, true);
     B(wall, du - dw / 2, 0, du + dw / 2, T, fy + (open0 ? 2.4 : 2.1), top);
+    if (!open0 && doorS === 1) { B('sandstone', du - dw / 2 - 0.15, -0.08, du + dw / 2 + 0.15, 0.0, fy + 2.1, fy + 2.25); B('sandstone_dressed', du - 0.14, -0.1, du + 0.14, -0.03, fy + 2.25, fy + 2.5); }
+    else if (!open0 && doorS === 2) { for (const sgn of [-1, 1]) B('limewash_red', du + sgn * (dw / 2 + 0.08) - 0.07, -0.05, du + sgn * (dw / 2 + 0.08) + 0.07, 0.0, fy, fy + 2.1); B('limewash_red', du - dw / 2 - 0.15, -0.05, du + dw / 2 + 0.15, 0.0, fy + 2.1, fy + 2.25); }
     const r = R(0, 0, L, D); col.floor(r, fy); col.rect(r, top - 0.1, top + 0.3);
     B('earth_wall', T, T, L - T, D - T, fy - 0.1, fy + 0.012); B('timber', T, T, L - T, D - T, top - 0.06, top - 0.02);
     for (let u = T + 0.6; u < L - T; u += 1.0) B('wood_dark', u - 0.07, T, u + 0.07, D - T, top - 0.24, top - 0.06);
-    furnish(el.trade && kind === 'shop' ? el.trade : kind === 'haveli' ? 'home' : 'home');
+    furnish(el.trade && kind === 'shop' ? el.trade : kind === 'shed' ? 'cattle' : 'home');
     if (kind === 'shop') {
       // the keeper's seat: a white cotton mattress (gaddi) and bolster on the floor behind the counter (the keeper sits there: town.js, dressing());
       // the potter's keeper sits on a plain mat by the door; on the back wall the picture of the household god with its garland and lamp on a shelf
@@ -84,6 +88,38 @@ function building(el, ctx) {
       const cu = L - T - 2.0;
       for (const v of [T + 0.7, T + 1.9]) { if (v + 0.9 > bk - 0.8 || cu < T + 0.8) continue; B('timber', cu, v, cu + 1.9, v + 0.9, fy + 0.4, fy + 0.46, true); B('cloth_white', cu + 0.05, v + 0.05, cu + 1.85, v + 0.85, fy + 0.46, fy + 0.48); for (const [a, b] of [[0, 0], [1.85, 0], [0, 0.85], [1.85, 0.85]]) B('timber', cu + a, v + b, cu + a + 0.05, v + b + 0.05, fy, fy + 0.4); }
       pot('earth_wall', T + 0.5, T + 0.8, 0.35, 1.0); B('cloth_ochre', T + 0.9, T + 0.2, T + 1.9, T + 0.45, fy, fy + 0.06);
+      // by the house's own habit (its seed): the grinding stone and the churn; the weaver's frame loom; the grain bin, the hanging cradle and the pots slung from the beam
+      const rope = (u, v, ya, yb) => { const q = P(u, v); bag.add('rope_fibre', rod([q[0], ya, q[1]], [q[0], yb, q[1]], 0.012, 4)); };
+      const up = T + 0.1, uc2 = Math.min(T + 1.4, cu - 0.2);
+      if (vS === 1 && D > 5.8) {
+        const q = P(T + 0.75, 2.3);
+        bag.add('granite_grey', lathe([[0.001, 0], [0.34, 0], [0.34, 0.12], [0.001, 0.12]], 12, null, q[0], fy, q[1])); bag.add('granite_grey', lathe([[0.001, 0.12], [0.3, 0.12], [0.3, 0.2], [0.04, 0.2], [0.001, 0.2]], 12, null, q[0], fy, q[1])); col.circle(q[0], q[1], 0.34, fy, fy + 0.2);
+        B('timber', T + 0.9, 2.2, T + 0.96, 2.26, fy + 0.2, fy + 0.34);
+        pot('terracotta', T + 0.8, 3.7, 0.25, 0.5); B('timber', T + 0.77, 3.67, T + 0.83, 3.73, fy + 0.45, fy + 1.45); B('wood_dark', T + 0.55, 3.69, T + 1.05, 3.71, fy + 1.3, fy + 1.34);
+        col.circle(P(T + 0.8, 3.7)[0], P(T + 0.8, 3.7)[1], 0.26, fy, fy + 0.5);
+      } else if (vS === 2 && D > 6.0) {
+        for (const [pu, pv] of [[up + 0.1, 1.9], [up + 1.2, 1.9], [up + 0.1, 3.6], [up + 1.2, 3.6]]) B('timber', pu, pv, pu + 0.08, pv + 0.08, fy, fy + 1.25, true);
+        for (const pv of [1.9, 3.6]) B('wood_dark', up + 0.1, pv, up + 1.28, pv + 0.08, fy + 1.25, fy + 1.33);
+        B('timber', up + 0.1, 2.5, up + 1.28, 2.58, fy + 0.7, fy + 0.76);
+        B('cloth_white', up + 0.3, 1.95, up + 1.1, 2.5, fy + 0.62, fy + 0.64); B('cloth_indigo', up + 0.3, 2.5, up + 1.1, 3.1, fy + 0.6, fy + 0.66); B('cloth_ochre', up + 0.3, 3.1, up + 1.1, 3.55, fy + 0.6, fy + 0.64);
+        B('timber', up + 0.2, 3.95, up + 1.2, 4.3, fy, fy + 0.28);
+        pot('terracotta', up + 1.6, 4.3, 0.2, 0.2);
+      } else if (vS === 3 && D > 6.0) {
+        pot('earth_wall', T + 0.75, 3.0, 0.38, 1.15); pot('thatch', T + 0.75, 3.0, 0.42, 0.25, fy + 1.15);
+        col.circle(P(T + 0.75, 3.0)[0], P(T + 0.75, 3.0)[1], 0.4, fy, fy + 1.4);
+        rope(0.9, 4.3, top - 0.24, fy + 0.65); rope(0.9, 4.75, top - 0.24, fy + 0.65);
+        B('timber', 0.62, 4.28, 1.18, 4.77, fy + 0.5, fy + 0.58); B('cloth_ochre', 0.66, 4.32, 1.14, 4.73, fy + 0.58, fy + 0.66);
+        rope(0.9, 2.2, top - 0.24, fy + 1.5); pot('terracotta', 0.9, 2.2, 0.13, 0.2, fy + 1.3); rope(1.9, 5.0, top - 0.24, fy + 1.55); pot('terracotta', 1.9, 5.0, 0.11, 0.18, fy + 1.35);
+      }
+      void uc2;
+    } else if (trade === 'cattle') {
+      // the cattle shed within: dung cakes stacked at the corner, a heap of fodder, two stakes to tie the beasts to, a yoke hung on the back wall, a pot of salt water
+      B('earth_wall', T + 0.1, T + 0.1, T + 1.1, T + 0.7, fy, fy + 0.55, true);
+      for (let k = 0; k < 5; k++) pot('earth_wall', T + 0.25 + k * 0.18, T + 0.4, 0.08, 0.05, fy + 0.55);
+      pot('thatch', L - T - 0.9, T + 0.9, 0.62, 0.75); col.circle(P(L - T - 0.9, T + 0.9)[0], P(L - T - 0.9, T + 0.9)[1], 0.6, fy, fy + 0.75);
+      for (const su of [L * 0.3, L * 0.7]) B('timber', su - 0.05, D * 0.42, su + 0.05, D * 0.42 + 0.1, fy, fy + 0.9, true);
+      const yu = L * 0.5; B('wood_dark', yu - 0.7, bk - 0.1, yu + 0.7, bk - 0.02, fy + 1.9, fy + 2.0); for (const sgn of [-1, 1]) B('wood_dark', yu + sgn * 0.3 - 0.015, bk - 0.1, yu + sgn * 0.3 + 0.015, bk - 0.02, fy + 1.55, fy + 1.9);
+      pot('terracotta', L - T - 0.4, bk - 0.9, 0.2, 0.3);
     } else if (trade === 'grain') {
       for (let k = 0; k < 4; k++) { const u = T + 0.7 + k * (L - 2 * T - 1.4) / 3; pot('sacking', u, bk - 0.5, 0.32, 0.8, fy); }
       B('timber', T + 0.3, T + 0.9, L - T - 0.3, T + 1.3, fy, fy + 0.8, true); for (let k = 0; k < 4; k++) pot('cloth_ochre', T + 0.7 + k * (L - 2 * T - 1.1) / 3, T + 1.1, 0.16, 0.12, fy + 0.8);
@@ -133,16 +169,37 @@ function building(el, ctx) {
   } else {
     // flat roof of earth on beams with a low parapet; the haveli's upper floor is a plain storey
     B('earth_wall', -0.15, -0.15, L + 0.15, D + 0.15, top, top + 0.12);
-    for (const [u0, v0, u1, v1] of [[-0.15, -0.15, L + 0.15, 0.05], [-0.15, D - 0.05, L + 0.15, D + 0.15], [-0.15, -0.15, 0.05, D + 0.15], [L - 0.05, -0.15, L + 0.15, D + 0.15]]) B(wall, u0, v0, u1, v1, top + 0.12, top + 0.7);
-    B('sandstone', -0.2, -0.2, L + 0.2, 0.0, top + 0.7, top + 0.76);
+    for (const [u0, v0, u1, v1] of [[-0.15, D - 0.05, L + 0.15, D + 0.15], [-0.15, -0.15, 0.05, D + 0.15], [L - 0.05, -0.15, L + 0.15, D + 0.15]]) B(wall, u0, v0, u1, v1, top + 0.12, top + 0.7);
+    // the front parapet by rule: plain with a stone coping, battlemented (merlons on a low wall), or a balustrade of little posts on a low wall
+    if (parS === 1) { B(wall, -0.15, -0.15, L + 0.15, 0.05, top + 0.12, top + 0.42); for (let u = -0.15; u < L; u += 0.75) B(wall, u, -0.15, Math.min(L + 0.15, u + 0.45), 0.05, top + 0.42, top + 0.85); }
+    else if (parS === 2) { B(wall, -0.15, -0.15, L + 0.15, 0.05, top + 0.12, top + 0.4); for (let u = 0.1; u < L; u += 0.4) B('sandstone', u - 0.035, -0.12, u + 0.035, -0.02, top + 0.4, top + 0.88); B('sandstone', -0.2, -0.2, L + 0.2, 0.0, top + 0.88, top + 0.96); }
+    else { B(wall, -0.15, -0.15, L + 0.15, 0.05, top + 0.12, top + 0.7); B('sandstone', -0.2, -0.2, L + 0.2, 0.0, top + 0.7, top + 0.76); }
+    // a spout of stone through the front parapet to throw the rain into the lane
+    { const ua = 0.35 + vr() * (L - 0.7), a = P(ua, -0.05), b = P(ua, -0.7); bag.add('sandstone', rod([a[0], top + 0.2, a[1]], [b[0], top + 0.1, b[1]], 0.045, 5)); }
     if (!simple) for (let k = 0; k < 3; k++) { const u = 0.8 + rand() * (L - 1.6), v = 1 + rand() * (D - 2); B('earth_wall', u, v, u + 0.7, v + 0.5, top + 0.12, top + 0.4 + rand() * 0.1); }
   }
   // the front: posts and a tiled lean-to over the platform, the eave board; openings, frames, stains
   const nb = Math.max(2, Math.round(L / 2.1));
   if (kind !== 'hut') {
     const ya = y + (storeys === 2 ? 3.0 : 0) + 2.55, ve = fy + 2.45;
-    for (let k = 0; k <= nb; k++) { const u = k * L / nb; B('timber', Math.max(0, u - 0.07), -oD + 0.1, Math.min(L, u + 0.07), -oD + 0.24, fy - 0.03, ve); col.rect(R(Math.max(0, u - 0.07), -oD + 0.1, Math.min(L, u + 0.07), -oD + 0.24), fy, ve); }
+    for (let k = 0; k <= nb; k++) {
+      const u = k * L / nb, uc = Math.max(0.1, Math.min(L - 0.1, u));
+      if (pS === 1) {
+        // a turned round post on a stone base, a flared head
+        const q = P(uc, -oD + 0.17);
+        bag.add('timber', lathe([[0.1, 0], [0.075, 0.12], [0.06, 0.5], [0.07, 1.4], [0.058, 1.9], [0.09, 2.2], [0.1, ve - fy + 0.03]], 8, null, q[0], fy - 0.03, q[1]));
+        B('sandstone', uc - 0.14, -oD + 0.03, uc + 0.14, -oD + 0.31, fy - 0.03, fy + 0.12);
+      } else {
+        B('timber', Math.max(0, u - 0.07), -oD + 0.1, Math.min(L, u + 0.07), -oD + 0.24, fy - 0.03, ve);
+        // bracketed head: two short brackets either side of the post carry the beam
+        if (pS === 2 && k > 0 && k < nb) for (const sgn of [-1, 1]) B('wood_dark', uc + sgn * 0.3 - 0.2, -oD + 0.08, uc + sgn * 0.3 + 0.2, -oD + 0.26, ve - 0.14, ve - 0.04);
+      }
+      col.rect(R(Math.max(0, u - 0.07), -oD + 0.1, Math.min(L, u + 0.07), -oD + 0.24), fy, ve);
+    }
     B('wood_dark', -0.1, -oD + 0.05, L + 0.1, -oD + 0.28, ve, ve + 0.2);
+    // the eave beam's face: a row of carved blocks under it, or a valance of coloured cloth hung from it
+    if (fS === 1) for (let u = 0.2; u < L - 0.1; u += 0.34) B('timber', u - 0.07, -oD - 0.03, u + 0.07, -oD + 0.05, ve - 0.15, ve);
+    else if (fS === 2 && !open0) for (let k = 0; k * 0.3 < L; k++) B(['cloth_red', 'cloth_ochre', 'cloth_indigo'][(k + (el.seed || 0)) % 3], k * 0.3, -oD - 0.02, Math.min(L, k * 0.3 + 0.3), -oD + 0.05, ve - 0.3, ve);
     // lean-to: slab sloping from the wall at (fy + 3.0) down to the beam
     const q = [P(-0.3, 0.05), P(L + 0.3, 0.05), P(L + 0.3, -oD - 0.3), P(-0.3, -oD - 0.3)], yt = [fy + 2.95, fy + 2.95, ve + 0.25, ve + 0.25];
     const pts = q.map((p, i) => [p[0], yt[i], p[1]]), bot = pts.map((p) => [p[0], p[1] - 0.12, p[2]]);
@@ -154,15 +211,23 @@ function building(el, ctx) {
     const win = (u, w, h, v0) => { B('opening', u - w / 2, -0.01, u + w / 2, 0.02, fy + v0, fy + v0 + h); B('wood_dark', u - w / 2 - 0.08, -0.04, u - w / 2, 0.04, fy + v0, fy + v0 + h + 0.08); B('wood_dark', u + w / 2, -0.04, u + w / 2 + 0.08, 0.04, fy + v0, fy + v0 + h + 0.08); B('wood_dark', u - w / 2 - 0.08, -0.04, u + w / 2 + 0.08, 0.04, fy + v0 + h, fy + v0 + h + 0.08); for (let k = 1; k < 5; k++) B('wood_dark', u - w / 2 + k * w / 5 - 0.015, -0.03, u - w / 2 + k * w / 5 + 0.015, 0.03, fy + v0, fy + v0 + h); };
     for (let k = 0; k < nb; k++) {
       const u = (k + 0.5) * L / nb;
-      if (Math.abs(u - doorU) < 0.9 && !open) { B('timber', doorU - 0.5, -0.04, doorU + 0.5, 0.03, fy, fy + 2.0); B('wood_dark', doorU - 0.6, -0.06, doorU + 0.6, 0.05, fy + 2.0, fy + 2.15); for (let j = 1; j < 5; j++) B('wood_dark', doorU - 0.5 + j * 0.2, -0.05, doorU - 0.49 + j * 0.2, 0.04, fy + 0.05, fy + 1.95); }
-      else if (!(open && Math.abs(u - doorU) < 0.9)) win(u, 0.75, 0.8, 1.15);
+      if (Math.abs(u - doorU) < 0.9 && !open) {
+        // the doorway by rule: plain, a carved stone lintel with the elephant-headed god over it, or red pilasters with a painted lintel
+        if (doorS === 1) { B('sandstone', doorU - 0.72, -0.08, doorU + 0.72, 0.0, fy + 2.15, fy + 2.3); B('sandstone_dressed', doorU - 0.14, -0.1, doorU + 0.14, -0.03, fy + 2.3, fy + 2.55); }
+        else if (doorS === 2) { for (const sgn of [-1, 1]) B('limewash_red', doorU + sgn * 0.68 - 0.07, -0.05, doorU + sgn * 0.68 + 0.07, 0.0, fy, fy + 2.15); B('limewash_red', doorU - 0.75, -0.05, doorU + 0.75, 0.0, fy + 2.15, fy + 2.3); } B('timber', doorU - 0.5, -0.04, doorU + 0.5, 0.03, fy, fy + 2.0); B('wood_dark', doorU - 0.6, -0.06, doorU + 0.6, 0.05, fy + 2.0, fy + 2.15); for (let j = 1; j < 5; j++) B('wood_dark', doorU - 0.5 + j * 0.2, -0.05, doorU - 0.49 + j * 0.2, 0.04, fy + 0.05, fy + 1.95); }
+      else if (!(open && Math.abs(u - doorU) < 0.9)) {
+        if (winS === 1) { win(u, 1.0, 0.7, 1.2); for (const sgn of [-1, 1]) B('timber', u + sgn * 0.5 - (sgn < 0 ? 0 : 0.34), -0.07, u + sgn * 0.5 + (sgn < 0 ? 0.34 : 0), -0.03, fy + 1.2, fy + 1.9); }
+        else if (winS === 2) { for (const sgn of [-1, 1]) { B('opening', u + sgn * 0.3 - 0.07, -0.01, u + sgn * 0.3 + 0.07, 0.02, fy + 1.8, fy + 2.4); B('sandstone', u + sgn * 0.3 - 0.12, -0.04, u + sgn * 0.3 + 0.12, 0.03, fy + 1.72, fy + 1.8); } B('limewash_white', u - 0.5, -0.03, u + 0.5, 0.0, fy + 2.45, fy + 2.52); }
+        else win(u, 0.75, 0.8, 1.15);
+      }
       if (storeys === 2) win(u, 0.8, 1.0, 3.2);
     }
   }
   if (!simple) {
     // weathering: the damp rising in the foot, streaks under the eaves, whitewash and rangoli at the door
     B('plaster_damp', 0.02, -0.03, L - 0.02, 0.0, fy, fy + 0.7); B('plaster_streak', 0.1, -0.03, L - 0.1, 0.0, top - 0.7, top - 0.02);
-    if (rand() < 0.5) B('limewash_white', 0.3, -0.03, L - 0.3, 0.0, fy + 0.7, fy + 0.85);
+    const rr = rand(), bandM = dadoS < 0.25 ? 'limewash_red' : dadoS < 0.45 ? 'limewash_yellow' : dadoS < 0.75 ? 'limewash_white' : null;
+    if (bandM) B(bandM, 0.3, -0.03, L - 0.3, 0.0, fy + 0.7, fy + 0.85); else if (rr < 0.35) B('limewash_white', 0.3, -0.03, L - 0.3, 0.0, fy + 0.7, fy + 0.85);
     if (!open0 && kind !== 'hut') for (const u of [doorU - 0.8, doorU + 0.8]) B('limewash_red', u - 0.15, -oD + 0.3, u + 0.15, -oD + 0.6, fy - 0.025, fy - 0.01);
     if (kind === 'haveli') {
       // balconies on brackets over the verandah's beam, a railing of balusters, a little tiled hood
@@ -245,4 +310,46 @@ function lampPillar(el, { bag, col }) {
   bag.add('bronze', lathe([[0.001, 0], [0.04, 0.03], [0.001, 0.14]], 6, null, cx, yt + 0.62, cz));
 }
 
-export const villageElements = { bazaar_house: building, yard_wall: yardWall, rest_house: restHouse, chhatri, lamp_pillar: lampPillar };
+
+/** wayside_shrine: a village shrine at a lane's side (gāṃv-devatā): a low stone platform, three upright stones daubed with red lead (sindūr) and
+ *  garlanded, a trident with a red pennant, a niche for the lamp, pots of offering. { c, y, rot, seed } — the platform 2.6 m square, its front toward +z turned by rot. */
+function waysideShrine(el, { bag, col }) {
+  const [cx, cz] = el.c, y = el.y ?? 0, rot = el.rot ?? 0, co = Math.cos(rot), si = Math.sin(rot);
+  const Q = (u, v) => [cx + u * co + v * si, cz - u * si + v * co];
+  const Bx = (m, u0, v0, u1, v1, ya, yb, c = false) => { const a = Q(u0, v0), b = Q(u1, v1), r = [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; bag.add(m, box(r[0], ya, r[1], r[2], yb, r[3])); if (c) col.rect(r, ya, yb); };
+  Bx('sandstone', -1.4, -1.4, 1.4, 1.4, y - 0.3, y + 0.14, true); Bx('sandstone_floor', -1.3, -1.3, 1.3, 1.3, y + 0.14, y + 0.4, true);
+  { const p0 = Q(-1.3, -1.3), p1 = Q(1.3, 1.3); col.floor([Math.min(p0[0], p1[0]), Math.min(p0[1], p1[1]), Math.max(p0[0], p1[0]), Math.max(p0[1], p1[1])], y + 0.4); }
+  const top = y + 0.4;
+  // the three stones, the middle one the tallest, each with its red-lead cap and a garland round the shoulder
+  [[-0.7, 0.5, 0.2], [0, 0.65, 0.24], [0.7, 0.42, 0.18]].forEach(([u, h, r], k) => {
+    const q = Q(u, -0.3);
+    bag.add('granite_grey', lathe([[0.001, 0], [r, 0.02], [r * 1.05, h * 0.4], [r * 0.85, h * 0.8], [r * 0.45, h * 0.97], [0.001, h]], 8, null, q[0], top, q[1]));
+    bag.add('limewash_red', lathe([[r * 0.92, h * 0.7], [r * 0.93, h * 0.82], [r * 0.6, h * 0.93], [r * 0.44, h * 0.975]], 8, null, q[0], top, q[1]));
+    bag.add(k === 1 ? 'cloth_white' : 'cloth_red', lathe([[r * 1.06, h * 0.3], [r * 1.12, h * 0.34], [r * 1.12, h * 0.4], [r * 1.06, h * 0.44]], 8, null, q[0], top, q[1]));
+    col.circle(q[0], q[1], r * 1.1, top, top + h);
+  });
+  // the trident planted behind them, its pennant
+  const t = Q(0, 0.7);
+  bag.add('iron', rod([t[0], top, t[1]], [t[0], top + 1.9, t[1]], 0.018, 5));
+  for (const dd of [-0.14, 0, 0.14]) { const a = Q(dd, 0.7); bag.add('iron', rod([a[0], top + 1.75, a[1]], [a[0], top + 2.1 + (dd ? 0 : 0.1), a[1]], 0.012, 4)); }
+  { const a = Q(-0.12, 0.7), b = Q(-0.55, 0.7); bag.add('cloth_red', fromTriangles(orientOutward([a[0], top + 1.6, a[1], b[0], top + 1.5, b[1], b[0], top + 1.2, b[1], a[0], top + 1.6, a[1], b[0], top + 1.2, b[1], a[0], top + 1.35, a[1]]))); }
+  // the lamp niche: a little block of stone with a dark recess, the lamp in it
+  Bx('sandstone', 0.55, 0.45, 1.1, 0.9, top, top + 0.8, true); Bx('opening', 0.62, 0.43, 1.03, 0.45, top + 0.3, top + 0.7); Bx('sandstone_dressed', 0.5, 0.4, 1.15, 0.95, top + 0.8, top + 0.88);
+  const l = Q(0.82, 0.44); bag.add('flame', box(l[0] - 0.015, top + 0.32, l[1] - 0.015, l[0] + 0.015, top + 0.38, l[1] + 0.015));
+  // offerings: a row of clay lamps, a pot of water, a coconut-sized heap of flowers
+  for (let k = 0; k < 4; k++) { const a = Q(-0.8 + k * 0.22, 0.55); bag.add('terracotta', lathe([[0.001, 0], [0.05, 0.01], [0.06, 0.04], [0.04, 0.05], [0.001, 0.04]], 6, null, a[0], top, a[1])); }
+  const w = Q(-0.9, 1.0); bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.02], [0.17, 0.12], [0.13, 0.26], [0.1, 0.3], [0.001, 0.3]], 9, null, w[0], top, w[1]));
+  const f = Q(0.2, 0.2); bag.add('cloth_red', lathe([[0.001, 0], [0.12, 0.01], [0.08, 0.06], [0.001, 0.08]], 7, null, f[0], top, f[1]));
+}
+
+/** kiln: a potter's updraught kiln (a domed mound of clay with a stoke-hole and a smoke-vent), fired pots stacked round it to cool, a heap of fuel, the clay pit's mound. { c, y, rot, seed } */
+function kiln(el, { bag, col }) {
+  const [cx, cz] = el.c, y = el.y ?? 0, rot = el.rot ?? 0, co = Math.cos(rot), si = Math.sin(rot), Q = (u, v) => [cx + u * co + v * si, cz - u * si + v * co];
+  bag.add('earth_wall', lathe([[1.6, -0.2], [1.5, 0.3], [1.3, 0.9], [0.95, 1.4], [0.5, 1.7], [0.2, 1.85], [0.28, 1.9], [0.2, 1.95], [0.001, 1.95]], 14, null, cx, y, cz)); col.circle(cx, cz, 1.55, y, y + 1.9);
+  bag.add('mud_plaster', lathe([[1.62, 0.12], [1.56, 0.2], [1.4, 0.26], [1.62, 0.13]], 14, null, cx, y, cz));
+  const m = Q(0, 1.45); bag.add('opening', box(m[0] - 0.3, y, m[1] - 0.3, m[0] + 0.3, y + 0.55, m[1] + 0.3));
+  for (let k = 0; k < 9; k++) { const a = (k / 9) * 6.2832 + 0.4, p = Q(Math.cos(a) * 2.5, Math.sin(a) * 2.5 + (Math.sin(a) > 0.6 ? 0.3 : 0)); if (Math.sin(a) > 0.55) continue; bag.add(k % 3 ? 'terracotta' : 'pottery_dark', lathe([[0.001, 0], [0.16, 0.02], [0.22, 0.2], [0.16, 0.38], [0.11, 0.42], [0.001, 0.42]], 8, null, p[0], y, p[1])); col.circle(p[0], p[1], 0.2, y, y + 0.4); }
+  const f = Q(2.6, 1.6); bag.add('thatch', lathe([[0.9, 0], [0.8, 0.35], [0.45, 0.6], [0.001, 0.65]], 8, null, f[0], y, f[1])); col.circle(f[0], f[1], 0.85, y, y + 0.6);
+}
+
+export const villageElements = { wayside_shrine: waysideShrine, kiln, bazaar_house: building, yard_wall: yardWall, rest_house: restHouse, chhatri, lamp_pillar: lampPillar };
