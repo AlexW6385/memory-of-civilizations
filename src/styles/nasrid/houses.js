@@ -24,7 +24,7 @@ function house(el, { bag, col }) {
   const B = (mat, u0, v0, u1, v1, ya, yb, c = false) => { const r = R(u0, v0, u1, v1); bag.add(mat, box(r[0], ya, r[1], r[2], yb, r[3])); if (c) col.rect(r, ya, yb); };
   const bays = Math.max(1, Math.round(L / 3.6)), du = (Math.floor(bays / 2) + 0.5) * L / bays;
   bag.add(LW, box(x0 - 0.05, (el.foot ?? y) - 0.6, z0 - 0.05, x1 + 0.05, y + 0.12, z1 + 0.05));
-  if (el.solid) {
+  if (el.solid || el.simple) {
     bag.add(LW, box(x0, y, z0, x1, top, z1)); col.rect(el.rect, y, top);
     B('roof_tile', -0.05, -0.05, L + 0.05, D + 0.05, top, top + 0.1);
     return;
@@ -68,6 +68,9 @@ function house(el, { bag, col }) {
   // a tiled canopy on corbels over the door (the shops have their cloth awning instead); on the other houses a crenellated coping
   if (!SHOP && VAR === 1) { B('roof_tile', du - 1.0, -0.7, du + 1.0, -0.02, y + 2.8, y + 2.9); for (const dd of [-0.8, 0.8]) B('wood_dark', du + dd - 0.05, -0.62, du + dd + 0.05, -0.02, y + 2.5, y + 2.8); }
   if (VAR === 3 || (VAR === 0 && N === 3)) for (let u = 0.2; u < L - 0.4; u += 0.75) B(LW, u, 0, u + 0.4, T, top + 0.1, top + 0.45);
+  // fronts varied by rule (one in five wears a wooden eave on corbels, one in five a tiled skirting; the arch, canopy and coping are the variants above)
+  if (el.seed % 5 < 2 && VAR !== 3) { B('roof_tile', -0.12, -0.48, L + 0.12, -0.06, top - 0.2, top - 0.1); for (let u = 0.5; u < L - 0.3; u += 0.9) B('wood_dark', u - 0.04, -0.46, u + 0.04, -0.06, top - 0.5, top - 0.2); }
+  if (el.seed % 5 === 3) for (const [a, b] of [[0.05, du - 0.95], [du + 0.95, L - 0.05]]) if (b - a > 0.4) { B('glaze_blue', a, -0.03, b, 0.01, y + 0.12, y + 0.62); B('glaze_white', a, -0.035, b, 0.01, y + 0.62, y + 0.7); }
   // the floors: each storey a slab with the flight below it cut out; the flights; the roof
   const fy = y + 0.15, lvl = (k) => (k === 0 ? fy : y + k * ST);
   const holeOf = (k) => (k % 2 === 0 ? [T, 1.4, T + 1.05, 5.6] : [L - T - 1.05, 1.4, L - T, 5.6]);

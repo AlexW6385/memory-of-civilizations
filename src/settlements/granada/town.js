@@ -9,9 +9,13 @@ export async function town() {
   const patio = new Set(albaicinPatios(all));
   // the medina's houses and the Albaicín's first rows above the Darro are of the Nasrid style: enterable inside the walls, closed blocks beyond
   const near = (l) => l.y === HILL.top || (l.rect[3] < -118 && l.rect[3] > -190 && l.rect[0] > -170 && l.rect[2] < 210);
+  // beyond them (§5.2) one house in four of the Albaicín's rest and of the town below the hill is of the same kind, enterable, in tiles seen in full only near
+  const farOpen = (l) => !patio.has(l) && !near(l) && l.seed % 4 === 0 && l.rect[2] - l.rect[0] >= 8.4 && l.rect[0] > -230 && l.rect[2] < 230 && (l.rect[3] < -118 ? l.rect[1] > -300 : l.rect[1] > 50 && l.rect[3] < 230);
   const mine = (l) => near(l) && !patio.has(l);
-  plans.push({ ...base('granada-houses-near', all.filter(mine).map((l) => ({ t: 'andalusi_house', rect: l.rect, y: l.y, foot: l.foot, front: l.front, seed: l.seed, storeys: l.storeys, solid: l.y !== HILL.top }))), style: 'nasrid' });
-  plans.push(...lodTiles('granada-houses', 'vernacular', all.filter((l) => !patio.has(l) && !mine(l)).map((l) => ({ t: 'house_med', variant: 'moorish', ...l, ...(open.has(l) ? { open: true, use: open.get(l) } : {}) })), { R: RADIUS }));
+  const house = (l) => ({ t: 'andalusi_house', rect: l.rect, y: l.y, foot: l.foot, front: l.front, seed: l.seed, storeys: l.storeys, solid: false });
+  plans.push({ ...base('granada-houses-near', all.filter(mine).map(house)), style: 'nasrid' });
+  plans.push(...lodTiles('granada-houses-open', 'nasrid', all.filter(farOpen).map(house), { R: RADIUS }));
+  plans.push(...lodTiles('granada-houses', 'vernacular', all.filter((l) => !patio.has(l) && !mine(l) && !farOpen(l)).map((l) => ({ t: 'house_med', variant: 'moorish', ...l, ...(open.has(l) ? { open: true, use: open.get(l) } : {}) })), { R: RADIUS }));
   // the Albaicín's houses round their patios and its cisterns (§5.1), in the Nasrid style
   const cis = aljibes(all);
   plans.push({ ...base('granada-albaicin', [...[...patio].map((l) => ({ t: 'patio_house', rect: l.rect, y: l.y, foot: l.foot, front: l.front, seed: l.seed })), ...cis]), style: 'nasrid' });
@@ -26,7 +30,7 @@ export async function town() {
     { t: 'alcaiceria', rect: SOUK, y: 0, seed: 3 },
   ]), style: 'nasrid' });
   // the fronts of the lanes dressed at eye level (§14): the medina's, and the Albaicín's first rows above the Darro
-  const dressed = all.filter(near).map((l) => ({ rect: l.rect, y: l.y, front: l.front, seed: l.seed, storeys: l.storeys, enterable: l.y === HILL.top, kind: patio.has(l) ? 'patio' : 'med' }));
+  const dressed = all.filter((l) => near(l) || farOpen(l)).map((l) => ({ rect: l.rect, y: l.y, front: l.front, seed: l.seed, storeys: l.storeys, enterable: l.y === HILL.top || farOpen(l) || near(l), kind: patio.has(l) ? 'patio' : 'med' }));
   plans.push({ ...base('granada-streets', [
     { t: 'lane_dress', lots: dressed },
     { t: 'medina_garden', rects: gardens() },
