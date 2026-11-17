@@ -103,8 +103,8 @@ function palace(el, ctx) {
       bag.add('brick_buff', box(x0, y - 0.5, -2, x1, y + FH, FZ)); col.rect([x0, -2, x1, FZ], y, y + FH);
       // beside the great arch a framed field of carved stucco 3 m wide (the pishtaq's pier); beyond it blind pointed arches in two ranks, their frames in baked brick
       const near = sd < 0 ? x1 : x0, pu0 = sd < 0 ? near - 3.0 : near + 0.25, pu1 = sd < 0 ? near - 0.25 : near + 3.0, ffr = { O: [0, FZ], U: [1, 0], N: [0, 1] };
-      stuccoPanel(bag, ffr, pu0 + 0.2, pu1 - 0.2, y + 0.6, y + 7.3, 0.06, 'stucco', 0.46);
-      stuccoPanel(bag, ffr, pu0 + 0.2, pu1 - 0.2, y + 7.9, y + 14.0, 0.06, 'stucco', 0.62);
+      stuccoPanel(bag, ffr, pu0 + 0.2, pu1 - 0.2, y + 0.6, y + 7.3, 0.06, 'stucco', 0.62);
+      stuccoPanel(bag, ffr, pu0 + 0.2, pu1 - 0.2, y + 7.9, y + 14.0, 0.06, 'stucco', 0.85);
       bag.add('plaster_white', box(pu0, y, FZ, pu0 + 0.2, y + 14.4, FZ + 0.16)); bag.add('plaster_white', box(pu1 - 0.2, y, FZ, pu1, y + 14.4, FZ + 0.16));
       bag.add('plaster_white', box(pu0, y + 7.3, FZ, pu1, y + 7.9, FZ + 0.16)); bag.add('plaster_white', box(pu0, y + 14.0, FZ, pu1, y + 14.4, FZ + 0.16)); bag.add('plaster_white', box(pu0, y, FZ, pu1, y + 0.6, FZ + 0.16));
       const ax0 = sd < 0 ? x0 : near + 3.4, ax1 = sd < 0 ? near - 3.4 : x1, n = 3, bw = (ax1 - ax0 - 0.8) / n;
@@ -177,8 +177,8 @@ function furnishChamber({ bag, col, lights }, y) {
   for (const [a, b, ox, oz] of [[[-S, -S], [S, -S], 0, 1], [[-S, -S], [-S, S], 1, 0], [[S, -S], [S, S], -1, 0]]) {
     const f2 = { O: [a[0], a[1]], U: [(b[0] - a[0]) / (2 * S), (b[1] - a[1]) / (2 * S)], N: [ox, oz] };
     const door = ox !== 0;                                              // the east and west walls have a door in the middle (3.4 m, apex 5.6)
-    if (door) { for (const [u0, u1] of [[0, S - 1.8], [S + 1.8, 2 * S]]) stuccoPanel(bag, f2, u0, u1, y, y + 2.6, 0.04, 'stucco', 0.4); stuccoPanel(bag, f2, 0, 2 * S, y + 5.9, y + 8.6, 0.03, 'stucco', 0.55); for (const [u0, u1] of [[0, S - 1.8], [S + 1.8, 2 * S]]) stuccoPanel(bag, f2, u0, u1, y + 3.1, y + 5.8, 0.03, 'stucco', 0.55); }
-    else { stuccoPanel(bag, f2, 0.0, 2 * S, y, y + 2.6, 0.04, 'stucco', 0.4); stuccoPanel(bag, f2, 0.0, 2 * S, y + 3.1, y + 8.6, 0.03, 'stucco', 0.55); }
+    if (door) { for (const [u0, u1] of [[0, S - 1.8], [S + 1.8, 2 * S]]) stuccoPanel(bag, f2, u0, u1, y, y + 2.6, 0.04, 'stucco', 0.4); stuccoPanel(bag, f2, 0, 2 * S, y + 5.9, y + 8.6, 0.03, 'stucco', 0.85); for (const [u0, u1] of [[0, S - 1.8], [S + 1.8, 2 * S]]) stuccoPanel(bag, f2, u0, u1, y + 3.1, y + 5.8, 0.03, 'stucco', 0.85); }
+    else { stuccoPanel(bag, f2, 0.0, 2 * S, y, y + 2.6, 0.04, 'stucco', 0.4); stuccoPanel(bag, f2, 0.0, 2 * S, y + 3.1, y + 8.6, 0.03, 'stucco', 0.85); }
     for (const [s0, s1] of door ? [[-S, -1.7], [1.7, S]] : [[-S, S]]) bag.add('tile_lapis', door ? box(ox > 0 ? -S : S - 0.04, y + 2.6, s0, ox > 0 ? -S + 0.04 : S, y + 2.9, s1) : box(s0, y + 2.6, -S, s1, y + 2.9, -S + 0.04));
   }
   lights.push({ at: [0, y + 4, 0], color: '#fff0d0', intensity: 3, distance: 16 });

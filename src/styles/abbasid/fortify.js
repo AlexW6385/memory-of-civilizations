@@ -3,7 +3,8 @@
 // teak columns over each main gate. Everything is built in a local frame (kit.local) so the facets stand at any angle.
 
 import { box, fromTriangles, lathe } from '../../core/geom.js';
-import { orientedBox, lineFrame, local, barrel, archBand, domeShell, merlons, archCurve, rng, D2R } from './kit.js';
+import { towerDetail } from './facade.js';
+import { orientedBox, lineFrame, local, barrel, archBand, domeShell, merlons, archCurve, spandrel, stuccoPanel, archPoly, polyGeo, rng, D2R } from './kit.js';
 
 /**
  * ring_wall: { c, r (the wall's middle), th, h, mat, gates: [angles deg] with `gap` (m, the gate's width along the wall),
@@ -44,6 +45,7 @@ function ringWall(el, ctx) {
         for (let j = 0; j < k; j++) { const aa = j / k * Math.PI * 2 + 0.13, x = tx + Math.cos(aa) * (t.r + 0.1), z = tz + Math.sin(aa) * (t.r + 0.1); bag.add(mat, box(x - 0.32, ty + 0.44, z - 0.32, x + 0.32, ty + 1.6, z + 0.32)); }
         bag.add(mat, lathe([[0.001, 0], [t.r - 0.19, 0]], 16, null, tx, ty + 0.44, tz));      // the tower's deck, under the dark hatch
         bag.add('opening', lathe([[0.001, 0], [t.r * 0.45, 0]], 8, null, tx, ty + 0.46, tz));
+        towerDetail(bag, tx, tz, t.r, ty - y0, y0, mat === 'mudbrick' ? 'mudbrick' : 'brick_buff', mat === 'mudbrick' ? { corbels: 8, slits: 0, rings: 1 } : t.r > 4 ? { corbels: 14, slits: 6, rings: 2 } : { corbels: 10, slits: 3, rings: 1 });
         ctx.col.circle(tx, tz, t.r, y0, ty);
       }
     }
@@ -87,6 +89,61 @@ function doorLeaf(bag, x, z0, z1, h) {
   for (let z = z0 + 0.3; z < z1 - 0.1; z += 0.34) for (let i = 0; i < 14; i++) bag.add('iron', box(x + 0.2, 0.3 + i * (h - 0.6) / 13 - 0.04, z - 0.04, x + 0.24, 0.3 + i * (h - 0.6) / 13 + 0.04, z + 0.04));
 }
 
+
+/**
+ * The main gate's body with a bent passage (docs §14): the outer portal stands to the left of the axis, the inner to the right, and between them a cross hall
+ * under a barrel vault, so that no one sees through and the doors of the two portals are never in line. Local frame, +z outward.
+ */
+function bentBody({ bag, col }, { hw, D, H, w, hh, mat }) {
+  const z0 = -D / 2, z1 = D / 2, hz0 = -2.5, hz1 = 3.0, hh2 = 9.5, ox = -4, ix = 4, rise = archCurve(w, hh).spring;
+  const solid = (x0, za, x1, zb, y0 = 0, y1 = H) => { bag.add(mat, box(x0, y0 - (y0 === 0 ? 1 : 0), za, x1, y1, zb)); col.rect([x0, za, x1, zb], y0, y1); };
+  solid(-hw, hz1, ox - w / 2, z1); solid(ox + w / 2, hz1, hw, z1);
+  solid(-hw, hz0, -hh2, hz1); solid(hh2, hz0, hw, hz1);
+  solid(-hw, z0, ix - w / 2, hz0); solid(ix + w / 2, z0, hw, hz0);
+  solid(-hh2, hz0, hh2, hz1, 8.75, H);
+  for (const [x, za, zb, face] of [[ox, hz1, z1, 1], [ix, z0, hz0, -1]]) {
+    solid(x - w / 2, za, x + w / 2, zb, hh, H);
+    for (const [z, sd] of [[za, -1], [zb, 1]]) {
+      const outer = (face > 0 && sd > 0) || (face < 0 && sd < 0), fr = { O: [x - w / 2, z], U: [1, 0], N: [0, sd] };
+      bag.add(mat, spandrel(fr, 0, 0, w, hh, H, -0.01, 0.01));
+      if (outer) { archBand(bag, fr, 0, 0, w, hh, 0.7, 0, 0.14); stuccoPanel(bag, { O: [x - w / 2 - 2.6, z], U: [1, 0], N: [0, sd] }, 0.2, 2.3, 0.6, 9.5, 0.05, 'plaster', 0.7); stuccoPanel(bag, { O: [x + w / 2 + 0.3, z], U: [1, 0], N: [0, sd] }, 0.2, 2.3, 0.6, 9.5, 0.05, 'plaster', 0.7); }
+    }
+    barrel(bag, 'brick_buff', [x - w / 2, za, x + w / 2, zb], rise, 'z', 10, hh - rise);
+    bag.add('brick_paving', box(x - w / 2, -0.2, za, x + w / 2, 0.02, zb));
+  }
+  barrel(bag, 'plaster', [-hh2, hz0, hh2, hz1], 6.0, 'x', 12, 2.75);
+  bag.add('brick_paving', box(-hh2, -0.2, hz0, hh2, 0.02, hz1));
+  // the hall's end walls: a stucco field each, a bench of brick for the gate guard along the north wall; a lamp niche
+  for (const sd of [-1, 1]) {
+    stuccoPanel(bag, { O: [sd * (hh2 - 0.0), hz0 + 0.3], U: [0, 1], N: [-sd, 0] }, 0, hz1 - hz0 - 0.6, 0.8, 5.6, 0.04, 'plaster', 0.65);
+  }
+  bag.add('brick_baked', box(-hh2, 0, hz1 - 0.6, ox - w / 2, 0.45, hz1)); bag.add('brick_baked', box(ox + w / 2, 0, hz1 - 0.6, hh2, 0.45, hz1));
+  // the base course of limestone and the loops and the band of projecting brick on the outer face (the blocks either side of the portal)
+  for (const [x0, x1] of [[-hw, ox - w / 2], [ox + w / 2, hw]]) {
+    bag.add('limestone', box(x0 - (x0 === -hw ? 0.2 : 0), -1, hz1, x1 + (x1 === hw ? 0.2 : 0), 0.6, z1 + 0.2));
+    for (let k = 0; k < 2; k++) { const xx = x0 + (k + 0.5) * (x1 - x0) / 2; for (const yy of [H * 0.42, H * 0.72]) bag.add('opening', box(xx - 0.12, yy, z1, xx + 0.12, yy + 1.4, z1 + 0.04)); }
+    for (let u = x0 + 0.3; u < x1 - 0.3; u += 0.3) bag.add(mat, box(u, H - 1.0, z1, u + 0.22, H - 0.82, z1 + 0.09));
+  }
+  // the doors of both portals, standing open against the passage walls at the outer end of the outer portal and the inner end of the inner one
+  doorLeaf(bag, ox - w / 2, z1 - 3.2, z1 - 0.15, hh - 1.0);
+  bag.add('cedar', box(ox + w / 2 - 0.16, 0, z1 - 3.2, ox + w / 2, hh - 1.0, z1 - 0.15));
+  for (let i = 0; i < 4; i++) bag.add('iron', box(ox + w / 2 - 0.2, 0.7 + i * (hh - 2.4) / 3 - 0.1, z1 - 3.2, ox + w / 2 - 0.16, 0.7 + i * (hh - 2.4) / 3 + 0.1, z1 - 0.15));
+  bag.add('cedar', box(ix - w / 2, 0, z0 + 0.15, ix - w / 2 + 0.16, hh - 1.0, z0 + 3.2)); bag.add('cedar', box(ix + w / 2 - 0.16, 0, z0 + 0.15, ix + w / 2, hh - 1.0, z0 + 3.2));
+  // the audience chamber over the hall: its three pointed windows with lattice shutters on each face (the chamber "overlooking the city"), a stucco frame, a sill band
+  for (const sd of [-1, 1]) {
+    const fr = { O: [-hw, sd * D / 2], U: [1, 0], N: [0, sd] };
+    for (const cx of [-7, 0, 7]) {
+      const u0 = hw + cx - 1.1;
+      bag.add('opening', polyGeo(fr, archPoly(u0, 11.2, 2.2, 3.6), 0, 0.05));
+      archBand(bag, fr, u0, 11.2, 2.2, 3.6, 0.35, 0, 0.12, ['brick_baked', 'plaster']);
+      for (let k = 1; k < 6; k++) { const xx = u0 + k * 2.2 / 6, p = [fr.O[0] + xx, sd * D / 2 + sd * 0.07]; bag.add('cedar', box(p[0] - 0.02, 11.2, p[1] - 0.02, p[0] + 0.02, 14.2, p[1] + 0.02)); }
+      for (let k = 0; k < 4; k++) bag.add('cedar', box(fr.O[0] + u0, 11.5 + k * 0.7, sd * D / 2 + (sd > 0 ? 0.05 : -0.09), fr.O[0] + u0 + 2.2, 11.56 + k * 0.7, sd * D / 2 + (sd > 0 ? 0.09 : -0.05)));
+    }
+    bag.add('plaster', box(-hw, 10.7, sd > 0 ? D / 2 : -D / 2 - 0.12, hw, 10.95, sd > 0 ? D / 2 + 0.12 : -D / 2));
+    stuccoPanel(bag, fr, 1.0, 2 * hw - 1.0, 15.9, 17.2, 0.05, 'plaster', 0.62);
+  }
+}
+
 /**
  * round_gate: { at: [x, z], face (the outward direction, degrees: 0 east, 90 south…), D (depth through the wall), w (passage width),
  * hh (apex of the arch), H (height of the gate block), W (width of the block), kiosk (the cupola on teak columns), towers }.
@@ -97,32 +154,35 @@ function roundGate(el, ctx) {
   const yaw = (90 - el.face) * D2R;           // local +z = outward; a face of 90 (south) is the identity
   local(ctx, el.at, yaw, (c) => {
     const { bag, col } = c, rise = archCurve(w, hh).spring, spring = rise;
+    if (el.bent) bentBody(c, { hw, D, H, w, hh, mat });
+    else {
     // the two blocks either side of the passage, the mass over it, the base course
-    for (const sd of [-1, 1]) {
-      const x0 = sd < 0 ? -hw : w / 2, x1 = sd < 0 ? -w / 2 : hw;
-      bag.add(mat, box(x0, -1, -D / 2, x1, H, D / 2));
-      col.rect([x0, -D / 2, x1, D / 2], 0, H);
-      bag.add('limestone', box(x0 - 0.2, -1, -D / 2 - 0.2, x1 + 0.2, 0.6, D / 2 + 0.2));
-      // loops and a band of projecting brick under the parapet on the outer face
-      for (let k = 0; k < 3; k++) { const xx = x0 + (k + 0.5) * (x1 - x0) / 3; for (const yy of [H * 0.42, H * 0.72]) bag.add('opening', box(xx - 0.12, yy, D / 2, xx + 0.12, yy + 1.4, D / 2 + 0.04)); }
-      for (let u = x0 + 0.3; u < x1 - 0.3; u += 0.3) bag.add(mat, box(u, H - 1.0, D / 2, u + 0.22, H - 0.82, D / 2 + 0.09));
-    }
-    // over the passage: mass from the arch up to the platform
-    bag.add(mat, box(-w / 2, hh, -D / 2, w / 2, H, D / 2));
-    col.rect([-w / 2, -D / 2, w / 2, D / 2], hh, H);
-    // the faces of the arch: a ring of alternating light and dark voussoirs on each face, set proud
-    for (const sd of [-1, 1]) {
-      c2(bag, mat, sd, w, hh, D, rise);
-    }
-    // the vaulted passage: a barrel from the springing, floor of paving
-    barrel(bag, 'brick_buff', [-w / 2, -D / 2, w / 2, D / 2], spring, 'z', 10, hh - spring);
-    bag.add('brick_paving', box(-w / 2, -0.2, -D / 2, w / 2, 0.02, D / 2));
-    // the doors, standing open and folded back against the passage walls near the outer end
-    doorLeaf(bag, -w / 2, D / 2 - 3.2, D / 2 - 0.15, hh - 1.0);
-    {
-      // the right leaf: mirror
-      bag.add('cedar', box(w / 2 - 0.16, 0, D / 2 - 3.2, w / 2, hh - 1.0, D / 2 - 0.15));
-      for (let i = 0; i < 4; i++) { const y = 0.7 + i * (hh - 2.4) / 3; bag.add('iron', box(w / 2 - 0.2, y - 0.1, D / 2 - 3.2, w / 2 - 0.16, y + 0.1, D / 2 - 0.15)); }
+      for (const sd of [-1, 1]) {
+        const x0 = sd < 0 ? -hw : w / 2, x1 = sd < 0 ? -w / 2 : hw;
+        bag.add(mat, box(x0, -1, -D / 2, x1, H, D / 2));
+        col.rect([x0, -D / 2, x1, D / 2], 0, H);
+        bag.add('limestone', box(x0 - 0.2, -1, -D / 2 - 0.2, x1 + 0.2, 0.6, D / 2 + 0.2));
+        // loops and a band of projecting brick under the parapet on the outer face
+        for (let k = 0; k < 3; k++) { const xx = x0 + (k + 0.5) * (x1 - x0) / 3; for (const yy of [H * 0.42, H * 0.72]) bag.add('opening', box(xx - 0.12, yy, D / 2, xx + 0.12, yy + 1.4, D / 2 + 0.04)); }
+        for (let u = x0 + 0.3; u < x1 - 0.3; u += 0.3) bag.add(mat, box(u, H - 1.0, D / 2, u + 0.22, H - 0.82, D / 2 + 0.09));
+      }
+      // over the passage: mass from the arch up to the platform
+      bag.add(mat, box(-w / 2, hh, -D / 2, w / 2, H, D / 2));
+      col.rect([-w / 2, -D / 2, w / 2, D / 2], hh, H);
+      // the faces of the arch: a ring of alternating light and dark voussoirs on each face, set proud
+      for (const sd of [-1, 1]) {
+        c2(bag, mat, sd, w, hh, D, rise);
+      }
+      // the vaulted passage: a barrel from the springing, floor of paving
+      barrel(bag, 'brick_buff', [-w / 2, -D / 2, w / 2, D / 2], spring, 'z', 10, hh - spring);
+      bag.add('brick_paving', box(-w / 2, -0.2, -D / 2, w / 2, 0.02, D / 2));
+      // the doors, standing open and folded back against the passage walls near the outer end
+      doorLeaf(bag, -w / 2, D / 2 - 3.2, D / 2 - 0.15, hh - 1.0);
+      {
+        // the right leaf: mirror
+        bag.add('cedar', box(w / 2 - 0.16, 0, D / 2 - 3.2, w / 2, hh - 1.0, D / 2 - 0.15));
+        for (let i = 0; i < 4; i++) { const y = 0.7 + i * (hh - 2.4) / 3; bag.add('iron', box(w / 2 - 0.2, y - 0.1, D / 2 - 3.2, w / 2 - 0.16, y + 0.1, D / 2 - 0.15)); }
+      }
     }
     // the parapet round the platform and the terrace
     for (const [a, b] of [[[-hw, D / 2 - 0.4], [hw, D / 2 - 0.4]], [[-hw, -D / 2 + 0.4], [hw, -D / 2 + 0.4]], [[-hw + 0.4, -D / 2], [-hw + 0.4, D / 2]], [[hw - 0.4, -D / 2], [hw - 0.4, D / 2]]]) {

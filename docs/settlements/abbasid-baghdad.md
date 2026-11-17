@@ -116,6 +116,20 @@ Sources added: Wikipedia, *Great Mosque of al-Mansur* (https://en.wikipedia.org/
 
 Still missing for L3: upper-storey rooms and roofs to walk on, sardab cellars, the bimaristan, the paper mill, the Khuld palace, wear and weathering on the new elements, coloured light.
 
+## 14. Landmark pass (the arrival and the close view): what was rebuilt and on what ground
+
+Sources added: Di Cesare, *reconstructive hypothesis* of the Round City's palace (2018, https://iris.uniroma1.it/retrieve/e383531d-7bb8-15e8-e053-a505fe0a3de9/Di%20Cesare_reconstructive%20hypothesis_2018.pdf): al-Khatib's text gives an iwan 30 by 20 cubits before a majlis 20 cubits long, wide and high; over it a dome, and above that a second majlis under the green dome, 80 cubits in all, the horseman on top; each city gate had a domed chamber above it; the streets are called arcades (taq, vaulted galleries) [stated]. Epoch Magazine and the Sunday Observer article (already cited) for the gate chambers [stated]. A source for a bent (dog-leg) gate passage was not found in the pages reached (Wikipedia could not be fetched); the bent passage is therefore [inferred] from the later Abbasid and Islamic gate practice and recorded as our choice.
+
+- **The audience chamber** [stated proportions]: the chamber is now 10 m square inside (was 12), with walls 2 m thick, under a ceiling of four spherical pendentives and a shallow pointed saucer at 10.4 m above the floor, white plaster; above it the floor of the upper majlis (teak, at 19 m), the octagonal drum with framed windows, stucco panels and corner colonettes, and the green dome. Blind arcades and a stucco frieze on the tower's other faces. The south door had been 0.8 m off the axis and is centred; the chamber's stucco dado no longer covers the doors; the hanging lamps hang from the saucer. The tower now stands flush against the iwan's back.
+- **The Golden Gate and the compound wall** [inferred form]: the gate-hall's pishtaq (white plaster frame, two stucco fields, engaged colonettes, gilt inscription band) and the wall's two wings in a blind arcade of pilasters and pointed niches with a stucco frieze and a saw-tooth course. Corner towers with string courses, slits and corbel tables.
+- **The iwan front** [inferred]: beside the great arch a framed field of carved stucco in two tiers; beyond it the blind arcade as before with a stucco band in each bay; a stucco frieze under the cornice.
+- **The Green Dome's horseman**: a horse at the walk with neck, head, ears, tail and four jointed legs, a rider in a caftan and turban, a lance with a pennon, on the finial's pin [stated: the horse and rider with a lance; the detail inferred].
+- **The main gates of the Round City** [inferred]: a bent passage: the outer portal left of the axis, a cross hall under a barrel vault, the inner portal right of the axis (no sight line through; the iron-bound doors stand open in each portal); stucco fields beside the portals; the audience chamber above the hall shown by three lattice-shuttered pointed windows on each face under a stucco frieze, the green cupola on its teak columns above as before. Not entered above the hall (no stair).
+- **The towers of the three walls**: corbel tables turned to face outward, string courses and slits (fewer on the outer wall); merged into the walls' existing materials.
+- Style C stucco only (the geometry is the bevelled lozenge field); styles A and B not drawn.
+
+Still missing for L3: a stair to the gate's audience chamber and the upper majlis; carved wooden ceilings in the mosque; arcaded ring streets with vaulted bays (the shop rows are as in §12); wear and weathering.
+
 ## Sources
 
 - Wikipedia, *Round City of Baghdad* — https://en.wikipedia.org/wiki/Round_City_of_Baghdad (founding 762–766; gates; centre; materials; wooden columns of the mosque).

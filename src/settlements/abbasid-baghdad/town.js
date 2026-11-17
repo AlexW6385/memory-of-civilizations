@@ -66,7 +66,7 @@ export async function town() {
   walls.push({ t: 'moat', c: C, r0: RC.moat0, r1: RC.moat1, y: RC.moatY, gap: 24, gaps: gates, n: 20 });
   for (const f of gates) {
     const at = (r) => [C[0] + Math.cos(f * Math.PI / 180) * r, C[1] + Math.sin(f * Math.PI / 180) * r];
-    walls.push({ t: 'round_gate', at: at(RC.main), face: f, ...GATE, kiosk: true, mat: 'brick_baked' });
+    walls.push({ t: 'round_gate', at: at(RC.main), face: f, ...GATE, kiosk: true, bent: true, mat: 'brick_baked' });
     walls.push({ t: 'round_gate', at: at(RC.outer), face: f, D: 6, w: 5, hh: 6, H: 8.5, W: 13, kiosk: false, bast: 0, mat: 'mudbrick' });
     walls.push({ t: 'round_gate', at: at(RC.inner), face: f, D: 7, w: 5.5, hh: 6.5, H: 11, W: 14, kiosk: false, bast: 0, mat: 'brick_baked' });
   }

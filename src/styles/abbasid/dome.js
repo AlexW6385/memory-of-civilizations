@@ -64,7 +64,7 @@ export function greenDome({ bag, col }, y) {
   const faces = [{ N: [0, -1], U: [-1, 0] }, { N: [1, 0], U: [0, -1] }, { N: [-1, 0], U: [0, 1] }];
   for (const f of faces) {
     const O = [f.N[0] * B - f.U[0] * B, f.N[1] * B - f.U[1] * B], fr = { O, U: f.U, N: f.N }, L = 2 * B;
-    stuccoPanel(bag, fr, 0.6, L - 0.6, y + T0 - 3.6, y + T0 - 1.5, 0.05, 'stucco', 0.42);
+    stuccoPanel(bag, fr, 0.6, L - 0.6, y + T0 - 3.6, y + T0 - 1.5, 0.05, 'stucco', 0.6);
     const n = f.N[1] ? 3 : 2, bw = (L - 1.6) / n;
     for (let k = 0; k < n; k++) {
       const u0 = 0.8 + k * bw + 0.45, w2 = bw - 0.9;
@@ -84,8 +84,8 @@ export function greenDome({ bag, col }, y) {
     const fr = { O: [A[0] + nx * 0.65 * 0 + (Bp[0] - A[0]) / L * 0, A[1]], U: [(Bp[0] - A[0]) / L, (Bp[1] - A[1]) / L], N: [nx, nz] };
     fr.O = [A[0] + nx * 0.65, A[1] + nz * 0.65];
     archBand(bag, fr, L / 2 - 1.2, y + T0 + 3.4, 2.4, 6.4, 0.3, 0.0, 0.1, ['brick_baked', 'plaster']);
-    stuccoPanel(bag, fr, L / 2 - 1.2, L / 2 + 1.2, y + T0 + 0.8, y + T0 + 3.1, 0.05, 'stucco', 0.4);
-    stuccoPanel(bag, fr, 0.5, L / 2 - 1.5, y + T0 + 0.8, y + T0 + 10.6, 0.04, 'stucco', 0.5); stuccoPanel(bag, fr, L / 2 + 1.5, L - 0.5, y + T0 + 0.8, y + T0 + 10.6, 0.04, 'stucco', 0.5);
+    stuccoPanel(bag, fr, L / 2 - 1.2, L / 2 + 1.2, y + T0 + 0.8, y + T0 + 3.1, 0.05, 'stucco', 0.6);
+    stuccoPanel(bag, fr, 0.5, L / 2 - 1.5, y + T0 + 0.8, y + T0 + 10.6, 0.04, 'stucco', 0.85); stuccoPanel(bag, fr, L / 2 + 1.5, L - 0.5, y + T0 + 0.8, y + T0 + 10.6, 0.04, 'stucco', 0.85);
     bag.add('plaster', lathe([[0.2, 0], [0.16, 0.2], [0.14, 11.0], [0.2, 11.2], [0.001, 11.2]], 7, null, A[0] + nx * 0.3, y + T0, A[1] + nz * 0.3));
   }
   const Rd = R + 0.1;
