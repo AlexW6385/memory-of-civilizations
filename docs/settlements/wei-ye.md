@@ -124,3 +124,19 @@ Sources used: Wikipedia, "Bronze Bird Terrace" and "Ye (Hebei)" (§10; the terra
 - **A fix.** The braziers meant for the stairs' heads stood 1.5 m east of the crown's edge, 9 m above the ledge; they now stand on the crown.
 
 Still below L3: the Sparrow's third storey is solid; the lou houses' upper floors and the market shops' upper floors are not entered; the vaults under the Tiger and the Ice Well are the same two open rooms each; no lane dressing inside the wards (the walkers' lanes there are narrow and a prop in the middle clips them); the terraces' faces are smooth earth without visible ramming courses.
+
+
+## 14. The landmark seen close (round 2, 2026-11-17) — what was added and on what ground
+
+Built in `src/styles/wei/landmark.js` and called from `terrace.js`. No new source was fetched this round; the choices rest on the sources of §10 and §13 and are [inferred] unless marked. Departures from the dossier: the bird is larger and more elaborate than the earlier "gilded bird on a mast" (the source says only "a bronze bird on the roof"; its pose is ours: a phoenix, wings raised, a crest, a long tail); the tower now has a colonnade round its ground storey (the dossier gave the pent roof no support).
+
+- **The bronze bird.** A phoenix of about 4 m on a lotus pedestal at the apex: an arched neck, crest of three plumes, eight flight feathers and a layer of coverts on each raised wing, seven tail feathers swept up behind, facing east toward the stair. [stated: a bronze bird topped the roof, Wikipedia "Bronze Bird Terrace"; inferred: the form, after Han bronze and relief phoenixes]
+- **The tower's colonnade and brackets.** Ten red columns on stone footings carry the edge of the ground storey's pent roof; each has a Han bracket set (lu dou block, cross arm, outward arm, sheng blocks; straight arms, no cascading dougong yet, as §5). Raked struts under the eaves of the second and third storeys carry their deep overhangs. [inferred: Han tomb-model buildings show posts and straight bracket arms; the eaves' depth needed a support]
+- **Tile rows.** The three roofs and the pent roof carry raised rows of tile (about 0.6 m apart) from the eave to the hips. [inferred: tiled roofs of rows of pan and cover tiles]
+- **The stairs' open balustrades.** The plaster flank wall is now low; over it stand stone posts every four steps with caps and bronze balls, two raking red-lacquer rails and stone balusters, stepped and raked with the flight. [inferred]
+- **The earth faces' bays.** Between the pilasters of each east face a stone skirt, a moulding, a frame head and ramming courses in relief. [inferred: rammed earth shows its courses of tamping]
+- **The skyways' bracing.** Cross-braces between the piers at two levels, tie beams across and knee braces under the deck's edges, so the flying walks read as timber trestles on earth piers. [inferred]
+
+Budget: `draw-count wei-ye` main 0.66 M to 0.69 M triangles, main draws 158 before and after. Boxes are built with a millimetre's lean so repeated pieces merge instead of instancing.
+
+Still below L3: the palace hall and the city gate (shared Han elements, read-only here) were not touched; the crown parapets are still plain plaster; the earth faces' bays are on the east faces only.

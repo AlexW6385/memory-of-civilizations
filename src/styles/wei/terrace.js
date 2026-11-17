@@ -4,6 +4,7 @@
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { hipLite, eaveTiles, rng, roofs } from '../han/kit.js';
 import { corridor } from '../han/scenery.js';
+import { bronzeBird, bracketSet, tileRows, pentRows, eaveStruts, stairBalustrade, earthBay, pierBracing, jb } from './landmark.js';
 
 /** A straight flight over rect from y0 to y1, rising toward dir ('w' = −x, 'n' = −z): one strip per step, each solid down to `base`. */
 function steps(bag, col, rect, y0, y1, dir, mat, riser, base, mat2) {
@@ -61,6 +62,8 @@ function leanTo(bag, r, ya, yb, cuts, skip) {
         bag.add('timber_red', box(bx0, ya, bz0, bx1, yi - 0.02, bz1));
         bag.add('bluestone', box(bx0 - 0.04, ya, bz0 - 0.04, bx1 + 0.04, ya + 0.22, bz1 + 0.04));
       }
+      // the bays between the pilasters of the east faces: stone skirt, framed panel, ramming courses
+      if (F.k === 'E') for (let q = 0; q < n; q++) earthBay(bag, F.f, s0 + 0.9 + (L - 1.8) * q / n + T + 0.03, s0 + 0.9 + (L - 1.8) * (q + 1) / n - T - 0.03, ya, yb);
     }
   }
   bag.add('tile_grey', fromTriangles(top)); bag.add('timber_red', fromTriangles(under));
@@ -70,13 +73,14 @@ function leanTo(bag, r, ya, yb, cuts, skip) {
 function stairFlanks(bag, col, rect, T, n) {
   const [sx0, sz0, sx1, sz1] = rect, d = (sx1 - sx0) / n;
   for (let i = 0; i < n; i += 2) {
-    const i2 = Math.min(n, i + 2), xa = sx1 - d * i2, xb = sx1 - d * i, yT = T * i2 / n + 0.85;
+    const i2 = Math.min(n, i + 2), xa = sx1 - d * i2, xb = sx1 - d * i, yT = T * i2 / n + 0.35;
     for (const [za, zb] of [[sz0 - 0.5, sz0], [sz1, sz1 + 0.5]]) {
       bag.add('lime_plaster', box(xa, -0.4, za, xb, yT, zb));
       bag.add('bluestone', box(xa - 0.03, yT, za - 0.07, xb + 0.03, yT + 0.1, zb + 0.07));
-      col.rect([xa, za, xb, zb], -0.4, yT + 0.1);
+      col.rect([xa, za, xb, zb], -0.4, yT + 1.0);
     }
   }
+  stairBalustrade(bag, rect, T, n, 0.35, 1.4);
   // the newels at the foot: a stone post with a bronze ball
   for (const [za, zb] of [[sz0 - 0.55, sz0 + 0.05], [sz1 - 0.05, sz1 + 0.55]]) {
     bag.add('bluestone', box(sx1, 0, za, sx1 + 0.6, 0.3, zb)); bag.add('bluestone', box(sx1 + 0.06, 0.3, za + 0.06, sx1 + 0.54, 1.45, zb - 0.06));
@@ -206,14 +210,6 @@ export function terrace(el, ctx) {
   }
 }
 
-const bird = (bag, x, y, z) => {
-  // the bronze bird on its mast: body, tail, wings spread, the head up
-  bag.add('gilt_bronze', lathe([[0.001, 0], [0.1, 0.05], [0.07, 2.2], [0.001, 2.3]], 6, null, x, y, z));
-  bag.add('gilt_bronze', box(x - 0.3, y + 2.3, z - 0.55, x + 0.3, y + 2.62, z + 0.55));
-  bag.add('gilt_bronze', box(x - 0.14, y + 2.62, z + 0.35, x + 0.14, y + 3.05, z + 0.7));
-  bag.add('gilt_bronze', box(x - 1.2, y + 2.55, z - 0.2, x + 1.2, y + 2.65, z + 0.2));
-  bag.add('gilt_bronze', box(x - 0.1, y + 2.4, z - 1.2, x + 0.1, y + 2.55, z - 0.5));
-};
 
 /** A triangle added so that its normal points up (up = true) or down. */
 function tri(out, a, b, c, up = true) {
@@ -233,6 +229,7 @@ function pentRoof(ctx, cx, cz, O, I, yo, yi) {
   }
   bag.add('tile_grey', fromTriangles(top)); bag.add('timber_red', fromTriangles(under));
   eaveTiles(bag, cx, cz, O, O, yo, 0, 0.42, 0.11);
+  pentRows(bag, cx, cz, O, I, yo, yi);
 }
 
 /**
@@ -297,8 +294,20 @@ export function tower(el, ctx) {
   bag.add('timber_red', box(cx - a2 - 0.3, f2 + hh2 - 0.5, cz - a2 - 0.3, cx + a2 + 0.3, f2 + hh2, cz + a2 + 0.3));
   bag.add('ceiling_coffer', box(cx - a2, f2 + hh2 - 0.55, cz - a2, cx + a2, f2 + hh2 - 0.5, cz + a2));
   // the roofs
-  const eave = (aa, y, rise) => { hipLite({ c: [cx, cz], A: aa, B: aa, y, rise, lift: 0.5, pow: 1.2, mat: 'tile_grey', soffit: 'timber_red', noChiwei: true }, ctx); eaveTiles(bag, cx, cz, aa, aa, y, 0.5, 0.4, 0.11); };
+  const eave = (aa, y, rise) => { hipLite({ c: [cx, cz], A: aa, B: aa, y, rise, lift: 0.5, pow: 1.2, mat: 'tile_grey', soffit: 'timber_red', noChiwei: true }, ctx); eaveTiles(bag, cx, cz, aa, aa, y, 0.5, 0.4, 0.11); tileRows(bag, { c: [cx, cz], A: aa, B: aa, y, rise, lift: 0.5, pow: 1.2 }); };
   eave(a2 + 2.6, f2 + hh2 - 0.1, 2.4);
+  eaveStruts(bag, cx, cz, a2, a2 + 2.6, f2 + hh2 - 0.1, [-a2 * 0.6, 0, a2 * 0.6]);
+  // the colonnade that carries the pent roof's edge: red columns on stone footings, each with its bracket set, round the ground storey (not at the doors, not at the corners)
+  {
+    const Rr = a + 2.4, top = f + 3.4;
+    for (const [nx, nz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) for (const o of nx ? [-5.2, 5.2] : [-7.8, -2.6, 2.6, 7.8]) {
+      const px = cx + nx * Rr + (nx ? 0 : o), pz = cz + nz * Rr + (nz ? 0 : o);
+      bag.add('bluestone', lathe([[0.5, 0], [0.5, 0.12], [0.42, 0.22], [0.36, 0.3]], 10, null, px, f, pz));
+      bag.add('timber_red', lathe([[0.3, 0.3], [0.26, 3.4]], 10, null, px, f, pz));
+      bracketSet(bag, px, top, pz, nx, nz);
+      col.circle(px, pz, 0.34, f, f + 4.2);
+    }
+  }
   // the third storey: solid, plaster and lattice with red columns' bands, under its own roof
   const upper = (aa, y0, hh, roofA, rise) => {
     bag.add('lime_plaster', box(cx - aa, y0, cz - aa, cx + aa, y0 + 0.9, cz + aa)); bag.add('lattice', box(cx - aa - 0.03, y0 + 0.9, cz - aa - 0.03, cx + aa + 0.03, y0 + hh - 0.5, cz + aa + 0.03));
@@ -309,7 +318,8 @@ export function tower(el, ctx) {
   };
   const y3 = f2 + hh2 + 1.0, a3 = a * 0.46;
   upper(a3, y3, 3.2, a3 + 2.2, 2.8);
-  bird(bag, cx, y3 + 3.1 + 2.8 - 0.1, cz);
+  eaveStruts(bag, cx, cz, a3, a3 + 2.2, y3 + 3.1, [0]);
+  bronzeBird(bag, cx, y3 + 3.1 + 2.8 - 0.1, cz);
   // inside the ground storey: a screen of black lacquer at the west door's north side, mats and low tables in two rows, lamps, a censer
   const y = f + 0.02;
   for (const s of [-1, 1]) for (let k = 0; k < 3; k++) {
@@ -364,6 +374,7 @@ export function skyway(el, ctx) {
     const x = alongX ? x0 + L * i / n : ax + s * (w / 2 - 0.3), z = alongX ? az + s * (w / 2 - 0.3) : z0 + L * i / n;
     bag.add('earth_wall', box(x - 0.45, -0.3, z - 0.45, x + 0.45, y - 0.35, z + 0.45)); col.rect([x - 0.45, z - 0.45, x + 0.45, z + 0.45], -0.3, y - 0.35);
   }
+  pierBracing(bag, alongX, ax, az, x0, z0, L, n, w, y);
   corridor({ a: el.a, b: el.b, w: w - 0.6, h: 3.6, y: y }, ctx);
   // the lattice between the posts, the lower part plastered
   for (const s of [-1, 1]) {
