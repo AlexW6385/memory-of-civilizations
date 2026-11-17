@@ -294,7 +294,7 @@ function whare(el, ctx) {
   const ca = Math.cos(yaw), sa = Math.sin(yaw);
   const W2 = (x, z) => [cx + x * ca + z * sa, cz - x * sa + z * ca];
   const fig = (kind, x, y, z, hh, ry = 0) => { const [wx, wz] = W2(x, z); figure(bag, kind, wx, y0 + y, wz, hh, yaw + ry); };
-  const spiral = (x, y, z, size, flip) => { const [wx, wz] = W2(x, z); koru(bag, K, wx, y, wz, size, yaw, flip, 90); };
+  const spiral = (x, y, z, size, flip, dz = 1) => { const [wx, wz] = W2(x, z); koru(bag, K, wx, y0 + y, wz, size, yaw, flip, 90, dz, true); };
   const zf = -l / 2 + pr, ov = 0.4, e = h - 0.1, ridge = h + rise, t = 0.25;
   const under = (x) => e + (ridge - e) * (1 - Math.abs(x) / (w / 2 + ov)) - 0.07;   // just under the roof at x
   // the side walls, carried forward to the porch's mouth, their tops cut to the roof's slope
@@ -327,7 +327,21 @@ function whare(el, ctx) {
   if (!small) { const tu = tr.slice(); for (let q = 1; q < tu.length; q += 3) tu[q] -= 0.1; add('wood_dark', fromTriangles(tu)); }
   // the ridge beam (tāhuhu) under the ridge, the rafters (heke) of the porch
   add(carved ? K : 'timber', box(-0.1, ridge - 0.32, -l / 2 - 0.05, 0.1, under(0.1) - 0.005, l / 2 - t));
-  for (const s of [-1, 1]) for (let zz = -l / 2 + 0.2; zz < zf - 0.1; zz += 0.45) add(carved ? K : 'timber', board([s * (w / 2 - 0.05), under(w / 2 - 0.05) - 0.06], [s * 0.12, under(0.12) - 0.06], 0.1, zz - 0.04, zz + 0.04));
+  for (const s of [-1, 1]) for (let zz = -l / 2 + 0.2; zz < zf - 0.1; zz += 0.45) {
+    if (!carved) { add('timber', board([s * (w / 2 - 0.05), under(w / 2 - 0.05) - 0.06], [s * 0.12, under(0.12) - 0.06], 0.1, zz - 0.04, zz + 0.04)); continue; }
+    // a porch rafter (heke) is a broad board, its face toward the floor painted in kōwhaiwhai: a red ground, a stem along the middle and a spiral
+    // either side of it in white, the koru winding alternately [inferred: after the painted heke of Te Arawa houses; the pattern generic]
+    const A = [s * (w / 2 - 0.05), under(w / 2 - 0.05) - 0.06], B2 = [s * 0.12, under(0.12) - 0.06], dxr = B2[0] - A[0], dyr = B2[1] - A[1], Lr = Math.hypot(dxr, dyr), uxr = dxr / Lr, uyr = dyr / Lr;
+    add(K, board(A, B2, 0.05, zz - 0.085, zz + 0.085));                                   // the rafter, 17 cm broad across the slope's line
+    const lo = (u, v, o = 0.03) => [A[0] + uxr * u - s * uyr * o, A[1] + uyr * u + s * uxr * o, zz + v];    // a point on its underface, offset o off it down and inward
+    add('wood_dark', rod(lo(0.05, 0), lo(Lr - 0.05, 0), 0.007, 4));                         // the stem
+    for (let u = 0.25, k = 0; u < Lr - 0.2; u += 0.3, k++) {
+      const f = k % 2 ? -1 : 1, pts = [];
+      for (let j = 0; j <= 9; j++) { const th = j / 9 * Math.PI * 2.2, r = 0.036 * (1 - 0.8 * j / 9); pts.push(lo(u + Math.cos(th) * r, f * 0.042 + f * Math.sin(th) * r)); }
+      for (let j = 0; j < 9; j++) add('rope_fibre', rod(pts[j], pts[j + 1], 0.0085, 4));
+      add('rope_fibre', rod(lo(u - 0.2, 0), pts[0], 0.0075, 4));                               // the tail joining the stem
+    }
+  }
   // a common house's plain bargeboards (maihi) at the porch's gable and the ridge-board's end standing out over it [inferred: the plain form of the carved maihi]
   if (!carved && !small && rank < 2) {
     const zb0 = -l / 2 - 0.2, zb1 = -l / 2 - 0.1;
@@ -354,7 +368,9 @@ function whare(el, ctx) {
       const cut = 0.45 + (L - 0.55) * 0.58;                          // the upper part of the face in rauponga, the lower in a run of pītau
       for (const g of rauponga([A[0] + ux * 0.45, A[1] + uy * 0.45], [A[0] + ux * cut, A[1] + uy * cut], mw * 0.86, zm0, 2)) add(K, g);
       const nk = Math.max(2, Math.floor((L - cut - 0.2) / (mw * 0.9)));
-      for (let k = 0; k < nk; k++) { const u = cut + 0.1 + (k + 0.5) * (L - cut - 0.2) / nk, [qx, qy] = [A[0] + ux * u, A[1] + uy * u]; spiral(qx, qy - 0.0, zm0 - 0.005, mw * 0.86, (k + (s > 0 ? 1 : 0)) % 2 === 0); }
+      for (let k = 0; k < nk; k++) { const u = cut + 0.1 + (k + 0.5) * (L - cut - 0.2) / nk, [qx, qy] = [A[0] + ux * u, A[1] + uy * u]; spiral(qx, qy - 0.0, zm0 - 0.005, mw * 0.86, (k + (s > 0 ? 1 : 0)) % 2 === 0, 3.2); }
+      // a raised rim along both edges of the board, so the carved field lies recessed between them (deep relief, not a flat plank)
+      for (const sd of [-1, 1]) { const o = sd * (mw / 2 - 0.018), px = -uy * o, py = ux * o; add(K, board([A[0] + px + ux * 0.2, A[1] + py + uy * 0.2], [Bp[0] + px, Bp[1] + py], 0.036, zm0 - 0.04, zm0 + 0.005)); }
       for (let k = 0; k < 3; k++) {                                     // the raparapa
         const off = (k - 1) * mw * 0.33, px = -uy * off, py = ux * off, len = 0.32 + 0.08 * (1 - Math.abs(k - 1));
         add(K, board([Bp[0] + px, Bp[1] + py], [Bp[0] + px + ux * len, Bp[1] + py + uy * len], mw * 0.22, zm0 + 0.01, zm1 - 0.01));
@@ -373,6 +389,14 @@ function whare(el, ctx) {
     const ph = Math.min(0.42, h - dh - 0.02);
     add(K, box(dl - 0.2, dh, zf - 0.1, dr + 0.2, dh + ph, zf));
     fig('face', (dl + dr) / 2, dh + 0.02, zf - 0.13, ph - 0.04);
+    // the door's jambs (poutāhuhu) carved in a column of pītau, the window's lintel and sill in a pair of spirals each and a rim [inferred: the carved door frame of a leader's house]
+    add(K, box(dl - 0.2, -0.1, zf - 0.1, dl, dh, zf)); add(K, box(dr, -0.1, zf - 0.1, dr + 0.2, dh, zf));
+    for (const [jx, fl] of [[dl - 0.1, false], [dr + 0.1, true]]) for (let k = 0; k < 3; k++) spiral(jx, 0.2 + k * 0.3, zf - 0.096, 0.17, (k % 2 === 0) !== fl, 2.6);
+    if (rank > 1) {
+      add(K, box(wl - 0.2, wb - 0.12, zf - 0.09, wr + 0.2, wb, zf)); add(K, box(wl - 0.2, wt, zf - 0.09, wr + 0.2, wt + 0.12, zf));
+      spiral(wl - 0.07, wt + 0.06, zf - 0.086, 0.11, false, 2.2); spiral(wr + 0.07, wt + 0.06, zf - 0.086, 0.11, true, 2.2);
+      for (const g of rauponga([wl + 0.02, wb - 0.06], [wr - 0.02, wb - 0.06], 0.1, zf - 0.09)) add(K, g);
+    }
     for (const g of rauponga([dl - 0.17, dh + ph / 2], [(dl + dr) / 2 - ph * 0.42, dh + ph / 2], ph * 0.8, zf - 0.1)) add(K, g);
     for (const g of rauponga([(dl + dr) / 2 + ph * 0.42, dh + ph / 2], [dr + 0.17, dh + ph / 2], ph * 0.8, zf - 0.1)) add(K, g);
   }
@@ -619,6 +643,17 @@ function waka(el, { bag, col }) {
   add(K, hull([[-0.05, hs - 0.3, us - 0.15], [0.05, hs - 0.3, us - 0.15], [0.05, hs - 0.3, us + 0.25], [-0.05, hs - 0.3, us + 0.25], [-0.05, hs + 2.6, us + 0.45], [0.05, hs + 2.6, us + 0.45], [0.05, hs + 2.6, us + 0.75], [-0.05, hs + 2.6, us + 0.75]]));
   for (const k of [0, 1]) add(K, lathe([[0.28, -0.05], [0.33, 0], [0.28, 0.05], [0.23, 0]], 14, null, 0, 0, 0).rotateZ(Math.PI / 2).translate(0, hs + 0.75 + k * 1.05, us + 0.2 + (0.5 * (0.75 + k * 1.05) / 2.9)));
   fig('slab', 0, hs - 0.25, us - 0.18, 0.55, Math.PI);
+  // the carving: the prow board and the sternpost each cut on both faces in a run of pītau standing out of the board (the tauihu and taurapa
+  // were the most carved parts of a waka taua [stated: Te Ara "Waka taua, 1769" — large figurehead, huge sternpost]; the spiral run [inferred: after museum tauihu and taurapa])
+  const kor = (px, py, pz, size, sd, flip) => koru(bag, K, x + px * ca + pz * sa, y0 + py, z - px * sa + pz * ca, size, yaw - sd * Math.PI / 2, flip, 100, 2.4, true);
+  const tz = (yy) => us + 0.05 + 0.55 * (yy - (hs - 0.3)) / 2.9;
+  for (const sd of [-1, 1]) {
+    for (const [u, sz] of [[ub + 0.62, 0.5], [ub + 0.02, 0.42], [ub - 0.48, 0.3]]) {
+      const tt = (ub + 0.9 - u) / 1.65, mid = ((hb - 0.3 + 0.18 * tt) + (hb + 0.75 - 0.45 * tt)) / 2;
+      kor(sd * 0.049, mid, u, sz, sd, (u > ub + 0.3) === (sd > 0));
+    }
+    for (const [yy, sz, fl] of [[hs + 0.3, 0.3, 0], [hs + 1.3, 0.36, 1], [hs + 2.2, 0.3, 0]]) kor(sd * 0.054, yy, tz(yy), sz, sd, (fl === 1) === (sd > 0));
+  }
   // the washstrakes are sewn to the hull: a cord lashing every half metre, standing proud of the board's outer face [inferred: after Parkinson's engraving, §4a]
   for (let u = -L / 2 + 0.9; u < L / 2 - 0.9; u += 0.5) for (const sd of [-1, 1]) { const b = beam(u) + 0.02; add('rope_fibre', box(sd > 0 ? b : -b - 0.018, sheer(u) - 0.06, u - 0.015, sd > 0 ? b + 0.018 : -b, sheer(u) + 0.27, u + 0.015)); }
   // the tuft of white feathers at the sternpost's head, hanging back and down in a fan of strands [inferred]
