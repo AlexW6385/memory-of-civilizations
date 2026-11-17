@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.15 — Baghdad, Ayutthaya, Sydney (2026-11-17)
+
+Baghdad: al-Mansur's mosque in detail (bays, a real mihrab niche, minbar, strapped composite capitals), four quarter mosques, 23 houses to enter, door forms by wealth. Ayutthaya: pillars, lotus band and porches on the chedi, framed windows, door leaves, gables and chofa on the halls, the Dutch lodge with its wharf, kitchen houses, two royal elephants. Sydney: the Opera House podium's granite panels and parapet, eleven Rocks terraces to enter, a fish-and-chip shop, a hardware store and a bakery, bubblers. Fixed: shop-sign lettering and window goods in the city blocks of Sydney lay in the plane of what stood behind them and flickered.
+
 ## v12.14 — eight more places (2026-11-17)
 
 Muscovy: St Basil's side chapels faceted and four of them entered, more furnished izby, street wells, wayside chapels and crosses. Bagan: the Ananda's Buddhas, 80 framed reliefs, plaques, grilles and ribbed sikhara, a palace throne hall, a monastery teaching hall, households by trade. Khajuraho: the temple walls' bands of apsaras, dancers, musicians and deities in niches, a procession frieze on the plinth, the far village entered, cattle sheds, wayside shrines, kilns. Uji: the Phoenix Hall's painted pillars and offering table, 260 houses to enter with fronts by rule, the Ujigami shrine on the far bank. Shaolin: vaulted bell and drum towers, steles under their pavilions, the abbot's hall and the Lixue Pavilion furnished, a stone pilgrim path up Mount Song. Qufu: the Dacheng Hall's coiled dragon columns, caisson ceiling and plaques, courtyard houses by rank, all entered. Foguang: a gate hall, weavers' homes and cave dwellings, a pilgrims' tea shed. Knossos: the Grand Staircase's flights, an ashlar base on the palace wings, houses by distance from the palace, potters, dyers, smiths, a press and a seal-cutter, stalls in the West Court.
