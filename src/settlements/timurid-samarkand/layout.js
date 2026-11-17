@@ -90,7 +90,7 @@ export function houses() {
     const far = Math.max(...[[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]]].map(([a, b]) => Math.hypot(a, b)));
     if (far > RADIUS - 70 || lotBlocked(r)) continue;                          // the outer ring is orchards
     const k = kr < 0.45 ? 0 : kr < 0.7 ? 1 : kr < 0.9 ? 3 : 2, nc = nearCore(cx, cz);
-    HOUSES.push({ rect: r, seed, k, xd: (xr - 0.5) * 6, garden: skip, full: nc < 135, rich: nc < 120 && rr < 0.45, trade: ['potter', 'baker', 'smith', 'weaver', 'carpenter', 'grocer'][Math.floor(tr * 6)] });
+    HOUSES.push({ rect: r, seed, k, xd: (xr - 0.5) * 6, garden: skip, full: true, rich: nc < 120 && rr < 0.45, trade: ['potter', 'baker', 'smith', 'weaver', 'carpenter', 'grocer', 'papermaker'][Math.floor(tr * 7)] });
   }
   return HOUSES;
 }
