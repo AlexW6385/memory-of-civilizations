@@ -39,6 +39,7 @@ export function cairoHouseOpen(el, { bag, col, lights }) {
   const { fr, L, D, mir, hb, R, m, along } = houseDims(el), y = el.y ?? 0, fy = y + FL, rand = rng(el.seed + 9);
   const kitchen = rng(el.seed + 5)() < 0.5, upper = PLAST[Math.floor(rand() * PLAST.length)];
   const B = (u0, u1, y0, y1, d0, d1) => { const [a, b] = m(u0, u1); return fr.B(a, b, y0, y1, -d1, -d0); };
+  const J = (u0, u1, d0, d1, y0, y1) => B(u0, u1, y0, y1, d0, d1);
   const P = (u, d) => fr.P(mir ? L - u : u, -d);
   const wall = (u0, u1, d0, d1, y0, y1, mat = 'plaster_white') => { bag.add(mat, B(u0, u1, y0, y1, d0, d1)); col.rect(R(u0, u1, d0, d1), y0, y1); };
   const yawU = along ? -Math.PI / 2 : 0, yawIn = Math.atan2(fr.N[0], fr.N[1]);   // along the lane; facing into the house
@@ -86,10 +87,10 @@ export function cairoHouseOpen(el, { bag, col, lights }) {
   wall(T, sOpen[0], DA, DA + SW, y, y + H); wall(sOpen[1], kd[0], DA, DA + SW, y, y + H); wall(kd[1], L - T, DA, DA + SW, y, y + H);
   for (const [a, b] of [sOpen, kd]) { bag.add('timber', B(a - 0.05, b + 0.05, y + 2.45, y + 2.6, DA - 0.04, DA + SW + 0.04)); bag.add('plaster_white', B(a, b, y + 2.6, y + H, DA, DA + SW)); col.rect(R(a, b, DA, DA + SW), y + 2.45, y + H); }
   wall(3.4, 3.9, T, DA, y, y + H);
-  bag.add('flagstone', B(T, 3.4, T, DA, y, fy)); col.floor(R(T, 3.4, T, DA), fy); bag.add('flagstone', B(3.9, L - T, T, DA, y, fy)); col.floor(R(3.9, L - T, T, DA), fy);
+  bag.add('flagstone', J(T, 3.4, T, DA, y, fy)); col.floor(R(T, 3.4, T, DA), fy); bag.add('flagstone', J(3.9, L - T, T, DA, y, fy)); col.floor(R(3.9, L - T, T, DA), fy);
   for (const [a, b] of [[T, 3.4], [3.9, L - T]]) {
-    bag.add('ceiling_painted', B(a, b, T, DA, y + H - 0.08, y + H));
-    for (let k = 0; k < 4; k++) bag.add('timber', B(a, b, T + 0.3 + k * (DA - T - 0.6) / 3 - 0.08, T + 0.3 + k * (DA - T - 0.6) / 3 + 0.08, y + H - 0.3, y + H - 0.08));
+    bag.add('ceiling_painted', J(a, b, T, DA, y + H - 0.08, y + H));
+    for (let k = 0; k < 4; k++) bag.add('timber', J(a, b, T + 0.3 + k * (DA - T - 0.6) / 3 - 0.08, T + 0.3 + k * (DA - T - 0.6) / 3 + 0.08, y + H - 0.3, y + H - 0.08));
   }
   // the vestibule: a mastaba, a jar on its stand, a lamp in the wall
   wall(2.55, 3.4, T, 1.5, y + FL, y + FL + 0.42, S);
@@ -104,19 +105,19 @@ export function cairoHouseOpen(el, { bag, col, lights }) {
     { const [px, pz] = P(sx0 + 0.55, 1.9); bag.add('terracotta', lathe([[0.001, 0], [0.3, 0], [0.42, 0.25], [0.4, 0.6], [0.3, 0.85], [0.2, 0.92], [0.2, 0.96], [0.001, 0.96]], 14, null, px, fy, pz)); bag.add('iron', lathe([[0.2, 0.9], [0.2, 0.93], [0.001, 0.93]], 12, null, px, fy, pz)); col.circle(px, pz, 0.42, fy, fy + 1.0); }  // the tannur
     { const [px, pz] = P(sx1 - 0.45, 1.9); F.waterJar(bag, px, fy, pz, 0.9); col.circle(px, pz, 0.3, fy, fy + 1.0); }
     { const [px, pz] = P(sx0 + 0.3, 1.1); F.pots(bag, px, fy, pz, yawU, 3); }
-    for (const sd of [0, 1]) { const u = sd ? sx1 - 1.9 : sx0 + 1.5; bag.add('timber', B(u, u + 1.0, 1.9 + fy - y, 1.95 + fy - y, T, T + 0.25)); const [px, pz] = P(u + 0.5, T + 0.12); F.pots(bag, px, y + 1.95 + FL + 0.05, pz, yawU, 3); }
+    for (const sd of [0, 1]) { const u = sd ? sx1 - 1.9 : sx0 + 1.5; bag.add('timber', B(u, u + 1.0, fy + 1.9, fy + 1.95, T, T + 0.25)); const [px, pz] = P(u + 0.5, T + 0.12); F.pots(bag, px, fy + 1.95, pz, yawU, 3); }
   } else {
     wall(4.4, sx1 - 1.0, T, T + 0.6, fy, fy + 0.55, S);                                        // the manger: a stone trough under the window
-    bag.add('sacking', B(4.5, sx1 - 1.1, T + 0.1, T + 0.5, fy + 0.4, fy + 0.62));
+    bag.add('sacking', J(4.5, sx1 - 1.1, T + 0.1, T + 0.5, fy + 0.4, fy + 0.62));
     { const [px, pz] = P(sx0 + 0.6, 1.9); for (let k = 0; k < 3; k++) F.bale(bag, px, fy + k * 0.3, pz + 0.0, 0.8, 0.3, 0.7, yawU, 'sacking'); col.rect(R(sx0 + 0.2, sx0 + 1.0, 1.5, 2.3), fy, fy + 0.9); }
     { const u = sx1 - 0.9, d = 1.9; for (const s of [-0.5, 0.5]) bag.add('wood_dark', B(u + s - 0.04, u + s + 0.04, fy, fy + 1.1, d - 0.04, d + 0.04)); bag.add('timber', B(u - 0.55, u + 0.55, fy + 1.05, fy + 1.1, d - 0.04, d + 0.04)); const [px, pz] = P(u, d); F.saddlebag(bag, px, fy + 1.1, pz, yawU); col.rect(R(u - 0.55, u + 0.55, d - 0.1, d + 0.1), fy, fy + 1.2); }
     { const [px, pz] = P(sx1 - 0.5, T + 0.5); bag.add('wicker', lathe([[0.001, 0], [0.18, 0], [0.2, 0.3], [0.001, 0.3]], 10, null, px, fy, pz)); }
   }
   // ── the court: flagstones with a square of pebbles at the middle, the fountain, a stone bench, the washing line
-  bag.add('flagstone', B(T, L - T, dC0, dC1, y, fy)); col.floor(R(T, L - T, dC0, dC1), fy);
+  bag.add('flagstone', J(T, L - T, dC0, dC1, y, fy)); col.floor(R(T, L - T, dC0, dC1), fy);
   { const rr = Math.min(0.85, (dC1 - dC0 - 1.3) / 2), [px, pz] = P(cu, cd);
     if (rr > 0.3) {
-      bag.add('marble_smooth', B(cu - rr - 0.45, cu + rr + 0.45, y + FL, y + FL + 0.012, cd - rr - 0.45, cd + rr + 0.45));
+      bag.add('marble_smooth', J(cu - rr - 0.45, cu + rr + 0.45, y + FL, y + FL + 0.012, cd - rr - 0.45, cd + rr + 0.45));
       bag.add('marble_smooth', lathe([[0.001, 0], [rr, 0], [rr, 0.42], [rr - 0.1, 0.42], [rr - 0.1, 0.3], [0.001, 0.3]], 8, null, px, fy, pz)); bag.add('glaze_blue', lathe([[0.001, 0.36], [rr - 0.1, 0.36], [rr - 0.1, 0.34], [0.001, 0.34]], 8, null, px, fy, pz));
       bag.add('marble_smooth', lathe([[0.001, 0.3], [0.12, 0.3], [0.08, 0.5], [0.05, 0.56], [0.001, 0.58]], 8, null, px, fy, pz)); bag.add('water_jet', rod([px, fy + 0.58, pz], [px, fy + 0.82, pz], 0.012, 4)); col.circle(px, pz, rr, fy, fy + 0.45);
     } else { bag.add('terracotta', lathe([[0.001, 0], [0.3, 0], [0.45, 0.45], [0.4, 0.8], [0.25, 0.95], [0.001, 0.95]], 12, null, px, fy, pz)); col.circle(px, pz, 0.45, fy, fy + 1.0); }
@@ -136,9 +137,9 @@ export function cairoHouseOpen(el, { bag, col, lights }) {
   bag.add('plaster_white', poly([[T, y - 0.3], [L - T, y - 0.3], [L - T, y + H], [T, y + H]], hb - ARC, hb, holes));
   for (let i = 0; i <= n; i++) { const a = T + i * (wA + wp); col.rect(R(a, a + wp, hb - ARC, hb), y, y + H); bag.add(S, B(a, a + wp, y, y + FL + 0.5, hb - ARC - 0.04, hb + 0.04)); }
   for (let i = 0; i < n; i++) { const a = T + wp + i * (wA + wp); col.rect(R(a, a + wA, hb - ARC, hb), y + 2.3, y + H); voussoirs(bag, fr, mu(a, a + wA), fy, wA, 2.6, 0.14, -hb + ARC - 0.07, -hb + ARC - 0.02 + 0.0, ['marble_dark', 'marble_smooth'], 6); }
-  bag.add('flagstone', B(T, L - T, hb, D - T, y, fy)); col.floor(R(T, L - T, hb, D - T), fy);
-  bag.add('marble_smooth', B(T + 1.5, L - T - 1.5, hb + 0.3, D - T - 0.9, fy, fy + 0.01));
-  bag.add('ceiling_painted', B(T, L - T, hb, D - T, y + H - 0.08, y + H)); for (let u = T + 0.2; u < L - T; u += 0.9) bag.add('timber', B(u, u + 0.16, hb, D - T, y + H - 0.32, y + H - 0.08));
+  bag.add('flagstone', J(T, L - T, hb, D - T, y, fy)); col.floor(R(T, L - T, hb, D - T), fy);
+  bag.add('marble_smooth', J(T + 1.5, L - T - 1.5, hb + 0.3, D - T - 0.9, fy, fy + 0.01));
+  bag.add('ceiling_painted', J(T, L - T, hb, D - T, y + H - 0.08, y + H)); for (let u = T + 0.2; u < L - T; u += 0.9) bag.add('timber', J(u, u + 0.16, hb, D - T, y + H - 0.32, y + H - 0.08));
   { const a = P(T + 0.05, D - T - 0.02), b = P(L - T - 0.05, D - T - 0.02), tw = P(cu, hb + 1); F.divan(bag, col, a, b, fy, tw, { h: 0.38, depth: 0.85, mattress: rand() < 0.5 ? 'cloth_red' : 'cloth_indigo', backs: ['cloth_ochre', 'cloth_red', 'cloth_green', 'cloth_indigo'] }); }
   { const cw = Math.max(2.0, Math.min(4.2, L - 2 * T - 3.0)), [px, pz] = P(cu, hb + (D - T - 0.85 - hb) / 2 + 0.05);
     F.carpet(bag, px, fy + 0.012, pz, cw, 1.15, along ? Math.PI / 2 : 0, ['persian', 'blue', 'maroon'][Math.floor(rand() * 3)]); F.trayTable(bag, px, fy + 0.026, pz, { seed: el.seed }); col.circle(px, pz, 0.4, fy, fy + 0.42); }
