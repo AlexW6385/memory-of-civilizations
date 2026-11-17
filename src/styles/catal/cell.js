@@ -5,6 +5,7 @@
 // the layout's ENTER list; everything is placed in the cell's own (u, v): u along the north wall from the corner the platforms start in,
 // v south from the north wall.
 import { box, lathe, rod, place } from '../../core/geom.js';
+import { vultureWall, townMap, breast, hornPlinth, post } from './murals.js';
 import { WALL, MUD, PLS, LIME, RED, BLK, LOG, REED, BONE, ASH, rng, ladder, dome, basket, jar, frame, flat, zigzag, diamonds, hands, bucranium, aurochs } from './kit.js';
 
 /** The geometry of a cell's interior: walls 0.4 m, u/v to world, the hatch, hearth and oven (shared with the settlement's people). */
@@ -56,7 +57,7 @@ function bin(bag, col, r, F, full) {
 
 /**
  * catal_cell: { rect, top (roof), seed, variant (0 plain with painted bands and bucrania, 1 leopards in relief, 2 seated figurine and diamonds,
- * 3 the knapper's, 4 the baker's), mirror }: the whole cell: walls, the roof with its hatch, the interior.
+ * 3 the knapper's, 4 the baker's, 5 the vultures over headless figures with plaster breasts, 6 the painted map of the volcano and the houses), mirror }: the whole cell: walls, the roof with its hatch, the interior.
  */
 export function cell(el, { bag, col, lights }) {
   const G = cellGeom(el.rect, el.mirror), { T, x0, z0, x1, z1, ix0, iz0, ix1, iz1, W, D, S, XO, lx, lz, ur, PH, hole } = G;
@@ -105,6 +106,12 @@ export function cell(el, { bag, col, lights }) {
     flat(bag, RED, FN, [[0, PH], [W, PH], [W, 0.75], [0, 0.75]], 0.008); hands(bag, FN, 0.4, 1.35, 4, 1);
     bag.add(LOG, B(0.2, 0.52, 1.4, 0.4, 0.58, D - 2.4));                    // a bench of a plank on stumps along the west wall
     knapper(bag, lx(0.95), F, lz(2.3), rand);
+  } else if (V === 5) {
+    flat(bag, RED, FN, [[0, PH], [W, PH], [W, 0.62], [0, 0.62]], 0.008);
+    vultureWall(bag, FN, 0.3, W - 0.6, 1.5, 2, Math.min(0.95, W * 0.17));
+  } else if (V === 6) {
+    flat(bag, RED, FN, [[0, PH], [W, PH], [W, 0.85], [0, 0.85]], 0.008);
+    const mw = Math.min(W - 0.5, 3.4); townMap(bag, FN, (W - mw) / 2, 0.85, mw, 1.0);
   } else {
     flat(bag, RED, FN, [[0.2, PH], [W - 0.2, PH], [W - 0.2, 1.4], [0.2, 1.4]], 0.008); zigzag(bag, BLK, FN, 0.3, W - 0.3, 1.45, 1.7, Math.round(W * 3));
     const o2 = [lx(W - 0.7), lz(D - 0.7)];                                  // the second oven, in the south-east corner
@@ -114,6 +121,11 @@ export function cell(el, { bag, col, lights }) {
   }
   // the east (or west) wall over the platform, the opposite wall: red band, or the aurochs on a bigger house of rank
   if (V !== 2) { flat(bag, RED, FE, [[1.4, PH + 0.1], [Math.max(3, D - 2.4), PH + 0.1], [Math.max(3, D - 2.4), 1.2], [1.4, 1.2]], 0.008); if (V < 2) bucranium(bag, XO + S * (W - PL), 1.1, lz(2.1), -S * Math.PI / 2, 0.85); }
+  if (V === 5) for (const v of [1.85, 2.4]) breast(bag, XO + S * (W - PL), 1.32, lz(v), -S * Math.PI / 2, 1.0);
+  if (V === 0) hornPlinth(bag, col, lx(0.42), PH, lz(0.45), 0, 0.5);
+  // the post at the inner corner of the platforms (and a second before the north platform in the two houses with the great walls)
+  post(bag, col, lx(W - 1.55), F, lz(1.62), CH - 0.07 - 0.1);
+  if (V >= 5) post(bag, col, lx(W * 0.42), F, lz(1.65), CH - 0.07 - 0.1);
   if (V === 1 && D > 5.2) aurochs(bag, FW, 2.4, 0.9, 1.0, rand); else flat(bag, RED, FW, [[0.2, 0.3], [D - 0.2, 0.3], [D - 0.2, 0.5], [0.2, 0.5]], 0.008);
   // hearth under the hatch: a ring of plaster, ash, a small fire; the oven in the south-west corner and the loaves by its mouth
   const [hx, hz] = G.hearth, [ox, oz] = G.oven;
