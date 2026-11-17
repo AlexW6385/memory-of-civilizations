@@ -32,7 +32,7 @@ export function dalem(el, ctx0) {
   const rand = rng(el.seed ?? 31), g = 3.6, cb = g / 2 + 4.4;
   const wl = (a, b, gaps) => wall({ a: [cx + a[0], cz + a[1]], b: [cx + b[0], cz + b[1]], y, h: 2.6, th: 0.6, mat: 'brick', cap: 'stone', gaps }, ctx);
   wl([-HW, HD], [-cb, HD]); wl([cb, HD], [HW, HD]); wl([-HW, -HD], [HW, -HD]); wl([-HW, -HD], [-HW, HD]); wl([HW, -HD], [HW, HD]);
-  candiBentar({ c: [cx, cz + HD], gap: g, y, depth: 3.6, rise }, ctx);
+  candiBentar({ c: [cx, cz + HD], gap: g, y, depth: 3.6, rise, dwara: true }, ctx);
   // the court, raised a little above the street: a floor of beaten earth and flags before the shrines
   bx(ctx, 'ground', cx - HW + 0.3, y - 0.3, cz - HD + 0.3, cx + HW - 0.3, y + rise - 0.02, cz + HD - 1.8);
   ctx.col.floor([cx - HW + 0.3, cz - HD + 0.3, cx + HW - 0.3, cz + HD - 1.8], y + rise);
