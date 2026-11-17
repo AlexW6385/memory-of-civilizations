@@ -13,6 +13,7 @@ import { houseFront } from './fronts.js';
 import { hollowShell, furnishShop, furnishHall } from './shops.js';
 import { dressFace, dressRoof, dressWindow, SABAT_ELEMENTS } from './dress.js';
 import { GARDEN_ELEMENTS } from './garden.js';
+import { YARD_ELEMENTS } from './yard.js';
 import '../../objects/index.js';
 import { GH, SH, K, topOf } from './dims.js';
 
@@ -42,7 +43,7 @@ function towerHouse(el, ctx) {
     // the ground storey hollowed into a room, the body above standing on its ceiling
     const q0 = ins(GH);
     bag.add('mud_plaster', frustum([x0 + q0[0], z0 + q0[2], x1 - q0[1], z1 - q0[3]], GH, yA, iA[0] - q0[0], iA[1] - q0[1], iA[2] - q0[2], iA[3] - q0[3]));
-    hollowShell(ctx, el, el.hall ? 3.2 : 1.5);
+    hollowShell(ctx, el, el.hall ? 3.2 : (el.shop.doorW ?? 1.5), el.shop?.H ?? 2.35);
     (el.hall ? furnishHall : furnishShop)(ctx, el);
   } else bag.add('mud_plaster', frustum([x0, z0, x1, z1], 0, yA, ...iA, { noBottom: true }));
   const r2 = [x0 + iA[0], z0 + iA[2], x1 - iA[1], z1 - iA[3]], iT = ins(top - yA);
@@ -88,7 +89,8 @@ function towerHouse(el, ctx) {
     // the door on the front: off the middle, a step up
     if (front) {
       const u = el.door ?? u0 + L * (0.3 + 0.4 * rand()), p = at(u, 0); rand();
-      if (el.shop) put(ctx.bag, shopFront(el.hall ? 3.2 : 1.5, el.shop.awning ?? ['reed_mat', 'cloth_indigo', 'reed_mat', 'cloth_ochre'][(el.seed >>> 3) & 3]), p[0], 0, p[2], nx, nz);
+      if (el.shop && el.shop.fashion && el.shop.fashion !== 'shop') put(ctx.bag, houseFront(el.shop.fashion, el.shop.doorW, el.shop.H ?? 2.35), p[0], 0, p[2], nx, nz);
+      else if (el.shop) put(ctx.bag, shopFront(el.hall ? 3.2 : 1.5, el.shop.awning ?? ['reed_mat', 'cloth_indigo', 'reed_mat', 'cloth_ochre'][(el.seed >>> 3) & 3]), p[0], 0, p[2], nx, nz);
       else if (el.hall) put(ctx.bag, shopFront(3.2, 'cloth_indigo'), p[0], 0, p[2], nx, nz);
       else put(ctx.bag, doorVariant((el.seed >>> 5) & 3), p[0], 0, p[2], nx, nz);
       el._door = u;
@@ -122,6 +124,6 @@ function merlons(el, { bag }) {
 
 registerStyle('hadhrami', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.life?.elements, tower_house: towerHouse, merlons, ...OPEN_ELEMENTS, ...MOSQUE_ELEMENTS, ...SABAT_ELEMENTS, ...GARDEN_ELEMENTS, reserve_wall: () => {} },
+  elements: { ...STYLES.life?.elements, tower_house: towerHouse, merlons, ...OPEN_ELEMENTS, ...MOSQUE_ELEMENTS, ...SABAT_ELEMENTS, ...GARDEN_ELEMENTS, ...YARD_ELEMENTS, reserve_wall: () => {} },
   objects: {},
 });

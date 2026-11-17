@@ -28,7 +28,7 @@ export function houseFront(kind, w, H = 2.4) {
     o.push(['timber', box(-hw - 0.34, H + 0.12, 0, hw + 0.34, H + 0.24, 0.15)], ['cedar', box(-hw - 0.2, H + 0.24, 0, hw + 0.2, H + 0.44, 0.1)]);
     for (let i = 0; i < Math.floor((w + 0.2) / 0.18); i++) o.push(['wood_dark', box(-hw - 0.1 + i * 0.18, H + 0.28, 0.1, -hw - 0.03 + i * 0.18, H + 0.4, 0.125)]);
     o.push(['lime_plaster', box(-hw - 0.4, H + 0.44, 0, hw + 0.4, H + 0.51, 0.19)], ['lime_plaster', box(-hw - 0.3, H + 0.51, 0, hw + 0.3, H + 0.57, 0.13)]);
-    o.push(['schist_rubble', box(-hw - 0.3, 0, 0, hw + 0.3, 0.18, 0.55)], ['schist_rubble', box(-hw - 0.2, 0, 0.55, hw + 0.2, 0.09, 0.8)]);
+    o.push(['schist_rubble', box(-hw - 0.3, 0, 0, hw + 0.3, 0.1, 0.5)], ['schist_rubble', box(-hw - 0.2, 0, 0.5, hw + 0.2, 0.05, 0.75)]);
     leafBack(o, hw, H, true);
     o.push(['wood_dark', box(hw - 0.55, 0.85, -0.1, hw - 0.07, 1.0, -0.04)]);   // the lock-case of the leaf, seen from inside
   } else if (kind === 'stable') {
@@ -47,7 +47,7 @@ export function houseFront(kind, w, H = 2.4) {
     o.push(['lime_plaster', archSpandrel({ u0: -a, u1: a, yS, rise, yTop: yS + rise + 0.22, w0: 0, w1: 0.1, axis: 'x' })]);
     o.push(['opening', archFill({ u0: -hw, u1: hw, y0: H + 0.15, yS, rise: rise - 0.2, w: 0.04, dir: 1, axis: 'x' })]);
     for (let i = 1; i < 6; i++) { const x = -hw + (w * i) / 6; o.push(['wood_dark', box(x - 0.012, H + 0.15, 0.04, x + 0.012, H + 0.15 + Math.min(0.55, rise * 0.5 * (1 - Math.abs(x) / hw * 0.4)), 0.065)]); }
-    o.push(['schist_rubble', box(-hw - 0.3, 0, 0, hw + 0.3, 0.2, 0.5)], ['schist_rubble', box(-hw - 0.2, 0, 0.5, hw + 0.2, 0.1, 0.75)]);
+    o.push(['schist_rubble', box(-hw - 0.3, 0, 0, hw + 0.3, 0.1, 0.5)], ['schist_rubble', box(-hw - 0.2, 0, 0.5, hw + 0.2, 0.05, 0.75)]);
     leafBack(o, hw, H, false);
   }
   return (CACHE[k] = o);

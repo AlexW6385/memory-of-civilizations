@@ -208,6 +208,68 @@ const TRADE = {
     S.b('timber', 0.1, S.D - 0.5, 0.9, S.D - 0.1, 0, 0.8, true); for (let k = 0; k < 4; k++) S.b('silver', 0.2 + k * 0.17, S.D - 0.4, 0.28 + k * 0.17, S.D - 0.2, 0.8, 0.83);
     S.light(S.cx, 2.7, S.D * 0.5, '#ffe8c0', 1.5);
   },
+  // ── the ground floors of ordinary houses far from the square (docs/settlements/shibam.md §12): livestock and stores on the ground storey [stated: Earth Architecture] ──
+  // the stable: a manger along the back wall under tether posts, litter, a heap of straw, bundles of fodder, a stone trough, saddles and halters on pegs
+  stable(S, rand) {
+    const L = Math.min(1.7, S.cx - 1.3);
+    S.b('thatch', 0.3, S.D - 2.7, S.W - 0.3, S.D - 1.1, 0, 0.02);
+    S.b('timber', 0.3, S.D - 0.85, S.W - 0.3, S.D - 0.3, 0, 0.62, true); S.b('thatch', 0.35, S.D - 0.8, S.W - 0.35, S.D - 0.35, 0.62, 0.84);
+    for (let a = 0.9; a < S.W - 0.4; a += 1.5) { S.rod('palm_trunk', a, 0, S.D - 1.0, a, 1.25, S.D - 1.0, 0.06, 6); S.rod('rope_fibre', a, 0.9, S.D - 1.0, a + 0.3, 0.35, S.D - 1.9, 0.01, 3); }
+    S.b('thatch', 0.15, 1.6, L, 3.4, 0, 0.5, true); S.b('thatch', 0.2, 1.7, L - 0.1, 3.3, 0.5, 0.58);
+    S.b('thatch', S.W - 1.1, 3.0, S.W - 0.1, 4.6, 0, 0.85, true); for (let k = 0; k < 4; k++) S.rod('rope_fibre', S.W - 1.12, 0.3 + k * 0.2, 3.0 + k * 0.4, S.W - 0.08, 0.3 + k * 0.2, 3.0 + k * 0.4, 0.012, 3);
+    S.b('schist_rubble', S.W - 1.4, 1.2, S.W - 0.2, 2.2, 0, 0.42, true); S.b('opening', S.W - 1.3, 1.3, S.W - 0.3, 2.1, 0.4, 0.43);
+    for (let k = 0; k < 3; k++) { S.rod('wood_dark', 0.03, 1.55, 4.2 + k * 0.55, 0.3, 1.55, 4.2 + k * 0.55, 0.025, 4); S.b('hide_brown', 0.04, 4.1 + k * 0.55, 0.2, 4.3 + k * 0.55, 0.9 + (k % 2) * 0.2, 1.55); }
+    S.lath('terracotta', P.big, 0.5, S.D - 1.5, 0, 1.0); S.circle(0.5, S.D - 1.5, 0.4, 0.95);
+    S.light(S.cx, 2.7, S.D * 0.55, '#ffd9a0', 1.1);
+  },
+  // the household's store: the big jars of grain and dates along one wall, baskets, sacks, the bin, firewood, a hand quern, the plank door of the stair behind its lamp
+  store(S, rand) {
+    for (let k = 0; k < Math.floor((S.D - 2.2) / 0.95); k++) { S.lath('terracotta', P.big, 0.5, 1.8 + k * 0.95, 0, 1.05); S.circle(0.5, 1.8 + k * 0.95, 0.4, 0.95); S.lath('cloth_white', P.bowl, 0.5, 1.8 + k * 0.95, 0.95, 0.85); }
+    for (let k = 0; k < 4; k++) { const b = 2.0 + k * 0.7; S.lath('wicker', P.pan, S.W - 0.55, b, 0, 2.2, 8); S.lath('cloth_brown', P.bowl, S.W - 0.55, b, 0.1, 0.9); S.circle(S.W - 0.55, b, 0.3, 0.3); }
+    spread(S, 1.4, S.W - 1.4, 0.7, (a) => { if (Math.abs(a - S.cx) < 1.0) return; S.lath('sacking', P.sack, a, S.D - 0.45, 0, 1.4); S.circle(a, S.D - 0.45, 0.3, 0.8); });
+    S.b('timber', S.cx - 1.3, S.D - 1.3, S.cx + 1.3, S.D - 0.7, 0, 1.0, true); S.b('wood_dark', S.cx - 1.35, S.D - 1.35, S.cx + 1.35, S.D - 0.65, 1.0, 1.05);
+    S.b('wood_dark', S.W - 1.5, S.D - 1.9, S.W - 0.2, S.D - 1.2, 0, 0.9, true); for (let k = 0; k < 3; k++) S.rod('palm_trunk', S.W - 1.45, 0.2 + k * 0.28, S.D - 1.7 + (k % 2) * 0.2, S.W - 0.25, 0.2 + k * 0.28, S.D - 1.7 + (k % 2) * 0.2, 0.09, 6);
+    S.lath('granite_grey', [[0.001, 0], [0.36, 0], [0.36, 0.1], [0.001, 0.1]], 1.7, 1.5, 0, 1); S.lath('granite_grey', [[0.001, 0.1], [0.3, 0.1], [0.3, 0.18], [0.001, 0.18]], 1.7, 1.5, 0, 1); S.circle(1.7, 1.5, 0.36, 0.18);
+    S.b('wood_dark', 0.02, S.D - 1.0, 0.1, S.D - 0.1, 0, 2.0); S.b('iron', 0.1, S.D - 0.6, 0.13, S.D - 0.5, 0.9, 1.0); S.b('lamp_glass', 0.1, S.D - 1.15, 0.2, S.D - 1.05, 1.6, 1.78);
+    S.light(S.cx, 2.7, S.D * 0.5, '#ffe0b0', 1.2); S.light(0.5, 1.7, S.D - 1.1, '#ffc880', 0.8, 3.5);
+  },
+  // the builders' store: moulds and the stack of dried bricks, trunks of palm for the floors, a ladder, the tub of mortar, plumb line, adzes and trowels
+  mason(S, rand) {
+    S.b('mudbrick', 0.2, 1.4, 1.5, 2.5, 0, 1.0, true); for (let k = 0; k < 5; k++) S.b('wood_dark', 0.2, 1.4 + k * 0.22, 1.5, 1.42 + k * 0.22, 1.0, 1.02);
+    for (let k = 0; k < 4; k++) S.b('timber', 0.2, 2.9 + k * 0.1, 1.2, 3.35 + k * 0.1, k * 0.12, k * 0.12 + 0.1);
+    S.solid(0.2, 2.9, 1.2, 3.8, 0, 0.5);
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 4 - r; c++) S.rod('palm_trunk', S.W - 0.35 - c * 0.22 - r * 0.11, 0.1 + r * 0.19, 1.3, S.W - 0.35 - c * 0.22 - r * 0.11, 0.1 + r * 0.19, S.D - 0.4, 0.1, 6);
+    S.solid(S.W - 1.3, 1.3, S.W - 0.2, S.D - 0.4, 0, 0.8);
+    S.rod('palm_trunk', 0.15, 0.05, S.D - 0.4, 0.55, 2.8, S.D - 0.2, 0.04, 5); S.rod('palm_trunk', 0.55, 0.05, S.D - 0.4, 0.95, 2.8, S.D - 0.2, 0.04, 5); for (let k = 1; k < 8; k++) S.rod('wood_dark', 0.17 + 0.012 * k * 5, 0.3 * k, S.D - 0.38, 0.55 + 0.012 * k * 5 + 0.04, 0.3 * k, S.D - 0.3, 0.015, 4);
+    S.lath('pottery_dark', P.vat, S.cx + 0.2, S.D - 1.1, 0, 1.0); S.lath('mud_plaster', [[0.001, 0.7], [0.4, 0.7], [0.001, 0.72]], S.cx + 0.2, S.D - 1.1, 0, 1); S.circle(S.cx + 0.2, S.D - 1.1, 0.5, 0.78);
+    S.lath('wicker', P.pan, S.cx - 0.8, S.D - 0.8, 0, 2.2, 8);
+    S.rod('rope_fibre', S.cx - 1.6, 3.0, S.D - 0.05, S.cx - 1.6, 1.5, S.D - 0.05, 0.01, 3); S.b('iron', S.cx - 1.66, S.D - 0.1, S.cx - 1.54, S.D - 0.02, 1.35, 1.5);
+    for (let k = 0; k < 5; k++) { S.rod('iron', 1.3 + k * 0.28, 1.5, S.D - 0.03, 1.3 + k * 0.28, 0.9 + (k % 3) * 0.2, S.D - 0.03, 0.018, 4); S.b('wood_dark', 1.27 + k * 0.28, S.D - 0.06, 1.33 + k * 0.28, S.D - 0.03, 1.5, 1.9); }
+    S.light(S.cx, 2.7, S.D * 0.5, '#ffe0b0', 1.3);
+  },
+  // the bakery: a clay oven (tannur) at the back with its fire, the trough where the dough is kneaded, flour, boards of loaves, firewood
+  bakery(S, rand) {
+    const OV = [[0.001, 0], [0.5, 0], [0.62, 0.3], [0.52, 0.8], [0.38, 1.05], [0.3, 1.1], [0.001, 1.1]];
+    S.b('schist_rubble', S.cx - 0.9, S.D - 1.6, S.cx + 0.9, S.D - 0.1, 0, 0.3, true); S.lath('terracotta', OV, S.cx, S.D - 0.85, 0.3, 1.0); S.circle(S.cx, S.D - 0.85, 0.66, 1.4); S.b('flame', S.cx - 0.12, S.D - 0.97, S.cx + 0.12, S.D - 0.73, 1.38, 1.42);
+    counter(S, 0.1, 1.2, 1.1, 3.4, 0.85);
+    for (let k = 0; k < 8; k++) S.lath('limestone_yellow', P.pan, 0.35 + (k % 2) * 0.4, 1.5 + Math.floor(k / 2) * 0.5, 0.9, 0.9);
+    S.b('timber', S.W - 1.3, 1.4, S.W - 0.2, 3.0, 0, 0.7, true); S.b('cloth_white', S.W - 1.2, 1.5, S.W - 0.3, 2.9, 0.7, 0.8);
+    spread(S, 0.4, 1.2, 0.5, (a) => { S.lath('sacking', P.sack, a, S.D - 0.5, 0, 1.4); S.circle(a, S.D - 0.5, 0.3, 0.8); });
+    S.b('wood_dark', S.W - 1.4, S.D - 1.6, S.W - 0.2, S.D - 0.8, 0, 0.8, true); for (let k = 0; k < 3; k++) S.rod('palm_trunk', S.W - 1.35, 0.2 + k * 0.25, S.D - 1.3, S.W - 0.25, 0.2 + k * 0.25, S.D - 1.3, 0.09, 6);
+    S.rod('wood_dark', S.cx + 1.2, 0, S.D - 0.6, S.cx + 1.3, 1.9, S.D - 0.3, 0.02, 4);
+    S.light(S.cx, 2.7, S.D * 0.5, '#ffd0a0', 1.5); S.light(S.cx, 1.2, S.D - 0.8, '#ff9a4a', 1.6, 5);
+  },
+  // the mat-maker's: heaps of split palm leaf, a mat half plaited on the floor, finished mats rolled in a stack, baskets, a pole with mats hung to air
+  mats(S, rand) {
+    S.b('thatch_palm', 0.2, 1.4, 1.4, 3.0, 0, 0.55, true); S.b('thatch_palm', S.W - 1.5, S.D - 2.2, S.W - 0.2, S.D - 0.3, 0, 0.7, true);
+    S.b('reed_mat', S.cx - 1.5, 2.0, S.cx + 0.5, 3.6, 0, 0.025); for (let k = 0; k < 12; k++) S.b('thatch_palm', S.cx + 0.5, 2.0 + k * 0.1, S.cx + 1.2 + (k % 3) * 0.1, 2.06 + k * 0.1, 0, 0.012);
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 4 - r; c++) S.rod('reed_mat', 0.3 + c * 0.32 + r * 0.16, 0.16 + r * 0.28, 3.4, 0.3 + c * 0.32 + r * 0.16, 0.16 + r * 0.28, 5.0, 0.15, 8);
+    S.solid(0.15, 3.4, 1.6, 5.0, 0, 0.7);
+    for (let k = 0; k < 4; k++) { S.lath('wicker', P.pan, S.W - 0.6, 1.4 + k * 0.5, 0, 2.2, 8); }
+    S.rod('palm_trunk', 0.1, 2.3, S.D - 0.3, S.W - 0.4, 2.3, S.D - 0.3, 0.05, 6); for (let a = 0.6; a < S.W - 1.2; a += 0.9) S.b('reed_mat', a, S.D - 0.33, a + 0.7, S.D - 0.27, 0.9, 2.28);
+    S.b('timber', S.cx - 0.5, 1.4, S.cx - 0.1, 1.8, 0, 0.3, true);
+    S.light(S.cx, 2.7, S.D * 0.5, '#ffe0b0', 1.3);
+  },
 };
 export const TRADE_NAMES = Object.keys(TRADE);
 
