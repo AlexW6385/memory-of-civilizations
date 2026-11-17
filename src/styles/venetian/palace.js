@@ -9,6 +9,7 @@
 import { box, lathe, frustum, rod } from '../../core/geom.js';
 import { faceFrame, Local, ext, archOutline, headPts, wrect } from '../renaissance/face.js';
 import { human, blob, limb as slimb } from '../greek/sculpture.js';
+import { porta } from './porta.js';
 
 const CV = 'limestone_carved';   // Istrian stone, carved: the figures, one block each, unjointed
 const M = 'marble', PINK = 'marble_pink', O = 'opening', I = 'limestone', L = 'lead';
@@ -50,7 +51,9 @@ export function dogesPalace(el, { bag, col }) {
     }
     if (!open) {
       // the plainer sides: rows of square-headed windows in the white wall, the ground storey of stone
-      for (const wy of [3.0, 9.5, 17.0, 21.0]) for (let u = 3; u < Lf - 2; u += 5) Lc.add(O, ext([[u - 0.7, wy], [u + 0.7, wy], [u + 0.7, wy + 2.4], [u - 0.7, wy + 2.4]], [], -0.03, 0.01));
+      const uP = f === 'n' ? Lf - 9 : -99;                                                            // the Porta della Carta on the north front, by the basilica
+      for (const wy of [3.0, 9.5, 17.0, 21.0]) for (let u = 3; u < Lf - 2; u += 5) if (Math.abs(u - uP) > 3.5) Lc.add(O, ext([[u - 0.7, wy], [u + 0.7, wy], [u + 0.7, wy + 2.4], [u - 0.7, wy + 2.4]], [], -0.03, 0.01));
+      if (f === 'n') porta(Lc, uP);
       Lc.emit(bag, FM);
       continue;
     }
