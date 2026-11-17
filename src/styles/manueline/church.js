@@ -6,6 +6,7 @@ import { box, lathe, rod, fromTriangles, orientOutward } from '../../core/geom.j
 import { archWall } from '../gothic/nd-interior.js';
 import { tube } from '../../objects/kit.js';
 import { furnishChurch } from './furnish.js';
+import { portalUpper, portalLower } from './portal-detail.js';
 import { ropeColumn, netVault, pinnacle, armillary, orderCross, wallRun, addBox } from './util.js';
 
 const T = 2.5, SPRING = 19.5, CROWN = 25.5, WALL = 26;
@@ -124,15 +125,10 @@ export function jeronChurch(el, ctx) {
   bag.add(CARVED, lathe([[0.55, 0], [0.5, 0.3], [0.001, 0.8]], 6, null, px, y + 6.6, pz1 - 0.55));
   // the upper tier: a wall of niches with saints, the great window, and the gable with pinnacles and a cross
   addBox(bag, MAT, ux, y + 14, pz0, ux + Wp, y + 27, pz1 - 1.2);
-  for (let i = 0; i < 3; i++) for (const k of [0, 1]) {
-    const nx = ux + 2 + i * 4, ny = y + 15 + k * 5.4;
-    addBox(bag, 'opening', nx - 0.9, ny, pz1 - 1.25, nx + 0.9, ny + 3.2, pz1 - 1.1);
-    bag.add(CARVED, lathe([[0.2, 0], [0.26, 0.5], [0.2, 1.4], [0.13, 1.7], [0.001, 1.8]], 8, null, nx, ny, pz1 - 1.5));
-    bag.add(CARVED, lathe([[0.9, 0], [0.8, 0.3], [0.001, 1.0]], 6, null, nx, ny + 3.2, pz1 - 1.5));
-  }
+  portalLower(bag, { px, ux, Wp, y, pz0, pz1 });
+  portalUpper(bag, { px, ux, Wp, y, zf: pz1 - 1.2, pz0 });
   bag.add(MAT, frustum2(ux - 0.5, pz0, ux + Wp + 0.5, pz1 - 1.2, y + 27, 5.5));
   for (const dx of [-5.5, 5.5, 0]) pinnacle(bag, CARVED, px + dx, y + 27, pz0 + 1.2, 0.5, dx ? 5 : 7, 8);
-  orderCross(bag, 'wall_red', px, y + 29.6, pz1 - 1.15, 0.8, 's');
   for (const s of [-1, 1]) { ropeColumn({ bag, col: { circle() {} } }, px + s * 6.2, pz0 + 0.8, y, 27, 0.5, { mat: MAT, carved: CARVED, collide: false, turns: 8 }); pinnacle(bag, CARVED, px + s * 6.2, y + 27, pz0 + 0.8, 0.7, 6, 8); col.circle(px + s * 6.2, pz0 + 0.8, 0.6, y, y + 27); }
   southFront(ctx, { x0, x1, z1, y, px, bays, sWin });
   // ── the main chapel: the altar, its retable of gilt niches, the rood arch, lamps
@@ -202,13 +198,6 @@ function southFront(ctx, { x0, x1, z1, y, px, bays, sWin }) {
   }
   // the portal's flanks: tiers of canopied statue niches either side of the doors and a rope-and-leaf cornice over the first stage
   const pz1 = z1 + 3.6;
-  for (const sd of [-1, 1]) for (let k = 0; k < 3; k++) {
-    const nx = px + sd * 5.25, ny = y + 1.6 + k * 4.2;
-    addBox(bag, 'opening', nx - 0.55, ny, pz1 + 0.0, nx + 0.55, ny + 2.6, pz1 + 0.08);
-    bag.add(MATC, lathe([[0.2, 0], [0.26, 0.5], [0.2, 1.5], [0.12, 1.85], [0.001, 2.05]], 6, null, nx, ny, pz1 - 0.2));
-    bag.add(MATC, lathe([[0.8, 0], [0.62, 0.3], [0.2, 0.8], [0.001, 1.25]], 6, null, nx, ny + 2.6, pz1 - 0.2));
-    addBox(bag, MATC, nx - 0.7, ny - 0.18, pz1 - 0.3, nx + 0.7, ny, pz1 + 0.1);
-  }
   bag.add(MATC, ring(px, y + 4.6, 4.9, pz1 + 0.05, 0.07));
   for (let k = 1; k < 12; k++) { const t = Math.PI - k / 12 * Math.PI; bag.add(MATC, lathe([[0.1, 0], [0.06, 0.14], [0.001, 0.36]], 4, null, px + Math.cos(t) * 5.0, y + 4.6 + Math.sin(t) * 5.0, pz1 + 0.05)); }
   addBox(bag, MATC, px - 6.3, y + 13.6, z1, px + 6.3, y + 14.1, pz1 + 0.35);
