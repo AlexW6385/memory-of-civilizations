@@ -37,7 +37,7 @@ function frame(el, bag, col) {
     g.applyMatrix4(new Matrix4().set(T[0], 0, T[1], T[2], 0, 1, 0, y0, T[3], 0, T[4], T[5], 0, 0, 0, 1));
     bag.add(m, g);
   };
-  return { L, D, P, R, B, X, f, bag };
+  return { L, D, P, R, B, X, f, bag, col };
 }
 
 /** A path of a round-headed opening, its sill at ya, springing at ys. */
@@ -65,11 +65,19 @@ export function chimneyTop(l) {
   return ytop - 0.25 + span / 2 * l.pitch + 0.9;
 }
 
+/** Where an ordinary house's door is (u along the front) and, for a vintner's house, the cellar's: the other end of the front. */
+export function doorU(l) {
+  const [x0, z0, x1, z1] = l.rect, f = l.front, L = (f === 's' || f === 'n') ? x1 - x0 : z1 - z0, r = rng(l.seed || 1);
+  r(); const du = L * (0.3 + r() * 0.4);
+  return { L, du, cellar: du < L / 2 ? L - 1.1 : 1.1 };
+}
+
 // ── the house ────────────────────────────────────────────────────────────────
 function maison(el, { bag, col, lights }) {
   const c = frame(el, bag, col), { L, D, B, X, P } = c, rand = rng(el.seed || 1);
   const y = el.y, G = el.G ?? 2.7, G2 = el.G2 ?? 2.4, n = el.storeys ?? 2, S = el.stone || 'schist_rubble', simple = !!el.simple;
   const hostel = !!el.hostel, open = el.open && !simple ? el.open : null, shop = !!el.shop && !hostel, dep = 0.5;
+  const barn = el.kind === 'grange' && !hostel && !shop, vint = el.kind === 'vintner' && !hostel && !shop && !el.perron && L >= 5.6, ashlar = el.kind === 'ashlar' && !hostel && !shop;
   const ytop = y + G + (n - 1) * G2;
   const mir = rand() < 0.5, U = (u) => (mir ? L - u : u);        // the door's end
   // an outside stair to a door in the upper wall (front 's', wide houses: a stone flight along the front, a landing at the door)
@@ -81,17 +89,21 @@ function maison(el, { bag, col, lights }) {
   if (hostel) du = L / 2;
   else if (shop && L >= 5.3) { shopA = [U(0.6 + 1.3)]; du = U(0.6 + 2.6 + 0.8 + 0.52); }
   else if (shop) shopA = [L / 2];
+  else if (barn) du = L / 2;
   else if (perron) du = mir ? L - 1.2 - rand() * 0.6 : 1.2 + rand() * 0.6;
   else du = L * (0.3 + rand() * 0.4);
-  const dw = hostel ? 1.9 : 1.05, dh = hostel ? 2.0 : 1.85;
+  const dw = hostel ? 1.9 : barn ? 2.4 : 1.05, dh = hostel ? 2.0 : barn ? 2.3 : 1.85;
+  const cu = vint && du !== null ? (du < L / 2 ? L - 1.1 : 1.1) : null;              // a vintner's cellar door, at the other end of the front
   if (du !== null) holes.push(arch(du, dw, 0.1, dh));
+  if (cu !== null) holes.push(arch(cu, 1.3, 0.0, 1.3));
   if (shopA) holes.push(arch(shopA[0], 2.6, 0.0, 1.25));
   const wins = [];
-  if (!shopA || L > 7) {
+  if (barn) wins.push(U(0.9));
+  else if (!shopA || L > 7) {
     const step = hostel ? 2.6 : 2.5, nw = Math.max(0, Math.floor((L - 0.8) / step));
     for (let k = 0; k < nw; k++) {
       const u = (k + 0.5) * L / nw;
-      if ((du !== null && Math.abs(u - du) < dw / 2 + 0.55) || (shopA && Math.abs(u - shopA[0]) < 1.3 + 0.55)) continue;
+      if ((du !== null && Math.abs(u - du) < dw / 2 + 0.55) || (shopA && Math.abs(u - shopA[0]) < 1.3 + 0.55) || (cu !== null && Math.abs(u - cu) < 1.2)) continue;
       if (perron && u > perS[0] - 0.5 && u < perS[1] + 1.5 && perS[0] < perS[1]) continue;
       wins.push(u);
     }
@@ -115,7 +127,7 @@ function maison(el, { bag, col, lights }) {
     rr(0, dep, 0.5, D); rr(L - 0.5, dep, L, D); rr(0.5, D - 0.5, L - 0.5, D);
     rr(0, 0, doorCol[0], dep); rr(doorCol[1], 0, L, dep);
     col.rect(el.rect, ceil - 0.22, ytop + 1.5);
-    furnish(c, open, { L, D, fy, ceil, du, shopA, dep, rand, trade: el.trade, homeKind: el.homeKind ?? 0 });
+    furnish(c, open, { L, D, fy, ceil, du, dw, shopA, dep, rand, trade: el.trade, homeKind: el.homeKind ?? 0, barn });
     // the room is lit: a rushlight on its stand near the middle of the room (the hostel's long hall has two), at any hour
     for (const u of open === 'hostel' ? [L * 0.3, L * 0.7] : [L / 2]) { const q = c.P(u, D * 0.55); lights?.push({ at: [q[0], fy + 1.7, q[1]], color: '#ffb46b', intensity: 3, distance: 7 }); }
   }
@@ -137,6 +149,35 @@ function maison(el, { bag, col, lights }) {
       B('iron', du + (mir ? 0.3 : -0.3), dep - 0.14, du + (mir ? 0.34 : -0.26), dep - 0.1, y + 1.0, y + 1.04);
     }
   }
+  // a vintner's cellar door: a round arch of dressed stone with its plank leaf, shut, and a stone sill; barrels stand before it (the lane's goods)
+  if (cu !== null && !simple) {
+    const ring = new Shape(), R0 = 0.65, R1 = 0.85, ys = 1.3;
+    ring.moveTo(cu + R1, ys); ring.lineTo(cu + R0, ys);
+    for (let k = 1; k < 10; k++) { const t = Math.PI * k / 10; ring.lineTo(cu + R0 * Math.cos(t), ys + R0 * Math.sin(t)); }
+    ring.lineTo(cu - R0, ys); ring.lineTo(cu - R1, ys);
+    for (let k = 9; k > 0; k--) { const t = Math.PI * k / 10; ring.lineTo(cu + R1 * Math.cos(t), ys + R1 * Math.sin(t)); }
+    X('limestone_yellow', ring, 0.07, -0.06, y);
+    B('limestone_yellow', cu - 0.85, -0.1, cu - 0.65, 0.02, y, ys); B('limestone_yellow', cu + 0.65, -0.1, cu + 0.85, 0.02, y, ys);
+    const g = new Shape(); g.moveTo(cu - 0.63, 0.0); g.lineTo(cu + 0.63, 0.0); g.lineTo(cu + 0.63, ys);
+    for (let k = 1; k < 8; k++) { const t = Math.PI * k / 8; g.lineTo(cu + 0.63 * Math.cos(t), ys + 0.63 * Math.sin(t)); }
+    g.lineTo(cu - 0.63, ys); g.lineTo(cu - 0.63, 0.0);
+    X('wood_dark', g, 0.05, dep - 0.1, y);
+    for (const h of [0.4, 1.0]) B('iron', cu - 0.6, dep - 0.11, cu + 0.6, dep - 0.08, y + h, y + h + 0.06);
+    B('limestone_yellow', cu - 0.8, -0.3, cu + 0.8, dep, y - 0.2, y + 0.06);
+  }
+  // an ashlar house: the quoins of red sandstone at both corners of the front in alternating courses, a plinth, a hood of red sandstone over the door
+  if (ashlar && !simple) {
+    for (let q = 0; q < Math.floor((ytop - y) / 0.5); q++) for (const e of [0, 1]) { const w = q % 2 ? 0.28 : 0.5; B('sandstone_red', e ? L - w + 0.04 : -0.04, -0.05, e ? L + 0.04 : w - 0.04, 0.35, y + q * 0.5, y + q * 0.5 + 0.5); }
+    B('sandstone_red', 0.0, -0.07, L, 0.0, y - 0.1, y + 0.45);
+    if (du !== null) {
+      const hood = new Shape(), R0 = dw / 2 + 0.2, R1 = R0 + 0.16;
+      hood.moveTo(du + R1, dh); hood.lineTo(du + R0, dh);
+      for (let k = 1; k < 10; k++) { const t = Math.PI * k / 10; hood.lineTo(du + R0 * Math.cos(t), dh + dw / 2 * 0.0 + R0 * Math.sin(t)); }
+      hood.lineTo(du - R0, dh); hood.lineTo(du - R1, dh);
+      for (let k = 9; k > 0; k--) { const t = Math.PI * k / 10; hood.lineTo(du + R1 * Math.cos(t), dh + R1 * Math.sin(t)); }
+      X('sandstone_red', hood, 0.06, -0.12, y);
+    }
+  }
   // windows of the ground storey: shutters shut, or the dark opening
   if (!simple) for (const u of wins) {
     if (rand() < 0.5) B('timber', u - 0.23, dep - 0.1, u + 0.23, dep - 0.05, y + 1.0, y + 1.55); else B('opening', u - 0.23, dep - 0.04, u + 0.23, dep - 0.02, y + 1.0, y + 1.55);
@@ -156,12 +197,18 @@ function maison(el, { bag, col, lights }) {
     const yi = y + G + (i - 1) * G2, wh = [];
     const nw = Math.max(1, Math.floor(L / 2.3)), ws = [];
     if (perron && i === 1) wh.push(arch(perD, 1.0, 0.0, 1.65));
-    for (let k = 0; k < nw; k++) { const u = (k + 0.5) * L / nw; if (perron && i === 1 && Math.abs(u - perD) < 1.05) continue; const tw = el.twin && (k % 2 === 0 || nw === 1) && L / nw > 2.1; ws.push([u, tw]); wh.push(arch(u, tw ? 0.95 : 0.55, 0.85, 1.35)); }
+    if (barn && i === 1) { ws.push([du, 'hatch']); wh.push(arch(du, 1.1, 0.0, 1.0)); }
+    else for (let k = 0; k < nw; k++) { const u = (k + 0.5) * L / nw; if (perron && i === 1 && Math.abs(u - perD) < 1.05) continue; const tw = (el.twin || ashlar) && (ashlar || k % 2 === 0 || nw === 1) && L / nw > 2.1; ws.push([u, tw]); wh.push(arch(u, tw ? 0.95 : 0.55, 0.85, 1.35)); }
     X(S, wall(L, G2, 0, wh), dep, 0, yi);
     B(S, 0, dep, L, D, yi, yi + G2);
     if (!simple) {
       B('limestone_yellow', -0.03, -0.07, L + 0.03, 0.04, yi - 0.1, yi + 0.06);
       for (const [u, tw] of ws) {
+        if (tw === 'hatch') {                                    // the hay-loft's door: two leaves of boards, a beam out over it for the hoist
+          B('timber', u - 0.52, dep - 0.1, u + 0.52, dep - 0.05, yi, yi + 1.5); B('wood_dark', u - 0.52, dep - 0.12, u + 0.52, dep - 0.1, yi + 0.5, yi + 0.56);
+          B('wood_dark', u - 0.06, -0.8, u + 0.06, 0.1, yi + 1.85, yi + 1.97); B('iron', u - 0.03, -0.78, u + 0.03, -0.74, yi + 1.6, yi + 1.85);
+          B('limestone_yellow', u - 0.66, -0.06, u + 0.66, 0.1, yi - 0.08, yi + 0.0); continue;
+        }
         const w = tw ? 0.95 : 0.55;
         if (tw) {
           B('opening', u - w / 2, dep - 0.06, u + w / 2, dep - 0.03, yi + 0.85, yi + 1.6);
@@ -208,7 +255,7 @@ function maison(el, { bag, col, lights }) {
     bag.add('lauze', box(cx - 0.36, top + 0.1, cz - 0.3, cx + 0.36, top + 0.18, cz + 0.3));
   } else if (el.chim) bag.add(S, box(el.chim[0] - 0.36, ytop - 0.4, el.chim[1] - 0.3, el.chim[0] + 0.36, chimneyTop(el), el.chim[1] + 0.3));
   // wall plate under the eave (hides the slit between wall and slab)
-  if (!simple) { B('wood_dark', -0.02, -0.04, L + 0.02, 0.04, ytop - 0.1, ytop + 0.08); dress(c, el, { y, G, G2, n, L, D, du, dw, dh, dep, wins, shopA, shop, hostel, open, perron, perD, perS, mir, ytop, col }); }
+  if (!simple) { B('wood_dark', -0.02, -0.04, L + 0.02, 0.04, ytop - 0.1, ytop + 0.08); dress(c, el, { y, G, G2, n, L, D, du, dw, dh, dep, wins, shopA, shop, hostel, open, perron, perD, perS, mir, ytop, col, barn }); }
 }
 
 // ── the fronts dressed at eye level: what a visitor sees at 1–20 m (docs/settlements/conques.md §1i) ──
@@ -234,9 +281,24 @@ function dress(c, el, o) {
       for (let k = 0; k < 5; k++) fill(bag, k % 2 ? 'cloth_ochre' : 'linen', c, uh, -0.07 - (k % 2) * 0.03, y + 1.25 + k * 0.1, 0.05, 0.08);
     } else if (pick < 0.78) { fill(bag, 'terracotta', c, du + side * (dw / 2 + 0.4), -0.3, y, 0.16, 0.34); fill(bag, 'palm_leaf', c, du + side * (dw / 2 + 0.4), -0.3, y + 0.32, 0.2, 0.28); }
   }
+  // a herder's front: fleeces over a rail; a fisher's: a net hung up to dry, its floats along the top
+  if (du !== null && !hostel && (el.kind === 'herder' || el.kind === 'fisher') && !o.barn) {
+    const side2 = du < L / 2 ? 1 : -1, ub = du + side2 * (dw / 2 + 0.95);
+    if (ub > 0.7 && ub < L - 0.7) {
+      if (el.kind === 'herder') {
+        for (const e of [-0.55, 0.55]) B('wood_dark', ub + e - 0.03, -0.5, ub + e + 0.03, -0.44, y, y + 1.3);
+        B('wood_dark', ub - 0.6, -0.5, ub + 0.6, -0.44, y + 1.3, y + 1.36);
+        for (const [e, w] of [[-0.35, 0.3], [0.0, 0.34], [0.38, 0.3]]) B(r() < 0.5 ? 'hide_white' : 'hide_grey', ub + e - w / 2, -0.52, ub + e + w / 2, -0.4, y + 0.6, y + 1.3);
+      } else {
+        B('rope_fibre', ub - 0.55, -0.09, ub + 0.55, -0.05, y + 0.5, y + 1.95);
+        for (let k = 0; k < 6; k++) B('wood_ochre', ub - 0.5 + k * 0.2, -0.12, ub - 0.4 + k * 0.2, -0.04, y + 1.95, y + 2.02);
+        B('iron', ub - 0.6, -0.1, ub + 0.6, -0.04, y + 2.02, y + 2.05);
+      }
+    }
+  }
   // the windows of the ground storey: pots of herbs on some sills, a hung bird-cage? no — cloth hung to air on some upper sills
   for (const u of wins) if (r() < 0.45) { fill(bag, r() < 0.5 ? 'terracotta' : 'pottery_dark', c, u, 0.0, y + 1.0, 0.1, 0.14); fill(bag, r() < 0.6 ? 'palm_leaf' : 'flax_leaf', c, u, 0.0, y + 1.12, 0.14, 0.16); }
-  if (n > 1) {
+  if (n > 1 && !o.barn) {
     const yi = y + G, nw = Math.max(1, Math.floor(L / 2.3));
     for (let k = 0; k < nw; k++) {
       const u = (k + 0.5) * L / nw;
@@ -393,6 +455,25 @@ function furnish(c, kind, o) {
     B('timber', a0 + side * 0.9 - 0.2, dep + 1.5, a0 + side * 0.9 + 0.2, dep + 1.9, fy, fy + 0.3, false);
     return;
   }
+  if (o.barn) {
+    // a barn-house: the cart parked beside the door, a stack of hay bales against the back wall, the plough, sacks, a ladder to the loft, rakes and forks on the wall
+    const pv = dep + 1.0, cx0 = 0.75, cx1 = Math.min(1.55, L / 2 - 1.5);
+    c.B('timber', cx0, pv, cx1, pv + 2.0, fy + 0.5, fy + 0.58, true);
+    for (const e of [cx0, cx1 - 0.04]) c.B('wood_dark', e, pv, e + 0.04, pv + 2.0, fy + 0.58, fy + 0.85, false);
+    for (const e of [pv + 0.05, pv + 1.95]) c.B('wood_dark', cx0, e - 0.02, cx1, e + 0.02, fy + 0.58, fy + 0.85, false);
+    for (const u of [cx0 - 0.04, cx1 + 0.04]) { const a = c.P(u - 0.03, pv + 1.0), b = c.P(u + 0.03, pv + 1.0); c.bag.add('wood_dark', rod([a[0], fy + 0.45, a[1]], [b[0], fy + 0.45, b[1]], 0.45, 14)); }
+    for (const e of [cx0 + 0.1, cx1 - 0.1]) { const a = c.P(e, pv), b = c.P(e, pv - 0.8); c.bag.add('wood_dark', rod([a[0], fy + 0.6, a[1]], [b[0], fy + 0.3, b[1]], 0.025, 6)); }
+    for (let r2 = 0; r2 < 2; r2++) for (let k = 0; k < 3 - r2; k++) { const u0 = L - 2.8 + k * 0.75 + r2 * 0.375; c.B('thatch', u0, D - 1.5, u0 + 0.72, D - 0.5, fy + r2 * 0.42, fy + 0.42 + r2 * 0.42, true); }
+    for (let k = 0; k < 3; k++) { const u0 = L - 2.8 + k * 0.75; c.B('thatch', u0, D - 2.45, u0 + 0.72, D - 1.55, fy, fy + 0.42, true); }
+    c.col.rect(c.R(cx0 - 0.1, pv - 0.1, cx1 + 0.1, pv + 2.1), fy, fy + 0.9);
+    c.B('wood_dark', 0.7, D - 3.3, 0.78, D - 0.9, fy + 0.5, fy + 0.6, false); c.B('iron', 0.62, D - 1.4, 0.86, D - 0.9, fy + 0.1, fy + 0.5, false);
+    for (const e of [D - 0.95, D - 1.3]) { const a = c.P(0.74, e), b = c.P(0.74, e - 0.2); c.bag.add('wood_dark', rod([a[0], fy + 0.5, a[1]], [b[0], fy + 1.2, b[1]], 0.02, 5)); }
+    for (let k = 0; k < 4; k++) c.B('sacking', L - 1.35, dep + 0.6 + k * 0.55, L - 0.65, dep + 1.05 + k * 0.55, fy, fy + 0.55, true);
+    for (let k = 0; k < 7; k++) c.B('wood_dark', L - 0.55, dep + 3.0, L - 0.5, dep + 3.04, fy + k * 0.3, fy + k * 0.3 + 0.04, false);
+    c.B('wood_dark', L - 0.55, dep + 2.95, L - 0.5, dep + 3.0, fy, ceil, false); c.B('wood_dark', L - 0.55, dep + 3.55, L - 0.5, dep + 3.6, fy, ceil, false);
+    for (let k = 0; k < 5; k++) c.B('wood_dark', 2.3 + k * 0.22, D - 0.53, 2.34 + k * 0.22, D - 0.5, fy + 0.5, fy + 1.95 - (k % 2) * 0.2, false);
+    return;
+  }
   // a home: the hearth, a table with a bench, a chest, a bed of boards with straw, a shelf of pots
   hearth(L - 0.5, D / 2);
   B('timber', L / 2 - 0.8, D / 2 - 0.4, L / 2 + 0.6, D / 2 + 0.4, fy + 0.74, fy + 0.8);
@@ -404,7 +485,33 @@ function furnish(c, kind, o) {
   for (let u = 2.2; u < L - 2.4; u += 0.35) pot(bag, 'terracotta', c, u, D - 0.68, fy + 1.45, 0.09, 0.2);
   barrelAt(bag, c, L - 1.2, D - 1.2, fy);
   const hk = o.homeKind;
-  if (hk === 1) {
+  if (hk === 3) {
+    // a vintner's: the casks in a row along the back wall, a wine press of beams and a screw at the front, a tub for the must
+    for (let u = 2.5; u < L - 2.2; u += 0.75) barrelAt(bag, c, u, D - 1.15, fy);
+    const pv = dep + 1.5;
+    c.B('timber', 0.6, pv, 1.8, pv + 1.2, fy + 0.12, fy + 0.3, true);
+    for (const e of [0.62, 1.68]) for (const f of [pv + 0.05, pv + 1.05]) c.B('wood_dark', e, f, e + 0.12, f + 0.1, fy + 0.3, fy + 1.9, false);
+    c.B('wood_dark', 0.62, pv + 0.05, 1.8, pv + 0.15, fy + 1.8, fy + 1.95, false); c.B('wood_dark', 0.62, pv + 1.05, 1.8, pv + 1.15, fy + 1.8, fy + 1.95, false);
+    const sp = c.P(1.2, pv + 0.6); c.bag.add('wood_dark', lathe([[0.001, 0], [0.07, 0], [0.07, 0.95], [0.001, 0.95]], 8, null, sp[0], fy + 0.9, sp[1]));
+    c.B('timber', 0.85, pv + 0.25, 1.55, pv + 0.95, fy + 0.3, fy + 0.8, false); c.B('timber', 0.8, pv + 0.2, 1.6, pv + 1.0, fy + 0.8, fy + 0.88, false);
+    c.B('wood_dark', 0.65, pv + 0.56, 1.75, pv + 0.64, fy + 1.45, fy + 1.52, false);
+    barrelAt(bag, c, 1.2, pv + 1.6, fy);
+  } else if (hk === 5) {
+    // a herder's: a rail of fleeces along the wall, a rack of cheeses on a board, a churn and a pail
+    c.B('wood_dark', 0.5, dep + 1.2, 0.56, dep + 3.0, fy + 1.5, fy + 1.56, false);
+    for (let k = 0; k < 4; k++) c.B(k % 2 ? 'hide_grey' : 'hide_white', 0.56, dep + 1.25 + k * 0.45, 0.72, dep + 1.6 + k * 0.45, fy + 0.75, fy + 1.5, false);
+    c.B('timber', 2.2, D - 1.55, L - 2.5, D - 1.2, fy + 0.9, fy + 0.95, false); for (const e of [2.25, L - 2.55]) c.B('wood_dark', e, D - 1.5, e + 0.05, D - 1.25, fy, fy + 0.9, false);
+    for (let u = 2.45; u < L - 2.6; u += 0.34) fill(bag, 'hide_white', c, u, D - 1.38, fy + 0.95, 0.13, 0.09);
+    const ch = c.P(L - 2.3, D - 1.15); bag.add('wood_dark', lathe([[0.17, 0], [0.19, 0.1], [0.15, 0.85], [0.001, 0.85]], 10, null, ch[0], fy, ch[1]));
+    pot(bag, 'terracotta', c, L / 2 - 1.2, D / 2 - 1.3, fy, 0.14, 0.22);
+  } else if (hk === 6) {
+    // a fisher's: a net hung on the wall with its floats, creels of wicker, fish hung to dry on a pole
+    c.B('rope_fibre', 0.5, dep + 1.2, 0.54, dep + 3.2, fy + 0.5, fy + 2.0, false);
+    for (let k = 0; k < 5; k++) c.B('wood_ochre', 0.5, dep + 1.3 + k * 0.4, 0.58, dep + 1.45 + k * 0.4, fy + 2.0, fy + 2.06, false);
+    for (const [u, v] of [[0.95, dep + 3.5], [1.45, dep + 3.4], [0.9, dep + 4.0]]) fill(bag, 'wicker', c, u, v, fy, 0.22, 0.4);
+    c.B('wood_dark', 1.9, dep + 1.0, L - 2.4, dep + 1.06, fy + 1.9, fy + 1.97, false);
+    for (let u = 2.1; u < L - 2.5; u += 0.3) { const q = c.P(u, dep + 1.03); bag.add('hide_grey', lathe([[0.001, 0], [0.03, 0.03], [0.045, 0.11], [0.022, 0.2], [0.001, 0.23]], 6, null, q[0], fy + 1.68, q[1])); }
+  } else if (hk === 1) {
     // a second bed, a cradle, a ladder to the loft, a spinner's stool with her basket of wool
     B('timber', L - 2.6, D - 0.5 - 2.0, L - 1.5, D - 0.55, fy, fy + 0.4); B('thatch', L - 2.55, D - 0.5 - 1.95, L - 1.55, D - 0.6, fy + 0.4, fy + 0.5, false); B('cloth_ochre', L - 2.5, D - 1.8, L - 1.6, D - 0.6, fy + 0.5, fy + 0.54, false);
     B('wood_dark', 1.9, D - 1.3, 2.5, D - 0.7, fy + 0.15, fy + 0.5); B('linen', 1.95, D - 1.25, 2.45, D - 0.75, fy + 0.5, fy + 0.54, false);

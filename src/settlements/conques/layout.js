@@ -128,6 +128,19 @@ function build() {
   // the hostel: a long hall of two floors
   const [hx0, hz0, hx1, hz1] = HOSTEL.rect;
   LOTS.push({ rect: [hx0, hz0, hx1, hz1], y: level(6), foot: level(6), front: 's', seed: 77, storeys: 2, k: 6, G: 3.1, G2: 2.5, pitch: 0.9, ridgeAlong: true, stone: 'schist_rubble', twin: true, gallery: false, dormer: false, shop: false, hostel: true });
+  // the kinds of house, by their place (docs/settlements/conques.md §1k): rich ashlar houses near the church, barn-houses on the outer rows,
+  // vintners' houses (the vine country, cellars in the rock) among them, herders on the high rows, fishers on the low rows toward the river
+  const rk = rng(2718);
+  for (const l of LOTS) {
+    if (l.hostel || l.shop) continue;
+    const [x0, z0, x1, z1] = l.rect, Lw = x1 - x0, cz = (z0 + z1) / 2, r = Math.hypot((x0 + x1) / 2, cz), roll = rk();
+    if (l.perron) continue;
+    if (r < 92 && Lw >= 7.0 && roll < 0.5) { l.kind = 'ashlar'; l.stone = 'limestone_yellow'; l.twin = true; l.storeys = Math.max(2, l.storeys); }
+    else if (r >= 95 && Lw >= 6.2 && roll < 0.3) { l.kind = 'grange'; l.storeys = 2; l.G = 3.7; l.gallery = false; l.twin = false; }
+    else if (r >= 50 && Lw >= 5.6 && roll >= 0.3 && roll < 0.5) l.kind = 'vintner';
+    else if (cz < 30 && r > 70 && Lw >= 5.2 && roll >= 0.5 && roll < 0.66) l.kind = 'herder';
+    else if (cz > 90 && Lw >= 5.2 && roll >= 0.5 && roll < 0.72) l.kind = 'fisher';
+  }
   // chimneys: a stack at one end of the roof, set against the gable
   for (const l of LOTS) {
     const [x0, z0, x1, z1] = l.rect, f = l.front, along = f === 's' || f === 'n', Lw = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0;
@@ -149,6 +162,17 @@ function build() {
   for (const l of shops) l.open = 'shop';
   homes.forEach((l, i) => { l.open = 'home'; l.homeKind = i % 3; });
   LOTS.find((l) => l.hostel).open = 'hostel';
+  // beyond the first rows: the houses with a trade of their own, and a share of the others, can be entered too, furnished by their kind
+  const KINDHOME = { grange: 4, vintner: 3, herder: 5, fisher: 6 }, ro = rng(3141);
+  let more = 0, plain = 0;
+  for (const l of LOTS) {
+    if (l.open || l.hostel || l.shop || l.perron) continue;
+    const [x0, z0, x1, z1] = l.rect, r = Math.hypot((x0 + x1) / 2, (z0 + z1) / 2), roll = ro();
+    if (r > 150 || x1 - x0 < (l.kind === 'grange' ? 6.2 : 4.8) || z1 - z0 < 6.6) continue;
+    const want = l.kind ? roll < 0.8 : roll < 0.2;
+    if (!want || more >= 70) continue;
+    l.open = 'home'; l.homeKind = KINDHOME[l.kind] ?? plain++ % 3; more++;
+  }
 }
 /** The houses (and the hostel) on the shelves. */
 export function lots() { if (!LOTS) build(); return LOTS; }

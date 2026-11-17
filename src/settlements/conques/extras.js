@@ -53,7 +53,7 @@ export function laneLife() {
       if (u > 0.3 && u < L - 0.3) E.push({ t: 'lantern', kind: 'iron', h: 2.3, at: P(u, -0.12), y: l.y, rot: out, seed: l.seed });
     }
     // the door's front of a house: what a household keeps there (the shops have their goods)
-    if (!l.shop && !l.hostel && L > 3.6 && rand() < 0.62) {
+    if (!l.shop && !l.hostel && !l.open && L > 3.6 && rand() < 0.62) {
       const u = rand() < 0.5 ? 0.45 : L - 0.45, pick = rand();
       if (pick < 0.22) E.push({ t: 'ladder', at: P(u, -0.12), y: l.y, rot: out, len: 3.2 });
       else if (pick < 0.4) E.push({ t: 'barrow', kind: 'front', at: P(L / 2 + 0.6, -0.9), y: l.y, rot: out + Math.PI / 2, seed: l.seed });
@@ -181,7 +181,7 @@ export function beasts() {
   let n = 0;
   for (const l of all) {
     const { P, out } = frameOf(l), cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2;
-    if (!near(cx, cz, 95) || l.hostel || rand() > 0.045) continue;
+    if (!near(cx, cz, 95) || l.hostel || l.open || rand() > 0.045) continue;
     L.push({ t: 'animal', kind: n++ % 5 === 4 ? 'pig' : 'dog', at: P(1.0 + rand() * 2, -0.8), y: l.y, rot: out + Math.PI * (0.5 + rand()), seed: Math.floor(rand() * 1e9) });
   }
   const [hx0, hz0, hx1, hz1] = HOSTEL.rect;
