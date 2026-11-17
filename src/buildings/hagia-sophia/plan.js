@@ -70,7 +70,7 @@ for (const sz of [-1, 1]) {
   for (let k = 1; k <= 6; k++) column(-S + gb * k, z, GF, 4.7, 0.6, 'verde_antico');
   for (let k = 0; k < 7; k++) {
     const x0 = -S + gb * k + 0.35, x1 = -S + gb * (k + 1) - 0.35;
-    block([x0, z - 0.14, x1, z + 0.14], GF, GF + 1.0, 'revetment_green');
+    add({ t: 'hs_parapet', a: [x0, z], b: [x1, z], y: GF, h: 1.0 });
   }
   // the projecting cornices at the gallery floor and at the top of the gallery arcade (Paul the Silentiary: the
   // cornices and the mouldings between the revetment gilded — pallasweb), the inlaid discs in the spandrels
@@ -136,7 +136,7 @@ for (const sx of [-1, 1]) {
         if (y0 > 1) {
           // a parapet between the gallery columns
           const q0 = [pa[0] + u[0] * 0.3, pa[1] + u[1] * 0.3], q1 = [pb[0] - u[0] * 0.3, pb[1] - u[1] * 0.3];
-          add({ t: 'wall', a: q0, b: q1, th: 0.28, y0, y1: y0 + 1.0, openings: [], mat: 'revetment_green' });
+          add({ t: 'hs_parapet', a: q0, b: q1, y: y0, h: 1.0 });
         }
       }
     };
@@ -154,6 +154,7 @@ add({ t: 'sphere', c: [0, YS, 0], R: RP, clips: [[1, 0, 0, S], [-1, 0, 0, S], [0
 add({ t: 'arc_wall', c: [0, 0], r0: S - 0.45, r1: S + 0.1, a0: 0, a1: 360, y0: YD - 0.45, y1: YD + 0.6, mat: 'marble_smooth', collide: false, step: 3 });
 add({ t: 'square_ring', c: [0, 0], half: 17.5, r: S + 0.9, y: YD + 0.6, y0: YD - 0.8, mat: 'stucco_warm' });
 add({ t: 'ribbed_dome', c: [0, 0], y0: YD + 0.6, r: S, thick: 0.9, win: { n: 40, w: 1.25, h: 1.9 }, crown: CROWN, mat: 'mosaic_gold', outMat: 'lead' });
+add({ t: 'hs_dome_windows', c: [0, 0], R: S + 0.9, y0: YD + 0.9, y1: YD + 3.1, n: 40, w: 1.25 });
 // the cross in a circle of mosaic at the crown; the single lamps on bronze stakes along the cornice (Paul, 489, 506, 862)
 add({ t: 'dome_cross', c: [0, 0], y0: YD + 0.6, r: S, win: { h: 1.9 }, crown: CROWN, R: 4.0 });
 add({ t: 'cornice_lamps', c: [0, 0], r: S - 0.25, y: YD + 0.6, n: 80, cyma: { r: S - 0.45, y0: YD - 0.45 } });
@@ -207,20 +208,19 @@ function exterior(sz, holes) {
   const doors = sz < 0 ? [[-42.6, -39.9]] : [[-11.8, -8.2]];
   run(x0, x1, 0, 0.8, 0.3, 'limestone', doors);                                   // the plinth
   for (const [y0, y1] of [[9.3, 9.9], [11.1, 11.7], [12.9, 13.5]]) run(x0, x1, y0, y1, 0.12, 'brick');   // the brick courses
-  run(x0, x1, 8.25, 8.85, 0.4, 'limestone');                                       // the cornice over the aisle windows
   run(x0, x1, 14.5, 15.15, 0.42, 'limestone', sz < 0 ? [[-42.6, -39.9]] : []);    // the cornice at the gallery floor
   run(x0, x1, 21.35, 22.5, 0.55, 'limestone');                                     // the eaves
-  for (const h of holes) {
+  for (const h of holes) {                                                        // the windows: jambs, sill, lintel, a hood of voussoirs round a lunette
     if (h.y0 < 1) continue;
-    const a = h.u0 - 43.5, b = h.u1 - 43.5, w = b - a;
-    if (w > 2.4) continue;
-    for (const [ja, jb] of [[a - 0.3, a], [b, b + 0.3]]) { const [za, zb] = zr(-0.15, 0.25); block([ja, za, jb, zb], h.y0 - 0.2, h.y1 + 0.1, 'limestone', { collide: false }); }
-    { const [za, zb] = zr(-0.2, 0.32); block([a - 0.45, za, b + 0.45, zb], h.y1, h.y1 + 0.55, 'limestone', { collide: false }); block([a - 0.35, za, b + 0.35, zb], h.y0 - 0.3, h.y0, 'limestone', { collide: false }); }
+    const a = h.u0 - 43.5, b = h.u1 - 43.5;
+    if (b - a > 2.4) continue;
+    add({ t: 'hs_window', sz, xc: (a + b) / 2, w: b - a, y0: h.y0, y1: h.y1 });
   }
   // the buttresses on the piers' lines: three steps, each narrower and taller, the lowest 9.5 m out from the wall
   for (const sx of [-1, 1]) for (const [hw, d, top, y0] of [[3.4, 9.5, 16.8, 0], [3.4, 6.6, 24.2, 16.8], [3.0, 3.8, 32.5, 24.2]]) {
     const xc = sx * 18.75, [za, zb] = zr(-0.2, d + 0.35);
     block([xc - hw, za, xc + hw, zb], y0, top, 'brick');
+    add({ t: 'hs_buttress', sz, xc, hw, d, y0, top });
     if (top > 30) { const [ba, bb] = zr(-1.8, 0.5); block([xc - 3.0, ba, xc + 3.0, bb], GR, top, 'brick'); }   // joined to the pier above the roof
     const [ca, cb] = zr(0.35, d + 0.6); block([xc - hw - 0.25, ca, xc + hw + 0.25, cb], top, top + 0.45, 'limestone', { collide: false });
   }
@@ -357,6 +357,38 @@ obj('polykandelon', 0, 0, 7.0, { r: 9.0, n: 64, top: CROWN, hang: { r: S - 0.7, 
 for (const sx of [-1, 1]) obj('polykandelon', sx * 22, 0, 6.0, { r: 2.6, n: 20, top: YS + 14, light: 1.5, lights: 2, distance: 10 });
 for (const sz of [-1, 1]) for (const x of [-25, -6, 6, 27]) obj('polykandelon', x, sz * 25.4, 5.5, { r: 1.1, n: 10, top: 13.8, light: 1.2, lights: 1, distance: 9 });
 for (const sz of [-1, 1]) for (const x of [-25, -6, 6, 27]) obj('polykandelon', x, sz * 25.4, GF + 4.5, { r: 0.9, n: 8, top: 21.4, light: 0.8, lights: 1, distance: 8 });
+
+// ── the ornament of the gold: bands and crosses on the great arches, crosses in roundels on the semidomes and pendentives ──
+for (const sz of [-1, 1]) add({ t: 'hs_mosaic', kind: 'arch', span: 'x', c: [0, YS, 0], r0: S, r1: 17.3, plane: sz * S, dir: -sz });
+for (const sx of [-1, 1]) {
+  add({ t: 'hs_mosaic', kind: 'arch', span: 'z', c: [0, YS, 0], r0: S, r1: 16.1, plane: sx * S, dir: -sx });
+  add({ t: 'hs_mosaic', kind: 'sphere', c: [sx * S, YS, 0], R: S,
+    medallions: [34, 52, 70].map((e) => ({ a: sx > 0 ? 0 : 180, e, r: 1.2 - (e - 34) * 0.004 })).concat([-24, 24].map((da) => ({ a: (sx > 0 ? 0 : 180) + da, e: 46, r: 0.85 }))) });
+}
+add({ t: 'hs_mosaic', kind: 'sphere', c: [0, YS, 0], R: RP, medallions: [45, 135, 225, 315].map((a) => ({ a, e: 24, r: 1.2 })) });
+
+// ── the revetment: book-matched slabs on the west wall of the nave, the piers' faces and the aisles' outer walls ──
+{
+  const reach = (ranges, w) => ranges;
+  // the nave side of the west wall, between the doors and their frames
+  const ds = westDoors.map((d) => [d.z - d.w / 2 - 0.9, d.z + d.w / 2 + 0.9]).sort((p, q) => p[0] - q[0]);
+  const rg = []; let c = -ZO + 0.3;
+  for (const [a, b] of ds) { if (a - c > 1.4) rg.push([c, a]); c = Math.max(c, b); }
+  if (ZO - 0.3 - c > 1.4) rg.push([c, ZO - 0.3]);
+  add({ t: 'hs_revetment', o: [XW, 0], u: [0, 1], n: [1, 0], ranges: reach(rg), y0: 0, y1: 8.4 });
+  // the aisles' outer walls, a dado under the windows, between the piers
+  for (const sz of [-1, 1]) {
+    const zf = sz * (ZO - 0.04), n = [0, -sz], u = [1, 0];
+    add({ t: 'hs_revetment', o: [0, zf], u, n, ranges: sz > 0 ? [[-30.5, -23], [-14.8, -12.4], [-7.6, 14.8], [23, 32.8]] : [[-30.5, -23], [-14.8, 14.8], [23, 32.8]], y0: 0, y1: 3.3 });
+  }
+  // the piers: the faces on the aisles and the reveals of their passages
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    const xi = sx * 15.5, xo = sx * 22, zA = sz * 20.4, zB = sz * 30.4;
+    add({ t: 'hs_revetment', o: [xi, sz * 25.4], u: [0, sz], n: [-sx, 0], ranges: [[-9, -5.0], [5.0, 9.0]], y0: 0, y1: 5.4 });
+    add({ t: 'hs_revetment', o: [xo, sz * 25.4], u: [0, sz], n: [sx, 0], ranges: [[-9, -5.0], [5.0, 9.0]], y0: 0, y1: 5.4 });
+    for (const [zz, ns] of [[zA, sz], [zB, -sz]]) add({ t: 'hs_revetment', o: [sx * 15.5, zz], u: [sx, 0], n: [0, ns], ranges: [[0.2, 6.3]], y0: 0, y1: 8.4 });
+  }
+}
 
 // ── rooms and walks ──────────────────────────────────────────────────────────
 // sealed: its openings glazed or small, the town outside not drawn from within (src/engine/world.js seal)
