@@ -94,9 +94,27 @@ export function lots() {
       || Math.hypot(cx - CASTEL.c[0], cz - CASTEL.c[1]) < CASTEL.r * 1.5 + 28 || Math.abs(cx - tiberX(cz)) < TIBER.w / 2 + 12
       || BORGO.some((b) => Math.abs(cz - b) < 6 && cx > 100) || Math.abs(cz - CASTEL.c[1]) < 9 && cx > 100 || Math.abs(cz + 158) < 6 && cx > -70 && cx < CASTEL.c[0]
       || Math.abs((cz + 420) % 60 - 30) < 3 || Math.abs((cx + 420) % 72 - 36) < 3 && Math.abs(cz) > 30 || inRow(cx, cz, 5) || rand() < 0.08) continue;
-    LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: Math.max(0, height(cx, cz)), foot: -0.3, storeys: 3 + (rand() < 0.5 ? 1 : 0), front: rand() < 0.5 ? 'n' : 's', plaster: rand() < 0.75, fronted: Math.hypot(cx - 175, cz) < 115 });
+    LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: Math.max(0, height(cx, cz)), foot: -0.3, storeys: 3 + (rand() < 0.5 ? 1 : 0), front: rand() < 0.5 ? 'n' : 's', plaster: rand() < 0.75, fronted: Math.hypot(cx - 175, cz) < 145 });
   }
   return LOTS;
+}
+/**
+ * The houses that can be entered (DESIGN §4.3): the five lots nearest the arrival (the first an inn), and eight more spread
+ * through the ring 120–240 m from it (two inns among them), each a furnished room with its household; a map from lot to its use.
+ */
+let HOMES = null;
+export function openHomes(arrival) {
+  if (HOMES) return HOMES;
+  const ok = lots().filter((l) => l.rect[2] - l.rect[0] >= 4.5 && l.rect[3] - l.rect[1] >= 4.5);
+  const d = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - arrival[0], (l.rect[1] + l.rect[3]) / 2 - arrival[1]);
+  const near = ok.slice().sort((a, b) => d(a) - d(b)), pick = near.slice(0, 5);
+  HOMES = new Map(pick.map((l, i) => [l, i === 0 ? 'inn' : 'home']));
+  const ring = near.filter((l) => d(l) >= 120 && d(l) <= 240 && l.rect[2] - l.rect[0] >= 8.4 && !inRow(l.rect[0], l.rect[1], 3));
+  // (spread by bearing from the arrival so that they do not cluster)
+  ring.sort((a, b) => Math.atan2((a.rect[1] + a.rect[3]) / 2 - arrival[1], (a.rect[0] + a.rect[2]) / 2 - arrival[0]) - Math.atan2((b.rect[1] + b.rect[3]) / 2 - arrival[1], (b.rect[0] + b.rect[2]) / 2 - arrival[0]));
+  const step = Math.max(1, Math.floor(ring.length / 8));
+  for (let i = 0, k = 0; i < ring.length && k < 8; i += step, k++) HOMES.set(ring[i], k === 2 || k === 5 ? 'inn' : 'home');
+  return HOMES;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
 

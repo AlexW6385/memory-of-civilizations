@@ -6,8 +6,7 @@
 
 import { feast } from './feast.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
-import { openLots } from '../lod.js';
-import { OVAL, FRONT_X, FLOOR, BORGO, GARDEN, TIBER, rows, frontPt, lots, tiberX, height, CROSSING } from './layout.js';
+import { OVAL, FRONT_X, FLOOR, BORGO, GARDEN, TIBER, rows, frontPt, lots, tiberX, height, CROSSING, openHomes, SISTINA_C, COURT } from './layout.js';
 
 const plan = (id, style, elements, bounds, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, 0], facing: 'n' }, bounds, rooms: [], elements, ...extra });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -103,7 +102,7 @@ export function streetPlans() {
     if (rr() < 0.18) L.push(sc({ at: P(w * 0.4, -1.6), rot: out + 2.4, seed: l.seed + 6, pose: 'talk', dress: 'robe', cloth: 'cloth_brown', cloth2: 'cloth_white', hat: 'veil', over: 'shawl' }));
   }
   // the open houses nearest the arrival: the innkeeper and his guests at the benches, the household at its table and hearth (the frame of vernacular's openGround)
-  for (const [l, use] of openLots(lots(), [ARRIVALS['baroque-rome'][0], ARRIVALS['baroque-rome'][2]], 5)) {
+  for (const [l, use] of openHomes([ARRIVALS['baroque-rome'][0], ARRIVALS['baroque-rome'][2]])) {
     const [x0, z0, x1, z1] = l.rect, f = l.front, W = x1 - x0, D = z1 - z0, fy = (l.y ?? 0) + 0.6, rr = rng(l.seed + 41);
     const P = (u, v) => (f === 's' ? [x1 - u, z1 - v] : [x0 + u, z0 + v]);
     const face = (a, b) => Math.atan2(-(b[0] - a[0]), -(b[1] - a[1]));
@@ -120,6 +119,27 @@ export function streetPlans() {
   // Swiss guards in the slashed doublets with their halberds at the colonnade's two mouths and on the sagrato
   const guard = (x, z, rot, y = 0) => L.push(sc({ at: [x, z], y, rot, seed: Math.floor(x * 5 + z), pose: 'stand', dress: 'tunic', legs: 'hose', cloth: 'cloth_red', cloth2: 'cloth_ochre', hat: 'cap', over: 'cape', carry: 'staff', len: 2.3 }));
   for (const s of [-1, 1]) { guard(OVAL.c[0] + 62, s * 38, s > 0 ? Math.PI - 0.4 : 0.4); guard(OVAL.c[0] + 64.5, s * 36, s > 0 ? Math.PI - 0.4 : 0.4); guard(FRONT_X + 3, s * 9, Math.PI / 2, FLOOR + 0.05); guard(FRONT_X + 3, s * 12.5, Math.PI / 2, FLOOR + 0.05); }
+  // the Sistine Chapel at a function: the cardinals on the benches either side of the sanctuary, a priest at the altar, the choir in the
+  // cantoria, two Swiss guards at the door, two visitors in the part for the laity (dimensions as styles/baroque/sistina.js)
+  {
+    const [kx, kz] = SISTINA_C, X0 = kx - 20.45, X1 = kx + 20.45, Z0 = kz - 6.7, Z1 = kz + 6.7, xs = X1 - 13.8, ax = X0 + 2.6, fy = 0.05;
+    const cardinal = (x, z, rot, seed, cl = 'cloth_red') => L.push(sc({ at: [x, z], y: fy + 0.15, rot, seed, pose: 'sit', dress: 'robe', legs: 'hose', cloth: cl, cloth2: 'cloth_white', hat: 'cap', over: 'cape', hair: 'short' }));
+    for (let i = 0; i < 6; i++) cardinal(X0 + 9.5 + i * 2.4, Z1 - 0.62, Math.PI, 960 + i, i === 3 ? 'cloth_maroon' : 'cloth_red');
+    for (let i = 0; i < 5; i++) cardinal(X0 + 4.5 + i * 2.6, Z0 + 0.62 + 0.0, 0, 970 + i, i === 1 ? 'cloth_maroon' : 'cloth_red');
+    L.push(sc({ at: [ax + 1.5, kz], y: fy, rot: Math.PI / 2, seed: 980, pose: 'stand', dress: 'robe', legs: 'hose', cloth: 'cloth_white', cloth2: 'cloth_red', hat: 'none', over: 'cape', hair: 'short' }));
+    for (let i = 0; i < 4; i++) L.push(sc({ at: [xs - 4.0 + i * 0.95, Z0 + 1.1], y: 1.42, rot: Math.PI, seed: 985 + i, pose: 'stand', dress: 'robe', legs: 'hose', cloth: 'cloth_black', cloth2: 'cloth_white', hat: 'none', over: 'none', hair: 'short' }));
+    for (const s of [-1, 1]) L.push(sc({ at: [X1 - 1.0, kz + s * 3.6], y: fy, rot: Math.PI / 2, seed: 990 + s, pose: 'stand', dress: 'tunic', legs: 'hose', cloth: 'cloth_red', cloth2: 'cloth_ochre', hat: 'cap', over: 'cape', carry: 'staff', len: 2.3 }));
+    for (const [dx, dz, r, cl, sd] of [[X1 - 5.5, 2.4, -2.4, 'cloth_brown', 995], [X1 - 6.4, 3.0, 0.7, 'cloth_black', 996]]) L.push(sc({ at: [dx, kz + dz], y: fy, rot: r, seed: sd, pose: 'talk', dress: 'robe', legs: 'hose', cloth: cl, cloth2: 'cloth_white', hat: 'veil', over: 'shawl' }));
+  }
+  // the Cortile di San Damaso: a cardinal's coach drawn up before the loggia with its coachman and footmen, guards at the gate and the stair, prelates
+  // crossing the court, grooms, pigeons (the palace's gate on the south face at x −110)
+  {
+    const [cx0, cz0, cx1, cz1] = COURT, mx = (cx0 + cx1) / 2;
+    coachAt(cx1 - 9, (cz0 + cz1) / 2 + 3, Math.PI / 2, { footmen: true, cloth: 'cloth_maroon', livery: 'cloth_maroon', horse: 'hide_grey' });
+    for (const [x, z, r] of [[mx - 3.2, cz1 + 14.2, Math.PI], [mx + 3.2, cz1 + 14.2, Math.PI], [mx - 3.2, cz1 + 3.0, Math.PI], [mx + 3.2, cz1 + 3.0, Math.PI]]) L.push(sc({ at: [x, z], y: 0, rot: r, seed: Math.floor(x * 7 - z), pose: 'stand', dress: 'tunic', legs: 'hose', cloth: 'cloth_red', cloth2: 'cloth_ochre', hat: 'cap', over: 'cape', carry: 'staff', len: 2.3 }));
+    for (const [x, z, r, cl, sd] of [[mx - 8, -146, 1.2, 'cloth_indigo', 1001], [mx - 9.2, -145, -1.9, 'cloth_black', 1002], [cx0 + 6, -150, 0.4, 'cloth_maroon', 1003], [mx + 4, -134, 2.7, 'cloth_black', 1004]]) L.push(sc({ at: [x, z], y: 0, rot: r, seed: sd, pose: sd % 2 ? 'stand' : 'talk', dress: 'robe', legs: 'hose', cloth: cl, cloth2: 'cloth_white', hat: sd === 1003 ? 'cap' : 'brim', over: 'cloak' }));
+    L.push(sc({ at: [cx1 - 6.5, (cz0 + cz1) / 2 + 6], y: 0, rot: 3.0, seed: 1005, pose: 'stand', dress: 'tunic', legs: 'hose', cloth: 'cloth_brown', cloth2: 'cloth_grey', hat: 'cap', over: 'apron' }), { t: 'chickens', kind: 'pigeon', n: 11, at: [mx - 6, (cz0 + cz1) / 2 - 4], y: 0, rot: 1, seed: 1006 });
+  }
   // people on the steps and the sagrato: sitting at the edge of a flight, pilgrims resting
   for (let i = 0; i < 9; i++) { const x = FRONT_X + 10.5 + rand() * 12, z = (i % 2 ? 1 : -1) * (3 + rand() * 27), g = Math.max(0, Math.min(FLOOR, (FRONT_X + 23 - x) / 22 * FLOOR)); L.push(sc({ at: [x, z], y: g, rot: Math.PI / 2 + (rand() - 0.5) * 1.2, seed: Math.floor(rand() * 1e9), pose: rand() < 0.4 ? 'sit_low' : 'stand', dress: 'robe', legs: 'hose', cloth: ['cloth_brown', 'cloth_black', 'cloth_grey', 'cloth_ochre'][Math.floor(rand() * 4)], cloth2: 'cloth_brown', hat: rand() < 0.6 ? 'brim' : 'veil', over: 'cape', carry: rand() < 0.3 ? 'staff' : 'none' })); }
   // the market at the Borgo's mouth: stalls of fruit and bread, the sellers behind and a buyer before each, a water-seller with his yoke, a handcart, two carts
@@ -173,8 +193,8 @@ export function streetPlans() {
   L.push({ t: 'chickens', kind: 'pigeon', n: 12, at: [OVAL.c[0] + 18, 22], seed: 9 });
   L.push({ t: 'animal', kind: 'dog', at: [OVAL.c[0] + 60, -30], rot: 1.2, seed: 5 });
   return [
-    plan('baroque-rome-coaches', 'baroque', C, [-100, -100, 200, 100], { center: [40, 0], near: 300 }),
+    plan('baroque-rome-coaches', 'baroque', C, [-140, -190, 200, 100], { center: [40, 0], near: 300 }),
     ...PLAN_EXTRA,
-    plan('baroque-rome-pilgrims', 'life', L, [-100, -170, 250, 170], { center: [80, 0], near: 330 }),
+    plan('baroque-rome-pilgrims', 'life', L, [-230, -190, 250, 170], { center: [80, 0], near: 330 }),
   ];
 }
