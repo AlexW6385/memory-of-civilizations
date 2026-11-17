@@ -2,6 +2,10 @@
 // Music: the palace's courts keep the court's ritual music (courtMusic); the lanes and the avenue the street's (streetMusic).
 import '../../styles/qing/index.js';
 import './style.js';
+import './hallwork.js';
+import './terrace.js';
+import './roofwork.js';
+import './bronzes.js';
 import palace from './plan.js';
 import { courtMusic, streetMusic } from './music.js';
 export { town } from './town.js';

@@ -55,7 +55,7 @@ E.push({ t: 'block', walk: true, rect: [-44, wz1 - 9, 44, MZ + 6], y0: 11.9, y1:
 E.push({ t: 'qing_hall', rect: [-30, wz1 - 7.8, 30, wz1 + 1.8], y: 12.6, H: 7.5, double: 6, roof: 'hip', bays: [9, 5], front: 's', four: true, plat: 0.4, doors: ['n'], orn: { figures: 9 } });
 // inside (§31): the seat, the drum and the bell; the deck is climbed by a flight each side on the court's face of the arms
 E.push({ t: 'wumen_fittings', rect: [-30, wz1 - 7.8, 30, wz1 + 1.8], y: 12.6 });
-for (const s of [-1, 1]) E.push({ t: 'stairs', rect: [s * 49 - 3, wz1 - 27, s * 49 + 3, wz1 - 9], y0: 0.03, y1: 12.2, dir: 's', rakes: true });
+for (const s of [-1, 1]) E.push({ t: 'bj_stairs', rect: [s * 49 - 3, wz1 - 27, s * 49 + 3, wz1 - 9], y0: 0.03, y1: 12.2, dir: 's', rakes: true });
 for (const s of [-1, 1]) {
   const r = (a, b) => (s < 0 ? [-b, 0, -a, 0] : [a, 0, b, 0]);
   const [lx0, , lx1] = r(31, 49.5), [px0, , px1] = r(49.5, 57.5);
@@ -88,12 +88,12 @@ for (const z of [RIVER[1] - 0.35, RIVER[3] + 0.35]) E.push({ t: 'rail', a: [RIVE
 
 // ── the Gate of Supreme Harmony on its platform, the wall across the court with its side gates ──
 const tm = HALLS.taihemen;
-E.push({ t: 'terrace', rect: [-34, 106, 34, 125], y0: 0, y1: tm.y, open: { s: [[18, 50]], n: [[18, 50]] }, carve: 'qing' });
+E.push({ t: 'bj_terrace', rect: [-34, 106, 34, 125], y0: 0, y1: tm.y, open: { s: [[18, 50]], n: [[18, 50]] }, carve: 'qing' });
 for (const [z, dir] of [[125, 'n'], [101, 's']]) {
   const r = dir === 'n' ? [0, 125, 0, 125 + 6] : [0, 100, 0, 106];
-  E.push({ t: 'stairs', rect: [-15, r[1], -4, r[3]], y0: 0.03, y1: tm.y, dir: dir === 'n' ? 'n' : 's', rakes: true });
-  E.push({ t: 'stairs', rect: [4, r[1], 15, r[3]], y0: 0.03, y1: tm.y, dir: dir === 'n' ? 'n' : 's', rakes: true });
-  E.push({ t: 'stairs', rect: [-3.5, r[1], 3.5, r[3]], y0: 0.03, y1: tm.y, dir: dir === 'n' ? 'n' : 's', slab: true });
+  E.push({ t: 'bj_stairs', rect: [-15, r[1], -4, r[3]], y0: 0.03, y1: tm.y, dir: dir === 'n' ? 'n' : 's', rakes: true });
+  E.push({ t: 'bj_stairs', rect: [4, r[1], 15, r[3]], y0: 0.03, y1: tm.y, dir: dir === 'n' ? 'n' : 's', rakes: true });
+  E.push({ t: 'bj_stairs', rect: [-3.5, r[1], 3.5, r[3]], y0: 0.03, y1: tm.y, dir: dir === 'n' ? 'n' : 's', slab: true });
   void z;
 }
 E.push({ t: 'qing_hall', rect: tm.rect, y: tm.y, H: 7.2, double: 5, roof: 'xieshan', bays: [9, 4], front: 's', four: true, plat: 0.3, open: true, doors: ['n'], orn: { figures: 9 } });
@@ -126,11 +126,11 @@ for (const s of [-1, 1]) {
   for (const [za, zb] of [[66, 104], [GZ + GATE_W / 2 + 1.2, 44], [-56, GZ - GATE_W / 2 - 1.2]]) E.push({ t: 'gallery_apron', rect: s < 0 ? [x + 5.2 + 0.7, za, x + 5.2 + 2.2, zb] : [x - 5.2 - 2.2, za, x - 5.2 - 0.7, zb], y: 0.15 });
   // the gate: a marble base 2.62 m high with balustrades, stairs and a ramp slab on each side, the hall of five bays, its doors
   const gx = s * 98, hx = GATE_D / 2 + 1.2;
-  E.push({ t: 'terrace', rect: [gx - hx, GZ - GATE_W / 2 - 1.2, gx + hx, GZ + GATE_W / 2 + 1.2], y0: 0, y1: GATE_Y, open: { w: [[6.0, 20.4]], e: [[6.0, 20.4]] }, carve: 'qing' });
+  E.push({ t: 'bj_terrace', rect: [gx - hx, GZ - GATE_W / 2 - 1.2, gx + hx, GZ + GATE_W / 2 + 1.2], y0: 0, y1: GATE_Y, open: { w: [[6.0, 20.4]], e: [[6.0, 20.4]] }, carve: 'qing' });
   for (const dir of ['e', 'w']) {
     const out = dir === 'e' ? gx - hx : gx + hx;                               // the face the flight rises from
     const r = dir === 'e' ? [out - 5.2, out] : [out, out + 5.2];
-    for (const [a, b, slab] of [[-2.3, 2.3, true], [-7.0, -2.7, false], [2.7, 7.0, false]]) E.push({ t: 'stairs', rect: [r[0], GZ + a, r[1], GZ + b], y0: 0.03, y1: GATE_Y, dir, slab, rakes: !slab });
+    for (const [a, b, slab] of [[-2.3, 2.3, true], [-7.0, -2.7, false], [2.7, 7.0, false]]) E.push({ t: 'bj_stairs', rect: [r[0], GZ + a, r[1], GZ + b], y0: 0.03, y1: GATE_Y, dir, slab, rakes: !slab });
   }
   E.push({ t: 'qing_side_gate', c: [gx, GZ], face: front, y: GATE_Y, W: GATE_W, D: GATE_D, H: 5.4 });
   for (const dz of [-GATE_W / 5, 0, GATE_W / 5]) E.push({ t: 'gate_doors', at: [gx - s * GATE_D / 2, GZ + dz], along: 'z', w: GATE_W / 5, h: 4.5, y: GATE_Y, swing: s, nails: 7 });
@@ -141,10 +141,10 @@ const stairX = [[-10.5, -4], [-3.6, 3.6], [4, 10.5]];
 for (const [k, t] of TIERS.entries()) {
   const [x0, z0, x1, z1] = t.rect, y0 = k ? TIERS[k - 1].y : 0, W = x1 - x0;
   const gap = [[-11 - x0, 11 - x0]];
-  E.push({ t: 'terrace', rect: t.rect, y0, y1: t.y, open: { s: gap, n: gap }, carve: 'qing' });
+  E.push({ t: 'bj_terrace', rect: t.rect, y0, y1: t.y, open: { s: gap, n: gap }, carve: 'qing' });
   for (const [face, dir, zA] of [['s', 'n', z1], ['n', 's', z0]]) {
     const r0 = dir === 'n' ? zA : zA - 5, r1 = dir === 'n' ? zA + 5 : zA;
-    for (const [i, [a, b]] of stairX.entries()) E.push({ t: 'stairs', rect: [a, r0, b, r1], y0, y1: t.y, dir, slab: i === 1, rakes: i !== 1 });
+    for (const [i, [a, b]] of stairX.entries()) E.push({ t: 'bj_stairs', rect: [a, r0, b, r1], y0, y1: t.y, dir, slab: i === 1, rakes: i !== 1 });
     void face;
   }
   void W;
@@ -158,8 +158,8 @@ const top = TIERS[2].y;
 E.push({ t: 'bronze', kind: 'sundial', at: [45, 18], y: top, lat: 40 });
 E.push({ t: 'bronze', kind: 'jialiang', at: [-45, 18], y: top });
 for (const s of [-1, 1]) {
-  E.push({ t: 'bronze', kind: 'tortoise', at: [s * 13.5, 19.6], y: top, face: [0, 1], s: 0.95 });
-  E.push({ t: 'bronze', kind: 'crane', at: [s * 13.5, 15.6], y: top, face: [0, 1], s: 1.3 });
+  E.push({ t: 'bj_bronze', kind: 'tortoise', at: [s * 13.5, 19.6], y: top, face: [0, 1], s: 0.95 });
+  E.push({ t: 'bj_bronze', kind: 'crane', at: [s * 13.5, 15.6], y: top, face: [0, 1], s: 1.3 });
   for (const x of [19.5, 25.5, 31.5]) for (const z of [15.6, 18.6, 21.1]) E.push({ t: 'bronze', kind: 'tripod', at: [s * x, z], y: top, s: 0.8, face: [0, 1] });
   E.push({ t: 'bronze', kind: 'vat', at: [s * 44, 2], y: top });
   E.push({ t: 'bronze', kind: 'vat', at: [s * 44, -40], y: top });
@@ -170,7 +170,9 @@ for (const s of [-1, 1]) {
 
 // ── the Three Great Halls ──
 const th = HALLS.taihe, zh = HALLS.zhonghe, bh = HALLS.baohe;
-E.push({ t: 'qing_hall', rect: th.rect, y: th.y, H: 9.2, double: 7.5, roof: 'hip', bays: [11, 5], front: 's', four: false, plat: 0.5, eave: 2.2, sweep: 0.55, orn: { figures: 10 } });
+E.push({ t: 'bj_hall', rect: th.rect, y: th.y, H: 9.2, double: 7.5, roof: 'hip', bays: [11, 5], front: 's', four: false, plat: 0.5, eave: 2.2, sweep: 0.55, orn: { figures: 10 } });
+E.push({ t: 'bj_hall_doors', rect: th.rect, y: th.y, H: 9.2, bays: [11, 5] });
+E.push({ t: 'bj_ridges', rect: th.rect, y: th.y, H: 9.2, double: 7.5, eave: 2.2, sweep: 0.55, bays: [11, 5] });
 E.push({ t: 'throne_hall', rect: th.rect, y: th.y, H: 9.2, bays: [11, 5], kind: 'taihe' });
 E.push({ t: 'qing_hall', rect: zh.rect, y: zh.y, H: 6.4, roof: 'none', bays: [5, 5], front: 's', four: true, plat: 0.4 });
 E.push({ t: 'throne_hall', rect: zh.rect, y: zh.y, H: 6.4, bays: [5, 5], kind: 'zhonghe', d: 0.7 });
@@ -181,10 +183,10 @@ E.push({ t: 'throne_hall', rect: bh.rect, y: bh.y, H: 7.6, bays: [9, 5], kind: '
 // ── the Gate of Heavenly Purity and the wall to the Inner Court ──
 E.push({ t: 'palace_wall', a: [wx0, -172], b: [-22, -172], y: 0, h: 7, th: 2.4, gates: gates([[60, 5, 5]]) });
 E.push({ t: 'palace_wall', a: [22, -172], b: [wx1, -172], y: 0, h: 7, th: 2.4, gates: gates([[30, 5, 5]]) });
-E.push({ t: 'terrace', rect: [-22, -177, 22, -164], y0: 0, y1: 1.6, open: { s: [[14, 30]] }, carve: 'qing' });
+E.push({ t: 'bj_terrace', rect: [-22, -177, 22, -164], y0: 0, y1: 1.6, open: { s: [[14, 30]] }, carve: 'qing' });
 for (const x of [-52, 52]) E.push({ t: 'qing_hall', rect: [x - 7, -173.2, x + 7, -170.8], y: 7, H: 4.2, roof: 'xieshan', bays: [5, 2], front: 's', four: true, plat: 0.3, orn: { figures: 5 } });
 for (const x of [-52, 52]) E.push({ t: 'gate_doors', at: [x, -172], along: 'x', w: 5, h: 5, y: 0.03, swing: -1, off: 1.2 });
-E.push({ t: 'stairs', rect: [-8, -164, 8, -159], y0: 0.03, y1: 1.6, dir: 'n', rakes: true });
+E.push({ t: 'bj_stairs', rect: [-8, -164, 8, -159], y0: 0.03, y1: 1.6, dir: 'n', rakes: true });
 E.push({ t: 'qing_hall', rect: [-17, -175, 17, -166], y: 1.6, H: 6.2, roof: 'xieshan', bays: [5, 2], front: 's', four: true, plat: 0.1, orn: { figures: 7 } });
 for (const s of [-1, 1]) E.push({ t: 'bronze', kind: 'lion', at: [s * 11, -160], y: 0.03, s: 0.8, face: [0, 1], metal: 'gilt_bronze', paw: s > 0 ? 'ball' : 'cub' });
 
