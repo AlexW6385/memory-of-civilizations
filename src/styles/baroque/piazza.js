@@ -34,8 +34,13 @@ export function obelisk(el, { bag, col }) {
   L.add(T, frustum([x - 3.9, z - 3.9, x + 3.9, z + 3.9], p0 + 0.9, p0 + 1.3, 0.5, 0.5, 0.5, 0.5));
   L.add(T, box(x - die, p0 + 1.3, z - die, x + die, p0 + 5.6, z + die));
   for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {                           // the inscription panels, framed
-    const fx = x + dx * die, fz = z + dz * die, ax = dz !== 0 ? 1.9 : 0.1, az = dx !== 0 ? 1.9 : 0.1;
-    L.add(T, box(fx - ax + dx * 0.0, p0 + 2.0, fz - az, fx + ax, p0 + 2.15, fz + az)); L.add(T, box(fx - ax, p0 + 4.75, fz - az, fx + ax, p0 + 4.9, fz + az));
+    // a slab on the face at (dx, dz): across u0..u1 (along the face), y0..y1, standing t out of the face
+    const pb = (u0, u1, y0, y1, t) => { const a = dx !== 0 ? [-0.02, u0] : [u0, -0.02], b = dx !== 0 ? [t, u1] : [u1, t]; const [x0, z0, x1, z1] = [dx > 0 ? a[0] : -b[0], dx !== 0 ? a[1] : (dz > 0 ? a[1] : -b[1]), dx > 0 ? b[0] : -a[0], dx !== 0 ? b[1] : (dz > 0 ? b[1] : -a[1])]; L.add(T, box(x + dx * die + Math.min(x0, x1), p0 + y0, z + dz * die + Math.min(z0, z1), x + dx * die + Math.max(x0, x1), p0 + y1, z + dz * die + Math.max(z0, z1))); };
+    pb(-1.9, 1.9, 1.3, 1.45, 0.15); pb(-1.9, 1.9, 4.75, 4.9, 0.15);                       // the string courses
+    pb(-1.75, -1.55, 1.45, 4.75, 0.12); pb(1.55, 1.75, 1.45, 4.75, 0.12);                  // the frame's stiles
+    pb(-1.55, 1.55, 1.7, 1.85, 0.12); pb(-1.55, 1.55, 4.35, 4.5, 0.12);                    // its rails
+    pb(-1.55, 1.55, 1.85, 4.35, 0.06);                                                     // the tablet, a little proud
+    pb(-2.1, 2.1, 5.15, 5.4, 0.3);                                                          // the cornice over the die
   }
   L.add(T, frustum([x - die, z - die, x + die, z + die], p0 + 5.6, p0 + 6.0, -0.45, -0.45, -0.45, -0.45));
   L.add(T, box(x - die - 0.45, p0 + 6.0, z - die - 0.45, x + die + 0.45, p0 + 6.35, z + die + 0.45));
