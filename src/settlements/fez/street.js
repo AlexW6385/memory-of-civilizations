@@ -98,7 +98,8 @@ export function streetLife() {
   for (let x = -230; x < 260; x += 70) { const side = rand() < 0.5 ? -1 : 1, z = riverZ(x) + side * (RIVER.w / 2 + 1.4); man([x, z], quayY(x, side), faceTo([0, -side]), { pose: 'sit_low', dress: 'tunic', hat: 'cap', cloth: 'cloth_brown' }); }
   for (let x = -240; x < 250; x += 26 + rand() * 20) { const side = rand() < 0.5 ? -1 : 1; L.push({ t: 'chickens', kind: 'duck', at: [x, riverZ(x) + side * (RIVER.w / 2 + 2.6)], y: quayY(x, side), rot: rand() * 6.28, seed: Math.floor(rand() * 1e9) }); }
   void SITES;
-  return L;
+  // the way into the Qarawiyyin's west door is kept free of standing figures
+  return L.filter((e) => !(e.at[0] > 116 && e.at[0] < 131 && e.at[1] > -23.8 && e.at[1] < -18.2));
 }
 /** The street life in tiles of 100 m, each shown within 230 m. */
 export function streetPlans() {
