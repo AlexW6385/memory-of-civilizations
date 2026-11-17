@@ -6,6 +6,7 @@
 import { HALL, RADIUS } from './layout.js';
 import { monasteryElements } from './monastery.js';
 import { courtElements } from './courts.js';
+import { gateElements } from './gate.js';
 import { cellElements, cellPeople } from './cells.js';
 import hallPlan from '../../buildings/foguang-east-hall/plan.js';
 
@@ -150,3 +151,6 @@ export const monastery = { id: 'tang-wutai-monastery', style: 'chinese', origin:
 
 /** The courts' worn paths, moss and the pines' beds (courts.js). */
 export const courts = { id: 'tang-wutai-courts', style: 'chinese', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: courtElements(), rooms: [], bounds: [-60, -50, 96, 50], entrance: { at: [-20, 0], facing: 'e' } };
+
+/** The gate hall in the precinct's west wall (gate.js). */
+export const gate = { id: 'tang-wutai-gate', style: 'wutai-site', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: gateElements(), rooms: [], bounds: [-62, -12, -42, 12], entrance: { at: [-60, 0], facing: 'e' } };

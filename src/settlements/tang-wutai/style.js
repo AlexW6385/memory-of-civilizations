@@ -6,6 +6,8 @@ import '../../styles/chinese/index.js';
 import { box, lathe } from '../../core/geom.js';
 import { tube, blob } from '../../styles/chinese/statues.js';
 import { height } from './layout.js';
+import { wutaiDwelling } from './dwelling.js';
+import { wutaiTeashed } from './teashed.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 
@@ -77,4 +79,4 @@ function wutaiCairn({ at: [x, z], y, seed = 1, h = 1.1 }, { bag, col }) {
 }
 
 const base = STYLES.chinese;
-registerStyle('wutai-site', { ...base, elements: { ...base.elements, wutai_tree: wutaiTree, wutai_rows: wutaiRows, wutai_lamp: wutaiLamp, wutai_scarecrow: wutaiScarecrow, wutai_cairn: wutaiCairn } });
+registerStyle('wutai-site', { ...base, elements: { ...base.elements, wutai_tree: wutaiTree, wutai_rows: wutaiRows, wutai_lamp: wutaiLamp, wutai_scarecrow: wutaiScarecrow, wutai_cairn: wutaiCairn, wutai_dwelling: wutaiDwelling, wutai_teashed: wutaiTeashed } });
