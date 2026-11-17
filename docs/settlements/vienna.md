@@ -93,3 +93,13 @@ Sources used: [Wikipedia, Beethoven (sculpture)](https://en.wikipedia.org/wiki/B
 - Three more trades for the shops: barber (friseur: two leather chairs before a long mirror, basins and bottles, a waiting bench), dairy (Milchmeierei: milk cans, marble counter, jars, butter and cheese, the scale), joiner (Tischler: planks on the wall, bench with vices, tools, a chair in the making, sawhorses, a cask, shavings). [inferred]
 - More shops enterable: the open lots now reach 245 m from the arrival and number 52 (were 28 within 175 m); the fronts stay by rule (kind, storeys, tint, trade sign and awning), the trade by order; no second figure in the three new trades' rooms.
 - Level: L2, with L3 parts in the Secession's hall. Missing for L3: tenement upper floors (flats), worshippers in the Karlskirche, wear on the Secession's stone, the Stadtbahn pavilions' furnishing, Fiaker drivers.
+
+## 13. Landmark pass (round 2): the Secession seen first and close
+
+All [inferred] from period photographs of the building and general knowledge of its parts; no new source pages were fetched.
+- The motto is now real lettering: two lines of gilded capitals in a 5 x 7 raster (DER ZEIT IHRE KUNST / DER KUNST IHRE FREIHEIT), reading correctly from the street (the header's frame had been mirrored), clear of the gorgon medallions below it.
+- Pylons: a base course, a stepped cornice over a row of dentils, a raised stucco frame round the laurel field on the outer pylons.
+- Portal: a stepped architrave, panelled doors with gilt handles, a transom glazed in bars.
+- Flanks: cornice and string course, a stucco frame (jambs, sill, lintel) and glazing bars round every clerestory window; the first window moved clear of the pylon.
+- Dome: seventeen rings of laurel leaves (were eleven); the square drum has a base course, a second cornice step and on each face a framed wreath of gilt laurel round a disc (the wreath is our reading of the drum's ornament).
+- Moser's owls: body, broad head with ear tufts, round gilt eyes, beak, folded-wing lines, breast feathers, toes.
