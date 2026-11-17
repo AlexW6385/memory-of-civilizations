@@ -13,7 +13,7 @@ export function retain(E, a, b, top, face, seed, o = {}) {
     const gs = [0, 0.5, 1].flatMap((t) => [1.6, 2.6].map((off) => height(p[0] + (q[0] - p[0]) * t + nx * off, p[1] + (q[1] - p[1]) * t + nz * off)));
     const g = Math.min(...gs, height(p[0], p[1]), height(q[0], q[1]));
     if (top - g < 0.3) continue;
-    E.push({ t: o.rough ? 'wall' : 'polygonal_wall', a: p, b: q, face, th: o.th ?? 1.6, y0: g - 0.6, y1: o.cap ? top + o.cap : top, mat: o.mat ?? 'limestone', seed: seed + i, ...(o.rough ? { } : {}) });
+    E.push({ t: o.rough ? 'wall' : 'polygonal_wall', a: p, b: q, face, th: o.th ?? 1.6, y0: g - 0.6, y1: o.cap ? top + o.cap : top, mat: o.mat ?? 'limestone', seed: seed + i, ...(o.rough ? {} : { u0: L * i / n, ug: [0, L], gseed: seed, coarse: !!o.coarse }) });
   }
 }
 
@@ -198,6 +198,12 @@ export function terraceMonuments(E) {
   E.push({ t: 'block', rect: [ax - w - 0.25, az - d - 0.25, ax + w + 0.25, az + d + 0.25], y0: y + 0.5, y1: y + 0.95, mat: 'marble' });
   E.push({ t: 'block', rect: [ax - w, az - d, ax + w, az + d], y0: y + 0.95, y1: y + 2.55, mat: 'marble_dark' });
   E.push({ t: 'block', rect: [ax - w - 0.3, az - d - 0.3, ax + w + 0.3, az + d + 0.3], y0: y + 2.55, y1: y + 2.8, mat: 'marble' });
+  // the table of offerings on the top, in white marble; the dedication cut along the crowning's east face and the right of first consultation (promanteia) on the footing
+  E.push({ t: 'block', rect: [ax - w + 0.15, az - d + 0.15, ax + w - 0.15, az + d - 0.15], y0: y + 2.8, y1: y + 2.92, mat: 'marble_smooth', collide: false });
+  for (let i = 0; i < 9; i++) E.push({ t: 'block', rect: [ax + w + 0.3, az - d + 0.15 + i * 0.3, ax + w + 0.32, az - d + 0.15 + i * 0.3 + 0.2], y0: y + 2.62, y1: y + 2.72, mat: 'marble_dark', collide: false });
+  for (let i = 0; i < 11; i++) E.push({ t: 'block', rect: [ax + w + 1.6, az - d + 0.1 + i * 0.28, ax + w + 1.62, az - d + 0.1 + i * 0.28 + 0.18], y0: y + 0.1, y1: y + 0.17, mat: 'marble_dark', collide: false });
+  // the tithe of Rhodopis: iron spits in a heap behind the altar, opposite the temple
+  E.push({ t: 'spits', at: [ax + w + 5.6, az + 2.2], y, seed: 6 });
   E.push({ t: 'lamp', at: [ax, y + 3.1, az], color: '#ff9a50', intensity: 6, distance: 12 });
   E.push({ t: 'serpent_column', at: SERPENT, y });
   E.push({ t: 'sphinx_column', at: SPHINX, y });

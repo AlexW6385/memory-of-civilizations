@@ -132,6 +132,14 @@ function village() {
   // (the east village's rows below the sanctuary are the houses within reach of the temple terrace; the west village is far)
   { const AR = [62, 16], TR = ['bronze', 'perfume', 'cloth', 'wine', 'carpenter', 'pottery', 'weaver', 'cook'], dist = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - AR[0], (l.rect[1] + l.rect[3]) / 2 - AR[1]);
     LOTS.filter((l) => l.tier >= 1 && l.rect[2] - l.rect[0] >= 9.0 && dist(l) <= 125).sort((a, b) => dist(a) - dist(b)).slice(0, 10).forEach((l, i) => { l.open = true; l.trade = TR[i % TR.length]; l.variant = i % 4; }); }
+  // the west village beyond the arrival's reach: about one house in three is open and fitted too, each row of them a run of different trades and
+  // different fronts (the variant follows the row and the place in it, so that neighbours differ); the baker's and the mason's join the trades
+  { const AR = [62, 16], TR2 = ['pottery', 'baker', 'weaver', 'mason', 'wine', 'cook', 'carpenter', 'perfume', 'bronze', 'cloth'], dist = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - AR[0], (l.rect[1] + l.rect[3]) / 2 - AR[1]);
+    let k = 0;
+    for (const l of LOTS.filter((q) => !q.open && q.rect[2] - q.rect[0] >= 9.0 && dist(q) > 120).sort((a, b) => a.row - b.row || a.rect[0] - b.rect[0])) {
+      if ((l.idx + l.row) % 3 !== 1) continue;
+      l.open = true; l.trade = TR2[(k * 3 + l.row) % TR2.length]; l.variant = (l.row * 2 + k) % 5; k++;
+    } }
   // the alleys' stairs: from the lane above down to the row's own level
   for (const a of ALLEYS) {
     const up = LANES.find((r) => r.k === a.k - 1 && a.x0 >= r.x0 - 0.01 && a.x1 <= r.x1 + 0.01), dn = LANES.find((r) => r.k === a.k && a.x0 >= r.x0 - 0.01 && a.x1 <= r.x1 + 0.01);
