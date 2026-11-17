@@ -62,6 +62,6 @@ export const belem = {
   view: [TOWER.c[0] - 60, TOWER.c[1] - 80, TOWER.c[0] + 60, TOWER.c[1] - 20],
   bakeTop: 36,
   elements: [{ t: 'belem_tower', c: TOWER.c, y: TOWER.deck, causeway: CAUSEWAY }],
-  rooms: [{ id: 'bastion deck', rect: [TOWER.c[0] - 11, TOWER.c[1] - 5, TOWER.c[0] + 11, TOWER.c[1] + 9], y: TOWER.deck, kind: 'open' }, ...['cistern', 'governor hall', 'king chamber', 'audience room', 'chapel'].map((id, i) => ({ id, rect: [TF.ix0 + 2.6, TF.iz0 + 0.3, TF.ix1 - 0.3, TF.iz1 - 1.5], y: TOWER.deck + FLOORS[i], kind: i === 4 ? 'hall' : 'inner' }))],
+  rooms: [{ id: 'bastion deck', rect: [TOWER.c[0] - 11, TOWER.c[1] - 5, TOWER.c[0] + 11, TOWER.c[1] + 9], y: TOWER.deck, kind: 'inner' }, ...['cistern', 'governor hall', 'king chamber', 'audience room', 'chapel'].map((id, i) => ({ id, rect: [TF.ix0 + 2.6, TF.iz0 + 0.3, TF.ix1 - 0.3, TF.iz1 - 1.5], y: TOWER.deck + FLOORS[i], kind: i === 4 ? 'hall' : 'inner' }))],
   walks: [Object.assign([[CAUSEWAY[0] + 1.6, CAUSEWAY[1] + 2], [CAUSEWAY[0] + 1.6, CAUSEWAY[3] - 1], [TOWER.c[0] - 9, TOWER.c[1] + 2], [TOWER.c[0], TOWER.c[1] + 9], [TOWER.c[0] + 9, TOWER.c[1] + 2]], { y0: GROUND }), Object.assign([[TC[0], TC[1] + 9], ...towerWalk], { y0: TOWER.deck })],
 };

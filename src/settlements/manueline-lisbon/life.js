@@ -3,7 +3,7 @@
 // with its pilgrims, beggars and friars, the Terreiro do Paço as a market, the quay with its porters, the yard's workers, the
 // beach at Belém with its nets and drying fish, the Alfama's lanes. Elements of style `life`, in tiles of 100 m.
 import { storeysOf, HEIGHTS } from '../../styles/manueline/houses.js';
-import { RADIUS, GROUND, QUAY, RUA_NOVA, TERREIRO, YARD, PLAZA, SQUARE, ZS, SHIPS, height, lots, onStreet, inRect, wet, shore, inLot } from './layout.js';
+import { SE, SE_Y, CASTLE, RADIUS, GROUND, QUAY, RUA_NOVA, TERREIRO, YARD, PLAZA, SQUARE, ZS, SHIPS, height, lots, onStreet, inRect, wet, shore, inLot } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const CL = ['cloth_indigo', 'cloth_brown', 'cloth_ochre', 'cloth_red', 'cloth_green', 'cloth_grey', 'cloth_white', 'cloth_maroon', 'cloth_blue'];
@@ -155,6 +155,23 @@ export function lifeElements() {
   }
   // ── the water's edge of the quay: a washerwoman at the steps' foot, men fishing with a line from the stones
   for (const x of [-80, 40, 140]) { const p = [x, QUAY[1] - 0.2]; person(p, g + 0.04, 0.0, { dress: 'tunic', cloth: 'cloth_brown', hat: 'brim', over: 'belt', pose: 'sit_low', hair: 'short' }); }
+  // ── the civic interiors (docs §11): canons and pilgrims in the Sé, scribes in the Casa da Índia, guards and courtiers in the palace and the castle
+  { const guard = (at, y, rot, e = {}) => person(at, y, rot, { dress: 'tunic', legs: 'hose', cloth: 'cloth_maroon', hat: 'brim', over: 'cape', carry: 'staff', pose: 'staff', beard: false, ...e });
+    const sy = SE_Y, sx = SE[0], sz = SE[1], E_ = [1, 0], W_ = [-1, 0], N_ = [0, -1], S_ = [0, 1];
+    friar([sx + 38.6, sz + 18], sy, faceTo(E_), { pose: 'stand' }); friar([sx + 38.0, sz + 14.7], sy, faceTo(S_), { pose: 'stand' }); friar([sx + 38.0, sz + 21.3], sy, faceTo(N_), { pose: 'stand' });
+    for (const [u, v] of [[9.9, 15.4], [13.0, 20.6], [16.0, 15.4], [19.0, 20.6]]) person([sx + u, sz + v], sy, faceTo(E_), { dress: 'robe', cloth: pick(DARK), hat: rand() < 0.5 ? 'veil' : 'cap', over: 'shawl', pose: 'sit_low' });
+    woman([sx + 5.5, sz + 18], sy, faceTo(E_), { carry: 'none' }); merchant([sx + 22, sz + 27], sy, faceTo(N_), { pose: 'stand' });
+    const gy = g + 0.04;
+    for (const [x, z] of [[20.9, 84.7], [26.3, 84.7], [31.7, 84.7]]) merchant([x, z], gy, faceTo(N_), { pose: 'sit', hat: 'cap' });
+    merchant([35.2, 91.2], gy, faceTo(N_), { pose: 'stand' }); merchant([37.9, 95.4], gy, faceTo(S_), { pose: 'stand' }); labourer([37.0, 87.5], gy, 2.0, { carry: 'sack' });
+    const hy = gy + 6.4;
+    guard([27.4, 56.0], hy, faceTo(E_)); guard([27.4, 60.0], hy, faceTo(E_)); noble([33.0, 50.0], hy, faceTo(S_), { pose: 'talk' }); noble([33.0, 51.2], hy, faceTo(N_), { pose: 'talk' }); merchant([34.5, 65.0], hy, faceTo(W_), { pose: 'stand' });
+    guard([31.0, 49.0], gy, faceTo(S_)); guard([30.0, 67.0], gy, faceTo(N_), { pose: 'stand' });
+    const [cx0, cz0, cx1, cz1] = CASTLE, cy = height((cx0 + cx1) / 2, (cz0 + cz1) / 2), cxm = (cx0 + cx1) / 2, czm = (cz0 + cz1) / 2;
+    guard([cxm - 3.4, cz1 - 3.4], cy, faceTo(S_)); guard([cxm + 3.4, cz1 - 3.4], cy, faceTo(S_)); guard([cx0 + 0.4, czm + 16], cy + 9.5, faceTo(W_));
+    noble([cxm - 2.5, cz0 + 10], cy + 0.04, faceTo(S_), { pose: 'talk' }); noble([cxm - 1.7, cz0 + 10.6], cy + 0.04, faceTo(N_), { pose: 'talk' });
+    merchant([cxm + 1.0, czm - 2.0], cy + 0.04 + 5.6, faceTo(W_), { pose: 'stand' }); labourer([cx0 + 11, czm + 17], cy + 0.04, faceTo(E_), { pose: 'stand' });
+  }
   // tile them
   const tiles = new Map();
   for (const e of L) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }

@@ -32,6 +32,8 @@ function civic() {
     { t: 'pelourinho', at: [(SQUARE[0] + SQUARE[2]) / 2 + 8, (SQUARE[1] + SQUARE[3]) / 2], y: g },
     { t: 'fountain', at: [(SQUARE[0] + SQUARE[2]) / 2 - 8, (SQUARE[1] + SQUARE[3]) / 2], y: g },
     { t: 'fountain', at: [(TERREIRO[0] + TERREIRO[2]) / 2 + 10, 60], y },
+    { t: 'fountain', at: [0, 63], y },
+    ...[[-12, 53], [12, 53], [-13, 76], [-1, 77], [-16, 64], [16, 62]].map(([x, z], i) => ({ t: 'orange_tree', at: [x, z], y, seed: 400 + i, h: 3.4 + (i % 3) * 0.3 })),
     { t: 'floor', rect: SQUARE, y: g + 0.03, th: 0.2, mat: 'flagstone' },
     ...[[-256, 62], [-256, 84], [-256, 106], [-170, 76], [-170, 98], [-170, 108], [-96, -52], [-64, -52], [-96, -18], [-64, -18]].map(([x, z], i) => ({ t: 'orange_tree', at: [x, z], y: g + 0.04, seed: 300 + i, h: 3.6 + (i % 3) * 0.4 })),
   ];
