@@ -39,13 +39,13 @@ const outward = (x, z) => {
   if (ex && ez) return [Math.sign(x) / Math.SQRT2, Math.sign(z) / Math.SQRT2];
   return ex ? [Math.sign(x), 0] : [0, Math.sign(z)];
 };
-for (const x of CX) for (const z of CZ) if (Math.abs(x) > 1 || Math.abs(z) > 5) add({ t: 'bracket_set', at: [x, z], y: F + CH, dir: outward(x, z), tiers: 3, step: 0.5, mat: 'timber_ni', blockMat: 'timber_ni' });
+for (const x of CX) for (const z of CZ) if (Math.abs(x) > 1 || Math.abs(z) > 5) add({ t: 'byodo_tokyo', at: [x, z], y: F + CH, dir: outward(x, z), tiers: 3, step: 0.5, mat: 'timber_ni', blockMat: 'timber_ni' });
 // small sets on the pent roof's posts
 for (const x of MX) for (const z of MZ) {
   const ex = Math.abs(Math.abs(x) - 5.62) < 0.01, ez = Math.abs(Math.abs(z) - 7.12) < 0.01;
   if (!ex && !ez) continue;
   const d = ex && ez ? [Math.sign(x) / Math.SQRT2, Math.sign(z) / Math.SQRT2] : ex ? [Math.sign(x), 0] : [0, Math.sign(z)];
-  add({ t: 'bracket_set', at: [x, z], y: F + 3.0, dir: d, tiers: 1, step: 0.4, mat: 'timber_ni', blockMat: 'timber_ni' });
+  add({ t: 'byodo_tokyo', at: [x, z], y: F + 3.0, dir: d, tiers: 1, step: 0.4, mat: 'timber_ni', blockMat: 'timber_ni' });
 }
 
 // beams: tie beams over the core columns and the pent posts (overhead, no colliders)
@@ -57,7 +57,15 @@ const ring = (hx, hz, y, w, h, mat, ext = 0) => {
 };
 ring(3.9, 5.4, F + CH - 0.45, 0.32, 0.45, 'timber_ni', 0.25);
 ring(5.62, 7.12, F + 3.0 - 0.3, 0.24, 0.3, 'timber_ni', 0.15);
-ring(3.9, 5.4, F + CH, 0.22, 1.75, 'plaster_white', 0);                       // the panels between the sets
+// the panels between the sets: white plaster on the sides and the back; on the front a panel with the round window over the
+// middle door where Amida's face is seen, the rest of the front's panel on either side and above it
+block([-3.9 - 0.11, -5.4, -3.9 + 0.11, 5.4], F + CH, F + CH + 1.75, 'plaster_white', { collide: false });
+block([-3.9, -5.4 - 0.11, 3.9, -5.4 + 0.11], F + CH, F + CH + 1.75, 'plaster_white', { collide: false });
+block([-3.9, 5.4 - 0.11, 3.9, 5.4 + 0.11], F + CH, F + CH + 1.75, 'plaster_white', { collide: false });
+block([3.9 - 0.11, -5.4, 3.9 + 0.11, -2.3], F + CH, F + CH + 1.75, 'plaster_white', { collide: false });
+block([3.9 - 0.11, 2.3, 3.9 + 0.11, 5.4], F + CH, F + CH + 1.75, 'plaster_white', { collide: false });
+block([3.9 - 0.11, -2.3, 3.9 + 0.11, 2.3], F + CH + 1.2, F + CH + 1.75, 'plaster_white', { collide: false });
+add({ t: 'byodo_round_window', x: 3.9, z: 0, y: F + CH + 0.6, half: 2.3, h: 1.2, r: 0.5, T: 0.11 });
 ring(3.9 + 1.5, 5.4 + 1.5, F + CH + 1.5, 0.3, 0.32, 'timber_ni', 1.5);           // the eave purlin
 // tie beams from the pent posts to the core
 for (const z of [-2.3, 2.3]) for (const s of [-1, 1]) block([Math.min(s * 3.9, s * 5.62), z - 0.1, Math.max(s * 3.9, s * 5.62), z + 0.1], F + 2.75, F + 3.0, 'timber_ni', { collide: false });
@@ -83,7 +91,7 @@ for (let i = 0; i < 3; i++) {
 }
 // lattice in the pent roof's front side bays (the middle bay is open), low lattice railings round it
 for (const [z0, z1] of [[-7.0, -2.45], [2.45, 7.0]]) {
-  for (let z = z0; z <= z1 + 0.01; z += 0.3) block([5.56, z - 0.03, 5.68, z + 0.03], F, F + 2.7, 'timber_ni', { collide: false });
+  add({ t: 'byodo_lattice', x: 5.62, z0: z0 + 0.05, z1: z1 - 0.05, y0: F + 0.05, y1: F + 2.7 });
   for (const [a, b] of z0 < 0 ? [[-6.92, -5.6], [-5.2, -2.5]] : [[2.5, 5.2], [5.6, 6.92]]) add({ t: 'railing', a: [5.62, a], b: [5.62, b], y: F, h: 0.9 });
 }
 
@@ -150,6 +158,9 @@ for (const s of [-1, 1]) add({ t: 'slab', rect: [-3.9, Math.min(s * 2.3, s * 2.4
 add({ t: 'pent_roof', rect: [-3.9, -5.4, 3.9, 5.4], out: 2.95, yIn: F + 4.4, yOut: F + 3.25,
   raise: { side: 'e', from: 3.0, to: 7.8, yIn: F + 5.7, yOut: F + 4.95 } });
 add({ t: 'irimoya', c: [0, 0], A: 5.4 + 3.6, B: 3.9 + 3.6, alongZ: true, y: EAVE, rise: 5.4, lift: 0.75, gable: 0.42, phoenix: true });
+add({ t: 'byodo_irimoya_detail', c: [0, 0], A: 5.4 + 3.6, B: 3.9 + 3.6, alongZ: true, y: EAVE, rise: 5.4, lift: 0.75, gable: 0.42 });
+add({ t: 'byodo_pent_detail', rect: [-3.9, -5.4, 3.9, 5.4], out: 2.95, yIn: F + 4.4, yOut: F + 3.25,
+  raise: { side: 'e', from: 3.0, to: 7.8, yIn: F + 5.7, yOut: F + 4.95 } });
 
 // ── the wing corridors, their corner towers, the tail corridor ───────────────
 const WX = -2.0, WW = 1.4, BAY = 3.94;            // corridor centre line, half width, bay
@@ -163,6 +174,7 @@ for (const s of [-1, 1]) {
   block([WX - WW - 0.15, Math.min(zs[0], zEnd), WX + WW + 0.15, Math.max(zs[0], zEnd)], 3.0, 3.25, 'timber', { collide: false });
   for (const dx of [-WW - 0.25, WW + 0.25]) add({ t: 'railing', a: [WX + dx, zs[0]], b: [WX + dx, zEnd], y: 3.25, h: 0.75, collide: false });
   add({ t: 'gable_roof_j', c: [WX, (zs[0] + zEnd) / 2], A: Math.abs(zEnd - zs[0]) / 2 + 0.6, B: WW + 1.25, y: 5.2, rise: 1.7, alongZ: true, mat: 'tile_dark', soffit: 'timber_ni', ridgeMat: 'tile_dark', noHorns: true });
+  add({ t: 'byodo_gable_detail', c: [WX, (zs[0] + zEnd) / 2], A: Math.abs(zEnd - zs[0]) / 2 + 0.6, B: WW + 1.25, y: 5.2, rise: 1.7, alongZ: true });
   // the forward arm along x from the tower to the pond side
   const xs = [WX + 2.1, WX + 2.1 + BAY, WX + 2.1 + 2 * BAY];
   for (const x of xs) for (const dz of [-WW, WW]) col(x, zT + dz, 0.24, 5.16, 0.3);
@@ -170,11 +182,13 @@ for (const s of [-1, 1]) {
   block([xs[0], zT - WW - 0.15, xs[2], zT + WW + 0.15], 3.0, 3.25, 'timber', { collide: false });
   for (const dz of [-WW - 0.25, WW + 0.25]) add({ t: 'railing', a: [xs[0], zT + dz], b: [xs[2], zT + dz], y: 3.25, h: 0.75, collide: false });
   add({ t: 'gable_roof_j', c: [(xs[0] + xs[2]) / 2 + 0.3, zT], A: (xs[2] - xs[0]) / 2 + 0.9, B: WW + 1.25, y: 5.2, rise: 1.7, mat: 'tile_dark', soffit: 'timber_ni', ridgeMat: 'tile_dark', noHorns: true });
+  add({ t: 'byodo_gable_detail', c: [(xs[0] + xs[2]) / 2 + 0.3, zT], A: (xs[2] - xs[0]) / 2 + 0.9, B: WW + 1.25, y: 5.2, rise: 1.7 });
   // the corner tower: open below, a pent roof at mid-height, a walled upper storey, a pyramidal roof
   for (const dx of [-2.1, 2.1]) for (const dz of [-2.1, 2.1]) col(WX + dx, zT + dz, 0.24, 7.26, 0.34);
   block([WX - 2.4, zT - 2.4, WX + 2.4, zT + 2.4], 0, 0.24, 'limestone', { walk: true });
   block([WX - 2.2, zT - 2.2, WX + 2.2, zT + 2.2], 3.0, 3.25, 'timber', { collide: false });
   add({ t: 'pent_roof', rect: [WX - 2.1, zT - 2.1, WX + 2.1, zT + 2.1], out: 1.5, yIn: 5.0, yOut: 4.3 });
+  add({ t: 'byodo_pent_detail', rect: [WX - 2.1, zT - 2.1, WX + 2.1, zT + 2.1], out: 1.5, yIn: 5.0, yOut: 4.3 });
   // the upper storey's walls between the posts, each with a latticed window
   for (const sx of [-1, 1]) {
     block([WX + sx * 2.1 - 0.09, zT - 1.93, WX + sx * 2.1 + 0.09, zT + 1.93], 5.0, 7.2, 'plaster_white', { collide: false });
@@ -184,6 +198,7 @@ for (const s of [-1, 1]) {
   }
   ring2(WX, zT, 2.1, 7.2, 0.3, 0.35);
   add({ t: 'hogyo', c: [WX, zT], A: 3.6, y: 7.7, rise: 2.9, lift: 0.5 });
+  add({ t: 'byodo_hogyo_detail', c: [WX, zT], A: 3.6, y: 7.7, rise: 2.9, lift: 0.5 });
 }
 function ring2(cx, cz, h, y, w, hh) {
   block([cx - h - 0.2, cz - h - w / 2, cx + h + 0.2, cz - h + w / 2], y, y + hh, 'timber_ni', { collide: false });
@@ -200,6 +215,7 @@ function ring2(cx, cz, h, y, w, hh) {
   floor([xs[7], -1.15, xs[0], 1.15], F, 'timber', { th: 0.05 });
   for (const s of [-1, 1]) add({ t: 'railing', a: [xs[0], s * 1.35], b: [xs[7], s * 1.35], y: F, h: 0.8 });
   add({ t: 'gable_roof_j', c: [(xs[0] + xs[7]) / 2 + 0.5, 0], A: (xs[0] - xs[7]) / 2 + 0.5, B: 2.3, y: F + 2.9, rise: 1.3, mat: 'tile_dark', soffit: 'timber_ni', ridgeMat: 'tile_dark', noHorns: true, gableMat: 'plaster_white' });
+  add({ t: 'byodo_gable_detail', c: [(xs[0] + xs[7]) / 2 + 0.5, 0], A: (xs[0] - xs[7]) / 2 + 0.5, B: 2.3, y: F + 2.9, rise: 1.3 });
   add({ t: 'stair', rect: [xs[7] - 2.2, -1.15, xs[7], 1.15], dir: 'e', y0: 0, y1: F, riser: 0.18, base: 0, mat: 'limestone' });
 }
 
