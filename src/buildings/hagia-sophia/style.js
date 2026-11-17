@@ -11,6 +11,7 @@ import { STYLES, registerStyle } from '../../core/build.js';
 import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { hexa } from '../../styles/chinese/index.js';
 import { byzantineColumn } from '../../styles/byzantine/index.js';
+import { hsColumn, hsWindow, hsButtress, hsDomeWindows, hsRevetment, hsParapet, hsMosaic, hsPhiale } from './detail.js';
 
 const D2R = Math.PI / 180;
 
@@ -448,6 +449,7 @@ function ambo(el, { bag, col }) {
 
 registerStyle('byzantine-hs', {
   ...base,
-  elements: { ...base.elements, dome_cross: domeCross, cornice_lamps: corniceLamps, n_cornice: nCornice, spandrel_discs: spandrelDiscs },
-  objects: { ...base.objects, chancel_screen: chancelScreen, ciborium, polykandelon, ambo, portal, pavement },
+  column: hsColumn,
+  elements: { ...base.elements, hs_window: hsWindow, hs_buttress: hsButtress, hs_dome_windows: hsDomeWindows, hs_revetment: hsRevetment, hs_parapet: hsParapet, hs_mosaic: hsMosaic, dome_cross: domeCross, cornice_lamps: corniceLamps, n_cornice: nCornice, spandrel_discs: spandrelDiscs },
+  objects: { ...base.objects, phiale: hsPhiale, chancel_screen: chancelScreen, ciborium, polykandelon, ambo, portal, pavement },
 });

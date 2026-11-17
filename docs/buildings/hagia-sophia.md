@@ -129,3 +129,12 @@ Our synthesis (`src/buildings/hagia-sophia/music.js`): voices (formant pads) sin
 ## Doors and floor (pass 2)
 
 Stone portals with gold lunettes round the doors of the narthexes and the nave's west wall, and the nave's marble floor with slab joints and four green bands: sources and reasoning in `docs/settlements/constantinople.md` §4.9 (`portal`, `pavement` in `src/buildings/hagia-sophia/style.js`).
+
+## 10. Round 2: the landmark seen first and close (src/buildings/hagia-sophia/detail.js)
+
+- **Capitals with monograms.** The columns' capitals are carved with acanthus and bear the monograms of Justinian and Theodora [stated: liturgicalartsjournal.com "The Imperial Marbles of Hagia Sophia"]. Built: a gilt bell with two tiers of three-tongued acanthus leaves, horns under the abacus, an impost block with a green plaque and a gold cruciform monogram on each face [inferred: the cruciform arrangement and the leaf form; the gilt ground after "capitals and cornices painted blue and gilt", pallasweb].
+- **Revetment.** Walls sheathed with book-matched marble [stated: pallasweb; Britannica]. Built: plinth, pairs of leaves with a seam and mirrored chevron veins, green frieze with gilt fillets, second tier, cornice, a porphyry disc over each seam, on the nave side of the west wall, the aisle dado, the piers' faces and passage reveals [inferred: the layout].
+- **Outside.** Brick and stone in courses, plaster for decoration [stated: Wikipedia "Byzantine architecture"]. Built: limestone courses across every step of the buttresses, blind arches of alternate stone and brick voussoirs on their faces, hooded windows on the flanks, arched heads and frames on the dome's forty windows [inferred: the proportions].
+- **Parapets.** Marble slabs framed in green with a roundel and silver cross, gilt-filleted coping [inferred].
+- **Gold vaults.** Plain gold with crosses and ornament, no figures [stated: pallasweb; Britannica]. Built: silver and green bands with lozenge chains and cross roundels on the great arches' nave faces; crosses in roundels on the semidomes and pendentives [inferred: placement and pattern].
+- **Phiale.** The atrium's fountain [stated: Wikipedia "Hagia Sophia"]. Built: octagonal stepped basin of framed slabs with bronze spouts, a column, bowl and bronze pine cone, and a canopy of eight columns under a lead roof [inferred: canopy and pine cone after Byzantine phialai].
