@@ -14,6 +14,7 @@ import { westminsterHall } from './hall.js';
 import { stStephens, centralLobby, commons, lords } from './interior.js';
 import { clockDial } from './dial.js';
 import { victoriaTower } from './vtower.js';
+import { clockTower } from './clocktower.js';
 import { faceFrame } from '../dutch/facade.js';
 import { terraceRich, shopHouse, pub, pillarBox, drinkingFountain, bollard, trestleStall, horseTrough, dustBin, grindstoneBarrow } from './shops.js';
 import { parliamentSquare, barrelOrgan, punchBooth } from './square.js';
@@ -120,6 +121,6 @@ function terraceHouseBase(el, ctx) {
 
 registerStyle('victorian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.gothic.elements, river_front: riverFront, iron_bridge: ironBridge, embankment, abbey, westminster_hall: westminsterHall, st_stephens: stStephens, central_lobby: centralLobby, commons, lords, hansom_cab: hansomCab, omnibus, gas_lamp: gasLamp, paddle_steamer: paddleSteamer, lighter, steamboat_pier: steamboatPier, sailing_barge: sailingBarge, wherry, river_stairs: riverStairs, gothic_tower: gothicTower, victoria_tower: victoriaTower, terrace_house: (el, c) => terraceRich(el, c, terraceHouseBase), shop_house: (el, c) => shopHouse(el, c, terraceHouseBase), pub: (el, c) => pub(el, c, terraceHouseBase), parliament_square: parliamentSquare, barrel_organ: barrelOrgan, punch_booth: punchBooth, pillar_box: pillarBox, drinking_fountain: drinkingFountain, bollard, trestle_stall: trestleStall, horse_trough: horseTrough, dust_bin: dustBin, grindstone_barrow: grindstoneBarrow, bridge_stone: STYLES.vernacular?.elements?.bridge_stone },
+  elements: { ...STYLES.gothic.elements, river_front: riverFront, iron_bridge: ironBridge, embankment, abbey, westminster_hall: westminsterHall, st_stephens: stStephens, central_lobby: centralLobby, commons, lords, hansom_cab: hansomCab, omnibus, gas_lamp: gasLamp, paddle_steamer: paddleSteamer, lighter, steamboat_pier: steamboatPier, sailing_barge: sailingBarge, wherry, river_stairs: riverStairs, gothic_tower: gothicTower, clock_tower: clockTower, victoria_tower: victoriaTower, terrace_house: (el, c) => terraceRich(el, c, terraceHouseBase), shop_house: (el, c) => shopHouse(el, c, terraceHouseBase), pub: (el, c) => pub(el, c, terraceHouseBase), parliament_square: parliamentSquare, barrel_organ: barrelOrgan, punch_booth: punchBooth, pillar_box: pillarBox, drinking_fountain: drinkingFountain, bollard, trestle_stall: trestleStall, horse_trough: horseTrough, dust_bin: dustBin, grindstone_barrow: grindstoneBarrow, bridge_stone: STYLES.vernacular?.elements?.bridge_stone },
   objects: {},
 });

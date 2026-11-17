@@ -122,6 +122,15 @@ From Parliament Square past the Clock Tower onto the bridge. [inferred]
 
 The Great Bell's chimes, church bells, the barrel organ, hymns. [inferred]
 
+### 1.7 Landmark pass, round 2 (2026-11; `clocktower.js`, `palace.js`, `bridge.js`, `abbey.js`)
+
+Seen from the arrival on Westminster Bridge the river front and the Clock Tower read as flat grey masses: their relief was 5–20 cm, invisible at 90–110 m. Rebuilt with depth (recesses, stepped masses) instead of surface patches.
+
+- **The Clock Tower (`clock_tower`, `clocktower.js`).** 96 m, 12 m square [stated: Wikipedia "Big Ben"/"Elizabeth Tower"; the dials centred 55 m up: UK Parliament "Great Clock facts" gives the dial 180 ft up]. The old build put the dials at 61.7 m on an undifferentiated box and capped it with one plain pyramid. Now: the shaft's core stands 30 cm back; corner buttress blocks stepped at 18 and 40 m with a lancet on each face; three bays of Perpendicular panelling in six storeys, each bay a pointed blind arch under a string course, the middle bay's lancet lighting the stair, roundels in the heads [inferred: counts and spacing from photographs; the Pugin panelling is stated by Historic England 1226284]; the clock stage with the dial on its recessed ground (the existing `dial.js`), a gilt bead under it, a row of gablets over it, a corbelled cornice; the belfry with its core 1.1 m back, two louvred pointed openings per face between piers, a mullion and roundel in each head [inferred: two openings per face]; a pierced parapet and octagonal corner pinnacles; the spire in two stages — a steep lower pyramid of iron plates with a louvred dormer and gilt finial on each face and the hips crested with gilt crockets, a lead collar with small gablets, a slender upper stage and the gilt finial to 96 m [stated: "a two-stage spire"; the proportions inferred].
+- **River front (`palace.js`).** The wall's core now stands 50 cm back; the piers and spandrels are built out of it and each window is a real reveal with its mullions, transom and cusps standing in the recess; jamb mouldings, sills and label moulds stand proud; buttresses widened to 92 cm and 95 cm deep with a set-back and a shaft at every storey, their pinnacles 0.9 m by 4.6 m. Each bay is merged into one prototype so the 60 bays instance (main draws at the arrival fell from 447 to 438). [inferred: reveal depth]
+- **Westminster Bridge (`bridge.js`).** The parapet now has panelled posts every 2.4 m under pinnacles with gilt panels, and between them cells of four lancets with pointed heads (Barry's Gothic detail [stated: Grace's Guide]); the lamp standards have a moulded octagonal base with gablets, a fluted column, scrolled arms and three six-ribbed lanterns with crocketed caps. [inferred: the lamps' form, as before]
+- **Abbey west towers (`abbey.js`).** Hawksmoor's towers gained an upper lantern stage with a pointed louvred opening on each face, corner pinnacles and a lead cap with a gilt finial. [inferred]
+
 ## Sources
 
 - [Palace of Westminster — Wikipedia](https://en.wikipedia.org/wiki/Palace_of_Westminster)
