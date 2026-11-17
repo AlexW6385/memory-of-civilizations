@@ -58,7 +58,7 @@ export function householdYard(ctx, x, y, z, seed) {
   // a mat of squash and beans, a basket, a woman sorting them
   if (r() < 0.7) { const [mx, mz] = Q(2.2, 3.6); L.goods_mat({ t: 'goods_mat', at: [mx, mz], y, rot: swap ? Math.PI / 2 : 0, goods: ['heap', 'basket', 'dark_pot'], seed: seed + 40 }, ctx); }
   // firewood under the back wall of the rooms
-  { const [fx2, fz2] = Q(5.0, 4.0); L.firewood({ t: 'firewood', at: [fx2, fz2], y, rot: swap ? 0 : Math.PI / 2, len: 1.2, seed: seed + 50 }, ctx); col.rect([fx2 - 0.7, fz2 - 0.7, fx2 + 0.7, fz2 + 0.7], y, y + 0.7); }
+  { const [fx2, fz2] = Q(5.0, 4.0); L.firewood({ t: 'firewood', at: [fx2, fz2], y, rot: swap ? 0 : Math.PI / 2, len: 1.2, seed: seed + 50 }, ctx); col.circle(fx2, fz2, 0.5, y, y + 0.6); }
   // a drain slab let into the floor with a dark mouth, as the city's courts had
   { const [dx, dz] = Q(0.6, 0.2); inst(bag, drainKit(), dx, y, dz, swap ? Math.PI / 2 : 0, 1, 60); }
   // the dog asleep in the sun, now and then
