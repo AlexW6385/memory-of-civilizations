@@ -8,6 +8,8 @@ import { subtractRects } from '../../core/build.js';
 import parthenonPlan from '../../buildings/parthenon/plan.js';
 import { southSlope, summitSanctuaries } from './slope.js';
 import { summitAltar } from './summit.js';
+import './maidens.js';
+import './promachos.js';
 
 const T = ACRO.top, E = [];
 // ── the Propylaia (Mnesikles, 437–432; docs/settlements/athens.md §4b) ──
@@ -82,7 +84,7 @@ E.push({ t: 'block', rect: [-150, 16.9, -128, 34], y0: T - 14, y1: T - 3, mat: '
     { a: [e[0], e[3]], b: [e[2], e[3]], o: [0, 1], seq: 'nikai', toward: 'b' }] });
 }
 // the Athena Promachos, the bronze of Pheidias, between the Propylaia and the Erechtheion
-E.push({ t: 'promachos', c: [-80, -6], h: 7.4, y: T, yaw: -Math.PI / 2 });
+E.push({ t: 'athens_promachos', c: [-80, -6], h: 7.4, y: T, yaw: -Math.PI / 2 });
 // ── the Erechtheion (421–406): the Ionic east porch of six, the cella under one roof, the north porch with its great
 // doorway standing in the court 3 m below, the porch of the maidens on the south; the frieze of dark Eleusinian stone
 // with figures of white marble ──
@@ -143,7 +145,7 @@ E.push({ t: 'promachos', c: [-80, -6], h: 7.4, y: T, yaw: -Math.PI / 2 });
   // the porch of the maidens: six korai on the parapet, the three on the west resting on the right leg, the three on the
   // east on the left, carrying the architrave on their basket-capitals
   const CX = [23.75, 25.78, 27.82, 29.85];
-  E.push({ t: 'caryatid_porch', rect: [23.1, -39.8, 30.5, -36.3], y, parapet: 1.77, h: 2.31,
+  E.push({ t: 'athens_caryatid_porch', rect: [23.1, -39.8, 30.5, -36.3], y, parapet: 1.77, h: 2.31,
     cols: [...CX.map((x, i) => [x, -36.85, i >= 2]), [CX[0], -38.75, false], [CX[3], -38.75, true]] });
 }
 // the summit's wall along the rim
@@ -300,7 +302,6 @@ const parthenonArt = [
     { a: [-FX, FZ], b: [-FX, -FZ], o: [-1, 0], seq: 'cavalcade', toward: 'b' },
     { a: [FX, FZ], b: [FX, -FZ], o: [1, 0], seq: 'east', toward: 'mid' },
   ] },
-  ...[1, -1].map((dir) => ({ t: 'acroterion', at: [dir * (PR.rect[2] - 0.6), 0], y: PR.y + PR.rise + PR.rakingGeison + 0.3, h: 2.6, yaw: Math.PI / 2 })),
 ];
 export const parthenon = { ...parthenonPlan, elements: [...PE.map((e) => (e === DE ? { ...e, triglyphMat: 'egyptian_blue' } : e)), ...parthenonArt],
   origin: [18, 18], base: T, district: undefined, view: [18 - 35, 18 - 16, 18 + 35, 18 + 16], viewY: T };
