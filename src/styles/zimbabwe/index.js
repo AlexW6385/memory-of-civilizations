@@ -249,7 +249,20 @@ function platform(el, { bag, col }) {
   bag.add('mud_plaster', lathe([[r - 0.1, 0], [r - 0.16, 0.06], [0.001, 0.06]], 32, null, x, y + h - 0.06, z));
   const a = el.step ?? 0, ux = Math.cos(a), uz = Math.sin(a);
   bag.add(G, orientedBox([x + ux * (r - 0.3), z + uz * (r - 0.3)], [x + ux * (r + 0.55), z + uz * (r + 0.55)], 1.2, y - 0.2, y + h / 2));
-  col.circle(x, z, r, y, y + h); col.floor([x - r * 0.7, z - r * 0.7, x + r * 0.7, z + r * 0.7], y + h);
+  if (el.tiers) {
+    // the platform "rises in steps" (zimfieldguide): two smaller drums on the first, each a course of stone faced with dhaka, the
+    // top one off-centre toward the old wall; a flight of three slabs up the face on the side of the step
+    let rr = r - 0.12, yy = y + h - 0.06, cx = x, cz = z;
+    for (let k = 0; k < el.tiers; k++) {
+      const rn = rr - 0.95, hn = 0.42, ox = cx - ux * 0.35, oz = cz - uz * 0.35;
+      bag.add(G, lathe([[rn + 0.06, -0.06], [rn + 0.06, 0], [rn - 0.04, hn - 0.05], [rn - 0.1, hn - 0.05], [0.001, hn - 0.05]], 28, null, ox, yy, oz));
+      bag.add('mud_plaster', lathe([[rn - 0.08, 0], [rn - 0.14, 0.05], [0.001, 0.05]], 28, null, ox, yy + hn - 0.05, oz));
+      bag.add(G, orientedBox([ox + ux * (rn - 0.25), oz + uz * (rn - 0.25)], [ox + ux * (rn + 0.4), oz + uz * (rn + 0.4)], 1.0, yy - 0.3, yy + hn / 2));
+      col.circle(ox, oz, rn, yy, yy + hn);
+      rr = rn; yy += hn - 0.05; cx = ox; cz = oz;
+    }
+  }
+  col.circle(x, z, r, y, y + h); if (!el.tiers) col.floor([x - r * 0.7, z - r * 0.7, x + r * 0.7, z + r * 0.7], y + h);
 }
 /**
  * soapstone_bird: a bird of soapstone on its column { at, rot, y, s, seed } (Zimbabwe Bird: ~40 cm
@@ -343,7 +356,7 @@ function hut(el, ctx) {
     bag.add(['mud_plaster', 'banco_smooth', 'adobe_taos', 'kahgel'][seed % 4], lathe([[r + 0.06, 0], [r - 0.06, h], [0.001, h]], 16, null, x, y + 0.2, z));
     // a screen of woven reed leaning against the wall at one side of the door, a water stain streaking the daga below the eave
     if (seed % 2 === 1) bag.add('reed_mat', orientedBox([x + ux * (r + 0.1) + tx * 0.62, z + uz * (r + 0.1) + tz * 0.62], [x + ux * (r + 0.1) + tx * 1.02, z + uz * (r + 0.1) + tz * 1.02], 0.07, y + 0.22, y + 1.55));
-    if (seed % 3 === 0) {
+    if (seed % 3 === 0 && Math.floor(seed / 3) % 4 !== 3) {
       // a band painted in ochre and white round the wall, hanging triangles under it (the patterns painted and cut into Shona daga walls; inferred)
       const rb = r + 0.06 - 0.12 * (1.45 / h) + 0.012, T = [], W2 = [], N = 18;
       bag.add('paint_ochre', lathe([[rb, 0], [rb, 0.1], [rb - 0.004, 0.1]], 18, null, x, y + 0.2 + 1.45, z));
@@ -356,6 +369,30 @@ function hut(el, ctx) {
     bag.add('opening', orientedBox([x + ux * (r + 0.02) - tx * 0.42, z + uz * (r + 0.02) - tz * 0.42], [x + ux * (r + 0.02) + tx * 0.42, z + uz * (r + 0.02) + tz * 0.42], 0.06, y + 0.38, y + 1.85));
   }
   bag.add('mud_plaster', orientedBox([x + ux * (r + 0.05) - tx * 0.5, z + uz * (r + 0.05) - tz * 0.5], [x + ux * (r + 0.05) + tx * 0.5, z + uz * (r + 0.05) + tz * 0.5], 0.22, y + 0.2, y + 0.4));
+  // the front of the house, by rule of its seed (zimbabwe_houses §18): plain / wing walls flanking the door / daga benches either
+  // side / a relief zigzag round the wall (the wall's chevron echoed in daga)
+  const front = Math.floor(seed / 3) % 4, g0 = (el.open ? 0.8 : 0.66) / r;
+  if (front === 1) for (const sg of [-1, 1]) {
+    const p0 = [x + ux * (r - 0.25) + tx * sg * (el.open ? 0.95 : 0.82), z + uz * (r - 0.25) + tz * sg * (el.open ? 0.95 : 0.82)], p1 = [p0[0] + ux * 1.15, p0[1] + uz * 1.15];
+    bag.add('mud_plaster', orientedBox(p0, p1, 0.22, y + 0.2, y + 1.38));
+    bag.add('mud_plaster', orientedBox([p0[0] + ux * 0.9, p0[1] + uz * 0.9], [p1[0] + ux * 0.1, p1[1] + uz * 0.1], 0.3, y + 0.2, y + 1.3));
+    col.segment(p0, [p1[0] + ux * 0.1, p1[1] + uz * 0.1], 0.3, y, y + 1.38);
+  }
+  if (front === 2) for (const sg of [-1, 1]) {
+    const t0 = a + sg * (g0 + 0.14), t1 = a + sg * (g0 + 0.14 + 0.52), B = [];
+    arcSolid(B, x, z, y + 0.2, Math.min(t0, t1), Math.max(t0, t1), [[r - 0.08, 0], [r + 0.42, 0], [r + 0.42, 0.34], [r + 0.34, 0.4], [r - 0.08, 0.4]], 4);
+    bag.add('mud_plaster', fromTriangles(B));
+    col.segment([x + Math.cos(t0) * (r + 0.2), z + Math.sin(t0) * (r + 0.2)], [x + Math.cos(t1) * (r + 0.2), z + Math.sin(t1) * (r + 0.2)], 0.5, y + 0.2, y + 0.6);
+  }
+  if (front === 3) {
+    const N = 26, Z = [], span = Math.PI * 2 - 2 * (g0 + 0.25), R0 = (hy) => r + 0.06 - 0.12 * (hy / h) + 0.03;
+    for (let k = 0; k < N; k++) {
+      const t0 = a + g0 + 0.25 + span * k / N, t1 = a + g0 + 0.25 + span * (k + 1) / N, tm = (t0 + t1) / 2, up = k % 2 === 0, h0 = up ? 1.5 : 1.82, h1 = up ? 1.82 : 1.5;
+      const P = (t, hy, d = 0) => [x + Math.cos(t) * (R0(hy) + d), y + 0.2 + hy, z + Math.sin(t) * (R0(hy) + d)];
+      putN(Z, [Math.cos(tm), 0, Math.sin(tm)], P(t0, h0), P(t1, h1), P(t1, h1 + 0.09), P(t0, h0 + 0.09));
+    }
+    bag.add('plaster_ochre', fromTriangles(Z));
+  }
   const yl = el.open ? 2.05 : 1.85;
   bag.add('timber', orientedBox([x + ux * (r + 0.07) - tx * 0.55, z + uz * (r + 0.07) - tz * 0.55], [x + ux * (r + 0.07) + tx * 0.55, z + uz * (r + 0.07) + tz * 0.55], 0.14, y + yl, y + yl + 0.12));
   const ye = y + 0.2 + h - 0.15, eave = ver ? fr + 0.15 : r + 0.75;
@@ -461,6 +498,38 @@ function hutInside(el, { bag, col, lights }, { x, z, r, y, h, a, seed }) {
     bag.add('granite_grey', lathe([[0.001, 0], [0.09, 0.005], [0.1, 0.05], [0.07, 0.09], [0.001, 0.1]], 8).scale(1.4, 1, 1).rotateY(-t).translate(gx, F + 0.16, gz)); }
   // the water pot inside the door, on its grass ring
   { const [wx, wz] = Q(ri - 0.35, 0.75); bag.add('thatch', lathe([[0.08, 0], [0.13, 0.02], [0.1, 0.05], [0.06, 0.03], [0.08, 0]], 10, null, wx, F, wz)); bag.add('terracotta', lathe(potProf(1.5), 12, null, wx, F + 0.04, wz)); }
+  // what the house is for, by rule of its seed (§18): 0 the kitchen as above; 1 the store (great storage pots, a grain basket, gourds
+  // on a rail); 2 the spinner's and weaver's (a strip loom on the floor, spindle with its pottery whorl, a basket of cotton); 3 the
+  // sleeping house (headrest and hides on the mat, a hide on the wall, a spear)
+  const kind = Math.floor(seed / 5) % 4, U = [], ring = (px, pz, rr) => bag.add('thatch', lathe([[rr * 0.5, 0], [rr, 0.02], [rr * 0.8, 0.05], [rr * 0.45, 0.03]], 10, null, px, F, pz));
+  if (kind === 1) {
+    for (const [t, sc] of [[-2.15, 2.0], [-1.8, 1.6]]) { const [px, pz] = Q(ri - 0.42, t); ring(px, pz, 0.16 * sc); bag.add('terracotta', lathe(potProf(sc), 12, null, px, F + 0.03, pz)); bag.add('wicker', lathe([[0.001, 0], [0.1 * sc, 0], [0.08 * sc, 0.04], [0.001, 0.07]], 10, null, px, F + 0.03 + 0.3 * sc, pz)); col.circle(px, pz, 0.18 * sc, F, F + 0.6); }
+    { const [bx, bz] = Q(ri - 0.35, 2.2); bag.add('wicker', lathe([[0.001, 0], [0.22, 0], [0.3, 0.2], [0.33, 0.3], [0.3, 0.31], [0.2, 0.22], [0.001, 0.22]], 10, null, bx, F, bz)); bag.add('reed_mat', lathe([[0.001, 0.26], [0.27, 0.27], [0.15, 0.34], [0.001, 0.37]], 8, null, bx, F, bz)); col.circle(bx, bz, 0.33, F, F + 0.37); }
+    { const [r0, r1] = [Q(ri - 0.03, -2.4), Q(ri - 0.03, -1.55)]; bag.add('timber', orientedBox(r0, r1, 0.05, y0 + 1.5, y0 + 1.56));
+      for (const t of [-2.25, -2.05, -1.85, -1.65]) { const [gx, gz] = Q(ri - 0.1, t); bag.add('terracotta', lathe([[0.001, 0], [0.06, 0.01], [0.09, 0.08], [0.065, 0.16], [0.033, 0.21], [0.03, 0.31], [0.001, 0.32]], 8, null, gx, y0 + 1.5 - 0.32, gz)); } }
+  } else if (kind === 2) {
+    { const [p0, p1] = [Q(ri - 0.55, -2.3), Q(ri - 0.55, -1.7)], dx = p1[0] - p0[0], dz = p1[1] - p0[1], L = Math.hypot(dx, dz), qx = dx / L, qz = dz / L;
+      // the loom: two stakes driven into the floor and two beams, the warp stretched between, the woven strip at one end
+      for (const q of [p0, p1]) beamTris(U, [q[0], F, q[1]], [q[0], F + 0.28, q[1]], 0.03, 0.03);
+      bag.add('cloth_white', orientedBox([p0[0] + qx * 0.03, p0[1] + qz * 0.03], [p1[0] - qx * 0.03, p1[1] - qz * 0.03], 0.3, F + 0.27, F + 0.285));
+      bag.add('cloth_indigo', orientedBox([p0[0] + qx * 0.03, p0[1] + qz * 0.03], [p0[0] + qx * 0.28, p0[1] + qz * 0.28], 0.3, F + 0.284, F + 0.292));
+      bag.add('timber', orientedBox([p0[0], p0[1]], [p1[0], p1[1]], 0.04, F + 0.28, F + 0.31));
+      col.segment(p0, p1, 0.4, F, F + 0.3); }
+    { const [sx, sz] = Q(ri - 0.9, 1.25); beamTris(U, [sx, F + 0.02, sz], [sx + Math.cos(a + 1.25) * 0.22, F + 0.06, sz + Math.sin(a + 1.25) * 0.22], 0.012, 0.014);
+      bag.add('terracotta', lathe([[0.001, 0], [0.035, 0], [0.03, 0.012], [0.001, 0.014]], 8, null, sx + Math.cos(a + 1.25) * 0.05, F + 0.019, sz + Math.sin(a + 1.25) * 0.05)); }
+    { const [bx, bz] = Q(ri - 0.35, 2.2); bag.add('wicker', lathe([[0.001, 0], [0.22, 0], [0.3, 0.2], [0.33, 0.3], [0.3, 0.31], [0.2, 0.22], [0.001, 0.22]], 10, null, bx, F, bz)); bag.add('cloth_white', lathe([[0.001, 0.27], [0.28, 0.28], [0.2, 0.42], [0.001, 0.5]], 8, (th) => 1 + 0.08 * Math.sin(th * 3), bx, F, bz)); col.circle(bx, bz, 0.33, F, F + 0.5); }
+  } else if (kind === 3) {
+    { const [hx, hz] = Q(ri - 0.75, 1.2), t = a + 1.2 + Math.PI / 2, ex = Math.cos(t), ez = Math.sin(t);
+      bag.add('timber', lathe([[0.001, 0], [0.06, 0], [0.045, 0.04], [0.03, 0.1], [0.001, 0.1]], 8, null, hx, F + 0.018, hz));
+      bag.add('timber', orientedBox([hx - ex * 0.15, hz - ez * 0.15], [hx + ex * 0.15, hz + ez * 0.15], 0.07, F + 0.118, F + 0.15));
+      for (const q of [-1, 1]) bag.add('timber', orientedBox([hx + ex * q * 0.15, hz + ez * q * 0.15], [hx + ex * q * 0.17, hz + ez * q * 0.17], 0.07, F + 0.15, F + 0.17));
+      const [b0, b1] = [Q(ri - 0.65, 1.55), Q(ri - 0.95, 1.9)]; bag.add('hide_tan', orientedBox(b0, b1, 0.55, F + 0.018, F + 0.05));
+      const [r0, r1] = [Q(ri - 0.5, 1.0), Q(ri - 0.78, 1.0)]; bag.add('hide_brown', orientedBox(r0, r1, 0.12, F + 0.018, F + 0.14)); }
+    { const [h0, h1] = [Q(ri - 0.03, -2.05), Q(ri - 0.03, -1.75)]; bag.add('hide_brown', orientedBox(h0, h1, 0.03, y0 + 0.65, y0 + 1.5)); }
+    { const [bx, bz] = Q(ri - 0.12, -2.28), c0 = Math.cos(a - 2.28), s0 = Math.sin(a - 2.28); beamTris(U, [bx - c0 * 0.1, F, bz - s0 * 0.1], [bx + c0 * 0.02, F + 1.8, bz + s0 * 0.02], 0.016, 0.026);
+      bag.add('iron', lathe([[0.001, 0], [0.03, 0.03], [0.012, 0.2], [0.001, 0.24]], 6, null, bx + c0 * 0.02, F + 1.8, bz + s0 * 0.02)); }
+  }
+  if (U.length) bag.add('timber', fromTriangles(U));
 }
 /**
  * stone_steps: a stair of granite slabs up a slope along z { x, z0, z1, w, yAt }: each step a slab
@@ -639,6 +708,32 @@ function homesteadGoods(el, { bag, col }) {
   bag.add('timber', fromTriangles(T));
 }
 /**
+ * pottery_firing: a potter's place by a homestead { c, y, rot, seed } — Shona pots were built by hand, burnished with graphite and
+ * fired in the open under a heap of dry grass and wood (worldhistory.org: "simple unglazed pottery of very good quality", often with
+ * a graphite covering and polish [the open firing inferred from later Shona practice]): a shallow scorched hollow with a heap of
+ * grass and sticks over the pots, three just-fired pots set out at its edge, a row of unfired ones drying on a mat, a burnishing
+ * stone, a heap of firewood, a pail-sized clay pot of water.
+ */
+function potteryFiring(el, { bag, col }) {
+  const [x, z] = el.c, y = (el.y ?? 0) + 0.04, a = el.rot ?? 0, c = Math.cos(a), s = Math.sin(a), T = [];
+  const at = (u, v) => [x + c * u - s * v, z + s * u + c * v];
+  // the hollow, scorched black, with the heap of grass over the pots and sticks leaned round it
+  bag.add('tar_wood', lathe([[1.15, 0], [1.0, 0.012], [0.001, 0.012]], 14, (th) => 1 + 0.08 * Math.sin(th * 3 + a), x, y - 0.03, z));
+  bag.add('thatch', lathe([[0.95, 0], [0.9, 0.2], [0.65, 0.5], [0.3, 0.72], [0.001, 0.8]], 12, (th, i) => 1 + 0.07 * Math.sin(th * 5 + i + a), x, y, z));
+  for (let k = 0; k < 14; k++) { const t = k * 0.45 + a; beamTris(T, [x + Math.cos(t) * 1.15, y, z + Math.sin(t) * 1.15], [x + Math.cos(t) * 0.35, y + 0.75, z + Math.sin(t) * 0.35], 0.022, 0.035); }
+  col.circle(x, z, 1.0, y, y + 0.8);
+  // fired pots at the edge, one a little blackened
+  for (const [u, v, sc, m] of [[1.9, -0.5, 1.5, 'terracotta'], [2.2, 0.3, 1.1, 'pottery_dark'], [1.7, 0.7, 1.25, 'terracotta']]) { const [px, pz] = at(u, v); bag.add(m, lathe(potProf(sc), 11, null, px, y, pz)); col.circle(px, pz, 0.2 * sc, y, y + 0.3 * sc); }
+  // the unfired pots drying on a mat, pale, in a row
+  { const [p0, p1] = [at(-0.6, -2.4), at(1.0, -2.4)]; bag.add('reed_mat', orientedBox(p0, p1, 1.0, y, y + 0.015));
+    for (let k = 0; k < 4; k++) { const [px, pz] = at(-0.4 + k * 0.45, -2.4 + (k % 2 ? 0.2 : -0.2)); bag.add('plaster_ochre', lathe(potProf(0.9 + 0.15 * (k % 3)), 10, null, px, y + 0.015, pz)); } }
+  // the burnishing stone and a lump of graphite on a flat slab
+  { const [bx, bz] = at(-1.7, 0.9); bag.add('granite_grey', lathe([[0.001, 0], [0.22, 0], [0.2, 0.06], [0.001, 0.07]], 7, (th) => 1 + 0.1 * Math.sin(th * 3), bx, y, bz)); bag.add('pottery_dark', lathe([[0.001, 0], [0.05, 0], [0.04, 0.05], [0.001, 0.06]], 6, null, bx + 0.05, y + 0.065, bz)); }
+  // firewood
+  for (let k = 0; k < 6; k++) { const o = (k % 3 - 1) * 0.15, l = Math.floor(k / 3), [ax, az] = at(-1.6 + o, -1.0), [bx, bz] = at(-0.8 + o, -1.0); beamTris(T, [ax, y + 0.07 + l * 0.12, az], [bx, y + 0.07 + l * 0.12, bz], 0.04, 0.07); }
+  bag.add('bark_grey', fromTriangles(T));
+}
+/**
  * millet_plot: standing millet (the staple grain; inferred for the plateau) in rows { rect, yAt, seed }, the stalks 2 m, the
  * heads nodding.
  */
@@ -747,6 +842,6 @@ function daraHouse(el, { bag, col, lights }) {
 }
 registerStyle('zimbabwe', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, dry_wall: dryWall, cone_tower: coneTower, daga_hut: hut, platform, soapstone_bird: soapstoneBird, monolith, boulder, stone_steps: stoneSteps, daga_yard: dagaYard, thatch_roof: thatchRoof, kraal, trade_goods: tradeGoods, granary, compound, homestead_goods: homesteadGoods, millet_plot: milletPlot, smithy, stone_carver: stoneCarver, termite_mound: termiteMound, dara_house: daraHouse },
+  elements: { ...STYLES.qing.elements, dry_wall: dryWall, cone_tower: coneTower, daga_hut: hut, platform, soapstone_bird: soapstoneBird, monolith, boulder, stone_steps: stoneSteps, daga_yard: dagaYard, thatch_roof: thatchRoof, kraal, trade_goods: tradeGoods, granary, compound, homestead_goods: homesteadGoods, millet_plot: milletPlot, smithy, stone_carver: stoneCarver, termite_mound: termiteMound, pottery_firing: potteryFiring, dara_house: daraHouse },
   objects: {},
 });

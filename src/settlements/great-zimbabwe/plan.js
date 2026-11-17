@@ -17,7 +17,7 @@ E.push({ t: 'dry_wall', pts: ellipse(ENCLOSURE.c, [ra - 5.9, rb - 5.9], 16, -Mat
 // beside it, and the platform "beside the tower", the largest at Great Zimbabwe (zimfieldguide), across the path
 E.push({ t: 'cone_tower', c: TOWER.c, r: TOWER.r, h: TOWER.h });
 E.push({ t: 'cone_tower', c: [TOWER.c[0] - 5.5, TOWER.c[1] - 3], r: 1.2, h: 4, dentelle: false });
-E.push({ t: 'platform', c: PLATFORM, r: 3.8, h: 0.9, step: Math.PI * 1.0 });
+E.push({ t: 'platform', c: PLATFORM, r: 3.8, h: 0.9, step: Math.PI * 1.0, tiers: 2 });
 // the tower's foot paved with daga, a kerb round it; the forecourt in the entrance's mouth, a kerbed court of daga that the path crosses
 // (zimfieldguide: courtyards paved with dhaka "often with raised kerbs" [placing inferred]); two round platforms each with its monolith
 E.push({ t: 'daga_yard', c: TOWER.c, r: [5.4, 5.4], y: 0 });
