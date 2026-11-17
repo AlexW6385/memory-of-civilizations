@@ -13,6 +13,9 @@ import { GOJONG } from './gojong.js';
 import { yangbanHouse, officeRange } from './house.js';
 import { hanokHome } from './home.js';
 import { joseonInner } from './inner.js';
+import { WOLDAE } from './woldae.js';
+import { GATE } from './gate.js';
+import { tileRoof, doubleRoofRelief } from './roof.js';
 
 export const JPAL = { wood: 'paint_dancheong', column: 'lacquer_red', soffit: 'paint_dancheong', base: 'granite_korea', floor: 'granite_korea', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'plaster_white', plinth: 'granite_korea', roof: 'tile_grey' };
 const withJ = (fn) => (el, ctx) => fn({ ...el, pal: { ...JPAL, ...(el.pal || {}) } }, ctx);
@@ -35,6 +38,7 @@ function hallOrn(el, ctx) {
   if (bk) dapo(ctx.bag, el.rect, posts, fy - 0.17, el.dapo, (d) => r.y + r.rise * Math.pow(Math.max(0, (o - d) / r.B), 1.7) - 0.14);
   // the king's and queen's halls have no main ridge (the king being the dragon himself)
   if (el.muryang) muryangRoof({ ...r, plaster: el.pal.plaster }, ctx.bag); else rectRoof(r, ctx.bag);
+  if (el.ribs) tileRoof(ctx.bag, r, { mat: el.pal.roof, discStep: 0.34 });
   roofOrnaments(ctx.bag, r, { mat: el.pal.roof, joseon: true, white: !el.muryang, ends: !el.muryang, figures: el.orn?.figures ?? 5 });
 }
 
@@ -151,8 +155,9 @@ registerStyle('joseon', {
   elements: {
     ...STYLES.qing.elements,
     ...Object.fromEntries(['ming_hall', 'qing_hall', 'ming_gallery', 'palace_wall', 'terrace', 'stairs', 'ming_pavilion', 'corner_tower', 'throne_hall'].filter((k) => STYLES.qing.elements[k]).map((k) => [k, withJ(STYLES.qing.elements[k])])),
+    qing_hall: withJ((el, ctx) => { STYLES.qing.elements.qing_hall(el, ctx); if (el.double && el.orn?.joseon && el.ribs !== false) doubleRoofRelief(el, ctx); }),
     ming_hall: withJ(withPal(hallOrn)),
-    ...Object.fromEntries(Object.entries(GOJONG).map(([k, f]) => [k, withJ(withPal(f))])),
+    ...Object.fromEntries(Object.entries({ ...GOJONG, ...WOLDAE, ...GATE }).map(([k, f]) => [k, withJ(withPal(f))])),
     yangban_house: (el, ctx) => withPal(yangbanHouse)({ ...el, pal: { ...hanokPal, ...(el.pal || {}) } }, ctx),
     joseon_precinct_range: (el, ctx) => withPal(officeRange)({ ...el, pal: { ...hanokPal, ...(el.pal || {}) } }, ctx),
     joseon_inner: joseonInner,
