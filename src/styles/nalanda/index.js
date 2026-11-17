@@ -8,6 +8,7 @@ import { registerStyle, orientedBox, subtractRects } from '../../core/build.js';
 import { box, lathe, frustum, fromTriangles, orientOutward } from '../../core/geom.js';
 import makeDress from './dress.js';
 import makeHouses from './houses.js';
+import makeRelief from './relief.js';
 
 const BR = 'brick', BRB = 'brick_baked', PL = 'lime_plaster', TB = 'timber';
 
@@ -80,22 +81,33 @@ export function flight(ctx, rect, dir, y0, y1, base, riser = 0.2, mat = BR) {
 /** A votive stupa of brick: two plinths, a plastered dome, a square harmika, a spire of rings. s is the scale (1 ≈ 3 m high). */
 function votiveStupa(ctx, x, z, y, s = 1, solid = true) {
   const { bag, col } = ctx;
-  B(bag, BR, x - 1.0 * s, y, z - 1.0 * s, x + 1.0 * s, y + 0.4 * s, z + 1.0 * s);
+  // the plinth of three courses (a moulding between two squared ones), the drum and dome of plaster, the harmika of two steps, the stack of parasols
+  B(bag, BR, x - 1.0 * s, y, z - 1.0 * s, x + 1.0 * s, y + 0.3 * s, z + 1.0 * s);
+  B(bag, BRB, x - 0.9 * s, y + 0.3 * s, z - 0.9 * s, x + 0.9 * s, y + 0.4 * s, z + 0.9 * s);
   B(bag, BR, x - 0.82 * s, y + 0.4 * s, z - 0.82 * s, x + 0.82 * s, y + 0.75 * s, z + 0.82 * s);
   bag.add(PL, lathe([[0.74 * s, 0], [0.74 * s, 0.1 * s], [0.62 * s, 0.45 * s], [0.34 * s, 0.7 * s], [0.12 * s, 0.78 * s], [0.001, 0.78 * s]], 10, null, x, y + 0.75 * s, z));
-  B(bag, BR, x - 0.2 * s, y + 1.5 * s, z - 0.2 * s, x + 0.2 * s, y + 1.75 * s, z + 0.2 * s);
-  bag.add(BRB, lathe([[0.22 * s, 0], [0.22 * s, 0.1 * s], [0.14 * s, 0.14 * s], [0.18 * s, 0.26 * s], [0.1 * s, 0.3 * s], [0.12 * s, 0.42 * s], [0.04 * s, 0.5 * s], [0.001, 0.9 * s]], 8, null, x, y + 1.75 * s, z));
+  B(bag, BRB, x - 0.3 * s, y + 1.5 * s, z - 0.3 * s, x + 0.3 * s, y + 1.56 * s, z + 0.3 * s);
+  B(bag, BR, x - 0.2 * s, y + 1.56 * s, z - 0.2 * s, x + 0.2 * s, y + 1.76 * s, z + 0.2 * s);
+  bag.add(BRB, lathe([[0.1 * s, 0], [0.1 * s, 0.08 * s], [0.3 * s, 0.1 * s], [0.3 * s, 0.14 * s], [0.1 * s, 0.17 * s], [0.1 * s, 0.26 * s], [0.22 * s, 0.28 * s], [0.22 * s, 0.31 * s], [0.06 * s, 0.34 * s], [0.04 * s, 0.5 * s], [0.001, 0.8 * s]], 6, null, x, y + 1.76 * s, z));
   if (solid) col.rect([x - 1.0 * s, z - 1.0 * s, x + 1.0 * s, z + 1.0 * s], y, y + 2.6 * s);
 }
 
-/** A seated Buddha with halo on a lotus seat at (x, z) facing `face` ('e' | 'w' | 's' | 'n'), scale s (1 ≈ 1.6 m high). */
+/**
+ * A seated Buddha in dhyāna on a lotus throne at (x, z) facing `face` ('e' | 'w' | 's' | 'n'), scale s (1 ≈ 1.45 m high): the throne, the crossed legs, the body
+ * with its two arms and the hands in the lap, the neck, the head with the ushnisha, and a halo of ten sides behind it.
+ */
 function buddha(bag, x, y, z, s, face = 'e', mat = 'clay_gilt', haloMat = PL) {
-  const g = lathe([[0.62 * s, 0], [0.66 * s, 0.08 * s], [0.5 * s, 0.14 * s], [0.46 * s, 0.3 * s], [0.34 * s, 0.7 * s], [0.26 * s, 0.9 * s], [0.12 * s, 0.98 * s], [0.1 * s, 1.0 * s], [0.18 * s, 1.1 * s], [0.14 * s, 1.26 * s], [0.04 * s, 1.34 * s], [0.001, 1.36 * s]], 10, null, x, y, z);
-  bag.add(mat, g);
-  const dx = face === 'e' ? 1 : face === 'w' ? -1 : 0, dz = face === 's' ? 1 : face === 'n' ? -1 : 0;
-  // the halo, a disc standing behind the head
-  const hx = x - dx * 0.3 * s, hz = z - dz * 0.3 * s;
-  bag.add(haloMat, orientedBox([hx - dz * 0.5 * s, hz + dx * 0.5 * s], [hx + dz * 0.5 * s, hz - dx * 0.5 * s], 0.07 * s, y + 0.95 * s, y + 1.55 * s, 0));
+  const dx = face === 'e' ? 1 : face === 'w' ? -1 : 0, dz = face === 's' ? 1 : face === 'n' ? -1 : 0, t = [-dz, dx];
+  const P = (a, d) => [x + t[0] * a + dx * d, z + t[1] * a + dz * d];
+  bag.add(haloMat, lathe([[0.72 * s, 0], [0.76 * s, 0.06 * s], [0.64 * s, 0.14 * s], [0.68 * s, 0.2 * s], [0.58 * s, 0.27 * s]], 10, null, x, y, z));
+  bag.add(mat, lathe([[0.6 * s, 0.26 * s], [0.62 * s, 0.34 * s], [0.5 * s, 0.44 * s], [0.34 * s, 0.5 * s]], 10, null, x, y, z));
+  bag.add(mat, lathe([[0.3 * s, 0.5 * s], [0.32 * s, 0.7 * s], [0.28 * s, 0.86 * s], [0.18 * s, 0.98 * s]], 10, null, x, y, z));
+  bag.add(mat, lathe([[0.09 * s, 0.98 * s], [0.09 * s, 1.05 * s], [0.17 * s, 1.1 * s], [0.18 * s, 1.22 * s], [0.14 * s, 1.31 * s], [0.08 * s, 1.37 * s], [0.001, 1.42 * s]], 10, null, x, y, z));
+  for (const sg of [-1, 1]) bag.add(mat, orientedBox(P(sg * 0.36 * s, 0), P(sg * 0.36 * s, 0), 0.2 * s, y + 0.5 * s, y + 0.9 * s, 0.1 * s));
+  bag.add(mat, orientedBox(P(-0.2 * s, 0.3 * s), P(0.2 * s, 0.3 * s), 0.2 * s, y + 0.46 * s, y + 0.56 * s, 0));
+  const hx = x - dx * 0.28 * s, hz = z - dz * 0.28 * s;
+  const disc = Array.from({ length: 10 }, (_, i) => [0.5 * s * Math.cos((i + 0.5) * Math.PI / 5), 1.2 * s + 0.5 * s * Math.sin((i + 0.5) * Math.PI / 5)]);
+  polyPrism(bag, haloMat, disc, [hx, hz], t, [dx, dz], y, -0.06 * s, 0.0);
 }
 
 // ── the monastery ───────────────────────────────────────────────────────────────
@@ -179,7 +191,7 @@ function monastery(el, ctx) {
           bag.add('reed_mat', orientedBox(P(s0 + 0.45, CELL.out + 0.1), P(s0 + 0.45, CELL.out + 1.8), 0.7, yb + 0.42, yb + 0.45, 0));
           if (r() < 0.6) bag.add(TB, orientedBox(P(s0 + 0.45, CELL.out + 1.5), P(s0 + 0.45, CELL.out + 1.8), 0.4, yb + 0.45, yb + 0.7, 0));
           const q = P(c + pitch / 2 - 0.55, CELL.out + 0.45);
-          if (r() < 0.8) bag.add('terracotta', lathe([[0.001, 0], [0.1, 0.02], [0.19, 0.14], [0.2, 0.26], [0.13, 0.38], [0.09, 0.42], [0.11, 0.46], [0.001, 0.46]], 10, null, q[0], yb, q[1]));
+          if (r() < 0.8) bag.add('terracotta', lathe([[0.001, 0], [0.14, 0.01], [0.2, 0.15], [0.15, 0.34], [0.09, 0.42], [0.001, 0.44]], 8, null, q[0], yb, q[1]));
           col.rect(rectOf2(P(s0, CELL.out), P(s0 + 0.9, CELL.out + 1.9)), yb, yb + 0.45);
           // a robe hung on the far partition, a lamp on a small stand by the bed's head, a bowl on the sill of the slit
           const sp = c + pitch / 2 - 0.25;
@@ -202,13 +214,13 @@ function monastery(el, ctx) {
         bag.add(PL, orientedBox(P(s - 0.33, -0.1), P(s + 0.33, -0.1), 0.2, H2 - 0.95, H2 - 0.7, 0));
         bag.add(PL, orientedBox(P(s - 0.33, -0.1), P(s + 0.33, -0.1), 0.2, 0.4, 0.55, 0));
       }
-      for (let s = 0.3; s < L - 0.3; s += 0.42) if (!cut(s)) bag.add(BRB, orientedBox(P(s - 0.1, -0.08), P(s + 0.1, -0.08), 0.16, H2 - 0.7, H2 - 0.5, 0));
+      for (let s = 0.3; s < L - 0.3; s += 0.56) if (!cut(s)) bag.add(BRB, orientedBox(P(s - 0.1, -0.08), P(s + 0.1, -0.08), 0.16, H2 - 0.7, H2 - 0.5, 0));
       if (enter) for (let k = 0; k < nc; k++) {
         const c = cellX(k);
         if (k === gate) continue;
         const pc = P(c, 0), disc = Array.from({ length: 10 }, (_, i) => [0.3 * Math.cos(i * Math.PI / 5), 0.3 + 0.3 * Math.sin(i * Math.PI / 5)]);
-        polyPrism(bag, BRB, disc, pc, u, out, H1 + 0.25, -0.02, 0.1);
-        polyPrism(bag, 'opening', disc.map(([a, b]) => [a * 0.55, 0.3 + (b - 0.3) * 0.55]), pc, u, out, H1 + 0.25, 0.1, 0.13);
+        R.slab(bag, BRB, disc, pc, u, out, H1 + 0.25, -0.02, 0.1);
+        R.panel(bag, 'opening', disc.map(([a, b]) => [a * 0.55, 0.3 + (b - 0.3) * 0.55]), pc, u, out, H1 + 0.25, 0.11);
         for (const y of [1.7, 5.4]) {
           for (const sg of [-1, 1]) bag.add(PL, orientedBox(P(c + sg * 0.34 - 0.06, -0.05), P(c + sg * 0.34 + 0.06, -0.05), 0.1, y, y + 0.85, 0));
           bag.add(PL, orientedBox(P(c - 0.4, -0.05), P(c + 0.4, -0.05), 0.1, y + 0.85, y + 0.97, 0));
@@ -217,8 +229,9 @@ function monastery(el, ctx) {
       }
       if (si === 3) {
         const pg = P(cellX(gate), 0);
-        archNiche(bag, pg, u, out, 5.05, 1.4, 0.3, 1.0);
-        buddha(bag, pg[0] + out[0] * 0.14, 5.17, pg[1] + out[1] * 0.14, 0.6, 'w', 'stucco_warm', 'stucco_warm');
+        R.archRing(bag, PL, pg, u, out, 5.05, 1.4, 1.1, 0.3, 1.0, 0.28, 0.82, -0.04, 0.3);
+        R.panel(bag, 'opening', archPoly(1.1, 0.28, 0.82, 6), pg, u, out, 5.05, 0.03);
+        buddha(bag, pg[0] + out[0] * 0.2, 5.17, pg[1] + out[1] * 0.2, 0.62, 'w', 'stucco_warm', 'stucco_warm');
       }
     }
     // the plaster band on the outer face, and a cornice of two steps under the parapet
@@ -271,12 +284,9 @@ function monastery(el, ctx) {
   B(bag, BR, x0 + 0.4, H2 + 3.9, gz - 2.6, x0 + 4.0, H2 + 4.6, gz + 2.6);
   bag.add(BRB, lathe([[0.5, 0], [0.45, 0.2], [0.2, 0.5], [0.3, 0.8], [0.1, 1.1], [0.001, 1.5]], 8, null, x0 + 2.2, H2 + 4.6, gz));
   // the turrets at the four corners
-  for (const [tx, tz] of [[x0 + 1.6, z0 + 1.6], [x1 - 1.6, z0 + 1.6], [x1 - 1.6, z1 - 1.6], [x0 + 1.6, z1 - 1.6]]) {
-    B(bag, BR, tx - 1.4, H2 + 0.3, tz - 1.4, tx + 1.4, H2 + 3.2, tz + 1.4);
-    B(bag, BRB, tx - 1.6, H2 + 3.2, tz - 1.6, tx + 1.6, H2 + 3.5, tz + 1.6);
-    B(bag, PL, tx - 1.0, H2 + 3.5, tz - 1.0, tx + 1.0, H2 + 4.4, tz + 1.0);
-    bag.add(BRB, lathe([[0.6, 0], [0.4, 0.3], [0.1, 0.9], [0.001, 1.6]], 8, null, tx, H2 + 4.4, tz));
-  }
+  [[x0 + 1.6, z0 + 1.6, -1, -1], [x1 - 1.6, z0 + 1.6, 1, -1], [x1 - 1.6, z1 - 1.6, 1, 1], [x0 + 1.6, z1 - 1.6, -1, 1]].forEach(([tx, tz, sx, sz], i) => R.turret(ctx, tx, tz, H2 + 0.3, sx, sz, i + (el.seed ?? 5) * 4));
+  R.gateTower(ctx, x0, gz, H2 + 0.3);
+  R.porch(ctx, x0, gz);
   // ── the court ──
   const mx = (cx0 + cx1) / 2, mz = (cz0 + cz1) / 2;
   // the well, octagonal, a stone curb
@@ -285,19 +295,20 @@ function monastery(el, ctx) {
   col.circle(wx, wz, 1.1, 0, 0.7);
   // the shrine across from the gate: a plastered brick chamber on a plinth, its door west, a stepped roof, the Buddha inside
   const sx0 = cx1 - 11.5, sx1 = cx1 - 4.7, sz0 = mz - 3.4, sz1 = mz + 3.4, sh = 4.6;
-  B(bag, BRB, sx0 - 0.5, 0, sz0 - 0.5, sx1 + 0.5, 0.35, sz1 + 0.5);
-  col.floor([sx0 - 0.5, sz0 - 0.5, sx1 + 0.5, sz1 + 0.5], 0.35);
+  B(bag, BRB, sx0 - 0.95, 0, sz0 - 0.95, sx1 + 0.95, 0.35, sz1 + 0.95);
+  col.floor([sx0 - 0.95, sz0 - 0.95, sx1 + 0.95, sz1 + 0.95], 0.35);
   const sc = { bag, col };
   wallGaps(sc, [sx0, sz0], [sx1, sz0], 0.8, 0.35, sh, [], PL); wallGaps(sc, [sx1, sz0], [sx1, sz1], 0.8, 0.35, sh, [], PL); wallGaps(sc, [sx1, sz1], [sx0, sz1], 0.8, 0.35, sh, [], PL);
   wallGaps(sc, [sx0, sz1], [sx0, sz0], 0.8, 0.35, sh, [{ s0: 2.5, s1: 4.3, y0: 0.35, y1: 3.1 }], PL);
   B(bag, TB, sx0 - 0.5, 3.1, mz - 1.05, sx0 + 0.5, 3.3, mz + 1.05);
-  bag.add(PL, frustum([sx0 - 0.4, sz0 - 0.4, sx1 + 0.4, sz1 + 0.4], sh, sh + 0.35, 0, 0, 0, 0));
-  for (let i = 0; i < 3; i++) { const e = 0.5 + i * 0.9; B(bag, i % 2 ? PL : BR, sx0 + e, sh + 0.35 + i * 0.75, sz0 + e, sx1 - e, sh + 0.35 + (i + 1) * 0.75, sz1 - e); }
-  bag.add(BRB, lathe([[0.5, 0], [0.4, 0.3], [0.2, 0.6], [0.001, 1.4]], 8, null, (sx0 + sx1) / 2, sh + 2.6, mz));
+  // the stepped roof with its chaitya windows, and the chamber's dressing (plinth, piers, niches with figures, string course, dentils, cornice)
+  R.shikhara(ctx, { c: [(sx0 + sx1) / 2, mz], ho: 3.8, y0: sh, n: 3, hh: 0.85, ps: 0.7 });
+  R.chamber(ctx, { c: [(sx0 + sx1) / 2, mz], ho: 3.8, y: 0.35, H: sh - 0.35, door: [-1, 0], dw: 0.9, seed: 7 });
   buddha(bag, sx1 - 1.9, 0.35, mz, 1.5, 'w');
   B(bag, 'sandstone_dressed', sx1 - 2.6, 0.35, mz - 0.9, sx1 - 1.2, 0.75, mz + 0.9);
   // the doorway: a chaitya-arched tympanum over the lintel, pilasters of baked brick at the jambs
-  archNiche(bag, [sx0 - 0.4, mz], [0, 1], [-1, 0], 3.35, 1.2, 0.25, 0.9);
+  R.archRing(bag, PL, [sx0 - 0.4, mz], [0, 1], [-1, 0], 3.35, 1.2, 0.95, 0.1, 0.5, 0.1, 0.38, -0.04, 0.3);
+  R.panel(bag, 'opening', archPoly(0.95, 0.1, 0.38, 6), [sx0 - 0.4, mz], [0, 1], [-1, 0], 3.35, 0.03);
   for (const z of [-1.3, 1.3]) { B(bag, BRB, sx0 - 0.5, 0.35, mz + z - 0.17, sx0 - 0.4, 0.7, mz + z + 0.17); B(bag, PL, sx0 - 0.48, 0.7, mz + z - 0.11, sx0 - 0.4, 3.0, mz + z + 0.11); B(bag, BRB, sx0 - 0.5, 3.0, mz + z - 0.17, sx0 - 0.4, 3.3, mz + z + 0.17); }
   // inside: the Buddha's throne with a plaster aureole on two posts and a beam behind, lamps on stands and heaps of flowers before it, a mat to kneel on
   for (const z of [-1.6, 1.6]) { B(bag, PL, sx1 - 1.0, 0.35, mz + z - 0.15, sx1 - 0.6, 3.4, mz + z + 0.15); }
@@ -364,7 +375,7 @@ function monastery(el, ctx) {
     B(bag, 'wood_dark', gx - 0.05, 1.5, gzz - 0.5, gx + 0.05, 2.25, gzz + 0.5);
   }
   // the court's paving: a darker way from the gate to the shrine
-  bag.add('cotto_floor', frustum([x0 + BLOCK + 2.9, mz - 1.4, sx0 - 0.5, mz + 1.4], 0, 0.02, 0, 0, 0, 0, { noBottom: true }));
+  bag.add('cotto_floor', frustum([x0 + BLOCK + 2.9, mz - 1.4, sx0 - 0.95, mz + 1.4], 0, 0.02, 0, 0, 0, 0, { noBottom: true }));
 }
 const rectOf = (p, q, y0, y1) => [Math.min(p[0], q[0]), y0, Math.min(p[1], q[1]), Math.max(p[0], q[0]), y1, Math.max(p[1], q[1])];
 const rectOf2 = (p, q) => [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])];
@@ -378,11 +389,12 @@ const rectOf2 = (p, q) => [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(
 function temple(el, ctx) {
   const { bag, col } = ctx, [cx, cz] = el.c, y = el.y ?? 0, half = el.half, n = el.tiers, tH = el.tierH, ter = tH * 1.04, r = rng(el.seed ?? 3);
   const hs = [], sw = 3.5;                                   // half-widths of the tiers; the stair's half-width
+  let nCount = 0;
   for (let k = 0; k < n; k++) hs.push(half - ter * k);
   for (let k = 0; k < n; k++) {
     const h = hs[k], y0 = y + k * tH, y1 = y0 + tH;
     bag.add(BR, frustum([cx - h, cz - h, cx + h, cz + h], y0 - (k === 0 ? 0.4 : 0), y1, 0.06, 0.06, 0.06, 0.06, { noBottom: k === 0 }));
-    col.rect([cx - h, cz - h, cx + h, cz + h], y0, y1);
+    col.rect([cx - h - 0.3, cz - h - 0.3, cx + h, cz + h + 0.3], y0, y1);
     col.floor([cx - h + 0.1, cz - h + 0.1, cx + h - 0.1, cz + h - 0.1], y1);
     // the foot: a plinth of three courses stepping out (a torus course on two squared ones); the cornice at the top, of baked brick
     const big = tH >= 4.5, stairZ = (t) => Math.abs(t) < sw + 1.0;
@@ -399,24 +411,18 @@ function temple(el, ctx) {
       const top = y1 - 0.45 - (big ? 0.3 : 0.12);
       if (!panels && el.niches !== false) {
         const m = Math.max(2, Math.floor((2 * h - 3) / 3.4)), span = 2 * h - 3;
+        const F = R.faceFrame(bag, cx, cz, h, o), pyb = top;
         for (let i = 0; i <= m; i++) {
           const t = -h + 1.5 + span * i / m;
           if (dx === 1 && stairZ(t)) continue;
-          // the pilaster: a base block, the plaster shaft, a capital of baked brick
-          rib(BRB, t - 0.26, t + 0.26, -0.04, 0.2, y0 + 0.5, y0 + 0.74);
-          rib(PL, t - 0.18, t + 0.18, -0.04, 0.14, y0 + 0.74, top - 0.22);
-          rib(BRB, t - 0.26, t + 0.26, -0.04, 0.2, top - 0.22, top);
+          R.pier(F, t, y0 + 0.5, pyb);                           // a pier of brick standing out from the wall, with base and capital
         }
-        // the niches: an arched frame of plaster, the dark recess, the Buddha seated in it, a plaster panel under it
+        // the niches: a deep arched ring of plaster, the dark recess, a throne, the figure (a Buddha, and every third a bodhisattva), the stepped panel of the base
         const ah = Math.min(2.2, tH - 0.45 - (big ? 0.3 : 0.12) - 1.15 - 0.1);
         for (let i = 0; i < m; i++) {
           const t = -h + 1.5 + span * (i + 0.5) / m;
           if (dx === 1 && Math.abs(t) < sw + 0.7) continue;
-          const ny = y0 + 1.25, pn = pt(t, 0);
-          archNiche(bag, pn, tg, o, ny - 0.1, 0.62, ah - 0.62 - 0.45, 0.62 + 0.45);
-          const pb = pt(t, 0.17);
-          buddha(bag, pb[0], ny, pb[1], 0.62, dx === 1 ? 'e' : dx === -1 ? 'w' : dz === 1 ? 's' : 'n', 'stucco_warm', 'stucco_warm');
-          rib(PL, t - 0.5, t + 0.5, 0, 0.06, y0 + 0.62, y0 + 1.0);                 // the panel of the base under the niche
+          R.niche(F, t, y0, ah, (i + k + (dx + 2 * dz + 4)) % 3 === 1 ? 1 : 0, nCount++);
         }
       } else if (panels) {
         // Temple 2: a dado of sculptural panels over the moulded plinth, 0.7 m apiece, each a pointed arch between pilasters, a figure in it
@@ -438,14 +444,23 @@ function temple(el, ctx) {
       const e0 = -h + 0.3, e1 = h - 0.3, sc0 = dx === 1 ? [[e0, -sw - 1.0], [sw + 1.0, e1]] : [[e0, e1]];
       for (const [t0, t1] of sc0) {
         if (big && !panels && t1 - t0 > 0.5) rib(PL, t0, t1, -0.02, 0.1, y0 + 3.7, y0 + 3.88);
-        if (big) for (let t = t0 + 0.2; t < t1 - 0.2; t += 0.5) rib(BRB, t - 0.11, t + 0.11, -0.04, 0.18, y1 - 0.75, y1 - 0.45);
+        if (big) for (let t = t0 + 0.2; t < t1 - 0.2; t += 0.62) rib(BRB, t - 0.11, t + 0.11, -0.04, 0.18, y1 - 0.75, y1 - 0.45);
       }
     }
     // the stair up this tier's east face, on the terrace below (or the ground)
     const x1 = cx + h, xs = k === 0 ? x1 + ter : cx + hs[k - 1];
     flight(ctx, [x1 + 0.12, cz - sw, xs, cz + sw], 'w', y0, y1, y0 - (k === 0 ? 0.5 : tH + 0.05), tH / Math.round(ter / 0.25));
-    // the parapet walls beside the flight, stepping with it: a plain wall of brick
-    for (const s of [-1, 1]) { const za = s > 0 ? cz + sw + 0.05 : cz - sw - 0.65, zb = za + 0.6; B(bag, BR, x1 + 0.12, y0 - (k === 0 ? 0.5 : 0), za, xs, y0 + 0.9, zb); col.rect([x1 + 0.12, za, xs, zb], y0 - 0.2, y0 + 0.9); }
+    // the cheek walls beside the flight, stepping with it, a coping on them, a newel with a small stupa at the foot
+    const nSt = Math.max(1, Math.round(ter / 0.25));
+    R.cheeks(ctx, x1 + 0.12, xs, cz, sw, y0, y1, nSt, y0 - (k === 0 ? 0.5 : tH + 0.05), votiveStupa);
+    for (const s of [-1, 1]) { const za = s > 0 ? cz + sw + 0.05 : cz - sw - 0.65, zb = za + 0.6; col.rect([x1 + 0.12, za, xs, zb], y0 - 0.2, y0 + 0.9); }
+    // the miniature shrines along the cornice, the piers at the corners
+    R.merlons(bag, cx, cz, h + 0.4, y1, 2.0, [[cx + h - 1.2, cz - sw - 0.9, cx + h + 1.2, cz + sw + 0.9]]);
+    if (!panels && el.niches !== false) for (const [sx, sz] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+      const ex = cx + sx * h, ez = cz + sz * h;
+      const r2 = (m, e, ya, yb) => { const x0 = ex - sx * 0.5 - e, x1b = ex + sx * 0.3 + e; B(bag, m, Math.min(x0, x1b), ya, Math.min(ez - sz * 0.5 - e, ez + sz * 0.3 + e), Math.max(x0, x1b), yb, Math.max(ez - sz * 0.5 - e, ez + sz * 0.3 + e)); };
+      r2(BRB, 0.1, y0 + 0.5, y0 + 0.64); r2(BR, 0, y0 + 0.64, y1 - 0.75); r2(BRB, 0.1, y1 - 0.75, y1 - 0.6);
+    }
     // votive stupas at the terrace's corners
     if (k < n - 1) { const hn = hs[k + 1], mid = (h + hn) / 2; for (const [sx, sz] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) votiveStupa(ctx, cx + sx * mid, cz + sz * mid, y1, 0.55 + 0.1 * (n - k)); }
   }
@@ -485,7 +500,9 @@ function temple(el, ctx) {
     col.circle(cx - sr + 1.9, cz, 0.7, yt, yt + 2.5);
     // the doorway: a chaitya-arched tympanum over the lintel, pilasters of baked brick at the jambs; inside, lamps on stands and a heap of flowers before the Buddha
     const door = [cx + sr + 0.5, cz];
-    archNiche(bag, door, [0, 1], [1, 0], yt + 3.25, 1.25, 0.2, Math.min(1.25, sh - 3.55));
+    R.archRing(bag, PL, door, [0, 1], [1, 0], yt + 3.25, 1.3, 1.0, 0.2, 0.9, 0.2, 0.62, -0.04, 0.3);
+    R.panel(bag, 'opening', archPoly(1.0, 0.2, 0.62, 6), door, [0, 1], [1, 0], yt + 3.25, 0.03);
+    R.chamber(ctx, { c: [cx, cz], ho: sr + 0.5, y: yt, H: sh, door: [1, 0], dw: 0.9, seed: 3 });
     for (const z of [-1.25, 1.25]) { B(bag, BRB, cx + sr + 0.5, yt, cz + z - 0.18, cx + sr + 0.66, yt + 0.4, cz + z + 0.18); B(bag, PL, cx + sr + 0.5, yt + 0.4, cz + z - 0.12, cx + sr + 0.62, yt + 2.9, cz + z + 0.12); B(bag, BRB, cx + sr + 0.5, yt + 2.9, cz + z - 0.18, cx + sr + 0.66, yt + 3.2, cz + z + 0.18); }
     for (const z of [-1.5, 1.5]) {
       const lx = cx + sr - 1.0;
@@ -495,10 +512,8 @@ function temple(el, ctx) {
     }
     for (let k = 0; k < 3; k++) { const px = cx - sr + 3.35, pz = cz - 0.8 + k * 0.8; bag.add(k === 1 ? 'cloth_ochre' : 'cloth_red', lathe([[0.26, 0], [0.2, 0.1], [0.001, 0.2]], 8, null, px, yt, pz)); }
   } else { B(bag, PL, cx - sr, yt, cz - sr, cx + sr, yt + sh, cz + sr); col.rect([cx - sr, cz - sr, cx + sr, cz + sr], yt, yt + sh); }
-  // the shrine's roof: stepped, and a pinnacle
-  B(bag, BR, cx - sr - 0.3, yt + sh, cz - sr - 0.3, cx + sr + 0.3, yt + sh + 0.4, cz + sr + 0.3);
-  for (let i = 0; i < 4; i++) { const e = 0.3 + i * (sr * 0.6 / 3.4 + 0.45); B(bag, i % 2 ? PL : BR, cx - sr + e, yt + sh + 0.4 + i * 0.9, cz - sr + e, cx + sr - e, yt + sh + 0.4 + (i + 1) * 0.9, cz + sr - e); }
-  bag.add(BRB, lathe([[0.7, 0], [0.55, 0.3], [0.5, 0.5], [0.3, 1.1], [0.35, 1.5], [0.2, 2.0], [0.001, 3.2]], 10, null, cx, yt + sh + 4.0, cz));
+  // the shrine's roof: five receding stages with chaitya windows and miniature shrines, the amalaka, parasols and a finial
+  R.shikhara(ctx, { c: [cx, cz], ho: sr + 0.5, y0: yt + sh, n: 5, hh: 1.0 });
   void r;
 }
 
@@ -637,6 +652,7 @@ function votives(el, ctx) { for (const [x, z, s] of el.at) votiveStupa(ctx, x, z
 /** A low brick wall a→b, height h, thickness th. */
 function brickWall(el, ctx) { wallGaps(ctx, el.a, el.b, el.th ?? 0.7, -0.2, el.h ?? 2.6, el.holes || [], BR); if (el.cap !== false) ctx.bag.add(BRB, orientedBox(el.a, el.b, (el.th ?? 0.7) + 0.2, el.h ?? 2.6, (el.h ?? 2.6) + 0.15, 0.1)); }
 
+const R = makeRelief({ B, polyPrism, archPoly, fromTriangles });
 const D = makeDress({ B, wallGaps, votiveStupa, buddha });
 const HS = makeHouses({ votiveStupa });
 registerStyle('nalanda', {
