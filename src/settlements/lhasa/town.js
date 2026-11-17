@@ -71,7 +71,15 @@ function people() {
 
 export async function town() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 130) plans.push(base(`lhasa-houses-${i / 130}`, all.slice(i, i + 130).map((l) => ({ t: 'tibetan_house', ...l }))));
+  for (let i = 0; i < all.length; i += 130) plans.push(base(`lhasa-houses-${i / 130}`, all.slice(i, i + 130).map((l) => ({ t: 'tibetan_house', ...l, y: l.farm ? ground.height((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) : 0 }))));
+  // yaks treading out the barley on the farmsteads' threshing floors (the post and floor are the house's: styles/tibetan house(), the same seed's draw)
+  { const yk = [];
+    for (const l of all) {
+      if (!l.farm || l.seed % 2 || Math.hypot(l.rect[0], l.rect[1]) > 300) continue;
+      const fr = rng(l.seed * 13 + 5), tx = (l.rect[0] + l.rect[2]) / 2 + (fr() - 0.5) * 4, tz = l.rect[3] + 6.6, gy = ground.height(tx, tz);
+      for (let i = 0; i < 2; i++) { const a = i * Math.PI + (l.seed % 7) * 0.4; yk.push({ t: 'animal', kind: 'yak', at: [tx + Math.cos(a) * 2.3, tz + Math.sin(a) * 2.3], y: gy + 0.05, rot: -a, seed: 90 + yk.length, graze: false }); }
+    }
+    plans.push(base('lhasa-farm-yaks', yk, 'life')); }
   // the printing house on Shöl's south-east corner
   plans.push(base('lhasa-parkhang', [{ t: 'parkhang', rect: PRINTERY, y: 0, seed: 1690, benches: BENCHES }]));
   // the pond behind the palace, where the earth for the Potala's mortar was dug (later the Lukhang's lake)

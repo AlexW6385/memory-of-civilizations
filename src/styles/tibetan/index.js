@@ -13,6 +13,7 @@ import { Shape, Path, ExtrudeGeometry } from '../../core/three.js';
 import '../qing/index.js';
 import '../chinese/index.js';
 import { makeShops } from './shops.js';
+import { makeRooms } from './rooms.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -444,19 +445,49 @@ function sangkhun(bag, x, y, z, dir = [0, 1]) {
 function house(el, ctx) {
   const { bag, col } = ctx, rand = rng(el.seed || 1), y = el.y ?? 0, [x0, z0, x1, z1] = el.rect, W = x1 - x0, D = z1 - z0;
   const H = 6, b = 0.3, pe = 0.45, cap = 0.3, yw = y + H - pe - cap, k = b / (yw - y + 0.5);
-  const third = W > 11 && rand() < 0.35, dn = third ? 4.3 : 3.6, dr = W > 12 ? 3.2 : 2.9, dw = 0.8;
+  const third = W > 11 && rand() < 0.35, dn = third ? 5.3 : 4.6, dr = W > 12 ? 3.2 : 2.9, dw = 0.8;
+  const farm = !!el.farm, merchant = !farm && W >= 12.6 && (el.seed || 0) % 5 === 0;
   const C = [x0 + dr, z0 + dn, x1 - dr, z1 - dw];               // the courtyard (its south side the wall)
-  // the house: one battered body hollowed by the courtyard, open to the sky and to the street side
-  dzong({ rect: el.rect, y0: y - 0.5, y1: y + H, batter: b, mat: 'limewash_white', windows: '', pembe: pe, cap, seed: el.seed,
-    voids: [{ r: [C[0], C[1], C[2], z1 + 1], y0: y + 0.04, y1: y + H + 1 }] }, ctx);
+  // the rooms of the main range: below the stable and the store-room, above the main room and the shrine room, each with its door
+  // on the courtyard (the upper two from the gallery); the larger room is the stable and the main room
+  const rooms = [], voids = [{ r: [C[0], C[1], C[2], z1 + 1], y0: y + 0.04, y1: y + H + 1 }], zr0 = z0 + 0.9, zr1 = C[1] - 0.7, DY = 3.05;
+  { const f = 0.42 + rand() * 0.16, px = x0 + 0.9 + (W - 1.8) * f, RA = [x0 + 0.9, px - 0.25], RB = [px + 0.25, x1 - 0.9], big = RA[1] - RA[0] > RB[1] - RB[0] ? 0 : 1, span = [RA, RB];
+    span.forEach((sp, i) => {
+      const lo = Math.max(sp[0] + 0.7, C[0] + 0.7), hi = Math.min(sp[1] - 0.7, C[2] - 0.7); if (lo > hi || sp[1] - sp[0] < 3.4) return;
+      const dxx = Math.min(hi, Math.max(lo, (sp[0] + sp[1]) / 2)), isBig = i === big;
+      rooms.push({ rect: [sp[0], zr0, sp[1], zr1], y, h: 2.7, door: dxx, kind: isBig ? 'stable' : 'store', seed: (el.seed || 1) + i * 7, v: i + (el.seed || 0) });
+      rooms.push({ rect: [sp[0], zr0, sp[1], zr1], y: y + DY, h: 2.15, door: dxx, kind: isBig ? 'living' : 'shrine', seed: (el.seed || 1) * 3 + i, v: i + (el.seed || 0) });
+    });
+  }
+  for (const r of rooms) {
+    const up = r.y > y + 1, [a, zz, c, d] = r.rect;
+    voids.push({ r: [a, zz, c, d], y0: r.y + (up ? 0 : 0.04), y1: r.y + r.h - (up ? 0.03 : 0) });
+    voids.push({ r: [r.door - 0.55, d - 0.1, r.door + 0.55, C[1] + 0.01], y0: r.y + (up ? 0 : 0.04), y1: r.y + (up ? 1.95 : 2.15) });
+  }
+  // the house: one battered body hollowed by the courtyard (open to the sky and to the street side) and by its rooms
+  dzong({ rect: el.rect, y0: y - 0.5, y1: y + H, batter: b, mat: 'limewash_white', windows: '', pembe: pe, cap, seed: el.seed, voids }, ctx);
+  for (const r of rooms) {
+    furnishRoom(ctx, r);
+    const up = r.y > y + 1;
+    doorway({ at: [r.door, C[1]], n: 's', y: up ? r.y : r.y + 0.05, w: 1.1, h: up ? 1.95 : 2.1, k: 0 }, ctx);
+  }
+  const upDoors = rooms.filter((r) => r.y > y + 1).map((r) => r.door);
   bag.add('pebbles', box(C[0], y, C[1], C[2], y + 0.1, z1 - dw + 0.3));
   // the courtyard wall with its gate (set back a little from the ranges' fronts, its ends in their walls)
-  const gx = (C[0] + C[2]) / 2 + (rand() - 0.5) * Math.max(0, C[2] - C[0] - 3), gw = 1.5, wh = 3.3;
+  const gx = (C[0] + C[2]) / 2 + (rand() - 0.5) * Math.max(0, C[2] - C[0] - 3), gw = merchant ? 2.0 : 1.5, wh = 3.3;
   dzong({ rect: [C[0] - 0.3, z1 - dw, C[2] + 0.3, z1 - 0.2], y0: y - 0.5, y1: y + wh, batter: 0.08, pembe: 0.35, cap: 0.25, windows: '', seed: 3,
     voids: [{ r: [gx - gw / 2, z1 - dw - 1, gx + gw / 2, z1 + 1], y0: y - 0.5, y1: y + 2.25, floor: false }] }, ctx);
   doorway({ at: [gx, z1 - 0.2], n: 's', y, w: gw, h: 2.25, k: 0.08 / (wh - 0.1) }, ctx);
   // the gate's two leaves standing open against the wall's inner face
   for (const sg of [-1, 1]) { const xe = gx + sg * gw / 2; bag.add('wood_painted', box(Math.min(xe, xe - sg * 0.06), y + 0.12, z1 - dw - 0.75, Math.max(xe, xe - sg * 0.06), y + 2.2, z1 - dw - 0.04)); }
+  if (merchant) {
+    // the merchant's gate under a little slate roof on two red posts ("small slate roofs over doors and windows"): courses of slate stepping down from the wall to a painted beam
+    const hw = gw / 2 + 0.8, zw = z1 - 0.3, zp = z1 + 0.65, yt = y + 3.25;
+    for (let i = 0; i < 4; i++) bag.add('slate', box(gx - hw - 0.2, yt - i * 0.1 - 0.06, zw + i * 0.25, gx + hw + 0.2, yt - i * 0.1, zw + i * 0.25 + 0.45));
+    bag.add('lacquer_red', box(gx - hw - 0.12, y + 2.68, zp - 0.1, gx + hw + 0.12, y + 2.86, zp + 0.06)); bag.add('paint_dancheong', box(gx - hw - 0.1, y + 2.86, zp - 0.1, gx + hw + 0.1, y + 2.92, zp + 0.08));
+    for (const sg of [-1, 1]) { const px = gx + sg * hw; bag.add('lacquer_red', lathe([[0.09, 0], [0.08, 2.65]], 8, null, px, y, zp)); bag.add('paint_dancheong', box(px - 0.16, y + 2.4, zp - 0.16, px + 0.16, y + 2.68, zp + 0.16)); col.circle(px, zp, 0.1, y, y + 2.7); }
+    for (let i = 0; i < 3; i++) bag.add('timber', rod([gx - hw + i * hw, y + 2.68, zp - 0.02], [gx - hw + i * hw, yt - 0.3, zw + 0.3], 0.035, 5));
+  }
   // windows on the outer faces: the ground floor nearly blind (store-rooms), the upper floor lit; few to the north
   const F = FACES(x0, z0, x1, z1);
   for (const f of 'snew') {
@@ -466,7 +497,7 @@ function house(el, ctx) {
       if (f === 's' && wx > C[0] - 0.6 && wx < C[2] + 0.6) continue;                  // the courtyard wall
       if (s === 0 ? rand() < 0.75 : f === 'n' ? rand() < 0.6 : rand() < 0.15) continue;
       const yy = y + s * 3 + (s ? 0.75 : 1.2), ins = k * (yy - y + 0.5) - 0.01;
-      win(bag, [wx - nx * ins, wz - nz * ins], [ux, uz], [nx, nz], yy, s ? 0.78 : 0.5, rand, { k });
+      win(bag, [wx - nx * ins, wz - nz * ins], [ux, uz], [nx, nz], yy, s ? (merchant ? 0.95 : 0.78) : (merchant ? 0.58 : 0.5), rand, { k, lights: merchant && s && f === 's' ? 2 : 1 });
     }
   }
   // the courtyard faces (upright): store-room doors below, windows above; the main range behind its gallery
@@ -478,11 +509,12 @@ function house(el, ctx) {
     const L = Math.hypot(fc.b[0] - fc.a[0], fc.b[1] - fc.a[1]), ux = (fc.b[0] - fc.a[0]) / L, uz = (fc.b[1] - fc.a[1]) / L, n = Math.max(1, Math.floor((L - 0.6) / 2.4)), main = fc.n[1] === 1;
     for (let i = 0; i < n; i++) {
       const u = (i + 0.5) * L / n, px = fc.a[0] + ux * u, pz = fc.a[1] + uz * u;
-      if (main || i % 2 === 0) {                                                        // a door to a store-room or stable
+      if (!main && i % 2 === 0) {                                                       // a door to a store-room or stable (the main range's doors are real, above)
         const P = (uu, v, d) => [px + ux * uu + fc.n[0] * d, y + v, pz + uz * uu + fc.n[1] * d];
         face(bag, 'lacquer_black', fc.n, P(-0.62, 0.1, 0.02), P(0.62, 0.1, 0.02), P(0.5, 2.15, 0.02), P(-0.5, 2.15, 0.02));
         face(bag, rand() < 0.5 ? 'opening' : 'wood_painted', fc.n, P(-0.42, 0.12, 0.07), P(0.42, 0.12, 0.07), P(0.42, 1.95, 0.07), P(-0.42, 1.95, 0.07));
       }
+      if (main && upDoors.some((d) => Math.abs(d - px) < 1.5)) continue;                // (the shrine and main room's doors on the gallery)
       if (!main || rand() < 0.9) win(bag, [px, pz], [ux, uz], fc.n, y + 3.75, main ? 0.95 : 0.8, rand, { k: 0, lights: main && n === 1 ? 2 : 1 });
     }
   }
@@ -519,6 +551,22 @@ function house(el, ctx) {
     if (rr() < 0.7) { const fx = x0 + 2.2 + rr() * Math.max(0.5, W - 9), fz = z0 + 0.6, fw = 1.6 + rr() * 1.4; bag.add('thatch', box(fx, y + H, fz, fx + fw, y + H + 0.8 + rr() * 0.4, fz + 1.2)); bag.add('rope_fibre', box(fx + fw * 0.3, y + H + 0.5, fz - 0.01, fx + fw * 0.34, y + H + 0.6, fz + 1.21)); }
     if (rr() < 0.6) { const dx = x1 - 4.4 - rr() * 2, dz = z0 + 0.6, dh = 0.5 + rr() * 0.4; bag.add('banco_rough', box(dx, y + H, dz, dx + 2, y + H + dh, dz + 0.8)); for (let r = 1; r < 4; r++) bag.add('mud_plaster', box(dx - 0.01, y + H + r * dh / 4 - 0.015, dz - 0.01, dx + 2.01, y + H + r * dh / 4 + 0.015, dz + 0.81)); }
     if (rr() < 0.5) { const bx = x0 + 1 + rr() * (W - 4), bz = z0 + 2.0 + rr() * (dn - 3.4); for (let q = 0; q < 4; q++) bag.add('bark_pine', box(bx, y + H - 0.03 + 0.07 * q, bz + q * 0.02, bx + 1.4, y + H - 0.03 + 0.07 * q + 0.07, bz + 0.1 + q * 0.02)); }
+  }
+  if (farm) {
+    // the farmstead's yard (the valley's barley): the threshing floor of beaten earth with its post, where yaks tread out the grain; the winter's
+    // hay stacked in a stook against the house's wall; the barley's drying rack — sheaves hung over rails on a frame of poles — beside the gate
+    const fr = rng((el.seed || 1) * 13 + 5), tx = (x0 + x1) / 2 + (fr() - 0.5) * 4, tz = z1 + 6.6, tr = 3.9;
+    bag.add('banco_smooth', lathe([[tr, -0.25], [tr, 0.04], [tr - 0.15, 0.05], [0.001, 0.05]], 18, null, tx, y, tz));
+    bag.add('timber', lathe([[0.1, 0], [0.07, 2.3]], 6, null, tx, y + 0.05, tz)); col.circle(tx, tz, 0.12, y, y + 2.3);
+    for (let i = 0; i < 6; i++) { const a = fr() * 6.28, r = 0.5 + fr() * 3, c = 'thatch'; bag.add(c, box(tx + Math.cos(a) * r - 0.2, y + 0.05, tz + Math.sin(a) * r - 0.1, tx + Math.cos(a) * r + 0.2, y + 0.1, tz + Math.sin(a) * r + 0.1)); }
+    const hx = fr() < 0.5 ? x1 + 2.6 : x0 - 2.6, hz = z0 + 3 + fr() * 3;
+    bag.add('thatch', lathe([[1.5, 0], [1.68, 0.5], [1.45, 1.6], [0.8, 2.6], [0.001, 3.3]], 8, (th, i) => 1 + 0.05 * Math.sin(th * 5 + i), hx, y, hz)); col.circle(hx, hz, 1.45, y, y + 2.6);
+    bag.add('rope_fibre', lathe([[1.5, 1.1], [1.5, 1.14]], 8, null, hx, y, hz)); bag.add('timber', rod([hx, y + 3.2, hz], [hx, y + 3.9, hz], 0.04, 5));
+    const rx = x0 + 1 + fr() * Math.max(0, W - 6), rz = z1 + 1.9;
+    for (const ex of [rx, rx + 3.4]) for (const sg of [-1, 1]) bag.add('timber', rod([ex, y, rz + sg * 0.55], [ex, y + 1.9, rz], 0.045, 5));
+    for (const hy of [0.8, 1.4, 1.9]) bag.add('timber', rod([rx, y + hy, rz], [rx + 3.4, y + hy, rz], 0.04, 5));
+    for (let i = 0; i < 9; i++) { const bx = rx + 0.2 + i * 0.36, hy = fr() < 0.5 ? 0.8 : 1.4; bag.add('thatch', frustum([bx - 0.14, rz - 0.1, bx + 0.14, rz + 0.1], y + hy - 0.65, y + hy + 0.05, 0, 0, 0, 0)); bag.add('rope_fibre', box(bx - 0.145, y + hy - 0.25, rz - 0.105, bx + 0.145, y + hy - 0.21, rz + 0.105)); }
+    col.rect([rx - 0.1, rz - 0.55, rx + 3.5, rz + 0.55], y, y + 1.9);
   }
   if (third) {
     const r3 = [x0 + 1.3, z0 + 1.0, x0 + 1.3 + Math.min(W - 2.6, 5 + rand() * 3), z0 + dn - 0.3];
@@ -1128,6 +1176,7 @@ function maniGallery(el, { bag, col }) {
     for (let k = 0; k < nw; k++) { const p = P(s0 + 0.2 + (k + 0.5) * (sl - 0.4) / nw, -0.3); wheel(p[0], y + 0.66, p[1]); }
   }
 }
+const { furnish: furnishRoom } = makeRooms({ face, thangka });
 const { teaSeats: _ts, ...SHOPS } = makeShops({ face, doorway, win, thangka, sangkhun, twigs, bannerPole, flagString });
 /** Where patrons sit in a tea house (shops.js). */
 export const teaSeats = _ts;
