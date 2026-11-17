@@ -10,6 +10,8 @@ import { Matrix4 } from '../../core/three.js';
 import { box, frustum, fromTriangles, orientOutward, rod, lathe } from '../../core/geom.js';
 import { rectRoof, withPal, beamTris } from '../ming/index.js';
 import '../qing/index.js';
+import { quad4 } from '../japanese/shape.js';
+import { Acc, rafters, tileRows, stackedRidge, onigawara, hipRidge } from './roofwork.js';
 import { barredWindows, shachi as shachiFish, karaHafu, samaWall, katomado } from './detail.js';
 import { machiyaShop, zashiki, kago, daisho } from './rooms.js';
 import { yashikiParts } from './yard.js';
@@ -20,7 +22,11 @@ import { machiyaFront, mushikoMado, ridgeCap, eaveBand, kuraWalls, gateFront, is
 
 const PL = 'plaster_castle', ST = 'ishigaki', TL = 'tile_grey', WD = 'wood_dark';
 const JPAL = { roof: TL, soffit: PL, plaster: PL, wood: WD, column: WD };
-const J = (fn) => (el, ctx) => withPal(fn)({ ...el, pal: { ...JPAL, ...(el.pal || {}) } }, ctx);
+let CUR = null;                                   // the roof work of the element being built, flushed as one mesh per material
+const J = (fn) => (el, ctx) => {
+  const outer = CUR; CUR = new Acc();
+  try { return withPal(fn)({ ...el, pal: { ...JPAL, ...(el.pal || {}) } }, ctx); } finally { const a = CUR; CUR = outer; a.flush(ctx.bag); }
+};
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** A Japanese roof over [x0, z0, x1, z1] (eave y, overhang o): hip, xieshan (irimoya) or gable; ridge along the longer side unless alongZ is given. */
 function roof(bag, rect, y, o, kind, rise, opt = {}) {
@@ -28,7 +34,42 @@ function roof(bag, rect, y, o, kind, rise, opt = {}) {
   const A = (alongZ ? d : w) / 2, B = (alongZ ? w : d) / 2;
   const sweep = opt.sweep ?? 0.3, c = [(x0 + x1) / 2, (z0 + z1) / 2];
   rectRoof({ c, A, B, y, rise: rise ?? B * 0.62, kind, sweep, p: opt.p ?? 1.25, alongZ, curl: false, gableAt: opt.gableAt ?? 0.5, mat: opt.mat, hole: opt.hole, gableBoard: kind === 'gable' && opt.board !== false ? o : undefined }, bag);
-  if (EAVE.pitch && B >= 3.9) eaveTiles(bag, { c, A, B, y, kind, sweep, alongZ, pitch: EAVE.pitch, crest: B >= 5.5 });
+  if (EAVE.pitch && B >= 3.9) {
+    eaveTiles(bag, { c, A, B, y, kind, sweep, alongZ, pitch: EAVE.pitch, crest: B >= 5.5 });
+    if (EAVE.pitch <= 0.35) roofWork(bag, { c, A, B, y, rise: rise ?? B * 0.62, sweep, p: opt.p ?? 1.25, kind, gableAt: opt.gableAt ?? 0.5, alongZ, hole: opt.hole, o, pitch: Math.min(0.7, EAVE.pitch * 2), s: Math.max(0.6, Math.min(1.15, B / 6.5)), oni: opt.oni !== false });
+  }
+}
+/** The tile rows on the slopes, the stacked ridge with its demon tiles, the hip ridges with their round plates (roofwork.js). */
+function roofWork(bag, o) {
+  const { c, A, B, y, rise: R, kind, gableAt: gAt, alongZ, s } = o;
+  const W = (lx, h, lz) => (alongZ ? [c[0] - lz, h, c[1] + lx] : [c[0] + lx, h, c[1] + lz]);
+  const acc = CUR || new Acc();
+  tileRows(acc, o);
+  rafters(acc, o);
+  const L = kind === 'gable' ? A : kind === 'xieshan' ? A - gAt * B : A - B;
+  if (!o.hole && L > 0.6) {
+    const a = W(-L - 0.3, 0, 0), b = W(L + 0.3, 0, 0), top = y + R, d = [b[0] - a[0], b[2] - a[2]], dl = Math.hypot(d[0], d[2] ?? 0) || 1;
+    void dl;
+    stackedRidge(acc, [a[0], a[2]], [b[0], b[2]], top, s);
+    if (o.oni) { const u = [(b[0] - a[0]), (b[2] - a[2])], ul = Math.hypot(u[0], u[1]); u[0] /= ul; u[1] /= ul; onigawara(acc, [b[0], b[2]], top + 0.3 * s, u, s); onigawara(acc, [a[0], a[2]], top + 0.3 * s, [-u[0], -u[1]], s); }
+  }
+  if (kind !== 'gable') {
+    const hole = (() => { if (!o.hole) return null; const inv = (wx, wz) => (alongZ ? [wz - c[1], -(wx - c[0])] : [wx - c[0], wz - c[1]]), a = inv(o.hole[0], o.hole[1]), b = inv(o.hole[2], o.hole[3]); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; })();
+    const dEnd = kind === 'xieshan' ? gAt * B - 0.02 : Math.min(A, B);
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+      const pts = [];
+      for (let k = 0; k <= 6; k++) {
+        const d = dEnd * k / 6, lx = sx * (A - d), lz = sz * (B - d);
+        if (hole && lx > hole[0] && lx < hole[2] && lz > hole[1] && lz < hole[3]) break;
+        const ax = Math.abs(lx), az = Math.abs(lz), ts = Math.max(0, Math.min(1, (B - az) / B)), te = Math.max(0, (A - ax) / B), t = Math.min(ts, te), cor = Math.max(0, 1 - te / 0.5) * Math.max(0, 1 - ts / 0.5);
+        pts.push(W(lx, y + R * Math.pow(t, o.p) + o.sweep * cor * cor + 0.03, lz));
+      }
+      if (pts.length < 2) continue;
+      const dd = [pts[0][0] - pts[1][0], pts[0][2] - pts[1][2]], dn = Math.hypot(dd[0], dd[1]) || 1;
+      hipRidge(acc, pts, [dd[0] / dn, dd[1] / dn], s);
+    }
+  }
+  if (acc !== CUR) acc.flush(bag);
 }
 /** Which roofs carry rows of eave tiles, and how close: set by the builders (castle 0.3 m, the samurai halls 0.5 m, none for the town's houses). */
 const EAVE = { pitch: 0.3 };
@@ -99,6 +140,7 @@ function ishigaki(el, { bag, col }) {
     for (let k = 0; k < N; k++) {
       const t0 = k / N, t1 = (k + 1) / N, ya = y0 + (y1 - y0) * t0 + 0.03, yb = y0 + (y1 - y0) * t1 - 0.03, tm = (t0 + t1) / 2, om = out(tm);
       if (el.reliefFrom != null && yb < el.reliefFrom) continue;                  // the courses buried in the hill need no blocks
+      if (el.dense) { denseCourse(bag, [rx0, rz0, rx1, rz1], sd, k, ya, yb, om, r, el.door, y0); continue; }
       const lay = (len, face) => {
         for (let u = 1.4; u < len - 3;) {
           const w = 0.7 + r() * 0.9, gap = 0.3 + r() * 1.2, q = r(), m = q < 0.45 ? 'granite_inca' : q < 0.8 ? 'granite_grey' : 'granite_black';
@@ -140,6 +182,39 @@ function ishigaki(el, { bag, col }) {
     if (el.coursed) relief([x0, z0, x1, z1], sd);
     if (el.walk !== false) col.floor([x0, z0, x1, z1], y1);
   }
+}
+
+/**
+ * One course of the fitted stones (uchikomi-hagi) of a dense rampart face: nearly every stone of the course laid
+ * as its own block, 0.5-1.7 m wide, a little different in height, standing 0.03-0.14 m out of the curved face with
+ * a chamfered front and a hairline joint, in four tones; the joints show the dark backing course.
+ */
+function denseCourse(bag, [rx0, rz0, rx1, rz1], sd, k, ya, yb, om, r, door, y0) {
+  const T = [[], [], [], []], MAT = ['granite_inca', 'granite_grey', 'granite_inca', 'granite_black'];
+  const hc = yb - ya;
+  const stone = (o, t, n, u0, u1, ys, ye, dB, dF) => {
+    const c = 0.045, W = (u, y, d) => [o[0] + t[0] * u + n[0] * d, y, o[1] + t[1] * u + n[1] * d], q = r(), m = q < 0.38 ? 0 : q < 0.75 ? 1 : q < 0.95 ? 2 : 3, out = T[m];
+    const fa = W(u0 + c, ys + c, dF), fb = W(u1 - c, ys + c, dF), fc = W(u1 - c, ye - c, dF), fd = W(u0 + c, ye - c, dF);
+    const ba = W(u0, ys, dB), bb = W(u1, ys, dB), bc = W(u1, ye, dB), bd = W(u0, ye, dB);
+    const nn = [n[0], 0, n[1]], tt = [t[0], 0, t[1]];
+    quad4(out, fa, fb, fc, fd, nn);
+    quad4(out, fd, fc, bc, bd, [0, 1, 0.2]);
+    quad4(out, ba, fa, fd, bd, [-tt[0], 0, -tt[2]]);
+    quad4(out, fb, bb, bc, fc, tt);
+  };
+  const run = (o, t, n, len, skip) => {
+    for (let u = 1.3; u < len - 1.5;) {
+      const w = 0.45 + r() * 0.95, ye = yb - 0.015 - r() * 0.12 * hc, ys = ya + 0.015 + r() * 0.08 * hc, dF = om + 0.03 + r() * 0.11;
+      if (u + w > len - 1.5) break;
+      if (!(skip && skip(u, w))) stone(o, t, n, u, u + w, ys, ye, om - 0.02, dF);
+      u += w + 0.035 + r() * 0.04;
+    }
+  };
+  if (sd.n) run([rx0, rz0], [1, 0], [0, -1], rx1 - rx0);
+  if (sd.s) run([rx0, rz1], [1, 0], [0, 1], rx1 - rx0);
+  if (sd.w) run([rx0, rz0], [0, 1], [-1, 0], rz1 - rz0, door && ((u, w) => ya < y0 + door.h + 0.4 && rz0 + u + w > door.at - door.w / 2 - 0.3 && rz0 + u < door.at + door.w / 2 + 0.3));
+  if (sd.e) run([rx1, rz0], [0, 1], [1, 0], rz1 - rz0);
+  for (let m = 0; m < 4; m++) if (T[m].length) bag.add(MAT[m], fromTriangles(T[m]));
 }
 
 /**
@@ -245,9 +320,9 @@ function tenshu(el, { bag, col }) {
     else { tierBox(bag, col, rect, y, t.h); col.floor(rect, y); }
     const ov = last ? 1.6 : 1.9;
     if (last) {
-      roof(bag, rect, y + t.h - 0.2, ov, 'xieshan', (Math.min(t.hw, t.hd) + ov) * 0.75);
+      roof(bag, rect, y + t.h - 0.2, ov, 'xieshan', (Math.min(t.hw, t.hd) + ov) * 0.75, { oni: false });
       const alongZ = t.hd > t.hw, L = (alongZ ? t.hd : t.hw) + ov - (Math.min(t.hw, t.hd) + ov), top = y + t.h - 0.2 + (Math.min(t.hw, t.hd) + ov) * 0.75;
-      shachi(bag, alongZ ? [cx, cz - L] : [cx - L, cz], alongZ ? [cx, cz + L] : [cx + L, cz], top + 0.2, 1.9 * Math.min(1, Math.min(t.hw, t.hd) / 5.3));
+      shachi(bag, alongZ ? [cx, cz - L] : [cx - L, cz], alongZ ? [cx, cz + L] : [cx + L, cz], top + 0.55, 1.9 * Math.min(1, Math.min(t.hw, t.hd) / 5.3));
       if (H) { bag.add(WD, box(rect[0] + T, y + t.h - 0.3, rect[1] + T, rect[2] - T, y + t.h, rect[3] - T)); }
     } else {
       roof(bag, rect, y + t.h - 0.2, ov, 'hip', (Math.min(t.hw, t.hd) + ov) * 0.62, H ? { hole: rects[i + 1] } : {});
@@ -389,10 +464,10 @@ function yagura(el, { bag, col, lights }) {
       if (i === 0) turretBays(bag, col, rect, y, h);
     }
     const B = mn / 2 + ov, rise = B * (last ? 0.7 : 0.55);
-    roof(bag, rect, y + h - 0.2, ov, last ? (el.top || 'xieshan') : 'hip', rise);
+    roof(bag, rect, y + h - 0.2, ov, last ? (el.top || 'xieshan') : 'hip', rise, last ? { oni: false } : {});
     if (last) {
       const alongZ = z1 - z0 > x1 - x0, L = (alongZ ? z1 - z0 : x1 - x0) / 2 - mn / 2, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, top = y + h - 0.2 + rise;
-      if (L > 0.6 && (el.top || 'xieshan') === 'xieshan') shachi(bag, alongZ ? [cx, cz - L] : [cx - L, cz], alongZ ? [cx, cz + L] : [cx + L, cz], top + 0.15, Math.min(1.3, mn * 0.13));
+      if (L > 0.6 && (el.top || 'xieshan') === 'xieshan') shachi(bag, alongZ ? [cx, cz - L] : [cx - L, cz], alongZ ? [cx, cz + L] : [cx + L, cz], top + 0.45, Math.min(1.3, mn * 0.13));
     } else {
       // the gables on the faces of this roof, standing against the storey above
       const up = [x0 + s, z0 + s, x1 - s, z1 - s], E = s + ov, R = rise, ye = y + h - 0.2;
@@ -590,9 +665,9 @@ function hishiMonN(el, { bag, col }) {
   barredWindows(bag, [x0 + 1.2, z1], [x1 - 1.2, z1], wy + 0.85, 0.75, 6, 1.6);
   for (const [p, q] of [[[x0, z0], [x0, z1]], [[x1, z1], [x1, z0]]]) barredWindows(bag, p, q, wy, 1.0, 1, 1.4);
   const rise = (Math.min(x1 - x0, z1 - z0) / 2 + 1.4) * 0.72, top = yu + H2 - 0.2 + rise;
-  roof(bag, el.rect, yu + H2 - 0.2, 1.4, 'xieshan', rise);
+  roof(bag, el.rect, yu + H2 - 0.2, 1.4, 'xieshan', rise, { oni: false });
   const L = (x1 - x0) / 2 + 1.4 - (Math.min(x1 - x0, z1 - z0) / 2 + 1.4);
-  shachi(bag, [cx - L, (z0 + z1) / 2], [cx + L, (z0 + z1) / 2], top + 0.2, 1.2);
+  shachi(bag, [cx - L, (z0 + z1) / 2], [cx + L, (z0 + z1) / 2], top + 0.5, 1.2);
 }
 /** A rhomb plate (4 points, roughly in a vertical plane facing −z) of thickness t toward +z. */
 function plateRhomb(out, q, t) {
