@@ -105,6 +105,27 @@ function dotrFace(el, { bag }) {
     const p = W(b * bay, sp + rb + 0.85, F0 - 0.01);
     G.push(lathe([[0.001, 0], [0.3, 0], [0.32, 0.03], [0.22, 0.05], [0.001, 0.06]], 16).rotateX(Math.PI / 2).rotateY(Math.atan2(el.n[0], el.n[1])).translate(p[0], p[1], p[2]));
   }
+  // the mosaic of the upper walls: turquoise-and-gold trees with lapis stones in the field over each window, a turquoise and gold archivolt round each window
+  // between its frame and the blind arch, the same on the doors' bays larger (docs/settlements/jerusalem.md §1h)
+  {
+    const M = newM(), X = { green: M.band, blue: M.gold, red: M.blue, pearl: M.pearl, gold: M.gold, band: M.band }, dm = F0 + 0.012;
+    for (let b = 0; b < 7; b++) {
+      const uc = (b + 0.5) * bay, a = arches.find((q) => Math.abs(q.uc - uc) < 0.01);
+      if (a && a === door) mosaicTree(X, W, uc, 6.05, 3.15, 1.15, dm);
+      else mosaicTree(X, W, uc, 9.42, 1.62, 0.6, dm);
+      if (a && a !== door) {
+        // the archivolt: quarters of the arch ring between r + 0.2 and r + 0.34 of the window, in turquoise with a gold stud to every third stone; the jambs likewise
+        const r0 = a.r + 0.2, r1 = rb - 0.04, n = 14;
+        for (let i = 0; i < n; i++) {
+          const t0 = Math.PI * (1 - i / n), t1 = Math.PI * (1 - (i + 1) / n), P = (r, t) => [a.uc + r * Math.cos(t), a.spring + r * Math.sin(t)];
+          flat(i % 2 ? M.band : M.gold, W, [P(r0, t0), P(r1, t0), P(r1, t1), P(r0, t1)], dm + 0.002);
+          if (i % 3 === 1) { const c = P((r0 + r1) / 2, (t0 + t1) / 2); disc(M.blue, W, c, 0.035, dm + 0.006, 6); }
+        }
+        for (const sg of [-1, 1]) for (let y = a.sill + 0.05; y < a.spring - 0.2; y += 0.34) flat(Math.round((y - a.sill) / 0.34) % 2 ? M.band : M.gold, W, [[a.uc + sg * r0, y], [a.uc + sg * r1, y], [a.uc + sg * r1, y + 0.3], [a.uc + sg * r0, y + 0.3]], dm + 0.002);
+      }
+    }
+    flush(bag, M);
+  }
   bag.add(el.darkMat || 'marble_dark', fromTriangles(dark));
   bag.add(el.lightMat || 'marble', fromTriangles(light));
   bag.add(el.goldMat || 'mosaic_gold', fromTriangles(gold));
@@ -139,6 +160,15 @@ function drumFrames(el, { bag }) {
     fbox(light, W, -hw - 0.35, hw + 0.35, el.y0 - 0.22, el.y0 - 0.08, r - 0.02, r + 0.2);
     grille(bars, W, 0, hw, el.y0, el.y1 - hw, r - 0.55, 0.2, 0.03);
   }
+  // between the windows a pilaster from the roof to the dome's foot, with base and capital, the drum's top banded
+  for (let k = 0; k < el.wins.length; k++) {
+    const a = (el.wins[k] + 11.25) * Math.PI / 180, n = [Math.cos(a), Math.sin(a)], u = [-Math.sin(a), Math.cos(a)], W = frame([cx, cz], u, n), r = el.r, yt = el.y1 + 1.0;
+    fbox(light, W, -0.3, 0.3, el.base + 0.2, el.base + 0.5, r - 0.02, r + 0.2);
+    fbox(light, W, -0.22, 0.22, el.base + 0.5, yt, r - 0.02, r + 0.14);
+    fbox(light, W, -0.3, 0.3, yt, yt + 0.25, r - 0.02, r + 0.2);
+    fbox(dark, W, -0.08, 0.08, el.base + 0.7, yt - 0.2, r + 0.13, r + 0.16);
+  }
+  for (const [y0, y1, d] of [[el.y1 + 1.25, el.y1 + 1.4, 0.1], [el.y1 + 1.4, el.y1 + 1.8, 0.04]]) bag.add(d > 0.05 ? 'marble' : 'mosaic_gold', lathe([[el.r + 0.01, 0], [el.r + d + 0.02, 0], [el.r + d + 0.02, y1 - y0], [el.r + 0.01, y1 - y0]], 96, null, cx, y0, cz));
   bag.add('marble', fromTriangles(light));
   bag.add('marble_dark', fromTriangles(dark));
   bag.add('marble', fromTriangles(bars));
@@ -427,9 +457,75 @@ function dotrCarpet(el, { bag }) {
   for (const s of [-1, 1]) { const f = box(-hw, y, 0, hw, y + 0.012, 0.12).translate(0, 0, s * (hl + 0.06)).rotateY(rot).translate(cx, 0, cz); bag.add('cloth_white', f); }   // the fringe
 }
 
+/**
+ * dotr_dome_ribs: { c, y, R, H, n, w, o } — the sheathing's seams on the dome's outer shell (profile as the plan's `shell`): n raised
+ * ribs from the foot to the crown, tapering, and four ring mouldings, so the shell reads as plates of metal. [inferred: joints of the plates]
+ */
+function dotrDomeRibs(el, { bag }) {
+  const [cx, cz] = el.c, R = el.R, H = el.H, o = el.o ?? 0.07, N = 22, T = [];
+  const prof = (t) => ({ r: R * Math.cos(t) + 0.0001, y: el.y + H * Math.pow(Math.sin(t), 0.9) });
+  const nrm = (t) => { const e = 1e-3, a = prof(t - e), b = prof(t + e), dr = b.r - a.r, dy = b.y - a.y, l = Math.hypot(dr, dy); return [dy / l, -dr / l]; };
+  for (let k = 0; k < el.n; k++) {
+    const ph = k * Math.PI * 2 / el.n, cs = Math.cos(ph), sn = Math.sin(ph), tg = [-sn, cs];
+    const row = (i) => {
+      const t = 0.03 + (Math.PI / 2 - 0.06) * i / N, p = prof(t), [nr, ny] = nrm(t), hw = el.w * (1 - 0.75 * t / (Math.PI / 2)) / 2;
+      const at = (side, off) => [cx + cs * (p.r + nr * off) + tg[0] * side, p.y + ny * off, cz + sn * (p.r + nr * off) + tg[1] * side];
+      return [at(-hw, 0), at(0, o), at(hw, 0)];
+    };
+    let prev = row(0);
+    for (let i = 1; i <= N; i++) {
+      const q = row(i);
+      for (const [a, b] of [[0, 1], [1, 2]]) T.push(...prev[a], ...prev[b], ...q[b], ...prev[a], ...q[b], ...q[a], ...prev[a], ...q[b], ...prev[b], ...prev[a], ...q[a], ...q[b]);
+      prev = q;
+    }
+  }
+  bag.add('bronze', fromTriangles(T));
+  for (const t of [0.3, 0.62, 0.95, 1.25]) {
+    const p = prof(t), r = p.r + 0.02;
+    bag.add('gilt_bronze', lathe([[r - 0.06, -0.1], [r + 0.06, -0.08], [r + 0.1, 0], [r + 0.06, 0.08], [r - 0.06, 0.1]], 96, null, cx, p.y, cz));
+  }
+}
+/** dotr_hips: { c, r0, r1, y0, y1, n, a0 } — the roof's hip ridges: gilt-bronze rolls from the corners of the outer wall up to the drum. */
+function dotrHips(el, { bag }) {
+  for (let k = 0; k < el.n; k++) {
+    const a = (el.a0 + 360 * k / el.n) * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
+    bag.add('bronze', rod([el.c[0] + c * el.r0, el.y0 + 0.06, el.c[1] + s * el.r0], [el.c[0] + c * el.r1, el.y1 + 0.06, el.c[1] + s * el.r1], 0.1));
+  }
+}
+/**
+ * dotr_porch: { c (the wall's centre line at the door), u, n, hw (half width), d0, d1 (depths out from the centre line), y (the roof slab's top... its
+ * bottom) } — the porch's finish over its four columns: a painted soffit between cedar beams, and above the slab a base moulding, a frieze
+ * of gold-ruled green mosaic with a gilt roundel to each bay, a row of dentils and a projecting cornice, round the front and the two returns.
+ */
+function dotrPorch(el, { bag }) {
+  const W = frame(el.c, el.u, el.n), hw = el.hw, d0 = el.d0, d1 = el.d1, y = el.y, light = [], gold = [], green = [], beams = [], ceil = [];
+  const ring3 = (T, y0, y1, o) => {                  // a band of box-sections round the front and the two returns, projecting o from the slab's edge
+    fbox(T, W, -hw - o, hw + o, y0, y1, d1 - 0.0 - 0.0, d1 + o);
+    for (const s of [-1, 1]) fbox(T, W, s * hw + (s > 0 ? 0 : -o), s * hw + (s > 0 ? o : 0), y0, y1, d0, d1);
+  };
+  ring3(light, y + 0.55, y + 0.66, 0.1);
+  ring3(green, y + 0.66, y + 1.1, 0.02);
+  ring3(gold, y + 0.9, y + 0.96, 0.04);
+  // dentils and cornice
+  for (let uu = -hw + 0.1; uu < hw; uu += 0.26) fbox(light, W, uu, uu + 0.13, y + 1.1, y + 1.26, d1, d1 + 0.07);
+  for (const s of [-1, 1]) for (let dd = d0 + 0.2; dd < d1 - 0.1; dd += 0.26) fbox(light, W, s * hw + (s > 0 ? 0 : -0.07), s * hw + (s > 0 ? 0.07 : 0), y + 1.1, y + 1.26, dd, dd + 0.13);
+  ring3(light, y + 1.26, y + 1.46, 0.2);
+  // the gilt roundels in the frieze, one to each bay between the columns
+  for (const uu of [-3.0, -0.0, 3.0]) bag.add('mosaic_gold', lathe([[0.001, 0], [0.2, 0], [0.22, 0.025], [0.15, 0.04], [0.001, 0.05]], 14).rotateX(Math.PI / 2).rotateY(Math.atan2(el.n[0], el.n[1])).translate(...W(uu, y + 0.88, d1 + 0.025)));
+  // the soffit: a painted ceiling and cedar beams across, three along the depth
+  fbox(ceil, W, -hw, hw, y - 0.05, y, d0, d1);
+  for (const uu of [-hw + 0.15, -hw / 2, 0, hw / 2, hw - 0.15]) fbox(beams, W, uu - 0.1, uu + 0.1, y - 0.22, y - 0.05, d0, d1);
+  for (let dd = d0 + 0.5; dd < d1; dd += 1.1) fbox(beams, W, -hw, hw, y - 0.16, y - 0.05, dd - 0.07, dd + 0.07);
+  bag.add('marble', fromTriangles(light));
+  bag.add('mosaic_green', fromTriangles(green));
+  bag.add('mosaic_gold', fromTriangles(gold));
+  bag.add('ceiling_painted', fromTriangles(ceil));
+  bag.add('cedar', fromTriangles(beams));
+}
+
 const base = STYLES.islamic;
 registerStyle('islamic-dotr', {
   ...base,
-  elements: { ...base.elements, dotr_face: dotrFace, ablaq, drum_frames: drumFrames, dotr_mosaic: dotrMosaic, drum_mosaic: drumMosaic, dotr_corona: dotrCorona, dotr_curtains: dotrCurtains, dotr_carpet: dotrCarpet },
+  elements: { ...base.elements, dotr_face: dotrFace, ablaq, drum_frames: drumFrames, dotr_mosaic: dotrMosaic, drum_mosaic: drumMosaic, dotr_corona: dotrCorona, dotr_curtains: dotrCurtains, dotr_carpet: dotrCarpet, dotr_dome_ribs: dotrDomeRibs, dotr_hips: dotrHips, dotr_porch: dotrPorch },
   objects: { ...base.objects, rock_screen: rockScreen, sakhra },
 });
