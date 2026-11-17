@@ -24,6 +24,7 @@ import { worksFence, stoneYard } from './works.js';
 import { schoolRooms, workshopRooms } from './school.js';
 import { makeShops, plotShops, shopPeople } from './shops.js';
 import { boxGeo, cull } from './boxes.js';
+import { makePortals, portalVariant, HW as PHW, OW as POW, OH as POH } from './portal.js';
 
 const S = 'limestone_yellow', P = 'stucco_cream', IRON = 'iron';
 const FACADES = [S, P, 'stucco_ochre', 'stucco_pale', P, 'stucco_rose'];
@@ -119,6 +120,7 @@ function panel(bag, fr, s0, s1, t, y0, y1) {
   bag.addInstance('opening', unitBox({ noTop: true, noBottom: true, noXn: true, noXp: true, noZp: true }), M);
 }
 const SHOPS = makeShops({ proto, put });
+const PORTALS = makePortals({ proto });
 const CORNER_CLEAR = 5;
 /** Louvred shutters at a window: folded open against the wall, or closed over it, or one leaf drawn. */
 function shutters(bag, F, ww, y0, y1, state, mat) {
@@ -243,14 +245,16 @@ function streetFront(bag, fr, s0, s1, y, h, mat, rand, tribune = false, opt = {}
   const tb = tribune ? door : mirador ? (dr() < 0.5 ? 0 : nb - 1) : -1;
   if (!own) {
     { // the plinth, in pieces round the shops' doors
-      const gaps = shops.map((q) => { const d = q.door === 'L' ? q.s0 + q.bw / 2 : q.s1 - q.bw / 2; return [d - 0.9, d + 0.9]; }).sort((p, q) => p[0] - q[0]);
+      const gaps = shops.map((q) => { const d = q.door === 'L' ? q.s0 + q.bw / 2 : q.s1 - q.bw / 2; return [d - 0.9, d + 0.9]; });
+      if (opt.portal) gaps.push([opt.portal.pc - POW, opt.portal.pc + POW]);                // (the doorway of a portal with a vestibule: portal.js)
+      gaps.sort((p, q) => p[0] - q[0]);
       let c0 = s0; for (const [g0, g1] of gaps) { if (g0 > c0 + 0.05) bag.add('granite_grey', F(c0, g0, -0.04, 0.1, y - 1.25, y + 0.45)); c0 = g1; }
       if (s1 > c0 + 0.05) bag.add('granite_grey', F(c0, s1, -0.04, 0.1, y - 1.25, y + 0.45));
     }
     // the stone ground floor, in pieces round the shops' own fronts
-    let c = s0; const cuts = [...shops].sort((p, q) => p.s0 - q.s0);
+    let c = s0; const cuts = [...shops, ...(opt.portal ? [{ s0: opt.portal.pc - POW, s1: opt.portal.pc + POW, portal: true }] : [])].sort((p, q) => p.s0 - q.s0);
     const stone = (a, b) => { if (b - a < 0.05) return; bag.add(S, F(a, b, -0.02, 0.06, y - 1.1, y + 4.6)); for (let yy = y + 1.0; yy < y + 4.4; yy += 0.6) bag.add('limestone', F(a, b, 0.06, 0.075, yy - 0.03, yy)); };
-    for (const q of cuts) { stone(c, q.s0); c = q.s1; bag.add(S, F(q.s0, q.s1, -0.02, 0.06, y + 4.42, y + 4.6)); }
+    for (const q of cuts) { stone(c, q.s0); c = q.s1; bag.add(S, F(q.s0, q.s1, -0.02, 0.06, y + (q.portal ? POH : 4.42), y + 4.6)); }
     stone(c, s1);
   }        // the coursing of the ground floor
   bag.add(S, F(s0, s1, 0, 0.22, y + 4.6, y + 4.85));
@@ -262,7 +266,10 @@ function streetFront(bag, fr, s0, s1, y, h, mat, rand, tribune = false, opt = {}
       continue;
     }
     if (!own) {
-      if (!inShop(i)) { put(bag, fr, far ? (i === door ? doorFarP() : shopFarP()) : i === door ? doorP() : shopP(), sc, y); const hw = i === door ? 0.95 : 1.2; panel(bag, fr, sc - hw, sc + hw, 0.1, y + 0.1, y + (i === door ? 3.9 : 3.8)); }
+      if (!inShop(i)) {
+        if (opt.portal && i === door) put(bag, fr, far ? doorFarP() : PORTALS.front(opt.portal.v), sc, y);        // a real doorway: no dark panel (portal.js)
+        else { put(bag, fr, far ? (i === door ? doorFarP() : shopFarP()) : i === door ? doorP() : shopP(), sc, y); const hw = i === door ? 0.95 : 1.2; panel(bag, fr, sc - hw, sc + hw, 0.1, y + 0.1, y + (i === door ? 3.9 : 3.8)); }
+      }
       if (i !== door && rand() < 0.34) { const ci = Math.floor(rand() * AWN.length); if ((!inShop(i) || dr() < 0.5) && !far) put(bag, fr, awningP(ci), sc, y - (inShop(i) ? 0.2 : 0)); }
     }
     put(bag, fr, far ? entresolFarP() : entresolP(), sc, y); panel(bag, fr, sc - 0.6, sc + 0.6, 0.03, y + 5.3, y + 6.9);
@@ -413,6 +420,24 @@ function pavement(el, bag) {
   // iron covers in the roadway's edge
   for (const [px, pz] of [[cx - 12, cz - o - Wd - 0.7], [cx + 17, cz + o + Wd + 0.7], [cx + o + Wd + 0.7, cz - 14], [cx - o - Wd - 0.7, cz + 9]]) bag.add(IRON, lathe([[0.001, 0], [0.34, 0], [0.34, 0.014], [0.001, 0.014]], 10, null, px, Z(pz) + 0.0, pz));
 }
+/** A plot's portal with a vestibule (portal.js), or null: the bay of the door (the middle bay), when the plan gives the block portals and the bay is wide enough. */
+function plotPortal(el, p, fr, shops) {
+  const nb = Math.max(1, Math.round((p.b - p.a) / 3.4)), bw = (p.b - p.a) / nb, pc = p.a + (Math.floor(nb / 2) + 0.5) * bw;
+  return el.portals && fr.axis && bw >= 2.9 && (!shops.length || bw >= 3.0) ? { pc, v: portalVariant(p.seed), mass: PORTALS.mass, lamp: !!el.shops } : null;
+}
+/** The portals of a block with a vestibule, for the plan's people: [{ at: [x, z] (where the porter stands), face: [x, z] (toward the street), y }]. */
+export function blockPortals(el) {
+  const { P8, plots } = blockPlan(el), y = el.y ?? 0, out = [];
+  for (const p of plots) {
+    const fr = frame(P8[2 * p.k], P8[2 * p.k + 1]); if (!fr.axis) continue;
+    const nb = Math.max(1, Math.round((p.b - p.a) / 3.4));
+    const sh = plotShops(p, nb, (p.b - p.a) / nb, !!el.shops && fr.axis, [CORNER_CLEAR, 2 * ((el.s ?? 70) / 2 - (el.ch ?? 12)) - CORNER_CLEAR]), po = plotPortal(el, p, fr, sh);
+    if (!po) continue;
+    const yS = y + (el.dz ?? 0) * (fr.at(po.pc, 0)[1] - el.c[1]);
+    out.push({ at: fr.at(po.pc + 0.45, -1.7), face: fr.n, y: yS + 0.12, seed: p.seed });
+  }
+  return out;
+}
 function block(el, ctx) {
   const { bag, col } = ctx;
   const [cx, cz] = el.c, s = el.s ?? 70, D = el.d ?? 18, ch = el.ch ?? 12, y = el.y ?? 0, rand = rng(el.seed || 1), o = s / 2;
@@ -423,12 +448,19 @@ function block(el, ctx) {
     bounds[k].push(a, b);
     const h = pickH(pr), mat = FACADES[Math.floor(pr() * FACADES.length)];
     const nbp = Math.max(1, Math.round((b - a) / 3.4)), shops = plotShops({ a, b, seed }, nbp, (b - a) / nbp, !!el.shops && fr.axis, [CORNER_CLEAR, 2 * (o - ch) - CORNER_CLEAR]);
-    if (shops.length) SHOPS.mass(ctx, fr, a, b, D, y, h, mat, shops, (u) => y + (el.dz ?? 0) * (fr.at(u, 0)[1] - cz));
-    else {
+    const yAt = (u) => y + (el.dz ?? 0) * (fr.at(u, 0)[1] - cz);
+    // a portal with a vestibule and a stair hall in the bay of the door (portal.js), in the blocks the plan gives them
+    const portal = plotPortal(el, { a, b, seed }, fr, shops);
+    if (shops.length) SHOPS.mass(ctx, fr, a, b, D, y, h, mat, shops, yAt, portal);
+    else if (portal) {
+      const pc = portal.pc;
+      for (const [s0, s1] of [[a, pc - PHW], [pc + PHW, b]]) { bag.add(mat, fr.F(s0, s1, -D, 0, y - 1.2, y + h)); const p = fr.at(s0, -D), q = fr.at(s1, 0); col.rect([p[0], p[1], q[0], q[1]], y - 1.2, y + h); }
+      PORTALS.mass(ctx, fr, pc, D, y, y + h, mat, yAt(pc), portal.v, portal.lamp);
+    } else {
       bag.add(mat, fr.F(a, b, -D, 0, y - 1.2, y + h));
       const p = fr.at(a, -D), q = fr.at(b, 0); col.rect([p[0], p[1], q[0], q[1]], y - 1.2, y + h);
     }
-    streetFront(bag, fr, a, b, y, h, mat, pr, false, { shops, far: el.far });
+    streetFront(bag, fr, a, b, y, h, mat, pr, false, { shops, far: el.far, portal });
     courtFront(bag, fr, a, b, y, h, D, pr, 1, el.far);
     roofTop(bag, fr, a, b, y, h, D, seed);
   }
@@ -549,6 +581,47 @@ function pinnacle(bag, x, y, z, s = 1) {
     (th, i) => (i >= 9 ? 1 + 0.45 * Math.max(0, Math.cos(th * 4)) : 1), x, y, z));
   for (let k = 0; k < 4; k++) bag.add(S, lathe([[0.001, 0], [0.22, 0.12], [0.26, 0.3], [0.14, 0.5], [0.001, 0.62]].map(([r, h]) => [r * s * (1 - k * 0.15), h * s]), 8, null, x, y + s * (10.2 + k * 0.5), z));
 }
+/**
+ * A gargoyle of the apse (docs/settlements/barcelona.md §1, "The apse's details"): a stone spout from the wall in the shape of one of the
+ * Mediterranean animals the apse's gargoyles take — snail, lizard, frog, toad, snake. p: the spout's root on the wall [x, y, z], n: the
+ * outward unit direction [x, z]. About 0.8–1.1 m long.
+ */
+function gargoyle(bag, kind, p, n) {
+  const t = [-n[1], n[0]], P = (u, v, w = 0) => [p[0] + n[0] * u + t[0] * w, p[1] + v, p[2] + n[1] * u + t[1] * w];
+  const R = (a, b, r) => bag.add(S, rod(a, b, r, 5)), L = (c, prof, seg = 6) => bag.add(S, lathe(prof, seg, null, c[0], c[1], c[2]));
+  const ball = (c, r) => L([c[0], c[1] - r, c[2]], [[0.001, 0], [r * 0.85, r * 0.3], [r, r], [r * 0.85, r * 1.7], [0.001, r * 2]], 5);
+  R(P(-0.3, 0), P(0.3, -0.06), 0.12);                                                                       // the channel, running into the wall
+  if (kind === 'snail') {
+    R(P(0.3, -0.06), P(0.85, -0.2), 0.1); ball(P(0.88, -0.17), 0.1);
+    L(P(0.45, -0.06 + 0.0, 0), [[0.001, 0.05], [0.14, 0.08], [0.24, 0.22], [0.24, 0.4], [0.14, 0.52], [0.001, 0.55]], 8);                  // the shell, on the back
+    for (const w of [-0.06, 0.06]) { R(P(0.9, -0.12, w), P(1.0, 0.1, w * 1.8), 0.012); ball(P(1.0, 0.1, w * 1.8), 0.025); }
+  } else if (kind === 'lizard') {
+    R(P(-0.1, 0), P(0.75, -0.18), 0.075); R(P(0.75, -0.18), P(1.0, -0.24), 0.055); R(P(-0.15, 0.02), P(-0.1, 0.3, 0.25), 0.03);
+    for (const [u, w] of [[0.12, 1], [0.12, -1], [0.55, 1], [0.55, -1]]) { R(P(u, -0.04, w * 0.05), P(u + 0.05, -0.04, w * 0.24), 0.028); R(P(u + 0.05, -0.04, w * 0.24), P(u + 0.1, -0.2, w * 0.26), 0.024); }
+  } else if (kind === 'frog' || kind === 'toad') {
+    const wd = kind === 'toad' ? 0.3 : 0.22;
+    L(P(0.45, -0.04), [[0.001, 0], [wd * 0.8, 0.02], [wd, 0.12], [wd * 0.7, 0.26], [0.001, 0.3]], 7); ball(P(0.75, 0.1), 0.1);
+    for (const w of [-0.08, 0.08]) ball(P(0.78, 0.26, w), 0.04);
+    for (const w of [-1, 1]) { R(P(0.65, 0.04, w * 0.12), P(0.9, -0.2, w * 0.18), 0.035); R(P(0.2, 0.06, w * wd), P(0.3, -0.2, w * (wd + 0.08)), 0.04); }
+    if (kind === 'toad') for (const [u, w] of [[0.35, 0.12], [0.5, -0.14], [0.55, 0.1], [0.4, -0.08]]) ball(P(u, 0.26, w), 0.025);
+  } else {
+    let q = P(-0.1, 0.0, 0);                                                                                 // the snake: a body of six turns, the head raised
+    for (let k = 1; k <= 6; k++) { const nq = P(-0.1 + k * 0.17, -0.02 - k * 0.025, 0.12 * Math.sin(k * 1.4)); R(q, nq, 0.055 - k * 0.003); q = nq; }
+    L([q[0], q[1] - 0.02, q[2]], [[0.001, 0], [0.07, 0.02], [0.08, 0.08], [0.001, 0.12]], 6);
+  }
+}
+/** A blind trefoil in a wall: three lobes as a dark plate (the niche), a boss with a monogram of Jesus (I H S), Mary (M) or Joseph (J). c: centre on the wall face, n, t: the wall's outward and along unit vectors. */
+function trefoil(bag, T, c, n, t, y, which) {
+  const P = (u, v, o) => [c[0] + t[0] * u + n[0] * o, y + v, c[1] + t[1] * u + n[1] * o];
+  const i0 = T.length;
+  for (const [cu, cv] of [[0, 0.3], [-0.29, -0.08], [0.29, -0.08]]) for (let i = 0; i < 10; i++) { const a0 = i / 10 * Math.PI * 2, a1 = (i + 1) / 10 * Math.PI * 2; T.push(...P(cu, cv, 0.04), ...P(cu + 0.27 * Math.cos(a0), cv + 0.27 * Math.sin(a0), 0.04), ...P(cu + 0.27 * Math.cos(a1), cv + 0.27 * Math.sin(a1), 0.04)); }
+  face(T, i0, n[0], 0, n[1]);
+  const hbar = (u0, u1, v) => { const a = P(u0, v, 0.05), b2 = P(u1, v, 0.05); bag.add('limestone', orientedBox([a[0], a[2]], [b2[0], b2[2]], 0.06, v - 0.025 + y, v + 0.025 + y)); };
+  const vbar = (u, v0, v1) => { const a = P(u - 0.025, v0, 0.05), b2 = P(u + 0.025, v1, 0.05); bag.add('limestone', orientedBox([a[0], a[2]], [b2[0], b2[2]], 0.06, y + v0, y + v1)); };
+  if (which === 0) { vbar(0, -0.18, 0.28); hbar(-0.16, 0.16, 0.18); hbar(-0.1, 0.1, 0.0); vbar(-0.1, -0.18, 0.0); vbar(0.1, -0.18, 0.0); }        // I H S, as a cross on a bar and two posts
+  else if (which === 1) { vbar(-0.13, -0.15, 0.25); vbar(0.13, -0.15, 0.25); hbar(-0.13, 0.0, 0.2); hbar(0.0, 0.13, 0.2); vbar(0, -0.15, 0.1); }                       // M
+  else { vbar(0.04, -0.15, 0.28); hbar(-0.12, 0.04, -0.12); vbar(-0.12, -0.15, -0.05); hbar(-0.12, 0.12, 0.28); }                                                    // J
+}
 /** The apse of 1891–1894: seven chapels in a horseshoe round the crypt, each with two lancets and a
  * rose, a crocketed gable over it; buttresses between them carrying pinnacles; the walls open to the
  * sky (the vaults came a century later); the crypt's floor inside. A: the centre, R: the outer radius. */
@@ -589,6 +662,8 @@ function apse(bag, col, A, y, R = 16, H = 19, run = 12) {
     T.push(...both(G));
     for (const sg of [-1, 1]) for (let i = 1; i < 6; i++) { const f = i / 6, p3 = V(sg * gw * (1 - f), gh * f + 0.12, 0); bag.add(S, lathe([[0.26, 0], [0.16, 0.36], [0.001, 0.62]], 6, null, p3[0], p3[1], p3[2])); }
     const tip = V(0, gh, 0); pinnacle(bag, tip[0], tip[1] - 0.1, tip[2], 0.32);
+    // under the cornice: three blind trefoils with the monograms of Mary, Jesus and Joseph (Booklet 05: "trefoil arches above the windows bear the monograms")
+    for (const [u, w] of [[-1.7, 1], [0, 0], [1.7, 2]]) trefoil(bag, win, [c[0] + t[0] * u, c[1] + t[1] * u], n, t, y + 17.55, w);
   }
   // the buttresses between the chapels and at the horseshoe's ends, stepping back, each with its pinnacle
   for (let j = 0; j <= 7; j++) {
@@ -597,6 +672,7 @@ function apse(bag, col, A, y, R = 16, H = 19, run = 12) {
     bag.add(S, orientedBox(at(a, R - 0.4), at(a, R + 1.5), 1.5, y + H * 0.5, y + H + 1.6));
     bag.add('limestone', orientedBox(at(a, R - 0.5), at(a, R + 2.45), 1.9, y + H * 0.5 - 0.3, y + H * 0.5));
     const pp = at(a, R + 0.55); pinnacle(bag, pp[0], y + H + 1.6, pp[1], 1.05);
+    const gp = at(a, R + 1.4); gargoyle(bag, ['snail', 'lizard', 'frog', 'snake', 'toad', 'lizard', 'snail', 'frog'][j], [gp[0], y + H - 0.9, gp[1]], d(a));      // the gargoyles: Mediterranean animals
   }
   // the presbytery's straight walls running south from the horseshoe, with lancets
   for (const sx of [-1, 1]) {
@@ -604,6 +680,7 @@ function apse(bag, col, A, y, R = 16, H = 19, run = 12) {
     bag.add(S, orientedBox(p, q, th, y - 1.2, y + H)); col.segment(p, q, th, y - 1.2, y + H);
     bag.add(S, orientedBox([x + sx * 0.3, A[1]], [x + sx * 0.3, A[1] + run], th + 0.6, y + H - 0.55, y + H));
     bag.add(S, box(x - 0.85, y - 1.2, A[1] + run - 1.6, x + 0.85, y + H + 1.2, A[1] + run));
+    gargoyle(bag, sx < 0 ? 'toad' : 'snake', [x + sx * (th / 2 - 0.05), y + H - 0.9, A[1] + 6], [sx, 0]);
     for (const zz of [A[1] + 3.5, A[1] + 8]) { lancet(win, [x + sx * th / 2, zz], [0, sx], [sx, 0], y + 3.2, 1.4, 8.6, 0.03); lancet(win, [x - sx * th / 2, zz], [0, -sx], [-sx, 0], y + 3.2, 1.4, 8.6, 0.03); }
   }
   bag.add(S, fromTriangles(T));
@@ -613,6 +690,63 @@ function apse(bag, col, A, y, R = 16, H = 19, run = 12) {
   bag.add(fl, lathe([[ri, 0], [ri, 2.4], [0.001, 2.4]], 28, null, A[0], y - 1.2, A[1]));
   bag.add(fl, box(A[0] - ri, y - 1.2, A[1], A[0] + ri, y + 1.2, A[1] + run - 0.02));
   col.floor([A[0] - ri, A[1] - ri, A[0] + ri, A[1] + run], y + 1.2);
+  apseInside(bag, col, A, y, R, H, th, run);
+}
+/**
+ * The apse's inside (docs/settlements/barcelona.md §1, "The apse's inside"): on the vertex of each pair of chapel walls an engaged shaft with
+ * base and foliage capital carrying the stub of a vault rib; a base course, a sill course under the lancets and a head course on the inner
+ * faces; the floor over the crypt inlaid with rings and spokes of pale stone; and the site's own goods on the slab — the masons' stacks of
+ * cut blocks, trestles with a plank, a barrow, a lime trough, a ladder against the wall, a tripod hoist — clear of the way from the south opening
+ * to the middle.
+ */
+function apseInside(bag, col, A, y, R, H, th, run) {
+  const at = (a, r) => [A[0] + Math.cos(a) * r, A[1] + Math.sin(a) * r], F0 = y + 1.2, rv = (R * Math.cos(Math.PI / 14) - th) / Math.cos(Math.PI / 14);   // the inner vertex's radius
+  const ang = (j) => Math.PI + Math.PI * j / 7;
+  for (let j = 0; j <= 7; j++) {
+    const a = ang(j), v = at(a, rv - 0.05), r0 = 0.3;
+    bag.add('limestone', lathe([[r0 + 0.12, 0], [r0 + 0.12, 0.35], [r0 + 0.02, 0.5], [r0, 0.6]], 8, null, v[0], F0, v[1]));                         // the base
+    bag.add(S, lathe([[r0, 0], [r0, 11.4]], 8, null, v[0], F0 + 0.6, v[1]));                                                                          // the shaft (a drum a course)
+    bag.add('limestone', lathe([[r0, 0], [r0 + 0.06, 0.1], [r0 + 0.2, 0.3], [r0 + 0.3, 0.55], [r0 + 0.3, 0.75], [r0 + 0.1, 0.8]].map(([r, h]) => [r, h]), 8, (th2, i) => (i >= 2 ? 1 + 0.22 * Math.max(0, Math.cos(th2 * 8)) : 1), v[0], F0 + 12.0, v[1]));   // the capital, its leaves in eight
+    const w = at(a, rv - 0.9);                                                                                                                         // the rib's stub, springing toward the middle
+    bag.add(S, rod([v[0], F0 + 12.8, v[1]], [w[0], F0 + 13.6, w[1]], 0.13, 6));
+    for (let k = 0; k < 3; k++) bag.add(S, lathe([[r0 + 0.04, 0], [r0 + 0.04, 0.12]], 8, null, v[0], F0 + 1.8 + k * 3.6, v[1]));                     // the rings of the shaft
+  }
+  for (let j = 0; j < 7; j++) {
+    const p = at(ang(j), rv), q = at(ang(j + 1), rv);
+    for (const [y0, y1, e] of [[F0, F0 + 0.55, 0.16], [y + 2.85, y + 3.05, 0.14], [y + 18.0, y + 18.35, 0.2]]) bag.add('limestone', orientedBox(at(ang(j), rv - 0.0), at(ang(j + 1), rv - 0.0), e * 2, y0, y1));
+    void p; void q;
+  }
+  for (const sx of [-1, 1]) for (const [y0, y1, e] of [[F0, F0 + 0.55, 0.16], [y + 2.85, y + 3.05, 0.14], [y + 18.0, y + 18.35, 0.2]]) bag.add('limestone', orientedBox([A[0] + sx * (R - th), A[1]], [A[0] + sx * (R - th), A[1] + run - 1.6], e * 2, y0, y1));
+  // the floor's inlay: rings and the seven spokes, a medallion at the middle of the horseshoe
+  const lo = F0 + 0.015;
+  for (const [r0, r1] of [[2.55, 2.85], [6.85, 7.15], [10.85, 11.25], [13.85, 14.15]]) bag.add('limestone', lathe([[r1, F0], [r1, lo], [r0, lo], [r0, F0]], 36, null, A[0], 0, A[1]));
+  bag.add('terracotta', lathe([[2.55, F0], [2.55, lo], [0.001, lo]], 24, null, A[0], 0, A[1]));
+  for (let k = 0; k < 7; k++) { const a = Math.PI + Math.PI * (k + 0.5) / 7; bag.add('limestone', orientedBox(at(a, 3.0), at(a, 13.8), 0.3, F0, lo)); }
+  // the site's goods on the slab, on the east and west sides of the way
+  const stack = (x, z, w, d, h, m = S) => { for (let i = 0, yy = F0; yy < F0 + h - 0.01; i++) { const hh = Math.min(0.42 + (i % 2) * 0.08, F0 + h - yy); bag.add(i % 3 === 2 ? 'sandstone' : m, box(x + (i % 2) * 0.05, yy, z, x + w - (i % 3) * 0.04, yy + hh, z + d)); yy += hh; } col.rect([x, z, x + w, z + d], F0, F0 + h); };
+  const zA = A[1] + 3;
+  stack(A[0] - 12.2, zA, 2.4, 1.2, 1.7); stack(A[0] - 12.2, zA + 2, 2.0, 1.0, 1.1); stack(A[0] + 9.8, zA + 1, 2.6, 1.2, 1.5); stack(A[0] + 10.4, zA + 3.2, 1.8, 1.0, 0.9);
+  // two trestles bearing a plank, a mason's block half dressed on it, with a mallet and a chisel
+  for (const sx of [-1, 1]) {
+    const x0 = A[0] + sx * 7.5, z0 = A[1] + 8;
+    for (const dz of [0, 1.6]) { bag.add('timber', rod([x0 - 0.5, F0, z0 + dz - 0.2], [x0, F0 + 0.8, z0 + dz], 0.045, 5)); bag.add('timber', rod([x0 + 0.5, F0, z0 + dz - 0.2], [x0, F0 + 0.8, z0 + dz], 0.045, 5)); bag.add('timber', rod([x0 - 0.5, F0, z0 + dz + 0.2], [x0, F0 + 0.8, z0 + dz], 0.045, 5)); bag.add('timber', rod([x0 + 0.5, F0, z0 + dz + 0.2], [x0, F0 + 0.8, z0 + dz], 0.045, 5)); }
+    bag.add('planks_grey', box(x0 - 0.35, F0 + 0.8, z0 - 0.3, x0 + 0.35, F0 + 0.86, z0 + 1.9));
+    bag.add(S, box(x0 - 0.28, F0 + 0.86, z0 + 0.2, x0 + 0.28, F0 + 1.2, z0 + 1.1)); bag.add('sandstone', box(x0 - 0.28, F0 + 1.2, z0 + 0.2, x0 + 0.28, F0 + 1.26, z0 + 1.1));
+    bag.add('wood_dark', box(x0 + 0.1, F0 + 0.86, z0 + 1.4, x0 + 0.34, F0 + 0.98, z0 + 1.6)); bag.add('iron', rod([x0 - 0.2, F0 + 0.88, z0 + 1.5], [x0 - 0.05, F0 + 0.88, z0 + 1.5], 0.015, 4));
+    col.rect([x0 - 0.5, z0 - 0.3, x0 + 0.5, z0 + 1.9], F0, F0 + 1.3);
+  }
+  // a barrow, a lime trough with its hoe, a ladder against the inner face of the east presbytery wall, a tripod hoist at the middle of the west side
+  const bx0 = A[0] - 9.2, bz0 = A[1] + 5.4;
+  bag.add('planks_grey', box(bx0 - 0.3, F0 + 0.38, bz0, bx0 + 0.3, F0 + 0.42, bz0 + 0.9)); for (const sx of [-1, 1]) { bag.add('wood_dark', box(bx0 + sx * 0.3 - 0.02, F0 + 0.4, bz0, bx0 + sx * 0.3 + 0.02, F0 + 0.6, bz0 + 0.9)); bag.add('wood_dark', rod([bx0 + sx * 0.28, F0 + 0.4, bz0 + 0.9], [bx0 + sx * 0.28, F0 + 0.55, bz0 + 1.7], 0.025, 4)); }
+  bag.add('wood_dark', lathe([[0.001, 0], [0.22, 0], [0.22, 0.1], [0.001, 0.1]], 8, null, bx0, F0 + 0.0, bz0 + 0.1)); col.rect([bx0 - 0.35, bz0 - 0.1, bx0 + 0.35, bz0 + 1.7], F0, F0 + 0.7);
+  const tx = A[0] + 10.6, tz = A[1] + 8.3;
+  bag.add('planks_grey', box(tx, F0, tz, tx + 1.8, F0 + 0.55, tz + 0.7)); bag.add('plaster_white', box(tx + 0.06, F0 + 0.4, tz + 0.06, tx + 1.74, F0 + 0.5, tz + 0.64)); bag.add('wood_dark', rod([tx + 0.5, F0 + 0.5, tz + 0.35], [tx + 1.5, F0 + 0.85, tz + 0.45], 0.02, 4)); col.rect([tx, tz, tx + 1.8, tz + 0.7], F0, F0 + 0.6);
+  const lx = A[0] + R - th - 0.15;
+  for (const dz of [-0.28, 0.28]) bag.add('wood_dark', rod([lx - 1.1, F0, A[1] + 9.5 + dz], [lx, F0 + 5.2, A[1] + 9.5 + dz], 0.035, 5));
+  for (let k = 1; k < 10; k++) bag.add('wood_dark', rod([lx - 1.1 + k * 0.11, F0 + k * 0.52, A[1] + 9.22], [lx - 1.1 + k * 0.11, F0 + k * 0.52, A[1] + 9.78], 0.02, 4));
+  const hx = A[0] - 11.2, hz = A[1] + 9.0, top = [hx, F0 + 3.6, hz];
+  for (const [dx, dz] of [[-1.3, -0.8], [1.3, -0.8], [0, 1.4]]) bag.add('timber', rod([hx + dx, F0, hz + dz], top, 0.07, 5));
+  bag.add('iron', rod(top, [hx, F0 + 1.2, hz], 0.012, 4)); bag.add('iron', box(hx - 0.2, F0 + 0.9, hz - 0.2, hx + 0.2, F0 + 1.2, hz + 0.2)); bag.add(S, box(hx - 0.35, F0, hz - 0.35, hx + 0.35, F0 + 0.7, hz + 0.35)); col.rect([hx - 0.4, hz - 0.4, hx + 0.4, hz + 0.4], F0, F0 + 0.8);
 }
 /** A guyed timber derrick: the mast, the boom raised toward the work, the guys, the winch. */
 function derrick(bag, x, y, z, H, tip) {

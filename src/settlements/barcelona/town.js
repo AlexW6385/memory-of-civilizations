@@ -3,7 +3,7 @@
 // the Passeig for it (both built with the landmark). The street life of 1910 (§5a): the trams on the
 // Passeig de Gràcia and on a line that turns off it round the cut corners, east along a cross street
 // and up the Carrer de la Marina past the Nativity façade; hackney carriages at the kerbs.
-import { blockShops } from '../../styles/modernisme/index.js';
+import { blockShops, blockPortals } from '../../styles/modernisme/index.js';
 import { worksElements, arrivalLife, arrivalStreet } from './arrival.js';
 import { RADIUS, PITCH, BLOCK, BATLLO, CASA, GRACIA_X, MERCAT, SAGRADA, ARRIVAL, shopCore, blocks, height, onDiagonal, bancsFanals } from './layout.js';
 
@@ -138,6 +138,39 @@ function shopLife(els) {
   });
   return out;
 }
+/** The porters of the houses with vestibules (styles/modernisme/portal.js): a portera in her apron, or a man in his cap, standing inside the door by the mailboxes; about one house in three. */
+function porterLife(els) {
+  const out = [];
+  els.forEach((el, bi) => {
+    const rand = rng(8100 + bi * 17), L = [], pick = (a) => a[Math.floor(rand() * a.length)];
+    for (const q of blockPortals(el)) {
+      if (rand() > 0.22) continue;
+      const woman = rand() < 0.6, rot = Math.atan2(-q.face[0], -q.face[1]);
+      L.push({ t: 'figure', at: q.at, y: q.y, rot, seed: Math.floor(rand() * 1e9), skin: 'skin_light', pose: rand() < 0.3 ? 'talk' : 'stand',
+        ...(woman ? { dress: 'robe', cloth: pick(['cloth_grey', 'cloth_indigo', 'cloth_maroon']), cloth2: 'cloth_white', over: 'apron', hat: 'none', hair: 'bun' }
+          : { dress: 'trousers', cloth: pick(['cloth_brown', 'cloth_grey']), cloth2: 'cloth_black', over: 'apron', hat: 'cap', hatMat: 'cloth_grey', hair: 'short', beard: rand() < 0.5 ? 0.8 : 0 }) });
+    }
+    if (L.length) out.push(L);
+  });
+  return out;
+}
+/** One gas lamp at each crossing of the streets between the blocks with portals, on the kerb's corner (not on the tram streets, where the poles stand, nor on the Diagonal). */
+function fanals(els) {
+  const seen = new Set(), out = [], o = BLOCK / 2 + 4.4 - 0.6;
+  for (const e of els) {
+    if (!e.portals) continue;
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+      const ix = e.c[0] + sx * PITCH / 2, iz = e.c[1] + sz * PITCH / 2, k = `${Math.round(ix)},${Math.round(iz)}`;
+      if (seen.has(k)) continue;
+      seen.add(k);
+      if (Math.abs(ix - GRACIA_X) < 1 || Math.abs(ix - PITCH * 2.5) < 1 || Math.abs(iz - PITCH / 2) < 1) continue;
+      const x = e.c[0] + sx * o, z = e.c[1] + sz * o;
+      if (Math.hypot(x, z) > RADIUS - 50 || onDiagonal(x, z, 8)) continue;
+      out.push({ t: 'fanal', at: [x, z], y: Y(x, z) + 0.05 });
+    }
+  }
+  return out;
+}
 /** Street sellers on the pavements of the arrival's streets and the Passeig's house (not on the tram streets, where the poles stand): a fruiterer's stall under an awning, flower and bread sellers on mats, with their buyers. */
 function vendors(els) {
   const L = [], rand = rng(1911), pick = (a) => a[Math.floor(rand() * a.length)];
@@ -185,10 +218,21 @@ function worksLife() {
 /** Blocks away from the three places a visitor goes to (the arrival's street, the house with the café, the market) are built of plainer pieces (styles/modernisme: block far). */
 const FOCUS = [[ARRIVAL[0], ARRIVAL[1], 118], [CASA.fx, CASA.z0, 118], [MERCAT[0], MERCAT[1], 105]];
 const isFar = (b) => !b.special && !FOCUS.some(([x, z, r]) => Math.hypot(b.c[0] - x, b.c[1] - z) < r);
+/**
+ * The blocks whose houses have real portals with vestibules (styles/modernisme/portal.js): those away from the arrival's view — beyond
+ * 110 m of the camera of src/planet/arrivals.js (240, −52, yaw 0.695) and outside its horizontal frustum (±50° and the block's own
+ * angular size), so that the arrival's frame (DESIGN §8: tools/draw-count.mjs) is what it was; the walk meets them from the south and west.
+ */
+const CAM = [240, -52], CAM_DIR = [-Math.sin(0.695), -Math.cos(0.695)];
+function portalBlock(c) {
+  const dx = c[0] - CAM[0], dz = c[1] - CAM[1], r = Math.hypot(dx, dz);
+  if (r < 110) return false;
+  return Math.acos(Math.max(-1, Math.min(1, (dx * CAM_DIR[0] + dz * CAM_DIR[1]) / r))) > 50 * Math.PI / 180 + Math.atan(60 / r) + 0.12;
+}
 /** The Eixample's block elements (the smoke finds the chimneys from the same plan). */
 export function blockElements() {
   return blocks().filter((b) => b.special !== 'sagrada' && b.special !== 'mercat').map((b) => ({
-    t: 'eixample_block', shops: shopCore(b.c), far: isFar(b), pave: Math.abs(b.c[0] - GRACIA_X) < 60 ? 'tile_grey' : 'flagstone', c: b.c, s: BLOCK, d: 18, ch: 12, y: height(...b.c), dz: (height(b.c[0], b.c[1] + 1) - height(b.c[0], b.c[1] - 1)) / 2, seed: b.seed,
+    t: 'eixample_block', shops: shopCore(b.c), far: isFar(b), portals: portalBlock(b.c), pave: Math.abs(b.c[0] - GRACIA_X) < 60 ? 'tile_grey' : 'flagstone', c: b.c, s: BLOCK, d: 18, ch: 12, y: height(...b.c), dz: (height(b.c[0], b.c[1] + 1) - height(b.c[0], b.c[1] - 1)) / 2, seed: b.seed,
     ...(b.special === 'pedrera' ? { cut: { corner: 3, a: 22, b: 22 } } : {}),
     ...(Math.hypot(b.c[0] - CASA.block[0], b.c[1] - CASA.block[1]) < 1 ? { gaps: [{ side: CASA.side, s0: CASA.s0, s1: CASA.s1 }] } : {}),
     ...(b.special === 'batllo' ? { gaps: [{ side: 1, s0: BATLLO.s0, s1: BATLLO.s1 }] } : {}),
@@ -197,14 +241,17 @@ export function blockElements() {
 export async function town() {
   const els = blockElements();
   // in plans of a few blocks each, so that the town streams in pieces
-  const plans = [];
-  for (let i = 0; i < els.length; i += 6) plans.push(base(`barcelona-eixample-${i / 6}`, els.slice(i, i + 6)));
+  // (the blocks with portals in plans of their own, nearest neighbours together: the arrival's frame draws whole meshes of any plan it touches)
+  const plans = [], groups = [els.filter((e) => !e.portals), els.filter((e) => e.portals).sort((p, q) => p.c[0] - q.c[0] || p.c[1] - q.c[1])];
+  let n = 0;
+  for (const g of groups) for (let i = 0; i < g.length; i += 6) plans.push(base(`barcelona-eixample-${n++}`, g.slice(i, i + 6)));
   const rand = rng(1910), lines = tramLines();
   plans.push(base('barcelona-casa', [{ t: 'casa_cafe', fx: CASA.fx, z0: CASA.z0, y: height(CASA.fx - 9, CASA.z0 + 8), h: CASA.h, seed: 1910 }]));
   plans.push({ ...base('barcelona-casa-life', casaLife()), style: 'life' });
   // the shops' people, a plan to a few blocks
   shopLife(els).forEach((L, i) => plans.push({ ...base(`barcelona-shop-life-${i}`, L), style: 'life' }));
   plans.push({ ...base('barcelona-works-life', worksLife()), style: 'life' });
+  porterLife(els.filter((e) => e.portals)).forEach((L, i) => plans.push({ ...base(`barcelona-porters-${i}`, L), style: 'life' }));
   plans.push({ ...base('barcelona-vendors', vendors(els)), style: 'life' });
   plans.push(base('barcelona-trams', [...lines.map((l) => ({ ...l, wires: false })), ...trams(lines, rand)]));
   // the wires apart, colliding with nothing
@@ -225,6 +272,7 @@ export async function town() {
   // the street at the arrival (§12): the works' hoarding and gate, the kiosk, visitors, cabs, a tram standing, the masons on the scaffolds
   plans.push(base('barcelona-works-front', [...worksElements(), ...arrivalStreet()]));
   plans.push({ ...base('barcelona-arrival-life', arrivalLife()), style: 'life' });
+  plans.push(base('barcelona-fanals', fanals(els)));
   plans.push(base('barcelona-passeig', bancsFanals().map(([x, z], i) => ({ t: 'banc_fanal', at: [x, z], y: Y(x, z), rect: [x - 0.9, z - 2.3, x + 0.9, z + 2.3], seed: 1906 + i }))));
   return plans;
 }
