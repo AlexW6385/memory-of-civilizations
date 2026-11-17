@@ -12,8 +12,12 @@ const norm = (r) => [Math.min(r[0], r[2]), Math.min(r[1], r[3]), Math.max(r[0], 
 
 /** A small seated gilded image, cheap: throne, body and head in two lathes. */
 export function lite(bag, x, y, z, yaw, s = 1, mat = 'gold') {
-  const g1 = lathe([[0.55, 0], [0.55, 0.14], [0.42, 0.2], [0.5, 0.34], [0.38, 0.5], [0.3, 0.9], [0.001, 0.92]], 8, null, 0, 0, 0).scale(s, s, s * 0.7);
-  const g2 = lathe([[0.001, 0.86], [0.18, 0.92], [0.2, 1.1], [0.14, 1.24], [0.06, 1.36], [0.001, 1.42]], 8, null, 0, 0, 0).scale(s, s, s);
+  s *= 1 + (Math.abs(Math.sin(x * 12.9898 + z * 78.233) * 43758.5453) % 1) * 0.006;
+  const g1 = lathe([[0.55, 0], [0.55, 0.14], [0.42, 0.2], [0.5, 0.34], [0.38, 0.46]], 8, null, 0, 0, 0).scale(s, s, s * 0.7);
+  const g3 = lathe([[0.001, 0.44], [0.6, 0.5], [0.58, 0.64], [0.4, 0.72]], 8, null, 0, 0, 0).scale(s, s, s * 0.8);       // the crossed legs
+  const g4 = lathe([[0.001, 0.7], [0.34, 0.74], [0.4, 0.98], [0.3, 1.14], [0.14, 1.2]], 8, null, 0, 0, 0).scale(s * 1.1, s, s * 0.62);   // the torso and shoulders
+  const g2 = lathe([[0.001, 1.12], [0.16, 1.16], [0.17, 1.3], [0.12, 1.42], [0.06, 1.52], [0.001, 1.6]], 8, null, 0, 0, 0).scale(s, s, s);
+  for (const g of [g3, g4]) { g.rotateY(yaw); g.translate(x, y, z); bag.add(mat, g); }
   for (const g of [g1, g2]) { g.rotateY(yaw); g.translate(x, y, z); bag.add(mat, g); }
 }
 

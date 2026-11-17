@@ -123,6 +123,12 @@ Tropical monsoon: hot and humid, the sky hazy; rainy season May–October, flood
 ### 12.5 Street life [inferred]
 - Elephants were the state's working and war animals of the Siamese kings; the source pages read here do not describe the palace's stable, so their placement is [inferred]. Model: two working elephants with their mahouts by the palace's south gate; a monk's alms round and a seller on the canal bank.
 
+## 12.6 Landmark pass 2 (the landmark as seen at the arrival and close)
+- The prang of the Prasat Phra Narai is now the Ayutthayan corn-cob type (the form of the prangs of Wat Ratchaburana and Wat Mahathat) [inferred from the type; the sources read give only "a slender prang"]: nine tiers of a square plan with redented corners, each a storey in miniature with a framed niche and a spired antefix on each face and a corner spire at each notch, tiers shrinking by a curve, a lotus bud and a gilded finial with a vajra. Garudas (gilt stucco) stand at the corners of the cella's cornice as supporters of the tower [inferred]. The porch gables carry red boards with gilt bargeboards.
+- The chedis' niche porches have real gabled tile roofs with a red board and gilt edges (as §12.1's porch model says), the stupika straddling the ridge; small spires stand at the corners of the two lower pedestal tiers [inferred; the pedestal corners themselves stay square, as in §12.1].
+- The royal wihan's main roof is two stacked tiers (lower over the walls, upper set back on a red step-board with gilt tabs, its own gable board and chofa), over the aisles' lean-tos and the porch gable [inferred from the stepped roofs of Siamese halls; §4.2 gives a three-tiered roof].
+- The seated images of the cloister have crossed legs and shoulders as separate forms.
+
 ## Sources
 - Wikipedia, "Wat Phra Si Sanphet": https://en.wikipedia.org/wiki/Wat_Phra_Si_Sanphet
 - Ayutthaya Historical Research, "The architecture of Wat Phra Sri Sanphet": https://ayutthaya-history.com/Temples_Ruins_PhraSisanphet_Architecture.html
