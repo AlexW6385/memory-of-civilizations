@@ -8,6 +8,12 @@ import { fromTriangles, orientOutward } from '../../core/geom.js';
 export const SECTION = [[-8, 0], [-2.5, 7], [2.5, 7], [3.6, 4.7], [4.8, 2.4], [6, 0]];
 const MAT = ['mudbrick', 'mudbrick', 'mud_plaster', 'mudbrick', 'mud_plaster'];     // the faces (inner slope, top, the three bands of the outer face)
 
+/** The section's inner and outer edge (u) at height y. */
+function widthAt(y) {
+  const edge = (pts) => { for (let i = 0; i + 1 < pts.length; i++) if (y <= pts[i + 1][1]) { const t = (y - pts[i][1]) / (pts[i + 1][1] - pts[i][1]); return pts[i][0] + t * (pts[i + 1][0] - pts[i][0]); } return pts[pts.length - 1][0]; };
+  return [edge([[-8, 0], [-2.5, 7]]), edge([[6, 0], [4.8, 2.4], [3.6, 4.7], [2.5, 7]])];
+}
+
 export function rampart(el, { bag, col }) {
   const r = el.r ?? 368, cen = [0, 3.5];
   for (const [a0, a1] of el.arcs) {
@@ -28,9 +34,11 @@ export function rampart(el, { bag, col }) {
         // (fromTriangles takes the normal from c − b × a − b: flip so that it matches the order used there)
         (T[MAT[j]] ??= []).push(...tri);
       }
-      // the solid mass to walk into nothing: its layers as the section narrows
-      const A = [Math.cos(a) * r, Math.sin(a) * r], B = [Math.cos(b) * r, Math.sin(b) * r];
-      for (const [y0, y1, th] of [[0, 1.75, 14], [1.75, 3.5, 11.6], [3.5, 5.25, 8.6], [5.25, 8.4, 5.4]]) col.segment(A, B, th, y0, y1);
+      // the solid of it for the walker: layers, each as wide as the section is at its middle (the section's middle line is not the crest's: rc)
+      for (let l = 0; l < 6; l++) {
+        const y0 = l * 7 / 6, y1 = (l + 1) * 7 / 6, ym = (y0 + y1) / 2, [ui, uo] = widthAt(ym), rc = r + (ui + uo) / 2;
+        col.segment([Math.cos(a) * rc, Math.sin(a) * rc], [Math.cos(b) * rc, Math.sin(b) * rc], uo - ui, y0, y1);
+      }
       // the battlement: a wall of burnt brick along the outer edge of the top, a merlon every 2.4 m
       const ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b), w0 = 1.6, w1 = 2.7;
       const q = [[ca * (r + w0), sa * (r + w0)], [cb * (r + w0), sb * (r + w0)], [cb * (r + w1), sb * (r + w1)], [ca * (r + w1), sa * (r + w1)]];
