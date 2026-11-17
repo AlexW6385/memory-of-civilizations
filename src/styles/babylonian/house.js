@@ -10,6 +10,7 @@ import { STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { beamTris } from '../ming/index.js';
 import '../sumerian/index.js';
+import { crenels } from './index.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** A closed hexahedron from four bottom and four top corners (any order, faces turned outward). */
@@ -91,7 +92,55 @@ function babylonHouse(el, ctx) {
     bag.add('terracotta', turned(ZIR, 12, u, 0.38, 0.22));
     bag.add('pottery_dark', turned([[0.001, 0.92], [0.12, 0.93], [0.17, 0.98], [0.001, 0.985]], 10, u, 0.38, 0.22));
   }
+  // The front by rule (docs/settlements/babylon.md §15.3): what a house shows the lane follows its grade (the Way's frontage 2,
+  // the rest of the core 1, the outer city 0, set by the settlement from the lot's place) and its storeys:
+  //   grade 2, one storey: baked-brick pilasters in pairs between recessed panels, a stepped parapet of merlons;
+  //   grade 2, two storeys: the merlons, a dentil course, a timber oriel with a lattice screen on palm brackets;
+  //   grade 1, two storeys: the dentil course (the projecting ends of a brick course under the parapet) and the oriel;
+  //   grade 1, one storey: a doorway of baked brick with jambs, a stepped head and a lintel of palm trunk;
+  //   grade 0: the plain front (beam ends, plinth, patches) only.
+  // Whether a grade-1 house takes the course or the doorway's frame and where the oriel stands come from the lot's seed.
+  function frontGrammar() {
+    const g = el.grade ?? 0;
+    if (g < 1) return;
+    const st2 = two && !open, ra = rng((el.seed || 1) * 13 + 5), plasterTop = el.white ? 'limewash_white' : 'mud_plaster';
+    const parapetR = { n: [x0, z0, x1, z0 + 0.2], s: [x0, z1 - 0.2, x1, z1], w: [x0, z0, x0 + 0.2, z1], e: [x1 - 0.2, z0, x1, z1] }[f];
+    const merlons = () => crenels(bag, parapetR, H + 0.1, plasterTop, 0.55, { gap: 0.4, tier: 0.2 });
+    const dentils = () => { for (let a = fa + 0.2; a < fb - 0.4; a += 0.42) bag.add('brick_baked', lbox(a, 0, a + 0.22, 0.14, H - 0.85, H - 0.73)); };
+    if (g >= 2 && !st2) {
+      // pairs of pilasters at the rhythm of the front, clear of the door
+      const n = Math.max(2, Math.floor((fb - fa) / 2.4));
+      for (let k = 0; k <= n; k++) {
+        const u = fa + 0.1 + k * (fb - fa - 0.5) / n;
+        if (Math.abs(u + 0.25 - du) < 1.25) continue;
+        bag.add('brick_baked', lbox(u, 0, u + 0.5, 0.16, 0.32, H - 0.3)); bag.add('brick_baked', lbox(u - 0.06, 0, u + 0.56, 0.2, H - 0.3, H - 0.18));   // the shaft and its stepped head
+      }
+      merlons();
+    } else if (g >= 2) {
+      merlons(); dentils();
+    } else if (st2) dentils();
+    else if (ra() < 0.7) {
+      // a doorway of baked brick: jambs and a stepped head round the door, the lintel of palm trunk over it
+      for (const sg of [-1, 1]) bag.add('brick_baked', lbox(sg < 0 ? du - 0.85 : du + 0.6, 0, sg < 0 ? du - 0.6 : du + 0.85, 0.12, 0.1, 2.75));
+      bag.add('brick_baked', lbox(du - 0.95, 0, du + 0.95, 0.14, 2.75, 2.9)); bag.add('brick_baked', lbox(du - 0.8, 0, du + 0.8, 0.2, 2.9, 3.0));
+      bag.add('palm_trunk', lbox(du - 0.7, 0.02, du + 0.7, 0.16, 2.62, 2.75));
+    }
+    if (st2 && (g >= 2 || ra() < 0.75)) {
+      // the oriel: a lattice-screened box on two palm brackets, over the middle of the front but never over the door
+      let u = fa + (0.38 + ra() * 0.24) * (fb - fa) - 0.85;
+      if (Math.abs(u + 0.85 - du) < 1.6) u = du + (u + 0.85 < du ? -2.3 : 2.3) - 0.85;
+      if (u > fa + 0.2 && u + 1.7 < fb - 0.2) {
+        for (const uu of [u + 0.2, u + 1.4]) bag.add('palm_trunk', lbox(uu - 0.07, 0, uu + 0.07, 0.62, 3.35, 3.5));
+        bag.add('cedar', lbox(u, 0.0, u + 1.7, 0.66, 3.5, 3.58));
+        bag.add('mud_plaster', lbox(u, 0.0, u + 1.7, 0.66, 4.78, 4.9));
+        for (const [a, b] of [[u, u + 0.07], [u + 1.63, u + 1.7]]) bag.add('cedar', lbox(a, 0.0, b, 0.66, 3.58, 4.78));
+        bag.add('lattice', lbox(u + 0.07, 0.58, u + 1.63, 0.64, 3.7, 4.7));
+        bag.add('cedar', lbox(u + 0.07, 0.56, u + 1.63, 0.66, 4.2, 4.26));
+      }
+    }
+  }
   if (!full) return;
+  frontGrammar();
   // the shop: a reed shade on two palm posts over the door and the wares on a counter at the side
   if (shop) {
     const u0 = du - 1.7, u1 = du + 1.7, o = 0.6, hi = 2.75, lo = 2.35;

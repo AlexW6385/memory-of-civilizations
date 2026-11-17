@@ -6,7 +6,7 @@
 
 import { STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
-import { crenels } from './index.js';
+import { crenels, beasts, rosettes, band } from './index.js';
 import { furnishRoom } from './rooms.js';
 
 const B = 'brick_baked', G = 'glaze_lapis', K = 'lacquer_black', AU = 'gold', CE = 'cedar', BZ = 'bronze', PL = 'plaster', BT = 'bitumen';
@@ -270,6 +270,24 @@ export function etemenanki(el, ctx) {
   // stepped battlements of blue glaze along the parapet
   for (const [a, b] of [zr(zs0, zs0 + 0.35), zr(zs1 - 0.35, zs1)]) crenels(bag, [x0, a, x1, b], y + Hs + 0.5, G, 1.0, { gap: 0.55 });
   { const [a, b] = zr(zs0 + 0.35, zs1 - 0.35); for (const r of [[x0, a, x0 + 0.35, b], [x1 - 0.35, a, x1, b]]) crenels(bag, r, y + Hs + 0.5, G, 1.0, { gap: 0.55 }); }
+  // the glazed front of the house of the god (docs/settlements/babylon.md §15.2): on the faces of the two towers either side of
+  // the door, rows of Marduk's dragons and Adad's bulls walking toward the door between enamelled bands and rosettes, as on the
+  // Ishtar Gate; a cornice of three courses (white, black, white) round the walls under the parapet, standing out 0.5 m
+  { const dw = 1.6, face = el.front === 's' ? 's' : 'n', TH = Hs + 1.4, fz0 = Math.min(Z(zs0 - 1.1), Z(zs0)), fz1 = Math.max(Z(zs0 - 1.1), Z(zs0));
+    for (const s of [-1, 1]) {
+      const a = cx + s * dw / 2, b = cx + s * (dw / 2 + 2.0), tr = [Math.min(a, b), fz0, Math.max(a, b), fz1], dir = (s < 0 ? 1 : -1) * (face === 's' ? 1 : -1);
+      for (let k = 0; y + 1.6 + k * 2 + 1.4 < y + TH - 1.7; k++) beasts(bag, tr, face, y + 1.6 + k * 2, { kind: k % 2 ? 'dragon' : 'bull', step: 2.4, size: 0.8, dir });
+      rosettes(bag, tr, face, y + 0.9, 0.5, 0.15); band(bag, tr, face, y + 0.3);
+      band(bag, tr, face, y + TH - 1.5); rosettes(bag, tr, face, y + TH - 0.95, 0.5, 0.15);
+    }
+    const o = 0.5, cy = y + Hs - 1.3, tw = dw / 2 + 2.0;
+    const ring = (m, y0, y1, e) => {
+      const slab = (u0, a, u1, b) => { const [za, zb] = zr(a, b); bag.add(m, box(u0, y0, za, u1, y1, zb)); };
+      slab(x0 - e, zs0 - e, cx - tw, zs0); slab(cx + tw, zs0 - e, x1 + e, zs0);                          // the front, the towers' width left out
+      slab(x0 - e, zs1, x1 + e, zs1 + e); slab(x0 - e, zs0, x0, zs1); slab(x1, zs0, x1 + e, zs1);     // the back and the two ends
+    };
+    ring('glaze_white', cy, cy + 0.1, o); ring('lacquer_black', cy + 0.1, cy + 0.2, o - 0.04); ring('glaze_white', cy + 0.2, cy + 0.3, o);
+  }
   // the couch along the cella's west end: a cedar frame on gold-shod feet, a mattress and a coverlet
   const t = 1.3, zA = zs0 + t + 3.0, zC = zA + 1.0, cz0 = zC + 0.9, cz1 = cz0 + 4.2, [ka, kb] = zr(cz0, cz1), kx0 = x0 + t + 0.75, kx1 = kx0 + 1.9;
   bag.add(CE, box(kx0, y + 0.55, ka, kx1, y + 0.75, kb));

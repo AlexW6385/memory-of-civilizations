@@ -120,7 +120,7 @@ function rosette(r) {
   });
 }
 /** A row of rosettes along a face of r at height y (centres), spaced `step`, radius rad. */
-function rosettes(bag, r, face, y, step = 0.7, rad = 0.2) {
+export function rosettes(bag, r, face, y, step = 0.7, rad = 0.2) {
   const [a, b] = faceSpan(r, face), L = b - a, m = Math.max(1, Math.floor(L / step)), P = facePoint(r, face), R = rosette(rad);
   for (let i = 0; i < m; i++) {
     const p = P(a + (i + 0.5) * L / m, y, 0.004);
@@ -129,7 +129,7 @@ function rosettes(bag, r, face, y, step = 0.7, rad = 0.2) {
   }
 }
 /** A band of enamelled lines along a face: white, black, white (from y up), standing a little proud. */
-function band(bag, r, face, y, t = 0.09) {
+export function band(bag, r, face, y, t = 0.09) {
   const [a, b] = faceSpan(r, face), P = facePoint(r, face);
   [W, K, W].forEach((mat, k) => { const p0 = P(a, y + k * t, 0), p1 = P(b, y + (k + 1) * t, 0.025); bag.add(mat, box(Math.min(p0[0], p1[0]), p0[1], Math.min(p0[2], p1[2]), Math.max(p0[0], p1[0]), p1[1], Math.max(p0[2], p1[2]))); });
 }
@@ -137,7 +137,7 @@ function band(bag, r, face, y, t = 0.09) {
  * A row of beasts on a face of r, feet at y, spaced `step`, `size` high (about), walking toward +u when dir = 1.
  * kind 'lion': white lions with yellow manes and yellow lions with red manes by turn (Koldewey).
  */
-function beasts(bag, r, face, y, { kind = 'lion', step = 3, size = 1, dir = 1 } = {}) {
+export function beasts(bag, r, face, y, { kind = 'lion', step = 3, size = 1, dir = 1 } = {}) {
   const [a, b] = faceSpan(r, face), L = b - a, n = Math.max(1, Math.floor(L / step)), P = facePoint(r, face);
   for (let i = 0; i < n; i++) {
     const u0 = a + (i + 0.5) * L / n, place = (du, dv, w) => P(u0 + du, y + dv, 0.02 + w), d = dir;
@@ -256,10 +256,40 @@ function ishtarGate(el, { bag, col }) {
     const ys = y + Math.min(H * 0.5, H - w / 2 - 2.5);
     archInfill(bag, col, cx - w / 2, cx + w / 2, ys, y + H, z0, z1, G);
     crenels(bag, [cx - w / 2, z0, cx + w / 2, z1], y + H, G, 1.2);
+    passageWalls(bag, col, [cx - w / 2, z0, cx + w / 2, z1], y, ys, tw);
     for (const f of ['n', 's']) { const r = [cx - w / 2, z0, cx + w / 2, z1]; band(bag, r, f, y + H - 0.7); rosettes(bag, r, f, y + H - 0.25, 0.6, 0.17); }
   }
   // the passage paved with limestone flags through both gates and the court between
   wayPaving({ rect: [cx - w / 2, cz - D / 2 - 1.5, cx + w / 2, cz + D / 2], centre: w, y: y + 0.12, seed: 576 }, { bag, col });
+}
+/**
+ * The inside of a gate's passage (docs/settlements/babylon.md §15.1): on both walls the rows of bulls and dragons up to the
+ * springing of the arch, a rosette band at the foot and one under the springing, and the cedar leaves bound in bronze
+ * standing open against the walls at the passage's northern mouth ("I hung doors of cedar adorned with bronze at all the
+ * gate openings"). r = the passage [x0, z0, x1, z1], ys = the springing, tw = the towers' breadth.
+ */
+function passageWalls(bag, col, r, y, ys, tw) {
+  const [x0, z0, x1, z1] = r;
+  for (const f of ['e', 'w']) {
+    // the wall faces the passage: the west tower's east face, the east tower's west face
+    const rr = f === 'e' ? [x0 - tw, z0, x0, z1] : [x1, z0, x1 + tw, z1];
+    const row0 = y + 1.6;
+    for (let k = 0; row0 + k * 2 + 1.4 < ys - 0.2; k++) beasts(bag, rr, f, row0 + k * 2, { kind: k % 2 ? 'dragon' : 'bull', step: 2.4, size: 0.82, dir: 1 });
+    rosettes(bag, rr, f, y + 0.9, 0.6, 0.17); band(bag, rr, f, y + 0.3);
+    band(bag, rr, f, ys - 0.45); rosettes(bag, rr, f, ys - 0.05, 0.6, 0.17);
+  }
+  // the doors: two cedar leaves, each a panelled board with bronze bands and studs, turned back flat against the walls and held
+  // by a bronze-shod pivot post at the hinge
+  const wd = 2.25, th = 0.2, hh = Math.min(ys - y - 0.2, 6.6), za = z0 + 0.5;
+  for (const [xa, xb, xs] of [[x0 + 0.2, x0 + 0.2 + th, 1], [x1 - 0.2 - th, x1 - 0.2, -1]]) {   // (clear of the reliefs, which stand 0.15 proud)
+    bag.add('cedar', box(xa, y + 0.12, za, xb, y + 0.12 + hh, za + wd));
+    col.rect([xa, za, xb, za + wd], y + 0.12, y + 0.12 + hh);
+    const fx0 = xs > 0 ? xb : xa - 0.03, fx1 = xs > 0 ? xb + 0.03 : xa;                                         // (bands and studs on the face turned to the passage)
+    for (const v of [0.5, 1.9, hh * 0.5, hh - 1.9, hh - 0.55]) bag.add('bronze', box(fx0, y + 0.12 + v - 0.1, za, fx1, y + 0.12 + v + 0.1, za + wd));
+    for (const u of [0.06, wd - 0.12]) bag.add('bronze', box(fx0, y + 0.12, za + u, fx1, y + 0.12 + hh, za + u + 0.06));
+    for (let a = 0.45; a < wd - 0.3; a += 0.45) for (let v = 0.9; v < hh - 0.7; v += 0.62) bag.add('bronze', box(xs > 0 ? xb : xa - 0.05, y + 0.12 + v, za + a, xs > 0 ? xb + 0.05 : xa, y + 0.12 + v + 0.07, za + a + 0.07));
+    bag.add('bronze', lathe([[0.09, 0], [0.07, 0.1], [0.07, hh - 0.1], [0.09, hh]], 8, null, (xa + xb) / 2, y + 0.12, za + 0.05));
+  }
 }
 /**
  * glazed_wall: a wall a→b { h, th } of glazed brick lining the Processional Way: slightly projecting towers

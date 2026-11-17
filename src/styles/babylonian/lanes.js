@@ -53,6 +53,19 @@ function lanes(el, { bag, col }) {
       Lt('pottery_dark', [[0.001, 1.25], [0.16, 1.26], [0.2, 1.32], [0.001, 1.33]], 0, 0, 0.3, 10);
       bx('brick_baked', 0.5, 0.04, -0.2, 0.9, 0.2, 0.2, false); Lt('terracotta', [[0.001, 0], [0.06, 0.005], [0.14, 0.06], [0.13, 0.065], [0.001, 0.02]], 0.7, 0, 0.2, 8);
     }
+    if (p.kind === 'altar') {
+      // the altar of burnt offerings in a temple court (docs/settlements/babylon.md §15.5): a block of baked brick on a broader foot, a horn at each
+      // corner of its top, the hearth on it blackened, three steps up its front (−z)
+      bx('brick_baked', -1.4, 0.04, -1.1, 1.4, 0.55, 1.1); bx('brick_baked', -1.05, 0.55, -0.78, 1.05, 1.25, 0.78);
+      bx('bitumen', -0.88, 1.25, -0.62, 0.88, 1.29, 0.62, false); bx('pottery_dark', -0.5, 1.29, -0.3, 0.5, 1.31, 0.3, false);
+      for (const sx of [-1, 1]) for (const sz of [-1, 1]) bx('brick_baked', sx * 0.95 - 0.07, 1.25, sz * 0.7 - 0.07, sx * 0.95 + 0.07, 1.5, sz * 0.7 + 0.07, false);
+      for (let k = 0; k < 3; k++) bx('brick_baked', -0.7, 0.04, -1.1 - 0.35 * (3 - k), 0.7, 0.2 + 0.175 * k, -1.1 - 0.35 * (2 - k));
+    } else if (p.kind === 'basin') {
+      // the great basin of the court for the priests' washing (the apsû): a round wall of limestone 0.8 m high, 3.4 m across, lined inside with bitumen, a step round its foot
+      Lt('limestone', [[1.95, 0.04], [1.95, 0.12], [1.75, 0.12], [1.75, 0.85], [1.35, 0.85], [1.35, 0.3], [0.001, 0.3]], 0, 0, 0, 24);
+      Lt('bitumen', [[1.34, 0.3], [1.34, 0.66], [1.33, 0.66], [1.33, 0.3]], 0, 0, 0, 24);
+      col.circle(x, z, 1.95, Y, Y + 0.85);
+    }
     if (p.kind === 'standard') {
       // a pole of cedar 5 m high on a foot of brick, a crossbar, the emblem of Marduk (the spade, marru) in gold on a blue disc and tassels
       bx('brick_baked', -0.3, 0.04, -0.3, 0.3, 0.5, 0.3); bx('cedar', -0.07, 0.5, -0.07, 0.07, 5.2, 0.07);
