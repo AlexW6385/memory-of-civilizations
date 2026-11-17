@@ -218,7 +218,7 @@ for (const z0 of [0, -5.04, 5.04]) block([-4.25, z0 - 0.45, -3.65, z0 + 0.45], F
 for (const z of [-10.08, -5.04, 0, 5.04, 10.08]) for (const x of [4.2]) block([x - 0.01, z - 0.28, x + 0.01, z + 0.28], F + H0 - 3.1, F + H0 - 0.45, z === 0 ? 'cloth_red' : 'cloth_ochre', { collide: false });
 // ── the roof ─────────────────────────────────────────────────────────────────
 // eaves 4.0 m past the column line on rafters and flying rafters; the lowest slope about 0.3, steeper toward the ridge
-add({ t: 'hip_roof', c: [0, 0], A: 17.0 + 4.0, B: 8.83 + 4.0, alongZ: true, y: F + 7.5, rise: 5.0, eaveSlope: 0.3, pow: 1.6, lift: 0.6, mat: 'tile_grey', soffit: 'timber_red', rafters: { out: 4.0, sp: 0.32 }, tangChiwei: 2.3 });
+add({ t: 'fg_roof', c: [0, 0], A: 17.0 + 4.0, B: 8.83 + 4.0, alongZ: true, y: F + 7.5, rise: 5.0, eaveSlope: 0.3, pow: 1.6, lift: 0.6, mat: 'tile_grey', soffit: 'timber_red', rafters: { out: 4.0, sp: 0.32 }, chiwen: 2.3 });
 
 // ── the monastery: gate, walls, the Tang pillar, the old pagoda ──────────────
 {
@@ -249,7 +249,7 @@ export const foguangEastHall = {
   id: 'foguang-east-hall',
   name: { en: 'The Great East Hall of Foguang Monastery', zh: '佛光寺东大殿' },
   era: { en: 'Tang dynasty, AD 857', zh: '唐，大中十一年（公元857年）' },
-  style: 'chinese',
+  style: 'foguang-hall',
   district: 'tang',
   ...SITES['foguang-east-hall'],
   entrance: { at: [-124, 0], facing: 'e' },
