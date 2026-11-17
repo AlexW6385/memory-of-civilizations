@@ -11,6 +11,7 @@ const E = [];
 E.push({ t: 'lane', rect: PLAZA, y: 0.04, mat: 'lime_plaster' });
 // the Castillo: 55.3 m at the base, 24 m to the top platform, the temple 6 m more
 E.push({ t: 'm_pyramid', c: [0, 0], base: 27.6, top: 9.8, h: 24, tiers: 9, stairs: 'nesw', steps: 91, stairW: 8.8, stairOut: 6.2, serpents: 'n', temple: { w: 13.5, d: 13.5, h: 6, doors: 'n', furnish: 'castillo' } });
+E.push({ t: 'cz_stair_serpent', c: [0, 0], base: 27.6, top: 9.8, h: 24, tiers: 9, stairW: 8.8, stairOut: 6.2, side: 'n' });
 E.push({ t: 'maya_weather', c: [0, 0], base: 27.6, top: 9.8, h: 24, tiers: 9, stairW: 8.8, seed: 11 });
 // the Great Ball Court: the alley 146 × 36 m, walls 8.5 m high
 E.push({ t: 'm_ballcourt', rect: [-133, -110, -97, 36], wallH: 8.5, bench: 4.5 });
@@ -23,8 +24,8 @@ E.push({ t: 'm_colonnade', rect: [84, 28, 164, 46], rows: 4, cols: 20, h: 4.2 })
 E.push({ t: 'm_colonnade', rect: [146, -36, 164, 28], rows: 10, cols: 3, h: 4.2 });
 // the Platform of Venus, the Tzompantli, the Platform of the Eagles and Jaguars
 E.push({ t: 'm_platform', c: [0, -64], a: 12.5, h: 4.2, serpents: 'nesw', venus: true });
-E.push({ t: 'm_platform', c: [-58, -46], a: 9, h: 1.9, stairs: 'e', skulls: true });
-E.push({ t: 'm_platform', c: [-48, -12], a: 7, h: 3.2 });
+E.push({ t: 'cz_tzompantli', c: [-58, -52], long: 44, wide: 11, stem: 4, stemLen: 16, h: 2.9 });
+E.push({ t: 'cz_eagles', c: [-48, -12], a: 7, h: 3.2 });
 // El Caracol, the round observatory, south-west of the Castillo (its stair facing west)
 E.push({ t: 'm_caracol', c: [-50, 75] });
 // the sacbe to the cenote, the cenote's rim temple

@@ -3,6 +3,7 @@
 
 import { RADIUS, PLAZA, CENOTE, lots, cenoteDist, PLAZA_STELAE, PLAZA_SHRINES, CEIBAS, SWEATBATH, WEAR_SKIP } from './layout.js';
 import { ground } from './ground.js';
+import { variant } from './house.js';
 
 const base = (id, elements) => ({ id, style: 'maya', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 62], facing: 'n' } });
 
@@ -15,10 +16,11 @@ function lotElements(l) {
     E.push({ t: 'albarrada', pts: [a, [m[0] - ux * gw, m[1] - uz * gw]] });
     E.push({ t: 'albarrada', pts: [[m[0] + ux * gw, m[1] + uz * gw], b] });
   });
-  for (const h of l.houses) E.push({ t: 'maya_house', ...h });
+  const others = (h) => [...l.houses.filter((o) => o !== h).map((o) => ({ c: o.c, r: 1.25 * Math.max(o.a, o.b) })), ...(l.range ? [{ c: l.range.c, r: 7.5 }] : [])];
+  const keep = l.houses.map((h) => { const o = { ...h, others: others(h) }; E.push({ t: 'cz_house', ...o }); return { c: h.c, r: variant(o).keep }; });
   if (l.range) E.push({ t: 'maya_range', ...l.range, y: ground.height(l.range.c[0], l.range.c[1]) });
   E.push({ t: 'maya_yard', rect: l.rect, gate: l.gate, seed: l.seed, level: l.level, h: ground.height,
-    keep: [...l.houses.map((h) => ({ c: h.c, r: h.a + 1.4 })), ...(l.range ? [{ c: l.range.c, r: 9 }] : [])] });
+    keep: [...keep, ...(l.range ? [{ c: l.range.c, r: 9 }] : [])] });
   // agave grown in the lot along its wall, for its fibre (§13)
   const r = rng(Math.floor(x0 * 31 + z1 * 17) >>> 0), P = [];
   for (let i = 0; i < 2 + Math.floor(r() * 4); i++) {
