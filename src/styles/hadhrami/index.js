@@ -8,7 +8,8 @@ import { box, frustum } from '../../core/geom.js';
 import { Matrix4 } from '../../core/three.js';
 import { OPEN_ELEMENTS } from './open.js';
 import { MOSQUE_ELEMENTS } from './mosque.js';
-import { windowPieces, doorPieces, bayPieces, doorVariant, shopFront } from './parts.js';
+import { windowPieces, doorPieces, bayPieces, doorVariant, shopFront, viewPortPieces } from './parts.js';
+import { houseFront } from './fronts.js';
 import { hollowShell, furnishShop, furnishHall } from './shops.js';
 import { dressFace, dressRoof, dressWindow, SABAT_ELEMENTS } from './dress.js';
 import { GARDEN_ELEMENTS } from './garden.js';
@@ -51,6 +52,19 @@ function towerHouse(el, ctx) {
   const t = ins(top), px0 = x0 + t[0], pz0 = z0 + t[2], px1 = x1 - t[1], pz1 = z1 - t[3], pt = 0.28;
   bag.add('lime_plaster', box(px0, top, pz0, px1, top + 0.9, pz0 + pt)); bag.add('lime_plaster', box(px0, top, pz1 - pt, px1, top + 0.9, pz1));
   bag.add('lime_plaster', box(px0, top, pz0 + pt, px0 + pt, top + 0.9, pz1 - pt)); bag.add('lime_plaster', box(px1 - pt, top, pz0 + pt, px1, top + 0.9, pz1 - pt));
+  // the lime cap (nurah, polished) on the parapet's head, projecting a little on the faces that show, and on the street face the view ports through it
+  { const o = 0.045, cy = top + 0.9;
+    bag.add('lime_plaster', box(px0 - o * a(free.w), cy, pz0 - o * a(free.n), px1 + o * a(free.e), cy + 0.06, pz0 + pt + 0.02)); bag.add('lime_plaster', box(px0 - o * a(free.w), cy, pz1 - pt - 0.02, px1 + o * a(free.e), cy + 0.06, pz1 + o * a(free.s)));
+    bag.add('lime_plaster', box(px0 - o * a(free.w), cy, pz0 + pt + 0.02, px0 + pt + 0.02, cy + 0.06, pz1 - pt - 0.02)); bag.add('lime_plaster', box(px1 - pt - 0.02, cy, pz0 + pt + 0.02, px1 + o * a(free.e), cy + 0.06, pz1 - pt - 0.02));
+    const f0 = el.front ?? 's';
+    if (free[f0] && !el.hall && n >= 6) {
+      const [lo, hi] = f0 === 'n' || f0 === 's' ? [px0, px1] : [pz0, pz1], c = hi - lo > 8 ? 3 : 2, nz = { n: [0, -1, pz0], s: [0, 1, pz1], w: [-1, 0, px0], e: [1, 0, px1] }[f0];
+      for (let i = 0; i < c; i++) {
+        const u = lo + 1.4 + (hi - lo - 2.8) * (c === 1 ? 0.5 : i / (c - 1)) + (rand() - 0.5) * 0.3;
+        if (f0 === 'n' || f0 === 's') put(bag, viewPortPieces(), u, top + 0.3, nz[2], nz[0], nz[1], 60); else put(bag, viewPortPieces(), nz[2], top + 0.3, u, nz[0], nz[1], 60);
+      }
+    }
+  }
   const pier = el.towers ? 1.4 : 0.55;
   for (const [cx, cz] of [[px0, pz0], [px1 - 0.55, pz0], [px0, pz1 - 0.55], [px1 - 0.55, pz1 - 0.55]]) bag.add('lime_plaster', box(cx, top, cz, cx + 0.55, top + (el.towers ? 3.2 : 1.35), cz + 0.55));
   void pier;
