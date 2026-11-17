@@ -21,7 +21,7 @@ import { ttHouse } from './houses.js';
 import { ttAvenue, ttPuma, weatherPyramid, paintBands } from './avenue.js';
 import { ttPalace, ttJaguars, ttPlazaAltars, ttCrossAltar, ttGoddess, ttTempleInside, ttPeople } from './palace.js';
 
-const S = 'stucco_ochre', RD = 'stucco_red', RF = 'limewash_red', RB = 'rubble_teo', HS = 'andesite';
+const S = 'stucco_ochre', RD = 'stucco_red', RF = 'limewash_red', RB = 'rubble_teo', HS = 'andesite', FE = 'stucco_red', BL = 'plaster_white';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const stairs = (el, ctx) => STYLES.qing.elements.stairs(el, ctx);
 
@@ -70,8 +70,12 @@ export function tablero(bag, [x0, z0, x1, z1], y0, y1, { out = 0.25, discs = tru
     bag.add(RF, box(i0, ya, z0 - out, i1, yb, j0)); bag.add(RF, box(i0, ya, j1, i1, yb, z1 + out));
   }
   for (const [cx, cz] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) bag.add(RF, box(cx - out - (cx === x1 ? fw : 0), y0 + fh * 0.5, cz - out - (cz === z1 ? fw : 0), cx + out + (cx === x0 ? fw : 0), y1 - fh * 0.5, cz + out + (cz === z0 ? fw : 0)));
+  if (H - 2 * fh > 0.9) for (const [ya, yb] of [[y0 + fh + 0.12, y0 + fh + 0.2], [y1 - fh - 0.2, y1 - fh - 0.12]]) {        // a pale line framing the field, above and below
+    bag.add('stucco_pale', box(x0 + fw, ya, z0 - 0.04, x1 - fw, yb, z0)); bag.add('stucco_pale', box(x0 + fw, ya, z1, x1 - fw, yb, z1 + 0.04));
+    bag.add('stucco_pale', box(x0 - 0.04, ya, z0 + fw, x0, yb, z1 - fw)); bag.add('stucco_pale', box(x1, ya, z0 + fw, x1 + 0.04, yb, z1 - fw));
+  }
   if (!discs) return;
-  const r = Math.min(0.34, (H - 2 * fh) * 0.3), sp = Math.max(2.6, r * 7), ym = (y0 + y1) / 2;
+  const hp = H - 2 * fh, r = Math.min(0.34, (H - 2 * fh) * 0.3), sp = Math.max(2.6, r * 7), ym = (y0 + y1) / 2;
   if (r < 0.12) return;
   const ring = lathe([[r, 0], [r, 0.03], [0.001, 0.03]], 8), dot = lathe([[r * 0.7, 0], [r * 0.7, 0.06], [0.001, 0.06]], 8);
   for (const [fx, fz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
@@ -83,6 +87,15 @@ export function tablero(bag, [x0, z0, x1, z1], y0, y1, { out = 0.25, discs = tru
         const c = g.clone();
         if (fx) c.rotateZ(-fx * Math.PI / 2); else c.rotateX(fz * Math.PI / 2);
         bag.add(m, c.translate(px, ym, pz));
+      }
+      // between the discs a stepped pyramid (a fret, xicalcoliuhqui) in pale plaster raised on the red, over a thin pale bar along the foot of the panel
+      if (hp > 1.0 && i < n - 1) {
+        const u2 = u + (L - 2 * fw) / n / 2, m = Math.min(hp * 0.55, 0.9), zy = ym - m / 2, sg = fx ? Math.sign(fx) : Math.sign(fz);
+        for (let st = 0; st < 3; st++) {
+          const hw = m * (1 - st * 0.3) / 2, ya = zy + st * m / 3, o = 0.05;
+          if (fx) bag.add('stucco_pale', box(Math.min(px, px + sg * o), ya, u2 - hw, Math.max(px, px + sg * o), ya + m / 3, u2 + hw));
+          else bag.add('stucco_pale', box(u2 - hw, ya, Math.min(pz, pz + sg * o), u2 + hw, ya + m / 3, Math.max(pz, pz + sg * o)));
+        }
       }
     }
   }
@@ -96,21 +109,24 @@ export function tablero(bag, [x0, z0, x1, z1], y0, y1, { out = 0.25, discs = tru
  * stand about 0.9 m out of the tablero. Faces +z, its middle at y 0.
  */
 export const teoSerpent = () => carved('teo-serpent', (k) => {
-  k.petals('stucco_pale', 0, 0, 0, 0.62, 0.14, 11);
+  k.petals('stucco_pale', 0, 0, 0, 0.74, 0.12, 14);                                           // the collar of feathers: two rings, the outer white, the inner green
+  k.petals(FE, 0, 0, 0.1, 0.52, 0.1, 12);
+  k.disc(BL, 0, 0, 0.18, 0.3, 0.06, 14, 0.2);                                                   // a blue band between the collar and the skull
   k.fz(HS, [-0.34, 0.34, -0.26, 0.32], [-0.26, 0.26, -0.16, 0.26], 0.1, 0.92);                // the skull and upper jaw
   k.fz(HS, [-0.27, 0.27, 0.12, 0.34], [-0.2, 0.2, 0.14, 0.3], 0.62, 1.0);                    // the snout
   k.fz(HS, [-0.28, 0.28, -0.44, -0.3], [-0.2, 0.2, -0.42, -0.32], 0.12, 0.82);               // the open lower jaw
   for (const sx of [-1, 1]) {
     k.fy('plaster_white', [sx * 0.17 - 0.05, sx * 0.17 + 0.05, 0.8, 0.88], [sx * 0.17 - 0.01, sx * 0.17 + 0.01, 0.83, 0.85], -0.16, -0.38);   // the fangs
     k.bx(HS, Math.min(sx * 0.12, sx * 0.36), Math.max(sx * 0.12, sx * 0.36), 0.26, 0.4, 0.3, 0.72);   // the brow
-    k.discAt('paint_minoan_black', sx * 0.3, 0.1, 0.52, 0.08, 0.05, sx * Math.PI / 2);               // the eye (obsidian)
+    k.discAt('plaster_white', sx * 0.3, 0.1, 0.52, 0.1, 0.05, sx * Math.PI / 2); k.discAt('paint_minoan_black', sx * 0.31, 0.1, 0.52, 0.05, 0.06, sx * Math.PI / 2);   // the eye: shell with an obsidian pupil
   }
 });
 const teoCipactli = () => carved('teo-cipactli', (k) => {
   k.fz(HS, [-0.46, 0.46, -0.42, 0.36], [-0.42, 0.42, -0.34, 0.3], 0, 0.62);                  // the block of the headdress
   k.bx(HS, -0.34, 0.34, 0.3, 0.48, 0.1, 0.5);                                                  // the plates on top
   for (const sx of [-1, 1]) {
-    k.disc(HS, sx * 0.2, 0.08, 0.6, 0.15, 0.08, 12, 0.07);                                   // the ringed eyes
+    k.disc(HS, sx * 0.2, 0.08, 0.6, 0.15, 0.08, 12, 0.07); k.disc('paint_minoan_black', sx * 0.2, 0.08, 0.62, 0.07, 0.07, 10);   // the ringed eyes, an obsidian disc in each
+    k.bx(RD, sx * 0.4 - 0.05, sx * 0.4 + 0.05, -0.2, 0.2, 0.4, 0.44);                         // the side scrolls painted
     k.bx(HS, Math.min(sx * 0.42, sx * 0.52), Math.max(sx * 0.42, sx * 0.52), -0.3, 0.3, 0.05, 0.4);   // the side scrolls
   }
   for (let i = 0; i < 6; i++) { const x = -0.3 + i * 0.12; k.fy('plaster_white', [x - 0.04, x + 0.04, 0.48, 0.56], [x - 0.01, x + 0.01, 0.51, 0.53], -0.32, -0.48); }   // the teeth of the upper jaw
@@ -160,7 +176,7 @@ export function ttPyramid(el, ctx) {
           const u = -half + 0.6 + (2 * half - 1.2) * (i + 0.5) / n, ym = (yt + yb) / 2;
           if (f === el.stair && Math.abs(u) < (el.stairW ?? 12) / 2 + 1) continue;
           const x = fx ? cx + fx * p[0] : cx + u, z = fx ? cz + u : cz + fz * p[1];
-          (i % 2 ? teoCipactli : teoSerpent)().emit(bag, x, ym, z, fx, fz, Math.min(1, (yb - yt) / 1.25));
+          (i % 2 ? teoCipactli : teoSerpent)().emit(bag, x, ym, z, fx, fz, Math.min(1.25, (yb - yt) / 1.25 * 1.25));
         }
         // on the talud below, the feathered serpent's body undulating in relief among shells and conches
         const k = new Kit(), ah = a[fx ? 0 : 1], sl = (fx ? sx : sz) * 0.85, at = (y) => ah - (y - ya) / (yt - ya) * sl + 0.06, yc = (ya + yt) / 2, amp = (yt - ya) * 0.22, lam = 9;
@@ -169,7 +185,8 @@ export function ttPyramid(el, ctx) {
         for (let u = -ha; u < ha - stp; u += stp) {
           if (f === el.stair && Math.abs(u) < (el.stairW ?? 12) / 2 + 1) continue;
           const y0 = yc + amp * Math.sin(u * 2 * Math.PI / lam), y1 = yc + amp * Math.sin((u + stp) * 2 * Math.PI / lam);
-          k.seg(HS, P(u, y0), P(u + stp + 0.05, y1), 0.16, 0.24);
+          k.seg(HS, P(u, y0), P(u + stp + 0.05, y1), 0.2, 0.3);
+          k.seg(FE, P(u, y0 + 0.02), P(u + stp + 0.05, y1 + 0.02), 0.07, 0.12, 0.07, 0.12);   // the feathers' green along the body
           if (Math.abs(Math.cos(u * 2 * Math.PI / lam)) < 0.12) {                       // a shell in each bend of the body
             const ys = y0 - Math.sign(Math.sin(u * 2 * Math.PI / lam)) * amp * 1.5;
             k.seg('stucco_pale', P(u - 0.4, ys), P(u + 0.45, ys), 0.2, 0.22, 0.04, 0.04);

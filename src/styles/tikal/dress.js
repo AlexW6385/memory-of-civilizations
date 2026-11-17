@@ -5,6 +5,7 @@
 
 import { box, lathe, rod } from '../../core/geom.js';
 import { patch, soot, put, hearthKit, ollaKit, metateKit, waterJarKit, storeJarKit } from '../maya/household.js';
+import { mask } from './carve.js';
 import { frame, slab, frust, hex, rng, L, RED, LIME } from './kit.js';
 
 /** Stains on a battered tier face: a rain runnel, a patch where the paint has gone, moss low down; `skip` {nx, nz, w} keeps the stair's face clear. */
@@ -34,22 +35,6 @@ export function wallWeather(bag, F, v0, v1, y0, y1, rand, n = 6, front = 0) {
     else if (r < 0.75) patch(bag, 'stucco_leaf', [p[0], y0 + 0.2 + rand() * 0.2, p[1]], nrm, 0.8 + rand(), 0.25 + rand() * 0.2, Math.floor(rand() * 1e6), 0.015);
     else patch(bag, 'rubble', [p[0], y0 + H * (0.3 + rand() * 0.4), p[1]], nrm, 0.5 + rand() * 0.8, 0.35 + rand() * 0.4, Math.floor(rand() * 1e6), 0.015);
   }
-}
-
-/** k_mask { c [x, z] (the middle of its foot on the face), face, y, s }: the stucco mask of the Sun God or of a god of the earth, in red and blue with a bared mouth. */
-export function mask(el, { bag }) {
-  const F = frame(el.face, ...el.c), y = el.y ?? 0, s = el.s ?? 1, R = (u0, u1, v0, v1) => F.R(u0 * s, u1 * s, v0 * s, v1 * s);
-  const add = (m, r, y0, y1) => bag.add(m, box(r[0], y + y0 * s, r[1], r[2], y + y1 * s, r[3]));
-  add(RED, R(-0.45, 0.2, -1.3, 1.3), 0, 2.5);                                     // the panel
-  add(L, R(-0.5, 0.2, -1.4, -1.25), 0, 2.6); add(L, R(-0.5, 0.2, 1.25, 1.4), 0, 2.6);   // its frame
-  add(L, R(-0.5, 0.2, -1.4, 1.4), 2.5, 2.65);
-  add('maya_blue', R(-0.6, -0.4, -0.95, -0.35), 1.4, 1.95); add('maya_blue', R(-0.6, -0.4, 0.35, 0.95), 1.4, 1.95);   // the eyes
-  add(L, R(-0.66, -0.5, -0.7, -0.55), 1.55, 1.8); add(L, R(-0.66, -0.5, 0.55, 0.7), 1.55, 1.8);                         // the pupils
-  add(L, R(-0.85, -0.45, -0.28, 0.28), 0.85, 1.55);                                // the nose
-  add(L, R(-0.6, -0.42, -0.8, 0.8), 0.35, 0.75);                                    // the mouth
-  for (const v of [-0.55, -0.2, 0.2, 0.55]) add('limestone_carved', R(-0.66, -0.55, v - 0.07, v + 0.07), 0.42, 0.72);   // the teeth
-  for (const sg of [-1, 1]) { add('maya_blue', R(-0.55, -0.35, sg * 1.05 - 0.2, sg * 1.05 + 0.2), 0.7, 1.3); add(L, R(-0.6, -0.4, sg * 1.05 - 0.1, sg * 1.05 + 0.1), 1.0, 1.15); }  // the ear flares
-  add('maya_blue', R(-0.55, -0.4, -0.7, 0.7), 2.0, 2.3);                          // the headband
 }
 
 /** A hanging mat across a doorway, rolled up to a third. */

@@ -96,6 +96,14 @@ Sources (2026-11-07):
 - Level reached: L2–L3 (landmark chapels now carry the full programme and four are enterable; furnished izby are one in two to 200 m and one in four beyond; the two-storey houses and the other chapels' interiors (the small ones, the galleries and corridors) are still shut).
 - Sources: [Flame in Stone — theartbog.com](https://theartbog.com/flame-in-stone-the-architecture-of-st-basils-cathedral/), [Saint Basil's Cathedral — Wikipedia](https://en.wikipedia.org/wiki/St_Basil's_Cathedral), [Sacred Timber — medievalwoodworking.org](https://medievalwoodworking.org/?p=288), [Tsypino museum, chasovnya from Pasynkovo — kirmuseum.org](https://kirmuseum.org/en/monument/casovna-iz-derevni-pasynkovo-talickogo-selsoveta).
 
+### 5.5 The landmark seen close (round 2, 2026-11-17)
+
+- **The domes' patterns** (`src/styles/muscovite/domes.js`): each of the eight chapel domes of St Basil's has its own surface: twisting ribs, chevrons, diamond-pointed facets, overlapping scales, diagonal lattice, vertical gadroons; the bright colours date from the 17th–19th c. [stated: Wikipedia "Saint Basil's Cathedral"; the patterned domes as they stand are well known from photographs]. Ours: each dome is sheet geometry with the pattern as real relief (up to 6% of the radius) and a second colour on the raised parts; which chapel has which pattern, and the colours (green and gilt, rust red), are ours [inferred].
+- **The tent** (`tent.js`): the octagonal tent with white ribs up its eight edges, white belts and three tiers of small dormer lights each under a keel gable, smaller as they climb; the tent roof's "rows of lights and ribs" are as the building stands [stated: photographs; Wikipedia]; counts and sizes ours [inferred].
+- **Drums**: white shafts between the lights and a band of diamond-point brick under the cornice on every dome drum [inferred from the surviving brick ornament].
+- **The Spassky tower's fronts** (`gate.js`): on both mouths the Saviour's icon in a white arched frame over the gate with the inscription plaque below (the icon and inscriptions of 1514 are recorded in Wikipedia "Spasskaya Tower" [stated]), blind arches in white frames in three stages and white belts round the shaft; the stage layout is ours [inferred].
+- **The wall**: a brick plinth at the foot, and the swallowtail merlons now carried out over the face on three corbels each (the machicolated parapet) [inferred].
+
 ## 6. Ground and water
 
 The square is beaten earth with log paving. There are gardens and orchards behind the courts, and the Moskva's banks are low with willows. [inferred]

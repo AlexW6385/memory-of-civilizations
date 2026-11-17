@@ -44,11 +44,24 @@ export function archWall(F, mat, u0, u1, v0, v1, y0, y1, open = [], faceMat = nu
     const a = o.w / 2, base = y0 + (o.sill ?? 0);
     solid(u, o.c - a);
     if (o.sill) F.b(mat, o.c - a, y0, v0, o.c + a, base, v1);
-    const R = Math.min(1.4 * a, o.top - base - 0.4), s = o.top - R, n = Math.max(6, Math.round(a * 4));
-    for (const sd of [-1, 1]) for (let j = 0; j < n; j++) {
-      const t0 = j / n, t1 = (j + 1) / n, tc = (t0 + t1) / 2, ya = s + R * Math.pow(1 - tc, 0.7);
-      const ua = o.c + sd * a * t0, ub = o.c + sd * a * t1;
-      F.b(mat, Math.min(ua, ub), ya, v0, Math.max(ua, ub), y1, v1, false);
+    const R = Math.min(1.4 * a, o.top - base - 0.4), s = o.top - R, n = o.n ?? Math.max(6, Math.round(a * 4));
+    if (o.smooth) {
+      // the haunches as prisms whose soffit follows the pointed curve, so the arch reads as one curve and not as steps
+      const tris = [];
+      for (const sd of [-1, 1]) for (let j = 0; j < n; j++) {
+        const ua = o.c + sd * a * (j / n), ub = o.c + sd * a * ((j + 1) / n);
+        const ya = archY(ua, o.c, a, s, R), yb = archY(ub, o.c, a, s, R), ytop = Math.max(y1, ya, yb);
+        for (const [v, dn] of [[v0, -1], [v1, 1]]) quadH(tris, Pw(F, ua, ya, v), Pw(F, ub, yb, v), Pw(F, ub, ytop, v), Pw(F, ua, ytop, v), Dw(F, 0, 0, dn));
+        quadH(tris, Pw(F, ua, ya, v0), Pw(F, ua, ya, v1), Pw(F, ub, yb, v1), Pw(F, ub, yb, v0), [0, -1, 0]);   // the soffit
+        quadH(tris, Pw(F, ua, ytop, v0), Pw(F, ub, ytop, v0), Pw(F, ub, ytop, v1), Pw(F, ua, ytop, v1), [0, 1, 0]);
+      }
+      F.bag.add(mat, fromTriangles(tris));
+    } else {
+      for (const sd of [-1, 1]) for (let j = 0; j < n; j++) {
+        const t0 = j / n, t1 = (j + 1) / n, tc = (t0 + t1) / 2, ya = s + R * Math.pow(1 - tc, 0.7);
+        const ua = o.c + sd * a * t0, ub = o.c + sd * a * t1;
+        F.b(mat, Math.min(ua, ub), ya, v0, Math.max(ua, ub), y1, v1, false);
+      }
     }
     // the obstacle above the opening starts at the spring (above any head)
     F.col.rect(F.R(o.c - a, v0, o.c + a, v1), s, y1);
@@ -95,3 +108,17 @@ export function hti(bag, x, y0, z, h, r = 1.0) {
   bag.add('gilt_bronze', lathe(prof, 10, null, x, y0, z));
 }
 export { fromTriangles };
+
+/** Triangles with a wanted outward direction: a, b, c are world points, hint the direction the face looks to; the winding is fixed to match. */
+export function tri3(out, a, b, c, hint) {
+  const ux = c[0] - b[0], uy = c[1] - b[1], uz = c[2] - b[2], vx = a[0] - b[0], vy = a[1] - b[1], vz = a[2] - b[2];
+  const n0 = uy * vz - uz * vy, n1 = uz * vx - ux * vz, n2 = ux * vy - uy * vx;
+  if (n0 * hint[0] + n1 * hint[1] + n2 * hint[2] < 0) out.push(...a, ...c, ...b); else out.push(...a, ...b, ...c);
+}
+export function quadH(out, a, b, c, d, hint) { tri3(out, a, b, c, hint); tri3(out, a, c, d, hint); }
+/** The world point of a frame's (u, y, v). */
+export function Pw(F, u, y, v) { const [x, z] = F.pt(u, v); return [x, y, z]; }
+/** A world direction from a frame's (du, dy, dv). */
+export function Dw(F, du, dy, dv) { return [F.U[0] * du + F.V[0] * dv, dy, F.U[1] * du + F.V[1] * dv]; }
+/** The height of the pointed arch (centre c, half width a, spring s, rise R) at u. */
+export const archY = (u, c, a, s, R) => s + R * Math.pow(Math.max(0, 1 - Math.abs(u - c) / a), 0.7);
