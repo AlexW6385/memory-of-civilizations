@@ -2,7 +2,7 @@
 // morning and the evening, women with jars at the doors, children, a goat tied at a post, hens in the alley, firewood
 // by the hearths, sacks and baskets before the shops; the pounding of grain. One life-style plan; positions come from the
 // houses' own facts (houseFacts: where the door is, which side the front faces), never hard-coded.
-import { lots, height, inRect, STREETS, isOpen } from './layout.js';
+import { lots, height, inRect, STREETS, isOpen, SIMPLE_FROM } from './layout.js';
 import { houseFacts } from '../../styles/swahili/house.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -14,7 +14,7 @@ export function fronts() {
   const fig = (at, y, face, o = {}) => L.push({ t: 'figure', at, y, rot: faceTo(at, face), seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: pick(['cloth_white', 'cloth_white', 'cloth_indigo', 'cloth_ochre']), cloth2: 'cloth_white', skin: pick(['skin_dark', 'skin_dark', 'skin_medium']), hat: 'cap', hatMat: 'cloth_white', hair: 'short', hairMat: 'hair_dark', beard: rand() < 0.4, feet: 'bare', over: pick(['sash', 'none']), carry: 'none', pose: 'stand', ...o });
   const woman = (at, y, face, o = {}) => fig(at, y, face, { dress: 'wrap', top: undefined, hat: 'veil', over: 'shawl', hair: 'bun', beard: false, cloth: pick(['cloth_indigo', 'cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_maroon']), cloth2: 'cloth_white', h: 0.93, ...o });
   for (const l of lots()) {
-    if (l.dh > 140) continue;
+    if (l.dh > SIMPLE_FROM + 12) continue;
     const f = houseFacts({ ...l }), [x0, , x1] = l.rect, out = f.out, zf = f.front, y = l.y + 0.05, d = f.doorX, near = l.dh < 100;
     const yl = (z) => height(d, z);
     const alleyZ = zf + out * 1.5;
@@ -43,6 +43,14 @@ export function fronts() {
         if (rand() < 0.65) { L.push({ t: 'stool', at: [cx, cz], y: cy, rot: 0, seed: l.seed + 9 }); woman([cx, cz], cy, to, { pose: 'sit_low', carry: 'none' }); }
         else fig([cx, cz], cy, to, { pose: 'sit', over: 'none', hat: 'cap' });
       }
+    }
+    // the outer lanes (docs/settlements/kilwa.md §20): fewer people, a man on a bench, a woman with her jar, a goat or hens at the wall
+    if (l.dh >= 100) {
+      const ro = rand();
+      if (ro < 0.14 && benches.length && l.dh <= SIMPLE_FROM) { const bx = pick(benches), z = zf + out * 0.22; fig([bx, z], y, [bx, z + out * 5], { pose: 'sit', over: 'none', hat: pick(['cap', 'turban']) }); }
+      else if (ro < 0.24) woman([d + (rand() < 0.5 ? -1 : 1) * 1.2, alleyZ], yl(alleyZ), [d, zf], { carry: pick(['pot', 'basket']) });
+      else if (ro < 0.31) L.push({ t: 'animal', kind: 'goat', at: [d + pick([-2.6, 2.6]), zf + out * 0.9], y: yl(zf + out * 0.9), rot: rand() * 6.28, seed: l.seed + 4 });
+      else if (ro < 0.4) L.push({ t: 'chickens', n: 3, at: [d + pick([-2.2, 2.2]), zf + out * 1.1], y: yl(zf + out * 1.1), seed: l.seed + 5 });
     }
     // animals and things in the alley, against the wall
     const r2 = rand();

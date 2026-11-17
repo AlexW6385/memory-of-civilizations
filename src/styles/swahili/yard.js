@@ -16,6 +16,27 @@ export function tank(el, { bag, col }) {
   bag.add('opening', box(x0 + k, y - 0.28, z0 + k, x1 - k, y - 0.26, z1 - k));
   bag.add('water', fromTriangles([x0 + k, y + 0.18, z0 + k, x0 + k, y + 0.18, z1 - k, x1 - k, y + 0.18, z1 - k, x0 + k, y + 0.18, z0 + k, x1 - k, y + 0.18, z1 - k, x1 - k, y + 0.18, z0 + k]));
   bag.add('terracotta', lathe([[0.001, 0], [0.16, 0.02], [0.2, 0.2], [0.14, 0.38], [0.15, 0.42], [0.001, 0.42]], 8, null, x1 + 0.5, y, z0 + 0.4));
+  // the tank's floor of quartz pebbles (docs/settlements/kilwa.md §20): rounded stones scattered over the dark bed, none above the water
+  let s = (Math.round(x0 * 31 + z0 * 17) >>> 0) || 7; const R = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
+  for (let i = 0; i < 70; i++) { const px = x0 + k + 0.1 + R() * (x1 - x0 - 2 * k - 0.3), pz = z0 + k + 0.1 + R() * (z1 - z0 - 2 * k - 0.3), r = 0.05 + R() * 0.04; bag.add('pebbles', box(px, y - 0.26, pz, px + r * 1.8, y - 0.26 + r, pz + r * 1.4)); }
+  // the sandstone foot-rubber and the bench of the porch: three round blocks of rough sandstone in a row on the washing side, a low masonry bench on the other
+  for (let i = 0; i < 3; i++) { const fx = x0 + 0.7 + i * 0.75, fz = z1 + 0.55; bag.add('sandstone_dressed', lathe([[0.001, 0], [0.3, 0], [0.3, 0.1], [0.27, 0.13], [0.001, 0.13]], 10, null, fx, y, fz)); col.circle(fx, fz, 0.3, y, y + 0.13); }
+  bag.add(C, box(x0 + 0.2, y, z0 - 0.75, x1 - 0.2, y + 0.42, z0 - 0.3)); bag.add(DR, box(x0 + 0.18, y + 0.42, z0 - 0.77, x1 - 0.18, y + 0.47, z0 - 0.28)); col.rect([x0 + 0.18, z0 - 0.77, x1 - 0.18, z0 - 0.28], y, y + 0.47);
+}
+
+/** swahili_well: { at, y } — a round well kerbed with dressed coral, two forked posts and a beam with its rope and a pot (the mosque's ablution court had a well). */
+export function well(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, r = 0.75;
+  bag.add(C, lathe([[r + 0.12, -0.3], [r + 0.12, 0.62], [r - 0.14, 0.62], [r - 0.14, -0.3]], 12, null, x, y, z));
+  bag.add(DR, lathe([[r + 0.17, 0.62], [r + 0.17, 0.7], [r - 0.19, 0.7], [r - 0.19, 0.62]], 12, null, x, y, z));
+  bag.add('opening', lathe([[0.001, -0.28], [r - 0.15, -0.28], [r - 0.15, -0.27], [0.001, -0.27]], 12, null, x, y, z));
+  col.circle(x, z, r + 0.17, y - 0.3, y + 0.7);
+  const T = [];
+  for (const sg of [-1, 1]) beamTris(T, [x + sg * (r + 0.05), y, z + 0.05], [x + sg * (r + 0.05), y + 2.0, z + 0.05], 0.06, 0.05);
+  beamTris(T, [x - r - 0.25, y + 1.95, z + 0.05], [x + r + 0.25, y + 1.95, z + 0.05], 0.05, 0.05);
+  bag.add('wood_dark', fromTriangles(T));
+  bag.add('rope_fibre', box(x - 0.01, y + 0.9, z + 0.04, x + 0.01, y + 1.95, z + 0.06));
+  bag.add('terracotta', lathe([[0.001, 0], [0.11, 0.02], [0.14, 0.14], [0.1, 0.26], [0.11, 0.29], [0.001, 0.29]], 8, null, x, y + 0.7, z + 0.55));
 }
 
 /** swahili_tomb: { at, y, rot, kind ('pillar' | 'slab'), seed } — facing the qibla (north: −z when rot is 0). */

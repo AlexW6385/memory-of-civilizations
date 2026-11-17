@@ -6,7 +6,7 @@
 // terraces and the stair cut down the cliff to the beach and the small mosque at its foot.
 // Coral rag in lime, plastered; doorways and carving in dressed porites coral.
 
-import { box, fromTriangles } from '../../core/geom.js';
+import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { pointedSpandrel } from '../sahel/index.js';
 import { C, RAG, DRESSED, CARVED, SMOOTH, solid, slab, wall, rooms, vault, domeBay, face, poleCeiling, carvedPanel, wallFace, nicheHoles, prism, frameOf, lathe8, cut } from './kit.js';
 
@@ -419,8 +419,33 @@ function southCourt(el, ctx) {
   // the manager's house of two storeys in the south-west corner, and the square well beside it (4.6 m a side)
   const mh = [ci[0], ci[3] - 6.4, ci[0] + 7.2, ci[3]];
   rooms(ctx, { rect: mh, along: 'x', n: 2, fl, door: 'n', roof: 'poles', hs: 2.8, t: 0.55, cross: true, parapet: 0 });
-  const up = rooms(ctx, { rect: mh, along: 'x', n: 2, fl: fl + 3.1 + 0.02, yB: fl + 3.1, door: null, roof: 'poles', hs: 2.6, t: 0.55, floor: null, holes: { n: [{ u0: mh[0] + 1.0, u1: mh[0] + 1.6, v0: fl + 4.4, v1: fl + 5.3 }, { u0: mh[2] - 1.6, u1: mh[2] - 1.0, v0: fl + 4.4, v1: fl + 5.3 }] } });
-  void up;
+  // the upper storey (docs/settlements/kilwa.md §20): a door in the east wall onto a landing at the head of a masonry flight
+  // that climbs north along the east face (the court's side, clear of the well), a parapet wall on its open side; the two
+  // upper rooms joined by a door, furnished as the quarters of the court's manager
+  const yM = fl + 3.1, nS = 15, rs = 3.1 / nS, tr = 0.28, zs = mh[3] - 0.2, sx0 = mh[2], sx1 = mh[2] + 1.0, lz1 = zs - nS * tr, lz0 = lz1 - 1.1;
+  const up = rooms(ctx, { rect: mh, along: 'x', n: 2, fl: yM + 0.02, yB: yM, door: null, roof: 'poles', hs: 2.6, t: 0.55, floor: null, cross: true,
+    holes: { n: [{ u0: mh[0] + 1.0, u1: mh[0] + 1.6, v0: fl + 4.4, v1: fl + 5.3 }, { u0: mh[2] - 1.6, u1: mh[2] - 1.0, v0: fl + 4.4, v1: fl + 5.3 }], e: [{ u0: lz0 + 0.1, u1: lz0 + 1.0, v0: yM + 0.02, v1: yM + 2.17, frame: 'door' }] } });
+  for (let i = 0; i < nS; i++) {
+    const za = zs - (i + 1) * tr, zb = zs - i * tr, top = fl + (i + 1) * rs;
+    ctx.bag.add(RAG, box(sx0, fl - 0.3, za, sx1, top - 0.04, zb)); ctx.bag.add(DRESSED, box(sx0, top - 0.04, za - 0.02, sx1, top, zb));
+    ctx.col.rect([sx0, za, sx1, zb], fl - 0.3, top);
+  }
+  solid(ctx, RAG, sx0, fl - 0.3, lz0, sx1, yM - 0.06, lz1); slab(ctx, DRESSED, [sx0, lz0, sx1, lz1], yM - 0.06, yM);
+  cheek(ctx, 'z', sx1 + 0.15, 0.3, lz0, zs, fl - 0.3, yM, fl);
+  ctx.bag.add(DRESSED, box(sx0 - 0.03, yM, lz0 - 0.03, sx1 + 0.3, yM + 0.06, lz0 + 0.0));   // the landing's end cap
+  { const [ra, rb] = up.rooms, M = (r, m) => (r[m === 'x' ? 0 : 1] + r[m === 'x' ? 2 : 3]) / 2;
+    // the east room: a sleeping platform along the south wall with its mat and cloth, a chest by the east wall; the west room: mats, a cloth, jars, a lamp
+    const px0 = rb[0] + 0.9, px1 = rb[2] - 0.1, pz0 = rb[3] - 1.0, pz1 = rb[3] - 0.1;
+    ctx.bag.add('lime_plaster', box(px0, yM + 0.02, pz0, px1, yM + 0.44, pz1)); ctx.col.rect([px0, pz0, px1, pz1], yM + 0.02, yM + 0.44);
+    ctx.bag.add('reed_mat', box(px0 + 0.02, yM + 0.44, pz0 + 0.02, px1 - 0.02, yM + 0.46, pz1 - 0.02));
+    ctx.bag.add('cloth_indigo', box(px0 + 0.1, yM + 0.46, pz0 + 0.1, px0 + 1.6, yM + 0.5, pz1 - 0.1));
+    const cz0 = rb[1] + 2.2, cz1 = cz0 + 0.9;
+    ctx.bag.add('wood_dark', box(rb[2] - 0.55, yM + 0.02, cz0, rb[2] - 0.05, yM + 0.52, cz1)); ctx.col.rect([rb[2] - 0.55, cz0, rb[2] - 0.05, cz1], yM + 0.02, yM + 0.52);
+    for (const d of [0.2, 0.7]) ctx.bag.add('iron', box(rb[2] - 0.575, yM + 0.02, cz0 + d - 0.02, rb[2] - 0.05, yM + 0.52, cz0 + d + 0.02));
+    ctx.bag.add('reed_mat', box(ra[0] + 0.6, yM + 0.025, ra[1] + 0.8, ra[2] - 0.6, yM + 0.04, ra[3] - 0.8));
+    ctx.bag.add('cloth_maroon', box(ra[0] + 1.1, yM + 0.04, ra[1] + 1.3, ra[2] - 1.1, yM + 0.05, ra[3] - 1.3));
+    for (let k = 0; k < 3; k++) ctx.bag.add(k % 2 ? 'pottery_dark' : 'terracotta', lathe8(ra[0] + 0.4 + k * 0.5, yM + 0.02, ra[3] - 0.4));
+    ctx.bag.add('lamp_glass', lathe([[0.001, 0], [0.06, 0.03], [0.07, 0.1], [0.04, 0.17], [0.001, 0.18]], 8, null, M(ra, 'x'), yM + 0.04, M(ra, 'z'))); }
   const wr = [mh[2] + 1.4, ci[3] - 5.6, mh[2] + 6.0, ci[3] - 1.0];
   // the court's floor of beaten earth and lime, round the house and the well
   for (const p of cut(ci[0], ci[1], ci[2], ci[3], [mh, wr])) slab(ctx, 'plaster_grey', p, fl - 0.3, fl - 0.01);

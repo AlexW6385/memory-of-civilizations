@@ -11,7 +11,7 @@ import { pointedSpandrel, orientBy } from '../sahel/index.js';
 import { HUSUNI } from './husuni.js';
 import { house } from './house.js';
 import { coconutPalm, baobab, tusks, mangrove, banana } from './plants.js';
-import { tank, tomb, benchRag, fishRack } from './yard.js';
+import { tank, well, tomb, benchRag, fishRack } from './yard.js';
 import { wall, carvedPanel, wallFace } from './kit.js';
 import { Quaternion, Vector3, Matrix4 } from '../../core/three.js';
 
@@ -189,6 +189,20 @@ function mosque(el, { bag, col }) {
   // inset glazed bowls in the domes and vaults (docs/settlements/kilwa.md §15: three concentric rings in the
   // great dome, rows of bowls along the barrel vaults); a crown bowl and a ring in each small dome
   insetBowls(bag, { x0, z0, x1, z1, nx, nz, sx, sz, yT, PD, mid, kindOf });
+  // the great dome's drum faced with dressed coral panels (Archnet 3779: "decorated with dressed coral panels"): sixteen
+  // framed panels of carved coral round the drum's inner face under a dressed cornice (docs/settlements/kilwa.md §20)
+  if (el.big) {
+    const [gi, gk] = el.big, gx0 = gi === 0 ? x0 + 0.8 : x0 + gi * sx, gx1 = gi === nx - 1 ? x1 - 0.8 : x0 + (gi + 1) * sx, gz0 = gk === 0 ? z0 + 0.8 : z0 + gk * sz, gz1 = gk === nz - 1 ? z1 - 0.8 : z0 + (gk + 1) * sz;
+    const gcx = (gx0 + gx1) / 2, gcz = (gz0 + gz1) / 2, ri = Math.min(gx1 - gx0, gz1 - gz0) / 2 - 0.05, yR = yT + PD, pw = 0.62, ph = 0.8, yb = yR + 0.3;
+    for (let n = 0; n < 16; n++) {
+      const th = (n + 0.5) / 16 * Math.PI * 2, phi = Math.atan2(-Math.cos(th), -Math.sin(th)), px = gcx + Math.cos(th) * (ri - 0.015), pz = gcz + Math.sin(th) * (ri - 0.015);
+      const put = (m, a0, b0, a1, b1, d1) => bag.add(m, box(a0, b0, 0, a1, b1, d1).rotateY(phi).translate(px, 0, pz));
+      put('limestone_carved', -pw / 2, yb, pw / 2, yb + ph, 0.035);
+      put('limestone', -pw / 2 - 0.06, yb - 0.06, pw / 2 + 0.06, yb, 0.06); put('limestone', -pw / 2 - 0.06, yb + ph, pw / 2 + 0.06, yb + ph + 0.06, 0.06);
+      for (const sg of [-1, 1]) put('limestone', sg < 0 ? -pw / 2 - 0.06 : pw / 2, yb, sg < 0 ? -pw / 2 : pw / 2 + 0.06, yb + ph, 0.06);
+      put('limestone', -0.45, yR + 1.22, 0.45, yR + 1.32, 0.09);
+    }
+  }
   // the mihrab in the middle of the qibla (north) wall: three frames of dressed coral stepping in to the niche,
   // dark under its pointed head; a herringbone cable carved up the outer jambs; over it a carved plaque with two
   // bowls inset either side (Archnet: "two bowls are inset into either side of a rectangular plaque"); carved
@@ -210,7 +224,14 @@ function mosque(el, { bag, col }) {
   bag.add('wood_dark', box(mx + 2.0, y, qz + 0.4, mx + 2.8, y + 1.9, qz + 0.7));
   for (const sx of [2.0, 2.72]) bag.add('wood_dark', box(mx + sx, y + 0.4, qz + 0.7, mx + sx + 0.08, y + 1.6, qz + 1.9));
   // reed mats in rows facing the qibla, and lamps hanging in the bays on chains
-  for (let z = qz + 2.2; z < z1 - 2; z += 1.6) for (let x = x0 + 1.6; x < x1 - 2.4; x += 2.6) bag.add('reed_mat', box(x, y + 0.05, z, x + 2.3, y + 0.075, z + 1.25));
+  // each mat plaited in one of four ways by its place (docs/settlements/kilwa.md §20): plain, a dyed border, two dyed stripes, a dyed middle band
+  for (let r = 0, z = qz + 2.2; z < z1 - 2; z += 1.6, r++) for (let c = 0, x = x0 + 1.6; x < x1 - 2.4; x += 2.6, c++) {
+    bag.add('reed_mat', box(x, y + 0.05, z, x + 2.3, y + 0.075, z + 1.25));
+    const kd = (r * 3 + c * 5 + (r >> 1)) % 4, dye = ['cloth_maroon', 'cloth_indigo', 'cloth_ochre'][(r + c) % 3], e = y + 0.079;
+    if (kd === 1) for (const q of [[0.06, 0.06, 2.24, 0.14], [0.06, 1.11, 2.24, 1.19], [0.06, 0.14, 0.14, 1.11], [2.16, 0.14, 2.24, 1.11]]) bag.add(dye, box(x + q[0], y + 0.075, z + q[1], x + q[2], e, z + q[3]));
+    else if (kd === 2) for (const u of [0.35, 1.8]) bag.add(dye, box(x + u, y + 0.075, z + 0.06, x + u + 0.12, e, z + 1.19));
+    else if (kd === 3) bag.add(dye, box(x + 0.06, y + 0.075, z + 0.5, x + 2.24, e, z + 0.75));
+  }
   for (let i = 0; i < nx; i += 2) for (let k = 0; k < nz; k += 2) {
     const x = x0 + (i + 0.5) * (x1 - x0) / nx, z = z0 + (k + 0.5) * (z1 - z0) / nz;
     const crown = (i === mid ? yT + PD + sx / 2 - 0.05 : yT + PD + 0.82 * (Math.min(sx, sz) / 2 - 0.05)) - 0.05;
@@ -292,6 +313,6 @@ function mtepe(el, { bag, col }) {
 }
 registerStyle('swahili', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, swahili_mosque: mosque, swahili_house: house, ...HUSUNI, mtepe, coconut_palm: coconutPalm, baobab, tusks, mangrove, banana, swahili_tank: tank, swahili_tomb: tomb, swahili_bench: benchRag, fish_rack: fishRack },
+  elements: { ...STYLES.qing.elements, swahili_mosque: mosque, swahili_house: house, ...HUSUNI, mtepe, coconut_palm: coconutPalm, baobab, tusks, mangrove, banana, swahili_tank: tank, swahili_well: well, swahili_tomb: tomb, swahili_bench: benchRag, fish_rack: fishRack },
   objects: {},
 });
