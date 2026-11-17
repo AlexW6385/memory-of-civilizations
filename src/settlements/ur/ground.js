@@ -2,7 +2,7 @@
 // basin holding water below its quay; date palms in groves by the water and at the edges, reeds in
 // the shallows; the hot, hazy sky of southern Mesopotamia.
 
-import { RADIUS, TEMENOS, COURT, HARBOUR, MARKET, inRect, inHarbour, inHouse, smooth as sm } from './layout.js';
+import { RADIUS, TEMENOS, COURT, HARBOUR, MARKET, MAUS, BRICKYARD, onRampart, inRect, inHarbour, inHouse, smooth as sm } from './layout.js';
 
 function hash2(x, z) { let h = Math.imul(Math.floor(x) | 0, 374761393) + Math.imul(Math.floor(z) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
 function height(x, z) {
@@ -15,6 +15,9 @@ function cover(x, z) {
   const c = { sand: 0.55, grass: 0, rock: 0, soil: 0.45, fields: 0, dry: 0.85, warmth: 0.8, red: 0.05, road: 0, snow: 0, forest: 0 };
   if (inHarbour(x, z)) { c.soil = 0.8; c.sand = 0.2; return c; }
   if (inRect(COURT, x, z)) { c.sand = 0; c.soil = 0.1; c.road = 1; return c; }               // the Court of Nanna, paved in baked brick
+  if (inRect(BRICKYARD, x, z)) { c.sand = 0.1; c.soil = 0.9; c.road = 0.4; return c; }            // the brickyard's trodden clay
+  if (inRect(MAUS, x, z)) { c.sand = 0; c.soil = 0.1; c.road = 1; return c; }
+  if (onRampart(x, z, 4)) { c.sand = 0.2; c.soil = 0.8; c.fields = 0; c.grass = 0; return c; }
   if (inRect(TEMENOS, x, z)) { c.sand = 0.4; c.soil = 0.6; c.road = 0.3; return c; }
   if (Math.hypot(x, z) > RADIUS - 30) { c.fields = 0.5; c.grass = 0.2; return c; }
   c.road = inHouse(x, z, 0.3) ? 0 : 0.5; return c;
@@ -25,7 +28,7 @@ function fromWater(x, z) { return inHarbour(x, z) ? 0 : Math.max(0, x - HARBOUR.
 /** Plants per 100 m²: date palms round the harbour and at the town's edge, reeds at the water's edge, nothing in the lanes. */
 function planting(x, z) {
   const r = Math.hypot(x, z);
-  if (r > RADIUS - 6 || inHarbour(x, z)) return null;
+  if (r > RADIUS - 6 || inHarbour(x, z) || onRampart(x, z, 3) || inRect(BRICKYARD, x, z, 4) || inRect(MAUS, x, z, 4)) return null;
   if (inRect(HARBOUR.rect, x, z, 3)) return { reeds: 6 };
   if (inRect(HARBOUR.rect, x, z, 14)) return { date_palm: 1.2, tamarisk: 0.5, grass_dry: 10 };
   if (inRect(HARBOUR.rect, x, z, 40) && !inHouse(x, z, 1)) return { date_palm: 0.5, tamarisk: 0.25, grass_dry: 8 };      // the groves behind the quay

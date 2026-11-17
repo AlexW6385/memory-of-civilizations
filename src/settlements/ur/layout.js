@@ -29,6 +29,29 @@ export const MARKET = [-44, -217, 42, -178];
 const OPEN = new Set([987775, 589524, 632118]);
 /** Where the scribal school's house stands: the lot nearest to this point west of the market square. */
 export const SCHOOL_AT = [-62, -200];
+/** The royal mausoleum of Shulgi, just outside the temenos's east side, on its made ground (docs/settlements/ur.md §5.11). */
+export const MAUS = [134, -6, 194, 56];
+/** The brickyard at the town's north-east edge (§5.9). */
+export const BRICKYARD = [196, -262, 266, -196];
+/** The city rampart (§5.10): the radius of its crest's middle, the gates (their angles; 0 east, +z south) and the half-width of a gate tower along the wall, and the harbour's opening. */
+export const RAMP = { r: 368, half: 14 };
+export const GATES = [{ a: -Math.PI / 2, door: 'n' }, { a: Math.asin(-20 / RAMP.r), door: 'e' }, { a: Math.PI / 2, door: 's' }];
+export const rampartArcs = () => {
+  const h = RAMP.half / RAMP.r, cuts = GATES.map((g) => [g.a - h, g.a + h]);
+  cuts.push([Math.PI - Math.asin(100 / RAMP.r), Math.PI], [-Math.PI, -Math.PI + Math.asin(180 / RAMP.r)]);   // the harbour side stays open
+  cuts.sort((p, q) => p[0] - q[0]);
+  const arcs = []; let a = -Math.PI;
+  for (const [c0, c1] of cuts) { if (c0 > a + 1e-6) arcs.push([a, c0]); a = Math.max(a, c1); }
+  if (a < Math.PI - 1e-6) arcs.push([a, Math.PI]);
+  return arcs;
+};
+/** Whether (x, z) lies on the rampart's footprint (the toe of its inner slope to the toe of its outer face), for the ground's planting. */
+export const onRampart = (x, z, m = 0) => {
+  const r = Math.hypot(x, z);
+  if (r < RAMP.r - 8 - m || r > RAMP.r + 6 + m) return false;
+  const a = Math.atan2(z, x);
+  return !(a > Math.PI - Math.asin(100 / RAMP.r) - 0.01 || a < -Math.PI + Math.asin(180 / RAMP.r) + 0.01);   // (the gates' corridors too; not the harbour's side)
+};
 export const HARBOUR = { rect: [-376, -150, -282, 70], bed: -3, water: -1.2 };
 /** The reed boats of the harbour: [x, z, direction (±1 along z, toward the bow), length]; the first four lie along the quay (docs/settlements/ur.md §6.1). */
 export const BOATS = [[-285.3, -96, 1, 8], [-285.3, -60, -1, 9], [-285.3, -8, 1, 7.5], [-286.8, 28, -1, 8.5], [-300, -90, 1, 8], [-310, -30, -1, 7], [-302, 20, 1, 8], [-330, -60, -1, 9], [-318, 45, 1, 7]];
@@ -70,8 +93,11 @@ export function houses() {
     if (Math.abs(cx) < 6 && cz < TEMENOS[1]) continue;               // the street to the north gate
     if (Math.abs(cz + 20) < 5 && cx > TEMENOS[2]) continue;          // the street to the east gate
     if (inRect(MARKET, cx, cz)) { rand(); rand(); continue; }
-    if (rand() < 0.08) { EMPTY.push(r); continue; }
+    // (lots taken by the mausoleum, the brickyard and the road to the south gate: the stream is used as before so the other lots stay as they were)
+    const taken = inRect(MAUS, cx, cz, w / 2 + 5) || inRect(BRICKYARD, cx, cz, w / 2 + 3) || (Math.abs(cx) < 6 && cz > TEMENOS[3]);
+    if (rand() < 0.08) { if (!taken) EMPTY.push(r); continue; }
     const seed = Math.floor(rand() * 1e6);
+    if (taken) continue;
     const open = OPEN.has(seed), big = Math.min(w, d) >= 10.8;
     // a public chapel (Woolley's "public chapels" stood at street corners): about one lot in twelve that is big enough, its door toward the temenos
     const chapel = !open && big && seed % 12 === 0, face = Math.abs(cz) > Math.abs(cx) ? (cz > 0 ? 'n' : 's') : (cx > 0 ? 'w' : 'e');
@@ -97,6 +123,20 @@ export function houses() {
   pick([190, -20], ['smith', 'potter', 'weaver', 'baker', 'brewer', 'smith']);
   pick([0, -270], ['baker', 'weaver', 'brewer', 'potter']);
   pick([0, 170], ['weaver', 'baker', 'potter', 'reeder', 'granary']);
+  // the outer town (§5.12): more trade houses along the ring of the town beyond the core, and family houses (no trade) among them
+  pick([205, -250], ['brewer', 'potter', 'baker', 'weaver', 'smith']);
+  pick([250, 70], ['weaver', 'baker', 'potter', 'reeder', 'brewer']);
+  pick([120, 250], ['granary', 'weaver', 'baker', 'potter']);
+  pick([-110, 255], ['baker', 'smith', 'weaver', 'brewer', 'reeder']);
+  pick([-220, 170], ['fisher', 'reeder', 'weaver', 'potter']);
+  pick([-215, -235], ['baker', 'weaver', 'brewer', 'granary', 'potter']);
+  pick([300, -90], ['smith', 'potter', 'baker']);
+  pick([-60, 300], ['weaver', 'baker']);
+  for (const a of [[150, -200], [-150, -190], [210, 150], [-200, 60], [60, 200], [-100, -300], [330, 10], [-30, 120], [180, 230], [-250, -100]]) {
+    const c = HOUSES.filter((h) => !h.open && !h.chapel && !h.temple && !taken.has(h) && Math.min(h.rect[2] - h.rect[0], h.rect[3] - h.rect[1]) >= 10.2)
+      .sort((p, q) => Math.hypot(mid(p)[0] - a[0], mid(p)[1] - a[1]) - Math.hypot(mid(q)[0] - a[0], mid(q)[1] - a[1]));
+    for (const h of c.slice(0, 2)) { taken.add(h); h.open = true; h.family = true; h.door = faceTo(h, [0, -120]); }
+  }
   // the trade of some of the rest (the wares at their doors), and how fully each is dressed by its distance from the core
   for (const h of HOUSES) {
     const [cx, cz] = mid(h), d = Math.hypot(cx, cz + 120);

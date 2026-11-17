@@ -1,9 +1,9 @@
 // The town round the temenos (docs/settlements/ur.md §5): courtyard houses of plastered mud brick, three of them
 // open and furnished on the market square before the north gate (§5.1); the square itself (a market: the
 // generic life pass sets out its stalls) and the life of the streets and the quay (§5.2).
-import { RADIUS, MARKET, HARBOUR, YARD, houses, inHouse, inHarbour, usedLots } from './layout.js';
+import { RADIUS, MARKET, HARBOUR, YARD, MAUS, BRICKYARD, RAMP, rampartArcs, houses, inHouse, inHarbour, usedLots } from './layout.js';
 import { urLife } from './life.js';
-const base = (id, elements) => ({ id, style: 'sumerian', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -110], facing: 's' } });
+const base = (id, elements) => ({ id, style: 'sumerian-ur', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -110], facing: 's' } });
 export async function town() {
   const all = houses(), plans = [];
   for (let i = 0; i < all.length; i += 150) plans.push(base(`ur-houses-${i / 150}`, all.slice(i, i + 150).map((h) => ({ t: h.chapel ? 'ur_chapel' : 'ur_house', ...h }))));
@@ -29,6 +29,14 @@ export async function town() {
   }
   plans.push(base('ur-lots', lots));
   plans.push(base('ur-lane-palms', trees));
+  // the city rampart with its three gates (§5.10), the brickyard at the north-east edge (§5.9), the royal mausoleum outside the temenos (§5.11)
+  const [N, E, S] = [[-14, -374, 14, -360], [360, -34, 374, -6], [-14, 360, 14, 374]];
+  plans.push(base('ur-rampart', [{ t: 'rampart', r: RAMP.r, arcs: rampartArcs() }, { t: 'gate_tower', rect: N, door: 'n', w: 5, h: 10.5, dh: 5.2 }, { t: 'gate_tower', rect: E, door: 'e', w: 5, h: 10.5, dh: 5.2 }, { t: 'gate_tower', rect: S, door: 's', w: 5, h: 10.5, dh: 5.2 }]));
+  plans.push(base('ur-brickyard', [{ t: 'brickyard', rect: BRICKYARD, seed: 2112 }]));
+  // (the palms in the mausoleum's court, in the brick pits on the made ground, 3.3 m up)
+  const maus = [{ t: 'ur_mausoleum', rect: MAUS, seed: 2094 }];
+  for (const [u, v, k] of [[5, 20.5, 1], [55, 20.5, 2], [5, 44, 3], [55, 44, 4], [8, 8, 5], [52, 8, 6]]) maus.push({ t: 'ur_palm', at: [MAUS[0] + u, MAUS[1] + v], y: 3.32, h: 7.5 + (k % 3), seed: 300 + k });
+  plans.push(base('ur-mausoleum', maus));
   plans.push({ ...base('ur-people', figures), style: 'life', center: [-60, -180], near: 320 });
   return plans;
 }
