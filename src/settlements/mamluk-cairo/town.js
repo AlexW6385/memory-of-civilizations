@@ -1,7 +1,8 @@
 // The city's houses (docs/settlements/mamluk-cairo.md §5): Cairene town houses (house_mamluk, style
 // vernacular) — and sabil-kuttabs on three street corners in place of a house.
-import { RADIUS, lots, yards, sabats, shops, tradeOf, SQUARE, SABILS, SUQ, QAA, BAYN, QALAWUN, NASIR, BARQUQ, KHAN, SUQ2, SUQ3, HAMMAM, SHOP, STALLS } from './layout.js';
+import { RADIUS, ARRIVAL, lots, yards, sabats, shops, tradeOf, SQUARE, SABILS, SUQ, QAA, BAYN, QALAWUN, NASIR, BARQUQ, KHAN, SUQ2, SUQ3, HAMMAM, SHOP, STALLS } from './layout.js';
 import { lifePlan } from './life.js';
+import { houseRooms } from './house.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-37, -30], facing: 's' } });
 const dist = (l, [x, z]) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - x, (l.rect[1] + l.rect[3]) / 2 - z);
 const TILE = 160;
@@ -13,7 +14,21 @@ export async function town() {
   const { fronts, open } = shops();
   const openSet = new Set(open), frontSet = new Set(fronts.filter((l) => !openSet.has(l)));
   const rest = all.filter((l) => !taken.has(l) && !openSet.has(l));
-  const houses = rest.filter((l) => !frontSet.has(l) && !l.yard);
+  // houses you can walk into (house.js): in the 200 m cells that hold four or more open shops (their plan and materials are shared),
+  // beyond 120 m of the arrival, at most three to a cell and 45 m apart
+  const cellN = new Map(); open.forEach((l) => { const k = Math.floor(l.rect[0] / 200) + ',' + Math.floor(l.rect[1] / 200); cellN.set(k, (cellN.get(k) || 0) + 1); });
+  const shopCells = new Set([...cellN].filter(([, n]) => n >= 4).map(([k]) => k));
+  const cen = (l) => [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2];
+  const cand = rest.filter((l) => !frontSet.has(l) && !l.yard && l.rect[2] - l.rect[0] >= 9 && l.rect[3] - l.rect[1] >= 9.5 && shopCells.has(Math.floor(l.rect[0] / 200) + ',' + Math.floor(l.rect[1] / 200))
+    && Math.hypot(cen(l)[0] - ARRIVAL[0], cen(l)[1] - ARRIVAL[1]) > 120).sort((a, b) => (a.seed % 977) - (b.seed % 977));
+  const homes = [], perCell = new Map();
+  for (const l of cand) {
+    const k = Math.floor(l.rect[0] / 200) + ',' + Math.floor(l.rect[1] / 200), c = cen(l);
+    if ((perCell.get(k) || 0) >= 3 || homes.some((h) => Math.hypot(cen(h)[0] - c[0], cen(h)[1] - c[1]) < 45)) continue;
+    perCell.set(k, (perCell.get(k) || 0) + 1); homes.push(l);
+  }
+  const homeSet = new Set(homes);
+  const houses = rest.filter((l) => !frontSet.has(l) && !l.yard && !homeSet.has(l));
   // the houses (house_mamluk, style vernacular: stone storey, corbelled plastered storeys, mashrabiyas,
   // the bent entrance, malqafs), in 100 m tiles, near and far; the shop fronts of the market streets (cairo_shopfront);
   // the dressing of the faces and roofs (cairo_dress), near only
@@ -43,9 +58,11 @@ export async function town() {
   open.forEach((l) => { const k = Math.floor(l.rect[0] / 200) + ',' + Math.floor(l.rect[1] / 200); if (!cells.has(k)) cells.set(k, []); cells.get(k).push(l); });
   for (const [k, group] of cells) {
     const xs = group.flatMap((l) => [l.rect[0], l.rect[2]]), zs = group.flatMap((l) => [l.rect[1], l.rect[3]]);
-    plans.push({ ...base('mamluk-cairo-shops-' + k, group.map((l) => ({ t: 'cairo_shop', rect: l.rect, face: l.front, y: 0, seed: l.seed, trade: tradeOf(l) }))), style: 'mamluk',
+    const mine = homes.filter((l) => Math.floor(l.rect[0] / 200) + ',' + Math.floor(l.rect[1] / 200) === k), hel = mine.map((l) => ({ t: 'cairo_house_open', rect: l.rect, front: l.front, y: 0, seed: l.seed, storeys: l.storeys }));
+    for (const l of mine) xs.push(l.rect[0], l.rect[2]), zs.push(l.rect[1], l.rect[3]);
+    plans.push({ ...base('mamluk-cairo-shops-' + k, [...group.map((l) => ({ t: 'cairo_shop', rect: l.rect, face: l.front, y: 0, seed: l.seed, trade: tradeOf(l) })), ...hel]), style: 'mamluk-cairo',
       bounds: [Math.min(...xs) - 2, Math.min(...zs) - 2, Math.max(...xs) + 2, Math.max(...zs) + 2],
-      rooms: group.map((l) => { const r = l.rect; return { id: 'shop ' + tradeOf(l), rect: [r[0] + 0.5, r[1] + 0.5, r[2] - 0.5, r[3] - 0.5], y: 0.2, kind: 'hall' }; }) });
+      rooms: [...group.map((l) => { const r = l.rect; return { id: 'shop ' + tradeOf(l), rect: [r[0] + 0.5, r[1] + 0.5, r[2] - 0.5, r[3] - 0.5], y: 0.2, kind: 'hall' }; }), ...hel.flatMap(houseRooms)] });
   }
   plans.push({ ...base('mamluk-cairo-sabats', sabats().map((b) => ({ t: 'cairo_sabat', ...b, along: 'z' }))), style: 'mamluk' });
   plans.push({ ...base('mamluk-cairo-square', [{ t: 'cairo_square', rect: SQUARE, y: 0, seed: 1363,
