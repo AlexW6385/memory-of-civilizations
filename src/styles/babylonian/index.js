@@ -173,16 +173,51 @@ function archInfill(bag, col, x0, x1, ys, yt, z0, z1, mat) {
   bag.add(mat, fromTriangles(T));
   col.rect([x0, z0, x1, z1], ys + R * 0.9, yt);
   // the archivolt: a white ring and a yellow one standing proud on each face
-  for (const [z, s] of [[z0, -1], [z1, 1]]) for (const [r0, r1, m] of [[R, R + 0.25, W], [R + 0.25, R + 0.4, Y]]) {
+  // four orders, each standing further out than the last (white, yellow, blue, white), then a ring of rosettes on the spandrel
+  const ORDERS = [[R, R + 0.22, W, 0.05], [R + 0.22, R + 0.42, Y, 0.1], [R + 0.42, R + 0.66, 'glaze_blue', 0.15], [R + 0.66, R + 0.8, W, 0.2]];
+  for (const [z, s] of [[z0, -1], [z1, 1]]) for (const [r0, r1, m, pw] of ORDERS) {
     const A = [];
     for (let k = 0; k < N; k++) {
       const a0 = Math.PI * (1 - k / N), a1 = Math.PI * (1 - (k + 1) / N), q = (r, a, w) => [cx + r * Math.cos(a), ys + r * Math.sin(a), z + s * w];
-      const p = [q(r0, a0, 0.03), q(r0, a1, 0.03), q(r1, a1, 0.03), q(r1, a0, 0.03)], b0 = [q(r0, a0, 0), q(r0, a1, 0), q(r1, a1, 0), q(r1, a0, 0)];
+      const p = [q(r0, a0, pw), q(r0, a1, pw), q(r1, a1, pw), q(r1, a0, pw)], b0 = [q(r0, a0, 0), q(r0, a1, 0), q(r1, a1, 0), q(r1, a0, 0)];
       if (s > 0) A.push(...p[0], ...p[2], ...p[1], ...p[0], ...p[3], ...p[2]); else A.push(...p[0], ...p[1], ...p[2], ...p[0], ...p[2], ...p[3]);
       // inner and outer edges
       for (const [e0, e1] of [[0, 1], [2, 3]]) A.push(...b0[e0], ...b0[e1], ...p[e1], ...b0[e0], ...p[e1], ...p[e0], ...b0[e0], ...p[e1], ...b0[e1], ...b0[e0], ...p[e0], ...p[e1]);
     }
     bag.add(m, fromTriangles(A));
+  }
+  const RS = rosette(0.17), rr = R + 1.1;
+  for (const [z, s] of [[z0, -1], [z1, 1]]) for (let k = 0; k < 11; k++) {
+    const a = Math.PI * (0.1 + 0.8 * k / 10), px = cx + rr * Math.cos(a), py = ys + rr * Math.sin(a);
+    if (px - 0.2 < x0 || px + 0.2 > x1 || py + 0.2 > yt - 1.2) continue;
+    const f = s < 0 ? 'n' : 's';
+    bag.add(W, turnTo(RS.petals.clone(), f).translate(px, py, z + s * 0.004)); bag.add(Y, turnTo(RS.heart.clone(), f).translate(px, py, z + s * 0.004));
+  }
+}
+/**
+ * The dressing of a gate tower's front block t on its `front` face ('n'|'s') and its outer side `out`: a plinth of baked brick
+ * with a yellow cap, a pier at each end of the beasts' panel (0.5 m proud, a column of large rosettes on each, a white cap),
+ * and a two-step corbelled cornice under the battlements (the Pergamon reconstruction's towers are stepped like this).
+ */
+function gateFront(bag, t, front, out, y, TH, s) {
+  const zf = front === 'n' ? t[1] : t[3], dz = front === 'n' ? -1 : 1, zr = (a, b) => (dz < 0 ? [zf - b, zf - a] : [zf + a, zf + b]);
+  const xa = t[0] - (s < 0 ? 0.3 : 0), xb = t[2] + (s > 0 ? 0.3 : 0), xo = s < 0 ? [t[0] - 0.3, t[0]] : [t[2], t[2] + 0.3];
+  const slab = (mat, x0, z0, x1, z1, y0, y1) => bag.add(mat, box(x0, y0, z0, x1, y1, z1));
+  { const [a, b] = zr(0, 0.3); slab(G, xa, a, xb, b, y - 0.05, y + 0.75); }
+  slab(G, xo[0], t[1], xo[1], t[3], y - 0.05, y + 0.75);
+  // the piers
+  const pierTop = y + TH - 0.5;
+  for (const [x0, x1] of [[t[0], t[0] + 1.2], [t[2] - 1.2, t[2]]]) {
+    const [a, b] = zr(0, 0.5);
+    slab(G, x0, a, x1, b, y + 0.82, pierTop);
+    const face = dz < 0 ? [x0, a, x1, b] : [x0, a, x1, b];
+    for (let yy = y + 1.5; yy < pierTop - 0.5; yy += 1.7) { const pc = (x0 + x1) / 2, [za, zb] = zr(0.5, 0.56); bag.add(W, box(pc - 0.3, yy - 0.3, za, pc + 0.3, yy + 0.3, zb)); bag.add(Y, box(pc - 0.15, yy - 0.15, zr(0.56, 0.6)[0], pc + 0.15, yy + 0.15, zr(0.56, 0.6)[1])); }
+  }
+  // the cornice
+  for (const [e, y0, y1] of [[0.2, y + TH, y + TH + 0.2], [0.4, y + TH + 0.2, y + TH + 0.45]]) {
+    const [a, b] = zr(0, e);
+    slab(G, t[0] - (s < 0 ? e : 0), a, t[2] + (s > 0 ? e : 0), b, y0, y1);
+    slab(G, s < 0 ? t[0] - e : t[2], t[1], s < 0 ? t[0] : t[2] + e, t[3], y0, y1);
   }
 }
 /**
@@ -245,11 +280,14 @@ function ishtarGate(el, { bag, col }) {
       // on the fronts the beasts walk toward the passage, on the outer side toward the city
       const out = s < 0 ? 'w' : 'e';
       rows(r, out, H, 1); deck(r, H, out);
-      // the towers projecting at the corners
+      // the towers projecting at the corners: a plinth of baked brick, piers either side of the beasts' panel, a corbelled cornice
       for (const tz of [z0 - 1.5, z1 - 4.5]) {
-        const t = s < 0 ? [r[0] - 1.5, tz, r[2], tz + 6] : [r[0], tz, r[2] + 1.5, tz + 6];
-        bag.add(G, box(t[0], y - 0.5, t[1], t[2], y + H + 2, t[3])); col.rect(t, y, y + H + 2); crenels(bag, t, y + H + 2, G, 1.2);
-        for (const f of [tz < z0 ? 'n' : 's', out]) { rows(t, f, H + 2, f === out ? 1 : -s); band(bag, t, f, y + H + 1.3); rosettes(bag, t, f, y + H + 1.75, 0.6, 0.17); }
+        const t = s < 0 ? [r[0] - 1.5, tz, r[2], tz + 6] : [r[0], tz, r[2] + 1.5, tz + 6], front = tz < z0 ? 'n' : 's', TH = H + 2, top = y + TH + 0.45;
+        bag.add(G, box(t[0], y - 0.5, t[1], t[2], top, t[3])); col.rect(t, y, top);
+        crenels(bag, t, top, G, 1.6);
+        gateFront(bag, t, front, out, y, TH, s);
+        const tI = [t[0] + 1.3, t[1], t[2] - 1.3, t[3]];                                  // the beasts' panel between the piers
+        for (const f of [front, out]) { rows(f === front ? tI : t, f, H + 2, f === out ? 1 : -s); band(bag, t, f, y + H + 1.3); rosettes(bag, f === front ? tI : t, f, y + H + 1.75, 0.6, 0.17); }
       }
     }
     // the arched passage: springing at a little over half the height
@@ -302,7 +340,7 @@ function glazedWall(el, { bag, col }) {
   const r = [Math.min(ax, bx) - (alongZ ? th / 2 : 0), Math.min(az, bz) - (alongZ ? 0 : th / 2), Math.max(ax, bx) + (alongZ ? th / 2 : 0), Math.max(az, bz) + (alongZ ? 0 : th / 2)];
   bag.add(mat, box(r[0], y - 0.5, r[1], r[2], y + h, r[3])); col.rect(r, y, y + h);
   const faces = alongZ ? ['w', 'e'] : ['n', 's'], u0 = alongZ ? r[1] : r[0], L = alongZ ? r[3] - r[1] : r[2] - r[0];
-  const tw = el.tower ?? 6, pr = el.projection ?? 0.45, nt = el.towers === false ? 0 : Math.max(1, Math.round(L / (2 * tw))), seg = L / Math.max(1, 2 * nt);
+  const tw = el.tower ?? 6, pr = el.projection ?? 0.8, nt = el.towers === false ? 0 : Math.max(1, Math.round(L / (2 * tw))), seg = L / Math.max(1, 2 * nt);
   const sub = (a, b, out) => (alongZ ? [r[0] - out, a, r[2] + out, b] : [a, r[1] - out, b, r[3] + out]);
   const deco = (q, f, top) => {
     rosettes(bag, q, f, y + 0.55, 0.62, 0.2); rosettes(bag, q, f, y + 1.1, 0.62, 0.2);                 // the plinth
@@ -311,19 +349,22 @@ function glazedWall(el, { bag, col }) {
     band(bag, q, f, y + 3.05);
     rosettes(bag, q, f, y + 3.6, 0.62, 0.2);
     band(bag, q, f, top - 0.6);
+    // the corbelled cornice under the battlements
+    const e = 0.22, sl = f === 'n' ? [q[0], q[1] - e, q[2], q[1]] : f === 's' ? [q[0], q[3], q[2], q[3] + e] : f === 'w' ? [q[0] - e, q[1], q[0], q[3]] : [q[2], q[1], q[2] + e, q[3]];
+    bag.add(mat, box(sl[0], top - 0.35, sl[1], sl[2], top - 0.05, sl[3])); bag.add(W, box(sl[0], top - 0.05, sl[1], sl[2], top, sl[3]));
   };
-  if (!nt) { for (const f of faces) deco(r, f, y + h); crenels(bag, r, y + h, mat, 1.1); return; }
+  if (!nt) { for (const f of faces) deco(r, f, y + h); crenels(bag, r, y + h, mat, 1.5); return; }
   for (let i = 0; i < 2 * nt; i++) {
     const a = u0 + i * seg, b = a + seg, tower = i % 2 === 1;
     if (tower) {
       const q = sub(a, b, pr), H = h + 1.4;
       bag.add(mat, box(q[0], y - 0.5, q[1], q[2], y + H, q[3])); col.rect(q, y, y + H);
       for (const f of faces) deco(q, f, y + H);
-      crenels(bag, q, y + H, mat, 1.1);
+      crenels(bag, q, y + H, mat, 1.5);
     } else {
       const q = sub(a, b, 0);
       for (const f of faces) deco(q, f, y + h);
-      crenels(bag, q, y + h, mat, 1.1);
+      crenels(bag, q, y + h, mat, 1.5);
     }
   }
 }

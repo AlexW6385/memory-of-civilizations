@@ -5,7 +5,7 @@
 // bank; the round hide boats that came down the river (Herodotus 1.194).
 
 import { STYLES } from '../../core/build.js';
-import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
+import { box, frustum, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { crenels, beasts, rosettes, band } from './index.js';
 import { furnishRoom } from './rooms.js';
 
@@ -263,6 +263,7 @@ export function etemenanki(el, ctx) {
     },
   };
   STYLES.sumerian.elements.ziggurat(el, { ...ctx, bag: inner });
+  zigPiers(el, ctx);
   const { bag, col } = ctx, [cx, c] = el.c, W = el.shrine.w, D = el.shrine.d, Hs = el.shrine.h, y = top;
   // positions on the north-fronted ziggurat, seen in the mirror when it fronts south
   const Z = el.front === 's' ? (z) => 2 * c - z : (z) => z, zr = (a, b) => [Math.min(Z(a), Z(b)), Math.max(Z(a), Z(b))];
@@ -306,6 +307,33 @@ export function etemenanki(el, ctx) {
   col.rect([gx - 0.45, gz - 0.7, gx + 0.45, gz + 0.7], y, y + 0.92);
 }
 
+/**
+ * The recessed buttressing of the two great stages (docs/settlements/babylon.md §16.1): broad piers of baked brick standing 1.3-1.6 m
+ * out of the battered faces and leaning with them, a recess between each pair, running the whole height; none on the front of the
+ * lowest stage, where the stairs lean, nor beside the central stair on the second.
+ */
+function zigPiers(el, { bag, col }) {
+  const [cx, cz] = el.c;
+  let y = el.y ?? 0;
+  el.stages.slice(0, 2).forEach((s, i) => {
+    const r = [cx - s.w / 2, cz - s.d / 2, cx + s.w / 2, cz + s.d / 2], b = s.batter ?? s.h * 0.12, pw = i ? 3.4 : 4.4, dp = i ? 1.3 : 1.6, pitch = i ? 8 : 10.5, mat = i ? 'brick' : 'brick_buff';
+    for (const [ax, az, bx, bz, nx, nz] of [[r[0], r[1], r[2], r[1], 0, -1], [r[0], r[3], r[2], r[3], 0, 1], [r[0], r[1], r[0], r[3], -1, 0], [r[2], r[1], r[2], r[3], 1, 0]]) {
+      const L = Math.hypot(bx - ax, bz - az), n = Math.floor((L - pw - 1) / pitch) + 1, o = (L - (n - 1) * pitch) / 2;
+      const front = (el.front === 's' ? nz > 0 : nz < 0) && nz !== 0;
+      for (let k = 0; k < n; k++) {
+        const u = o + k * pitch, px = ax + (bx - ax) * u / L, pz = az + (bz - az) * u / L;
+        if (front && (i === 0 || Math.abs(px - cx) < 7)) continue;
+        const hw = pw / 2, q = nz ? [px - hw, pz + (nz < 0 ? -dp : -0.3), px + hw, pz + (nz < 0 ? 0.3 : dp)] : [px + (nx < 0 ? -dp : -0.3), pz - hw, px + (nx < 0 ? 0.3 : dp), pz + hw];
+        // both faces of the pier lean in with the wall: the inner one stays within it
+        const ln = nx < 0 ? [b, -b, 0, 0] : nx > 0 ? [-b, b, 0, 0] : nz < 0 ? [0, 0, b, -b] : [0, 0, -b, b];
+        const h = s.h * 0.985;
+        bag.add(mat, frustum(q, y, y + h, ...ln, { noBottom: true }));
+        col.rect(q, y, y + h);
+      }
+    }
+    y += s.h;
+  });
+}
 /** A loft between two convex outlines (bottom P0 at y0, top P1 at y1, same count): sides and top. */
 function loft(P0, y0, P1, y1, { top = true } = {}) {
   const T = [], n = P0.length;

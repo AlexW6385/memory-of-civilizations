@@ -217,6 +217,14 @@ Fact: the precinct of Etemenanki, walled, with the Processional Way entering fro
 
 Upper storeys of the open houses are shut (they are one-storey); the oriels and dentils are visual only (no colliders); the leaves of the gate stand open only; the shrine's own door is still the Ur shrine's 1.6 × 2.9 m; the Hanging Gardens are undecided; the passages' arches have no cedar roof (a vault stands there).
 
+## 16. The landmark seen close (2026-11-17 pass)
+
+### 16.1 What changed
+- **Gate towers:** the blocks projecting from the Ishtar Gate's towers now stand on a plinth, carry at each end of the beasts' panel a pier 1.2 m broad standing 0.5 m out with a column of enamelled studs (white with a yellow heart), and under the battlements a two-step corbelled cornice; the merlons are larger (1.6 m) to suit 23 m towers. The stepped, recessed profile follows the Pergamon reconstruction of the gate [inferred: dimensions; the form after worldhistory.org/Ishtar_Gate and the Pergamon reconstruction, not measured].
+- **Arches:** the passages' arches have four orders standing successively further out (white, yellow, blue, white) and a ring of rosettes on the spandrel [inferred].
+- **Processional Way walls:** the towers project 0.8 m (Koldewey: slightly projecting, as broad as the intervals), and a corbelled cornice with a white cap runs under the battlements; merlons 1.5 m [inferred: sizes].
+- **Etemenanki:** the two lowest stages carry broad piers of baked brick (4.4 m and 3.4 m broad, 1.6 and 1.3 m out) between recesses, leaning with the battered faces, none on the lowest stage's front where the stairs lean (Mesopotamian temple walls were articulated by buttresses and niches [inferred]; Koldewey's 90 m base [stated]).
+
 ## Sources
 
 - [Ishtar Gate — World History Encyclopedia](https://www.worldhistory.org/Ishtar_Gate/)
