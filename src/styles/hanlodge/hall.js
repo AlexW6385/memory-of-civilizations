@@ -3,9 +3,9 @@
 // plastered frieze closing the wall under the eave, and only above that the roof; gilt rings on the columns, a lotus caisson over the throne, the
 // bronze phoenix on the ridge. The furniture of the han hall (src/styles/han/hall.js, read-only) is repeated here, unchanged.
 import { box, lathe, clothBox, addCloth, fromTriangles } from '../../core/geom.js';
-import { STYLES } from '../../core/build.js';
-import { rng, steps, eaveTiles, eaveTilesGable, roofs, hipLite } from '../han/kit.js';
+import { rng, steps, eaveTilesGable, roofs, hipLite } from '../han/kit.js';
 import { limb } from '../qing/carving.js';
+import { Mesh, wadang, bracketSet, faceOf } from './detail.js';
 
 /** A straight strut between a and b (in the plane of a face): cross-section w in the plane and t out of it; frame: base point, U (along the face), N (outward). */
 function strut(bag, mat, base, U, N, [u0, y0], [u1, y1], w, t, o = 0) {
@@ -70,7 +70,7 @@ const censer = (bag, x, y, z) => {
  *   furnish ('throne' | 'court' | 'lecture' | 'office' | none), rafters, base }. The hall faces south.
  */
 export function hall(el, ctx) {
-  const { bag, col, lights } = ctx, rand = rng(el.seed ?? 7);
+  const { bag, col, lights } = ctx, rand = rng(el.seed ?? 7), M = new Mesh();
   const W = el.bays * el.bayW, D = el.depth * el.depthW, x0 = el.cx - W / 2, x1 = el.cx + W / 2, z1 = el.z1, z0 = z1 - D, f = el.floor, H = el.h ?? 7;
   const base = el.base ?? 0.9, gy = f - base, ap = el.ap ?? 2.2, BZ = el.bz ?? 2.7;
   const open = el.open ?? [Math.floor(el.bays / 2) - 1, Math.floor(el.bays / 2) + 1];
@@ -82,6 +82,13 @@ export function hall(el, ctx) {
   // the steps up from the crown: the middle flight and one at each end of the front
   const flights = [el.cx]; if (el.bays >= 7) flights.push(el.cx - el.bayW * 3.3, el.cx + el.bayW * 3.3);
   for (const cx of flights) steps(bag, col, [cx - 2.4, z1 + ap, cx + 2.4, z1 + ap + 3.0], gy, f, 'n', 'bluestone', 0.18, gy - 0.4);
+  // the cheeks of each flight: a sloped stone wall either side, a lotus bud on a post at its foot
+  for (const cx of flights) for (const sd of [-1, 1]) {
+    const xa = cx + sd * 2.4, xb = xa + sd * 0.55, za = z1 + ap, zb = z1 + ap + 3.0;
+    M.solid('bluestone', [Math.min(xa, xb), 0, 0], [0, 0, 1], [0, 1, 0], [1, 0, 0], [[za, gy - 0.4], [zb, gy - 0.4], [zb, gy + 0.08], [za, f + 0.42]], 0, 0.55);
+    M.box('granite_grey', Math.min(xa, xb) - 0.04, gy + 0.08, zb - 0.3, Math.max(xa, xb) + 0.04, gy + 0.5, zb + 0.06);
+    M.box('gilt_bronze', xa + sd * 0.275 - 0.08, gy + 0.5, zb - 0.22, xa + sd * 0.275 + 0.08, gy + 0.78, zb - 0.06);
+  }
   // the columns on stone plinths, with their cap blocks and bracket arms; the architraves along every line
   const colAt = (x, z) => {
     bag.add('bluestone', lathe([[0.62, 0], [0.62, 0.1], [0.5, 0.2], [0.45, 0.32]], 10, null, x, f, z));
@@ -136,7 +143,7 @@ export function hall(el, ctx) {
   {
     const oRoof = el.overhang ?? 3.4, rs = el.rise ?? 6.4, Bd = D / 2 + oRoof;
     const top = f + H + BZ - 0.5 + rs * Math.pow(oRoof / Bd, 1.25) - 0.1;            // the roof's surface over the wall line, a hand under the tiles
-    const yPlate = f + H + 0.6, sets = STYLES.chinese.elements.bracket_set;
+    const yPlate = f + H + 0.6;
     for (const [c, side] of [[Z(0), 'n'], [Z(el.depth), 's'], [X(0), 'w'], [X(el.bays), 'e']]) {
       const alongX = side === 'n' || side === 's', sg = side === 'n' || side === 'w' ? -1 : 1;
       const lo0 = alongX ? x0 : z0, len = alongX ? W : D, nb = alongX ? el.bays : el.depth, bw = len / nb;
@@ -157,10 +164,8 @@ export function hall(el, ctx) {
         slab(uc - 0.55, uc + 0.55, yPlate + 1.4, yPlate + 1.85, -0.1, 0.13, 'paint_caihua');                                                // a teal panel of clouds on the frieze
         slab(uc - 0.18, uc + 0.18, yPlate + 1.55, yPlate + 1.7, 0.13, 0.15, 'gilt_bronze');                                                 // its gilt boss
       }
-      for (let k = 0; k <= nb; k++) {
-        const u = lo0 + k * bw, p = alongX ? [u, c] : [c, u];
-        sets({ at: p, y: yPlate, dir: alongX ? [0, sg] : [sg, 0], tiers: 2, step: 0.45, mat: 'timber_red', blockMat: 'paint_ochre' }, ctx);
-      }
+      const fc = faceOf(side, c);
+      for (let k = 0; k <= nb; k++) bracketSet(M, fc, lo0 + k * bw, yPlate, Math.min(1.95, oRoof * 0.58));
     }
   }
   // the ceiling: coffers between crossbeams
@@ -171,7 +176,7 @@ export function hall(el, ctx) {
   const ov = el.overhang ?? 3.4, rise = el.rise ?? 6.4, ey = f + H + BZ - 0.5, cz = (z0 + z1) / 2;
   if ((el.roof ?? 'hip') === 'hip') {
     (el.rafters ? roofs().hip_roof : hipLite)({ c: [el.cx, cz], A: W / 2 + ov, B: D / 2 + ov, y: ey, rise, lift: 0.5, pow: 1.25, mat: 'tile_grey', soffit: 'timber_red', noChiwei: true, rafters: el.rafters ? { out: ov, sp: 0.6 } : undefined, alongZ: false }, ctx);
-    eaveTiles(bag, el.cx, cz, W / 2 + ov, D / 2 + ov, ey, 0.5);
+    wadang(M, el.cx, cz, W / 2 + ov, D / 2 + ov, ey, 0.5, 0.46, 0.19, el.glyphs ?? '');
     // the ridge ends: simple upturned ornaments, the ridge's centre carrying a bronze bird
     for (const s of [-1, 1]) {
       const ex = el.cx + s * (W / 2 - D / 2 + 0.1);
@@ -183,6 +188,7 @@ export function hall(el, ctx) {
     roofs().gable_roof_c({ c: [el.cx, cz], A: W / 2 + 1.2, B: D / 2 + ov * 0.7, y: ey, rise: rise * 0.85, mat: 'tile_grey', soffit: 'timber_red', noHorns: true, alongZ: false }, ctx);
     eaveTilesGable(bag, el.cx, cz, W / 2 + 1.2, D / 2 + ov * 0.7, ey);
   }
+  M.flush(bag);
   // inside
   const mid = el.cx, dz = z0;
   const fl = el.furnish;
