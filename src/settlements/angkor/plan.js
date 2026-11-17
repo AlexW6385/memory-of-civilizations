@@ -100,6 +100,14 @@ function carve(r, holes) {
   return out;
 }
 
+// the carving laid over the style's masses (dress.js, docs §27): the same parameters, the same places
+for (const el of E.slice()) {
+  if (el.t === 'k_gallery') E.push({ ...el, t: 'ak_gdress', dress: el.relief ? { win: true, dev: true } : el.devatas ? { pil: true } : el.windows ? { dev: true } : { dev: true } });
+  else if (el.t === 'k_tower') E.push({ ...el, t: 'ak_tdress' });
+  else if (el.t === 'naga_rail') E.push({ ...el, t: 'ak_ndress' });
+  else if (el.t === 'k_cloister') E.push({ ...el, t: 'ak_cdress' });
+}
+
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
   room('bakan', T.bakan.terrace, T.bakan.y, 'open'),
