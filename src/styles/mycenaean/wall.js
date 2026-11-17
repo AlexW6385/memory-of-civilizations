@@ -5,6 +5,7 @@ import { box, frustum, fromTriangles } from '../../core/geom.js';
 import { profile, ell, cap, poly } from '../greek/sculpture.js';
 import { merge } from '../greek/columns.js';
 import { rng, mergeG, inFrame, courses } from './util.js';
+import { stud, bar } from './relief.js';
 
 const ROUGH = 'rock_boulder', CORE = 'rubble', DRESSED = 'limestone_yellow';
 
@@ -138,5 +139,23 @@ export function lionGate(el, ctx) {
   col.floor([X - 0.4, -hw, X + th + 0.4, hw], y);
   // the door's pivot stones inside
   for (const s of [-1, 1]) bag.add('granite_grey', box(X + th - 0.9, y, s * (hw - 0.05) - 0.18, X + th - 0.5, y + 0.12, s * (hw - 0.05) + 0.18));
+  // the double doors on their pivot beams, swung back against the jambs inside the passage and leaning with them (the doors' wood planked, railed and studded with bronze)
+  {
+    const lean = 0.155, lh = 2.85, xa = X + th - 0.7 - 1.62, xb = X + th - 0.7, planks = [], rails = [], nails = [], rings = [];
+    for (const s of [-1, 1]) {
+      const za = s > 0 ? hw - 0.16 : -hw + 0.04, zb = s > 0 ? hw - 0.04 : -hw + 0.16;
+      for (let k = 0; k < 6; k++) {
+        const a = xa + k * ((xb - xa) / 6);
+        planks.push(frustum([a + 0.012, za, a + (xb - xa) / 6 - 0.012, zb], y + 0.02, y + lh, 0, 0, s > 0 ? -lean : lean, s > 0 ? lean : -lean));
+      }
+      const inner = (v) => s * (hw - 0.16 - lean * (v / lh));            // the leaf's inner face at height v above the threshold
+      for (const v of [0.45, 1.4, 2.4]) { const z = inner(v); rails.push(box(xa, y + v, Math.min(z, z - s * 0.05), xb, y + v + 0.15, Math.max(z, z - s * 0.05))); }
+      for (let a = xa + 0.18; a < xb - 0.1; a += 0.28) for (const v of [0.52, 1.47, 2.47]) for (const dv of [0.03, 0.12]) nails.push(stud([a, y + v + dv, inner(v) - s * 0.05], [0, 0, -s], 0.032));
+      // the bronze ring on a boss, and the pivot's iron shoe
+      rings.push(bar((u, v, d) => [u, y + v, d], xa + 0.35, 1.15, xa + 0.35, 1.45, 0.02, inner(1.3) - s * 0.08, 6));
+      col.rect([xa, s > 0 ? hw - 0.17 : -hw, xb, s > 0 ? hw : -hw + 0.17], y, y + lh);
+    }
+    bag.add('timber', mergeG(planks)); bag.add('cedar', mergeG(rails)); bag.add('bronze', mergeG(nails)); bag.add('bronze', mergeG(rings));
+  }
   void cap; void ell;
 }
