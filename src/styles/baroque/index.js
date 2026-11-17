@@ -20,6 +20,7 @@ import { sistina } from './sistina.js';
 import { palaceApostolic } from './apostolic.js';
 import { colonnade } from './colonnade.js';
 import { cupola } from './cupola.js';
+import { dressBlock } from './block.js';
 import { piazzaLines, parterre, passetto, castel as castelRich, naveDress, shipMill, tiberLanding } from './dress.js';
 
 const T = 'travertine', L = 'lead', ST = 'stucco_ochre';
@@ -43,7 +44,7 @@ function stPeter(el, { bag, col }) {
   // the attic and giant pilasters
   if (!IN) bag.add(T, box(cx - arm - 1, y + H, cz - aw / 2 - 1, cx + arm + 1, y + H + 2.5, cz + aw / 2 + 1));
   else bag.add(T, slab([[cx - arm - 1, cz - aw / 2 - 1], [cx + arm + 1, cz - aw / 2 - 1], [cx + arm + 1, cz + aw / 2 + 1], [cx - arm - 1, cz + aw / 2 + 1]], y + H, y + H + 2.5, cx, cz, R0));
-  for (let k = -5; k <= 5; k++) for (const s of [-1, 1]) bag.add(T, box(cx + k * arm / 5 - 0.9, y, cz + s * (aw / 2 + 0.6) - 0.6, cx + k * arm / 5 + 0.9, y + H, cz + s * (aw / 2 + 0.6) + 0.6));
+  dressBlock(bag, { cx, cz, y, H, arm, aw, n0, n1, W });   // (the giant order, niches and windows: block.js)
   // Maderno's nave to the east, its front with eight columns, the pediment and the statues
   if (!IN) { bag.add(T, box(n0 - 1, y - 0.5, cz - W / 2, n1, y + H, cz + W / 2)); col.rect([n0 - 1, cz - W / 2, n1, cz + W / 2], y, y + H); }
   bag.add(L, box(n0, y + H, cz - W * 0.3, n1, y + H + 6, cz + W * 0.3));
