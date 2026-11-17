@@ -12,6 +12,7 @@ import { arcadeWall } from '../mughal/index.js';
 import '../safavid/index.js';
 import { B, LAP, TUR, CRE, WHI, unit, away, solid, wallRun, bannai, ribbedDome, tiledMinaret, deck, bar, boxR } from './kit.js';
 import { madrasa } from './madrasa.js';
+import { archRings, frameRect, corbelCornice } from './relief.js';
 import { timHouse, timGarden } from './houses.js';
 import { market, bazaarDress, tapchan } from './market.js';
 import { bibiKhanym, gurEAmir, observatory, chorsu, shopRow, domeBlock, nicheWall, khanqah } from './monuments.js';
@@ -27,7 +28,7 @@ function pishtaq(el, { bag, col }) {
   const [ux, uz, L] = unit(a, b), [nx, nz] = away(a, b, el.facing), mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
   const inside = [mid[0] + nx * 100, mid[1] + nz * 100], out = [-nx, -nz];
   const idepth = iw.depth ?? 6;
-  const arches = [{ at: L / 2, w: iw.w, h: iw.h, depth: idepth, alcove: 'rect', pass: !!iw.pass, domeMat: TUR, ribMat: LAP, cellMat: CRE, sideMat: 'tile_cream', backMat: 'tile_lapis' }];
+  const arches = [{ at: L / 2, w: iw.w, h: iw.h, depth: idepth, alcove: 'rect', pass: !!iw.pass, domeMat: TUR, ribMat: LAP, cellMat: CRE, sideMat: 'tile_cream', backMat: 'tile_lapis', deep: iw.h > 14, deepRows: 9, deepCols: Math.max(12, Math.round(iw.w * 1.7)) }];
   const holes = [{ at: L / 2, w: iw.w, h: iw.h }];
   const nw = Math.min((L - iw.w) / 2 - 3.2, iw.w * 0.5);
   if (nw > 1.5) for (const s of [-1, 1]) {
@@ -47,19 +48,27 @@ function pishtaq(el, { bag, col }) {
   const base = { a, b, n: N, d, y };
   const e0 = Math.max(0.6, sL - gap - bw), e1 = Math.min(L - 0.6, sR + gap + bw);
   bag.add('marble', orientedBox([a[0] + out[0] * (d + 0.05), a[1] + out[1] * (d + 0.05)], [b[0] + out[0] * (d + 0.05), b[1] + out[1] * (d + 0.05)], 0.12, y, y + 1.0));
-  bannai(bag, { ...base, s0: sL - gap - bw, s1: sL - gap, v0: 1.05, v1: vTop, kind: 'kufic', base: LAP, ink: CRE, alt: WHI, ink2: TUR, cell: bw * 0.62, seed: 5 });
-  bannai(bag, { ...base, s0: sR + gap, s1: sR + gap + bw, v0: 1.05, v1: vTop, kind: 'kufic', base: LAP, ink: CRE, alt: WHI, ink2: TUR, cell: bw * 0.62, seed: 9 });
+  bannai(bag, { ...base, s0: sL - gap - bw, s1: sL - gap, v0: 1.05, v1: vTop, kind: 'kufic', base: LAP, ink: CRE, alt: WHI, ink2: TUR, cell: bw * 0.62, seed: 5, relief: 0.09 });
+  bannai(bag, { ...base, s0: sR + gap, s1: sR + gap + bw, v0: 1.05, v1: vTop, kind: 'kufic', base: LAP, ink: CRE, alt: WHI, ink2: TUR, cell: bw * 0.62, seed: 9, relief: 0.09 });
   if (h > vTop + bw + 1.5) {
-    bannai(bag, { ...base, s0: e0, s1: e1, v0: vTop, v1: vTop + bw, kind: 'kufic', base: LAP, ink: WHI, alt: CRE, ink2: TUR, cell: bw * 0.62, seed: 2 });
+    bannai(bag, { ...base, s0: e0, s1: e1, v0: vTop, v1: vTop + bw, kind: 'kufic', base: LAP, ink: WHI, alt: CRE, ink2: TUR, cell: bw * 0.62, seed: 2, relief: 0.09 });
     // the spandrels beside the arch, the field over it up to the cornice
     bannai(bag, { ...base, s0: sL - gap, s1: sR + gap, v0: 1.05, v1: vTop, kind: 'diamond', base: TUR, ink: LAP, alt: WHI, ink2: CRE, cell: 0.7, holes: [holes[0]] });
-    bannai(bag, { ...base, s0: e0, s1: e1, v0: vTop + bw + 0.05, v1: h - 1.5, kind: 'diamond', base: TUR, ink: LAP, alt: WHI, ink2: CRE, cell: Math.max(0.7, (e1 - e0) / 22), holes: [] });
+    bannai(bag, { ...base, s0: e0, s1: e1, v0: vTop + bw + 0.05, v1: h - 2.4, kind: 'diamond', base: TUR, ink: LAP, alt: WHI, ink2: CRE, cell: Math.max(0.7, (e1 - e0) / 22), holes: [], relief: 0.14 });
   }
   // the wings: a diamond field between the niches, a chequer cornice along the top
   const wL = [0.5, e0 - 0.3], wR = [e1 + 0.3, L - 0.5];
-  for (const [s0, s1] of [wL, wR]) if (s1 - s0 > 2.5) bannai(bag, { ...base, s0, s1, v0: 1.05, v1: h - 1.5, kind: 'diamond', base: B, ink: TUR, alt: CRE, ink2: LAP, cell: 0.8, holes: holes.slice(1).map((q) => ({ ...q })), seed: 4 });
-  bannai(bag, { ...base, s0: 0.3, s1: L - 0.3, v0: h - 1.3, v1: h - 0.35, kind: 'checker', base: LAP, ink: TUR, alt: WHI, cell: 0.65 });
-  bag.add('marble', orientedBox([a[0] + out[0] * (d + 0.06), a[1] + out[1] * (d + 0.06)], [b[0] + out[0] * (d + 0.06), b[1] + out[1] * (d + 0.06)], 0.2, y + h - 0.3, y + h));
+  for (const [s0, s1] of [wL, wR]) if (s1 - s0 > 2.5) bannai(bag, { ...base, s0, s1, v0: 1.05, v1: h - 2.4, kind: 'diamond', base: B, ink: TUR, alt: CRE, ink2: LAP, cell: 0.8, holes: holes.slice(1).map((q) => ({ ...q })), seed: 4, relief: 0.12 });
+  bannai(bag, { ...base, s0: 0.3, s1: L - 0.3, v0: h - 2.3, v1: h - 1.35, kind: 'checker', base: LAP, ink: TUR, alt: WHI, cell: 0.65 });
+  // relief: the stepped archivolts round the iwan, the moulded frame round the portal's field, the corbel cornice and merlons
+  archRings(bag, { a, b, n: N, d, y, at: L / 2, w: iw.w, h: iw.h, rings: [[0, 0.12, 0.42, 'tile_cream'], [0.12, 0.22, 0.3, 'tile_turquoise'], [0.22, 0.3, 0.18, 'marble']] });
+  if (h > vTop + bw + 1.5) {
+    frameRect(bag, { ...base, s0: e0 - 0.35, s1: e1 + 0.35, v0: 1.0, v1: h - 1.45, t: 0.3, proj: 0.3, mat: 'marble' });
+    frameRect(bag, { ...base, s0: e0 - 0.05, s1: e1 + 0.05, v0: 1.3, v1: h - 1.75, t: 0.1, proj: 0.18, mat: LAP });
+  }
+  corbelCornice(bag, { a, b, n: N, d, y: y + h - 0.12, th, cell: h > 20 ? 0.5 : 0.45 });
+  // the wing niches' own mouldings
+  for (const ar of arches.slice(1)) archRings(bag, { a, b, n: N, d, y, at: ar.at, w: ar.w, h: ar.h, sill: ar.sill, rings: [[0, 0.16, 0.14, 'tile_cream'], [0.16, 0.3, 0.08, 'tile_turquoise']] });
   // the mass behind: the two sides, and the block over the iwan
   for (const [s0, s1] of [[0, L / 2 - iw.w / 2 - 0.2], [L / 2 + iw.w / 2 + 0.2, L]]) {
     const p = [a[0] + ux * (s0 + s1) / 2 + nx * (th / 2 + D / 2), a[1] + uz * (s0 + s1) / 2 + nz * (th / 2 + D / 2)], hl = (s1 - s0) / 2;

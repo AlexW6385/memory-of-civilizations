@@ -128,3 +128,18 @@ Sources: Archnet, Madrasah-i Ulugh Beg (https://archnet.org/sites/2123: four dom
 | Footbridges on the aryk | A plank deck with battens where each cross lane meets the channel | [inferred] |
 
 Level: L2, the landmark's halls and the town's houses toward L3. Still missing for L3: the upper storey of the cells and the minarets' stairs, Gur-e Amir's crypt and screen, weathering tuned to the climate, house interiors beyond one room and the court, per-trade street noises.
+
+## 18. Landmark pass (2026-11-17): the pishtaq and minarets seen close
+
+Sources: Archnet, Madrasah-i Ulugh Beg (https://archnet.org/sites/2123: the pishtaq, tile mosaic, haft-rang and banna'i covering every face, marble for dados and mouldings); Wikipedia, Registan (https://en.wikipedia.org/wiki/Registan: minarets at the corners, the pishtaq); Wikipedia, Timurid architecture (https://en.wikipedia.org/wiki/Timurid_architecture: muqarnas of ever smaller cells in the iwan's half-dome, banna'i Kufic).
+
+| Feature | What we build | Basis |
+|---|---|---|
+| Iwan half-dome | Muqarnas proper (rows of faceted cells standing out of the shell, nine rows) in place of a plain ribbed shell | [stated] muqarnas in the iwan's half-dome; [inferred] row count |
+| Archivolts | Three stepped mouldings (cream, turquoise, marble; 0.42, 0.30, 0.18 m out) round the iwan's pointed arch, thinner ones round the wing niches | [inferred] stepped framing of Timurid iwans |
+| Moulded frame (alfiz) | A marble and a lapis frame standing out round the whole portal field | [inferred] |
+| Banna'i in relief | Kufic strokes and bars as real prisms 9 cm proud; the lozenges of the great field as pyramids with a cream cap | [stated] banna'i Kufic and diamond patterns; [inferred] relief depth |
+| Cornice | A corbel cornice of two tiers of cells (brick, cream tile) under a marble slab, and a parapet of merlons capped in turquoise, replacing the flat slab top | [inferred] |
+| Minarets | Eight lapis-in-turquoise pointed panels round the octagonal foot, three rings of muqarnas cells under the gallery, a lantern with eight ribs and a ribbed cap | [inferred]; the minaret height 33 m is the dossier's measure |
+
+Arrival frame (tools/draw-count.mjs): main draws 758 before and after; main triangles 3.66 M before, 3.75 M after.
