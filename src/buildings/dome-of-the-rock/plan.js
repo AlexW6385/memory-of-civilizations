@@ -74,6 +74,7 @@ for (let k = 0; k < 8; k++) {
     const [cx, cz] = s.c, [nx, nz] = s.n, [ux, uz] = s.u;
     const pc = (u, d) => [cx + ux * u + nx * d, cz + uz * u + nz * d];
     for (const u of [-3.6, -1.5, 1.5, 3.6]) { const q = pc(u, TH / 2 + 3.0); column(q[0], q[1], 0, 6.2, 0.55, 'marble_column'); }
+    add({ t: 'dotr_porch', c: s.c, u: s.u, n: s.n, hw: 4.4, d0: TH / 2, d1: TH / 2 + 3.6, y: 6.75 - 0.55 });
     const a = pc(-4.4, TH / 2), b = pc(4.4, TH / 2 + 3.6);
     add({ t: 'slab', rect: [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], y0: 6.2, y1: 6.75, mat: 'limestone', holes: [] });
     const dpos = pc(0, -TH / 2 + 0.1);
@@ -127,7 +128,10 @@ add({ t: 'arc_wall', c: [0, 0], r0: RDO - 0.05, r1: RDO + 0.45, a0: 0, a1: 360, 
 const shell = (R, H, n = 14) => { const p = []; for (let i = 0; i <= n; i++) { const t = (i / n) * Math.PI / 2; p.push([R * Math.cos(t) + 0.0001, H * Math.pow(Math.sin(t), 0.9)]); } p.push([0.0001, H + 0.5]); return p; };
 add({ t: 'lathe_shell', c: [0, 0], y: SPR, profile: shell(RD, 10.5), seg: 96, inward: true, mat: 'mosaic_gold' });
 add({ t: 'lathe_shell', c: [0, 0], y: SPR, profile: shell(RDO + 0.2, 14.4), seg: 96, inward: false, mat: 'gold' });
-add({ t: 'lathe_shell', c: [0, 0], y: SPR + 14.85, profile: [[0.3, 0], [0.15, 0.6], [0.38, 0.95], [0.12, 1.3], [0.05, 2.2], [0.0001, 2.3]], seg: 16, mat: 'gold' });
+add({ t: 'dotr_dome_ribs', c: [0, 0], y: SPR, R: RDO + 0.2, H: 14.4, n: 32, w: 0.34 });
+// the finial: a collar, a swelling bulb, a ball, a second smaller ball and the spire
+add({ t: 'lathe_shell', c: [0, 0], y: SPR + 14.85, profile: [[0.55, 0], [0.5, 0.12], [0.3, 0.2], [0.2, 0.3], [0.42, 0.55], [0.5, 0.85], [0.38, 1.15], [0.16, 1.3], [0.13, 1.4], [0.27, 1.6], [0.3, 1.85], [0.2, 2.05], [0.08, 2.15], [0.05, 2.9], [0.0001, 3.3]], seg: 24, mat: 'gold' });
+add({ t: 'dotr_hips', c: [0, 0], r0: AC / Math.cos(22.5 * D2R), r1: RDO + 0.1, y0: WALL + 0.5, y1: 14.0, n: 8, a0: 22.5 });
 
 // ── the ceilings of the two ambulatories ─────────────────────────────────────
 add({ t: 'ring_slab', c: [0, 0], outer: { n: 8, a: AO - TH }, inner: { n: 8, a: AA + 0.55 }, y0: CEIL, y1: CEIL + 0.3, mat: 'ceiling_painted' });
