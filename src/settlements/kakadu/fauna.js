@@ -22,5 +22,7 @@ const perches = [], r = rng(31);
 for (let k = 0; k < 22; k++) { const x = -80 + r() * 140, z = -20 + r() * 80; if (poolD(x, z) > 1.3) perches.push({ kind: 'sparrow', x, z, y: height(x, z) + 0.05, rot: r() * 3, range: [1.8, 1.6] }); }
 for (const [x, z, y] of [[-12, -33, 4.2], [20, -34, 4.2], [-50, -35, 3.8], [0, -33, 3.0], [-6, -33.6, 3.3], [-54, -35, 3.3]]) perches.push({ kind: 'sparrow', x, z, y, rot: 0, range: [1.5, 0], alert: 5 });
 for (const [a, rot] of [[0.6, 1.0], [2.4, 4.0], [4.2, 2.0], [1.4, 0.5], [3.3, 2.5], [5.2, 3.5], [5.9, 1.2]]) { const x = POOL.c[0] + Math.cos(a) * POOL.a * 1.08, z = POOL.c[1] + Math.sin(a) * POOL.b * 1.08; perches.push({ kind: 'egret', x, z, y: height(x, z), rot, stay: [60, 200], gone: [60, 160], alert: 10 }); }
+// a jabiru and a brolga wading, ibis on the margin (stand-ins of the engine's stork, heron and ibis looks)
+for (const [kind, a, rot] of [['stork', 0.9, 1.2], ['stork', 3.0, 3.8], ['crane', 2.0, 2.2], ['crane', 2.1, 5.0], ['ibis', 4.9, 0.6], ['ibis', 5.0, 2.0], ['ibis', 4.8, 4.0]]) { const x = POOL.c[0] + Math.cos(a) * POOL.a * 1.03, z = POOL.c[1] + Math.sin(a) * POOL.b * 1.03; perches.push({ kind, x, z, y: height(x, z), rot, stay: [80, 240], gone: [60, 160], alert: 12 }); }
 void CAMPS;
 export default { fish, flights, perches };

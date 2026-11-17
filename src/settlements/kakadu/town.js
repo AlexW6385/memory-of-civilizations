@@ -3,7 +3,7 @@
 // the people at the camp (bare, with fibre belts, ochre and white clay), dingoes, and magpie geese crowded on the water [docs §5].
 import { HOUSE } from '../../styles/kakadu/house.js';
 import { faceSpots } from '../../styles/kakadu/outcrop.js';
-import { RADIUS, POOL, CAMPS, HOUSES, houseRot, height, groves, inPool, poolD, rng, inRect, MAIN, SMALL, woodland, tuftSpots, screeSpots, shelterSpots } from './layout.js';
+import { RADIUS, POOL, HOLLOWS, inHollow, CAMPS, HOUSES, houseRot, height, groves, inPool, poolD, rng, inRect, MAIN, SMALL, woodland, tuftSpots, screeSpots, shelterSpots } from './layout.js';
 
 const plan = (id, style, elements) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -14], facing: 's' } });
 
@@ -50,11 +50,6 @@ export async function town() {
   // a hunter at the billabong's edge with a goose spear; people on the way along the foot
   for (let k = 0; k < 8; k++) { const x = -60 + rand() * 100, z = -18 + rand() * 5, f = rand() < 0.5 ? man : woman, rot = rand() * 6.28, o = rand() < 0.4 ? { pose: 'talk' } : {}; if (Math.hypot(x + 1, z + 13) < 9) continue; f([x, z], height(x, z), rot, o); }   // (none within 9 m of the arrival)
   man([POOL.c[0] - POOL.a * 1.08, POOL.c[1] - 5], 0, -1.2, { pose: 'staff' });
-  // magpie geese crowded on the shrunken water and on its margin
-  for (let k = 0; k < 12; k++) {
-    const a = rand() * 6.28, d = Math.sqrt(rand()) * 0.55, x = POOL.c[0] + Math.cos(a) * POOL.a * d, z = POOL.c[1] + Math.sin(a) * POOL.b * d;
-    if (inPool(x, z, -0.1)) L.push({ t: 'chickens', kind: 'goose', at: [x, z], y: POOL.water - 0.02, rot: rand() * 6.28, n: 4 + Math.floor(rand() * 4), seed: k + 21 });
-  }
   // ── the deepening (docs §8): woodland, ground cover, rock tops, furnished shelters, camp goods, canoes, more people ──
   const R2 = rng(2024), wood = woodland();
   for (const [x, z, h] of wood.gum) K.push({ t: 'ka_gum', at: [x, z], y: height(x, z), rot: R2() * 6.28, h: Math.round(h * 2) / 2, seed: Math.floor(R2() * 3) });
@@ -117,10 +112,6 @@ export async function town() {
   for (const [x, z, y, rot, pose] of [[44, -29, 4.7, Math.PI, 'sit_ground'], [46.2, -28.6, 4.7, Math.PI, 'sit_ground'], [50, -45, 11.3, Math.PI, 'stand'], [56, -44, 11.3, Math.PI, 'talk'], [58.4, -62, 21.1, Math.PI, 'sit_ground'], [60.4, -61, 21.1, Math.PI, 'sit_ground']]) (R2() < 0.5 ? man : woman)([x, z], y, rot, { pose });
   // a dog or two lying in the shade of the overhang, and more geese
   for (const [x, z] of [[-14, -29.6], [14, -29.6], [-52, -32]]) L.push({ t: 'animal', kind: 'dog', at: [x, z], y: height(x, z), rot: R2() * 6.28, seed: x + 9 });
-  for (let k = 0; k < 10; k++) {
-    const a = R2() * 6.28, d = 0.6 + R2() * 0.4, x = POOL.c[0] + Math.cos(a) * POOL.a * d, z = POOL.c[1] + Math.sin(a) * POOL.b * d;
-    if (inPool(x, z, -0.1)) L.push({ t: 'chickens', kind: 'goose', at: [x, z], y: POOL.water - 0.02, rot: R2() * 6.28, n: 3 + Math.floor(R2() * 5), seed: k + 51 });
-  }
   // the apron between the camps, seen whole from the arrival (12-30 m off, none in the lane of the way): work groups at their mats and goods, a dog beside each
   {
     const kid = (x, z, rot, seed, pose = 'sit_ground') => L.push({ t: 'figure', at: [x, z], y: height(x, z), rot, seed, dress: 'loincloth', cloth: 'cloth_brown', skin: 'skin_dark', child: true, h: 0.95 + (seed % 3) * 0.05, pose, hair: 'short', feet: 'bare', over: 'none' });
@@ -150,7 +141,7 @@ export async function town() {
     HOUSES.forEach((Hs, i) => {
       const B = HOUSE[Hs.kind], rot = houseRot(Hs), [x, z] = Hs.at, y = height(x, z), ca = Math.abs(Math.cos(rot)), sa = Math.abs(Math.sin(rot));
       const ex = (B.hw + 0.5) * ca + (B.hd + 0.5) * sa, ez = (B.hw + 0.5) * sa + (B.hd + 0.5) * ca;
-      K.push({ t: 'ka_house', kind: Hs.kind, at: [x, z], y, rot });
+      K.push({ t: 'ka_house', kind: Hs.kind, at: [x, z], y, rot, paint: i });
       rects.push({ t: 'ka_homeprecinct', at: [x, z], rect: [x - ex, z - ez, x + ex, z + ez] });
       const [fx, fz] = wl(Hs, ...B.fire); K.push({ t: 'ka_fire', at: [fx, fz], y, seed: 60 + i });
       for (const [lx, lz, kind] of B.goods) { const [gx, gz] = wl(Hs, lx, lz); K.push({ t: 'ka_item', kind, at: [gx, gz], y, rot, seed: i }); }
@@ -162,6 +153,66 @@ export async function town() {
       if (i % 2 === 0) { const [px, pz] = wl(Hs, ...B.child); L.push({ t: 'figure', at: [px, pz], y: y + 0.4, rot: rot + 1.3, seed: 900 + i, dress: 'loincloth', cloth: 'cloth_brown', skin: 'skin_dark', child: true, h: 0.95, pose: 'sit_ground', hair: 'short', feet: 'bare', over: 'none' }); }
     });
     K.push(...rects);
+  }
+  // ── floors, camps, birds and plants deepened (docs §13) ──
+  {
+    const R3 = rng(3131);
+    const inHouse = (x, z, m) => HOUSES.some((Hs) => { const r = houseRot(Hs), c = Math.cos(r), sn = Math.sin(r), dx = x - Hs.at[0], dz = z - Hs.at[1], B = HOUSE[Hs.kind]; return Math.abs(dx * c - dz * sn) < B.hw + m && Math.abs(dx * sn + dz * c) < B.hd + m; });
+    const free = (x, z, r) => !inHouse(x, z, 0.8) && !inPool(x, z, 0.03) && !K.some((e) => e.at && e.t !== 'ka_lilies' && Math.hypot(e.at[0] - x, e.at[1] - z) < r) && !L.some((e) => e.at && Math.hypot(e.at[0] - x, e.at[1] - z) < r);
+    const useAt = (kind, x, z, seed = 0, rot = 0) => K.push({ t: 'ka_use', kind, at: [x, z], y: height(x, z), rot, seed });
+    const crouch = (f, x, z, rot, pose) => f([x, z], height(x, z), rot, { pose });
+    // the rock shelters' floors: shell middens at the lips, earth ovens, grinding places, ochre and fibre work, a bark bed on its frame
+    useAt('shells', -19.6, -27.7, 0); useAt('shells', 19.6, -27.9, 1); useAt('shells', -48.2, -30.4, 2);
+    useAt('oven', 12.0, -28.5, 1); useAt('oven', -49.4, -31.4, 0, 0.4);
+    useAt('grind', -11, -28.9, 0, 0); woman([-11.0, -28.15], height(-11, -28.15), Math.PI, { pose: 'kneel' });
+    useAt('grind', 5.7, -32.9, 1, 0); useAt('grind', -58.3, -34.2, 2, 0.2);
+    useAt('ochre', -15.2, -32.9, 1, 0.1); useAt('string', 14.3, -32.8, 0, 0); woman([14.2, -31.95], height(14.2, -31.95), Math.PI, { pose: 'sit_ground' });
+    useAt('bedframe', 19.3, -33.1, 0, 0); useAt('bedframe', -49.5, -34.9, 0, 0.05);
+    // the camps: an earth oven (open or closed) at each fire, a grinding place where there was none, fibre work at some
+    CAMPS.forEach((C, i) => {
+      const [fx, fz] = C.fire, pick = (list, r) => list.map(([dx, dz]) => [fx + dx, fz + dz]).find(([x, z]) => free(x, z, r));
+      const o = pick([[-0.5, -3.9], [-4.2, -3.2], [4.6, -5.0], [-4.6, 5.2], [5.4, 3.6], [0, 6.5]], 1.9); if (o) useAt('oven', o[0], o[1], i % 2, i * 0.7);
+      if (!C.grind) { const g = pick([[-5.5, 0.5], [5.8, 1.8], [-1, 7.2], [3, -6.5]], 2.0); if (g) { useAt('grind', g[0], g[1], i % 3, 0.3); woman([g[0], g[1] + 0.75], height(g[0], g[1]), Math.PI, { pose: 'kneel' }); } }
+      if (i % 3 === 1) { const t = pick([[6.2, 5.8], [-6.2, 4.6], [6.8, -3.4], [-3, 8]], 2.0); if (t) { useAt('string', t[0], t[1], i % 3, 0.2); woman([t[0], t[1] + 0.7], height(t[0], t[1]), Math.PI, { pose: 'sit_ground' }); } }
+      if (i === 4 || i === 6) { const t = pick([[-6.5, 2], [6.5, 1.5], [0, -6.5]], 2.0); if (t) useAt('ochre', t[0], t[1], i % 3, 0.5); }
+    });
+    // by the doors of the walk-in shelters: the work done in the shade of the eaves
+    HOUSES.forEach((Hs, i) => {
+      const B = HOUSE[Hs.kind], r = houseRot(Hs), c = Math.cos(r), sn = Math.sin(r), wl2 = (lx, lz) => [Hs.at[0] + lx * c + lz * sn, Hs.at[1] - lx * sn + lz * c];
+      const p = [[3.0, B.hd + 1.1], [-3.0, B.hd + 1.1], [3.4, 0.5], [-3.4, 0.5], [0, B.hd + 2.6]].map(([lx, lz]) => wl2(lx, lz)).find(([x, z]) => free(x, z, 1.8));
+      if (!p) return;
+      const kind = ['oven', 'grind', 'string'][i % 3];
+      useAt(kind, p[0], p[1], i % 2, r);
+      if (kind !== 'oven') woman([p[0], p[1] + 0.75], height(p[0], p[1]), Math.PI, { pose: kind === 'grind' ? 'kneel' : 'sit_ground' });
+    });
+    // the water's birds: magpie geese in the shallows and on the margin (black and white), plumed whistling ducks packed on the mud
+    const shallow = (x, z) => { const h = height(x, z); return h > -0.75 && h < -0.28; };
+    const geese = [];
+    for (let gI = 0; gI < 9; gI++) {
+      const ga = R3() * 6.28, gd = 0.78 + R3() * 0.3, gx = POOL.c[0] + Math.cos(ga) * POOL.a * gd, gz = POOL.c[1] + Math.sin(ga) * POOL.b * gd, hd = R3() * 6.28;
+      for (let k = 0, n = 0; k < 40 && n < 5 + Math.floor(R3() * 4); k++) {
+        const x = gx + (R3() - 0.5) * 6, z = gz + (R3() - 0.5) * 4;
+        if (!shallow(x, z) || !free(x, z, 0.9) || geese.some((q) => Math.hypot(q[0] - x, q[1] - z) < 0.8)) continue;
+        const q = R3(); geese.push([x, z, height(x, z), hd + (R3() - 0.5) * 1.4, q < 0.42 ? 1 : q < 0.55 ? 2 : 0, 0.92 + R3() * 0.16]); n++;
+      }
+    }
+    for (let k = 0; k < 40 && geese.length < 90; k++) { const a = R3() * 6.28, d = 1.06 + R3() * 0.1, x = POOL.c[0] + Math.cos(a) * POOL.a * d, z = POOL.c[1] + Math.sin(a) * POOL.b * d; if (free(x, z, 3) && !inPool(x, z, 0)) for (let j = 0; j < 4; j++) geese.push([x + R3() * 2, z + R3() * 2, height(x, z), R3() * 6.28, j % 2, 1]); }
+    K.push({ t: 'ka_geese', list: geese });
+    const duck = [];
+    for (const [da, dd] of [[0.5, 1.2], [3.9, 1.22], [5.5, 1.18]]) {
+      const cx = POOL.c[0] + Math.cos(da) * POOL.a * dd, cz = POOL.c[1] + Math.sin(da) * POOL.b * dd;
+      for (let k = 0, n = 0; k < 60 && n < 12; k++) { const x = cx + (R3() - 0.5) * 3.4, z = cz + (R3() - 0.5) * 2.6; if (inPool(x, z, 0.0) || !free(x, z, 0.75) || duck.some((q) => Math.hypot(q[0] - x, q[1] - z) < 0.45)) continue; duck.push([x, z, height(x, z), 1.4 + (R3() - 0.5) * 1.2, R3() < 0.3 ? 1 : 0, 1]); n++; }
+    }
+    K.push({ t: 'ka_whistlers', list: duck });
+    // spike-rush and sedge in the shallows and round the hollows
+    const sed = [];
+    for (let k = 0; k < 400 && sed.length < 80; k++) { const a = R3() * 6.28, d = 0.86 + R3() * 0.3, x = POOL.c[0] + Math.cos(a) * POOL.a * d, z = POOL.c[1] + Math.sin(a) * POOL.b * d; if (free(x, z, 1.4) && !duck.some((q) => Math.hypot(q[0] - x, q[1] - z) < 1) && !geese.some((q) => Math.hypot(q[0] - x, q[1] - z) < 0.8)) sed.push([x, z, height(x, z), 0.8 + R3() * 0.6, R3() * 6.28]); }
+    for (const [cx, cz, ha, hb] of HOLLOWS) for (let k = 0; k < 9; k++) { const a = R3() * 6.28, x = cx + Math.cos(a) * ha * (0.8 + R3() * 0.4), z = cz + Math.sin(a) * hb * (0.8 + R3() * 0.4); if (free(x, z, 1.2)) sed.push([x, z, height(x, z), 0.7 + R3() * 0.5, R3() * 6.28]); }
+    K.push({ t: 'ka_sedge', list: sed });
+    // paperbark come away from the trunks lies in scrolls under the trees
+    const bl = [];
+    for (const [x, z] of paper) for (let k = 0; k < 5; k++) { const a = R3() * 6.28, d = 0.8 + R3() * 2.4, bx = x + Math.cos(a) * d, bz = z + Math.sin(a) * d; if (!inPool(bx, bz, 0.02) && !inHollow(bx, bz, 0.4) && !inHouse(bx, bz, 0.4)) bl.push([bx, bz, height(bx, bz), R3() * 6.28, 0.8 + R3() * 0.6]); }
+    K.push({ t: 'ka_barklitter', list: bl });
   }
   void poolD; void inRect;
   // the country in four quarters (so that the far ones cull apart)
