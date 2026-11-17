@@ -44,7 +44,7 @@ function frontPlan(el) {
 
 /** The courses of the front: the three pieces (store range, court wall, kitchen range) less the door's clear strip. */
 function pieces(f, gap = 0.93) {
-  return [[f.x0 + 0.02, f.xc0, f.hW], [f.xc0, f.dc - gap, f.hS], [f.dc + gap, f.xc1, f.hS], [f.xc1, f.x1 - 0.045, f.hE]].filter(([a, b]) => b - a > 1.0);
+  return [[f.x0 + 0.02, f.xc0 - 0.02, f.hW], [f.xc0 + 0.02, f.dc - gap, f.hS], [f.dc + gap, f.xc1 - 0.02, f.hS], [f.xc1 + 0.02, f.x1 - 0.045, f.hE]].filter(([a, b]) => b - a > 1.0);
 }
 
 function dressFront(el, { bag }, cls) {
