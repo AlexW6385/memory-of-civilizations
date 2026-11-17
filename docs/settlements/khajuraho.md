@@ -106,6 +106,17 @@ Sources added:
 - [The Kandariya Mahadeva Temple — mahavidya.ca](https://mahavidya.ca/?p=797)
 - [Earthen embrace: Rajasthan's thatched mud houses — Down To Earth](https://www.downtoearth.org.in/environment/earthen-embrace-rajasthans-thatched-mud-houses-provide-cool-comfort-from-scorching-heat)
 
+## 16. Detail added (2026-11 round 2: the landmark seen at the arrival and close)
+
+Kandariya Mahadeva rebuilt where the arrival and the first metres of the walk meet it (`src/styles/nagara/index.js`; no new materials, one geometry per material):
+
+- **The jagati and the plinth as moulded basements.** The temple stands "on a massive plinth" and its sides are "in three vertical layers" of carved bands under mouldings [stated: Wikipedia; mahavidya.ca: "a socle of five mouldings … beneath is a recessed band with a processional frieze"]. Ours (`basement`): on the jagati and again on the hall plinth, a base, a sloping khura, a swelling kumbha and a neck; fillets about the carved band; over it a field of niches with a small god in each, between projecting piers every 5–6 m with pale caps; a kapota eave flaring on a row of dark lion-head blocks; the coping. The earlier plain 4 m slab carried only a strip of figures [inferred: profile proportions and the pier spacing after the usual Nagara adhisthana].
+- **The stairs' balustrades.** The flat wedge cheeks are now panelled parapets rising with the flight, pale coping, a newel with its pot at the head and a seated lion at the foot of the terrace stair, a stepped moonstone before it; the porch's flight has the same parapets [inferred: the lion (shardula) and the moonstone are the usual Nagara stair furniture; Kandariya's own are not in the sources I read].
+- **Balconied windows.** The great hall's and sanctum hall's lateral windows (kakshasana) are now pavilions projecting 2.3 m: moulded floor, leaning seat-back with panels, pillars (square base, sixteen-sided shaft, pot capital), architrave, a three-tiered sloping roof with its amalaka, instead of a seat and a bare eave [stated: "lateral balcony windows" — Studio Matrx; inferred: dimensions].
+- **The tower.** The shaft is a shade darker than the climbing spires so that they stand off it, pale ribs (lata) run up its convex corners following the curve, the dormers (gavaksha) stand deeper, the larger spires have ribbed corners [inferred].
+- **The torana.** The seven-lobed garland is thicker, with a scalloped fringe beneath, bud pendants at the cusps, and makaras with a lower jaw, an eye and a curling tail [stated: a garland carved from a single stone — Wikipedia; inferred: forms].
+Budget at the arrival (`tools/draw-count.mjs khajuraho`): main 1.35 M to 1.48 M triangles, main draws 259 to 257.
+
 ## Sources
 
 - [Kandariya Mahadeva Temple — Wikipedia](https://en.wikipedia.org/wiki/Kandariya_Mahadeva_Temple)
