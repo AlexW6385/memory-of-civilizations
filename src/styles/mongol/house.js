@@ -68,11 +68,14 @@ export function furnishRoom(L, kind, room, y, rand, H = 3.2) {
 
 /** A house of the court: shell with door and windows, the room(s), the stair and upper room when `floors` > 1. Returns the roof height. */
 function houseBody(L, o) {
-  const { W, D, floors, mat, rand, kind } = o;
+  const { W, D, floors, mat, rand, kind, variant } = o;
   const T = 0.5, hh = floors > 1 ? 6.2 : 3.6, FY = 3.5;
   const dc = W * (0.22 + rand() * 0.2);
   const ops = [{ at: dc, w: 1.3, h: 2.4 }];
   for (const f of [0.17, 0.83]) if (Math.abs(W * f - dc) > 1.6) ops.push({ at: W * f, w: 0.9, h: 1.0, y0: 1.2, lat: true });
+  // the oriel house: an opening in the upper front for the timber bay window that stands out over the court (built after the shell, in the court's part of mudCompound)
+  const oriU = W * 0.64;
+  if (variant === 'oriel' && floors > 1) ops.push({ at: oriU, w: 1.9, h: 1.6, y0: FY + 0.5, lat: true });
   // shell: front (door and windows), back, the two ends
   L.wall(mat, 0, -T / 2, W, -T / 2, T, 0, hh, ops, 'lattice');
   L.wall(mat, 0, -D + T / 2, W, -D + T / 2, T, 0, hh);
@@ -136,6 +139,58 @@ function houseBody(L, o) {
   return { hh, dc };
 }
 
+/**
+ * The three fronts of the courtyard houses [inferred: Central Asian town houses, where a roofed porch on carved posts (aiwan), a framed entrance portal (pishtaq) and a timber bay
+ * window are the usual ways to dress a mud-brick front; no Karakorum house front survives]. All in local (u along the front, v out into the court).
+ */
+function frontOf(L, variant, dc, W, hh, floors) {
+  const FY = 3.5;
+  if (variant === 'aiwan') {
+    const pu0 = Math.max(0.8, dc - 2.3), pu1 = Math.min(W - 0.8, dc + 2.3), hP = 3.0, pv = 2.1;
+    for (const pu of [pu0, pu1]) {
+      // a carved poplar post on a stone base: a swelling shaft with painted bands, a stalactite capital of stepped brackets
+      L.lathe('granite_grey', [[0.22, 0], [0.22, 0.14], [0.14, 0.2], [0.001, 0.2]], 8, pu, pv, 0);
+      L.lathe('wood_dark', [[0.1, 0], [0.12, 0.8], [0.095, 2.2], [0.001, 2.2]], 8, pu, pv, 0.2);
+      L.lathe('paint_ochre', [[0.125, 0], [0.125, 0.08], [0.1, 0.08], [0.1, 0]], 8, pu, pv, 0.9);
+      L.lathe('tile_turquoise', [[0.1, 0], [0.1, 0.06], [0.085, 0.06], [0.085, 0]], 8, pu, pv, 2.0);
+      L.box('cedar', pu - 0.2, pv - 0.2, pu + 0.2, pv + 0.2, 2.4, 2.55); L.box('wood_dark', pu - 0.3, pv - 0.3, pu + 0.3, pv + 0.3, 2.55, 2.7); L.box('cedar', pu - 0.4, pv - 0.4, pu + 0.4, pv + 0.4, 2.7, 2.82);
+      L.circle(pu, pv, 0.16, 0, hP);
+      // the beam from the post back to the wall
+      L.box('wood_dark', pu - 0.11, 0, pu + 0.11, pv + 0.2, 2.82, hP);
+    }
+    L.box('wood_dark', pu0 - 0.3, pv - 0.2, pu1 + 0.3, pv + 0.2, 2.82, hP);
+    L.box('paint_ochre', pu0 - 0.3, pv + 0.2, pu1 + 0.3, pv + 0.22, 2.86, 2.96);
+    for (let u = pu0 + 0.35; u < pu1; u += 0.5) L.rod('cedar', [u, hP - 0.05, 0.1], [u, hP - 0.05, pv + 0.2], 0.035, 4);
+    L.box('timber', pu0 - 0.3, 0, pu1 + 0.3, pv + 0.45, hP, hP + 0.1);
+    L.box('mud_plaster', pu0 - 0.3, pv + 0.35, pu1 + 0.3, pv + 0.45, hP + 0.1, hP + 0.32);
+  } else if (variant === 'pishtaq') {
+    // two plastered piers and a lintel panel standing 0.4 m out of the front, rising over the roof edge, with turquoise tile in stripes and a lapis panel
+    const top = hh + 0.9, pw = 0.7, o = 0.4;
+    for (const s of [-1, 1]) {
+      const a = dc + s * 1.0, b = dc + s * 1.7;
+      L.box('mud_plaster', Math.min(a, b), 0, Math.max(a, b), o, 0, top, true);
+      L.box('tile_turquoise', Math.min(a, b) + 0.16, o, Math.min(a, b) + 0.22, o + 0.02, 0.4, top - 0.2);
+      L.box('tile_turquoise', Math.max(a, b) - 0.22, o, Math.max(a, b) - 0.16, o + 0.02, 0.4, top - 0.2);
+      L.box('brick_buff', Math.min(a, b) - 0.02, 0, Math.max(a, b) + 0.02, o + 0.05, 0, 0.35);
+    }
+    L.box('mud_plaster', dc - 1.7, 0, dc + 1.7, o, 2.75, top, false);
+    L.box('tile_lapis', dc - 1.2, o, dc + 1.2, o + 0.02, 2.95, 3.4);
+    L.box('gilt_bronze', dc - 1.2, o + 0.02, dc + 1.2, o + 0.035, 3.0, 3.06);
+    L.box('brick_buff', dc - 1.85, 0, dc + 1.85, o + 0.12, top, top + 0.12);
+    L.box('tile_turquoise', dc - 1.7, o, dc + 1.7, o + 0.02, top - 0.45, top - 0.2);
+  } else if (variant === 'oriel' && floors > 1) {
+    const u = W * 0.64, hw = 1.2, pr = 0.8, y0 = FY + 0.4;
+    L.box('timber', u - hw, 0, u + hw, pr, y0 - 0.1, y0);
+    for (const du of [-0.9, 0, 0.9]) L.rod('cedar', [u + du, y0 - 0.5, 0.0], [u + du, y0 - 0.1, pr], 0.07, 5);
+    L.box('wood_dark', u - hw, pr - 0.04, u + hw, pr, y0, y0 + 0.3);
+    for (const s of [-1, 1]) L.box('cedar', u + s * hw - 0.06, pr - 0.12, u + s * hw + 0.06, pr, y0 + 0.3, y0 + 2.0);
+    L.slab('lattice', u - hw, pr - 0.04, u + hw, pr - 0.04, 0.05, y0 + 0.33, y0 + 1.95);
+    for (const s of [-1, 1]) L.slab('lattice', u + s * hw, 0.0, u + s * hw, pr, 0.04, y0 + 0.33, y0 + 1.95);
+    L.box('wood_dark', u - hw - 0.1, 0, u + hw + 0.1, pr + 0.1, y0 + 2.0, y0 + 2.14);
+    L.box('mud_plaster', u - hw - 0.1, 0, u + hw + 0.1, pr + 0.1, y0 + 2.14, y0 + 2.26);
+  }
+}
+
 export function mudCompound(el, { bag, col, lights }) {
   const [x0, z0, x1, z1] = el.rect, rand = rng(el.seed || 5), gate = el.gate ?? 's', T = 0.45, WH = 2.9, floors = el.floors ?? 1, mat = rand() < 0.5 ? 'mudbrick' : 'mud_plaster';
   const gu = (gate === 's' || gate === 'n') ? (x0 + x1) / 2 + (rand() - 0.5) * (x1 - x0) * 0.3 : (z0 + z1) / 2 + (rand() - 0.5) * (z1 - z0) * 0.3;
@@ -169,7 +224,12 @@ export function mudCompound(el, { bag, col, lights }) {
   const dd = gate === 's' ? [x0 + T, z0 + T, x1 - T, z0 + (z1 - z0) * 0.44] : gate === 'n' ? [x0 + T, z1 - (z1 - z0) * 0.44, x1 - T, z1 - T] : gate === 'e' ? [x0 + T, z0 + T, x0 + (x1 - x0) * 0.44, z1 - T] : [x1 - (x1 - x0) * 0.44, z0 + T, x1 - T, z1 - T];
   const F = frontFrame(dd, gate), L = new Local(bag, col, lights, F.O, F.U, F.V);
   const kind = ['family', 'merchant', 'craft', 'family'][Math.floor(rand() * 4)];
-  const { hh, dc: doorU } = houseBody(L, { W: F.W, D: F.D, floors, mat, rand, kind });
+  // the front by rule, from the lot's own seed (not the stream, so the rest of the house stays as it was): a portico on carved posts (aiwan), a framed portal standing out of the front (pishtaq),
+  // or, in the two-storey houses, a timber bay window over the court (oriel); the rest keep the plain mud front
+  const vr = rng((el.seed || 5) * 7919 + 13), roll = vr();
+  const variant = floors > 1 ? (roll < 0.35 ? 'oriel' : roll < 0.6 ? 'pishtaq' : roll < 0.8 ? 'aiwan' : 'plain') : (roll < 0.38 ? 'aiwan' : roll < 0.68 ? 'pishtaq' : 'plain');
+  const { hh, dc: doorU } = houseBody(L, { W: F.W, D: F.D, floors, mat, rand, kind, variant });
+  frontOf(L, variant, doorU, F.W, hh, floors);
   if (el.dome) {
     const [cx, cz] = L.P(F.W * 0.3, -F.D / 2), r = Math.min(2.6, Math.min(F.W, F.D) * 0.32);
     bag.add('brick_buff', lathe([[r, 0], [r, 0.5], [r * 0.9, 1.0], [r * 0.62, 1.7], [r * 0.2, 2.15], [0.001, 2.2]], 14, null, cx, hh + 0.12, cz));
@@ -191,7 +251,7 @@ export function mudCompound(el, { bag, col, lights }) {
   L.col.rect(L.R(dcu - 2.8, 0.55, dcu - 1.2, 0.95), 0, 0.48);
   L.box('cloth_red', dcu - 2.7, 0.58, dcu - 1.8, 0.92, 0.48, 0.5);
   // a ladder of notched poplar up to the roof, leaning on the house front
-  { const lu = side > 0 ? F.W - 1.4 : 1.4; L.rod('cedar', [lu - 0.22, 0, 1.0], [lu - 0.22, hh + 0.2, 0.05], 0.045, 5); L.rod('cedar', [lu + 0.22, 0, 1.0], [lu + 0.22, hh + 0.2, 0.05], 0.045, 5);
+  { let lu = side > 0 ? F.W - 1.4 : 1.4; if (variant === 'aiwan' && Math.abs(lu - doorU) < 3) lu = F.W - lu; if (variant === 'oriel' && Math.abs(lu - F.W * 0.64) < 2.4) lu = F.W - lu; L.rod('cedar', [lu - 0.22, 0, 1.0], [lu - 0.22, hh + 0.2, 0.05], 0.045, 5); L.rod('cedar', [lu + 0.22, 0, 1.0], [lu + 0.22, hh + 0.2, 0.05], 0.045, 5);
     for (let k = 1; k < 9; k++) { const t = k / 9.5, v = 1.0 - 0.95 * t; L.rod('timber', [lu - 0.22, t * (hh + 0.2), v], [lu + 0.22, t * (hh + 0.2), v], 0.025, 4); } }
   // a laundry line on two posts across the court, a cheese-drying rack (white curds laid on a cloth over a frame), a felt-roofed store
   if (Dc > 7) {
