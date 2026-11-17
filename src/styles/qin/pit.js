@@ -41,15 +41,46 @@ export function qinPit(el, { bag, col, lights }) {
     const face = corrZ(k) + f * CORR.w / 2;
     for (let y = FL + 0.4; y < PT - 0.15; y += 0.4) bag.add('mud_plaster', box(CORR.x0, y, f < 0 ? face : face - 0.03, CORR.x1, y + 0.04, f < 0 ? face + 0.03 : face));
   }
+  // the partitions' end faces on the gallery: the ramming courses as clay ledges every 0.4 m (each a little shorter or longer, stepped
+  // out in turn), the form-boards' joints as thin vertical seams, patched clay at the foot where the floor was trodden
+  { const rr = rng(808);
+    for (let k = 0; k < CORR.n - 1; k++) {
+      const pa = corrZ(k) + CORR.w / 2, pb = pa + CORR.part, xe = CORR.x1;
+      for (let y = FL + 0.35, n = 0; y < PT - 0.1; y += 0.4, n++) {
+        const o = 0.03 + (n % 2) * 0.012, a = pa + 0.03 + rr() * 0.12, b = pb - 0.03 - rr() * 0.12;
+        bag.add('mud_plaster', box(xe, y, a, xe + o, y + 0.045, b));
+      }
+      for (const f of [0.34, 0.68]) bag.add('earth_wall', box(xe, FL + 0.1, pa + CORR.part * f - 0.012, xe + 0.05, PT - 0.1, pa + CORR.part * f + 0.012));
+      bag.add('mud_plaster', box(xe, FL + 0.02, pa + 0.1, xe + 0.07, FL + 0.38, pb - 0.1));
+    }
+    // the posts along the three aisles: a granite base, a bearing block under the beam and a bracket arm reaching over the aisle
+    for (let k = 0; k < CORR.n - 1; k++) {
+      const pa = corrZ(k) + CORR.w / 2, pb = pa + CORR.part;
+      for (const [zz, sg, kk] of [[pa - 0.16, -1, k], [pb + 0.16, 1, k + 1]]) {
+        if (!RAMP.zs.includes(kk)) continue;
+        for (let x = CORR.x0 + 3; x < CORR.x1; x += 7.0) {
+          bag.add('brick_grey', box(x - 0.24, FL, zz - 0.24, x + 0.24, FL + 0.14, zz + 0.24));
+          bag.add('timber', box(x - 0.26, PT - 0.24, zz - 0.26, x + 0.26, PT - 0.08, zz + 0.26));                       // the bearing block
+          bag.add('timber', box(x - 0.1, PT - 0.5, Math.min(zz, zz + sg * 0.9), x + 0.1, PT - 0.26, Math.max(zz, zz + sg * 0.9)));   // the bracket arm
+        }
+      }
+    }
+  }
   // the gallery's cross beam at the corridors' mouths
   bag.add('timber', box(GALLERY[0] - 0.2, PT - 0.5, z0 + wall, GALLERY[0] + 0.2, PT, z1 - wall));
   // the roof: one log for each corridor and each 0.42 m, laid across the partitions (a log 5.46 m, from partition middle to middle)
-  const span = CORR.w + CORR.part;
+  const span = CORR.w + CORR.part, rl = rng(4242);
   // (a solid core inside the logs, so that the roof reads as one slab to the walker and the earth heaped over it is no shell)
   bag.add('log_pine', box(x0 + wall, ROOF.beamY0 + 0.1, z0 + wall, x1 - wall, ROOF.beamY1 - 0.1, z1 - wall));
   for (let k = 0; k < CORR.n; k++) {
     const zc = corrZ(k);
-    for (let x = x0 + 0.21; x < x1 - 0.1; x += 0.42) bag.add('log_pine', box(x - 0.19, ROOF.beamY0, zc - span / 2, x + 0.19, ROOF.beamY1, zc + span / 2));
+    // the logs over the three aisles and the front gallery are round (octagonal, each a hair different so that they merge, not instance);
+    // over the closed corridors, which no one sees from below, boxes, and none under the heaped earth (the core below carries it)
+    const lr = RAMP.zs.includes(k), rb = (ROOF.beamY1 - ROOF.beamY0) / 2, ym = (ROOF.beamY0 + ROOF.beamY1) / 2;
+    for (let x = x0 + 0.21; x < x1 - 0.1; x += 0.42) {
+      if (lr || x > CORR.x1 - 1) { const j = rl(), rr2 = rb * (0.97 + j * 0.03); bag.add('log_pine', rod([x, ym + (j - 0.5) * 0.02, zc - span / 2], [x + j * 0.01, ym + (j - 0.5) * 0.02, zc + span / 2], rr2, 6)); }
+      else if (x > ROOF.bareX + 8) bag.add('log_pine', box(x - 0.19, ROOF.beamY0, zc - span / 2, x + 0.19, ROOF.beamY1, zc + span / 2));
+    }
   }
   col.floor([ROOF.bareX, z0, x1, z1], ROOF.top);                                           // the bare part of the roof can be walked
   // the earth over the western part: heaped to 2.2 m, sloping away at the east end toward the bare logs
@@ -95,7 +126,7 @@ export function qinPit(el, { bag, col, lights }) {
 /** One chariot: four horses abreast, the pole, the carriage, its wheels and its crew. */
 function chariot(bag, col, ctx, x, zc, seed, colOnly = false) {
   if (colOnly) { col.rect([x - 5.9 - 0.9, zc - 1.5, x + 0.6, zc + 1.5], FL, FL + 2.2); return; }
-  const r = rng(seed), y = FL + 0.05;
+  const r = rng(seed), y = FL + 0.05, rs = rng(seed + 9);
   const rot = -Math.PI / 2;
   for (let h = 0; h < 4; h++) {
     const z = zc + (h - 1.5) * 0.86;
@@ -108,13 +139,31 @@ function chariot(bag, col, ctx, x, zc, seed, colOnly = false) {
   const cx = x - 5.9;
   bag.add('timber_red', box(cx - 0.6, y + 0.78, zc - 0.7, cx + 0.5, y + 0.86, zc + 0.7));
   for (const [a, b, c, d] of [[cx - 0.6, zc - 0.7, cx - 0.55, zc + 0.7], [cx - 0.6, zc - 0.7, cx + 0.5, zc - 0.65], [cx - 0.6, zc + 0.65, cx + 0.5, zc + 0.7]]) bag.add('timber_red', box(a, y + 0.86, b, c, y + 1.3, d));
-  bag.add('lacquer_black', box(cx - 0.62, y + 1.3, zc - 0.72, cx - 0.53, y + 1.36, zc + 0.72));
+  bag.add('iron', box(cx - 0.62, y + 1.3, zc - 0.72, cx - 0.53, y + 1.36, zc + 0.72));
   bag.add('iron', box(cx - 0.05, y + 0.68, zc - 1.25, cx + 0.05, y + 0.76, zc + 1.25));
+  // the wheels: a felloe of two layers, thirty spokes tapering from the nave to the rim (each a hair different), the nave with its bands and
+  // a bronze axle cap, the linchpin
   for (const s of [-1, 1]) {
-    const wz = zc + s * 1.0, R = 0.7;
+    const wz = zc + s * 1.0, R = 0.7, tilt = (s > 0 ? 1 : -1);
     bag.add('timber', lathe([[R, -0.07], [R, 0.07], [R - 0.07, 0.07], [R - 0.07, -0.07]], 20, null, 0, 0, 0).rotateX(Math.PI / 2).translate(cx, y + R, wz));
-    bag.add('timber', lathe([[0.001, -0.12], [0.12, -0.12], [0.12, 0.12], [0.001, 0.12]], 10).rotateX(Math.PI / 2).translate(cx, y + R, wz));
-    for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI, c = Math.cos(a) * (R - 0.04), sn = Math.sin(a) * (R - 0.04); bag.add('timber', boxAxisSpoke(cx, y + R, wz, c, sn)); }
+    bag.add('iron', lathe([[R + 0.008, -0.075], [R + 0.008, 0.075], [R - 0.01, 0.075], [R - 0.01, -0.075]], 20).rotateX(Math.PI / 2).translate(cx, y + R, wz));   // the tyre
+    bag.add('timber', lathe([[0.001, -0.14], [0.11, -0.14], [0.13, -0.05], [0.16, 0.0], [0.13, 0.05], [0.11, 0.14], [0.001, 0.14]], 12).rotateX(Math.PI / 2).translate(cx, y + R, wz));
+    bag.add('bronze', lathe([[0.001, 0.14], [0.085, 0.14], [0.085, 0.2], [0.05, 0.23], [0.001, 0.23]], 10).rotateX(s * Math.PI / 2).translate(cx, y + R, wz));
+    bag.add('bronze', lathe([[0.1, -0.15], [0.12, -0.15], [0.12, -0.11], [0.1, -0.11]], 10).rotateX(Math.PI / 2).translate(cx, y + R, wz));
+    for (let k = 0; k < 15; k++) { const a = (k + rs() * 0.02) / 15 * Math.PI, c = Math.cos(a) * (R - 0.05), sn = Math.sin(a) * (R - 0.05); bag.add('timber', boxAxisSpoke(cx, y + R, wz, c, sn, 0.016 + rs() * 0.002)); }
+    void tilt;
+  }
+  // the carriage: a lattice of rail posts on the three sides, a hand-rail, the door gap at the rear, the floor's lashings, the front plate's binding
+  for (let k = 0; k <= 8; k++) { const t = -0.62 + k * 0.14; for (const zz of [zc - 0.68, zc + 0.68]) bag.add('timber_red', box(cx + t - 0.015, y + 0.86, zz - 0.015, cx + t + 0.015, y + 1.3, zz + 0.015)); }
+  for (let k = 0; k <= 8; k++) bag.add('timber_red', box(cx - 0.6, y + 0.86, zc - 0.65 + k * 0.1625 - 0.015, cx - 0.57, y + 1.3, zc - 0.65 + k * 0.1625 + 0.015));
+  bag.add('timber_red', box(cx - 0.6, y + 1.3, zc - 0.7, cx + 0.5, y + 1.34, zc - 0.66)); bag.add('timber_red', box(cx - 0.6, y + 1.3, zc + 0.66, cx + 0.5, y + 1.34, zc + 0.7));
+  bag.add('bronze', box(cx - 0.64, y + 0.76, zc - 0.7, cx - 0.6, y + 0.9, zc + 0.7));                                // the front plate's bronze binding
+  // the harness: a neck-yoke on each horse, the breast straps back to the pole, and the reins in four to the driver's hands
+  for (let h = 0; h < 4; h++) {
+    const z = zc + (h - 1.5) * 0.86;
+    bag.add('iron', rod([x - 1.0, y + 1.45, z], [x - 0.9, y + 1.1, z], 0.045, 6));
+    bag.add('bronze', lathe([[0.001, 0], [0.04, 0.0], [0.05, 0.05], [0.001, 0.07]], 6, null, x - 0.9, y + 1.15, z));
+    bag.add('iron', rod([x + 0.0, y + 1.1, z], [cx + 0.1, y + 1.12, zc + (h - 1.5) * 0.08], 0.008, 4));
   }
   col.rect([cx - 0.9, zc - 1.5, x + 0.6, zc + 1.5], FL, FL + 2.2);
   // the crew: a driver and two soldiers
@@ -123,8 +172,8 @@ function chariot(bag, col, ctx, x, zc, seed, colOnly = false) {
   void r;
 }
 /** A spoke as a thin box through the hub, in the wheel's plane (x fixed), end to end. */
-function boxAxisSpoke(cx, cy, cz, dx, dy) {
-  const n = Math.hypot(dx, dy), g = box(-0.025, -n, -0.025, 0.025, n, 0.025);
+function boxAxisSpoke(cx, cy, cz, dx, dy, w = 0.025) {
+  const n = Math.hypot(dx, dy), g = box(-w, -n, -w, w, n, w);
   g.rotateZ(-Math.atan2(dx, dy));
   g.translate(cx, cy, cz);
   return g;
