@@ -10,6 +10,7 @@ import { box, frustum, lathe, fromTriangles, rod, disc, place } from '../../core
 import { Shape, ExtrudeGeometry, Matrix4, Vector3, Quaternion, Color } from '../../core/three.js';
 import '../qing/index.js';
 import '../../objects/index.js';
+import { merge } from '../../objects/kit.js';
 import { rite } from '../indian/rites.js';
 import { tamilHouse } from './houses.js';
 import { courtHouse } from './courthouse.js';
@@ -169,6 +170,17 @@ function gopuram(el, { bag, col }) {
     pos.push(A, B, C, A, C, D2);
   }
   bag.add('stucco_saffron', vaultTris(pos));
+  if (!el.simple) {      // the vault's ribs: cream arches standing proud of the wagon roof, one at about every 1.7 m
+    const nr = Math.max(3, Math.round(2 * L / 1.7)), e = 0.14, rp = [], pq = (u, k, f) => { const [a, b] = prof[k]; return alongX ? [cx + (a * (vr + e * f)) / vr, yv + (b * (vh + e * 1.3 * f)) / vh, cz + u] : [cx + u, yv + (b * (vh + e * 1.3 * f)) / vh, cz + (a * (vr + e * f)) / vr]; };
+    for (let r = 0; r < nr; r++) {
+      const u = -L + 0.5 + r * (2 * L - 1) / (nr - 1), t = 0.1;
+      for (let k = 0; k < 12; k++) {
+        rp.push(pq(u - t, k, 1), pq(u + t, k, 1), pq(u + t, k + 1, 1), pq(u - t, k, 1), pq(u + t, k + 1, 1), pq(u - t, k + 1, 1));
+        for (const su of [-t, t]) rp.push(pq(u + su, k, 0), pq(u + su, k, 1), pq(u + su, k + 1, 1), pq(u + su, k, 0), pq(u + su, k + 1, 1), pq(u + su, k + 1, 0));
+      }
+    }
+    bag.add('stucco_cream', vaultTris(rp));
+  }
   for (const s2 of [-1, 1]) {
     const gh = vh + vr * 0.5, ga = vr * 0.9, gr = vr * 1.1;
     place2(bag, 'stucco_rose', nasiGeo(ga, gr, gh, 0.7), s2 * (L - 0.35), 0, yv, [s2, 0]);
@@ -222,8 +234,9 @@ function sculpt(kind) {
     gilt(sq(L([[0.1, 0.7 * k], [0.085, 0.8 * k], [0.05, 0.88 * k], [0.001, 0.96 * k]])));
     for (const sd of [-1, 1]) { body('b', sq(A(0.17 * sd * k, 0.5 * k, 0.27 * sd * k, 0.28 * k, 0.06))); body('b', sq(A(0.17 * sd * k, 0.55 * k, 0.3 * sd * k, 0.7 * k, 0.03))); }
   } else { halo(0.17, 1.1); standing(0, 1, kind === 0 ? 4 : kind === 5 ? 0 : 2, kind === 5); }
-  SCULPT.set(kind, out);
-  return out;
+  const by = (r) => out.filter((o) => o[0] === r).map((o) => o[2]), res = [['body', 'stucco_cream', merge(by('body'))], ['gilt', 'gilt_bronze', merge(by('gilt'))], ['halo', 'stucco_cream', merge(by('halo'))], ['gran', G, merge([...by('body'), ...by('gilt')].map((g) => g.clone()))]];
+  SCULPT.set(kind, res);
+  return res;
 }
 const _M = new Matrix4(), _Q = new Quaternion(), _P = new Vector3(), _Sc = new Vector3(), _X = new Quaternion(), _XA = new Vector3(1, 0, 0), _YA = new Vector3(0, 1, 0);
 /** A sculpture p = { kind, mat (paint), x, y, z (foot), nx, nz (outward), lean, Hf (height), gran (carved in the granite) } placed at its niche. */
@@ -232,7 +245,7 @@ function figure(bag, p) {
   _Q.setFromAxisAngle(_YA, Math.atan2(p.nx, p.nz)).multiply(_X.setFromAxisAngle(_XA, -p.lean));
   _M.compose(_P.set(p.x, p.y, p.z), _Q, _Sc.set(s, s, s));
   for (const [role, mat, g] of sculpt(p.kind)) {
-    if (p.gran && role === 'halo') continue;
+    if (p.gran ? role !== 'gran' : role === 'gran') continue;
     const m = p.gran ? G : mat, real = p.gran ? G : role === 'body' ? p.mat : mat;
     const opt = role === 'body' && !p.gran ? { color: [TINT[p.mat].r / TINT.stucco_cream.r, TINT[p.mat].g / TINT.stucco_cream.g, TINT[p.mat].b / TINT.stucco_cream.b], real } : { real };
     if (bag.addInstance) bag.addInstance(m, g.clone(), _M.clone(), { ...opt, reach: 140 }); else bag.add(real, g.clone().applyMatrix4(_M));
