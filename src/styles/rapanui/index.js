@@ -44,7 +44,7 @@ function moaiSection(y) {
     return { w: 0.176 - 0.036 * t, d: 0.118 - 0.014 * t, zc: -0.006 * t, n: 3.2 + 0.4 * t };
   }
   const t = (y - HEAD0) / (1 - HEAD0), top = smooth(0.955, 1, y);
-  return { w: (0.14 - 0.006 * t) - 0.014 * top, d: (0.104 - 0.004 * t) - 0.016 * top, zc: -0.006, n: 3.6 };
+  return { w: (0.122 + 0.024 * smooth(0.05, 0.75, t) - 0.01 * smooth(0.75, 1, t)) - 0.014 * top, d: (0.104 - 0.004 * t) - 0.016 * top, zc: -0.006, n: 3.6 };
 }
 function moaiRelief(kind) {
   const ahu = kind === 'ahu';
@@ -58,7 +58,8 @@ function moaiRelief(kind) {
       f += 0.03 * bump(ax / 0.1, 0.4) * bump((yh - 0.05) / 0.06, 0.45) * smooth(-0.04, 0.0, yh);      // chin
       // the lips pushed forward together in a thin pout, the mouth a fine line between them
       f += 0.026 * bump(ax / 0.066, 0.5) * bump((yh - 0.2) / 0.06, 0.45);
-      f -= 0.007 * bump(ax / 0.06, 0.35) * bump((yh - 0.19) / 0.006, 0.6);
+      f -= 0.011 * bump(ax / 0.062, 0.35) * bump((yh - 0.19) / 0.006, 0.6);
+      f -= 0.006 * bump(ax / 0.07, 0.4) * bump((yh - 0.125) / 0.012, 0.5);                       // under the lip
       // the nose: from the brow to above the lip, widening to flared nostrils, its tip far out
       if (yh > 0.26 && yh < 0.84) {
         const u = (yh - 0.28) / 0.54, w = 0.022 + 0.034 * (1 - clamp(u)) ** 2, p = 0.012 + 0.05 * (1 - clamp(u)) ** 1.2;
@@ -67,17 +68,20 @@ function moaiRelief(kind) {
         f -= 0.011 * bump((c - 1) / 0.35, 0.6) * smooth(0.27, 0.31, yh) * (1 - smooth(0.38, 0.42, yh));
       }
       // eye sockets under the brow (ahu statues), the brow ridge, the forehead receding
-      if (ahu) f -= 0.028 * blob((ax - 0.072) / 0.044, (yh - 0.745) / 0.048, 0.4);
+      if (ahu) f -= 0.042 * blob((ax - 0.07) / 0.042, (yh - 0.745) / 0.044, 0.25);
       else f -= 0.006 * blob((ax - 0.072) / 0.046, (yh - 0.75) / 0.05, 0.5);
-      f += 0.024 * bump(ax / 0.138, 0.2) * bump((yh - 0.835) / 0.04, 0.45);
+      f += 0.036 * bump(ax / 0.14, 0.15) * bump((yh - 0.83) / 0.045, 0.4);
+      f += 0.012 * bump((ax - 0.085) / 0.04, 0.5) * bump((yh - 0.63) / 0.06, 0.5);              // cheekbones
+      f -= 0.01 * bump((ax - 0.085) / 0.03, 0.6) * bump((yh - 0.36) / 0.1, 0.5);               // hollow of the cheek
+      f += 0.012 * bump((ax - 0.04) / 0.018, 0.5) * bump((yh - 0.33) / 0.035, 0.5);            // wings of the nostrils
       f += 0.016 * bump(ax / 0.13, 0.3) * smooth(0.82, 0.86, yh) * (1 - smooth(0.88, 0.97, yh));
       r += front * f * smooth(-0.07, -0.02, yh);
       // the long oblong ears, their rims raised and their bowls hollow
-      const zc = z + 0.006 - 0.01, ew = 0.034, e0 = 0.3, e1 = 0.84;
+      const zc = z + 0.006 - 0.01, ew = 0.036, e0 = 0.24, e1 = 0.86;
       if (yh > e0 - 0.08 && yh < e1 + 0.08) {
         const u = Math.abs(zc) / ew, v = Math.abs(yh - (e0 + e1) / 2) / ((e1 - e0) / 2);
         const out = Math.max(u, v), rim = bump((out - 0.86) / 0.16, 0.6);
-        r += side * (0.03 * (1 - smooth(0.95, 1.1, out)) - 0.01 * (1 - smooth(0.55, 0.8, out)) + 0.003 * rim);
+        r += side * (0.04 * (1 - smooth(0.95, 1.1, out)) - 0.01 * (1 - smooth(0.55, 0.8, out)) + 0.003 * rim);
       }
       r += side * 0.008 * bump((yh - 0.12) / 0.1, 0.5) * smooth(0.0, -0.06, z);              // the jaw line
     } else {
@@ -88,19 +92,19 @@ function moaiRelief(kind) {
       f += 0.004 * bump((y - (0.545 - 0.06 * (ax / 0.18) ** 2)) / 0.008, 0.6) * bump(ax / 0.12, 0.5);
       // the forearms turning in across the hips; the long hands, four fingers, meeting at the hami
       const t = clamp((0.18 - ax) / 0.12), yc = 0.31 - 0.13 * t;
-      f += 0.013 * bump((y - yc) / 0.024, 0.5) * smooth(0.05, 0.07, ax) * bump((ax - 0.125) / 0.07, 0.3);
+      f += 0.02 * bump((y - yc) / 0.026, 0.5) * smooth(0.05, 0.07, ax) * bump((ax - 0.125) / 0.07, 0.3);
       if (ax > 0.008 && ax < 0.12) {
         const hy = 0.172 + 0.012 * (ax - 0.012) / 0.1, hand = bump((y - hy) / 0.026, 0.4) * bump((ax - 0.062) / 0.052, 0.25);
         let fing = 0;
         for (const k of [-1, 0, 1]) fing += bump((y - hy - k * 0.0125) / 0.0018, 0.6);
         fing *= smooth(0.06, 0.035, ax);
-        f += hand * (0.013 - 0.006 * Math.min(1, fing));
+        f += hand * (0.02 - 0.009 * Math.min(1, fing));
         f += 0.01 * bump((ax - 0.05) / 0.012, 0.5) * bump((y - (hy + 0.04)) / 0.022, 0.5);   // the thumb toward the navel
       }
       f += 0.007 * bump((y - (0.115 - 0.03 * (1 - (ax / 0.19) ** 2))) / 0.01, 0.5);            // the hami
       r += front * f;
       // the upper arms down the sides to the elbow, the elbow turning forward
-      r += side * 0.014 * bump((z - 0.005) / 0.045, 0.5) * bump((y - 0.42) / 0.12, 0.4);
+      r += side * 0.022 * bump((z - 0.005) / 0.045, 0.5) * bump((y - 0.42) / 0.12, 0.4);
       r += side * 0.012 * bump((y - 0.3) / 0.03, 0.5) * smooth(0.04, -0.02, z) * (1 - smooth(0.5, 0.95, front));
       if (ahu) {                                                  // the ring and girdle, the spine
         let b = 0;
@@ -173,7 +177,8 @@ function moai(el, { bag, col }) {
   const m = new Matrix4().makeRotationY(yaw);
   if (el.lie) m.multiply(new Matrix4().makeRotationX(Math.PI / 2 - (el.tilt ?? 0)));
   else if (el.lean) m.multiply(new Matrix4().makeRotationX(el.lean));
-  m.multiply(new Matrix4().makeScale(h, h, h));
+  const wd = el.wide ?? 0.93 + 0.15 * ((Math.sin(x * 12.9898 + z * 78.233) * 43758.5453) % 1 + 1) % 1;   // each statue a little broader or slimmer
+  m.multiply(new Matrix4().makeScale(h * wd, h, h * (0.97 + 0.06 * wd)));
   m.setPosition(x, y - (el.buried ?? 0), z);
   putStone(bag, T, moaiGeometry(kind), m);
   if (kind === 'ahu' && !el.lie && !el.buried) {              // the statue stands on the platform, wedged round its base with small stones
@@ -185,7 +190,7 @@ function moai(el, { bag, col }) {
   }
   if (kind === 'ahu' && el.eyes !== false) for (const e of moaiEyes()) putStone(bag, e.mat, e.g, m);
   if (el.pukao) putStone(bag, 'scoria_red', pukaoGeometry().clone().translate(0, 1 - 0.006, -0.02), m);
-  const r = h * 0.17;
+  const r = h * 0.17 * wd;
   if (el.lie) col.circle(x, z, r * 1.4, y - 1, y + r * 1.5);
   else col.circle(x, z, r, y - 1, y + h);
 }

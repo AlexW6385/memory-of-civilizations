@@ -108,6 +108,12 @@ Moai of yellow-brown tuff; ahu of fitted basalt with a paved ramp of rounded sto
 - [Ahu Vinapu — Wikipedia](https://en.wikipedia.org/wiki/Ahu_Vinapu)
 - [Hare Moa — Chicken Houses — southamerica.cl](https://southamerica.cl/easter-island/hare-moa.htm)
 
+## 4j. Round 2: the faces and the statues' proportions
+
+- **Faces** (`moaiRelief`, `moaiSection`): heavy brow ridge overhanging deep eye sockets, cheekbones with a hollow of the cheek below, flared nostril wings on the long nose, a deeper mouth line with a shadow under the lip, longer protruding ears from the brow to below the nose, the head broad at the brow and narrowing to the jaw; arms and hands cut bolder [stated: Wikipedia "Moai" for the features, as §4a; the degrees are inferred].
+- **Each statue different:** width scaled 0.93-1.08 and depth a little with it, fixed by the statue's position, on top of the height already varied [inferred: statues were not cast to one pattern].
+- Departure: none from §4a; the geometry's triangle count is unchanged.
+
 ## 5. The town
 
 Fifty-six hare paenga, chicken houses and garden walls in eight hamlets on the plain, kept off the statue road (§4f). [inferred]
