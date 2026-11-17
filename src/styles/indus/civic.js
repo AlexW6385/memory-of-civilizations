@@ -18,6 +18,34 @@ function outer(ctx, rect, y, H, lowH, seed, gaps = {}, sides = 'nswe', plain = f
     dressWall(F, rand, 'front', len, H, lowH, { gaps: gs, life: true, plain });
   }
 }
+
+/** A brick set on edge across a drain's mouth with a notch cut in its top, so that water passes and objects are caught (Kenoyer's photograph at DK; docs §13). axis: the drain's direction. */
+export function notchedBrick(bag, x, y, z, axis = 'x') {
+  const a = axis === 'x' ? (u0, v0, u1, v1) => [u0, v0, u1, v1] : (u0, v0, u1, v1) => [v0, u0, v1, u1];
+  const P = (r, y0, y1) => { const q = a(...r); bag.add('brick_baked', box(x + q[0], y + y0, z + q[1], x + q[2], y + y1, z + q[3]), false); };
+  P([-0.04, -0.15, 0.04, 0.15], 0, 0.05); P([-0.04, -0.15, 0.04, -0.045], 0.05, 0.13); P([-0.04, 0.045, 0.04, 0.15], 0.05, 0.13);
+}
+/** The corbelled-arch mouth of the Bath's drain on the west wall's outer face: four courses each drawn in 0.08 m, a capstone, the dark back; hollow. */
+function corbelMouth(bag, col, ox0, y, zc) {
+  const w = 0.7, hc = 0.18, n = 4, d = 0.08, ext = 0.4, x0 = ox0 - 0.5, x1 = ox0;
+  bag.add('bitumen', box(x0, y + 0.0, zc - w / 2, x1, y + 0.012, zc + w / 2), false);
+  for (let i = 0; i < n; i++) {
+    const a = w / 2 - i * d;
+    bag.add('brick', box(x0, y + i * hc, zc - w / 2 - ext, x1, y + (i + 1) * hc, zc - a), false); bag.add('brick', box(x0, y + i * hc, zc + a, x1, y + (i + 1) * hc, zc + w / 2 + ext), false);
+  }
+  bag.add('brick', box(x0, y + n * hc, zc - w / 2 - ext, x1, y + (n + 1) * hc, zc + w / 2 + ext), false);
+  bag.add('bitumen', box(x1 - 0.06, y + 0.012, zc - w / 2, x1, y + n * hc, zc + w / 2), false);
+  col.rect([x0, zc - w / 2 - ext, x1, zc - w / 2], y, y + n * hc); col.rect([x0, zc + w / 2, x1, zc + w / 2 + ext], y, y + n * hc);
+}
+/** A settling trap on a covered drain: a brick-rimmed pit, a slab drawn half across it, the heap of grey sand cleaned out beside it. */
+export function settlingTrap(bag, x, y, z, along = 'x', hw = 0.55, lift = 0) {
+  const R = (u0, v0, u1, v1) => (along === 'x' ? [x + u0, z + v0, x + u1, z + v1] : [x + v0, z + u0, x + v1, z + u1]);
+  const B = (m, u0, y0, v0, u1, y1, v1) => { const r = R(u0, v0, u1, v1); bag.add(m, box(r[0], y + lift + y0, r[1], r[2], y + lift + y1, r[3]), false); };
+  const t = 0.2, hl = 0.55;
+  B('brick', -hl, 0, -hw, hl, 0.1, -hw + t); B('brick', -hl, 0, hw - t, hl, 0.1, hw); B('brick', -hl, 0, -hw + t, -hl + t, 0.1, hw - t); B('brick', hl - t, 0, -hw + t, hl, 0.1, hw - t);
+  B('bitumen', -hl + t, 0.0, -hw + t, hl - t, 0.02, hw - t); B('chalk', -0.02, 0.1, -hw + t + 0.03, hl - 0.05, 0.15, hw - t - 0.03);
+  const q = R(-1.5, hw + 0.1, -0.7, hw + 0.8); bag.add('silt', frustum([q[0], q[1], q[2], q[3]], y, y + 0.22, 0.22, 0.22, 0.22, 0.22, { noBottom: true }), false);
+}
 /** A low heap of fallen brick at the foot of a wall: a short wedge (the mound's foot, the platforms). */
 function heap(bag, x, z, along, outx, outz, len) {
   const w = 1.5 + Math.abs((x * 7 + z * 3) % 1.2), h = 0.55 + Math.abs((x + z) % 0.5), hx = along ? len / 2 : w / 2, hz = along ? w / 2 : len / 2;
@@ -141,10 +169,29 @@ export function bath(el, ctx) {
   bstairs(pz1 - 3.4, pz1, 1);
   // the lining's wet band above the water (darker, black-green) and the ledge's dark lip
   bag.add('pottery_dark', box(px0 + 0.04, WL, pz0 + 3.4, px0 + 0.1, WL + 0.45, pz1 - 3.4), false); bag.add('pottery_dark', box(px1 - 0.1, WL, pz0 + 3.4, px1 - 0.04, WL + 0.45, pz1 - 3.4), false);
-  // the outlet at the south-west corner, the drain across the court under its cover to the west wall and the corbelled mouth outside
-  bag.add('bitumen', box(ox0 + wt, y + 0.004, pz1 - 0.55, px0, y + 0.02, pz1 - 0.15), false);
-  for (let k = 0; k < 3; k++) { const w = 0.9 - k * 0.25; bag.add('brick', box(ox0 - 0.5 - 0.0, y + 0.2 + k * 0.28, pz1 - 0.35 - w / 2 - 0.1, ox0 + wt * 0.5, y + 0.48 + k * 0.28, pz1 - 0.35 + w / 2 + 0.1), false); }
-  bag.add('bitumen', box(ox0 - 0.45, y + 0.2, pz1 - 0.6, ox0, y + 0.75, pz1 - 0.1), false);
+  // the outlet at the south-west corner: the channel across the court under flat cover slabs, the corbelled-arch mouth against the wall's outer face,
+  // the covered culvert running on westward flush with the platform to a settling pit with its heap of cleaned sand (docs §13)
+  {
+    const zc = pz1 - 0.35, xa = ox0 + wt, xb = px0 - 0.3;
+    bag.add('bitumen', box(xa, y + 0.004, zc - 0.2, px0, y + 0.02, zc + 0.2), false);
+    for (let x = xa + 0.05; x < xb; x += 0.78) bag.add('brick', box(x, y + 0.02, zc - 0.28, Math.min(xb, x + 0.72), y + 0.05, zc + 0.28), false);
+    notchedBrick(bag, px0 - 0.28, y + 0.02, zc, 'x');
+    corbelMouth(bag, col, ox0, y, zc);
+    for (let x = ox0 - 0.6; x > ox0 - 9.6; x -= 0.95) bag.add('brick', box(x - 0.9, y, zc - 0.42, x, y + 0.03, zc + 0.42), false);
+    settlingTrap(bag, ox0 - 10.5, y, zc);
+  }
+  // the brick edging across the full width at the foot of each stair, and the sockets in the treads at the stairs' edges (they may have held planks)
+  for (const [zf, dv] of [[pz0 + 3.4, 1], [pz1 - 3.4, -1]]) {
+    const za = Math.min(zf, zf + dv * 0.45), zb = Math.max(zf, zf + dv * 0.45);
+    bag.add('brick', box(px0 + 0.06, yb + 0.05, za, px1 - 0.06, yb + 0.17, zb)); col.rect([px0 + 0.06, za, px1 - 0.06, zb], yb + 0.05, yb + 0.17);
+  }
+  for (const [z0s, z1s, dv] of [[pz0, pz0 + 3.4, -1], [pz1 - 3.4, pz1, 1]]) {
+    const n = Math.round(B.depth / 0.2), vs = z1s - z0s;
+    for (let i = 1; i < n - 1; i += 2) {
+      const top = yb + (B.depth * (i + 1)) / n, zt = dv > 0 ? z0s + (vs * (i + 0.5)) / n : z1s - (vs * (i + 0.5)) / n;
+      for (const [xa2, xb2] of [[px0 + 0.1, px0 + 0.28], [px1 - 0.28, px1 - 0.1]]) bag.add('wood_dark', box(xa2, top + 0.003, zt - 0.05, xb2, top + 0.015, zt + 0.05), false);
+    }
+  }
   // the gallery: stepped piers (a cross in plan) round the court on the north, east and south; beams and the flat roof
   const GH = 3.3, pier = (x, z) => { bag.add('brick', box(x - 0.5, y, z - 0.3, x + 0.5, y + GH, z + 0.3)); bag.add('brick', box(x - 0.3, y, z - 0.5, x + 0.3, y + GH, z + 0.5)); bag.add('brick', box(x - 0.55, y, z - 0.55, x + 0.55, y + 0.3, z + 0.55)); col.rect([x - 0.55, z - 0.55, x + 0.55, z + 0.55], y, y + GH); };
   const xs = Array.from({ length: 9 }, (_, i) => cx0 + 0.55 + (cx1 - cx0 - 1.1) * i / 8), zs = Array.from({ length: 10 }, (_, i) => cz0 - 0.55 + (cz1 - cz0 + 1.1) * i / 9);
