@@ -185,7 +185,8 @@ function prakara(el, { bag, col }) {
   const r = [Math.min(ax, bx) - th / 2, Math.min(az, bz) - th / 2, Math.max(ax, bx) + th / 2, Math.max(az, bz) + th / 2];
   if (r[2] - r[0] < 0.1 || r[3] - r[1] < 0.1) return;
   const M = el.mat || G;
-  bag.add(M, box(r[0], y - 0.3, r[1], r[2], y + h, r[3])); col.rect(r, y, y + h);
+  bag.add(M, box(r[0], y - 0.3, r[1], r[2], y + h, r[3]));
+  { const pd = el.simple ? 0 : 0.15, alongX0 = (r[2] - r[0]) > (r[3] - r[1]); col.rect(alongX0 ? [r[0], r[1] - pd, r[2], r[3] + pd] : [r[0] - pd, r[1], r[2] + pd, r[3]], y, y + h); }   // (the pilasters and plinth stand within it)
   bag.add('stucco_cream', box(r[0] - 0.2, y + h, r[1] - 0.2, r[2] + 0.2, y + h + 0.5, r[3] + 0.2));
   if (el.simple) return;
   const alongX = (r[2] - r[0]) > (r[3] - r[1]), L = alongX ? r[2] - r[0] - th : r[3] - r[1] - th, t0 = alongX ? r[0] + th / 2 : r[1] + th / 2, c = alongX ? (r[1] + r[3]) / 2 : (r[0] + r[2]) / 2, hh = th / 2;
@@ -845,13 +846,16 @@ function quarterFrame(el, bag, col) {
 /** wayside: a small shrine of Pillaiyar (Ganesha) at a street crossing { at, rot } (docs/settlements/madurai.md §15): a granite platform with steps,
  *  a cell open to the front with the seated god on a pedestal, a cornice, two stepped tiers and a pot above, a lit lamp. */
 function wayside(el, { bag, col }) {
-  const { B, C, L } = quarterFrame(el, bag, col);
+  const { B, C, L, map } = quarterFrame(el, bag, col);
   B(G, -1.7, -0.3, -1.7, 1.7, 0.18, 1.9); B(G, -1.55, 0.18, -1.55, 1.55, 0.4, 1.75);
-  B(G, -0.8, 0.0, 1.75, 0.8, 0.2, 2.1); C(-1.7, -1.7, 1.7, 1.9, 0, 3);                              // the steps
+  B(G, -0.8, 0.0, 1.75, 0.8, 0.2, 2.1);                                                                // the steps
+  { const Fl = (u0, v0, u1, v1, y) => { const [p, q] = map(u0, v0), [r2, t] = map(u1, v1); col.floor([Math.min(p, r2), Math.min(q, t), Math.max(p, r2), Math.max(q, t)], y); };
+    Fl(-1.7, -1.7, 1.7, 1.9, 0.18); Fl(-1.55, -1.55, 1.55, 1.75, 0.4); Fl(-0.8, 1.75, 0.8, 2.1, 0.2); }
   // the cell: three walls and a roof slab on two front pilasters
   B(G, -1.15, 0.4, -1.15, 1.15, 2.1, -0.85); B(G, -1.15, 0.4, -0.85, -0.85, 2.1, 0.9); B(G, 0.85, 0.4, -0.85, 1.15, 2.1, 0.9);
   B(G, -1.3, 2.1, -1.3, 1.3, 2.38, 1.1); B('stucco_cream', -1.1, 2.38, -1.1, 1.1, 2.58, 0.9);
   B('wood_dark', -0.85, 0.4, -0.85, 0.85, 2.1, -0.8);                                                  // the dark back of the cell
+  C(-1.15, -1.15, 1.15, -0.85, 0.4, 2.1); C(-1.15, -0.85, -0.85, 0.9, 0.4, 2.1); C(0.85, -0.85, 1.15, 0.9, 0.4, 2.1); C(-1.1, 0.88, -0.9, 1.08, 0.4, 2.1); C(0.9, 0.88, 1.1, 1.08, 0.4, 2.1); C(-0.4, -0.7, 0.4, 0.2, 0.4, 1.8);
   for (const sg of [-1, 1]) B('stucco_cream', sg * 1.0 - 0.1, 0.4, 0.88, sg * 1.0 + 0.1, 2.1, 1.08);
   B('stucco_cream', -1.1, 2.0, 0.88, 1.1, 2.3, 1.08);
   // the god on his pedestal: a belly, an elephant's head, the raised arms, the mouse before him
