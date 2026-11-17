@@ -19,16 +19,23 @@ const outer = (g) => Math.hypot((g.rect[0] + g.rect[2]) / 2, (g.rect[1] + g.rect
 function groupElements(g) {
   const [x0, z0, x1, z1] = g.rect, E = [], lite = outer(g);
   E.push({ t: 'lane', rect: [x0, z0, x1, z1], y: 0.1, mat: 'lime_plaster' });
-  for (const h of g.houses) E.push({ t: 'k_house', c: h.c, w: h.w, d: h.d, door: h.door, seed: h.seed, kitchen: h.kitchen, lite });
-  // the shrine on the east side: a platform with a small stepped altar on it
+  for (const h of g.houses) { // the kind of house by rule: near the rulers' courts a better household (plaster, dado, porch) in four, away from them poles and daub in equal parts
+    const near = Math.hypot((x0 + x1) / 2, (z0 + z1) / 2) < 190, r = (h.seed % 97) / 97;
+    const type = near && r < 0.4 ? 'rich' : r < 0.7 ? 'pole' : 'daub';
+    E.push({ t: 'k_house', c: h.c, w: h.w, d: h.d, door: h.door, seed: h.seed, kitchen: h.kitchen, lite, type }); }
+  // the lineage shrine on the east side: a vaulted masonry house on its platform, facing the court
   const [sx, sz] = g.shrine;
-  E.push({ t: 'block', rect: [sx - 2.2, sz - 2.2, sx + 2.2, sz + 2.2], y0: 0, y1: 1.3, batter: [1.4, 1.4, 1.4, 1.4], mat: 'lime_plaster', collide: false, walk: true });
-  E.push({ t: 'block', rect: [sx - 0.9, sz - 0.9, sx + 0.9, sz + 0.9], y0: 1.3, y1: 1.9, batter: [0.2, 0.2, 0.2, 0.2], mat: 'stucco_red', collide: true });
+  E.push({ t: 'k_eshrine', at: [sx, sz], seed: g.seed });
   // the court's furnishing: the kitchen shed in the north-east corner, the granary in the south-east, a cistern in the middle, the damp
   const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
   E.push({ t: 'k_shed', c: [x1 - 4.4, z0 + 3.4], w: 3.4, d: 2.8, seed: g.seed });
   E.push({ t: 'k_granary', c: [x1 - 3.6, z1 - 3.4], seed: g.seed + 1 });
   if (!lite) { E.push({ t: 'k_chultun', at: [cx + 2, cz - 3.2], y: 0.1, seed: g.seed + 2 }); E.push({ t: 'k_stains', rect: [x0 + 7, z0 + 6, x1 - 7, z1 - 6], y: 0.11, n: 3, seed: g.seed + 3 }); }
+  // the court's work: a drying rack with maize in six groups of ten, a row of log hives in one of four (not in the craftsmen's small courts), the midden behind the east wall
+  { const k = (g.seed >>> 3) % 10, cx2 = (x0 + x1) / 2, cz2 = (z0 + z1) / 2;
+    if (k < 6) E.push({ t: 'k_tapesco', at: [cx2 - 3.5, cz2 + 1.5], y: 0.1, seed: g.seed + 4 });
+    if (!g.ward && (g.seed >>> 5) % 4 === 0) E.push({ t: 'k_hives', at: [cx2 - 0.4, cz2 + 3.0], y: 0.1, rot: 0 });
+    if (!lite && k % 3 !== 1) E.push({ t: 'k_midden', at: [x1 + 2.6, z0 + 4], seed: g.seed + 6 }); }
   // the low wall of dry stone round the group, a gate in the middle of the east side and the corners left open
   const r0 = x0 - 0.6, r1 = z0 - 0.6, r2 = x1 + 0.6, r3 = z1 + 0.6;
   for (const pts of [[[r0 + 3, r1], [r2, r1], [r2, cz - 1.6]], [[r2, cz + 1.6], [r2, r3], [r0 + 3, r3]], [[r0, r1 + 3], [r0, cz - 1.6]], [[r0, cz + 1.6], [r0, r3 - 3]]]) E.push({ t: 'albarrada', pts, h: 0.7 });

@@ -9,6 +9,8 @@ import { box, lathe, rod, fromTriangles, orientOutward } from '../../core/geom.j
 import '../qing/index.js';
 import { hearthKit, ollaKit, metateKit, waterJarKit, bedKit, storeJarKit, put, patch, soot } from '../maya/household.js';
 import { frame, slab, frust, flipGeo, hex, flight, rng, L, RED, LIME } from './kit.js';
+import { tapesco, midden, hives } from './yard.js';
+import { roofComb, shrineDoor, frontPanels } from './comb.js';
 import { DRESS, tierWeather, wallWeather, curtain, hammock } from './dress.js';
 
 const TIM = 'timber';
@@ -29,8 +31,7 @@ function shrine(el, { bag, col }) {
     if (u1 === D) { wall(u0, u1, v0, v1, 0, ceil); continue; }                      // the back wall has no door
     wall(u0, u1, v0, -dw / 2, 0, ceil); wall(u0, u1, dw / 2, v1, 0, ceil);
     wall(u0, u1, -dw / 2, dw / 2, dh, ceil, dh);                                   // over the doorway
-    const r = F.R(u0 - 0.05, u1 + 0.05, -dw / 2 - 0.2, dw / 2 + 0.2);
-    bag.add(TIM, box(r[0], y + dh - 0.28, r[1], r[2], y + dh, r[3]));              // the sapodilla lintel, through the wall
+    shrineDoor(bag, F, y, u0, u1, dw, dh, u0 === 0);                                  // jambs, the lintel of four sapodilla planks
   }
   // the corbel vault of each chamber: five steps in from each long wall, a capstone
   const inset = (ch / 2 - 0.15) / steps;
@@ -57,17 +58,8 @@ function shrine(el, { bag, col }) {
   const ax = (F.R(0, D, -W / 2, W / 2)[2] - F.R(0, D, -W / 2, W / 2)[0]) / 2 + 0.3, az = (F.R(0, D, -W / 2, W / 2)[3] - F.R(0, D, -W / 2, W / 2)[1]) / 2 + 0.3;
   frust(bag, RED, cx, cz, ax, az, ax - 0.9, az - 0.9, y + roof, y + roof + 2.2);
   // the roof comb: a tall slab over the rear, three stages, each narrower, niched and painted
-  const cmb = el.comb ?? 12, st = [[0.40, 1.0, 0.55], [0.46, 0.84, 0.28], [0.52, 0.66, 0.17]];
-  let yy = y + roof + 2.2;
-  st.forEach(([u0, vw, hf], i) => {
-    const h = cmb * hf, r = F.R(D * u0, D * 0.98 - i * 0.7, -(W / 2 - 0.8) * vw, (W / 2 - 0.8) * vw);
-    bag.add(i % 2 ? RED : L, box(r[0], yy, r[1], r[2], yy + h, r[3]));
-    // niches on the front face: recessed panels, the middle one a throne with the enthroned king
-    const f = F.R(D * u0 - 0.06, D * u0, -(W / 2 - 0.8) * vw + 0.6, (W / 2 - 0.8) * vw - 0.6);
-    bag.add(i % 2 ? L : 'maya_blue', box(f[0], yy + h * 0.2, f[1], f[2], yy + h * 0.8, f[3]));
-    yy += h;
-  });
-  { const r = F.R(D * 0.5, D * 0.62, -0.7, 0.7); bag.add(L, box(r[0], yy, r[1], r[2], yy + 0.5, r[3])); const q = F.R(D * 0.53, D * 0.59, -0.35, 0.35); bag.add(RED, box(q[0], yy + 0.5, q[1], q[2], yy + 1.5, q[3])); const h = F.R(D * 0.54, D * 0.58, -0.45, 0.45); bag.add(L, box(h[0], yy + 1.5, h[1], h[2], yy + 2.1, h[3])); }   // the crowning figure
+  roofComb(bag, F, y + roof + 2.2, D, W, el.comb ?? 12);
+  frontPanels(bag, F, y, len, dw, ceil);
   // inside: the innermost chamber has a low bench, a censer bowl on the floor of each
   { const ua = tf + (n - 1) * (ch + tp), r = F.R(ua + ch - 0.7, ua + ch, -len / 2 + 0.3, len / 2 - 0.3); slab(bag, L, r, y, y + 0.45, col); }
   { const rr = rng(Math.round(fx * 5 + fz * 3) + 9);                                     // painted walls in the chambers: a band of ochre and rows of glyph panels
@@ -170,6 +162,13 @@ function range(el, { bag, col, lights }) {
   frust(bag, RED, cx, cz, ax, az, ax - 0.7, az - 0.7, y + roof, y + roof + 1.4);
   // the piers between the doors: a painted dado in blue on the front
   for (let i = 0; i <= n; i++) { const v = V0 + i * (rw + pt) + pt / 2, r = F.R(-0.12, 0, v - 0.18, v + 0.18); bag.add(RED, box(r[0], y, r[1], r[2], y + ceil, r[3])); }
+  // the doors' stone jambs with the rings for the curtain's cord, and over each door a frieze plaque of painted stucco between the piers
+  for (let i = 0; i < n; i++) {
+    const v = vc(i);
+    for (const sg of [-1, 1]) { const a = sg > 0 ? v + dw / 2 : v - dw / 2 - 0.16, r = F.R(-0.1, 0, a, a + 0.16); bag.add(L, box(r[0], y, r[1], r[2], y + dh, r[3])); const k = F.R(-0.16, -0.1, sg > 0 ? v + dw / 2 : v - dw / 2 - 0.08, sg > 0 ? v + dw / 2 + 0.08 : v - dw / 2); bag.add('rope_fibre', box(k[0], y + dh - 0.35, k[1], k[2], y + dh - 0.27, k[3])); }
+    const f = F.R(-0.06, 0, v - rw / 2 + 0.35, v + rw / 2 - 0.35); bag.add('maya_blue', box(f[0], y + hs + 0.3, f[1], f[2], y + ceil - 0.3, f[3]));
+    for (let g = 0; g < 3; g++) { const gv = v - 1.0 + g * 1.0, q = F.R(-0.12, -0.06, gv - 0.28, gv + 0.28); bag.add(g === 1 ? RED : L, box(q[0], y + hs + 0.5, q[1], q[2], y + ceil - 0.5, q[3])); }
+  }
   if (el.comb) { const r = F.R(D * 0.3, D * 0.7, V0 + 2, Lv / 2 - 2); bag.add(RED, box(r[0], y + roof + 1.4, r[1], r[2], y + roof + 1.4 + el.comb, r[3])); const q = F.R(D * 0.3 - 0.08, D * 0.3, V0 + 3, Lv / 2 - 3); bag.add(L, box(q[0], y + roof + 1.4 + el.comb * 0.25, q[1], q[2], y + roof + 1.4 + el.comb * 0.8, q[3])); }
   wallWeather(bag, F, V0 + 0.6, Lv / 2 - 0.6, y, y + ceil, rng((el.seed ?? 7) + 31), Math.max(4, n + 1));
   // inside every room: the painted dado along its back wall (an ochre band, blue and red glyph panels), a hanging mat at the door
@@ -195,6 +194,29 @@ function range(el, { bag, col, lights }) {
       if (lights && el.lit !== false) { const pl = F.P(ub - 0.5, vc(i) + 1.3); lights.push({ at: [pl[0], y + 1.5, pl[1]], color: '#ffa860', intensity: 3.2, distance: 5.5 }); bag.add('flame', lathe([[0.04, 0], [0.02, 0.1], [0.001, 0.18]], 6, null, pl[0], y + 0.5, pl[1])); }
     }
   }
+}
+
+/**
+ * k_eshrine { at [x, z] (the middle), seed }: the lineage shrine on the east side of a patio group (§13): a battered platform with a ramp of
+ * steps up its west face, a one-room vaulted house of masonry facing the court, a bench-altar and a censer inside, the stone over a burial before it.
+ */
+function eshrine(el, ctx) {
+  const { bag, col } = ctx, [sx, sz] = el.at, H = 1.3, R = [sx - 3.3, sz - 3.3, sx + 2.9, sz + 3.3], F = frame('w', sx - 2.3, sz);
+  bag.add(LIME, box(R[0], -0.1, R[1], R[2], H - 0.45, R[3]));
+  frust(bag, LIME, (R[0] + R[2]) / 2, sz, (R[2] - R[0]) / 2, 3.3, (R[2] - R[0]) / 2 - 0.25, 3.05, H - 0.45, H);
+  frust(bag, L, (R[0] + R[2]) / 2, sz, (R[2] - R[0]) / 2 - 0.2, 3.1, (R[2] - R[0]) / 2 - 0.2, 3.1, H - 0.08, H);
+  col.floor(R, H);
+  col.rect([R[0], R[1], R[2], R[1] + 0.05], -0.1, H - 0.31); col.rect([R[0], R[3] - 0.05, R[2], R[3]], -0.1, H - 0.31);
+  for (const [z0, z1] of [[sz - 3.3, sz - 0.9], [sz + 0.9, sz + 3.3]]) col.rect([R[0] - 0.05, z0, R[0], z1], -0.1, H - 0.31);
+  for (let k = 0; k < 4; k++) bag.add(LIME, box(R[0] - 1.4 + k * 0.35, -0.1, sz - 0.85, R[0] - 1.4 + (k + 1) * 0.35, 0.325 * (k + 1), sz + 0.85));
+  col.rect([R[2] - 0.05, R[1], R[2], R[3]], -0.1, H - 0.31);
+  col.ramp([R[0] - 1.4, sz - 0.85, R[0], sz + 0.85], 0, H, 'e');
+  const sr = { c: [sx - 2.3, sz], face: 'w', y: H, n: 1, rw: 3.2, rd: 2.2, furn: true, lit: false, seed: Math.round((el.seed ?? 3) % 1000) };
+  range(sr, ctx);
+  const cs = F.P(1.0, -0.8); DRESS.k_brazier({ at: cs, y: H, rot: 1, r: 0.8 }, ctx);
+  const sl = F.R(-1.0, -0.2, 1.45, 2.65); bag.add(L, box(sl[0], H, sl[1], sl[2], H + 0.07, sl[3]));                        // the flat stone over the burial
+  const sl2 = F.R(-0.8, -0.4, 1.8, 2.3); bag.add('limestone_carved', box(sl2[0], H + 0.07, sl2[1], sl2[2], H + 0.09, sl2[3]));
+  const bp = F.P(-0.6, 2.05); bag.add('pottery_dark', lathe([[0.001, 0], [0.12, 0], [0.15, 0.08], [0.11, 0.14], [0.001, 0.14]], 8, null, bp[0], H + 0.09, bp[1]));
 }
 
 /** A stela and its altar { at [x, z], face, h, seed }: a tall slab of carved limestone on a footing, the round altar before it. */
@@ -244,13 +266,13 @@ function ballcourt(el, { bag, col }) {
 
 /** A pole-and-thatch house { c, w, d (the extents in x and z), door ('n'…), seed, kitchen }: a rubble platform, walls of daub, a hipped roof of palm thatch; furnished. */
 function house(el, ctx) {
-  const { bag, col, lights } = ctx, [cx, cz] = el.c, w = el.w, d = el.d, rand = rng(el.seed || 1), P = 0.42, T = 0.16, wh = 1.95, side = el.door ?? 's';
+  const { bag, col, lights } = ctx, [cx, cz] = el.c, w = el.w, d = el.d, rand = rng(el.seed || 1), P = 0.42, T = 0.16, type = el.type ?? 'daub', wh = type === 'rich' ? 2.2 : 1.95, side = el.door ?? 's';
   const px = w / 2 + 0.7, pz = d / 2 + 0.7;
   bag.add('rubble', box(cx - px, -0.1, cz - pz, cx + px, P, cz + pz));
   bag.add(LIME, box(cx - px + 0.1, P - 0.04, cz - pz + 0.1, cx + px - 0.1, P, cz + pz - 0.1));
   col.floor([cx - px, cz - pz, cx + px, cz + pz], P);
   // the walls: four of daub, a doorway in the middle of the door's side (1.0 wide, 1.85 high)
-  const dwid = 1.0, dh = 1.85, mat = rand() < 0.5 ? 'mud_plaster' : 'lime_plaster';
+  const dwid = 1.0, dh = 1.85, mat = type === 'rich' ? 'lime_plaster' : type === 'pole' ? 'mud_plaster' : rand() < 0.5 ? 'mud_plaster' : 'lime_plaster';
   const wl = (x0, z0, x1, z1, isDoor, alongX) => {
     if (!isDoor) { slab(bag, mat, [x0, z0, x1, z1], P, P + wh, col, P, P + wh); return; }
     const m = alongX ? (x0 + x1) / 2 : (z0 + z1) / 2;
@@ -264,17 +286,49 @@ function house(el, ctx) {
   wl(cx - w / 2, cz + d / 2 - T, cx + w / 2, cz + d / 2, side === 's', true);
   wl(cx - w / 2, cz - d / 2 + T, cx - w / 2 + T, cz + d / 2 - T, side === 'w', false);
   wl(cx + w / 2 - T, cz - d / 2 + T, cx + w / 2, cz + d / 2 - T, side === 'e', false);
+  // by kind: the poles of the daub walls showing outside, lashed; or the better house's dado and porch
+  if (type === 'pole' && !el.lite) {
+    const poleRow = (x0, z0, x1, z1, nrm, isDoor) => {
+      const len = Math.hypot(x1 - x0, z1 - z0), n = Math.max(2, Math.round(len / 0.5)), m = [(x0 + x1) / 2, (z0 + z1) / 2];
+      for (let i = 0; i <= n; i++) {
+        const q = i / n, px2 = x0 + (x1 - x0) * q, pz2 = z0 + (z1 - z0) * q;
+        if (isDoor && Math.hypot(px2 - m[0], pz2 - m[1]) < 0.62) continue;
+        const ox = px2 + nrm[0] * 0.05, oz = pz2 + nrm[1] * 0.05;
+        bag.add(TIM, rod([ox, P, oz], [ox, P + wh, oz], 0.04, 4));
+      }
+      for (const yy of [P + 0.55, P + 1.35]) { const g = (nrm[0] ? box(-0.012, 0, -len / 2, 0.012, 0.05, len / 2) : box(-len / 2, 0, -0.012, len / 2, 0.05, 0.012)); bag.add('rope_fibre', g.translate(m[0] + nrm[0] * 0.075, yy, m[1] + nrm[1] * 0.075)); }
+    };
+    poleRow(cx - w / 2, cz - d / 2, cx + w / 2, cz - d / 2, [0, -1], side === 'n');
+    poleRow(cx - w / 2, cz + d / 2, cx + w / 2, cz + d / 2, [0, 1], side === 's');
+    poleRow(cx - w / 2, cz - d / 2, cx - w / 2, cz + d / 2, [-1, 0], side === 'w');
+    poleRow(cx + w / 2, cz - d / 2, cx + w / 2, cz + d / 2, [1, 0], side === 'e');
+  }
+  if (type === 'rich') {
+    const F3 = frame(side, ...(side === 'n' ? [cx, cz - d / 2] : side === 's' ? [cx, cz + d / 2] : side === 'w' ? [cx - w / 2, cz] : [cx + w / 2, cz]));
+    const dado = (u0, u1, v0, v1) => { const r = F3.R(u0, u1, v0, v1); bag.add(L, box(r[0], P, r[1], r[2], P + 0.45, r[3])); };
+    const half = (side === 'n' || side === 's' ? w : d) / 2;
+    dado(-0.06, 0, -half, -0.55); dado(-0.06, 0, 0.55, half);                                // a stone dado under the plaster
+    // the porch: two posts and a lean-to of thatch before the door, the platform carried out under it
+    const pf = F3.R(-1.9, -0.7, -1.7, 1.7); bag.add('rubble', box(pf[0], -0.1, pf[1], pf[2], P, pf[3])); bag.add(LIME, box(pf[0] + 0.05, P - 0.04, pf[1] + 0.05, pf[2] - 0.05, P, pf[3] - 0.05)); col.floor(pf, P);
+    for (const v of [-1.5, 1.5]) { const q = F3.P(-1.6, v); bag.add(TIM, rod([q[0], P, q[1]], [q[0], P + wh - 0.3, q[1]], 0.07, 6)); col.circle(q[0], q[1], 0.09, P, P + wh); }
+    const A = F3.P(-1.9, -1.9), B2 = F3.P(-1.9, 1.9), C2 = F3.P(0, 1.9), D2 = F3.P(0, -1.9), hi = P + wh + 0.1, lo = P + wh - 0.55;
+    hex(bag, 'thatch_palm', [[A[0], lo - 0.12, A[1]], [B2[0], lo - 0.12, B2[1]], [C2[0], hi - 0.12, C2[1]], [D2[0], hi - 0.12, D2[1]], [A[0], lo, A[1]], [B2[0], lo, B2[1]], [C2[0], hi, C2[1]], [D2[0], hi, D2[1]]]);
+  }
   // the roof: steep, hipped, thatch both sides of the skin; the ridge along the long axis
   const ex = w / 2 + 0.7, ez = d / 2 + 0.7, y0 = P + wh - 0.15, rise = 3.0, long = w >= d;
   const inx = long ? ez - 0.12 : ex - 0.12, g = (inxx, inzz) => ({ ax: ex - inxx, az: ez - inzz });
   const top = long ? g(Math.min(ex - 0.25, ez + 0.4) , ez - 0.12) : g(ex - 0.12, Math.min(ez - 0.25, ex + 0.4));
   void inx;
-  const t = [];
-  const B = [[-ex, -ez], [ex, -ez], [ex, ez], [-ex, ez]], T2 = [[-top.ax, -top.az], [top.ax, -top.az], [top.ax, top.az], [-top.ax, top.az]];
-  const V = (q, yy) => [cx + q[0], yy, cz + q[1]];
-  for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; t.push(...V(B[i], y0), ...V(T2[i], y0 + rise), ...V(T2[j], y0 + rise), ...V(B[i], y0), ...V(T2[j], y0 + rise), ...V(B[j], y0)); }
-  t.push(...V(T2[0], y0 + rise), ...V(T2[3], y0 + rise), ...V(T2[2], y0 + rise), ...V(T2[0], y0 + rise), ...V(T2[2], y0 + rise), ...V(T2[1], y0 + rise));
-  const gr = fromTriangles(t); bag.add('thatch_palm', gr); bag.add('thatch_palm', flipGeo(gr.clone()));
+  // the thatch in three courses, steeper toward the ridge, an eave fringe, a ridge pole with crossed finials
+  { const ta = top.ax, tz = top.az, prof = [[0, 0], [0.3, 0.42], [0.65, 0.78], [1, 1]];
+    for (let k = 0; k < 3; k++) {
+      const [h0, p0] = prof[k], [h1, p1] = prof[k + 1], lerp = (a0, a1, q) => a0 + (a1 - a0) * q;
+      frust(bag, 'thatch_palm', cx, cz, lerp(ex, ta, p0), lerp(ez, tz, p0), lerp(ex, ta, p1), lerp(ez, tz, p1), y0 + rise * h0, y0 + rise * h1);
+    }
+    frust(bag, 'thatch_palm', cx, cz, ex + 0.1, ez + 0.1, ex + 0.04, ez + 0.04, y0 - 0.1, y0 + 0.16);
+    const rl = long ? ta + 0.7 : tz + 0.7, yr = y0 + rise + 0.06, ax = long ? [1, 0] : [0, 1];
+    bag.add(TIM, rod([cx - ax[0] * rl, yr, cz - ax[1] * rl], [cx + ax[0] * rl, yr, cz + ax[1] * rl], 0.07, 6));
+    for (const sg of [-1, 1]) { const e = [cx + ax[0] * rl * sg, cz + ax[1] * rl * sg]; for (const k of [-1, 1]) bag.add(TIM, rod([e[0] - ax[0] * 0.1 * sg - ax[1] * 0.45 * k, yr - 0.1, e[1] - ax[1] * 0.1 * sg - ax[0] * 0.45 * k], [e[0] - ax[0] * 0.1 * sg + ax[1] * 0.45 * k, yr + 0.45, e[1] - ax[1] * 0.1 * sg + ax[0] * 0.45 * k], 0.04, 5)); } }
   void ctx;
   // inside: the bed with its mats at one end, the hearth (in the kitchen), the metate, a water jar
   const ix = (a) => cx + a, iz = (a) => cz + a, F = P - 0.0;
@@ -318,7 +372,7 @@ function albarrada(el, { bag, col }) {
 
 registerStyle('tikal', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, k_pyramid: pyramid, k_shrine: shrine, k_platform: platform, k_range: range, k_stela: stela, k_causeway: causeway, k_ballcourt: ballcourt, k_house: house, k_ball: ball, petate, albarrada, ...DRESS },
+  elements: { ...STYLES.qing.elements, k_pyramid: pyramid, k_shrine: shrine, k_platform: platform, k_range: range, k_stela: stela, k_causeway: causeway, k_ballcourt: ballcourt, k_house: house, k_eshrine: eshrine, k_tapesco: tapesco, k_midden: midden, k_hives: hives, k_ball: ball, petate, albarrada, ...DRESS },
   objects: {},
 });
 export { frame };
