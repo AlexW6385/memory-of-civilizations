@@ -2,13 +2,20 @@
 // plaques, an impluvium in each court; the great gallery of audience with the Oba's dais; the ancestral altars with their cast heads
 // and carved tusks; the turrets with their spires, brass snakes down their faces and brass birds on their points; the gate.
 import { fromTriangles, quad } from '../../core/geom.js';
-import { rng, wallMat, B, clayWall, gable, lean, hip, pillar, plaque, head, bird, snake, altar, box, frustum, lathe, rod } from './kit.js';
+import { courses, crest, rng, wallMat, B, clayWall, gable, lean, hip, pillar, plaque, head, bird, snake, altar, box, frustum, lathe, rod } from './kit.js';
 import { orientedBox } from '../../core/build.js';
 import { frame } from '../greek/agora.js';
 import { pot, pots, stool, bed, chest, hearth, mortar, wood, wear, claySeat, hung } from './props.js';
 
 const SHINGLE = 'roof_bark';
-const PH = 4.35, GY = 0.3;                        // pillar height, gallery floor
+const PH = 4.35, GY = 0.3;
+/** A gabled roof with its shingle courses and the crest tiles on its ridge (ridge along x). */
+function gableC(ctx, rect, y, rise, over, step = 0.42) {
+  const [x0, z0, x1, z1] = rect, ins = (z1 - z0 + 2 * over) / 2;
+  gable(ctx, rect, y, rise, SHINGLE, 'x', over);
+  courses(ctx, [x0 - over, z0 - over, x1 + over, z1 + over], y, y + rise, [0, 0, ins, ins], SHINGLE, step);
+  crest(ctx, x0 - over, x1 + over, (z0 + z1) / 2, y + rise + 0.2);
+}                        // pillar height, gallery floor
 
 /** An impluvium: a raised clay rim round a pool of rain water at the court's middle. */
 function impluvium(ctx, cx, cz, pw, pd) {
@@ -118,7 +125,7 @@ function hall(el, ctx) {
   if (el.near !== false) for (const x of [x0 + 0.3, x1 - 0.3]) wear(ctx, [x, z0], [x, z1], 0.6, Y, T + 0.3, Math.round(x));
   for (const x of [x0 + 0.3, x1 - 0.3]) clayWall(ctx, [x, z0], [x, z1], 0.6, Y, T + 0.3, wm, [{ at: (z1 - z0) / 2, w: 3, h: 3.1 }]);
   bag.add('timber', box(x0 - 0.9, T, z0 - 0.9, x1 + 0.9, T + 0.1, z1 + 0.9));
-  gable(ctx, el.rect, T + 0.1, RISE, SHINGLE, 'x', 0.9);
+  gableC(ctx, el.rect, T + 0.1, RISE, 0.9, 0.5);
   bag.add('roof_ridge', box(x0 - 0.9, T + 0.1 + RISE - 0.08, (z0 + z1) / 2 - 0.3, x1 + 0.9, T + 0.1 + RISE + 0.26, (z0 + z1) / 2 + 0.3));
   // the small spired towers along the ridge with their brass birds (Dapper: every roof is adorned with one)
   for (let i = 0; i < 6; i++) spire(ctx, x0 + 3 + i * (x1 - x0 - 6) / 5, (z0 + z1) / 2, T + 0.1 + RISE, i % 5 === 2 ? 4.4 : 2.8, rand);
@@ -177,7 +184,7 @@ function frontRange(el, ctx) {
   bag.add('tuff_red', box(x0, 0, z0, x1, Y, z1 - 1.0)); col.floor([x0, z0, x1, z1 - 1.0], Y);
   // the roof, its tie beams, the ridge cap and the little spired towers along it
   bag.add('timber', box(x0 - 0.5, EY - 0.12, z0 - 0.5, x1 + 0.5, EY, z1 + 0.5));
-  gable(ctx, [x0, z0, x1, z1], EY, RISE, SHINGLE, 'x', 0.6);
+  gableC(ctx, [x0, z0, x1, z1], EY, RISE, 0.6);
   bag.add('roof_ridge', box(x0 - 0.6, EY + RISE - 0.08, zm - 0.28, x1 + 0.6, EY + RISE + 0.24, zm + 0.28));
   for (const q of [0.3, 0.62]) for (const sg of [-1, 1]) bag.add('wood_dark', box(x0 - 0.6, EY + RISE * (1 - q) - 0.03, zm + sg * q * (z1 - z0 + 1.2) / 2 - 0.06, x1 + 0.6, EY + RISE * (1 - q) + 0.1, zm + sg * q * (z1 - z0 + 1.2) / 2 + 0.06));
   const n = Math.max(3, Math.round((x1 - x0) / 11));
@@ -334,6 +341,20 @@ function tower(el, ctx) {
   // collections shows a pyramid on the turret, a snake down its front head first, the bird above with outstretched wings)
   const u0 = sy + span * 0.28, u1 = sy + span * 0.82, hw0 = r + 0.1, hw1 = 0.5;
   bag.add(SHINGLE, frustum([cx - hw0, cz - hw0, cx + hw0, cz + hw0], u0, u1, hw0 - hw1, hw0 - hw1, hw0 - hw1, hw0 - hw1, { noBottom: true }));
+  { const k = hw0 - hw1, sk = r + 0.7 - 0.5;
+    courses(ctx, [cx - hw0, cz - hw0, cx + hw0, cz + hw0], u0, u1, [k, k, k, k], SHINGLE, big ? 0.5 : 0.4, 0.1);
+    courses(ctx, [cx - r - 0.7, cz - r - 0.7, cx + r + 0.7, cz + r + 0.7], sy, sy + span * 0.3, [0.5, 0.5, 0.5, 0.5], SHINGLE, 0.5, 0.1);
+    void sk;
+    // the clay body: a string course of stucco under the lantern and one above the foot, a slit window on each face with its brass-pinned surround
+    const bf = (y) => r - 0.28 * y / bh;
+    for (const y of [1.0, bh - 0.9]) bag.add('stucco_red', frustum([cx - bf(y) - 0.12, cz - bf(y) - 0.12, cx + bf(y) + 0.12, cz + bf(y) + 0.12], y, y + 0.2, 0.0, 0.0, 0.0, 0.0));
+    for (const [dx, dz] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+      const y0 = bh * 0.42, y1 = y0 + 1.15, f = bf((y0 + y1) / 2), qx = cx + dx * f, qz = cz + dz * f, ax = dz ? 1 : 0, az = dx ? 1 : 0, o = 0.05;
+      bag.add('wood_dark', box(qx - ax * 0.13 - dx * 0.0 - (dx ? 0.02 : 0), y0, qz - az * 0.13 - (dz ? 0.02 : 0), qx + ax * 0.13 + (dx ? 0.05 : 0), y1, qz + az * 0.13 + (dz ? 0.05 : 0)));
+      for (const sg of [-1, 1]) bag.add('stucco_red', box(qx + ax * sg * 0.24 - (ax ? 0.05 : 0) - (dx < 0 ? 0.08 : 0), y0 - 0.1, qz + az * sg * 0.24 - (az ? 0.05 : 0) - (dz < 0 ? 0.08 : 0), qx + ax * sg * 0.24 + (ax ? 0.05 : 0) + (dx > 0 ? 0.08 : 0), y1 + 0.1, qz + az * sg * 0.24 + (az ? 0.05 : 0) + (dz > 0 ? 0.08 : 0)));
+      void o;
+    }
+  }
   bag.add('timber', box(cx - hw1 - 0.15, u1, cz - hw1 - 0.15, cx + hw1 + 0.15, u1 + 0.12, cz + hw1 + 0.15));
   bag.add('timber', lathe([[0.1, 0], [0.1, Math.max(0.3, h - u1 - 0.1)]], 6, null, cx, u1 + 0.12, cz));
   bird(ctx, cx, h + 0.0, cz, big ? 2.4 : 1.3, (el.seed ?? 5) * 0.7, SM);
@@ -382,7 +403,7 @@ function gatehouse(el, ctx) {
   bag.add('tuff_red', box(cx - pw, 0, cz - D, cx + pw, 0.12, cz)); col.floor([cx - pw, cz - D, cx + pw, cz], 0.12);
   // the roof: tie beams, the steep upper roof, a ridge cap, a spired tower on the ridge with the great bird
   bag.add('timber', box(cx - W - 0.9, T, cz - D - 0.9, cx + W + 0.9, T + 0.12, cz + 0.9));
-  gable(ctx, [cx - W, cz - D, cx + W, cz], T + 0.12, RISE, SHINGLE, 'x', 0.9);
+  gableC(ctx, [cx - W, cz - D, cx + W, cz], T + 0.12, RISE, 0.9);
   const ry = T + 0.12 + RISE;
   bag.add('roof_ridge', box(cx - W - 0.9, ry - 0.06, cz - D / 2 - 0.3, cx + W + 0.9, ry + 0.26, cz - D / 2 + 0.3));
   for (const q of [-0.62, -0.3, 0.3, 0.62]) bag.add('wood_dark', box(cx - W - 0.9, T + 0.12 + RISE * (1 - Math.abs(q) * 1.2) - 0.02, cz - D / 2 + q * (D / 2 + 0.9) - 0.07, cx + W + 0.9, T + 0.12 + RISE * (1 - Math.abs(q) * 1.2) + 0.1, cz - D / 2 + q * (D / 2 + 0.9) + 0.07));
@@ -401,6 +422,16 @@ function gatehouse(el, ctx) {
   }
   bag.add('wood_dark', box(cx - W - 0.5, PY + 4.55, pz - 0.2, cx + W + 0.5, PY + 5.0, pz + 0.2));
   lean(ctx, [cx - W - 0.4, cz - 0.3, cx + W + 0.4, cz + PD + 0.3], 'zp', PY + 4.9, T + 0.5, SHINGLE, 0.5);
+  // the wings' front walls: a stucco cornice under the eaves and raised frames (a moulded border) round each pair of hung plaques
+  for (const s of [-1, 1]) {
+    bag.add('stucco_red', box(s < 0 ? cx - W : cx + pw, T - 0.38, cz - 0.08, s < 0 ? cx - pw : cx + W, T - 0.02, cz + 0.16));
+    for (const [u0, u1] of [[3.25, 5.55], [7.45, 9.75]]) {
+      const a = cx + s * u0, b = cx + s * u1, xa = Math.min(a, b), xb = Math.max(a, b);
+      for (const [y0, y1] of [[1.38, 1.5], [3.0, 3.12]]) bag.add('stucco_red', box(xa, y0, cz + 0.0, xb, y1, cz + 0.1));
+      for (const xx of [xa, xb - 0.12]) bag.add('stucco_red', box(xx, 1.38, cz, xx + 0.12, 3.12, cz + 0.1));
+      bag.add('gilt_bronze', box(xa + 0.2, 3.12, cz, xb - 0.2, 3.2, cz + 0.06));
+    }
+  }
   // the plaques on the wings' front walls, a clay seat under the porch at each end
   for (const s of [-1, 1]) for (const u of [3.8, 5.0, 8.0, 9.2]) for (const y of [1.8, 2.7]) plaque(ctx, cx + s * u, y, cz, 's', Math.floor(rand() * 1e6), 0.4, 0.5);
   for (const s of [-1, 1]) claySeat(ctx, [cx + s * 9.0 - 1.2, cz + 0.5, cx + s * 9.0 + 1.2, cz + 1.0], PY, 6 + s);

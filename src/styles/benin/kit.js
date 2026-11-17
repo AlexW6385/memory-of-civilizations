@@ -28,6 +28,26 @@ export function gable(ctx, rect, y, rise, mat, ridge = 'x', over = 0.5) {
   const [x0, z0, x1, z1] = rect, w = ridge === 'x' ? z1 - z0 : x1 - x0, r = [x0 - over, z0 - over, x1 + over, z1 + over], ins = (w + 2 * over) / 2;
   ctx.bag.add(mat, frustum(r, y, y + rise, ridge === 'x' ? 0 : ins, ridge === 'x' ? 0 : ins, ridge === 'x' ? ins : 0, ridge === 'x' ? ins : 0, { noBottom: true }));
 }
+/**
+ * Courses of shingle laid over a roof frustum: the roof is (rect, y0 → y1, ins = [xn, xp, zn, zp] the insets of its top). Each course is a thin
+ * wedge with a thick butt (0.09 m) that tapers to the roof's own surface, so the slope reads as rows of overlapping shingles with a shadow line
+ * under each. `step` is the course's height along the slope's rise; seed varies the lip by a millimetre so the courses merge, not instance.
+ */
+export function courses(ctx, rect, y0, y1, ins, mat, step = 0.42, butt = 0.09) {
+  const [x0, z0, x1, z1] = rect, H = y1 - y0, n = Math.max(2, Math.round(H / step)), e = [0, 0, 0, 0];
+  for (let i = 1; i < n; i++) {
+    const t0 = i / n, t1 = (i + 1) / n, dt = t1 - t0, m = (i % 3) * 0.001;
+    const a = ins.map((v) => v * t0);
+    const r = [x0 + a[0] - butt - m, z0 + a[2] - butt - m, x1 - a[1] + butt + m, z1 - a[3] + butt + m];
+    const q = ins.map((v, k) => (v ? v * dt : 0) + (v ? butt - 0.02 : butt - 0.02));
+    void e;
+    ctx.bag.add(mat, frustum(r, y0 + H * t0 - 0.02, y0 + H * t1, q[0], q[1], q[2], q[3], { noBottom: true }));
+  }
+}
+/** A row of upright crest tiles along a ridge from a to b at height y (the cap of a Benin roof). */
+export function crest(ctx, x0, x1, z, y, mat = 'roof_ridge', gap = 0.9, h = 0.38) {
+  for (let x = x0 + 0.3; x < x1 - 0.2; x += gap) ctx.bag.add(mat, box(x - 0.2, y, z - 0.16, x + 0.2, y + h, z + 0.16));
+}
 /** A lean-to over rect with its low edge on `low` ('xn' | 'xp' | 'zn' | 'zp'), from yLow up to yHigh; a ceiling of timber below. */
 export function lean(ctx, rect, low, yLow, yHigh, mat, over = 0.4, ceil = true) {
   const [x0, z0, x1, z1] = rect, ins = [0, 0, 0, 0], k = { xn: 0, xp: 1, zn: 2, zp: 3 }[low];
