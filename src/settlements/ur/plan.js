@@ -45,6 +45,9 @@ walks[0].y0 = 0;
 // into the palace by its west gate and across its court to the audience hall's door
 walks.push([[0, -155], [60, -155], [60, -111], [76, -111], [88, -111], [88, -106], [106, -106], [106, -111], [116, -111]]);
 walks[1].y0 = 0;
+// into the royal mausoleum outside the temenos (§5.11): the stair from the east street, the forecourt, the court of offerings, the door of the stepped room, the stair down and the two tomb chambers
+walks.push([[164, -16], [164, -7], [164, 5], [164, 14], [170, 20], [185.5, 44.4], [185.5, 48.0], [190, 48.4], [190, 50.4], [181.5, 50.4], [178, 50.4], [172, 50.4], [166, 50.4], [160, 50.4]]);
+walks[2].y0 = 0;
 
 export const precinct = {
   id: 'ur-ziggurat',
