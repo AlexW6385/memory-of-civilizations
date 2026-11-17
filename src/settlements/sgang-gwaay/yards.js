@@ -108,7 +108,7 @@ export function yards() {
   for (let z = -150; z <= 150; z += 5 + rand() * 6) {
     if (runs.some((r) => Math.abs(r.z - z) < 3.4)) continue;
     const x = shoreX(z) + 3.2 + rand() * 4.5;
-    put('tidepool', x, z, rand() * 6, { r: 1.7, w: 2.2 + rand() * 1.4, minH: -1.7 });
+    put('tidepool', x, z, rand() * 6, { r: 1.7, w: 2.2 + rand() * 1.4, minH: -0.3 });
   }
   // boats at their moorings with their crews, fishing in the bay
   for (const z of [-112, -50, 28, 92, 138]) {
