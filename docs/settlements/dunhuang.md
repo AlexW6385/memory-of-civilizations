@@ -105,3 +105,13 @@ What was built:
 - **The threshing floor** [stated: the oasis lived by the Daquan's irrigation and grew wheat and millet, §12; inferred: the floor itself, the commonest form of the Hexi villages] at the east fields' edge: a round of beaten earth 12 m across with a pivot pole and a stone roller on an arm, piles of wheat and straw, forks, a winnowing tray, the ox resting, two farmers and a woman at the grain, sacks.
 
 Level after this pass: L2, in several parts L3 (the landmark's doors, corridors, eaves and shrines are at the full decorative programme; the interiors of the caves and the first 120 m of the town were already at L3). What keeps the settlement from L3: no mural texture (the paintings are flat coloured pieces, not brushwork), the 9th-century storey count of Cave 96 unresolved (§4), the monasteries at the cliff foot are halls of the town's type, the cave shrines of the two upper tiers are painted not modelled.
+
+## 14. Round 2: the landmark seen first and close (Nine-Storey building, cave porches)
+
+No new sources; forms follow §13's and the usual Tang timber vocabulary [inferred: the halls of Foguang and Nanchan, the temples painted in the Mogao murals].
+
+- **Tiled eaves.** Each eave skirt of the Nine-Storey building now carries rolls of cover tiles (two to a 0.8 m sample, running down the warped skirt from the wall to the rim) ending in round eave-end discs on alternate rolls; the crown hip and its two hip faces have the same; the cave porches' shed roofs carry rolls at 0.42 m. [inferred: Tang roofs are of paired pan and cover tiles with round ends.]
+- **Facade joinery.** Every window now has its frame, seven uprights and two cross rails in front of the lattice paper; every apron panel a red frame round a green field; stepped corbels (queti) of three tiers with a painted tip flank each column under the beam (in the porches too); the ground-floor columns stand on lotus plinths of stone, the porch columns on plain ones.
+- **Balustrades.** The rail at each deck (formerly one floating bar) is a Tang-style balustrade: posts every 1.5 m with gilt lotus-bud caps, a top rail, a lower rail, turned balusters and a painted ochre panel in each span, standing on the eave deck.
+- **Owl-tail ridge ends (chiwen).** The crowning roof's ridge ends are the Tang owl-tail form (a body leaning out, its tip curled back over the ridge, a row of gilt knobs) instead of lathe finials. [inferred: the Tang form, as at the Foguang hall and in the murals.] The storey count stays as in §4.
+- Budget: every new small piece is gathered into one geometry per material (no instanced prototypes, no new materials in the plan), so the arrival's main draws are unchanged.
