@@ -128,3 +128,9 @@ A living culture (DESIGN §7): only what communities and museum documentation sh
 - **Watchmen's platforms in the millet** (two): four posts, pole floor at 1.7 m, straw pyramid roof, notched ladder, a cord with dry gourds to scare birds [inferred: the common Sahelian field-guard platform; no Dogon source read].
 
 Sources added: Palmer/PSU catalogue 19; MFA Boston 516953; Met 312204; AMUM Dogon granary door; naturalhomes.org; dennisrhollowayarchitect.com.
+
+## 14. Landmark pass (2026-11-17, round 2): niches with depth, the toguna's roof, the Tellem fronts
+- **Niches as recesses.** The ginna facade's niches were flat dark rectangles on the wall. Each is now a hand-smoothed frame (heavy lintel, sill, jambs) standing 0.09 m proud, so its dark back lies that deep, with a floor ledge; rows at a 0.66 m beat (0.62 m on the tall kind), so a facade carries more of them [stated: rows of rectangular niches for the first ancestors, eartharchitecture.org "Ginna House"; the depth and frame are inferred: the wall is a solid mass, so the recess is made by relief].
+- **Toguna roof.** The eight layers now swell toward the middle (up to 6 cm at the top layer), the eaves carry loose splayed stalk ends hanging 0.2-0.4 m, and three bark cords lash the layers across the length [inferred: a thick mat of millet stalks, dossier 4.1; the lashing and ragged eaves are our reading of photographs]. Departure: none; the 1.95 m clear height remains as stated in 4.1.
+- **Tellem fronts.** Rooms gain beam ends through the front wall, mud corner ribs and a jamb either side of the door [inferred; Dogon houses took the Tellem stone-and-clay houses as pattern, habitatio.epitesz.bme.hu].
+- Budget at the arrival (draw-count): main 0.33 -> 0.34 M triangles, main draws 127 -> 127.
