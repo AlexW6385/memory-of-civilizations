@@ -272,12 +272,12 @@ function imperialShop(el, ctx) {
 function house(el, ctx) {
   const R = room(el, ctx), { F, put } = R, rand = rng(el.seed || 1), pick = (a) => a[Math.floor(rand() * a.length)];
   const { Wd, Dp } = F;
-  { const P = new Parts(); altar(P, 1.3); put(P, 0, 0.3, 0); R.rect(-0.65, 0.1, 0.65, 0.5, 0.95); }
+  { const P = new Parts(); altar(P, 1.3); put(P, 0, 0.3, Math.PI); R.rect(-0.65, 0.1, 0.65, 0.5, 0.95); }
   for (const s of [-1, 1]) { const P = new Parts(); scroll(P, 0, 0, 0, 0.45, 1.5, (el.seed || 1) + s); put(P, s * 1.45, 0.06, 0, 0.9); }
   for (const s of [-1, 1]) { const C = new Parts(); chair(C); put(C, s * 1.1, 1.5, Math.PI); R.rect(s * 1.1 - 0.3, 1.25, s * 1.1 + 0.3, 1.75, 1.0); }
   { const T = new Parts(); table(T, 0.7, 0.5, 0.74); put(T, 0, 1.5, 0); R.rect(-0.35, 1.25, 0.35, 1.75, 0.74); const V = new Parts(); teabowl(V, 0, 0.74, 0); teabowl(V, 0.16, 0.74, 0); put(V, 0, 1.5, 0); }
   if (Wd > 5) { const P = new Parts(); couch(P, 1.9, 0.95); put(P, -Wd / 2 + 1.1, Dp * 0.55, Math.PI / 2 * 0 + Math.PI); R.rect(-Wd / 2 + 0.1, Dp * 0.55 - 0.5, -Wd / 2 + 2.1, Dp * 0.55 + 0.5, 0.98); }
-  { const P = new Parts(); chest(P); put(P, Wd / 2 - 0.5, 0.6, -Math.PI / 2 * 0 + 0); R.rect(Wd / 2 - 0.9, 0.4, Wd / 2 - 0.1, 0.8, 0.5); }
+  { const P = new Parts(); chest(P); put(P, Wd / 2 - 0.5, 0.6, Math.PI); R.rect(Wd / 2 - 0.9, 0.4, Wd / 2 - 0.1, 0.8, 0.5); }
   if (Wd > 4.5) { const P = new Parts(); qinTable(P); put(P, Wd / 2 - 1.2, Dp * 0.6, Math.PI); R.rect(Wd / 2 - 1.6, Dp * 0.6 - 0.2, Wd / 2 - 0.8, Dp * 0.6 + 0.2, 0.55); }
   tieBeam(R, Wd, Dp * 0.5, 2.9);
   { const L = new Parts(); lantern(L, 0, 2.9, 0); put(L, 0, Dp * 0.5, 0); }

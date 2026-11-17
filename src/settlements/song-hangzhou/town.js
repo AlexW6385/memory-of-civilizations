@@ -4,7 +4,7 @@
 // peddlers come to the riverbank for the crowd: stalls along the foot of the flood wall, hawkers with
 // their shoulder poles, a fruit seller under a parasol.
 import { RADIUS, LEVEL, WALL, ROAD, PAGODA, CANAL, CANAL_BRIDGES, CITY, GATE, LAKE_GATE, WATER_GATE, WEST_LAKE, lakeDepth, canalLandings, TAFANG, TAFANG_FRONT, WATCH_TOWERS, lots, streets, wells, riverTeaHouses } from './layout.js';
-import { lifePlans, interiorLots } from './life.js';
+import { lifePlans, interiorLots, dwellingLots, dwellingPlans, dwellingShells } from './life.js';
 import './townscape.js';
 import './houses.js';
 import { streetsideElements } from './houses.js';
@@ -62,8 +62,9 @@ function tideDay() {
   teaInside(S, L, rand, person);
   // the shops' name boards over their fronts, on the beam over the opening; the tea houses' on their front beam
   const tea = new Set([...teaHouses(), ...Object.entries(interiorLots()).filter(([k]) => k !== 'house').flatMap(([, v]) => v)]), F = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] };
+  const dwSet = new Set(dwellingLots());
   for (const l of lots()) {
-    if (!l.shop) continue;
+    if (!l.shop || dwSet.has(l)) continue;
     const [x0, z0, x1, z1] = l.rect, o = F[l.front], len = o[0] ? z1 - z0 : x1 - x0, edge = [o[0] > 0 ? x1 : o[0] < 0 ? x0 : (x0 + x1) / 2, o[1] > 0 ? z1 : o[1] < 0 ? z0 : (z0 + z1) / 2];
     const n = Math.min(Math.floor((len - 1.6) / 0.36), 2 + (l.seed % 4)), back = tea.has(l) ? 0.435 : 0.505;
     if (n < 2) continue;
@@ -205,7 +206,7 @@ import { hillStatic, hillLife } from './hill.js';
 
 export async function town() {
   const chosen = interiorLots(), tea = new Set(teaHouses()), inter = new Set(Object.values(chosen).flat());
-  const all = lots().filter((l) => !tea.has(l) && !inter.has(l)), plans = [];
+  const dw = new Set(dwellingLots()), all = lots().filter((l) => !tea.has(l) && !inter.has(l) && !dw.has(l)), plans = [];
   const order = [...all].sort((a, b) => b.detail - a.detail);
   const N = 120;
   for (let i = 0; i < order.length; i += N) plans.push(base(`song-hangzhou-houses-${i / N}`, order.slice(i, i + N).map((l) => ({ t: 'hz_house', y: LEVEL.street, ...l, simple: l.detail === 0 ? true : undefined }))));
@@ -213,8 +214,9 @@ export async function town() {
   // the lots the life furnishes (life.js): their shells raised here, the floor 0.45 m over the street; the furniture is the life's
   const shells = [];
   for (const [kind, list] of Object.entries(chosen)) for (const l of list) shells.push({ t: 'hz_shell', rect: l.rect, front: l.front, y: LEVEL.street, kind, seed: l.seed, roof: l.roof });
+  shells.push(...dwellingShells());
   plans.push(base('song-hangzhou-shells', shells));
-  plans.push(fabric(), ...tideDay(), boatPeople(), ...lifePlans(base));
+  plans.push(fabric(), ...tideDay(), boatPeople(), ...lifePlans(base), ...dwellingPlans(base));
   plans.push(...streetPlans(base));
   // life at the water and at the city's posts (§25), in 100 m tiles of the street life; the river's stairs
   const tiles = new Map();

@@ -4,7 +4,8 @@
 // on the bank, the river with its boats; the canal and its lock, bridges and boats.
 
 import { RADIUS, LEVEL, WALL, ROAD, PAGODA, T1, T2, CANAL, CANAL_STREETS, CANAL_BRIDGES, WAREHOUSES } from './layout.js';
-import { interiorRooms } from './life.js';
+import { interiorRooms, dwellingRooms } from './life.js';
+import './pagoda-upper.js';
 
 /** The river boats [x, z, heading (±1 along x), length − 4] (moored by the wall when z < 165, under sail beyond), and the canal boats [z, heading]. */
 export const RIVER_BOATS = [[-240, 160, 1, 12], [-60, 158, -1, 9], [20, 172, 1, 14], [100, 160, 1, 8], [190, 158, -1, 10], [250, 190, -1, 16], [-150, 215, 1, 18], [60, 240, -1, 11]];
@@ -47,6 +48,8 @@ E.push({ t: 'stairs', rect: [PAGODA.c[0] - 4, T2.rect[3], PAGODA.c[0] + 4, T1.re
 const tiers = [{ r: 10.5, h: 9.5 }];
 for (let i = 1; i < 7; i++) tiers.push({ r: 10.5 - 0.6 * i, h: 6.7 });
 E.push({ t: 'liuhe_pagoda', c: PAGODA.c, y: PAGODA.y, base: { r: 17, h: 2 }, tiers, bells: 'iron', interior: true, images: true });
+// the five upper storeys dressed as the two lowest are (the style dresses only those): pilasters, framed doors and windows, a brick-carved frieze, balusters
+E.push({ t: 'hz_pagoda_upper', c: PAGODA.c, y: PAGODA.y, base: { r: 17, h: 2 }, tiers, from: 2 });
 // the steps up the base on the south, to the way onto the lowest gallery and the doors into the pagoda
 E.push({ t: 'stairs', rect: [PAGODA.c[0] - 3, PAGODA.c[1] + 15.3, PAGODA.c[0] + 3, PAGODA.c[1] + 19.3], y0: T1.y, y1: PAGODA.y + 2, dir: 'n', mat: 'granite_block' });
 E.push({ t: 'ming_hall', rect: [-129, -4, -91, 24], y: T2.y, H: 6, front: 's', four: true, roof: 'xieshan', plat: 0.8, eave: 1.8, sweep: 0.9 });
@@ -81,7 +84,7 @@ for (const dx of [-8.5, 8.5]) E.push({ t: 'sutra_pillar', at: [PAGODA.c[0] + dx,
 for (const r of WAREHOUSES) E.push({ t: 'hz_house', rect: r, y: LEVEL.street, front: 's', storeys: 2, shop: false, seed: r[0] });
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
-const rooms = [room('terrace', T1.rect, T1.y, 'open'), room('hall', [-129, -4, -91, 24], T2.y, 'hall'), ...interiorRooms()];   // the music zones of the furnished houses (life.js)
+const rooms = [room('terrace', T1.rect, T1.y, 'open'), room('hall', [-129, -4, -91, 24], T2.y, 'hall'), ...interiorRooms(), ...dwellingRooms()];   // the music zones of the furnished houses (life.js)
 // each storey inside the pagoda, in the corridor's north-west corner (the stair arrives in the south-west one)
 {
   const [px, pz] = PAGODA.c, aw = (tiers[6].r * Math.cos(Math.PI / 8)) * 0.78, sw = aw * Math.tan(Math.PI / 8);

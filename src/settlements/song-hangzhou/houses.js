@@ -77,7 +77,7 @@ function houseSong(el, { bag, col }) {
   const tProf = (vv) => { const t = vv <= vm ? (vv - vf) / (vm - vf) : (vbE - vv) / (vbE - vm); return Math.pow(Math.max(0, Math.min(1, t)), 1.35); };
   const prof = (vv) => yEv + rise * tProf(vv);
   // the collider is the house as drawn: from the front's outermost things at body height (the counters, sills and frames at v0 − 0.16; the steps are low enough to walk over) to the back wall
-  const solid = () => { const p = W(0, v0 - 0.16, 0), q = W(L, D - 0.15, 0); col.rect([p[0], p[2], q[0], q[2]], y - 0.4, yE + rise); };
+  const solid = () => { const p = W(0, v0 - 0.16, 0), q = W(L, D - 0.15, 0), e = 0.2; col.rect([Math.min(p[0], q[0]) - e, Math.min(p[2], q[2]) - e, Math.max(p[0], q[0]) + e, Math.max(p[2], q[2]) + e], y - 0.4, yE + rise); };   // 0.2 m proud of the walls, so that no free spot lies in a cell of the drawn wall
 
   // plinth, party walls, back wall, with the damp band
   B(0, v0 - 0.12, L, vb, y - 0.4, y0, 'granite_block');
