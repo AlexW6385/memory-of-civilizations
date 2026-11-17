@@ -41,7 +41,12 @@ export function tileWork(bag, o, K) {
     for (const s of [-1, 1]) row(line([cx + s * (A - 0.2), z], [cx + s * (A - xEnd), z]));
   }
   bag.add('tile_dark', fromTriangles(orientOutward(T)));
-  // the eave's end discs: round tiles standing at the edge, facing out, along the whole perimeter
+  discRing(bag, o.c, A, B, h, K);
+}
+
+/** The eave's end discs: round tiles standing at the edge of a rectangular eave (half-sizes A, B), facing out, with the edge's height h(x, z) at scale K. */
+export function discRing(bag, c, A, B, h, K) {
+  const [cx, cz] = c;
   const D = [], r = 0.27 * K, per = 4 * (A + B), n = Math.floor(per / (0.62 * K));
   for (let k = 0; k < n; k++) {
     const d = per * (k + 0.5) / n;
