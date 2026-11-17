@@ -475,8 +475,14 @@ function gallery(el, ctx) {
   bag.add('flagstone', box(x0 + T, fl - 0.12, z0 + T, x1 - T, fl, z1));
   for (let zz = z0 + T + 0.6; zz < z1 - 0.3; zz += 1.2) bag.add('timber', box(x0 + T, fl - 0.7, zz - 0.12, x1 - T, fl - 0.45, zz + 0.12));
   col.floor([x0 + T, z0 + T, x1 - T, z1], fl);
-  bag.add('limestone', box(x0, y, z0, x1, E, z0 + T));
-  col.rect([x0, z0, x1, z0 + T], y, E);
+  if (el.door == null) { bag.add('limestone', box(x0, y, z0, x1, E, z0 + T)); col.rect([x0, z0, x1, z0 + T], y, E); }
+  else {
+    // the far end opens by a pointed door into the Grand-Salle (the hall's south wall, flush against this one)
+    const dc = el.door, dr = 0.95;
+    bag.add('limestone', planarWall({ o: [x0, z0 + T / 2], u: [1, 0], th: T, u0: 0, u1: x1 - x0, y0: y, y1: E, arches: [{ uc: dc - x0, r: dr, spring: fl + 2.2, sill: fl, pointed: 0.8 }] }));
+    col.rect([x0, z0, dc - dr, z0 + T], y, E); col.rect([dc + dr, z0, x1, z0 + T], y, E); col.rect([dc - dr, z0, dc + dr, z0 + T], fl + 2.6, E);
+    col.rect([dc - dr, z0, dc + dr, z0 + T], y, fl - 0.1);
+  }
   // the roof and its far gable
   const xc = (x0 + x1) / 2, rg = E + (x1 - x0) * 0.75, R = [], Gb = [];
   prism(R, [[x0 - 0.35, E + 0.02, z0 - 0.3], [x1 + 0.35, E + 0.02, z0 - 0.3], [xc, rg, z0 - 0.3]], [0, 0, Ln + 0.3 - 0.05]);
@@ -576,8 +582,189 @@ function dado(el, { bag }) {
 }
 const triOf = (g) => Array.from(g.attributes.position.array);
 
+// ── the furnishings of the upper and lower chapel (docs/buildings/sainte-chapelle.md §8a) ───────────────────────────────────
+
+/**
+ * sc_tribune { at [cx, cz], y (the floor), w (across, along z), d (along x), h (the platform's height) }: the platform of the
+ * relics in the apse — a stone body on a plinth with a blind arcade on each face, a deck with an openwork parapet, a baldachin of six
+ * painted posts with cusped arches under gablets and a gilt gabled roof with a crest and a spirelet; on the deck the Grande
+ * Châsse, a house-shaped shrine of silver with a gilt crest, an arcade of figures on each long side, set with gems.
+ */
+function tribune(el, { bag, col }) {
+  const [cx, cz] = el.at, y = el.y, w = el.w ?? 3.8, d = el.d ?? 2.5, h = el.h ?? 2.5, x0 = cx - d / 2, x1 = cx + d / 2, z0 = cz - w / 2, z1 = cz + w / 2;
+  const top = y + h, S = [], G = [], B = [], F = [];
+  // the body, the plinth, the deck's slab with its moulded edge
+  bag.add('limestone', box(x0 - 0.1, y, z0 - 0.1, x1 + 0.1, y + 0.3, z1 + 0.1));
+  bag.add('limestone', box(x0, y + 0.3, z0, x1, top - 0.14, z1));
+  bag.add('limestone', box(x0 - 0.1, top - 0.14, z0 - 0.1, x1 + 0.1, top - 0.02, z1 + 0.1));
+  bag.add('marble_floor', box(x0, top - 0.02, z0, x1, top, z1));
+  // the blind arcades: three on the west face, two on each side, east face plain (against the apse)
+  const arcade = (o, u, n, len, count) => {
+    const W = frame(o, u, n), st = len / count;
+    for (let k = 0; k <= count; k++) { const uu = k * st; fbox(S, W, uu - 0.06, uu + 0.06, y + 0.3, y + 1.95, 0, 0.1); const c = W(uu, 0, 0.1); G.push(...Array.from(lathe([[0.04, 0], [0.04, 1.1]], 8, null, c[0], y + 0.5, c[2]).attributes.position.array)); }
+    for (let k = 0; k < count; k++) {
+      const a = { uc: (k + 0.5) * st, r: st / 2 - 0.1, spring: y + 1.15, pointed: 0.8 };
+      archBand(G, W, a, 0, 0.05, 0.02, 0.12, 8);
+      fbox(B, W, a.uc - a.r, a.uc + a.r, y + 0.4, y + 1.15, 0, 0.02);
+      for (let i = 0; i < 6; i++) { const ta = Math.PI * i / 6, tb = Math.PI * (i + 1) / 6, cr = a.r * 0.42; for (const s of [-1, 1]) { const cu = a.uc + s * a.r * 0.5, P = (t, e, dd) => W(cu + Math.cos(t) * (cr + e), y + 1.12 + Math.sin(t) * (cr + e) * 0.55, dd); hexa(G, [P(ta, 0, 0.02), P(ta, 0.03, 0.02), P(tb, 0.03, 0.02), P(tb, 0, 0.02)], [P(ta, 0, 0.07), P(ta, 0.03, 0.07), P(tb, 0.03, 0.07), P(tb, 0, 0.07)]); } }
+    }
+  };
+  arcade([x0, z0], [0, 1], [-1, 0], w, 3);
+  arcade([x0, z0], [1, 0], [0, -1], d, 2);
+  arcade([x0, z1], [1, 0], [0, 1], d, 2);
+  // the parapet of timber balusters round the deck, open between the two corner posts of each side, where the stairs' landings come in
+  const rail = (a, b) => {
+    const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(2, Math.round(L / 0.3));
+    bag.add('wood_dark', rod([a[0], top + 0.9, a[1]], [b[0], top + 0.9, b[1]], 0.035, 4));
+    bag.add('wood_dark', rod([a[0], top + 0.14, a[1]], [b[0], top + 0.14, b[1]], 0.03, 4));
+    for (let i = 0; i <= n; i++) { const t = i / n, p = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; bag.add('wood_dark', rod([p[0], top + 0.14, p[1]], [p[0], top + 0.9, p[1]], 0.018, 4)); }
+    col.segment(a, b, 0.14, top, top + 0.95);
+  };
+  rail([x0 + 0.06, z0 + 0.06], [x0 + 0.06, z1 - 0.06]);
+  for (const zz of [z0 + 0.06, z1 - 0.06]) { rail([x0 + 0.06, zz], [cx - 0.6, zz]); rail([cx + 0.45, zz], [x1 - 0.06, zz]); }
+  rail([x1 - 0.06, z0 + 0.06], [x1 - 0.06, z1 - 0.06]);
+  // the baldachin: six posts of painted wood on gilt bases, capitals of leaves, cusped arches, gablets, the roof
+  const px = [x0 + 0.3, x1 - 0.3], pz = [z0 + 0.3, cz, z1 - 0.3], PH = 3.0, ya = top + PH;
+  for (const x of px) for (const z of pz) {
+    bag.add('gold', lathe([[0.13, 0], [0.11, 0.1], [0.08, 0.2]], 8, null, x, top, z));
+    bag.add('paint_blue', lathe([[0.07, 0], [0.07, PH - 0.5]], 8, null, x, top + 0.2, z));
+    bag.add('gold', lathe([[0.07, 0], [0.12, 0.12], [0.15, 0.3]], 8, null, x, ya - 0.3, z));
+    bag.add('gold', box(x - 0.14, ya, z - 0.14, x + 0.14, ya + 0.1, z + 0.14));
+  }
+  // beams on the capitals, and the arches in each face with a gablet over (a triangle of gilt wood)
+  bag.add('gold', box(px[0] - 0.12, ya + 0.1, pz[0] - 0.1, px[0] + 0.12, ya + 0.26, pz[2] + 0.1));
+  bag.add('gold', box(px[1] - 0.12, ya + 0.1, pz[0] - 0.1, px[1] + 0.12, ya + 0.26, pz[2] + 0.1));
+  for (const z of [pz[0], pz[2]]) bag.add('gold', box(px[0] - 0.1, ya + 0.1, z - 0.12, px[1] + 0.1, ya + 0.26, z + 0.12));
+  const face = (o, u, n, spans) => {
+    const W = frame(o, u, n);
+    for (const [u0, u1] of spans) {
+      const a = { uc: (u0 + u1) / 2, r: (u1 - u0) / 2 - 0.1, spring: ya - 0.45, pointed: 0.8 }, H = archRise(a);
+      archBand(G, W, a, 0, 0.07, -0.05, 0.05, 8);
+      prism(F, [W(u0 + 0.05, ya + 0.26, -0.05), W(u1 - 0.05, ya + 0.26, -0.05), W(a.uc, ya + 0.26 + 0.9 + H * 0.2, -0.05)], [n[0] * 0.1, 0, n[1] * 0.1]);
+    }
+  };
+  face([x0 + 0.3, z0 + 0.3], [0, 1], [-1, 0], [[0, pz[1] - pz[0]], [pz[1] - pz[0], pz[2] - pz[0]]]);
+  face([x1 - 0.3, z0 + 0.3], [0, 1], [1, 0], [[0, pz[1] - pz[0]], [pz[1] - pz[0], pz[2] - pz[0]]]);
+  face([x0 + 0.3, z0 + 0.3], [1, 0], [0, -1], [[0, px[1] - px[0]]]);
+  face([x0 + 0.3, z1 - 0.3], [1, 0], [0, 1], [[0, px[1] - px[0]]]);
+  // the roof: gabled along z, gilt, with a crest of fleurs and a spirelet with a cross at the middle of the ridge
+  const R = [], xr = (x0 + x1) / 2, yb = ya + 0.26, yr = yb + 1.55;
+  prism(R, [[x0 - 0.25, yb, z0 - 0.2], [x1 + 0.25, yb, z0 - 0.2], [xr, yr, z0 - 0.2]], [0, 0, w + 0.4]);
+  bag.add('gilt_bronze', fromTriangles(R));
+  bag.add('gold', rod([xr, yr + 0.05, z0 - 0.1], [xr, yr + 0.05, z1 + 0.1], 0.06, 6));
+  for (let z = z0 + 0.2; z < z1; z += 0.4) bag.add('gold', lathe([[0.001, 0], [0.08, 0.06], [0.05, 0.16], [0.001, 0.22]], 5, null, xr, yr + 0.1, z));
+  bag.add('gold', lathe([[0.2, 0], [0.12, 0.3], [0.1, 0.8], [0.03, 1.5]], 8, null, xr, yr, cz));
+  bag.add('gold', box(xr - 0.02, yr + 1.4, cz - 0.02, xr + 0.02, yr + 2.0, cz + 0.02)); bag.add('gold', box(xr - 0.02, yr + 1.7, cz - 0.14, xr + 0.02, yr + 1.76, cz + 0.14));
+  // the Grande Châsse: a house of silver on a gilt plinth, its roof of silver scales, gems along the ridge and the eaves
+  const sx = xr, sw = 0.4, sl = 1.1, sb = top;
+  bag.add('gilt_bronze', box(sx - sw - 0.12, sb, cz - sl - 0.12, sx + sw + 0.12, sb + 0.16, cz + sl + 0.12));
+  bag.add('silver', box(sx - sw, sb + 0.16, cz - sl, sx + sw, sb + 0.9, cz + sl));
+  const Rr = [];
+  prism(Rr, [[sx - sw - 0.06, sb + 0.9, cz - sl - 0.06], [sx + sw + 0.06, sb + 0.9, cz - sl - 0.06], [sx, sb + 1.5, cz - sl - 0.06]], [0, 0, 2 * sl + 0.12]);
+  bag.add('silver', fromTriangles(Rr));
+  bag.add('gold', rod([sx, sb + 1.52, cz - sl - 0.04], [sx, sb + 1.52, cz + sl + 0.04], 0.04, 5));
+  for (let z = cz - sl + 0.1; z < cz + sl; z += 0.3) bag.add('gold', lathe([[0.001, 0], [0.05, 0.05], [0.03, 0.12], [0.001, 0.16]], 5, null, sx, sb + 1.5, z));
+  for (const s of [-1, 1]) {
+    const xs = sx + s * (sw + 0.01), fig = [];
+    for (let k = 0; k < 6; k++) {
+      const z = cz - sl + 0.19 + k * (2 * sl - 0.38) / 5;
+      bag.add('gold', lathe([[0.03, 0], [0.03, 0.62], [0.05, 0.68]], 6, null, xs + s * 0.03, sb + 0.2, z - 0.18));
+      bag.add('paint_robe', lathe([[0.001, 0], [0.07, 0.03], [0.06, 0.28], [0.03, 0.4], [0.001, 0.41]], 7, null, xs + s * 0.04, sb + 0.26, z));
+      bag.add('ivory', lathe([[0.001, 0], [0.035, 0.02], [0.035, 0.08], [0.001, 0.1]], 6, null, xs + s * 0.04, sb + 0.66, z));
+      bag.add(['inlay_carnelian', 'inlay_lapis', 'inlay_jade'][k % 3], box(xs + s * 0.01 - 0.012, sb + 0.82, z - 0.04, xs + s * 0.01 + 0.012, sb + 0.88, z + 0.04));
+    }
+    void fig;
+    bag.add('gold', box(xs - 0.01 + s * 0.02, sb + 0.9 - 0.04, cz - sl, xs + 0.01 + s * 0.02, sb + 0.9 + 0.02, cz + sl));
+  }
+  for (let k = 0; k < 6; k++) bag.add('gold', lathe([[0.03, 0], [0.03, 0.62], [0.05, 0.68]], 6, null, sx - sw - 0.04, sb + 0.2, cz + sl - 0.18 - k * 0));
+  for (const [m, T] of [['limestone', S], ['gold', G], ['paint_blue', B], ['gilt_bronze', F]]) if (T.length) bag.add(m, fromTriangles(T));
+  // collision: the body, the deck to stand on, the posts, the shrine
+  col.rect([x0, z0, x1, z1], y, top - 0.05);
+  col.floor([x0 + 0.1, z0 + 0.1, x1 - 0.1, z1 - 0.1], top);
+  for (const x of px) for (const z of pz) col.circle(x, z, 0.16, top, top + PH);
+  col.rect([sx - sw - 0.12, cz - sl - 0.12, sx + sw + 0.12, cz + sl + 0.12], top, top + 1.5);
+}
+function tribLanding(el, { bag, col }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y;
+  bag.add('limestone', box(x0, y - 0.3, z0, x1, y, z1)); col.floor(el.rect, y); col.floor(el.bridge, y);
+  bag.add('limestone', box(x0, y - 2.6, z0, x1, y - 0.3, z1));
+}
+
+/**
+ * sc_apostle { at [x, z], y (the corbel's top), h, face [fx, fz], i }: one of the twelve, larger than life, on a carved corbel
+ * against a clustered shaft, under a little canopy, in a painted robe with a gilt nimbus, holding the disk marked with the
+ * consecration cross, his own attribute (book, key, sword, saw, cross, spear…) in the other hand.
+ */
+function apostle(el, { bag }) {
+  const [x, z] = el.at, y = el.y, h = el.h ?? 1.95, f = el.face, i = el.i ?? 0, sx = -f[1], sz = f[0];
+  bag.add('limestone_carved', lathe([[0.001, 0], [0.1, 0.18], [0.2, 0.38], [0.26, 0.55]], 8, null, x, y - 0.55, z));
+  bag.add('limestone', box(x - 0.3, y - 0.04, z - 0.3, x + 0.3, y + 0.04, z + 0.3));
+  ndFigure(bag, x, y + 0.04, z, h, { mat: ['paint_robe', 'paint_blue', 'paint_castle', 'paint_fleur'][i % 4], face: f, book: i % 2 === 0 });
+  const hy = y + 0.04 + 0.87 * h;
+  // the gilt nimbus behind the head, a disk in the vertical plane across f
+  const N = [], r = 0.21, cc = [x - f[0] * 0.07, hy + 0.02, z - f[1] * 0.07];
+  prism(N, Array.from({ length: 12 }, (_, k) => { const a = k / 12 * Math.PI * 2; return [cc[0] + sx * Math.cos(a) * r, cc[1] + Math.sin(a) * r, cc[2] + sz * Math.cos(a) * r]; }), [-f[0] * 0.025, 0, -f[1] * 0.025]);
+  bag.add('gold', fromTriangles(N));
+  // the consecration disk held at the breast: a round board with a red cross in its field
+  const D = [], dc = [x + f[0] * 0.2 + sx * 0.12, y + 0.04 + 0.56 * h, z + f[1] * 0.2 + sz * 0.12], dr = 0.15;
+  prism(D, Array.from({ length: 12 }, (_, k) => { const a = k / 12 * Math.PI * 2; return [dc[0] + sx * Math.cos(a) * dr, dc[1] + Math.sin(a) * dr, dc[2] + sz * Math.cos(a) * dr]; }), [f[0] * 0.03, 0, f[1] * 0.03]);
+  bag.add('ivory', fromTriangles(D));
+  const cr = [];
+  prism(cr, [[dc[0] + f[0] * 0.03 - sx * 0.1, dc[1] - 0.018, dc[2] + f[1] * 0.03 - sz * 0.1], [dc[0] + f[0] * 0.03 + sx * 0.1, dc[1] - 0.018, dc[2] + f[1] * 0.03 + sz * 0.1], [dc[0] + f[0] * 0.03 + sx * 0.1, dc[1] + 0.018, dc[2] + f[1] * 0.03 + sz * 0.1], [dc[0] + f[0] * 0.03 - sx * 0.1, dc[1] + 0.018, dc[2] + f[1] * 0.03 - sz * 0.1]], [f[0] * 0.012, 0, f[1] * 0.012]);
+  prism(cr, [[dc[0] + f[0] * 0.03 - 0.018 * 0, dc[1] - 0.1, dc[2] + f[1] * 0.03], [dc[0] + f[0] * 0.03 + sx * 0.018, dc[1] - 0.1, dc[2] + f[1] * 0.03 + sz * 0.018], [dc[0] + f[0] * 0.03 + sx * 0.018, dc[1] + 0.1, dc[2] + f[1] * 0.03 + sz * 0.018], [dc[0] + f[0] * 0.03, dc[1] + 0.1, dc[2] + f[1] * 0.03]], [f[0] * 0.012, 0, f[1] * 0.012]);
+  bag.add('paint_castle', fromTriangles(cr));
+  // the attribute in the other hand: a key, sword, spear or saw as a slender staff by the shoulder
+  const kind = i % 6, ax = x + f[0] * 0.14 - sx * 0.2, az = z + f[1] * 0.14 - sz * 0.2;
+  if (kind !== 0) {
+    bag.add(kind === 2 ? 'gold' : 'iron', rod([ax, y + 0.2, az], [ax, y + 0.04 + 0.92 * h, az], 0.016, 5));
+    if (kind === 1) bag.add('gold', box(ax - 0.07, y + 0.04 + 0.86 * h, az - 0.01, ax + 0.07, y + 0.04 + 0.92 * h, az + 0.01));
+    if (kind === 3) bag.add('iron', box(ax - 0.07 * Math.abs(f[1]), y + 0.04 + 0.55 * h, az - 0.07 * Math.abs(f[0]), ax + 0.07 * Math.abs(f[1]), y + 0.04 + 0.6 * h, az + 0.07 * Math.abs(f[0])));
+  }
+  // the canopy: two slim shafts and a gabled hood with a finial, above the head
+  const cy = y + 0.04 + h + 0.35;
+  for (const s of [-1, 1]) bag.add('limestone', rod([x + sx * 0.26 * s, y + 0.04, z + sz * 0.26 * s], [x + sx * 0.26 * s, cy, z + sz * 0.26 * s], 0.03, 5));
+  bag.add('limestone', lathe([[0.38, 0], [0.34, 0.14], [0.22, 0.34], [0.001, 0.72]], 4, null, x, cy, z));
+  bag.add('limestone_carved', lathe([[0.04, 0], [0.06, 0.16], [0.001, 0.3]], 6, null, x, cy + 0.7, z));
+}
+
+/**
+ * sc_altar { at [x, z] (the front of the mensa's step), y, face [fx, fz] (toward the people), w, kind 'main'|'virgin' }: steps, the
+ * stone table with its frontal of painted cloth, a linen cloth, a low painted retable with the cross between two candlesticks
+ * (the flames lit), a chalice and a book on a cushion; the Virgin's altar of the lower chapel has a blue retable with a gilt
+ * Virgin and Child in the middle.
+ */
+function altar(el, { bag, col, lights }) {
+  const [x, z] = el.at, y = el.y, f = el.face ?? [-1, 0], sx = -f[1], sz = f[0], w = el.w ?? 2.4, hw = w / 2;
+  const P = (u, d) => [x + sx * u - f[0] * d, z + sz * u - f[1] * d];        // u across, d back from the people
+  const R = (m, u0, u1, d0, d1, ya, yb) => { const a = P(u0, d0), b = P(u1, d1); bag.add(m, box(Math.min(a[0], b[0]), y + ya, Math.min(a[1], b[1]), Math.max(a[0], b[0]), y + yb, Math.max(a[1], b[1]))); };
+  R('limestone', -hw - 0.5, hw + 0.5, -0.2, 1.6, 0, 0.16);
+  R('limestone', -hw - 0.2, hw + 0.2, 0.3, 1.3, 0.16, 0.32);
+  R('limestone', -hw, hw, 0.4, 1.0, 0.32, 1.0);                                    // the mensa's body
+  R('limestone', -hw - 0.06, hw + 0.06, 0.34, 1.06, 1.0, 1.08);                    // its slab
+  R(el.kind === 'virgin' ? 'paint_blue' : 'paint_castle', -hw + 0.1, hw - 0.1, 0.34, 0.38, 0.4, 0.95);   // the frontal
+  R('gold', -hw + 0.1, hw - 0.1, 0.33, 0.37, 0.9, 0.95);
+  for (let k = 0; k < 4; k++) R('gold', -hw + 0.1 + (k + 0.5) * (w - 0.2) / 4 - 0.04, -hw + 0.1 + (k + 0.5) * (w - 0.2) / 4 + 0.04, 0.33, 0.37, 0.55, 0.75);
+  R('linen', -hw - 0.1, hw + 0.1, 0.3, 1.1, 1.08, 1.1); R('linen', -hw - 0.1, hw + 0.1, 0.3, 0.34, 0.8, 1.1);
+  // the retable: a low painted panel at the back, the cross at its middle, candlesticks at the ends
+  R(el.kind === 'virgin' ? 'paint_blue' : 'paint_fleur', -hw + 0.2, hw - 0.2, 0.9, 1.0, 1.1, 1.65);
+  R('gold', -hw + 0.15, hw - 0.15, 0.88, 1.02, 1.65, 1.7);
+  if (el.kind === 'virgin') { const p = P(0, 0.88); bag.add('gold', lathe([[0.001, 0], [0.18, 0.03], [0.14, 0.3], [0.1, 0.42], [0.001, 0.42]], 8, null, p[0], y + 1.12, p[1])); bag.add('ivory', lathe([[0.001, 0], [0.06, 0.02], [0.06, 0.08], [0.001, 0.1]], 6, null, p[0], y + 1.54, p[1])); }
+  else { const p = P(0, 0.7); bag.add('gold', box(p[0] - 0.02, y + 1.08, p[1] - 0.02, p[0] + 0.02, y + 1.7, p[1] + 0.02)); bag.add('gold', box(p[0] - 0.12 * Math.abs(f[1]) - 0.02 * Math.abs(f[0]), y + 1.48, p[1] - 0.12 * Math.abs(f[0]) - 0.02 * Math.abs(f[1]), p[0] + 0.12 * Math.abs(f[1]) + 0.02 * Math.abs(f[0]), y + 1.54, p[1] + 0.12 * Math.abs(f[0]) + 0.02 * Math.abs(f[1]))); }
+  for (const s of [-1, 1]) {
+    const p = P(s * (hw - 0.45), 0.55);
+    bag.add('gilt_bronze', lathe([[0.1, 0], [0.04, 0.06], [0.025, 0.4], [0.06, 0.44], [0.001, 0.46]], 8, null, p[0], y + 1.1, p[1]));
+    bag.add('ivory', lathe([[0.025, 0], [0.025, 0.24], [0.001, 0.24]], 6, null, p[0], y + 1.54, p[1]));
+    bag.add('flame', lathe([[0.001, 0], [0.02, 0.04], [0.001, 0.1]], 5, null, p[0], y + 1.78, p[1]));
+    lights?.push({ at: [p[0], y + 1.9, p[1]], color: '#ffc27a', intensity: 0.9, distance: 5 });
+  }
+  { const p = P(0.5, 0.55); bag.add('gold', lathe([[0.001, 0], [0.05, 0.01], [0.015, 0.08], [0.04, 0.16], [0.06, 0.22], [0.001, 0.22]], 8, null, p[0], y + 1.1, p[1])); }
+  { const p = P(-0.5, 0.6); R('cloth_red', -0.5 - 0.17, -0.5 + 0.17, 0.46, 0.74, 1.1, 1.16); R('ivory', -0.5 - 0.14, -0.5 + 0.14, 0.5, 0.7, 1.16, 1.22); void p; }
+  const a = P(-hw - 0.5, 1.6), b = P(hw + 0.5, -0.2);
+  col.rect([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], y, y + 1.8);
+}
+
 const base = STYLES.gothic;
 registerStyle('gothic-chapelle', {
   ...base,
-  elements: { ...base.elements, sc_turret: turret, sc_portal: portal, sc_balustrade: balustrade, sc_gablet: gablet, sc_front: frontFrames, sc_keep: keep, sc_gable: wgable, sc_pinnacle: scPinnacle, sc_cornice: cornice, sc_window_frame: windowFrame, sc_roof_dress: roofDress, sc_fleche: fleche, sc_tri_window: triWindow, sc_gallery: gallery, sc_stair_rail: stairRail, sc_stair_arcade: stairArcade, sc_dado: dado },
+  elements: { ...base.elements, sc_turret: turret, sc_portal: portal, sc_balustrade: balustrade, sc_gablet: gablet, sc_front: frontFrames, sc_keep: keep, sc_gable: wgable, sc_pinnacle: scPinnacle, sc_cornice: cornice, sc_window_frame: windowFrame, sc_roof_dress: roofDress, sc_fleche: fleche, sc_tri_window: triWindow, sc_gallery: gallery, sc_tribune: tribune, sc_trib_landing: tribLanding, sc_apostle: apostle, sc_altar: altar, sc_stair_rail: stairRail, sc_stair_arcade: stairArcade, sc_dado: dado },
 });

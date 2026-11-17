@@ -3,7 +3,7 @@
 // a lantern), the masters behind the counters of the open shops, craftsmen working at their doors, washing hung across the
 // ruelles, washerwomen kneeling at the strand of the Seine, fishermen on the quay and the bridges' piers. Pure data from layout.js.
 import { RIVER, NORTH_ARM, SOUTH_ARM, QUAY, lots, laneCenters, rowMids, LANE_WIDTH, inLot, inRect, ISLAND, height } from './layout.js';
-import { shopPoint } from '../../styles/gothic/houses.js';
+import { shopPoint, frontKind } from '../../styles/gothic/houses.js';
 import { openSet } from './town.js';
 
 function lrng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -22,13 +22,13 @@ export function lifePlans() {
     if (Math.hypot(cx - FOCUS[0], cz - FOCUS[1]) > REACH) continue;
     const sp = tag(l), [ox, oz] = sp.out, side = [oz, ox], pt = (a, b) => [sp.at[0] + ox * a + side[0] * b, sp.at[1] + oz * a + side[1] * b];
     const rot = Math.atan2(ox, oz) + Math.PI;                       // facing out of the house, away from its wall
-    const isOpen = open.has(l);
+    const isOpen = open.has(l), shop = frontKind({ rect: l.rect, seed: l.seed, front: l.front, open: isOpen }) === 'shop';
     // the master behind the counter of an open shop (inside), and at the counter's outside a customer
     if (isOpen) fig(sp.inside, y0 + 0.1, faceTo(sp.inside, sp.at), { pose: 'stand', over: pick(['sash', 'none']), carry: 'none' });
-    if (rand() < (isOpen ? 0.75 : 0.35)) { const a = pt(0.2, (rand() - 0.5) * 1.4); fig(a, y0, faceTo(a, [a[0] - ox, a[1] - oz]), { pose: rand() < 0.5 ? 'talk' : 'stand', carry: rand() < 0.3 ? 'basket' : 'none' }); }
+    if (shop && rand() < (isOpen ? 0.75 : 0.35)) { const a = pt(0.2, (rand() - 0.5) * 1.4); fig(a, y0, faceTo(a, [a[0] - ox, a[1] - oz]), { pose: rand() < 0.5 ? 'talk' : 'stand', carry: rand() < 0.3 ? 'basket' : 'none' }); }
     // by the trade
     const q = (a, b) => pt(a, b);
-    switch (sp.trade) {
+    switch (shop ? sp.trade : 'none') {
       case 'cooper': L.push({ t: 'barrel', at: q(1.4, 1.2), y: y0, rot: rand() * 6, n: 3, seed: Math.floor(rand() * 1e6) }, { t: 'barrel', at: q(1.9, -0.8), y: y0, rot: rand() * 6, n: 2, seed: Math.floor(rand() * 1e6) });
         if (rand() < 0.6) { const a = q(1.8, 0.2); L.push({ t: 'stool', at: a, y: y0, rot: rot, seed: 1 }); fig(a, y0, rot + Math.PI, { pose: 'low', dress: 'tunic', hat: 'cap', carry: 'none' }); } break;
       case 'baker': L.push({ t: 'sacks', at: q(1.3, 1.5), y: y0, rot: rand() * 6, n: 3, seed: Math.floor(rand() * 1e6) }); L.push({ t: 'firewood', at: q(0.8, -1.9), y: y0, rot: rot + Math.PI / 2, len: 1.5, seed: Math.floor(rand() * 100) }); break;

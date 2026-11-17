@@ -2,8 +2,9 @@
 // previous design, src/buildings/sainte-chapelle) in the palace court; the palace's great hall and
 // towers; Notre-Dame and its parvis; the bridges; the river.
 
-import { RADIUS, CHAPEL, CATHEDRAL, PALACE, GARDEN, QUAY, BRIDGES, NORTH_ARM, SOUTH_ARM, ISLAND, RIVER, PARVIS, height, inLot } from './layout.js';
-import { shopPoint } from '../../styles/gothic/houses.js';
+import { CHATELETS, RADIUS, CHAPEL, CATHEDRAL, PALACE, GARDEN, QUAY, BRIDGES, NORTH_ARM, SOUTH_ARM, ISLAND, RIVER, PARVIS, height, inLot } from './layout.js';
+import { shopPoint, frontKind } from '../../styles/gothic/houses.js';
+import { openSet } from './town.js';
 import { lots as allLots } from './layout.js';
 import chapelPlan from '../../buildings/sainte-chapelle/plan.js';
 
@@ -15,7 +16,7 @@ export const city = {
     { t: 'notre_dame', rect: CATHEDRAL, y: g },
     // the palace (docs/settlements/paris.md §1c): the Grand-Salle north-west of the chapel, the king's gallery reaching it from
     // the chapel's upper porch (the chapel's plan); the towers on the Seine; the enclosure on the Barillerie with its gate
-    { t: 'palace_hall', rect: [-265, -72, -199, -44], h: 17, floor: 6, y: g, gap: -203 },
+    { t: 'palace_hall', rect: [-265, -72, -199, -44], h: 17, floor: 7.6, y: g, gap: -203, door: -202.9 },
     { t: 'palace_tower', at: [-262, -104.5], y: RIVER.bed + 0.5, ground: g, r: 5.0, h: 24.5, roof: 11, face: -Math.PI / 2 },     // Tour Bonbec
     { t: 'palace_tower', at: [-236, -104.5], y: RIVER.bed + 0.5, ground: g, r: 5.3, h: 27.5, roof: 13, face: -Math.PI / 2 },     // Tour César
     { t: 'palace_tower', at: [-222, -104.5], y: RIVER.bed + 0.5, ground: g, r: 5.3, h: 27.5, roof: 13, face: -Math.PI / 2 },     // Tour d'Argent
@@ -54,6 +55,12 @@ export const bridges = PONTS.map(({ name, b, n, mills }) => {
   for (const zm of mills) els.push({ t: 'mill_pendant', at: [b.x - BW, zm], dir: -1, w: 5.5, y: DECK, water: RIVER.level, bed: RIVER.bed });
   return { id: `paris-pont-${name}`, style: 'gothic', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [b.x, (z0 + z1) / 2], facing: 'n' }, bounds: [b.x - BW - 8, z0, b.x + BW + 8, z1], rooms: [], elements: els };
 });
+// the Châtelets (docs/settlements/paris.md §1e): the Grand Châtelet at the Grand Pont's Right Bank end (the prévôt's court in its west block),
+// the Petit Châtelet at the Petit Pont's Left Bank end
+export const chatelets = [
+  { id: 'paris-chatelet-grand', rect: CHATELETS.grand, el: { t: 'chatelet', rect: CHATELETS.grand, y: g, h: 11.5, court: true, face: Math.PI / 2, towers: [[-13.2, -176.8, 4.4, 17, 8.5], [13.2, -176.8, 4.4, 17, 8.5]] } },
+  { id: 'paris-chatelet-petit', rect: CHATELETS.petit, el: { t: 'chatelet', rect: CHATELETS.petit, y: g, h: 10, court: false, face: -Math.PI / 2, towers: [[99.6, 159.2, 3.6, 14, 7], [120.4, 159.2, 3.6, 14, 7]] } },
+].map(({ id, rect, el }) => ({ id, style: 'gothic', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, -135], facing: 'n' }, bounds: [rect[0] - 14, rect[1] - 14, rect[2] + 14, rect[3] + 14], rooms: [], elements: [el] }));
 /** The houses on the bridges: narrow lots along both sides of the street, their fronts to it, none where a mill stands. */
 export function bridgeHouses() {
   let seed = 1250;
@@ -106,9 +113,10 @@ export function streetLife() {
   }
   // customers at the counters of the shops near the parvis and the Grand Pont, and barrels, baskets and fire-wood at the doors
   { let n = 0;
+    const os = openSet();
     for (const l of allLots()) {
       const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2;
-      if (Math.hypot(cx - 70, cz) > 110 || n >= 46 || rand() > 0.3) continue;
+      if (Math.hypot(cx - 70, cz) > 110 || n >= 46 || rand() > 0.3 || frontKind({ rect: l.rect, seed: l.seed, front: l.front, open: os.has(l) }) !== 'shop') continue;
       const sp = shopPoint({ rect: l.rect, y: 1, seed: l.seed, front: l.front });
       const at = [sp.at[0] + sp.out[1] * (rand() - 0.5) * 0.6, sp.at[1] + sp.out[0] * (rand() - 0.5) * 0.6], rot = 0;
       fig(at, 1.0, faceTo(at, [at[0] - sp.out[0], at[1] - sp.out[1]]), { pose: rand() < 0.5 ? 'talk' : 'stand' });

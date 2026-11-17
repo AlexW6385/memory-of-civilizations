@@ -7,9 +7,10 @@ import { ARRIVALS } from '../../planet/arrivals.js';
 import { RADIUS, RIVER, lots, streets } from './layout.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -60], facing: 'w' } });
 export const RICH = { c: [60, 0], r: 250 };
-export const OPEN_MAX = 70;
+export const OPEN_MAX = 170, OPEN_OUTER = 60;          // the shops and homes of the core that can be entered, and the outer rows' workshops and inns
 const dist = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - 70, (l.rect[1] + l.rect[3]) / 2);
-export function openSet() { const all = lots(), near = openLots(all, [ARRIVALS.paris[0], ARRIVALS.paris[2]], 2), s = new Set(near.keys()); all.filter((l) => rich(l) && l.rect[2] - l.rect[0] >= 5.0 && l.seed % 4 === 0 && !s.has(l)).sort((a, b) => dist(a) - dist(b)).slice(0, OPEN_MAX).forEach((l) => s.add(l)); return s; }
+const outerOpen = (all) => all.filter((l) => !rich(l) && l.rect[2] - l.rect[0] >= 5.0 && l.seed % 7 === 0).sort((a, b) => dist(a) - dist(b)).slice(0, OPEN_OUTER);
+export function openSet() { const all = lots(), near = openLots(all, [ARRIVALS.paris[0], ARRIVALS.paris[2]], 2), s = new Set(near.keys()); all.filter((l) => rich(l) && l.rect[2] - l.rect[0] >= 5.0 && l.seed % 4 === 0 && !s.has(l)).sort((a, b) => dist(a) - dist(b)).slice(0, OPEN_MAX).forEach((l) => s.add(l)); outerOpen(all).forEach((l) => s.add(l)); return s; }
 const rich = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - RICH.c[0], (l.rect[1] + l.rect[3]) / 2 - RICH.c[1]) < RICH.r;
 export async function houses() {
   const all = lots(), plans = [], near = openLots(all, [ARRIVALS.paris[0], ARRIVALS.paris[2]], 2);
@@ -18,8 +19,9 @@ export async function houses() {
   all.filter((l) => rich(l) && l.rect[2] - l.rect[0] >= 5.0 && l.seed % 4 === 0 && !open.has(l))
     .sort((a, b) => dist(a) - dist(b)).slice(0, OPEN_MAX).forEach((l) => open.set(l, 'shop'));
   const core = all.filter((l) => rich(l)), rest = all.filter((l) => !core.includes(l));
+  outerOpen(all).forEach((l) => open.set(l, 'outer'));
   plans.push(...lodTiles('paris-houses', 'gothic', core.map((l) => ({ t: 'paris_house', y: RIVER.ground, foot: RIVER.ground, ...l, ...(open.has(l) ? { open: true } : {}) })), { near: 200, R: RADIUS, entrance: { at: [0, -60], facing: 'w' } }));
-  for (let i = 0; i < rest.length; i += 160) plans.push(base(`paris-outer-${i / 160}`, rest.slice(i, i + 160).map((l) => ({ t: 'house_timber', y: RIVER.ground, foot: RIVER.ground, ...l, ...(open.has(l) ? { open: true, use: 'workshop' } : {}) }))));
+  for (let i = 0; i < rest.length; i += 160) plans.push(base(`paris-outer-${i / 160}`, rest.slice(i, i + 160).map((l) => ({ t: 'house_timber', y: RIVER.ground, foot: RIVER.ground, ...l, ...(open.has(l) ? { open: true, use: (l.seed >>> 3) % 3 === 0 ? 'inn' : 'workshop' } : {}) }))));
   // the surfaces of the rues of the core, cut into pieces of 24 m (tiles of 100 m, full near, the crown and kerbs only far)
   const pieces = [], rand = lrng(1252);
   for (const r of streets()) {
