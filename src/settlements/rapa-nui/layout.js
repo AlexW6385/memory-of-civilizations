@@ -88,7 +88,7 @@ export const HAMLETS = [[-88, 28, 34, Math.PI], [64, 28, 36, Math.PI], [-34, -14
 /** What goes on inside a house: sleeping and daily life, the cook's, the net-maker's, the bark-cloth maker's, the carver's. */
 export const KINDS = ['sleep', 'cook', 'net', 'tapa', 'carver', 'sleep', 'cook', 'net', 'tapa', 'sleep'];
 /** The nearest this many houses to the arrival are built to be entered; further ones are solid. */
-export const ENTER_N = 22;
+export const ENTER_N = 40;
 /** The village: boat-shaped houses (long axis roughly east–west) in hamlets, chicken houses and garden walls among them. */
 export function village() {
   if (HOUSES) return HOUSES;

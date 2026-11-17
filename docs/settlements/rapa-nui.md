@@ -93,6 +93,21 @@ Moai of yellow-brown tuff; ahu of fitted basalt with a paved ramp of rounded sto
 - **The lake** (`pora`): two rafts of totora reed bundles on the crater lake [stated: reed-filled lake in the crater — Wikipedia "Rano Raraku"; the raft — inferred].
 - **Life**: 36 walkers by day; steam over the plaza ovens; hearth smoke from the houses (always from cooks' houses); terns over the shore, frigatebirds over the sea; chickens in the yards.
 
+## 4i. Detail pass: the ahu's masonry, the pukao, the chicken houses, the manavai, more houses to enter, fronts, postholes
+
+- **The ahu** (`ahu` in src/styles/rapanui/index.js): the Ahu Vinapu wall is "large, carefully fitted slabs of basalt" [stated: Wikipedia "Ahu Vinapu"]; the sources read give no slab sizes or courses. Ours, added to the earlier slab wall [inferred]: wedge stones driven into the joint at each great slab's edge, a footing stone at its foot, a coping of squared stones along the top edge standing a hand above the paving, laid edge stones along the sloping edges of the wings, and every standing statue wedged round its base with small stones.
+- **The pukao** (`pukaoGeometry`): cylinders with a dent below to sit on the head and a boss on top [stated: Wikipedia "Pukao"]; of red scoria, a vesicular rock [stated: Wikipedia "Moai"]. Ours: a drum a little oval, its sides faceted and pitted, the base edge ringed with grooves, a flat shoulder, and a separate top-knot with tying grooves set a little back [inferred: the faceting, pits, grooves].
+- **Hare moa** (`hare_moa` in src/styles/rapanui/masonry.js): "substantial, carefully built stone structures with a long, narrow internal chamber and one or two small openings … just large enough for a chicken" [stated: vernianera.com "Features and sites"]; normally a single small opening, closed by a rock placed in the gap [stated: southamerica.cl "Hare moa"]. Ours: six courses of laid, battered stones (long side to the wall, each course set half a stone over the one below) round a core, rounded ends, capstones laid across; two small openings at the foot, one open with its rock lying beside it, one stopped with the rock; sizes and courses [inferred].
+- **Manavai** (`manavai`): circular, sheltering plants from wind and holding moisture [stated: vernianera.com "Features and sites"]; lithic mulch covering gardens [stated: Wikipedia "Easter Island"]. Ours: a ring wall of five courses of dry-laid stones leaning in, a gap to go in by (open to the walker) with an upright stone at each side and a step stone, inside a bed of dark soil strewn with small stones and clumps of sugar cane (sugar cane grown, stated: Wikipedia "Easter Island"; its place in the manavai [inferred]).
+- **Hare paenga curbs:** the paenga have holes in their tops that held the poles of the frame [stated: The Past]. Ours: a dark hole in the top of every second curb stone, in all the houses. The door's gap in the curb now stops at the jambs.
+- **Fronts by rule** (`hare_house`, `hare_paenga`): from each house's seed one of four: the sill alone; flat stepping stones laid out from the sill; two upright stones at the jambs; a low windbreak of laid stones beside the pavement; the porch of the solid houses varies in width and length [inferred: the houses were not all alike].
+- **More to enter:** 40 houses (from 22) are built to be entered, out to about 140 m; the doorway is three cells wide on an odd grid, a jamb-to-jamb gap; the wear of the thatch (paler patches, streaks, hoops, straw) no longer crosses the door of a house to enter.
+- Level: L2, toward L3 (see the earlier passes).
+
+### Sources added
+- [Ahu Vinapu — Wikipedia](https://en.wikipedia.org/wiki/Ahu_Vinapu)
+- [Hare Moa — Chicken Houses — southamerica.cl](https://southamerica.cl/easter-island/hare-moa.htm)
+
 ## 5. The town
 
 Fifty-six hare paenga, chicken houses and garden walls in eight hamlets on the plain, kept off the statue road (§4f). [inferred]

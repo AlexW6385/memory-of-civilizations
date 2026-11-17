@@ -13,6 +13,7 @@ import { SCENES, rope } from './scenes.js';
 import { WORKS } from './works.js';
 import { HOUSES } from './houses.js';
 import { PLACES } from './places.js';
+import { MASONRY, laid } from './masonry.js';
 import '../qing/index.js';
 
 const T = 'tuff_moai', B = 'basalt_ahu';
@@ -158,9 +159,12 @@ function moaiEyes() {
 let PUKAO = null;
 function pukaoGeometry() {
   if (PUKAO) return PUKAO;
-  const r = 0.13, H = 0.15;
-  PUKAO = lathe([[0.001, 0.02], [r * 0.6, 0.004], [r * 0.93, 0], [r, 0.018], [r * 0.975, 0.028], [r, 0.038], [r * 1.01, H * 0.7], [r * 0.95, H * 0.92], [r * 0.82, H],
-    [r * 0.5, H], [r * 0.48, H * 1.05], [r * 0.46, H * 1.22], [r * 0.38, H * 1.3], [0.001, H * 1.32]], 28);
+  // a drum of red scoria, a little oval, its sides faceted where it was cut and pitted with the vesicles of the rock; a dent below to sit on
+  // the head, a flat shoulder, then the topknot (a boss tied round with grooves); the base edge ringed with grooves [stated: Wikipedia "Pukao"]
+  const r = 0.13, H = 0.15, rough = (th, y) => 1 + 0.022 * Math.cos(th * 7 + 0.8) + 0.014 * Math.cos(th * 13 + y * 90) - 0.018 * Math.max(0, Math.cos(th * 5 + y * 60) * Math.cos(y * 140));
+  const drum = lathe([[0.001, 0.02], [r * 0.6, 0.004], [r * 0.93, 0], [r, 0.018], [r * 0.975, 0.028], [r, 0.038], [r * 1.01, H * 0.4], [r * 1.0, H * 0.7], [r * 0.95, H * 0.92], [r * 0.82, H], [r * 0.5, H]], 36, (th, i, rr, y) => rough(th, y));
+  const knot = lathe([[r * 0.5, H], [r * 0.48, H * 1.05], [r * 0.5, H * 1.1], [r * 0.45, H * 1.14], [r * 0.47, H * 1.19], [r * 0.4, H * 1.24], [r * 0.34, H * 1.3], [0.001, H * 1.34]], 24, (th) => 1 + 0.03 * Math.cos(th * 3));
+  PUKAO = merge([drum.scale(1, 1, 0.93), knot.translate(0, 0, -0.012)]);
   return PUKAO;
 }
 /** moai: { at, y, h, facing, pukao, kind ('ahu' | 'quarry'), lie (on its back, head toward `facing`), tilt, lean, buried (depth) }. */
@@ -172,6 +176,13 @@ function moai(el, { bag, col }) {
   m.multiply(new Matrix4().makeScale(h, h, h));
   m.setPosition(x, y - (el.buried ?? 0), z);
   putStone(bag, T, moaiGeometry(kind), m);
+  if (kind === 'ahu' && !el.lie && !el.buried) {              // the statue stands on the platform, wedged round its base with small stones
+    const sc = moaiSection(0), cy = Math.cos(yaw), sy = Math.sin(yaw);
+    for (let k = 0; k < 11; k++) {
+      const a = k / 11 * Math.PI * 2 + 0.3, lx = Math.cos(a) * (sc.w * h + 0.1), lz = sc.zc * h + Math.sin(a) * (sc.d * h + 0.1);
+      boulder(bag, B, x + lx * cy + lz * sy, y - 0.05, z - lx * sy + lz * cy, 0.1 + 0.07 * ((k * 7) % 3) / 2, k + x);
+    }
+  }
   if (kind === 'ahu' && el.eyes !== false) for (const e of moaiEyes()) putStone(bag, e.mat, e.g, m);
   if (el.pukao) putStone(bag, 'scoria_red', pukaoGeometry().clone().translate(0, 1 - 0.006, -0.02), m);
   const r = h * 0.17;
@@ -285,7 +296,16 @@ function ahu(el, { bag, col }) {
           ya += ch;
         }
       }
+      // wedge stones driven into the joint at the slab's edge, and a footing stone at its foot
+      for (let q = 0; q < 2 + (rand() < 0.5 ? 1 : 0); q++) boulder(bag, B, xa + w + (rand() - 0.5) * 0.04, y + 0.3 + q * (hh / 2.4) + rand() * 0.2, zf + dir * (0.33 + d), 0.07 + rand() * 0.05, xa + q);
+      boulder(bag, B, xa + w * (0.25 + 0.5 * rand()), y - 0.12, zf + dir * (0.52 + rand() * 0.15), 0.3 + rand() * 0.2, xa * 1.7);
       xa += w;
+    }
+    // the coping: squared stones along the top edge, standing a hand above the paving
+    for (let xc = x0 - 0.05; xc < x1 + 0.05 - 0.2;) {
+      const cw = Math.min(x1 + 0.05 - xc, 0.7 + rand() * 0.45);
+      bag.add(B, box(xc + 0.03, y + h - 0.12, Math.min(zf, zf + dir * 0.42), xc + cw - 0.03, y + h + 0.06 + rand() * 0.05, Math.max(zf, zf + dir * 0.42)));
+      xc += cw;
     }
   };
   face(z1 - 0.15, 1, [1.4, 1.6], false);
@@ -322,6 +342,11 @@ function ahu(el, { bag, col }) {
     const xe = s < 0 ? x0 : x1, L = 14;
     bag.add('pebbles', hull8([[xe, y - 0.6, z0 + 0.4], [xe + s * L, y - 0.6, z0 + 1.2], [xe + s * L, y - 0.6, z1 - 0.8], [xe, y - 0.6, z1 - 0.4],
       [xe, y + h * 0.55, z0 + 0.8], [xe + s * L, y + 0.15, z0 + 2], [xe + s * L, y + 0.15, z1 - 1.6], [xe, y + h * 0.55, z1 - 0.8]]));
+    for (let q = 0; q <= 14; q++) {                           // the laid edge stones along both sloping edges
+      const t = q / 14, top = y + h * 0.55 + (0.15 - h * 0.55) * t, xx = xe + s * t * L;
+      boulder(bag, B, xx, top - 0.1, z0 + 0.8 + 1.2 * t + 0.1, 0.36 + rand() * 0.12, q + s);
+      boulder(bag, B, xx, top - 0.1, z1 - 0.8 - 0.8 * t - 0.1, 0.36 + rand() * 0.12, q * 2 + s);
+    }
     for (let k = 0; k < 90; k++) {
       const t = rand(), zz = z0 + 1 + t * 0.6 + rand() * (z1 - z0 - 2 - t * 1.4), top = y + h * 0.55 + (0.15 - h * 0.55) * t, br = 0.18 + rand() * 0.2;
       boulder(bag, B, xe + s * t * L, top - 0.05, zz, br, k + s * 0.37);
@@ -352,8 +377,9 @@ function harePaenga(el, { bag, col }) {
   for (let i = 0; i < n; i++) { const t = i / n * Math.PI * 2, u = -Math.cos(t) * (L / 2 + 0.12), v = Math.sin(t) >= 0 ? half(u) + 0.14 : -half(u) - 0.14; pts.push([u, Math.sin(t) * 0 + v]); }
   for (let i = 0; i < n; i++) {
     const a = pts[i], b = pts[(i + 1) % n];
-    const g = orientedBox(a, b, 0.24, -0.35, 0.22 + rand() * 0.04, -0.03);
+    const yt = 0.22 + rand() * 0.04, g = orientedBox(a, b, 0.24, -0.35, yt, -0.03);
     add(B, g);
+    if (i % 2 === 0) add('opening', lathe([[0.05, 0], [0.001, -0.02]], 8, null, (a[0] + b[0]) / 2, yt + 0.003, (a[1] + b[1]) / 2));   // the hole in the paenga's top that held a pole
   }
   // the hull: steep-sided, a little pointed at the ridge, the plan a pointed oval; laid in rows of thatch
   const arch = (c) => (1 - Math.abs(c) ** 1.3) ** 0.62;
@@ -391,7 +417,7 @@ function harePaenga(el, { bag, col }) {
   const ridge = (u) => [u, 0.2 + H * Math.max(0, 1 - (2 * u / L) ** 2) ** 0.4 + 0.03, 0];
   for (let k = 0; k < 6; k++) add('thatch', rod(ridge(-L * 0.42 + L * 0.84 * k / 6), ridge(-L * 0.42 + L * 0.84 * (k + 1) / 6), 0.1, 6));
   // the porch on the −v side at the middle: a short tunnel of thatch round the low crawling door
-  const dv = -half(0), tw = 0.5, th = 0.95, tl = 0.85, NT = 4, NA = 12, sh = [];
+  const sd = el.seed ?? 11, dv = -half(0), tw = 0.44 + (sd % 3) * 0.06, th = 0.95, tl = 0.72 + ((sd >> 2) % 4) * 0.15, NT = 4, NA = 12, sh = [];
   const tp = (k, j, inner) => {
     const tt = k / NT, c = 1 - 2 * j / NA, s = inner ? 0.78 : 1, hh = th * (1 - 0.12 * tt);
     return [c * tw * s, 0.2 + hh * arch(c) * (inner ? 0.85 : 1), dv + 0.35 - tt * (tl + 0.35)];
@@ -412,6 +438,9 @@ function harePaenga(el, { bag, col }) {
   add('opening', fromTriangles(dark));
   add(B, box(-0.62, -0.2, dv - tl - 0.3, 0.62, 0.24, dv - tl + 0.05));          // the threshold stone
   const dv2 = dv - tl + 0.05;
+  const fk = (sd >> 5) % 4;      // the front, by rule from the seed (as hare_house): jamb stones, or a low windbreak of laid stones
+  if (fk === 2) for (const sg of [-1, 1]) { const [sx, sz] = P(sg * (tw + 0.42), dv - tl - 0.1); boulder(bag, B, sx, y0 - 0.02, sz, 0.3, sg + 2); }
+  else if (fk === 3) for (let c = 0; c < 3; c++) for (let k = 0; k < 5 - c; k++) { const u = (sd % 2 ? 1 : -1) * (1.0 + k * 0.5 + c * 0.25), [sx, sz] = P(u, dv - 2.9 - 0.15 * Math.sin(k)); laid(bag, B, sx, y0 + c * 0.2 - 0.05, sz, yaw, 0.3, 0.2, 0.1, k + c * 3); }
   col.circle(x, z, W / 2, y0, y0 + H);
   for (const s of [-1, 1]) col.circle(x + ca * s * L * 0.3, z - sa * s * L * 0.3, W / 2 * 0.8, y0, y0 + H);
   // the half-moon pavement before the door, edged with boulders
@@ -436,36 +465,6 @@ function harePaenga(el, { bag, col }) {
   }
   add('opening', lathe([[0.48, 0.02], [0.001, 0.03]], 10, null, ou, 0, ov));
 }
-/** hare_moa: a chicken house { c, y, yaw, len }: a long cairn of rubble over a narrow chamber, little openings at its foot, capped with slabs. */
-function hareMoa(el, { bag, col }) {
-  const [x, z] = el.c, y0 = el.y ?? 0, L = el.len ?? 6, yaw = el.yaw ?? 0;
-  const M = new Matrix4().makeRotationY(yaw).setPosition(x, y0, z), add = (mat, g) => { g.applyMatrix4(M); bag.add(mat, g); };
-  add('pebbles', frustum([-L / 2, -1.2, L / 2, 1.2], -0.3, 1.5, 0.5, 0.5, 0.55, 0.55));
-  for (let k = 0; k < 4; k++) { const u = -L / 2 + 0.9 + k * (L - 1.8) / 3; add(B, box(u - 0.42, 1.48, -0.7, u + 0.42, 1.68, 0.7)); }
-  const rand = rng(Math.floor(x * 7 + z * 11));
-  for (let k = 0; k < 46; k++) {
-    // boulders of the rubble showing on the sloping sides
-    const s = rand() < 0.5 ? -1 : 1, t = 0.1 + rand() * 0.8, u = (-L / 2 + 0.5 * t) + rand() * (L - t), br = 0.18 + rand() * 0.14;
-    const v = s * (1.2 - 0.55 * t), ca = Math.cos(yaw), sa = Math.sin(yaw);
-    boulder(bag, B, x + u * ca + v * sa, y0 - 0.3 + 1.8 * t - 0.08, z - u * sa + v * ca, br, k + x);
-  }
-  for (const s of [-1, 1]) for (const u of [-L / 4, L / 4]) {
-    // a little opening, set into the sloping side: a dark recess under a lintel stone
-    add('opening', hull8([[u - 0.18, 0, s * 1.16], [u + 0.18, 0, s * 1.16], [u + 0.18, 0, s * 1.21], [u - 0.18, 0, s * 1.21], [u - 0.18, 0.32, s * 1.06], [u + 0.18, 0.32, s * 1.06], [u + 0.18, 0.32, s * 1.11], [u - 0.18, 0.32, s * 1.11]]));
-    add(B, hull8([[u - 0.3, 0.32, s * 1.04], [u + 0.3, 0.32, s * 1.04], [u + 0.3, 0.32, s * 1.2], [u - 0.3, 0.32, s * 1.2], [u - 0.3, 0.46, s * 1.0], [u + 0.3, 0.46, s * 1.0], [u + 0.3, 0.46, s * 1.16], [u - 0.3, 0.46, s * 1.16]]));
-  }
-  const ca = Math.cos(yaw), sa = Math.sin(yaw);
-  for (const s of [-1, 0, 1]) col.circle(x + ca * s * L / 3, z - sa * s * L / 3, 1.2, y0, y0 + 1.6);
-}
-/** manavai: a round garden wall { c, y, r }: dry-laid boulders round a sunken garden. */
-function manavai(el, { bag, col }) {
-  const [x, z] = el.c, y0 = el.y ?? 0, r = el.r ?? 3;
-  bag.add('pebbles', lathe([[r + 0.7, -0.3], [r + 0.55, 0.7], [r + 0.35, 1.25], [r + 0.1, 1.25], [r, 0.6], [r - 0.05, -0.5], [0.001, -0.5]], 18, null, x, y0, z));
-  const rand = rng(Math.floor(x * 13 + z * 7));
-  for (let k = 0; k < Math.round(r * 5); k++) { const a = rand() * Math.PI * 2, br = 0.22 + rand() * 0.14; boulder(bag, B, x + Math.cos(a) * (r + 0.25), y0 + 1.2, z + Math.sin(a) * (r + 0.25), br, k + a); }
-  for (let k = 0; k < 10; k++) { const a = k / 10 * Math.PI * 2, b = (k + 1) / 10 * Math.PI * 2; col.segment([x + Math.cos(a) * (r + 0.3), z + Math.sin(a) * (r + 0.3)], [x + Math.cos(b) * (r + 0.3), z + Math.sin(b) * (r + 0.3)], 0.6, y0, y0 + 1.3); }
-}
-
 /**
  * mulch_garden: a garden of sweet potato under a mulch of stones { rect, ground (x, z → y), seed } —
  * "lithic mulching – the practice of covering fields with gravel or rocks to trap moisture and improve
@@ -503,7 +502,7 @@ function mulchGarden(el, { bag }) {
 
 registerStyle('rapanui', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, moai, quarry_bay: quarryBay, ahu, hare_paenga: harePaenga, hare_moa: hareMoa, manavai, moai_walk: moaiWalk, mulch_garden: mulchGarden, ...SCENES, ...WORKS, ...HOUSES, ...PLACES },
+  elements: { ...STYLES.qing.elements, moai, quarry_bay: quarryBay, ahu, hare_paenga: harePaenga, ...MASONRY, moai_walk: moaiWalk, mulch_garden: mulchGarden, ...SCENES, ...WORKS, ...HOUSES, ...PLACES },
   objects: {},
 });
 export { sculpt, moaiGeometry };
