@@ -31,11 +31,18 @@ export function intihuatana(el, { bag, col }) {
   const [cx, cz] = el.c, y = el.y;
   // the mound of the bedrock: ten sides, worn and irregular, wider east–west
   const R = [], rand = rng(el.seed || 13);
-  for (let k = 0; k < 10; k++) { const a = k / 10 * Math.PI * 2 + 0.2, e = 1 + (rand() - 0.5) * 0.14; R.push([cx + Math.cos(a) * 3.0 * e, cz + Math.sin(a) * 2.6 * e]); }
-  prism(bag, 'granite_rough', R, y - 0.4, scaled(R, 0.84, cx, cz), y + 0.45);
+  for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2 + 0.2, e = 1 + (rand() - 0.5) * 0.2; R.push([cx + Math.cos(a) * 3.0 * e, cz + Math.sin(a) * 2.6 * e]); }
+  prism(bag, 'granite_rough', R, y - 0.4, scaled(R, 0.9, cx, cz), y + 0.18);
+  prism(bag, 'granite_rough', scaled(R, 0.9, cx, cz), y + 0.18, scaled(R, 0.8, cx, cz).map(([x, z], i) => [x, z, y + 0.45 + (rand() - 0.5) * 0.07]), y + 0.45);
+  // the bedrock's own lumps standing out of its foot, rounded by weathering
+  for (let k = 0; k < 7; k++) { const a = rand() * Math.PI * 2, rr = 0.35 + rand() * 0.4, px = cx + Math.cos(a) * 3.0, pz = cz + Math.sin(a) * 2.6; if (Math.abs(Math.sin(a)) > 0.88 && Math.abs(Math.cos(a)) < 0.3) continue;
+    bag.add('granite_rough', lathe([[rr, 0], [rr * 0.92, 0.18], [rr * 0.6, 0.34], [0.001, 0.4]], 9, (t, i) => 1 + 0.15 * Math.sin(t * 3 + i + k), px, y - 0.2, pz)); }
   // the carved tier: a squared pyramid's step with its corners cut
   const T = [[-1.7, -1.1], [-0.9, -1.45], [0.9, -1.45], [1.7, -1.1], [1.7, 1.1], [0.9, 1.45], [-0.9, 1.45], [-1.7, 1.1]].map(([u, w]) => [cx + u, cz + w]);
-  prism(bag, 'granite_inca', T, y + 0.45, scaled(T, 0.94, cx, cz), y + 0.85);
+  prism(bag, 'granite_inca', T, y + 0.45, scaled(T, 0.97, cx, cz), y + 0.64);
+  prism(bag, 'granite_inca', scaled(T, 0.985, cx, cz), y + 0.64, scaled(T, 0.94, cx, cz), y + 0.85);
+  // the carved planes cut into the platform's west and south: two steps down, their edges cut sharp [inferred from photographs: the many planes of the stone]
+  for (const [k, [u0, w0, u1, w1, hh]] of [[-1.35, -0.9, -0.95, 0.9, 0.98], [-1.55, -0.9, -1.35, 0.9, 0.92], [-0.7, 0.72, 0.7, 1.05, 0.95]].entries()) bag.add('granite_inca', frustum([cx + u0, cz + w0, cx + u1, cz + w1], y + 0.84, y + hh, 0.015, 0.015, 0.015, 0.015));
   // the inclined platform on top
   const Pq = [[-1.1, -0.75], [1.0, -0.75], [1.1, 0.65], [-1.0, 0.7]].map(([u, w]) => [cx + u, cz + w]);
   prism(bag, 'granite_inca', Pq, y + 0.85, Pq.map(([x, z]) => [x, z, y + 1.2 - (z - (cz - 0.75)) * 0.04]), y + 1.2);
@@ -53,11 +60,15 @@ export function intihuatana(el, { bag, col }) {
   const lean = Math.tan(13 * Math.PI / 180), hp = 0.62, b = [cx - 0.24, cz - 0.17, cx + 0.24, cz + 0.17], y0 = y + 1.17;
   const lo = [[b[0], b[1]], [b[2], b[1]], [b[2], b[3]], [b[0], b[3]]];
   const tops = lo.map(([x, z], i) => [x, y0 + hp + (i < 2 ? 0.07 : -0.05) - (x - cx) * 0.06, z - hp * lean]);
-  const base = lo.map(([x, z]) => [x, y0 - 0.05, z]), g = [];
-  g.push(...tops[0], ...tops[3], ...tops[2], ...tops[0], ...tops[2], ...tops[1]);
-  for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; g.push(...base[i], ...tops[i], ...tops[j], ...base[i], ...tops[j], ...base[j]); }
-  bag.add('granite_inca', fromTriangles(orientOutward(g)));
-  { const px = cx, pz = cz - hp * lean, py = y0 + hp - 0.07; bag.add('granite_inca', box(px - 0.07, py, pz - 0.07, px + 0.07, py + 0.2, pz + 0.07)); }
+  // the post: a chamfered shaft (the four corners cut off), its top a slanted plane, a small cube with its own slanted face on it
+  {
+    const ch = 0.07, ring = (yy, k, dz) => [[-0.24 + ch, -0.17], [0.24 - ch, -0.17], [0.24, -0.17 + ch], [0.24, 0.17 - ch], [0.24 - ch, 0.17], [-0.24 + ch, 0.17], [-0.24, 0.17 - ch], [-0.24, -0.17 + ch]].map(([u, w]) => [cx + u * k, yy(u), cz + w * k - dz]);
+    const topY = (u) => y0 + hp + 0.06 - (u * 0.12) , botY = () => y0 - 0.05, A = ring(botY, 1, 0), B = ring(topY, 1, hp * lean), g2 = [];
+    for (let i = 0; i < 8; i++) { const j = (i + 1) % 8; g2.push(...A[i], ...B[i], ...B[j], ...A[i], ...B[j], ...A[j]); }
+    for (let i = 1; i < 7; i++) g2.push(...B[0], ...B[i], ...B[i + 1]);
+    bag.add('granite_inca', fromTriangles(orientOutward(g2)));
+  }
+  { const px = cx, pz = cz - hp * lean, py = y0 + hp - 0.02; prism(bag, 'granite_inca', [[px - 0.07, pz - 0.07], [px + 0.07, pz - 0.07], [px + 0.07, pz + 0.07], [px - 0.07, pz + 0.07]], py, [[px - 0.07, pz - 0.07, py + 0.2], [px + 0.07, pz - 0.07, py + 0.2], [px + 0.07, pz + 0.07, py + 0.13], [px - 0.07, pz + 0.07, py + 0.13]], py + 0.2); }
   col.circle(cx, cz - 0.1, 0.32, y + 1.15, y + 2.0);
   // the altar block west of the mound
   bag.add('granite_inca', frustum([cx - 5.4, cz - 0.28, cx - 4.0, cz + 0.28], y - 0.05, y + 0.42, 0.03, 0.03, 0.03, 0.03));

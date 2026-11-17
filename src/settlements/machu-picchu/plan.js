@@ -26,16 +26,16 @@ for (let k = 0; k < TERRACE.n; k++) {
   let pts = [];
   ts.forEach((t, i) => {
     const p = [Math.cos(t) * a, Math.sin(t) * b], buried = ground.height(p[0], p[1]) > y1 + 1;     // under a peak's slope
-    if (inGap(p) || buried || !keep(p)) { if (pts.length > 1) E.push({ t: 'ring_wall', pts, y0, y1 }); pts = []; return; }
+    if (inGap(p) || buried || !keep(p)) { if (pts.length > 1) E.push({ t: 'ring_wall', pts, y0, y1, mat: 'granite_inca' }); pts = []; return; }
     if (pts.length && Math.hypot(p[0] - pts[pts.length - 1][0], p[1] - pts[pts.length - 1][1]) < 0.05) return;
     pts.push(p);
     // now and then a flight of stones standing out of the wall, climbing across its face
     if (pts.length > 1 && (i + k * 7) % 19 === 3 && Math.hypot(p[0] - pts[pts.length - 2][0], p[1] - pts[pts.length - 2][1]) > 4) E.push({ t: 'flying_stair', a: pts[pts.length - 2], b: p, from: 0.9, y0, y1, dir: 1 });
   });
-  if (pts.length > 1) E.push({ t: 'ring_wall', pts, y0, y1 });
+  if (pts.length > 1) E.push({ t: 'ring_wall', pts, y0, y1, mat: 'granite_inca' });
   // the shoulders' walls, straight across (z = z0 + s) from the neck's edge to the ellipse, and the neck's own, down its edges to the ellipse again
   const ez = (x) => b * Math.sqrt(Math.max(0, 1 - (x / a) ** 2)), ex = (z) => a * Math.sqrt(Math.max(0, 1 - (z / b) ** 2));
-  const line = (P, Q, side) => { const L = Math.hypot(Q[0] - P[0], Q[1] - P[1]), m = Math.max(2, Math.ceil(L / 6)); if (L < 0.5) return; E.push({ t: 'ring_wall', pts: Array.from({ length: m + 1 }, (_, i) => [P[0] + (Q[0] - P[0]) * i / m, P[1] + (Q[1] - P[1]) * i / m]), y0, y1, side });
+  const line = (P, Q, side) => { const L = Math.hypot(Q[0] - P[0], Q[1] - P[1]), m = Math.max(2, Math.ceil(L / 6)); if (L < 0.5) return; E.push({ t: 'ring_wall', pts: Array.from({ length: m + 1 }, (_, i) => [P[0] + (Q[0] - P[0]) * i / m, P[1] + (Q[1] - P[1]) * i / m]), y0, y1, side, mat: 'granite_inca' });
     // a flight of long stones standing out of the wall's face, the way down to the terrace below (the outside is the normal of Q→P here)
     if (L > 12 && (k + Math.round(P[0])) % 3 === 0) { const f = (u) => [P[0] + (Q[0] - P[0]) * u, P[1] + (Q[1] - P[1]) * u]; E.push({ t: 'flying_stair', a: f(0.7), b: f(0.3), from: 0.8, y0, y1, dir: 1 }); } };
   if (zc < b) {
