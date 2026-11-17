@@ -10,6 +10,8 @@ import { box, lathe, rod, fromTriangles, orientOutward, place } from '../../core
 import '../khmer/index.js';
 import { thaiHouse } from './houses.js';
 import { WAT_ELEMENTS, wihanInterior, lite } from './wat.js';
+import { lotusRing, pinnacle, saoHan, chofa, gablePattern, slitFrame, doorLeaves } from './detail.js';
+import { VOC_ELEMENTS } from './voc.js';
 
 import { hull } from '../ptolemaic/harbour.js';
 import { wallSeg } from '../ptolemaic/util.js';
@@ -51,8 +53,9 @@ function gableEnd(bag, rect, y, rise, over, axis, atEnd) {
     const c = P(u + dir * 0.05, vm + s * (v1 - vm), 0), h1 = P(u + dir * 0.05, vm + s * (v1 - vm) + s * 0.35, 0.55);
     bag.add('clay_gilt', rod(c, h1, 0.07, 4));
   }
-  const top = P(u + dir * 0.05, vm, rise), tip = P(u + dir * 0.05 + dir * 0.3, vm, rise + 1.1);
-  bag.add('clay_gilt', rod(top, tip, 0.1, 5));
+  const top = P(u + dir * 0.05, vm, rise);
+  chofa(bag, 'clay_gilt', top, A ? [dir, 0] : [0, dir], 0.9);
+  gablePattern(bag, P, u, dir, vm, v1 - vm, rise);
 }
 function orientOutwardFace(T, dir, A) {
   // make the board face outward along the ridge axis
@@ -81,6 +84,11 @@ function chedi(el, { bag, col }) {
     bag.add(M, box(cx - r, y + y0, cz - r, cx + r, y + y1 - 0.25 * v, cz + r));
     bag.add('plaster_white', box(cx - r - 0.18 * k, y + y1 - 0.25 * v, cz - r - 0.18 * k, cx + r + 0.18 * k, y + y1, cz + r + 0.18 * k));
     bag.add('lime_plaster', box(cx - r - 0.1 * k, y + y0, cz - r - 0.1 * k, cx + r + 0.1 * k, y + y0 + 0.28 * v, cz + r + 0.1 * k));
+    // a row of small blocks (dentils) under the cornice of each tier, on all four faces (not on the small chedi)
+    if (!el.mini && w > 3) for (let u = -r + 0.5 * k; u < r - 0.3 * k; u += 0.75 * k) for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const px = cx + dx * (r + 0.1 * k) + (dz ? u : 0), pz = cz + dz * (r + 0.1 * k) + (dx ? u : 0), e = 0.13 * k;
+      bag.add('lime_plaster', box(px - (dx ? 0.07 * k : e), y + y1 - 0.62 * v, pz - (dz ? 0.07 * k : e), px + (dx ? 0.07 * k : e), y + y1 - 0.27 * v, pz + (dz ? 0.07 * k : e)));
+    }
   }
   col.rect([cx - a - 0.2, cz - a - 0.2, cx + a + 0.2, cz + a + 0.2], y, y + 4.5 * v);
   // the porches (four, to the quarters) with a niche holding a standing image, a small chedi above
@@ -92,7 +100,13 @@ function chedi(el, { bag, col }) {
     bag.add('opening', dx ? box(px + dx * hd - (dx > 0 ? 0.05 : -0.01) - 0.02, y + 0.5 * v, pz - 0.55 * k, px + dx * hd + (dx > 0 ? 0.02 : -0.05), y + 2.0 * v, pz + 0.55 * k) : box(px - 0.55 * k, y + 0.5 * v, pz + dz * hd - (dz > 0 ? 0.05 : -0.01) - 0.02, px + 0.55 * k, y + 2.0 * v, pz + dz * hd + (dz > 0 ? 0.02 : -0.05)));
     bag.add('gold', lathe([[0.001, 0], [0.22 * k, 0.05], [0.2 * k, 0.6 * v], [0.14 * k, 1.0 * v], [0.16 * k, 1.2 * v], [0.001, 1.4 * v]], 8, null, px + dx * (hd - 0.12), y + 0.55 * v, pz + dz * (hd - 0.12)));   // the standing image, small and gilded
     col.rect(r, y, y + 2.85 * v);
-    chedi({ c: [px, pz], y: y + 2.85 * v, w: 1.9 * k, h: 5.2 * v, mini: true }, { bag, col: { rect() {}, circle() {} } });
+    // pilasters either side of the niche with a pointed gilt arch over it, and the porch roof as two receding courses carrying the stupika
+    for (const sgn of [-1, 1]) { const n0 = (dx + dz) > 0 ? -0.06 * k : -0.1 * k, n1 = (dx + dz) > 0 ? 0.1 * k : 0.06 * k, wq = 0.13 * k;
+      if (dx) { const q = px + dx * hd, zz = pz + sgn * 0.82 * k; bag.add('lime_plaster', box(q + n0, y, zz - wq, q + n1, y + 2.3 * v, zz + wq)); }
+      else { const q = pz + dz * hd, xx = px + sgn * 0.82 * k; bag.add('lime_plaster', box(xx - wq, y, q + n0, xx + wq, y + 2.3 * v, q + n1)); } }
+    for (const sgn of [-1, 1]) { const o = dx ? [px + dx * (hd + 0.06 * k), y + 2.0 * v, pz + sgn * 0.55 * k] : [px + sgn * 0.55 * k, y + 2.0 * v, pz + dz * (hd + 0.06 * k)], t = dx ? [px + dx * (hd + 0.06 * k), y + 2.55 * v, pz] : [pz * 0 + px, y + 2.55 * v, pz + dz * (hd + 0.06 * k)]; bag.add('gold', rod(o, t, 0.035 * k, 4)); }
+    { const r2 = dx ? [px - hd * 0.8, pz - hw * 0.8, px + hd * 0.8, pz + hw * 0.8] : [px - hw * 0.8, pz - hd * 0.8, px + hw * 0.8, pz + hd * 0.8]; bag.add('plaster_white', box(r2[0], y + 2.85 * v, r2[1], r2[2], y + 3.2 * v, r2[3])); bag.add('lime_plaster', box(r2[0] - 0.08 * k, y + 3.2 * v, r2[1] - 0.08 * k, r2[2] + 0.08 * k, y + 3.32 * v, r2[3] + 0.08 * k)); }
+    chedi({ c: [px, pz], y: y + 3.32 * v, w: 1.7 * k, h: 4.8 * v, mini: true }, { bag, col: { rect() {}, circle() {} } });
   }
   const y0 = y + 4.5 * v, r0 = a * 0.62;
   // the round tiers and the bell
@@ -104,6 +118,7 @@ function chedi(el, { bag, col }) {
   bag.add(M, lathe(bell, el.mini || w < 5 ? 12 : 24, null, cx, bb, cz));
   // the ring mouldings round the bell's shoulder and neck
   for (const t of [0.34, 0.5, 0.78]) { const r = bell[Math.round(t * N)][0], hh = t * 8.6 * v; bag.add('lime_plaster', lathe([[r * 0.98, -0.12 * v], [r * 1.07, -0.04 * v], [r * 1.07, 0.1 * v], [r * 0.98, 0.16 * v]], el.mini || w < 5 ? 12 : 24, null, cx, bb + hh, cz)); }
+  if (!el.mini && w >= 5) lotusRing(bag, 'lime_plaster', cx, bb, cz, br * 1.0, 0.7 * v, w > 8 ? 28 : 20, 0.25 * k);
   const topR = bell[N][0], yh = bb + 8.6 * v;
   // the harmika: a square box with pillars (sao han) round the neck, its gilded cornice
   bag.add(M, box(cx - topR * 1.15, yh, cz - topR * 1.15, cx + topR * 1.15, yh + 1.7 * v, cz + topR * 1.15));
@@ -115,6 +130,7 @@ function chedi(el, { bag, col }) {
     sp.push([r * 1.0, yy], [r * 1.0, yy + sh / rings * 0.35], [r * 1.18, yy + sh / rings * 0.45], [r * 1.18, yy + sh / rings * 0.7], [r * 0.9, yy + sh / rings * 0.82]);
   }
   bag.add(M, lathe(sp, el.mini || w < 5 ? 8 : 12, null, cx, s0, cz));
+  if (!el.mini && w >= 5) saoHan(bag, cx, s0, cz, topR * 1.02, sh * 0.24, 12, 0.1 * k);
   const sb = s0 + sh;
   bag.add('gold', lathe([[0.001, 0], [0.38 * k, 0.1 * v], [0.5 * k, 0.5 * v], [0.38 * k, 1.1 * v], [0.2 * k, 1.8 * v], [0.1 * k, 2.4 * v], [0.07 * k, 2.9 * v], [0.001, 3.2 * v]], 10, null, cx, sb, cz));
 }
@@ -168,10 +184,17 @@ function wihan(el, ctx) {
     const door = [{ at: (cz1 - cz0) / 2, w: 3.2, h: 4.6 }];
     const fa = east ? [cx1, cz0] : [cx0, cz0], fb = east ? [cx1, cz1] : [cx0, cz1], ba = east ? [cx0, cz0] : [cx1, cz0], bb = east ? [cx0, cz1] : [cx1, cz1];
     wall(ctx, fa, fb, 0.9, f, f + wallH, 'plaster_white', door); wall(ctx, ba, bb, 0.9, f, f + wallH, 'plaster_white', []);
+    for (const op of slit(cx1 - cx0)) for (const [zf, sd] of [[cz0, -1], [cz0, 1], [cz1, 1], [cz1, -1]]) slitFrame(bag, 'x', cx0 + op.at, zf + sd * 0.45, sd, op.y0, op.y0 + op.h, 0.14, f + wallH > op.y0 + op.h + 1.2);
     // the door's frame of red and gold
     const dx = east ? cx1 : cx0, dz = (cz0 + cz1) / 2;
     bag.add('timber_red', box(dx - 0.55, f + 4.6, dz - 1.9, dx + 0.55, f + 4.95, dz + 1.9));
     bag.add('clay_gilt', box(dx - 0.6, f + 4.95, dz - 1.95, dx + 0.6, f + 5.1, dz + 1.95));
+    // the door's surround on the outer face: stucco jambs, a crown of three receding gilded courses, the leaves standing open inside
+    { const out = east ? 1 : -1, xa = dx + out * 0.45, xb = dx + out * 0.7, lo = Math.min(xa, xb), hi = Math.max(xa, xb);
+      for (const sg of [-1, 1]) bag.add('lime_plaster', box(lo, f, sg > 0 ? dz + 1.6 : dz - 2.1, hi, f + 5.1, sg > 0 ? dz + 2.1 : dz - 1.6));
+      for (let i = 0; i < 3; i++) { const w2 = 2.15 - i * 0.55, y2 = f + 5.1 + i * 0.3; bag.add(i % 2 ? 'clay_gilt' : 'lime_plaster', box(Math.min(xa, dx + out * (0.7 + 0.05 * i)), y2, dz - w2, Math.max(xa, dx + out * (0.7 + 0.05 * i)), y2 + 0.3, dz + w2)); }
+      doorLeaves(bag, dx, dz, 3.2, 4.6, f, -out);
+      for (const k of [-1, 1]) { const zz = dz + k * 3.2; bag.add('gold', lathe([[0.001, 0], [0.12, 0.05], [0.001, 0.5]], 6, null, dx + out * 0.62, f + 5.1 + 0.9, dz + k * 0.0)); void zz; } }
   } else {
     for (const zz of [cz0, cz1]) for (let xx = cx0 + 1; xx < cx1; xx += 4.6) post(bag, col, xx, zz, f, f + wallH, 0.26);
   }
@@ -188,9 +211,11 @@ function wihan(el, ctx) {
   // the roofs: the aisles' lean-tos (two slopes rising to the wall), the main gable, the porch's gable
   const lean = (za, zb, up) => {
     const T = [], q = (a, b, c, d) => T.push(...a, ...b, ...c, ...a, ...c, ...d), a = x0 - 0.9, b = x1 + 0.9, lo = f + eave, hi = f + wallH - 0.3, o = 1.1;
-    const zl = za, zh = zb; void up;
-    q([a, lo - 0.4, zl - o], [b, lo - 0.4, zl - o], [b, hi, zh], [a, hi, zh]); q([a, lo - 0.2, zl - o], [a, hi + 0.15, zh], [b, hi + 0.15, zh], [b, lo - 0.2, zl - o]);
-    q([a, lo - 0.4, zl - o], [a, hi, zh], [a, hi + 0.15, zh], [a, lo - 0.2, zl - o]); q([b, lo - 0.4, zl - o], [b, lo - 0.2, zl - o], [b, hi + 0.15, zh], [b, hi, zh]);
+    const zh = zb, zl = za + (za < zb ? -o : o); void up;   // zl: the lower edge, hung out over the aisle on its own side
+    q([a, lo - 0.4, zl], [b, lo - 0.4, zl], [b, hi, zh], [a, hi, zh]); q([a, lo - 0.2, zl], [a, hi + 0.15, zh], [b, hi + 0.15, zh], [b, lo - 0.2, zl]);
+    q([a, lo - 0.4, zl], [a, hi, zh], [a, hi + 0.15, zh], [a, lo - 0.2, zl]); q([b, lo - 0.4, zl], [b, lo - 0.2, zl], [b, hi + 0.15, zh], [b, hi, zh]);
+    // the rafter ends under the eave, every half metre
+    for (let x = a + 0.4; x < b - 0.3; x += 0.5) bag.add('timber_red', box(x - 0.05, lo - 0.6, Math.min(zl, zl + (za < zb ? 0.12 : -0.12)), x + 0.05, lo - 0.26, Math.max(zl, zl + (za < zb ? 0.12 : -0.12))));
     bag.add('roof_tile', fromTriangles(orientOutward(T)));
   };
   lean(z0, cz0, 1); lean(z1 + 0, cz1, -1);
@@ -229,7 +254,7 @@ function mandapa(el, { bag, col }) {
   bag.add('plaster_white', box(cx - a * 0.72, y + 1.05, cz - a * 0.72, cx + a * 0.72, y + 4.6, cz + a * 0.72));
   bag.add('opening', box(cx - 0.6, y + 1.05, cz - a * 0.72 - 0.02, cx + 0.6, y + 3.2, cz - a * 0.72 + 0.03)); bag.add('opening', box(cx - 0.6, y + 1.05, cz + a * 0.72 - 0.03, cx + 0.6, y + 3.2, cz + a * 0.72 + 0.02));
   let r = a * 0.78, yy = y + 4.6;
-  for (let i = 0; i < 5; i++) { const h = 1.0 - i * 0.08; bag.add(i % 2 ? 'lime_plaster' : 'plaster_white', box(cx - r * 1.12, yy, cz - r * 1.12, cx + r * 1.12, yy + 0.22, cz + r * 1.12)); bag.add('plaster_white', box(cx - r, yy + 0.22, cz - r, cx + r, yy + h, cz + r)); yy += h; r *= 0.78; }
+  for (let i = 0; i < 5; i++) { const h = 1.0 - i * 0.08; bag.add(i % 2 ? 'lime_plaster' : 'plaster_white', box(cx - r * 1.12, yy, cz - r * 1.12, cx + r * 1.12, yy + 0.22, cz + r * 1.12)); bag.add('plaster_white', box(cx - r, yy + 0.22, cz - r, cx + r, yy + h, cz + r)); for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const pa = 0.1 + r * 0.04; pinnacle(bag, 'plaster_white', cx + sx * (r * 1.12 - pa - 0.02), yy + 0.22, cz + sz * (r * 1.12 - pa - 0.02), pa, 0.45 + r * 0.2); } yy += h; r *= 0.78; }
   bag.add('gold', lathe([[0.2, 0], [0.12, 0.8], [0.001, 1.6]], 8, null, cx, yy, cz));
   col.rect([cx - a - 0.1, cz - a - 0.1, cx + a + 0.1, cz + a + 0.1], y, y + 7);
 }
@@ -246,11 +271,14 @@ function prasat(el, { bag, col }) {
     const ptx = dx ? cx + dx * (a - 0.02) : cx, ptz = dz ? cz + dz * (a - 0.02) : cz;
     bag.add('opening', dx ? box(ptx - 0.02 - (dx > 0 ? 0.05 : 0), f, ptz - 0.9, ptx + 0.02 + (dx < 0 ? 0.05 : 0), f + 2.8, ptz + 0.9) : box(ptx - 0.9, f, ptz - 0.02 - (dz > 0 ? 0.05 : 0), ptx + 0.9, f + 2.8, ptz + 0.02 + (dz < 0 ? 0.05 : 0)));
     col.rect(rr, f, f + 4.4);
+    // the doorway's pointed arch (the Narai reign's Indo-Persian and European touch) in stucco, its edge gilt, jambs either side
+    { const q = (u, h) => (dx ? [ptx + dx * 0.05, f + h, ptz + u] : [ptx + u, f + h, ptz + dz * 0.05]);
+      for (const sg of [-1, 1]) { bag.add('lime_plaster', rod(q(sg * 1.0, 0), q(sg * 1.0, 2.8), 0.07, 5)); bag.add('lime_plaster', rod(q(sg * 1.0, 2.8), q(0, 3.85), 0.07, 5)); bag.add('gold', rod(q(sg * 0.92, 2.8), q(0, 3.72), 0.03, 4)); } }
   }
   col.rect([cx - c, cz - c, cx + c, cz + c], f, f + 7.4);
   // the prang: stacked, tapering tiers, each a storey in miniature, then the finial
   let r = c * 0.95, yy = f + 7.4;
-  for (let i = 0; i < 6; i++) { const h = 1.55 - i * 0.1; bag.add(i % 2 ? 'lime_plaster' : 'plaster_white', box(cx - r, yy, cz - r, cx + r, yy + h, cz + r)); bag.add('lime_plaster', box(cx - r * 1.1, yy + h, cz - r * 1.1, cx + r * 1.1, yy + h + 0.2, cz + r * 1.1)); yy += h + 0.2; r *= 0.8; }
+  for (let i = 0; i < 6; i++) { const h = 1.55 - i * 0.1; bag.add(i % 2 ? 'lime_plaster' : 'plaster_white', box(cx - r, yy, cz - r, cx + r, yy + h, cz + r)); bag.add('lime_plaster', box(cx - r * 1.1, yy + h, cz - r * 1.1, cx + r * 1.1, yy + h + 0.2, cz + r * 1.1)); for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) pinnacle(bag, i % 2 ? 'plaster_white' : 'lime_plaster', cx + sx * r * 0.82, yy + h + 0.2, cz + sz * r * 0.82, r * 0.14, 0.5 + r * 0.2); yy += h + 0.2; r *= 0.8; }
   bag.add('plaster_white', lathe([[r, 0], [r * 0.9, 1.6], [r * 0.5, 3.2], [0.001, 4.6]], 8, null, cx, yy, cz)); bag.add('gold', lathe([[0.14, 4.4], [0.08, 5.4], [0.001, 6.2]], 8, null, cx, yy, cz));
 }
 /** bell_tower: { rect, y } brick columns, a wooden floor, the roof in five tiers. */
@@ -434,5 +462,5 @@ function floatingHouse(el, { bag, col }) {
 /** mooring_post: { at, y } a bamboo or timber pile a few boats are tied to. */
 function pile(el, { bag, col }) { bag.add('timber', lathe([[0.12, 0], [0.1, 3.6]], 6, null, el.at[0], el.y ?? -2.3, el.at[1])); col.circle(el.at[0], el.at[1], 0.14, el.y ?? -2.3, 1.2); }
 
-const SIAMESE = { ...WAT_ELEMENTS, thai_house: thaiHouse, chedi, buddha, wihan, mandapa, prasat, bell_tower: bellTower, cloister, canal_bank: canalBank, thai_bridge: thaiBridge, landing, boat, floating_house: floatingHouse, pile };
+const SIAMESE = { ...WAT_ELEMENTS, ...VOC_ELEMENTS, thai_house: thaiHouse, chedi, buddha, wihan, mandapa, prasat, bell_tower: bellTower, cloister, canal_bank: canalBank, thai_bridge: thaiBridge, landing, boat, floating_house: floatingHouse, pile };
 registerStyle('siamese', { ...kh, elements: { ...kh.elements, ...SIAMESE } });
