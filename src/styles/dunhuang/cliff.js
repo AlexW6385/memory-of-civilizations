@@ -5,8 +5,10 @@
 import { box, lathe, fromTriangles, quad, rod } from '../../core/geom.js';
 import { subtractRects } from '../../core/build.js';
 import { XF, ROCK, ZEND, FLOOR, CAVES, STAIR, GALLERY, APRON, cliffTop, rng } from '../../settlements/dunhuang/layout.js';
-import { hallCave, pillarCave, cellCave } from './caves.js';
-import { greatCave, nineStorey } from './nine.js';
+import { hallCave, pillarCave, cellCave, valance } from './caves.js';
+import { statue } from '../chinese/statues.js';
+import { buddha } from '../chinese/index.js';
+import { greatCave, nineStorey, bracketSet } from './nine.js';
 import { Panel, wallPanel, PAL, tableauM, buddhaM, apsaraM, lotusM } from './paint.js';
 
 const ROCKM = 'rubble';
@@ -31,8 +33,8 @@ function porch(ctx, c, y, w, h) {
   }
   bag.add('timber_red', box(XF + e - 0.5, ye, z0 - 0.35, XF + e - 0.1, ye + 0.34, z1 + 0.35));
   bag.add('lacquer_red', box(XF + e - 0.5, ye - 0.22, z0 - 0.1, XF + e - 0.1, ye, z1 + 0.1));
-  // brackets: two projecting arms on each column
-  for (const zz of [z0, z1]) for (let k = 0; k < 2; k++) bag.add('timber_red', box(XF + e - 0.3 - 0.15 - k * 0.5, ye + 0.0 + k * 0.17, zz - 0.1, XF + e - 0.3 + 0.6 + k * 0.3, ye + 0.17 + k * 0.17, zz + 0.1));
+  // brackets: a small stepped set on each column, standing on the beam under the roof
+  for (const zz of [z0, z1]) bracketSet(ctx, XF + e - 0.3, zz, ye + 0.34, 0.6);
   // the roof: tiles from the cliff face (a little above the beam) out over the beam and down
   const yo = ye + 0.9, yi = ye + 1.9, xo = XF + e + 0.5, t = [], u = [];
   const A = [XF, yi, z0 - 0.6], B = [XF, yi, z1 + 0.6], C = [xo, yo, z1 + 1.0], D = [xo, yo, z0 - 1.0];
@@ -41,10 +43,18 @@ function porch(ctx, c, y, w, h) {
   quad(u, down(D), down(C), down(B), down(A));
   bag.add('tile_grey', fromTriangles(flipUp(t, true)));
   bag.add('timber_red', fromTriangles(flipUp(u, false)));
-  // eave front (fascia) and bells at the corners
+  // eave front (fascia), the side boards, the rafters under the slope and their heads, bells at the corners
   bag.add('timber_red', box(xo - 0.1, yo - 0.3, z0 - 1.0, xo + 0.03, yo - 0.02, z1 + 1.0));
+  const side = [];
+  for (const [p, q] of [[A, D], [B, C]]) { const p0 = [p[0], p[1] - 0.3, p[2]], q0 = [q[0], q[1] - 0.3, q[2]]; quad(side, p0, q0, q, p); quad(side, p, q, q0, p0); }
+  bag.add('timber_red', fromTriangles(side));
+  const nR = Math.round((z1 - z0 + 2.2) / 0.45);
+  for (let k = 0; k <= nR; k++) {
+    const f = k / nR, a = [XF, yi - 0.2, A[2] + (B[2] - A[2]) * f], b = [xo, yo - 0.2, D[2] + (C[2] - D[2]) * f];
+    bag.add('timber_red', rod(a, b, 0.04, 5));
+    bag.add('lacquer_black', box(b[0] - 0.02, b[1] - 0.05, b[2] - 0.045, b[0] + 0.12, b[1] + 0.05, b[2] + 0.045));
+  }
   for (const zz of [z0 - 1.0, z1 + 1.0]) bag.add('bronze', lathe([[0.001, 0], [0.07, 0.03], [0.08, 0.13], [0.001, 0.15]], 8, null, xo - 0.05, yo - 0.52, zz));
-  // the side walls of the roof (two triangles of plaster) so that the roof's ends are closed
 }
 /** Make every triangle of a list face up (up) or down (!up). */
 function flipUp(t, up) {
@@ -57,19 +67,40 @@ function flipUp(t, up) {
   return o;
 }
 
-/** A shallow shrine: the painted back, a seated Buddha painted large, a red frame; seen from outside. */
+/**
+ * A shallow shrine (龛, dossier §13). The two lower tiers, which one sees from the apron and the gallery, hold a clay Buddha
+ * on his throne in his mandorla (and two bodhisattvas in the wider ones) before the painted back wall; the upper tiers keep
+ * the painted Buddha. A painted valance hangs under the lintel of every one.
+ */
 function recess(ctx, c) {
-  const { bag } = ctx, y = FLOOR[c.tier], z = c.z, x1 = XF, x0 = XF - 1.9, w = c.w, h = c.h, t = 0.04;
+  const { bag, col } = ctx, y = FLOOR[c.tier], z = c.z, x1 = XF, x0 = XF - 1.9, w = c.w, h = c.h, t = 0.04, near = c.tier <= 1;
   bag.add('brick_grey', box(x0, y - 0.12, z - w / 2, x1, y, z + w / 2));
   bag.add('lime_plaster', box(x0, y, z - w / 2, x0 + t, y + h, z + w / 2));
   bag.add('lime_plaster', box(x0, y, z - w / 2, x1, y + h, z - w / 2 + t));
   bag.add('lime_plaster', box(x0, y, z + w / 2 - t, x1, y + h, z + w / 2));
   const P = wallPanel(bag, [x0, z + w / 2], [x0, z - w / 2], y, [1, 0]);
   P.rect(PAL.green2, 0.05, 0.05, w - 0.05, h - 0.05, 1);
-  P.ell(PAL.red, w / 2, h * 0.5, w * 0.34, h * 0.42, 2, 14);
-  buddhaM(P, w / 2, 0.15, Math.min(h, w) * 0.95, { robe: PAL.red2 }, 3);
+  if (near) {
+    P.rect(PAL.red, 0.05, 0.05, w - 0.05, 0.2, 2);
+    for (const s of [-1, 1]) buddhaM(P, w / 2 + s * (w / 2 - 0.4), h * 0.6, 0.42, { robe: s > 0 ? PAL.blue : PAL.red2 }, 3);
+  } else {
+    P.ell(PAL.red, w / 2, h * 0.5, w * 0.34, h * 0.42, 2, 14);
+    buddhaM(P, w / 2, 0.15, Math.min(h, w) * 0.95, { robe: PAL.red2 }, 3);
+  }
   if (c.seed % 2) { apsaraM(P, w * 0.25, h * 0.85, 0.7, 1, {}, 3); apsaraM(P, w * 0.75, h * 0.85, 0.7, -1, {}, 3); }
   P.flush();
+  // the valance under the lintel, seen from outside: hanging pointed strips in four colours
+  const V = new Panel(bag, [XF - 0.06, y + h, z + w / 2], [0, 0, -1], [0, -1, 0], [1, 0, 0]);
+  valance(V, w, 0.26, 1); V.flush();
+  if (near) {
+    const hb = Math.min(h * 0.72, w * 0.62), bx = XF - 0.95;
+    buddha({ at: [bx, z], y, h: hb, dir: [1, 0], robe: c.seed % 3 ? 'clay_robe' : 'clay_green', simple: true }, ctx);
+    col.circle(bx, z, 0.5 * hb / 1.9 + 0.15, y, y + hb);
+    if (w >= 3.0) for (const s of [-1, 1]) {
+      statue({ at: [XF - 1.1, z + s * (w / 2 - 0.5)], y, h: hb * 0.62, dir: [1, 0], type: 'bodhisattva', robe: s > 0 ? 'clay_green' : 'clay_robe', robe2: 'clay_robe', seed: 100 + c.seed + s }, ctx);
+      col.circle(XF - 1.1, z + s * (w / 2 - 0.5), 0.3, y, y + hb * 0.62);
+    }
+  }
   // the frame: two posts and a lintel painted red, set on the face
   bag.add('lacquer_red', box(XF - 0.04, y, z - w / 2 - 0.1, XF + 0.12, y + h + 0.2, z - w / 2));
   bag.add('lacquer_red', box(XF - 0.04, y, z + w / 2, XF + 0.12, y + h + 0.2, z + w / 2 + 0.1));
@@ -77,7 +108,7 @@ function recess(ctx, c) {
 }
 
 export function cliff(el, ctx) {
-  const { bag, col } = ctx, rand = rng(7);
+  const { bag, col } = ctx, rand = rng(7), lr = rng(33);       // (lr: the ledges' own stream, so that the face's silhouette keeps its earlier shape)
   const H = [];
   for (const c of CAVES) for (const h of holes(c)) H.push({ ...h, cave: c });
   // cut planes in z: every hole's edges, and rhythm cuts (so that the face is not one slab)
@@ -95,6 +126,17 @@ export function cliff(el, ctx) {
     for (const [x0, y0, x1, y1] of rects) {
       bag.add(here.length ? ROCKM : MATS[Math.floor(Math.abs(Math.sin(zm * 12.9898)) * 43758) % 3], box(x0, y0, za, x1, y1, zb));
       col.rect([x0, za, x1, zb], y0, y1);
+    }
+    // the bedding of the conglomerate: two to four horizontal ledges across a slab without a hole, standing 8–22 cm proud, from 3 m up
+    // (above the reach of the walkways; the Nine-Storey building hides the face's middle)
+    if (!here.length && Math.abs(zm) > 16) {
+      const nb = 2 + Math.floor(lr() * 3);
+      for (let q = 0; q < nb; q++) {
+        const yb = 3 + lr() * (top - 5), tb = 0.12 + lr() * 0.34, pb = 0.08 + lr() * 0.14, m = ['sandstone_white', 'sandstone_yellow', 'rubble', 'sandstone_relief'][Math.floor(lr() * 4)];
+        if (zm > -138 && zm < 114 && yb < FLOOR[1] + 2.6) continue;                      // the gallery and the stair keep their reach clear
+        if (CAVES.some((c) => c.kind === 'recess' && Math.abs(c.z - zm) < c.w / 2 + 0.3 && FLOOR[c.tier] - 0.3 < yb + tb && yb < FLOOR[c.tier] + c.h + 0.5)) continue;
+        bag.add(m, box(XF + off - 0.02, yb, za + 0.05, XF + off + pb, yb + tb, zb - 0.05));
+      }
     }
     // a stepped, broken crest: boulders on the top of the cliff in the slabs without a hole
     if (!here.length && rand() < 0.4) { const w = Math.min(zb - za, 2 + rand() * 2); bag.add(ROCKM, box(XF - ROCK * (0.3 + rand() * 0.4), top, za, XF - 1 - rand() * 6, top + 1 + rand() * 2, za + w)); }
@@ -122,6 +164,11 @@ export function cliff(el, ctx) {
     else recess(ctx, c);
   }
   nineStorey(ctx);
+  // soot over the cells' doors (no porch there): a flame-shaped smear above the lintel
+  for (const c of CAVES) if (c.kind === 'cell') {
+    const y = FLOOR[c.tier] + 2.5;
+    for (const [w, h, dy] of [[0.9, 0.5, 0], [0.62, 0.5, 0.45], [0.34, 0.5, 0.9]]) bag.add('lacquer_black', box(XF - 0.02, y + dy, c.z - w / 2, XF + 0.014, y + dy + h, c.z + w / 2));
+  }
   // the face's weathering: pale salt streaks under the cave mouths (small pieces on the face), dark soot over the cell's door
   const r2 = rng(19);
   for (let k = 0; k < 90; k++) {

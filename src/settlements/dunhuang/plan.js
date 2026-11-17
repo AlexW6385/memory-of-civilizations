@@ -8,6 +8,8 @@ const E = [];
 E.push({ t: 'dh_cliff' });
 E.push({ t: 'dh_stream' }); E.push({ t: 'dh_talus' });
 E.push({ t: 'dh_bridge', z: 0, w: 4.4 });
+// the stele of 698 on its tortoise and a bronze censer on the apron south of the Great Buddha's hall (dossier §13)
+E.push({ t: 'dh_stele', at: [XF + 3.0, -17.5], y: FLOOR[0] }); E.push({ t: 'dh_censer', at: [XF + 3.4, -26.0], y: FLOOR[0] });
 // the monks' halls and cells at the foot, facing the cliff over the apron: tiled halls and earth cells
 const mk = (rect, tiled, seed, extra = {}) => E.push({ t: 'dh_house', rect, front: 'w', seed, tiled, ...extra });
 mk([-61, 28, -50, 41], true, 71); mk([-61, 50, -50, 62], false, 72); mk([-61, 72, -50, 86], true, 73);

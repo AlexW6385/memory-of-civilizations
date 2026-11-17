@@ -67,3 +67,8 @@ export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >=
 export const onStreet = (x, z, m = 0) => (Math.abs(z) < 6 + m && x > STREET.x0 - m && x < STREET.x1 + m) || CROSS.some((cx) => Math.abs(x - cx) < LANE_W / 2 + m && Math.abs(z) < 62);
 /** A crescent: the disc of radius r minus a disc of the same radius moved 6 m to the north-east. */
 export function crescent(x, z, m = 0) { const [cx, cz] = SPRING.c; return Math.hypot(x - cx, z - cz) < SPRING.r - 6 + m + 4 && Math.hypot(x - cx - 6, z - cz + 5) > SPRING.r - 6 - m; }
+
+/** The beacon tower (fengsui) and its walled yard in the fields north of the town: the yard is 18 m square, centred here (dossier §13). */
+export const BEACON = { x: 92, z: -118, half: 9 };
+/** The threshing floor at the east fields' edge, radius 6 (dossier §13). */
+export const THRESH = { x: 158, z: 58, r: 6 };

@@ -30,9 +30,45 @@ function shell(ctx, S) {
   slab(ctx, PLASTER, x0, y, z1 - t, x1, y + h, z1);                     // the south
   slab(ctx, PLASTER, x1 - t, y, z0, x1, y + h, zc - 1);                 // the east, beside the door
   slab(ctx, PLASTER, x1 - t, y, zc + 1, x1, y + h, z1);
-  slab(ctx, PLASTER, x1 - t, y + 2.6, zc - 1, x1, y + h, zc + 1);       // over the door
-  // the passage: its sides and lintel painted red-brown, jambs of timber
-  for (const s of [-1, 1]) slab(ctx, 'timber_red', S.xf - 0.5, y, zc + s * 1.0 - (s > 0 ? 0 : -0.0), x1, y + 2.6, zc + s * 1.0 + (s > 0 ? 0.0 : 0));
+  if (h > 2.6) slab(ctx, PLASTER, x1 - t, y + 2.6, zc - 1, x1, y + h, zc + 1);       // over the door
+  passage(ctx, S, y + (S.top ?? 2.6));
+}
+
+/**
+ * The corridor from the cliff face to the chamber (dossier §13): plastered sides painted with rows of small seated
+ * Buddhas over a black-and-red skirting, a painted ceiling (a green field with a lotus medallion between red bands),
+ * a frame of red timber on the face with the two door leaves swung back against it.
+ */
+function passage(ctx, S, top) {
+  const { bag } = ctx, { x1, xf, y, zc } = S, t = 0.04, L = xf - x1, hgt = top - y;
+  for (const s of [-1, 1]) {
+    const za = s < 0 ? zc - 1 : zc + 1 - t;
+    slab(ctx, PLASTER, x1, y, za, xf, top, za + t);
+    const P = s < 0 ? wallPanel(bag, [x1, zc - 1], [xf, zc - 1], y, [0, 1], t) : wallPanel(bag, [xf, zc + 1], [x1, zc + 1], y, [0, -1], t);
+    P.rect(PAL.black, 0, 0, L, 0.14, 1); P.rect(PAL.red, 0, 0.14, L, 0.2, 1);
+    thousandM(P, 0.1, 0.3, L - 0.1, hgt - 0.3, 2, 400 + Math.round(zc) + (s < 0 ? 0 : 7), 0.3);
+    friezeM(P, 0, L, hgt - 0.26, hgt - 0.04, 1, s < 0 ? 0 : 2);
+    P.flush();
+  }
+  const C = new Panel(bag, [x1, top, zc + 1], [1, 0, 0], [0, 0, -1], [0, -1, 0]);
+  C.rect(PAL.green2, 0, 0, L, 2, 0); C.rect(PAL.red, 0, 0, L, 0.18, 1); C.rect(PAL.red, 0, 1.82, L, 2, 1);
+  lotusM(C, L / 2, 1, Math.min(0.55, L * 0.4), 2, {});
+  C.flush();
+  if (S.leaves === false) return;
+  // the frame on the face and the two leaves swung back (about 100°), studded with bronze
+  const ex = xf + 0.14;
+  if (S.frame !== false) for (const s of [-1, 1]) {
+    slab(ctx, 'timber_red', xf - 0.02, y, Math.min(zc + s * 1.14, zc + s * 1.0), ex, y + 2.76, Math.max(zc + s * 1.14, zc + s * 1.0));
+  }
+  if (S.frame !== false) slab(ctx, 'timber_red', xf - 0.02, top, zc - 1.14, ex, top + 0.16, zc + 1.14);
+  for (const s of [-1, 1]) {
+    const leaf = box(-0.03, 0.0, s < 0 ? 0 : -0.92, 0.03, top - y - 0.05, s < 0 ? 0.92 : 0).rotateY(s < 0 ? 1.745 : -1.745).translate(ex, y + 0.02, zc + s * 1.0);
+    ctx.bag.add('lacquer_red', leaf);
+    for (let k = 0; k < 3; k++) {
+      const stud = box(-0.05, 0.55 + k * 0.7, s < 0 ? 0.08 : -0.84, -0.03, 0.62 + k * 0.7, s < 0 ? 0.84 : -0.08).rotateY(s < 0 ? 1.745 : -1.745).translate(ex, y + 0.02, zc + s * 1.0);
+      ctx.bag.add('bronze', stud);
+    }
+  }
 }
 
 /** The pyramid-truncated ceiling (fudou) from the wall tops at y+h up to the well at y+h+rise, inset f. Returns the slope panels. */
@@ -63,7 +99,7 @@ function fudou(ctx, S, f, rise, seed) {
 }
 
 /** A valance of hanging triangles in three colours along a slope's lower edge. */
-function valance(P, L, h = 0.3, L1 = 6) {
+export function valance(P, L, h = 0.3, L1 = 6) {
   P.rect(PAL.black, 0, 0, L, 0.04, L1);
   const n = Math.round(L / 0.3), w = L / n, cols = [PAL.red, PAL.green, PAL.blue, PAL.ochre];
   for (let k = 0; k < n; k++) P.poly(cols[k % 4], [[k * w, 0.04], [(k + 1) * w, 0.04], [(k + 0.5) * w, 0.04 + h]], L1 + 1);
@@ -89,15 +125,16 @@ export function hallCave(ctx, S0) {
   // the walls
   const wall = (a, b, n, kind) => {
     const P = wallPanel(bag, a, b, y, n), L = P.len;
-    P.rect(PAL.black, 0, 0, L, 0.1, 1);                                              // the skirting
-    P.rect(PAL.red, 0, 0.1, L, 0.16, 1);
+    const dA = L / 2 - 1.0, dB = L / 2 + 1.0, spans = kind === 'door' ? [[0, dA], [dB, L]] : [[0, L]];          // the door's span is left unpainted
+    for (const [a, b] of spans) { P.rect(PAL.black, a, 0, b, 0.1, 1); P.rect(PAL.red, a, 0.1, b, 0.16, 1); }                      // the skirting
     friezeM(P, 0, L, h - 0.34, h - 0.04, 1, kind === 'main' ? 0 : 2);                                    // the upper frieze
     if (kind === 'main') {
       donorsM(P, 0.3, L - 0.3, 0.22, 1.25, 1, 5);
       friezeM(P, 0.1, L - 0.1, 1.1, 1.26, 1, 1);
       tableauM(P, 0.18, 1.34, L - 0.18, h - 0.42, 11 + Math.round(L), 2);
     } else if (kind === 'door') {
-      thousandM(P, 0.2, 0.3, L - 0.2, h - 0.45, 2, 77, 0.36);
+      thousandM(P, 0.2, 0.3, dA - 0.15, h - 0.45, 2, 77, 0.36); thousandM(P, dB + 0.15, 0.3, L - 0.2, h - 0.45, 2, 78, 0.36);
+      P.rect(PAL.red, dA, 2.6, dB, 2.7, 1); P.rect(PAL.green2, dA, 2.7, dB, h - 0.36, 1);                           // over the door: a red lintel band and a green field
     } else {
       // the back (west) wall: the halo and mandorla behind the altar, apsaras above, bodhisattvas and disciples painted at the sides
       P.rect(PAL.green2, 0.2, 0.2, L - 0.2, h - 0.4, 1);
@@ -168,17 +205,22 @@ export function pillarCave(ctx, S0) {
   E.poly(PLASTER, [[0, 0], [w, 0], [w / 2, rise]], 0); E.flush();
   const Wg = new Panel(bag, [xg, yt, z1], [0, 0, -1], [0, 1, 0], [1, 0, 0]);
   Wg.poly(PLASTER, [[0, 0], [w, 0], [w / 2, rise]], 0); Wg.rect(PAL.red, 0.1, 0, w - 0.1, 0.18, 1); Wg.flush();
-  // the walls: skirting and yaksha band (triangles), thousand Buddhas, an upper band of apsaras; a tableau on each side wall
+  // the walls: skirting and yaksha band (triangles), thousand Buddhas, an upper band of apsaras; a tableau on each side wall.
+  // On the door wall the painting is split round the doorway (u from L/2 − 1 to L/2 + 1, to 2.6 m), with a lintel band over it.
   const wall = (a, b, n, kind) => {
-    const P = wallPanel(bag, a, b, y, n), L = P.len;
-    P.rect(PAL.black, 0, 0, L, 0.9, 1);
-    const m = Math.round(L / 0.45);
-    for (let k = 0; k < m; k++) P.poly(k % 2 ? PAL.red : PAL.ochre, [[k * L / m, 0.02], [(k + 1) * L / m, 0.02], [(k + 0.5) * L / m, 0.82]], 2);
-    friezeM(P, 0, L, 0.92, 1.1, 1, 2);
-    thousandM(P, 0.1, 1.15, L - 0.1, 2.5, 2, 40 + Math.round(L), 0.36);
-    P.rect(PAL.red, 0, 2.5, L, 2.58, 1);
-    P.rect(PAL.green2, 0, 2.58, L, h, 1);
-    for (let k = 0; k < Math.floor(L / 1.15); k++) apsaraM(P, 0.8 + k * 1.15, 2.85, 0.62, k % 2 ? 1 : -1, { scarf: k % 3 ? PAL.red : PAL.white, dress: k % 2 ? PAL.blue : PAL.green }, 3);
+    const P = wallPanel(bag, a, b, y, n), L = P.len, dA = L / 2 - 1.0, dB = L / 2 + 1.0;
+    const spans = kind === 'door' ? [[0, dA], [dB, L]] : [[0, L]];
+    for (const [ua, ub] of spans) {
+      P.rect(PAL.black, ua, 0, ub, 0.9, 1);
+      const m = Math.max(1, Math.round((ub - ua) / 0.45));
+      for (let k = 0; k < m; k++) P.poly(k % 2 ? PAL.red : PAL.ochre, [[ua + k * (ub - ua) / m, 0.02], [ua + (k + 1) * (ub - ua) / m, 0.02], [ua + (k + 0.5) * (ub - ua) / m, 0.82]], 2);
+      friezeM(P, ua, ub, 0.92, 1.1, 1, 2);
+      if (ub - ua > 0.5) thousandM(P, ua + 0.1, 1.15, ub - 0.1, 2.5, 2, 40 + Math.round(L) + Math.round(ua), 0.36);
+      P.rect(PAL.red, ua, 2.5, ub, 2.58, 1);
+      P.rect(PAL.green2, ua, 2.58, ub, h, 1);
+      for (let k = 0; k < Math.floor((ub - ua) / 1.15); k++) apsaraM(P, ua + 0.8 + k * 1.15, 2.85, 0.62, k % 2 ? 1 : -1, { scarf: k % 3 ? PAL.red : PAL.white, dress: k % 2 ? PAL.blue : PAL.green }, 3);
+    }
+    if (kind === 'door') { P.rect(PAL.red, dA, 2.6, dB, 2.7, 1); P.rect(PAL.green2, dA, 2.7, dB, h, 1); apsaraM(P, L / 2, 3.0, 0.62, 1, { scarf: PAL.red, dress: PAL.green }, 3); }
     if (kind === 'side') tableauM(P, L * 0.28, 1.2, L * 0.72, 2.45, 7 + Math.round(L), 8);
     P.flush();
   };
@@ -205,7 +247,7 @@ export function pillarCave(ctx, S0) {
 /** A monk's cell: kang, stove, shelf of sutras, water jar, mat; a monk at the lamp. */
 export function cellCave(ctx, S0) {
   const { bag, col } = ctx, d = 3.8, w = 3.2, h = 2.3;
-  const x1 = S0.xf - 1.2, S = { ...S0, x1, x0: x1 - d, z0: S0.zc - w / 2, z1: S0.zc + w / 2, h }, { x0, z0, z1, zc, y } = S;
+  const x1 = S0.xf - 1.2, S = { ...S0, x1, x0: x1 - d, z0: S0.zc - w / 2, z1: S0.zc + w / 2, h, top: 2.3, frame: false }, { x0, z0, z1, zc, y } = S;
   shell(ctx, S);
   const c = new Panel(bag, [x0, y + h, z1], [1, 0, 0], [0, 0, -1], [0, -1, 0]);
   c.rect('wood_dark', 0, 0, d, w, 0); c.flush();
