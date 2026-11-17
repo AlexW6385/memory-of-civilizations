@@ -113,31 +113,47 @@ export function flame(ctx, x, y, z, h = 0.22, r = 0.07) {
  * it, a bulging-eyed head with moustache and fangs, a tall pointed headdress. h the whole height.
  */
 export function dwarapala(ctx, x, z, y, h = 1.4, face = 's') {
-  const F = frame(ctx, x, z, face), T = 'tuff_hewn', S = h / 1.4;
+  const F = frame(ctx, x, z, face), T = 'tuff_hewn', hv = ((Math.imul(Math.round(x * 100), 73856093) ^ Math.imul(Math.round(z * 100), 19349663)) >>> 0) % 12, S = (h / 1.4) * (1 + 0.003 * hv);   // (each guard a hair different in size, so the pieces merge rather than become shared copies)
   const B = (m, u0, v0, n0, u1, v1, n1, solid = false) => F.B(m, u0 * S, y + v0 * S, n0 * S, u1 * S, y + v1 * S, n1 * S, solid);
   B(T, -0.34, 0, -0.34, 0.34, 0.38, 0.34, true); B('andesite', -0.38, 0, -0.38, 0.38, 0.1, 0.38); B(T, -0.3, 0.38, -0.3, 0.3, 0.46, 0.3);
   const L = (m, prof, u, v, n, seg = 8) => F.lathF(m, prof.map(([r, yy]) => [r * S, yy * S]), u * S, y + v * S, n * S, seg);
-  // legs, bent and apart, feet turned out; the kain between them
+  const R = (m, a, b, r, seg = 6) => F.rodF(m, [a[0] * S, y + a[1] * S, a[2] * S], [b[0] * S, y + b[1] * S, b[2] * S], r * S, seg);
+  const Bl = (m, v, n, r, seg = 8) => F.ballF(m, v[0] * S, y + v[1] * S, n * S, r * S, seg);
+  // legs, bent and apart (the squat stance), the feet turned out with their toes
   for (const s of [-1, 1]) {
-    B(T, s * 0.1, 0.46, -0.1, s * 0.25, 0.8, 0.1); B(T, s * 0.1, 0.46, 0.0, s * 0.27, 0.52, 0.24);
-    F.rodF(T, [s * 0.18 * S, y + 0.78 * S, 0.0], [s * 0.26 * S, y + 0.64 * S, 0.12 * S], 0.07 * S);
+    R(T, [s * 0.13, 0.84, 0], [s * 0.3, 0.68, 0.1], 0.085, 7); R(T, [s * 0.3, 0.68, 0.1], [s * 0.27, 0.5, 0.15], 0.07, 7);
+    B(T, s * 0.2, 0.46, 0.04, s * 0.36, 0.52, 0.3); for (const q of [-0.05, 0, 0.05]) Bl(T, [s * 0.28 + q * s, 0.5], 0.3, 0.025, 5);
+    Bl(T, [s * 0.3, 0.68], 0.1, 0.085, 6);
   }
-  L(T, [[0.18, 0], [0.26, 0.08], [0.2, 0.3]], 0, 0.78, 0, 8);                        // the belly over the cloth
-  L(T, [[0.001, 0], [0.2, 0.0], [0.25, 0.14], [0.2, 0.34], [0.001, 0.38]], 0, 0.84, 0, 8);
-  ctx.bag.add('cloth_black', lathe([[0.2 * S + 0.03, 0], [0.2 * S + 0.03, 0.08 * S]], 8, (th) => (Math.floor(th / TAU * 8) % 2 ? 1 : 0.001), F.P(0, 0)[0], y + 0.78 * S, F.P(0, 0)[1]));
-  ctx.bag.add('cloth_white', lathe([[0.2 * S + 0.03, 0], [0.2 * S + 0.03, 0.08 * S]], 8, (th) => (Math.floor(th / TAU * 8) % 2 ? 0.001 : 1), F.P(0, 0)[0], y + 0.78 * S, F.P(0, 0)[1]));
-  // arms: the right bent to the club, the left on the hip; the club upright before the figure
-  B(T, 0.27, 1.0, -0.06, 0.37, 1.18, 0.06); B(T, 0.3, 0.9, 0.04, 0.4, 1.02, 0.22);
-  B(T, -0.38, 1.02, -0.06, -0.28, 1.18, 0.06); B(T, -0.4, 0.88, -0.06, -0.3, 1.04, 0.06);
-  F.rodF(T, [0.35 * S, y + 0.5 * S, 0.26 * S], [0.35 * S, y + 1.3 * S, 0.26 * S], 0.045 * S);
-  F.ballF(T, 0.35 * S, y + 1.36 * S, 0.26 * S, 0.1 * S, 7);
-  // the head, eyes, brows, moustache, fangs, the headdress
-  F.ballF(T, 0, y + 1.28 * S, 0.0, 0.17 * S, 8, 1.0);
-  for (const s of [-1, 1]) { F.ballF('plaster_white', s * 0.07 * S, y + 1.31 * S, 0.14 * S, 0.04 * S, 6); F.ballF('wood_dark', s * 0.07 * S, y + 1.31 * S, 0.175 * S, 0.018 * S, 5); }
-  B('hair_dark', -0.13, 1.36, 0.1, 0.13, 1.4, 0.16); B('hair_dark', -0.15, 1.2, 0.1, 0.15, 1.24, 0.17);
-  for (const s of [-1, 1]) B('plaster_white', s * 0.06 - 0.012, 1.14, 0.12, s * 0.06 + 0.012, 1.2, 0.15);
-  L(T, [[0.001, 0], [0.15, 0.0], [0.13, 0.12], [0.07, 0.28], [0.001, 0.36]], 0, 1.4, -0.02, 8);
-  ctx.bag.add('gilt_bronze', lathe([[0.152 * S, 0], [0.152 * S, 0.03 * S]], 8, null, F.P(0, -0.02 * S)[0], y + 1.41 * S, F.P(0, -0.02 * S)[1]));
+  // the kain: a skirt of poleng, black and white in the eight sectors, flaring from the waist, and a gilt sash with its knot at the front
+  for (const [m, odd] of [['cloth_black', 1], ['cloth_white', 0]]) {
+    ctx.bag.add(m, lathe([[0.14 * S, 0.3 * S], [0.17 * S, 0.12 * S], [0.19 * S, 0]], 8, (th) => ((Math.floor(th / TAU * 8) % 2) === odd ? 1 : 0.001), F.P(0, 0)[0], y + 0.58 * S, F.P(0, 0)[1]));
+  }
+  ctx.bag.add('gilt_bronze', lathe([[0.2 * S, 0], [0.2 * S, 0.05 * S]], 10, null, F.P(0, 0)[0], y + 0.86 * S, F.P(0, 0)[1]));
+  Bl('gilt_bronze', [0, 0.88], 0.2, 0.05, 6);
+  // the torso: belly, chest, shoulders; a collar of gilt
+  L(T, [[0.17, 0], [0.23, 0.1], [0.21, 0.24], [0.2, 0.34], [0.12, 0.42], [0.07, 0.48]], 0, 0.88, 0, 10);
+  B(T, -0.27, 1.14, -0.1, 0.27, 1.25, 0.1);
+  ctx.bag.add('gilt_bronze', lathe([[0.12 * S, 0], [0.16 * S, 0.02 * S], [0.12 * S, 0.04 * S]], 10, null, F.P(0, 0)[0], y + 1.25 * S, F.P(0, 0)[1]));
+  for (const s of [-1, 1]) Bl(T, [s * 0.12, 1.1], 0.17, 0.065, 6);                // the chest
+  // arms: the right bent forward to the club, the left fist on the hip; armlets of gilt
+  R(T, [0.27, 1.2, 0], [0.37, 1.04, 0.05], 0.06); R(T, [0.37, 1.04, 0.05], [0.36, 1.14, 0.22], 0.055); Bl(T, [0.36, 1.14], 0.24, 0.065, 6);
+  R(T, [-0.27, 1.2, 0], [-0.38, 1.02, 0.0], 0.06); R(T, [-0.38, 1.02, 0], [-0.24, 0.92, 0.04], 0.055); Bl(T, [-0.23, 0.92], 0.05, 0.06, 6);
+  for (const s of [-1, 1]) Bl('gilt_bronze', [s * 0.34, 1.1], 0.0, 0.05, 6);
+  // the club (gada), upright before the right hand: a shaft, a knobbed head
+  R(T, [0.36, 0.48, 0.24], [0.36, 1.12, 0.24], 0.04);
+  Bl(T, [0.36, 1.2], 0.24, 0.09, 7); for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2; Bl(T, [0.36 + Math.cos(a) * 0.08, 1.2 + Math.sin(a) * 0.0], 0.24 + Math.sin(a) * 0.08, 0.025, 4); }
+  // the head: a broad face with a heavy brow, round eyes, a bulbous nose, a moustache sweeping out, bared fangs, ears with gilt discs
+  Bl(T, [0, 1.38], 0.0, 0.16, 9);
+  B(T, -0.15, 1.4, 0.09, 0.15, 1.44, 0.17);                                        // the brow
+  for (const s of [-1, 1]) { Bl('plaster_white', [s * 0.065, 1.375], 0.14, 0.04, 6); Bl('wood_dark', [s * 0.065, 1.375], 0.175, 0.018, 5); Bl(T, [s * 0.12, 1.32], 0.12, 0.05, 5); Bl('gilt_bronze', [s * 0.17, 1.37], 0.0, 0.04, 6); }
+  Bl(T, [0, 1.32], 0.17, 0.045, 6);
+  B('hair_dark', -0.1, 1.265, 0.15, 0.1, 1.285, 0.17);
+  for (const s of [-1, 1]) { R('hair_dark', [s * 0.03, 1.28, 0.17], [s * 0.15, 1.25, 0.13], 0.014, 4); R('hair_dark', [s * 0.15, 1.25, 0.13], [s * 0.18, 1.3, 0.1], 0.012, 4); F.lathF('plaster_white', [[0.016 * S, 0], [0.001, -0.07 * S]], s * 0.055 * S, y + 1.265 * S, 0.165 * S, 5); }
+  // the crown: a tiered headdress, gilt band, a jewel at the front
+  ctx.bag.add('gilt_bronze', lathe([[0.17 * S, 0], [0.17 * S, 0.035 * S]], 10, null, F.P(0, 0)[0], y + 1.46 * S, F.P(0, 0)[1]));
+  L(T, [[0.001, 0], [0.16, 0.0], [0.13, 0.08], [0.15, 0.1], [0.1, 0.2], [0.115, 0.22], [0.05, 0.34], [0.001, 0.4]], 0, 1.495, 0, 8);
+  Bl('gilt_bronze', [0, 1.54], 0.16, 0.025, 5);
 }
 
 /** The turtle Bedawang Nala with its two serpents coiled round it, at (cx, cz) on y, the head toward the front (+z of the frame `face`). r the shell's radius at its foot. */
