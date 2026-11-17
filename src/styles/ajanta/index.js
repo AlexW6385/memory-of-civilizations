@@ -6,9 +6,10 @@ import { cliff } from './cliff.js';
 import { VILLAGE_ELEMENTS } from './village.js';
 import { HOUSE_ELEMENTS } from './houses.js';
 import { DRESS_ELEMENTS } from './dress.js';
+import { CRAFT_ELEMENTS } from './crafts.js';
 
 registerStyle('ajanta', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { aj_cliff: cliff, ...VILLAGE_ELEMENTS, ...HOUSE_ELEMENTS, ...DRESS_ELEMENTS },
+  elements: { aj_cliff: cliff, ...VILLAGE_ELEMENTS, ...HOUSE_ELEMENTS, ...DRESS_ELEMENTS, ...CRAFT_ELEMENTS },
   objects: {},
 });

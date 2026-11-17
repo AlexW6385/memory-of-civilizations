@@ -5,6 +5,7 @@
 import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { subtractRects } from '../../core/build.js';
 import { Panel, PAL, wall, figM, bodhiM, lotusBand, jatakaM, ceilingM, buddhaM, rngOf } from './paint.js';
+import { pillar, figure, shrineBuddha, nave_frieze, toranaFront } from './sculpt.js';
 
 const FLOORM = 'sandstone_floor', PLASTER = 'plaster_ochre', STONE = 'sandstone_carved', WHITE = 'lime_plaster';
 const hole = (x0, x1, z0, z1, y0, y1) => ({ x0, x1, z0, z1, y0, y1 });
@@ -47,16 +48,6 @@ function plane(ctx, axis, at, n, a0, a1, y0, y1, holes = [], mat = PLASTER) {
     else slab(ctx, mat, p0, q0, Math.min(at, at + t), p1, q1, Math.max(at, at + t));
   }
 }
-/** An octagonal pillar of the vihara: a square base, a shaft with a painted band, a cushion capital and a bracket block. */
-function pillar(ctx, x, y, z, h, r = 0.34, base = 0.5) {
-  const { bag, col } = ctx;
-  bag.add(STONE, box(x - base, y, z - base, x + base, y + 0.9, z + base));
-  bag.add(PLASTER, lathe([[r, 0], [r * 0.98, h - 1.5], [r * 0.9, h - 1.2], [r * 0.9, h - 0.5]], 8, null, x, y + 0.9, z));
-  bag.add(PAL.ground, lathe([[r * 1.02, 0], [r * 1.02, 0.18]], 8, null, x, y + 1.6, z));
-  bag.add(STONE, lathe([[r * 0.9, 0], [r * 1.5, 0.12], [r * 1.65, 0.3], [r * 1.5, 0.4], [r * 0.9, 0.46]], 12, null, x, y + h - 0.46, z));
-  bag.add(STONE, box(x - base, y + h - 0.02, z - base, x + base, y + h + 0.0, z + base));
-  col.circle(x, z, base * 0.95, y, y + h);
-}
 /** The beams of a flat painted ceiling over [x0, x1] × [z0, z1] at y: a grid of carved beams, each bay a painted panel. */
 function ceiling(ctx, x0, x1, z0, z1, y, nx, nz, seed) {
   const { bag } = ctx, a = (x1 - x0) / nx, b = (z1 - z0) / nz;
@@ -68,28 +59,16 @@ function ceiling(ctx, x0, x1, z0, z1, y, nx, nz, seed) {
   for (let i = 0; i <= nx; i++) slab(ctx, STONE, x0 + i * a - 0.13, y - 0.3, z0, x0 + i * a + 0.13, y - 0.02, z1);
   for (let j = 0; j <= nz; j++) slab(ctx, STONE, x0, y - 0.24, z0 + j * b - 0.12, x1, y - 0.02, z0 + j * b + 0.12);
 }
-/** A seated Buddha on a throne facing +x: the rock-cut image, plastered and painted, s the total height. */
-export function seatedBuddha(ctx, x, y, z, s) {
-  const { bag, col } = ctx, k = s / 3.2;
-  bag.add(STONE, box(x - 0.9 * k, y, z - 1.2 * k, x + 0.9 * k, y + 0.7 * k, z + 1.2 * k));
-  bag.add(PAL.ground, box(x + 0.9 * k, y + 0.05 * k, z - 1.05 * k, x + 0.96 * k, y + 0.65 * k, z + 1.05 * k));
-  for (const sg of [-1, 1]) { bag.add(WHITE, lathe([[0.001, 0], [0.2 * k, 0.04], [0.26 * k, 0.28 * k], [0.14 * k, 0.5 * k], [0.001, 0.52 * k]], 8, null, x + 0.95 * k, y + 0.7 * k, z + sg * 1.45 * k)); }
-  bag.add(PAL.ochre, lathe([[0.95 * k, 0], [1.05 * k, 0.1 * k], [0.95 * k, 0.35 * k], [0.4 * k, 0.5 * k], [0.001, 0.5 * k]], 12, null, x, y + 0.7 * k, z));
-  bag.add(PAL.ochre, lathe([[0.001, 0], [0.62 * k, 0.05 * k], [0.55 * k, 0.9 * k], [0.4 * k, 1.5 * k], [0.34 * k, 1.8 * k], [0.001, 1.8 * k]], 12, null, x, y + 1.15 * k, z));
-  bag.add(PAL.skin, lathe([[0.001, 0], [0.2 * k, 0.04 * k], [0.26 * k, 0.26 * k], [0.18 * k, 0.5 * k], [0.001, 0.52 * k]], 10, null, x, y + 2.7 * k, z));
-  bag.add(PAL.black, lathe([[0.001, 0], [0.22 * k, 0.0], [0.2 * k, 0.16 * k], [0.001, 0.2 * k]], 10, null, x, y + 3.15 * k, z));
-  bag.add(PAL.skin, box(x + 0.34 * k, y + 1.7 * k, z - 0.3 * k, x + 0.6 * k, y + 2.0 * k, z + 0.3 * k));
-  col.rect([x - 0.9 * k, z - 1.2 * k, x + 1.0 * k, z + 1.2 * k], y, y + 0.7 * k);
-  col.circle(x, z, 0.7 * k, y + 0.7 * k, y + 3.2 * k);
+/** A flying figure of the wall paintings (a vidyadhara with a garland), s ≈ 1 m long, dir ±1 the way it flies. */
+function flyerM(P, u, v, s, dir, L = 1) {
+  P.disc(PAL.ochre, u + dir * 0.34 * s, v + 0.12 * s, 0.1 * s, L, 10); P.disc(PAL.skin2, u + dir * 0.34 * s, v + 0.12 * s, 0.055 * s, L + 1, 8);
+  P.rect(PAL.black, u + dir * 0.3 * s - 0.05 * s, v + 0.16 * s, u + dir * 0.3 * s + 0.05 * s, v + 0.2 * s, L + 2);
+  P.line(PAL.skin2, u + dir * 0.3 * s, v + 0.05 * s, u - dir * 0.08 * s, v - 0.04 * s, 0.1 * s, L + 1);
+  P.line(PAL.blue, u - dir * 0.08 * s, v - 0.04 * s, u - dir * 0.34 * s, v - 0.16 * s, 0.09 * s, L + 1);
+  P.ribbon(PAL.white, [[u - dir * 0.3 * s, v - 0.14 * s], [u - dir * 0.6 * s, v - 0.04 * s], [u - dir * 0.9 * s, v - 0.18 * s]], 0.03 * s, L);
+  P.ribbon(PAL.green, [[u + dir * 0.28 * s, v + 0.02 * s], [u + dir * 0.5 * s, v - 0.12 * s], [u + dir * 0.7 * s, v + 0.02 * s], [u + dir * 0.9 * s, v - 0.1 * s]], 0.05 * s, L);
+  P.line(PAL.skin2, u + dir * 0.2 * s, v + 0.04 * s, u + dir * 0.45 * s, v - 0.06 * s, 0.035 * s, L + 2);
 }
-/** A standing figure (a Buddha of the stupa's front, a yaksha): robe, head, a halo ring; facing +x. */
-export function standingFigure(ctx, x, y, z, h, robe = PAL.ochre, belly = 0) {
-  const { bag } = ctx, k = h / 2.2;
-  bag.add(robe, lathe([[0.001, 0], [0.3 * k, 0.02 * k], [0.28 * k + belly * k, 0.9 * k], [0.34 * k + belly * k, 1.3 * k], [0.26 * k, 1.7 * k], [0.12 * k, 1.8 * k], [0.001, 1.8 * k]], 10, null, x, y, z));
-  bag.add(PAL.skin, lathe([[0.001, 0], [0.12 * k, 0.04 * k], [0.15 * k, 0.2 * k], [0.1 * k, 0.38 * k], [0.001, 0.4 * k]], 10, null, x, y + 1.78 * k, z));
-  bag.add(PAL.black, lathe([[0.001, 0], [0.14 * k, 0], [0.11 * k, 0.12 * k], [0.001, 0.16 * k]], 8, null, x, y + 2.05 * k, z));
-}
-
 // ── Cave 1: the painted vihara ──────────────────────────────────────────────────────────────────────────────────────
 const V = { porchD: 3.8, porchHW: 12, wallT: 1.0, HW: 9.75, hallD: 19.5, H: 5.2 };
 /** The cells' x (the side walls): five along the 19.5 m wall. */
@@ -137,11 +116,11 @@ export function vihara(ctx, xf, zc, y) {
   plane(ctx, 'z', zc - V.porchHW, 1, xp0, xf, y, y + 5.6); plane(ctx, 'z', zc + V.porchHW, -1, xp0, xf, y, y + 5.6);
   slab(ctx, PLASTER, xp0, y + 5.56, zc - V.porchHW, xf, y + 5.6, zc + V.porchHW);
   // the ring of 20 pillars, 12 m square, spacing 2.4 m
-  for (let i = 0; i < 6; i++) for (let j = 0; j < 6; j++) if (i === 0 || i === 5 || j === 0 || j === 5) pillar(ctx, xc - 6 + 2.4 * i, y, zc - 6 + 2.4 * j, H - 0.3);
+  for (let i = 0; i < 6; i++) for (let j = 0; j < 6; j++) if (i === 0 || i === 5 || j === 0 || j === 5) pillar(ctx, xc - 6 + 2.4 * i, y, zc - 6 + 2.4 * j, H - 0.3, { kind: (i * 3 + j * 5 + 1) % 4, cap: (i + j) % 3 ? 'lime_plaster' : 'sandstone_carved' });
   // the architrave over the ring
   for (const s of [-6, 6]) { slab(ctx, STONE, xc - 6.5, y + H - 0.32, zc + s - 0.3, xc + 6.5, y + H - 0.02, zc + s + 0.3); slab(ctx, STONE, xc + s - 0.3, y + H - 0.32, zc - 6.5, xc + s + 0.3, y + H - 0.02, zc + 6.5); }
   // the porch's six pillars and its lintel
-  for (let i = 0; i < 6; i++) pillar(ctx, xf - 0.7, y, zc - 10 + 4 * i, 4.9, 0.4, 0.62);
+  for (let i = 0; i < 6; i++) pillar(ctx, xf - 0.7, y, zc - 10 + 4 * i, 4.9, { r: 0.4, base: 0.62, kind: [1, 2, 3, 1, 2, 3][i], cap: 'sandstone_carved' });
   slab(ctx, STONE, xf - 1.1, y + 4.9, zc - 11.6, xf - 0.1, y + 5.6, zc + 11.6);
   const r = rngOf(5);
   for (let i = 0; i < 22; i++) slab(ctx, i % 2 ? PLASTER : PAL.ground, xf - 0.1, y + 5.0, zc - 11.4 + i * 1.04, xf + 0.03, y + 5.5, zc - 10.6 + i * 1.04);
@@ -170,9 +149,18 @@ export function vihara(ctx, xf, zc, y) {
   const sx1 = xh0 - 1.2, sx0 = xh0 - 7.0;
   plane(ctx, 'z', zc - 2.5, 1, sx0, sx1, y, y + 4.3); plane(ctx, 'z', zc + 2.5, -1, sx0, sx1, y, y + 4.3);
   plane(ctx, 'x', sx0, 1, zc - 2.5, zc + 2.5, y, y + 4.3); slab(ctx, PLASTER, sx0, y + 4.26, zc - 2.5, sx1, y + 4.3, zc + 2.5);
-  seatedBuddha(ctx, sx0 + 1.2, y, zc, 3.4);
-  const P = wall(bag, sx0, zc + 2.5, [1, 0], y, 5.0); P.ell(PAL.green2, 2.5, 2.4, 1.2, 1.6, 1, 14); P.disc(PAL.ochre, 2.5, 2.8, 0.7, 2, 14); for (const s of [-1, 1]) { figM(P, 2.5 + s * 1.7, 0.2, 2.0, { dir: -s, halo: PAL.ochre, dhoti: s > 0 ? PAL.blue : PAL.green }, 2); } P.flush();
+  shrineBuddha(ctx, sx0 + 0.04, y, zc, 3.4);
+  for (const sg of [-1, 1]) figure(ctx, sx0 + 1.5, y, zc + sg * 2.0, 2.3, { kind: 'bodhi', yaw: 0, dhoti: sg > 0 ? PAL.green : PAL.blue, sway: sg });
+  { const P = wall(bag, sx0, zc + 2.5, [1, 0], y, 5.0);
+    P.ell(PAL.green2, 2.5, 2.6, 1.25, 1.65, 1, 16); P.disc(PAL.ochre, 2.5, 3.2, 0.72, 2, 16); P.disc(PAL.white, 2.5, 3.2, 0.6, 3, 16);
+    for (const s of [-1, 1]) flyerM(P, 2.5 + s * 1.85, 3.55, 0.9, -s, 4);                   // a flying pair each side, bearing garlands
+    P.flush(); }
   offerings(ctx, sx0 + 3.4, y, zc, 2);
+  // the sanctum's doorway on the hall's rear wall: two stepped jambs, a lintel with the double roof (kapotali) over it, a row of tiny chaitya windows
+  for (const sg of [-1, 1]) { slab(ctx, STONE, xh0 + 0.04, y, zc + sg * 1.5 - (sg < 0 ? 0.2 : 0), xh0 + 0.12, y + 3.5, zc + sg * 1.5 + (sg > 0 ? 0.2 : 0)); slab(ctx, 'sandstone_dressed', xh0 + 0.04, y, zc + sg * 1.7 - (sg < 0 ? 0.1 : 0), xh0 + 0.2, y + 3.62, zc + sg * 1.7 + (sg > 0 ? 0.1 : 0)); }
+  slab(ctx, STONE, xh0 + 0.04, y + 3.5, zc - 1.8, xh0 + 0.14, y + 3.72, zc + 1.8);
+  slab(ctx, 'sandstone_dressed', xh0 + 0.04, y + 3.72, zc - 1.9, xh0 + 0.38, y + 3.8, zc + 1.9); slab(ctx, STONE, xh0 + 0.04, y + 3.8, zc - 1.8, xh0 + 0.22, y + 4.0, zc + 1.8); slab(ctx, 'sandstone_dressed', xh0 + 0.04, y + 4.0, zc - 1.9, xh0 + 0.34, y + 4.08, zc + 1.9);
+  for (let i = 0; i < 7; i++) { const zz = zc - 1.5 + i * 0.5; slab(ctx, PAL.ground, xh0 + 0.22, y + 3.84, zz - 0.14, xh0 + 0.25, y + 3.98, zz + 0.14); }
   lamp(ctx, sx1 - 0.7, y, zc - 1.9, 0.9, 1.4, 8); lamp(ctx, sx1 - 0.7, y, zc + 1.9, 0.9, 1.4, 8);
   // the cells: lining, a stone bed with a raised pillow, a lamp niche
   for (const c of cells) {
@@ -241,7 +229,7 @@ export function chaitya(ctx, xf, zc, y) {
   for (let i = 0; i < 9; i++) slab(ctx, i % 2 ? PLASTER : PAL.ground, xf + 2.78, y + 4.35, zc - 3.4 + i * 0.85, xf + 2.84, y + 4.75, zc - 2.7 + i * 0.85);
   col.rect([xf, zc - 3.6, xf + 2.8, zc + 3.6], y + 4.3, y + 4.8);
   // yakshas flanking the arch, on brackets, and a frieze of small seated Buddhas over the porch roof's edge
-  for (const s of [-1, 1]) { slab(ctx, STONE, xf, y + 4.9, zc + s * 3.9 - 0.45, xf + 0.7, y + 5.1, zc + s * 3.9 + 0.45); standingFigure(ctx, xf + 0.4, y + 5.1, zc + s * 3.9, 2.4, PAL.skin2, 0.15); }
+  for (const s of [-1, 1]) { slab(ctx, STONE, xf, y + 4.9, zc + s * 3.9 - 0.45, xf + 0.7, y + 5.1, zc + s * 3.9 + 0.45); figure(ctx, xf + 0.4, y + 5.1, zc + s * 3.9, 2.4, { kind: 'yaksha', col: false }); }
   for (let i = 0; i < 9; i++) { const z = zc - 4.0 + i; bag.add(WHITE, lathe([[0.001, 0], [0.18, 0.02], [0.2, 0.2], [0.12, 0.34], [0.001, 0.36]], 8, null, xf + 0.05, y + 7.0, z)); }
   // the interior: aisle ceilings, the vault with its ribs, the colonnade
   const ax = (xn1 + xn0) / 2;
@@ -265,7 +253,7 @@ export function chaitya(ctx, xf, zc, y) {
   const pil = [];
   for (let i = 0; i < 6; i++) for (const s of [-1, 1]) pil.push([xn1 - 1.8 - i * 1.7, zc + s * 2.55]);
   for (const a of [-1.0, 0, 1.0]) pil.push([xs - Math.cos(a) * 2.55 - 0.6, zc + Math.sin(a) * 2.55]);
-  for (const [px, pz] of pil) pillar(ctx, px, y, pz, 4.3, 0.26, 0.4);
+  pil.forEach(([px, pz], i) => pillar(ctx, px, y, pz, 4.3, { r: 0.26, base: 0.4, kind: i % 3 === 2 ? 1 : 0 }));
   // the stupa: plinth, panelled drum, dome, harmika and three umbrellas; the standing Buddha in front
   bag.add(STONE, lathe([[1.7, 0], [1.7, 0.45], [1.5, 0.55], [0.001, 0.55]], 16, null, xs, y, zc));
   bag.add(PLASTER, lathe([[1.45, 0], [1.45, 1.9], [1.62, 2.0], [1.62, 2.2], [1.4, 2.3], [0.001, 2.3]], 16, null, xs, y + 0.55, zc));
@@ -275,7 +263,12 @@ export function chaitya(ctx, xf, zc, y) {
   bag.add(PAL.ochre, rod([xs, y + 4.7, zc], [xs, y + 6.9, zc], 0.07, 6));
   for (const [r, yy] of [[0.95, 5.2], [0.75, 5.9], [0.55, 6.5]]) bag.add(STONE, lathe([[0.001, 0], [r, 0.0], [r * 0.9, 0.12], [0.001, 0.15]], 12, null, xs, y + yy, zc));
   col.circle(xs, zc, 1.75, y, y + 5.0);
-  standingFigure(ctx, xs + 1.75, y + 0.55, zc, 2.0, PAL.ochre);
+  slab(ctx, STONE, xs + 1.2, y, zc - 0.55, xs + 2.05, y + 0.55, zc + 0.55); col.rect([xs + 1.2, zc - 0.55, xs + 2.05, zc + 0.55], y, y + 0.55);
+  figure(ctx, xs + 1.62, y + 0.55, zc, 2.0, { kind: 'buddha', col: false });
+  toranaFront(ctx, xs + 1.95, y + 0.55, zc, 0.75, 1.55);
+  for (const sg of [-1, 1]) for (const sx of [-1, 1]) slab(ctx, STONE, xs + sx * 0.62 - 0.05, y + 3.9, zc + sg * 0.62 - 0.05, xs + sx * 0.62 + 0.05, y + 4.55, zc + sg * 0.62 + 0.05);
+  for (const hh of [4.2, 4.46]) { slab(ctx, STONE, xs - 0.67, y + hh, zc - 0.67, xs + 0.67, y + hh + 0.05, zc - 0.57); slab(ctx, STONE, xs - 0.67, y + hh, zc + 0.57, xs + 0.67, y + hh + 0.05, zc + 0.67); slab(ctx, STONE, xs - 0.67, y + hh, zc - 0.67, xs - 0.57, y + hh + 0.05, zc + 0.67); slab(ctx, STONE, xs + 0.57, y + hh, zc - 0.67, xs + 0.67, y + hh + 0.05, zc + 0.67); }
+  nave_frieze(ctx, Array.from({ length: 6 }, (_, i) => xn1 - 1.8 - i * 1.7), y, zc, hw);
   bag.add(PAL.ground, box(xs + 1.55, y + 0.5, zc - 0.45, xs + 1.66, y + 2.9, zc + 0.45));
   // the walls' paintings: Buddhas in rows and attendants along the aisles
   const mur = (x, z, n, len, fn) => { const P = wall(bag, x, z, n, y, len); fn(P, len); P.flush(); };

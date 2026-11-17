@@ -21,13 +21,15 @@ export function lots() {
       out.push({ rect, front: row.front, row: ri, variant, seed: Math.round(x * 13 + row.zc * 7), mud: r() < 0.3 ? 'earth_wall' : 'mud_plaster' });
     }
   });
+  // four of the lots are the trades' sheds (docs/settlements/ajanta.md §14): the potter near the ford's road, the oil-presser, the smith and the weaver at the village's far edge
+  for (const [i, craft] of [[3, 'potter'], [8, 'oilpress'], [10, 'smithy'], [15, 'weaver']]) if (out[i]) { out[i].craft = craft; out[i].variant = 0; }
   return out;
 }
 
 export async function town() {
   const E = [], L = [], V = [], rand = rng(481), seed = () => Math.floor(rand() * 1e9);
   const LOTS = lots();
-  for (const l of LOTS) E.push({ t: 'aj_house', rect: l.rect, front: l.front, mud: l.mud, variant: l.variant, seed: l.seed });
+  for (const l of LOTS) E.push(l.craft ? { t: 'aj_' + l.craft, rect: l.rect, front: l.front, seed: l.seed } : { t: 'aj_house', rect: l.rect, front: l.front, mud: l.mud, variant: l.variant, seed: l.seed });
   // low mud walls close the street front between the houses (a gap left to pass)
   for (let i = 0; i < LOTS.length - 1; i++) {
     const a = LOTS[i], b = LOTS[i + 1];
@@ -147,6 +149,7 @@ export async function town() {
   woman([wx + 0.8, wz + 2.0], 0, Math.PI, { pose: 'squat' });
   T.push({ t: 'pot', kind: 'water_pot', n: 3, at: [wx + 2.6, wz + 1.6], y: 0, seed: 7 });
   for (const l of LOTS) {
+    if (l.craft) continue;
     const [x0, z0, x1, z1] = l.rect, cx = (x0 + x1) / 2, front = l.front === 's' ? z1 + 1.4 : z0 - 1.4;
     if (rand() < 0.5) T.push({ t: 'drying_tray', at: [cx + 1.2, front], y: 0, rot: 0, seed: seed() });
     if (rand() < 0.5) T.push({ t: 'firewood', at: [x1 + 0.6, (z0 + z1) / 2], y: 0, rot: 0, seed: seed() });
@@ -163,6 +166,7 @@ export async function town() {
   monk([VSHRINE[0] + 1.6, VSHRINE[1] + 2.0], 0, Math.PI, { pose: 'kneel', arms: 'pray', cloth: 'cloth_white', hair: 'long', dress: 'wrap' });
   T.push({ t: 'pot', kind: 'water_pot', n: 2, at: [VSHRINE[0] - 1.6, VSHRINE[1] + 1.5], y: 0, seed: 11 });
   for (const l of LOTS) {
+    if (l.craft) continue;
     const [x0, z0, x1, z1] = l.rect, cx = (x0 + x1) / 2, front = l.front === 's' ? z1 + (l.variant === 2 ? 3.7 : l.variant === 1 ? 2.2 : 1.4) : z0 - (l.variant === 1 ? 2.2 : 1.4);
     if (rand() < 0.3) { T.push({ t: 'stool', at: [cx + 1.3, front + (l.front === 's' ? 0.5 : -0.5)], y: 0, rot: 0, seed: seed() }); woman([cx + 1.3, front + (l.front === 's' ? 0.5 : -0.5)], 0.0, l.front === 's' ? 0 : Math.PI, { pose: 'sit_low' }); }
     if (rand() < 0.3) T.push({ t: 'animal', kind: rand() < 0.5 ? 'goat' : 'dog', at: [x0 - 1.2, front], y: 0, rot: rand() * 6.28, seed: seed(), graze: rand() < 0.5 });
@@ -171,11 +175,20 @@ export async function town() {
   }
   // inside the huts (the house's own dice: styles/ajanta/houses.js): a woman squatting at the hearth in one hut of two, a man resting on the rope cot in another
   for (const l of LOTS) {
+    if (l.craft) continue;
     const [x0, z0, x1, z1] = l.rect, W = x1 - x0, D = z1 - z0, d = rng(l.seed ?? 1), uc = W * (0.38 + d() * 0.24), left = uc > W / 2, tt = 0.35, south = l.front === 's';
     const xz = (u, v) => (south ? [x0 + u, z1 - v] : [x1 - u, z0 + v]), rot = south ? 0 : Math.PI;           // v runs into the house; the person at the hearth faces the back wall
     if (Math.hypot((x0 + x1) / 2 + 21.5, (z0 + z1) / 2 + 4) > 125) continue;
     if (l.seed % 2 === 0) woman(xz((left ? tt + 0.15 : W - tt - 0.85) + 0.35, D - tt - 1.25), 0.02, rot, { pose: 'squat' });
     else if (l.seed % 3 === 0) { const cu = left ? W - tt - 1.8 : tt + 0.1; (rand() < 0.5 ? worker : lay)(xz(cu + 0.9, D - tt - 0.6), 0.5, rot + Math.PI, { pose: 'sit' }); }
+  }
+  // the trades at work: the smith at his anvil, the potter at his wheel, the ox that drives the oil press, the weaver at his loom
+  for (const l of LOTS) if (l.craft) {
+    const [x0, z0, x1, z1] = l.rect, W = x1 - x0, D = z1 - z0, south = l.front === 's', xz = (u, v) => (south ? [x0 + u, z1 - v] : [x1 - u, z0 + v]), face = south ? 0 : Math.PI, back = south ? Math.PI : 0;
+    if (l.craft === 'smithy') { worker(xz(W * 0.5 + 0.5, D * 0.5 - 0.75), 0, face, { pose: 'stand', carry: 'none' }); worker(xz(W * 0.5 + 1.2, D * 0.5 + 0.2), 0, face + 2.2, { pose: 'squat' }); }
+    if (l.craft === 'potter') { worker(xz(W * 0.5, D * 0.5 + 0.75), 0.2, back, { pose: 'sit', cloth: 'cloth_brown' }); woman(xz(1.2, -1.2), 0, face, { pose: 'squat' }); }
+    if (l.craft === 'oilpress') { T.push({ t: 'animal', kind: 'zebu', at: xz(W * 0.4 + 2.55, -2.9), y: 0, rot: south ? Math.PI / 2 : -Math.PI / 2, seed: 91 }); worker(xz(W * 0.4 + 1.2, -2.2), 0, face + 1.6, { pose: 'stand', carry: 'staff' }); }
+    if (l.craft === 'weaver') { worker(xz(W * 0.5, 0.35), 0.2, face, { pose: 'sit', cloth: 'cloth_white' }); woman(xz(W * 0.3, -2.0), 0, face + 0.4, { pose: 'stand' }); }
   }
   T.push({ t: 'chickens', at: [wx - 6, wz + 4], y: 0, seed: 3 }); T.push({ t: 'chickens', at: [wx + 9, wz - 5], y: 0, seed: 4 });
   for (let k = 0; k < 4; k++) T.push({ t: 'animal', kind: 'goat', at: [wx - 10 + k * 1.6, wz + 7 + (k % 2)], y: 0, rot: rand() * 6.28, seed: 40 + k, graze: k % 2 === 0 });
