@@ -5,6 +5,7 @@
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import { face, holedWall, archHead, dbl, dado, dadoFlat, stucco, canopy, screen, door, basin, gable, rng, q4, zellij } from './kit.js';
 import { minaret } from './minaret.js';
+import { starPave, muqarnas, hallFront, pillarCap, frieze, joists } from './hallfront.js';
 import * as F from '../mughal/furnish.js';
 
 const OUT = 'stucco_ochre';
@@ -20,7 +21,7 @@ export function bouInania(el, { bag, col, lights }) {
   bag.add('tile_cream', box(gx0, y - 0.4, zN, gx1, y, cz0)); bag.add('tile_cream', box(gx0, y - 0.4, cz0, cw0, y, cz1)); bag.add('tile_cream', box(cw1, y - 0.4, cz0, gx1, y, cz1));
   col.floor([gx0, zN, gx1, cz1], y);
   // the court paved in a pattern: dark marble squares set diagonally in the white
-  for (let x = cw0 + 1.45; x < cw1 - 1; x += 2.9) for (let z = cz0 + 1.45; z < cz1 - 1; z += 2.9) bag.add('marble_dark', box(x - 0.22, y, z - 0.22, x + 0.22, y + 0.012, z + 0.22));
+  starPave(bag, y, cw0, cw1, cz0, cz1, (cw0 + cw1) / 2, (cz0 + cz1) / 2);
   // the basin at the court's heart (ablutions) and the channel along the south edge with its two small bridges
   basin(bag, col, (cw0 + cw1) / 2, (cz0 + cz1) / 2, y, 1.15);
   for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2 + 0.39; bag.add('marble_smooth', box((cw0 + cw1) / 2 + Math.cos(a) * 1.5 - 0.15, y, (cz0 + cz1) / 2 + Math.sin(a) * 1.5 - 0.15, (cw0 + cw1) / 2 + Math.cos(a) * 1.5 + 0.15, y + 0.06, (cz0 + cz1) / 2 + Math.sin(a) * 1.5 + 0.15)); }
@@ -35,7 +36,7 @@ export function bouInania(el, { bag, col, lights }) {
   // lower storey: a plinth of dressed stone; the portal: horseshoe arch in an alfiz, jambs, leaves folded back, a canopy of cedar with green tiles
   bag.add('limestone', box(x0 - 0.05, y - 0.5, z0 - 0.08, px[0] - 0.4, y + 0.7, z0)); bag.add('limestone', box(px[1] + 0.4, y - 0.5, z0 - 0.08, x1 + 0.05, y + 0.7, z0));
   archHead(bag, fiN, px[0], px[1], y + 2.8, y + ph, t, 'horseshoe', { alfiz: true, alfizUp: 0.5 });
-  stucco(bag, foN, px[0] - 1.3, px[1] + 1.3, y + ph + 0.4, y + ph + 2.6, [], { cell: 0.36 });
+  stucco(bag, foN, px[0] - 1.3, px[1] + 1.3, y + ph + 0.4, y + ph + 1.7, [], { cell: 0.36 }); muqarnas(bag, foN, px[0] - 1.3, px[1] + 1.3, y + ph + 1.7, 4, 0.45);
   zellij(bag, foN, px[0] - 1.3, px[0] - 0.12, y + 0.7, y + 3.8, () => true, { cell: 0.38 }); zellij(bag, foN, px[1] + 0.12, px[1] + 1.3, y + 0.7, y + 3.8, () => true, { cell: 0.38 });
   canopy(bag, foN, px[0] - 1.9, px[1] + 1.9, y + ph + 3.0, 1.15);
   for (const s of [-1, 1]) { const a = s < 0 ? px[0] + 0.02 : px[1] - 0.1; bag.add('bronze', box(a, y + 0.05, z0 + 0.1, a + 0.08, y + ph - 1.0, z0 + 0.9)); for (let k = 0; k < 5; k++) bag.add('iron', box(a - 0.02, y + 0.6 + k * 0.6, z0 + 0.2, a + 0.1, y + 0.66 + k * 0.6, z0 + 0.8)); }
@@ -64,7 +65,7 @@ export function bouInania(el, { bag, col, lights }) {
   { const f = face('z', zN, -1);
     const holes = [[vx0(cx), vx1(cx), y, y + 3.6]];
     holedWall(bag, col, 'plaster_white', [gx0, zN - 0.5, gx1, zN], y, y + H1, holes, true);
-    dado(bag, f, gx0, gx1, y, 1.7, holes); stucco(bag, f, gx0, gx1, y + 2.15, y + H1 - 0.15, holes);
+    dado(bag, f, gx0, gx1, y, 1.7, holes); stucco(bag, f, gx0, gx1, y + 2.15, y + H1 - 0.7, holes);
     // two doors in the stucco frames to the rooms either side
     for (const u of [cx - 7.2, cx + 7.2]) { door(bag, f, u - 0.7, u + 0.7, y, 2.6, 0.06); archHead(bag, f, u - 0.7, u + 0.7, y + 2.2, y + 2.8, 0.3, 'lobed', { alfiz: true, side: 'far' }); }
     // the north rooms behind: a mass
@@ -77,7 +78,7 @@ export function bouInania(el, { bag, col, lights }) {
   for (const [at, n, xo] of [[gx0, 1, -1], [gx1, -1, 1]]) {
     const f = face('x', at, n), holes = [[cls[0] + 1.3, cls[1] - 1.3, y, y + 3.3]];
     holedWall(bag, col, 'plaster_white', n > 0 ? [at - 0.5, zN, at, cz1] : [at, zN, at + 0.5, cz1], y, y + H1, holes, false);
-    dado(bag, f, zN, cz1, y, 1.7, holes); stucco(bag, f, zN, cz1, y + 2.15, y + H1 - 0.15, holes);
+    dado(bag, f, zN, cz1, y, 1.7, holes); stucco(bag, f, zN, cz1, y + 2.15, y + H1 - 0.7, holes);
     archHead(bag, f, cls[0] + 1.3, cls[1] - 1.3, y + 2.5, y + 3.3, 0.5, 'lobed', { alfiz: true, side: 'near', mat: 'stucco_cream' });
     // the classroom (5 × 5): carved stucco walls, a wooden cupola, a mat, a lectern, a lamp
     const rx = n > 0 ? [at - R + 0.4, at - 0.5] : [at + 0.5, at + R - 0.4], rz = [cls[0], cls[1]];
@@ -103,16 +104,22 @@ export function bouInania(el, { bag, col, lights }) {
   // the south part of the side ranges beyond the court (beside the hall): solid
   for (const m of [[x0 + t, cz1, x0 + t + R, z1 - t], [x1 - t - R, cz1, x1 - t, z1 - t]]) { bag.add('plaster_white', box(m[0], y, m[1], m[2], y + H1, m[3])); col.rect(m, y, y + H1); }
   // ——— the galleries' pillars at the court's edge: zellij to a man's height, stucco above, cedar lintel; cedar screens between some
+  let pcount = 0, alongXp = true;
   const pillar = (px0, pz0) => {
     const s = 0.5; bag.add('marble_smooth', box(px0 - s / 2 - 0.05, y, pz0 - s / 2 - 0.05, px0 + s / 2 + 0.05, y + 0.15, pz0 + s / 2 + 0.05));
     bag.add('stucco_cream', box(px0 - s / 2, y + 0.15, pz0 - s / 2, px0 + s / 2, y + 3.55, pz0 + s / 2)); col.rect([px0 - s / 2, pz0 - s / 2, px0 + s / 2, pz0 + s / 2], y, y + 3.6);
     for (const [ax, at, n, a] of [['z', pz0 - s / 2, -1, px0], ['z', pz0 + s / 2, 1, px0], ['x', px0 - s / 2, -1, pz0], ['x', px0 + s / 2, 1, pz0]]) { const f = face(ax, at, n); zellij(bag, f, a - s / 2, a + s / 2, y + 0.15, y + 1.65, () => true, { cell: 0.5, pal: [1, 2] }); const rr = f.R(0, 0.05, a - s / 2, a + s / 2); bag.add('tile_turquoise', box(rr[0], y + 1.65, rr[1], rr[2], y + 1.78, rr[3])); }
     bag.add('cedar', box(px0 - 0.4, y + 3.55, pz0 - 0.4, px0 + 0.4, y + 3.7, pz0 + 0.4));
+    pillarCap(bag, px0, pz0, y, alongXp, pcount++);
   };
   const nx = Math.round((cw1 - cw0) / 2.9), nzz = Math.round((cz1 - cz0) / 3.25);
   const xs = Array.from({ length: nx + 1 }, (_, i) => cw0 + (cw1 - cw0) * i / nx), zs = Array.from({ length: nzz + 1 }, (_, i) => cz0 + (cz1 - cz0) * i / nzz);
   for (const x of xs) pillar(x, cz0 - 0.3);
+  alongXp = false;
   for (const z of zs.slice(1)) { pillar(cw0 - 0.3, z); pillar(cw1 + 0.3, z); }
+  // the carved frieze on the upper floor's edge and the joists under its ceiling
+  frieze(bag, face('z', cz0, 1), cw0, cw1, y + 3.72, y + 4.38); frieze(bag, face('x', cw0, 1), cz0, cz1, y + 3.72, y + 4.38); frieze(bag, face('x', cw1, -1), cz0, cz1, y + 3.72, y + 4.38);
+  joists(bag, y + 3.7, [gx0, zN + 1.3, gx1, cz0], true); joists(bag, y + 3.7, [gx0, cz0, cw0, cz1], false); joists(bag, y + 3.7, [cw1, cz0, gx1, cz1], false);
   // ——— the cedar lintel beam round three sides, the stucco band over it up to the upper floor
   for (const r of [[gx0, zN, gx1, zN + 0.0], ]) void r;
   // ——— the upper floor: a platform over the galleries, its cedar balustrade, the cells' doors and lattice windows
@@ -175,11 +182,11 @@ export function bouInania(el, { bag, col, lights }) {
   canopy(bag, face('z', zN, -1), gx0, gx1, yu + HT - H1 - 0.15, 1.2); canopy(bag, face('x', gx0, 1), zN, cz1, yu + HT - H1 - 0.15, 1.2); canopy(bag, face('x', gx1, -1), zN, cz1, yu + HT - H1 - 0.15, 1.2);
   // ——— the prayer hall: its north wall with a door and lattice windows, two aisles divided by a row of arches on columns, berchla ceilings
   { const f = face('z', zH, -1), fi = face('z', zH + 0.7, 1), hx0 = gx0, hx1 = gx1, hz1 = z1 - t, mid = (zH + 0.7 + hz1) / 2;
-    const holes = [[cx - 1.7, cx + 1.7, y, y + 3.6], ...[-8, -5.2, 5.2, 8].map((d) => [cx + d - 0.5, cx + d + 0.5, y + 1.2, y + 3.6])];
+    const wins = [-8, -5.2, 5.2, 8].map((d) => cx + d), holes = [[cx - 1.7, cx + 1.7, y, y + 4.4], ...wins.map((u) => [u - 0.5, u + 0.5, y + 1.2, y + 3.7])];
     holedWall(bag, col, 'plaster_white', [hx0, zH, hx1, zH + 0.7], y, y + 5.8, holes, true);
     dado(bag, f, hx0, hx1, y, 1.6, holes); stucco(bag, f, hx0, hx1, y + 2.05, y + 5.8, holes, { cell: 0.4 });
     for (const h of holes.slice(1)) { const g = f.R(0.03, 0.09, h[0], h[1]); bag.add('lattice', box(g[0], h[2], g[1], g[2], h[3], g[3])); }
-    for (const d of [-0.04]) { const g = f.R(d, d + 0.04, cx - 1.9, cx + 1.9); bag.add('cedar', box(g[0], y + 3.6, g[1], g[2], y + 3.85, g[3])); }
+    hallFront(bag, y, zH, hx0, hx1, cx, wins);
     // inside: the side walls and the south wall with the mihrab
     for (const [at, n] of [[hx0, 1], [hx1, -1]]) { const ff = face('x', at, n); dado(bag, ff, zH + 0.7, hz1, y, 1.5); stucco(bag, ff, zH + 0.7, hz1, y + 1.95, y + 5.7, [], { cell: 0.42 }); }
     const fs = face('z', hz1, -1), mh = [cx - 1.0, cx + 1.0];
