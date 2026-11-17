@@ -4,6 +4,7 @@
 // where the render has fallen). Local frame: see frame.js.
 import { Fr, hip } from './frame.js';
 import { S, rng } from './kit.js';
+import { flatSpec, buildFlat } from './flat.js';
 
 const WALLS = ['stucco_pale', 'stucco_cream', 'stucco_warm', 'facade_buff', 'stucco_ochre', 'plaster_grey'];
 const SHUT = ['shutter_green', 'shutter_brown', 'shutter_grey'];
@@ -170,6 +171,8 @@ function shopFront(F, kind, y, yc, r, du, ux0, ux1) {
   if (g < 0.35) { F.b('slate', ux1 - 0.9, ux1 - 0.1, 1.0, 1.6, -0.12, -0.06); F.b('paint_white', ux1 - 0.8, ux1 - 0.2, 1.1, 1.5, -0.13, -0.12); }
 }
 
+const el_flat = (l, spec, W, D) => flatSpec(l, spec, W, D);
+
 /** One house, in its frame. */
 function houseIn(F, l, spec, r) {
   const { n, H0, SH, yc, yb, top, manner, modern } = spec, W = F.W, D = F.D, y = FL;
@@ -180,8 +183,15 @@ function houseIn(F, l, spec, r) {
   const dcol = l.shop ? Math.min(cols - 1, Math.max(1, Math.round(cols * (0.25 + r() * 0.5)))) : Math.floor(cols * (0.25 + r() * 0.5)), du = cu(dcol);
   const FT = 0.35, wy1 = (s) => (s === 0 ? yc : yb + s * SH);
   // the footprint's volume above the ground storey, and the colliders of the ground storey
-  F.b(mat, 0, W, yc, top, FT, D); F.b('plaster_white', 0.3, W - 0.3, yc, yc + 0.3, FT, D - 0.3);
-  F.k(0, W, yc - 0.1, top, 0, D);
+  const fs = el_flat(l, spec, W, D), yR = fs ? fs.yR : 0;
+  if (fs) {
+    // an enterable first floor: side walls and the rear block solid, the mass over the ceiling, the floor and its stair built by buildFlat
+    F.s(mat, 0, 0.3, yc, yR, FT, fs.E); F.s(mat, W - 0.3, W, yc, yR, FT, fs.E); F.b(mat, 0, W, yc, yR, fs.E, D);
+    F.b(mat, 0, W, yR, top, FT, D); F.k(0, W, yR - 0.1, top, 0, D); F.k(0, W, yc - 0.1, top, fs.E, D);
+  } else {
+    F.b(mat, 0, W, yc, top, FT, D); F.b('plaster_white', 0.3, W - 0.3, yc, yc + 0.3, FT, D - 0.3);
+    F.k(0, W, yc - 0.1, top, 0, D);
+  }
   // the ground storey: the walls, hollow
   const pm = manner === 'brick' ? 'brick' : sandstone;
   const dopen = { u0: du - 0.6, u1: du + 0.6, y1: y + 2.55 };
@@ -195,7 +205,7 @@ function houseIn(F, l, spec, r) {
   F.wall({ u0: 0.3, u1: W - 0.3, v: D - 0.3, th: 0.3, y0: y, y1: yc, mat, ops: [0.22, 0.62].map((f) => ({ u0: W * f - 0.5, u1: W * f + 0.5, y0: y + 1.1, y1: y + 2.5, glass: 'glass_outer', frame: 'paint_white' })) });
   // the floor, the ceiling, the dark behind the glass of the closed ones
   F.b(shopKind ? 'tile_cream' : 'wood_ochre', 0.3, W - 0.3, y - 0.02, y + 0.012, FT, D - 0.3); F.floor(0.3, W - 0.3, FT, D - 0.3, y);
-  F.b('plaster_white', 0.3, W - 0.3, yc - 0.04, yc, FT, D - 0.3);
+  if (!fs) F.b('plaster_white', 0.3, W - 0.3, yc - 0.04, yc, FT, D - 0.3); else if (fs.E < D - 0.31) F.b('plaster_white', 0.3, W - 0.3, yc - 0.04, yc, fs.E, D - 0.3);
   // the partition with its door; wainscot along the inner walls
   const pv = Math.min(D - 5.5, shopKind ? 7.2 : 6.2), pd = W - 1.7;
   F.wall({ u0: 0.3, u1: W - 0.3, v: pv, th: 0.2, y0: y, y1: yc, mat: 'plaster_white', ops: [{ u0: pd - 0.5, u1: pd + 0.5, y1: y + 2.3 }] });
@@ -219,6 +229,7 @@ function houseIn(F, l, spec, r) {
   if (modern) F.b('concrete_light', du - 1.3, du + 1.3, y + 2.75, y + 2.88, -1.3, 0);
   if (shopKind) shopFront(F, shopKind, y, yc, r, du, 0.6, W - 0.6);
   // the upper storeys: a wall with deep reveals, windows with sills and lintels, curtains, boxes, shutters
+  const wins = [];
   for (let s = 1; s < n; s++) {
     const sb = yb + (s - 1) * SH, y0 = sb + 0.85, y1 = sb + SH - (modern ? 0.55 : 0.5), w = modern ? 0.8 : 0.52;
     const ops = [];
@@ -226,10 +237,12 @@ function houseIn(F, l, spec, r) {
       const u = cu(c), balc = !modern && manner === 'gruender' && s === 1 && c === dcol;
       ops.push({ u0: u - w, u1: u + w, y0: balc ? sb + 0.12 : y0, y1: balc ? y1 + 0.1 : y1, glass: 'glass_outer', frame: modern ? 'steel_grey' : 'paint_white' });
     }
-    F.wall({ u0: 0, u1: W, v: 0, th: FT, y0: s === 1 ? sb - 0.3 : sb, y1: sb + SH, mat, ops, solid: false });
+    const live = !!fs && s === 1;                                                                           // the first floor of an enterable flat: a real wall, real windows
+    F.wall({ u0: 0, u1: W, v: 0, th: FT, y0: s === 1 ? sb - 0.3 : sb, y1: sb + SH, mat, ops, solid: live });
+    if (live) { for (const p of ops) F.k(p.u0, p.u1, p.y0, p.y1, 0, FT); wins.push(...ops.map((p) => ({ u: (p.u0 + p.u1) / 2, w: (p.u1 - p.u0) / 2, y0: p.y0, y1: p.y1 }))); }
     for (let c = 0; c < cols; c++) {
       const u = cu(c), balc = !modern && manner === 'gruender' && s === 1 && c === dcol, wy0 = balc ? sb + 0.12 : y0, wy1b = balc ? y1 + 0.1 : y1;
-      F.b('wood_dark', u - w + 0.02, u + w - 0.02, wy0 + 0.02, wy1b - 0.02, FT - 0.06, FT - 0.02);                                        // the dark room behind the glass
+      if (!live) F.b('wood_dark', u - w + 0.02, u + w - 0.02, wy0 + 0.02, wy1b - 0.02, FT - 0.06, FT - 0.02);                                        // the dark room behind the glass
       const cc = ['cloth_white', 'cloth_white', 'cloth_ochre', 'cloth_red', 'cloth_blue'][Math.floor(r() * 5)], open = 0.25 + r() * 0.2;
       F.b('cloth_white', u - w, u - w + open, wy0 + 0.3, wy1b - 0.05, 0.2, 0.23); F.b('cloth_white', u + w - open, u + w, wy0 + 0.3, wy1b - 0.05, 0.2, 0.23);
       if (r() < 0.35) F.b(cc, u - w, u + w, wy1b - 0.35, wy1b - 0.05, 0.19, 0.2);                          // a blind half down
@@ -256,6 +269,7 @@ function houseIn(F, l, spec, r) {
     if (manner === 'gruender' && s > 0) for (const u of [0, W - 0.35]) F.b(sandstone, u, u + 0.35, sb, sb + SH, -0.04, 0);
     if (modern) F.b('concrete_light', -0.03, W + 0.03, sb - 0.1, sb + 0.04, -0.03, 0);
   }
+  if (fs) buildFlat(F, fs, { wins, r: rng(l.seed * 11 + 5) });
   // downpipes at both ends, a gutter, the cornice and the roof
   for (const u of [0.18, W - 0.18]) F.b('iron_galv', u - 0.05, u + 0.05, 0.2, top, -0.12, -0.04);
   F.b('plaster_damp', 0.05, 0.55, top - 1.6, top - 0.1, -0.03, 0.01); F.b('plaster_streak', W - 0.75, W - 0.05, top - 1.2, top - 0.1, -0.03, 0.01);

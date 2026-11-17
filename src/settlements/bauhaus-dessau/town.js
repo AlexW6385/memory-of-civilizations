@@ -3,6 +3,8 @@
 // the looms, the benches and the stairs, townspeople on the pavements, queues at the shops, children in the lane. Several plans (the four quarters, the grove, the estate)
 // so that each builds in turn and the viewer culls them by distance.
 import { streetLife, WHEELED } from './street-life.js';
+import { houseSpec } from '../../styles/bauhaus/tenement.js';
+import { flatSpec, flatSeats } from '../../styles/bauhaus/flat.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
 import { RADIUS, LV, PL, B, ROADS, ROAD_K, ROAD_M, ROAD_KV, ROAD_E, FOOT, MASTERS, TORTEN, TORTEN_FRONT, KONSUM, GARDEN, GARDEN_SHED, lots, inRoad, inLot, inMasters, inSchool, inTorten, inRect } from './layout.js';
 
@@ -190,6 +192,13 @@ function life() {
         if (r2() < 0.6) put(2.8, pv - 3.2, 2.8, pv - 1.7, { pose: 'stand', carry: 'basket', hair: 'bun', hat: 'cap' }, true);
       }
       if (r2() < (l.shop ? 0.35 : 0.5)) put(2.5, kv + 1.2, 3.8, kv + 1.2, { pose: 'sit', hair: 'bun', cloth: pick(r2, ['cloth_blue', 'cloth_grey', 'cloth_ochre']), over: 'apron' }, true);
+      // the first-floor flat (flat.js): the housewife at her kitchen table, a man at the parlour table, the seamstress at her treadle machine, a woman at the range
+      const fsp = flatSpec(l, houseSpec(l), W, D);
+      if (fsp) for (const st of flatSeats(fsp)) {
+        const q = r2(); if (q > 0.5) continue;
+        const a = P2(st.at[0], st.at[1]), b = P2(st.to[0], st.to[1]);
+        (st.woman ? woman : fig)(a, Math.atan2(-(b[0] - a[0]), -(b[1] - a[1])), { y: fsp.yF, pose: st.pose, ...(st.woman ? { hair: 'bun', cloth: pick(r2, ['cloth_blue', 'cloth_grey', 'cloth_ochre']), over: 'apron' } : { cloth: 'cloth_brown', cloth2: 'cloth_grey' }) });
+      }
     }
   }
   streetLife({ fig, woman, P, rand });
