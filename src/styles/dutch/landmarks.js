@@ -241,14 +241,37 @@ export function townHall(el, { bag, col, lights }) {
       for (const [v0, v1] of [[e1 - 0.55, e1 + 0.6], [e2 - 0.55, e2 + 0.4]]) A(ST, u0 - 0.02, u1 + 0.02, v0, v1, p, p + 0.42);
       A(ST, u0 - 0.03, u1 + 0.03, h - 0.6, h, p, p + 0.55);                                            // the crowning cornice
       // a festoon of fruit and sea creatures under each upper window
-      A(RL, um - 0.8, um + 0.8, e1 + 1.2, e1 + 1.6, p, p + 0.12);
+      for (let q = 0; q < 9; q++) {                                  // hung from two rosettes: fruit and leaves in a sagging chain, the swag of Quellinus
+        const t = q / 8, uu = um - 1.0 + 2.0 * t, vv = e1 + 1.55 - 0.55 * Math.sin(Math.PI * t), r = 0.1 + 0.07 * Math.sin(Math.PI * t);
+        bag.add(RL, prism(F, y, ngon(uu, vv, r, 8), p, p + 0.1 + 0.05 * (q % 2)));
+      }
+      for (const sg of [-1, 1]) bag.add(ST, prism(F, y, ngon(um + sg * 1.08, e1 + 1.55, 0.13, 8), p, p + 0.12));
       const entry = long && f === front && ctr && i >= c0 && i < c0 + ctr;
       const rows = [[2.4, 7.4, 0.85], [9.6, 12.4, 0.6], [e1 + 1.9, e1 + 7.6, 0.85], [e1 + 9.6, e1 + 12.2, 0.6]];
       for (const [k, [v0, v1, ww]] of rows.entries()) {
         if (entry && k === 0) continue;
-        A(ST, um - ww - 0.2, um + ww + 0.2, v0 - 0.2, v1 + 0.2, p, p + 0.12); A('opening', um - ww, um + ww, v0, v1, p + 0.08, p + 0.14);
-        A('wood_dark', um - 0.05, um + 0.05, v0, v1, p + 0.14, p + 0.17); A('wood_dark', um - ww, um + ww, v0 + (v1 - v0) * 0.66 - 0.05, v0 + (v1 - v0) * 0.66 + 0.05, p + 0.14, p + 0.17);
-        if (k === 0 || k === 2) A(ST, um - ww - 0.35, um + ww + 0.35, v1 + 0.2, v1 + 0.5, p, p + 0.3);           // the cornice over the main windows
+        // a window of Van Campen's front (docs §5.19): the glass set 0.3 deep behind a proud architrave of four bars, the stone cross of mullion
+        // and transom, the leaded lights in their dark frames, a sill on its apron, the cornice — on the upper main windows a pediment, triangular
+        // and segmental in turn — so that each reads as a reveal with shadow and depth, not a dark patch
+        const H1 = v1 - v0, vt = v0 + H1 * 0.64, a0 = um - ww, a1 = um + ww;
+        A(ST, a0 - 0.26, a1 + 0.26, v0 - 0.34, v0 - 0.04, p, p + 0.4); if (k !== 2) A(ST, a0 - 0.1, a1 + 0.1, v0 - 0.7, v0 - 0.34, p, p + 0.14);                // the sill, its apron
+        A(ST, a0 - 0.26, a0, v0 - 0.04, v1 + 0.26, p, p + 0.3); A(ST, a1, a1 + 0.26, v0 - 0.04, v1 + 0.26, p, p + 0.3);                              // the jambs of the architrave
+        A(ST, a0 - 0.26, a1 + 0.26, v1, v1 + 0.26, p, p + 0.34);                                                                                      // its head
+        A(ST, a0, a1, v0 - 0.04, v0, p, p + 0.12);
+        A('opening', a0, a1, v0, v1, p + 0.04, p + 0.08);                                                                                              // the glass, the wall's face behind it
+        A(ST, um - 0.07, um + 0.07, v0, v1, p + 0.04, p + 0.22); A(ST, a0, a1, vt - 0.06, vt + 0.06, p + 0.04, p + 0.22);                              // the stone cross
+        for (const [q0, q1] of [[a0, um - 0.07], [um + 0.07, a1]]) {
+          const m = (q0 + q1) / 2; A('lead', m - 0.012, m + 0.012, v0, v1, p + 0.08, p + 0.12);
+          for (let r = 1; r < 5; r++) { const v = v0 + (vt - v0) * r / 5; A('lead', q0, q1, v - 0.012, v + 0.012, p + 0.08, p + 0.12); }
+          for (let r = 1; r < 4; r++) { const v = vt + (v1 - vt) * r / 4; A('lead', q0, q1, v - 0.012, v + 0.012, p + 0.08, p + 0.12); }
+        }
+        if (k === 0) A(ST, a0 - 0.45, a1 + 0.45, v1 + 0.26, v1 + 0.56, p, p + 0.44);                                                                   // the cornice over the ground windows
+        else if (k === 2) {
+          const cw = ww + 0.5, vb = v1 + 0.26, ph2 = cw * 0.55;
+          A(ST, um - cw - 0.1, um + cw + 0.1, vb, vb + 0.16, p, p + 0.46);
+          if (i % 2) bag.add(ST, prism(F, y, [[um - cw, vb + 0.16], [um + cw, vb + 0.16], [um, vb + 0.16 + ph2]], p, p + 0.4));                          // the triangular pediment
+          else for (let q = 0; q < 6; q++) { const t0 = -1 + q / 3, t1 = -1 + (q + 1) / 3, hh = (t) => ph2 * Math.sqrt(Math.max(0, 1 - t * t)); bag.add(ST, prism(F, y, [[um + t0 * cw, vb + 0.16], [um + t1 * cw, vb + 0.16], [um + t1 * cw, vb + 0.16 + hh(t1) + 0.04], [um + t0 * cw, vb + 0.16 + hh(t0) + 0.04]], p, p + 0.4)); }   // the segmental one, in strips
+        } else A(ST, a0 - 0.3, a1 + 0.3, v1 + 0.26, v1 + 0.4, p, p + 0.36);
       }
       if (entry && !gate) { for (const q of arch(um, 1.6, 2.0, 5.2, false, 0.3)) bag.add(ST, prism(F, y, q, p, p + 0.16)); for (const q of arch(um, 1.6, 2.0, 5.2)) bag.add('opening', prism(F, y, q, p + 0.16, p + 0.2)); }
     }
