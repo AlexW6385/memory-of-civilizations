@@ -4,6 +4,8 @@
 
 import { darroSlots } from '../../styles/nasrid/streets.js';
 import { isShop } from '../../styles/nasrid/houses.js';
+import { patioHall } from '../../styles/nasrid/albaicin.js';
+import { albaicinPatios } from './town.js';
 import { RADIUS, lots, gardens, DARRO, DARRO_BRIDGES, GY, ACEQUIA, GEN, TERRACES, SULTANA_Y, DISMOUNT_Y, HILL, LIONS, COMARES, MYRTLES, PARTAL } from './layout.js';
 
 export function life() {
@@ -104,6 +106,15 @@ function streets(P, man, woman, L) {
       else if (l.seed % 2) { woman(F(Ln * 0.38, D - 0.9), y + 0.36, face, { pose: 'sit', cloth: 'cloth_ochre' }); n++; }
       else { man(F(Ln * 0.62, D - 0.9), y + 0.36, face, { pose: 'sit', cloth: 'cloth_white' }); n++; }
     }
+  }
+  // the halls of the Albaicín's patio houses nearest the way in (§5.2): the weaver at her loom, the scholar at his desk, a woman on the divan, a guest at the tray
+  for (const l of albaicinPatios(lots()).sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 - 20, a.rect[1] - 30) - Math.hypot((b.rect[0] + b.rect[2]) / 2 - 20, b.rect[1] - 30)).slice(0, 14)) {
+    const h = patioHall({ rect: l.rect, y: l.y, front: l.front, seed: l.seed }), { pcx, xa, xb, za, zb, y0, use } = h, mid = (za + zb) / 2;
+    if (use === 'weaver') woman([pcx + 1.0 + Math.min(xb - 0.7 - pcx - 1.0, 1.8) / 2, za + 1.85], y0 + 0.28, 0, { pose: 'sit', cloth: 'cloth_ochre' });
+    else if (use === 'scholar') man([pcx + 1.5, za + 2.05], y0 + 0.13, 0, { pose: 'cross', cloth: 'cloth_white', hat: 'turban' });
+    else if (use === 'home') woman([pcx - 1.2, za + 0.4], y0 + 0.35, Math.PI, { pose: 'sit', cloth: 'cloth_red' });
+    else man([pcx + 0.9, mid + 0.3], y0 + 0.12, -Math.PI / 2, { pose: 'cross', cloth: 'cloth_brown' });
+    void xa;
   }
   const at = [20, 30];
   for (const g of gardens().sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 - at[0], (a.rect[1] + a.rect[3]) / 2 - at[1]) - Math.hypot((b.rect[0] + b.rect[2]) / 2 - at[0], (b.rect[1] + b.rect[3]) / 2 - at[1])).slice(0, 6)) {

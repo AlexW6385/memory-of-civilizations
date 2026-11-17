@@ -15,6 +15,12 @@ function wins(bag, ax, at, n, us, v0, v1, w = 0.32) {
   for (const u of us) { const p = at - n * 0.01, q = at + n * 0.02; bag.add('opening', ax === 'z' ? box(u - w, v0, Math.min(p, q), u + w, v1, Math.max(p, q)) : box(Math.min(p, q), v0, u - w, Math.max(p, q), v1, u + w)); }
 }
 
+/** The hall of a patio house (§5.2) for the people: its rect, floor, door x, use and the spots of the seat. */
+export function patioHall(el) {
+  const [x0, z0, x1, z1] = el.rect, tw = 0.3, P1 = z0 + 3.0, pcx = (x0 + x1) / 2, nf = el.front === 'n', xa = nf ? x0 + 1.25 + 1.35 + tw : x0 + tw, xb = x1 - tw, za = z0 + tw, zb = P1 - tw;
+  return { xa, xb, za, zb, pcx, y0: el.y + 0.05, use: USES[el.seed % 4] };
+}
+
 /**
  * patio_house: { rect, y, foot, front ('n' | 's'), seed } — a house of the Albaicín round its patio
  * (§5.1): ranges of rooms on four sides, two storeys, the roofs sloping in; on the patio's north side
