@@ -10,6 +10,7 @@ import { STYLES } from '../../core/build.js';
 import { box, rod, fromTriangles, lathe } from '../../core/geom.js';
 import './index.js';
 import { openGround } from './shop-interior.js';
+import { archRise, archHalf } from '../byzantine/index.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const ST0 = 3.3, ST = 2.75;                         // the stone storey (a shop's opening needs height), the upper storeys
@@ -27,6 +28,20 @@ const TRADES = [
   { id: 'scribe', board: 'cloth_brown', emblem: 'ivory', goods: 'sheets' },
   { id: 'fishmonger', board: 'cloth_blue', emblem: 'hide_white', goods: 'fish' },
 ];
+/**
+ * The kind of a house's street front, by rule (never by add-on): the shop (the counter board on chains under its pent), the
+ * burgher's house (no shop: a pointed door under a niche with a saint, a stone bench beside it, two small barred windows),
+ * the carriage gate (a pointed arch for carts into the court behind, its leaves iron-bound, a wicket beside it; only on
+ * the wide lots). Open houses are always shops. Drawn from the seed, not from the house's own random stream.
+ */
+export function frontKind(el) {
+  if (el.open) return 'shop';
+  const f = el.front || 's', along = f === 's' || f === 'n', L = along ? el.rect[2] - el.rect[0] : el.rect[3] - el.rect[1];
+  const k = (Math.imul((el.seed >>> 7) + 7, 2654435761) >>> 0) % 9;
+  if (k < 2) return 'burgher';
+  if (k === 2) return L >= 6.2 ? 'gate' : 'burgher';
+  return 'shop';
+}
 export const tradeOfSeed = (seed) => TRADES[(seed >>> 3) % TRADES.length].id;
 
 function paris_house(el, { bag, col, lights }) {
@@ -96,18 +111,52 @@ function paris_house(el, { bag, col, lights }) {
   // the stone storey: the shop's opening, framed, with its counter board, shutter and sign; the door beside it
   const doorL = rand() < 0.5, ws = Math.max(2.2, Math.min(4.0, L - 1.7)), su = doorL ? L - 0.35 - ws : 0.35, du = doorL ? 0.3 : L - 1.2;
   const lintel = 2.75;
+  const kind = frontKind(el);
   if (OPEN) openGround({ bag, col, rect: el.rect, y, foot: el.foot, f, L, D, st: ST0, su, ws, du, doorL, trade: trade.id, seed: el.seed, lights, lit: !!el.lit });
-  else B('opening', su, su + ws, 0.12, lintel, -0.03, 0.05);
-  for (const u of [su - 0.2, su + ws]) B('timber', u, u + 0.2, 0, lintel + 0.3, -0.14, 0.06);                 // the posts
-  B('timber', su - 0.2, su + ws + 0.2, lintel, lintel + 0.32, -0.18, 0.08);                                 // the head beam
-  B('limestone', su - 0.35, su + ws + 0.35, 0, 0.18, -0.12, 0.06);                                          // the step/stall-riser
-  // the counter: the lower shutter let down, held by two chains; the upper raised as a pent roof
-  B('timber', su, su + ws, 0.92, 0.98, -0.78, -0.04);
-  for (const u of [su + 0.08, su + ws - 0.08]) R('iron', [u, 2.15, -0.04], [u, 0.98, -0.74], 0.008, 3);
-  if (!OPEN) B('timber', su - 0.04, su + ws + 0.04, 0.12, 0.92, -0.06, -0.02);                              // the board's outer face, shut against the riser
-  B('wood_dark', su, su + ws, 2.38, 2.45, -0.8, -0.1);
-  for (const u of [su + 0.06, su + ws - 0.06]) R('iron', [u, 2.38, -0.8], [u, 2.72, -0.1], 0.008, 3);
-  goods(trade.goods, B, R, su, ws, 0.98, rand);
+  if (kind === 'shop') {
+    if (!OPEN) B('opening', su, su + ws, 0.12, lintel, -0.03, 0.05);
+    for (const u of [su - 0.2, su + ws]) B('timber', u, u + 0.2, 0, lintel + 0.3, -0.14, 0.06);                 // the posts
+    B('timber', su - 0.2, su + ws + 0.2, lintel, lintel + 0.32, -0.18, 0.08);                                 // the head beam
+    B('limestone', su - 0.35, su + ws + 0.35, 0, 0.18, -0.12, 0.06);                                          // the step/stall-riser
+    // the counter: the lower shutter let down, held by two chains; the upper raised as a pent roof
+    B('timber', su, su + ws, 0.92, 0.98, -0.78, -0.04);
+    for (const u of [su + 0.08, su + ws - 0.08]) R('iron', [u, 2.15, -0.04], [u, 0.98, -0.74], 0.008, 3);
+    if (!OPEN) B('timber', su - 0.04, su + ws + 0.04, 0.12, 0.92, -0.06, -0.02);                              // the board's outer face, shut against the riser
+    B('wood_dark', su, su + ws, 2.38, 2.45, -0.8, -0.1);
+    for (const u of [su + 0.06, su + ws - 0.06]) R('iron', [u, 2.38, -0.8], [u, 2.72, -0.1], 0.008, 3);
+    goods(trade.goods, B, R, su, ws, 0.98, rand);
+  } else if (kind === 'gate') {
+    // the carriage gate: a pointed arch of dressed stone (jambs, a voussoir band of strips), the dark of the passage, the leaves of
+    // planks with iron straps shut in it, a guard-post (borne) at each jamb against the wheels
+    const gw = Math.min(ws, 3.0), gu = su + (ws - gw) / 2, hh = 2.5, uc = gu + gw / 2, ar = { r: gw / 2, pointed: 0.8 }, H = archRise(ar), NS = 9;
+    B('opening', gu, gu + gw, 0.0, hh, -0.03, 0.05);
+    const dark = [], band = [], hf = (i) => archHalf(ar, H * i / NS);
+    for (let i = 0; i < NS; i++) {
+      const y0 = hh + H * i / NS, y1 = hh + H * (i + 1) / NS, h0 = hf(i), h1 = hf(i + 1);
+      dark.push([[uc - h0, y0, 0.05], [uc + h0, y0, 0.05], [uc + h1, y1, 0.05]], [[uc - h0, y0, 0.05], [uc + h1, y1, 0.05], [uc - h1, y1, 0.05]]);
+      for (const sg of [-1, 1]) band.push([[uc + sg * h0, y0, -0.1], [uc + sg * (h0 + 0.3), y0, -0.1], [uc + sg * (h1 + 0.3), y1, -0.1]], [[uc + sg * h0, y0, -0.1], [uc + sg * (h1 + 0.3), y1, -0.1], [uc + sg * h1, y1, -0.1]]);
+    }
+    solid('opening', dark, [uc, hh + 0.4, -0.5]); solid('limestone', band, [uc, hh + 0.4, 0.5]);
+    B('limestone', uc - 0.3, uc + 0.3, hh + H + 0.0, hh + H + 0.34, -0.1, 0.06);                  // the keystone
+    for (const u of [gu - 0.3, gu + gw]) B('limestone', u, u + 0.3, 0, hh, -0.1, 0.06);           // the jambs
+    for (const u of [gu + 0.04, uc + 0.04]) { B('wood_dark', u, u + gw / 2 - 0.08, 0.0, hh - 0.04, -0.07, -0.03); for (const yy of [0.5, 1.4, 2.1]) B('iron', u, u + gw / 2 - 0.08, yy, yy + 0.09, -0.09, -0.065); }
+    for (const u of [uc - 0.2, uc + 0.2]) R('iron', [u, 1.15, -0.1], [u, 1.15, -0.095], 0.06, 8);
+    for (const u of [gu - 0.62, gu + gw + 0.32]) B('limestone', u, u + 0.3, 0, 0.9, -0.55, -0.25);
+  } else {
+    // the burgher's front: two small windows with iron bars and wooden shutters, a stone bench, a niche over the door with a saint
+    const wu = doorL ? [su + 0.3, su + ws * 0.5 + 0.3] : [su + 0.1, su + ws * 0.5 + 0.1], ww = Math.min(0.62, ws * 0.38);
+    for (const u0 of wu) {
+      B('opening', u0, u0 + ww, 1.3, 2.1, -0.03, 0.05);
+      B('limestone', u0 - 0.1, u0 + ww + 0.1, 1.2, 1.3, -0.12, 0.06); B('limestone', u0 - 0.1, u0 + ww + 0.1, 2.1, 2.2, -0.1, 0.06);
+      for (const u of [u0 - 0.1, u0 + ww]) B('limestone', u, u + 0.1, 1.3, 2.1, -0.1, 0.06);
+      for (let k = 1; k < 4; k++) R('iron', [u0 + ww * k / 4, 1.3, -0.07], [u0 + ww * k / 4, 2.1, -0.07], 0.012, 4);
+      B('wood_dark', u0 - 0.1 - 0.34, u0 - 0.1, 1.3, 2.1, -0.08, -0.04); B('wood_dark', u0 + ww + 0.1, u0 + ww + 0.1 + 0.34, 1.3, 2.1, -0.08, -0.04);
+    }
+    { const bu0 = doorL ? du + 1.2 : du - 1.0, bu1 = bu0 + 1.0; B('limestone', bu0, bu1, 0, 0.48, -0.5, -0.12); B('limestone', bu0 - 0.04, bu1 + 0.04, 0.48, 0.55, -0.54, -0.1); }
+    { const nu = du + 0.5; B('limestone', nu - 0.28, nu + 0.28, 2.75, 3.25, -0.16, 0.06); B('opening', nu - 0.2, nu + 0.2, 2.8, 3.15, -0.17, -0.1);
+      bag.add('limestone_carved', lathe([[0.001, 0], [0.07, 0.02], [0.06, 0.2], [0.04, 0.3], [0.001, 0.33]], 7, null, ...P(nu, 2.82, -0.22)));
+      bag.add('ivory', lathe([[0.001, 0], [0.03, 0.02], [0.03, 0.07], [0.001, 0.09]], 6, null, ...P(nu, 3.1, -0.22))); }
+  }
   // the door: boards under a pointed head, an iron ring
   if (!OPEN) { B('opening', du - 0.02, du + 1.0, 0.0, 2.35, -0.02, 0.05); B('wood_dark', du, du + 0.96, 0.0, 2.3, -0.06, -0.02); }
   B('limestone', du - 0.12, du + 1.12, 2.3, 2.52, -0.1, 0.06);
@@ -235,6 +284,7 @@ export function chimneyAt(el) {
 }
 /** Where a customer stands at the shop's counter: { at [x, z], out [dx, dz], trade } (the same random draws as the house). */
 export function shopPoint(el) {
+  // (no counter on a burgher's house or a gate: see frontKind; callers skip those)
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, f = el.front || 's', along = f === 's' || f === 'n';
   const L = along ? x1 - x0 : z1 - z0;
   rand(); rand(); rand();

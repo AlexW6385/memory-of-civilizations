@@ -3,7 +3,8 @@
 // towers; Notre-Dame and its parvis; the bridges; the river.
 
 import { CHATELETS, RADIUS, CHAPEL, CATHEDRAL, PALACE, GARDEN, QUAY, BRIDGES, NORTH_ARM, SOUTH_ARM, ISLAND, RIVER, PARVIS, height, inLot } from './layout.js';
-import { shopPoint } from '../../styles/gothic/houses.js';
+import { shopPoint, frontKind } from '../../styles/gothic/houses.js';
+import { openSet } from './town.js';
 import { lots as allLots } from './layout.js';
 import chapelPlan from '../../buildings/sainte-chapelle/plan.js';
 
@@ -112,9 +113,10 @@ export function streetLife() {
   }
   // customers at the counters of the shops near the parvis and the Grand Pont, and barrels, baskets and fire-wood at the doors
   { let n = 0;
+    const os = openSet();
     for (const l of allLots()) {
       const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2;
-      if (Math.hypot(cx - 70, cz) > 110 || n >= 46 || rand() > 0.3) continue;
+      if (Math.hypot(cx - 70, cz) > 110 || n >= 46 || rand() > 0.3 || frontKind({ rect: l.rect, seed: l.seed, front: l.front, open: os.has(l) }) !== 'shop') continue;
       const sp = shopPoint({ rect: l.rect, y: 1, seed: l.seed, front: l.front });
       const at = [sp.at[0] + sp.out[1] * (rand() - 0.5) * 0.6, sp.at[1] + sp.out[0] * (rand() - 0.5) * 0.6], rot = 0;
       fig(at, 1.0, faceTo(at, [at[0] - sp.out[0], at[1] - sp.out[1]]), { pose: rand() < 0.5 ? 'talk' : 'stand' });
