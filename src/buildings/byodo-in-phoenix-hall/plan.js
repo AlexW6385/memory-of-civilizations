@@ -90,6 +90,19 @@ for (const [z0, z1] of [[-7.0, -2.45], [2.45, 7.0]]) {
 // ── the interior: altar, Amida, canopy, the bodhisattvas on clouds, ceilings ─
 block([-2.7, -2.0, 1.2, 2.0], F, F + 1.0, 'lacquer_black');
 obj('byodo_amida', -0.9, 0, F + 1.0, { h: 2.77, dir: [1, 0] });
+// the pillars' paintings on the core's round columns, turned to the hall's inside (a wall column shows its inner face only,
+// a corner column its diagonal), and the offering table with the incense burner between the dais and the worshippers
+{
+  const cols = [];
+  for (const x of CX) for (const z of CZ) {
+    if (!(Math.abs(x) > 1 || Math.abs(z) > 5)) continue;
+    const ex = Math.abs(Math.abs(x) - 3.9) < 0.01, ez = Math.abs(Math.abs(z) - 5.4) < 0.01;
+    const dirs = ex && ez ? [[-Math.sign(x) / Math.SQRT2, -Math.sign(z) / Math.SQRT2]] : ex ? [[-Math.sign(x), 0]] : [[0, -Math.sign(z)]];
+    cols.push({ at: [x, z], y: F, h: CH, d: 0.5, dirs });
+  }
+  add({ t: 'byodo_pillars', cols });
+  add({ t: 'byodo_offering', at: [1.75, 0], y: F, dir: [-1, 0] });
+}
 obj('byodo_canopy', -0.9, 0, F + 8.4, { half: 1.85, depth: 0.62 });
 // the sixty-six bronze mirrors: on the high ceiling round the canopy and on the lower ceilings either side
 {
