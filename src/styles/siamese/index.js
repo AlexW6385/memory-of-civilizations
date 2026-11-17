@@ -11,6 +11,7 @@ import '../khmer/index.js';
 import { thaiHouse } from './houses.js';
 import { WAT_ELEMENTS, wihanInterior, lite } from './wat.js';
 import { lotusRing, pinnacle, saoHan, chofa, gablePattern, slitFrame, doorLeaves } from './detail.js';
+import { garuda, prang, porchRoof, jit } from './landmark.js';
 import { VOC_ELEMENTS } from './voc.js';
 
 import { hull } from '../ptolemaic/harbour.js';
@@ -84,6 +85,7 @@ function chedi(el, { bag, col }) {
     bag.add(M, box(cx - r, y + y0, cz - r, cx + r, y + y1 - 0.25 * v, cz + r));
     bag.add('plaster_white', box(cx - r - 0.18 * k, y + y1 - 0.25 * v, cz - r - 0.18 * k, cx + r + 0.18 * k, y + y1, cz + r + 0.18 * k));
     bag.add('lime_plaster', box(cx - r - 0.1 * k, y + y0, cz - r - 0.1 * k, cx + r + 0.1 * k, y + y0 + 0.28 * v, cz + r + 0.1 * k));
+    if (!el.mini && w > 3 && y1 < 4.4 * v) for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) pinnacle(bag, 'plaster_white', cx + sx * (r - 0.42 * k), y + y1, cz + sz * (r - 0.42 * k), 0.2 * k * jit(cx + sx, cz + sz + y1), 1.5 * k * jit(cz + sz, cx));
     // a row of small blocks (dentils) under the cornice of each tier, on all four faces (not on the small chedi)
     if (!el.mini && w > 3) for (let u = -r + 0.5 * k; u < r - 0.3 * k; u += 0.75 * k) for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       const px = cx + dx * (r + 0.1 * k) + (dz ? u : 0), pz = cz + dz * (r + 0.1 * k) + (dx ? u : 0), e = 0.13 * k;
@@ -105,8 +107,8 @@ function chedi(el, { bag, col }) {
       if (dx) { const q = px + dx * hd, zz = pz + sgn * 0.82 * k; bag.add('lime_plaster', box(q + n0, y, zz - wq, q + n1, y + 2.3 * v, zz + wq)); }
       else { const q = pz + dz * hd, xx = px + sgn * 0.82 * k; bag.add('lime_plaster', box(xx - wq, y, q + n0, xx + wq, y + 2.3 * v, q + n1)); } }
     for (const sgn of [-1, 1]) { const o = dx ? [px + dx * (hd + 0.06 * k), y + 2.0 * v, pz + sgn * 0.55 * k] : [px + sgn * 0.55 * k, y + 2.0 * v, pz + dz * (hd + 0.06 * k)], t = dx ? [px + dx * (hd + 0.06 * k), y + 2.55 * v, pz] : [pz * 0 + px, y + 2.55 * v, pz + dz * (hd + 0.06 * k)]; bag.add('gold', rod(o, t, 0.035 * k, 4)); }
-    { const r2 = dx ? [px - hd * 0.8, pz - hw * 0.8, px + hd * 0.8, pz + hw * 0.8] : [px - hw * 0.8, pz - hd * 0.8, px + hw * 0.8, pz + hd * 0.8]; bag.add('plaster_white', box(r2[0], y + 2.85 * v, r2[1], r2[2], y + 3.2 * v, r2[3])); bag.add('lime_plaster', box(r2[0] - 0.08 * k, y + 3.2 * v, r2[1] - 0.08 * k, r2[2] + 0.08 * k, y + 3.32 * v, r2[3] + 0.08 * k)); }
-    chedi({ c: [px, pz], y: y + 3.32 * v, w: 1.7 * k, h: 4.8 * v, mini: true }, { bag, col: { rect() {}, circle() {} } });
+    { const yT = y + 2.85 * v, rise = 0.95 * v, over = 0.15 * k; porchRoof(bag, gable, r, yT, rise, over, dx, dz, k);
+      chedi({ c: [px, pz], y: yT + rise * 0.44, w: 1.7 * k, h: 4.8 * v, mini: true }, { bag, col: { rect() {}, circle() {} } }); }
   }
   const y0 = y + 4.5 * v, r0 = a * 0.62;
   // the round tiers and the bell
@@ -219,10 +221,19 @@ function wihan(el, ctx) {
     bag.add('roof_tile', fromTriangles(orientOutward(T)));
   };
   lean(z0, cz0, 1); lean(z1 + 0, cz1, -1);
-  const mainRect = [cx0 - 0.6, cz0 - 0.5, cx1 + 0.6, cz1 + 0.5], rise = (cz1 - cz0) * 0.5 * 0.62;
+  // the main roof in two stacked tiers (the lower over the walls, the upper set back on a red step-board), each with its gable board
+  const mainRect = [cx0 - 0.6, cz0 - 0.5, cx1 + 0.6, cz1 + 0.5], rise = 1.75, half = (cz1 - cz0) / 2 + 0.5 + 1.5, dm = (cz0 + cz1) / 2;
   gable(bag, 'roof_tile', mainRect, f + wallH, rise, 1.5, 'x');
-  bag.add('clay_gilt', box(mainRect[0] - 1.4, f + wallH + rise - 0.05, (cz0 + cz1) / 2 - 0.12, mainRect[2] + 1.4, f + wallH + rise + 0.16, (cz0 + cz1) / 2 + 0.12));
   gableEnd(bag, mainRect, f + wallH, rise, 1.5, 'x', 1); gableEnd(bag, mainRect, f + wallH, rise, 1.5, 'x', -1);
+  {
+    const hv = half * 0.5, hu = rise * (1 - hv / half), eaveU = f + wallH + hu + 0.6, riseU = 2.1, over = 0.45;
+    const upper = [cx0 + 1.4, dm - (hv - over), cx1 - 1.4, dm + (hv - over)];
+    gable(bag, 'roof_tile', upper, eaveU, riseU, over, 'x');
+    for (const sg of [-1, 1]) bag.add('timber_red', box(upper[0] - over, f + wallH + hu - 0.1, dm + sg * hv - 0.06, upper[2] + over, eaveU - 0.02, dm + sg * hv + 0.06));
+    for (let x = upper[0]; x < upper[2]; x += 0.9) for (const sg of [-1, 1]) bag.add('clay_gilt', box(x, f + wallH + hu + 0.25, dm + sg * hv - 0.075 + sg * 0.02, x + 0.07, f + wallH + hu + 0.5, dm + sg * hv + 0.075 + sg * 0.02));
+    bag.add('clay_gilt', box(upper[0] - over - 0.9, eaveU + riseU - 0.05, dm - 0.12, upper[2] + over + 0.9, eaveU + riseU + 0.16, dm + 0.12));
+    gableEnd(bag, upper, eaveU, riseU, over, 'x', 1); gableEnd(bag, upper, eaveU, riseU, over, 'x', -1);
+  }
   // the porch: a lower gable over the front, on the posts
   const pr = east ? [cx1 - 0.4, z0 + 0.4, x1 + 0.2, z1 - 0.4] : [x0 - 0.2, z0 + 0.4, cx0 + 0.4, z1 - 0.4];
   gable(bag, 'roof_tile', pr, f + eave + 0.3, 2.4, 1.0, 'x');
@@ -267,7 +278,7 @@ function prasat(el, { bag, col }) {
   for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
     const rr = dx ? [cx + dx * c - (dx < 0 ? a - c : 0), cz - 2.6, cx + dx * c + (dx > 0 ? a - c : 0), cz + 2.6] : [cx - 2.6, cz + dz * c - (dz < 0 ? a - c : 0), cx + 2.6, cz + dz * c + (dz > 0 ? a - c : 0)];
     bag.add('plaster_white', box(rr[0], f, rr[1], rr[2], f + 4.4, rr[3]));
-    gable(bag, 'roof_tile', [rr[0], rr[1], rr[2], rr[3]], f + 4.4, 1.9, 0.5, dx ? 'x' : 'z');
+    porchRoof(bag, gable, [rr[0], rr[1], rr[2], rr[3]], f + 4.4, 1.9, 0.5, dx, dz, 1.6);
     const ptx = dx ? cx + dx * (a - 0.02) : cx, ptz = dz ? cz + dz * (a - 0.02) : cz;
     bag.add('opening', dx ? box(ptx - 0.02 - (dx > 0 ? 0.05 : 0), f, ptz - 0.9, ptx + 0.02 + (dx < 0 ? 0.05 : 0), f + 2.8, ptz + 0.9) : box(ptx - 0.9, f, ptz - 0.02 - (dz > 0 ? 0.05 : 0), ptx + 0.9, f + 2.8, ptz + 0.02 + (dz < 0 ? 0.05 : 0)));
     col.rect(rr, f, f + 4.4);
@@ -276,10 +287,14 @@ function prasat(el, { bag, col }) {
       for (const sg of [-1, 1]) { bag.add('lime_plaster', rod(q(sg * 1.0, 0), q(sg * 1.0, 2.8), 0.07, 5)); bag.add('lime_plaster', rod(q(sg * 1.0, 2.8), q(0, 3.85), 0.07, 5)); bag.add('gold', rod(q(sg * 0.92, 2.8), q(0, 3.72), 0.03, 4)); } }
   }
   col.rect([cx - c, cz - c, cx + c, cz + c], f, f + 7.4);
-  // the prang: stacked, tapering tiers, each a storey in miniature, then the finial
-  let r = c * 0.95, yy = f + 7.4;
-  for (let i = 0; i < 6; i++) { const h = 1.55 - i * 0.1; bag.add(i % 2 ? 'lime_plaster' : 'plaster_white', box(cx - r, yy, cz - r, cx + r, yy + h, cz + r)); bag.add('lime_plaster', box(cx - r * 1.1, yy + h, cz - r * 1.1, cx + r * 1.1, yy + h + 0.2, cz + r * 1.1)); for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) pinnacle(bag, i % 2 ? 'plaster_white' : 'lime_plaster', cx + sx * r * 0.82, yy + h + 0.2, cz + sz * r * 0.82, r * 0.14, 0.5 + r * 0.2); yy += h + 0.2; r *= 0.8; }
-  bag.add('plaster_white', lathe([[r, 0], [r * 0.9, 1.6], [r * 0.5, 3.2], [0.001, 4.6]], 8, null, cx, yy, cz)); bag.add('gold', lathe([[0.14, 4.4], [0.08, 5.4], [0.001, 6.2]], 8, null, cx, yy, cz));
+  // the cella's pilasters and cornice, the garudas at its corners, the redented prang above (landmark.js)
+  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    bag.add('lime_plaster', box(cx + sx * c - 0.32 - (sx > 0 ? 0 : 0.05), f + 0.3, cz + sz * c - 0.32 - (sz > 0 ? 0 : 0.05), cx + sx * c + 0.32 + (sx > 0 ? 0.05 : 0), f + 7.2, cz + sz * c + 0.32 + (sz > 0 ? 0.05 : 0)));
+    garuda(bag, cx + sx * (c - 0.15), f + 7.7, cz + sz * (c - 0.15), Math.atan2(sx, sz), 1.8);
+  }
+  bag.add('lime_plaster', box(cx - c - 0.3, f + 7.4, cz - c - 0.3, cx + c + 0.3, f + 7.7, cz + c + 0.3));
+  bag.add('lime_plaster', box(cx - c - 0.2, f + 0.0, cz - c - 0.2, cx + c + 0.2, f + 0.45, cz + c + 0.2));
+  prang(bag, cx, cz, f + 7.7, c * 0.78);
 }
 /** bell_tower: { rect, y } brick columns, a wooden floor, the roof in five tiers. */
 function bellTower(el, { bag, col }) {
