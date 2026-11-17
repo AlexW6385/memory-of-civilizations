@@ -116,6 +116,12 @@ function streetFolk() {
     }
   }
   for (const [i, [x, z, rot]] of SQ_STALLS.entries()) fig([x + 0.3, z + (rot ? 0.9 : -0.9)], rot ? 0 : Math.PI, { h: 1.6, dress: i % 2 ? 'robe' : 'trousers', cloth: ['cloth_brown', 'cloth_indigo', 'cloth_grey'][i % 3], cloth2: 'cloth_black', hat: i % 2 ? 'none' : 'cap', hatMat: 'cloth_brown', over: i % 2 ? 'shawl' : 'apron', pose: 'stand' });
+  // the trades of the street (§8.2): a lamplighter with his pole at the gas lamps of Bridge Street, a muffin-man with his tray on his head, a chimney sweep
+  // with his brushes at a side street's corner, the knife-grinder at his barrow
+  fig([86.9, BRIDGE.z - 5.7], N, { dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_black', hat: 'cap', hatMat: 'cloth_black', over: 'collar', carry: 'pole', len: 2.4, pose: 'stand', staffMat: 'wood_dark' });
+  fig([68.2, BRIDGE.z - 5.8], E, { dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_brown', hat: 'none', over: 'apron', carry: 'basket', pose: 'stand' });
+  fig([286.9, BRIDGE.z + 4.9], S, { dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_brown', over: 'apron', pose: 'stand' });
+  for (const [x, z, rot] of [[-62, -149.4 - 2 * 0, W], [150, BRIDGE.z - 30 - 1.2, E]]) fig([x, z], rot, { dress: 'trousers', cloth: 'cloth_black', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_black', over: 'collar', carry: 'pole', len: 2.5, pose: 'stand', staffMat: 'wood_dark', beard: false });
   // the cabmen of the rank, each by his cab's horse
   for (const x of [-48, -41, -34, -27]) fig([x + 0.4, -149.4], S, { dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_black', over: 'cloak', pose: rand() < 0.5 ? 'talk' : 'stand' });
   return L;
@@ -137,6 +143,12 @@ function furniture() {
   add('drinking_fountain', 70, BRIDGE.z + 6.6); add('drinking_fountain', -30, -150.5);
   // the coster's trestle stalls along Bridge Street's kerbs and the busy streets nearest it
   for (const zc of streetsZ()) { if (Math.abs(zc - BRIDGE.z) > 62) continue; for (let x = -200 + rand() * 30; x < 200; x += 55 + rand() * 40) add('trestle_stall', x, zc + (rand() < 0.5 ? -1 : 1) * (Math.abs(zc - BRIDGE.z) < 1 ? 5.6 : 2.0), { rot: rand() < 0.5 ? 0 : Math.PI, goods: rand() < 0.5 ? 'wicker' : 'cloth_red' }); }
+  // the Association's granite horse troughs at the kerbs of the busiest streets, the dustmen's bins before the houses of the side streets,
+  // the knife-grinder's barrow at the Lambeth end of Bridge Street, off the bridge (dossier §8.2)
+  { const tr = [[120, BRIDGE.z - 6.4, 0], [-38, -146.0, 0], [30, BRIDGE.z + 6.4, 0], [236, BRIDGE.z - 6.2, 0], [160, BRIDGE.z - 36, 0]];
+    for (const [x, z, rot] of tr) add('horse_trough', x, z, { rot });
+    for (const zc of streetsZ()) { if (Math.abs(zc - BRIDGE.z) < 1) continue; for (let x = -240 + rand() * 20; x < 240; x += 26 + rand() * 30) { const side = rand() < 0.5 ? -1 : 1; if (crossX().some((c) => Math.abs(c - x) < STREET_W / 2 + 1.2)) continue; add('dust_bin', x, zc + side * (STREET_W / 2 - 1.75), { rot: rand() * 3 }); } }
+    add('grindstone_barrow', 286, BRIDGE.z + 5.9, { rot: 0 }); }
   return [base('london-furniture', L)];
 }
 const SQ_STALLS = [[-30, -185, 0, 'wicker'], [-2, -174.8, Math.PI, 'cloth_red'], [14, -185, 0, 'wicker'], [-38, -175, Math.PI, 'hide_brown'], [26, -172.5, Math.PI, 'cloth_green'], [3, -185, 0, 'cloth_red']];
@@ -164,7 +176,26 @@ function openSet(all) {
   const A = [60, BRIDGE.z];
   near(A, (l) => l.pub, 1); near(A, (l) => l.shop, 3, 1);
   near([30, BRIDGE.z - 40], (l) => !l.shop && !l.pub, 2);
+  // beyond the first 120 m (dossier §8): through the rest of the town within 340 m of the arrival, a house in each 100 m cell and a shop in each
+  // 160 m cell stands open too, so that every quarter has its doors to try; the kinds of room follow the quarter (variantOf)
+  const spread = (f, cell, rmax, cap) => { const taken = new Map(); for (const l of all.filter((q) => ok(q) && f(q) && !out.has(q) && d(q, ARRIVAL) < rmax && d(q, ARRIVAL) >= 118).sort((a, b) => a.seed - b.seed)) { const k = Math.floor(cx(l) / cell) + ',' + Math.floor(cz(l) / cell); if (!taken.has(k) && taken.size < cap) taken.set(k, l); } for (const l of taken.values()) out.add(l); };
+  spread((l) => !l.shop && !l.pub, 120, 340, 30); spread((l) => l.shop, 200, 340, 6);
   return out;
+}
+/** The doors of a terrace come in pairs (the houses built two and two, mirrored about their party wall); the rooms of an open house follow
+ *  its quarter: the better streets about Bridge Street and the square have the parlour or the dining room, the Lambeth side and the far streets
+ *  a working family's lodging. */
+function mirrors(all) {
+  const rows = new Map();
+  for (const l of all) { const k = l.front + l.rect[1].toFixed(1); if (!rows.has(k)) rows.set(k, []); rows.get(k).push(l); }
+  for (const row of rows.values()) { row.sort((a, b) => a.rect[0] - b.rect[0]); row.forEach((l, i) => { l.mirror = i % 2 === 1; }); }
+}
+function variantOf(l) {
+  const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, r = Math.hypot(cx - 60, cz - BRIDGE.z), k = l.seed % 6;
+  if (cx > 262) return k < 4 ? 'lodging' : 'parlour';
+  if (r < 130) return k % 2 ? 'dining' : 'parlour';
+  if (r < 260) return ['parlour', 'lodging', 'dining', 'lodging', 'parlour', 'lodging'][k];
+  return k < 4 ? 'lodging' : k === 4 ? 'parlour' : 'dining';
 }
 /** The terraces cut into TILE-metre tiles, each built in full (near) and simple (far) like ../lod.js lodTiles, but larger: a plan costs one mesh
  *  per material, so fewer, larger tiles keep the mesh count down (the geometry budget); `near` grows with the tile so the same ground shows in full. */
@@ -186,7 +217,8 @@ function terraceTiles(id, elements) {
 }
 export async function houses() {
   const all = lots(), plans = [], open = openSet(all);
-  plans.push(...terraceTiles('london-terraces', all.map((l) => ({ t: l.pub ? 'pub' : l.shop ? 'shop_house' : 'terrace_house', ...l, ...(open.has(l) ? { open: true } : {}) }))));
+  mirrors(all);
+  plans.push(...terraceTiles('london-terraces', all.map((l) => ({ t: l.pub ? 'pub' : l.shop ? 'shop_house' : 'terrace_house', ...l, ...(open.has(l) ? { open: true, variant: variantOf(l) } : {}) }))));
   const sq = square();
   return [...plans, base('london-square', sq), base('london-square-life', sq.flatMap(ridersOf), 'life'), ...traffic(), ...furniture(), base('london-street-folk', streetFolk(), 'life'), base('london-river-folk', riverFolk(), 'life')];
 }

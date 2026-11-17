@@ -21,7 +21,7 @@ export const westminster = {
     // Westminster Hall: Richard II's hall and Herland's hammerbeam roof, entered by the north door from New Palace Yard
     { t: 'westminster_hall', rect: HALL, y: g, h: 14, ridge: 28 },
     { t: 'gothic_tower', c: CLOCK, s: 12, h: 96, clock: true, y: g },
-    { t: 'gothic_tower', c: VICTORIA, s: 22, h: 98, y: g },
+    { t: 'victoria_tower', c: VICTORIA, s: 22, h: 98.5, y: g },
     // the principal floor (§1.5): St Stephen's Porch and Hall, the Central Lobby under the Central Tower, the Commons to
     // the north and the Lords to the south along the axis
     { t: 'st_stephens', porch: PORCH, hall: STEPHEN, y: g, L, P },

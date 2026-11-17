@@ -9,6 +9,7 @@
 import { box, lathe, rod } from '../../core/geom.js';
 import { hexa } from './street.js';
 import { shopInterior, pubInterior } from './inside.js';
+import { terraceInterior } from './houseinside.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const pick = (rand, a) => a[Math.floor(rand() * a.length)];
@@ -117,26 +118,36 @@ function dress(F, rand, wins, { H, uD = null, brick = 'brick', dormers = true })
  * carrying an iron balcony; area railings, a chimney stack on each party wall with its pots.
  */
 export function terraceRich(el, ctx, base) {
-  if (el.open && !el.simple && (el.front === 'n' || el.front === 's')) pavement(frameOf(el, ctx), el.pw ?? 1.9);
-  if (el.open || el.simple || (el.front !== 'n' && el.front !== 's')) return base(el, ctx);
-  const F = frameOf(el, ctx), rand = rng(el.seed || 1), { B, C, bag, col, Wd, D, y, x0, z0, x1, z1 } = F;
-  const n = el.storeys ?? 3, st = 3.2, H = n * st, mat = brickOf(rand), type = rand() < 0.33 ? 'bay' : rand() < 0.3 ? 'stucco' : 'plain';
-  const uD = Wd / 4, uW = 3 * Wd / 4, doorMat = pick(rand, DOORS), wins = [];
-  bag.add(mat, box(x0, y - 0.5, z0, x1, y + H, z1)); col.rect(el.rect, y - 0.5, y + H);
+  if (el.simple || (el.front !== 'n' && el.front !== 's')) return base(el, ctx);
+  const F = frameOf(el, ctx), rand = rng(el.seed || 1), { B, C, bag, col, Wd, D, y, x0, z0, x1, z1 } = F, open = !!el.open;
+  const n = el.storeys ?? 3, st = 3.2, H = n * st, mat = brickOf(rand), type0 = rand() < 0.33 ? 'bay' : rand() < 0.3 ? 'stucco' : 'plain', type = open && type0 === 'bay' ? (el.seed % 3 ? 'plain' : 'stucco') : type0;
+  const uD = el.mirror ? 3 * Wd / 4 : Wd / 4, uW = el.mirror ? Wd / 4 : 3 * Wd / 4, doorMat = pick(rand, DOORS), wins = [];
+  // an open house is hollow on its ground floor (houseinside.js: the doorway and the window are real openings in the front wall, so the
+  // surrounds are strips round them and the rusticating is laid in the piers between)
+  if (open) { bag.add(mat, box(x0, y + st, z0, x1, y + H, z1)); col.rect(el.rect, y + st, y + H); terraceInterior(el, ctx, mat, st); }
+  else { bag.add(mat, box(x0, y - 0.5, z0, x1, y + H, z1)); col.rect(el.rect, y - 0.5, y + H); }
   pavement(F, el.pw ?? 1.9);
+  const piers = (fn) => { const o = [[uD - 0.65, uD + 0.65], [uW - 0.65, uW + 0.65]].sort((a, b) => a[0] - b[0]); let u = 0; for (const [a, b] of o) { if (a - u > 0.02) fn(u, a); u = b; } if (Wd - u > 0.02) fn(u, Wd); };
   if (type === 'stucco') {
     // the ground floor rusticated in stucco, a banded plinth
-    B('stucco_cream', 0, Wd, y - 0.1, y + st, 0, 0.06);
-    for (let b = 0.5; b < st - 0.3; b += 0.42) B('plaster_white', 0, Wd, y + b, y + b + 0.03, 0.06, 0.075);
+    if (open) { piers((a, b) => { B('stucco_cream', a, b, y - 0.1, y + st, 0, 0.06); for (let q = 0.5; q < st - 0.3; q += 0.42) B('plaster_white', a, b, y + q, y + q + 0.03, 0.06, 0.075); }); }
+    else { B('stucco_cream', 0, Wd, y - 0.1, y + st, 0, 0.06); for (let b = 0.5; b < st - 0.3; b += 0.42) B('plaster_white', 0, Wd, y + b, y + b + 0.03, 0.06, 0.075); }
   } else B('limestone', 0, Wd, y - 0.1, y + 0.5, 0, 0.05);
   // string courses at the floors
   for (let s = 1; s < n; s++) B(type === 'stucco' && s === 1 ? 'stucco_cream' : 'plaster_white', 0, Wd, y + s * st - 0.1, y + s * st + 0.1, 0, 0.07);
   // the door: surround, panelled leaf, the fanlight, a brass knocker; two steps
+  if (open) {
+    // the doorway is open (the leaf folded back inside): its stucco reveals, the lintel over the fanlight, the fanlight's bar
+    B('plaster_white', uD - 0.65, uD - 0.55, y + 0.4, y + 3.15, -0.02, 0.05); B('plaster_white', uD + 0.55, uD + 0.65, y + 0.4, y + 3.15, -0.02, 0.05); B('plaster_white', uD - 0.65, uD + 0.65, y + 3.0, y + 3.15, -0.02, 0.05);
+    B(doorMat, uD - 0.55, uD - 0.5, y + 0.4, y + 2.6, 0.0, 0.14); B(doorMat, uD + 0.5, uD + 0.55, y + 0.4, y + 2.6, 0.0, 0.14);     // the leaf's case
+    B('plaster_white', uD - 0.025, uD + 0.025, y + 2.45, y + 3.0, 0.05, 0.07); B('gold', uD + (el.mirror ? -0.2 : 0.2), uD + (el.mirror ? -0.15 : 0.25), y + 1.7, y + 1.82, 0.0, 0.03);
+  } else {
   B('plaster_white', uD - 0.65, uD + 0.65, y + 0.4, y + 3.15, -0.02, 0.05);
   B(doorMat, uD - 0.5, uD + 0.5, y + 0.4, y + 2.45, 0.05, 0.1);
   for (const [a, b] of [[0.55, 1.2], [1.3, 2.3]]) for (const sd of [-1, 1]) B(doorMat, sd < 0 ? uD - 0.4 : uD + 0.04, sd < 0 ? uD - 0.04 : uD + 0.4, y + 0.4 + a, y + 0.4 + b, 0.1, 0.13);
   B('opening', uD - 0.5, uD + 0.5, y + 2.5, y + 2.95, 0.05, 0.08); B('plaster_white', uD - 0.025, uD + 0.025, y + 2.5, y + 2.95, 0.08, 0.1);
   B('gold', uD - 0.04, uD + 0.04, y + 1.7, y + 1.82, 0.13, 0.16);
+  }
   B('limestone', uD - 0.7, uD + 0.7, y - 0.3, y + 0.2, 0, 0.95); B('limestone', uD - 0.7, uD + 0.7, y - 0.3, y + 0.4, 0, 0.5);
   if (type === 'stucco') {
     // the porch: two columns, an entablature, the iron balcony round its flat roof, the first-floor window to the floor
@@ -152,6 +163,13 @@ export function terraceRich(el, ctx, base) {
   for (let s = 0; s < n; s++) for (let i = 0; i < 2; i++) {
     const u = i === 0 ? uD : uW, hh = s === 0 ? 1.8 : s === 1 ? 2.2 : 1.8, y0 = y + s * st + (s === 0 ? 0.6 : 0.9);
     if (s === 0 && i === 0) continue;
+    if (s === 0 && open) {
+      // the parlour's window: a real opening; stucco reveals and sill, the meeting rail and the middle bar over the glass
+      B('plaster_white', u - 0.65, u - 0.55, y0 - 0.1, y0 + hh + 0.12, -0.02, 0.05); B('plaster_white', u + 0.55, u + 0.65, y0 - 0.1, y0 + hh + 0.12, -0.02, 0.05);
+      B('plaster_white', u - 0.65, u + 0.65, y0 + hh, y0 + hh + 0.12, -0.02, 0.05); B('limestone', u - 0.7, u + 0.7, y0 - 0.12, y0 - 0.04, 0, 0.14);
+      B('plaster_white', u - 0.025, u + 0.025, y0, y0 + hh, 0.0, 0.03); B('plaster_white', u - 0.55, u + 0.55, y0 + hh / 2 - 0.03, y0 + hh / 2 + 0.03, 0.0, 0.03);
+      continue;
+    }
     if (s === 0 && type === 'bay') {
       // a square bay: stucco dado, three glazed faces between posts, a lead roof
       B('plaster_white', u - 1.05, u + 1.05, y, y + 0.75, 0, 0.8);
@@ -461,4 +479,44 @@ export function trestleStall(el, { bag, col }) {
   put('iron', -0.8, -0.74, 0.92, 1.9, -0.5, -0.44); put('iron', 0.74, 0.8, 0.92, 1.9, -0.5, -0.44);
   put('cloth_white', -0.82, 0.82, 1.9, 1.94, -0.55, 0.15);
   col.rect([x - 0.9, z - 0.6, x + 0.9, z + 0.6], y, y + 1.1); void P;
+}
+/** horse_trough: { at, y, rot } — the Metropolitan Drinking Fountain and Cattle Trough Association's granite trough for horses (and a dog's bowl at the end), a low
+ *  dished slab at its back, standing on a plinth at the kerb. */
+export function horseTrough(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, r = el.rot ?? 0;
+  const put = (m, a0, a1, y0, y1, b0, b1) => { const g = box(a0, y0, b0, a1, y1, b1); g.rotateY(r); g.translate(x, y, z); bag.add(m, g); };
+  put('granite_block', -1.45, 1.45, 0, 0.12, -0.55, 0.55);                                    // the plinth
+  put('granite_grey', -1.3, 1.3, 0.12, 0.4, -0.4, 0.4);                                      // the trough hollowed from a block: the floor of it,
+  for (const sd of [-1, 1]) { put('granite_grey', -1.3, 1.3, 0.4, 0.72, sd * 0.4 - (sd > 0 ? 0.12 : 0), sd * 0.4 + (sd < 0 ? 0.12 : 0)); put('granite_grey', sd * 1.3 - (sd > 0 ? 0.12 : 0), sd * 1.3 + (sd < 0 ? 0.12 : 0), 0.4, 0.72, -0.4, 0.4); }   // its walls
+  put('water', -1.18, 1.18, 0.41, 0.58, -0.28, 0.28);                                          // the water, a hand below the rim
+  put('granite_grey', -1.3, 1.3, 0.72, 1.35, -0.52, -0.4);                                     // the back slab, higher at the middle
+  put('granite_grey', -0.55, 0.55, 1.35, 1.65, -0.52, -0.4); put('granite_grey', -0.25, 0.25, 1.65, 1.8, -0.52, -0.4);
+  put('gilt_bronze', -0.2, 0.2, 1.0, 1.12, -0.4, -0.36);                                      // the Association's tablet
+  put('granite_grey', 1.3, 1.6, 0.12, 0.34, -0.2, 0.2); put('opening', 1.36, 1.54, 0.34, 0.36, -0.14, 0.14);       // the dog's bowl at the end
+  const c = Math.cos(r), s = Math.sin(r), pt = (a, b) => [x + a * c + b * s, z - a * s + b * c];
+  const a = pt(-1.6, -0.6), b = pt(1.7, 0.6); col.rect([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], y, y + 1.0);
+}
+/** dust_bin: { at, y, rot } — the householder's wooden dust bin at the kerb for the dustman, with the lid on and a few cinders spilled; beside it the coal-hole's plate */
+export function dustBin(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, r = el.rot ?? 0;
+  const put = (m, a0, a1, y0, y1, b0, b1) => { const g = box(a0, y0, b0, a1, y1, b1); g.rotateY(r); g.translate(x, y, z); bag.add(m, g); };
+  bag.add('wood_dark', lathe([[0.3, 0], [0.34, 0.5], [0.34, 0.78], [0.001, 0.78]], 10, null, x, y, z));
+  for (const h of [0.15, 0.5]) bag.add('iron', lathe([[0.305 + h * 0.07, 0], [0.31 + h * 0.07, 0.03], [0.001, 0.03]], 10, null, x, y + h, z));
+  bag.add('iron_galv', lathe([[0.36, 0], [0.34, 0.05], [0.16, 0.1], [0.12, 0.14], [0.001, 0.14]], 10, null, x, y + 0.78, z));
+  put('granite_black', 0.4, 0.62, 0, 0.012, -0.2, 0.2);
+  col.circle(x, z, 0.36, y, y + 0.95);
+}
+/** grindstone_barrow: { at, y, rot } — the knife-grinder's barrow: a frame on two wheels with the grindstone in its trough of water and the treadle that turns it */
+export function grindstoneBarrow(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, r = el.rot ?? 0, c = Math.cos(r), s = Math.sin(r);
+  const put = (m, a0, a1, y0, y1, b0, b1) => { const g = box(a0, y0, b0, a1, y1, b1); g.rotateY(r); g.translate(x, y, z); bag.add(m, g); };
+  const disc = (m, a, yy, b, rad, th, axis) => { const g = lathe([[0.001, -th / 2], [rad, -th / 2], [rad, th / 2], [0.001, th / 2]], 16); g.rotateZ(Math.PI / 2); if (axis === 'z') g.rotateY(Math.PI / 2); g.rotateY(r); g.translate(x + a * c + b * s, y + yy, z - a * s + b * c); bag.add(m, g); };
+  put('wood_dark', -0.7, 0.7, 0.55, 0.62, -0.4, 0.4);                                         // the frame's bed
+  for (const sd of [-1, 1]) { put('wood_dark', -1.5, -0.7, 0.58, 0.63, sd * 0.35 - 0.025, sd * 0.35 + 0.025); disc('wood_dark', 0.0, 0.4, sd * 0.5, 0.4, 0.05, 'z'); }        // the shafts and the two wheels
+  put('wood_dark', -0.7, -0.6, 0.0, 0.55, -0.4, -0.35); put('wood_dark', 0.6, 0.7, 0.0, 0.55, 0.35, 0.4);
+  put('wood_dark', 0.2, 0.6, 0.62, 0.78, -0.35, 0.35); put('water', 0.25, 0.55, 0.75, 0.77, -0.3, 0.3);                    // the trough of water
+  disc('granite_grey', 0.4, 0.95, 0.0, 0.33, 0.08, 'z');                                       // the grindstone
+  put('iron', 0.37, 0.43, 0.62, 0.96, 0.33, 0.37); put('iron', 0.37, 0.43, 0.62, 0.96, -0.37, -0.33);                              // its two uprights
+  put('wood_dark', -0.5, 0.1, 0.62, 0.66, 0.2, 0.26);                                           // the treadle bar
+  col.rect([x - 1.1, z - 0.7, x + 1.1, z + 0.7], y, y + 1.3); void s;
 }
