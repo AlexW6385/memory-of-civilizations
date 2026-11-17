@@ -39,7 +39,7 @@ export class Fr {
   lathe(mat, prof, u, y, v, seg = 10) { const p = this.at(u, v); this.sk.lathe(mat, prof, p[0], y, p[1], seg); }
   /**
    * A wall across u0..u1 at depth v..v+th, y0..y1, with openings [{ u0, u1, y0?, y1, glass?, frame?, solid? }]: a door has no y0 (it starts at the
-   * wall's foot), a window carries its pane (both sides) and a frame. `solid` makes the pieces block.
+   * wall's foot), a window carries its pane (the dark glass outside, the lit sky inside) and a frame. `solid` makes the pieces block.
    */
   wall(o) {
     const { u0, u1, v, th, y0, y1, mat, solid = true } = o, ops = (o.ops || []).map((p) => ({ ...p })).sort((p, q) => p.u0 - q.u0);
@@ -54,7 +54,7 @@ export class Fr {
     for (const p of ops) {
       if (!p.glass) continue;
       const wy0 = p.y0, wy1 = p.y1, vm = v + th * 0.45, fr = p.frame ?? 'paint_white', t = 0.05;
-      this.pane(p.glass, p.u0, p.u1, wy0, wy1, vm, 1); this.pane(p.glass, p.u0, p.u1, wy0, wy1, vm, -1);
+      this.pane(p.glass, p.u0, p.u1, wy0, wy1, vm, 1); this.pane(p.inner ?? (p.glass === 'glass_outer' ? 'daylight_plain' : p.glass), p.u0, p.u1, wy0, wy1, vm, -1);   // seen from inside the pane is the sky's light
       const e = 0.02;
       this.b(fr, p.u0 + e, p.u1 - e, wy0 + e, wy0 + t, vm - 0.04, vm + 0.04); this.b(fr, p.u0 + e, p.u1 - e, wy1 - t, wy1 - e, vm - 0.04, vm + 0.04);
       this.b(fr, p.u0 + e, p.u0 + t, wy0 + e, wy1 - e, vm - 0.04, vm + 0.04); this.b(fr, p.u1 - t, p.u1 - e, wy0 + e, wy1 - e, vm - 0.04, vm + 0.04);

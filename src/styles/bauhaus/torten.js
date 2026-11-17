@@ -4,6 +4,7 @@
 import { Fr } from './frame.js';
 import { S, rng } from './kit.js';
 import { fitShop, pend, tbl, chr, stove, sack, rug } from './tenement.js';
+import { buildRowUp } from './flat.js';
 
 const Y = 0.15, H0 = 2.75, YC = Y + H0, YB = YC + 0.3, TOP = YB + 2.9;
 const DOORS = ['car_blue', 'car_red', 'paint_cab_yellow', 'car_cream', 'paint_ferry_green', 'car_blue'];
@@ -16,21 +17,27 @@ function rowHouse(F, i, r, fit) {
   F.s(wm, 0, T, Y, YC, T, D); F.s(wm, W - T, W, Y, YC, T, D);
   F.wall({ u0: T, u1: W - T, v: D - T, th: T, y0: Y, y1: YC, mat: wm, ops: [{ u0: 0.6, u1: 1.7, y0: Y + 1.0, y1: Y + 2.1, glass: 'glass_outer', frame: 'steel_grey' }, { u0: W - 1.7, u1: W - 0.7, y1: Y + 2.1 }] });
   F.b('wood_ochre', T, W - T, Y - 0.02, Y + 0.012, T, D - T); F.floor(T, W - T, T, D - T, Y);
-  F.wall({ u0: 0, u1: W, v: 0, th: T, y0: YC, y1: TOP, mat: wm, ops: [{ u0: 0.4, u1: W - 0.4, y0: YB + 0.75, y1: YB + 1.95, glass: 'glass_outer', frame: 'steel_grey' }], solid: false });
-  F.b(wm, 0, W, YC, TOP, T, D); F.k(0, W, YC - 0.1, TOP, 0, D);
-  F.b('plaster_white', T, W - T, YC - 0.04, YC, T, D - T);
-  F.b('wood_dark', 0.4, W - 0.4, YB + 0.75, YB + 1.95, T, T + 0.04);
-  F.b('cloth_white', 0.4, 0.4 + 0.5, YB + 0.9, YB + 1.9, 0.2, 0.23); F.b('cloth_white', W - 0.9, W - 0.4, YB + 0.9, YB + 1.9, 0.2, 0.23);
+  // the upper floor, enterable (flat.js, buildRowUp): the walls solid with real windows (the street's ribbon, one on the garden side), the roof's slab over it
+  const upOps = [{ u0: 0.4, u1: W - 0.4, y0: YB + 0.75, y1: YB + 1.95, glass: 'glass_outer', frame: 'steel_grey' }];
+  F.wall({ u0: 0, u1: W, v: 0, th: T, y0: YC, y1: TOP, mat: wm, ops: upOps, solid: true });
+  for (const p of upOps) F.k(p.u0, p.u1, p.y0, p.y1, 0, T);
+  F.s(wm, 0, T, YC, TOP, T, D); F.s(wm, W - T, W, YC, TOP, T, D);
+  const bk = [{ u0: 1.6, u1: 3.3, y0: YB + 0.8, y1: YB + 1.9, glass: 'glass_outer', frame: 'steel_grey' }];
+  F.wall({ u0: T, u1: W - T, v: D - T, th: T, y0: YC, y1: TOP, mat: wm, ops: bk, solid: true });
+  for (const p of bk) F.k(p.u0, p.u1, p.y0, p.y1, D - T, D);
+  F.k(0, W, TOP - 0.1, TOP, 0, D);
+  { const sp = { Y, YC, YB, TOP, pv: 4.6, T, n: Math.round((YB + 0.025 - Y) / 0.18), run: Math.round((YB + 0.025 - Y) / 0.18) * 0.27 }; buildRowUp(F, sp, rng(i * 7 + 3)); }
+  for (const u of [0.4, W - 0.9]) F.b('cloth_white', u, u + 0.5, YB + 0.9, YB + 1.9, T + 0.03, T + 0.06);
   // the partition, the furniture: a front room (table, chairs, a built-in cupboard, a stove) and the kitchen behind
   const pv = 4.6;
-  F.wall({ u0: T, u1: W - T, v: pv, th: 0.15, y0: Y, y1: YC, mat: wm, ops: [{ u0: 0.7, u1: 1.6, y1: Y + 2.1 }] });
+  F.wall({ u0: T, u1: W - T, v: pv, th: 0.15, y0: Y, y1: YC, mat: wm, ops: [{ u0: 0.9, u1: 2.0, y1: Y + 2.1 }] });
   rug(F, 0.6, W - 0.6, 0.8, pv - 0.6, Y, ['cloth_red', 'cloth_indigo', 'cloth_green'][i % 3]);
   tbl(F, 1.0, 2.2, 1.8, 2.7, Y, 0.76, 'wood_painted'); for (const [u, v, d] of [[0.7, 2.0, 'u+'], [0.7, 2.5, 'u+'], [2.5, 2.2, 'u-'], [1.6, 3.1, 'v-']]) chr(F, u, v, d, Y);
   F.s('wood_painted', W - 1.4, W - 0.35, Y, Y + 2.1, 1.0, 3.0); stove(F, W - 0.8, pv - 0.7, Y);
-  F.s('glaze_white', T, 0.9, Y, Y + 0.9, D - 1.3, D - T); F.b('steel_chrome', 0.5, 0.7, Y + 0.9, Y + 1.1, D - 1.1, D - 0.9);
-  F.s('iron', 1.2, 2.2, Y, Y + 0.85, D - 0.9, D - T); F.rod('iron', 1.7, Y + 0.85, D - 0.6, 1.7, YC, D - 0.6, 0.06, 6);
+  F.s('glaze_white', W - 0.95, W - T, Y, Y + 0.9, 5.4, 6.3); F.b('steel_chrome', W - 0.6, W - 0.56, Y + 0.9, Y + 1.1, 5.8, 5.84);    // the sink on the east wall (the stair takes the west)
+  F.s('iron', W - 1.0, W - T, Y, Y + 0.85, 7.0, 8.2); F.rod('iron', W - 0.65, Y + 0.85, 7.6, W - 0.65, YC, 7.6, 0.06, 6);
   tbl(F, 2.5, 3.6, D - 2.4, D - 1.6, Y, 0.78, 'paint_white'); chr(F, 3.0, D - 2.8, 'v-', Y); chr(F, 4.0, D - 2.0, 'u+', Y);
-  F.b('wood_painted', T, 0.42, Y + 0.9, Y + 1.0, D - 3.4, D - 1.3); F.b('car_cream', T, 0.42, Y + 1.0, Y + 2.0, D - 3.4, D - 1.3);
+  F.s('wood_painted', 1.5, 2.7, Y, Y + 2.0, D - T - 0.45, D - T); F.b('car_cream', 1.55, 2.65, Y + 1.0, Y + 1.9, D - T - 0.5, D - T - 0.45);   // the kitchen dresser on the back wall
   if (fit) pend(F, 1.8, YC, 2.4, i % 4 === 0); pend(F, 2.2, YC, D - 2.2, false);
   // the front: a door in its colour, a cantilevered canopy, the plinth, rain streaks and damp, a downpipe
   F.b(dm, du - 0.5, du + 0.5, Y, Y + 2.2, 0.0, 0.1); F.b('concrete_light', du - 0.9, du + 0.9, Y + 2.4, Y + 2.5, -1.0, 0); F.k(du - 0.9, du + 0.9, Y + 2.4, Y + 2.5, -1.0, 0);
