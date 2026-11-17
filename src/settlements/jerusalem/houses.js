@@ -177,7 +177,7 @@ function trade(el, { bag, col, lights }) {
     col.circle(ax, zc, 0.24, Y, Y + 0.5); col.rect([fx - 0.78, fz - 0.42, fx + 0.48, fz + 0.42], Y, Y + 0.52);
     const rz = rz0 + 0.4;
     bag.add('timber', box(x + 2.7, Y + 1.55, rz - 0.03, x + 4.0, Y + 1.6, rz + 0.03)); for (const px of [x + 2.7, x + 4.0]) post(bag, px, rz, Y, Y + 1.6, 0.03);
-    for (let k = 0; k < 5; k++) bag.add('bronze', k % 2 ? lathe([[0.001, 0], [0.08, 0.03], [0.1, 0.22], [0.05, 0.3], [0.001, 0.3]], 10, null, x + 2.85 + k * 0.25, Y + 1.25, rz) : lathe([[0.001, 0], [0.16, 0.0], [0.17, 0.05], [0.001, 0.05]], 12, null, x + 2.85 + k * 0.25, Y + 1.45, rz).rotateX(Math.PI / 2).translate(0, 0.1, 0));
+    for (let k = 0; k < 5; k++) bag.add('bronze', lathe([[0.001, 0], [0.08, 0.03], [0.1, 0.22], [0.05, 0.3], [0.04, 0.31], [0.001, 0.31]], 10, null, x + 2.85 + k * 0.25, Y + 1.26, rz));
     lights?.push({ at: [fx, Y + 0.7, fz], color: '#ff8a3c', intensity: 2.2, distance: 5 });
   }
   void mid;

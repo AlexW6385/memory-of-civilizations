@@ -176,7 +176,7 @@ for (let k = 0; k < 16; k++) {
   add({ t: 'lamp_chain', at: [Math.cos(am) * (RC + 0.05), Math.sin(am) * (RC + 0.05)], y: 5.6, drop: 1.0, n: 1, dir: [Math.cos(am), Math.sin(am)] });
   if (k % 2 === 1 && k !== 1) add({ t: 'dotr_curtains', a: [Math.cos(a) * RC, Math.sin(a) * RC], b: [Math.cos(b) * RC, Math.sin(b) * RC], y0: 0.25, y1: 5.7, s0: 0.95, w: 0.7, mat: k % 4 === 1 ? 'cloth_maroon' : 'cloth_green' });
 }
-for (let k = 0; k < 4; k++) { const a = (45 + 90 * k) * D2R; add({ t: 'censer', at: [Math.cos(a) * 12.9, Math.sin(a) * 12.9], y: 0.03 }); }
+for (let k = 0; k < 4; k++) { const a = (45 + 90 * k) * D2R; add({ t: 'censer', at: [Math.cos(a) * 15.4, Math.sin(a) * 15.4], y: 0.03 }); }
 for (const [x, z] of [[14.2, 0], [-14.2, 0], [0, 14.2], [0, -14.2]]) add({ t: 'lamp', at: [x, 4.4, z], intensity: 3, distance: 10 });
 
 // ── rooms and walks ──────────────────────────────────────────────────────────
