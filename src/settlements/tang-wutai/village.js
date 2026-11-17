@@ -6,6 +6,7 @@
 import { lots, voids, height, GREEN, GATE_X, LANES, RADIUS, inRect } from './layout.js';
 import { frame, dirOf } from '../../styles/chinese/village.js';
 import { TRADES, trade } from './shops.js';
+import { dwellingSize, lampSpot } from './dwelling.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const g4 = (r) => [height(r[0], r[1]), height(r[2], r[1]), height(r[0], r[3]), height(r[2], r[3])];
@@ -24,6 +25,7 @@ export function village() {
     const [y, foot] = vy(v.rect), nearGate = v.green && v.rect[0] > -80 && v.front === 's' ? 'temple' : v.green ? (v.rect[0] < -80 && v.front === 's' ? 'threshing' : v.front === 'n' && v.rect[0] < -80 ? 'garden' : 'yard') : ['garden', 'threshing', 'yard'][vseed(v)];
     plots.push({ ...v, y, foot, kind: nearGate, id: 1000 + i });
   });
+  let dwellCount = 0;                                       // the open weaver's homes and cave dwellings (dwelling.js)
   const all = [...lots(), ...plots.filter((p) => p.kind === 'yard')];
   // the open houses: the three yards nearest the gate on the main lane's two sides, an inn first
   // (round the gate: the four trades take the first plots of the lane's two sides, then three open houses)
@@ -74,11 +76,16 @@ export function village() {
     let kind = open ? 'flat' : rich && r < 0.45 ? 'arch' : r < 0.6 ? 'flat' : r < 0.85 ? 'shed' : 'flat';
     if (!open && more.has(l) && kind === 'flat') open = true;
     const wing = L >= 16 && rand() < 0.75, nb = rich || open ? 3 : 2 + (rand() < 0.4 ? 1 : 0), bay = kind === 'arch' ? 3.6 : 3.3, Wh = nb * bay;
-    const Dh = kind === 'arch' ? 4.8 : kind === 'shed' ? 5.0 : 5.4;
+    const dwell = !open && (kind === 'shed' || kind === 'arch') && flat(l) && dist < 150 && dwellCount < 16 && (dwellCount += 1);
+    const Dh = dwell ? dwellingSize(kind, nb).D : kind === 'arch' ? 4.8 : kind === 'shed' ? 5.0 : 5.4;
     const v0 = D - 1.3 - Dh, u0 = Math.min(L - Wh - 1.0, wing ? 4.9 + rand() * 1.0 : (L - Wh) / 2 + (rand() - 0.5) * 1.2);
     const hr = R(u0, v0, u0 + Wh, v0 + Dh), hs = [[hr[0], hr[1]], [hr[2], hr[1]], [hr[0], hr[3]], [hr[2], hr[3]]].map(([x, z]) => gh(x, z));
     // the house's front faces the lane, as the yard does
-    C.push({ t: 'wutai_house', rect: hr, front: l.front, y: Math.max(...hs), foot: Math.min(...hs), seed: l.seed + 7, kind, nb, ...(open ? { open: true } : {}) });
+    if (dwell) {
+      C.push({ t: 'wutai_dwelling', rect: hr, front: l.front, y: Math.max(...hs), foot: Math.min(...hs), seed: l.seed + 7, kind, nb });
+      const [lu, lv, lh] = lampSpot(kind, nb), [lx, lz] = frame(hr, l.front).P(lu, lv);
+      C.push({ t: 'tang_lamp', at: [lx, lz], y: Math.max(...hs) + 0.4 + lh, h: 0.22, intensity: 1.4, distance: 6 });
+    } else C.push({ t: 'wutai_house', rect: hr, front: l.front, y: Math.max(...hs), foot: Math.min(...hs), seed: l.seed + 7, kind, nb, ...(open ? { open: true } : {}) });
     // an oil lamp on the kang table of an open house, the room's only light besides the door (openFlat: the table at L/2 − 0.2, 0.3 from the back wall's inner face)
     if (open && kind === 'flat') { const [lx, lz] = P(u0 + Wh / 2 - 0.2, v0 + Dh - 0.34 - 1.0); C.push({ t: 'tang_lamp', at: [lx, lz], y: Math.max(...hs) + 0.4 + 0.91, h: 0.22, intensity: 1.4, distance: 6 }); }
     const hy = Math.max(...hs), vf = v0, doorU = u0 + (Math.floor(nb / 2) + 0.5) * bay;

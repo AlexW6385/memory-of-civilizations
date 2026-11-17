@@ -195,6 +195,18 @@ for (const sz of [-1, 1]) st('king', -2.35, sz * 11.6, 4.1, { robe: 'clay_green'
 // oil lamps on bronze stands before the three Buddhas, the hall's only light besides the open doors
 for (const z0 of [0, -5.04, 5.04]) for (const k of [-1, 1]) add({ t: 'tang_lamp', at: [-3.55, z0 + k * 1.1], y: F, h: 1.25 });
 
+// the hall's offerings and ritual furniture [inferred: usual in a Tang hall of worship; no source for this hall's]: two bronze incense burners on stone
+// stands to either side of the central way, a wooden fish and a bowl-gong on the side mats, a plate of fruit and a pair of vases at the foot of each Buddha
+for (const z of [-2.7, 2.7]) { block([-5.55, z - 0.5, -4.45, z + 0.5], F, F + 0.5, 'limestone'); block([-5.65, z - 0.6, -4.35, z + 0.6], F + 0.5, F + 0.56, 'granite_grey', { collide: false }); obj('censer', -5.0, z, F + 0.56); }
+for (const z0 of [-5.04, 5.04]) {
+  block([-4.12, z0 - 0.14, -3.82, z0 + 0.14], F + 0.05, F + 0.2, 'lacquer_red', { collide: false });
+  block([-4.1, z0 + 0.22, -3.86, z0 + 0.34], F + 0.05, F + 0.13, 'bronze', { collide: false });
+}
+for (const z0 of [0, -5.04, 5.04]) {
+  block([-2.95, z0 - 0.22, -2.65, z0 + 0.22], A, A + 0.03, 'glaze_white', { collide: false });
+  for (const k of [-0.1, 0.1]) block([-2.88, z0 + k - 0.07, -2.72, z0 + k + 0.07], A + 0.03, A + 0.13, 'paint_ochre', { collide: false });
+  for (const k of [-0.5, 0.5]) { block([-2.9, z0 + k - 0.07, -2.76, z0 + k + 0.07], A, A + 0.34, 'bronze', { collide: false }); block([-2.93, z0 + k - 0.1, -2.73, z0 + k + 0.1], A + 0.34, A + 0.4, 'bronze', { collide: false }); }
+}
 // the altar platform's mouldings: a plinth of dark stone at the foot, a projecting cornice under the top, a step before it
 block([-3.25, -12.45, 4.05, 12.45], F, F + 0.14, 'granite_grey', { collide: false });
 block([-3.1, -12.3, 3.9, 12.3], A - 0.16, A - 0.03, 'limestone', { collide: false });
@@ -211,12 +223,10 @@ add({ t: 'hip_roof', c: [0, 0], A: 17.0 + 4.0, B: 8.83 + 4.0, alongZ: true, y: F
 // ── the monastery: gate, walls, the Tang pillar, the old pagoda ──────────────
 {
   const gx = -114;
-  for (const z of [-4.5, 4.5, -1.5, 1.5]) add({ t: 'column', at: [gx, z], y: 0, h: 4.2, d: 0.4 });
-  for (const z of [-4.5, 4.5]) add({ t: 'column', at: [gx + 4, z], y: 0, h: 4.2, d: 0.4 });
-  add({ t: 'gable_roof_c', c: [gx + 2, 0], A: 4.2, B: 7.0, y: 4.6, rise: 2.6 });
-  for (const sz of [-1, 1]) add({ t: 'wall', a: [gx + 2, sz * 6.0], b: [gx + 2, sz * 46], th: 0.8, y0: 0, y1: 3.2, openings: [], mat: 'earth_wall' });
+  // (the gate hall itself is built by the settlement: src/settlements/tang-wutai/gate.js)
+  for (const sz of [-1, 1]) add({ t: 'wall', a: [gx + 2, sz * 5.0], b: [gx + 2, sz * 46], th: 0.8, y0: 0, y1: 3.2, openings: [], mat: 'earth_wall' });
   for (const sz of [-1, 1]) add({ t: 'wall', a: [gx + 2, sz * 46], b: [-62, sz * 46], th: 0.8, y0: 0, y1: 3.2, openings: [], mat: 'earth_wall' });
-  for (const sz of [-1, 1]) block([gx + 1.8, Math.min(sz * 6.0, sz * 46), gx + 2.2, Math.max(sz * 6.0, sz * 46)], 3.2, 3.5, 'tile_grey', { collide: false });
+  for (const sz of [-1, 1]) block([gx + 1.8, Math.min(sz * 5.0, sz * 46), gx + 2.2, Math.max(sz * 5.0, sz * 46)], 3.2, 3.5, 'tile_grey', { collide: false });
 }
 obj('dharani_pillar', -22, -8, T);
 obj('pagoda', 6, 32, T);
