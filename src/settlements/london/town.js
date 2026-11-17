@@ -116,6 +116,12 @@ function streetFolk() {
     }
   }
   for (const [i, [x, z, rot]] of SQ_STALLS.entries()) fig([x + 0.3, z + (rot ? 0.9 : -0.9)], rot ? 0 : Math.PI, { h: 1.6, dress: i % 2 ? 'robe' : 'trousers', cloth: ['cloth_brown', 'cloth_indigo', 'cloth_grey'][i % 3], cloth2: 'cloth_black', hat: i % 2 ? 'none' : 'cap', hatMat: 'cloth_brown', over: i % 2 ? 'shawl' : 'apron', pose: 'stand' });
+  // the trades of the street (§8.2): a lamplighter with his pole at the gas lamps of Bridge Street, a muffin-man with his tray on his head, a chimney sweep
+  // with his brushes at a side street's corner, the knife-grinder at his barrow
+  fig([86.9, BRIDGE.z - 5.7], N, { dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_black', hat: 'cap', hatMat: 'cloth_black', over: 'collar', carry: 'pole', len: 2.4, pose: 'stand', staffMat: 'wood_dark' });
+  fig([68.2, BRIDGE.z - 5.8], E, { dress: 'trousers', cloth: 'cloth_grey', cloth2: 'cloth_brown', hat: 'none', over: 'apron', carry: 'basket', pose: 'stand' });
+  fig([286.9, BRIDGE.z + 4.9], S, { dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_brown', over: 'apron', pose: 'stand' });
+  for (const [x, z, rot] of [[-62, -149.4 - 2 * 0, W], [150, BRIDGE.z - 30 - 1.2, E]]) fig([x, z], rot, { dress: 'trousers', cloth: 'cloth_black', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_black', over: 'collar', carry: 'pole', len: 2.5, pose: 'stand', staffMat: 'wood_dark', beard: false });
   // the cabmen of the rank, each by his cab's horse
   for (const x of [-48, -41, -34, -27]) fig([x + 0.4, -149.4], S, { dress: 'trousers', cloth: 'cloth_brown', cloth2: 'cloth_black', hat: 'brim', hatMat: 'cloth_black', over: 'cloak', pose: rand() < 0.5 ? 'talk' : 'stand' });
   return L;
@@ -137,6 +143,12 @@ function furniture() {
   add('drinking_fountain', 70, BRIDGE.z + 6.6); add('drinking_fountain', -30, -150.5);
   // the coster's trestle stalls along Bridge Street's kerbs and the busy streets nearest it
   for (const zc of streetsZ()) { if (Math.abs(zc - BRIDGE.z) > 62) continue; for (let x = -200 + rand() * 30; x < 200; x += 55 + rand() * 40) add('trestle_stall', x, zc + (rand() < 0.5 ? -1 : 1) * (Math.abs(zc - BRIDGE.z) < 1 ? 5.6 : 2.0), { rot: rand() < 0.5 ? 0 : Math.PI, goods: rand() < 0.5 ? 'wicker' : 'cloth_red' }); }
+  // the Association's granite horse troughs at the kerbs of the busiest streets, the dustmen's bins before the houses of the side streets,
+  // the knife-grinder's barrow at the Lambeth end of Bridge Street, off the bridge (dossier §8.2)
+  { const tr = [[120, BRIDGE.z - 6.4, 0], [-38, -146.0, 0], [30, BRIDGE.z + 6.4, 0], [236, BRIDGE.z - 6.2, 0], [160, BRIDGE.z - 36, 0]];
+    for (const [x, z, rot] of tr) add('horse_trough', x, z, { rot });
+    for (const zc of streetsZ()) { if (Math.abs(zc - BRIDGE.z) < 1) continue; for (let x = -240 + rand() * 20; x < 240; x += 26 + rand() * 30) { const side = rand() < 0.5 ? -1 : 1; if (crossX().some((c) => Math.abs(c - x) < STREET_W / 2 + 1.2)) continue; add('dust_bin', x, zc + side * (STREET_W / 2 - 1.75), { rot: rand() * 3 }); } }
+    add('grindstone_barrow', 286, BRIDGE.z + 5.9, { rot: 0 }); }
   return [base('london-furniture', L)];
 }
 const SQ_STALLS = [[-30, -185, 0, 'wicker'], [-2, -174.8, Math.PI, 'cloth_red'], [14, -185, 0, 'wicker'], [-38, -175, Math.PI, 'hide_brown'], [26, -172.5, Math.PI, 'cloth_green'], [3, -185, 0, 'cloth_red']];

@@ -480,3 +480,43 @@ export function trestleStall(el, { bag, col }) {
   put('cloth_white', -0.82, 0.82, 1.9, 1.94, -0.55, 0.15);
   col.rect([x - 0.9, z - 0.6, x + 0.9, z + 0.6], y, y + 1.1); void P;
 }
+/** horse_trough: { at, y, rot } — the Metropolitan Drinking Fountain and Cattle Trough Association's granite trough for horses (and a dog's bowl at the end), a low
+ *  dished slab at its back, standing on a plinth at the kerb. */
+export function horseTrough(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, r = el.rot ?? 0;
+  const put = (m, a0, a1, y0, y1, b0, b1) => { const g = box(a0, y0, b0, a1, y1, b1); g.rotateY(r); g.translate(x, y, z); bag.add(m, g); };
+  put('granite_block', -1.45, 1.45, 0, 0.12, -0.55, 0.55);                                    // the plinth
+  put('granite_grey', -1.3, 1.3, 0.12, 0.4, -0.4, 0.4);                                      // the trough hollowed from a block: the floor of it,
+  for (const sd of [-1, 1]) { put('granite_grey', -1.3, 1.3, 0.4, 0.72, sd * 0.4 - (sd > 0 ? 0.12 : 0), sd * 0.4 + (sd < 0 ? 0.12 : 0)); put('granite_grey', sd * 1.3 - (sd > 0 ? 0.12 : 0), sd * 1.3 + (sd < 0 ? 0.12 : 0), 0.4, 0.72, -0.4, 0.4); }   // its walls
+  put('water', -1.18, 1.18, 0.41, 0.58, -0.28, 0.28);                                          // the water, a hand below the rim
+  put('granite_grey', -1.3, 1.3, 0.72, 1.35, -0.52, -0.4);                                     // the back slab, higher at the middle
+  put('granite_grey', -0.55, 0.55, 1.35, 1.65, -0.52, -0.4); put('granite_grey', -0.25, 0.25, 1.65, 1.8, -0.52, -0.4);
+  put('gilt_bronze', -0.2, 0.2, 1.0, 1.12, -0.4, -0.36);                                      // the Association's tablet
+  put('granite_grey', 1.3, 1.6, 0.12, 0.34, -0.2, 0.2); put('opening', 1.36, 1.54, 0.34, 0.36, -0.14, 0.14);       // the dog's bowl at the end
+  const c = Math.cos(r), s = Math.sin(r), pt = (a, b) => [x + a * c + b * s, z - a * s + b * c];
+  const a = pt(-1.6, -0.6), b = pt(1.7, 0.6); col.rect([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], y, y + 1.0);
+}
+/** dust_bin: { at, y, rot } — the householder's wooden dust bin at the kerb for the dustman, with the lid on and a few cinders spilled; beside it the coal-hole's plate */
+export function dustBin(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, r = el.rot ?? 0;
+  const put = (m, a0, a1, y0, y1, b0, b1) => { const g = box(a0, y0, b0, a1, y1, b1); g.rotateY(r); g.translate(x, y, z); bag.add(m, g); };
+  bag.add('wood_dark', lathe([[0.3, 0], [0.34, 0.5], [0.34, 0.78], [0.001, 0.78]], 10, null, x, y, z));
+  for (const h of [0.15, 0.5]) bag.add('iron', lathe([[0.305 + h * 0.07, 0], [0.31 + h * 0.07, 0.03], [0.001, 0.03]], 10, null, x, y + h, z));
+  bag.add('iron_galv', lathe([[0.36, 0], [0.34, 0.05], [0.16, 0.1], [0.12, 0.14], [0.001, 0.14]], 10, null, x, y + 0.78, z));
+  put('granite_black', 0.4, 0.62, 0, 0.012, -0.2, 0.2);
+  col.circle(x, z, 0.36, y, y + 0.95);
+}
+/** grindstone_barrow: { at, y, rot } — the knife-grinder's barrow: a frame on two wheels with the grindstone in its trough of water and the treadle that turns it */
+export function grindstoneBarrow(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y ?? 0, r = el.rot ?? 0, c = Math.cos(r), s = Math.sin(r);
+  const put = (m, a0, a1, y0, y1, b0, b1) => { const g = box(a0, y0, b0, a1, y1, b1); g.rotateY(r); g.translate(x, y, z); bag.add(m, g); };
+  const disc = (m, a, yy, b, rad, th, axis) => { const g = lathe([[0.001, -th / 2], [rad, -th / 2], [rad, th / 2], [0.001, th / 2]], 16); g.rotateZ(Math.PI / 2); if (axis === 'z') g.rotateY(Math.PI / 2); g.rotateY(r); g.translate(x + a * c + b * s, y + yy, z - a * s + b * c); bag.add(m, g); };
+  put('wood_dark', -0.7, 0.7, 0.55, 0.62, -0.4, 0.4);                                         // the frame's bed
+  for (const sd of [-1, 1]) { put('wood_dark', -1.5, -0.7, 0.58, 0.63, sd * 0.35 - 0.025, sd * 0.35 + 0.025); disc('wood_dark', 0.0, 0.4, sd * 0.5, 0.4, 0.05, 'z'); }        // the shafts and the two wheels
+  put('wood_dark', -0.7, -0.6, 0.0, 0.55, -0.4, -0.35); put('wood_dark', 0.6, 0.7, 0.0, 0.55, 0.35, 0.4);
+  put('wood_dark', 0.2, 0.6, 0.62, 0.78, -0.35, 0.35); put('water', 0.25, 0.55, 0.75, 0.77, -0.3, 0.3);                    // the trough of water
+  disc('granite_grey', 0.4, 0.95, 0.0, 0.33, 0.08, 'z');                                       // the grindstone
+  put('iron', 0.37, 0.43, 0.62, 0.96, 0.33, 0.37); put('iron', 0.37, 0.43, 0.62, 0.96, -0.37, -0.33);                              // its two uprights
+  put('wood_dark', -0.5, 0.1, 0.62, 0.66, 0.2, 0.26);                                           // the treadle bar
+  col.rect([x - 1.1, z - 0.7, x + 1.1, z + 0.7], y, y + 1.3); void s;
+}
