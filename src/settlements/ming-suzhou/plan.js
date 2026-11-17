@@ -133,6 +133,12 @@ const low = { h: 3.2, th: 0.32 };
 wall([lx0, lz1], [lx0, lz0], { ...low, gates: [{ at: 10.5, r: 1.15 }], windows: [leaky(4, 2, 0.9, 0.9, 1.3), leaky(17, 3, 0.9, 0.9, 1.3)] });
 wall([lx0, lz0], [lx1, lz0], { ...low, gates: [{ at: 9, w: 1.6, h: 2.3 }], windows: [leaky(3.5, 1, 0.9, 0.9, 1.3), leaky(15, 4, 0.9, 0.9, 1.3)] });
 
+// the moon gates' dressing: mouldings, a square frame and rosettes on both faces (hallwork.js)
+for (const e of [...E]) if (e.t === 'ming_wall') for (const g of e.gates || []) if (g.r) {
+  const L = Math.hypot(e.b[0] - e.a[0], e.b[1] - e.a[1]), u = [(e.b[0] - e.a[0]) / L, (e.b[1] - e.a[1]) / L];
+  E.push({ t: 'moon_dress', c: [e.a[0] + u[0] * g.at, e.a[1] + u[1] * g.at], u, y: e.y, r: g.r, th: e.th });
+}
+
 // ── the galleries, along the walls and between the halls ─────────────────────
 // the beauty's rest (mei ren kao) where a bench looks on water (within 5.5 m of the pond), a plain bench elsewhere
 const facesWater = (x, z) => pondDistance(x, z) < 5.5;
@@ -143,8 +149,9 @@ GALLERIES.forEach((pts, i) => E.push({ t: 'ming_gallery', fine: true, wet: faces
 const B = BUILDINGS;
 // the Hall of Distant Fragrance: lattice on all four sides, a terrace north over the pond
 E.push({ t: 'paving', rect: [-10, -26, 10, -19.6], y: G + B.yuanxiang.y - 0.05, th: 1.6, mat: 'bluestone' });
-E.push({ t: 'ming_hall', rect: B.yuanxiang.rect, y: G + B.yuanxiang.y, H: 5.0, front: 'n', four: true, roof: 'xieshan', plat: 0.6, eave: 1.5, sweep: 1.3, ...B.yuanxiang.hall });
-E.push({ t: 'ming_hall', rect: B.yiyu.rect, y: G + B.yiyu.y, H: 3.8, front: B.yiyu.front, four: true, roof: 'xieshan', plat: 0.4, ...B.yiyu.hall });
+E.push({ t: 'ming_hall', rect: B.yuanxiang.rect, y: G + B.yuanxiang.y, H: 5.0, front: 'n', four: true, roof: 'xieshan', plat: 0.6, eave: 1.5, sweep: 1.3, real: true, tiles: true, ...B.yuanxiang.hall });
+E.push({ t: 'terrace_rail', rect: [-10, -26, 10, -19.6], y: G + B.yuanxiang.y - 0.05, sides: ['n', 'w', 'e'] });
+E.push({ t: 'ming_hall', rect: B.yiyu.rect, y: G + B.yiyu.y, H: 3.8, front: B.yiyu.front, four: true, roof: 'xieshan', plat: 0.4, real: true, tiles: true, ...B.yiyu.hall });
 E.push({ t: 'ming_hall', rect: B.linglong.rect, y: G + B.linglong.y, H: 3.9, front: 'w', four: false, roof: 'xieshan', plat: 0.35, ...B.linglong.hall });
 E.push({ t: 'stone_boat', rect: B.xiangzhou.rect, y: G + B.xiangzhou.y });
 E.push({ t: 'lou', rect: B.jianshan.rect, y: G + B.jianshan.y });

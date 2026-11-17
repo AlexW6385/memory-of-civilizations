@@ -38,7 +38,15 @@ function penjing(el, { bag, col }) {
   P.emit(bag, el.at[0], el.y ?? 0, el.at[1], el.rot ?? 0);
   col.circle(el.at[0], el.at[1], 0.35 * s, el.y ?? 0, (el.y ?? 0) + sh);
 }
+import { realLatticeBag, roofWork, terraceRail, moonDress } from './hallwork.js';
 const base = STYLES.ming;
+
+/** ming_hall, with the fine work of the landmark's halls where the plan asks: `real` (lattice as geometry), `tiles` (cover tiles and rafters). */
+function hall(el, ctx) {
+  const c = el.real ? { ...ctx, bag: realLatticeBag(ctx.bag, 'lacquer_chestnut', { cell: el.realCell }) } : ctx;
+  base.elements.ming_hall(el, c);
+  if (el.tiles) roofWork(ctx.bag, el, { roof: 'tile_dark', wood: 'lacquer_chestnut' });
+}
 
 /**
  * path laid on the ground: when the element carries `ground` (the garden's height function), the
@@ -94,7 +102,7 @@ function drapeTri(a, b, c, H, out, depth) {
   drapeTri(A, m, r, H, out, d); drapeTri(m, B, q, H, out, d); drapeTri(r, q, C, H, out, d); drapeTri(m, q, r, H, out, d);
 }
 
-registerStyle('suzhou-site', { ...base, elements: { ...base.elements, scholar_study: scholarStudy, hall_furniture: hallFurniture, court_piece: courtPiece, plaque, penjing, path: drapedPath } });
+registerStyle('suzhou-site', { ...base, elements: { ...base.elements, ming_hall: hall, terrace_rail: terraceRail, moon_dress: moonDress, scholar_study: scholarStudy, hall_furniture: hallFurniture, court_piece: courtPiece, plaque, penjing, path: drapedPath } });
 
 // the shop fronts are an element of the street life (instanced pieces, shared settlement-wide)
 STYLES.life.elements.suzhou_shop = suzhouShop;
