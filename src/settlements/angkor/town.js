@@ -91,11 +91,11 @@ function palms() {
   };
   const add = (x, z) => { if (ok(x, z)) E.push({ t: 'sugar_palm', at: [x, z], c: [x, z], r: 0.4, y: 0, s: 0.8 + rand() * 0.35, rot: rand() * 6.28, ladder: rand() < 0.25 }); };
   // on the dykes of the fields: a loose grid of 26 m with each palm thrown off it
-  for (let x = -RADIUS; x < RADIUS; x += 26) for (let z = -RADIUS; z < RADIUS; z += 26) { const r = Math.hypot(x, z); if (r > 215 && rand() < 0.55) add(x + (rand() - 0.5) * 14, z + (rand() - 0.5) * 14); }
+  for (let x = -RADIUS; x < RADIUS; x += 26) for (let z = -RADIUS; z < RADIUS; z += 26) { const r = Math.hypot(x, z); if (r > 215 && rand() < 0.38) add(x + (rand() - 0.5) * 14, z + (rand() - 0.5) * 14); }
   // round the houses, two or three to a cluster
   for (const h of houses()) if (rand() < 0.35) { const a = rand() * 6.28, d = 6 + rand() * 5; add((h.rect[0] + h.rect[2]) / 2 + Math.cos(a) * d, (h.rect[1] + h.rect[3]) / 2 + Math.sin(a) * d); }
   // a few in the enclosure's lawns
-  for (let k = 0; k < 40; k++) add(ENCLOSURE[0] + 8 + rand() * (ENCLOSURE[2] - ENCLOSURE[0] - 16), ENCLOSURE[1] + 8 + rand() * (ENCLOSURE[3] - ENCLOSURE[1] - 16));
+  for (let k = 0; k < 28; k++) add(ENCLOSURE[0] + 8 + rand() * (ENCLOSURE[2] - ENCLOSURE[0] - 16), ENCLOSURE[1] + 8 + rand() * (ENCLOSURE[3] - ENCLOSURE[1] - 16));
   return E;
 }
 /**

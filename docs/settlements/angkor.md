@@ -155,6 +155,19 @@ Ours: carving in faceted low relief (pyramidal bosses: lit in facets, cheap in t
 Sources added:
 - [Angkor lintel styles — Lucas Varro](https://lucasvarro.com/blogs/angkorpedia/angkor-lintel-styles)
 
+## 28. Round 3: the bas-relief galleries carved in the wall's own stone (2026-11-17)
+
+The style's relief panels (§13) were sparse flat silhouettes in a separate, warmer material. The third gallery now takes `reliefMap` (the same eight subjects) and `src/settlements/angkor/relief.js` (`ak_relief`) carves the band itself: a polished slab 2 m high between a moulded foot and head, a frieze of lotus petals above it, and on it the panels composed in `panels.js` (figures from `figures.js`, after the style's) in three registers 0.64 m apart, so that the figures fill the 2 m as they do on the real walls. All of a wall segment is one mesh in `sandstone_carved` (no material, no draw added; the style's `sandstone_relief` is no longer used at Angkor).
+
+| Panel | Composition |
+|---|---|
+| Churning of the Sea of Milk (east gallery, south) | asuras with helmets on the left and devas with crowns on the right haul the serpent, a thick scaled rope at mid-height; its five-hooded head at the left end, the asuras' chief before it, Hanuman at the tail; Mount Mandara in the middle with the serpent wound round it, the turtle Kurma under it, four-armed Vishnu beside it, Indra flying above; two ranks of apsaras over the rope; fish and crocodiles over a ridge of waves along the foot |
+| Battle panels (Kurukshetra, Lanka, gods and asuras) | two armies of three registers of spearmen and archers meeting in a melee in the middle; chiefs on elephants under a parasol and on horses |
+| Procession of Suryavarman II (south gallery, west) | the king seated under parasols with ministers kneeling (two registers), court ladies in palanquins on poles below, then the army in file in three registers with a chief on an elephant every 4.7 m, the king on the twelfth under fifteen parasols |
+| Heavens and hells | the style's composition, carved the same way |
+
+Basis as §13 [stated]; the denser composition and the direction of the files are ours [inferred]. Depth: figures stand 3.5 cm (principal figures 6 cm) from a 4 cm slab; bodies are truncated pyramids, limbs and spears pyramids (lit in facets). Budget at the arrival (`tools/draw-count.mjs`): main draws 613 to 587, main triangles 4.65 M to 4.46 M (the relief costs about as much as the one it replaces; 0.19 M returned by thinning the far dyke palms in `town.js`: 0.55 to 0.38 of the grid, 40 to 28 in the enclosure). Also: the naga's scales (dress.js) lowered to 3 cm so that they read as scales, not spikes.
+
 ## Sources
 
 - [Angkor Wat — wondermondo](https://wondermondo.com/angkor-wat)

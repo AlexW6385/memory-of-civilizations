@@ -384,7 +384,7 @@ function akNDress(el, ctx) {
       for (let s = s0 + 0.12 + ph * step; s < s1 - 0.1; s += step) {
         if (ringAt(s)) continue;
         const p = pos(s, sg * (r - 0.035)), O = [p[0], yb + dv, p[1]];
-        facet(t, scaled(DIAM, step * 0.66 * hand(s, sg), step * 0.46), [0, 0, 0.06], O, Uu.map((v) => -v), N);
+        facet(t, scaled(DIAM, step * 0.66 * hand(s, sg), step * 0.46), [0, 0, 0.032], O, Uu.map((v) => -v), N);
         void row;
       }
     }
@@ -425,4 +425,4 @@ function akCDress(el, ctx) {
 }
 
 Object.assign(STYLES.khmer.elements, { ak_gdress: akGDress, ak_tdress: akTDress, ak_ndress: akNDress, ak_cdress: akCDress });
-export { akGDress, akTDress, akNDress, akCDress };
+export { akGDress, akTDress, akNDress, akCDress, galleryPieces };

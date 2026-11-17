@@ -2,6 +2,7 @@
 import '../../styles/khmer/index.js';
 import './library.js';
 import './dress.js';
+import './relief.js';
 import './uses.js';
 import temple from './plan.js';
 import music from './music.js';

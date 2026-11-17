@@ -62,7 +62,7 @@ for (const r of carve(T.base.rect, CL.basins)) E.push({ t: 'k_terrace', rect: r,
 E.push({ t: 'k_cloister', rect: CL.rect, y: T.base.y, w: 4, h: 3.4, west: CL.west, stair: CL.stair, basins: CL.basins });
 E.push({ t: 'k_gallery', rect: T.third.line, y: T.base.y, w: T.third.w, h: T.third.h, solid: 'in', half: true, gates: true, gatePass: true, gate: 22, gateH: 12,
   // the eight panels of the bas-relief, two to a side (docs/settlements/angkor.md §13); the north-east pair not yet carved c. 1150
-  relief: { w: { s: 'kurukshetra', n: 'lanka' }, s: { w: 'procession', e: 'heavens' }, e: { s: 'churning', n: 'uncarved' }, n: { e: 'uncarved', w: 'gods' } } });
+  reliefMap: { w: { s: 'kurukshetra', n: 'lanka' }, s: { w: 'procession', e: 'heavens' }, e: { s: 'churning', n: 'uncarved' }, n: { e: 'uncarved', w: 'gods' } } });
 E.push({ t: 'k_terrace', rect: T.second.terrace, y0: T.base.y, y1: T.second.y });
 E.push({ t: 'k_gallery', rect: T.second.line, y: T.second.y, w: T.second.w, h: T.second.h, solid: 'out', gates: true, gatePass: true, gate: 12, gateH: 13, corner: 12, devatas: true });
 E.push({ t: 'k_terrace', rect: T.bakan.terrace, y0: T.second.y, y1: T.bakan.y });
@@ -102,7 +102,8 @@ function carve(r, holes) {
 
 // the carving laid over the style's masses (dress.js, docs §27): the same parameters, the same places
 for (const el of E.slice()) {
-  if (el.t === 'k_gallery') E.push({ ...el, t: 'ak_gdress', dress: el.relief ? { win: true, dev: true } : el.devatas ? { pil: true } : el.windows ? { dev: true } : { dev: true } });
+  if (el.t === 'k_gallery' && el.reliefMap) E.push({ ...el, t: 'ak_relief' });
+  if (el.t === 'k_gallery') E.push({ ...el, t: 'ak_gdress', dress: el.reliefMap ? { win: true, dev: true } : el.devatas ? { pil: true } : el.windows ? { dev: true } : { dev: true } });
   else if (el.t === 'k_tower') E.push({ ...el, t: 'ak_tdress' });
   else if (el.t === 'naga_rail') E.push({ ...el, t: 'ak_ndress' });
   else if (el.t === 'k_cloister') E.push({ ...el, t: 'ak_cdress' });
