@@ -9,102 +9,24 @@
 import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe, rod, fromTriangles, hull, prism, sideprism, ellipse, board, frame, placer, rng, Matrix4 } from './util.js';
 import '../qing/index.js';
+import { being } from './beings.js';
+import { doorway, chest, paintFront, beamEnds, prow } from './parts.js';
 
 const BLK = 'tar_wood', RED = 'kokowai', WHT = 'plaster_white';
 const woodOf = (age, r) => (r < age ? 'planks_grey' : r < age + 0.35 ? 'timber' : 'cedar');
 /** A transform for a piece placed inside a placed frame: M (outer) then (x, y, z, yaw). */
 const sub = (M, x, y, z, yaw = 0) => new Matrix4().multiplyMatrices(M, frame(x, y, z, yaw));
 
-// ── carved beings: a stack of them makes a pole ─────────────────────────────────────────
-/**
- * One being cut into a pole of radius r from y0 up len, facing −z, in the frame `add` places: a body of
- * the log, the eyes and brows of the formline (black, red inside), the mouth, and what marks the being.
- * type: bird | bear | whale | human | watchman (human with the tall ringed hat).
- */
-function being(add, type, y0, len, r, wood, rand) {
-  const zf = -r * 0.97, t = 0.07;
-  add(wood, lathe([[r, y0], [r * 1.03, y0 + len * 0.5], [r * 0.95, y0 + len], [0.001, y0 + len]], 12));
-  const ey = y0 + len * 0.62, ex = r * 0.44, rx = r * 0.25, ry = r * 0.17;
-  for (const s of [-1, 1]) {
-    add(BLK, ellipse(s * ex, ey, rx, ry, zf - t, zf + 0.03));
-    add(RED, ellipse(s * ex, ey, rx * 0.62, ry * 0.62, zf - t - 0.02, zf + 0.03));
-    add(BLK, ellipse(s * ex, ey, rx * 0.25, ry * 0.3, zf - t - 0.04, zf + 0.03));
-    add(BLK, board([s * r * 0.06, ey + ry * 1.55], [s * r * 0.9, ey + ry * 1.15], 0.08, zf - t, zf + 0.03));
-  }
-  const my = y0 + len * 0.3;
-  if (type !== 'whale') {
-    add(RED, board([-r * 0.55, my], [r * 0.55, my], len * 0.12, zf - t - 0.02, zf + 0.03));
-    for (const dy of [-1, 1]) add(BLK, board([-r * 0.6, my + dy * len * 0.07], [r * 0.6, my + dy * len * 0.07], 0.045, zf - t - 0.03, zf + 0.03));
-  }
-  const q = (a) => a * len;
-  if (type === 'bird') {
-    // the hooked beak, red with a black edge, over the mouth's place
-    const yb = y0 + len * 0.48;
-    add(RED, sideprism([[-r * 0.9, yb + q(0.12)], [-r * 1.9, yb - q(0.02)], [-r * 1.95, yb - q(0.2)], [-r * 1.2, yb - q(0.34)], [-r * 0.9, yb - q(0.24)]], -r * 0.28, r * 0.28));
-    add(BLK, sideprism([[-r * 1.5, yb + q(0.06)], [-r * 1.9, yb - q(0.02)], [-r * 1.95, yb - q(0.1)], [-r * 1.5, yb - q(0.02)]], -r * 0.3, r * 0.3));
-    for (const s of [-1, 1]) {
-      // folded wings: long boards down the sides, the ends curled out, red-edged
-      add(BLK, board([s * r * 1.02, y0 + len * 0.86], [s * r * 1.12, y0 + len * 0.1], r * 0.55, -r * 0.5, r * 0.45).translate(0, 0, 0));
-      add(RED, board([s * r * 1.1, y0 + len * 0.78], [s * r * 1.16, y0 + len * 0.2], r * 0.2, -r * 0.46, r * 0.36));
-      for (let k = 0; k < 5; k++) add(RED, board([s * r * 0.8, y0 + len * (0.72 - k * 0.13)], [s * r * 1.35, y0 + len * (0.66 - k * 0.13)], 0.03, -r * 0.54, -r * 0.48));
-    }
-  } else if (type === 'bear') {
-    add(wood, box(-r * 0.4, y0 + len * 0.36, -r * 1.55, r * 0.4, y0 + len * 0.58, zf + 0.1));
-    add(BLK, box(-r * 0.16, y0 + len * 0.5, -r * 1.58, r * 0.16, y0 + len * 0.58, -r * 1.5));
-    for (let k = -3; k <= 3; k++) add(WHT, box(k * r * 0.1 - 0.03, y0 + len * 0.3, -r * 1.5, k * r * 0.1 + 0.03, y0 + len * 0.37, -r * 1.42));
-    for (const s of [-1, 1]) {
-      add(wood, ellipse(s * r * 0.62, y0 + len * 0.93, r * 0.2, r * 0.2, -r * 0.45, -r * 0.1));
-      add(BLK, ellipse(s * r * 0.62, y0 + len * 0.93, r * 0.11, r * 0.11, -r * 0.5, -r * 0.12));
-      add(BLK, board([s * r * 0.98, y0 + len * 0.3], [s * r * 1.15, y0 + len * 0.1], r * 0.4, -r * 0.8, -r * 0.3));   // the paws
-    }
-  } else if (type === 'whale') {
-    add(RED, board([-r * 0.7, my], [r * 0.7, my + q(0.04)], len * 0.2, zf - t - 0.03, zf + 0.03));
-    add(BLK, board([-r * 0.7, my + q(0.1)], [r * 0.7, my + q(0.1)], 0.06, zf - t - 0.04, zf + 0.03));
-    add(BLK, sideprism([[-r * 0.1, y0 + len * 0.96], [-r * 0.28, y0 + len * 1.42], [r * 0.45, y0 + len * 0.96]], -0.07, 0.07));   // the tall fin
-    add(RED, ellipse(0, y0 + len * 0.88, r * 0.1, r * 0.06, -r * 0.1, r * 0.05));
-    for (const s of [-1, 1]) add(BLK, board([s * r * 1.0, y0 + len * 0.55], [s * r * 1.5, y0 + len * 0.2], r * 0.38, -r * 0.4, -r * 0.05));   // the flippers
-  } else if (type === 'frog') {
-    // a very wide flat mouth, the eyes standing up on top of the head, the hands with spread fingers on the chest
-    add(RED, board([-r * 0.95, my], [r * 0.95, my], len * 0.1, zf - t - 0.04, zf + 0.03));
-    for (const s of [-1, 1]) {
-      add(wood, ellipse(s * ex, ey + ry * 1.5, rx * 0.9, ry * 1.0, zf - 0.16, zf + 0.04)); add(BLK, ellipse(s * ex, ey + ry * 1.5, rx * 0.45, ry * 0.5, zf - 0.19, zf + 0.0));
-      for (let k = 0; k < 3; k++) add(BLK, board([s * (r * 0.5 + k * r * 0.14), y0 + len * 0.2], [s * (r * 0.58 + k * r * 0.22), y0 + len * 0.06], 0.05, zf - 0.08, zf + 0.03));
-    }
-  } else if (type === 'beaver') {
-    // the two great incisors under the nose, the scaled tail hanging down the chest
-    add(wood, box(-r * 0.3, y0 + len * 0.45, -r * 1.3, r * 0.3, y0 + len * 0.6, zf + 0.1));
-    for (const s of [-1, 1]) add(WHT, box(s * r * 0.02 + (s > 0 ? 0 : -r * 0.2), y0 + len * 0.12, zf - 0.14, s * r * 0.02 + (s > 0 ? r * 0.2 : 0), y0 + len * 0.31, zf - 0.04));
-    add(BLK, board([0, y0 + len * 0.02], [0, y0 + len * 0.12], r * 0.9, zf - 0.1, zf - 0.02));
-    for (let k = 0; k < 4; k++) add(RED, board([-r * 0.4, y0 + len * (0.025 + k * 0.025)], [r * 0.4, y0 + len * (0.025 + k * 0.025)], 0.02, zf - 0.11, zf - 0.02));
-  } else {
-    add(wood, box(-r * 0.13, y0 + len * 0.42, -r * 1.25, r * 0.13, y0 + len * 0.66, zf + 0.1));                 // the nose
-    for (const s of [-1, 1]) {
-      add(BLK, board([s * r * 0.92, y0 + len * 0.42], [s * r * 0.5, y0 + len * 0.18], r * 0.3, -r * 0.95, -r * 0.5));   // the arms folded to the chest
-      add(RED, ellipse(s * r * 0.46, y0 + len * 0.16, r * 0.16, r * 0.1, -r * 1.0, -r * 0.7));
-    }
-    if (type === 'watchman') {
-      // the tall hat of stacked rings
-      for (let k = 0; k < 5; k++) add(k % 2 ? BLK : 'planks_grey', lathe([[r * (0.5 - k * 0.04), 0], [r * (0.62 - k * 0.04), 0.05], [r * (0.5 - k * 0.04), 0.3]], 12, null, 0, y0 + len + k * 0.28, 0));
-    }
-  }
-  // weathering: dark cracks down the back and sides of the log, a collar of moss at the foot of some beings
-  const rr = rand;
-  for (let k = 0; k < 3; k++) {
-    const a = 1.0 + rr() * 1.7, sg = rr() < 0.5 ? -1 : 1, x = Math.sin(a) * r * 0.98 * sg, z = -Math.cos(a) * r * 0.98, ya = y0 + len * (0.05 + rr() * 0.4);
-    add('wood_dark', box(x - 0.012, ya, z - 0.012, x + 0.012, ya + len * (0.25 + rr() * 0.3), z + 0.012));
-  }
-  if (rr() < 0.35) add('sod', lathe([[r * 1.07, y0], [r * 1.07, y0 + 0.1], [r * 0.99, y0 + 0.14], [r * 0.99, y0]], 12));
-}
-
+// ── carved beings: see beings.js; a stack of them makes a pole ──
 const KINDS = ['bear', 'bird', 'whale', 'human', 'bird', 'bear', 'frog', 'beaver'];
 /** The pole's beings from y0 up to y0 + total, the sequence from the seed; the top one the watchman or a bird. */
-function carved(add, y0, total, r0, r1, wood, seed, topHat = true) {
+function carved(add, y0, total, r0, r1, wood, seed, topHat = true, lod = 1) {
   const rand = rng(seed), n = Math.max(2, Math.round(total / 1.9)), len = total / n;
   let last = -1;
   for (let k = 0; k < n; k++) {
     let t = Math.floor(rand() * KINDS.length); if (t === last) t = (t + 2) % KINDS.length; last = t;
     const type = k === n - 1 && topHat ? 'watchman' : KINDS[t], r = r0 + (r1 - r0) * (k + 0.5) / n;
-    being(add, type, y0 + k * len, len, r, wood, rand);
+    being(add, type, y0 + k * len, len, r, wood, rand, lod);
   }
 }
 
@@ -187,14 +109,8 @@ function house(el, ctx) {
   // the frontal pole, set against the front: 1.6 m through, the door an oval through its foot
   const pz = -hd - 0.15 - 0.8, pw = 0.8, wood = woodOf(el.age, rand()), P = sub(M, 0, g, pz, 0), padd = placer(bag, P);
   const lint = 2.1, top = 2.95;
-  for (const s of [-1, 1]) {
-    padd(wood, box(s > 0 ? dw : -pw, 0, -0.8, s > 0 ? pw : -dw, top, 0.8));
-    padd(BLK, ellipse(s * 0.66, 1.55, 0.13, 0.2, -0.86, -0.78)); padd(RED, ellipse(s * 0.66, 1.55, 0.07, 0.12, -0.9, -0.78));
-    padd(BLK, ellipse(s * 0.66, 0.7, 0.12, 0.17, -0.86, -0.78)); padd(RED, ellipse(s * 0.66, 0.7, 0.06, 0.1, -0.9, -0.78));
-  }
-  padd(wood, box(-pw, lint, -0.8, pw, top, 0.8));
-  padd(BLK, board([-0.7, 2.5], [0.7, 2.5], 0.2, -0.86, -0.78)); padd(RED, board([-0.5, 2.5], [0.5, 2.5], 0.09, -0.9, -0.78));
-  carved(padd, top, el.landmark ? 7.6 : (el.pole ?? 5.8) , 0.72, 0.55, wood, el.seed * 7 + 3);
+  doorway(padd, wood, dw, pw, lint, top, rand, el.landmark ? 2 : 1);
+  carved(padd, top, el.landmark ? 7.6 : (el.pole ?? 5.8) , 0.72, 0.55, wood, el.seed * 7 + 3, true, el.landmark ? 2 : 1);
   for (const s of [-1, 1]) rectL(s > 0 ? dw : -pw, pz - 0.8, s > 0 ? pw : -dw, pz + 0.8, g, g + top);
   houseFront(el, { bag, add, col, W, segL, rectL, rand, hw, hd, g, yTop, ridgeY, eaveY, R, vF, vB, yAt, hole, pz, dw, pw });
   // the doorway's floor board and the dark board that shuts it in the other houses
@@ -248,7 +164,7 @@ function house(el, ctx) {
   for (const [su, sv] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
     const Q = sub(M, su * pu, 0, sv * pv, 0);
     placer(bag, Q)(woodOf(el.age, 0.5), lathe([[0.46, yP], [0.43, bY - 0.2], [0.001, bY - 0.2]], 12));
-    being(placer(bag, sub(M, su * pu, 0, sv * pv, (su > 0 ? Math.PI / 2 : -Math.PI / 2))), sv < 0 ? 'bear' : 'human', yP + 1.1, 2.1, 0.46, woodOf(el.age, 0.2), rand);
+    being(placer(bag, sub(M, su * pu, 0, sv * pv, (su > 0 ? Math.PI / 2 : -Math.PI / 2))), sv < 0 ? 'bear' : 'human', yP + 1.1, 2.1, 0.46, woodOf(el.age, 0.2), rand, el.landmark ? 2 : 0);
     circL(su * pu, sv * pv, 0.48, yP, bY);
   }
   for (const s of [-1, 1]) {
@@ -385,16 +301,9 @@ function houseFront(el, { bag, add, col, W, segL, rectL, rand, hw, hd, g, yTop, 
     add('sod', prism([[s * u0, yAt(u0) + 0.045], [s * Math.min(u1, R - 0.1), yAt(Math.min(u1, R - 0.1)) + 0.045], [s * Math.min(u1, R - 0.1), yAt(Math.min(u1, R - 0.1)) + 0.085], [s * u0, yAt(u0) + 0.085]], v0, Math.min(v1, vB - 0.05)));
   }
   // the painted front on most houses: formline ovoids and bands each side of the pole, generic and different in each
-  const ptype = Math.floor(fr() * 5);
-  if (ptype < 3) {
-    const yc = g + 1.7, zf = -hd - 0.075, zb = -hd - 0.04, ux = Math.min(hw - 1.6, 2.2 + fr() * 1.2);
-    for (const s of [-1, 1]) {
-      const cx = s * ux;
-      if (ptype === 0) { add(BLK, ellipse(cx, yc, 0.7, 0.45, zf, zb)); add(RED, ellipse(cx, yc, 0.44, 0.27, zf - 0.015, zb)); add(BLK, ellipse(cx, yc, 0.15, 0.15, zf - 0.03, zb)); add(RED, board([s * 1.3, yc - 0.85], [s * (ux + 1.0), yc - 0.85], 0.28, zf, zb)); }
-      else if (ptype === 1) { add(RED, box(cx - 0.8, yc - 0.6, zf, cx + 0.8, yc + 0.6, zb)); add(BLK, ellipse(cx, yc, 0.5, 0.36, zf - 0.015, zb)); add(RED, ellipse(cx, yc, 0.18, 0.16, zf - 0.03, zb)); }
-      else { add(BLK, board([s * 1.3, yc + 0.5], [s * (ux + 0.9), yc + 0.8], 0.3, zf, zb)); add(RED, ellipse(cx, yc - 0.1, 0.4, 0.3, zf, zb)); add(BLK, ellipse(cx, yc - 0.1, 0.17, 0.17, zf - 0.015, zb)); }
-    }
-  }
+  const ptype = el.paint ?? (el.landmark ? 0 : Math.floor(fr() * 5));
+  if (ptype < 3) paintFront(add, { hw, hd, g, dw, pw, yAt, yTop, ridgeY }, ptype, fr, !!el.landmark);
+  beamEnds(add, hw, hd, yAt, vF);
   // the bench: a thick plank on two blocks, either side of the door, a cape or a mat over it, a basket under it
   for (const s of [-1, 1]) {
     if (fr() < 0.35) continue;
@@ -516,7 +425,7 @@ function pole(el, ctx) {
   const r = el.r, h = el.h, base = placer(bag, frame(el.c[0], el.y, el.c[1], el.yaw));
   if (el.kind === 'memorial') {
     const wings = el.seed % 3 === 0;
-    carved(add, 0, h - 0.2, r * 1.1, r * 0.8, wood, el.seed * 3 + 1, !wings);
+    carved(add, 0, h - 0.2, r * 1.1, r * 0.8, wood, el.seed * 3 + 1, !wings, el.lod ?? 0);
     add(wood, lathe([[r * 1.1, -0.4], [r * 1.15, 0], [0.001, 0]], 10));
     if (wings) {
       // a bird at the head, its wings spread wide: boards raised either side, black with red feather lines
@@ -532,17 +441,9 @@ function pole(el, ctx) {
     for (let k = 0; k < 5; k++) { const a = k * 1.3 + rand(), d = r * (1.6 + rand() * 0.5); base('rock_boulder', lathe([[0.26, 0], [0.22, 0.13], [0.001, 0.22]], 6, null, Math.cos(a) * d, 0, Math.sin(a) * d)); }
   } else {
     // the mortuary pole: a post, a carved length of two beings, and the chest on top that holds the dead
-    add(wood, lathe([[r * 1.15, -0.4], [r, h * 0.3], [0.001, h * 0.3]], 10));
-    carved(add, h * 0.3 - 0.01, h * 0.45, r, r * 0.9, wood, el.seed * 5 + 2, false);
-    const y1 = h * 0.75;
-    add(wood, box(-r * 1.9, y1, -r * 1.5, r * 1.9, y1 + 0.18, r * 1.5));
-    add('cedar', box(-r * 1.8, y1 + 0.18, -r * 1.4, r * 1.8, y1 + 0.18 + r * 2.1, r * 1.4));
-    add(BLK, box(-r * 1.5, y1 + 0.18 + r * 0.5, -r * 1.45, r * 1.5, y1 + 0.18 + r * 1.7, -r * 1.38)); add(RED, ellipse(0, y1 + 0.18 + r * 1.1, r * 0.7, r * 0.4, -r * 1.5, -r * 1.38));
-    add('planks_grey', prism([[-r * 1.95, y1 + 0.18 + r * 2.1], [r * 1.95, y1 + 0.18 + r * 2.1], [0, y1 + 0.18 + r * 3.0]], -r * 1.6, r * 1.6));
-    // the lashings round the chest, the moss on its lid, the overhang's drip stains
-    for (const dy of [0.35, 1.45]) add('rope_fibre', box(-r * 1.83, y1 + 0.18 + r * dy, -r * 1.43, r * 1.83, y1 + 0.18 + r * dy + 0.05, r * 1.43));
-    add('sod', box(-r * 1.2, y1 + 0.18 + r * 2.1 + r * 0.55, -r * 0.8, r * 0.2, y1 + 0.18 + r * 2.1 + r * 0.7, r * 0.9));
-    add('wood_dark', box(-r * 1.2 - 0.02, y1 - 0.5, -r * 1.55, -r * 1.2 + 0.03, y1, -r * 1.5));
+    add(wood, lathe([[r * 1.15, -0.4], [r, h * 0.1], [0.001, h * 0.1]], 10));
+    carved(add, h * 0.1 - 0.01, h * 0.65, r, r * 0.9, wood, el.seed * 5 + 2, false, el.lod ?? 0);
+    chest(add, h * 0.75, r, wood, rand, el.lod ?? 0);
     // at the foot: a small heap of stones, a shell dish, a bundle of cedar bark (what the family leaves)
     for (let k = 0; k < 3; k++) { const a = k * 2.2 + rand(), d = r * (1.4 + rand() * 0.4); base('rock_boulder', lathe([[0.2, 0], [0.17, 0.1], [0.001, 0.17]], 6, null, Math.cos(a) * d, 0, Math.sin(a) * d)); }
     base('coral', lathe([[0.16, 0], [0.19, 0.04], [0.001, 0.05]], 8, null, -r * 1.7, 0, -r * 0.8));
@@ -591,15 +492,7 @@ function canoe(el, ctx) {
   add(BLK, prism([[-B * 0.5, sheer(-0.55) + 0.02], [B * 0.5, sheer(-0.55) + 0.02], [B * 0.5, sheer(-0.55) + 0.03], [-B * 0.5, sheer(-0.55) + 0.03]], -L * 0.5, -L * 0.3).translate(0, 0, 0));
   // the bow piece and the stern piece
   const zb = -L / 2, yb = sheer(-1) + 0.0;
-  add(BLK, sideprism([[zb + 0.55, yb - 0.1], [zb - 0.1, yb + 0.1], [zb - 0.5, yb + Dp * 1.2], [zb - 0.25, yb + Dp * 1.5], [zb + 0.05, yb + Dp * 1.25], [zb + 0.5, yb + 0.25]], -0.13, 0.13));
-  add(RED, sideprism([[zb - 0.1, yb + Dp * 0.6], [zb - 0.35, yb + Dp * 1.1], [zb - 0.18, yb + Dp * 1.18], [zb + 0.1, yb + Dp * 0.72]], -0.14, 0.14));
-  // the painted eye of the formline on each cheek of the bow piece (black ovoid, red within, black pupil), generic
-  { const zc = zb - 0.02, yc = yb + Math.max(0.3, Dp * 0.62), side = (x0, x1, m, rx, ry) => add(m, ellipse(-zc, yc, rx, ry, x0, x1, 12).rotateY(Math.PI / 2));
-    for (const sg of [-1, 1]) {
-      const f = (a, b) => (sg > 0 ? [a, b] : [-b, -a]);
-      side(...f(0.13, 0.15), BLK, 0.17, 0.12); side(...f(0.15, 0.165), RED, 0.1, 0.07); side(...f(0.165, 0.175), BLK, 0.035, 0.035);
-      add(BLK, board([-zc - 0.2, yc + 0.17], [-zc + 0.15, yc + 0.2], 0.04, ...f(0.13, 0.15)).rotateY(Math.PI / 2));
-    } }
+  prow(add, zb, yb, Dp, rand);
   const zs = L / 2, ys = sheer(1);
   add(wood, sideprism([[zs - 0.5, ys - 0.1], [zs + 0.1, ys + 0.05], [zs + 0.3, ys + Dp * 0.5], [zs + 0.05, ys + Dp * 0.55], [zs - 0.4, ys + 0.2]], -0.1, 0.1));
   // thwarts, a bailer, paddles laid in

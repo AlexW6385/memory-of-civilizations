@@ -28,7 +28,7 @@ export async function town() {
       bnd({ pts: [...grp[k].pts, [h.c[0] - r, h.c[1] - r], [h.c[0] + r, h.c[1] + r]] }, 2)));
   });
   // the poles of the street, the graveyard at the south end
-  for (const p of v.poles) E.push({ t: 'haida_pole', kind: p.kind, c: p.c, yaw: p.yaw, h: p.h, r: p.r, seed: p.seed, y: height(...p.c), age: 0.45 + rand() * 0.5 });
+  for (const p of v.poles) E.push({ t: 'haida_pole', kind: p.kind, c: p.c, yaw: p.yaw, h: p.h, r: p.r, seed: p.seed, y: height(...p.c), age: 0.45 + rand() * 0.5, lod: (() => { const d = Math.hypot(p.c[0] - ARRIVAL[0], p.c[1] - ARRIVAL[1]); return d < 14 ? 2 : d < 40 ? 1 : 0; })() });
   for (const c of v.canoes) E.push({ t: 'haida_canoe', c: c.c, yaw: c.yaw, l: c.l, moored: c.moored, seed: c.seed, y: c.moored ? SEA - 0.3 : height(...c.c) + 0.38 });
   for (const r of v.racks) E.push({ t: 'haida_rack', c: r.c, yaw: r.yaw, w: r.w, seed: r.seed, y: height(...r.c) });
   for (const s of v.stacks) E.push({ t: 'haida_stack', c: s.c, yaw: s.yaw, kind: s.kind, seed: s.seed, y: height(...s.c) });
