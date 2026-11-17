@@ -69,6 +69,11 @@ for (const p of STELE_PAV) E.push({ t: 'lu_stele_pavilion', c: p.c, w: p.w, y: 0
   E.push({ t: 'terrace', rect: MOON, y0: 0, y1: y, open: { n: [[-1, mx1 - mx0 + 1]], s: [[-10.8 - mx0, 10.8 - mx0]] }, carve: 'qing' });
   for (const [a, b, slab] of [[-10.5, -4.0, false], [-3.6, 3.6, false], [4.0, 10.5, false]]) E.push({ t: 'stairs', rect: [a, mz1, b, mz1 + 5], y0: 0.03, y1: y, dir: 'n', slab, rakes: !slab });
   for (const [a, b, slab] of [[-3.4, 3.4, false]]) E.push({ t: 'stairs', rect: [a, bz0 - 5, b, bz0], y0: 0.03, y1: y, dir: 's', slab, rakes: !slab });
+  // the imperial way (yulu): a carved marble slab of clouds and dragons laid over the middle of the front and of the back flight, lifted one tread
+  // (0.17) above the steps and ending 0.4 m short of the terrace, so that it runs flush with the floor above (docs §12)
+  { const lift = 0.17, cut = 0.4, w = 1.5, rise = y - 0.03, len = 5, y1s = 0.03 + lift + rise * (len - cut) / len;
+    E.push({ t: 'stairs', rect: [-w, mz1 + cut, w, mz1 + len], y0: 0.03 + lift, y1: y1s, dir: 'n', slab: true });
+    E.push({ t: 'stairs', rect: [-w, bz0 - len + 0, w, bz0 - cut], y0: 0.03 + lift, y1: y1s, dir: 's', slab: true }); }
   E.push({ t: 'lu_dacheng', rect: HALL.rect, y, H: HALL.H, double: HALL.double, seed: 5 });
   // the bronze burners on the terrace before the hall, the stone lions at the foot of the stairs
   for (const s of [-1, 1]) E.push({ t: 'bronze', kind: 'tripod', at: [s * 12.5, mz0 + 5], y, s: 0.9, face: [0, 1] });
