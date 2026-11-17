@@ -16,6 +16,7 @@ import { stPeterFacade, entrances } from './facade.js';
 import { stPeterInterior } from './interior.js';
 import { socle, sagrato } from './sagrato.js';
 import { borgoRow } from './borgo.js';
+import { sistina } from './sistina.js';
 import { piazzaLines, parterre, passetto, castel as castelRich, naveDress, shipMill, tiberLanding } from './dress.js';
 
 const T = 'travertine', L = 'lead', ST = 'stucco_ochre';
@@ -134,6 +135,6 @@ function colonnade(el, { bag, col }) {
 function paving(el, { bag }) { const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0; bag.add('flagstone', box(x0, y - 0.4, z0, x1, y + 0.02, z1)); }
 registerStyle('baroque', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.renaissance.elements, st_peter: stPeter, colonnade, obelisk, fountain, castel: castelRich, piazza_lines: piazzaLines, nave_dress: naveDress, ship_mill: shipMill, tiber_landing: tiberLanding, parterre, passetto, paving, ponte_angeli: ponteAngeli, palace_roman: palaceRoman, coach, sedan_chair: sedanChair, proc_cross: procCross, gonfalone, baldachin, borgo_row: borgoRow },
+  elements: { ...STYLES.qing.elements, ...STYLES.renaissance.elements, st_peter: stPeter, colonnade, obelisk, fountain, castel: castelRich, piazza_lines: piazzaLines, nave_dress: naveDress, ship_mill: shipMill, tiber_landing: tiberLanding, parterre, passetto, paving, ponte_angeli: ponteAngeli, palace_roman: palaceRoman, coach, sedan_chair: sedanChair, proc_cross: procCross, gonfalone, baldachin, borgo_row: borgoRow, sistina },
   objects: {},
 });
