@@ -45,6 +45,25 @@ export function tulouHall(el, { bag, col, lights }) {
   bag.add('timber', zslab(X(-ex), X(ex), Z(-ez), ye - 0.12, Z(0), yr - 0.12, 0.05));
   bag.add('timber', zslab(X(-ex), X(ex), Z(ez), ye - 0.12, Z(0), yr - 0.12, 0.05));
   B('tile_dark', -ex - 0.1, yr - 0.05, -0.3, ex + 0.1, yr + 0.3, 0.3);
+  // the ridge's upturned ends (the Hakka hall's swallow-tail curl) and a gourd finial at the middle
+  for (const sg of [-1, 1]) {
+    B('tile_dark', sg > 0 ? ex - 0.5 : -ex - 0.2, yr + 0.25, -0.2, sg > 0 ? ex + 0.2 : -ex + 0.5, yr + 0.45, 0.2);
+    B('tile_dark', sg > 0 ? ex - 0.1 : -ex - 0.45, yr + 0.45, -0.17, sg > 0 ? ex + 0.45 : -ex + 0.1, yr + 0.68, 0.17);
+    B('tile_dark', sg > 0 ? ex + 0.2 : -ex - 0.7, yr + 0.68, -0.12, sg > 0 ? ex + 0.7 : -ex - 0.2, yr + 0.86, 0.12);
+  }
+  bag.add('tile_dark', lathe([[0.001, 0], [0.16, 0.02], [0.2, 0.14], [0.12, 0.28], [0.1, 0.4], [0.16, 0.52], [0.1, 0.66], [0.001, 0.72]], 10, null, X(0), yr + 0.3, Z(0)));
+  // brackets (stacked blocks) carrying the tie-beams on every post, drum caps on the stone bases
+  for (const z of [zf - 0.6, -0.4]) for (const x of xs) {
+    B('timber_red', x - 0.38, 3.8, z - 0.14, x + 0.38, 4.1, z + 0.14); B('timber_red', x - 0.26, 3.55, z - 0.12, x + 0.26, 3.8, z + 0.12);
+    B('gilt_bronze', x - 0.2, 4.1, z - 0.15, x + 0.2, 4.14, z + 0.15);
+    bag.add('granite_block', lathe([[0.001, 0], [0.31, 0], [0.34, 0.04], [0.3, 0.18], [0.001, 0.18]], 12, null, X(x), PY + 0.25, Z(z)));
+  }
+  // the offering table before the altar, its red cloth, fruit and cups, kneeling cushions on the floor
+  B('timber_red', -1.1, PY, zb + 2.1, 1.1, PY + 0.85, zb + 2.75); B('cloth_red', -1.15, PY + 0.8, zb + 2.05, 1.15, PY + 0.88, zb + 2.8);
+  col.rect([X(-1.1), Z(zb + 2.1), X(1.1), Z(zb + 2.75)], PY, PY + 0.9);
+  for (const x of [-0.7, 0, 0.7]) bag.add('terracotta', lathe([[0.001, 0], [0.11, 0.01], [0.14, 0.08], [0.1, 0.12], [0.001, 0.12]], 9, null, X(x), PY + 0.88, Z(zb + 2.45)));
+  for (const x of [-0.35, 0.35]) bag.add('bronze', lathe([[0.001, 0], [0.04, 0.01], [0.05, 0.06], [0.001, 0.06]], 8, null, X(x), PY + 0.88, Z(zb + 2.6)));
+  for (const x of [-0.8, 0, 0.8]) B('cloth_red', x - 0.25, PY, zb + 3.3, x + 0.25, PY + 0.06, zb + 3.7);
   for (let k = -3; k <= 3; k++) { const z = k * 1.0, y = yr - (yr - ye) * Math.abs(k) / 7; bag.add('timber', rod([X(-ex + 0.3), y - 0.2, Z(z)], [X(ex - 0.3), y - 0.2, Z(z)], 0.07, 5)); }
   for (const s of [-1, 1]) {
     const x = X(s * (hw - 0.3)), t = [x, 4.2, Z(-6.3), x, 4.2, Z(6.3), x, yr - 0.4, Z(0)];

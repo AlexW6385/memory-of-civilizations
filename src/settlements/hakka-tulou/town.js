@@ -18,7 +18,7 @@ export async function town() {
       V.push({ t: 'tulou_ring', rect: [n.c[0] - n.R, n.c[1] - n.R, n.c[0] + n.R, n.c[1] + n.R], c: n.c, R: n.R, n: n.R > 16 ? 48 : 36, floors: fl, wallIn, front, rail: front - 1.4, full: false, windows: true, gates: [n.gate === 'n' ? 270 : 90], windowsFrom: 2, rooms: true, stairs: true, bays: [0, 180], furnish: furnishRing(n.R > 16 ? 48 : 36, k, { gates: [n.gate === 'n' ? 270 : 90], bays: [0, 180] }) });
     }
   }
-  for (const [x, z, w, d] of FARMS) V.push({ t: 'farmhouse', c: [x, z], w, d, rot: 0, front: 's', rect: [x - w / 2 - 0.9, z - d / 2 - 0.9, x + w / 2 + 0.9, z + d / 2 + 0.9] });
+  FARMS.forEach(([x, z, w, d], fi) => V.push({ t: 'farmhouse', kind: fi, c: [x, z], w, d, rot: 0, front: 's', rect: [x - w / 2 - 0.9, z - d / 2 - 0.9, x + w / 2 + 0.9, z + d / 2 + 0.9] }));
   // the stream: water, two slab bridges, the road and the drying ground
   V.push({ t: 'water_cells', rect: [-RADIUS + 12, 60, RADIUS - 12, 100], y: STREAM.water, cell: 1, inside: (x, z) => inStream(x, z, -0.3) });
   for (const x of [0, -66]) { const z = streamZ(x); V.push({ t: 'slab_bridge', a: [x, z - 5.2], b: [x, z + 5.2], y: 0.1, w: 1.9 }); }

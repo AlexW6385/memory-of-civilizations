@@ -40,6 +40,10 @@ export function ringRoof(bag, c, n, o) {
     bag.add(TIMBER, slope(c, o.ro, o.ye - 0.1, o.rr, o.yr - 0.1, 0.05, a0, a1));
     bag.add(TIMBER, slope(c, o.rr, o.yr - 0.1, o.ri, o.yi - 0.1, 0.05, a0, a1));
     bag.add('tile_dark', slope(c, o.rr + 0.35, o.yr + 0.09, o.rr - 0.35, o.yr + 0.09, 0.14, a0, a1));
+    // the eave: a drip row of darker tile ends along the edge and a fascia board under it
+    const yAt = (r) => o.ye + (o.yr - o.ye) * (o.ro - r) / (o.ro - o.rr);
+    bag.add('tile_dark', slope(c, o.ro, o.ye + 0.035, o.ro - 0.4, yAt(o.ro - 0.4) + 0.035, 0.07, a0, a1));
+    bag.add('wood_dark', sector(c, o.ro + 0.01, o.ro - 0.05, o.ro + 0.01, o.ro - 0.05, o.ye - 0.26, o.ye - 0.02, a0, a1));
   }
   // the rafters under the soffit: one in every second sector, a purlin ring under the ridge
   for (let i = 0; i < n; i += 2) {
@@ -78,6 +82,7 @@ export function tulouRound(el, ctx) {
     bag.add('granite_block', sector(c, R + 0.07, wallIn, ro(1.3) + 0.04, wallIn, 0, 1.3, a0, a1));
     let y = 1.3;
     if (full || el.windows) for (const [s0, s1] of sills) {
+      const topW = s0 > fl[K - 1];
       bag.add(EARTH, sector(c, ro(y), wallIn, ro(s0), wallIn, y, s0, a0, a1));
       // the window: two piers beside a 0.5 m opening, a timber lintel and sill
       const hw = 0.27 / ro(s0);
@@ -85,6 +90,13 @@ export function tulouRound(el, ctx) {
       bag.add(EARTH, sector(c, ro(s0), wallIn, ro(s1), wallIn, s0, s1, ac + hw, a1));
       bag.add(TIMBER, sector(c, ro(s1) + 0.03, wallIn - 0.1, ro(s1) + 0.03, wallIn - 0.1, s1 - 0.1, s1, ac - hw, ac + hw));
       bag.add(TIMBER, sector(c, ro(s0) + 0.03, wallIn - 0.1, ro(s0) + 0.03, wallIn - 0.1, s0, s0 + 0.07, ac - hw, ac + hw));
+      // three bars across the opening, a dark recess behind; on the top floor two narrow gun ports either side
+      { const rb = (ro(s0) + wallIn) / 2; for (const f of [-0.55, 0, 0.55]) { const [bx, bz] = P(c, rb, ac + hw * f); bag.add(TIMBER, rod([bx, s0, bz], [bx, s1, bz], 0.017, 4)); } }
+      if (topW) for (const off of [-0.3, 0.3]) {
+        const gy = s0 + 0.45, gh = 0.07 / ro(gy), ag = ac + off * da;
+        bag.add('opening', sector(c, ro(gy + 0.3) + 0.01, ro(gy) - 0.05, ro(gy + 0.3) + 0.01, ro(gy) - 0.05, gy, gy + 0.3, ag - gh, ag + gh));
+        bag.add('opening', sector(c, wallIn + 0.01, wallIn - 0.03, wallIn + 0.01, wallIn - 0.03, gy, gy + 0.3, ag - gh, ag + gh));
+      }
       y = s1;
     }
     bag.add(EARTH, sector(c, ro(y), wallIn, ro(yTopO), wallIn, y, [yTopO, yTopI], a0, a1));
