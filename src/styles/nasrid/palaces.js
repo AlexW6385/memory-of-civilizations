@@ -10,6 +10,16 @@ import { holedWall, face, dress, muqarnasDome, archHead, cupola, starDome, starC
 
 const PL = 'plaster_white', SC = 'stucco_cream', SW = 'stucco_warm', MS = 'marble_smooth', RED = 'tuff_red';
 const q4 = (out, a, b, c, d) => out.push(...a, ...b, ...c, ...a, ...c, ...d);
+/** A clipped myrtle hedge x0..x1 × z0..z1 from y to y + h: straight sides, a rounded shoulder, a crown that swells and dips along its length (the leaves' clumps), ends rounded off. */
+function hedge(bag, x0, x1, z0, z1, y, h) {
+  const w = x1 - x0, cx = (x0 + x1) / 2, n = Math.max(4, Math.round((z1 - z0) / 0.3)), tri = [];
+  const prof = [[-0.5, 0], [-0.5, 0.62], [-0.43, 0.8], [-0.3, 0.93], [-0.14, 0.99], [0, 1], [0.14, 0.99], [0.3, 0.93], [0.43, 0.8], [0.5, 0.62], [0.5, 0]];
+  const P = (k, i) => { const t = k / n, taper = Math.min(1, Math.sin(Math.min(1, t * 8, (1 - t) * 8) * Math.PI / 2) * 0.35 + 0.65), swell = 1 + 0.045 * Math.sin(t * Math.PI * 2 * (z1 - z0) / 1.1), ed = Math.min(1, t * 14, (1 - t) * 14);
+    const [u, v] = prof[i]; return [cx + u * w * taper, y + v * h * swell * (v > 0.6 ? 0.9 + 0.1 * ed : 1), z0 + (z1 - z0) * t]; };
+  for (let k = 0; k < n; k++) for (let i = 0; i + 1 < prof.length; i++) q4(tri, P(k, i), P(k + 1, i), P(k + 1, i + 1), P(k, i + 1));
+  for (const k of [0, n]) for (let i = 1; i + 1 < prof.length - 1; i++) tri.push(...P(k, 0), ...P(k, i), ...P(k, i + 1));
+  bag.add('lotus_leaf', dbl(tri));
+}
 /** A sloping slab of tiles over a gallery: from (z = za, y = ya) to (z = zb, y = yb) across x0..x1 (or along x when alongZ is false). */
 function slabZ(bag, x0, x1, za, ya, zb, yb) {
   const t = [], e = [];
@@ -97,8 +107,7 @@ export function comares(el, ctx) {
     const xa = cx + s * (pw + k + 0.3), xb = cx + s * (pw + k + 1.35), lo = Math.min(xa, xb), hi = Math.max(xa, xb);
     for (let z = pz0 + 0.2; z < pz1 - 0.5; z += 6.9) {
       const zb = Math.min(pz1 - 0.2, z + 6.6);
-      bag.add('lotus_leaf', box(lo, y + 0.05, z, hi, y + 0.78, zb));
-      bag.add('lotus_leaf', box(lo + 0.08, y + 0.78, z + 0.08, hi - 0.08, y + 0.9, zb - 0.08));
+      hedge(bag, lo, hi, z, zb, y + 0.05, 0.95);
       col.rect([lo, z, hi, zb], y, y + 0.9);
     }
   }
@@ -211,7 +220,26 @@ export function comares(el, ctx) {
   for (const f of [face('z', u0, -1), face('z', u1, 1), face('x', t0, -1), face('x', t1, 1)]) for (const m of f.ax === 'z' ? [ic[0] - 3, ic[0] + 3] : [ic[1] - 3, ic[1] + 3]) for (const yy of [y + 24, y + 33]) {
     if (f.ax === 'z' && f.at === u1 && yy < y + 26) continue;
     const fr = f.R(0, 0.12, m - 1.1, m + 1.1); bag.add('stucco_cream', box(fr[0], yy - 0.3, fr[1], fr[2], yy + 3.3, fr[3]));
-    for (const d of [-0.5, 0.5]) { const o = f.R(0.12, 0.16, m + d - 0.36, m + d + 0.36); bag.add('opening', box(o[0], yy, o[1], o[2], yy + 2.6, o[3])); }
+    for (const d of [-0.5, 0.5]) {
+      const o = f.R(0.12, 0.16, m + d - 0.36, m + d + 0.36); bag.add('opening', box(o[0], yy, o[1], o[2], yy + 2.6, o[3]));
+      // the lobed arch of each light (the spandrel in front of the opening's square head), a sill below
+      archHead(bag, f, m + d - 0.36, m + d + 0.36, yy + 1.8, yy + 2.6, 0.2, 'lobed', { alfiz: false });
+      const sl = f.R(0, 0.3, m + d - 0.5, m + d + 0.5); bag.add(SC, box(sl[0], yy - 0.12, sl[1], sl[2], yy, sl[3]));
+    }
+  }
+  // the tower's dress: string courses at the storeys, a rhomb-lattice panel between the window rows, and the great cornice of stepped
+  // courses on a row of modillions under the crenels (Hall's exterior is plain brick below; §4.2)
+  for (const f of [face('z', u0, -1), face('z', u1, 1), face('x', t0, -1), face('x', t1, 1)]) {
+    const a = f.ax === 'z' ? t0 : u0, b = f.ax === 'z' ? t1 : u1, mc = (a + b) / 2;
+    for (const [yy, dd, hh] of [[y + 18.4, 0.28, 0.4], [y + 22.0, 0.14, 0.16], [y + 30.0, 0.14, 0.16], [y + 38.6, 0.14, 0.16]]) {
+      const c = f.R(0, dd, a - dd, b + dd); bag.add(SC, box(c[0], yy, c[1], c[2], yy + hh, c[3]));
+    }
+    // the corner pilasters: a slim cream band down each edge of the shaft
+    for (const e of [a, b]) { const c = f.R(0, 0.1, e - 0.1 + (e === a ? 0 : -0.5) + 0.1, e + 0.1 + (e === a ? 0.5 : 0) - 0.1); bag.add(SC, box(c[0], y + 18.8, c[1], c[2], y + 44.2, c[3])); }
+    sebka(bag, f, mc - 5.2, mc + 5.2, y + 27.4, y + 29.7, 0.5, 1.7, 0.05);
+    // the cornice: three stepped courses, modillions between them and the crenels
+    for (const [yy, dd] of [[y + 43.0, 0.24], [y + 43.3, 0.38], [y + 44.6, 0.5]]) { const c = f.R(0, dd, a - dd, b + dd); bag.add(SC, box(c[0], yy, c[1], c[2], yy + 0.3, c[3])); }
+    for (let u = a + 0.3; u < b - 0.2; u += 0.55) { const c = f.R(0, 0.36, u, u + 0.2); bag.add(SC, box(c[0], y + 43.3, c[1], c[2], y + 44.6, c[3])); }
   }
 }
 
