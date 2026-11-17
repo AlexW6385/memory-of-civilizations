@@ -51,6 +51,8 @@ export function tangPagoda(el, ctx) {
     const { h, s, bays } = S, ch = 1.05, bodyH = h - ch, ai = AI(s), aN = i < STOREYS.length - 1 ? AI(STOREYS[i + 1].s) : ai;
     // the walls with the openings in their middle bays (rectangular passages; the carved frames outside make them arches)
     const bw = (2 * s) / bays, aw = Math.min(bw * 0.62, 2.8), ah = i === 0 ? 5.4 : Math.min(bodyH * 0.6, 3.6), sill = i === 0 ? 0 : 0.9;
+    const ra = aw / 2, ahS = ah - ra, NA = 7;     // the arch: a straight part ahS, then a half-round head of radius ra, stepped in brick courses
+    const archHW = (k) => Math.sqrt(Math.max(0, ra * ra - ((k * ra) / NA) ** 2));   // the opening's half-width at the k-th course's foot
     const face = (r, along) => {   // r: the wall's rectangle; the opening in its middle along `along` ('x' | 'z')
       const m = along === 'x' ? (r[0] + r[2]) / 2 : (r[1] + r[3]) / 2, o0 = m - aw / 2, o1 = m + aw / 2;
       const P = (a0, a1, ya, yb) => solid(along === 'x' ? [a0, r[1], a1, r[3]] : [r[0], a0, r[2], a1], ya, yb, 'brick_buff');
@@ -58,6 +60,10 @@ export function tangPagoda(el, ctx) {
       P(lo, o0, y, y + bodyH); P(o1, hi, y, y + bodyH);
       if (sill > 0) P(o0, o1, y, y + sill);
       P(o0, o1, y + sill + ah, y + bodyH);
+      for (let k = 1; k < NA; k++) {   // the spandrels of the arch head
+        const hk = archHW(k), ya = y + sill + ahS + (k * ra) / NA, yb = ya + ra / NA;
+        P(m - ra, m - hk, ya, yb); P(m + hk, m + ra, ya, yb);
+      }
     };
     face([cx - s, cz + ai, cx + s, cz + s], 'x'); face([cx - s, cz - s, cx + s, cz - ai], 'x');
     // (the side walls between the end walls: their middle bay opens too)
@@ -72,19 +78,79 @@ export function tangPagoda(el, ctx) {
     }
     bag.add('limestone', frustum([cx - s - 0.02, cz - s - 0.02, cx + s + 0.02, cz + s + 0.02], y, y + 0.35, 0, 0, 0, 0));
     bag.add(wall, frustum([cx - s - pr - 0.04, cz - s - pr - 0.04, cx + s + pr + 0.04, cz + s + pr + 0.04], y + bodyH - 0.45, y + bodyH, 0, 0, 0, 0));   // the architrave course
-    // the carved frames round the openings (the ground storey's south door in bluestone, its lintel with the Buddha figures)
+    // the carved frames round the openings, following the arch (the ground storey's south door in bluestone); on the ground storey a lintel
+    // panel above each door carved in low relief: the Buddha preaching with his attendants under a canopy (the west one the Amitabha
+    // preaching scene, the south one the Buddha with the Heavenly Kings; line-carved on the real tower)
     const ay = y + sill;
     for (const [fx, fz] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
       const px = cx + fx * (s + pr + 0.02), pz = cz + fz * (s + pr + 0.02), along = fz !== 0, oz = fz, ox = fx;
       const fr = i === 0 && fz === 1 ? 'bluestone' : 'limestone';
-      const B = (a0, y_a, a1, y_b, d, m) => along ? bag.add(m, box(px + a0, y_a, pz + (oz > 0 ? 0 : -d), px + a1, y_b, pz + (oz > 0 ? d : 0))) : bag.add(m, box(px + (ox > 0 ? 0 : -d), y_a, pz + a0, px + (ox > 0 ? d : 0), y_b, pz + a1));
-      B(-aw / 2 - 0.3, ay, -aw / 2, ay + ah + 0.3, 0.08, fr); B(aw / 2, ay, aw / 2 + 0.3, ay + ah + 0.3, 0.08, fr); B(-aw / 2 - 0.3, ay + ah, aw / 2 + 0.3, ay + ah + 0.3, 0.08, fr);
+      const B = (a0, y_a, a1, y_b, d, m, d0 = 0) => along ? bag.add(m, box(px + a0, y_a, pz + (oz > 0 ? d0 : -d), px + a1, y_b, pz + (oz > 0 ? d : -d0))) : bag.add(m, box(px + (ox > 0 ? d0 : -d), y_a, pz + a0, px + (ox > 0 ? d : -d0), y_b, pz + a1));
+      for (const sg of [-1, 1]) B(sg < 0 ? -aw / 2 - 0.3 : aw / 2, ay, sg < 0 ? -aw / 2 : aw / 2 + 0.3, ay + ahS, 0.08, fr);
+      for (let k = 0; k < NA; k++) {
+        const hk = archHW(k), yA = ay + ahS + (k * ra) / NA, yB = yA + ra / NA;
+        B(-hk - 0.3, yA, -hk, yB, 0.08, fr); B(hk, yA, hk + 0.3, yB, 0.08, fr);
+      }
+      const hT = archHW(NA - 1) + 0.3;
+      B(-hT, ay + ah, hT, ay + ah + 0.3, 0.08, fr);
       if (sill > 0) B(-aw / 2 - 0.3, ay - 0.12, aw / 2 + 0.3, ay, 0.12, fr);
-      if (i === 0 && fz === 1) B(-aw / 2 - 0.45, ay + ah + 0.3, aw / 2 + 0.45, ay + ah + 1.2, 0.1, 'bluestone');
+      if (i === 0) {
+        const y1 = ay + ah + 0.3, pw = Math.min(bw - 0.55, 2.2) / 2, hh = 1.25, yt = y1 + hh, ymid = y1 + 0.1;
+        B(-pw, y1, pw, yt, 0.09, 'bluestone');                                   // the carved lintel slab
+        B(-pw - 0.08, yt, pw + 0.08, yt + 0.12, 0.13, 'limestone');            // its cornice
+        const R = (a0, ya, a1, yb) => B(a0, ya, a1, yb, 0.12, 'limestone', 0.09);   // a relief figure: a thin raised box
+        const west = fx === -1, v = fz === 1 ? 0 : west ? 1 : 2;
+        // the canopy: a ridge-board and two tiers of eaves with hanging fringe
+        R(-pw + 0.15, yt - 0.14, pw - 0.15, yt - 0.1); R(-pw + 0.3, yt - 0.24, pw - 0.3, yt - 0.2);
+        for (let q = -pw + 0.3; q < pw - 0.25; q += 0.2) R(q, yt - 0.36, q + 0.07, yt - 0.24);
+        // the Buddha: a halo, the head, the body on a lotus seat; the hands raised in the preaching gesture
+        R(-0.22, ymid + 0.5, 0.22, ymid + 0.94); R(-0.07, ymid + 0.5, 0.07, ymid + 0.7); R(-0.16, ymid + 0.2, 0.16, ymid + 0.5); R(-0.26, ymid + 0.08, 0.26, ymid + 0.2); R(-0.34, ymid + 0.02, 0.34, ymid + 0.08);
+        if (v === 1) { R(-0.42, ymid + 0.2, -0.16, ymid + 0.26); R(0.16, ymid + 0.2, 0.42, ymid + 0.26); }          // the preaching hands spread: Amitabha
+        // the attendants on each side: bodhisattvas (v 1) or Heavenly Kings in armour (v 0, 2) — a halo, the head, the long body, the lotus
+        for (const sg of [-1, 1]) for (const [dx, hgt] of v === 1 ? [[0.62, 0.62], [0.95, 0.5]] : [[0.62, 0.7], [0.97, 0.62]]) {
+          const a = sg * dx; R(a - 0.05, ymid + 0.04 + hgt - 0.02, a + 0.05, ymid + 0.04 + hgt + 0.1); R(a - 0.06, ymid + 0.08, a + 0.06, ymid + 0.04 + hgt - 0.02);
+          if (v !== 1) R(a - 0.09, ymid + 0.2, a + 0.09, ymid + 0.3);     // the broad shoulders of the Heavenly King
+          R(a - 0.1, ymid + 0.02, a + 0.1, ymid + 0.07);
+        }
+        // a border of scrolling vine: small leaves along the lintel's edge
+        for (let q = -pw + 0.1; q < pw - 0.14; q += 0.22) R(q, y1 + 0.04, q + 0.12, y1 + 0.1);
+      }
+    }
+    // the two steles of Taizong and Gaozong (Chu Suiliang's calligraphy) beside the south door, set against the wall in brick niches: a stone with
+    // coiled dragons on its head, curling foliage on its sides, celestial dancers on its base
+    if (i === 0) for (const sg of [-1, 1]) {
+      const bwc = (2 * s) / bays, xc = cx + sg * bwc, zf = cz + s + pr + 0.02, F = F0;
+      bag.add('brick_grey', box(xc - 0.78, F, zf, xc + 0.78, F + 3.3, zf + 0.1)); bag.add('brick_grey', box(xc - 0.9, F + 3.3, zf, xc + 0.9, F + 3.5, zf + 0.16));
+      bag.add('limestone', box(xc - 0.62, F, zf + 0.1, xc + 0.62, F + 0.45, zf + 0.46));
+      for (let q = 0; q < 4; q++) bag.add('bluestone', box(xc - 0.5 + q * 0.28, F + 0.1, zf + 0.46, xc - 0.34 + q * 0.28, F + 0.38, zf + 0.5));
+      bag.add('slate', box(xc - 0.5, F + 0.45, zf + 0.12, xc + 0.5, F + 2.35, zf + 0.36));
+      bag.add('paint_white', box(xc - 0.4, F + 0.7, zf + 0.36, xc + 0.4, F + 2.15, zf + 0.375));   // the inscription field
+      for (let q = 0; q < 9; q++) bag.add('slate', box(xc - 0.36, F + 0.78 + q * 0.15, zf + 0.375, xc + 0.36, F + 0.82 + q * 0.15, zf + 0.385));   // its lines of characters
+      bag.add('slate', box(xc - 0.55, F + 2.35, zf + 0.12, xc + 0.55, F + 2.95, zf + 0.34));
+      for (const e of [-1, 1]) { bag.add('limestone', box(xc + e * 0.3 - 0.17, F + 2.45, zf + 0.34, xc + e * 0.3 + 0.17, F + 2.85, zf + 0.4)); bag.add('limestone', box(xc + e * 0.12 - 0.05, F + 2.5, zf + 0.34, xc + e * 0.12 + 0.05, F + 2.8, zf + 0.42)); }
+      bag.add('slate', box(xc - 0.35, F + 2.95, zf + 0.14, xc + 0.35, F + 3.15, zf + 0.32));
+      col.rect([xc - 0.9, zf, xc + 0.9, zf + 0.5], F, F + 3.5);
     }
     // the cornice: corbelled courses of brick (rings: the chamber stays hollow), then a sloping course
+    // the brick imitation of timber at the pilasters' heads: the cap block (ludou) and the short arm (huagong) of a bracket set under the architrave
+    for (let k = 0; k <= bays; k++) {
+      const a = pos(k), c0 = Math.min(Math.max(a, -s + pw / 2), s - pw / 2), yb0 = y + bodyH - 0.78;
+      for (const [fx, fz] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+        const ex = fz !== 0 ? [cx + c0, cz + fz * s] : [cx + fx * s, cz + c0];
+        const box2 = (hl, ya, yb, out) => fz !== 0 ? box(ex[0] - hl, ya, fz > 0 ? ex[1] : ex[1] - out, ex[0] + hl, yb, fz > 0 ? ex[1] + out : ex[1]) : box(fx > 0 ? ex[0] : ex[0] - out, ya, ex[1] - hl, fx > 0 ? ex[0] + out : ex[0], yb, ex[1] + hl);
+        bag.add(wall, box2(0.36, yb0, yb0 + 0.16, pr + 0.14)); bag.add(wall, box2(0.24, yb0 + 0.16, yb0 + 0.33, pr + 0.2));
+      }
+    }
     let yy = y + bodyH;
-    for (const [o, t] of [[0.2, 0.2], [0.4, 0.2], [0.65, 0.2], [0.9, 0.2]]) { ring(s + o, ai, yy, yy + t, wall); yy += t; }
+    for (const [o, t] of [[0.2, 0.2], [0.4, 0.2]]) { ring(s + o, ai, yy, yy + t, wall); yy += t; }
+    // the corbelled eaves with the row of dentils (the "water-chestnut" teeth, lingjiao) along each face
+    ring(s + 0.55, ai, yy, yy + 0.2, wall);
+    for (let t = -s + 0.3; t < s - 0.1; t += 0.5) {
+      bag.add(wall, box(cx + t, yy, cz + s + 0.5, cx + t + 0.26, yy + 0.2, cz + s + 0.74)); bag.add(wall, box(cx + t, yy, cz - s - 0.74, cx + t + 0.26, yy + 0.2, cz - s - 0.5));
+      bag.add(wall, box(cx + s + 0.5, yy, cz + t, cx + s + 0.74, yy + 0.2, cz + t + 0.26)); bag.add(wall, box(cx - s - 0.74, yy, cz + t, cx - s - 0.5, yy + 0.2, cz + t + 0.26));
+    }
+    yy += 0.2;
+    ring(s + 0.9, ai, yy, yy + 0.2, wall); yy += 0.2;
     ring(s + 0.9, ai, yy, y + h, 'roof_ridge');
     // the chamber: the floor (storey 0: brick; the others the slab below), a ceiling = the next slab's underside
     if (i === 0) { slab([cx - ai, cz - ai, cx + ai, cz + ai], F0 - 0.01, F0 + 0.04, 'brick_grey'); col.floor([cx - ai, cz - ai, cx + ai, cz + ai], F0 + 0.04); }
@@ -130,10 +196,16 @@ export function tangPagoda(el, ctx) {
     }
     y += h;
   });
-  // the crown: a stepped square roof and the finial
+  // the crown: corbelled courses of flat brick rising to a low pointed roof, and on it the finial (tacha): a lotus base, a gourd, rings and the flame pearl
   const s = 8.5;
-  bag.add('roof_ridge', frustum(R(s - 0.6), y, y + 0.5, 0, 0, 0, 0));   bag.add('tile_grey', frustum(R(s - 0.3), y + 0.5, y + 2.0, s - 1.2, s - 1.2, s - 1.2, s - 1.2));
-  bag.add('gilt_bronze', lathe([[0.001, 2.0], [0.5, 2.0], [0.25, 2.5], [0.35, 3.0], [0.15, 3.6], [0.001, 4.2]], 10, null, cx, y, cz));
+  bag.add('roof_ridge', frustum(R(s - 0.6), y, y + 0.5, 0, 0, 0, 0));
+  for (let k = 0; k < 4; k++) bag.add('brick_buff', frustum(R(s - 0.9 - k * 0.7), y + 0.5 + k * 0.28, y + 0.78 + k * 0.28, 0, 0, 0, 0));
+  bag.add('tile_grey', frustum(R(s - 3.2), y + 1.62, y + 3.4, 4.5, 4.5, 4.5, 4.5));
+  bag.add('gilt_bronze', lathe([[0.001, 3.4], [0.9, 3.4], [0.95, 3.52], [0.7, 3.7], [0.5, 3.8], [0.001, 3.8]], 12, null, cx, y, cz));          // the lotus base
+  bag.add('gilt_bronze', lathe([[0.001, 3.8], [0.5, 3.9], [0.62, 4.3], [0.5, 4.7], [0.2, 4.9], [0.001, 4.9]], 12, null, cx, y, cz));          // the gourd
+  bag.add('gilt_bronze', lathe([[0.18, 4.9], [0.18, 5.7]], 8, null, cx, y, cz));
+  for (let k = 0; k < 5; k++) bag.add('gilt_bronze', lathe([[0.001, 5.0 + k * 0.16], [0.42 - k * 0.05, 5.0 + k * 0.16], [0.42 - k * 0.05, 5.08 + k * 0.16], [0.001, 5.08 + k * 0.16]], 12, null, cx, y, cz));   // the wheel of rings
+  bag.add('gilt_bronze', lathe([[0.001, 5.7], [0.16, 5.8], [0.14, 6.0], [0.001, 6.3]], 10, null, cx, y, cz));               // the flame pearl
 }
 
 export const PAGODA_ELEMENTS = { tang_pagoda: tangPagoda };

@@ -3,6 +3,7 @@
 // hall of an official's house near the avenue, with its dais, screen and zither — walkable from its court; the temple's halls are
 // the plan's. The rooms give the music its zones.
 import { YAW, rng } from '../../styles/tang/kit.js';
+import { houseVariant } from '../../styles/tang/house.js';
 import { lots, WINE, DACI_AX, DACI_MAIN, OFFICE, DACI_QUARTERS } from './layout.js';
 
 const mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
@@ -77,6 +78,26 @@ export function interiorLife() {
     per([2.3, bz2 + 3.5], yy, [0, 0], { pose: 'harp', cloth: 'cloth_green', cloth2: 'cloth_red', hair: 'bun', skin: 'skin_light' });
     per([1.6, 0.9], h.plat, [0, bz2], { pose: 'sit', cloth: 'cloth_indigo', hat: 'cap', hair: 'topknot' });
     per([-1.5, 2.3], h.plat, [0, bz2], { pose: 'stand', cloth: 'cloth_grey', hair: 'topknot' });
+  }
+  // the ordinary houses of the wards: in some of them (by lot) the people of the room's use, in the hall's frame as tangHouse builds it
+  for (const l of lots()) {
+    if (l.kind === 'hut' || l.det < 1 || l === furnishedLot() || rng(l.seed + 5)() > 0.45) continue;
+    const variant = houseVariant({ ...l, furnished: false }), [W, D] = ext(l.rect, l.front), big = l.kind === 'mansion';
+    const hw = Math.min(W - 5.5, big ? 17.5 : 11.5), hd = big ? 7.4 : 5.8, hz = -D / 2 + hd / 2 + 2.0, plat = big ? 0.55 : 0.4, z0 = -hd / 2 + 0.3, hx = hw / 2 - 0.45;
+    const side = rng(l.seed + 7)() < 0.5 ? -1 : 1, F = frameOf(mid(l.rect), l.front), r2 = rng(l.seed + 17);
+    const who = (at, y2, toward, o = {}) => { const p = F.P([at[0], hz + at[1]]), q = F.P([toward[0], hz + toward[1]]); out.push({ t: 'figure', at: p, y: y2, rot: face([q[0] - p[0], q[1] - p[1]]), seed: Math.floor(r2() * 1e9), dress: 'robe', skin: 'skin_light', hat: 'none', carry: 'none', ...o }); };
+    const master = { cloth: ['cloth_maroon', 'cloth_green', 'cloth_indigo', 'cloth_blue'][Math.floor(r2() * 4)], cloth2: 'cloth_white', over: 'sash', hat: 'cap', hatMat: 'cloth_black', hair: 'topknot', beard: r2() < 0.6 };
+    const woman = { cloth: ['cloth_red', 'cloth_green', 'cloth_ochre', 'cloth_blue'][Math.floor(r2() * 4)], cloth2: 'cloth_white', over: 'shawl', hair: 'bun' };
+    const plain = { dress: 'trousers', cloth: ['cloth_brown', 'cloth_grey', 'cloth_indigo'][Math.floor(r2() * 3)], cloth2: 'cloth_white', hat: 'cap', hatMat: 'cloth_black', hair: 'topknot' };
+    const poor = l.wk !== 'official' && !big;
+    if (variant === 'study') { const tx = -side * 2.1, tz = z0 + 1.4; who([tx, tz + 0.95], plat + 0.34, [tx, tz], { pose: 'cross', ...(poor ? plain : master) }); }
+    else if (variant === 'bedroom') who([side * 2.2, z0 + 2.4], plat, [side * 2.2, z0 + 1.2], { pose: 'sit', ...woman });
+    else if (variant === 'dining') { who([2.8, z0 + 1.8], plat + 0.38, [1.7, z0 + 1.8], { pose: 'cross', ...(poor ? plain : master) }); who([-0.6, z0 + 1.8], plat + 0.38, [-1.7, z0 + 1.8], { pose: 'cross', ...woman }); }
+    else if (variant === 'weaver') who([side * 2.6, z0 + 3.0], plat, [side * 2.6, z0 + 1.6], { pose: 'sit', ...woman, cloth: 'cloth_brown' });
+    else if (variant === 'shrine') who([0, z0 + 2.0], plat + 0.05, [0, z0 + 0.4], { pose: 'kneel', arms: 'pray', ...(poor ? { ...plain, hat: 'none' } : woman) });
+    else if (variant === 'guest') { who([-1.55, z0 + 1.65], plat + 0.37, [0, z0 + 1.6], { pose: 'cross', ...master }); who([1.55, z0 + 1.65], plat + 0.37, [0, z0 + 1.6], { pose: 'cross', cloth: 'cloth_indigo', cloth2: 'cloth_white', over: 'belt', hat: 'brim', skin: 'skin_medium', beard: true, hair: 'short' }); }
+    else if (variant === 'music') { const xa = Math.min(hx - 0.6, 4.4), qx = (-side * xa - side * 1.5) / 2, qz = z0 + 1.25; who([qx, qz + 0.85], plat + 0.34, [qx, qz], { pose: 'harp', ...woman }); }
+    else if (variant === 'physician') { who([-side * 2.3, z0 + 1.55], plat, [-side * 2.3, z0 + 0.7], { pose: 'stand', cloth: 'cloth_grey', cloth2: 'cloth_white', over: 'belt', hat: 'cap', hatMat: 'cloth_black', hair: 'topknot', beard: true }); who([-side * 3.2, z0 + 2.5], plat, [-side * 2.5, z0 + 1.2], { pose: 'sit', ...plain }); }
   }
   // the translation hall of Daci'en: the monks at their desks, the master (Xuanzang) at the middle, a scribe standing with a scroll
   { const tc = [DACI_AX + 52, DACI_MAIN[1]], tw = 22, td = 9.6, ty = 0.7, fr3 = frameOf(tc, 'w'), z0 = -td / 2 + 0.3, hx3 = tw / 2 - 0.45, n = Math.max(4, Math.floor((tw - 4) / 2.4));

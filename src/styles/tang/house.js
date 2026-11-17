@@ -12,15 +12,45 @@ const ext = (rect, front) => { const w = rect[2] - rect[0], d = rect[3] - rect[1
 const mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
 
 /** The gate of a courtyard house in the front wall (local +z side) at x = gx: two posts, a lintel and a small gabled roof. */
-function plainGate(L, gx, z, rich) {
+function plainGate(L, gx, z, rich, hwG = 1.25, tile = null) {
   const { bag, col } = L;
-  for (const s of [-1, 1]) { bag.add('timber_red', box(gx + s * 1.25 - 0.2, 0, z - 0.3, gx + s * 1.25 + 0.2, 3.0, z + 0.3)); }
-  bag.add('timber_red', box(gx - 1.45, 2.65, z - 0.3, gx + 1.45, 3.0, z + 0.3));
-  tangRoof(L.bag, { cx: gx, cz: z, A: 2.5, B: 1.6, y: 3.05, rise: 0.75, gable: !rich, thick: 0.18, chi: 0.5 });
-  bag.add('wood_dark', box(gx - 1.2, 0, z + 0.22, gx - 0.15, 2.65, z + 0.3));      // one door leaf open against the post
+  for (const s of [-1, 1]) { bag.add('timber_red', box(gx + s * hwG - 0.2, 0, z - 0.3, gx + s * hwG + 0.2, 3.0, z + 0.3)); }
+  bag.add('timber_red', box(gx - hwG - 0.2, 2.65, z - 0.3, gx + hwG + 0.2, 3.0, z + 0.3));
+  tangRoof(L.bag, { cx: gx, cz: z, A: hwG + 1.25, B: 1.6, y: 3.05, rise: 0.75, gable: !rich, thick: 0.18, chi: 0.5, ...(tile ? { tile, soffit: tile, ridge: tile, chiwei: false } : {}) });
+  bag.add('wood_dark', box(gx - hwG + 0.05, 0, z + 0.22, gx - 0.15, 2.65, z + 0.3));      // one door leaf open against the post
   void col;
 }
 
+/** The brushwood gate of a poor house: two posts, a wattle leaf hung on one, a ragged lintel of poles. */
+function brushGate(L, gx, z) {
+  const { bag } = L;
+  for (const s of [-1, 1]) bag.add('wood_dark', box(gx + s * 0.9 - 0.07, 0, z - 0.08, gx + s * 0.9 + 0.07, 2.0, z + 0.08));
+  bag.add('wood_dark', box(gx - 1.0, 1.9, z - 0.06, gx + 1.0, 2.0, z + 0.06)); bag.add('thatch', box(gx - 1.1, 2.0, z - 0.2, gx + 1.1, 2.2, z + 0.2));
+  bag.add('wicker', box(gx - 0.85, 0.05, z + 0.12, gx - 0.1, 1.5, z + 0.18)); bag.add('wood_dark', box(gx - 0.85, 0.7, z + 0.18, gx - 0.1, 0.74, z + 0.2));
+}
+/** The gate of an official's house (rank): lacquered door leaves ajar, a name board under the gate building's eaves, the stone drums, a rack of halberds, a mounting block. */
+function rankGate(L, gx, z, wt, W) {
+  const { bag, col } = L, zo = z + wt / 2, dir = gx > 0 ? -1 : 1;
+  for (const s of [-1, 1]) {   // the drum stones (menmo) beside the gate's porch: a block with a drum-shaped stone upon it
+    const x = gx + s * 4.9; bag.add('granite_block', box(x - 0.3, 0, zo + 0.15, x + 0.3, 0.2, zo + 0.75)); bag.add('granite_block', lathe([[0.001, 0.2], [0.26, 0.2], [0.3, 0.34], [0.3, 0.6], [0.26, 0.72], [0.001, 0.72]], 12, null, x, 0, zo + 0.45)); col.circle(x, zo + 0.45, 0.32, 0, 0.72);
+  }
+  bag.add('lacquer_black', box(gx - 0.7, 3.0, z + 2.4, gx + 0.7, 3.45, z + 2.44)); bag.add('gilt_bronze', box(gx - 0.6, 3.07, z + 2.44, gx + 0.6, 3.38, z + 2.46));   // the name board under the gate building's eaves
+  // the halberd rack (lieji): two posts and a bar, five halberds with their pennons, at the wall's foot beside the gate
+  const rx = gx + dir * 7.6, rz = zo + 0.5;
+  for (const s of [-1, 1]) bag.add('wood_dark', box(rx + s * 0.9 - 0.04, 0, rz - 0.04, rx + s * 0.9 + 0.04, 1.35, rz + 0.04));
+  bag.add('wood_dark', box(rx - 0.94, 0.6, rz - 0.05, rx + 0.94, 0.66, rz + 0.05)); col.rect([rx - 0.95, rz - 0.08, rx + 0.95, rz + 0.08], 0, 1.4);
+  for (let k = 0; k < 5; k++) { const x = rx - 0.7 + k * 0.35; bag.add('wood_dark', box(x - 0.015, 0.1, rz - 0.015, x + 0.015, 2.5, rz + 0.015)); bag.add('iron', box(x - 0.045, 2.5, rz - 0.01, x + 0.045, 2.75, rz + 0.01)); bag.add('iron', box(x - 0.01, 2.4, rz - 0.07, x + 0.01, 2.55, rz + 0.07)); bag.add('cloth_red', box(x + 0.015, 2.1, rz - 0.005, x + 0.2, 2.4, rz + 0.005)); }
+  // the mounting block (xiamashi) on the other side, if the wall is long enough
+  const mx = gx - dir * 7.4;
+  if (Math.abs(mx) < W / 2 - 1.2) { bag.add('granite_block', box(mx - 0.5, 0, zo + 0.2, mx + 0.5, 0.3, zo + 0.8)); bag.add('granite_block', box(mx - 0.4, 0.3, zo + 0.3, mx + 0.4, 0.55, zo + 0.7)); col.rect([mx - 0.5, zo + 0.2, mx + 0.5, zo + 0.8], 0, 0.55); }
+}
+/** A small earth-god niche (tudi) in the foot of a common house's wall: a shelf under a tiny tiled roof, an incense bowl, a lamp. */
+function wallShrine(L, x, zo) {
+  const { bag } = L;
+  bag.add('wood_dark', box(x - 0.3, 0.85, zo, x + 0.3, 0.9, zo + 0.32)); for (const s of [-1, 1]) bag.add('wood_dark', box(x + s * 0.28 - 0.02, 0.9, zo, x + s * 0.28 + 0.02, 1.4, zo + 0.02));
+  bag.add('tile_grey', box(x - 0.36, 1.4, zo - 0.02, x + 0.36, 1.46, zo + 0.38)); bag.add('tile_grey', box(x - 0.3, 1.46, zo + 0.04, x + 0.3, 1.52, zo + 0.3));
+  bag.add('bronze', lathe([[0.001, 0], [0.07, 0], [0.09, 0.05], [0.001, 0.06]], 8, null, x, 0.9, zo + 0.17)); bag.add('paint_white', box(x - 0.012, 0.96, zo + 0.17, x + 0.012, 1.2, zo + 0.19)); bag.add('cloth_red', box(x - 0.2, 0.92, zo + 0.0, x + 0.2, 1.38, zo + 0.01));
+}
 
 /** The weathering of a lot's wall of rammed earth on its outer faces: the damp skirt, blotches, rain streaks, a patch of repair; the gate's gap kept clear. */
 function weatherFront(L, W, D, wh, th, gx, gw, rand) {
@@ -49,24 +79,35 @@ function weatherFront(L, W, D, wh, th, gx, gw, rand) {
   run(-ox, -D / 2, -ox, D / 2, -1, 0, null); run(ox, -D / 2, ox, D / 2, 1, 0, null);
 }
 
+/** The kind of room a house's main hall holds, by its class (the rooms of the great houses: study, music, guests, shrine; of the common: weaving, physician, store). */
+export function houseVariant(el, rr = rng((el.seed || 1) + 99)) {
+  const kind = el.kind || 'house', wk = el.wk || 'official';
+  if (el.furnished) return 'dais';
+  if (kind === 'mansion' && rr() < 0.35) return 'dais2';
+  const pool = kind === 'mansion' ? ['study', 'bedroom', 'dining', 'music', 'shrine', 'guest', 'study', 'bedroom'] : wk === 'official' ? ['study', 'bedroom', 'dining', 'shrine', 'guest', 'weaver', 'store'] : ['dining', 'weaver', 'store', 'shrine', 'physician', 'bedroom', 'weaver'];
+  return pool[Math.floor(rr() * pool.length)];
+}
 /** tang_house { rect, front, kind: 'mansion' | 'house' | 'hut', seed, det }. */
 export function tangHouse(el, ctx) {
   const rect = el.rect, f = el.front || 's', [W, D] = ext(rect, f), det = el.det ?? 1, kind = el.kind || 'house', rand = rng(el.seed || 1);
   const c = mid(rect), gx = (rand() < 0.5 ? -1 : 1) * W * 0.2;
   inFrame(ctx, c, YAW[f], (L) => {
-    const { bag, col } = L, wh = kind === 'hut' ? 1.1 : 2.7, th = 0.55;
+    // the front by rule: the class of the house (rank of an official's, gentry, common, poor) sets the wall's height and capping, the gate and its furniture
+    const wk = el.wk || 'official', cls = kind === 'hut' ? 'poor' : kind === 'mansion' ? 'rank' : wk === 'official' ? 'gentry' : wk === 'common' ? 'common' : 'poor';
+    const { bag, col } = L, wh = kind === 'hut' ? 1.1 : { rank: 3.0, gentry: 2.8, common: 2.4, poor: 1.9 }[cls], th = 0.55, capMat = cls === 'common' ? 'thatch' : 'tile_grey';
+    const gateW = cls === 'rank' || cls === 'gentry' ? 2.5 : 1.8;
     const op = [{ at: W / 2 + gx, w: kind === 'hut' ? 1.6 : 2.5, h: 4, y0: 0 }];
     // the wall of rammed earth round the lot, capped with tile; the gate in the front wall
     const ring = [[[-W / 2, -D / 2], [W / 2, -D / 2]], [[-W / 2, -D / 2], [-W / 2, D / 2]], [[W / 2, -D / 2], [W / 2, D / 2]]];
     for (const [a, b] of ring) wallRun(L, 'earth_wall', a, b, th, 0, wh);
-    wallRun(L, 'earth_wall', [-W / 2, D / 2], [W / 2, D / 2], th, 0, wh, kind === 'hut' ? [{ at: W / 2 + gx, w: 1.6, h: wh, y0: 0 }] : [{ at: W / 2 + gx, w: 2.5, h: 4.2, y0: 0 }]);
-    if (kind !== 'hut') {
+    wallRun(L, 'earth_wall', [-W / 2, D / 2], [W / 2, D / 2], th, 0, wh, kind === 'hut' ? [{ at: W / 2 + gx, w: 1.6, h: wh, y0: 0 }] : [{ at: W / 2 + gx, w: gateW, h: Math.max(wh + 0.1, cls === 'rank' || cls === 'gentry' ? 4.2 : 2.1), y0: 0 }]);
+    if (kind !== 'hut' && cls !== 'poor') {
       for (const [a, b, o] of [[ring[0][0], ring[0][1], []], [ring[1][0], ring[1][1], []], [ring[2][0], ring[2][1], []], [[-W / 2, D / 2], [W / 2, D / 2], []]]) void o, a, b;
-      const cap = (a, b, o) => { const Lw = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / Lw, uz = (b[1] - a[1]) / Lw; let s = 0; for (const q of [...o, { s0: Lw, s1: Lw }]) { if (q.s0 - s > 0.1) bag.add('tile_grey', Math.abs(ux) > 0.5 ? box(Math.min(a[0] + ux * s, a[0] + ux * q.s0) - 0.0, wh, a[1] - 0.45, Math.max(a[0] + ux * s, a[0] + ux * q.s0), wh + 0.28, a[1] + 0.45) : box(a[0] - 0.45, wh, Math.min(a[1] + uz * s, a[1] + uz * q.s0), a[0] + 0.45, wh + 0.28, Math.max(a[1] + uz * s, a[1] + uz * q.s0))); s = q.s1; } };
+      const cap = (a, b, o) => { const Lw = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / Lw, uz = (b[1] - a[1]) / Lw; let s = 0; for (const q of [...o, { s0: Lw, s1: Lw }]) { if (q.s0 - s > 0.1) bag.add(capMat, Math.abs(ux) > 0.5 ? box(Math.min(a[0] + ux * s, a[0] + ux * q.s0) - 0.0, wh, a[1] - 0.45, Math.max(a[0] + ux * s, a[0] + ux * q.s0), wh + (cls === 'common' ? 0.34 : 0.28), a[1] + 0.45) : box(a[0] - 0.45, wh, Math.min(a[1] + uz * s, a[1] + uz * q.s0), a[0] + 0.45, wh + (cls === 'common' ? 0.34 : 0.28), Math.max(a[1] + uz * s, a[1] + uz * q.s0))); s = q.s1; } };
       cap(ring[0][0], ring[0][1], []); cap(ring[1][0], ring[1][1], []); cap(ring[2][0], ring[2][1], []);
-      cap([-W / 2, D / 2], [W / 2, D / 2], [{ s0: W / 2 + gx - 1.5, s1: W / 2 + gx + 1.5 }]);
+      cap([-W / 2, D / 2], [W / 2, D / 2], [{ s0: W / 2 + gx - gateW / 2 - 0.25, s1: W / 2 + gx + gateW / 2 + 0.25 }]);
     }
-    weatherFront(L, W, D, wh, th, gx, 2.5, rand);
+    weatherFront(L, W, D, wh, th, gx, gateW, rand);
     if (kind === 'hut') {
       // a hut of earth: walls of rammed earth with a doorway and a window, a low thatched gable roof, a bed platform and a stove inside; a yard before it
       const hw = Math.min(W - 3, 6.4), hd = 4.4, hz = -D / 2 + hd / 2 + 1.5, y = 0.12;
@@ -86,10 +127,13 @@ export function tangHouse(el, ctx) {
     }
     // the gate
     if (kind === 'mansion') inFrame(L, [gx, D / 2], 0, (G) => buildHall(G, { w: 7.2, d: 4.4, y: 0, plat: 0.3, H: 3.3, nb: 3, kind: 'open', det: Math.max(1, det), bh: 0.95, over: 1.7, steps: false, roof: 'hip', through: true }));
-    if (kind !== 'mansion') plainGate(L, gx, D / 2, false);
+    if (cls === 'rank') rankGate(L, gx, D / 2, th, W);
+    if (cls === 'gentry') { plainGate(L, gx, D / 2, true); bag.add('lacquer_black', box(gx - 0.5, 2.68, D / 2 + 0.3, gx + 0.5, 2.98, D / 2 + 0.34)); bag.add('gilt_bronze', box(gx - 0.42, 2.73, D / 2 + 0.34, gx + 0.42, 2.93, D / 2 + 0.36)); }
+    if (cls === 'common') { plainGate(L, gx, D / 2, false, 1.0, 'thatch'); wallShrine(L, gx + (gx > 0 ? -2.8 : 2.8), D / 2 + th / 2 + 0.04); }
+    if (cls === 'poor') { brushGate(L, gx, D / 2); }
     // the main hall at the back, facing the gate; the wings on both sides of the court
     const hw = Math.min(W - 5.5, kind === 'mansion' ? 17.5 : 11.5), hd = kind === 'mansion' ? 7.4 : 5.8, nb = hw > 15 ? 5 : 3, hz = -D / 2 + hd / 2 + 2.0;
-    const rr = rng((el.seed || 1) + 99), variant = el.furnished ? 'dais' : (kind === 'mansion' && rr() < 0.35 ? 'dais2' : ['study', 'bedroom', 'dining', 'weaver', 'store'][Math.floor(rr() * 5)]);
+    const rr = rng((el.seed || 1) + 99), variant = houseVariant(el, rr);
     inFrame(L, [0, hz], 0, (H) => {
       const plat = kind === 'mansion' ? 0.55 : 0.4;
       buildHall(H, { w: hw, d: hd, y: 0, plat, H: kind === 'mansion' ? 4.0 : 3.3, nb, kind: 'hall', det, bh: kind === 'mansion' ? 1.2 : 0.9, over: kind === 'mansion' ? 2.2 : 1.8, roof: rr() < 0.5 || kind === 'mansion' ? 'hip' : 'gable', doorW: 2.4, steps: true, bq: det >= 2 ? 'med' : 'low', interior: true });
