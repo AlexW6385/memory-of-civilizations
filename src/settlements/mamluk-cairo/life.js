@@ -4,7 +4,7 @@
 // donkeys saddled for hire with their boys at the market street's north end and on the Rumayla; a string of camels
 // with bales coming down the road from the Citadel; in the open house, the merchant on his iwan and a servant.
 
-import { RADIUS, SUQ, SUQ2, SUQ3, SQUARE, QAA, SHOP, STALLS, KHAN, HAMMAM, BAYN, height, shops, lanes, yards, lots } from './layout.js';
+import { RADIUS, ARRIVAL, sabats, SUQ, SUQ2, SUQ3, SQUARE, QAA, SHOP, STALLS, KHAN, HAMMAM, BAYN, height, shops, lanes, yards, lots } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -121,6 +121,45 @@ export function life() {
     for (const [x, z] of [[84, 44], [98, 70], [123, 84]]) L.push({ t: 'animal', kind: 'dog', at: [x, z], y: Y(x, z), rot: rand() * 6.28, seed: Math.floor(rand() * 1e6) });
     for (const [x, z] of [[100, 95], [96, 90], [112, 78], [86, 70], [124, 90]]) L.push({ t: 'chickens', kind: 'pigeon', at: [x, z], y: Y(x, z), rot: rand() * 6.28, n: 5, seed: Math.floor(x * 3 + z) });
     for (const z of [26, 58]) L.push({ t: 'sacks', at: [78, z], y: Y(78, z), rot: 1.5, n: 4, seed: z + 3 });
+  }
+  // the lanes beyond 120 m of the arrival (docs §16): washing strung across the lane from window to window, a hawker's stall at the
+  // mouth of an alley (the seller behind it, a buyer), peddlers sitting on their mats against the house fronts with their goods;
+  // all kept to one side of the lane so that two can pass
+  {
+    const cr = rng(5150), far = (x, z) => Math.hypot(x - ARRIVAL[0], z - ARRIVAL[1]) > 120 && Math.hypot(x, z) < 330, ln = lanes(), bridges = sabats().map((b) => b.c);
+    const nearBridge = (x, z) => bridges.some(([bx, bz]) => Math.abs(bx - x) < 6 && Math.abs(bz - z) < 6);
+    const lanesE = ln.filter((l) => l.kind === 'lane');
+    for (const l of lanesE) {
+      const W = l.r[3] - l.r[1], zc = (l.r[1] + l.r[3]) / 2;
+      for (let x = l.r[0] + 16; x < l.r[2] - 16; x += 44 + cr() * 40) {
+        if (!far(x, zc) || nearBridge(x, zc) || cr() < 0.45) continue;
+        L.push({ t: 'wash_line', at: [x, zc], y: 4.9, rot: Math.PI / 2, len: W - 0.9, emb: [0.15, 0.15], clear: [0.6, 0.6], seed: Math.floor(cr() * 1e6) });
+      }
+    }
+    const goodsSets = [['produce', 'basket'], ['cloth', 'basket'], ['water_pot', 'basket'], ['produce'], ['pottery', 'basket']];
+    for (const al of ln.filter((l) => l.kind === 'alley')) {
+      const xm = (al.r[0] + al.r[2]) / 2;
+      for (const north of [true, false]) {
+        const zE = north ? al.r[1] - 1.5 : al.r[3] + 1.5, l = lanesE.find((q) => xm > q.r[0] + 6 && xm < q.r[2] - 6 && zE > q.r[1] && zE < q.r[3]);
+        if (!l || !far(xm, zE) || cr() > 0.22) continue;
+        // the wall the alley opens from: the lane's south edge when the alley lies to its south
+        const wallZ = north ? l.r[3] : l.r[1], inward = north ? -1 : 1, x = xm + (cr() < 0.5 ? -3.6 : 3.6), zc = wallZ + inward * 1.35;
+        if (nearBridge(x, zc)) continue;
+        L.push({ t: 'stall', at: [x, zc], y: Y(x, zc), rot: north ? Math.PI : 0, w: 2.0, d: 1.0, awning: pick(['cloth_white', 'cloth_ochre', 'cloth_red']), stripe: 'cloth_white', goods: pick(goodsSets), seed: Math.floor(cr() * 1e6) });
+        // the seller behind the table facing the lane; a buyer before it
+        person([x, zc + (north ? 0.95 : -0.95)], north ? 0 : Math.PI, { man: true, cloth: pick(['cloth_white', 'cloth_ochre', 'cloth_brown']), pose: 'stand' });
+        if (cr() < 0.6) person([x + 0.5, zc + inward * 1.9], north ? Math.PI : 0, cr() < 0.4 ? { pose: 'talk' } : {});
+      }
+    }
+    for (const l of lanesE) {
+      for (let x = l.r[0] + 12; x < l.r[2] - 12; x += 34 + cr() * 40) {
+        const north = cr() < 0.5, zc = north ? l.r[1] + 1.0 : l.r[3] - 1.0;
+        if (!far(x, zc) || nearBridge(x, zc) || cr() < 0.5) continue;
+        const sets = [['heap', 'greens'], ['bread', 'heap'], ['pottery', 'baskets'], ['spice', 'heap'], ['greens', 'melons']];
+        L.push({ t: 'goods_mat', at: [x, zc], y: Y(x, zc), rot: north ? 0 : Math.PI, goods: pick(sets), seed: Math.floor(cr() * 1e6) });
+        person([x, zc + (north ? -0.5 : 0.5)], north ? Math.PI : 0, { pose: 'cross', y: Y(x, zc), man: cr() < 0.8, cloth: pick(['cloth_white', 'cloth_ochre', 'cloth_brown', 'cloth_green']) });
+      }
+    }
   }
   void BAYN; void lots;
   return L;
