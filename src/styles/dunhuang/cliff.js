@@ -8,6 +8,7 @@ import { XF, ROCK, ZEND, FLOOR, CAVES, STAIR, GALLERY, APRON, cliffTop, rng } fr
 import { hallCave, pillarCave, cellCave, valance } from './caves.js';
 import { statue } from '../chinese/statues.js';
 import { buddha } from '../chinese/index.js';
+import { skirtRolls, tileRoll, corbel } from './roofwork.js';
 import { greatCave, nineStorey, bracketSet } from './nine.js';
 import { Panel, wallPanel, PAL, tableauM, buddhaM, apsaraM, lotusM } from './paint.js';
 
@@ -29,6 +30,8 @@ function porch(ctx, c, y, w, h) {
   const z0 = z - w / 2, z1 = z + w / 2;
   for (const zz of [z0, z1]) {
     bag.add('timber_red', lathe([[0.2, 0], [0.2, 0.06], [0.17, 0.12], [0.16, h - 0.2], [0.18, h]], 10, null, XF + e - 0.3, y, zz));
+    bag.add('granite_grey', lathe([[0.001, 0], [0.3, 0], [0.3, 0.07], [0.25, 0.12], [0.28, 0.17], [0.19, 0.2], [0.001, 0.2]], 10, null, XF + e - 0.3, y, zz));
+    corbel(bag, XF + e - 0.3, ye - 0.22, zz, zz < z ? 1 : -1, 0.7);
     col.circle(XF + e - 0.3, zz, 0.2, y, ye);
   }
   bag.add('timber_red', box(XF + e - 0.5, ye, z0 - 0.35, XF + e - 0.1, ye + 0.34, z1 + 0.35));
@@ -48,6 +51,8 @@ function porch(ctx, c, y, w, h) {
   const side = [];
   for (const [p, q] of [[A, D], [B, C]]) { const p0 = [p[0], p[1] - 0.3, p[2]], q0 = [q[0], q[1] - 0.3, q[2]]; quad(side, p0, q0, q, p); quad(side, p, q, q0, p0); }
   bag.add('timber_red', fromTriangles(side));
+  const nT = Math.round((z1 - z0 + 2.2) / 0.42);
+  for (let k = 0; k <= nT; k++) { const f = (k + 0.5) / (nT + 1), a = [A[0], A[1], A[2] + (B[2] - A[2]) * f], b = [D[0], D[1], D[2] + (C[2] - D[2]) * f]; tileRoll(bag, [a[0] + 0.05, a[1] + (b[1] - a[1]) * 0.03, a[2]], [b[0] - 0.02, b[1] + (a[1] - b[1]) * 0.0, b[2]], [1, 0]); }
   const nR = Math.round((z1 - z0 + 2.2) / 0.45);
   for (let k = 0; k <= nR; k++) {
     const f = k / nR, a = [XF, yi - 0.2, A[2] + (B[2] - A[2]) * f], b = [xo, yo - 0.2, D[2] + (C[2] - D[2]) * f];
