@@ -106,13 +106,64 @@ function shikhara(bag, cx, cz, y, w, h, mat = S, courses = 14, mesh = true) {
   bag.add(mat, fromTriangles(tris));
   crown(bag, cx, y + h, cz, s * f(1), PALE, courses > 6);
 }
+
+/** The order of the figures along a band: apsarās at their toilet, dancers, musicians, deities in their niches, pairs, attendants —
+ *  "dancers, devotees, acrobats, musicians, warriors" and "divine couples" (mahavidya.ca); no scene beyond the temple's own decorum. */
+const BAND_KINDS = [0, 4, 1, 2, 0, 3, 4, 5, 1, 6, 0, 2, 3, 4, 1, 5, 6, 0];
+/**
+ * One carved figure standing on a ledge against a wall face: feet at (x, y, z), the face's outward normal (nx, nz), h tall.
+ * The apsarā stands in the three-bend pose (tribhaṅga: hips swung one way, the bust the other, the head back again,
+ * `sw` the side of the swing), on a small lotus, a tall crowned headdress, the waist narrow, the skirt falling to the feet;
+ * kind 0 an arm raised to the hair, 1 an arm to the hip and one held out, 2 a dancer with arms out and a leg lifted,
+ * 3 a musician with a lute (vīṇā), 4 a deity in a niche under a horseshoe hood with four arms, 5 a pair side by side with
+ * joined hands, 6 an attendant with a whisk (cāmara). Parts in the round, low (6 sides): read at 50 m as a row of slim figures.
+ */
+export function wallFig(bag, kind, x, y, z, nx, nz, h, sw = 1, mat = LIGHT) {
+  const ux = -nz, uz = nx, s = h / 1.02, A = (u, d, v) => [x + ux * u + nx * d, y + v * s, z + uz * u + nz * d];
+  const body = (u0, sc, pose) => {
+    const q = s * sc, hip = u0 + sw * 0.045 * q, bust = u0 - sw * 0.04 * q, head = u0 + sw * 0.015 * q;
+    const lat = (u, d = 0) => [x + ux * u + nx * d, z + uz * u + nz * d];
+    bag.add(mat, lathe([[0.001, 0], [0.075 * q, 0.002 * q], [0.07 * q, 0.03 * q], [0.088 * q, 0.14 * q], [0.1 * q, 0.26 * q], [0.075 * q, 0.4 * q], [0.001, 0.4 * q]], 6, null, ...[lat(hip)[0], y, lat(hip)[1]]));
+    bag.add(mat, lathe([[0.05 * q, 0.39 * q], [0.052 * q, 0.46 * q], [0.082 * q, 0.55 * q], [0.078 * q, 0.62 * q], [0.05 * q, 0.67 * q], [0.001, 0.68 * q]], 6, null, lat(bust)[0], y, lat(bust)[1]));
+    bag.add(mat, lathe([[0.022 * q, 0.66 * q], [0.03 * q, 0.72 * q], [0.047 * q, 0.77 * q], [0.05 * q, 0.82 * q], [0.05 * q, 0.86 * q], [0.036 * q, 0.92 * q], [0.018 * q, 0.98 * q], [0.001, 1.02 * q]], 6, null, lat(head)[0], y, lat(head)[1]));
+    const sh = (side) => [bust + side * 0.075 * q, 0.62 * q], arm = (side, tu, td, tv) => { const a = sh(side); bag.add(mat, rod(A(a[0], 0.02, a[1] / s), A(tu, td, tv / s), 0.016 * q, 4)); };
+    const hand = (side, du, dd, dv) => arm(side, bust + side * du * q, dd * q, dv * q);
+    if (pose === 0) { hand(1, 0.14, 0.03, 0.88); hand(-1, 0.13, 0.03, 0.4); }
+    else if (pose === 1) { hand(1, 0.1, 0.14, 0.5); hand(-1, 0.13, 0.03, 0.42); }
+    else if (pose === 2) { hand(1, 0.3, 0.02, 0.8); hand(-1, 0.28, 0.02, 0.52); bag.add(mat, rod(A(hip, 0.01, 0.3 * q / s), A(hip + sw * 0.17 * q, 0.07 * q, 0.2 * q / s), 0.03 * q, 4)); }
+    else if (pose === 3) {
+      hand(1, 0.2, 0.1, 0.6); hand(-1, -0.1, 0.1, 0.5);
+      bag.add(mat, rod(A(bust - 0.2 * q, 0.1 * q, 0.34 * q / s), A(bust + 0.26 * q, 0.1 * q, 0.72 * q / s), 0.011 * q, 4));
+      bag.add(mat, lathe([[0.001, 0], [0.05 * q, 0.04 * q], [0.04 * q, 0.1 * q], [0.001, 0.12 * q]], 6, null, ...(() => { const p = A(bust - 0.2 * q, 0.1 * q, 0.34 * q / s); return [p[0], p[1] - 0.03 * q, p[2]]; })()));
+    } else if (pose === 4) {
+      hand(1, 0.2, 0.03, 0.9); hand(-1, 0.2, 0.03, 0.78); hand(1, 0.15, 0.08, 0.45); hand(-1, 0.13, 0.08, 0.38);
+    } else if (pose === 5) hand(1, 0.07, 0.07, 0.48);
+    else { hand(1, 0.12, 0.05, 0.92); bag.add(mat, rod(A(bust + 0.16 * q, 0.05 * q, 0.5 * q / s), A(bust + 0.2 * q, 0.05 * q, 1.02 * q / s), 0.012 * q, 4)); hand(-1, 0.13, 0.03, 0.42); }
+  };
+  bag.add(PALE, lathe([[0.001, 0], [0.15 * s, 0], [0.13 * s, 0.03 * s], [0.001, 0.035 * s]], 8, null, x + nx * 0.02, y - 0.005, z + nz * 0.02));
+  if (kind === 5) { body(-0.15 * s, 0.94, 1); body(0.15 * s, 0.9, 5); bag.add(mat, rod(A(-0.06 * s, 0.07 * s, 0.46), A(0.07 * s, 0.07 * s, 0.46), 0.014 * s, 4)); return; }
+  if (kind === 4) {
+    body(0, 0.76, 4);
+    gavaksha(bag, x + nx * 0.03, y + 0.77 * h, z + nz * 0.03, nx, nz, h * 0.34, PALE);
+    return;
+  }
+  body(0, 1, kind === 6 ? 6 : kind);
+}
+/** The row of small dark kirttimukha heads along the lower ledge of a band, on its three or four faces (the lower moulding series). */
+function dentils(bag, r, yb, gap, hide) {
+  const [x0, z0, x1, z1] = r, o = 0.2, zc = (z0 + z1) / 2;
+  const run = (a0, a1, f, ax, skip) => { for (let u = a0 + 0.3; u < a1 - 0.2; u += 0.5) { if (skip && skip(u)) continue; bag.add(DARK, ax ? box(u - 0.11, yb - 0.17, f - 0.05, u + 0.11, yb - 0.04, f + 0.05) : box(f - 0.05, yb - 0.17, u - 0.11, f + 0.05, yb - 0.04, u + 0.11)); } };
+  run(x0 - o, x1 + o, z0 - o, true); run(x0 - o, x1 + o, z1 + o, true);
+  if (!hide.includes('w')) run(z0 - o, z1 + o, x0 - o, false);
+  if (!hide.includes('e')) run(z0 - o, z1 + o, x1 + o, false, gap ? (u) => Math.abs(u - zc) < gap + 0.3 : null);
+}
 /** A band of figures in high relief round a wall rect r, standing on yb, h tall — gods, attendants, couples, set in niches between pilasters.
  *  The band's ground is a dark recessed strip, the figures and pilasters pale stone, the ledges over and under it pale cornices:
  *  at 50 m the band reads as a row of bright figures in shade. `eskip`: where the east face is hidden by the next hall,
  *  the half-width of that hall — the step beyond it still shows the band. */
-function figureBand(bag, r, yb, h, gap = 0, hide = '', eskip = 0) {
-  const [x0, z0, x1, z1] = r, k = h / 1.15, zc = (z0 + z1) / 2;
-  const prof = [[0.2 * k, 0], [0.16 * k, 0.45 * k], [0.12 * k, 0.72 * k], [0.07 * k, 0.78 * k], [0.1 * k, 0.86 * k], [0.085 * k, 1.0 * k], [0.001, 1.12 * k]];
+function figureBand(bag, r, yb, h, gap = 0, hide = '', eskip = 0, tier = 0) {
+  const [x0, z0, x1, z1] = r, zc = (z0 + z1) / 2;
+  let fi = tier * 5;
   for (const [a, b, fx, fz] of [[[x0, z0], [x1, z0], 0, -1], [[x1, z1], [x0, z1], 0, 1], [[x0, z1], [x0, z0], -1, 0], [[x1, z0], [x1, z1], 1, 0]]) {
     if (fx === -1 && hide.includes('w')) continue;   // the faces against the next hall
     const eh = fx === 1 && hide.includes('e');
@@ -134,8 +185,8 @@ function figureBand(bag, r, yb, h, gap = 0, hide = '', eskip = 0) {
       const t = (i + 0.5) / n, x = a[0] + (b[0] - a[0]) * t + fx * 0.12, z = a[1] + (b[1] - a[1]) * t + fz * 0.12;
       if (gap && fx === 1 && Math.abs(z - zc) < gap) continue;          // the doorway into the hall
       if (eh && Math.abs(z - zc) < eskip + 0.3) continue;
-      bag.add(LIGHT, lathe(prof, 5, null, x, yb + 0.05, z));
-      if (i % 3 === 1) bag.add(LIGHT, lathe(prof.map(([pr, py]) => [pr * 0.95, py * 0.93]), 5, null, x + (fz ? h * 0.18 : 0), yb + 0.05, z + (fx ? h * 0.18 : 0)));   // a couple
+      const kind = BAND_KINDS[fi++ % BAND_KINDS.length];
+      wallFig(bag, kind, x, yb + 0.06, z, fx, fz, h * 0.93, (i + tier) % 2 ? 1 : -1);
       const pt = (a[0] + (b[0] - a[0]) * (i / n)), pz = (a[1] + (b[1] - a[1]) * (i / n));
       if (gap && fx === 1 && Math.abs(pz - zc) < gap + 0.1) continue;
       if (eh && Math.abs(pz - zc) < eskip + 0.3) continue;
@@ -143,6 +194,7 @@ function figureBand(bag, r, yb, h, gap = 0, hide = '', eskip = 0) {
     }
   }
   // the ledges over and under the band (broken by a doorway on the east face)
+  dentils(bag, r, yb, gap, hide);
   for (const [o, ya, yb2] of [[0.25, yb + h + 0.1, yb + h + 0.35], [0.2, yb - 0.2, yb]]) {
     if (!gap) { bag.add(PALE, box(x0 - o, ya, z0 - o, x1 + o, yb2, z1 + o)); continue; }
     bag.add(PALE, box(x0 - o, ya, z0 - o, x1, yb2, z1 + o));
@@ -292,7 +344,7 @@ function temple(el, ctx) {
   // the plinth's mouldings: courses stepping out and in, a frieze of elephants and riders (small blocks) along the middle
   if (!el.simple) {
     for (const [f, o] of [[0.12, 0.35], [0.28, 0.15], [0.62, 0.22], [0.86, 0.3], [0.97, 0.12]]) bag.add('sandstone', box(P[0] - o, y + plinth * f - 0.12, P[1] - o, P[2] + o, y + plinth * f + 0.12, P[3] + o));
-    for (const [a0, a1, zz, ax] of [[P[0], P[2], P[1] - 0.15, true], [P[0], P[2], P[3] + 0.15, true], [P[1], P[3], P[0] - 0.15, false]]) for (let u = a0 + 0.8; u < a1 - 0.6; u += 1.6) { const hh = plinth * 0.18; bag.add('sandstone', along(ax, u, zz, 0.55, 0.12, y + plinth * 0.4, hh)); }
+    plinthFrieze(bag, P, y, plinth);
   }
   // the halls' walls with their sculpture bands, from the sanctum eastward, each roof lower
   // (the halls fill the plinth from the sanctum's east wall to its east end)
@@ -329,11 +381,28 @@ function temple(el, ctx) {
       bag.add(RELIEF, lathe([[0.001, 0], [0.34, 0.04], [0.4, 0.14], [0.3, 0.3], [0.12, 0.42], [0.04, 0.5], [0.001, 0.62]], 12, null, xm, cy - 0.5 - 0.62, cz));
       for (const sx of [-1, 1]) for (const sz of [-1, 1]) { const px = xm + sx * 1.5, pz = cz + sz * 2.8; pillar(bag, px, pz, fl, cy - 0.05, 0.4); col.rect([px - 0.4, pz - 0.4, px + 0.4, pz + 0.4], fl, cy); }
       for (const sz of [-1, 1]) lampStand(bag, r[2] - t - 0.7, fl, cz + sz * 1.9, 1.1);
+      // the great hall's images: deities and attendants in their niches either side of the two doors (pilasters and a pale frame behind each),
+      // and on each pillar's inner face, on a corbel, a nymph holding up the beam ("atlantean brackets", "paired nymphs": mahavidya.ca)
+      [[r[0] + t, 1], [r[2] - t, -1]].forEach(([wx, dx], wi) => [-1, 1].forEach((sz, si) => [2.5, 4.1].forEach((dz, k) => {
+        const zz = cz + sz * dz, kind = [4, 6, 0, 4, 2, 4, 6, 3][(wi * 4 + si * 2 + k) % 8];
+        bag.add(PALE, box(Math.min(wx, wx + dx * 0.1), fl + 0.05, zz - 0.62, Math.max(wx, wx + dx * 0.1), fl + 2.45, zz - 0.5)); bag.add(PALE, box(Math.min(wx, wx + dx * 0.1), fl + 0.05, zz + 0.5, Math.max(wx, wx + dx * 0.1), fl + 2.45, zz + 0.62));
+        bag.add(PALE, box(Math.min(wx, wx + dx * 0.1), fl + 2.45, zz - 0.66, Math.max(wx, wx + dx * 0.1), fl + 2.6, zz + 0.66));
+        wallFig(bag, kind, wx + dx * 0.1, fl + 0.06, zz, dx, 0, 1.9, si ? 1 : -1);
+      })));
+      for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+        const px = xm + sx * 1.5, pz = cz + sz * 2.8, fx = px - sx * 0.42, yy = cy - 1.75;
+        bag.add(PALE, box(Math.min(px - sx * 0.38, px - sx * 0.72), yy - 0.2, pz - 0.2, Math.max(px - sx * 0.38, px - sx * 0.72), yy, pz + 0.2));
+        wallFig(bag, 0, fx - sx * 0.1, yy, pz, -sx, 0, 0.95, sz);
+      }
       c2.lights.push({ at: [xm, fl + 3.4, cz - 3.5], color: '#ffb46b', intensity: 2.4, distance: 10 }, { at: [xm, fl + 3.4, cz + 3.5], color: '#ffb46b', intensity: 2.4, distance: 10 });
     } else if (i === 3) {
       c2.lights.push({ at: [xm, fl + 2.6, cz], color: '#ffb46b', intensity: 1.8, distance: 8 });
       for (const sz of [-1, 1]) diya(bag, r[0] + t + 0.1, fl, cz + sz * 1.25, 1.3);
-    } else c2.lights.push({ at: [xm, fl + 2.4, cz], color: '#ffb46b', intensity: 1.4, distance: 6 });
+    } else {
+      c2.lights.push({ at: [xm, fl + 2.4, cz], color: '#ffb46b', intensity: 1.4, distance: 6 });
+      // the vestibule's door-keepers on its two side walls: Śiva's guardian with his four arms, and the whisk-bearer (mahavidya.ca)
+      if (i === 1) { wallFig(bag, 4, xm, fl + 0.06, r[1] + t + 0.02, 0, 1, 1.8, 1); wallFig(bag, 6, xm, fl + 0.06, r[3] - t - 0.02, 0, -1, 1.8, -1); }
+    }
   };
   halls.forEach(([x, len, wh, roofH], i) => {
     const hw = i === 0 ? W / 2 : W * (i === 2 ? 0.48 : 0.36), r = [x, cz - hw, x + len, cz + hw];
@@ -341,7 +410,7 @@ function temple(el, ctx) {
     else if (el.interior) interiorHall(ctx, i, r, y + plinth, wh);
     else { bag.add(S, box(r[0], y + plinth, r[1], r[2], y + plinth + wh, r[3])); col.rect(r, y, y + plinth + wh); }
     if (i === 4) { /* the open porch */ } else if (el.simple) for (const k of [0.3, 0.62]) bag.add('sandstone', box(r[0] - 0.05, y + plinth + wh * k, r[1] - 0.05, r[2] + 0.05, y + plinth + wh * k + wh * 0.22, r[3] + 0.05));
-    else { for (const k of [0.2, 0.47, 0.74]) figureBand(bag, r, y + plinth + wh * k, Math.min(1.5, wh * 0.21), i === 3 ? 1.6 : 0, (i > 0 ? 'w' : '') + (i < 3 ? 'e' : ''), i === 0 ? W * 0.36 : i === 2 ? W * 0.36 : 0); if (i === 3) doorway(bag, r[2], cz, y + plinth + 0.9, Math.min(3.2, wh * 0.62), !!el.interior); if (i === 2 || i === 0) for (const sd of [-1, 1]) balcony(bag, r[0] + len * 0.25, r[2] - len * 0.25, sd < 0 ? r[1] : r[3], sd, y + plinth + wh * 0.18, wh * 0.55); }
+    else { [0.2, 0.47, 0.74].forEach((k, tier) => figureBand(bag, r, y + plinth + wh * k, Math.min(1.5, wh * 0.21), i === 3 ? 1.6 : 0, (i > 0 ? 'w' : '') + (i < 3 ? 'e' : ''), i === 0 ? W * 0.36 : i === 2 ? W * 0.36 : 0, tier + i * 2)); if (i === 3) doorway(bag, r[2], cz, y + plinth + 0.9, Math.min(3.2, wh * 0.62), !!el.interior); if (i === 2 || i === 0) for (const sd of [-1, 1]) balcony(bag, r[0] + len * 0.25, r[2] - len * 0.25, sd < 0 ? r[1] : r[3], sd, y + plinth + wh * 0.18, wh * 0.55); }
     if (i > 0) stepped(bag, [r[0] - 0.4, r[1] - 0.6, r[2] + 0.4, r[3] + 0.6], y + plinth + wh, el.simple ? H * roofH * 0.45 : Math.max(2.2, H * RISE[i] - wh));
   });
   // the steep flight from the terrace up the plinth to the porch's floor
@@ -441,6 +510,19 @@ function friezeFig(bag, kind, x, y, z, ux, uz, h) {
   if (kind === 5) { man(0, 1); bag.add(M, lathe([[0.05 * k, 0], [0.07 * k, 0.07 * k], [0.05 * k, 0.14 * k]], 6, null, ...P(0.08 * k, 0.22))); return; }
   if (kind === 6) { man(-0.06 * k, 1, 1); man(0.06 * k, 0.94, -1); return; }
   man(0, 1); bag.add(M, rod(P(-0.2 * k, 0.5), P(0.2 * k, 0.5), 0.012 * k, 4)); for (const u of [-0.18, 0.18]) bag.add(M, lathe([[0.04 * k, 0], [0.05 * k, 0.05 * k], [0.001, 0.1 * k]], 5, null, ...P(u * k, 0.36)));
+}
+/** The plinth's socle: between its fillets a recessed band carrying the procession "dancers, devotees, acrobats, musicians, warriors, hunters,
+ *  horses, elephants" (mahavidya.ca), on the north, south and west faces; a row of niches on the kapota above is left to the mouldings. */
+function plinthFrieze(bag, P, y, plinth) {
+  const [x0, z0, x1, z1] = P, ya = y + plinth * 0.28 + 0.14, bh = plinth * 0.34 - 0.28, mid = (z0 + z1) / 2;
+  for (const r of [[x0, z0 - 0.07, x1, z0], [x0, z1, x1, z1 + 0.07], [x0 - 0.07, z0, x0, z1]]) bag.add(DARK, box(r[0], ya, r[1], r[2], ya + bh, r[3]));
+  let n = 3;
+  const run = (ax, az, bx, bz, nx, nz) => {
+    const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, m = Math.floor(L / 0.7);
+    for (let i = 0; i < m; i++) { const u = (i + 0.5) * L / m; friezeFig(bag, [0, 2, 4, 1, 3, 5, 6, 2, 4, 7, 0, 3][n++ % 12], ax + ux * u + nx * 0.05, ya, az + uz * u + nz * 0.05, ux, uz, bh * 0.92); }
+  };
+  run(x1, z0, x0, z0, 0, -1); run(x0, z1, x1, z1, 0, 1); run(x0, z0, x0, z1, -1, 0);
+  void mid;
 }
 /** The jagati's sides: a moulded base and coping, and between them a sunk band carved with the life of the
  *  kingdom in long processions — elephants and horsemen, soldiers, dancers and drummers, couples, porters.
