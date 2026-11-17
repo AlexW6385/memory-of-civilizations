@@ -48,10 +48,10 @@ export function lots() {
   LOTS = LOTS.filter((l) => !(l.rect[2] > PRINTERY[0] - 4 && l.rect[0] < PRINTERY[2] + 4 && l.rect[3] > PRINTERY[1] - 4 && l.rect[1] < SHOL[3]));
   const nShol = LOTS.length;
   for (let k = 0; k < 2500 && LOTS.length < nShol + 90; k++) {
-    const a = rand() * Math.PI * 2, d = 230 + rand() * 160, x = Math.cos(a) * d, z = Math.sin(a) * d;
-    if (z < 40 || hill(x, z) > 1 || Math.hypot(x, z) > RADIUS - 30) continue;
+    const a = rand() * Math.PI * 2, d = 225 + rand() * 105, x = Math.cos(a) * d, z = Math.sin(a) * d;
+    if (z < 40 || hill(x, z) > 1 || Math.hypot(x, z) > 326) continue;       // (farther out the valley floor climbs toward the rim)
     if (LOTS.some((l) => Math.abs(l.rect[0] - x) < 26 && Math.abs(l.rect[1] - z) < 26)) continue;
-    LOTS.push({ rect: [x, z, x + 12 + rand() * 4, z + 10 + rand() * 4], seed: Math.floor(rand() * 1e6) });
+    LOTS.push({ rect: [x, z, x + 12 + rand() * 4, z + 10 + rand() * 4], seed: Math.floor(rand() * 1e6), farm: true });
   }
   return LOTS;
 }

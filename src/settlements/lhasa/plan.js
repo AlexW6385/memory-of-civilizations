@@ -61,7 +61,12 @@ E.push({ t: 'landing', rect: [104, zGs, 112, -18.4], y: DY, base: 18.7, walls: [
 // the top tier: the Red Palace rising in two stages with its doubled, gilt-studded frieze; the White Palace east, its quarters' wide windows in the middle
 mass(-160, -118, -64, -96, 72, { windows: 'sw', banners: 'black' }); mass(-118, -58, -60, -98, 86, { windows: 'sw', banners: 'black' });
 mass(-52, 22, -56, -98, 104, { mat: 'limewash_red', split: 52, pembe: 2.6, gilt: true, windows: 'sew', banners: 'gilt' });
-mass(-42, 12, -64, -94, 117, { mat: 'limewash_red', pembe: 2.8, gilt: true, windows: 'sew', banners: 'gilt', bannerS: 1.2 });
+// the upper stage hollowed: the hall of the Fifth Dalai Lama's funerary stupa (the Red Palace was built 1690-94 for it) on the lower stage's roof, and the steep stair up from it to the roof
+const HT = [-27, -85.5, -3, -74.5], YT = 104.3, SWT = [-8.8, -81.5, -7.4, -72.0];
+mass(-42, 12, -64, -94, 117, { mat: 'limewash_red', pembe: 2.8, gilt: true, windows: 'sew', banners: 'gilt', bannerS: 1.2,
+  voids: [{ r: HT, y0: YT, y1: 113.3 }, { r: SWT, y0: YT, y1: 118 }] });
+E.push({ t: 'tomb_chapel', rect: HT, y: YT, h: 9.0, c: [-15, -80], pillars: [-24.5, -20, -4.5].flatMap((x) => [[x, -84], [x, -76]]), keep: [SWT[0] - 0.25, SWT[1] - 0.1, SWT[2] + 0.25, SWT[3]], seed: 5 });
+E.push({ t: 'skas', rect: SWT, y0: YT, y1: 117, up: 's', hatch: true });
 // the White Palace east, hollowed: the Great East Hall on its fourth floor (27.8 × 25.8 m), the
 // passage in to it from the triple stair's head, the stairwell up from it to the roof
 const WP = shape(44, 98, -60, 100, 2.0), YH = DY + 14, HALL = [62, -92.5, 90, -66.7], SW = [51.5, -91.2, 62, -88.6], DZ = [-75.2, -72.8];
@@ -177,7 +182,7 @@ E.push({ t: 'stone_heap', at: [GX - 6, 237], r: 1.2, seed: 5 }); E.push({ t: 'sa
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('shol', SHOL, 0, 'open'), room('below the palace', [sx0 + 2, 47, sx1 - 2, 62], 0, 'open'),
   room('deyang shar', [100, -80, 145, -45], DY, 'open'), room('great east hall', [HALL[0] + 2, HALL[1] + 2, HALL[2] - 2, HALL[3] - 2], YH, 'hall'),
-  room('white palace roof', [52, -86, 90, -68], 100, 'open'), room('red palace roof', [-36, -88, 6, -70], 117, 'open')];
+  room('white palace roof', [52, -86, 90, -68], 100, 'open'), room('red palace roof', [-36, -88, 6, -70], 117, 'open'), room('tomb of the fifth dalai lama', [HT[0] + 2, HT[1] + 2, HT[2] - 2, HT[3] - 2], YT, 'hall')];
 const walks = [[[-1, 228], [-1, 140], [-1, 58], [-103, 50], [-103, 44], [-137, 44], [-137, 40], [-103, 40], [-103, 36], [-137, 36], [-137, 32], [-103, 32], [-103, 18]]];
 walks[0].y0 = 0;
 
