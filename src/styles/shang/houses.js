@@ -73,15 +73,19 @@ function furnish(F, u, v, w, d, P, th, rich, rand) {
 }
 
 /** The main house: a rammed foundation 0.5 m, plastered walls 2.6 m, a porch of posts on stone bases under the deep eaves, a door, a hipped thatch roof. */
-function mainHouse(F, u, v, w, d, open, rand, lod) {
-  const wm = WALLS[Math.floor(rand() * WALLS.length)], th = 0.45, H = 2.6, P = 0.5, dw = 1.1, dc = u + w / 2;
+function mainHouse(F, u, v, w, d, open, rand, lod, vr = 0) {
+  const wm = vr === 2 ? 'earth_wall' : WALLS[Math.floor(rand() * WALLS.length)], th = 0.45, H = 2.6, P = 0.5, dw = 1.1, dc = u + w / 2;
   F.b('earth_wall', u - 0.4, 0, v - 0.4, u + w + 0.4, P, v + d + 0.4);
   steps(F.bag, F.col, F.R(dc - 0.9, v - 1.1, dc + 0.9, v - 0.4), 0, P, F.asc);
   F.b(wm, u, P, v, dc - dw / 2, P + H, v + th); F.b(wm, dc + dw / 2, P, v, u + w, P + H, v + th); F.b(wm, dc - dw / 2, P + 1.9, v, dc + dw / 2, P + H, v + th, false);
   F.b(wm, u, P, v + th, u + th, P + H, v + d); F.b(wm, u + w - th, P, v + th, u + w, P + H, v + d); F.b(wm, u + th, P, v + d - th, u + w - th, P + H, v + d);
   doorway(F, dc, v - 0.0, P, dw, 1.95, th, open);
-  for (const k of [-2, -1, 1, 2]) { const c = dc + k * w * 0.2; if (Math.abs(c - dc) > dw) F.b('opening', c - 0.28, P + 1.6, v - 0.01, c + 0.28, P + 2.2, v + 0.03, false), F.b('timber', c - 0.34, P + 1.55, v - 0.03, c + 0.34, P + 1.6, v + 0.05, false); }
-  F.b('kokowai', u - 0.02, P, v - 0.03, u + w + 0.02, P + 0.3, v, false);                                           // the red dado
+  for (const k of (vr === 1 ? [-2, 2] : [-2, -1, 1, 2])) { const c = dc + k * w * 0.2; if (Math.abs(c - dc) > dw) F.b('opening', c - 0.28, P + 1.6, v - 0.01, c + 0.28, P + 2.2, v + 0.03, false), F.b('timber', c - 0.34, P + 1.55, v - 0.03, c + 0.34, P + 1.6, v + 0.05, false); }
+  // the three fronts of the great houses, by the lot's seed (docs §5d): 0 the red dado; 1 a frieze of red and white squares under the eave and two wide
+  // windows; 2 bare rammed earth with the posts of the wall-frame standing proud at every 2 m and a footing of beaten earth under each
+  if (vr === 0) F.b('kokowai', u - 0.02, P, v - 0.03, u + w + 0.02, P + 0.3, v, false);                                           // the red dado
+  else if (vr === 1) { for (let a = u + 0.5; a + 0.5 < u + w; a += 1.0) { if (Math.abs(a - dc) < dw / 2 + 0.3) continue; F.b(Math.round((a - u) / 1.0) % 2 ? 'kokowai' : 'lacquer_black', a - 0.3, P + H - 0.75, v - 0.025, a + 0.3, P + H - 0.25, v, false); F.b('ivory', a - 0.14, P + H - 0.6, v - 0.04, a + 0.14, P + H - 0.4, v - 0.025, false); } F.b('kokowai', u - 0.02, P, v - 0.03, u + w + 0.02, P + 0.12, v, false); }
+  else { for (let a = u; a <= u + w + 0.01; a += w / Math.round(w / 2)) { if (Math.abs(a - dc) < dw / 2 + 0.22) continue; F.b('timber', a - 0.11, P + 0.1, v - 0.07, a + 0.11, P + H, v, false); F.b('granite_grey', a - 0.2, P, v - 0.1, a + 0.2, P + 0.1, v, false); } }
   skirt(F, u, v, w, d, P, [dc - dw / 2 - 0.1, dc + dw / 2 + 0.1], 0.5); streaks(F, u, v, w, P + H, rand, 5, [dc - dw / 2, dc + dw / 2]);
   F.roof(u, v, u + w, v + d, P + H, 2.3 + w * 0.08, 0.95, true); ridge(F, u, v, u + w, v + d, P + H, 2.3 + w * 0.08, 0.95, true);
   if (lod === 0) {
@@ -117,12 +121,12 @@ function smallHouse(F, w, d, open, rand, lod, H = 2.3) {
 export function courtHouse(el, ctx) {
   const rand = rng(el.seed), F = frame(el.rect, el.front, ctx.bag, ctx.col), W = F.W, D = F.D, lod = el.lod ?? 0;
   const gate = [W / 2 - 1.3, W / 2 + 1.3];
-  fence(F, 0.4, 0.4, W - 0.4, D - 0.4, [gate], lod);
+  fence(F, 0.4, 0.4, W - 0.4, D - 0.4, [gate], lod, el.seed % 3);
   const hw = 11 + Math.floor(rand() * 3), hd = 6.4, hv = D - hd - 1.3;
-  mainHouse(F, (W - hw) / 2, hv, hw, hd, !!el.open, rand, lod);
-  smallHouse(F.sub(5.6, 7.0, '+u'), 7.4, 4.8, lod === 0 && rand() < 0.5, rand, lod);
-  smallHouse(F.sub(W - 5.6, 7.0, '-u'), 7.4, 4.8, false, rand, lod);
-  pitHouse(F.sub(5.0, 6.2, 'back'), 0, 0, 3.6, 4.4, false, lod); if (rand() < 0.85) pitHouse(F.sub(W - 1.4, 6.2, 'back'), 0, 0, 3.6, 4.4, false, lod);
+  mainHouse(F, (W - hw) / 2, hv, hw, hd, !!el.open, rand, lod, (el.seed >> 2) % 3);
+  smallHouse(F.sub(5.6, 7.0, '+u'), 7.4, 4.8, !!el.open && rand() < 0.7, rand, lod);
+  smallHouse(F.sub(W - 5.6, 7.0, '-u'), 7.4, 4.8, !!el.open && rand() < 0.4, rand, lod);
+  pitHouse(F.sub(5.0, 6.2, 'back'), 0, 0, 3.6, 4.4, !!el.open && el.seed % 2 === 0, lod); if (rand() < 0.85) pitHouse(F.sub(W - 1.4, 6.2, 'back'), 0, 0, 3.6, 4.4, !!el.open && el.seed % 3 === 1, lod);
   granary(F, 1.6, D - 5.2, 2.6, 2.6);
   well(F, W / 2 - 4.6, 11); hearth(F, W / 2 + 4.5, 12.2, lod);
   pitStore(F, W / 2 - 2.5, 4.2, 0.8); pitStore(F, W / 2 + 2.5, 5.6, 0.7);
@@ -138,10 +142,10 @@ export function courtHouse(el, ctx) {
 /** shang_pit_yard: { rect, front, seed, open, lod } — pit houses round a yard with a hearth, a granary, racks, a pen, storage pits, a garden. */
 export function pitYard(el, ctx) {
   const rand = rng(el.seed), F = frame(el.rect, el.front, ctx.bag, ctx.col), W = F.W, D = F.D, lod = el.lod ?? 0;
-  fence(F, 0.4, 0.4, W - 0.4, D - 0.4, [[W / 2 - 1.1, W / 2 + 1.1]], lod);
+  fence(F, 0.4, 0.4, W - 0.4, D - 0.4, [[W / 2 - 1.1, W / 2 + 1.1]], lod, el.seed % 3);
   pitHouse(F.sub(1.8 + 3.6, 2.0 + 4.6, 'back'), 0, 0, 3.6, 4.6, false, lod); pitHouse(F.sub(W - 1.8, 2.0 + 4.6, 'back'), 0, 0, 3.6, 4.6, false, lod);
   const rv = D - 6.4;
-  pitHouse(F, 1.6, rv, 3.8, 4.6, false, lod); pitHouse(F, W / 2 - 3.2, rv, 5.0, 5.0, !!el.open, lod); pitHouse(F, W - 5.4, rv, 3.8, 4.6, false, lod);
+  pitHouse(F, 1.6, rv, 3.8, 4.6, !!el.open && el.seed % 3 === 0, lod); pitHouse(F, W / 2 - 3.2, rv, 5.0, 5.0, !!el.open, lod); pitHouse(F, W - 5.4, rv, 3.8, 4.6, !!el.open && el.seed % 3 === 2, lod);
   hearth(F, W / 2, D / 2 - 1, lod);
   granary(F, W / 2 + 4.4, D / 2 - 3.2, 2.6, 2.6); well(F, 4.6, D / 2 - 1);
   pitStore(F, W / 2 - 4.4, 5.6, 0.8); pitStore(F, W / 2 + 3.4, 5.2, 0.75);
@@ -156,12 +160,15 @@ export function rowHouse(el, ctx) {
   const rand = rng(el.seed), F = frame(el.rect, el.front, ctx.bag, ctx.col), W = F.W, D = F.D, lod = el.lod ?? 0;
   const alley = [9.4, 10.9], spans = [[0.5, alley[0] - 0.2], [alley[1] + 0.2, alley[1] + 8.4], [alley[1] + 8.8, W - 0.5]];
   spans.forEach(([a0, a1], i) => {
-    const w = a1 - a0, d = 5.2 + rand() * 1.2, th = 0.4, H = 2.4, wm = WALLS[Math.floor(rand() * WALLS.length)], dc = a0 + w / 2, open = !!el.open && i === 1, v = 0.7;
+    const w = a1 - a0, d = 5.2 + rand() * 1.2, th = 0.4, H = 2.4, wm = WALLS[Math.floor(rand() * WALLS.length)], dc = a0 + w / 2, open = !!el.open && (i === 1 || i === (el.seed >> 3) % 3), v = 0.7, fv = (i + (el.seed >> 5)) % 3;
     F.b(wm, a0, 0, v, dc - 0.5, H, v + th); F.b(wm, dc + 0.5, 0, v, a1, H, v + th); F.b(wm, dc - 0.5, 1.85, v, dc + 0.5, H, v + th, false);
     F.b(wm, a0, 0, v + th, a0 + th, H, v + d); F.b(wm, a1 - th, 0, v + th, a1, H, v + d); F.b(wm, a0 + th, 0, v + d - th, a1 - th, H, v + d);
     doorway(F, dc, v, 0, 1.0, 1.85, th, open);
     for (const s of [-1, 1]) { const c = dc + s * w * 0.3; F.b('opening', c - 0.3, 1.45, v - 0.01, c + 0.3, 1.95, v + 0.03, false); F.b('timber', c - 0.36, 1.4, v - 0.03, c + 0.36, 1.45, v + 0.05, false); }
     skirt(F, a0, v, w, d, 0, [dc - 0.6, dc + 0.6], 0.5); if (!lod) streaks(F, a0, v, w, H, rand, 3, [dc - 0.5, dc + 0.5]);
+    // the fronts of the row, by rule: 0 plain; 1 wall-frame posts proud of the plaster at 2 m; 2 a red band under the eave with a row of hung millet bundles on a pole
+    if (fv === 1) for (let a = a0; a <= a1 + 0.01; a += w / Math.round(w / 2)) { if (Math.abs(a - dc) < 0.75) continue; F.b('timber', a - 0.09, 0.1, v - 0.06, a + 0.09, H, v, false); }
+    else if (fv === 2) { F.b('kokowai', a0, H - 0.5, v - 0.025, a1, H - 0.2, v, false); if (!lod) { F.b('timber', a0 + 0.3, H - 0.9, v - 0.16, a1 - 0.3, H - 0.84, v - 0.1, false); for (let a = a0 + 0.6; a < a1 - 0.5; a += 0.55) if (Math.abs(a - dc) > 0.9) F.b(Math.round(a * 2) % 2 ? 'ichu' : 'cloth_ochre', a, H - 1.5, v - 0.15, a + 0.14, H - 0.88, v - 0.11, false); } }
     F.roof(a0, v, a1, v + d, H, 2.1, 0.75, false); ridge(F, a0, v, a1, v + d, H, 2.1, 0.75, false);
     // the lane front: a pent roof over the door on two posts, a bench, jars and baskets, a hung bundle
     if (!lod) {
@@ -189,7 +196,7 @@ export function rowHouse(el, ctx) {
 /** shang_workshop: { rect, front, seed, open, trade, lod } — a yard of a craft: bone, jade, pottery or the oracle-bone craft, under a shed of posts and thatch. */
 export function workshop(el, ctx) {
   const rand = rng(el.seed), F = frame(el.rect, el.front, ctx.bag, ctx.col), W = F.W, D = F.D, T = el.trade ?? 'bone', lod = el.lod ?? 0;
-  fence(F, 0.4, 0.4, W - 0.4, D - 0.4, [[W / 2 - 1.3, W / 2 + 1.3]], lod);
+  fence(F, 0.4, 0.4, W - 0.4, D - 0.4, [[W / 2 - 1.3, W / 2 + 1.3]], lod, el.seed % 3);
   const su0 = 1.5, sv0 = D - 10, su1 = W - 1.5, sv1 = D - 1.4, sh = 2.6;
   for (let u = su0; u <= su1 + 0.1; u += (su1 - su0) / 5) for (const v of [sv0, sv1]) F.post(u, v, 0, sh, 0.13);
   F.b('timber', su0, sh, sv0 - 0.1, su1, sh + 0.18, sv0 + 0.1, false); F.b('timber', su0, sh, sv1 - 0.1, su1, sh + 0.18, sv1 + 0.1, false);

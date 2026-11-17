@@ -103,6 +103,17 @@ export function shangHall(el, { bag, col, lights }) {
   { const hv = vb + (D + Pd - 0.5) / 2, top = y + WH + 0.35 + RISE, hlen = Math.abs((BL + 2 * O) / 2 - (D + Pd - 0.5 + 2 * O) / 2);
     B('roof_ridge', -hlen - 0.3, top - 0.1, hv - 0.2, hlen + 0.3, top + 0.2, hv + 0.2, false);
     for (const s of [-1, 1]) { const p = M(s * (hlen + 0.3), hv); for (const t of [-1, 1]) { const q = M(s * (hlen + 0.3) + s * 0.9, hv + t * 0.55); bag.add('timber', rod([p[0], top + 0.1, p[1]], [q[0], top + 1.1, q[1]], 0.05, 5)); } } }
+  // the frame in the wall: the posts of the wall-frame stand proud of the plaster at every bay line on the back and the ends (the walls were rammed or
+  // daubed between posts set in pits), each with a footing of beaten earth; and the roof's frame inside: rafters at 1 m from the plates to the ridge,
+  // two purlins on each side (docs §4b)
+  for (let k = 0; k <= bays; k++) { const uu = -BL / 2 + k * bw; B('timber', uu - 0.16, y + 0.12, vb - 0.07, uu + 0.16, y + WH, vb, false); B('earth_wall', uu - 0.24, y, vb - 0.1, uu + 0.24, y + 0.12, vb, false); }
+  for (const sd of [-1, 1]) for (let k = 0; k <= 3; k++) { const vv = vb + k * D / 3 - (k === 3 ? 0.15 : 0), ue = sd * BL / 2;
+    B('timber', Math.min(ue, ue + sd * 0.07) - (sd > 0 ? 0 : 0), y + 0.12, vv - 0.16, Math.max(ue, ue + sd * 0.07), y + WH, vv + 0.16, false); }
+  { const yp = y + WH + 0.4, hv = vb + (D + Pd - 0.5) / 2, yr = y + WH + 0.35 + RISE - 0.28, run = hv - vb, halfRidge = Math.max(0.5, BL / 2 - Math.abs(D + Pd - 0.5 + 2 * O) / 2 + 0 * O) - 0.4;
+    const RF = (u0, v0, y0, u1, v1, y1) => { const a = M(u0, v0), b = M(u1, v1); bag.add('timber', rod([a[0], y0, a[1]], [b[0], y1, b[1]], 0.045, 5)); };
+    for (let k = 0; k <= BL; k += 1) { const uu = -BL / 2 + k, ur = Math.max(-halfRidge, Math.min(halfRidge, uu)); RF(uu, vb + tw, yp - 0.02, ur, hv, yr); RF(uu, vp, yp, ur, hv, yr); }
+    for (const t of [0.34, 0.67]) { const hf = Math.max(1, BL / 2 - t * run * 1.1) - 0.5, yy = yp + t * (yr - yp) - 0.02;
+      for (const vv of [vb + tw + t * (hv - vb - tw), vp + t * (hv - vp)]) B('timber', -hf, yy - 0.07, vv - 0.07, hf, yy + 0.07, vv + 0.07, false); } }
   // the porch: lamps (bronze tripods with a flame) between the posts, banners hung from the front beam, offerings on low stands before the doors
   if (el.rich) {
     for (const k of [1, 3, 5, 7]) { const p = M(-BL / 2 + (k + 0.5) * bw, vp + 0.8); bag.add('bronze', lathe([[0.001, 0], [0.15, 0.02], [0.04, 0.5], [0.04, 0.9], [0.14, 1.0], [0.001, 1.02]], 8, null, p[0], y + 0.17, p[1])); bag.add('flame', lathe([[0.001, 0], [0.07, 0.04], [0.001, 0.26]], 6, null, p[0], y + 1.17, p[1])); }

@@ -57,9 +57,25 @@ export function thatch(bag, r, y, rise, o = 0.6, hip = true, mat = 'thatch') {
   }
 }
 
-/** A rammed-earth platform: battered sides, walkable top. */
+/**
+ * The ramming courses of a battered rammed-earth wall: a thin proud strip round the foot of the platform every 0.3 m (the layers of
+ * 5–10 cm show as bands of drier and damper earth; every third course is darker), each standing 3 cm proud of the battered face.
+ * Strips lie inside the stair's boxes at the stair, so nothing shows through.
+ */
+export function courses(bag, r, h, bat) {
+  const n = Math.floor((h - 0.1) / 0.3);
+  for (let k = 1; k <= n; k++) {
+    const y = k * 0.3, s = bat * y / h - 0.03, m = k % 3 === 0 ? 'silt' : 'mudbrick', t = 0.05, y1 = y + 0.035;
+    const x0 = r[0] + s, z0 = r[1] + s, x1 = r[2] - s, z1 = r[3] - s;
+    bag.add(m, box(x0, y, z0, x1, y1, z0 + t)); bag.add(m, box(x0, y, z1 - t, x1, y1, z1));
+    bag.add(m, box(x0, y, z0 + t, x0 + t, y1, z1 - t)); bag.add(m, box(x1 - t, y, z0 + t, x1, y1, z1 - t));
+  }
+}
+
+/** A rammed-earth platform: battered sides with the courses of the ramming, walkable top. */
 export function platform(bag, col, r, h, bat = 0.35) {
   bag.add('earth_wall', frustum(r, 0, h, bat, bat, bat, bat, { noBottom: true }));
+  courses(bag, r, h, bat);
   col.rect(r, 0, h);
   col.floor([r[0] + bat, r[1] + bat, r[2] - bat, r[3] - bat], h);
 }
@@ -78,31 +94,82 @@ export function steps(bag, col, rect, y0, y1, dir, mat = 'earth_wall') {
 }
 
 // ── the bronze vessels of the ritual set (all about 0.25–0.9 m) ──
+/** Subdivide a lathe profile [[r, h], ...] so that no step is taller than `step`. */
+function refine(P, step) {
+  const out = [P[0]];
+  for (let i = 1; i < P.length; i++) {
+    const [r0, h0] = P[i - 1], [r1, h1] = P[i], lo = Math.min(h0, h1), hi = Math.max(h0, h1), cuts = [];
+    for (let k = Math.floor(lo / step) + 1; k * step < hi - 1e-6; k++) cuts.push(k * step);
+    if (h1 < h0) cuts.reverse();
+    for (const h of cuts) out.push([r0 + (r1 - r0) * (h - h0) / (h1 - h0), h]);
+    out.push([r1, h1]);
+  }
+  return out;
+}
+/**
+ * An ornamented bronze body of revolution (the casting's relief, in geometry): `bands` [[h0, h1, prot], ...] raised rings (the bowstring
+ * bands); `fl` { n, h0, h1, prot } vertical flanges, notched (every other course shorter); `eyes` { h0, h1, prot } the bosses of the
+ * taotie's eyes, either side of each flange; `ribs` { n, h0, h1, prot } low vertical ribs. Heights are those of the unscaled profile.
+ */
+function ornate(bag, prof, s, x, y, z, o = {}) {
+  const step = o.step ?? 0.03, seg = o.seg ?? 32, P = refine(prof, step), TAU = Math.PI * 2, eyeA = TAU / 16, T = step * 0.5 + 1e-6;
+  const near = (th, n, off = 0) => { const q = (th - off) / (TAU / n), d = Math.abs(q - Math.round(q)) * (TAU / n); return d < 0.01; };
+  const mod = (th, i, r, yy) => {
+    if (r < 0.05 * s) return 1;
+    const h = yy / s, odd = Math.round(h / step) % 2;
+    let p = 0;
+    for (const [a, b, pr] of o.bands ?? []) if (h >= a - T && h <= b + T) p = Math.max(p, pr);
+    const f = o.fl;
+    if (f && h >= f.h0 - T && h <= f.h1 + T && near(th, f.n)) p = Math.max(p, odd ? f.prot * 0.45 : f.prot);
+    const e = o.eyes;
+    if (e && h >= e.h0 - T && h <= e.h1 + T && (near(th, 4, eyeA) || near(th, 4, -eyeA))) p = Math.max(p, e.prot);
+    const rb = o.ribs;
+    if (rb && h >= rb.h0 - T && h <= rb.h1 + T && near(th, rb.n)) p = Math.max(p, rb.prot);
+    return 1 + (p * s) / r;
+  };
+  bag.add('bronze', lathe(P.map(([r, h]) => [r * s, h * s]), seg, mod, x, y, z));
+}
 const V = {
-  // ding: a round tripod cauldron with two loop handles
+  // ding: a round tripod cauldron with two loop handles; the belly carries a taotie band: flanges at four points, an eye either side, bowstring bands
   ding(bag, x, y, z, s = 1) {
-    bag.add('bronze', lathe([[0.001, 0.32], [0.26, 0.34], [0.34, 0.5], [0.33, 0.66], [0.36, 0.68], [0.36, 0.72], [0.001, 0.72]].map(([r, h]) => [r * s, h * s]), 14, null, x, y, z));
-    for (const a of [0.4, 2.5, 4.6]) bag.add('bronze', rod([x + Math.cos(a) * 0.22 * s, y, z + Math.sin(a) * 0.22 * s], [x + Math.cos(a) * 0.28 * s, y + 0.38 * s, z + Math.sin(a) * 0.28 * s], 0.05 * s, 6));
-    for (const sd of [-1, 1]) bag.add('bronze', box(x + sd * 0.35 * s - 0.04 * s, y + 0.68 * s, z - 0.05 * s, x + sd * 0.35 * s + 0.04 * s, y + 0.86 * s, z + 0.05 * s));
+    ornate(bag, [[0.001, 0.32], [0.26, 0.34], [0.30, 0.40], [0.34, 0.5], [0.335, 0.64], [0.36, 0.68], [0.36, 0.72], [0.001, 0.72]], s, x, y, z,
+      { bands: [[0.52, 0.52, 0.012], [0.58, 0.58, 0.012], [0.70, 0.70, 0.01]], fl: { n: 4, h0: 0.46, h1: 0.64, prot: 0.032 }, eyes: { h0: 0.52, h1: 0.58, prot: 0.02 } });
+    for (const a of [0.4, 2.5, 4.6]) {
+      bag.add('bronze', rod([x + Math.cos(a) * 0.22 * s, y, z + Math.sin(a) * 0.22 * s], [x + Math.cos(a) * 0.28 * s, y + 0.38 * s, z + Math.sin(a) * 0.28 * s], 0.05 * s, 6));
+      bag.add('bronze', rod([x + Math.cos(a) * 0.22 * s, y + 0.3 * s, z + Math.sin(a) * 0.22 * s], [x + Math.cos(a) * 0.27 * s, y + 0.33 * s, z + Math.sin(a) * 0.27 * s], 0.065 * s, 6));   // the ring of the leg's head
+    }
+    for (const sd of [-1, 1]) {
+      bag.add('bronze', box(x + sd * 0.36 * s - 0.035 * s, y + 0.68 * s, z - 0.05 * s, x + sd * 0.36 * s + 0.035 * s, y + 0.86 * s, z + 0.05 * s));
+      bag.add('bronze', box(x + sd * 0.36 * s - 0.035 * s, y + 0.82 * s, z - 0.05 * s, x + sd * 0.36 * s + 0.035 * s, y + 0.86 * s, z + 0.05 * s));
+      bag.add('bronze', box(x + sd * 0.45 * s - 0.03 * s, y + 0.8 * s, z - 0.05 * s, x + sd * 0.45 * s + 0.03 * s, y + 0.86 * s, z + 0.05 * s));   // the loop: two posts and a bar
+    }
   },
-  // gui: a bowl with a ring foot and two handles
+  // gui: a bowl on a ring foot with two handles; vertical ribs on the belly, a band at the lip
   gui(bag, x, y, z, s = 1) {
-    bag.add('bronze', lathe([[0.17, 0], [0.19, 0.1], [0.33, 0.14], [0.37, 0.3], [0.33, 0.4], [0.001, 0.4]].map(([r, h]) => [r * s, h * s]), 14, null, x, y, z));
-    for (const sd of [-1, 1]) bag.add('bronze', box(x + sd * 0.38 * s - 0.03 * s, y + 0.2 * s, z - 0.05 * s, x + sd * 0.38 * s + 0.03 * s, y + 0.42 * s, z + 0.05 * s));
+    ornate(bag, [[0.17, 0], [0.19, 0.1], [0.33, 0.14], [0.37, 0.3], [0.33, 0.4], [0.001, 0.4]], s, x, y, z,
+      { bands: [[0.34, 0.34, 0.012], [0.08, 0.08, 0.01]], ribs: { n: 16, h0: 0.17, h1: 0.3, prot: 0.014 }, eyes: { h0: 0.32, h1: 0.34, prot: 0.016 }, seg: 32 });
+    for (const sd of [-1, 1]) {
+      bag.add('bronze', box(x + sd * 0.38 * s - 0.03 * s, y + 0.2 * s, z - 0.05 * s, x + sd * 0.38 * s + 0.03 * s, y + 0.42 * s, z + 0.05 * s));
+      bag.add('bronze', box(x + sd * 0.4 * s - 0.03 * s, y + 0.14 * s, z - 0.05 * s, x + sd * 0.4 * s + 0.03 * s, y + 0.2 * s, z + 0.05 * s));      // the hook under the handle
+    }
   },
-  // jue: a three-legged pouring cup with a spout and a tail
+  // jue: a three-legged pouring cup with a spout, a tail and two posts with caps at the rim
   jue(bag, x, y, z, s = 1) {
-    bag.add('bronze', lathe([[0.001, 0.18], [0.07, 0.2], [0.1, 0.3], [0.13, 0.42], [0.001, 0.42]].map(([r, h]) => [r * s, h * s]), 10, null, x, y, z));
+    ornate(bag, [[0.001, 0.18], [0.07, 0.2], [0.1, 0.3], [0.13, 0.42], [0.001, 0.42]], s, x, y, z, { seg: 16, bands: [[0.3, 0.3, 0.008]], fl: { n: 4, h0: 0.24, h1: 0.4, prot: 0.016 } });
     for (const a of [0.3, 2.4, 4.5]) bag.add('bronze', rod([x + Math.cos(a) * 0.05 * s, y, z + Math.sin(a) * 0.05 * s], [x + Math.cos(a) * 0.08 * s, y + 0.22 * s, z + Math.sin(a) * 0.08 * s], 0.012 * s, 5));
     bag.add('bronze', box(x + 0.1 * s, y + 0.38 * s, z - 0.015 * s, x + 0.24 * s, y + 0.43 * s, z + 0.015 * s));
+    bag.add('bronze', box(x - 0.24 * s, y + 0.38 * s, z - 0.015 * s, x - 0.11 * s, y + 0.43 * s, z + 0.015 * s));                              // the tail
+    for (const dz of [-0.06, 0.06]) { bag.add('bronze', rod([x + 0.07 * s, y + 0.42 * s, z + dz * s], [x + 0.07 * s, y + 0.5 * s, z + dz * s], 0.008 * s, 5)); bag.add('bronze', box(x + 0.055 * s, y + 0.5 * s, z + dz * s - 0.015 * s, x + 0.085 * s, y + 0.53 * s, z + dz * s + 0.015 * s)); }
   },
-  // gu: a tall slender beaker with a flared mouth
+  // gu: a tall slender beaker with a flared mouth, flanges on the foot and the trumpet
   gu(bag, x, y, z, s = 1) {
-    bag.add('bronze', lathe([[0.001, 0], [0.09, 0], [0.07, 0.1], [0.05, 0.3], [0.05, 0.4], [0.1, 0.55], [0.13, 0.62], [0.001, 0.6]].map(([r, h]) => [r * s, h * s]), 10, null, x, y, z));
+    ornate(bag, [[0.001, 0], [0.09, 0], [0.07, 0.1], [0.05, 0.3], [0.05, 0.4], [0.1, 0.55], [0.13, 0.62], [0.001, 0.6]], s, x, y, z,
+      { seg: 16, bands: [[0.33, 0.33, 0.01], [0.1, 0.1, 0.008]], fl: { n: 4, h0: 0.03, h1: 0.12, prot: 0.016 }, eyes: { h0: 0.04, h1: 0.08, prot: 0.01 } });
   },
-  // zun: a wide-mouthed jar-vessel on a ring foot
+  // zun: a wide-mouthed jar-vessel on a ring foot, with flanges on the shoulder and the foot
   zun(bag, x, y, z, s = 1) {
-    bag.add('bronze', lathe([[0.001, 0], [0.16, 0], [0.15, 0.1], [0.2, 0.25], [0.2, 0.34], [0.26, 0.5], [0.3, 0.56], [0.001, 0.54]].map(([r, h]) => [r * s, h * s]), 12, null, x, y, z));
+    ornate(bag, [[0.001, 0], [0.16, 0], [0.15, 0.1], [0.2, 0.25], [0.2, 0.34], [0.26, 0.5], [0.3, 0.56], [0.001, 0.54]], s, x, y, z,
+      { bands: [[0.25, 0.25, 0.012], [0.4, 0.4, 0.012]], fl: { n: 4, h0: 0.1, h1: 0.34, prot: 0.024 }, eyes: { h0: 0.28, h1: 0.34, prot: 0.016 } });
   },
 };
 export const vessel = (kind, bag, x, y, z, s = 1) => V[kind](bag, x, y, z, s);
