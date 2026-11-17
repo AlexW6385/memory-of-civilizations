@@ -42,6 +42,9 @@ export const BELL = [108, -143, 116, -135];
 export const PRASAT = [-62, -148, -46, -132];
 export const UBOSOT = [76, -118, 109, -103];
 export const PALACE = { wall: [-226, -240, -100, -100], halls: [[-210, -230, -150, -208], [-196, -196, -128, -172], [-212, -150, -164, -126]] };
+/** The Dutch lodge's compound on the island's south bank (docs §12.3), and its parts: main building, wharf, gates. */
+export const VOC = [60, 128, 140, 212];
+export const VOC_MAIN = [81, 150, 119, 162.5];
 /** The floating market's reach (the river by the palace) and the moorings along the river's east bank. */
 export const MARKET = [-300, -150, -246, 60];
 
@@ -88,7 +91,7 @@ export function lots() {
     const [x0, z0, x1, z1] = rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
     if (!inRect(ISLAND, cx, cz, -14) || Math.hypot(cx, cz) > RADIUS - 44) return false;
     if (inRect(WAT.wall, cx, cz, 8) || inRect(PALACE.wall, cx, cz, 8)) return false;
-    if (inRect(UBOSOT, cx, cz, 10) || onBridge(cx, cz, 5)) return false;
+    if (inRect(UBOSOT, cx, cz, 10) || onBridge(cx, cz, 5) || inRect(VOC, cx, cz, 6)) return false;
     for (const [px, pz] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1], [cx, cz]]) if (wetCanal(px, pz) < 3.5 || wetRiver(px, pz) < 10) return false;
     return true;
   };

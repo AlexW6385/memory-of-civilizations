@@ -3,7 +3,7 @@
 // pots, rice and fish, the vendors sitting in them); sugar palms and the granaries; the monks and the people of the banks.
 import { lodTiles } from '../lod.js';
 import { frame } from '../../styles/khmer/village.js';
-import { RADIUS, WATER, CANALS, BRIDGES, MARKET, RIVER_W, ISLAND, inRect, wet, lots, onBridge, onPath, paths, inLot, WAT, PALACE, UBOSOT, wetRiver } from './layout.js';
+import { RADIUS, WATER, CANALS, BRIDGES, MARKET, RIVER_W, ISLAND, inRect, wet, lots, onBridge, onPath, paths, inLot, WAT, PALACE, UBOSOT, wetRiver, VOC, VOC_MAIN } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const plan = (id, style, elements, extra = {}) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [10, -90], facing: 'n' }, ...extra });
@@ -70,12 +70,12 @@ function garden() {
   const E = [], rand = rng(168);
   for (let k = 0; k < 210; k++) {
     const x = -228 + rand() * 520, z = -240 + rand() * 462;
-    if (!inRect(ISLAND, x, z, -6) || Math.hypot(x, z) > RADIUS - 40 || wet(x, z) < 3.5 || inLot(x, z, 2.2) || onPath(x, z, 0.8) || onBridge(x, z, 4) || inRect(WAT.wall, x, z, 4) || inRect(PALACE.wall, x, z, 4) || wetRiver(x, z) < 8) continue;
+    if (!inRect(ISLAND, x, z, -6) || Math.hypot(x, z) > RADIUS - 40 || wet(x, z) < 3.5 || inLot(x, z, 2.2) || onPath(x, z, 0.8) || onBridge(x, z, 4) || inRect(WAT.wall, x, z, 4) || inRect(PALACE.wall, x, z, 4) || inRect(VOC, x, z, 4) || wetRiver(x, z) < 8) continue;
     E.push({ t: 'sugar_palm', at: [x, z], y: 0, s: 0.75 + rand() * 0.5, rot: rand() * 6.28 });
   }
   for (let k = 0; k < 40; k++) {
     const x = -220 + rand() * 500, z = -235 + rand() * 450;
-    if (!inRect(ISLAND, x, z, -8) || Math.hypot(x, z) > RADIUS - 44 || wet(x, z) < 6 || inLot(x, z, 3) || onPath(x, z, 1.5) || onBridge(x, z, 5) || inRect(WAT.wall, x, z, 5) || inRect(PALACE.wall, x, z, 5) || wetRiver(x, z) < 14) continue;
+    if (!inRect(ISLAND, x, z, -8) || Math.hypot(x, z) > RADIUS - 44 || wet(x, z) < 6 || inLot(x, z, 3) || onPath(x, z, 1.5) || onBridge(x, z, 5) || inRect(WAT.wall, x, z, 5) || inRect(PALACE.wall, x, z, 5) || inRect(VOC, x, z, 6) || wetRiver(x, z) < 14) continue;
     E.push(k % 3 ? { t: 'k_granary', at: [x, z], seed: k } : { t: 'k_sala', rect: [x, z, x + 5, z + 4], front: 's', seed: k });
   }
   // the back yards of the lots: bananas and areca, a rack of drying fish, a granary, a hammock, water jars; the yard's bamboo fence
@@ -83,7 +83,7 @@ function garden() {
   for (const l of lots()) {
     const [x0, z0, x1, z1] = l.rect, f = FR[l.front], cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, hb = Math.abs(f[0]) ? (x1 - x0) / 2 : (z1 - z0) / 2;
     const at = (u, v) => [cx - f[0] * (hb + v) + -f[1] * u, cz - f[1] * (hb + v) + f[0] * u];
-    const ok = (p) => wet(p[0], p[1]) > 3 && !inLot(p[0], p[1], 0.8) && !onPath(p[0], p[1], 0.6) && !onBridge(p[0], p[1], 3) && !inRect(WAT.wall, p[0], p[1], 3) && !inRect(PALACE.wall, p[0], p[1], 3) && wetRiver(p[0], p[1]) > 8 && Math.hypot(p[0], p[1]) < RADIUS - 46;
+    const ok = (p) => wet(p[0], p[1]) > 3 && !inLot(p[0], p[1], 0.8) && !onPath(p[0], p[1], 0.6) && !onBridge(p[0], p[1], 3) && !inRect(WAT.wall, p[0], p[1], 3) && !inRect(PALACE.wall, p[0], p[1], 3) && !inRect(VOC, p[0], p[1], 3) && wetRiver(p[0], p[1]) > 8 && Math.hypot(p[0], p[1]) < RADIUS - 46;
     const r = yr();
     if (r < 0.5) { const p = at((yr() - 0.5) * 3, 1.6 + yr()); if (ok(p)) E.push({ t: 'k_banana', at: p, y: 0, s: 0.9 + yr() * 0.3, seed: l.seed }); }
     if (r < 0.3) { const p = at((yr() - 0.5) * 2, 3.4); if (ok(p)) E.push({ t: 'k_areca', at: p, y: 0, s: 0.9 + yr() * 0.2, seed: l.seed + 1 }); }
@@ -91,6 +91,20 @@ function garden() {
     if (r > 0.7 && r < 0.8) { const p = at(-1.0, 2.4); if (ok(p)) E.push({ t: 'k_granary', at: p, seed: l.seed }); }
   }
   return plan('ayutthaya-garden', 'siamese', E);
+}
+/** The Dutch lodge on the south bank (docs §12.3): main building, quarters, kitchen, billiard hall, prison, stables, smithy, store, the fence and its gates, garden, burial ground, flagstaff, wharf. */
+function voc() {
+  const [x0, z0, x1, z1] = VOC, E = [], cx = (VOC_MAIN[0] + VOC_MAIN[2]) / 2;
+  E.push({ t: 'voc_lodge', rect: VOC_MAIN, seed: 5 });
+  E.push({ t: 'voc_house', rect: [124, 150, 134, 160], kind: 'kitchen', door: 's', seed: 1 }, { t: 'voc_house', rect: [66, 132, 84, 142], kind: 'quarters', door: 's', seed: 2 }, { t: 'voc_house', rect: [90, 132, 106, 141], kind: 'billiard', door: 's', seed: 3 }, { t: 'voc_house', rect: [122, 134, 128, 140], kind: 'prison', door: 's', seed: 4 });
+  E.push({ t: 'voc_shed', rect: [112, 178, 134, 186], kind: 'stable', seed: 6 }, { t: 'voc_shed', rect: [66, 176, 76, 184], kind: 'smithy', seed: 7 }, { t: 'voc_shed', rect: [70, 192, 92, 206], kind: 'store', seed: 8 });
+  E.push({ t: 'voc_fence', a: [x0, z0], b: [x1, z0] }, { t: 'voc_fence', a: [x1, z0], b: [x1, z1] }, { t: 'voc_fence', a: [x1, z1], b: [x0, z1], gaps: [[x1 - 102, x1 - 98]] }, { t: 'voc_fence', a: [x0, z1], b: [x0, z0], gaps: [[z1 - 170, z1 - 164]] });
+  const trees = []; let n = 0;
+  for (let x = 126; x <= 138; x += 4) for (let z = 166; z <= 174; z += 4) trees.push([x, z, n++ % 3]);
+  for (let z = 130; z <= 146; z += 4) trees.push([136, z, n++ % 3]);
+  E.push({ t: 'voc_grounds', paths: [[53, 167, 100, 170], [98.5, 170, 101.5, 212]], trees, cemetery: [112, 194, 138, 210], flag: [110, 175], wharf: { x: 100, z0: 212, z1: 234 }, seed: 8 });
+  void cx;
+  return plan('ayutthaya-voc', 'siamese', E);
 }
 /** The people standing about: monks at the wat, vendors sitting in the market's boats, villagers on the banks. */
 function people() {
@@ -153,11 +167,17 @@ function people() {
       if (hr() < 0.5 && l.kind !== 'small') fig(W(-hS * 0.45, -hF + 1.9), up, dir + 1.2, { pose: 'sit_ground', legs: 'cross', hair: 'short', cloth: CL[Math.floor(hr() * CL.length)] });
       if (hr() < 0.35) fig(W(hS * 0.4, -hF + 1.6), up, dir, { pose: 'stand', child: true, h: 0.8, hair: 'short' });
     } }
+  // at the Dutch lodge: porters on the wharf with a bale on the pole, a woman cooking at the kitchen's hearth, a servant at the gate
+  fig([98.8, 224], 0.06, 0, { carry: 'pole', hat: 'straw' }); fig([101.2, 220], 0.06, Math.PI, { hat: 'straw', carry: 'basket' }); fig([127.5, 154.6], 0.04, 0, { pose: 'sit_ground', legs: 'cross', hair: 'bun', top: '', over: 'shawl' });
+  fig([64, 164.4], 0, -Math.PI / 2, { hat: 'cap', over: 'sash', carry: 'pole' });
+  // the king's elephants at the palace gate's south side, a mahout on each: led out to work
+  P.push({ t: 'animal', kind: 'elephant', at: [-84, -122], y: 0, rot: Math.PI, seed: 16500, tusks: 'short', gear: true, cloth: 'cloth_red', mahout: { dress: 'wrap', top: 'bare', cloth: 'cloth_ochre', hat: 'none', hair: 'short' } });
+  P.push({ t: 'animal', kind: 'elephant', at: [-84, -110], y: 0, rot: Math.PI - 0.15, seed: 16501, tusks: 'none', mahout: { dress: 'wrap', top: 'bare', cloth: 'cloth_white', hat: 'none', hair: 'short' } });
   void face;
   return plan('ayutthaya-people', 'life', P);
 }
 export async function town() {
-  const plans = [water(), garden(), people()];
+  const plans = [water(), garden(), people(), voc()];
   const els = lots().map((l) => ({ t: 'thai_house', rect: l.rect, front: l.front, seed: l.seed, kind: l.kind }));
   plans.push(...lodTiles('ayutthaya-houses', 'siamese', els, { R: RADIUS, near: 150 }));
   void UBOSOT;

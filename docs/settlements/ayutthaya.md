@@ -97,10 +97,39 @@ Tropical monsoon: hot and humid, the sky hazy; rainy season May–October, flood
 - The palace gate: a pair of brick pylons with a three-tiered tiled roof over the way, a gilt finial [inferred]; the court's brick way, rows of palms and the stands of the royal umbrellas.
 - The bell tower: stair to the bell's floor [inferred; Ayutthayan bell towers were of brick with a wooden floor, §4.3].
 
+## 12. Detail pass (landmark, the Dutch lodge, houses, street life)
+
+### 12.1 The chedis, as the sources give them [stated unless marked]
+- Superimposed pedestals on one platform; four porches to the quarters, each roof carrying a stupika identical to the main chedi; a niche with a standing Buddha on three sides; the east porch leads to the small chamber of the king's ashes [ayutthaya-history.com, wat-phra-si-sanphet-2].
+- Sao han: vertical pillars decorating the shaft and supporting the spire above the harmika, breaking the horizontal rings of the pinnacle [same]. Model: a ring of slender pillars round the neck, rising from the bell's shoulder into the spire's foot, the harmika above the bell.
+- Not in the sources read: indented corners (those belong to Chedi Phukhao Thong), lotus-petal mouldings (the source has lotus capitals only on some columns of the royal wihan). Model [inferred]: a lotus-petal band round the foot of the bell, a common Sukhothai/Ayutthaya bell-chedi form; pedestal corners stay square.
+- Porch model [inferred]: a small gabled, tile-roofed porch (pediment, pilasters framing the niche, a threshold step), the stupika on its ridge.
+
+### 12.2 The royal wihan and the Prasat Phra Narai [stated unless marked]
+- The wihan has no windows, only vertical slits; two entries at each porch; columns with stylised lotus capitals in places; wooden gables and tiled roofs [ayutthaya-history.com]. Model [inferred]: framed slits with a stucco surround, a pair of lacquered door leaves with gilt, the gables patterned with gilt flame-scrolls (lai kranok) radiating from the ridge, rows of rafter ends under the eaves.
+- The prasat is Greek-cross, with a square sanctuary, four porch-like antechambers and a slender prang [ayutthaya-history.com, wat-phra-si-sanphet-2]. The pointed-arch (Gothic, French-influenced) doors and windows belong to a separate mondop near the north wall (Prasat Thong's remains), not to the prasat [same]. Model [inferred]: the pointed-arch windows go on the prasat's porches only as a Narai-reign touch noted by Wikipedia ("pointed arch windows"), kept as shallow stucco frames.
+
+### 12.3 The Dutch lodge (VOC, "the Red Building") [stated unless marked]
+- Founded 1633, the lodge finished 1636, kept until 1767; it stood outside the city island, on the east bank of the river, north of the English post and the Japanese settlement and opposite the Portuguese one [ayutthaya-history.com, dutch-settlement]. [inferred: the disc ends at the river, so the lodge is shown on the island's south bank by the river, as a compression; the Japanese and Portuguese quarters are not shown.]
+- Gijsbert Heeck, 1655: walls of brick plastered with lime, woodwork of teak, roofs of Siamese tile; stables and other bamboo buildings under atap; the main building a sturdy front with airy lodgings above and warehouse space below, a double stair of about twenty steps to the dining hall, the director's and deputy's rooms on opposite sides of it; brick rooms for junior staff and servants, a brick kitchen, a prison, bamboo stables, a smithy; a bamboo fence enclosing the compound within a moat; a garden of pomegranate, orange and lime; a Dutch cemetery beside it; a wooden warehouse for rice and dried planking across the moat [ayutthaya-history.com, dutch-settlement].
+- Excavation: the main building two storeys, 12.5 by 45 m; three further brick foundations (warehouse, accommodation, a billiard hall with many windows on all sides, a "troktafel" for the cadets) [ayutthaya-history.com, Settlements_Dutch_BaanHolland].
+- Trade: deer hides, ray skins, sappan wood from Siam, for Japanese silver and copper [ayutthaya-history.com, dutch-settlement]. Furnishing "according to the rank of the occupant" [same].
+- Model [inferred in detail]: the two-storey red-brick main building 12.5 by 45 m (here 12.5 by 38 m) with warehouse below (hides, sappan logs, ray-skin bales, rice sacks, chests, a weighing beam), the double stair to a dining hall with the long table, high-backed chairs, a map and a pewter and blue-and-white display; the director's room and the deputy's room at the two ends (bed with a curtain, writing table, chest); the Company's flag (orange, white, blue: the prince's flag of the period) on a staff before it; the billiard hall; kitchen; bamboo stables and a smithy; the bamboo fence; the garden; a small cemetery with grave slabs; a wharf on piles at the river.
+
+### 12.4 Houses [inferred from the Thai house tradition]
+- The houses so far were one type with random cladding. Now the front is chosen by rule from the lot's place: a house on the river road or beside the palace and wat is a "great" house (tile, enclosed gallery, a separate kitchen house across the terrace, as the Thai rueanthai is a cluster of houses on one terrace); on the far canals plain thatch with an open terrace; the very small ones have a lean-to kitchen at the side.
+- Interior kitchens: the kitchen house holds the hearth, water jars, a rack of pots, a mortar, rice winnowing tray.
+
+### 12.5 Street life [inferred]
+- Elephants were the state's working and war animals of the Siamese kings; the source pages read here do not describe the palace's stable, so their placement is [inferred]. Model: two working elephants with their mahouts by the palace's south gate; a monk's alms round and a seller on the canal bank.
+
 ## Sources
 - Wikipedia, "Wat Phra Si Sanphet": https://en.wikipedia.org/wiki/Wat_Phra_Si_Sanphet
 - Ayutthaya Historical Research, "The architecture of Wat Phra Sri Sanphet": https://ayutthaya-history.com/Temples_Ruins_PhraSisanphet_Architecture.html
 - Ayutthaya Historical Research, "Boathouses of Ayutthaya": https://ayutthaya-history.com/boathouses.html
 - Ayutthaya Historical Research, "Waterways II": https://ayutthaya-history.com/Essays_WaterwaysII.html
+- Ayutthaya Historical Research, "Wat Phra Si Sanphet (part 2)": https://www.ayutthaya-history.com/wat-phra-si-sanphet-2.html
+- Ayutthaya Historical Research, "The Dutch settlement" (Heeck 1655): https://ayutthaya-history.com/dutch-settlement.html
+- Ayutthaya Historical Research, "Baan Hollanda" (the excavated foundations): https://ayutthaya-history.com/Settlements_Dutch_BaanHolland.html
 - Wikipedia, "Ayutthaya Kingdom": https://en.wikipedia.org/wiki/Ayutthaya_Kingdom
 - Wikipedia, "Du royaume de Siam" (La Loubère, 1691): https://en.wikipedia.org/wiki/Du_royaume_de_Siam
