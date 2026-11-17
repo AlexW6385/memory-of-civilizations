@@ -118,6 +118,8 @@ pwall({ o: [2.25, FRONT[0]], u: [0, 1], th: 1.5, u0: 0, u1: 2 * WZ, y0: 0, y1: E
 for (const sz of [-1, 1]) add({ t: 'block', rect: [0, Math.min(sz * 1.5, sz * 4.4), 1.5, Math.max(sz * 1.5, sz * 4.4)], y0: 0, y1: 0.01, mat: 'limestone_yellow', collide: false });
 for (const sz of [-1, 1]) for (const [z0, x0] of [[3.35, 0.35], [2.4, 0.9]]) add({ t: 'block', rect: [x0, Math.min(sz * z0, sz * 4.4), 1.5, Math.max(sz * z0, sz * 4.4)], y0: 0, y1: 4.85, mat: 'sandstone_red' });
 add({ t: 'tympanum', x: 1.0, zc: 0, y: 4.6, w: 6.7, h: 3.6 });
+add({ t: 'portal_dress', x: 1.0, R: 3.35, yb: 4.85 });
+add({ t: 'front_dress', y0: OUT });
 add({ t: 'obj', kind: 'doors', at: [2.6, 0], y: 0, yaw: Math.PI / 2, w: 3.0, h: 4.6, th: 0.12, depth: 0 });
 // the threshold hollowed by the pilgrims' feet, in the doorway under the leaves (docs/settlements/conques.md §1e)
 add({ t: 'worn_sill', rect: [1.55, -1.5, 2.45, 1.5], y: 0, h: 0.035, dip: 0.022, mat: 'limestone_yellow' });
@@ -137,6 +139,9 @@ for (const sz of [-1, 1]) {
     const off = (u[0] === 0) ? [o[0] + (o[0] === 0 ? 0.5 : -0.5), o[1]] : [o[0], o[1] + (o[1] < zc ? 0.5 : -0.5)];
     pwall({ o: off, u, th: 1.0, u0: 0, u1: L, y0, y1, arches: [{ uc: L / 2 - 0.75, r: 0.55, spring: 26.6, sill: 25.0 }, { uc: L / 2 + 0.75, r: 0.55, spring: 26.6, sill: 25.0 }], mat: 'limestone_yellow', collide: false });
   }
+  add({ t: 'tower_dress', zc, sz, h, y0, y1 });
+  add({ t: 'corbel_row', a: [0, zc - h], b: [0, zc + h], n: [-1, 0], y: y1 - 0.8, h: 0.3, out: 0.3, w: 0.26, step: 0.52 });
+  add({ t: 'corbel_row', a: [0, zc + sz * h], b: [2 * h, zc + sz * h], n: [0, sz], y: y1 - 0.8, h: 0.3, out: 0.3, w: 0.26, step: 0.52 });
   add({ t: 'pyramid_roof', c: [h, zc], r: h * Math.SQRT2 + 0.5, y: y1, apex: y1 + 4.2 });
 }
 
@@ -413,6 +418,8 @@ for (const sz of [-1, 1]) {
 add({ t: 'corbel_arc', c: [XH, 0], r: RH + 0.45, a0: -90, a1: 90, y: 22.6, h: 0.3, out: 0.35, w: 0.3, step: 0.55 });
 add({ t: 'corbel_arc', c: [XH, 0], r: RAO, a0: -90, a1: 90, y: 10.3, h: 0.3, out: 0.5, w: 0.3, step: 0.6 });
 for (const a of CHAPELS) add({ t: 'corbel_arc', c: [XH + Math.cos(a * D2R) * RCH, Math.sin(a * D2R) * RCH], r: rch + 0.8, a0: a - 90, a1: a + 90, y: 6.4, h: 0.3, out: 0.28, w: 0.26, step: 0.5 });
+
+add({ t: 'chevet_dress', c: [XH, 0], rAmb: RAO, rd: RH + 0.45, chapels: CHAPELS.map((a) => ({ a, r: rch + 0.8, c: [XH + Math.cos(a * D2R) * RCH, Math.sin(a * D2R) * RCH] })) });
 
 // ── rooms and walks ──────────────────────────────────────────────────────────
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });

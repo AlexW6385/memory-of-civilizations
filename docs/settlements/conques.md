@@ -168,3 +168,13 @@ Sources added:
 - [The perfect monastic garden — The Garden History Blog](https://thegardenhistory.blog/2019/08/31/the-perfect-monastic-garden)
 - [Dirty business: making leather in the Middle Ages — Medievalists.net](https://www.medievalists.net/?p=111561)
 - [Mills — Historic England](https://cms.historicengland.org.uk/images-books/publications/iha-mills/heag212-mills)
+
+## 1l. The landmark seen close (round 2, 2026-11): portal, front, towers, chevet
+
+- **Sources used:** the tympanum's inscribed bands and compartments [stated: art-roman-conques.fr/english/structure.html; christianiconography.info]; the three archivolts [stated: tourisme-conques.fr "The tympanum"]; the church's chevet with an ambulatory and radiating chapels [stated: Wikipedia "Abbey Church of Sainte-Foy"]. The mouldings below are [inferred] after Romanesque portals and chevets of the Rouergue and Auvergne; no photograph was copied.
+- **Tympanum:** the bands of the middle and top registers now carry lettering in incised capitals (about 110 letters, one stroke at a time; the text itself is not reproduced, the letters are forms only); three more of the damned are bound on the slope of Hell's gable, answering the rising dead.
+- **Portal (`portal_dress`):** five jamb shafts each side with carved capitals (two on the inner reveal, three under the archivolts), a billet moulding on the first ring, rosettes on the second, a chevron on the third, and a hood moulding with billets and two head corbels round the whole opening.
+- **West front (`front_dress`):** a sill course with billets under the two windows, hoods and shafts on the windows, courses at the towers' foot and under the gable, a blind arcade of five arches between the towers.
+- **West towers (`tower_dress`, corbel table):** corner buttress strips to the top on their stepped feet, two string courses with billets, a blind arcade, the belfry pairs with hoods and shafts, a corbel table under each pyramid.
+- **Chevet (`chevet_dress`):** pilaster strips between the bays of the ambulatory, the drum and the radiating chapels, string courses with billets round them, hoods and shafts at their windows. Hoods and shafts are in yellow limestone against the red wall (dressed-stone surrounds; also keeps the draw count unchanged).
+- **Not done this round:** the village's half-timbered fronts; the nave capitals were already carved (§1c).
