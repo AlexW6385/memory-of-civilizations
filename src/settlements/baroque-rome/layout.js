@@ -12,7 +12,9 @@ export const FLOOR = 3;                                      // the church's flo
 export const OVAL = { c: [40, 0], ax: 70, bz: 95 };
 export const RETTA = [-78, -50, -28, 50];
 export const PALACE = [-150, -175, -70, -112];
-export const SISTINE = [-205, -138, -165, -118];
+export const SISTINA_C = [-185, -128];                       // the Sistine Chapel's centre: 40.9 × 13.4 m inside, walls 2.2 m (styles/baroque/sistina.js)
+export const COURT = [-131, -160, -89, -127];                  // the Cortile di San Damaso's clear rectangle in the palace (its gate on the south face, x -110)
+export const SISTINE = [-207.65, -136.9, -162.35, -119.1];
 export const GARDEN = [-285, 84, -195, 150];                  // the Vatican gardens' parterre, south-west of the church
 export const CASTEL = { c: [172, -60], r: 22 };
 export const TIBER = { x: 268, w: 64, level: -5, bed: -8 };
@@ -95,6 +97,25 @@ export function lots() {
     LOTS.push({ rect: [x, z, x + w, z + d], seed: Math.floor(rand() * 1e6), y: Math.max(0, height(cx, cz)), foot: -0.3, storeys: 3 + (rand() < 0.5 ? 1 : 0), front: rand() < 0.5 ? 'n' : 's', plaster: rand() < 0.75, fronted: Math.hypot(cx - 175, cz) < 115 });
   }
   return LOTS;
+}
+/**
+ * The houses that can be entered (DESIGN §4.3): the five lots nearest the arrival (the first an inn), and eight more spread
+ * through the ring 120–240 m from it (two inns among them), each a furnished room with its household; a map from lot to its use.
+ */
+let HOMES = null;
+const EXTRA_HOMES = 0;      // 8 more open homes in the ring add ~48 walls walked through (furniture without collision in the shared house); raise when the shared house collides its furniture
+export function openHomes(arrival) {
+  if (HOMES) return HOMES;
+  const ok = lots().filter((l) => l.rect[2] - l.rect[0] >= 4.5 && l.rect[3] - l.rect[1] >= 4.5);
+  const d = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - arrival[0], (l.rect[1] + l.rect[3]) / 2 - arrival[1]);
+  const near = ok.slice().sort((a, b) => d(a) - d(b)), pick = near.slice(0, 5);
+  HOMES = new Map(pick.map((l, i) => [l, i === 0 ? 'inn' : 'home']));
+  const ring = near.filter((l) => d(l) >= 120 && d(l) <= 240 && l.rect[2] - l.rect[0] >= 8.4 && !inRow(l.rect[0], l.rect[1], 3));
+  // (spread by bearing from the arrival so that they do not cluster)
+  ring.sort((a, b) => Math.atan2((a.rect[1] + a.rect[3]) / 2 - arrival[1], (a.rect[0] + a.rect[2]) / 2 - arrival[0]) - Math.atan2((b.rect[1] + b.rect[3]) / 2 - arrival[1], (b.rect[0] + b.rect[2]) / 2 - arrival[0]));
+  const step = Math.max(1, Math.floor(ring.length / 8));
+  for (let i = 0, k = 0; i < ring.length && k < EXTRA_HOMES; i += step, k++) HOMES.set(ring[i], k === 2 || k === 5 ? 'inn' : 'home');
+  return HOMES;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
 

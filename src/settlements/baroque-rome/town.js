@@ -1,12 +1,12 @@
-import { lodTiles, openLots } from '../lod.js';
+import { lodTiles } from '../lod.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
 // The Borgo's houses and the palaces across the river (docs/settlements/baroque-rome.md §5).
-import { RADIUS, lots, rows, LANES } from './layout.js';
+import { RADIUS, lots, rows, LANES, openHomes } from './layout.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [125, 0], facing: 'w' } });
 const TRADES = ['grocer', 'baker', 'cloth', 'wine', 'apothecary', 'osteria', 'cobbler'];
 const CAS_H = [3.9, 3.4, 3.2, 2.9];
 export async function houses() {
-  const all = lots(), plans = [], arrival = ARRIVALS['baroque-rome'], homes = openLots(all, [arrival[0], arrival[2]], 5);
+  const all = lots(), plans = [], arrival = ARRIVALS['baroque-rome'], homes = openHomes([arrival[0], arrival[2]]);
   // the lots about the Borgo and the oval's mouth are fronted like the Borgo's own houses (shops, madonnelle, awnings, notices);
   // the farther ones, and the three homes that can be entered, are the shared Roman house
   const fronted = all.filter((l) => l.fronted && !homes.has(l) && l.rect[2] - l.rect[0] >= 8.4);

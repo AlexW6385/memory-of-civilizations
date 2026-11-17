@@ -1,5 +1,5 @@
 // Baroque Rome about 1670 (docs/settlements/baroque-rome.md §2–§4).
-import { GARDEN, RADIUS, CROSSING, FRONT_X, FLOOR, OVAL, RETTA, PALACE, SISTINE, CASTEL, TIBER, tiberX, height } from './layout.js';
+import { GARDEN, RADIUS, CROSSING, FRONT_X, FLOOR, OVAL, RETTA, PALACE, COURT, SISTINA_C, CASTEL, TIBER, tiberX, height } from './layout.js';
 
 export const stpeter = {
   id: 'baroque-rome-stpeter',
@@ -32,8 +32,8 @@ export const vatican = {
   id: 'baroque-rome-vatican', style: 'baroque', origin: [0, 0], base: 0, yaw: 0, feature: true,
   entrance: { at: [125, 0], facing: 'w' }, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms: [],
   elements: [
-    { t: 'palace_roman', rect: PALACE, h: 26 },
-    { t: 'palace_roman', rect: SISTINE, h: 21, hall: true },
+    { t: 'palace_apostolic', rect: PALACE, court: COURT, h: 26 },
+    { t: 'sistina', c: SISTINA_C },
     { t: 'castel', c: CASTEL.c, r: CASTEL.r, h: 20 },
     { t: 'parterre', rect: GARDEN, cols: 4, rows: 2, seed: 9 },
   ],
