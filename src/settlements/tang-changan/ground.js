@@ -2,7 +2,7 @@
 // locusts planted along them, the wards' lanes of earth, the temples' brick courts, the market's lanes; locusts, elms and jujubes in
 // the courts of the houses, cypresses and pines in the temples, peach trees in the Daoist temple's court; wheat beyond the wards.
 
-import { RADIUS, AVE, DITCH, STREETS, WARDS, DACI, DAOIST, MARKET, MARKET_BLOCKS, OFFICE, DACI_AX, DAO_AX, inRect, inDitch, onStreet, onLane, onMarketLane, lotAt, smooth as sm, inWard, TREE_ROWS, FIRE, marketYards, DACI_MAIN, sightDist } from './layout.js';
+import { RADIUS, AVE, DITCH, STREETS, WARDS, DACI, DAOIST, MARKET, MARKET_BLOCKS, OFFICE, DACI_AX, DAO_AX, inRect, inDitch, onStreet, onLane, onMarketLane, lotAt, smooth as sm, inWard, TREE_ROWS, marketYards, DACI_MAIN, sightDist } from './layout.js';
 
 function height(x, z) {
   const r = Math.hypot(x, z);
@@ -71,11 +71,6 @@ function planting(x, z) {
     return z > z0 + 120 ? { apple: 0.7, grass: 8 } : { chinese_pine: 0.1, cypress: 0.06, apple: 0.15, grass: 5 };
   }
   if (ward.kind === 'market') { return onMarketLane(x, z, 0.5) ? null : (marketYards().some((m) => inRect(m.yard, x, z, -1.5)) ? { pagoda_tree: 0.18, grass: 3 } : null); }
-  if (inRect(FIRE.rect, x, z)) {                                                                  // the fire temple's court: cypresses along its walls, clear before the chamber, the hall and the path
-    const [fx, fz] = FIRE.c, [a0, b0, a1, b1] = FIRE.rect;
-    if (x < a0 + 3 || x > a1 - 3 || z < b0 + 3 || z > b1 - 3 || inRect([fx - 10, fz - 10, fx + 10, fz + 10], x, z) || Math.abs(z - FIRE.gate[1]) < 3.5 || z < b0 + 14 || z > b1 - 14) return null;
-    return { cypress: 0.3, grass: 3 };
-  }
   if (onLane(x, z, 0.4)) { const rim = Math.abs(((ward.c[0] - x) * 0.5)) % 1; void rim; return { pagoda_tree: 0.12, elm: 0.05, grass: 2 }; }
   const lot = lotAt(x, z);
   if (lot) { const inCourt = true; void inCourt; return lot.kind === 'hut' ? { grass: 4, jujube: 0.1 } : { pagoda_tree: 0.12, jujube: 0.14, persimmon: 0.1, elm: 0.06, grass: 5 }; }
