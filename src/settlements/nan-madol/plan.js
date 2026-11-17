@@ -18,6 +18,11 @@ E.push({ t: 'crib_wall', a: [ox1, oz0], b: [ox1, oz1], th, top: outerTop, seed: 
 E.push({ t: 'crib_wall', a: [ox0, oz0], b: [ox0, oz1], th, top: outerTop, seed: 13, proj: 1 });
 E.push({ t: 'crib_wall', a: [ox0, oz1], b: [OUTER_GATE[0], oz1], th, top: (u, L) => 5.8 + 2.3 * (1 - sm(0, 10, u)), seed: 14, proj: 0, ends: [th / 2, 0] });
 E.push({ t: 'crib_wall', a: [OUTER_GATE[1], oz1], b: [ox1, oz1], th, top: (u, L) => 5.8 + 2.3 * (1 - sm(0, 10, L - u)), seed: 15, proj: 0, ends: [0, th / 2] });
+// the foundation of boulders at the outer wall's foot, outside (stated: NRHP — boulders, some over 20 tonnes): clear of the corners, of the gate and of the apron's seats
+{ const bf = (a, b, out, m, o = {}) => E.push({ t: 'boulder_foot', a, b, out, margin: m, off: 2.4, size: 1.2, y0: -0.05, h: 1.6, colH: 0.8, rmax: 0.5, seed: 80 + E.length, ...o });
+  bf([ox0, oz0], [ox1, oz0], [0, -1], 3.4); bf([ox1, oz0], [ox1, oz1], [1, 0], 3.4); bf([ox0, oz0], [ox0, oz1], [-1, 0], 3.4);
+  const so = { off: 2.3, size: 1.0, h: 1.5, colH: 0.7 };
+  bf([ox0, oz1], [OUTER_GATE[0], oz1], [0, 1], 3.4, so); bf([OUTER_GATE[1], oz1], [ox1, oz1], [0, 1], 3.4, so); }
 // the inner enclosure
 E.push({ t: 'crib_wall', a: [ix0, iz0], b: [ix1, iz0], th: ith, top: innerTop, seed: 21, proj: 0 });
 E.push({ t: 'crib_wall', a: [ix1, iz0], b: [ix1, iz1], th: ith, top: innerTop, seed: 22, proj: 1 });

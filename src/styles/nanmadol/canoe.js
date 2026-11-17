@@ -44,6 +44,19 @@ export function canoe(el, { bag, col }) {
   // thwarts
   for (const u of [-L * 0.28, 0, L * 0.28]) { const b = beam(u); add('timber', box(-b + 0.04, sheer(u) - 0.12, u - 0.05, b - 0.04, sheer(u) - 0.05, u + 0.05)); }
   if (!el.afloat) for (let k = 0; k < 3; k++) { const u = -0.7 + k * 0.7; add('timber', box(-0.9, D * 0.55, u - 0.05, 0.1, D * 0.55 + 0.03, u + 0.05)); add('timber', box(0.1, D * 0.55, u - 0.1, 0.55, D * 0.55 + 0.03, u + 0.1)); }
+  // a canoe lying at a landing keeps her rig: the mast stepped amidships, the sail of pandanus mat furled on its yard and laid along the hull on two forks, lashed at the mast, a bailer (a half coconut) in the bilge [stated: sails of woven pandanus leaves, Hudson Museum, Univ. of Maine; the Kapingamarangi model's sail furled on deck; the rig's arrangement inferred]
+  if (!el.afloat) {
+    const mu = -L * 0.14, sx = -side * 0.05;
+    add('palm_trunk', rod([0, D - 0.05, mu], [0, D + 3.3, mu], 0.045, 6));
+    add(ROPE, lathe([[0.075, 0], [0.075, 0.12]], 6, null, 0, D + 3.0, mu));
+    const y1 = D + 0.5, u0 = -L * 0.22, u1 = L * 0.28;
+    for (const u of [u0 + 0.5, mu + 0.3, u1 - 0.6]) add('timber', rod([0, D + 0.02, u], [sx * 0.4, y1 - 0.08, u], 0.025, 5));
+    add('timber', rod([sx * 0.4, y1, u0], [sx * 0.4, y1, u1], 0.03, 6));
+    add('reed_mat', lathe([[0.13, 0], [0.14, 0.05], [0.14, u1 - u0 - 0.05], [0.12, u1 - u0]], 8).rotateX(Math.PI / 2).translate(sx * 0.4, y1 + 0.1, u0));
+    for (let k = 0; k < 5; k++) add(ROPE, lathe([[0.15, 0], [0.15, 0.05]], 7).rotateX(Math.PI / 2).translate(sx * 0.4, y1 + 0.1, u0 + 0.35 + k * (u1 - u0 - 0.7) / 4));
+    add(ROPE, rod([0, D + 3.0, mu], [sx * 0.4, y1 + 0.1, u0 + 0.8], 0.012, 3));
+    add('bark_dark', lathe([[0.001, 0], [0.06, 0.02], [0.1, 0.08], [0.11, 0.1]], 7, null, 0.1, D * 0.3, L * 0.34));
+  }
   col?.segment([x - Math.sin(yaw) * L / 2, z - Math.cos(yaw) * L / 2], [x + Math.sin(yaw) * L / 2, z + Math.cos(yaw) * L / 2], B, y0, y0 + D);
 }
 const ROPE = 'rope_fibre';
