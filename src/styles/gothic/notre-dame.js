@@ -11,7 +11,7 @@ import { STYLES } from '../../core/build.js';
 import { box, frustum, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { planarWall, archHalf, archRise } from '../byzantine/index.js';
 import './index.js';
-import { archWall, pier, vault, rise, jube, stalls, altar } from './nd-interior.js';
+import { archWall, pier, vault, rise, jube, stalls, altar, sideAltar } from './nd-interior.js';
 
 const L = 'limestone', CARVE = 'limestone_carved', LEAD = 'lead';
 const D2R = Math.PI / 180;
@@ -100,7 +100,7 @@ function limb(out, a, b, w0, w1) {
 function figureND(bag, x, y, z, h, o = {}) {
   const m = o.mat || CARVE, f = o.face || [-1, 0], sd = [-f[1], f[0]], lod = o.lod ?? (h < 0.9 ? 1 : 0);
   const P = (a, yy, b) => [x + f[0] * a + sd[0] * b, y + yy, z + f[1] * a + sd[1] * b];
-  const hash = Math.abs(Math.floor(x * 12.9 + z * 78.2 + y * 37.7 + h * 91)), head = o.mat ? 'ivory' : m, hair = o.mat ? 'hair_dark' : m;
+  const hash = Math.abs(Math.floor(x * 12.9 + z * 78.2 + y * 37.7 + h * 91)), head = o.mat ? 'ivory' : m, hair = o.mat ? 'wood_dark' : m;
   const folds = (th, i) => (i > 0 && i < 6 ? 1 + 0.07 * Math.cos(7 * th + hash) + 0.035 * Math.cos(13 * th) : 1);
   const seg = lod ? 8 : 14;
   let shY;                                                   // the shoulder line
@@ -404,7 +404,7 @@ function notreDame(el, ctx) {
     bag.add(L, fromTriangles(w));
     // a statue before the buttress on its corbel, under a gabled canopy (the four of the buttresses)
     const zm = Z((a + b) / 2);
-    bag.add(L, lathe([[0.42, 0], [0.4, 0.2], [0.36, 0.32], [0.36, 2.7], [0.44, 2.82], [0.46, 3.0]], 10, null, X0 - 1.75, Y(0), zm));
+    { const j = 0.0007 * (zm % 7); bag.add(L, lathe([[0.42 + j, 0], [0.4 + j, 0.2], [0.36 + j, 0.32], [0.36 + j, 2.7], [0.44 + j, 2.82], [0.46 + j, 3.0]], 10, null, X0 - 1.75, Y(0), zm)); }
     figure(bag, X0 - 1.75, Y(3.0), zm, 2.5, { book: a < 0 && a > -10, crown: a > 10 });
     bag.add(L, box(X0 - 2.15, Y(5.7), zm - 0.45, X0 - 1.39, Y(5.95), zm + 0.45));
     const g = []; prism(g, [[X0 - 2.15, Y(5.95), zm - 0.45], [X0 - 2.15, Y(5.95), zm + 0.45], [X0 - 2.15, Y(6.9), zm]], [0.76, 0, 0]); bag.add(L, fromTriangles(g));
@@ -538,7 +538,9 @@ function notreDame(el, ctx) {
     const n = Math.round((xb - xa) / BAY), bw = (xb - xa) / n, nave = xa === XT;
     for (const s of [-1, 1]) {
       const zlo = (a, b) => Z(Math.min(s * a, s * b)), zhi = (a, b) => Z(Math.max(s * a, s * b));
-      const M = (u, yy, d) => [u, yy, Z(s * d)], wA = [], wB = [], wC = [], wT = [], wO = [];
+      const M = (u, yy, d) => [u, yy, Z(s * d)], wA = [], wB = [], wC = [], wT = [], wO = [], wR = [];
+      // the roll mouldings round the arches on the vessel's face, the string courses between the stages
+      const RO = (c, r, sp) => bars(wR, [0, Z(s * (ZN - 1))], [1, 0], pointedPts(c, r, sp, 0.75, 12), 0.2, 0.14, -s * 0.06);
       // the lead roofs: the tribune's terrace-roof, the outer aisle's lean-to
       const lean = (z0, y0, z1, y1) => { const r = []; hexa(r, [[xa, Y(y0 - 0.25), Z(s * z0)], [xb, Y(y0 - 0.25), Z(s * z0)], [xb, Y(y1 - 0.25), Z(s * z1)], [xa, Y(y1 - 0.25), Z(s * z1)]], [[xa, Y(y0), Z(s * z0)], [xb, Y(y0), Z(s * z0)], [xb, Y(y1), Z(s * z1)], [xa, Y(y1), Z(s * z1)]]); bag.add(LEAD, fromTriangles(r)); };
       lean(ZN - 0.1, TRIBR, ZT + 0.35, TRIB + 0.05);
@@ -553,9 +555,11 @@ function notreDame(el, ctx) {
         // the clerestory wall: the arcade's arch, the tribune's opening (three arches on two colonnettes under a
         // relieving arch), the window
         const ra = (u1 - ua) / 2 - (engaged ? 0.45 : 0.9), ca = engaged ? ua + 0.45 + ra : uc;
+        RO(ca, ra + 0.1, Y(SP));
         archWall(wA, M, { u0, u1, d0: ZN - 1, d1: ZN, y0: Y(SP), y1: Y(TF), openings: [{ uc: ca, r: ra, sill: Y(SP), spring: Y(SP), f: 0.75 }] });
         if (!engaged) {
           const rt = bw / 2 - 0.75;
+          RO(uc, rt + 0.1, Y(16.0)); RO(uc, 2.1, Y(28.6));
           archWall(wB, M, { u0, u1, d0: ZN - 1, d1: ZN, y0: Y(TF), y1: Y(22.5), openings: [{ uc, r: rt, sill: Y(TF + 0.9), spring: Y(16.0), f: 0.75 }] });
           const ty = [], k3 = (2 * rt) / 3;
           archWall(ty, M, { u0: uc - rt, u1: uc + rt, d0: ZN - 0.7, d1: ZN - 0.35, y0: Y(15.0), y1: Y(16.0) + rise(rt, 0.75), openings: [0, 1, 2].map((k) => ({ uc: uc - rt + (k + 0.5) * k3, r: k3 / 2 - 0.1, sill: Y(15.0), spring: Y(15.0), f: 0.8 })) });
@@ -567,6 +571,7 @@ function notreDame(el, ctx) {
         const rz = (u1 - ua) / 2 - (engaged ? 0.4 : 0.75), cz2 = engaged ? ua + 0.4 + rz : uc;
         archWall(wT, M, { u0, u1, d0: ZT - 0.9, d1: ZT + 0.1, y0: Y(SP), y1: Y(TF), openings: [{ uc: cz2, r: rz, sill: Y(SP), spring: Y(SP), f: 0.7 }] });
         archWall(wT, M, { u0, u1, d0: ZT - 0.9, d1: ZT + 0.1, y0: Y(TF), y1: Y(TRIB), openings: engaged ? [] : [{ uc, r: 1.4, sill: Y(CHAPR + 0.8), spring: Y(18.4), f: 0.75 }] });
+        if (chapels && !engaged) sideAltar(ctx, { x: uc, z: Z(s * (zc - 0.9)), y: Y(0.02), s, seed: i * 2 + (s > 0 ? 1 : 0), vaultY: Y(9.0) });
         outerOps.push(chapels ? { uc, r: 1.7, sill: Y(2.8), spring: Y(8.0), f: 0.75 } : { uc, r: 1.3, sill: Y(3.2), spring: Y(7.6), f: 0.75 });
         if (!engaged) {
           win(ctx, [xa, Z(s * (ZN - 0.5))], [1, 0], uc - xa, 4.0, Y(VS), Y(28.6), 2, -s);
@@ -585,6 +590,8 @@ function notreDame(el, ctx) {
       }
       archWall(wO, M, { u0: xa, u1: xb, d0: zc - 0.9, d1: zc + 0.1, y0: Y(-0.5), y1: Y(CHAP), openings: outerOps });
       for (const w of [wA, wB, wC, wT, wO]) bag.add(L, fromTriangles(w));
+      bag.add(CARVE, fromTriangles(wR));
+      for (const [b0, b1] of [[TF, TF + 0.26], [22.5, 22.76]]) bag.add(L, box(xa, Y(b0), zlo(ZN - 1.14, ZN - 1), xb, Y(b1), zhi(ZN - 1.14, ZN - 1)));
       col.rect([xa, zlo(zc - 0.9, zc + 0.1), xb, zhi(zc - 0.9, zc + 0.1)], y, Y(CHAP));
       // the piers of the arcade, the columns between the aisles (every other one with attached shafts), the
       // vaulting shafts up the clerestory wall from each pier to the vault
@@ -625,8 +632,16 @@ function notreDame(el, ctx) {
     const Pt = (t) => { const zz = za + (zb - za) * t; return [Z(s * zz), Y(ya0 + (yb0 - ya0) * Math.sin(t * Math.PI / 2)), Y(ya1 + (yb1 - ya1) * t)]; };
     for (let k = 0; k < N; k++) {
       const A = Pt(k / N), B = Pt((k + 1) / N);
-      hexa(fl, [[x - 0.42, A[1], A[0]], [x + 0.42, A[1], A[0]], [x + 0.42, B[1], B[0]], [x - 0.42, B[1], B[0]]], [[x - 0.42, A[2], A[0]], [x + 0.42, A[2], A[0]], [x + 0.42, B[2], B[0]], [x - 0.42, B[2], B[0]]]);
+      hexa(fl, [[x - 0.42, A[1], A[0]], [x + 0.42, A[1], A[0]], [x + 0.42, B[1], B[0]], [x - 0.42, B[1], B[0]]], [[x - 0.42, A[1] + 0.95, A[0]], [x + 0.42, A[1] + 0.95, A[0]], [x + 0.42, B[1] + 0.95, B[0]], [x - 0.42, B[1] + 0.95, B[0]]]);    // the arch's band
+      hexa(fl, [[x - 0.42, A[2] - 0.5, A[0]], [x + 0.42, A[2] - 0.5, A[0]], [x + 0.42, B[2] - 0.5, B[0]], [x - 0.42, B[2] - 0.5, B[0]]], [[x - 0.42, A[2], A[0]], [x + 0.42, A[2], A[0]], [x + 0.42, B[2], B[0]], [x - 0.42, B[2], B[0]]]);    // the coping with its gutter
       hexa(fl, [[x - 0.2, A[2] - 0.01, A[0]], [x + 0.2, A[2] - 0.01, A[0]], [x + 0.2, B[2] - 0.01, B[0]], [x - 0.2, B[2] - 0.01, B[0]]], [[x - 0.1, A[2] + 0.22, A[0]], [x + 0.1, A[2] + 0.22, A[0]], [x + 0.1, B[2] + 0.22, B[0]], [x - 0.1, B[2] + 0.22, B[0]]]);
+    }
+    // the spandrel between the arch and the coping: a file of slender colonnettes (an open arcade), each with a base and a small capital
+    for (let j = 1; j <= 11; j++) {
+      const t = j / 12, [pz, yi, yt] = Pt(t), y0 = yi + 0.9, y1 = yt - 0.45, hh = y1 - y0;
+      if (hh < 0.5) continue;
+      const sq = (r, ya, yb) => hexa(fl, [[x - r, ya, pz - r], [x + r, ya, pz - r], [x + r, ya, pz + r], [x - r, ya, pz + r]], [[x - r, yb, pz - r], [x + r, yb, pz - r], [x + r, yb, pz + r], [x - r, yb, pz + r]]);
+      sq(0.09, y0, y1 - 0.02); sq(0.14, y0, y0 + 0.14); sq(0.14, y1 - 0.16, y1);
     }
     bag.add(L, fromTriangles(fl));
     pinnacle(bag, x, Y(29.5), Z(s * (zu0 + (zu1 - 1.4 - zu0) / 2)), Math.min(1.8, zu1 - 1.4 - zu0 - 0.1), 7.5);
@@ -753,7 +768,9 @@ function notreDame(el, ctx) {
     const N = 14;
     for (let i = 0; i < N; i++) {
       const f0 = i / N, f1 = (i + 1) / N, rr = (f) => ZUC0 + (R7 + 0.6 - ZUC0) * f, yb = (f) => 23.4 + 6.3 * Math.sin(f * Math.PI / 2), yt = (f) => 28.6 + 2.5 * f;
-      hexa(up, [Q(rr(f0), -0.42, yb(f0)), Q(rr(f0), 0.42, yb(f0)), Q(rr(f1), 0.42, yb(f1)), Q(rr(f1), -0.42, yb(f1))], [Q(rr(f0), -0.42, yt(f0)), Q(rr(f0), 0.42, yt(f0)), Q(rr(f1), 0.42, yt(f1)), Q(rr(f1), -0.42, yt(f1))]);
+      hexa(up, [Q(rr(f0), -0.42, yb(f0)), Q(rr(f0), 0.42, yb(f0)), Q(rr(f1), 0.42, yb(f1)), Q(rr(f1), -0.42, yb(f1))], [Q(rr(f0), -0.42, yb(f0) + 0.95), Q(rr(f0), 0.42, yb(f0) + 0.95), Q(rr(f1), 0.42, yb(f1) + 0.95), Q(rr(f1), -0.42, yb(f1) + 0.95)]);
+      hexa(up, [Q(rr(f0), -0.42, yt(f0) - 0.5), Q(rr(f0), 0.42, yt(f0) - 0.5), Q(rr(f1), 0.42, yt(f1) - 0.5), Q(rr(f1), -0.42, yt(f1) - 0.5)], [Q(rr(f0), -0.42, yt(f0)), Q(rr(f0), 0.42, yt(f0)), Q(rr(f1), 0.42, yt(f1)), Q(rr(f1), -0.42, yt(f1))]);
+      if (i > 0) { const f = f0, y0 = yb(f) + 0.9, y1 = yt(f) - 0.45, c = Q(rr(f), 0, y0); if (y1 - y0 > 0.5) { const sq = (r, ya, yb2) => hexa(up, [[c[0] - r, c[1] + ya, c[2] - r], [c[0] + r, c[1] + ya, c[2] - r], [c[0] + r, c[1] + ya, c[2] + r], [c[0] - r, c[1] + ya, c[2] + r]], [[c[0] - r, c[1] + yb2, c[2] - r], [c[0] + r, c[1] + yb2, c[2] - r], [c[0] + r, c[1] + yb2, c[2] + r], [c[0] - r, c[1] + yb2, c[2] + r]]); sq(0.09, 0, y1 - y0 - 0.02); sq(0.14, 0, 0.14); sq(0.14, y1 - y0 - 0.16, y1 - y0); } }
     }
     bag.add(L, fromTriangles(up));
     col.circle(...[XAP + d[0] * (ZUC0 + 2), cz + d[1] * (ZUC0 + 2)], 1.6, y, Y(29.5));
