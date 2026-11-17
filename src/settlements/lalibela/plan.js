@@ -90,6 +90,8 @@ for (const [a, b] of [[-10.0, -5.6], [-5.2, -1.0]]) E.push({ t: 'floor_mat', rec
   E.push({ t: 'block', walk: true, rect: [-216.05, tz0 + EDGE, x1 + 0.1, tz1 - EDGE], y0: -13, y1: -G.depth + 0.15, mat: 'tuff_red' });
   // the tunnel's mouths, each under a hewn band standing a little proud of the rock face
   for (const x of [x1 - 8 - 0.06, x1 + 0.06]) E.push({ t: 'rock_cut', a: [x, tz0 + EDGE - 0.2], b: [x, tz1 - EDGE + 0.2], y0: -7.75, th: 0.12, top: -7.1 });
+  // niches cut in the trench walls beside the way down, each a pointed arch with a frame, as the masons left them for lamps
+  for (const x of [-249, -241, -233, -226]) for (const [z, nz] of [[tz0 + EDGE, 1], [tz1 - EDGE, -1]]) E.push({ t: 'cave', c: [x, z], n: [0, nz], y: slope(x, zc) - cutDepth(x, zc) + 1.35, floor: -99, w: 0.5, h: 0.85 });
 }
 
 // tunnels: stretches of the trenches from the Jordan to Bete Gabriel-Rufael and to Bete Amanuel left roofed, the rock
