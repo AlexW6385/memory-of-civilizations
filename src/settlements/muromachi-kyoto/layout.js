@@ -95,6 +95,10 @@ export function onStreet(x, z, m = 0) {
   return !!l && l.some((r) => inRect(r, x, z, m));
 }
 export const inPrecinctAt = (x, z, m = 0) => PRECINCTS.some((p) => inRect(p, x, z, m));
-/** Which houses are open inside: nearly half (the shops), the tea-sellers' and eating-houses always. */
-export const isOpen = (l) => l.open === true || l.seed % 20 < 9 || l.trade === 'tea' || l.trade === 'food';
+/** Which houses are open inside: three in four (the shops and the dwellings with their passage open), the tea-sellers' and eating-houses always. */
+export const isOpen = (l) => l.open === true || l.seed % 20 < 14 || l.trade === 'tea' || l.trade === 'food';
+/** The house is built as its mirror image (the earth passage on the left of the front): half of them, by seed, so that a row does not repeat. */
+export const mirrored = (l) => ((l.seed >>> 4) & 1) === 1;
+/** The front of an open house: 'shop' (shutter propped up) for the shops of the approach, the tea-sellers and eating-houses; 'shut' (front shut, passage open) for the keepers' houses; else by seed. */
+export const frontOf = (l) => (l.keeper ? 'shut' : (l.open === true || l.trade === 'tea' || l.trade === 'food') ? 'shop' : undefined);
 export { far };

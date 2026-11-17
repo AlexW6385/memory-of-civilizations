@@ -6,11 +6,20 @@ export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 166
 export const WD = 'wood_dark', PL = 'plaster_white', BARK = 'roof_bark', TM = 'timber', MAT = 'reed_mat';
 const TURN = { s: 0, e: Math.PI / 2, n: Math.PI, w: -Math.PI / 2 };
 
+/** The same geometry seen in a mirror across x = 0: positions and normals flipped, the winding of every triangle reversed. */
+export function mirrorX(g) {
+  if (g.index) g = g.toNonIndexed();
+  g.scale(-1, 1, 1);
+  for (const k of Object.keys(g.attributes)) { const a = g.attributes[k], n = a.itemSize, A = a.array; for (let i = 0; i + 2 < a.count; i += 3) for (let c = 0; c < n; c++) { const p = (i + 1) * n + c, q = (i + 2) * n + c, t = A[p]; A[p] = A[q]; A[q] = t; } }
+  return g;
+}
+
 /** Runs fn(b, c, T) with a bag and collider sink in the building's own frame (origin el.at, front +z), put into the world turned to el.facing. */
 export function local(el, ctx, fn) {
-  const th = TURN[el.facing || 's'], co = Math.round(Math.cos(th)), si = Math.round(Math.sin(th)), [ax, az] = el.at;
-  const P = (x, z) => [ax + x * co + z * si, az - x * si + z * co];
-  const bag = { add: (m, g, ...r) => { g.rotateY(th); g.translate(ax, 0, az); return ctx.bag.add(m, g, ...r); } };
+  const th = TURN[el.facing || 's'], co = Math.round(Math.cos(th)), si = Math.round(Math.sin(th)), [ax, az] = el.at, mir = !!el.mirror;
+  const P0 = (x, z) => [ax + x * co + z * si, az - x * si + z * co];
+  const P = mir ? (x, z) => P0(-x, z) : P0;
+  const bag = { add: (m, g, ...r) => { if (mir) g = mirrorX(g); g.rotateY(th); g.translate(ax, 0, az); return ctx.bag.add(m, g, ...r); } };
   const R = (r) => { const a = P(r[0], r[1]), b = P(r[2], r[3]); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
   const DIR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
   const col = {
@@ -18,7 +27,7 @@ export function local(el, ctx, fn) {
     floor: (r, y, tag) => ctx.col.floor(R(r), y, tag),
     circle: (x, z, r, y0, y1) => { const p = P(x, z); ctx.col.circle(p[0], p[1], r, y0, y1); },
     segment: (a, b, t, y0, y1) => ctx.col.segment(P(...a), P(...b), t, y0, y1),
-    ramp: (r, y0, y1, d) => { const v = DIR[d], w = [v[0] * co + v[1] * si, -v[0] * si + v[1] * co]; ctx.col.ramp(R(r), y0, y1, Math.abs(w[0]) > 0.5 ? (w[0] > 0 ? 'e' : 'w') : (w[1] > 0 ? 's' : 'n')); },
+    ramp: (r, y0, y1, d) => { const v = DIR[d].slice(); if (mir) v[0] = -v[0]; const w = [v[0] * co + v[1] * si, -v[0] * si + v[1] * co]; ctx.col.ramp(R(r), y0, y1, Math.abs(w[0]) > 0.5 ? (w[0] > 0 ? 'e' : 'w') : (w[1] > 0 ? 's' : 'n')); },
   };
   const B = (m, x0, y0, z0, x1, y1, z1) => bag.add(m, box(Math.min(x0, x1), Math.min(y0, y1), Math.min(z0, z1), Math.max(x0, x1), Math.max(y0, y1), Math.max(z0, z1)));
   const L = (m, prof, seg, x, y, z) => bag.add(m, lathe(prof, seg, null, x, y, z));

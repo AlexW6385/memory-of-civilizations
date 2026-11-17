@@ -11,7 +11,8 @@ export function trade(kind, { B, L, col }, { x0, x1, y0, fl, qm, d, H, r }) {
   const g = B, Y = y0 + fl + 0.03, cx = (x0 + x1) / 2, f0 = y0 + fl;
   // what stands on the floor stops the walker, each fixture by its own footprint
   const post = (a, b, c, e, h) => col.rect([a, b, c, e], f0, f0 + h);
-  if (kind === 'cloth' || kind === 'pottery' || kind === 'lacquer' || kind === 'sandals') post(x0, -qm - 0.1, x1, -qm + 0.3, 1.4);
+  if (kind === 'cloth') { post(x0, -qm - 0.1, x0 + 2.15, -qm + 0.3, 1.4); post(x0 + 2.15, -qm - 0.1, x1, -qm - 0.02, 1.3); }      // the bolts stand on the first two metres; beyond them the board alone
+  else if (kind === 'pottery' || kind === 'lacquer' || kind === 'sandals') post(x0, -qm - 0.1, x1, -qm + 0.3, 1.4);
   else if (kind === 'sake') for (let k = 0; k < 4; k++) col.circle(x0 + 0.5 + k * 0.62, -qm - 0.45, 0.33, f0, f0 + 0.85);
   else if (kind === 'rice') post(x0 + 0.2, -qm - 0.3, x0 + 2.2, -qm + 0.3, 1.3);
   else if (kind === 'dye') for (let k = 0; k < 3; k++) col.circle(x0 + 0.55 + k * 0.85, -qm - 0.2, 0.37, f0, f0 + 0.65);

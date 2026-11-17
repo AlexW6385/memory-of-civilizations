@@ -3,13 +3,13 @@
 // old men, water jars, firewood, hens and dogs, the family at the counter and in the doma; at the stream the women washing and
 // the punts. Elements of the shared `life` style, placed from layout.js; tiles of 100 m as at Suzhou so that the viewer draws
 // them by distance.
-import { lots, isOpen, yards, STREAM, BRIDGES, RADIUS, streets, inRect, onBridge, GINKAKU, RYOAN, SHRINE } from './layout.js';
+import { lots, isOpen, mirrored, yards, STREAM, BRIDGES, RADIUS, streets, inRect, onBridge, GINKAKU, RYOAN, SHRINE } from './layout.js';
 import { dims } from '../../styles/muromachi/machiya.js';
 
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const TURN = { s: [1, 0, Math.PI], e: [0, 1, -Math.PI / 2], n: [-1, 0, 0], w: [0, -1, Math.PI / 2] };
 /** The frame of a house: P(x, z) the world point of x across the front and z out into the street; rot the heading of one who faces the street. */
-export const frame = (l) => { const [co, si, rot] = TURN[l.facing]; return { P: (x, z) => [l.at[0] + x * co + z * si, l.at[1] - x * si + z * co], rot }; };
+export const frame = (l) => { const [co, si, rot] = TURN[l.facing], m = mirrored(l) ? -1 : 1; return { P: (x, z) => [l.at[0] + m * x * co + z * si, l.at[1] - m * x * si + z * co], rot }; };
 
 const MEN = ['cloth_brown', 'cloth_grey', 'cloth_indigo', 'cloth_ochre', 'cloth_green'];
 const WOMEN = ['cloth_indigo', 'cloth_maroon', 'cloth_ochre', 'cloth_green', 'cloth_grey'];
