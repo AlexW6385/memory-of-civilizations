@@ -88,6 +88,15 @@ export async function town() {
       continue;
     }
     const W = l.front === 'n' || l.front === 's' ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1];
+    if (l.home) {
+      // the dwellings' open ground floors: the weaver on her seat at the loom, a woman kneeling at the quern, or someone seated by the door
+      if (Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) > 125) continue;
+      const rr = frontRot(l.front), r = rand();
+      if (l.trade === 'weaver' && r < 0.7) P.push(woman(fp(l, 0.55 + 1.45, 3.5), 0.42, rr, { pose: 'sit_low' }));
+      else if (l.trade === 'mill' && r < 0.6) P.push(woman(fp(l, 0.55 + 1.82, 3.35), 0.12, rr, { pose: 'kneel' }));
+      else if (r < 0.3) { const ox = Math.max(1.0, Math.min(l.dpos, W - 0.55 - 3.65 - 1.3)), px = ox > W - ox - 1.3 ? ox / 2 : ox + 1.3 + (W - ox - 1.3) / 2; if (Math.min(ox, W - ox - 1.3) > 0.9) P.push(woman(fp(l, px, -1.0), 0.05, rr + Math.PI, { pose: 'sit_ground', carry: 'basket' })); }
+      continue;
+    }
     if (Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) > 105) continue;
     const rot = frontRot(l.front);
     if (l.open) {

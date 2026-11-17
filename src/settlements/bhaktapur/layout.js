@@ -126,6 +126,16 @@ export function lots() {
     l.dx = r2() < 0.5 ? W / 2 - 0.6 : 0.7 + r2() * Math.max(0.1, W - 2.4);
     l.pid = !l.shop && r2() < 0.35;
   }
+  // the third stream: the dwellings whose ground floor (the chidi: tools, grain, the loom) stands open by a low door, from the middle of the town out to its edge; each has the stair to the first floor
+  const r3 = rng(9100), HT = ['store', 'mill', 'weaver', 'home', 'store', 'grain', 'mill', 'weaver'];
+  let nHome = 0;
+  for (const l of out) {
+    if (l.use || l.open) continue;
+    const d = dist(l), W = wOf(l);
+    if (W < 7 || dOf(l) < 6.5 || d < 45 || d > 150 || nHome >= 140 || r3() > (d < 100 ? 0.4 : 0.55)) continue;
+    l.open = true; l.home = true; l.door = true; l.shop = false; l.pid = false; l.upper = true; l.light = d < 135;
+    l.trade = HT[Math.floor(r3() * HT.length)]; l.dpos = 0.7 + r3() * Math.max(0.1, W - 5.6); nHome++;
+  }
   return (_lots = out);
 }
 /** A point (lx along the facade, lz into the house) of a lot in world coordinates (house.js's frame). */
