@@ -10,7 +10,8 @@ import { PLATFORM } from './haram-detail.js';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const PY = HARAM.top + 4;
 const DOME = [-28, -48, 28, 8];            // the Dome's footprint (octagon of apothem 25 about (0, -20)), joints stop at it
-export const CHAIN = [40, -2];
+/** The Dome of the Chain: the one the Dome's plan builds, 58 m east of the Rock (world coordinates; the Dome stands at (0, −20)). */
+export const CHAIN = [58, -20];
 
 export function platformFurnish() {
   const E = [], [px0, pz0, px1, pz1] = PLATFORM;
@@ -30,8 +31,7 @@ export function platformFurnish() {
     if (horiz) { cut([w[0], w[1] - 0.2, w[2], w[1]], 0.03, 'limestone_carved'); cut([w[0], w[3], w[2], w[3] + 0.2], 0.03, 'limestone_carved'); }
     else { blk([w[0] - 0.2, w[1], w[0], w[3]], 0.03, 'limestone_carved'); blk([w[2], w[1], w[2] + 0.2, w[3]], 0.03, 'limestone_carved'); }
   }
-  // the Dome of the Chain; the waqf's water at the west stair's head, one more at the south; shoe racks at the doors
-  E.push({ t: 'chain_dome', at: CHAIN, y: PY, r: 5.1 });
+  // the waqf's water at the west stair's head, one more at the south; shoe racks at the doors
   E.push({ t: 'water_station', at: [-60, -29], dir: [0, 1], y: PY });
   E.push({ t: 'water_station', at: [58, -9], dir: [0, -1], y: PY });
   E.push({ t: 'shoe_rack', at: [-30.2, -26.5], dir: [-1, 0], y: PY, len: 2.4 });
@@ -83,8 +83,8 @@ export function platformLife() {
   person(-61.2, -26.8, Math.PI, { pose: 'talk' }); woman(-58.6, -26.9, Math.PI, { carry: 'pot' });
   person(58, -10.1, Math.PI, { pose: 'stand', cloth: 'cloth_white', cloth2: 'cloth_green' }); person(57, -6.6, 0, { pose: 'talk' });
   // at the Chain: men sitting on the rim, a man at each side
-  for (let k = 0; k < 5; k++) { const a = k * 1.25 + 0.4, R = 6.4; person(CHAIN[0] + Math.cos(a) * R, CHAIN[1] + Math.sin(a) * R, a + Math.PI / 2 + Math.PI, { pose: 'sit', y: PY + 0.2 }); }
-  for (let k = 0; k < 4; k++) person(CHAIN[0] + (k - 1.5) * 1.6, CHAIN[1] - 2 + (k % 2) * 3.2, rand() * 6.28, { pose: k % 2 ? 'talk' : 'stand' });
+  for (let k = 0; k < 5; k++) { const a = k * 1.25 + 3.7, R = 7.5; person(CHAIN[0] + Math.cos(a) * R, CHAIN[1] + Math.sin(a) * R, Math.PI / 2 - a, { pose: 'sit_ground' }); }
+  for (let k = 0; k < 4; k++) { const a = (30 + 60 * k + (k > 1 ? 60 : 0)) * Math.PI / 180; person(CHAIN[0] + Math.cos(a) * 4.8, CHAIN[1] + Math.sin(a) * 4.8, Math.PI / 2 - a, { pose: k % 2 ? 'talk' : 'stand' }); }
   // seated groups on the paving: conversing on the ground in threes and fours, a child among them
   for (const [cx, cz] of [[-56, -52], [-52, -6], [-61, -14], [62, -37], [52, -66], [-40, 24], [35, 28], [10, -70], [-16, 30]]) {
     const n = 3 + Math.floor(rand() * 3);
