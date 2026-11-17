@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.10 — Sultan Hasan's tomb, the Orangerie, Angkor's villages, the Pharos' hall (2026-11-17)
+
+Cairo: Sultan Hasan's mausoleum is hollow and entered (marble dado, the gilt Throne Verse frieze, mihrab, cenotaphs, lamps on long chains, the wooden corbelled zone under the dome; entered by a door of its own, the iwan's door being drawn shut), bronze work on the portal leaves, wash lines, hawkers and goods mats in the lanes. Versailles: the Orangerie with its vaulted gallery, court and the Hundred Steps, the Colonnade bosquet, four kinds of home. Angkor: the two libraries entered and furnished, houses with a use each (shrine shelf, cradle, nets, rice store, dye pots), nine village shrines, paddies in four stages with their farmers. Alexandria: the Pharos' ground hall (fuel, oil, mules, keepers, a shrine of Isis Pharia) and ramp landings, scholars and Eratosthenes' gnomon in the Museion, roof rooms in Rhakotis, fronts by rule in the Greek quarter.
+
 ## v12.9 — Giza, London, Himeji, Barcelona's doorways (2026-11-17)
 
 Giza: the casing's courses show on the pyramids, a granite false door with its offering table stands in the mortuary temple, five houses in six are furnished, with a loom, a fish rack or a potter's wheel in the court. London: the Victoria Tower with the Sovereign's Entrance, niches, tracery and turrets; 30 more houses and 6 shops to enter, with a parlour, a dining room or a lodging; horse troughs, dust bins, a knife-grinder, lamplighters and sweeps. Himeji: round eave tiles along every castle roof, closed gables, and the retainers' rows opened, each unit with its hearth, mats and sword rack. Barcelona: real doorways with tiled vestibules and a stair hall in 19 blocks, gargoyles and trefoils on the Sagrada Família's apse, masons' goods inside it, porters and gas lamps.
