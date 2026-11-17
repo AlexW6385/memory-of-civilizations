@@ -8,6 +8,7 @@ import { fromTriangles, orientOutward, box } from '../../core/geom.js';
 import { Parts } from '../../styles/qing/carving.js';
 
 const DROP = '__drop';
+let JIT = 0;                                     // a hair of difference in each piece: pieces of one shape would be drawn as instances of their own (a draw each), these are merged with the hall's meshes
 const S3 = Math.sqrt(3) / 2;
 
 /** A convex prism of the polygon `poly` ([u, v] points) from depth z0 to z1, no back face; its triangles pushed into `out`. */
@@ -45,7 +46,7 @@ function clip(p0, d, x0, y0, x1, y1) {
 function lattice(M, x0, y0, x1, y1, a, bw = 0.026, zb = 0.0, zt = 0.045) {
   const h = a * S3, ox = (x0 + x1) / 2, oy = (y0 + y1) / 2, red = M('lacquer_red'), gilt = M('gilt_bronze'), paper = M('marble_smooth');
   // the paper: one quad each way
-  const quadT = (z, flip) => { const A = [x0, y0, z], B = [x1, y0, z], C = [x1, y1, z], D = [x0, y1, z]; return flip ? [...A, ...C, ...B, ...A, ...D, ...C] : [...A, ...B, ...C, ...A, ...C, ...D]; };
+  const j = (JIT++ % 997) * 0.0004, quadT = (z, flip) => { const A = [x0, y0, z], B = [x1 + j, y0, z], C = [x1 + j, y1, z], D = [x0, y1, z]; return flip ? [...A, ...C, ...B, ...A, ...D, ...C] : [...A, ...B, ...C, ...A, ...C, ...D]; };
   paper.push(...quadT(zb, false), ...quadT(zb - 0.002, true));
   const n = 1 / 2;
   // family 0: horizontal rows
@@ -105,7 +106,7 @@ function leaf(w, h) {
   };
   panel(ySk0, ySk1, 'skirt'); panel(yW0, yW1, 'waist'); panel(yW3, yT1, 'waist');
   // the lattice
-  lattice(M, iw0 + 0.035, yL0 + 0.035, iw1 - 0.035, yL1 - 0.035, 0.24);
+  lattice(M, iw0 + 0.035, yL0 + 0.035, iw1 - 0.035, yL1 - 0.035, 0.25);
   // the lattice's inner frame (a slimmer moulding round it)
   add(red, iw0, yL0, 0, iw0 + 0.035, yL1, 0.07); add(red, iw1 - 0.035, yL0, 0, iw1, yL1, 0.07);
   add(red, iw0, yL0, 0, iw1, yL0 + 0.035, 0.07); add(red, iw0, yL1 - 0.035, 0, iw1, yL1, 0.07);
@@ -123,9 +124,14 @@ function windowPanel(w, h) {
   return m;
 }
 
-function emit(bag, m, x, y, z) {
-  const P = new Parts();
-  for (const [mat, t] of m) if (t.length) P.add(mat, fromTriangles(t));
+function emit(bag, m, x, y, z, merged = []) {
+  const P = new Parts(), k = (JIT++ % 4001) * 0.0003;
+  for (const [mat, t] of m) {
+    if (!t.length) continue;
+    // the pieces to be merged get a speck of their own behind the leaf (inside the wall), so that no two are the same shape
+    const q = merged.includes(mat) ? [...t, 0, 0, -0.02, 0.01 + k, 0, -0.02, 0, 0.01, -0.02 + k] : t;
+    P.add(mat, fromTriangles(q));
+  }
   P.emit(bag, x, y, z);
 }
 
@@ -154,9 +160,8 @@ function bjHallDoors(el, { bag }) {
   const yWin = y + hd + 0.45 + span * 0.3;
   for (let i = 0; i < nb; i++) {
     const bx = x0 + pitch * i + cw;
-    // (each leaf a hair different in height, so that they are merged with the hall's meshes and not drawn as instances of their own)
-    if (!skip.includes(i)) for (let j = 0; j < nLeaf; j++) emit(bag, leaf(lw, hd - 0.12 + 0.0007 * (i * nLeaf + j)), bx + j * lw, y + 0.04, z1 + 0.07);
-    for (let j = 0; j < nw; j++) emit(bag, windowPanel(ww, wh + 0.0007 * (i * nw + j)), bx + j * ww, yWin, z1 + 0.15);
+    if (!skip.includes(i)) for (let j = 0; j < nLeaf; j++) emit(bag, leaf(lw, hd - 0.12), bx + j * lw, y + 0.04, z1 + 0.07, ['gilt_bronze']);
+    for (let j = 0; j < nw; j++) emit(bag, windowPanel(ww, wh), bx + j * ww, yWin, z1 + 0.15, ['gilt_bronze', 'lacquer_red']);
   }
 }
 
