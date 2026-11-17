@@ -122,3 +122,11 @@ WebFetch was refused in this pass; the searches returned titles only (https://mu
 - **Riads.** About 45 more wide riads beyond 120 m of the arrival are open and furnished like the first fourteen (households as before), non-rich ones with plain dados [inferred]. Door fronts follow a rule from rank and seed: plain frame, horseshoe door with tile alfiz, carved cedar lintel on corbels with a worn step, dressed-stone surround with a zellij plaque [inferred: the door types of Fassi houses].
 - **Attarine gate.** A wall across the souk's west end with a horseshoe archway, carved stucco, a cedar canopy with green tiles [inferred: souks had gates (bab) closed at night].
 - **Level.** L2, with L3 in the Bou Inania and now in the Qarawiyyin's hall and minaret. Missing for L3: the anaza screen, library and ablution hall, tile-level dukkan interiors, tannery workers' dress detail, boats, wear and weathering in the new work.
+
+## 14. Landmark pass (2026-11-17): the court seen from the arrival
+
+Additions to the Bou Inania, all [inferred] from the monument's general character (the dossier §4.1 choices stand; no new source could be fetched):
+- **Pavement.** The court's marble is inlaid with dark eight-pointed stars (a pale star and a turquoise heart inside each) on a grid joined by dark marble links, a dark border with a turquoise fillet, and a great star round the basin; replaces the black squares.
+- **Prayer hall front.** A horseshoe door with an alfiz and marble colonnettes, arched lobed windows in alfiz frames with sills and jamb shafts, and a carved cedar canopy with corbels and green tiles across the front.
+- **Galleries.** Flared capitals and stepped cedar corbels on each pillar, a carved cedar frieze of relief lozenges on the edge of the upper floor, cedar joists under its ceiling, and the muqarnas cornice of the gallery walls (it had been hidden behind the upper slab).
+- **Street portal.** A four-tier muqarnas cornice over the horseshoe arch, under the cedar canopy.
