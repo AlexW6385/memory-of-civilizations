@@ -114,6 +114,11 @@ export function cathedral(el, { bag, col, lights }) {
       }
     }
     for (let b = 0; b < 3; b++) bag.add(BAND[i % 4][b], fromTriangles(GT[b]));
+    // the joints of the fibreglass pieces: a transom at each 5 m and four mullions between the glass panes, thin raised bars on the roof's surface
+    const MT = [], Pj = (y, uu, off) => { const r = cathR(y), d = wt(y) / r, aa = th + d + (th2 - th - 2 * d) * uu / 5; return [cx + Math.cos(aa) * (r - 0.1 + off), y, cz + Math.sin(aa) * (r - 0.1 + off)]; };
+    for (let k = 1; k < gy.length - 1; k++) for (let u = 0; u < 5; u++) { const a0 = Pj(gy[k] - 0.07, u, 0.03), a1 = Pj(gy[k] - 0.07, u + 1, 0.03), b0 = Pj(gy[k] + 0.07, u, 0.03), b1 = Pj(gy[k] + 0.07, u + 1, 0.03); MT.push(...a0, ...a1, ...b1, ...a0, ...b1, ...b0, ...a0, ...b1, ...a1, ...a0, ...b0, ...b1); }
+    for (let u = 1; u < 5; u++) for (let k = 0; k < gy.length - 1; k++) { const w = 0.07 / 5 / 3; const a0 = Pj(gy[k], u - w * 6, 0.03), a1 = Pj(gy[k], u + w * 6, 0.03), b0 = Pj(gy[k + 1], u - w * 6, 0.03), b1 = Pj(gy[k + 1], u + w * 6, 0.03); MT.push(...a0, ...a1, ...b1, ...a0, ...b1, ...b0, ...a0, ...b1, ...a1, ...a0, ...b0, ...b1); }
+    bag.add(CONC, fromTriangles(MT));
   }
   // the crown: a ring beam and the skylight at the top
   bag.add(CONC, lathe([[cathR(CATH.top) + 0.5, CATH.top - 0.5], [cathR(CATH.top) + 0.5, CATH.top + 0.3], [cathR(CATH.top) - 0.9, CATH.top + 0.3], [cathR(CATH.top) - 0.9, CATH.top - 0.5]], 48, null, cx, 0, cz));
@@ -146,7 +151,7 @@ export function cathedral(el, { bag, col, lights }) {
   // ── the baptistery: a low ovoid of white concrete to the left, east ──
   {
     const bx = cx + 30, bz = cz - 54, a = 10, b = 6.5;
-    bag.add('plaster_white', lathe([[1, 0], [0.99, 2.5], [0.93, 5.5], [0.78, 8], [0.55, 9.7], [0.25, 10.6], [0.001, 10.9]].map(([r, h]) => [r, h]), 40, (th) => 1 / Math.hypot(Math.cos(th) / a, Math.sin(th) / b), bx, 0, bz));
+    bag.add('plaster_white', lathe(Array.from({ length: 19 }, (_, k) => { const h = 10.9 * k / 18; return [Math.max(0.001, Math.pow(1 - (h / 10.9) ** 2.3, 0.5)), h]; }), 64, (th) => 1 / Math.hypot(Math.cos(th) / a, Math.sin(th) / b), bx, 0, bz));
     for (let k = 0; k < 24; k++) {   // the ovoid's footprint: a ring of chords 2.2 m thick just inside its rim
       const u = k / 24 * TAU, v = (k + 1) / 24 * TAU, e = (t) => [bx + (a - 1.1) * Math.cos(t), bz + (b - 1.1) * Math.sin(t)];
       col.segment(e(u), e(v), 2.4, 0, 11);

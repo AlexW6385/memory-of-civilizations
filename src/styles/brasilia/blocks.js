@@ -1,6 +1,6 @@
 // Brasília style — the Esplanade's ministries, the Itamaraty and Justice palaces, the Planalto and the Supreme Court with their
 // Alvorada columns, the Three Powers Square's furniture, the superquadra's slabs on pilotis and the commercial strip.
-import { box, lathe, rod, disc, fromTriangles } from '../../core/geom.js';
+import { box, lathe, rod, disc, fromTriangles, frustum } from '../../core/geom.js';
 import { turnedBox, ring, revSurf, quad2, tri2, TAU } from './util.js';
 
 const WHITE = 'plaster_white', CONC = 'concrete_light';
@@ -95,10 +95,20 @@ export function praca(el, { bag, col }) {
   // the Candangos: two tall bronze figures of Bruno Giorgi with spears, on a block
   const [wx, wz] = el.warriors;
   bag.add('granite_grey', box(wx - 3, 0.04, wz - 1.5, wx + 3, 1.2, wz + 1.5)); col.rect([wx - 3, wz - 1.5, wx + 3, wz + 1.5], 0, 1.25);
+  // each figure is built of faceted blocks and bars, not a blob: planted legs, a tapering torso with square shoulders, a six-sided head, one arm
+  // lifted to the spear that leans across the whole group (Giorgi's figures are angular, the spears crossing above them)
   for (const s of [-1, 1]) {
-    bag.add('bronze', lathe([[0.7, 0], [0.55, 1.2], [0.38, 3.0], [0.34, 4.4], [0.2, 5.4], [0.001, 5.6]], 10, (th) => 1 / Math.hypot(Math.cos(th) / 1.0, Math.sin(th) / 0.45), wx + s * 1.5, 1.2, wz));
-    bag.add('bronze', lathe([[0.001, 0], [0.25, 0.1], [0.27, 0.4], [0.001, 0.62]], 8, null, wx + s * 1.5, 6.8, wz));
-    bag.add('bronze', rod([wx + s * 1.5 + 0.5, 1.6, wz - 0.1], [wx + s * 1.5 + 0.9 * s, 10.5, wz - 0.1], 0.09, 6));
+    const X = wx + s * 1.5, Y = 1.2, B = (a) => bag.add('bronze', a);
+    B(frustum([X - 0.95, wz - 0.5, X - 0.2, wz + 0.5], Y, Y + 3.3, 0.12, 0.08, 0.1, 0.1));                       // the standing leg
+    B(frustum([X + 0.1, wz - 0.45, X + 0.85, wz + 0.55], Y, Y + 3.2, 0.1, 0.12, 0.1, 0.1));
+    B(frustum([X - 1.05, wz - 0.55, X + 1.05, wz + 0.6], Y + 3.2, Y + 5.6, 0.18, 0.18, 0.12, 0.12));            // the torso, widening to the shoulders
+    B(frustum([X - 1.3, wz - 0.5, X + 1.3, wz + 0.55], Y + 5.6, Y + 6.1, 0.1, 0.1, 0.06, 0.06));               // the square shoulders
+    B(lathe([[0.001, 0], [0.3, 0.05], [0.34, 0.3], [0.26, 0.62], [0.001, 0.74]], 6, null, X, Y + 6.1, wz + 0.02)); // the head
+    B(rod([X - 1.15 * s, Y + 5.8, wz], [X - 1.9 * s, Y + 4.0, wz + 0.2], 0.22, 6));                              // the arm at his side
+    B(rod([X + 1.15 * s, Y + 5.8, wz], [X + 1.5 * s, Y + 7.2, wz - 0.1], 0.22, 6));                              // the arm raised
+    B(rod([X + 1.5 * s, Y + 7.2, wz - 0.1], [X + 0.9 * s, Y + 6.6, wz - 0.3], 0.16, 6));
+    B(rod([X + 1.1 * s, Y + 0.4, wz - 0.7], [X + 2.4 * s, Y + 10.2, wz - 0.1], 0.07, 6));                       // the spear
+    B(frustum([X + 2.25 * s - 0.1, wz - 0.2, X + 2.25 * s + 0.1, wz], Y + 10.0, Y + 10.8, 0.1, 0.1, 0.1, 0.1));
   }
   // Justice: a seated blindfolded woman in granite, the sword across her knees (Ceschiatti)
   const [jx, jz] = el.justice;

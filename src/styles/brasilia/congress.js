@@ -139,6 +139,13 @@ export function congress(el, { bag, col, lights }) {
     bag.add(WHITE, box(tx0 - 0.3, y, ta - 0.4, tx1 + 0.3, top - 3.2, ta)); bag.add(WHITE, box(tx0 - 0.3, y, tb, tx1 + 0.3, top - 3.2, tb + 0.4));   // the end walls, blank
     for (let h = y + 3.5; h < top - 3.4; h += 3.5) bag.add(WHITE, box(tx0 - 0.25, h - 0.18, ta - 0.4, tx1 + 0.25, h + 0.12, tb + 0.4));   // the floor slabs' edges
     bag.add(WHITE, box(tx0 - 0.5, top - 3.2, ta - 0.6, tx1 + 0.5, top, tb + 0.6));                           // the crown
+    // the curtain wall: steel mullions every 1.75 m and a spandrel panel under each floor's glass, on both long faces; fins at the corners
+    const nM = Math.round((tb - ta) / 1.75);
+    for (const [fx0, fx1] of [[tx0 - 0.14, tx0], [tx1, tx1 + 0.14]]) {
+      for (let k = 0; k <= nM; k++) { const zz = ta + 0.9 + k * (tb - ta - 1.8) / nM; bag.add('steel_grey', box(fx0, y, zz - 0.05, fx1, top - 3.2, zz + 0.05)); }
+      for (let h = y + 0.4; h < top - 3.6; h += 3.5) { bag.add('steel_grey', box(fx0 - 0.01, h, ta + 1.6, fx1 + 0.01, h + 0.95, tb - 1.6)); bag.add('steel_grey', box(fx0, h + 2.6, ta + 1.6, fx1, h + 2.66, tb - 1.6)); }
+    }
+    for (const zz of [ta - 0.4, tb]) for (let k = 0; k < 6; k++) bag.add(WHITE, box(tx0 + 0.4 + k * 1.9, y, zz - 0.12 * (zz < tb ? 1 : 0), tx0 + 0.55 + k * 1.9, top - 3.2, zz + 0.4 + (zz < tb ? 0 : 0.12)));   // fins on the blank ends
     bag.add(CONC, box(tx0 + 3, top, ta + 4, tx1 - 3, top + 3.2, tb - 4));                                     // the machine room
     col.rect([tx0 - 0.5, ta - 0.6, tx1 + 0.5, tb + 0.6], y, top);
     bag.add('steel_chrome', rod([(tx0 + tx1) / 2, top + 3.2, (ta + tb) / 2], [(tx0 + tx1) / 2, top + 14, (ta + tb) / 2], 0.12, 6));
