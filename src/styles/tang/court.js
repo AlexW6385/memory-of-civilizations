@@ -83,6 +83,68 @@ export function furnishRoom(L, kind, o) {
     solid(L, 'wood_dark', -side * (hx - 0.1) - 0.8, y, z0, -side * (hx - 0.1) + 0.0, y + 1.9, z0 + 0.4);
     for (let k = 0; k < 6; k++) bag.add(['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white', 'cloth_green'][k % 5], box(-side * (hx - 0.1) - 0.75 + (k % 3) * 0.25, y + 0.5 + Math.floor(k / 3) * 0.7, z0 + 0.4, -side * (hx - 0.1) - 0.55 + (k % 3) * 0.25, y + 0.9 + Math.floor(k / 3) * 0.7, z0 + 0.7));
     stool(L, side * 2.6, z0 + 2.9, y);
+  } else if (kind === 'shrine') {
+    // the household shrine: an altar table against the back wall with a small gilt Buddha, the incense burner, two candlesticks, offerings, ancestors' tablets; a hanging scroll behind, a kneeling mat before
+    const zt = z0 + 0.35, yt = y + 0.95;
+    table(L, 0, zt, y, 2.1, 0.6, 0.95, 'lacquer_red');
+    bag.add('paint_ochre', box(-1.0, y + 1.2, -d / 2 + 0.2, 1.0, y + 2.5, -d / 2 + 0.23)); bag.add('cloth_black', box(-1.06, y + 1.15, -d / 2 + 0.2, 1.06, y + 1.2, -d / 2 + 0.24)); bag.add('cloth_black', box(-1.06, y + 2.5, -d / 2 + 0.2, 1.06, y + 2.55, -d / 2 + 0.24));
+    bag.add('bronze', lathe([[0.001, 0], [0.1, 0], [0.15, 0.08], [0.12, 0.17], [0.001, 0.17]], 10, null, 0, yt, zt + 0.1));
+    for (const sx of [-1, 1]) {
+      bag.add('bronze', lathe([[0.001, 0], [0.07, 0], [0.03, 0.12], [0.03, 0.3], [0.001, 0.3]], 8, null, sx * 0.62, yt, zt)); bag.add('paint_white', box(sx * 0.62 - 0.02, yt + 0.3, zt - 0.02, sx * 0.62 + 0.02, yt + 0.5, zt + 0.02)); bag.add('flame', lathe([[0.001, 0.5], [0.012, 0.55], [0.001, 0.62]], 4, null, sx * 0.62, yt, zt));
+      bag.add('wood_dark', box(sx * 0.98 - 0.1, yt, zt - 0.08, sx * 0.98 + 0.1, yt + 0.42, zt + 0.0)); bag.add('lacquer_red', box(sx * 0.98 - 0.13, yt, zt - 0.1, sx * 0.98 + 0.13, yt + 0.05, zt + 0.1)); bag.add('gilt_bronze', box(sx * 0.98 - 0.05, yt + 0.12, zt + 0.0, sx * 0.98 + 0.05, yt + 0.32, zt + 0.004));
+      cup(bag, sx * 0.3, yt, zt + 0.2, 'glaze_white'); bag.add('cloth_red', lathe([[0.001, 0], [0.05, 0.02], [0.04, 0.07], [0.001, 0.08]], 8, null, sx * 0.3, yt + 0.065, zt + 0.2));
+    }
+    bag.add('lacquer_red', box(-0.15, yt, zt - 0.15, 0.15, yt + 0.06, zt + 0.1)); bag.add('gilt_bronze', box(-0.1, yt + 0.06, zt - 0.1, 0.1, yt + 0.26, zt + 0.06)); bag.add('gilt_bronze', lathe([[0.001, 0], [0.06, 0.02], [0.06, 0.1], [0.001, 0.12]], 8, null, 0, yt + 0.26, zt - 0.02)); bag.add('gilt_bronze', box(-0.14, yt + 0.06, zt - 0.14, -0.1, yt + 0.4, zt - 0.1));
+    bag.add('cloth_maroon', box(-0.55, y, z0 + 1.55, 0.55, y + 0.05, z0 + 2.35)); bag.add('reed_mat', box(-1.3, y, z0 + 1.2, 1.3, y + 0.02, z0 + 2.7));
+    bag.add('bronze', lathe([[0.001, 0], [0.1, 0], [0.16, 0.1], [0.001, 0.14]], 10, null, side * 3.2, y, z0 + 0.5)); bag.add('wood_dark', box(side * 3.2 - 0.3, y, z0 + 0.9, side * 3.2 + 0.3, y + 0.04, z0 + 1.5));
+    solid(L, 'wood_dark', side * (hx - 0.1) - 1.2, y, z0, side * (hx - 0.1), y + 1.3, z0 + 0.45); for (let k = 0; k < 4; k++) bag.add('paint_white', box(side * (hx - 0.1) - 1.1 + k * 0.27, y + 1.3, z0 + 0.1, side * (hx - 0.1) - 0.9 + k * 0.27, y + 1.5, z0 + 0.35));
+    lamp(L, -side * (hx - 0.3), y, z0 + 2.4, o.light);
+  } else if (kind === 'guest') {
+    // the reception hall: a dais at the back with a low table, a painted screen behind it, cushions, folding stools on the floor, a tea stand
+    const xa = Math.min(hx - 0.6, 4.2);
+    dais(L, -xa, z0 + 0.2, xa, z0 + 2.9, y, 0.3);
+    table(L, 0, z0 + 1.6, y + 0.3, 1.5, 0.7, 0.36, 'lacquer_black');
+    for (let k = 0; k < 3; k++) cup(bag, -0.4 + k * 0.4, y + 0.66, z0 + 1.6 + (k % 2 ? 0.1 : -0.1), k % 2 ? 'glaze_green' : 'glaze_white');
+    bag.add('bronze', lathe([[0.001, 0], [0.09, 0], [0.12, 0.08], [0.001, 0.12]], 8, null, 0.6, y + 0.66, z0 + 1.6));
+    for (const sx of [-1, 1]) { bag.add(sx < 0 ? 'cloth_indigo' : 'cloth_ochre', box(sx * 1.55 - 0.32, y + 0.3, z0 + 1.3, sx * 1.55 + 0.32, y + 0.37, z0 + 1.95)); }
+    for (const sx of [-1, 1]) bag.add('lacquer_red', box(sx * 1.6 - 0.04, y + 0.3, z0 - 0.1, sx * 1.6 + 0.04, y + 1.9, z0 + 0.04));
+    bag.add('lacquer_red', box(-1.64, y + 1.84, z0 - 0.1, 1.64, y + 1.94, z0 + 0.04)); bag.add('paint_white', box(-1.56, y + 0.4, z0 - 0.02, 1.56, y + 1.84, z0 + 0.0)); bag.add('paint_ochre', box(-1.2, y + 0.7, z0, 1.2, y + 1.4, z0 + 0.02));
+    for (const sx of [-1, 1]) { stool(L, sx * (xa + 0.9 > hx - 0.3 ? hx - 0.5 : xa + 0.9), z0 + 3.4, y); }
+    stool(L, side * 2.6, z0 + 4.0 < d / 2 - 0.7 ? z0 + 4.0 : z0 + 3.5, y);
+    table(L, -side * (hx - 0.6), z0 + 0.5, y, 0.9, 0.6, 0.8, 'wood_dark'); bag.add('bronze', lathe([[0.001, 0], [0.12, 0.0], [0.16, 0.2], [0.001, 0.22]], 10, null, -side * (hx - 0.6), y + 0.8, z0 + 0.5)); for (let k = 0; k < 3; k++) cup(bag, -side * (hx - 0.6) + 0.22 + k * 0.1, y + 0.8, z0 + 0.4, 'glaze_white');
+    lamp(L, side * (hx - 0.3), y, z0 + 3.2, o.light);
+  } else if (kind === 'music') {
+    // the music room: a dais with the zither (qin) on a low table, a pipa on its stand, a drum on a frame, a flute rack, a screen, cushions
+    const xa = Math.min(hx - 0.6, 4.4), x0 = -side * xa, x1 = -side * 1.5;
+    dais(L, Math.min(x0, x1), z0 + 0.2, Math.max(x0, x1), z0 + 2.7, y, 0.28, 'cloth_white');
+    const qx = (x0 + x1) / 2, qz = z0 + 1.25;
+    table(L, qx, qz, y + 0.28, 1.3, 0.5, 0.34, 'lacquer_black');
+    bag.add('lacquer_black', box(qx - 0.55, y + 0.62, qz - 0.1, qx + 0.55, y + 0.67, qz + 0.1)); bag.add('wood_dark', box(qx - 0.55, y + 0.67, qz - 0.06, qx + 0.55, y + 0.69, qz + 0.06));
+    for (let k = 0; k < 7; k++) bag.add('gilt_bronze', box(qx - 0.4 + k * 0.1, y + 0.69, qz - 0.01, qx - 0.38 + k * 0.1, y + 0.7, qz + 0.01));
+    bag.add(['cloth_maroon', 'cloth_indigo'][side > 0 ? 0 : 1], box(qx - 0.3, y + 0.28, qz + 0.5, qx + 0.3, y + 0.34, qz + 1.1));
+    const px = side * 2.4, pz = z0 + 0.5;   // the pipa on its stand, the drum on its frame, the flute rack
+    bag.add('wood_dark', box(px - 0.2, y, pz - 0.05, px + 0.2, y + 0.05, pz + 0.25)); bag.add('wood_dark', box(px - 0.02, y + 0.05, pz + 0.1, px + 0.02, y + 1.0, pz + 0.14));
+    bag.add('wood_dark', lathe([[0.001, 0], [0.17, 0.02], [0.2, 0.18], [0.12, 0.32], [0.001, 0.34]], 10, null, px, y + 0.9, pz + 0.12)); bag.add('wood_dark', box(px - 0.03, y + 1.12, pz + 0.08, px + 0.03, y + 1.62, pz + 0.16));
+    col.circle(px, pz + 0.1, 0.25, y, y + 1.0);
+    const dx = side * 3.7;
+    for (const s2 of [-1, 1]) bag.add('wood_dark', box(dx + s2 * 0.34 - 0.03, y, z0 + 0.25, dx + s2 * 0.34 + 0.03, y + 0.75, z0 + 0.31)); bag.add('lacquer_red', lathe([[0.2, 0], [0.26, 0.15], [0.26, 0.3], [0.2, 0.45], [0.2, 0]], 12, null, dx, y + 0.3, z0 + 0.28)); col.rect([dx - 0.4, z0 + 0.2, dx + 0.4, z0 + 0.4], y, y + 0.75);
+    bag.add('wood_dark', box(-side * 3.0 - 0.7, y + 1.5, -d / 2 + 0.2, -side * 3.0 + 0.7, y + 1.55, -d / 2 + 0.26)); for (let k = 0; k < 4; k++) bag.add('bamboo_culm', box(-side * 3.0 - 0.55 + k * 0.35, y + 1.38, -d / 2 + 0.22, -side * 3.0 - 0.51 + k * 0.35, y + 1.5, -d / 2 + 0.26));
+    bag.add('paint_white', box(-side * 3.0 - 0.55, y + 0.4, -d / 2 + 0.2, -side * 3.0 + 0.55, y + 1.3, -d / 2 + 0.23)); bag.add('cloth_black', box(-side * 3.0 - 0.6, y + 0.35, -d / 2 + 0.2, -side * 3.0 + 0.6, y + 0.4, -d / 2 + 0.24));
+    bag.add('reed_mat', box(-1.0, y, z0 + 2.6, 1.0, y + 0.02, z0 + 3.8));
+    lamp(L, -side * (hx - 0.3), y, z0 + 3.4, o.light);
+  } else if (kind === 'physician') {
+    // the physician's room: a wall cabinet of many small drawers, a counter with the steelyard and the mortar, jars of drugs, bundles of herbs hung from the beam, a stool for the patient
+    const cw = Math.min((hx - 1.3) / 2, 2.6), cx0 = side * 0.6, cx1 = side * (0.6 + 2 * cw), xa = Math.min(cx0, cx1), xb = Math.max(cx0, cx1);
+    solid(L, 'wood_dark', xa, y, z0, xb, y + 2.0, z0 + 0.4);
+    for (let r = 0; r < 6; r++) for (let q = 0; q < Math.round((xb - xa) / 0.4); q++) bag.add('lacquer_black', box(xa + 0.05 + q * 0.4, y + 0.1 + r * 0.31, z0 + 0.4, xa + 0.4 + q * 0.4 - 0.03 - 0.02, y + 0.1 + r * 0.31 + 0.26, z0 + 0.42)), bag.add('gilt_bronze', box(xa + 0.2 + q * 0.4, y + 0.19 + r * 0.31, z0 + 0.42, xa + 0.24 + q * 0.4, y + 0.21 + r * 0.31, z0 + 0.44));
+    table(L, -side * 2.3, z0 + 0.7, y, 2.0, 0.7, 0.9, 'wood_dark');
+    const tx = -side * 2.3, ty = y + 0.9;
+    bag.add('wood_dark', box(tx - 0.5, ty + 0.0, z0 + 0.7, tx + 0.5, ty + 0.03, z0 + 0.74)); bag.add('rope_fibre', box(tx - 0.5, ty + 0.03, z0 + 0.71, tx - 0.5 + 0.01, ty + 0.35, z0 + 0.72)); bag.add('iron', box(tx - 0.5, ty + 0.35, z0 + 0.69, tx + 0.5, ty + 0.37, z0 + 0.75));     // the steelyard
+    bag.add('granite_block', lathe([[0.001, 0], [0.12, 0], [0.14, 0.06], [0.1, 0.14], [0.001, 0.14]], 10, null, tx + 0.7, ty, z0 + 0.5)); for (let k = 0; k < 4; k++) bag.add(['cloth_ochre', 'cloth_brown', 'cloth_green', 'wicker'][k], lathe([[0.001, 0], [0.1, 0.03], [0.07, 0.1], [0.001, 0.1]], 8, null, tx - 0.8 + k * 0.28, ty, z0 + 0.55));
+    for (let k = 0; k < 5; k++) { const hx2 = -side * (1.5 + k * 0.7); bag.add('rope_fibre', box(hx2 - 0.01, y + 2.5, z0 + 1.7, hx2 + 0.01, y + 2.9, z0 + 1.72)); bag.add(['cloth_green', 'cloth_ochre', 'cloth_brown', 'wicker'][k % 4], lathe([[0.001, 0], [0.09, 0.06], [0.07, 0.3], [0.001, 0.36]], 8, null, hx2, y + 2.2, z0 + 1.7)); }
+    for (let k = 0; k < 4; k++) jar(bag, side * (hx - 0.4), y, z0 + 0.7 + k * 0.7, 0.24, 0.5 + (k % 2) * 0.1, ['glaze_white', 'pottery_dark', 'terracotta', 'glaze_green'][k]);
+    stool(L, -side * 2.3, z0 + 2.2, y); stool(L, -side * 3.2, z0 + 2.5, y);
+    lamp(L, -side * (hx - 0.2), y, z0 + 3.2, o.light);
   } else {   // 'store' and 'kitchen'
     const kitchen = kind === 'kitchen';
     for (let k = 0; k < 4; k++) jar(bag, -hx + 0.4 + k * 0.78, y, z0 + 0.5, 0.3 + (k % 2) * 0.05, 0.78 + (k % 3) * 0.08, k % 2 ? 'pottery_dark' : 'terracotta');

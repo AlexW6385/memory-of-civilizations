@@ -167,7 +167,7 @@ export function lots() {
           const d = Math.hypot((rect[0] + rect[2]) / 2, (rect[1] + rect[3]) / 2), r = rand();
           let kind = w.kind === 'official' ? (r < 0.55 ? 'mansion' : 'house') : w.kind === 'common' ? (r < 0.08 ? 'mansion' : r < 0.85 ? 'house' : 'hut') : (r < 0.55 ? 'hut' : 'house');
           if (rand() < (d > 440 ? 0.25 : 0.04)) continue;
-          LOTS.push({ rect, front, kind, seed: Math.floor(rand() * 1e6), det: d < 230 ? 2 : d < 380 ? 1 : 0, ward: w.id });
+          LOTS.push({ rect, front, kind, seed: Math.floor(rand() * 1e6), det: d < 230 ? 2 : d < 380 ? 1 : 0, ward: w.id, wk: w.kind });
         }
       }
     }
