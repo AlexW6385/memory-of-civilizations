@@ -1,7 +1,8 @@
 // Towers and pavilions (docs/settlements/bali-village.md §3, §4): the meru, the kulkul tower, the bale (open pavilion on a plinth), the wantilan with the gamelan,
 // the compound's house (bale daja), the kitchen (paon), the rice barn (lumbung).
-import { box, lathe } from '../../core/geom.js';
-import { bx, post, thatchHip, hipHeight, steps, coping, canang, rng, pick, TAU } from './kit.js';
+import { box, lathe, rod } from '../../core/geom.js';
+import { bx, post, thatchHip, hipHeight, steps, coping, canang, sash, rng, pick, TAU } from './kit.js';
+import { frame, patraField, lotusFinial } from './carve.js';
 
 /** bali_meru: { c, y, tiers (3 | 5 | 7 | 9 | 11), a (half width of the base), seed } — a base with stair, the closed cell, then the roofs diminishing upward. */
 export function meru(el, ctx) {
@@ -10,22 +11,31 @@ export function meru(el, ctx) {
   bx(ctx, 'brick', cx - a, y + 0.5, cz - a, cx + a, y + bh, cz + a, true);
   coping(ctx, cx - a, cz - a, cx + a, cz + a, y + bh, 'tuff_hewn');
   steps(ctx, [cx - 0.8, cz + a + 0.25, cx + 0.8, cz + a + 1.5], y, y + bh + 0.2, 'n', 'andesite', 0.2, y - 0.3);
+  // the base's carved fields on its four faces (the stair's face in two, either side of the stair)
+  for (const face of ['s', 'n', 'e', 'w']) {
+    const F = frame(ctx, cx, cz, face), v0 = y + 0.62, v1 = y + bh - 0.12;
+    if (face === 's') { patraField(F, 'tuff_hewn', 'andesite', 0.95, v0, a - 0.25, v1, a, 0.3); patraField(F, 'tuff_hewn', 'andesite', -(a - 0.25), v0, -0.95, v1, a, 0.3); }
+    else patraField(F, 'tuff_hewn', 'andesite', -(a - 0.25), v0, a - 0.25, v1, a, 0.3);
+  }
   const y0 = y + bh + 0.2, sp = 1.05 + (n > 5 ? 0.05 : 0);
   // the cell (a closed chamber of painted timber, in the lowest storey) and the frame of posts above
   const cw = a * 0.6;
   bx(ctx, 'wood_painted', cx - cw, y0, cz - cw, cx + cw, y0 + 1.5, cz + cw, true);
   bx(ctx, 'wood_dark', cx - 0.35, y0, cz + cw, cx + 0.35, y0 + 1.1, cz + cw + 0.05);
+  bx(ctx, 'gilt_bronze', cx - 0.4, y0 + 1.1, cz + cw, cx + 0.4, y0 + 1.16, cz + cw + 0.07);
+  patraField(frame(ctx, cx, cz, 's'), 'gilt_bronze', 'wood_dark', -0.28, y0 + 0.1, 0.28, y0 + 1.0, cw + 0.05, 0.28);
   for (let k = 0; k < n; k++) {
     const t = k / Math.max(1, n - 1), ek = a + 0.9 - t * (a + 0.2), ey = y0 + 1.5 + k * sp + (k === 0 ? 0 : 0.0);
     thatchHip(ctx, { c: [cx, cz], A: ek, B: ek, y: ey, rise: 0.75 + 0.3 * (k === n - 1), mat: 'ijuk', pow: 1.5, th: 0.34 });
     if (k < n - 1) {
       const pr = Math.max(0.35, ek * 0.45);
       for (const sx of [-1, 1]) for (const sz of [-1, 1]) post(ctx, 'wood_painted', cx + sx * pr, cz + sz * pr, ey - 0.0, ey + sp, 0.07, false);
+      if (k === 0) for (const sx of [-1, 1]) for (const sz of [-1, 1]) sash(ctx, cx + sx * pr, cz + sz * pr, ey + 0.35, 0.07);
       bx(ctx, 'wood_painted', cx - pr - 0.1, ey + sp - 0.12, cz - pr - 0.1, cx + pr + 0.1, ey + sp - 0.02, cz + pr + 0.1);
     }
   }
   const top = y0 + 1.5 + (n - 1) * sp + 1.05;
-  ctx.bag.add('gilt_bronze', lathe([[0.001, 0], [0.16, 0], [0.1, 0.25], [0.14, 0.5], [0.07, 0.8], [0.001, 1.2]], 8, null, cx, top - 0.2, cz));
+  lotusFinial(ctx, cx, top - 0.2, cz, 0.15);
   ctx.col.rect([cx - cw, cz - cw, cx + cw, cz + cw], y0, top);
 }
 
@@ -194,23 +204,67 @@ export function house(el, ctx) {
   const df = d === 's' ? [cx - dw - 0.1, z1 - t - 0.04, cx + dw + 0.1, z1 + 0.02] : d === 'n' ? [cx - dw - 0.1, z0 - 0.02, cx + dw + 0.1, z0 + t + 0.04] : d === 'e' ? [x1 - t - 0.04, cz - dw - 0.1, x1 + 0.02, cz + dw + 0.1] : [x0 - 0.02, cz - dw - 0.1, x0 + t + 0.04, cz + dw + 0.1];
   bx(ctx, 'wood_painted', df[0], f + 2.0, df[1], df[2], f + 2.15, df[3]);
   thatchHip(ctx, { c: [cx, cz], A: (x1 - x0) / 2 + 1.3, B: (z1 - z0) / 2 + 1.3, y: f + H + 0.2, rise: Math.max(1.5, Math.min(x1 - x0, z1 - z0) * 0.6), mat: el.roof === 'ijuk' ? 'ijuk' : 'thatch_palm', pow: 1.3 });
-  // the furnished room can be seen through the door: a sleeping platform and a chest inside (head toward kaja)
-  bx(ctx, 'wood_ochre', x0 + t + 0.1, f, z0 + t + 0.1, x0 + t + 1.5, f + 0.4, z1 - t - 0.1);
-  bx(ctx, 'reed_mat', x0 + t + 0.1, f + 0.4, z0 + t + 0.1, x0 + t + 1.5, f + 0.43, z1 - t - 0.1);
-  bx(ctx, 'wood_dark', x1 - t - 0.9, f, z0 + t + 0.1, x1 - t - 0.1, f + 0.7, z0 + t + 0.8);
-  // the room's furnishing: tie-beams under the thatch, the pillow and a folded cloth on the platform, offerings on a ledge at the head, jars and a rice sack by the chest, a cloth hung on the wall
-  const sd = el.seed ?? 1;
-  for (let k = 0; k < 3; k++) bx(ctx, 'wood_dark', x0 + t, f + H - 0.22, z0 + t + (z1 - z0 - 2 * t) * (k + 0.5) / 3 - 0.06, x1 - t, f + H - 0.1, z0 + t + (z1 - z0 - 2 * t) * (k + 0.5) / 3 + 0.06);
-  bx(ctx, 'cloth_white', x0 + t + 0.15, f + 0.43, z0 + t + 0.2, x0 + t + 0.6, f + 0.52, z0 + t + 0.65);
-  bx(ctx, ['cloth_red', 'cloth_indigo', 'cloth_ochre'][sd % 3], x0 + t + 0.7, f + 0.43, z0 + t + 0.15, x0 + t + 1.4, f + 0.47, z0 + t + 0.8);
-  bx(ctx, 'wood_dark', x0 + t, f + 1.1, z1 - t - 1.3, x0 + t + 0.3, f + 1.16, z1 - t - 0.1);
-  canang(ctx, x0 + t + 0.15, f + 1.16, z1 - t - 0.7, sd);
-  ctx.bag.add('pottery_dark', lathe([[0.001, 0], [0.15, 0.02], [0.2, 0.2], [0.13, 0.4], [0.1, 0.44]], 8, null, x1 - t - 0.3, f, z1 - t - 0.3));
-  ctx.bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.02], [0.16, 0.16], [0.1, 0.3]], 8, null, x1 - t - 0.75, f, z1 - t - 0.25));
-  bx(ctx, 'sacking', x1 - t - 0.9, f, z0 + t + 0.9, x1 - t - 0.35, f + 0.55, z0 + t + 1.4);
-  bx(ctx, ['cloth_red', 'cloth_black', 'cloth_ochre'][(sd >> 2) % 3], x1 - t - 0.06, f + 0.9, z0 + t + 0.3, x1 - t - 0.02, f + 1.9, z0 + t + 0.9);
-  // the lamp: a clay oil lamp on the offering ledge, lit (one light in the room)
-  ctx.bag.add('pottery_dark', lathe([[0.001, 0], [0.05, 0.01], [0.07, 0.04], [0.04, 0.06], [0.001, 0.06]], 8, null, x0 + t + 0.17, f + 1.16, z1 - t - 1.05));
-  ctx.lights?.push({ at: [x0 + t + 0.17, f + 1.3, z1 - t - 1.05], color: '#ffb86a', intensity: 2.6, distance: 6 });
+  interior(ctx, { x0, z0, x1, z1, t, f, d, H, sd: el.seed ?? 1 });
   void pick; void rng;
+}
+
+/**
+ * The sleeping house's room, furnished in the frame of its own door (lu along the back wall, lv from the back wall toward the door; the door's strip stays free) by one of four
+ * variants: the sleepers' house, the weavers', the store, the elder's bed. docs/settlements/bali-village.md §11.
+ */
+function interior(ctx, { x0, z0, x1, z1, t, f, d, H, sd }) {
+  const xi0 = x0 + t, xi1 = x1 - t, zi0 = z0 + t, zi1 = z1 - t;
+  const along = d === 'n' || d === 's', U = along ? xi1 - xi0 : zi1 - zi0, V = along ? zi1 - zi0 : xi1 - xi0;
+  const P = (lu, lv) => (d === 'n' ? [xi0 + lu, zi1 - lv] : d === 's' ? [xi1 - lu, zi0 + lv] : d === 'e' ? [xi0 + lv, zi1 - lu] : [xi1 - lv, zi0 + lu]);
+  const B = (m, a, b, c, e, h0, h1, solid = false) => { const p = P(a, b), q = P(c, e); bx(ctx, m, Math.min(p[0], q[0]), f + h0, Math.min(p[1], q[1]), Math.max(p[0], q[0]), f + h1, Math.max(p[1], q[1]), solid); };
+  const L = (m, prof, lu, lv, h0 = 0, seg = 8) => { const p = P(lu, lv); ctx.bag.add(m, lathe(prof, seg, null, p[0], f + h0, p[1])); };
+  const Rd = (m, a, b, r) => { const p = P(a[0], a[1]), q = P(b[0], b[1]); ctx.bag.add(m, rod([p[0], f + a[2], p[1]], [q[0], f + b[2], q[1]], r, 5)); };
+  const variant = U >= 5.4 ? (sd >> 2) % 4 : 0, pw = Math.min(1.9, U - 1.7), cl = ['cloth_red', 'cloth_indigo', 'cloth_ochre'][sd % 3];
+  // under the thatch: three tie-beams across the room; the offering ledge on the back wall at the left, a clay lamp lit on it
+  for (let k = 0; k < 3; k++) B('wood_dark', 0, V * (k + 0.5) / 3 - 0.06, U, V * (k + 0.5) / 3 + 0.06, H - 0.22, H - 0.1);
+  B('wood_dark', 0.1, 0, 1.3, 0.3, 1.1, 1.16); canang(ctx, ...(() => { const p = P(0.45, 0.15); return [p[0], f + 1.16, p[1]]; })(), sd);
+  { const p = P(0.9, 0.15); ctx.bag.add('pottery_dark', lathe([[0.001, 0], [0.05, 0.01], [0.07, 0.04], [0.04, 0.06], [0.001, 0.06]], 8, null, p[0], f + 1.16, p[1])); ctx.lights?.push({ at: [p[0], f + 1.3, p[1]], color: '#ffb86a', intensity: 2.6, distance: 6 }); }
+  const jar = (lu, lv, k = 0) => L(k ? 'terracotta' : 'pottery_dark', [[0.001, 0], [0.15, 0.02], [0.21, 0.2], [0.14, 0.4], [0.1, 0.44]], lu, lv);
+  if (variant === 0) {
+    // the sleepers: the platform with its mat, pillow and folded cloths; the chest, a sack, jars, a cloth on the end wall
+    B('wood_ochre', 0.1, 0.1, pw, V - 0.1, 0, 0.4, true); B('reed_mat', 0.1, 0.1, pw, V - 0.1, 0.4, 0.43);
+    B('cloth_white', 0.2, 0.2, 0.65, 0.65, 0.43, 0.52); B(cl, 0.8, 0.2, Math.max(0.9, pw - 0.2), 0.9, 0.43, 0.47);
+    B('wood_dark', U - 0.9, 0.1, U - 0.1, 0.8, 0, 0.7, true); B('sacking', U - 1.5, 0.1, U - 0.95, 0.65, 0, 0.55);
+    jar(U - 0.3, V - 0.3); jar(U - 0.75, V - 0.25, 1);
+    B(['cloth_red', 'cloth_black', 'cloth_ochre'][(sd >> 4) % 3], U - 0.04, 0.3, U, 0.9, 0.9, 1.9);
+  } else if (variant === 1) {
+    // the weavers: a frame loom (posts, beams, the stretched warp, heddle frames, the cloth beam) with its bench, thread baskets, the finished cloths on the platform
+    B('wood_ochre', 0.1, 0.1, 1.5, 1.3, 0, 0.4, true); B('reed_mat', 0.1, 0.1, 1.5, 1.3, 0.4, 0.43);
+    B('cloth_indigo', 0.2, 0.2, 1.3, 0.6, 0.43, 0.5); B('cloth_red', 0.2, 0.62, 1.3, 1.0, 0.43, 0.49); B('cloth_ochre', 0.25, 0.25, 0.9, 0.55, 0.5, 0.55);
+    for (const [a, b] of [[3.85, 0.2], [5.35, 0.2], [3.85, 1.15], [5.35, 1.15]]) B('wood_dark', a - 0.04, b - 0.04, a + 0.04, b + 0.04, 0, 1.5);
+    for (const b of [0.2, 1.15]) B('wood_dark', 3.8, b - 0.04, 5.4, b + 0.04, 1.43, 1.5);
+    B('wood_dark', 3.8, 0.2, 3.88, 1.15, 1.43, 1.5); B('wood_dark', 5.32, 0.2, 5.4, 1.15, 1.43, 1.5);
+    B('cloth_ochre', 3.92, 0.24, 5.28, 1.1, 0.64, 0.655); B('cloth_white', 3.92, 0.24, 5.28, 0.6, 0.655, 0.665);
+    B('cloth_red', 3.86, 1.1, 5.34, 1.22, 0.55, 0.66);
+    for (const b of [0.62, 0.72]) { B('wood_painted', 3.95, b, 5.25, b + 0.03, 0.72, 0.78); B('wood_painted', 3.95, b, 5.25, b + 0.03, 1.15, 1.2); B('wood_painted', 3.95, b, 3.99, b + 0.03, 0.72, 1.2); B('wood_painted', 5.21, b, 5.25, b + 0.03, 0.72, 1.2); }
+    B('wood_ochre', 4.3, 1.3, 5.0, 1.7, 0, 0.32); B('wood_dark', 4.35, 0.2, 4.45, 1.0, 0, 0.08); B('wood_dark', 4.75, 0.2, 4.85, 1.0, 0, 0.08);
+    B('wood_dark', 3.8, 0.15, 5.4, 1.2, 0, 0.04); ctx.col.rect([...(() => { const p = P(3.8, 0.15), q = P(5.4, 1.2); return [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; })()], f, f + 1.5);
+    for (const [lu, lv] of [[3.4, 0.3], [3.4, 1.9]]) L('wicker', [[0.001, 0], [0.2, 0.02], [0.24, 0.2], [0.2, 0.3]], lu, lv);
+    B('cloth_indigo', 3.3, 0.2, 3.5, 0.4, 0.3, 0.38);
+  } else if (variant === 2) {
+    // the store: jars along the wall, sacks of rice piled, baskets hung from the tie-beams, the rice mortar with its two pestles
+    for (let i = 0; i < 4; i++) L('terracotta', [[0.001, 0], [0.22, 0.02], [0.32, 0.3], [0.28, 0.6], [0.2, 0.72], [0.22, 0.76]], 0.4 + i * 0.7, 0.35);
+    jar(0.5, 1.2); jar(1.2, 1.1, 1);
+    for (const [a, b, h0] of [[3.8, 0.1, 0], [4.45, 0.1, 0], [5.1, 0.1, 0], [4.1, 0.1, 0.4], [4.75, 0.1, 0.4], [3.9, 0.75, 0], [4.55, 0.75, 0]]) B('sacking', a, b, a + 0.55, b + 0.6, h0, h0 + 0.4, h0 === 0);
+    B('timber', 1.5, 1.6, 2.5, 2.1, 0, 0.38, false);
+    Rd('timber', [1.7, 1.85, 0.4], [1.7, 1.85, 0.8], 0.04); Rd('timber', [2.3, 1.85, 0.4], [2.3, 1.85, 0.8], 0.04);
+    Rd('timber', [5.5, 0.1, 0.05], [5.55, 0.1, 1.7], 0.04); Rd('timber', [5.35, 0.1, 0.05], [5.4, 0.1, 1.7], 0.04);
+    for (const [lu, lv] of [[1.9, 0.9], [3.2, 0.8]]) { Rd('rope_fibre', [lu, lv, H - 0.22], [lu, lv, H - 0.62], 0.012); L('wicker', [[0.001, 0], [0.24, 0.0], [0.28, 0.16], [0.2, 0.34], [0.001, 0.34]], lu, lv, H - 0.96); }
+  } else {
+    // the elder's bed along the back wall: a broad bed with its mat and bolsters, four posts and a valance, a chest at the foot, an offering shelf with canang and a gebogan
+    B('wood_ochre', 0.1, 0.1, 2.3, 1.4, 0, 0.45, true); B('reed_mat', 0.1, 0.1, 2.3, 1.4, 0.45, 0.48);
+    B('cloth_white', 0.2, 0.2, 0.7, 0.6, 0.48, 0.58); B(cl, 0.9, 0.2, 2.2, 1.3, 0.48, 0.52);
+    for (const [a, b] of [[0.1, 0.1], [2.3, 0.1], [0.1, 1.4], [2.3, 1.4]]) B('wood_painted', a - 0.04, b - 0.04, a + 0.04, b + 0.04, 0.45, 1.7);
+    B('cloth_white', 0.06, 0.06, 2.34, 1.44, 1.5, 1.7);
+    B('wood_dark', 2.5, 0.1, 3.2, 0.8, 0, 0.6, true);
+    B('wood_dark', U - 2.2, 0, U - 0.1, 0.3, 0.55, 0.6);
+    for (let i = 0; i < 3; i++) { const p = P(U - 1.9 + i * 0.5, 0.15); canang(ctx, p[0], f + 0.6, p[1], sd + i); }
+    { const p = P(U - 0.5, 0.15); const rings = [['cloth_red', 0.2, 0.0], ['cloth_ochre', 0.17, 0.18], ['cloth_green', 0.14, 0.36], ['cloth_white', 0.08, 0.52]]; for (const [m, r, dy] of rings) ctx.bag.add(m, lathe([[0.001, 0.1 + dy], [r, 0.12 + dy], [r * 0.9, 0.28 + dy], [0.001, 0.3 + dy]], 8, null, p[0], f + 0.6, p[1])); }
+    jar(U - 0.3, V - 0.3, 1);
+  }
 }

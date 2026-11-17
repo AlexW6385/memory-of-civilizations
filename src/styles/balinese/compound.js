@@ -47,6 +47,8 @@ export function compound(el, ctx) {
   const sgn = left ? 1 : -1;                                  // +u of the canonical frame in the real frame's u
   const th = 0.5, h = rich ? 2.4 : 2.0, mat = rich ? 'brick' : 'earth_wall', cap = rich ? 'stone' : 'thatch';
   const gateU = W * (el.gateF ?? 0.5), parts = compoundParts(el);
+  // the front by rule of wealth: 0 the poor (earth wall, thatch piers, plank door), 1 the brick angkul-angkul with its pyramid roof, 2 the rich (carved piers, a paduraksa tower, a carved band on the wall)
+  const tier = !rich ? 0 : ((el.seed >>> 7) % 3 === 0 ? 2 : 1), sideN = f === 'n' ? [0, -1] : f === 's' ? [0, 1] : f === 'e' ? [1, 0] : [-1, 0];
   const wl = (a, b, gaps) => wall({ a, b, h, th, mat, cap, gaps, y }, ctx);
   // the four walls (centre lines on the lot's edge, inset by half the thickness)
   const c00 = P(0, 0), c10 = P(W, 0), c01 = P(0, D), c11 = P(W, D);
@@ -60,13 +62,13 @@ export function compound(el, ctx) {
     const gaps = [{ at: L * (gateU - 0.25) / (W - 0.5), w: gw }];
     if (el.shop) gaps.push({ at: L * ((el.shop.u0 + el.shop.u1) / 2 - 0.25) / (W - 0.5), w: el.shop.u1 - el.shop.u0 + 0.3 });
     if (parts.pav) gaps.push({ at: L * (parts.pav.uc - 0.25) / (W - 0.5), w: parts.pav.w + 0.3 });
-    wl(a, b, gaps);
+    wall({ a, b, h, th, mat, cap, gaps, y, band: tier === 2 ? sideN : null }, ctx);
   }
   wl(P(0.25, D - 0.25), P(W - 0.25, D - 0.25));
   wl(P(0.25, 0.25), P(0.25, D - 0.25)); wl(P(W - 0.25, 0.25), P(W - 0.25, D - 0.25));
   void c00; void c10; void c01; void c11;
   const gp = P(gateU, 0.25);
-  gate({ at: gp, axis: alongX ? 'x' : 'z', w: gw, h: 2.7, y, face: (f === 'n' || f === 'w') ? -1 : 1, rich }, ctx);
+  gate({ at: gp, axis: alongX ? 'x' : 'z', w: gw, h: 2.7, y, face: (f === 'n' || f === 'w') ? -1 : 1, rich, tier }, ctx);
   // the sanggah yard, canonical left-back corner: a low walled yard 6 × 6 with its shrines
   {
     const sv0 = D - 7.2, sv1 = D - 0.6, su0 = 0.6, su1 = 6.8, lw = 0.9;
