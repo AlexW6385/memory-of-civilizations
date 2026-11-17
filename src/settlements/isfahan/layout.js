@@ -24,6 +24,8 @@ export const LOTF = { portal: [[80, -29], [80, -51]], c: [103, -32], half: 10.5 
 export const TEAHOUSE = [17, -332, 35, -316];       // the coffeehouse by the Qeysarieh (docs/settlements/isfahan.md §18)
 export const CHAHAR = [-384, -110, -338, 110];       // the Chahar Bagh avenue west of the royal garden, canal on x = CHAHAR_X
 export const CHAHAR_X = -361;
+/** The pigeon towers of the fields at the disc's edge (docs/settlements/isfahan.md §23). */
+export const DOVECOTES = [[20, 7.5, 17], [75, 8.5, 20], [130, 7, 15], [205, 8, 18], [245, 7.2, 16], [315, 8.2, 19]].map(([deg, r, h], i) => ({ c: [Math.cos(deg * Math.PI / 180) * 407, Math.sin(deg * Math.PI / 180) * 407], r, h, seed: 40 + i }));
 export const ALIQAPU = { rect: [-104, -50, -80, -30] };
 
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;

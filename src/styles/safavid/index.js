@@ -13,7 +13,7 @@ import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
 import { box, lathe, fromTriangles, orientOutward, rod, place } from '../../core/geom.js';
 import { tube } from '../../objects/kit.js';
 import { beamTris } from '../ming/index.js';
-import { arcadeWall, pishtaqFace } from '../mughal/index.js';
+import { arcadeWall } from '../mughal/index.js';
 import { courtHouse } from '../mughal/courthouse.js';
 import * as F from '../mughal/furnish.js';
 
@@ -265,6 +265,89 @@ function arcadeShop(bag, col, lights, { Q, R, sub, i, w, y, h, D, c, trade, ux, 
 }
 
 /**
+ * safFace (docs/settlements/isfahan.md §24): the tiled face of a Safavid portal — the wall with its great arch and the niches
+ * beside it (as the shared pishtaq face cuts them), a marble plinth, the arch framed in a turquoise cable that runs down the jambs,
+ * the rectangular alfiz round it as a band of white thuluth on lapis between cream lines, the spandrels in turquoise with a chain
+ * of flowers and a star rosette in each, a frame in turquoise round every niche, a frieze of cream and lapis under a brick cornice.
+ * (The shared pishtaqFace carries Mughal inlay; this replaces it for the Safavid faces.)
+ */
+function safFace(bag, col, a, b, y, h, iw, mat, niches, inside, trim) {
+  const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
+  const arches = [{ at: L / 2, w: iw.w, h: iw.h, depth: iw.depth ?? 4, door: !iw.pass && !iw.back, back: iw.back, pass: iw.pass }];
+  if (niches) for (const sg of [-1, 1]) {
+    const c = L / 2 + sg * (iw.w / 2 + (L - iw.w) / 4), nw = Math.min((L - iw.w) / 2 - 2, iw.w * 0.45);
+    arches.push({ at: c, w: nw, h: iw.h * 0.42, sill: 0.6, depth: 1.5 }, { at: c, w: nw, h: iw.h * 0.38, sill: iw.h * 0.52, depth: 1.5 });
+  }
+  arcadeWall(bag, col, a, b, y, h, 2.4, mat, arches, inside);
+  let mx = -uz, mz = ux;
+  if (inside && (inside[0] - (a[0] + b[0]) / 2) * mx + (inside[1] - (a[1] + b[1]) / 2) * mz < 0) { mx = -mx; mz = -mz; }
+  if (iw.pass) {
+    const off = 1.2 + (iw.depth ?? 4) + 0.2, c0 = [a[0] + ux * L / 2 + mx * off, a[1] + uz * L / 2 + mz * off], dw = Math.min(5, iw.w * 0.45);
+    arcadeWall(bag, col, [c0[0] - ux * iw.w / 2, c0[1] - uz * iw.w / 2], [c0[0] + ux * iw.w / 2, c0[1] + uz * iw.w / 2], y, iw.h, 0.4, iw.backMat || mat, [{ at: iw.w / 2, w: dw, h: iw.doorH ?? Math.min(iw.h * 0.5, dw * 1.6), pass: true }]);
+  }
+  // the face is seen from the side away from the inside
+  const nx = -mx, nz = -mz, F = 1.2, buckets = new Map();
+  const Pt = (sv, o) => [a[0] + ux * sv[0] + nx * (F + o), y + sv[1], a[1] + uz * sv[0] + nz * (F + o)];
+  const prismOf = (m, c) => { const t = [], q = (p1, p2, p3, p4) => t.push(...p1, ...p2, ...p3, ...p1, ...p3, ...p4); q(c[0], c[1], c[2], c[3]); q(c[4], c[7], c[6], c[5]); q(c[0], c[4], c[5], c[1]); q(c[1], c[5], c[6], c[2]); q(c[2], c[6], c[7], c[3]); q(c[3], c[7], c[4], c[0]); if (!buckets.has(m)) buckets.set(m, []); buckets.get(m).push(...orientOutward(t)); };
+  const slab = (m, s0, s1, v0, v1, o0, o1) => prismOf(m, [Pt([s0, v0], o0), Pt([s1, v0], o0), Pt([s1, v1], o0), Pt([s0, v1], o0), Pt([s0, v0], o1), Pt([s1, v0], o1), Pt([s1, v1], o1), Pt([s0, v1], o1)]);
+  const strip = (m, pts, wd, o0, o1) => { for (let i = 0; i + 1 < pts.length; i++) { const [p, q] = [pts[i], pts[i + 1]], dl = Math.hypot(q[0] - p[0], q[1] - p[1]) || 1, ps = [-(q[1] - p[1]) / dl * wd / 2, (q[0] - p[0]) / dl * wd / 2]; const k = (pp, sg, o) => Pt([pp[0] + sg * ps[0], pp[1] + sg * ps[1]], o); prismOf(m, [k(p, -1, o0), k(p, 1, o0), k(q, 1, o0), k(q, -1, o0), k(p, -1, o1), k(p, 1, o1), k(q, 1, o1), k(q, -1, o1)]); } };
+  const star = (m, cs, cv, rr, o0, o1) => { for (const rot of [0, Math.PI / 4]) { const pts = [0, 1, 2, 3].map((k) => [cs + Math.cos(rot + Math.PI / 4 + k * Math.PI / 2) * rr * 1.41, cv + Math.sin(rot + Math.PI / 4 + k * Math.PI / 2) * rr * 1.41]); prismOf(m, [...pts.map((q) => Pt(q, o0)), ...pts.map((q) => Pt(q, o1))]); } };
+  const sL = L / 2 - iw.w / 2, sR = L / 2 + iw.w / 2, w = iw.w, r = w * 0.8, rise = Math.sqrt(r * r - (r - w / 2) ** 2), spring = Math.max(0.3, iw.h - rise), gap = 0.7, bw = Math.min(1.3, w * 0.1);
+  const nwG = Math.min((L - iw.w) / 2 - 2, iw.w * 0.45), availR = niches ? L / 2 + (iw.w / 2 + (L - iw.w) / 4) - nwG / 2 - 0.3 - sR : sL;
+  const bandW = Math.max(0, Math.min(bw + 0.45, availR - gap - 0.15));
+  const vTop = Math.min(iw.h + 0.8, h - bw - 2.4), vLo = 0.7;
+  // marble plinth under the whole face except the iwan and the niches' openings
+  for (const [s0, s1] of [[0.1, sL - 0.1], [sR + 0.1, L - 0.1]]) slab('marble', s0, s1, 0, 0.55, 0, 0.14);
+  // the cable: a turquoise band between white lines, up the jambs and over the pointed arch (a concentric curve)
+  const arc = (rr, dxo) => { const pts = []; for (let j = 0; j <= 20; j++) { const x = (sL - dxo) + (w / 2 + dxo) * j / 20, cL = sL + r; pts.push([x, spring + Math.sqrt(Math.max(0, rr * rr - (x - cL) ** 2))]); } return pts; };
+  const half = (dxo) => { const rr = r + dxo, pl = arc(rr, dxo); return pl; };
+  for (const [dxo, wd, m, o1] of [[0.5, 0.12, 'tile_white', 0.07], [0.32, 0.24, Q, 0.1], [0.14, 0.12, 'tile_white', 0.07]]) {
+    const left = [[sL - dxo, vLo + 0.5], ...half(dxo)], right = left.map(([s2, v2]) => [L - s2, v2]).reverse();
+    strip(m, [...left, ...right.slice(1)], wd, 0, o1);
+  }
+  // the alfiz: vertical bands either side of the arch and a band across the head — white letters on the lapis between cream lines
+  const e0 = sL - gap - Math.max(bandW, 0.45), e1 = sR + gap + Math.max(bandW, 0.45);
+  const letters = (vert, s0, s1, v0, v1, k) => {
+    const len = vert ? v1 - v0 : s1 - s0, cw = (vert ? s1 - s0 : v1 - v0) * 0.62, c0 = vert ? (s0 + s1) / 2 : (v0 + v1) / 2;
+    for (let t = 0.25, j = 0; t < len - 0.25; j++) {
+      const cell = 0.24 + ((j * 7 + k) % 5) * 0.03, tall = (j * 3 + k) % 4 === 0;
+      if (vert) { slab('tile_white', c0 - cw * 0.45, c0 + cw * 0.45, v0 + t, v0 + t + cell * 0.45, 0, 0.03); slab('tile_white', c0 + (tall ? 0.18 : -0.05) * cw, c0 + (tall ? 0.18 : -0.05) * cw + 0.07, v0 + t, v0 + t + cell, 0, 0.03); }
+      else { slab('tile_white', s0 + t, s0 + t + cell * 0.45, c0 - cw * 0.45, c0 + cw * 0.45, 0, 0.03); slab('tile_white', s0 + t, s0 + t + cell, c0 + (tall ? 0.18 : -0.05) * cw, c0 + (tall ? 0.18 : -0.05) * cw + 0.07, 0, 0.03); }
+      t += cell + 0.1;
+    }
+  };
+  if (bandW > 0.5) for (const [s0, s1] of [[e0, e0 + bandW], [e1 - bandW, e1]]) {
+    slab('tile_cream', s0, s0 + 0.1, vLo, vTop + bw, 0, 0.035); slab('tile_cream', s1 - 0.1, s1, vLo, vTop + bw, 0, 0.035);
+    letters(true, s0 + 0.1, s1 - 0.1, vLo, vTop, s0 < L / 2 ? 1 : 2);
+  }
+  slab('tile_cream', e0, e1, vTop, vTop + 0.1, 0, 0.035); slab('tile_cream', e0, e1, vTop + bw + 0.35, vTop + bw + 0.45, 0, 0.035);
+  letters(false, e0 + 0.1, e1 - 0.1, vTop + 0.1, vTop + bw + 0.35, 3);
+  slab('tile_turquoise', e0 - 0.16, e1 + 0.16, vTop + bw + 0.45, vTop + bw + 0.6, 0, 0.05);
+  // the spandrels: a chain of flowers along the cable and a star rosette in each angle
+  for (const sg of [-1, 1]) {
+    const S = (x) => (sg < 0 ? x : L - x), pl = arc(r + 1.0, 1.0);
+    for (let j = 1; j < pl.length - 1; j += 2) { const [x, v] = pl[j]; if (v > vTop - 0.5) break; slab(j % 4 === 1 ? 'tile_cream' : 'tile_yellow', S(x) - 0.14, S(x) + 0.14, v - 0.14, v + 0.14, 0, 0.04); slab('tile_turquoise', S(x) - 0.05, S(x) + 0.05, v - 0.05, v + 0.05, 0.04, 0.06); }
+    const lim = niches ? L / 2 - (iw.w / 2 + (L - iw.w) / 4) + nwG / 2 + 0.3 : 0, avail = sL - Math.max(lim, 0), rx = sL - avail / 2 - 0.2, rs = sg < 0 ? rx : L - rx, rv = Math.min(vTop - 1.0, spring + rise * 0.95), rr = Math.min(0.9, avail * 0.3);
+    star('tile_turquoise', rs, rv, rr, 0, 0.04); star('tile_cream', rs, rv, rr * 0.55, 0.04, 0.07); slab('tile_yellow', rs - 0.12, rs + 0.12, rv - 0.12, rv + 0.12, 0.07, 0.09);
+  }
+  // the niches: a turquoise frame with a white line round each
+  if (niches) for (const sg of [-1, 1]) {
+    const c = L / 2 + sg * (iw.w / 2 + (L - iw.w) / 4), nw = Math.min((L - iw.w) / 2 - 2, iw.w * 0.45);
+    for (const [sill, hh] of [[0.6, iw.h * 0.42], [iw.h * 0.52, iw.h * 0.38]]) {
+      const t0 = c - nw / 2 - 0.3, t1 = c + nw / 2 + 0.3, top = sill + hh + 0.3;
+      slab(Q, t0, t0 + 0.2, sill - 0.2, top, 0, 0.06); slab(Q, t1 - 0.2, t1, sill - 0.2, top, 0, 0.06); slab(Q, t0, t1, top - 0.2, top, 0, 0.06); slab(Q, t0, t1, sill - 0.2, sill - 0.05, 0, 0.06);
+      slab('tile_white', t0 + 0.2, t0 + 0.26, sill - 0.05, top - 0.2, 0, 0.05); slab('tile_white', t1 - 0.26, t1 - 0.2, sill - 0.05, top - 0.2, 0, 0.05); slab('tile_white', t0 + 0.2, t1 - 0.2, top - 0.26, top - 0.2, 0, 0.05);
+    }
+  }
+  // the frieze under the cornice: cream and lapis lozenges, a brick cornice standing out
+  { const f0 = h - 1.5, f1 = h - 0.8; slab('tile_cream', 0.2, L - 0.2, f0, f0 + 0.08, 0, 0.04); slab('tile_cream', 0.2, L - 0.2, f1 - 0.08, f1, 0, 0.04);
+    for (let t = 0.6; t < L - 0.6; t += 0.9) slab(Math.round(t / 0.9) % 2 ? 'tile_turquoise' : 'tile_white', t - 0.2, t + 0.2, f0 + 0.15, f1 - 0.15, 0, 0.04);
+    slab('brick_buff', 0, L, h - 0.7, h - 0.3, 0, 0.3); }
+  for (const [m, t] of buckets) bag.add(m, fromTriangles(t));
+  void trim;
+}
+
+/**
  * portal: an iwan portal a→b { y, h, iwan: { w, h, depth, pass }, depth (of the mass behind),
  * mat, trim, minarets: { h, r } }: the tiled face with the great arch, its mass behind, the
  * frame standing above, two minarets on its front corners if asked.
@@ -272,7 +355,7 @@ function arcadeShop(bag, col, lights, { Q, R, sub, i, w, y, h, D, c, trade, ux, 
 function portal(el, { bag, col }) {
   const a = el.a, b = el.b, y = el.y ?? 0, h = el.h, D = el.depth ?? 10, mat = el.mat ?? T;
   const [nx, nz] = awayFrom(a, b, el.facing), inside = [(a[0] + b[0]) / 2 + nx * 100, (a[1] + b[1]) / 2 + nz * 100];
-  pishtaqFace(bag, col, a, b, y, h, el.iwan, mat, el.niches ?? true, inside, el.trim ?? Q);
+  safFace(bag, col, a, b, y, h, el.iwan, mat, el.niches ?? true, inside, el.trim ?? Q);
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, iw = el.iwan.w;
   // the side masses beside the iwan's recess and the roof over it
   for (const [s0, s1] of [[0, L / 2 - iw / 2 - 0.2], [L / 2 + iw / 2 + 0.2, L]]) {
@@ -1158,6 +1241,41 @@ function khanehOpen(el, { bag, col, lights }) {
   }
 }
 
+/**
+ * dovecote (docs/settlements/isfahan.md §23): the pigeon tower (burj-i kabutar) of the fields round Isfahan { c, r, h, seed }: a cylinder of brick
+ * and plaster 15–25 m across, a white plastered band with merlons under the roof, flight holes in rows, a dome with
+ * openings on a cupola, small turrets round it, a low door of fired brick.
+ */
+function dovecote(el, { bag, col }) {
+  const [x, z] = el.c, r = el.r ?? 7.5, h = el.h ?? 16, rand = rng(el.seed || 5), yw = h * 0.8;
+  bag.add('kahgel', lathe([[r * 1.04, 0], [r, yw]], 32, null, x, 0, z));
+  bag.add('brick_buff', lathe([[r * 1.06, 0], [r * 1.06, 1.1], [r * 1.02, 1.1]], 32, null, x, 0, z));
+  // the white band and its merlons
+  bag.add('plaster_white', lathe([[r * 1.03, yw], [r * 1.03, h]], 32, null, x, 0, z));
+  bag.add('plaster_white', lathe([[r * 1.08, h - 0.5], [r * 1.08, h], [r * 1.0, h]], 32, null, x, 0, z));
+  const nm = Math.round(Math.PI * 2 * r / 1.7);
+  for (let k = 0; k < nm; k++) { const a = (k + 0.5) / nm * Math.PI * 2, t = []; const px = x + Math.cos(a) * r * 1.04, pz = z + Math.sin(a) * r * 1.04, sx = Math.sin(a) * 0.45, sz = Math.cos(a) * 0.45; beamTris(t, [px + sx, h, pz - sz], [px - sx, h, pz + sz], 0.2, 0.9); bag.add('plaster_white', fromTriangles(t)); }
+  // flight holes in rows on the upper wall, the dark openings
+  const Rw = (yy) => r * (1.04 - 0.04 * yy / yw) + 0.02, rows = Math.max(2, Math.round(h * 0.12));
+  for (let q = 0; q < rows; q++) {
+    const yy = yw - 1.2 - q * 1.3, n = Math.round(Math.PI * 2 * r / 1.5);
+    for (let k = 0; k < n; k++) { const a = (k + (q % 2) * 0.5) / n * Math.PI * 2, rr = Rw(yy); const t = []; const px = x + Math.cos(a) * rr, pz = z + Math.sin(a) * rr, sx = Math.sin(a) * 0.17, sz = Math.cos(a) * 0.17; beamTris(t, [px + sx, yy, pz - sz], [px - sx, yy, pz + sz], 0.04, 0.3); bag.add('lacquer_black', fromTriangles(t)); }
+  }
+  // the door of fired brick at the foot, toward +x
+  { const px = x + r * 1.06; bag.add('brick_buff', box(px - 0.16, 0, z - 1.0, px + 0.5, 2.4, z + 1.0)); bag.add('wood_dark', box(px + 0.5, 0, z - 0.6, px + 0.53, 1.9, z + 0.6)); }
+  // the roof: a plastered terrace, a dome in the middle with a lantern of openings, small turrets round it
+  bag.add('plaster_white', lathe([[0.001, 0], [r * 1.02, 0], [r * 1.02, 0.2], [0.001, 0.2]], 32, null, x, h - 0.2, z));
+  const dr = r * 0.55, dh = r * 0.45, ly = h + dh * 0.9;
+  bag.add('plaster_white', lathe(domeProfile(dr, dh, 0.04), 28, null, x, h, z));
+  bag.add('plaster_white', lathe([[r * 0.2, 0], [r * 0.2, 1.5]], 16, null, x, ly - 0.15, z));
+  for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2, t = []; const px = x + Math.cos(a) * r * 0.205, pz = z + Math.sin(a) * r * 0.205, sx = Math.sin(a) * 0.2, sz = Math.cos(a) * 0.2; beamTris(t, [px + sx, ly + 0.4, pz - sz], [px - sx, ly + 0.4, pz + sz], 0.03, 0.7); bag.add('lacquer_black', fromTriangles(t)); }
+  bag.add('brick_buff', lathe(domeProfile(r * 0.24, r * 0.22, 0), 16, null, x, ly + 1.35, z));
+  for (let k = 0; k < 4; k++) { const a = k / 4 * Math.PI * 2 + Math.PI / 4, tr = r * 0.13, tx = x + Math.cos(a) * r * 0.76, tz = z + Math.sin(a) * r * 0.76, th = h + 2.2;
+    bag.add('plaster_white', lathe([[tr, 0], [tr * 0.95, th - h]], 12, null, tx, h, tz));
+    bag.add('brick_buff', lathe(domeProfile(tr * 1.12, tr * 1.7, 0), 12, null, tx, th, tz)); }
+  col.circle(x, z, r * 1.08, 0, h);
+}
+
 // ---- Ali Qapu ------------------------------------------------------------------------------------
 
 /** Vessels as the music room's stucco cut them out: half-profiles [half-width, height], both of a unit of height. */
@@ -1453,7 +1571,7 @@ registerStyle('safavid', {
   elements: {
     ...STYLES.mughal.elements,
     square_arcade: squareArcade, arcade_precinct: () => {}, portal, dome_chamber: domeChamber, court_arcade: courtArcade,
-    safavid_minaret: minaret, adobe_wall: wall, mass, arcade, talar, goalpost, bazaar, khaneh, khaneh_open: khanehOpen, ali_qapu: aliQapu, sagittarius, qahveh_khaneh: qahvehKhaneh,
+    safavid_minaret: minaret, adobe_wall: wall, mass, arcade, talar, goalpost, bazaar, khaneh, khaneh_open: khanehOpen, ali_qapu: aliQapu, sagittarius, qahveh_khaneh: qahvehKhaneh, dovecote,
   },
   objects: {},
 });

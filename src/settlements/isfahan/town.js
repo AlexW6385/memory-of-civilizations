@@ -1,6 +1,6 @@
 // The town round the square (docs/settlements/isfahan.md §6, §16): courtyard houses of straw-mud plaster; the one
 // facing the lane from the square's east gap open and furnished.
-import { RADIUS, houses, openHouses, houseSpots, TEAHOUSE, CHAHAR, CHAHAR_X } from './layout.js';
+import { RADIUS, houses, openHouses, houseSpots, TEAHOUSE, CHAHAR, CHAHAR_X, DOVECOTES } from './layout.js';
 import { lifePlan } from './life.js';
 const base = (id, elements) => ({ id, style: 'safavid', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -150], facing: 's' } });
 export async function town() {
@@ -14,6 +14,7 @@ export async function town() {
     for (const side of ['n', 's', 'w', 'e']) rooms.push({ id: `${i ? `house ${i} ` : ''}${kind[h.v.wings[side]]}`, rect: sp.rooms[side], y: h.v.wings[side] === 'vestibule' ? 0.04 : 0.45, kind: 'hall' });
     plans.push({ ...base(i ? `isfahan-open-house-${i}` : 'isfahan-open-house', [{ t: 'khaneh_open', rect: h.rect, entry: h.entry, seed: h.seed, v: h.v }]), bounds: [x0 - 3, z0 - 3, x1 + 3, z1 + 3], rooms });
   });
+  plans.push(base('isfahan-dovecotes', DOVECOTES.map((q) => ({ t: 'dovecote', ...q }))));
   plans.push(...quarter());
   return [...plans, lifePlan()];
 }
