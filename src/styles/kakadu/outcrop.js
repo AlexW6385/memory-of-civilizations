@@ -226,7 +226,7 @@ export function columnMass(acc, o) {
   o.slices.forEach((s, si) => {
     const wb = o.bridge && si === 0 ? o.bridge : 0, hx = w / 2 - s.inx + wb, hz = (o.deep - s.set) / 2, cz = o.zf - s.set - hz, cx = cx0 + s.dx;
     const fine = s.honey > 0;
-    const rows = sliceRings(s.ya, s.yb, s.rb, s.rt, fine ? Math.min(0.3, (o.fine ?? 0.4) * 0.8) : 0.75), top = si === nS - 1;
+    const rows = sliceRings(s.ya, s.yb, s.rb, s.rt, fine ? Math.min(0.3, (o.fine ?? 0.4) * 0.8) : o.laminae ? o.laminae : 0.75), top = si === nS - 1;
     const V = [], aux = [], R = [];
     const ringsOut = [];
     for (const [y, ins] of rows) {
@@ -234,10 +234,14 @@ export function columnMass(acc, o) {
       for (const t of th) {
         const c = Math.cos(t), sn = Math.sin(t), e = 2 / s.n, fw = top && y > s.yb - s.rt - 0.01 ? smooth(-0.25, 0.4, sn) : 1;
         const prof = 1 + 0.1 * noise3(y * 0.37, seed * 0.013, 0.5, seed + 2), sxs = 0.3 * noise3(y * 0.3, 1.5, 0.5, seed + 4), lz = s.lean * (y - s.ya) / Math.max(0.5, s.yb - s.ya);
-        const hxx = Math.max(0.3, (hx - ins * fw) * prof), hzz = Math.max(0.3, (hz - ins * fw) * prof);
+        // the plan is lobed, not a rounded box: slow swellings and flats round the outline, changing with height
+        const lobe = 1 + 0.09 * noise3(Math.cos(t) * 1.3 + 7, y * 0.31, Math.sin(t) * 1.3, seed + 11);
+        const hxx = Math.max(0.3, (hx - ins * fw) * prof * lobe), hzz = Math.max(0.3, (hz - ins * fw) * prof * lobe);
         let x = cx + sxs + hxx * sgnPow(c, e), z = cz + lz + hz * (1 - prof) + hzz * sgnPow(sn, e);
         const gx = sgnPow(c, 2 - e) / hxx, gz = sgnPow(sn, 2 - e) / hzz, gl = Math.hypot(gx, gz) || 1, nx = gx / gl, nz = gz / gl;
         let d = o.amp * (0.62 * noise3(x * 0.4, y * 0.4, z * 0.4, seed) + 0.38 * noise3(x * 1.1, y * 1.1, z * 1.1, seed + 5)) + 0.3 * noise3(x * 0.16, y * 0.2, z * 0.16, seed + 9);
+        // laminae: thin beds of the sandstone weather back unevenly, so the face steps in and out a few centimetres from row to row
+        if (o.laminae && !s.soft) d -= 0.07 * smooth(-0.1, 0.6, noise3(0.5, y * 1.7, seed * 0.1, seed + 21)) + 0.02 * noise3(x * 2, y * 4, z * 2, seed + 22);
         let pd = 0;
         const front = nz > 0.3 ? 1 : 0;
         if (front) for (const g of grooves) d -= g.d * (1 - smooth(g.w * 0.5, g.w * 0.5 + 0.2, Math.abs(x - g.x))) * smooth(g.y0, g.y0 + 0.5, y) * smooth(g.y1, g.y1 - 0.5, y);
@@ -261,9 +265,9 @@ export function columnMass(acc, o) {
       if (n[1] > 0.5) return matBase;
       if (n[2] > 0.25 || Math.abs(n[0]) > 0.5) {
         if (n[0] < -0.55 && o.darkL || n[0] > 0.55 && o.darkR) return BLACK;
-        const st = noise3(cen[0] * 0.9 + cen[2] * 0.6, cen[1] * 0.045, 0.5, seed + 17);
-        if (!s.soft) { if (st > 0.55) return BLACK; if (st > 0.38) return GREY; if (st < -0.42) return IRON; }
-        else if (st > 0.5) return GREY;
+        const st = noise3(cen[0] * 1.9 + cen[2] * 1.2, cen[1] * 0.03, 0.5, seed + 17);
+        if (!s.soft) { if (st > 0.66) return BLACK; if (st > 0.5) return GREY; if (st < -0.6) return IRON; }
+        else if (st > 0.6) return GREY;
       }
       return matBase;
     };
@@ -338,7 +342,7 @@ export function outcropBlock(acc, B, o = {}) {
       if (slab && first) set = 0;
       set = Math.max(-0.5, Math.min(3.3, set));
       const inx = soft ? 0.15 + rnd() * 0.4 : rnd() * 0.25;
-      slices.push({ ya: y, yb: y + th, mat, set, inx, dx: (rnd() - 0.5) * 2 * Math.min(inx, 0.25), n: soft ? 3.0 + rnd() * 1.2 : 4.5 + rnd() * 3.5, rb: first ? 0 : soft ? 0.1 + rnd() * 0.1 : 0.2 + rnd() * 0.25, rt: topS ? (flat ? 0.2 : 0.3 + rnd() * 0.25) : soft ? 0.1 : 0.2 + rnd() * 0.2, soft, lean: (rnd() - 0.5) * 0.9, honey: soft ? (rnd() < 0.75 ? 1 : 0.5) : rnd() < 0.3 ? 0.35 : 0, pit: 0.14 + rnd() * 0.12, pitMat: PIT[mat] ?? 'tuff_red' });
+      slices.push({ ya: y, yb: y + th, mat, set, inx, dx: (rnd() - 0.5) * 2 * Math.min(inx, 0.25), n: soft ? 3.0 + rnd() * 1.2 : 4.5 + rnd() * 3.5, rb: first ? 0 : soft ? 0.08 + rnd() * 0.08 : 0.12 + rnd() * 0.14, rt: topS ? (flat ? 0.2 : 0.25 + rnd() * 0.2) : soft ? 0.08 : 0.12 + rnd() * 0.14, soft, lean: (rnd() - 0.5) * 0.9, honey: soft ? (rnd() < 0.75 ? 1 : 0.5) : rnd() < 0.3 ? 0.35 : 0, pit: 0.14 + rnd() * 0.12, pitMat: PIT[mat] ?? 'tuff_red' });
       y += th; i++;
     }
     if (!slices.length) continue;
@@ -348,7 +352,7 @@ export function outcropBlock(acc, B, o = {}) {
     let tp = null;
     if (!slab && !flat) tops.push(tp = { x: xa + 0.9 + rnd() * Math.max(0.1, w - 1.8), y: yTop, z: z1 - deepC * (0.35 + rnd() * 0.3) });
     const rings = o.cols || tp ? [] : undefined;
-    columnMass(acc, { fine: z1 > -31 ? 0.4 : z1 > -40 ? 0.55 : 0.8, xa, xb, zf: z1, deep: deepC, slices, seed, res, amp: 0.2 + rnd() * 0.12, darkL: gapL > 0.9, darkR: gapR > 0.9, bridge: slab ? 0.2 : 0, rings });
+    columnMass(acc, { fine: z1 > -31 ? 0.4 : z1 > -40 ? 0.55 : 0.8, xa, xb, zf: z1, deep: deepC, slices, seed, res, amp: 0.2 + rnd() * 0.12, laminae: z1 > -31 ? 0.42 : z1 > -40 ? 0.5 : 0, darkL: gapL > 0.9, darkR: gapR > 0.9, bridge: slab ? 0.2 : 0, rings });
     if (o.cols) o.cols.push({ xa, xb, wall, yBase, rings });
     // a plant on the cap stands on the cap: where the column stands back (set, lean) from where the spot was drawn, it moves to the middle of the cap
     if (tp && rings.length) {

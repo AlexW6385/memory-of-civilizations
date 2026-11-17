@@ -23,7 +23,7 @@ export class Panel {
     for (let i = 0; i < P.length; i++) {
       const a = P[i], b = P[(i + 1) % P.length];
       const nx = (b[1] - c[1]) * (a[2] - c[2]) - (b[2] - c[2]) * (a[1] - c[1]), ny = (b[2] - c[2]) * (a[0] - c[0]) - (b[0] - c[0]) * (a[2] - c[2]), nz = (b[0] - c[0]) * (a[1] - c[1]) - (b[1] - c[1]) * (a[0] - c[0]);
-      if (nx * n[0] + ny * n[1] + nz * n[2] >= 0) t.push(...c, ...a, ...b); else t.push(...c, ...b, ...a);
+      if (nx * n[0] + ny * n[1] + nz * n[2] < 0) t.push(...c, ...a, ...b); else t.push(...c, ...b, ...a);
     }
     this.buf.set(mat, t);
   }
