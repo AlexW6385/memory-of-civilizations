@@ -185,6 +185,42 @@ function incaWall(bag, col, F, o) {
     }
     bag.add(mat, fromTriangles(S));
   }
+  // the fitted ashlar above the great stones (o.ashlar): courses laid right up the wall, each a little lower than
+  // the one under it (the Inca imperial courses shrink upward), the joints staggered, each block's face cushioned
+  // and its edges bevelled back into hairline joints; the courses stop short of the openings' reveals [stated: Wikipedia,
+  // "Inca architecture": ashlar of "smooth, seamless" fit for the temples; inferred: the course heights and block lengths]
+  if (o.ashlar) {
+    const S = [], rand = rng((o.seed || Math.round(L * 1000)) * 3 + 11), maxL = F.curved ? 0.8 : 1.35, proud0 = F.curved ? 0.05 : 0.03;
+    for (const sg of [1, -1]) {
+      const holes = ops.map((op) => holeOn(op, sg)).filter(Boolean).map((t) => ({ u0: t.c - Math.max(t.wb, t.wt) - 0.05, u1: t.c + Math.max(t.wb, t.wt) + 0.05, v0: t.v0 - 0.04, v1: t.v1 + 0.04 }));
+      let v = o.stones ?? 0, ch = 0.47, row = 0;
+      while (v < h - 0.12) {
+        const vt = Math.min(h - 0.03, v + ch);
+        if (vt - v < 0.12) break;
+        const a = Math.max(uL(sg, v), uL(sg, vt)) + 0.04, b = Math.min(uR(sg, v), uR(sg, vt)) - 0.04;
+        const act = holes.filter((t) => t.v0 < vt && t.v1 > v).sort((p, q) => p.u0 - q.u0), spans = [];
+        let s0 = a;
+        for (const t of act) { if (t.u0 - s0 > 0.3) spans.push([s0, t.u0]); s0 = Math.max(s0, t.u1); }
+        if (b - s0 > 0.3) spans.push([s0, b]);
+        for (const [p, q] of spans) {
+          const n = Math.max(1, Math.round((q - p) / Math.min(maxL, 0.8 + rand() * 0.5))), shift = row % 2 ? 0.5 : 0;
+          const ju = [p]; for (let i = 1; i < n; i++) ju.push(p + (q - p) * (i + (n > 1 ? shift * 0.3 - 0.15 : 0)) / n); ju.push(q);
+          for (let i = 0; i < n; i++) {
+            const lean = (rand() - 0.5) * 0.06, u0 = ju[i], u1 = ju[i + 1];
+            if (u1 - u0 < 0.2) continue;
+            const C = [[u0 + 0.008, v + 0.008], [u1 - 0.008, v + 0.008], [u1 - 0.008 + lean, vt - 0.008], [u0 + 0.008 + lean, vt - 0.008]];
+            const bev = 0.03 + rand() * 0.012, proud = proud0 + rand() * 0.015, cu = (u0 + u1) / 2, cv = (v + vt) / 2;
+            const inner = C.map(([u, vv]) => { const du = u - cu, dv = vv - cv, l = Math.hypot(du, dv) || 1; return [u - du / l * bev * 1.3, vv - dv / l * bev]; });
+            const P = ([u, vv], k) => W(u, vv, sg * (off(vv) + k)), want = nrm(cu, sg);
+            quad4(S, P(inner[0], proud), P(inner[1], proud), P(inner[2], proud), P(inner[3], proud), want);
+            for (let e = 0; e < 4; e++) { const f = (e + 1) % 4; quad4(S, P(C[e], -0.01), P(C[f], -0.01), P(inner[f], proud), P(inner[e], proud), want); }
+          }
+        }
+        v = vt; ch *= 0.955; row++;
+      }
+    }
+    if (S.length) bag.add(mat, fromTriangles(S));
+  }
   // collision: the wall but its doorways, which keep only their lintels
   const doors = ops.filter((d) => d.kind === 'door').map((d) => trap(d, false)).sort((p, q) => p.c - q.c);
   const solid = (s0, s1, y0, y1) => { const k = F.curved ? Math.max(1, Math.ceil((s1 - s0) / 1)) : 1; for (let j = 0; j < k; j++) col.segment(F.at(s0 + (s1 - s0) * j / k), F.at(s0 + (s1 - s0) * (j + 1) / k), th, y0, y1); };
@@ -305,7 +341,7 @@ function incaHouse(el, { bag, col, lights }) {
 }
 
 /** The stone gables at a building's short ends (the wall carried up in a triangle, its pegs along the rakes) and the steep roof of ichu thatch between them. */
-function gableRoof(bag, walls, rect, y, h, th, mat, roofMat = 'thatch') {
+function gableRoof(bag, walls, rect, y, h, th, mat, roofMat = 'thatch', fine = false) {
   const [x0, z0, x1, z1] = rect, along = x1 - x0 >= z1 - z0;
   const B = (along ? z1 - z0 : x1 - x0) / 2, A = (along ? x1 - x0 : z1 - z0) / 2, rise = B * 1.45;
   for (const k of along ? ['e', 'w'] : ['n', 's']) {
@@ -319,10 +355,37 @@ function gableRoof(bag, walls, rect, y, h, th, mat, roofMat = 'thatch') {
     for (const fr of [0.28, 0.55]) for (const sd of [-1, 1]) list.push([L / 2 + sd * (1 - fr) * (L / 2 + o), fr * rise - 0.3]);
     list.push([L / 2, rise - 0.55]);
     pegs(bag, F, y + h, list, -o, -1, 0.26, 0.07);
+    // the temples' gables are laid in courses like the walls under them: raised bedding joints and staggered head joints on both faces
+    if (fine) {
+      const jr = rng(Math.round(L * 53 + y * 7)), CH = 0.4;
+      for (const s of [1, -1]) {
+        const at = (u, v, k) => { const p = F.at(u), n = F.n(u); return [p[0] + n[0] * (o + k) * s, y + h + v, p[1] + n[1] * (o + k) * s]; };
+        const bx = (u0, v0, u1, v1) => { const a = at(u0, v0, 0), b = at(u1, v1, 0.022), mn = [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.min(a[2], b[2])], mx = [Math.max(a[0], b[0]), Math.max(a[1], b[1]), Math.max(a[2], b[2])]; bag.add(mat, box(mn[0], mn[1], mn[2], mx[0], mx[1], mx[2])); };
+        let row = 0;
+        for (let v = 0.08; v < rise - 0.3; v += CH, row++) {
+          const hw = (L / 2 + o) * (1 - (v + 0.03) / rise) - 0.12;
+          if (hw < 0.3) break;
+          bx(L / 2 - hw, v, L / 2 + hw, v + 0.028);
+          const hv = (L / 2 + o) * (1 - (v + CH) / rise) - 0.12;
+          for (let u = L / 2 - hv + (row % 2 ? 0.45 : 0) + jr() * 0.2; u < L / 2 + hv - 0.1; u += 0.9 + jr() * 0.3) bx(u, v + 0.028, u + 0.025, Math.min(v + CH, rise - 0.3));
+        }
+      }
+    }
   }
   const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
   // the roof's thatch weathered dark, the eaves short (an Inca roof stops at the wall's head), a stone-weighted ridge line
   rectRoof({ c: [cx, cz], A: A + th / 2 + 0.3, B: B + th / 2 + 0.35, y: y + h - 0.12, rise: rise + 0.35, kind: 'gable', sweep: 0, p: 1, curl: false, alongZ: !along, mat: roofMat, soffit: 'thatch' }, bag);
+  // the thatch laid in overlapping bundles: a rib along each course across both slopes, and the ridge capped with a thick roll of ichu
+  if (fine) {
+    const Aa = A + th / 2 + 0.3, Bt = B + th / 2 + 0.35, R0 = y + h - 0.12, Rs = rise + 0.35, ax = (u, c) => (along ? [cx + u, cz + c] : [cx + c, cz + u]);
+    const pt = (u, c, hh) => { const q = ax(u, c); return [q[0], hh, q[1]]; };
+    const nr = Math.max(4, Math.round(Math.hypot(Bt, Rs) / 0.55));
+    for (let i = 1; i < nr; i++) {
+      const f = i / nr, hh = R0 + Rs * f + 0.05;
+      for (const sd of [-1, 1]) bag.add(roofMat, rod(pt(-Aa + 0.1, sd * Bt * (1 - f), hh), pt(Aa - 0.1, sd * Bt * (1 - f), hh), 0.06, 6));
+    }
+    bag.add(roofMat, rod(pt(-Aa - 0.12, 0, R0 + Rs + 0.1), pt(Aa + 0.12, 0, R0 + Rs + 0.1), 0.17, 8));
+  }
 }
 
 /**
@@ -368,7 +431,7 @@ function incaTemple(el, { bag, col }) {
       if (k === el.open) return;
       const ends = [order[(i + 3) % 4] === el.open ? 'cap' : 'mitre', order[(i + 1) % 4] === el.open ? 'cap' : 'mitre'];
       const F = lineFrame(...sides[k]);
-      walls[k] = { F, ...incaWall(bag, col, F, { y, h, th, mat: 'granite_inca', openings: ops[k] ?? [], ends, out: -1, stones: el.stones, seed: (el.seed || 5) * 7 + i }) };
+      walls[k] = { F, ...incaWall(bag, col, F, { y, h, th, mat: 'granite_inca', openings: ops[k] ?? [], ends, out: -1, stones: el.stones, ashlar: true, seed: (el.seed || 5) * 7 + i }) };
     });
   }
   // great pegs high on a wall's inner face [stated: the Main Temple's six, theonlyperuguide]
@@ -386,7 +449,7 @@ function incaTemple(el, { bag, col }) {
     col.rect([Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)], y, y + ah);
   }
   if (el.roof === 'thatch') {
-    gableRoof(bag, walls, el.rect, y, h, th, 'granite_inca');
+    gableRoof(bag, walls, el.rect, y, h, th, 'granite_inca', 'thatch', true);
     // over the open side, a beam from gable wall to gable wall carries the eaves
     if (el.open) {
       const [a, b] = { n: [[x0, z0], [x1, z0]], e: [[x1, z0], [x1, z1]], s: [[x1, z1], [x0, z1]], w: [[x0, z1], [x0, z0]] }[el.open];
@@ -407,7 +470,7 @@ function torreon(el, { bag, col }) {
   const uOf = (az) => { const a = Math.atan2(-Math.cos(az * Math.PI / 180), Math.sin(az * Math.PI / 180)); return (a - a0) * r; };
   const F = arcFrame(el.c, r, a0, a1);
   const tw = incaWall(bag, col, F, {
-    y, h, th: 1.0, mat: 'granite_inca', ends: ['cap', 'cap'], out: -1,
+    y, h, th: 1.0, mat: 'granite_inca', ends: ['cap', 'cap'], out: -1, ashlar: true, stones: 0.9, seed: 17,
     openings: [
       { kind: 'window', at: uOf(65), w: 0.62, h: 0.82, sill: 1.35 },        // the June solstice sunrise
       { kind: 'window', at: uOf(113), w: 0.62, h: 0.82, sill: 1.35 },       // the December solstice sunrise
