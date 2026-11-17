@@ -164,3 +164,9 @@ Measured before: within 120 m of the arrival (0, 70) on the avenue's plaza, two 
 - [Pyramid of the Sun — Britannica](https://www.britannica.com/place/Pyramid-of-the-Sun) (five terraces, the fifth Batres's; 248 steps)
 - [Pyramid of the Sun — Wikipedia mirror](https://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq.ipfs.4everland.io/wiki/Pyramid_of_the_Sun.html) (plaster, murals, jaguar heads and paws, stars, rattles)
 - [Teotihuacan is Unique among Ancient Mesoamerican Cities — sci.news](https://www.sci.news/archaeology/teotihuacan-unique-among-ancient-mesoamerican-cities-05243.html) (one entrance, many households)
+
+## 17. Round 6: the landmark seen close
+
+- The Feathered Serpent's heads and bodies in pale painted stone (they read as near-black before), larger (scale up to 1.25), the head with a feather collar of two rings, a band, the eyes with a white ring and a dark pupil, the Cipactli headdress with dark discs in its rings and painted side scrolls; the serpent bodies on the taluds thicker with a painted stripe along them [stated: the Met essay, heads about 0.9 m, bodies in relief with rattles; inferred: the colours, the painted stripe].
+- Tableros (every platform, pyramid stage and the Adosada): a thin pale line framing the field above and below, and between the chalchihuite discs a stepped-pyramid fret in pale plaster raised on the red [stated: painted panels with stepped frets, México Desconocido on the palace; inferred: extended to the platforms' tableros].
+- Frame: `tools/draw-count.mjs teotihuacan` main 1.36 M to 1.43 M triangles, main draws 260 to 260 (no new material: feathers red, not green, to keep the draw count).
