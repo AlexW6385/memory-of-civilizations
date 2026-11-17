@@ -5,6 +5,7 @@
 //                octopus drying on racks, bark cloth on frames, nets, baskets, mortars, thatch stock;
 //   thatch_wear  the wear of the thatch: patches of newer reed, lashing hoops, damp streaks at the eaves,
 //                a fringe of loose straw.
+import { laid } from './masonry.js';
 import { Matrix4 } from '../../core/three.js';
 import { box, lathe, fromTriangles, rod, frustum } from '../../core/geom.js';
 import { orientedBox } from '../../core/build.js';
@@ -50,11 +51,20 @@ function hareHouse(el, { bag, col }) {
   for (let i = 0; i < n; i++) { const t = i / n * Math.PI * 2, u = -Math.cos(t) * (L / 2 + 0.12); pts.push([u, Math.sin(t) >= 0 ? half(u) + 0.14 : -half(u) - 0.14]); }
   for (let i = 0; i < n; i++) {
     const a = pts[i], b = pts[(i + 1) % n];
-    if (a[1] < 0 && b[1] < 0 && Math.abs(a[0]) < 0.9 && Math.abs(b[0]) < 0.9) continue;
-    add(B, orientedBox(a, b, 0.24, -0.35, 0.22 + rand() * 0.04, -0.03));
+    let sa_ = a, sb_ = b;
+    if (a[1] < 0 && b[1] < 0 && Math.min(a[0], b[0]) < 1.0 && Math.max(a[0], b[0]) > -1.0) {          // the door's gap: the curb stops at its jambs
+      const cut = (p, q, uc) => [uc, p[1] + (q[1] - p[1]) * (uc - p[0]) / (q[0] - p[0])];
+      const lo = Math.min(a[0], b[0]) < -1.0 ? (a[0] < b[0] ? [a, cut(a, b, -1.0)] : [cut(b, a, -1.0), b]) : null;
+      const hi = Math.max(a[0], b[0]) > 1.0 ? (a[0] > b[0] ? [a, cut(a, b, 1.0)] : [cut(b, a, 1.0), b]) : null;
+      const part = lo || hi; if (!part) continue; [sa_, sb_] = part;
+      if (Math.hypot(sb_[0] - sa_[0], sb_[1] - sa_[1]) < 0.25) continue;
+    }
+    const yt = 0.22 + rand() * 0.04;
+    add(B, orientedBox(sa_, sb_, 0.24, -0.35, yt, -0.03));
+    if (i % 2 === 0 && sa_ === a && sb_ === b) add('opening', lathe([[0.05, 0], [0.001, -0.02]], 8, null, (a[0] + b[0]) / 2, yt + 0.003, (a[1] + b[1]) / 2));   // the hole in the paenga's top that held a pole
   }
-  add(B, box(-0.62, -0.35, -half(0) - 0.45, 0.62, 0.08, -half(0) + 0.1));
-  const NU = 2 * Math.round(L * 0.85), NS = 14, JD = H > 3.1 ? 3 : 4, I0 = NU / 2 - 1, I1 = NU / 2 + 1, G = [], Gi = [];
+  add(B, box(-0.95, -0.35, -half(0) - 0.45, 0.95, 0.08, -half(0) + 0.1));
+  const NU = 2 * Math.round(L * 0.85) + 1, NS = 14, JD = 4, I0 = (NU - 3) / 2, I1 = I0 + 3, G = [], Gi = [];
   for (let i = 0; i <= NU; i++) {
     const u = -L / 2 + L * i / NU, w = half(u) + 0.02, r = [], ri = [];
     for (let j = 0; j <= NS; j++) {
@@ -103,6 +113,17 @@ function hareHouse(el, { bag, col }) {
   for (let k = 0; k < nseg; k++) ofan.push(0, -0.35, cv, Math.cos(Math.PI * k / nseg) * R, -0.35, -Math.sin(Math.PI * k / nseg) * R * 0.75 + cv, Math.cos(Math.PI * (k + 1) / nseg) * R, -0.35, -Math.sin(Math.PI * (k + 1) / nseg) * R * 0.75 + cv);
   add('pebbles', fromTriangles(fan.concat(ofan)));
   for (let k = 0; k < 24; k++) { const a = rand() * Math.PI, rr = Math.sqrt(rand()) * (R - 0.3), [sx, sz] = P(Math.cos(a) * rr, -Math.sin(a) * rr * 0.75 + cv); stoneAt(bag, 'pebbles', sx, y0 + 0.08, sz, 0.08 + rand() * 0.07, k * 1.3); }
+  // the front, by rule from the house's seed: 0 the sill alone; 1 flat stepping stones out from the sill; 2 two upright
+  // stones at the jambs; 3 a low windbreak of laid stones beside the pavement [inferred: the island's houses were not alike]
+  const fk = ((el.seed ?? 0) >> 5) % 4;
+  if (fk === 1) {
+    for (let k = 0; k < 3; k++) add(B, box(-0.7 + k * 0.5, -0.1, -half(0) - 1.0 - 0.28 - (k % 2) * 0.18, -0.3 + k * 0.5, 0.1 + 0.01 * k, -half(0) - 1.0 + 0.2 - (k % 2) * 0.18));   // flat stepping stones laid out from the sill
+  } else if (fk === 2) {
+    for (const s of [-1, 1]) { const [sx, sz] = P(s * 1.2, -half(0) - 0.4); stoneAt(bag, B, sx, y0 - 0.02, sz, 0.3, s + 2, 2.6); }
+  } else if (fk === 3) {
+    const sg = ((el.seed ?? 11) % 2 ? 1 : -1);
+    for (let c = 0; c < 3; c++) for (let k = 0; k < 5 - c; k++) { const u = sg * (1.0 + k * 0.5 + c * 0.25), [sx, sz] = P(u, -half(0) - 2.4 - 0.15 * Math.sin(k)); laid(bag, B, sx, y0 + c * 0.2 - 0.05, sz, yaw, 0.3, 0.2, 0.1, k + c * 3); }
+  }
   const ov = cv - 2.7, ou = L * 0.3 * ((el.seed ?? 11) % 2 ? -1 : 1);
   for (let k = 0; k < 6; k++) {
     const a = k / 6 * Math.PI * 2, b = (k + 1) / 6 * Math.PI * 2, rr = 0.55;
@@ -292,7 +313,7 @@ function houseYard(el, { bag, col }) {
     }
   });
   // always: gourds and a basket by the door, a scatter of stones and a tuft or two
-  { const [b0, b1] = basket(0.22, 0.3); add('wicker', b0.translate(1.2, 0.05, dv - 0.45)); add('wicker', b1.translate(1.2, 0.05, dv - 0.45)); add('pottery_dark', GOURD().translate(-1.3, 0.05, dv - 0.5)); add('pottery_dark', GOURD().scale(0.9, 0.9, 0.9).translate(-1.05, 0.05, dv - 0.35)); }
+  { const [b0, b1] = basket(0.22, 0.3); add('wicker', b0.translate(1.9, 0.05, dv - 0.45)); add('wicker', b1.translate(1.9, 0.05, dv - 0.45)); add('pottery_dark', GOURD().translate(-1.9, 0.05, dv - 0.5)); add('pottery_dark', GOURD().scale(0.9, 0.9, 0.9).translate(-1.65, 0.05, dv - 0.35)); }
   for (let k = 0; k < 14; k++) { const [a, b] = P((rand() - 0.5) * (L + 6), dv - 0.5 - rand() * 4.5); stoneAt(bag, rand() < 0.5 ? B : 'pebbles', a, y0 + 0.02, b, 0.05 + rand() * 0.07, k); }
 }
 
@@ -319,24 +340,26 @@ function thatchWear(el, { bag }) {
   };
   // patches of mended reed, paler, on both slopes
   for (let k = 0; k < 4; k++) {
-    const s = rand() < 0.5 ? -1 : 1, u = (rand() - 0.5) * (L - 4), w = 1.0 + rand() * 1.4, c0 = s * (0.12 + rand() * 0.3), c1 = s * (0.55 + rand() * 0.3);
+    let s = rand() < 0.5 ? -1 : 1; const u = (rand() - 0.5) * (L - 4), w = 1.0 + rand() * 1.4; if (el.inside && s > 0 && Math.abs(u) - w / 2 < 1.4) s = -1;     // (not over the door of a house to enter)
+    const c0 = s * (0.12 + rand() * 0.3), c1 = s * (0.55 + rand() * 0.3);
     const g = quad(u - w / 2, u + w / 2, c0, c1, 0.035);
     add('thatch_palm', g);
   }
   // damp, dark streaks from the eaves up the slope and under the ridge's drip
   for (let k = 0; k < 7; k++) {
-    const s = rand() < 0.5 ? -1 : 1, u = (rand() - 0.5) * (L - 3), w = 0.25 + rand() * 0.5;
+    let s = rand() < 0.5 ? -1 : 1; const u = (rand() - 0.5) * (L - 3), w = 0.25 + rand() * 0.5; if (el.inside && s > 0 && Math.abs(u) - w / 2 < 1.4) s = -1;
     add('bark_dark', quad(u - w / 2, u + w / 2, s * 0.98, s * (0.55 + rand() * 0.25), 0.028, 1, 2));
   }
   // hoops of lashing round the roof, every metre and a bit
   for (let u = -L / 2 + 1.6; u < L / 2 - 1.2; u += 1.3 + rand() * 0.25) {
     const P2 = [];
-    for (let j = 0; j <= 14; j++) { const c = 1 - 2 * j / 14, a = at(u, c * 0.96, 0.05); P2.push([...a, 0.014]); }
+    for (let j = 0; j <= 14; j++) { const c = 1 - 2 * j / 14; if (el.inside && Math.abs(u) < 1.4 && c > 0.2) continue; const a = at(u, c * 0.96, 0.05); P2.push([...a, 0.014]); }
     add('rope_fibre', tube(P2, 4));
   }
   // loose straw hanging at the eaves
   for (const s of [-1, 1]) for (let u = -L / 2 + 1.2; u < L / 2 - 1.0; u += 0.28 + rand() * 0.2) {
     if (Math.abs(u) < 0.8 && s < 0) continue;
+    if (el.inside && Math.abs(u) < 1.3 && s > 0) continue;
     const a = at(u, s * 0.97, 0.0), len = 0.12 + rand() * 0.22;
     add('thatch', rod([a[0], a[1] + 0.02, a[2]], [a[0] + (rand() - 0.5) * 0.06, a[1] - len, a[2] - s * 0.05 * (0.5 + rand())], 0.012, 3));
   }
