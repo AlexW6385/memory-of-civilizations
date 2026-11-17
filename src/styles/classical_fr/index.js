@@ -59,18 +59,43 @@ function range(el, { bag, col }) {
     bag.add('lead', box(x0 + 1, y + h + 0.4, z0 + 1, x1 - 1, y + h + 1.2, z1 - 1));
   }
 }
-// a bronze figure reclining on a stone plinth (the rivers and nymphs round the basins)
-function reclining(bag, x, z, y, yaw, s = 1) {
-  const c = Math.cos(yaw), sn = Math.sin(yaw), P = (u, v) => [x + c * u - sn * v, z + sn * u + c * v];
-  const [px, pz] = P(0, 0);
-  bag.add(S, box(px - 1.3 * s, y, pz - 1.3 * s, px + 1.3 * s, y + 0.7 * s, pz + 1.3 * s));
-  const lie = lathe([[0.001, -0.9], [0.3, -0.7], [0.36, 0], [0.28, 0.6], [0.001, 0.85]], 10, null, 0, 0, 0);
-  lie.scale(s, s * 0.8, s); lie.rotateZ(Math.PI / 2 - 0.35); lie.rotateY(-yaw); lie.translate(px, y + 0.7 * s + 0.3 * s, pz);
-  bag.add('bronze', lie);
-  const [hx, hz] = P(-0.75 * s, 0);
-  bag.add('bronze', lathe([[0.001, -0.17], [0.16, -0.08], [0.17, 0.06], [0.001, 0.18]], 8, null, hx, y + 0.7 * s + 0.75 * s, hz));
-  const [ux, uz] = P(0.55 * s, 0.25 * s);
-  bag.add('bronze', lathe([[0.18, 0], [0.22, 0.25], [0.12, 0.45], [0.001, 0.46]], 8, null, ux, y + 0.7 * s, uz));   // the urn pouring
+// a bronze figure reclining on a moulded marble plinth (the rivers and nymphs round the water parterre's basins, 1685–88, by Tuby,
+// Le Hongre, Regnaudin, Coysevox and others): propped on one elbow against an urn that pours, one knee raised, a drapery over the hips,
+// the head turned to the visitor. Local frame: u along the figure (head at -u), v toward the front (+), up y.
+function limb(bag, mat, a, b, r0, r1, seg = 8) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2], len = Math.hypot(dx, dy, dz);
+  const g = lathe([[0.001, 0], [r0, 0.02 * len], [(r0 + r1) * 0.58, len * 0.45], [r1, len * 0.97], [0.001, len]], seg, null, 0, 0, 0);
+  g.rotateX(Math.acos(dy / len)); g.rotateY(Math.atan2(dx, dz)); g.translate(a[0], a[1], a[2]); bag.add(mat, g);
+}
+function reclining(bag, x, z, y, yaw, s = 1, k = 0) {
+  const c = Math.cos(yaw), sn = Math.sin(yaw);
+  // local (u, h, v) with h up, scaled and placed on the plinth; the plinth's top at y + 0.8
+  const T = ([u, h, v]) => [x + c * u * s - sn * v * s, y + 0.8 + h * s, z + sn * u * s + c * v * s];
+  const M = 'bronze', fem = k % 3 === 1, flip = k % 2 ? -1 : 1;
+  // the plinth: base, die, a cornice with its cyma, in marble
+  const rect = (u0, u1, v0, v1, h0, h1) => { const P = [[u0, v0], [u1, v0], [u1, v1], [u0, v1]].map(([u, v]) => [x + c * u * s - sn * v * s, z + sn * u * s + c * v * s]), xs = P.map((q) => q[0]), zs = P.map((q) => q[1]); bag.add('marble', box(Math.min(...xs), y + h0, Math.min(...zs), Math.max(...xs), y + h1, Math.max(...zs))); };
+  rect(-1.6, 1.6, -1.05, 1.05, 0, 0.14); rect(-1.5, 1.5, -0.95, 0.95, 0.14, 0.62); rect(-1.58, 1.58, -1.03, 1.03, 0.62, 0.7); rect(-1.66, 1.66, -1.11, 1.11, 0.7, 0.8);
+  const L = (p) => T([p[0] - 0.2, p[1], p[2] * flip]);
+  // the torso, hips to shoulders, and the drapery thrown over the hips and the lower thigh
+  limb(bag, M, L([0.55, 0.3, 0]), L([-0.4, 0.72, 0]), 0.3, fem ? 0.27 : 0.34, 10);
+  limb(bag, M, L([0.45, 0.4, 0.03]), L([1.25, 0.3, -0.02]), 0.36, 0.24, 12);                                  // the drapery over the hips and thighs
+  // the legs: one stretched, one bent with the knee up
+  limb(bag, M, L([0.7, 0.3, -0.12]), L([1.5, 0.22, -0.2]), 0.2, 0.14, 8); limb(bag, M, L([1.5, 0.22, -0.2]), L([2.05, 0.1, -0.1]), 0.13, 0.09, 8);
+  limb(bag, M, L([0.72, 0.32, 0.12]), L([1.32, 0.78, 0.2]), 0.19, 0.14, 8); limb(bag, M, L([1.32, 0.78, 0.2]), L([1.8, 0.1, 0.3]), 0.13, 0.08, 8);
+  for (const f of [[2.12, 0.09, -0.1], [1.86, 0.08, 0.3]]) limb(bag, M, L([f[0] - 0.2, f[1], f[2]]), L(f), 0.08, 0.05, 6);
+  // the arms: one propped on the elbow, the other resting on the urn
+  limb(bag, M, L([-0.32, 0.66, -0.2]), L([-0.2, 0.2, -0.45]), 0.12, 0.1, 8); limb(bag, M, L([-0.2, 0.2, -0.45]), L([0.25, 0.18, -0.5]), 0.1, 0.07, 8);
+  limb(bag, M, L([-0.42, 0.7, 0.2]), L([-0.78, 0.5, 0.42]), 0.11, 0.09, 8); limb(bag, M, L([-0.78, 0.5, 0.42]), L([-1.1, 0.56, 0.62]), 0.09, 0.06, 8);
+  // the head, hair and beard (a river) or a knot of hair (a nymph), and a shoulder drapery
+  { const hp = L([-0.72, 0.94, 0.04]);
+    bag.add(M, lathe([[0.001, -0.16], [0.13, -0.1], [0.16, 0.02], [0.12, 0.13], [0.001, 0.17]], 10, null, hp[0], hp[1], hp[2]));
+    bag.add(M, lathe([[0.001, 0.05], [0.19, 0.07], [0.19, 0.16], [0.001, 0.22]], 10, null, hp[0], hp[1], hp[2]));
+    if (fem) bag.add(M, lathe([[0.001, 0], [0.09, 0.03], [0.001, 0.12]], 8, null, ...T([-0.92, 1.02, 0.04 * flip])));
+    else limb(bag, M, [hp[0], hp[1] - 0.04, hp[2]], [hp[0] - c * 0.02 * s - 0.05, hp[1] - 0.34, hp[2]], 0.1, 0.01, 8); }
+  // the urn lying on the plinth, its mouth to the front, a fluted belly and a gadrooned lip
+  { const a = L([-1.2, 0.2, 0.5]), b = L([-1.0, 0.62, 1.02]), dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2], len = Math.hypot(dx, dy, dz);
+    const g = lathe([[0.001, 0], [0.12, 0.02 * len], [0.27, 0.3 * len], [0.3, 0.5 * len], [0.22, 0.78 * len], [0.14, 0.88 * len], [0.2, 0.97 * len], [0.17, len], [0.1, len]], 12, (t, i) => (i === 2 || i === 3 ? 1 + 0.05 * Math.cos(10 * t) : 1), 0, 0, 0);
+    g.rotateX(Math.acos(dy / len)); g.rotateY(Math.atan2(dx, dz)); g.translate(a[0], a[1], a[2]); bag.add(M, g); }
 }
 /**
  * parterre: { rect, y, water } — with water: the water parterre, two great basins either side of the
@@ -85,16 +110,19 @@ function parterre(el, ctx) {
       const r = [x0 + 12, sz < 0 ? z0 + 8 : cz + 7, x1 - 12, sz < 0 ? cz - 7 : z1 - 8];
       const k = 0.7;
       for (const q of [[r[0] - k, r[1] - k, r[2] + k, r[1]], [r[0] - k, r[3], r[2] + k, r[3] + k], [r[0] - k, r[1], r[0], r[3]], [r[2], r[1], r[2] + k, r[3]]]) bag.add(S, box(q[0], y - 0.2, q[1], q[2], y + 0.45, q[3]));
+      // the moulded coping of white marble overhanging the kerb, and a footing step round the basin
+      for (const [e, t0, t1] of [[0.1, 0.45, 0.56], [0.0, 0.56, 0.62]]) for (const q of [[r[0] - k - e, r[1] - k - e, r[2] + k + e, r[1] + 0.0], [r[0] - k - e, r[3], r[2] + k + e, r[3] + k + e], [r[0] - k - e, r[1], r[0] + 0.05, r[3]], [r[2] - 0.05, r[1], r[2] + k + e, r[3]]]) bag.add('marble', box(q[0], y + t0, q[1], q[2], y + t1, q[3]));
+      for (const q of [[r[0] - k - 0.35, r[1] - k - 0.35, r[2] + k + 0.35, r[1] - k], [r[0] - k - 0.35, r[3] + k, r[2] + k + 0.35, r[3] + k + 0.35], [r[0] - k - 0.35, r[1] - k, r[0] - k, r[3] + k], [r[2] + k, r[1] - k, r[2] + k + 0.35, r[3] + k]]) bag.add(S, box(q[0], y - 0.1, q[1], q[2], y + 0.12, q[3]));
       bag.add('marble_dark', box(r[0], y - 0.6, r[1], r[2], y - 0.55, r[3]));
       STYLES.qing.elements.water_rect({ rect: r, y: y + 0.25 }, ctx);
       col.rect([r[0] - k, r[1] - k, r[2] + k, r[3] + k], y - 0.5, y + 0.45);
       // the bronzes round the rim: along the long sides and at the corners
       const W = r[2] - r[0], D = r[3] - r[1];
       for (let i = 1; i < 4; i++) {
-        reclining(bag, r[0] + W * i / 4, r[1] - 2.4, y + 0.04, 0, 0.9);
-        reclining(bag, r[0] + W * i / 4, r[3] + 2.4, y + 0.04, Math.PI, 0.9);
+        reclining(bag, r[0] + W * i / 4, r[1] - 2.4, y + 0.04, 0, 1, i + (sz < 0 ? 0 : 3));
+        reclining(bag, r[0] + W * i / 4, r[3] + 2.4, y + 0.04, Math.PI, 1, i + 1 + (sz < 0 ? 0 : 3));
       }
-      for (const fx of [r[0] - 2.4, r[2] + 2.4]) reclining(bag, fx, (r[1] + r[3]) / 2, y + 0.04, fx < cx ? Math.PI / 2 : -Math.PI / 2, 0.9);
+      for (const fx of [r[0] - 2.4, r[2] + 2.4]) reclining(bag, fx, (r[1] + r[3]) / 2, y + 0.04, fx < cx ? Math.PI / 2 : -Math.PI / 2, 1, fx < cx ? 2 : 5);
       void D;
     }
     return;
