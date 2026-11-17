@@ -71,7 +71,7 @@ export function openHouses() {
   if (OPENS) return OPENS;
   const first = OPEN_HOUSE(), rand = rng(9031), pickd = [], all = houses().filter((h) => h !== first);
   const cen = (h) => [(h.rect[0] + h.rect[2]) / 2, (h.rect[1] + h.rect[3]) / 2];
-  const cand = all.filter((h) => { const [cx, cz] = cen(h); return Math.hypot(cx - ARRIVAL[0], cz - ARRIVAL[1]) > 125 && Math.hypot(cx, cz) < 340 && h.rect[2] - h.rect[0] >= 15.5 && h.rect[3] - h.rect[1] >= 15.5; });
+  const cand = all.filter((h) => { const [cx, cz] = cen(h); return Math.hypot(cx - ARRIVAL[0], cz - ARRIVAL[1]) > 125 && Math.hypot(cx, cz) < 340 && h.rect[2] - h.rect[0] >= 15.5 && h.rect[3] - h.rect[1] >= 15.5 && !inRect(GARDEN, cx, cz, 18) && !inRect(CHAHAR, cx, cz, 14); });
   for (let i = cand.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [cand[i], cand[j]] = [cand[j], cand[i]]; }
   const chosen = [first];
   for (const h of cand) {
