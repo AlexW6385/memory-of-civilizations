@@ -28,14 +28,14 @@ add({ t: 'stair', rect: [-17.1, -51.2, 17.1, -49.1], dir: 's', y0: 0, y1: F, ris
   add({ t: 'floor', rect: [-BACK, -110, -40, -51.2], y: 0, mat: 'travertine' });
   add({ t: 'floor', rect: [40, -110, BACK, -51.2], y: 0, mat: 'travertine' });
   for (const s of [-1, 1]) {
-    for (let z = N0 + 10.5; z < -53; z += 3.8) column(s * IN, z, 0, PH, PD, { shaftMat: 'granite_grey' });
+    for (let z = N0 + 10.5; z < -53; z += 3.8) column(s * IN, z, 0, PH, PD, { shaftMat: 'granite_grey', lod: 1 });
     add({ t: 'beam', a: [s * IN, N0 + 6.6], b: [s * IN, -53], y: PH, w: 1.0, h: 1.1, mat: 'marble' });
     add({ t: 'wall', a: [s * (BACK - 0.5), N0], b: [s * (BACK - 0.5), -51.2], th: 1.0, y0: 0, y1: PH + 2.4, openings: [], mat: 'stucco' });
     add({ t: 'slab', rect: [Math.min(s * (IN - 0.6), s * BACK), N0 + 6, Math.max(s * (IN - 0.6), s * BACK), -51.2], y0: PH + 1.1, y1: PH + 1.5, mat: 'gilt_bronze', holes: [] });
   }
   // north portico, with the gateway on the axis
   const NZ = N0 + 6.6;
-  for (let x = -IN; x <= IN + 0.01; x += 3.95) if (Math.abs(x) > 4.5) column(x, NZ, 0, PH, PD, { shaftMat: 'granite_grey' });
+  for (let x = -IN; x <= IN + 0.01; x += 3.95) if (Math.abs(x) > 4.5) column(x, NZ, 0, PH, PD, { shaftMat: 'granite_grey', lod: 1 });
   add({ t: 'beam', a: [-IN, NZ], b: [IN, NZ], y: PH, w: 1.0, h: 1.1, mat: 'marble' });
   add({ t: 'wall', a: [-BACK, N0 + 0.5], b: [BACK, N0 + 0.5], th: 1.0, y0: 0, y1: PH + 2.4, openings: [{ at: BACK, w: 7.2, h: PH, y0: 0 }], mat: 'stucco' });
   add({ t: 'slab', rect: [-BACK, N0, BACK, NZ + 0.6], y0: PH + 1.1, y1: PH + 1.5, mat: 'gilt_bronze', holes: [] });
@@ -119,8 +119,8 @@ add({ t: 'pediment_roof_z', rect: [-17.1, BZ0, 17.1, BZ1], y: F + 24.5, rise: 7.
 const CH = 14.15, CD = 1.5;
 const FX = [-15.47, -11.05, -6.63, -2.21, 2.21, 6.63, 11.05, 15.47];
 const FZ = -47.6;
-for (const x of FX) column(x, FZ, F, CH, CD, { shaftMat: 'granite_grey' });
-for (const x of [-11.05, -6.63, 6.63, 11.05]) for (const z of [-42.6, -37.7]) column(x, z, F, CH, CD, { shaftMat: 'granite_red' });
+for (const x of FX) column(x, FZ, F, CH, CD, { shaftMat: 'granite_grey', lod: 2 });
+for (const x of [-11.05, -6.63, 6.63, 11.05]) for (const z of [-42.6, -37.7]) column(x, z, F, CH, CD, { shaftMat: 'granite_red', lod: 2 });
 const ET = F + CH, EH = 3.5;
 add({ t: 'roman_entablature', a: [-17.1, FZ], b: [17.1, FZ], y: ET, w: 1.7, h: EH, mat: 'marble' });
 for (const x of [-15.47, 15.47]) add({ t: 'roman_entablature', a: [x, FZ - 0.85], b: [x, BZ0], y: ET, w: 1.7, h: EH, mat: 'marble' });
