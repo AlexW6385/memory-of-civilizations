@@ -8,20 +8,43 @@ import '../../styles/indian/index.js';
 import { STYLES, registerStyle } from '../../core/build.js';
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { hexa } from '../../styles/chinese/index.js';
+import { torana } from './torana.js';
+import { vedikaRun, vedikaRing, newLists, addLists } from './vedika.js';
 
-/** The base stupa, with its own harmika and parasols left out (all of them stand above the flattened top). */
+/**
+ * The base stupa with its own harmika, parasols, railings and gateways left out (the harmika and the parasols stand above the
+ * flattened top; the railings are rebuilt as vedika in ./vedika.js, the gateways in ./torana.js; the base's colliders stay).
+ */
 function stupa(el, ctx) {
-  const s = el.s ?? 1, y = el.y ?? 0, [cx, cz] = el.c, TOP = 16.46 * s, hm = 2.3 * s;
+  const s = el.s ?? 1, y = el.y ?? 0, [cx, cz] = el.c, TOP = 16.46 * s, hm = 2.3 * s, RV = 24 * s, RM = 18.3 * s, HM = 4.3 * s;
   const keep = {
     add(mat, g) {
       g.computeBoundingBox();
       const b = g.boundingBox;
       if (b.min.y >= y + TOP - 0.01 && b.min.x >= cx - hm - 0.4 && b.max.x <= cx + hm + 0.4 && b.min.z >= cz - hm - 0.4 && b.max.z <= cz + hm + 0.4) return;
+      if (mat === 'sandstone_rail') return;                                                                  // railings, gateways' carving
+      if (mat === 'sandstone_dressed' && Math.hypot((b.min.x + b.max.x) / 2 - cx, (b.min.z + b.max.z) / 2 - cz) > RV + 0.5 * s) return;   // the gateways' stone
       ctx.bag.add(mat, g);
     },
   };
   STYLES.indian.elements.stupa(el, { ...ctx, bag: keep });
   harmika({ c: el.c, y: y + TOP, s }, ctx);
+  // the ground railing and the terrace's, with the openings of the base; lens posts, bars and coping
+  const gs = Math.PI / 2, ang = { e: 0, s: Math.PI / 2, w: Math.PI, n: -Math.PI / 2 }, gates = el.gates || [];
+  const L = newLists(), T = newLists();
+  const ring = (Ls, r, yy, h, gaps, gap, inscribe) => { const g0 = h / 3.1, pw = 0.3 * Math.max(0.45, g0); vedikaRing(Ls, [cx, cz], r, yy, h, gaps, gap, Math.max(0.7, g0), pw, pw * 0.68, inscribe); };
+  if (!el.carved) ring(L, RV, y, 3.1 * s, gates.map((g) => ang[g]), 2.0 * s, s >= 0.8);
+  ring(T, RM - 0.2 * s, y + HM, 1.3 * s, el.stair ? [gs] : [], 1.4 * s, false);
+  // the balustrades of the double stairway: sloping runs from the landing down to the foot
+  if (el.stair) {
+    const zs1 = cz + RM + 1.6 * s, xl = 1.6 * s, xr = 7.0 * s;
+    for (const k of [-1, 1]) vedikaRun(T, [cx + k * xl, zs1 - 0.15 * s], [cx + k * xr, zs1 - 0.15 * s], y + HM, y, 1.3 * s, 1.1 * s, 0.14 * s, 0.1 * s, { ends: [true, true] });
+  }
+  addLists(ctx.bag, 'sandstone_rail', L); addLists(ctx.bag, 'sandstone_rail', T);
+  for (const g of gates) {
+    const a = ang[g], d = [Math.cos(a), Math.sin(a)];
+    torana(ctx.bag, null, [cx + d[0] * (RV + 3 * s), cz + d[1] * (RV + 3 * s)], d, y, s, s >= 1 && g === 's' ? 'lion' : s >= 1 && g === 'w' ? 'dwarf' : 'elephant');
+  }
 }
 
 /**

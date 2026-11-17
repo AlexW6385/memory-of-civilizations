@@ -90,7 +90,7 @@ function stupa2(el, ctx) {
   const keep = { add(mat, g) { g.computeBoundingBox(); if (mat === RAIL && skipRail(g.boundingBox)) return; bag.add(mat, g); } };
   const kcol = Object.create(col);
   kcol.segment = (a, b, th, y0, y1) => { if (Math.abs(y0 - y) < 0.01 && Math.abs(y1 - y - H0) < 0.01) return; col.segment(a, b, th, y0, y1); };
-  STYLES['indian-sanchi'].elements.stupa({ ...el, gates: [], stair: el.stair ?? true }, { ...ctx, bag: keep, col: kcol });
+  STYLES['indian-sanchi'].elements.stupa({ ...el, gates: [], stair: el.stair ?? true, carved: true }, { ...ctx, bag: keep, col: kcol });
   const R = el.rv ?? 11.5, h = el.h ?? 2.4, gap = 1.3, wing = 2.4, L = { post: [], bar: [], cope: [], medal: [], relief: [], boss: [] };
   const N = 40, pt = (a, r = R) => [cx + Math.cos(a) * r, cz + Math.sin(a) * r];
   const wall = (a, b) => col.segment(a, b, 0.4, y, y + h);
