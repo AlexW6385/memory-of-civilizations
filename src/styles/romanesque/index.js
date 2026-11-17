@@ -240,6 +240,25 @@ function tympanum(el, { bag }) {
     bar(bands, [s * 0.66, Vm], [s * halfAt(Vm) * 0.99, Vm], 0.12, -0.03, 0.12);                                            // the band under the top register
   }
   bag.add('paint_ochre', fromTriangles(bands));
+  // the inscriptions along the bands of the middle and top registers: incised capitals, a stroke at a time
+  {
+    const strokes = [], stroke = (p, q) => bar(strokes, p, q, 0.013, 0.112, 0.136);
+    let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const letter = (u, v, k) => {
+      const h = 0.032, w = 0.026;
+      if (k === 0) stroke([u, v - h], [u, v + h]);
+      else if (k === 1) { stroke([u, v - h], [u, v + h]); stroke([u - w, v + h], [u + w, v + h]); }
+      else if (k === 2) { stroke([u - w, v - h], [u - w, v + h]); stroke([u - w, v - h], [u + w, v - h]); }
+      else if (k === 3) { stroke([u - w, v - h], [u - w, v + h]); for (const q of [-h, 0, h]) stroke([u - w, v + q], [u + w, v + q]); }
+      else if (k === 4) { stroke([u - w, v - h], [u, v + h]); stroke([u, v + h], [u + w, v - h]); stroke([u - w / 2, v], [u + w / 2, v]); }
+      else { stroke([u - w, v - h], [u - w, v + h]); stroke([u + w, v - h], [u + w, v + h]); stroke([u - w, v + h], [u + w, v + h]); stroke([u - w, v - h], [u + w, v - h]); }
+    };
+    for (const [vv, u0] of [[Vr, 0.95], [Vm, 0.72]]) for (const sd of [-1, 1]) {
+      const end = halfAt(vv) * 0.97 - 0.06;
+      for (let u = u0 + 0.05; u < end; u += 0.085) if (rnd() > 0.12) letter(sd * u, vv, Math.floor(rnd() * 6));
+    }
+    bag.add('iron', fromTriangles(strokes));
+  }
   // the arcades of the heavenly Jerusalem (left), the towers of its wall; the gate of Paradise, its door ajar
   const arc = [];
   for (let k = 0; k <= 6; k++) { const u = -0.5 - k * 0.45; bar(arc, [u, -lint + 0.02], [u, 0.68], 0.06, -0.02, 0.1); }
@@ -274,6 +293,11 @@ function tympanum(el, { bag }) {
     fig(u, lv + 0.1, 0.34, 'linen', { d: 0.14 });
   }
   fig(-2.5, Vg + 0.08, 0.42, 'paint_ochre', { halo: true, d: 0.14 });
+  // the damned bound on the slope of Hell's gable, mirroring the rising dead
+  for (const u of [1.0, 1.35, 1.7]) {
+    const lv = Vg + 0.5 * (1 - Math.abs(u - R / 2 - hw0 / 2) / (R / 2 - hw0 / 2)) + 0.06;
+    fig(u, lv, 0.3, 'ivory', { d: 0.15 });
+  }
   bag.add('ivory', box(x - 0.16, yb + Vg + 0.5, zc - 2.25, x - 0.06, yb + Vg + 0.56, zc - 2.12));
   // ── the middle register: Christ in his mandorla, the elect on his right, the angels and the damned on his left ──
   const mc = 1.78, ma = 0.88, mb = 0.62, mand = [], stars = [];

@@ -384,10 +384,240 @@ function garth(el, { bag }) {
   }
 }
 
+
+// ── the dressing of the stone: the portal's shafts and mouldings, the west front, the towers, the chevet ──────
+// (docs/settlements/conques.md §1l). Every repeated piece is varied by a millimetre so the renderer merges it.
+let SEQ = 0;
+const jit = () => (SEQ++ % 13) * 0.0009;
+/** A frame in a vertical plane: P(u, v, d) = the point u along the tangent t, v up, d out along the normal n. */
+const frame = (o, t, n) => (u, v, d) => [o[0] + t[0] * u + n[0] * d, v, o[1] + t[1] * u + n[1] * d];
+const fb = (out, P, u0, u1, v0, v1, d0, d1) => hexa(out, [P(u0, v0, d0), P(u1, v0, d0), P(u1, v0, d1), P(u0, v0, d1)], [P(u0, v1, d0), P(u1, v1, d0), P(u1, v1, d1), P(u0, v1, d1)]);
+/** A bar between two (u, v) points, width w, from depth d0 to d1. */
+function barB(out, P, a, b, w, d0, d1) {
+  const tu = b[0] - a[0], tv = b[1] - a[1], L = Math.hypot(tu, tv) || 1, pu = -tv / L * w / 2, pv = tu / L * w / 2;
+  hexa(out, [P(a[0] - pu, a[1] - pv, d0), P(a[0] + pu, a[1] + pv, d0), P(b[0] + pu, b[1] + pv, d0), P(b[0] - pu, b[1] - pv, d0)],
+    [P(a[0] - pu, a[1] - pv, d1), P(a[0] + pu, a[1] + pv, d1), P(b[0] + pu, b[1] + pv, d1), P(b[0] - pu, b[1] - pv, d1)]);
+}
+/** A ring of voussoirs (an arch band) of radii r0…r1 about (uc, yc), angles a0…a1. */
+function ringB(out, P, uc, yc, r0, r1, d0, d1, n = 18, a0 = 0, a1 = Math.PI) {
+  const Q = (r, t, d) => P(uc + r * Math.cos(t), yc + r * Math.sin(t), d);
+  for (let i = 0; i < n; i++) {
+    const a = a0 + (a1 - a0) * i / n, b = a0 + (a1 - a0) * (i + 1) / n;
+    hexa(out, [Q(r0, a, d0), Q(r1, a, d0), Q(r1, b, d0), Q(r0, b, d0)], [Q(r0, a, d1), Q(r1, a, d1), Q(r1, b, d1), Q(r0, b, d1)]);
+  }
+}
+/** A billet moulding: short blocks with gaps along an arc of radius r, radial width 2·rw. */
+function billetsB(out, P, uc, yc, r, rw, d0, d1, count, a0 = 0, a1 = Math.PI) {
+  for (let k = 0; k < count; k++) {
+    const t = a0 + (a1 - a0) * (k + 0.5) / count, hl = r * (a1 - a0) / count * 0.27, c = Math.cos(t), s = Math.sin(t), cu = uc + r * c, cv = yc + r * s;
+    const Q = (rr, tt, d) => P(cu + c * rr - s * tt, cv + s * rr + c * tt, d);
+    hexa(out, [Q(-rw, -hl, d0), Q(rw, -hl, d0), Q(rw, hl, d0), Q(-rw, hl, d0)], [Q(-rw, -hl, d1), Q(rw, -hl, d1), Q(rw, hl, d1), Q(-rw, hl, d1)]);
+  }
+}
+/** A zigzag (chevron) band along an arc between radii r0 and r1. */
+function chevronB(out, P, uc, yc, r0, r1, d0, d1, count, a0 = 0, a1 = Math.PI, w = 0.05) {
+  const pt = (i) => { const t = a0 + (a1 - a0) * i / (2 * count), r = i % 2 ? r1 : r0; return [uc + r * Math.cos(t), yc + r * Math.sin(t)]; };
+  for (let i = 0; i < 2 * count; i++) barB(out, P, pt(i), pt(i + 1), w, d0, d1);
+}
+/** A shaft on a base with a carved capital, standing at world (x, z) from y0 to y1. */
+function colonnette(bag, x, z, y0, y1, r, kind = 0, mat = 'limestone_yellow') {
+  const rr = r + jit(), ch = Math.max(0.16, r * 3.0 + jit()), by = 0.14 + jit();
+  bag.add(mat, lathe([[rr * 1.5, 0], [rr * 1.5, 0.05], [rr * 1.22, 0.1], [rr, by]], 10, null, x, y0, z));
+  bag.add(mat, lathe([[rr, 0], [rr * 0.94, y1 - y0 - ch - by]], 10, null, x, y0 + by, z));
+  bag.add(mat, carvedCapital(rr, ch, kind).clone().translate(x, y1 - ch, z));
+}
+const flush = (bag, acc) => { for (const m of Object.keys(acc)) if (acc[m].length) bag.add(m, fromTriangles(acc[m])); };
+/** A blind arcade of n arches across u0…u1 on a face: shafts' strips, a ring over each, springing at ys, from yb. */
+function blindArcade(L, P, u0, u1, n, yb, ys, d0, d1) {
+  const st = (u1 - u0) / n, r = st / 2 - 0.06;
+  for (let k = 0; k <= n; k++) fb(L, P, u0 + k * st - 0.06 - (k === 0 ? 0 : 0), u0 + k * st + 0.06, yb, ys, d0, d1);
+  for (let k = 0; k < n; k++) ringB(L, P, u0 + (k + 0.5) * st, ys, r - 0.02, r + 0.07, d0, d1, 10);
+}
+
+/**
+ * portal_dress { x (the tympanum's face), R (its radius), yb (its springing) }: the three orders of the west portal as at Conques:
+ * jamb shafts with carved capitals under each of the archivolts and the inner reveal, a billet moulding on the first ring,
+ * a row of rosettes on the second, a chevron on the third, and a hood moulding with billets round the whole opening
+ * (docs/settlements/conques.md §1l). [stated: three archivolts, "curious" heads; inferred: the mouldings after the Romanesque
+ * portals of the Rouergue and Auvergne]
+ */
+function portalDress(el, { bag }) {
+  const x = el.x ?? 1.0, R = el.R ?? 3.35, yb = el.yb ?? 4.85, P = (u, v, xx) => [xx, v, u], L = [], Y = [];
+  const fx = (k) => x - 0.25 - 0.35 * k;
+  // the rings' faces
+  { const r0 = R + 0.05, r1 = r0 + 0.3; billetsB(Y, P, 0, yb, (r0 + r1) / 2, 0.065, fx(0) - 0.06, fx(0), 46, 0.08, Math.PI - 0.08); }
+  { const r0 = R + 0.05 + 0.64, r1 = r0 + 0.3; chevronB(Y, P, 0, yb, r0 + 0.02, r1 - 0.02, fx(2) - 0.05, fx(2), 22, 0.04, Math.PI - 0.04, 0.045); }
+  // rosettes in the middle of the red ring (small discs, each a little different)
+  for (let i = 0; i < 20; i++) {
+    const a = Math.PI * (i + 0.5) / 20, rr = R + 0.05 + 0.32 + 0.15;
+    const g = lathe([[0.001, 0], [0.065 + jit(), 0.004], [0.06 + jit(), 0.03], [0.03, 0.05], [0.001, 0.055]], 8);
+    g.rotateZ(Math.PI / 2); g.translate(fx(1), yb + rr * Math.sin(a), rr * Math.cos(a));
+    bag.add('limestone_yellow', g);
+  }
+  // the hood: a moulded band round the opening on the face of the wall, with billets
+  ringB(L, P, 0, yb, 4.42, 4.62, -0.12, 0.0, 26);
+  billetsB(Y, P, 0, yb, 4.72, 0.05, -0.12, -0.02, 54, 0.06, Math.PI - 0.06);
+  ringB(L, P, 0, yb, 4.62, 4.78, -0.07, 0.0, 26);
+  // the shafts: two on the inner reveal, three under the archivolts, each side
+  for (const s of [-1, 1]) {
+    for (const [z, xc, k] of [[2.55, 0.8, 0], [2.95, 0.8, 1], [3.55, 0.25, 2], [3.87, 0.25, 3], [4.19, 0.25, 4]]) {
+      colonnette(bag, xc, s * z, 0.0, yb - 0.02, 0.1, k, 'limestone_yellow');
+    }
+  }
+  // the hood's feet: two small corbel heads at its springing
+  for (const s of [-1, 1]) bag.add('limestone_yellow', lathe([[0.001, 0], [0.09, 0.03], [0.1, 0.11], [0.07, 0.18], [0.001, 0.2]], 8).rotateZ(Math.PI / 2).translate(0, yb - 0.1 + jit(), s * 4.95));
+  bag.add('limestone_yellow', fromTriangles(L));
+  bag.add('limestone_yellow', fromTriangles(Y));
+}
+
+/**
+ * front_dress: the flat of the west front given its courses: the sill course and the cornice with billets, the two upper windows
+ * with their hoods and shafts, the blind arcade between the towers (docs/settlements/conques.md §1l). [inferred: after the
+ * western fronts of the Rouergue's Romanesque churches]
+ */
+function frontDress(el, { bag }) {
+  const P = (u, v, xx) => [xx, v, u], L = [], Y = [], zs = el.zs ?? 3.5, y0 = el.y0 ?? 15.5;
+  // the sill course under the windows, with a billet row
+  fb(L, P, -4.85, 4.85, 11.45, 11.68, -0.13, 0);
+  for (let k = 0; k < 40; k++) { const u = -4.7 + k * 9.4 / 39; fb(Y, P, u - 0.07, u + 0.07, 11.3, 11.45, -0.1, -0.0); }
+  // the two windows: a hood with a billet row and a shaft each side
+  for (const s of [-1, 1]) {
+    const uc = s * 1.1;
+    ringB(L, P, uc, 14.2, 0.55, 0.72, -0.12, 0, 14);
+    billetsB(Y, P, uc, 14.2, 0.8, 0.04, -0.1, -0.02, 14, 0.1, Math.PI - 0.1);
+    for (const e of [-1, 1]) colonnette(bag, -0.07, uc + e * 0.635, 12.2, 14.2, 0.065, (s + e + 3) % 3);
+    fb(L, P, uc - 0.78, uc + 0.78, 12.12, 12.2, -0.1, 0);
+  }
+  // the courses above: under the towers' foot and under the gable
+  fb(L, P, -3.55, 3.55, y0 - 0.02, y0 + 0.16, -0.14, 0);
+  fb(L, P, -3.55, 3.55, 19.5, 19.7, -0.14, 0);
+  for (let k = 0; k < 30; k++) { const u = -3.4 + k * 6.8 / 29; fb(Y, P, u - 0.07, u + 0.07, 19.35, 19.5, -0.1, 0); }
+  // the blind arcade between the towers
+  blindArcade(L, P, -3.5, 3.5, 5, y0 + 0.3, 17.8, -0.09, 0);
+  for (let k = 0; k <= 5; k++) { const u = -3.5 + k * 1.4; bag.add('limestone_yellow', carvedCapital(0.06 + jit(), 0.2, k % 5).clone().translate(-0.03, 17.8 - 0.2, u)); }
+  bag.add('limestone_yellow', fromTriangles(L));
+  bag.add('limestone_yellow', fromTriangles(Y));
+}
+
+/**
+ * tower_dress { zc (the tower's axis), sz (the side), h (half the width), y0, y1 }: the face of a west tower — corner buttress
+ * strips to the top, string courses, a blind arcade, and the belfry's openings with shafts, hoods and the pier's shaft between
+ * the pair. Built on the west face and on the outer side; the other two faces are hidden by the roofs.
+ */
+function towerDress(el, { bag }) {
+  const zc = el.zc, sz = el.sz, h = el.h ?? 3.0, y0 = el.y0 ?? 15.5, y1 = el.y1 ?? 30.0, L = [], Y = [];
+  const zo = zc + sz * h, zi = zc - sz * h;
+  const sorted = (a, b) => (a < b ? [a, b] : [b, a]);
+  const [oa, ob] = sorted(zo - sz * 0.5, zo + sz * 0.25), [ia, ib] = sorted(zi + sz * 0.5, zi - sz * 0.25);
+  const W = (u, v, xx) => [xx, v, u];
+  fb(L, W, oa, ob, y0, y1 - 0.2, -0.25, 0.5);
+  fb(L, W, ia, ib, y0, y1 - 0.2, -0.25, 0.5);
+  fb(L, W, oa - 0.04, ob + 0.04, y1 - 0.2, y1 - 0.1, -0.3, 0.5);
+  for (const [a, b] of [[oa, ob], [ia, ib]]) { fb(L, W, a, b, y0 - 0.4, y0, -0.12, 0.5); fb(L, W, a, b, y0 - 0.8, y0 - 0.4, -0.05, 0.5); }
+  fb(L, frame([0, zo], [1, 0], [0, sz]), 5.5, 6.25, y0 - 0.4, y0, -0.5, 0.12);
+  fb(L, W, ia - 0.04, ib + 0.04, y1 - 0.2, y1 - 0.1, -0.3, 0.5);
+  // the side face: u runs along x, the normal points out along sz
+  const S = frame([0, zo], [1, 0], [0, sz]);
+  fb(L, S, 5.5, 6.25, y0, y1 - 0.2, -0.5, 0.25);
+  fb(L, S, 5.45, 6.3, y1 - 0.2, y1 - 0.1, -0.5, 0.3);
+  const faces = [[W, zc - h + 0.5, zc + h - 0.5, 0], [S, 0.5, 2 * h - 0.5, 1]];
+  for (const [Pf, u0, u1, kind] of faces) {
+    const lo = kind ? u0 : Math.min(zc - h + 0.5, zc + h - 0.5) , hi = kind ? u1 : Math.max(zc - h + 0.5, zc + h - 0.5), mid = (lo + hi) / 2, wid = hi - lo, d1 = kind ? 0 : 0, dd = kind ? 1 : -1;
+    // dd: for the west face the outward way is −x, so depths are given as x (negative = outward); for the side face as d (positive = outward)
+    const o0 = kind ? 0 : 0.0, a = kind ? -0.1 : 0.0, b = kind ? 0.12 : -0.12;
+    // string courses
+    for (const yy of [19.0, 24.4]) fb(L, Pf, lo - 0.1, hi + 0.1, yy, yy + 0.2, kind ? 0 : 0.0, kind ? 0.13 : -0.13);
+    for (const yy of [19.0, 24.4]) for (let k = 0; k < Math.round(wid / 0.2); k++) { const u = lo + 0.1 + k * (wid - 0.2) / Math.round(wid / 0.2); fb(Y, Pf, u - 0.06, u + 0.06, yy - 0.1, yy, kind ? 0 : 0.0, kind ? 0.1 : -0.1); }
+    // the blind arcade
+    const n = Math.round(wid);
+    blindArcade(L, Pf, lo, hi, n, 19.3, 22.4, kind ? 0 : 0, kind ? 0.08 : -0.08);
+    // the belfry's pair of openings, with hoods and shafts
+    for (const uc of [mid - 0.75, mid + 0.75]) {
+      ringB(L, Pf, uc, 26.6, 0.55, 0.7, kind ? 0 : 0, kind ? 0.1 : -0.1, 12);
+      billetsB(Y, Pf, uc, 26.6, 0.77, 0.04, kind ? 0 : 0, kind ? 0.08 : -0.08, 12, 0.1, Math.PI - 0.1);
+    }
+    for (const u of [mid - 0.75 - 0.6, mid, mid + 0.75 + 0.6]) {
+      const p = Pf(u, 0, kind ? 0.06 : -0.06);
+      colonnette(bag, p[0], p[2], 25.0, 26.6, 0.075, Math.abs(Math.round(u * 3)) % 5);
+    }
+    fb(L, Pf, mid - 1.5, mid + 1.5, 24.88, 25.0, kind ? 0 : 0, kind ? 0.1 : -0.1);
+  }
+  bag.add('limestone_yellow', fromTriangles(L));
+  bag.add('limestone_yellow', fromTriangles(Y));
+}
+
+/** A band round an arc in plan (world frame): radii r0…r1, angles a0…a1 (deg), y0…y1. */
+function arcBand(out, c, r0, r1, a0, a1, y0, y1, seg) {
+  const D = Math.PI / 180, Q = (r, t, y) => [c[0] + Math.cos(t * D) * r, y, c[1] + Math.sin(t * D) * r];
+  for (let i = 0; i < seg; i++) {
+    const a = a0 + (a1 - a0) * i / seg, b = a0 + (a1 - a0) * (i + 1) / seg;
+    hexa(out, [Q(r0, a, y0), Q(r1, a, y0), Q(r1, b, y0), Q(r0, b, y0)], [Q(r0, a, y1), Q(r1, a, y1), Q(r1, b, y1), Q(r0, b, y1)]);
+  }
+}
+/** A string course of billets round an arc (world frame). */
+function arcBillets(out, c, r, a0, a1, y0, y1, count, rw = 0.06, skip = []) {
+  const D = Math.PI / 180;
+  for (let k = 0; k < count; k++) {
+    const t = a0 + (a1 - a0) * (k + 0.5) / count;
+    if (skip.some(([s0, s1]) => t > s0 && t < s1)) continue;
+    const hl = r * (a1 - a0) * D / count * 0.27, c0 = Math.cos(t * D), s0 = Math.sin(t * D), cx = c[0] + c0 * r, cz = c[1] + s0 * r;
+    const Q = (rr, tt, y) => [cx + c0 * rr - s0 * tt, y, cz + s0 * rr + c0 * tt];
+    hexa(out, [Q(-rw, -hl, y0), Q(rw, -hl, y0), Q(rw, hl, y0), Q(-rw, hl, y0)], [Q(-rw, -hl, y1), Q(rw, -hl, y1), Q(rw, hl, y1), Q(-rw, hl, y1)]);
+  }
+}
+/**
+ * chevet_dress { c (the hemicycle's centre), rAmb (the ambulatory wall's outer radius), rd (the drum's), chapels: [{ c, a, r }] }: the
+ * east end given its pilaster strips between the bays, hoods and shafts at its windows, and string courses with billets round the
+ * ambulatory and the radiating chapels (docs/settlements/conques.md §1l). [inferred: the type of the pilgrimage churches' chevets]
+ */
+function chevetDress(el, { bag }) {
+  const D = Math.PI / 180, c = el.c, L = [], R = [], Y = [];
+  const polar = (cc, r, adeg) => { const a = adeg * D; return frame([cc[0] + Math.cos(a) * r, cc[1] + Math.sin(a) * r], [-Math.sin(a), Math.cos(a)], [Math.cos(a), Math.sin(a)]); };
+  const gaps = (el.chapels || []).map((k) => [k.a - 9.5, k.a + 9.5]);
+  // the ambulatory: pilaster strips between the bays, the cap-course, the string course at the springing of the vault
+  for (const a of [-75, -45, -15, 15, 45, 75]) {
+    const P = polar(c, el.rAmb, a);
+    fb(R, P, -0.3, 0.3, 0, 7.6, -0.15, 0.3); fb(L, P, -0.3, 0.3, 7.6, 10.9, -0.15, 0.3); fb(L, P, -0.36, 0.36, 10.9, 11.1, -0.15, 0.36);
+    fb(L, P, -0.36, 0.36, 7.4, 7.6, -0.15, 0.36);
+  }
+  arcBand(L, c, el.rAmb - 0.1, el.rAmb + 0.1, -90, 90, 7.45, 7.6, 40);
+  arcBillets(Y, c, el.rAmb + 0.1, -90, 90, 7.6, 7.72, 100, 0.05, gaps);
+  for (const a of [-30, 30]) {            // the windows: a hood and two shafts
+    const P = polar(c, el.rAmb, a);
+    ringB(L, P, 0, 4.75, 0.45, 0.62, -0.05, 0.12, 12);
+    for (const e of [-1, 1]) { const q = P(e * 0.51, 0, 0.1); colonnette(bag, q[0], q[2], 3.4, 4.75, 0.06, 0); }
+    fb(L, P, -0.68, 0.68, 3.3, 3.4, -0.05, 0.18);
+  }
+  // the radiating chapels: a string course with billets, hoods at the three windows, a pilaster between each
+  for (const k of el.chapels || []) {
+    arcBand(L, k.c, k.r - 0.08, k.r + 0.08, k.a - 82, k.a + 82, 4.35, 4.5, 24);
+    arcBillets(Y, k.c, k.r + 0.08, k.a - 82, k.a + 82, 4.5, 4.62, 36, 0.045);
+    for (const d of [-50, 0, 50]) {
+      const P = polar(k.c, k.r, k.a + d);
+      ringB(L, P, 0, 3.9, 0.3, 0.46, -0.05, 0.1, 10);
+      for (const e of [-1, 1]) { const q = P(e * 0.35, 0, 0.08); colonnette(bag, q[0], q[2], 2.6, 3.9, 0.045, 1); }
+    }
+    for (const d of [-25, 25, -75, 75]) { const P = polar(k.c, k.r, k.a + d); fb(R, P, -0.22, 0.22, 0, 6.0, -0.15, 0.2); fb(L, P, -0.28, 0.28, 6.0, 6.15, -0.15, 0.26); }
+  }
+  // the drum of the hemicycle: pilaster strips and hoods at the clerestory
+  for (const a of [-60, -30, 0, 30, 60]) { const P = polar(c, el.rd, a); fb(L, P, -0.3, 0.3, 13.2, 22.9, -0.15, 0.25); fb(L, P, -0.36, 0.36, 22.9, 23.1, -0.15, 0.3); }
+  for (const a of [-45, -15, 15, 45]) {
+    const P = polar(c, el.rd, a);
+    ringB(L, P, 0, 16.15, 0.45, 0.62, -0.05, 0.1, 12);
+    for (const e of [-1, 1]) { const q = P(e * 0.5, 0, 0.08); colonnette(bag, q[0], q[2], 14.4, 16.15, 0.06, 2); }
+    fb(L, P, -0.68, 0.68, 14.3, 14.4, -0.05, 0.14);
+  }
+  arcBand(L, c, el.rd - 0.05, el.rd + 0.1, -90, 90, 19.0, 19.15, 40);
+  arcBillets(Y, c, el.rd + 0.1, -90, 90, 19.15, 19.27, 70, 0.05);
+  bag.add('sandstone_red', fromTriangles(R));
+  bag.add('limestone_yellow', fromTriangles(L));
+  bag.add('limestone_yellow', fromTriangles(Y));
+}
+
 const base = STYLES.romanesque;
 registerStyle('romanesque-foy', {
   ...base,
   column,
-  elements: { ...base.elements, pier, foy_treasure: treasure, worn_sill: wornSill, corbel_row: corbelRow, corbel_arc: corbelArc, garth },
+  elements: { ...base.elements, pier, foy_treasure: treasure, worn_sill: wornSill, corbel_row: corbelRow, corbel_arc: corbelArc, garth, portal_dress: portalDress, front_dress: frontDress, tower_dress: towerDress, chevet_dress: chevetDress },
   objects: { ...base.objects, reliquary: majesty },
 });
