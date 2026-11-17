@@ -239,7 +239,7 @@ export function se(el, ctx) {
   for (let k = 0; k < 6; k++) for (const s of [-1, 1]) { const u = A0 + 1.4 + k * 3.0, v = VC + s * 2.6; bag.add('timber', box(X(u), Y(0.0), Z(v - 0.5), X(u + 0.9), Y(0.42), Z(v + 0.5))); col.rect([X(u), Z(v - 0.5), X(u + 0.9), Z(v + 0.5)], Y(0), Y(0.42)); }
   for (const [u, v] of [[14, 15], [20.5, 21], [30.6, 18], [6.5, 21]]) bag.add('marble_dark', box(X(u - 0.5), Y(0), Z(v - 1.0), X(u + 0.5), Y(0.02), Z(v + 1.0)));
   // hanging lamps on chains and the church's own light
-  for (const [u, v] of [[11, VC], [17, VC], [23, VC], [30.6, VC], [38.5, VC], [30.6, 7], [30.6, 29]]) { bag.add('iron', rod([X(u), Y(13.3), Z(v)], [X(u), Y(4.1), Z(v)], 0.012, 3)); bag.add('gilt_bronze', lathe([[0.001, 0], [0.18, 0.04], [0.2, 0.12], [0.001, 0.12]], 8, null, X(u), Y(3.85), Z(v))); bag.add('flame', lathe([[0.001, 0], [0.02, 0.02], [0.001, 0.09]], 4, null, X(u), Y(3.97), Z(v))); }
+  for (const [u, v, top] of [[11, VC, 14.3], [17, VC, 14.3], [23, VC, 14.3], [30.6, VC, 17.4], [38.5, VC, 14.3], [30.6, 7, 13.5], [30.6, 29, 13.5]]) { bag.add('iron', rod([X(u), Y(top), Z(v)], [X(u), Y(4.1), Z(v)], 0.012, 3)); bag.add('gilt_bronze', lathe([[0.001, 0], [0.18, 0.04], [0.2, 0.12], [0.001, 0.12]], 8, null, X(u), Y(3.85), Z(v))); bag.add('flame', lathe([[0.001, 0], [0.02, 0.02], [0.001, 0.09]], 4, null, X(u), Y(3.97), Z(v))); }
   for (const [u, v, i] of [[5, VC, 3], [14, VC, 4], [22, VC, 4], [30.6, VC, 5], [38.5, VC, 5], [30.6, 6, 3], [30.6, 30, 3], [43.7, 18, 3]]) lights.push({ at: [X(u), Y(5.4), Z(v)], color: '#ffc78a', intensity: i, distance: 15 });
   void z1; void zc; void x1;
 }

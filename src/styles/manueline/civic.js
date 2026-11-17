@@ -7,24 +7,6 @@ import { tube } from '../../objects/kit.js';
 import { rng, gable, armillary, orderCross, ropeColumn, wallRun, addBox, pinnacle, prism } from './util.js';
 
 const LIME = 'limestone', WALL = 'limewash_white';
-export function castle(el, ctx) {
-  const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, rand = rng(el.seed ?? 3);
-  bag.add('limestone', box(x0 - 3, y - 9, z0 - 3, x1 + 3, y - 0.2, z1 + 3));
-  const run = (a, b, gap) => { wallRun(ctx, a, b, 2.8, y - 0.2, y + 9.5, 'limestone', gap ?? []); const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.floor(L / 2.4); for (let k = 0; k < n; k++) { const t = (k + 0.5) / n; addBox(bag, 'limestone', a[0] + (b[0] - a[0]) * t - 0.55, y + 9.5, a[1] + (b[1] - a[1]) * t - 0.55, a[0] + (b[0] - a[0]) * t + 0.55, y + 11, a[1] + (b[1] - a[1]) * t + 0.55); } };
-  const xm = (x0 + x1) / 2, zm = (z0 + z1) / 2;
-  run([x0, z0], [x1, z0]); run([x0, z0], [x0, z1]); run([x1, z0], [x1, z1]);
-  run([x0, z1], [x1, z1], [{ at: xm - x0, w: 4, h: 5 }]);
-  for (const [tx, tz] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1], [xm, z0], [x0, zm], [x1, zm]]) {
-    bag.add('limestone', box(tx - 4, y - 0.2, tz - 4, tx + 4, y + 15, tz + 4)); col.rect([tx - 4, tz - 4, tx + 4, tz + 4], y, y + 15);
-    for (let u = -3.4; u < 4; u += 1.8) for (const [mx, mz] of [[tx + u, tz - 4], [tx + u, tz + 3.2], [tx - 4, tz + u], [tx + 3.2, tz + u]]) addBox(bag, 'limestone', mx - 0.4, y + 15, mz - 0.4, mx + 0.4, y + 16.4, mz + 0.4);
-  }
-  // the gate's towers, a keep (the alcáçova's tower) in the middle, the roofs of the barracks
-  bag.add('limestone', box(xm - 8, y, zm - 6, xm + 8, y + 12, zm + 6)); col.rect([xm - 8, zm - 6, xm + 8, zm + 6], y, y + 12);
-  bag.add('roof_tile', frustum([xm - 9, zm - 7, xm + 9, zm + 7], y + 12, y + 16, 0, 0, 7, 7));
-  orderCross(bag, 'cloth_red', xm, y + 18.5, zm, 1.6, 's', 0.05); bag.add('timber', rod([xm, y + 14, zm], [xm, y + 21, zm], 0.08, 5));
-  addBox(bag, 'cloth_white', xm - 0.0, y + 19.5, zm, xm + 3, y + 21, zm + 0.05);
-  void rand;
-}
 /** monastery_range: { rect, y, h } a plain two-storey range with a tile roof, regular windows. */
 export function range(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 11;

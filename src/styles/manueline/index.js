@@ -11,7 +11,8 @@ import { ship } from './ships.js';
 import { manuYard, orangeTree } from './garden.js';
 import { se } from './se.js';
 import { palace } from './palace.js';
-import { castle, range, pelourinho, fountain, hullOnStocks, timberStack, ropeWalk, crane, masonsYard } from './civic.js';
+import { castle } from './castle.js';
+import { range, pelourinho, fountain, hullOnStocks, timberStack, ropeWalk, crane, masonsYard } from './civic.js';
 
 export const manueline = {
   trim: () => {}, opening: () => {}, column: () => {},
