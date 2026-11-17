@@ -58,5 +58,11 @@ export function terraceLife() {
       person(at(-1.0, -2.0 - rand() * 1.5), rand() * 6, { dy: 0.08, woman: l.kind === 'home', el: { pose: 'cross' } });
     }
   });
-  return { id: 'persepolis-terrace-houses-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [-122, -60], facing: 'e' }, bounds: [-150, -20, -48, 6], rooms: [], elements: F, center: [-100, -6], near: 260 };
+  // the masons at the works yard: one seated in the awning's shade at his stool, two at the sledge and the hoist, a water-carrier at the tank
+  F.push({ t: 'stool', at: [-100.7, 32.2], y: T, rot: 0, seed: seed() });
+  person([-100.7, 32.2], Math.PI, { cloth: 'cloth_ochre', el: { pose: 'sit_low' } });
+  person([-119.4, 30.8], Math.PI / 2, { cloth: 'cloth_brown', hat: 'cap', el: { pose: 'stand' } });
+  person([-112.0, 34.0], 1.2, { cloth: 'cloth_white', hat: 'cap', el: { pose: 'talk' } });
+  person([-120.4, 41.2], -Math.PI / 2, { woman: true, el: { pose: 'stand', carry: 'pot' } });
+  return { id: 'persepolis-terrace-houses-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [-122, -60], facing: 'e' }, bounds: [-150, -20, -48, 50], rooms: [], elements: F, center: [-100, -6], near: 260 };
 }

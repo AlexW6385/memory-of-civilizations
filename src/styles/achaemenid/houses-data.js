@@ -17,7 +17,7 @@ export function houseMake(el) {
   const rect = el.rect, seed = el.seed || 1, front = el.front ?? 'n', rand = RAND(seed), { L, D } = frameOf(rect, front);
   const kind = el.kind ?? (RAND(seed)() < 0.58 ? 'court' : 'home'), court = kind === 'court';
   const h = 3.3 + rand() * 0.9, da = L * (0.3 + rand() * 0.4), upper = !court && rand() < (kind === 'shop' ? 0.5 : 0.45);
-  return { kind, court, h, da, upper, L, D, front, rect, seed, enter: !!el.enter, trade: el.trade ?? null };
+  return { kind, court, h, da, upper, L, D, front, rect, seed, enter: !!el.enter, trade: el.trade ?? null, tier: kind === 'shop' ? 1 : el.tier ?? 1 };
 }
 
 /** The doorway on the street face: its middle in the world (x, z), the way out into the street, its width, and the house's height. */

@@ -12,6 +12,8 @@ import { jambScene } from './throne.js';
 import { fortification, guardGear, gift } from './fort.js';
 import { terracePaving, towerDress, porchDress } from './court.js';
 import { incenseStand, courtAwning, courtWear, parasol } from './set.js';
+import { nicheCut, wallDress, furnish } from './interior.js';
+import { terraceWorks } from './works.js';
 import { house, workshops, streetChannel, flagApron, gardenPlot } from './town.js';
 import '../qing/index.js';
 import { scribeKit } from '../sumerian/house.js';
@@ -200,16 +202,27 @@ function hall(el, { bag, col }) {
     if (nw) {
       const e0 = lo + th + 1.6, e1 = hi - th - 1.6, d0 = m - dw / 2 - jw - 1.6, d1 = m + dw / 2 + jw + 1.6;
       const parts = door ? [[e0, d0, Math.ceil(nw / 2)], [d1, e1, Math.floor(nw / 2)]] : [[e0, e1, nw]];
-      for (const [s0, s1, n] of parts) for (let i = 0; i < n && s1 - s0 > 2.8; i++) { const u = s0 + (i + 0.5) * (s1 - s0) / n; gaps.push([u - wwin / 2, u + wwin / 2, 'window']); }
+      for (const [s0, s1, n] of parts) for (let i = 0; i < n && s1 - s0 > 2.8; i++) { const u = s0 + (i + 0.5) * (s1 - s0) / n; gaps.push([u - wwin / 2, u + wwin / 2, (el.niches ?? '').includes(face) ? 'niche' : 'window']); }
     }
     gaps.sort((a, b) => a[0] - b[0]);
     let a = lo;
-    const piece = (q) => { bag.add(W, box(q[0], y, q[1], q[2], y + h + 1.2, q[3])); col.rect(q, y, y + h + 1.2); };
+    // the inner face of the wall: its coordinate across, and the way from it into the wall
+    const innerB = face === 'n' || face === 'w' ? (alongX ? r[3] : r[2]) : (alongX ? r[1] : r[0]), into = face === 'n' || face === 'w' ? -1 : 1, thk = Math.abs((alongX ? r[3] - r[1] : r[2] - r[0]));
+    const inLo = alongX ? x0 : z0, inHi = alongX ? x1 : z1;
+    const piece = (q, p0, p1, kPrev, kNext) => {
+      bag.add(W, box(q[0], y, q[1], q[2], y + h + 1.2, q[3])); col.rect(q, y, y + h + 1.2);
+      if (el.interior && !el.simple) wallDress(bag, { alongX, bi: innerB, into, y, h, a0: Math.max(p0, inLo), a1: Math.min(p1, inHi), kPrev: p0 <= inLo ? 'corner' : kPrev, kNext: p1 >= inHi ? 'corner' : kNext, seed: Math.floor(Math.abs(lo) + (alongX ? 3 : 7)), hang: !!el.hangings });
+    };
+    let kp = 'corner';
     for (const [g0, g1, kind] of gaps) {
-      if (g0 > a) piece(Rr(a, g0));
+      if (g0 > a) piece(Rr(a, g0), a, g0, kp, kind);
+      kp = kind;
       a = g1;
       const L = Rr(g0, g1), gm = (g0 + g1) / 2;
-      if (kind === 'door') {
+      if (kind === 'niche') {
+        nicheCut(bag, { alongX, bi: innerB, into, th: thk, g0, g1, y, sill, nh: wh, nd: Math.min(0.9, thk * 0.45), top: y + h + 1.2 });
+        col.rect(L, y, y + h + 1.2);
+      } else if (kind === 'door') {
         bag.add(W, box(L[0], y + dh + 0.1, L[1], L[2], y + h + 1.2, L[3]));
         doorFrame(bag, alongX, gm, alongX ? r[1] : r[0], alongX ? r[3] : r[2], y, dw, dh, el.reliefs && !el.simple, face);
       } else {
@@ -224,7 +237,7 @@ function hall(el, { bag, col }) {
         }
       }
     }
-    if (hi > a) piece(Rr(a, hi));
+    if (hi > a) piece(Rr(a, hi), a, hi, kp, 'corner');
   };
   // the frame of polished stone round a door: two jambs the depth of the wall, the lintel, the
   // Egyptian cornice above it (a roll, the flaring gorge of upright leaves, a fillet); on the
@@ -777,12 +790,13 @@ function audience(el, { bag, col }) {
   const [cx, cz] = el.c, y = el.y, d = el.dir ?? [0, -1], u = [-d[1], d[0]], L = el.aisle ?? 40;
   const P = (a, b) => [cx + d[0] * a + u[0] * b, cz + d[1] * a + u[1] * b];
   const Bx = (a0, a1, b0, b1, y0, y1, m) => { const p = P(a0, b0), q = P(a1, b1); bag.add(m, box(Math.min(p[0], q[0]), y0, Math.min(p[1], q[1]), Math.max(p[0], q[0]), y1, Math.max(p[1], q[1]))); };
+  const hw = el.half ?? 3, hd = el.depth ?? 2.6, pa = hd - 0.9, pb = hw - 0.9;
   // the carpet down the aisle, a border of another colour
-  Bx(2.6, 2.6 + L, -1.6, 1.6, y, y + 0.03, 'cloth_indigo');
-  Bx(2.6, 2.6 + L, -1.3, 1.3, y + 0.03, y + 0.045, 'cloth_red');
+  Bx(hd, hd + L, -1.6, 1.6, y, y + 0.03, 'cloth_indigo');
+  Bx(hd, hd + L, -1.3, 1.3, y + 0.03, y + 0.045, 'cloth_red');
   // the dais in two steps
-  Bx(-2.6, 2.6, -3, 3, y, y + 0.35, S); Bx(-2.0, 2.0, -2.4, 2.4, y + 0.35, y + 0.7, S);
-  const r = [P(-2.6, -3), P(2.6, 3)]; col.rect([Math.min(r[0][0], r[1][0]), Math.min(r[0][1], r[1][1]), Math.max(r[0][0], r[1][0]), Math.max(r[0][1], r[1][1])], y, y + 0.7);
+  Bx(-hd, hd, -hw, hw, y, y + 0.35, S); Bx(-hd + 0.6, hd - 0.6, -hw + 0.6, hw - 0.6, y + 0.35, y + 0.7, S);
+  const r = [P(-hd, -hw), P(hd, hw)]; col.rect([Math.min(r[0][0], r[1][0]), Math.min(r[0][1], r[1][1]), Math.max(r[0][0], r[1][0]), Math.max(r[0][1], r[1][1])], y, y + 0.7);
   const dy = y + 0.7;
   // the throne: lion feet, the seat, the high back, cushions; the footstool before it
   for (const [a, b] of [[0.45, -0.6], [0.45, 0.6], [-0.35, -0.6], [-0.35, 0.6]]) { const p = P(a, b); bag.add('gilt_bronze', lathe([[0.12, 0], [0.09, 0.15], [0.07, 0.5]], 8, null, p[0], dy, p[1])); }
@@ -793,15 +807,15 @@ function audience(el, { bag, col }) {
   Bx(0.75, 1.25, -0.4, 0.4, dy, dy + 0.25, 'gilt_bronze');
   // the canopy on four posts, its fringe hanging all round
   const ch = dy + 3.8;
-  for (const [a, b] of [[-1.7, -2.1], [-1.7, 2.1], [1.7, -2.1], [1.7, 2.1]]) { const p = P(a, b); bag.add('gilt_bronze', lathe([[0.1, 0], [0.08, ch - dy]], 8, null, p[0], dy, p[1])); }
-  Bx(-1.9, 1.9, -2.3, 2.3, ch, ch + 0.12, 'cloth_red');
-  for (const [a0, a1, b0, b1] of [[-1.9, 1.9, -2.3, -2.25], [-1.9, 1.9, 2.25, 2.3], [-1.9, -1.85, -2.3, 2.3], [1.85, 1.9, -2.3, 2.3]]) Bx(a0, a1, b0, b1, ch - 0.45, ch, 'cloth_ochre');
+  for (const [a, b] of [[-pa, -pb], [-pa, pb], [pa, -pb], [pa, pb]]) { const p = P(a, b); bag.add('gilt_bronze', lathe([[0.1, 0], [0.08, ch - dy]], 8, null, p[0], dy, p[1])); }
+  Bx(-pa - 0.2, pa + 0.2, -pb - 0.2, pb + 0.2, ch, ch + 0.12, 'cloth_red');
+  for (const [a0, a1, b0, b1] of [[-pa - 0.2, pa + 0.2, -pb - 0.2, -pb - 0.15], [-pa - 0.2, pa + 0.2, pb + 0.15, pb + 0.2], [-pa - 0.2, -pa - 0.15, -pb - 0.2, pb + 0.2], [pa + 0.15, pa + 0.2, -pb - 0.2, pb + 0.2]]) Bx(a0, a1, b0, b1, ch - 0.45, ch, 'cloth_ochre');
   // the incense burners on their tall stands, before the dais
-  for (const b of [-3.6, 3.6]) { const p = P(3.2, b); bag.add('bronze', lathe([[0.3, 0], [0.12, 0.2], [0.07, 1.1], [0.32, 1.25], [0.36, 1.5], [0.12, 1.65], [0.18, 1.9], [0.001, 2.1]], 10, null, p[0], y, p[1])); col.circle(p[0], p[1], 0.3, y, y + 2.1); }
+  for (const b of el.burners === false ? [] : [-3.6, 3.6]) { const p = P(3.2, b); bag.add('bronze', lathe([[0.3, 0], [0.12, 0.2], [0.07, 1.1], [0.32, 1.25], [0.36, 1.5], [0.12, 1.65], [0.18, 1.9], [0.001, 2.1]], 10, null, p[0], y, p[1])); col.circle(p[0], p[1], 0.3, y, y + 2.1); }
 }
 
 registerStyle('achaemenid', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, terrace, hall, lamassu_gate: gate, audience, persian_house: house, street_channel: streetChannel, flag_apron: flagApron, garden_plot: gardenPlot, royal_workshops: workshops, apadana_stair: apadanaStair, treasury, fortification, guard_gear: guardGear, gift, terrace_paving: terracePaving, tower_dress: towerDress, incense_stand: incenseStand, court_awning: courtAwning, court_wear: courtWear, parasol, scribe_kit: scribeKit },
+  elements: { ...STYLES.qing.elements, furnish, terrace_works: terraceWorks, terrace, hall, lamassu_gate: gate, audience, persian_house: house, street_channel: streetChannel, flag_apron: flagApron, garden_plot: gardenPlot, royal_workshops: workshops, apadana_stair: apadanaStair, treasury, fortification, guard_gear: guardGear, gift, terrace_paving: terracePaving, tower_dress: towerDress, incense_stand: incenseStand, court_awning: courtAwning, court_wear: courtWear, parasol, scribe_kit: scribeKit },
   objects: {},
 });

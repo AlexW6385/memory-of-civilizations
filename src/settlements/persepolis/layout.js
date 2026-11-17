@@ -57,8 +57,13 @@ export function lots() {
         const pShop = major ? 0.7 : dm < 90 ? 0.5 : dm < 170 ? 0.3 : 0.14;
         const u = q(), kind = u < pShop ? 'shop' : u < pShop + (1 - pShop) * 0.5 ? 'court' : 'home';
         const da = Math.hypot(x + w / 2 - ARRIVAL[0], r[1] + d / 2 - ARRIVAL[1]);
-        const enter = da < 210 && q() < (kind === 'court' ? 0.45 : 0.62);
-        LOTS.push({ rect: r, seed, front, kind, enter, trade: kind === 'shop' ? TRADES[Math.floor(q() * TRADES.length)] : null });
+        // the nearer houses are mostly walked into, the farther ones a good share still (the walk-in standard reaches out through the town)
+        const enter = q() < (da < 210 ? (kind === 'court' ? 0.45 : 0.62) : (kind === 'court' ? 0.34 : 0.42));
+        // the house's standing, from its place: notables' houses near the road and the market (stone doorway, glazed frieze, columned porch),
+        // plain ones between, the poor at the town's edge (a reed lean-to on the front); shops keep their trade's front
+        const tr = rng(seed ^ 0x51ed27), p2 = major ? 0.4 : dm < 90 ? 0.3 : dm < 170 ? 0.16 : 0.07, p0 = dm > 170 ? 0.3 : 0.1;
+        const tier = kind === 'shop' ? 1 : tr() < p2 ? 2 : tr() < p0 ? 0 : 1;
+        LOTS.push({ rect: r, seed, front, kind, enter, tier, trade: kind === 'shop' ? TRADES[Math.floor(q() * TRADES.length)] : null });
       }
       x += w + 1.1;
     }

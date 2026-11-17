@@ -5,6 +5,7 @@
 // its roof goods. Also the stone-lined water channels of the streets and the walled garden plots.
 
 import { box, lathe, rod } from '../../core/geom.js';
+import { rosette } from './reliefs.js';
 
 import { RAND, frameOf, houseMake, houseDoor, houseVent, houseRoom } from './houses-data.js';
 export { frameOf, houseMake, houseDoor, houseVent, houseRoom };
@@ -55,10 +56,12 @@ export function house(el, { bag, col, lights }) {
     for (let i = 0; i < 2; i++) { const a = a0 + 0.4 + rand() * Math.max(0.1, span - 2.2); patch('plaster_persian', a, a + 0.8 + rand() * 0.9, hh * 0.3 + rand() * hh * 0.3, hh * 0.6 + rand() * hh * 0.25); }   // a repair in a paler plaster
     if (spouts) for (const a of spouts) patch('plaster_streak', a - 0.14, a + 0.14, hh * 0.35, hh - 0.25);
   };
+  let benchSide = 0;
   const doorFurniture = (a, w) => {
     B('limestone_persian', a - w / 2 - 0.2, a + w / 2 + 0.2, -0.6, 0, 0, 0.14);        // the doorstep
     if (kind !== 'shop' && rand() < 0.55) {                                            // a brick bench by the door, in the sun or in the shade
       const side = a + w / 2 + 2.2 < L - 0.3 ? 1 : -1, a0 = a + side * (w / 2 + 0.2), a1 = a + side * (w / 2 + 2.0);
+      benchSide = side;
       solid('mudbrick', Math.min(a0, a1), Math.max(a0, a1), -0.5, 0, 0, 0.44);
       B('mud_plaster', Math.min(a0, a1) - 0.03, Math.max(a0, a1) + 0.03, -0.53, 0.0, 0.44, 0.5);
     }
@@ -76,6 +79,51 @@ export function house(el, { bag, col, lights }) {
     for (const [a, b] of [[a0, b0], [a1, b0], [a0, b1], [a1, b1]]) { const p = P(a, b); bag.add('timber', rod([p[0], y + 0.12, p[1]], [p[0], y + 1.9, p[1]], 0.05, 6)); }
     B('reed_mat', a0 - 0.2, a1 + 0.2, b0 - 0.2, b1 + 0.2, y + 1.9, y + 1.97);
     B('reed_mat', a0 + 0.2, a1 - 0.2, b0 + 0.2, b1 - 0.2, y + 0.12, y + 0.17);
+  };
+  // ── the fronts by standing (docs/settlements/persepolis.md §20): `tier` 2 a notable's house, 0 a poor one
+  const rt = RAND(m.seed + 4242), tier = m.tier;
+  const toWorld = (u, v, w) => { const [x, z] = P(u, -w); return [x, v, z]; };
+  const notable = ({ a, ow, yo, top, porch }) => {
+    // a socle of dressed grey stone along the street face, broken at the door
+    const sk = (a0, a1) => { if (a1 - a0 > 0.3) B('limestone_persian', a0, a1, -0.07, 0.0, 0.4, 0.95); };
+    sk(0.25, a - ow / 2 - 0.85); sk(a + ow / 2 + 0.85, L - 0.25);
+    // the glazed band along the parapet's face: lapis between white edges, yellow rosettes (as on the palaces' towers, Susa's glazed brick)
+    const y0 = top + 0.17, y1 = top + 0.5;
+    B('glaze_lapis', 0.15, L - 0.15, -0.045, -0.005, y0, y1);
+    B('glaze_white', 0.15, L - 0.15, -0.055, -0.005, y0, y0 + 0.035); B('glaze_white', 0.15, L - 0.15, -0.055, -0.005, y1 - 0.035, y1);
+    const n = Math.max(3, Math.floor((L - 0.6) / 1.05));
+    for (let i = 0; i < n; i++) rosette(bag, 'glaze_yellow', (u, v, w) => toWorld(u, v, w + 0.045), 0.3 + (i + 0.5) * (L - 0.6) / n, (y0 + y1) / 2, 0.11, 0.035);
+    if (porch) {
+      // the columned porch before the gate: two timber columns on stone bases carrying a cedar beam and a roof of reed, the palaces' portico in little
+      for (const s of [-1, 1]) {
+        const [px, pz] = P(a + s * (ow / 2 + 0.85), -1.35);
+        bag.add('limestone_persian', lathe([[0.26, 0], [0.24, 0.1], [0.2, 0.2], [0.001, 0.2]], 10, null, px, 0, pz));
+        bag.add('wood_dark', rod([px, 0.2, pz], [px, 2.58, pz], 0.1, 8));
+        bag.add('gilt_bronze', lathe([[0.1, 0], [0.15, 0.05], [0.15, 0.1], [0.001, 0.1]], 8, null, px, 2.5, pz));
+        col.circle(px, pz, 0.14, 0, 2.6);
+      }
+      B('cedar', a - ow / 2 - 1.3, a + ow / 2 + 1.3, -1.55, -1.15, 2.58, 2.84);
+      B('cedar', a - ow / 2 - 1.3, a + ow / 2 + 1.3, -1.15, -0.06, 2.62, 2.8);
+      B('reed_mat', a - ow / 2 - 1.45, a + ow / 2 + 1.45, -1.7, -0.02, 2.84, 2.9);
+      B(['cloth_red', 'cloth_indigo', 'cloth_ochre'][m.seed % 3], a - ow / 2 - 1.45, a + ow / 2 + 1.45, -1.74, -1.7, 2.46, 2.84);
+    } else {
+      // the stone surround: a lintel and the Egyptian cornice stepping out over the timber door frame
+      B('marble_dark', a - ow / 2 - 0.78, a + ow / 2 + 0.78, -0.13, 0.0, yo + 0.24, yo + 0.5);
+      B('marble_dark', a - ow / 2 - 0.9, a + ow / 2 + 0.9, -0.22, 0.0, yo + 0.5, yo + 0.6);
+      B('marble_dark', a - ow / 2 - 1.0, a + ow / 2 + 1.0, -0.3, 0.0, yo + 0.6, yo + 0.68);
+    }
+  };
+  const leanTo = (a, ow, wallTop) => {
+    // a lean-to of poles and reed against the street wall, on the side away from the door's bench: firewood and a sleeping mat under it
+    const free = [[0.5, a - ow / 2 - 0.7, -1], [a + ow / 2 + 0.7, L - 0.5, 1]].filter(([p, q, sd]) => q - p > 2.0 && sd !== benchSide).sort((u, v) => (v[1] - v[0]) - (u[1] - u[0]))[0];
+    if (!free) return;
+    const [f0, f1] = free, w = Math.min(3.4, f1 - f0), a0 = rt() < 0.5 ? f0 : f1 - w, a1 = a0 + w, yr = Math.min(2.15, wallTop - 0.35);
+    for (const aa of [a0 + 0.15, a1 - 0.15]) { const [px, pz] = P(aa, -1.45); bag.add('timber', rod([px, 0, pz], [px, yr, pz], 0.06, 6)); col.circle(px, pz, 0.1, 0, yr); }
+    B('timber', a0, a1, -1.55, -1.35, yr, yr + 0.1);
+    B('reed_mat', a0 - 0.1, a1 + 0.1, -1.6, -0.02, yr + 0.1, yr + 0.16);
+    const hk = rt();
+    if (hk < 0.5) { solid('wood_dark', a0 + 0.3, a0 + 1.5, -1.0, -0.3, 0, 0.55); for (let i = 0; i < 5; i++) { const p = P(a0 + 0.5 + i * 0.22, -1.1), q = P(a0 + 0.5 + i * 0.22, -0.2); bag.add('thatch', rod([p[0], 0.62, p[1]], [q[0], 0.62, q[1]], 0.05, 5)); } }
+    else { B('reed_mat', a0 + 0.3, a1 - 0.3, -1.3, -0.4, 0.0, 0.04); B(['cloth_brown', 'cloth_ochre'][m.seed % 2], a0 + 0.5, a0 + 1.2, -1.15, -0.55, 0.04, 0.12); jarAt(a1 - 0.5, -0.7, 0.3); col.circle(...P(a1 - 0.5, -0.7), 0.3, 0, 0.8); }
   };
   const vent = houseVent(el);
   const ventA = () => { if (!vent) return; bag.add('mud_plaster', box(vent[0] - 0.3, vent[1] - 1.25, vent[2] - 0.3, vent[0] + 0.3, vent[1] - 0.55, vent[2] + 0.3)); bag.add('mudbrick', box(vent[0] - 0.26, vent[1] - 0.55, vent[2] - 0.26, vent[0] + 0.26, vent[1] - 0.2, vent[2] + 0.26)); bag.add('opening', box(vent[0] - 0.12, vent[1] - 0.2, vent[2] - 0.12, vent[0] + 0.12, vent[1] - 0.17, vent[2] + 0.12)); };
@@ -238,6 +286,8 @@ export function house(el, { bag, col, lights }) {
     if (rand() < 0.4) sunshade(L * 0.55, L * 0.55 + 2.8, bd * 0.4, bd * 0.4 + 2.0, h + (m.upper ? 0 : 0));
     ventA();
   }
+  if (tier === 2) notable(m.court ? { a: m.da, ow: 1.5, yo: 1.95, top: 2.6, porch: true } : { a: m.da, ow: 1.1, yo: m.enter ? 2.15 : 2.2, top: h });
+  else if (tier === 0) leanTo(m.da, m.court ? 1.5 : 1.1, m.court ? 2.5 : h);
   void lights;
 }
 function wall2(bag, R, col, a0, a1, b0, b1, y0, y1) {
