@@ -3,6 +3,7 @@
 
 import { box, lathe, rod, frustum, fromTriangles, orientOutward } from '../../core/geom.js';
 import { Matrix4 } from '../../core/three.js';
+import { guardian } from './guardians.js';
 
 const bx = (x0, y0, z0, x1, y1, z1) => box(Math.min(x0, x1), Math.min(y0, y1), Math.min(z0, z1), Math.max(x0, x1), Math.max(y0, y1), Math.max(z0, z1));
 const STONE = 'sandstone_dressed';
@@ -56,65 +57,56 @@ function tunal(bag, p0, p1, u, w = 0.36) {
   void e;
 }
 
+/** The profile of a pagoda roof from eave (t = 0) to its top (t = 1): a gentle sag, as the Newar roofs are drawn. */
+const prof = (t) => t - 0.1 * Math.sin(Math.PI * t);
+
 /**
- * The guardians of the Nyatapola's stages, from the ground up [stated: wrestlers, elephants, lions, griffins, the goddesses];
- * each pair stronger than the one below, so each figure larger [inferred]. Facing sx (+1 east, −1 west); (x, y, z) the foot of its pedestal.
+ * The roof of a tier as the real ones are: four facets of pan-and-roll tile courses (a zigzag across the slope, every 0.34 m) on a sagging
+ * profile, the eave edge rising at the corners by U, a thick red fascia that follows it, and the dark underside of the overhang.
+ * (ex, ez) its centre, hw the eave half-width, top the half-width where it meets the wall above, ye the eave height, rise its height.
  */
-function guardian(bag, col, kind, x, y, z, sx, s) {
-  const M = STONE, ped = 0.45 * s;
-  bag.add(M, bx(x - 0.55 * s, y, z - 0.55 * s, x + 0.55 * s, y + ped, z + 0.55 * s));
-  col.circle(x, z, 0.62 * s, y, y + 2.4 * s);
-  const top = y + ped, F = (u) => x + sx * u;
-  if (kind === 'wrestler') {
-    // Jaimal or Patta, the Rajput wrestler: a wide stance, the dhoti and belt, a bare chest, a moustached head under a turban, a club in the raised right hand and a round shield on the left arm [stated: wrestlers armed with bludgeons and shields — nepalitimes]
-    for (const dz of [-1, 1]) {
-      bag.add(M, rod([x, top + 0.04 * s, z + dz * 0.2 * s], [x, top + 0.46 * s, z + dz * 0.15 * s], 0.075 * s, 6));
-      bag.add(M, rod([x, top + 0.46 * s, z + dz * 0.15 * s], [x, top + 0.86 * s, z + dz * 0.1 * s], 0.09 * s, 6));
-      bag.add(M, bx(x - 0.1 * s, top, z + dz * 0.2 * s - 0.07 * s, F(0.18 * s), top + 0.04 * s, z + dz * 0.2 * s + 0.07 * s));
+function tileRoof(bag, ex, ez, hw, top, ye, rise, U, seed) {
+  const NT = 4, NU = Math.max(20, 2 * Math.round(hw / 0.25)), amp = 0.04;
+  const lift = (u, t) => U * Math.abs(u) ** 4 * (1 - t) ** 1.5;
+  const tri = (out, a, b, c, h) => {
+    const n = [(b[1] - a[1]) * (c[2] - a[2]) - (b[2] - a[2]) * (c[1] - a[1]), (b[2] - a[2]) * (c[0] - a[0]) - (b[0] - a[0]) * (c[2] - a[2]), (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])];
+    if (n[0] * h[0] + n[1] * h[1] + n[2] * h[2] < 0) out.push(...a, ...c, ...b); else out.push(...a, ...b, ...c);
+  };
+  const top3 = [], under = [], fascia = [], trim = [];
+  const eps = ((seed * 7 + 3) % 5) * 0.0004;                       // a hair apart from the other tiers' pieces
+  for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    const px = -dz, pz = dx, hint = [dx * 0.4, 1, dz * 0.4], hdn = [-dx * 0.4, -1, -dz * 0.4];
+    const P = (u, t, off = 0, drop = 0) => { const r = hw - (hw - top) * t, y = ye + rise * prof(t) + lift(u, t) + off - drop; return [ex + dx * r + px * u * r, y, ez + dz * r + pz * u * r]; };
+    const V = [], W = [];
+    for (let j = 0; j <= NT; j++) {
+      const t = j / NT, row = [], rw = [];
+      for (let i = 0; i <= NU; i++) {
+        const u = -1 + 2 * i / NU, fade = Math.min(1, (1 - Math.abs(u)) * hw / 0.4) * (j === NT ? 0.4 : 1);
+        row.push(P(u, t, (i & 1) * amp * fade + eps));
+        rw.push(P(u, t, 0, 0.16));
+      }
+      V.push(row); W.push(rw);
     }
-    bag.add(M, lathe([[0.2 * s, 0], [0.3 * s, 0.3 * s], [0.32 * s, 0.58 * s], [0.2 * s, 0.7 * s], [0.001, 0.72 * s]], 8).translate(x, top + 0.74 * s, z));
-    bag.add('gilt_bronze', lathe([[0.3 * s, 0], [0.31 * s, 0.05 * s], [0.3 * s, 0.1 * s]], 8, null, x, top + 0.78 * s, z));
-    bag.add(M, lathe([[0.2 * s, 0], [0.3 * s, 0.1 * s], [0.34 * s, 0.3 * s], [0.25 * s, 0.5 * s], [0.12 * s, 0.56 * s]], 8, null, x, top + 1.1 * s, z));
-    bag.add(M, rod([x, top + 1.62 * s, z], [x, top + 1.74 * s, z], 0.07 * s, 6));
-    bag.add(M, ball(0.13 * s).translate(x, top + 1.7 * s, z));
-    for (const v of [-1, 1]) bag.add(M, rod([F(0.12 * s), top + 1.82 * s, z + v * 0.02 * s], [F(0.14 * s), top + 1.8 * s, z + v * 0.17 * s], 0.012 * s, 4));      // the moustache
-    bag.add(M, lathe([[0.15 * s, 0], [0.17 * s, 0.07 * s], [0.12 * s, 0.17 * s], [0.001, 0.2 * s]], 8, null, x, top + 1.9 * s, z));                                   // the turban
-    // the right arm raised to the club, the left bearing the shield
-    bag.add(M, rod([x, top + 1.58 * s, z - 0.3 * s], [F(0.3 * s), top + 1.5 * s, z - 0.48 * s], 0.065 * s, 6));
-    bag.add(M, rod([F(0.3 * s), top + 1.5 * s, z - 0.48 * s], [F(0.38 * s), top + 1.82 * s, z - 0.46 * s], 0.055 * s, 6));
-    bag.add(M, rod([F(0.38 * s), top + 1.5 * s, z - 0.46 * s], [F(0.38 * s), top + 2.2 * s, z - 0.46 * s], 0.042 * s, 6));
-    bag.add(M, lathe([[0.06 * s, 0], [0.11 * s, 0.1 * s], [0.12 * s, 0.25 * s], [0.07 * s, 0.34 * s], [0.001, 0.36 * s]], 7, null, F(0.38 * s), top + 1.9 * s, z - 0.46 * s));
-    bag.add(M, rod([x, top + 1.58 * s, z + 0.3 * s], [F(0.25 * s), top + 1.25 * s, z + 0.34 * s], 0.065 * s, 6));
-    bag.add('iron', rod([F(0.27 * s), top + 1.2 * s, z + 0.36 * s], [F(0.33 * s), top + 1.2 * s, z + 0.36 * s], 0.24 * s, 10));
-    bag.add('gilt_bronze', ballAt(0.07 * s, [F(0.36 * s), top + 1.2 * s, z + 0.36 * s]));
-    return;
+    for (let j = 0; j < NT; j++) for (let i = 0; i < NU; i++) {
+      tri(top3, V[j][i], V[j][i + 1], V[j + 1][i + 1], hint); tri(top3, V[j][i], V[j + 1][i + 1], V[j + 1][i], hint);
+    }
+    // the underside: coarse (it is smooth), every fourth column
+    for (let j = 0; j < NT; j++) for (let i = 0; i < NU; i += 4) {
+      const i1 = Math.min(NU, i + 4);
+      tri(under, W[j][i], W[j][i1], W[j + 1][i1], hdn); tri(under, W[j][i], W[j + 1][i1], W[j + 1][i], hdn);
+    }
+    // the fascia: a red board 0.38 high and 0.1 thick at the eave edge, rising with the corners; a gilt moulding along its foot
+    for (let i = 0; i < NU; i += 4) {
+      const u0 = -1 + 2 * i / NU, u1 = -1 + 2 * Math.min(NU, i + 4) / NU;
+      const o = (u, dd, y) => { const p = P(u, 0, 0, 0); return [p[0] - dx * dd, p[1] + y, p[2] - dz * dd]; };
+      const a = o(u0, 0, -0.38), b = o(u1, 0, -0.38), c = o(u1, 0, 0), d = o(u0, 0, 0);
+      tri(fascia, a, b, c, [dx, 0, dz]); tri(fascia, a, c, d, [dx, 0, dz]);
+      const g0 = o(u0, -0.03, -0.38), g1 = o(u1, -0.03, -0.38), g2 = o(u1, -0.03, -0.3), g3 = o(u0, -0.03, -0.3);
+      tri(trim, g0, g1, g2, [dx, 0, dz]); tri(trim, g0, g2, g3, [dx, 0, dz]);
+    }
   }
-  // the quadrupeds and the seated goddess: a body, a chest, a head
-  if (kind === 'elephant') {
-    along(bag, M, lathe([[0.001, -0.7], [0.5, -0.5], [0.58, 0], [0.5, 0.6], [0.001, 0.8]], 10), x, top + 0.95 * s, z, sx, s);
-    for (const [u, v] of [[-0.45, -0.28], [-0.45, 0.28], [0.4, -0.28], [0.4, 0.28]]) bag.add(M, bx(F(u * s) - 0.11 * s, top, z + v * s - 0.11 * s, F(u * s) + 0.11 * s, top + 0.75 * s, z + v * s + 0.11 * s));
-    bag.add(M, ball(0.3 * s).translate(F(0.88 * s), top + 1.3 * s, z));
-    for (const v of [-0.33, 0.33]) bag.add(M, bx(F(0.74 * s) - 0.03 * s, top + 1.1 * s, z + v * s - 0.17 * s, F(0.74 * s) + 0.03 * s, top + 1.55 * s, z + v * s + 0.17 * s));
-    bag.add(M, rod([F(1.05 * s), top + 1.25 * s, z], [F(1.2 * s), top + 0.9 * s, z], 0.1 * s, 7));
-    bag.add(M, ball(0.2 * s).translate(F(0.8 * s), top + 1.38 * s, z - 0.17 * s)); bag.add(M, ball(0.2 * s).translate(F(0.8 * s), top + 1.38 * s, z + 0.17 * s));            // the twin bosses of the brow
-    bag.add(M, rod([F(1.2 * s), top + 0.9 * s, z], [F(1.35 * s), top + 0.6 * s, z], 0.07 * s, 7)); bag.add(M, rod([F(1.35 * s), top + 0.6 * s, z], [F(1.3 * s), top + 0.32 * s, z], 0.055 * s, 7));   // the trunk curls down
-    bag.add(M, rod([F(-0.7 * s), top + 1.1 * s, z], [F(-0.78 * s), top + 0.4 * s, z], 0.03 * s, 5));                      // the tail
-    bag.add('cloth_red', bx(F(-0.38 * s), top + 1.44 * s, z - 0.4 * s, F(0.3 * s), top + 1.52 * s, z + 0.4 * s)); bag.add('gilt_bronze', bx(F(-0.4 * s), top + 1.5 * s, z - 0.42 * s, F(0.32 * s), top + 1.54 * s, z - 0.38 * s)); bag.add('gilt_bronze', bx(F(-0.4 * s), top + 1.5 * s, z + 0.38 * s, F(0.32 * s), top + 1.54 * s, z + 0.42 * s));   // the saddle cloth
-    bag.add('gilt_bronze', bx(F(0.86 * s), top + 1.5 * s, z - 0.12 * s, F(0.92 * s), top + 1.68 * s, z + 0.12 * s));        // the frontlet
-    bag.add('ivory', rod([F(1.0 * s), top + 1.1 * s, z - 0.1 * s], [F(1.3 * s), top + 0.95 * s, z - 0.13 * s], 0.025 * s, 5));
-    bag.add('ivory', rod([F(1.0 * s), top + 1.1 * s, z + 0.1 * s], [F(1.3 * s), top + 0.95 * s, z + 0.13 * s], 0.025 * s, 5));
-    return;
-  }
-  // lion, griffin (with wings), the goddesses (lion-bodied, crowned)
-  along(bag, M, lathe([[0.001, -0.5], [0.28, -0.3], [0.34, 0], [0.3, 0.4], [0.001, 0.55]], 9), x, top + 0.7 * s, z, sx, s);
-  for (const [u, v] of [[-0.3, -0.2], [-0.3, 0.2], [0.34, -0.17], [0.34, 0.17]]) bag.add(M, bx(F(u * s) - 0.07 * s, top, z + v * s - 0.07 * s, F(u * s) + 0.07 * s, top + 0.5 * s, z + v * s + 0.07 * s));
-  bag.add(M, ball(0.23 * s).translate(F(0.5 * s), top + 1.0 * s, z));
-  bag.add(M, lathe([[0.001, 0], [0.3 * s, 0.05 * s], [0.34 * s, 0.25 * s], [0.001, 0.4 * s]], 8).rotateZ(-Math.PI / 2 * sx).translate(F(0.42 * s), top + 0.98 * s, z));   // the mane
-  bag.add(M, rod([F(-0.5 * s), top + 0.75 * s, z], [F(-0.68 * s), top + 0.95 * s, z], 0.04 * s, 5)); bag.add(M, rod([F(-0.68 * s), top + 0.95 * s, z], [F(-0.62 * s), top + 1.2 * s, z], 0.035 * s, 5));   // the tail
-  bag.add(M, ball(0.19 * s).translate(F(-0.3 * s), top + 0.3 * s, z - 0.2 * s)); bag.add(M, ball(0.19 * s).translate(F(-0.3 * s), top + 0.3 * s, z + 0.2 * s));      // the haunches
-  if (kind === 'griffin') for (const v of [-1, 1]) for (let k = 0; k < 4; k++) bag.add(M, bx(F((-0.05 - 0.1 * k) * s), top + (0.9 + 0.04 * k) * s, z + v * 0.36 * s - 0.02 * s, F((-0.25 - 0.1 * k) * s), top + (1.55 - 0.1 * k) * s, z + v * 0.36 * s + 0.02 * s));
-  if (kind === 'goddess') for (const v of [-1, 1]) for (const [dy, dv] of [[0.2, 0.2], [-0.05, 0.28]]) bag.add(M, rod([F(0.45 * s), top + 1.0 * s, z + v * 0.1 * s], [F(0.52 * s), top + (1.0 + dy) * s, z + v * dv * s], 0.025 * s, 5));
-  if (kind === 'goddess') { bag.add('gilt_bronze', lathe([[0.001, 0], [0.16 * s, 0], [0.12 * s, 0.2 * s], [0.001, 0.3 * s]], 8).translate(F(0.5 * s), top + 1.22 * s, z)); }
+  bag.add('roof_tile', fromTriangles(top3)); bag.add('timber_red', fromTriangles(under));
+  bag.add('timber_red', fromTriangles(fascia)); bag.add('gilt_bronze', fromTriangles(trim));
 }
 
 /**
@@ -129,6 +121,13 @@ export function pagoda(el, { bag, col, lights }) {
   for (let k = 0; k < n; k++) {
     const r = rect(-P.hw[k], -P.hw[k], uFace[k], P.hw[k]), y1 = (k + 1) * h;
     bag.add('brick', box(r[0], 0, r[1], r[2], y1 - 0.1, r[3])); bag.add(STONE, box(r[0] - 0.06, y1 - 0.1, r[1] - 0.06, r[2] + 0.06, y1, r[3] + 0.06));
+    // a moulded stone base course, a string course under the coping, and stone pilaster strips dividing the brick face into panels [inferred]
+    const pe = (a, b, c, d, e2, f) => bag.add(STONE, box(a, b, c, d, e2, f));
+    const y0 = k * h;
+    pe(r[0] - 0.1, y0, r[1] - 0.1, r[2] + 0.1, y0 + 0.25, r[3] + 0.1);
+    pe(r[0] - 0.03, y1 - 0.34, r[1] - 0.03, r[2] + 0.03, y1 - 0.24, r[3] + 0.03);
+    const np = Math.max(2, Math.round(P.hw[k] / 1.6));
+    for (let j = 1; j < np; j++) { const v = -P.hw[k] + 2 * P.hw[k] * j / np; pe(r[0] - 0.03, y0 + 0.28, cz + v - 0.14, r[0], y1 - 0.34, cz + v + 0.14); pe(r[2], y0 + 0.28, cz + v - 0.14 - 0.0004 * j, r[2] + 0.03, y1 - 0.34, cz + v + 0.14); pe(X(0) + v - 0.14 - 0.0004 * j, y0 + 0.28, r[3], X(0) + v + 0.14, y1 - 0.34, r[3] + 0.03); pe(X(0) + v - 0.14, y0 + 0.28, r[1] - 0.03, X(0) + v + 0.14, y1 - 0.34, r[1]); }
     col.rect(r, 0, y1); col.floor(r, y1);
   }
   const W = P.stair ?? 4.4, m = 4;
@@ -137,7 +136,7 @@ export function pagoda(el, { bag, col, lights }) {
     bag.add(STONE, box(r[0], 0, r[1], r[2], t, r[3])); col.rect(r, 0, t); col.floor(r, t);
   }
   const kinds = el.guard ?? ['wrestler', 'elephant', 'lion', 'griffin', 'goddess'];
-  for (let k = 0; k < n && k < kinds.length; k++) for (const v of [-1, 1]) guardian(bag, col, kinds[k], X(uFace[k] + 1.25), k * h, cz + v * (W / 2 + 1.05), sx, 0.85 + 0.12 * k);
+  for (let k = 0; k < n && k < kinds.length; k++) for (const v of [-1, 1]) guardian(bag, col, kinds[k], X(uFace[k] + 1.25), k * h, cz + v * (W / 2 + 1.05), sx, 0.85 + 0.12 * k, v);
   // the roofs and the walls of the tiers
   let yb = n * h - 0.02;
   const R = el.roofs;
@@ -167,9 +166,33 @@ export function pagoda(el, { bag, col, lights }) {
       bag.add('brick', box(c0[0], yb, c0[1], c0[2], ye, c0[3]));
       if (i === 0) col.rect(c0, 0, ye + q.rise);
     }
+    // the carved cornice beam and the base band of the tier's wall, and its corner posts [inferred: the usual Newar framing of a brick storey]
+    if (!(i === 0 && el.chamber)) {
+      bag.add('timber_red', bx(c0[0] - 0.12, ye - 0.58, c0[1] - 0.12, c0[2] + 0.12, ye - 0.26, c0[3] + 0.12));
+      bag.add('gilt_bronze', bx(c0[0] - 0.14, ye - 0.4, c0[1] - 0.14, c0[2] + 0.14, ye - 0.36, c0[3] + 0.14));
+      bag.add('timber_red', bx(c0[0] - 0.07, yb, c0[1] - 0.07, c0[2] + 0.07, yb + 0.24, c0[3] + 0.07));
+      for (const sa of [-1, 1]) for (const sb of [-1, 1]) { const qx = cx + sa * q.core, qz = cz + sb * q.core; bag.add('timber_red', bx(qx - 0.16, yb + 0.24, qz - 0.16, qx + 0.16, ye - 0.58, qz + 0.16)); }
+    }
+    // the colonnade of the ground tier: 20 wooden columns, six to a face, each on a stone base and under a carved bracket (meth), under a tie beam [stated: khwopa-raks, 'colonnade of wooden poles and pillars', 20 columns, 6 on each face]
+    if (i === 0 && el.colonnade) {
+      const cc = q.core + 0.38, ring = [];
+      for (let k = 0; k < 6; k++) { const v = -cc + 2 * cc * k / 5; ring.push([cc, v], [-cc, v]); if (k > 0 && k < 5) ring.push([v, cc], [v, -cc]); }
+      ring.forEach(([a, b], k) => {
+        const qx = cx + a, qz = cz + b, th = 0.0004 * (k % 5);
+        bag.add(STONE, bx(qx - 0.3, yb, qz - 0.3, qx + 0.3, yb + 0.22, qz + 0.3));
+        bag.add('timber_red', lathe([[0.2 + th, 0], [0.19, 0.3], [0.17, 1.2], [0.16, 2.0]], 8, null, qx, yb + 0.22, qz));
+        bag.add('gilt_bronze', lathe([[0.215 + th, 0], [0.215, 0.05], [0.17, 0.06]], 8, null, qx, yb + 0.22, qz));
+        bag.add('timber_red', bx(qx - 0.26, ye - 0.58, qz - 0.26, qx + 0.26, ye - 0.3, qz + 0.26));
+        col.circle(qx, qz, 0.22, yb, ye - 0.3);
+      });
+      // the tie beam over the columns, its face carved with a gilt band
+      const bw = cc + 0.26;
+      for (const [a0, b0, a1, b1] of [[-bw, -bw, bw, -cc + 0.26], [-bw, cc - 0.26, bw, bw], [-bw, -cc + 0.26, -cc + 0.26, cc - 0.26], [cc - 0.26, -cc + 0.26, bw, cc - 0.26]]) bag.add('timber_red', bx(cx + a0, ye - 0.3, cz + b0, cx + a1, ye - 0.04, cz + b1));
+      bag.add('gilt_bronze', bx(cx - bw - 0.02, ye - 0.22, cz - bw - 0.02, cx + bw + 0.02, ye - 0.16, cz + bw + 0.02));
+    }
     // the openings of the tier: a door on the front at the first, a lattice window on every face above [stated: a chamber with gates on the four sides — oocities]
     for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-      const dw = 0.75, door = i === 0 && dx === sx, w = door ? 0.9 : 0.55, hh = door ? 2.0 : 1.1, y0 = door ? yb : yb + 0.8, off = 0.03;
+      const dw = 0.75, door = i === 0 && dx === sx, w = door ? 0.9 : Math.min(0.8, 0.25 * q.core + 0.2), hh = door ? 2.0 : 1.45, y0 = door ? yb : yb + 0.6, off = 0.03;
       const px = cx + dx * (q.core + off), pz = cz + dz * (q.core + off);
       if (!(door && el.chamber)) bag.add('opening', bx(px - (dz ? w : 0.02), y0, pz - (dx ? w : 0.02), px + (dz ? w : 0.02), y0 + hh, pz + (dx ? w : 0.02)));
       const fo = 0.08, fx = cx + dx * (q.core + fo), fz = cz + dz * (q.core + fo);
@@ -180,12 +203,16 @@ export function pagoda(el, { bag, col, lights }) {
       const fb = (mat, t0, t1, ya, yb2, o0, o1) => bag.add(mat, bx(cx + (dx ? dx * (q.core + o0) : t0), ya, cz + (dz ? dz * (q.core + o0) : t0), cx + (dx ? dx * (q.core + o1) : t1), yb2, cz + (dz ? dz * (q.core + o1) : t1)));
       if (!door) {
         // the lattice of the window (ankhi jhyal): bars each way behind a carved, gilt-headed frame [stated: windows and doors lavishly carved and painted]
-        const nb = 5;
-        for (let k = 1; k < nb; k++) { const t = -w + 2 * w * k / nb; fb('wood_dark', t - 0.016, t + 0.016, y0, y0 + hh, 0.0, 0.05); }
-        for (let k = 1; k < 4; k++) { const yy = y0 + hh * k / 4; fb('wood_dark', -w, w, yy - 0.016, yy + 0.016, 0.0, 0.05); }
-        fb('gilt_bronze', -w - 0.06, w + 0.06, y0 + hh + 0.14, y0 + hh + 0.2, 0.04, 0.14);
-        fb('gilt_bronze', -0.12, 0.12, y0 + hh + 0.2, y0 + hh + 0.34, 0.06, 0.12);
-        fb('timber_red', -w - 0.1, w + 0.1, y0 - 0.1, y0 - 0.04, 0.06, 0.2);
+        const nb = 8;
+        for (let k = 1; k < nb; k++) { const t = -w + 2 * w * k / nb; fb('wood_dark', t - 0.014, t + 0.014, y0, y0 + hh, 0.0, 0.05); }
+        for (let k = 1; k < 6; k++) { const yy = y0 + hh * k / 6; fb('wood_dark', -w, w, yy - 0.014, yy + 0.014, 0.0, 0.05); }
+        // a carved lintel board with three gilt roundels over the head, stepped gilt cornice, brackets under the sill [inferred from the Newar window's form]
+        fb('timber_red', -w - 0.3, w + 0.3, y0 + hh + 0.14, y0 + hh + 0.46, 0.0, 0.12);
+        for (const t of [-w * 0.6, 0, w * 0.6]) fb('gilt_bronze', t - 0.09, t + 0.09, y0 + hh + 0.2, y0 + hh + 0.4, 0.12, 0.15);
+        fb('gilt_bronze', -w - 0.36, w + 0.36, y0 + hh + 0.46, y0 + hh + 0.52, 0.0, 0.2);
+        fb('gilt_bronze', -0.14, 0.14, y0 + hh + 0.52, y0 + hh + 0.72, 0.04, 0.14);
+        fb('timber_red', -w - 0.1, w + 0.1, y0 - 0.1, y0 - 0.04, 0.06, 0.24);
+        for (const t of [-w * 0.8, w * 0.8]) fb('timber_red', t - 0.05, t + 0.05, y0 - 0.34, y0 - 0.1, 0.06, 0.24);
       } else if (!el.chamber) {
         // the shut door: two painted leaves with gilt bosses, the carved jambs, and a gilt torana (an arch with a kirtimukha) over the lintel [inferred: the sanctum is closed]
         fb('wood_painted', -w, -0.02, y0, y0 + hh, 0.0, 0.06); fb('wood_painted', 0.02, w, y0, y0 + hh, 0.0, 0.06);
@@ -201,22 +228,24 @@ export function pagoda(el, { bag, col, lights }) {
         fb('gilt_bronze', -dw - 0.2, dw + 0.2, yb + 2.1, yb + 2.2, -0.04, 0.14);
       }
     }
-    // the eave: a red fascia, the roof in two slopes (a gentle curve), gilt hip ridges, upturned corners
+    // the eave: a red fascia that rises with the upturned corners, the roof of tile courses on a sagging profile, gilt hip ridges ending in curls
     const e = rect(-q.hw, -q.hw, q.hw, q.hw), ex = (e[0] + e[2]) / 2, ez = (e[1] + e[3]) / 2;
-    bag.add('timber_red', bx(e[0], ye - 0.38, e[1], e[2], ye, e[1] + 0.12)); bag.add('timber_red', bx(e[0], ye - 0.38, e[3] - 0.12, e[2], ye, e[3]));
-    bag.add('timber_red', bx(e[0], ye - 0.38, e[1] + 0.12, e[0] + 0.12, ye, e[3] - 0.12)); bag.add('timber_red', bx(e[2] - 0.12, ye - 0.38, e[1] + 0.12, e[2], ye, e[3] - 0.12));
-    const hw2 = q.hw - run * 0.38, y2 = ye + q.rise * 0.3;
-    bag.add('roof_tile', frustum([e[0], e[1], e[2], e[3]], ye, y2, run * 0.38, run * 0.38, run * 0.38, run * 0.38, { noBottom: false }));
-    bag.add('roof_tile', frustum([ex - hw2, ez - hw2, ex + hw2, ez + hw2], y2, ye + q.rise, hw2 - next, hw2 - next, hw2 - next, hw2 - next, { noBottom: true }));
+    const U = 0.04 * q.hw, lf = (u, t) => U * Math.abs(u) ** 4 * (1 - t) ** 1.5;
+    tileRoof(bag, ex, ez, q.hw, next, ye, q.rise, U, i);
     for (const [a, b] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
-      bag.add('gilt_bronze', rod([ex + a * q.hw, ye + 0.05, ez + b * q.hw], [ex + a * next, ye + q.rise, ez + b * next], 0.07, 5));
-      bag.add('gilt_bronze', lathe([[0.1, 0], [0.06, 0.18], [0.001, 0.4]], 5, null, ex + a * (q.hw - 0.05), ye + 0.05, ez + b * (q.hw - 0.05)));
+      // the hip ridge, a gilt rod along the corner, and at the eave the curl of its end
+      const pts = []; for (let j = 0; j <= 6; j++) { const t = j / 6, r = q.hw - run * t; pts.push([ex + a * r, ye + q.rise * prof(t) + lf(1, t) + 0.07, ez + b * r]); }
+      for (let j = 0; j < 6; j++) bag.add('gilt_bronze', rod(pts[j], pts[j + 1], 0.075, 5));
+      const c0 = [ex + a * (q.hw + 0.02), ye + lf(1, 0) + 0.02, ez + b * (q.hw + 0.02)], k = 0.7071;
+      bag.add('gilt_bronze', rod(c0, [c0[0] + a * 0.16 * k, c0[1] + 0.18, c0[2] + b * 0.16 * k], 0.06, 5));
+      bag.add('gilt_bronze', rod([c0[0] + a * 0.16 * k, c0[1] + 0.18, c0[2] + b * 0.16 * k], [c0[0] + a * 0.1 * k, c0[1] + 0.42, c0[2] + b * 0.1 * k], 0.042, 5));
+      bag.add('gilt_bronze', rod([c0[0] + a * 0.1 * k, c0[1] + 0.42, c0[2] + b * 0.1 * k], [c0[0] - a * 0.06 * k, c0[1] + 0.56, c0[2] - b * 0.06 * k], 0.026, 5));
     }
     // the struts, at 45° from the wall to the eave, each a carved board with the forms of the Devi [stated: 108 on the Nyatapola — 7, 6, 6, 5, 3 on each face]
     const ns = el.struts ? el.struts[i] : Math.max(3, Math.round(q.hw / 1.35));
     for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) for (let s = 0; s < ns; s++) {
-      const v = (-q.core + 0.6) + (2 * q.core - 1.2) * (ns > 1 ? s / (ns - 1) : 0.5), ou = Math.min(ov * 0.82, 2.4);
-      const p0 = [cx + (dx ? dx * (q.core + 0.04) : v), ye - 0.3 - ou, cz + (dz ? dz * (q.core + 0.04) : v)], p1 = [cx + (dx ? dx * (q.core + ou) : v), ye - 0.38, cz + (dz ? dz * (q.core + ou) : v)];
+      const v = (-q.core + 0.6) + (2 * q.core - 1.2) * (ns > 1 ? s / (ns - 1) : 0.5), ou = Math.min(ov * 0.82, 2.4), bo = i === 0 && el.colonnade ? 0.58 : 0;
+      const p0 = [cx + (dx ? dx * (q.core + 0.04 + bo) : v), ye - 0.3 - ou, cz + (dz ? dz * (q.core + 0.04 + bo) : v)], p1 = [cx + (dx ? dx * (q.core + ou + bo) : v), ye - 0.38, cz + (dz ? dz * (q.core + ou + bo) : v)];
       tunal(bag, p0, p1, dx ? [0, 0, 1] : [1, 0, 0], Math.min(0.4, 0.2 + 0.07 * q.hw));
     }
     // the bells along the eave [stated: 528 wind bells, the most on the lowest roof]
@@ -225,7 +254,8 @@ export function pagoda(el, { bag, col, lights }) {
     for (let b = 0; b < nb; b++) {
       let d = (b + 0.5) / nb * per, x, z;
       if (d < 2 * q.hw) { x = ex - q.hw + d; z = ez - q.hw; } else if (d < 4 * q.hw) { x = ex + q.hw; z = ez - q.hw + (d - 2 * q.hw); } else if (d < 6 * q.hw) { x = ex + q.hw - (d - 4 * q.hw); z = ez + q.hw; } else { x = ex - q.hw; z = ez + q.hw - (d - 6 * q.hw); }
-      bag.add('bronze', lathe([[0.001, 0], [0.09, 0.02], [0.07, 0.16], [0.03, 0.22], [0.001, 0.22]], 5, null, x, ye - 0.62, z));
+      const bu = Math.min(Math.abs(x - ex), Math.abs(z - ez)) / q.hw;
+      bag.add('bronze', lathe([[0.001, 0], [0.09, 0.02], [0.07, 0.16], [0.03, 0.22], [0.001, 0.22]], 5, null, x, ye - 0.62 + lf(bu, 0), z));
     }
     yb = ye + q.rise - 0.15;
   });
