@@ -17,6 +17,9 @@ import { ivanTower, archangel, annunciation } from './kremlin.js';
 import { kitaiWall } from './kitai.js';
 import { facetsPalace } from './palace.js';
 import { chapel } from './chapel.js';
+import { patternDome } from './domes.js';
+import { tentDress } from './tent.js';
+import { gateFront } from './gate.js';
 import { wayside } from './street.js';
 import { landing, raft } from './river.js';
 import { dressHouse, yardbuild, garden } from './yard.js';
@@ -24,7 +27,7 @@ import { dressHouse, yardbuild, garden } from './yard.js';
 const BR = 'brick_kremlin', WS = 'limestone', G = 'gilt_bronze', LOG = 'log_pine';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** An onion dome of radius r on its drum (drum height dh) at (x, y, z): the drum with its slit windows and white-stone cornice, the sheet dome with its standing seams (ribs), the cross on top. */
-export function onion(bag, x, y, z, r, dh, mat, drum = BR, ribs = 16) {
+export function onion(bag, x, y, z, r, dh, mat, drum = BR, ribs = 16, pat = null) {
   bag.add(drum, lathe([[r * 0.8, 0], [r * 0.8, dh], [r * 0.9, dh + 0.3], [0.001, dh + 0.3]], 16, null, x, y, z));
   bag.add(WS, lathe([[r * 0.8 + 0.01, 0], [r * 0.8 + 0.12, 0.08], [r * 0.8 + 0.12, 0.26], [r * 0.8 + 0.01, 0.34]], 16, null, x, y + dh - 0.42, z));
   bag.add(WS, lathe([[r * 0.8 + 0.01, 0], [r * 0.8 + 0.1, 0.06], [r * 0.8 + 0.1, 0.2], [r * 0.8 + 0.01, 0.26]], 16, null, x, y + 0.05, z));
@@ -32,9 +35,15 @@ export function onion(bag, x, y, z, r, dh, mat, drum = BR, ribs = 16) {
     const a = (k + 0.5) / 8 * Math.PI * 2, R = r * 0.8 + 0.02, w = Math.min(0.22, r * 0.09), c = Math.cos(a), sn = Math.sin(a);
     bag.add('opening', orientedBox([x + c * R - sn * w, z + sn * R + c * w], [x + c * R + sn * w, z + sn * R - c * w], 0.05, y + dh * 0.3, y + dh * 0.72));
   }
+  if (dh > 1.2) {
+    // the drum's brick ornament: white shafts between the lights, a band of diamond-point brick (rows set off by half a point) under the cornice, a white ring over the base
+    const R0 = r * 0.8, nb = Math.max(20, Math.round(R0 * 9)), tw = (th, i) => 1 + 0.07 * (1 - Math.abs(((th / (Math.PI * 2) * nb + (i % 2) * 0.5) % 1) * 2 - 1)) * (i === 0 || i === 6 ? 0 : 1);
+    bag.add(drum, lathe([0, 1, 2, 3, 4, 5, 6].map((i) => [R0 + 0.0, 0.085 * i]), nb * 2, tw, x, y + dh - 1.2, z));
+    for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2, R = R0 + 0.02, w = 0.09, c = Math.cos(a), sn = Math.sin(a); bag.add(WS, orientedBox([x + c * R - sn * w, z + sn * R + c * w], [x + c * R + sn * w, z + sn * R - c * w], 0.1, y + 0.3, y + dh - 0.45)); }
+  }
   const prof = [[r * 0.85, 0], [r * 1.15, r * 0.55], [r * 1.1, r * 0.95], [r * 0.7, r * 1.45], [r * 0.2, r * 1.95], [0.06, r * 2.3], [0.001, r * 2.3]];
   const last = prof.length - 1, mod = ribs ? (th, i) => (i === 0 || i >= last - 1 ? 1 : 1 + 0.035 * Math.max(0, Math.cos(th * ribs)) ** 24) : null;
-  bag.add(mat, lathe(prof, ribs ? ribs * 4 : 16, mod, x, y + dh + 0.3, z));
+  if (pat) patternDome(bag, x, y + dh + 0.3, z, r, mat, pat[1], pat[0]); else bag.add(mat, lathe(prof, ribs ? ribs * 4 : 16, mod, x, y + dh + 0.3, z));
   const top = y + dh + 0.3 + r * 2.3;
   bag.add(G, lathe([[0.001, 0], [r * 0.14, r * 0.05], [r * 0.16, r * 0.16], [r * 0.12, r * 0.28], [0.001, r * 0.3]], 10, null, x, top - 0.02, z));   // the apple under the cross
   bag.add(G, box(x - 0.06, top, z - 0.06, x + 0.06, top + r * 0.9 + 0.5, z + 0.06));
@@ -51,7 +60,7 @@ export function kokoshnikShape(w, h1, h2) {
   return sh;
 }
 /** A kokoshnik gable standing on a polygonal drum: brick face, white-stone border behind; centre at angle a, apothem R, from y. */
-function kokoshnik(bag, cx, cz, a, R, y, w, h1, h2, th = 0.5) {
+export function kokoshnik(bag, cx, cz, a, R, y, w, h1, h2, th = 0.5) {
   const c = Math.cos(a), sn = Math.sin(a), at = (rr, u) => [cx + c * rr - sn * u, cz + sn * rr + c * u];
   bag.add(WS, slab(kokoshnikShape(w + 0.4, h1 + 0.1, h2 + 0.2), th * 0.6, at(R - th * 0.25, -(w + 0.4) / 2), at(R - th * 0.25, (w + 0.4) / 2), y, 10));
   bag.add(BR, slab(kokoshnikShape(w, h1, h2), th * 0.5, at(R + th * 0.25, -w / 2), at(R + th * 0.25, w / 2), y + 0.1, 10));
@@ -156,10 +165,12 @@ function pokrov(el, { bag, col, lights }) {
     bag.add(WS, orientedBox([cx + c * R - sn * (w + 0.3), cz + sn * R + c * (w + 0.3)], [cx + c * R + sn * (w + 0.3), cz + sn * R - c * (w + 0.3)], 0.04, yb + 8.7 * s, yb + 14.1 * s));
   }
   bag.add(BR, lathe([[6.2 * s, 0], [1.4 * s, 18 * s], [0.001, 18 * s]], 8, null, cx, yb + 25 * s, cz));
-  for (let k = 0; k < 8; k++) { const a = (k + 0.5) / 8 * Math.PI * 2; for (const t of [0.15, 0.45, 0.75]) { const r = (6.2 * s * (1 - t) + 1.4 * s * t) * ap; bag.add(WS, box(cx + Math.cos(a) * r - 0.15, yb + 25 * s + 18 * s * t - 0.15, cz + Math.sin(a) * r - 0.15, cx + Math.cos(a) * r + 0.15, yb + 25 * s + 18 * s * t + 0.15, cz + Math.sin(a) * r + 0.15)); } }
+  tentDress(bag, cx, cz, yb, s, ap);
   onion(bag, cx, yb + 43 * s, cz, 1.4 * s, 1.5 * s, G, BR, 12);
   // the four great chapels on the axes, the four small ones on the diagonals (./chapel.js: the faceted drum, its windows and portal; the great ones hollow)
   const mats = ['tile_green', G, 'tile_green', G, G, 'tile_green', G, 'tile_green'];
+  // each chapel's dome has its own pattern in relief: [pattern, second colour]; the colours and the assignment are ours
+  const DOMES = [['spiral', G], ['zigzag', 'tile_green'], ['facets', G], ['scales', BR], ['lattice', 'tile_green'], ['diamonds', G], ['spiralR', BR], ['gadroon', G]];
   for (let k = 0; k < 8; k++) {
     const big = k % 2 === 0, a = k / 8 * Math.PI * 2 + Math.PI / 2, d = (big ? 14 : 12) * s, r = (big ? 4.6 : 3) * s, h = (big ? 15 : 11) * s, nf = big ? 8 : 12;
     const x = cx + Math.cos(a) * d, z = cz + Math.sin(a) * d;
@@ -170,13 +181,16 @@ function pokrov(el, { bag, col, lights }) {
       const qa = a + q * (big ? Math.PI / 4 : Math.PI / 3), R = r * 0.85 + 0.15;
       kokoshnik(bag, x, z, qa, R, yb + h + 0.6, (big ? 2.4 : 1.7) * s * (big ? 0.95 : 1), 0.5 * s, (big ? 1.5 : 1.1) * s, 0.4);
     }
-    onion(bag, x, yb + h + 2.5 * s, z, (big ? 2.4 : 1.8) * s, (big ? 3 : 2.2) * s, mats[k], BR, big ? 16 : 12);
+    onion(bag, x, yb + h + 2.5 * s, z, (big ? 2.4 : 1.8) * s, (big ? 3 : 2.2) * s, mats[k], BR, big ? 16 : 12, DOMES[k]);
   }
 }
 /** A swallowtail merlon's outline: w wide, H high to the horns' tips, the V notch `notch` deep, a loophole slit in it. */
 function merlonShape(w, H, notch = 0.6) {
   const sh = new Shape();
-  sh.moveTo(0, 0); sh.lineTo(w, 0); sh.lineTo(w, H); sh.lineTo(w / 2, H - notch); sh.lineTo(0, H); sh.lineTo(0, 0);
+  // below its foot, the corbels that carry it out over the wall's face: three teeth hanging
+  sh.moveTo(0, -0.5);
+  for (const c of [0.2, 0.5, 0.8]) { const m = c * w; sh.lineTo(m - 0.17, -0.5); sh.lineTo(m - 0.12, -1.25); sh.lineTo(m + 0.12, -1.25); sh.lineTo(m + 0.17, -0.5); }
+  sh.lineTo(w, -0.5); sh.lineTo(w, H); sh.lineTo(w / 2, H - notch); sh.lineTo(0, H); sh.lineTo(0, -0.5);
   const p = new Path(), q = 0.08; p.moveTo(w / 2 - q, 0.55); p.lineTo(w / 2 + q, 0.55); p.lineTo(w / 2 + q, 1.25); p.lineTo(w / 2 - q, 1.25); p.lineTo(w / 2 - q, 0.55); sh.holes.push(p);
   return sh;
 }
@@ -214,7 +228,11 @@ function kremlinWall(el, { bag, col }) {
       for (let k = 0; k < m; k++) {
         const ta = s0 + k * stepT, tb = ta + stepT, pa = [a[0] + ux * L * ta, a[1] + uz * L * ta], pb = [a[0] + ux * L * tb, a[1] + uz * L * tb], yy = Math.min(yf(...pa), yf(...pb));
         bag.add(BR, orientedBox(pa, pb, th, yy - 3, yy + h, 0.05)); col.segment(pa, pb, th, yy - 3, yy + h);
-        merlons(bag, pa, pb, o, th / 2 - 0.35, yy + h);
+        merlons(bag, pa, pb, o, th / 2 - 0.05, yy + h);
+        // the brick plinth at the foot and, under the parapet, a table of corbels with a cap course: the wall's outside in relief
+        { const W = (u, off) => [pa[0] + (pb[0] - pa[0]) * u + o[0] * off, pa[1] + (pb[1] - pa[1]) * u + o[1] * off], sl2 = Math.hypot(pb[0] - pa[0], pb[1] - pa[1]);
+          bag.add(BR, orientedBox(W(0, th / 2 + 0.1), W(1, th / 2 + 0.1), 0.5, yy - 3, yy + 0.9, 0.0));
+        }
         // the span roof over the wall-walk: its outer slope resting on the merlons, the inner on posts
         const sl = Math.hypot(pb[0] - pa[0], pb[1] - pa[1]), P3 = (u, off, yv) => [pa[0] + ux * u + o[0] * off, yv, pa[1] + uz * u + o[1] * off];
         const eo = th / 2 + 0.35, ei = -(th / 2 + 0.35), ye = yy + h + MH + 0.04, yr = ye + 2.1, t = 0.14;
@@ -252,6 +270,7 @@ function kremlinWall(el, { bag, col }) {
           bag.add('timber', Bx(l0, l0 + 2.1, -g + 0.02, -g + 0.14, yy - 1, gh - 0.3)); bag.add('timber', Bx(l0, l0 + 2.1, g - 0.14, g - 0.02, yy - 1, gh - 0.3));
           for (const yb of [yy + 0.4, yy + 2.6]) { bag.add('iron', Bx(l0 + 0.1, l0 + 2.0, -g + 0.14, -g + 0.16, yb, yb + 0.08)); bag.add('iron', Bx(l0 + 0.1, l0 + 2.0, g - 0.16, g - 0.14, yb, yb + 0.08)); }
         }
+        gateFront(bag, x, z, r, yy, H, gh, ax, g);
       } else { bag.add(BR, box(x - r, yy - 3, z - r, x + r, yy - 3 + H, z + r)); col.rect([x - r, z - r, x + r, z + r], yy - 3, yy - 3 + H); }
       bag.add(BR, box(x - r - 0.5, yy - 3 + H, z - r - 0.5, x + r + 0.5, yy - 1.5 + H, z + r + 0.5));        // the machicolated parapet's corbelled band
       for (let q = 0; q < 6; q++) { const zz = z - r + (q + 0.5) * 2 * r / 6; for (const sx of [-1, 1]) bag.add(BR, box(x + sx * (r + 0.25) - 0.25, yy - 4.2 + H, zz - 0.3, x + sx * (r + 0.25) + 0.25, yy - 3 + H, zz + 0.3)); }
