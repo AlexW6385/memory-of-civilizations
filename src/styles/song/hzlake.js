@@ -149,7 +149,8 @@ export function hzLakePavilion(el, { bag, col }) {
   // ---- inside: a stone table with four drum stools, a paper lantern hung from the apex
   bag.add('granite_grey', lathe([[0.001, 0], [0.45, 0], [0.45, 0.06], [0.16, 0.12], [0.16, 0.6], [0.5, 0.64], [0.5, 0.72], [0.001, 0.72]], 12, null, cx, y, cz));
   for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + Math.PI / 4, sx = cx + Math.cos(a) * 0.95, sz = cz + Math.sin(a) * 0.95; bag.add('granite_grey', lathe([[0.001, 0], [0.2, 0], [0.22, 0.04], [0.2, 0.08], [0.17, 0.12], [0.17, 0.36], [0.22, 0.4], [0.22, 0.44], [0.001, 0.44]], 8, null, sx, y, sz)); }
-  bag.add('timber_red', rod([cx, top - 0.5, cz], [cx, yE + rise * 0.9 - 0.05, cz], 0.01, 3));
+  bag.add('timber_red', rod([poly[0][0], y + H - 0.4, poly[0][1]], [poly[n / 2][0], y + H - 0.4, poly[n / 2][1]], 0.06, 5));
+  bag.add('timber_red', rod([cx, y + H - 1.08, cz], [cx, y + H - 0.4, cz], 0.01, 3));
   bag.add('lamp_paper', lathe([[0.001, -0.22], [0.12, -0.15], [0.17, 0], [0.12, 0.15], [0.001, 0.22]], 8, null, cx, y + H - 1.3, cz));
   // ---- the name board on the first open side, under the lintel
   for (const k of open.slice(0, 1)) {
