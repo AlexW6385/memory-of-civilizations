@@ -3,7 +3,7 @@
 // and the north–south streets, and the grey-brick courtyard houses between the lanes, in plans of
 // a few dozen each so that they build in turn.
 
-import { RADIUS, LEVEL, MOAT, RING, AVENUE, NOTCH, TEMPLE, DANBI, STREET_X, lanes, houses, houseTrees, shopRows, wells } from './layout.js';
+import { WALL, enterable, RADIUS, LEVEL, MOAT, RING, AVENUE, NOTCH, TEMPLE, DANBI, STREET_X, lanes, houses, houseTrees, shopRows, wells } from './layout.js';
 import './townstyle.js';
 import { lifePlans } from './life.js';
 import { thrones } from './plan.js';
@@ -90,7 +90,7 @@ function courtyards() {
   const N = 8;
   for (let i = 0; i < all.length; i += N) {
     const part = all.slice(i, i + N);
-    plans.push(base(`qing-beijing-houses-${i / N}`, part.map((h) => ({ t: 'hutong_house', rect: h.rect, seed: h.seed, gate: h.gate, courts: h.courts, wealth: h.wealth, lod: h.lod, trees: houseTrees(h).map((t) => [t[0], t[1]]) })), 'beijing-site'));
+    plans.push(base(`qing-beijing-houses-${i / N}`, part.map((h) => ({ t: 'hutong_house', rect: h.rect, seed: h.seed, gate: h.gate, courts: h.courts, wealth: h.wealth, lod: h.lod, enter: enterable(h), trees: houseTrees(h).map((t) => [t[0], t[1]]) })), 'beijing-site'));
   }
   return plans;
 }
@@ -186,10 +186,32 @@ function traffic() {
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
+/**
+ * The palace wall's dressing (§35): the red wall's outer faces on a footing of dressed granite (0.9 m, standing 0.12 m proud) and, a metre under
+ * the coping, a corbelled course of moulded grey brick, along the north wall and the west and east walls between the corner platforms and
+ * clear of the flowery gates (the flat red slab of the wall builder had neither).
+ */
+function wallDress() {
+  const [x0, z0, x1, z1] = WALL.rect, h = WALL.h, t = WALL.th / 2, E = [], gap = [60, 70], zA = z0 + 9.2, zB = z1 - 9.2;
+  const run = (xa, za, xb, zb) => { E.push({ t: 'block', rect: [xa, za, xb, zb], y0: 0, y1: 0.9, mat: 'granite_block' }); };
+  for (const sx of [-1, 1]) {
+    const xf = sx * (Math.abs(sx < 0 ? x0 : x1) + t);                                   // the wall's outer face
+    for (const [za, zb] of [[zA, gap[0]], [gap[1], zB]]) {
+      run(sx < 0 ? xf - 0.12 : xf, za, sx < 0 ? xf : xf + 0.12, zb);
+      E.push({ t: 'block', rect: [sx < 0 ? xf - 0.1 : xf, za, sx < 0 ? xf : xf + 0.1, zb], y0: h - 1.35, y1: h - 1.05, mat: 'brick_grey', collide: false });
+      E.push({ t: 'block', rect: [sx < 0 ? xf - 0.16 : xf, za, sx < 0 ? xf : xf + 0.16, zb], y0: h - 1.05, y1: h - 0.9, mat: 'brick_grey', collide: false });
+    }
+  }
+  run(x0 + 9.2, z0 - t - 0.12, x1 - 9.2, z0 - t);
+  E.push({ t: 'block', rect: [x0 + 9.2, z0 - t - 0.1, x1 - 9.2, z0 - t], y0: h - 1.35, y1: h - 1.05, mat: 'brick_grey', collide: false });
+  E.push({ t: 'block', rect: [x0 + 9.2, z0 - t - 0.16, x1 - 9.2, z0 - t], y0: h - 1.05, y1: h - 0.9, mat: 'brick_grey', collide: false });
+  return base('qing-beijing-wall-dress', E);
+}
+
 /** The rooms of the outer court that are walked into (palace-rooms.js): the duty and waiting rooms at the courtyard's south end (shells of plain grey tile here, furnished there) and the pavilions' storerooms. */
 function courtRooms() {
   const shells = COURT_ROOMS.map((r) => ({ t: 'qing_hall', rect: r.rect, y: 0.3, H: 3.6, roof: 'gable', bays: [4, 2], front: r.front, plat: 0.3, pal: HOUSE }));
   const furn = [...COURT_ROOMS.map((r, i) => ({ t: 'bj_palace_room', rect: r.rect, front: r.front, kind: r.kind, y: 0.3, H: 3.6, seed: 40 + i })), ...PAVILION_ROOMS.map((r, i) => ({ t: 'bj_palace_room', ...r, seed: 60 + i }))];
   return [base('qing-beijing-court-rooms', shells), { ...base('qing-beijing-court-rooms-furnished', furn, 'life'), style: 'life', center: [0, 80], near: 230 }, { ...base('qing-beijing-court-rooms-people', palaceRoomFigures(), 'life'), style: 'life', center: [0, 80], near: 230 }];
 }
-export async function town() { return [thrones, ...courtRooms(), streets(), ...surfaces(), temple(), ...traffic(), ...courtyards(), ...shopStreet(), ...(await lifePlans())]; }
+export async function town() { return [thrones, wallDress(), ...courtRooms(), streets(), ...surfaces(), temple(), ...traffic(), ...courtyards(), ...shopStreet(), ...(await lifePlans())]; }
