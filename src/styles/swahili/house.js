@@ -45,15 +45,38 @@ export function house(el, ctx0) {
   const ctx = el.flip ? mirrorCtx(ctx0, (el.rect[1] + el.rect[3]) / 2) : ctx0;
   const { bag, col } = ctx, rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, low = Math.min(el.low ?? y, y) - 0.3;
   if (el.simple) {
-    // the outer ring: a solid block with its street door, step and bench (nothing inside)
-    solid(ctx, C, x0, low, z0, x1, y + 3.4, z1);
-    const f = houseFacts(el), dx = f.doorX;
-    bag.add('wood_dark', box(dx - 0.45, y + 0.05, z0 - 0.04, dx + 0.45, y + 2.1, z0));
-    for (const [a, b] of [[dx - 0.62, dx - 0.45], [dx + 0.45, dx + 0.62]]) bag.add(DRESSED, box(a, y + 0.05, z0 - 0.07, b, y + 2.2, z0));
-    bag.add(DRESSED, box(dx - 0.62, y + 2.1, z0 - 0.07, dx + 0.62, y + 2.2, z0));
-    bag.add(DRESSED, box(x0 - 0.03, y + 3.4, z0 - 0.04, x1 + 0.03, y + 3.48, z0 + 0.4));
-    solid(ctx, C, dx + 0.8, low, z0 - 0.4, dx + 2.2, y + 0.45, z0, false);
-    for (const p of cut(x0, low, x1, y + 0.55, [[dx - 0.7, y, dx + 0.7, y + 3]])) bag.add('plaster_damp', box(p[0], Math.max(p[1], low), z0 - 0.012, p[2], p[3], z0));
+    // the outer ring (docs/settlements/kilwa.md §20): a solid block with its street door, no rooms; its front varied by rule from
+    // its seed: the wall's height (one storey, a taller one, or two with barred upper windows), the carved lintel, the benches
+    // (both sides, one, or none), a window with its shutter, the awning, the goods of its trade by the door, the plaster
+    const r = rng((el.seed || 1) * 13 + 5), f = houseFacts(el), dx = f.doorX, W = x1 - x0, k = (el.seed || 0) % 5;
+    const hh = k === 0 ? 5.9 : 3.0 + 0.35 * ((el.seed || 0) % 4), cf = y + 0.05, mat = r() < 0.5 ? SMOOTH : 'plaster_white';
+    solid(ctx, mat === SMOOTH ? SMOOTH : C, x0, low, z0, x1, y + hh, z1);
+    // the door of dark wood with its dressed frame and a carved lintel of one of four patterns
+    bag.add('wood_dark', box(dx - 0.45, cf, z0 - 0.04, dx + 0.45, cf + 2.05, z0));
+    for (let j = 0; j < 4; j++) bag.add('iron', box(dx - 0.4 + j * 0.2, cf + 1.0, z0 - 0.055, dx - 0.36 + j * 0.2, cf + 1.04, z0 - 0.04));
+    for (const [a, b2] of [[dx - 0.62, dx - 0.45], [dx + 0.45, dx + 0.62]]) bag.add(DRESSED, box(a, cf, z0 - 0.07, b2, cf + 2.15, z0));
+    bag.add(DRESSED, box(dx - 0.62, cf + 2.05, z0 - 0.07, dx + 0.62, cf + 2.15, z0));
+    carvedPanel(ctx, wallFace('x', z0, -1, 0), dx - 0.75, cf + 2.3, dx + 0.75, cf + 2.6, ['cable', 'cable', 'arcade', 'boss', 'darts'][k]);
+    bag.add(DRESSED, box(x0 - 0.03, y + hh, z0 - 0.04, x1 + 0.03, y + hh + 0.08, z0 + 0.4));
+    // the benches (baraza) either side of the door, one side, or none
+    const bm = r() < 0.7 ? 2 : r() < 0.5 ? 1 : 0;
+    for (const sg of [-1, 1]) {
+      if (bm === 0 || (bm === 1 && sg > 0)) continue;
+      const a = sg < 0 ? dx - 0.75 - 1.5 : dx + 0.75, b2 = a + 1.5;
+      if (a > x0 + 0.1 && b2 < x1 - 0.1) { solid(ctx, mat, a, low, z0 - 0.42, b2, cf + 0.42, z0); bag.add(DRESSED, box(a - 0.02, cf + 0.42, z0 - 0.45, b2 + 0.02, cf + 0.47, z0)); }
+    }
+    // a window with its plank shutter on a wider front; upper windows on the two-storey blocks
+    const side = dx - x0 > x1 - dx ? -1 : 1, wx = side < 0 ? (x0 + dx) / 2 : (dx + x1) / 2;
+    if (W > 7.4 && Math.abs(wx - dx) > 1.5 && r() < 0.6) {
+      bag.add('opening', box(wx - 0.28, cf + 1.35, z0 - 0.012, wx + 0.28, cf + 2.0, z0));
+      for (let j = 0; j < 5; j++) bag.add('wood_dark', box(wx - 0.25 + j * 0.125, cf + 1.35, z0 - 0.04, wx - 0.21 + j * 0.125, cf + 2.0, z0 - 0.015));
+      bag.add('wood_dark', box(wx + 0.3, cf + 1.35, z0 - 0.07, wx + 0.6, cf + 2.0, z0 - 0.03));
+    }
+    if (k === 0) for (let x = x0 + 1.4; x < x1 - 1.0; x += 2.6) { bag.add('opening', box(x - 0.25, y + 4.1, z0 - 0.012, x + 0.25, y + 4.9, z0)); for (let j = 0; j < 3; j++) bag.add('wood_dark', box(x - 0.2 + j * 0.2, y + 4.1, z0 - 0.04, x - 0.16 + j * 0.2, y + 4.9, z0 - 0.015)); }
+    // the damp at the foot, one patch of newer limewash, the spout's streak, the trade's goods and (some) a makuti awning
+    for (const p of cut(x0, low, x1, cf + 0.55, [[dx - 0.7, y, dx + 0.7, y + 3]])) bag.add('plaster_damp', box(p[0], Math.max(p[1], low), z0 - 0.012, p[2], p[3], z0));
+    { const w = 0.9 + r() * 1.2, xa = x0 + 0.3 + r() * Math.max(0.1, W - w - 0.6); if (xa + w < dx - 0.7 || xa > dx + 0.7) bag.add(r() < 0.6 ? 'plaster_grey' : 'plaster_white', box(xa, cf + 0.7, z0 - 0.007, xa + w, cf + 0.7 + 0.7 + r() * 0.8, z0)); }
+    dressFront(ctx, { x0, z0, x1, z1, cf, fl: y + 0.35, doorX: dx, rand: r, W, yC: y + hh, trade: f.trade, duka: false, seed: el.seed || 1 }, { holes: [], rec: [], win: null, lamp: null });
     return;
   }
   const fl = y + 0.35, cf = y + 0.05, W = x1 - x0, mx = (x0 + x1) / 2;

@@ -113,8 +113,10 @@ for (let z = -23.9; z < 125; z += 2 * ROW_D + ALLEY) BLOCKS.push([z, z + ROW_D, 
 export const ALLEYS = [];
 for (let i = 1; i < BLOCKS.length; i++) if (Math.abs(BLOCKS[i][0] - BLOCKS[i - 1][1] - ALLEY) < 1e-6) { const z0 = BLOCKS[i - 1][1], z1 = BLOCKS[i][0]; if (z1 > MOSQUE[1] - 7 && z0 < MOSQUE[3] + 7) ALLEYS.push([-222, z0, MOSQUE[0] - 7, z1], [MOSQUE[2] + 7, z0, 124, z1]); else ALLEYS.push([-222, z0, 124, z1]); }
 const heart = (cx, cz) => Math.hypot(cx + 45, cz - 10);
-/** Is the stone house of this lot furnished and open to the visitor? (every house within 95 m of the town's heart but one in seven; beyond it one in eight to 140 m) */
-export const isOpen = (l) => (l.dh < 95 ? l.seed % 7 !== 0 : l.dh < 140 && l.seed % 8 === 0);
+/** The outer ring beyond this distance from the town's heart stays a solid block with a varied front (docs/settlements/kilwa.md §20). */
+export const SIMPLE_FROM = 190;
+/** Is the stone house of this lot furnished and open to the visitor? (every house within 95 m of the town's heart but one in seven; one in two to 140 m; one in three beyond, to the solid outer ring) */
+export const isOpen = (l) => (l.dh < 95 ? l.seed % 7 !== 0 : l.dh < 140 ? l.seed % 2 === 0 : l.dh < SIMPLE_FROM && l.seed % 3 === 0);
 let LOTS = null;
 export function lots() {
   if (LOTS) return LOTS;

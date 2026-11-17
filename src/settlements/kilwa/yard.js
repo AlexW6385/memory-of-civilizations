@@ -21,11 +21,12 @@ export function yard() {
   // ---- the mosque's forecourt (between the mosque street and the north wall)
   const zt = MOSQUE_STREET[3] + 3.4;
   S.push({ t: 'swahili_tank', rect: [-5, zt, -0.8, zt + 2.2], y: height(-3, zt + 1) });
+  S.push({ t: 'swahili_well', at: [5.2, zt + 1.4], y: height(5.2, zt + 1.4) });
   for (const x of [-34, -2, 12]) S.push({ t: 'swahili_bench', rect: [x, MOSQUE_STREET[3] + 0.5, x + 2.2, MOSQUE_STREET[3] + 1.0], y: height(x, MOSQUE_STREET[3] + 0.7) });
   for (const [x, z] of [[-47, -20], [27.5, -20], [-46, 45], [26, 46], [-47, 12], [27, 20]]) S.push({ t: 'coconut_palm', at: [x, z], y: height(x, z) - 0.1, h: 12 + rand() * 6, lean: 1 + rand() * 1.5, dir: rand() * 6.28, seed: Math.floor(rand() * 1e6) });
   // worshippers coming to the doors, an imam in a long robe, men talking, boys with a jar from the tank
   for (let k = 0; k < 9; k++) { const x = -34 + k * 6 + rand() * 3, z = mz0 - 4 - rand() * 6; fig([x, z], height(x, z), [x, mz0], { pose: k % 3 === 0 ? 'talk' : 'stand', over: 'none', hat: pick(['cap', 'cap', 'turban']), carry: rand() < 0.2 ? 'staff' : 'none' }); }
-  fig([-3.5, zt + 3.4], height(-3.5, zt + 3.4), [-3, zt + 1], { pose: 'kneel', over: 'none' });
+  fig([-3.5, zt + 3.9], height(-3.5, zt + 3.9), [-3, zt + 1], { pose: 'kneel', over: 'none' });
   child([0.8, zt + 1.2], height(0.8, zt + 1.2), [-3, zt + 1], { pose: 'stand' });
   // the evening's music before the mosque street: a drum (ngoma), a flute (zumari), the listeners on mats
   { const cx = -26, cz = MOSQUE_STREET[3] + 6.5, y = height(cx, cz);
