@@ -21,16 +21,16 @@ pave([ax - 24, 98, ax + 24, DACI_MAIN[1] - 9]);
 E.push({ t: 'tang_pagoda', c: PAGODA, y: 0 });
 // the main hall (Mahavira): seven bays on a high platform, big bracket sets, deep eaves, the Buddha and his company inside
 const MH = { w: 33.6, d: 14.0 }, MAIN = [ax - MH.w / 2, DACI_MAIN[1] - MH.d / 2, ax + MH.w / 2, DACI_MAIN[1] + MH.d / 2];
-E.push({ t: 'tang_hall', c: DACI_MAIN, w: MH.w, d: MH.d, face: 's', y: 0, plat: 1.2, H: 5.6, nb: 7, kind: 'hall', roof: 'hip', over: 3.2, bh: 1.9, big: true, doorW: 3.4, interior: true, det: 2, chi: 1.9, pitch: 0.24 });
+E.push({ t: 'daci_hall', c: DACI_MAIN, w: MH.w, d: MH.d, face: 's', y: 0, plat: 1.2, H: 5.6, nb: 7, kind: 'hall', roof: 'hip', over: 3.2, bh: 1.9, big: true, doorW: 3.4, interior: true, det: 2, chi: 1.9, pitch: 0.24, terrace: true, wadang: true, lanterns: true });
 E.push({ t: 'temple_interior', rect: MAIN, y: 1.2, H: 5.6, front: 's', kind: 'main' });
 // the Hall of the Heavenly Kings (the gate hall of the inner court), five bays
 const KH = { c: [ax, 150], w: 22.4, d: 10 };
-E.push({ t: 'tang_hall', c: KH.c, w: KH.w, d: KH.d, face: 's', y: 0, plat: 0.9, H: 4.6, nb: 5, kind: 'hall', roof: 'hip', over: 2.6, bh: 1.5, doorW: 3.0, interior: true, det: 2, chi: 1.5 });
+E.push({ t: 'daci_hall', c: KH.c, w: KH.w, d: KH.d, face: 's', y: 0, plat: 0.9, H: 4.6, nb: 5, kind: 'hall', roof: 'hip', over: 2.6, bh: 1.5, big: true, doorW: 3.0, interior: true, det: 2, chi: 1.5, terrace: true, wadang: true, lanterns: true });
 E.push({ t: 'temple_interior', rect: [KH.c[0] - KH.w / 2, KH.c[1] - KH.d / 2, KH.c[0] + KH.w / 2, KH.c[1] + KH.d / 2], y: 0.9, H: 4.6, front: 's', kind: 'guanyin' });
 // the sutra hall (west) and the translation hall (east), facing the axis
 for (const [s, kind] of [[-1, 'sutra'], [1, 'guanyin']]) {
   const c = [ax + s * 52, DACI_MAIN[1]], w = 22, d = 9.6, face = s < 0 ? 'e' : 'w';
-  E.push({ t: 'tang_hall', c, w, d, face, y: 0, plat: 0.7, H: 4.4, nb: 5, kind: 'hall', roof: 'gable', over: 2.3, bh: 1.4, doorW: 2.6, interior: true, det: 2, chi: 1.3 });
+  E.push({ t: 'daci_hall', c, w, d, face, y: 0, plat: 0.7, H: 4.4, nb: 5, kind: 'hall', roof: 'gable', over: 2.3, bh: 1.4, doorW: 2.6, interior: true, det: 2, chi: 1.3, wadang: true });
   if (s > 0) E.push({ t: 'tang_interior', c, face, w, d, y: 0.7, kind: 'scriptorium', seed: 21 });
   else E.push({ t: 'temple_interior', rect: [c[0] - d / 2, c[1] - w / 2, c[0] + d / 2, c[1] + w / 2], y: 0.7, H: 4.4, front: face, kind });
 }
@@ -67,7 +67,7 @@ export const temple = {
   id: 'tang-changan-daci-en',
   name: { en: 'Daci\'en Temple and the Big Wild Goose Pagoda', zh: '大慈恩寺与大雁塔' },
   era: { en: 'Tang, c. 750', zh: '唐，约750年' },
-  style: 'tang',
+  style: 'tang-changan',
   origin: [0, 0], base: 0, yaw: 0,
   entrance: { at: [ax, 210], facing: 'n' },
   bounds: [x0 - 4, z0 - 4, x1 + 4, z1 + 4],

@@ -5,7 +5,7 @@
 import './style.js';
 import {
   RADIUS, AVE, DITCH, WARDS, DACI, DAOIST, MARKET, MARKET_BLOCKS, MARKET_LANES, MARKET_INNER, OFFICE, DAO_AX, DACI_AX, PAGODA,
-  wallRuns, gates, lots, FIRE, marketRows, marketYards, inDitch, inRect, DAO_HALLS, GALLERIES,
+  wallRuns, gates, lots, marketRows, marketYards, inDitch, inRect, DAO_HALLS, GALLERIES,
 } from './layout.js';
 import { dressLife } from './dress.js';
 import { interiorElements, interiorLife, furnishedLot } from './interiors.js';
@@ -57,24 +57,6 @@ function daoist() {
   E.push({ t: 'incense_ding', at: [ax, -86], y: 0.04, s: 1.3 });
   for (const s of [-1, 1]) for (const z of [-60, -90]) E.push({ t: 'stone_lamp', at: [ax + s * 6, z], y: 0.04 });
   void x0; void x1;
-  return E;
-}
-
-// ── the Zoroastrian fire temple (dossier §16): a walled court south of the West Market with the domed four-arched fire chamber, the guests' hall and the fuel store ──
-function fireTemple() {
-  const E = [], [x0, z0, x1, z1] = FIRE.rect, [cx, cz] = FIRE.c, gz = FIRE.gate[1];
-  const w = (a, b, gaps = []) => E.push({ t: 'fang_wall', a, b, gaps, h: 3.0, th: 0.8 });
-  w([x0, z0], [x1, z0]); w([x0, z1], [x1, z1]); w([x0, z0], [x0, z1]); w([x1, z0], [x1, z1], [[gz - z0 - 1.3, gz - z0 + 1.3]]);
-  E.push({ t: 'tang_hall', c: [x1, gz], w: 6.6, d: 4.4, face: 'e', y: 0, plat: 0.15, H: 3.4, nb: 3, kind: 'open', roof: 'hip', over: 1.8, bh: 1.0, det: 2, steps: false, through: true, chi: 1.1 });
-  E.push({ t: 'paving', rect: [x0 + 2, z0 + 2, x1 - 2, z1 - 2], y: 0.04, th: 0.3 }, { t: 'paving', rect: [x1 - 0.5, gz - 3, x1 + 4, gz + 3], y: 0.04, th: 0.3 });
-  E.push({ t: 'fire_chamber', c: [cx, cz], y: 0 });
-  for (const [dz, face, kind, ww] of [[-25, 's', 'guest', 16], [25, 'n', 'store', 14]]) {
-    const c = [cx, cz + dz];
-    E.push({ t: 'tang_hall', c, w: ww, d: 7.4, face, y: 0, plat: 0.45, H: 3.8, nb: ww > 15 ? 5 : 3, kind: 'hall', roof: 'gable', over: 1.9, bh: 1.2, doorW: 2.4, interior: true, det: 2, chi: 1.2 });
-    E.push({ t: 'tang_interior', c, face, w: ww, d: 7.4, y: 0.45, kind, seed: 61 + dz });
-  }
-  LO.push({ t: 'well', kind: 'windlass', at: [cx + 14, cz - 11], y: 0, roof: true, seed: 8 });
-  for (const s of [-1, 1]) E.push({ t: 'stone_lamp', at: [cx + 11, cz + s * 3.6], y: 0.04 });
   return E;
 }
 
@@ -165,13 +147,6 @@ function life() {
     if (inRect([ax - 28, 160, ax - 26 + 3, 184], x, z) || Math.hypot(x - (ax - 27), z - 172) < 6 || Math.hypot(x - (ax + 27), z - 172) < 6) continue;
     const r = rand(); if (r < 0.5) monk(at, rand() * 6.28, { pose: rand() < 0.3 ? 'talk' : 'stand' }); else if (r < 0.75) commoner(at, rand() * 6.28, { carry: 'none' }); else if (r < 0.9) lady(at, rand() * 6.28); else sogdian(at, rand() * 6.28);
   }
-  // the fire temple: the priest in white at the altar, a Sogdian worshipper kneeling, a woman and a merchant in the court
-  { const [fx, fz] = FIRE.c, wh = { dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_white', over: 'belt', hat: 'cap', hatMat: 'cloth_white', hair: 'short', beard: true };
-    fig([fx, fz + 1.9], 0.3, faceTo([0, -1]), { ...wh, pose: 'stand' });
-    fig([fx - 2.0, fz + 1.2], 0.3, faceTo([1, -0.6]), { pose: 'kneel', arms: 'pray', cloth: 'cloth_indigo', cloth2: 'cloth_white', over: 'belt', hat: 'brim', skin: 'skin_medium', beard: true, hair: 'short' });
-    fig([fx + 16, fz + 8], 0.0, 2.2, { cloth: 'cloth_green', cloth2: 'cloth_white', over: 'belt', hat: 'turban', skin: 'skin_dark', beard: true, hair: 'short', pose: 'talk' });
-    fig([fx + 15, fz + 7.2], 0.0, 5.4, { ...wh, pose: 'talk' });
-    lady([fx + 12, fz - 15], 1.0); }
   // the Daoist temple's court: a few visitors under the peach trees
   for (let k = 0; k < 10; k++) { const x = DAO_AX + (rand() - 0.5) * 20, z = -40 - rand() * 40; if (Math.abs(x - DAO_AX) < 4) continue; (rand() < 0.5 ? lady : commoner)([x, z], rand() * 6.28); }
   void PAGODA;
@@ -188,7 +163,7 @@ function life() {
 }
 
 export async function town() {
-  const plans = [base('tang-changan-walls', walls()), base('tang-changan-avenue', avenue()), base('tang-changan-daoist', daoist()), base('tang-changan-fire', fireTemple()), base('tang-changan-market', market())];
+  const plans = [base('tang-changan-walls', walls()), base('tang-changan-avenue', avenue()), base('tang-changan-daoist', daoist()), base('tang-changan-market', market())];
   const fl = furnishedLot(), by = new Map();
   for (const l of lots()) { if (!by.has(l.ward)) by.set(l.ward, []); by.get(l.ward).push(l); }
   for (const [ward, ls] of [...by].sort()) for (let i = 0; i < ls.length; i += 40) plans.push(base(`tang-changan-houses-${ward}-${i / 40}`, ls.slice(i, i + 40).map((l) => ({ t: 'tang_house', ...l, furnished: l === fl }))));
