@@ -17,6 +17,7 @@ export function shaolinStupa(el, { bag, col }) {
   const fin = (g) => g.rotateY(rot).translate(x, y0, z);
   const put = (m, g) => bag.add(m, fin(g));
   const ap = (r) => r * Math.cos(Math.PI / n);
+  const D = el.rich ? new Parts() : null, dB = (m, ...a) => D.add(m, box(...a)), sd = el.seed ?? 0;
   let rb;
   if (el.kind === 'brick') {
     const T1 = el.tiers;
@@ -33,6 +34,27 @@ export function shaolinStupa(el, { bag, col }) {
     put(STONE, box(a - 0.01, ty0 - 0.08, -hw - 0.1, a + 0.07, ty0, hw + 0.1)); put(STONE, box(a - 0.01, ty1, -hw - 0.1, a + 0.07, ty1 + 0.1, hw + 0.1));
     put('opening', box(a - 0.01, ty0, -hw, a + 0.03, ty1, hw));
     put(LIME, box(a + 0.03, ty0 + 0.1, -hw * 0.8, a + 0.045, ty1 - 0.1, hw * 0.8));
+    if (D) {
+      // the inscription on the tablet: columns of characters (a bar, a stem, a cross-stroke), and the dead monk's name in a plaque over it
+      const nc = 3, nr = Math.max(3, Math.floor((ty1 - ty0 - 0.5) / 0.2)), cw = hw * 1.5 / nc;
+      for (let i = 0; i < nc; i++) for (let j = 0; j < nr; j++) if (((i * 5 + j * 3 + sd) % 4) !== 0) {
+        const cz = -hw * 0.75 + (i + 0.5) * cw - 0.03, cy = ty0 + 0.18 + j * 0.2;
+        dB('granite_black', a + 0.045, cy + 0.06, cz, a + 0.052, cy + 0.085, cz + 0.07); dB('granite_black', a + 0.045, cy, cz + 0.025 + ((i + j) % 2) * 0.01, a + 0.052, cy + 0.15, cz + 0.045 + ((i + j) % 2) * 0.01);
+      }
+      dB(LIME, a - 0.02, ty1 + 0.1, -hw - 0.2, a + 0.1, ty1 + 0.34, hw + 0.2);
+      dB('granite_black', a + 0.1, ty1 + 0.14, -hw - 0.12, a + 0.108, ty1 + 0.3, hw + 0.12);
+      for (let i = 0; i < 4; i++) dB(LIME, a + 0.108, ty1 + 0.17, -hw * 0.9 + i * hw * 0.5, a + 0.114, ty1 + 0.27, -hw * 0.9 + i * hw * 0.5 + 0.05);
+      // engaged pilasters at the corners of the first storey, with a foot and a capital
+      for (let k = 0; k < n; k++) {
+        const ph = Math.PI / n + k * 2 * Math.PI / n, cx = Math.cos(ph) * (r + 0.01), cz2 = Math.sin(ph) * (r + 0.01), q = 0.07;
+        dB(STONE, cx - q, y, cz2 - q, cx + q, y + bodyH, cz2 + q);
+      }
+      // a false door on the back face: two leaves, lintel, a row of studs on each; blind windows on the faces at the sides
+      const ab = -a, hd = Math.min(0.5, hw * 0.9), dh = Math.min(bodyH * 0.6, 1.6);
+      dB(STONE, ab - 0.07, y, -hd - 0.1, ab + 0.01, y + dh + 0.1, -hd); dB(STONE, ab - 0.07, y, hd, ab + 0.01, y + dh + 0.1, hd + 0.1); dB(STONE, ab - 0.07, y + dh, -hd - 0.1, ab + 0.01, y + dh + 0.1, hd + 0.1);
+      dB('lacquer_red', ab - 0.03, y, -hd, ab - 0.005, y + dh, -0.02); dB('lacquer_red', ab - 0.03, y, 0.02, ab - 0.005, y + dh, hd);
+      for (const sg of [-1, 1]) for (let i = 0; i < 3; i++) for (let j = 0; j < 4; j++) dB('gilt_bronze', ab - 0.05, y + 0.2 + j * (dh - 0.4) / 3 - 0.025, sg * (0.1 + i * (hd - 0.2) / 2) - 0.025, ab - 0.03, y + 0.2 + j * (dh - 0.4) / 3 + 0.025, sg * (0.1 + i * (hd - 0.2) / 2) + 0.025);
+    }
     y += bodyH;
     // the eaves
     const tr = (i) => rb * (0.95 - 0.38 * (i / Math.max(1, T1 - 1 + (T1 === 1 ? 1 : 0))));
@@ -40,7 +62,14 @@ export function shaolinStupa(el, { bag, col }) {
     for (let i = 0; i < T1; i++) {
       r = T1 === 1 ? rb * 0.95 : tr(i);
       if (i > 0) { const bh = Math.max(0.12, step - 0.9 * u); put(BRICK, poly([[r * 0.88, y], [r * 0.88, y + bh], [0.001, y + bh]], n)); y += bh; }
+      put(BRICK, poly([[0.001, y - 0.005], [r * 1.37, y - 0.005]], n));                                       // the soffit under the eave: closes the underside
       put(BRICK, poly([[r * 0.88, y], [r * 1.0, y + 0.04], [r * 1.1, y + 0.08], [r * 1.2, y + 0.14], [r * 1.34, y + 0.2], [0.001, y + 0.2]], n));
+      if (D) {
+        // the brick bracket course: rows of little blocks (dentils) under the eave on every face, and a blind niche on the front face of each body above the first
+        const ar = ap(r * 1.17), fl = r * 1.17 * Math.sin(Math.PI / n), nd = Math.max(2, Math.floor(fl * 1.1 / 0.2));
+        for (let f = 0; f < n; f++) { const al = f * 2 * Math.PI / n; for (let k = 0; k < nd; k++) { const u = (k + 0.5) / nd * 2 * fl - fl, px = Math.cos(al) * ar - Math.sin(al) * u, pz = Math.sin(al) * ar + Math.cos(al) * u; D.add(BRICK, box(-0.045, y + 0.02, -0.04, 0.045, y + 0.13, 0.04).rotateY(-al).translate(px + Math.cos(al) * 0.05, 0, pz + Math.sin(al) * 0.05)); } }
+        if (i > 0) { const bh2 = Math.max(0.12, step - 0.9 * u), a2 = ap(r * 0.88), ny = y - bh2 + bh2 * 0.2; if (bh2 > 0.3) { dB('opening', a2 - 0.01, ny, -0.09, a2 + 0.03, ny + bh2 * 0.6, 0.09); dB(STONE, a2 - 0.01, ny + bh2 * 0.6, -0.14, a2 + 0.05, ny + bh2 * 0.6 + 0.045, 0.14); } }
+      }
       const rr = r * 1.38, rise = Math.max(0.35, 0.55 * u * (r / rb) + 0.2);
       put(TILE, poly([[rr, y + 0.2], [rr * 0.8, y + 0.2 + rise * 0.3], [rr * 0.55, y + 0.2 + rise * 0.68], [rr * 0.34, y + 0.2 + rise], [0.001, y + 0.2 + rise]], n));
       y += 0.2 + rise;
@@ -71,6 +100,7 @@ export function shaolinStupa(el, { bag, col }) {
     put(STONE, fin2(ball(rb * 0.16, rb * 0.16, rb * 0.16, 6, 4), 0, h * 0.93, 0));
     put('opening', box(rb * 0.8, 0.9, -0.17, rb * 0.9, 0.9 + h * 0.2, 0.17));
   }
+  if (D) D.emit(bag, x, y0, z, rot);
   col.circle(x, z, rb * 1.3, y0, y0 + h);
 }
 const fin2 = (g, x, y, z) => g.translate(x, y, z);
@@ -80,35 +110,64 @@ const fin2 = (g, x, y, z) => g.translate(x, y, z);
  * A tablet of grey stone: on a tortoise (bixi) with a carved heads of coiled dragons, or on a plain plinth with a rounded top.
  */
 export function shaolinStele(el, { bag, col }) {
-  const [x, z] = el.at, y0 = el.y, h = el.h ?? 2.7, w = el.w ?? 0.95, th = 0.26, yaw = el.yaw ?? 0;
-  const P = new Parts();
+  const [x, z] = el.at, y0 = el.y, h = el.h ?? 2.7, w = el.w ?? 0.95, th = 0.26, yaw = el.yaw ?? 0, sd = el.seed ?? 0;
+  const fine = !!el.fine, P = new Parts(), bx = (m, ...a) => P.add(m, box(...a)), bl = (m, rx, ry, rz, x1, y1, z1, n = 6, k = 4) => P.add(m, T(ball(rx, ry, rz, n, k), x1, y1, z1));
   let yb = 0;
   if (el.kind === 'bixi') {
-    P.add(STONE, T(ball(w * 0.95, 0.3, 0.72, 10, 5), 0, 0.3, 0.1));                      // the shell
-    for (let k = 0; k < 6; k++) P.add(STONE, T(ball(0.2, 0.05, 0.2, 6, 3), -0.45 + (k % 3) * 0.45, 0.58, -0.1 + Math.floor(k / 3) * 0.4));
-    P.add(STONE, T(ball(0.26, 0.2, 0.3, 8, 4), 0, 0.28, 1.0));                            // the head
-    P.add(STONE, limb([0, 0.3, 0.5], [0, 0.3, 0.85], 0.17, 0.2, 6));                      // the neck
-    for (const sx of [-1, 1]) for (const sz of [-1, 1]) P.add(STONE, T(ball(0.2, 0.12, 0.28, 6, 4), sx * w * 0.75, 0.1, 0.1 + sz * 0.5));
-    P.add(STONE, box(-w * 0.58, 0.46, -th * 0.9, w * 0.58, 0.62, th * 0.9)); yb = 0.62;
+    // the tortoise (bixi): a low shell with its rim and scutes, four paddle legs with claws, a short tail, the dragon's head on its long neck
+    P.add(STONE, T(ball(w * 0.98, 0.3, 0.74, 12, 6), 0, 0.3, 0.05));
+    P.add(STONE, lathe([[w * 1.0, 0.14], [w * 1.06, 0.2], [w * 1.0, 0.26], [0.001, 0.26]], 12).scale(1, 1, 0.78).translate(0, 0.02, 0.05));        // the rim of the shell
+    if (fine) for (let r = -1; r <= 1; r++) for (let c = -1; c <= 1; c++) { if ((r + c) & 1 && r) continue; bl(STONE, 0.17, 0.045, 0.15, c * 0.4 * w * 1.1 + (r ? r * 0.18 : 0), 0.575 - Math.abs(c) * 0.07 - Math.abs(r) * 0.03, -0.12 + r * 0.31, 6, 3); }
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+      const lx = sx * w * 0.8, lz = 0.06 + sz * 0.46;
+      bl(STONE, 0.22, 0.1, 0.3, lx, 0.1, lz, 7, 4);                                         // the paddle
+      for (let k = -1; k <= 1; k++) bl(STONE, 0.045, 0.04, 0.06, lx + k * 0.1, 0.06, lz + sz * 0.3, 5, 3);   // the claws
+    }
+    P.add(STONE, limb([0, 0.28, 0.6], [0, 0.34, 1.0], 0.2, 0.17, 8));                         // the neck
+    bl(STONE, 0.25, 0.2, 0.3, 0, 0.33, 1.12, 8, 5);                                         // the head
+    bl(STONE, 0.18, 0.1, 0.2, 0, 0.27, 1.36, 8, 4); bl(STONE, 0.14, 0.05, 0.14, 0, 0.19, 1.3, 6, 3);   // snout, lower jaw
+    for (const k of [-1, 1]) { bl(STONE, 0.03, 0.035, 0.03, k * 0.06, 0.32, 1.52, 4, 3); bl(STONE, 0.05, 0.05, 0.05, k * 0.14, 0.45, 1.1, 5, 3); bx(STONE, k * 0.1 - 0.02, 0.2, 1.38, k * 0.1 + 0.02, 0.25, 1.46); P.add(STONE, limb([k * 0.2, 0.4, 1.05], [k * 0.34, 0.3, 0.92], 0.05, 0.02, 5)); }   // nostrils, eyes, teeth, whiskers
+    P.add(STONE, limb([0, 0.45, 1.2], [0, 0.62, 1.05], 0.04, 0.02, 4));                       // the single horn
+    bl(STONE, 0.1, 0.07, 0.2, 0, 0.17, -0.72, 6, 3);                                         // the tail
+    bx(STONE, -w * 0.58, 0.5, -th * 0.9, w * 0.58, 0.64, th * 0.9); yb = 0.64;
+    // the carved mortise block under the tablet: a row of studs on its front
+    if (fine) for (let k = 0; k < 5; k++) bl(STONE, 0.04, 0.035, 0.03, -w * 0.46 + k * w * 0.23, 0.57, th * 0.9 + 0.02, 5, 3);
   } else {
     P.add(STONE, box(-w * 0.75, 0, -0.35, w * 0.75, 0.3, 0.35)); P.add(STONE, box(-w * 0.62, 0.3, -0.3, w * 0.62, 0.42, 0.3)); yb = 0.42;
+    for (let k = 0; k < 4; k++) bl(STONE, 0.06, 0.05, 0.03, -w * 0.5 + k * w * 0.33, 0.15, 0.36, 5, 3);        // petals on the plinth
   }
-  // the tablet and its head
+  // the tablet: limestone, a raised border all round the inscription field, the field sunk
   const hs = h - yb - 0.55;
   P.add(LIME, box(-w / 2, yb, -th / 2, w / 2, yb + hs, th / 2));
-  // inscription: a dark field with columns of characters
+  const bw = 0.07, fz = th / 2 + 0.014;
+  for (const [a0, b0, a1, b1] of [[-w / 2, yb + 0.05, -w / 2 + bw, yb + hs - 0.05], [w / 2 - bw, yb + 0.05, w / 2, yb + hs - 0.05], [-w / 2, yb + 0.05, w / 2, yb + 0.05 + bw], [-w / 2, yb + hs - 0.05 - bw, w / 2, yb + hs - 0.05]]) P.add(STONE, box(a0, b0, th / 2, a1, b1, fz));
+  if (fine) for (let k = 0; k < Math.max(3, Math.floor(hs / 0.22)); k++) for (const sx of [-1, 1]) bl(LIME, 0.025, 0.03, 0.012, sx * (w / 2 - bw / 2), yb + 0.18 + k * 0.22, fz, 4, 3);        // the scroll border
   P.add('granite_black', box(-w * 0.4, yb + 0.25, th / 2, w * 0.4, yb + hs - 0.25, th / 2 + 0.012));
   const cols = 5, rows = Math.max(3, Math.floor((hs - 0.9) / 0.3));
-  for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) if (((i * 7 + j * 3 + (el.seed ?? 0)) % 5) !== 0) P.add(LIME, box(-w * 0.34 + i * w * 0.17, yb + 0.35 + j * 0.3, th / 2 + 0.012, -w * 0.34 + i * w * 0.17 + 0.08, yb + 0.35 + j * 0.3 + 0.17, th / 2 + 0.02));
+  for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) if (((i * 7 + j * 3 + sd) % 5) !== 0) {
+    if (!fine && (i + j) % 2) continue;
+    const cx = -w * 0.34 + i * w * 0.17, cy = yb + 0.35 + j * 0.3, t = (i * 3 + j + sd) % 3;
+    P.add(LIME, box(cx, cy + 0.07, th / 2 + 0.012, cx + 0.085, cy + 0.095, th / 2 + 0.02));                     // each character: a bar and a stem or two bars
+    if (t === 0) P.add(LIME, box(cx + 0.03, cy, th / 2 + 0.012, cx + 0.052, cy + 0.17, th / 2 + 0.02)); else if (t === 1) { P.add(LIME, box(cx, cy + 0.01, th / 2 + 0.012, cx + 0.085, cy + 0.034, th / 2 + 0.02)); P.add(LIME, box(cx + 0.02, cy + 0.12, th / 2 + 0.012, cx + 0.05, cy + 0.17, th / 2 + 0.02)); } else P.add(LIME, box(cx + 0.01, cy, th / 2 + 0.012, cx + 0.035, cy + 0.17, th / 2 + 0.02));
+  }
   const yt = yb + hs;
   if (el.kind === 'bixi') {
-    // the head: two coiled dragons, a title panel between them
+    // the head (螭首): the board with six dragons coiled in two groups, their heads turned in to the title panel, the bodies in loops of scales
     P.add(LIME, box(-w / 2 - 0.04, yt, -th / 2 - 0.02, w / 2 + 0.04, yt + 0.5, th / 2 + 0.02));
-    for (const s of [-1, 1]) for (let k = 0; k < 3; k++) P.add(LIME, T(ball(0.15, 0.13, 0.17, 6, 4), s * (0.18 + k * 0.12), yt + 0.38 - k * 0.04, 0));
-    for (const s of [-1, 1]) P.add(LIME, T(ball(0.1, 0.09, 0.12, 6, 4), s * (w * 0.5), yt + 0.32, th / 2 + 0.02));
-    P.add('granite_black', box(-0.17, yt + 0.12, th / 2 + 0.02, 0.17, yt + 0.4, th / 2 + 0.03));
+    P.add(STONE, box(-w / 2 - 0.06, yt, -th / 2 - 0.03, w / 2 + 0.06, yt + 0.04, th / 2 + 0.03)); P.add(STONE, box(-w / 2 - 0.06, yt + 0.46, -th / 2 - 0.03, w / 2 + 0.06, yt + 0.5, th / 2 + 0.03));
+    for (const sx of [-1, 1]) for (const zz of [-1, 1]) for (let d = 0; d < (fine ? 2 : 1); d++) {
+      // a dragon: a body of seven segments in an S loop from the outer corner toward the middle, a head at the end with horn and eye, a claw
+      const y1 = yt + 0.09 + d * 0.13, zf = zz * (th / 2 + 0.03);
+      for (let k = 0; k < (fine ? 5 : 4); k++) { const u = k / (fine ? 4 : 3), px = sx * (w / 2 - 0.04 - u * (w * 0.5 - 0.12)), py = y1 + Math.sin(u * 6.28 + d) * 0.045; bl(LIME, 0.06 - u * 0.012, 0.045, 0.03, px, py, zf, 5, 3); }
+      bl(LIME, 0.07, 0.055, 0.045, sx * 0.14, y1, zf, 6, 4); P.add(LIME, limb([sx * 0.15, y1 + 0.03, zf], [sx * 0.2, y1 + 0.12, zf], 0.015, 0.008, 4));
+    }
+    bx(LIME, -0.17, yt + 0.1, th / 2 + 0.02, 0.17, yt + 0.42, th / 2 + 0.035);
+    P.add('granite_black', box(-0.14, yt + 0.13, th / 2 + 0.035, 0.14, yt + 0.39, th / 2 + 0.043));
+    for (let k = 0; k < 3; k++) for (let j = 0; j < 3; j++) if ((k + j + sd) % 4) P.add(LIME, box(-0.1 + k * 0.07, yt + 0.16 + j * 0.08, th / 2 + 0.043, -0.1 + k * 0.07 + 0.045, yt + 0.16 + j * 0.08 + 0.05, th / 2 + 0.05));
+    bl(LIME, 0.1, 0.07, 0.05, 0, yt + 0.5, 0, 6, 3);                                              // the pearl on the crown
   } else {
     P.add(LIME, lathe([[w * 0.5, 0], [w * 0.46, 0.2], [w * 0.3, 0.4], [0.001, 0.52]], 12).scale(1, 1, th / w).translate(0, yt, 0));
+    for (const sx of [-1, 1]) bl(STONE, 0.07, 0.05, 0.04, sx * w * 0.22, yt + 0.22, th / 2 + 0.01, 6, 3);      // the cloud scrolls on the arch
   }
   P.emit(bag, x, y0, z, yaw);
   col.rect([x - w * 0.8, z - 0.5, x + w * 0.8, z + 0.5], y0, y0 + h);
@@ -157,11 +216,33 @@ export function courtCenser(el, { bag, col }) {
   P.emit(bag, x, el.y, z, el.yaw ?? 0);
   col.circle(x, z, 0.9 * s, el.y, el.y + 2.3 * s);
 }
-/** stone_lion { at, y, yaw, s, male }: a guardian lion on a plinth (the seated lion of the Qing carving kit). */
+/**
+ * stone_lion { at, y, yaw, s, male }: a guardian lion on a carved sumeru plinth. The plinth: a plain foot, a band of lotus petals, a waist with
+ * a framed panel carved on each face, a band of petals upturned, a slab; the lion (the carving kit's seated lion, the curls of its mane, the open
+ * jaw, the ball or the cub under its paw) in the grey limestone of the gate.
+ */
 export function stoneLion(el, { bag, col }) {
-  const [x, z] = el.at, s = el.s ?? 1.1, P = new Parts();
-  P.add(STONE, box(-0.7 * s, 0, -0.9 * s, 0.7 * s, 0.7, 0.9 * s)); P.add(STONE, box(-0.8 * s, 0, -1.0 * s, 0.8 * s, 0.12, 1.0 * s));
-  const L = new Parts(); seated(L, LIME, { paw: el.male === false ? 'cub' : 'ball', lite: true }); L.emit(P, 0, 0.7, 0, 0, s * 0.9);
+  const [x, z] = el.at, s = el.s ?? 1.1, P = new Parts(), hx = 0.72 * s, hz = 0.92 * s;
+  const sb = (a, b, i, m = STONE) => P.add(m, box(-hx + i, a, -hz + i, hx - i, b, hz - i));
+  sb(0, 0.12, -0.1); sb(0.12, 0.26, 0);
+  // the band of lotus petals round the foot: upright petals, a ball-ended tip each
+  const petals = (y0, up) => {
+    for (const sx of [-1, 1]) for (let k = 0; k < 5; k++) P.add(STONE, T(ball(0.075 * s, 0.07, 0.04 * s, 5, 3), sx * (hx + 0.005), y0, (-hz + (k + 0.5) * 2 * hz / 5) * 0.96).scale(1, up, 1));
+    for (const sz of [-1, 1]) for (let k = 0; k < 4; k++) P.add(STONE, T(ball(0.04 * s, 0.07, 0.075 * s, 5, 3), (-hx + (k + 0.5) * 2 * hx / 4) * 0.96, y0, sz * (hz + 0.005)).scale(1, up, 1));
+  };
+  petals(0.33, 1);
+  sb(0.26, 0.4, 0.0 + 0.04);
+  // the waist, set in, with a recessed panel carved on each face (a raised frame round a sunk field)
+  sb(0.4, 0.58, 0.1);
+  for (const sx of [-1, 1]) {
+    const xf = sx * (hx - 0.1);
+    P.add(LIME, box(Math.min(xf, xf + sx * 0.03), 0.43, -hz + 0.28, Math.max(xf, xf + sx * 0.03), 0.55, hz - 0.28));
+    for (let k = 0; k < 3; k++) P.add(STONE, T(ball(0.05, 0.05, 0.05, 6, 3), xf + sx * 0.04, 0.49, -hz * 0.4 + k * hz * 0.4));
+  }
+  for (const sz of [-1, 1]) { const zf = sz * (hz - 0.1); P.add(LIME, box(-hx + 0.28, 0.43, Math.min(zf, zf + sz * 0.03), hx - 0.28, 0.55, Math.max(zf, zf + sz * 0.03))); P.add(STONE, T(ball(0.07, 0.05, 0.05, 6, 3), 0, 0.49, zf + sz * 0.04)); }
+  sb(0.58, 0.64, 0.02); petals(0.67, -1);
+  sb(0.62, 0.74, 0.0 - 0.02);
+  const L = new Parts(); seated(L, LIME, { paw: el.male === false ? 'cub' : 'ball' }); L.emit(P, 0, 0.74, 0, 0, s * 0.95);
   P.emit(bag, x, el.y, z, el.yaw ?? 0);
   col.rect([x - 0.8 * s, z - 1.0 * s, x + 0.8 * s, z + 1.0 * s], el.y, el.y + 2.6);
 }

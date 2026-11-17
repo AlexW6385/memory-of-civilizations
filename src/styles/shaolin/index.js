@@ -5,6 +5,7 @@ import '../ming/index.js';
 import '../chinese/index.js';
 import '../../objects/index.js';
 import { shaolinStupa, shaolinStele, practiceFloor, courtCenser, stoneLion, bellHung, pathEarth } from './stupa.js';
+import { shaolinBrackets, shanmenDoor, ridgeVase, roofOrn } from './landmark.js';
 import { shaolinInterior } from './interiors.js';
 import { shaolinRoom } from './rooms.js';
 import { shaolinGear, shaolinWear, shaolinSteps } from './gear.js';
@@ -28,7 +29,7 @@ registerStyle('shaolin', {
   elements: {
     ...base.elements,
     shaolin_stupa: shaolinStupa, shaolin_stele: shaolinStele, practice_floor: practiceFloor, court_censer: courtCenser, stone_lion: stoneLion, bell_hung: bellHung, path_earth: pathEarth, shaolin_interior: shaolinInterior,
-    hall_furniture: hallFurniture, plaque, shaolin_room: shaolinRoom, shaolin_gear: shaolinGear, shaolin_wear: shaolinWear, shaolin_steps: shaolinSteps,
+    hall_furniture: hallFurniture, plaque, shaolin_room: shaolinRoom, shaolin_gear: shaolinGear, shaolin_wear: shaolinWear, shaolin_steps: shaolinSteps, shaolin_brackets: shaolinBrackets, shanmen_door: shanmenDoor, ridge_vase: ridgeVase, roof_orn: roofOrn,
   },
   objects: { ...STYLES.chinese.objects },
 });

@@ -56,13 +56,20 @@ const hall = (name, o) => {
   E.push({ t: 'ming_hall', rect: r, y: 0.02 + pl, H: HGT[name], front: 's', four: false, roof: 'xieshan', plat: pl, platMargin: 0.8, eave: 1.5, pal: PAL, lat: 'lattice_red', walls: { n: 'plaster', e: 'plaster', w: 'plaster' }, winWall: true, ...o });
   stairs(r, pl, 's');
 };
-hall('shanmen', { roof: 'hip', doors: ['n'], eave: 1.35 }); stairs(AXIS.shanmen, PLAT.shanmen, 'n');
+hall('shanmen', { roof: 'hip', doors: ['n'], eave: 1.35, walls: { s: 'plaster', n: 'plaster', e: 'plaster', w: 'plaster' } }); stairs(AXIS.shanmen, PLAT.shanmen, 'n');
 hall('tianwang', { doors: ['n'] }); stairs(AXIS.tianwang, PLAT.tianwang, 'n');
 hall('mahavira', { eave: 1.9, sweep: 1.4 });
 hall('fatang', { roof: 'gable', eave: 1.3 });
 hall('fangzhang', { roof: 'gable', doors: ['n'], eave: 1.2 }); stairs(AXIS.fangzhang, PLAT.fangzhang, 'n');
 hall('lixue', { roof: 'xieshan', doors: ['n'], four: true, eave: 1.4 }); stairs(AXIS.lixue, PLAT.lixue, 'n');
 hall('qianfo', { eave: 1.9, sweep: 1.4, plat: PLAT.qianfo, platMargin: 0.8 });
+// the bracket sets under the eaves and the ridge ornaments of the halls (docs §6e)
+for (const [name, o] of [['shanmen', { roof: 'hip', eave: 1.35, sides: ['s', 'n'], per: 3 }], ['tianwang', { eave: 1.5, sides: ['s', 'n'], per: 3 }], ['mahavira', { eave: 1.9, sides: ['s'], per: 3 }],
+  ['fatang', { roof: 'gable', eave: 1.3, sides: ['s'], per: 3 }], ['fangzhang', { roof: 'gable', eave: 1.2, sides: ['s'], per: 3 }], ['lixue', { eave: 1.4, sides: ['s'], per: 3 }], ['qianfo', { eave: 1.9, sides: ['s'], per: 3 }]]) {
+  const base = { rect: AXIS[name], y: 0.02 + PLAT[name], H: HGT[name] };
+  E.push({ t: 'shaolin_brackets', ...base, ...o });
+  if (o.roof !== 'gable') E.push({ t: 'roof_orn', ...base, eave: o.eave, roof: o.roof ?? 'xieshan', sweep: name === 'mahavira' || name === 'qianfo' ? 1.4 : 1.0, figures: name === 'mahavira' || name === 'qianfo' ? 2 : 0 });
+}
 // the Mahavira Hall's terrace (yuetai) before it, with the great censers
 {
   const r = AXIS.mahavira, z1 = r[3] + 0.8;
@@ -87,14 +94,16 @@ E.push({ t: 'shaolin_interior', kind: 'fangzhang', rect: AXIS.fangzhang, y: 0.02
 E.push({ t: 'shaolin_interior', kind: 'lixue', rect: AXIS.lixue, y: 0.02 + PLAT.lixue, H: HGT.lixue });
 // the boards over the doors
 const board = (cx, y, z, n, seed, w = 2.6) => E.push({ t: 'plaque', at: [cx, z], y, facing: [0, 1], w, h: 0.8, n, seed });
-board(0, 0.02 + PLAT.shanmen + HGT.shanmen - 1.1, AXIS.shanmen[3] + 0.17, 4, 21);
+{ const fy = 0.02 + PLAT.shanmen, ph = 0.75;
+  E.push({ t: 'plaque', at: [0, AXIS.shanmen[3] + 0.17], y: fy + 3.66, facing: [0, 1], w: 2.8, h: ph, n: 3, seed: 21 });
+  E.push({ t: 'shanmen_door', x: 0, z: AXIS.shanmen[3], y: fy, w: 3.1, h: 3.3, plaqueY: fy + 3.66, plaqueH: ph, plaqueW: 2.8 }); }
 board(0, 0.02 + PLAT.tianwang + HGT.tianwang - 1.1, AXIS.tianwang[3] + 0.17, 4, 22);
 board(0, 0.02 + PLAT.mahavira + HGT.mahavira - 1.1, AXIS.mahavira[3] + 0.17, 5, 23, 3.4);
 board(0, 0.02 + PLAT.fatang + HGT.fatang - 1.1, AXIS.fatang[3] + 0.17, 3, 24);
 board(0, 0.02 + PLAT.lixue + HGT.lixue - 1.0, AXIS.lixue[3] + 0.17, 4, 25, 1.9);
 board(0, 0.02 + PLAT.qianfo + HGT.qianfo - 1.1, AXIS.qianfo[3] + 0.17, 5, 26, 3.4);
 
-const stele = (x, z, o = {}) => E.push({ t: 'shaolin_stele', at: [x, z], y: 0.02, yaw: 0, ...o });
+const stele = (x, z, o = {}) => E.push({ t: 'shaolin_stele', at: [x, z], y: 0.02, yaw: 0, fine: z > 135, ...o });
 // ── the bell and drum towers: a brick podium with a vaulted passage through it (a corbelled arch of stepped brick courses, stone jambs and a stone
 // band over it with the name board), a stone cornice, a brick parapet round the platform, a four-sided open pavilion on it (docs §6d) ──
 for (const [r, kind] of [[BELL, 'bell'], [DRUM, 'drum']]) {
@@ -183,9 +192,9 @@ E.push({ t: 'court_censer', at: [3.6, 62], y: 0.04, s: 1.2 });
 E.push({ t: 'court_censer', at: [3.6, 22], y: 0.04, s: 1.0 });
 
 // ── the Pagoda Forest ───────────────────────────────────────────────────────────────────────
-for (const s of STUPAS) {
+for (const [si, s] of STUPAS.entries()) {
   const y = H(s.c[0], s.c[1]) - 0.05;
-  E.push({ t: 'shaolin_stupa', c: s.c, y, kind: s.kind, tiers: s.tiers, shape: s.shape, h: s.h, jit: ((s.seed % 7) - 3) * 0.05, seed: s.seed });
+  E.push({ t: 'shaolin_stupa', rich: si < 7 && s.kind === 'brick', c: s.c, y, kind: s.kind, tiers: s.tiers, shape: s.shape, h: s.h, jit: ((s.seed % 7) - 3) * 0.05, seed: s.seed });
 }
 // before each of the seven great pagodas, a stone offering table with a censer (the tablet faces south; docs §6d)
 for (const s of STUPAS.slice(0, 7)) {
