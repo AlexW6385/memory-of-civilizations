@@ -8,6 +8,9 @@
 import { courtPlans } from './court.js';
 import { officePlans } from './offices.js';
 import { RADIUS, lots, SHOPS, BELL, JONGNO, AVENUE, YANGBAN } from './layout.js';
+import { ground } from './ground.js';
+import { homeLayout, classOf } from '../../styles/joseon/home.js';
+import { rangeFrame } from '../../styles/joseon/house.js';
 const base = (id, elements) => ({ id, style: 'joseon', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 70], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -148,10 +151,37 @@ function street() {
   return [{ ...base('joseon-seoul-street', P), style: 'life', center: [0, 330], near: 260 }, { ...base('joseon-seoul-loads', J), feature: false, center: [0, 330], near: 260 }];
 }
 
+// which hanok can be entered: every gentry house and every other lot by its seed (half of them), where the ground is level
+const enterable = (l) => { const [a, b, c, d] = l.rect; return [[a, b], [c, b], [a, d], [c, d]].every(([x, z]) => ground.height(x, z) < 0.05) && (classOf(l) === 'gentry' || l.seed % 2 === 0); };
+
+// the households: in some houses a woman at the kitchen's stove, an old man on his cushion in the men's room or the main room, a child in the yard
+function homefolk() {
+  const rand = rng(1888 ^ 0x1234), F = [], sd = () => Math.floor(rand() * 1e9);
+  for (const l of lots()) {
+    if (!enterable(l)) continue;
+    const L = homeLayout({ ...l, cls: classOf(l) }), FL = 0.5;
+    for (const r of L.ranges) {
+      const f = rangeFrame(r), { P, spans } = f, s = r.face === 's', dir = (a, b) => (s ? [a, b] : r.face === 'e' ? [b, a] : [-b, a]), face = ([dx, dz]) => Math.atan2(-dx, -dz);
+      const fig = (u, v, toward, extra = {}) => { const p = P(u, v); const q = r.face === 'w' ? [p[0], p[1]] : p; F.push({ t: 'figure', at: q, y: extra.y ?? FL + 0.04, rot: face(dir(...toward)), seed: sd(), dress: 'robe', cloth: 'cloth_white', cloth2: 'cloth_white', skin: rand() < 0.6 ? 'skin_light' : 'skin_medium', hat: 'none', hair: 'topknot', beard: false, h: 1.6, ...extra }); };
+      for (const sp of spans) {
+        const c = (sp.a0 + sp.a1) / 2;
+        if (sp.kind === 'kitchen' && rand() < 0.55) fig(sp.a1 - 2.2 < sp.a0 + 0.4 ? sp.a0 + 0.5 : sp.a1 - 2.2, 1.25, [1, 0], { pose: 'squat', y: 0, hair: 'bun', cloth: 'cloth_green', skin: 'skin_light' });
+        else if ((sp.kind === 'sarangbang' || (sp.kind === 'room' && r.role === 'main' && L.cls === 'poor')) && rand() < 0.5) fig(c, 1.15, [0, 1], { pose: 'cross', arms: 'cross', y: FL + 0.1, hat: rand() < 0.6 ? 'brim' : 'none', hatMat: 'lacquer_black', beard: true, h: 1.62 });
+        else if (sp.kind === 'daecheong' && r.role === 'main' && rand() < 0.3) fig(c + 0.4, 1.6, [0, 1], { pose: 'cross', arms: 'cross', y: FL + 0.03, hair: 'bun', cloth: 'cloth_white', skin: 'skin_light', h: 1.5 });
+      }
+    }
+    if (rand() < 0.3) { const [x0, z0, x1, z1] = l.rect; F.push({ t: 'figure', at: [(x0 + x1) / 2 + 2 + rand() * 3, z1 - 4.5 - rand() * 2], y: 0.03, rot: rand() * 6.28, seed: sd(), child: true, dress: 'trousers', cloth: 'cloth_white', cloth2: 'cloth_white', skin: 'skin_light', hair: 'long', h: 1.1 + rand() * 0.15 }); }
+  }
+  const tiles = new Map();
+  for (const e of F) { const k = Math.floor(e.at[0] / 100) + ',' + Math.floor(e.at[1] / 100); if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
+  return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`joseon-seoul-homefolk-${k}`, list), style: 'life', feature: false, center: [i * 100 + 50, j * 100 + 50], near: 200 }; });
+}
+
 export async function town() {
-  const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 80) plans.push(base(`joseon-seoul-hanok-${i / 80}`, all.slice(i, i + 80).map((l) => ({ t: 'hanok', ...l, simple: true }))));
+  const all = lots(), plans = [], shells = all.filter((l) => !enterable(l)), homes = all.filter(enterable);
+  for (let i = 0; i < shells.length; i += 80) plans.push(base(`joseon-seoul-hanok-${i / 80}`, shells.slice(i, i + 80).map((l) => ({ t: 'hanok', ...l, simple: true }))));
+  for (let i = 0; i < homes.length; i += 12) plans.push(base(`joseon-seoul-homes-${i / 12}`, homes.slice(i, i + 12).map((l) => ({ t: 'hanok_home', ...l, cls: classOf(l) }))));
   plans.push({ ...base('joseon-seoul-yangban', [{ t: 'yangban_house', rect: YANGBAN, seed: 1888 }]), feature: false });
-  plans.push(...courtPlans(), ...officePlans(), jongno(), shopfronts(), ...lanedress(), ...street());
+  plans.push(...courtPlans(), ...officePlans(), jongno(), shopfronts(), ...lanedress(), ...street(), ...homefolk());
   return plans;
 }

@@ -62,11 +62,15 @@ E.push({ t: 'throne_hall', rect: [-15, 13, 15, 34], y: 3.2, H: 6.8, bays: [5, 5]
 E.push({ t: 'qing_hall', rect: [-15, 13, 15, 34], y: 3.2, H: 6.8, double: 5.5, roof: 'xieshan', bays: [5, 5], front: 's', four: true, plat: 0.3, orn: { joseon: true, figures: 7 }, dapo: { tiers: 3, inter: 2 } });
 // the inner halls, with their own walled courts
 E.push({ t: 'ming_hall', rect: [-14, -52, 14, -38], y: 0, H: 5, front: 's', four: true, roof: 'xieshan', plat: 1, eave: 1.6, sweep: 0.8, orn: { figures: 5 }, dapo: { tiers: 3, inter: 2 } });
+// inside Sajeongjeon, the king's office: the throne before the screen of the sun and moon, a room of the court on each side
+E.push({ t: 'throne_hall', rect: [-14, -52, 14, -38], y: 0, H: 4.9, bays: [7, 4], d: 0.5, kind: 'joseon' });
+E.push({ t: 'joseon_inner', rect: [-14, -52, 14, -38], y: 0, H: 4.9, kind: 'throne', seed: 41 });
 for (const [z, w] of [[-108, 34], [-165, 32]]) {
   // Gangnyeongjeon and Gyotaejeon: hip-and-gable roofs with no main ridge (muryang), brackets on the posts only
   E.push({ t: 'ming_hall', rect: [-w / 2, z - 7, w / 2, z + 7], y: 0, H: 4.6, front: 's', four: true, roof: 'xieshan', muryang: true, plat: 1, eave: 1.5, sweep: 0.8, orn: { figures: 5 }, dapo: { tiers: 2, inter: 0 } });
   wall([-w / 2 - 14, z - 20], [w / 2 + 14, z - 20], [], 3.6); wall([-w / 2 - 14, z + 22], [-5, z + 22], [], 3.6); wall([5, z + 22], [w / 2 + 14, z + 22], [], 3.6);
   wall([-w / 2 - 14, z - 20], [-w / 2 - 14, z + 22], [], 3.6); wall([w / 2 + 14, z - 20], [w / 2 + 14, z + 22], [], 3.6);
+  E.push({ t: 'joseon_inner', rect: [-w / 2, z - 7, w / 2, z + 7], y: 0, H: 4.6, kind: 'royal', who: z === -108 ? 'king' : 'queen', seed: z });
 }
 // Amisan behind the queen's hall: four terraces walled in granite, their ends walled too; on them the
 // four hexagonal chimneys of Gyotaejeon's ondol (1869) and two stone basins
@@ -134,6 +138,8 @@ E.push({ t: 'water_rect', rect: HYANG, y: -1.2 });
   house([-170, -255, -161, -234], 'e', 2.9);                   // its wing
   house([-112, -274, -82, -263], 's');                         // Gonnyeonghap
   house([-82, -263, -72, -240], 'w', 2.9);                     // its wing, toward Okhoru
+  E.push({ t: 'joseon_inner', rect: [-170, -266, -136, -255], y: 0, H: 3.1, kind: 'royal', who: 'king', seed: 71 });
+  E.push({ t: 'joseon_inner', rect: [-112, -274, -82, -263], y: 0, H: 3.1, kind: 'royal', who: 'queen', seed: 73 });
   house([-160, -210, -132, -203], 'n', 2.7);                   // the service range by the gate
   house([-108, -210, -84, -203], 'n', 2.7);
 }
@@ -142,8 +148,10 @@ E.push({ t: 'water_rect', rect: HYANG, y: -1.2 });
 for (const [x0, x1] of [[px1 - 16, px1 - 6], [px0 + 6, px0 + 16]]) for (const z0 of [-280, -200, -120, 60, 180]) {
   if (x0 < 0 && z0 > -60 && z0 < 60) continue;
   E.push({ t: 'ming_hall', rect: [x0, z0, x1, z0 + 46], y: 0, H: 3.4, front: x0 > 0 ? 'w' : 'e', roof: 'xieshan', plat: 0.5, eave: 1.1, sweep: 0.5, simple: true });
+  E.push({ t: 'joseon_inner', rect: [x0, z0, x1, z0 + 46], y: 0, H: 3.4, front: x0 > 0 ? 'w' : 'e', kind: 'store', seed: z0 + x0 });
 }
 for (const [x, z] of [[110, -60], [110, 10], [100, 90], [-60, 190], [70, 190], [100, -200]]) E.push({ t: 'ming_hall', rect: [x - 14, z - 7, x + 14, z + 7], y: 0, H: 3.8, front: 's', roof: 'xieshan', plat: 0.7, eave: 1.3, sweep: 0.6, simple: true });
+for (const [x, z] of [[110, -60], [110, 10], [100, 90], [-60, 190], [70, 190], [100, -200]]) E.push({ t: 'joseon_inner', rect: [x - 14, z - 7, x + 14, z + 7], y: 0, H: 3.8, front: 's', kind: 'office', seed: x + z });
 // the avenue of the ministries south of the gate
 E.push({ t: 'lane', rect: AVENUE, y: 0.03, mat: 'granite_korea' });
 for (const [i, r] of MINISTRIES.entries()) {
@@ -153,6 +161,7 @@ for (const [i, r] of MINISTRIES.entries()) {
   wall([side, mz0], [side, (mz0 + mz1) / 2 - 3], [], 3.2); wall([side, (mz0 + mz1) / 2 + 3], [side, mz1], [], 3.2);
   wall([r[0] < 0 ? mx0 : mx1, mz0], [r[0] < 0 ? mx0 : mx1, mz1], [], 3.2);
   E.push({ t: 'ming_hall', rect: [(mx0 + mx1) / 2 - 16, (mz0 + mz1) / 2 - 6, (mx0 + mx1) / 2 + 16, (mz0 + mz1) / 2 + 6], y: 0, H: 4.2, front: r[0] < 0 ? 'e' : 'w', roof: 'xieshan', plat: 0.7, eave: 1.4, sweep: 0.7, simple: i > 1 });
+  E.push({ t: 'joseon_inner', rect: [(mx0 + mx1) / 2 - 16, (mz0 + mz1) / 2 - 6, (mx0 + mx1) / 2 + 16, (mz0 + mz1) / 2 + 6], y: 0, H: 4.2, front: r[0] < 0 ? 'e' : 'w', kind: 'office', seed: 100 + i });
 }
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });

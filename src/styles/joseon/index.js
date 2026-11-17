@@ -11,6 +11,8 @@ import { roofOrnaments, Parts, limb } from '../qing/carving.js';
 import { dapo, dapoHeight, meoricho, muryangRoof, postLines } from './dancheong.js';
 import { GOJONG } from './gojong.js';
 import { yangbanHouse, officeRange } from './house.js';
+import { hanokHome } from './home.js';
+import { joseonInner } from './inner.js';
 
 export const JPAL = { wood: 'paint_dancheong', column: 'lacquer_red', soffit: 'paint_dancheong', base: 'granite_korea', floor: 'granite_korea', lattice: 'lattice_red', leaky: 'lattice_red', plaster: 'plaster_white', plinth: 'granite_korea', roof: 'tile_grey' };
 const withJ = (fn) => (el, ctx) => fn({ ...el, pal: { ...JPAL, ...(el.pal || {}) } }, ctx);
@@ -153,6 +155,8 @@ registerStyle('joseon', {
     ...Object.fromEntries(Object.entries(GOJONG).map(([k, f]) => [k, withJ(withPal(f))])),
     yangban_house: (el, ctx) => withPal(yangbanHouse)({ ...el, pal: { ...hanokPal, ...(el.pal || {}) } }, ctx),
     joseon_precinct_range: (el, ctx) => withPal(officeRange)({ ...el, pal: { ...hanokPal, ...(el.pal || {}) } }, ctx),
+    joseon_inner: joseonInner,
+    hanok_home: (el, ctx) => withPal(hanokHome)({ ...el, pal: { ...hanokPal, ...(el.pal || {}) } }, ctx),
     hanok: (el, ctx) => withPal(hanok)({ ...el, pal: { ...hanokPal, ...(el.pal || {}) } }, ctx),
   },
   objects: {},
