@@ -14,6 +14,7 @@ import { yard, works, tomb_court, wall_dress, post, weir, things } from './dress
 import { plants, taro_bed } from './plants.js';
 import { court } from './court.js';
 import { boulder_foot } from './foot.js';
+import { column, lump, flush } from './column.js';
 
 const TH = 'thatch_palm', ROPE = 'rope_fibre', WOOD = 'palm_trunk';
 const dirOf = (yaw) => { const dx = Math.round(Math.sin(yaw)), dz = Math.round(Math.cos(yaw)); return dz > 0 ? 's' : dz < 0 ? 'n' : dx > 0 ? 'e' : 'w'; };
@@ -40,6 +41,29 @@ function islet_wall(el, { bag }) {
   const r = 0.34, c = r * Math.sqrt(3) + 0.03, e = el.ends ?? [0, 0];
   cribWall(bag, { a: A, b: B, y0: 0.1 - 3 * c, th, top: 3 * c, seed: el.seed ?? 1, sides: [s], ends: e, proj: 1, r, depth: th - 0.05, reach: 170 });
   void C; void R;
+}
+
+/**
+ * gate { c, w, th, n, seed }: the entrance through a crib wall, c = [x of the gap's middle, z of the wall's centre line], the gap w wide through a wall th thick,
+ * the outside on the +z side. A sill of columns laid through the wall at (n + 1) risers of 0.17 m over the ground, a flight of n treads each side, each tread a column laid across
+ * (docs/settlements/nan-madol.md §13: the entrance with its steps) — the walker climbs ramps laid over them.
+ */
+function gate(el, { bag, col }) {
+  const [cx, cz] = el.c, w = el.w, th = el.th, n = el.n ?? 2, rise = 0.17, top = (n + 1) * rise, depth = 0.55, rand = rng(el.seed ?? 1);
+  const T = { granite_black: [], basalt: [] }, pick = () => (rand() < 0.62 ? 'granite_black' : 'basalt');
+  const x0 = cx - w / 2, x1 = cx + w / 2;
+  // the sill: columns laid through the wall, side by side across the gap
+  for (let x = x0 + 0.24; x < x1 - 0.2; x += 0.47) column(T[pick()], rand, [x, top - 0.25, cz - th / 2 + 0.02 - rand() * 0.06], 0, 1, th - 0.02 + rand() * 0.1, 0.47 * (0.98 + rand() * 0.05), 0.5, 3);
+  for (const side of [1, -1]) for (let k = 1; k <= n; k++) {
+    const y = (n + 1 - k) * rise, zf = cz + side * th / 2, z0 = zf + side * (k - 1) * depth, z1 = z0 + side * depth;
+    // the tread: one column laid across the flight, its top at the step, the rubble of the step's body behind it
+    column(T[pick()], rand, [x0 - 0.1 - rand() * 0.06, y - 0.21, (z0 + z1) / 2 + (rand() - 0.5) * 0.04], 1, 0, w + 0.2 + rand() * 0.1, depth * 0.96, 0.42, 3);
+    if (y > 0.4) bag.add('coral_rag', box(x0, 0, Math.min(z0, z1), x1, y - 0.38, Math.max(z0, z1)));
+  }
+  flush(bag, T);
+  col.ramp([x0, cz + th / 2, x1, cz + th / 2 + n * depth], 0, top, 'n');
+  col.floor([x0, cz - th / 2, x1, cz + th / 2], top);
+  col.ramp([x0, cz - th / 2 - n * depth, x1, cz - th / 2], 0, top, 's');
 }
 /** steps { a, b, out, n }: landing steps at an islet's edge between a and b, going down toward the water (out). */
 function steps(el, { bag }) {
@@ -79,11 +103,11 @@ function ford(el, { bag }) {
  */
 function tomb(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, h = el.h ?? 2.4, [px0, pz0, px1, pz1] = el.pit, roofZ = el.roofZ, seed = el.seed ?? 5;
-  const th = 1.5, top = (u) => h - 0.1;
-  cribWall(bag, { a: [x0 + th / 2, z0 + th / 2], b: [x1 - th / 2, z0 + th / 2], y0: 0, th, top: h - 0.1, seed, ends: [th / 2, th / 2], proj: 0, core: false, sides: [-1] });
-  cribWall(bag, { a: [x0 + th / 2, z1 - th / 2], b: [x1 - th / 2, z1 - th / 2], y0: 0, th, top: h - 0.1, seed: seed + 1, ends: [th / 2, th / 2], proj: 1, core: false, sides: [1] });
-  cribWall(bag, { a: [x0 + th / 2, z0 + th / 2], b: [x0 + th / 2, z1 - th / 2], y0: 0, th, top: h - 0.1, seed: seed + 2, ends: [th / 2, th / 2], proj: 1, core: false, sides: [1] });
-  cribWall(bag, { a: [x1 - th / 2, z0 + th / 2], b: [x1 - th / 2, z1 - th / 2], y0: 0, th, top: h - 0.1, seed: seed + 3, ends: [th / 2, th / 2], proj: 0, core: false, sides: [-1] });
+  const fine = !!el.fine, rand = rng(seed * 7 + 3), th = 1.5, top = (u) => h - 0.1, F = fine ? { fine: true, rough: 0.09, jut: 0.4, flare: 0.04 } : {};
+  cribWall(bag, { a: [x0 + th / 2, z0 + th / 2], b: [x1 - th / 2, z0 + th / 2], y0: 0, th, top: h - 0.1, seed, ends: [th / 2, th / 2], proj: 0, core: false, sides: [-1], ...F });
+  cribWall(bag, { a: [x0 + th / 2, z1 - th / 2], b: [x1 - th / 2, z1 - th / 2], y0: 0, th, top: h - 0.1, seed: seed + 1, ends: [th / 2, th / 2], proj: 1, core: false, sides: [1], ...F });
+  cribWall(bag, { a: [x0 + th / 2, z0 + th / 2], b: [x0 + th / 2, z1 - th / 2], y0: 0, th, top: h - 0.1, seed: seed + 2, ends: [th / 2, th / 2], proj: 1, core: false, sides: [1], ...F });
+  cribWall(bag, { a: [x1 - th / 2, z0 + th / 2], b: [x1 - th / 2, z1 - th / 2], y0: 0, th, top: h - 0.1, seed: seed + 3, ends: [th / 2, th / 2], proj: 0, core: false, sides: [-1], ...F });
   // the fill: coral rubble up to the skin, round the crypt
   for (const r of subtractRects([x0 + 0.05, z0 + 0.05, x1 - 0.05, z1 - 0.05], [[px0 - 0.62, pz0 - 0.62, px1 + 0.62, pz1 + 0.62]])) bag.add('coral_rag', box(r[0], 0, r[1], r[2], h - 0.1, r[3]));
   // the crypt's lining: stretcher courses facing in
@@ -91,33 +115,51 @@ function tomb(el, { bag, col }) {
   cribWall(bag, { a: [px0 - lw / 2, pz0 - lw / 2], b: [px1 + lw / 2, pz0 - lw / 2], y0: 0, th: lw, top: h - 0.1, seed: seed + 4, ends: [0, 0], core: false, sides: [1], depth: 0.5 });
   cribWall(bag, { a: [px0 - lw / 2, pz0 - lw / 2], b: [px0 - lw / 2, pz1 + lw / 2], y0: 0, th: lw, top: h - 0.1, seed: seed + 5, ends: [0, 0], core: false, sides: [-1], depth: 0.5 });
   cribWall(bag, { a: [px1 + lw / 2, pz0 - lw / 2], b: [px1 + lw / 2, pz1 + lw / 2], y0: 0, th: lw, top: h - 0.1, seed: seed + 6, ends: [0, 0], core: false, sides: [1], depth: 0.5 });
-  // the skin of gravel over the platform, round the opening
-  const open = [px0 - 0.62, roofZ, px1 + 0.62, pz1 + 0.62];
-  for (const r of subtractRects([x0, z0, x1, z1], [open])) bag.add('coral', box(r[0], h - 0.1, r[1], r[2], h, r[3]));
+  // the skin of gravel over the platform, round the opening (fine: the beams of the roof lie bare, so the skin stops at them)
+  const open = [px0 - 0.62, roofZ, px1 + 0.62, pz1 + 0.62], beamsAt = [px0 - 1.2, pz0 - 0.62, px1 + 1.2, roofZ];
+  for (const r of subtractRects([x0, z0, x1, z1], fine ? [open, beamsAt] : [open])) bag.add('coral', box(r[0], h - 0.1, r[1], r[2], h, r[3]));
   // the roof of the crypt: columns laid across, their tops at the platform's
-  for (let z = pz0 - 0.05; z < roofZ - 0.25; z += 0.47) laid(bag, ROCK[Math.floor(z * 3) & 3], px1 - px0 + 2.4, px0 - 1.2, h - 0.1 - 0.25, z + 0.24, 1, 0, 200);
+  const T = { granite_black: [], basalt: [], coral: [], coral_rag: [] };
+  if (fine) {
+    // each beam its own prism, their ends running out past the walls by different lengths, rubble heaped in the joints and over the ends
+    for (let z = beamsAt[1] + 0.24; z < roofZ - 0.2; z += 0.47) {
+      const ex0 = rand() * 0.25, ex1 = rand() * 0.25;
+      column(T[rand() < 0.6 ? 'granite_black' : 'basalt'], rand, [beamsAt[0] + ex0, h - 0.27, z + (rand() - 0.5) * 0.04], 1, 0, beamsAt[2] - beamsAt[0] - ex0 - ex1, 0.47 * (0.97 + rand() * 0.06), 0.5, 3);
+    }
+    for (let i = 0; i < 26; i++) lump(T.coral, rand, beamsAt[0] + 0.3 + rand() * (beamsAt[2] - beamsAt[0] - 0.6), h - 0.08, beamsAt[1] + 0.1 + rand() * (beamsAt[3] - beamsAt[1] - 0.2), 0.05 + rand() * 0.08, 0.5);
+  } else {
+    for (let z = pz0 - 0.05; z < roofZ - 0.25; z += 0.47) laid(bag, ROCK[Math.floor(z * 3) & 3], px1 - px0 + 2.4, px0 - 1.2, h - 0.1 - 0.25, z + 0.24, 1, 0, 200);
+  }
   // the bier: a great column laid on two stones in the crypt, the central column of the tomb
   const bz = pz0 + 1.3, bx = (px0 + px1) / 2;
   bag.add('granite_black', box(bx - 0.5, 0, bz - 0.2, bx - 0.2, 0.3, bz + 0.2)); bag.add('granite_black', box(bx + 0.2, 0, bz - 0.2, bx + 0.5, 0.3, bz + 0.2));
-  laid(bag, 'dolerite_spotted', 2.6, bx - 1.3, 0.55, bz, 1, 0, 120, 0.25);
+  if (fine) column(T.basalt, rand, [bx - 1.4, 0.8, bz], 1, 0, 2.8, 0.5, 0.5, 3);
+  else laid(bag, 'dolerite_spotted', 2.6, bx - 1.3, 0.55, bz, 1, 0, 120, 0.25);
   col.rect([bx - 1.3, bz - 0.3, bx + 1.3, bz + 0.3], 0, 0.9);
   // the stair down into the crypt (south end, ascending south) and the stair up the platform's south face
   const sd = el.ramp, su = el.stair;
-  stair(bag, col, sd, 0, h, 's', true);
-  stair(bag, col, su, 0, h, 'n', false);
+  stair(bag, col, sd, 0, h, 's', true, fine ? { T, rand } : null);
+  stair(bag, col, su, 0, h, 'n', false, fine ? { T, rand } : null);
+  if (fine) flush(bag, T);
   // colliders: the platform's mass round the crypt, its skin walkable
   for (const r of subtractRects([x0, z0, x1, z1], [[px0, pz0, px1, pz1]])) col.rect(r, 0, h);
   for (const r of subtractRects([x0, z0, x1, z1], [[px0, roofZ, px1, pz1]])) col.floor(r, h);
 }
-/** A flight of steps: its boxes drawn, the walkable ramp laid over it. `dir` is the direction of ascent. */
-function stair(bag, col, rect, y0, y1, dir, inner) {
+/** A flight of steps: its boxes drawn, the walkable ramp laid over it. `dir` is the direction of ascent. With `fine` ({ T, rand }) each tread is a column laid across the flight over a body of rubble. */
+function stair(bag, col, rect, y0, y1, dir, inner, fine = null) {
   const [x0, z0, x1, z1] = rect, n = Math.round((y1 - y0) / 0.3), horiz = dir === 'e' || dir === 'w';
   const L = horiz ? x1 - x0 : z1 - z0;
   for (let k = 0; k < n; k++) {
     const t0 = k / n * L, t1 = (k + 1) / n * L, y = y0 + (k + 1) * (y1 - y0) / n;
     const a = dir === 'e' || dir === 's' ? t0 : L - t1, b = dir === 'e' || dir === 's' ? t1 : L - t0;
     const r = horiz ? [x0 + a, z0, x0 + b, z1] : [x0, z0 + a, x1, z0 + b];
-    bag.add(k % 2 ? 'dolerite_spotted' : 'granite_black', box(r[0], inner ? Math.max(0, y - 0.3) : y0, r[1], r[2], y, r[3]));
+    if (fine) {
+      const { T, rand } = fine, d = t1 - t0, depthc = (r[horiz ? 0 : 1] + r[horiz ? 2 : 3]) / 2;
+      if (y - 0.4 > 0.02) bag.add('coral_rag', box(r[0], 0, r[1], r[2], y - 0.38, r[3]));
+      // (the column lies across the flight: along z for a flight that runs east–west, along x for one that runs north–south)
+      if (horiz) column(T[rand() < 0.6 ? 'granite_black' : 'basalt'], rand, [depthc + (rand() - 0.5) * 0.03, y - 0.2, z0 - 0.12 - rand() * 0.05], 0, 1, z1 - z0 + 0.22 + rand() * 0.08, d * 0.98, 0.4, 3);
+      else column(T[rand() < 0.6 ? 'granite_black' : 'basalt'], rand, [x0 - 0.12 - rand() * 0.05, y - 0.2, depthc + (rand() - 0.5) * 0.03], 1, 0, x1 - x0 + 0.22 + rand() * 0.08, d * 0.98, 0.4, 3);
+    } else bag.add(k % 2 ? 'dolerite_spotted' : 'granite_black', box(r[0], inner ? Math.max(0, y - 0.3) : y0, r[1], r[2], y, r[3]));
   }
   col.ramp(rect, y0, y1, dir);
 }
@@ -275,7 +317,7 @@ function pile(el, { bag }) {
 
 registerStyle('nanmadol', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { crib_wall, islet_wall, steps, ford, tomb, nah, cookhouse, canoe, mangrove, sakau, pile, yard, works, things, tomb_court, wall_dress, post, weir, plants, taro_bed, court, boulder_foot },
+  elements: { crib_wall, islet_wall, gate, steps, ford, tomb, nah, cookhouse, canoe, mangrove, sakau, pile, yard, works, things, tomb_court, wall_dress, post, weir, plants, taro_bed, court, boulder_foot },
   objects: {},
 });
 export { canoe };

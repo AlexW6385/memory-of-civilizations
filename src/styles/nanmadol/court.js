@@ -4,6 +4,7 @@
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import { Matrix4 } from '../../core/three.js';
 import { rng, laid } from './crib.js';
+import { lump, flush } from './column.js';
 
 const coconut = (r = 0.12) => lathe([[0.001, 0], [r * 0.8, r * 0.3], [r, r * 0.9], [r * 0.8, r * 1.6], [0.001, r * 1.9]], 6);
 const frameOf = (c, yaw) => { const ca = Math.cos(yaw), sa = Math.sin(yaw); return { W: (u, v) => [c[0] + u * ca + v * sa, c[1] - u * sa + v * ca], M: new Matrix4().makeRotationY(yaw).setPosition(c[0], 0, c[1]) }; };
@@ -39,6 +40,16 @@ export function court(el, { bag, col }) {
         bag.add('coral', box(a, 0.0, z - 0.035, b, 0.045, z + 0.035));
       }
     }
+  } else if (el.kind === 'rubble') {
+    // lumps of coral rubble and gravel on the floor of a court: thick at the walls' feet, thinning out toward the middle, clear of the skip rectangles
+    const [x0, z0, x1, z1] = el.rect, T = { coral: [], coral_rag: [] };
+    for (let i = 0, n = el.n ?? 300; i < n; i++) {
+      const x = x0 + rand() * (x1 - x0), z = z0 + rand() * (z1 - z0), edge = Math.min(x - x0, x1 - x, z - z0, z1 - z) / 6;
+      if (rand() < Math.min(1, edge) * 0.75) continue;
+      if ((el.skip ?? []).some((s) => x > s[0] && x < s[2] && z > s[1] && z < s[3])) continue;
+      lump(T[rand() < 0.55 ? 'coral' : 'coral_rag'], rand, x, el.y ?? 0.0, z, 0.05 + rand() * rand() * 0.18, 0.55);
+    }
+    flush(bag, T);
   } else if (el.kind === 'offering') {
     const F = frameOf(el.c, el.yaw ?? 0), put = (m, g) => { g.applyMatrix4(F.M); bag.add(m, g); };
     put('reed_mat', box(-1.0, 0.0, -0.7, 1.0, 0.03, 0.7));
