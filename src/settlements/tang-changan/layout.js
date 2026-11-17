@@ -167,6 +167,7 @@ export function lots() {
           const d = Math.hypot((rect[0] + rect[2]) / 2, (rect[1] + rect[3]) / 2), r = rand();
           let kind = w.kind === 'official' ? (r < 0.55 ? 'mansion' : 'house') : w.kind === 'common' ? (r < 0.08 ? 'mansion' : r < 0.85 ? 'house' : 'hut') : (r < 0.55 ? 'hut' : 'house');
           if (rand() < (d > 440 ? 0.25 : 0.04)) continue;
+          if (rectsMeet(rect, FIRE.rect, 0.5)) continue;
           LOTS.push({ rect, front, kind, seed: Math.floor(rand() * 1e6), det: d < 230 ? 2 : d < 380 ? 1 : 0, ward: w.id, wk: w.kind });
         }
       }
@@ -189,11 +190,16 @@ export function laneRects() {
     const [x0, z0, x1, z1] = w.rect, [cx, cz] = w.c;
     if (w.kind === 'daci\'en' || w.kind === 'daoist' || w.kind === 'market') continue;
     out.push([x0, cz - LANE / 2, x1, cz + LANE / 2], [cx - LANE / 2, z0, cx + LANE / 2, z1]);
-    for (const qz of [-1, 1]) { const qb = qz < 0 ? [z0 + WALL + 0.4, cz - LANE / 2] : [cz + LANE / 2, z1 - WALL - 0.4], mid = (qb[0] + qb[1]) / 2; out.push([x0 + WALL, mid - 2, x1 - WALL, mid + 2]); }
+    for (const qz of [-1, 1]) { const qb = qz < 0 ? [z0 + WALL + 0.4, cz - LANE / 2] : [cz + LANE / 2, z1 - WALL - 0.4], mid = (qb[0] + qb[1]) / 2; const al = [x0 + WALL, mid - 2, x1 - WALL, mid + 2]; if (rectsMeet(al, FIRE.rect)) out.push([al[0], al[1], FIRE.rect[0], al[3]], [FIRE.rect[2], al[1], al[2], al[3]]); else out.push(al); }
   }
   return out;
 }
 export const onLane = (x, z, m = 0) => laneRects().some((r) => inRect(r, x, z, m));
+
+// ── the Zoroastrian fire temple (xian) in the ward south of the West Market: a walled compound in the ward's north-west quadrant, its gate
+// in the east wall onto the ward's north–south lane ──
+export const FIRE = { rect: [-206, 234.5, -146, 298.5], c: [-176, 266.5], gate: [-146, 266.5] };
+// (the houses' lots that would stand there are dropped, and the alley that crossed it ends at its walls)
 
 // ── Daci'en, the Daoist temple: the axes and what stands on them ──
 export const DACI_AX = DACI.c[0];

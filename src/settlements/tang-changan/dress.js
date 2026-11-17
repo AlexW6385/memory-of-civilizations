@@ -97,6 +97,20 @@ export function dressLife() {
     if (rand() < 0.4) { fig([bx - side * 0.2, z + 12], faceTo([side, 0]), { pose: 'squat', hat: 'straw', carry: 'none' }); }
   }
 
+  // ── the wards' lane crossings: the ward's well under its windlass roof, women drawing water, old men on a bench in the sun, a barrow, a cart of water jars, a dog ──
+  for (const w of WARDS) {
+    if (w.kind === 'daci\'en' || w.kind === 'daoist' || w.kind === 'market') continue;
+    const [cx, cz] = w.c, r = rng(Math.round(cx * 7 + cz * 3));
+    const wx = cx + 3.6, wz = cz + 3.4;
+    L.push({ t: 'well', kind: 'windlass', at: [wx, wz], y: 0, roof: true, seed: Math.round(cx) });
+    woman([wx - 1.5, wz + 0.2], faceTo([1, 0]), { pose: 'stand', carry: 'pole' });
+    L.push({ t: 'pot', kind: 'water_pot', n: 2, at: [wx - 2.2, wz + 1.0], y: 0, rot: 0.4, seed: Math.round(cz) });
+    L.push({ t: 'bench', at: [cx - 3.6, cz + 3.6], y: 0, rot: Math.PI / 2, len: 1.9 });
+    fig([cx - 3.6, cz + 3.2], faceTo([1, 0]), { pose: 'sit', beard: true, hat: pick(['cap', 'none']), cloth: pick(CLOTH) }); fig([cx - 3.6, cz + 4.1], faceTo([1, 0]), { pose: 'sit', beard: r() < 0.5, hat: 'none', cloth: pick(CLOTH) });
+    L.push({ t: 'barrow', at: [cx - 2.6, cz - 3.6], y: 0, rot: 0.2 + r(), seed: Math.round(cx + cz) });
+    L.push({ t: 'cart', kind: 'two', beast: 'ox', load: 'barrels', at: [cx + 1.2, cz - 22], y: 0, rot: 0.1, seed: Math.round(cz) });
+    L.push({ t: 'animal', kind: 'dog', at: [cx + 5.5, cz - 3], y: 0, rot: r() * 6.28, seed: Math.round(cx) + 3 });
+  }
   // ── Daci'en: pilgrims kneeling before the main hall, monks sweeping and passing, lamps and benches along the court ──
   const ax = DACI_AX, mh = DACI_MAIN[1];
   for (let k = 0; k < 9; k++) { const x = ax + 3.5 + (k % 5) * 2.3, z = mh + 13 + Math.floor(k / 5) * 2.6; (k % 3 === 0 ? woman : k % 3 === 1 ? fig : hu)([x, z], faceTo([0, -1]), { pose: 'kneel', arms: 'pray', carry: 'none' }); }

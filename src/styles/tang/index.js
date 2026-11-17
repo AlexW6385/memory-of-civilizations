@@ -10,10 +10,11 @@ import { WARD_ELEMENTS } from './ward.js';
 import { HOUSE_ELEMENTS } from './house.js';
 import { PAGODA_ELEMENTS } from './pagoda.js';
 import { INTERIOR_ELEMENTS } from './interior.js';
+import { FIRE_ELEMENTS } from './fire.js';
 import { tangHall } from './hall.js';
 
 registerStyle('tang', {
   column: STYLES.chinese.column, trim: STYLES.chinese.trim, opening: STYLES.chinese.opening,
-  elements: { ...STYLES.chinese.elements, ...STYLES.song.elements, tang_hall: tangHall, ...WARD_ELEMENTS, ...HOUSE_ELEMENTS, ...PAGODA_ELEMENTS, ...INTERIOR_ELEMENTS },
+  elements: { ...STYLES.chinese.elements, ...STYLES.song.elements, tang_hall: tangHall, ...WARD_ELEMENTS, ...HOUSE_ELEMENTS, ...PAGODA_ELEMENTS, ...INTERIOR_ELEMENTS, ...FIRE_ELEMENTS },
   objects: STYLES.chinese.objects,
 });
