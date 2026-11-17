@@ -141,7 +141,7 @@ add({ t: 'sc_stair_rail', a: [-17.9, 0, -7.4], b: [-4.5, UP, -7.4], h: 1.0, th: 
 add({ t: 'sc_stair_rail', a: [-17.9, 0, -9.8], b: [-5.2, UP - 0.53, -9.8], h: 1.0, th: 0.3 });
 add({ t: 'sc_stair_arcade', o: [-17.9, -7.6], u: [1, 0], n: [0, 1], u0: 0.3, u1: 13.4, y0: 0, ya: 0, yb: UP, d0: 0.02 });
 add({ t: 'sc_stair_arcade', o: [-17.9, -9.6], u: [1, 0], n: [0, -1], u0: 0.3, u1: 12.7, y0: 0, ya: 0, yb: UP - 0.53, d0: 0.02 });
-add({ t: 'sc_gallery', rect: [GAL.x0, GAL.z0, GAL.x1, -9.6], y: 0, fl: UP, h: 5.6 });
+add({ t: 'sc_gallery', rect: [GAL.x0, GAL.z0, GAL.x1, -9.6], y: 0, fl: UP, h: 5.6, door: (GAL.x0 + GAL.x1) / 2 });
 
 // ── the roof, the spire ──────────────────────────────────────────────────────
 // the roof springs behind the balustrade (the gutter's walk between them); its lead in sheets with rolls, the gilt crest of
@@ -153,16 +153,20 @@ add({ t: 'sc_roof_dress', x0: -0.6, x1: XA, z0: -RZ, z1: RZ, e: RY + 0.25, ridge
 add({ t: 'sc_fleche', at: [XA - 3.0, 0], y: RIDGE - 4.0, ridge: RIDGE, h: 33, r: 1.5 });
 
 // ── the upper chapel's furnishings: the tribune of the relics, the altar, the apostles ─
-add({ t: 'block', rect: [29.4, -1.9, 31.6, 1.9], y0: UP, y1: UP + 2.6, mat: 'limestone' });
-for (const [x, z] of [[29.5, -1.8], [31.5, -1.8], [29.5, 1.8], [31.5, 1.8]]) add({ t: 'column', at: [x, z], y: UP + 2.6, h: 3.2, d: 0.18, shaftMat: 'gold' });
-add({ t: 'gable_roof', x0: 29.2, x1: 31.8, z0: -2.1, z1: 2.1, y: UP + 5.8, ridge: UP + 7.4, mat: 'gold' });
-add({ t: 'block', rect: [30.0, -0.9, 31.0, 0.9], y0: UP + 2.6, y1: UP + 3.5, mat: 'gold', collide: false });
-add({ t: 'block', rect: [26.4, -1.2, 27.6, 1.2], y0: UP, y1: UP + 1.05, mat: 'marble_smooth' });
+// the tribune of the relics in the apse with its two narrow stairs (the north one's landing, the south one's), the Grande Châsse on it
+add({ t: 'sc_tribune', at: [30.6, 0], y: UP, w: 3.8, d: 2.5, h: 2.5 });
+for (const sz of [-1, 1]) {
+  add({ t: 'stair', rect: [27.9, Math.min(sz * 2.05, sz * 2.85), 31.0, Math.max(sz * 2.05, sz * 2.85)], dir: 'e', y0: UP, y1: UP + 2.5, riser: 0.19, base: UP, mat: 'limestone' });
+  add({ t: 'sc_trib_landing', rect: [31.0, Math.min(sz * 2.0, sz * 2.9), 31.95, Math.max(sz * 2.0, sz * 2.9)], bridge: [31.0, Math.min(sz * 1.8, sz * 2.0), 31.8, Math.max(sz * 1.8, sz * 2.0)], y: UP + 2.5 });
+}
+// the altars: the high altar of the upper chapel before the tribune, the Virgin's altar in the lower chapel's apse
+add({ t: 'sc_altar', at: [25.8, 0], y: UP, face: [-1, 0], w: 2.4, kind: 'main' });
+add({ t: 'sc_altar', at: [28.0, 0], y: 0.15, face: [-1, 0], w: 2.0, kind: 'virgin' });
 {
   const piers = [];
   for (let k = 1; k <= NB; k++) for (const sz of [-1, 1]) piers.push([k * BAY, sz * (HW - 0.35)]);
   for (let k = 1; k < APSE.sides; k += 1.0) piers.push(apsePt(k, RAP - 0.35));
-  for (const [x, z] of piers.slice(0, 12)) add({ t: 'statue_el', at: [x, z], y: UP + 3.6, h: 1.85, robe: 'paint_robe' });
+  piers.slice(0, 12).forEach(([x, z], i) => { const dx = XA - x, dz = -z, dl = Math.hypot(dx, dz), straight = x <= XA + 0.01; add({ t: 'sc_apostle', at: [x, z], y: UP + 3.6, h: 1.95, face: straight ? [0, -Math.sign(z)] : [dx / dl, dz / dl], i }); });
 }
 
 // ── the palace: two towers by the water ─────────────────────────────────────

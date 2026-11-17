@@ -15,7 +15,7 @@ export const city = {
     { t: 'notre_dame', rect: CATHEDRAL, y: g },
     // the palace (docs/settlements/paris.md §1c): the Grand-Salle north-west of the chapel, the king's gallery reaching it from
     // the chapel's upper porch (the chapel's plan); the towers on the Seine; the enclosure on the Barillerie with its gate
-    { t: 'palace_hall', rect: [-265, -72, -199, -44], h: 17, floor: 6, y: g, gap: -203 },
+    { t: 'palace_hall', rect: [-265, -72, -199, -44], h: 17, floor: 7.6, y: g, gap: -203, door: -202.9 },
     { t: 'palace_tower', at: [-262, -104.5], y: RIVER.bed + 0.5, ground: g, r: 5.0, h: 24.5, roof: 11, face: -Math.PI / 2 },     // Tour Bonbec
     { t: 'palace_tower', at: [-236, -104.5], y: RIVER.bed + 0.5, ground: g, r: 5.3, h: 27.5, roof: 13, face: -Math.PI / 2 },     // Tour César
     { t: 'palace_tower', at: [-222, -104.5], y: RIVER.bed + 0.5, ground: g, r: 5.3, h: 27.5, roof: 13, face: -Math.PI / 2 },     // Tour d'Argent

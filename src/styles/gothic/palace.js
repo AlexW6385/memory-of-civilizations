@@ -9,6 +9,7 @@ import { box, lathe, rod, fromTriangles, orientOutward } from '../../core/geom.j
 import { planarWall, archRise } from '../byzantine/index.js';
 import './index.js';
 import { prism, bars, ringPts } from './notre-dame.js';
+import { hallInterior } from './hall-interior.js';
 
 const L = 'limestone', CARV = 'limestone_carved';
 const G = () => STYLES.gothic.elements;
@@ -33,7 +34,7 @@ function pane(bag, o, u, a, off) { const n = [-u[1], u[0]]; bag.add('opening', p
  * tall windows of two lights above; at each end two gables, each with a great window of four lights and a rose; a cornice.
  */
 function palaceHall(el, ctx) {
-  const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 17, fl = el.floor ?? 6, T = 1.1;
+  const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 17, fl = el.floor ?? 6, T = 1.1, door = el.door ?? null;
   const Wd = z1 - z0, nw = Wd / 2, n = Math.max(2, Math.round((x1 - x0) / 6)), bl = (x1 - x0) / n, E = y + h;
   bag.add(L, box(x0 - 0.35, y - 0.6, z0 - 0.35, x1 + 0.35, y + 0.7, z1 + 0.35));
   // the long walls
@@ -41,12 +42,14 @@ function palaceHall(el, ctx) {
     const arches = [];
     for (let k = 0; k < n; k++) {
       const uc = (k + 0.5) * bl;
-      arches.push({ uc, r: 0.55, spring: y + 3.4, sill: y + 2.0, pointed: 0.8 }, { uc, r: 1.25, spring: E - 3.6, sill: y + fl + 2.2, pointed: 0.75 });
+      arches.push({ uc, r: 0.55, spring: y + 3.4, sill: y + 2.0, pointed: 0.8 });
+      if (!(door != null && inS < 0 && Math.abs(x0 + uc - door) < 2.4)) arches.push({ uc, r: 1.25, spring: E - 3.6, sill: y + fl + 2.2, pointed: 0.75 });
     }
+    if (door != null && inS < 0) arches.push({ uc: door - x0, r: 0.95, spring: y + fl + 2.2, sill: y + fl, pointed: 0.8 });
     bag.add(L, planarWall({ o: [x0, zf], u: [1, 0], th: T, u0: 0, u1: x1 - x0, y0: y, y1: E, arches }));
     for (let k = 0; k < n; k++) {
       const uc = (k + 0.5) * bl;
-      G().gothic_window({ o: [x0, zf], u: [1, 0], uc, w: 2.5, sill: y + fl + 2.2, spring: E - 3.6, f: 0.75, lancets: 2, inSide: inS, bar: 0.12 }, ctx);
+      if (!(door != null && inS < 0 && Math.abs(x0 + uc - door) < 2.4)) G().gothic_window({ o: [x0, zf], u: [1, 0], uc, w: 2.5, sill: y + fl + 2.2, spring: E - 3.6, f: 0.75, lancets: 2, inSide: inS, bar: 0.12 }, ctx);
       pane(bag, [x0, zf], [1, 0], { uc, r: 0.55, sill: y + 2.0, spring: y + 3.4, pointed: 0.8 }, inS * 0.2);
     }
     const W = frame([x0, zf], [1, 0], [0, -inS]), S = [];
@@ -79,7 +82,13 @@ function palaceHall(el, ctx) {
     bag.add('slate', fromTriangles(R));
     bag.add('lead', rod([x0 + T / 2, rg + 0.02, za + nw / 2], [x1 - T / 2, rg + 0.02, za + nw / 2], 0.14, 6));
   }
-  col.rect([x0, z0, x1, z1], y - 0.6, E);
+  if (door == null) { col.rect([x0, z0, x1, z1], y - 0.6, E); return; }
+  // enterable: the undercroft solid, the hall's floor over it; the walls as colliders, the south wall cut for the gallery's door
+  col.rect([x0, z0, x1, z1], y - 0.6, y + fl - 0.3);
+  col.rect([x0, z0, x1, z0 + T], y - 0.6, E); col.rect([x0, z0, x0 + T, z1], y - 0.6, E); col.rect([x1 - T, z0, x1, z1], y - 0.6, E);
+  col.rect([x0, z1 - T, door - 0.95, z1], y - 0.6, E); col.rect([door + 0.95, z1 - T, x1, z1], y - 0.6, E);
+  col.rect([door - 0.95, z1 - T, door + 0.95, z1], y + fl + 2.6, E);
+  hallInterior(ctx, { x0, z0, x1, z1, T, y: y + fl, E, bl, n, door });
 }
 
 /**
