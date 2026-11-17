@@ -164,6 +164,14 @@ Sources (2026-11-16, §5.16–5.18):
 - [Copper pans, iron pots — Vermeer-info (Kalden)](https://kalden.home.xs4all.nl/vermeer-info/house/hz-koperpan-eng.htm)
 - [In the inner kitchen — Vermeer-info (Kalden)](https://kalden.home.xs4all.nl/vermeer-info/house/h-binnenkeucken-eng.htm)
 
+### 5.19 The landmark and the canal front seen close (L3, 2026-11-17; `src/styles/dutch/house.js`, `gables.js`, `reveal.js`, `canal.js`, `landmarks.js`)
+
+- **Windows in reveals:** the cross-window (kruiskozijn) with leaded upper lights is the window of the period; Van Campen's Town Hall kept leaded glass in dark grey frames [stated: Kuyper/Fockema Andreae, §5.1]. Ours: the front of each canal house is two layers, the body behind and a front layer 0.3 m thick cut through at every window and the door, the frame and glass standing 0.2 m back, a stone sill through the reveal and a lintel bearing on the jambs; shutters are planked leaves with a batten, closed in the reveal or folded back on the wall. [inferred: depths, plank pattern]
+- **Town Hall windows:** glass 0.3 m behind a proud architrave of four bars, a stone cross of mullion and transom, leaded lights in dark frames, sills, cornices, and over the upper main windows pediments alternately triangular and segmental; swags of fruit under them (Quellinus's festoons, §5.3). [inferred: proportions]
+- **Gables:** neck gables with a cove of brick (flat at the shoulder, upright at the neck) edged by a broad sandstone roll ending in a volute, an urn on each shoulder ("clawed inserts with volutes" [stated: Snail in the City, §5.1]); bell gables with volutes beside the crown, urns and a finial; stepped gables with sandstone obelisks on the steps. [inferred: the carving]
+- **Stoops:** moulded landing, nosed steps, sloping stone cheek walls, wrought railings (level over the landing, raking beside the steps, balusters, newels with balls, a curl at the foot). [inferred]
+- **Bridges:** arch rings in dressed voussoirs, every second proud, a keystone to each vault, a string course under the parapets, stone end piers with pyramid caps and balls. [inferred]
+
 ## 6. Ground and water
 
 Brick quays and streets; rows of elms on the quays; canals; the IJ. [stated: elms along canals — inferred from paintings]

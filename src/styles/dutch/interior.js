@@ -6,6 +6,7 @@
 // skirting of every wall, the beamed and boarded ceiling. Built in the house's front frame F (u along the front,
 // d outward from it — the house lies at d < 0 — v up from y).
 
+import { wallHoles } from './reveal.js';
 import { box, lathe, rod } from '../../core/geom.js';
 import { fbox, vprism, sideprism } from './facade.js';
 import { kitchenFit, officeFit, storeFit } from './rooms.js';
@@ -47,7 +48,10 @@ export function canalInterior(bag, col, F, y, o) {
   const dP = -Math.max(3.4, Math.min(5.8, Dm * 0.47)), pT = 0.15;            // the partition between the hall and the room behind
   // ---- the shell: the basement and the upper floors solid, the party walls, the back wall, the front with its door and windows
   W(mat, 0, w, -0.6, b, -Dm, 0); col.floor((() => { const p = F.at(iu0, dF), q = F.at(iu1, dB); return [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; })(), y + fl);
-  W(mat, 0, w, top, H, -Dm, 0);
+  if (o.upper?.length) {                                                       // the upper floors: the body solid, the front layer cut through at each window (their reveals)
+    W(mat, 0, w, top, H, -Dm, dF); C(0, w, dF, 0, top, H);
+    wallHoles((ua, ub, va, vb) => A(mat, ua, ub, va, vb, dF, 0), 0, w, top, H, o.upper);
+  } else W(mat, 0, w, top, H, -Dm, 0);
   W(mat, 0, P, b, top, -Dm, 0); W(mat, w - P, w, b, top, -Dm, 0); W(mat, P, w - P, b, top, -Dm, dB);
   const holes = [{ u0: du - dw, u1: du + dw, v0: b, v1: b + dh, door: true }, ...wins.map((u) => ({ u0: u - ww / 2, u1: u + ww / 2, v0: b + 0.45, v1: b + 3.0 }))].sort((p, q) => p.u0 - q.u0);
   let cur = P;

@@ -5,29 +5,50 @@
 // neck with sandstone claw pieces (from 1640), bell (from 1660, low in this century) or, for a
 // warehouse, a spout gable with loading doors — with the attic hatch and the hoisting beam at its top.
 
-import { box, frustum } from '../../core/geom.js';
-import { faceFrame, prism, fbox, outline, ngon, slab4, sideprism } from './facade.js';
+import { box, frustum, lathe } from '../../core/geom.js';
+import { relief, ribbon, spiral } from '../norse/carving.js';
+import { faceFrame, prism, fbox, outline, ngon, slab4, sideprism, bar } from './facade.js';
 import { canalInterior } from './interior.js';
 import { frontDress } from './dress.js';
+import { wallHoles } from './reveal.js';
+import { volute, urn, obelisk, jit } from './gables.js';
 
 const ST = 'sandstone_dressed';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const sstep = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 
-/** A cross-window: frame bars over the glass, the transom at 62%, the lower lights shuttered (closed or folded open). */
+/**
+ * A cross-window (kruiskozijn) set back in its reveal when o.set < 0 (the face of the wall at d = 0): the frame (jambs, head,
+ * sill, mullion and transom, with a rebate), the leaded upper lights in a lattice of cames, the lower lights shuttered —
+ * closed (planked leaves with their battens and iron bands, in the reveal), folded open against the wall (leaf with its
+ * strap hinges, a latch bolt) or none — and, outside, the stone sill, the lintel and its keystone.
+ */
 export function crossWindow(bag, F, y, u, v0, ww, hh, o) {
-  const A = (m, ...r) => bag.add(m, fbox(F, y, ...r)), u0 = u - ww / 2, u1 = u + ww / 2, vt = v0 + hh * 0.62, b = 0.07;
-  A(ST, u0 - 0.1, u1 + 0.1, v0 - 0.14, v0, o.open ? 0 : -0.02, 0.12);           // the sill
-  A(ST, u0 - 0.16, u1 + 0.16, v0 + hh, v0 + hh + 0.24, 0, 0.05);              // the lintel
+  const s = o.set ?? 0, A = (m, ...r) => bag.add(m, fbox(F, y, ...r)), u0 = u - ww / 2, u1 = u + ww / 2, vt = v0 + hh * 0.62, b = 0.07;
+  if (s < 0) {
+    A(ST, u0 - 0.1, u1 + 0.1, v0 - 0.14, v0 + 0.03, -0.3, 0.12);                  // the sill, running back through the reveal
+    A(ST, u0 - 0.16, u1 + 0.16, v0 + hh - 0.06, v0 + hh + 0.24, -0.3, 0.05);      // the lintel, bearing on the jambs
+  } else {
+    A(ST, u0 - 0.1, u1 + 0.1, v0 - 0.14, v0, o.open ? 0 : -0.02, 0.12);          // the sill
+    A(ST, u0 - 0.16, u1 + 0.16, v0 + hh, v0 + hh + 0.24, 0, 0.05);              // the lintel
+  }
   A(ST, u - 0.13, u + 0.13, v0 + hh - 0.02, v0 + hh + 0.34, 0.05, 0.09);      // its keystone
-  if (!o.open) A('opening', u0, u1, v0, v0 + hh, -0.02, 0.04);                  // the glass (a window open to a furnished room shows it)
-  A(o.frame, u0, u0 + b, v0, v0 + hh, 0, 0.1); A(o.frame, u1 - b, u1, v0, v0 + hh, 0, 0.1);
-  A(o.frame, u0 + b, u1 - b, v0 + hh - b, v0 + hh, 0, 0.1); A(o.frame, u0 + b, u1 - b, v0, v0 + b, 0, 0.1);
-  A(o.frame, u - b / 2, u + b / 2, v0 + b, v0 + hh - b, 0, 0.1); A(o.frame, u0 + b, u - b / 2, vt - b / 2, vt + b / 2, 0, 0.1); A(o.frame, u + b / 2, u1 - b, vt - b / 2, vt + b / 2, 0, 0.1);
+  if (!o.open) A('opening', u0, u1, v0, v0 + hh, s - 0.02, s + 0.04);          // the glass (a window open to a furnished room shows it)
+  A(o.frame, u0, u0 + b, v0, v0 + hh, s, s + 0.1); A(o.frame, u1 - b, u1, v0, v0 + hh, s, s + 0.1);
+  A(o.frame, u0 + b, u1 - b, v0 + hh - b, v0 + hh, s, s + 0.1); A(o.frame, u0 + b, u1 - b, v0, v0 + b, s, s + 0.1);
+  A(o.frame, u - b / 2, u + b / 2, v0 + b, v0 + hh - b, s, s + 0.1); A(o.frame, u0 + b, u - b / 2, vt - b / 2, vt + b / 2, s, s + 0.1); A(o.frame, u + b / 2, u1 - b, vt - b / 2, vt + b / 2, s, s + 0.1);
   // the leading of the upper lights: thin bars in a lattice
-  for (const [a, c] of [[u0 + b, u - b / 2], [u + b / 2, u1 - b]]) { const m = (a + c) / 2; A('lead', m - 0.012, m + 0.012, vt + b / 2, v0 + hh - b, 0.04, 0.06); A('lead', a, c, (vt + v0 + hh) / 2 - 0.012, (vt + v0 + hh) / 2 + 0.012, 0.04, 0.06); }
-  if (o.shut === 'closed') for (const [a, c] of [[u0 + b, u - b / 2], [u + b / 2, u1 - b]]) { A(o.shutter, a + 0.01, c - 0.01, v0 + b + 0.01, vt - b / 2 - 0.01, 0.04, 0.08); A(o.shutter, (a + c) / 2 - 0.12, (a + c) / 2 + 0.12, (v0 + vt) / 2 - 0.2, (v0 + vt) / 2 + 0.2, 0.08, 0.1); }
-  else if (o.shut === 'open') for (const s of [-1, 1]) { const e = s < 0 ? u0 - 0.04 : u1 + 0.04, f = e + s * (ww / 2 - 0.05); A(o.shutter, Math.min(e, f), Math.max(e, f), v0 + 0.02, vt - 0.02, 0.002, 0.043); }
+  for (const [a, c] of [[u0 + b, u - b / 2], [u + b / 2, u1 - b]]) {
+    const m = (a + c) / 2, vm = (vt + v0 + hh) / 2; A('lead', m - 0.012, m + 0.012, vt + b / 2, v0 + hh - b, s + 0.04, s + 0.06); A('lead', a, c, vm - 0.012, vm + 0.012, s + 0.04, s + 0.06);
+    if (false) { A('lead', (a + m) / 2 - 0.01, (a + m) / 2 + 0.01, vt + b / 2, v0 + hh - b, s + 0.04, s + 0.06); A('lead', (m + c) / 2 - 0.01, (m + c) / 2 + 0.01, vt + b / 2, v0 + hh - b, s + 0.04, s + 0.06); A('lead', a, c, (vt + vm) / 2 - 0.01, (vt + vm) / 2 + 0.01, s + 0.04, s + 0.06); A('lead', a, c, (vm + v0 + hh - b) / 2 - 0.01, (vm + v0 + hh - b) / 2 + 0.01, s + 0.04, s + 0.06); }
+  }
+  const leaf = (a, c, lo, hi, d0, d1, hinge) => {                                                  // a planked shutter leaf: planks, two battens, strap hinges
+    A(o.shutter, Math.min(a, c), Math.max(a, c), lo, hi, d0, d1);
+    if (d1 - d0 < 0.03) return;
+    for (const t of [0.5]) { const v = lo + (hi - lo) * t; A('wood_dark', Math.min(a, c) + 0.02, Math.max(a, c) - 0.02, v - 0.035, v + 0.035, d1, d1 + 0.012); }
+  };
+  if (o.shut === 'closed') for (const [a, c] of [[u0 + b, u - b / 2], [u + b / 2, u1 - b]]) leaf(a + 0.01, c - 0.01, v0 + b + 0.01, vt - b / 2 - 0.01, s + 0.1, s + 0.15, a < u ? u0 : u1);
+  else if (o.shut === 'open') for (const sg of [-1, 1]) { const e = sg < 0 ? u0 - 0.04 : u1 + 0.04, f = e + sg * (ww / 2 - 0.05); leaf(e, f, v0 + 0.02, vt - 0.02, 0.002, 0.043, e); }
 }
 
 /**
@@ -112,20 +133,45 @@ export function canalHouse(el, { bag, col }) {
   const main = ((r, k) => ({ s: [r[0], r[1] + k, r[2], r[3]], n: [r[0], r[1], r[2], r[3] - k], e: [r[0] + k, r[1], r[2], r[3]], w: [r[0], r[1], r[2] - k, r[3]] })[f])(el.rect, D - Dm);
   const open = !!el.open, hallWins = [];
   const use = warehouse ? 'store' : ((q) => q < 0.45 ? 'zaal' : q < 0.75 ? 'kitchen' : 'office')(rng((el.seed || 1) * 19 + 7)());
-  if (!open) { bag.add(mat, box(main[0], y - 0.6, main[1], main[2], y + H, main[3])); col.rect(main, y - 0.6, y + H); }
+  if (!open) col.rect(main, y - 0.6, y + H);
   A(ST, -0.02, w + 0.02, base - 0.16, base, 0, 0.06);                            // the water table over the basement
   A(mat, 0, w, H - 0.5, H, 0, 0.08); A(ST, -0.03, w + 0.03, H - 0.12, H + 0.02, 0, 0.14);  // a brick band and its stone cap at the eaves line
   const bays = w >= 6.4 ? 3 : 2, bw = w / bays, ww = Math.min(1.2, bw - 0.95), door = rand() < 0.5 ? 0 : bays - 1;
+  // the front wall in two layers: the body of the house behind, and the front layer 0.3 thick with every window and the door cut
+  // through it, so that each stands in a real reveal (docs §5.19); a warehouse keeps its plain wall (its hatches fill the bay)
+  const RV = -0.3, rev = !warehouse, holes = [];
+  if (rev) {
+    for (let i = 0; i < bays; i++) {
+      const u = (i + 0.5) * bw;
+      if (i === door) holes.push({ u0: u - 0.75, u1: u + 0.75, v0: base, v1: base + 2.45 }); else holes.push({ u0: u - ww / 2, u1: u + ww / 2, v0: base + 0.45, v1: base + 3.0 });
+      for (let s = 1; s < n; s++) holes.push({ u0: u - ww / 2, u1: u + ww / 2, v0: floors[s] + 0.5, v1: floors[s] + 0.5 + (s === n - 1 ? st - 1.05 : st - 0.85) });
+    }
+  }
+  if (!open) {
+    if (rev) {
+      bag.add(mat, fbox(F, y, 0, w, -0.6, H, -Dm, RV));
+      wallHoles((ua, ub, va, vb) => A(mat, ua, ub, va, vb, RV, 0), 0, w, -0.6, H, holes);
+    } else bag.add(mat, box(main[0], y - 0.6, main[1], main[2], y + H, main[3]));
+  }
+  const SET = rev ? -0.2 : 0;
   let doorU = null, doorLeaf = 'wood_dark', stoneAt = -1;
   const stoop = (u) => {
     // the stoop: a stone landing at the door's sill, steps down to the quay, an iron rail each side
     const L = 1.15, steps = 3, rise = base / (steps + 1);
-    A(ST, u - 0.95, u + 0.95, -0.6, base - 0.02, 0, L);
-    for (let k = 0; k < steps; k++) A(ST, u - 0.8, u + 0.8, -0.6, base - (k + 1) * rise, L + k * 0.3, L + (k + 1) * 0.3);
-    for (const s of [-1, 1]) {
-      const ue = u + s * 0.9;
-      A('iron', ue - 0.025, ue + 0.025, base + 0.85, base + 0.9, 0, L);
-      for (const dd of [0.3, 0.7, L - 0.05]) A('iron', ue - 0.015, ue + 0.015, base, base + 0.85, dd - 0.015, dd + 0.015);
+    A(ST, u - 0.95, u + 0.95, -0.6, base - 0.02, 0, L); A(ST, u - 0.98, u + 0.98, base - 0.1, base - 0.02, L - 0.02, L + 0.05);      // the landing and its moulded nosing
+    for (let k = 0; k < steps; k++) { const top = base - (k + 1) * rise, d1 = L + (k + 1) * 0.3; A(ST, u - 0.8, u + 0.8, -0.6, top, L + k * 0.3, d1); A(ST, u - 0.83, u + 0.83, top - 0.05, top, d1 - 0.05, d1 + 0.03); }
+    const P3 = (uu, v, d) => { const [x, z] = F.at(uu, d); return [x, y + v, z]; }, RH = 0.92, dEnd = L + steps * 0.3, vEnd = base - (steps + 1) * rise + 0.0;
+    for (const sg of [-1, 1]) {
+      const ue = u + sg * 0.875, lo = Math.min(u + sg * 0.8, u + sg * 0.95), hi = Math.max(u + sg * 0.8, u + sg * 0.95);
+      bag.add(ST, sideprism(F, y, [[L, -0.2], [dEnd + jit(), -0.2], [dEnd + jit(), 0.25], [L, base + 0.1 + jit()]], lo, hi));                                    // the cheek wall of the steps, sloping with them
+      A(ST, lo, hi, base - 0.02, base + 0.1, 0, L);                                                                                       // the kerb of the landing
+      bag.add('iron', bar(P3(ue, base + 0.1 + RH, 0), P3(ue, base + 0.1 + RH, L), 0.045, 0.03));                                         // the handrail: level over the landing,
+      bag.add('iron', bar(P3(ue, base + 0.1 + RH, L), P3(ue, vEnd + 0.25 + RH, dEnd), 0.045, 0.03));                                    // raking down beside the steps
+      for (let d = 0.2; d < L - 0.03; d += 0.34) A('iron', ue - 0.012, ue + 0.012, base + 0.1, base + 0.1 + RH, d - 0.012, d + 0.012);      // the balusters
+      for (let k = 0; k < steps; k++) { const d = L + k * 0.3 + 0.15, top = Math.max(base - (k + 1) * rise, 0) + 0.15, rail = base + 0.1 + RH + (vEnd + 0.25 - base - 0.1) * (d - L) / (dEnd - L); A('iron', ue - 0.012, ue + 0.012, top, rail, d - 0.012, d + 0.012); }
+      for (const [d, v] of [[0.04, base + 0.1 + RH + 0.04], [dEnd, vEnd + 0.25 + RH + 0.04]]) { A('iron', ue - 0.022, ue + 0.022, v - RH - 0.04, v, d - 0.022, d + 0.022); const [bx, bz] = F.at(ue, d); bag.add('iron', lathe([[0.04 + jit(), 0], [0.05, 0.07], [0.001, 0.15 + jit()]], 5, null, bx, y + v, bz)); }   // the newels with their balls
+      { const [ox, oz] = F.at(ue, 0), [qx, qz] = F.at(ue + 1, 0), cd = dEnd + 0.1, cv = vEnd + 0.25 + RH - 0.16, pts = spiral([-cd, cv], sg > 0 ? Math.PI * 0.1 : Math.PI * 0.1, 0.13 + jit(), 1.1, 1, 0.3, 7);   // the curl at the foot of the rail
+        bag.add('iron', relief(ribbon(pts, 0.022), [ox, y, oz], [qx - ox, qz - oz], -0.012, 0.012, 3)); }
     }
     if (open) {                                                                                                     // walkable: the landing, the flight down to the quay
       const p0 = F.at(u - 0.95, 0), p1 = F.at(u + 0.95, L), q0 = F.at(u - 0.8, L), q1 = F.at(u + 0.8, L + steps * 0.3), nr = (a, c) => [Math.min(a[0], c[0]), Math.min(a[1], c[1]), Math.max(a[0], c[0]), Math.max(a[1], c[1])];
@@ -147,16 +193,16 @@ export function canalHouse(el, { bag, col }) {
       doorU = u;
       A(ST, u - d0, u + d0, dv + dh, dv + dh + 0.1, 0, 0.1);                                                             // the transom over the door
       const leaf = shutter === 'lacquer_red' ? 'wood_dark' : shutter; doorLeaf = leaf;
-      if (!open) { A(leaf, u - d0, u, dv, dv + dh, -0.02, 0.05); A(leaf, u, u + d0, dv, dv + dh, -0.02, 0.05); }
-      if (!open) for (const s of [-1, 1]) { A('wood_dark', Math.min(u + s * 0.15, u + s * 0.6), Math.max(u + s * 0.15, u + s * 0.6), dv + 0.4, dv + 1.1, 0.05, 0.08); A('wood_dark', Math.min(u + s * 0.15, u + s * 0.6), Math.max(u + s * 0.15, u + s * 0.6), dv + 1.4, dv + 2.15, 0.05, 0.08); }
-      if (!open) A('iron', u + 0.12, u + 0.2, dv + 1.15, dv + 1.25, 0.05, 0.11);                                         // the knocker
+      if (!open) { A(leaf, u - d0, u, dv, dv + dh, SET - 0.02, SET + 0.05); A(leaf, u, u + d0, dv, dv + dh, SET - 0.02, SET + 0.05); }
+      if (!open) for (const s of [-1, 1]) { A('wood_dark', Math.min(u + s * 0.15, u + s * 0.6), Math.max(u + s * 0.15, u + s * 0.6), dv + 0.4, dv + 1.1, SET + 0.05, SET + 0.08); A('wood_dark', Math.min(u + s * 0.15, u + s * 0.6), Math.max(u + s * 0.15, u + s * 0.6), dv + 1.4, dv + 2.15, SET + 0.05, SET + 0.08); }
+      if (!open) A('iron', u + 0.12, u + 0.2, dv + 1.15, dv + 1.25, SET + 0.05, SET + 0.11);                                         // the knocker
       A('opening', u - d0, u + d0, dv + dh + 0.1, dv + dh + 0.95, -0.02, 0.04);                                         // the fanlight and its bars
       for (let k = 1; k < 5; k++) { const a = u - d0 + k * 2 * d0 / 5; A('wood_painted', a - 0.025, a + 0.025, dv + dh + 0.1, dv + dh + 0.95, 0, 0.07); }
       if (rand() < 0.35) stoneAt = i;                                                                                  // a gable stone (gevelsteen) by the door
       stoop(u);
       continue;
     }
-    crossWindow(bag, F, y, u, base + 0.45, ww, 2.55, { frame, shutter, shut: shutMode(), open }); if (open) hallWins.push(u);
+    crossWindow(bag, F, y, u, base + 0.45, ww, 2.55, { frame, shutter, shut: shutMode(), open, set: SET }); if (open) hallWins.push(u);
     A(ST, u - ww / 2 - 0.08, u + ww / 2 + 0.08, 0.05, 0.12, 0, 0.08);                                                    // the basement window: its sill, glass and bars
     A('opening', u - ww / 2, u + ww / 2, 0.12, base - 0.3, -0.02, 0.04);
     for (let k = 1; k < 5; k++) { const a = u - ww / 2 + k * ww / 5; A('iron', a - 0.015, a + 0.015, 0.12, base - 0.3, 0.04, 0.07); }
@@ -165,12 +211,12 @@ export function canalHouse(el, { bag, col }) {
   for (let s = 1; s < n; s++) for (let i = 0; i < bays; i++) {
     if (warehouse && i === Math.floor(bays / 2)) continue;
     const top = s === n - 1, hh = top ? st - 1.05 : st - 0.85;
-    crossWindow(bag, F, y, (i + 0.5) * bw, floors[s] + 0.5, ww * (warehouse ? 0.8 : 1), hh, { frame, shutter, shut: warehouse ? 'closed' : shutMode() });
+    crossWindow(bag, F, y, (i + 0.5) * bw, floors[s] + 0.5, ww * (warehouse ? 0.8 : 1), hh, { frame, shutter, shut: warehouse ? 'closed' : shutMode(), set: SET });
   }
   frontDress(bag, F, y, { w, base, bays, bw, door, warehouse, open, seed: el.seed || 1 });
   // the gable stone in the pier of the first floor beside the door's bay (gable stones stood about 4 m up: docs §5.9)
   if (stoneAt >= 0 && n > 1) { const pu = (stoneAt === 0 ? 1 : stoneAt) * bw; gableStone(bag, F, y, pu, floors[1] + 0.5 + (st - 0.85) * 0.62 + 0.14, Math.min(0.56, bw - ww - 0.36), rng((el.seed || 1) * 31 + 3)); }
-  if (open && doorU !== null) canalInterior(bag, col, F, y, { w, Dm, base, g, H, mat, du: doorU, dw: 0.75, dh: 2.45, wins: hallWins, ww, leaf: doorLeaf, use });
+  if (open && doorU !== null) canalInterior(bag, col, F, y, { w, Dm, base, g, H, mat, du: doorU, dw: 0.75, dh: 2.45, wins: hallWins, ww, leaf: doorLeaf, use, upper: holes.filter((h) => h.v0 > floors[1]) });
   // iron wall anchors at each floor, holding the front to the beams
   for (let s = 1; s < n; s++) for (const u of [0.32, w - 0.32]) { const v = floors[s] - 0.15; A('iron', u - 0.03, u + 0.03, v - 0.32, v + 0.32, 0, 0.04); A('iron', u - 0.16, u + 0.16, v - 0.03, v + 0.03, 0, 0.05); }
 
@@ -190,31 +236,32 @@ export function canalHouse(el, { bag, col }) {
       // the stone cap of each step's tread (the top step's over its whole width)
       if (k < ns - 1) for (const sg of [-1, 1]) A(ST, sg < 0 ? uc - hw - 0.06 : uc + hn, sg < 0 ? uc - hn : uc + hw + 0.06, b, b + 0.14, -0.5, 0.06);
       else A(ST, uc - hw - 0.06, uc + hw + 0.06, b, b + 0.14, -0.5, 0.06);
-      if (k < ns - 1) for (const sg of [-1, 1]) { const u = uc + sg * (hw - 0.15); bag.add(ST, prism(F, y, ngon(u, b + 0.34, 0.13, 8), -0.3, -0.04)); A(ST, u - 0.05, u + 0.05, b + 0.14, b + 0.22, -0.22, -0.12); }
+      if (k < ns - 1) for (const sg of [-1, 1]) obelisk(bag, F, y, uc + sg * (hw - 0.17), b + 0.14, 0.07, 0.62, -0.15);
     }
     crownV = gh + 0.14; neck = w / 2 / ns;
-    A(ST, uc - 0.2, uc + 0.2, G + crownV, G + crownV + 0.35, -0.35, -0.05); bag.add(ST, prism(F, y, ngon(uc, G + crownV + 0.55, 0.2, 8), -0.4, 0));
+    A(ST, uc - 0.2, uc + 0.2, G + crownV, G + crownV + 0.35, -0.35, -0.05); urn(bag, F, y, uc, G + crownV + 0.35, 0.11, -0.15);
   } else if (kind === 'neck') {
     neck = w * 0.21;
     const v1 = gh * 0.14, v2 = Math.min(gh * 0.78, rh * (eave - (neck - 0.06)) / (w / 2 - 0.45)), ow = w / 2 - 0.08;
     brick([[uc - ow, G], [uc + ow, G], [uc + ow, G + v1], [uc - ow, G + v1]]);
-    const claw = (v) => neck + (ow - neck) * Math.sqrt(Math.max(0, 1 - ((v - v1) / (v2 - v1)) ** 2));
+    const claw = (v) => { const t = Math.min(1, Math.max(0, (v - v1) / (v2 - v1))); return neck + (ow - neck) * (1 - Math.sqrt(Math.max(0, 1 - (1 - t) ** 2))); };   // a cove: flat at the shoulder, upright at the neck
     for (const q of outline(uc, () => neck, G + v1, G + gh, 1)) brick(q);
-    for (const s of [-1, 1]) for (let i = 0; i < 8; i++) {                                               // the claw pieces in sandstone
-      const a = v1 + (v2 - v1) * i / 8, b = v1 + (v2 - v1) * (i + 1) / 8;
-      stone(s < 0 ? [[uc - claw(a), G + a], [uc - neck, G + a], [uc - neck, G + b], [uc - claw(b), G + b]] : [[uc + neck, G + a], [uc + claw(a), G + a], [uc + claw(b), G + b], [uc + neck, G + b]], 0.04);
+    // the claw: brick filling the curve from the shoulders to the neck, edged along it by a broad sandstone band (a roll with a ridge
+    // down it), which ends at the neck in a scroll
+    for (const s of [-1, 1]) for (let i = 0; i < 7; i++) {
+      const a = v1 + (v2 - v1) * i / 7, b = v1 + (v2 - v1) * (i + 1) / 7, ca = claw(a), cb = claw(b);
+      brick(s < 0 ? [[uc - ca, G + a], [uc - neck, G + a], [uc - neck, G + b], [uc - cb, G + b]] : [[uc + neck, G + a], [uc + ca, G + a], [uc + cb, G + b], [uc + neck, G + b]]);
+      const e = 0.2, ra = Math.max(neck, ca - e), rb = Math.max(neck, cb - e);
+      stone(s < 0 ? [[uc - ca - 0.04, G + a], [uc - ra, G + a], [uc - rb, G + b], [uc - cb - 0.04, G + b]] : [[uc + ra, G + a], [uc + ca + 0.04, G + a], [uc + cb + 0.04, G + b], [uc + rb, G + b]], 0.1);
+      const ma = (ca + ra) / 2, mb = (cb + rb) / 2;
+      Pz('sandstone_relief', s < 0 ? [[uc - ma - 0.025, G + a], [uc - ma + 0.025, G + a], [uc - mb + 0.025, G + b], [uc - mb - 0.025, G + b]] : [[uc + ma - 0.025, G + a], [uc + ma + 0.025, G + a], [uc + mb + 0.025, G + b], [uc + mb - 0.025, G + b]], 0.1, 0.14);
     }
-    // the claw's carving: a rolled moulding along its curve, a leaf ridge down its middle
-    for (const s of [-1, 1]) for (let i = 0; i < 8; i++) {
-      const a = v1 + (v2 - v1) * i / 8, b = v1 + (v2 - v1) * (i + 1) / 8, ca = claw(a), cb = claw(b), ma = (ca + neck) / 2, mb = (cb + neck) / 2;
-      stone(s < 0 ? [[uc - ca, G + a], [uc - ca + 0.12, G + a], [uc - cb + 0.12, G + b], [uc - cb, G + b]] : [[uc + ca - 0.12, G + a], [uc + ca, G + a], [uc + cb, G + b], [uc + cb - 0.12, G + b]], 0.1);
-      if (i > 0) Pz('sandstone_relief', s < 0 ? [[uc - ma - 0.05, G + a], [uc - ma + 0.05, G + a], [uc - mb + 0.05, G + b], [uc - mb - 0.05, G + b]] : [[uc + ma - 0.05, G + a], [uc + ma + 0.05, G + a], [uc + mb + 0.05, G + b], [uc + mb - 0.05, G + b]], 0.04, 0.08);
-    }
-    for (const s of [-1, 1]) { bag.add(ST, prism(F, y, ngon(uc + s * (ow - 0.32), G + v1 + 0.32, 0.26, 10), 0.04, 0.12)); bag.add(mat, prism(F, y, ngon(uc + s * (ow - 0.32), G + v1 + 0.32, 0.1, 8), 0.12, 0.15)); }
+    for (const s of [-1, 1]) { volute(bag, F, y, uc + s * (ow - 0.34), G + v1 + 0.34, 0.34, -Math.PI / 2 + s * 0.4, s, 0.04, 0.14); urn(bag, F, y, uc + s * (ow - 0.08), G + v1 + 0.0, 0.11, -0.15); }
     for (const s of [-1, 1]) A(ST, s < 0 ? uc - neck - 0.08 : uc + neck, s < 0 ? uc - neck : uc + neck + 0.08, G + v2 - 0.05, G + gh, -0.5, 0.06);   // the neck's stone edges
     A(ST, uc - neck - 0.2, uc + neck + 0.2, G + gh, G + gh + 0.18, -0.5, 0.12);                                        // the cornice and the pediment over the neck
     stone([[uc - neck - 0.1, G + gh + 0.18], [uc + neck + 0.1, G + gh + 0.18], [uc, G + gh + 0.18 + neck * 0.45]], 0.08);
     crownV = gh + 0.18 + neck * 0.45;
+    urn(bag, F, y, uc, G + crownV, 0.11, -0.15);
     // a festoon of fruit hanging either side of the attic window, in relief
     for (const s of [-1, 1]) { const u = uc + s * (neck - 0.28); A('sandstone_relief', u - 0.09, u + 0.09, G + gh * 0.38, G + gh * 0.62, 0, 0.06); bag.add('sandstone_relief', prism(F, y, ngon(u, G + gh * 0.36, 0.13, 8), 0, 0.08)); }
   } else if (kind === 'bell') {
@@ -226,6 +273,11 @@ export function canalHouse(el, { bag, col }) {
     const cr = hw(G + gh) + 0.05, ch = Math.min(0.9, cr * 0.85);                                                               // the crowning arch of the bell
     for (const q of outline(uc, (v) => Math.max(0.05, cr * Math.sqrt(Math.max(0, 1 - ((v - G - gh - 0.16) / ch) ** 2))), G + gh + 0.16, G + gh + 0.16 + ch * 0.98, 6)) stone(q, 0.04);
     crownV = gh + 0.16 + ch;
+    for (const sg of [-1, 1]) {                                                                                                // the stone scrolls flanking the crown, the urns on the shoulders, the ball on the apex
+      volute(bag, F, y, uc + sg * (cr + 0.28), G + gh + 0.16 + 0.34, 0.34, -Math.PI / 2 + sg * 0.4, sg, 0.04, 0.14);
+      urn(bag, F, y, uc + sg * (hw(G + 0.15) - 0.12), G + 0.02, 0.11, -0.15);
+    }
+    urn(bag, F, y, uc, G + gh + 0.16 + ch, 0.11, -0.15);
   } else {
     // the spout gable of a warehouse: a plain triangle with a stone-capped spout at the top
     const hw = (v) => Math.max(0.55, cover(v - G) + 0.05);

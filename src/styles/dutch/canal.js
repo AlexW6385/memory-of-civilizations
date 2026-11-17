@@ -4,6 +4,7 @@
 
 import { sweep, box, lathe } from '../../core/geom.js';
 import { prism, outline } from './facade.js';
+import { jit } from './gables.js';
 
 const ST = 'sandstone_dressed';
 const rect = (u0, v0, u1, v1) => [[u0, v0], [u1, v0], [u1, v1], [u0, v1], [u0, v0]];
@@ -63,6 +64,12 @@ export function canalBridge(el, { bag, col }) {
     const q = [[a, ba], [b, bb], [b, deck(b)], [a, deck(a)]];
     bag.add('brick', prism(F, y, q, -w / 2, w / 2));
     if (s !== null) for (const sd of [-1, 1]) bag.add(ST, prism(F, y, [[a, ba], [b, bb], [b, bb + 0.42], [a, ba + 0.42]], sd < 0 ? -w / 2 - 0.05 : w / 2 - 0.3, sd < 0 ? -w / 2 + 0.3 : w / 2 + 0.05));
+    // the arch ring in dressed voussoirs, every second one standing proud, and a string course under the parapet (docs §5.19)
+    if (s !== null) for (const sd of [-1, 1]) {
+      const o0 = sd < 0 ? -w / 2 - 0.11 : w / 2 + 0.05, o1 = sd < 0 ? -w / 2 - 0.05 : w / 2 + 0.11;
+      if (i % 2) bag.add(ST, prism(F, y, [[a + 0.03, ba - 0.02], [b - 0.03, bb - 0.02], [b - 0.03, bb + 0.58], [a + 0.03, ba + 0.58]], o0, o1));
+    }
+    for (const sd of [-1, 1]) bag.add(ST, prism(F, y, [[a, deck(a) - 0.22], [b, deck(b) - 0.22], [b, deck(b) - 0.05], [a, deck(a) - 0.05]], sd < 0 ? -w / 2 - 0.07 : w / 2 - 0.3, sd < 0 ? -w / 2 + 0.3 : w / 2 + 0.07));
     // the parapets: brick, a sandstone coping; walkers kept on the deck
     for (const sd of [-1, 1]) {
       const d0 = sd < 0 ? -w / 2 : w / 2 - 0.35, d1 = sd < 0 ? -w / 2 + 0.35 : w / 2;
@@ -70,6 +77,16 @@ export function canalBridge(el, { bag, col }) {
       bag.add(ST, prism(F, y, [[a, deck(a) + 0.75], [b, deck(b) + 0.75], [b, deck(b) + 0.9], [a, deck(a) + 0.9]], d0 - 0.05, d1 + 0.05));
       col.segment(F.at(a, sd * (w / 2 - 0.17)), F.at(b, sd * (w / 2 - 0.17)), 0.35, y + Math.min(deck(a), deck(b)), y + Math.max(deck(a), deck(b)) + 0.9);
     }
+  }
+  // the keystone of each vault, and at the four ends of the parapets the stone piers with their pyramid caps and balls
+  for (const A of arches) for (const sd of [-1, 1]) { const o0 = sd < 0 ? -w / 2 - 0.18 : w / 2 + 0.05, o1 = sd < 0 ? -w / 2 - 0.05 : w / 2 + 0.18, k = Math.min(0.32, A.Rr * 0.12);
+    bag.add(ST, prism(F, y, [[A.m - k, spring + A.r - 0.02], [A.m + k, spring + A.r - 0.02], [A.m + k * 1.25, spring + A.r + 0.78], [A.m - k * 1.25, spring + A.r + 0.78]], o0, o1)); }
+  for (const t of [-L / 2, L / 2]) for (const sd of [-1, 1]) {
+    const dk = deck(t), t0 = t < 0 ? t : t - 0.6, d0 = sd < 0 ? -w / 2 - 0.05 : w / 2 - 0.55, d1 = sd < 0 ? -w / 2 + 0.55 : w / 2 + 0.05, tc = t0 + 0.3, dc = (d0 + d1) / 2;
+    bag.add(ST, prism(F, y, [[t0, dk - 0.3], [t0 + 0.6, dk - 0.3], [t0 + 0.6, dk + 0.3], [t0, dk + 0.3]], d0 - 0.04, d1 + 0.04));
+    bag.add(ST, prism(F, y, [[t0 + 0.04, dk + 0.3], [t0 + 0.56, dk + 0.3], [t0 + 0.56, dk + 1.25], [t0 + 0.04, dk + 1.25]], d0, d1));
+    bag.add(ST, prism(F, y, [[t0 - 0.05, dk + 1.25], [t0 + 0.65, dk + 1.25], [t0 + 0.6, dk + 1.35], [t0, dk + 1.35]], d0 - 0.05, d1 + 0.05));
+    const [bx, bz] = F.at(tc, dc); bag.add(ST, lathe([[0.2 + jit(), 0], [0.12, 0.05], [0.16, 0.1], [0.19, 0.22], [0.12, 0.34], [0.001, 0.4 + jit()]], 8, null, bx, y + dk + 1.35, bz));
   }
   // the deck's paving: brick on edge, laid in a slightly proud strip
   for (let i = 0; i < T.length - 1; i++) { const a = T[i], b = T[i + 1]; if (draw && (a + b) / 2 > -LF && (a + b) / 2 < LF) continue; bag.add('brick_paving', prism(F, y, [[a, deck(a)], [b, deck(b)], [b, deck(b) + 0.06], [a, deck(a) + 0.06]], -w / 2 + 0.35, w / 2 - 0.35)); }
