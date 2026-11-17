@@ -6,6 +6,7 @@ import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { subtractRects } from '../../core/build.js';
 import { Panel, PAL, wall, figM, bodhiM, lotusBand, jatakaM, ceilingM, buddhaM, rngOf } from './paint.js';
 import { pillar, figure, shrineBuddha, nave_frieze, toranaFront } from './sculpt.js';
+import { horseshoe, brackets, windowLattice } from './carving.js';
 
 const FLOORM = 'sandstone_floor', PLASTER = 'plaster_ochre', STONE = 'sandstone_carved', WHITE = 'lime_plaster';
 const hole = (x0, x1, z0, z1, y0, y1) => ({ x0, x1, z0, z1, y0, y1 });
@@ -122,6 +123,7 @@ export function vihara(ctx, xf, zc, y) {
   // the porch's six pillars and its lintel
   for (let i = 0; i < 6; i++) pillar(ctx, xf - 0.7, y, zc - 10 + 4 * i, 4.9, { r: 0.4, base: 0.62, kind: [1, 2, 3, 1, 2, 3][i], cap: 'sandstone_carved' });
   slab(ctx, STONE, xf - 1.1, y + 4.9, zc - 11.6, xf - 0.1, y + 5.6, zc + 11.6);
+  for (let i = 0; i < 6; i++) brackets(bag, xf - 0.95, xf - 0.45, zc - 10 + 4 * i, y + 4.9, 1.55, i);
   const r = rngOf(5);
   for (let i = 0; i < 22; i++) slab(ctx, i % 2 ? PLASTER : PAL.ground, xf - 0.1, y + 5.0, zc - 11.4 + i * 1.04, xf + 0.03, y + 5.5, zc - 10.6 + i * 1.04);
   // murals
@@ -211,26 +213,24 @@ export function chaitya(ctx, xf, zc, y) {
       else slab(ctx, STONE, xn1, y - 0.1, zc + z, xf, yb, zc + z + dw);
       slab(ctx, STONE, xn1, win, zc + z, xf, yTop, zc + z + dw);
     } else slab(ctx, STONE, xn1, y - 0.1, zc + z, xf, yTop, zc + z + dw);
-    // the horseshoe frame: a raised band round the arch
-    if (m < rr + 0.55 && m >= rr - 0.0 || (m < rr && win > 0)) { const top = m < rr ? win + 0.55 : yc + 0.55 * 0.5; if (m < rr) slab(ctx, 'sandstone_relief', xf - 0.02, win, zc + z, xf + 0.22, top, zc + z + dw); else slab(ctx, 'sandstone_relief', xf - 0.02, yb, zc + z, xf + 0.22, top, zc + z + dw); }
   }
+  // the great window: a moulded horseshoe surround of three rings over the opening, and the timber rib lattice in it
+  horseshoe(bag, 'sandstone_relief', xf, zc, yc, yb, [[rr - 0.18, rr + 0.05, 0.06], [rr + 0.05, rr + 0.3, 0.14], [rr + 0.3, rr + 0.56, 0.2]], { n: 22, sp: 0 });
+  windowLattice(bag, xf - 0.45, zc, yc, rr - 0.1, yb);
   // the door's jambs and lintel, carved
   for (const s of [-1, 1]) slab(ctx, 'sandstone_relief', xf - 0.02, y, zc + s * 1.4 - 0.15, xf + 0.2, y + 3.3, zc + s * 1.4 + 0.15);
   slab(ctx, 'sandstone_relief', xf - 0.02, y + 3.2, zc - 1.6, xf + 0.2, y + 3.5, zc + 1.6);
   // the porch: two fluted round pillars and a rock-cut roof slab, over the ledge
   for (const s of [-1, 1]) {
     const px = xf + 2.0, pz = zc + s * 2.7;
-    bag.add(STONE, box(px - 0.5, y, pz - 0.5, px + 0.5, y + 0.8, pz + 0.5));
-    bag.add(PLASTER, lathe([[0.36, 0], [0.34, 3.0], [0.4, 3.3]], 14, (t) => 1 + 0.04 * Math.cos(t * 12), px, y + 0.8, pz));
-    bag.add(STONE, lathe([[0.4, 0], [0.62, 0.18], [0.7, 0.4]], 14, null, px, y + 3.9, pz));
-    col.circle(px, pz, 0.5, y, y + 4.3);
+    pillar(ctx, px, y, pz, 4.3, { r: 0.34, base: 0.55, kind: s > 0 ? 1 : 2, cap: 'sandstone_carved' });
+    brackets(bag, px - 0.25, px + 0.25, pz, y + 4.3, 1.2, s + 3);
   }
   slab(ctx, STONE, xf, y + 4.3, zc - 3.6, xf + 2.8, y + 4.8, zc + 3.6);
   for (let i = 0; i < 9; i++) slab(ctx, i % 2 ? PLASTER : PAL.ground, xf + 2.78, y + 4.35, zc - 3.4 + i * 0.85, xf + 2.84, y + 4.75, zc - 2.7 + i * 0.85);
   col.rect([xf, zc - 3.6, xf + 2.8, zc + 3.6], y + 4.3, y + 4.8);
   // yakshas flanking the arch, on brackets, and a frieze of small seated Buddhas over the porch roof's edge
   for (const s of [-1, 1]) { slab(ctx, STONE, xf, y + 4.9, zc + s * 3.9 - 0.45, xf + 0.7, y + 5.1, zc + s * 3.9 + 0.45); figure(ctx, xf + 0.4, y + 5.1, zc + s * 3.9, 2.4, { kind: 'yaksha', col: false }); }
-  for (let i = 0; i < 9; i++) { const z = zc - 4.0 + i; bag.add(WHITE, lathe([[0.001, 0], [0.18, 0.02], [0.2, 0.2], [0.12, 0.34], [0.001, 0.36]], 8, null, xf + 0.05, y + 7.0, z)); }
   // the interior: aisle ceilings, the vault with its ribs, the colonnade
   const ax = (xn1 + xn0) / 2;
   plane(ctx, 'z', zc - hw, 1, xn0, xn1, y, y + 4.3); plane(ctx, 'z', zc + hw, -1, xn0, xn1, y, y + 4.3);
@@ -262,6 +262,9 @@ export function chaitya(ctx, xf, zc, y) {
   bag.add(STONE, box(xs - 0.5, y + 4.1, zc - 0.5, xs + 0.5, y + 4.7, zc + 0.5)); bag.add(PAL.ochre, box(xs - 0.56, y + 4.65, zc - 0.56, xs + 0.56, y + 4.75, zc + 0.56));
   bag.add(PAL.ochre, rod([xs, y + 4.7, zc], [xs, y + 6.9, zc], 0.07, 6));
   for (const [r, yy] of [[0.95, 5.2], [0.75, 5.9], [0.55, 6.5]]) bag.add(STONE, lathe([[0.001, 0], [r, 0.0], [r * 0.9, 0.12], [0.001, 0.15]], 12, null, xs, y + yy, zc));
+  // the vedika: a railing of posts and rails round the plinth's edge
+  for (let i = 0; i < 18; i++) { const a = i / 18 * Math.PI * 2; bag.add(STONE, box(-0.05, 0, -0.05, 0.05 + 0.001 * (i % 5), 0.9, 0.05).rotateY(-a).translate(xs + Math.cos(a) * 1.62, y + 0.5, zc + Math.sin(a) * 1.62)); }
+  for (const yy of [0.2, 0.45, 0.72]) bag.add(STONE, lathe([[1.64, 0], [1.64, 0.07], [1.6, 0.07], [1.6, 0]], 36, null, xs, y + 0.55 + yy, zc));
   col.circle(xs, zc, 1.75, y, y + 5.0);
   slab(ctx, STONE, xs + 1.2, y, zc - 0.55, xs + 2.05, y + 0.55, zc + 0.55); col.rect([xs + 1.2, zc - 0.55, xs + 2.05, zc + 0.55], y, y + 0.55);
   figure(ctx, xs + 1.62, y + 0.55, zc, 2.0, { kind: 'buddha', col: false });
