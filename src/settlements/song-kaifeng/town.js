@@ -17,6 +17,7 @@ import { shopElements } from './shops.js';
 import { interiorElements, interiorLife, furnishedLots } from './interiors.js';
 import { SEDANS, OXCARTS, BARROWS, DRAY } from './doors.js';
 import { doorOf } from './houses.js';
+import { isOuter, outerLife } from './outer.js';
 const base = (id, elements, style = 'song') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [160, -130], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const FR = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
@@ -352,6 +353,12 @@ function waterside() {
 
 import { streetPlans } from './street.js';
 
+/** The outer houses of a plan's list gathered into groups of 20 (one geometry per material for a group, not for a house). */
+function groupOuter(els) {
+  const out = [], rest = els.filter((e) => e.t !== 'kf_outer'), ho = els.filter((e) => e.t === 'kf_outer');
+  for (let i = 0; i < ho.length; i += 20) out.push({ t: 'kf_outer', y: 0, lots: ho.slice(i, i + 20) });
+  return [...rest, ...out];
+}
 export async function town() {
   const plans = [], groups = new Map();
   for (const l of lots()) {
@@ -361,12 +368,13 @@ export async function town() {
     groups.get(k).push(l);
   }
   const furnished = furnishedLots();
-  for (const [k, all] of [...groups].sort()) for (let i = 0; i < all.length; i += 120) plans.push(base(`song-kaifeng-houses-${k.replace(':', '-')}-${i / 120}`, all.slice(i, i + 120).map((l) => (l.det < 0 ? { t: 'kf_far_wall', y: 0, ...l, door: doorOf(l) } : { t: l.det === 0 && !l.shop && hotDist((l.foot[0] + l.foot[2]) / 2, (l.foot[1] + l.foot[3]) / 2) > 150 ? 'kf_mid_wall' : 'house_song', y: 0, ...l, trade: tradeOf(l) ?? l.trade, furnished: furnished.has(l) })), 'kaifeng-site'));
+  for (const [k, all] of [...groups].sort()) for (let i = 0; i < all.length; i += 120) plans.push(base(`song-kaifeng-houses-${k.replace(':', '-')}-${i / 120}`, groupOuter(all.slice(i, i + 120).map((l) => (isOuter(l) ? { t: 'kf_outer', y: 0, ...l, door: doorOf(l) } : l.det < 0 ? { t: 'kf_far_wall', y: 0, ...l, door: doorOf(l) } : { t: l.det === 0 && !l.shop && hotDist((l.foot[0] + l.foot[2]) / 2, (l.foot[1] + l.foot[3]) / 2) > 150 ? 'kf_mid_wall' : 'house_song', y: 0, ...l, trade: tradeOf(l) ?? l.trade, furnished: furnished.has(l) }))), 'kaifeng-site'));
   plans.push(waterside(), ...scroll(), ...landing());
   // the shops' signs on their poles and goods in the street; the rooms of the shops, wine shops and tea shops furnished, their people
   plans.push(base('song-kaifeng-shops', shopElements(), 'life'));
   plans.push(base('song-kaifeng-interiors', interiorElements()));
   plans.push(base('song-kaifeng-interior-life', interiorLife(), 'life'));
   plans.push(...streetPlans(base));
+  { const cells = new Map(), all = outerLife(lots()); for (const e of all) { const k = Math.floor(e.at[0] / 260) + ',' + Math.floor(e.at[1] / 260); if (!cells.has(k)) cells.set(k, []); cells.get(k).push(e); } for (const [k, es] of cells) plans.push(base(`song-kaifeng-outer-life-${k}`, es, 'life')); }
   return plans;
 }
