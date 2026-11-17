@@ -60,10 +60,10 @@ function manaiaGeoms(flip) {
 const PAUA_EYE = lathe([[1, 0], [0.85, 0.35], [0.001, 0.45]], 10).rotateX(-Math.PI / 2);
 const manaiaG = (flip) => (MANAIA[flip ? 1 : 0] ||= manaiaGeoms(flip));
 
-const put = (bag, mat, g, m, reach) => { if (bag.addInstance) bag.addInstance(mat, g, m.clone(), { reach }); else bag.add(mat, g.clone().applyMatrix4(m)); };
-const place = (x, y, z, s, yaw) => new Matrix4().makeRotationY(yaw).setPosition(x, y, z).multiply(new Matrix4().makeScale(s, s, s));
+const put = (bag, mat, g, m, reach, merge = false) => { if (bag.addInstance && !merge) bag.addInstance(mat, g, m.clone(), { reach }); else bag.add(mat, g.clone().applyMatrix4(m)); };
+const place = (x, y, z, s, yaw, dz = 1) => new Matrix4().makeRotationY(yaw).setPosition(x, y, z).multiply(new Matrix4().makeScale(s, s, s * dz));   // dz deepens the relief (the cut stands out dz times as far)
 /** A koru at (x, y, z) (its stalk's foot at y − 0.5 s), `s` high, facing −z turned by `yaw`; `flip` winds it the other way. */
-export function koru(bag, mat, x, y, z, s, yaw = 0, flip = false, reach = 200) { put(bag, mat, koruGeom(flip), place(x, y, z, s, yaw), reach); }
+export function koru(bag, mat, x, y, z, s, yaw = 0, flip = false, reach = 200, dz = 1, merge = false) { put(bag, mat, koruGeom(flip), place(x, y, z, s, yaw, dz), reach, merge); }
 /** A manaia at (x, y, z), `s` high. */
 export function manaia(bag, mat, paua, x, y, z, s, yaw = 0, flip = false, reach = 200) {
   const g = manaiaG(flip), m = place(x, y, z, s, yaw);
