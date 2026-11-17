@@ -129,6 +129,8 @@ export function lots() {
       l.open = true;
     }
   }
+  // beyond the court every house of the quarters can be entered too (the furnishing is by kind and rule, in src/styles/shang/houses.js)
+  for (const l of LOTS) l.open = true;
   return LOTS;
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));

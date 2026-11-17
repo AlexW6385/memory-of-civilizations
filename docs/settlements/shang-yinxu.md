@@ -73,6 +73,19 @@ Landings of planks on piles at intervals along both reaches, each with a net hun
 
 Soot and ash about the furnaces and the pit; water troughs; a mound kiln for baking the mould sections (smoke); a drying shed over the field's far rows; fettling benches with finished vessels and stone files; broken mould sections; baskets of ore; tally posts; one of the casters' pit houses enterable. [inferred; "furnaces, crucibles, models, cores, and section-mold fragments" — dailylifehistory.pages.dev]
 
+## 4b. Detail pass: platforms, wall-frame, roof frame, bronzes (third pass)
+
+- **Ramming courses.** The platforms were built of layers beaten one on another, "5–10 cm" by the reports (§4); the weathered face of a real Shang foundation shows the layers as bands of drier and damper earth. Every platform (hall, flanks, tomb) now shows a proud strip every 0.3 m round its battered foot, every third one darker. The 0.3 m spacing is ours (a legible multiple of the layer) [inferred].
+- **Wall-frame.** Timber posts stood in pits along the wall lines and the walls were rammed or daubed between them ("Mostly timber posts, compacted-earth walls, and thatched roofs, raised on rammed-earth platforms" — ancient-history-sites.com) [stated]. The hall's back and end walls now show the posts of the frame at every bay line, proud of the plaster, each on a footing of beaten earth; the great houses of the second front type (§5d) show the same at 2 m [inferred: that they stood proud rather than flush].
+- **Roof frame.** Inside the hall and the flanking halls: rafters at 1 m from the plates to the ridge, two purlins on each slope; the frame is ours, the thatched hip is the dossier's [inferred; no roof survives].
+- **Bronze relief.** Vessels were cast by the section-mould method (§5c); the ding, gui, jue, gu and zun of the altars now carry what the casting gave them: the taotie band of the ding and zun (flanges at four points, notched, an eye boss either side, bowstring bands: "the Houmuwu ding was cast using a section-mold process" — Wikipedia "Yinxu") [stated for the method, inferred for the pattern's layout]; the ribbed belly of the gui; the jue with its tail and the two capped posts at the rim; flanges on the foot and trumpet of the gu. Fresh bronze, not patinated, as in c. 1200 BC [inferred].
+
+## 5d. Detail pass: every house enterable, fronts by rule
+
+- **Enterable.** Every lot of the lineage quarters is open: the furnished main house of a court, its wings (each by seed), the pit houses by the gate and in the yards (up to two or three by seed), the middle house of a row and a second by seed, the workshops as before. Furnishing is the kind's: mat, bench of earth, hearth, jars, loom, hung bundles [inferred; §5a].
+- **Fronts by rule, not by add-ons.** Lanes show three gate types by the lot's seed (posts with a hood and plank leaves; piers of beaten earth under a thatched cap with a deep hood; a low hurdle with crossed horns on the posts and a jar at each post), and three fronts of the great house by seed (the red dado; a frieze of red and white squares under the eave with two wide windows; bare rammed earth with the wall-frame posts proud); the row houses take three by position and seed (plain; posts proud; a red band with millet bundles hung on a pole). [inferred: the sources give the houses' plans and materials, not their fronts; the variants are the vocabulary of §4 and §5a combined]
+- Level: L2 firmly, toward L3 in the hall, the court and the nearest quarters; still missing for L3: coloured and lamp light in the houses beyond the court, a loom with warp in every room, the sound of the quarters, the foot of the platforms' wear (steps worn at the middle).
+
 ## 8. Sources
 
 - Wikipedia, "Yinxu" — https://en.wikipedia.org/wiki/Yinxu

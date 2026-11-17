@@ -39,19 +39,28 @@ export function fenceRun(F, a0, b0, a1, b1, gaps = [], h = 1.45) {
   for (let k = 0; k <= n; k++) { const q = L * k / n; if (gaps.some(([g0, g1]) => q > g0 - 0.05 && q < g1 + 0.05)) continue; const A = alongA ? a0 + q : a0, B = alongA ? b0 : b0 + q; F.b('timber', A - 0.07, 0, B - 0.07, A + 0.07, h + 0.12, B + 0.07, false); }
 }
 /** A lot's fence: front (with a gateway at gate = [g0, g1] or none), sides and back. lod 1: plain. */
-export function fence(F, a0, b0, a1, b1, gaps = [], lod = 0) {
+export function fence(F, a0, b0, a1, b1, gaps = [], lod = 0, kind = 0) {
   fenceRun(F, a0, b0, a1, b0, gaps);
   fenceRun(F, a0, b1, a1, b1); fenceRun(F, a0, b0, a0, b1); fenceRun(F, a1, b0, a1, b1);
-  for (const [g0, g1] of gaps) gateway(F, g0, g1, b0, lod);
+  for (const [g0, g1] of gaps) gateway(F, g0, g1, b0, lod, kind);
 }
 /** A gateway of two tall posts with a lintel and a thatched hood, the leaves of planks standing open against the fence (lod 0). */
-export function gateway(F, g0, g1, b, lod = 0) {
+export function gateway(F, g0, g1, b, lod = 0, kind = 0) {
   for (const a of [g0, g1]) F.b('timber', a - 0.12, 0, b - 0.12, a + 0.12, 2.35, b + 0.12);
   F.b('timber', g0 - 0.2, 2.2, b - 0.1, g1 + 0.2, 2.42, b + 0.1, false);
   if (lod === 0) {
     F.roof(g0 - 0.1, b - 0.35, g1 + 0.1, b + 0.35, 2.42, 0.55, 0.3, false);
     F.b('planks_grey', g0 + 0.02, 0, b + 0.16, g0 + 0.95, 1.7, b + 0.24, false); F.b('planks_grey', g1 - 0.95, 0, b + 0.16, g1 - 0.02, 1.7, b + 0.24, false);
     F.b('kokowai', g0 - 0.14, 1.9, b - 0.14, g0 + 0.14, 2.0, b + 0.14, false); F.b('kokowai', g1 - 0.14, 1.9, b - 0.14, g1 + 0.14, 2.0, b + 0.14, false);
+  }
+  // the three fronts of the lanes, by the lot's seed (docs §5d): 0 the posts with the hood and the leaves; 1 piers of beaten earth with a thatched cap and a deep hood;
+  // 2 the hurdle: a low lintel, one wicker leaf swung back, crossed horns on the posts, a jar by each post
+  if (kind === 1) {
+    for (const [a0, a1] of [[g0 - 1.05, g0 - 0.12], [g1 + 0.12, g1 + 1.05]]) { F.b('earth_wall', a0, 0, b - 0.3, a1, 2.3, b + 0.3); F.b('thatch', a0 - 0.1, 2.3, b - 0.42, a1 + 0.1, 2.42, b + 0.42, false); F.b('kokowai', a0, 0, b + 0.3, a1, 0.35, b + 0.33, false); }
+    if (lod === 0) F.roof(g0 - 1.1, b - 0.5, g1 + 1.1, b + 0.5, 2.5, 0.75, 0.2, false);
+  } else if (kind === 2) {
+    for (const a of [g0, g1]) for (const t of [-1, 1]) { const A = F.P(a, b), B = F.P(a + t * 0.45, b); F.bag.add('timber', rod([A[0], 2.35, A[1]], [B[0], 2.95, B[1]], 0.035, 5)); }
+    if (lod === 0) { F.b('wicker', g1 - 0.95, 0, b + 0.16, g1 - 0.02, 1.35, b + 0.22, false); jars(F, g0 - 0.55, b + 0.5, 1, 0.22); jars(F, g1 + 0.55, b + 0.5, 1, 0.2); F.b('ichu', g0 + 0.5, 1.7, b - 0.04, g0 + 0.62, 2.2, b + 0.04, false); }
   }
 }
 
