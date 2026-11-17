@@ -78,9 +78,18 @@ function statue(bag, p, h, o = {}) {
     bag.add(FIG, fromTriangles(both(T)));
   }
 }
-/** A corbel under a group: a flat shelf over a drooping, leafy cone, its back in the wall. */
+/** A corbel under a group: three stepped courses of carved shelf narrowing downward, a leafy pendant under the middle, its back in the wall. */
 function corbel(bag, x, y, z, r) {
-  bag.add(MASS, lathe([[0.001, -r * 1.3], [r * 0.45, -r * 0.95], [r * 0.8, -r * 0.45], [r, -0.12], [r, 0], [0.001, 0]], 12, (th, i) => (i === 2 ? 1 + 0.12 * Math.cos(th * 5) : 1)).scale(0.7, 0.65, 1).translate(x, y, z));
+  bag.add(FIG, box(x - 0.4, y - 0.16, z - r, x + 0.85, y, z + r));
+  bag.add(MASS, box(x - 0.4, y - 0.5, z - r * 0.82, x + 0.7, y - 0.16, z + r * 0.82));
+  bag.add(FIG, box(x - 0.4, y - 0.8, z - r * 0.55, x + 0.55, y - 0.5, z + r * 0.55));
+  bag.add(MASS, lathe([[0.001, -r * 0.75], [r * 0.22, -r * 0.45], [r * 0.3, -0.05], [0.001, -0.05]], 8, (th, i) => (i === 1 ? 1 + 0.15 * Math.cos(th * 4) : 1)).scale(1, 1, 1).translate(x + 0.25, y - 0.8, z));
+}
+/** A hood over a group: a shallow dome of dark rock in the wall, its lip fringed with drips. */
+function canopy(bag, x, y, z, r, hh, rand) {
+  bag.add(PORCH, lathe([[r, 0], [r * 0.97, hh * 0.25], [r * 0.8, hh * 0.55], [r * 0.45, hh * 0.85], [0.001, hh]], 14, (th, i) => (i === 0 ? 1 + 0.06 * Math.cos(th * 7) : 1)).scale(0.62, 1, 1).translate(x - 0.1, y, z));
+  const n = Math.max(4, Math.round(r * 2.2));
+  for (let k = 0; k < n; k++) { const t = -1 + 2 * (k + 0.5) / n, zz = z + t * r * 0.95; drips(bag, x + 0.55 * Math.sqrt(Math.max(0, 1 - t * t)) * 0.9, y + 0.12, zz, 0.45 + 0.5 * rand(), rand); }
 }
 /** Stalactites hanging from a point: a cluster of two or three drips of ice in stone. */
 function drips(bag, x, y, z, L, rand) {
@@ -134,7 +143,7 @@ const BV = 25, R0 = 2.55, V0 = BV + 2.6;                      // the square base
 /** The spindle's radius at height v (above the façade's ground) for a tower that would end in a point at hf: a parabola from R0 at V0 to nothing at hf. */
 export const spin = (v, hf) => R0 * (1 - Math.min(1, Math.max(0, (v - V0) / (hf - V0))) ** 2);
 /** The four towers, Faith's side (north) first: u along the façade, top the height reached (the two inner the tallest), hf the height at which the finished spindle would close; Barnabas's (north) is finished (1925), the others stand cut off in scaffolding. */
-export const TOWERS = [{ u: -21, top: 64, hf: 64 }, { u: -7.5, top: 72, hf: 90 }, { u: 7.5, top: 74, hf: 92 }, { u: 21, top: 54, hf: 70 }];
+export const TOWERS = [{ u: -21, top: 58, hf: 64 }, { u: -7.5, top: 72, hf: 90 }, { u: 7.5, top: 74, hf: 92 }, { u: 21, top: 54, hf: 70 }];
 /**
  * The timber scaffolds that stand on the façade (fx its line, y its ground, cz its centre): on the cut-off stages of the unfinished
  * towers, round the base of the cypress, and round the stumps of the side portals' lanterns. { rect, y0, y1 } each. The masons of
@@ -232,7 +241,25 @@ function tower(bag, col, xc, zc, y, hq, top, hf, rand) {
   spindle(cur, top, !done);
   bag.add(S, fromTriangles(TS));
   // bands round the shaft every 9 m
-  for (let v = V0 + 6; v < top - 3; v += 9) { const r = spin(v, hf); bag.add('limestone', lathe([[r - 0.05, 0], [r + 0.2, 0.08], [r + 0.2, 0.42], [r - 0.05, 0.52]], 24).translate(xc, y + v, zc)); }
+  for (let v = V0 + 6; v < top - 3; v += 9) {
+    const r = spin(v, hf); bag.add('limestone', lathe([[r - 0.05, 0], [r + 0.2, 0.08], [r + 0.2, 0.42], [r - 0.05, 0.52]], 24).translate(xc, y + v, zc));
+    // the lettered band (Hosanna, Excelsis ...): raised blocks of letters of unequal height standing on the band's face, on the street half
+    const N = Math.round(Math.PI * 2 * (r + 0.2) / 0.62);
+    for (let q = 0; q < N; q++) {
+      const a = q / N * Math.PI * 2; if (Math.cos(a) < -0.2 || q % 5 === 4) continue;
+      const hl = 0.5 + 0.2 * ((q * 7) % 3), wl = 0.14 + 0.08 * (q % 2);
+      bag.add(FIG, box(-wl, 0, -0.09, wl, hl, 0.09).rotateY(-a - Math.PI / 2).translate(xc + Math.cos(a) * (r + 0.27), y + v + 0.03, zc + Math.sin(a) * (r + 0.27)));
+    }
+  }
+  // the spiral stair seen as a rib climbing the cone, broken where the belfry slots are cut
+  { let run = [];
+    const flush = () => { if (run.length > 2) bag.add('limestone', tube(run, 5)); run = []; };
+    for (let v = V0 + 1.2; v < top - 1.5; v += 0.45) {
+      if (stages.some((s) => v > s.v - 0.3 && v < s.v + s.len + 0.3)) { flush(); continue; }
+      const a = 0.9 + (v - V0) / 7.2 * Math.PI * 2, r = spin(v, hf) + 0.08;
+      run.push([xc + Math.cos(a) * r, y + v, zc + Math.sin(a) * r, 0.17]);
+    }
+    flush(); }
   bag.add('opening', fromTriangles(O));
   if (done) {                                                     // the finished spire: a pale finial and its cross
     bag.add('limestone', ball(0.5, 10, 7).translate(xc, y + top - 0.1, zc));
@@ -318,9 +345,9 @@ function portal(bag, col, P, cz, y, { uc, hw, ht, gt, ft, Xw, Xf, Xb, ho, kb = 0
   ring(1.0, 1.0, 1.2, 1.1, Xf + 2.4, Xf + 0.2);
   ring(1.2, 1.1, 1.42, 1.2, Xf + 1.9, Xf + 0.6);
   // the mass broken into rock and foliage: lumps over its face, and along the gable's rakes a row of crockets (small pinnacles), so the outline is not a smooth curve
-  for (let k = 0; k < 12; k++) {
-    const a = -0.9 + rand() * 1.8, b = 0.4 + rand() * 0.45, [x, v, u] = face(a, b), rr = 0.8 + rand() * 0.9;
-    bag.add(rand() < 0.35 ? LEAF : MASS, ball(rr, 8, 6).scale(0.9, 0.85, 1.1).translate(x + 0.1, y + v, cz + u));
+  for (let k = 0; k < 22; k++) {
+    const a = -0.9 + rand() * 1.8, b = 0.4 + rand() * 0.45, [x, v, u] = face(a, b), rr = 0.35 + rand() * 0.4;
+    bag.add(rand() < 0.45 ? LEAF : MASS, ball(rr, 7, 5).scale(0.6, 1.25, 0.8).rotateX(rand() - 0.5).translate(x - 0.05, y + v, cz + u));
   }
   for (let a = -0.95; a < 0.96; a += 0.075) {
     const [uo, vo] = outline(a); if (vo > ft - 0.3) continue;
@@ -328,6 +355,9 @@ function portal(bag, col, P, cz, y, { uc, hw, ht, gt, ft, Xw, Xf, Xb, ho, kb = 0
     const lean = Math.atan2(Math.abs(uo1 - uo), Math.abs(vo1 - vo)) * 0.6 * s;           // leaning out along the rake's slope
     bag.add(rand() < 0.3 ? LEAF : MASS, lathe([[0.4, 0], [0.3, L * 0.35], [0.14, L * 0.75], [0.001, L]], 6, (th, i) => 1 + 0.15 * Math.cos(th * 3 + i)).rotateX(lean).translate(Xf + 0.35, y + vo - 0.15, cz + uo));
   }
+  // the gable's rake: a continuous stepped rib of pale stone along the outline, and drips hanging from the outer archivolt
+  { const pts = []; for (let a = -0.97; a <= 0.971; a += 0.06) { const [uo, vo] = outline(a); pts.push([Xf + 0.55, y + vo - 0.3, cz + uo, 0.3]); } bag.add(FIG, tube(pts, 6)); }
+  for (let i = 1; i < 40; i++) { const a = -1 + 2 * i / 40; if (Math.abs(a) > 0.93) continue; const [u, v] = arch(a, 1.42, 1.2); drips(bag, Xf + 1.9 - 0.2, y + v - 0.1, cz + u, 0.6 + 0.8 * rand() * (1 - Math.abs(a) * 0.5), rand); }
   // the colliders: the mass either side of the mouth, the doorway's wall
   for (const s of [-1, 1]) { const u0 = uc + s * hw * 0.98, u1 = uc + s * how; col.rect([Xb, cz + Math.min(u0, u1), Xf + 1.6, cz + Math.max(u0, u1)], y - 1.2, y + Math.min(ft, gt)); }
   return { face, at, depth, arch, outline, ip };
@@ -337,7 +367,9 @@ function portal(bag, col, P, cz, y, { uc, hw, ht, gt, ft, Xw, Xf, Xb, ho, kb = 0
 function group(bag, pr, cz, y, a, b, figs, h = 2.6, sp = 0.46) {
   h *= 1.9;                                                   // (the figures of the façade are larger than life; here they must read from 50 m)
   const [x, v, u] = pr.face(a, b), half = (figs.length - 1) / 2 * sp * h;
-  corbel(bag, x + 0.15, y + v, cz + u, Math.max(0.6, half + 0.22 * h));
+  const cr = Math.max(0.6, half + 0.22 * h);
+  corbel(bag, x + 0.15, y + v, cz + u, cr);
+  canopy(bag, x + 0.15, y + v + h * 1.02, cz + u, cr * 0.95, h * 0.5, rng(Math.floor(x * 31 + v * 17 + u * 7)));
   figs.forEach((o, i) => { const du = (i - (figs.length - 1) / 2) * sp * h; statue(bag, [x + 0.15 + (o.dx ?? 0), y + v + (o.dv ?? 0), cz + u + du], o.h ?? h, o); });
 }
 /** Foliage over the face: leaves and flowers, the façade "full of plants". */
@@ -436,6 +468,14 @@ export function nativity(bag, col, fx, y, cz) {
   const cxx = fx + 3.55;
   bag.add(MASS, lathe([[1.9, 0], [2.0, 0.55], [1.8, 2.0], [1.95, 3.3], [1.55, 4.8], [1.7, 6.2], [1.25, 7.7], [1.2, 9.0], [0.85, 10.2], [0.55, 11.5], [0.28, 12.9], [0.001, 14.2]], 28,
     (th, k) => 1 + (k > 0 ? 0.1 * Math.cos(th * 9 + k * 0.7) : 0)).translate(cxx, y + 38, cz));
+  const CP = [[0, 1.9], [0.55, 2.0], [2, 1.8], [3.3, 1.95], [4.8, 1.55], [6.2, 1.7], [7.7, 1.25], [9, 1.2], [10.2, 0.85], [11.5, 0.55], [12.9, 0.28], [14.2, 0]];
+  const CYP = (t) => { for (let i = 1; i < CP.length; i++) if (t <= CP[i][0]) return CP[i - 1][1] + (CP[i][1] - CP[i - 1][1]) * (t - CP[i - 1][0]) / (CP[i][0] - CP[i - 1][0]); return 0; };
+  for (let k = 0; k < 16; k++) {    // doves perched in the cypress's boughs: body, tail, head, wings folded
+    const v = 40.5 + k * 0.62, rr = CYP(v - 38) + 0.12, a = k * 2.4;
+    const dx = cxx + Math.cos(a) * rr, dz = cz + Math.sin(a) * rr;
+    bag.add(FIG, ball(0.2, 6, 5).scale(1.5, 0.9, 0.9).rotateY(-a).translate(dx, y + v + 0.1, dz).translate(0, 0, 0));
+    bag.add(FIG, ball(0.1, 6, 4).translate(dx + Math.cos(a) * 0.3, y + v + 0.28, dz + Math.sin(a) * 0.3));
+  }
   bag.add(FIG, rod([cxx, y + 51.4, cz], [cxx, y + 53.6, cz], 0.09, 6)); bag.add(FIG, rod([cxx, y + 53.4, cz - 0.7], [cxx, y + 53.4, cz + 0.7], 0.08, 6));
   for (const uc of [-14.25, 14.25]) {
     bag.add(S, lathe([[1.75, 0], [1.9, 0.5], [1.7, 2.5], [1.4, 4.6], [1.05, 6.4], [0.001, 6.4]], 14, (th, i) => 1 + 0.08 * Math.cos(th * 6 + i)).translate(cxx, y + 28, cz + uc));
