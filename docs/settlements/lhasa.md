@@ -173,6 +173,15 @@ Sources added:
 - [Potala Palace — Project Himalayan Art, Rubin Museum](https://rubinmuseum.org/projecthimalayanart/essays/potala-palace/)
 - [Potala Palace: history, architecture, rooms and treasures — factsanddetails.com](https://factsanddetails.com/china/cat15/sub100/entry-6525.html)
 
+## 17. The landmark seen close (2026-11 seventh pass)
+
+- **Window reveals.** Tibetan windows are set in walls a metre or more thick, framed in black [stated: Tibetan architecture, §1.1]. Ours: besides the painted black trapezoid, each window has a timber frame standing 0.18-0.23 m out of the wall with its returns (jambs, head, sill-board) and a white stone sill, the lattice set back behind it; returns and sill on the ways up (below 60 m) only [inferred: depths].
+- **Pembe frieze.** Dyed tamarisk twigs bundled upright [stated: §1.1]. Ours: the frieze carries upright bundle ridges (0.34 m, 0.10-0.13 m proud) on every face; the gilt melong are domed mirrors with a rim of lotus petals, 12-sided [inferred].
+- **Gilded roofs.** Ours: a ring of gilt melong on each drum's pembe band; on the three large roofs the wheel of the law between two kneeling deer on the ridge's middle, a small ganjira at each ridge end [inferred, after the Jokhang's roofs, §1].
+- **Zigzag stairs.** Stone copings on the parapets and newel posts with capstones at 4.5 m [inferred].
+- **Chortens.** Six whitewashed chortens (three-tier plinth, vase with a niche, red-banded harmika, thirteen rings, gilt parasol, crescent and jewel) in a row on the open ground below the palace, about 4-7 m high [inferred: placing; Pargo Kaling not used].
+- Budget: arrival main draws 445 -> 444, main triangles 2.92 M -> 2.97 M.
+
 ## Sources
 
 - [Deyangshar — Wikipedia](https://en.wikipedia.org/wiki/Deyangshar)

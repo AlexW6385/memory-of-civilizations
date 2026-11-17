@@ -113,6 +113,8 @@ for (const [x, z] of [[sx0, sz1], [sx1, sz1]]) E.push({ t: 'dzong', rect: [x - 5
 // the inner pillar (doring nangma, uninscribed) under the stairs; the outer pillar (doring chima, inscribed, c. 764)
 // across the road outside the south gate, with its heap of stones and incense burner beside it
 E.push({ t: 'doring', at: [-4, 54], h: 6.5 });
+// the whitewashed chortens of the open ground below the palace, in a row either side of the way up (pilgrims' offerings)
+for (const [x, k] of [[-14, 1.2], [14, 1.17], [-27, 0.9], [27, 0.87], [-38, 0.7], [38, 0.67]]) E.push({ t: 'chorten', at: [x, 52.5], y: hill(x, 52.5), k });
 E.push({ t: 'doring', at: [GX, 238], h: 7.5 });
 E.push({ t: 'stone_heap', at: [GX - 6, 237], r: 1.2, seed: 5 }); E.push({ t: 'sangkhang', at: [GX - 9.5, 234], rot: 0 });
 
