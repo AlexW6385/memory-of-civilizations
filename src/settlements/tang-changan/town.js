@@ -149,7 +149,9 @@ function life() {
   }
   // along the avenue: walkers at rest and in knots, riders' grooms, porters; the city's traffic
   for (let k = 0; k < 70; k++) {
-    const x = (rand() - 0.5) * 78, z = -300 + rand() * 600, at = [x, z];
+    let x = (rand() - 0.5) * 78; const z = -300 + rand() * 600;
+    if (Math.abs(x - 28) < 3.2 && z > 10 && z < 215) x += 4.4;               // the visitor's way down the avenue's edge (plan.js) is kept free of walkers and their poles
+    const at = [x, z];
     if (Math.abs(x + 8) < 4 && z > 60 && z < 100) continue;
     const r = rand(); if (r < 0.28) official(at, rand() * 6.28, { pose: rand() < 0.25 ? 'talk' : 'stand' }); else if (r < 0.5) lady(at, rand() * 6.28); else if (r < 0.7) sogdian(at, rand() * 6.28); else commoner(at, rand() * 6.28, { carry: pick(['pole', 'none', 'basket']) });
   }
