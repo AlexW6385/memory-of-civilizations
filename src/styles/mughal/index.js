@@ -32,13 +32,13 @@ function onion(r, h) {
   }
   return p;
 }
-function dome(bag, mat, x, y, z, r, h, finial = true) {
+function dome(bag, mat, x, y, z, r, h, finial = true, gilt = true) {
   bag.add(mat, lathe(onion(r, h), 32, null, x, y, z));
   if (finial) {
     // (a neck from the dome's tip through the lotus to the spire: the crown is one piece with the dome)
     bag.add(mat, lathe([[r * 0.035, 0], [r * 0.03, r * 0.2]], 8, null, x, y + h * 0.97, z));
     bag.add(mat, lathe([[r * 0.18, 0], [r * 0.22, r * 0.06], [r * 0.1, r * 0.12], [0.001, r * 0.14]], 16, (t) => 1 + 0.25 * Math.max(0, Math.cos(t * 16)), x, y + h * 0.98, z));
-    bag.add('gilt_bronze', lathe([[0.001, 0], [r * 0.03, 0], [r * 0.05, r * 0.15], [r * 0.025, r * 0.3], [r * 0.05, r * 0.42], [0.001, r * 0.6]], 8, null, x, y + h * 0.98 + r * 0.12, z));
+    if (gilt) bag.add('gilt_bronze', lathe([[0.001, 0], [r * 0.03, 0], [r * 0.05, r * 0.15], [r * 0.025, r * 0.3], [r * 0.05, r * 0.42], [0.001, r * 0.6]], 8, null, x, y + h * 0.98 + r * 0.12, z));
   }
 }
 
@@ -136,21 +136,40 @@ function alcove(bag, col, at, ux, uz, nx, nz, ar, th, y, mat) {
   if (ar.floor && !oct) bag.add(SM, orientedBox(Q(-w / 2, (th / 2 + n1) / 2), Q(w / 2, (th / 2 + n1) / 2), n1 - th / 2, y0 - Math.min(sill, 0.5), y0));
   // the half-dome: rows from the springing up to the arch at the face, faced toward the opening
   const NU = 24, NT = 10, tris = [], tgt = Q(0, n0 - 4), ty = y0 + spring * 0.4;
-  const push = (A, Bv, C) => {
+  const push = (A, Bv, C, out = tris) => {
     const ab = [A[0] - Bv[0], A[1] - Bv[1], A[2] - Bv[2]], cb = [C[0] - Bv[0], C[1] - Bv[1], C[2] - Bv[2]];
     const nrm = [cb[1] * ab[2] - cb[2] * ab[1], cb[2] * ab[0] - cb[0] * ab[2], cb[0] * ab[1] - cb[1] * ab[0]];
     const m = [(A[0] + Bv[0] + C[0]) / 3, (A[1] + Bv[1] + C[1]) / 3, (A[2] + Bv[2] + C[2]) / 3];
     const dot = nrm[0] * (tgt[0] - m[0]) + nrm[1] * (ty - m[1]) + nrm[2] * (tgt[1] - m[2]);
-    if (dot >= 0) tris.push(...A, ...Bv, ...C); else tris.push(...A, ...C, ...Bv);
+    if (dot >= 0) out.push(...A, ...Bv, ...C); else out.push(...A, ...C, ...Bv);
   };
   for (let i = 0; i < NU; i++) for (let j = 0; j < NT; j++) {
     const a1 = V(i / NU, j / NT), b1 = V((i + 1) / NU, j / NT), c1 = V((i + 1) / NU, (j + 1) / NT), d1 = V(i / NU, (j + 1) / NT);
     push(a1, b1, c1); if (j < NT - 1) push(a1, c1, d1);
   }
   bag.add(DM, fromTriangles(tris));
+  const rb = Math.max(0.018, Math.min(0.035, w * 0.0025));
+  if (ar.deep) {
+    // muqarnas proper: rows of faceted cells (little pyramids) standing out of the shell, every other row set over the joints of the row below, each cell's apex hanging a little, the rows' protrusion fading toward the arch
+    const NR = ar.deepRows ?? 8, NC = ar.deepCols ?? 20, ct = [], ctr = Q(0, (n0 + n1) / 2);
+    for (let j = 0; j < NR; j++) {
+      const t0 = 0.9 * j / NR, t1 = 0.9 * (j + 1) / NR, odd = j % 2, nc = NC - odd, prot = Math.max(0.12, w * 0.034) * (1 - t0 * 0.7);
+      for (let i = 0; i < nc; i++) {
+        const ua = (i + odd * 0.5) / NC, ub = (i + 1 + odd * 0.5) / NC;
+        const c = [V(ua + 0.003, t0), V(ub - 0.003, t0), V(ub - 0.003, t1), V(ua + 0.003, t1)];
+        const m = [0, 1, 2].map((k) => (c[0][k] + c[1][k] + c[2][k] + c[3][k]) / 4);
+        const e1 = [c[1][0] - c[0][0], c[1][1] - c[0][1], c[1][2] - c[0][2]], e2 = [c[3][0] - c[0][0], c[3][1] - c[0][1], c[3][2] - c[0][2]];
+        let nn = [e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]];
+        const nl = Math.hypot(...nn) || 1; nn = nn.map((v) => v / nl);
+        if (nn[0] * (ctr[0] - m[0]) + nn[2] * (ctr[1] - m[2]) + nn[1] * (ty - m[1]) < 0) nn = nn.map((v) => -v);
+        const apx = [m[0] + nn[0] * prot, m[1] + nn[1] * prot - (t1 - t0) * 0.12, m[2] + nn[2] * prot];
+        for (let k = 0; k < 4; k++) push(c[k], c[(k + 1) % 4], apx, ct);
+      }
+    }
+    bag.add(RM, fromTriangles(ct));
+  } else {
   // the net of ribs over it, standing a few centimetres proud toward the opening
   const ro = ar.ribOut ?? 0.035, inward = (p) => { const dx = tgt[0] - p[0], dy = ty - p[1], dz = tgt[1] - p[2], L = Math.hypot(dx, dy, dz) || 1; return [p[0] + dx / L * ro, p[1] + dy / L * ro, p[2] + dz / L * ro]; };
-  const rb = Math.max(0.018, Math.min(0.035, w * 0.0025));
   for (let k = 0; k <= 8; k++) for (let j = 0; j < 4; j++) {
     const t0 = j / 4.4, t1 = (j + 1) / 4.4, u0 = k / 8;
     // each rib in ar.ribSeg pieces following the shell (one straight piece cuts in under it on a small hood)
@@ -158,6 +177,7 @@ function alcove(bag, col, at, ux, uz, nx, nz, ar, th, y, mat) {
     if (k < 8) { rib(u0, u0 + 1 / 8); rib(u0 + 1 / 8, u0); }
   }
   for (const t of [0.0, 0.45, 0.68, 0.9]) for (let i = 0; i < 16; i++) bag.add(RM, rod(inward(V(i / 16, t)), inward(V((i + 1) / 16, t)), rb, 4));
+  }
   // muqarnas: two tiers of little corbelled cells along the springing, the upper set over the joints of the lower
   const cw = Math.max(0.35, Math.min(0.7, w * 0.07));
   for (let i = 0; i < 3; i++) {
@@ -217,11 +237,11 @@ function alcove(bag, col, at, ux, uz, nx, nz, ar, th, y, mat) {
  */
 function pishtaqFace(bag, col, a, b, y, h, iw, mat, niches = true, inside = null, trim = 'marble_dark') {
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]);
-  const arches = [{ at: L / 2, w: iw.w, h: iw.h, depth: iw.depth ?? 4, door: !iw.pass && !iw.back, back: iw.back, pass: iw.pass, alcove: iw.alcove && (iw.pass ? 'rect' : iw.alcove), gap: iw.gap }];
+  const arches = [{ at: L / 2, w: iw.w, h: iw.h, depth: iw.depth ?? 4, door: !iw.pass && !iw.back, back: iw.back, pass: iw.pass, alcove: iw.alcove && (iw.pass ? 'rect' : iw.alcove), gap: iw.gap, deep: iw.deep }];
   if (niches) for (const s of [-1, 1]) {
     const c = L / 2 + s * (iw.w / 2 + (L - iw.w) / 4);
     const nw = Math.min((L - iw.w) / 2 - 2, iw.w * 0.45);
-    arches.push({ at: c, w: nw, h: iw.h * 0.42, sill: 0.6, depth: 1.5, alcove: iw.alcove && 'oct' }, { at: c, w: nw, h: iw.h * 0.38, sill: iw.h * 0.52, depth: 1.5, alcove: iw.alcove && 'oct' });
+    arches.push({ at: c, w: nw, h: iw.h * 0.42, sill: 0.6, depth: 1.5, alcove: iw.alcove && 'oct', deep: iw.deep, deepRows: 6, deepCols: 12 }, { at: c, w: nw, h: iw.h * 0.38, sill: iw.h * 0.52, depth: 1.5, alcove: iw.alcove && 'oct', deep: iw.deep, deepRows: 6, deepCols: 12 });
   }
   arcadeWall(bag, col, a, b, y, h, 2.4, mat, arches, inside);
   if (iw.pass) {
@@ -258,7 +278,7 @@ function faceDecor(bag, a, b, y, h, iw, mat, niches, inside, opt = {}) {
     buckets.get(m).push(...orientOutward(t));
   };
   const DK = 'marble_dark', field = mat === W ? null : W;
-  const sL = L / 2 - iw.w / 2, sR = L / 2 + iw.w / 2, gap = 0.35, bw = Math.min(1.5, iw.w * 0.09), vTop = Math.min(iw.h + 0.5, h - bw - 0.4);
+  const sL = L / 2 - iw.w / 2, sR = L / 2 + iw.w / 2, gap = 0.3, bw = Math.min(1.2, iw.w * 0.072), vTop = Math.min(iw.h + 0.5, h - bw - 0.4);
   // the inscription band: field, borders, letters running along it
   const band = (s0, s1, v0, v1, along) => {
     if (field) slab(field, s0, s1, v0, v1, 0, 0.03);
@@ -275,19 +295,38 @@ function faceDecor(bag, a, b, y, h, iw, mat, niches, inside, opt = {}) {
       }
       return;
     }
-    for (let t = 0.15; t < len - 0.15;) {
-      const vv = along === 'v' ? v0 + t : (v0 + v1) / 2, k = (1 + 0.45 * (vv / h)) * Math.max(0.6, bw / 1.2), cell = 0.2 * k;
-      const S2 = (tt, c0, c1, w2) => (along === 'v' ? slab(DK, s0 + 0.1 + c0 * cw, s0 + 0.1 + c1 * cw, v0 + tt, v0 + tt + w2, o, o + 0.012) : slab(DK, s0 + tt, s0 + tt + w2, v0 + 0.1 + c0 * cw, v0 + 0.1 + c1 * cw, o, o + 0.012));
-      S2(t, 0.25, 0.32, cell);                                     // the baseline
+    // Thuluth-like lettering: a ribbon of baseline, tall uprights with their hooks, bowls, dots; the letters grow with height
+    for (let t = 0.12; t < len - 0.2;) {
+      const vv = along === 'v' ? v0 + t : (v0 + v1) / 2, k = (1 + 0.45 * (vv / h)) * Math.max(0.6, bw / 1.2), g = 0.3 * k, oo = 0.02;
+      const S2 = (tt, c0, c1, w2, hh = 0.02) => (along === 'v' ? slab(DK, s0 + 0.1 + c0 * cw, s0 + 0.1 + c1 * cw, v0 + tt, v0 + tt + w2, o, o + hh) : slab(DK, s0 + tt, s0 + tt + w2, v0 + 0.1 + c0 * cw, v0 + 0.1 + c1 * cw, o, o + hh));
       const r = rnd();
-      if (r < 0.4) S2(t + cell * 0.2, 0.25, 0.25 + 0.55 * Math.min(1, k * 0.8), 0.035 * k);     // a tall upright (alif, lam)
-      else if (r < 0.7) { S2(t + cell * 0.1, 0.3, 0.5, 0.03 * k); S2(t + cell * 0.1, 0.48, 0.52, cell * 0.6); }
-      else S2(t + cell * 0.4, 0.6, 0.66, 0.05 * k);                // a dot
-      t += cell + 0.03;
+      S2(t, 0.2, 0.33, g * 1.05, oo);                                           // the baseline ribbon
+      if (r < 0.34) {                                                           // alif then lam: two tall uprights, a hook on the second
+        S2(t + g * 0.1, 0.33, 0.93, 0.06 * k, oo + 0.006); S2(t + g * 0.55, 0.33, 0.85, 0.06 * k, oo + 0.006); S2(t + g * 0.55, 0.85, 0.9, 0.2 * k, oo);
+      } else if (r < 0.62) {                                                    // a bowl (ba, nun): two short strokes, a dot beneath
+        S2(t + g * 0.05, 0.33, 0.5, 0.05 * k, oo + 0.004); S2(t + g * 0.7, 0.33, 0.55, 0.05 * k, oo + 0.004); S2(t + g * 0.3, 0.07, 0.15, 0.1 * k, oo);
+      } else if (r < 0.82) {                                                    // a closed loop (waw, mim): a ring on the line, a tail
+        S2(t + g * 0.15, 0.33, 0.62, 0.22 * k, oo + 0.004); S2(t + g * 0.15 + 0.05 * k, 0.4, 0.55, 0.12 * k, oo + 0.012); S2(t + g * 0.85, 0.05, 0.33, 0.05 * k, oo);
+      } else {                                                                  // a tall stroke and two dots above
+        S2(t + g * 0.3, 0.33, 0.78, 0.07 * k, oo + 0.006); S2(t + g * 0.05, 0.8, 0.88, 0.07 * k, oo); S2(t + g * 0.6, 0.8, 0.88, 0.07 * k, oo);
+      }
+      t += g * 1.15;
     }
   };
   const e0 = sL - gap - bw, e1 = sR + gap + bw;
   band(e0, sL - gap, 0.2, vTop, 'v'); band(sR + gap, e1, 0.2, vTop, 'v'); band(e0, e1, vTop, vTop + bw, 's');
+  // outside the lettering a narrow border of lozenges and dots (carnelian, jade, yellow), between two dark lines
+  { const bo = 0.08, bwid = 0.3, nwid = Math.min((L - iw.w) / 2 - 2, iw.w * 0.45), avail = (niches ? (L - iw.w) / 4 - nwid / 2 : (L - iw.w) / 2 - 0.4) - gap - bw, topEnd = vTop + bw + bo + bwid, run = (s0b, s1b, v0b, v1b, horiz) => {
+      slab(DK, horiz ? s0b : s0b, horiz ? s1b : s0b + 0.04, horiz ? v0b : v0b, horiz ? v0b + 0.04 : v1b, 0, 0.012); slab(DK, horiz ? s0b : s1b - 0.04, horiz ? s1b : s1b, horiz ? v1b - 0.04 : v0b, horiz ? v1b : v1b, 0, 0.012);
+      const len2 = horiz ? s1b - s0b : v1b - v0b, n2 = Math.max(2, Math.floor(len2 / 0.34));
+      for (let q = 0; q < n2; q++) {
+        const tt = (q + 0.5) * len2 / n2, cs = horiz ? s0b + tt : (s0b + s1b) / 2, cv = horiz ? (v0b + v1b) / 2 : v0b + tt, d = 0.085;
+        slab(q % 2 ? 'inlay_jade' : 'inlay_carnelian', cs - d, cs + d, cv - d, cv + d, 0, 0.016);
+        slab('inlay_yellow', cs - d * 0.4, cs + d * 0.4, cv - d * 0.4, cv + d * 0.4, 0, 0.026);
+      }
+    };
+    const vEnd = Math.min(topEnd, h - 0.2);
+    if (avail > bo + bwid + 0.12) { run(e0 - bo - bwid, e0 - bo, 0.2, vEnd, false); run(e1 + bo, e1 + bo + bwid, 0.2, vEnd, false); if (topEnd <= h - 0.2) run(e0 - bo - bwid, e1 + bo + bwid, vTop + bw + bo, topEnd, true); } }
   // the spandrels: a vine of inlaid stones along the arch, flowers on it, a rosette in the angle
   const w = iw.w, r = w * 0.8, rise = Math.sqrt(r * r - (r - w / 2) ** 2), spring = Math.max(0.3, iw.h - rise), cLs = sL + r;
   const arcV = (x) => spring + Math.sqrt(Math.max(0, r * r - (x - cLs) ** 2));
@@ -335,13 +374,80 @@ function faceDecor(bag, a, b, y, h, iw, mat, niches, inside, opt = {}) {
     for (let k = 0; k < np; k++) {
       const p0 = r0 + k * pw, p1 = p0 + pw, pc = (p0 + p1) / 2;
       slab(DK, p0, p0 + 0.05, 0.25, DH, 0, 0.02); slab(DK, p1 - 0.05, p1, 0.25, DH, 0, 0.02); slab(DK, p0, p1, 0.25, 0.3, 0, 0.02);
-      const R2 = W;
-      slab(R2, pc - 0.025, pc + 0.025, 0.32, 1.25, 0, 0.05);
-      for (const [dv, ds] of [[0.5, -1], [0.62, 1], [0.8, -1], [0.92, 1]]) slab(R2, Math.min(pc, pc + ds * 0.22), Math.max(pc, pc + ds * 0.22), dv, dv + 0.06, 0, 0.04);
-      for (const [fs, fv] of [[0, 1.3], [-0.22, 1.06], [0.22, 1.14]]) { slab(R2, pc + fs - 0.08, pc + fs + 0.08, fv - 0.06, fv + 0.06, 0, 0.07); slab(R2, pc + fs - 0.05, pc + fs + 0.05, fv + 0.06, fv + 0.14, 0, 0.06); }
+      // the plant in relief, round-headed in its frame: a flowering plant (lily, poppy or iris) with its leaves
+      plantRelief((pts, o0, o1, kk) => { if (!buckets.has(W)) buckets.set(W, []); buckets.get(W).push(...reliefSolid(P, pts, o0 + 0.01, o1, kk)); }, pc, 0.36, DH - 0.14, pw - 0.2, (k + Math.round(r0)) % 3, Math.round(pc * 31) + k, true);
     }
   }
   for (const [m, t] of buckets) bag.add(m, fromTriangles(t));
+}
+
+
+/**
+ * A convex outline pts [[u, v]] raised from the wall as a little solid: its foot at depth o0, its top at o1 shrunk toward the middle
+ * by k (the sloping edge of a carving in relief). P(u, v, o) gives the world point. Returns triangles (outward-facing).
+ */
+function reliefSolid(P, pts, o0, o1, k = 0.6) {
+  const n = pts.length, cu = pts.reduce((a, q) => a + q[0], 0) / n, cv = pts.reduce((a, q) => a + q[1], 0) / n;
+  const A = pts.map(([u, v]) => P(u, v, o0)), B = pts.map(([u, v]) => P(cu + (u - cu) * k, cv + (v - cv) * k, o1)), c0 = P(cu, cv, o0), c1 = P(cu, cv, o1), t = [];
+  for (let i = 0; i < n; i++) { const j = (i + 1) % n; t.push(...A[i], ...A[j], ...B[j], ...A[i], ...B[j], ...B[i], ...B[i], ...B[j], ...c1, ...A[j], ...A[i], ...c0); }
+  return orientOutward(t);
+}
+
+/**
+ * A flowering plant carved in relief, standing in a dado panel from vb to vt about the line u = pc, width pw (docs/settlements/mughal-agra.md §4):
+ * a tuft of long leaves at the root, a stem that sways, leaves of lens shape set alternately along it, side stems ending in buds,
+ * and at the top a flower: kind 0 a lily (six pointed petals), 1 a poppy (five round petals round a heart), 2 an iris (three upright petals and two falls).
+ * emit(pts, o0, o1, k) puts one carved piece on the panel; `fine` leaves the midribs out.
+ */
+function plantRelief(emit, pc, vb, vt, pw, kind, seed, fine = false) {
+  const Hh = vt - vb, rnd = rng(seed * 977 + 13), sway = pw * 0.07 * (rnd() < 0.5 ? -1 : 1);
+  const rot = (a, [u, v], c, sc) => [c[0] + (u * Math.cos(a) - v * Math.sin(a)) * sc, c[1] + (u * Math.sin(a) + v * Math.cos(a)) * sc];
+  // a lens leaf from `b` along angle `a` (from the vertical), length L, half-width w, drooping toward its tip
+  const leaf = (b, a, L, w, o1 = 0.045) => {
+    const pts = [];
+    const prof = [[0, 0], [0.2, 0.55], [0.45, 1], [0.7, 0.85], [0.9, 0.4], [1, 0]];
+    for (const sd of [1, -1]) for (const [f, ww] of (sd > 0 ? prof : prof.slice().reverse())) {
+      const droop = f * f * 0.12 * L;
+      pts.push(rot(-a, [sd * ww * w, f * L - droop * Math.sign(a || 1) * 0.0], b, 1));
+    }
+    emit(pts, 0, o1, 0.55);
+    if (!fine) emit([rot(-a, [-0.008, 0.08 * L], b, 1), rot(-a, [0.008, 0.08 * L], b, 1), rot(-a, [0.006, L * 0.9], b, 1), rot(-a, [-0.006, L * 0.9], b, 1)], 0.03, 0.058, 0.8);
+  };
+  const stemAt = (f) => [pc + sway * Math.sin(f * Math.PI * 1.6), vb + 0.06 + f * (Hh * 0.66)];
+  // the root tuft: five blades fanning from the foot
+  for (let i = 0; i < 5; i++) leaf([pc + (i - 2) * pw * 0.025, vb + 0.04], (i - 2) * 0.34, Hh * (0.32 + 0.06 * (i % 2)), pw * 0.05, 0.04);
+  // the stem, in pieces
+  const NS = 9;
+  for (let i = 0; i < NS; i++) {
+    const a = stemAt(i / NS), b = stemAt((i + 1) / NS), dx = b[0] - a[0], dv = b[1] - a[1], L = Math.hypot(dx, dv), nu = -dv / L * 0.022, nv = dx / L * 0.022;
+    emit([[a[0] - nu, a[1] - nv], [b[0] - nu, b[1] - nv], [b[0] + nu, b[1] + nv], [a[0] + nu, a[1] + nv]], 0, 0.05, 0.7);
+  }
+  // alternating leaves and a side stem with a bud
+  for (let i = 0; i < 4; i++) {
+    const f = 0.1 + i * 0.2, sd = i % 2 ? 1 : -1, b = stemAt(f);
+    leaf(b, sd * (1.0 - i * 0.1), Hh * (0.27 - i * 0.025), pw * (0.065 - i * 0.008));
+  }
+  { const b = stemAt(0.55), sd = sway > 0 ? -1 : 1, tip = [b[0] + sd * pw * 0.2, b[1] + Hh * 0.16];
+    emit([[b[0] - 0.015, b[1]], [tip[0] - 0.015, tip[1] - 0.02], [tip[0] + 0.015, tip[1] - 0.02], [b[0] + 0.015, b[1]]], 0, 0.05, 0.7);
+    const bud = []; for (let q = 0; q < 8; q++) { const an = q / 8 * Math.PI * 2; bud.push([tip[0] + Math.cos(an) * pw * 0.028, tip[1] + 0.045 + Math.sin(an) * pw * 0.05]); }
+    emit(bud, 0, 0.07, 0.5); emit([[tip[0] - 0.03, tip[1] - 0.01], [tip[0] + 0.03, tip[1] - 0.01], [tip[0], tip[1] + 0.07]], 0.01, 0.055, 0.7); }
+  // the flower on the stem's end
+  const c = stemAt(1), R = pw * 0.2;
+  const petal = (a, L, w, o1 = 0.075) => {
+    const prof = [[0, 0], [0.25, 0.6], [0.6, 1], [0.9, 0.55], [1, 0]], pts = [];
+    for (const sd of [1, -1]) for (const [f, ww] of (sd > 0 ? prof : prof.slice().reverse())) pts.push(rot(-a, [sd * ww * w, f * L], c, 1));
+    emit(pts, 0.02, o1, 0.5);
+  };
+  if (kind === 0) { for (let i = 0; i < 6; i++) petal((i - 2.5) * 0.52, R * 1.6, R * 0.34, 0.07 + (i % 2) * 0.012); }
+  else if (kind === 1) {
+    for (let i = 0; i < 5; i++) { const an = Math.PI / 2 + (i - 2) * 1.2, cc = [c[0] + Math.cos(an) * R * 0.62, c[1] + 0.02 + Math.sin(an) * R * 0.62], pts = []; for (let q = 0; q < 9; q++) { const t = q / 9 * Math.PI * 2; pts.push([cc[0] + Math.cos(t) * R * 0.62, cc[1] + Math.sin(t) * R * 0.62]); } emit(pts, 0.02, 0.075, 0.55); }
+    const ct = []; for (let q = 0; q < 8; q++) { const t = q / 8 * Math.PI * 2; ct.push([c[0] + Math.cos(t) * R * 0.22, c[1] + 0.02 + Math.sin(t) * R * 0.22]); } emit(ct, 0.06, 0.1, 0.6);
+  } else {
+    for (const a of [-0.28, 0, 0.28]) petal(a, R * (a ? 1.3 : 1.7), R * 0.3, 0.075);
+    for (const sd of [-1, 1]) petal(sd * 2.3, R * 1.1, R * 0.32, 0.068);
+  }
+  // the flower's heart
+  if (kind !== 1) { const ct = []; for (let q = 0; q < 8; q++) { const t = q / 8 * Math.PI * 2; ct.push([c[0] + Math.cos(t) * R * 0.1, c[1] + Math.sin(t) * R * 0.1]); } emit(ct, 0.06, 0.095, 0.6); }
 }
 
 /** chhatri: a domed kiosk { c, y, r, h, n (columns), mat } on a little platform. */
@@ -351,6 +457,58 @@ function chhatri(bag, col, x, y, z, r, h, n = 8, mat = W, domeMat = W) {
   bag.add(mat, lathe([[r * 1.25, 0], [r * 1.25, 0.25], [r * 1.05, 0.5], [0.001, 0.5]], n, null, x, y + 0.4 + h, z));       // the chhajja (eave)
   dome(bag, domeMat, x, y + 0.9 + h, z, r * 0.95, r * 1.4);
   if (col) col.circle(x, z, r * 1.15, y, y + h + 1);
+}
+
+
+/**
+ * chhatri_rich: the tomb's roof kiosks and the minarets' crown (docs/settlements/mughal-agra.md §4): on a moulded octagonal base eight
+ * slender piers with capitals, between them eight pointed arches cut through a thin marble panel, a ring-beam and a deep chhajja over
+ * them, a drum of merlons, a ribbed dome on a collar of lotus petals, a gilt finial (a bud and a spike). Open: one sees the sky through it.
+ */
+function chhatriRich(bag, x, y, z, r, h) {
+  const none = { segment() {}, rect() {}, circle() {}, floor() {} };
+  // the repeated small pieces (piers, caps, merlons) gathered into one mesh per kiosk, so that they are not found and instanced as copies
+  const acc = [], addSmall = (g) => { const q = g.index ? g.toNonIndexed() : g; acc.push(...q.attributes.position.array); };
+  const th = r * 0.1, ang = (k) => k / 8 * Math.PI * 2 + Math.PI / 8;
+  bag.add(W, lathe([[r * 1.3, 0], [r * 1.3, 0.28], [r * 1.18, 0.34], [r * 1.18, 0.5], [0.001, 0.5]], 8, null, x, y, z));
+  bag.add('marble_dark', lathe([[r * 1.31, 0.26], [r * 1.31, 0.3], [r * 1.17, 0.3], [r * 1.17, 0.26]], 8, null, x, y, z));
+  const y0 = y + 0.5, ph = h - 0.7, V = [];
+  for (let k = 0; k < 8; k++) V.push([x + Math.cos(ang(k)) * r, z + Math.sin(ang(k)) * r]);
+  for (let k = 0; k < 8; k++) {
+    const a = V[k], b = V[(k + 1) % 8], L = Math.hypot(b[0] - a[0], b[1] - a[1]), w = L - r * 0.34;
+    addSmall(lathe([[r * 0.17, 0], [r * 0.17, ph + 0.1]], 4, null, a[0], y0, a[1]));
+    addSmall(lathe([[r * 0.24, 0], [r * 0.24, 0.12], [r * 0.19, 0.2]], 8, null, a[0], y0, a[1]));
+    addSmall(lathe([[r * 0.19, 0], [r * 0.27, 0.1], [r * 0.27, 0.22], [r * 0.2, 0.3]], 8, null, a[0], y0 + ph - 0.12, a[1]));
+    // the arch: a panel with a pointed opening
+    arcadeWall(bag, none, a, b, y0, ph, th, W, [{ at: L / 2, w, h: ph - r * 0.22, pass: true }], null);
+  }
+  bag.add(W, lathe([[r * 1.12, 0], [r * 1.12, 0.3], [r * 1.0, 0.3], [0.001, 0.3]], 8, null, x, y0 + ph, z));
+  bag.add(W, lathe([[r * 1.32, 0], [r * 1.34, 0.18], [r * 1.2, 0.4], [r * 1.0, 0.5], [0.001, 0.5]], 8, null, x, y0 + ph + 0.3, z));
+  const ye = y0 + ph + 0.8;
+  for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2 + Math.PI / 16; addSmall(lathe([[0.001, 0], [r * 0.09, 0], [r * 0.07, r * 0.2], [0.001, r * 0.3]], 6, null, x + Math.cos(a) * r * 1.0, ye, z + Math.sin(a) * r * 1.0)); }
+  bag.add(W, fromTriangles(acc));
+  bag.add(W, lathe([[r * 0.98, 0], [r * 1.06, 0.1], [r * 1.0, 0.3], [r * 0.85, 0.42]], 32, (t, i) => (i === 1 || i === 2 ? 1 + 0.06 * Math.cos(16 * t) : 1), x, ye, z));
+  const dh = r * 1.45, dr = r * 0.94;
+  bag.add(W, lathe(onion(dr, dh), 40, (t, i) => (i > 1 && i < 14 ? 1 + 0.025 * Math.cos(10 * t) : 1), x, ye + 0.38, z));
+  const yt = ye + 0.38 + dh * 0.97, k = r / 3.4;
+  bag.add(W, lathe([[r * 0.02, 0], [r * 0.2, 0.05 * k], [r * 0.14, 0.14 * k], [0.001, 0.2 * k]], 12, (t) => 1 + 0.2 * Math.max(0, Math.cos(t * 8)), x, yt - 0.02, z));
+  bag.add('gilt_bronze', lathe([[0.001, 0], [0.09 * k, 0.04 * k], [0.15 * k, 0.2 * k], [0.08 * k, 0.4 * k], [0.04 * k, 0.5 * k], [0.05 * k, 0.9 * k], [0.001, 1.2 * k]], 8, null, x, yt + 0.15 * k, z));
+}
+
+/**
+ * tajFinial: the finial of the great dome (docs/settlements/mughal-agra.md §4): two stacked pots (kalasha), a crescent with its horns
+ * pointing up round the spike, the spike with three rings; all gilt. Scale s = dome radius / 17.7.
+ */
+function tajFinial(bag, x, y, z, s) {
+  const G = 'gilt_bronze', P = (r, h) => [r * s, h * s];
+  bag.add(G, lathe([P(0.001, 0), P(0.7, 0), P(0.95, 0.35), P(0.8, 0.9), P(0.4, 1.3), P(0.3, 1.6), P(0.6, 1.75), P(0.5, 2.1), P(0.5, 2.3), P(0.25, 2.5), P(0.2, 3.1)], 24, null, x, y, z));
+  bag.add(G, lathe([P(0.2, 3.0), P(0.55, 3.2), P(0.65, 3.55), P(0.5, 4.0), P(0.2, 4.35), P(0.14, 4.6)], 20, null, x, y, z));
+  // the crescent: a tapering tube along an arc open to the sky, in the east–west plane
+  const cy = y + 5.5 * s, Rc = 1.6 * s, N = 20, pts = [];
+  for (let i = 0; i <= N; i++) { const phi = (-1 + 2 * i / N) * 2.25; pts.push([x + Math.sin(phi) * Rc, cy - Math.cos(phi) * Rc, phi]); }
+  for (let i = 0; i < N; i++) { const a = pts[i], b = pts[i + 1], tr = (0.07 + 0.27 * Math.cos((a[2] + b[2]) / 2 / 2.25 * Math.PI / 2)) * s; bag.add(G, rod([a[0], a[1], z], [b[0], b[1], z], tr, 8)); }
+  bag.add(G, lathe([P(0.001, 3.9), P(0.1, 4.0), P(0.09, 9.2), P(0.04, 10.2), P(0.001, 10.8)], 8, null, x, y, z));
+  for (const h of [6.4, 7.6, 8.8]) bag.add(G, lathe([P(0.09, 0), P(0.26, 0.15), P(0.3, 0.3), P(0.26, 0.45), P(0.09, 0.6)], 10, null, x, y + h * s, z));
 }
 
 /** minaret: a tapering round tower { c, y, h, r } on an octagonal base, in three stages divided by balconies
@@ -372,7 +530,7 @@ function minaret(bag, col, x, y, z, h, r) {
     bag.add(W, lathe([[R, 0], [R, 0.12], [R * 0.9, 0.12], [R * 0.9, 0]], 24, null, x, yb + 1.95, z));
     bag.add('marble_dark', lathe([[rr + 0.02, -0.2], [rr + 0.02, -0.05], [rr - 0.01, -0.05], [rr - 0.01, -0.2]], 24, null, x, yb, z));
   }
-  chhatri(bag, null, x, y + h + 0.3, z, r * 0.95, 3.4, 8);
+  chhatriRich(bag, x, y + h + 0.3, z, r * 0.95, 3.4);
   col.circle(x, z, r * 1.45, y, y + h);
 }
 
@@ -421,7 +579,7 @@ function mausoleum(el, { bag, col }) {
   const P = [[-A + C, -A], [A - C, -A], [A, -A + C], [A, A - C], [A - C, A], [-A + C, A], [-A, A - C], [-A, -A + C]].map(([x, z]) => [cx + x, cz + z]);
   for (let k = 0; k < 8; k++) {
     const a = P[k], b = P[(k + 1) % 8], main = k % 2 === 0;
-    pishtaqFace(bag, col, a, b, y, H, main ? { w: (A - C) * 2 * 0.42, h: H * 0.82, depth: 5, pass: el.interior && k === 4, alcove: 'oct' } : { w: C * 1.4 * 0.5, h: H * 0.42, alcove: 'oct', depth: 2.2 }, W, main, [cx, cz]);
+    pishtaqFace(bag, col, a, b, y, H, main ? { w: (A - C) * 2 * 0.42, h: H * 0.82, depth: 5, pass: el.interior && k === 4, alcove: 'oct', deep: true } : { w: C * 1.4 * 0.5, h: H * 0.42, alcove: 'oct', depth: 2.2, deep: true }, W, main, [cx, cz]);
   }
   if (el.interior) tombChamber(bag, col, cx, cz, y, A);
   bag.add(W, box(cx - A + 2, y + H - 0.8, cz - A + 2, cx + A - 2, y + H, cz + A - 2));
@@ -429,8 +587,9 @@ function mausoleum(el, { bag, col }) {
   // the drum and the dome
   const dr = el.dome.r, dh = el.dome.h, drum = el.dome.drum;
   bag.add(W, lathe([[dr * 1.02, 0], [dr * 1.02, drum], [dr * 1.08, drum + 0.6], [dr, drum + 0.8]], 32, null, cx, y + H, cz));
-  dome(bag, W, cx, y + H + drum + 0.8, cz, dr, dh);
-  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) chhatri(bag, null, cx + sx * (A - C) * 0.75, y + H, cz + sz * (A - C) * 0.75, 3.4, 4.6, 8);
+  dome(bag, W, cx, y + H + drum + 0.8, cz, dr, dh, true, false);
+  tajFinial(bag, cx, y + H + drum + 0.8 + dh * 0.98 + dr * 0.12, cz, dr / 17.7);
+  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) chhatriRich(bag, cx + sx * (A - C) * 0.75, y + H, cz + sz * (A - C) * 0.75, 3.4, 4.6);
   // pinnacles at the corners of the chamfers
   for (const p of P) bag.add(W, lathe([[0.7, 0], [0.62, H + 0.1]], 8, null, p[0], y, p[1]));
   tombRoofline(bag, P, y, H);
@@ -1048,7 +1207,7 @@ function plinthDado(el, { bag, col }) {
   const faces = [{ n: [0, 1], t: [1, 0], h: hz, key: 's' }, { n: [0, -1], t: [-1, 0], h: hz, key: 'n' }, { n: [1, 0], t: [0, 1], h: hx, key: 'e' }, { n: [-1, 0], t: [0, -1], h: hx, key: 'w' }];
   const M = 'marble_smooth', DK = 'marble_dark';
   for (const f of faces) {
-    const skip = el.skip?.[f.key];
+    const skip = el.skip?.[f.key], soup = [];
     const slab = (m, u0, u1, v0, v1, o0, o1) => {
       const P = (u, o) => [cx + f.t[0] * u + f.n[0] * (f.h + o), cz + f.t[1] * u + f.n[1] * (f.h + o)], a = P(u0, o0), b = P(u1, o1);
       bag.add(m, box(Math.min(a[0], b[0]), y0 + v0, Math.min(a[1], b[1]), Math.max(a[0], b[0]), y0 + v1, Math.max(a[1], b[1])));
@@ -1070,15 +1229,9 @@ function plinthDado(el, { bag, col }) {
       // the frame in dark stone, then the plant: a stem, four pairs of stepped leaves, a flower of eight petals
       slab(DK, u0 + bi, u1 - bi, vb, vb + 0.06, 0, 0.04); slab(DK, u0 + bi, u1 - bi, vt - 0.06, vt, 0, 0.04);
       slab(DK, u0 + bi, u0 + bi + 0.06, vb + 0.06, vt - 0.06, 0, 0.04); slab(DK, u1 - bi - 0.06, u1 - bi, vb + 0.06, vt - 0.06, 0, 0.04);
-      slab(M, pc - 0.04, pc + 0.04, vb + 0.3, vt - 1.0, 0, 0.05);
-      for (let i = 0; i < 4; i++) for (const sd of [-1, 1]) for (let j = 0; j < 3; j++) {
-        const va = vb + 0.55 + i * 0.5 + j * 0.07, ua = pc + sd * (0.06 + j * 0.2);
-        slab(M, Math.min(ua, ua + sd * 0.2), Math.max(ua, ua + sd * 0.2), va, va + 0.07, 0, 0.05);
-      }
-      const fv = vt - 0.62;
-      for (let q = 0; q < 8; q++) { const an = q / 8 * Math.PI * 2, uu = pc + Math.cos(an) * 0.26, vv = fv + Math.sin(an) * 0.26; slab(M, uu - 0.07, uu + 0.07, vv - 0.07, vv + 0.07, 0, 0.05); }
-      slab(M, pc - 0.08, pc + 0.08, fv - 0.08, fv + 0.08, 0, 0.07);
+      plantRelief((pts, o0, o1, kk) => soup.push(...reliefSolid((u, v, o) => [cx + f.t[0] * u + f.n[0] * (f.h + o), y0 + v, cz + f.t[1] * u + f.n[1] * (f.h + o)], pts, o0 + 0.01, o1 * 1.6, kk)), pc, vb + 0.25, vt - 0.2, u1 - u0 - 2 * bi - 0.4, (k + (f.key.charCodeAt(0) % 3)) % 3, k + f.key.charCodeAt(0));
     }
+    bag.add(M, fromTriangles(soup));
   }
 }
 
