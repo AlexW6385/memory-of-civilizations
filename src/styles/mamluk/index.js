@@ -19,7 +19,7 @@ import * as FN from '../mughal/furnish.js';
 const S = 'limestone_yellow';
 /** A band of inscription in relief on a face: a carved ground and the raised stems and heads of the letters (B: box in the face's frame, u world). */
 function inscription(bag, B, u0, u1, ya, bh, d, seed = 0) {
-  bag.add('stucco_warm', B(u0, u1, ya, ya + bh, 0, d));
+  bag.add('stucco', B(u0, u1, ya, ya + bh, 0, d));
   bag.add(S, B(u0, u1, ya - 0.12, ya, 0, d + 0.1)); bag.add(S, B(u0, u1, ya + bh, ya + bh + 0.12, 0, d + 0.1));
   let u = u0 + 0.25, k = seed;
   while (u < u1 - 0.3) {

@@ -171,7 +171,7 @@ function dome(el, { bag, col }) {
     bag.add(S, place(box(-0.75, dr * 0.12 - 0.2, -0.05, -0.55, dr * 0.34 + 0.18, 0.07), cx + Math.cos(th) * R, y + dr, cz + Math.sin(th) * R, yaw));
     bag.add(S, place(box(0.55, dr * 0.12 - 0.2, -0.05, 0.75, dr * 0.34 + 0.18, 0.07), cx + Math.cos(th) * R, y + dr, cz + Math.sin(th) * R, yaw)); }
   // a band of inscription (stems in relief on a carved ground) above the windows, and a stalactite cornice at the drum's head
-  bag.add('stucco_warm', lathe([[r + 0.04, 0], [r + 0.04, 0.8]], 32, null, cx, y + dr + 2.2, cz));
+  bag.add('stucco', lathe([[r + 0.04, 0], [r + 0.04, 0.8]], 32, null, cx, y + dr + 2.2, cz));
   bag.add(S, lathe([[r + 0.04, 0.15], [r + 0.04, 0.65]], 96, (t) => 1 + 0.012 * Math.sign(Math.cos(t * 48 + 0.4)) * (Math.cos(t * 7) > -0.6 ? 1 : 0), cx, y + dr + 2.2, cz));
   for (let k = 0; k < 2; k++) { const n = 44 - k * 4; for (let i = 0; i < n; i++) { const th = (i + (k % 2) * 0.5) / n * TAU, w = r * Math.PI / n * 0.8; bag.add(S, place(box(0, 0, -w, 0.6 - k * 0.2, 0.3, w), cx + Math.cos(th) * (r - 0.02), yT - 0.3 * (k + 1), cz + Math.sin(th) * (r - 0.02), -th)); } }
   bag.add(S, lathe([[r * 1.06, 0], [r * 1.06, 0.2], [r * 0.99, 0.2], [r * 0.99, 0]], 32, null, cx, yT - 0.05, cz));
