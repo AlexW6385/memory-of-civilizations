@@ -160,6 +160,25 @@ obj('sakhra', 0, 0, 0, { rx: 6.4, rz: 8.6, h: 1.5 });
   obj('mihrab', cx, cz + RO * Math.cos(Math.PI / 11) - 0.75, 0, { w: 1.3, h: 2.6, d: 0.45 });
 }
 
+// ── the furnishing: the chain and its crown of lamps, lamps in the arcades, curtains, carpets, censers (docs/settlements/jerusalem.md §1g) ──
+add({ t: 'dotr_corona', at: [0, 0], hook: SPR + 10.5 - 0.05, y: 13.3, r: 1.7, n: 16 });
+for (let k = 0; k < 8; k++) {
+  // a glass lamp on a chain from the tie-beam in the middle of each arch of the octagonal arcade (two in the middle one)
+  const s = side(k, AA), bay = (s.L - 1.6) / 3;
+  for (let i = 0; i < 3; i++) { const uc = 0.8 + bay * (i + 0.5); add({ t: 'lamp_chain', at: [s.o[0] + s.u[0] * uc, s.o[1] + s.u[1] * uc], y: 5.75, drop: 1.2, n: i === 1 ? 2 : 1, dir: s.n }); }
+  // two carpets along each side of the outer ambulatory, the door's bay left free
+  const c = side(k, 20.3), half = c.L / 2;
+  for (const [a, b] of [[1.7, half - 2.3], [half + 2.3, c.L - 1.7]]) { const m = (a + b) / 2; add({ t: 'dotr_carpet', at: [c.o[0] + c.u[0] * m, c.o[1] + c.u[1] * m], along: c.u, len: b - a, wid: 2.0 }); }
+}
+for (let k = 0; k < 16; k++) {
+  const a = slot(k), b = slot(k + 1), am = (a + b) / 2;
+  // a lamp from the ring beam in each arch of the circular arcade; a curtain woven with gold, in two panels, in every other one (not where the steps go down to the cave)
+  add({ t: 'lamp_chain', at: [Math.cos(am) * (RC + 0.05), Math.sin(am) * (RC + 0.05)], y: 5.6, drop: 1.0, n: 1, dir: [Math.cos(am), Math.sin(am)] });
+  if (k % 2 === 1 && k !== 1) add({ t: 'dotr_curtains', a: [Math.cos(a) * RC, Math.sin(a) * RC], b: [Math.cos(b) * RC, Math.sin(b) * RC], y0: 0.25, y1: 5.7, s0: 0.95, w: 0.7, mat: k % 4 === 1 ? 'cloth_maroon' : 'cloth_green' });
+}
+for (let k = 0; k < 4; k++) { const a = (45 + 90 * k) * D2R; add({ t: 'censer', at: [Math.cos(a) * 12.9, Math.sin(a) * 12.9], y: 0.03 }); }
+for (const [x, z] of [[14.2, 0], [-14.2, 0], [0, 14.2], [0, -14.2]]) add({ t: 'lamp', at: [x, 4.4, z], intensity: 3, distance: 10 });
+
 // ── rooms and walks ──────────────────────────────────────────────────────────
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [

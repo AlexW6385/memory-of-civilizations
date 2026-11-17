@@ -2,7 +2,7 @@
 // near the street from the west gate to the Haram open, their rooms walkable and furnished, with the life of
 // the house (life.js).
 import { RADIUS, HARAM, LODGES, lots, height } from './layout.js';
-import { houseLife, pilgrims, lodgeLife, lodgeFront } from './life.js';
+import { houseLife, pilgrims, lodgeLife, lodgeFront, domeLife } from './life.js';
 const base = (id, elements, style = 'islamic') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-180, 0], facing: 'e' } });
 /** The lots of the open houses: north of the street to the Haram (their doors to the south, toward it), nearest its stair. */
 export function openLots() {
@@ -19,6 +19,6 @@ export async function houses() {
   // the lodges of the Haram's servants on the esplanade: open, furnished by use (layout.js LODGES)
   plans.push(base('jerusalem-lodges', [...LODGES.map((l) => ({ t: 'levant_house', rect: l.rect, seed: l.seed, y: HARAM.top, y1: HARAM.top, ys: HARAM.top, open: true })), ...lodgeFront()]));
   plans.push(base('jerusalem-lodge-life', lodgeLife(), 'life'));
-  plans.push(base('jerusalem-house-life', [...houseLife([...open].map(el)), ...pilgrims()], 'life'));
+  plans.push(base('jerusalem-house-life', [...houseLife([...open].map(el)), ...pilgrims(), ...domeLife()], 'life'));
   return plans;
 }
