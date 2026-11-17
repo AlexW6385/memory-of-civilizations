@@ -7,6 +7,7 @@
 import { registerStyle, orientedBox, subtractRects } from '../../core/build.js';
 import { box, lathe, frustum, fromTriangles, orientOutward } from '../../core/geom.js';
 import makeDress from './dress.js';
+import makeHouses from './houses.js';
 
 const BR = 'brick', BRB = 'brick_baked', PL = 'lime_plaster', TB = 'timber';
 
@@ -637,8 +638,9 @@ function votives(el, ctx) { for (const [x, z, s] of el.at) votiveStupa(ctx, x, z
 function brickWall(el, ctx) { wallGaps(ctx, el.a, el.b, el.th ?? 0.7, -0.2, el.h ?? 2.6, el.holes || [], BR); if (el.cap !== false) ctx.bag.add(BRB, orientedBox(el.a, el.b, (el.th ?? 0.7) + 0.2, el.h ?? 2.6, (el.h ?? 2.6) + 0.15, 0.1)); }
 
 const D = makeDress({ B, wallGaps, votiveStupa, buddha });
+const HS = makeHouses({ votiveStupa });
 registerStyle('nalanda', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { monastery, temple, tower, tank, votives, brick_wall: brickWall, ...D },
+  elements: { monastery, temple, tower, tank, votives, brick_wall: brickWall, ...D, ...HS },
   objects: {},
 });
