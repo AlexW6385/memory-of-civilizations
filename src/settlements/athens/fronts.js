@@ -7,6 +7,7 @@
 import { lots, height, OPEN_CORES } from './layout.js';
 import { frame } from '../../styles/greek/agora.js';
 import { kindOf } from '../../styles/greek/ward.js';
+import { houseLife } from './houses.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -81,6 +82,7 @@ export function crossings() {
 export function openLife() {
   const E = [], R = rng(55), sd = () => Math.floor(R() * 1e9);
   lots().filter((l) => l.open).forEach((l, k) => {
+    if (l.kind && l.kind !== 'simon') { E.push(...houseLife(l)); return; }
     const [X0, Z0, , Z1] = l.rect, y = l.y;
     if (k % 6 !== 1) E.push({ t: 'figure', at: [X0 + 3.9, Z0 + 2.5], y, rot: 0, seed: sd(), skin: 'skin_medium', dress: 'tunic', legs: 'bare', cloth: ['cloth_brown', 'linen', 'cloth_ochre', 'cloth_grey'][k % 4], over: 'belt', hair: 'short', beard: 0.9, hat: 'none', feet: 'bare', pose: 'stand' });
     else E.push({ t: 'figure', at: [X0 + 1.42, Z0 + 3.25], y, rot: 0, seed: sd(), skin: 'skin_medium', dress: 'tunic', legs: 'bare', cloth: 'cloth_brown', over: 'belt', hair: 'short', beard: 1, hat: 'none', feet: 'bare', pose: 'sit_low' });

@@ -84,10 +84,12 @@ export function lotAt(x, z, m = 0) {
 }
 export const SIMON = [-291, -107, -278, -93];
 /** The points the open (walk-in) houses crowd round: the arrival, the Way and the Agora's edges, the road under the theatre. */
-export const OPEN_CORES = [[-300, 70], [-262, 36], [-215, 20], [-200, 52], [-310, -60], [-330, -120], [-150, -150], [-195, -92], [-120, -20], [-60, 105], [60, 205]];
+export const OPEN_CORES = [[-300, 70], [-262, 36], [-215, 20], [-200, 52], [-310, -60], [-330, -120], [-150, -150], [-195, -92], [-120, -20], [-60, 105], [60, 205], [-250, 200], [-120, 160], [150, -40], [100, -200], [-30, -250], [-180, -330], [200, 150], [-340, -230]];
 // the way the houses stand: the blocks are bands 27.4 m deep, two rows of houses back to back (the northern faces the lane on the
 // north, the southern the lane on the south), lanes 3.6 m between the bands; along a band the houses stand wall to wall in runs
 // of three to five, a cross-lane of 3.4 m between the runs; along the Way and the ramp the houses face the road itself (§5c)
+const HOUSE_KINDS = ['simon', 'pastas', 'workshop', 'small', 'pastas', 'small', 'workshop', 'pastas'];
+const KIND_SIZE = { simon: [13, 14], pastas: [13.6, 15], small: [11.4, 15], workshop: [14, 15] };
 const BAND = 27.4, LANE = 3.6, XLANE = 3.4;
 const OFF = (p, r) => Math.hypot(...[p[0] - r[0], p[1] - r[1]]);
 function blockedPt(x, z, loose) {
@@ -146,8 +148,9 @@ export function lots() {
     for (let x = -RADIUS + 18; x < RADIUS - 30;) {
       const run = 3 + Math.floor(rand() * 3);
       for (let k = 0; k < run; k++) {
-        const wantOpen = open < 26 && near(x + 6.5, zb + 7) < 80 + rand() * 90 && rand() < 0.42;
-        const w = wantOpen ? 13 : 10.5 + rand() * 4, dA = wantOpen ? 14 : 11 + rand() * 4, dB = BAND - dA;
+        const wantOpen = open < 44 && near(x + 6.5, zb + 7) < 80 + rand() * 90 && rand() < 0.42;
+        const kind = HOUSE_KINDS[open % HOUSE_KINDS.length], sz = wantOpen ? KIND_SIZE[kind] : null;
+        const w = wantOpen ? sz[0] : 10.5 + rand() * 4, dA = wantOpen ? sz[1] : 11 + rand() * 4, dB = BAND - dA;
         const rA = [x, zb, x + w, zb + dA], rB = [x, zb + dA, x + w, zb + BAND];
         const cx = x + w / 2;
         for (const [r, front, isOpen] of [[rA, 'n', wantOpen], [rB, 's', false]]) {
@@ -155,7 +158,7 @@ export function lots() {
           const [g0, g1] = groundOf(r);
           if (g1 - g0 > 3.2 || rand() < 0.06) continue;
           if (isOpen) open++;
-          push({ rect: r, front, seed: Math.floor(rand() * 1e6), y: g0, fall: g1 - g0, open: isOpen });
+          push({ rect: r, front, seed: Math.floor(rand() * 1e6), y: g0, fall: g1 - g0, open: isOpen, kind: isOpen ? kind : undefined });
         }
         x += w + 0.12; void cx;
       }
