@@ -42,10 +42,17 @@ export async function town() {
       const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
       const cuts = G.filter((g) => g[0] === side).map((g) => [Math.max(0, g[1]), Math.min(L, g[2])]).sort((p, q) => p[0] - q[0]);
       let u = 0;
+      const q1ok = (p, r) => r - p > 3;
       const seg = (u0, u1) => {
         if (u1 - u0 < 1.2) return;
         E.push({ t: 'islet_wall', a: [a[0] + ux * u0, a[1] + uz * u0], b: [a[0] + ux * u1, a[1] + uz * u1], out: [nx, nz], seed: seed++, ends: [u0 < 0.01 ? 0.45 : 0, u1 > L - 0.01 ? 0.45 : 0] });
         E.push({ t: 'wall_dress', a: [a[0] + ux * u0, a[1] + uz * u0], b: [a[0] + ux * u1, a[1] + uz * u1], out: [nx, nz], seed: seed + 5000 });
+        // the foundation: heavy boulders in the canal at the wall's foot, half out of the water (stated: NRHP, boulders under the walls); none by the landings where canoes lie
+        { const lan = (LANDINGS[s.id] ?? []).filter((q) => q[0] === side).map((q) => q[1]);
+          let q0 = u0; const spans = [];
+          for (const lu of lan.sort((p, r) => p - r)) { if (lu + 9 < q0 || lu - 9 > u1) continue; if (lu - 9 > q0) spans.push([q0, lu - 9]); q0 = Math.max(q0, lu + 9); }
+          if (q1ok(q0, u1)) spans.push([q0, u1]);
+          for (const [s0, s1] of spans) E.push({ t: 'boulder_foot', a: [a[0] + ux * s0, a[1] + uz * s0], b: [a[0] + ux * s1, a[1] + uz * s1], out: [nx, nz], off: 0.85, jit: 0.3, size: 1.1, y0: -2.55, h: 1.7, margin: 1.0, beds: false, seed: seed + 9000 }); }
       };
       for (const [c0, c1] of cuts) { seg(u, c0); u = Math.max(u, c1); }
       seg(u, L);

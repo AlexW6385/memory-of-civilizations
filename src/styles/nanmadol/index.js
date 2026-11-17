@@ -13,6 +13,7 @@ import { canoe } from './canoe.js';
 import { yard, works, tomb_court, wall_dress, post, weir, things } from './dress.js';
 import { plants, taro_bed } from './plants.js';
 import { court } from './court.js';
+import { boulder_foot } from './foot.js';
 
 const TH = 'thatch_palm', ROPE = 'rope_fibre', WOOD = 'palm_trunk';
 const dirOf = (yaw) => { const dx = Math.round(Math.sin(yaw)), dz = Math.round(Math.cos(yaw)); return dz > 0 ? 's' : dz < 0 ? 'n' : dx > 0 ? 'e' : 'w'; };
@@ -53,10 +54,20 @@ function steps(el, { bag }) {
 }
 /** ford { c, axis, len, w }: the kerb of columns along both sides of a causeway across a canal, awash at its middle. */
 function ford(el, { bag }) {
-  const [x, z] = el.c, hl = Math.max(0.5, el.len / 2 - 2.8), w = el.w / 2 + 0.25, top = -0.78;
+  const [x, z] = el.c, hl = Math.max(0.5, el.len / 2 - 2.8), w = el.w / 2 + 0.25, top = -0.78, r = 0.2, c = r * Math.sqrt(3) + 0.03;
   for (const s of [-1, 1]) {
-    if (el.axis === 'x') bag.add('granite_black', box(x - hl, -2.2, z + s * w - 0.2 + (s > 0 ? 0.0 : 0), x + hl, top, z + s * w + 0.2));
-    else bag.add('granite_black', box(x + s * w - 0.2, -2.2, z - hl, x + s * w + 0.2, top, z + hl));
+    // the kerb: two courses of columns laid along the causeway's edge, the lower a little proud, their heads showing at the ends, a core of rubble behind
+    if (el.axis === 'x') bag.add('coral_rag', box(x - hl, -2.2, z + s * w - 0.2, x + hl, top - 0.05, z + s * w + 0.2));
+    else bag.add('coral_rag', box(x + s * w - 0.2, -2.2, z - hl, x + s * w + 0.2, top - 0.05, z + hl));
+    for (let k = 0; k < 2; k++) {
+      const y = top - r - k * c, off = s * (w + 0.2 - (r * 0.866) + 0.02 + (k ? 0.03 : 0));
+      for (let u = -hl, i = 0; u < hl - 0.3; i++) {
+        const len = Math.min(hl - u, [1.8, 2.2, 2.6][(i + k) % 3]);
+        if (el.axis === 'x') laid(bag, ROCK[(i + k) & 3], len, x + u, y, z + off, 1, 0, 120, r);
+        else laid(bag, ROCK[(i + k) & 3], len, x + off, y, z + u, 0, 1, 120, r);
+        u += len + 0.02;
+      }
+    }
   }
 }
 
@@ -124,6 +135,23 @@ function nah(el, { bag, col, lights }) {
   put('dolerite_spotted', box(-w / 2 - 0.2, 0, -l / 2 - 0.2, w / 2 + 0.2, 0.2, l / 2 + 0.2));
   put('coral_rag', box(-w / 2 - 0.15, ph - 0.12, -l / 2 - 0.15, w / 2 + 0.15, ph, l / 2 + 0.15));
   put('reed_mat', box(-w / 2 + 0.1, ph, -l / 2 + 0.1, w / 2 - 0.1, ph + 0.025, l / 2 - 0.1));
+  // the platform's faces: courses of laid basalt prisms, stretchers on the long faces in one course and on the short faces in the next, the ends of each course running 0.1 m past the corner like a log cabin's [stated: stacked basalt, Univ. of Oregon; the prisms' sizes inferred]
+  { const pr = 0.095, nC = Math.max(2, Math.round((ph - 0.12) / 0.165)), sp = (ph - 0.12) / nC, W = w / 2 + 0.15, Lh = l / 2 + 0.15, ca = Math.cos(el.yaw ?? 0), sa = Math.sin(el.yaw ?? 0);
+    const run = (u0, v0, u1, v1, y, k, outU, outV) => {
+      const Ls = Math.hypot(u1 - u0, v1 - v0), du = (u1 - u0) / Ls, dv = (v1 - v0) / Ls, X = (u, v) => F.W(u, v);
+      let s = 0, i = 0;
+      while (s < Ls - 0.35) {
+        const want = [1.2, 1.6, 2.0][(k + i * 2 + ((el.seed ?? 0) >> 3)) % 3], len = Math.max(0.6, Math.min(want, Math.round((Ls - s) * 5) / 5));
+        const p = X(u0 + du * s + outU * (0.05 - pr * 0.866), v0 + dv * s + outV * (0.05 - pr * 0.866)), d = [du * ca + dv * sa, -du * sa + dv * ca];
+        laid(bag, ROCK[(i + k) & 3], len, p[0], y, p[1], d[0], d[1], 70, pr);
+        s += len + 0.01; i++;
+      }
+    };
+    for (let k = 0; k < nC; k++) {
+      const y = (k + 0.5) * sp, e = 0.1;
+      if (k % 2 === 0) { run(-W - e, -Lh, W + e, -Lh, y, k, 0, -1); run(-W - e, Lh, W + e, Lh, y, k + 1, 0, 1); }
+      else { run(-W, -Lh - e, -W, Lh + e, y, k, -1, 0); run(W, -Lh - e, W, Lh + e, y, k + 1, 1, 0); }
+    } }
   // posts at the corners and the middle of the long sides, the front two taller carrying the beam
   const px = [-w / 2 + 0.2, w / 2 - 0.2], pz = [-l / 2 + 0.2, 0, l / 2 - 0.2];
   for (const x of px) for (const z of pz) put(WOOD, lathe([[0.075, 0], [0.07, eave - ph + 0.4]], 7, null, x, ph, z));
@@ -137,6 +165,10 @@ function nah(el, { bag, col, lights }) {
   const W2 = w + 2 * ov, L2 = l + 2 * ov, inset = (W2 - 0.4) / 2, rise = inset * 0.85;
   const zi = Math.min(inset * 0.9, (L2 - 0.6) / 2);
   put(TH, frustum([-W2 / 2, -L2 / 2, W2 / 2, L2 / 2], eave - 0.35, eave + rise, inset, inset, zi, zi));
+  // the thatch laid in courses: four overlapping lips down the hip, each a row of sewn frondlets standing 7 cm proud of the slope below [stated: frondlets sewn in rows over rafters, Dana Lee Ling; the row spacing inferred]
+  for (const t0 of [0.12, 0.34, 0.56, 0.78]) { const t1 = t0 + 0.13; put(TH, frustum([-W2 / 2 + t0 * inset - 0.07, -L2 / 2 + t0 * zi - 0.07, W2 / 2 - t0 * inset + 0.07, L2 / 2 - t0 * zi + 0.07], eave - 0.35 + t0 * (rise + 0.35), eave - 0.35 + t1 * (rise + 0.35), (t1 - t0) * inset + 0.07, (t1 - t0) * inset + 0.07, (t1 - t0) * zi + 0.07, (t1 - t0) * zi + 0.07, { noTop: true })); }
+  // a ridge finial by rule (every third house): crossed poles at the ridge's ends
+  if ((el.seed ?? 0) % 3 === 0) for (const sg of [-1, 1]) { const zE = sg * ((L2 - 2 * zi) / 2 + 0.1), top = eave + rise + 0.15; put('timber', rod([-0.3, top, zE], [0.3, top + 0.6, zE], 0.022, 4)); put('timber', rod([0.3, top, zE], [-0.3, top + 0.6, zE], 0.022, 4)); }
   put(TH, box(-0.18, eave + rise - 0.02, -(L2 - 2 * zi) / 2 - 0.1, 0.18, eave + rise + 0.2, (L2 - 2 * zi) / 2 + 0.1));
   // inside: a mat and a headrest log, the back wall's bench for the chief
   put('reed_mat', box(-w / 2 + 0.7, ph + 0.025, -0.4, w / 2 - 0.9, ph + 0.05, 0.9));
@@ -243,7 +275,7 @@ function pile(el, { bag }) {
 
 registerStyle('nanmadol', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { crib_wall, islet_wall, steps, ford, tomb, nah, cookhouse, canoe, mangrove, sakau, pile, yard, works, things, tomb_court, wall_dress, post, weir, plants, taro_bed, court },
+  elements: { crib_wall, islet_wall, steps, ford, tomb, nah, cookhouse, canoe, mangrove, sakau, pile, yard, works, things, tomb_court, wall_dress, post, weir, plants, taro_bed, court, boulder_foot },
   objects: {},
 });
 export { canoe };
