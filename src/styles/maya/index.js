@@ -10,14 +10,15 @@ import { registerStyle, STYLES, subtractRects } from '../../core/build.js';
 import { venusPanelKit, jawsPanelKit, cornice } from './venus.js';
 import { hearthKit, ollaKit, metateKit, waterJarKit, bedKit, storeJarKit, put } from './household.js';
 import { mesoPlants } from './plants.js';
-import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
+import { box, lathe, fromTriangles, orientOutward, place } from '../../core/geom.js';
 import '../qing/index.js';
 import { beamTris, flipTris } from '../ming/index.js';
-import { serpentHeadKit, chaacKit, chacmoolKit, warriorPanelKit, Kit } from './meso.js';
+import { serpentHeadKit, chaacKit, chacmoolKit, warriorPanelKit, Kit, carved } from './meso.js';
 import { emitFrame, ballPanelKit, ringKit, jaguarThroneKit } from './ballcourt.js';
 import { warriorsInterior, mOffering } from './sanctuary.js';
 import { mayaTownElements } from './town.js';
 import { castilloInterior } from './interior.js';
+import { terracePanelKit, friezePanelKit, merlonKit } from './facade.js';
 
 const L = 'limestone_maya';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -73,15 +74,18 @@ function mPyramid(el, { bag, col }) {
         cornice(len, ch).emit(bag, x, y0 + th * 0.9, z, fx, fz);
       }
     } else if (!el.simple) {
-      const pw = 2.2, py0 = y0 + th * 0.6, py1 = y0 + th * 0.86, d = ap - step * 0.04 + 0.05;
-      for (const [fx, fz] of [[0, -1], [0, 1], [1, 0], [-1, 0]]) {
-        const mm = Math.floor((2 * d) / (pw + 0.9));
-        for (let i = 0; i < mm; i++) {
-          const u = -d + (i + 0.5) * (2 * d) / mm;
-          if (Math.abs(u) < sw + bw + pw / 2 + 0.3) continue;
-          const [qx, qz] = fz ? [cx + u, cz + fz * d] : [cx + fx * d, cz + u];
-          const t = 0.2, d0 = 0.15, bar = (u0, u1, v0, v1) => bag.add(L, fz ? box(qx + u0, v0, qz - d0, qx + u1, v1, qz + d0) : box(qx - d0, v0, qz + u0, qx + d0, v1, qz + u1));
-          bar(-pw / 2, pw / 2, py0, py0 + t); bar(-pw / 2, pw / 2, py1 - t, py1); bar(-pw / 2, -pw / 2 + t, py0 + t, py1 - t); bar(pw / 2 - t, pw / 2, py0 + t, py1 - t);
+      const ph = th * 0.3, py0 = y0 + th * 0.58, pd = ap - step * 0.04 - 0.002, edge = sw + bw + 0.3;
+      const pw = 2.6, gap = 0.7, kit = terracePanelKit(pw, ph), stairs = el.stairs || 'nesw';
+      for (const [k, [fx, fz]] of Object.entries(sides)) {
+        const runs = stairs.includes(k) ? [[edge, pd - 0.5], [-(pd - 0.5), -edge]] : [[-(pd - 0.5), pd - 0.5]];
+        for (const [r0, r1] of runs) {
+          const room = r1 - r0, mm = Math.floor((room + gap) / (pw + gap));
+          if (mm < 1) continue;
+          const span = mm * pw + (mm - 1) * gap, u0 = r0 + (room - span) / 2 + pw / 2;
+          for (let i = 0; i < mm; i++) {
+            const u = u0 + i * (pw + gap);
+            kit.emit(bag, fz ? cx + u : cx + fx * pd, py0, fz ? cz + fz * pd : cz + u, fx, fz);
+          }
         }
       }
     }
@@ -134,17 +138,23 @@ function mPyramid(el, { bag, col }) {
  * tail bent out at the top under the lintel, its rattles turned up.
  */
 function serpentColumn(bag, x, z, [dx, dz], y, H) {
-  const k = new Kit(), top = H - 0.55;
-  k.bx(L, -0.42, 0.42, 0.9, top, -0.42, 0.42);                                                         // the body
-  for (let yy = 1.2; yy < top - 0.2; yy += 0.42) {                                                     // the bands of feathers
-    k.bx('stucco_red', -0.46, 0.46, yy, yy + 0.12, -0.46, 0.46);
-    k.fz(L, [-0.36, 0.36, yy + 0.12, yy + 0.3], [-0.3, 0.3, yy + 0.12, yy + 0.22], 0.42, 0.5);
-  }
-  k.bx(L, -0.46, 0.46, top, H, -0.6, 0.62);                                                            // the tail, bent out under the lintel
-  k.fz(L, [-0.4, 0.4, top + 0.05, H], [-0.32, 0.32, top + 0.12, H], 0.62, 1.2);
-  for (let i = 0; i < 4; i++) { const zz = 0.72 + i * 0.13; k.bx('stucco_red', -0.44 + i * 0.02, 0.44 - i * 0.02, top + 0.02, H - 0.03, zz, zz + 0.06); }   // the rattles
+  const k = new Kit(), top = H - 0.7, hw = 0.5, nb = Math.floor((top - 1.1) / 0.36);
+  k.bx(L, -hw, hw, 0.9, top, -hw, hw);                                                                 // the body, a square shaft
+  k.bx(L, -hw - 0.06, hw + 0.06, 0.9, 1.0, -hw - 0.06, hw + 0.06);                                     // its plinth
+  k.bx(L, -hw - 0.04, hw + 0.04, top, H, -0.62, hw + 0.04);                                            // the tail, bent out under the lintel
+  k.fz(L, [-0.44, 0.44, top + 0.05, H], [-0.36, 0.36, top + 0.14, H], 0.5, 1.3);
+  for (let i = 0; i < 5; i++) { const zz = 0.6 + i * 0.14, m = 0.025 * i; k.bx('stucco_red', -0.42 + m, 0.42 - m, top + 0.04, H - 0.04, zz, zz + 0.07); k.bx(L, -0.4 + m, 0.4 - m, top + 0.06 + i * 0.012, H - 0.06, zz + 0.07, zz + 0.14); }   // the rattles
+  // the feathers: rows of three tabs on each face, the painted band between the rows (the column is seen from all sides)
+  const fk = carved(`cz-feathers:${nb}`, (f) => {
+    for (let i = 0; i < nb; i++) {
+      const yy = 1.05 + i * 0.36;
+      for (let j = 0; j < 2; j++) { const u = (j - 0.5) * 0.5; f.fz(L, [u - 0.22, u + 0.22, yy + 0.04, yy + 0.3], [u - 0.18, u + 0.18, yy, yy + 0.26], 0, 0.1); }
+      f.bx('stucco_red', -hw, hw, yy + 0.3, yy + 0.36, 0, 0.04);
+    }
+  });
+  for (const [fx, fz] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) for (const [mat, list] of fk.m) for (const g of list) k.geo(mat, place(g.clone(), fx * hw, 0, fz * hw, Math.atan2(fx, fz)));
   k.emit(bag, x, y, z, dx, dz);
-  serpentHead(bag, x + dx * 0.4, z + dz * 0.4, [dx, dz], y, 0.64);
+  serpentHead(bag, x + dx * 0.5, z + dz * 0.5, [dx, dz], y, 0.82);
 }
 
 /**
@@ -166,6 +176,15 @@ function mTemple(el, { bag, col }) {
       beamTris(t, [p[0], y1, p[1]], [q[0], y1, q[1]], wt / 2, wallH);
       bag.add('stucco', fromTriangles(t));
       col.segment(p, q, wt, y1, y1 + wallH);
+      // framed panels with frets on the wall's outer face, between the doorway and the corner
+      const sl = s1 - s0, pw = sl >= 3.4 ? 2.2 : 1.6, nOut = sides[k];
+      if (sl >= 2.6) {
+        const np = Math.max(1, Math.floor((sl - 0.6) / (pw + 0.5))), pk = terracePanelKit(pw, 1.8);
+        for (let i = 0; i < np; i++) {
+          const m = s0 + sl * (i + 0.5) / np;
+          pk.emit(bag, a[0] + ux * m + nOut[0] * (wt / 2), y1 + 0.75, a[1] + uz * m + nOut[1] * (wt / 2), nOut[0], nOut[1]);
+        }
+      }
     }
     if (front && el.serpentCols !== false) for (const s of [-1, 1]) {
       const m = len / 2 + s * door / 6, px = a[0] + ux * m, pz = a[1] + uz * m;
@@ -190,12 +209,21 @@ function mTemple(el, { bag, col }) {
         chaacKit().emit(bag, x, fy0 + 0.18, z, fx, fz, ms);
       }
     }
-  } else bag.add('maya_blue', box(cx - w - 0.25, fy0 + 0.5, cz - d - 0.25, cx + w + 0.25, fy0 + 0.8, cz + d + 0.25));
-  bag.add(L, box(cx - w - 0.3, fy1, cz - d - 0.3, cx + w + 0.3, y1 + h, cz + d + 0.3));
-  for (let i = 0; i < Math.round(w * 2 / 1.2); i++) for (const z of [cz - d, cz + d]) {
-    const x = cx - w + 0.6 + i * 1.2;
-    bag.add('stucco', box(x - 0.3, y1 + h, z - 0.2, x + 0.3, y1 + h + 0.9, z + 0.2));
+  } else {
+    // the Castillo's frieze: a painted fillet, framed panels with frets on a blue field all round
+    bag.add('stucco_red', box(cx - w - 0.24, fy0, cz - d - 0.24, cx + w + 0.24, fy0 + 0.2, cz + d + 0.24));
+    const fh = Math.floor((fy1 - fy0 - 0.5) * 4) / 4, fw = 2.2, fk = friezePanelKit(fw, fh);
+    for (const k of 'nsew') {
+      const [fx, fz] = sides[k], len = (fx ? d : w) * 2, nn = Math.floor((len - 0.4) / (fw + 0.5)), out = (fx ? w : d) + 0.2;
+      for (let i = 0; i < nn; i++) {
+        const u = -len / 2 + len * (i + 0.5) / nn;
+        fk.emit(bag, fx ? cx + fx * out : cx + u, fy0 + 0.3, fx ? cz + u : cz + fz * out, fx, fz);
+      }
+    }
   }
+  bag.add(L, box(cx - w - 0.3, fy1, cz - d - 0.3, cx + w + 0.3, y1 + h, cz + d + 0.3));
+  const mk = merlonKit(), nm = Math.round(w * 2 / 1.2);
+  for (let i = 0; i < nm; i++) for (const z of [cz - d, cz + d]) mk.emit(bag, cx - w + 0.6 + i * 1.2, y1 + h, z, 0, 1);
   // the chacmool before the main doorway, looking out over the stair
   if (el.chacmool) {
     const [fx, fz] = sides[el.doors], off = (fx ? w : d) + 2.0;
@@ -273,7 +301,13 @@ function mBallcourt(el, ctx) {
       emitFrame(ballPanelKit(12, 1.95), bag, O, U, V, N);
     }
     // the ring, high on the wall's middle, its hole facing across the court
-    ringKit().emit(bag, xi + s * 0.03, el.ringY ?? 6.2, zc, -s, 0);
+    const ry = el.ringY ?? 6.2;
+    terracePanelKit(4.2, 4.2).emit(bag, xi, ry - 2.1, zc, -s, 0);                                       // the carved block the ring is set in
+    ringKit().emit(bag, xi - s * 0.1, ry, zc, -s, 0);
+    // the wall's cornice, its painted fillet, over the length of the alley
+    const cx0 = Math.min(xi, xi - s * 0.4), cx1 = Math.max(xi, xi - s * 0.4);
+    bag.add(L, box(cx0, H - 0.6, wz0, cx1, H, wz1));
+    bag.add('stucco_red', box(Math.min(xi, xi - s * 0.41), H - 0.75, wz0, Math.max(xi, xi - s * 0.41), H - 0.6, wz1));
   }
   // the end temples (north and south), on low platforms
   for (const [zt, k] of [[z0 - 8, 'n'], [z1 + 8, 's']]) {
@@ -318,6 +352,25 @@ function ringWithGaps(bag, mat, cx, cz, r0, r1, y0, y1, at, w) {
   for (let i = 0; i < gaps.length; i++) { const a = gaps[i][1], b = i + 1 < gaps.length ? gaps[i + 1][0] : gaps[0][0] + 2 * Math.PI; arcWall(bag, mat, cx, cz, r0, r1, a, b, y0, y1); }
 }
 
+
+/**
+ * Framed panels with frets along the vertical faces of a rectangular platform { c, a, b (the half-sizes at the face), y (the foot of the panels), ph, pw, gap, sides, clear (a half-width left bare on the west
+ * face for its stair) }.
+ */
+function facePanels(bag, [cx, cz], a, b, y, ph, pw, gap, sides, clear) {
+  const kit = terracePanelKit(pw, ph), S = { n: [0, -1, a], s: [0, 1, a], e: [1, 0, b], w: [-1, 0, b] };
+  for (const k of sides) {
+    const [fx, fz] = S[k] ? [S[k][0], S[k][1]] : [0, 0], half = fx ? b : a, off = fx ? a : b;
+    const runs = k === 'w' && clear ? [[-half + 1, -clear], [clear, half - 1]] : [[-half + 1, half - 1]];
+    for (const [r0, r1] of runs) {
+      const room = r1 - r0, mm = Math.floor((room + gap) / (pw + gap));
+      if (mm < 1) continue;
+      const u0 = r0 + (room - (mm * pw + (mm - 1) * gap)) / 2 + pw / 2;
+      for (let i = 0; i < mm; i++) { const u = u0 + i * (pw + gap); kit.emit(bag, fx ? cx + fx * off : cx + u, y, fx ? cz + u : cz + fz * off, fx, fz); }
+    }
+  }
+}
+
 /**
  * m_caracol: El Caracol, the round observatory { c, rot (unused: the stair faces west) }: the lower platform
  * (52 × 67 m, 6 m high) with its broad west stair; the upper platform with its own stair; on it the round base
@@ -328,15 +381,20 @@ function ringWithGaps(bag, mat, cx, cz, r0, r1, y0, y1, at, w) {
 function mCaracol(el, { bag, col }) {
   const [cx, cz] = el.c, H1 = 6, ax = 26, az = 33.5;
   // the lower platform: a battered face, a projecting cornice
-  frust(bag, L, cx, cz, ax, az, ax - 0.5, az - 0.5, 0, H1 - 0.5);
-  frust(bag, L, cx, cz, ax - 0.3, az - 0.3, ax - 0.3, az - 0.3, H1 - 0.5, H1);
+  frust(bag, L, cx, cz, ax, az, ax - 0.3, az - 0.3, 0, 1.6);                              // the battered foot
+  frust(bag, L, cx, cz, ax - 0.3, az - 0.3, ax - 0.3, az - 0.3, 1.6, H1 - 0.6);           // the vertical wall, carrying the panels
+  frust(bag, L, cx, cz, ax - 0.05, az - 0.05, ax - 0.05, az - 0.05, H1 - 0.6, H1);        // the projecting cornice
+  frust(bag, 'stucco_red', cx, cz, ax - 0.07, az - 0.07, ax - 0.07, az - 0.07, H1 - 0.5, H1 - 0.4);   // its painted fillet
+  facePanels(bag, [cx, cz], ax - 0.3, az - 0.3, 2.2, 1.8, 2.2, 1.6, 'nsew', 7.9);
   col.rect([cx - ax, cz - az, cx + ax, cz + az], 0, H1 - 0.31);
   col.floor([cx - ax + 0.3, cz - az + 0.3, cx + ax - 0.3, cz + az - 0.3], H1);
   flight(bag, col, [cx - ax - 24 * 0.3, cz], [1, 0], 14, H1, 24, 0.3, 1.0);
   // the upper platform, set back toward the east, its stair from the west
   const ux = cx + 6, H2 = 4, bx = 12, bz = 13;
-  frust(bag, L, ux, cz, bx, bz, bx - 0.3, bz - 0.3, H1, H1 + H2 - 0.45);
-  frust(bag, L, ux, cz, bx - 0.15, bz - 0.15, bx - 0.15, bz - 0.15, H1 + H2 - 0.45, H1 + H2);
+  frust(bag, L, ux, cz, bx, bz, bx - 0.2, bz - 0.2, H1, H1 + 0.8);
+  frust(bag, L, ux, cz, bx - 0.2, bz - 0.2, bx - 0.2, bz - 0.2, H1 + 0.8, H1 + H2 - 0.45);
+  frust(bag, L, ux, cz, bx - 0.05, bz - 0.05, bx - 0.05, bz - 0.05, H1 + H2 - 0.45, H1 + H2);
+  facePanels(bag, [ux, cz], bx - 0.2, bz - 0.2, H1 + 1.1, 1.8, 2.2, 1.0, 'nsew', 4.8);
   col.rect([ux - bx, cz - bz, ux + bx, cz + bz], H1, H1 + H2 - 0.31);
   col.floor([ux - bx + 0.2, cz - bz + 0.2, ux + bx - 0.2, cz + bz - 0.2], H1 + H2);
   flight(bag, col, [ux - bx - 16 * 0.3, cz], [1, 0], 8, H2, 16, 0.3, 1.0, H1);
@@ -360,6 +418,10 @@ function mCaracol(el, { bag, col }) {
   arcWall(bag, L, ux, cz, Ro - 0.4, Ro + 0.15, 0, 2 * Math.PI, yr - 0.05, yr + 0.25, 64);
   arcWall(bag, 'stucco_red', ux, cz, Ro - 0.4, Ro, 0, 2 * Math.PI, yr + 0.2, yf - 0.25, 64);
   arcWall(bag, L, ux, cz, Ro - 0.4, Ro + 0.2, 0, 2 * Math.PI, yf - 0.3, yf, 64);
+  { // framed frets round the frieze between the masks
+    const fk = friezePanelKit(1.5, yf - 0.25 - (yr + 0.25) - 0.1);
+    for (let i = 0; i < 16; i++) { if (i % 4 === 0) continue; const a = i * Math.PI / 8; fk.emit(bag, ux + Math.cos(a) * (Ro - 0.02), yr + 0.3, cz + Math.sin(a) * (Ro - 0.02), Math.cos(a), Math.sin(a)); }
+  }
   for (const a of card) chaacKit().emit(bag, ux + Math.cos(a) * (Ro - 0.04), yr + 0.28, cz + Math.sin(a) * (Ro - 0.04), Math.cos(a), Math.sin(a), 0.62);
   arcWall(bag, L, ux, cz, 0, Ro - 0.39, 0, 2 * Math.PI, yr - 0.15, yf - 0.05, 48);     // the roof's fill
   col.floor([ux - 3.8, cz - 3.8, ux + 3.8, cz + 3.8], yf - 0.05);
