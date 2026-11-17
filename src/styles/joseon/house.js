@@ -12,12 +12,15 @@ import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { rectRoof, beamTris, latticeBay } from '../ming/index.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-const H = 2.4, C = 2.9, V = 1.0, FL = 0.5;              // wall height over the floor, the rooms' depth, the veranda's depth, the floor's height over the yard
+const H = 2.4, C = 2.9, V = 1.0;                         // wall height over the floor, the rooms' depth, the veranda's depth
+let FL = 0.5;                                            // the floor's height over the yard (the palace halls draw at their own: atFloor)
 
-/** One range { org [x, z] (its back's left end), face ('s' | 'e'), L, kinds: [[kind, bays]...], seed }. */
-function range(bag, col, o) {
-  const { org: [ox, oz], face, L, kinds, seed } = o, rand = rng(seed), along = face === 's';
-  const P = (a, b) => (along ? [ox + a, oz + b] : [ox + b, oz + a]);
+/** Furniture and rooms drawn with the floor at another height (the palace halls): fn runs with FL = y. */
+export function atFloor(y, fn) { const o = FL; FL = y; try { return fn(); } finally { FL = o; } }
+/** One range { org [x, z] (its back's left end), face ('s' | 'e' | 'w'), L, kinds: [[kind, bays]...], seed, thatch, wall (the plaster's material), poor }. */
+export function range(bag, col, o) {
+  const { org: [ox, oz], face, L, kinds, seed } = o, rand = rng(seed), along = face === 's', WALL = o.wall || 'plaster_white';
+  const P = (a, b) => (along ? [ox + a, oz + b] : face === 'w' ? [ox - b, oz + a] : [ox + b, oz + a]);
   const R = (a0, b0, a1, b1) => { const p = P(a0, b0), q = P(a1, b1); return [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; };
   const B = (m, a0, b0, a1, b1, ya, yb, c = false) => { const r = R(a0, b0, a1, b1); bag.add(m, box(r[0], ya, r[1], r[2], yb, r[3])); if (c) col.rect(r, ya, yb); };
   const nb = kinds.reduce((s, k) => s + k[1], 0), bw = L / nb;
@@ -36,7 +39,7 @@ function range(bag, col, o) {
   // ── the back wall and the ends: white papered plaster over a damp-greyed foot ──
   for (const s of spans) {
     const y0 = s.kind === 'kitchen' ? 0 : FL, top = FL + H;
-    B('plaster_white', s.a0, 0, s.a1, 0.22, y0, top, true);
+    B(WALL, s.a0, 0, s.a1, 0.22, y0, top, true);
     B('plaster_damp', s.a0, -0.012, s.a1, 0.0, y0, y0 + 0.45);
     B('timber', s.a0, -0.03, s.a1, 0.0, top - 0.3, top - 0.12);
     // ceiling (papered), a hair under the roof's soffit
@@ -44,7 +47,7 @@ function range(bag, col, o) {
   }
   for (const [ae, sg] of [[0, 1], [L, -1]]) {
     const y0 = ae === 0 && kit ? 0 : FL;
-    B('plaster_white', ae - 0.1, 0, ae + 0.1, C, y0, FL + H, true);
+    B(WALL, ae - 0.1, 0, ae + 0.1, C, y0, FL + H, true);
     B('plaster_damp', ae - 0.11, 0, ae + 0.11, 0.0, y0, y0 + 0.45);
     void sg;
   }
@@ -52,10 +55,10 @@ function range(bag, col, o) {
   for (let i = 1; i < spans.length; i++) {
     const A0 = spans[i - 1], A1 = spans[i], x = A1.a0, lead = A0.kind !== 'kitchen' && A1.kind !== 'kitchen';
     const y0 = A0.kind === 'kitchen' ? 0 : FL;
-    if (!lead) { B('plaster_white', x - 0.1, 0, x + 0.1, C, y0, FL + H, true); continue; }
-    B('plaster_white', x - 0.1, 0, x + 0.1, C - 1.5, FL, FL + H, true);
-    B('plaster_white', x - 0.1, C - 0.55, x + 0.1, C, FL, FL + H, true);
-    B('plaster_white', x - 0.1, C - 1.5, x + 0.1, C - 0.55, FL + 1.78, FL + H);
+    if (!lead) { B(WALL, x - 0.1, 0, x + 0.1, C, y0, FL + H, true); continue; }
+    B(WALL, x - 0.1, 0, x + 0.1, C - 1.5, FL, FL + H, true);
+    B(WALL, x - 0.1, C - 0.55, x + 0.1, C, FL, FL + H, true);
+    B(WALL, x - 0.1, C - 1.5, x + 0.1, C - 0.55, FL + 1.78, FL + H);
     for (const bb of [C - 1.5, C - 0.55]) B('timber', x - 0.12, bb - 0.03, x + 0.12, bb + 0.03, FL, FL + 1.78);
     B('timber', x - 0.12, C - 1.55, x + 0.12, C - 0.5, FL + 1.74, FL + 1.8);
   }
@@ -101,11 +104,13 @@ function range(bag, col, o) {
   // ── the roof ──
   const r = R(-0.0, -0.0, L, C + V), thatch = !!o.thatch;
   const w = r[2] - r[0] + 1.8, d = r[3] - r[1] + 1.8;
-  rectRoof({ c: [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2], A: (along ? w : d) / 2, B: (along ? d : w) / 2, y: FL + H - 0.05, rise: Math.min(w, d) * 0.42, kind: 'xieshan', sweep: 0.6, p: 1.5, alongZ: !along, mat: thatch ? 'thatch' : 'tile_grey', soffit: 'timber', curl: false }, bag);
+  rectRoof({ c: [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2], A: (along ? w : d) / 2, B: (along ? d : w) / 2, y: FL + H - 0.05, rise: Math.min(w, d) * (thatch ? 0.5 : 0.42), kind: 'xieshan', sweep: 0.6, p: 1.5, alongZ: !along, mat: thatch ? 'thatch' : 'tile_grey', soffit: 'timber', curl: false }, bag);
   // ── what is in the rooms ──
   const ctx = { bag, col, P, R, B, rand };
   for (const s of spans) {
     if (s.kind === 'kitchen') kitchen(ctx, s);
+    else if (o.poor && s.kind === 'daecheong') poorHall(ctx, s);
+    else if (o.poor) poorRoom(ctx, s);
     else if (s.kind === 'anbang') anbang(ctx, s);
     else if (s.kind === 'sarangbang') sarangbang(ctx, s);
     else if (s.kind === 'daecheong') hall(ctx, s);
@@ -121,8 +126,8 @@ function bandaji(ctx, a, b, w = 0.9, dpt = 0.42, h = 0.78, y = FL) {
   B('wood_dark', a - w / 2, b, a + w / 2, b + dpt, y, y + 0.06);
   B('timber', a - w / 2, b, a + w / 2, b + dpt, y + 0.06, y + h, true);
   B('wood_dark', a - w / 2 - 0.02, b - 0.02, a + w / 2 + 0.02, b + dpt + 0.02, y + h, y + h + 0.04);
-  B('gilt_bronze', a - 0.07, b - 0.02, a + 0.07, b + 0.0, y + h * 0.5, y + h * 0.5 + 0.14);        // the lock plate (front is at lower b; face toward −b? see callers)
-  for (const dx of [-w / 2 + 0.12, w / 2 - 0.12]) B('gilt_bronze', a + dx - 0.02, b - 0.015, a + dx + 0.02, b + 0.0, y + h * 0.35, y + h - 0.1);
+  B('gilt_bronze', a - 0.07, b + dpt, a + 0.07, b + dpt + 0.02, y + h * 0.5, y + h * 0.5 + 0.14);        // the lock plate, on the face toward the room (+b)
+  for (const dx of [-w / 2 + 0.12, w / 2 - 0.12]) B('gilt_bronze', a + dx - 0.02, b + dpt, a + dx + 0.02, b + dpt + 0.015, y + h * 0.35, y + h - 0.1);
 }
 /** A two-tier chest (ichungjang): two stacked boxes, a lacquered black with inlaid mother-of-pearl bands. */
 function twoTier(ctx, a, b, w = 0.95, dpt = 0.46) {
@@ -130,11 +135,11 @@ function twoTier(ctx, a, b, w = 0.95, dpt = 0.46) {
   B('wood_dark', a - w / 2, b, a + w / 2, b + dpt, FL, FL + 0.1);
   B('lacquer_black', a - w / 2, b, a + w / 2, b + dpt, FL + 0.1, FL + 0.72, true);
   B('lacquer_black', a - w / 2 + 0.03, b + 0.02, a + w / 2 - 0.03, b + dpt - 0.02, FL + 0.74, FL + 1.28, true);
-  B('shell_inlay', a - w / 2 + 0.05, b - 0.012, a + w / 2 - 0.05, b, FL + 0.18, FL + 0.24);
-  B('shell_inlay', a - w / 2 + 0.05, b - 0.012, a + w / 2 - 0.05, b, FL + 0.56, FL + 0.62);
-  B('shell_inlay', a - w / 2 + 0.08, b - 0.012, a + w / 2 - 0.08, b, FL + 0.84, FL + 0.88);
-  B('shell_inlay', a - w / 2 + 0.08, b - 0.012, a + w / 2 - 0.08, b, FL + 1.18, FL + 1.22);
-  for (const dx of [-0.18, 0.18]) B('gilt_bronze', a + dx - 0.04, b - 0.02, a + dx + 0.04, b, FL + 0.38, FL + 0.46);
+  B('shell_inlay', a - w / 2 + 0.05, b + dpt, a + w / 2 - 0.05, b + dpt + 0.012, FL + 0.18, FL + 0.24);
+  B('shell_inlay', a - w / 2 + 0.05, b + dpt, a + w / 2 - 0.05, b + dpt + 0.012, FL + 0.56, FL + 0.62);
+  B('shell_inlay', a - w / 2 + 0.08, b + dpt, a + w / 2 - 0.08, b + dpt + 0.012, FL + 0.84, FL + 0.88);
+  B('shell_inlay', a - w / 2 + 0.08, b + dpt, a + w / 2 - 0.08, b + dpt + 0.012, FL + 1.18, FL + 1.22);
+  for (const dx of [-0.18, 0.18]) B('gilt_bronze', a + dx - 0.04, b + dpt, a + dx + 0.04, b + dpt + 0.02, FL + 0.38, FL + 0.46);
 }
 /** Folded bedding (iburi) on a chest or the floor: quilts of red, blue and ochre silk, a pillow. */
 function bedding(ctx, a, b, y, w = 0.9, dpt = 0.45) {
@@ -216,6 +221,33 @@ function bookcase(ctx, a, b, w = 1.0, dpt = 0.34, rows = 3) {
   B('timber', a - w / 2, b, a + w / 2, b + dpt, FL + 0.05 + rows * hh, FL + 0.08 + rows * hh);
 }
 
+
+/** A poor household's room: a straw-mat floor over the ondol, the bedding rolled in a corner, a small chest, a jar of grain, the clay oil lamp on its stand, a basket. */
+function poorRoom(ctx, s) {
+  const { B, bag, P, rand } = ctx, w = s.a1 - s.a0, c = (s.a0 + s.a1) / 2;
+  B('reed_mat', s.a0 + 0.1, 0.22, s.a1 - 0.1, C, FL, FL + 0.02, true);
+  ctx.col.floor(ctx.R(s.a0 + 0.1, 0.22, s.a1 - 0.1, C), FL + 0.02);
+  const left = rand() < 0.5, ea = left ? s.a0 + 0.55 : s.a1 - 0.55, sg = left ? 1 : -1;
+  bedding(ctx, ea + sg * 0.3, 0.28, FL + 0.02, 0.8, 0.38);                                // the quilts folded in the corner
+  bandaji(ctx, ea + sg * 1.45, 0.26, 0.7, 0.36, 0.62);
+  if (w > 3.2) { const [x, z] = P(c + sg * 0.1 + (left ? 0.9 : -0.9), 1.0); bag.add('pottery_dark', lathe([[0.1, 0], [0.19, 0.12], [0.2, 0.3], [0.13, 0.46], [0.1, 0.5], [0.001, 0.5]], 10, null, x, FL + 0.02, z)); }
+  { const [x, z] = P(c - sg * 0.6, 1.7); B('timber', c - sg * 0.6 - 0.12, 1.58, c - sg * 0.6 + 0.12, 1.82, FL + 0.02, FL + 0.06); bag.add('timber', lathe([[0.001, 0], [0.015, 0], [0.015, 0.5], [0.001, 0.5]], 5, null, x, FL + 0.06, z)); bag.add('pottery_dark', lathe([[0.001, 0.5], [0.07, 0.5], [0.08, 0.54], [0.001, 0.52]], 8, null, x, FL + 0.06, z)); }   // the oil lamp
+  B('wicker', c + sg * 0.2, 1.9, c + sg * 0.55, 2.25, FL + 0.02, FL + 0.16);
+}
+/** A poor household's hall (the maru): its boards bare, the sacks of grain, straw sandals on a rack, a jar, the farmer's tools against the back wall. */
+function poorHall(ctx, s) {
+  const { B, bag, P } = ctx, c = (s.a0 + s.a1) / 2;
+  B('planks_grey', s.a0 + 0.05, 0.22, s.a1 - 0.05, C, FL, FL + 0.03, true);
+  ctx.col.floor(ctx.R(s.a0 + 0.05, 0.22, s.a1 - 0.05, C), FL + 0.03);
+  for (let k = 0; k < 3; k++) B('sacking', s.a0 + 0.3 + (k % 2) * 0.5, 0.3 + (k > 1 ? 0.5 : 0), s.a0 + 0.75 + (k % 2) * 0.5, 0.7 + (k > 1 ? 0.5 : 0), FL + 0.03 + (k > 1 ? 0.34 : 0), FL + 0.4 + (k > 1 ? 0.34 : 0), k < 2);
+  for (let k = 0; k < 4; k++) B('rope_fibre', c + 0.2 + k * 0.1, 0.24, c + 0.26 + k * 0.1, 0.32, FL + 1.2, FL + 1.6);        // straw sandals hung on pegs
+  B('timber', c + 0.1, 0.22, c + 0.7, 0.26, FL + 1.55, FL + 1.6);
+  const [x, z] = P(s.a1 - 0.7, 0.7); bag.add('pottery_dark', lathe([[0.16, 0], [0.3, 0.2], [0.33, 0.4], [0.24, 0.62], [0.17, 0.68], [0.001, 0.68]], 10, null, x, FL + 0.03, z)); ctx.col.circle(x, z, 0.32, FL + 0.03, FL + 0.7);
+  B('timber', c - 0.3, 0.22, c - 0.26, 0.26, FL + 0.9, FL + 2.0);                                                              // a hoe and a rake leaning on the wall
+  B('timber', c - 0.1, 0.22, c - 0.06, 0.26, FL + 0.9, FL + 2.0); B('iron', c - 0.36, 0.22, c - 0.2, 0.28, FL + 1.9, FL + 2.0);
+}
+
+export const furn = { floor: () => FL, bandaji, twoTier, bedding, screen, desk, cushion, soban, brazier, lantern, bookcase };
 // ── the rooms ────────────────────────────────────────────────────────────────
 function kitchen({ bag, col, P, R, B }, s) {
   // the stove (agungi) against the wall of the anbang, its fire mouth toward the room's yard side; two iron pots set in clay, a wooden lid
