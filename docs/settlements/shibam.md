@@ -100,7 +100,7 @@ Built in this pass (all in `src/styles/hadhrami/` and `src/settlements/shibam/`)
 1. **Windows and doors with depth** (every house, instanced): frames, hoods, sills, carved shutters, lattice fanlights, carved lintels; the arrival's tower house gets a carved door with its leaf open.
 2. **Parapets**: lime caps with a drip, view ports on the street face.
 3. **The Friday mosque**: pointed lime arches between the piers of the hall (arcades along the rows), a moulded mihrab arch with recess, a rebuilt minaret (three stages, string courses, arched openings, corbelled gallery, lantern, finial).
-4. **Houses entered beyond 120 m**: fourteen ordinary ground floors in the east, west and south of the town, each with one of four fronts by rule and one of five rooms (stable with mangers and beasts, household store, builder's store, bakery, mat-maker's) [inferred: the trades of a ground floor, from the stated uses].
+4. **Houses entered beyond 120 m**: thirteen ordinary ground floors in the east, west and south of the town, each with one of four fronts by rule and one of five rooms (stable with mangers and beasts, household store, builder's store, bakery, mat-maker's) [inferred: the trades of a ground floor, from the stated uses].
 5. **Brickyard** outside the south gate: moulds, rows of bricks drying on edge, a mud pit and trough, straw heaps, a donkey, workers [inferred: layout; the process is stated].
 
 Level reached: L2, parts of L3 (windows, doors, minaret, far interiors). Still missing for L3: the carved interior ceilings and wardrobe doors of the upper rooms of ordinary houses (only the one enterable house has upper floors), polished-lime decoration on the palace, weathering by streets (damp lines) beyond the arrival's quarter.
