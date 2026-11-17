@@ -40,12 +40,13 @@ function dress() {
     const v0 = l.court ? -0.55 : -0.62;
     // pots by the door
     const kinds = ['pithos', 'amphora', 'water_pot', 'dark_pot'];
-    if (l.kind !== 'cult') put('pot', at(du + side * (dw / 2 + 0.75), v0), 0, { kind: kinds[Math.floor(rand() * 4)], n: 1 + Math.floor(rand() * 3) });
-    if (rand() < 0.55) put('pot', at(du - side * (dw / 2 + 0.7), v0 - 0.1), 0, { kind: rand() < 0.5 ? 'water_pot' : 'amphora', n: 2 });
-    if (rand() < 0.55) { const uu = du - side * (dw / 2 + 1.9); if (near(uu)) put('bench', at(uu, v0 - 0.1), fr.rot, { len: 1.5, mat: 'mudbrick' }); }
+    const porch = l.front === 'porch';
+    if (l.kind !== 'cult' && !porch) put('pot', at(du + side * (dw / 2 + 0.75), v0), 0, { kind: kinds[Math.floor(rand() * 4)], n: 1 + Math.floor(rand() * 3) });
+    if (rand() < 0.55 && !porch) put('pot', at(du - side * (dw / 2 + 0.7), v0 - 0.1), 0, { kind: rand() < 0.5 ? 'water_pot' : 'amphora', n: 2 });
+    if (rand() < 0.55 && !porch) { const uu = du - side * (dw / 2 + 1.9); if (near(uu)) put('bench', at(uu, v0 - 0.1), fr.rot, { len: 1.5, mat: 'mudbrick' }); }
     if (rand() < 0.5) { const uu = side > 0 ? W - 1.1 : 1.1; if (near(uu)) put('firewood', at(uu, v0 + 0.1), fr.rot, { len: 1.2 }); }
     if (rand() < 0.5) { const uu = du + side * (dw / 2 + 2.0); if (near(uu)) put(rand() < 0.5 ? 'basket' : 'sacks', at(uu, v0), fr.rot, { n: 2 }); }
-    if (W > 7 && rand() < 0.3) put('laundry', at(W / 2 + (rand() - 0.5), -1.25), fr.rot, { len: 3 });
+    if (W > 7 && rand() < 0.3 && !porch) put('laundry', at(W / 2 + (rand() - 0.5), -1.25), fr.rot, { len: 3 });
     if (rand() < 0.28) { const uu = du + side * (dw / 2 + 3.0); if (near(uu)) put('chickens', at(uu, -1.0), rand() * 6, { kind: 'hen' }); }
     if (rand() < 0.2) { const uu = du - side * (dw / 2 + 2.9); if (near(uu)) put('drying_tray', at(uu, -0.9), rand() * 6); }
     // the trade's goods before the shop
@@ -265,6 +266,29 @@ function hillside() {
   return E;
 }
 
+/** The works of the lower town (docs §13): threshing floors on the level ground above the houses, bread-ovens and vine arbours by the lanes. Sites are found by rule: outside the walls,
+ *  clear of lanes, houses, courts, tombs and the Treasury, on ground that is level within the object's footprint, the nearest lane not too far. */
+function works() {
+  const E = [], rand = rng(8800), courts = lots().filter((l) => l.court).map((l) => l.court), tombs = hillside().filter((e) => e.t === 'chamber_tomb').map((e) => e.at), taken = [];
+  const laneDist = (x, z) => { let d = 1e9; for (const lane of LANES) for (let i = 0; i < lane.length - 1; i++) { const [ax, az] = lane[i], [bx, bz] = lane[i + 1], vx = bx - ax, vz = bz - az, t = Math.max(0, Math.min(1, ((x - ax) * vx + (z - az) * vz) / (vx * vx + vz * vz))); d = Math.min(d, Math.hypot(x - ax - vx * t, z - az - vz * t)); } return d; };
+  const flat = (x, z, r, tol) => { const h0 = h(x, z); let lo = 0, hi = 0; for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2, d = h(x + Math.cos(a) * r, z + Math.sin(a) * r) - h0; lo = Math.min(lo, d); hi = Math.max(hi, d); } return hi - lo <= tol; };
+  const site = (r, laneMin, laneMax, tol, box = [-186, -100, 186, 130]) => {
+    for (let tries = 0; tries < 900; tries++) {
+      const x = box[0] + rand() * (box[2] - box[0]), z = box[1] + rand() * (box[3] - box[1]);
+      if (Math.hypot(x, z) > RADIUS - 26 || sdCircuit(x, z) < 28 || (x > -140 && x < -100 && Math.abs(z) < 22) || (x > TREAS.x0 - 12 && x < TREAS.xf + 8 && Math.abs(z - TREAS.z) < 18) || Math.hypot(x - TREAS.x, z - TREAS.z) < 36) continue;
+      const ld = laneDist(x, z); if (ld < laneMin || ld > laneMax) continue;
+      if (inHouse(x, z, r + 1.2) || courts.some((c) => x > c[0] - r - 1 && x < c[2] + r + 1 && z > c[1] - r - 1 && z < c[3] + r + 1) || tombs.some(([a, b]) => Math.hypot(a - x, b - z) < r + 14) || taken.some(([a, b, q]) => Math.hypot(a - x, b - z) < r + q + 2)) continue;
+      if (!flat(x, z, r, tol)) continue;
+      taken.push([x, z, r]); return [x, z];
+    }
+    return null;
+  };
+  for (let i = 0; i < 5; i++) { const p = site(4.9, 7.5, 26, 0.5); if (p) E.push({ t: 'yard', kind: 'threshing', at: p, y: h(...p) + 0.02, r: 4.6, seed: 300 + i }); }
+  for (let i = 0; i < 9; i++) { const p = site(1.6, 4.2, 14, 0.22); if (p) E.push({ t: 'yard', kind: 'oven', at: p, y: h(...p), rot: rand() * 6.28, seed: 400 + i }); }
+  for (let i = 0; i < 7; i++) { const p = site(2.6, 4.6, 16, 0.3); if (p) E.push({ t: 'yard', kind: 'arbour', at: p, y: h(...p), rot: Math.floor(rand() * 4) * Math.PI / 2 + (rand() - 0.5) * 0.3, seed: 500 + i }); }
+  return E;
+}
+
 export async function town() {
   const plans = [], L = lots().filter((l) => l.kind !== 'granary');
   // houses in tiles of 64 m (each tile a few merged draws, culled together)
@@ -274,7 +298,7 @@ export async function town() {
     const els = [], rooms = [];
     for (const l of list) {
       const fr = frame(l), door = fr.P(l.du, -1.3), gd = ground.height(...door);
-      els.push({ t: 'house', rect: l.rect, y: l.y, face: l.face, storeys: l.storeys, seed: l.seed, kind: l.kind, trade: l.trade, du: l.du, gd, lit: l.lit, ...(l.inside ? { low: l.y - 2.5 } : {}) });
+      els.push({ t: 'house', rect: l.rect, y: l.y, face: l.face, storeys: l.storeys, seed: l.seed, kind: l.kind, trade: l.trade, du: l.du, gd, lit: l.lit, front: l.front, ...(l.inside ? { low: l.y - 2.5 } : {}) });
       if (l.court) els.push({ t: 'forecourt', rect: l.court, face: l.face, y: l.y, du: l.du, seed: l.seed });
       const [x0, z0, x1, z1] = l.rect, st = l.kind === 'house' ? l.storeys : 1;
       const name = l.kind === 'store' ? 'a storehouse' : l.kind === 'workshop' ? `a ${l.trade}'s workshop` : l.kind === 'cult' ? 'a shrine' : l.kind === 'guard' ? 'the guard-room' : 'a house';
@@ -286,6 +310,7 @@ export async function town() {
   // places kept free of the engine's street life: the Treasury's dromos and façade, the approach road's walking line
   plans.push(base('mycenae-keep', 'mycenaean', [{ t: 'precinct', rect: [TREAS.x0 - 3, TREAS.z - 7, TREAS.xf + 6, TREAS.z + 7] }, { t: 'precinct', rect: [-190, -3.2, -107, 2.2] }, { t: 'precinct', rect: [-107, -3.4, -84, 3.4] }, { t: 'precinct', rect: [24, 1.0, 80, 5.2] }, ...RAMP.slice(0, -1).map(([ax, az], i) => { const [bx, bz] = RAMP[i + 1]; return { t: 'precinct', rect: [Math.min(ax, bx) - 2.3, Math.min(az, bz) - 2.3, Math.max(ax, bx) + 2.3, Math.max(az, bz) + 2.3] }; })]));
   plans.push(base('mycenae-yards', 'mycenaean', yards()));
+  plans.push(base('mycenae-works', 'mycenaean', works()));
   plans.push(base('mycenae-walls', 'mycenaean', laneWalls()));
   plans.push(base('mycenae-hillside', 'mycenaean', hillside()));
   plans.push(base('mycenae-dress', 'life', [...dress(), ...verge()]));

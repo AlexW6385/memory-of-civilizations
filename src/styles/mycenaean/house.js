@@ -135,6 +135,51 @@ export function house(el, ctx) {
     for (let j = 1; j < n; j++) add('limestone_yellow', B(du - w2 / 2, y - rise - 0.4, -j * tread - 0.45, du + w2 / 2, y - j * (rise / n), -(j - 1) * tread - 0.45));
     col.ramp(R(du - w2 / 2, -n * tread - 0.45, du + w2 / 2, -0.0), y - rise, y, m.dirV);
   }
+  // ── the front by rule (docs/settlements/mycenae.md §13): porch, quoins, dado, frieze ──
+  const fk = el.front ?? 'plain';
+  if (fk === 'porch') {
+    // two posts of painted timber tapering downward on stone bases, a beam and a clay canopy over the door; a bench of mudbrick and a water jar in its shade
+    const u1 = du - dw / 2 - 1.0, u2 = du + dw / 2 + 1.0, vp = -1.35, ph = 2.42, posts = [], caps = [], yb0 = Math.min(y - 0.1, (el.gd ?? y - 0.1) - 0.3);
+    for (const u of [u1, u2]) {
+      const [x, z] = m.P(u, vp);
+      add('limestone_yellow', lathe([[0.27, 0], [0.27, y + 0.16 - yb0], [0.2, y + 0.2 - yb0], [0.001, y + 0.2 - yb0]], 8, null, x, yb0, z));
+      posts.push(lathe([[0.001, 0], [0.085, 0.01], [0.09, 0.2], [0.115, ph - 0.25], [0.001, ph - 0.25]], 10, null, x, y + 0.15, z));
+      caps.push(lathe([[0.1, 0], [0.17, 0.05], [0.2, 0.12], [0.17, 0.17], [0.001, 0.17]], 10, null, x, y + 0.15 + ph - 0.25, z));
+      col.circle(x, z, 0.28, yb0, y + ph + 0.2);
+    }
+    add('paint_minoan_red', mergeG(posts)); add('pottery_dark', mergeG(caps));
+    add('timber', B(u1 - 0.25, y + ph + 0.1, vp - 0.12, u2 + 0.25, y + ph + 0.34, vp + 0.12));
+    add('earth_wall', B(u1 - 0.4, y + ph + 0.34, vp - 0.35, u2 + 0.4, y + ph + 0.52, 0.04));
+    add(wallMat, mergeG([B(u1 - 0.4, y + ph + 0.52, vp - 0.35, u2 + 0.4, y + ph + 0.7, vp - 0.2), B(u1 - 0.4, y + ph + 0.52, vp - 0.35, u1 - 0.25, y + ph + 0.7, 0.04), B(u2 + 0.25, y + ph + 0.52, vp - 0.35, u2 + 0.4, y + ph + 0.7, 0.04)]));
+    const ends = []; for (let v = vp + 0.1; v < -0.05; v += 0.5) ends.push(B(u1 - 0.45, y + ph + 0.12, v - 0.05, u1 - 0.25, y + ph + 0.3, v + 0.05), B(u2 + 0.25, y + ph + 0.12, v - 0.05, u2 + 0.45, y + ph + 0.3, v + 0.05));
+    add('timber', mergeG(ends));
+    const bu0 = du > W / 2 ? u1 + 0.1 : u2 - 0.65;
+    add('mudbrick', B(bu0, yb0, -0.62, bu0 + 0.55, y + 0.42, -0.2)); solid(bu0, -0.62, bu0 + 0.55, -0.2, yb0, y + 0.42);
+    const [jx, jz] = m.P(bu0 + 0.27, -0.41); add('terracotta', lathe([[0.001, 0], [0.1, 0.02], [0.17, 0.2], [0.11, 0.38], [0.08, 0.42], [0.001, 0.42]], 8, null, jx, y + 0.42, jz));
+  } else if (fk === 'quoin' || fk === 'both') {
+    // dressed corner stones, long and short in turn, up the front's two ends (and round the corner a little)
+    const q = [], hq = H - 0.45;
+    for (let k = 0, ya = y + 0.55; ya < y + hq; k++, ya += 0.44) {
+      const a = k % 2 ? 0.95 : 0.5, b = k % 2 ? 0.5 : 0.95;
+      q.push(B(-0.05, ya, -0.05, a, ya + 0.41, 0.0), B(-0.05, ya, 0.0, 0.0, ya + 0.41, b * 0.6), B(W - a, ya, -0.05, W + 0.05, ya + 0.41, 0.0), B(W, ya, 0.0, W + 0.05, ya + 0.41, b * 0.6));
+    }
+    add('limestone_yellow', mergeG(q));
+  }
+  if (fk === 'dado' || fk === 'both') {
+    // a painted band along the front above the socle, broken by the door, one to a storey
+    const bands = [];
+    for (let s2 = 0; s2 < st; s2++) { const ya = y + 0.78 + s2 * SH; bands.push(B(0.12, ya, -0.02, du - dw / 2 - 0.35, ya + 0.14, 0.0), B(du + dw / 2 + 0.35, ya, -0.02, W - 0.12, ya + 0.14, 0.0)); }
+    add(rand() < 0.5 ? 'paint_minoan_red' : 'paint_ochre', mergeG(bands));
+  }
+  if (fk === 'frieze') {
+    // the painted frieze under the parapet: blue and ochre blocks between white joints, as on the palaces' walls
+    const blue = [], och = [], wh = [], yf = top - 0.88;
+    for (let u = 0.3; u < W - 0.55; u += 0.56) {
+      if (Math.abs(u + 0.28 - du) < dw / 2 + 0.5) continue;
+      blue.push(B(u, yf, -0.02, u + 0.26, yf + 0.38, 0.0)); och.push(B(u + 0.32, yf, -0.02, u + 0.5, yf + 0.38, 0.0)); wh.push(B(u + 0.26, yf, -0.02, u + 0.32, yf + 0.38, 0.0), B(u + 0.5, yf, -0.02, u + 0.56, yf + 0.38, 0.0));
+    }
+    if (blue.length) { add('egyptian_blue', mergeG(blue)); add('paint_ochre', mergeG(och)); add('plaster_white', mergeG(wh)); }
+  }
   // window frames and open shutters on the front
   const wf = [], sh = [];
   for (const o of fwin) {
@@ -204,6 +249,51 @@ export function yard(el, { bag, col }) {
     bag.add('cloth_ochre', box(x - 0.7, y + 0.45, z - 0.01, x + 0.7, y + 1.8, z + 0.01));
     const w = []; for (let i = 0; i < 12; i++) w.push(box(x - 0.66 + i * 0.12, y + 0.3, z - 0.04, x - 0.58 + i * 0.12, y + 0.45, z + 0.04));
     bag.add('terracotta', mergeG(w)); col.rect([x - 0.85, z - 0.1, x + 0.85, z + 0.1], y, y + 1.9);
+  } else if (el.kind === 'threshing') {
+    // a threshing floor (docs §13): a round of paved and beaten ground ringed with boulders, the post at its middle, sheaves and a heap of straw at the edge, winnowing fork and fan, baskets and sacks of grain
+    const R = el.r ?? 4.6, y0 = y - 1.1, ring = [], sheaf = [], stalk = [], tools = [];
+    bag.add('flagstone', lathe([[R, 0], [R, y - y0], [0.001, y - y0]], 24, null, x, y0, z));
+    bag.add('mud_plaster', lathe([[R - 0.5, y - y0 + 0.003], [R - 0.5, y - y0 + 0.012], [0.001, y - y0 + 0.012]], 24, null, x, y0, z));
+    for (let i = 0; i < 28; i++) { const a = (i / 28) * Math.PI * 2, rr = 0.25 + rand() * 0.12; ring.push(place(box(-rr, y0, -rr * 0.8, rr, y + 0.15 + rand() * 0.12, rr * 0.8), x + Math.cos(a) * (R + 0.1), 0, z + Math.sin(a) * (R + 0.1), -a + rand() * 0.4)); }
+    bag.add('rock_boulder', mergeG(ring));
+    bag.add('timber', lathe([[0.1, 0], [0.09, 1.7], [0.001, 1.75]], 8, null, x, y + 0.012, z)); col.circle(x, z, 0.14, y, y + 1.7);
+    bag.add('rope_fibre', box(x - 0.01, y + 0.3, z, x + 2.3, y + 0.33, z + 0.01));
+    for (let k = 0; k < 14; k++) { const a = 0.4 + (k / 14) * 4.6 + rand() * 0.2, rr = R - 0.9 - rand() * 0.6; sheaf.push(lathe([[0.17, 0], [0.12, 0.45], [0.1, 0.7], [0.001, 0.9]], 7, null, x + Math.cos(a) * rr, y + 0.012, z + Math.sin(a) * rr)); }
+    bag.add('thatch', mergeG(sheaf));
+    for (let k = 0; k < 4; k++) { const a = 4.7 + k * 0.3, rr = R - 0.5; stalk.push(lathe([[0.7 - k * 0.1, 0], [0.5 - k * 0.08, 0.35 + k * 0.1], [0.001, 0.7 + k * 0.2]], 9, null, x + Math.cos(a) * rr, y + 0.012, z + Math.sin(a) * rr)); }
+    bag.add('ichu', mergeG(stalk));
+    // the winnowing fork leaning on the post and a fan (a shallow basket) with grain, baskets and sacks at the ring's edge
+    const fx = x + 0.5, fz = z + 0.35;
+    tools.push(box(fx, y + 0.012, fz, fx + 0.05, y + 1.5, fz + 0.05), box(fx - 0.12, y + 1.5, fz, fx + 0.17, y + 1.55, fz + 0.05), box(fx - 0.12, y + 1.55, fz, fx - 0.09, y + 1.8, fz + 0.05), box(fx + 0.14, y + 1.55, fz, fx + 0.17, y + 1.8, fz + 0.05), box(fx + 0.01, y + 1.55, fz, fx + 0.04, y + 1.82, fz + 0.05));
+    bag.add('timber', mergeG(tools));
+    bag.add('wicker', lathe([[0.45, 0], [0.4, 0.07], [0.001, 0.05]], 12, null, x - 1.5, y + 0.012, z + 1.0));
+    bag.add('plaster_ochre', lathe([[0.38, 0.055], [0.001, 0.1]], 10, null, x - 1.5, y + 0.012, z + 1.0));
+    bag.add('wicker', mergeG([lathe([[0.22, 0], [0.34, 0.2], [0.36, 0.45], [0.001, 0.45]], 8, null, x - 3.6, y + 0.012, z - 1.8), lathe([[0.22, 0], [0.34, 0.2], [0.36, 0.45], [0.001, 0.45]], 8, null, x - 3.1, y + 0.012, z - 2.4)]));
+    for (let k = 0; k < 3; k++) bag.add('sacking', box(x + 2.4 + k * 0.5, y + 0.012, z - 3.5 + (k % 2) * 0.3, x + 2.8 + k * 0.5, y + 0.52, z - 3.1 + (k % 2) * 0.3));
+    col.circle(x + 2.6, z - 3.3, 0.7, y, y + 0.6);
+  } else if (el.kind === 'oven') {
+    // a clay bread-oven: a dome on a base of stones with its mouth turned to the rot, a slab before it, the wood and the baker's peel, a kneading trough
+    const rot = el.rot ?? 0, P = (g) => place(g, x, 0, z, rot), y0 = y - 0.4;
+    bag.add('rubble', P(box(-0.8, y0, -0.8, 0.8, y + 0.38, 0.8)));
+    bag.add('mudbrick', P(lathe([[0.74, 0], [0.72, 0.3], [0.5, 0.62], [0.2, 0.82], [0.001, 0.9]], 14, null, 0, y + 0.38, 0)));
+    bag.add('pottery_dark', P(box(-0.22, y + 0.46, 0.5, 0.22, y + 0.86, 0.72)));
+    bag.add('limestone_yellow', P(box(-0.5, y0, 0.78, 0.5, y + 0.38, 1.25)));
+    bag.add('timber', P(mergeG([box(-0.02, y + 0.39, 0.85, 0.02, y + 0.41, 2.1), box(-0.14, y + 0.39, 2.1, 0.14, y + 0.41, 2.3)])));
+    bag.add('timber', P(mergeG([box(0.95, y0, 0.2, 1.7, y + 0.35, 0.4), box(0.95, y0, 0.45, 1.7, y + 0.35, 0.65), box(0.95, y + 0.35, 0.2, 1.7, y + 0.7, 0.4), box(1.0, y + 0.7, 0.28, 1.65, y + 1.05, 0.38)])));
+    bag.add('terracotta', P(lathe([[0.001, 0], [0.3, 0.02], [0.42, 0.22], [0.38, 0.28], [0.001, 0.2]], 10, null, -1.5, y, 0.6)));
+    col.circle(x, z, 1.0, y0, y + 1.0);
+  } else if (el.kind === 'arbour') {
+    // a vine arbour on four posts: rails, a roof of vine over them with leaves and grapes, a table and two stools beneath
+    const rot = el.rot ?? 0, P = (g) => place(g, x, 0, z, rot), post = [], rail = [], leaf = [], fruit = [], hh = 2.3;
+    for (const [a, b] of [[-1.3, -2.0], [1.3, -2.0], [-1.3, 2.0], [1.3, 2.0]]) { post.push(box(a - 0.07, y - 0.3, b - 0.07, a + 0.07, y + hh, b + 0.07)); col.circle(...(() => { const c = Math.cos(rot), sn = Math.sin(rot); return [x + c * a + sn * b, z - sn * a + c * b]; })(), 0.1, y, y + hh); }
+    for (const b of [-2.0, 2.0]) rail.push(box(-1.45, y + hh, b - 0.06, 1.45, y + hh + 0.1, b + 0.06));
+    for (let b = -1.8; b <= 1.8; b += 0.45) rail.push(box(-1.4, y + hh + 0.1, b - 0.025, 1.4, y + hh + 0.15, b + 0.025));
+    for (let i = 0; i < 46; i++) leaf.push(box(-1.4 + rand() * 2.5, y + hh + 0.12 + rand() * 0.1, -2.0 + rand() * 3.6, -1.4 + rand() * 2.5 + 0.5, y + hh + 0.15 + rand() * 0.14, -2.0 + rand() * 3.6 + 0.4));
+    for (let i = 0; i < 16; i++) { const a = -1.1 + rand() * 2.2, b = -1.8 + rand() * 3.6; fruit.push(lathe([[0.05, 0], [0.06, -0.09], [0.001, -0.2]], 5, null, a, y + hh, b)); }
+    bag.add('timber', P(mergeG([...post, ...rail]))); bag.add('cloth_green', P(mergeG(leaf))); bag.add('paint_minoan_black', P(mergeG(fruit)));
+    bag.add('timber', P(mergeG([box(-0.5, y + 0.66, -0.4, 0.5, y + 0.72, 0.4), ...[[-0.45, -0.35], [0.45, -0.35], [-0.45, 0.35], [0.45, 0.35]].map(([a, b]) => box(a - 0.03, y, b - 0.03, a + 0.03, y + 0.66, b + 0.03)), box(-0.9, y + 0.3, -0.15, -0.55, y + 0.34, 0.15), box(0.55, y + 0.3, -0.15, 0.9, y + 0.34, 0.15)])));
+    bag.add('terracotta', P(lathe([[0.001, 0], [0.12, 0.02], [0.17, 0.2], [0.1, 0.38], [0.001, 0.4]], 8, null, 0.1, y + 0.72, 0.0)));
+    col.rect([x - 0.55, z - 0.55, x + 0.55, z + 0.55], y, y + 0.75);
   } else {
     // the oil press: a stone basin, a beam weighted by a stone, jars
     bag.add('limestone_yellow', lathe([[0.9, 0], [0.9, 0.5], [0.6, 0.5], [0.6, 0.35], [0.001, 0.35]], 12, null, x, y, z));

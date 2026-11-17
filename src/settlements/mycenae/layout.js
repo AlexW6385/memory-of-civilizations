@@ -165,6 +165,17 @@ export function lots() {
     const alongX = l.face === 'n' || l.face === 's', W = alongX ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1], wide = l.kind === 'workshop' || l.kind === 'store', dw = wide ? 1.5 : 1.05;
     l.W = W; l.dw = dw; l.du = Math.max(dw / 2 + 0.75, Math.min(W - dw / 2 - 0.75, W * (rand() < 0.5 ? 0.3 : 0.7) + (rand() - 0.5) * 0.8));
   }
+  // the front of each house by rule from its kind, storeys, width and seed (docs §13): a porch of two posts under a clay canopy (one-storey houses with room beside the door,
+  // not on the main road), dressed quoins, a painted dado band, a painted frieze under the parapet, or the plain front
+  for (const l of LOTS_CACHE) {
+    const hs = l.seed % 7, cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, onRoad = cx < -104 && Math.abs(cz) < 16;
+    const room = l.du - l.dw / 2 - 1.0 >= 0.45 && l.du + l.dw / 2 + 1.0 <= l.W - 0.45;
+    if (l.kind === 'house' && l.storeys === 1) l.front = room && !onRoad && l.W >= 7.4 && hs < 3 ? 'porch' : hs < 5 ? 'dado' : 'plain';
+    else if (l.kind === 'house') l.front = hs < 3 ? 'quoin' : hs < 5 ? 'frieze' : 'both';
+    else if (l.kind === 'workshop') l.front = hs % 2 ? 'dado' : 'plain';
+    else if (l.kind === 'cult') l.front = 'frieze';
+    else l.front = 'plain';
+  }
   LOT_IDX = new Map();
   for (const l of [...LOTS_CACHE, ...PAD_LOTS]) {
     const r = l.rect;
