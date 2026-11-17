@@ -94,15 +94,15 @@ export function shopName(x, z, r) {
 function windowGoods(Q, F, g0, g1, y, kind, r) {
   if (kind === 'bank') return;
   const pal = GOODS[kind] ?? GOODS.gen, d = 0.1, yb = y + 0.82, yt = y + 3.1;
-  const P = (u, v) => F.P(u, d, v);
-  Q.quad('wood_dark', P(g0 + 0.05, yb), P(g1 - 0.05, yb), P(g1 - 0.05, yt), P(g0 + 0.05, yt));                 // the back of the window
+  const P = (u, v) => F.P(u, d, v), Pb = (u, v) => F.P(u, d - 0.015, v);       // (the back and the forms' stands 1.5 cm behind the goods: a rank shared with a card would fight)
+  Q.quad('wood_dark', Pb(g0 + 0.05, yb), Pb(g1 - 0.05, yb), Pb(g1 - 0.05, yt), Pb(g0 + 0.05, yt));                 // the back of the window
   if (kind === 'dress' || kind === 'hat') {
     // forms: a dress form (a skirt, a bust, a stick) or a hat on a stand, spaced along the window
     for (let u = g0 + 0.7; u < g1 - 0.5; u += 0.9 + r() * 0.5) {
       const m = pal[Math.floor(r() * pal.length)];
       if (kind === 'dress') { Q.quad(m, P(u - 0.2, yb + 0.15), P(u + 0.2, yb + 0.15), P(u + 0.12, yb + 1.05), P(u - 0.12, yb + 1.05)); Q.quad('cloth_white', P(u - 0.1, yb + 1.05), P(u + 0.1, yb + 1.05), P(u + 0.09, yb + 1.45), P(u - 0.09, yb + 1.45)); }
       else Q.quad(m, P(u - 0.17, yb + 0.55 + (r() < 0.5 ? 0.4 : 0)), P(u + 0.17, yb + 0.55 + (r() < 0.5 ? 0.4 : 0)), P(u + 0.12, yb + 0.7), P(u - 0.12, yb + 0.7));
-      Q.quad('iron', P(u - 0.012, yb), P(u + 0.012, yb), P(u + 0.012, yb + 0.55), P(u - 0.012, yb + 0.55));
+      Q.quad('iron', Pb(u - 0.012, yb), Pb(u + 0.012, yb), Pb(u + 0.012, yb + 0.55), Pb(u - 0.012, yb + 0.55));
     }
     Q.quad('car_red', P(g0 + 0.2, yt - 0.5), P(g0 + 0.8, yt - 0.5), P(g0 + 0.8, yt - 0.25), P(g0 + 0.2, yt - 0.25));      // a price card
     return;
@@ -131,7 +131,7 @@ export function shopSign(bag, F, u0, u1, y, shop, g0, g1, full, r, glassD = 0.18
   if (!full) return;
   const rs = F.sg < 0 === (F.along) ? -1 : 1, mid = (u0 + u1) / 2, cell = fitCell(shop.text, u1 - u0 - 0.5, 0.075), tl = textLen(shop.text, cell);
   const at = (d, v0) => (h, v) => F.P(mid - rs * tl / 2 + rs * h, d, v0 + v);
-  letters(Q.t(lm), shop.text, cell, at(0.46, yb + (yt - yb - 5 * cell) / 2), 0, 0);
+  letters(Q.t(lm), shop.text, cell, at(0.47, yb + (yt - yb - 5 * cell) / 2), 0, 0);
   windowGoods(Q, F, g0, g1, y, shop.kind, r);
   if (shop.pane && g1 - g0 > 2.6) {
     const c2 = fitCell(shop.pane, g1 - g0 - 0.8, 0.05), l2 = textLen(shop.pane, c2), m2 = (g0 + g1) / 2;
