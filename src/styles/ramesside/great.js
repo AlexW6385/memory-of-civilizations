@@ -6,7 +6,7 @@
 import { box, frustum, place, rod, lathe } from '../../core/geom.js';
 import { cavettoProfile } from '../egyptian/trim.js';
 import { figure, wallReliefs, astroCeiling } from '../egyptian/objects.js';
-import { colossus, royalStatue, baboon, uraeus, osiride, seatedGod, standing } from './statues.js';
+import { colossus, fallenHead, royalStatue, baboon, uraeus, osiride, seatedGod, standing } from './statues.js';
 import { kadesh, campaigns } from './reliefs.js';
 import { rockWithRooms, extrudeProfile, turnedBag, rng, carve } from './util.js';
 import { carveGreat } from './carve.js';
@@ -71,7 +71,20 @@ export function greatTemple(el, { bag, col, lights }) {
   const cobras = []; for (let z = -half + 0.4; z < half - 0.2; z += 0.62) cobras.push(z);
   for (const z of cobras) put(bag, uraeus(), front(29.5) - 0.02, 29.2, z, EAST, 1);
   const nBab = 22;
-  for (let k = 0; k < nBab; k++) put(bag, baboon(), front(G.H) + 0.5, G.H + G.cornice, -half + (k + 0.5) * (2 * half / nBab), EAST, 1);
+  for (let k = 0; k < nBab; k++) put(bag, baboon(), front(G.H) + 0.5, G.H + G.cornice, -half + (k + 0.5) * (2 * half / nBab), EAST, 1 + 0.0012 * k);
+  // the rolls (tori) down the two edges of the pylon-shaped façade and under the cavetto, the stepped door frame with its own cavetto
+  for (const z of [-half, half]) bag.add('sandstone_dressed', rod([front(0.3) + 0.02, 0.3, z], [front(G.H - 0.5) + 0.02, G.H - 0.5, z], 0.3, 10));
+  bag.add('sandstone_dressed', rod([front(G.H - 0.5) + 0.12, G.H - 0.5, -half], [front(G.H - 0.5) + 0.12, G.H - 0.5, half], 0.22, 8));
+  for (const sg of [-1, 1]) {
+    const za = sg > 0 ? dw : -dw - 0.5, zb = sg > 0 ? dw + 0.5 : -dw;
+    bag.add('sandstone_dressed', frustum([FX - 8, za, front(0) + 0.3, zb], 0, G.doorH + 0.3, 0, lean * (G.doorH + 0.3), 0, 0, { noBottom: true })); col.rect([FX - 8, za, front(0), zb], 0, G.doorH + 0.3);
+  }
+  bag.add('sandstone_dressed', extrudeProfile(cavettoProfile(0.7, 0.6, 0.18), front(G.doorH + 0.3) + 0.25, G.doorH + 0.3, -dw - 0.5, dw + 0.5, 1));
+  // the mouldings round the four panels that frame the colossi: a roll up each side, a ledge across the top
+  for (const zc of G.colossi) {
+    for (const sg of [-1, 1]) bag.add('sandstone_dressed', rod([front(0.7) + 0.55, 0.7, zc + sg * 3.95], [front(21.2) + 0.55, 21.2, zc + sg * 3.95], 0.17, 8));
+    bag.add('sandstone_dressed', box(front(21.2) + 0.1, 21.2, zc - 4.15, front(21.2) + 0.95, 21.65, zc + 4.15));
+  }
   // the door's own frame: a lintel of dressed stone proud of the face, jambs inside the passage
   bag.add('sandstone_dressed', box(front(G.doorH) - 0.1, G.doorH, -dw - 0.25, front(G.doorH) + 0.25, G.doorH + 0.3, dw + 0.25));
   // reliefs on the leaning face: the king offering Maat to Ra-Horakhty either side of his niche
@@ -83,12 +96,20 @@ export function greatTemple(el, { bag, col, lights }) {
   // the colossi, and at their feet the royal family (queen mother and Nefertari at the outer ones, princes and princesses at the inner)
   const X0 = FX + 1.0, r = rng(1255), kinds = ['queen', 'prince', 'princess'];
   G.colossi.forEach((zc, i) => {
-    put(bag, colossus(), X0, 0, zc, EAST, 1);
-    col.rect([X0 - 1.8, zc - 3.7, X0 + 7.6, zc + 3.7], 0, 7.4); col.rect([X0 - 1.9, zc - 3.9, X0 + 1.2, zc + 3.9], 7.4, 17.5);
+    const fallen = i === 2;                                              // the second from the left (south), whose upper body fell in an earthquake [stated: dossier §4.1]
+    put(bag, colossus(fallen), X0, 0, zc, EAST, 1 + 0.0012 * i);   // (a millimetre apart, so that the four merge into the material's mesh instead of being drawn as copies)
+    col.rect([X0 - 1.8, zc - 3.7, X0 + 7.6, zc + 3.7], 0, 7.4); col.rect([X0 - 1.9, zc - 3.9, X0 + 1.2, zc + 3.9], 7.4, fallen ? 11.5 : 17.5);
+    if (fallen) {
+      // its head on the terrace before the throne, on its back, and the blocks of the break around it
+      const fh = fallenHead(), hx = X0 + 13.2, hz = zc + 0.8;
+      put(bag, fh.parts, hx, FLOOR, hz, 0, 1);
+      col.rect([hx + fh.bounds[0], hz + fh.bounds[1], hx + fh.bounds[2], hz + fh.bounds[3]], FLOOR, FLOOR + fh.bounds[4] * 0.8);
+      [[8.5, -2.6, 1.3, 0.9, 0.8], [8.9, 2.4, 1.0, 0.7, 0.9], [9.2, 0.2, 0.7, 0.45, 0.6]].forEach(([dx, dz, a, h, b]) => { bag.add('sandstone_dressed', box(X0 + dx - a / 2, FLOOR, zc + dz - b / 2, X0 + dx + a / 2, FLOOR + h, zc + dz + b / 2)); col.rect([X0 + dx - a / 2, zc + dz - b / 2, X0 + dx + a / 2, zc + dz + b / 2], FLOOR, FLOOR + h); });
+    }
     const outer = Math.abs(zc) > 10;
     [[-3.12, -3.2], [3.12, -3.2], [0, -5.0]].forEach(([lx, lz], k) => {
       const kind = outer ? (k < 2 ? 'queen' : 'princess') : (k < 2 ? kinds[1 + ((i + k) % 2)] : 'princess');
-      put(bag, royalStatue(kind), X0 - lz, 0.5, zc + lx, EAST, 1);
+      put(bag, royalStatue(kind), X0 - lz, 0.5, zc + lx, EAST, 1 + 0.0009 * (i * 3 + k));
     });
   });
   void r;
