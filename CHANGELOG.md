@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.7 — Beijing's courtyards entered, Barcelona lighter, Petra's water (2026-11-16)
+
+Beijing: 72 courtyard houses are entered (each was one solid block before), with lattices, ridges and walls varied by rule, family, ancestors' and reception halls, kitchens and school rooms, oil lamps, and a footing and corbel course on the palace wall. Barcelona: the arrival view is lighter (counted in Node: 4.08 to 2.91 M triangles, 458 to 379 draws, the shadow cascades a quarter to a third fewer) by hidden faces not built, shared shapes and plainer far blocks, and the Sagrada Família's belfry slots are real openings with their stone louvres. Petra: a stone conduit and nine rock-cut cisterns on the north side, and the triclinium's outcrop collides where it is drawn.
+
 ## v12.6 — the detail wave goes on: eight more places (2026-11-16)
 
 New York: the Chrysler Building's body (granite base, portals, setbacks, the hubcap frieze) and 42 shops to enter with five new trades, an automat among them. Rome: the gods in the Pantheon's niches, gilt rosettes in the dome's coffers, fourteen insulae with shops, a court, a stair and furnished rooms. Constantinople: marble portals and a slab floor with green bands in Hagia Sophia, sixteen more houses to enter (a potter, a smith), fronts by rule, stalls, wells and fountains in the outer lanes. Florence: the campanile's reliefs, niches and crown, the dome's oculi and lantern, 35 more houses to enter (a kitchen, an apothecary, a weaver). Tenochtitlan: serpent heads and braziers on the Templo Mayor, the palace's upper rooms, six calpulli temples with their schools, lords' houses and steam baths. Agra: the Taj Mahal's parapet, guldastas and plinth dado, households in the open houses with rooms above. Venice: the Campanile rebuilt (belfry, bells, lion, angel), 82 houses to enter, Gothic and plainer fronts by rule. Kakadu: the rocks and tree trunks collide where they are drawn.
