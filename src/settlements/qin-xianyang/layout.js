@@ -117,9 +117,9 @@ export function lots() {
       if (RESERVED.some((q) => rect[0] < q[2] && rect[2] > q[0] && rect[1] < q[3] && rect[3] > q[1])) continue;
       if (ws && (rect[0] < WS_X[0] || rect[2] > WS_X[1])) continue;
       const seed = Math.floor(rand() * 1e6);
-      const lot = { rect, front, kind: !ws && kind !== 'granary' && rand() < 0.07 ? 'garden' : kind, seed, open: false, row: zs };
+      const lot = { tier: ws ? 1 : Math.abs(zs) < 130 ? 0 : Math.abs(zs) < 200 ? 1 : 2, rect, front, kind: !ws && kind !== 'granary' && rand() < 0.07 ? 'garden' : kind, seed, open: false, row: zs };
       if (ws) lot.trade = trades[wsi++ % trades.length];
-      if (lot.kind !== 'garden' && lot.kind !== 'granary' && (ws || lot.kind === 'official' || (Math.hypot(c[0], c[1]) < 240 && furnished++ % 3 === 0))) lot.open = true;
+      if (lot.kind !== 'garden' && lot.kind !== 'granary' && (ws || lot.kind === 'official' || (Math.hypot(c[0], c[1]) < RADIUS - 44 && furnished++ % 2 === 0))) lot.open = true;
       LOTS.push(lot);
     }
   };
@@ -127,6 +127,8 @@ export function lots() {
   for (const side of [-1, 1]) rowOf(WS_Z, side, WS_ROW, WS_X[0], WS_X[1], true);
   return LOTS;
 }
+/** The lanes' mouths on the road side and half way down: the places of the ward gates [x, z]. */
+export const wardGates = () => LANES_X.flatMap((lx) => [[lx, 93], [lx, 183]]).filter(([x, z]) => Math.hypot(x, z) < RADIUS - 45);
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
 
 /** The streets (rectangles, free of houses): the E–W streets, the lanes, the workshop street, the road itself. */

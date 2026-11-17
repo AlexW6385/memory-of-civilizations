@@ -4,7 +4,7 @@
 import { TRADES } from '../../styles/qin/shops.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
 import { doorOf } from '../../styles/qin/houses.js';
-import { RADIUS, YARD, HAUL, rampZ, RAMP, ROAD, MARKET, TOWER, MWALL, TERRACE, STAIR, HALL, ROOF, PIT, WS_Z, lots } from './layout.js';
+import { RADIUS, YARD, HAUL, rampZ, RAMP, ROAD, MARKET, TOWER, MWALL, TERRACE, STAIR, HALL, ROOF, PIT, WS_Z, lots, wardGates } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 const base = (id, elements, o = {}) => ({ id, style: 'qin', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 0], facing: 'n' }, ...o });
@@ -180,8 +180,9 @@ export async function town() {
   plans.push({ ...base('qin-carts', carts()), style: 'life' });
   const LOTS = lots(), K = { row: 'qin_row_house', court: 'qin_court_house', official: 'qin_official', granary: 'qin_granary', garden: 'qin_garden', workshop: 'qin_workshop' };
   const ws = LOTS.filter((l) => l.trade), houses = LOTS.filter((l) => !l.trade);
-  plans.push(base('qin-workshops', ws.map((l) => ({ t: K.workshop, rect: l.rect, front: l.front, seed: l.seed, open: l.open, lit: lit(l), trade: l.trade }))));
-  for (let i = 0; i < houses.length; i += 70) plans.push(base(`qin-town-${i / 70}`, houses.slice(i, i + 70).map((l) => ({ t: K[l.kind], rect: l.rect, front: l.front, seed: l.seed, open: l.open, lit: lit(l) }))));
+  plans.push(base('qin-workshops', ws.map((l) => ({ t: K.workshop, tier: l.tier, rect: l.rect, front: l.front, seed: l.seed, open: l.open, lit: lit(l), trade: l.trade }))));
+  for (let i = 0; i < houses.length; i += 70) plans.push(base(`qin-town-${i / 70}`, houses.slice(i, i + 70).map((l) => ({ t: K[l.kind], tier: l.tier, rect: l.rect, front: l.front, seed: l.seed, open: l.open, lit: lit(l) }))));
+  plans.push(base('qin-wards', wardGates().map((at) => ({ t: 'qin_ward_gate', at }))));
   plans.push(...frontLife(), insideLife());
   void MWALL;
   return (CACHE = plans);

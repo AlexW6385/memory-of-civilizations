@@ -2,12 +2,51 @@
 // earth with a coping of grey brick, the great stair of brick steps with hollow-brick cheeks, the hall of vermilion walls
 // and round red columns under a grey-tiled hipped roof, black and ochre architraves, simple bracket blocks, the throne dais,
 // the screen, lamps and the bells of the hall inside; the twin que (gate towers) at the stair's foot.
-import { box, frustum, lathe, rod, addCloth, clothBox } from '../../core/geom.js';
+import { box, frustum, lathe, rod, addCloth, clothBox, fromTriangles } from '../../core/geom.js';
 import { frame, gable } from './houses.js';
 import { hipRoof } from '../chinese/index.js';
 import { TERRACE, STAIR, HALL, QUE, FORECOURT } from '../../settlements/qin-xianyang/layout.js';
 
 const TOP = TERRACE.h, T1 = TERRACE.h1;
+
+/**
+ * A bracket set (ludou and gong) on the outer face of a wall plate: a cantilever beam from the plate, a block over its end, a cross arm
+ * on the block, cap-pieces in ochre at the arm's ends. `face` is the plate's outer face (a z for a wall along x, an x for a wall along z),
+ * `s` the outward sign, `p` the place along the wall, `ay` the plate's bottom; `k` scales the set (1 for the hall).
+ */
+function bracketSet(bag, alongX, face, s, p, ay, k = 1) {
+  const B = (a0, a1, y0, y1, o0, o1, mat) => {
+    const f0 = face + s * o0 * k, f1 = face + s * o1 * k, lo = Math.min(f0, f1), hi = Math.max(f0, f1);
+    bag.add(mat, alongX ? box(p + a0 * k, ay + y0 * k, lo, p + a1 * k, ay + y1 * k, hi) : box(lo, ay + y0 * k, p + a0 * k, hi, ay + y1 * k, p + a1 * k));
+  };
+  B(-0.2, 0.2, 0.1, 0.4, -0.05, 1.05, 'lacquer_black');             // the cantilever
+  B(-0.32, 0.32, 0.4, 0.75, 0.55, 1.0, 'timber_red');               // the block (dou) over its end
+  B(-0.7, 0.7, 0.75, 0.92, 0.6, 0.95, 'lacquer_black');             // the cross arm (gong)
+  for (const [a0, a1] of [[-0.76, -0.64], [0.64, 0.76]]) B(a0, a1, 0.73, 0.94, 0.58, 0.97, 'paint_ochre');   // the arm's ends
+}
+/** A lattice window painted on a wall's outer face: a dark ground, a black frame, red bars. `face` the wall's outer face, `s` outward sign. */
+function windowOn(bag, alongX, face, s, p, y0, y1, w) {
+  const P = (a0, a1, yy0, yy1, o0, o1, mat) => {
+    const f0 = face + s * o0, f1 = face + s * o1, lo = Math.min(f0, f1), hi = Math.max(f0, f1);
+    bag.add(mat, alongX ? box(p + a0, yy0, lo, p + a1, yy1, hi) : box(lo, yy0, p + a0, hi, yy1, p + a1));
+  };
+  P(-w / 2, w / 2, y0, y1, -0.02, 0.03, 'opening');
+  for (let q = 1; q < Math.round(w / 0.2); q++) P(-w / 2 + q * 0.2 - 0.025, -w / 2 + q * 0.2 + 0.025, y0, y1, 0.0, 0.06, 'timber_red');
+  P(-w / 2 - 0.1, w / 2 + 0.1, y1, y1 + 0.1, -0.02, 0.1, 'lacquer_black'); P(-w / 2 - 0.1, w / 2 + 0.1, y0 - 0.1, y0, -0.02, 0.12, 'lacquer_black');
+  P(-w / 2 - 0.1, -w / 2, y0, y1, -0.02, 0.1, 'lacquer_black'); P(w / 2, w / 2 + 0.1, y0, y1, -0.02, 0.1, 'lacquer_black');
+  P(-w / 2, w / 2, (y0 + y1) / 2 - 0.03, (y0 + y1) / 2 + 0.03, 0.0, 0.08, 'lacquer_black');
+}
+/** A plank door leaf of red lacquer with its studs and iron straps, standing on the outer face of a wall: along `alongX`, from a0 to a1. */
+function leafOn(bag, alongX, face, s, a0, a1, y0, y1) {
+  const P = (b0, b1, yy0, yy1, o0, o1, mat) => {
+    const f0 = face + s * o0, f1 = face + s * o1, lo = Math.min(f0, f1), hi = Math.max(f0, f1);
+    bag.add(mat, alongX ? box(b0, yy0, lo, b1, yy1, hi) : box(lo, yy0, b0, hi, yy1, b1));
+  };
+  P(a0, a1, y0, y1, 0.0, 0.1, 'lacquer_red');
+  const nc = Math.max(2, Math.round((a1 - a0) / 0.4)), nr = Math.max(3, Math.round((y1 - y0) / 0.55));
+  for (let j = 0; j < nr; j++) P(a0, a1, y0 + (j + 0.5) * (y1 - y0) / nr - 0.05, y0 + (j + 0.5) * (y1 - y0) / nr + 0.05, 0.1, 0.13, 'lacquer_black');   // the straps
+  for (let i = 0; i < nc; i++) for (let j = 0; j < nr; j++) { const u = a0 + (i + 0.5) * (a1 - a0) / nc, v = y0 + (j + 0.5) * (y1 - y0) / nr; P(u - 0.05, u + 0.05, v - 0.05, v + 0.05, 0.13, 0.17, 'bronze'); }   // the studs
+}
 
 /** qin_terrace: {} — the two tiers, the coping, the colonnade's floor. The stair is a generic `stair` element. */
 export function qinTerrace(el, { bag, col }) {
@@ -54,6 +93,9 @@ export function qinHall(el, { bag, col, lights }) {
     bag.add('lacquer_black', box(a, ay, b, c2, ay + 0.7, d));
     bag.add('paint_ochre', box(a - (c2 - a > 2 ? 0 : 0.02), ay + 0.7, b - (d - b > 2 ? 0 : 0.02), c2 + (c2 - a > 2 ? 0 : 0.02), ay + 0.82, d + (d - b > 2 ? 0 : 0.02)));
   }
+  // a bracket set (ludou and gong) on every column of the colonnade, under the eave
+  for (let i = 0; i <= nx; i++) { const px = x0 + 0.6 + i * (x1 - x0 - 1.2) / nx; bracketSet(bag, true, z0, -1, px, ay); bracketSet(bag, true, z1, 1, px, ay); }
+  for (let j = 1; j < nz; j++) { const pz = z0 + 0.6 + j * (z1 - z0 - 1.2) / nz; bracketSet(bag, false, x0, -1, pz, ay); bracketSet(bag, false, x1, 1, pz, ay); }
   // the enclosed core: vermilion walls (a dark dado), doors in the south wall, a window slit row in the others
   const Wl = (r, y0 = y, y1 = y + ch) => { bag.add('palace_wall', box(r[0], y0, r[1], r[2], y1, r[3])); col.rect(r, y0, y1); };
   const doors = [cx - 12, cx, cx + 12], dw = 4.4;
@@ -61,6 +103,14 @@ export function qinHall(el, { bag, col, lights }) {
   let xa = c[0] - th;
   for (const d of doors) { Wl([xa, c[3], d - dw / 2, c[3] + th]); xa = d + dw / 2; bag.add('timber_red', box(d - dw / 2, y + 3.6, c[3], d + dw / 2, y + ch, c[3] + th)); col.rect([d - dw / 2, c[3], d + dw / 2, c[3] + th], y + 3.6, y + ch); bag.add('lacquer_black', box(d - dw / 2 - 0.2, y + 3.4, c[3] - 0.05, d + dw / 2 + 0.2, y + 3.6, c[3] + th + 0.05)); }
   Wl([xa, c[3], c[2] + th, c[3] + th]);
+  // the doors' leaves (red lacquer, studded, strapped) folded back on the wall's face, a granite sill; lattice windows high on the walls
+  for (const d of doors) {
+    leafOn(bag, true, c[3] + th, 1, d - dw / 2 - 1.15, d - dw / 2 - 0.05, y + 0.1, y + 3.5); leafOn(bag, true, c[3] + th, 1, d + dw / 2 + 0.05, d + dw / 2 + 1.15, y + 0.1, y + 3.5);
+    bag.add('granite_grey', box(d - dw / 2, y + 0.08, c[3] - 0.1, d + dw / 2, y + 0.17, c[3] + th + 0.25));
+  }
+  for (const p of [cx - 6, cx + 6]) windowOn(bag, true, c[3] + th, 1, p, y + 2.0, y + 3.3, 1.6);
+  for (const p of [cx - 14, cx - 7, cx, cx + 7, cx + 14]) windowOn(bag, true, c[1] - th, -1, p, y + 2.0, y + 3.3, 1.6);
+  for (const p of [cz - 10, cz - 3.3, cz + 3.3, cz + 10]) { windowOn(bag, false, c[0] - th, -1, p, y + 2.0, y + 3.3, 1.6); windowOn(bag, false, c[2] + th, 1, p, y + 2.0, y + 3.3, 1.6); }
   bag.add('lacquer_black', box(c[0] - th - 0.04, y + 0.08, c[1] - th - 0.04, c[2] + th + 0.04, y + 1.0, c[1] - th));
   bag.add('lacquer_black', box(c[0] - th - 0.05, y + ch - 0.4, c[1] - th - 0.05, c[2] + th + 0.05, y + ch + 0.06, c[3] + th + 0.05));       // the wall plate, under the roof
   // inside the core: two rows of columns, the dais, the screen, seats and tables, lamps, bells, a drum
@@ -150,16 +200,96 @@ export function qinHall(el, { bag, col, lights }) {
     col.circle(dx, dz, 1.0, 0, 1.7); }
 }
 
-/** qin_que: { at [x, z] } — a gate tower: a rammed-earth base, a timber room above, a hipped roof. */
+/**
+ * qin_que: { at [x, z] } — a gate tower (que) of the stair's foot: a battered base of rammed earth with its timber wall-posts and
+ * ramming courses, a stone kerb, a deck with a railing (pingzuo), a room of vermilion walls between red posts with lattice windows and
+ * a door on the side toward the stair, bracket sets under a hipped roof of grey tile with round tile-ends and a bird on the ridge;
+ * and beside it, outward, the lower subsidiary tower (zi que) with a roof of its own (docs/settlements/qin-xianyang.md §9d).
+ */
 export function qinQue(el, { bag, col }) {
-  const [x, z] = el.at, hw = QUE.w / 2, hd = QUE.d / 2, h = QUE.h - 3, rise = 2.6;
-  bag.add('earth_wall', frustum([x - hw, z - hd, x + hw, z + hd], 0, h, 0.9, 0.9, 0.9, 0.9, { noBottom: true }));
+  const [x, z] = el.at, hw = QUE.w / 2, hd = QUE.d / 2, h = QUE.h - 3, out = x < STAIR.x ? -1 : 1;
+  const inset = 0.9;
+  // ── the main tower's base: rammed earth, battered, with a stone kerb at its foot
+  bag.add('earth_wall', frustum([x - hw, z - hd, x + hw, z + hd], 0, h, inset, inset, inset, inset, { noBottom: true }));
   col.rect([x - hw, z - hd, x + hw, z + hd], 0, h);
   bag.add('brick_grey', box(x - hw + 0.4, 0, z - hd + 0.4, x + hw - 0.4, 0.6, z + hd - 0.4));
-  bag.add('palace_wall', box(x - hw + 1.3, h, z - hd + 1.3, x + hw - 1.3, h + 3, z + hd - 1.3));
-  bag.add('lacquer_black', box(x - hw + 1.2, h + 2.6, z - hd + 1.2, x + hw - 1.2, h + 3.1, z + hd - 1.2));
-  col.rect([x - hw + 1.3, z - hd + 1.3, x + hw - 1.3, z + hd - 1.3], h, h + 3.1);
-  hipRoof({ c: [x, z], A: hw + 1.4, B: hd + 1.4, y: h + 3.3, rise, lift: 0.2, pow: 1.3, mat: 'tile_dark', soffit: 'timber_red', ridgeMat: 'tile_dark', noChiwei: true }, { bag });
+  for (const [a, b, c, d] of [[x - hw - 0.2, z - hd - 0.2, x + hw + 0.2, z - hd], [x - hw - 0.2, z + hd, x + hw + 0.2, z + hd + 0.2], [x - hw - 0.2, z - hd, x - hw, z + hd], [x + hw, z - hd, x + hw + 0.2, z + hd]]) bag.add('granite_grey', box(a, 0, b, c, 0.35, d));
+  // the ramming courses (light bands of clay between the layers) and the wall-posts of timber standing in the earth
+  for (let y = 0.7; y < h - 0.3; y += 0.7) {
+    const i = inset * y / h;
+    bag.add('mud_plaster', box(x - hw + i - 0.02, y, z - hd + i - 0.03, x + hw - i + 0.02, y + 0.05, z - hd + i + 0.03)); bag.add('mud_plaster', box(x - hw + i - 0.02, y, z + hd - i - 0.03, x + hw - i + 0.02, y + 0.05, z + hd - i + 0.03));
+    bag.add('mud_plaster', box(x - hw + i - 0.03, y, z - hd + i - 0.02, x - hw + i + 0.03, y + 0.05, z + hd - i + 0.02)); bag.add('mud_plaster', box(x + hw - i - 0.03, y, z - hd + i - 0.02, x + hw - i + 0.03, y + 0.05, z + hd - i + 0.02));
+  }
+  for (const u of [-hw + 1.5, 0, hw - 1.5]) for (const sz of [-1, 1]) {
+    const zf = sz < 0 ? z - hd - 0.06 : z + hd - 1.3 + 0.0;                               // the batter-following post: its face stands 0.06 off the earth's
+    bag.add('timber', frustum([x + u - 0.13, zf, x + u + 0.13, zf + 1.36], 0, h, 0, 0, sz < 0 ? inset : 0, sz < 0 ? 0 : inset));
+  }
+  for (const u of [-1.1, 1.1]) for (const sx of [-1, 1]) {
+    const xf = sx < 0 ? x - hw - 0.06 : x + hw - 1.3;
+    bag.add('timber', frustum([xf, z + u - 0.13, xf + 1.36, z + u + 0.13], 0, h, sx < 0 ? inset : 0, sx < 0 ? 0 : inset, 0, 0));
+  }
+  // ── the deck: a timber floor a little wider than the base's top, a railing (pingzuo) of posts and two rails
+  const dx = hw - inset + 0.5, dz = hd - inset + 0.5;                                      // half-sizes of the deck (4.1 × 3.1)
+  bag.add('timber', box(x - dx, h - 0.25, z - dz, x + dx, h + 0.06, z + dz));
+  const rx = dx - 0.12, rz = dz - 0.12, y0 = h + 0.06;
+  for (let u = -rx; u <= rx + 0.01; u += rx / 4) for (const sz of [-1, 1]) bag.add('timber_red', box(x + u - 0.05, y0, z + sz * rz - 0.05, x + u + 0.05, y0 + 0.95, z + sz * rz + 0.05));
+  for (let v = -rz + rz / 2; v < rz - 0.01; v += rz / 2) for (const sx of [-1, 1]) bag.add('timber_red', box(x + sx * rx - 0.05, y0, z + v - 0.05, x + sx * rx + 0.05, y0 + 0.95, z + v + 0.05));
+  for (const [yy, m] of [[0.9, 'lacquer_black'], [0.5, 'timber']]) {
+    for (const sz of [-1, 1]) bag.add(m, box(x - rx - 0.06, y0 + yy - 0.05, z + sz * rz - 0.04, x + rx + 0.06, y0 + yy + 0.05, z + sz * rz + 0.04));
+    for (const sx of [-1, 1]) bag.add(m, box(x + sx * rx - 0.04, y0 + yy - 0.05, z - rz - 0.06, x + sx * rx + 0.04, y0 + yy + 0.05, z + rz + 0.06));
+  }
+  // ── the room: vermilion walls between red posts (the corners and two more on each long face), the plate above, lattice windows, a door toward the stair
+  const ex = hw - 1.3, ez = hd - 1.3, rh = 2.65, ry = y0, plate = ry + rh;
+  bag.add('palace_wall', box(x - ex, ry, z - ez, x + ex, plate, z + ez));
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) bag.add('timber_red', box(x + sx * ex - 0.17, ry, z + sz * ez - 0.17, x + sx * ex + 0.17, plate, z + sz * ez + 0.17));
+  for (const u of [-ex / 3, ex / 3]) for (const sz of [-1, 1]) bag.add('timber_red', box(x + u - 0.12, ry, z + sz * ez - 0.1, x + u + 0.12, plate, z + sz * ez + 0.1));
+  bag.add('lacquer_black', box(x - ex - 0.12, plate, z - ez - 0.12, x + ex + 0.12, plate + 0.4, z + ez + 0.12));
+  for (const sz of [-1, 1]) windowOn(bag, true, z + sz * ez, sz, x, ry + 1.2, ry + 2.1, 1.3);
+  windowOn(bag, false, x + out * ex, out, z, ry + 1.2, ry + 2.1, 1.3);
+  const side = -out;                                                                       // the door faces the stair's axis
+  leafOn(bag, false, x + side * ex, side, z - 0.62, z - 0.02, ry + 0.05, ry + 2.15); leafOn(bag, false, x + side * ex, side, z + 0.02, z + 0.62, ry + 0.05, ry + 2.15);
+  bag.add('lacquer_black', box(Math.min(x + side * ex, x + side * (ex + 0.12)) - 0.0, ry + 2.15, z - 0.75, Math.max(x + side * ex, x + side * (ex + 0.12)) + 0.0, ry + 2.3, z + 0.75));
+  // bracket sets on the plate (small ones), at the corners and the posts
+  const ba = plate + 0.0;
+  for (const u of [-ex, -ex / 3, ex / 3, ex]) for (const sz of [-1, 1]) bracketSet(bag, true, z + sz * (ez + 0.12), sz, x + u, ba - 0.12, 0.8);
+  for (const v of [-ez, 0, ez]) for (const sx of [-1, 1]) bracketSet(bag, false, x + sx * (ex + 0.12), sx, z + v, ba - 0.12, 0.8);
+  // ── the roof: grey tile, the eave's round tile-ends, a bird on the ridge
+  const A = hw + 1.4, B = hd + 1.4, ey = h + 3.3 + 0.2, R = 3.0;
+  hipRoof({ c: [x, z], A, B, y: ey, rise: R, lift: 0.2, pow: 1.3, mat: 'tile_dark', soffit: 'timber_red', ridgeMat: 'tile_dark', noChiwei: true }, { bag });
+  for (let u = -A + 0.4; u < A - 0.3; u += 0.55) for (const sz of [-1, 1]) bag.add('terracotta', rod([x + u, ey - 0.3, z + sz * B], [x + u, ey - 0.02, z + sz * B], 0.1, 6));
+  for (let v = -B + 0.7; v < B - 0.6; v += 0.55) for (const sx of [-1, 1]) bag.add('terracotta', rod([x + sx * A, ey - 0.3, z + v], [x + sx * A, ey - 0.02, z + v], 0.1, 6));
+  bird(bag, x, ey + R + 0.74, z, out);
+  // ── the subsidiary tower, outward: a lower battered base standing against the main one, a small room, a roof of its own
+  const sh = 4.0, sw = 4.0, sd = 2.4, bi = 0.6, xin = x + out * (hw - 0.9), xfar = x + out * (hw - 0.9 + sw);
+  const ox = Math.min(xin, xfar), ox1 = Math.max(xin, xfar);
+  bag.add('earth_wall', frustum([ox, z - sd, ox1, z + sd], 0, sh, out > 0 ? 0 : bi, out > 0 ? bi : 0, bi, bi, { noBottom: true }));
+  col.rect([ox, z - sd, ox1, z + sd], 0, sh);
+  for (const sz of [-1, 1]) bag.add('granite_grey', box(ox, 0, sz < 0 ? z - sd - 0.2 : z + sd, ox1, 0.3, sz < 0 ? z - sd : z + sd + 0.2));
+  bag.add('granite_grey', box(out > 0 ? ox1 : ox - 0.2, 0, z - sd - 0.2, out > 0 ? ox1 + 0.2 : ox, 0.3, z + sd + 0.2));
+  for (let y = 0.7; y < sh - 0.3; y += 0.7) {
+    const i = bi * y / sh, xo = out > 0 ? ox1 - i : ox + i;
+    bag.add('mud_plaster', box(xo - 0.03, y, z - sd + i - 0.02, xo + 0.03, y + 0.05, z + sd - i + 0.02));
+    for (const sz of [-1, 1]) bag.add('mud_plaster', box(out > 0 ? ox : ox + i, y, z + sz * (sd - i) - 0.03, out > 0 ? ox1 - i : ox1, y + 0.05, z + sz * (sd - i) + 0.03));
+  }
+  const sTop = sh + 0.06, szh = sd - 0.8, srw = 2.5, rxa = out > 0 ? x + 4.0 : x - 4.0 - srw, rxb = rxa + srw, rcx = (rxa + rxb) / 2;
+  bag.add('brick_grey', box(out > 0 ? ox : ox + bi, sh, z - sd + bi, out > 0 ? ox1 - bi : ox1, sTop, z + sd - bi));
+  bag.add('palace_wall', box(rxa, sTop, z - szh, rxb, sTop + 2.0, z + szh));
+  for (const xx of [rxa, rxb]) for (const sz of [-1, 1]) bag.add('timber_red', box(xx - 0.15, sTop, z + sz * szh - 0.15, xx + 0.15, sTop + 2.0, z + sz * szh + 0.15));
+  bag.add('lacquer_black', box(rxa - 0.1, sTop + 2.0, z - szh - 0.1, rxb + 0.1, sTop + 2.35, z + szh + 0.1));
+  windowOn(bag, false, out > 0 ? rxb : rxa, out, z, sTop + 0.7, sTop + 1.5, 1.1);
+  for (const sz of [-1, 1]) windowOn(bag, true, z + sz * szh, sz, rcx, sTop + 0.7, sTop + 1.5, 1.1);
+  for (const sz of [-1, 1]) bracketSet(bag, true, z + sz * (szh + 0.1), sz, rcx, sTop + 2.0 - 0.12, 0.6);
+  hipRoof({ c: [rcx, z], A: szh + 1.0, B: srw / 2 + 1.0, y: sTop + 2.35 + 0.2, rise: 1.5, lift: 0.15, pow: 1.3, mat: 'tile_dark', soffit: 'timber_red', ridgeMat: 'tile_dark', noChiwei: true, alongZ: true }, { bag });
+}
+
+/** A bird (the cresting of the que's ridge): a pedestal, a body, a neck and head, a beak, a fan of tail feathers. */
+function bird(bag, x, y, z, dir) {
+  bag.add('tile_dark', box(x - 0.18, y - 0.04, z - 0.18, x + 0.18, y + 0.3, z + 0.18));
+  bag.add('bronze', lathe([[0.001, 0], [0.2, 0.06], [0.24, 0.22], [0.14, 0.42], [0.001, 0.48]], 10, null, x, y + 0.3, z));
+  bag.add('bronze', rod([x + dir * 0.05, y + 0.62, z], [x + dir * 0.32, y + 1.0, z], 0.07, 6));
+  bag.add('bronze', lathe([[0.001, 0], [0.1, 0.05], [0.1, 0.16], [0.001, 0.2]], 8, null, x + dir * 0.34, y + 0.96, z));
+  bag.add('bronze', rod([x + dir * 0.38, y + 1.05, z], [x + dir * 0.62, y + 1.0, z], 0.03, 5));
+  for (const a of [-0.5, 0, 0.5]) bag.add('bronze', rod([x - dir * 0.15, y + 0.5, z], [x - dir * 0.7, y + 0.8 + a * 0.2, z + a * 0.4], 0.035, 5));
 }
 
 /** qin_court: {} — the terrace's paving and drains, the galleries and lamp-posts of the forecourt, banner staffs, incense burners. */
