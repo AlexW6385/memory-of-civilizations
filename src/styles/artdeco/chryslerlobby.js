@@ -57,9 +57,10 @@ function elevator(bag, axis, p, sg, c, yF) {
 export function chryslerLobby(bag, col, lights, H, y, top, mouth) {
   const [hx0, hz0, hx1, hz1] = H, yF = y + 0.04, cz = (hz0 + hz1) / 2, cx = (hx0 + hx1) / 2;
   // the floor: Siena travertine with a black border and a gold line inside it
-  bag.add('travertine', box(hx0, y - 0.5, hz0, hx1, yF, hz1)); col.floor(H, yF);
-  for (const [a, b, c, d] of [[hx0, hz0, hx1, hz0 + 0.5], [hx0, hz1 - 0.5, hx1, hz1], [hx1 - 0.5, hz0 + 0.5, hx1, hz1 - 0.5]]) bag.add(GB, box(a, yF, b, c, yF + 0.01, d));
-  for (const [a, b, c, d] of [[hx0, hz0 + 0.55, hx1 - 0.55, hz0 + 0.62], [hx0, hz1 - 0.62, hx1 - 0.55, hz1 - 0.55], [hx1 - 0.62, hz0 + 0.62, hx1 - 0.55, hz1 - 0.62]]) bag.add(GD, box(a, yF, b, c, yF + 0.012, d));
+  const yS = yF - 0.02;                                                                    // (the floor 2 cm under the walls' feet: nothing coplanar)
+  bag.add('travertine', box(hx0, y - 0.5, hz0, hx1, yS, hz1)); col.floor(H, yS);
+  for (const [a, b, c, d] of [[hx0, hz0, hx1, hz0 + 0.5], [hx0, hz1 - 0.5, hx1, hz1], [hx1 - 0.5, hz0 + 0.5, hx1, hz1 - 0.5]]) bag.add(GB, box(a, yS - 0.004, b, c, yS + 0.03, d));
+  for (const [a, b, c, d] of [[hx0, hz0 + 0.55, hx1 - 0.55, hz0 + 0.62], [hx0, hz1 - 0.62, hx1 - 0.55, hz1 - 0.55], [hx1 - 0.62, hz0 + 0.62, hx1 - 0.55, hz1 - 0.62]]) bag.add(GD, box(a, yS - 0.004, b, c, yS + 0.036, d));
   // the walls: north and south with the elevators' banks, the west beside the doors, the east with the great onyx panel
   for (const [p, sg] of [[hz0, 1], [hz1, -1]]) {
     wall(bag, 'z', p, sg, hx0, hx1, yF, top, 2.75, false);
