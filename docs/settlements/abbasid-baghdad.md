@@ -102,10 +102,25 @@ Sources for this pass are general (History of Baghdad, Wikipedia; Daily Life in 
 
 Still not built: upper storeys (rooms above the ground ranges, roofs to walk on), the cellar rooms (sardab), the bimaristan, the paper mill, the Khuld palace.
 
+## 13. Detail pass 2 (beyond the arrival, the great mosque): what was added and on what ground
+
+Sources added: Wikipedia, *Great Mosque of al-Mansur* (https://en.wikipedia.org/wiki/Great_Mosque_of_al-Mansur): about 100 yards a side, built against the palace; first of sun-dried brick set in clay, torn down and rebuilt in kiln-fired brick by Harun al-Rashid in 807-809; roof on wooden columns with wooden capitals, mostly several glued pieces bolted with iron, a few carved from single trunks; a minaret is mentioned (date of its building not given, so none shown) [stated]. Ancient History Sites, Samarra houses (entrance passage, court ringed by roofed rooms, cisterns and basins, stucco in some rooms) [stated]. A search for Harun's hospital and quarter mosques returned only links; the page could not be fetched, so the bimaristan stays unbuilt and the small mosques are [inferred].
+
+- **Great mosque, outer walls** [inferred form, stated material]: sun-dried brick at c. 800 (was baked brick in the earlier build); nine bays a side, a pilaster between bays, a blind pointed niche in each bay, doors in chosen bays with a voussoir ring and a stucco field, a toothed brick band and plaster cornice, corner piers, arched windows in the qibla wall. Doors on the east wall corrected (one had been mis-placed outside the wall).
+- **Mihrab** [inferred]: a niche cut through the qibla wall, its back plugged 0.7 m deep; voussoir ring, marble colonettes, bevelled stucco, an inscription band; replaces a plaster block. **Minbar**: seven steps, stepped side boards, seat under a canopy (the old one floated). Qur'an stands, drinking jars, hung lamps in the riwaq.
+- **Columns** [stated]: capitals of three glued blocks with an iron strap and bolt heads.
+- **Fronts by rule** [inferred]: four door forms (arch; flat lintel under a lattice transom; arch under a brick hood; wide double gate), wealth from lot area, storeys and wind tower; stucco frames on rich houses; solid, merlon or toothed-frieze parapets. One-storey iwans no longer rise above the roof.
+- **Open houses**: 23 (were 8) across the ring, Karkh, the canal bank, the river suburb and east bank; storeys and wind towers from the lot; one plan per 160 m quarter.
+- **Quarter mosques**: four, each of two joined lots: street door, court with basin, jars and palms, hall of teak columns on the qibla side, mihrab, minbar, lamps, worshippers. No minaret.
+- **Lanes**: by some doors a trough with a tethered donkey, a ladder to the roof, a brick bench with a jar.
+
+Still missing for L3: upper-storey rooms and roofs to walk on, sardab cellars, the bimaristan, the paper mill, the Khuld palace, wear and weathering on the new elements, coloured light.
+
 ## Sources
 
 - Wikipedia, *Round City of Baghdad* — https://en.wikipedia.org/wiki/Round_City_of_Baghdad (founding 762–766; gates; centre; materials; wooden columns of the mosque).
 - Wikipedia, *Palace of the Golden Gate* — https://en.wikipedia.org/wiki/Palace_of_the_Golden_Gate (dome 48.36 m; chamber, iwan arch; guards; history).
+- Wikipedia, *Great Mosque of al-Mansur* — https://en.wikipedia.org/wiki/Great_Mosque_of_al-Mansur (size, sun-dried then baked brick, wooden columns and capitals).
 - Wikipedia, *Karkh* — https://en.wikipedia.org/wiki/Karkh (markets moved 773; trades; canals; bridges).
 - Wikipedia, *Abbasid architecture* — https://en.wikipedia.org/wiki/Abbasid_architecture (materials, arches, Samarra stucco A/B/C, houses, mosque plans, Bab al-ʿAmma).
 - Epoch Magazine, *The City of Peace: Reconstructions of the Round City of Baghdad* — https://epoch-magazine.com/post/the-city-of-peace-reconstructions-of-the-round-city-of-baghdad (three walls, baked brick, iron doors, green cupolas on teak columns).
