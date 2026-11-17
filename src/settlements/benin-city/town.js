@@ -130,7 +130,7 @@ function streetLife(F) {
     for (const l of lots()) {
       const c = [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2];
       if (!near(c[0], c[1], 200) && rr() > 0.35) continue;
-      const Fr = frame(l.rect, l.front), Lw = Fr.L, D = Fr.D, dw = 2.4, fd = 5.4, bd = 6.4, Yf = 0.25;
+      const Fr = frame(l.rect, l.front), Lw = Fr.L, D = Fr.D, dw = 2.4, fd = l.fd ?? 5.4, bd = l.bd ?? 6.4, Yf = 0.25;
       const put = (f, u, v, tu, tv, o) => { const a = Fr.P(u, v); if (Math.hypot(a[0] - ARR[0], a[1] - ARR[1]) > 4) f(a, Yf, face(a, Fr.P(tu, tv)), o); };
       if (l.kind === 'trade') { put(woman, Lw / 2, 1.9, Lw / 2, 0, { pose: 'stand', carry: 'none' }); if (rr() < 0.5) put(man, Lw / 2 + 1.2, -0.9, Lw / 2 + 1.2, 1.0, { pose: 'stand', carry: 'none' }); }
       else {
@@ -289,7 +289,7 @@ export async function town() {
   }
   plans.push({ ...base('benin-people', [...F.P, ...P2]), style: 'life' });
   plans.push({ ...base('benin-street-life', lifeEls), style: 'life' });
-  const els = lots().map((l) => ({ t: 'benin_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front, chief: l.chief, kind: l.kind, du: l.du }));
+  const els = lots().map((l) => ({ t: 'benin_house', rect: l.rect, seed: l.seed, y: l.y, front: l.front, chief: l.chief, kind: l.kind, du: l.du, fd: l.fd, bd: l.bd, swL: l.swL, swR: l.swR, pitch: l.pitch, dado: l.dado, roof: l.roof }));
   plans.push(...lodTiles('benin-houses', 'benin', els, { R: RADIUS }));
   return plans;
 }

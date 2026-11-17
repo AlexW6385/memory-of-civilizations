@@ -139,15 +139,23 @@ function hall(el, ctx) {
   const dz0 = z0 + 1.2, dz1 = z0 + 5.4;
   B(ctx, 'stucco_red', [cx - 4.5, dz0, cx + 4.5, dz1], Y, Y + 0.45); col.floor([cx - 4.5, dz0, cx + 4.5, dz1], Y + 0.45);
   B(ctx, 'stucco_red', [cx - 3.5, dz0 + 0.4, cx + 3.5, dz1 - 0.4], Y + 0.45, Y + 0.9); col.floor([cx - 3.5, dz0 + 0.4, cx + 3.5, dz1 - 0.4], Y + 0.9);
-  B(ctx, 'wood_dark', [cx - 0.55, dz0 + 1.2, cx + 0.55, dz0 + 2.1], Y + 0.9, Y + 1.38, true); B(ctx, 'timber', [cx - 0.7, dz0 + 1.1, cx + 0.7, dz0 + 2.2], Y + 1.38, Y + 1.5);
-  B(ctx, 'bronze', [cx - 0.7, dz0 + 1.05, cx + 0.7, dz0 + 1.1], Y + 0.9, Y + 1.5);
+  // the Oba's stool: a carved wooden seat of the waisted Edo form (a foot, a neck with its carved rings, a broad round seat with a rim of brass studs), a hide on it
+  { const tz = dz0 + 1.65, ty = Y + 0.9;
+    bag.add('wood_dark', lathe([[0.001, 0], [0.52, 0], [0.52, 0.04], [0.34, 0.09], [0.26, 0.2], [0.23, 0.31], [0.27, 0.42], [0.46, 0.5], [0.6, 0.55], [0.6, 0.62], [0.001, 0.62]], 16, null, cx, ty, tz));
+    for (const yb of [0.14, 0.2, 0.26, 0.32]) bag.add('bronze', lathe([[0.27 - Math.abs(yb - 0.23) * 0.1, yb], [0.29 - Math.abs(yb - 0.23) * 0.1, yb + 0.012], [0.27 - Math.abs(yb - 0.23) * 0.1, yb + 0.024]], 12, null, cx, ty, tz));
+    bag.add('bronze', lathe([[0.605, 0.56], [0.62, 0.575], [0.605, 0.59]], 16, null, cx, ty, tz));
+    bag.add('hide_tan', lathe([[0.001, 0.62], [0.5, 0.62], [0.5, 0.645], [0.001, 0.645]], 14, null, cx, ty, tz)); bag.add('hide_black', box(cx - 0.12, ty + 0.645, tz - 0.1, cx + 0.12, ty + 0.65, tz + 0.1));
+    col.circle(cx, tz, 0.62, ty, ty + 0.65);
+    // plaques hung on the faces of the two tiers of the dais
+    if (el.near !== false) { for (let u = -3.6; u <= 3.61; u += 1.2) plaque(ctx, cx + u, Y + 0.22, dz1, 's', Math.floor(rand() * 1e6), 0.42, 0.32); for (let u = -2.8; u <= 2.81; u += 1.4) plaque(ctx, cx + u, Y + 0.67, dz1 - 0.4, 's', Math.floor(rand() * 1e6), 0.42, 0.32); }
+  }
   for (const s of [-1, 1]) { B(ctx, 'ivory', [cx + s * 2.6 - 0.07, dz0 + 1.4, cx + s * 2.6 + 0.07, dz0 + 1.54], Y + 0.9, Y + 2.8); head(ctx, cx + s * 2.0, Y + 0.9, dz0 + 1.3, 0, 40 + s, false); }
   for (const s of [-1, 1]) altar(ctx, [cx + s * 16 - 2.6, z0 + 0.7, cx + s * 16 + 2.6, z0 + 2.2], 's', 90 + s, 5);
   // the furnishings of the great gallery: leopard skins on the dais, the cast leopards at its steps, the stools of the chiefs in two rows,
   // mats in the aisle, benches of clay under the side walls
   if (el.near !== false) {
     for (let i = 0; i < 4; i++) for (const s of [-1, 1]) { const x = cx + s * (1.5 + i * 0.6), z = dz0 + 2.9; bag.add('hide_tan', box(x - 0.3, Y + 0.9, z - 0.4, x + 0.3, Y + 0.92, z + 0.4)); bag.add('hide_black', box(x - 0.08, Y + 0.92, z - 0.12, x + 0.08, Y + 0.925, z + 0.02)); }
-    for (const s of [-1, 1]) leopard(ctx, cx + s * 5.2, Y, dz1 + 0.6, s);
+    for (const s of [-1, 1]) leopard(ctx, cx + s * 6.35, Y, dz1 + 0.6, s);
     for (let i = 0; i < 6; i++) for (const s of [-1, 1]) { stool(ctx, cx + s * (7 + i * 1.9), Y, z0 + 7.6 + (i % 2) * 0.4); }
     for (let x = x0 + 4; x < x1 - 3; x += 7) bag.add('reed_mat', box(x, Y, z0 + 8.4, x + 3, Y + 0.02, z1 - 1.6));
     for (const s of [-1, 1]) for (let k = 0; k < 3; k++) { const bx = s < 0 ? x0 + 0.9 : x1 - 0.9; claySeat(ctx, [bx - 0.4, z0 + 8 + k * 1.8, bx + 0.4, z0 + 9.6 + k * 1.8], Y, k); }
@@ -214,14 +222,57 @@ function audience(el, ctx) {
   for (const b of el.benches) if (rand() < 0.5) { const west = b[2] < ax; bag.add('reed_mat', box(west ? b[2] : b[0] - 1.3, 0.03, b[1] + 0.5, west ? b[2] + 1.3 : b[0], 0.05, b[3] - 0.5)); }
 }
 
-/** A cast brass leopard, standing, at (x, y, z), facing +z (s = ±1 turns it to look across): the guardian of the Oba's steps. */
+/**
+ * A cast brass leopard, standing, at (x, y, z), facing +z (s = ±1 turns it to look across): the guardian of the Oba's steps. Built as the Benin
+ * leopards are described (Art Institute of Chicago, "Pair of Leopards" and the plaque cats: ring spots over the body, tufts at the neck, bared teeth
+ * set with ivory, a tail ending in three prongs; the pair "the kingly counterpart in the wilderness"): a long deep body, four tapering legs with
+ * paws, a round head with a short muzzle, ears, eyes and fangs, the neck ruff, the spots as rings of gilt on bronze. Not a copy of any piece.
+ */
 function leopard(ctx, x, y, z, s = 1) {
-  const { bag, col } = ctx, g = (m, b) => { b.rotateY(s > 0 ? 0.25 : -0.25); b.translate(x, y, z); bag.add(m, b); };
-  g('bronze', box(-0.22, 0.42, -0.62, 0.22, 0.82, 0.5)); g('bronze', box(-0.17, 0.5, 0.45, 0.17, 0.85, 0.82)); g('bronze', box(-0.14, 0.52, 0.8, 0.14, 0.78, 1.0));
-  for (const sx of [-0.14, 0.14]) for (const sz of [-0.5, 0.35]) g('bronze', box(sx - 0.05, 0, sz - 0.05, sx + 0.05, 0.45, sz + 0.05));
-  g('bronze', box(-0.04, 0.55, -1.15, 0.04, 0.65, -0.6));
-  for (let i = 0; i < 5; i++) g('gilt_bronze', box(-0.225, 0.5 + (i % 2) * 0.15, -0.5 + i * 0.2, 0.225, 0.56 + (i % 2) * 0.15, -0.44 + i * 0.2));
-  col.rect([x - 0.4, z - 0.8, x + 0.4, z + 0.9], y, y + 0.9);
+  const { bag, col } = ctx, rot = s > 0 ? 0.25 : -0.25, g = (m, b) => { b.rotateY(rot); b.translate(x, y, z); bag.add(m, b); };
+  const YC = 0.64, RY = 1.15;
+  const prof = [[-0.66, 0.001], [-0.6, 0.12], [-0.44, 0.2], [-0.15, 0.225], [0.2, 0.235], [0.45, 0.24], [0.6, 0.2], [0.7, 0.12], [0.74, 0.001]];
+  const rAt = (zz) => { for (let i = 0; i < prof.length - 1; i++) { const [z0, r0] = prof[i], [z1, r1] = prof[i + 1]; if (zz >= z0 && zz <= z1) return r0 + (r1 - r0) * (zz - z0) / (z1 - z0); } return 0.1; };
+  // the body: a lathe about the long axis, turned to lie along z, a little deeper than wide
+  const body = lathe(prof.map(([zz, r]) => [r, zz]), 14); body.rotateX(Math.PI / 2); body.scale(1, RY, 1); body.translate(0, YC, 0); g('bronze', body);
+  // the legs: tapering from the paw to the belly, the hind ones heavier at the thigh, a paw with a rise of toes
+  for (const [lx, lz, hind] of [[-0.14, 0.47, 0], [0.14, 0.47, 0], [-0.15, -0.4, 1], [0.15, -0.4, 1]]) {
+    g('bronze', lathe([[0.05, 0.05], [0.058, 0.1], [0.07, 0.28], [hind ? 0.125 : 0.1, 0.5], [0.001, 0.52]], 8, null, lx, 0, lz));
+    g('bronze', lathe([[0.001, 0], [0.085, 0.0], [0.095, 0.03], [0.075, 0.075], [0.05, 0.09], [0.001, 0.09]], 8, null, lx, 0, lz + 0.03));
+    for (const t of [-1, 0, 1]) g('iron', box(lx + t * 0.03 - 0.004, 0.0, lz + 0.1, lx + t * 0.03 + 0.004, 0.04, lz + 0.125));
+  }
+  // the neck, the head (a round skull, a short muzzle), the lower jaw open a little, fangs of ivory, the nose, the eyes, the ears
+  g('bronze', rod([0, YC + 0.06, 0.55], [0, YC + 0.2, 0.84], 0.155, 10));
+  g('bronze', lathe([[0.001, -0.14], [0.11, -0.1], [0.16, 0], [0.14, 0.09], [0.07, 0.14], [0.001, 0.15]], 10, null, 0, YC + 0.2, 0.9));
+  g('bronze', box(-0.075, YC + 0.17, 0.96, 0.075, YC + 0.27, 1.12));
+  g('bronze', box(-0.065, YC + 0.1, 0.94, 0.065, YC + 0.15, 1.08));
+  g('iron', box(-0.035, YC + 0.255, 1.115, 0.035, YC + 0.285, 1.14));
+  for (const t of [-1, 1]) {
+    g('ivory', rod([t * 0.045, YC + 0.165, 1.07], [t * 0.045, YC + 0.1, 1.085], 0.011, 5));
+    g('ivory', rod([t * 0.04, YC + 0.15, 1.06], [t * 0.04, YC + 0.2, 1.075], 0.009, 5));
+    g('ivory', lathe([[0.001, 0], [0.022, 0.0], [0.022, 0.012], [0.001, 0.02]], 6, null, t * 0.095, YC + 0.3, 1.0));
+    g('iron', lathe([[0.001, 0], [0.011, 0.0], [0.011, 0.016], [0.001, 0.02]], 5, null, t * 0.095, YC + 0.3, 1.005));
+    g('bronze', lathe([[0.06, 0], [0.05, 0.06], [0.001, 0.12]], 6, null, t * 0.095, YC + 0.34, 0.83));
+    for (const q of [0.0, 0.03, 0.06]) g('iron', box(t * (0.085 + q) - 0.005, YC + 0.215 + q * 0.5, 1.07, t * (0.085 + q) + 0.005, YC + 0.225 + q * 0.5, 1.09));
+  }
+  // the ruff at the neck: tufts hanging in a collar
+  for (let i = 0; i < 9; i++) { const a = -1.3 + i * 0.325; g('bronze', rod([Math.sin(a) * 0.17, YC + 0.12 + Math.cos(a) * 0.02, 0.66 + Math.cos(a) * 0.12], [Math.sin(a) * 0.2, YC - 0.05, 0.7 + Math.cos(a) * 0.14], 0.028, 5)); }
+  // the tail: from the rump out and up in a curve, ending in three prongs
+  const tail = [[0, YC + 0.02, -0.66], [0, YC - 0.08, -0.86], [0, YC - 0.12, -1.06], [0, YC - 0.02, -1.24], [0, YC + 0.14, -1.3], [0, YC + 0.28, -1.24]];
+  for (let i = 0; i < tail.length - 1; i++) g('bronze', rod(tail[i], tail[i + 1], 0.04 - i * 0.003, 6));
+  for (const t of [-1, 0, 1]) g('bronze', rod(tail[tail.length - 1], [t * 0.08, tail[tail.length - 1][1] + 0.1, tail[tail.length - 1][2] + 0.04], 0.017, 5));
+  // the spots: rings of gilt set on the flanks in staggered rows, an inner disc of bronze to make the ring
+  for (const sg of [-1, 1]) {
+    for (const [phi, row] of [[-28, 0], [8, 1], [42, 0], [68, 1]]) {
+      const ph = phi * Math.PI / 180;
+      for (let zz = -0.5 + row * 0.07; zz < 0.62; zz += 0.14) {
+        const r = rAt(zz) - 0.002, px = sg * r * Math.cos(ph), py = YC + RY * r * Math.sin(ph), nx = Math.cos(ph) * sg, ny = Math.sin(ph) / RY, nl = Math.hypot(nx, ny);
+        g('gilt_bronze', rod([px - nx / nl * 0.004, py - ny / nl * 0.004, zz], [px + nx / nl * 0.011, py + ny / nl * 0.011, zz], 0.032, 7));
+        g('bronze', rod([px + nx / nl * 0.009, py + ny / nl * 0.009, zz], [px + nx / nl * 0.016, py + ny / nl * 0.016, zz], 0.017, 6));
+      }
+    }
+  }
+  col.rect([x - 0.4, z - 0.8, x + 0.4, z + 0.85], y, y + 1.1);
 }
 /**
  * benin_range: { rect, front ('e' | 'w' | 'n' | 's'), seed, kinds } — a range of single rooms of the palace's servants and stores under one lean-to
@@ -251,8 +302,8 @@ function range(el, ctx) {
       const r = R(u0, D - 2.6, u0 + 2.4, D - 1.2); bed(ctx, r, yy, (el.seed ?? 1) + i); const [x, z] = at(u1 - 0.6, 1.8); stool(ctx, x, yy, z); const [c1, c2] = at(u1 - 0.6, D - 0.7); chest(ctx, c1, yy, c2, 0.8, 0.5);
     } else {
       // the casters' stock: heads and plaques on shelves, crucibles of clay in a row
-      for (const h of [0.9, 1.6]) { const r = R(u0 - 0.1, D - 1.2, u1 + 0.1, D - 0.5); bag.add('timber', box(r[0], yy + h, r[1], r[2], yy + h + 0.05, r[3])); }
-      for (let j = 0; j < 4; j++) { const [x, z] = at(u0 + 0.5 + j * 0.75, D - 0.85); head(ctx, x, yy + 1.65, z, 0, (el.seed ?? 1) * 11 + i * 5 + j, false); if (j < 3) head(ctx, x, yy + 0.95, z, 0, (el.seed ?? 1) * 13 + i * 7 + j, false); }
+      for (const h of [0.9, 1.7]) { const r = R(u0 - 0.1, D - 1.2, u1 + 0.1, D - 0.5); bag.add('timber', box(r[0], yy + h, r[1], r[2], yy + h + 0.05, r[3])); }
+      for (let j = 0; j < 4; j++) { const [x, z] = at(u0 + 0.5 + j * 0.75, D - 0.85); head(ctx, x, yy + 1.75, z, F.yaw, (el.seed ?? 1) * 11 + i * 5 + j, false); if (j < 3) head(ctx, x, yy + 0.95, z, F.yaw, (el.seed ?? 1) * 13 + i * 7 + j, false); }
       for (let j = 0; j < 5; j++) { const [x, z] = at(u0 + 0.4 + j * 0.5, 1.8); bag.add('earth_wall', lathe([[0.001, yy], [0.16, yy + 0.01], [0.2, yy + 0.2], [0.12, yy + 0.32], [0.001, yy + 0.34]], 7, null, x, 0, z)); }
     }
   }
@@ -383,5 +434,5 @@ function pwall(el, ctx) {
     }
   }
 }
-export const PALACE_EL = { benin_audience: audience, benin_frontrange: frontRange, benin_court: court, benin_hall: hall, benin_tower: tower, benin_gatehouse: gatehouse, benin_wall: pwall, benin_range: range, benin_leopard: (el, ctx) => { if (el.plinth) { B(ctx, 'stucco_red', [el.at[0] - 0.75, el.at[1] - 1.3, el.at[0] + 0.75, el.at[1] + 1.4], 0, el.y ?? 0, true); } leopard(ctx, el.at[0], el.y ?? 0, el.at[1], el.s ?? 1); } };
+export const PALACE_EL = { benin_audience: audience, benin_frontrange: frontRange, benin_court: court, benin_hall: hall, benin_tower: tower, benin_gatehouse: gatehouse, benin_wall: pwall, benin_range: range, benin_leopard: (el, ctx) => { if (el.plinth) { const [ax, az] = el.at, py = el.y ?? 0; B(ctx, 'stucco_red', [ax - 0.75, az - 1.3, ax + 0.75, az + 1.4], 0, py, true); B(ctx, 'chalk', [ax - 0.82, az - 1.37, ax + 0.82, az + 1.47], 0, 0.1); B(ctx, 'tuff_red', [ax - 0.8, az - 1.35, ax + 0.8, az + 1.45], 0.1, 0.16); plaque(ctx, ax, 0.3, az + 1.4, 's', Math.round(ax * 7), 0.5, 0.26); } leopard(ctx, el.at[0], el.y ?? 0, el.at[1], el.s ?? 1); } };
 void hip;

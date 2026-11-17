@@ -14,10 +14,12 @@ const toStreet = (F) => { const o = F.out; return o[1] !== 0 ? (o[1] > 0 ? 'zp' 
 function house(el, ctx) {
   const { bag, col } = ctx, rand = rng(el.seed || 1), rv = rng((el.seed || 1) * 7 + 3), y = el.y ?? 0, F = frame(el.rect, el.front ?? 's'), { L, D } = F, simple = el.simple;
   const chief = !!el.chief, kind = el.kind ?? (chief ? 'chief' : 'plain');
-  const wm = wallMat(rand), roof = chief ? 'roof_bark' : 'thatch_palm', P = F.P, R = F.R;
+  const wm = wallMat(rand), roof = chief || el.roof === 'shingle' ? 'roof_bark' : 'thatch_palm', P = F.P, R = F.R;
   const H1 = chief ? 3.8 : 3.1, Y = 0.25, H2 = chief ? H1 + 2.9 : H1;
   const rr = (u0, v0, u1, v1) => R(u0, v0, u1, v1);
-  const fd = 5.4, bd = 6.4, sw = 3.8, dw = 2.4, du = el.du ?? L * (0.3 + 0.4 * rand());
+  // the plan varies by rule from the lot (layout.js: houseRule): the depth of the front and of the back range, a side range on each hand or none
+  // (the court then opens on the party wall), the pitch of the thatch, the pattern of the painted dado
+  const fd = el.fd ?? 5.4, bd = el.bd ?? 6.4, swL = el.swL ?? 3.8, swR = el.swR ?? 3.8, pitch = el.pitch ?? 2.9, dado = el.dado ?? 0, dw = 2.4, du = el.du ?? L * (0.3 + 0.4 * rand());
   const wall = (u0, v0, u1, v1, h, op = [], y0 = y + Y) => { const a = P(u0, v0), b = P(u1, v1); clayWall(ctx, a, b, 0.55, y0, y + h, wm, op.map((o) => ({ ...o })), !simple); };
   const worn = (u0, v0, u1, v1, ya, yb, seed) => { if (!simple) wear(ctx, P(u0, v0), P(u1, v1), 0.55, y + ya, y + yb, seed); };
   // the platform of beaten clay under all, the steps at the door
@@ -42,25 +44,25 @@ function house(el, ctx) {
     for (const f of [0.27, 0.73]) { const r = rr(L * f - 0.55, 0.0, L * f + 0.55, 0.1); bag.add('wood_dark', box(r[0], y + H1 + 2.05, r[1], r[2], y + H1 + 2.2, r[3])); bag.add('lattice', box(r[0] + 0.1, y + H1 + 1.0, rr(0, 0.25, 1, 0.3)[1] - 0.0, r[2] - 0.1, y + H1 + 2.05, rr(0, 0.25, 1, 0.3)[1] + 0.02)); }
     col.floor(rr(0.6, 0.6, L - 0.6, fd - 0.3), y + H1);
     gable(ctx, fr, y + H2, 2.6, roof, F.alongX ? 'x' : 'z', 0.7);
-  } else gable(ctx, fr, y + H1, 2.9, roof, F.alongX ? 'x' : 'z', 0.55);
+  } else gable(ctx, fr, y + H1, pitch, roof, F.alongX ? 'x' : 'z', 0.55);
   // the side ranges (lean-to, sloping to the court) and the back range with its verandah
   const sideR = (u0, u1) => rr(u0, fd, u1, D - bd);
   const sidesLow = (side) => { const o = F.out; if (o[1] !== 0) return side === 0 ? 'xp' : 'xn'; return side === 0 ? 'zp' : 'zn'; };
-  lean(ctx, sideR(0, sw), sidesLow(0), y + H1 - 0.7, y + H1 + 0.7, roof, 0.4, !simple);
-  lean(ctx, sideR(L - sw, L), sidesLow(1), y + H1 - 0.7, y + H1 + 0.7, roof, 0.4, !simple);
+  if (swL > 0) lean(ctx, sideR(0, swL), sidesLow(0), y + H1 - 0.7, y + H1 + 0.7, roof, 0.4, !simple);
+  if (swR > 0) lean(ctx, sideR(L - swR, L), sidesLow(1), y + H1 - 0.7, y + H1 + 0.7, roof, 0.4, !simple);
   const back = rr(0, D - bd, L, D);
   lean(ctx, back, toStreet(F), y + H1 - 0.5, y + H1 + 1.4, roof, 0.4, !simple);
   // the posts of the verandahs on the court's edge (the chief's sheathed in brass)
   const posts = [], nb = Math.max(3, Math.round(L / 3.4));
   for (let i = 0; i <= nb; i++) posts.push([0.9 + i * (L - 1.8) / nb, D - bd + 0.3]);
-  for (let v = fd + 1; v < D - bd - 1; v += 3.2) { posts.push([sw - 0.3, v], [L - sw + 0.3, v]); }
+  for (let v = fd + 1; v < D - bd - 1; v += 3.2) { if (swL > 0) posts.push([swL - 0.3, v]); if (swR > 0) posts.push([L - swR + 0.3, v]); }
   for (const [u, v] of posts) {
     const [px, pz] = P(u, v);
     if (chief) pillar(ctx, px, pz, y + Y, H1 - 0.5, 0.18);
     else { bag.add('palm_trunk', lathe([[0.13, 0], [0.12, H1 - 0.5]], 6, null, px, y + Y, pz)); col.circle(px, pz, 0.14, y + Y, y + H1); }
   }
   // the court: an impluvium, a well-head, pots
-  const cu = L / 2, cv = (fd + D - bd) / 2, iw = Math.min(3.0, (L - 2 * sw) * 0.4), id = Math.min(2.4, (D - bd - fd) * 0.4);
+  const cu = L / 2, cv = (fd + D - bd) / 2, iw = Math.min(3.0, (L - swL - swR) * 0.4), id = Math.min(2.4, (D - bd - fd) * 0.4);
   if (iw > 1.2 && id > 1.2) {
     const out = rr(cu - iw / 2 - 0.35, cv - id / 2 - 0.35, cu + iw / 2 + 0.35, cv + id / 2 + 0.35), inn = rr(cu - iw / 2, cv - id / 2, cu + iw / 2, cv + id / 2);
     bag.add('stucco_red', box(out[0], y + Y, out[1], out[2], y + Y + 0.2, out[3]));
@@ -81,8 +83,11 @@ function house(el, ctx) {
   for (const [a, b] of side) {
     if (b - a < 1.2) continue;
     for (const hh of [1.05, 1.2]) { const r = fo(a, -0.01, b, 0.01); bag.add('chalk', box(r[0], Yf + hh, r[1] - 0.012, r[2], Yf + hh + 0.08, r[3] + 0.012)); }
-    const lo = rv() < 0.5;
-    for (let u = a + 0.2; u < b - 0.2; u += 0.42) { const r = fo(u, -0.01, u + 0.16, 0.01); bag.add(lo ? 'chalk' : 'kokowai', box(r[0], Yf + 1.28, r[1] - 0.014, r[2], Yf + 1.44, r[3] + 0.014)); }
+    // the painted dado over the chalk bands, by the lot's rule: a row of posts, a zigzag of staggered bars, or stepped lozenges (Edo wall paintings [inferred])
+    const lo = rv() < 0.5, dm = lo ? 'chalk' : 'kokowai', dz = (r, y0, y1) => bag.add(dm, box(r[0], y0, r[1] - 0.014, r[2], y1, r[3] + 0.014));
+    if (dado === 0) for (let u = a + 0.2; u < b - 0.2; u += 0.42) dz(fo(u, -0.01, u + 0.16, 0.01), Yf + 1.28, Yf + 1.44);
+    else if (dado === 1) for (let u = a + 0.2, k = 0; u < b - 0.2; u += 0.26, k++) dz(fo(u, -0.01, u + 0.2, 0.01), Yf + 1.28 + (k % 2) * 0.1, Yf + 1.38 + (k % 2) * 0.1);
+    else for (let u = a + 0.45; u < b - 0.45; u += 0.9) for (let i = 0; i < 3; i++) { const hw = 0.28 - i * 0.09; dz(fo(u - hw, -0.01, u + hw, 0.01), Yf + 1.28 + i * 0.09, Yf + 1.28 + (i + 1) * 0.09); }
     // a grille of lattice set in the wall (the air of the room)
     const gu = (a + b) / 2, r = fo(gu - 0.34, -0.01, gu + 0.34, 0.01);
     bag.add('wood_dark', box(r[0] - 0.05, Yf + 1.8, r[1] - 0.03, r[2] + 0.05, Yf + 2.4, r[3] + 0.03)); bag.add('lattice', box(r[0], Yf + 1.85, r[1] - 0.045, r[2], Yf + 2.35, r[3] + 0.045));
@@ -150,17 +155,29 @@ function house(el, ctx) {
     const [m1, m2] = P(ku - 1.4, bz + 1.4); stool(ctx, m1, Yf, m2);
     const [w1, w2] = P(L - 1.4, D - 1.0); wood(ctx, w1, Yf, w2, F.along, 1.5, (el.seed || 1) + 15);
     // the court: the mortar, a drying rack, washing between posts, a plantain clump in the corner
-    const [mx, mz] = P(sw + 0.8, bz - 2.2); mortar(ctx, mx, Yf, mz, (el.seed || 1) + 16);
-    const [rx, rz] = P(L - sw - 1.2, cvd + 1.2); rack(ctx, rx, rz, Yf, F.along, 2.0, (el.seed || 1) + 17, ['pepper', 'cassava', 'cloth'][(el.seed || 0) % 3]);
-    if (L > 17) wash(ctx, P(sw + 0.4, bz - 0.7), P(Math.min(L - sw - 0.4, sw + 6), bz - 0.7), Yf, (el.seed || 1) + 18, 4);
+    const [mx, mz] = P(swL + 0.8, bz - 2.2); mortar(ctx, mx, Yf, mz, (el.seed || 1) + 16);
+    const rU = L - Math.max(swR, 1.0) - 1.2, [rx, rz] = P(rU, cvd + 1.2); rack(ctx, rx, rz, Yf, F.along, 2.0, (el.seed || 1) + 17, ['pepper', 'cassava', 'cloth'][(el.seed || 0) % 3]);
+    if (L > 17) wash(ctx, P(swL + 0.4, bz - 0.7), P(Math.min(L - Math.max(swR, 0.6) - 0.4, swL + 6), bz - 0.7), Yf, (el.seed || 1) + 18, 4);
     const [px, pz] = P(L - 1.3, fd + 1.2); plantain(ctx, px, Yf, pz, (el.seed || 1) + 19, 3);
+    // the well of the house (Dapper: each house has a well): a rim of clay, two posts and a beam with a rope and a calabash, in the back corner of the court
+    if (bz - fd >= 5.5) {
+      const [wx, wz] = P(rU, bz - 1.9), al = F.along;
+      bag.add('stucco_red', lathe([[0.56, 0], [0.56, 0.5], [0.44, 0.5], [0.44, 0.35], [0.001, 0.35]], 10, null, wx, Yf, wz));
+      bag.add('pottery_dark', lathe([[0.001, 0.352], [0.43, 0.352], [0.43, 0.372], [0.001, 0.372]], 10, null, wx, Yf, wz));
+      col.circle(wx, wz, 0.6, Yf, Yf + 0.55);
+      for (const t of [-1, 1]) { const qx = wx + al[0] * t * 0.75, qz = wz + al[1] * t * 0.75; bag.add('palm_trunk', rod([qx, Yf, qz], [qx, Yf + 1.8, qz], 0.055, 5)); col.circle(qx, qz, 0.08, Yf, Yf + 1.8); }
+      bag.add('timber', rod([wx - al[0] * 0.85, Yf + 1.78, wz - al[1] * 0.85], [wx + al[0] * 0.85, Yf + 1.78, wz + al[1] * 0.85], 0.045, 5));
+      bag.add('rope_fibre', rod([wx, Yf + 1.76, wz], [wx, Yf + 0.95, wz], 0.012, 4));
+      bag.add('wicker', lathe([[0.001, 0], [0.1, 0.03], [0.14, 0.11], [0.09, 0.17], [0.001, 0.15]], 7, null, wx, Yf + 0.82, wz));
+      bag.add('wicker', lathe([[0.001, 0], [0.1, 0.03], [0.14, 0.11], [0.09, 0.17], [0.001, 0.15]], 7, null, wx + F.out[0] * 0.5, Yf + 0.5, wz + F.out[1] * 0.5)); // a second calabash set on the rim
+    }
     // the pots at the corners of the court (those of the engine's life pass stand at the street door)
-    const [qx, qz] = P(sw + 1.4, fd + 1.5); void qx; void qz;
-    const [q1, q2] = P(L - sw - 1.2, fd + 1.4); pot(ctx, q1, Yf, q2, 0.32, 0.68, 'terracotta', true);
+    
+    const [q1, q2] = P(rU, fd + 1.4); pot(ctx, q1, Yf, q2, 0.32, 0.68, 'terracotta', true);
   }
   // ── the chief's upper room: the stair on the court, the bed, chests, a tusk pair on the wall ──
   if (chief) {
-    const u0 = sw + 0.4, nr = 15, tr = 0.25, rise = (H1 - Y) / nr;
+    const u0 = swL + 0.4, nr = 15, tr = 0.25, rise = (H1 - Y) / nr;
     for (let k = 0; k < nr; k++) { const r = rr(u0 + k * tr, fd + 0.28, u0 + (k + 1) * tr, fd + 1.2); bag.add('tuff_red', box(r[0], y - 0.1, r[1], r[2], Yf + (k + 1) * rise, r[3])); }
     col.ramp(rr(u0, fd + 0.28, u0 + nr * tr, fd + 1.2), Yf, y + H1, 'e');
     const lr = rr(u0 + nr * tr, fd + 0.28, 9.2, fd + 1.2); bag.add('tuff_red', box(lr[0], y - 0.1, lr[1], lr[2], y + H1, lr[3])); col.floor(lr, y + H1);
