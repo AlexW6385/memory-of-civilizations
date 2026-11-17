@@ -17,6 +17,8 @@ export const BRIDGE = { z: -190 };
 export const VILLA = [-194, -34, -122, 46];
 export const NOBLE = [-124, -148, -86, -114];
 export const COMPOUNDS = [VILLA, NOBLE];
+/** The Ujigami shrine on the far bank, at the foot of the hill: its levelled terrace [x0, z0, x1, z1] and the level (docs/settlements/heian-uji.md §17). */
+export const SHRINE = { terrace: [198, -166, 238, -134], level: 0.4, axis: -150 };
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
 const riverX = (z) => RIVER.x + 15 * Math.sin(z / 110);
@@ -41,6 +43,7 @@ export function height(x, z) {
   if (p < 5) { const bed = POND_LEVEL - 1.2; h = bed + (Math.max(h, bed) - bed) * smooth(-1, 5, p); }
   const q = islandDistance(x, z);
   if (q < 2) { const bed = POND_LEVEL - 1.2; h = Math.max(h, bed + (ISLAND.top - bed) * smooth(2, -2.5, q)); }
+  { const T = SHRINE.terrace, dx = Math.max(T[0] - x, 0, x - T[2]), dz = Math.max(T[1] - z, 0, z - T[3]), dd = Math.hypot(dx, dz), w = 1 - smooth(0, 12, dd); if (w > 0) h = h + (SHRINE.level - h) * w; }   // the terrace under the shrine, blended into the slope
   return h * (1 - smooth(RADIUS - 40, RADIUS - 5, r));
 }
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }

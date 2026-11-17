@@ -2,12 +2,13 @@
 // garden, the swift Uji River with its pebbled banks, wooded hills of cedar and maple beyond; the
 // soft, humid light of the Kyoto basin.
 
-import { RADIUS, GARDEN, RIVER, POND_LEVEL, height, inPond, inRiver, inRect, inLot, nearLot, pondDistance, islandDistance, VILLA, NOBLE, COMPOUNDS, onStreet, MARKET, LANDING } from './layout.js';
+import { RADIUS, GARDEN, RIVER, POND_LEVEL, height, inPond, inRiver, inRect, inLot, nearLot, pondDistance, islandDistance, VILLA, NOBLE, COMPOUNDS, SHRINE, onStreet, MARKET, LANDING } from './layout.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0.1, grass: 0.55, rock: 0, soil: 0.35, fields: 0, dry: 0.15, warmth: 0.5, red: 0.05, road: 0, snow: 0, forest: 0.1 };
   // the garden: a beach of gravel round the pond, moss under the pines and maples beyond it
   if (islandDistance(x, z) < -1.5) { c.sand = 0.15; c.grass = 0.8; c.soil = 0.05; return c; }      // the small island's turf
+  if (inRect(SHRINE.terrace, x, z)) { c.sand = 0.85; c.grass = 0.05; c.soil = 0.1; c.dry = 0.2; return c; }      // the shrine's court of gravel
   if (inRect(GARDEN, x, z)) {
     const d = pondDistance(x, z);
     if (d < 5 || Math.hypot(x + 40, z) < 26) { c.sand = 0.85; c.grass = 0.1; c.soil = 0.05; c.dry = 0.05; return c; }
@@ -28,6 +29,7 @@ function water(x, z, y) { return (inRiver(x, z) && y < RIVER.level + 0.3) || (in
 function waterLevel(x, z) { return inRiver(x, z) ? RIVER.level : inPond(x, z) ? POND_LEVEL : -Infinity; }
 function fromWater(x, z) { return inRiver(x, z) || inPond(x, z) ? -2 : Math.max(-5, Math.min(40, height(x, z) - RIVER.level)); }
 function planting(x, z) {
+  if (inRect(SHRINE.terrace, x, z, 2)) return inRect(SHRINE.terrace, x, z, -4) ? null : { sugi: 0.12, grass: 6 };   // the court is kept clear, a cedar grove round it
   if (islandDistance(x, z) < -1.5) return { grass: 6 };                      // the small island: low grass in its middle
   if (COMPOUNDS.some((r) => inRect(r, x, z, 1))) return null;
   if (Math.hypot(x, z) > RADIUS - 6 || inRiver(x, z) || inPond(x, z) || inLot(x, z, 1) || onStreet(x, z, 0.5) || inRect(MARKET, x, z, 2) || Math.hypot(x - LANDING.c[0], z - LANDING.c[1]) < 12) return null;

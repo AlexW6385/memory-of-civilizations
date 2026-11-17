@@ -391,9 +391,105 @@ function shoro(el, ctx) {
 function boxT(x0, y0, z0, x1, y1, z1) { const o = []; hexa(o, [[x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1]], [[x0, y1, z0], [x1, y1, z0], [x1, y1, z1], [x0, y1, z1]]); return o; }
 function hexaBox(out, top, t) { hexa(out, top.map((p) => [p[0], p[1] - t, p[2]]), top); }
 
+
+/**
+ * The painted pillars of the hall's inside { cols: [{ at: [x, z], y (floor), h, d, dirs: [[dx, dz]…] }] } (docs/buildings §10):
+ * on each round column a lotus-petal collar of gilt at the foot, gilt bands at the head, and on the faces turned to the hall a
+ * vine of gilt scrolling between rosettes (hōsōge) of eight petals of mother-of-pearl round a gilt heart. Everything follows
+ * the column's curve and its slight taper above the middle. [stated: the pillars bore paintings — Niigata Bandaijima release;
+ * hōsōge and mother-of-pearl through the interior — MLIT 001553422; inferred: the pattern's layout]
+ */
+function byodoPillars(el, { bag }) {
+  const G = [], S = [], H = [], GB = [];
+  for (const c of el.cols) {
+    const [cx, cz] = c.at, r = c.d / 2, y0 = c.y + 0.06, top = c.h - 0.06, mid = c.h * 0.5;
+    const rad = (t) => (t <= mid ? r : r * (1 - 0.07 * (t - mid) / (top - mid)));
+    const at = (phi, t, off) => { const rr = rad(t) + off; return [cx + Math.cos(phi) * rr, y0 + t, cz + Math.sin(phi) * rr]; };
+    // the gilt collars: a broad band at the foot with a lotus-petal row above it, narrow bands under the capital
+    const band = (t0, t1, w) => GB.push(lathe([[rad(t0) + 0.002, t0], [rad(t0) + w, t0 + w * 0.6], [rad(t1) + w, t1 - w * 0.6], [rad(t1) + 0.002, t1]], 20, null, cx, y0, cz));
+    band(0.3, 0.42, 0.012); band(0.46, 0.49, 0.009);
+    band(top - 0.78, top - 0.72, 0.009); band(top - 0.42, top - 0.34, 0.011); band(top - 0.1, top - 0.02, 0.012);
+    for (let k = 0; k < 16; k++) {                                  // upright petals of the lotus collar, each a pointed leaf on the column's face
+      const phi = (k + 0.5) / 16 * Math.PI * 2, dp = 0.5 / 16 * Math.PI * 2 * 0.8;
+      const A = at(phi - dp, 0.5, 0.009), B = at(phi + dp, 0.5, 0.009), Cc = at(phi + dp * 0.9, 0.74, 0.009), D = at(phi, 0.92, 0.009), E = at(phi - dp * 0.9, 0.74, 0.009);
+      G.push(...A, ...B, ...Cc, ...A, ...Cc, ...E, ...E, ...Cc, ...D, ...A, ...Cc, ...B, ...A, ...E, ...Cc, ...E, ...D, ...Cc);
+    }
+    // the faces turned to the hall: rosettes in a column with a gilt vine between them
+    const ts = [1.35, 2.0, 2.65, 3.3, 3.95];
+    for (const d of c.dirs) {
+      const phi = Math.atan2(d[1], d[0]);
+      const pt = (s, t, off) => at(phi + s / rad(t), t, off);        // s metres along the face from its middle
+      const vine = [];
+      for (let t = 1.15; t <= 4.15; t += 0.1) vine.push(pt(0.09 * Math.sin((t - 1.15) * 5.2), t, 0.007));
+      for (let i = 0; i < vine.length - 1; i++) H.push(rod(vine[i], vine[i + 1], 0.0055, 0.0055, 4));
+      for (const t of ts) {
+        H.push(ellipsoid(pt(0, t, 0.004), 0.021, 0.021, 0.021, 8, 4));
+        for (let k = 0; k < 8; k++) {
+          const a = k / 8 * Math.PI * 2, ca = Math.cos(a), sa = Math.sin(a), q = (rr, w, o) => pt(ca * rr - sa * w, t + sa * rr + ca * w, 0.009 + o);
+          const base = q(0.03, 0, 0), l = q(0.058, -0.028, 0), tip = q(0.115, 0, 0), rg = q(0.058, 0.028, 0);
+          S.push(...base, ...l, ...tip, ...base, ...tip, ...rg, ...base, ...tip, ...l, ...base, ...rg, ...tip);
+        }
+      }
+    }
+  }
+  bag.add('clay_gilt', fromTriangles(G)); bag.add('shell_inlay', fromTriangles(S));
+  for (const g of [...GB, ...H]) bag.add('clay_gilt', g);
+}
+
+/**
+ * The offering table before the dais { at: [x, z], y (floor), dir (toward the dais, unit) }: a low black-lacquer table with
+ * gilt edges and legs of cusped profile, on it the incense burner (kōro: a bowl on three feet with a pierced lid and a lotus bud),
+ * a pair of flower vases (kebyō) holding gilt lotus, a pair of candlesticks with lit candles. [inferred: the furniture a Heian
+ * Amida hall's altar bore; the forms]
+ */
+function byodoOffering(el, { bag, col }) {
+  const [x, z] = el.at, y = el.y, d = el.dir || [-1, 0], u = [-d[1], d[0]];
+  const P = (a, b, h) => [x + d[0] * a + u[0] * b, y + h, z + d[1] * a + u[1] * b];   // a along dir, b across it
+  const T = 0.46, L = [], G = [], B = [], F = [];
+  const slab = (a0, b0, a1, b1, h0, h1, out) => { const p = [P(a0, b0, h0), P(a1, b0, h0), P(a1, b1, h0), P(a0, b1, h0)], q = [P(a0, b0, h1), P(a1, b0, h1), P(a1, b1, h1), P(a0, b1, h1)]; hexa(out, p, q); };
+  { const a = P(-0.23, -0.535, 0), b = P(0.23, 0.535, 0); col?.rect([Math.min(a[0], b[0]), Math.min(a[2], b[2]), Math.max(a[0], b[0]), Math.max(a[2], b[2])], y, y + T + 0.05); }
+  slab(-0.21, -0.52, 0.21, 0.52, T - 0.05, T, L);                                    // the top
+  slab(-0.225, -0.535, 0.225, 0.535, T - 0.012, T + 0.012, G);                        // its gilt rim
+  slab(-0.16, -0.46, 0.16, 0.46, T - 0.09, T - 0.05, L);                                // the apron
+  for (const sa of [-1, 1]) for (const sb of [-1, 1]) {
+    slab(sa * 0.16 - 0.03, sb * 0.46 - 0.03, sa * 0.16 + 0.03, sb * 0.46 + 0.03, 0, T - 0.09, L);
+    slab(sa * 0.16 - 0.036, sb * 0.46 - 0.036, sa * 0.16 + 0.036, sb * 0.46 + 0.036, 0.0, 0.03, G);      // the gilt foot
+  }
+  bag.add('lacquer_black', fromTriangles(L)); bag.add('gilt_bronze', fromTriangles(G));
+  // the incense burner in the middle: a bowl on three feet, a lid pierced with a ring of holes, a lotus-bud finial
+  const c = P(0, 0, T);
+  bag.add('bronze', lathe([[0.001, 0.05], [0.06, 0.05], [0.1, 0.1], [0.115, 0.15], [0.105, 0.2], [0.09, 0.2], [0.095, 0.15], [0.085, 0.11], [0.001, 0.1]], 16, null, c[0], c[1], c[2]));
+  bag.add('gilt_bronze', lathe([[0.1, 0.2], [0.11, 0.2], [0.09, 0.27], [0.05, 0.31], [0.03, 0.34], [0.045, 0.37], [0.02, 0.41], [0.001, 0.44], [0.001, 0.2]], 16, null, c[0], c[1], c[2]));
+  for (let k = 0; k < 3; k++) { const a = k / 3 * Math.PI * 2 + 0.4, f = [c[0] + Math.cos(a) * 0.085, c[1], c[2] + Math.sin(a) * 0.085]; bag.add('gilt_bronze', lathe([[0.001, 0], [0.022, 0.0], [0.012, 0.03], [0.02, 0.055], [0.001, 0.055]], 6, null, f[0], f[1], f[2])); }
+  for (let k = 0; k < 10; k++) { const a = k / 10 * Math.PI * 2, f = [c[0] + Math.cos(a) * 0.075, c[1] + 0.25, c[2] + Math.sin(a) * 0.075]; bag.add('opening', lathe([[0.001, 0], [0.011, 0], [0.011, 0.012], [0.001, 0.012]], 5, null, f[0], f[1], f[2])); }
+  // two vases with gilt lotus (the blossom of eight petals open, a bud beside it) and two candlesticks with their candles
+  for (const s of [-1, 1]) {
+    const v = P(0, s * 0.4, T);
+    bag.add('gilt_bronze', lathe([[0.001, 0], [0.04, 0], [0.03, 0.03], [0.018, 0.1], [0.04, 0.17], [0.05, 0.2], [0.03, 0.235], [0.036, 0.26], [0.001, 0.26]], 12, null, v[0], v[1], v[2]));
+    bag.add('lotus_leaf', rod([v[0], v[1] + 0.22, v[2]], [v[0] + u[0] * s * 0.03, v[1] + 0.52, v[2] + u[1] * s * 0.03], 0.007, 0.006, 4));
+    bag.add('lotus_leaf', rod([v[0], v[1] + 0.22, v[2]], [v[0] - u[0] * s * 0.07, v[1] + 0.4, v[2] - u[1] * s * 0.07], 0.005, 0.005, 4));
+    const t = [v[0] + u[0] * s * 0.03, v[1] + 0.52, v[2] + u[1] * s * 0.03];
+    for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; B.push(petalFlatTilt(t, a, 0.02, 0.09)); }
+    bag.add('gilt_bronze', lathe([[0.001, 0], [0.025, 0.005], [0.001, 0.025]], 8, null, t[0], t[1] - 0.006, t[2]));
+    const w = P(0.0, s * 0.24, T);
+    bag.add('gilt_bronze', lathe([[0.001, 0], [0.04, 0], [0.04, 0.012], [0.012, 0.03], [0.012, 0.14], [0.03, 0.15], [0.03, 0.17], [0.012, 0.17], [0.001, 0.17]], 10, null, w[0], w[1], w[2]));
+    bag.add('ivory', lathe([[0.001, 0], [0.014, 0], [0.014, 0.17], [0.001, 0.17]], 8, null, w[0], w[1] + 0.17, w[2]));
+    bag.add('flame', lathe([[0.001, 0], [0.012, 0.012], [0.001, 0.055]], 6, null, w[0], w[1] + 0.34, w[2]));
+  }
+  for (const g of B) bag.add('clay_gilt', g);
+  void F;
+}
+/** An open lotus blossom's petal: a leaf-shaped plate rising and opening out from its centre t at angle a (r0 → r1 along the slope). */
+function petalFlatTilt(t, a, r0, r1) {
+  const tri = [], w = (r1 - r0) * 0.3, c = Math.cos(a), sn = Math.sin(a), P = (rr, ww, dy) => [t[0] + c * rr - sn * ww, t[1] + dy, t[2] + sn * rr + c * ww];
+  const lift = 0.5, A = P(r0, 0, 0), L = P(r0 + (r1 - r0) * 0.5, -w, (r1 - r0) * 0.5 * lift), R = P(r0 + (r1 - r0) * 0.5, w, (r1 - r0) * 0.5 * lift), Tt = P(r1, 0, (r1 - r0) * lift);
+  tri.push(...A, ...L, ...Tt, ...A, ...Tt, ...R, ...A, ...Tt, ...L, ...A, ...R, ...Tt);
+  return fromTriangles(tri);
+}
+
 const base = STYLES.japanese;
 registerStyle('japanese-byodo', {
   ...base,
-  elements: { ...base.elements, byodo_mirrors: byodoMirrors, raigo, shoro },
+  elements: { ...base.elements, byodo_mirrors: byodoMirrors, byodo_pillars: byodoPillars, byodo_offering: byodoOffering, raigo, shoro },
   objects: { ...base.objects, byodo_amida: amida, byodo_cloud: cloudBodhisattva, byodo_canopy: byodoCanopy },
 });

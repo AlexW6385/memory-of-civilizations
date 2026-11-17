@@ -7,8 +7,8 @@ import { lots, RADIUS, HALL, VILLA } from './layout.js';
 
 const ID = 'heian-uji';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
-/** Where the incense burns: on its stand before the dais in the hall, 1.1 m (the floor) + 0.9 m up. */
-export const CENSER = [HALL.origin[0] + 3.2, 2.0, 0];
+/** Where the incense burns: from the burner on the offering table before the dais in the hall: the floor 1.1 m, the table 0.46 m, the burner's lid 0.44 m. */
+export const CENSER = [HALL.origin[0] + 1.5, 1.1 + 0.46 + 0.44, 0];
 
 function emitters() {
   const E = [], rand = rng(1100);
