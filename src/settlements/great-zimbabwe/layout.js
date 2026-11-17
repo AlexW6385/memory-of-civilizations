@@ -93,7 +93,10 @@ export function compounds() {
       const a = a0 + (i + 0.5) * Math.PI * 2 / n, hx = x + Math.cos(a) * 5.4, hz = z + Math.sin(a) * 5.4, toC = Math.atan2(z - hz, x - hx);
       huts.push({ c: [hx, hz], r: 2.35 + rand() * 0.6, y: height(hx, hz), seed: (Math.round(toC * 100) % 628 + 628) % 628, open: false });
     }
-    huts[0].open = rand() < 0.4;
+    // beyond the first homesteads, most are walk-in: the first house of seven in ten, a second of three in ten (the rest keep their doors shut)
+    const q = rand();
+    huts[0].open = q < 0.7;
+    if (huts.length > 2) huts[1].open = q < 0.3;
     COMP.push({ c: [x, z], r: R, gap, y, huts, granary: [x + Math.cos(a0) * 6.2, z + Math.sin(a0) * 6.2], seed: Math.floor(rand() * 1e6) });
   }
   // the homesteads nearest the arrival are the ones the visitor walks into: all their houses open (furnished inside)
@@ -126,4 +129,24 @@ export function daras() {
     }
   }
   return DARAS;
+}
+
+let FIRINGS = null;
+/** The potters' firing places by homesteads: [{ c, y, rot, seed }] — one beside every fifth homestead where the ground is free. */
+export function firings() {
+  if (FIRINGS) return FIRINGS;
+  FIRINGS = [];
+  const all = compounds(), D = daras();
+  all.forEach((k, i) => {
+    if (k.inner || i % 5 !== 2 || FIRINGS.length >= 14) return;
+    for (const off of [1.2, -1.2, 2.0, -2.0]) {
+      const a = k.gap + off, x = k.c[0] + Math.cos(a) * (k.r + 4.2), z = k.c[1] + Math.sin(a) * (k.r + 4.2), r = 3.2;
+      if (inEnclosure(x, z, 6) || inWalled(x, z, 6) || onAscent(x, z, 4) || height(x, z) > 3.5 || Math.hypot(x, z) > RADIUS - 60 || pathDist(x, z) < r + 2) continue;
+      if (all.some((o) => o !== k && Math.hypot(o.c[0] - x, o.c[1] - z) < o.r + r + 3) || all.some((o) => o.huts.some((h) => Math.hypot(h.c[0] - x, h.c[1] - z) < h.r + r + 1.5))) continue;
+      if (KRAAL_AT.some(([kx, kz, kr]) => Math.hypot(kx - x, kz - z) < kr + r + 3) || D.some((q) => Math.hypot(q.c[0] - x, q.c[1] - z) < q.r + r + 3) || FIRINGS.some((q) => Math.hypot(q.c[0] - x, q.c[1] - z) < 10)) continue;
+      FIRINGS.push({ c: [x, z], y: height(x, z), rot: a + Math.PI, seed: k.seed % 997 });
+      break;
+    }
+  });
+  return FIRINGS;
 }

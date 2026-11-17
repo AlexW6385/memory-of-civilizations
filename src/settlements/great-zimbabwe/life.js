@@ -3,7 +3,7 @@
 // sticks; women grinding and carrying water in the courts of the Valley Ruins; a trader with the goods of the
 // coast; a few people in the Great Enclosure. Kept few and quiet. Pure data.
 
-import { ENCLOSURE, VALLEY, WEST, RADIUS, KRAAL_AT, height, huts, daras, compounds, inWalled, inEnclosure, pathDist } from './layout.js';
+import { ENCLOSURE, VALLEY, WEST, RADIUS, KRAAL_AT, height, huts, daras, firings, compounds, inWalled, inEnclosure, pathDist } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));     // a figure faces −z when rot = 0
@@ -111,6 +111,8 @@ export function people() {
       man([55.2, 80.2], y, face([55.2, 80.2], [57.5, 79.5]), { pose: 'cross' });
       const w = [47.8, 77.5]; woman(w, height(w[0], w[1]), face(w, [44, 90]), { carry: 'basket' }); }
   }
+  // a potter kneeling by each firing place, tending the heap
+  for (const f of firings()) { const c = Math.cos(f.rot), sn = Math.sin(f.rot), p = [f.c[0] + c * 1.9 - sn * 1.4, f.c[1] + sn * 1.9 + c * 1.4]; woman(p, height(p[0], p[1]), face(p, f.c), { pose: 'kneel' }); }
   // in the Western Enclosure on the hill and in the Great Enclosure
   man([WEST.c[0] + 2, WEST.c[1] + 9], WEST.y, 0.4, { over: 'cape', cloth: 'hide_brown' });
   woman([WEST.c[0] - 4, WEST.c[1] + 8], WEST.y, -0.6, { carry: 'basket' });
@@ -137,7 +139,7 @@ export function mounds() {
   const rand = rng(1352);
   for (let t = 0; t < 4000 && MOUNDS.length < 46; t++) {
     const x = (rand() * 2 - 1) * 230, z = (rand() * 2 - 1) * 230;
-    if (!clear(x, z, 3) || pathDist(x, z) < 4 || compounds().some((c) => Math.hypot(c.c[0] - x, c.c[1] - z) < c.r + 3) || KRAAL_AT.some(([kx, kz, kr]) => Math.hypot(kx - x, kz - z) < kr + 4)) continue;
+    if (!clear(x, z, 3) || pathDist(x, z) < 4 || compounds().some((c) => Math.hypot(c.c[0] - x, c.c[1] - z) < c.r + 3) || KRAAL_AT.some(([kx, kz, kr]) => Math.hypot(kx - x, kz - z) < kr + 4) || firings().some((f) => Math.hypot(f.c[0] - x, f.c[1] - z) < 6)) continue;
     if (MOUNDS.some((m) => Math.hypot(m.c[0] - x, m.c[1] - z) < 10)) continue;
     MOUNDS.push({ c: [x, z], r: 0.7 + rand() * 0.9, h: 0.9 + rand() * 1.5, y: height(x, z), seed: Math.floor(rand() * 1e6) });
   }
