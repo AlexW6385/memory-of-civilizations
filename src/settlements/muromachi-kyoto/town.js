@@ -2,7 +2,7 @@
 // street, a quarter of them open as shops; the stream in its stone channel with the bridge to Ginkaku-ji; the shrine with its
 // torii, hall and the Noh stage with the players at their places; a tea hut in a yard; bamboo fences, wells and lanterns in the
 // yards; the shopkeepers at their counters, monks, samurai.
-import { RADIUS, STREAM, BRIDGES, SHRINE, TEA, GINKAKU, RYOAN, lots, yards, isOpen, inRect } from './layout.js';
+import { RADIUS, STREAM, BRIDGES, SHRINE, TEA, GINKAKU, RYOAN, lots, yards, isOpen, inRect, mirrored, frontOf } from './layout.js';
 import { lifeTiles } from './life.js';
 import { gutters, furniture, yardWork, streamWork, templeWork } from './streetwork.js';
 
@@ -46,7 +46,7 @@ function people() {
   const fig = (at, rot, o = {}) => P.push({ t: 'figure', at, y: o.y ?? 0, rot, seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: ['cloth_indigo', 'cloth_brown', 'cloth_grey', 'cloth_ochre'][Math.floor(rand() * 4)], cloth2: 'cloth_grey', skin: 'skin_light', hat: 'none', hair: 'topknot', hairMat: 'hair_dark', beard: 0, feet: 'shod', over: 'sash', ...o });
   const monk = (at, rot, o = {}) => fig(at, rot, { cloth: 'cloth_black', cloth2: 'cloth_grey', hair: 'shaven', over: 'collar', ...o });
   // the shopkeepers kneeling at their counters in the open shops
-  for (const l of lots()) if (isOpen(l)) { const d = l.d, w = l.w, p = W(l, -w / 2 + 1.2, -1.3); if (d > 9) fig(p, heading(l), l.keeper ? { y: 0.45, pose: 'seiza', cloth: 'cloth_black', cloth2: 'cloth_grey', hair: 'shaven', over: 'collar' } : { y: 0.45, pose: 'seiza', cloth: 'cloth_brown', over: 'apron', cloth2: 'cloth_indigo' }); }
+  for (const l of lots()) if (isOpen(l)) { const d = l.d, w = l.w, p = W(l, (mirrored(l) ? 1 : -1) * (w / 2 - 1.2), -1.3); if (d > 9) fig(p, heading(l), l.keeper ? { y: 0.45, pose: 'seiza', cloth: 'cloth_black', cloth2: 'cloth_grey', hair: 'shaven', over: 'collar' } : { y: 0.45, pose: 'seiza', cloth: 'cloth_brown', over: 'apron', cloth2: 'cloth_indigo' }); }
   // Ryōan-ji: a monk seated on the veranda before the garden, one in the Buddha room; Ginkaku-ji: a monk at the Dōjinsai's desk
   const hoj = { at: RYOAN.hojo, facing: 'n' };
   monk(W(hoj, -5, 6.9), heading(hoj), { y: 0.85, pose: 'seiza' }); monk(W(hoj, -1.2, 7.0), heading(hoj), { y: 0.85, pose: 'seiza' });
@@ -65,7 +65,7 @@ function people() {
 
 export async function town() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 60) plans.push(base(`muromachi-town-${i / 60}`, all.slice(i, i + 60).map((l) => ({ t: 'machiya_m', at: l.at, facing: l.facing, w: l.w, d: l.d, seed: l.seed, trade: l.trade, open: isOpen(l), y: 0 }))));
+  for (let i = 0; i < all.length; i += 60) plans.push(base(`muromachi-town-${i / 60}`, all.slice(i, i + 60).map((l) => ({ t: 'machiya_m', at: l.at, facing: l.facing, w: l.w, d: l.d, seed: l.seed, trade: l.trade, open: isOpen(l), mirror: mirrored(l), front: frontOf(l), y: 0 }))));
   plans.push(base('muromachi-civic', civic()));
   plans.push(base('muromachi-gutters', gutters()));
   plans.push(base('muromachi-furniture', [...furniture(), ...streamWork(), ...templeWork()]));

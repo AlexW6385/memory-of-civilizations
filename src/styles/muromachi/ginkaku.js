@@ -130,12 +130,37 @@ function kannonDen(el, ctx) {
     // the cusped windows: three on the front, one at each side
     for (const x of [-2.1, 0, 2.1]) katomado(T, x, yT + 1.35, uz + 0.04, 1.1, 1.7);
     katomado(T, 0, yT + 1.35, -uz - 0.04, 1.1, 1.7, -1);
-    // the upper hip roof, its eave a hand above the head beam, the phoenix on the ridge
+    // the upper storey's bracket sets (kara-yō / Zen style, the "Kara style" of the upper floor — docs §10b): on the head beam, a block, a
+    // first arm with its cross arms, a second block and a second arm bearing the purlin that runs round the building; plaster between
+    // them; the eave's rafters in two rows beyond. The roof stands on them, so it is raised the height of the sets.
+    const yR = yU + 0.95, bk = 'lacquer_black', zf = uz + 0.12, xf = ux + 0.12;
+    B(PL, -ux - 0.1, yU, uz - 0.02, ux + 0.1, yU + 1.3, uz + 0.08); B(PL, -ux - 0.1, yU, -uz - 0.08, ux + 0.1, yU + 1.3, -uz + 0.02);
+    B(PL, -ux - 0.08, yU, -uz, -ux + 0.02, yU + 1.3, uz); B(PL, ux - 0.02, yU, -uz, ux + 0.08, yU + 1.3, uz);
+    const set = (c, f, alongX) => {                                    // c along the face, f the face's distance from the centre (signed: which side)
+      const sg = Math.sign(f), a = Math.abs(f);
+      const box = (u0, y0_, v0, u1, y1_, v1) => alongX ? B(bk, c + u0, y0_, sg * (a + v0), c + u1, y1_, sg * (a + v1)) : B(bk, sg * (a + v0), y0_, c + u0, sg * (a + v1), y1_, c + u1);
+      box(-0.14, yU, -0.02, 0.14, yU + 0.14, 0.2);                       // the cap block on the beam
+      box(-0.07, yU + 0.14, -0.1, 0.07, yU + 0.27, 0.52); box(-0.42, yU + 0.14, -0.02, 0.42, yU + 0.27, 0.1);        // the first arm and its cross arm
+      box(-0.11, yU + 0.27, 0.36, 0.11, yU + 0.41, 0.58); box(-0.09, yU + 0.27, -0.02, 0.09, yU + 0.41, 0.1);        // the second block, a block on the cross arm
+      box(-0.06, yU + 0.41, 0.0, 0.06, yU + 0.52, 0.86); box(-0.46, yU + 0.41, -0.02, 0.46, yU + 0.52, 0.1);        // the second arm and its cross arm
+    };
+    for (let i = 0; i <= 3; i++) set(-ux + i * 2.1, zf, true), set(-ux + i * 2.1, -zf, true);
+    for (let i = 0; i < 3; i++) set(-ux + 1.05 + i * 2.1, zf, true), set(-ux + 1.05 + i * 2.1, -zf, true);
+    for (let j = 0; j <= 2; j++) set(-uz + j * 2.1, xf, false), set(-uz + j * 2.1, -xf, false);
+    for (let j = 0; j < 2; j++) set(-uz + 1.05 + j * 2.1, xf, false), set(-uz + 1.05 + j * 2.1, -xf, false);
+    const pu = 0.86;                                                  // the purlin (keta) on the second arms, all round; its end blocks at the corners
+    B(bk, -ux - 0.5, yU + 0.5, zf + pu - 0.1, ux + 0.5, yU + 0.62, zf + pu + 0.08); B(bk, -ux - 0.5, yU + 0.5, -zf - pu - 0.08, ux + 0.5, yU + 0.62, -zf - pu + 0.1);
+    B(bk, xf + pu - 0.1, yU + 0.5, -uz - 0.5, xf + pu + 0.08, yU + 0.62, uz + 0.5); B(bk, -xf - pu - 0.08, yU + 0.5, -uz - 0.5, -xf - pu + 0.1, yU + 0.62, uz + 0.5);
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) B(bk, sx * xf - 0.17, yU, sz * zf - 0.17, sx * xf + 0.17, yU + 0.27, sz * zf + 0.17);
+    // the rafters: a lower row from the purlin to the eave, spaced as the bays, the ends of the upper row between them
+    for (let x = -ux - 0.9; x <= ux + 0.9; x += 0.26) for (const sz of [-1, 1]) { B(WD, x - 0.035, yR - 0.4, sz * (uz + 0.12 + pu - 0.05) - (sz < 0 ? 0.29 : 0), x + 0.035, yR - 0.31, sz * (uz + 0.12 + pu - 0.05) + (sz > 0 ? 0.29 : 0)); }
+    for (let z = -uz - 0.9; z <= uz + 0.9; z += 0.26) for (const sx of [-1, 1]) { B(WD, sx * (ux + 0.12 + pu - 0.05) - (sx < 0 ? 0.29 : 0), yR - 0.4, z - 0.035, sx * (ux + 0.12 + pu - 0.05) + (sx > 0 ? 0.29 : 0), yR - 0.31, z + 0.035); }
+    // the upper hip roof on the sets, the phoenix on the ridge
     const R = 3.2;
-    STYLES.japanese.elements.irimoya({ c: [0, 0], A: ux + 1.25, B: uz + 1.25, y: yU + 0.1, rise: R, lift: 0.75, gable: 1, mat: BARK, soffit: TM }, { bag, col });
+    STYLES.japanese.elements.irimoya({ c: [0, 0], A: ux + 1.25, B: uz + 1.25, y: yR, rise: R, lift: 0.75, gable: 1, mat: BARK, soffit: TM }, { bag, col });
     const phx = STYLES.japanese.objects?.phoenix;
-    B('gilt_bronze', -0.3, yU + 0.1 + R - 0.05, -0.3, 0.3, yU + 0.1 + R + 0.25, 0.3);
-    phx?.({ at: [0, 0], y: yU + 0.1 + R + 0.25, dir: [0, 1] }, { bag, col });
+    B('gilt_bronze', -0.3, yR + R - 0.05, -0.3, 0.3, yR + R + 0.25, 0.3);
+    phx?.({ at: [0, 0], y: yR + R + 0.25, dir: [0, 1] }, { bag, col });
   });
 }
 export const ginkakuElements = { kannon_den: kannonDen };

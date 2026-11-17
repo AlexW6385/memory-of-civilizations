@@ -1,6 +1,6 @@
 // Tōgu-dō with its Dōjinsai, the Ryōan-ji hōjō and its rock garden (docs/settlements/muromachi-kyoto.md §3.1, §4).
 import { STYLES } from '../../core/build.js';
-import { lathe } from '../../core/geom.js';
+import { lathe, fromTriangles } from '../../core/geom.js';
 import { local, tatami, rng, WD, PL, BARK, TM } from './kit.js';
 
 /** A thin screen (fusuma or shoji) from x0 to x1 at z (or from z0 to z1 at x) with the mid-section open: panels of paper in dark frames. */
@@ -27,6 +27,36 @@ function screenX(B, col, z0, z1, x, y0, y1, open = null, mat = 'shoji', th = 0.0
     col.rect([x - th, a, x + th, b], y0, y1);
   }
   if (open) { col.rect([x - th, z0, x + th, open[0]], y0, y1); col.rect([x - th, open[1], x + th, z1], y0, y1); }
+}
+
+/** Ink landscape (suibokuga) on the closed panels of a screen, both faces, a different scene on each: grey-wash hills in one run across the panels,
+ * the sky left as bare paper (ma), a black foot of bank, and on one or two panels a pine with its flat clusters. axis 'z': the screen runs along x at z = c;
+ * 'x': along z at x = c. [inferred: the hōjō's rooms were painted in ink in the Zen manner; no painting survives at Ryōan-ji for 1490] */
+function ink(B, T, axis, c, a0, a1, y0, y1, open, seed) {
+  const n = Math.max(1, Math.round((a1 - a0) / 0.9)), w = (a1 - a0) / n, V = (u, y, off) => (axis === 'z' ? [u, y, c + off] : [c + off, y, u]);
+  const quad = (o, p, q, yb, ya, yq, off) => { const A = V(p, yb, off), Bq = V(q, yb, off), C = V(q, yq, off), D = V(p, ya, off); o.push(...A, ...Bq, ...C, ...A, ...C, ...Bq, ...A, ...C, ...D, ...A, ...D, ...C); };
+  for (const face of [1, -1]) {
+    const r = rng(seed + (face > 0 ? 0 : 31)), off = face * 0.034, ph = r() * 6, amp = 0.4 + 0.3 * r(), trees = [Math.floor(r() * n), (Math.floor(r() * n) + 4) % n];
+    const hill = (u) => 0.12 + amp * (0.5 + 0.5 * Math.sin(u * 1.7 + ph)) * (0.55 + 0.45 * Math.sin(u * 4.1 + ph * 2)), wash = [], blk = [];
+    for (let i = 0; i < n; i++) {
+      const a = a0 + i * w, b = a + w;
+      if (open && a >= open[0] - 1e-6 && b <= open[1] + 1e-6) continue;
+      const ua = a + 0.05, ub = b - 0.04, yb = y0 + 0.55, S = 3;
+      for (let k = 0; k < S; k++) { const p = ua + (ub - ua) * k / S, q = ua + (ub - ua) * (k + 1) / S; quad(wash, p, q, yb, yb + hill(p), yb + hill(q), off); }
+      for (let k = 0; k < S; k++) { const p = ua + (ub - ua) * k / S, q = ua + (ub - ua) * (k + 1) / S; quad(blk, p, q, y0 + 0.14, y0 + 0.14 + 0.1 + 0.12 * Math.abs(Math.sin(p * 2.3 + ph)), y0 + 0.14 + 0.1 + 0.12 * Math.abs(Math.sin(q * 2.3 + ph)), off); }
+      if (trees.includes(i)) {
+        const u = (ua + ub) / 2, lean = (r() - 0.5) * 0.12, top = y0 + 1.55 + r() * 0.3;
+        quad(blk, u - 0.025, u + 0.025, y0 + 0.2, y0 + 0.2, top, off);
+        for (const [fy, fu, fr] of [[0.55, -0.12, 0.17], [0.38, 0.14, 0.2], [0.18, -0.06, 0.15]]) {
+          const cy = top - fy * 0.9, cu = u + fu + lean * fy, A = V(cu, cy, off);
+          for (let k = 0; k < 6; k++) { const a1_ = k / 6 * Math.PI * 2, a2 = (k + 1) / 6 * Math.PI * 2, P1 = V(cu + Math.cos(a1_) * fr, cy + Math.sin(a1_) * fr * 0.32, off), P2 = V(cu + Math.cos(a2) * fr, cy + Math.sin(a2) * fr * 0.32, off); blk.push(...A, ...P1, ...P2, ...A, ...P2, ...P1); }
+          quad(blk, Math.min(u, cu) - 0.01, Math.max(u, cu) + 0.01, cy - 0.02, cy - 0.02, cy, off);
+        }
+      }
+    }
+    if (wash.length) T('cloth_grey', wash); if (blk.length) T('cloth_black', blk);
+  }
+  void B;
 }
 
 function togudo(el, ctx) {
@@ -99,7 +129,7 @@ const MAT_HALF = 'reed_mat';
 
 /** The hōjō (abbot's quarters) { at (its centre), facing: the veranda's side, W, D }: six rooms in two rows of three, the veranda along the front. */
 function hojo(el, ctx) {
-  local(el, ctx, ({ bag, col, B, L }, y0) => {
+  local(el, ctx, ({ bag, col, B, L, T }, y0) => {
     const W = el.W ?? 26, D = el.D ?? 12, hw = W / 2, hd = D / 2, F = 0.85, H = 2.9, y1 = y0 + F, yc = y1 + H, bay = W / 12;
     for (let i = 0; i <= 12; i++) for (const z of [-hd, -hd + D / 2, hd]) { const x = -hw + i * bay; B('granite_block', x - 0.22, y0, z - 0.22, x + 0.22, y0 + 0.36, z + 0.22); B(WD, x - 0.1, y0 + 0.36, z - 0.1, x + 0.1, yc + 0.2, z + 0.1); }
     B(TM, -hw, y1 - 0.25, -hd, hw, y1, hd);
@@ -124,6 +154,8 @@ function hojo(el, ctx) {
     col.floor([-hw + 0.1, -hd + 0.1, hw - 0.1, hd - 0.1], y1);
     for (const i of [1, 2]) screenX(B, col, -hd + 0.1, hd - 0.1, cx[i], y1, yc, i === 1 ? [-1.8, -0.6] : [-hd + 1, -hd + 2.2]);
     screenZ(B, col, -hw + 0.1, hw - 0.1, zm, y1, yc, [cx[1] + 1.0, cx[1] + 3.6]);
+    for (const i of [1, 2]) ink(B, T, 'x', cx[i], -hd + 0.1, hd - 0.1, y1, yc, i === 1 ? [-1.8, -0.6] : [-hd + 1, -hd + 2.2], 40 + i);
+    ink(B, T, 'z', zm, -hw + 0.1, hw - 0.1, y1, yc, [cx[1] + 1.0, cx[1] + 3.6], 47);
     for (let r = 0; r < 3; r++) { const a = cx[r] + (r === 0 ? 0.1 : 0.06), b = cx[r + 1] - (r === 2 ? 0.1 : 0.06);
       tatami(B, a, b, zm + 0.06, hd - 0.1, y1, true); if (r === 1) B(TM, a, y1 - 0.02, -hd + 0.1, b, y1 + 0.002, zm - 0.06); else tatami(B, a, b, -hd + 0.1, zm - 0.06, y1, true); }
     // the Buddha room (middle, rear): the altar against the back wall
@@ -148,6 +180,18 @@ function hojo(el, ctx) {
   });
 }
 
+/** One garden stone as a faceted body (not a body of revolution): five rings of eight to eleven points with their own radii, an oval plan of
+ * half-axes w × d, the upper rings shifted by `lean`, a sloping top from `slant`, the foot set into the ground; the flat normals show its planes. */
+export function stoneTris(w, h, d, seed, lean, slant, flat) {
+  const r = rng(seed), n = 9 + Math.floor(r() * 3), prof = flat ? [1.0, 1.08, 1.0, 0.82, 0.5] : [1.0, 1.0, 0.86, 0.64, 0.36], yy = [-0.08, 0.22, 0.5, 0.8, 1.0];
+  const rings = prof.map((k, i) => { const o = []; for (let j = 0; j < n; j++) { const a = (j + 0.4 * (r() - 0.5)) / n * Math.PI * 2, q = k * (0.82 + 0.36 * r()); o.push([Math.cos(a) * w * q + lean * h * yy[i] * (i ? 1 : 0), yy[i] * h + (i === 4 ? slant * Math.cos(a) * w : 0), Math.sin(a) * d * q]); } return o; });
+  const t = [];
+  for (let i = 0; i < 4; i++) for (let j = 0; j < n; j++) { const k = (j + 1) % n, A = rings[i][j], B = rings[i][k], C = rings[i + 1][k], D = rings[i + 1][j]; t.push(...A, ...C, ...B, ...A, ...D, ...C); }
+  const top = rings[4].reduce((m, p) => [m[0] + p[0] / n, m[1] + p[1] / n + 0.03 * h, m[2] + p[2] / n], [0, 0, 0]);
+  for (let j = 0; j < n; j++) t.push(...rings[4][j], ...top, ...rings[4][(j + 1) % n]);
+  return t;
+}
+
 /** The rock garden { rect, y, seed }: white gravel raked in lines along x and in rings round the five groups of stones (3, 2, 3, 2, 5 from west to east), moss under each group, the clay wall on three sides. */
 function karesansui(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, r = rng(el.seed || 15), gy = y + 0.07;
@@ -164,9 +208,10 @@ function karesansui(el, { bag, col }) {
       const a = k / n * 6.28 + gi, d = n === 1 ? 0 : (0.25 + 0.55 * r()) * R * 0.85, sx = cx + Math.cos(a) * d, sz = cz + Math.sin(a) * d * 0.7;
       const s = (k === 0 ? 1.0 : 0.55 + 0.4 * r()) * (n === 5 ? 1.1 : 1), w = 0.5 * s + 0.15, h = (0.45 + 0.5 * r()) * s;
       stones.push([sx, sz, w]);
-      const ph = r() * 6, sk = 0.35 * r();
-      bag.add('rock_boulder', lathe([[0.001, -0.05], [w, -0.05], [w * 1.0, h * 0.3], [w * 0.86, h * 0.7], [w * 0.5, h * 0.95], [0.001, h]], 11, (th, i) => 1 + 0.22 * Math.sin(th * 2 + ph) + 0.12 * Math.sin(th * 5 + ph * 2) + (i > 2 ? -sk * Math.cos(th) * 0.5 : 0), sx, gy, sz));
-      col.circle(sx, sz, w * 0.95, gy, gy + h);
+      // the tallest of a group stands upright and narrow, the others lie broader and lower, leaning from the centre as stones set in the ground do
+      const lean = (k === 0 ? 0.08 : 0.2) * (r() - 0.3), sd = 7 + Math.floor(r() * 1000), asp = 0.65 + 0.5 * r();
+      bag.add('rock_boulder', fromTriangles(stoneTris(k === 0 ? w * 0.85 : w * 1.05, h, (k === 0 ? w * 0.85 : w * 1.05) * asp, sd, lean * Math.cos(a), 0.12 * (r() - 0.5), k !== 0).map((v, i) => (i % 3 === 0 ? v + sx : i % 3 === 1 ? v + gy : v + sz))));
+      col.circle(sx, sz, w * 1.1, gy, gy + h);
     }
   });
   // the raked lines along the garden, broken at the groups, the rings round them
