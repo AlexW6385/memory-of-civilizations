@@ -183,6 +183,13 @@ Open houses (about 120 now, within 330 m of the terrace, shops by preference) ta
 
 **The yards.** Each block's yard holds two or three of: a stone well with its windlass and bucket, a vine arbor over a bench, vegetable beds in timber kerbs, a hen coop on legs with steps, a woodpile under a lean-to, a washing line between posts; the middle of the yard is kept clear of trees for them [inferred: the garden of an Istanbul house, §13].
 
+## 16. Round 2: the landmark seen first (lead, finials, the courtyard portal)
+
+- **Lead roofs (`src/styles/ottoman/lead.js`).** Sinan's domes are covered in lead sheets laid in strips from crown to foot and joined by raised standing seams (rolls) [inferred: the usual lead-roof technique; the Ottoman domes are plainly ribbed in photographs]. Ours: the great dome (64 seams over a sampled shell, a lead ring at the springing, a gilt collar at the crown), the two semidomes (17 seams each), the court's and aisles' bay domes (9–16 seams, the count varied from dome to dome) and the minarets' cones (12 seams), each seam a raised strip tapering to the crown.
+- **The alem.** A gilt spike with three balls and a crescent (horns up), one piece, on the great dome, the bay domes and the minarets [stated: the finials of Ottoman domes are gilt balls and a crescent; ours: sizes inferred].
+- **The courtyard portal (`portal2.js`).** A portal block standing out 2.4 m and rising to 16.4 m, its niche a pointed arch of white marble and red granite voussoirs in turn; in the niche head a muqarnas hood of nine tiers of cells receding upward (the old hood stepped outward as it rose, the wrong way); corner colonnettes of red granite and porphyry with stepped capitals; over the door an inscription tablet in a lapis frame with gilt rules, a small Iznik tile lunette above it, tall pointed Iznik panels in lapis and gilt frames either side; a corbelled cornice [stated for the type: ktb.gov.tr on the portal's marble muqarnas and the court's tile panels; ours inferred in form and size].
+- **Not built.** Exedrae on the semidomes (Studio Matrx, §4.10: none on this plan) and Süleyman's tomb (1566, after the moment shown).
+
 ## Sources
 
 - [Strolling through Istanbul — Freely and Sumner-Boyd, the Süleymaniye](https://erenow.org/common/strolling-through-istanbul-classic-guide-to-the-city/11.php) (the interior's piers, arcades, mihrab, minbar, glass, tiles)

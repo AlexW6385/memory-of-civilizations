@@ -11,6 +11,7 @@
 
 import { box, lathe, fromTriangles, rod, place } from '../../core/geom.js';
 import { arcadeWall, dblT } from './index.js';
+import { seams, domeProfile, alem } from './lead.js';
 
 const S = 'limestone', L = 'lead', M = 'marble_smooth', ST = 'stucco';
 const q4 = (o, a, b, c, d) => o.push(...a, ...b, ...c, ...a, ...c, ...d);
@@ -136,9 +137,13 @@ export function prayerHall(bag, col, p) {
   bag.add('gilt_bronze', lathe([[R * 0.24, shellY(R * 0.24) - 0.05], [R * 0.27, shellY(R * 0.27) - 0.05]], 32, null, cx, yr, cz));
   for (let k = 0; k < 16; k++) { const a = k / 16 * PI * 2, r0 = R * 0.28, r1 = R * (k % 2 ? 0.52 : 0.62); bag.add('gilt_bronze', rod([cx + Math.cos(a) * r0, yr + shellY(r0) - 0.06, cz + Math.sin(a) * r0], [cx + Math.cos(a) * r1, yr + shellY(r1) - 0.06, cz + Math.sin(a) * r1], 0.06, 3)); }
   for (let k = 0; k < 24; k++) { const a = k / 24 * PI * 2, r0 = R * 0.05, r1 = R * 0.2; bag.add('glaze_white', rod([cx + Math.cos(a) * r0, yr + shellY(r0) - 0.06, cz + Math.sin(a) * r0], [cx + Math.cos(a) * r1, yr + shellY(r1) - 0.06, cz + Math.sin(a) * r1], 0.04, 3)); }
-  bag.add(L, lathe([[RO, 0], [RO * 0.94, R * 0.3], [RO * 0.78, R * 0.6], [RO * 0.5, R * 0.86], [0.001, R * 0.97]], 48, null, cx, yr + 0.15, cz));
-  for (const [rr, yy] of [[0.5, 0], [0.75, 0.9], [0.55, 2.0]]) bag.add('gilt_bronze', lathe([[0.1, 0], [rr, 0.35], [0.1, 0.75]], 10, null, cx, yr + 0.15 + R * 0.97 + yy, cz));
-  bag.add('gilt_bronze', rod([cx, yr + R * 0.97, cz], [cx, yr + R * 0.97 + 4.2, cz], 0.08, 6));
+  // the lead of the great dome: a sampled shell with its standing seams, a gilt ring at the crown, the alem
+  const dp = domeProfile(RO, R * 0.97, 16);
+  bag.add(L, lathe(dp, 64, null, cx, yr + 0.15, cz));
+  seams(bag, L, dp, (a, rho, yy) => [cx + Math.cos(a) * rho, yr + 0.15 + yy, cz + Math.sin(a) * rho], 64, 0, Math.PI * 2, 0.2, 0.1, 1.0);
+  bag.add('lead', lathe([[RO * 0.99, 0.0], [RO * 1.015, 0.12], [RO * 1.015, 0.3], [RO * 0.97, 0.45]], 64, null, cx, yr + 0.1, cz));
+  bag.add('gilt_bronze', lathe([[1.0, 0], [1.25, 0.2], [0.5, 0.7], [0.001, 0.8]], 16, null, cx, yr + 0.15 + R * 0.97 - 0.1, cz));
+  alem(bag, cx, yr + 0.15 + R * 0.97 + 0.6, cz, 1.8, 0);
 
   // ——— the semidomes on the qibla axis (north and south) ———
   const NT = 16, NP = 24, cl = 0.24 * R, rr = 1.24 * R, ta = Math.acos(-cl / rr);
@@ -173,6 +178,7 @@ export function prayerHall(bag, col, p) {
     for (let j = 0; j < NP; j++) { const f0 = j / NP * PI, f1 = (j + 1) / NP * PI; for (let k = 0; k < NL; k++) q4(lead, Pt(f0, lp[k][0], lp[k][1]), Pt(f1, lp[k][0], lp[k][1]), Pt(f1, lp[k + 1][0], lp[k + 1][1]), Pt(f0, lp[k + 1][0], lp[k + 1][1])); }
     for (const f of [0, PI]) for (let k = 0; k < NL; k++) { const a = lp[k], b = lp[k + 1], ia = semiH(Math.min(R, a[0])), ib = semiH(Math.min(R, b[0])); q4(cap, Pt(f, a[0], a[1]), Pt(f, b[0], b[1]), Pt(f, Math.min(R, b[0]), ys + ib), Pt(f, Math.min(R, a[0]), ys + ia)); }
     bag.add(L, dblT(lead)); bag.add(L, dblT(cap));
+    seams(bag, L, lp.map(([r, h]) => [r, h]), (a, rho, yy) => Pt(a, rho, yy), 16, 0, PI, 0.16, 0.08, 0.6);
     // the side arches from the piers to the outer wall, opening on the corner bays
     for (const sx of [-1, 1]) arcadeWall(bag, [cx + sx * (R + 0.75), cz + sz * (R + P)], [cx + sx * (R + 0.75), qzOf(cz, sz, Hi)], [[0, Hi - R - P]], ys - 7.5, ys - 7.5, ys + 0.6, 1.5, S, true);
     // the corner fills between the rim and the bay's rectangle
@@ -252,8 +258,8 @@ export function prayerHall(bag, col, p) {
       bag.add('glaze_blue', lathe([[0.001, rD * 0.82 - 0.03], [rD * 0.22, rD * 0.79 - 0.03]], 16, null, xc, ys, zc));
       // outside, on the roof: the drum ring and the lead dome
       bag.add(S, lathe([[rD + 0.25, 0], [rD + 0.25, 0.9], [rD + 0.05, 1.1]], 24, null, xc, ys + 1.2, zc));
-      bag.add(L, lathe([[rD + 0.1, 0], [rD * 0.94, rD * 0.3], [rD * 0.78, rD * 0.6], [rD * 0.5, rD * 0.85], [0.001, rD * 0.95]], 24, null, xc, ys + 2.2, zc));
-      bag.add('gilt_bronze', lathe([[0.1, 0], [0.05, 0.6], [0.001, 0.75]], 6, null, xc, ys + 2.2 + rD * 0.95, zc));
+      { const dq = domeProfile(rD + 0.1, rD * 0.95, 8); bag.add(L, lathe(dq, 24, null, xc, ys + 2.2, zc)); seams(bag, L, dq, (a, rho, yy) => [xc + Math.cos(a) * rho, ys + 2.2 + yy, zc + Math.sin(a) * rho], 12 + (Math.round(xc * 3 + zc * 7) % 5 + 5) % 5, 0, Math.PI * 2, 0.1, 0.05, 0.4); }
+      alem(bag, xc, ys + 2.2 + rD * 0.95 - 0.05, zc, 0.46 + ((Math.round(xc * 5 + zc) % 7 + 7) % 7) * 0.012, 0);
       if (!(sx > 0 && k === 4)) lampRing(bag, xc, y + 4.6, zc, 2.1, 12, 4, (px, pz) => ys + rD * 0.82 * Math.sqrt(Math.max(0, 1 - (Math.hypot(px - xc, pz - zc) / rD) ** 2)) - 0.05);
     }
     bag.add(S, dblT(t)); bag.add(S, dblT(tt)); bag.add(S, dblT(band));
