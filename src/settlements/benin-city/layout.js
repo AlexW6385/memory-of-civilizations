@@ -76,6 +76,22 @@ export function onStreet(x, z, m = 0) {
 const ZONES = [[PALACE[0] - 3, PALACE[1] - 1.2, PALACE[2] + 3, PALACE[3] + 4], GUILD, SQUARE, GREAT, CROSS, MARKET];
 let LOTS = null;
 /**
+ * The plan of a compound by rule from its lot's seed, so that no two are alike (docs/settlements/benin-city.md §12): the depth of the front range
+ * and of the back range, a side range on each hand or none on one (the court then opens on the party wall), the pitch of the thatch, the pattern
+ * of the painted dado (posts, zigzag, lozenges), a roof of shingle for a few. A chief's house keeps the plan its upper storey and stair are built on.
+ * A court of at least 5.6 m is always left between the ranges.
+ */
+export function houseRule(seed, chief, w, d) {
+  if (chief) return { fd: 5.4, bd: 6.4, swL: 3.8, swR: 3.8, pitch: 2.6, dado: seed % 3, roof: 'shingle' };
+  const r = rng(seed * 31 + 7), pick = (a) => a[Math.floor(r() * a.length)];
+  const fd = pick([4.8, 5.4, 6.0]);
+  let bd = pick([5.8, 6.4, 7.0]);
+  bd = Math.min(bd, d - fd - 5.6);
+  let swL = pick([3.2, 3.8, 4.4]), swR = pick([0, 3.2, 3.8, 4.4]);
+  if (w < 17) { swL = Math.min(swL, 3.2); swR = Math.min(swR, 3.2); }
+  return { fd, bd: Math.max(5.2, bd), swL, swR, pitch: pick([2.5, 2.9, 3.3]), dado: Math.floor(r() * 3), roof: r() < 0.15 ? 'shingle' : 'thatch' };
+}
+/**
  * The compounds, in rows between the streets, each facing a street: { rect, seed, y, front ('n' | 's'), chief, w, d, row }.
  * Each row is cut by the lanes and the zones (palace, guild, square, market, great streets) into free runs, and each run is filled
  * with compounds of 15–25 m side by side (a run keeps no gap but the party walls), so that the city is built up between its lanes.
@@ -105,7 +121,8 @@ export function lots() {
           // to the street behind a clay counter); the plain gabled front with its one door
           const onGreat = z1 > GREAT[1] - 12 && z0 < GREAT[3] + 12 && Math.abs(x - 98) > 4;
           const kind = chief ? 'chief' : r < (onGreat ? 0.34 : 0.22) ? 'trade' : r < 0.55 ? 'porch' : 'plain';
-          LOTS.push({ rect, seed: Math.floor(rand() * 1e6), y: 0, front: face, chief, kind, w: w - 0.3, d: z1 - z0, row: za, du: chief ? Math.min(w - 0.3 - 3.3, 9.7 + rand() * 1.5) : (w - 0.3) * (0.3 + 0.4 * rand()) });
+          const seed = Math.floor(rand() * 1e6), du = chief ? Math.min(w - 0.3 - 3.3, 9.7 + rand() * 1.5) : (w - 0.3) * (0.3 + 0.4 * rand());
+          LOTS.push({ rect, seed, y: 0, front: face, chief, kind, w: w - 0.3, d: z1 - z0, row: za, du, ...houseRule(seed, chief, w - 0.3, z1 - z0) });
         }
       }
     }
@@ -115,7 +132,7 @@ export function lots() {
     const A = [-65, 24], chosen = [];
     const cand = LOTS.filter((l) => !l.chief && l.w >= 16 && l.d > 18).map((l) => ({ l, d: Math.hypot((l.rect[0] + l.rect[2]) / 2 - A[0], (l.rect[1] + l.rect[3]) / 2 - A[1]) })).filter((q) => q.d > 45 && q.d < 96).sort((a, b) => a.d - b.d);
     for (const q of cand) { if (chosen.length >= 2) break; if (chosen.every((c) => Math.hypot(c.l.rect[0] - q.l.rect[0], c.l.rect[1] - q.l.rect[1]) > 30)) chosen.push(q); }
-    for (const { l } of chosen) { l.chief = true; l.kind = 'chief'; l.du = Math.min(l.w - 3.3, 10.2); }
+    for (const { l } of chosen) { l.chief = true; l.kind = 'chief'; l.du = Math.min(l.w - 3.3, 10.2); Object.assign(l, houseRule(l.seed, true, l.w, l.d)); }
   }
   return LOTS;
 }
