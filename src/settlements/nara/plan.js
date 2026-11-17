@@ -6,7 +6,7 @@ import { HALL, COURT, SOUTH_GATE, PAGODAS } from './layout.js';
 
 const E = [];
 // the Great Buddha Hall: eleven bays by seven, two roofs, about 49 m high to the ridge (§1)
-E.push({ t: 'nara_hall', rect: HALL, y: 2.2, H: 21, bays: [11, 7], k: 1.8, colD: 1.5, plat: 2.2, walls: 'full', doors: { s: [3, 4, 5, 6, 7], n: [5], e: [3], w: [3] }, doorH: 13, upper: { H: 6.5, ins: 7.14, k: 1.4 }, rise: 11, top: 50, shibi: 6 });
+E.push({ t: 'nara_hall', rect: HALL, y: 2.2, H: 21, bays: [11, 7], k: 1.8, colD: 1.5, plat: 2.2, rail: true, walls: 'full', doors: { s: [3, 4, 5, 6, 7], n: [5], e: [3], w: [3] }, doorH: 13, upper: { H: 6.5, ins: 7.14, k: 1.4 }, rise: 11, top: 50, shibi: 6 });
 E.push({ t: 'stairs', rect: [-6, HALL[3] + 0.9, 6, HALL[3] + 6], y0: 0, y1: 2.2, dir: 'n' });
 // the corridors round the court, the Middle Gate in the south side
 const [cx0, cz0, cx1, cz1] = COURT, g = 16;

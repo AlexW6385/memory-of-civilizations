@@ -8,7 +8,8 @@
 
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { rectRoof } from '../ming/index.js';
-import { bracketSet } from '../chinese/index.js';
+import { naraBracket } from './bracket.js';
+import { discRing } from './tilework.js';
 import { plate } from '../japanese/shape.js';
 
 /**
@@ -68,8 +69,8 @@ export function pagodaJp(el, ctx) {
     const yt = y + H;
     for (const a of bays) for (const [nx, nz] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
       const corner = Math.abs(a) > hs - 0.01, at = nz ? [cx + a, cz + nz * hs] : [cx + nx * hs, cz + a];
-      if (corner) { if (nz) bracketSet({ at, y: yt, dir: [Math.sign(a) * Math.SQRT1_2, nz * Math.SQRT1_2], tiers: 3, step: 0.62, mat: 'timber_red', blockMat: 'timber_red' }, ctx); continue; }
-      bracketSet({ at, y: yt, dir: [nx, nz], tiers: 3, step: 0.62, mat: 'timber_red', blockMat: 'timber_red' }, ctx);
+      if (corner) { if (nz) naraBracket({ at, y: yt, dir: [Math.sign(a) * Math.SQRT1_2, nz * Math.SQRT1_2], kind: 'corner' }, ctx, 0.55); continue; }
+      naraBracket({ at, y: yt, dir: [nx, nz], kind: 'column' }, ctx, 0.55);
     }
     for (const g of red) bag.add('timber_red', g);
     for (const g of wall) bag.add('plaster_white', g);
@@ -79,6 +80,7 @@ export function pagodaJp(el, ctx) {
     const ye = yt + 1.5, O = el.over - i * 0.12, Bh = hs + O, R = Bh * (last ? 0.62 : 0.42), p = 1.25;
     const next = last ? null : side(i + 1) / 2;
     rectRoof({ c: [cx, cz], A: Bh, B: Bh, y: ye, rise: R, kind: 'hip', sweep: 0.55, p, curl: false, mat: 'tile_grey', soffit: 'timber_red', hole: next ? [cx - next, cz - next, cx + next, cz + next] : undefined }, bag);
+    discRing(bag, [cx, cz], Bh, Bh, () => ye, 0.55);
     // the frieze between the wall's head and the roof's underside, closing the bracket zone
     const under = ye + R * Math.pow(O / Bh, p) - 0.1;
     bag.add('plaster_white', box(x0 + 0.3, yt, z0 + 0.3, x1 - 0.3, under, z1 - 0.3));
