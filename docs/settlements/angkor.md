@@ -214,3 +214,48 @@ Sources added:
 Radius unchanged: 460 m (class limit 520); the enclosure's quarters lie inside the wall and the workshops within the outer ring.
 
 Still below Suzhou: the village houses stand as three kinds with small variation (the shop fronts of Suzhou have dozens of designs); no enterable shops with counters (the workshops are open floors); the temple's galleries remain bare stone with few furnishings beyond the wooden ceilings; paddies are flat colour with dykes, no crops standing or water; the moving boats are one hull.
+
+## 23. Detail pass (2026-11-16): the libraries entered
+
+The two libraries either side of the inner causeway were solid halls with painted-on doors. They are now hollow and can be entered from east and west (`library.js`, element `ak_library`: the style's `k_library` run through a filter that drops its solid hall and the solid fill of the end porticoes, so the exterior — platform, stairs, cornices, vaults, pediments, blind balustered windows, side porticoes — is unchanged).
+
+| Feature | What we build | Basis |
+|---|---|---|
+| Passage | The end porticoes become vestibules with thick side walls, a 1.66 m wide doorway with carved jambs and head under the style's lintel, a step up from the platform (0.35 m, then the 0.7 m plinth), hall floor 0.1 m lower; hall walls 0.9 m thick, a head over each door | the building has porches on all four sides [inferred from the Khmer library type]; the dimensions ours [inferred] |
+| Shelves | A rack of three shelves and a top board along one long wall (the north wall in the north library, the south in the south one): bundles of palm-leaf leaves, 1–3 high, each wrapped at the ends in cloth | palm leaves and ink supplied to religious schools; temple inscriptions record gifts of "physical books" of the Mahabharata, Ramayana and a Purana kept as temple property; each institution had scribes and book-keepers protecting the collection [stated: ancient-history-sites, Khmer Writing, Inscriptions and Learned Traditions]; bundles wrapped in cloth, the rack's form [inferred] |
+| Fire pit | A stepped sandstone pit with an ash bed and a low fire in the middle of the hall, a bronze ghee bowl and ladle beside it, a Brahmin in worship before it | the "libraries" (annexes) are debated: small brick, stone or laterite buildings with ventilation openings, "the authors do not rule out" manuscripts but argue they served mainly as sacred spaces for Shaiva rites incl. homa (fire) rituals [stated: Cambridge, Libraries or fire shrines?]; we show both uses [inferred]; Angkor Wat is Vishnu's, so the rite is general Brahmanic fire worship [inferred] |
+| Furnishing | Three chests with red lids along the other wall, a water pot, a low reading desk with an open bundle and a mat, a Brahmin reading cross-legged; reed mat on the floor; two oil-lamp stands with real lights; dark beams under the ceiling slab | [inferred] |
+
+Sources added:
+- [Libraries or fire shrines? Annex buildings in Khmer Saiva temples — Cambridge](https://cambridge.org/core/books/creative-south/libraries-or-fire-shrines-reinterpreting-the-function-of-annex-buildings-in-khmer-saiva-temples-from-the-prism-of-early-saivism/48C5A8170C0CB67C33C69E4284FBB3D5)
+- [Khmer Writing, Inscriptions and Learned Traditions — ancient-history-sites](https://www.ancient-history-sites.com/?p=149111)
+
+## 24. Detail pass: what the houses are used for, and their fronts
+
+Every house beyond 100 m of the arrival whose room is large enough (about 200 of the 370) takes one use in the front-left corner of its floor, by the rule of its front design and seed (`uses.js` `useOf`): a shop front a dyer's or a rice store, a tile house the household shelf, a porch house a fisherman's or a cradle, a plain house any of the five. The five uses are placed clear of the door's lane and of the existing mats, hearth, shelf and lamp, and never in two houses of one row alike.
+
+| Use | What stands in it |
+|---|---|
+| Household shelf | A board on two brackets on the left wall: a small stone linga on its base, a bronze bowl of lotus buds, a bowl of incense sticks, an oil lamp; a reed kneeling mat |
+| Cradle | A wicker cradle on two rockers with a blanket, a spindle basket |
+| Fisherman's | A net hung on the right wall (rope lattice, wooden floats along its head), two conical fish traps |
+| Rice store | Sacks (two with one across them), a big jar, a winnowing tray with a heap of rice |
+| Dyer's and weaver's | A drying pole from the wall to a post, dyed cloths hung from it, two pots of dye |
+
+Basis: rice husks and broken grains found in 12th–13th-century deposits at Angkor Wat and Ta Prohm suggest rice was dehusked where people lived; rice farmed on the seasonal floodplain [stated: ancient-history-sites, Khmer Agriculture and Landholding]; Zhou Daguan's account of weaving without a loom by cloth round the waist (§19) [stated]; Hindu household worship of the linga, the nets, traps, cradle and dye pots [inferred from the Khmer house and from the general Khmer craft; the forms ours].
+
+Fronts: three dressings by seed on the houses that have no other (`frontOf`, about 200 houses): a door cloth tied back at the doorpost; strings of red chillies and dried gourds hung from the front plate; a songbird's cage of split bamboo on a bracket. One in four plain fronts has none. [inferred]
+
+## 25. Detail pass: the village shrines
+
+Nine small brick sanctuaries (prasat) stand west of village ponds, doors to the east toward the water, clear of houses, shops and the road (`ak_shrine`): a laterite plinth 4.4 m square with sandstone mouldings and a step; brick walls 0.7 m thick round a 1.4 m cella with a doorway under a carved lintel, false doors on the other three faces; a cornice and a roof of four corbelled brick tiers under a sandstone lotus-bud finial; inside a linga on its base with a spout to the north and a lamp; before the door a stone offering table with a bowl of lotus buds and a lamp. Basis: "small structures, made of brick and sometimes stone or laterite" at Khmer temples [stated: Cambridge, above]; rural Angkorian holy places such as Ta Thnu and Neak Bous are small shrines in the countryside [stated: Cambodianess]; the village scale and the plan [inferred].
+
+## 26. Detail pass: the paddies and the farmers
+
+32 plots of 20–30 × 14–22 m between the dykes in the open country beyond 300 m (`ak_paddy`), each in one of four stages by seed: seedlings (low, pale rows) with three women bent at the transplanting, green rice, ripe rice (tall, straw-gold) with two women carrying headloads of baskets at its edge, and ploughed mud in furrows with a buffalo at a wooden plough (yoke across the neck, a shaft down each side, share and handle) and the farmer walking behind with his goad. Rice grown on the seasonal floodplain within raised bunds around the paddies; cattle and buffalo as valued property and probably traction [stated: ancient-history-sites, Khmer Agriculture and Landholding]; the stages, the plough's form and the planting are [inferred].
+
+Sources added:
+- [Khmer Agriculture and Landholding — ancient-history-sites](https://www.ancient-history-sites.com/?p=149113)
+- [Ta Thnu Temple: an Angkorian Holy Place's Fading Pulse — Cambodianess](https://www.cambodianess.com/article/ta-thnu-temple-an-angkorian-holy-places-fading-pulse)
+
+Still below L3: the galleries' bare stone, the carved lintels and colonnettes in full, no standing water or reflections in the paddies, one moving boat hull, the village houses' fronts four designs plus three dressings.

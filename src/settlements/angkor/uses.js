@@ -118,7 +118,7 @@ function shrine(el, ctx) {
   bag.add('sandstone_carved', box(cx - P, 0, cz - P, cx + P, 0.12, cz + P));
   bag.add('laterite', box(cx - P + 0.1, 0.12, cz - P + 0.1, cx + P - 0.1, top - 0.05, cz + P - 0.1));
   bag.add('sandstone_khmer', box(cx - P, top - 0.05, cz - P, cx + P, top, cz + P));
-  col.floor([cx - P, cz - P, cx + P, cz + P], top); col.rect([cx - P - 0.4, cz - P - 0.4, cx + P + 0.4, cz + P + 0.4], -0.3, top - 0.01);
+  col.floor([cx - P, cz - P, cx + P, cz + P], top); col.rect([cx - P, cz - P, cx + P, cz + P], -0.3, top - 0.01);
   STYLES.qing.elements.stairs({ rect: [cx + P, cz - 0.9, cx + P + 0.9, cz + 0.9], y0: 0, y1: top, dir: 'w', mat: 'sandstone_khmer' }, ctx);
   // the body: brick walls 0.7 thick round a cella 1.4 m square, a doorway in the east wall
   const wall = (r, y0 = top, y1 = wallTop) => { bag.add('brick', box(r[0], y0, r[1], r[2], y1, r[3])); col.rect(r, y0, y1 + 0.001); };
