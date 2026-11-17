@@ -6,10 +6,11 @@ import '../../styles/gothic/town.js';
 import '../../styles/gothic/notre-dame.js';
 import '../../styles/gothic/palace.js';
 import '../../styles/gothic/houses.js';
+import '../../styles/gothic/chatelet.js';
 import '../../styles/gothic/rue.js';
 import '../../styles/vernacular/index.js';
 import '../../styles/ming/index.js';
-import { chapel, city, bridges, bridgeHouses, boats, river, streetLife } from './plan.js';
+import { chapel, city, chatelets, bridges, bridgeHouses, boats, river, streetLife } from './plan.js';
 import { lifePlans } from './life.js';
 import music from './music.js';
 import { houses } from './town.js';
@@ -17,4 +18,4 @@ import '../../styles/gothic/court.js';
 import { courtGround, courtLife } from './court.js';
 export { music };
 export const landmarks = [{ plan: chapel, music }];
-export async function town() { return [city, river, ...bridges, bridgeHouses(), boats, ...streetLife(), ...lifePlans(), courtGround(), courtLife(), ...(await houses())]; }
+export async function town() { return [city, river, ...bridges, ...chatelets, bridgeHouses(), boats, ...streetLife(), ...lifePlans(), courtGround(), courtLife(), ...(await houses())]; }

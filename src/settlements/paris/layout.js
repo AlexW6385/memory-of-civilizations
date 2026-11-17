@@ -15,6 +15,8 @@ export const QUAY = { x0: -326, x1: -112, z: -107, back: -100, y: 1.08 };   // t
 export const CHAPEL = { origin: [-200, -10] };                  // the plan's origin (its west door at x − 34)
 export const CATHEDRAL = [150, -24, 278, 24];
 export const PARVIS = [100, -40, 150, 40];
+export const CHATELETS = { grand: [-15, -204, 15, -176], petit: [98, 158, 122, 172] };      // the gates at the bridges' ends (§1e)
+const CHAT_ZONES = [[-19, -208, 19, -170], [94, 154, 126, 176]];
 export const BRIDGES = [{ x: 0, arm: NORTH_ARM }, { x: 110, arm: SOUTH_ARM }];
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
@@ -54,6 +56,7 @@ export function streets() {
     const cut = (a, b) => { segs = segs.flatMap(([s0, s1]) => (b <= s0 || a >= s1 ? [[s0, s1]] : [[s0, Math.min(s1, a)], [Math.max(s0, b), s1]])).filter(([s0, s1]) => s1 - s0 > 8); };
     if (zc > PALACE[1] - 3 && zc < PALACE[3] + 3) cut(-340, PALACE[2] + 2);
     if (zc > CATHEDRAL[1] - 4 && zc < CATHEDRAL[3] + 4) cut(CATHEDRAL[0] - 2, 340);
+    for (const z of CHAT_ZONES) if (zc > z[1] && zc < z[3]) cut(z[0], z[2]);
     for (const [s0, s1] of segs) out.push([s0, z0, s1, z1]);
   }
   // the bridges' streets run on through the rows (the gap left in them) from bank to bank
@@ -70,7 +73,7 @@ export function lots() {
   const rand = rng(1248);
   for (const [za, zb, front] of rowList()) for (let x = -RADIUS + 20; x < RADIUS - 20;) {
     const w = 5.2 + rand() * 3.2, cx = x + w / 2, cz = (za + zb) / 2;
-    if (Math.hypot(cx, cz) < RADIUS - 40 && !inRect(PALACE, cx, cz, 8) && !inRect(CATHEDRAL, cx, cz, 14) && !inRect(PARVIS, cx, cz, 4) && !BRIDGES.some((b) => Math.abs(cx - b.x) < 8) && !laneAt(cx) && !laneAt(x) && !laneAt(x + w) && (inRect(ISLAND, cx, za, -4) && inRect(ISLAND, cx, zb, -4) || Math.abs(cz) > 175) && rand() > 0.05)
+    if (Math.hypot(cx, cz) < RADIUS - 40 && !inRect(PALACE, cx, cz, 8) && !inRect(CATHEDRAL, cx, cz, 14) && !inRect(PARVIS, cx, cz, 4) && !BRIDGES.some((b) => Math.abs(cx - b.x) < 8) && !CHAT_ZONES.some((z) => inRect(z, cx, cz, 2) || inRect(z, x, cz) || inRect(z, x + w, cz)) && !laneAt(cx) && !laneAt(x) && !laneAt(x + w) && (inRect(ISLAND, cx, za, -4) && inRect(ISLAND, cx, zb, -4) || Math.abs(cz) > 175) && rand() > 0.05)
     {
       const lot = { rect: [x, za, x + w - 0.25, zb], seed: Math.floor(rand() * 1e6), front, storeys: 3 + (rand() < 0.35 ? 1 : 0) };
       // the flanks left open by a ruelle or the end of a row are seen: they are framed too

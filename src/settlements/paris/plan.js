@@ -2,7 +2,7 @@
 // previous design, src/buildings/sainte-chapelle) in the palace court; the palace's great hall and
 // towers; Notre-Dame and its parvis; the bridges; the river.
 
-import { RADIUS, CHAPEL, CATHEDRAL, PALACE, GARDEN, QUAY, BRIDGES, NORTH_ARM, SOUTH_ARM, ISLAND, RIVER, PARVIS, height, inLot } from './layout.js';
+import { CHATELETS, RADIUS, CHAPEL, CATHEDRAL, PALACE, GARDEN, QUAY, BRIDGES, NORTH_ARM, SOUTH_ARM, ISLAND, RIVER, PARVIS, height, inLot } from './layout.js';
 import { shopPoint } from '../../styles/gothic/houses.js';
 import { lots as allLots } from './layout.js';
 import chapelPlan from '../../buildings/sainte-chapelle/plan.js';
@@ -54,6 +54,12 @@ export const bridges = PONTS.map(({ name, b, n, mills }) => {
   for (const zm of mills) els.push({ t: 'mill_pendant', at: [b.x - BW, zm], dir: -1, w: 5.5, y: DECK, water: RIVER.level, bed: RIVER.bed });
   return { id: `paris-pont-${name}`, style: 'gothic', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [b.x, (z0 + z1) / 2], facing: 'n' }, bounds: [b.x - BW - 8, z0, b.x + BW + 8, z1], rooms: [], elements: els };
 });
+// the Châtelets (docs/settlements/paris.md §1e): the Grand Châtelet at the Grand Pont's Right Bank end (the prévôt's court in its west block),
+// the Petit Châtelet at the Petit Pont's Left Bank end
+export const chatelets = [
+  { id: 'paris-chatelet-grand', rect: CHATELETS.grand, el: { t: 'chatelet', rect: CHATELETS.grand, y: g, h: 11.5, court: true, face: Math.PI / 2, towers: [[-13.2, -176.8, 4.4, 17, 8.5], [13.2, -176.8, 4.4, 17, 8.5]] } },
+  { id: 'paris-chatelet-petit', rect: CHATELETS.petit, el: { t: 'chatelet', rect: CHATELETS.petit, y: g, h: 10, court: false, face: -Math.PI / 2, towers: [[99.6, 159.2, 3.6, 14, 7], [120.4, 159.2, 3.6, 14, 7]] } },
+].map(({ id, rect, el }) => ({ id, style: 'gothic', origin: [0, 0], base: 0, yaw: 0, feature: true, entrance: { at: [0, -135], facing: 'n' }, bounds: [rect[0] - 14, rect[1] - 14, rect[2] + 14, rect[3] + 14], rooms: [], elements: [el] }));
 /** The houses on the bridges: narrow lots along both sides of the street, their fronts to it, none where a mill stands. */
 export function bridgeHouses() {
   let seed = 1250;
