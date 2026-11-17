@@ -141,10 +141,10 @@ const stairX = [[-10.5, -4], [-3.6, 3.6], [4, 10.5]];
 for (const [k, t] of TIERS.entries()) {
   const [x0, z0, x1, z1] = t.rect, y0 = k ? TIERS[k - 1].y : 0, W = x1 - x0;
   const gap = [[-11 - x0, 11 - x0]];
-  E.push({ t: 'terrace', rect: t.rect, y0, y1: t.y, open: { s: gap, n: gap }, carve: 'qing' });
+  E.push({ t: 'bj_terrace', rect: t.rect, y0, y1: t.y, open: { s: gap, n: gap }, carve: 'qing' });
   for (const [face, dir, zA] of [['s', 'n', z1], ['n', 's', z0]]) {
     const r0 = dir === 'n' ? zA : zA - 5, r1 = dir === 'n' ? zA + 5 : zA;
-    for (const [i, [a, b]] of stairX.entries()) E.push({ t: 'stairs', rect: [a, r0, b, r1], y0, y1: t.y, dir, slab: i === 1, rakes: i !== 1 });
+    for (const [i, [a, b]] of stairX.entries()) E.push({ t: 'bj_stairs', rect: [a, r0, b, r1], y0, y1: t.y, dir, slab: i === 1, rakes: i !== 1 });
     void face;
   }
   void W;
@@ -170,7 +170,8 @@ for (const s of [-1, 1]) {
 
 // ── the Three Great Halls ──
 const th = HALLS.taihe, zh = HALLS.zhonghe, bh = HALLS.baohe;
-E.push({ t: 'qing_hall', rect: th.rect, y: th.y, H: 9.2, double: 7.5, roof: 'hip', bays: [11, 5], front: 's', four: false, plat: 0.5, eave: 2.2, sweep: 0.55, orn: { figures: 10 } });
+E.push({ t: 'bj_hall', rect: th.rect, y: th.y, H: 9.2, double: 7.5, roof: 'hip', bays: [11, 5], front: 's', four: false, plat: 0.5, eave: 2.2, sweep: 0.55, orn: { figures: 10 } });
+E.push({ t: 'bj_hall_doors', rect: th.rect, y: th.y, H: 9.2, bays: [11, 5] });
 E.push({ t: 'throne_hall', rect: th.rect, y: th.y, H: 9.2, bays: [11, 5], kind: 'taihe' });
 E.push({ t: 'qing_hall', rect: zh.rect, y: zh.y, H: 6.4, roof: 'none', bays: [5, 5], front: 's', four: true, plat: 0.4 });
 E.push({ t: 'throne_hall', rect: zh.rect, y: zh.y, H: 6.4, bays: [5, 5], kind: 'zhonghe', d: 0.7 });
