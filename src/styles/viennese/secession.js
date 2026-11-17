@@ -8,6 +8,14 @@ import { subtractRects } from '../../core/build.js';
 import { prism, fbox, ngon } from '../dutch/facade.js';
 import { rng } from './mietshaus.js';
 
+const MOTTO_FONT = {
+  D: ['11110', '10001', '10001', '10001', '10001', '10001', '11110'], E: ['11111', '10000', '10000', '11110', '10000', '10000', '11111'],
+  R: ['11110', '10001', '10001', '11110', '10100', '10010', '10001'], Z: ['11111', '00001', '00010', '00100', '01000', '10000', '11111'],
+  I: ['11111', '00100', '00100', '00100', '00100', '00100', '11111'], T: ['11111', '00100', '00100', '00100', '00100', '00100', '00100'],
+  H: ['10001', '10001', '10001', '11111', '10001', '10001', '10001'], K: ['10001', '10010', '10100', '11000', '10100', '10010', '10001'],
+  U: ['10001', '10001', '10001', '10001', '10001', '10001', '01110'], N: ['10001', '11001', '10101', '10101', '10101', '10011', '10001'],
+  S: ['01111', '10000', '10000', '01110', '00001', '00001', '11110'], F: ['11111', '10000', '10000', '11110', '10000', '10000', '10000'],
+};
 const W = 34, D = 28, FL = 0.35, WH = 8.4, T = 0.5;
 
 export function secession(el, ctx) {
@@ -39,31 +47,65 @@ export function secession(el, ctx) {
   // the front wall (b 2.8…3.6) with the portal; the side walls with clerestory windows; the back wall
   wall(WALL, 'a', 3.2, -W / 2, W / 2, 0.8, -0.2, WH, [{ c: 0, w: 3.4, v0: -0.2, v1: FL + 4.3 }]);
   const clere = [];
-  for (let k = 0; k < 6; k++) clere.push({ c: 5.6 + k * 3.35, w: 1.5, v0: FL + 5.4, v1: FL + 7.3 });
+  for (let k = 0; k < 6; k++) clere.push({ c: 7.6 + k * 3.1, w: 1.5, v0: FL + 5.4, v1: FL + 7.3 });
   for (const s of [-1, 1]) wall(WALL, 'b', s * (W / 2 - T / 2), 0, D, T, -0.2, WH, clere.map((c) => ({ ...c, c: c.c + 0 })));
   wall(WALL, 'a', D - T / 2, -W / 2, W / 2, T, -0.2, WH);
   // the side windows' glass and frames (drawn on the outer face)
   for (const s of [-1, 1]) for (const c of clere) { bx('opening', s * (W / 2 - 0.03) - 0.02, c.c - c.w / 2, s * (W / 2 - 0.03) + 0.02, c.c + c.w / 2, c.v0, c.v1); bx('iron', s * (W / 2 - 0.3), c.c - 0.02, s * (W / 2 - 0.0) + (s > 0 ? 0.0 : 0), c.c + 0.02, c.v0, c.v1); }
   // ── the pylons, the header, the cornice ────────────────────────────────────────────────────
-  const pyl = (a0, b0, a1, b1, h) => { solid(WALL, a0, b0, a1, b1, -0.2, h); bx('stucco_pale', a0 - 0.12, b0 - 0.12, a1 + 0.12, b1 + 0.12, h, h + 0.3); bx('gilt_bronze', a0 + 0.3, b0 + 0.3, a1 - 0.3, b1 - 0.3, h + 0.3, h + 0.34); };
-  for (const s of [-1, 1]) { pyl(s < 0 ? -17 : 11, 0, s < 0 ? -11 : 17, 6, 13.2); pyl(s < 0 ? -6.6 : 4.2, 0, s < 0 ? -4.2 : 6.6, 3.2, 10.0); }
+  const pyl = (a0, b0, a1, b1, h, framed) => {
+    solid(WALL, a0, b0, a1, b1, -0.2, h);
+    // a base course with a shadow-line, the stepped cornice over a row of dentils, the gilt cap
+    bx('stucco_pale', a0 - 0.1, b0 - 0.1, a1 + 0.1, b1 + 0.1, -0.2, 1.0); bx('stucco_pale', a0 - 0.05, b0 - 0.05, a1 + 0.05, b1 + 0.05, 1.0, 1.12);
+    for (let a = a0 + 0.15; a < a1 - 0.2; a += 0.34) bx('stucco_pale', a, b0 - 0.1, a + 0.2, b0, h - 0.3, h - 0.1);
+    bx('stucco_pale', a0 - 0.05, b0 - 0.05, a1 + 0.05, b1 + 0.05, h - 0.1, h); bx('stucco_pale', a0 - 0.12, b0 - 0.12, a1 + 0.12, b1 + 0.12, h, h + 0.14);
+    bx('stucco_pale', a0 - 0.2, b0 - 0.2, a1 + 0.2, b1 + 0.2, h + 0.14, h + 0.28); bx('stucco_pale', a0 - 0.12, b0 - 0.12, a1 + 0.12, b1 + 0.12, h + 0.28, h + 0.4);
+    bx('gilt_bronze', a0 + 0.3, b0 + 0.3, a1 - 0.3, b1 - 0.3, h + 0.4, h + 0.44);
+    if (framed) {   // the raised frame round the laurel field on the front face, and on the side face toward the porch
+      const fw = 0.1, u0 = a0 + 0.35, u1 = a1 - 0.35, v0 = 1.7, v1 = h - 1.2;
+      bx('stucco_pale', u0, b0 - fw, u1, b0, v0, v0 + 0.14); bx('stucco_pale', u0, b0 - fw, u1, b0, v1 - 0.14, v1);
+      bx('stucco_pale', u0, b0 - fw, u0 + 0.14, b0, v0, v1); bx('stucco_pale', u1 - 0.14, b0 - fw, u1, b0, v0, v1);
+      bx('stucco_pale', u0 + 0.14, b0 - 0.03, u1 - 0.14, b0, v0 + 0.14, v0 + 0.2); bx('stucco_pale', u0 + 0.14, b0 - 0.03, u1 - 0.14, b0, v1 - 0.2, v1 - 0.14);
+    }
+  };
+  for (const s of [-1, 1]) { pyl(s < 0 ? -17 : 11, 0, s < 0 ? -11 : 17, 6, 13.2, true); pyl(s < 0 ? -6.6 : 4.2, 0, s < 0 ? -4.2 : 6.6, 3.2, 10.0, false); }
   // golden spheres on the pylons' tops
-  for (const [a, b, h] of [[-14, 3, 13.55], [14, 3, 13.55], [-5.4, 1.6, 10.35], [5.4, 1.6, 10.35]]) lat('gilt_bronze', [[0.001, 0], [0.35, 0.1], [0.5, 0.5], [0.35, 0.9], [0.001, 1.0]], a, b, h, 12);
+  for (const [a, b, h] of [[-14, 3, 13.64], [14, 3, 13.64], [-5.4, 1.6, 10.44], [5.4, 1.6, 10.44]]) lat('gilt_bronze', [[0.001, 0], [0.35, 0.1], [0.5, 0.5], [0.35, 0.9], [0.001, 1.0]], a, b, h, 12);
   // between the pylons: the wall's top course and cornice
   bx('stucco_pale', -17.1, 2.7, 17.1, 3.7, WH, WH + 0.35);
+  bx('stucco_pale', -17.2, 2.6, 17.2, 3.8, WH - 0.12, WH); bx('stucco_pale', -17.2, 2.6, 17.2, 3.8, WH, WH + 0.0);
+  // the flanks: a cornice course and a string course, and a frame (jambs, sill, lintel, glazing bars) round every clerestory window
+  for (const s of [-1, 1]) {
+    const o = (a0, a1) => (s < 0 ? [-W / 2 - a1, -W / 2 - a0] : [W / 2 + a0, W / 2 + a1]);
+    const side = (a0, a1, b0, b1, v0, v1, m = 'stucco_pale') => { const [p0, p1] = o(a0, a1); bx(m, p0, b0, p1, b1, v0, v1); };
+    side(0, 0.12, 6, D, WH - 0.35, WH - 0.15); side(0, 0.2, 6, D, WH - 0.15, WH + 0.05); side(0, 0.1, 6, D, FL + 4.6, FL + 4.8); side(0, 0.06, 6, D, -0.2, 0.9);
+    for (const c of clere) {
+      const b0 = c.c - c.w / 2, b1 = c.c + c.w / 2;
+      side(0, 0.1, b0 - 0.16, b0, c.v0 - 0.12, c.v1 + 0.2); side(0, 0.1, b1, b1 + 0.16, c.v0 - 0.12, c.v1 + 0.2);
+      side(0, 0.18, b0 - 0.16, b1 + 0.16, c.v0 - 0.12, c.v0); side(0, 0.12, b0 - 0.16, b1 + 0.16, c.v1, c.v1 + 0.2);
+      for (const f of [1 / 3, 2 / 3]) side(-0.04, 0.03, b0, b1, c.v0 + (c.v1 - c.v0) * f - 0.02, c.v0 + (c.v1 - c.v0) * f + 0.02, 'iron');
+      side(-0.04, 0.03, c.c - 0.02, c.c + 0.02, c.v0, c.v1, 'iron');
+    }
+  }
   // the header over the porch: motto band and the three gorgons
   solid(WALL, -4.2, 0, 4.2, 1.2, FL + 4.9, FL + 8.6);
-  const FH = { w: 8.4, D: 1.2, at: (u, d) => [X(-4.2 + u), Z(-d)] };          // the header's face (looking north): u east, d outward
+  const FH = { w: 8.4, D: 1.2, at: (u, d) => [X(4.2 - u), Z(-d)] };          // the header's face (looking north): u east, d outward
   const A = (m, ...q) => bag.add(m, fbox(FH, y, ...q)), Pz = (m, pts, d0, d1) => bag.add(m, prism(FH, y, pts, d0, d1));
   A('stucco_pale', -0.1, 8.5, FL + 4.9, FL + 5.1, 0, 0.12);
-  // the motto: DER ZEIT IHRE KUNST / DER KUNST IHRE FREIHEIT, in two lines of gilded capitals (as bars of letter width)
-  for (const [line, text] of [[0, 'DERZEITIHREKUNST'], [1, 'DERKUNSTIHREFREIHEIT']]) {
-    const n = text.length, w0 = 0.3, x0u = 4.2 - n * 0.2, v0 = FL + 7.3 - line * 0.55;
-    for (let k = 0; k < n; k++) { const u = x0u + k * 0.4; A(G, u, u + w0, v0, v0 + 0.36, -0.02, 0.07); if ('AEFHKRTZ'.includes(text[k])) A(G, u + 0.07, u + 0.11, v0 + 0.05, v0 + 0.31, -0.03, 0.08); }
+  // the motto, two lines of gilded capitals in a 5 x 7 raster, each row a run of bars (DER ZEIT IHRE KUNST / DER KUNST IHRE FREIHEIT)
+  for (const [line, text] of [[0, 'DER ZEIT IHRE KUNST'], [1, 'DER KUNST IHRE FREIHEIT']]) {
+    const pitch = 0.34, sx = 0.052, sy = 0.07, u00 = 4.2 - text.length * pitch / 2 + (pitch - 5 * sx) / 2, v0 = FL + 7.95 - line * 0.65;
+    for (let k = 0; k < text.length; k++) {
+      const g = MOTTO_FONT[text[k]]; if (!g) continue;
+      for (let r = 0; r < 7; r++) for (let c = 0; c < 5; c++) {
+        if (g[r][c] !== '1') continue; let e = c; while (e + 1 < 5 && g[r][e + 1] === '1') e++;
+        const u = u00 + k * pitch; A(G, u + c * sx, u + (e + 1) * sx, v0 + (6 - r) * sy, v0 + (7 - r) * sy, -0.02, 0.07); c = e;
+      }
+    }
   }
   // the three gorgons: gilt heads (disc, hair of snakes as radiating bars, the face)
   for (const [k, u] of [4.2 - 1.9, 4.2, 4.2 + 1.9].entries()) {
-    const v = FL + 6.05;
+    const v = FL + 5.9;
     Pz(G, ngon(u, v, 0.55, 14), -0.02, 0.12);
     for (let s = 0; s < 10; s++) { const a = s / 10 * Math.PI * 2, c = Math.cos(a), sn = Math.sin(a); Pz('gilt_bronze', [[u + c * 0.5 - sn * 0.06, v + sn * 0.5 + c * 0.06], [u + c * 0.5 + sn * 0.06, v + sn * 0.5 - c * 0.06], [u + c * 0.85, v + sn * 0.85]], 0.0, 0.1); }
     Pz('ivory', ngon(u, v, 0.34, 12), 0.1, 0.16);
@@ -93,8 +135,18 @@ export function secession(el, ctx) {
   for (const s of [-1, 1]) {
     const a = s * 7.5, b = 0.5;
     bx('sandstone_white', a - 0.5, b - 0.5, a + 0.5, b + 0.5, -0.2, 1.1); ob(a - 0.5, b - 0.5, a + 0.5, b + 0.5, -0.2, 2.4);
-    lat('sandstone_white', [[0.001, 1.1], [0.36, 1.12], [0.4, 1.7], [0.3, 2.2], [0.22, 2.35], [0.001, 2.38]], a, b, 0, 12);
-    for (const q of [-1, 1]) { bx('sandstone_white', a + q * 0.24 - 0.07, b - 0.12, a + q * 0.24 + 0.07, b + 0.12, 2.3, 2.55); bag.add('gold', lathe([[0.001, 0], [0.09, 0.01], [0.09, 0.03], [0.001, 0.04]], 8, null, X(a + q * 0.14), y + 2.1, Z(b - 0.3))); }
+    const SW = 'sandstone_white';
+    lat(SW, [[0.001, 1.1], [0.34, 1.12], [0.4, 1.4], [0.38, 1.75], [0.3, 2.0], [0.22, 2.08], [0.001, 2.1]], a, b, 0, 14);                   // the body
+    lat(SW, [[0.001, 1.95], [0.3, 2.0], [0.36, 2.2], [0.3, 2.4], [0.18, 2.5], [0.001, 2.52]], a, b - 0.04, 0, 14);                          // the head, broad
+    for (const q of [-1, 1]) {
+      bx(SW, a + q * 0.2 - 0.06, b - 0.2, a + q * 0.2 + 0.06, b - 0.04, 2.45, 2.75);                                                      // ear tufts
+      lat('gold', [[0.001, 0], [0.12, 0.01], [0.13, 0.04], [0.001, 0.05]], a + q * 0.15, b - 0.33, 2.27, 10); lat('lacquer_black', [[0.001, 0.04], [0.05, 0.045], [0.001, 0.07]], a + q * 0.15, b - 0.33, 2.27, 8);   // the great round eyes
+      bag.add(SW, rod([X(a + q * 0.12), y + 1.75, Z(b - 0.37)], [X(a + q * 0.3), y + 1.2, Z(b - 0.33)], 0.035, 5));                      // the folded wing's edge
+      bag.add(SW, rod([X(a + q * 0.04), y + 1.8, Z(b - 0.4)], [X(a + q * 0.16), y + 1.25, Z(b - 0.38)], 0.03, 5));
+      for (const t of [-0.07, 0, 0.07]) bx(SW, a + q * 0.18 + t - 0.02, b - 0.4, a + q * 0.18 + t + 0.02, b - 0.3, 1.1, 1.2);        // the toes
+    }
+    bx('gilt_bronze', a - 0.04, b - 0.4, a + 0.04, b - 0.34, 2.12, 2.24);                                                               // the beak
+    for (let k = 0; k < 5; k++) for (const q of [-0.16, 0, 0.16]) bx(SW, a + q + (k % 2 ? 0.08 : 0) - 0.05, b - 0.4, a + q + (k % 2 ? 0.08 : 0) + 0.05, b - 0.34, 1.45 + k * 0.1, 1.5 + k * 0.1);   // breast feathers
   }
   // tripod bowls on the wall tops between the pylons
   for (const a of [-8.8, 8.8]) {
@@ -103,25 +155,49 @@ export function secession(el, ctx) {
   }
   // the lettering band's cornice over the door and the portal's jambs
   bx('stucco_pale', -2.0, 2.7, -1.7, 3.7, -0.2, FL + 4.5); bx('stucco_pale', 1.7, 2.7, 2.0, 3.7, -0.2, FL + 4.5); bx('stucco_pale', -2.0, 2.7, 2.0, 3.7, FL + 4.3, FL + 4.6);
-  // the doors: a pair of leaves in dark wood, glazed above
-  bx('wood_dark', -1.7, 3.0, 0, 3.4, FL, FL + 3.6); bx('wood_dark', 0, 3.0, 1.7, 3.4, FL, FL + 3.6); bx('opening', -1.6, 3.38, 1.6, 3.42, FL + 2.2, FL + 4.2);
+  // the portal: a stepped architrave on the outer face, a leaf of two panelled doors in dark wood with gilt handles, the transom glazed in bars
+  { const tp = FL + 4.3;
+    bx('stucco_pale', -2.28, 2.58, -2.0, 2.7, -0.2, tp + 0.5); bx('stucco_pale', 2.0, 2.58, 2.28, 2.7, -0.2, tp + 0.5); bx('stucco_pale', -2.28, 2.58, 2.28, 2.7, tp, tp + 0.5);
+    bx('stucco_pale', -2.1, 2.66, -1.7, 2.7, -0.2, tp + 0.0); bx('stucco_pale', 1.7, 2.66, 2.1, 2.7, -0.2, tp); bx('stucco_pale', -2.1, 2.66, 2.1, 2.7, tp - 0.12, tp);
+    bx('gilt_bronze', -1.72, 2.74, 1.72, 2.78, tp - 0.06, tp - 0.02);
+    for (const sg of [-1, 1]) {
+      const a0 = sg < 0 ? -1.7 : 0.02, a1 = sg < 0 ? -0.02 : 1.7, w = 1.68;
+      bx('wood_dark', a0, 3.0, a1, 3.4, FL, FL + 3.6);
+      for (const [p0, p1] of [[0.12, 0.62], [0.78, 1.56]]) for (const [v0, v1] of [[0.2, 1.5], [1.7, 3.4]]) bx('wood_ochre', a0 + (sg < 0 ? p0 : w - p1), 2.94, a0 + (sg < 0 ? p1 : w - p0), 3.0, FL + v0, FL + v1);
+      bx('gilt_bronze', sg < 0 ? -0.2 : 0.12, 2.9, sg < 0 ? -0.12 : 0.2, 3.0, FL + 1.5, FL + 2.0);
+    }
+    bx('wood_dark', -1.7, 2.98, 1.7, 3.4, FL + 3.6, FL + 3.72); bx('opening', -1.6, 3.38, 1.6, 3.42, FL + 3.72, FL + 4.2);
+    for (let a = -1.2; a <= 1.2; a += 0.4) bx('iron', a - 0.02, 3.0, a + 0.02, 3.4, FL + 3.72, FL + 4.2); bx('iron', -1.6, 3.0, 1.6, 3.4, FL + 3.95, FL + 3.99); }
   // ── the dome: a square drum over the middle of the hall, the ball of gilded laurel leaves ────────────
   const DB = 17.2, DT = WH + 0.3;
   solid(WALL, -2.7, DB - 2.7, 2.7, DB + 2.7, WH, DT + 5.0, false); bx('stucco_pale', -3.0, DB - 3.0, 3.0, DB + 3.0, DT + 5.0, DT + 5.3);
   for (const s of [-1, 1]) for (const t of [-1, 1]) bx('stucco_pale', s * 2.7 - 0.2 + (s > 0 ? -0.0 : 0), DB + t * 2.7 - 0.2, s * 2.7 + 0.2, DB + t * 2.7 + 0.2, WH, DT + 5.0);
+  // the drum's four faces: a raised frame, and in it a wreath of gilt laurel leaves round a gilt disc; a base course; a second step under the cornice
+  bx('stucco_pale', -2.85, DB - 2.85, 2.85, DB + 2.85, WH, WH + 0.5); bx('stucco_pale', -3.15, DB - 3.15, 3.15, DB + 3.15, DT + 5.3, DT + 5.45);
+  for (let q = 0; q < 4; q++) {
+    const Fd = [{ w: 5.4, D: 1, at: (u, d) => [X(-2.7 + u), Z(DB - 2.7 - d)] }, { w: 5.4, D: 1, at: (u, d) => [X(2.7 - u), Z(DB + 2.7 + d)] },
+      { w: 5.4, D: 1, at: (u, d) => [X(2.7 + d), Z(DB - 2.7 + u)] }, { w: 5.4, D: 1, at: (u, d) => [X(-2.7 - d), Z(DB + 2.7 - u)] }][q];
+    const A3 = (m, ...r) => bag.add(m, fbox(Fd, y, ...r)), P3 = (m, pts, d0, d1) => bag.add(m, prism(Fd, y, pts, d0, d1));
+    const v0 = WH + 0.95, v1 = DT + 4.5, vc = (v0 + v1) / 2;
+    A3('stucco_pale', 0.4, 5.0, v0, v0 + 0.14, 0, 0.1); A3('stucco_pale', 0.4, 5.0, v1 - 0.14, v1, 0, 0.1); A3('stucco_pale', 0.4, 0.54, v0, v1, 0, 0.1); A3('stucco_pale', 4.86, 5.0, v0, v1, 0, 0.1);
+    for (let k = 0; k < 16; k++) { const th = k / 16 * Math.PI * 2, c = Math.cos(th), sn = Math.sin(th), rr0 = 1.0;
+      P3(G, [[2.7 + c * rr0 - sn * 0.17, vc + sn * rr0 + c * 0.17], [2.7 + c * rr0 + sn * 0.17, vc + sn * rr0 - c * 0.17], [2.7 + c * (rr0 + 0.62), vc + sn * (rr0 + 0.62)]], 0, 0.06); }
+    P3(G, ngon(2.7, vc, 0.6, 16), 0, 0.05); P3('stucco_pale', ngon(2.7, vc, 0.45, 16), 0.05, 0.08);
+    for (let k = 0; k < 8; k++) { const th = (k + 0.5) / 8 * Math.PI * 2; P3(G, ngon(2.7 + Math.cos(th) * 0.28, vc + Math.sin(th) * 0.28, 0.07, 5), 0.08, 0.11); }
+  }
   const cyBall = DT + 5.3 + 3.6, Rb = 4.25;
   bag.add('glaze_yellow', lathe([[0.001, -Rb * 0.8], [Rb * 0.6, -Rb * 0.78], [Rb * 0.92, -Rb * 0.3], [Rb * 0.98, 0.1], [Rb * 0.88, Rb * 0.55], [Rb * 0.55, Rb * 0.88], [0.001, Rb * 0.98]], 16, null, X(0), y + cyBall, Z(DB)));
   {
     const tris = [], rr = rng(1898);
-    const rings = 11;
+    const rings = 17;
     for (let i = 1; i <= rings; i++) {
-      const ph = -0.5 + (i / (rings + 1)) * 2.9 * 0.5 + 0.0, lat0 = -0.25 + i / (rings + 1) * (Math.PI / 2 + 0.25), cphi = Math.cos(lat0), n = Math.max(6, Math.round(26 * cphi));
+      const ph = -0.5 + (i / (rings + 1)) * 2.9 * 0.5 + 0.0, lat0 = -0.25 + i / (rings + 1) * (Math.PI / 2 + 0.25), cphi = Math.cos(lat0), n = Math.max(6, Math.round(40 * cphi));
       void ph;
       for (let k = 0; k < n; k++) {
         const th = (k + (i % 2) * 0.5) / n * Math.PI * 2 + rr() * 0.05;
         const nx = Math.cos(th) * cphi, ny = Math.sin(lat0), nz = Math.sin(th) * cphi, R = Rb;
         const ex = [-Math.sin(th), 0, Math.cos(th)], ey = [-Math.cos(th) * Math.sin(lat0), cphi, -Math.sin(th) * Math.sin(lat0)];
-        const L = 1.2, Wd = 0.66, p = [nx * R, ny * R, nz * R];
+        const L = 1.0, Wd = 0.56, p = [nx * R, ny * R, nz * R];
         const pt = (u, v, out = 0) => [X(0) + p[0] + ex[0] * u + ey[0] * v + nx * out, y + cyBall + p[1] + ex[1] * u + ey[1] * v + ny * out, Z(DB) + p[2] + ex[2] * u + ey[2] * v + nz * out];
         const top = pt(0, L / 2, 0.02), bot = pt(0, -L / 2, 0.02), l = pt(-Wd / 2, 0, 0.03), r = pt(Wd / 2, 0, 0.03), c = pt(0, 0, 0.11);
         for (const [a, b] of [[top, r], [r, bot], [bot, l], [l, top]]) {
