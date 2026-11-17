@@ -5,7 +5,7 @@
 // drying racks of poles; the perimeter wall.
 
 import { registerStyle, STYLES } from '../../core/build.js';
-import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
+import { box, lathe, fromTriangles, rod, quad, orientOutward } from '../../core/geom.js';
 import { beamTris, flipTris } from '../ming/index.js';
 import { Matrix4 } from '../../core/three.js';
 import '../qing/index.js';
@@ -16,6 +16,36 @@ const RAMP_DROP = 0.5;
 const A = 'adobe_taos', V = 'viga';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const ST = 2.7;
+
+/**
+ * The mass of a cell from storey s0 to s1 (a storey is ST high), its exposed vertical corners (where both neighbours across the two edges stand
+ * lower than the storey) rounded by hand, radius 0.22 m in three facets; consecutive storeys with the same corners are one prism. `lower(dj, di)` is
+ * the storeys of the cell's neighbours across x and across z. The sides and the top (if `capTop`) only: the base is hidden.
+ */
+function roundedMass(x0, z0, x1, z1, s0, s1, exposed, capTop) {
+  const R = 0.22, out = [];
+  const flags = (s) => [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([dj, di]) => exposed(dj, di, s));
+  let a = s0 + 1;
+  while (a <= s1) {
+    const f = flags(a).join();
+    let b = a;
+    while (b < s1 && flags(b + 1).join() === f) b++;
+    const fl = flags(a), ya = (a - 1) * ST, yb = b * ST, ring = [];
+    [[x0, z0], [x1, z0], [x1, z1], [x0, z1]].forEach(([cx, cz], k) => {
+      const sx = k === 0 || k === 3 ? 1 : -1, sz = k < 2 ? 1 : -1;
+      if (!fl[k]) { ring.push([cx, cz]); return; }
+      // the arc about the centre (cx + sx R, cz + sz R), from the face along z to the face along x
+      const ox = cx + sx * R, oz = cz + sz * R;
+      for (let q = 0; q <= 2; q++) { const th = (k % 2 ? 2 - q : q) / 2 * Math.PI / 2; ring.push([ox - sx * R * Math.cos(th), oz - sz * R * Math.sin(th)]); }
+    });
+    const t = [];
+    for (let k = 0; k < ring.length; k++) { const p = ring[k], q = ring[(k + 1) % ring.length]; quad(t, [p[0], ya, p[1]], [q[0], ya, q[1]], [q[0], yb, q[1]], [p[0], yb, p[1]]); }
+    if (capTop && b === s1) { const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2; for (let k = 0; k < ring.length; k++) { const p = ring[k], q = ring[(k + 1) % ring.length]; t.push(cx, yb, cz, p[0], yb, p[1], q[0], yb, q[1]); } }
+    out.push(...orientOutward(t));
+    a = b + 1;
+  }
+  return fromTriangles(out);
+}
 /**
  * A ladder of two peeled poles and lashed rungs, its foot at (x, y, z), leaning by `lean` metres
  * toward (dx, dz) over its height h, the poles running on `over` metres past the top — the long
@@ -53,6 +83,8 @@ function pueblo(el, ctx) {
   // catch the climber's head), and the x of the ladder is kept to place the ramp
   const fd = el.front === 's' ? 1 : -1, ladderAt = new Map();
   for (const l of el.ladders ?? []) ladderAt.set((l.ground ? l.i : l.i - fd) + ':' + l.j, el.x0 + l.j * c + 1.0);
+  // a corner of the cell is exposed at storey s where the cells across both its edges are lower than s
+  const ex = (i, j) => (dj, di, st) => at(i, j + dj) < st && at(i + di, j) < st;
   const upperAt = (i, j) => (el.upper ?? []).find((r) => r.i === i && r.j === j), clear = new Set(el.clear ?? []);
   for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) {
     const n = H[i][j]; if (!n) continue;
@@ -60,13 +92,13 @@ function pueblo(el, ctx) {
     if (up) {
       // a room of the top storey, opened and furnished, its doorway on the terrace in front (the lower cell's roof): the storeys under it solid
       const lo = top - ST;
-      bag.add(A, box(x0, 0, z0, x1, lo, z1)); col.rect([x0, z0, x1, z1], 0, lo);
+      bag.add(A, roundedMass(x0, z0, x1, z1, 0, n - 1, ex(i, j), true)); col.rect([x0, z0, x1, z1], 0, lo);
       puebloRoom({ rect: [x0, z0, x1, z1], door: up.door, kind: up.kind, store: up.kind === 'store', seed: el.seed * 31 + j + i * 7, y0: lo, out: { n: at(i - 1, j) < n, s: at(i + 1, j) < n } }, ctx);
     } else if (room) {
       // a ground-storey room opened and furnished (pueblo_room); any storeys over it solid
       puebloRoom({ rect: [x0, z0, x1, z1], door: room.door, store: room.store, kind: room.kind, seed: el.seed * 31 + j, out: { n: at(i - 1, j) < 1, s: at(i + 1, j) < 1 } }, ctx);
-      if (n > 1) { bag.add(A, box(x0, ST, z0, x1, top, z1)); col.rect([x0, z0, x1, z1], ST, top); col.floor([x0, z0, x1, z1], top); }
-    } else { bag.add(A, box(x0, 0, z0, x1, top, z1)); col.rect([x0, z0, x1, z1], 0, top); col.floor([x0, z0, x1, z1], top); }
+      if (n > 1) { bag.add(A, roundedMass(x0, z0, x1, z1, 1, n, ex(i, j), true)); col.rect([x0, z0, x1, z1], ST, top); col.floor([x0, z0, x1, z1], top); }
+    } else { bag.add(A, roundedMass(x0, z0, x1, z1, 0, n, ex(i, j), true)); col.rect([x0, z0, x1, z1], 0, top); col.floor([x0, z0, x1, z1], top); }
     // the edges where this roof stands above its neighbour: a parapet; the faces below: vigas, openings
     for (const [di, dj, a, b, nx, nz] of [[-1, 0, [x0, z0], [x1, z0], 0, -1], [1, 0, [x0, z1], [x1, z1], 0, 1], [0, -1, [x0, z0], [x0, z1], -1, 0], [0, 1, [x1, z0], [x1, z1], 1, 0]]) {
       const m = at(i + di, j + dj);
@@ -75,7 +107,9 @@ function pueblo(el, ctx) {
       const t = [], lxp = nz === fd ? ladderAt.get(i + ':' + j) : undefined, cuts = lxp === undefined ? [[a[0], b[0]]] : [[a[0], lxp - 0.6], [lxp + 0.6, b[0]]];
       for (const [u0, u1] of cuts) if (nz === 0 || u1 - u0 > 0.05) {
         const A0 = nz === 0 ? a : [u0, a[1]], B0 = nz === 0 ? b : [u1, b[1]];
-        beamTris(t, [A0[0] - nx * 0.15, top, A0[1] - nz * 0.15], [B0[0] - nx * 0.15, top, B0[1] - nz * 0.15], 0.15, 0.5);
+        beamTris(t, [A0[0] - nx * 0.15, top, A0[1] - nz * 0.15], [B0[0] - nx * 0.15, top, B0[1] - nz * 0.15], 0.15, 0.42);
+        // the head rounded by the hand that plastered it: a half-round roll on the beam, its ends a little uneven
+        bag.add('mud_plaster', rod([A0[0] - nx * 0.15 + (nz ? (rand() - 0.5) * 0.04 : 0), top + 0.42, A0[1] - nz * 0.15 + (nx ? (rand() - 0.5) * 0.04 : 0)], [B0[0] - nx * 0.15, top + 0.42 + (rand() - 0.5) * 0.01, B0[1] - nz * 0.15], 0.075, 6));
       }
       bag.add(A, fromTriangles(t));
       for (let s = m + 1; s <= n; s++) {
@@ -128,7 +162,15 @@ function pueblo(el, ctx) {
         }
         if (opening) {
           const w = door ? 0.4 : 0.26, hh = door ? 1.45 : 0.45, yy = (s - 1) * ST + (door ? 0.15 : 1.25);
-          const f = 0.3 + rand() * 0.4, px = a[0] + (b[0] - a[0]) * f, pz = a[1] + (b[1] - a[1]) * f, ux = Math.abs(nz), uz = Math.abs(nx);
+          let f = 0.3 + rand() * 0.4;
+          const lxw = nz === fd ? ladderAt.get(i + ':' + j) : undefined;
+          if (lxw !== undefined && Math.abs(a[0] + (b[0] - a[0]) * f - lxw) < 1.0) f = (lxw + 1.4 - a[0]) / (b[0] - a[0]);   // (not behind the ladder's poles)
+          const px = a[0] + (b[0] - a[0]) * f, pz = a[1] + (b[1] - a[1]) * f, ux = Math.abs(nz), uz = Math.abs(nx);
+          // the reveal: a plaster surround standing proud of the face, jambs and a sloped sill, so that the dark opening sits deep in it
+          const fr = (a0, a1, y0, y1, p0, p1) => bag.add('mud_plaster', box(Math.min(px + ux * a0, px + ux * a1) + Math.min(nx * p0, nx * p1), y0, Math.min(pz + uz * a0, pz + uz * a1) + Math.min(nz * p0, nz * p1), Math.max(px + ux * a0, px + ux * a1) + Math.max(nx * p0, nx * p1), y1, Math.max(pz + uz * a0, pz + uz * a1) + Math.max(nz * p0, nz * p1)));
+          const pr = 0.09 + rand() * 0.02;
+          fr(-w - 0.12, -w, yy - 0.06, yy + hh + 0.05, -0.03, pr); fr(w, w + 0.12, yy - 0.06, yy + hh + 0.05, -0.03, pr);
+          if (!door) fr(-w - 0.12, w + 0.12, yy - 0.12, yy - 0.013, -0.03, pr + 0.05);
           bag.add('lacquer_black', box(Math.min(px - ux * w, px + nx * 0.02), yy, Math.min(pz - uz * w, pz + nz * 0.02), Math.max(px + ux * w, px + nx * 0.02), yy + hh, Math.max(pz + uz * w, pz + nz * 0.02)));
           // the soot of the smoke and the rain's stain above and below; a hide hung in a doorway, a skin laced over some windows
           if (!door) bag.add('lacquer_black', box(Math.min(px - ux * (w + 0.06), px + nx * 0.012), yy + hh + 0.1, Math.min(pz - uz * (w + 0.06), pz + nz * 0.012), Math.max(px + ux * (w + 0.06), px + nx * 0.012), yy + hh + 0.1 + 0.12 + rand() * 0.25, Math.max(pz + uz * (w + 0.06), pz + nz * 0.012)));
