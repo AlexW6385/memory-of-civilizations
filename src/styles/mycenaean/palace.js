@@ -6,6 +6,7 @@ import { box, lathe, disc, frustum, fromTriangles, quad } from '../../core/geom.
 import { STYLES } from '../../core/build.js';
 import { minoanColumn } from '../minoan/index.js';
 import { rng, mergeG } from './util.js';
+import { spiral, bar } from './relief.js';
 
 const PLASTER = 'lime_plaster', SOCLE = 'rubble', ROOF = 'earth_wall', TIM = 'timber', RED = 'paint_minoan_red', BLUE = 'egyptian_blue', OCHRE = 'paint_ochre';
 const fresco = (el, ctx) => STYLES.minoan.elements.fresco(el, ctx);
@@ -124,15 +125,22 @@ export function megaron(el, ctx) {
   bag.add(TIM, box(hole[0] - 0.4, y + HR - 0.4, hole[1] - 0.4, hole[2] + 0.4, y + HR, hole[3] + 0.4)); bag.add(ROOF, box(hole[0] - 0.5, y + HR, hole[1] - 0.5, hole[2] + 0.5, y + HR + 0.3, hole[3] + 0.5));
   // ── the throne against the right-hand (south) wall, an offering table beside it ──
   const tx = hx, tz = zi1;
-  bag.add('limestone_yellow', mergeG([box(tx - 0.7, y, tz - 1.0, tx + 0.7, y + 0.2, tz), box(tx - 0.55, y + 0.2, tz - 0.85, tx + 0.55, y + 0.5, tz), box(tx - 0.55, y + 0.5, tz - 0.22, tx + 0.55, y + 1.7, tz)]));
-  bag.add(RED, box(tx - 0.45, y + 0.9, tz - 0.235, tx + 0.45, y + 1.5, tz - 0.22));
-  col.rect([tx - 0.7, tz - 1.0, tx + 0.7, tz], y, y + 1.7);
+  // the throne on a plastered dais of one step: seat, arms and a tall back of limestone, the back painted red with a band of gilded spirals between ivory strips, a footstool before it
+  bag.add(PLASTER, box(tx - 0.95, y, tz - 1.3, tx + 0.95, y + 0.12, tz));
+  bag.add('limestone_yellow', mergeG([box(tx - 0.58, y + 0.12, tz - 0.9, tx + 0.58, y + 0.5, tz), box(tx - 0.58, y + 0.5, tz - 0.24, tx + 0.58, y + 1.72, tz), box(tx - 0.46, y + 1.72, tz - 0.24, tx + 0.46, y + 1.84, tz), box(tx - 0.62, y + 0.5, tz - 0.78, tx - 0.5, y + 0.8, tz - 0.24), box(tx + 0.5, y + 0.5, tz - 0.78, tx + 0.62, y + 0.8, tz - 0.24)]));
+  bag.add(RED, box(tx - 0.5, y + 0.82, tz - 0.255, tx + 0.5, y + 1.64, tz - 0.24));
+  bag.add('ivory', mergeG([box(tx - 0.5, y + 1.0, tz - 0.262, tx + 0.5, y + 1.05, tz - 0.255), box(tx - 0.5, y + 1.4, tz - 0.262, tx + 0.5, y + 1.45, tz - 0.255)]));
+  const tm = (u, v, d) => [tx + u, y + v, tz - 0.255 - d];
+  bag.add('gilt_bronze', mergeG([...[-0.33, -0.11, 0.11, 0.33].flatMap((u, i) => spiral(tm, u, 1.225, 0.01, 0.085, 1.8, i % 2 ? 1 : -1, 0.01, 0.012, 5)), ...[-0.22, 0, 0.22].map((u) => bar(tm, u - 0.02, 1.225, u + 0.02, 1.225, 0.008, 0.012))]));
+  bag.add(TIM, mergeG([box(tx - 0.42, y + 0.12, tz - 1.22, tx + 0.42, y + 0.3, tz - 0.96)]));
+  bag.add('ivory', box(tx - 0.4, y + 0.3, tz - 1.2, tx + 0.4, y + 0.325, tz - 0.98));
+  col.rect([tx - 0.95, tz - 1.3, tx + 0.95, tz], y, y + 1.84);
   bag.add(TIM, mergeG([box(tx + 1.2, y + 0.62, tz - 0.8, tx + 2.0, y + 0.68, tz - 0.2), ...[[1.25, 0.25], [1.95, 0.25], [1.25, 0.75], [1.95, 0.75]].map(([a, b]) => box(tx + a - 0.04, y, tz - b - 0.04, tx + a + 0.04, y + 0.62, tz - b + 0.04))]));
   col.rect([tx + 1.2, tz - 0.8, tx + 2.0, tz - 0.2], y, y + 0.68);
   bag.add('terracotta', lathe([[0.001, 0], [0.09, 0.02], [0.14, 0.12], [0.07, 0.24], [0.08, 0.28], [0.001, 0.28]], 10, null, tx + 1.45, y + 0.68, tz - 0.5));
   bag.add('silver', lathe([[0.001, 0], [0.07, 0], [0.09, 0.1], [0.001, 0.1]], 10, null, tx + 1.75, y + 0.68, tz - 0.5));
   // the libation channel: a groove of dark stone running from the throne to the hearth
-  bag.add('pottery_dark', box(tx - 0.04, y, hearth[1] + R, tx + 0.04, y + 0.012, tz - 1.0));
+  bag.add('pottery_dark', box(tx - 0.04, y, hearth[1] + R, tx + 0.04, y + 0.012, tz - 1.3));
   // ── the walls' dado and the frescoes ──
   bag.add(RED, mergeG([box(xH, y, zi0, x1 - th, y + 0.9, zi0 + 0.012), box(xH, y, zi1 - 0.012, x1 - th, y + 0.9, zi1), box(x1 - th - 0.012, y, zi0, x1 - th, y + 0.9, zi1)]));
   bag.add(OCHRE, mergeG([box(xH, y + 4.0, zi0, x1 - th, y + 4.5, zi0 + 0.012), box(xH, y + 4.0, zi1 - 0.012, x1 - th, y + 4.5, zi1), box(x1 - th - 0.012, y + 4.0, zi0, x1 - th, y + 4.5, zi1)]));
