@@ -15,23 +15,37 @@ function post(bag, col, x, y, z, rand, face, k) {
   bag.add(DARK, lathe([[r * 1.1, 0.18], [r, 0.4], [r * 0.96, 1.2], [r * 1.02, 1.75], [r * 0.9, 1.84]], 10, (t, i) => 1 + 0.025 * Math.sin(t * 3 + i * 2 + k), x, y, z));
   // the fork: two short branches opening upward, the beam lying in them
   for (const s of [-1, 1]) bag.add(DARK, rod([x, y + 1.8, z], [x + s * 0.17 * Math.cos(face), y + 2.02, z + s * 0.17 * Math.sin(face)], 0.065, 6));
-  // carving: zig-zag bands (raised triangles) near the foot and under the fork; the face and body of the ancestor between
-  const fx = Math.sin(face), fz = Math.cos(face), px = fz, pz = -fx;
-  const at = (u, v, h) => [x + fx * (r + h) + px * u, y + v, z + fz * (r + h) + pz * u];
-  const T = [];
-  for (const [v0, v1] of [[0.45, 0.62], [1.45, 1.6]]) for (let i = -2; i < 2; i++) {
-    const a = at(i * 0.07, v0, 0), b = at(i * 0.07 + 0.07, v0, 0), c = at(i * 0.07 + 0.035, v1, 0);
-    T.push(...a, ...c, ...b);
-  }
-  bag.add(LOG, fromTriangles(T));
-  if (k % 3 !== 2) {
-    const head = at(0, 1.3, 0.02);
-    bag.add(LOG, lathe([[0.001, 0], [0.085, 0.03], [0.1, 0.12], [0.07, 0.22], [0.001, 0.25]], 8, null, head[0], head[1] - 0.12, head[2]));
-    for (const s of [-1, 1]) { const e = at(s * 0.045, 1.33, 0.1); bag.add('opening', box(e[0] - 0.012, e[1] - 0.01, e[2] - 0.012, e[0] + 0.012, e[1] + 0.012, e[2] + 0.012)); }
-    if (k % 3 === 0) for (const s of [-1, 1]) { const b = at(s * 0.09, 1.0, 0.03); bag.add(LOG, lathe([[0.001, 0], [0.06, 0.02], [0.045, 0.09], [0.001, 0.11]], 8, null, b[0], b[1], b[2]).rotateX(0)); }
-    else for (const s of [-1, 1]) bag.add(LOG, rod(at(s * 0.12, 1.15, 0.02), at(s * 0.1, 0.85, 0.07), 0.025, 5));
-  }
+  // carving (docs/settlements/dogon.md §13): ancestor figures in relief on the post's faces, built in the post's own frame (x across, z outward)
+  const faces = k % 2 === 0 ? [face, face + Math.PI] : [face];
+  faces.forEach((fc, n) => carve(bag, x, y, z, r, fc, k + n));
   col.circle(x, z, r + 0.08, y, y + 2.2);
+}
+
+
+/** The relief on one face of a post: a zig-zag band at the foot, the ancestor above it — legs bent, hands to the belly or the arms raised, a face with nose, eyes and mouth, a flat cap — and a ring cut under the fork; some carry the breasts. */
+function carve(bag, x, y, z, r, yaw, k) {
+  const g = (mat, geo) => bag.add(mat, place(geo, x, y, z, yaw));
+  const zr = r * 0.93, d = 0.05, female = k % 3 === 0, raised = k % 2 === 0;
+  const T = [];
+  for (let i = -2; i < 2; i++) { const a = i * 0.065, b = a + 0.065; T.push(a, 0.24, zr, (a + b) / 2, 0.42, zr, b, 0.24, zr); }
+  g(LOG, fromTriangles(T));
+  for (const v of [0.46, 1.74]) g(LOG, lathe([[r + 0.012, 0], [r + 0.02, 0.014], [r + 0.012, 0.03]], 10, null, 0, v, 0));
+  for (const s of [-1, 1]) {                                                       // legs: thigh out, shin back in
+    g(LOG, rod([s * 0.06, 0.98, zr + 0.01], [s * 0.11, 0.78, zr + 0.04], 0.034, 5));
+    g(LOG, rod([s * 0.11, 0.78, zr + 0.04], [s * 0.08, 0.56, zr + 0.015], 0.03, 5));
+  }
+  g(LOG, box(-0.13, 0.96, zr, 0.13, 1.34, zr + d));                               // trunk
+  g(LOG, box(-0.04, 1.34, zr, 0.04, 1.4, zr + d));                                // neck
+  for (const s of [-1, 1]) {
+    if (raised) { g(LOG, rod([s * 0.13, 1.3, zr + 0.02], [s * 0.19, 1.52, zr + 0.02], 0.03, 5)); g(LOG, rod([s * 0.19, 1.52, zr + 0.02], [s * 0.17, 1.74, zr + 0.02], 0.028, 5)); }
+    else { g(LOG, rod([s * 0.14, 1.3, zr + 0.02], [s * 0.15, 1.1, zr + 0.03], 0.03, 5)); g(LOG, rod([s * 0.15, 1.1, zr + 0.03], [s * 0.03, 1.04, zr + 0.05], 0.027, 5)); }
+  }
+  if (female) for (const s of [-1, 1]) g(LOG, lathe([[0.001, 0], [0.05, 0.01], [0.04, 0.07], [0.001, 0.09]], 7, null, s * 0.07, 1.2, zr + d).rotateX(Math.PI / 2 * 0));
+  g(LOG, lathe([[0.001, 0], [0.065, 0.03], [0.085, 0.13], [0.06, 0.23], [0.001, 0.26]], 8, null, 0, 1.4, zr + 0.03));       // the head
+  g(LOG, box(-0.012, 1.48, zr + 0.1, 0.012, 1.58, zr + 0.16));                    // the nose
+  for (const s of [-1, 1]) g('opening', box(s * 0.04 - 0.012, 1.55, zr + 0.105, s * 0.04 + 0.012, 1.57, zr + 0.12));
+  g('opening', box(-0.03, 1.44, zr + 0.105, 0.03, 1.455, zr + 0.115));
+  g(LOG, lathe([[0.1, 0], [0.09, 0.03], [0.001, 0.045]], 8, null, 0, 1.64, zr + 0.03));                                       // a flat cap
 }
 
 /** toguna: { c: [x, z], w, d, y, yaw?, seed }: the plan about its centre, the floor at y + 0.12. */

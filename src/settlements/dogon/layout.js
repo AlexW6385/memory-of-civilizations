@@ -112,7 +112,7 @@ export const COMPOUNDS = [];
   COMPOUNDS.forEach((c) => {
     const cx = (c.rect[0] + c.rect[2]) / 2;
     c.hw = c.landmark ? true : c.seed % 2 === 0;
-    c.open = c.landmark || (c.row !== 'A' && Math.abs(cx) <= 34) || (c.row === 'A' && Math.abs(cx) <= 20);
+    c.open = true;   // every ginna is a house to walk into, none a shut shell
   });
 }
 export const LANDMARK = COMPOUNDS.find((c) => c.landmark);

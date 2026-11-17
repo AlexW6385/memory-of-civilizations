@@ -39,7 +39,7 @@ function furnish(bag, col, r, y, rand, o) {
   for (let i = 0; i < n; i++) {
     const rr = 0.72 + rand() * 0.3, s = spot(rr + 0.3);
     if (!s) continue;
-    const kind = i === 0 ? 'male' : rand() < 0.5 ? 'female' : rand() < 0.3 ? 'low' : 'male';
+    const q = rand(), kind = i === 0 ? 'male' : q < 0.28 ? 'square' : q < 0.55 ? 'female' : q < 0.7 ? 'low' : 'male';   // the square one holds belongings (the women's), the round ones grain and beans
     granary(bag, col, s[0], y, s[1], rr, 1.7 + rand() * 0.7, { rand, yaw: Math.PI * (0.35 + rand() * 0.3), kind });
     placed.push([s[0], s[1], rr + 0.3]);
   }
@@ -143,11 +143,31 @@ export function house(el, { bag, col, lights }) {
   bag.add(SMOOTH, box(ix0, F + 0.42, lz(3.1), ix0 + 0.52, F + 0.46, lz(4.0)));
   jar(bag, lx(0.3), F + 0.46, lz(3.4), 0.8, 'terracotta'); jar(bag, lx(2.6), F, lz(3.0), 1.5); col.circle(lx(2.6), lz(3.0), 0.34, F, F + 0.8);
   bag.add(DARK, lathe([[0.001, 0], [0.12, 0.05], [0.14, 0.18], [0.001, 0.3]], 8, null, lx(2.1), CH - 0.6, lz(3.15)));    // a hanging calabash
-  // ---- the storeroom (east): the big grain jars, bins of mud, baskets ----
-  for (const [u, v, k] of [[3.8, 3.2, 1.6], [3.8, 4.0, 1.4], [6.0, 3.3, 1.7]]) { jar(bag, lx(u), F, lz(v), k, 'terracotta'); col.circle(lx(u), lz(v), 0.25 * k, F, F + 0.8 * k); }
-  bag.add(WALL, box(lx(5.9), F, lz(3.7), ix1, F + 0.8, iz1)); col.rect([lx(5.9), lz(3.7), ix1, iz1], F, F + 0.8);
-  bag.add(MUD, lathe([[0.001, 0.8], [0.4, 0.8], [0.28, 0.95], [0.001, 1.05]], 8, null, lx(6.2), F, lz(4.1)));
-  basket(bag, lx(4.5), F, lz(3.9), 0.3, 'cloth_ochre'); basket(bag, lx(5.2), F, lz(4.1), 0.24); col.circle(lx(4.5), lz(3.9), 0.3, F, F + 0.4);
+  // ---- the storeroom (east): by the house's own seed one of three kinds — the big grain jars and a bin of mud; sacks, a chest and baskets; or calabashes, rolled mats and tools. The walk from the east door (u 4.3…5.5) stays clear.
+  const sv = (el.seed || 9) % 3;
+  if (sv === 0) {
+    for (const [u, v, k] of [[3.8, 3.2, 1.6], [3.8, 4.0, 1.4], [6.0, 3.3, 1.7]]) { jar(bag, lx(u), F, lz(v), k, 'terracotta'); col.circle(lx(u), lz(v), 0.25 * k, F, F + 0.8 * k); }
+    bag.add(WALL, box(lx(5.9), F, lz(3.7), ix1, F + 0.8, iz1)); col.rect([lx(5.9), lz(3.7), ix1, iz1], F, F + 0.8);
+    bag.add(MUD, lathe([[0.001, 0.8], [0.4, 0.8], [0.28, 0.95], [0.001, 1.05]], 8, null, lx(6.2), F, lz(4.1)));
+    basket(bag, lx(4.5), F, lz(3.9), 0.3, 'cloth_ochre'); basket(bag, lx(5.2), F, lz(4.1), 0.24); col.circle(lx(4.5), lz(3.9), 0.3, F, F + 0.4);
+  } else if (sv === 1) {
+    // a wooden chest with iron straps against the west partition, grain sacks stacked on the east side, baskets
+    bag.add(DARK, box(lx(3.3), F, lz(3.8), lx(4.1), F + 0.46, lz(4.4))); col.rect([lx(3.3), lz(3.8), lx(4.1), lz(4.4)], F, F + 0.5);
+    bag.add(LOG, box(lx(3.28), F + 0.46, lz(3.78), lx(4.12), F + 0.5, lz(4.42)));
+    for (const u of [3.5, 3.9]) bag.add('iron', box(lx(u) - 0.02, F, lz(3.8) - 0.004, lx(u) + 0.02, F + 0.5, lz(3.8)));
+    for (const [u, v, h2] of [[6.1, 3.3, 0], [6.1, 3.85, 0], [6.1, 4.3, 0], [6.1, 3.55, 0.45], [6.1, 4.1, 0.45]]) { bag.add('sacking', lathe([[0.001, 0], [0.22, 0.04], [0.26, 0.28], [0.17, 0.52], [0.09, 0.58], [0.001, 0.56]], 9, (t, i) => 1 + 0.05 * Math.sin(t * 4 + i + v * 3), lx(u), F + h2, lz(v))); if (!h2) col.circle(lx(u), lz(v), 0.27, F, F + 0.58); }
+    basket(bag, lx(3.6), F + 0.5, lz(4.1), 0.2, 'cloth_ochre'); basket(bag, lx(3.55), F, lz(3.3), 0.26);
+  } else {
+    // calabashes piled in a bin of mud, mats rolled and stood in the corner, the hoe and the axe on pegs
+    bag.add(WALL, box(lx(5.7), F, lz(3.75), ix1, F + 0.4, iz1)); col.rect([lx(5.7), lz(3.75), ix1, iz1], F, F + 0.4);
+    for (let k = 0; k < 7; k++) bag.add(DARK, lathe([[0.001, 0], [0.11, 0.03], [0.14, 0.12], [0.08, 0.2], [0.001, 0.22]], 8, null, lx(5.95 + (k % 3) * 0.17), F + 0.4 + (k > 4 ? 0.18 : 0), lz(3.95 + (k % 2) * 0.22 + (k > 4 ? 0.1 : 0))));
+    for (let k = 0; k < 3; k++) bag.add(STALK, rod([lx(3.45 + k * 0.17), F, lz(4.35)], [lx(3.5 + k * 0.17), F + 1.15, lz(4.38)], 0.075, 7));
+    col.rect([lx(3.3), lz(4.2), lx(4.05), iz1], F, F + 1.15);
+    basket(bag, lx(3.55), F, lz(3.45), 0.25, 'cloth_ochre');
+    bag.add(DARK, rod([lx(3.25), F + 1.55, lz(3.7)], [lx(3.25), F + 1.55, lz(4.1)], 0.02, 4));
+    bag.add(DARK, rod([lx(3.27), F + 1.52, lz(3.75)], [lx(3.27), F + 0.72, lz(3.75)], 0.017, 4)); bag.add('iron', box(lx(3.26), F + 0.62, lz(3.7), lx(3.3), F + 0.74, lz(3.82)));   // the daba (hoe): haft and blade
+    bag.add(DARK, rod([lx(3.27), F + 1.52, lz(4.05)], [lx(3.27), F + 0.95, lz(4.05)], 0.017, 4)); bag.add('iron', box(lx(3.26), F + 0.88, lz(3.99), lx(3.31), F + 1.0, lz(4.11)));   // the axe
+  }
   for (let k = 0; k < 6; k++) bag.add(THATCH, rod([lx(3.5 + k * 0.5), CH - 0.1, lz(3.1)], [lx(3.52 + k * 0.5), CH - 0.7, lz(3.1)], 0.03, 4));
   // ---- the kitchen: round, north of the central room, doorway at u 5.45 ----
   const ri = 1.35, rc = ri + 0.2, kx = lx(5.45), kz = z0 - ri - 0.2 + 0.0, KH = y + 2.25;

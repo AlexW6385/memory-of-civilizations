@@ -3,6 +3,7 @@
 
 import { box, lathe, rod, place, fromTriangles } from '../../core/geom.js';
 import { orientedBox } from '../../core/build.js';
+import { frame, leaf } from './door.js';
 
 export const WALL = 'banco_rough', PLASTER = 'banco', SMOOTH = 'banco_smooth', MUD = 'mud_plaster', BRICK = 'mudbrick', STONE = 'schist_rubble', STONE2 = 'granite_rough';
 export const THATCH = 'thatch', STALK = 'reed_mat', LOG = 'log_pine', DARK = 'wood_dark', RED = 'kokowai', HOLE = 'opening', ROCK = 'sandstone_red';
@@ -78,31 +79,51 @@ export function firewood(bag, col, x, y, z, yaw, len = 1.6, rows = 3, rand = Mat
  * on the wall with an overhang. kind: 'male' | 'female' | 'low' (the door at the ground, the old men's shelter).
  */
 export function granary(bag, col, x, y, z, r, h, o = {}) {
-  const rand = o.rand ?? rng(7), yaw = o.yaw ?? Math.PI / 2, kind = o.kind ?? 'male', hh = o.hat ?? (r * 1.35 + 0.25);
-  const pl = 0.38;
-  bag.add(STONE, lathe([[r + 0.28, -0.3], [r + 0.3, 0.05], [r + 0.22, pl], [0.001, pl]], 11, (t, i) => 1 + 0.07 * Math.sin(t * 6 + i * 1.7 + r * 9), x, y, z));
-  bag.add(STONE2, lathe([[r + 0.22, pl - 0.04], [r + 0.2, pl], [0.001, pl]], 11, null, x, y + 0.001, z));
-  const y0 = y + pl;
-  bag.add(WALL, lathe([[r * 1.04, 0], [r * 1.0, h * 0.1], [r * 1.06, h * 0.5], [r * 1.0, h]], 14, (t, i) => 1 + 0.018 * Math.sin(t * 7 + i * 3.3 + h * 5), x, y0, z));
-  bag.add(MUD, lathe([[r * 1.0, h], [0.001, h]], 14, null, x, y0, z));
-  // the hat: a cone of straw, ragged at the eaves, a pot or a tuft on the apex
-  const yh = y0 + h;
-  bag.add(THATCH, lathe([[r + 0.3, 0], [r + 0.26, 0.05], [r * 0.95 + 0.1, hh * 0.25], [r * 0.55, hh * 0.62], [r * 0.22, hh * 0.86], [0.02, hh]], 14, (t, i) => i < 2 ? 1 + 0.05 * Math.sin(t * 17 + r * 7) : 1 + 0.03 * Math.sin(t * 9 + i), x, yh - 0.06, z));
-  bag.add('pottery_dark', lathe([[0.001, 0], [0.07, 0.02], [0.09, 0.08], [0.05, 0.13], [0.001, 0.14]], 8, null, x, yh + hh - 0.1, z));
-  // the door
+  const rand = o.rand ?? rng(7), kind = o.kind ?? 'male', sq = kind === 'square', hh = o.hat ?? (r * 1.35 + 0.25);
+  const yaw = sq ? Math.round((o.yaw ?? Math.PI / 2) / (Math.PI / 2)) * (Math.PI / 2) : (o.yaw ?? Math.PI / 2);
+  const pl = 0.38, y0 = y + pl, yh = y0 + h, half = r;          // a square granary: half its side = r
+  // the platform of stones against the rodents
+  if (sq) {
+    bag.add(STONE, box(x - r - 0.3, y - 0.3, z - r - 0.3, x + r + 0.3, y + pl, z + r + 0.3));
+    bag.add(STONE2, box(x - r - 0.22, y + pl - 0.01, z - r - 0.22, x + r + 0.22, y + pl + 0.01, z + r + 0.22));
+  } else {
+    bag.add(STONE, lathe([[r + 0.28, -0.3], [r + 0.3, 0.05], [r + 0.22, pl], [0.001, pl]], 11, (t, i) => 1 + 0.07 * Math.sin(t * 6 + i * 1.7 + r * 9), x, y, z));
+    bag.add(STONE2, lathe([[r + 0.22, pl - 0.04], [r + 0.2, pl], [0.001, pl]], 11, null, x, y + 0.001, z));
+  }
+  // the walls of mud, in courses (the ridges where each course of the mud was laid on the last)
+  if (sq) {
+    bag.add(WALL, box(x - r, y0, z - r, x + r, yh, z + r)); bag.add(MUD, box(x - r, yh, z - r, x + r, yh + 0.04, z + r));
+    for (const c of [0.36, 0.7]) bag.add(SMOOTH, box(x - r - 0.025, y0 + h * c, z - r - 0.025, x + r + 0.025, y0 + h * c + 0.04, z + r + 0.025));
+  } else {
+    bag.add(WALL, lathe([[r * 1.04, 0], [r * 1.0, h * 0.1], [r * 1.06, h * 0.5], [r * 1.0, h]], 14, (t, i) => 1 + 0.018 * Math.sin(t * 7 + i * 3.3 + h * 5), x, y0, z));
+    bag.add(MUD, lathe([[r * 1.0, h], [0.001, h]], 14, null, x, y0, z));
+    for (const c of [0.3, 0.62, 0.9]) bag.add(SMOOTH, lathe([[r * (1.03 + 0.03 * c) + 0.012, 0], [r * (1.03 + 0.03 * c) + 0.035, 0.015], [r * (1.03 + 0.03 * c) + 0.012, 0.045]], 14, null, x, y0 + h * c, z));
+  }
+  // the hat: courses of straw laid in rings, each flaring over the one below, ragged at the eaves, the apex tied off with a pot over it
+  const R0 = sq ? (r + 0.25) * Math.SQRT2 : r + 0.3, nc = sq ? 4 : 5, Rt = (t) => R0 * Math.pow(1 - t, 0.92) + 0.02;
+  const seg = sq ? 4 : 14, rot = sq ? Math.PI / 4 : 0;
+  const hatH = sq ? Math.min(hh, 1.1) : hh;
+  for (let j = 0; j < nc; j++) {
+    const t0 = j / nc, t1 = (j + 1) / nc, mat = j % 2 ? STALK : THATCH, f = j === 0 ? (t, i) => 1 + 0.05 * Math.sin(t * 17 + r * 7 + i) : null;
+    const g = lathe([[Rt(t0) + 0.06, hatH * t0 - 0.03], [Rt(t0) + 0.02, hatH * t0 + 0.02], [Rt(t1) + 0.03, hatH * t1 - 0.01]], seg, f, 0, 0, 0);
+    bag.add(mat, place(g, x, yh - 0.06 + (j ? 0.0 : 0), z, rot));
+  }
+  bag.add(THATCH, place(lathe([[Rt((nc - 0.1) / nc) + 0.03, hatH * (nc - 0.1) / nc], [0.02, hatH]], seg, null, 0, 0, 0), x, yh - 0.06, z, rot));
+  bag.add('pottery_dark', lathe([[0.001, 0], [0.07, 0.02], [0.09, 0.08], [0.05, 0.13], [0.001, 0.14]], 8, null, x, yh + hatH - 0.1, z));
+  // the shutter (door.js leaf): two planks carved in rows, pivots in the frame, the sliding lock; a high one with a notched ladder for the male granary
   const dx = Math.sin(yaw), dz = Math.cos(yaw);
-  const dw = 0.42, dh = 0.48, dy = kind === 'male' ? y0 + h * 0.52 : kind === 'female' ? y0 + h * 0.32 : y0 + 0.02;
-  const w = kind === 'low' ? 0.7 : dw, hgt = kind === 'low' ? 0.85 : dh;
-  const px = x + dx * (r * 1.04 - 0.02), pz = z + dz * (r * 1.04 - 0.02);
-  bag.add(HOLE, place(box(-w / 2 - 0.05, 0, 0, w / 2 + 0.05, hgt + 0.05, 0.03), px, dy, pz, yaw));
-  bag.add(DARK, place(box(-w / 2, 0.01, 0.03, w / 2, hgt, 0.07), px, dy, pz, yaw));
-  for (let k = 0; k < 3; k++) bag.add(LOG, place(box(-w / 2 + 0.02, 0.07 + k * hgt * 0.3, 0.07, w / 2 - 0.02, 0.11 + k * hgt * 0.3, 0.095), px, dy, pz, yaw));
-  bag.add(DARK, place(box(-0.025, hgt * 0.45, 0.07, 0.025, hgt * 0.65, 0.12), px, dy, pz, yaw));          // the lock bar
-  bag.add(WALL, place(box(-w / 2 - 0.1, hgt + 0.04, 0, w / 2 + 0.1, hgt + 0.12, 0.09), px, dy, pz, yaw));   // the lintel's lip
+  const dw = 0.46, dh = 0.62, dy = kind === 'male' ? y0 + h * 0.5 : kind === 'female' || sq ? y0 + h * 0.32 : y0 + 0.02;
+  const w = kind === 'low' ? 0.7 : dw, hgt = kind === 'low' ? 0.9 : dh;
+  const off = sq ? r : r * 1.04;
+  const px = x + dx * (off - 0.02), pz = z + dz * (off - 0.02);
+  const add = (m, g) => bag.add(m, place(g, px, dy, pz, yaw));
+  frame(add, w, hgt, { jamb: 0.05 });
+  leaf(add, w, hgt - 0.02, { rand, planks: kind === 'low' ? 3 : 2, rows: kind === 'low' ? 5 : 3, lockAt: rand() < 0.5 ? 'e' : 'w', lockK: kind === 'low' ? 0.8 : 0.55 });
   if (kind === 'male') notchedLadder(bag, x + dx * (r + 0.5), y0, z + dz * (r + 0.5), dy - y0 - 0.05, -dx, -dz, 0.35);
-  col.circle(x, z, r + 0.3, y - 0.3, yh + hh);
-  // a few stones of the wall's lumps and the straw's binding
+  if (sq) col.rect([x - r - 0.3, z - r - 0.3, x + r + 0.3, z + r + 0.3], y - 0.3, yh + hatH);
+  else col.circle(x, z, r + 0.3, y - 0.3, yh + hatH);
   for (let k = 0; k < 2; k++) { const a = rand() * 6.28; bag.add(STONE, lathe([[0.12, 0], [0.09, 0.07], [0.001, 0.08]], 6, null, x + Math.cos(a) * (r + 0.25), y + pl, z + Math.sin(a) * (r + 0.25))); }
+  void half;
 }
 
 /** A round kitchen: a cylinder of mud with a flat roof and a low parapet, a door gap toward `yaw`; solid (the landmark's is built by its own function). */
@@ -188,17 +209,14 @@ export function nicheFacade(bag, x0, x1, zf, y, H, rand, o = {}) {
   }
 }
 
-/** A carved door: a frame with a pair of leaves, bands of figures cut in rows. At (u, y), facing +z at zf. */
+/** A carved door (door.js): the frame with its lintel and sill, the plank leaf carved in registers by this door's own seed, the sliding-bolt lock. At (u, y), facing +z at zf. An open door stands with its leaf swung back against the wall's front beside the jamb. */
 export function carvedDoor(bag, u, y, zf, w, h, rand, open = false) {
-  bag.add(HOLE, box(u - w / 2, y, zf - 0.02, u + w / 2, y + h, zf + 0.012));
-  if (!open) {
-    bag.add(DARK, box(u - w / 2 + 0.02, y, zf + 0.02, u + w / 2 - 0.02, y + h - 0.03, zf + 0.08));
-    for (let r = 0; r < 4; r++) for (let k = 0; k < 4; k++) if (rand() < 0.8) bag.add(LOG, box(u - w / 2 + 0.07 + k * (w - 0.14) / 4, y + 0.15 + r * (h - 0.3) / 4, zf + 0.08, u - w / 2 + 0.07 + k * (w - 0.14) / 4 + 0.09, y + 0.15 + r * (h - 0.3) / 4 + 0.2, zf + 0.11));
-    bag.add(LOG, box(u - 0.015, y, zf + 0.08, u + 0.015, y + h - 0.03, zf + 0.115));
-  }
-  bag.add(DARK, box(u - w / 2 - 0.1, y, zf - 0.02, u - w / 2, y + h + 0.1, zf + 0.12));
-  bag.add(DARK, box(u + w / 2, y, zf - 0.02, u + w / 2 + 0.1, y + h + 0.1, zf + 0.12));
-  bag.add(DARK, box(u - w / 2 - 0.1, y + h, zf - 0.02, u + w / 2 + 0.1, y + h + 0.12, zf + 0.13));
+  const at = (px, pz, yaw) => (m, g) => bag.add(m, place(g, px, y, pz, yaw));
+  frame(at(u, zf, 0), w, h, open ? { fill: 0.5 } : {});
+  const o = { rand, planks: w > 0.9 ? 3 : 2, rows: h > 1.7 ? 5 : 4, lockAt: rand() < 0.5 ? 'e' : 'w', lockK: 1 };
+  if (!open) { leaf(at(u, zf, 0), w, h - 0.03, o); return; }
+  const swing = (m, g) => bag.add(m, place(g.translate(-w / 2, 0, 0), u + w / 2 + 0.14, y, zf + 0.14, Math.PI / 2));
+  leaf(swing, w, h - 0.03, { ...o, lockAt: 'w' });
 }
 
 /** A flat roof's furniture: parapet round the edge (a lip 0.28 high), a drain spout or two, bundles of stalks, a pot. */

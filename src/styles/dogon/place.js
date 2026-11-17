@@ -90,8 +90,40 @@ export function milletPlot(el, { bag, col }) {
   for (let x = x0 + 0.6; x < x1; x += 1.25) for (let z = z0 + 0.6; z < z1; z += 1.25) {
     if (rand() < 0.3) continue;
     const px = x + (rand() - 0.5) * 0.5, pz = z + (rand() - 0.5) * 0.5, y = yAt(px, pz), h = 2.2 + rand() * 0.6;
+    if (el.skip && el.skip(px, pz)) continue;
     bag.add(STALK, rod([px, y, pz], [px + (rand() - 0.5) * 0.15, y + h, pz + (rand() - 0.5) * 0.15], 0.018, 4));
     if (rand() < 0.75) bag.add(THATCH, lathe([[0.001, 0], [0.05, 0.05], [0.055, 0.25], [0.001, 0.4]], 5, null, px, y + h - 0.1, pz));
   }
 }
 void SMOOTH; void STONE2; void LOG; void milletStack; void notchedLadder;
+
+/** field_hut: { at: [x, z], y, seed }: the watchman's platform in the millet (docs/settlements/dogon.md §13): four forked posts, a floor of poles at 1.7 m, a pitched roof of straw on four posts, a notched-log ladder, a cord running out into the field hung with dry gourds that rattle when it is pulled (scaring the birds). */
+export function fieldHut(el, { bag, col }) {
+  const rand = rng(el.seed || 2), [x, z] = el.at, y = el.y ?? 0, S = 0.95, FL = 1.7, TOP = 3.55;
+  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    bag.add('wood_dark', rod([x + sx * S, y - 0.3, z + sz * S], [x + sx * S + (rand() - 0.5) * 0.05, y + FL + 0.12, z + sz * S], 0.07, 6));
+    bag.add('wood_dark', rod([x + sx * S, y + FL, z + sz * S], [x + sx * S, y + TOP, z + sz * S], 0.045, 5));      // the roof's post stands on the platform's corner
+    col.circle(x + sx * S, z + sz * S, 0.11, y, y + FL);
+  }
+  for (const sz of [-1, 1]) bag.add('wood_dark', rod([x - S - 0.2, y + FL + 0.1, z + sz * S], [x + S + 0.2, y + FL + 0.1, z + sz * S], 0.06, 6));
+  for (let i = 0; i < 11; i++) { const u = -S + 0.1 + i * (2 * S - 0.2) / 10; bag.add('log_pine', rod([x + u, y + FL + 0.19, z - S - 0.12], [x + u, y + FL + 0.19, z + S + 0.12], 0.045, 5)); }   // poles of the floor
+  bag.add('reed_mat', box(x - S + 0.05, y + FL + 0.235, z - S + 0.05, x + S - 0.05, y + FL + 0.25, z + S - 0.05));
+  for (const sz of [-1, 1]) bag.add('wood_dark', rod([x - S, y + FL + 0.7, z + sz * S], [x + S, y + FL + 0.7, z + sz * S], 0.025, 5));      // a rail on the sides
+  bag.add('wood_dark', rod([x - S, y + FL + 0.7, z - S], [x - S, y + FL + 0.7, z + S], 0.025, 5));
+  // the roof: wall plates on the four posts' tops, a pyramid of straw courses over them
+  for (const sz of [-1, 1]) bag.add('wood_dark', rod([x - S - 0.1, y + TOP, z + sz * S], [x + S + 0.1, y + TOP, z + sz * S], 0.045, 6));
+  for (const sx of [-1, 1]) bag.add('wood_dark', rod([x + sx * S, y + TOP, z - S - 0.1], [x + sx * S, y + TOP, z + S + 0.1], 0.045, 6));
+  const R0 = (S + 0.35) * Math.SQRT2;
+  for (let j = 0; j < 3; j++) {
+    const t0 = j / 3, t1 = (j + 1) / 3, Rt = (t) => R0 * (1 - t) + 0.02;
+    bag.add(j % 2 ? 'reed_mat' : 'thatch', place(lathe([[Rt(t0) + 0.05, 0.9 * t0], [Rt(t0), 0.9 * t0 + 0.04], [Rt(t1) + 0.03, 0.9 * t1]], 4, null, 0, 0, 0), x, y + TOP + 0.02, z, Math.PI / 4));
+  }
+  // the ladder: a notched log leaning on the platform's south edge
+  bag.add('wood_dark', rod([x + 0.3, y, z + S + 1.0], [x + 0.3, y + FL + 0.35, z + S + 0.08], 0.09, 7));
+  for (let k = 1; k < 6; k++) { const f = k / 6.4; bag.add('log_pine', box(x + 0.15, y + (FL + 0.35) * f, z + S + 1.0 - (0.92) * f - 0.1, x + 0.45, y + (FL + 0.35) * f + 0.04, z + S + 1.0 - 0.92 * f + 0.1)); }
+  // the cord of gourds running out toward the field
+  bag.add('thatch', rod([x - S, y + FL + 0.55, z + S], [x - 4.2, y + 1.7, z + 4.2], 0.01, 3));
+  for (const f of [0.35, 0.6, 0.85]) bag.add('wood_dark', lathe([[0.001, 0], [0.07, 0.03], [0.09, 0.11], [0.05, 0.2], [0.001, 0.22]], 7, null, x - S + (-4.2 + S) * f, y + FL + 0.55 + (1.7 - FL - 0.55) * f - 0.2, z + S + (4.2 - S) * f));
+  bag.add('wood_dark', rod([x - 4.2, y - 0.2, z + 4.2], [x - 4.2, y + 1.72, z + 4.2], 0.03, 5));      // the stake that holds the cord's end
+  col.circle(x - 4.2, z + 4.2, 0.06, y, y + 1.7);
+}

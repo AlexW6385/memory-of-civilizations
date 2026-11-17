@@ -24,7 +24,10 @@ for (const t of PENS) E.push({ t: 'pen', at: t.at, y: height(t.at[0], t.at[1]), 
 E.push({ t: 'lane_stones', rects: [[-1.8, -34, 1.8, 34, 0.55], [-62, -34, 62, 12, 0.1], [-26, 21, 24, 33, 0.07]], yAt: height, skip: (x, z) => inCompound(x, z, 0.4), seed: 6 });
 for (const b of BAOBABS) E.push({ t: 'baobab', at: b.at, y: height(b.at[0], b.at[1]), r: b.r, seed: Math.round(b.at[0]) });
 // small plots of standing millet at the village's foot, between it and the fields
-for (const [i, r] of [[-60, 34, -34, 44], [30, 33, 58, 43]].entries()) E.push({ t: 'millet_plot', rect: r, yAt: height, seed: 40 + i });
+for (const [i, r] of [[-60, 34, -34, 44], [30, 33, 58, 43]].entries()) E.push({ t: 'millet_plot', rect: r, yAt: height, seed: 40 + i, skip: (x, z) => [[-47, 38.5], [44, 38]].some(([hx, hz]) => Math.hypot(x - hx, z - hz) < 2.6) });
+
+// the watchmen's platforms in the millet, one in each plot
+for (const [i, [x, z]] of [[-47, 38.5], [44, 38]].entries()) E.push({ t: 'field_hut', at: [x, z], y: height(x, z), seed: 60 + i });
 
 // the opened ginnas (compound.js house(): the pad's west or east part, walls 0.45 m, rooms 6.5 × 4.5 m inside)
 const F = LANDMARK.y + 0.05;
