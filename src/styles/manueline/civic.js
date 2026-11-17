@@ -52,38 +52,6 @@ export function palace(el, ctx) {
   orderCross(bag, 'wall_red', (tx0 + tx1) / 2 - 1.0, y + 4.7, tz1 + 0.22, 0.7, 's', 0.04); armillary(bag, 'limestone_carved', (tx0 + tx1) / 2 + 1.1, y + 4.7, tz1 + 0.35, 0.8);
   addBox(bag, 'wood_dark', (tx0 + tx1) / 2 - 1.4, y, tz1, (tx0 + tx1) / 2 + 1.4, y + 3.0, tz1 + 0.1);                                // the Casa da Índia's door on the quay
 }
-export function se(el, ctx) {
-  const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, zc = (z0 + z1) / 2;
-  bag.add(LIME, box(x0 - 0.5, y - 6, z0 - 0.5, x1 + 0.5, y, z1 + 0.5)); col.rect([x0 - 0.5, z0 - 0.5, x1 + 0.5, z1 + 0.5], y - 6, y);   // (the terrace the church stands on)
-  // aisles, nave, the transept and the lantern over the crossing, the apse
-  bag.add(LIME, box(x0 + 8, y, z0, x1 - 6, y + 11, z1)); col.rect([x0 + 8, z0, x1 - 6, z1], y, y + 12);
-  // (the west front between the towers is one wall with the nave's: the rose window and the portal stand on it)
-  bag.add(LIME, box(x0, y, z0 + 10, x0 + 8, y + 11, z1 - 10)); col.rect([x0, z0 + 10, x0 + 8, z1 - 10], y, y + 12);
-  bag.add(LIME, box(x0, y + 11, zc - 10, x1 - 6, y + 17, zc + 10));
-  gable(bag, 'roof_tile', [x0, zc - 10, x1 - 6, zc + 10], y + 17, 3.2, true, 0.5);
-  for (const s of [-1, 1]) bag.add('roof_tile', box(x0 + 8, y + 11, zc + s * 10 - (s > 0 ? 0 : 0), x1 - 6, y + 11.2, zc + s * 10 + s * 0.1).translate(0, 0, 0));
-  const tx = (x0 + x1) / 2 + 6;
-  bag.add(LIME, box(tx - 6, y, z0 - 4, tx + 6, y + 20, z1 + 4)); col.rect([tx - 6, z0 - 4, tx + 6, z1 + 4], y, y + 20);
-  gable(bag, 'roof_tile', [tx - 6, z0 - 4, tx + 6, z1 + 4], y + 20, 2.6, false, 0.4);
-  bag.add(LIME, lathe([[4.2, 0], [4.2, 5]], 8, null, tx, y + 20, zc)); bag.add('roof_tile', lathe([[4.5, 0], [3.0, 1.4], [0.001, 3.6]], 8, null, tx, y + 25, zc));
-  bag.add(LIME, lathe([[5.5, 0], [5.0, 6]], 10, null, x1 - 1, y, zc));
-  // the west front: two square towers with merlons, the rose window, the portal
-  for (const [a, b] of [[z0, z0 + 10], [z1 - 10, z1]]) {
-    bag.add(LIME, box(x0, y, a, x0 + 10, y + 27, b)); col.rect([x0, a, x0 + 10, b], y, y + 27);
-    bag.add('limestone_carved', box(x0 - 0.1, y + 26.4, a - 0.1, x0 + 10.1, y + 27.2, b + 0.1));
-    for (let u = 0.6; u < 10; u += 1.8) for (const [mx, mz] of [[x0 + u, a - 0.1], [x0 + u, b - 0.9], [x0 - 0.1, a + u], [x0 + 9.1, a + u]]) addBox(bag, LIME, mx, y + 27.2, mz, mx + 1.0, y + 28.6, mz + 1.0);
-    for (const yy of [9, 17]) addBox(bag, 'opening', x0 - 0.05, y + yy, (a + b) / 2 - 0.4, x0 + 0.05, y + yy + 2.6, (a + b) / 2 + 0.4);
-  }
-  bag.add('stained_glass', lathe([[2.4, 0], [0.001, 0]], 16).rotateZ(Math.PI / 2).translate(x0 + 0.02, y + 16, zc));
-  addBox(bag, 'stained_glass', x0 - 0.04, y + 14.2, zc - 1.8, x0 + 0.02, y + 17.8, zc + 1.8);
-  addBox(bag, LIME, x0 - 0.2, y + 11.4, zc - 2.6, x0 + 0.1, y + 20.6, zc - 2.3); addBox(bag, LIME, x0 - 0.2, y + 11.4, zc + 2.3, x0 + 0.1, y + 20.6, zc + 2.6);
-  addBox(bag, 'wood_dark', x0 - 0.1, y, zc - 1.4, x0 + 0.1, y + 3.6, zc + 1.4);
-  const T = [];
-  archWall(T, (u, yy, d) => [x0 - 0.7 + d, yy, zc - 3 + u], { u0: 0, u1: 6, d0: 0, d1: 0.7, y0: y, y1: y + 8, openings: [{ uc: 3, r: 1.9, sill: y, spring: y + 3.6, f: 0.5 }], n: 8 });
-  bag.add('limestone_carved', fromTriangles(T));
-  col.rect([x0 - 0.7, zc - 3, x0, zc - 1.9], y, y + 8); col.rect([x0 - 0.7, zc + 1.9, x0, zc + 3], y, y + 8);   // the portal's jambs (its doorway stands open)
-  for (let k = 0; k < 7; k++) { const zz = z0 + 11 + k * (z1 - z0 - 22) / 6; pinnacle(bag, 'limestone_carved', x0 + 8.5, y + 11, zz, 0.3, 1.6, 6); }
-}
 export function castle(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, rand = rng(el.seed ?? 3);
   bag.add('limestone', box(x0 - 3, y - 9, z0 - 3, x1 + 3, y - 0.2, z1 + 3));

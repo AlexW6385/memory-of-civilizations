@@ -77,7 +77,7 @@ export function kit(ctx, F, fy, rand) {
 const BIRDS = ['cloth_green', 'cloth_red', 'cloth_ochre', 'cloth_blue'];
 /** Stocks a shop of trade `t` along its two side walls and back (v 0.5…vb), with a counter in the front third. */
 export function shop(K, F, L, vb, t, rand, T = 0.5) {
-  const { A, Lh, jar, barrel, sack, crate, coil, bolt, book, shelves, counter, table, stool, scales, cage, tusk, ham, herbs, pick } = K;
+  const { A, Lh, jar, barrel, sack, crate, coil, bolt, book, shelves, counter, table, stool, scales, cage, tusk, ham, herbs, pick, Rod } = K;
   const w = L - 2 * T, vs = T + 0.1, mid = L / 2;
   const counterAt = (u0, u1, v) => { counter(u0, u1, v, v + 0.7); };
   if (t === 'spice') {
@@ -144,6 +144,51 @@ export function shop(K, F, L, vb, t, rand, T = 0.5) {
     for (let k = 0; k < 4; k++) barrel(L - T - 0.5, 2.2 + k * 0.7, 0, 0.3, 0.8);
     for (let k = 0; k < 5; k++) Lh('terracotta', jarP(0.08, 0.28), L - T - 0.45, 1.5 + k * 0.55, 1.06, 8);
     for (let k = 0; k < 3; k++) ham(T + 1.4 + k * 0.9, vb - 0.3, 2.0);
+  } else if (t === 'baker') {   // a brick oven with its dome and mouth, loaves on shelves and the counter, the kneading trough, flour
+    A('brick', L - T - 2.3, vb - 2.4, L - T - 0.1, vb - 0.1, 0, 0.9, true); Lh('brick', [[1.0, 0], [1.0, 0.25], [0.8, 0.62], [0.45, 0.88], [0.001, 0.98]], L - T - 1.2, vb - 1.25, 0.9, 12);
+    A('opening', L - T - 1.65, vb - 2.45, L - T - 0.75, vb - 2.38, 0.98, 1.4); A('limestone', L - T - 1.75, vb - 2.47, L - T - 0.65, vb - 2.4, 0.9, 0.98); A('limestone', L - T - 1.75, vb - 2.47, L - T - 1.65, vb - 2.4, 0.98, 1.45); A('limestone', L - T - 0.75, vb - 2.47, L - T - 0.65, vb - 2.4, 0.98, 1.45);
+    A('bark_dark', L - T - 3.5, vb - 1.7, L - T - 2.6, vb - 0.15, 0, 0.8, true);
+    K.Rod('wood_dark', [L - T - 2.5, vb - 0.6, 0.02], [L - T - 2.5, vb - 0.9, 2.1], 0.03, 4); A('wood_dark', L - T - 2.62, vb - 1.0, L - T - 2.38, vb - 0.8, 1.9, 2.15);   // the peel
+    shelves(T, T + 3.4, vs, 0.45, [0.85, 1.35, 1.85], (u, v, h) => { if (rand() < 0.15) return; Lh('hide_tan', [[0.001, 0], [0.12, 0.01], [0.16, 0.07], [0.12, 0.13], [0.001, 0.15]], u, v, h, 9); }, 0.34);
+    counterAt(mid - 1.4, mid + 1.0, 2.6);
+    for (let k = 0; k < 7; k++) Lh('hide_tan', [[0.001, 0], [0.13, 0.01], [0.18, 0.08], [0.14, 0.15], [0.001, 0.17]], mid - 1.2 + k * 0.32, 2.95, 1.06, 9);
+    Lh('wicker', [[0.2, 0], [0.26, 0.18], [0.22, 0.18], [0.001, 0.04]], mid + 0.65, 2.95, 1.06, 9);
+    A('wood_dark', T + 0.3, vb - 1.5, T + 2.0, vb - 0.55, 0, 0.8, true); A('timber', T + 0.25, vb - 1.55, T + 2.05, vb - 0.5, 0.8, 0.86); A('cloth_white', T + 0.5, vb - 1.3, T + 1.8, vb - 0.75, 0.86, 0.93);   // the trough and its dough
+    for (let k = 0; k < 5; k++) sack(T + 2.5 + (k % 2) * 0.55, vb - 0.5 - Math.floor(k / 2) * 0.5, 0, 'linen', k < 2);
+  } else if (t === 'cooper') {   // barrels of every size, a half-raised barrel in its hoops, staves, hoops, the bench with its adze
+    for (let k = 0; k < 5; k++) barrel(T + 0.5 + (k % 3) * 0.8, vs + 0.5 + Math.floor(k / 3) * 0.8, k > 2 ? 0 : 0, k % 2 ? 0.36 : 0.3, k % 2 ? 0.95 : 0.8);
+    for (let k = 0; k < 3; k++) barrel(L - T - 0.5 - k * 0.8, vs + 0.5, 0, 0.38, 1.0);
+    barrel(L - T - 0.5, vs + 1.4, 0, 0.3, 0.8); barrel(L - T - 0.5, vs + 1.4, 0.8, 0.28, 0.7);   // two stacked
+    for (let k = 0; k < 14; k++) { const a = k / 14 * Math.PI * 2, r0 = 0.34, r1 = 0.2; Rod('timber', [mid - 1.6 + Math.cos(a) * r0, 4.6 + Math.sin(a) * r0, 0.02], [mid - 1.6 + Math.cos(a) * r1, 4.6 + Math.sin(a) * r1, 0.95], 0.022, 4); }   // staves of a barrel being raised
+    Lh('iron', [[0.31, 0.0], [0.34, 0.0], [0.34, 0.04], [0.31, 0.04], [0.31, 0.0]], mid - 1.6, 4.6, 0.3, 12);
+    for (let k = 0; k < 6; k++) Lh('iron', [[0.38, 0], [0.42, 0], [0.42, 0.04], [0.38, 0.04], [0.38, 0]], T + 0.7, vb - 0.6, k * 0.05, 12);   // a stack of hoops
+    for (let k = 0; k < 7; k++) Rod('timber', [L - T - 0.15, vb - 1.6 + k * 0.17, 0.02], [L - T - 0.25, vb - 1.6 + k * 0.17, 1.9], 0.03, 4);   // staves leant on the wall
+    A('wood_dark', T + 1.6, vb - 1.5, T + 3.6, vb - 0.7, 0.8, 0.88, true); for (const x of [T + 1.7, T + 3.4]) for (const z of [vb - 1.4, vb - 0.8]) A('wood_dark', x, z, x + 0.12, z + 0.12, 0, 0.8);
+    A('iron', T + 2.0, vb - 1.2, T + 2.5, vb - 1.1, 0.88, 0.92); A('wood_dark', T + 2.4, vb - 1.2, T + 3.0, vb - 1.14, 0.88, 0.92);   // adze and drawknife on the bench
+  } else if (t === 'sailmaker') {   // the sail on its trestles under the needle, rolls of canvas, a sail hung from a pole, rope, the palm and needles
+    table(T + 1.9, 3.9, 2.8, 1.3); A('cloth_white', T + 0.6, 3.3, T + 3.2, 4.5, 0.78, 0.85); A('cloth_white', T + 0.5, 3.2, T + 0.62, 4.6, 0.3, 0.8);
+    for (let k = 0; k < 5; k++) Rod('cloth_white', [T + 0.3 + k * 0.32, vs + 0.35, 0.02], [T + 0.3 + k * 0.32, vs + 0.35, 1.5], 0.13, 7);
+    for (let k = 0; k < 3; k++) Rod('linen', [L - T - 0.4 - k * 0.3, vs + 0.4, 0.02], [L - T - 0.4 - k * 0.3, vs + 0.4, 1.4], 0.12, 7);
+    Rod('timber', [T + 0.05, vb - 0.4, 2.4], [L - T - 0.05, vb - 0.4, 2.4], 0.04, 5); A('cloth_white', T + 0.6, vb - 0.45, L - T - 0.6, vb - 0.4, 0.95, 2.4);
+    { const cu = (L - 1.0) / 2 + 0.5; A('wall_red', cu - 0.09, vb - 0.46, cu + 0.09, vb - 0.44, 1.25, 2.0); A('wall_red', cu - 0.45, vb - 0.46, cu + 0.45, vb - 0.44, 1.6, 1.76); }   // the Order's red cross painted on the sail
+    for (let k = 0; k < 5; k++) coil(L - T - 0.6 - (k % 2) * 0.8, vb - 1.6 - Math.floor(k / 2) * 0.75, k > 3 ? 0.22 : 0, 0.34);
+    A('wood_dark', mid + 1.0, 2.5, mid + 2.2, 3.1, 0, 0.45, true); A('iron', mid + 1.2, 2.7, mid + 1.5, 2.8, 0.45, 0.47); Lh('terracotta', jarP(0.1, 0.22), mid + 1.9, 2.8, 0.45, 8);
+  } else if (t === 'scribe') {   // notary: a long desk with ledgers, ink and quills, shelves of books and rolled deeds, iron-bound chests, a map
+    for (let k = 0; k < 2; k++) { const u = T + 1.2 + k * 2.4; A('wood_dark', u, 2.0, u + 1.5, 2.8, 0, 1.0, true); A('timber', u - 0.05, 1.9, u + 1.55, 2.5, 1.0, 1.08); A('timber', u + 0.05, 2.5, u + 1.45, 2.8, 1.0, 1.2); for (let b = 0; b < 3; b++) K.book(u + 0.15 + b * 0.35, 2.0, 1.08, 0.3, 0.07 + (b % 2) * 0.03); Lh('pottery_dark', jarP(0.04, 0.09), u + 1.3, 2.1, 1.08, 7); K.Rod('cloth_white', [u + 1.25, 2.2, 1.12], [u + 1.38, 2.3, 1.42], 0.008, 3); }   // the lecterns, a ledger, an inkpot and a quill
+    stool(T + 1.9, 1.5); stool(T + 4.3, 1.5);
+    shelves(L - T - 3.6, L - T, vs, 0.42, [0.5, 1.05, 1.6, 2.15], (u, v, h, row) => { if (row % 2) K.Rod('cloth_white', [u - 0.12, v, h + 0.05], [u + 0.12, v, h + 0.05], 0.045, 6); else K.book(u, v - 0.1, h, 0.06, 0.25 + rand() * 0.06); }, 0.3);
+    K.chest(T + 0.55, vb - 0.6, 1.1, 0.55, 'wood_dark'); K.chest(T + 0.55, vb - 1.4, 1.0, 0.5, 'wood_dark'); A('iron', T + 0.1, vb - 1.3, T + 0.2, vb - 0.7, 0.58, 1.1);
+    A('cloth_ochre', T, 1.2, T + 0.04, 3.4, 1.1, 2.3); A('cloth_red', T + 0.04, 1.7, T + 0.07, 1.78, 1.6, 1.64); A('cloth_indigo', T + 0.04, 2.4, T + 0.07, 3.0, 1.35, 1.45);   // a chart of the Indian Ocean pinned to the wall
+    for (let k = 0; k < 3; k++) Lh('lamp_glass', [[0.001, 0], [0.07, 0.02], [0.06, 0.16], [0.001, 0.18]], mid - 0.4 + k * 0.3, vb - 0.4, 0.0, 7);
+  } else if (t === 'smith') {   // forge and bellows, the anvil on its stump, tools on the wall, iron bars, a quench tub
+    A('brick', L - T - 2.1, vb - 2.1, L - T - 0.1, vb - 0.1, 0, 0.9, true); A('brick', L - T - 2.1, vb - 0.4, L - T - 0.1, vb - 0.1, 0.9, 2.2); A('brick', L - T - 1.7, vb - 0.25, L - T - 0.5, vb - 0.1, 2.2, 3.6);
+    for (const [fu, fv] of [[1.3, 1.3], [0.9, 1.1], [1.1, 0.7]]) Lh('flame', [[0.001, 0], [0.09, 0.02], [0.04, 0.2], [0.001, 0.26]], L - T - fu, vb - fv, 0.9, 6); A('bark_dark', L - T - 1.9, vb - 1.9, L - T - 1.6, vb - 1.0, 0.9, 1.0);
+    A('hide_brown', L - T - 2.9, vb - 1.6, L - T - 2.15, vb - 1.0, 0.7, 1.1, true); A('wood_dark', L - T - 2.9, vb - 1.7, L - T - 2.15, vb - 1.6, 0.6, 1.2);   // the bellows
+    Lh('wood_dark', [[0.2, 0], [0.22, 0.6], [0.001, 0.6]], T + 2.4, vb - 1.2, 0, 8); A('iron', T + 2.1, vb - 1.4, T + 2.7, vb - 1.0, 0.6, 0.72); A('iron', T + 2.3, vb - 1.32, T + 2.5, vb - 1.08, 0.72, 0.82); A('iron', T + 2.65, vb - 1.28, T + 2.95, vb - 1.12, 0.66, 0.72);   // the anvil: face, waist, horn
+    barrel(T + 0.6, vb - 0.6, 0, 0.3, 0.7);
+    for (let k = 0; k < 6; k++) K.Rod('iron', [T + 1.0 + k * 0.12, vb - 0.12, 0.02], [T + 1.1 + k * 0.12, vb - 0.3, 1.1], 0.02, 4);   // bars leant in a corner
+    for (let k = 0; k < 5; k++) { const u = T + 0.9 + k * 0.55; K.Rod('iron', [u, vs + 0.1, 1.8], [u, vs + 0.1, 2.3], 0.012, 3); A('iron', u - 0.08, vs, u + 0.08, vs + 0.04, 1.4, 1.75); }   // tongs, hammers and shoes on the front wall
+    counterAt(mid - 1.2, mid + 1.0, 2.5); for (let k = 0; k < 4; k++) A('iron', mid - 0.9 + k * 0.5, 2.75, mid - 0.6 + k * 0.5, 2.85, 1.06, 1.16);
   } else {   // a plain trader's shop: a counter, a few sacks and jars
     counterAt(mid - 1.2, mid + 1.2, 2.5);
     for (let k = 0; k < 4; k++) sack(T + 0.5 + k * 0.55, vb - 0.5, 0);

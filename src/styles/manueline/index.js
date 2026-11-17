@@ -9,7 +9,8 @@ import { belem } from './belem.js';
 import { manuHouse } from './houses.js';
 import { ship } from './ships.js';
 import { manuYard, orangeTree } from './garden.js';
-import { palace, se, castle, range, pelourinho, fountain, hullOnStocks, timberStack, ropeWalk, crane, masonsYard } from './civic.js';
+import { se } from './se.js';
+import { palace, castle, range, pelourinho, fountain, hullOnStocks, timberStack, ropeWalk, crane, masonsYard } from './civic.js';
 
 export const manueline = {
   trim: () => {}, opening: () => {}, column: () => {},

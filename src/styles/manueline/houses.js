@@ -13,6 +13,24 @@ const WALLS = ['plaster_white', 'plaster_white', 'limewash_yellow', 'plaster_och
 const SHUT = ['shutter_green', 'shutter_brown', 'shutter_grey', 'shutter_green'];
 const DIR = { '0,1': 's', '0,-1': 'n', '1,0': 'e', '-1,0': 'w' };
 
+/** The emblems of the trades' signs: rectangles [u0, u1, y0, y1, material] in a board's unit square (layered in order). */
+const EMBLEMS = {
+  spice: [[0.25, 0.75, 0.1, 0.55, 'sacking'], [0.4, 0.6, 0.55, 0.7, 'sacking'], [0.4, 0.6, 0.25, 0.4, 'cloth_red']],
+  porcelain: [[0.35, 0.65, 0.1, 0.55, 'glaze_blue'], [0.42, 0.58, 0.55, 0.8, 'glaze_blue'], [0.35, 0.65, 0.8, 0.88, 'glaze_white']],
+  cloth: [[0.1, 0.9, 0.12, 0.42, 'cloth_red'], [0.1, 0.9, 0.5, 0.8, 'cloth_indigo']],
+  jeweller: [[0.3, 0.7, 0.1, 0.55, 'gilt_bronze'], [0.4, 0.6, 0.2, 0.45, 'wood_painted'], [0.4, 0.6, 0.6, 0.8, 'cloth_red']],
+  parrots: [[0.3, 0.65, 0.1, 0.6, 'cloth_green'], [0.4, 0.62, 0.6, 0.85, 'cloth_red'], [0.6, 0.72, 0.7, 0.76, 'cloth_ochre']],
+  chandler: [[0.46, 0.54, 0.1, 0.85, 'iron'], [0.3, 0.7, 0.68, 0.76, 'iron'], [0.15, 0.85, 0.12, 0.2, 'iron'], [0.15, 0.23, 0.12, 0.35, 'iron'], [0.77, 0.85, 0.12, 0.35, 'iron']],
+  grocer: [[0.2, 0.8, 0.15, 0.6, 'hide_brown'], [0.4, 0.6, 0.6, 0.8, 'rope_fibre']],
+  apothecary: [[0.2, 0.7, 0.12, 0.45, 'bronze'], [0.62, 0.7, 0.4, 0.88, 'wood_dark'], [0.3, 0.5, 0.45, 0.55, 'bronze']],
+  tavern: [[0.2, 0.8, 0.15, 0.7, 'palm_leaf'], [0.45, 0.55, 0.0, 0.2, 'timber']],
+  baker: [[0.15, 0.85, 0.12, 0.5, 'hide_tan'], [0.3, 0.7, 0.5, 0.7, 'hide_tan'], [0.2, 0.8, 0.28, 0.34, 'cloth_ochre']],
+  cooper: [[0.25, 0.75, 0.1, 0.8, 'timber'], [0.22, 0.78, 0.25, 0.3, 'iron'], [0.22, 0.78, 0.6, 0.65, 'iron']],
+  sailmaker: [[0.2, 0.8, 0.2, 0.9, 'cloth_white'], [0.46, 0.54, 0.0, 0.95, 'timber'], [0.44, 0.56, 0.3, 0.7, 'wall_red'], [0.35, 0.65, 0.44, 0.56, 'wall_red']],
+  scribe: [[0.15, 0.7, 0.1, 0.7, 'cloth_white'], [0.65, 0.78, 0.2, 0.95, 'wood_dark'], [0.2, 0.6, 0.35, 0.4, 'cloth_black']],
+  smith: [[0.1, 0.9, 0.35, 0.6, 'iron'], [0.35, 0.65, 0.1, 0.35, 'iron'], [0.7, 0.95, 0.5, 0.58, 'iron']],
+};
+
 /** A hipped roof over rect from y0, rising `rise`, eaves overhanging by oh. */
 function hip(bag, mat, rect, y0, rise, oh) {
   const r = [rect[0] - oh, rect[1] - oh, rect[2] + oh, rect[3] + oh], m = Math.min(r[2] - r[0], r[3] - r[1]) / 2;
@@ -81,11 +99,12 @@ export function manuHouse(el, ctx) {
     for (let s = 1; s < n; s++) for (let k = 0; k < wn; k++) holes.push({ u0: wu(k), u1: wu(k) + WW, b: sillAt(s), t: sillAt(s) + WH });
     holes.sort((p, q) => p.u0 - q.u0);
     let u = 0;
-    R(0, 0, L, T, h0, sillAt(1), wall);
+    const top1 = Math.min(sillAt(1), H);
+    R(0, 0, L, T, h0, top1, wall);
     for (const hh of holes) { /* full-height strips between holes */ }
     const strips = [[0, holes.length ? holes[0].u0 : L]];
     for (let i = 0; i < holes.length; i++) strips.push([holes[i].u1, holes[i + 1] ? holes[i + 1].u0 : L]);
-    for (const [a0, a1] of strips) R(a0, 0, a1, T, sillAt(1), H, wall);
+    if (H > top1 + 0.01) for (const [a0, a1] of strips) R(a0, 0, a1, T, top1, H, wall);
     for (const hh of holes) {
       // between storeys over each window to the next sill
       const next = hh.t + (hs - WH);
@@ -159,7 +178,15 @@ export function manuHouse(el, ctx) {
       R(du2 - dw2 / 2 - 0.2, -0.12, du2 + dw2 / 2 + 0.2, 0.15, 0.0, 2.55, 'limestone'); R(du2 - dw2 / 2 - 0.25, -0.15, du2 + dw2 / 2 + 0.25, 0.15, 2.4, 2.75, 'limestone');
       R(du2 - dw2 / 2, -0.02, du2 + dw2 / 2, 0.2, 0.0, 2.4, 'wood_dark');
       if (!simple) for (let k = 0; k < 3; k++) for (let j = 0; j < 4; j++) R(du2 - 0.4 + k * 0.4, -0.04, du2 - 0.34 + k * 0.4, -0.02, 0.5 + j * 0.5, 0.56 + j * 0.5, 'iron');
-    } else { R(doorU - 1.55, -0.12, doorU - 1.3, 0.0, 0.0, 3.4, 'limestone'); R(doorU + 1.3, -0.12, doorU + 1.55, 0.0, 0.0, 3.4, 'limestone'); R(doorU - 1.6, -0.15, doorU + 1.6, 0.0, 3.4, 3.7, 'limestone'); }
+    } else { const fh = Math.min(3.4, H - 0.4); R(doorU - 1.55, -0.12, doorU - 1.3, 0.0, 0.0, fh, 'limestone'); R(doorU + 1.3, -0.12, doorU + 1.55, 0.0, 0.0, fh, 'limestone'); R(doorU - 1.6, -0.15, doorU + 1.6, 0.0, fh, fh + 0.3, 'limestone'); }
+  }
+  // the trade's hanging sign (open shops): an iron arm from the wall to the right of the door, a painted board with the trade's emblem
+  if (open && el.use && el.use !== 'home') {
+    const su = Math.min(L - 0.7, doorU + 2.05), sy = 2.5, bw = 0.7, bh = 0.62, vOut = -0.95;
+    R(su - 0.03, vOut, su + 0.03, 0.0, sy + bh + 0.1, sy + bh + 0.16, 'iron'); R(su - 0.03, vOut - 0.03, su + 0.03, vOut + 0.03, sy + bh - 0.02, sy + bh + 0.16, 'iron');
+    R(su - bw / 2, vOut - 0.04, su + bw / 2, vOut, sy, sy + bh, 'wood_painted');
+    for (const e of EMBLEMS[el.use] ?? []) { const [a, b, c, d, m] = e; R(su - bw / 2 + a * bw, vOut - 0.075, su - bw / 2 + b * bw, vOut - 0.04, sy + c * bh, sy + d * bh, m); }
+    R(su - bw / 2 - 0.02, vOut - 0.05, su + bw / 2 + 0.02, vOut - 0.04, sy - 0.02, sy, 'iron'); R(su - bw / 2 - 0.02, vOut - 0.05, su + bw / 2 + 0.02, vOut - 0.04, sy + bh, sy + bh + 0.02, 'iron');
   }
   if (simple) { roofOver(); return; }
   // upper windows: stone frame, hood, mullion, shutters; an iron balcony or a lattice rótula on the first floor of merchants
