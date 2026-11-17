@@ -3,6 +3,7 @@
 // stone; the foot plough (chakitaqlla); the quarry's broken granite; the Funerary Rock.
 
 import { box, lathe, frustum, rod, fromTriangles, orientOutward } from '../../core/geom.js';
+import { useThings } from './uses.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -94,6 +95,7 @@ export function houseInterior(bag, col, el, walls, niches, f) {
       else { bowl(bag, q[0] - n[1] * 0.08, yy, q[1] + n[0] * 0.08, 0.1); bowl(bag, q[0] - n[1] * 0.08, yy + 0.04, q[1] + n[0] * 0.08, 0.09); if (rand() < 0.5) olla(bag, q[0] + n[1] * 0.1, yy, q[1] - n[0] * 0.1, 0.07); }
     }
   }
+  if (el.use) useThings({ bag, col, at, sd, rand, depth, width, y, urpu, olla, bowl }, el.use);
 }
 
 /**

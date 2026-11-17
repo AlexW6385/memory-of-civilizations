@@ -1,5 +1,5 @@
 // The houses of Machu Picchu in their kanchas (docs/settlements/machu-picchu.md §5).
-import { laneLevel, STAIRS, STORES, RADIUS, TERRACE, SITE, TOWN_WALL, CONDOR, houses, kanchas, kanchaWalls, outside } from './layout.js';
+import { inHouse, houseKind, laneLevel, STAIRS, STORES, RADIUS, TERRACE, SITE, TOWN_WALL, CONDOR, houses, kanchas, kanchaWalls, outside } from './layout.js';
 import { ground } from './ground.js';
 import { people } from './people.js';
 
@@ -9,17 +9,19 @@ export async function town() {
   const all = houses(), plans = [];
   for (let i = 0; i < all.length; i += 50) plans.push(base(`machu-picchu-houses-${i / 50}`, all.slice(i, i + 50).map((h) => {
     const [x0, z0, x1, z1] = h.rect, y = Math.min(ground.height(x0, z0), ground.height(x1, z0), ground.height(x0, z1), ground.height(x1, z1));
-    // the houses a little different in height, by their seeds
-    // the houses a little different in height, by their seeds; near the way in each a different front: the nobles' with the double jamb in fine ashlar,
-    // a tall house with the second-storey window of its gable, the newly thatched pale ichu, the plain; every lived-in house within 140 m of the arrival has its hearth lit
-    const near = Math.hypot((x0 + x1) / 2 - ARRIVAL[0], (z0 + z1) / 2 - ARRIVAL[1]) < 140, k = h.seed % 7;
-    const v = !near ? {} : k === 0 || k === 4 ? { jamb: true, mat: 'granite_inca' } : k === 1 ? { roofMat: 'ichu' } : k === 2 ? { tall: true } : {};
-    return { t: 'inca_house', ...h, y, h: 2.45 + (h.seed % 9) * 0.07 + (v.tall ? 0.55 : 0), ...v, ...(near ? { lit: true } : {}) };
+    // the front by rule, from the house's rank (layout houseKind): the nobles' of fine ashlar with the double jamb, the lintel, the threshold stone and the two small
+    // windows; the middling of rough stones with a lintel, now and then a step, a window, the newly thatched pale ichu or a tall house; the humble at the town's edge
+    // lower, the door narrower, a woodpile by it. The uses inside by rule too. Every lived-in house within 140 m of the arrival has its hearth lit.
+    const near = Math.hypot((x0 + x1) / 2 - ARRIVAL[0], (z0 + z1) / 2 - ARRIVAL[1]) < 140, s = h.seed, { rank, use } = houseKind(h);
+    const v = rank === 0 ? { mat: 'granite_inca', jamb: true, lintel: true, step: true, frontWin: true, tall: s % 3 === 0 }
+      : rank === 1 ? { lintel: true, step: s % 2 === 0, frontWin: s % 3 === 0, ...(s % 7 === 0 ? { mat: 'granite_inca', jamb: true } : {}), ...(s % 3 === 1 ? { roofMat: 'ichu' } : {}), tall: s % 11 === 0 }
+      : { humble: true, ...(s % 4 === 1 ? { roofMat: 'ichu' } : {}) };
+    return { t: 'inca_house', ...h, y, h: (rank === 2 ? 2.15 : 2.45) + (s % 9) * 0.07 + (v.tall ? 0.55 : 0), ...v, use, ...(near ? { lit: true } : {}) };
   })));
   // the strings of maize cobs under the eaves, either side of the door, on about half the houses
   { const items = [];
     for (const h of all) {
-      if (h.seed % 2) continue;
+      if (h.seed % 2 || houseKind(h).rank === 2) continue;
       const [x0, z0, x1, z1] = h.rect, f = h.front, out = { e: [1, 0], w: [-1, 0], n: [0, -1], s: [0, 1] }[f], cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, hy = Math.min(ground.height(x0, z0), ground.height(x1, z1));
       const L = f === 'n' || f === 's' ? x1 - x0 : z1 - z0; if (L < 4.2) continue;
       const edge = f === 'e' ? [x1, cz] : f === 'w' ? [x0, cz] : f === 'n' ? [cx, z0] : [cx, z1], t = [-out[1], out[0]], sg = h.seed % 4 === 0 ? 1 : -1;
@@ -31,6 +33,17 @@ export async function town() {
     const r = K.rect, gateE = K.inward[0] < 0, gx = gateE ? r[2] : r[0], gz = r[1] + K.A / 2;
     return { t: 'inca_patio', o: [gx, gz], d: [K.inward[0], 0], A: K.A, D: K.D, sd: K.sd, sv0: K.sv0, sv1: K.sv1, bd: K.bd, weaver: i % 5 !== 0, y: ground.height(gx + K.inward[0] * 4, gz), seed: 500 + i };
   })));
+  // the lane before each kancha's gate: a water jar in its ring of stones, a seat, firewood, the patio's gutter (§12.4), where the ground is level and nothing stands
+  { const items = [], flat = (x, z, ox, len) => Math.abs(ground.height(x, z) - ground.height(x + ox * len, z)) < 0.05 && Math.abs(ground.height(x, z) - ground.height(x, z + 0.5)) < 0.05;
+    kanchas().forEach((K, i) => {
+      const r = K.rect, gateE = K.inward[0] < 0, gx = gateE ? r[2] : r[0], gz = (r[1] + r[3]) / 2, ox = gateE ? 1 : -1, kinds = [['jar', 'seat'], ['wood', 'gutter'], ['jar', 'wood'], ['seat', 'gutter']][i % 4];
+      [1, -1].forEach((sg, j) => {
+        const kind = kinds[j], gut = kind === 'gutter', x = gx + ox * (gut ? 0.45 : 1.3), z = gz + sg * 1.4;
+        if (outside(x, z) > -2 || inHouse(x, z, 0.8) || inHouse(x + ox * (gut ? 2.4 : 0), z, 0.5) || !flat(x, z, ox, gut ? 2.4 : 0.4)) return;
+        items.push({ at: [x, z], kind, y: ground.height(x, z), yaw: gut ? (gateE ? -Math.PI / 2 : Math.PI / 2) : (i * 1.7 + j) % 6.28, seed: 700 + i * 2 + j });
+      });
+    });
+    plans.push(base('machu-picchu-gates', [{ t: 'inca_gate_dress', items }])); }
   // the Temple of the Condor's rock and its walls
   { const [cx, cz] = CONDOR.c, c = Math.cos(CONDOR.yaw), s = Math.sin(CONDOR.yaw), y = ground.height(cx, cz), P = (u, w) => [cx + u * c + w * s, cz - u * s + w * c];
     const E = [{ t: 'condor_temple', c: CONDOR.c, yaw: CONDOR.yaw, y }];

@@ -11,6 +11,7 @@ import '../qing/index.js';
 import { rectRoof, beamTris } from '../ming/index.js';
 import { houseInterior, hallInterior, INCA_LIFE } from './life.js';
 import { INCA_DRESS } from './dress.js';
+import { INCA_DETAIL, banner } from './detail.js';
 
 import { patch } from '../maya/household.js';
 import { incaPlants } from './plants.js';
@@ -229,7 +230,7 @@ function incaHouse(el, { bag, col, lights }) {
     const L = k === 'n' || k === 's' ? x1 - x0 : z1 - z0, list = (ops[k] = []);
     // a kallanka (el.doors: n): "the entrance normally on one of the long sides, with equally spaced doors; the opposite side niches or windows but no doors" [stated: Wikipedia, "Kallanka"]
     const doors = k === f && el.doors > 1 ? Array.from({ length: el.doors }, (_, i) => (i + 0.5) * L / el.doors) : k === f ? [L / 2] : [];
-    for (const d of doors) list.push({ kind: 'door', at: d, w: 1.0, h: 1.95, jamb: !!el.jamb });
+    for (const d of doors) list.push({ kind: 'door', at: d, w: el.humble ? 0.9 : 1.0, h: el.humble ? 1.8 : 1.95, jamb: !!el.jamb });
     // a row of niches inside, at chest height; a small window now and then on a long wall
     const n = Math.floor((L - 1.2) / 1.35), gable = along ? k === 'e' || k === 'w' : k === 'n' || k === 's';
     for (let i = 0; i < n; i++) {
@@ -240,16 +241,41 @@ function incaHouse(el, { bag, col, lights }) {
       else if (rand() < 0.8) list.push({ kind: 'niche', at, w: 0.48, h: 0.68, sill: 1.05, depth: 0.26 });
     }
   }
+  // the front's own windows: a small trapezoid either side of the door on the better houses
+  if (el.frontWin && !el.doors) {
+    const L = f === 'n' || f === 's' ? x1 - x0 : z1 - z0, list = ops[f];
+    if (L >= 6) for (const sg of [-1, 1]) {
+      const at = L / 2 + sg * 1.9;
+      for (let i = list.length - 1; i >= 0; i--) if (list[i].kind === 'niche' && Math.abs(list[i].at - at) < 0.8) list.splice(i, 1);
+      list.push({ kind: 'window', at, w: 0.42, h: 0.55, sill: 1.25, jamb: !!el.jamb });
+    }
+  }
   const walls = rectWalls(bag, col, el.rect, y, h, th, mat, ops);
   bag.add('granite_inca', box(x0 - th / 2 - 0.12, y - 0.3, z0 - th / 2 - 0.12, x1 + th / 2 + 0.12, y + 0.04, z1 + th / 2 + 0.12));
   col.floor([x0, z0, x1, z1], y + 0.04);
+  // the front by rule (docs §12.2): a monolithic lintel over the door, a threshold stone, textiles on the nobles' pegs, a woodpile at the humble door
+  if (!el.doors && walls[f]) {
+    const { F, off } = walls[f], u = F.L / 2, p = F.at(u), tg = F.t(u), nn = F.n(u), jm = el.jamb ? 0.14 : 0.02;
+    const bx = (k0, k1, w) => { const c = [[-w / 2, k0], [w / 2, k0], [w / 2, k1], [-w / 2, k1]].map(([a, k]) => [p[0] + tg[0] * a + nn[0] * k, p[1] + tg[1] * a + nn[1] * k]); return [Math.min(...c.map((q) => q[0])), Math.min(...c.map((q) => q[1])), Math.max(...c.map((q) => q[0])), Math.max(...c.map((q) => q[1]))]; };
+    if (el.lintel) { const v0 = (el.humble ? 1.8 : 1.95) + jm + 0.02; bag.add('granite_inca', frustum(bx(-(off(v0) + 0.06), -0.02, 1.7), y + v0, y + v0 + 0.27, 0.01, 0.01, 0.01, 0.01)); }
+    if (el.step) { const r = bx(-(off(0) + 0.5), -(off(0) - 0.1), 1.6); bag.add('granite_inca', frustum(r, y - 0.02, y + 0.1, 0.02, 0.02, 0.02, 0.02)); }
+    if (el.use === 'noble') {
+      const back = { n: 's', s: 'n', e: 'w', w: 'e' }[f], B = walls[back];
+      if (B) for (let uu = 0.9, i = 0; uu < B.F.L - 0.5; uu += 1.6, i++) if (i % 2 === 1) banner(bag, B.F, B.off, y, uu, h - 0.32, 0.55, 0.7, i % 4 === 1 ? 'cloth_red' : 'cloth_brown', 0.16);
+    }
+    if (el.humble) {
+      // a stack of firewood against the wall beside the door
+      const sgn = (el.seed || 1) % 2 ? 1 : -1;
+      for (let k = 0; k < 6; k++) { const a = 1.3 * sgn + (k - 2.5) * 0.1, r = [p[0] + tg[0] * a - nn[0] * (off(0.4) + 0.35), p[1] + tg[1] * a - nn[1] * (off(0.4) + 0.35)]; const e = [r[0] - nn[0] * 0.25, r[1] - nn[1] * 0.25], f2 = [r[0] + nn[0] * 0.25, r[1] + nn[1] * 0.25]; bag.add('timber', rod([e[0], y + 0.08 + (k % 2) * 0.07, e[1]], [f2[0], y + 0.08 + (k % 2) * 0.07, f2[1]], 0.04, 5)); }
+    }
+  }
   // the things of the house: the stove, the grinding stone, the mats, the urpu, pots in the niches
   if (el.doors > 1) hallInterior(bag, col, el, f);
   else if (!el.empty) houseInterior(bag, col, el, walls, ops, f);
   // the hearth's glow in a lived-in house (the stove's embers and the smoke-hole's daylight), one light a room
   if (el.lit && !el.empty && !el.doors && lights) lights.push({ at: [(x0 + x1) / 2, y + 1.15, (z0 + z1) / 2], color: '#ff9a52', intensity: 3.2, distance: 6.5 });
   // outside the door: on some houses a stone bench against the wall beside it, on others a pole ladder of notched trunk leaning to the eaves [inferred: after the benches and ladders of Andean houses today]
-  if (!el.doors && f && el.roof !== 'none') {
+  if (!el.doors && f && el.roof !== 'none' && !el.humble) {
     const r2 = rng((el.seed || 1) * 7 + 3), k = r2(), out = { e: [1, 0], w: [-1, 0], n: [0, -1], s: [0, 1] }[f], tg = [-out[1], out[0]], sgn = r2() < 0.5 ? -1 : 1;
     const cxh = (x0 + x1) / 2, czh = (z0 + z1) / 2, edge = f === 'e' ? [x1, czh] : f === 'w' ? [x0, czh] : f === 'n' ? [cxh, z0] : [cxh, z1], Lf = f === 'n' || f === 's' ? x1 - x0 : z1 - z0;
     if (Lf > 4.2 && k < 0.7) {
@@ -380,7 +406,7 @@ function torreon(el, { bag, col }) {
   // angles: +x east, +z south; a sunrise azimuth A (from north, clockwise) lies at atan2(-cos A, sin A)
   const uOf = (az) => { const a = Math.atan2(-Math.cos(az * Math.PI / 180), Math.sin(az * Math.PI / 180)); return (a - a0) * r; };
   const F = arcFrame(el.c, r, a0, a1);
-  incaWall(bag, col, F, {
+  const tw = incaWall(bag, col, F, {
     y, h, th: 1.0, mat: 'granite_inca', ends: ['cap', 'cap'], out: -1,
     openings: [
       { kind: 'window', at: uOf(65), w: 0.62, h: 0.82, sill: 1.35 },        // the June solstice sunrise
@@ -388,6 +414,14 @@ function torreon(el, { bag, col }) {
       { kind: 'window', at: uOf(0), w: 0.9, h: 1.05, sill: 1.2, jamb: true },   // the north window
     ],
   });
+  // the north window's base: "a unique form cut into the stones at its base" and "several carefully crafted small holes" in the base stones
+  // [stated: The Only Peru Guide, "Temple of the Sun"]; built as three stepped courses under the sill, each wider and set further out than the next
+  // above, the holes as dark discs on the steps' tops [inferred: the steps' sizes; the cut itself is only suggested]
+  for (const [i, [v0, v1, wd, pr]] of [[0.72, 0.84, 2.3, 0.05], [0.84, 0.94, 1.9, 0.09], [0.94, 1.04, 1.5, 0.13]].entries()) {
+    const ro = r + tw.off(v0) + pr, ri = r + tw.off(v1) - 0.2;
+    bag.add('granite_inca', frustum([cx - wd / 2, cz - ro, cx + wd / 2, cz - ri], y + v0, y + v1, 0.01, 0.01, 0.01, 0.01));
+    for (const sg of [-1, 1]) bag.add('pottery_dark', lathe([[0.035, 0], [0.035, 0.004], [0.001, 0.004]], 8, null, cx + sg * (0.35 + i * 0.2), y + v1 + 0.001, cz - (r + tw.off(v1) + pr * 0.5)));
+  }
   // the sacred rock inside: a weathered outcrop carved flat on top into a long altar, a step cut in its side
   const rr = r - 0.5;
   bag.add('granite_rough', lathe([[rr * 0.98, -0.2], [rr * 0.9, 0.5], [rr * 0.72, 1.05], [rr * 0.55, 1.32], [rr * 0.42, 1.42], [0.001, 1.42]], 20, (t, i) => 1 + (i > 0 ? 0.09 * Math.sin(t * 3 + i * 1.3) + 0.05 * Math.sin(t * 7 - i) : 0), cx, y, cz));
@@ -446,31 +480,6 @@ function tombRock(el, { bag, col }) {
   bag.add('granite_rough', box(bx + 0.2, -0.3, ez - hw - 0.1, ex + 0.2, fl, ez + hw + 0.1));
   col.floor([bx + 0.2, ez - hw, ex, ez + hw], fl);
   col.circle(a0, ez, 1.45, fl, fl + 0.9);
-}
-
-/**
- * intihuatana: the carved stone on the top of its terraced hill { c, y }: an outcrop of the
- * bedrock cut into planes and steps, a flat platform on it, and on that the upright post, its
- * top cut on a slant, leaning 13° to the north [stated: Wikipedia "Intihuatana"].
- */
-function intihuatana(el, { bag, col }) {
-  const [cx, cz] = el.c, y = el.y;
-  // the outcrop, worn, a little irregular
-  bag.add('granite_rough', lathe([[1.9, -0.3], [1.85, 0.35], [1.6, 0.72], [1.25, 0.86], [0.001, 0.86]], 14, (t, i) => (1 + 0.1 * Math.sin(t * 2 + 0.7) + 0.06 * Math.sin(t * 5 + i)) * (Math.abs(Math.cos(t)) * 0.35 + 0.65), cx, y, cz));
-  // the carved planes: the main platform, a lower ledge on the east, a step on the south
-  bag.add('granite_rough', frustum([cx - 1.05, cz - 0.7, cx + 0.95, cz + 0.6], y + 0.7, y + 1.12, 0.03, 0.03, 0.03, 0.03));
-  bag.add('granite_rough', frustum([cx + 0.6, cz - 0.95, cx + 1.3, cz + 0.2], y + 0.2, y + 0.86, 0.02, 0.02, 0.02, 0.02));
-  bag.add('granite_rough', frustum([cx - 0.7, cz + 0.3, cx + 0.2, cz + 1.1], y - 0.1, y + 0.55, 0.02, 0.02, 0.02, 0.02));
-  // the post: a squared block about 0.6 m high, leaning north, its top cut on a slant
-  const lean = Math.tan(13 * Math.PI / 180), hp = 0.62, b = [cx - 0.24, cz - 0.17, cx + 0.24, cz + 0.17], y0 = y + 1.06;
-  const lo = [[b[0], b[1]], [b[2], b[1]], [b[2], b[3]], [b[0], b[3]]];
-  const tops = lo.map(([x, z], i) => [x, y0 + hp + (i < 2 ? 0.07 : -0.05) - (x - cx) * 0.06, z - hp * lean]);
-  const base = lo.map(([x, z]) => [x, y0, z]), g = [];
-  quad(g, tops[0], tops[3], tops[2], tops[1]);
-  for (let i = 0; i < 4; i++) quad(g, base[i], tops[i], tops[(i + 1) % 4], base[(i + 1) % 4]);
-  bag.add('granite_rough', fromTriangles(orientOutward(g)));
-  col.rect([cx - 1.6, cz - 1, cx + 1.6, cz + 1], y, y + 1.12);
-  col.floor([cx - 1.05, cz - 0.7, cx + 0.95, cz + 0.6], y + 1.12);
 }
 
 /**
@@ -696,6 +705,6 @@ function stoneBlock(el, { bag, col }) {
 
 registerStyle('inca', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, inca_house: incaHouse, inca_temple: incaTemple, torreon, intihuatana, ring_wall: ringWall, flying_stair: flyingStair, inca_canal: incaCanal, inca_fountain: incaFountain, sacred_rock: sacredRock, stone_block: stoneBlock, inca_plants: incaPlants, ...INCA_LIFE, ...INCA_DRESS },
+  elements: { ...STYLES.qing.elements, inca_house: incaHouse, inca_temple: incaTemple, torreon, ring_wall: ringWall, flying_stair: flyingStair, inca_canal: incaCanal, inca_fountain: incaFountain, sacred_rock: sacredRock, stone_block: stoneBlock, inca_plants: incaPlants, ...INCA_LIFE, ...INCA_DRESS, ...INCA_DETAIL },
   objects: {},
 });

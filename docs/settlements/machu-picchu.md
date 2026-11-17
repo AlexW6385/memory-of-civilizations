@@ -149,6 +149,36 @@ Panpipes and the quena flute, drums, the conch (a flute, a reed and a struck sou
 - **Terraces and fountains.** Maize on whole sectors of the terraces, the stairs kept clear; ten llamas grazing in twos on the terraces' grass; women with a jar at every third fountain. [inferred]
 - **Life.** Per patio: a man with a load at the gate, a child, a dog asleep in every other; porters and a string of llamas on the road; sparrows in patios and on gate walls.
 
+## 12. Seventh pass: the Intihuatana, the fronts and uses of the houses, the gates (as built)
+
+Status: L3 in the Sacred Sector's stone and the houses; the Inti Punku and the trails, and the walls' polygonal masonry beyond the lowest courses, stay recorded for later.
+
+### 12.1 The Intihuatana and the Sacred Sector's furnishing
+
+- "Carved into the shape of a pyramid" out of the bedrock, on a polygonal base with terraces, two huayrana-type rooms and a natural mound; two long stairs, north and south, the south one cut for most of its length from a single rock; a granite block serving as altar, bench or shelf; small carved channels like stairs; a slightly inclined upper plane and a column leaning 13° north, with a cubic protrusion on its top; 1–2 m high [stated: salkantaytrekking, "The Intihuatana stone at Machu Picchu"; Wikipedia, "Intihuatana, Urubamba"]. **Built** (`intihuatana`, src/styles/inca/detail.js): a ten-sided worn mound of rough granite (0.45 m), a squared carved tier with cut corners (to 0.85 m), the inclined platform (1.2 m north edge, 1.14 m south), each rise within a walking step; a stair of five steps south and four north; the post with its slanted top and a 0.14 m cube; the altar block west of the mound; a carved ledge east of the tier; and on the hill's top the two wayronas (`inca_temple`, thatched, open to the stone) north and south of it [inferred: the sizes, the rooms' places; the stairs' steps]. The old lathe-blob outcrop is gone.
+- **Torreón, the north window.** "A unique form cut into the stones at its base"; "several carefully crafted small holes" in the base stones; the interior is the top of the natural rock, "carved with long flat sections for use as an altar" [stated: The Only Peru Guide, "Temple of the Sun (Torreón)"]. **Built:** three stepped courses under the north window's sill, each wider and further out than the next above, dark holes on their tops [inferred: the cut itself is only suggested by the steps].
+- **Textiles on the Main Temple's pegs.** Interior pegs "perhaps for textile hangings" [stated: World History Encyclopedia, "Inca Architecture"]. **Built** (`inca_hangings`): from each of the six great pegs of the rear wall a banner of black, red, ochre and white bands falling against the wall above the niches, a fringe at the hem [inferred: the bands, the sizes].
+- **The wayronas of the Sacred Rock** now each have a long granite bench along the back wall with the offerings of the Main Temple's altar on it (gold and silver llamas, kero cups, a bowl of maize) [inferred: the three-walled halls held altars; offerings after Wikipedia, "Inca religion"].
+
+### 12.2 The fronts of the houses, by rule (`houseKind` in layout.js, `town.js`, `inca_house`)
+
+Every house has a rank by its distance from the core of the town (the Sacred sector, the plaza, the kallanka, the way in): 0 within 14 m, 1 to 38 m, 2 beyond. The Inca built "smooth, seamless walls for elite buildings; rougher stone for common areas" [stated: digital art archive]. **Built:** rank 0 (the nobles'): fine ashlar, the double-jambed door, a monolithic lintel stone, a threshold stone, two small trapezoid windows either side of the door, now and then tall; rank 1: rough stones, a lintel, a threshold on half, a front window on a third, a third newly thatched in pale ichu, one in seven in fine stone with the double jamb, one in eleven tall; rank 2 (the humble, at the edge): lower walls, a narrower and lower door (0.9 × 1.8 m), no lintel or step, a woodpile against the wall beside it, no bench or ladder. The strings of maize cobs hang on the first two ranks only [inferred: the rule and the sizes].
+
+### 12.3 The uses inside (`src/styles/inca/uses.js`)
+
+Women did most spinning, often while walking, the wool drawn out by hand and twisted on a spindle, a straight stick weighted by a whorl; weaving was on a belt loom; masons dressed blocks with heavy stone hammers; a rocker mill crushed grain [stated: ancient-history-sites, "Work and Household Production in the Inca World"]. Beside the stove, the batán, the mats and the urpu every house has, the free front half of the room now holds by use [inferred: the arrangement, and the uses of store and brewer, after Andean households]: a **spinner's** (a reed mat with wool in bundles of every colour, a basket of fleece, a spindle with its whorl, two low seats); a **storekeeper's** (wicker bins of grain, sacks of tubers, two jars); a **mason's** near the quarry (a granite bench on two stones, a half-dressed block, three hammerstones, a bronze bar, sand, dressed blocks stacked); a **brewer's** (three tall jars of maize beer, a pot on three stones with its fire, a paddle); the **nobles'** (a dais of cut granite with a hide, kero cups, tall jars, and cloths hung from every second inside peg). Rooms narrower than 7 m keep the plain furnishing.
+
+### 12.4 The lane before the gates
+
+"Drainage channels run into stairways, walkways and buildings, carrying runoff to the main drain"; drainage holes are built into city walls and structures [stated: ancientengrtech.wisc.edu, "Machu Picchu Water Management"]. **Built** (`inca_gate_dress`): before every kancha's gate, on the level ground beside its stair, two of: a water jar standing in a ring of three stones, a cut stone seat, a bundle of firewood leaning with its cord, the short gutter of kerb stones that takes the patio's water out [inferred: the jars, seats and wood, after Andean lanes today].
+
+### Sources of §12
+
+- [The Intihuatana stone at Machu Picchu — Salkantay Trekking](https://www.salkantaytrekking.com/blog/the-intihuatana-stone-at-machu-picchu/)
+- [Temple of the Sun (Torreón) — The Only Peru Guide](https://theonlyperuguide.com/?p=6034)
+- [Work and Household Production in the Inca World — ancient-history-sites](https://www.ancient-history-sites.com/?p=141784)
+- [Machu Picchu Water Management — UW–Madison](https://ancientengrtech.wisc.edu/machu-picchu/machu-picchu-water-management)
+
 ## Sources
 
 - [Machu Picchu — Wikipedia (IPFS snapshot)](https://ipfs.ssi.eecc.de/ipns/en.wikipedia-on-ipfs.org/wiki/Machu_Picchu)

@@ -247,3 +247,19 @@ export function ploughed(x, z) {
 const nearWall = (x, z, m) => kanchaWalls().some(({ a, b }) => { const dx = b[0] - a[0], dz = b[1] - a[1], l2 = dx * dx + dz * dz, t = Math.max(0, Math.min(1, ((x - a[0]) * dx + (z - a[1]) * dz) / l2)); return Math.hypot(x - a[0] - dx * t, z - a[1] - dz * t) < m; });
 export const inHouse = (x, z, m = 0) => houses().some((h) => inRect(h.rect, x, z, m)) || nearWall(x, z, 0.5 + m);
 export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+
+/**
+ * What a house is, by rule (docs §12.2–12.3): its rank by the distance from the town's core (the Sacred sector, the plaza, the kallanka, the way in) —
+ * 0 the nobles' near the core, 1 the middling, 2 the humble at the edge — and its use: the nobles' have a dais; the middling and humble are a spinner's,
+ * a storekeeper's, a brewer's or plain homes; near the quarry the mason's [stated: masons dressed blocks with heavy stone hammers — ancient-history-sites;
+ * the quarry between the Sacred Plaza and the Temple of the Sun — michaelstephenwills; inferred: the rule].
+ */
+export function houseKind(h) {
+  const [x0, z0, x1, z1] = h.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, d = coreDist(cx, cz), s = h.seed;
+  const rank = d < 14 ? 0 : d < 38 ? 1 : 2, dq = Math.hypot(cx + 32, cz + 14);
+  let use = 'home';
+  if (rank === 0) use = 'noble';
+  else if (dq < 55 && s % 2 === 0) use = 'mason';
+  else use = rank === 1 ? ['spinner', 'store', 'brewer', 'home', 'home'][s % 5] : ['spinner', 'store', 'home', 'home'][s % 4];
+  return { rank, use };
+}

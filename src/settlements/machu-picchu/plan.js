@@ -137,6 +137,15 @@ E.push({ t: 'inca_house', rect: KALLANKA, y: 0, h: 3.3, th: 0.8, front: 'w', doo
 // the Main Plaza's edge: a low wall with stairs down into it
 E.push({ t: 'lane', rect: [PLAZA[0] - 4, PLAZA[1] - 4, PLAZA[0] - 1, PLAZA[3] + 4], y: 0.02, mat: 'granite_rough' });
 
+// the Intihuatana's hill: two wayrona-type rooms facing the stone across it, one to the north and one to the south, the stairs between them
+// [stated: "two huayrana-type rooms" on the base — salkantaytrekking]; the Main Temple's pegs hung with textiles; the wayronas' benches with offerings
+for (const [r, open, s] of [[[HILL.c[0] - 2.4, HILL.c[1] - 7.6, HILL.c[0] + 2.4, HILL.c[1] - 4.8], 's', 83], [[HILL.c[0] - 2.4, HILL.c[1] + 4.8, HILL.c[0] + 2.4, HILL.c[1] + 7.6], 'n', 84]]) E.push({ t: 'inca_temple', rect: r, y: 2.2 * HILL.n + 0.3, h: 2.4, th: 0.7, open, roof: 'thatch', niches: { n: 2, s: 2, e: 1, w: 1 }, seed: s });
+E.push({ t: 'inca_hangings', rect: [-50, -56, -34, -44], side: 'n', y: 0.6, h: 3.8, th: 1.0, n: 6, w: 0.9, drop: 1.1, seed: 5 });
+for (const [i, [r]] of SACRED_ROCK.wayronas.entries()) {
+  const bx = i === 0 ? r[0] + 0.8 : r[2] - 0.8, zc = (r[1] + r[3]) / 2;
+  E.push({ t: 'inca_altar_bench', a: [bx, zc - 3.6], b: [bx, zc + 3.6], y: 0.3, d: 0.7, h: 0.42 });
+  E.push({ t: 'inca_offerings', at: [bx, zc], y: 0.72, yaw: Math.PI / 2, w: 5, seed: 20 + i });
+}
 // the water: the canal from the spring on the mountain to the south, along the saddle's west edge,
 // and the stairway of sixteen fountains down beside the west stair
 E.push(...waterworks(ground.height));
