@@ -99,12 +99,42 @@ for (const [ti, z0, z1] of [[8, 4, 16], [7, 12, 24]]) {
   E.push({ t: 'rock_cut', a: [xc, z0], b: [xc, z1], y0: -5.3, th: wT, top: 0.12 });
   for (const z of [z0 - 0.06, z1 + 0.06]) E.push({ t: 'rock_cut', a: [tx0 + EDGE - 0.2, z], b: [tx1 - EDGE + 0.2, z], y0: -5.65, th: 0.12, top: -5.0 });
 }
+// Gabriel-Rufael to Mercoreus (docs §17): "a 35-metre unlit tunnel"; the trench between their pits is roofed over its whole length, the rock left
+// above it (a ceiling 7.6 m under the ground, so 2.4 m of headroom), each mouth under a hewn band
+{
+  const T = TRENCHES[9], [tx0, tz0, tx1, tz1] = T.rect, zc = (tz0 + tz1) / 2, wT = tz1 - tz0 - 2 * EDGE, xa = PITS.gabriel.rect[2] - EDGE, xb = PITS.mercoreus.rect[0] + EDGE;
+  E.push({ t: 'rock_cut', a: [xa, zc], b: [xb, zc], y0: -7.6, th: wT, top: 0.12 });
+  for (const x of [xa - 0.06, xb + 0.06]) E.push({ t: 'rock_cut', a: [x, tz0 + EDGE - 0.2], b: [x, tz1 - EDGE + 0.2], y0: -7.95, th: 0.12, top: -7.3 });
+  void tx0; void tx1;
+}
+// the lobed cross cut in the rock faces of every pit (docs §17), three to a long face, where no trench opens and no cell is cut
+{
+  const cavesAt = [], Gp = PITS.giyorgis;
+  { const [x0, z0, x1, z1] = Gp.rect, k = (x1 - x0 - 2 * EDGE) / 26, mx = (v) => gc[0] + (v + 200) * k, mz = (v) => gc[1] + (v - 130) * k;
+    cavesAt.push([x1 - EDGE, mz(120)], [mx(-208), z1 - EDGE], [x1 - EDGE, mz(139)], [mx(-206), z0 + EDGE], [mx(-193), z0 + EDGE], [mx(-193.5), z1 - EDGE], [mx(-189), z1 - EDGE], [x0 + EDGE, mz(118.5)], [x0 + EDGE, mz(140)]); }
+  for (const [id, p] of Object.entries(PITS)) {
+    const [x0, z0, x1, z1] = p.rect, yc = -p.depth + 4.2, s = id === 'giyorgis' || id === 'medhane' ? 1.0 : 0.8;
+    for (const [side, f] of [['n', 0.22], ['n', 0.78], ['s', 0.22], ['s', 0.78], ['w', 0.5], ['e', 0.5]]) {
+      const horiz = side === 'n' || side === 's', pt = horiz ? [x0 + EDGE + (x1 - x0 - 2 * EDGE) * f, side === 'n' ? z0 + EDGE : z1 - EDGE] : [side === 'w' ? x0 + EDGE : x1 - EDGE, z0 + EDGE + (z1 - z0 - 2 * EDGE) * f];
+      const n = horiz ? [0, side === 'n' ? 1 : -1] : [side === 'w' ? 1 : -1, 0];
+      if (TRENCHES.some((tr) => inRect(tr.rect, pt[0], pt[1], 3.2)) || cavesAt.some((q) => Math.hypot(q[0] - pt[0], q[1] - pt[1]) < 3)) continue;
+      if (inRect([-262, 120, -200, 136], pt[0], pt[1], 2)) continue;
+      E.push({ t: 'rock_cross', c: pt, n, y: yc, s });
+    }
+  }
+}
+// the iron shackles of Mercoreus' pit, set in its walls at a standing man's reach
+{
+  const [x0, z0, x1, z1] = PITS.mercoreus.rect, yf = -PITS.mercoreus.depth + 0.15;
+  for (const [i, x] of [182, 188, 194, 199].entries()) { E.push({ t: 'shackles', c: [x, z0 + EDGE], n: [0, 1], y: yf + 1.6, seed: 10 + i }); E.push({ t: 'shackles', c: [x - 2, z1 - EDGE], n: [0, -1], y: yf + 1.6, seed: 20 + i }); }
+  E.push({ t: 'shackles', c: [x1 - EDGE, 33], n: [-1, 0], y: yf + 1.6, seed: 31 }, { t: 'shackles', c: [x1 - EDGE, 44], n: [-1, 0], y: yf + 1.6, seed: 32 });
+}
 const M = PITS.medhane, mc = [(M.rect[0] + M.rect[2]) / 2, (M.rect[1] + M.rect[3]) / 2];
 E.push({ t: 'basilica', rect: [mc[0] - 16.75, mc[1] - 11.75, mc[0] + 16.75, mc[1] + 11.75], y0: -M.depth + 0.15, h: 11, cols: [12, 7] });
 { const p = PITS.maryam; E.push({ t: 'maryam', c: [(p.rect[0] + p.rect[2]) / 2, (p.rect[1] + p.rect[3]) / 2], y0: -p.depth + 0.15, h: 9 }); }
 const AKS = {};
 const ch = (id, w, d, h) => { const p = PITS[id], c = [(p.rect[0] + p.rect[2]) / 2, (p.rect[1] + p.rect[3]) / 2]; AKS[id] = { rect: [c[0] - w / 2, c[1] - d / 2, c[0] + w / 2, c[1] + d / 2], y: -p.depth + 0.15, h }; E.push({ t: 'aksumite', name: id, rect: AKS[id].rect, y0: AKS[id].y, h }); };
-ch('golgotha', 22, 12, 8); ch('amanuel', 18, 12, 11.5); ch('gabriel', 16, 10, 9);
+ch('golgotha', 22, 12, 8); ch('amanuel', 18, 12, 11.5); ch('gabriel', 16, 10, 9); ch('mercoreus', 18, 11, 8.5);
 
 // cells and tombs cut into the rock faces of Bete Giyorgis' pit (sensesatlas: its walls have "a
 // number of caves", lodgings of priests and burial places), some at the floor, some on a ledge
@@ -151,7 +181,7 @@ for (const [ti, from, to] of [[0, -262, -226], [1, -146, -114], [2, -130, -106],
   const foot = { giyorgis: [gc[0] - 12.8, gc[1] - 12.8, gc[0] + 12.8, gc[1] + 12.8], medhane: [mc[0] - 17.25, mc[1] - 12.25, mc[0] + 17.25, mc[1] + 12.25], maryam: [59.3, -97.2, 78.3, -82.8] };
   for (const [id, a] of Object.entries(AKS)) foot[id] = [a.rect[0] - 0.6, a.rect[1] - 0.6, a.rect[2] + 0.6, a.rect[3] + 0.6];
   const shoes = { giyorgis: [[gc[0] - 16.6, gc[1] - 2.3, Math.PI / 2, 8], [gc[0] - 16.6, gc[1] + 2.3, Math.PI / 2, 8]], medhane: [[mc[0] - 20.4, mc[1] - 2.7, Math.PI / 2, 10], [mc[0] - 20.4, mc[1] + 2.7, Math.PI / 2, 10]] };
-  for (const id of ['golgotha', 'amanuel', 'gabriel']) { const r = AKS[id].rect, zc = (r[1] + r[3]) / 2; shoes[id] = [[r[0] - 3.2, zc - 1.9, Math.PI / 2, 6], [r[0] - 3.2, zc + 1.9, Math.PI / 2, 6]]; }
+  for (const id of ['golgotha', 'amanuel', 'gabriel', 'mercoreus']) { const r = AKS[id].rect, zc = (r[1] + r[3]) / 2; shoes[id] = [[r[0] - 3.2, zc - 1.9, Math.PI / 2, 6], [r[0] - 3.2, zc + 1.9, Math.PI / 2, 6]]; }
   const KINDS = ['staff', 'bundle', 'jar', 'bench', 'staff', 'bench', 'bundle', 'jar'];
   let seed = 400;
   for (const [id, p] of Object.entries(PITS)) {

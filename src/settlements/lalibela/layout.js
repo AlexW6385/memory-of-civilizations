@@ -14,7 +14,9 @@ export const PITS = {
   golgotha: { rect: [-72, -104, -32, -78], depth: 9 },
   amanuel: { rect: [20, 44, 60, 76], depth: 12 },
   gabriel: { rect: [104, 28, 136, 52], depth: 10 },
+  mercoreus: { rect: [171, 26, 205, 52], depth: 10 },       // docs §17: reached from Gabriel-Rufael by a long dark tunnel
 };
+const BASE_PITS = ['giyorgis', 'medhane', 'maryam', 'golgotha', 'amanuel', 'gabriel'];
 // trenches: { rect, axis ('x'|'z'), d0 (depth at the low-coordinate end), d1 }
 export const TRENCHES = [
   { rect: [-262, 123, -216, 133], axis: 'x', d0: 0, d1: 12 },          // down to Bete Giyorgis
@@ -26,7 +28,9 @@ export const TRENCHES = [
   { rect: [180, -22, 212, -6], axis: 'x', d0: 7, d1: 0 },              // out of its east end
   { rect: [34, -8, 46, 44], axis: 'z', d0: 7, d1: 12 },               // the Jordan to Amanuel
   { rect: [114, -8, 126, 28], axis: 'z', d0: 7, d1: 10 },             // the Jordan to Gabriel-Rufael
+  { rect: [136, 33, 171, 45], axis: 'x', d0: 10, d1: 10 },            // Gabriel-Rufael to Mercoreus: the 35 m tunnel (roofed in plan.js)
 ];
+const BASE_TRENCHES = 9;
 export const POOL = [-96, -19, -66, -15.4];            // the baptismal pool in the Jordan's floor
 export const PRECINCT = 250;                             // level within this radius; slopes beyond
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
@@ -49,6 +53,8 @@ export function cutDepth(x, z) {
   return d;
 }
 export const inCut = (x, z, m = 0) => Object.values(PITS).some((p) => inRect(p.rect, x, z, m)) || TRENCHES.some((t) => inRect(t.rect, x, z, m));
+// the cuts of the first layout alone: the village is laid out against these, so that cuts added later do not move a single house (they are cleared afterwards)
+const inCutBase = (x, z, m = 0) => BASE_PITS.some((k) => inRect(PITS[k].rect, x, z, m)) || TRENCHES.slice(0, BASE_TRENCHES).some((t) => inRect(t.rect, x, z, m));
 
 // ---- the terraced slopes: flat treads with a steep riser between, a retaining wall on each riser (docs §15)
 export const TERR = { r0: 262, P: 9, rise: 0.16 * 9, n: 9 };
@@ -98,7 +104,7 @@ let BUCKET = null;
 function build() {
   CMP = []; LAN = [];
   const rand = rng(1220), taken = (x, z, R) => CMP.some((q) => Math.hypot(q.c[0] - x, q.c[1] - z) < q.R + R + 1.4);
-  const free = (x, z, R) => !inCut(x, z, R + 9) && Math.hypot(x - ARRIVAL[0], z - ARRIVAL[1]) > R + 7 && Math.hypot(x - HUT.c[0], z - HUT.c[1]) > R + 7
+  const free = (x, z, R) => !inCutBase(x, z, R + 9) && Math.hypot(x - ARRIVAL[0], z - ARRIVAL[1]) > R + 7 && Math.hypot(x - HUT.c[0], z - HUT.c[1]) > R + 7
     && !PATHS.some((r) => rectDist(r, x, z) < R * 0.55 + 3.4) && !LINKS.some((l) => segDist(l.a, l.b, x, z) < R * 0.55 + 3) && Math.hypot(x, z) < 255 - R * 0.4;
   for (const [ax, az] of ANCHORS) {
     const np = nearPath(ax, az), want = 2 + Math.floor(rand() * 3) + (Math.hypot(ax, az) < 250 ? 1 : 0);
@@ -137,15 +143,19 @@ function build() {
   // the knoll is left open: no compound, house or lane on it
   { const off = (p) => Math.hypot(p[0] - KNOLL.c[0], p[1] - KNOLL.c[1]) < KNOLL.clear;
     CMP = CMP.filter((q) => !off(q.c)); HOUSES = HOUSES.filter((h) => !off(h.c)); LAN = LAN.filter((l) => !off(l.a) && !off(l.b)); }
+  // the cuts added since (Mercoreus and its tunnel): nothing of the village within their margin
+  { const late = (p, m) => inRect(PITS.mercoreus.rect, p[0], p[1], m) || inRect(TRENCHES[BASE_TRENCHES].rect, p[0], p[1], m);
+    CMP = CMP.filter((q) => !late(q.c, q.R + 10)); HOUSES = HOUSES.filter((h) => !late(h.c, h.r + 10)); LAN = LAN.filter((l) => !late(l.a, 3) && !late(l.b, 3)); }
   // the enterable houses: the main houses nearest the arrival (the knoll's pilgrims' viewing place, WATCH), a good way apart, then the kitchens
   // of the compounds nearest it (a smaller round house each, the family's cooking house, entered like the others)
   ENTER = [];
   const dA = (h) => Math.hypot(h.c[0] - WATCH[0], h.c[1] - WATCH[1]);
   const mains = HOUSES.filter((h) => h.kind === 'main' && h.r > 3.0).sort((p, q) => dA(p) - dA(q));
-  const KINDS = ['household', 'weaver', 'brewer', 'scribe', 'store', 'household', 'weaver', 'brewer', 'scribe', 'household', 'store', 'brewer'];
+  const KINDS = ['household', 'weaver', 'brewer', 'scribe', 'store', 'household', 'weaver', 'brewer', 'scribe', 'household', 'store', 'brewer',
+    'smith', 'mason', 'potter', 'school', 'household', 'smith', 'mason', 'weaver', 'potter', 'school', 'brewer', 'household', 'smith', 'store', 'mason', 'potter'];   // (the first twelve lie within 130 m of the arrival; the trades follow farther out, docs §17)
   for (const h of mains) {
     if (ENTER.length >= KINDS.length) break;
-    if (Math.hypot(h.c[0] - ARRIVAL[0], h.c[1] - ARRIVAL[1]) < 22 || dA(h) > 170) continue;
+    if (Math.hypot(h.c[0] - ARRIVAL[0], h.c[1] - ARRIVAL[1]) < 22 || dA(h) > 330) continue;
     if (ENTER.some((e) => Math.hypot(e.c[0] - h.c[0], e.c[1] - h.c[1]) < 16)) continue;
     h.enter = KINDS[ENTER.length]; h.storeys = 1; h.r = 3.8; ENTER.push(h);
   }
