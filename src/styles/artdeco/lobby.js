@@ -62,6 +62,14 @@ export function esbLobby(bag, col, lights, { H1, H2, y, yF, hTop, cTop }) {
       lin(bag, AL, 'x', p, sg, z - 0.68, z + 0.68, yF, yF + 2.75, 0.04, 0.12);
       lin(bag, GB, 'x', p, sg, z - 0.55, z - 0.01, yF, yF + 2.5, 0.12, 0.14);
       lin(bag, GB, 'x', p, sg, z + 0.01, z + 0.55, yF, yF + 2.5, 0.12, 0.14);
+      // the leaves' relief (the doors "carry silhouettes" of the building): panel mouldings, the stepped tower in aluminium on each leaf
+      for (const [a, b] of [[z - 0.55, z - 0.01], [z + 0.01, z + 0.55]]) {
+        const zc = (a + b) / 2;
+        for (const [y0, y1] of [[0.12, 0.2], [0.78, 0.84], [2.2, 2.26]]) lin(bag, AL, 'x', p, sg, a + 0.04, b - 0.04, yF + y0, yF + y1, 0.14, 0.16);
+        for (const [hw, y0, h] of [[0.2, 0.9, 0.55], [0.15, 1.45, 0.4], [0.1, 1.85, 0.25], [0.05, 2.1, 0.1]]) lin(bag, AL, 'x', p, sg, zc - hw, zc + hw, yF + y0, yF + y0 + h, 0.14, 0.17);
+        lin(bag, AL, 'x', p, sg, zc - 0.012, zc + 0.012, yF + 2.2, yF + 2.45, 0.14, 0.17);
+      }
+      for (let q = -2; q <= 2; q++) lin(bag, AL, 'x', p, sg, z + q * 0.1 - 0.012, z + q * 0.1 + 0.012, yF + 2.5, yF + 2.72, 0.12, 0.15);   // the fan over the doors
       lin(bag, AL, 'x', p, sg, z - 0.3, z + 0.3, yF + 2.85, yF + 3.15, 0.1, 0.16);
       lin(bag, GD, 'x', p, sg, z - 0.22, z + 0.22, yF + 2.92, yF + 3.08, 0.16, 0.17);
     }
