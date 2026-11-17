@@ -13,6 +13,7 @@ export const OVAL = { c: [40, 0], ax: 70, bz: 95 };
 export const RETTA = [-78, -50, -28, 50];
 export const PALACE = [-150, -175, -70, -112];
 export const SISTINA_C = [-185, -128];                       // the Sistine Chapel's centre: 40.9 × 13.4 m inside, walls 2.2 m (styles/baroque/sistina.js)
+export const COURT = [-131, -160, -89, -127];                  // the Cortile di San Damaso's clear rectangle in the palace (its gate on the south face, x -110)
 export const SISTINE = [-207.65, -136.9, -162.35, -119.1];
 export const GARDEN = [-285, 84, -195, 150];                  // the Vatican gardens' parterre, south-west of the church
 export const CASTEL = { c: [172, -60], r: 22 };
