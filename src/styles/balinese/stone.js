@@ -2,7 +2,7 @@
 // (candi bentar), the roofed gate (kori agung), the compound's gate with its spirit wall, the padmasana, the shrines, guardian statues.
 import { box, lathe, rod } from '../../core/geom.js';
 import { bx, post, thatchHip, steps, coping, sash, rng, TAU } from './kit.js';
-import { frame, patraField, bhoma, karangGajah, lotusFinial, flame, dwarapala, bedawang, ball } from './carve.js';
+import { frame, ukel, patraField, bhoma, karangGajah, lotusFinial, flame, dwarapala, bedawang, ball } from './carve.js';
 
 /** A guardian statue (a squat figure on a plinth with a club, a poleng cloth at its waist): at (x, z), y the ground, facing 'n' | 's' | 'e' | 'w'. */
 export function guardian(ctx, x, z, y, h = 1.3, face = 's') { dwarapala(ctx, x, z, y, h, face); }
@@ -83,14 +83,17 @@ export function candiBentar(el, ctx) {
     for (const face of ['s', 'n']) karangGajah(ctx, ox(0.1) - s * 0.42, cz, face, 0, y + 0.72, D / 2 - 0.05, s);
     slab('tuff_hewn', 0.15, y + 2.9, y + 3.1, 0.0); slab('tuff_hewn', 0.0, y + 3.1, y + 3.3, -0.05);
     let yy = y + 3.3;
-    for (let k = 0; k < 8; k++) {
-      const hh = 0.5 - k * 0.025, inset = 0.4 + k * 0.38, dd = 0.15 + k * 0.17;
+    const NT = 13;
+    for (let k = 0; k < NT; k++) {
+      const t = k / (NT - 1), hh = 0.3 - 0.07 * t, inset = 0.35 + 3.35 * Math.pow(t, 1.45), dd = 0.15 + 2.2 * Math.pow(t, 1.3) * 0.75;
       slab(k % 2 ? 'tuff_hewn' : 'brick', inset, yy, yy + hh, dd);
-      if (k % 2 === 0) {                                   // a row of dentils along each brick tier's front and back
-        const x0 = Math.min(ix, ox(inset)) + 0.15, x1 = Math.max(ix, ox(inset)) - 0.15, n = Math.floor((x1 - x0) / 0.26);
-        for (let i = 0; i < n; i++) { const x = x0 + (i + 0.5) * (x1 - x0) / n; for (const zf of [-1, 1]) bx(ctx, 'tuff_hewn', x - 0.07, yy + hh * 0.35, cz + zf * (D / 2 - dd), x + 0.07, yy + hh * 0.75, cz + zf * (D / 2 - dd + 0.05) + (zf > 0 ? 0 : 0)); }
+      // a thin moulding projecting under each course, and a row of dentils on every other one
+      slab('tuff_hewn', inset - 0.06, yy, yy + 0.05, dd - 0.03);
+      if (k % 2 === 0) {
+        const x0 = Math.min(ix, ox(inset)) + 0.15, x1 = Math.max(ix, ox(inset)) - 0.15, n = Math.floor((x1 - x0) / 0.24);
+        for (let i = 0; i < n; i++) { const x = x0 + (i + 0.5) * (x1 - x0) / n; for (const zf of [-1, 1]) bx(ctx, 'tuff_hewn', x - 0.06, yy + hh * 0.3, cz + zf * (D / 2 - dd), x + 0.06, yy + hh * 0.75, cz + zf * (D / 2 - dd + 0.05)); }
       }
-      flame(ctx, ox(inset) - s * 0.12, yy + hh, cz + (D / 2 - dd - 0.12), 0.24 - k * 0.012); flame(ctx, ox(inset) - s * 0.12, yy + hh, cz - (D / 2 - dd - 0.12), 0.24 - k * 0.012);
+      if (k % 2 === 1 && Math.abs(ox(inset) - ix) > 0.5) { flame(ctx, ox(inset) - s * 0.12, yy + hh, cz + (D / 2 - dd - 0.12), 0.26 - k * 0.012); flame(ctx, ox(inset) - s * 0.12, yy + hh, cz - (D / 2 - dd - 0.12), 0.26 - k * 0.012); }
       yy += hh;
     }
     // the lotus-bud murdha on top
@@ -99,7 +102,11 @@ export function candiBentar(el, ctx) {
   steps(ctx, [cx - g / 2, cz - D / 2, cx + g / 2, cz + D / 2], y, y + rise, 'n', 'andesite', 0.17, y - 0.3);
   for (const s of [-1, 1]) {
     const gx = cx + s * (g / 2 + W + 0.55);
-    if (el.guards !== false) { bx(ctx, 'tuff_hewn', gx - 0.3, y, cz + D / 2 - 0.5, gx + 0.3, y + 0.4, cz + D / 2 + 0.1, true); if (el.dwara) dwarapala(ctx, gx, cz + D / 2 - 0.2, y + 0.4, 1.0, 's'); }
+    if (el.guards !== false) { bx(ctx, 'tuff_hewn', gx - 0.01, y, cz + D / 2 + 0.3, gx + 0.01, y + 0.01, cz + D / 2 + 0.31); dwarapala(ctx, gx, cz + D / 2 + 0.2, y, 1.4, 's'); }
+    // the stair's cheek walls: stepping with the stair, ending in a curled scroll at the foot
+    const nst = Math.max(1, Math.round(rise / 0.17)), cxw = cx + s * (g / 2 - 0.15);
+    for (let i = 0; i < nst; i++) { const f0 = i / nst, f1 = (i + 1) / nst; bx(ctx, i % 2 ? 'tuff_hewn' : 'andesite', cxw - 0.15, y - 0.3, cz + D / 2 - D * f1, cxw + 0.15, y + rise * f1 + 0.4, cz + D / 2 - D * f0); }
+    ukel(frame(ctx, cxw + (s > 0 ? -0.15 : 0.15), cz + D / 2 - 0.35, s > 0 ? 'w' : 'e'), 'tuff_hewn', 0, y + 0.28, 0.015, 0.14, s, 0.03);
   }
   void rng; void TAU; void box;
 }
@@ -132,19 +139,31 @@ export function kori(el, ctx) {
   bx(ctx, 'gilt_bronze', cx - w / 2, y + ph - 0.3, cz - D / 2 - 0.04, cx + w / 2, y + ph - 0.24, cz - D / 2 - 0.02);
   // four stepped tiers over the block
   let yy = ly + LH + 0.1;
-  const TN = 4;
+  const TN = 8;
   for (let k = 0; k < TN; k++) {
-    const hh = 0.5 - k * 0.03, a = (half - 0.5) - k * ((half - 0.5) - 1.0) / TN, d = D / 2 - 0.4 - k * (D / 2 - 0.9) / TN, m = k % 2 ? 'tuff_hewn' : 'brick';
+    const t = k / (TN - 1), hh = 0.34 - 0.08 * t, a = (half - 0.5) - ((half - 0.5) - 0.95) * Math.pow(t, 1.3), d = D / 2 - 0.4 - (D / 2 - 0.95) * Math.pow(t, 1.3), m = k % 2 ? 'tuff_hewn' : 'brick';
     bx(ctx, m, cx - a, yy, cz - d, cx + a, yy + hh, cz + d, k === 0);
-    bx(ctx, 'tuff_hewn', cx - a - 0.1, yy + hh - 0.07, cz - d - 0.1, cx + a + 0.1, yy + hh + 0.07, cz + d + 0.1);
-    if (k % 2 === 0) { const n = Math.floor((2 * a - 0.4) / 0.26); for (let i = 0; i < n; i++) { const x = cx - a + 0.2 + (i + 0.5) * (2 * a - 0.4) / n; bx(ctx, 'tuff_hewn', x - 0.07, yy + hh * 0.3, cz + d, x + 0.07, yy + hh * 0.7, cz + d + 0.05); bx(ctx, 'tuff_hewn', x - 0.07, yy + hh * 0.3, cz - d - 0.05, x + 0.07, yy + hh * 0.7, cz - d); } }
-    for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) flame(ctx, cx + sx * (a + 0.02), yy + hh + 0.07, cz + sz * (d - 0.1), 0.3 - k * 0.03, 0.08);
-    yy += hh + 0.14;
+    bx(ctx, 'tuff_hewn', cx - a - 0.1, yy + hh - 0.06, cz - d - 0.1, cx + a + 0.1, yy + hh + 0.06, cz + d + 0.1);
+    bx(ctx, 'tuff_hewn', cx - a - 0.05, yy, cz - d - 0.05, cx + a + 0.05, yy + 0.05, cz + d + 0.05);
+    if (k % 2 === 0) { const n = Math.floor((2 * a - 0.4) / 0.24); for (let i = 0; i < n; i++) { const x = cx - a + 0.2 + (i + 0.5) * (2 * a - 0.4) / n; bx(ctx, 'tuff_hewn', x - 0.06, yy + hh * 0.3, cz + d, x + 0.06, yy + hh * 0.7, cz + d + 0.05); bx(ctx, 'tuff_hewn', x - 0.06, yy + hh * 0.3, cz - d - 0.05, x + 0.06, yy + hh * 0.7, cz - d); } }
+    if (k % 2 === 1) for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) flame(ctx, cx + sx * (a + 0.02), yy + hh + 0.06, cz + sz * (d - 0.1), 0.3 - k * 0.025, 0.08);
+    // a carved panel in the middle of the odd tiers' faces
+    if (k % 2 === 1 && a > 1.6) patraField(frame(ctx, cx, cz, 's'), 'tuff_hewn', 'andesite', -a * 0.6, yy + 0.05, a * 0.6, yy + hh - 0.02, d, 0.2);
+    yy += hh + 0.12;
   }
   // the little roof of ijuk and the murdha
-  thatchHip(ctx, { c: [cx, cz], A: half * 0.5, B: D / 2 - 0.4, y: yy + 0.1, rise: 1.3, mat: 'ijuk', pow: 1.4, th: 0.3 });
-  bx(ctx, 'tuff_hewn', cx - 0.5, yy, cz - 0.4, cx + 0.5, yy + 0.2, cz + 0.4);
-  lotusFinial(ctx, cx, yy + 1.35, cz, 0.18);
+  bx(ctx, 'tuff_hewn', cx - 0.85, yy, cz - 0.7, cx + 0.85, yy + 0.18, cz + 0.7);
+  bx(ctx, 'wood_dark', cx - 0.6, yy + 0.18, cz - 0.45, cx + 0.6, yy + 0.7, cz + 0.45);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) post(ctx, 'wood_painted', cx + sx * 0.66, cz + sz * 0.5, yy + 0.18, yy + 0.7, 0.05, false);
+  let ry = yy + 0.7;
+  for (let k = 0; k < 3; k++) {
+    const A = 1.5 - k * 0.5, B = 1.0 - k * 0.3;
+    thatchHip(ctx, { c: [cx, cz], A, B, y: ry, rise: 0.45 + 0.2 * (k === 2), mat: 'ijuk', pow: 1.4, th: 0.28 });
+    if (k < 2) { for (const sx of [-1, 1]) for (const sz of [-1, 1]) post(ctx, 'wood_painted', cx + sx * (A - 0.55), cz + sz * (B - 0.35), ry, ry + 0.6, 0.04, false); ry += 0.6; }
+    else ry += 0.1;
+  }
+  yy = ry - 0.1;
+  lotusFinial(ctx, cx, yy + 0.35, cz, 0.15);
   // the stair through the passage: from the court below (south) up to the court beyond
   steps(ctx, [cx - w / 2, cz - D / 2, cx + w / 2, cz + D / 2], y, y + up, 'n', 'andesite', 0.17, y - 0.3);
   // guardians either side of the foot

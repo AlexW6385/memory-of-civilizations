@@ -93,3 +93,16 @@ export function curvedPole(ctx, mat, p0, p1, p2, r, n = 7) {
     prev = q;
   }
 }
+
+/** The cut fringe of a square thatched roof, bundles of uneven length hanging below y all round (half extent e), made as ONE piece so it merges with the roof's material. */
+export function fringe(ctx, mat, cx, cz, y, e, rand) {
+  const tris = [], step = e > 2 ? 0.26 : 0.22, nn = Math.max(4, Math.floor(2 * e / step)), w = (2 * e - 0.12) / nn * 0.4;
+  const add = (g) => { const h = g.index ? g.toNonIndexed() : g; tris.push(...h.attributes.position.array); };
+  for (let i = 0; i < nn; i++) {
+    const u = -e + 0.06 + (i + 0.5) * (2 * e - 0.12) / nn, len = 0.1 + rand() * 0.1, d = 0.012 * rand(), y0 = y - 0.04 - len;
+    add(box(cx + u - w, y0, cz - e - 0.03 - d, cx + u + w, y, cz - e + 0.05)); add(box(cx + u - w, y0, cz + e - 0.05, cx + u + w, y, cz + e + 0.03 + d));
+    add(box(cx - e - 0.03 - d, y0, cz + u - w, cx - e + 0.05, y, cz + u + w)); add(box(cx + e - 0.05, y0, cz + u - w, cx + e + 0.03 + d, y, cz + u + w));
+  }
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) add(lathe([[0.1 + 0.002 * rand(), 0], [0.07, 0.12 + 0.01 * rand()], [0.001, 0.3 + 0.02 * rand()]], 5, null, cx + sx * (e - 0.08), y + 0.32, cz + sz * (e - 0.08)));
+  ctx.bag.add(mat, fromTriangles(tris));
+}

@@ -1,8 +1,8 @@
 // Towers and pavilions (docs/settlements/bali-village.md §3, §4): the meru, the kulkul tower, the bale (open pavilion on a plinth), the wantilan with the gamelan,
 // the compound's house (bale daja), the kitchen (paon), the rice barn (lumbung).
 import { box, lathe, rod } from '../../core/geom.js';
-import { bx, post, thatchHip, hipHeight, steps, coping, canang, sash, rng, pick, TAU } from './kit.js';
-import { frame, patraField, lotusFinial } from './carve.js';
+import { bx, post, fringe, thatchHip, hipHeight, steps, coping, canang, sash, rng, pick, TAU } from './kit.js';
+import { frame, patraField, lotusFinial, ukel } from './carve.js';
 
 /** bali_meru: { c, y, tiers (3 | 5 | 7 | 9 | 11), a (half width of the base), seed } — a base with stair, the closed cell, then the roofs diminishing upward. */
 export function meru(el, ctx) {
@@ -17,21 +17,48 @@ export function meru(el, ctx) {
     if (face === 's') { patraField(F, 'tuff_hewn', 'andesite', 0.95, v0, a - 0.25, v1, a, 0.3); patraField(F, 'tuff_hewn', 'andesite', -(a - 0.25), v0, -0.95, v1, a, 0.3); }
     else patraField(F, 'tuff_hewn', 'andesite', -(a - 0.25), v0, a - 0.25, v1, a, 0.3);
   }
+  // the stair's cheek walls, stepping with it and ending at the foot in a scroll
+  { const zs = cz + a + 0.25, zl = cz + a + 1.5, nst = Math.max(1, Math.round((bh + 0.2) / 0.2));
+    for (const sd of [-1, 1]) {
+      for (let i = 0; i < nst; i++) { const f0 = i / nst, f1 = (i + 1) / nst, zz0 = zl - (zl - zs) * f1, zz1 = zl - (zl - zs) * f0; bx(ctx, i % 2 ? 'tuff_hewn' : 'andesite', cx + sd * 0.8 - (sd > 0 ? 0 : 0.28), y - 0.3, zz0, cx + sd * 0.8 + (sd > 0 ? 0.28 : 0), y + (bh + 0.2) * f1 + 0.32, zz1); }
+      const F = frame(ctx, cx + sd * (0.8 + 0.28 * (sd > 0 ? 1 : 0)) - (sd > 0 ? 0 : 0), zl - 0.3, sd > 0 ? 'e' : 'w');
+      ukel(F, 'tuff_hewn', 0, y + 0.3, 0.015, 0.17, sd, 0.03);
+      F.ballF('tuff_hewn', 0.0, y + 0.3, 0.03, 0.045, 5);
+    }
+    bx(ctx, 'tuff_hewn', cx - 1.12, y + bh + 0.2, zs - 0.02, cx + 1.12, y + bh + 0.5, zs + 0.3);
+  }
+  // pilasters at the base's corners
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) { bx(ctx, 'tuff_hewn', cx + sx * a - 0.17 - (sx > 0 ? 0 : -0.0), y + 0.5, cz + sz * a - 0.17, cx + sx * a + 0.17, y + bh, cz + sz * a + 0.17); }
   const y0 = y + bh + 0.2, sp = 1.05 + (n > 5 ? 0.05 : 0);
-  // the cell (a closed chamber of painted timber, in the lowest storey) and the frame of posts above
-  const cw = a * 0.6;
+  // the cell (a closed chamber of painted timber, in the lowest storey): corner posts with poleng, framed carved door, carved fields on the three other faces
+  const cw = a * 0.6, rnd = rng((el.seed ?? 1) * 7919 + 13);
   bx(ctx, 'wood_painted', cx - cw, y0, cz - cw, cx + cw, y0 + 1.5, cz + cw, true);
-  bx(ctx, 'wood_dark', cx - 0.35, y0, cz + cw, cx + 0.35, y0 + 1.1, cz + cw + 0.05);
-  bx(ctx, 'gilt_bronze', cx - 0.4, y0 + 1.1, cz + cw, cx + 0.4, y0 + 1.16, cz + cw + 0.07);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) { bx(ctx, 'wood_dark', cx + sx * cw - 0.09, y0, cz + sz * cw - 0.09, cx + sx * cw + 0.09, y0 + 1.5, cz + sz * cw + 0.09); sash(ctx, cx + sx * cw, cz + sz * cw, y0 + 0.5, 0.06); }
+  bx(ctx, 'wood_dark', cx - 0.38, y0, cz + cw, cx + 0.38, y0 + 1.1, cz + cw + 0.05);
+  for (const sd of [-1, 1]) bx(ctx, 'gilt_bronze', cx + sd * 0.42 - 0.04, y0, cz + cw, cx + sd * 0.42 + 0.04, y0 + 1.2, cz + cw + 0.09);
+  bx(ctx, 'gilt_bronze', cx - 0.46, y0 + 1.1, cz + cw, cx + 0.46, y0 + 1.2, cz + cw + 0.09);
   patraField(frame(ctx, cx, cz, 's'), 'gilt_bronze', 'wood_dark', -0.28, y0 + 0.1, 0.28, y0 + 1.0, cw + 0.05, 0.28);
+  { // framed panels of gilt on the cell's faces (a dark ground, a gilt edge): the south face either side of the door, and the other three faces
+    const pan = (face, u0, u1) => { const G = 'wood_painted'; const F = frame(ctx, cx, cz, face), v0 = y0 + 0.2, v1 = y0 + 1.1, n = cw + 0.02; F.B('wood_dark', u0, v0, n, u1, v1, n + 0.02); F.B(G, u0, v0, n, u1, v0 + 0.04, n + 0.04); F.B(G, u0, v1 - 0.04, n, u1, v1, n + 0.04); F.B(G, u0, v0, n, u0 + 0.04, v1, n + 0.04); F.B(G, u1 - 0.04, v0, n, u1, v1, n + 0.04); F.B(G, (u0 + u1) / 2 - 0.03, v0 + 0.3, n, (u0 + u1) / 2 + 0.03, v1 - 0.3, n + 0.05); };
+    const w2 = cw - 0.2 - 0.5; if (w2 > 0.3) { pan('s', 0.52, 0.52 + w2); pan('s', -0.52 - w2, -0.52); }
+    for (const face of ['n', 'e', 'w']) pan(face, -cw + 0.3, cw - 0.3);
+  }
   for (let k = 0; k < n; k++) {
-    const t = k / Math.max(1, n - 1), ek = a + 0.9 - t * (a + 0.2), ey = y0 + 1.5 + k * sp + (k === 0 ? 0 : 0.0);
+    const t = k / Math.max(1, n - 1), ek = a + 0.9 - t * (a + 0.2), ey = y0 + 1.5 + k * sp;
     thatchHip(ctx, { c: [cx, cz], A: ek, B: ek, y: ey, rise: 0.75 + 0.3 * (k === n - 1), mat: 'ijuk', pow: 1.5, th: 0.34 });
+    // the cut fringe of the thatch, bundles of uneven length, and the curl at each corner
+    {
+      fringe(ctx, 'ijuk', cx, cz, ey - 0.3, ek, rnd);
+    }
     if (k < n - 1) {
+      // the storey between two roofs: a dark closed core with carved posts at the corners and the faces' middles, a rail and a beam gilt along its edge
       const pr = Math.max(0.35, ek * 0.45);
+      bx(ctx, 'wood_dark', cx - pr * 0.82, ey + 0.05, cz - pr * 0.82, cx + pr * 0.82, ey + sp - 0.12, cz + pr * 0.82, k === 0);
       for (const sx of [-1, 1]) for (const sz of [-1, 1]) post(ctx, 'wood_painted', cx + sx * pr, cz + sz * pr, ey - 0.0, ey + sp, 0.07, false);
+      if (pr > 0.6) for (const q of [-1, 1]) { post(ctx, 'wood_painted', cx + q * pr, cz, ey, ey + sp, 0.06, false); post(ctx, 'wood_painted', cx, cz + q * pr, ey, ey + sp, 0.06, false); }
       if (k === 0) for (const sx of [-1, 1]) for (const sz of [-1, 1]) sash(ctx, cx + sx * pr, cz + sz * pr, ey + 0.35, 0.07);
       bx(ctx, 'wood_painted', cx - pr - 0.1, ey + sp - 0.12, cz - pr - 0.1, cx + pr + 0.1, ey + sp - 0.02, cz + pr + 0.1);
+      bx(ctx, 'wood_painted', cx - pr - 0.06, ey + 0.1, cz - pr - 0.06, cx + pr + 0.06, ey + 0.17, cz + pr + 0.06);
     }
   }
   const top = y0 + 1.5 + (n - 1) * sp + 1.05;
