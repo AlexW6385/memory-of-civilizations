@@ -107,7 +107,7 @@ function landing() {
 export function lanesPlan() {
   const [L, F] = laneLife(), [ML, MP] = market(), [LE, LL] = landing(), out = [];
   out.push(...tiled('heian-uji-lanes', 'life', L));
-  out.push({ ...base('heian-uji-fences', 'japanese', F), near: 160, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS] });
+  out.push({ ...base('heian-uji-fences', 'japanese', F), near: 160, center: [0, 0], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS] });
   out.push(...tiled('heian-uji-market', 'life', ML, 260));
   const fig = MP.map((p, i) => ({ t: 'figure', at: p.at, y: 0, rot: p.rot, seed: 9100 + i * 37, dress: p.woman ? 'robe' : 'trousers', hair: p.woman ? 'long' : 'topknot', hat: p.woman ? 'none' : (i % 2 ? 'straw' : 'cap'), hatMat: 'cloth_black', cloth: p.c, cloth2: 'cloth_brown', skin: 'skin_medium', carry: p.carry || 'none', pose: 'stand' }));
   out.push(base('heian-uji-marketfolk', 'life', [...fig, ...LL]));

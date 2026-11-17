@@ -97,3 +97,7 @@ The music of the Heian court, *gagaku* (*tōgaku*): the mouth organ *shō* holdi
 ## Pillar paintings and offering table (fourth pass)
 
 See `docs/settlements/heian-uji.md` §17: `byodo_pillars` (gilt collars, lotus petals, hōsōge rosettes of mother-of-pearl, vines on the ten core columns) and `byodo_offering` (lacquer table, incense burner, vases, candlesticks) in `style.js`; both [inferred] in form, grounded in the stated pillar paintings, hōsōge and mother-of-pearl decoration.
+
+## Roof work, bracket sets, round window (fifth pass)
+
+See `docs/settlements/heian-uji.md` §18: `roofs.js` (tile rows, foot tiles, stacked ridges, rafter ends) and `front.js` (`byodo_tokyo` bracket sets, `byodo_round_window`, `byodo_lattice`); [inferred] in form, grounded in the stated hongawara roof, mitesaki brackets and round window.

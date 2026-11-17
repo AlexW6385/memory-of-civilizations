@@ -8,6 +8,8 @@ import '../../styles/japanese/index.js';
 import { STYLES, registerStyle } from '../../core/build.js';
 import { lathe, fromTriangles, box } from '../../core/geom.js';
 import { buddha, ellipsoid, petal, hexa } from '../../styles/chinese/index.js';
+import { roofElements } from './roofs.js';
+import { frontElements } from './front.js';
 
 // a rod from a to b (radius r0 → r1), and a chain of them through points
 function rod(a, b, r0, r1 = r0, seg = 6) {
@@ -490,6 +492,6 @@ function petalFlatTilt(t, a, r0, r1) {
 const base = STYLES.japanese;
 registerStyle('japanese-byodo', {
   ...base,
-  elements: { ...base.elements, byodo_mirrors: byodoMirrors, byodo_pillars: byodoPillars, byodo_offering: byodoOffering, raigo, shoro },
+  elements: { ...base.elements, byodo_mirrors: byodoMirrors, byodo_pillars: byodoPillars, byodo_offering: byodoOffering, raigo, shoro, ...roofElements, ...frontElements },
   objects: { ...base.objects, byodo_amida: amida, byodo_cloud: cloudBodhisattva, byodo_canopy: byodoCanopy },
 });
