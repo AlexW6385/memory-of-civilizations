@@ -13,9 +13,12 @@ import { ttPlants } from './plants.js';
 import { ttMarket } from './market.js';
 import { midden } from './market.js';
 import { kiln, dyeYard } from './craft.js';
-import { streetFront } from './street.js';
+import { streetFront, fig, inst } from './street.js';
+import { gateKind, gateFront, dado, FINISH } from './gate.js';
+import { householdYard } from './yard.js';
+import { drainKit } from './avenue.js';
 import { ttHouse } from './houses.js';
-import { ttAvenue, ttPuma, weatherPyramid } from './avenue.js';
+import { ttAvenue, ttPuma, weatherPyramid, paintBands } from './avenue.js';
 import { ttPalace, ttJaguars, ttPlazaAltars, ttCrossAltar, ttGoddess, ttTempleInside, ttPeople } from './palace.js';
 
 const S = 'stucco_ochre', RD = 'stucco_red', RF = 'limewash_red', RB = 'rubble_teo', HS = 'andesite';
@@ -113,6 +116,7 @@ const teoCipactli = () => carved('teo-cipactli', (k) => {
   for (let i = 0; i < 6; i++) { const x = -0.3 + i * 0.12; k.fy('plaster_white', [x - 0.04, x + 0.04, 0.48, 0.56], [x - 0.01, x + 0.01, 0.51, 0.53], -0.32, -0.48); }   // the teeth of the upper jaw
 });
 
+const tb0 = (el) => (el.tablero ?? 0.35) === 0;
 /**
  * tt_pyramid: { c, w, d (base), tw, td (top), h, levels, tablero (share of each level's height in a
  * vertical panel; 0 for plain sloping stages), stair ('w'|'s'|…), stairW, temple: { w, d, h }, heads (faces
@@ -180,6 +184,7 @@ export function ttPyramid(el, ctx) {
     col.rect([cx - a[0] + sx * 0.4, cz - a[1] + sz * 0.4, cx + a[0] - sx * 0.4, cz + a[1] - sz * 0.4], ya, ya + ht * 0.5);
   }
   if (el.weather) weatherPyramid(bag, el);
+  if (el.paint && tb0(el)) paintBands(bag, el);
   // the stair up the chosen face, the whole height
   // (`stairFoot`: the stair starts higher than the pyramid's base, on a plaza laid above it)
   const sw = (el.stairW ?? 12) / 2, sy0 = el.stairFoot ?? y0b, run = (y0b + H - sy0) * 1.05, f = el.stair || 'w', ov = tb === 0 && el.talud ? -0.15 * (el.w - el.tw) / 2 / n : 0.5;   // the stair's head laid over the top's edge (on a plastered top, ending at its edge)
@@ -249,16 +254,18 @@ function compound(el, ctx) {
   const { bag, col } = ctx;
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, h = 3.2, gate = Math.floor(rand() * 4), gw = 0.9;
   // the outer wall, a doorway in the middle of one side
-  const xm = (x0 + x1) / 2, zm = (z0 + z1) / 2;
+  const xm = (x0 + x1) / 2, zm = (z0 + z1) / 2, { kind: gk, finish } = gateKind(el.seed || 1, xm), WS = FINISH[finish];
   const sides = [[[x0, z0, x1, z0 + 1], 'x'], [[x0, z1 - 1, x1, z1], 'x'], [[x0, z0 + 1, x0 + 1, z1 - 1], 'z'], [[x1 - 1, z0 + 1, x1, z1 - 1], 'z']];
   sides.forEach(([r, ax], i) => {
     const parts = i !== gate ? [r] : ax === 'x' ? [[r[0], r[1], xm - gw, r[3]], [xm + gw, r[1], r[2], r[3]]] : [[r[0], r[1], r[2], zm - gw], [r[0], zm + gw, r[2], r[3]]];
-    for (const q of parts) { bag.add(S, box(q[0], 0, q[1], q[2], h, q[3])); col.rect(q, 0, h); }
+    for (const q of parts) { bag.add(WS, box(q[0], 0, q[1], q[2], h, q[3])); col.rect(q, 0, h); }
     if (i === gate) {                                                                   // the wall over the doorway on a painted lintel
-      bag.add(S, ax === 'x' ? box(xm - gw, 2.6, r[1], xm + gw, h, r[3]) : box(r[0], 2.6, zm - gw, r[2], h, zm + gw));
+      bag.add(WS, ax === 'x' ? box(xm - gw, 2.6, r[1], xm + gw, h, r[3]) : box(r[0], 2.6, zm - gw, r[2], h, zm + gw));
       bag.add(RD, ax === 'x' ? box(xm - gw - 0.2, 2.3, r[1] - 0.05, xm + gw + 0.2, 2.6, r[3] + 0.05) : box(r[0] - 0.05, 2.3, zm - gw - 0.2, r[2] + 0.05, 2.6, zm + gw + 0.2));
     }
   });
+  gateFront(ctx, el.rect, gate, gk, el.seed || 1, !!el.simple);
+  if (finish === 2) dado(ctx, el.rect, gate, gk === 'gatehouse' ? 3.8 : gk === 'porch' ? 3.3 : 1.4);
   bag.add(RB, frustum([x0 - 0.5, z0 - 0.5, x1 + 0.5, z1 + 0.5], 0, 0.9, 0.5, 0.5, 0.5, 0.5, { noBottom: true, noTop: true }));   // (a ring: its top must not roof the courts and floors inside)
   // the outer wall's plaster patched where it was re-laid, here and there fallen away from the rubble core
   for (const [nx, nz, c] of [[0, -1, z0], [0, 1, z1], [-1, 0, x0], [1, 0, x1]]) {
@@ -282,7 +289,7 @@ function compound(el, ctx) {
     }
     return;
   }
-  streetFront(ctx, el.rect, gate, h, el.seed || 1, el.rich ?? 0.6);
+  streetFront(ctx, el.rect, gate, h, el.seed || 1, el.rich ?? 0.6, gk);
   // rooms: a grid of blocks, the middle cell the main patio, another the second patio
   const nx = 3, nz = 3, cw = (x1 - x0 - 2) / nx, cd = (z1 - z0 - 2) / nz, second = [0, 2, 6, 8][Math.floor(rand() * 4)];
   const P = [x0 + 1 + cw, z0 + 1 + cd, x0 + 1 + 2 * cw, z0 + 1 + 2 * cd];            // the main patio
@@ -293,12 +300,16 @@ function compound(el, ctx) {
       if (k !== 4 && el.workshop) midden(bag, col, cx0 + cw / 2, 0.06, cz0 + cd / 2, el.seed + k);
       if (k !== 4 && el.craft === 'potter') kiln(ctx, cx0 + cw / 2, 0.06, cz0 + cd / 2, el.seed + k);
       if (k !== 4 && el.craft === 'weaver') dyeYard(ctx, cx0 + cw / 2, 0.06, cz0 + cd / 2, el.seed + k);
+      if (k !== 4 && !el.workshop && !el.craft) householdYard(ctx, cx0 + cw / 2, 0.06, cz0 + cd / 2, (el.seed || 1) + k);
       if (k === 4) {
         // the altar: a talud and a framed tablero, a little shrine in miniature
         const ax = cx0 + cw / 2, az = cz0 + cd / 2;
         bag.add(RD, frustum([ax - 1, az - 1, ax + 1, az + 1], 0.06, 0.5, 0.2, 0.2, 0.2, 0.2, { noBottom: true, noTop: true }));
         tablero(bag, [ax - 0.85, az - 0.85, ax + 0.85, az + 0.85], 0.5, 1.15, { out: 0.12, discs: false });
         col.rect([ax - 1, az - 1, ax + 1, az + 1], 0, 1.15);
+        // the court swept clean: a drain slab in the floor, the household's sweeper at her broom now and then
+        inst(bag, drainKit(), ax - 3.0, 0.06, az + 0.4, 0, 1, 70);
+        if (rand() < 0.4) fig(ctx, { who: 'woman', at: [ax + 3.2, az - 2.6], y: 0.06, rot: rand() * 6.28, seed: (el.seed || 1) + 71, pose: 'stand', carry: 'broom' });
       }
       continue;
     }

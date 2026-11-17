@@ -95,15 +95,15 @@ const FACES = (r) => { const [x0, z0, x1, z1] = r; return [
  * Dress the outer wall of a compound (rect, its gate on side `gate` as numbered in `compound`, h the wall's height).
  * `richness` 0..1 sets how much is set out; the band, the merlons and the spouts are on every face.
  */
-export function streetFront(ctx, rect, gate, h, seed, richness = 0.6) {
-  const { bag, col } = ctx, L = STYLES.life.elements, rand = rng(seed ^ 0x2f1b), faces = FACES(rect);
+export function streetFront(ctx, rect, gate, h, seed, richness = 0.6, kind = 'plain') {
+  const { bag, col } = ctx, L = STYLES.life.elements, rand = rng(seed ^ 0x2f1b), faces = FACES(rect), half = kind === 'gatehouse' ? 5.2 : kind === 'porch' ? 4.2 : 2.2, bh = kind === 'gatehouse' ? 3.8 : kind === 'porch' ? 1.5 : 1.5;
   const fret = fretKit(), merlon = merlonKit(), spout = spoutKit(), streak = streakKit();
   faces.forEach((s, i) => {
     const [nx, nz] = s.n, mid = (s.a0 + s.a1) / 2, isGate = i === gate, yawK = Math.atan2(nx, nz), yawF = Math.atan2(-nx, -nz);
     const P = (u, d) => (s.ax === 'x' ? [u, s.c + nz * d] : [s.c + nx * d, u]);
-    const nearGate = (u, w) => isGate && Math.abs(u - mid) < 1.6 + w;
+    const nearGate = (u, w) => isGate && Math.abs(u - mid) < Math.max(1.6, half - 0.6) + w;
     // the painted band under the roof's edge: a red strip with the stepped frets along it, broken by the doorway
-    const bandRuns = isGate ? [[s.a0, mid - 1.5], [mid + 1.5, s.a1]] : [[s.a0, s.a1]];
+    const bandRuns = isGate ? [[s.a0, mid - bh], [mid + bh, s.a1]] : [[s.a0, s.a1]];
     for (const [a, b] of bandRuns) {
       if (b - a < 1) continue;
       const q = s.ax === 'x' ? [a, 2.5, s.c + (nz > 0 ? 0 : -0.035), b, 2.95, s.c + (nz > 0 ? 0.035 : 0)] : [s.c + (nx > 0 ? 0 : -0.035), 2.5, a, s.c + (nx > 0 ? 0.035 : 0), 2.95, b];
@@ -114,7 +114,7 @@ export function streetFront(ctx, rect, gate, h, seed, richness = 0.6) {
     // the merlons along the wall's head (the wall is 1 m thick, their middle on its middle)
     {
       const n = Math.floor((s.a1 - s.a0 - 1.5) / 1.5);
-      for (let k = 0; k < n; k++) { const u = s.a0 + 0.75 + (s.a1 - s.a0 - 1.5) * (k + 0.5) / n, [x, z] = P(u, -0.5); inst(bag, merlon, x, h, z, s.ax === 'x' ? 0 : Math.PI / 2, 1, 170); }
+      for (let k = 0; k < n; k++) { const u = s.a0 + 0.75 + (s.a1 - s.a0 - 1.5) * (k + 0.5) / n, [x, z] = P(u, -0.5); if (isGate && kind === 'gatehouse' && Math.abs(u - mid) < 4) continue; inst(bag, merlon, x, h, z, s.ax === 'x' ? 0 : Math.PI / 2, 1, 170); }
     }
     // the drain spouts, each with its streak of damp below
     for (let u = s.a0 + 4 + rand() * 5; u < s.a1 - 3; u += 8 + rand() * 7) {
@@ -123,7 +123,7 @@ export function streetFront(ctx, rect, gate, h, seed, richness = 0.6) {
       inst(bag, spout, x, 2.95, z, yawK, 1, 90); inst(bag, streak, x, 2.9, z, yawK, 1, 80);
     }
     // the doorway: its step and painted jambs
-    if (isGate) {
+    if (isGate && kind !== 'gatehouse') {
       const [x, z] = P(mid, 0);
       inst(bag, doorKit(), x, 0, z, yawK, 1, 120);
       col.rect(s.ax === 'x' ? [mid - 1.3, nz > 0 ? s.c : s.c - 0.7, mid + 1.3, nz > 0 ? s.c + 0.7 : s.c] : [nx > 0 ? s.c : s.c - 0.7, mid - 1.3, nx > 0 ? s.c + 0.7 : s.c, mid + 1.3], 0, 0.3);
@@ -135,7 +135,7 @@ export function streetFront(ctx, rect, gate, h, seed, richness = 0.6) {
       let kind = pick(rand);
       if (kind === last) kind = pick(rand);
       last = kind;
-      const w = item(ctx, L, kind, s, P, u, rand, { nx, nz, yawK, yawF, mid, isGate, seed: Math.floor(rand() * 1e9) });
+      const w = item(ctx, L, kind, s, P, u, rand, { nx, nz, yawK, yawF, mid, isGate, half, seed: Math.floor(rand() * 1e9) });
       u += w + 3 + rand() * 5.5;
     }
   });
@@ -148,7 +148,7 @@ function pick(rand) { let t = rand() * TOTAL; for (const [k, w] of MENU) { if ((
 /** One thing set out at u along face s; returns the width it takes. */
 function item(ctx, L, kind, s, P, u, rand, o) {
   const { bag, col } = ctx, { nx, nz, yawK, yawF } = o, sd = o.seed;
-  const gateClash = (w) => o.isGate && Math.abs(u - o.mid) < 2.2 + w;
+  const gateClash = (w) => o.isGate && Math.abs(u - o.mid) < o.half + w;
   const circ = (x, z, r, hh) => col.circle(x, z, r, 0, hh);
   switch (kind) {
     case 'jars': {
