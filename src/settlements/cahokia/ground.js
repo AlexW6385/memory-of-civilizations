@@ -19,7 +19,8 @@ function cover(x, z, h, ny = 1) {
   if (onMound(x, z)) {
     // the mound's tops in short grass, its faces (the risers between the terraces) plastered with pale clay: each stage reads, the tops green, the faces buff
     const face = smooth(0.985, 0.9, ny), edge = inRect(MONKS.main, x, z) || inRect(MONKS.first, x, z) || inRect(MONKS.west, x, z) || inRect(MONKS.east, x, z);
-    c.grass = 0.9 - 0.7 * face; c.soil = 0.1 + 0.7 * face; c.dry = 0.28 + 0.22 * face; c.road = face * (edge ? 0.65 : 0.3); c.warmth = 0.75;
+    const gul = Math.min(1, Math.max(0, (mounds(x, z, true) - mounds(x, z)) / 0.7));                    // the erosion gullies: bare clay in the bed, the turf broken at the lips
+    c.grass = (0.9 - 0.7 * face) * (1 - 0.85 * gul); c.soil = 0.1 + 0.7 * face + 0.3 * gul; c.dry = 0.28 + 0.22 * face + 0.2 * gul; c.road = face * (edge ? 0.65 : 0.3) + 0.4 * gul; c.warmth = 0.75;
     return c;
   }
   if (Math.hypot(x, z) < 300) {                                                                         // beaten earth: the lanes between the houses, the yards about them
