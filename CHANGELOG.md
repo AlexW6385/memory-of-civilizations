@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.11 — Kyoto's townhouses, Persepolis furnished, Kaifeng's outer quarters (2026-11-17)
+
+Kyoto: bracket sets under the Silver Pavilion's upper roof, shop signboards (an Edo thing) replaced by noren and goods hung from the eaves, 553 townhouses entered, a third of them dwellings, half built mirrored, a furnished middle room, faceted stones in the rock garden, ink landscapes on the hōjō's screens. Persepolis: niches, windows, a glazed band and hangings in the Hundred-Column Hall with its throne, couches and carpets in the palaces of Darius and Xerxes, reliefs in the Tripylon's doorways, houses of Parsa by standing, a masons' yard on the terrace. Kaifeng: the outer quarters' plain blocks are houses by rule (front shops, lofts, walled courts, cottages with a pen, a granary or a garden), nearly a quarter of them entered and furnished, with their households.
+
 ## v12.10 — Sultan Hasan's tomb, the Orangerie, Angkor's villages, the Pharos' hall (2026-11-17)
 
 Cairo: Sultan Hasan's mausoleum is hollow and entered (marble dado, the gilt Throne Verse frieze, mihrab, cenotaphs, lamps on long chains, the wooden corbelled zone under the dome; entered by a door of its own, the iwan's door being drawn shut), bronze work on the portal leaves, wash lines, hawkers and goods mats in the lanes. Versailles: the Orangerie with its vaulted gallery, court and the Hundred Steps, the Colonnade bosquet, four kinds of home. Angkor: the two libraries entered and furnished, houses with a use each (shrine shelf, cradle, nets, rice store, dye pots), nine village shrines, paddies in four stages with their farmers. Alexandria: the Pharos' ground hall (fuel, oil, mules, keepers, a shrine of Isis Pharia) and ramp landings, scholars and Eratosthenes' gnomon in the Museion, roof rooms in Rhakotis, fronts by rule in the Greek quarter.
