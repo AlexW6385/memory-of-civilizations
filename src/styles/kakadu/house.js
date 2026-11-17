@@ -2,7 +2,8 @@
 // All sizes and forms [inferred] from the bark shelters and wet-season huts of the region's ethnography; none is dated to the rock's painters.
 // Local frame: the door on +z; the element's rot turns it. Walls collide, the door and the open sides do not; the roofs do not (the head is free).
 import { box, rod, fromTriangles } from '../../core/geom.js';
-import { placer, assembly } from '../../objects/kit.js';
+import { placer, assembly, slathe } from '../../objects/kit.js';
+import { Panel, PAL, fish, turtle, wallaby, goanna, person, yam, tally, goose, rng } from './paint.js';
 
 /** A thin bark slab from four corners, seen from both faces. */
 function slab(p0, p1, p2, p3, d = 0.04) {
@@ -37,7 +38,23 @@ function barkHouse(a) {
   a('pole', box(-W + 0.08, 0.34, -D + 0.1, -0.15, 0.4, 0.1));                                                    // the sleeping platform on poles, a mat on it
   for (const [x, z] of [[-W + 0.1, -D + 0.12], [-0.17, -D + 0.12], [-W + 0.1, 0.08], [-0.17, 0.08]]) a('pole', rod([x, 0, z], [x, 0.34, z], 0.04, 4));
   a('mat', box(-W + 0.2, 0.4, -D + 0.2, -0.25, 0.43, 0));
+  // the roof laid in courses: sheets overlapping along the slope, each a little proud of the last, weighted with a pole lashed at each end
+  for (const s of [-1, 1]) for (let k = 0; k < 5; k++) {
+    const z0 = -D - 0.3 + k * 0.92, z1 = z0 + 1.1, lift = 0.03 + (k % 2) * 0.035;
+    a('sheet', slab([s * (W + 0.4), WH - 0.25 + lift, z0], [s * (W + 0.4), WH - 0.25 + lift, z1], [0, RH + 0.05 + lift, z1], [0, RH + 0.05 + lift, z0], 0.025));
+  }
+  for (const s of [-1, 1]) for (const f of [0.35, 0.7]) { const x = s * (W + 0.4) * (1 - f), y = RH + 0.05 - (RH + 0.05 - (WH - 0.25)) * f + 0.1; a('pole', rod([x, y, -D - 0.25], [x, y, D + 0.25], 0.035, 5)); for (const z of [-D + 0.1, D - 0.1]) a('lash', mv0(slathe([[0.06, 0], [0.06, 0.05], [0.001, 0.05]], 6), x, y - 0.025, z)); }
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) a('lash', mv0(slathe([[0.07, 0], [0.07, 0.05], [0.001, 0.05]], 6), sx * W, WH - 0.05, sz * D));
+  a('lash', mv0(slathe([[0.08, 0], [0.08, 0.05], [0.001, 0.05]], 6), 0, RH - 0.03, -D + 0.1)); a('lash', mv0(slathe([[0.08, 0], [0.08, 0.05], [0.001, 0.05]], 6), 0, RH - 0.03, D - 0.1));
+  // soot over the fire on the roof's underside
+  a('soot', slab([0.1, 2.92, -1.2], [0.1, 2.92, 0.2], [1.5, 1.99, 0.2], [1.5, 1.99, -1.2], 0.0).translate(0, -0.012, 0));
+  // what hangs in the smoke: bags and strings of smoked fish from the ridge pole, spears and a spear-thrower on pegs along the east wall
+  for (const [x, z] of [[-0.3, -1.2], [0.3, 0.6]]) { a('lash', rod([x, 2.75, z], [x, 2.55, z], 0.008, 3)); a('bagH', mv0(slathe([[0.001, -0.3], [0.09, -0.26], [0.13, -0.12], [0.1, 0.02], [0.001, 0.05]], 7), x, 2.5, z)); }
+  for (let k = 0; k < 3; k++) { const z = -0.6 + k * 0.45; a('lash', rod([0.5, 2.62, z], [0.5, 2.2, z], 0.006, 3)); a('fish', mv0(slathe([[0.001, 0], [0.03, 0.05], [0.04, 0.18], [0.001, 0.3]], 5), 0.5, 1.92, z)); }
+  a('pole', rod([W - 0.1, 1.55, -D + 0.5], [W - 0.1, 1.5, D - 0.5], 0.02, 4));
+  for (let k = 0; k < 3; k++) a('pole', rod([W - 0.14, 0.1, -D + 0.9 + k * 0.1], [W - 0.12, 1.55, -D + 0.9 + k * 0.1], 0.013, 4));
 }
+const mv0 = (g, x, y, z) => { g.translate(x, y, z); return g; };
 
 function dome(a) {
   const P = [[1.75, 0], [1.72, 0.6], [1.5, 1.3], [1.0, 1.85], [0.45, 2.15], [0.001, 2.25]], N = 16, step = Math.PI * 2 / N, d = 0.07;
@@ -55,6 +72,9 @@ function dome(a) {
   a('pole', box(-1.5, 0.3, -1.45, -0.2, 0.36, -0.1));
   for (const [x, z] of [[-1.45, -1.4], [-0.25, -1.4], [-1.45, -0.15], [-0.25, -0.15]]) a('pole', rod([x, 0, z], [x, 0.3, z], 0.04, 4));
   a('mat', box(-1.45, 0.36, -1.4, -0.25, 0.39, -0.2));
+  for (const [y, r0] of [[0.55, 1.72], [1.25, 1.52]]) for (let k = 0; k < N; k++) { if (k === 3 || k === 4) continue; const q = (t, rr) => [(rr + 0.05) * Math.cos(t), y, (rr + 0.05) * Math.sin(t)]; a('lash', rod(q(k * step, r0), q((k + 1) * step, r0), 0.018, 4)); }   // the ties round the sheets
+  for (let k = 0; k < 22; k++) { if (k === 4 || k === 5 || k === 6) continue; const t = k / 22 * Math.PI * 2; a('stone', mv0(slathe([[0.001, 0], [0.1, 0.02], [0.09, 0.1], [0.001, 0.12]], 6), 1.95 * Math.cos(t), 0, 1.95 * Math.sin(t))); }   // stones along the foot hold the sheets down
+  a('lash', rod([0.0, 2.15, 0.0], [0.0, 1.95, 0.0], 0.008, 3)); a('bagH', mv0(slathe([[0.001, -0.3], [0.09, -0.26], [0.13, -0.12], [0.1, 0.02], [0.001, 0.05]], 7), 0.0, 1.9, 0.0));
   a('sheet', box(0.85, 0, 1.75, 1.5, 1.35, 1.8));                                                                // the bark door-flap propped open beside the doorway
 }
 
@@ -69,6 +89,10 @@ function brushShade(a) {
   a('pole', box(-W + 0.25, 0.35, -D + 0.2, -0.3, 0.41, 0.0));
   for (const [x, z] of [[-W + 0.3, -D + 0.25], [-0.35, -D + 0.25], [-W + 0.3, -0.05], [-0.35, -0.05]]) a('pole', rod([x, 0, z], [x, 0.35, z], 0.04, 4));
   a('mat', box(-W + 0.3, 0.41, -D + 0.25, -0.35, 0.44, -0.05));
+  for (const [x, z] of [[-W + 0.2, -D + 0.2], [W - 0.2, -D + 0.2], [-W + 0.2, D - 0.2], [W - 0.2, D - 0.2]]) a('lash', mv0(slathe([[0.075, 0], [0.075, 0.06], [0.001, 0.06]], 6), x, (z < 0 ? HB : HF) - 0.08, z));
+  for (let k = 0; k < 4; k++) a('lash', rod([-1.2 + k * 0.8, HB - 0.05, -D + 0.3], [-1.2 + k * 0.8, HB - 0.5, -D + 0.3], 0.007, 3));
+  a('fish', mv0(slathe([[0.001, 0], [0.03, 0.05], [0.04, 0.18], [0.001, 0.3]], 5), 0.4, HB - 0.85, -D + 0.3)); a('fish', mv0(slathe([[0.001, 0], [0.03, 0.05], [0.04, 0.18], [0.001, 0.3]], 5), 1.2, HB - 0.85, -D + 0.3));
+  a('bagH', mv0(slathe([[0.001, -0.3], [0.09, -0.26], [0.13, -0.12], [0.1, 0.02], [0.001, 0.05]], 7), -0.4, HB - 0.5, -D + 0.3));
   for (let k = 0; k < 5; k++) a('thatch', rod([-1.6 + k * 0.8, HF + 0.02, D + 0.3], [-1.6 + k * 0.8, HF - 0.35 - (k % 2) * 0.12, D + 0.32], 0.03, 3));   // the thatch's fringe over the open front
 }
 
@@ -78,7 +102,8 @@ export function house(el, { bag, col, lights }) {
   const put = placer(el, bag), kind = el.kind ?? 'bark', H = HOUSE[kind];
   const A = assembly(`ka_house|${kind}`, (a) => MAKE[kind](a));
   put('wood_dark', A.pole.clone()); if (A.sheet) put('roof_bark', A.sheet.clone()); if (A.dome) put('bark_birch', A.dome.clone());
-  if (A.thatch) put('palm_leaf', A.thatch.clone()); put('reed_mat', A.mat.clone());
+  if (A.thatch) put('palm_leaf', A.thatch.clone());
+  if (A.lash) put('rope_fibre', A.lash.clone()); if (A.soot) put('pottery_dark', A.soot.clone()); if (A.bagH) put('rope_fibre', A.bagH.clone()); if (A.fish) put('hide_grey', A.fish.clone()); if (A.stone) put('rock_boulder', A.stone.clone()); put('reed_mat', A.mat.clone());
   const [x, z] = el.at, y = el.y ?? 0, r = el.rot ?? 0, c = Math.cos(r), s = Math.sin(r), w = (lx, lz) => [x + lx * c + lz * s, z - lx * s + lz * c];
   const seg = (p, q, y1 = 1.9) => col?.segment(w(...p), w(...q), 0.12, y, y + y1);
   if (kind === 'bark') {
@@ -87,8 +112,23 @@ export function house(el, { bag, col, lights }) {
     const N = 16, st = Math.PI * 2 / N;
     for (let k = 0; k < N; k++) if (k !== 3 && k !== 4) seg([1.75 * Math.cos(k * st), 1.75 * Math.sin(k * st)], [1.75 * Math.cos((k + 1) * st), 1.75 * Math.sin((k + 1) * st)], 1.8);
   } else { const W = 2.2, D = 1.7; seg([-W + 0.15, -D + 0.13], [W - 0.15, -D + 0.13], 1.5); seg([-W + 0.15, -D + 0.13], [-W + 0.15, 0.2], 1.1); seg([W - 0.15, -D + 0.13], [W - 0.15, -0.2], 1.1); }
+  if (kind !== 'dome') paintWall(el, bag, kind);
   const [fx, fz] = w(...H.fire);
   lights?.push({ at: [fx, y + 0.8, fz], color: '#ff9a4a', intensity: 3.2, distance: 7 });
 }
 /** The ground a house stands on, marked so that the street life keeps clear of it: draws nothing. */
 export function homeSite() {}
+
+/** Paintings on the inside of the back wall (the explorers saw paintings on the inner walls of some bark shelters; docs §13): generic food animals in the X-ray manner, four compositions by el.paint. */
+function paintWall(el, bag, kind) {
+  const [x, z] = el.at, y = el.y ?? 0, r = el.rot ?? 0, c = Math.cos(r), s = Math.sin(r), k = el.paint ?? 0;
+  const zw = kind === 'bark' ? -2.0 + 0.03 : -1.7 + 0.16, hw = kind === 'bark' ? 1.3 : 1.7;
+  const P = new Panel(bag, (u, v) => ({ p: [x + u * c + zw * s, y + v, z - u * s + zw * c], n: [s, 0, c] }));
+  const fresh = { line: PAL.red, fill: PAL.white, band: PAL.yellow, fresh: true }, red = { line: PAL.red }, old = { line: PAL.old }, rand = rng(40 + k);
+  const L = hw * 0.8;
+  if (k % 4 === 0) { fish(P, -L * 0.45, 1.1, 1.1, 1, fresh, 1, rand); turtle(P, L * 0.5, 1.0, 0.8, -1, red, 1); fish(P, -L * 0.1, 0.62, 0.6, -1, old, 0, rand); }
+  else if (k % 4 === 1) { wallaby(P, -L * 0.5, 0.75, 0.9, 1, red, 1); yam(P, L * 0.45, 1.0, 0.8, 1, red, 1); tally(P, L * 0.1, 1.5, 0.7, 1, old, 0, rand); }
+  else if (k % 4 === 2) { goanna(P, -L * 0.3, 1.0, 1.1, 1, red, 1); fish(P, L * 0.45, 1.15, 0.95, -1, { line: PAL.red, fill: PAL.yellow, band: PAL.white, fresh: true }, 1, rand); }
+  else { person(P, -L * 0.6, 0.55, 0.9, 1, red, 1, { spear: true }); goose(P, L * 0.1, 0.9, 0.7, 1, red, 1); fish(P, L * 0.55, 1.2, 0.8, 1, old, 0, rand); }
+  P.flush();
+}
