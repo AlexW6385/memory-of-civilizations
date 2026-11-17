@@ -5,6 +5,7 @@
 import { rectRoof } from '../ming/index.js';
 import { buddha } from '../chinese/index.js';
 import { box, rod, lathe, obox, rng } from './util.js';
+import { roofOrnament } from './roof.js';
 
 const COL = 'lacquer_red', EARTH = 'earth_wall', STONE = 'granite_grey';
 const OUT = { s: [0, 1, 'n'], n: [0, -1, 's'], e: [1, 0, 'w'], w: [-1, 0, 'e'] };
@@ -190,7 +191,8 @@ export function palaceHall(el, { bag, col, lights }) {
   // the great eaves
   // the eave stands on a tier of bracket sets over the capitals (the roof is lifted 0.45 m for them, a plastered frieze closes the wall to the soffit)
   const ov = 2.5, RY = Y + H + 0.75;
-  rectRoof({ c: [cx, (z0 + zF) / 2], A: D / 2 + ov, B: W / 2 + ov, y: RY, rise: 5.2, kind: 'xieshan', alongZ: true, sweep: 1.0, mat: 'tile_green', soffit: COL }, bag);
+  rectRoof({ c: [cx, (z0 + zF) / 2], A: D / 2 + ov, B: W / 2 + ov, y: RY, rise: 5.2, kind: 'xieshan', alongZ: true, sweep: 1.0, mat: 'tile_green', soffit: COL, curl: false }, bag);
+  roofOrnament(bag, { c: [cx, (z0 + zF) / 2], A: D / 2 + ov, B: W / 2 + ov, y: RY, R: 5.2, sweep: 1.0, alongZ: true, L: D / 2 + ov - 0.42 * (W / 2 + ov) - 0.3 + 0.2, top: RY + 5.2 + 0.1 });
   for (const [a, b] of [[[x0, zF], [x1, zF]], [[x0, z0], [x1, z0]], [[x0, z0], [x0, zF]], [[x1, z0], [x1, zF]]]) bag.add('timber_red', obox(a, b, T, Y + H, Y + H + 0.95));
   eaveSets(bag, x0, z0, x1, zF, Y + H, xs, zs);
   // the ridge's ornaments: gilt finials
