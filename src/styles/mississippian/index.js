@@ -164,11 +164,17 @@ function openHouse(el, { bag, col, lights }) {
 function palisade(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, yf = typeof el.y === 'function' ? el.y : () => el.y ?? 0, every = el.every ?? 25, h = el.h ?? 4.5, gates = el.gates ?? [], half = 0.3;
   // a stretch of wall a→b: the daubed body, the post tops above it
-  const tops = [], daub = [];
+  const tops = [], daub = [], lime = [];
   const stretch = (pa, pb) => {
     const L = Math.hypot(pb[0] - pa[0], pb[1] - pa[1]), ux = (pb[0] - pa[0]) / L, uz = (pb[1] - pa[1]) / L, yy = Math.min(yf(...pa), yf(...pb));
     beamTris(daub, [pa[0], yy - 1, pa[1]], [pb[0], yy - 1, pb[1]], half, h + 1);
     col.segment(pa, pb, 2 * half, yy - 1, yy + h);
+    // the whitewash: panels of lime wash over the daub, each a different length, its lower edge ragged where the rain and the earth have stained it [inferred]
+    for (let t0 = 0.2, i = Math.round(pa[0] * 3 + pa[1] * 7); t0 < L - 1; i++) {
+      const len = 1.6 + ((i * 2654435761) >>> 0) % 300 / 100, t1 = Math.min(L - 0.2, t0 + len), on = ((i * 40503) >>> 0) % 10 < 5, lo = 0.55 + ((i * 9301) >>> 0) % 70 / 100;
+      if (on && t1 - t0 > 0.8) beamTris(lime, [pa[0] + ux * t0, yy + lo, pa[1] + uz * t0], [pa[0] + ux * t1, yy + lo, pa[1] + uz * t1], half + 0.02, h - 0.55 - lo);
+      t0 = t1 + 0.35 + ((i * 7001) >>> 0) % 100 / 100;
+    }
     for (let q = 0; q < Math.floor(L / 0.36); q++) {
       const t = (q + 0.5) * L / Math.floor(L / 0.36), x = pa[0] + ux * t, z = pa[1] + uz * t, r = 0.17 + ((q * 7919) % 5) * 0.012, hh = 0.55 + ((q * 104729) % 7) * 0.06;
       tops.push([x, yy + h - 0.25, z, r, hh]);
@@ -190,6 +196,7 @@ function palisade(el, { bag, col }) {
       const pb = P(s1), bx = pb[0] + ox * 1.8, bz = pb[1] + oz * 1.8, yb = Math.min(yf(bx, bz), yf(...pb)), R = 2.6;
       bag.add(WALL, lathe([[R + 0.1, -1], [R, h + 1.0], [R - 0.5, h + 1.0], [R - 0.5, h + 0.2], [0.001, h + 0.2]], 20, null, bx, yb, bz));
       col.circle(bx, bz, R, yb - 1, yb + h + 1.0);
+      if (k % 2 === 0) { const ro = (yv) => R + 0.1 - 0.1 * (yv + 1) / (h + 2) + 0.035; bag.add('paint_white', lathe([[ro(0.9), 0.9], [ro(h + 0.5), h + 0.5]], 20, null, bx, yb, bz)); }
       // a watch shelter on every third bastion: four posts and a thatched cone over the sentry's platform [inferred]
       if (k % 3 === 0) {
         for (let q = 0; q < 4; q++) { const aq = q * Math.PI / 2 + Math.PI / 4; bag.add('timber', rod([bx + Math.cos(aq) * 2.0, yb + h + 0.9, bz + Math.sin(aq) * 2.0], [bx + Math.cos(aq) * 2.0, yb + h + 3.6, bz + Math.sin(aq) * 2.0], 0.1, 6)); }
@@ -200,6 +207,7 @@ function palisade(el, { bag, col }) {
     }
   });
   bag.add(WALL, fromTriangles(daub));
+  if (lime.length) bag.add('paint_white', fromTriangles(lime));
   // the post tops: rounded log ends, a little uneven in height and girth — a few shapes, placed as instances
   const shapes = [0, 1, 2, 3].map((k) => { const r = 0.19, hh = 0.55 + 0.11 * k; return lathe([[r, 0], [r * 0.97, hh * 0.7], [r * 0.6, hh * 0.92], [0.001, hh]], 6); });
   const M = new Matrix4(), S = new Matrix4();

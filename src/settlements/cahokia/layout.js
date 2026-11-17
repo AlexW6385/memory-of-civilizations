@@ -34,31 +34,56 @@ export const smooth = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0
 export const inRect = (r, x, z, m = 0) => x >= r[0] - m && x <= r[2] + m && z >= r[1] - m && z <= r[3] + m;
 export const creekZ = (x) => CREEK.z + 18 * Math.sin(x / 70);
 export const inCreek = (x, z) => Math.abs(z - creekZ(x)) < CREEK.w / 2 - 2 && Math.hypot(x, z) < RADIUS - 45;
-/** A platform of earth: rect [x0, z0, x1, z1], height h, its sides sloping over s metres. */
-const platform = ([x0, z0, x1, z1], h, s) => (x, z) => h * smooth(0, s, Math.min(x - x0, x1 - x, z - z0, z1 - z));
-const MAIN = platform(MONKS.main.slice(0, 4), 30, 28), FIRST = platform(MONKS.first.slice(0, 4), 12, 12), WEST = platform(MONKS.west.slice(0, 4), 18, 14), EAST = platform(MONKS.east.slice(0, 4), 16, 12), FOXP = platform(FOX.slice(0, 4), 9, 9);
-const SMALL = MOUNDS.map(([x, z, s, h]) => platform([x - s, z - s, x + s, z + s], h, h * 1.1));
-/** The ramp from the plaza up the first terrace's south face, and on up the main mound's. */
+/** Slow irregularity, about ±1.1: the same everywhere, so the earthworks wander the same way every time. */
+const N = (x, z) => 0.5 * Math.sin(x * 0.071 + z * 0.043 + 1.3) + 0.35 * Math.sin(x * 0.13 - z * 0.09 + 0.4) + 0.25 * Math.sin(x * 0.19 + z * 0.23 + 2.1);
+const GULLY = { on: true };
+/**
+ * A platform of earth, as weathered earth stands: rect [x0, z0, x1, z1], height h, the slope on each side given
+ * its own length (sw, se, sn, ss), the shoulders and toes wandering by a few metres, and on the faces
+ * erosion gullies running down the fall line about 18 m apart, as deep as 1.6 m on a 30 m mound.
+ */
+const platform = ([x0, z0, x1, z1], h, [sw, se, sn, ss], seed = 0) => (x, z) => {
+  const dw = (x - x0) / sw, de = (x1 - x) / se, dn = (z - z0) / sn, ds = (z1 - z) / ss, m = Math.min(dw, de, dn, ds);
+  if (m < -0.2) return 0;
+  // the sides' distances joined by a soft minimum, so the corners are rounded, not mitred
+  const q = (d) => Math.exp(-9 * Math.min(d, 3)), t = m <= 0 ? m : Math.min(m + 0.2, -Math.log(q(dw) + q(de) + q(dn) + q(ds)) / 9);
+  const tt = t + 0.1 * N(x + seed, z - seed * 0.7) * smooth(-0.2, 0.2, t);
+  if (tt <= 0) return 0;
+  let v = h * smooth(0, 1, tt);
+  if (GULLY.on && tt < 1) {
+    const u = m === dw || m === de ? z : x, ph = u * 0.349 + 1.9 * N(u * 0.9 + seed, seed * 0.3) + seed + 2.6 * tt * N(u * 0.5, seed + 9), g = smooth(0.62, 1, Math.cos(ph)) * smooth(0.1, 0.85, 0.5 + 0.5 * Math.sin(u * 0.113 + seed * 1.7) + 0.3 * N(u, seed));
+    v -= 1.6 * (h / 30) * g * Math.min(1, 4 * tt * (1 - tt) * 1.3) * smooth(9, 22, Math.abs(x + 25));
+  }
+  return Math.max(0, v);
+};
+const MAIN = platform(MONKS.main.slice(0, 4), 30, [40, 40, 30, 38], 3), FIRST = platform(MONKS.first.slice(0, 4), 12, [14, 14, 12, 22], 11), WEST = platform([-134, -234, -62, -136], 18, [24, 24, 18, 18], 5), EAST = platform([58, -219, 132, -146], 16, [20, 20, 16, 16], 8), FOXP = platform(FOX.slice(0, 4), 9, [13, 13, 13, 13], 2);
+const SMALL = MOUNDS.map(([x, z, s, h], i) => platform([x - s, z - s, x + s, z + s], h, [h * 2, h * 2, h * 2, h * 2], 20 + i * 7));
+/** A spur of earth rising to hz along its crest, with soft shoulders that spread as it grows. */
+const spurSide = (dx, over) => 1 - smooth(5, 7 + 1.7 * over, Math.abs(dx));
+/** The ramp from the plaza up the first terrace's south face, and on up the main mound's: a broad spur with sloping sides, not a causeway. */
 function ramp(x, z) {
-  if (Math.abs(x + 25) > 5) return 0;
-  if (z > -74 && z < -38) return 12 * smooth(-38, -74, z);
-  if (z > -148 && z <= -108) return 12 + 18 * smooth(-108, -148, z);
+  const dx = x + 25 + 1.2 * N(z, 4);
+  if (Math.abs(dx) > 30) return 0;
+  if (z > -96 && z < -30) { const hz = 12 * smooth(-32, -74, z); return hz * spurSide(dx, hz); }
+  if (z > -158 && z <= -96) { const hz = 12 + 18 * smooth(-108, -156, z); return 12 + (hz - 12) * spurSide(dx, hz - 12) * (1 - smooth(-146, -158, z)); }
   return 0;
 }
-/** A ramp up each small platform mound's south face: 5 m wide, its foot 2.5 heights out. */
-export const mRamp = ([x, z, s, h]) => ({ x, zOut: z + s + 2.5 * h, zIn: z + s - 1.1 * h, h });
-const SRAMP = MOUNDS.map((m) => { const r = mRamp(m); return (px, pz) => (Math.abs(px - r.x) > 4.5 || pz > r.zOut || pz < r.zIn - 0.5 ? 0 : r.h * smooth(r.zOut, r.zIn, pz) * smooth(4.5, 2.5, Math.abs(px - r.x))); });
-const CONE = CONES.map(([cx, cz, r, h]) => (x, z) => h * smooth(r, 0, Math.hypot(x - cx, z - cz)));
+/** A ramp up each small platform mound's south face: its foot 2.5 heights out, its head on the crown, the sides spreading. */
+export const mRamp = ([x, z, s, h]) => ({ x, zOut: z + s + 2.5 * h, zIn: z + s - 2.0 * h, h });
+const SRAMP = MOUNDS.map((m) => { const r = mRamp(m); return (px, pz) => { if (pz > r.zOut || pz < r.zIn - 0.5) return 0; const hz = r.h * smooth(r.zOut, r.zIn, pz); return hz * (1 - smooth(2.5, 4 + 1.4 * hz, Math.abs(px - r.x))); }; });
+const CONE = CONES.map(([cx, cz, r, h]) => (x, z) => h * smooth(r * (1 + 0.07 * N(x * 0.8, z * 0.8)), 0, Math.hypot(x - cx, z - cz)));
 const RIDGE = RIDGES.map(([x0, z0, x1, z1, h]) => (x, z) => {
   const mz = (z0 + z1) / 2, hw = (z1 - z0) / 2 + h * 1.3, across = 1 - Math.min(1, Math.abs(z - mz) / hw) ** 2, along = smooth(0, h * 2.2, Math.min(x - x0 + h * 1.3, x1 + h * 1.3 - x));
   return h * smooth(0, 0.9, across) * along;
 });
-export function mounds(x, z) {
+export function mounds(x, z, smoothOnly = false) {
+  GULLY.on = !smoothOnly;
   let h = Math.max(MAIN(x, z), FIRST(x, z), WEST(x, z), EAST(x, z), FOXP(x, z), ramp(x, z), ROUNDTOP[3] * smooth(ROUNDTOP[2], 0, Math.hypot(x - ROUNDTOP[0], z - ROUNDTOP[1])));
   for (const f of SMALL) h = Math.max(h, f(x, z));
   for (const f of SRAMP) h = Math.max(h, f(x, z));
   for (const f of CONE) h = Math.max(h, f(x, z));
   for (const f of RIDGE) h = Math.max(h, f(x, z));
+  GULLY.on = true;
   return h;
 }
 export const onMound = (x, z) => mounds(x, z) > 0.8;

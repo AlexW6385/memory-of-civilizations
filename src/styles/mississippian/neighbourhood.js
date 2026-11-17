@@ -158,13 +158,25 @@ function smallPlaza(el, { bag, col }) {
 
 /** log_stair: { from: [x, z], to: [x, z], width, y (fn), step } — treads of logs laid across the slope, held by stakes at the ends. */
 function logStair(el, { bag }) {
+  // each step a cross log laid in a cut across the slope, its ends cut square and staked outside; between the logs a tread of split poles laid along the way; a stringer log along each side
   const [ax, az] = el.from, [bx, bz] = el.to, w = el.width ?? 3, st = el.step ?? 1.4, L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, nx = -uz, nz = ux;
-  const n = Math.floor(L / st);
+  const n = Math.floor(L / st), rand = rng(Math.round(ax * 7 + az * 13) + 5), nT = Math.max(3, Math.round(w / 0.5));
+  const at = (k, o, dy = 0) => { const x = ax + ux * st * k + nx * o, z = az + uz * st * k + nz * o; return [x, yAt(el, x, z) + dy, z]; };
   for (let k = 1; k <= n; k++) {
-    const x = ax + ux * st * k, z = az + uz * st * k, p = [x + nx * w / 2, z + nz * w / 2], q = [x - nx * w / 2, z - nz * w / 2];
-    const y = yAt(el, x, z);
-    bag.add('log_pine', rod([p[0], y + 0.02, p[1]], [q[0], y + 0.02, q[1]], 0.14, 7));
-    for (const e of [p, q]) bag.add('timber', rod([e[0], y - 0.3, e[1]], [e[0], y + 0.25, e[1]], 0.06, 6));
+    const rl = 0.17 + rand() * 0.04, o = w / 2 + 0.03 * rand(), p = at(k, o, 0.1), q = at(k, -o, 0.1);
+    bag.add('log_pine', rod(p, q, rl, 8));
+    // the cut ends, paler, and the stakes that hold the log, driven in outside it
+    for (const [e, sd] of [[p, 1], [q, -1]]) {
+      bag.add('timber', rod(e, [e[0] + nx * sd * 0.03, e[1], e[2] + nz * sd * 0.03], rl * 0.94, 8));
+      for (const f of [-0.45, 0.45]) { const sx = e[0] + nx * sd * (rl + 0.1) + ux * f * 0.5, sz = e[2] + nz * sd * (rl + 0.1) + uz * f * 0.5; bag.add('timber', rod([sx, e[1] - 0.55, sz], [sx, e[1] + 0.32 + rand() * 0.1, sz], 0.06, 6)); }
+    }
+    // the tread behind it: split poles laid downhill, each end resting on a log
+    if (k > 1) for (let j = 0; j < nT; j++) {
+      const o2 = -w / 2 + (j + 0.5) * w / nT + (rand() - 0.5) * 0.1, a = at(k - 1, o2, 0.12), b = at(k, o2, 0.12);
+      bag.add('timber', rod([a[0] + ux * 0.2, a[1], a[2] + uz * 0.2], [b[0] - ux * 0.2, b[1], b[2] - uz * 0.2], 0.05 + rand() * 0.012, 5));
+    }
+    // the stringers
+    if (k > 1) for (const sd of [-1, 1]) { const a = at(k - 1, sd * (w / 2 + 0.28), 0.12), b = at(k, sd * (w / 2 + 0.28), 0.12); bag.add('log_pine', rod(a, b, 0.13, 7)); }
   }
 }
 
