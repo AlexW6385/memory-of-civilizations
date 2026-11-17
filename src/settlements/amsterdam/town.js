@@ -5,8 +5,8 @@ import { RADIUS, GROUND, WATER, WAAG, DAMRAK, VOC, lots } from './layout.js';
 import { SLEDGES, BOATS } from './plan.js';
 export const ARRIVAL = [20, -210];
 const base = (id, elements) => ({ id, style: 'dutch', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [20, -207], facing: 'n' } });
-/** Is this lot built open (a furnished ground floor you can walk into)? The Dam's south row, and one house in four near the Dam (one in nine beyond 190 m). */
-export const isOpen = (l) => (l.front === 'n' && l.rect[1] === -203) || l.seed % (Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 + 230) < 190 ? 4 : 9) === 0;
+/** Is this lot built open (a furnished ground floor you can walk into)? The Dam's south row, and one house in four near the Dam (one in three beyond 190 m); of the warehouses (spout gables) one in two. */
+export const isOpen = (l) => (l.front === 'n' && l.rect[1] === -203) || l.seed % (Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 + 230) < 190 ? 4 : 3) === 0;
 export async function houses() {
   const all = lots(), plans = [];
   for (let i = 0; i < all.length; i += 160) plans.push(base(`amsterdam-houses-${i / 160}`, all.slice(i, i + 160).map((l) => ({ t: 'canal_house', ...l, open: isOpen(l) }))));
@@ -25,8 +25,8 @@ function houseLights() {
   for (const l of lots()) {
     if (!isOpen(l) || Math.hypot((l.rect[0] + l.rect[2]) / 2 - ARRIVAL[0], (l.rect[1] + l.rect[3]) / 2 - ARRIVAL[1]) > 140) continue;
     const r = rng(l.seed || 1); r(); r(); r(); const kr = r(), kind = l.gable ?? (kr > 0.9 ? 'spout' : kr < 0.3 ? 'step' : kr < 0.65 ? 'neck' : 'bell');
-    if (kind === 'spout') continue;
     const turned = l.front === 'n' || l.front === 's', w = turned ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1], D = turned ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0];
+    if (kind === 'spout') { const [sx, sz] = faces[l.front](l.rect, w / 2, -D / 2); out.push({ t: 'lamp', at: [sx, GROUND + 4.2, sz], color: '#ffc27a', intensity: 3.2, distance: 8 }); continue; }   // the store's hanging lantern
     const annex = D >= 11 && rng((l.seed || 1) * 7 + 13)() < 0.55, Dm = annex ? D - 3.4 : D, dP = -Math.max(3.4, Math.min(5.8, Dm * 0.47)), cd = (dP + 2.9 - 0.32) / 2;
     const [x, z] = faces[l.front](l.rect, w / 2, cd);
     out.push({ t: 'lamp', at: [x, GROUND + 4.65, z], color: '#ffc27a', intensity: 4, distance: 8 });
