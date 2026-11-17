@@ -8,6 +8,7 @@ import { STYLES } from '../../core/build.js';
 import { box, disc, lathe, rod } from '../../core/geom.js';
 import { DEG, P, hexa, sector, slope, lbox, frameOf, prism, plank } from './geo.js';
 import { furnishRooms } from './rooms.js';
+import { roofRows, cobbleFoot, windowHood, jbox, lslab, couplet, rnd } from './detail.js';
 
 const EARTH = 'mud_plaster', INNER = 'earth_wall', TIMBER = 'timber', TILE = 'tile_grey';
 const GATE_H = 3.4;
@@ -31,7 +32,7 @@ export function roofer(R, o) {
 }
 
 /** The ring roof over rings of radius [ri…ro]: tile slabs on a soffit of boards, a ridge of dark tiles. */
-export function ringRoof(bag, c, n, o) {
+export function ringRoof(bag, c, n, o, rows = false) {
   const da = 2 * Math.PI / n;
   for (let i = 0; i < n; i++) {
     const a0 = (i - 0.5) * da - 0.0008, a1 = (i + 0.5) * da + 0.0008;
@@ -46,9 +47,10 @@ export function ringRoof(bag, c, n, o) {
     bag.add('wood_dark', sector(c, o.ro + 0.01, o.ro - 0.05, o.ro + 0.01, o.ro - 0.05, o.ye - 0.26, o.ye - 0.02, a0, a1));
   }
   // the rafters under the soffit: one in every second sector, a purlin ring under the ridge
+  if (rows) roofRows(bag, c, n, o, 7, true);
   for (let i = 0; i < n; i += 2) {
     const a = i * da, p = (r, y) => { const [x, z] = P(c, r, a); return [x, y, z]; };
-    bag.add(TIMBER, rod(p(o.ro - 0.2, o.ye - 0.18), p(o.rr, o.yr - 0.2), 0.05, 5));
+    if (!rows) bag.add(TIMBER, rod(p(o.ro - 0.2, o.ye - 0.18), p(o.rr, o.yr - 0.2), 0.05, 5));
     bag.add(TIMBER, rod(p(o.rr, o.yr - 0.2), p(o.ri + 0.2, o.yi - 0.18), 0.05, 5));
   }
 }
@@ -79,7 +81,10 @@ export function tulouRound(el, ctx) {
       bag.add(EARTH, sector(c, ro(GATE_H), wallIn, ro(yTopO), wallIn, GATE_H, [yTopO, yTopI], a0, a1));
       continue;
     }
-    bag.add('granite_block', sector(c, R + 0.07, wallIn, ro(1.3) + 0.04, wallIn, 0, 1.3, a0, a1));
+    if (full || el.windows) {
+      bag.add('banco_rough', sector(c, R - 0.0, wallIn, ro(1.3) - 0.0, wallIn, 0, 1.3, a0, a1));
+      cobbleFoot(bag, c, ro, a0, a1, i);
+    } else bag.add('granite_block', sector(c, R + 0.07, wallIn, ro(1.3) + 0.04, wallIn, 0, 1.3, a0, a1));
     let y = 1.3;
     if (full || el.windows) for (const [s0, s1] of sills) {
       const topW = s0 > fl[K - 1];
@@ -97,6 +102,7 @@ export function tulouRound(el, ctx) {
         bag.add('opening', sector(c, ro(gy + 0.3) + 0.01, ro(gy) - 0.05, ro(gy + 0.3) + 0.01, ro(gy) - 0.05, gy, gy + 0.3, ag - gh, ag + gh));
         bag.add('opening', sector(c, wallIn + 0.01, wallIn - 0.03, wallIn + 0.01, wallIn - 0.03, gy, gy + 0.3, ag - gh, ag + gh));
       }
+      if (full) windowHood(bag, c, ro, ac, s0, s1, i, Math.round(s0));
       y = s1;
     }
     bag.add(EARTH, sector(c, ro(y), wallIn, ro(yTopO), wallIn, y, [yTopO, yTopI], a0, a1));
@@ -110,31 +116,90 @@ export function tulouRound(el, ctx) {
     const rm = (ro(0) + wallIn) / 2, [p0, p1] = [P(c, rm, a0), P(c, rm, a1)];
     col.segment(p0, p1, ro(0) - wallIn + 0.1, 0, topFl + 4);
   }
-  // the gates: granite frame, lintel, tile hood, plank doors standing open against the passage walls
+  // the gates: a granite frame of dressed blocks with a stepped lintel, a pitched tile hood on corbels, the name board, plank doors
+  // shod with iron and studded, standing open against the passage walls, the couplets, the rules board, the worn threshold
   for (const g of gates) {
     const a = g * da, phi = Math.PI / 2 - a, W = frameOf(c[0], c[1], phi), small = g * da > Math.PI * 1.2 || el.smallGate;
-    const hw = el.gateW ? el.gateW / 2 : 1.2, rz0 = wallIn - 0.4, rz1 = R + 0.2;
-    for (const s of [-1, 1]) bag.add('granite_block', lbox(c[0], c[1], phi, s > 0 ? hw : -hw - 0.3, 0, rz0, s > 0 ? hw + 0.3 : -hw, GATE_H, rz1));
-    bag.add('granite_block', lbox(c[0], c[1], phi, -hw - 0.3, GATE_H, rz0, hw + 0.3, GATE_H + 0.35, rz1));
-    bag.add('lacquer_black', lbox(c[0], c[1], phi, -0.9, GATE_H + 0.4, R - 0.05 - lean * 0.3, 0.9, GATE_H + 0.8, R - 0.0));
-    bag.add('gilt_bronze', lbox(c[0], c[1], phi, -0.6, GATE_H + 0.52, R - 0.0, 0.6, GATE_H + 0.68, R + 0.03));
-    bag.add(TILE, lbox(c[0], c[1], phi, -hw - 0.8, GATE_H + 0.9, R - 0.1, hw + 0.8, GATE_H + 1.0, R + 1.0));
-    bag.add('tile_dark', lbox(c[0], c[1], phi, -hw - 0.85, GATE_H + 1.0, R + 0.9, hw + 0.85, GATE_H + 1.1, R + 1.0));
+    const hw = el.gateW ? el.gateW / 2 : 1.2, rz0 = wallIn - 0.4, rz1 = R + 0.2, J = (x0, y0, z0, x1, y1, z1, sd, m = 'granite_block') => bag.add(m, jbox(c[0], c[1], phi, x0, y0, z0, x1, y1, z1, g * 97 + sd));
     for (const s of [-1, 1]) {
-      bag.add(TIMBER, lbox(c[0], c[1], phi, s > 0 ? hw - 0.16 : -hw, 0, R - 1.55, s > 0 ? hw : -hw + 0.16, 3.2, R - 0.35));
-      for (const y of [0.5, 1.6, 2.7]) bag.add('iron', lbox(c[0], c[1], phi, s > 0 ? hw - 0.19 : -hw - 0.03 + 0.0, y, R - 1.55, s > 0 ? hw + 0.03 : -hw + 0.19, y + 0.12, R - 0.35));
+      bag.add('granite_block', lbox(c[0], c[1], phi, s > 0 ? hw : -hw - 0.3, 0, rz0, s > 0 ? hw + 0.3 : -hw, GATE_H, rz1));
+      // the jamb dressed in courses of long and short blocks (the joints are shadow lines), an outer stone frame stepped beyond it
+      const x0 = s > 0 ? hw : -hw - 0.3, x1 = x0 + 0.3, courses = [0.0, 0.62, 1.14, 1.9, 2.42, 2.95, GATE_H];
+      for (let q = 0; q < courses.length - 1; q++) {
+        const long = q % 2 === 0, e = long ? 0.0 : 0.17, xa = s > 0 ? x0 : x0 + e, xb = s > 0 ? x1 - e : x1;
+        J(xa + 0.008, courses[q] + 0.008, rz1, xb - 0.008, courses[q + 1] - 0.008, rz1 + 0.03 + (q % 3) * 0.008, 10 + q * 3 + (s > 0 ? 1 : 0));
+        if (!long) J(s > 0 ? x1 - 0.15 + 0.008 : x0 + 0.008, courses[q] + 0.008, rz1, s > 0 ? x1 - 0.008 : x0 + 0.15 - 0.008, courses[q + 1] - 0.008, rz1 + 0.03 + (q % 3) * 0.008, 60 + q);
+      }
+      const o0 = s > 0 ? hw + 0.3 : -hw - 0.3 - 0.2, o1 = o0 + 0.2;
+      J(o0, 0, R - 0.12, o1, GATE_H + 0.35, R + 0.07, 80 + (s > 0 ? 1 : 0));
+      J(o0 + 0.02, 0.0, R + 0.07, o1 - 0.02, GATE_H + 0.33, R + 0.09, 82 + (s > 0 ? 1 : 0));
+    }
+    // the lintel: one long stone, a second course above it stepped out, and a moulded cornice under the hood
+    bag.add('granite_block', lbox(c[0], c[1], phi, -hw - 0.3, GATE_H, rz0, hw + 0.3, GATE_H + 0.35, rz1));
+    J(-hw - 0.5, GATE_H, R - 0.12, hw + 0.5, GATE_H + 0.35, R + 0.2, 90);
+    J(-hw - 0.55, GATE_H + 0.35, R - 0.1, hw + 0.55, GATE_H + 0.45, R + 0.26, 91);
+    J(-hw - 0.62, GATE_H + 0.45, R - 0.1, hw + 0.62, GATE_H + 0.52, R + 0.34, 92);
+    // the name board between lintel and hood: black lacquer with a gilt frame and gilt strokes for the characters
+    bag.add('lacquer_black', lbox(c[0], c[1], phi, -1.0, GATE_H + 0.6, R - 0.12 - lean * 0.3, 1.0, GATE_H + 1.1, R + 0.05));
+    for (const [x0, y0, x1, y1] of [[-1.0, GATE_H + 0.6, 1.0, GATE_H + 0.66], [-1.0, GATE_H + 1.04, 1.0, GATE_H + 1.1], [-1.0, GATE_H + 0.66, -0.94, GATE_H + 1.04], [0.94, GATE_H + 0.66, 1.0, GATE_H + 1.04]]) J(x0, y0, R + 0.05, x1, y1, R + 0.075, 100 + Math.round(x0 * 7 + y0), 'gilt_bronze');
+    for (let q = 0; q < 4; q++) {
+      const cx0 = -0.62 + q * 0.34;
+      for (let s = 0; s < 4; s++) {
+        const hor = rnd(g + q, 3 + s) < 0.55, u = (rnd(g + q, 13 + s) - 0.5) * 0.12, v = (rnd(g + q, 23 + s) - 0.5) * 0.14;
+        if (hor) J(cx0 + u - 0.09, GATE_H + 0.85 + v - 0.012, R + 0.05, cx0 + u + 0.09, GATE_H + 0.85 + v + 0.012, R + 0.063, 200 + q * 5 + s, 'gilt_bronze');
+        else J(cx0 + u - 0.012, GATE_H + 0.85 + v - 0.11, R + 0.05, cx0 + u + 0.012, GATE_H + 0.85 + v + 0.11, R + 0.063, 230 + q * 5 + s, 'gilt_bronze');
+      }
+    }
+    // the hood: a pitched slab of tile with a dark drip edge, a ridge tile at the wall, rows of cover tiles, a soffit and corbel arms
+    const hy0 = GATE_H + 1.75, hy1 = GATE_H + 1.22, hz1 = R + 1.25, hx = hw + 1.0;
+    bag.add('tile_grey', lslab(c[0], c[1], phi, -hx, hx, R - 0.1, hy0, hz1, hy1, 0.09));
+    bag.add('timber', lslab(c[0], c[1], phi, -hx + 0.05, hx - 0.05, R - 0.05, hy0 - 0.09, hz1 - 0.05, hy1 - 0.09, 0.05));
+    bag.add('tile_dark', lslab(c[0], c[1], phi, -hx - 0.06, hx + 0.06, hz1 - 0.34, hy1 + (hy0 - hy1) * 0.34 / 1.35 + 0.02, hz1 + 0.06, hy1 + 0.03, 0.08));
+    bag.add('tile_dark', lslab(c[0], c[1], phi, -hx - 0.06, hx + 0.06, R - 0.12, hy0 + 0.14, R + 0.2, hy0 + 0.06, 0.12));
+    for (let q = 0; q < 17; q++) {
+      const x = -hx + 0.16 + q * (2 * hx - 0.32) / 16;
+      bag.add('tile_dark', lslab(c[0], c[1], phi, x - 0.05 - rnd(q, g) * 0.004, x + 0.05, R + 0.1, hy0 + 0.1 - 0.02, hz1 - 0.34, hy1 + (hy0 - hy1) * 0.34 / 1.35 + 0.07, 0.07 + rnd(q, g + 3) * 0.003));
+    }
+    for (const sx of [-1, 1]) {
+      for (const [x, z0, z1] of [[sx * (hx - 0.22), R - 0.1, R + 1.05], [sx * 0.5, R - 0.1, R + 0.95]]) {
+        J(x - 0.06, hy0 - 0.9, z0, x + 0.06, hy0 - 0.78, z0 + 0.14, 300 + Math.round(x * 10), 'timber');
+        bag.add('timber_red', lslab(c[0], c[1], phi, x - 0.06, x + 0.06, z0, hy0 - 0.78, z1, hy1 - 0.12, 0.1));
+        J(x - 0.075, hy1 - 0.36, z1 - 0.13, x + 0.075, hy1 - 0.12, z1 - 0.02, 310 + Math.round(x * 10), 'timber');
+      }
+      // the corner tip of the eave turned up a hand
+      J(sx * hx - (sx > 0 ? 0.42 : -0.02), hy1 + 0.02, hz1 - 0.1, sx * hx + (sx > 0 ? 0.02 : 0.42), hy1 + 0.2, hz1 + 0.2, 320 + sx, 'tile_grey');
+    }
+    // the doors: leaves 0.12 thick lying along the passage walls, boarded, strapped and studded with iron, a bronze boss and pull
+    for (const s of [-1, 1]) {
+      const xf = s > 0 ? hw - 0.12 : -hw, xi = s > 0 ? hw - 0.12 : -hw + 0.12, fs = s > 0 ? -1 : 1;
+      bag.add('timber', lbox(c[0], c[1], phi, xf, 0, R - 1.55, xf + 0.12, 3.2, R - 0.35));
+      for (let b = 1; b < 6; b++) J(xi + fs * 0.0 - (s > 0 ? 0.008 : -0.0), 0.0, R - 1.55 + b * 0.2 - 0.006, xi + (s > 0 ? -0.012 : 0.012), 3.2, R - 1.55 + b * 0.2 + 0.006, 400 + b + (s > 0 ? 9 : 0), 'wood_dark');
+      for (const y of [0.5, 1.6, 2.7]) {
+        bag.add('iron', lbox(c[0], c[1], phi, s > 0 ? hw - 0.15 : -hw - 0.03 + 0.0, y, R - 1.55, s > 0 ? hw + 0.03 : -hw + 0.15, y + 0.12, R - 0.35));
+        for (let q = 0; q < 6; q++) {
+          const z = R - 1.5 + q * 0.2 + 0.05 * rnd(q, y * 10);
+          J(xi + (s > 0 ? -0.036 : 0.0), y + 0.025, z, xi + (s > 0 ? 0.0 : 0.036), y + 0.095, z + 0.07, 500 + q + Math.round(y * 5) + (s > 0 ? 40 : 0), 'iron');
+        }
+      }
+      J(xi + (s > 0 ? -0.04 : 0.0), 1.2, R - 1.05, xi + (s > 0 ? 0.0 : 0.04), 1.35, R - 0.9, 600 + (s > 0 ? 1 : 0), 'bronze');
+      J(xi + (s > 0 ? -0.07 : 0.0), 1.02, R - 0.99, xi + (s > 0 ? 0.0 : 0.07), 1.18, R - 0.96, 602 + (s > 0 ? 1 : 0), 'bronze');
       const q0 = W(s * (hw + 0.15), rz0), q1 = W(s * (hw + 0.15), rz1);
       col.segment(q0, q1, 0.3, 0, GATE_H);
     }
     void small;
-    // red couplets on the granite jambs, a strip of red paper over the lintel, two lanterns under the hood, the worn threshold
-    for (const sg of [-1, 1]) bag.add('lacquer_red', lbox(c[0], c[1], phi, sg > 0 ? hw + 0.05 : -hw - 0.25, 0.9, R + 0.2, sg > 0 ? hw + 0.25 : -hw - 0.05, 3.0, R + 0.235));
-    bag.add('cloth_red', lbox(c[0], c[1], phi, -hw, GATE_H - 0.5, R + 0.2, hw, GATE_H - 0.2, R + 0.225));
+    // red couplets (strokes for the characters) on the granite jambs, a strip of red paper over the lintel, two lanterns under the hood, the worn threshold and its step
+    for (const sg of [-1, 1]) {
+      bag.add('lacquer_red', lbox(c[0], c[1], phi, sg > 0 ? hw + 0.05 : -hw - 0.25, 0.9, R + 0.25, sg > 0 ? hw + 0.25 : -hw - 0.05, 3.0, R + 0.28));
+      couplet(bag, c, phi, sg > 0 ? hw + 0.05 : -hw - 0.25, sg > 0 ? hw + 0.25 : -hw - 0.05, 0.9, 3.0, R + 0.28, g * 3 + (sg > 0 ? 1 : 0));
+    }
+    bag.add('cloth_red', lbox(c[0], c[1], phi, -hw, GATE_H - 0.5, R + 0.25, hw, GATE_H - 0.2, R + 0.275));
     bag.add('granite_block', lbox(c[0], c[1], phi, -hw - 0.3, 0, R - 0.3, hw + 0.3, 0.14, R + 1.4));
-    for (const sg of [-1, 1]) { const q = W(sg * (hw + 0.1), R + 0.7); LF.hang_lantern({ t: 'hang_lantern', at: q, y: GATE_H + 0.88, rot: 0, seed: g }, ctx); }
-    // the rules of conduct, a board beside the gate [stated: NatGeo]
-    bag.add('lacquer_black', lbox(c[0], c[1], phi, hw + 0.5, 1.5, R - lean * 0.12, hw + 1.2, 2.4, R + 0.04));
-    bag.add('cloth_white', lbox(c[0], c[1], phi, hw + 0.58, 1.58, R + 0.03, hw + 1.12, 2.32, R + 0.05));
+    bag.add('granite_block', lbox(c[0], c[1], phi, -hw - 0.1, 0, R + 1.4, hw + 0.1, 0.07, R + 1.85));
+    for (const sg of [-1, 1]) { const q = W(sg * (hw + 0.1), R + 0.9); LF.hang_lantern({ t: 'hang_lantern', at: q, y: hy1 - 0.5, rot: 0, seed: g }, ctx); }
+    // the rules of conduct, a board beside the gate [stated: NatGeo], its lines of script
+    bag.add('lacquer_black', lbox(c[0], c[1], phi, hw + 0.6, 1.5, R - lean * 0.12, hw + 1.3, 2.4, R + 0.04));
+    bag.add('cloth_white', lbox(c[0], c[1], phi, hw + 0.68, 1.58, R + 0.03, hw + 1.22, 2.32, R + 0.05));
+    for (let q = 0; q < 7; q++) J(hw + 0.74, 2.2 - q * 0.1, R + 0.05, hw + 0.74 + 0.18 + rnd(q, g) * 0.22, 2.2 - q * 0.1 + 0.02, R + 0.058, 700 + q, 'iron');
   }
 
   // the apron of cobbles round the foot, on which the lane's life stands
@@ -143,7 +208,26 @@ export function tulouRound(el, ctx) {
   bag.add('pebbles', disc(front, 0.02, 72, c[0], c[1]));
   if (full) {
     const phiS = 0;                                                                       // the south gate's axis is +z
-    bag.add('bluestone', lbox(c[0], c[1], phiS, -1.1, 0.02, el.hall ? el.hall[3] + 0.3 : 0, 1.1, 0.06, R));
+    // the way: two columns of bluestone slabs laid in bond with joints and a granite kerb each side; the stone gutter ring under the inner eave
+    {
+      const z0 = el.hall ? el.hall[3] + 0.3 : 0, zEnd = wallIn;
+      let z = z0, q = 0;
+      while (z < zEnd - 0.2) {
+        for (const [xa, xb, off] of [[-1.1, -0.03, 0], [0.03, 1.1, 0.8]]) {
+          const zs = Math.max(z0, z - off + (off ? 0 : 0)), L = 1.5 + rnd(q, 3) * 0.5, ze = Math.min(zEnd, z + L - off);
+          if (ze - zs > 0.3) bag.add('bluestone', jbox(c[0], c[1], 0, xa, 0.02, zs + 0.02, xb, 0.06 + (rnd(q, 5) - 0.5) * 0.006, ze - 0.02, 800 + q));
+          q++;
+        }
+        z += 1.5 + rnd(q, 4) * 0.5;
+      }
+      for (const x of [-1.2, 1.1]) bag.add('granite_block', jbox(c[0], c[1], 0, x, 0.02, z0, x + 0.1, 0.1, R + 0.1, 900 + (x > 0 ? 1 : 0)));
+      const G = 96, dg = 2 * Math.PI / G, rg = rail - 1.0;
+      for (let q2 = 0; q2 < G; q2++) {
+        const am = (q2 + 0.5) * dg, d90 = Math.abs(((am - Math.PI / 2 + 3 * Math.PI) % (2 * Math.PI)) - Math.PI), d270 = Math.abs(((am - 1.5 * Math.PI + 3 * Math.PI) % (2 * Math.PI)) - Math.PI);
+        if (Math.min(d90, d270) < 0.06) continue;
+        for (const [r0, r1] of [[rg - 0.12, rg + 0.03], [rg + 0.38, rg + 0.53]]) bag.add('granite_block', sector(c, r1, r0, r1, r0, 0.0, 0.07 + rnd(q2, r0 * 9) * 0.004, q2 * dg, (q2 + 1) * dg + 0.0006));
+      }
+    }
   } else bag.add('bluestone', lbox(c[0], c[1], 0, -1.0, 0.02, 0, 1.0, 0.05, R));
 
   // ── the ring of rooms ──
@@ -266,7 +350,7 @@ export function tulouRound(el, ctx) {
   }
 
   // ── the ring roof, the second ring, the furnished rooms ──
-  ringRoof(bag, c, n, rf);
+  ringRoof(bag, c, n, rf, full);
   if (el.ring2) ring2(el, ctx);
   if (furn.length) furnishRooms(el, ctx, { front, wallIn, n, da, fl, c, furn });
 }
@@ -308,6 +392,6 @@ function ring2(el, ctx) {
   }
   // the posts under the balcony, up to the roof
   for (let i = 0; i < n; i++) { const p = P(c, g.r0 - 0.9, (i + 0.5) * da); bag.add('timber', box(p[0] - 0.09, 0, p[1] - 0.09, p[0] + 0.09, roofY(g.r0 - 0.9) - 0.14, p[1] + 0.09)); col.circle(p[0], p[1], 0.11, 0, top); }
-  ringRoof(bag, c, n, o);
+  ringRoof(bag, c, n, o, true);
 }
 export { lathe, STYLES };
