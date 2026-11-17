@@ -48,7 +48,10 @@ export function buildings() {
       const corners = [[rect[0], rect[1]], [rect[2], rect[1]], [rect[0], rect[3]], [rect[2], rect[3]]];
       if (corners.some(([x, z]) => inRiver(x, z) || Math.abs(z - riverZ(x)) < RIVER.w / 2 + 3) || Math.max(...ys) > 5 || Math.hypot(cx, cz) > RADIUS - 70) return;
       const alongX = w0 >= d0, front = alongX ? fz < cz : fx < cx;
-      BUILT.push({ rect, y: Math.max(...ys), foot: Math.min(...ys) - 0.4, kind, front, farm: i, seed: Math.floor(rand() * 1e6) });
+      const seed = Math.floor(rand() * 1e6), vr = rng(seed * 3 + 1);
+      const dm = kind === 'stue' ? [-0.8, 0.8, 0, -0.8][Math.floor(vr() * 4)] : kind === 'smithy' ? -0.8 : 0;     // the door's place in the wall, by the house
+      const use = k === 6 && kind === 'stue' ? ['cook', 'weave', null][i % 3] : null;                     // the second house: the cook-house, the weaving house, or a dwelling
+      BUILT.push({ rect, y: Math.max(...ys), foot: Math.min(...ys) - 0.4, kind, front, farm: i, seed, dm, use, v: [vr(), vr(), vr()] });
     });
   });
   // the summer farms (seter) on the slopes: a small smoke-room hut, a byre for the milking and a cheese store, round a trodden yard
@@ -67,7 +70,7 @@ export const SETERS = [[-75, -122], [112, -124], [-200, -116]];
 export function doorOf(b) {
   const [x0, z0, x1, z1] = b.rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, alongX = x1 - x0 >= z1 - z0;
   if (b.kind === 'loft') return { at: [cx, z1 + 0.95], n: [0, 1] };
-  if (alongX) { const m = b.kind === 'barn' || b.kind === 'shed' ? 0 : -0.8; return b.front ? { at: [cx + m, z0], n: [0, -1] } : { at: [cx + m, z1], n: [0, 1] }; }
+  if (alongX) { const m = b.dm ?? (b.kind === 'barn' || b.kind === 'shed' ? 0 : -0.8); return b.front ? { at: [cx + m, z0], n: [0, -1] } : { at: [cx + m, z1], n: [0, 1] }; }
   return b.front ? { at: [x0, cz], n: [-1, 0] } : { at: [x1, cz], n: [1, 0] };
 }
 export const inBuilding = (x, z, m = 0) => buildings().some((b) => inRect(b.rect, x, z, m));

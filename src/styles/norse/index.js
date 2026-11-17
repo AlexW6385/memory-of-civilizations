@@ -9,10 +9,11 @@ import { registerStyle, STYLES, orientedBox } from '../../core/build.js';
 import { box, frustum, lathe, quad, fromTriangles, orientOutward } from '../../core/geom.js';
 import { Shape, Path, ExtrudeGeometry, Matrix4 } from '../../core/three.js';
 import '../qing/index.js';
-import { dragonHead, ridgeCrest, westPortal, staveMask } from './carving.js';
+import { dragonHead, ridgeCrest, westPortal, staveMask, relief, poly, ribbon, spiral } from './carving.js';
 import { stueInside } from './stue.js';
 import { makeShore } from './shore.js';
 import { makeFarm } from './farm.js';
+import { southPortal, doorIron, crossLeaves, bellFrame } from './church2.js';
 
 const W = 'tar_wood', SH = 'tar_shingle', LOG = 'log_pine';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -163,10 +164,11 @@ function leanTo(bag, O, I, yo, yi, cut = null) {
   }
 }
 /** A St Andrew's cross of planks in the upright field between u0 and u1 along a→b (plan points), v0 to v1 high, with the sun disc at its crossing. */
-function andrew(bag, a, b, u0, u1, v0, v1, w = 0.16, d = 0.06, sun = 0.2) {
+function andrew(bag, a, b, u0, u1, v0, v1, w = 0.16, d = 0.06, sun = 0.2, side = 0) {
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L, P = (u, v) => [a[0] + ux * u, v, a[1] + uz * u];
   bag.add(W, beam(P(u0, v0), P(u1, v1), d, w));
   bag.add(W, beam(P(u0, v1), P(u1, v0), d, w));
+  if (side) crossLeaves(bag, W, a, b, u0, u1, v0, v1, side);
   if (!sun) return;
   const m = P((u0 + u1) / 2, (v0 + v1) / 2), alongX = Math.abs(ux) > 0.5;
   const rodN = (h, r) => logRod(alongX ? [m[0], m[1], m[2] - h] : [m[0] - h, m[1], m[2]], alongX ? [m[0], m[1], m[2] + h] : [m[0] + h, m[1], m[2]], r, 14);
@@ -253,12 +255,16 @@ function staveChurch(el, { bag, col, lights }) {
     for (const e of [-1, 1]) { const p = u + e * (w / 2 + 0.07); bag.add(W, along ? box(p - 0.07, F, line + sg * 0.02, p + 0.07, F + h, line + sg * 0.1) : box(line + sg * 0.02, F, p - 0.07, line + sg * 0.1, F + h, p + 0.07)); }
   };
   jambs(xs, sDoor.w, sDoor.h, true, ai[3] - T, -1);
+  // outside, in the skruv, the south portal plugged onto the wall: lions on the capitals, cat-head bases, the spiral vine
+  southPortal(bag, W, [xs, F, ai[3]], [0, 1], { w: sDoor.w, hs: sDoor.h });
   jambs(cz, wDoor.w, wDoor.h, false, ai[0] + T, 1);
   // the chancel screen: the opening framed as a stepped portal with a half-column each side, the rood beam and the crucifix over it
   for (const e of [-1, 1]) {
     const zz = cz + e * (chW / 2 + 0.1), xx = ai[2] - T - 0.02;
     bag.add(W, box(xx - 0.12, F, zz - 0.1, xx, F + chH, zz + 0.1));
     bag.add(W, lathe([[0.1, 0], [0.08, 0.1], [0.075, chH - 0.25], [0.11, chH - 0.12], [0.11, chH], [0.001, chH]], 10, null, xx - 0.12, F, cz + e * (chW / 2 - 0.02)));
+    // the masks on the staves either side of the opening, hidden in the half-darkness: a man and a beast, turned into the nave
+    staveMask(bag, W, [xx - 0.12 - 0.088, F + chH - 0.45, cz + e * (chW / 2 - 0.02)], [-1, 0], e < 0 ? 'man' : 'beast', 0.7);
   }
   const rb = F + 2.55;
   bag.add(W, box(ai[2] - T - 0.2, rb - 0.2, cz - chW / 2 - 0.15, ai[2] - T - 0.02, rb, cz + chW / 2 + 0.15));
@@ -312,12 +318,12 @@ function staveChurch(el, { bag, col, lights }) {
     if (!onDoor) bag.add(W, box(wx - 0.09, F, wz - 0.09, wx + 0.09, topNS - 0.25, wz + 0.09));
   }
   // the great St Andrew's crosses on the aisle walls between the posts, above the benches (with leaf-carved arms: a boss at each end)
-  const bayCross = (a, b, us, skip) => { for (let k = 0; k + 1 < us.length; k++) if (!skip(us[k], us[k + 1])) andrew(bag, a, b, us[k] + 0.12, us[k + 1] - 0.12, F + 1.35, topNS - 0.35, 0.18, 0.05, 0); };
+  const bayCross = (a, b, us, skip, side) => { for (let k = 0; k + 1 < us.length; k++) if (!skip(us[k], us[k + 1])) andrew(bag, a, b, us[k] + 0.12, us[k + 1] - 0.12, F + 1.35, topNS - 0.35, 0.18, 0.05, 0, side); };
   const nsU = [ai[0] + T, ...sx, ai[2] - T];
-  bayCross([nsU[0], ai[1] + T + 0.03], [nsU[6], ai[1] + T + 0.03], nsU.map((x) => x - nsU[0]), () => false);
-  bayCross([nsU[0], ai[3] - T - 0.03], [nsU[6], ai[3] - T - 0.03], nsU.map((x) => x - nsU[0]), (u0, u1) => xs - nsU[0] > u0 - 0.6 && xs - nsU[0] < u1 + 0.6);
+  bayCross([nsU[0], ai[1] + T + 0.03], [nsU[6], ai[1] + T + 0.03], nsU.map((x) => x - nsU[0]), () => false, 1);
+  bayCross([nsU[0], ai[3] - T - 0.03], [nsU[6], ai[3] - T - 0.03], nsU.map((x) => x - nsU[0]), (u0, u1) => xs - nsU[0] > u0 - 0.6 && xs - nsU[0] < u1 + 0.6, -1);
   const weU = [ai[1] + T, ...sz, ai[3] - T];
-  bayCross([ai[0] + T + 0.03, weU[0]], [ai[0] + T + 0.03, weU[5]], weU.map((z) => z - weU[0]), (u0, u1) => cz - weU[0] > u0 && cz - weU[0] < u1);
+  bayCross([ai[0] + T + 0.03, weU[0]], [ai[0] + T + 0.03, weU[5]], weU.map((z) => z - weU[0]), (u0, u1) => cz - weU[0] > u0 && cz - weU[0] < u1, -1);
   // the wall benches round the aisles
   const bench = (a, b, sg, along) => {
     const [p, q] = along ? [a[0], b[0]] : [a[1], b[1]], line = along ? a[1] : a[0];
@@ -387,6 +393,7 @@ function staveChurch(el, { bag, col, lights }) {
   { const hh = (po[3] - po[1]) / 2, yr = pH + hh * 1.2;
     westPortal(bag, W, [po[0], F, cz], [-1, 0], { w: wDoor.w, hs: wDoor.h, pw: 0.62 * s, top: (u) => yr - 0.16 - 0.08 - Math.abs(u) * 1.2 - F }); }
   bag.add(W, box(po[0] + T + 0.02, F, cz + wDoor.w / 2 + 0.02, po[0] + T + wDoor.w - 0.04, F + wDoor.h + 0.2, cz + wDoor.w / 2 + 0.07));
+  doorIron(bag, { x0: po[0] + T + 0.02, x1: po[0] + T + wDoor.w - 0.04, y: F, zf: cz + wDoor.w / 2 + 0.02, hf: wDoor.h + 0.2 });
   bag.add('iron', box(po[0] + T + 0.3, F + 0.3, cz + wDoor.w / 2 + 0.07, po[0] + T + wDoor.w - 0.1, F + 0.34, cz + wDoor.w / 2 + 0.085));
   bag.add('iron', box(po[0] + T + 0.3, F + 1.25, cz + wDoor.w / 2 + 0.07, po[0] + T + wDoor.w - 0.1, F + 1.29, cz + wDoor.w / 2 + 0.085));
 
@@ -498,7 +505,16 @@ function bellHouse(el, { bag, col }) {
   bag.add(SH, frustum([x - h - 0.1, z - h - 0.1, x + h + 0.1, z + h + 0.1], y + 0.55, y + 5.2, h + 0.1 - a, h + 0.1 - a, h + 0.1 - a, h + 0.1 - a));
   bag.add('opening', box(x - 0.45, y + 0.55, z + h - 0.02, x + 0.45, y + 2.3, z + h + 0.14));    // the low door in the skirt
   bag.add(W, box(x - 0.55, y + 2.3, z + h - 0.02, x + 0.55, y + 2.45, z + h + 0.2));
-  bag.add(W, box(x - a, y + 5.2, z - a, x + a, y + 7.9, z + a));
+  // the belfry is hollow: four boarded walls, each with two round-headed sound openings cut through, the bell hung inside
+  { const tw = 0.12, Lw = 2 * a, wall = (len, off = 0) => { const sh = new Shape(); sh.moveTo(0, 0); sh.lineTo(len, 0); sh.lineTo(len, 2.7); sh.lineTo(0, 2.7); sh.lineTo(0, 0);
+      for (const uc of [0.1 + (2 * a - 0.2) * 0.3 - off, 0.1 + (2 * a - 0.2) * 0.7 - off]) { const p = new Path(); p.moveTo(uc - 0.32, 0.75); p.lineTo(uc + 0.32, 0.75); p.lineTo(uc + 0.32, 1.6); p.absarc(uc, 1.6, 0.32, 0, Math.PI, false); p.lineTo(uc - 0.32, 0.75); sh.holes.push(p); }
+      return sh; };
+    bag.add(W, slab(wall(Lw), tw, [x - a, z + a - tw / 2], [x + a, z + a - tw / 2], y + 5.2, 8));
+    bag.add(W, slab(wall(Lw), tw, [x + a, z - a + tw / 2], [x - a, z - a + tw / 2], y + 5.2, 8));
+    bag.add(W, slab(wall(Lw - 2 * tw, tw), tw, [x + a - tw / 2, z + a - tw], [x + a - tw / 2, z - a + tw], y + 5.2, 8));
+    bag.add(W, slab(wall(Lw - 2 * tw, tw), tw, [x - a + tw / 2, z - a + tw], [x - a + tw / 2, z + a - tw], y + 5.2, 8));
+    bag.add(W, box(x - a, y + 5.2, z - a, x + a, y + 5.3, z + a));
+    bellFrame(bag, W, x, y + 5.3, z, a); }
   for (let k = -3; k <= 3; k++) for (const sz of [-1, 1]) { bag.add(W, box(x + k * a / 3.5 - 0.05, y + 5.2, z + sz * a - 0.04, x + k * a / 3.5 + 0.05, y + 7.9, z + sz * a + 0.04)); bag.add(W, box(x + sz * a - 0.04, y + 5.2, z + k * a / 3.5 - 0.05, x + sz * a + 0.04, y + 7.9, z + k * a / 3.5 + 0.05)); }
   // the sound openings: a board with two round-headed openings on each face, dark behind
   const so = new Shape(), L = 2 * a - 0.2, w = 0.32, H = 1.9;
@@ -506,8 +522,6 @@ function bellHouse(el, { bag, col }) {
   for (const uc of [L * 0.3, L * 0.7]) { const p = new Path(); p.moveTo(uc - w, 0.35); p.lineTo(uc + w, 0.35); p.lineTo(uc + w, 1.2); p.absarc(uc, 1.2, w, 0, Math.PI, false); p.lineTo(uc - w, 0.35); so.holes.push(p); }
   for (const [p0, p1, nx, nz] of [[[x - a + 0.1, z + a + 0.1], [x + a - 0.1, z + a + 0.1], 0, 1], [[x + a - 0.1, z - a - 0.1], [x - a + 0.1, z - a - 0.1], 0, -1], [[x + a + 0.1, z + a - 0.1], [x + a + 0.1, z - a + 0.1], 1, 0], [[x - a - 0.1, z - a + 0.1], [x - a - 0.1, z + a - 0.1], -1, 0]]) {
     bag.add(W, slab(so, 0.08, p0, p1, y + 5.6, 8));
-    const e = a - 0.15, f = a + 0.03;
-    bag.add('opening', nx ? box(x + nx * (a + 0.015) - 0.015, y + 5.9, z - e, x + nx * (a + 0.015) + 0.015, y + 7.4, z + e) : box(x - e, y + 5.9, z + nz * (a + 0.015) - 0.015, x + e, y + 7.4, z + nz * (a + 0.015) + 0.015));
   }
   bag.add(SH, pyr(x, z, a + 0.75, y + 7.75, a + 0.1, y + 8.25));
   bag.add(SH, pyr(x, z, a + 0.15, y + 8.2, 0, y + 12));
@@ -616,10 +630,10 @@ function logHouse(el, ctx) {
     roofTrim(bag, rr, ry, 0.95, 0.35, true, false);
     return;
   }
-  const H = kind === 'barn' ? 3.9 : 3.1;
+  const vv = el.v ?? [0.5, 0.5, 0.5], H = (kind === 'barn' ? 3.9 : 3.1) + (el.v ? (vv[0] - 0.5) * 0.5 : 0);
   bag.add('rubble', box(x0 - 0.15, foot, z0 - 0.15, x1 + 0.15, y + 0.15, z1 + 0.15));
   const alongX = x1 - x0 >= z1 - z0, front0 = rand() < 0.5, front = el.front ?? front0, open = (kind === 'stue' || kind === 'barn' || kind === 'smithy') && !!el.open;
-  const dw = kind === 'barn' ? 2.2 : 0.85, dh = kind === 'barn' ? 2.3 : 1.7, dm = kind === 'stue' || kind === 'smithy' ? -0.8 : 0;
+  const dw = kind === 'barn' ? 2.2 : 0.85, dh = kind === 'barn' ? 2.3 : 1.7, dm = el.dm ?? (kind === 'stue' || kind === 'smithy' ? -0.8 : 0);
   const hole = open ? (alongX ? { face: front ? 'z0' : 'z1', c: (x0 + x1) / 2 + dm, w: dw, h: dh + 0.12 - r } : { face: front ? 'x0' : 'x1', c: (z0 + z1) / 2, w: dw, h: dh + 0.12 - r }) : null;
   logWalls(bag, el.rect, y + 0.15 + r, H - r, d, 0.3, hole);
   if (!open) col.rect(el.rect, foot, y + H);
@@ -638,7 +652,32 @@ function logHouse(el, ctx) {
     door(bag, mx, f, sg, y + 0.15, kind === 'barn' ? 2.2 : 0.85, kind === 'barn' ? 2.3 : 1.7, r + 0.01, open);
     if (open && kind !== 'barn') { const zi = f - sg * (r + 0.03); bag.add(W, box(mx + 0.425 - 0.05, y + 0.19, Math.min(zi, zi - sg * 0.8), mx + 0.425, y + 1.82, Math.max(zi, zi - sg * 0.8))); }
     if (open && kind === 'barn') for (const e of [-1, 1]) { const zo = f + sg * (r + 0.06); bag.add(W, box(mx + e * 1.1 - 0.04, y + 0.2, Math.min(zo, zo + sg * 1.05), mx + e * 1.1 + 0.04, y + 2.3, Math.max(zo, zo + sg * 1.05))); }
-    if (kind === 'stue' || kind === 'smithy') { const wx = mx + 1.7, z = f + sg * (r + 0.01); bag.add('opening', box(wx - 0.3, y + 1.4, Math.min(z, z + sg * 0.03), wx + 0.3, y + 1.85, Math.max(z, z + sg * 0.03))); for (const [a, b, c, e] of [[-0.38, -0.3, 1.32, 1.93], [0.3, 0.38, 1.32, 1.93], [-0.38, 0.38, 1.32, 1.4], [-0.38, 0.38, 1.85, 1.93]]) bag.add(W, box(wx + a, y + c, Math.min(z, z + sg * 0.06), wx + b, y + e, Math.max(z, z + sg * 0.06))); }
+    if (kind === 'stue' || kind === 'smithy') { for (const wx of dm > 0 ? [mx - 1.7] : dm < 0 || kind === 'smithy' ? [mx + 1.7] : [mx - 1.9, mx + 1.9]) { const z = f + sg * (r + 0.01); bag.add('opening', box(wx - 0.3, y + 1.4, Math.min(z, z + sg * 0.03), wx + 0.3, y + 1.85, Math.max(z, z + sg * 0.03))); for (const [a, b, c, e] of [[-0.38, -0.3, 1.32, 1.93], [0.3, 0.38, 1.32, 1.93], [-0.38, 0.38, 1.32, 1.4], [-0.38, 0.38, 1.85, 1.93]]) bag.add(W, box(wx + a, y + c, Math.min(z, z + sg * 0.06), wx + b, y + e, Math.max(z, z + sg * 0.06))); } }
+    // fronts by rule, from the house's own numbers: a dwelling has a roofed porch (sval) over its door, or carved jambs and a lozenge-carved lintel, or stays plain; a barn may have a hay hatch with its hoist beam
+    if (kind === 'stue') {
+      const zf = f + sg * (r + 0.01), vf = Math.floor(vv[2] * 3);
+      if (vf === 1) {
+        const xa = mx - 1.35, xb = mx + 1.35, zo = zf + sg * 1.7, hi = y + 2.7, ho = y + 2.3;
+        for (const [mat, y0, y1] of [[W, 0, 0.07], ['sod', 0.07, 0.17]]) bag.add(mat, hexa([[xa, hi + y0, zf], [xb, hi + y0, zf], [xb, ho + y0, zo], [xa, ho + y0, zo], [xa, hi + y1, zf], [xb, hi + y1, zf], [xb, ho + y1, zo], [xa, ho + y1, zo]]));
+        bag.add(LOG, logRod([xa, ho - 0.1, zo - sg * 0.12], [xb, ho - 0.1, zo - sg * 0.12], 0.09));
+        for (const e of [-1, 1]) { const px = mx + e * 1.1, pz = zo - sg * 0.12; bag.add(LOG, logRod([px, y + 0.15, pz], [px, ho - 0.1, pz], 0.1)); bag.add('rubble', box(px - 0.2, y + 0.1, pz - 0.2, px + 0.2, y + 0.2, pz + 0.2)); col.circle(px, pz, 0.12, y, y + 2.3); }
+      } else if (vf === 2) {
+        const Oo = [mx, y + 0.15, f + sg * (r + 0.11)], nn = [0, sg], RL = (sh, d1 = 0.02) => bag.add(W, relief(sh, Oo, nn, -0.004, d1, 4));
+        for (const e of [-1, 1]) {
+          const uc = e * 0.485, stem = []; for (let v = 0.08; v <= dh - 0.05; v += 0.06) stem.push([uc + 0.022 * Math.sin(v * 11), v]);
+          RL(ribbon(stem, 0.026));
+          for (const [v, sd] of [[0.3, 1], [0.75, -1], [1.2, 1]]) RL(ribbon(spiral([uc + sd * 0.03, v], sd > 0 ? Math.PI : 0, 0.024, 1.1, sd, 0.3, 8), 0.014), 0.017);
+        }
+        for (let u = -0.52; u <= 0.53; u += 0.13) RL(poly([[u - 0.05, dh + 0.07], [u, dh + 0.125], [u + 0.05, dh + 0.07], [u, dh + 0.015]]), 0.018);
+      }
+    }
+    if (kind === 'barn' && vv[2] < 0.6) {
+      const zf = f + sg * (r + 0.01);
+      bag.add('opening', box(mx - 0.5, y + 2.85, Math.min(zf, zf + sg * 0.03), mx + 0.5, y + 3.45, Math.max(zf, zf + sg * 0.03)));
+      for (const [a, b, c, e] of [[-0.58, -0.5, 2.8, 3.5], [0.5, 0.58, 2.8, 3.5], [-0.58, 0.58, 3.45, 3.53], [-0.58, 0.58, 2.8, 2.88]]) bag.add(W, box(mx + a, y + c, Math.min(zf, zf + sg * 0.06), mx + b, y + e, Math.max(zf, zf + sg * 0.06)));
+      bag.add(LOG, logRod([mx, y + 3.75, zf + sg * 0.05], [mx, y + 3.75, zf + sg * 1.25], 0.09));
+      bag.add('iron', box(mx - 0.02, y + 3.4, zf + sg * 1.2, mx + 0.02, y + 3.7, zf + sg * 1.24));
+    }
   } else {
     const f = front ? x0 : x1, sg = front ? -1 : 1, mz = (z0 + z1) / 2, X0 = f + sg * (r + 0.01), X1 = X0 + sg * 0.06;
     const w = kind === 'barn' ? 2.2 : 0.85, h = kind === 'barn' ? 2.3 : 1.7;
@@ -646,7 +685,7 @@ function logHouse(el, ctx) {
     else { const xi = f - sg * (r + 0.03); if (kind !== 'barn') bag.add(W, box(Math.min(xi, xi - sg * 0.8), y + 0.19, mz + w / 2 - 0.05, Math.max(xi, xi - sg * 0.8), y + 1.82, mz + w / 2)); else for (const e of [-1, 1]) { const xo = f + sg * (r + 0.06); bag.add(W, box(Math.min(xo, xo + sg * 1.05), y + 0.2, mz + e * 1.1 - 0.04, Math.max(xo, xo + sg * 1.05), y + 2.3, mz + e * 1.1 + 0.04)); } for (const e of [-1, 1]) bag.add(W, box(Math.min(X0, X1 + sg * 0.04), y + 0.15, mz + e * (w / 2 + 0.06) - 0.06, Math.max(X0, X1 + sg * 0.04), y + 0.15 + h + 0.14, mz + e * (w / 2 + 0.06) + 0.06)); }
     bag.add(W, box(Math.min(X0, X1 + sg * 0.04), y + 0.15 + h, mz - w / 2 - 0.14, Math.max(X0, X1 + sg * 0.04), y + 0.29 + h, mz + w / 2 + 0.14));
   }
-  const roof = el.roof ?? (kind === 'stue' || kind === 'smithy' ? 'sod' : rand() < 0.5 ? 'sod' : SH), pitch = kind === 'stue' || kind === 'smithy' ? 0.5 : 0.7, o = 0.45, yt = y + H + o * pitch;
+  const roof = el.roof ?? (kind === 'stue' || kind === 'smithy' ? 'sod' : rand() < 0.5 ? 'sod' : SH), pitch = (kind === 'stue' || kind === 'smithy' ? 0.5 : 0.7) + (el.v ? (vv[1] - 0.5) * 0.14 : 0), o = 0.45, yt = y + H + o * pitch;
   const span = alongX ? z1 - z0 : x1 - x0;
   const top = pitched(bag, roof, LOG, el.rect, yt, pitch, o, alongX, roof === 'sod' ? 0.28 : 0.16);
   logGables(bag, el.rect, y + H, span / 2 * pitch + o * pitch - 0.28, alongX, d);
@@ -659,7 +698,7 @@ function logHouse(el, ctx) {
     pitched(bag, W, W, [mx - 0.35, mz - 0.35, mx + 0.35, mz + 0.35], top + 0.35, 0.8, 0.12, alongX, 0.05);
   }
   if (open) {
-    const io = { rect: el.rect, fl: y + 0.17, top: y + H, ridge: top - (roof === 'sod' ? 0.28 : 0.16), alongX, wt: r + 0.05, door: hole, seed: el.seed };
+    const io = { use: el.use, rect: el.rect, fl: y + 0.17, top: y + H, ridge: top - (roof === 'sod' ? 0.28 : 0.16), alongX, wt: r + 0.05, door: hole, seed: el.seed };
     (kind === 'barn' ? FARM.interiors.barn : kind === 'smithy' ? FARM.interiors.smithy : stueInside)(bag, col, io);
     // the fire's light in the room: the hearth of the stue (in the middle of the floor), the forge of the smithy; the byre has a horn lantern on its beam
     if (ctx.lights && !el.simple) ctx.lights.push({ at: [(x0 + x1) / 2, y + 0.17 + (kind === 'barn' ? 1.7 : 1.0), (z0 + z1) / 2], color: kind === 'barn' ? '#ffd9a0' : '#ffb46b', intensity: kind === 'barn' ? 1.6 : kind === 'smithy' ? 3.2 : 2.8, distance: kind === 'barn' ? 6 : 8 });
