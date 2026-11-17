@@ -164,7 +164,7 @@ export function nicheFacade(bag, x0, x1, zf, y, H, rand, o = {}) {
   const cuts = [x0 - 0.2, ...[...door].sort((a, b) => a - b).flatMap((d) => [d - 0.75, d + 0.75]), x1 + 0.2], spans = [];
   for (let i = 0; i < cuts.length; i += 2) if (cuts[i + 1] - cuts[i] > 0.4) spans.push([cuts[i], cuts[i + 1]]);
   if (!smooth) {
-    const rows = kind === 'tall' ? 4 : 3, nh = kind === 'tall' ? 0.28 : 0.34, nw = kind === 'tall' ? 0.13 : 0.17, sp = kind === 'tall' ? 0.72 : 0.8, y0 = kind === 'wash' ? y + 1.45 : y + 1.15;
+    const rows = kind === 'tall' ? 4 : 3, nh = kind === 'tall' ? 0.28 : 0.34, nw = kind === 'tall' ? 0.13 : 0.17, sp = kind === 'tall' ? 0.62 : 0.66, y0 = kind === 'wash' ? y + 1.45 : y + 1.15;
     for (let i = 0; i < n; i++) {
       const uc = x0 + (i + 0.5) * pitch;
       if (inDoor(uc, 0)) continue;
@@ -173,8 +173,13 @@ export function nicheFacade(bag, x0, x1, zf, y, H, rand, o = {}) {
         if (yy + 0.4 > top - 0.35 - (kind === 'wash' ? 0.35 : 0)) continue;
         if (r === 0 && kind !== 'wash' && rand() < 0.25) continue;
         bag.add(HOLE, box(uc - nw, yy, zf, uc + nw, yy + nh, zf + 0.012));
-        bag.add(SMOOTH, box(uc - nw - 0.03, yy + nh, zf, uc + nw + 0.03, yy + nh + 0.03, zf + 0.04));    // lintel plaster
-        bag.add(SMOOTH, box(uc - nw - 0.03, yy - 0.03, zf, uc + nw + 0.03, yy, zf + 0.04));
+        // the niche as a recess: a hand-smoothed frame standing 0.09 m proud of the wall, so the dark back lies that deep (lintel heavy, sill sloped, jambs)
+        const e = 0.001 * (r % 3), dz = 0.09 + e;
+        bag.add(SMOOTH, box(uc - nw - 0.06, yy + nh, zf, uc + nw + 0.06, yy + nh + 0.06, zf + dz + 0.02));
+        bag.add(SMOOTH, box(uc - nw - 0.05, yy - 0.05, zf, uc + nw + 0.05, yy, zf + dz));
+        bag.add(SMOOTH, box(uc - nw - 0.05, yy, zf, uc - nw, yy + nh, zf + dz));
+        bag.add(SMOOTH, box(uc + nw, yy, zf, uc + nw + 0.05, yy + nh, zf + dz));
+        bag.add(WALL, box(uc - nw, yy, zf + 0.012, uc + nw, yy + 0.02, zf + dz - 0.01));                    // the niche's floor, seen from above
       }
     }
   }

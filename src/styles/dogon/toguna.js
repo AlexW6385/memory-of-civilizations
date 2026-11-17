@@ -74,13 +74,23 @@ export function toguna(el, { bag, col }) {
   for (let L = 0; L < 8; L++) {
     const alongX = L % 2 === 0, n = Math.round((alongX ? RD : RW) / 0.21), span = alongX ? RW : RD, mat = L % 3 === 1 ? STALK : THATCH;
     const inset = L * 0.05 + (L > 5 ? 0.1 * (L - 5) : 0);
+    const rise = (o) => 0.06 * (1 - Math.min(1, Math.abs(o) / ((alongX ? RD : RW) / 2)) ** 2) * (L / 7);      // the mat swells toward its middle
     for (let i = 0; i < n; i++) {
       const o = -(alongX ? RD : RW) / 2 + (i + 0.5) * (alongX ? RD : RW) / n, ext = span / 2 - inset + (rand() - 0.5) * 0.18, bh = BH * (0.9 + rand() * 0.25);
-      if (alongX) bag.add(mat, box(cx - ext, yy, cz + o - 0.105, cx + ext, yy + bh, cz + o + 0.105));
-      else bag.add(mat, box(cx + o - 0.105, yy, cz - ext, cx + o + 0.105, yy + bh, cz + ext));
+      if (alongX) bag.add(mat, box(cx - ext, yy + rise(o), cz + o - 0.105, cx + ext, yy + bh + rise(o), cz + o + 0.105));
+      else bag.add(mat, box(cx + o - 0.105, yy + rise(o), cz - ext, cx + o + 0.105, yy + bh + rise(o), cz + ext));
     }
     yy += BH;
   }
+  // the ragged eaves: loose stalk ends hanging and splayed from the lowest layers on all four sides, and the lashings (a cord of bark round the bundle ends)
+  for (let i = 0; i < 70; i++) {
+    const t = i / 70, per = 2 * (RW + RD), d = t * per;
+    let px, pz, nx, nz;
+    if (d < RW) { px = -RW / 2 + d; pz = -RD / 2; nx = 0; nz = -1; } else if (d < RW + RD) { px = RW / 2; pz = -RD / 2 + (d - RW); nx = 1; nz = 0; } else if (d < 2 * RW + RD) { px = RW / 2 - (d - RW - RD); pz = RD / 2; nx = 0; nz = 1; } else { px = -RW / 2; pz = RD / 2 - (d - 2 * RW - RD); nx = -1; nz = 0; }
+    const len = 0.22 + rand() * 0.2, sp = (rand() - 0.5) * 0.25, y0 = yb + 0.3 + rand() * 0.1;
+    bag.add(THATCH, rod([cx + px - nx * 0.05, y0, cz + pz - nz * 0.05], [cx + px + nx * 0.12 + nz * sp, y0 - len, cz + pz + nz * 0.12 + nx * sp], 0.016, 3));
+  }
+  for (const f of [-0.33, 0, 0.33]) { bag.add('bark_dark', box(cx - RW / 2 + 0.02, yb + 0.3, cz + f * RD - 0.02, cx + RW / 2 - 0.02, yb + 0.33, cz + f * RD + 0.02)); }
   // stones and a broken bundle on top, held down
   for (let i = 0; i < 9; i++) bag.add(STONE2, lathe([[0.2 + rand() * 0.1, 0], [0.18, 0.1], [0.001, 0.14]], 6, (t) => 1 + 0.15 * Math.sin(t * 3 + i), cx + (rand() - 0.5) * (RW - 1), yy - 0.02, cz + (rand() - 0.5) * (RD - 1)));
   col.rect([cx - RW / 2, cz - RD / 2, cx + RW / 2, cz + RD / 2], F + CLEAR, yy);

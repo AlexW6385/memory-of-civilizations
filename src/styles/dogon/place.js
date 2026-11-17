@@ -13,6 +13,7 @@ import { rng, WALL, SMOOTH, MUD, STONE, STONE2, DARK, LOG, HOLE, STALK, THATCH, 
 export function tellem(el, { bag }) {
   const NC = { circle() {}, rect() {}, floor() {}, segment() {} };
   const rand = rng(el.seed || 3), [cx, cz] = el.c, y = el.y, W = el.w, x0 = cx - W / 2 + 0.3, x1 = cx + W / 2 - 0.3, zB = cz - 3.4;
+  const k0 = (v) => Math.round(v * 7) % 3;
   let u = x0 + 0.1;
   while (u < x1 - 1.2) {
     const kind = rand() < 0.55 ? 'room' : 'granary';
@@ -27,9 +28,13 @@ export function tellem(el, { bag }) {
         if (rand() < 0.4 && w > 2.1) { const uw = w * 0.62, ux = u + rand() * (w - uw); bag.add(WALL, box(ux, y + hh + 0.1, z0 + 0.1, ux + uw, y + hh + 1.35, zf - 0.05)); bag.add(MUD, box(ux - 0.04, y + hh + 1.35, z0 + 0.06, ux + uw + 0.04, y + hh + 1.45, zf - 0.01)); bag.add(HOLE, box(ux + uw * 0.35, y + hh + 0.3, zf - 0.05, ux + uw * 0.35 + 0.36, y + hh + 0.95, zf - 0.038)); }
         bag.add(THATCH, box(u + 0.1, y + hh + 0.1, z0 + 0.1, u + 0.5, y + hh + 0.3, z0 + 0.4));     // a bundle on the roof
       }
+      // the roof beams' ends through the front wall, a mud parapet lip, pilaster ribs at the corners (the Tellem houses were built of stone and clay, the Dogon copied them)
+      for (let k = 0; k < 4; k++) { const bx = u + 0.25 + k * (w - 0.5) / 3; bag.add(LOG, rod([bx, y + hh - 0.14, zf - 0.1], [bx, y + hh - 0.14 + 0.003 * k, zf + 0.22], 0.045, 5)); }
+      for (const cxp of [u, u + w - 0.14]) bag.add(MUD, box(cxp - 0.02, y, zf, cxp + 0.16, y + hh + 0.12 + 0.001 * k0(u), zf + 0.1));
       const dx = u + w * (0.3 + rand() * 0.4);
       bag.add(HOLE, box(dx - 0.22, y + 0.05, zf, dx + 0.22, y + 0.8, zf + 0.012));
       bag.add(DARK, box(dx - 0.27, y + 0.8, zf - 0.02, dx + 0.27, y + 0.9, zf + 0.06));
+      for (const sd of [-1, 1]) bag.add(MUD, box(dx + sd * 0.22 - (sd > 0 ? 0 : 0.07), y, zf, dx + sd * 0.22 + (sd > 0 ? 0.07 : 0), y + 0.8, zf + 0.05));
       bag.add('bark_dark', box(dx - 0.3, y + 0.92, zf, dx + 0.3, y + 1.25, zf + 0.004));      // the soot over the door
       if (rand() < 0.5) bag.add(HOLE, box(u + 0.2, y + hh - 0.55, zf, u + 0.45, y + hh - 0.3, zf + 0.012));
       u += w + 0.3;
