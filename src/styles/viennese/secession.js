@@ -80,10 +80,14 @@ export function secession(el, ctx) {
   };
   const FP = (s) => ({ w: 6, D: 6, at: (u, d) => [X(s < 0 ? -17 + u : 11 + u), Z(-d)] });
   for (const s of [-1, 1]) { const Fr = FP(s); for (const u of [1.5, 3, 4.5]) leafStem(Fr, u, FL + 3.4, FL + 10.8, 7); }
-  for (const s of [-1, 1]) { const Fr = { w: 4.4, D: 0, at: (u, d) => [X(s * 6.6 + s * u), Z(-d)] }; void Fr; }
-  // the walls between pylons: a frame of gilt lines and a laurel tree on each
+  // the recessed wall panels between the pylons (face at b 2.8): a frame of gilt lines, a gilt laurel tree rising from a low mound, the course of small gilt squares under the cornice
   for (const s of [-1, 1]) {
-    const Fr = { w: 4.4, D: 0, at: (u, d) => [X((s < 0 ? -11 : 6.6) + u), Z(-d - 0.0)] }; void Fr;
+    const Fr = { w: 4.4, D: 2.8, at: (u, d) => [X((s < 0 ? -11 : 6.6) + u), Z(2.8 - d)] }, AA = (m, ...q) => bag.add(m, fbox(Fr, y, ...q)), PP = (m, pts, d0, d1) => bag.add(m, prism(Fr, y, pts, d0, d1));
+    for (const [u0, u1, v0, v1] of [[0.25, 4.15, 1.0, 1.06], [0.25, 4.15, WH - 1.1, WH - 1.04], [0.25, 0.31, 1.0, WH - 1.04], [4.09, 4.15, 1.0, WH - 1.04]]) AA(G, u0, u1, v0, v1, 0.0, 0.05);
+    leafStem(Fr, 2.2, 1.6, 6.9, 9);
+    for (const q of [-1, 1]) { PP(G, [[2.2, 1.6], [2.2 + q * 0.9, 1.75], [2.2 + q * 0.2, 2.05]], 0.0, 0.06); PP(G, [[2.2 + q * 0.5, 4.2], [2.2 + q * 1.15, 4.6], [2.2 + q * 0.55, 4.9]], 0.0, 0.06); }
+    PP(G, [[1.3, 1.0], [3.1, 1.0], [2.8, 1.55], [1.6, 1.55]], 0.0, 0.06);
+    for (let u = 0.6; u < 4.0; u += 0.4) AA(G, u - 0.07, u + 0.07, WH - 0.62, WH - 0.48, 0.0, 0.04);
   }
   // Moser's owls on stone bases at the foot of the inner pylons
   for (const s of [-1, 1]) {
@@ -158,20 +162,39 @@ export function secession(el, ctx) {
     for (let a = -10.0; a <= 10.0; a += 1.0) { sq(a, 9.4); sq(a, 24.7); }
     for (let b = 10.4; b <= 24.0; b += 1.0) { sq(-10.2, b); sq(10.2, b); } }
   for (const [a0, b0, a1, b1] of [[-10.6, 9.15, 10.6, 9.25], [-10.6, 24.9, 10.6, 25.0], [-10.6 + 0.0, 9.15, -10.5, 25], [10.5, 9.15, 10.6, 25]]) void [a0, b0, a1, b1];
-  // the statue of Beethoven by Klinger in the middle of the hall (a, b) = (0, 17.2)
+  // the statue of Beethoven by Klinger in the middle of the hall (a, b) = (0, 17.2): black marble plinth in two steps, the throne of coloured
+  // marbles with a tall bronze back and angel heads on its cheeks, the figure bare to the waist (ivory) leaning forward, drapery of bronze over
+  // the knees, fists clenched, the eagle at his side; he faces the entrance (north)
   {
-    const a = 0, b = 17.2;
-    bx('marble_dark', -2.2, b - 2.2, 2.2, b + 2.2, FL - 0.02, FL + 0.28); bx('marble_dark', -1.8, b - 1.8, 1.8, b + 1.8, FL + 0.28, FL + 0.58); ob(-2.2, b - 2.2, 2.2, b + 2.2, FL, FL + 0.6);
-    bx('marble_pink', -1.5, b - 1.3, 1.5, b + 1.3, FL + 0.58, FL + 1.1); bx('marble_pink', -1.35, b - 0.6, -0.95, b + 1.0, FL + 1.1, FL + 2.0); bx('marble_pink', 0.95, b - 0.6, 1.35, b + 1.0, FL + 1.1, FL + 2.0);
-    bx('bronze', -1.0, b + 0.65, 1.0, b + 1.0, FL + 1.1, FL + 3.9); bx('gilt_bronze', -1.15, b + 0.55, 1.15, b + 1.05, FL + 3.9, FL + 4.1);
-    bx('marble_pink', -0.95, b - 0.5, 0.95, b + 0.7, FL + 1.1, FL + 1.55);                        // the seat
-    lat('bronze', [[0.001, 1.55], [0.7, 1.55], [0.75, 1.9], [0.55, 2.35], [0.001, 2.4]], a, b - 0.1, FL, 12);        // the drapery over the knees
-    lat('ivory', [[0.001, 2.2], [0.42, 2.25], [0.46, 2.9], [0.36, 3.2], [0.001, 3.3]], a, b + 0.15, FL, 12);        // the torso
-    lat('ivory', [[0.001, 3.25], [0.17, 3.3], [0.2, 3.5], [0.14, 3.72], [0.001, 3.78]], a, b + 0.1, FL, 10);       // the head
-    bx('ivory', -0.55, b - 0.65, -0.35, b + 0.0, FL + 1.55, FL + 1.75); bx('ivory', 0.35, b - 0.65, 0.55, b + 0.0, FL + 1.55, FL + 1.75);
-    for (const s of [-1, 1]) bag.add('ivory', rod([X(s * 0.42), y + FL + 2.9, Z(b + 0.05)], [X(s * 0.45), y + FL + 2.2, Z(b - 0.6)], 0.1, 6));
-    lat('bronze', [[0.001, 0.58], [0.3, 0.6], [0.28, 1.15], [0.12, 1.3], [0.001, 1.38]], 1.7, b - 1.0, FL, 8);     // the eagle at his side (small)
-    ob(-2.2, b - 2.2, 2.2, b + 2.2, FL, FL + 4.1);
+    const b = 17.2, V = FL;
+    bx('marble_dark', -2.4, b - 2.1, 2.4, b + 2.1, V - 0.02, V + 0.3); bx('marble_dark', -2.0, b - 1.7, 2.0, b + 1.7, V + 0.3, V + 0.7); bx('gilt_bronze', -2.02, b - 1.72, 2.02, b + 1.72, V + 0.7, V + 0.72);
+    bx('marble_pink', -1.25, b - 1.05, 1.25, b + 1.05, V + 0.72, V + 1.2); bx('bronze', -1.3, b - 1.1, 1.3, b + 1.1, V + 1.2, V + 1.27);
+    for (const t of [-0.8, -0.27, 0.27, 0.8]) bx('gilt_bronze', t - 0.05, b - 1.07, t + 0.05, b - 1.05, V + 0.8, V + 1.12);               // gilt inlay on the base's front
+    bx('marble_pink', -1.0, b - 0.2, 1.0, b + 0.8, V + 1.27, V + 1.62); bx('gilt_bronze', -1.02, b - 0.22, 1.02, b - 0.18, V + 1.55, V + 1.62);        // the seat
+    for (const sg of [-1, 1]) {
+      bx('bronze', sg * 1.05 - 0.13, b - 0.2, sg * 1.05 + 0.13, b + 0.85, V + 1.27, V + 2.2); bx('gilt_bronze', sg * 1.05 - 0.17, b - 0.26, sg * 1.05 + 0.17, b + 0.9, V + 2.2, V + 2.27);  // the cheeks
+      for (const [dz, v] of [[0.15, 1.65], [0.55, 1.95]]) bag.add('ivory', lathe([[0.001, -0.12], [0.1, -0.06], [0.13, 0.04], [0.08, 0.14], [0.001, 0.17]], 8, null, X(sg * 1.2), y + V + v, Z(b + dz)));   // angel heads
+    }
+    bx('bronze', -1.3, b + 0.8, 1.3, b + 1.1, V + 1.27, V + 2.7); bx('bronze', -1.0, b + 0.8, 1.0, b + 1.1, V + 2.7, V + 4.05); bx('gilt_bronze', -1.05, b + 0.76, 1.05, b + 1.14, V + 4.05, V + 4.15);
+    for (const sg of [-1, 1]) { bx('marble_pink', sg * 0.8 - 0.22, b + 0.74, sg * 0.8 + 0.22, b + 0.8, V + 1.9, V + 3.7); bx('gold', sg * 0.8 - 0.26, b + 0.74, sg * 0.8 - 0.22, b + 0.8, V + 1.9, V + 3.7); bx('gold', sg * 0.8 + 0.22, b + 0.74, sg * 0.8 + 0.26, b + 0.8, V + 1.9, V + 3.7); }
+    // the figure
+    const R = (p, q, r) => bag.add('ivory', rod([X(p[0]), y + V + p[1], Z(b + p[2])], [X(q[0]), y + V + q[1], Z(b + q[2])], r, 8));
+    bx('bronze', -0.72, b - 0.55, 0.72, b + 0.45, V + 1.62, V + 2.0); bx('bronze', -0.72, b - 0.72, 0.72, b - 0.5, V + 1.4, V + 1.95);
+    for (const t of [-0.55, -0.28, 0, 0.28, 0.55]) bx('bronze', t - 0.035, b - 0.76, t + 0.035, b - 0.72, V + 1.42, V + 1.9);                              // the folds
+    for (const sg of [-1, 1]) bx('bronze', sg * 0.4 - 0.2, b - 1.05, sg * 0.4 + 0.2, b - 0.7, V + 1.27, V + 1.4);                                          // the feet
+    R([0, 1.75, 0.3], [0, 2.7, -0.05], 0.42); R([-0.5, 2.75, -0.05], [0.5, 2.75, -0.05], 0.2);                                                           // chest, shoulders
+    for (const sg of [-1, 1]) { R([sg * 0.52, 2.7, -0.05], [sg * 0.58, 2.15, -0.3], 0.11); R([sg * 0.58, 2.15, -0.3], [sg * 0.42, 2.02, -0.6], 0.1); bx('ivory', sg * 0.42 - 0.1, b - 0.72, sg * 0.42 + 0.1, b - 0.5, V + 1.95, V + 2.12); }
+    R([0, 2.78, -0.05], [0, 2.98, -0.3], 0.13);
+    bag.add('ivory', lathe([[0.001, -0.17], [0.15, -0.1], [0.2, 0.05], [0.18, 0.22], [0.1, 0.34], [0.001, 0.37]], 10, null, X(0), y + V + 2.95, Z(b - 0.36)));   // the head, bowed
+    bag.add('lacquer_black', lathe([[0.001, 0.2], [0.17, 0.2], [0.21, 0.3], [0.19, 0.36], [0.001, 0.4]], 8, null, X(0), y + V + 2.95, Z(b - 0.28)));            // the hair
+    // the eagle, on the plinth's step at his side
+    { const ea = 1.65, eb = b - 0.9, e0 = V + 0.7;
+      bag.add('bronze', lathe([[0.001, 0], [0.26, 0.02], [0.3, 0.3], [0.2, 0.62], [0.001, 0.66]], 10, null, X(ea), y + e0, Z(eb)));
+      bag.add('bronze', lathe([[0.001, 0.58], [0.12, 0.6], [0.13, 0.72], [0.08, 0.82], [0.001, 0.83]], 8, null, X(ea), y + e0, Z(eb - 0.12)));
+      bx('gilt_bronze', ea - 0.03, eb - 0.4, ea + 0.03, eb - 0.2, e0 + 0.66, e0 + 0.72);
+      for (const sg of [-1, 1]) bx('bronze', ea + sg * 0.3 - 0.04, eb - 0.1, ea + sg * 0.3 + 0.04, eb + 0.35, e0 + 0.12, e0 + 0.55);
+      bx('bronze', ea - 0.1, eb + 0.2, ea + 0.1, eb + 0.55, e0 + 0.04, e0 + 0.14); }
+    ob(-2.4, b - 2.1, 2.4, b + 2.1, FL, FL + 4.15);
   }
   // benches along the hall's side walls
   for (const s of [-1, 1]) for (const b of [12.2, 22.2]) { const a = s * 9.7; bx('leather_bench', a - 0.4, b - 1.0, a + 0.4, b + 1.0, FL + 0.42, FL + 0.5); bx('wood_dark', a - 0.35, b - 0.9, a - 0.3, b - 0.8, FL, FL + 0.42); bx('wood_dark', a + 0.3, b - 0.9, a + 0.35, b - 0.8, FL, FL + 0.42); bx('wood_dark', a - 0.35, b + 0.8, a - 0.3, b + 0.9, FL, FL + 0.42); bx('wood_dark', a + 0.3, b + 0.8, a + 0.35, b + 0.9, FL, FL + 0.42); ob(a - 0.4, b - 1.0, a + 0.4, b + 1.0, FL, FL + 0.5); }
@@ -214,7 +237,17 @@ export function secession(el, ctx) {
       Pq('skin_light', ngon(u - 0.08, V0 + 1.68, 0.17, 8), 0.06, 0.075); Pq('lacquer_black', ngon(u - 0.14, V0 + 1.78, 0.2, 8), 0.04, 0.06);
       for (let k = 0; k < 8; k++) { const q = 8.5 + k * 0.38; Aq(k % 2 ? 'paint_ochre' : 'cloth_red', q, q + 0.22, V0 + 0.2, V0 + 0.55, 0.04, 0.055); } }
     // the squares and the spirals above the frieze (gold on the white wall)
-    for (const [Fr, len] of [[FE, FE.w], [FW, FW.w], [FS, FS.w]]) for (let u = 0.6; u < len - 0.4; u += 0.9) bag.add(G, fbox(Fr, y, u - 0.14, u + 0.14, V0 + HF + 0.35, V0 + HF + 0.63, 0.0, 0.03));
+    for (const [Fr, len] of [[FE, FE.w], [FW, FW.w], [FS, FS.w]]) for (let u = 0.6; u < len - 0.4; u += 0.9) if (Fr === FS || ((u - 1.6) % 2.7 + 2.7) % 2.7 > 0.55 && ((u - 1.6) % 2.7 + 2.7) % 2.7 < 2.15) bag.add(G, fbox(Fr, y, u - 0.14, u + 0.14, V0 + HF + 0.35, V0 + HF + 0.63, 0.0, 0.03));
+    // Klimt's gilt spirals above the frieze on the two long walls: a ring of small bars round a centre, every 2.7 m
+    for (const [Fr, len] of [[FE, FE.w], [FW, FW.w]]) for (let u = 1.6; u < len - 1; u += 2.7) {
+      const c = V0 + HF + 0.82;
+      for (let k = 0; k < 14; k++) { const th = k / 14 * Math.PI * 2, rr2 = 0.14 + 0.16 * (k / 14); bag.add(G, fbox(Fr, y, u + Math.cos(th) * rr2 - 0.04, u + Math.cos(th) * rr2 + 0.04, c + Math.sin(th) * rr2 - 0.04, c + Math.sin(th) * rr2 + 0.04, 0.0, 0.03)); }
+      bag.add(G, fbox(Fr, y, u - 0.05, u + 0.05, c - 0.05, c + 0.05, 0.0, 0.03));
+    }
+    // the floating women of Longing for Happiness: tall narrow gowns slanting up, gold and white, hair streaming
+    for (let k = 0; k < 4; k++) { const u = 2.3 + k * 4.2, v = V0 + 1.0 + (k % 2) * 0.2, sl = 0.5; const gm = k % 2 ? 'gold' : 'cloth_white';
+      bag.add(gm, prism(FE, y, [[u - 0.22, v], [u + 0.22, v], [u + 0.14 + sl, v + 1.0], [u - 0.1 + sl, v + 1.0]], 0.03, 0.05));
+      bag.add('skin_light', prism(FE, y, ngon(u + sl + 0.02, v + 1.12, 0.07, 8), 0.05, 0.065)); bag.add('lacquer_black', prism(FE, y, [[u + sl - 0.08, v + 1.05], [u + sl + 0.1, v + 1.1], [u + sl + 0.55, v + 0.8], [u + sl + 0.1, v + 0.95]], 0.04, 0.055)); }
     // a rail at knee height before the frieze (so nobody leans on the paint)
     for (const [a, b0, b1] of [[aW + 1.3, bN + 0.4, bS - 0.3]]) { bx('wood_dark', a - 0.03, b0, a + 0.03, b1, FL + 0.55, FL + 0.6); for (let b = b0; b <= b1; b += 3) bx('wood_dark', a - 0.03, b - 0.03, a + 0.03, b + 0.03, FL, FL + 0.6); }
   }

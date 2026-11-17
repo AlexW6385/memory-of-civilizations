@@ -124,7 +124,7 @@ function findYards(hit) {
   return out;
 }
 /** Which lots have a Durchhaus (one for each yard), which are shops (the n nearest the arrival), and the trade of each. */
-export const TRADES = ['kaffeehaus', 'baeckerei', 'tabak', 'apotheke', 'greissler', 'fleischhauer', 'buchhandlung', 'huetemacher', 'weinstube', 'schneider', 'konditorei', 'uhrmacher', 'schuster', 'blumen'];
+export const TRADES = ['kaffeehaus', 'baeckerei', 'tabak', 'apotheke', 'greissler', 'fleischhauer', 'buchhandlung', 'huetemacher', 'weinstube', 'schneider', 'konditorei', 'uhrmacher', 'schuster', 'blumen', 'friseur', 'milch', 'tischler'];
 function assignUses(rand) {
   const touch = (l, y) => {
     const [a, b, c, d] = l.rect, [p, q, r, s] = y.rect, e = 0.02;
@@ -149,13 +149,13 @@ function assignUses(rand) {
   // every lot gets the yard it backs onto (for the rear face)
   for (const l of LOTS) { l.yardAt = null; for (const y of YARDS) { const t = touch(l, y); if (t) { l.yardAt = y.i; break; } } }
   // the shops: the nearest lots of the three older kinds to the arrival, not the Durchhäuser
-  const ok = LOTS.filter((l) => l.kind !== 'biedermeier' && !l.side && l.passage === undefined && !l.faience && !l.medallions && (l.front === 'n' || l.front === 's' ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1]) >= 8.5 && Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 + 40) < 175);
+  const ok = LOTS.filter((l) => l.kind !== 'biedermeier' && !l.side && l.passage === undefined && !l.faience && !l.medallions && (l.front === 'n' || l.front === 's' ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1]) >= 8.5 && Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 + 40) < 245);
   ok.sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2, (a.rect[1] + a.rect[3]) / 2 + 40) - Math.hypot((b.rect[0] + b.rect[2]) / 2, (b.rect[1] + b.rect[3]) / 2 + 40));
   let n = 0; const taken = [];
   for (const l of ok) {
     // not two shops side by side (one lot between), so that the street keeps its rhythm
     if (taken.some((t) => Math.hypot((t.rect[0] + t.rect[2]) / 2 - (l.rect[0] + l.rect[2]) / 2, (t.rect[1] + t.rect[3]) / 2 - (l.rect[1] + l.rect[3]) / 2) < 12)) continue;
-    l.open = TRADES[n % TRADES.length]; taken.push(l); n++; if (n >= 28) break;
+    l.open = TRADES[n % TRADES.length]; taken.push(l); n++; if (n >= 52) break;
   }
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m)) || inRect(CAFE, x, z, m);
