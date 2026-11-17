@@ -6,15 +6,35 @@ import { profile, ell, cap, poly } from '../greek/sculpture.js';
 import { merge } from '../greek/columns.js';
 import { rng, mergeG, inFrame, courses } from './util.js';
 import { stud, bar } from './relief.js';
+import { lionRelief } from './lions.js';
+import { toPlane, prism } from '../greek/sculpture.js';
 
 const ROUGH = 'rock_boulder', CORE = 'rubble', DRESSED = 'limestone_yellow';
 
-/** A block of a face: front at the face, `d` deep, its top and sides leaning in a little (rough work), five faces only. */
+/** A block of a face: front at the face, `d` deep, its top and sides leaning in a little (rough work); the front bulges to a boulder's crown (a swell of nine points), five faces. */
 function block(rand, [ua, ya, ub, yb], z0, z1, front, o) {
   const g = o.gap, lean = o.lean * rand();
-  const r = front < 0 ? [ua + g, z0, ub - g, z1] : [ua + g, z0, ub - g, z1];
-  const top = o.top;
-  return frustum(r, ya + g, yb - g, lean * 0.6, lean * 0.6, front < 0 ? lean : 0, front < 0 ? 0 : lean, { noBottom: true, noTop: !top, ...(front < 0 ? { noZp: true } : { noZn: true }) });
+  const x0 = ua + g, x1 = ub - g, y0 = ya + g, y1 = yb - g, top = o.top, f = front < 0 ? -1 : 1;
+  const iz = lean, ix = lean * 0.6;
+  const zf = f < 0 ? z0 : z1, zb = f < 0 ? z1 : z0;
+  void zb;
+  const base = frustum(f < 0 ? [x0, z0, x1, z1] : [x0, z0, x1, z1], y0, y1, ix, ix, f < 0 ? iz : 0, f < 0 ? 0 : iz, { noBottom: true, noTop: !top, noZn: true, noZp: true });
+  // the face: corners at the bottom and (leaning) at the top
+  const zt = zf - f * iz;
+  const A = [x0, y0, zf], B = [x1, y0, zf], C = [x1 - ix, y1, zt], D = [x0 + ix, y1, zt];
+  // nine points of the face: corners on the plane, the edge midpoints and the crown pushed out by uneven amounts (a boulder's swell, not a pyramid)
+  const lerp = (u, v, k) => [x0 + (x1 - x0) * u + (k ? (rand() - 0.5) * 0.06 : 0), y0 + (y1 - y0) * v, zf + (zt - zf) * v + f * k * o.bulge];
+  const gr = [[lerp(0, 0, 0), lerp(0.5, 0, 0.35 + rand() * 0.3), lerp(1, 0, 0)], [lerp(0.5 - 0.1 + rand() * 0.2, 0.5, 0.35 + rand() * 0.3), lerp(0.5 + (rand() - 0.5) * 0.3, 0.5, 0.8 + rand() * 0.5), lerp(1, 0.5, 0.3 + rand() * 0.3)], [lerp(0, 1, 0), lerp(0.5, 1, 0.3 + rand() * 0.3), lerp(1, 1, 0)]];
+  gr[1][0] = lerp(0, 0.5, 0.3 + rand() * 0.3);
+  const t = [];
+  for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) {
+    const p00 = gr[i][j], p10 = gr[i][j + 1], p11 = gr[i + 1][j + 1], p01 = gr[i + 1][j];
+    // quad p00 p10 p11 p01 runs +x then +y: counter-clockwise from the +z side
+    if (f > 0) t.push(...p00, ...p10, ...p11, ...p00, ...p11, ...p01);
+    else t.push(...p00, ...p11, ...p10, ...p00, ...p01, ...p11);
+  }
+  const face = fromTriangles(t);
+  return mergeG([base, face]);
 }
 
 /**
@@ -23,7 +43,7 @@ function block(rand, [ua, ya, ub, yb], z0, z1, front, o) {
  */
 export function wallRun(el, { bag, col }) {
   const rand = rng(el.seed ?? 1), [ax, az] = el.a, [bx, bz] = el.b, L = Math.hypot(bx - ax, bz - az), th = el.th, ext = el.ext ?? 0, y0 = el.y0, y1 = el.y1;
-  const ash = !!el.ashlar, H = ash ? [0.6, 0.85] : [0.9, 1.5], W = ash ? [1.1, 2.1] : [1.0, 2.6], o = { gap: ash ? 0.02 : 0.07, lean: ash ? 0.02 : 0.14 };
+  const ash = !!el.ashlar, H = ash ? [0.6, 0.85] : [1.0, 1.6], W = ash ? [1.1, 2.1] : [1.4, 3.4], o = { gap: ash ? 0.02 : 0.07, lean: ash ? 0.02 : 0.14, bulge: ash ? 0.03 : 0.16 };
   const geo = [], core = [];
   core.push(box(-ext + 0.5, y0, -th / 2 + 0.6, L + ext - 0.5, y1 - 0.2, th / 2 - 0.6));
   const rows = courses(rand, -ext, L + ext, y0, y1, { h: H, w: W, taper: ash ? 0.01 : 0.05 });
@@ -132,7 +152,8 @@ export function lionGate(el, ctx) {
   bag.add(CORE, mergeG(core));
   // the slab with the relief, set back a hand's breadth from the face, over the lintel (the front of the relief level with the wall)
   const slabX = X + 0.32;
-  bag.add('travertine', profile(reliefParts(true).map(([q, f]) => [q, f]), { p: [slabX, lintelTop, 0], u: [0, 0, 1], o: [-1, 0, 0], s: 1, d: rel }));
+  const slab = prism([[-1.8, 0], [1.8, 0], [0, 3.3]], 0.12), plane = { p: [slabX, lintelTop, 0], u: [0, 0, 1], o: [-1, 0, 0] };
+  bag.add('travertine', toPlane(mergeG([slab, lionRelief()]), plane.p, plane.u, plane.o));
   void merge; void fromTriangles;
   // threshold stone and the floor of the passage
   bag.add('flagstone', box(X - 0.4, y - 0.4, -hw - 0.2, X + th + 0.4, y, hw + 0.2));

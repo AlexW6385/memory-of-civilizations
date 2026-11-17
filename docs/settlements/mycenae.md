@@ -122,3 +122,8 @@ Tags: **[stated]** by a cited source; **[inferred]** our reasoning, written next
 - ancient-history-sites.com, "Mycenaean Housing and Living Conditions" — https://www.ancient-history-sites.com/?p=142032
 - Dartmouth, Aegean Prehistory, lesson 20, "Mycenaean Residential Architecture: Palaces and Ordinary Housing" — https://sites.dartmouth.edu/aegean-prehistory/lessons/lesson-20-narrative
 - ancient-history-sites.com, "Mycenaean Architecture and Building Methods" — https://www.ancient-history-sites.com/?p=142019
+
+## 14. The landmark seen close (round 2, 2026-11-17)
+
+- **The lionesses.** The relief slab is 3.60 m wide and over 3 m high, the lionesses standing on their hind legs with the forefeet on the altar, either side of the column [stated: Wikipedia, "Lion Gate"]; their heads were carved separately and are lost, so ours are restored, turned out [inferred]. In the model each lioness is built from rounded volumes (haunch, flank with ribs, shoulder and chest, tapering limbs with knee and elbow, neck, head with muzzle and ears, tufted tail) raised from a 12 cm slab, and fitted inside the triangle; the column is fluted, tapers downward, with a round cushion capital and abacus; four round rafter ends above; the altar has a base course and a moulded top [inferred: forms; stated: the column and discs].
+- **The Cyclopean faces.** Blocks of the rough runs are larger (1.0–1.6 m high, 1.4–3.4 m long) and their faces swell out of the plane in nine uneven points (a boulder's crown); the dressed pseudo-ashlar of the west front swells by a few centimetres [stated: Wikipedia, "Mycenae" — huge roughly shaped blocks; "Lion Gate" — hammer-dressed, regular courses; the sizes are inferred].
