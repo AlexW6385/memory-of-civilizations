@@ -6,6 +6,7 @@ import { rectRoof, column, beamTris } from '../ming/index.js';
 import { hexa } from './kaifeng.js';
 import { STYLES } from '../../core/build.js';
 import { Matrix4, Float32BufferAttribute } from '../../core/three.js';
+import { hzLakePavilion, hzArchBridge, bracketSet } from './hzlake.js';
 
 /**
  * view_tent: a stand for watching the bore { at, y, w (along x), d (along z), h, cloth, trim, open ('s' |
@@ -254,15 +255,13 @@ function templeGate(el, { bag, col }) {
   }
   const x0 = cx - w - 2 * pw, x1 = cx + w + 2 * pw;
   bag.add('lacquer_red', box(x0 - 0.1, y + H - 0.4, cz - 0.3, x1 + 0.1, y + H - 0.1, cz + 0.3));
-  const t = [];
-  for (const sg of [-1, 1]) for (const [px, u] of [[cx - w - pw, 0], [cx + w + pw, 0], [cx, 0]]) {
-    const o = [px - 0.35, y + H - 0.1, cz + sg * 0.25], p = [px + 0.35, y + H - 0.1, cz + sg * 0.25];
-    beamTris(t, o, p, 0.1, 0.12); beamTris(t, [px - 0.5, y + H + 0.02, cz + sg * 0.45], [px + 0.5, y + H + 0.02, cz + sg * 0.45], 0.1, 0.12);
-  }
-  bag.add('paint_ochre', fromTriangles(t));
+  const och = [];
+  for (const sg of [-1, 1]) for (const px of [cx - w - pw, cx, cx + w + pw]) bracketSet(och, px, cz, 0, sg, y + H + 0.42, 1);
+  for (const sg of [-1, 1]) for (const px of [(cx - w - pw + cx) / 2, (cx + cx + w + pw) / 2]) bracketSet(och, px, cz, 0, sg, y + H + 0.42, 0.8);
+  bag.add('paint_ochre', fromTriangles(och));
   bag.add('lacquer_red', box(x0 - 0.1, y + H + 0.14, cz - 0.3, x1 + 0.1, y + H + 0.42, cz + 0.3));
-  const hy = y + H + 0.4, rise = 0.95;
-  rectRoof({ c: [cx, cz], A: (x1 - x0) / 2 + 0.7, B: 1.25, y: hy, rise, kind: 'gable', sweep: 0.2, mat: 'tile_dark', soffit: 'timber', p: 1.4 }, bag);
+  const hy = y + H + 1.0, rise = 1.25;
+  rectRoof({ c: [cx, cz], A: (x1 - x0) / 2 + 0.7, B: 1.45, y: hy, rise, kind: 'gable', sweep: 0.5, mat: 'tile_dark', soffit: 'timber', p: 1.4 }, bag);
   // the gable boards over the piers' ends
   const top = hy + rise - 0.2;
   for (const x of [x0 - 0.12, x1 + 0.12 - 0.1]) bag.add('plaster_white', box(x, hy - 0.02, cz - 0.4, x + 0.1, top, cz + 0.4));
@@ -1391,4 +1390,4 @@ function hzLanding(el, { bag, col }) {
   void t;
 }
 
-export const HANGZHOU_ELEMENTS = { hz_shell: hzShell, hz_imperial_way: imperialWay, view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving, hz_stair: hzStair, hz_lion_pair: hzLionPair, hz_tree: hzTree, hz_bank: hzBank, hz_wall_skin: hzWallSkin, hz_gate: hzGate, hz_revetment: hzRevetment, hz_slabs: hzSlabs, hz_landing: hzLanding };
+export const HANGZHOU_ELEMENTS = { hz_shell: hzShell, hz_imperial_way: imperialWay, view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving, hz_stair: hzStair, hz_lion_pair: hzLionPair, hz_tree: hzTree, hz_bank: hzBank, hz_wall_skin: hzWallSkin, hz_gate: hzGate, hz_revetment: hzRevetment, hz_slabs: hzSlabs, hz_landing: hzLanding, hz_lake_pavilion: hzLakePavilion, hz_arch_bridge: hzArchBridge };

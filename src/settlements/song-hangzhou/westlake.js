@@ -47,13 +47,13 @@ E.push({ t: 'stairs', rect: [-4, -96, 4, -88], y0: TOP, y1: 3.4, dir: 'n', mat: 
 const BR = [[-74, 'arch', 10, 2.0], [-48, 'arch', 12, 2.4], [-22, 'arch', 12, 2.6], [4, 'slab', 10], [30, 'arch', 12, 2.4], [56, 'arch', 10, 2.0]];
 for (const [z, kind, sp, rise] of BR) {
   E.push({ t: 'water_rect', rect: [-11, z - sp / 2, 11, z + sp / 2], y: LAKE });
-  if (kind === 'arch') E.push({ t: 'ming_arch_bridge', at: [0, z], across: 'z', span: sp + 0.4, width: 5.2, rise, landing: 4.2, y: TOP + 0.04, water: LAKE, bed: BED });
+  if (kind === 'arch') E.push({ t: 'hz_arch_bridge', at: [0, z], across: 'z', span: sp + 0.4, width: 5.2, rise, landing: 4.2, y: TOP + 0.04, water: LAKE, bed: BED });
   else E.push({ t: 'ming_slab_bridge', pts: [[0, z - sp / 2 - 1.5], [0, z + sp / 2 + 1.5]], w: 5.2, y: TOP + 0.04, bed: BED });
 }
 export const LAKE_BRIDGES = BR.map(([z, kind, sp]) => ({ z: WL.origin[1] + z, kind, span: sp }));   // world z, kind and the water channel's width, for the boats' lanes
 // lakeside pavilions on the east edge of the bank, between the third and fourth bridges and between the fifth and the sixth
-E.push({ t: 'ming_pavilion', c: [7.2, -9], shape: 'hex', r: 3.0, y: TOP + 0.5, H: 3.6, plat: 0.5, open: [0, 1, 2, 3, 4, 5] });
-E.push({ t: 'ming_pavilion', c: [-7.2, 43], shape: 'square', w: 5, y: TOP + 0.5, H: 3.4, plat: 0.5, open: [0, 1, 2, 3] });
+E.push({ t: 'hz_lake_pavilion', c: [7.2, -9], shape: 'hex', r: 3.0, y: TOP + 0.5, H: 3.6, plat: 0.5, open: [2] });
+E.push({ t: 'hz_lake_pavilion', c: [-7.2, 43], shape: 'square', w: 5, y: TOP + 0.5, H: 3.4, plat: 0.5, open: [1] });
 // the landing on the west side of the bank: timber jetties with the painted boats moored along them
 for (const z of [12, 22]) E.push({ t: 'block', walk: true, rect: [-24, z, -11, z + 2.4], y0: -1.8, y1: TOP, mat: 'timber' });
 // the landing's mooring: piles with their iron rings, plank decks with the boatmen's gear (a pole, a basket, a coil of rope), a stone landing step on the bank
