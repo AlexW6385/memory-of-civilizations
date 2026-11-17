@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.16 — Lisbon, Yinxu, the tulou, Mycenae (2026-11-17)
+
+Lisbon: the Sé entered (nave, transept, chevet, rose), the Ribeira palace with its loggia and the Casa da Índia's counting-house, São Jorge castle with its wall-walk, six new trades under hanging signs, 50 more houses to enter. Yinxu: bronzes with flanges, eyes and bands, ramming courses on the platforms, the halls' wall posts and rafters, every house of the lineage quarters entered, gates and fronts by rule. The tulou: the square tulou entered and furnished on every floor, real barred windows and gun ports, a pigsty, a buffalo shed, a tea shed and a barn, the ancestral hall's ridge, brackets and offering table. Mycenae: the Treasury of Atreus' spiral slab, door leaves and rosettes in the dome, the Lion Gate's leaves, carved stelae in Grave Circle A, house fronts by rule, threshing floors, ovens and arbours, the megaron's throne.
+
 ## v12.15 — Baghdad, Ayutthaya, Sydney (2026-11-17)
 
 Baghdad: al-Mansur's mosque in detail (bays, a real mihrab niche, minbar, strapped composite capitals), four quarter mosques, 23 houses to enter, door forms by wealth. Ayutthaya: pillars, lotus band and porches on the chedi, framed windows, door leaves, gables and chofa on the halls, the Dutch lodge with its wharf, kitchen houses, two royal elephants. Sydney: the Opera House podium's granite panels and parapet, eleven Rocks terraces to enter, a fish-and-chip shop, a hardware store and a bakery, bubblers. Fixed: shop-sign lettering and window goods in the city blocks of Sydney lay in the plane of what stood behind them and flickered.
