@@ -1,7 +1,7 @@
 // The square's life about 1630 (docs/settlements/isfahan.md §5, §15): horses held by grooms at both ends of the polo
 // field, by the stone goalposts; the guard's horses before Ali Qapu; people at the Qeysarieh portal and on the walks.
 
-import { RADIUS, SQUARE, CANAL, ALIQAPU, BAZAAR, OPEN_HOUSE, arcadeBays } from './layout.js';
+import { RADIUS, SQUARE, CANAL, ALIQAPU, BAZAAR, openHouses, houseSpots, arcadeBays } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
@@ -9,7 +9,7 @@ export function life() {
   const rand = rng(1630), L = [], pick = (a) => a[Math.floor(rand() * a.length)], [sx0, sz0, sx1, sz1] = SQUARE;
   /** A man in a long robe with a sash and a turban (the Qizilbash's red one now and then), or a woman wrapped and veiled. */
   const person = (at, rot, o = {}) => {
-    const woman = !o.man && rand() < 0.25;
+    const rw = !o.man && rand() < 0.25, woman = o.woman ?? rw;
     L.push({ t: 'figure', at, y: 0.04, rot, seed: Math.floor(rand() * 1e9), skin: rand() < 0.8 ? 'skin_medium' : 'skin_light', dress: 'robe',
       ...(woman ? { cloth: pick(['cloth_black', 'cloth_indigo', 'cloth_white']), cloth2: 'cloth_white', hat: 'veil', hair: 'long' }
         : { cloth: pick(['cloth_red', 'cloth_green', 'cloth_ochre', 'cloth_indigo', 'cloth_white', 'cloth_brown']), cloth2: pick(['cloth_white', 'cloth_ochre', 'cloth_red']), over: 'sash', hat: 'turban', hatMat: rand() < 0.3 ? 'cloth_red' : pick(['cloth_white', 'cloth_ochre']), hair: 'short', beard: true }),
@@ -109,8 +109,12 @@ export function life() {
     person(at(sg * 1.5, 4.2 + 3.2), Math.atan2(n[0], n[1]), { man: true, pose: 'cross', y: 0.2 });
     if (k % 3 === 1) person(at(0.4, 4.9), Math.atan2(n[0], n[1]) + Math.PI + 0.3, { pose: 'talk', y: 0.1 });
   }
-  // the open house: the master of the house on the talar's carpet, a servant in the court
-  { const [x0, z0, x1, z1] = OPEN_HOUSE().rect, cx = (x0 + 3.6 + x1 - 3.8) / 2; person([cx - 1.4, z0 + 1.9], Math.PI, { man: true, pose: 'cross', y: 0.47, cloth: 'cloth_green', cloth2: 'cloth_white' }); person([x1 - 4.6, z1 - 4.4], Math.PI / 2, { man: true, cloth: 'cloth_white' }); }
+  // the open houses (docs/settlements/isfahan.md §16, §22): the master of the house on the talar's carpet, a servant in the court, the cook
+  // at her hearth, a man on the takht where there is one
+  for (const h of openHouses()) for (const q of houseSpots(h).people) {
+    if (q.woman) person(q.at, q.rot, { woman: true, y: q.y, pose: q.pose });
+    else person(q.at, q.rot, { man: true, y: q.y, pose: q.pose, cloth: q.cloth, cloth2: 'cloth_white' });
+  }
   return L;
 }
 export const lifePlan = () => ({ id: 'isfahan-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: life(), rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -150], facing: 's' } });
