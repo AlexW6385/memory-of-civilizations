@@ -2,6 +2,7 @@
 // the bridge over Kothener Strasse, the north wing, the festive block (Aula, stage, canteen) and the Prellerhaus with its balconies —
 // every part enterable and furnished. Plan coordinates: +x east, +z south, metres.
 import { S, wall, slab, rail, scissor, chair, stool, table, pendant, bench, loom, machine, saw, boards, desk, cabinet, board, easel, bed, vitrine, rng } from './kit.js';
+import { curtainWall, bridgeDetail, lettering as letteringFin, balcony, entrance } from './detail.js';
 import { LV, PL, B } from '../../settlements/bauhaus-dessau/layout.js';
 
 const TH = 0.3, F0 = LV.f0, F1 = LV.f1, F2 = LV.f2, FR = LV.roof;
@@ -95,11 +96,7 @@ function workshopWing(sk) {
   // (the glass is drawn only where it covers the slab edges and the sills — the dark bands of the photographs; between them the panes are left open to the eye
   // so that the workshops behind the wall read from the street: the palette's glass is opaque)
   for (const [ya, yb] of [[F0, F0 + 0.95], [F1 - 0.55, F1 + 0.35], [F2 - 0.55, F2 + 0.35], [FR - 0.95, FR]]) sk.pane('glass_outer', { alongX: false, x: x0, u0: z0 + 0.05, u1: z1 - 0.05, y0: ya, y1: yb, n: -1 });
-  // sky-reflecting upper lights: every third bay's panes at the heads of the 2nd and 3rd floors, tilted open (the louvred sashes, opened by a mechanism)
-  for (const y of [F1 + 2.2, F2 + 2.2]) for (let u = z0 + 1.3; u + 1.25 < z1; u += 3.75) sk.pane('glass_outer', { alongX: false, x: x0 - 0.02, u0: u, u1: u + 1.25 - 0.06, y0: y, y1: y + 0.9, n: -1 });
-  for (let u = z0 + 0.05; u <= z1 + 0.01; u += 1.25) sk.b('steel_grey', x0 - 0.07, F0, u - 0.03, x0 + 0.03, FR, u + 0.03);
-  for (const y of [F0 + 0.0, F1 - 0.6, F1 + 0.9, F1 + 2.2, F2 - 0.6, F2 + 0.9, F2 + 2.2, FR - 0.06]) sk.b('steel_grey', x0 - 0.07, y, z0, x0 + 0.03, y + 0.07, z1);
-  sk.b('steel_grey', x0 - 0.07, F0 + 1.0, z0, x0 + 0.03, F0 + 1.07, z1);
+  curtainWall(sk, x0, z0, z1, F);   // mullions, transoms, opening lights and the columns behind (detail.js)
   sk.col.segment([x0 + 0.02, z0], [x0 + 0.02, z1], 0.12, 0, FR + 1);
   // the north, south and east walls, storey by storey
   for (let k = 0; k < 3; k++) {
@@ -185,6 +182,7 @@ function bridge(sk) {
     void k;
   }
   roof(sk, [x0, z0, x1, z1], FR);
+  bridgeDetail(sk, B.bridge, F1, F2, FR);
   // the lower level: the administration (desks with typewriters, filing cabinets, a counter); the upper: Gropius's building office
   {
     const y = F1;
@@ -246,6 +244,7 @@ function northWing(sk) {
   // an entrance canopy over the door on Kothener Strasse
   sk.b('concrete_light', 6.6, 3.3, z1 - 0.0, 12.0, 3.45, z1 + 1.6); sk.b('steel_grey', 6.65, 3.45, z1 + 1.55, 11.95, 3.55, z1 + 1.6);
   sk.k(6.6, 3.3, z1, 12.0, 3.5, z1 + 1.6);
+  steps(sk, [7.7, z1, 10.7, z1 + 0.9], 0, F0, 'n');   // the two risers up to the door
 }
 
 // ── the festive block ─────────────────────────────────────────────────────────────────────────
@@ -322,9 +321,7 @@ function prellerhaus(sk) {
         stool(sk, 46.2, y, zb - 0.55);
         // the balcony
         const b0 = za + 0.2, b1 = zb - 0.2;
-        slab(sk, [XB, b0, x1, b1], y, [], { mat: 'concrete_light', th: 0.2 });
-        rail(sk, [x1 - 0.05, b0], [x1 - 0.05, b1], y); rail(sk, [XB, b0 + 0.05], [x1 - 0.05, b0 + 0.05], y); rail(sk, [XB, b1 - 0.05], [x1 - 0.05, b1 - 0.05], y);
-        sk.b('car_red', x1 - 0.1, y + 0.4, b0, x1, y + 0.9, b1);
+        balcony(sk, XB, x1, b0, b1, y, ['car_blue', 'paint_cab_yellow'][k % 2]);
         // the balcony's furnishing: tubular chairs and a little table, a window box of geraniums on the rail, a rug or a blanket aired over it, a bicycle against the wall
         const q = rng(k * 31 + i * 7 + 5);
         if (q() < 0.55) { chair(sk, x1 - 0.55, y, zm - 0.35, 1); if (q() < 0.5) chair(sk, x1 - 0.55, y, zm + 0.45, 1); }
@@ -348,19 +345,6 @@ function prellerhaus(sk) {
 
 
 // ── the extras: the vertical lettering, the boiler house and its chimney, curtains behind the glass wall, books, hangings, a piano, weathering ──
-const GLYPH = { B: ['110', '101', '110', '101', '110'], A: ['010', '101', '111', '101', '101'], U: ['101', '101', '101', '101', '111'], H: ['101', '101', '111', '101', '101'], S: ['011', '100', '010', '001', '110'] };
-function lettering(sk) {
-  // a plastered fin at the workshop wing's north-west corner, BAUHAUS down its north face in black blocks (docs §2, [inferred] from the photographs)
-  const x0 = -17.95, x1 = -16.9, z0 = 3.55, z1 = B.ww[1] + 0.05, top = FR + 1.4, cell = 0.24;
-  sk.s(WHITE, x0, 0, z0, x1, top, z1); sk.b('concrete_light', x0 - 0.04, top, z0 - 0.04, x1 + 0.04, top + 0.1, z1);
-  let y = top - 0.9;
-  for (const ch of 'BAUHAUS') {
-    const g = GLYPH[ch];
-    for (let r = 0; r < 5; r++) for (let c = 0; c < 3; c++) if (g[r][c] === '1') { const xx = x1 - 0.12 - c * cell; sk.b('car_black', xx - cell + 0.02, y - (r + 1) * cell + 0.02, z0 - 0.04, xx - 0.02, y - r * cell - 0.02, z0 - 0.0); }
-    y -= 5 * cell + 0.3;
-  }
-  sk.b('plaster_damp', x0 + 0.05, 0.3, z0 - 0.03, x1 - 0.05, 1.0, z0 + 0.01);
-}
 function boilerHouse(sk) {
   sk.s(WHITE, 40.5, 0, 36.2, 47.5, 4.0, 41.4); sk.b('concrete_light', 40.45, 4.0, 36.15, 47.55, 4.12, 41.45); sk.b('asphalt', 40.5, 4.12, 36.2, 47.5, 4.15, 41.4);
   sk.b('steel_grey', 41.2, 0.2, 36.17, 43.6, 2.4, 36.2); sk.b('steel_grey', 44.6, 0.2, 36.17, 46.8, 2.2, 36.2); sk.b('wood_dark', 44.9, 0, 36.15, 46.0, 2.1, 36.2);
@@ -411,7 +395,7 @@ function weathering(sk) {
 export function bauhausSchool(el, ctx) {
   const sk = new S(ctx);
   workshopWing(sk); bridge(sk); northWing(sk); festBlock(sk); prellerhaus(sk);
-  lettering(sk); boilerHouse(sk); curtains(sk); hangings(sk); piano(sk); weathering(sk);
+  letteringFin(sk, FR); entrance(sk, B.nw[3], F0); boilerHouse(sk); curtains(sk); hangings(sk); piano(sk); weathering(sk);
   // the courtyard's paving, the entrance plinth steps and bicycle racks by the main door
   sk.b('concrete_light', 1.2, 0, 4.4, 8.0, 0.03, 13.8);
   for (let i = 0; i < 6; i++) { const x = 3 + i * 0.55; sk.rod('steel_chrome', [x, 0, 12.4], [x, 0.9, 12.4], 0.012, 4); }
