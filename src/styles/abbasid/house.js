@@ -117,7 +117,7 @@ function house(el, ctx) {
     // the front range's court face
     faceStuff({ O: [cx1, cz1], U: [-1, 0], N: [0, -1] }, cx1 - cx0, H, -1);
     // the north range: the iwan (3.2 m wide, a vault 4.2 m high for one storey, up to 6.6 for two), rooms either side
-    const iw = Math.min(3.4, (cx1 - cx0) * 0.4), iwh = storeys === 2 ? 6.4 : 4.4, spring = archCurve(iw, iwh).spring;
+    const iw = Math.min(3.4, (cx1 - cx0) * 0.4), iwh = storeys === 2 ? 6.4 : H - 0.5, spring = archCurve(iw, iwh).spring;
     const nx0 = -hw + T, nx1 = hw - T, nz0 = -hd + T, nz1 = cz0;
     if (hollow) {
       // rooms either side of the iwan, hollow, with a door each on the court; ceilings of timber, a roof over

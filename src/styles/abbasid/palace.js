@@ -4,8 +4,9 @@
 // (front to +z, the south), turned by `face`.
 
 import { box, fromTriangles, lathe } from '../../core/geom.js';
-import { furnish, buildRooms } from './dress.js';
-import { gardenTree, local, wallRun, barrel, domeShell, archBand, spandrel, stuccoPanel, merlons, lineFrame, rng, archCurve, orientedBox, polyGeo, D2R } from './kit.js';
+import { furnish, buildRooms, zir } from './dress.js';
+import { mosqueExterior, mihrab, minbar, rahla, hangLamp, MOSQUE_BAYS } from './mosque.js';
+import { gardenTree, local, wallRun, barrel, domeShell, archBand, spandrel, stuccoPanel, merlons, lineFrame, rng, archCurve, archPoly, orientedBox, polyGeo, D2R } from './kit.js';
 
 const YAW = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 };
 const mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
@@ -24,8 +25,15 @@ export function archway({ bag, col }, { x = 0, w, hh, z0, z1, top, mat = 'brick_
 
 /** A row of columns of teak along a line, each with a capital block, on a base; returns nothing. h = to the top of the capital. */
 export function teak(bag, col, x, z, y, h, r = 0.24) {
-  bag.add('cedar', lathe([[r * 1.3, 0], [r * 1.25, 0.12], [r, 0.2], [r * 0.9, h * 0.5], [r * 0.92, h - 0.5], [r * 1.15, h - 0.3], [r * 1.5, h - 0.18], [r * 1.5, h - 0.06], [r * 1.9, h - 0.06], [0.001, h - 0.06]], 10, null, x, y, z));
+  // the shaft (palm-and-teak trunks were used whole or built up of glued pieces bolted with iron [stated: Wikipedia, Great Mosque of al-Mansur]): a turned
+  // shaft and a capital of three glued blocks, an iron strap round the middle one, bolt heads on its faces
+  bag.add('cedar', lathe([[r * 1.3, 0], [r * 1.25, 0.12], [r, 0.2], [r * 0.9, h * 0.5], [r * 0.92, h - 0.52], [r * 1.05, h - 0.5], [0.001, h - 0.5]], 10, null, x, y, z));
   bag.add('limestone', box(x - r * 1.5, y - 0.02, z - r * 1.5, x + r * 1.5, y + 0.14, z + r * 1.5));
+  bag.add('cedar', box(x - r * 1.25, y + h - 0.5, z - r * 1.25, x + r * 1.25, y + h - 0.32, z + r * 1.25));
+  bag.add('cedar', box(x - r * 1.6, y + h - 0.32, z - r * 1.6, x + r * 1.6, y + h - 0.12, z + r * 1.6));
+  bag.add('iron', box(x - r * 1.66, y + h - 0.25, z - r * 1.66, x + r * 1.66, y + h - 0.2, z + r * 1.66));
+  bag.add('cedar', box(x - r * 2.0, y + h - 0.12, z - r * 2.0, x + r * 2.0, y + h - 0.01, z + r * 2.0));
+  for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const bx = x + dx * r * 1.66, bz = z + dz * r * 1.66; bag.add('iron', box(bx - 0.035, y + h - 0.27, bz - 0.035, bx + 0.035, y + h - 0.23, bz + 0.035)); }
   col.circle(x, z, r * 1.2, y, y + h);
 }
 
@@ -230,8 +238,11 @@ function mosque(el, ctx) {
     const { bag, col, lights } = c, T = 1.5, WH = 9;
     const ops = (xs, w = 3.4, h = 4.6) => xs.map((at) => ({ at, w, h }));
     // the outer wall (baked brick with a white wash above 3 m); doors: north (into the sahn), east and west (into the sahn and the hall)
-    const W = (a, b, o) => { wallRun(c, { a, b, th: T, y0: y, y1: y + WH, mat: 'brick_baked', ops: o }); bag.add('plaster_white', orientedBox([a[0], a[1]], [b[0], b[1]], T + 0.08, y + 6.2, y + WH)); };
-    W([-H, -H], [H, -H], ops([H])); W([H, -H], [H, H], ops([H - 31, H - 8], 3.2, 4.4)); W([-H, H], [-H, -H], ops([8, 31], 3.2, 4.4)); W([-H, H], [H, H], []);
+    const W = (a, b, o) => { wallRun(c, { a, b, th: T, y0: y, y1: y + WH, mat: 'mudbrick', ops: o }); bag.add('plaster_white', orientedBox([a[0], a[1]], [b[0], b[1]], T + 0.08, y + 6.2, y + WH)); };
+    const bw = 2 * H / MOSQUE_BAYS, bayAt = (ks) => ks.map((k) => (k + 0.5) * bw);
+    W([-H, -H], [H, -H], ops(bayAt([4]), 3.0, 4.4)); W([H, -H], [H, H], ops(bayAt([2, 7]), 3.0, 4.4)); W([-H, H], [-H, -H], ops(bayAt([1, 5]), 3.0, 4.4));
+    W([-H, H], [H, H], [{ at: H, w: 1.8, h: 3.6 }]);                        // the qibla wall, cut for the mihrab's niche (its back is filled below, 0.7 m behind the inner face)
+    mosqueExterior(c, { H, T, WH, y });
     // the sahn: the paved court 26 m deep, open; the riwaqs on its north, east and west sides, one bay deep, a flat roof on teak
     const hallZ0 = 2, hallZ1 = H - T / 2;
     bag.add('brick_paving', box(-H + T / 2, y - 0.2, -H + T / 2, H - T / 2, y + 0.02, H - T / 2));
@@ -262,20 +273,22 @@ function mosque(el, ctx) {
     for (const sd of [-1, 1]) { const x0 = sd < 0 ? -H + T / 2 : H - 5.8, x1 = sd < 0 ? -H + 5.8 : H - T / 2; bag.add('cedar', box(x0, y + rh, -H + 5.8, x1, y + rh + 0.3, hallZ0 - 0.4)); bag.add('mud_plaster', box(x0, y + rh + 0.3, -H + 5.8, x1, y + rh + 0.55, hallZ0 - 0.4)); }
     // the basin in the sahn: an octagonal rim of stone, water, a spout
     bag.add('limestone', lathe([[2.5, 0], [2.5, 0.7], [2.1, 0.7], [2.1, 0.5]], 8, null, 0, y, -12)); bag.add('water', lathe([[0.001, 0], [2.1, 0]], 8, null, 0, y + 0.5, -12)); col.circle(0, -12, 2.5, y, y + 0.7);
-    // the mihrab and its stucco hood, the minbar, the lamps
+    // the mihrab (a niche cut through the qibla wall, its back plugged 0.7 m deep), the minbar, the lamps
     const mz = hallZ1;
-    bag.add('opening', lathe([[0.001, 0], [0.9, 0]], 8, null, 0, y + 0.02, mz - 0.5));
-    bag.add('plaster_white', box(-0.9, y, mz - 1.1, 0.9, y + 3.2, mz - 0.02)); bag.add('dome_stucco', lathe([[0.9, 0], [0.62, 0.55], [0.001, 0.8]], 10, null, 0, y + 3.2, mz - 0.62));
-    { const fr = { O: [-3, mz - 0.02], U: [1, 0], N: [0, -1] }; stuccoPanel(bag, fr, 0.0, 2.1, y + 0.3, y + 4.4, 0.045, 'stucco', 0.36); stuccoPanel(bag, fr, 3.9, 6, y + 0.3, y + 4.4, 0.045, 'stucco', 0.36); stuccoPanel(bag, fr, 2.1, 3.9, y + 3.9, y + 4.4, 0.045, 'stucco', 0.36); }
-    bag.add('cedar', box(5.0, y, mz - 1.3, 6.4, y + 0.3, mz - 0.1)); for (let k = 0; k < 5; k++) bag.add('cedar', box(5.0 + k * 0.28, y + 0.3, mz - 1.2, 5.28 + k * 0.28, y + 0.35 + k * 0.1, mz - 0.2));
-    bag.add('cedar', box(5.0, y + 1.2, mz - 1.2, 6.3, y + 1.3, mz - 0.2)); bag.add('cedar', box(5.0, y + 1.3, mz - 1.3, 5.08, y + 2.2, mz - 0.1));
-    col.rect([5.0, mz - 1.3, 6.4, mz - 0.1], y, y + 2.2);
+    bag.add('mudbrick', box(-0.9, y, mz + 0.7, 0.9, y + 3.6, H + T / 2 - 0.03)); col.rect([-0.9, mz + 0.7, 0.9, H + T / 2], y, y + 3.7);
+    mihrab(c, { mz, y, T });
+    minbar(c, { x: 6.9, zWall: mz, y });
+    // Qur'an stands on the mats, jars of drinking water by the sahn's edge, glass lamps hung under the riwaq's beams
+    for (const [rx, rz] of [[-15.4, 11.6], [-6.2, 11.6], [7.0, 16.2], [16.2, 16.2]]) rahla(c, rx, rz, y + 0.05);
+    for (let k = 0; k < 4; k++) zir(bag, col, -13.8 + k * 9.2, hallZ0 + 0.6, y, 1.0);
+    for (let k = 0; k < 10; k++) hangLamp(bag, -H + 3.4 + (H * 2 - 6.8) * (k + 0.5) / 10, -H + 3.4, y + rh, 0.7);
     for (const lx of [-9.2, -4.6, 0, 4.6, 9.2]) {
       bag.add('iron', box(lx - 0.01, y + 2.2, mz - 5.2 - 0.01, lx + 0.01, y + CH, mz - 5.2 + 0.01)); bag.add('lamp_glass', lathe([[0.001, 0], [0.16, 0.06], [0.18, 0.28], [0.001, 0.4]], 10, null, lx, y + 2.0, mz - 5.2));
       lights.push({ at: [lx, y + 2.2, mz - 5.2], color: '#ffc27a', intensity: 4, distance: 9 });
     }
-    // windows high in the qibla wall: arched, with a plaster lattice: a daylight pane
-    for (let k = 0; k < 9; k++) { const wx = -22 + k * 5.5; bag.add('daylight', box(wx - 0.5, y + 6.0, mz + 0.0, wx + 0.5, y + 7.8, mz + 0.02)); }
+    // windows high in the qibla wall, one in each bay: a pointed arch with a ring of brick and a colonette, a daylight pane
+    { const wf = { O: [-H, mz], U: [1, 0], N: [0, -1] }, bw2 = 2 * H / MOSQUE_BAYS;
+      for (let k = 0; k < MOSQUE_BAYS; k++) { const uc = (k + 0.5) * bw2; bag.add('daylight', polyGeo(wf, archPoly(uc - 0.6, y + 6.1, 1.2, 2.0), 0, 0.02)); archBand(bag, wf, uc - 0.6, y + 6.1, 1.2, 2.0, 0.22, 0, 0.09, ['brick_buff', 'plaster_white']); bag.add('cedar', box(-H + uc - 0.03, y + 6.1, mz - 0.1, -H + uc + 0.03, y + 7.6, mz - 0.04)); } }
   });
 }
 

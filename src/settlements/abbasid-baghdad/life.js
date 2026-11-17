@@ -4,7 +4,7 @@
 // of use (src/objects); the walkers are the movers'.
 import { lodTiles } from '../lod.js';
 import { ALL_SUQS, C, PALACE, MOSQUE, LIBRARY, SUQS, RC, RIVER, CANAL, JETTIES, jettyAt, riverX, lots, inRect } from './layout.js';
-import { KHAN_RECT, HAMMAM_RECT, WORKSHOPS, CANAL_BRIDGES, moored } from './layout.js';
+import { MASJIDS, KHAN_RECT, HAMMAM_RECT, WORKSHOPS, CANAL_BRIDGES, moored } from './layout.js';
 import { frontElements, esplanadeElements, esplanadeShopFronts } from './fronts.js';
 import { suqKeepers } from '../../styles/abbasid/market.js';
 
@@ -72,6 +72,13 @@ export async function lifePlan() {
     man([mx + 8, mz + 12], 0.05, Math.PI, { pose: 'sit_ground', hat: 'turban', cloth: 'cloth_white' }); man([mx - 13, mz + 14], 0.05, 0.3, { pose: 'sit_ground', cloth: 'cloth_grey' });
     man([mx + 5.4, mz + 22.6], 0.05, Math.PI, { pose: 'cross', cloth: 'cloth_indigo' });
     man([mx + 18, mz - 20], 0, -Math.PI / 2, { pose: 'sit_ground', cloth: 'cloth_brown' });
+  }
+  // ── the small mosques of the quarters: one at prayer facing the mihrab (south), one washing at the basin, an old man on the bench of the court ──
+  for (const m of MASJIDS) {
+    const cx = (m.rect[0] + m.rect[2]) / 2, z1 = m.rect[3], d = m.rect[3] - m.rect[1], hallD = Math.min(11.5, d * 0.55);
+    man([cx - 1.0, z1 - 0.6 - 2.7], 0.05, Math.PI, { pose: 'pray', arms: 'pray', over: 'none' });
+    man([cx + 1.2, z1 - 0.6 - 2.7], 0.05, Math.PI, { pose: 'kneel', arms: 'pray', over: 'none' });
+    man([cx - (m.rect[2] - m.rect[0]) / 2 + 1.4, z1 - hallD - 3.3], 0, -Math.PI / 2, { pose: 'sit_ground', cloth: 'cloth_grey' });
   }
   // ── the river: porters and boatmen at the jetties, a fisherman and washerwomen at the banks, camels on the Khurasan road ──
   for (const j of JETTIES) {
