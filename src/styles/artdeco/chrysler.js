@@ -7,6 +7,7 @@
 
 import { box, lathe, rod } from '../../core/geom.js';
 import { subtractRects } from '../../core/build.js';
+import { chryslerLobby } from './chryslerlobby.js';
 
 const WH = 'plaster_white', MW = 'marble_smooth', GR = 'granite_grey', GB = 'granite_black', CH = 'steel_chrome', AL = 'aluminium_dull', GL = 'glass_outer', LS = 'limestone', GD = 'gilt_bronze';
 const FLOOR = 3.9;
@@ -79,13 +80,15 @@ function portal(bag, F, c, y, depth) {
  * chryslerBody: the base, setbacks and shaft of the tower, centred (cx, cz) on its lot r = [x0, z0, x1, z1], standing at y.
  * Lexington Avenue is the west face (x0) and 42nd Street the south (z1): their portals. Collides with the base and its portals' recesses.
  */
-export function chryslerBody(bag, col, r, y, cx, cz) {
+export function chryslerBody(bag, col, r, y, cx, cz, lights = []) {
   const [x0, z0, x1, z1] = r, T = fl(16), PD = 2.4, PW2 = 6.2, HOLE = fl(4) + 2.4;
   // ── the base: the lot's whole outline through the 16th floor, the two portals cut into it ──
-  const holes = [[x0, cz - 4.5, x0 + PD, cz + 4.5], [cx - 4.5, z1 - PD, cx + 4.5, z1]];
+  const LOB = [x0 + PD, cz - 5.5, x0 + PD + 22, cz + 5.5], holes = [[x0, cz - 4.5, x0 + PD, cz + 4.5], [cx - 4.5, z1 - PD, cx + 4.5, z1], LOB];
   for (const [ya, yb, hs] of [[y - 0.5, y + 12.0, holes], [y + 12.0, y + T, []]]) for (const q of subtractRects(r, hs)) { bag.add(GL, box(q[0], ya, q[1], q[2], yb, q[3])); col.rect(q, ya, yb); }
   col.floor(r, y + T);
-  col.rect([x0 + (PD - 1.2), cz - 4.5, x0 + PD, cz + 4.5], y, y + 12.0); col.rect([cx - 4.5, z1 - PD, cx + 4.5, z1 - (PD - 1.2)], y, y + 12.0);   // the screens at the recesses' backs
+  for (const [a, b] of [[cz - 4.5, cz - 1.3], [cz + 1.3, cz + 4.5]]) col.rect([x0 + (PD - 1.2), a, x0 + PD, b], y, y + 12.0);   // (the middle revolving door stands open to the lobby)
+  chryslerLobby(bag, col, lights, LOB, y, y + 11.9, [cz - 4.5, cz + 4.5]);
+  col.rect([cx - 4.5, z1 - PD, cx + 4.5, z1 - (PD - 1.2)], y, y + 12.0);   // the screens at the recesses' backs
   const base = [[false, x0, -1, z0, z1, 'w'], [false, x1, 1, z0, z1, 'e'], [true, z0, -1, x0 - 0.3, x1 + 0.3, 'n'], [true, z1, 1, x0 - 0.3, x1 + 0.3, 's']];
   for (const [along, o, sg, u0, u1, name] of base) {
     const F = faceBox(along, o, sg), c = along ? cx : cz;

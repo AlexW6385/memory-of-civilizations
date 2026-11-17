@@ -22,7 +22,7 @@ const fl = (n) => BASE + (n - 5) * FLOOR;
  */
 function skin(bag, F, u0, u1, y0, y1, step = FLOOR, glass = false) {
   const L = u1 - u0; if (L < 1.2 || y1 - y0 < 1) return;
-  const n = Math.max(1, Math.round(L / 1.55)), w = L / n, pw = Math.min(0.8, w * 0.5);
+  const n = Math.max(1, Math.round(L / 1.55)), w = L / n, pw = Math.min(0.62, w * 0.4);
   if (glass) bag.add(GL, F(u0, u1, 0.002, 0.02, y0, y1));
   for (let i = 0; i <= n; i++) {
     const u = u0 + i * w, a = Math.max(u0, u - pw / 2), b = Math.min(u1, u + pw / 2);
@@ -96,15 +96,25 @@ function inscribe(bag, F, text, uc, yTop, k, dir) {
     u += w + 1;
   }
 }
-/** A stylised eagle of stone, wings raised, facing out along +d of the face, standing on a pier top at (uc, y). */
-function eagle(bag, F, uc, y, d0) {
-  bag.add(LS, F(uc - 0.9, uc + 0.9, d0, d0 + 1.2, y, y + 0.5));                        // the plinth
-  bag.add(LS, F(uc - 0.45, uc + 0.45, d0 + 0.2, d0 + 1.0, y + 0.5, y + 2.2));           // the body
-  bag.add(LS, F(uc - 0.3, uc + 0.3, d0 + 0.5, d0 + 1.25, y + 2.2, y + 2.8));            // the head and beak
-  for (const s of [-1, 1]) for (let k = 0; k < 4; k++) {                                   // the wings in stepped feathers
-    const a = uc + s * (0.45 + k * 0.32), b = a + s * 0.32;
-    bag.add(LS, F(Math.min(a, b), Math.max(a, b), d0 + 0.25, d0 + 0.75, y + 1.0 + k * 0.15, y + 3.0 - k * 0.38));
+/**
+ * An eagle of stone on the top of a Fifth Avenue pier (docs §1a: "stylized stone eagles"), facing out (+x) with its wings raised in
+ * layers of feathers, a hooked beak, a fanned tail, standing on a stepped plinth; built in a local frame (across, up, out) of metres.
+ */
+function eagle(bag, o, uc, y, k = 1) {
+  const G = [];
+  const add = (g) => { g.scale(k, k, k); g.rotateY(Math.PI / 2); g.translate(o, y, uc); G.push(g); };
+  add(box(-1.15, 0, -1.15, 1.15, 0.35, 1.15)); add(box(-0.9, 0.35, -0.9, 0.9, 0.7, 0.9));                  // the stepped plinth
+  add(lathe([[0.001, 0], [0.5, 0.15], [0.68, 0.7], [0.55, 1.4], [0.3, 1.9], [0.001, 2.0]], 12).rotateX(0.3).translate(0, 0.7, -0.05));   // the breast, leaning out
+  add(lathe([[0.001, 0], [0.26, 0.1], [0.3, 0.4], [0.2, 0.7], [0.001, 0.8]], 10).translate(0, 2.35, 0.45));      // the neck and head
+  add(lathe([[0.17, 0], [0.001, 0.5]], 8).rotateX(Math.PI * 0.62).translate(0, 2.75, 0.8));                     // the hooked beak
+  for (let i = 0; i < 4; i++) add(box(-0.1 - i * 0.07, -1.1 + i * 0.04, -0.03, 0.1 + i * 0.07, 0.05, 0.03).rotateX(-0.5 + i * 0.05).translate((i - 1.5) * 0.16, 0.95, -0.7 - i * 0.02));   // the tail
+  for (const s of [-1, 1]) for (let i = 0; i < 7; i++) {                                                          // the wings: feathers fanned from the shoulder
+    const ang = (0.12 + i * 0.17), L = 2.5 - i * 0.2 - (i > 4 ? 0.2 : 0), w = 0.36;
+    const f = box(-w / 2, 0, -0.07, w / 2, L, 0.07).rotateZ(-s * ang).translate(s * (0.5 + i * 0.03), 1.45 + i * 0.03, -0.1 - i * 0.045);
+    add(f);
+    if (i % 2 === 0) add(box(-0.12, 0.3, -0.03, 0.12, L * 0.55, 0.03).rotateZ(-s * ang).translate(s * (0.5 + i * 0.03), 1.45 + i * 0.03, -0.1 - i * 0.045 + 0.09));   // the coverts' ridge
   }
+  for (const g of G) bag.add(LS, g);
 }
 /** empire_state: { rect (the full lot), y } */
 export function empireState(el, { bag, col, lights }) {
@@ -141,28 +151,39 @@ export function empireState(el, { bag, col, lights }) {
     // the Fifth Avenue entrance: two great piers crowned by eagles, the triple-height transom of chrome in a stepped
     // pattern over the doors, a central pair of doors flanked by revolving doors; EMPIRE STATE in gilt over the fifth floor
     for (const s of [-1, 1]) {
-      const pa = mid + s * 7.5, pb = mid + s * 5.2;
-      bag.add(LS, F(Math.min(pa, pb), Math.max(pa, pb), 0.004, 1.4, y - 0.5, y + 16));
-      for (let k = 0; k < 6; k++) bag.add(LS, F(Math.min(pa, pb) + 0.3, Math.max(pa, pb) - 0.3, 1.4, 1.55, y + 2 + k * 2.3, y + 3.6 + k * 2.3));   // the mouldings down the pier
-      eagle(bag, F, (pa + pb) / 2, y + 16, 0.2);
+      const pa = mid + s * 7.5, pb = mid + s * 5.2, lo = Math.min(pa, pb), hi = Math.max(pa, pb), top = y + BASE + 1.1;
+      bag.add(LS, F(lo, hi, 0.004, 1.4, y - 0.5, top));
+      bag.add(LS, F(lo - 0.15, hi + 0.15, 0.004, 1.7, top - 1.4, top));                          // the capital
+      bag.add(LS, F(lo - 0.25, hi + 0.25, 0.004, 1.9, top, top + 0.3));
+      for (let q = 0; q < 6; q++) bag.add(LS, F(lo + 0.22 + q * 0.34, lo + 0.22 + q * 0.34 + 0.14, 1.4, 1.58, y + 1.2, top - 1.8));   // the molded flutes of the face
+      for (let q = 0; q < 4; q++) bag.add(LS, F(lo + 0.12, hi - 0.12, 1.4, 1.6 + q * 0.0, y + 3 + q * 4.6, y + 3.35 + q * 4.6));       // the bands across it
+      eagle(bag, o + sg * 0.7, (pa + pb) / 2, top + 0.3, 1.45);
     }
     bag.add(LS, F(mid - 5.2, mid + 5.2, 0.004, 0.5, y + 14.5, y + 16));                 // the lintel
     bag.add('granite_black', F(mid - 5.2, mid + 5.2, -RD, 0.004, y - 0.5, y + 0.15));    // the threshold
     // the glass at the back of the recess, the central doors standing open into the lobby
     for (const [a, b, ya] of [[mid - 5.2, mid - 1.4, y + 0.15], [mid + 1.4, mid + 5.2, y + 0.15], [mid - 1.4, mid + 1.4, y + 3.6]]) bag.add(GL, F(a, b, -RD, -RD + 0.02, ya, y + 14.5));
     for (const [a, b] of [[mid - 5.2, mid - 1.4], [mid + 1.4, mid + 5.2]]) col.rect(along ? [a, o - RD, b, o - RD + 0.02] : [o - RD, a, o - RD + 0.02, b], y, y + 14.5);
-    for (let i = 0; i <= 8; i++) { const u = mid - 5.2 + i * 10.4 / 8; bag.add(CH, F(Math.max(mid - 5.2, u - 0.07), Math.min(mid + 5.2, u + 0.07), -RD + 0.02, -RD + 0.2, i === 4 ? y + 3.6 : y + 0.15, y + 14.5)); }
+    const Pf = (u, d, yy) => (along ? [u, yy, o + sg * d] : [o + sg * d, yy, u]);
+    for (let i = 0; i <= 8; i++) { const u = mid - 5.2 + i * 10.4 / 8; bag.add(CH, F(Math.max(mid - 5.2, u - 0.07), Math.min(mid + 5.2, u + 0.07), -RD + 0.02, -RD + 0.2, y + 0.15, i === 4 ? y + 3.6 : y + 4.4)); }
     for (const s of [-1, 1]) bag.add(CH, F(mid + s * 1.4 - 0.08, mid + s * 1.4 + 0.08, -RD + 0.02, -RD + 0.24, y + 0.15, y + 3.6));
     for (const s of [-1, 1]) bag.add('gilt_bronze', F(mid + s * 1.4, mid + s * 1.45, -RD - 1.3, -RD, y + 0.15, y + 3.45));     // the leaves folded back inside
-    for (let k = 0; k < 7; k++) {                                                          // the stepped transom
-      const yy = y + 5 + k * 1.35, hwk = 5.2 - Math.abs(k - 3) * 0.6;
-      bag.add(CH, F(mid - 5.2, mid + 5.2, -RD + 0.02, -RD + 0.16, yy, yy + 0.12));
-      bag.add(CH, F(mid - hwk, mid + hwk, -RD + 0.16, -RD + 0.28, yy + 0.5, yy + 0.6));
+    // the triple-height transom: a fan of chrome rays from the head of the doors, stepped rings across it, the frame
+    const yc = y + 4.7, yt = y + 14.4;
+    for (let k = -6; k <= 6; k++) {
+      const t = k / 6, ex = mid + t * 5.2, ey = Math.abs(t) > 0.8 ? yc + (1 - Math.abs(t)) * 9.5 + 3.0 : yt;
+      bag.add(CH, rod(Pf(mid, -RD + 0.1, yc), Pf(ex, -RD + 0.1, Math.min(ey, yt)), 0.035, 4));
     }
+    for (let k = 1; k <= 4; k++) {                                                          // stepped (ziggurat) rings
+      const rr = k * 2.3, h = k * 2.1;
+      const pts = [[-rr, 0], [-rr, h * 0.55], [-rr * 0.75, h * 0.55], [-rr * 0.75, h * 0.8], [-rr * 0.4, h * 0.8], [-rr * 0.4, h], [rr * 0.4, h], [rr * 0.4, h * 0.8], [rr * 0.75, h * 0.8], [rr * 0.75, h * 0.55], [rr, h * 0.55], [rr, 0]];
+      for (let q = 0; q + 1 < pts.length; q++) { const A = pts[q], B = pts[q + 1]; if (Math.min(yc + A[1], yc + B[1]) > yt) continue; bag.add(CH, rod(Pf(mid + A[0], -RD + 0.14, yc + Math.min(A[1], yt - yc)), Pf(mid + B[0], -RD + 0.14, yc + Math.min(B[1], yt - yc)), 0.05, 4)); }
+    }
+    bag.add(CH, F(mid - 5.2, mid + 5.2, -RD + 0.02, -RD + 0.3, yt - 0.1, yt)); for (const s of [-1, 1]) bag.add(CH, F(mid + s * 5.2 - 0.06, mid + s * 5.2 + 0.06, -RD + 0.02, -RD + 0.3, y + 4.4, yt));
     for (const s of [-1, 1]) bag.add('opening', F(mid + s * 3.6 - 1.0, mid + s * 3.6 + 1.0, -RD + 0.2, -RD + 0.3, y + 0.15, y + 3.0));
     for (const s of [-1, 1]) bag.add(CH, lathe([[0.95, 0], [0.95, 0.12], [0.9, 0.12], [0.9, 2.9], [0.95, 2.9], [0.95, 3.05], [0.001, 3.05]], 16, null, ...(along ? [mid + s * 3.6, y + 0.15, o - sg * 1.05] : [o - sg * 1.05, y + 0.15, mid + s * 3.6])));   // the revolving doors' drums
     bag.add(CH, F(mid - 5.2, mid + 5.2, -RD + 0.02, -RD + 0.3, y + 4.4, y + 4.6));
-    inscribe(bag, F, 'EMPIRE STATE', mid, y + BASE - 0.5, 0.26, -sg);
+    inscribe(bag, F, 'EMPIRE STATE', mid, y + BASE - 0.8, 0.205, -sg);
   }
   // the tower: set back on all sides above the fifth floor, stepping in at the 21st, 25th, 30th, 72nd, 81st and 85th floors
   const T = [
@@ -198,20 +219,27 @@ export function empireState(el, { bag, col, lights }) {
     }
     ym += h;
   }
-  // the wings: four fins at the corners, sloping from the first tier's corners in to the shaft
-  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-    const a = [cx + dx * 8.6, y86 + 1.0, cz + dz * 7.6], b = [cx + dx * 2.4, ym + 9, cz + dz * 2.4], c = [cx + dx * 2.4, y86 + 1.0, cz + dz * 2.4];
-    const nx = dz / Math.SQRT2 * 0.22, nz = -dx / Math.SQRT2 * 0.22, T2 = [];
-    const P = (p, s) => [p[0] + s * nx, p[1], p[2] + s * nz];
-    const A1 = P(a, 1), B1 = P(b, 1), C1 = P(c, 1), A2 = P(a, -1), B2 = P(b, -1), C2 = P(c, -1);
-    T2.push(...A1, ...B1, ...C1, ...A2, ...C2, ...B2, ...A1, ...A2, ...B2, ...A1, ...B2, ...B1, ...B1, ...B2, ...C2, ...B1, ...C2, ...C1, ...C1, ...C2, ...A2, ...C1, ...A2, ...A1);
-    bag.add(CH, fromTriangles(T2));
+  // the wings: at each corner a stepped buttress of chrome-nickel steel, rising a step at every tier from the shaft out to the tier's corner
+  {
+    let y0 = y86 + 1.0;
+    for (let i = 0; i < tiers.length; i++) {
+      const [hx, hz, h] = tiers[i], top = y0 + h + 1.4 + (tiers.length - i) * 0.7;
+      for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+        const sx = 2.5, sz = 2.5, ex = hx - 0.9, ez = hz - 0.9, vx = ex - sx, vz = ez - sz, len = Math.hypot(vx, vz), ang = Math.atan2(vz * dz, vx * dx);
+        const fin = (t0, t1, w, yb, yt) => bag.add(CH, box(len * t0, yb, -w / 2, len * t1, yt, w / 2).rotateY(-ang).translate(cx + dx * sx, 0, cz + dz * sz));
+        fin(0, 1, 0.46, y0, top);                                                          // the buttress
+        fin(0.5, 1, 0.7, top - 0.5, top);                                                  // its cap
+        for (let k = 1; k <= 3; k++) fin(0, 1, 0.5, y0 + (top - y0) * k / 4 - 0.04, y0 + (top - y0) * k / 4 + 0.04);   // the courses on it
+      }
+      y0 += h;
+    }
   }
   // the shaft with its fluting, the 102nd floor's glass drum, the open gallery, the cone and the mooring tip
   const yTop = y + 381, yS = ym, yG = yTop - 16, yO = yTop - 11.8, yC = yTop - 9.5;
   bag.add(AL, lathe([[3.6, 0], [3.6, yG - yS], [0.001, yG - yS]], 24, null, cx, yS, cz));
   for (let k = 0; k < 16; k++) { const t = k / 16 * Math.PI * 2; bag.add(CH, box(-0.14, 0, -0.1, 0.14, yG - yS, 0.1).rotateY(-t).translate(cx + Math.cos(t) * 3.62, yS, cz + Math.sin(t) * 3.62)); }
   for (let k = 0; k < 8; k++) { const t = (k + 0.5) / 8 * Math.PI * 2; for (let yy = yS + 2; yy < yG - 2; yy += 3.4) bag.add(GL, box(-0.1, 0, -0.38, 0.1, 1.6, 0.38).rotateY(-t).translate(cx + Math.cos(t) * 3.56, yy, cz + Math.sin(t) * 3.56)); }
+  for (let yy = yS + 6; yy < yG - 3; yy += 7) bag.add(CH, lathe([[3.7, 0], [3.7, 0.12], [3.55, 0.12]], 24, null, cx, yy, cz));   // the shaft's rings
   bag.add(CH, lathe([[3.9, 0], [3.9, 0.5], [3.3, 0.5]], 24, null, cx, yG, cz));
   bag.add(GL, lathe([[3.3, 0], [3.3, yO - yG - 0.6], [0.001, yO - yG - 0.6]], 24, null, cx, yG + 0.5, cz));      // the enclosed gallery
   for (let k = 0; k < 12; k++) { const t = k / 12 * Math.PI * 2; bag.add(CH, rod([cx + Math.cos(t) * 3.34, yG + 0.5, cz + Math.sin(t) * 3.34], [cx + Math.cos(t) * 3.34, yO - 0.1, cz + Math.sin(t) * 3.34], 0.08, 4)); }

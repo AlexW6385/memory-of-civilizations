@@ -200,9 +200,9 @@ function skyscraper(el, { bag, col, lights }) {
   else block(bag, mat, inset(r, -0.4), yy - 0.2, yy + 0.8);
 }
 /** chrysler: { rect, y } — the base, the tower with its eagles, the stainless crown of seven tiers of sunbursts with triangular windows, the spire to 319 m. */
-function chrysler(el, { bag, col }) {
+function chrysler(el, { bag, col, lights }) {
   const r = el.rect, y = el.y ?? 0, cx = (r[0] + r[2]) / 2, cz = (r[1] + r[3]) / 2;
-  chryslerBody(bag, col, r, y, cx, cz);
+  chryslerBody(bag, col, r, y, cx, cz, lights);
   // the radiator caps of 1929 at the corners of the 31st floor's roof: a winged cap on a stepped base
   for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
     const px = cx + dx * CAP_AT[0], pz = cz + dz * CAP_AT[1], ang = Math.atan2(dx, dz), yc = y + CAP_AT[2];
@@ -239,7 +239,7 @@ function chrysler(el, { bag, col }) {
       // the triangular windows, pointing out along the arch like rays
       const nw = Math.max(5, 9 - k);
       for (let i = 0; i < nw; i++) {
-        const f = Math.PI * (i + 0.5) / nw, d = 0.16 * Math.PI / nw * 3, r0 = s * 0.5, r1 = s * 0.86;
+        const f = Math.PI * (i + 0.5) / nw, d = 0.2 * Math.PI / nw * 3, r0 = s * 0.32, r1 = s * 0.92;
         const A = R(-Math.cos(f - d) * r0, top + Math.sin(f - d) * r0, 0.04), B = R(-Math.cos(f + d) * r0, top + Math.sin(f + d) * r0, 0.04), C = R(-Math.cos(f) * r1, top + Math.sin(f) * r1, 0.04);
         W.push(...A, ...B, ...C, ...A, ...C, ...B);
       }
@@ -255,8 +255,8 @@ function chrysler(el, { bag, col }) {
     if (k < 6) yy = top + Math.sqrt(S[k] * S[k] - S[k + 1] * S[k + 1]) - 0.02;
     else yy = top + s;
   }
-  bag.add(CH, fromTriangles(both3(V)));
-  bag.add('glass_lamp', fromTriangles(W));
+  bag.add('plaster_white', fromTriangles(both3(V)));
+  bag.add('glass_outer', fromTriangles(W));
   // the spire, its foot hidden in the last vault
   bag.add(CH, lathe([[2.2, 0], [1.6, 4], [1.0, 9], [0.45, 20], [0.001, 319 - (yy - y) + 2]], 8, null, cx, yy - 2, cz));
 }
