@@ -3,7 +3,7 @@
 // censers and bell and drum towers, the side ranges, and the Pagoda Forest of memorial stupas west of the wall.
 import '../../styles/shaolin/index.js';
 import { PAL, PAL_HOUSE } from '../../styles/shaolin/index.js';
-import { WALL, AXIS, PLAT, HGT, BELL, DRUM, CROSS, RANGES, STUPAS, FOREST, FOREST_PATH, CELL, GEAR, gateX, hw, inRect, rng } from './layout.js';
+import { WALL, AXIS, PLAT, HGT, BELL, DRUM, CROSS, RANGES, STUPAS, FOREST, FOREST_PATH, MOUNT_PATH, CELL, GEAR, gateX, hw, inRect, rng } from './layout.js';
 import { ground } from './ground.js';
 
 const E = [];
@@ -204,6 +204,14 @@ for (const z of [66, 74]) E.push({ t: 'shaolin_gear', kind: 'lamp', at: [-110.5,
 E.push({ t: 'path_earth', pts: FOREST_PATH, w: 2.2, ground: H });
 stele(-114, 63, { kind: 'bixi', h: 3.4, yaw: Math.PI / 2, seed: 5 }); stele(-114, 77, { kind: 'bixi', h: 3.4, yaw: Math.PI / 2, seed: 6 });
 
+// ── the mountain path: from the north gate up the slope, stone treads laid on the ground, wayside shrines and stone lamps (docs §6d) ──
+E.push({ t: 'shaolin_steps', pts: MOUNT_PATH, w: 2.2, from: -125, ground: H });
+for (const sx of [-1, 1]) E.push({ t: 'shaolin_gear', kind: 'lamp', at: [sx * 2.6, -115.5], y: H(sx * 2.6, -115.5) - 0.02, rot: 0, s: 0.9 });
+for (const [z, side, k] of [[-132, 1, 0], [-146, -1, 1], [-162, 1, 2]]) {
+  const a = MOUNT_PATH.findIndex((p, j) => j && p[1] <= z), p0 = MOUNT_PATH[a - 1], p1 = MOUNT_PATH[a], x = p0[0] + (p1[0] - p0[0]) * (z - p0[1]) / (p1[1] - p0[1]) + side * 2.6;
+  E.push({ t: 'shaolin_gear', kind: 'wayshrine', at: [x, z], y: H(x, z) + 0.02, rot: -side * Math.PI / 2, s: 1, seed: k });
+}
+
 // ── rooms and the walk ────────────────────────────────────────────────────────────────────────
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
@@ -227,7 +235,7 @@ export const monastery = {
   style: 'shaolin',
   origin: [0, 0], base: 0, yaw: 0,
   entrance: { at: [0, 165], facing: 'n' },
-  bounds: [-175, -115, 66, 192],
+  bounds: [-175, -178, 66, 192],
   bakeBounds: [-18, -98, 18, 100],
   view: [-16, -2, 16, 128],
   bakeTop: 12,

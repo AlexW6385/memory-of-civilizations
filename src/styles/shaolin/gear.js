@@ -83,6 +83,41 @@ function offering(P, s = 1) {
   for (const dx of [-0.05, 0, 0.05]) { P.add('lacquer_red', limb([dx * s, 0.84 * s, 0.0], [dx * s * 1.4, 1.15 * s, 0.0], 0.004 * s, 0.004 * s, 3)); P.add('flame', lathe([[0.001, 1.15 * s], [0.008 * s, 1.16 * s], [0.001, 1.18 * s]], 4, null, dx * s * 1.4, 0, 0)); }
   P.add('glaze_white', lathe([[0.001, 0.62 * s], [0.05 * s, 0.62 * s], [0.06 * s, 0.7 * s], [0.001, 0.7 * s]], 8, null, 0.34 * s, 0, 0.0));
 }
+/** A wayside shrine of stone on a mountain path: a small stone hall on a footing sunk into the slope, a niche with a seated figure, a gabled tile roof. Faces +z. */
+function wayshrine(P, s = 1) {
+  P.add('granite_grey', box(-0.75 * s, -0.9, -0.6 * s, 0.75 * s, 0.2 * s, 0.6 * s));
+  P.add('limestone', box(-0.62 * s, 0.2 * s, -0.48 * s, 0.62 * s, 1.25 * s, 0.48 * s));
+  P.add('opening', box(-0.3 * s, 0.34 * s, 0.47 * s, 0.3 * s, 1.0 * s, 0.5 * s));
+  P.add('granite_grey', box(-0.34 * s, 0.3 * s, 0.46 * s, 0.34 * s, 0.36 * s, 0.56 * s));                      // the sill, where the offerings stand
+  P.add('clay_gilt', lathe([[0.001, 0.36 * s], [0.14 * s, 0.36 * s], [0.11 * s, 0.6 * s], [0.08 * s, 0.74 * s], [0.001, 0.78 * s]], 8, null, 0, 0, 0.3 * s));
+  P.add('granite_grey', box(-0.7 * s, 1.25 * s, -0.56 * s, 0.7 * s, 1.31 * s, 0.56 * s));
+  // the gabled roof: two sloping tile slabs and the ridge (a stone block roof stepped in three courses)
+  for (const [k, w, y] of [[0, 0.78, 1.31], [1, 0.56, 1.43], [2, 0.32, 1.55]]) P.add('tile_grey', box(-w * s, y * s, -0.62 * s, w * s, (y + 0.12) * s, 0.62 * s));
+  P.add('granite_grey', box(-0.12 * s, 1.67 * s, -0.62 * s, 0.12 * s, 1.75 * s, 0.62 * s));
+}
+/**
+ * shaolin_steps { pts, w, from (z where the treads begin), ground }: the stone treads of a mountain path laid on a slope along a polyline running
+ * mostly north–south; each tread a slab 0.55 deep, its top 0.16 above the ground at its middle, its foot sunk 0.3 below the lowest ground under it.
+ */
+export function shaolinSteps(el, { bag, col }) {
+  const H = el.ground, w = el.w ?? 2.2, d = 0.55, pts = el.pts, from = el.from ?? -Infinity;
+  const at = (z) => { for (let i = 1; i < pts.length; i++) { const a = pts[i - 1], b = pts[i]; if ((z - a[1]) * (z - b[1]) <= 0 && a[1] !== b[1]) return a[0] + (b[0] - a[0]) * (z - a[1]) / (b[1] - a[1]); } return null; };
+  const z0 = Math.max(pts[0][1], pts[pts.length - 1][1]), z1 = Math.min(pts[0][1], pts[pts.length - 1][1]);
+  const P = new Parts(), cols = [];
+  let k = 0;
+  for (let z = Math.min(z0, from) - d / 2; z > z1; z -= d, k++) {
+    const x = at(z); if (x === null) continue;
+    const r = [x - w / 2, z - d / 2 + 0.01, x + w / 2, z + d / 2 - 0.01];
+    let lo = Infinity; for (const [px, pz] of [[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]], [x, z]]) lo = Math.min(lo, H(px, pz));
+    const top = H(x, z) + 0.16;
+    P.add('granite_grey', box(r[0], lo - 0.3, r[1], r[2], top, r[3]));
+    // the worn middle of every fourth tread is a darker slab: the path's pattern of long and short stones
+    if (k % 4 === 1) P.add('bluestone', box(r[0] + 0.25, top, r[1] + 0.06, r[2] - 0.25, top + 0.012, r[3] - 0.06));
+    cols.push([r, lo - 0.3, top]);
+  }
+  P.emit(bag);
+  for (const [r, y0, y1] of cols) col.rect(r, y0, y1);
+}
 export function shaolinGear(el, { bag, col }) {
   const P = new Parts(), s = el.s ?? 1, [x, z] = el.at, y = el.y ?? 0.02, rot = el.rot ?? 0, seed = el.seed ?? 3;
   switch (el.kind) {
@@ -93,6 +128,7 @@ export function shaolinGear(el, { bag, col }) {
     case 'cistern': cistern(P, s); col.circle(x, z, 0.85 * s, y, y + 1.2 * s); break;
     case 'lamp': stoneLamp(P, s); col.circle(x, z, 0.4 * s, y, y + 2.3 * s); break;
     case 'robes': robes(P, el.n ?? 4, seed); break;
+    case 'wayshrine': wayshrine(P, s); { const c = Math.cos(rot), sn = Math.sin(rot), ex = Math.abs(0.75 * s * c) + Math.abs(0.6 * s * sn), ez = Math.abs(0.75 * s * sn) + Math.abs(0.6 * s * c); col.rect([x - ex, z - ez, x + ex, z + ez], y - 0.9, y + 1.75 * s); } break;
     case 'offering': offering(P, s); col.rect([x - 0.65 * s, z - 0.3 * s, x + 0.65 * s, z + 0.3 * s], y, y + 0.7 * s); break;
     case 'brooms': brooms(P); break;
     default: throw new Error('shaolin_gear: ' + el.kind);
