@@ -30,14 +30,14 @@ add({ t: 'stair', rect: [-17.1, -51.2, 17.1, -49.1], dir: 's', y0: 0, y1: F, ris
   for (const s of [-1, 1]) {
     for (let z = N0 + 10.5; z < -53; z += 3.8) column(s * IN, z, 0, PH, PD, { shaftMat: 'granite_grey', lod: 1 });
     add({ t: 'beam', a: [s * IN, N0 + 6.6], b: [s * IN, -53], y: PH, w: 1.0, h: 1.1, mat: 'marble' });
-    add({ t: 'wall', a: [s * (BACK - 0.5), N0], b: [s * (BACK - 0.5), -51.2], th: 1.0, y0: 0, y1: PH + 2.4, openings: [], mat: 'stucco' });
+    add({ t: 'wall', a: [s * (BACK - 0.5), N0], b: [s * (BACK - 0.5), -51.2], th: 1.0, y0: 0, y1: PH + 2.4, openings: [], mat: 'dome_stucco' });
     add({ t: 'slab', rect: [Math.min(s * (IN - 0.6), s * BACK), N0 + 6, Math.max(s * (IN - 0.6), s * BACK), -51.2], y0: PH + 1.1, y1: PH + 1.5, mat: 'gilt_bronze', holes: [] });
   }
   // north portico, with the gateway on the axis
   const NZ = N0 + 6.6;
   for (let x = -IN; x <= IN + 0.01; x += 3.95) if (Math.abs(x) > 4.5) column(x, NZ, 0, PH, PD, { shaftMat: 'granite_grey', lod: 1 });
   add({ t: 'beam', a: [-IN, NZ], b: [IN, NZ], y: PH, w: 1.0, h: 1.1, mat: 'marble' });
-  add({ t: 'wall', a: [-BACK, N0 + 0.5], b: [BACK, N0 + 0.5], th: 1.0, y0: 0, y1: PH + 2.4, openings: [{ at: BACK, w: 7.2, h: PH, y0: 0 }], mat: 'stucco' });
+  add({ t: 'wall', a: [-BACK, N0 + 0.5], b: [BACK, N0 + 0.5], th: 1.0, y0: 0, y1: PH + 2.4, openings: [{ at: BACK, w: 7.2, h: PH, y0: 0 }], mat: 'dome_stucco' });
   add({ t: 'slab', rect: [-BACK, N0, BACK, NZ + 0.6], y0: PH + 1.1, y1: PH + 1.5, mat: 'gilt_bronze', holes: [] });
 }
 add({ t: 'floor', rect: [-17.1, -49.1, 17.1, -20], y: F, mat: 'marble_floor', th: F + 0.3 });
@@ -96,18 +96,18 @@ add({
   t: 'coffered_dome', c: [0, 0], y: SPRING, R, thick: WALL - 0.3, top: 1.45, oculus: 4.45,
   rings: [[7, 17.5], [17.5, 28], [28, 38], [38, 47.5], [47.5, 56.5]], n: 28, step: 0.24,
   outSteps: [[8.7, RO - 0.95], [9.6, RO - 1.9], [10.5, RO - 2.85], [11.4, RO - 3.8], [12.3, RO - 4.75], [13.2, RO - 5.7], [14.1, RO - 6.65]],
-  mat: 'dome_stucco', outMat: 'gilt_bronze', stepMat: 'stucco',
+  mat: 'dome_stucco', outMat: 'gilt_bronze', stepMat: 'dome_stucco',
 });
 // a gilt rosette in the back of every coffer (docs/buildings/pantheon.md §8b)
 add({ t: 'coffer_rosettes', c: [0, 0], y: SPRING, R, n: 28, step: 0.24, rings: [[7, 17.5], [17.5, 28], [28, 38], [38, 47.5], [47.5, 56.5]] });
 // exterior cornices dividing the drum into its three zones
-for (const y of [F + 10.6, F + 21.0, F + 30.4]) add({ t: 'ring_wall', c: [0, 0], r0: RO - 0.2, r1: RO + 0.55, y0: y - 0.7, y1: y, gaps: [{ a: 0, w: 30 }], mat: 'marble' });
+add({ t: 'drum_exterior', c: [0, 0], RO, y0: F + 10.6, zones: [F + 10.6, F + 21.0, F + 30.4], gap: 33 });
 
 // ── intermediate block and the bronze doors ──────────────────────────────────
 const BZ0 = -33.5, BZ1 = -22.5;
-block([-17.1, BZ0, -3.8, BZ1], 0, F + 24.5, { mat: 'stucco' });
-block([3.8, BZ0, 17.1, BZ1], 0, F + 24.5, { mat: 'stucco' });
-block([-3.8, BZ0, 3.8, BZ1], F + 12.2, F + 24.5, { mat: 'stucco' });
+block([-17.1, BZ0, -3.8, BZ1], 0, F + 24.5, { mat: 'brick' });
+block([3.8, BZ0, 17.1, BZ1], 0, F + 24.5, { mat: 'brick' });
+block([-3.8, BZ0, 3.8, BZ1], F + 12.2, F + 24.5, { mat: 'brick' });
 // the passage narrows to the doorway (4.45 × 7.53) with a bronze grille in the transom above
 block([-3.8, -26.6, -2.225, -25.4], F, F + 12.2, { mat: 'marble' });
 block([2.225, -26.6, 3.8, -25.4], F, F + 12.2, { mat: 'marble' });
