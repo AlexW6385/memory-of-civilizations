@@ -32,6 +32,11 @@ export function props() {
       const r = rand();
       if (r < 0.3) E.push({ t: 'rain_tub', at: pt(gc - 3.4, 1.1), seed: l.seed });
       if (r > 0.65) E.push({ t: 'animal', kind: 'horse', at: pt(gc + 3.8, 1.5), rot: faceOut + Math.PI / 2, seed: l.seed });
+      // the lane side of the wall: a cat on the coping (2.75 m up) on the wall opposite the gate, and at the lane corner firewood stacked or a basket of greens set down
+      { const r2 = rand(), sd = Math.floor(rand() * 1e9), ux = x0 + 6 + rand() * (x1 - x0 - 12), uz = z0 + 6 + rand() * (z1 - z0 - 12);
+        if (r2 < 0.3) E.push({ t: 'animal', kind: 'cat', at: g === 'n' ? [ux, z1] : g === 's' ? [ux, z0] : g === 'e' ? [x0, uz] : [x1, uz], y: 2.72, rot: rand() * 6.28, seed: sd });
+        else if (r2 < 0.55) E.push({ t: 'firewood', at: [x0 + 2.5, z1 + 1.35], rot: 0, len: 1.3, seed: sd });
+        else if (r2 < 0.7) E.push({ t: 'basket', at: [x1 - 2.5, z0 - 1.35], n: 2, seed: sd }); }
       if (r > 0.3 && r < 0.45) E.push({ t: 'animal', kind: 'dog', at: pt(gc + 2.6, 2.3), rot: rand() * 6.28, seed: l.seed });
     }
   }

@@ -13,6 +13,7 @@ import '../qing/index.js';
 import { barredWindows, shachi as shachiFish, karaHafu, samaWall, katomado } from './detail.js';
 import { machiyaShop, zashiki, kago, daisho } from './rooms.js';
 import { yashikiParts } from './yard.js';
+import { nagayaOpen, yardFace } from './nagaya.js';
 import { kido, hinomiYagura, kosatsu, jizo, inari } from './street.js';
 import { kuraIn, turretFurnish, doorWall } from './stores.js';
 import { machiyaFront, mushikoMado, ridgeCap, eaveBand, kuraWalls, gateFront, ishidoro, niwaki, ido, boat, barrel } from './town.js';
@@ -25,8 +26,39 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
 function roof(bag, rect, y, o, kind, rise, opt = {}) {
   const [x0, z0, x1, z1] = rect, w = x1 - x0 + 2 * o, d = z1 - z0 + 2 * o, alongZ = opt.alongZ ?? d > w;
   const A = (alongZ ? d : w) / 2, B = (alongZ ? w : d) / 2;
-  rectRoof({ c: [(x0 + x1) / 2, (z0 + z1) / 2], A, B, y, rise: rise ?? B * 0.62, kind, sweep: opt.sweep ?? 0.3, p: opt.p ?? 1.25, alongZ, curl: false, gableAt: opt.gableAt ?? 0.5, mat: opt.mat, hole: opt.hole }, bag);
+  const sweep = opt.sweep ?? 0.3, c = [(x0 + x1) / 2, (z0 + z1) / 2];
+  rectRoof({ c, A, B, y, rise: rise ?? B * 0.62, kind, sweep, p: opt.p ?? 1.25, alongZ, curl: false, gableAt: opt.gableAt ?? 0.5, mat: opt.mat, hole: opt.hole, gableBoard: kind === 'gable' && opt.board !== false ? o : undefined }, bag);
+  if (EAVE.pitch && B >= 3.9) eaveTiles(bag, { c, A, B, y, kind, sweep, alongZ, pitch: EAVE.pitch, crest: B >= 5.5 });
 }
+/** Which roofs carry rows of eave tiles, and how close: set by the builders (castle 0.3 m, the samurai halls 0.5 m, none for the town's houses). */
+const EAVE = { pitch: 0.3 };
+const withEave = (pitch, fn) => { const o = EAVE.pitch; EAVE.pitch = pitch; try { return fn(); } finally { EAVE.pitch = o; } };
+/**
+ * The eave's row of round-ended tiles (nokimaru-gawara): at every pitch along the eave a half-round tile whose disc ends the cover
+ * course, standing a hand out of the eave's edge, with a pale crest at its middle on the larger roofs. The eave runs at the roof's
+ * own height there (the sweep lifts the corners, as rectRoof lays it); a gable has them on its long sides only.
+ */
+function eaveTiles(bag, { c, A, B, y, kind, sweep, alongZ, pitch, crest }) {
+  const rot = (x, z) => (alongZ ? [c[0] - (z - c[1]), c[1] + (x - c[0])] : [x, z]);
+  const lift = (te, ts) => { const q = kind === 'gable' ? 0 : Math.max(0, 1 - te / 0.5) * Math.max(0, 1 - ts / 0.5); return y + sweep * q * q; };
+  const R = 0.075, tri = [], dot = [], body = [];
+  const one = (lx, lz, nx, nz, h) => {
+    const [px, pz] = rot(c[0] + lx, c[1] + lz), [dx, dz] = rot(c[0] + lx + nx, c[1] + lz + nz), ox = dx - px, oz = dz - pz;
+    const tx = -oz, tz = ox, cy = h - 0.07, ex = px + ox * 0.02, ez = pz + oz * 0.02;
+    const ring = (r, k, off) => [ex + ox * off + tx * r * Math.cos(k * Math.PI / 3), cy + r * Math.sin(k * Math.PI / 3), ez + oz * off + tz * r * Math.cos(k * Math.PI / 3)];
+    for (let k = 0; k < 6; k++) { const a = ring(R, k, 0), b = ring(R, k + 1, 0); tri.push(ex, cy, ez, ...a, ...b); }
+    if (crest) for (let k = 0; k < 4; k++) { const a = ring(0.035, k * 1.5, 0.012), b = ring(0.035, k * 1.5 + 1.5, 0.012); dot.push(ex + ox * 0.012, cy, ez + oz * 0.012, ...a, ...b); }
+    body.push(box(Math.min(px, px - ox * 0.14) - Math.abs(tx) * 0.06, h - 0.02, Math.min(pz, pz - oz * 0.14) - Math.abs(tz) * 0.06, Math.max(px, px - ox * 0.14) + Math.abs(tx) * 0.06, h + 0.07, Math.max(pz, pz - oz * 0.14) + Math.abs(tz) * 0.06));
+  };
+  const nL = Math.max(2, Math.round(2 * A / pitch));
+  for (let i = 0; i <= nL; i++) { const lx = -A + 2 * A * i / nL, te = Math.max(0, (A - Math.abs(lx)) / B), h = lift(te, 0); for (const sg of [-1, 1]) one(lx, sg * B, 0, sg, h); }
+  if (kind !== 'gable') { const nE = Math.max(2, Math.round(2 * B / pitch)); for (let i = 1; i < nE; i++) { const lz = -B + 2 * B * i / nE, ts = (B - Math.abs(lz)) / B, h = lift(0, ts); for (const sg of [-1, 1]) one(sg * A, lz, sg, 0, h); } }
+  bag.add('tile_dark', fromTriangles(tri.concat(flipTris6(tri))));
+  for (const g of body) bag.add('tile_dark', g);
+  if (dot.length) bag.add('paint_white', fromTriangles(dot.concat(flipTris6(dot))));
+}
+/** The same triangles wound the other way (so that the disc shows from both sides). */
+const flipTris6 = (t) => { const o = []; for (let i = 0; i < t.length; i += 9) o.push(t[i], t[i + 1], t[i + 2], t[i + 6], t[i + 7], t[i + 8], t[i + 3], t[i + 4], t[i + 5]); return o; };
 /** A section [[offset, y]…] swept along a→b, capped at the ends. */
 function sweepSection(bag, mat, a, b, sec) {
   const L = Math.hypot(b[0] - a[0], b[1] - a[1]), nx = -(b[1] - a[1]) / L, nz = (b[0] - a[0]) / L, t = [];
@@ -634,8 +666,9 @@ function roofKura(bag, rect, y) {
 }
 
 /** nagaya: the retainers' row house { rect } along a wall of the yard: plastered, a dark base, doors and barred windows on the yard side, a long tiled gable roof. */
-function nagaya(bag, col, rect, g) {
-  const [x0, z0, x1, z1] = rect, H = 3.0, alongZ = z1 - z0 > x1 - x0;
+function nagaya(bag, col, rect, g, yard, open, seed) {
+  const [x0, z0, x1, z1] = rect, H = 3.0, alongZ = z1 - z0 > x1 - x0, face = yardFace(rect, yard);
+  if (open) { nagayaOpen({ rect, face, seed }, { bag, col }); roof(bag, rect, H - 0.1, 0.5, 'gable', Math.min(x1 - x0, z1 - z0) * 0.5, { alongZ, sweep: 0 }); return; }
   bag.add('plaster_grey', box(x0, 0, z0, x1, 0.5, z1));
   bag.add(PL, box(x0, 0.5, z0, x1, H, z1));
   col.rect(rect, 0, H);
@@ -675,8 +708,7 @@ function yashiki(el, { bag, col }) {
   if (g === 's' || g === 'n') ridgeCap(bag, gx0 - 0.7, gx1 + 0.7, 3.5 + Math.min(gx1 - gx0, gz1 - gz0) * 0.4, (gz0 + gz1) / 2);
   // the main house, the storehouse and the retainers' row
   shoinHall(bag, col, P.house, 0, 3.2, P.roof, TL, el.simple && !el.open ? 3.6 : 1.8, el.open ? { face: g, seed: el.seed } : null);
-  if (P.kura) kura(bag, col, P.kura);
-  nagaya(bag, col, P.nagaya, g);
+  withEave(0, () => { if (P.kura) kura(bag, col, P.kura); nagaya(bag, col, P.nagaya, g, el.rect, !!el.open, el.seed); });
   // the garden before the house: a stone lantern, a pruned pine, a well in some
   const gp = P.garden;
   ishidoro(bag, col, gp[0] + 1.6, gp[1] + 1.2, 0, 1.1);
@@ -740,14 +772,14 @@ registerStyle('edo', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
-    ishigaki, dobei, tenshu: J(tenshu), yagura: J(yagura), watari: J(watari), yagura_mon: J(yaguraMon), hishi_mon: J(hishiMon), kabuki_mon: J(kabukiMon), goten: J(goten), yashiki: J(yashiki), machiya: J(machiya), kago, daisho,
+    ishigaki, dobei, tenshu: J(tenshu), yagura: J(yagura), watari: J(watari), yagura_mon: J(yaguraMon), hishi_mon: J(hishiMon), kabuki_mon: J(kabukiMon), goten: J(goten), yashiki: J((el, ctx) => withEave(0.5, () => yashiki(el, ctx))), machiya: J((el, ctx) => withEave(0, () => machiya(el, ctx))), kago, daisho,
     ido: (el, ctx) => ido(ctx.bag, ctx.col, el.at[0], el.at[1], el.y ?? 0, el.rot ?? 0),
     ishidoro: (el, ctx) => ishidoro(ctx.bag, ctx.col, el.at[0], el.at[1], el.y ?? 0, el.s ?? 1),
     niwaki: (el, ctx) => niwaki(ctx.bag, ctx.col, el.at[0], el.at[1], el.y ?? 0, el.h ?? 5, el.seed),
     taru: (el, ctx) => { for (let r = 0; r < (el.rows ?? 3); r++) for (let k = 0; k < (el.rows ?? 3) - r; k++) barrel(ctx.bag, 'timber', el.at[0] + (k + r * 0.5) * 0.56, (el.y ?? 0) + r * 0.55, el.at[1], 0.27, 0.62, 'thatch'); ctx.col.circle(el.at[0] + 0.6, el.at[1], 1.0, el.y ?? 0, (el.y ?? 0) + 1.5); },
     kido, hinomi_yagura: hinomiYagura, kosatsu, jizo, inari,
-    kura: (el, ctx) => kura(ctx.bag, ctx.col, el.rect, el.y ?? 0),
-    kura_in: (el, ctx) => { kuraIn(el, ctx); roofKura(ctx.bag, el.rect, el.y ?? 0); },
+    kura: J((el, ctx) => kura(ctx.bag, ctx.col, el.rect, el.y ?? 0)),
+    kura_in: J((el, ctx) => { kuraIn(el, ctx); roofKura(ctx.bag, el.rect, el.y ?? 0); }),
     moat_boat: (el, ctx) => boat(ctx.bag, ctx.col, el.at[0], el.at[1], el.y, el.dir ?? [1, 0], el.len ?? 7.5),
   },
   objects: {},
