@@ -715,6 +715,14 @@ function logHouse(el, ctx) {
   const top = pitched(bag, roof, LOG, el.rect, yt, pitch, o, alongX, roof === 'sod' ? 0.28 : 0.16);
   logGables(bag, el.rect, y + H, span / 2 * pitch + o * pitch - 0.28, alongX, d);
   roofTrim(bag, el.rect, yt, pitch, o, alongX, roof === 'sod');
+  if (roof === 'sod') {                       // the turf rolled over the ridge, held down by crossed poles at every pace (the ridge's cross-staves)
+    const L0 = (alongX ? x0 : z0) - o, L1 = (alongX ? x1 : z1) + o, mid = alongX ? (z0 + z1) / 2 : (x0 + x1) / 2, rr = 0.15 + rand() * 0.01;
+    bag.add('sod', alongX ? logRod([L0 + 0.1, top + 0.02, mid], [L1 - 0.1, top + 0.02, mid], rr, 6) : logRod([mid, top + 0.02, L0 + 0.1], [mid, top + 0.02, L1 - 0.1], rr, 6));
+    for (let q = L0 + 0.6; q < L1 - 0.4; q += 1.3) for (const sg of [-1, 1]) {
+      const a = alongX ? [q - 0.04 * sg, top + 0.17, mid + sg * 0.05] : [mid + sg * 0.05, top + 0.17, q - 0.04 * sg], yb = top - pitch * 0.72 + 0.045;
+      bag.add(LOG, beam(a, alongX ? [q + 0.1 * sg, yb, mid + sg * 0.72] : [mid + sg * 0.72, yb, q + 0.1 * sg], 0.07, 0.07));
+    }
+  }
   // the stue's smoke-hole (ljore) on the ridge: a little boarded hood with its own roof — no chimney yet
   if (kind === 'stue' || kind === 'smithy') {
     const mx = (x0 + x1) / 2 - (alongX ? 0.6 : 0), mz = (z0 + z1) / 2 - (alongX ? 0 : 0.6);
