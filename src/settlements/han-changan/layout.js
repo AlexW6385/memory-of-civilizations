@@ -187,3 +187,9 @@ export function marketShops(rect, seedBase, th = MARKET_WALL.th) {
 export const SERVICE_QUARTERS = QUARTERS.slice(3);
 export const inService = (l) => l.ward === -2 && SERVICE_QUARTERS.some((q) => l.rect[0] >= q[0] - 0.01 && l.rect[2] <= q[2] + 0.01 && l.rect[1] >= q[1] - 0.01 && l.rect[3] <= q[3] + 0.01);
 export const serviceKind = (l) => (l.kind === 'tower' ? 'lou' : l.kind === 'row' ? (l.seed % 2 ? 'shop' : 'row') : 'court');
+
+/** The house's standing, by rule: 2 near the great avenue (the officials' and merchants' wards), 1 between, 0 in the far wards (the poor's); the palace quarters' are 1. */
+export const rankOf = (l) => { if (l.ward === -2) return 1; const d = Math.abs((l.rect[0] + l.rect[2]) / 2 - (AVENUE[0] + AVENUE[2]) / 2); return d < 120 ? 2 : d < 260 ? 1 : 0; };
+/** The wards' houses built to be entered (src/styles/hanlodge): the ones left open, and every fourth of the rest by seed (about two in five). */
+export const enterable = (l) => l.kind !== 'office' && !inService(l) && (l.open || l.seed % 4 === 0);
+export const wardKind = (l) => (l.kind === 'tower' ? 'lou' : l.kind === 'row' ? 'row' : 'court');

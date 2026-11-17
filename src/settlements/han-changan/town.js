@@ -4,7 +4,7 @@
 // and the caravans of the Silk Road at the west gate.
 
 import { RADIUS, AX, PALACE, PALACE_WALL, HALL, CROWN, EAST_GATE, SOUTH_GATE, CHANGLE, CHANGLE_HALL, WEST_MARKET, EAST_MARKET, MARKET_WALL, LAKE, LAKE_Y, ACADEMY, WARDS, WARD_WALL, GARDEN_POND, POND_Y, JIAOFANG,
-  RAMP, CITY_WALL, WALL_W, WALL_S, GATE_W, GATE_S, cityWalls, lots, inService, serviceKind, TIERS, marketShops, BRIDGES, MOAT_Y, AVENUE } from './layout.js';
+  RAMP, CITY_WALL, WALL_W, WALL_S, GATE_W, GATE_S, cityWalls, lots, inService, serviceKind, rankOf, enterable, wardKind, TIERS, marketShops, BRIDGES, MOAT_Y, AVENUE } from './layout.js';
 const AVENUE_BAND = { mid: [AVENUE[0] + 11, AVENUE[1], AVENUE[2] - 11, WALL_S - 6], kerbW: [AVENUE[0], AVENUE[1], AVENUE[0] + 0.6, WALL_S - 6], kerbE: [AVENUE[2] - 0.6, AVENUE[1], AVENUE[2], WALL_S - 6] };
 
 import { lifePlans } from './life.js';
@@ -89,7 +89,7 @@ export async function town() {
     for (const s of [-1, 1]) E.push({ t: 'han_corridor', a: [AX + s * 80, -80], b: [AX + s * 80, 84], w: 3.4, h: 3.6, wall: s });
     E.push({ t: 'han_corridor', a: [AX - 80, 84], b: [AX + 80, 84], w: 3.4, h: 3.6, wall: 1 });
     // the Jiaofang hall behind the terrace, the offices west of the court, the library pavilions on their platforms
-    E.push({ t: 'han_hall', cx: JIAOFANG.cx, z1: JIAOFANG.cz + 6, bays: 5, bayW: 7.2, depth: 2, depthW: 6, floor: 0.9, base: 0.9, h: 5.8, roof: 'hip', rise: 4.4, overhang: 2.8, ap: 1.6, furnish: 'court', open: [2, 2], seed: 31 });
+    E.push({ t: 'hanl_hall', cx: JIAOFANG.cx, z1: JIAOFANG.cz + 6, bays: 5, bayW: 7.2, depth: 2, depthW: 6, floor: 0.9, base: 0.9, h: 5.8, roof: 'hip', rise: 4.4, overhang: 2.8, ap: 1.6, furnish: 'court', open: [2, 2], seed: 31 });
     for (const [cz, sd] of [[-130, 41], [-176, 43]]) E.push({ t: 'han_hall', cx: -228, z1: cz, bays: 5, bayW: 6, depth: 2, depthW: 6, floor: 0.9, base: 0.9, h: 5.0, roof: 'gable', rise: 3.4, overhang: 2.4, ap: 1.6, furnish: 'office', open: [2, 2], seed: sd });
     for (const [x, z] of [[-210, -228], [-165, -232]]) {
       E.push({ t: 'han_wall', a: [x - 9, z], b: [x + 9, z], th: 14, h: 2.6, mat: 'earth_wall', cap: 'none' });
@@ -98,14 +98,14 @@ export async function town() {
     E.push({ t: 'han_pond', rect: GARDEN_POND, y: POND_Y }, { t: 'han_island', at: [(GARDEN_POND[0] + GARDEN_POND[2]) / 2 - 6, GARDEN_POND[1] + 17], r: 7, y: POND_Y, pond: GARDEN_POND, seed: 4 });
     // the paved axial way from the south gate to the ramp, and the paved court at its foot
     E.push({ t: 'floor', rect: [AX - 6, RAMP.z1 - 0.5, AX + 6, PALACE[3] - 2], y: 0.03, mat: 'bluestone', th: 0.3 }, { t: 'floor', rect: [AX - 26, RAMP.z1 - 0.5, AX + 26, RAMP.z1 + 24], y: 0.02, mat: 'brick_paving', th: 0.3 });
-    plans.push(base('han-palace', E));
+    plans.push(base('han-palace', E, { style: 'hanlodge' }));
   }
   // ── the Changle palace ──
   {
     const E = walledRect(CHANGLE, PALACE_WALL.th, PALACE_WALL.h, 'lime_plaster', [{ side: 'w', c: EAST_GATE.z, w: 14 }, { side: 's', c: CHANGLE_HALL.cx, w: 14 }]);
-    for (const cz of [-150, -20]) E.push({ t: 'han_hall', cx: CHANGLE_HALL.cx, z1: cz, bays: 5, bayW: 6, depth: 2, depthW: 6, floor: 0.9, base: 0.9, h: 5.2, roof: 'hip', rise: 4.2, overhang: 2.6, ap: 1.6, furnish: 'court', open: [2, 2], seed: 51 + cz });
+    for (const cz of [-150, -20]) E.push({ t: 'hanl_hall', cx: CHANGLE_HALL.cx, z1: cz, bays: 5, bayW: 6, depth: 2, depthW: 6, floor: 0.9, base: 0.9, h: 5.2, roof: 'hip', rise: 4.2, overhang: 2.6, ap: 1.6, furnish: 'court', open: [2, 2], seed: 51 + cz });
     E.push({ t: 'han_corridor', a: [CHANGLE[0] + 10, -100], b: [CHANGLE[0] + 40, -100], w: 3.4, wall: 1 });
-    plans.push(base('han-changle', E));
+    plans.push(base('han-changle', E, { style: 'hanlodge' }));
   }
   // ── the great avenue's offices ──
   {
@@ -121,8 +121,11 @@ export async function town() {
       E.push({ t: 'han_ward', rect: w, gates: [{ side: 'w', c: lc[0], w: 4.5 }, { side: 'e', c: lc[0], w: 4.5 }, { side: 'w', c: lc[1], w: 3.5 }, { side: 'e', c: lc[1], w: 3.5 }] });
     }
     plans.push(base('han-wards', E));
-    const H = lots().filter((l) => l.kind !== 'office' && !inService(l)), K = { court: 'han_house', row: 'han_house', tower: 'han_house' };
-    for (let i = 0; i < H.length; i += 40) plans.push(base(`han-houses-${i / 40}`, H.slice(i, i + 40).map((l) => ({ t: K[l.kind], rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, open: l.open }))));
+    const H = lots().filter((l) => l.kind !== 'office' && !inService(l) && !enterable(l)), K = { court: 'han_house', row: 'han_house', tower: 'han_house' };
+    for (let i = 0; i < H.length; i += 40) plans.push(base(`han-houses-${i / 40}`, H.slice(i, i + 40).map((l) => ({ t: K[l.kind], rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, open: false }))));
+    // the wards' houses built to be entered, each its own front by the standing of the lot (docs §6d)
+    const Hn = lots().filter(enterable);
+    for (let i = 0; i < Hn.length; i += 30) plans.push(base(`han-ward-homes-${i / 30}`, Hn.slice(i, i + 30).map((l) => ({ t: 'hanl_house', rect: l.rect, front: l.front, kind: wardKind(l), rank: rankOf(l), seed: l.seed })), { style: 'hanlodge' }));
   }
   // the service quarters' houses: enterable (src/styles/hanlodge)
   plans.push(base('han-service-houses', lots().filter(inService).map((l) => ({ t: 'hanl_house', rect: l.rect, front: l.front, kind: serviceKind(l), seed: l.seed })), { style: 'hanlodge' }));

@@ -6,22 +6,48 @@
 //   shop   — the hall's front open between posts under a tiled awning, a counter on the lane (the stewards' stores);
 //   lou    — a hall with a second storey over its back half, a red balcony, a hipped upper roof.
 // Built in a lot's frame (u along the lane, v into the lot; han/kit.js lotFrame). The Han kit, interiors and dress are used read-only.
-import { registerStyle } from '../../core/build.js';
+import { registerStyle, STYLES } from '../../core/build.js';
 import { box, lathe } from '../../core/geom.js';
 import '../han/index.js';
 import { rng, lotFrame, eaveTilesGable } from '../han/kit.js';
 import { furnish, KINDS } from '../han/interiors.js';
 import { frontDress, yardDress } from '../han/dress.js';
+import { hall as hanlHall } from './hall.js';
+import { que as hanlQue } from './que.js';
+import { terraceDress } from './terrace.js';
 
 const WALLS = ['earth_wall', 'lime_plaster', 'mud_plaster', 'earth_wall', 'lime_plaster'];
 
-function perimeter(F, W, D, h, gateU, gateW, wm, noFront = false) {
-  const t = 0.5, cap = (u0, v0, u1, v1) => F.b('tile_grey', u0, h, v0, u1, h + 0.28, v1, false);
+function perimeter(F, W, D, h, gateU, gateW, wm, noFront = false, rank = 1) {
+  // rank 0 (the poor): a low wall under a thatched coping and a brushwood gate; rank 1: the tile coping and the small roofed gate; rank 2 (the rich, near the
+  // avenue): a taller wall, red leaves with bronze rings, stone drums at the jambs and a gate-house over the passage (docs §6d)
+  const t = 0.5, cap = (u0, v0, u1, v1) => (rank === 0 ? F.b('thatch', u0 - 0.04, h, v0 - 0.04, u1 + 0.04, h + 0.34, v1 + 0.04, false) : F.b('tile_grey', u0, h, v0, u1, h + 0.28, v1, false));
   F.b(wm, 0, 0, D - t, W, h, D); F.b(wm, 0, 0, noFront ? 0.2 : t, t, h, D - t); F.b(wm, W - t, 0, noFront ? 0.2 : t, W, h, D - t);
   cap(-0.1, D - t - 0.1, W + 0.1, D + 0.1); cap(-0.1, noFront ? 0.2 : t, t + 0.1, D - t); cap(W - t - 0.1, noFront ? 0.2 : t, W + 0.1, D - t);
   if (noFront) return;
   F.b(wm, 0, 0, 0, gateU - gateW / 2, h, t); F.b(wm, gateU + gateW / 2, 0, 0, W, h, t);
   cap(-0.1, -0.1, gateU - gateW / 2, t + 0.1); cap(gateU + gateW / 2, -0.1, W + 0.1, t + 0.1);
+  const g0 = gateU - gateW / 2, g1 = gateU + gateW / 2;
+  if (rank === 0) {
+    // the brushwood gate: two rough posts, a crossbar, a wicker leaf pushed back against the wall
+    F.b('timber', g0 - 0.18, 0, -0.08, g0 + 0.08, h + 0.35, t + 0.08); F.b('timber', g1 - 0.08, 0, -0.08, g1 + 0.18, h + 0.35, t + 0.08);
+    F.b('timber', g0 - 0.18, h - 0.05, -0.1, g1 + 0.18, h + 0.18, t + 0.1, false);
+    F.b('wicker', g0 + 0.08, 0.05, 0.08, g0 + 0.16, h - 0.35, 1.0, false);
+    return;
+  }
+  if (rank === 2) {
+    // the gate-house: the passage under a room (a floor of timber over the lintel, plastered walls with a lattice window to the lane, a hipped tiled roof)
+    F.b('timber_red', g0 - 0.25, 0, -0.12, g0 + 0.1, h + 0.1, t + 0.12); F.b('timber_red', g1 - 0.1, 0, -0.12, g1 + 0.25, h + 0.1, t + 0.12);
+    F.b('timber_red', g0 - 0.55, h + 0.1, -0.14, g1 + 0.55, h + 0.4, t + 0.14, false);
+    const yb = h + 0.4, uu0 = g0 - 0.55, uu1 = g1 + 0.55, hh = 2.3;
+    F.b(wm, uu0, yb, -0.1, uu1, yb + hh, t + 0.9);
+    F.b('lattice', gateU - 0.8, yb + 0.7, -0.16, gateU + 0.8, yb + 1.7, -0.08, false);
+    F.b('timber_red', uu0 - 0.06, yb, -0.18, uu0 + 0.14, yb + hh, -0.02, false); F.b('timber_red', uu1 - 0.14, yb, -0.18, uu1 + 0.06, yb + hh, -0.02, false);
+    F.roof('hip_roof', gateU, (t + 0.9 - 0.1) / 2 - 0.0, (uu1 - uu0) / 2 + 0.8, (t + 1.0) / 2 + 0.8, yb + hh, 1.5, { mat: 'tile_grey', soffit: 'timber_red', noChiwei: true, lift: 0.3, pow: 1.1 });
+    F.b('lacquer_red', g0 + 0.1, 0, 0.05, g0 + 0.2, h - 0.1, 0.9, false);                                    // the leaves, open against the passage walls
+    for (const [u, v] of [[g0 - 0.7, -0.7], [g1 + 0.7, -0.7]]) F.lathe('granite_grey', [[0.34, 0], [0.34, 0.12], [0.3, 0.16], [0.3, 0.62], [0.001, 0.66]], u, 0, v, 10);   // the stone drums at the jambs
+    return;
+  }
   // the gate: two posts, a lintel, a small tiled roof, the leaves left open
   F.b('timber_red', gateU - gateW / 2 - 0.2, 0, -0.1, gateU - gateW / 2 + 0.1, h + 0.7, t + 0.1); F.b('timber_red', gateU + gateW / 2 - 0.1, 0, -0.1, gateU + gateW / 2 + 0.2, h + 0.7, t + 0.1);
   F.b('timber_red', gateU - gateW / 2 - 0.2, h + 0.3, -0.12, gateU + gateW / 2 + 0.2, h + 0.7, t + 0.12, false);
@@ -68,13 +94,15 @@ function hall(F, u0, u1, v0, v1, H, wm, o, rand) {
 
 /** hanl_house: { rect, front, kind ('court' | 'row' | 'shop' | 'lou'), seed } — a house of the service quarters, its hall enterable and lit. */
 function house(el, ctx) {
-  const rand = rng(el.seed), F = lotFrame(ctx, el.rect, el.front), W = F.W, D = F.D, wm = WALLS[el.seed % WALLS.length], kind = el.kind, H = 3.3 + rand() * 0.3;
+  const rank = el.rank ?? 1, rand = rng(el.seed), F = lotFrame(ctx, el.rect, el.front), W = F.W, D = F.D, kind = el.kind, H = 3.3 + rand() * 0.3;
+  const wm = rank === 0 ? (el.seed % 2 ? 'mud_plaster' : 'earth_wall') : rank === 2 ? (el.seed % 3 ? 'lime_plaster' : WALLS[el.seed % WALLS.length]) : WALLS[el.seed % WALLS.length];
   const gateU = Math.max(1.8, Math.min(W - 1.8, W * (0.25 + 0.5 * rand()))), room = KINDS[(el.seed >> 3) % KINDS.length];
+  const wh = rank === 0 ? 2.0 : rank === 2 ? 2.7 : 2.5, gw = rank === 2 ? 2.1 : rank === 0 ? 1.6 : 1.8, tile = rank === 0 ? 'tile_dark' : 'tile_grey';
   if (kind === 'court') {
-    perimeter(F, W, D, 2.5, gateU, 1.8, wm);
-    frontDress(F, W, D, gateU, 1.8, 2.5, el.seed, 'court');
+    perimeter(F, W, D, wh, gateU, gw, wm, false, rank);
+    frontDress(F, W, D, gateU, gw, wh, el.seed, 'court');
     const hv = D - 7.8;
-    hall(F, 1.0, W - 1.0, hv, D - 0.9, H, wm, {}, rand);
+    hall(F, 1.0, W - 1.0, hv, D - 0.9, H, wm, { tile }, rand);
     furnish(F, room, 1.4, W - 1.4, hv + 0.4, D - 1.3, 0.33, el.seed, ctx.lights, true);
     yardDress(F, W, D, hv, el.seed);
     if (rand() < 0.75) {
@@ -88,9 +116,10 @@ function house(el, ctx) {
     return;
   }
   if (kind === 'row') {
-    perimeter(F, W, D, 2.3, gateU, 1.7, wm, true);
+    perimeter(F, W, D, 2.3, gateU, 1.7, wm, true, rank);
     const hv = 1.4;
-    hall(F, 0.5, W - 0.5, hv, hv + 6.4, H - 0.2, wm, {}, rand);
+    const du = hall(F, 0.5, W - 0.5, hv, hv + 6.4, H - 0.2, wm, { tile }, rand);
+    if (rank === 2) for (const sd of [-1, 1]) F.lathe('granite_grey', [[0.3, 0], [0.3, 0.1], [0.26, 0.14], [0.26, 0.56], [0.001, 0.6]], du + sd * 1.25, 0, 0.25, 10);   // stone drums at the door
     furnish(F, room, 0.9, W - 0.9, hv + 0.4, hv + 6.0, 0.33, el.seed, ctx.lights, true);
     frontDress(F, W, D, gateU, 1.7, 2.3, el.seed, 'row');
     yardDress(F, W, D, hv + 6.4, el.seed);
@@ -111,10 +140,10 @@ function house(el, ctx) {
     return;
   }
   // lou: the hall with a second storey over its back half (not entered), a balcony of red rails under the upper eave
-  perimeter(F, W, D, 2.4, gateU, 1.8, wm);
-  frontDress(F, W, D, gateU, 1.8, 2.4, el.seed, 'court');
-  const hv = D - 8.2, P = 0.3, hb = hv + 3.4;
-  hall(F, 1.0, W - 1.0, hv, D - 0.9, H, wm, { hip: false }, rand);
+  perimeter(F, W, D, wh, gateU, gw, wm, false, rank);
+  frontDress(F, W, D, gateU, gw, wh, el.seed, 'court');
+  const hv = D - 8.2, P = 0.3, hb = hv + 3.43;
+  hall(F, 1.0, W - 1.0, hv, D - 0.9, H, wm, { hip: false, tile }, rand);
   furnish(F, room, 1.4, W - 1.4, hv + 0.4, D - 1.3, 0.33, el.seed, ctx.lights, true);
   const y2 = H + 0.5, b0 = 2.4, b1 = W - 2.4;
   F.b('timber_red', b0 - 0.1, y2, hb - 0.1, b1 + 0.1, y2 + 0.18, D - 1.6 + 0.1, false);
@@ -129,6 +158,6 @@ function house(el, ctx) {
 
 registerStyle('hanlodge', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { hanl_house: house },
+  elements: { ...STYLES.han.elements, hanl_house: house, hanl_hall: hanlHall, hanl_que: hanlQue, hanl_terrace_dress: terraceDress },
   objects: {},
 });
