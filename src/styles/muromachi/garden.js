@@ -66,7 +66,7 @@ function pondStones(el, { bag, col }) {
     const tall = i % 5 === 0, w = (tall ? 0.45 : 0.55 + rnd() * 0.45), h = tall ? 1.0 + rnd() * 0.5 : 0.4 + rnd() * 0.4, asp = 0.6 + 0.4 * rnd();
     const tris = stoneTris(w, h, w * asp, 100 + i * 7 + (el.seed || 5), (rnd() - 0.5) * 0.2, 0.1 * (rnd() - 0.5), !tall).map((v, j) => (j % 3 === 0 ? v + x : j % 3 === 1 ? v + y0 : v + z));
     bag.add('rock_boulder', fromTriangles(tris));
-    col.circle(x, z, w * 1.05, y0, y0 + h);
+    col.circle(x, z, w * 1.05, y0 - 0.9, y0 + h);
     if (rnd() < 0.6) bag.add('sod', lathe([[0.001, 0.0], [w * 1.25, 0.0], [w * 1.0, 0.08], [0.001, 0.12]], 10, null, x + w * 0.6, y0 + 0.28, z));
   }
 }
