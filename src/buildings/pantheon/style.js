@@ -7,11 +7,12 @@ import '../../styles/greek/index.js';
 import '../../styles/roman/index.js';
 import { STYLES, registerStyle } from '../../core/build.js';
 import { box, lathe, fromTriangles } from '../../core/geom.js';
+import { merge } from '../../styles/greek/columns.js';
 import { hexa } from '../../styles/chinese/index.js';
 import { god, cofferRosettes } from './statues.js';
 import { pantheonColumn } from './column.js';
 import { drumExterior } from './drum.js';
-import { gateArch } from './forecourt.js';
+import { gateArch, pilasters } from './forecourt.js';
 import { revetmentPanels } from './interior.js';
 import { friezeLetters, eagleRelief } from './relief.js';
 
@@ -273,28 +274,31 @@ const base = STYLES.roman;
  */
 function rotundaFloor(el, { bag }) {
   const [cx, cz] = el.c, y = el.y, cell = el.cell ?? 3.6, n = Math.floor(el.R / cell);
+  const acc = {};                                                         // one merged mesh per material: no run of identical copies to instance
+  const add = (m, g) => (acc[m] ||= []).push(g);
   const disc = (r, y0, h, x, z, seg = 32) => lathe([[r, 0], [r, h], [0.001, h]], seg, null, x, y0, z);
   const sq = (c, h, y0, x, z, y1) => box(x - c, y0, z - c, x + c, y1, z + c);
   for (let i = -n; i <= n; i++) for (let j = -n; j <= n; j++) {
     const x = cx + i * cell, z = cz + j * cell, hs = cell / 2;
     if (Math.hypot(i * cell, j * cell) > el.R - cell * 0.95) continue;
     const alt = (i + j) % 2 === 0;
-    bag.add('marble', sq(hs - 0.03, 0, y + 0.004, x, z, y + 0.009));                       // the white frame, a plate under each cell
+    add('marble', sq(hs - 0.03, 0, y + 0.004, x, z, y + 0.009));                       // the white frame, a plate under each cell
     if (alt) {
       // a circle in a square: a grey granite square, a white ring, a disc of porphyry or giallo, a boss
-      bag.add('granite_grey', sq(hs - 0.15, 0, y + 0.009, x, z, y + 0.0135));
-      bag.add('marble', disc(cell * 0.375, y + 0.0135, 0.0035, x, z, 40));
-      bag.add(((i + 2 * j) % 3 === 0) ? 'giallo' : 'porphyry', disc(cell * 0.335, y + 0.017, 0.0035, x, z, 40));
-      bag.add('marble', disc(cell * 0.08, y + 0.0205, 0.003, x, z, 16));
+      add('granite_grey', sq(hs - 0.15, 0, y + 0.009, x, z, y + 0.0135));
+      add('marble', disc(cell * 0.375, y + 0.0135, 0.0035, x, z, 40));
+      add(((i + 2 * j) % 3 === 0) ? 'giallo' : 'porphyry', disc(cell * 0.335, y + 0.017, 0.0035, x, z, 40));
+      add('marble', disc(cell * 0.08, y + 0.0205, 0.003, x, z, 16));
     } else {
       // a square in a square: pavonazzetto, a giallo frame, a white diamond, a disc at its heart
-      bag.add('pavonazzetto', sq(hs - 0.15, 0, y + 0.009, x, z, y + 0.0135));
-      bag.add('giallo', sq(hs - 0.34, 0, y + 0.0135, x, z, y + 0.017));
-      bag.add('pavonazzetto', sq(hs - 0.42, 0, y + 0.017, x, z, y + 0.0195));
-      bag.add('marble', lathe([[hs - 0.5, 0], [hs - 0.5, 0.0035], [0.001, 0.0035]], 4, null, x, y + 0.0195, z));
-      bag.add('porphyry', disc(cell * 0.14, y + 0.023, 0.0035, x, z, 28));
+      add('pavonazzetto', sq(hs - 0.15, 0, y + 0.009, x, z, y + 0.0135));
+      add('giallo', sq(hs - 0.34, 0, y + 0.0135, x, z, y + 0.017));
+      add('pavonazzetto', sq(hs - 0.42, 0, y + 0.017, x, z, y + 0.0195));
+      add('marble', lathe([[hs - 0.5, 0], [hs - 0.5, 0.0035], [0.001, 0.0035]], 4, null, x, y + 0.0195, z));
+      add('porphyry', disc(cell * 0.14, y + 0.023, 0.0035, x, z, 28));
     }
   }
+  for (const [m, list] of Object.entries(acc)) bag.add(m, merge(list));
 }
 /**
  * oculus_light: { c, y (the oculus' height), r } — the light of the eye of the dome: a warm pool of light hung under the
@@ -332,6 +336,6 @@ function porticoTruss(el, { bag }) {
 registerStyle('roman-pantheon', {
   ...base,
   column: (el, ctx) => (el.lod ? pantheonColumn(el, ctx) : base.column(el, ctx)),
-  elements: { ...base.elements, aedicula, attic, eagle_wreath: eagleWreath, eagle_relief: eagleRelief, drum_exterior: drumExterior, revetment_panels: revetmentPanels, gate_arch: gateArch, frieze_letters: friezeLetters, rotunda_floor: rotundaFloor, oculus_light: oculusLight, portico_truss: porticoTruss, god, coffer_rosettes: cofferRosettes },
+  elements: { ...base.elements, aedicula, attic, eagle_wreath: eagleWreath, eagle_relief: eagleRelief, drum_exterior: drumExterior, revetment_panels: revetmentPanels, gate_arch: gateArch, pilasters, frieze_letters: friezeLetters, rotunda_floor: rotundaFloor, oculus_light: oculusLight, portico_truss: porticoTruss, god, coffer_rosettes: cofferRosettes },
   objects: { ...base.objects, pantheon_door: pantheonDoor },
 });

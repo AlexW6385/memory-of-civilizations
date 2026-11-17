@@ -80,3 +80,18 @@ export function gateArch(el, { bag }) {
   bag.add('marble', fromTriangles(tr));
   bag.add('marble', fromTriangles(co));
 }
+
+/**
+ * pilasters { rects: [[x0, z0, x1, z1]], h }: a row of pilasters against a wall, each a plinth, a shaft and a capital block, all in one
+ * mesh (so that the renderer has no run of identical copies to instance). A rect gives the shaft's footprint.
+ */
+export function pilasters(el, { bag }) {
+  const out = [], h = el.h;
+  const bx = (x0, z0, x1, z1, y0, y1) => hexa(out, [[x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1]], [[x0, y1, z0], [x1, y1, z0], [x1, y1, z1], [x0, y1, z1]]);
+  for (const [x0, z0, x1, z1] of el.rects) {
+    bx(x0, z0, x1, z1, 0, 0.45);
+    bx(x0 + 0.04, z0 + 0.04, x1 - 0.04, z1 - 0.04, 0.45, h - 0.7);
+    bx(x0 - 0.04, z0 - 0.04, x1 + 0.04, z1 + 0.04, h - 0.7, h);
+  }
+  bag.add('marble', fromTriangles(out));
+}

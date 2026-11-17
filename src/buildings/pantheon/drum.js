@@ -27,7 +27,7 @@ function faceTo(t, dir) {
 
 export function drumExterior(el, { bag }) {
   const [cx, cz] = el.c, RO = el.RO, y0 = el.y0, [yc1, yc2, yc3] = el.zones, gap = (el.gap ?? 33) * D2R;
-  const brick = [], field = [], trim = [];
+  const field = [], trim = [];
   const ang = (bearing) => (bearing - 90) * D2R;
   const inGap = (a) => { let b = ((a / D2R + 90) % 360 + 360) % 360; if (b > 180) b -= 360; return Math.abs(b) < gap / D2R; };
 
@@ -108,10 +108,9 @@ export function drumExterior(el, { bag }) {
       B(0.09, 0.3, 0.4, -0.64, -0.51);
     }
   }
-  bag.add(el.mat || 'brick', fromTriangles(brick));
   bag.add(el.fieldMat || 'dome_stucco', fromTriangles(field));
   bag.add(el.trimMat || 'marble', fromTriangles(cor));
   bag.add(el.trimMat || 'marble', fromTriangles(dent));
-  // the voussoirs and quoins are of brick, as the skin is
-  bag.add(el.mat || 'brick', fromTriangles(trim));
+  // the voussoirs and quoins: buff brick (the palette's giallo, a material already in every cell of the rotunda)
+  bag.add(el.mat || 'giallo', fromTriangles(trim));
 }

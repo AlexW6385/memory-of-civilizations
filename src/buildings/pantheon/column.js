@@ -107,7 +107,7 @@ export function pantheonColumn(el, { bag, col }) {
   const hi = lod >= 2;
   const plH = R * 0.5, bH = R * 0.65, capH = R * 2.3;
   const shaftH = H - plH - bH - capH;
-  const seg = hi ? 40 : 18;
+  const seg = hi ? 40 : 14;
   const parts = [], shaft = [];
 
   // the plinth and the Attic base
@@ -143,11 +143,11 @@ export function pantheonColumn(el, { bag, col }) {
   const bell = [];
   for (let i = 0; i <= 8; i++) { const yy = bellTop * i / 8; bell.push([rb(yy), yy]); }
   bell.push([rb(bellTop) * 1.03, bellTop * 1.02], [0, bellTop * 1.02]);
-  parts.push(lathe(bell, hi ? 36 : 16, null, 0, c0, 0));
+  parts.push(lathe(bell, hi ? 36 : 12, null, 0, c0, 0));
 
   // the two rows of eight acanthus leaves (the lower row at 0°, 45°, …; the upper in the gaps)
   const lt = [];
-  const LS = hi ? 15 : 8, LT = hi ? 4 : 2;
+  const LS = hi ? 15 : 6, LT = hi ? 4 : 2;
   for (let k = 0; k < 8; k++) {
     leaf(lt, { th: k * Math.PI / 4, half: 0.395, y0: 0.02 * capH, H: 0.36 * capH, R, S: LS, T: LT, tip: 0.38, rb, lobes: 5 });
     leaf(lt, { th: k * Math.PI / 4 + Math.PI / 8, half: 0.37, y0: 0.31 * capH, H: 0.33 * capH, R, S: LS, T: LT, tip: 0.34, rb, lobes: 5 });
@@ -159,7 +159,7 @@ export function pantheonColumn(el, { bag, col }) {
   // the fluted stalks (caulicoli) between the upper leaves, each in its calyx; the scrolls
   const yStalk0 = 0.46 * capH, yStalk1 = 0.69 * capH;
   const sc = [];
-  for (let k = 0; k < 8; k += (hi ? 1 : 2)) {
+  for (let k = 0; k < (hi ? 8 : 0); k++) {
     const th = k * Math.PI / 4, corner = k % 2 === 1;
     const r0 = rb(yStalk0) + R * 0.1, r1 = (corner ? rb(yStalk1) + R * 0.2 : rb(yStalk1) + R * 0.1);
     const cx = Math.cos(th), cz = Math.sin(th);
