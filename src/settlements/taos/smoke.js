@@ -4,7 +4,7 @@
 import { registerSystem } from '../../engine/systems.js';
 import { Smoke, solarHour, bump } from '../../engine/smoke.js';
 import { dressItems } from './dress.js';
-import { NORTH, SOUTH, CELL, KIVAS, YARDS, ROOMS, RADIUS, isRoom, roomsOf } from './layout.js';
+import { NORTH, SOUTH, CELL, KIVAS, YARDS, ROOMS, RADIUS, isRoom, roomsOf, UPPER } from './layout.js';
 
 const ID = 'taos';
 const ST = 2.7;
@@ -22,6 +22,8 @@ export function emitters() {
   }
   // the furnished room's hatch (puebloRoom: hx = cx + 0.35, hz = cz − 0.25 in its cell; the coaming 0.22 above the roof)
   for (const B of [NORTH, SOUTH]) for (const q of roomsOf(B)) if (q.kind === 'home' || q.kind === 'sleep' || q.kind === 'weave') E.push({ p: [B.x0 + q.j * CELL + CELL / 2 + 0.35, ST + 0.9, B.z0 + q.i * CELL + CELL / 2 - 0.25], kind: 'kitchen', thr: q === ROOMS[0] ? 0 : 0.1 + 0.4 * ((q.j * 7) % 5) / 5, seed: 5 + q.j });
+  // the hatches of the terraced rooms with a fire (§4.6), at the top of their storey
+  for (const q of UPPER) if (q.kind === 'home' || q.kind === 'sleep' || q.kind === 'weave') { const B = q.b === 'N' ? NORTH : SOUTH; E.push({ p: [B.x0 + q.j * CELL + CELL / 2 + 0.35, q.storey * ST + 0.9, B.z0 + q.i * CELL + CELL / 2 - 0.25], kind: 'kitchen', thr: 0.3, seed: q.i * 17 + q.j }); }
   for (const [x, z] of KIVAS) E.push({ p: [x, 1.4, z], kind: 'kitchen', thr: 0.35, seed: Math.round(x) });
   for (const [x, z] of YARDS.cook) { E.push({ p: [x - 1.5, 0.5, z], kind: 'steam', thr: 0.1, seed: 21 }); E.push({ p: [x + 1.3, 0.55, z], kind: 'kitchen', thr: 0.05, seed: 22 }); }
   // the plaza's hearth rings with a fire (the dress items' variants 0 and 2)
