@@ -4,7 +4,9 @@
 // horns, brows, snouts and manes, and carving the sumeru base's lotus-petal band along each face.
 import { STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, frustum, orientOutward } from '../../core/geom.js';
-import { Parts, ball, limb, T, post as oldPost } from '../../styles/qing/carving.js';
+import { Matrix4, Vector3 } from '../../core/three.js';
+import { Parts, ball, limb, T, merge, post as oldPost } from '../../styles/qing/carving.js';
+import { dragon, cloud } from '../../styles/qing/throne.js';
 
 const M = 'marble_smooth';
 const hash01 = (v) => { const t = Math.sin(v * 12.9898) * 43758.5453; return t - Math.floor(t); };
@@ -52,7 +54,6 @@ function spout(P) {
   P.add(M, limb([0, -0.02, 0.0], [0, 0.0, 0.34], 0.125, 0.105, 5));                              // the neck
   P.add(M, T(ball(0.115, 0.09, 0.17, 5, 2), 0, 0.03, 0.4));                                      // the skull
   P.add(M, frustum([-0.085, 0.45, 0.085, 0.78], -0.04, 0.07, 0.005, 0.005, 0.02, 0.0, { noZn: true }));        // the snout, its mouth open under it
-  P.add(M, T(ball(0.1, 0.03, 0.11, 5, 2), 0, -0.07, 0.62));                                      // the lower jaw
   for (const sx of [-1, 1]) P.add(M, limb([sx * 0.06, 0.1, 0.34], [sx * 0.1, 0.24, 0.12], 0.032, 0.012, 3));             // the horns, swept back
 }
 
@@ -129,9 +130,9 @@ function bjTerrace(el, ctx) {
       }
       fil.emit(bag, 0, 0, 0);
       // the petals along it, 0.3 apart, each standing from the face of the plinth's top
-      const n = Math.max(1, Math.floor((r1 - r0) / 0.4)), pw = 0.4, c0 = (r0 + r1) / 2 - n * pw / 2;
+      const n = Math.max(1, Math.floor((r1 - r0) / 0.5)), pw = 0.5, c0 = (r0 + r1) / 2 - n * pw / 2;
       for (let q = 0; q < n; q++) {
-        const c = c0 + pw * (q + 0.5), P = new Parts(); petal(P, 0.42, 0.36);
+        const c = c0 + pw * (q + 0.5), P = new Parts(); petal(P, 0.42, 0.45);
         const yaw = fk === 's' ? 0 : fk === 'n' ? Math.PI : fk === 'e' ? Math.PI / 2 : -Math.PI / 2;
         if (alongX) P.emit(bag, c, bb + 0.07, vert, yaw); else P.emit(bag, vert, bb + 0.07, c, yaw);
       }
@@ -139,7 +140,65 @@ function bjTerrace(el, ctx) {
   }
 }
 
-function bjStairs(el, ctx) { STYLES.qing.elements.stairs(el, { ...ctx, bag: swapPosts(ctx.bag) }); }
+// ── the carved ramp (yu lu) ──
+const reliefCache = new Map();
+/** The relief on a ramp W wide and S long, in its own frame (x across, y up the slope, z out of the stone): a double border with a band of
+ *  cloud heads, the sea's breaking waves and three stepped mountains at the foot, two dragons (legs, claws, scales' fins, mane) rising among
+ *  clouds to the flaming pearl between their heads. */
+function reliefParts(W, S) {
+  const key = `${W.toFixed(2)}x${S.toFixed(2)}`;
+  if (reliefCache.has(key)) return reliefCache.get(key);
+  const P = new Parts(), m = 'marble';
+  const e = 0.1, fw = 0.16;
+  for (const sx of [-1, 1]) { P.add(m, box(sx * (W / 2 - e) - fw / 2, e, 0, sx * (W / 2 - e) + fw / 2, S - e, 0.06)); P.add(m, box(sx * (W / 2 - e - 0.3) - 0.04, e + 0.3, 0, sx * (W / 2 - e - 0.3) + 0.04, S - e - 0.3, 0.045)); }
+  for (const y of [e, S - e - fw]) { P.add(m, box(-W / 2 + e, y, 0, W / 2 - e, y + fw, 0.06)); }
+  for (const y of [e + 0.3, S - e - 0.3 - 0.08]) P.add(m, box(-W / 2 + e + 0.3, y, 0, W / 2 - e - 0.3, y + 0.08, 0.045));
+  // the cloud heads (ruyi) in a row along the inner border's feet and head, and down its sides
+  for (let i = 0; i < Math.floor((W - 1.4) / 0.5); i++) { const x = -W / 2 + 0.7 + (i + 0.5) * ((W - 1.4) / Math.floor((W - 1.4) / 0.5)); cloud(P, m, x, e + 0.5, 0.2, 0.03); cloud(P, m, x, S - e - 0.58, 0.2, 0.03); }
+  const nw = Math.max(5, Math.round(W / 0.55));
+  for (let row = 0; row < 2; row++) for (let i = 0; i < nw + row; i++) {
+    const x = -W / 2 + (i + (row ? 0 : 0.5)) * (W / nw) - (row ? W / nw / 2 : 0);
+    if (Math.abs(x) > W / 2 - 0.9) continue;
+    P.add(m, T(ball(W / nw * 0.55, 0.17, 0.05, 8, 4), x, 0.78 + row * 0.24, 0.03));
+    P.add(m, T(ball(W / nw * 0.3, 0.08, 0.065, 6, 3), x + 0.06, 0.86 + row * 0.24, 0.06));
+  }
+  for (const [x, hgt, wd] of [[-W * 0.2, 0.8, 0.55], [0, 1.1, 0.7], [W * 0.2, 0.8, 0.55]]) {
+    P.add(m, T(lathe([[wd, 0], [wd * 0.6, hgt * 0.5], [0.001, hgt]], 6).scale(1, 1, 0.14), x, 1.1, 0.03));
+    P.add(m, T(lathe([[wd * 0.6, 0], [wd * 0.3, hgt * 0.4], [0.001, hgt * 0.7]], 6).scale(1, 1, 0.1), x + wd * 0.3, 1.1 + hgt * 0.25, 0.07));
+  }
+  // the dragons
+  const n = W > 5 ? 2 : 1, y0 = 2.35, hh = Math.max(1.6, S - y0 - 0.65), cw = (W - 1.1) / n;
+  for (let k = 0; k < n; k++) {
+    const D = new Parts(), cx = -W / 2 + 0.55 + cw * (k + 0.5), dr = n === 2 ? (k ? -1 : 1) : 1, ph = k ? Math.PI : 0, N = 28, pts = [], w = cw;
+    for (let q = 0; q <= N; q++) { const t = q / N; pts.push([Math.sin(t * Math.PI * 2.2 + ph) * w * 0.3 * (1 - t * 0.3), hh * (0.88 - t * 0.8), 0]); }
+    pts[0] = [pts[1][0] + w * 0.12 * dr, hh * 0.86, 0];
+    dragon(D, m, pts, Math.min(0.3, cw * 0.075), { up: [0, 0, 1], flat: 0.8, pearl: true, pearlMat: 'gilt_bronze', head: 0.95, lite: W < 6.5 });
+    for (const [mm, list] of D.m) P.add(mm, T(merge(list), cx, y0, 0.05));
+  }
+  for (let k = 0; k < 5; k++) for (const sx of [-1, 1]) {
+    const y = 2.0 + k * (S - 3.2) / 4, x = sx * (W / 2 - 0.95) * (k % 2 ? 0.8 : 1);
+    if (n === 1 && sx > 0 && k % 2) continue;
+    cloud(P, m, x, y, 0.5, 0.035);
+  }
+  if (n === 2) for (let k = 0; k < 4; k++) cloud(P, m, 0, 2.8 + k * (S - 3.9) / 3, 0.45, 0.035);
+  reliefCache.set(key, P);
+  return P;
+}
+function rampRelief(bag, el) {
+  const [x0, z0, x1, z1] = el.rect, dir = el.dir, alongZ = dir === 'n' || dir === 's', len = alongZ ? z1 - z0 : x1 - x0, rise = el.y1 - el.y0, S = Math.hypot(len, rise), W = alongZ ? x1 - x0 : z1 - z0;
+  if (W < 2 || S < 2.5) return;
+  const P = reliefParts(W, S), qc = alongZ ? (x0 + x1) / 2 : (z0 + z1) / 2;
+  const [fx, fz] = dir === 'n' ? [qc, z1] : dir === 's' ? [qc, z0] : dir === 'e' ? [x0, qc] : [x1, qc];
+  const h = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[dir], c = len / S, sn = rise / S;
+  const Y = new Vector3(h[0] * c, sn, h[1] * c), Z = new Vector3(-h[0] * sn, c, -h[1] * sn), X = new Vector3().crossVectors(Y, Z);
+  const M4 = new Matrix4().makeBasis(X, Y, Z).setPosition(fx, el.y0, fz);
+  for (const [mat, list] of P.m) bag.add(mat, merge(list).applyMatrix4(M4));
+}
+
+function bjStairs(el, ctx) {
+  STYLES.qing.elements.stairs(el.slab ? { ...el, carve: false } : el, { ...ctx, bag: swapPosts(ctx.bag) });
+  if (el.slab && el.carve !== false) rampRelief(ctx.bag, el);
+}
 
 STYLES.qing.elements.bj_terrace = bjTerrace;
 STYLES.qing.elements.bj_stairs = bjStairs;

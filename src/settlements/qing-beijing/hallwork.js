@@ -43,7 +43,7 @@ function clip(p0, d, x0, y0, x1, y1) {
  * directions of a triangular grid of side a (so that three bars cross at every node, and six triangles meet), a gilt
  * six-sided boss at each node; the paper behind (both faces).
  */
-function lattice(M, x0, y0, x1, y1, a, bw = 0.026, zb = 0.0, zt = 0.045) {
+function lattice(M, x0, y0, x1, y1, a, bw = 0.026, zb = 0.0, zt = 0.045, bosses = true) {
   const h = a * S3, ox = (x0 + x1) / 2, oy = (y0 + y1) / 2, red = M('lacquer_red'), gilt = M('gilt_bronze'), paper = M('marble_smooth');
   // the paper: one quad each way
   const j = (JIT++ % 997) * 0.0004, quadT = (z, flip) => { const A = [x0, y0, z], B = [x1 + j, y0, z], C = [x1 + j, y1, z], D = [x0, y1, z]; return flip ? [...A, ...C, ...B, ...A, ...D, ...C] : [...A, ...B, ...C, ...A, ...C, ...D]; };
@@ -63,7 +63,7 @@ function lattice(M, x0, y0, x1, y1, a, bw = 0.026, zb = 0.0, zt = 0.045) {
   }
   // the bosses at the nodes
   const rows = Math.floor((y1 - oy) / h), rows0 = Math.ceil((y0 - oy) / h);
-  for (let j = rows0; j <= rows; j++) {
+  for (let j = rows0; bosses && j <= rows; j++) {
     const y = oy + j * h, off = (j & 1) ? a / 2 : 0;
     for (let i = Math.ceil((x0 - ox - off) / a); ox + off + i * a <= x1; i++) {
       const x = ox + off + i * a;
@@ -106,7 +106,7 @@ function leaf(w, h) {
   };
   panel(ySk0, ySk1, 'skirt'); panel(yW0, yW1, 'waist'); panel(yW3, yT1, 'waist');
   // the lattice
-  lattice(M, iw0 + 0.035, yL0 + 0.035, iw1 - 0.035, yL1 - 0.035, 0.25);
+  lattice(M, iw0 + 0.035, yL0 + 0.035, iw1 - 0.035, yL1 - 0.035, 0.3, 0.03);
   // the lattice's inner frame (a slimmer moulding round it)
   add(red, iw0, yL0, 0, iw0 + 0.035, yL1, 0.07); add(red, iw1 - 0.035, yL0, 0, iw1, yL1, 0.07);
   add(red, iw0, yL0, 0, iw1, yL0 + 0.035, 0.07); add(red, iw0, yL1 - 0.035, 0, iw1, yL1, 0.07);
@@ -120,7 +120,7 @@ function windowPanel(w, h) {
   const m = new Map(), M = (k) => { if (!m.has(k)) m.set(k, []); return m.get(k); }, red = M('lacquer_red'), f = 0.07;
   const add = (x0, y0, z0, x1, y1, z1) => { const g = box(x0, y0, z0, x1, y1, z1).attributes.position.array; for (let i = 0; i < g.length; i++) red.push(g[i]); };
   add(0, 0, 0, f, h, 0.08); add(w - f, 0, 0, w, h, 0.08); add(f, 0, 0, w - f, f, 0.08); add(f, h - f, 0, w - f, h, 0.08);
-  lattice(M, f, f, w - f, h - f, 0.19);
+  lattice(M, f, f, w - f, h - f, 0.3, 0.03, 0.0, 0.045, false);
   return m;
 }
 

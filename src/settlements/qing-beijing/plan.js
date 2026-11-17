@@ -158,8 +158,8 @@ const top = TIERS[2].y;
 E.push({ t: 'bronze', kind: 'sundial', at: [45, 18], y: top, lat: 40 });
 E.push({ t: 'bronze', kind: 'jialiang', at: [-45, 18], y: top });
 for (const s of [-1, 1]) {
-  E.push({ t: 'bronze', kind: 'tortoise', at: [s * 13.5, 19.6], y: top, face: [0, 1], s: 0.95 });
-  E.push({ t: 'bronze', kind: 'crane', at: [s * 13.5, 15.6], y: top, face: [0, 1], s: 1.3 });
+  E.push({ t: 'bj_bronze', kind: 'tortoise', at: [s * 13.5, 19.6], y: top, face: [0, 1], s: 0.95 });
+  E.push({ t: 'bj_bronze', kind: 'crane', at: [s * 13.5, 15.6], y: top, face: [0, 1], s: 1.3 });
   for (const x of [19.5, 25.5, 31.5]) for (const z of [15.6, 18.6, 21.1]) E.push({ t: 'bronze', kind: 'tripod', at: [s * x, z], y: top, s: 0.8, face: [0, 1] });
   E.push({ t: 'bronze', kind: 'vat', at: [s * 44, 2], y: top });
   E.push({ t: 'bronze', kind: 'vat', at: [s * 44, -40], y: top });
@@ -172,6 +172,7 @@ for (const s of [-1, 1]) {
 const th = HALLS.taihe, zh = HALLS.zhonghe, bh = HALLS.baohe;
 E.push({ t: 'bj_hall', rect: th.rect, y: th.y, H: 9.2, double: 7.5, roof: 'hip', bays: [11, 5], front: 's', four: false, plat: 0.5, eave: 2.2, sweep: 0.55, orn: { figures: 10 } });
 E.push({ t: 'bj_hall_doors', rect: th.rect, y: th.y, H: 9.2, bays: [11, 5] });
+E.push({ t: 'bj_ridges', rect: th.rect, y: th.y, H: 9.2, double: 7.5, eave: 2.2, sweep: 0.55, bays: [11, 5] });
 E.push({ t: 'throne_hall', rect: th.rect, y: th.y, H: 9.2, bays: [11, 5], kind: 'taihe' });
 E.push({ t: 'qing_hall', rect: zh.rect, y: zh.y, H: 6.4, roof: 'none', bays: [5, 5], front: 's', four: true, plat: 0.4 });
 E.push({ t: 'throne_hall', rect: zh.rect, y: zh.y, H: 6.4, bays: [5, 5], kind: 'zhonghe', d: 0.7 });

@@ -4,6 +4,8 @@ import '../../styles/qing/index.js';
 import './style.js';
 import './hallwork.js';
 import './terrace.js';
+import './roofwork.js';
+import './bronzes.js';
 import palace from './plan.js';
 import { courtMusic, streetMusic } from './music.js';
 export { town } from './town.js';
