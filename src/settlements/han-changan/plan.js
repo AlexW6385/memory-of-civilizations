@@ -3,18 +3,19 @@
 // the two side chambers, the palace's east gate with its pair of que, the Changle Palace's hall on its low terrace.
 // Authored in world coordinates (origin 0, yaw 0). The hall faces south.
 
+import '../../styles/hanlodge/index.js';
 import { AX, TIERS, CROWN, RAMP, HALL, SIDE_HALLS, EAST_GATE, PALACE, CHANGLE_HALL, PALACE_WALL } from './layout.js';
 
 const E = [];
 E.push({ t: 'han_terrace', tiers: TIERS, ramp: { x: RAMP.x, z0: RAMP.z0, z1: RAMP.z1 } });
-E.push({ t: 'han_hall', cx: AX, z1: HALL.z1, bays: HALL.bays, bayW: HALL.bayW, depth: HALL.depth, depthW: HALL.depthW, floor: HALL.floor, base: HALL.base, h: HALL.h, roof: 'hip', rise: 6.6, rafters: true, furnish: 'throne', open: [3, 5], seed: 3 });
+E.push({ t: 'hanl_hall', cx: AX, z1: HALL.z1, bays: HALL.bays, bayW: HALL.bayW, depth: HALL.depth, depthW: HALL.depthW, floor: HALL.floor, base: HALL.base, h: HALL.h, roof: 'hip', rise: 6.6, rafters: true, furnish: 'throne', open: [3, 5], seed: 3 });
 for (const [i, [cx]] of SIDE_HALLS.entries()) {
-  E.push({ t: 'han_hall', cx: cx + (i ? -2 : 2), z1: HALL.z1, bays: 3, bayW: 6, depth: 2, depthW: 7, floor: CROWN + 0.6, base: 0.6, h: 5.6, roof: 'hip', rise: 4.2, overhang: 2.6, ap: 1.0, furnish: 'court', open: [1, 1], seed: 11 + i });
+  E.push({ t: 'hanl_hall', cx: cx + (i ? -2 : 2), z1: HALL.z1, bays: 3, bayW: 6, depth: 2, depthW: 7, floor: CROWN + 0.6, base: 0.6, h: 5.6, roof: 'hip', rise: 4.2, overhang: 2.6, ap: 1.0, furnish: 'court', open: [1, 1], seed: 11 + i });
 }
 // the Changle Palace's hall on its low terrace (one tier, a ramp)
 const CH = CHANGLE_HALL;
 E.push({ t: 'han_terrace', tiers: [{ r: [CH.cx - 36, CH.z1 - 38, CH.cx + 36, CH.z1 + 18], top: 2.5 }], ramp: { x: [CH.cx - 4, CH.cx + 4], z0: CH.z1 + 18, z1: CH.z1 + 28 } });
-E.push({ t: 'han_hall', cx: CH.cx, z1: CH.z1, bays: 7, bayW: 6, depth: 3, depthW: 6, floor: 3.1, base: 0.6, h: 6.4, roof: 'hip', rise: 5.2, overhang: 3.0, furnish: 'court', open: [2, 4], seed: 21 });
+E.push({ t: 'hanl_hall', cx: CH.cx, z1: CH.z1, bays: 7, bayW: 6, depth: 3, depthW: 6, floor: 3.1, base: 0.6, h: 6.4, roof: 'hip', rise: 5.2, overhang: 3.0, furnish: 'court', open: [2, 4], seed: 21 });
 // the east gate of the palace: the gate in the wall, a pair of que outside it
 const wx = PALACE[2], gz = EAST_GATE.z;
 for (const [dz, s] of [[-14, 1], [14, -1]]) E.push({ t: 'han_que', at: [wx + PALACE_WALL.th / 2 + 6, gz + dz], sub: [0, s], h: 11 });
@@ -41,7 +42,7 @@ export const weiyang = {
   id: 'han-changan-weiyang',
   name: { en: 'Weiyang Palace: the Front Hall', zh: '未央宫前殿' },
   era: { en: 'Western Han, c. 100 BC', zh: '西汉，约公元前100年' },
-  style: 'han',
+  style: 'hanlodge',
   origin: [0, 0], base: 0, yaw: 0,
   entrance: { at: [AX, 60], facing: 'n' },
   bounds: [PALACE[0], PALACE[1], 420, PALACE[3]],
