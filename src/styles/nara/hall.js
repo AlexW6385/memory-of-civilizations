@@ -14,6 +14,7 @@ import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { orientedBox } from '../../core/build.js';
 import { hipRoof, chineseColumn, hexa } from '../chinese/index.js';
 import { naraBracket } from './bracket.js';
+import { tileWork } from './tilework.js';
 import { tangDoor, tangWindow } from '../chinese/hallwork.js';
 
 const S = 0.3, PW = 1.6;                 // the hip roof's eave slope and profile power (chinese/index.js hipRoofX, as the Tang halls call it)
@@ -122,10 +123,12 @@ export function naraHall(el, ctx) {
   const out1 = el.out ?? 3.0 * k, eave1 = yb + 2.4 * k, A1 = (x1 - x0) / 2 + out1, B1 = (z1 - z0) / 2 + out1;
   const roof = (c, A, B, ye, rise, out, kk) => {
     hipRoof({ c, A, B, y: ye, rise, eaveSlope: S, pow: PW, lift: 0.5 * kk, mat: 'tile_grey', soffit: 'timber_red', rafters: { out, sp: 0.3 * kk }, noChiwei: true, ridgeMat: 'tile_grey' }, ctx);
+    tileWork(bag, { c, A, B, y: ye, rise, S, PW, lift: 0.5 * kk }, kk);
   };
   const ridge = (c, A, B, ye, rise, kk, fin) => {
     const top = ye + rise, L = A - B;
-    bag.add('tile_grey', box(c[0] - L - 0.4 * kk, top - 0.1, c[1] - 0.55 * kk, c[0] + L + 0.4 * kk, top + 1.15 * kk, c[1] + 0.55 * kk));
+    // the ridge: three stepped courses of tile, the end of each course capped with a round boss
+    for (const [w, y0, y1, e] of [[0.62, -0.1, 0.45, 0.45], [0.46, 0.45, 0.85, 0.3], [0.3, 0.85, 1.15, 0.15]]) bag.add('tile_grey', box(c[0] - L - e * kk, top + y0 * kk - (y0 < 0 ? 0 : 0), c[1] - w * kk, c[0] + L + e * kk, top + y1 * kk, c[1] + w * kk));
     if (fin) for (const s of [-1, 1]) shibi(bag, c[0] + s * (L + 0.1), c[1], top + 1.1 * kk, -s, fin);
   };
   const up = el.upper;

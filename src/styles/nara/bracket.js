@@ -43,42 +43,41 @@ export function naraBracket(el, { bag }, K) {
     hexa(B, [P(-b, -b, y0), P(b, -b, y0), P(b, b, y0), P(-b, b, y0)], [P(-hw, -hw, y0 + q), P(hw, -hw, y0 + q), P(hw, hw, y0 + q), P(-hw, hw, y0 + q)]);
     hexa(B, [P(-hw, -hw, y0 + q), P(hw, -hw, y0 + q), P(hw, hw, y0 + q), P(-hw, hw, y0 + q)], [P(-hw, -hw, y0 + h), P(hw, -hw, y0 + h), P(hw, hw, y0 + h), P(-hw, hw, y0 + h)]);
   };
-  const T = 0.34, st = 0.62;                               // arm height, the step of the projection
+  const T = 0.26, st = 0.62, Bh = 0.2;                     // arm height, the step of the projection, a block's height
   if (kind !== 'between') {
     // the great block on the column's head, the long arm along the wall over it with a block at each end
-    blk(0, 0, 0, 0.5, 0.56);
-    armT(-1.35, 1.35, 0.5, T, 0, 0.1);
-    for (const t of [-1.05, 1.05]) blk(0, t, 0.5 + T, 0.3, 0.24);
-    blk(0, 0, 0.5 + T, 0.3, 0.26);
-    // first step: the arm out from the column, its tail inside; a block at its tip, with a lateral arm across it
-    armS(-st, st, 0.5 + T + 0.3, T, 0.1);
-    armT(-0.62, 0.62, 0.5 + T + 0.3, T - 0.02, st, 0.09);
-    for (const t of [-0.5, 0, 0.5]) blk(st, t, 0.5 + 2 * T + 0.3, 0.3, 0.22);
-    // second step: out another step, with blocks at its tip and at its inner end
-    const y2 = 0.5 + 2 * T + 0.6;
+    let y1 = 0.4;
+    blk(0, 0, 0, y1, 0.56);
+    armT(-1.35, 1.35, y1, T, 0, 0.1);
+    for (const t of [-1.05, 0, 1.05]) blk(0, t, y1 + T, Bh, 0.22);
+    // first step: the arm out from the column, its tail inside; blocks at its tip, a lateral arm across them
+    y1 += T + Bh;
+    armS(-st, st, y1, T, 0.1);
+    armT(-0.62, 0.62, y1, T - 0.02, st, 0.09);
+    for (const t of [-0.5, 0, 0.5]) blk(st, t, y1 + T, Bh, 0.2);
+    // second step: out another step, blocks at its tip and at its inner end
+    const y2 = y1 + T + Bh;
     armS(-2 * st, 2 * st, y2, T, 0.1);
-    for (const s of [-2 * st, 2 * st]) blk(s, 0, y2 + T, 0.3, 0.24);
+    for (const s of [-2 * st, 2 * st]) blk(s, 0, y2 + T, Bh, 0.22);
     armT(-0.8, 0.8, y2, T - 0.02, 2 * st, 0.09);
-    for (const t of [-0.62, 0.62]) blk(2 * st, t, y2 + T, 0.3, 0.2);
+    for (const t of [-0.62, 0.62]) blk(2 * st, t, y2 + T, Bh, 0.19);
     // the tail rafter: from deep inside, resting on the second step's tip block, sloping down toward its end
-    const yb0 = y2 + T + 0.3, slope = 0.12, tip = 3 * st + 0.32;
-    prism(A, [[-2.4, yb0 + slope * (2 * st + 2.4)], [tip, yb0 - slope * (tip - 2 * st)], [tip, yb0 - slope * (tip - 2 * st) + T], [-2.4, yb0 + slope * (2 * st + 2.4) + T]], 0.11 * K, alongS);
+    const yr = y2 + T + Bh, slope = 0.1, tip = 3 * st + 0.32;
+    prism(A, [[-2.4, yr + slope * (2 * st + 2.4)], [tip, yr - slope * (tip - 2 * st)], [tip, yr - slope * (tip - 2 * st) + 0.22], [-2.4, yr + slope * (2 * st + 2.4) + 0.22]], 0.11 * K, alongS);
     // third step: the long tie arm on the rafter's end, its three blocks under the eave purlin
-    const y3 = yb0 - slope * (3 * st - 2 * st) + T;
-    armT(-1.3, 1.3, y3, T * 0.9, 3 * st, 0.1);
-    for (const t of [-1.0, 0, 1.0]) blk(3 * st, t, y3 + T * 0.9, 0.3, 0.25);
-    // the narrow arms along the third step joining the blocks to the second (shirin)
-    armS(2 * st, 3 * st + 0.2, y3 + T * 0.9 + 0.02, 0.18, 0.06, 0.05);
+    const y3 = yr - slope * st + 0.22;
+    armT(-1.3, 1.3, y3, 0.22, 3 * st, 0.1);
+    for (const t of [-1.0, 0, 1.0]) blk(3 * st, t, y3 + 0.22, Bh, 0.23);
   } else {
     // between the columns: the A-shaped strut on the beam, a flat plank under its feet, a two-step set on its head
-    prism(A, [[-0.95, 0], [0.95, 0], [0.95, 0.16], [-0.95, 0.16]], 0.2 * K, alongT);
-    for (const sd of [-1, 1]) prism(A, [[sd * 0.78, 0.16], [sd * 0.5, 0.16], [sd * 0.05, 0.92], [sd * 0.2, 0.92]], 0.15 * K, alongT);
-    armT(-0.85, 0.85, 0.92, T, 0, 0.1);
-    for (const t of [-0.6, 0, 0.6]) blk(0, t, 0.92 + T, 0.3, 0.22);
-    armS(-st, st, 0.92 + T + 0.3, T, 0.1);
-    for (const s of [st]) blk(s, 0, 0.92 + 2 * T + 0.3, 0.3, 0.22);
-    armS(-2 * st, 2 * st, 0.92 + 2 * T + 0.6, T, 0.1);
-    for (const s of [2 * st, -2 * st]) blk(s, 0, 0.92 + 3 * T + 0.6, 0.3, 0.24);
+    prism(A, [[-0.95, 0], [0.95, 0], [0.95, 0.14], [-0.95, 0.14]], 0.2 * K, alongT);
+    for (const sd of [-1, 1]) prism(A, [[sd * 0.78, 0.14], [sd * 0.52, 0.14], [sd * 0.05, 0.8], [sd * 0.2, 0.8]], 0.15 * K, alongT);
+    armT(-0.85, 0.85, 0.8, T, 0, 0.1);
+    for (const t of [-0.6, 0, 0.6]) blk(0, t, 0.8 + T, Bh, 0.2);
+    armS(-st, st, 0.8 + T + Bh, T, 0.1);
+    blk(st, 0, 0.8 + 2 * T + Bh, Bh, 0.2);
+    armS(-2 * st, 2 * st, 0.8 + 2 * T + 2 * Bh, T, 0.1);
+    for (const s of [2 * st, -2 * st]) blk(s, 0, 0.8 + 3 * T + 2 * Bh, Bh, 0.22);
   }
   bag.add('timber_red', fromTriangles(A));
   bag.add('timber_red', fromTriangles(B));
