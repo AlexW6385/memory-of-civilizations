@@ -8,7 +8,7 @@ import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { planarWall } from '../byzantine/index.js';
 import { ext } from '../renaissance/face.js';
 
-export const GB = 'gilt_bronze', GD = 'gold', AG = 'silver', MS = 'marble_smooth', WM = 'pavonazzetto', RM = 'breccia_red', GM = 'revetment_green', DM = 'marble_dark', MI = 'mirror_tin', FR = 'paint_white', CR = 'glass_lamp';
+export const GB = 'gilt_bronze', GD = 'gold', AG = 'silver', MS = 'marble_smooth', WM = 'pavonazzetto', RM = 'breccia_red', GM = 'revetment_green', DM = 'marble_dark', MI = 'daylight_plain', FR = 'paint_white', CR = 'glass_lamp';
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 /**
@@ -298,19 +298,18 @@ export function silverTable(F, col, u, y, w = 1.5, dep = 0.7, d0 = 0.08) {
 
 /** A silver tub (caisse) with its orange tree, standing at (x, z). */
 export function orangeTub(bag, col, x, y, z, s = 0.36) {
-  bag.add(AG, box(x - s, y, z - s, x + s, y + 0.7, z + s));
-  bag.add(AG, box(x - s - 0.03, y + 0.66, z - s - 0.03, x + s + 0.03, y + 0.72, z + s + 0.03));
-  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-    bag.add(AG, box(x + sx * s - 0.05, y - 0.05, z + sz * s - 0.05, x + sx * s + 0.05, y + 0.76, z + sz * s + 0.05));
-    bag.add(AG, lathe([[0.05, 0], [0.06, 0.05], [0.03, 0.1], [0.001, 0.15]], 8, null, x + sx * s, y + 0.76, z + sz * s));
-  }
-  // a raised panel with a sun on each side
-  for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) bag.add(GD, box(x + dx * (s + 0.004) - Math.abs(dz) * 0.12 - 0.004, y + 0.28, z + dz * (s + 0.004) - Math.abs(dx) * 0.12 - 0.004, x + dx * (s + 0.004) + Math.abs(dz) * 0.12 + 0.004, y + 0.46, z + dz * (s + 0.004) + Math.abs(dx) * 0.12 + 0.004));
-  bag.add('silt', box(x - s + 0.02, y + 0.7, z - s + 0.02, x + s - 0.02, y + 0.71, z + s - 0.02));
+  // a round caisse of silver: gadrooned belly swelling above a spreading foot, a moulded rim and a gilt band, on four ball feet
+  const R = s * 1.18 * (1 + 0.025 * Math.sin(x * 12.9898 + z * 78.233));
+  bag.add(AG, lathe([[R * 0.62, 0.1], [R * 0.72, 0.14], [R * 0.9, 0.3], [R * 1.0, 0.46], [R * 0.97, 0.62], [R * 1.04, 0.66], [R * 1.06, 0.72], [R * 0.9, 0.72]], 20, (t, i) => (i >= 2 && i <= 4 ? 1 + 0.035 * Math.cos(t * 16) : 1), x, y, z));
+  bag.add(GD, lathe([[R * 0.99, 0.36], [R * 1.03, 0.36], [R * 1.03, 0.4], [R * 0.99, 0.4]], 20, null, x, y, z));
+  bag.add(GD, lathe([[R * 1.05, 0.66], [R * 1.07, 0.66], [R * 1.07, 0.71], [R * 1.05, 0.71]], 20, null, x, y, z));
+  for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + Math.PI / 4; bag.add(AG, lathe([[0.001, 0], [0.07, 0.03], [0.09, 0.09], [0.001, 0.14]], 8, null, x + Math.cos(a) * R * 0.66, y - 0.02, z + Math.sin(a) * R * 0.66)); }
+  for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2; bag.add(GD, lathe([[0.001, 0], [0.09, 0.012], [0.1, 0.03], [0.001, 0.04]], 10, null, 0, 0, 0).rotateX(Math.PI / 2).rotateY(-a + Math.PI / 2).translate(x + Math.cos(a) * (R * 1.0 + 0.01), y + 0.52, z + Math.sin(a) * (R * 1.0 + 0.01))); }
+  bag.add('silt', lathe([[0.001, 0.7], [R * 0.9, 0.7]], 20, null, x, y, z));
   bag.add('bark_dark', lathe([[0.05, 0], [0.04, 0.9], [0.03, 1.05]], 6, null, x, y + 0.7, z));
   bag.add('lotus_leaf', lathe([[0.001, 0], [0.32, 0.06], [0.45, 0.3], [0.42, 0.55], [0.25, 0.75], [0.001, 0.82]], 10, (th, i) => (i > 0 && i < 5 ? 1 + 0.1 * Math.cos(th * 5 + i) : 1), x, y + 1.62, z));
   for (let k = 0; k < 7; k++) { const a = k * 2.4, r = 0.36 + (k % 3) * 0.03, yy = y + 1.75 + (k % 4) * 0.13; bag.add('stucco_saffron', lathe([[0.001, 0], [0.03, 0.01], [0.035, 0.035], [0.001, 0.07]], 6, null, x + Math.cos(a) * r, yy, z + Math.sin(a) * r)); }
-  col.rect([x - s - 0.05, z - s - 0.05, x + s + 0.05, z + s + 0.05], y, y + 0.76);
+  col.rect([x - R, z - R, x + R, z + R], y, y + 0.76);
 }
 
 /** A silver bench (banquette) with its velvet cushion, along frame F at u. */
@@ -324,6 +323,7 @@ export function silverBench(F, col, u, y, w = 1.8, d = 0.15) {
 
 /** A gilt bronze trophy of arms on a wall frame: cuirass, helmet, round shield, crossed spears and standards, a laurel. */
 export function trophy(F, u, y, d, s = 1, mat = GB) {
+  s *= 1 + 0.03 * Math.sin(u * 12.9898 + y * 78.233);                                // each trophy a little its own, as hand-chased pieces are (and not one instanced shape)
   const X = (v) => u + v * s, Y = (v) => y + v * s;
   // the pikes crossed behind, each with its leaf-shaped head, and a banner hanging from each below the head
   for (const sg of [-1, 1]) {

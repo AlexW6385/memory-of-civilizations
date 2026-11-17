@@ -47,7 +47,7 @@ export function townHouse(el, { bag, col }) {
   const rectOf = (u0, v0, u1, v1) => { const a = P(u0, v0), b = P(u1, v1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
   const B = (mat, u0, v0, u1, v1, ya, yb, c = false) => { const r = rectOf(u0, v0, u1, v1); bag.add(mat, box(r[0], ya, r[1], r[2], yb, r[3])); if (c) col.rect(r, ya, yb); };
   const W3 = (u, v, yy) => { const p = P(u, v); return [p[0], yy, p[1]]; };
-  const Rd = (mat, a, b, r, seg = 6) => bag.add(mat, rod(W3(...a), W3(...b), r, seg));
+  const Rd = (mat, a, b, r, seg = 6) => bag.add(mat, rod(W3(a[0], a[2], a[1]), W3(b[0], b[2], b[1]), r, seg));
   const Lt = (mat, prof, u, v, ya, seg = 10) => { const p = P(u, v); bag.add(mat, lathe(prof, seg, null, p[0], ya, p[1])); };
   const fy = y + 0.14;                                                      // an open house's floor
   const FP = f === 's' ? 1 : -1;                                            // (unused sign kept for clarity)
@@ -150,9 +150,9 @@ export function townHouse(el, { bag, col }) {
       B('wood_dark', a, 0.04, b, 0.1, yb, y + o.h);
       // the stall board let down at 0.95 m and the shutter above it raised as a canopy, on iron stays
       B('wood_painted', a - 0.05, -0.55, b + 0.05, 0.0, y + 0.93, y + 0.98);
-      for (const u of [a + 0.1, b - 0.1]) Rd('iron', [u, 0.95, -0.52], [u, 0.2, 0.0], 0.012, 4);
+      for (const u of [a + 0.1, b - 0.1]) Rd('iron', [u, y + 0.95, -0.52], [u, y + 0.2, 0.0], 0.012, 4);
       B('wood_painted', a - 0.1, -0.7, b + 0.1, 0.0, y + o.h + 0.05, y + o.h + 0.1);
-      for (const u of [a + 0.05, b - 0.05]) Rd('iron', [u, o.h + 0.05, -0.68], [u, o.h + 0.5, 0.0], 0.012, 4);
+      for (const u of [a + 0.05, b - 0.05]) Rd('iron', [u, y + o.h + 0.05, -0.68], [u, y + o.h + 0.5, 0.0], 0.012, 4);
       shopGoods(el.trade, B, a, b, y, rand);
     } else if (o.type === 'win') {
       B('opening', a, 0.0, b, 0.05, yb, y + o.h);
@@ -172,7 +172,7 @@ export function townHouse(el, { bag, col }) {
   // the lantern on its iron bracket, here and there; the corner posts (bornes)
   if (!simple && rand() < 0.4) {
     const u = rand() < 0.5 ? 0.35 : L - 0.35;
-    Rd('iron', [u, 3.5, -0.02], [u, 3.5, -0.75], 0.02, 5); Rd('iron', [u, 3.5, -0.75], [u, 3.3, -0.75], 0.012, 4);
+    Rd('iron', [u, y + 3.5, -0.02], [u, y + 3.5, -0.75], 0.02, 5); Rd('iron', [u, y + 3.5, -0.75], [u, y + 3.3, -0.75], 0.012, 4);
     Lt('lamp_glass', [[0.001, 0], [0.1, 0.05], [0.12, 0.25], [0.07, 0.38], [0.001, 0.4]], u, -0.75, y + 2.95, 8); Lt('iron', [[0.001, 0], [0.14, 0], [0.1, 0.06], [0.001, 0.08]], u, -0.75, y + 3.35, 8);
   }
   if (!simple && kind !== 'shop') for (const u of [door - 1.0, door + 1.0]) if (u > 0.3 && u < L - 0.3 && rand() < 0.5) Lt('limestone', [[0.2, 0], [0.24, 0.1], [0.19, 0.4], [0.2, 0.7], [0.14, 0.78], [0.001, 0.82]], u, -0.4, y, 8);

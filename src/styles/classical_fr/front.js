@@ -64,9 +64,7 @@ export function gardenFront(ctx, f, rect, y, h, opts = {}) {
       const spans = inWin ? [[u0, c0(i) - hw - 0.3], [c0(i) + hw + 0.3, u1]] : [[u0, u1]];
       for (const [sa, sb] of spans) {
         if (sb - sa < 0.15) continue;
-        let a = sa;
-        for (let j = sa + 0.55 + (c % 2) * 0.6 + 0.6; j < sb - 0.3; j += 1.2) { if (j - a > 0.3) B(S, a, j - 0.035, yb, ye, d - 0.01, d + 0.08); a = j + 0.035; }
-        if (sb - a > 0.1) B(S, a, sb, yb, ye, d - 0.01, d + 0.08);
+        B(S, sa, sb, yb, ye, d - 0.01, d + 0.08);
       }
     }
     // the arch's voussoirs: long and short stones in turn, radial, round each ground-floor arch
