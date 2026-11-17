@@ -172,3 +172,10 @@ The lyre, the double pipe and the sistrum are shown on the Hagia Triada sarcopha
 - [The Queen's Megaron — HMdb marker](https://www.HMdb.org/m.asp?m=85496)
 - [Minoan pottery — Wikipedia](https://en.wikipedia.org/wiki/Minoan_pottery)
 - [A LM IA Ceramic Kiln in South-Central Crete (Hesperia Suppl. 30) — andromedabooks summary](https://andromedabooks.gr/?p=244972)
+
+## 4i. The landmark seen first and close (round 2, 2026-11-17)
+
+- **Porticoes on the court attached to their walls:** the antechamber's, the Tripartite Shrine's and the east side's roofs ran out over the court, 4.8 m clear of the wall, with their columns at the back; they now run back from the column line to the wall (plan.js `side`). The shrine's portico is shortened to 3.2 m so the shrine's three columns and horns stand clear of its beam [inferred: after Evans's restoration of the west and east court fronts].
+- **Entablature:** the round ends of the ceiling logs in a row on the beam with painted end grain, a frieze of painted blocks (blue, red, ochre) over it [inferred: Minoan architecture showed log ends and half-rosette friezes in painted miniatures; the colour rhythm is ours].
+- **Upper colonnade on the east portico:** a second storey of slimmer red columns on the portico's roof carrying its own beam, roof and horns, the upper gallery of the court's east side [stated: §4f, "an upper-storey colonnade over the court" (Oxford Classics)].
+- **Throne:** tall back with a wavy crest, fluted front on the pedestal, a footstool [inferred: after the gypsum throne]; **griffins:** plumed wings in blue and red, a rosette on the haunch, the crest [inferred: after the restored fresco].

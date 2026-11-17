@@ -55,12 +55,12 @@ E.push({ t: 'fresco', kind: 'bull_leaping', at: [19, -12], face: 'w', y0: 1.1, w
 E.push({ t: 'wing', rect: [-19, 28, -3, 58], storeys: 2, windows: 'sn', seed: 5 }, { t: 'wing', rect: [3, 28, 19, 58], storeys: 2, windows: 'sn', seed: 6, holes: [{ rect: KI, h: 3.3 }, { rect: [10, 28, 12.4, KI[1]], h: 2.6, lintel: true }] });
 E.push({ t: 'furnished_room', rect: KI, y: 0, front: 'n', kind: 'kitchen', seed: 33 });
 // porticoes on the court: the Throne Room's antechamber, the Tripartite Shrine, the east side, the south
-E.push({ t: 'portico', a: [-14.2, -20], b: [-14.2, -8], n: 4, depth: 4.6, side: -1, h: 3.4 });
+E.push({ t: 'portico', a: [-14.2, -20], b: [-14.2, -8], n: 4, depth: 4.6, side: 1, h: 3.4 });
 // the antechamber shut on the north and south by its walls; the wooden throne and the gypsum benches (§4c)
 for (const z of [[-20.3, -20], [-8, -7.7]]) E.push({ t: 'block', rect: [-19, z[0], -14.55, z[1]], y0: 0, y1: 3.65, mat: 'plaster_ochre' });
 E.push({ t: 'antechamber', rect: [-19, -20, -14.6, -8], y: 0, throne: [-16.8, -20] });
-E.push({ t: 'portico', a: [-14.2, 0], b: [-14.2, 12], n: 3, depth: 4.6, side: -1, h: 3.4 });
-E.push({ t: 'portico', a: [14.2, -22], b: [14.2, 22], n: 10, depth: 4.6, side: 1, h: 3.6 });
+E.push({ t: 'portico', a: [-14.2, 0], b: [-14.2, 12], n: 3, depth: 3.2, side: 1, h: 3.4 });
+E.push({ t: 'portico', a: [14.2, -22], b: [14.2, 22], n: 10, depth: 4.6, side: -1, h: 3.6, upper: true });
 // the North Entrance: the passage between the wings, the bastion's portico above its ramp
 E.push({ t: 'portico', a: [-6, -66], b: [6, -66], n: 4, depth: 4, side: -1, h: 3.4 });
 // the West Bastion: a portico raised over the passage, the charging bull in painted relief on its back wall

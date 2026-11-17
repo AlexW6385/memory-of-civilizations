@@ -166,6 +166,37 @@ function portico(el, { bag, col }) {
   { const vm = ['cloth_red', 'cloth_indigo', 'cloth_white', 'cloth_ochre'], eo = alongX0 ? (nz > 0 ? az - 0.12 : az + 0.12) : (nx > 0 ? ax - 0.12 : ax + 0.12);
     for (let i = 0; i < n; i++) { const t0 = i / n, t1 = (i + 1) / n, p0 = [ax + ux * L * t0, az + uz * L * t0], p1 = [ax + ux * L * t1, az + uz * L * t1], m = vm[(i + (el.seed ?? 0)) % 4], pad = 0.5 * L / n * 0.12;
       if (alongX0) bag.add(m, box(Math.min(p0[0], p1[0]) + pad, y + h - 0.55, eo - 0.02, Math.max(p0[0], p1[0]) - pad, y + h + 0.2, eo + 0.02)); else bag.add(m, box(eo - 0.02, y + h - 0.55, Math.min(p0[1], p1[1]) + pad, eo + 0.02, y + h + 0.2, Math.max(p0[1], p1[1]) - pad)); } }
+  // the entablature's open face (§4i): the round ends of the ceiling logs in a row on the beam, each with its painted end grain, and over the beam a frieze of
+  // painted blocks (blue, red, ochre: the half-rosette frieze as a rhythm of colour) with a dark rule under the cornice
+  { const fo = alongX0 ? (nz > 0 ? r[1] - 0.2 : r[3] + 0.2) : (nx > 0 ? r[0] - 0.2 : r[2] + 0.2), so = alongX0 ? (nz > 0 ? -1 : 1) : (nx > 0 ? -1 : 1);
+    const m = Math.max(2, Math.round(L / 0.46)), yc = y + h + 0.475, ends = [[], [], []];
+    for (let i = 0; i < m; i++) {
+      const t = (i + 0.5) / m, u = -0.2 + (L + 0.4) * t, px = ax + ux * u, pz = az + uz * u, ln = 0.07 + (i % 3) * 0.004;
+      const g = lathe([[0.001, 0], [0.085, 0], [0.085, ln], [0.001, ln]], 8), e = lathe([[0.001, 0], [0.05, 0], [0.05, ln + 0.012], [0.001, ln + 0.012]], 8);
+      for (const q of [g, e]) { if (alongX0) q.rotateX(so * Math.PI / 2); else q.rotateZ(-so * Math.PI / 2); }
+      ends[0].push(g.translate(alongX0 ? px : fo, yc, alongX0 ? fo : pz));
+      ends[i % 2 ? 1 : 2].push(e.translate(alongX0 ? px : fo, yc, alongX0 ? fo : pz));
+    }
+    // one geometry per material: the ends are far under the size of fine detail, and each would be a draw of its own
+    bag.add(BLK, merge(ends[0])); if (ends[1].length) bag.add('paint_ochre', merge(ends[1])); if (ends[2].length) bag.add(RED, merge(ends[2]));
+    const nb = Math.max(3, Math.round(L / 0.5)), fm = ['egyptian_blue', RED, 'paint_ochre', RED];
+    for (let i = 0; i < nb; i++) {
+      const u0 = -0.3 + (L + 0.6) * i / nb + 0.02, u1 = -0.3 + (L + 0.6) * (i + 1) / nb - 0.02, fp = (alongX0 ? (nz > 0 ? r[1] - 0.3 : r[3] + 0.3) : (nx > 0 ? r[0] - 0.3 : r[2] + 0.3)), d = so * 0.03;
+      const a0 = [ax + ux * u0, az + uz * u0], a1 = [ax + ux * u1, az + uz * u1], lo = Math.min(fp, fp + d), hi = Math.max(fp, fp + d);
+      bag.add(fm[i % 4], alongX0 ? box(Math.min(a0[0], a1[0]), y + h + 0.74, lo, Math.max(a0[0], a1[0]), y + h + 0.94, hi) : box(lo, y + h + 0.74, Math.min(a0[1], a1[1]), hi, y + h + 0.94, Math.max(a0[1], a1[1])));
+    }
+  }
+  // an upper colonnade (el.upper): on the flat roof set back from its edge, slimmer red columns carrying a second beam and roof, the gallery of the court's east side
+  if (el.upper) {
+    const ub = y + h + 1.0, uh = el.upper === true ? 3.0 : el.upper, off = 0.95;
+    for (let i = 0; i < n; i++) { const t = (i + 0.5) / n; column(bag, col, ax + ux * L * t + nx * off, az + uz * L * t + nz * off, ub, uh, 0.25); }
+    const q = [Math.min(ax, bx, ax + nx * dp, bx + nx * dp), Math.min(az, bz, az + nz * dp, bz + nz * dp), Math.max(ax, bx, ax + nx * dp, bx + nx * dp), Math.max(az, bz, az + nz * dp, bz + nz * dp)];
+    if (alongX0) { if (nz > 0) q[1] += off - 0.45; else q[3] -= off - 0.45; } else { if (nx > 0) q[0] += off - 0.45; else q[2] -= off - 0.45; }
+    bag.add('timber', box(q[0], ub + uh + 0.25, q[1], q[2], ub + uh + 0.65, q[3]));
+    bag.add('plaster', box(q[0] - 0.1, ub + uh + 0.65, q[1] - 0.1, q[2] + 0.1, ub + uh + 0.95, q[3] + 0.1)); col.floor(q, ub + uh + 0.95);
+    const ue = alongX0 ? (nz > 0 ? q[1] : q[3]) : (nx > 0 ? q[0] : q[2]);
+    for (let i = 0; i < n; i++) { const t = (i + 0.5) / n, px = ax + ux * L * t, pz = az + uz * L * t; if (alongX0) horns(bag, px, ub + uh + 0.95, ue + (nz > 0 ? 0.1 : -0.1), 0.6, true); else horns(bag, ue + (nx > 0 ? 0.1 : -0.1), ub + uh + 0.95, pz, 0.6, false); }
+  }
   // horns of consecration on the roof's edge, one over each bay, on the side away from the wall
   const alongX = Math.abs(ux) > 0.5, edge = alongX ? (nz > 0 ? r[1] + 0.15 : r[3] - 0.15) : (nx > 0 ? r[0] + 0.15 : r[2] - 0.15);
   for (let i = 0; i < n; i++) { const t = (i + 0.5) / n, px = ax + ux * L * t, pz = az + uz * L * t; if (alongX) horns(bag, px, y + h + 1.0, edge, 0.8, true); else horns(bag, edge, y + h + 1.0, pz, 0.8, false); }
@@ -235,6 +266,15 @@ export const FRESCO = {
       [cap([0.62, 0.93], [0.74, 0.86], 0.04, 0.01), 1], [poly([-0.18, 0.56], [0.2, 0.58], [0.06, 0.76], [-0.3, 0.7]), 1.2], [cap([-0.55, 0.4], [-0.78, 0.62], 0.03, 0.02), 1]];
     for (const k of [0, 1, 2]) g.push([cap([0.5, 0.98], [0.42 - k * 0.06, 1.12 + k * 0.03], 0.025, 0.008), 1]);
     out[1].parts.push(...g.map(([p, f]) => [tr(p, 0.15, 0.12), f]));
+    // the wing: curled plumes fanning up and back from the shoulder, blue and red in turn, a spiral rosette on the haunch, the red crest and the beak (§4i)
+    const bl = [], rd = [];
+    for (let k = 0; k < 5; k++) {
+      const a0 = [-0.02 - k * 0.07, 0.62 + k * 0.02], a1 = [-0.3 - k * 0.1, 0.9 + k * 0.1 - k * k * 0.01], a2 = [-0.5 - k * 0.1, 1.0 + k * 0.05];
+      (k % 2 ? rd : bl).push([cap(a0, a1, 0.09, 0.06), 1.4], [cap(a1, a2, 0.06, 0.02), 1.4]);
+    }
+    for (const [cx, cy, r] of [[-0.3, 0.5, 0.075], [-0.3, 0.5, 0.045]]) (r > 0.05 ? bl : rd).push([ell(cx, cy, r, r, 10), r > 0.05 ? 1.45 : 1.55]);
+    rd.push([cap([0.52, 1.02], [0.46, 1.2], 0.02, 0.006), 1.4], [cap([0.55, 1.03], [0.58, 1.22], 0.02, 0.006), 1.4]);
+    out.push({ mat: 'egyptian_blue', parts: bl.map(([q, f]) => [tr(q, 0.15, 0.12), f]) }, { mat: 'paint_minoan_red', parts: rd.map(([q, f]) => [tr(q, 0.15, 0.12), f]) });
     return out;
   },
   // dolphins and little fish swimming (the Queen's Megaron)
@@ -287,8 +327,13 @@ function throneRoom(el, ctx) {
   bag.add('wall_red', box(x0 + 0.004, y + 0.5, z0 + 0.02, x0 + 0.02, y + 3.0, pit[1] - 0.02));
   // the throne: a pedestal, the seat hollowed for sitting, the tall back with its rounded, wavy crest
   bag.add(G, box(tx - 0.33, y, tz + 0.14, tx + 0.33, y + 0.42, tz + 0.62)); bag.add(G, box(tx - 0.36, y + 0.42, tz + 0.14, tx + 0.36, y + 0.5, tz + 0.66));
-  const back = merge([prism([[-0.3, 0], [0.3, 0], [0.3, 0.75], [-0.3, 0.75]], 0.14, true), prism(ell(0, 0.86, 0.3, 0.42, 14), 0.14, true), prism([[-0.34, 0.62], [-0.22, 0.6], [-0.2, 0.84], [-0.35, 0.82]], 0.14, true), prism([[0.22, 0.6], [0.34, 0.62], [0.35, 0.82], [0.2, 0.84]], 0.14, true)]);
+  // the tall back, its crest rising and falling in a wave (strips, each convex), the fluting of the pedestal's front and a low footstool (§4i)
+  const strips = [], NSTR = 14;
+  for (let i = 0; i < NSTR; i++) { const u0 = -0.34 + i * 0.68 / NSTR, u1 = u0 + 0.68 / NSTR, v = (u) => 1.05 + 0.12 * Math.cos(u * 14) - 0.9 * Math.max(0, Math.abs(u) - 0.24); strips.push(prism([[u0, 0], [u1, 0], [u1, v(u1)], [u0, v(u0)]], 0.16, true)); }
+  const back = merge(strips);
   bag.add(G, toPlane(back, [tx, y + 0.5, tz + 0.002], [1, 0, 0], [0, 0, 1]));
+  bag.add(BLK, merge(Array.from({ length: 7 }, (_, k) => box(tx + (k - 3) * 0.085 - 0.014, y + 0.06, tz + 0.62, tx + (k - 3) * 0.085 + 0.014, y + 0.38, tz + 0.636))));
+  bag.add(G, box(tx - 0.3, y, tz + 0.66, tx + 0.3, y + 0.14, tz + 1.0)); col.rect([tx - 0.3, tz + 0.66, tx + 0.3, tz + 1.0], y, y + 0.14);
   col.rect([tx - 0.36, tz, tx + 0.36, tz + 0.66], y, y + 0.5);
   // the benches along the north wall either side of the throne, and along the west wall to the basin
   const bench = (r) => { bag.add(G, box(r[0], y, r[1], r[2], y + 0.42, r[3])); bag.add(G, box(r[0] - 0.02, y + 0.42, r[1], r[2] + 0.02, y + 0.48, r[3] + 0.03)); col.rect(r, y, y + 0.48); };
