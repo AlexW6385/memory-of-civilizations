@@ -1,7 +1,7 @@
 // Istanbul — the ground: the paved terrace and courts, gardens with cypresses and plane trees, the
 // steep lanes; the bright, windy sky over the Golden Horn.
 
-import { RADIUS, TERRACE, PRECINCT, height, inRect, inLot, inYard, laneAt, inCemetery, nearGrave, inKulliye } from './layout.js';
+import { RADIUS, TERRACE, PRECINCT, height, inRect, inLot, inYard, laneAt, inCemetery, nearGrave, inKulliye, inYardCore } from './layout.js';
 
 function cover(x, z, h, ny) {
   const c = { sand: 0.1, grass: 0.45, rock: 0, soil: 0.45, fields: 0, dry: 0.35, warmth: 0.55, red: 0.2, road: 0, snow: 0, forest: 0 };
@@ -22,6 +22,7 @@ function planting(x, z) {
     if (Math.abs(x) < 14 || !inRect(PRECINCT, x, z, -5) || inRect([-34, -50, 34, 52], x, z) || inKulliye(x, z, 1.5) || Math.hypot(x, z + 91) < 7) return null;
     return { plane_tree: 0.011, cypress: 0.009 };
   }
+  if (inYardCore(x, z)) return null;
   if (inYard(x, z) && inRect([90, 118, 116, 146], x, z)) return null;
   if (inYard(x, z)) return { fig: 0.02, cypress: 0.012, stone_pine: 0.004, grass: 20 };
   if (laneAt(x, z, 0.5)) return null;

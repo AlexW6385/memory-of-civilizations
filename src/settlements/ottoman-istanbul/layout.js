@@ -118,7 +118,7 @@ function split(len, rand, first = 0) {
 }
 const slopeY = (r) => { const ys = [[r[0], r[1]], [r[2], r[1]], [r[0], r[3]], [r[2], r[3]], [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2]].map(([a, b]) => height(a, b)); return [Math.max(...ys), Math.min(...ys)]; };
 /** The target of the coffee house: the lot's block nearest it gives its east column's first lot 10 m. */
-const TRADE_LIST = ['baker', 'grocer', 'cobbler', 'coppersmith', 'weaver', 'barber', 'potter', 'butcher', 'sherbet', 'saddler', 'grocer', 'baker'];
+const TRADE_LIST = ['baker', 'grocer', 'cobbler', 'coppersmith', 'weaver', 'barber', 'potter', 'butcher', 'sherbet', 'saddler', 'grocer', 'baker', 'tailor', 'attar', 'tailor', 'attar'];
 const COFFEE_AT = [-178, -20];
 export function lots() {
   if (LOTS) return LOTS;
@@ -158,8 +158,8 @@ export function openSet() {
   // (not where the door's step would stand more than a walker's step (0.5 m) above the lane: on the steeper slopes the floor is cut into the hill above it)
   const stepOK = (l) => { const [x0, z0, x1, z1] = l.rect, mx = (x0 + x1) / 2, mz = (z0 + z1) / 2, p = l.front === 's' ? [mx, z1 + 0.5] : l.front === 'n' ? [mx, z0 - 0.5] : l.front === 'e' ? [x1 + 0.5, mz] : [x0 - 0.5, mz]; return l.y + 0.3 - height(p[0], p[1]) <= 0.45; };
   const ok = all.filter((l) => l.rect[2] - l.rect[0] >= 4.5 && l.rect[3] - l.rect[1] >= 4.5 && stepOK(l));
-  for (const [px, pz, nShop, nHome] of [[0, -135, 8, 4], [-176, 40, 8, 4], [176, 40, 8, 4], [0, 185, 8, 4], [-176, -80, 4, 2], [176, -80, 4, 2]]) {
-    const d = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - px, (l.rect[1] + l.rect[3]) / 2 - pz), srt = ok.filter((l) => !out.has(l)).sort((a, b) => d(a) - d(b)).slice(0, 60);
+  for (const [px, pz, nShop, nHome] of [[0, -135, 12, 8], [-176, 40, 12, 8], [176, 40, 12, 8], [0, 185, 12, 8], [-176, -80, 8, 5], [176, -80, 8, 5], [-250, 130, 5, 4], [250, 130, 5, 4], [-250, -130, 5, 4], [250, -130, 5, 4]]) {
+    const d = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - px, (l.rect[1] + l.rect[3]) / 2 - pz), srt = ok.filter((l) => !out.has(l)).sort((a, b) => d(a) - d(b)).slice(0, 90);
     srt.filter((l) => l.shop).slice(0, nShop).forEach((l) => out.add(l)); srt.filter((l) => !l.shop).slice(0, nHome).forEach((l) => out.add(l));
   }
   return (OPENED = out);
@@ -168,4 +168,22 @@ export function openSet() {
 export function roomPoint(l, u, v) {
   const [x0, z0, x1, z1] = l.rect;
   return l.front === 's' ? [x1 - u, z1 - v] : l.front === 'n' ? [x0 + u, z0 + v] : l.front === 'e' ? [x1 - v, z0 + u] : [x0 + v, z1 - u];
+}
+
+/** The dressed part of each block's yard (the middle, kept clear of trees): [x0, z0, x1, z1]. */
+export const yardCore = (y) => { const cx = (y.rect[0] + y.rect[2]) / 2, cz = (y.rect[1] + y.rect[3]) / 2; return [cx - 8, cz - 5.5, cx + 8, cz + 5.5]; };
+export const inYardCore = (x, z) => yards().some((y) => y.block.i !== 99 && inRect(yardCore(y), x, z));
+/** What each yard near enough holds (docs/settlements/ottoman-istanbul.md §15): two or three of six household things in the four slots of its core. */
+export function yardItems() {
+  const out = [], rand = rng(1566), KINDS = ['well', 'arbor', 'beds', 'coop', 'wood', 'line'];
+  for (const y of yards()) {
+    if (y.block.i === 99) continue;
+    const [x0, z0, x1, z1] = yardCore(y), cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+    if (Math.hypot(cx, cz) > 320) continue;
+    const slots = [[-4.6, -3], [4.6, -3], [-4.6, 3], [4.6, 3]].sort(() => rand() - 0.5), n = 2 + (rand() < 0.5 ? 1 : 0), kinds = KINDS.slice().sort(() => rand() - 0.5);
+    const items = [];
+    for (let k = 0; k < n; k++) { const [dx, dz] = slots[k], x = cx + dx, z = cz + dz; items.push({ k: kinds[k], at: [x, z], y: height(x, z), rot: rand() < 0.5 ? 0 : Math.PI / 2 }); }
+    out.push({ rect: y.rect, items });
+  }
+  return out;
 }

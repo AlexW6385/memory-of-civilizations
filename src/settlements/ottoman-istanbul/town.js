@@ -1,7 +1,7 @@
 import { ARRIVALS } from '../../planet/arrivals.js';
 // The timber houses of the slopes (docs/settlements/ottoman-istanbul.md §5); the coffee house on the lane west of the
 // terrace by the Tiryaki shops (§10); the street life (§10, life.js).
-import { RADIUS, lots, COFFEE, openSet } from './layout.js';
+import { RADIUS, lots, COFFEE, openSet, yardItems } from './layout.js';
 import { lifePlan } from './life.js';
 import { courtPaving } from './court-life.js';
 /** The houses cut into 160 m tiles in two levels (as lod.js, but coarser: the mesh count is plan x material, DESIGN §8; budget). */
@@ -30,6 +30,7 @@ export async function town() {
   plans.push({ ...base('ottoman-istanbul-kahvehane', [{ t: 'kahvehane', rect: coffee.rect, y: coffee.y, foot: coffee.foot, front: 'e', seed: coffee.seed }]), style: 'ottoman', bounds: [x0 - 2, z0 - 2, x1 + 2, z1 + 2],
     rooms: [{ id: 'coffee house', rect: [x0 + 0.4, z0 + 0.4, x1 - 0.4, z1 - 0.4], y: coffee.y + 0.45, kind: 'hall' }] });
   plans.push({ ...base('ottoman-istanbul-court-paving', courtPaving()), style: 'ottoman', bounds: [-80, -100, 80, 95] });
+  plans.push(...tiles('ottoman-istanbul-yards', 'ottoman', yardItems().map((y) => ({ t: 'yard_dress', ...y })), { near: 150 }).filter((p) => !p.far));
   plans.push(lifePlan());
   return plans;
 }

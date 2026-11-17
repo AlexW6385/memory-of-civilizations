@@ -11,6 +11,7 @@ import { KULLIYE } from './kulliye.js';
 import { prayerHall } from './prayerhall.js';
 import { kahvehane } from './kahve.js';
 import { carsi } from './bazaar.js';
+import { yardDress } from './yards.js';
 import { hallExterior, weightTower, portal } from './exterior.js';
 import { cesme } from './cesme.js';
 import { ottomanHouse } from './konak.js';
@@ -396,6 +397,6 @@ function graves(el, { bag, col }) {
 
 registerStyle('ottoman', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, sinan_mosque: mosque, minaret, madrasa, turbe, graves, kahvehane, carsi, cesme, ottoman_house: ottomanHouse, mescit, court_dress: courtDress, ...KULLIYE },
+  elements: { ...STYLES.qing.elements, sinan_mosque: mosque, minaret, madrasa, turbe, graves, kahvehane, carsi, cesme, ottoman_house: ottomanHouse, mescit, court_dress: courtDress, yard_dress: yardDress, ...KULLIYE },
   objects: {},
 });
