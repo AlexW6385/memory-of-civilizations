@@ -6,13 +6,24 @@
 
 import { box, frustum, lathe } from '../../core/geom.js';
 import { faceFrame, prism, fbox, ngon } from '../dutch/facade.js';
+import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
+
+function join(gs) {
+  const pos = [], nor = [];
+  for (const g0 of gs) { const g = g0.index ? g0.toNonIndexed() : g0; for (const v of g.attributes.position.array) pos.push(v); for (const v of g.attributes.normal.array) nor.push(v); }
+  const out = new BufferGeometry();
+  out.setAttribute('position', new Float32BufferAttribute(pos, 3)); out.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+  return out;
+}
 
 const S = 'limestone_yellow';
 
 /** river_front: { rect, h, y, face, pavilions: [[u0, u1]…] (metres along the face), turrets } */
 export function riverFront(el, { bag, col }) {
   const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, h = el.h ?? 22, f = el.face ?? 'e', F = faceFrame(el.rect, f), L = F.w, k = h / 22;
-  bag.add(S, box(x0, y - 0.5, z0, x1, y + h, z1)); col.rect(el.rect, y - 0.5, y + h); col.floor(el.rect, y + h);
+  // the wall's core stands REC back from the face; the piers, spandrels, buttresses and mouldings stand out of it, so every window sits in a deep reveal
+  const REC = 0.5, core = f === 'e' ? [x0, z0, x1 - REC, z1] : f === 'w' ? [x0 + REC, z0, x1, z1] : f === 'n' ? [x0, z0 + REC, x1, z1] : [x0, z0, x1, z1 - REC];
+  bag.add(S, box(core[0], y - 0.5, core[1], core[2], y + h, core[3])); col.rect(el.rect, y - 0.5, y + h); col.floor(el.rect, y + h);
   const A = (m, ...r) => bag.add(m, fbox(F, y, ...r)), P = (m, pts, d0, d1) => bag.add(m, prism(F, y, pts, d0, d1));
   const n = Math.max(2, Math.round(L / 4.4)), bw = L / n, pav = el.pavilions ?? [];
   const proj = (u) => (pav.some(([a, b]) => u > a + 0.01 && u < b - 0.01) ? 2.4 : 0);
@@ -22,23 +33,35 @@ export function riverFront(el, { bag, col }) {
   const solid = (u0, u1, d0, d1, y0, y1) => { const a = F.at(u0, d0), b = F.at(u1, d1); col.rect([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], y0, y1); };
   solid(-0.3, L + 0.3, 0, 0.5, y - 0.5, y + 1.2);
   for (let i = 0; i < n; i++) {
-    const u0 = i * bw, u1 = u0 + bw, um = (u0 + u1) / 2, p = proj(um), top = h + (p ? 1.6 : 0);
-    if (p) A(S, u0, u1, 0, top, 0, p); if (p) solid(u0, u1, 0, p, y, y + top);
-    // the window of each storey: two lights, a transom, cusped heads, the label over it
-    const ww = Math.min(0.72, bw / 2 - 0.8);
-    // the panelling runs the full height: shafts at the windows' edges and between the bays' halves
-    for (const e of [um - 2 * ww - 0.32, um + 2 * ww + 0.32]) A(S, e - 0.07, e + 0.07, 1.2, top - 0.2, p, p + 0.12);
+    const sk = new Map(), add = (m, g) => { if (!sk.has(m)) sk.set(m, []); sk.get(m).push(g); }, bg = { add };
+    const A = (m, ...r) => add(m, fbox(F, y, ...r)), P = (m, pts, d0, d1) => add(m, prism(F, y, pts, d0, d1));
+    const u0 = i * bw, u1 = u0 + bw, um = (u0 + u1) / 2, p = proj(um), top = h + (p ? 1.6 : 0), q = p - REC;
+    if (p) { A(S, u0, u1, 0, top, -REC - 0.01, q); if (p) solid(u0, u1, 0, p, y, y + top); }
+    // the window of each storey: two lights, a transom, cusped heads, the label over it; set in the reveal
+    const ww = Math.min(0.72, bw / 2 - 0.8), wl = um - 2 * ww, wr = um + 2 * ww;
+    // the skin: the piers beside each window and the spandrels between the storeys, REC thick, the windows left open to the core
+    let vp = 0;
     for (const [v0, v1] of rows) {
-      A(S, um - 2 * ww - 0.3, um + 2 * ww + 0.3, v0 - 0.25, v1 + 0.2, p, p + 0.08);
-      A('opening', um - 2 * ww, um + 2 * ww, v0, v1, p + 0.06, p + 0.11);
-      for (const u of [um - 2 * ww, um, um + 2 * ww]) A(S, u - 0.09, u + 0.09, v0, v1, p + 0.08, p + 0.2);
-      const vt = v0 + (v1 - v0) * 0.62; A(S, um - 2 * ww, um + 2 * ww, vt - 0.07, vt + 0.07, p + 0.08, p + 0.18);
+      A(S, u0, u1, vp, v0, q - 0.01, p);
+      A(S, u0, wl, v0, v1, q - 0.01, p); A(S, wr, u1, v0, v1, q - 0.01, p);
+      vp = v1;
+    }
+    A(S, u0, u1, vp, top, q - 0.01, p);
+    for (const e of [wl - 0.32, wr + 0.32]) A(S, e - 0.07, e + 0.07, 1.2, top - 0.2, p, p + 0.12);
+    for (const [v0, v1] of rows) {
+      A('opening', wl, wr, v0, v1, q + 0.0, q + 0.04);
+      for (const u of [wl, um, wr]) A(S, u - 0.09, u + 0.09, v0, v1, q + 0.03, p + 0.05);
+      const vt = v0 + (v1 - v0) * 0.62; A(S, wl, wr, vt - 0.07, vt + 0.07, q + 0.03, p + 0.0);
       for (const c of [um - ww, um + ww]) for (const s of [-1, 1]) {                               // cusps: the corners of each light filled to a pointed head
         const e = c + s * (ww - 0.09), m = 0.5;
-        P(S, [[e, v1], [e - s * m, v1], [e, v1 - m * 0.9]].sort((a, b) => a[0] - b[0]), p + 0.08, p + 0.16);
+        P(S, [[e, v1], [e - s * m, v1], [e, v1 - m * 0.9]].sort((a, b) => a[0] - b[0]), q + 0.03, p - 0.05);
       }
-      A(S, um - 2 * ww - 0.4, um + 2 * ww + 0.4, v1 + 0.2, v1 + 0.38, p, p + 0.22);                // the label mould and its stops
-      for (const s of [-1, 1]) A(S, um + s * (2 * ww + 0.3) - 0.1, um + s * (2 * ww + 0.3) + 0.1, v1 - 0.45, v1 + 0.38, p, p + 0.22);
+      // the jamb mouldings and the sill proud of the skin, the label mould over the head and its stops
+      A(S, wl - 0.28, wl, v0 - 0.25, v1 + 0.1, p, p + 0.14); A(S, wr, wr + 0.28, v0 - 0.25, v1 + 0.1, p, p + 0.14);
+      A(S, wl - 0.35, wr + 0.35, v0 - 0.3, v0 - 0.1, p, p + 0.3);
+      A(S, wl - 0.28, wr + 0.28, v1, v1 + 0.22, p, p + 0.16);
+      A(S, wl - 0.42, wr + 0.42, v1 + 0.22, v1 + 0.4, p, p + 0.3);
+      for (const s of [-1, 1]) A(S, um + s * (2 * ww + 0.3) - 0.11, um + s * (2 * ww + 0.3) + 0.11, v1 - 0.45, v1 + 0.4, p, p + 0.3);
     }
     // the close panelling between the storeys: narrow blind panels with a carved shield in the middle
     for (let r = 0; r < rows.length; r++) {
@@ -55,14 +78,19 @@ export function riverFront(el, { bag, col }) {
     A(S, u0, u1, top - 0.2, top + 1.0, p - 0.3, p + 0.1);
     for (let j = 0; j < 3; j++) { const u = u0 + (j + 0.5) * bw / 3; P('opening', ngon(u, top + 0.4, 0.28, 4).map(([a, b]) => [a, b]), p + 0.1, p + 0.12); P(S, ngon(u, top + 0.4, 0.09, 8), p + 0.12, p + 0.16); }
     A(S, u0 - 0.02, u1 + 0.02, top + 1.0, top + 1.15, p - 0.35, p + 0.18);
+    for (const [m, gs] of sk) bag.add(m, join(gs));   // one prototype per bay for the instancing
   }
   // the buttresses at the bays' edges, set back at each storey, each ending in a crocketed pinnacle
   for (let i = 0; i <= n; i++) {
+    const sk = new Map(), add = (m, g) => { if (!sk.has(m)) sk.set(m, []); sk.get(m).push(g); }, bg = { add };
+    const A = (m, ...r) => add(m, fbox(F, y, ...r)), P = (m, pts, d0, d1) => add(m, prism(F, y, pts, d0, d1));
     const u = i * bw, p = Math.max(proj(u - 0.1), proj(u + 0.1)), top = h + (p ? 1.6 : 0);
-    A(S, u - 0.36, u + 0.36, 0, top + 1.2, p, p + 0.7);
-    solid(u - 0.36, u + 0.36, 0, p + 0.7, y, y + top + 1.2);
-    for (const [, v1] of rows) A(S, u - 0.42, u + 0.42, v1 + 0.5, v1 + 0.75, p, p + 0.8);
-    pinnacle(bag, F, y, u, top + 1.2, p + 0.35, 0.6, 3.6);
+    A(S, u - 0.46, u + 0.46, 0, top + 1.2, -REC - 0.01 + (p ? REC : 0), p + 0.95);
+    solid(u - 0.46, u + 0.46, 0, p + 0.95, y, y + top + 1.2);
+    for (const [, v1] of rows) A(S, u - 0.54, u + 0.54, v1 + 0.5, v1 + 0.8, p, p + 1.05);
+    for (const [, v1] of rows) A(S, u - 0.08, u + 0.08, v1 + 0.8, v1 + 1.5, p + 0.95, p + 1.1);
+    pinnacle(bg, F, y, u, top + 1.2, p + 0.47, 0.9, 4.6);
+    for (const [m, gs] of sk) bag.add(m, join(gs));   // one prototype per bay for the instancing
   }
   // pavilions: an octagonal turret at each corner, rising above the parapet under a cap of iron plates
   if (el.turrets !== false) for (const [a, b] of pav) for (const u of [a, b]) {

@@ -121,4 +121,22 @@ function towerH(bag, col, x, z, s, T, y, clock) {
     bag.add(PO, prism(F, y, [[s / 2 - 2, Tb + 1.8], [s / 2 + 2, Tb + 1.8], [s / 2, Tb + 4.2]], -0.4, 0.15));
   }
   bag.add('lead', frustum([r[0] + 0.5, r[1] + 0.5, r[2] - 0.5, r[3] - 0.5], y + Tb, y + Tb + 1.2, s / 2 - 1, s / 2 - 1, s / 2 - 1, s / 2 - 1));
+
+  // the upper stage: a smaller square lantern with a pointed louvred opening on each face, buttress piers at its corners, a lead cap and a gilt finial
+  const q = s * 0.31, ub = Tb + 1.2, uh = 6.2, ur = [x - q, z - q, x + q, z + q];
+  bag.add(PO, box(ur[0], y + ub - 0.1, ur[1], ur[2], y + ub + uh, ur[3]));
+  for (const f of 'nsew') {
+    const F = faceFrame(ur, f), w = 2 * q;
+    archWindow(bag, F, y, w / 2, ub + 0.8, 1.3, 4.2, true, 1, PO);
+    for (let l = 0; l < 4; l++) bag.add('lead', fbox(F, y, w / 2 - 1.1, w / 2 + 1.1, ub + 1.2 + l * 0.7, ub + 1.3 + l * 0.7, 0.14, 0.22));
+    bag.add(PO, fbox(F, y, -0.25, w + 0.25, ub + uh - 0.5, ub + uh + 0.3, 0, 0.35));
+  }
+  for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    const px = x + dx * (q + 0.1), pz = z + dz * (q + 0.1);
+    bag.add(PO, box(px - 0.4, y + ub, pz - 0.4, px + 0.4, y + ub + uh + 0.3, pz + 0.4));
+    bag.add(PO, lathe([[0.5, 0], [0.001, 2.6]], 4, null, px, y + ub + uh + 0.3, pz).rotateY(Math.PI / 4));
+    bag.add('gilt_bronze', lathe([[0.001, 0], [0.1, 0.12], [0.001, 0.45]], 6, null, px, y + ub + uh + 2.8, pz));
+  }
+  bag.add('lead', frustum([ur[0] - 0.2, ur[1] - 0.2, ur[2] + 0.2, ur[3] + 0.2], y + ub + uh + 0.3, y + ub + uh + 3.4, q + 0.2, q + 0.2, q + 0.2, q + 0.2));
+  bag.add('gilt_bronze', lathe([[0.001, 0], [0.22, 0.2], [0.001, 1.8]], 6, null, x, y + ub + uh + 3.4, z));
 }

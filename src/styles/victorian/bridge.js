@@ -4,8 +4,18 @@
 // standards over the piers.
 
 import { box, lathe, sweep, rod } from '../../core/geom.js';
+import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { prism, vprism, ngon } from '../dutch/facade.js';
+import { pointed } from './hall.js';
 
+/** Several pieces made one geometry (one prototype for the instancing: a post with its base and cap, a lamp, a parapet cell). */
+function join(gs) {
+  const pos = [], nor = [];
+  for (const g0 of gs) { const g = g0.index ? g0.toNonIndexed() : g0; pos.push(...g.attributes.position.array); nor.push(...g.attributes.normal.array); }
+  const out = new BufferGeometry();
+  out.setAttribute('position', new Float32BufferAttribute(pos, 3)); out.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+  return out;
+}
 /** iron_bridge: { x0, x1 (its ends, along x), z (its axis), w (width), y (deck), water, bed, spans (count) } */
 export function ironBridge(el, { bag, col }) {
   const { x0, x1, z } = el, w = el.w ?? 16, y = el.y ?? 2.4, water = el.water ?? -2.5, bed = el.bed ?? -6, n = el.spans ?? 7, ab = el.abut ?? 8, pw = 3.2;
@@ -65,24 +75,48 @@ export function ironBridge(el, { bag, col }) {
   for (const s of [-1, 1]) {
     const zp = s < 0 ? za + 0.12 : zb - 0.12, F = { at: (uu, d) => [uu, zp + d] };
     bag.add(I, box(x0, y + 0.15, zp - 0.15, x1, y + 0.3, zp + 0.15)); bag.add(I, box(x0, y + 1.1, zp - 0.12, x1, y + 1.22, zp + 0.12)); bag.add(I, box(x0, y + 0.95, zp - 0.05, x1, y + 1.0, zp + 0.05));
-    for (let t = x0 + 0.1; t < x1; t += 2.4) bag.add(I, box(t - 0.1, y + 0.15, zp - 0.15, t + 0.1, y + 1.35, zp + 0.15));
-    for (let t = x0 + 0.25; t < x1; t += 0.3) {
-      bag.add(I, box(t - 0.02, y + 0.3, zp - 0.025, t + 0.02, y + 0.95, zp + 0.025));
-      for (const [p0, p1] of [[[t, y + 0.74], [t + 0.15, y + 0.95]], [[t + 0.15, y + 0.95], [t + 0.3, y + 0.74]]]) bag.add(I, prism(F, 0, [[p0[0], p0[1] - 0.02], [p1[0], p1[1] - 0.02], [p1[0], p1[1] + 0.02], [p0[0], p0[1] + 0.02]], -0.02, 0.02));
+    // Barry's Gothic parapet: panelled posts every 2.4 m under crocketed pinnacles, between them cells of lancets
+    // (a pointed arch over each 0.5 m light) under the top rail, a roundel in the spandrels
+    for (let t = x0 + 0.1; t < x1 - 0.2; t += 2.4) {
+      const iron = [box(t - 0.2, y + 0.15, zp - 0.2, t + 0.2, y + 1.45, zp + 0.2), box(t - 0.25, y + 0.15, zp - 0.25, t + 0.25, y + 0.4, zp + 0.25), box(t - 0.25, y + 1.4, zp - 0.25, t + 0.25, y + 1.52, zp + 0.25),
+        lathe([[0.3, 0], [0.001, 0.55]], 4, null, t, y + 1.52, zp).rotateY(Math.PI / 4), box(t - 0.03, y + 2.05, zp - 0.03, t + 0.03, y + 2.3, zp + 0.03)];
+      // the cell to the next post: four lancets, each with its pointed head, and a hub between the heads
+      for (let j = 0; j < 4; j++) {
+        const c = t + 0.2 + j * 0.5, m = c + 0.25, hw = 0.21, vs = y + 0.86, rise = 0.24;
+        iron.push(box(c - 0.02, y + 0.4, zp - 0.03, c + 0.02, vs, zp + 0.03));
+        for (let q = 0; q < 4; q++) { const a0 = -hw + 2 * hw * q / 4, a1 = -hw + 2 * hw * (q + 1) / 4, h0 = vs + pointed(a0, hw, rise), h1 = vs + pointed(a1, hw, rise);
+          iron.push(prism(F, 0, [[m + a0, h0], [m + a1, h1], [m + a1, h1 + 0.045], [m + a0, h0 + 0.045]], -0.035, 0.035)); }
+      }
+      bag.add(I, join(iron));
+      bag.add('gilt_bronze', join([-1, 1].map((sd) => box(t - 0.07, y + 0.62, zp + sd * 0.2 - 0.01, t + 0.07, y + 1.1, zp + sd * 0.2 + 0.01))));
     }
     col.rect([x0, zp - 0.15, x1, zp + 0.15], y, y + 1.35);
   }
 }
 
-/** A lamp standard: a fluted iron column, a crossbar and three lanterns. */
+/** A lamp standard: an octagonal moulded base with gablets, a fluted column, scrolled arms and three lanterns with iron frames and crocketed caps. */
 function lamp(bag, x, y, z) {
-  bag.add('iron', lathe([[0.32, 0], [0.32, 0.3], [0.2, 0.45], [0.12, 0.6], [0.11, 3.4], [0.16, 3.5], [0.16, 3.6]], 10, null, x, y, z));
-  bag.add('iron', box(x - 0.75, y + 3.55, z - 0.04, x + 0.75, y + 3.65, z + 0.04));
-  for (const dx of [-0.75, 0, 0.75]) {
-    const yy = y + (dx ? 3.65 : 3.6);
-    bag.add('lamp_glass', lathe([[0.1, 0], [0.2, 0.15], [0.2, 0.55], [0.12, 0.65], [0.001, 0.66]], 8, null, x + dx, yy, z));
-    bag.add('iron', lathe([[0.24, 0], [0.12, 0.18], [0.001, 0.32]], 8, null, x + dx, yy + 0.66, z));
+  const iron = [], glass = [], gilt = [];
+  iron.push(lathe([[0.5, 0], [0.5, 0.25], [0.38, 0.4], [0.36, 0.9], [0.3, 1.0], [0.26, 1.1]], 8, null, x, y, z));
+  for (const [dx, dz] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) iron.push(lathe([[0.1, 0], [0.001, 0.5]], 4, null, x + dx * 0.36, y + 0.9, z + dz * 0.36));
+  iron.push(lathe([[0.2, 0], [0.19, 2.2], [0.14, 2.3], [0.13, 2.9]], 10, (th) => 1 + 0.07 * Math.cos(th * 10), x, y + 1.1, z));
+  const yt = y + 4.0;
+  iron.push(lathe([[0.13, 0], [0.22, 0.12], [0.2, 0.3], [0.1, 0.38]], 10, null, x, yt - 0.38, z));
+  // the scrolled arms: a curve of rods up to the side lanterns
+  for (const sg of [-1, 1]) {
+    let p0 = [x + sg * 0.05, yt - 0.1, z];
+    for (let i = 1; i <= 5; i++) { const t = i / 5, p1 = [x + sg * (0.05 + 0.85 * Math.sin(t * Math.PI / 2)), yt - 0.1 + 0.3 * (1 - Math.cos(t * Math.PI / 2)) + 0.0, z]; iron.push(rod(p0, p1, 0.04, 6)); p0 = p1; }
+    iron.push(lathe([[0.001, 0], [0.09, 0.05], [0.001, 0.2]], 6, null, x + sg * 0.9, yt + 0.2, z));
   }
+  for (const [dx, yy] of [[-0.9, yt + 0.2], [0, yt + 0.2], [0.9, yt + 0.2]]) {
+    const lx = x + dx, ly = dx ? yy : yy + 0.15;
+    iron.push(lathe([[0.1, 0], [0.24, 0.1], [0.24, 0.16]], 6, null, lx, ly, z));
+    glass.push(lathe([[0.2, 0], [0.24, 0.1], [0.24, 0.55], [0.2, 0.7]], 6, null, lx, ly + 0.14, z));
+    for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3; iron.push(box(lx + Math.cos(a) * 0.24 - 0.018, ly + 0.14, z + Math.sin(a) * 0.24 - 0.018, lx + Math.cos(a) * 0.24 + 0.018, ly + 0.84, z + Math.sin(a) * 0.24 + 0.018)); }
+    iron.push(lathe([[0.3, 0], [0.26, 0.08], [0.1, 0.3], [0.001, 0.45]], 6, null, lx, ly + 0.82, z));
+    gilt.push(lathe([[0.001, 0], [0.05, 0.05], [0.001, 0.24]], 6, null, lx, ly + 1.25, z));
+  }
+  bag.add('iron', join(iron)); bag.add('lamp_glass', join(glass)); bag.add('gilt_bronze', join(gilt));
 }
 
 /**
