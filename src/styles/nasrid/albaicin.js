@@ -6,6 +6,7 @@
 
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { holedWall, face, archHead, dbl } from './halls.js';
+import { hallRoom, USES } from './interiors.js';
 
 const LW = 'limewash_white', q4 = (out, a, b, c, d) => out.push(...a, ...b, ...c, ...a, ...c, ...d);
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -21,13 +22,29 @@ function wins(bag, ax, at, n, us, v0, v1, w = 0.32) {
  * passage in the front range under a horseshoe arch.
  */
 function patioHouse(el, { bag, col }) {
-  const [x0, z0, x1, z1] = el.rect, y = el.y, rand = rng(el.seed), H = 5.4 + rand() * 0.4, dN = 2.6, dS = 2.1, t = 1.25;
+  const [x0, z0, x1, z1] = el.rect, y = el.y, rand = rng(el.seed), H = 5.4 + rand() * 0.4, dN = 3.0, dS = 2.1, t = 1.25;
   const P = [x0 + t, z0 + dN, x1 - t, z1 - dS], pcx = (P[0] + P[2]) / 2, pcz = (P[1] + P[3]) / 2;
   bag.add(LW, box(x0, (el.foot ?? y) - 0.5, z0, x1, y, z1));
   // the ranges; the front one pierced by the passage in from the lane
   const front = el.front === 's' ? 's' : 'n', du = [P[0] + 0.25, P[0] + 1.35], dv = [y, y + 2.35];
   const R = { n: [x0, z0, x1, P[1]], s: [x0, P[3], x1, z1], w: [x0, P[1], P[0], P[3]], e: [P[2], P[1], x1, P[3]] };
-  for (const [k, r] of Object.entries(R)) holedWall(bag, col, LW, r, y, y + H, k === front ? [[du[0], du[1], dv[0], dv[1]]] : [], k === 'n' || k === 's');
+  for (const [k, r] of Object.entries(R)) if (k !== 'n') holedWall(bag, col, LW, r, y, y + H, k === front ? [[du[0], du[1], dv[0], dv[1]]] : [], k === 'n' || k === 's');
+  // the north range is the hall (§5.2): a room behind the portico, its door and two windows real, the passage in from the lane
+  // beside it when the front is north
+  const tw = 0.3, rn = R.n, nf = front === 'n', xa = nf ? du[1] + tw : x0 + tw, xb = x1 - tw, za = z0 + tw, zb = P[1] - tw;
+  const doorU = [pcx - 0.5, pcx + 0.5], winU = [x0 + 1.85, x1 - 1.85].filter((u) => Math.abs(u - pcx) > 1.6 && u > xa + 0.5 && u < xb - 0.5);
+  if (nf) {
+    holedWall(bag, col, LW, [x0, z0, du[0], rn[3]], y, y + H, [], false);
+    holedWall(bag, col, LW, [du[0], z0, du[1], rn[3]], dv[1], y + H, [], true);
+    holedWall(bag, col, LW, [du[1], z0, xa, rn[3]], y, y + H, [], false);
+  } else holedWall(bag, col, LW, [x0, z0, xa, rn[3]], y, y + H, [], false);
+  holedWall(bag, col, LW, [xa, z0, x1, za], y, y + H, [[x0 + (x1 - x0) * 0.62 - 0.2, x0 + (x1 - x0) * 0.62 + 0.2, y + 1.9, y + 2.5]], true);
+  bag.add('lattice', box(x0 + (x1 - x0) * 0.62 - 0.2, y + 1.9, z0 + 0.1, x0 + (x1 - x0) * 0.62 + 0.2, y + 2.5, z0 + 0.14));
+  holedWall(bag, col, LW, [xa, zb, x1, rn[3]], y, y + H, [[doorU[0], doorU[1], y + 0.05, y + 2.2], ...winU.map((u) => [u - 0.28, u + 0.28, y + 0.8, y + 1.8])], true);
+  holedWall(bag, col, LW, [xb, za, x1, zb], y, y + H, [], false);
+  archHead(bag, face('z', rn[3], -1), doorU[0], doorU[1], y + 1.75, y + 2.2, tw, 'horseshoe', { alfiz: true });
+  hallRoom(bag, col, { room: [xa, za, xb, zb], y, pcx, ceil: 3.0, use: USES[el.seed % 4], seed: el.seed });
+  col.floor([xa, za, xb, zb], y + 0.05);
   const pr = R[front]; bag.add('brick_paving', box(du[0], y - 0.2, pr[1], du[1], y + 0.05, pr[3])); col.floor([du[0], pr[1], du[1], pr[3]], y + 0.05);
   // the plinth is solid but for the passage in
   for (const r of [[pr[0], pr[1], du[0], pr[3]], [du[1], pr[1], pr[2], pr[3]]]) col.rect(r, (el.foot ?? y) - 0.5, y);
@@ -75,7 +92,6 @@ function patioHouse(el, { bag, col }) {
   bag.add('timber', box(P[0] + 0.14, yb + 1.25, zc - 0.04, P[2] - 0.14, yb + 1.33, zc + 0.04));
   for (let x = P[0] + 0.35; x < P[2] - 0.25; x += 0.22) bag.add('timber', box(x - 0.015, yb + 0.38, zc - 0.015, x + 0.015, yb + 1.25, zc + 0.015));
   // doors and windows on the patio: the hall's door and two windows beside it, the upper rooms' doors on the gallery
-  wins(bag, 'z', P[1], 1, [pcx], y + 0.05, y + 2.2, 0.5); wins(bag, 'z', P[1], 1, [P[0] + 0.6, P[2] - 0.6].filter((u) => Math.abs(u - pcx) > 1.1), y + 0.8, y + 1.8, 0.28);
   wins(bag, 'z', P[1], 1, [pcx], yb + 0.4, yb + 2.2, 0.42);
   wins(bag, 'z', P[3], -1, [pcx], y + 0.05, y + 2.1, 0.45); wins(bag, 'z', P[3], -1, [pcx], yb + 0.7, yb + 1.6, 0.3);
   for (const [at, n] of [[P[0], 1], [P[2], -1]]) wins(bag, 'x', at, n, [pcz + 0.3], y + 0.6, y + 1.8, 0.3);
