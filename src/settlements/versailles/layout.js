@@ -34,6 +34,13 @@ export const STATE_ROOMS = [
   ['ambassadors staircase landing', [49.8, -54.2, 51.6, -40.8], FY], ['ambassadors staircase vestibule', [71.6, -54.2, 76.2, -40.8], RISE + 0.06],
 ];
 export const LATONA_Y = RISE * 0.352;
+// the Orangerie (docs/settlements/versailles.md §1i): the sunken parterre of the orange trees south of the south parterre, its gallery under the
+// terrace at the north (roof level with the parterre), the retaining walls round the rest, the two flights of the Cent Marches climbing from the court
+// to the terrace beside the gallery's ends. LOW is the court with the gallery's footprint; the terrain drops to OR_Y inside it.
+export const OR_Y = -1.5;
+export const ORANGERIE = { low: [-68.25, 124, -7.75, 192.25], gallery: [-68.25, 124, -7.75, 139.25], walls: [-72.25, 124, -3.75, 196.25] };
+// the Colonnade bosquet (§1i): a ring of marble columns in a clearing of the woods south of the Allée Royale, reached from its gate in the hornbeam wall
+export const COLONNADE = { c: [-188, 96], R: 14, walk: [-194, 36, -182, 72], clear: [-214, 70, -162, 122] };
 // the service yards (docs/settlements/versailles.md §5d): two levelled terraces behind the hornbeam walls either side of the Latona walk, entered by the
 // gate in each wall at x = -104 — the gardeners', fountain-keepers', sculptors' and guards' lodgings and workshops of the gardens
 export const YARD_Y = 3.55;
@@ -50,6 +57,10 @@ export function height(x, z) {
   if (dl < 26) h = LATONA_Y + (h - LATONA_Y) * smooth(18, 26, dl);
   if (inCanal(x, z)) h = -2.2;
   for (const r of YARDS) { const d = rectDist(r, x, z); if (d < 8) h = YARD_Y + (h - YARD_Y) * smooth(0, 8, d); }
+  { const d = rectDist(ORANGERIE.low, x, z); if (d < 1.2) h = OR_Y + (h - OR_Y) * smooth(0, 1.2, d);
+    // the ground under the Cent Marches follows the flights, a riser under their treads (so that nothing can stand in the steps' mass)
+    const [lx0, , lx1] = ORANGERIE.low, gz1 = ORANGERIE.gallery[3], zb = gz1 + 50 * 0.34;
+    if (z >= gz1 && z <= zb && (x <= lx0 + 4 && x >= lx0 || x >= lx1 - 4 && x <= lx1)) h = Math.max(OR_Y, OR_Y + 0.04 - 0.15 + 0.15 * (zb - z) / 0.34); }
   return h * (1 - smooth(RADIUS - 40, RADIUS - 5, Math.hypot(x, z)));
 }
 // the three avenues: Paris on the axis, Saint-Cloud and Sceaux leaving the Place's corners, the stables in the wedges between

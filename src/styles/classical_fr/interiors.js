@@ -261,7 +261,40 @@ export function furnish(use, c) {
       break;
     }
     default: {
-      // a home: the table and stools, the hearth, the bed with its curtains, a dresser, a spinning wheel, a cradle
+      // a home, in one of four kinds by the house's seed (docs/settlements/versailles.md §5e): the family's kitchen-room (below), a notary's study, a lace-maker's
+      // room, a tailor's workroom
+      const kindOf = Math.floor(L * 10 + D * 3) % 4;
+      if (kindOf === 1) {
+        // the notary's (procureur's) study: a desk with registers and the inkstand, a clerk's stool, shelves of bound registers, the strongbox with its iron bands
+        table(L * 0.42, 3.6, 2.2, 1.0, 0.8, 'lacquer_chestnut'); bu('cloth_green', L * 0.42 - 0.9, 3.2, L * 0.42 + 0.9, 4.0, 0.8, 0.82);
+        for (const [du, dv, m] of [[-0.6, 0.0, 'cloth_brown'], [-0.1, 0.1, 'hide_tan'], [0.5, -0.1, 'cloth_red']]) bu(m, L * 0.42 + du - 0.22, 3.6 + dv - 0.15, L * 0.42 + du + 0.22, 3.6 + dv + 0.15, 0.82, 0.9);
+        jar('pottery_dark', L * 0.42 + 0.85, 3.3, 0.82, 0.05, 0.1); lu('cloth_white', [[0.025, 0], [0.025, 0.22]], L * 0.42 + 0.7, 3.9, 0.82, 6); lu('gilt_bronze', [[0.06, 0], [0.04, 0.03], [0.001, 0.04]], L * 0.42 + 0.7, 3.9, 0.82, 8); lu('flame', [[0.012, 0.22], [0.001, 0.28]], L * 0.42 + 0.7, 3.9, 0.82, 5);
+        chair(L * 0.42, 4.9, 1); chair(L * 0.42 - 0.6, 2.5, -1); chair(L * 0.42 + 0.6, 2.5, -1); stool(1.0, 2.6, 0.7);
+        bu('wood_dark', 0.6, back - 0.5, L - 2.8, back, 0, 2.3, true); for (let k = 0; k < 4; k++) bu('wood_painted', 0.7, back - 0.53, L - 2.9, back - 0.5, 0.15 + k * 0.52, 0.6 + k * 0.52);
+        bu('wood_dark', 0.6, back - 1.4, 1.7, back - 0.6, 0, 0.6, true); bu('iron', 0.58, back - 1.42, 1.72, back - 0.58, 0.18, 0.24); bu('iron', 0.58, back - 1.42, 1.72, back - 0.58, 0.4, 0.45);
+        hearth(L - 1.7); common(); break;
+      }
+      if (kindOf === 2) {
+        // the lace-maker's room (point de France was made in houses like this from 1665): lace pillows on their stands by the window, the bobbins hanging, stools; a table with the finished lace; a bed and the hearth
+        for (const u of [L * 0.2, L * 0.45, L * 0.7]) {
+          bu('wood_dark', u - 0.3, 1.5, u + 0.3, 2.0, 0.0, 0.74, true); lu('cloth_white', [[0.001, 0], [0.26, 0.03], [0.3, 0.12], [0.22, 0.2], [0.001, 0.22]], u, 1.75, 0.74, 10);
+          for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; ru('timber', [u + Math.cos(a) * 0.2, 0.9, 1.75 + Math.sin(a) * 0.15], [u + Math.cos(a) * 0.24, 0.62, 1.75 + Math.sin(a) * 0.19 + 0.04], 0.008, 3); }
+          bu('cloth_white', u - 0.12, 1.65, u + 0.12, 1.85, 0.95, 0.955); stool(u, 2.8);
+        }
+        table(L * 0.4, 5.0, 1.6, 0.8, 0.8); bu('cloth_white', L * 0.4 - 0.6, 4.7, L * 0.4 + 0.2, 5.1, 0.8, 0.83); bu('cloth_white', L * 0.4 + 0.1, 5.1, L * 0.4 + 0.7, 5.3, 0.8, 0.84);
+        lu('wood_dark', [[0.28, 0], [0.28, 0.05], [0.001, 0.05]], L - 0.9, 3.2, 0.0, 10); lu('timber', [[0.02, 0], [0.02, 0.9]], L - 0.9, 3.2, 0.05, 5);
+        bed(0.9, back - 2.1); hearth(L - 1.7); sack(W - 0.4, 1.2); common(); break;
+      }
+      if (kindOf === 3) {
+        // the tailor's workroom: the cutting table with its cloth and shears, bolts of cloth on the shelves, a dress form, the pressing irons at the hearth
+        table(L * 0.42, 3.6, 2.4, 1.2, 0.85); bu('cloth_blue', L * 0.42 - 1.0, 3.2, L * 0.42 + 0.3, 4.0, 0.85, 0.89); bu('cloth_red', L * 0.42 + 0.3, 3.1, L * 0.42 + 0.9, 3.7, 0.85, 0.88);
+        bu('iron', L * 0.42 + 0.4, 4.0, L * 0.42 + 0.9, 4.04, 0.85, 0.87); bu('cloth_white', L * 0.42 - 0.2, 4.0, L * 0.42 + 0.2, 4.2, 0.85, 0.87);
+        bu('wood_dark', 0.6, back - 0.7, L - 2.8, back, 0, 0.9, true); for (let k = 0; k < 3; k++) for (let u = 0.75; u < L - 3.0; u += 0.5) bu(pickOf(rand, ['cloth_red', 'cloth_blue', 'cloth_green', 'cloth_ochre', 'cloth_indigo']), u, back - 0.62, u + 0.42, back - 0.08, 0.9 + k * 0.22, 1.1 + k * 0.22);
+        lu('timber', [[0.02, 0], [0.02, 1.0]], L * 0.82, 2.7, 0.0, 5); lu('wood_painted', [[0.001, 0.9], [0.2, 0.95], [0.24, 1.25], [0.17, 1.5], [0.07, 1.62], [0.001, 1.68]], L * 0.82, 2.7, 0.0, 10);
+        stool(L * 0.42, 5.2, 0.45); stool(L * 0.42 - 0.9, 5.2, 0.45); hearth(L - 1.7); bu('iron', L - 2.1, back - 0.7, L - 1.7, back - 0.5, 0.52, 0.6); bu('iron', L - 1.6, back - 0.7, L - 1.2, back - 0.5, 0.52, 0.6);
+        common(); break;
+      }
+      // the family's room: the table and stools, the hearth, the bed with its curtains, a dresser, a spinning wheel, a cradle
       table(L * 0.45, D * 0.45, 1.3, 0.8, 0.78); for (const [a, c2] of [[-0.9, 0], [0.9, 0], [0, -0.65], [0, 0.65]]) stool(L * 0.45 + a, D * 0.45 + c2);
       jar('terracotta', L * 0.45 - 0.2, D * 0.45, 0.78, 0.09, 0.3); jar('glaze_white', L * 0.45 + 0.25, D * 0.45 - 0.1, 0.78, 0.1, 0.06);
       hearth(L - 1.7); bed(0.9, back - 2.1); buffet(L * 0.4, back - 0.5);

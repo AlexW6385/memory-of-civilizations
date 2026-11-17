@@ -12,7 +12,7 @@ const C = ['cloth_brown', 'cloth_grey', 'cloth_indigo', 'cloth_green', 'cloth_re
 const pick = (rand, a) => a[Math.floor(rand() * a.length)];
 
 export function streetPlans() {
-  const rand = rng(1691), tiles = new Map();
+  const rand = rng(1691), r2 = rng(1695), tiles = new Map();
   const put = (e) => { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); };
   for (const l of lots()) {
     const [x0, z0, x1, z1] = l.rect, w = x1 - x0, [nx, nz] = OUT[l.front] ?? [0, 1], fz = l.front === 'n' ? z0 : z1;
@@ -28,6 +28,10 @@ export function streetPlans() {
       else if (a < 0.34) put({ t: 'firewood', at: at(w * (0.6 + rand() * 0.3), 0.8), y: RISE, rot: along, len: 1.4, seed: Math.floor(rand() * 1e6) });
       else if (a < 0.46) put({ t: 'pot', kind: pick(rand, ['water_pot', 'dark_pot', 'glazed_jar']), at: at(w * (0.15 + rand() * 0.7), 0.6), y: RISE, rot: rand() * 6, n: 1, seed: Math.floor(rand() * 1e6) });
     }
+    // (a second rng, so that the first one's picks stay: hens scratching at a house's door, pigeons on the cobbles)
+    { const b = r2();
+      if (l.kind !== 'shop' && b < 0.12) put({ t: 'chickens', kind: 'hen', n: 3 + Math.floor(r2() * 3), at: at(w * (0.2 + r2() * 0.6), 1.7), y: RISE, rot: r2() * 6, seed: Math.floor(r2() * 1e6) });
+      else if (b < 0.2) put({ t: 'chickens', kind: 'pigeon', n: 4, at: at(w * (0.2 + r2() * 0.6), 3.2), y: RISE, rot: r2() * 6, seed: Math.floor(r2() * 1e6) }); }
     const p = rand();
     if (p < 0.16) {                                                    // neighbours in talk at the door
       const [px, pz] = at(w * (0.2 + rand() * 0.6), 2.4), a0 = rand() * 6.28;
