@@ -141,6 +141,10 @@ Brought toward the standard of Ming Suzhou; the earlier houses stood apart, each
 
 **Life.** Sellers sitting on the mastabas with an occasional buyer, a merchant in each open shop, neighbours and children in the lanes, donkeys with their boys, porters; yard animals; sparrows on the lanes, flocks over the dovecotes; steam from every sixth shop front [inferred].
 
+## 14. Detail pass: the town house you can enter (`cairo_house_open`, `src/settlements/mamluk-cairo/house.js`)
+
+A share of the houses beyond 120 m of the arrival (nine, in the three 200 m cells that hold four or more open shops) are enterable and furnished, in place of the shut `house_mamluk` shells. The plan follows the Mamluk and Ottoman Cairene house as the sources give it: foundation walls to the first-floor height cased in limestone, the superstructure of plastered brick, the upper storey projecting on corbels with lattice windows (mashrabiya/rawshan) [stated: MIT 4.615 handout 12, Residential architecture in Historic Cairo, Wikipedia]; the entrance bent so that no one in the lane can see into the court (the dihliz) [stated: same sources; inferred: the exact dimensions]; rooms round a small open court with a fountain or a water jar, the maq'ad (a loggia hall opening onto the court in arches) on the side of the cool air, a malqaf (wind catcher) over it [stated: MIT handout 12, Wikipedia]; a kitchen with a tannur oven or a stable beside the entrance [inferred]. Fronts vary by rule from the lot's seed: the side of the door, a mastaba or none beside it, the plaster tint, one to three upper windows, lattice oriels or plain shuttered windows, a third storey set back, a malqaf or none, jars on the parapet. The upper storeys are shut mass [inferred].
+
 ## Sources
 
 - [The Rab' in Cairo: a window on Mamluk architecture and urbanism — MIT](https://dspace.mit.edu/handle/1721.1/75720)
