@@ -31,7 +31,7 @@ const FRONT_OF = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] };
 export function houses() {
   if (HOUSES) return HOUSES;
   HOUSES = [];
-  const rand = rng(825), furnished = new Map();
+  const rand = rng(825), rand2 = rng(2718), furnished = new Map();
   HAMLETS.forEach(([hx, hz, hr], hi) => {
     let n = 0;
     for (let k = 0; k < 150 && n < 36; k++) {
@@ -42,16 +42,18 @@ export function houses() {
       const r = [x - hx2, z - hz2, x + hx2, z + hz2];
       if (Math.hypot(x, z) > RADIUS - 30 || Math.hypot(x - hx, z - hz) < 13 || HOUSES.some((h) => inRect(h.rect, x, z, hx2 + hz2 + 1.7))) continue;
       // the first three houses of each hamlet are furnished and walkable, each in its own way (variant 0 hearth and bed, 1 loom and rice store, 2 household shrine)
-      const nf = furnished.get(hi) ?? 0, interior = !granary && nf < 3;
-      if (interior) furnished.set(hi, nf + 1);
-      HOUSES.push({ rect: r, seed: Math.floor(rand() * 1e6), kind: granary ? 'lumbung' : 'house', front, W, D, hamlet: hi, interior, variant: interior ? nf : -1 });
+      // (§18: beyond the first three, about two houses in five more are furnished, from five ways: the three above, a kitchen-store, a smith's)
+      const nf = furnished.get(hi) ?? 0, first = !granary && nf < 3, extra = !granary && !first && rand2() < 0.4, interior = first || extra;
+      if (first) furnished.set(hi, nf + 1);
+      const variant = first ? nf : extra ? Math.floor(rand2() * 5) : -1;
+      HOUSES.push({ rect: r, seed: Math.floor(rand() * 1e6), kind: granary ? 'lumbung' : 'house', front, W, D, hamlet: hi, interior, variant });
       n++;
     }
   });
   // the lodgings of the pilgrims' way (§17): furnished houses on posts set back from the way, fronts to it, hamlet -1
   for (const [i, [x, z, front, W, D]] of WAYHOUSES.entries()) {
     const ew = front === 'e' || front === 'w', hx2 = (ew ? D : W) / 2, hz2 = (ew ? W : D) / 2;
-    HOUSES.push({ rect: [x - hx2, z - hz2, x + hx2, z + hz2], seed: 7000 + i * 131, kind: 'house', front, W, D, hamlet: -1, interior: true, variant: i % 3 });
+    HOUSES.push({ rect: [x - hx2, z - hz2, x + hx2, z + hz2], seed: 7000 + i * 131, kind: 'house', front, W, D, hamlet: -1, interior: true, variant: i % 5 });
   }
   return HOUSES;
 }

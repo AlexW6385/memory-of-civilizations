@@ -194,13 +194,18 @@ function households() {
       const free = ([x, z], m = 0.9) => !hs.some((q) => q !== h && inRect(q.rect, x, z, m)) && !hs.some((q) => q === h && inRect(q.rect, x, z, 0.3));
       const put = (el, p, m) => { if (free(p, m)) L.push({ ...el, at: p, y: 0 }); };
       if (h.kind === 'lumbung') { if (rand() < 0.6) put({ t: 'haystack', seed: h.seed + 8 }, at(2.2, -2.6), 1.6); continue; }
+      const hr = rng(h.seed + 5);
+      if (h.interior && hr() < 0.6) {                                      // someone at home on the matted floor, at the middle of the room
+        const q = at(-half - 0.1, 0.4), vr = h.variant;
+        L.push(person(hr, q, floorOf(h.seed), vr === 1 ? rot : rot + Math.PI, { pose: vr === 1 || vr === 3 ? 'cross' : 'stand', man: vr === 0 || vr === 4, carry: 'none' }));
+      }
       if (rand() < 0.4) {                                                    // a bench in the yard with someone on it
         const p = at(1.9, -1.0);
         put({ t: 'bench', rot: rot + Math.PI / 2, len: 1.5, mat: 'bamboo_culm', seed: h.seed + 11 }, p, 1.0);
         if (rand() < 0.8 && free(p, 1.0)) L.push(person(rand, [p[0], p[1]], 0, rot + Math.PI / 2 * (rand() < 0.5 ? 1 : -1), { pose: 'sit', man: rand() < 0.5 }));
       }
       if (rand() < 0.35) { const p = at(2.2, 1.6); if (free(p, 1.0)) { L.push({ t: 'stool', at: p, y: 0, rot: rot + Math.PI, seed: h.seed + 12 }); L.push(person(rand, [p[0] + fx * 0.08, p[1] + fz * 0.08], 0, rot + Math.PI, { pose: 'sit_low', man: false, hair: 'bun' })); } }
-      if (rand() < 0.3) put({ t: 'wash_line', rot: Math.atan2(-tz, tx), len: 3.5, pole: true, emb: [0.15, 0.15], clear: [0.3, 0.3], seed: h.seed + 13 }, at(4.2, 0.4), 1.8);
+      if (rand() < 0.3 && !h.interior) put({ t: 'wash_line', rot: Math.atan2(-tz, tx), len: 3.5, pole: true, emb: [0.15, 0.15], clear: [0.3, 0.3], seed: h.seed + 13 }, at(4.2, 0.4), 1.8);
       const q = rand();
       if (q < 0.18) put({ t: 'animal', kind: 'goat', graze: true, seed: h.seed + 14, rot: rand() * 6.28 }, at(3.6, 2.2), 1.0);
       else if (q < 0.30) put({ t: 'animal', kind: 'pig', seed: h.seed + 15, rot: rand() * 6.28 }, at(3.4, -2.4), 1.0);
