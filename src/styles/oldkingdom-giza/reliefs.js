@@ -16,13 +16,13 @@ const BEARER = (n) => {
     ['plaster_white', [[-0.075, 0.62], [0.075, 0.62], [0.15, 0.42], [-0.1, 0.43]], 1.5],
     ['paint_robe', [[-0.06, 0.615], [0.06, 0.615], [0.12, 0.82], [0.05, 0.845], [-0.05, 0.845], [-0.12, 0.82]], 1.2],
     ['paint_robe', [[-0.045, 0.87], [0.04, 0.87], [0.06, 0.9], [0.072, 0.925], [0.055, 0.935], [0.05, 0.97], [0.0, 0.99], [-0.045, 0.97]], 1.2],
-    ['lacquer_black', [[-0.06, 0.885], [0.025, 0.95], [0.04, 0.985], [0.0, 1.005], [-0.055, 0.99], [-0.07, 0.94]], 1.5],
+    ['basalt', [[-0.06, 0.885], [0.025, 0.95], [0.04, 0.985], [0.0, 1.005], [-0.055, 0.99], [-0.07, 0.94]], 1.5],
     ['paint_robe', [[-0.12, 0.82], [-0.08, 0.82], [-0.075, 0.5], [-0.105, 0.5]], 0.8],
     ['paint_robe', [[0.08, 0.82], [0.12, 0.8], [0.15, 0.68], [0.25, 0.71], [0.25, 0.74], [0.13, 0.725], [0.1, 0.8]], 1.8],
   ];
-  if (it === 0) L.push(['limewash_yellow', [[0.2, 0.74], [0.32, 0.74], [0.3, 0.78], [0.26, 0.8], [0.22, 0.78]], 2.2]);
-  else if (it === 1) L.push(['terracotta', [[0.22, 0.73], [0.27, 0.73], [0.29, 0.78], [0.27, 0.84], [0.265, 0.87], [0.235, 0.87], [0.225, 0.84], [0.205, 0.78]], 2.2]);
-  else if (it === 2) L.push(['fresco_green', [[0.24, 0.74], [0.255, 0.74], [0.26, 0.9], [0.31, 0.97], [0.25, 0.94], [0.19, 0.97], [0.24, 0.9]], 2.2]);
+  if (it === 0) L.push(['paint_ochre', [[0.2, 0.74], [0.32, 0.74], [0.3, 0.78], [0.26, 0.8], [0.22, 0.78]], 2.2]);
+  else if (it === 1) L.push(['paint_ochre', [[0.22, 0.73], [0.27, 0.73], [0.29, 0.78], [0.27, 0.84], [0.265, 0.87], [0.235, 0.87], [0.225, 0.84], [0.205, 0.78]], 2.2]);
+  else if (it === 2) L.push(['paint_ochre', [[0.24, 0.74], [0.255, 0.74], [0.26, 0.9], [0.31, 0.97], [0.25, 0.94], [0.19, 0.97], [0.24, 0.9]], 2.2]);
   else L.push(['paint_ochre', [[0.18, 0.74], [0.33, 0.745], [0.36, 0.78], [0.3, 0.8], [0.2, 0.79]], 2.2]);
   return L;
 };
@@ -84,7 +84,7 @@ export function causewayReliefs(bag, el, from = 0, to = Infinity) {
 /** The pavement laid in slabs { x0, z0, x1, z1 (the room), y (the floor's top), mat, joint, seed, skip: [[x0,z0,x1,z1]...] }: irregular slabs in staggered
  *  rows 1.1–2.2 m across and 1.5–3.5 m long, each a few millimetres higher or lower, a hairline joint between. */
 export function slabFloor(bag, g) {
-  const { x0, z0, x1, z1, y, seed } = g, rand = rng(seed ?? 5), mats = g.mats ?? ['basalt', 'marble_dark'], gap = 0.035, skip = g.skip ?? [];
+  const { x0, z0, x1, z1, y, seed } = g, rand = rng(seed ?? 5), mats = g.mats ?? ['basalt', 'granite_grey'], gap = 0.035, skip = g.skip ?? [];
   const T = {};
   for (let z = z0; z < z1 - 0.2;) {
     const rw = Math.min(z1 - z, 1.1 + rand() * 1.1);
@@ -92,11 +92,15 @@ export function slabFloor(bag, g) {
       const len = 1.5 + rand() * 2.0, a = Math.max(x0, x), b = Math.min(x1, x + len);
       if (b - a > 0.3 && !skip.some((r) => a < r[2] && b > r[0] && z < r[3] && z + rw > r[1])) {
         const m = mats[rand() < 0.3 ? 1 : 0], h = 0.012 + rand() * 0.016;
-        bag.add(m, box(a + gap / 2, y, z + gap / 2, b - gap / 2, y + h, z + rw - gap / 2));
-        void T;
+        const X0 = a + gap / 2, X1 = b - gap / 2, Z0 = z + gap / 2, Z1 = z + rw - gap / 2, Y1 = y + h, t = (T[m] ||= []);
+        const q = (p0, p1, p2, p3) => t.push(...p0, ...p1, ...p2, ...p0, ...p2, ...p3);          // one merged mesh, not a box each (no repeated shapes to instance)
+        q([X0, Y1, Z0], [X0, Y1, Z1], [X1, Y1, Z1], [X1, Y1, Z0]);
+        q([X0, y, Z0], [X1, y, Z0], [X1, Y1, Z0], [X0, Y1, Z0]); q([X1, y, Z1], [X0, y, Z1], [X0, Y1, Z1], [X1, Y1, Z1]);
+        q([X0, y, Z1], [X0, y, Z0], [X0, Y1, Z0], [X0, Y1, Z1]); q([X1, y, Z0], [X1, y, Z1], [X1, Y1, Z1], [X1, Y1, Z0]);
       }
       x += len;
     }
     z += rw;
   }
+  for (const m of Object.keys(T)) if (T[m].length) bag.add(m, fromTriangles(T[m]));
 }

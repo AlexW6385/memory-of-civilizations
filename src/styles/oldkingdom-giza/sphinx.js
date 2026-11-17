@@ -68,7 +68,7 @@ export function sphinx(el, { bag, col }) {
         const hgt = (sa + sb) / 2 < 58 ? 5.2 - ((sa + sb) / 2 - 44) * 0.14 : 3.1;
         if (y0 - F >= hgt - 0.05) continue;
         const y1 = Math.min(y0 + 1.0, F + hgt);
-        for (const k of [-1, 1]) bag.add((i + c + (k > 0 ? 1 : 0)) % 3 === 0 ? 'limestone_yellow' : 'limestone_core', box(S(sa), y0 - (c ? 0 : 0.3), lz + (k > 0 ? 0.03 : -1.9), S(sb), y1, lz + (k > 0 ? 1.9 : -0.03)));
+        for (const k of [-1, 1]) bag.add((i + c + (k > 0 ? 1 : 0)) % 3 === 0 ? 'paint_ochre' : 'limestone_core', box(S(sa), y0 - (c ? 0 : 0.3), lz + (k > 0 ? 0.03 : -1.9), S(sb), y1, lz + (k > 0 ? 1.9 : -0.03)));
       }
     }
     // the toes: four, rounded, the claws' grooves between them
@@ -106,7 +106,7 @@ export function sphinx(el, { bag, col }) {
     // the cheek, full under the eye, and the nasolabial fold's rise to the lip
     alongZ(Z9(sg * 0.7 - 0.5, sg * 0.7 + 0.5), (z) => [faceX(16.6, z) + 0.0, 16.6, 0.2, 0.42], 'paint_robe', 8);
     // the ear, a curl of stone standing out beneath the headcloth, its rim and hollow
-    for (const [dz, rx, ry, m] of [[0, 0.38, 0.85, 'paint_robe'], [0.07, 0.24, 0.62, 'plaster_grey']]) bag.add(m, loft([0.0, 0.25, 0.5].map((q, i) => { const r = []; for (let j = 0; j < 10; j++) { const t = j / 10 * Math.PI * 2; r.push([Hx + 0.3 + rx * Math.cos(t) * (1 - i * 0.12), F + 17.2 + ry * Math.sin(t) * (1 - i * 0.1), zc + sg * (2.05 + q + dz * i)]); } return r; })));
+    for (const [dz, rx, ry, m] of [[0, 0.38, 0.85, 'paint_robe'], [0.07, 0.24, 0.62, 'lacquer_red']]) bag.add(m, loft([0.0, 0.25, 0.5].map((q, i) => { const r = []; for (let j = 0; j < 10; j++) { const t = j / 10 * Math.PI * 2; r.push([Hx + 0.3 + rx * Math.cos(t) * (1 - i * 0.12), F + 17.2 + ry * Math.sin(t) * (1 - i * 0.1), zc + sg * (2.05 + q + dz * i)]); } return r; })));
   }
   // the nose: a wedge from the brow to a rounded tip, the nostrils' flare at its base
   bag.add('paint_robe', loft([[17.8, 0.2, 0.45, 0.28], [17.2, 0.55, 0.7, 0.34], [16.7, 0.8, 0.85, 0.42], [16.35, 0.95, 0.95, 0.55], [16.1, 0.85, 0.8, 0.58]].map(([y, tip, a, b]) => ellipse(y, faceX(y, 0) - Hx + tip - a, a, b, 14))));

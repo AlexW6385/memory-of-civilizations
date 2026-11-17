@@ -17,13 +17,13 @@ const FACES = [
   { n: [1, 0], t: [0, 1] },     // east
 ];
 
-/** ok_pyramid's casing { c, a, h, y, door }: a slab (0.04 m off the face) for every course or block from the pavement's edge
- *  to the pyramidion's foot, the joint strip (0.012 m off) behind; none across the heights of the entrance. */
+/** ok_pyramid's casing { c, a, h, y, door }: a slab (0.1 m off the face) for every course or block from the pavement's edge
+ *  to the pyramidion's foot, the joint strip (0.03 m off) behind; none across the heights of the entrance. */
 export function courseRibs(bag, el) {
   const [cx, cz] = el.c, a = el.a, h = el.h, y = el.y ?? 0, ph = Math.min(4.4, h * 0.03), top = h - ph - 0.4, D = el.door;
-  const half = (v) => a * (1 - v / h), OFF = 0.04, JOFF = 0.012, gap = 0.035;
+  const half = (v) => a * (1 - v / h), OFF = 0.1, JOFF = 0.03, gap = 0.05;
   const blockZone = Math.min(15, h * 0.12), bw = Math.max(1.2, a * 0.016);        // blocks 1.8 m wide on the Great Pyramid
-  const T = { marble_smooth: [], plaster_white: [], limestone_core: [] };
+  const T = { marble_smooth: [], limestone_core: [], tura_limestone: [] };
   const quad = (arr, f, u0, v0, u1, v1, off) => {
     // a trapezoid on face f between heights v0 < v1, from u0 to u1 clipped at the arrises (mitred)
     const lim0 = half(v0) + off, lim1 = half(v1) + off;
@@ -47,8 +47,9 @@ export function courseRibs(bag, el) {
       const skip = (u0, u1) => doorBand && u1 > D[0] - 0.7 && u0 < D[2] + 0.7;
       const L = half(v) + OFF;
       // the joint strip behind the whole course, and the slab(s) before it
-      if (!skip(-L, L)) quad(T.limestone_core, f, -L, v, L, v1, JOFF);
-      else { quad(T.limestone_core, f, -L, v, D[0] - 0.7, v1, JOFF); quad(T.limestone_core, f, D[2] + 0.7, v, L, v1, JOFF); }
+      const J = T[v < blockZone ? 'limestone_core' : 'tura_limestone'];      // far up the face the joint is kept pale: a tan line there aliases into rings at a distance
+      if (!skip(-L, L)) quad(J, f, -L, v, L, v1, JOFF);
+      else { quad(J, f, -L, v, D[0] - 0.7, v1, JOFF); quad(J, f, D[2] + 0.7, v, L, v1, JOFF); }
       const s0 = v + gap;
       if (v < blockZone) {
         // blocks, the joints staggered by course
@@ -56,10 +57,10 @@ export function courseRibs(bag, el) {
         for (let i = -1; i <= n; i++) {
           const u0 = -L + i * w + sh - w * 0.5 * 0, u1 = u0 + w - 0.03;
           if (u1 < -L || u0 > L || skip(u0, u1)) continue;
-          const m = ((i * 7 + k * 5 + f * 3) % 4) < 2 ? 'marble_smooth' : 'plaster_white';
+          const m = 'marble_smooth';
           quad(T[m], f, Math.max(u0, -L), s0, Math.min(u1, L), v1, OFF);
         }
-      } else if (!skip(-L, L)) quad(T[k % 2 ? 'marble_smooth' : 'plaster_white'], f, -L, s0, L, v1, OFF);
+      } else if (!skip(-L, L)) quad(T.marble_smooth, f, -L, s0, L, v1, OFF);
       else { quad(T.marble_smooth, f, -L, s0, D[0] - 0.7, v1, OFF); quad(T.marble_smooth, f, D[2] + 0.7, s0, L, v1, OFF); }
     }
     v = v1;

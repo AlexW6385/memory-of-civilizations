@@ -47,10 +47,10 @@ export function northernNiche(bag, { c, a, b, h, cased }) {
     S('tura_limestone', Math.min(k * 0.36, k * 0.55), Math.max(k * 0.36, k * 0.55), 0, 1.5, 0, 0.05);      // the inner jambs
     S('egyptian_blue', k * 0.635 - 0.035, k * 0.635 + 0.035, 0.2, 2.05, 0.09, 0.1);                         // the offering formula down the jamb
   }
-  S('granite_black', -0.36, 0.36, 0, 1.4, 0, 0.03);                                                          // the door, recessed in the dark
-  bag.add('limewash_yellow', lathe([[0.001, -0.36], [0.1, -0.36], [0.1, 0.36], [0.001, 0.36]], 10).rotateX(Math.PI / 2).translate(X + 0.09, y0 + 1.5, zc));   // the rolled mat
+  S('lacquer_black', -0.36, 0.36, 0, 1.4, 0, 0.03);                                                          // the door, recessed in the dark
+  S('limewash_yellow', -0.36, 0.36, 1.43, 1.57, 0.03, 0.13);   // the rolled mat
   S('tura_limestone', -0.72, 0.72, 2.2, 2.35, 0, 0.12);                                                      // the lintel
-  bag.add('tura_limestone', lathe([[0.001, -0.74], [0.07, -0.74], [0.07, 0.74], [0.001, 0.74]], 8).rotateX(Math.PI / 2).translate(X + 0.08, y0 + 2.42, zc));   // the roll
+  S('tura_limestone', -0.74, 0.74, 2.35, 2.48, 0.0, 0.15);   // the roll
   // the panel over the door: the owner seated at the table of loaves, the columns of the offering list
   S('plaster_white', -0.36, 0.36, 1.58, 2.15, 0.03, 0.05);
   const R = (mat, z0, z1, ya, yb, d = 0.07) => S(mat, z0, z1, ya, yb, 0.05, d);

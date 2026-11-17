@@ -12,12 +12,12 @@ import { causewayReliefs, slabFloor } from './reliefs.js';
 import { roomThings, courtCraft } from './houses.js';
 
 const OK = STYLES.oldkingdom;
-/** Khafre's valley temple's alabaster floor in slabs over the halls and rooms (docs §17): a dark joint layer, the slabs on it in two whites. */
+/** Khafre's valley temple's alabaster floor in slabs over the halls and rooms (docs §17): a grey joint layer, the slabs on it. */
 function khafreFloor(bag, el) {
   const [rx0, rz0] = el.rect, y0 = el.y ?? 0;
   for (const [u0, v0, u1, v1] of [[29, 4, 38, 38], [8, 15, 29, 27], [8, 6, 26, 13], [8, 29, 26, 36]]) {
-    bag.add('marble_dark', box(rx0 + u0, y0 + 0.1, rz0 + v0, rx0 + u1, y0 + 0.106, rz0 + v1));
-    slabFloor(bag, { x0: rx0 + u0, z0: rz0 + v0, x1: rx0 + u1, z1: rz0 + v1, y: y0 + 0.106, mats: ['marble_smooth', 'plaster_white'], seed: 7 + u0 });
+    bag.add('granite_grey', box(rx0 + u0, y0 + 0.1, rz0 + v0, rx0 + u1, y0 + 0.106, rz0 + v1));
+    slabFloor(bag, { x0: rx0 + u0, z0: rz0 + v0, x1: rx0 + u1, z1: rz0 + v1, y: y0 + 0.106, mats: ['marble_smooth', 'marble_smooth'], seed: 7 + u0 });
   }
 }
 registerStyle('oldkingdom-giza', {
@@ -33,7 +33,7 @@ registerStyle('oldkingdom-giza', {
     ok_causeway_dress: (el, c) => {
       OK.elements.ok_causeway_dress(el, c);
       // the reliefs on the first reaches (the straight reach at the temple's door and the first 54 m of the level run) — the ones a visitor walks in
-      if (el.ya === 0 && el.yb === 0 && el.a[0] >= 168 && el.a[0] <= 186) causewayReliefs(c.bag, el, 0, 54);
+      if (el.ya === 0 && el.yb === 0 && el.a[0] >= 168 && el.a[0] <= 186) causewayReliefs(c.bag, el, 0, 40);
     },
     ok_khafre_temple: (el, c) => {
       OK.elements.ok_khafre_temple(el, c);
@@ -45,7 +45,8 @@ registerStyle('oldkingdom-giza', {
       if (el.court[2] - el.court[0] > 20) {
         // the pavement "plastered with irregular slabs of basalt": the slabs laid in rows, each a hair off level, a hairline joint between
         const [x0, z0, x1, z1] = el.rect, o = 1.15;
-        slabFloor(c.bag, { x0: x0 + o, z0: z0 + o, x1: x1 - o, z1: z1 - o, y: 0.12, seed: 11 });
+        c.bag.add('granite_grey', box(x0 + o, 0.12, z0 + o, x1 - o, 0.126, z1 - o));
+        slabFloor(c.bag, { x0: x0 + o, z0: z0 + o, x1: x1 - o, z1: z1 - o, y: 0.126, mats: ['basalt', 'basalt'], seed: 11 });
       }
       if (el.backDoor && el.court[2] - el.court[0] > 20 && el.door === 'e') falseDoor(c.bag, c.col, { rect: el.rect, th: 2.2, s: (el.rect[3] - el.rect[1]) / 2 - 7 });
     },
