@@ -5,21 +5,44 @@ import { box, lathe } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import { IMPERIAL } from '../qing/index.js';
 import { Parts, ball, limb, T } from '../qing/carving.js';
+import { dragon, cloud } from '../qing/throne.js';
+import { dougongHeight } from '../qing/caihua.js';
 import { rng } from './kit.js';
+import { glyph } from './plaques.js';
 
 const PAL = { ...IMPERIAL, column: 'granite_grey', base: 'marble' };
 
-/** A coiled-dragon stone column: the shaft with a spiral ridge turning up it, the head at the top. */
+/**
+ * One dragon wound up a column of radius cr: the body on a helix of rate c (radians per metre) between yHead and yTail, the head set out from the
+ * shaft at angle `a` (facing outward, up when it rises, down when it comes down). The same helix hand for both dragons of a column keeps them apart.
+ */
+function coil(P, cr, yHead, yTail, r, phi, c, o = {}) {
+  const N = 38, pts = [], R = cr + r * 0.7, sg = Math.sign(yHead - yTail);
+  for (let k = 0; k <= N; k++) { const y = yHead + (yTail - yHead) * k / N, a = phi + c * y; pts.push([Math.cos(a) * R, y, Math.sin(a) * R]); }
+  const ah = phi + c * yHead;
+  pts[0] = [Math.cos(ah) * (cr + r * 2.1), yHead + sg * r * 0.7, Math.sin(ah) * (cr + r * 2.1) + r * 0.5];
+  dragon(P, 'granite_grey', pts, r, { up: [0, 1, 0], head: 1.55, ...o });
+}
+
+/** A coiled-dragon stone column (docs/settlements/lu-qufu.md §10): the carved shaft with two dragons in high relief, one rising with its head up
+ *  toward a pearl, one coming down, among scrolls of cloud, on a stone plinth with a lotus drum and a banded neck under the bracket sets. */
 function dragonColumn(P, h, seed) {
-  const prof = [[0.52, 0], [0.5, 0.18], [0.4, 0.3]];
-  const N = 16;
-  for (let i = 0; i <= N; i++) prof.push([0.4 - 0.03 * i / N, 0.3 + (h - 0.6) * i / N]);
-  prof.push([0.38, h - 0.2], [0.001, h - 0.2]);
-  const ph = seed * 1.7;
-  P.add('granite_grey', lathe(prof, 14, (th, i) => (i >= 3 && i <= N + 3 ? 1 + 0.2 * Math.max(0, Math.cos(th - (i - 3) * 0.62 + ph)) ** 2 : 1)));
-  // the second turn of the coil, in gilt: a thin spiral band; and the dragon's head and claws
-  P.add('gilt_bronze', lathe(prof, 14, (th, i) => (i >= 3 && i <= N + 3 ? 1 + 0.07 * Math.max(0, Math.cos(th - (i - 3) * 0.62 + ph + 0.2)) ** 6 : 0.01)));
-  P.add('granite_grey', T(ball(0.2, 0.17, 0.26, 8, 5), 0.0, h - 0.6, 0.42));
+  const cr = 0.4, prof = [[0.52, 0.34], [0.5, 0.5], [0.44, 0.56], [0.4, 0.62]];
+  const N = 10;
+  for (let i = 1; i <= N; i++) prof.push([0.4 - 0.025 * i / N, 0.62 + (h - 1.1) * i / N]);
+  prof.push([0.42, h - 0.46], [0.46, h - 0.4], [0.46, h - 0.26], [0.42, h - 0.2], [0.41, h - 0.1], [0.001, h - 0.1]);
+  P.add('granite_grey', lathe(prof, 16));
+  P.add('marble', box(-0.68, 0, -0.68, 0.68, 0.22, 0.68));                                  // the square plinth
+  P.add('marble', lathe([[0.001, 0.22], [0.6, 0.22], [0.6, 0.3], [0.56, 0.34], [0.001, 0.34]], 16));   // the drum of lotus petals under the shaft
+  // two dragons: the heads' angles on the front of the column (+z), the helices half a turn apart
+  const c = 2.05, yA = h * 0.82, yB = h * 0.3, aA = Math.PI / 2 - 0.5 + (seed % 3 - 1) * 0.12, aB = Math.PI / 2 + 0.5 + (seed % 3 - 1) * 0.12;
+  coil(P, cr, yA, 1.15, 0.105, aA - c * yA, c, { pearl: true, pearlMat: 'gilt_bronze' });
+  coil(P, cr, yB, h - 0.7, 0.1, aB - c * yB, c);
+  // the clouds round the foot and the neck of the shaft, the ruyi scrolls turned to the four sides
+  for (let k = 0; k < 4; k++) {
+    const Q = new Parts(); cloud(Q, 'granite_grey', 0, 0.9, 0.5, 0.46); cloud(Q, 'granite_grey', 0, h - 1.0, 0.5, 0.46);
+    for (const [mat, list] of Q.m) for (const g of list) { g.rotateY(k * Math.PI / 2 + 0.4); P.add(mat, g); }
+  }
 }
 
 /** A seated statue facing +z: robe, torso, head, crown; s the scale (the Master about 3.4 m seated). */
@@ -48,13 +71,14 @@ export function dacheng(el, ctx) {
   for (let i = 0; i <= 9; i++) {
     const x = x0 + i * bw, P = new Parts();
     dragonColumn(P, hc, i);
-    P.emit(bag, x, y, z1 + 0.62, Math.PI * (i % 2 ? 0.0 : 0.15));
+    P.emit(bag, x, y, z1 + 0.62, 0);
     col.circle(x, z1 + 0.62, 0.52, y, y + hc);
   }
   // the side columns of the peristyle, plain stone, on both long sides
   for (const sx of [x0, x1]) for (let j = 1; j <= 5; j++) {
     const z = z0 + (z1 - z0) * j / 5, P = new Parts();
-    P.add('granite_grey', lathe([[0.5, 0], [0.5, 0.15], [0.4, 0.3], [0.38, hc - 0.4], [0.001, hc - 0.4]], 10));
+    P.add('marble', box(-0.6, 0, -0.6, 0.6, 0.2, 0.6));
+    P.add('granite_grey', lathe([[0.5, 0.2], [0.46, 0.3], [0.42, 0.4], [0.4, hc - 0.4], [0.44, hc - 0.34], [0.001, hc - 0.34]], 8));   // an octagonal shaft (eight sides), as the plain columns of the hall are
     P.emit(bag, sx + (sx < cx ? -0.62 : 0.62), y, z);
     col.circle(sx + (sx < cx ? -0.62 : 0.62), z, 0.46, y, y + hc);
   }
@@ -104,6 +128,44 @@ export function dacheng(el, ctx) {
   }
   bag.add('lacquer_red', lathe([[0.7, 0], [0.9, 0.4], [0.9, 1.1], [0.001, 1.1]], 12, null, cx + 17.5, y + 0.7, z1 - 9)); bag.add('timber_red', box(cx + 16.6, y, z1 - 9.6, cx + 18.4, y + 0.7, z1 - 8.4));
   col.circle(cx + 17.5, z1 - 9, 0.9, y, y + 1.8);
+  // ── the ceiling: the coffered ceiling under the upper body's floor, with the caisson over the shrine, and the plaques hung before it (§10) ──
+  {
+    const bk = dougongHeight({ tiers: y + H > 8 ? 3 : 2 }), cy = y + H + bk - 0.2 - 0.12;       // the underside of the upper body's box (qing_hall) less the thickness of the boards
+    const cr = [x0 + 0.9, z0 + 0.9, x1 - 0.9, z1 - 0.9], well = [cx - 3.4, zb + 1.2, cx + 3.4, zb + 8.0];
+    const nx = Math.round((cr[2] - cr[0]) / 1.9), nz = Math.round((cr[3] - cr[1]) / 1.9), sx = (cr[2] - cr[0]) / nx, sz = (cr[3] - cr[1]) / nz;
+    for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
+      const ax = cr[0] + i * sx, az = cr[1] + j * sz, bx = ax + sx, bz = az + sz;
+      if (ax > well[0] - 0.01 && bx < well[2] + 0.01 && az > well[1] - 0.01 && bz < well[3] + 0.01) continue;
+      bag.add('paint_blue', box(ax + 0.06, cy, az + 0.06, bx - 0.06, cy + 0.04, bz - 0.06));          // each coffer a blue-green panel
+      bag.add('paint_caihua', box(ax - 0.07, cy - 0.12, az - 0.07, ax + 0.07, cy + 0.05, bz + 0.07)); bag.add('paint_caihua', box(ax - 0.07, cy - 0.12, az - 0.07, bx + 0.07, cy + 0.05, az + 0.07));
+      bag.add('gilt_bronze', lathe([[0.001, 0.0], [0.16, 0.02], [0.2, 0.06], [0.001, 0.1]], 8, null, ax + sx / 2, cy, az + sz / 2));       // a gilt boss in each coffer's heart
+    }
+    bag.add('paint_caihua', box(cr[2] - 0.07, cy - 0.12, cr[1] - 0.07, cr[2] + 0.07, cy + 0.05, cr[3] + 0.07)); bag.add('paint_caihua', box(cr[0] - 0.07, cy - 0.12, cr[3] - 0.07, cr[2] + 0.07, cy + 0.05, cr[3] + 0.07));
+    // the caisson over the shrine: a stepped gilt-and-red frame, the blue field, the gilt dragon coiled in it with the pearl hung from its mouth
+    const kx = (well[0] + well[2]) / 2, kz = (well[1] + well[3]) / 2, hw = (well[2] - well[0]) / 2, hd = (well[3] - well[1]) / 2;
+    for (const [m, e, d0, d1] of [['paint_caihua', 0.0, -0.1, 0.06], ['gilt_bronze', 0.16, -0.22, -0.1], ['lacquer_red', 0.34, -0.3, -0.22]]) bag.add(m, box(kx - hw + e, cy + d0, kz - hd + e, kx + hw - e, cy + d1, kz + hd - e));
+    bag.add('paint_blue', box(kx - hw + 0.5, cy - 0.34, kz - hd + 0.5, kx + hw - 0.5, cy - 0.3, kz + hd - 0.5));
+    const Cq = new Parts(), pts = [];
+    for (let k = 0; k <= 30; k++) { const a = 0.4 + k * 0.34, R = 2.1 - k * 0.045; pts.push([Math.cos(a) * R * 0.98, Math.sin(a) * R * 1.0, 0]); }
+    pts[0] = [pts[1][0] * 0.7, pts[1][1] * 0.7, 0.1];
+    dragon(Cq, 'gilt_bronze', pts, 0.16, { up: [0, 0, 1], flat: 0.55, head: 1.2 });
+    for (const [mat, list] of Cq.m) for (const g of list) { g.rotateX(Math.PI / 2); g.translate(kx, cy - 0.3, kz); bag.add(mat, g); }   // laid flat, its face to the floor
+    bag.add('silver', lathe([[0.001, -0.7], [0.2, -0.62], [0.28, -0.45], [0.2, -0.28], [0.001, -0.22]], 10, null, kx, cy - 0.34, kz));           // the pearl hanging from the mouth
+    bag.add('gilt_bronze', lathe([[0.012, -0.22], [0.012, 0]], 4, null, kx, cy - 0.34, kz));
+    // the plaques of the emperors hung on the beams before the shrine, facing the door: gilt frame, black field, the characters
+    for (const [px, pz, w, hgt, chs] of [[cx, zb + 12.6, 3.8, 1.5, ['万', '世', '师', '表']], [cx - 9.5, zb + 12.6, 2.9, 1.2, ['至', '圣']], [cx + 9.5, zb + 12.6, 2.9, 1.2, ['大', '成']]]) {
+      const top = cy - 0.35, bot = top - hgt;
+      bag.add('gilt_bronze', box(px - w / 2 - 0.08, bot - 0.08, pz - 0.06, px + w / 2 + 0.08, top + 0.08, pz + 0.06));
+      bag.add('lacquer_black', box(px - w / 2, bot, pz, px + w / 2, top, pz + 0.09));
+      const gs = Math.min(hgt * 0.62, (w - 0.4) / chs.length * 0.9);
+      chs.forEach((ch, k) => glyph(bag, ch, px - ((chs.length - 1) * gs * 1.1) / 2 + k * gs * 1.1, bot + hgt / 2, pz + 0.125, 0, gs));
+      for (const dx of [-1, 1]) bag.add('timber', limb([px + dx * w * 0.38, top + 0.08, pz], [px + dx * w * 0.38, cy, pz], 0.025, 0.025, 4));
+    }
+    // the name board of the hall under the upper eaves: the three characters on a vertical board over the middle bay
+    const yb = y + H + bk, u = cx, zf = z1 - 4.52 + 0.07;                                       // the upper wall's front plane is z1 less the inset; the skirt roof covers its lowest 4 m
+    bag.add('gilt_bronze', box(u - 0.62, yb + 4.4, zf - 0.02, u + 0.62, yb + 6.95, zf + 0.1)); bag.add('paint_blue', box(u - 0.5, yb + 4.52, zf + 0.1, u + 0.5, yb + 6.83, zf + 0.13));
+    ['大', '成', '殿'].forEach((ch, k) => glyph(bag, ch, u, yb + 6.4 - k * 0.74, zf + 0.165, 0, 0.7));
+  }
   // hanging banners (cloth) are left out; the lamps
   for (const [dx, dz] of [[0, 7], [-12, 9], [12, 9], [0, 17], [-14, 19], [14, 19]]) lights.push({ at: [cx + dx, y + H - 1.4, z0 + dz], color: '#ffcf93', intensity: 7, distance: 20 });
   void rand; void W;
