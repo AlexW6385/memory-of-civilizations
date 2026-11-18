@@ -27,6 +27,14 @@ export const UP = [
   { x0: 56.76, use: 'books', Hf: 3.4, Hu: 2.8, mir: true, label: 'the bookshop with its block-cutting room' },
   { x0: 71.21, use: 'lacquer', Hf: 3.4, Hu: 2.75, mir: true, label: 'the lacquer shop with its drying room' },
   { x0: 78.08, use: 'tenement', Hf: 3.0, Hu: 2.6, mir: true, label: 'the tenement: kitchen below, two families\' rooms above' },
+  // the narrow houses that stand between them (rooms2.js), each with the trade whose sign hangs outside
+  { x0: -90, use: 'wine', trade: 'wine', Hf: 3.3, Hu: 2.7, label: 'the wine shop with its jars' },
+  { x0: -86.3144740720978, use: 'pawn', trade: 'pawn', Hf: 3.4, Hu: 2.75, label: 'the pawnshop with its grille and storeroom' },
+  { x0: -75.56236214335075, use: 'food', trade: 'food', Hf: 3.3, Hu: 2.7, label: 'the noodle house' },
+  { x0: -54.40958784276153, use: 'silk', trade: 'cloth', Hf: 3.3, Hu: 2.7, label: 'the embroiderer' },
+  { x0: 63.87040823984426, use: 'pottery', trade: 'pottery', mir: true, Hf: 3.3, Hu: 2.7, label: 'the potter' },
+  { x0: 67.77528853372206, use: 'iron', trade: 'iron', mir: true, Hf: 3.2, Hu: 2.65, label: 'the ironmonger' },
+  { x0: 85.35959949837998, use: 'fans', trade: 'fans', mir: true, Hf: 3.3, Hu: 2.7, label: 'the fan and umbrella maker' },
   { x0: -79.13, use: 'weaver', Hf: 3.15, Hu: 2.7, label: 'the weaver\'s house with its loom' },
 ];
 
@@ -63,7 +71,7 @@ export function layoutOf(L) {
 export function routeOf(lot, u) {
   const F = frameOf(lot.rect, !!u.mir), lay = layoutOf(F.L), p = ([a, b]) => F.at(a, b);
   const sa = 0.75;
-  const pts = [[lay.dc, -2.2], [lay.dc, 0.2], [lay.dc, 1.9], [sa + 0.9, 1.9], [sa, STAIR.b0 - 0.2], [sa, STAIR.b0 + 1.2], [sa, STAIR.b1 - 0.1], [1.9, STAIR.b1 + 0.25], ...lay.via, [lay.du, 0.5], [lay.du, 0.3]];
+  const pts = [[lay.dc, -2.2], [lay.dc, 0.2], [lay.dc, 1.9], [sa + 0.75, 1.9], [sa + 0.75, 1.4], [sa, STAIR.b0 - 0.2], [sa, STAIR.b0 + 1.2], [sa, STAIR.b1 - 0.1], [1.9, STAIR.b1 + 0.25], ...lay.via, [lay.du, 0.5], [lay.du, 0.3]];
   return pts.map(p);
 }
 
@@ -75,5 +83,6 @@ export function doorGap(lot, u) {
 /** Where the shopkeeper stands: behind the counter, clear of the doorway and of the way to the stair. */
 export function shopkeeperAt(lot, u) {
   const F = frameOf(lot.rect, !!u.mir), L = F.L;
+  if (L < 5.5) return F.at(L - 0.55, 2.45);          // (a narrow shop: no room behind the counter; he stands in the east back corner, off the way to the stair)
   return F.at((0.25 + L - 1.9) / 2 + 0.4, 1.0);
 }

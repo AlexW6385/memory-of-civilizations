@@ -6,7 +6,9 @@
 
 const BOLT = ['cloth_indigo', 'cloth_red', 'cloth_white', 'cloth_ochre', 'cloth_grey', 'cloth_brown', 'cloth_black'];
 
-function kit(c) {
+import { NEW_USES, groundExtra, upperExtra } from './rooms2.js';
+
+export function kit(c) {
   const { B, blk, lat, rand } = c;
   const k = {};
   const hash = (a, b) => { let h = Math.imul(Math.floor(a * 100) | 0, 374761393) + Math.imul(Math.floor(b * 100) | 0, 668265263) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
@@ -188,6 +190,7 @@ export function groundFit(c) {
     B(a0 + 0.2, b1 - 0.7, a1 - 0.2, b1 - 0.35, y0, y0 + 0.4, 'timber'); blk(a0, b0, a1, b1, y0, y0 + 1.5);
     k.lamp((a0 + a1) / 2, 3.4, y0 + 2.2);
   }
+  if (NEW_USES.includes(use)) groundExtra(c, { ...k, B, blk });
   void P; void blk; void lay;
 }
 function lat0(c, mat, a, b, yy) { c.lat(mat, [[0.001, 0], [0.08, 0.01], [0.1, 0.1], [0.06, 0.16], [0.001, 0.16]], 8, a, b, yy); }
@@ -292,5 +295,6 @@ export function upperFit(c) {
     B(0.28, 3.0, 0.4, 3.9, y + 1.2, y + 1.26, 'bamboo_culm'); for (let q = 0; q < 5; q++) B(0.3, 3.05 + q * 0.17, 0.38, 3.15 + q * 0.17, y + 0.6 + k.hash(q, 1) * 0.1, y + 1.2, ['cloth_white', 'cloth_red', 'cloth_ochre', 'cloth_white', 'cloth_indigo'][q]);
     blk(0.25, 2.95, 0.45, 3.95, y, y + 1.3);
   }
+  if (NEW_USES.includes(use)) upperExtra(c, k);
   void backJars; void ibU;
 }

@@ -142,7 +142,7 @@ function houses() {
   for (const l of dry.filter((q) => !q.shop).slice(0, 3)) { l.overhang = false; open.add(l); }
   prepareShops(open);
   // the houses whose upper floors can be climbed (uphouses.js): the open ones, and the weaver's beside them
-  for (const l of all) if (upOf(l) && !open.has(l)) { l.overhang = false; open.add(l); }
+  for (const l of all) if (upOf(l) && !open.has(l)) { l.overhang = false; open.add(l); const u = upOf(l); if (u.trade) { l.trade = u.trade; l.shop = true; } }
   const ups = all.filter((l) => upOf(l));
   const quads = [[], [], [], [], [], [], [], []];
   for (const l of all) {
