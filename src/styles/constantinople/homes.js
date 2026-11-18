@@ -9,6 +9,7 @@ import { box, frustum, lathe, rod, disc, fromTriangles } from '../../core/geom.j
 import { solid8, rng } from '../byzantine/houses.js';
 import '../roman/town.js';
 import '../../objects/index.js';
+import { upperFloor, terrace, upWalks, hasTerrace, STAIR2 } from './upper.js';
 
 // ── small things ──────────────────────────────────────────────────────────────
 class Parts {
@@ -79,8 +80,8 @@ function trade(ctx, V, { x0, z0, x1, z1, Y0, zc, th }) {
       put(bag, bench, x0 + dx + 0.5, Y0, z0 + dz - 0.75, 0, 1.6); put(bag, bench, x0 + dx + 0.5, Y0, z0 + dz + 0.75, 0, 1.6);
       put(bag, (Q) => { bowlP(Q, 'glaze_white'); }, x0 + dx + 0.2, Y0 + 0.78, z0 + dz); put(bag, (Q) => bowlP(Q, 'glaze_green'), x0 + dx + 0.9, Y0 + 0.78, z0 + dz + 0.1);
     }
-    put(bag, (Q) => { Q.add('wood_painted', box(-1.6, 0, -0.35, 1.6, 1.0, 0.35)); Q.add('marble', box(-1.65, 1.0, -0.4, 1.65, 1.05, 0.4)); for (let a = -1.3; a < 1.4; a += 0.5) Q.add(a < 0 ? 'terracotta' : 'glaze_green', ly([[0.04, 1.05], [0.1, 1.15], [0.1, 1.3], [0.001, 1.38]], 8).translate(a, 0, 0)); }, x0 + 6.0, Y0, z1 - 1.6);
-    bk([x0 + 4.3, z1 - 2.05, x0 + 7.7, z1 - 1.15], 1.1);
+    put(bag, (Q) => { Q.add('wood_painted', box(-1.6, 0, -0.35, 1.6, 1.0, 0.35)); Q.add('marble', box(-1.65, 1.0, -0.4, 1.65, 1.05, 0.4)); for (let a = -1.3; a < 1.4; a += 0.5) Q.add(a < 0 ? 'terracotta' : 'glaze_green', ly([[0.04, 1.05], [0.1, 1.15], [0.1, 1.3], [0.001, 1.38]], 8).translate(a, 0, 0)); }, x0 + 6.0, Y0, z1 - 2.4);
+    bk([x0 + 4.3, z1 - 2.85, x0 + 7.7, z1 - 1.95], 1.1);
     for (const a of [0.6, 1.4, 2.2]) { put(bag, pithos, x0 + a + 0.6, Y0, z0 + th + 0.55); bk([x0 + a + 0.15, z0 + th + 0.1, x0 + a + 1.05, z0 + th + 1.0], 1.2); }
     put(bag, (Q) => { Q.add('brick', box(-0.8, 0, -0.5, 0.8, 0.8, 0.5)); Q.add('iron', box(-0.5, 0.8, -0.3, 0.5, 0.86, 0.3)); Q.add('flame', box(-0.3, 0.86, -0.15, 0.3, 0.92, 0.15)); }, x0 + 1.6, Y0, zc + 3.0); bk([x0 + 0.8, zc + 2.5, x0 + 2.4, zc + 3.5], 0.9);
     put(bag, lampstand, x0 + 4.0, Y0, zc - 0.4, 0, 1.8); pushLight(ctx, [x0 + 4.0, Y0 + 2.0, zc - 0.4], 4, 9);
@@ -98,7 +99,7 @@ function trade(ctx, V, { x0, z0, x1, z1, Y0, zc, th }) {
     put(bag, (Q) => { Q.add('brick', box(-1.2, 0, -1.2, 1.2, 1.1, 1.2)); Q.add('brick', ly([[1.15, 1.1], [1.0, 1.7], [0.6, 2.2], [0.001, 2.45]], 14)); Q.add('opening', box(-0.35, 0.25, -1.25, 0.35, 0.85, -1.15)); Q.add('flame', box(-0.3, 0.3, -1.2, 0.3, 0.45, -1.12)); Q.add('iron', box(-0.08, 2.3, -0.08, 0.08, 2.6, 0.08)); }, x0 + 2.0, Y0, z0 + th + 1.4, 0.0); bk([x0 + 0.8, z0 + th + 0.2, x0 + 3.2, z0 + th + 2.6], 2.4);
     put(bag, (Q) => { Q.add('wood_dark', box(-0.3, 0, -0.3, 0.3, 0.06, 0.3)); Q.add('timber', ly([[0.04, 0.06], [0.04, 0.62]], 6)); Q.add('terracotta', ly([[0.001, 0.62], [0.3, 0.62], [0.3, 0.68], [0.001, 0.68]], 14)); Q.add('terracotta', ly([[0.001, 0.4], [0.32, 0.4], [0.3, 0.46], [0.001, 0.46]], 14)); Q.add('terracotta', ly([[0.12, 0.68], [0.17, 0.78], [0.14, 0.9], [0.09, 0.92], [0.001, 0.9]], 10)); }, x0 + 5.6, Y0, z0 + 3.2); bk([x0 + 5.2, z0 + 2.8, x0 + 6.0, z0 + 3.6], 0.9);
     put(bag, stool, x0 + 5.6, Y0, z0 + 4.1);
-    for (const dx of [2.0, 4.0]) put(bag, (Q) => { const ys = shelves(Q, 1.8, 2.0, 4); for (const yy of ys) for (let a = -0.7; a < 0.8; a += 0.3) Q.add(rand() < 0.5 ? 'terracotta' : 'glaze_green', ly([[0.001, 0], [0.07, 0], [0.1, 0.1], [0.07, 0.2], [0.001, 0.2]], 8).translate(a, yy, 0)); }, x0 + dx, Y0, z1 - th - 0.25, Math.PI), bk([x0 + dx - 0.9, z1 - th - 0.5, x0 + dx + 0.9, z1 - th], 2.0);
+    for (const dx of [2.0, 6.2]) put(bag, (Q) => { const ys = shelves(Q, 1.8, 2.0, 4); for (const yy of ys) for (let a = -0.7; a < 0.8; a += 0.3) Q.add(rand() < 0.5 ? 'terracotta' : 'glaze_green', ly([[0.001, 0], [0.07, 0], [0.1, 0.1], [0.07, 0.2], [0.001, 0.2]], 8).translate(a, yy, 0)); }, x0 + dx, Y0, z1 - th - 0.25, Math.PI), bk([x0 + dx - 0.9, z1 - th - 0.5, x0 + dx + 0.9, z1 - th], 2.0);
     for (const a of [0, 0.7, 1.4]) { put(bag, (Q) => Q.add('sacking', box(-0.3, 0, -0.2, 0.3, 0.7, 0.2)), x0 + 0.9 + a, Y0, zc + 1.0); } bk([x0 + 0.5, zc + 0.7, x0 + 3.0, zc + 1.3], 0.7);
     put(bag, pithos, x0 + 7.4, Y0, z0 + th + 0.7); bk([x0 + 6.9, z0 + th + 0.2, x0 + 7.9, z0 + th + 1.2], 1.2);
     put(bag, table, x0 + 4.8, Y0, zc + 0.9, 0, 2.0, 0.9, 0.8); bk([x0 + 3.8, zc + 0.4, x0 + 5.8, zc + 1.4], 0.8);
@@ -112,7 +113,7 @@ function trade(ctx, V, { x0, z0, x1, z1, Y0, zc, th }) {
     put(bag, (Q) => { Q.add('wood_dark', box(-0.6, 0, -0.25, 0.6, 0.6, 0.25)); Q.add('water', box(-0.52, 0.55, -0.17, 0.52, 0.58, 0.17)); }, x0 + 6.6, Y0, zc - 0.2); bk([x0 + 6.0, zc - 0.45, x0 + 7.2, zc + 0.05], 0.65);
     put(bag, (Q) => { for (let a = -0.9; a < 1.0; a += 0.3) Q.add('iron', rod([a, 0.2, 0], [a + 0.05, 1.3 + (a * 7 % 3) * 0.1, 0.05], 0.025, 5)); Q.add('wood_dark', box(-1.0, 1.55, -0.04, 1.0, 1.62, 0.04)); }, x0 + 4.4, Y0, z0 + th + 0.1, 0.0);
     for (const a of [0, 0.6, 1.2]) put(bag, (Q) => Q.add('sacking', box(-0.3, 0, -0.2, 0.3, 0.7, 0.2)), x0 + 0.9 + a, Y0, z1 - th - 0.4); bk([x0 + 0.5, z1 - th - 0.7, x0 + 2.4, z1 - th - 0.1], 0.7);
-    for (let i = 0; i < 6; i++) put(bag, (Q) => Q.add('iron', box(-0.5, 0, -0.04, 0.5, 0.05, 0.04)), x0 + 4.5, Y0 + i * 0.05, z1 - th - 0.5 - (i % 2) * 0.01); bk([x0 + 4.0, z1 - th - 0.7, x0 + 5.0, z1 - th - 0.3], 0.3);
+    for (let i = 0; i < 6; i++) put(bag, (Q) => Q.add('iron', box(-0.5, 0, -0.04, 0.5, 0.05, 0.04)), x0 + 7.0, Y0 + i * 0.05, z1 - th - 0.5 - (i % 2) * 0.01); bk([x0 + 6.5, z1 - th - 0.7, x0 + 7.5, z1 - th - 0.3], 0.3);
     pushLight(ctx, [x0 + 2.0, Y0 + 1.6, z0 + th + 1.5], 5, 9);
   } else {   // weaver
     for (const [dx, dz] of [[2.6, 2.2], [6.2, 2.2]]) {
@@ -128,6 +129,21 @@ function trade(ctx, V, { x0, z0, x1, z1, Y0, zc, th }) {
   }
 }
 
+/** The rules a house is drawn by, from its seed (shared with the walk routes of its way up). */
+export function homeRules(el) {
+  const [x0, , x1] = el.rect;
+  const sd = rng((el.seed || 1) * 7919 + 17), pk = (a) => a[Math.floor(sd() * a.length)];
+  const wall = el.wall ?? pk(['brick', 'brick', 'plaster', 'stucco_warm']), doorK = pk(['arch', 'lintel', 'pilasters']), galK = el.gallery ?? pk(['open', 'closed', 'rail', 'open']);
+  const banded = wall === 'brick' && sd() < 0.7, upperM = wall === 'brick' ? pk(['plaster', 'stucco_warm', 'brick']) : wall;
+  const dc = x0 + (x1 - x0) * (0.22 + 0.09 * sd());
+  return { sd, wall, doorK, galK, banded, upperM, dc };
+}
+/** The walk-check routes up a house (street, door, store, stair, hall, rooms, maenianum; the roof terrace) in world coordinates. */
+export function homeWalks(el) {
+  const r = homeRules(el);
+  return upWalks({ x0: el.rect[0], z0: el.rect[1], dc: r.dc, variant: el.variant || 'home', kind: el.up, y: el.y ?? 0 });
+}
+
 // ── the house you can enter ───────────────────────────────────────────────────
 /**
  * byz_home: { rect (about 18 × 13), y, seed } — an enterable two-storey house: the door in the south wall under a
@@ -139,10 +155,9 @@ function trade(ctx, V, { x0, z0, x1, z1, Y0, zc, th }) {
 function home(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, Y0 = y + 0.2, H1 = 3.7, Yf = Y0 + H1 + 0.3, H2 = 3.1, th = 0.6;
   // the house's own rules (each is drawn from its seed): the wall's skin, the door's frame and place, the kind of gallery, the roof's pitch
-  const sd = rng((el.seed || 1) * 7919 + 17), pk = (a) => a[Math.floor(sd() * a.length)];
-  const wall = el.wall ?? pk(['brick', 'brick', 'plaster', 'stucco_warm']), doorK = pk(['arch', 'lintel', 'pilasters']), galK = el.gallery ?? pk(['open', 'closed', 'rail', 'open']);
-  const banded = wall === 'brick' && sd() < 0.7, upperM = wall === 'brick' ? pk(['plaster', 'stucco_warm', 'brick']) : wall;
-  const xp = x0 + (x1 - x0) * 0.5, xs = x1 - 2.1, zs1 = z0 + 6.8, dc = x0 + (x1 - x0) * (0.22 + 0.09 * sd());
+  const { sd, wall, doorK, galK, banded, upperM, dc } = homeRules(el);
+  const xp = x0 + (x1 - x0) * 0.5, xs = x1 - 2.1, zs1 = z0 + 6.8;
+  const UP = el.up, TERR = UP && hasTerrace(UP);
   bag.add('flagstone', box(x0, y - 0.4, z0, x1, Y0, z1)); col.floor([x0 + th, z0 + th, x1 - th, z1 - th], Y0);
   bag.add('limestone', box(dc - 1.0, y - 0.1, z1, dc + 1.0, Y0 - 0.02, z1 + 0.7)); col.floor([dc - 1.0, z1, dc + 1.0, z1 + 0.7], Y0 - 0.02);
   // ground-floor walls
@@ -156,14 +171,14 @@ function home(el, ctx) {
   wallRun(bag, col, [x0 + th, z1 - th / 2], [x1 - th, z1 - th / 2], th, Yf, Yf + H2, upperM, [{ s0: 2.2, s1: 3.6, y0: Yf, y1: Yf + 2.5 }, { s0: 5.2, s1: 6.2, y0: Yf + 0.9, y1: Yf + 2.4 }, { s0: 8.3, s1: 9.7, y0: Yf, y1: Yf + 2.5 }, { s0: 11.7, s1: 12.7, y0: Yf + 0.9, y1: Yf + 2.4 }]);
   // inside faces of the upper south wall seen from the room: the wall's own; the ground-floor south wall is brick to Yf
   // the floor between the storeys: beams and boards, the stair's hole
-  for (const r of subtractRects([x0 + th, z0 + th, x1 - th, z1 - th], [[xs, z0 + th, x1 - th, zs1]])) { bag.add('timber', box(r[0], Yf - 0.3, r[1], r[2], Yf - 0.02, r[3])); bag.add('wood_ochre', box(r[0], Yf - 0.02, r[1], r[2], Yf, r[3])); col.floor(r, Yf); }
+  for (const r of subtractRects([x0 + th, z0 + th, x1 - th, z1 - th], [[xs - (UP ? 0.4 : 0), z0 + th, x1 - th, zs1]])) { bag.add('timber', box(r[0], Yf - 0.3, r[1], r[2], Yf - 0.02, r[3])); bag.add('wood_ochre', box(r[0], Yf - 0.02, r[1], r[2], Yf, r[3])); col.floor(r, Yf); }
   for (let x = x0 + 1.5; x < x1 - 1; x += 1.5) bag.add('wood_dark', box(x - 0.1, Yf - 0.55, z0 + th, x + 0.1, Yf - 0.3, z1 - th));
   stair(bag, col, [xs, z0 + th, x1 - th, zs1], Y0, Yf, 's');
   // the ceiling and the roof
-  bag.add('ceiling_painted', box(x0 + th, Yf + H2 - 0.1, z0 + th, x1 - th, Yf + H2, z1 - th));
-  for (let x = x0 + 1.5; x < x1 - 1; x += 1.5) bag.add('wood_dark', box(x - 0.1, Yf + H2 - 0.35, z0 + th, x + 0.1, Yf + H2 - 0.1, z1 - th));
+  if (!TERR) bag.add('ceiling_painted', box(x0 + th, Yf + H2 - 0.1, z0 + th, x1 - th, Yf + H2, z1 - th));
+  for (let x = x0 + 1.5; x < x1 - 1; x += 1.5) { if (TERR && x + 0.1 > x0 + STAIR2.u0 && x - 0.1 < x0 + STAIR2.u1) continue; bag.add('wood_dark', box(x - 0.1, Yf + H2 - 0.35, z0 + th, x + 0.1, Yf + H2 - 0.1, z1 - th)); }
   const ov = 0.7, rise = 2.5 + sd() * 1.0;
-  bag.add('roof_tile', frustum([x0 - ov, z0 - ov, x1 + ov, z1 + 1.9 + ov], Yf + H2, Yf + H2 + rise, (x1 - x0) * 0.14, (x1 - x0) * 0.14, (z1 - z0 + 1.9) / 2 + ov - 0.05, (z1 - z0 + 1.9) / 2 + ov - 0.05, { noBottom: true }));
+  if (!TERR) bag.add('roof_tile', frustum([x0 - ov, z0 - ov, x1 + ov, z1 + 1.9 + ov], Yf + H2, Yf + H2 + rise, (x1 - x0) * 0.14, (x1 - x0) * 0.14, (z1 - z0 + 1.9) / 2 + ov - 0.05, (z1 - z0 + 1.9) / 2 + ov - 0.05, { noBottom: true }));
   // the front's dressing by rule: a plinth, the door's frame (arch, lintel or pilasters), lintels and sills at the windows, courses of travertine
   { const f = 0.12, dx0 = dc - 0.7, dx1 = dc + 0.7, face = (u0, u1, ya, yb, d, mat) => bag.add(mat, box(u0, ya, z1, u1, yb, z1 + d));
     const seg = (ya, yb, d, mat, avoid = [[dx0 - 0.4, dx1 + 0.4]]) => { let a = x0; for (const [g0, g1] of [...avoid, [x1 + 1, x1 + 2]]) { if (g0 > a) face(a, Math.min(g0, x1), ya, yb, d, mat); a = Math.max(a, g1); } };
@@ -223,7 +238,13 @@ function home(el, ctx) {
   put(bag, (Q) => { const ys = shelves(Q, 1.8, 2.0, 4); for (const yy of ys.slice(0, 3)) for (let a = -0.7; a < 0.8; a += 0.45) amphora(Q, 0.5), void a; }, xp + 2.0, Y0, z1 - th - 0.3, Math.PI);
   put(bag, amphora, xp + 1.0, Y0, z1 - 1.0, 0, 1.2);
   put(bag, (Q) => { Q.add('brick', box(-0.7, 0, -0.5, 0.7, 0.9, 0.5)); Q.add('flame', box(-0.3, 0.9, -0.2, 0.3, 0.97, 0.2)); }, x0 + 8.2, Y0, z1 - 1.3, 0); col.rect([x0 + 7.5, z1 - 1.8, x0 + 8.9, z1 - 0.8], Y0, Y0 + 0.9);
-  // upstairs
+  // upstairs: the single room of the houses whose floor is not laid out (el.up unset), else the rooms of upper.js
+  if (UP) {
+    const K = { put, kline, table, chest, stool, bench, lampstand, brazier, icon, shelves, pithos, amphora, bowlP, wallRun, ly, solid8, pushLight, stair };
+    const G = { x0, z0, x1, z1, Yf, H2, kind: UP, seed: el.seed || 1, variant: V, upperM };
+    upperFloor(ctx, G, K);
+    if (TERR) terrace(ctx, G, K);
+  } else {
   put(bag, (Q) => { Q.add('wood_dark', box(-0.55, 0.2, -1.0, 0.55, 0.45, 1.0)); Q.add('cloth_white', box(-0.5, 0.45, -0.95, 0.5, 0.6, 0.95)); Q.add('cloth_indigo', box(-0.52, 0.55, -0.1, 0.52, 0.62, 0.95)); Q.add('cloth_white', box(-0.4, 0.6, -0.9, 0.4, 0.72, -0.5)); }, x0 + 2.2, Yf, z0 + 3.0);
   col.rect([x0 + 1.6, z0 + 2.0, x0 + 2.8, z0 + 4.0], Yf, Yf + 0.6);
   put(bag, chest, x0 + 4.5, Yf, z0 + 1.1, 0.1); put(bag, chest, x0 + 8.5, Yf, z0 + 1.1, 0);
@@ -234,6 +255,7 @@ function home(el, ctx) {
   col.rect([xp + 1.0, z1 - 2.35, xp + 2.2, z1 - 1.65], Yf, Yf + 0.75);
   put(bag, icon, xp + 3.0, Yf + 1.3, z1 - th - 0.04, 0, 0.5, 0.7);
   put(bag, lampstand, x0 + 1.2, Yf, z1 - 1.3, 0, 1.5); pushLight(ctx, [x0 + 1.2, Yf + 1.8, z1 - 1.3], 3.5, 8);
+  }
 }
 
 
