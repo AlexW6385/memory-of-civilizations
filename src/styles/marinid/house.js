@@ -7,9 +7,11 @@ import { subtractRects } from '../../core/build.js';
 import { frame } from '../mamluk/kit.js';
 import { face, dado, dadoFlat, stucco, rng, q4, dbl, basin, door, gable } from './kit.js';
 import * as F from '../mughal/furnish.js';
+import { stairOf, upLayout, groundVoids, buildUpper } from './upper.js';
 import { dukkan, wallLamp, houseLamp, folded, bench, weather, beamEnds, shutters, spout, roofTop, orangeTree, potRow, jar } from './front.js';
 
 const WALLS = ['stucco_ochre', 'stucco_ochre', 'stucco_warm', 'stucco_warm', 'mud_plaster', 'limewash_white', 'lime_plaster', 'lime_plaster'];
+const stairDirOf = (v) => (Math.abs(v[0]) > Math.abs(v[1]) ? (v[0] > 0 ? 'e' : 'w') : (v[1] > 0 ? 's' : 'n'));
 export const FLOOR = 3.7, UPPER = 3.25;
 
 /** The plan of a house from its element (shared with the town's life): the court, the passage, the dukkan bays, the side rooms. */
@@ -22,7 +24,7 @@ export function planOf(el) {
   let ud = rand() < 0.5 ? 1.5 + rand() * 1.2 : Lw - 1.5 - rand() * 1.2;
   const cu0 = Math.max(t + 2.2, Math.min(Lw - t - 2.2 - cw, Lw / 2 - cw / 2 + (rand() - 0.5) * 1.0)), cu1 = cu0 + cw;
   if (ud > cu0 - 0.8 && ud < cu1 + 0.8) ud = ud < Lw / 2 ? Math.max(0.95, cu0 - 1.0) : Math.min(Lw - 0.95, cu1 + 1.0);
-  const dw = 1.25, Dc0 = t + 1.6, Dc1 = Math.min(Dp - t - 3.0, Dc0 + cd), BD = 1.45;
+  const dw = 1.25, Dc0 = t + (el.up ? 2.3 : 1.6), Dc1 = Math.min(Dp - t - 3.0, Dc0 + cd), BD = 1.45;
   // the dukkans: bays 2.2–2.6 m wide on the front either side of the passage and the court's way in
   const bays = [];
   if (el.shops?.length && Dc1 - Dc0 >= 3) {
@@ -40,16 +42,23 @@ export function planOf(el) {
     if (cu0 - 0.4 - (t + 0.05) >= 1.9) rooms.push({ u0: t + 0.05, u1: cu0 - 0.4, d0: Dc0 + 0.3, d1: Dc1 - 0.3, door: [cu0 - 0.42, cu0 + 0.02, dm - 0.6, dm + 0.6], side: -1 });
     if (Lw - t - 0.05 - (cu1 + 0.4) >= 1.9) rooms.push({ u0: cu1 + 0.4, u1: Lw - t - 0.05, d0: Dc0 + 0.3, d1: Dc1 - 0.3, door: [cu1 - 0.02, cu1 + 0.42, dm - 0.6, dm + 0.6], side: 1 });
   }
-  return { rand, mat, t, cw, cd, ud, cu0, cu1, dw, Dc0, Dc1, Lw, Dp, along, fr, bays, rooms, BD, e, n };
+  const P = { rand, mat, t, cw, cd, ud, cu0, cu1, dw, Dc0, Dc1, Lw, Dp, along, fr, bays, rooms, BD, e, n, el };
+  if (el.up) {
+    P.stair = stairOf(P);
+    if (P.stair) { const sd = P.stair.mir ? 1 : -1; P.rooms = rooms.filter((q) => q.side !== sd); P.upL = upLayout(P); P.balcony = el.up === 'merchant' || el.up === 'shop'; }
+  }
+  return P;
 }
 
 export function house(el, ctx) {
   const { bag, col } = ctx;
   const P0 = planOf(el), { rand, mat, t, cw, cd, ud, cu0, cu1, dw, Dc0, Dc1, Lw, Dp, along, fr, bays, rooms: sideRooms, BD, n } = P0;
+  const UP = !!P0.stair;
   const r = el.rect, y = el.y, foot = el.foot ?? y - 0.4, e = el.door ?? 's';
   const [x0, z0, x1, z1] = r;
   const H = FLOOR + UPPER * (n - 1), yT = y + H;
   const W = (u0, u1, D0, D1) => fr.rect(u0, u1, -D1, -D0);
+  const U2 = (u) => (P0.stair?.mir ? Lw - u : u);
   // the far view: a block with its parapet
   if (el.simple) {
     bag.add(mat, box(x0, foot, z0, x1, yT + 0.8, z1)); if (el.collide !== false) col.rect(r, y, yT + 0.8);
@@ -58,12 +67,12 @@ export function house(el, ctx) {
   // — plan: the court, its passage
   void cw; void cd;
   if (Dc1 - Dc0 < 3) { bag.add(mat, box(x0, foot, z0, x1, yT + 0.8, z1)); col.rect(r, y, yT + 0.8); return; }
-  const court = W(cu0, cu1, Dc0, Dc1), leg1 = W(ud - dw / 2, ud + dw / 2, 0, t + 1.6), leg2 = W(Math.min(ud, cu0 + 1.2) - dw / 2, Math.max(ud, cu1 - 1.2) + dw / 2, t + 0.05, t + 1.6);
+  const court = W(cu0, cu1, Dc0, Dc1), leg1 = W(ud - dw / 2, ud + dw / 2, 0, Dc0), leg2 = W(Math.min(ud, cu0 + 1.2) - dw / 2, Math.max(ud, cu1 - 1.2) + dw / 2, UP ? Dc0 - 1.6 : t + 0.05, Dc0);
   // an enterable salon behind the court's rear edge (open houses): the room fills the back range, opening to the court
   const salonD = Dp - t - Dc1;
   const salon = el.open && salonD >= 3.0 ? W(cu0 + 0.35, cu1 - 0.35, Dc1, Dp - t - 0.05) : null;
   // — the ground storey: the solid between the outer walls and the voids
-  const inner = fr.rect(0, Lw, -Dp, 0), bayR = bays.map((b) => W(b.u0, b.u1, 0, BD)), roomR = sideRooms.map((q) => W(q.u0, q.u1, q.d0, q.d1)), doorR = sideRooms.map((q) => W(q.door[0], q.door[1], q.door[2], q.door[3])), voids = [court, leg1, leg2, ...(salon ? [salon] : []), ...bayR, ...roomR, ...doorR];
+  const inner = fr.rect(0, Lw, -Dp, 0), bayR = bays.map((b) => W(b.u0, b.u1, 0, BD)), roomR = sideRooms.map((q) => W(q.u0, q.u1, q.d0, q.d1)), doorR = sideRooms.map((q) => W(q.door[0], q.door[1], q.door[2], q.door[3])), voids = [court, leg1, leg2, ...(UP ? groundVoids(P0, (a, b, c, d) => W(U2(a), U2(b), c, d)) : []), ...(salon ? [salon] : []), ...bayR, ...roomR, ...doorR];
   bag.add(mat, box(x0, foot, z0, x1, y - 0.3, z1));
   if (foot < y - 0.3) col.rect(r, foot, y - 0.3);
   for (const p of subtractRects(inner, voids)) { bag.add(mat, box(p[0], y - 0.3, p[1], p[2], y + FLOOR, p[3])); col.rect(p, y - 0.3, y + FLOOR); }
@@ -96,14 +105,14 @@ export function house(el, ctx) {
   for (const v of [leg1, leg2]) bag.add('cedar', box(v[0], y + 2.9, v[1], v[2], y + FLOOR, v[3]));
   // upper floors over the passage and the salon: the mass again
   const over = (rect) => { if (n > 1) { bag.add(mat, box(rect[0], y + FLOOR, rect[1], rect[2], yT, rect[3])); col.rect(rect, y + FLOOR, yT); } };
-  for (const p of subtractRects(inner, [court])) { if (n > 1) { bag.add(mat, box(p[0], y + FLOOR, p[1], p[2], yT, p[3])); col.rect(p, y + FLOOR, yT); } }
+  if (!UP) for (const p of subtractRects(inner, [court])) { if (n > 1) { bag.add(mat, box(p[0], y + FLOOR, p[1], p[2], yT, p[3])); col.rect(p, y + FLOOR, yT); } }
   void over;
   // the roof: a terrace over everything but the court, a parapet round the outside, the pent roof of green tiles round the court's rim
-  for (const p of subtractRects(inner, [court])) bag.add('plaster_white', box(p[0], yT, p[1], p[2], yT + 0.2, p[3]));
+  if (!UP) for (const p of subtractRects(inner, [court])) bag.add('plaster_white', box(p[0], yT, p[1], p[2], yT + 0.2, p[3]));
   const par = [[x0, z0, x1, z0 + 0.3], [x0, z1 - 0.3, x1, z1], [x0, z0 + 0.3, x0 + 0.3, z1 - 0.3], [x1 - 0.3, z0 + 0.3, x1, z1 - 0.3]];
   for (const p of par) bag.add(mat, box(p[0], yT + 0.2, p[1], p[2], yT + 0.95, p[3]));
-  roofTop(bag, r, yT, court, rand, !!el.rich, gable);
-  { const c = court, o = [c[0] - 0.9, c[1] - 0.9, c[2] + 0.9, c[3] + 0.9], tr = [], yo = yT + 0.55, yi = yT + 0.1;
+  if (!UP) roofTop(bag, r, yT, court, rand, !!el.rich, gable);
+  { const c = court, o = UP ? W(U2(P0.stair.cuL - 0.3), U2(P0.stair.cuR + 0.9), Dc0 - 0.9, Dc1 + 0.9) : [c[0] - 0.9, c[1] - 0.9, c[2] + 0.9, c[3] + 0.9], tr = [], yo = yT + 0.55, yi = yT + 0.1;
     const ring = (A, yy) => [[A[0], yy, A[1]], [A[2], yy, A[1]], [A[2], yy, A[3]], [A[0], yy, A[3]]], oo = ring(o, yo), ii = ring(c, yi);
     for (let i = 0; i < 4; i++) { const j = (i + 1) % 4; q4(tr, oo[i], oo[j], ii[j], ii[i]); }
     bag.add('tile_green', dbl(tr)); bag.add('cedar', box(c[0] - 0.05, yi - 0.2, c[1] - 0.05, c[2] + 0.05, yi, c[3] + 0.05)); // eaves board (the rim)
@@ -116,11 +125,15 @@ export function house(el, ctx) {
   fs.forEach((f, i) => {
     const [a, b] = spans[i], uc = (a + b) / 2, holes = [];
     // a doorway to a room in the middle of each side but the one the passage enters, and a pair of narrow ones on wide sides
-    if (!(i === 1 && !salon && false)) holes.push([uc - 0.55, uc + 0.55, y, y + 2.5]);
-    if (salon && i === 1 && f.at === court[3]) holes.length = 0;
-    for (const h of holes) { const rr = f.R(0, 0.04, h[0], h[1]); bag.add('opening', box(rr[0], h[2], rr[1], rr[2], h[3], rr[3])); door(bag, f, h[0] + 0.02, h[1] - 0.02, h[2] + 0.012, 2.3, 0.04, { studs: false }); }
+    let stairFace = false;
+    if (UP) { const sg = P0.stair.mir ? -1 : 1, pu = [sg * fr.U[0], sg * fr.U[1]], nv = f.ax === 'z' ? [0, f.n] : [f.n, 0]; stairFace = nv[0] * pu[0] + nv[1] * pu[1] > 0.9; }
+    if (stairFace) { const sp = P0.stair, q = W(U2(sp.S0 + 2.0), U2(sp.cuL), sp.f + 0.05, sp.f + 0.95), [q0, q1] = f.ax === 'z' ? [q[0], q[2]] : [q[1], q[3]]; holes.push([q0, q1, y, y + 2.2]); }
+    else if (!(i === 1 && !salon && false)) holes.push([uc - 0.55, uc + 0.55, y, y + 2.5]);
+    if (salon && i === 1 && f.at === court[3] && !stairFace) holes.length = 0;
+    for (const h of stairFace ? [] : holes) { const rr = f.R(0, 0.04, h[0], h[1]); bag.add('opening', box(rr[0], h[2], rr[1], rr[2], h[3], rr[3])); door(bag, f, h[0] + 0.02, h[1] - 0.02, h[2] + 0.012, 2.3, 0.04, { studs: false }); }
     if (el.rich) dado(bag, f, a, b, y, 1.35, salon && i === 1 ? [] : holes, { ribbon: true }); else dadoFlat(bag, f, a, b, y, 1.35, salon && i === 1 ? [] : holes);
-    for (let k = 1; k < n; k++) {
+    if (stairFace) { const h = holes[0], rr = f.R(0, 0.12, h[0] - 0.12, h[0]), r2 = f.R(0, 0.12, h[1], h[1] + 0.12), r3 = f.R(0, 0.12, h[0] - 0.12, h[1] + 0.12); bag.add('cedar', box(rr[0], y, rr[1], rr[2], y + 2.3, rr[3])); bag.add('cedar', box(r2[0], y, r2[1], r2[2], y + 2.3, r2[3])); bag.add('cedar', box(r3[0], y + 2.2, r3[1], r3[2], y + 2.35, r3[3])); }
+    if (!UP) for (let k = 1; k < n; k++) {
       const yk = yF + UPPER * (k - 1);
       // upper windows: a pair of dark, lattice-closed openings; a balustrade of turned cedar at the floor edge
       for (const dd of [-0.9, 0.9]) { if ((b - a) < 2.6 && dd > 0) continue; const rr = f.R(0, 0.05, uc + dd - 0.32, uc + dd + 0.32); bag.add('opening', box(rr[0], yk + 0.5, rr[1], rr[2], yk + 2.3, rr[3])); const g = f.R(0.05, 0.1, uc + dd - 0.36, uc + dd + 0.36); bag.add('lattice', box(g[0], yk + 0.5, g[1], g[2], yk + 2.3, g[3])); }
@@ -128,7 +141,7 @@ export function house(el, ctx) {
       const lp = f.R(0.17, 0.19, a + 0.08, b - 0.08); bag.add('lattice', box(lp[0], yk + 0.1, lp[1], lp[2], yk + 0.95, lp[3]));
     }
     // a stucco band under the rim on the rich houses
-    if (el.rich) stucco(bag, f, a, b, yT - 1.3, yT, [], { cell: 0.4, cornice: true });
+    if (el.rich && !UP) stucco(bag, f, a, b, yT - 1.3, yT, [], { cell: 0.4, cornice: true });
   });
   // the salon: its floor, ceiling, divans, carpet, lamp; the dado on its walls
   if (salon) {
@@ -170,6 +183,12 @@ export function house(el, ctx) {
     bx(0, 0.2, ua - 0.32, ua - 0.2, 0, 2.7, 'limestone'); bx(0, 0.2, ub + 0.2, ub + 0.32, 0, 2.7, 'limestone'); bx(0, 0.24, ua - 0.38, ub + 0.38, 2.7, 2.95, 'sandstone');
     const um = (ua + ub) / 2; bx(0.03, 0.06, um - 0.55, um + 0.55, 3.0, 3.62, 'tile_cream'); bx(0.06, 0.08, um - 0.3, um + 0.3, 3.15, 3.5, 'glaze_blue'); bx(0.08, 0.1, um - 0.12, um + 0.12, 3.25, 3.4, 'glaze_green');
   }
+  // the threshold of a house with its upper floor open: steps from the lane's level up to the floor (the ground inside the lot stands at the floor's height, a ledge)
+  if (UP && el.gd !== undefined && y - el.gd > 0.03) {
+    const nS = Math.max(2, Math.ceil((y - el.gd) / 0.18)), rs = (y - el.gd) / nS, trd = 0.3, LL = (nS - 1) * trd;
+    for (let k = 1; k < nS; k++) { const q = fr.B(uA - 0.1, uB + 0.1, el.gd - 0.3, el.gd + k * rs, LL - k * trd, LL - (k - 1) * trd); bag.add('limestone', q); }
+    col.ramp(fr.rect(uA, uB, 0, LL), el.gd + rs, y, stairDirOf([-fr.N[0], -fr.N[1]]));
+  }
   const sill = FR(0, 0.25, ua, ub); bag.add('limestone', box(sill[0], y - 0.05, sill[1], sill[2], y + 0.06, sill[3]));
   // eye level on the lane: the foot of the wall, the lamp and the bench by the door, beam ends under the first floor, spouts at the roof
   { const holes = [[ua - 0.3, ub + 0.3], ...bays.map((q) => [base + q.u0 - 0.3, base + q.u1 + 0.3])];
@@ -183,11 +202,12 @@ export function house(el, ctx) {
   if (fk === 0 && (rand() < 0.5 || el.rich)) { const canW = 1.2; void canW; import_canopy(bag, fo, ua - 0.4, ub + 0.4, y + 3.0); }
   // windows: dark openings with cedar lattices high on the facade and the other faces, one or two a storey
   const faces = [fo, ...(along ? [face('x', x0, -1), face('x', x1, 1), face(e === 's' ? 'z' : 'z', e === 's' ? z0 : z1, e === 's' ? -1 : 1)] : [face('z', z0, -1), face('z', z1, 1), face('x', e === 'e' ? x0 : x1, e === 'e' ? -1 : 1)])];
-  for (const f of faces) {
+  if (!UP) for (const f of faces) {
     const lenF = (f.ax === 'z') ? x1 - x0 : z1 - z0, a = f.ax === 'z' ? x0 : z0;
     for (let k = 1; k < n; k++) { const m = 1 + Math.floor(rand() * 2); for (let q = 0; q < m; q++) { const u = a + lenF * (0.18 + 0.64 * rand()); if (f === fo && Math.abs(u - (ua + ub) / 2) < 1.0 && k === 1) continue; const yk = y + FLOOR + UPPER * (k - 1) + 1.2; const rr = f.R(0, 0.04, u - 0.25, u + 0.25); bag.add('opening', box(rr[0], yk, rr[1], rr[2], yk + 0.85, rr[3])); const g = f.R(0.04, 0.09, u - 0.3, u + 0.3); bag.add('lattice', box(g[0], yk - 0.04, g[1], g[2], yk + 0.9, g[3])); if (rand() < 0.6) shutters(bag, f, u, yk, 0.5, 0.85, rand() < 0.5 ? 'shutter_brown' : 'shutter_green'); } }
   }
-  if (n > 1 && rand() < 0.55 && Lw > 7) {
+  if (UP) buildUpper({ bag, col, lights: ctx.lights, mat, fr, el, P: P0, y, yT, FLOOR, court });
+  if (!UP && n > 1 && rand() < 0.55 && Lw > 7) {
     // a cantilevered bay over the lane: a cedar box on corbels, lattice on its three faces
     const u = base + Lw * (0.3 + 0.4 * rand()), yb = y + FLOOR + 0.5, w = 1.5, rr = fo.R(0, 0.5, u - w / 2, u + w / 2);
     bag.add('cedar', box(rr[0], yb, rr[1], rr[2], yb + 1.7, rr[3]));

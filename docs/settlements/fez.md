@@ -130,3 +130,13 @@ Additions to the Bou Inania, all [inferred] from the monument's general characte
 - **Prayer hall front.** A horseshoe door with an alfiz and marble colonnettes, arched lobed windows in alfiz frames with sills and jamb shafts, and a carved cedar canopy with corbels and green tiles across the front.
 - **Galleries.** Flared capitals and stepped cedar corbels on each pillar, a carved cedar frieze of relief lozenges on the edge of the upper floor, cedar joists under its ceiling, and the muqarnas cornice of the gallery walls (it had been hidden behind the upper slab).
 - **Street portal.** A four-tier muqarnas cornice over the horseshoe arch, under the cedar canopy.
+
+## 15. Upper floors of the dar (2026-11-18) — what is built and on what ground
+
+Ten open houses nearest the arrival and along the main walk (merchant's, craftsman's, tenement and shop-with-dwelling kinds) are enterable upstairs, in the full-detail copy only. No new source was fetched; the ground is §1 (Maghrebi Voices), Wikipedia "Historic house architecture in Morocco" and "Funduq".
+- **Stair.** [stated] A dar's stair rises in a corner cell off the court and ends on the roof. [inferred] Built as a U: a tiled flight to the gallery, a landing, a second flight to the roof, reached from the lane by a threshold step, the bent passage, the court and a door in the stair cell.
+- **Gallery.** [stated] Rooms of the upper floor open on a gallery round the court with a turned-cedar balustrade. [inferred] Spindles are coarse and few; the court's opening has a collider rail with no top face to step on.
+- **Rooms by use.** [inferred] Sleeping room (divan, bolsters, chest, brazier), store (sacks, jars, pots), workroom by kind (bolts and copperware for a merchant, a loom or wool for a craftsman), all long, narrow and behind tall doors.
+- **Street.** [stated] Upper rooms look to the lane over projecting bays. [inferred] One room per house has a cedar balcony on corbels with rail that can be stepped onto, and windows as open reveals.
+- **Roof terrace.** [stated] The roof is the women's working and resting place, with high parapets. [inferred] A mat with cushions, a washing line, water jars and a charcoal pot, a low wall round the stair well and a rail round the court's opening.
+- **Still shut.** The other open riads, every closed house, and the funduq's upper gallery (§4 funduq stays as built).

@@ -1,4 +1,6 @@
 // The houses of the medina as elements (docs/settlements/fez.md §5): which lot carries dukkans, which is open, which is rich.
+import { frame } from '../../styles/mamluk/kit.js';
+import { planOf } from '../../styles/marinid/house.js';
 import { lots, lanes, ground0, inLot, riverZ, RIVER, quayY, RADIUS, BRIDGES, K, S } from './layout.js';
 
 /** The lane a lot's door opens on: { w, kind } of the lane touching the door's side, or null. */
@@ -31,8 +33,15 @@ export function houseList() {
     const shop = q && (q.kind === 'street' || (q.kind === 'lane' && dist < 230 && rand() < 0.3) || (q.kind === 'derb' && dist < 170 && rand() < 0.07));
     houses.push({ t: 'fez_house', rect: l.rect, y: l.y, foot: l.foot, door: l.door, storeys: l.storeys, seed: l.seed, open, rich, laneW: q ? q.w : 2.4, shops: shop ? tradesAt(cx, l.seed) : undefined });
   }
+  // the houses whose upper floors are open (marinid/upper.js): the enterable ones nearest the madrasa's door and the Talaa Kebira, where the stair cell fits
+  const A = [-132.5, -21], KINDS = ['merchant', 'craft', 'tenement'];
+  const fit = houses.filter((h) => h.open && planOf({ ...h, storeys: 2, up: 'x' }).stair).sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 - A[0], (a.rect[1] + a.rect[3]) / 2 - A[1]) - Math.hypot((b.rect[0] + b.rect[2]) / 2 - A[0], (b.rect[1] + b.rect[3]) / 2 - A[1]));
+  let k = 0, sh = 0;
+  for (const h of fit.slice(0, UP_COUNT)) { h.storeys = 2; h.gd = ground0(...frame(h.rect, h.door).P(planOf({ ...h, up: 'x' }).ud, 0.5));   // (the lane's level before the door: the threshold steps climb from it)
+    h.up = h.shops && sh++ % 2 === 0 ? 'shop' : KINDS[k++ % KINDS.length]; }
   return houses;
 }
+const UP_COUNT = 10;
 
 /** The lanes' gutters and paving courses (near level), the covered stretches of the derbs, the wash-places on the quays. */
 export function laneElements() {

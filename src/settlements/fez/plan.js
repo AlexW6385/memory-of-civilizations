@@ -1,5 +1,9 @@
 // The Bou Inania madrasa and the Dar al-Magana (docs/settlements/fez.md §4): the court, the galleries, the hall, the classrooms, the cells above.
 import { SITES, siteY, ground0 } from './layout.js';
+import { houseList } from './houses.js';
+import { planOf } from '../../styles/marinid/house.js';
+import { upWalks } from '../../styles/marinid/upper.js';
+import { frame } from '../../styles/mamluk/kit.js';
 
 const b = SITES.bou, y = siteY('bou'), cx = (b[0] + b[2]) / 2;
 const E = [];
@@ -10,6 +14,9 @@ E.push({ t: 'fez_sabat', rect: [-141, b[1] - 4, -137, b[1]], y: ground0(-139, b[
 const room = (id, rect, yy, kind) => ({ id, rect, y: yy, kind });
 const zN = b[1] + 8, cz0 = zN + 2.4, cz1 = b[3] - 9.6 - 0.7;
 const yu = y + 4.4, gx0 = b[0] + 6.4, gx1 = b[2] - 6.4, STX = 6.6, zb = b[1] + 1.0, ze = zN - 0.5;
+// the open upper floors of the houses (docs/settlements/fez.md §15): from the lane to a back room upstairs, and on to the roof terrace
+const houseWalks = [];
+for (const h of houseList()) if (h.up) { const P = planOf(h); for (const r of upWalks(P, frame(h.rect, h.door))) { r.y0 = ground0(r[0][0], r[0][1]); houseWalks.push(r); } }
 export const bouInania = {
   id: 'fez-bou-inania',
   name: { en: 'Bou Inania Madrasa', zh: '布·伊纳尼亚经学院' },
@@ -33,6 +40,6 @@ export const bouInania = {
     room('cell east', [gx1 + 1.2, zN + 7.3, b[2] - 1.6, zN + 9.7], yu, 'hall'),
     room('prayer hall', [b[0] + 6.4, cz1 + 0.7, b[2] - 6.4, b[3] - 1], y, 'hall'),
   ],
-  walks: [Object.assign([[cx, b[1] - 3], [cx, zN + 1], [cx + 1.45, zN + 1.3], [cx + 1.45, cz0 + 3], [cx, cz0 + 8]], { y0: y })],   // (the gallery's middle pillar stands on the axis: the way passes between it and the next)
+  walks: [Object.assign([[cx, b[1] - 3], [cx, zN + 1], [cx + 1.45, zN + 1.3], [cx + 1.45, cz0 + 3], [cx, cz0 + 8]], { y0: y }), ...houseWalks],   // (the gallery's middle pillar stands on the axis: the way passes between it and the next)
 };
 export default bouInania;
