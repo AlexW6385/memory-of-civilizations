@@ -11,6 +11,9 @@ import { STYLES, registerStyle } from '../../core/build.js';
 import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
 import { hexa } from '../../styles/chinese/index.js';
 import { byzantineColumn } from '../../styles/byzantine/index.js';
+import { Sculpt } from '../../styles/nabataean/sculpt.js';
+import { jit, bust, monogram } from './carve.js';
+import { hsDoors } from './doors.js';
 import { hsColumn, hsWindow, hsButtress, hsDomeWindows, hsRevetment, hsParapet, hsMosaic, hsPhiale } from './detail.js';
 
 const D2R = Math.PI / 180;
@@ -116,7 +119,7 @@ function nCornice(el, { bag }) {
   });
   const mid = P[Math.floor(n / 2)], s = Math.sign((tw[0] - mid[0]) * M[Math.floor(n / 2)][0] + (tw[1] - mid[1]) * M[Math.floor(n / 2)][1]) || 1;
   const Q = (i, u, yy) => [P[i][0] + M[i][0] * u * s, yy, P[i][1] + M[i][1] * u * s];
-  const stone = [], gilt = [];
+  const stone = [], gilt = [], carv = [];
   /** a layer from (uBack…uFront0) at y0 to (uBack…uFront1) at y1 */
   const layer = (out, ub, uf0, uf1, y0, y1) => {
     for (let i = 0; i < n - 1; i++) hexa(out, [Q(i, ub, y0), Q(i, uf0, y0), Q(i + 1, uf0, y0), Q(i + 1, ub, y0)], [Q(i, ub, y1), Q(i, uf1, y1), Q(i + 1, uf1, y1), Q(i + 1, ub, y1)]);
@@ -128,7 +131,23 @@ function nCornice(el, { bag }) {
   layer(gilt, f, h + 0.5, h + 0.5, y - 0.34, y - 0.27);            // a gilt astragal under the corona
   layer(stone, el.fill ? -h + 0.02 : f, h + 0.56, h + 0.56, y - 0.27, y);   // the corona (with fill, the wall's top behind it)
   if (el.fill) layer(stone, -h + 0.02, f + 0.01, f + 0.01, y - 0.66, y - 0.27);
+  // the carving of the cyma: an egg-and-dart, each egg a bevelled lens standing 4 cm off the moulding, a gilt dart between; the spacing and size
+  // of each differ by a hair from a hash of its place, as cut by hand
+  for (let i = 0; i < n - 1; i++) {
+    const a = Q(i, 0, y), b = Q(i + 1, 0, y), L = Math.hypot(b[0] - a[0], b[2] - a[2]), cnt = Math.max(1, Math.round(L / 0.3)), o = [M[i][0] * s, M[i][1] * s];
+    const P = (t, u, yy) => { const p = Q(i, u, yy), q = Q(i + 1, u, yy); return [p[0] + (q[0] - p[0]) * t, yy, p[2] + (q[2] - p[2]) * t]; };
+    for (let k = 0; k < cnt; k++) {
+      const t0 = k / cnt, t1 = (k + 1) / cnt, tm = (t0 + t1) / 2, j = jit(a[0] + k, a[2], 5, 0.12), hw = (t1 - t0) * 0.36 * (1 + j);
+      const lift = (p, d) => [p[0] + o[0] * 0.75 * d, p[1] - 0.66 * d, p[2] + o[1] * 0.75 * d];
+      const e0 = [P(tm - hw, h + 0.19, y - 0.64), P(tm + hw, h + 0.19, y - 0.64), P(tm + hw, h + 0.43, y - 0.4), P(tm - hw, h + 0.43, y - 0.4)];
+      hexa(carv, e0, [lift(P(tm - hw * 0.55, h + 0.23, y - 0.6), 0.05), lift(P(tm + hw * 0.55, h + 0.23, y - 0.6), 0.05), lift(P(tm + hw * 0.55, h + 0.4, y - 0.43), 0.05), lift(P(tm - hw * 0.55, h + 0.4, y - 0.43), 0.05)]);
+      const d0 = t1 - (t1 - t0) * 0.0, dw = (t1 - t0) * 0.07;
+      const dq = [P(d0 - dw, h + 0.2, y - 0.63), P(d0 + dw, h + 0.2, y - 0.63), P(d0 + dw * 0.4, h + 0.42, y - 0.41), P(d0 - dw * 0.4, h + 0.42, y - 0.41)];
+      void dq;
+    }
+  }
   bag.add(el.mat || 'marble_smooth', fromTriangles(stone));
+  bag.add('limestone', fromTriangles(carv));
   bag.add('gold', fromTriangles(gilt));
 }
 const norm = (v) => { const l = Math.hypot(v[0], v[1]) || 1; return [v[0] / l, v[1] / l]; };
@@ -141,17 +160,30 @@ const norm = (v) => { const l = Math.hypot(v[0], v[1]) || 1; return [v[0] / l, v
  */
 function spandrelDiscs(el, { bag }) {
   const n = [-el.u[1], el.u[0]], W = frame(el.o, el.u, n), h = el.half ?? 0.4, r = el.r ?? 0.5;
-  const red = [], green = [], gilt = [];
+  const red = [], green = [], gilt = [], pale = [];
+  /** a tile of the inlay: the annular sector r0…r1, a0…a1, inset by g all round (the mortar line), raised from d0 to d1 with a bevelled top */
+  const tile = (out, uc, yc, r0, r1, a0, a1, d0, d1, g = 0.006) => {
+    const m = (a1 - a0) * 0.5, ia = g / Math.max(r0 + r1, 0.05) * 2;
+    const P = (rad, t, d) => W(uc + rad * Math.cos(t), yc + rad * Math.sin(t), d);
+    const A0 = a0 + ia, A1 = a1 - ia, R0 = r0 + g, R1 = r1 - g, bv = g * 0.8;
+    hexa(out, [P(R0, A0, d0), P(R1, A0, d0), P(R1, A1, d0), P(R0, A1, d0)], [P(R0 + bv, A0 + ia * 0.5, d1), P(R1 - bv, A0 + ia * 0.5, d1), P(R1 - bv, A1 - ia * 0.5, d1), P(R0 + bv, A1 - ia * 0.5, d1)]);
+    void m;
+  };
   for (const sd of el.both ? [1, -1] : [el.side ?? 1]) {
-    const d0 = sd * (h - 0.02), d1 = sd * (h + 0.04), d2 = sd * (h + 0.06);
+    const dB = sd * (h - 0.02), s2 = (a, b) => (sd > 0 ? [a, b] : [-b, -a]);
     for (const uu of el.at) {
-      ring(red, W, uu, el.y, 0.001, r, Math.min(d0, d1), Math.max(d0, d1), 24);
-      ring(gilt, W, uu, el.y, r, r + 0.05, Math.min(d0, d2), Math.max(d0, d2), 24);
-      ring(green, W, uu, el.y, r + 0.05, r + 0.3, Math.min(d0, d1), Math.max(d0, d1), 24);
+      const j = jit(uu, el.y, 4, 0.01), d1 = h + 0.04 + j, nb = 16 + Math.round(r * 0), rot = jit(uu, el.y, 9, 0.2);
+      const D = (top) => (sd > 0 ? top : -top);
+      // the disc of porphyry at the middle, a ring of twelve tiles of pale and green marble, a gilt fillet, a band of sixteen tiles of porphyry and green
+      ring(red, W, uu, el.y, 0.001, r * 0.5, ...s2(dB * sd, d1 + 0.004), 20);
+      for (let k = 0; k < 12; k++) tile(k % 2 ? green : pale, uu, el.y, r * 0.56, r * 0.92, rot + k * Math.PI / 6, rot + (k + 1) * Math.PI / 6, dB, D(d1 + 0.002 * (k % 2)), 0.007);
+      ring(gilt, W, uu, el.y, r * 0.94, r + 0.05, ...s2(dB * sd, h + 0.06), 24);
+      for (let k = 0; k < nb; k++) tile(k % 2 ? red : green, uu, el.y, r + 0.07, r + 0.3, rot + k * 2 * Math.PI / nb, rot + (k + 1) * 2 * Math.PI / nb, dB, D(d1 - 0.004), 0.008);
     }
   }
   bag.add('porphyry', fromTriangles(red));
   bag.add('verde_antico', fromTriangles(green));
+  bag.add('limestone', fromTriangles(pale));
   bag.add('gold', fromTriangles(gilt));
 }
 
@@ -171,11 +203,16 @@ function chancelScreen(el, { bag, col }) {
     const t = i * L / nb;
     byzantineColumn({ at: [ax + u[0] * t, az + u[1] * t], y, h: H, d: 0.36, shaftMat: 'silver', capMat: 'silver', impost: false }, { bag, col });
   }
-  const sil = [], gold = [], st = L / nb;
+  const sil = [], gold = [], st = L / nb, bSt = new Sculpt(), bGo = new Sculpt();
   for (let i = 0; i < nb; i++) {
     const t0 = i * st + 0.26, t1 = (i + 1) * st - 0.26, tc = (i + 0.5) * st;
     // the medallion on the architrave over the bay
-    for (const sd of [1, -1]) ring(sil, W, tc, y + H + 0.27, 0.001, 0.19, sd > 0 ? 0.27 : -0.3, sd > 0 ? 0.3 : -0.27, 16);
+    for (const sd of [1, -1]) {
+      ring(sil, W, tc, y + H + 0.27, 0.19, 0.225, sd > 0 ? 0.25 : -0.31, sd > 0 ? 0.31 : -0.25, 10);          // the roundel's rim
+      ring(sil, W, tc, y + H + 0.27, 0.001, 0.19, sd > 0 ? 0.25 : -0.285, sd > 0 ? 0.285 : -0.25, 10);
+      const c3 = nb === 5 ? 2 : -1, kind = i === c3 ? 'C' : (i + (sd > 0 ? 0 : 1)) % 3 === 0 ? 'V' : 'A';           // Christ over the middle door; the Virgin, apostles and prophets either side [inferred: the order]
+      bust(bSt, bGo, W, tc, y + H + 0.28, sd * 0.285, sd, kind);
+    }
     if (el.gaps && el.gaps.includes(i)) continue;
     fbox(sil, W, t0, t1, y, y + 0.12, -0.1, 0.1);                       // the sill
     fbox(sil, W, t0 + 0.02, t1 - 0.02, y + 0.12, y + 1.0, -0.05, 0.05);   // the plate
@@ -202,6 +239,8 @@ function chancelScreen(el, { bag, col }) {
   fbox(gold, W, -0.27, L + 0.27, y + H + 0.08, y + H + 0.13, -0.27, 0.27);
   bag.add('silver', fromTriangles(sil));
   bag.add('gold', fromTriangles(gold));
+  bag.add('silver', bSt.geometry());
+  bag.add('gold', bGo.geometry());
 }
 
 /**
@@ -398,13 +437,15 @@ function ambo(el, { bag, col }) {
   oval([[0.94, H + 1.0], [1.01, H + 1.0], [1.01, H + 1.07], [0.94, H + 1.07]], 48, 'silver');
   oval([[0.995, H + 0.12], [1.002, H + 0.12], [1.002, H + 0.2], [0.995, H + 0.2]], 48, 'gold');
   oval([[0.995, H + 0.82], [1.002, H + 0.82], [1.002, H + 0.9], [0.995, H + 0.9]], 48, 'gold');
+  const mono = [];
   for (let k = 0; k < 16; k++) {
     const t = 2 * Math.PI * (k + 0.5) / 16, c = Math.cos(t), s = Math.sin(t);
     if (Math.abs(c) > 0.97) continue;
-    // a silver cross on each panel
-    const px = x + c * a * 1.003, pz = z + s * b * 1.003, yaw = Math.atan2(-s * a, c * b);
-    for (const [w, h2] of [[0.06, 0.42], [0.28, 0.06]]) { const g = box(-w / 2, -h2 / 2, -0.008, w / 2, h2 / 2, 0.008); g.rotateY(-yaw + Math.PI / 2); g.translate(px, y + H + 0.5, pz); bag.add('silver', g); }
+    // on each panel the monogram of Justinian or of Theodora in gilt relief, alternately (the parapets' panels: fhw.gr)
+    const nl = Math.hypot(c / a, s / b), nx = c / a / nl, nz = s / b / nl, Wm = frame([x + c * a * 1.003, z + s * b * 1.003], [-nz, nx], [nx, nz]);
+    monogram(mono, Wm, 0, y + H + 0.5, 0.27 + jit(x + k, z, 3, 0.01), 0.0, 0.03, k % 2 ? 'T' : 'J', true);
   }
+  bag.add('gold', fromTriangles(mono));
   col.floor([x - a * 0.85, z - b * 1.02, x + a * 0.85, z + b * 1.02], y + H);   // (under the parapets too: they stand on it)
   for (const s of [-1, 1]) col.segment([x - a * 0.8, z + s * b * 0.98], [x + a * 0.8, z + s * b * 0.98], 0.15, y + H, y + H + 1.07);
   // the stairs from east and west: marble treads between parapets of green marble with silver copings, walked up
@@ -451,5 +492,5 @@ registerStyle('byzantine-hs', {
   ...base,
   column: hsColumn,
   elements: { ...base.elements, hs_window: hsWindow, hs_buttress: hsButtress, hs_dome_windows: hsDomeWindows, hs_revetment: hsRevetment, hs_parapet: hsParapet, hs_mosaic: hsMosaic, dome_cross: domeCross, cornice_lamps: corniceLamps, n_cornice: nCornice, spandrel_discs: spandrelDiscs },
-  objects: { ...base.objects, phiale: hsPhiale, chancel_screen: chancelScreen, ciborium, polykandelon, ambo, portal, pavement },
+  objects: { ...base.objects, hs_doors: hsDoors, phiale: hsPhiale, chancel_screen: chancelScreen, ciborium, polykandelon, ambo, portal, pavement },
 });

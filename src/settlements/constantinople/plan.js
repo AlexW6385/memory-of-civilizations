@@ -7,6 +7,7 @@
 import { AUGUSTAION, EIRENE, ZEUXIPPUS, HIPPODROME, PALACE, MESE, MILION, FORUM, SENATE, CHALKE, COURTS, COURT_KINDS, COURT_Y, height } from './layout.js';
 import sophiaPlan from '../../buildings/hagia-sophia/plan.js';
 
+export const JUSTINIAN = [AUGUSTAION[0] + 24, AUGUSTAION[1] + 32];
 const E = [];
 // the Augustaion: porticoes on its west and south sides (open at the corners and toward Hagia Sophia),
 // the Senate house on its east side, the Chalke at its south-east corner (§4.4)
@@ -15,7 +16,7 @@ E.push({ t: 'stoa', a: [AUGUSTAION[0] + 16, AUGUSTAION[3] - 6], b: [AUGUSTAION[2
 E.push({ t: 'senate', rect: SENATE, y: 0, porch: 12, h: 18 });
 E.push({ t: 'chalke', c: CHALKE.c, y: 0 });
 // the column of Justinian on the Augustaion's west side, his horse facing east
-E.push({ t: 'honor_column', kind: 'justinian', at: [AUGUSTAION[0] + 24, AUGUSTAION[1] + 32], y: 0, h: 34, d: 3.2 });
+E.push({ t: 'cn_justinian_column', at: JUSTINIAN, y: 0, h: 34, d: 3.2 });
 // honorific statues on marble bases (the Augustaion "was full of statues": Theodosius, Eudoxia, Pulcheria and others, after Procopius and the Patria) and phialai (canopied basins) in the squares
 for (const [x, z, r] of [[-30, 124, 0.4], [-4, 128, -0.3], [-24, 156, 0.8], [-8, 166, 3.1], [-38, 46, 0.2], [27, 46, -0.2], [-47, 104, 1.4]]) E.push({ t: 'charioteer_statue', at: [x, z], y: 0, rot: r });
 for (const [x, z] of [[-14, 140], [24, 72]]) E.push({ t: 'byz_fountain', at: [x, z], y: 0, kind: 'canopy', r: 1.8 });
