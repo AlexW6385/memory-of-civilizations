@@ -12,7 +12,7 @@ import '../../styles/islamic/platform.js';
 import { dome, haram } from './plan.js';
 import { city } from './city.js';
 import music from './music.js';
-import { houses } from './town.js';
+import { houses, upWalks } from './town.js';
 export { music };
-export const landmarks = [{ plan: dome, music }];
+export const landmarks = [{ plan: { ...dome, walks: [...(dome.walks ?? []), ...upWalks(dome.origin, dome.base || 0)] }, music }];
 export async function town() { return [haram, ...city(), ...(await houses())]; }
