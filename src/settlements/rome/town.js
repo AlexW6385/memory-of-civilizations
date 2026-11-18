@@ -1,6 +1,7 @@
 // The insulae of the Campus Martius (docs/settlements/rome.md §5): in 100 m tiles, each in full
 // (shops, windows, shutters, balconies, cornices) near and in outline far (as src/settlements/lod.js, but in 160 m tiles:
 // fewer plan x material buckets, DESIGN geometry budget).
+import './sculpt.js';
 import { RADIUS, VIA_LATA, lots, inRect, rows, INN, FULLER, STADIUM, saeptaRows, quayRows, riverEdge, fountains, fills, gardens, FORUM, TEMPLE, PISTRINUM, LATRINE, inn2 } from './layout.js';
 import '../../styles/roman/ways.js';
 import '../../styles/roman/houses.js';
@@ -25,6 +26,12 @@ function tiles160(id, style, elements, { near, R, entrance, T = 160 }) {
   return plans;
 }
 const site = (id, elements, rooms = []) => ({ id, style: 'rome-site', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -200], facing: 's' } });
+/** The lares of a crossroads shrine: where street_kit puts it (src/styles/roman/ways.js), turned as it is. */
+function shrineLares(w) {
+  const zz = w.along !== 'x', side = w.shrine[1], u = w.shrine[0], off = side * (w.half - 0.6);
+  const [x, z] = zz ? [w.at[0] + off, w.at[1] + u] : [w.at[0] + u, w.at[1] + off];
+  return { t: 'rome_lares', at: [x, z], y: 0, yaw: zz ? (side > 0 ? -Math.PI / 2 : Math.PI / 2) : (side > 0 ? Math.PI : 0) };
+}
 export async function town() {
   // the lot by the street north of the Pantheon holds the atrium house with its thermopolium (§4.4), walked into
   const same = (r, q) => r.every((v, i) => Math.abs(v - q[i]) < 1);
@@ -53,11 +60,13 @@ export async function town() {
   const [fx0, fz0, fx1, fz1] = FORUM, zm = (fz0 + fz1) / 2, cl = (a, b, side, gaps) => ({ t: 'colonnade', a, b, at: a, y: 0, h: 7.6, step: 3.9, depth: 5, side, gaps });
   const forum = [
     { t: 'forum_floor', rect: FORUM, y: 0 },
-    { t: 'forum_kit', rect: FORUM, temple: TEMPLE, at: [(FORUM[0] + FORUM[2]) / 2, (FORUM[1] + FORUM[3]) / 2], seed: 5 },
+    { t: 'rome_forum_kit', rect: FORUM, temple: TEMPLE, at: [(FORUM[0] + FORUM[2]) / 2, (FORUM[1] + FORUM[3]) / 2], seed: 5 },
+    { t: 'rome_rostra', at: [fx1 - 18, zm], y: 0 },
+    { t: 'rome_equestrian', at: [-96, zm], y: 0, yaw: 0 },
     cl([TEMPLE[2] + 2, fz0 + 5], [fx1 - 6, fz0 + 5], -1), cl([TEMPLE[2] + 2, fz1 - 5], [fx1 - 6, fz1 - 5], 1),
     cl([fx1 - 5, fz0 + 5], [fx1 - 5, fz1 - 5], -1, [[zm - fz0 - 5 - 7, zm - fz0 - 5 + 7]]),
     { t: 'temple', rect: TEMPLE, at: [(TEMPLE[0] + TEMPLE[2]) / 2, (TEMPLE[1] + TEMPLE[3]) / 2], front: 'e', y: 0, h: 11.5, nf: 6, podium: 2.6 },
-    ...[[-84, -142, 0], [-84, -96, Math.PI], [-102, -146, 0], [-102, -92, Math.PI], [-124, -146, 0], [-124, -92, Math.PI]].map(([x, z, r], i) => ({ t: 'statue', at: [x, z], y: 0, rot: r, h: 2.0, base: 1.3, mat: i % 2 ? 'marble' : 'gilt_bronze' })),
+    ...[[-84, -142, 0], [-84, -96, Math.PI], [-102, -146, 0], [-102, -92, Math.PI], [-124, -146, 0], [-124, -92, Math.PI]].map(([x, z, r], i) => ({ t: 'rome_statue', i, at: [x, z], y: 0, rot: r, h: 2.0, base: 1.3, mat: i % 2 ? 'marble' : 'gilt_bronze' })),
   ];
   // the ways: basalt paving on the Via Lata and the two cross streets in 100 m pieces, the stepping stones at the alleys, street furniture, the closed alleys, the gardens
   const xs = VIA_LATA.x, hw = VIA_LATA.w / 2 + 0.4, zmax = Math.floor(Math.sqrt((RADIUS - 30) ** 2 - xs * xs)), ways = [];
@@ -80,7 +89,7 @@ export async function town() {
     for (const i of [4, 14, 24, 31]) if (E[i]) ways.push({ t: 'landing', at: [E[i][0], E[i][1]], land: 1, level: -5, w: 4 });
     for (const i of [9, 20]) if (E[i]) ways.push({ t: 'crane', at: [E[i][0] + 5.5, E[i][1]], rot: -Math.PI / 2, y: 0.06 });
     for (const r of quayRows()) ways.push({ t: 'taberna_row', ...r }); }
-  const tiles = tiles160('rome-insulae', 'roman', [...ways, ...free.map((l) => ({ t: 'insula', ...l })), ...rows().map((r) => ({ t: 'taberna_row', ...r, storeys: r.front === 's' && r.seed % 3 === 0 ? 2 : undefined })), ...saeptaRows().map((r) => ({ t: 'taberna_row', ...r })), ...fountains().map((f) => ({ t: 'fountain', ...f })), ...forum], { near: 270, R: RADIUS, entrance: { at: [0, -200], facing: 's' } });
+  const tiles = tiles160('rome-insulae', 'roman', [...ways, ...free.map((l) => ({ t: 'insula', ...l })), ...rows().map((r) => ({ t: 'taberna_row', ...r, storeys: r.front === 's' && r.seed % 3 === 0 ? 2 : undefined })), ...saeptaRows().map((r) => ({ t: 'taberna_row', ...r })), ...fountains().map((f) => ({ t: 'rome_fountain', ...f })), ...ways.filter((w) => w.shrine).map(shrineLares), ...forum], { near: 270, R: RADIUS, entrance: { at: [0, -200], facing: 's' } });
   const [x0, z0, x1, z1] = DOMUS;
   return [...tiles, houses,
     site('rome-domus', [{ t: 'domus', rect: DOMUS, y: 0 }, { t: 'litter', at: LITTER.at, y: 0, rot: LITTER.rot }], [

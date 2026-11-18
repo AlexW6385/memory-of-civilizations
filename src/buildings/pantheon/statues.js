@@ -10,6 +10,7 @@
 
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import { Matrix4, Vector3 } from '../../core/three.js';
+import { romanFigure, placeRoman } from './romans.js';
 
 const TAU = Math.PI * 2;
 
@@ -102,9 +103,12 @@ function pedestal(bag, col, x, y, z, h, w, dieMat) {
 
 export function god(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0, h = el.h ?? 3.6, base = el.base ?? 1.1, f = el.face ?? [0, 1];
-  const rot = Math.atan2(f[0], f[1]), s = h / 1.8, mat = el.mat ?? GODS[el.god].mat ?? 'marble';
+  const rot = Math.atan2(f[0], f[1]), mat = el.mat ?? 'marble';
   pedestal(bag, col, x, y, z, base, el.w ?? 1.5, el.die ?? 'pavonazzetto');
-  for (const [m, g] of figure(el.god)) { g.scale(s, s, s); g.rotateY(rot); g.translate(x, y + base, z); bag.add(m ?? mat, g); }
+  const fig = placeRoman(romanFigure(el.god, el.lod ?? 0, [x, z]), h / 0.97, x, y + base, z, rot);
+  if (fig.stone) bag.add(mat, fig.stone);
+  if (fig.metal) bag.add('bronze', fig.metal);
+  if (fig.gilt) bag.add('gilt_bronze', fig.gilt);
 }
 
 /** coffer_rosettes: see the header; the maths of the coffers is that of the dome's own builder (src/styles/roman/index.js). */
