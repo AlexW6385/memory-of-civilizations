@@ -3,6 +3,7 @@
 // houses, the roadside stalls, the brickworks and the tank, and the people and animals about them. Several plans, so that each builds in turn while the visitor already walks.
 import '../../styles/burmese/index.js';
 import { dressing } from './dressing.js';
+import { sculpture, gateLions } from './sculpt.js';
 import { houseSpots } from '../../styles/burmese/houses.js';
 import {
   RADIUS, RIVER_Y, bankX, CITY, WALL, GATE, THAT, THAT_ENC, PALACE, PAL_HALL, SHWE, SHWE_PREC, SULA, SULA_PREC, TANK, TANK_Y, KILNS, KYAUNGS, PRECINCT, MAIN_ROAD,
@@ -114,8 +115,6 @@ function roadside() {
 /** The precinct furniture of the Ananda: the chinthe pairs at the four gates, lamp pillars and festival poles along the approaches, rows of votive stupas inside the walls, offerings by the porches. */
 function anandaCourt() {
   const [px0, pz0, px1, pz1] = PRECINCT, [ax, az] = ANANDA.c, items = [], r = rng(1105);
-  const lions = [[px0 + 2.6, az, -Math.PI / 2, 'z'], [px1 - 2.6, az, Math.PI / 2, 'z'], [ax, pz0 + 2.6, Math.PI, 'x'], [ax, pz1 - 2.6, 0, 'x']];
-  for (const [x, z, rot, ax2] of lions) for (const sd of [-1, 1]) items.push({ k: 'chinthe', c: ax2 === 'z' ? [x, z + sd * 5] : [x + sd * 5, z], rot, s: 1.15 });
   for (let x = px0 + 9; x < ax - 52; x += 7) for (const sd of [-1, 1]) items.push({ k: 'lamp', c: [x, az + sd * 6.2], rot: 0, seed: x });
   for (const [dx, dz] of [[-62, -9], [-62, 9], [-70, -9], [-70, 9], [62, -9], [62, 9], [-9, -62], [9, -62], [-9, 62], [9, 62]]) items.push({ k: 'pole', c: [ax + dx, az + dz], rot: 0, seed: Math.round(dx * 7 + dz) });
   const rows = [[60, pz0 + 3.5, 0, 22], [150, pz0 + 3.5, 0, 22], [60, pz1 - 3.5, 0, 22], [150, pz1 - 3.5, 0, 22], [px0 + 4, -48, Math.PI / 2, 26], [px0 + 4, 52, Math.PI / 2, 26], [px1 - 4, 40, Math.PI / 2, 20],
@@ -170,6 +169,7 @@ function temples() {
   [[26, -8, 0], [26, 8, Math.PI], [105 - 9, 100, Math.PI], [105 + 9, -100, 0], [96, -112, Math.PI / 2], [96, 112, Math.PI / 2]].forEach(([x, z, rot], i) => E.push({ t: 'bgn_stall', c: [x, z], y: 0, rot, seed: i + 40, goods: goods[(i + 1) % 4] }));
   E.push(...courts());
   E.push({ t: 'bgn_props', items: [...anandaCourt(), ...roadside()] });
+  E.push(...gateLions());   // the modelled chinthe of the Ananda's four gates (sculpt.js)
   // more stalls inside the Ananda's west gate and by the gates of the other two great temples (flowers, candles, gold leaf, water-pots for the pilgrims)
   [[31, -10.5, 0], [31, 10.5, Math.PI], [45, -10.5, 0], [45, 10.5, Math.PI], [120, -100, Math.PI / 2], [150, -144, Math.PI], [130, 153, 0], [112 - 8, 190, Math.PI / 2], [112 - 8, 206, Math.PI / 2]]
     .forEach(([x, z, rot], i) => E.push({ t: 'bgn_stall', c: [x, z], y: 0, rot, seed: i + 60, goods: goods[(i + 2) % 4] }));
@@ -262,6 +262,6 @@ function people() {
 }
 
 export async function town() {
-  return [...city(), houses(), temples(), people(), base('bagan-dressing', dressing(), 'life')];
+  return [...city(), houses(), temples(), people(), base('bagan-dressing', dressing(), 'life'), ...sculpture()];
 }
 void MAIN_ROAD; void PRECINCT;
