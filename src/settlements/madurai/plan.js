@@ -29,7 +29,7 @@ const OG = [
 // (the Ashta Shakti Mandapam's entrance opens through the east wall south of the east gopuram)
 export const ASHTA = [104, 34, 128, 46];
 wallLoop(WALL, [...OG.map((g) => ({ s: g.s, at: g.s === 'n' || g.s === 's' ? g.c[0] : g.c[1], w: g.w })), { s: 'e', at: (ASHTA[1] + ASHTA[3]) / 2, w: ASHTA[3] - ASHTA[1] }], 9, 2);
-for (const g of OG) E.push({ t: 'gopuram', c: g.c, dir: g.s === 'n' || g.s === 's' ? 'ns' : 'ew', w: g.w, d: g.d, h: g.h, tiers: g.n });
+for (const g of OG) E.push({ t: 'gopuram', c: g.c, dir: g.s === 'n' || g.s === 's' ? 'ns' : 'ew', w: g.w, d: g.d, h: g.h, tiers: g.n, fig: g.s === 's' ? 'near' : 'far', dvara: true, out: g.s === 'n' || g.s === 'w' ? -1 : 1 });
 // Sundareswarar's enclosure: gopurams east, north and south, the vimana, the flagstaff
 {
   const [x0, z0, x1, z1] = SUNDARA, cz = (z0 + z1) / 2, cx = (x0 + x1) / 2;

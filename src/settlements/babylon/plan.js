@@ -5,6 +5,8 @@
 import { esagilaChambers, RADIUS, WAY, GATE, WALL_Z, PALACE, PRECINCT, ZIGGURAT, ESAGILA, RIVER, BRIDGE, QUAY, riverX, height } from './layout.js';
 
 const E = [];
+// the level of detail of the modelled relief by distance from the arrival (src/planet/arrivals.js): full to the gate, reduced beyond
+const LOD = { at: [WAY.x, -360], full: 62, mid: 400 }, LOD_GATE = { ...LOD, mid: 76 };
 /** The round boats on the river: z, d (from the river's middle), r, cargo; the boatmen and an ass are placed in town.js. */
 export const QUFFAS = [
   { z: -60, d: 22, r: 2.0, cargo: 'casks', moored: true }, { z: -40, d: 23, r: 1.6, cargo: 'reeds', moored: true },
@@ -23,18 +25,18 @@ E.push({ t: 'esagila', rect: ESAGILA, h: 12 });
 // the double wall across the north with the Ishtar Gate in it
 E.push({ t: 'city_wall', a: [-(RADIUS - 50), WALL_Z], b: [GATE.c[0] - 22, WALL_Z], h: 15, th: 6, gap: 12 });
 E.push({ t: 'city_wall', a: [GATE.c[0] + 22, WALL_Z], b: [RADIUS - 50, WALL_Z], h: 15, th: 6, gap: 12 });
-E.push({ t: 'ishtar_gate', c: [GATE.c[0], WALL_Z + 8], w: 5, d: 40, h: 14, h2: 23 });
+E.push({ t: 'ishtar_gate', c: [GATE.c[0], WALL_Z + 8], w: 5, d: 40, h: 14, h2: 23, lod: LOD_GATE });
 // Nebuchadnezzar's dedication on the city face of the inner wall east of the gate, between its first two towers,
 // seen on coming out of the gate into the city
-E.push({ t: 'gate_inscription', x0: GATE.c[0] + 27.2, x1: GATE.c[0] + 37.2, z: WALL_Z + 18 + 1.95, face: 's', y0: 1.0, y1: 10.6, lines: 60 });
+E.push({ t: 'gate_inscription', x0: GATE.c[0] + 27.2, x1: GATE.c[0] + 37.2, z: WALL_Z + 18 + 1.95, face: 's', y0: 1.0, y1: 10.6, lines: 60, lod: LOD });
 // the Processional Way: paved with limestone flags down the middle and red breccia either side, between
 // glazed walls with lions
 E.push({ t: 'way_paving', rect: [WAY.x - WAY.w / 2, WAY.z0, WAY.x + WAY.w / 2, WALL_Z - 13.5], y: 0.12, seed: 1 });
 E.push({ t: 'way_paving', rect: [WAY.x - WAY.w / 2, WALL_Z + 28, WAY.x + WAY.w / 2, WAY.z1], y: 0.12, seed: 2 });
 // the Processional Way: glazed walls with lions, north of the gate and on to the precinct
 for (const s of [-1, 1]) {
-  E.push({ t: 'glazed_wall', a: [WAY.x + s * (WAY.w / 2 + 1.2), WAY.z0 + 20], b: [WAY.x + s * (WAY.w / 2 + 1.2), WALL_Z - 14], h: 9, th: 2.4 });
-  E.push({ t: 'glazed_wall', a: [WAY.x + s * (WAY.w / 2 + 1.2), WALL_Z + 32], b: [WAY.x + s * (WAY.w / 2 + 1.2), PALACE[3]], h: 8, th: 2.4, lions: true });
+  E.push({ t: 'glazed_wall', a: [WAY.x + s * (WAY.w / 2 + 1.2), WAY.z0 + 20], b: [WAY.x + s * (WAY.w / 2 + 1.2), WALL_Z - 14], h: 9, th: 2.4, lod: LOD });
+  E.push({ t: 'glazed_wall', a: [WAY.x + s * (WAY.w / 2 + 1.2), WALL_Z + 32], b: [WAY.x + s * (WAY.w / 2 + 1.2), PALACE[3]], h: 8, th: 2.4, lions: true, lod: LOD });
 }
 // the Southern Palace: its gate on the east, toward the Way; the east court, the throne court with the
 // enamelled facade of the throne room on its south side, a court of lodgings to the south-east

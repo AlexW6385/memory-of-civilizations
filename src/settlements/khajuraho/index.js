@@ -5,6 +5,7 @@ import '../../styles/ming/index.js';
 import { temples, tank, life } from './plan.js';
 import music from './music.js';
 import { houses } from './town.js';
+import { sculptPlans } from './sculpt.js';
 export { music };
 export const landmarks = [{ plan: temples, music }];
-export async function town() { return [tank, life, ...(await houses())]; }
+export async function town() { return [tank, life, ...sculptPlans(), ...(await houses())]; }

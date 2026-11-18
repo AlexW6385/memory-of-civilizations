@@ -73,22 +73,14 @@ export const HAUL = (() => {
   const S = [241, -58.6], ang = Math.atan2(-18, -34), d = [Math.cos(ang), Math.sin(ang)], pr = [-d[1], d[0]];
   return { at: S, ang, d, pr };
 })();
-export function haulLife() {
-  const rand = rng(2576), L = [], { at: S, d, pr } = HAUL;
-  const man = (at, rot, o) => L.push({ t: 'figure', at, y: 0.02, rot, seed: Math.floor(rand() * 1e9), dress: 'wrap', top: 'bare', cloth: 'cloth_white', skin: 'skin_medium', hat: 'none', hair: 'short', hairMat: 'hair_dark', feet: 'bare', carry: 'none', pose: 'stand', ...o });
-  const dir = face([0, 0], d);
-  for (let k = 0; k < 6; k++) for (const sg of [-1, 1]) {
-    const t = 6.0 + k * 1.25, p = [S[0] + d[0] * t + pr[0] * 0.45 * sg, S[1] + d[1] * t + pr[1] * 0.45 * sg];
-    man(p, dir, { pose: 'pull', carry: 'rope', len: 1.4 });
-  }
-  // the overseer beside them with his staff, the boy pouring water on the sand under the runners, two men with levers at the sledge's back, a man with a basket of sand
-  man([S[0] + d[0] * 8 + pr[0] * 2.3, S[1] + d[1] * 8 + pr[1] * 2.3], dir + 2.6, { pose: 'staff', carry: 'staff', over: 'sash', len: 1.7 });
-  man([S[0] + d[0] * 2.4 - pr[0] * 1.5, S[1] + d[1] * 2.4 - pr[1] * 1.5], dir + 1.57, { carry: 'pot', child: true, dress: 'loincloth' });
-  man([S[0] - d[0] * 2.4 + pr[0] * 1.1, S[1] - d[1] * 2.4 + pr[1] * 1.1], dir, { pose: 'brace', carry: 'staff', len: 1.7 });
-  man([S[0] - d[0] * 2.3 - pr[0] * 1.2, S[1] - d[1] * 2.3 - pr[1] * 1.2], dir, { pose: 'staff', carry: 'staff', len: 1.7 });
-  man([S[0] - d[0] * 6 + pr[0] * 3, S[1] - d[1] * 6 + pr[1] * 3], dir + Math.PI, { carry: 'basket' });
+/** The hauling gang near the arrival, in the sledge's frame (lat: sideways, fwd: along the haul; docs/settlements/giza.md §18): the figures are modelled bodies of the `ok_haul` element. */
+export const HAUL_ITEMS = (() => {
+  const L = [];
+  for (let k = 0; k < 6; k++) for (const sg of [-1, 1]) L.push({ kind: 'pull', lat: 0.45 * sg, fwd: 6.0 + k * 1.25 });
+  L.push({ kind: 'overseer', lat: -2.3, fwd: 8, off: 2.6 }, { kind: 'boy', lat: 1.5, fwd: 2.4, off: 1.57, k: 0.62 }, { kind: 'brace', lat: -1.1, fwd: -2.4 }, { kind: 'brace', lat: 1.2, fwd: -2.3 }, { kind: 'porter', lat: -3, fwd: -6, off: Math.PI });
   return L;
-}
+})();
+export function haulLife() { return []; }
 
 /** The masons' yard south of the causeway (casing stones, tools, a shade) and the priests' waiting-place before the causeway's northern doorway. */
 export const YARD = {

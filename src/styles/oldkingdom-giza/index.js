@@ -9,6 +9,11 @@ import { courseRibs } from './courses.js';
 import { falseDoor, northernNiche } from './sanctuary.js';
 import { sphinx } from './sphinx.js';
 import { causewayReliefs, slabFloor } from './reliefs.js';
+import { causewayCarved } from './carved.js';
+import { khafreTemple } from './khafre.js';
+import { khafre } from './statue.js';
+import { Sculpt } from './anatomy.js';
+import { haul } from './haulers.js';
 import { roomThings, courtCraft } from './houses.js';
 
 const OK = STYLES.oldkingdom;
@@ -26,17 +31,24 @@ registerStyle('oldkingdom-giza', {
     ...OK.elements,
     ok_pyramid: (el, c) => { OK.elements.ok_pyramid(el, c); courseRibs(c.bag, el); },
     ok_sphinx: sphinx,
+    ok_haul: haul,
+    // one seated statue of Khafre standing alone { at: [x, z], y, face: 'e'|'s'|'w'|'n', lod } (for the showroom and for courts)
+    ok_khafre_statue: (el, { bag }) => { const S = { g: new Sculpt(), m: new Sculpt() }; khafre(S, el.at[0], el.y ?? 0, el.at[1], el.face ?? 'e', el.lod ?? 0); bag.add('granite_black', S.g.geometry()); bag.add('marble_smooth', S.m.geometry()); },
     mastaba: (el, c) => {
       OK.elements.mastaba(el, c);
-      northernNiche(c.bag, { c: el.c, a: el.a, b: el.b, h: el.h, cased: el.mat === 'tura_limestone' });
+      {
+        // the false door's panel: the owner modelled in low relief for the tombs near the arrival (full within 70 m, reduced to 110 m of it), the old boxes beyond
+        const d = Math.hypot(el.c[0] + el.a - 242, el.c[1] - el.b + 2.6 + 50);
+        northernNiche(c.bag, { c: el.c, a: el.a, b: el.b, h: el.h, cased: el.mat === 'tura_limestone', lod: d < 70 ? 0 : d < 110 ? 1 : undefined });
+      }
     },
     ok_causeway_dress: (el, c) => {
       OK.elements.ok_causeway_dress(el, c);
       // the reliefs on the first reaches (the straight reach at the temple's door and the first 54 m of the level run) — the ones a visitor walks in
-      if (el.ya === 0 && el.yb === 0 && el.a[0] >= 168 && el.a[0] <= 186) causewayReliefs(c.bag, el, 0, 40);
+      if (el.ya === 0 && el.yb === 0 && el.a[0] >= 168 && el.a[0] <= 186) { const stop = causewayCarved(c.bag, el, 0, 40, [[177, -44], [200, -40]]); if (stop < 40) causewayReliefs(c.bag, el, stop, 40); }
     },
     ok_khafre_temple: (el, c) => {
-      OK.elements.ok_khafre_temple(el, c);
+      khafreTemple(el, c);
       khafreFloor(c.bag, el);
     },
     ok_temple: (el, c) => {

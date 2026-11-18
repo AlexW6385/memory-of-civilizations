@@ -9,10 +9,16 @@
 // Nyoirin holds the jewel before the chest in the right hand and the wheel on the left knee.
 
 import { figure, setFigure, along, lerp } from './sculpt.js';
+import { curve, ell, shell, head as headMesh, faceField, hand, frame, smooth, pleat } from './model.js';
+import { FEATS } from './buddha.js';
 
 const GILT = 'clay_gilt', METAL = 'gilt_bronze', HAIR = 'lacquer_black', RED = 'lacquer_red', JEWEL = 'gold', BLADE = 'gilt_bronze';
 
 /** bosatsu { at, y (the dais), dir (facing), bodhisattva ('kokuzo' | 'nyoirin'), h (seat to the top of the knot, 5.2 m) } */
+export const bosatsuMid = (el, { bag }) => {
+  const kind = el.bodhisattva === 'nyoirin' ? 'nyoirin' : 'kokuzo', s = (el.h ?? 5.2) / 5.2, P = 2.2;
+  setFigure(bag, figure(`bosatsu|${kind}|mid`, (S) => build(S, kind, true)), el.at, (el.y ?? 0) + P * s, el.dir || [0, 1], s);
+};
 export function bosatsu(el, { bag, col }) {
   const kind = el.bodhisattva === 'nyoirin' ? 'nyoirin' : 'kokuzo', s = (el.h ?? 5.2) / 5.2, P = 2.2;
   const f = figure(`bosatsu|${kind}`, (S) => build(S, kind));
@@ -22,7 +28,7 @@ export function bosatsu(el, { bag, col }) {
   col.circle(x, z, 1.9 * s, y + P * s, y + (P + 5.2) * s);
 }
 
-function build(S, kind) {
+function build(S, kind, mod = false) {
   pedestal(S);
   // ---- the crossed legs under the skirt, the soles turned up, the folds over the lap
   S.lathe(GILT, [[0.001, 0], [1.85, 0], [1.97, 0.25], [1.78, 0.6], [1.15, 0.86], [0.001, 0.9]], 28, (th) => 1 + 0.022 * Math.cos(th * 15), [0, 0, 0.35], 0.62);
@@ -32,7 +38,11 @@ function build(S, kind) {
   S.tube(GILT, along((t) => { const u = -1 + 2 * t; return [u * 1.5, 0.05 + 0.04 * Math.cos(u * 9), 1.42 - 0.35 * u * u, 0.06, 0.05]; }, 14), 6);
   // ---- the torso, bare; the sash across it from the left shoulder to the right hip
   const torso = [[0.001, 0.4], [0.95, 0.4], [0.86, 1.2], [0.82, 1.7], [0.95, 2.4], [1.02, 2.78], [0.86, 3.04], [0.42, 3.2], [0.001, 3.22]], TZ = -0.1, KZ = 0.62;
-  S.lathe(GILT, torso, 24, null, [0, 0, TZ], KZ);
+  if (mod) {
+    // the bare chest modelled: the pectorals, the breastbone, the waist, the ribs' swell
+    const tdisp = (a, y, r) => { const ca = Math.cos(a); if (ca < 0) return 0; const lx = r * Math.sin(a), w = smooth(0, 0.5, ca); return w * (0.06 * Math.exp(-0.5 * (((Math.abs(lx) - 0.38) / 0.22) ** 2 + ((y - 2.35) / 0.2) ** 2)) - 0.012 * Math.exp(-0.5 * (lx / 0.06) ** 2) * smooth(1.9, 2.4, y)); };
+    S.add(GILT, shell(torso, { n: 40, rows: 24, kz: KZ, c: [0, 0, TZ], disp: tdisp, cap: true }));
+  } else S.lathe(GILT, torso, 24, null, [0, 0, TZ], KZ);
   const rad = (prof, y) => { for (let i = 0; i < prof.length - 1; i++) if (y >= prof[i][1] && y <= prof[i + 1][1]) return prof[i][0] + (prof[i + 1][0] - prof[i][0]) * (y - prof[i][1]) / ((prof[i + 1][1] - prof[i][1]) || 1); return 0; };
   const front = (x, y, o = 0) => TZ + KZ * Math.sqrt(Math.max(0.01, rad(torso, y) ** 2 - x * x)) + o;
   S.tube(GILT, along((t) => { const x = 0.72 - 1.5 * t, y = 2.95 - 1.75 * t; return [x, y, front(x, y, 0.03), 0.09, 0.03]; }, 10), 6);
@@ -47,7 +57,8 @@ function build(S, kind) {
   // ---- the neck with its three folds, the head
   S.lathe(GILT, [[0.33, 3.05], [0.34, 3.14], [0.31, 3.2], [0.33, 3.27], [0.3, 3.33], [0.31, 3.4], [0.001, 3.45]], 16, null, [0, 0, 0.02]);
   const head = [[0.001, 3.36], [0.3, 3.39], [0.43, 3.56], [0.48, 3.85], [0.5, 4.1], [0.48, 4.3], [0.38, 4.5], [0.2, 4.6], [0.001, 4.62]], HZ = 0.06, HK = 1.08;
-  S.lathe(GILT, head, 22, null, [0, 0, HZ], HK);
+  if (mod) S.add(GILT, headMesh(head, { c: [0, 0, HZ], kz: HK, field: faceField(FEATS, 0.235), chinY: 3.36, n: 72, rows: 44 }));
+  else S.lathe(GILT, head, 22, null, [0, 0, HZ], HK);
   const face = (x, y, o = 0) => HZ + HK * Math.sqrt(Math.max(0.005, rad(head, y) ** 2 - x * x)) + o;
   // the hair: a cap above the hairline, down the back of the head to the nape; the high knot
   S.lathe(HAIR, [[0.47, 4.15], [0.5, 4.3], [0.41, 4.5], [0.22, 4.61], [0.001, 4.64]], 22, null, [0, 0.015, HZ], HK * 1.03, 1.03);
@@ -72,21 +83,29 @@ function build(S, kind) {
   }
   // the face: brows, lowered lids, nose, lips, the urna; the long ears
   for (const sx of [-1, 1]) {
-    S.tube(GILT, along((t) => { const x = sx * (0.06 + 0.3 * t); return [x, 4.03 + 0.05 * Math.sin(Math.PI * t) - 0.03 * t, face(x, 4.03, 0.012), 0.022, 0.02]; }, 6), 5);
-    S.tube(GILT, along((t) => { const x = sx * (0.09 + 0.24 * t); return [x, 3.9 + 0.025 * Math.sin(Math.PI * t), face(x, 3.9, 0.006), 0.018, 0.014]; }, 6), 5);
+    if (!mod) S.tube(GILT, along((t) => { const x = sx * (0.06 + 0.3 * t); return [x, 4.03 + 0.05 * Math.sin(Math.PI * t) - 0.03 * t, face(x, 4.03, 0.012), 0.022, 0.02]; }, 6), 5);
+    if (!mod) S.tube(GILT, along((t) => { const x = sx * (0.09 + 0.24 * t); return [x, 3.9 + 0.025 * Math.sin(Math.PI * t), face(x, 3.9, 0.006), 0.018, 0.014]; }, 6), 5);
     const E = (y, o, f) => [sx * (0.47 + o), y, HZ + 0.02 + f];
     S.plate(GILT, [E(4.0, 0, 0.06), E(3.98, 0.08, -0.06), E(3.78, 0.1, -0.1), E(3.55, 0.08, -0.07), E(3.45, 0.03, 0), E(3.52, 0.01, 0.06), E(3.82, 0.02, 0.09)], [sx, 0, 0], 0.07);
   }
-  S.tube(GILT, [[0, 3.98, face(0, 3.98, -0.02), 0.045], [0, 3.78, face(0, 3.78, 0.05), 0.06], [0, 3.72, face(0, 3.72, 0.07), 0.065, 0.05]], 7);
-  for (const sx of [-1, 1]) S.ball(GILT, [sx * 0.06, 3.7, face(sx * 0.06, 3.7, 0.03)], 0.035, [1, 1, 1], 6, 5);
-  S.tube(GILT, along((t) => { const x = -0.13 + 0.26 * t; return [x, 3.58 + 0.012 * Math.cos(x * 22), face(x, 3.58, 0.012), 0.018, 0.024]; }, 6), 5);
-  S.ball(JEWEL, [0, 4.07, face(0, 4.07, 0.0)], 0.035, [1, 1, 1], 6, 5);
+  if (!mod) S.tube(GILT, [[0, 3.98, face(0, 3.98, -0.02), 0.045], [0, 3.78, face(0, 3.78, 0.05), 0.06], [0, 3.72, face(0, 3.72, 0.07), 0.065, 0.05]], 7);
+  if (!mod) for (const sx of [-1, 1]) S.ball(GILT, [sx * 0.06, 3.7, face(sx * 0.06, 3.7, 0.03)], 0.035, [1, 1, 1], 6, 5);
+  if (!mod) S.tube(GILT, along((t) => { const x = -0.13 + 0.26 * t; return [x, 3.58 + 0.012 * Math.cos(x * 22), face(x, 3.58, 0.012), 0.018, 0.024]; }, 6), 5);
+  S.ball(JEWEL, [0, 4.07, face(0, 4.07, 0.02) + (mod ? 0.02 : 0)], 0.035, [1, 1, 1], 6, 5);
   // ---- the arms, the armlets and bracelets, the scarf
   const SH = (sx) => [sx * 0.98, 2.82, -0.12];
   const arm = (sx, E, Wr) => {
+    if (mod) {
+      const m1 = lerp(SH(sx), E, 0.5), m2 = lerp(E, Wr, 0.5);
+      S.add(GILT, curve([SH(sx), [m1[0] + sx * 0.04, m1[1], m1[2] - 0.04], E], 0.27, 0.19, { n: 10, per: 3, swell: 0.12 }));
+      S.add(GILT, curve([E, [m2[0], m2[1], m2[2] + 0.03], Wr], 0.19, 0.12, { n: 10, per: 3, swell: 0.16 }));
+      S.add(GILT, ell(SH(sx), [0.31, 0.3, 0.29], undefined, 10, 6));
+      S.add(GILT, ell(E, [0.2, 0.2, 0.2], undefined, 8, 5));
+    } else {
     S.tube(GILT, [[...SH(sx), 0.27], [...lerp(SH(sx), E, 0.5), 0.23], [...E, 0.2]], 10);
     S.tube(GILT, [[...E, 0.2], [...lerp(E, Wr, 0.5), 0.17], [...Wr, 0.13]], 10);
     S.ball(GILT, E, 0.2, [1, 1, 1], 8, 6);
+    }
     const ar = lerp(SH(sx), E, 0.38), d = E.map((v, i) => v - SH(sx)[i]);
     S.tube(METAL, [[...ar.map((v, i) => v - d[i] * 0.05), 0.26], [...ar.map((v, i) => v + d[i] * 0.05), 0.26]], 10);
     S.ball(JEWEL, ar.map((v, i) => v + [sx * 0.24, 0.02, 0.05][i]), 0.05);
@@ -103,23 +122,23 @@ function build(S, kind) {
     // the right hand (−x) raised before the shoulder holding the sword upright
     const E = [-1.36, 1.92, 0.32], Wr = [-1.02, 2.18, 1.02];
     arm(-1, E, Wr);
-    fist(S, Wr, [0.3, 0.6, 1]);
+    if (mod) fistGrip(S, Wr, -1); else fist(S, Wr, [0.3, 0.6, 1]);
     sword(S, [-0.98, 2.3, 1.14]);
     // the left hand on the knee, palm up, the jewel on it
     const E2 = [1.36, 1.74, 0.24], W2 = [1.36, 0.97, 0.95];
     arm(1, E2, W2);
-    palmUp(S, [1.36, 0.93, 1.16], 1);
+    if (mod) openHand(S, W2, 1); else palmUp(S, [1.36, 0.93, 1.16], 1);
     jewel(S, [1.36, 1.02, 1.2], 0.15);
   } else {
     // the right hand before the chest, palm up, holding the jewel
     const E = [-1.3, 1.86, 0.3], Wr = [-0.62, 2.2, 0.86];
     arm(-1, E, Wr);
-    palmUp(S, [-0.5, 2.18, 1.0], -1);
+    if (mod) openHand(S, [-0.62, 2.2, 0.86], -1); else palmUp(S, [-0.5, 2.18, 1.0], -1);
     jewel(S, [-0.5, 2.27, 1.02], 0.14);
     // the left hand on the knee holding the wheel of the law upright
     const E2 = [1.36, 1.74, 0.24], W2 = [1.36, 0.97, 0.95];
     arm(1, E2, W2);
-    fist(S, [1.38, 0.95, 1.12], [0, 1, 0.2]);
+    if (mod) fistGrip(S, [1.38, 0.92, 1.0], 1); else fist(S, [1.38, 0.95, 1.12], [0, 1, 0.2]);
     wheel(S, [1.38, 1.5, 1.18], 0.34);
   }
   halo(S);
@@ -207,4 +226,13 @@ function fist(S, c, dir) {
   S.ball(GILT, [c[0], c[1] - 0.12, c[2]], 0.12, [1, 1.1, 1.1], 8, 6);
   for (let f = 0; f < 4; f++) S.ball(GILT, [c[0] + 0.1 * (dir[2] > 0.5 ? 1 : 0.6), c[1] - 0.05 - f * 0.055, c[2] + 0.06], 0.035, [1, 1, 1], 6, 5);
   S.tube(GILT, [[c[0] - 0.07, c[1] - 0.02, c[2] - 0.06, 0.035], [c[0] - 0.02, c[1] + 0.03, c[2] + 0.08, 0.028]], 6);
+}
+
+/** A modelled open hand lying palm up from the wrist w, the fingers forward and a little curled, the thumb toward the body; sx the side (−1 right). */
+function openHand(S, w, sx) {
+  for (const g of hand(frame([w[0], w[1] - 0.03, w[2] - 0.02], [-sx, 0, 0], [0, 0, 1], [0, 1, 0], 0.26), { curl: [0.2, 0.24, 0.28, 0.34], spread: 0.08, thumb: [0.7, 0.1], n: 6 })) S.add(GILT, g);
+}
+/** A modelled fist round an upright stem (the sword's hilt, the wheel's stem); sx the side (−1 right). */
+function fistGrip(S, w, sx) {
+  for (const g of hand(frame([w[0] - sx * 0.02, w[1] - 0.06, w[2] - 0.12], [0, 1, 0], [0, 0, 1], [-sx, 0, 0], 0.24), { curl: [0.75, 0.75, 0.75, 0.75], spread: 0.02, thumb: [0.3, 0.6], thumbCurl: 0.8, n: 6 })) S.add(GILT, g);
 }
