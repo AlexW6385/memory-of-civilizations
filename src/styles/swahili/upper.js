@@ -167,7 +167,7 @@ function furnish(ctx, P, o, fu) {
   const gate = [lc, tc].filter((v) => v !== null);       // the doors' x: kept clear
   const clear = (x, w) => gate.every((g) => Math.abs(x - g) > 0.75 + w / 2);
   // a floor mat across the middle, its length by the house
-  bag.add('reed_mat', box(Math.min(at(0.9), at(Lr - 0.5)), fu, zf + 0.5, Math.max(at(0.9), at(Lr - 0.5)), fu + 0.018, zb - 0.5));
+  bag.add('reed_mat', box(Math.min(at(0.9), at(Lr - 0.5)), fu + 0.015, zf + 0.5, Math.max(at(0.9), at(Lr - 0.5)), fu + 0.03, zb - 0.5));
   // the lamp hung from the roof poles
   { const lx = rc + (hp(seed, 3) - 0.5) * 0.6, lz = (zf + zb) / 2, top = fu + 2.5;
     bag.add('rope_fibre', box(lx - 0.006, fu + 2.15, lz - 0.006, lx + 0.006, top, lz + 0.006));
@@ -177,9 +177,9 @@ function furnish(ctx, P, o, fu) {
   const e0 = Math.min(endX, at(1.35)), e1 = Math.max(endX, at(1.35));
   if (use === 'sleep') {
     bx(bag, 'lime_plaster', e0, fu - 0.01, zf + 0.1, e1, fu + 0.42, zb - 0.1); col.rect([e0, zf + 0.1, e1, zb - 0.1], fu, fu + 0.42);
-    bx(bag, 'reed_mat', e0 + 0.03, fu + 0.42, zf + 0.13, e1 - 0.03, fu + 0.445, zb - 0.13);
-    bx(bag, pick(CL, seed, 1), e0 + 0.06, fu + 0.445, zf + 0.2, e1 - 0.06, fu + 0.5, zf + 0.2 + (zb - zf) * 0.5);
-    bx(bag, 'cloth_white', e0 + 0.08, fu + 0.5, zb - 0.55, e0 + 0.4 + 0.25 * hp(seed, 2), fu + 0.6, zb - 0.2);
+    bx(bag, 'reed_mat', e0 + 0.03, fu + 0.4, zf + 0.13, e1 - 0.03, fu + 0.435, zb - 0.13);
+    bx(bag, pick(CL, seed, 1), e0 + 0.06, fu + 0.43, zf + 0.2, e1 - 0.06, fu + 0.5, zf + 0.2 + (zb - zf) * 0.5);
+    bx(bag, 'cloth_white', e0 + 0.08, fu + 0.49, zb - 0.55, e0 + 0.4 + 0.25 * hp(seed, 2), fu + 0.6, zb - 0.2);
     // the chests (sanduku) against the wall beside, and the water jar
     const cx = at(1.9 + 0.3 * hp(seed, 4));
     if (clear(cx, 1)) { bx(bag, 'wood_dark', cx - 0.45, fu, zS - 0.5, cx + 0.45, fu + 0.52, zS); col.rect([cx - 0.45, zS - 0.5, cx + 0.45, zS], fu, fu + 0.52); for (const d of [-0.3, 0.3]) bx(bag, 'iron', cx + d - 0.02, fu, zS - 0.505, cx + d + 0.02, fu + 0.52, zS); }
@@ -259,7 +259,7 @@ function terrace(ctx, P, o, yU) {
     if (Math.abs(x - tc) < 0.9) continue;
     const m = hp(x, z1, 3);
     if (m < 0.55) { jar(bag, m < 0.3 ? 'terracotta' : 'pottery_dark', x, yU, zS - 0.2, 0.5 + 0.2 * m, 0.17 + 0.05 * m); col.circle(x, zS - 0.2, 0.22, yU, yU + 0.6); }
-    else if (m < 0.8) bx(bag, 'reed_mat', x - 0.4, yU + 0.001, zS - 1.0 + 0.2 * hp(z1, x), x + 0.4 + 0.2 * m, yU + 0.02, zS - 0.1);
+    else if (m < 0.8) bx(bag, 'reed_mat', x - 0.4, yU + 0.015, zS - 1.0 + 0.2 * hp(z1, x), x + 0.4 + 0.2 * m, yU + 0.03, zS - 0.1);
   }
   if (hp(seed, 31) < 0.7) {
     const sx = tc + sg * (1.9 + 0.2 * hp(seed, 32)), a = sx - 0.9, b = sx + 0.9;
