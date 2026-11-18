@@ -22,6 +22,7 @@ import '../../styles/song/index.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const TH = 0.25, H1 = 3.2, SL = 0.25, F2 = H1 + SL, H2 = 2.9, UT = F2 + H2, NT = 16, RISE = F2 / (NT + 1), TREAD = 0.26;
+const GROUND_FIGS = 0;
 const RD = 4.5, PT = 0.16;
 const YAW = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 };
 const SHUT = ['timber', 'wood_dark', 'timber'];
@@ -468,7 +469,12 @@ function storeyIn(el, ctx) {
   R.emit();
   return R.figs;
 }
-STYLES.life.elements.hz_upstairs_in = (el, ctx) => { for (const fg of storeyIn(el, ctx)) STYLES.life.elements.figure(fg, ctx); };
+STYLES.life.elements.hz_upstairs_in = (el, ctx) => {
+  const g0 = el.y ?? 0;
+  let seen = 0;
+  // (the ground floors keep no figures: the street life stands there, and their extra figure variants would add draws at the arrival)
+  for (const fg of storeyIn(el, ctx)) { if (fg.y < g0 + 1 && seen++ >= GROUND_FIGS) continue; STYLES.life.elements.figure(fg, ctx); }
+};
 
 /** The rectangles of the music rooms: the ground floor's two rooms and the upper floor's, in the world. */
 export function storeyRooms(l) {
