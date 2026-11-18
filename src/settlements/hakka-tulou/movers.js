@@ -27,7 +27,7 @@ export function walkways() {
   road(-1.2, -80, 1.2, -T.R - 1, 0.6, 'lane', 0.1);
   // through the gate and across the court to the hall; round the hall; the passages out to the lane
   road(-1.1, 6.2, 1.1, T.R + 1, 1.2, 'lane', 0.8);
-  road(-10, 6.2, 10, 9.4, 0.9, 'lane', 0.5); road(-10, -9.4, 10, -6.2, 0.7, 'lane', 0.3);
+  road(-10, 6.2, 10, 8.5, 0.9, 'lane', 0.5); road(-10, -8.5, 10, -6.2, 0.7, 'lane', 0.3); // kept clear of the second ring's two court stairs (z ±8.8–10)
   road(-12.5, -9.4, -9.6, 9.4, 0.7, 'lane', 0.3); road(9.6, -9.4, 12.5, 9.4, 0.7, 'lane', 0.3);
   road(-1.1, -T.R - 1, 1.1, -9.4, 0.6, 'lane', 0.2);
   road(9.6, -1.1, 25, 1.1, 0.5, 'lane', 0.2); road(-25, -1.1, -9.6, 1.1, 0.5, 'lane', 0.2);
