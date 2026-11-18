@@ -2,7 +2,7 @@
 // goldfish and red carp in the garden pond, dark carp in the canals, house swallows over the
 // canals and the pond, tree sparrows on the paving and the garden walls, crows at twilight over
 // the temple, a little egret on the canal's edge and a grey heron at the pond's shore.
-import { LEVEL, GARDEN, FOOTPRINTS, CANALS, pondDistance, canalDistance, nearGallery, nearRockPath } from './layout.js';
+import { LEVEL, GARDEN, GARDEN_BRIDGES, FOOTPRINTS, CANALS, pondDistance, canalDistance, nearGallery, nearRockPath } from './layout.js';
 import { ground } from './ground.js';
 
 const pondArea = [GARDEN[0] + 6, GARDEN[1] + 10, GARDEN[2] - 6, GARDEN[3] - 40];
@@ -11,6 +11,11 @@ const fish = [];
 // goldfish (jinyu) in loose schools, a few red carp (hongli) among larger loops
 for (let i = 0; i < 6; i++) fish.push({ n: 5, size: [0.26, 0.4], palette: 'goldfish', y: LEVEL.pond, area: pondArea, dist: pondDistance, margin: 1.7, a: [14, 7], ratio: 0.55, speed: 0.32, rise: 0.4, tries: 1 });
 for (let i = 0; i < 3; i++) fish.push({ n: 2, size: [0.5, 0.68], palette: 'redcarp', y: LEVEL.pond, area: pondArea, dist: pondDistance, margin: 1.9, a: [18, 8], ratio: 0.45, speed: 0.4, rise: 0.5 });
+// goldfish gathered at the garden's bridges (people feed the fish from them): a small tight school beside each, circling within a few metres
+for (const { pts } of GARDEN_BRIDGES) {
+  const mx = pts.reduce((a, q) => a + q[0], 0) / pts.length, mz = pts.reduce((a, q) => a + q[1], 0) / pts.length;
+  fish.push({ n: 6, size: [0.24, 0.36], palette: 'goldfish', y: LEVEL.pond, area: [mx - 6, mz - 6, mx + 6, mz + 6], dist: pondDistance, margin: 0.9, a: [4.5, 2.6], ratio: 0.55, speed: 0.22, rise: 0.7, minA: 1.4, tries: 1 });
+}
 // dark carp lazing in the canals, along their length
 for (const [x0, z0, x1, z1] of CANALS) {
   const alongX = x1 - x0 > z1 - z0, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
