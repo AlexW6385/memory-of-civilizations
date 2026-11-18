@@ -6,7 +6,7 @@
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { frame, L, RED } from './kit.js';
 
-const CV = 'limestone_carved', BL = 'maya_blue', JD = 'inlay_jade', OC = 'stucco_ochre', LF = 'stucco_leaf';
+export const CV = 'limestone_carved', BL = 'maya_blue', JD = 'inlay_jade', OC = 'stucco_ochre', LF = 'stucco_leaf';
 const SJ = JD, SO = OC;
 
 /**
@@ -14,7 +14,7 @@ const SJ = JD, SO = OC;
  * many small boxes would otherwise be a fine-detail mesh of its own for every material (one more draw each); joined, the element's
  * relief is one piece per material (src/core/geom.js DETAIL_SIZE).
  */
-function gather(bag) {
+export function gather(bag) {
   const by = new Map();
   return {
     add(m, g) {
