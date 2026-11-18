@@ -97,7 +97,7 @@ export function torana(bag0, col, at, dir, y, s = 1, kind = 'elephant') {
   const sq = (a, d, hw, hd, ch, yy) => [[a - hw + ch, d - hd, yy], [a + hw - ch, d - hd, yy], [a + hw, d - hd + ch, yy], [a + hw, d + hd - ch, yy], [a + hw - ch, d + hd, yy], [a - hw + ch, d + hd, yy], [a - hw, d + hd - ch, yy], [a - hw, d - hd + ch, yy]].map(([a2, d2, y2]) => f.p(a2, d2, y2));
   const yawOf = (dx, dz) => Math.atan2(-dz, dx);
   // the cell of the grids, by level (metres on the stone)
-  const cellBeast = lvl === 2 ? 0.036 : lvl === 1 ? 0.06 : 0.07, cellRider = lvl === 2 ? 0.06 : 0.08, cellYak = lvl === 2 ? 0.04 : 0.06, cellFrieze = lvl === 2 ? 0.032 : 0.05, cellPanel = lvl === 2 ? 0.032 : 0.055;
+  const cellBeast = lvl === 2 ? 0.05 : lvl === 1 ? 0.08 : 0.09, cellRider = lvl === 2 ? 0.085 : 0.1, cellYak = lvl === 2 ? 0.055 : 0.08, cellFrieze = lvl === 2 ? 0.045 : 0.065, cellPanel = lvl === 2 ? 0.04 : 0.065;
 
   // ---- the pillars ----
   for (const k of [-1, 1]) {
