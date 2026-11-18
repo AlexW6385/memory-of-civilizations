@@ -43,6 +43,29 @@ Sources added:
 - [Sarsen pick-dressing question — sarsen.org (2013)](https://www.sarsen.org/2013/02/sarsen-pick-dressing-question.html)
 - [Lichen survey at Stonehenge — Stone Pages (2003)](https://www.stonepages.com/news/archives/000177.html)
 
+## 1f. The stones' individual faults (2026-11; `faults()`, `tooledStone`, `standingStone`, `lintel_ring`, `lintel`, `src/styles/neolithic/index.js`)
+
+Every entry is [inferred]: the surveyed shapes of the individual stones are not used here; these are the faults any real sarsen or dolerite pillar has and a box lacks, applied by a hash of each stone's own seed so no two stones agree and every build is the same.
+
+| Feature | What we build | Basis |
+|---|---|---|
+| Weathering pits | Hollows 10-32 cm radius (a hand to a forearm across) and 1-8 cm deep on the old crust, fewer and shallower on dressed faces (a third of the depth); 9 on a plain upright, 34 on a dressed sarsen, 44 on a natural boulder; none within 20 cm of the foot | Solution hollows and weathering pits are the commonest surface fault of sarsen [inferred from the stones as seen today; the 2012 laser scan records the tooling surviving between them, see 1c] |
+| Entasis | The shaft swells 2.5-6.5% at mid-height, narrowing to both ends | Sarsens "widen slightly towards the top" and are "somewhat tapered" (see 1a) [stated]; the mid-height swelling is [inferred] from the irregular sections of unworked boulders |
+| Twist | The section turns up to 0.045 rad from foot to top, the sign by the stone's seed | [inferred]: a stone split along its bedding and dressed by hand is never plane |
+| Bluestones | Faceted pillars: section a superellipse of exponent 2.8-4 (rounded rectangles with defined arrises), the tops sloped up to 0.35 rad and notched irregularly, rounded or peaked | Dolerite and rhyolite pillars split along cleavage planes, "rising ... pillars" at Waun Mawn (see 1a) [stated]; the facets [inferred] |
+| Lintels | Rectangular sections of high exponent (9 ring lintels, 8 trilithon lintels), 28 points round; ends squared (0.97) and a 2 cm open joint between neighbours, the tops and faces slightly uneven | Lintels "around 3.2 m long, 1 m wide and 0.8 m thick", the joint a tongue and groove showing as a fine line (see 1a) [stated: EH]; the open joint [inferred: wide enough to read from a distance] |
+
+## 1g. The earthworks and the entrance stones (2026-11; `earthwork`, `ringGrid`/`avenueGrid` in `layout.js`, `aubrey_holes`, `lyingTenon`)
+
+| Feature | What we build | Basis |
+|---|---|---|
+| Ditch and bank | The ring ditch 1.8 m deep and bank 1.4 m high (were 1.6 / 1.0); over every steep part (the ditch walls and floor, the bank's scarp, the ends of the causeways) a skin of fresh white chalk, 3 cm uneven, its edge ragged by a hash of the cell's position, the gentle shoulders left to the turf; the causeways (north-east, wide; south, narrow) are the ground left uncut | The henge was dug in segments through chalk, the bank of the spoil "originally white" [stated: Wikipedia "Stonehenge", first phase]; depths, ragged edge and shoulders [inferred] |
+| Avenue | Both banks (14 m apart) and the ditch outside each, from the entrance to the settlement's edge, in the same chalk face; the Heel Stone's ring ditch likewise | "A parallel pair of ditches and banks" [stated: Wikipedia]; chalk face [inferred as above] |
+| Station mounds | The North and South mounds with their ring ditches in chalk | [stated: Station Stones, Wikipedia]; chalk [inferred] |
+| Aubrey Holes | Each a shallow dish of white rubble (6 cm deep) with a lip of spoil, outline uneven by its seed, rubble lumps and about one flint in four, a dark ring of trodden turf round 60% | Refilled with chalk rubble [stated, 1d]; the dish and lip [inferred] |
+| Slaughter Stone | Lying along the axis on the north-west side of the way in, 4.9 m, its top pitted; its partner standing | It "originally stood" with flanking stones [stated: EH]; shown fallen, as a visitor would find it, to give the entrance a lying stone [inferred: our choice, the owner's brief] |
+| Tenons | A tenon knob on the end of the sarsen waiting to be dressed at the arrival and of the one on the sledge on the Avenue | Tenons were cut on upright tops [stated: EH]; cut before raising [inferred] |
+
 ## 10a. The midwinter feast (2026-11 L3; `feast_fire`, `midden`; placed in `town.js`)
 
 | Feature | What we build | Basis |

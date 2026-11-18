@@ -5,7 +5,7 @@
 // Slaughter Stone and its partner at the entrance and the Heel Stone; the four Station Stones.
 // +x east, +z south; the axis runs to the north-east (AXIS).
 
-import { height, AXIS, HEEL, STATIONS } from './layout.js';
+import { height, AXIS, HEEL, STATIONS, DITCH, ringGrid } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const rand = rng(2500);
@@ -64,7 +64,9 @@ for (let k = 0; k < 19; k++) {
 { const at = P(-3.8, 0); E.push({ t: 'standing_stone', at, y: height(at[0], at[1]), yaw: AXIS, lying: true, h: 4.9, w0: 1.0, w1: 1.0, d0: 0.53, d1: 0.5, rough: 0.03, dress: 1, bury: 0.12, mat: 'sandstone_green', seed: 41 }); }
 
 // ── at the entrance: the Slaughter Stone and its partner, standing; the Heel Stone, unshaped and leaning in ──
-for (const v of [-3.2, 2.4]) { const at = P(47 + (v > 0 ? 0.4 : 0), v); stone(at, AXIS, { h: v > 0 ? 4.0 : 3.6, w0: 2.1, w1: 1.9, d0: 0.95, d1: 0.85, rough: 0.06, bury: 1.2, mat: 'granite_rough' }); }
+// the standing partner of the Slaughter Stone, still upright at the entrance; the Slaughter Stone itself (4.9 m) fallen, lying along the axis on the north-west side of the way in, its upper face pitted by the hollows that hold the rain (§1g)
+{ const at = P(47.4, 2.4); stone(at, AXIS, { h: 4.0, w0: 2.1, w1: 1.9, d0: 0.95, d1: 0.85, rough: 0.06, bury: 1.2, mat: 'granite_rough' }); }
+{ const at = P(47, -3.4); E.push({ t: 'standing_stone', at, y: height(at[0], at[1]), yaw: AXIS + Math.PI / 2, lying: true, h: 4.9, w0: 2.0, w1: 1.9, d0: 0.95, d1: 0.9, rough: 0.05, dress: 1, bury: 0.3, mat: 'granite_rough', tool: { faces: 'inner', lichen: 10 }, seed: 8801 }); }
 { const at = P(HEEL.d, 0.6); stone(at, AXIS + 0.25, { h: 4.9, w0: 2.6, w1: 1.4, d0: 2.3, d1: 1.4, rough: 0.16, bury: 1.6, cap: 'peak', lean: [-0.38, 0.05], natural: true, mat: 'rock_boulder', tool: { faces: 'none', lichen: 70 } }); }
 // the Station Stones: small undressed sarsens, two on their mounds
 for (const s of STATIONS) stone(s.at, AXIS + rand() * 0.5, { h: s.n === 91 ? 2.7 : s.n === 93 ? 1.3 : 1.6, w0: s.n === 91 ? 1.6 : 1.1, w1: 0.8, d0: 0.8, d1: 0.6, rough: 0.1, bury: 0.8, cap: 'round', natural: true, mat: 'rock_boulder', tool: { faces: 'none', lichen: 30 } });
@@ -79,12 +81,14 @@ for (const s of STATIONS) stone(s.at, AXIS + rand() * 0.5, { h: s.n === 91 ? 2.7
   E.push({ t: 'aubrey_holes', holes });
 }
 
+// ── the earthwork (§1g): the chalk face of the ditch and bank, the ring ditches round the two Station mounds ──
+E.push({ t: 'earthwork', grids: [ringGrid([0, 0], DITCH.r - 9, DITCH.r + 7.5), ...STATIONS.filter((st) => st.mound).map((st) => ringGrid(st.at, 0.5, 8.5, 0.5, 36))] });
 
 // ── the work and the gifts about the stones (§1e): the sarsen waiting to be dressed where the visitor comes in, the chips, mauls, antler
 // picks, rope and rollers about it; pots, bones and antlers left at the foot of the stones ──
 {
   const blk = P(34, 24);                                          // a sarsen as hauled, not yet dressed, lying on rollers, one face begun
-  E.push({ t: 'standing_stone', at: blk, y: height(blk[0], blk[1]), yaw: AXIS + 0.5, lying: true, h: 3.6, w0: 1.5, w1: 1.2, d0: 1.0, d1: 0.9, rough: 0.14, dress: 0, bury: 0.1, mat: 'rock_boulder', natural: true, tool: { faces: 'none', lichen: 20 }, seed: 5150 });
+  E.push({ t: 'standing_stone', at: blk, y: height(blk[0], blk[1]), yaw: AXIS + 0.5, lying: true, h: 3.6, w0: 1.5, w1: 1.2, d0: 1.0, d1: 0.9, rough: 0.14, dress: 0, bury: 0.1, mat: 'rock_boulder', natural: true, tenon: true, tool: { faces: 'none', lichen: 20 }, seed: 5150 });
   for (const [u, v, r, n] of [[34, 24, 4.5, 60], [60, -12, 3.5, 24], [-18, 5, 3.5, 24], [8, -18, 3.5, 24], [40, 13, 3.5, 24]]) {
     const at = P(u, v); E.push({ t: 'litter', kind: 'dressing', c: at, y: height(at[0], at[1]), r, n, seed: Math.floor(rand() * 1e6) });
   }

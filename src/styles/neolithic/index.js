@@ -94,6 +94,13 @@ function faults(rand, h, n, depth) {
   };
 }
 
+/** The tenon cut on the end of an upright waiting to be raised (or fallen): a low knob standing out of the end face, along the stone's length. */
+function lyingTenon(bag, mat, el, x, y, z, a, h, d0, bury) {
+  const g = lathe([[0.34, -0.08], [0.32, 0.12], [0.24, 0.24], [0.001, 0.27]], 12);
+  g.rotateZ(-Math.PI / 2); g.rotateY(-Math.atan2(Math.cos(a), -Math.sin(a)));
+  g.translate(x - Math.sin(a) * h / 2, y + d0 / 2 - bury, z + Math.cos(a) * h / 2);
+  bag.add(mat, g);
+}
 /**
  * standing_stone: { at, y (the ground there), yaw (direction of the stone's thickness, outward), h (height above
  * the ground) or top (the absolute level of its top), w0/w1 (width at the ground / at the top), d0/d1 (thickness),
@@ -141,6 +148,7 @@ function standingStone(el, ctx) {
   };
   const g = loft(rows.map((r) => r.map(place)), { capStart: true, capEnd: true });
   bag.add(el.mat || 'granite_rough', g);
+  if (el.tenon && el.lying) lyingTenon(bag, el.mat || 'granite_rough', el, x, y, z, a, h, d0, bury);
   if (el.tenon && !el.lying) {
     // the tenon on the top, which the lintel's mortise takes: a low knob, mostly hidden
     bag.add(el.mat || 'granite_rough', lathe([[0.32, 0], [0.3, 0.14], [0.22, 0.24], [0.001, 0.26]], 12, null, x, y + h - 0.01, z));
@@ -234,6 +242,7 @@ function tooledStone(el, { bag, col }) {
   const dm = el.tool.dressMat || 'sandstone_white', cm = el.mat || 'granite_rough';
   if (buckets[0].pos.length) bag.add(dm, toGeom(buckets[0]));
   if (buckets[1].pos.length) bag.add(cm, toGeom(buckets[1]));
+  if (el.tenon && el.lying) lyingTenon(bag, cm, el, x, y, z, a, h, d0, bury);
   if (el.tenon && !el.lying) bag.add(dm, lathe([[0.32, 0], [0.3, 0.14], [0.22, 0.24], [0.001, 0.26]], 12, null, x, y + h - 0.01, z));
   // the lichens on the crust: rosettes 3–12 cm across in loose colonies, each a hair off the face, on faces that see the sky
   const nL = el.tool.lichen ?? 0, LM = ['plaster_damp', 'plaster_damp', 'plaster_ochre', 'plaster_grey'], disc = { plaster_damp: [], plaster_ochre: [], plaster_grey: [] };
@@ -628,19 +637,62 @@ function midden(el, { bag }) {
 
 
 /**
+ * earthwork: { grids: [{ rows, closed }] } — the chalk face of dug earthworks (docs/settlements/stonehenge.md §1g): over the ground
+ * where it is steep (the ditch's walls and floor, the bank's scarp, the ends of the causeways, the sides of the Avenue's banks) a
+ * skin of fresh white chalk, a little uneven, standing off the ground by each point's own lift; the gentle shoulders left to the
+ * turf, the edge of the chalk ragged by a hash of the cell's position. Points are [x, y, z, lift].
+ */
+function earthwork(el, { bag }) {
+  const hash = (x, z) => { const q = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return q - Math.floor(q); };
+  const lump = (x, z) => 0.03 * (Math.sin(x * 3.1 + z * 2.3) + Math.sin(x * 5.7 - z * 4.1) + 0.6 * Math.sin(x * 11.3 + z * 9.7));
+  for (const G of el.grids) {
+    const R = G.rows, M = R.length, N = R[0].length;
+    const P = R.map((row) => row.map((p) => [p[0], p[1] + p[3] + lump(p[0], p[2]), p[2]]));
+    const nor = R.map((row, i) => row.map((p, j) => {
+      const a = P[Math.max(0, i - 1)][j], b = P[Math.min(M - 1, i + 1)][j], c = P[i][Math.max(0, j - 1)], d = P[i][Math.min(N - 1, j + 1)];
+      const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], v = [d[0] - c[0], d[1] - c[1], d[2] - c[2]];
+      let n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+      if (n[1] < 0) n = [-n[0], -n[1], -n[2]];
+      const l = Math.hypot(...n) || 1;
+      return [n[0] / l, n[1] / l, n[2] / l];
+    }));
+    const slope = (i, j) => { const a = R[i][j], b = R[i][j + 1], c = R[i + 1][j]; return Math.max(Math.abs(b[1] - a[1]) / Math.hypot(b[0] - a[0], b[2] - a[2]), Math.abs(c[1] - a[1]) / Math.hypot(c[0] - a[0], c[2] - a[2])); };
+    const pos = [], nr = [];
+    for (let i = 0; i < M - 1; i++) for (let j = 0; j < N - 1; j++) {
+      const c = R[i][j];
+      if (slope(i, j) < 0.2 + 0.1 * hash(c[0], c[2])) continue;
+      for (const [a, b] of [[i, j], [i + 1, j + 1], [i, j + 1], [i, j], [i + 1, j], [i + 1, j + 1]]) { pos.push(...P[a][b]); nr.push(...nor[a][b]); }
+    }
+    if (!pos.length) continue;
+    // wind every triangle upward
+    for (let t = 0; t < pos.length; t += 9) {
+      const ux = pos[t + 3] - pos[t], uy = pos[t + 4] - pos[t + 1], uz = pos[t + 5] - pos[t + 2], vx = pos[t + 6] - pos[t], vy = pos[t + 7] - pos[t + 1], vz = pos[t + 8] - pos[t + 2];
+      if (uz * vx - ux * vz < 0) for (let k = 0; k < 3; k++) { const q = pos[t + 3 + k]; pos[t + 3 + k] = pos[t + 6 + k]; pos[t + 6 + k] = q; const w = nr[t + 3 + k]; nr[t + 3 + k] = nr[t + 6 + k]; nr[t + 6 + k] = w; }
+      void uy; void vy;
+    }
+    bag.add('chalk', toGeom({ pos, nor: nr }));
+  }
+}
+
+/**
  * aubrey_holes: { holes: [{ at, y, r, seed }] } — the 56 Aubrey Holes (docs/settlements/stonehenge.md §1d): pits about 1.06 m across,
  * refilled soon after digging with the chalk rubble thrown out of them, so each shows as a patch of white rubble, a little proud,
  * with lumps of chalk on it, the turf not yet grown over.
  */
 function aubreyHoles(el, { bag }) {
   for (const h of el.holes) {
-    const rand = rng(h.seed ?? 1), [x, z] = h.at, r = h.r ?? 0.55;
-    bag.add('chalk', lathe([[r * 1.12, -0.04], [r * 0.98, 0.012], [r * 0.7, 0.05], [r * 0.3, 0.07], [0.001, 0.075]], 12, null, x, h.y, z));
-    for (let k = 0, n = 5 + Math.floor(rand() * 4); k < n; k++) {
-      const t = rand() * 6.28, d = Math.sqrt(rand()) * r * 0.85, sz = 0.04 + rand() * 0.07;
-      bag.add('chalk', lathe([[sz, 0], [sz * 0.95, sz * 0.5], [sz * 0.5, sz * 0.9], [0.001, sz]], 5, null, x + Math.cos(t) * d, h.y + 0.05 + 0.02 * (1 - d / r), z + Math.sin(t) * d));
+    const rand = rng(h.seed ?? 1), [x, z] = h.at, r = h.r ?? 0.55, ph = rand() * 6.28, k = 0.1 + rand() * 0.08;
+    // the refilled pit as a shallow dish, its rim a low lip of the spoil, the outline uneven (a hash of the hole's own seed)
+    const dish = lathe([[r * 1.3, -0.04], [r * 1.12, 0.035], [r * 0.98, 0.062], [r * 0.8, 0.05], [r * 0.5, 0.026], [r * 0.2, 0.014], [0.001, 0.012]], 14, (t) => 1 + k * Math.sin(t * 2 + ph) + 0.05 * Math.sin(t * 5 + ph * 2), x, h.y, z);
+    bag.add('chalk', dish);
+    // the dark soil of the dug turf trodden round the lip, thrown on the side toward the bank (outward)
+    if (rand() < 0.6) bag.add('plaster_damp', lathe([[r * 1.7, -0.04], [r * 1.45, 0.004], [r * 1.2, 0.03], [r * 1.18, -0.04]], 14, (t) => 1 + 0.18 * Math.sin(t * 3 + ph), x, h.y, z));
+    for (let q = 0, n = 6 + Math.floor(rand() * 5); q < n; q++) {
+      const t = rand() * 6.28, d = Math.sqrt(rand()) * r * 0.95, sz = 0.035 + rand() * rand() * 0.1, hy = d < r * 0.5 ? 0.02 : d < r * 0.9 ? 0.04 : 0.06;
+      bag.add('chalk', lathe([[sz, 0], [sz * 0.95, sz * 0.5], [sz * 0.5, sz * 0.9], [0.001, sz]], 5, null, x + Math.cos(t) * d, h.y + hy, z + Math.sin(t) * d));
     }
-    if (rand() < 0.4) bag.add('plaster_damp', lathe([[r * 1.45, -0.04], [r * 1.2, 0.0], [r * 1.1, -0.04]], 12, null, x, h.y, z));      // the dark ring of the dug soil trodden into the turf
+    // a flint among the lumps in about one in four
+    if (rand() < 0.25) bag.add('granite_black', lathe([[0.001, 0], [0.05, 0.008], [0.06, 0.04], [0.001, 0.07]], 5, null, x + (rand() - 0.5) * r, h.y + 0.04, z + (rand() - 0.5) * r));
   }
 }
 
@@ -1012,6 +1064,6 @@ function granary(el, { bag, col }) {
 
 registerStyle('neolithic', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, standing_stone: standingStone, lintel_ring: lintelRing, lintel, neolithic_house: house, stone_setting: stoneSetting, timber_circle: timberCircle, feast_fire: feastFire, midden, aubrey_holes: aubreyHoles, camp_shelter: campShelter, camp_hut: campHut, hurdle, yard, craft, litter, scrub, granary },
+  elements: { ...STYLES.qing.elements, standing_stone: standingStone, lintel_ring: lintelRing, lintel, neolithic_house: house, stone_setting: stoneSetting, timber_circle: timberCircle, feast_fire: feastFire, midden, aubrey_holes: aubreyHoles, earthwork, camp_shelter: campShelter, camp_hut: campHut, hurdle, yard, craft, litter, scrub, granary },
   objects: {},
 });

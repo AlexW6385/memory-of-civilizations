@@ -1,7 +1,7 @@
 // The builders' houses (docs/settlements/stonehenge.md §5) and the people (§10): a gathering at the
 // stones and up the Avenue, as at the midwinter feasts; at the houses people, pigs fattened for the
 // feast, cattle and dogs.
-import { RADIUS, AXIS, VILLAGE, DURR, BARROWS, DITCH, HEEL, height, houses, avenue, durr } from './layout.js';
+import { RADIUS, AXIS, VILLAGE, DURR, BARROWS, DITCH, HEEL, height, houses, avenue, durr, ringGrid, avenueGrid } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** The huts of the camps (camp()): what can be entered, and who is inside. */
@@ -283,7 +283,7 @@ export function village() {
   // rollers and the lever men behind, children running alongside; a second knot of people at the Heel Stone with their gifts
   {
     const stoneAt = P(124, 1.5);
-    C.push({ t: 'standing_stone', at: P(121, 0), y: height(...P(121, 0)) + 0.35, yaw: AXIS, lying: true, h: 4.6, w0: 1.5, w1: 1.3, d0: 1.0, d1: 0.9, rough: 0.14, dress: 0, bury: 0.1, mat: 'rock_boulder', natural: true, tool: { faces: 'none', lichen: 20 }, seed: 6001 });
+    C.push({ t: 'standing_stone', at: P(121, 0), y: height(...P(121, 0)) + 0.35, yaw: AXIS, lying: true, h: 4.6, w0: 1.5, w1: 1.3, d0: 1.0, d1: 0.9, rough: 0.14, dress: 0, bury: 0.1, mat: 'rock_boulder', natural: true, tenon: true, tool: { faces: 'none', lichen: 20 }, seed: 6001 });
     const hz = P(122, 1.5); S.push({ t: 'litter', kind: 'dressing', c: hz, y: height(...hz), r: 2.6, n: 22, seed: 6002 });
     for (const [u, v, rot] of [[100, -1.3, 0], [100, 1.3, 0], [103.5, -1.6, 0], [103.5, 1.6, 0], [107, -1.0, 0], [107, 1.0, 0], [110.5, -1.7, 0], [110.5, 1.7, 0], [114, -1.1, 0], [114, 1.1, 0]]) { const at = P(u, v); person(at, face(at, P(u - 10, v)) + rot, { pose: 'stand', dress: 'tunic', carry: 'rope' }); }
     for (const v of [-0.9, 0.9]) { const at = P(95, v); L.push({ t: 'animal', kind: 'ox', at, y: height(...at), rot: face(at, P(60, v)), seed: 6010 + Math.round(v * 10), gear: true }); }
@@ -296,6 +296,7 @@ export function village() {
   return [base('stonehenge-yards', Y, 'neolithic', rooms), base('stonehenge-crafts', C, 'neolithic'), base('stonehenge-scrub', S, 'neolithic'), base('stonehenge-village-life', L, 'life')];
 }
 const HEEL_D = HEEL.d;
+function avenue2xz(d) { return [d * Math.cos(AXIS), d * Math.sin(AXIS)]; }
 
 /** No figure or animal within 9 m of where the visitor arrives (34, -16): moved out along the line from the arrival. */
 const ARR = [34, -16];
@@ -310,6 +311,8 @@ function clearArrival(plans) {
 export async function town() {
   return clearArrival([
     base('stonehenge-timber-circle', timberCircle(), 'neolithic'),
+    // the Avenue's twin banks with their ditches outside, from the entrance out to the edge of the settlement, and the Heel Stone's ring ditch (§1g)
+    base('stonehenge-earthworks', [{ t: 'earthwork', grids: [avenueGrid(46, RADIUS - 40, -11.8, -4.6), avenueGrid(46, RADIUS - 40, 4.6, 11.8), ringGrid(avenue2xz(HEEL.d), 2.6, 4.9, 0.4, 48)] }], 'neolithic'),
     base('stonehenge-houses', houses().map((h) => ({ t: 'neolithic_house', ...h })), 'neolithic'),
     base('stonehenge-people', people(), 'life'),
     ...feast(),

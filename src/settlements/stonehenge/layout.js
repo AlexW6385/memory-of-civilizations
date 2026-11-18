@@ -4,7 +4,7 @@
 // Walls, which lies about 3 km away) brought near, to the north-east. Pure data. +x east, +z south.
 
 export const RADIUS = 360;
-export const DITCH = { r: 55, w: 6, depth: 1.6, bank: 1.0 };
+export const DITCH = { r: 55, w: 6, depth: 1.8, bank: 1.4 };
 export const AXIS = -Math.PI / 4;                          // toward the north-east
 /** Bowl barrows (a few may be as early as the Late Neolithic; most round barrows are later): [x, z, radius]. */
 export const BARROWS = [[-180, -170, 11], [180, 160, 13], [-150, 210, 12], [120, -260, 11]];
@@ -104,4 +104,27 @@ export function houses() {
     H.push({ c: [x, z], s, yaw, y, low: y - 0.1, seed: Math.floor(rand() * 1e6) });
   }
   return H;
+}
+
+/**
+ * The earthworks as grids of ground points for the style's `earthwork` element (the chalk faces laid over the ground): each point
+ * [x, y, z, lift], y the ground there and lift how far the face must stand off it so that the ground's own coarse mesh (2 m cells)
+ * cannot cut through it (the larger the ground's curvature, the more). A grid is { rows, closed }; rows run along the work, the
+ * points of a row across it.
+ */
+const pt = (x, z) => {
+  const h = height(x, z), c = Math.abs(height(x + 2, z) + height(x - 2, z) - 2 * h) + Math.abs(height(x, z + 2) + height(x, z - 2) - 2 * h);
+  return [x, h, z, Math.min(0.45, 0.04 + c / 4.5)];
+};
+/** The ring ditch and bank, as one grid round the centre (the radii from r0 to r1). */
+export function ringGrid(c, r0, r1, step = 0.6, n = 360, a0 = 0) {
+  const rows = [], m = Math.round((r1 - r0) / step);
+  for (let i = 0; i <= n; i++) { const a = a0 + (i % n) / n * Math.PI * 2, row = []; for (let j = 0; j <= m; j++) { const r = r0 + j * step; row.push(pt(c[0] + Math.cos(a) * r, c[1] + Math.sin(a) * r)); } rows.push(row); }
+  return { rows, closed: false };
+}
+/** One side of the Avenue's earthwork: from s0 to s1 along the axis, t0 to t1 across it. */
+export function avenueGrid(s0, s1, t0, t1, ds = 2.5, dt = 0.5) {
+  const ax = Math.cos(AXIS), az = Math.sin(AXIS), rows = [];
+  for (let s = s0; s <= s1 + 1e-6; s += ds) { const row = []; for (let t = t0; t <= t1 + 1e-6; t += dt) row.push(pt(s * ax - t * az, s * az + t * ax)); rows.push(row); }
+  return { rows, closed: false };
 }
