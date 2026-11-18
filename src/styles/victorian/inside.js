@@ -62,7 +62,7 @@ function counterThings(F, I, rand, u, v, fyc) {
 }
 /** the hollow ground floor of a shop_house: see shops.js shopHouse; wu0, wu1 the window's span, uDoor/dw the door */
 export function shopInterior(F, rand, tn, tr, ctx, o) {
-  const { Wd, D, y, bag } = F, { g0, mat, uDoor, dw, wu0, wu1, left } = o, I = inner(F), { IB, W, IL } = I;
+  const { Wd, D, y, bag } = F, { g0, mat, uDoor, dw, wu0, wu1, left, zone: zn } = o, I = inner(F), { IB, W, IL } = I;
   const T = 0.34, fy = y + 0.1, ceil = y + g0, dA = uDoor - dw / 2 - 0.05, dB = uDoor + dw / 2 + 0.05, pv = Math.min(D * 0.62, 5.6);
   // the front wall: piers either side of the door, the stallriser and the lintels over window and door
   const lo = left ? [0, dA] : [wu1, Wd], mid = left ? [dB, wu0] : [wu1 === Wd ? 0 : 0, 0];
@@ -76,17 +76,18 @@ export function shopInterior(F, rand, tn, tr, ctx, o) {
   IB('timber', 0.22, Wd - 0.22, y - 0.5, fy, T, D - T); I.floor(0.22, Wd - 0.22, T, D - T, fy);
   // the lining of plaster on the inner faces, the dado of dark boards, the ceiling with its rose
   const lin = 'stucco_cream';
-  IB(lin, 0.22, Wd - 0.22, ceil - 0.05, ceil, T, D - T);
+  if (zn) { IB(lin, 0.22, Wd - 0.22, ceil - 0.05, ceil, T, zn.zs); const [a, b] = zn.u0 < 1 ? [zn.u1, Wd - 0.22] : [0.22, zn.u0]; IB(lin, a, b, ceil - 0.05, ceil, zn.zs, D - T); } else IB(lin, 0.22, Wd - 0.22, ceil - 0.05, ceil, T, D - T);
   for (const [u0, u1, v0, v1] of [[0.22, 0.24, T, D - T], [Wd - 0.24, Wd - 0.22, T, D - T], [0.22, Wd - 0.22, D - T - 0.02, D - T]]) IB(lin, u0, u1, fy, ceil - 0.05, v0, v1);
   for (const [a, b] of segs) if (b - a > 0.3) IB(lin, a, b, fy, ceil - 0.05, T, T + 0.02);
   IB('wood_dark', 0.22, 0.26, fy, fy + 1.0, T, D - T); IB('wood_dark', Wd - 0.26, Wd - 0.22, fy, fy + 1.0, T, D - T);
   // the partition between the shop and the room behind, a door in it near the counter's end
   const pd0 = left ? Wd - 1.9 : 0.9, pd1 = pd0 + 0.95;
-  W('stucco_cream', 0.22, pd0, fy, ceil - 0.05, pv, pv + 0.12); W('stucco_cream', pd1, Wd - 0.22, fy, ceil - 0.05, pv, pv + 0.12); W('stucco_cream', pd0, pd1, fy + 2.1, ceil - 0.05, pv, pv + 0.12);
+  const PW = (a, b, ya, yb) => { for (const [p, q] of zn ? [[a, Math.min(b, zn.u0)], [Math.max(a, zn.u1), b]] : [[a, b]]) if (q - p > 0.01) W('stucco_cream', p, q, ya, yb, pv, pv + 0.12); };
+  PW(0.22, pd0, fy, ceil - 0.05); PW(pd1, Wd - 0.22, fy, ceil - 0.05); PW(pd0, pd1, fy + 2.1, ceil - 0.05);
   // the stock on the walls behind the counter and on the partition; the counter along the party wall on the window's side
   const cu = left ? Wd - 0.22 : 0.22, cdir = left ? -1 : 1, cf = cu + cdir * 0.85;           // the counter's front face
   shelves(F, I, rand, tr, { axis: 'v', a0: 0.9, a1: pv - 0.2, wall: cu, dir: cdir, fy });
-  const sh0 = left ? 0.4 : pd1 + 0.2, sh1 = left ? pd0 - 0.2 : Wd - 0.4;
+  const sh0 = left ? (zn ? zn.u1 + 0.15 : 0.4) : pd1 + 0.2, sh1 = left ? pd0 - 0.2 : (zn ? zn.u0 - 0.15 : Wd - 0.4);
   if (sh1 - sh0 > 0.6) shelves(F, I, rand, tr, { axis: 'u', a0: sh0, a1: sh1, wall: pv, dir: -1, fy, depth: 0.3 });
   { const u0 = Math.min(cu + cdir * 0.4, cf), u1 = Math.max(cu + cdir * 0.4, cf);       // the counter: a panelled front, a marble or mahogany top
     W('wood_dark', u0, u1, fy, fy + 0.92, 1.2, pv - 0.5); IB(tn === 'butcher' || tn === 'grocer' ? 'marble' : 'timber', Math.min(cu + cdir * 0.2, cf - cdir * 0.06), Math.max(cu + cdir * 0.2, cf - cdir * 0.06), fy + 0.92, fy + 0.96, 1.15, pv - 0.45);
@@ -111,15 +112,15 @@ export function shopInterior(F, rand, tn, tr, ctx, o) {
   W('wood_dark', ru - 0.5, ru + 0.5, fy + 0.7, fy + 0.74, rv - 0.5, rv + 0.5); IB('linen', ru - 0.55, ru + 0.55, fy + 0.74, fy + 0.745, rv - 0.55, rv + 0.55);
   for (const [a, b] of [[-0.45, -0.45], [0.45, -0.45], [-0.45, 0.45], [0.45, 0.45]]) IB('wood_dark', ru + a - 0.03, ru + a + 0.03, fy, fy + 0.7, rv + b - 0.03, rv + b + 0.03);
   for (const s of [-1, 1]) { const u = ru + s * 0.85; IB('wood_dark', u - 0.2, u + 0.2, fy + 0.43, fy + 0.47, rv - 0.2, rv + 0.2); IB('wood_dark', u - 0.2 * (s > 0 ? -0 : 1), u + 0.2 * (s > 0 ? 1 : 0), fy + 0.47, fy + 0.95, rv - 0.2, rv + 0.2); I.IC(u - 0.2, u + 0.2, fy, fy + 0.9, rv - 0.2, rv + 0.2); }
-  const ru2 = left ? 0.22 : Wd - 0.22;
-  W('iron', Math.min(ru2, ru2 + (left ? 0.5 : -0.5)), Math.max(ru2, ru2 + (left ? 0.5 : -0.5)), fy, fy + 0.85, rv - 0.55, rv + 0.55); IB('opening', Math.min(ru2, ru2 + (left ? 0.51 : -0.51)), Math.max(ru2, ru2 + (left ? 0.51 : -0.51)), fy + 0.2, fy + 0.5, rv - 0.2, rv + 0.2);
-  IL('iron', [[0.1, 0], [0.12, 0.05], [0.12, 0.18], [0.1, 0.2]], 10, ru2 + (left ? 0.3 : -0.3), fy + 0.85, rv + 0.25);
+  const ru2 = (left !== !!zn) ? 0.22 : Wd - 0.22, sgn = zn ? -1 : 1;
+  W('iron', Math.min(ru2, ru2 + (left ? 0.5 : -0.5) * sgn), Math.max(ru2, ru2 + (left ? 0.5 : -0.5) * sgn), fy, fy + 0.85, rv - 0.55, rv + 0.55); IB('opening', Math.min(ru2, ru2 + (left ? 0.51 : -0.51) * sgn), Math.max(ru2, ru2 + (left ? 0.51 : -0.51) * sgn), fy + 0.2, fy + 0.5, rv - 0.2, rv + 0.2);
+  IL('iron', [[0.1, 0], [0.12, 0.05], [0.12, 0.18], [0.1, 0.2]], 10, ru2 + (left ? 0.3 : -0.3) * sgn, fy + 0.85, rv + 0.25);
   I.IC(ru - 0.55, ru + 0.55, fy, fy + 0.75, rv - 0.55, rv + 0.55);
 }
 
 /** the hollow ground floor of a pub: see shops.js pub; uDoor the double doors' centre, east the corner's side, wins the window spans */
 export function pubInterior(F, rand, ctx, o) {
-  const { Wd, D, y } = F, { g0, mat, uDoor, east, wins } = o, I = inner(F), { IB, W, IL } = I;
+  const { Wd, D, y } = F, { g0, mat, uDoor, east, wins, zone: zn } = o, I = inner(F), { IB, W, IL } = I;
   const T = 0.34, fy = y + 0.1, ceil = y + g0, dA = uDoor - 0.85, dB = uDoor + 0.85;
   // the front wall under the windows and between them, the doors' gap; the party walls, the back wall, the boards
   const gaps = [[dA, dB], ...wins.filter(([a, b]) => !(uDoor > a && uDoor < b)).map(([a, b]) => [a + 0.05, b - 0.05])].sort((p, q) => p[0] - q[0]);
@@ -130,10 +131,10 @@ export function pubInterior(F, rand, ctx, o) {
   W(mat, 0, 0.22, y - 0.5, ceil, T, D - T); W(mat, Wd - 0.22, Wd, y - 0.5, ceil, T, D - T); W(mat, 0, Wd, y - 0.5, ceil, D - T, D);
   IB('timber', 0.22, Wd - 0.22, y - 0.5, fy, T, D - T); I.floor(0.22, Wd - 0.22, T, D - T, fy);
   // the plaster, a dado of mahogany panelling, the deep red ceiling that hid the smoke, gas globes in clusters
-  IB('paint_fleur', 0.22, Wd - 0.22, ceil - 0.05, ceil, T, D - T);
+  if (zn) { IB('paint_fleur', 0.22, Wd - 0.22, ceil - 0.05, ceil, T, zn.zs); const [a, b] = zn.u0 < 1 ? [zn.u1, Wd - 0.22] : [0.22, zn.u0]; IB('paint_fleur', a, b, ceil - 0.05, ceil, zn.zs, D - T); } else IB('paint_fleur', 0.22, Wd - 0.22, ceil - 0.05, ceil, T, D - T);
   for (const [u0, u1, v0, v1] of [[0.22, 0.24, T, D - T], [Wd - 0.24, Wd - 0.22, T, D - T], [0.22, Wd - 0.22, D - T - 0.02, D - T]]) { IB('stucco_cream', u0, u1, fy, ceil - 0.05, v0, v1); IB('lacquer_chestnut', u0, u1, fy, fy + 1.2, v0, v1); }
   // the bar: a long mahogany counter across the room, brass rail, hand-pumps, the snob-screens of etched glass, the back-fitting
-  const bv = Math.min(D * 0.55, 5.8), bu0 = east ? 0.5 : 2.4, bu1 = east ? Wd - 2.4 : Wd - 0.5;
+  const bv = Math.min(D * 0.55, 5.8), bu0 = east ? (zn ? zn.u1 + 0.75 : 0.5) : 2.4, bu1 = east ? Wd - 2.4 : (zn ? zn.u0 - 0.75 : Wd - 0.5);
   W('lacquer_chestnut', bu0, bu1, fy, fy + 1.05, bv, bv + 0.6); IB('timber', bu0 - 0.05, bu1 + 0.05, fy + 1.05, fy + 1.1, bv - 0.04, bv + 0.64);
   IB('gilt_bronze', bu0, bu1, fy + 0.15, fy + 0.19, bv - 0.25, bv - 0.21); for (let k = bu0 + 0.3; k < bu1; k += 1.4) IB('gilt_bronze', k, k + 0.04, fy, fy + 0.18, bv - 0.25, bv - 0.21);
   for (let k = bu0 + 0.6; k < bu1 - 0.3; k += 1.1) { const p = I.pt(k, bv + 0.3); F.bag.add('gilt_bronze', lathe([[0.04, 0], [0.025, 0.05], [0.025, 0.4], [0.04, 0.45]], 8, null, p[0], fy + 1.1, p[1])); F.bag.add('glaze_white', lathe([[0.03, 0], [0.04, 0.2]], 6, null, p[0], fy + 1.5, p[1])); }
@@ -141,11 +142,12 @@ export function pubInterior(F, rand, ctx, o) {
   I.IC(bu0, bu1, fy, fy + 1.1, bv - 0.1, bv + 0.7);
   // behind the bar: spirit casks on a rack with brass taps, shelves of bottles under a gilt mirror, a clock
   const bw = D - T - 0.02, bu0b = bu0 + 0.2, bu1b = bu1 - 0.2;
-  IB('lacquer_chestnut', 0.22, Wd - 0.22, fy, fy + 0.9, bw - 0.55, bw); IB('timber', 0.22, Wd - 0.22, fy + 0.9, fy + 0.94, bw - 0.6, bw);
-  I.IC(0.22, Wd - 0.22, fy, fy + 0.9, bw - 0.55, bw);
+  const bfa = zn && zn.u0 < 1 ? zn.u1 : 0.22, bfb = zn && zn.u0 > 1 ? zn.u0 : Wd - 0.22;
+  IB('lacquer_chestnut', bfa, bfb, fy, fy + 0.9, bw - 0.55, bw); IB('timber', bfa, bfb, fy + 0.9, fy + 0.94, bw - 0.6, bw);
+  I.IC(bfa, bfb, fy, fy + 0.9, bw - 0.55, bw);
   for (let k = bu0b; k < bu1b - 0.4; k += 0.75) { const p = I.pt(k + 0.3, bw - 0.9); F.bag.add('wood_dark', lathe([[0.001, 0], [0.24, 0], [0.28, 0.2], [0.3, 0.4], [0.28, 0.6], [0.24, 0.8], [0.001, 0.8]], 10, null, p[0], fy + 0.94, p[1])); }
   IB('gold', bu0b, bu1b, fy + 1.85, fy + 1.95, bw - 0.08, bw); IB('mirror_tin', bu0b + 0.1, bu1b - 0.1, fy + 1.1, fy + 1.85, bw - 0.03, bw);
-  for (const t of [1.25, 1.6, 1.95]) { IB('timber', bu0b, bu1b, fy + t, fy + t + 0.03, bw - 0.3, bw - 0.05); for (let k = bu0b + 0.15; k < bu1b - 0.1; k += 0.2 + rand() * 0.1) IL(pick(rand, ['glaze_blue', 'glaze_green', 'glass_topaz', 'glaze_white']), [[0.001, 0], [0.04, 0.01], [0.045, 0.16], [0.02, 0.26], [0.02, 0.3]], 6, k, fy + t + 0.03, bw - 0.17); }
+  for (const t of [1.25, 1.6, 1.95]) { IB('timber', bu0b, bu1b, fy + t, fy + t + 0.03, bw - 0.3, bw - 0.05); for (let k = bu0b + 0.15; k < bu1b - 0.1; k += 0.2 + rand() * 0.1) IL((c => zn ? 'glaze_blue' : c)(pick(rand, ['glaze_blue', 'glaze_green', 'glass_topaz', 'glaze_white'])), [[0.001, 0], [0.04, 0.01], [0.045, 0.16], [0.02, 0.26], [0.02, 0.3]], 6, k, fy + t + 0.03, bw - 0.17); }
   IB('wood_dark', Math.max(bu0b, (bu0b + bu1b) / 2 - 0.2), Math.min(bu1b, (bu0b + bu1b) / 2 + 0.2), fy + 2.0, fy + 2.5, bw - 0.1, bw); IB('gold', (bu0b + bu1b) / 2 - 0.12, (bu0b + bu1b) / 2 + 0.12, fy + 2.1, fy + 2.4, bw - 0.12, bw - 0.1);
   // the room before the bar: round cast-iron tables, stools, benches along the front wall and the party wall; sawdust on the boards
   IB('sacking', 0.3, Wd - 0.3, fy + 0.001, fy + 0.006, T + 0.2, bv - 0.5);
@@ -153,9 +155,11 @@ export function pubInterior(F, rand, ctx, o) {
   const stool = (u, v) => { const p = I.pt(u, v); F.bag.add('wood_dark', lathe([[0.17, 0], [0.04, 0.02], [0.04, 0.42], [0.17, 0.45], [0.17, 0.5], [0.001, 0.5]], 8, null, p[0], fy, p[1])); };
   const tabs = [[Wd * 0.5, 2.0], [Wd * 0.5 + (east ? -1 : 1) * 2.0, 3.0], [Wd * 0.5 + (east ? 1 : -1) * 1.8, 1.6]].filter(([tu]) => tu > 0.9 && tu < Wd - 0.9);
   for (const [tu, tv] of tabs) { tbl(tu, tv); stool(tu - 0.5, tv); stool(tu + 0.5, tv); stool(tu, tv + 0.5); }
+  if (!zn) {
   const benchU = east ? 0.22 : Wd - 0.22, bd = east ? 1 : -1;
   W('lacquer_chestnut', Math.min(benchU, benchU + bd * 0.5), Math.max(benchU, benchU + bd * 0.5), fy, fy + 0.46, T + 1.5, bv - 0.9); IB('cloth_red', Math.min(benchU + bd * 0.08, benchU + bd * 0.5), Math.max(benchU + bd * 0.08, benchU + bd * 0.5), fy + 0.46, fy + 0.56, T + 1.5, bv - 0.9);
   IB('lacquer_chestnut', Math.min(benchU, benchU + bd * 0.08), Math.max(benchU, benchU + bd * 0.08), fy + 0.46, fy + 1.1, T + 1.5, bv - 0.9);
+  }
   // the spittoon, a tray of sawdust, the gas globes on their brass drops
   for (const [gu, gv] of [[Wd * 0.3, 2.0], [Wd * 0.7, 2.0], [Wd * 0.5, bv - 1.0]]) { const p = I.pt(gu, gv); F.bag.add('gilt_bronze', lathe([[0.012, 0], [0.012, 0.6]], 5, null, p[0], ceil - 0.7, p[1])); F.bag.add('lamp_glass', lathe([[0.03, 0], [0.13, 0.08], [0.18, 0.2], [0.11, 0.34], [0.001, 0.36]], 10, null, p[0], ceil - 1.02, p[1])); }
   // the people: the landlord behind the bar, the barmaid, men at the tables and the bar

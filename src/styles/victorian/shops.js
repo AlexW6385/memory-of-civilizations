@@ -10,6 +10,7 @@ import { box, lathe, rod } from '../../core/geom.js';
 import { hexa } from './street.js';
 import { shopInterior, pubInterior } from './inside.js';
 import { terraceInterior } from './houseinside.js';
+import { terraceUp, terraceWindows, frame, dogleg, shopSpec, shopUp, shopWindows, pubSpec, pubUp, pubWindows } from './upstairs.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const pick = (rand, a) => a[Math.floor(rand() * a.length)];
@@ -111,6 +112,24 @@ function dress(F, rand, wins, { H, uD = null, brick = 'brick', dormers = true })
   }
 }
 
+/** a window that is a hole in the wall (an open house's upper floors): the stucco reveals round it, the stone sill (not for a French window), the lintel; the glazing is inside (upstairs.js) */
+function holeSash(F, u, y0, hh, o = {}) {
+  const { B } = F, lt = o.lintel ?? 'limestone', hi = o.tall ? 0.35 : 0.12;
+  B('plaster_white', u - 0.6, u - 0.5, y0 - (o.gap ? 0 : 0.06), y0 + hh + hi, -0.02, 0.04); B('plaster_white', u + 0.5, u + 0.6, y0 - (o.gap ? 0 : 0.06), y0 + hh + hi, -0.02, 0.04);
+  B(lt, u - 0.62, u + 0.62, y0 + hh, y0 + hh + hi, -0.02, 0.08);
+  if (!o.gap) B('limestone', u - 0.64, u + 0.64, y0 - 0.12, y0 - 0.04, 0, 0.14);
+}
+/** the cast-iron balcony before a French window: a floor of grating on brackets, a rail with balusters, colliders (floor and rails) */
+function balcony(F, u, f1, w, dep) {
+  const { B, C, col, x0, f, zf, sg } = F;
+  B('iron', u - w, u + w, f1 - 0.07, f1, 0, dep);
+  for (const e of [-1, 1]) { const q = u + e * (w - 0.1); B('iron', q - 0.02, q + 0.02, f1 - 0.55, f1 - 0.07, 0, 0.04); B('iron', q - 0.02, q + 0.02, f1 - 0.3, f1 - 0.27, 0, dep * 0.7); }
+  B('iron', u - w, u + w, f1 + 0.95, f1 + 1.0, dep - 0.04, dep); for (let q = u - w + 0.08; q < u + w; q += 0.17) B('iron', q - 0.01, q + 0.01, f1, f1 + 0.95, dep - 0.03, dep - 0.01);
+  for (const e of [-1, 1]) { B('iron', u + e * w - 0.02, u + e * w + 0.02, f1 + 0.95, f1 + 1.0, 0, dep); for (let d = 0.15; d < dep; d += 0.17) B('iron', u + e * w - 0.01, u + e * w + 0.01, f1, f1 + 0.95, d - 0.01, d + 0.01); }
+  const za = zf, zb = zf + sg * dep; col.floor([x0 + u - w, Math.min(za, zb), x0 + u + w, Math.max(za, zb)], f1);
+  C(u - w, u + w, f1, f1 + 1.0, dep - 0.05, dep); C(u - w - 0.03, u - w + 0.03, f1, f1 + 1.0, 0, dep); C(u + w - 0.03, u + w + 0.03, f1, f1 + 1.0, 0, dep);
+}
+
 /**
  * terrace_house (the town's ordinary house, a richer version): { rect, seed, front, storeys, y } — London stock brick (sooted
  * grey in places) or red, a stucco cornice and parapet, sash windows with stone sills and lintels, the door with its fanlight
@@ -124,7 +143,9 @@ export function terraceRich(el, ctx, base) {
   const uD = el.mirror ? 3 * Wd / 4 : Wd / 4, uW = el.mirror ? Wd / 4 : 3 * Wd / 4, doorMat = pick(rand, DOORS), wins = [];
   // an open house is hollow on its ground floor (houseinside.js: the doorway and the window are real openings in the front wall, so the
   // surrounds are strips round them and the rusticating is laid in the piers between)
-  if (open) { bag.add(mat, box(x0, y + st, z0, x1, y + H, z1)); col.rect(el.rect, y + st, y + H); terraceInterior(el, ctx, mat, st); }
+  const up = open && !!el.up;
+  if (up) { terraceInterior(el, ctx, mat, st); terraceUp(el, ctx, { mat, type }); }
+  else if (open) { bag.add(mat, box(x0, y + st, z0, x1, y + H, z1)); col.rect(el.rect, y + st, y + H); terraceInterior(el, ctx, mat, st); }
   else { bag.add(mat, box(x0, y - 0.5, z0, x1, y + H, z1)); col.rect(el.rect, y - 0.5, y + H); }
   pavement(F, el.pw ?? 1.9);
   const piers = (fn) => { const o = [[uD - 0.65, uD + 0.65], [uW - 0.65, uW + 0.65]].sort((a, b) => a[0] - b[0]); let u = 0; for (const [a, b] of o) { if (a - u > 0.02) fn(u, a); u = b; } if (Wd - u > 0.02) fn(u, Wd); };
@@ -182,12 +203,19 @@ export function terraceRich(el, ctx, base) {
       C(u - 1.05, u + 1.05, y, y + 2.85, 0, 0.8);
       continue;
     }
+    if (up && s >= 1) {
+      const w = terraceWindows(el, type, s), spec = i === 0 ? w.door : w.room, uu = i === 0 ? uD : uW;
+      holeSash(F, uu, spec.y0, spec.y1 - spec.y0, { gap: spec.gap, tall: s === 1, lintel: type === 'stucco' ? 'plaster_white' : 'limestone' });
+      if (spec.gap && type !== 'stucco') balcony(F, uu, spec.y0, 1.05, 0.85);
+      continue;
+    }
     const balc = type === 'stucco' && s === 1 && i === 1;
     sash(F, u, y0, balc ? 2.6 : hh, { lintel: type === 'stucco' ? 'plaster_white' : 'limestone' });
     wins.push({ u, y0, hh: balc ? 2.6 : hh, fl: s });
     if (balc || (s === 1 && rand() < 0.25)) { B('iron', u - 0.8, u + 0.8, y0 + 0.05, y0 + 0.09, 0.25, 0.28); for (let q = u - 0.76; q < u + 0.78; q += 0.17) B('iron', q - 0.01, q + 0.01, y0 - 0.5, y0 + 0.9, 0.25, 0.28); B('iron', u - 0.8, u + 0.8, y0 + 0.9, y0 + 0.94, 0.25, 0.28); }
   }
-  dress(F, rand, wins, { H, uD, brick: mat });
+  dress(F, rand, up ? [] : wins, { H, uD, brick: mat });
+  if (up && type === 'stucco') { const by = y + 3.4, ph = by + 1.0; col.floor([x0 + uD - 1.05, Math.min(F.zf, F.zf + F.sg * 1.3), x0 + uD + 1.05, Math.max(F.zf, F.zf + F.sg * 1.3)], by); C(uD - 1.05, uD + 1.05, by, ph, 1.27, 1.31); C(uD - 1.07, uD - 1.03, by, ph, 0, 1.31); C(uD + 1.03, uD + 1.07, by, ph, 0, 1.31); }
   roofAndStacks(F, mat, H, rand, false);
 }
 
@@ -309,7 +337,17 @@ export function shopHouse(el, ctx, base) {
   const left = rand() < 0.5, dw = 1.0, uDoor = left ? 0.42 + dw / 2 + 0.05 : Wd - 0.42 - dw / 2 - 0.05;
   const wu0 = left ? 0.42 + dw + 0.2 : 0.5, wu1 = left ? Wd - 0.5 : Wd - 0.42 - dw - 0.2;
   const isOpen = el.open && !el.simple;
-  if (isOpen) { bag.add(mat, box(x0, y + g0, z0, x1, y + H, z1)); col.rect(el.rect, y + g0, y + H); shopInterior(F, rand, tn, tr, ctx, { g0, mat, uDoor, dw, wu0, wu1, left }); }
+  const up = isOpen && !!el.up, SS = up ? shopSpec(el) : null, uF = (u) => left ? u : Wd - u;
+  if (isOpen) {
+    if (!up) { bag.add(mat, box(x0, y + g0, z0, x1, y + H, z1)); col.rect(el.rect, y + g0, y + H); }
+    shopInterior(F, rand, tn, tr, ctx, { g0, mat, uDoor, dw, wu0, wu1, left, ...(up ? { zone: { u0: left ? 0 : Wd - SS.hw, u1: left ? SS.hw : Wd, zs: SS.Z.zs } } : {}) });
+    if (up) {
+      // the dogleg stair beside the party wall at the shop's back, the dwelling's floors over the shop (upstairs.js)
+      const K = frame(el, ctx, !left), fy = y + 0.1;
+      dogleg(K, SS.Z, fy, y + g0 + 0.25, { base: fy }); K.W('stucco_cream', SS.hw, SS.hw + 0.06, fy, y + g0, SS.Z.zs, SS.Z.vEnd);
+      shopUp(el, ctx, { mat, left });
+    }
+  }
   else { bag.add(mat, box(x0, y - 0.5, z0, x1, y + H, z1)); col.rect(el.rect, y - 0.5, y + H); }
   const bayD = 0.42;
   // pilasters on plinths, the console brackets carrying the cornice
@@ -356,9 +394,16 @@ export function shopHouse(el, ctx, base) {
   // the cornice carrying the first floor's brick, the first-floor string, the upper windows
   B('plaster_white', 0, Wd, y + g0 + 0.1, y + g0 + 0.3, 0, 0.06);
   const wins = [];
-  for (let s = 1; s < n; s++) for (const u of [Wd * 0.27, Wd * 0.73]) { sash(F, u, y + g0 + (s - 1) * st + 0.55, s === 1 ? 2.2 : 1.8); wins.push({ u, y0: y + g0 + (s - 1) * st + 0.55, hh: s === 1 ? 2.2 : 1.8, fl: s }); }
+  for (let s = 1; s < n; s++) {
+    if (up) {
+      const w = shopWindows(el, s);
+      for (const h of [w.hall, w.room]) { holeSash(F, uF(h.u), h.y0, h.y1 - h.y0, { gap: h.gap, tall: s === 1, lintel: 'limestone' }); if (h.gap) balcony(F, uF(h.u), h.y0, 1.05, 0.85); }
+      continue;
+    }
+    for (const u of [Wd * 0.27, Wd * 0.73]) { sash(F, u, y + g0 + (s - 1) * st + 0.55, s === 1 ? 2.2 : 1.8); wins.push({ u, y0: y + g0 + (s - 1) * st + 0.55, hh: s === 1 ? 2.2 : 1.8, fl: s }); }
+  }
   pavement(F, el.pw ?? 1.9); shopFront(F, rand, tn, tr, uDoor, left, y);
-  dress(F, rand, wins, { H, uD: null, brick: mat });
+  dress(F, rand, up ? [] : wins, { H, uD: null, brick: mat });
   for (let s = 2; s < n; s++) B('plaster_white', 0, Wd, y + g0 + (s - 1) * st - 0.1, y + g0 + (s - 1) * st + 0.1, 0, 0.06);
   roofAndStacks(F, mat, H, rand, false);
 }
@@ -376,8 +421,8 @@ export function pub(el, ctx, base) {
   const F = frameOf(el, ctx), rand = rng(el.seed || 1), { B, C, bag, col, Wd, y, x0, z0, x1, z1, L } = F;
   const g0 = 4.0, n = 3, st = 3.3, H = g0 + (n - 1) * st, mat = brickOf(rand), bayD = 0.3;
   const isOpen = el.open && !el.simple;
-  if (isOpen) { bag.add(mat, box(x0, y + g0, z0, x1, y + H, z1)); col.rect(el.rect, y + g0, y + H); } else { bag.add(mat, box(x0, y - 0.5, z0, x1, y + H, z1)); col.rect(el.rect, y - 0.5, y + H); }
-  const east = el.corner === 'e', uDoor = east ? Wd - 1.3 : 1.3;
+  const east = el.corner === 'e', uDoor = east ? Wd - 1.3 : 1.3, up = isOpen && !!el.up, PS = up ? pubSpec(el) : null;
+  if (isOpen) { if (!up) { bag.add(mat, box(x0, y + g0, z0, x1, y + H, z1)); col.rect(el.rect, y + g0, y + H); } } else { bag.add(mat, box(x0, y - 0.5, z0, x1, y + H, z1)); col.rect(el.rect, y - 0.5, y + H); }
   // granite pilasters on plinths: at the ends, the corner and between the windows
   const bays = Math.max(2, Math.round((Wd - 2.6) / 2.4)), cuts = [];
   const gx = [0.0, Wd - 0.4, ...Array.from({ length: bays - 1 }, (_, i) => 0.4 + (Wd - 2.8) * (i + 1) / bays)].sort((a, b) => a - b);
@@ -395,7 +440,12 @@ export function pub(el, ctx, base) {
   // the windows between the pilasters: a granite stallriser, mahogany frames, etched glass above clear glass; the double doors at the corner
   const wins = [], edges = [...cuts.map((a) => [a, a + 0.4])];
   for (let i = 0; i + 1 < edges.length; i++) { const a = edges[i][1], b = edges[i + 1][0]; if (b - a > 0.8) wins.push([a, b]); }
-  if (isOpen) pubInterior(F, rand, ctx, { g0, mat, uDoor, east, wins });
+  if (isOpen) pubInterior(F, rand, ctx, { g0, mat, uDoor, east, wins, ...(up ? { zone: { u0: east ? 0 : Wd - PS.hw, u1: east ? PS.hw : Wd, zs: PS.Z.zs } } : {}) });
+  if (up) {
+    const K = frame(el, ctx, !east), fy = y + 0.1;
+    dogleg(K, PS.Z, fy, y + g0 + 0.25, { base: fy }); K.W('stucco_cream', PS.hw, PS.hw + 0.06, fy, y + g0, PS.Z.zs, PS.Z.vEnd);
+    pubUp(el, ctx, { mat });
+  }
   for (const [a, b] of wins) {
     const door = uDoor > a && uDoor < b;
     B('granite_red', a, b, y, y + 0.8, 0, bayD - 0.06);
@@ -427,8 +477,11 @@ export function pub(el, ctx, base) {
   const nw = Math.max(2, Math.round(Wd / 2.6));
   const upper = [];
   for (let s = 1; s < n; s++) for (let i = 0; i < nw; i++) {
-    const u = (i + 0.5) * Wd / nw, y0 = y + g0 + (s - 1) * st + 0.6, hh = s === 1 ? 2.3 : 1.9;
-    sash(F, u, y0, hh, { w: 0.95, lintel: s === 1 ? 'plaster_white' : 'limestone' }); upper.push({ u, y0, hh, fl: s });
+    const u = (i + 0.5) * Wd / nw; let y0 = y + g0 + (s - 1) * st + 0.6, hh = s === 1 ? 2.3 : 1.9;
+    if (up) {
+      const h = pubWindows(el, s)[i]; y0 = h.y0; hh = h.y1 - h.y0;
+      holeSash(F, u, y0, hh, { w: 0.95, gap: h.gap, tall: s === 1, lintel: s === 1 ? 'plaster_white' : 'limestone' }); if (h.gap) balcony(F, u, y0, 1.05, 0.85);
+    } else { sash(F, u, y0, hh, { w: 0.95, lintel: s === 1 ? 'plaster_white' : 'limestone' }); upper.push({ u, y0, hh, fl: s }); }
     if (s === 1) { B('plaster_white', u - 0.75, u + 0.75, y0 + hh + 0.3, y0 + hh + 0.42, -0.02, 0.16); B('plaster_white', u - 0.6, u + 0.6, y0 + hh + 0.42, y0 + hh + 0.52, -0.02, 0.12); }
   }
   B('plaster_white', 0, Wd, y + g0 + st - 0.1, y + g0 + st + 0.1, 0, 0.06);
