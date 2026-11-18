@@ -91,7 +91,7 @@ await page.route('**/*', async (route) => {
 });
 const t0 = Date.now();
 // the time of day: each region at its baked moment unless asked (--time 21.5)
-const q = `quality=${opt('quality', 'high')}&time=${opt('time', '15.5')}&weather=${opt('weather', 'clear')}` + (opt('start') ? `&start=${opt('start')}` : '');
+const q = `quality=${opt('quality', 'high')}&time=${opt('time', '15.5')}&weather=${opt('weather', 'clear')}` + (opt('start') ? `&start=${opt('start')}` : '') + (opt('query') ? `&${opt('query')}` : '');
 if (flag('webgl')) await page.addInitScript(() => { Object.defineProperty(navigator, 'gpu', { get: () => undefined }); });
 await page.goto(`http://127.0.0.1:${port}/index.html?${q}`);
 try { await page.waitForFunction('window.READY === true', null, { timeout: 600_000 }); }

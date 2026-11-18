@@ -452,3 +452,6 @@ export function animal(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0;
   if (K.L > 0.9) col.circle(x, z, K.L / 2 * 0.75, y, y + K.H);
 }
+
+// the beast builders, for the open country's wild animals (src/planet/wild-models.js)
+export { build as buildBeast, elephantParts, gear as beastGear };
