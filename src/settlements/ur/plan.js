@@ -3,7 +3,8 @@
 // terrace's walls, the Court of Nanna, the Giparu, the palace E-hursag, storehouses, the precinct
 // wall; the harbour's quay and boats.
 
-import { TEMENOS, TERRACE, COURT, GIPARU, PALACE, STORES, HARBOUR, RADIUS, BOATS, ZIG } from './layout.js';
+import { TEMENOS, TERRACE, COURT, GIPARU, PALACE, STORES, HARBOUR, RADIUS, BOATS, ZIG, houses } from './layout.js';
+import { upperRoute, roofRoute } from '../../styles/sumerian-ur/upper.js';
 
 const E = [];
 const [tx0, tz0, tx1, tz1] = TERRACE.rect, ty = TERRACE.y;
@@ -49,6 +50,9 @@ walks[1].y0 = 0;
 // into the royal mausoleum outside the temenos (§5.11): the stair from the east street, the forecourt, the court of offerings, the door of the stepped room, the stair down and the two tomb chambers
 walks.push([[164, -16], [164, -7], [164, 5], [164, 14], [170, 20], [185.5, 44.4], [185.5, 48.0], [190, 48.4], [190, 50.4], [181.5, 50.4], [178, 50.4], [172, 50.4], [166, 50.4], [160, 50.4]]);
 walks[2].y0 = 0;
+
+// up into the houses (docs/settlements/ur.md §5.14): from the lane through the street door, the court and the brick stair to the bedchamber, the store, the terrace and the room on the street; and again to the roof of the rooms by the ladder
+for (const h of houses()) if (h.upper) for (const r of [upperRoute(h), roofRoute(h)]) { r.y0 = 0; walks.push(r); }
 
 export const precinct = {
   id: 'ur-ziggurat',

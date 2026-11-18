@@ -93,6 +93,13 @@ export function upperRoute(el) {
   return pts;
 }
 
+/** Waypoints from the terrace up the ladder to the roof of the rooms and across it, in the world (the walk starts at the lane like upperRoute's and follows it to the terrace). */
+export function roofRoute(el) {
+  const L = layout(el), { F, doorB, ul, vS } = L, r = upperRoute(el), n = L.two ? 13 : 11, base = r.slice(0, n), W = F.W;
+  const mid = (doorB[0] + doorB[1]) / 2;
+  return [...base, W(mid, vS - 1.3), W(ul, vS - 1.3), W(ul, vS - 0.1), W(ul, vS + 1.5), W(ul - 2.2, vS + 1.5)];
+}
+
 /** The segments of a wall (local rectangle with a long side along u or along v), holes [{ a, b, y0, y1 }] cut in it, as boxes of mat; colliders for what stands. */
 function makeKit({ bag, col }, F) {
   const { W, R } = F;
@@ -109,13 +116,14 @@ function makeKit({ bag, col }, F) {
     bag.add(mat, fromTriangles(orientOutward(T)));
   };
   /** a wall along u (u0..u1, v0..v1) or along v, y0..y1, with holes cut in it; colliders where it stands */
-  const wall = (mat, u0, v0, u1, v1, y0, y1, holes = []) => {
+  const wall = (mat, u0, v0, u1, v1, y0, y1, holes = [], noCol = null) => {
     const alongU = u1 - u0 > v1 - v0, A = alongU ? u0 : v0, Z = alongU ? u1 : v1;
     const seg = (a, b, ya, yb) => {
       if (b - a < 1e-3 || yb - ya < 1e-3) return;
       const q = alongU ? [a, v0, b, v1] : [u0, a, u1, b];
       B(mat, ...q, ya, yb);
-      col.rect(R(...q), Math.max(ya, H), yb);
+      if (noCol && alongU) { for (const [c0, c1] of [[a, Math.min(b, noCol[0])], [Math.max(a, noCol[1]), b]]) if (c1 - c0 > 0.02) col.rect(R(c0, v0, c1, v1), Math.max(ya, H), yb); }   // (no collider where the ladder's ramp meets the wall: the wall is climbed over, not through)
+      else col.rect(R(...q), Math.max(ya, H), yb);
     };
     let a = A;
     for (const o of [...holes].sort((p, q) => p.a - q.a)) { seg(a, o.a, y0, y1); seg(o.a, o.b, y0, o.y0); seg(o.a, o.b, o.y1, y1); a = o.b; }
@@ -190,8 +198,8 @@ function sacks(kit, u, v, n, seed) {
 /** The ladder of palm trunks to the roof of the rooms: its poles and rungs; the ramp is laid by the caller. */
 function ladder(kit, u, vFoot, vTop, yTop) {
   const { beam, LP, B } = kit;
-  for (const s of [-0.3, 0.3]) beam('palm_trunk', LP(u + s, vFoot, H), LP(u + s, vTop, yTop + 1.0), 0.035, 0.07);
-  for (let y = H + 0.4; y < yTop + 0.8; y += 0.34) { const k = (y - H) / (yTop + 1.0 - H), v = vFoot + (vTop - vFoot) * k; B('palm_trunk', u - 0.3, v - 0.045, u + 0.3, v + 0.045, y, y + 0.05); }
+  for (const s of [-0.3, 0.3]) beam('palm_trunk', LP(u + s, vFoot, H), LP(u + s, vTop, yTop + 0.22), 0.035, 0.07);   // (the poles stop a hand's breadth over the roof: the engine's roof-shell test turns the climber back from poles that stand taller)
+  for (let y = H + 0.4; y < yTop; y += 0.34) { const k = (y - H) / (yTop + 0.22 - H), v = vFoot + (vTop - vFoot) * k; B('palm_trunk', u - 0.3, v - 0.045, u + 0.3, v + 0.045, y, y + 0.05); }
 }
 
 /** The kinds' store and workroom furniture: what stands in the room over the back range's east part, by the house's use. */
@@ -266,7 +274,7 @@ export function upperStorey(ctx, el) {
   const holesS = [wn(win(aMid - 0.35, aMid + 0.35), 'S')];
   holesS.push(doorOf(doorB[0], doorB[1]));
   if (two && Math.abs(bMid - (doorB[0] + doorB[1]) / 2) > 1.0) holesS.push(wn(win(bMid - 0.3, bMid + 0.3), 'S'));
-  wall(up, ua - 0.35, vS, uE, vS + 0.35, H, TOP, holesS);
+  wall(up, ua - 0.35, vS, uE, vS + 0.35, H, TOP, holesS, [ul - 0.7, ul + 0.7]);
   // the back wall (sits on the parapet: from the parapet's top up; the hole's frame the same)
   const holesN = [wn(win(aMid - 0.3, aMid + 0.3), 'N')];
   if (two) holesN.push(wn(win(bMid - 0.3, bMid + 0.3), 'N'));
@@ -339,7 +347,7 @@ export function upperStorey(ctx, el) {
   }
   // ---- the terrace over the side range: a sleeping mat in the shade of the wall, a bench of mud brick, a jar; (the shared roofLife puts the rest)
   { const tu = T0 + 1.9 <= T1 - 0.2 ? T0 + 1.9 : T0 + 1.3; void tu; }
-  B(MP, T0 + 0.2, vC0 + 0.55, T0 + 0.8, vC0 + 0.95, H, H + 0.35); C(T0 + 0.2, vC0 + 0.55, T0 + 0.8, vC0 + 0.95, H, H + 0.35);
+  B(MP, T0 + 1.55, vC0 + 0.35, T1 - 0.1, vC0 + 0.75, H, H + 0.35); C(T0 + 1.55, vC0 + 0.35, T1 - 0.1, vC0 + 0.75, H, H + 0.35);
   // ---- the gallery of timber over the court's east side, at the roof's height: boards on joists, the court's posts, a rail; posts to the floor of the court
   { const g0 = uC1 - 0.95, g1 = uC1, v0 = vC0 + 0.05, v1 = vC1 - 0.05, h0 = H - 0.14;
     B('timber', g0, v0, g1, v1, h0, H); col.floor(R(g0, v0, g1, v1), H);
@@ -360,9 +368,10 @@ export function upperStorey(ctx, el) {
   }
   // ---- the ladder to the roof of the rooms, leaning on the court-side wall at the terrace's east end, and its ramp
   ladder(kit, ul, vS - 0.8, vS - 0.02, TOP);
-  col.ramp(R(ul - 0.65, vS - 0.8, ul + 0.65, vS), H - 0.5, TOP, F.dir);
+  col.ramp(R(ul - 0.65, vS - 0.8, ul + 0.65, vS + 0.1), H - 0.5, TOP, F.dir);   // (the ramp reaches the roof's height over the wall's foot, and a floor carries on over the wall's thickness: the engine's roof-shell test turns one back from a wall's top that has no floor under it)
+  col.floor(R(ul - 0.65, vS + 0.1, ul + 0.65, vS + 0.6), TOP);
   // ---- the roof of the rooms: a mat, a bench for sleeping out, a jar in its stand
   { const ru = ua + 1.0 + hash(seed, 5) * 1.5, rv = vS + 1.4; B('reed_mat', ru - 0.9, rv - 0.4, ru + 0.9, rv + 0.4, TOP, TOP + 0.014); B('linen', ru - 0.85, rv - 0.35, ru + 0.85, rv + 0.35, TOP + 0.014, TOP + 0.06);
-    Lat('terracotta', JAR(1.1), U - 1.2, vS + 0.7, TOP, 12); Lat('terracotta', [[0.2, 0], [0.2, 0.08], [0.14, 0.08]], U - 1.2, vS + 0.7, TOP, 10); }
+    Lat('terracotta', JAR(1.1), U - 0.85, V - 0.85, TOP, 12); Lat('terracotta', [[0.2, 0], [0.2, 0.08], [0.14, 0.08]], U - 0.85, V - 0.85, TOP, 10); }
   void rs;
 }
