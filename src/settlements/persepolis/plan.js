@@ -6,6 +6,9 @@
 import { TERRACE, STAIR, COURT, mountain } from './layout.js';
 import { people } from './people.js';
 
+// the ways visitors walk on the terrace: the royal way from the stair's head to the Apadana's west stair, and the file from the
+// Gate of All Nations along the Apadana's north stair (the carved figures there are modelled in full within 12 m of them)
+const WALK = [[[-148, -60], [-80, -60]], [[-112, -132], [-91, -123], [-60, -123], [-44, -123]]];
 const E = [], T = TERRACE.h, [tx0, tz0, tx1, tz1] = TERRACE.rect;
 // the terrace and its parapet (open where the stair arrives)
 // (and along the east edge, where the fortification wall stands on it)
@@ -37,7 +40,7 @@ for (const [x, z, rot, scroll] of [[-100.5, -34.5, -Math.PI / 2, false], [-100.5
 E.push({ t: 'lamassu_gate', c: [-112, STAIR.z], s: 25, h: 17, y: T });
 // the Apadana on its 2.6 m plinth: 6 × 6 columns in the hall, porticoes north, west and east
 E.push({ t: 'hall', rect: [-60, -90, 0, -30], y: T, plinth: 2.6, h: 20, grid: [6, 6], porticoes: 'nwe', portDepth: 17, walls: 5, towers: 20, doors: 'nwe', dress: true,
-  stairs: [{ face: 'w', W: 26, flight: 9, D: 6, wings: ['nobles', 'nobles'], c: -60 }] });   // the west porch's stair (the visitor's side) [inferred]
+  stairs: [{ face: 'w', W: 26, flight: 9, D: 6, wings: ['nobles', 'nobles'], c: -60, walk: WALK }] });   // the west porch's stair (the visitor's side) [inferred]
 E.push({ t: 'audience', c: [-30, -40], y: T + 2.75, dir: [0, -1], aisle: 44 });
 // the throne in the Hundred-Column Hall, at the south end of its middle aisle between two rows of columns (the aisle's 4.7 m, the dais 4.6 m)
 const HY = T + 0.95;
@@ -64,8 +67,8 @@ E.push({ t: 'furnish', y: T + 3.65, items: [
   ['stand', -28.4, 91.2, 0, {}], ['stand', -28.4, 98.8, 0, {}], ['stand', 8.4, 91.2, 0, {}], ['stand', 8.4, 98.8, 0, {}],
 ] });
 // its two stairways, north and east, with their reliefs: the nobles on the north, the delegations on the east stair's south wing
-E.push({ t: 'apadana_stair', face: 'n', line: -110, span: [-67, 7], c: -30, W: 32, D: 7.5, y: T, h: 2.6, wings: ['nobles', 'nobles'] });
-E.push({ t: 'apadana_stair', face: 'e', line: 20, span: [-97, -40], c: -68.5, W: 32, D: 7.5, y: T, h: 2.6, wings: ['nobles', 'tribute'] });
+E.push({ t: 'apadana_stair', face: 'n', line: -110, span: [-67, 7], c: -30, W: 32, D: 7.5, y: T, h: 2.6, wings: ['nobles', 'nobles'], walk: WALK });
+E.push({ t: 'apadana_stair', face: 'e', line: 20, span: [-97, -40], c: -68.5, W: 32, D: 7.5, y: T, h: 2.6, wings: ['nobles', 'tribute'], walk: WALK });
 // the Hall of a Hundred Columns, 70 × 70 m, 10 × 10 columns, a portico north
 // (its platform 0.8 m high, a flight of 10 cm steps before the portico and before each other door)
 E.push({ t: 'hall', rect: [40, -130, 110, -60], y: T, plinth: 0.8, h: 13, grid: [10, 10], porticoes: 'n', portDepth: 14, walls: 3.5, doors: 'nesw', reliefs: true, bulls: true,

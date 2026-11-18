@@ -18,8 +18,9 @@ import { house, workshops, streetChannel, flagApron, gardenPlot } from './town.j
 import '../qing/index.js';
 import { scribeKit } from '../sumerian/house.js';
 import { loft } from '../egyptian/objects.js';
+import { Acc, figure } from './sculpt.js';
 
-const S = 'limestone_persian', W = 'plaster_persian', C = 'marble_dark';     // C: the polished stone of the columns, frames and sculpture
+const S = 'limestone_persian', W = 'plaster_persian', C = 'marble_dark', STONE = 'plaster_persian';   // STONE: the pale stone the reliefs are cut in, so that they read on the dark wall     // C: the polished stone of the columns, frames and sculpture
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
 /**
@@ -58,13 +59,39 @@ function column(bag, col, x, z, y, h, d, beam = 'x', simple = false) {
       for (let i = 1; i <= 5; i++) { const o = -q + i * (2 * q) / 6, cx = x + fx * (q + 0.02) + lx * o, cz = z + fz * (q + 0.02) + lz * o; bag.add(C, box(cx - (fx ? 0.03 : 0.045 * s), yV + 0.65 * s, cz - (fz ? 0.03 : 0.045 * s), cx + (fx ? 0.03 : 0.045 * s), yP - 0.65 * s, cz + (fz ? 0.03 : 0.045 * s))); }
       for (const vy of [yV + 0.33 * s, yP - 0.33 * s]) for (const o of [-0.33 * s, 0.33 * s]) {
         const c = [x + fx * q + lx * o, vy, z + fz * q + lz * o], out = (k) => [c[0] + fx * k, c[1], c[2] + fz * k];
-        bag.add(C, rod(out(-0.05), out(0.1 * s), 0.31 * s, 14));
-        bag.add('egyptian_blue', rod(out(0.09 * s), out(0.16 * s), 0.2 * s, 12));   // the volutes' eyes carried paint [inferred from the traces of colour]
-        bag.add('stucco_red', rod(out(0.15 * s), out(0.21 * s), 0.08 * s, 8));
+        volute(bag, c, [fx, fz], [lx, lz], s, o > 0 ? 1 : -1, vy > yV + 0.5 * (yP - yV) ? 1 : -1);
+        bag.add('egyptian_blue', rod(out(0.1 * s), out(0.16 * s), 0.07 * s, 8));   // the volutes' eyes carried paint [inferred from the traces of colour]
       }
     }
   }
   bullProtomes(bag, x, z, yS, s, beam === 'x');
+}
+
+/**
+ * A volute of the capital's square zone (docs/settlements/persepolis.md §21): a band wound in a spiral of nearly two turns, standing
+ * 0.1 s out of the face, its centre at c, the face's outward direction f and lateral l (x, z); kl, ku mirror it across and up.
+ */
+function volute(bag, c, f, l, s, kl, ku) {
+  const N = 22, T = Math.PI * 2 * 1.8, w = 0.03 * s, h = 0.1 * s, ph = kl > 0 ? 0.6 : Math.PI - 0.6;
+  const P = (lat, up, o) => [c[0] + l[0] * lat + f[0] * o, c[1] + up, c[2] + l[1] * lat + f[1] * o];
+  const ring = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N, a = ph + kl * ku * T * t, r = s * (0.33 - 0.27 * t), ca = Math.cos(a), sa = Math.sin(a);
+    ring.push({ ca, sa, ro: r + w, ri: Math.max(0.004 * s, r - w) });
+  }
+  const tri = [], sub = (p, q) => [p[0] - q[0], p[1] - q[1], p[2] - q[2]], cr = (p, q) => [p[1] * q[2] - p[2] * q[1], p[2] * q[0] - p[0] * q[2], p[0] * q[1] - p[1] * q[0]];
+  const quad = (a, b, cc, d, hint) => {
+    const n = cr(sub(b, a), sub(cc, a)), flip = n[0] * hint[0] + n[1] * hint[1] + n[2] * hint[2] < 0;
+    if (flip) tri.push(...a, ...cc, ...b, ...a, ...d, ...cc); else tri.push(...a, ...b, ...cc, ...a, ...cc, ...d);
+  };
+  for (let i = 0; i < N; i++) {
+    const A = ring[i], B = ring[i + 1], _u = 0;
+    const at = (R, rad, o) => P(kl * R.ca * rad, ku * R.sa * rad, o);
+    quad(at(A, A.ro, h), at(B, B.ro, h), at(B, B.ri, h), at(A, A.ri, h), [f[0], 0, f[1]]);                                   // the band's face
+    quad(at(A, A.ro, 0), at(B, B.ro, 0), at(B, B.ro, h), at(A, A.ro, h), [l[0] * kl * A.ca, ku * A.sa, l[1] * kl * A.ca]);    // its outer edge
+    quad(at(A, A.ri, 0), at(B, B.ri, 0), at(B, B.ri, h), at(A, A.ri, h), [-l[0] * kl * A.ca, -ku * A.sa, -l[1] * kl * A.ca]); // its inner edge
+  }
+  bag.add(C, fromTriangles(tri));
 }
 
 /**
@@ -491,6 +518,7 @@ function treasury(el, ctx) {
  * divided by cypresses; guards climbing the parapets.
  */
 function apadanaStair(el, { bag, col }) {
+  const acc = new Acc(), WALK = el.walk ?? [];
   const { face, line, c, y, h } = el, [s0, s1] = el.span, W = el.W ?? 32, D = el.D ?? 7.5, Lf = el.flight ?? 10, pt = 0.8, ph = 1.0;
   const M = face === 'n' ? (a, o) => [a, line - o] : face === 's' ? (a, o) => [a, line + o] : face === 'w' ? (a, o) => [line - o, a] : (a, o) => [line + o, a];
   const ax = face === 'n' || face === 's', climber = el.climbers ?? 'persian';
@@ -505,6 +533,18 @@ function apadanaStair(el, { bag, col }) {
   };
   const front = (u, v, w) => { const [x, z] = M(u, D + w); return [x, y + v, z]; };
   const wall = (u, v, w) => { const [x, z] = M(u, w); return [x, y + v, z]; };
+  // detail by distance from the ways people walk: modelled in full within 12 m, reduced to 40 m, coarse beyond
+  const lodOf = (a, o) => {
+    const [px, pz] = M(a, o); let dm = Infinity;
+    for (const w of WALK) for (let i = 0; i + 1 < w.length; i++) {
+      const [x0, z0] = w[i], [x1, z1] = w[i + 1], ex = x1 - x0, ez = z1 - z0, l2 = ex * ex + ez * ez, t = l2 ? Math.max(0, Math.min(1, ((px - x0) * ex + (pz - z0) * ez) / l2)) : 0;
+      dm = Math.min(dm, Math.hypot(px - x0 - ex * t, pz - z0 - ez * t));
+    }
+    return dm <= 12 ? 2 : dm <= 40 ? 1 : 0;
+  };
+  const fig = (kind, place, u, v, size, dir, paintMat, gift) => figure(acc, kind, place, u, v, size, dir, lodOf(u, place === front ? D : 0), Math.max(0.026, 0.052 * size / 0.7), { stone: STONE, paint: paintMat, gift });
+  const PAINT = [['stucco_red', 'egyptian_blue', 'cloth_ochre', 'egyptian_blue', 'cloth_green'], ['egyptian_blue', 'stucco_red', 'cloth_green', 'stucco_red', 'cloth_ochre']];
+  const paint = (n, kind) => PAINT[kind === 'mede' ? 1 : 0][((n % 5) + 5) % 5];
   const L0 = c - W / 2 + Lf, L1 = c + W / 2 - Lf;
   // the middle block (the landing at the top) and its parapet
   const mr = Box(S, L0, L1, 0, D, y - 0.2, y + h); col.rect(mr, y, y + h); col.floor(mr, y + h);
@@ -531,37 +571,34 @@ function apadanaStair(el, { bag, col }) {
     strip(bag, S, front, aOut, top(aOut) - 0.95, aIn, top(aIn) - 0.95, 0.07, 0.05);
     for (let k = 0; k < 6; k++) {
       const a = aOut + up * (k + 0.8) * Lf / 7;
-      relief(bag, C, climber, front, a, top(a) - 0.88, 0.7, up, 0.05);
-      if (climber === 'persian') strip(bag, C, front, a + up * 0.115 * 0.7, top(a) - 0.88, a + up * 0.115 * 0.7, top(a) - 0.88 + 0.75, 0.018, 0.065);
+      fig(climber, front, a, top(a) - 0.88, 0.7, up, paint(k + sg, climber === 'persian' ? 'persian' : 'bearer'), climber === 'bearer' ? 'bronze' : null);
+      if (climber === 'persian') strip(bag, STONE, front, a + up * 0.115 * 0.7, top(a) - 0.88, a + up * 0.115 * 0.7, top(a) - 0.88 + 0.75, 0.018, 0.065);
     }
     const size = 1.8, u0 = aIn - up * (0.5 * size + 0.35);
-    relief(bag, C, 'bull', front, u0, 0.12, size, up, 0.07);
-    relief(bag, C, 'lion', front, u0, 0.12, size, up, 0.09);
+    fig('lionbull', front, u0, 0.12, size, up, null);
   }
   // the central panel: rosette borders, the winged disc between sphinxes, the guards below
   for (let a = L0 + 0.25; a < L1 - 0.1; a += 0.32) { rosette(bag, S, front, a, h - 0.13, 0.1); rosette(bag, S, front, a, 0.1, 0.07); }
   // (or, on the palaces' stairs, the trilingual inscription between guards: Old Persian, Elamite, Babylonian)
   const insc = el.centre === 'inscription', iw = Math.min(4.4, (L1 - L0) * 0.5);
   if (insc) {
-    Box(C, c - iw / 2, c + iw / 2, D, D + 0.03, y + 0.3, y + h - 0.3);
+    Box(STONE, c - iw / 2, c + iw / 2, D, D + 0.03, y + 0.3, y + h - 0.3);
     for (let k = 0; k < 3; k++) for (let r = 0; r * 0.16 < h - 0.85; r++) {
       const u0 = c - iw / 2 + 0.12 + k * (iw - 0.24) / 3 + 0.06, u1 = u0 + (iw - 0.24) / 3 - 0.12 - ((r * 7 + k * 3) % 5) * 0.05;
-      Box(C, u0, u1, D + 0.03, D + 0.045, y + 0.45 + r * 0.16, y + 0.5 + r * 0.16);
+      Box(STONE, u0, u1, D + 0.03, D + 0.045, y + 0.45 + r * 0.16, y + 0.5 + r * 0.16);
     }
-  } else relief(bag, C, 'disc', front, c, 1.4, 1.35, 1, 0.07);
+  } else fig('disc', front, c, 1.4, 1.35, 1, null);
   for (const sg of [-1, 1]) {
-    if (!insc) relief(bag, C, 'sphinx', front, c + sg * 2.7, 1.48, 0.85, -sg, 0.07);
+    if (!insc) fig('sphinx', front, c + sg * 2.7, 1.48, 0.85, -sg, null);
     const ng = insc ? Math.max(0, Math.min(4, Math.floor(((L1 - L0) / 2 - iw / 2 - 0.35) / 0.8))) : 4;
     for (let k = 0; k < ng; k++) {
       const a = insc ? c + sg * (iw / 2 + 0.45 + k * 0.8) : c + sg * (1.4 + k * 0.95);
-      relief(bag, C, 'persian', front, a, 0.2, 1.1, -sg, 0.07);
-      strip(bag, C, front, a - sg * 0.13 * 1.1, 0.2, a - sg * 0.13 * 1.1, 0.2 + 1.2, 0.025, 0.085);
+      fig('persian', front, a, 0.2, 1.1, -sg, paint(k + (sg > 0 ? 2 : 0), 'persian'));
+      strip(bag, STONE, front, a - sg * 0.13 * 1.1, 0.2, a - sg * 0.13 * 1.1, 0.2 + 1.2, 0.025, 0.085);
     }
   }
   // the wings: three registers of the procession, all walking toward the stair
   // the robes carried their paint (Egyptian blue, red ochre, green; the background bare): the colour by figure (Nagel et al. 2024)
-  const PAINT = [['stucco_red', 'egyptian_blue', 'cloth_ochre', 'egyptian_blue', 'cloth_green'], ['egyptian_blue', 'stucco_red', 'cloth_green', 'stucco_red', 'cloth_ochre']];
-  const paint = (n, kind) => PAINT[kind === 'mede' ? 1 : 0][((n % 5) + 5) % 5];
   const reg = [0.2, 0.93, 1.66], rh = 0.66;
   for (const [w0, w1, kind] of [[s0, c - W / 2, el.wings?.[0] ?? 'nobles'], [c + W / 2, s1, el.wings?.[1] ?? 'nobles']]) {
     const toward = w1 <= c ? 1 : -1;
@@ -575,19 +612,19 @@ function apadanaStair(el, { bag, col }) {
         if (kind === 'servants') {
           // the palaces' servants carrying up food in covered dishes, a kid or a wineskin; a cypress between groups
           const k = i % 7;
-          if (k === 6) { relief(bag, 'cloth_green', 'cypress', wall, a, v, rh, 1, 0.05); a -= toward * 0.5; }
-          else if (k === 3) { relief(bag, C, 'ram', wall, a - toward * 0.1, v, rh * 0.8, toward, 0.05); a -= toward * 0.62; }
-          else { relief(bag, paint(i + ri, k % 2 ? 'mede' : 'bearer'), k % 2 ? 'mede' : 'bearer', wall, a, v, rh * 0.96, toward, 0.05); a -= toward * 0.5; }
+          if (k === 6) { fig('cypress', wall, a, v, rh, 1, 'cloth_green'); a -= toward * 0.5; }
+          else if (k === 3) { fig('ram', wall, a - toward * 0.1, v, rh * 0.8, toward, null); a -= toward * 0.62; }
+          else { fig(k % 2 ? 'mede' : 'bearer', wall, a, v, rh * 0.96, toward, paint(i + ri, k % 2 ? 'mede' : 'bearer'), k % 2 ? null : 'bronze'); a -= toward * 0.5; }
         } else if (kind === 'tribute') {
           // a delegation: an usher, three bearers and their animal, then a cypress
           const k = i % 6, beast = ['horse', 'zebu', 'camel', 'ram', 'horse', 'camel', 'zebu', 'ram'][(Math.floor(i / 6) * 3 + ri) % 8];
-          if (k === 5) { relief(bag, 'cloth_green', 'cypress', wall, a, v, rh, 1, 0.05); a -= toward * 0.55; }
-          else if (k === 4) { relief(bag, C, beast, wall, a - toward * 0.1, v, rh * (beast === 'camel' ? 1.12 : beast === 'ram' ? 0.95 : 1.0), toward, 0.05); a -= toward * (beast === 'ram' ? 0.75 : 0.95); }
-          else { relief(bag, paint(i + ri, k === 0 ? 'persian' : 'bearer'), k === 0 ? 'persian' : 'bearer', wall, a, v, rh * 0.96, toward, 0.05); a -= toward * 0.52; }
+          if (k === 5) { fig('cypress', wall, a, v, rh, 1, 'cloth_green'); a -= toward * 0.55; }
+          else if (k === 4) { fig(beast, wall, a - toward * 0.1, v, rh * (beast === 'camel' ? 1.12 : beast === 'ram' ? 0.95 : 1.0), toward, null); a -= toward * (beast === 'ram' ? 0.75 : 0.95); }
+          else { fig(k === 0 ? 'persian' : 'bearer', wall, a, v, rh * 0.96, toward, paint(i + ri, k === 0 ? 'persian' : 'bearer'), k === 0 ? null : 'bronze'); a -= toward * 0.52; }
         } else {
           // Persians and Medes by turns, a cypress now and then
-          if (i % 9 === 8) { relief(bag, 'cloth_green', 'cypress', wall, a, v, rh, 1, 0.05); a -= toward * 0.5; }
-          else { relief(bag, paint(i + ri, (i + ri) % 2 ? 'mede' : 'persian'), (i + ri) % 2 ? 'mede' : 'persian', wall, a, v, rh * 0.96, toward, 0.05); a -= toward * 0.5; }
+          if (i % 9 === 8) { fig('cypress', wall, a, v, rh, 1, 'cloth_green'); a -= toward * 0.5; }
+          else { fig((i + ri) % 2 ? 'mede' : 'persian', wall, a, v, rh * 0.96, toward, paint(i + ri, (i + ri) % 2 ? 'mede' : 'persian')); a -= toward * 0.5; }
         }
         i++;
       }
@@ -595,6 +632,7 @@ function apadanaStair(el, { bag, col }) {
     // the wing's parapet of stepped merlons along the plinth's edge
     merlonsAlong(bag, M, w0 + 0.3, w1 - 0.3, -0.35, y + h);
   }
+  acc.flush(bag);
 }
 /** One stepped merlon at (a, o) in a stair's frame, its base at yb. */
 function merlon(bag, M, a, o, yb, hgt, w, th, face) {
@@ -703,7 +741,7 @@ function lamassu(bag, x, z, y, fd, { kind = 'man', wings = kind === 'man', skin 
   const RB = (mat, a0, a1, b0, b1, y0, y1) => { const p = P(a0, b0), q = P(a1, b1); bag.add(mat, box(Math.min(p[0], q[0]), y0, Math.min(p[1], q[1]), Math.max(p[0], q[0]), y1, Math.max(p[1], q[1]))); };
   RB('limestone_persian', -3.2, 3.2, -1, 1, y, yb - 0.08); RB(C, -3.25, 3.25, -1.04, 1.04, yb - 0.08, yb);
   // the legs: the forelegs together, the hind legs a little apart; hoof, pastern, fetlock and dewclaw, cannon, knee, forearm
-  const LEG = [[0.33, 0], [0.32, 0.05], [0.28, 0.3], [0.23, 0.36], [0.21, 0.5], [0.27, 0.6], [0.235, 0.72], [0.225, 1.15], [0.29, 1.28], [0.27, 1.42], [0.33, 1.62], [0.42, 1.9], [0.47, 2.2]];
+  const LEG = [[0.33, 0], [0.32, 0.05], [0.29, 0.3], [0.255, 0.36], [0.245, 0.5], [0.3, 0.6], [0.27, 0.72], [0.26, 1.15], [0.33, 1.28], [0.31, 1.42], [0.38, 1.62], [0.47, 1.9], [0.52, 2.2]];
   for (const [a, b, hind] of [[1.85, -0.44, 0], [1.85, 0.44, 0], [-1.95, -0.44, 1], [-1.45, 0.44, 1]]) {
     const [lx, lz] = P(a, b);
     bag.add(skin, lathe(hind ? LEG.map(([r, v], i) => [r * (i > 9 ? 1.18 : 1), v]) : LEG, 12, null, lx, yb, lz));
@@ -715,6 +753,9 @@ function lamassu(bag, x, z, y, fd, { kind = 'man', wings = kind === 'man', skin 
   E(skin, 0, 0, 2.75, 2.45, 0.98, 0.8, 18, 0.72);
   E(skin, 1.62, 0, 3.05, 0.86, 1.18, 0.84, 16, 0.68);
   E(skin, -1.9, 0, 2.9, 0.92, 1.12, 0.8, 16, 0.75);
+  // the chest and shoulders modelled: the pectorals, the shoulder blades and the haunch's muscle, and the chest's curls in rows
+  for (const b of [-0.48, 0.48]) { E(skin, 2.05, b, 2.7, 0.55, 0.62, 0.34, 12, 0.8); E(skin, 1.2, b * 1.12, 3.15, 0.7, 0.55, 0.25, 12, 0.8); E(skin, -1.75, b * 1.1, 2.75, 0.62, 0.7, 0.28, 12, 0.8); }
+  if (kind === 'man') for (let r = 0; r < 5; r++) for (let i = 0; i < 9; i++) E(skin, 2.28 - 0.01 * r, -0.62 + i * 0.155 + (r % 2) * 0.07, 2.3 + r * 0.2, 0.06, 0.08, 0.06, 6);
   // the belly fringe: a row of locks along the underside
   for (let i = 0; i < 15; i++) for (const b of [-0.56, 0.56]) E(skin, -1.2 + i * 0.17, b, 1.86 + 0.02 * Math.sin(i * 1.7), 0.06, 0.17, 0.06, 8);
   // the tail down the back of the haunch to its tuft
