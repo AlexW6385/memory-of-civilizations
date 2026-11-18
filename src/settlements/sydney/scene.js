@@ -3,6 +3,7 @@
 // benches, lamps, strollers and anglers on the sea wall; the Garden's paths with their benches; the Opera House's great stair with
 // people sitting on it; the traffic on the Harbour Bridge's deck and the Cahill Expressway. Everything derives from layout.js.
 import { frame } from '../../styles/modern/rooms.js';
+import { RES } from '../../styles/modern/upper.js';
 import { LEVEL, OPERA, BRIDGE, QUAY, FARM, COVE, MACQUARIE, GARDEN, BENNELONG, RADIUS, shore, height, inRect, lots } from './layout.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -134,7 +135,7 @@ export function roomPeople() {
   const MEN = [['cloth_white', 'cloth_grey'], ['cloth_blue', 'cloth_brown'], ['cloth_ochre', 'cloth_indigo'], ['cloth_grey', 'cloth_black'], ['cloth_green', 'cloth_brown']], FROCK = ['cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_blue', 'cloth_maroon'];
   for (const l of lots()) {
     if (l.t !== 'shop_room' && l.t !== 'espresso_bar') continue;
-    const fr = frame(l.rect, l.front), F = l.y + 0.12, T = 0.3, { L: Wd, Dp } = fr;
+    const fr = frame(l.rect, l.front), F = l.y + 0.12, T = 0.3, { L: Wd } = fr, Dp = fr.Dp - (l.up ? RES : 0);   // (the room is shorter by the stair hall behind its partition)
     // a person at local (u, d) facing local direction (a, b)
     const at = (u, d, a, b, o = {}, woman = rand() < 0.35) => {
       const p = fr.W(u, d, F), q = fr.W(u + a, d + b, F), rot = Math.atan2(-(q[0] - p[0]), -(q[2] - p[2])), [c1, c2] = pick(MEN);

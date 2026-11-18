@@ -1,4 +1,5 @@
 // Modern Sydney, 1973 (docs/settlements/sydney.md §2–§4).
+import { upperWalks } from './upper-walks.js';
 import { RADIUS, LEVEL, OPERA, BRIDGE, QUAY, AUSTRALIA_SQ, height, seawalls } from './layout.js';
 
 const [ox0, oz0, ox1, oz1] = OPERA.rect, cw = ox0 + 21, ce = ox1 - 21;
@@ -31,7 +32,9 @@ export const opera = {
     // up the stair, in at the Concert Hall's east door and down its aisle to the stage
     Object.assign([[100, oz1 - 4], [100, oz1 - 34], [cw + 8, oz1 - 34], [cw, oz1 - 34], [cw, oz1 - 45], [cw, oz1 - 55]], { y0: height(100, -190) + OPERA.h }),
     // and in at the Opera Theatre's west door, down the aisle between the stalls
-    Object.assign([[100, oz1 - 4], [100, oz1 - 38], [ce - 8, oz1 - 38], [ce, oz1 - 38], [ce, oz1 - 50], [ce, oz1 - 60]], { y0: height(100, -190) + OPERA.h })],
+    Object.assign([[100, oz1 - 4], [100, oz1 - 38], [ce - 8, oz1 - 38], [ce, oz1 - 38], [ce, oz1 - 50], [ce, oz1 - 60]], { y0: height(100, -190) + OPERA.h }),
+    // and from the footpath up the stairs of the shops and the terraces whose upper floors are open (modern/upper.js)
+    ...upperWalks()],
 };
 export const harbour = {
   id: 'sydney-harbour', style: 'modern', origin: [0, 0], base: 0, yaw: 0, feature: true,

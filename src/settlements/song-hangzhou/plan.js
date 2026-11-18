@@ -4,7 +4,8 @@
 // on the bank, the river with its boats; the canal and its lock, bridges and boats.
 
 import { RADIUS, LEVEL, WALL, ROAD, PAGODA, T1, T2, CANAL, CANAL_STREETS, CANAL_BRIDGES, WAREHOUSES } from './layout.js';
-import { interiorRooms, dwellingRooms } from './life.js';
+import { interiorRooms, dwellingRooms, upLots } from './life.js';
+import { storeyWalk } from './storeys.js';
 import './pagoda-upper.js';
 
 /** The river boats [x, z, heading (±1 along x), length − 4] (moored by the wall when z < 165, under sail beyond), and the canal boats [z, heading]. */
@@ -98,6 +99,7 @@ const walks = [
   [[-110, 136], [-110, 104], [-108, 98.4], [-107, 96.6], [-92, 97], [-91.5, 76], [-91.5, 62], [-110, 55], [-110, 36]],
   [[-110, 136], [-110, 104], [-108, 98.4], [-108, 95.5], [-108, 90], [-113, 88], [-117, 84], [-114, 80]],
 ];
+for (const l of upLots()) walks.push(storeyWalk({ ...l, y: LEVEL.street }));
 walks.forEach((w) => { w.y0 = 0; });
 
 export const pagoda = {

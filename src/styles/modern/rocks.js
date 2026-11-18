@@ -28,7 +28,7 @@ export function rocksTerrace(el, { bag, col, lights }) {
   bag.add('sandstone', B(0, L, 0, Dp, y0 - 0.4, y + 0.5));                                    // the sandstone footings
   if (el.kind === 'store') return store(el, { bag, col }, { B, W, T, L, Dp, y, rand });
   const n = Math.max(1, Math.round(L / 4.6)), fw = L / n, wall = WALLS[Math.floor(rand() * WALLS.length)], H1 = 3.5, H2 = 3.2, top = y + 0.5 + H1 + H2;
-  const balcony = rand() < 0.55, roofM = 'iron_galv';
+  const balcony = rand() < 0.55 || !!el.up, roofM = 'iron_galv';
   const enter = el.enter ?? -1, fwE = L / n, rb = rng(((el.seed || 1) ^ 0x5a5a) >>> 0);
   if (enter < 0) { bag.add(wall, B(0, L, 0.3, Dp, y + 0.5, top)); col.rect(el.rect, y0 - 0.4, top + 3); }
   else for (let i = 0; i < n; i++) {
@@ -65,7 +65,7 @@ export function rocksTerrace(el, { bag, col, lights }) {
       bag.add('paint_white', B(da, db, PR - 0.12, PR - 0.06, y + 2.25, y + 2.3)); bag.add('glass_outer', B(da, db, PR - 0.12, PR - 0.08, y + 2.3, y + 2.75));
       for (let k = 0; k < nn; k++) { bag.add('sandstone_dressed', B(da - 0.15, db + 0.15, -0.3 * (k + 1), -0.3 * k, gy - 0.4, gy + hh * (nn - k))); col.floor(R_(da - 0.15, db + 0.15, -0.3 * (k + 1), -0.3 * k), gy + hh * (nn - k)); }
       col.floor(R_(da, db, 0, PR), y + 0.5);
-      terraceInterior({ variant: el.vari ?? 0, bag, col, lights, B, W, R: R_, u0, u1: u0 + fw, PR, Dp, F: y + 0.5, H1, top, wall, door: da, doorMat: dm });
+      terraceInterior({ up: !!el.up, variant: el.vari ?? 0, bag, col, lights, B, W, R: R_, u0, u1: u0 + fw, PR, Dp, F: y + 0.5, H1, top, wall, door: da, doorMat: dm });
     } else {
     bag.add(dm, B(da, db, PR - 0.12, PR - 0.08, y + 0.5, y + 2.25)); bag.add('glass_outer', B(da, db, PR - 0.12, PR - 0.08, y + 2.3, y + 2.75));
     bag.add('paint_white', B(da, db, PR - 0.12, PR - 0.06, y + 2.25, y + 2.3));

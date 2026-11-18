@@ -8,6 +8,7 @@ import { RADIUS, LEVEL, CANALS, STREETS, BRIDGES, lots, onBridge } from './layou
 import { northPlans } from './north.js';
 import { upOf, doorGap, shopkeeperAt } from './uphouses.js';
 import './style.js';
+import { bridgeLamps } from './lamps.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const R = RADIUS - 26;                                  // the street life stops here (the people are drawn near)
@@ -219,6 +220,8 @@ function riverLife() {
     }
     // (a climbable house keeps its doorway clear: of what the street life put before it only the lanterns and the shopkeeper stay)
     if (uhouse) { const keep = L.splice(n0).filter((e) => e.t === 'hang_lantern' || (e.t === 'figure' && e.y > y + 0.2)); L.push(...keep); }
+    // the tall drum lantern over the door of the tea house and inn, and of some tea and wine shops and eating places (by the lot's own seed, no draw of the stream)
+    if (l.shop0 && !l.water && (uhouse?.use === 'inn' || (['tea', 'wine', 'food'].includes(l.trade0 || l.trade) && ((l.seed * 2654435761) >>> 0) % 100 < 55))) L.push({ t: 'suzhou_lamp', kind: 'inn', at: F.P(0.5, 0.12), y: y + 3.25, rot: F.rot });
   }
   // the public landings with no boat: women washing at the bottom slab — squatting at the water's
   // edge to rinse, a basket of washing beside, now and then one beating the cloth with a paddle on
@@ -309,7 +312,13 @@ function shopFronts() {
 function inDisc([x, z], m = 30) { return Math.hypot(x, z) < R - m; }
 let openLots = new Set();
 
+/** The lamps on poles at the bridge heads (lamps.js), one plan of the street life. */
+function bridgeLampPlans() {
+  const list = bridgeLamps(inDisc);
+  return list.length ? [{ ...base('ming-suzhou-bridge-lamps', list), style: 'life', center: [0, 0], near: 230 }] : [];
+}
+
 export async function town() {
   const hs = houses();
-  return [waterways(), ...hs, ...riverLife(), ...shopFronts(), ...northPlans()];
+  return [waterways(), ...hs, ...riverLife(), ...bridgeLampPlans(), ...shopFronts(), ...northPlans()];
 }

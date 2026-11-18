@@ -123,9 +123,9 @@ In the garden, slow pentatonic phrases on a plucked zither (the qin, played here
 
 ## 10. Not yet (L3)
 
-(Furniture, the study, boards and couplets and penjing are now built: §11; the street life and the open houses: §6.) Still to do (sound: §13): boats moving; lamps at night in the streets; the western and eastern parts of the garden as they were in the Ming.
+(Furniture, the study, boards and couplets and penjing are now built: §11; the street life and the open houses: §6.) Still to do (sound: §13): boats moving; the western and eastern parts of the garden beyond the named stands of §19 (Wen's positions are not given in the sources found).
 
-(Furniture, the study, boards and couplets and penjing are now built: §11; the street life and the open houses: §6.) Still to do: lamps at night in the streets; the western and eastern parts of the garden as they were in the Ming.
+(Furniture, the study, boards and couplets and penjing are now built: §11; the street life and the open houses: §6.) Still to do: the rest of the Ming garden's east and west beyond §19's stands; lanterns carried by walkers.
 
 ## 11. The halls furnished, boards and couplets, penjing, damp (L3)
 
@@ -261,13 +261,13 @@ Audit of DESIGN.md §5 against the garden core and the residence, from the code 
 | Eave tile ends, drip tiles, ridge cap, hip scrolls | missing (rows of cover tiles only) | the round tile end at every cover-tile row, the drip tile, the ridge foot and the coin at its middle, the scroll at each hip |
 | Brackets, purlins, beam bosses | missing (plain dou block) | profile brackets under the eave, purlin run, carved bosses on the beam band |
 | Carved door panels | missing | the roundel on each foot panel of the door leaves |
-| Gate tablets | blank boards | an inscription (real characters for the garden gate in round 4, §19) |
+| Gate tablets | blank boards | an inscription (real characters for the garden gate in round 4, §20) |
 | Pebble medallions | flat tinted mosaic cells | real pebbles with relief |
 | Rooms' objects and figures (gate hall, sedan hall, women's room, east hall, Little Canglang, five pavilions) | empty or one table | furniture and one person each where the dossier gives one |
-| Taihu stones near the paths | partly (blobby, dark triangle patches, in the shared `garden-stone.js`) | piercing and wrinkling; rebuilt in round 4 (§19) |
-| Zigzag bridge rail posts, thresholds, steps, terrace paving wear | partly | plain posts, little wear; thresholds, steps, moss and terrace settling in round 4 (§19); rail posts not touched |
-| Pavilion roofs, Xiangzhou stone boat, Jianshan tower trim and interiors | missing | no trim, no furnishing; done in round 4 (§19) |
-| Leaky windows' tracery variety, lamps and coloured light, sound, animals in the core | partly / missing | tracery and the animals at the bridges in round 4 (§19); lamps, light and sound belong to the other agent |
+| Taihu stones near the paths | partly (blobby, dark triangle patches, in the shared `garden-stone.js`) | piercing and wrinkling; rebuilt in round 4 (§20) |
+| Zigzag bridge rail posts, thresholds, steps, terrace paving wear | partly | plain posts, little wear; thresholds, steps, moss and terrace settling in round 4 (§20); rail posts not touched |
+| Pavilion roofs, Xiangzhou stone boat, Jianshan tower trim and interiors | missing | no trim, no furnishing; done in round 4 (§20) |
+| Leaky windows' tracery variety, lamps and coloured light, sound, animals in the core | partly / missing | tracery and the animals at the bridges in round 4 (§20); lamps, light and sound belong to the other agent |
 
 Built this round:
 
@@ -277,7 +277,13 @@ Built this round:
 - **Pebble medallions** (`pebbleMedal`). The crane, plum and lotus laid in raised pebbles of the court's own materials, cell 13 cm, each pebble a low pyramid with a hash offset. [stated: Suzhou pebble courts carry crane, plum and lotus figures (§5, Sources).]
 - **Rooms furnished** (`hallLife`). Gate hall: a bench, a doorkeeper. Sedan hall: two sedan chairs on trestles, a bearer resting. Women's room: an embroidery frame with a woman at it, a dressing table with mirror, a couch, a wardrobe. East hall: two tables with four stools each, a long table, two cabinets, a hanging scroll, a steward. [inferred: a family dining and tea hall.] Little Canglang: a qin table with its player, a couch with a low table. The pavilions: a stone table and stools (Hefeng, with a go board; Daishuang; Wuzhu), a seat and table (Xuexiang, Lvyi), with a person in four. All in materials the garden's fine pieces already use, so the draws do not rise.
 
-## 19. The garden core and the residence at 2 m: round 4 (`taihu.js`, `leaky.js`, `wear.js`, `script.js`, `pebbles.js`, `lifework.js`)
+## 19. Lanterns at night; the named stands of the Ming garden (`lamps.js`, `ground.js`)
+
+- **Lanterns (built).** Paper and silk lanterns were hung at gates, shop fronts, halls and bridges in Ming towns; Ming lantern-making had many forms (more than 200 kinds by the late Ming at Nanjing) with shades of translucent paper or silk over frames of bamboo, horn or metal [stated: Wikipedia, *Qinhuai lantern*; it does not mention Suzhou]. Which hung where in Suzhou is [inferred]. Built, all lit from dusk by the glow materials (lamp_white, lamp_paper), unlit by day: a small round paper lantern with black cap and foot and a red tassel at every second tie beam of the covered walks and of the covered bridge Small Flying Rainbow (about 60); one at the middle of each open side of the four open pavilions (Lotus Breeze, Snowy Fragrance, Waiting for Frost, Green Ripples); a pair of red-framed palace lanterns (gongdeng) under the front eave of the Hall of Distant Fragrance, the Leaning Jade Pavilion and Little Canglang; at the residence, a larger pair under the street eave of the gate hall and a pair on the court front of the sedan, main and women's halls; on the street, a lantern on a timber pole with a bracket arm beside the end post of each bridge's parapet (about three of four), and over the door of the tea house and inn and of some tea, wine and eating shops a tall drum lantern of paper in red caps. The halls' interiors keep their hung lanterns (§11). No plan lights: the engine makes lights of the nearest glow shades itself.
+- **Named stands (built, planting only).** Wen's 1533 album and Record name the Orchard of Laiqin (来禽囿, "hundreds" of fruit trees, south of the Canglang pool), the Bamboo Hollow of Xiangyun (湘筠坞, dense bamboo, south of the Peach Blossom Bank and north of the Locust Rain Pavilion), the Plum Slope (珍李坂), the Banana Rail (芭蕉槛, beside the Locust Rain Pavilion), the Fishing Bank under the Yuanyi terrace with willows, and the Jade Spring in the south-east corner [stated: dome.mit.edu and Met Museum records of the 1551 album (Apple Garden, Bamboo Bank, Banana Balustrade, Fishing Stone); a Chinese-language account of the 31 scenes]. We plant, on free ground: an orchard of flowering fruit trees east of the pond (x 46…64, z −34…−14), a bamboo hollow (x −68…−59, z −34…−20) and a plum slope (x −68…−59, z −19…−8) west. [inferred: the positions, which the sources do not give in our coordinates; the species stand in the plant library's flowering fruit tree and bamboo.]
+- **Missing.** The Locust Rain and Jiashi pavilions, the Banana Rail, the Fishing Bank, the Jade Spring and Wen's plain thatched pavilions are not built: the sources found give names and neighbours but not positions or sizes. Sources: [Wikipedia, Qinhuai lantern](https://en.wikipedia.org/wiki/Qinhuai_lantern); [Wikipedia, Humble Administrator's Garden](https://en.wikipedia.org/wiki/Humble_Administrator%27s_Garden); [Met, album leaf record](https://metmuseum.org/art/collection/search/39654).
+
+## 20. The garden core and the residence at 2 m: round 4 (`taihu.js`, `leaky.js`, `wear.js`, `script.js`, `pebbles.js`, `lifework.js`)
 
 - **Taihu stones** (`taihu.js`, replacing the shared garden-stone for Suzhou). Each stone is a smooth signed-distance field: swellings strung on a leaning spine, bored through at some node centres, scooped from the sides, creased by Worley and value noise, meshed by surface nets; the form of each is chosen by a hash of its position. Hero stones (the two peaks at the Hall of Distant Fragrance, the court stones, the rockery feature piles) are merged geometry; the many small ones are instanced with a colour by hash, in three levels of detail. [stated: Taihu stones are prized for being pierced, wrinkled, thin and lean (*lou, zhou, shou, tou*), §5.] [inferred: our forms; a stone's identity is not recorded.]
 - **Leaky windows** (`leaky.js`). The windows of the garden walls and galleries each take a pattern by the hash of their place: ice-crack, cash, wan fret, eight directions, tortoise shell, lozenge, waves, fan, plum over ice, begonia; the outline decides which patterns suit it; a vase-shaped window has a plain plate. [stated: leaky windows (*loucuang*) hold varied tracery, §5 and Sources, J-STAGE / Wikipedia.]

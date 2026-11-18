@@ -2,6 +2,7 @@
 // (signs, pots, benches, stalls, firewood, washing, a dog or a cat), the shopkeepers in the open shops, the plaza of the Jerónimos
 // with its pilgrims, beggars and friars, the Terreiro do Paço as a market, the quay with its porters, the yard's workers, the
 // beach at Belém with its nets and drying fish, the Alfama's lanes. Elements of style `life`, in tiles of 100 m.
+import { frame } from '../../styles/greek/agora.js';
 import { storeysOf, HEIGHTS } from '../../styles/manueline/houses.js';
 import { SE, SE_Y, CASTLE, RADIUS, GROUND, QUAY, RUA_NOVA, TERREIRO, YARD, PLAZA, SQUARE, ZS, SHIPS, height, lots, onStreet, inRect, wet, shore, inLot } from './layout.js';
 
@@ -45,7 +46,7 @@ export function lifeElements() {
       // the shopkeeper behind his counter, a customer at it; a lamp over the door
       const inV = l.front === 'n' ? 1 : -1, fy = l.y + 0.45, kp = [x0 + w * 0.5, fz + inV * 4.0];
       if (l.use !== 'home') { merchant(kp, fy, faceTo(n), { pose: 'stand' }); if (rand() < 0.7) noble([x0 + w * 0.4, fz + inV * 1.5], fy, faceTo([-n[0], -n[1]]), { pose: 'talk' }); }
-      else { woman([x0 + w * 0.5, fz + inV * 5.5], fy, rand() * 6, { pose: 'stand' }); if (rand() < 0.6) child([x0 + w * 0.3, fz + inV * 4.5], fy, rand() * 6); }
+      else if (!l.up) { woman([x0 + w * 0.5, fz + inV * 5.5], fy, rand() * 6, { pose: 'stand' }); if (rand() < 0.6) child([x0 + w * 0.3, fz + inV * 4.5], fy, rand() * 6); }
     }
     if (l.kind === 'merchant') {
       if (!l.open && rand() < 0.8) L.push({ t: 'shop_sign', board: true, at: P(0.62, 0.06), y, rot, h: 3.1, seed: seed() });
@@ -172,6 +173,9 @@ export function lifeElements() {
     noble([cxm - 2.5, cz0 + 10], cy + 0.04, faceTo(S_), { pose: 'talk' }); noble([cxm - 1.7, cz0 + 10.6], cy + 0.04, faceTo(N_), { pose: 'talk' });
     merchant([cxm + 1.0, czm - 2.0], cy + 0.04 + 5.6, faceTo(W_), { pose: 'stand' }); labourer([cx0 + 11, czm + 17], cy + 0.04, faceTo(E_), { pose: 'stand' });
   }
+  // the doors of the houses whose upper floors are open: nobody stands, and nothing is set, in the way in (3 m wide, from 4.5 m out to the first metre in)
+  { const lanes = lots().filter((l) => l.up).map((l) => { const F = frame(l.rect, l.front); return [F.R(F.L / 2 - 2.6, -4.5, F.L / 2 + 2.6, 1.0), l]; });
+    for (let i = L.length - 1; i >= 0; i--) { const e = L[i]; if (e.t === 'shop_sign') continue; if (lanes.some(([r]) => e.at[0] > r[0] && e.at[0] < r[2] && e.at[1] > r[1] && e.at[1] < r[3])) L.splice(i, 1); } }
   // tile them
   const tiles = new Map();
   for (const e of L) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }

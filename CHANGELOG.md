@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.37 — Suzhou by lantern light (2026-11-18)
+
+Suzhou has its lamps at night: small lanterns along the garden's covered walks and in its pavilions, palace lanterns under the halls' eaves, a pair at the residence gate, lantern poles at the bridge heads and drum lanterns over the doors of the inn and the tea and wine shops; lit at night, hanging unlit by day. East of the pond stands an orchard and in the west a bamboo hollow and a plum slope, as Wen Zhengming's record gives them.
+
 ## v12.36 — the sky and the open country (2026-11-18)
 
 The night has stars and the Milky Way, turning with the planet; the moon has phases, a face and its own orbit, and rises later each day; the sun stands higher and the days are longer in summer; after sunset the horizon glows before the stars come out. Clouds have body in three layers and take the colour of the hour, gold and rose at sunrise and sunset. Thunderstorms break now and then where it rains hard: lightning in the clouds, sometimes a bolt, thunder after its delay; a rainbow stands opposite a low sun after rain. In the open country grass, flowers, ferns, heather and reeds grow near the visitor by climate and season; rivers show their current, gravel bars, rapids and sandbanks at the mouths; there are tors, sea cliffs with stacks, terraces and gorges; along the roads between settlements lie the region's fields, milestones, wayside shrines, wells, farmsteads and hamlets, with fords and bridges where a road meets a river. Herds graze there by climate (deer, horses, camels, zebra, giraffe, elephants, kangaroos, bison, guanaco, reindeer), look up and run off when approached; raptors circle, flocks cross, waterfowl sit on the rivers; walkers, porters, riders and small caravans travel the roads. In Suzhou's garden and residence the halls have eave-tile ends, bracket work and carved door panels, pebble medallions lie in the paving, and every hall and pavilion is furnished, most with someone in it.

@@ -86,6 +86,9 @@ function viewWedge(x, z) {
   return Math.abs(x - 4) < 11 + Math.max(0, z + 50) * 0.35;
 }
 
+/** The Ming garden's named stands of planting: the orchard (east), the bamboo hollow and the plum slope (west). */
+const ORCHARD = [46, -34, 64, -14], HOLLOW = [-68, -34, -59, -20], PLUMS = [-68, -19, -59, -8];
+
 /** Plants per 100 m² at a place ({ x, z, h, ny, g }), or null where nothing grows. */
 function planting(x, z, p) {
   if (Math.hypot(x, z) > RADIUS - 6) return null;
@@ -107,6 +110,11 @@ function planting(x, z, p) {
     if (inRect(LOQUAT_COURT, x, z)) return { fig: 1.2, grass: 6 * sm(0.0, 0.6, tn) };
     const out = {};
     const vw = viewWedge(x, z);
+    // the parts Wen Zhengming's album names (docs/settlements/ming-suzhou.md §19): the orchard of the east (Laiqin Pu, 'hundreds of fruit trees'),
+    // the bamboo hollow (Xiangyun Wu) and the plum slope (Zhenli Ban) of the west; open ground between, no building
+    if (inRect(ORCHARD, x, z)) return { apple: 2.0 * sm(0.0, 0.5, -n + 0.6), grass: 8 * sm(0.0, 0.6, tn), fig: 0.0 };
+    if (inRect(HOLLOW, x, z)) return { bamboo: 5.5 * sm(-0.2, 0.3, gn + 0.2), grass: 6 * sm(0.0, 0.6, tn) };
+    if (inRect(PLUMS, x, z)) return { apple: 1.5 * sm(0.0, 0.5, n + 0.6), grass: 8 * sm(0.0, 0.6, tn) };
     // mondo grass (grass stands in for it): thick strips along the walls, the galleries and the stone, thin patches elsewhere
     // under the trees; most of the ground bare of tufts (moss and groundcover in its colour)
     const edge = wall < 1.7 || nearGallery(x, z, 3.2) || nearRockPath(x, z, 3.6) ? 1 : 0;
@@ -133,7 +141,7 @@ function planting(x, z, p) {
 
 export const ground = {
   height, cover, water, waterLevel, planting, fromWater,
-  maxDensity: { willow: 20, bamboo: 3, fig: 1.5, red_pine: 0.32, maple: 0.9, apple: 0.6, camphor: 0.12, tea: 0.8, grass: 80 },
+  maxDensity: { willow: 20, bamboo: 6, fig: 1.5, red_pine: 0.32, maple: 0.9, apple: 2.2, camphor: 0.12, tea: 0.8, grass: 80 },
   // late spring in Jiangnan (the plum rains near): soft hazy sun, drizzle and mist over the water
   climate: {
     waterline: LEVEL.canal,              // the canals' still water: the stain line on their walls (src/engine/materials.js)

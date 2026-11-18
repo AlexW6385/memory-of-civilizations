@@ -8,6 +8,7 @@ import { archWall } from '../gothic/nd-interior.js';
 import { frame } from '../greek/agora.js';
 import { rng, pick, gable } from './util.js';
 import { kit, shop, home } from './interiors.js';
+import { upperOf, sv1Of } from './upstairs.js';
 
 const WALLS = ['plaster_white', 'plaster_white', 'limewash_yellow', 'plaster_ochre', 'stucco_rose', 'stucco_pale', 'limewash_white', 'stucco_cream', 'plaster_white', 'stucco_siena', 'limewash_red'];
 const SHUT = ['shutter_green', 'shutter_brown', 'shutter_grey', 'shutter_green'];
@@ -70,6 +71,8 @@ export function manuHouse(el, ctx) {
   const wu = (k) => 0.6 + (k + 0.5) * (L - 1.2) / wn - WW / 2;
   const sillAt = (s) => h0 + (s - 1) * hs + 0.8;
   const hoods = kind === 'merchant' && rand() < 0.7;
+  // the upper storeys that can be entered (upstairs.js): only in the full copy of a house marked `up`
+  const UP = open && !!el.up && n > 1, UPG = UP ? upperOf({ ctx, F, el, y, L, D, T, h0, hs, n, H, wall, kind, wn, WW, WH, wu, sillAt }) : null;
   if (!open) {
     const tri = [];
     if (!simple && ops.length && shopF) {
@@ -85,16 +88,17 @@ export function manuHouse(el, ctx) {
     archWall(tri, (u, yy, d) => { const p = F.P(u, d); return [p[0], yy, p[1]]; }, { u0: 0, u1: L, d0: 0, d1: T, y0: y + 0.3, y1: y + h0, openings: arch, n: 6 });
     bag.add(wall, fromTriangles(tri));
     const a = arch[0], ju = a.uc - a.r, jv = a.uc + a.r;
-    col.rect(F.R(0, 0, ju, T), y, y + H + 1); col.rect(F.R(jv, 0, L, T), y, y + H + 1); col.rect(F.R(ju, 0, jv, T), y + 2.8, y + H + 1);
+    if (UP) UPG.frontCol(ju, jv); else { col.rect(F.R(0, 0, ju, T), y, y + H + 1); col.rect(F.R(jv, 0, L, T), y, y + H + 1); col.rect(F.R(ju, 0, jv, T), y + 2.8, y + H + 1); }
     for (const [u0, v0, u1, v1] of [[0, 0, T, D], [L - T, 0, L, D], [0, D - T, L, D]]) { R(u0, v0, u1, v1, 0.3, H, wall); col.rect(F.R(u0, v0, u1, v1), y, y + H + 1); }
     // inner whitewash
-    R(T, T, L - T, T + 0.02, 0.3, h0 + hs, 'limewash_white'); R(T, D - T - 0.02, L - T, D - T, 0.3, h0 + hs, 'limewash_white');
+    R(T, T, L - T, T + 0.02, 0.3, UP ? h0 : h0 + hs, 'limewash_white'); R(T, D - T - 0.02, L - T, D - T, 0.3, h0 + hs, 'limewash_white');
     R(T, T, T + 0.02, D - T, 0.3, h0 + hs, 'limewash_white'); R(L - T - 0.02, T, L - T, D - T, 0.3, h0 + hs, 'limewash_white');
     // floor, step, ceiling beams
     R(T, T, L - T, D - T, 0.3, 0.45, 'cotto_floor'); col.floor(F.R(T, T, L - T, D - T), fy);
     R(a.uc - a.r, -0.7, a.uc + a.r, 0, 0.0, 0.22, 'limestone'); col.floor(F.R(a.uc - a.r, -0.7, a.uc + a.r, 0), y + 0.22);
     R(a.uc - a.r - 0.3, -0.2, a.uc + a.r + 0.3, 0.02, 0.0, 0.5, 'limestone');
     // upper front wall: with windows cut through
+    if (UP) UPG.front(); else {
     const holes = [];
     for (let s = 1; s < n; s++) for (let k = 0; k < wn; k++) holes.push({ u0: wu(k), u1: wu(k) + WW, b: sillAt(s), t: sillAt(s) + WH });
     holes.sort((p, q) => p.u0 - q.u0);
@@ -112,12 +116,12 @@ export function manuHouse(el, ctx) {
       R(hh.u0, 0, hh.u1, 0.08, hh.b, hh.t, 'opening'); R(hh.u0, T - 0.1, hh.u1, T - 0.03, hh.b, hh.t, 'daylight_plain');
     }
     col.rect(F.R(0, 0, L, T), y + h0, y + H + 1);
-    u = 0; void u;
+    }
     // the first floor: the slab with the stair's well, beams under it, the ceiling above
     const stairV0 = 7.6, stairV1 = Math.min(D - 6, 13.4), hasStair = n > 1;
     const slab = (u0, v0, u1, v1) => { if (u1 - u0 < 0.05 || v1 - v0 < 0.05) return; R(u0, v0, u1, v1, h0 - 0.25, h0, 'timber'); col.floor(F.R(u0, v0, u1, v1), y + h0); };
     if (hasStair) {
-      slab(T, T, L - T, stairV0); slab(T + 1.4, stairV0, L - T, D - T); slab(T, stairV1, T + 1.4, D - T);
+      if (UP) UPG.slab(1); else { slab(T, T, L - T, stairV0); slab(T + 1.4, stairV0, L - T, D - T); slab(T, stairV1, T + 1.4, D - T); }
       // the stair: steps rising toward the front, along the left wall
       const nS = 13, dir = DIR[`${F.out[0]},${F.out[1]}`];
       col.ramp(F.R(T, stairV0, T + 1.4, stairV1), fy, y + h0, dir);
@@ -125,16 +129,20 @@ export function manuHouse(el, ctx) {
       for (let k = 0; k <= 4; k++) { const vv = stairV0 + k * (stairV1 - stairV0) / 4; R(T + 1.36, vv - 0.03, T + 1.42, vv + 0.03, 0.45 + (stairV1 - vv) / (stairV1 - stairV0) * (h0 - 0.45), 1.4 + (stairV1 - vv) / (stairV1 - stairV0) * (h0 - 0.45), 'wood_dark'); }
       // the chamber above: a bed, a chest, a table by the window, a bench
       const k2 = kit(ctx, F, y + h0 + 0.0, rand);
+      if (UP) { if (L > 6) rand(); rand(); /* (furnished by upstairs.js; the house's random stream goes on as it did) */ } else {
       if (L > 6) { k2.bed(L - T - 1.1, T + 0.4, 1.5, 2.1); k2.chest(T + 2.6, T + 0.5, 1.0, 0.5); k2.table(L * 0.5, T + 1.0, 1.1, 0.7); k2.stool(L * 0.5, T + 1.8); }
       k2.bed(L - T - 1.1, D - T - 2.5, 1.5, 2.1); k2.chest(T + 2.4, D - T - 0.5, 1.1, 0.5);
       { const pl = F.P(L / 2, 2.5); lights.push({ at: [pl[0], y + h0 + 2.3, pl[1]], color: '#ffc27a', intensity: 4, distance: 8 }); }
+      }
     }
     // ceiling of the chamber's storey and the mass above
+    if (UP) UPG.rooms(); else {
     R(T, T, L - T, D - T, h0 + hs - 0.05, h0 + hs, 'plaster_white');
     for (let v = T + 0.6; v < D - T; v += 0.9) R(T, v - 0.08, L - T, v + 0.08, h0 + hs - 0.25, h0 + hs - 0.05, 'wood_dark');
     if (H > h0 + hs) R(T, T, L - T, D - T, h0 + hs, H, wall);
     // ground ceiling beams (under the first floor)
     for (let u2 = T + 0.7; u2 < L - T; u2 += 0.9) R(u2 - 0.08, T, u2 + 0.08, D - T, h0 - 0.5, h0 - 0.25, 'wood_dark');
+    }
     if (!hasStair) { R(T, T, L - T, D - T, h0 - 0.05, h0, 'plaster_white'); }
     // ── the rooms
     const K = kit(ctx, F, fy, rand), vp = 7.0;
@@ -143,7 +151,7 @@ export function manuHouse(el, ctx) {
     // partition with an arched door and a narrow side door
     const dw = 1.6, du = L * 0.5;
     R(T, vp, du - dw / 2, vp + 0.4, 0.3, h0 - 0.25, 'limewash_white', true); R(du + dw / 2, vp, L - T, vp + 0.4, 0.3, h0 - 0.25, 'limewash_white', true);
-    R(du - dw / 2, vp, du + dw / 2, vp + 0.4, 2.55, h0 - 0.25, 'limewash_white'); col.rect(F.R(du - dw / 2, vp, du + dw / 2, vp + 0.4), y + 3.0, y + H + 1);
+    R(du - dw / 2, vp, du + dw / 2, vp + 0.4, 2.55, h0 - 0.25, 'limewash_white'); col.rect(F.R(du - dw / 2, vp, du + dw / 2, vp + 0.4), y + 3.0, y + (UP ? h0 : H + 1));
     for (const s of [du - dw / 2 - 0.1, du + dw / 2]) R(s, vp - 0.05, s + 0.1, vp + 0.45, 0.3, 2.65, 'limestone');
     const use = el.use ?? 'home';
     if (use !== 'home') { shop(K, F, L, vp - 0.2, use, rand); }
@@ -165,7 +173,7 @@ export function manuHouse(el, ctx) {
   }
   // ── the street front: quoins, cornice, damp, streaks, patches
   for (const [u0, u1] of [[0, 0.45], [L - 0.45, L]]) R(u0 - 0.03, -0.03, u1 + 0.03, 0.4, 0, H - 0.3, cap);
-  R(-0.08, -0.4, L + 0.08, D + 0.08, H - 0.28, H + 0.12, 'limestone');
+  if (UP && UPG.terraceRoof) UPG.cap(); else R(-0.08, -0.4, L + 0.08, D + 0.08, H - 0.28, H + 0.12, 'limestone');
   if (!simple) {
     R(0.45, -0.03, L - 0.45, 0.03, 0.8, 1.5 + rand() * 0.4, 'plaster_damp');
     for (let s = 1; s < n; s++) if (rand() < 0.6) { const k = Math.floor(rand() * wn); R(wu(k) + 0.1, -0.045, wu(k) + 0.1 + 0.3, 0.06, sillAt(s) - 1.7, sillAt(s) - 0.2, 'plaster_streak'); }
@@ -194,6 +202,7 @@ export function manuHouse(el, ctx) {
     const yy = sillAt(s);
     for (let k = 0; k < wn; k++) {
       const u = wu(k);
+      if (UP && s === UPG.balS && k === UPG.kb) { UPG.balcony(); continue; }
       if (!open) { R(u, -0.1, u + WW, 0.16, yy, yy + WH, 'opening'); }
       R(u - 0.15, -0.12, u, 0.12, yy - 0.15, yy + WH + 0.15, 'limestone'); R(u + WW, -0.12, u + WW + 0.15, 0.12, yy - 0.15, yy + WH + 0.15, 'limestone');
       R(u - 0.2, -0.16, u + WW + 0.2, 0.12, yy - 0.2, yy - 0.05, 'limestone'); R(u - 0.15, -0.12, u + WW + 0.15, 0.12, yy + WH, yy + WH + 0.15, 'limestone');
@@ -220,6 +229,7 @@ export function manuHouse(el, ctx) {
   roofOver();
   function roofOver() {
     const alongX = F.alongX, r = body, aged = rand() < 0.25, tile = kind === 'fisher' && rand() < 0.3 ? 'thatch' : aged ? 'tile_dark' : 'roof_tile';
+    if (UP && UPG.terraceRoof) { UPG.roof(tile === 'thatch' ? 'roof_tile' : tile); return; }
     const short = Math.min(r[2] - r[0], r[3] - r[1]);
     if (kind === 'merchant' && rand() < 0.45 && L < D) hip(bag, tile, r, y + H + 0.12, Math.min(2.2, short * 0.3), 0.55);
     else {

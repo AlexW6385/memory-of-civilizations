@@ -218,6 +218,12 @@ Lots more than 125 m from the arrival, off the Imperial Way and 19 m apart, are 
 
 Wall colliders stand 0.2 m proud of the drawn wall so that no free spot lies within a 0.5 m float-check cell of it; jambs of a doorway are not inflated, so that a 1.4 m door stays 1.4 m. Items use plain colliders. Door steps are 0.12 m, because a step of 0.25 m put the walker's head into the eave of a neighbouring roof shell. A dwelling shop gets no goods apron across its door, and one lot whose door a city planter blocks is dropped.
 
+## 30. Houses opened upstairs (`storeys.js`, nine lots nearest the arrival and along the river road and the lane behind it)
+- [stated] Lin'an's street houses were of two and more storeys, the upper floor a dwelling over the shop below (Meng liang lu, Wulin jiu shi on the crowded city; fire regulations of the Southern Song limited height but not storeys). [inferred] Nine lots are built as two-storey houses: a shop with its dwelling, a pawnshop, an inn, a tenement, a silk-weaver's, a merchant's and a craftsman's house.
+- [inferred] The stair is the closed-riser flight (lou ti) of timber along one party wall, sixteen treads, a boarded flank with a rail, rising to a landing at the back; the slab has a railed opening beside it. [stated] Timber frame on stone plinth, white-washed plaster, grey-tile roof with the ridge along the street.
+- [inferred] Upstairs by use: the street room is the family's sitting room, guest room, strong room, silkworm room or workroom; the rear room is for sleeping (canopy bed or board pallets, chests, wash stand) or storage. A railed timber loggia over the street is stepped onto through a door; windows are open reveals with a lattice leaf folded back.
+- Not built: roof terraces (the roofs are pitched tile); the other furnished lots stay one floor.
+
 ## Sources
 
 - [Disembodied historicity: Southern Song Imperial Street in Hangzhou — Univ. of Nottingham](https://nottingham-repository.worktribe.com/OutputFile/794882)

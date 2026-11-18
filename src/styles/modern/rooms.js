@@ -5,6 +5,7 @@
 // floor, the little tables and bentwood chairs, the jukebox, and tables with umbrellas on the footpath.
 
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
+import { shopUpper, terraceUpper, doorWedge, RES } from './upper.js';
 
 /** The local frame of a lot: u along the front from a0, d inward from the front face; returns W (point) and B (box). */
 export function frame(rect, f) {
@@ -35,6 +36,7 @@ export function terraceInterior(c) {
   const { bag, col, lights, B, W, R, u0, u1, PR, Dp, F, H1, top, wall } = c;
   const C = F + H1 - 0.3;                                   // the ceiling's underside
   const v = (c.variant ?? 0) % 4;                           // the house's household (the parlour's furnishing)
+  const up = !!c.up;                                        // the upper floor is open: the stair rises in the passage, the rooms below knocked through
   const rc = (a, b, d0, d1, ya, yb) => col.rect(R(a, b, d0, d1), ya, yb);
   const S = (m, a, b, d0, d1, ya, yb) => { bag.add(m, B(a, b, d0, d1, ya, yb)); rc(a, b, d0, d1, ya, yb); };
   const fl = (a, b, d0, d1, yy) => col.floor(R(a, b, d0, d1), yy);
@@ -42,8 +44,11 @@ export function terraceInterior(c) {
   const pw = 0.25, i0 = u0 + pw, i1 = u1 - pw, dB = Dp - pw;
   for (const [a, b, s] of [[u0, i0, 1], [i1, u1, -1]]) { S(wall, a, b, PR, Dp, F, C); bag.add('plaster_white', B(s > 0 ? b : a - 0.03, s > 0 ? b + 0.03 : a, PR, dB, F, C)); }
   S(wall, u0, u1, dB, Dp, F, C); bag.add('plaster_white', B(i0, i1, dB - 0.03, dB, F, C));
+  if (up) terraceUpper({ bag, col, lights, B, W, R, u0, u1, PR, Dp, F, H1, top, wall, variant: c.variant });
+  else {
   bag.add('plaster_white', B(u0, u1, PR, Dp, C, F + H1)); bag.add(wall, B(u0, u1, PR, Dp, F + H1, top)); rc(u0, u1, PR, Dp, F + H1, top + 3);
   rc(u0, u1, PR, Dp, C, F + H1);
+  }
   // the front wall's inside: plastered; the picture rail and the skirting round the rooms are drawn with each room
   bag.add('plaster_white', B(i0, i1, PR, PR + 0.03, F, C));
   // the floor: boards over the footing's stone
@@ -51,29 +56,38 @@ export function terraceInterior(c) {
   const f = F + 0.04;
   // the passage along the left party wall (the door's side), the thin wall to the rooms with its two doors; the rooms and kitchen beyond
   const pu = u0 + 1.3, dP1 = PR + 4.5, dP2 = dP1 + 3.5, dr = 0.9;
-  const doorWall = (d0, d1, ctr) => {      // the passage wall from d0 to d1 with a door's gap at ctr
+  const doorWall = (d0, d1, ctr) => {      // the passage wall from d0 to d1 with a door's gap at ctr (none: solid)
+    if (ctr === null) { S('plaster_white', pu, pu + 0.12, d0, d1, f, C); return; }
     S('plaster_white', pu, pu + 0.12, d0, ctr - dr / 2, f, C); S('plaster_white', pu, pu + 0.12, ctr + dr / 2, d1, f, C);
     bag.add('plaster_white', B(pu, pu + 0.12, ctr - dr / 2, ctr + dr / 2, f + 2.1, C));
     bag.add('wood_dark', B(pu - 0.03, pu + 0.15, ctr - dr / 2 - 0.05, ctr - dr / 2, f, f + 2.15)); bag.add('wood_dark', B(pu - 0.03, pu + 0.15, ctr + dr / 2, ctr + dr / 2 + 0.05, f, f + 2.15));
     bag.add('wood_dark', B(pu - 0.03, pu + 0.15, ctr - dr / 2 - 0.05, ctr + dr / 2 + 0.05, f + 2.1, f + 2.2));
   };
-  doorWall(PR + 0.04, dP1, PR + 2.4); doorWall(dP1, dP2, dP1 + 1.9);
-  S('plaster_white', pu + 0.12, i1, dP1, dP1 + 0.12, f, C); S('plaster_white', pu + 0.12, i1, dP2, dP2 + 0.12, f, C);   // the partitions between the rooms
+  doorWall(PR + 0.04, dP1, PR + 2.4); doorWall(dP1, dP2, up ? null : dP1 + 1.9);
+  // the partitions between the rooms (in a house with its upper floor open, each has a doorway: the rooms run through, the passage being the stair's)
+  const gapDoor = (d, a0, a1) => { S('plaster_white', pu + 0.12, a0, d, d + 0.12, f, C); S('plaster_white', a1, i1, d, d + 0.12, f, C); bag.add('plaster_white', B(a0, a1, d, d + 0.12, f + 2.1, C));
+    for (const a of [a0, a1]) bag.add('wood_dark', B(a - 0.04, a + 0.04, d - 0.03, d + 0.15, f, f + 2.15)); bag.add('wood_dark', B(a0, a1, d - 0.03, d + 0.15, f + 2.1, f + 2.18)); };
+  if (up) { gapDoor(dP1, i1 - 1.33, i1 - 0.33); gapDoor(dP2, pu + 0.3, pu + 1.2); }
+  else { S('plaster_white', pu + 0.12, i1, dP1, dP1 + 0.12, f, C); S('plaster_white', pu + 0.12, i1, dP2, dP2 + 0.12, f, C); }
   // the stair's door in the passage wall (the stair runs up behind the partition; the upper floor is not open), the kitchen's door
-  bag.add('wood_dark', B(u0 + pw, u0 + pw + 0.05, dP2 - 1.9, dP2 - 0.9, f, f + 2.0)); bag.add('wood_dark', B(u0 + pw - 0.001, u0 + pw + 0.06, dP2 - 1.95, dP2 - 0.85, f + 2.0, f + 2.05));
+  if (!up) { bag.add('wood_dark', B(u0 + pw, u0 + pw + 0.05, dP2 - 1.9, dP2 - 0.9, f, f + 2.0)); bag.add('wood_dark', B(u0 + pw - 0.001, u0 + pw + 0.06, dP2 - 1.95, dP2 - 0.85, f + 2.0, f + 2.05)); }
   // the door of the house, standing open against the passage wall (its leaf and the fanlight's glass are not drawn in the front)
   const dl = c.door;
   bag.add(c.doorMat ?? 'shutter_green', B(dl + 0.02, dl + 0.07, PR, PR + 0.95, f, f + 2.2));
   // lights: a pendant in each room and the passage
   const pend = (u, d, h = C - 0.35) => { const p = W(u, d, h); bag.add('lamp_white', lathe([[0.001, 0], [0.12, 0.05], [0.14, 0.2], [0.05, 0.3], [0.001, 0.3]], 10, null, p[0], p[1], p[2])); bag.add('iron', rod([p[0], C, p[2]], [p[0], p[1] + 0.3, p[2]], 0.01, 4)); lights.push({ at: [p[0], p[1] + 0.1, p[2]], color: '#ffd9a0', intensity: 2.2, distance: 6 }); };
-  pend(u0 + 0.9, PR + 2.4); pend((pu + i1) / 2 + 0.2, PR + 2.2); pend((pu + i1) / 2, dP1 + 1.9); pend((i0 + i1) / 2, dP2 + 1.7); pend(u0 + 0.9, dP2 - 1.2);
+  pend(u0 + 0.9, PR + 2.4); pend((pu + i1) / 2 + 0.2, PR + 2.2); pend((pu + i1) / 2, dP1 + 1.9); pend((i0 + i1) / 2, dP2 + 1.7); if (!up) pend(u0 + 0.9, dP2 - 1.2);
   // the passage: a runner of red carpet, a hall stand with its mirror, a telephone on its table, a framed picture
   bag.add(['cloth_red', 'cloth_red', 'cloth_maroon', 'cloth_green'][v], B(u0 + 0.35, pu - 0.2, PR + 0.3, dP2 - 0.1, f, f + 0.012));
+  if (!up) {
   S('wood_dark', u0 + pw, u0 + pw + 0.3, dP1 + 0.2, dP1 + 1.0, f, f + 0.85); bag.add('wood_dark', B(u0 + pw, u0 + pw + 0.06, dP1 + 0.25, dP1 + 0.95, f + 0.85, f + 1.95)); bag.add('mirror_tin', B(u0 + pw + 0.06, u0 + pw + 0.07, dP1 + 0.32, dP1 + 0.88, f + 1.1, f + 1.8));
   S('wood_dark', u0 + pw, u0 + pw + 0.3, PR + 3.4, PR + 3.8, f, f + 0.72); bag.add('car_black', B(u0 + pw + 0.04, u0 + pw + 0.26, PR + 3.45, PR + 3.75, f + 0.72, f + 0.82)); bag.add('car_black', B(u0 + pw + 0.1, u0 + pw + 0.2, PR + 3.5, PR + 3.7, f + 0.82, f + 0.88));
   bag.add('gilt_bronze', B(u0 + pw, u0 + pw + 0.02, dP2 - 0.8, dP2 - 0.2, f + 1.4, f + 1.9)); bag.add('fresco_green', B(u0 + pw + 0.02, u0 + pw + 0.03, dP2 - 0.75, dP2 - 0.25, f + 1.45, f + 1.85));
+  } else {
+  S('wood_dark', u0 + pw, u0 + pw + 0.3, PR + 1.2, PR + 1.6, f, f + 0.72); bag.add('car_black', B(u0 + pw + 0.04, u0 + pw + 0.26, PR + 1.25, PR + 1.55, f + 0.72, f + 0.82)); bag.add('car_black', B(u0 + pw + 0.1, u0 + pw + 0.2, PR + 1.3, PR + 1.5, f + 0.82, f + 0.88));
+  }
   // ── the front room (the parlour): the fireplace in the right party wall under its mantel, an armchair either side of it, the television
-  const ru0 = pu + 0.12 + 0.04, ru1 = i1 - 0.03, rm = (ru0 + ru1) / 2;
+  const ru0 = pu + 0.12 + 0.04, ru1 = i1 - 0.03, rm = (ru0 + ru1) / 2, sd = up ? 0.9 : 0;   // (with the doorway to the middle room, the settee stands further forward)
   bag.add(['cloth_maroon', 'cloth_green', 'cloth_blue', 'cloth_brown'][v], B(ru0 + 0.3, ru1 - 0.4, PR + 0.5, dP1 - 0.4, f, f + 0.012));      // the carpet square
   bag.add('slate', B(ru1 - 0.12, ru1, PR + 1.75, PR + 3.15, f, f + 0.95));                    // the chimney breast's lower part: slate surround
   bag.add('car_black', B(ru1 - 0.1, ru1 - 0.02, PR + 2.05, PR + 2.85, f + 0.1, f + 0.7)); bag.add('flame', B(ru1 - 0.12, ru1 - 0.1, PR + 2.2, PR + 2.7, f + 0.15, f + 0.35));
@@ -87,7 +101,7 @@ export function terraceInterior(c) {
   S('wood_dark', ru0, ru0 + 0.5, PR + 1.5, PR + 2.4, f + 0.35, f + 0.85); for (const d of [1.55, 2.35]) for (const uu of [ru0 + 0.04, ru0 + 0.44]) bag.add('wood_dark', B(uu, uu + 0.04, d + PR - 0.0, d + PR + 0.04, f, f + 0.35));
   bag.add('glass_lamp', B(ru0 + 0.5, ru0 + 0.51, PR + 1.6, PR + 2.2, f + 0.45, f + 0.78)); bag.add('car_black', B(ru0 + 0.5, ru0 + 0.52, PR + 2.25, PR + 2.35, f + 0.5, f + 0.7));
   bag.add('timber', B(ru0 + 0.02, ru0 + 0.2, PR + 1.45, PR + 1.5, f + 0.85, f + 0.95));
-  S('cloth_ochre', rm - 0.2, rm + 0.45, PR + 3.0, PR + 4.15, f, f + 0.4); bag.add('cloth_ochre', B(rm - 0.2, rm + 0.45, PR + 4.05, PR + 4.15, f + 0.4, f + 0.95));
+  S('cloth_ochre', rm - 0.2, rm + 0.45, PR + 3.0 - sd, PR + 4.15 - sd, f, f + 0.4); bag.add('cloth_ochre', B(rm - 0.2, rm + 0.45, PR + 4.05 - sd, PR + 4.15 - sd, f + 0.4, f + 0.95));
   } else if (v === 1) {
     // the family with the piano: an upright against the back partition (keyboard to the room) with its stool, a sewing machine on its treadle table by the window, a settee
     S('wood_dark', ru0 + 0.2, ru0 + 1.7, PR + 3.8, PR + 4.4, f, f + 1.3); bag.add('wood_dark', B(ru0 + 0.2, ru0 + 1.7, PR + 3.55, PR + 3.8, f + 0.72, f + 0.77)); bag.add('paint_white', B(ru0 + 0.3, ru0 + 1.6, PR + 3.6, PR + 3.8, f + 0.77, f + 0.8));
@@ -101,7 +115,7 @@ export function terraceInterior(c) {
     S('wood_dark', ru0, ru0 + 0.45, PR + 3.0, PR + 4.4, f + 0.3, f + 0.85); for (const d of [3.05, 4.35]) for (const uu of [ru0 + 0.03, ru0 + 0.4]) bag.add('wood_dark', B(uu, uu + 0.04, PR + d - 0.02, PR + d + 0.02, f, f + 0.3));
     bag.add('cloth_ochre', B(ru0 + 0.45, ru0 + 0.46, PR + 3.1, PR + 3.65, f + 0.4, f + 0.78)); bag.add('car_black', B(ru0 + 0.45, ru0 + 0.47, PR + 3.75, PR + 4.3, f + 0.55, f + 0.75));
     for (let d = PR + 3.2; d < PR + 3.7; d += 0.08) bag.add('car_black', B(ru0 + 0.02, ru0 + 0.4, d, d + 0.01, f + 0.85, f + 1.17));
-    S('cloth_blue', rm - 0.2, rm + 0.45, PR + 3.0, PR + 4.15, f, f + 0.4); bag.add('cloth_blue', B(rm - 0.2, rm + 0.45, PR + 4.05, PR + 4.15, f + 0.4, f + 0.95));
+    S('cloth_blue', rm - 0.2, rm + 0.45, PR + 3.0 - sd, PR + 4.15 - sd, f, f + 0.4); bag.add('cloth_blue', B(rm - 0.2, rm + 0.45, PR + 4.05 - sd, PR + 4.15 - sd, f + 0.4, f + 0.95));
     S('wood_painted', rm - 0.1, rm + 0.4, PR + 2.35, PR + 2.8, f + 0.3, f + 0.34); bag.add('paint_white', B(rm, rm + 0.3, PR + 2.4, PR + 2.7, f + 0.34, f + 0.345));
   } else {
     // a lodger's room, the front room let to a single man: an iron bed along the back partition made up with a grey blanket, a table with an electric hotplate and a kettle, a chair, a chest of drawers
@@ -117,6 +131,7 @@ export function terraceInterior(c) {
   lights.push({ at: [lp[0], lp[1] + 1.7, lp[2]], color: '#ffcf90', intensity: 1.6, distance: 5 });
   for (const [d, wd] of [[1.0, 0.5], [1.6, 0.4]]) { bag.add('gilt_bronze', B(ru0 + 0.0, ru0 + 0.02, PR + d + 2.3, PR + d + 2.3 + wd, f + 1.4, f + 1.4 + wd * 0.8)); bag.add('fresco_green', B(ru0 + 0.02, ru0 + 0.03, PR + d + 2.35, PR + d + 2.25 + wd, f + 1.45, f + 1.35 + wd * 0.8)); }
   bag.add('cloth_green', B(i1 - 1.2, i1 - 0.15, PR + 0.31, PR + 0.4, f + 0.9, f + 3.0));
+  if (!up) {
   // ── the bedroom behind it: an iron bedstead with a chenille cover, a wardrobe, a dressing table with its mirror, a chair, a rag rug
   const bu0 = ru0, bu1 = ru1, bd0 = dP1 + 0.16, bd1 = dP2 - 0.02;
   bag.add('cloth_blue', B(bu0 + 0.3, bu1 - 0.3, bd0 + 0.9, bd1 - 0.5, f, f + 0.012));
@@ -127,6 +142,16 @@ export function terraceInterior(c) {
   S('wood_dark', bu0 + 0.02, bu0 + 0.6, bd1 - 1.5, bd1 - 0.2, f, f + 1.9); bag.add('wood_painted', B(bu0 + 0.6, bu0 + 0.63, bd1 - 1.42, bd1 - 0.28, f + 0.05, f + 1.85)); bag.add('steel_chrome', B(bu0 + 0.62, bu0 + 0.65, bd1 - 0.9, bd1 - 0.85, f + 0.9, f + 1.1));
   S('wood_dark', bu0 + 0.02, bu0 + 0.5, bd0 + 0.25, bd0 + 1.25, f, f + 0.78); bag.add('mirror_tin', B(bu0 + 0.02, bu0 + 0.05, bd0 + 0.4, bd0 + 1.1, f + 0.9, f + 1.6)); bag.add('timber', B(bu0 + 0.02, bu0 + 0.06, bd0 + 0.36, bd0 + 1.14, f + 1.6, f + 1.66));
   chair(bag, B, bu0 + 0.95, bd0 + 0.75, f, 'u-');
+  } else {
+  // ── the middle room, with the bedroom gone upstairs: a dining table with four chairs, a sideboard with a wireless, a rug, a picture
+  const mu = (pu + 0.16 + i1) / 2, md = (dP1 + dP2) / 2 + 0.05;
+  bag.add(['cloth_blue', 'cloth_maroon', 'cloth_green', 'cloth_ochre'][v], B(mu - 1.0, mu + 1.0, md - 1.0, md + 1.0, f, f + 0.012));
+  S('wood_dark', mu - 0.55, mu + 0.55, md - 0.4, md + 0.4, f + 0.72, f + 0.77); for (const [a, b] of [[-0.5, -0.35], [0.5, -0.35], [-0.5, 0.35], [0.5, 0.35]]) bag.add('wood_dark', B(mu + a - 0.035, mu + a + 0.035, md + b - 0.035, md + b + 0.035, f, f + 0.72));
+  bag.add('cloth_white', B(mu - 0.45, mu + 0.45, md - 0.3, md + 0.3, f + 0.77, f + 0.775));
+  for (const [dx, dz, bk] of [[-0.75, 0, 'u-'], [0.75, 0, 'u+'], [0, -0.62, -1], [0, 0.62, 1]]) chair(bag, B, mu + dx, md + dz, f, bk, 'wood_dark', 'cloth_brown');
+  S('wood_dark', i1 - 0.5, i1 - 0.02, dP1 + 0.6, dP1 + 2.0, f, f + 0.9); bag.add('timber', B(i1 - 0.52, i1 - 0.0, dP1 + 0.58, dP1 + 2.02, f + 0.9, f + 0.94)); bag.add('wood_dark', B(i1 - 0.4, i1 - 0.15, dP1 + 0.9, dP1 + 1.6, f + 0.94, f + 1.2)); bag.add('cloth_ochre', B(i1 - 0.15, i1 - 0.14, dP1 + 0.95, dP1 + 1.55, f + 0.98, f + 1.16));
+  bag.add('gilt_bronze', B(i1 - 0.02, i1, dP1 + 2.2, dP1 + 3.0, f + 1.4, f + 1.9)); bag.add('fresco_green', B(i1 - 0.03, i1 - 0.02, dP1 + 2.25, dP1 + 2.95, f + 1.45, f + 1.85));
+  }
   // ── the kitchen at the back, in the timber addition: a wood stove with its flue, the sink under the window, the table and four chairs, the refrigerator, a dresser
   const ku0 = i0 + 0.02, ku1 = i1 - 0.02, kd0 = dP2 + 0.14, kd1 = dB - 0.02;
   bag.add('timber', B(ku0, ku1, kd0, kd1, f, f + 0.01));
@@ -152,14 +177,14 @@ export function terraceInterior(c) {
  * espresso_bar: { rect, y (the floor), front, seed } — an espresso bar of two storeys on a street corner lot, built hollow on its ground floor.
  */
 export function espressoBar(el, { bag, col, lights }) {
-  const { L, Dp, W, R, B, rise } = frame(el.rect, el.front ?? 'n');
+  const { L, Dp: Dq, W, R, B, rise } = frame(el.rect, el.front ?? 'n'), Dp = el.up ? Dq - RES : Dq;
   const y = el.y ?? 0, F = y + 0.12, H1 = 3.7, top = y + 8.2, T = 0.3, gy = el.gy ?? y;
   const rc = (a, b, d0, d1, ya, yb) => col.rect(R(a, b, d0, d1), ya, yb);
   const S = (m, a, b, d0, d1, ya, yb) => { bag.add(m, B(a, b, d0, d1, ya, yb)); rc(a, b, d0, d1, ya, yb); };
   const dw = 1.15, du = L * 0.62;                                                                 // the door
   // the foundation and the floor of terrazzo with a border of dark tiles
-  bag.add('concrete_light', B(0, L, 0, Dp, y - 1.5, F - 0.1));
-  bag.add('tile_cream', B(T, L - T, T, Dp - T, F - 0.1, F)); col.floor(R(T, L - T, T, Dp - T), F);
+  bag.add('concrete_light', B(0, L, 0, Dq, y - 1.5, F - 0.1));
+  bag.add('tile_cream', B(T, L - T, T, Dq - T, F - 0.1, F)); col.floor(R(T, L - T, T, Dq - T), F);
   for (let u = T + 0.25; u < L - T; u += 0.5) for (let d = T + 0.25; d < Dp - T; d += 0.5) if (((u / 0.5 | 0) + (d / 0.5 | 0)) % 2 === 0) bag.add('tile_dark', B(u - 0.12, u + 0.12, d - 0.12, d + 0.12, F, F + 0.008));
   // the shopfront: a glass wall in aluminium frames between brick piers, a stall riser of glazed tile, the doorway; a fascia with the name over it
   const fy1 = F + 2.75;
@@ -176,7 +201,8 @@ export function espressoBar(el, { bag, col, lights }) {
   // the door standing open inward, a glazed leaf in an aluminium frame; the step up from the footpath
   bag.add('glass_outer', B(du + dw / 2 - 0.04, du + dw / 2 - 0.02, 0.25, 0.25 + dw - 0.1, F + 0.1, fy1 - 0.05)); bag.add('aluminium_dull', B(du + dw / 2 - 0.05, du + dw / 2 - 0.01, 0.25, 0.25 + dw - 0.1, fy1 - 0.12, fy1 - 0.05));
   const n = Math.max(1, Math.ceil((F - gy) / 0.17)), hh = (F - gy) / n;
-  for (let k = 0; k < n; k++) { const d1 = -0.38 * (k), d0 = -0.38 * (k + 1); bag.add('granite_grey', B(du - dw / 2, du + dw / 2, d0 - 0.02, 0.05, gy - 0.5, gy + hh * (n - k))); col.floor(R(du - dw / 2, du + dw / 2, d0, d1 + 0.05), gy + hh * (n - k)); }
+  if (el.up) doorWedge({ bag, col, W, R }, du - dw / 2, du + dw / 2, gy, F);
+  else for (let k = 0; k < n; k++) { const d1 = -0.38 * (k), d0 = -0.38 * (k + 1); bag.add('granite_grey', B(du - dw / 2, du + dw / 2, d0 - 0.02, 0.05, gy - 0.5, gy + hh * (n - k))); col.floor(R(du - dw / 2, du + dw / 2, d0, d1 + 0.05), gy + hh * (n - k)); }
   col.floor(R(du - dw / 2, du + dw / 2, 0.05, T), F);
   // the fascia and the awning (a fixed canvas hood over the footpath tables), the name in letters
   bag.add('plaster_white', B(0.45, L - 0.45, 0, 0.3, fy1, F + H1)); bag.add('car_red', B(0.6, L - 0.6, -0.04, 0, fy1 + 0.1, F + H1 - 0.1));
@@ -184,13 +210,16 @@ export function espressoBar(el, { bag, col, lights }) {
   for (let k = 0; k < 8; k++) { const u0 = 0.45 + k * (L - 0.9) / 8, u1 = u0 + (L - 0.9) / 8, T2 = [W(u0, 0, F + H1 - 0.1), W(u1, 0, F + H1 - 0.1), W(u1, -1.9, fy1 + 0.1), W(u0, 0, F + H1 - 0.1), W(u1, -1.9, fy1 + 0.1), W(u0, -1.9, fy1 + 0.1)]; bag.add(k % 2 ? 'cloth_white' : 'cloth_red', fromTriangles(both(T2.flat()))); }
   // the walls: brick, plastered inside, the side walls and the back
   const wall = el.wall ?? 'brick';
-  for (const [a, b] of [[0, T], [L - T, L]]) { S(wall, a, b, T + 0.15, Dp, F, F + H1); bag.add('plaster_white', B(a === 0 ? T : a - 0.03, a === 0 ? T + 0.03 : a, T + 0.15, Dp - T, F, F + H1 - 0.3)); }
-  S(wall, 0, L, Dp - T, Dp, F, F + H1); bag.add('plaster_white', B(T, L - T, Dp - T - 0.03, Dp - T, F, F + H1 - 0.3));
+  for (const [a, b] of [[0, T], [L - T, L]]) { S(wall, a, b, T + 0.15, Dq, F, F + H1); bag.add('plaster_white', B(a === 0 ? T : a - 0.03, a === 0 ? T + 0.03 : a, T + 0.15, Dq - T, F, F + H1 - 0.3)); }
+  S(wall, 0, L, Dq - T, Dq, F, F + H1); bag.add('plaster_white', B(T, L - T, Dq - T - 0.03, Dq - T, F, F + H1 - 0.3));
   // the ceiling and the upper storey (solid): brick with its windows and a parapet
+  if (el.up) shopUpper({ bag, col, lights, B, W, R, L, Dq, F, H1, T, top, wall, kind: 'espresso', front: el.front ?? 'n', balcony: 'slab' });
+  else {
   bag.add('plaster_white', B(0.45, L - 0.45, 0.16, Dp, F + H1 - 0.3, F + H1)); rc(0, L, 0, Dp, F + H1 - 0.3, F + H1);
   bag.add(wall, B(0, L, 0, Dp, F + H1, top)); rc(0, L, 0, Dp, F + H1, top + 1);
   for (let u = 0.9; u + 1.1 < L - 0.5; u += 2.0) { bag.add('glass_outer', B(u, u + 1.1, -0.02, 0.0, F + H1 + 1.0, F + H1 + 2.7)); bag.add('paint_white', B(u - 0.1, u + 1.2, -0.08, 0.0, F + H1 + 0.92, F + H1 + 1.0)); bag.add('paint_white', B(u - 0.1, u + 1.2, -0.06, 0.0, F + H1 + 2.7, F + H1 + 2.85)); bag.add('paint_white', B(u + 0.53, u + 0.57, -0.03, 0.0, F + H1 + 1.0, F + H1 + 2.7)); }
-  bag.add('concrete_light', B(-0.05, L + 0.05, -0.15, Dp + 0.05, top, top + 0.25));
+  bag.add('concrete_light', B(-0.05, L + 0.05, -0.15, Dq + 0.05, top, top + 0.25));
+  }
   // ── inside: the counter along the right wall with the machine, the back bar, the tables, the jukebox
   const cu0 = L - T - 1.55, cu1 = L - T - 0.95, c0 = T + 3.0, c1 = Dp - T - 1.0;
   S('wood_dark', cu0, cu1, c0, c1, F, F + 1.0); bag.add('car_cream', B(cu0 - 0.02, cu0, c0, c1, F + 0.15, F + 0.95)); bag.add('steel_chrome', B(cu0 - 0.03, cu0, c0, c1, F + 0.18, F + 0.22)); bag.add('marble', B(cu0 - 0.08, cu1 + 0.05, c0 - 0.05, c1 + 0.05, F + 1.0, F + 1.05));
@@ -221,7 +250,7 @@ export function espressoBar(el, { bag, col, lights }) {
   };
   let k = 0; for (let d = T + 1.3; d < Dp - T - 1.0; d += 1.5, k++) for (const u of [T + 1.1, T + 3.2]) if (u + 0.9 < cu0 - 0.6 && !(d > Dp - 3.0 && u > L - 4)) tbl(u, d);
   // the jukebox by the back wall: its arch of coloured light, the record window, the chrome; a poster
-  const ju = T + 0.45, jd = Dp - T - 0.4;
+  const ju = el.up ? T + 2.1 : T + 0.45, jd = Dp - T - 0.4;
   S('car_red', ju - 0.4, ju + 0.4, jd - 0.3, jd + 0.15, F, F + 1.2); bag.add('gold', B(ju - 0.3, ju + 0.3, jd - 0.31, jd - 0.3, F + 0.4, F + 0.9)); bag.add('glass_lamp', lathe([[0.001, 0], [0.3, 0.0], [0.3, 0.3], [0.2, 0.48], [0.001, 0.5]], 14, null, ...W(ju, jd - 0.08, F + 1.2)));
   bag.add('steel_chrome', B(ju - 0.41, ju + 0.41, jd - 0.31, jd - 0.28, F + 0.08, F + 0.14));
   lights.push({ at: [...W(ju, jd - 0.5, F + 0.9)], color: '#ff9ab0', intensity: 1.4, distance: 3.5 });
