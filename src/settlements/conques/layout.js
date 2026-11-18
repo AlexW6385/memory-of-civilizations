@@ -92,7 +92,7 @@ export const worksLevel = () => ({ tannery: maxH([TANNERY.rect[0], TANNERY.rect[
 export const WORKS = [[TANNERY.rect[0] - 1.5, TANNERY.rect[1] - 2.5, TANNERY.rect[2] + 2, TANNERY.rect[3] + 1.5], [MILL.rect[0] - 2.5, MILL.rect[1] - 4, MILL.rect[2] + 2.5, MILL.rect[3] + 0.5]];
 
 const overlap = (a, b, m = 0) => a[0] < b[2] + m && a[2] > b[0] - m && a[1] < b[3] + m && a[3] > b[1] - m;
-const UP_MAX = +(globalThis.process?.env?.C6_UPMAX ?? 30), UP_R = 95;                         // how many houses have their upper floor open, within what distance of the arrival
+const UP_MAX = 30, UP_R = 95;                         // how many houses have their upper floor open, within what distance of the arrival
 let LOTS = null, GARDENS = null;
 function build() {
   LOTS = []; GARDENS = [];
