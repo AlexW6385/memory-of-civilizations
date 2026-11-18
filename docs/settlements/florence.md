@@ -133,6 +133,16 @@ Code: `src/styles/renaissance/relief.js` (low relief as one height field: domes,
 - **Piazza della Signoria.** The Marzocco: the lion stood at the end of the ringhiera, on a sculpted base from about 1460, seated with a paw on the shield of the lily [stated: Wikipedia "Marzocco"]; ours on the platform's south end, facing the piazza, in pietraforte [inferred: its exact place]. Donatello's Judith (placed on the Piazza in 1495) and Michelangelo's David (1504) are after our date and the Medici lions of the Loggia (1598) are too: none is shown, as in §4 [stated: dates].
 - Sources: [Marzocco - Wikipedia](https://en.wikipedia.org/wiki/Marzocco); the rest as §4 and §12.
 
+## 15. Round 6: upstairs
+
+The eleven enterable houses within 70 m of the arrival (osteria, merchant's houses, a tenement, the shop-houses of the wine, candle, smith, goldsmith and cloth trades) can be climbed (`src/styles/renaissance/casa-up.js`, `src/settlements/florence/upstairs.js`).
+- **Stair.** Town houses of two to five storeys on a frontage of about nine braccia (about 5.25 m) had the door lead straight to a steep straight flight about a metre wide, repeated in the same form to the top floor [stated: yourwaytoflorence.com "houses"]. Ours: one flight along the left wall from the door, then the same flight carried on above it, 0.25 m risers and treads, a handrail and posts, the well in each floor railed on its front and room sides [inferred: the carrying-on of the flights; the rails].
+- **Floors and walls.** Shop or workshop on the ground floor and the family above, row houses let to tenants [stated: hiddenflorence.org "the workers' home"]; walls of the house's own plaster or stone, floors of timber boards with a cotto finish, ceilings on exposed beams, lamps hung from them [inferred]. The street windows are cut through the 0.4 m wall as open reveals under the stone rings, the shutters folded back [inferred].
+- **Rooms by use.** Merchant's house: sala (long table with benches, credenza, cassapanca, hearth), camera (canopied bed, cassone, prie-dieu, table with candle and book), a study with a writing desk and books, bedrooms above, and the kitchen on the top floor as in the Palazzo Davanzati, where the kitchen is on the third floor and a well shaft runs through all four storeys [stated: Apollo magazine "Palazzo Davanzati"; painted marriage chests in its bedroom likewise]. Osteria: a common room, then beds of straw on frames with pegs for the guests' cloaks [inferred]. Tenement: one room to a family (bed, cradle, table, hearth, chest, spinning wheel) [inferred; one room, one family: hiddenflorence.org]. Shop-house: the dwelling over the shop and the stock (bolts of cloth, casks, sacks) at the top. Craftsman's house: the workroom (bench and tools of the trade, rods of iron, hides, planks, tapers on racks) over the shop and the apprentices' beds [inferred].
+- **Balcony.** On the first floor of the house whose middle bay lies clear of the stair well, a balcony on timber corbels with a rail of spindles, reached by a round-arched door; it may be stepped onto [inferred: a sporto-like projection; kept to 1.05 m].
+- **Left shut.** Floors the depth of the lot cannot give a stair to (a landing of a metre behind the last flight is needed), the roof spaces and the altane, and every house beyond 70 m: their stair still climbs to a closed first-floor bedroom.
+- **Budget.** Houses beyond 340 m of the arrival are drawn without quoins, rain streaks, window shutters and every other eave bracket in their near form (about 3 MB); the street clutter in front of the climbed houses' doors is left out.
+
 ## Sources
 
 - [The Bottega (Shop) and the Street — yourwaytoflorence.com](https://www.yourwaytoflorence.com/db/brunell/bottega.htm)
@@ -173,6 +183,9 @@ Code: `src/styles/renaissance/relief.js` (low relief as one height field: domes,
 - [Basilica of Santa Maria Novella — ermakvagus.com](https://ermakvagus.com/Europe/Italy/florence/maria-novella.html)
 - [The panel painter's workshop — shafe.co.uk](https://www.shafe.co.uk/essay_panel_painters_workshop/)
 - [Corso dei Tintori — voicemap](https://voicemap.me/tour/florence/bridging-florence-s-history-an-arno-river-walking-tour-with-context/sites/corso-dei-tintori)
+- [Fifteenth-century Florentine houses — yourwaytoflorence.com](https://www.yourwaytoflorence.com/db/brunell/houses.htm)
+- [The workers' home — hiddenflorence.org](https://hiddenflorence.org/stories/giovanni/3-the-workers-home/)
+- [Palazzo Davanzati — Apollo magazine](https://apollo-magazine.com/palazzo-davanzati-museum-florence/)
 - [Tracking down tintori — refashioningrenaissance.eu](https://refashioningrenaissance.eu/tracking-down-tintori/)
 
 ## Round 5: houses to enter
