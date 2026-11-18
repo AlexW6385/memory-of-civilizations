@@ -15,7 +15,7 @@
 //   cirrus, deck 0…1  the high streaks and the low deck of its sky (else from clouds, rain, snow: climate.js)
 //   storm  0…1  how likely a thunderstorm breaks in it (else from a heavy shower's rain and the climate's damp)
 //
-// Seasons: the sun keeps its fixed date (the equinox, §4.3), but the open country follows the
+// Seasons: the sun's declination (src/engine/climate.js) and the open country follow the
 // calendar of the visit (or ?season=winter|spring|summer|autumn): the snow line comes down in a
 // hemisphere's winter, the grass yellows and the broadleaf forest turns in autumn and stands bare
 // in winter, by latitude (none in the tropics). The settlements' own ground keeps its chosen moment.
@@ -93,7 +93,7 @@ export function withSetPieces(id, climate) {
 }
 
 /**
- * The season now: the month (1–12) of the visit, or as asked (?season=…), and two numbers for the
+ * The season now: the month (1–12) and day of the year of the visit, or as asked (?season=…), and two numbers for the
  * northern hemisphere (the southern has them negated): winter (1 in mid-January … −1 in mid-July)
  * and autumn (1 in mid-October … −1 in mid-April).
  */
@@ -101,7 +101,7 @@ export function seasonNow(date = new Date()) {
   const asked = { winter: 1, spring: 4, summer: 7, autumn: 10 }[query().get('season')];
   const doy = asked ? (asked - 1) * 30.4 + 15 : (Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) - Date.UTC(date.getUTCFullYear(), 0, 0)) / 864e5;
   const th = 2 * Math.PI * (doy - 15) / 365.25;
-  return { month: asked || date.getUTCMonth() + 1, winter: Math.cos(th), autumn: -Math.sin(th) };
+  return { month: asked || date.getUTCMonth() + 1, doy, winter: Math.cos(th), autumn: -Math.sin(th) };
 }
 
 /** A state's weight at a local hour and month. */

@@ -1,7 +1,7 @@
 // Climate, weather and the time of day on the planet (DESIGN §4.3). One sun: it stands over the
-// planet's equator (a fixed date, the equinox) at the longitude where it is noon, and moves west as
-// the day passes (a day lasts DAY_SECONDS) — so it is high at Sanchi and low at Paris, evening in
-// Uji while morning in Athens. The full moon stands opposite. The time is kept as the hour at the
+// latitude of its declination (from the date of the visit, see CAL) at the longitude where it is
+// noon, and moves west as the day passes (a day lasts DAY_SECONDS) — so it is high at Sanchi and low
+// at Paris, evening in Uji while morning in Athens. The moon keeps its own orbit and phase. The time is kept as the hour at the
 // prime meridian; the clock shows (and sets) the hour where the visitor is. The sky, haze and
 // weather are each settlement's own (its region's climate), blended out over its zone into the
 // open country's. Drives the sun and moon light, the sky, the fog, cloud shadows, rain and
@@ -12,9 +12,50 @@ import { ENV, THUNDER } from './env.js';
 import { unit } from '../planet/geo.js';
 import { withSetPieces, seasonNow, weightNow } from '../planet/setpieces.js';
 
+/**
+ * The sky's calendar (DESIGN §4.3), fixed for the visit: the sun's place on the ecliptic from the
+ * date of the visit (or ?season=), and the moon's phase from the same date (or ?moon=0…1, held:
+ * 0 new, 0.25 first quarter, 0.5 full). The planet's axis is tilted TILT (two thirds of the Earth's
+ * 23.44°: at the Earth's, Borgund at 66.6° would lie in polar night from November to January and
+ * the winter noon sun over London would stand at 10°). The moon runs its own orbit, a synodic month
+ * of 29.53 of the planet's days, so it rises later each day; the sun's date does not move.
+ */
+export const TILT = 16;
+const SYNODIC = 29.530588853;
+const CAL = (() => {
+  const q = typeof location !== 'undefined' ? new URLSearchParams(location.search) : new URLSearchParams();
+  const now = Date.now() / 864e5, d = now - 10957.5;                        // days since J2000
+  const R = Math.PI / 180, S = seasonNow();
+  // the sun's ecliptic longitude: the real one (mean anomaly and its two terms), or the asked season's
+  const g = (357.529 + 0.98560028 * d) * R;
+  const lam = q.get('season') ? 360 * (S.doy - 80) / 365.25 : 280.459 + 0.98564736 * d + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g);
+  const mq = parseFloat(q.get('moon'));
+  const phase = Number.isFinite(mq) ? ((mq % 1) + 1) % 1 : (((now - 10962.2597) / SYNODIC) % 1 + 1) % 1;   // a new moon: 2000-01-06 18:14 UTC
+  return { lam, phase, held: Number.isFinite(mq), node: 125.04 - 0.052954 * d };
+})();
+/** Equatorial [dec, ra] (degrees) of an ecliptic longitude and latitude, on the planet's tilt. */
+function equatorial(lam, beta = 0) {
+  const R = Math.PI / 180, l = lam * R, b = beta * R, e = TILT * R;
+  const x = Math.cos(b) * Math.cos(l), y = Math.cos(b) * Math.sin(l), z = Math.sin(b);
+  const Y = y * Math.cos(e) - z * Math.sin(e), Z = y * Math.sin(e) + z * Math.cos(e);
+  return [Math.asin(Z) / R, Math.atan2(Y, x) / R];
+}
+const SUN_EQ = equatorial(CAL.lam);
+/** The sun's declination for the visit (degrees). */
+export const SUN_DEC = SUN_EQ[0];
+let moonDays = 0;                 // the planet's days run since the visit began (the moon's orbit)
+/** The moon's phase now: 0 new … 0.5 full … 1. */
+export function moonPhase() { return CAL.held ? CAL.phase : (CAL.phase + moonDays / SYNODIC) % 1; }
+/** The moon's equatorial [dec, ra] now (degrees): on the ecliptic at its elongation, tilted 5.1° to it. */
+function moonEq() {
+  const lm = CAL.lam + 360 * moonPhase();
+  return equatorial(lm, 5.14 * Math.sin((lm - CAL.node) * Math.PI / 180));
+}
+/** How far the stars have turned (degrees, about the pole): the celestial longitude of planet longitude 0. */
+export function siderealOffset(utc) { return SUN_EQ[1] - (12 - utc) * 15; }
 /** Direction toward the sun in planet coordinates at an hour of the prime meridian (and the moon's). */
-export function sunPlanet(utc) { return unit(0, (12 - utc) * 15); }
-export function moonPlanet(utc) { return unit(-4, (24 - utc) * 15); }
+export function sunPlanet(utc) { return unit(SUN_DEC, (12 - utc) * 15); }
+export function moonPlanet(utc) { const [dec, ra] = moonEq(); return unit(dec, ra - siderealOffset(utc)); }
 
 const params = new URLSearchParams(location.search);
 let FORCE = params.get('weather');              // e.g. ?weather=shower (screenshots, tests)
@@ -154,13 +195,17 @@ export class Climate {
    * zones: [{ zone (an id and a climate), w }] (weights summing to 1) }. Applies it and returns the state.
    */
   update(ctx, dt) {
-    if (this.mode === 'cycle') this.utc = (this.utc + dt * 24 / DAY_SECONDS) % 24;
+    if (this.mode === 'cycle') { this.utc = (this.utc + dt * 24 / DAY_SECONDS) % 24; moonDays += dt / DAY_SECONDS; }
     const acc = { sun: [0, 0, 0], sunColor: [0, 0, 0], zen: [0, 0, 0], hor: [0, 0, 0], fogColor: [0, 0, 0], fog: 0, falloff: 0, clouds: 0, density: 0,
       turb: 0, ray: 0, mie: 0, mieG: 0, exposure: 0, wind: [0, 0], rain: 0, sunFactor: 0, sky: [0, 0, 0], ground: [0, 0, 0], windy: 0,
       day: 0, moon: [0, 0, 0], moonLight: 0, sunEl: 0, damp: 0, snow: 0, dust: 0, fall: 0, cirrus: 0, deck: 0, storm: 0 };
     const up = ctx.up || [0, 1, 0];
     const el = Math.asin(Math.max(-1, Math.min(1, ctx.sun[0] * up[0] + ctx.sun[1] * up[1] + ctx.sun[2] * up[2]))) * 180 / Math.PI;
     const moonEl = Math.asin(Math.max(-1, Math.min(1, ctx.moon[0] * up[0] + ctx.moon[1] * up[1] + ctx.moon[2] * up[2]))) * 180 / Math.PI;
+    // the moon's light by its phase: the lit fraction of its face, steeper than linear (a half moon
+    // gives about a fifth of the full moon's light on the ground, a thin crescent next to none)
+    const cosE = ctx.sun[0] * ctx.moon[0] + ctx.sun[1] * ctx.moon[1] + ctx.sun[2] * ctx.moon[2];
+    const lit = (1 - cosE) / 2, phaseLight = Math.pow(lit, 2.2);
     const ids = [];
     let wl = -1e4, wlW = 0;
     for (const { zone, w } of ctx.zones) {
@@ -177,7 +222,7 @@ export class Climate {
       const day = smooth(-10, 8, el);
       const low = smooth(0, 25, el), upF = smooth(-2, 6, el) * (0.55 + 0.45 * smooth(0, 20, el));
       const sunCol = [1.0, 0.52, 0.28].map((v, k) => lerp(v, c.sun.color[k], low));
-      const moonUp = smooth(-2, 10, moonEl) * (1 - smooth(-6, 2, el));
+      const moonUp = smooth(-2, 10, moonEl) * (1 - smooth(-6, 2, el)) * phaseLight;
       for (let k = 0; k < 3; k++) {
         acc.sunColor[k] += w * sunCol[k] * c.sun.intensity * upF * wx.sun;
         acc.zen[k] += w * lerp(0.004 + k * 0.002, c.sky.zenith[k] * lerp(1, 0.8, wx.clouds), day);
@@ -199,6 +244,7 @@ export class Climate {
     }
     acc.sun = ctx.sun.slice();
     acc.moon = ctx.moon.slice();
+    acc.moonLit = lit; acc.moonEl = moonEl;
     acc.waterLine = wl;
     // wetness: soaks in under rain within a minute or two (faster the harder it rains), and dries
     // over some twenty minutes after (a time constant of 400 s: 5 % left after 20 min)
@@ -310,6 +356,9 @@ export class Climate {
     // (under a raining deck the deck is the sky: its haze thinned so that its dark shows)
     sky.cloudSpeed.value = 0.00002 * (1 + 2 * a.windy);
     sky.sunPosition.value.set(a.sun[0], a.sun[1], a.sun[2]).multiplyScalar(1000);
+    // the stars' sphere turned with the planet, and the moon's light in the sky (src/engine/sky.js)
+    sky.setCelestial?.(ENV.planetM.value, siderealOffset(this.utc));
+    if (sky.moonLight) sky.moonLight.value = smooth(-3, 8, a.moonEl) * Math.pow(a.moonLit, 2.2);
     // the outdoor fallback for indirect light, and the strength of the baked light under cloud
     // (and a lightning flash: a blue-white light from the whole sky for its few frames)
     const fl = a.flash ?? 0;

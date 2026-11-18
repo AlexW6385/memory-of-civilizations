@@ -10,7 +10,7 @@ import * as THREE from 'three/webgpu';
 import { uniform, positionLocal, vec3 } from 'three/tsl';
 import { Renderer } from '/src/engine/renderer.js';
 const R = await new Renderer(document.getElementById('view')).init('high');
-R.sky.visible = false; R.stars.visible = false; R.moon.visible = false;
+R.sky.visible = false;
 R.scene.background = new THREE.Color(0x8899aa);
 R.sunDir = [0.45, 0.7, 0.35];
 const S = R.scene;
