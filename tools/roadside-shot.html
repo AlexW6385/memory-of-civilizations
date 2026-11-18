@@ -1,0 +1,58 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><base href="/"><title>Roadside shot</title>
+<style>html,body{margin:0;background:#9bb6d0;overflow:hidden}canvas{display:block;width:100vw;height:100vh}</style>
+<script type="importmap">{"imports":{"three":"/src/vendor/three/build/three.webgpu.js","three/webgpu":"/src/vendor/three/build/three.webgpu.js","three/tsl":"/src/vendor/three/build/three.tsl.js"}}</script>
+</head><body><canvas id="view"></canvas>
+<script type="module">
+// The country along a road, alone: its chunks and a coarse ground, built in node (tools/roadside-shot.mjs)
+// and lit by a sun and a hemisphere. For looking at what src/planet/roadside-build.js makes.
+import * as THREE from 'three/webgpu';
+import { ENV } from '../src/engine/env.js';
+import { roadsideMaterial } from '../src/planet/roadside.js';
+const cfg = await (await fetch('/shots/rs-data.json')).json();
+const bin = await (await fetch('/shots/rs-data.bin')).arrayBuffer();
+const renderer = new THREE.WebGPURenderer({ canvas: document.getElementById('view'), antialias: true });
+await renderer.init();
+renderer.setSize(cfg.w, cfg.h, false);
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.8;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#a9c4dc');
+scene.fog = new THREE.Fog('#bdd0e0', 250, 1100);
+ENV.seasonAutumn.value = cfg.autumn; ENV.seasonWinter.value = cfg.winter; ENV.snowCover.value = cfg.snow || 0;
+let o = 0;
+const take = (n, T) => { const a = new T(bin, o, n); o += n * T.BYTES_PER_ELEMENT; return a; };
+const mk = (L, mat) => {
+  const g = new THREE.BufferGeometry();
+  for (const k of ['position', 'normal', 'color', 'alt', 'ses']) if (L[k]) g.setAttribute(k, new THREE.BufferAttribute(take(L[k], Float32Array), 3));
+  g.setIndex(new THREE.BufferAttribute(take(L.idx, Uint32Array), 1));
+  const m = new THREE.Mesh(g, mat); m.frustumCulled = false; m.castShadow = true; m.receiveShadow = true; scene.add(m); return m;
+};
+mk(cfg.ground, new THREE.MeshStandardNodeMaterial({ vertexColors: true, roughness: 0.95 }));
+mk(cfg.things, roadsideMaterial());
+const sun = new THREE.DirectionalLight('#fff1dc', 3.2);
+sun.position.set(...cfg.sun); sun.castShadow = true;
+Object.assign(sun.shadow.camera, { left: -140, right: 140, top: 140, bottom: -140, near: 1, far: 700 });
+sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0005;
+scene.add(sun, new THREE.HemisphereLight('#bcd4ee', '#6b6248', 1.1));
+const cam = new THREE.PerspectiveCamera(68, cfg.w / cfg.h, 0.1, 3000);
+cam.position.set(...cfg.cam); cam.lookAt(...cfg.look);
+if (location.search.includes('dbg')) { const bx = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 4), new THREE.MeshStandardNodeMaterial({ color: '#c33' })); bx.position.set(0, 2, -12); scene.add(bx); }
+console.log('cfg', JSON.stringify(cfg.cam), JSON.stringify(cfg.look), JSON.stringify(cfg.ground), JSON.stringify(cfg.things));
+// drawn into a target and read back (presenting to a WebGPU canvas fails in headless set-ups, as in tools/showroom.html)
+const OFF = new THREE.RenderTarget(cfg.w, cfg.h, { type: THREE.HalfFloatType });
+renderer.setRenderTarget(OFF);
+renderer.toneMapping = THREE.NoToneMapping;
+for (let k = 0; k < 3; k++) { renderer.render(scene, cam); const d = renderer.backend?.device; if (d) await d.queue.onSubmittedWorkDone(); }
+const px = await renderer.readRenderTargetPixelsAsync(OFF, 0, 0, cfg.w, cfg.h);
+const c2 = document.createElement('canvas'); c2.width = cfg.w; c2.height = cfg.h; c2.style.cssText = 'position:fixed;left:0;top:0;width:100vw;height:100vh';
+const g = c2.getContext('2d'), im = g.createImageData(cfg.w, cfg.h);
+const h = (v) => THREE.DataUtils.fromHalfFloat(v), half = px instanceof Uint16Array;
+const enc = (v) => { v = Math.max(0, v * 0.9); v = (v * (2.51 * v + 0.03)) / (v * (2.43 * v + 0.59) + 0.14); v = Math.min(1, Math.max(0, v)); return Math.round(255 * (v <= 0.0031308 ? v * 12.92 : 1.055 * Math.pow(v, 1 / 2.4) - 0.055)); };
+for (let y = 0; y < cfg.h; y++) for (let x = 0; x < cfg.w; x++) {
+  const i = (y * cfg.w + x) * 4;
+  for (let k = 0; k < 3; k++) im.data[i + k] = enc(half ? h(px[i + k]) : px[i + k]);
+  im.data[i + 3] = 255;
+}
+g.putImageData(im, 0, 0); document.body.appendChild(c2); document.getElementById('view').remove();
+window.DONE = true;
+</script></body></html>
