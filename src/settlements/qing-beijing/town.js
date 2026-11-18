@@ -6,7 +6,7 @@
 import { WALL, enterable, RADIUS, LEVEL, MOAT, RING, AVENUE, NOTCH, TEMPLE, DANBI, STREET_X, lanes, houses, houseTrees, shopRows, wells } from './layout.js';
 import './townstyle.js';
 import { lifePlans } from './life.js';
-import { thrones } from './plan.js';
+import { thrones, detailPlans } from './plan.js';
 import { HOUSE } from '../../styles/qing/index.js';
 import { COURT_ROOMS, PAVILION_ROOMS, palaceRoomFigures } from './palace-rooms.js';
 
@@ -214,4 +214,4 @@ function courtRooms() {
   const furn = [...COURT_ROOMS.map((r, i) => ({ t: 'bj_palace_room', rect: r.rect, front: r.front, kind: r.kind, y: 0.3, H: 3.6, seed: 40 + i })), ...PAVILION_ROOMS.map((r, i) => ({ t: 'bj_palace_room', ...r, seed: 60 + i }))];
   return [base('qing-beijing-court-rooms', shells), { ...base('qing-beijing-court-rooms-furnished', furn, 'life'), style: 'life', center: [0, 80], near: 230 }, { ...base('qing-beijing-court-rooms-people', palaceRoomFigures(), 'life'), style: 'life', center: [0, 80], near: 230 }];
 }
-export async function town() { return [thrones, wallDress(), ...courtRooms(), streets(), ...surfaces(), temple(), ...traffic(), ...courtyards(), ...shopStreet(), ...(await lifePlans())]; }
+export async function town() { return [thrones, ...detailPlans, wallDress(), ...courtRooms(), streets(), ...surfaces(), temple(), ...traffic(), ...courtyards(), ...shopStreet(), ...(await lifePlans())]; }

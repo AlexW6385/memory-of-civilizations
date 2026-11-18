@@ -4,8 +4,10 @@
 // carapace laid with raised hexagonal scutes, a dragon's head, claws. bj_bronze wraps the style's `bronze`: these two kinds
 // are drawn here, the rest by the style.
 import { STYLES } from '../../core/build.js';
-import { lathe, fromTriangles, orientOutward } from '../../core/geom.js';
+import { lathe, fromTriangles, orientOutward, frustum, box } from '../../core/geom.js';
 import { Parts, ball, limb, T, sumeru } from '../../styles/qing/carving.js';
+import { buildLion, plinth } from './lion.js';
+import { ell, ring, cloudScroll, curve, h01 } from './sculpt.js';
 
 const B = 'bronze';
 const hexPlate = (P, c, y, r, h, rot = 0) => {
@@ -77,10 +79,61 @@ function tortoise(P) {
   P.add(B, limb([0, y + 0.3, -0.72], [0, y + 0.14, -1.02], 0.08, 0.015, 5));       // the tail
 }
 
+
+const XA = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+/** The sundial (rigui): the dial of white marble set in the plane of the equator, its rim moulded, the ring of 96 raised graduations (the ke)
+ *  and the twelve hours' pads on it, the bronze gnomon through its middle toward the pole, the pedestal carved with lotus petals. */
+function sundial(P, lat = 40) {
+  plinth(P, 'marble', -0.75, -0.75, 0.75, 0.75, 1.3);
+  const yt = (z) => 1.85 + z / Math.tan(lat * Math.PI / 180) - 0.07, w = [];
+  const tilt = -(90 - lat) * Math.PI / 180, put = (g) => { g.rotateX(tilt); g.translate(0, 1.85, 0); return g; };
+  // the bracket under the dial: a wedge of marble with a scrolled front
+  P.add('marble', box(-0.2, 1.3, -0.3, 0.2, 1.62, 0.25));
+  void yt; void w;
+  P.add('marble_smooth', put(lathe([[0.001, -0.07], [0.6, -0.07], [0.66, -0.05], [0.66, 0.02], [0.64, 0.06], [0.62, 0.06], [0.62, 0.07], [0.001, 0.07]], 40)));
+  for (const s of [-1, 1]) { const r = ring([0, s * 0.075, 0], 0.5, 0.012, [0, 1, 0], 40, 4); P.add('bronze', put(r)); const r2 = ring([0, s * 0.075, 0], 0.3, 0.008, [0, 1, 0], 32, 4); P.add('bronze', put(r2)); }
+  for (let k = 0; k < 96; k++) { const a = k * Math.PI / 48, big = k % 8 === 0, l = big ? 0.15 : 0.07, g2 = box(-0.007, 0.07, 0.5 - l / 2 + 0.2 - 0.2, 0.007, 0.082, 0.5 + l / 2); g2.rotateY(a); P.add('bronze', put(g2)); }
+  for (let k = 0; k < 12; k++) { const a = k * Math.PI / 6; P.add('bronze', put(ell([Math.sin(a) * 0.57, 0.075, Math.cos(a) * 0.57], [0.035, 0.012, 0.035], XA, 7, 3))); }
+  P.add('iron', put(lathe([[0.016, -0.55], [0.016, 0.5], [0.001, 0.54]], 8)));
+  P.add('bronze', put(ell([0, 0.55, 0], [0.025, 0.025, 0.025], XA, 6, 4)));
+  P.add('bronze', put(lathe([[0.001, 0.07], [0.05, 0.07], [0.04, 0.12], [0.02, 0.18]], 10)));
+}
+/** The grain measure (jialiang) in its square shrine on a carved plinth: marble corner posts with carved capitals, the parapet with cloud scrolls,
+ *  the bronze measure with bands and handles, the canopy over it. */
+function jialiang(P) {
+  plinth(P, 'marble', -0.8, -0.8, 0.8, 0.8, 1.3);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    P.add('marble', box(sx * 0.62 - 0.08, 1.3, sz * 0.62 - 0.08, sx * 0.62 + 0.08, 2.15, sz * 0.62 + 0.08));
+    P.add('marble_smooth', lathe([[0.1, 0], [0.12, 0.03], [0.09, 0.07], [0.12, 0.12], [0.1, 0.15]], 8, null, sx * 0.62, 2.15, sz * 0.62));
+  }
+  for (const [a, b] of [[[-0.7, -0.7], [0.7, -0.62]], [[-0.7, 0.62], [0.7, 0.7]], [[-0.7, -0.62], [-0.62, 0.62]], [[0.62, -0.62], [0.7, 0.62]]]) P.add('marble', box(a[0], 2.15, a[1], b[0], 2.3, b[1]));
+  // the parapet's panels between the posts: a low wall carved with cloud scrolls on the outer face
+  for (const [sx, sz, along] of [[0, -1, true], [0, 1, true], [-1, 0, false], [1, 0, false]]) {
+    const o = 0.7 * (along ? sz : sx);
+    if (along) P.add('marble', box(-0.54, 1.3, o - 0.04, 0.54, 1.58, o + 0.04)); else P.add('marble', box(o - 0.04, 1.3, -0.54, o + 0.04, 1.58, 0.54));
+    for (const x of [-0.27, 0.27]) for (const gg of cloudScroll(x, 1.42, 0.3, 0.015, x < 0 ? 1 : -1)) { const q = gg.clone(); if (along) { if (sz > 0) q.translate(0, 0, o + 0.04); else { q.rotateY(Math.PI); q.translate(0, 0, o - 0.04); } } else { q.rotateY(sx > 0 ? Math.PI / 2 : -Math.PI / 2); q.translate(o + (sx > 0 ? 0.04 : -0.04), 0, 0); } P.add('marble', q); }
+  }
+  P.add('marble', box(-0.7, 2.3, -0.7, 0.7, 2.36, 0.7));
+  P.add('bronze', lathe([[0.3, 0], [0.32, 0.05], [0.3, 0.42], [0.33, 0.46], [0.27, 0.46], [0.27, 0.12], [0.001, 0.12]], 20, null, 0, 1.3, 0));
+  for (const y of [1.42, 1.58, 1.7]) P.add('bronze', ring([0, y, 0], 0.318, 0.012, [0, 1, 0], 24, 4));
+  for (const sx of [-1, 1]) { const r = ring([sx * 0.33, 1.65, 0], 0.07, 0.014, [0, 0, 1], 14, 4); P.add('bronze', r); P.add('bronze', ell([sx * 0.31, 1.65, 0], [0.03, 0.05, 0.05], XA, 6, 4)); }
+  P.add('marble_smooth', frustum([-0.86, -0.86, 0.86, 0.86], 2.36, 2.46, 0, 0, 0, 0));
+  P.add('marble_smooth', frustum([-0.86, -0.86, 0.86, 0.86], 2.46, 2.9, 0.72, 0.72, 0.72, 0.72));
+  for (let k = 0; k < 4; k++) P.add('marble_smooth', ell([Math.cos(k * Math.PI / 2) * 0.82, 2.4, Math.sin(k * Math.PI / 2) * 0.82], [0.06, 0.05, 0.06], XA, 6, 4));
+  P.add('marble_smooth', lathe([[0.16, 0], [0.18, 0.06], [0.1, 0.14], [0.13, 0.24], [0.05, 0.34], [0.001, 0.38]], 10, null, 0, 2.88, 0));
+}
+
 function bjBronze(el, ctx) {
   const k = el.kind;
-  if (k !== 'crane' && k !== 'tortoise') return STYLES.qing.elements.bronze(el, ctx);
+  if (k !== 'crane' && k !== 'tortoise' && k !== 'lion' && k !== 'sundial' && k !== 'jialiang') return STYLES.qing.elements.bronze(el, ctx);
   const { bag, col } = ctx, [x, z] = el.at, y = el.y ?? 0, s = el.s ?? 1, f = el.face ?? [0, 1], yaw = Math.atan2(f[0], f[1]), P = new Parts();
+  if (k === 'lion') {
+    buildLion(P, el.metal ?? 'bronze', el.stone ?? 'marble', { paw: el.paw, fine: !!el.fine, ped: el.ped ?? 1.4 });
+    if (!el.fine) col.rect([x - 1.1 * s, z - 1.5 * s, x + 1.1 * s, z + 1.5 * s], y, y + 3.8 * s);
+    P.emit(bag, x, y, z, yaw, s); return;
+  }
+  if (k === 'sundial') { sundial(P, el.lat ?? 40); col.rect([x - 0.8 * s, z - 0.8 * s, x + 0.8 * s, z + 0.8 * s], y, y + 2.4 * s); P.emit(bag, x, y, z, yaw, s); return; }
+  if (k === 'jialiang') { jialiang(P); col.rect([x - 0.85 * s, z - 0.85 * s, x + 0.85 * s, z + 0.85 * s], y, y + 3.2 * s); P.emit(bag, x, y, z, yaw, s); return; }
   if (k === 'crane') { crane(P); col.circle(x, z, 0.55 * s, y, y + 2.6 * s); } else { tortoise(P); col.rect([x - 0.9 * s, z - 1.1 * s, x + 0.9 * s, z + 1.1 * s], y, y + 1.8 * s); }
   P.emit(bag, x, y, z, yaw, s);
 }
