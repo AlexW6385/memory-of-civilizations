@@ -9,6 +9,7 @@ import { urHouseOpen } from '../sumerian/house.js';
 import { lotPoint } from '../sumerian/house.js';
 import { urHouse, frontClass, frontOuter } from './house.js';
 import { nearHouse } from './near.js';
+import { upperStorey } from './upper.js';
 import { brickyard } from './brickyard.js';
 import { rampart } from './rampart.js';
 import { mausoleum } from './mausoleum.js';
@@ -19,6 +20,7 @@ function house(el, ctx) {
   // the front of its class outside the wall of an entered house: the street door's middle on the front face
   const f = el.door ?? 's', [px, pz] = lotPoint(el, 1.275, 0), uc = f === 'n' || f === 's' ? px : pz;
   frontOuter(ctx, { rect: el.rect, f, uc, H: 3.4, cls: Math.min(2, frontClass(el.rect, el.seed)), seed: el.seed, flat: true, near: (el.lod ?? 2) > 1 });
+  if (el.upper && !process.env.NOUP) upperStorey(ctx, el);
   if (el.near) nearHouse(ctx, { rect: el.rect, f, uc, du: uc, H: 3.4, cls: Math.min(2, frontClass(el.rect, el.seed)), seed: el.seed, open: true });
 }
 
