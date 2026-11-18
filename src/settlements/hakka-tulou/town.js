@@ -69,7 +69,9 @@ export async function town() {
   }
   // the elders at the hall, the children in the inner court
   man([-1.8, 3.4], 0.35, 0, { pose: 'sit_low', hat: 'cap', cloth: 'cloth_black' }); man([1.6, 2.8], 0.35, Math.PI, { cloth: 'cloth_black', hat: 'cap' });
-  for (let k = 0; k < 5; k++) L.push({ t: 'figure', at: [-11 + rand() * 22, 7 + rand() * 3], y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), dress: 'trousers', cloth: 'cloth_red', cloth2: 'cloth_blue', over: 'none', skin: 'skin_medium', hat: 'none', hair: 'short', h: 0.62 + rand() * 0.12, feet: 'shod' });
+  // (kept off the second ring's stairs and posts: nothing stands in the stair's lane or under the balcony's rail)
+  const court = (x, z) => { const r = Math.hypot(x, z), f = r > 11.6 ? 11.6 / r : 1; x *= f; z *= f; return x > -10 && x < -2.5 && z > 8.2 ? [x, 7.6] : [x, z]; };
+  for (let k = 0; k < 5; k++) L.push({ t: 'figure', at: court(-11 + rand() * 22, 7 + rand() * 3), y: 0, rot: rand() * 6.28, seed: Math.floor(rand() * 1e9), dress: 'trousers', cloth: 'cloth_red', cloth2: 'cloth_blue', over: 'none', skin: 'skin_medium', hat: 'none', hair: 'short', h: 0.62 + rand() * 0.12, feet: 'shod' });
   // the drying ground and the road
   for (let k = 0; k < 8; k++) { const x = YARD[0] + 2 + rand() * 24, z = YARD[1] + 2 + rand() * 20; if (Math.abs(x) < 2.6) continue; (k % 2 ? woman : man)([x, z], 0.05, rand() * 6.28, k % 3 === 0 ? { pose: 'squat', carry: 'none' } : { hat: 'straw' }); }
   // the paddy: farmers bent with the hoe, women in straw hats; tea pickers on the upper terraces
