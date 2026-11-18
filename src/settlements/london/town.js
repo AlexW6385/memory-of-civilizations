@@ -215,10 +215,20 @@ function terraceTiles(id, elements) {
   }
   return plans;
 }
+/** The open houses whose upper floors are open too (dossier §9): those nearest the arrival and along Bridge Street toward the square: houses of the three
+ *  kinds of room, the shops of different trades, the pubs. */
+export function upSet(all, open) {
+  const out = new Set(), cx = (l) => (l.rect[0] + l.rect[2]) / 2, cz = (l) => (l.rect[1] + l.rect[3]) / 2, d = (l, p) => Math.hypot(cx(l) - p[0], cz(l) - p[1]);
+  const cand = all.filter((l) => open.has(l) && (d(l, ARRIVAL) < 125 || d(l, [60, BRIDGE.z]) < 70));
+  const take = (f, n, per = 99) => { const seen = {}; for (const l of cand.filter((q) => f(q) && !out.has(q)).sort((a, b) => Math.min(d(a, ARRIVAL), d(a, [60, BRIDGE.z])) - Math.min(d(b, ARRIVAL), d(b, [60, BRIDGE.z])))) { const k = (l.trade ?? '') + (l.pub ? 'pub' : '') + variantOf(l); if ((seen[k] = (seen[k] ?? 0) + 1) > per) continue; out.add(l); if (--n === 0) break; } };
+  take((l) => l.pub, 2); take((l) => l.shop, 4, 1); take((l) => !l.shop && !l.pub, 7, 3);
+  return out;
+}
+export function upLots() { const all = lots(); mirrors(all); const open = openSet(all); for (const l of open) l.variant = variantOf(l); return [...upSet(all, open)]; }
 export async function houses() {
-  const all = lots(), plans = [], open = openSet(all);
+  const all = lots(), plans = [], open = openSet(all), ups = upSet(all, open);
   mirrors(all);
-  plans.push(...terraceTiles('london-terraces', all.map((l) => ({ t: l.pub ? 'pub' : l.shop ? 'shop_house' : 'terrace_house', ...l, ...(open.has(l) ? { open: true, variant: variantOf(l) } : {}) }))));
+  plans.push(...terraceTiles('london-terraces', all.map((l) => ({ t: l.pub ? 'pub' : l.shop ? 'shop_house' : 'terrace_house', ...l, ...(open.has(l) ? { open: true, variant: variantOf(l), ...(ups.has(l) ? { up: true } : {}) } : {}) }))));
   const sq = square();
   return [...plans, base('london-square', sq), base('london-square-life', sq.flatMap(ridersOf), 'life'), ...traffic(), ...furniture(), base('london-street-folk', streetFolk(), 'life'), base('london-river-folk', riverFolk(), 'life')];
 }

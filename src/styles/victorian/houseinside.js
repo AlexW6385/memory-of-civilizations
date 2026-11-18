@@ -3,6 +3,7 @@
 // the door on the left or the right of the front (el.mirror) as the houses of a terrace were built in pairs.
 import { box, lathe } from '../../core/geom.js';
 import { figure } from '../../objects/figures.js';
+import { frame, dogleg, terraceSpec } from './upstairs.js';
 
 /**
  * The ground floor of an open terrace house about 1870 (docs/settlements/london.md §5a), its front 's' or 'n': walls of
@@ -37,14 +38,23 @@ export function terraceInterior(el, ctx, mat, st) {
   B('wood_dark', du - 0.62, du - 0.57, fy, fy + 2.03, T, T + 0.95);
   // the hall: a partition along it with the parlour's door, the stair rising toward the back
   const hw = du + 0.6, pv = 4.6;                                                                       // the hall's inner side; the parlours' dividing wall
-  W('stucco_cream', hw, hw + 0.12, fy, ceil, T, 1.5); W('stucco_cream', hw, hw + 0.12, fy + 2.1, ceil, 1.5, 2.4); W('stucco_cream', hw, hw + 0.12, fy, ceil, 2.4, 5.0);
-  W('stucco_cream', hw, hw + 0.12, fy + 2.1, ceil, 5.0, 5.9); W('stucco_cream', hw, hw + 0.12, fy, ceil, 5.9, D - T);           // the back room's door from the hall
+  const UP = !!el.up, ZS = UP ? terraceSpec(el) : null, Z = ZS?.Z;
+  W('stucco_cream', hw, hw + 0.12, fy, ceil, T, 1.5); W('stucco_cream', hw, hw + 0.12, fy + 2.1, ceil, 1.5, 2.4);
+  if (UP && Z.zs < 6.0) W('stucco_cream', hw, hw + 0.12, fy, ceil, 2.4, D - T);
+  else { W('stucco_cream', hw, hw + 0.12, fy, ceil, 2.4, 5.0); W('stucco_cream', hw, hw + 0.12, fy + 2.1, ceil, 5.0, 5.9); W('stucco_cream', hw, hw + 0.12, fy, ceil, 5.9, D - T); }
+  if (UP) {
+    // the dogleg of the open houses: flight up the strip beside the party wall, the half landing across the back, the return flight beside the partition
+    const K = frame(el, ctx, M);
+    dogleg(K, Z, fy, y + st + 0.25, { base: fy });
+    B('cloth_red', 0.4, hw - 0.1, fy + 0.002, fy + 0.01, T + 0.3, Z.zs - 0.1);
+  } else {
   const nst = 14, rise = (ceil - fy) / nst, run = 0.24, sv0 = D - T - 0.3 - nst * run;
   for (let k = 0; k < nst; k++) B('timber', 0.22, hw, fy, fy + rise * (k + 1), sv0 + k * run, sv0 + (k + 1) * run);
   C(0.22, hw, fy, ceil, sv0, D - T);
   B('wood_dark', hw - 0.06, hw - 0.02, fy + 0.2, fy + 1.1, sv0, D - T - 0.3);                          // the banister's rail on its balusters
   for (let k = 0; k < nst; k += 1) B('wood_dark', hw - 0.05, hw - 0.03, fy + rise * (k + 1), fy + rise * (k + 1) + 0.9, sv0 + k * run + 0.1, sv0 + k * run + 0.12);
   B('cloth_red', 0.4, hw - 0.1, fy + 0.002, fy + 0.01, T + 0.3, sv0);                                   // the hall's runner
+  }
   // the parlours' dividing wall with its door near the hall
   W('stucco_cream', hw + 0.12, hw + 0.25, fy, ceil, pv, pv + 0.14); W('stucco_cream', hw + 1.15, L - 0.22, fy, ceil, pv, pv + 0.14); W('stucco_cream', hw + 0.25, hw + 1.15, fy + 2.1, ceil, pv, pv + 0.14);
   // ── the front parlour (u hw+0.12 … L−0.22, v T … pv) ──
