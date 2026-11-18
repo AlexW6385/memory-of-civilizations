@@ -31,6 +31,12 @@ export function stairs(el, { bag, col }) {
     const p0 = at(i * tr), p1 = at((i + 1) * tr), yy = y0 + (i + 1) * rise, lo = Math.max(foot, yy - 0.5), [q0, q1] = [Math.min(p0, p1), Math.max(p0, p1)];
     bag.add(mat, alongZ ? box(x0, lo, q0, x1, yy, q1) : box(q0, lo, z0, q1, yy, z1));
   }
+  if (el.nosing) {                                      // the brick facing of each riser and its nosing (docs/settlements/ur.md §4.1e): a pale strip 0.02 m proud of every riser, its top 1 cm over the tread
+    for (let i = 0; i < n; i++) {
+      const p0 = at(i * tr), yy = y0 + (i + 1) * rise, fw = p0 < at(i * tr + 1e-3) ? [p0 - 0.02, p0 + 0.1] : [p0 - 0.1, p0 + 0.02];
+      soupOf(bag).add(el.nosing, alongZ ? box(x0 + 0.02, yy - rise + 0.01, fw[0], x1 - 0.02, yy + 0.012, fw[1]) : box(fw[0], yy - rise + 0.01, z0 + 0.02, fw[1], yy + 0.012, z1 - 0.02));
+    }
+  }
   const top = y1 + rise - 0.5;
   if (top > foot + 0.05) {
     const T = [], pf = at(0), pb = at(len), P = (u, y, c) => (alongZ ? [c, y, u] : [u, y, c]), [c0, c1] = alongZ ? [x0, x1] : [z0, z1];
@@ -40,6 +46,29 @@ export function stairs(el, { bag, col }) {
   }
   col.ramp([x0, z0, x1, z1], y0, y1, dir);
 }
+/**
+ * A stepped parapet beside a flight { rect, y0, y1, dir } (docs/settlements/ur.md §4.1e): blocks one to a group of four treads, each rising 0.95 m
+ * over the highest tread of its group so that the flight is walled in a staircase of its own, a coping of baked brick on each, a pier at the foot,
+ * 1.9 m high, with a coping and a band of blue glaze. `side` -1 / 1: the low / high side across the flight.
+ */
+function stairParapet(bag, el, side, mat, w = 0.9) {
+  const [x0, z0, x1, z1] = el.rect, { y0, y1, dir } = el, alongZ = dir === 'n' || dir === 's', n = Math.max(1, Math.round((y1 - y0) / 0.16)), rise = (y1 - y0) / n;
+  const [a0, a1] = alongZ ? [z0, z1] : [x0, x1], [c0, c1] = alongZ ? [x0, x1] : [z0, z1], inc = dir === 's' || dir === 'e', len = a1 - a0, tr = len / n;
+  const cr = side < 0 ? [c0 - w, c0] : [c1, c1 + w], B = (u0, u1, c, ya, yb) => (alongZ ? box(c[0], ya, u0, c[1], yb, u1) : box(u0, ya, c[0], u1, yb, c[1]));
+  const g = 4, sp = soupOf(bag);
+  for (let i = 0; i < n; i += g) {
+    const j = Math.min(n, i + g), ua = inc ? a0 + i * tr : a1 - j * tr, ub = inc ? a0 + j * tr : a1 - i * tr, top = y0 + j * rise + 0.95;
+    sp.add(mat, B(ua, ub, cr, y0 + (i + 1) * rise - 0.7, top));
+    sp.add(BB, B(ua - 0.04, ub + 0.04, [cr[0] - 0.07, cr[1] + 0.07], top, top + 0.1));
+  }
+  const pa = inc ? [a0 - w, a0] : [a1, a1 + w], pc = cr, ph = y0 + 1.9;
+  sp.add(mat, B(pa[0], pa[1], pc, y0 - 0.3, ph));
+  sp.add(BB, B(pa[0] - 0.07, pa[1] + 0.07, [pc[0] - 0.07, pc[1] + 0.07], ph, ph + 0.12));
+  sp.add(BB, B(pa[0] + 0.1, pa[1] - 0.1, [pc[0] + 0.1, pc[1] - 0.1], ph + 0.12, ph + 0.3));
+  const f = inc ? pa[0] : pa[1];                                          // the pier's end face: a band of blue glaze 0.4 m high
+  sp.add('glaze_lapis', alongZ ? box(pc[0] + 0.12, y0 + 1.2, f - (inc ? 0.03 : 0), pc[1] - 0.12, y0 + 1.6, f + (inc ? 0 : 0.03)) : box(f - (inc ? 0.03 : 0), y0 + 1.2, pc[0] + 0.12, f + (inc ? 0 : 0.03), y0 + 1.6, pc[1] - 0.12));
+}
+
 /** Shallow buttresses along the faces of a sloping stage [x0, z0, x1, z1] from y to y + h (inset at the top by b). */
 export function buttresses(bag, [x0, z0, x1, z1], y, h, b, step = 3.2, skip = null, mat = BB, hw = 0.55, dp = 0.35, col = null) {
   for (const [ax, az, bx, bz, nx, nz] of [[x0, z0, x1, z0, 0, -1], [x0, z1, x1, z1, 0, 1], [x0, z0, x0, z1, -1, 0], [x1, z0, x1, z1, 1, 0]]) {
@@ -96,6 +125,35 @@ function skinDetail(bag, col, r, b, y0, h, i, cx, rand) {
       bag.add(rand() < 0.5 ? 'mudbrick' : 'brick_baked', frustum(rect, y, y + hh, ins[0], ins[1], ins[2], ins[3], { noBottom: true })); col.rect(rect, y, y + hh * 0.8);
     }
   }
+}
+
+/**
+ * The new fine detail of the ziggurat (§4.1e) is gathered into one soup of triangles per material and added at the end of the build, so that the
+ * viewer merges it into the material's mesh instead of instancing thousands of small boxes (each spatial cell of instances is a draw).
+ */
+function soupOf(bag) {
+  if (!bag.__soup) bag.__soup = { m: new Map(), add(mat, g0) { const g = g0.index ? g0.toNonIndexed() : g0, P = g.attributes.position.array; let a = this.m.get(mat); if (!a) this.m.set(mat, (a = [])); for (let i = 0; i < P.length; i++) a.push(P[i]); } };
+  return bag.__soup;
+}
+function flushSoup(bag) {
+  const S = bag.__soup; if (!S) return;
+  for (const [mat, T] of S.m) bag.add(mat, fromTriangles(T));
+  delete bag.__soup;
+}
+
+/**
+ * One weeper hole of the ziggurat's skin (docs/settlements/ur.md §4.1e) at (fx, fz) on the face with outward normal (nx, nz), its sill at
+ * height y: a dark mouth 0.34 × 0.3 m lined with baked brick (two jambs, a lintel course and a sill that juts out as a drip), the
+ * stage's own brick round it. The hole's width and the drip's length differ a little by `k` (a hash of its place, never a counter).
+ */
+function weeper(bag, SK, fx, fz, nx, nz, y, k) {
+  const w = 0.17 + ((k * 7) % 3) * 0.012, fr = 0.12;
+  const at = (u0, u1, y0, y1, d0, d1) => { const dd = [Math.min(d0, d1), Math.max(d0, d1)]; return nx ? box(fx + (nx > 0 ? dd[0] : -dd[1]), y0, fz + u0, fx + (nx > 0 ? dd[1] : -dd[0]), y1, fz + u1) : box(fx + u0, y0, fz + (nz > 0 ? dd[0] : -dd[1]), fx + u1, y1, fz + (nz > 0 ? dd[1] : -dd[0])); };
+  const sp = soupOf(bag);
+  sp.add(SK, at(-w - fr, -w, y - 0.1, y + 0.42, -0.08, 0.1)); sp.add(SK, at(w, w + fr, y - 0.1, y + 0.42, -0.08, 0.1));
+  sp.add(SK, at(-w - fr, w + fr, y + 0.3, y + 0.42, -0.08, 0.1));
+  sp.add(SK, at(-w - fr, w + fr, y - 0.1, y, -0.08, 0.2 + ((k * 5) % 4) * 0.02));
+  bag.add('opening', at(-w, w, y, y + 0.3, -0.1, 0.06));
 }
 
 /**
@@ -160,7 +218,8 @@ function ziggurat(el, ctx) {
         if (nz < 0 && i === 0 && Math.abs(px - cx) > s.w / 2 - 4) continue;
         for (let yy = y + 1.4; yy < y + s.h - 1; yy += 1.8) {
           const f = (yy - y) / s.h, o = b * f, fx = px - nx * o, fz = pz - nz * o, hw = 0.13, hd = 0.09;
-          bag.add('opening', nx ? box(fx - hd, yy, fz - hw, fx + hd, yy + 0.22, fz + hw) : box(fx - hw, yy, fz - hd, fx + hw, yy + 0.22, fz + hd));
+          if (LIT) weeper(bag, SK, fx, fz, nx, nz, yy, k + i);
+          else bag.add('opening', nx ? box(fx - hd, yy, fz - hw, fx + hd, yy + 0.22, fz + hw) : box(fx - hw, yy, fz - hd, fx + hw, yy + 0.22, fz + hd));
           // the stain below it: salt and damp running down the face, following its slope
           { const sp = (y, u) => { const o2 = b * ((y - y0s) / s.h); const px2 = nx ? fx0(px, nx, o2) : px + u, pz2 = nz ? fz0(pz, nz, o2) : pz + u; return nx ? [px2 + nx * 0.03, y, pz + u] : [px2, y, pz2 + nz * 0.03]; };
             const yb = yy - 0.9, q = [sp(yy, -0.12), sp(yy, 0.12), sp(yb, 0.2), sp(yb, -0.2)]; stains.push(...q[0], ...q[1], ...q[2], ...q[0], ...q[2], ...q[3], ...q[0], ...q[2], ...q[1], ...q[0], ...q[3], ...q[2]); }
@@ -174,17 +233,22 @@ function ziggurat(el, ctx) {
   const S0 = tops[0], fz = S0.r[1];                          // the front face (north)
   // the central stair, out from the face to the first stage's top; the two leaning stairs
   const run = S0.y1 - S0.y0;
-  stairs({ rect: [cx - 4, fz - run * 1.9, cx + 4, fz + S0.b + 0.5], y0: S0.y0, y1: S0.y1, dir: 's', mat: ZIG_SKIN[0] }, { bag, col });
+  const NOSE = LIT ? BB : null;                                      // (Ur's reading: the risers faced, the parapets stepped: §4.1e)
+  const central = { rect: [cx - 4, fz - run * 1.9, cx + 4, fz + S0.b + 0.5], y0: S0.y0, y1: S0.y1, dir: 's' };
+  stairs({ ...central, mat: ZIG_SKIN[0], nosing: NOSE }, { bag, col });
   // the central stair's parapets: low walls rising with it
   for (const sx of [-1, 1]) {
     const t = [], za = fz - run * 1.9, zb = fz + S0.b + 0.5;
+    if (LIT) { stairParapet(bag, central, sx, ZIG_SKIN[0]); col.segment([cx + sx * 4.45, za], [cx + sx * 4.45, zb], 0.9, S0.y0, S0.y1 + 1); continue; }
     beamTris(t, [cx + sx * 4.3, S0.y0, za], [cx + sx * 4.3, S0.y1, zb], 0.3, 1.0);
     bag.add(ZIG_SKIN[0], fromTriangles(t)); col.segment([cx + sx * 4.3, za], [cx + sx * 4.3, zb], 0.6, S0.y0, S0.y1 + 1);
   }
   for (const s of [-1, 1]) {
     const x0 = cx + s * (S0.r[2] - cx - 3), x1 = cx + s * 5;
-    stairs({ rect: [Math.min(x0, x1), fz - 1, Math.max(x0, x1), fz + 4], y0: S0.y0, y1: S0.y1, dir: s < 0 ? 'e' : 'w', mat: ZIG_SKIN[0] }, { bag, col });
-    bag.add(ZIG_SKIN[0], frustum([Math.min(x0, x1), fz - 1.4, Math.max(x0, x1), fz - 1], S0.y0, S0.y1 + 0.8, 0, 0, 0, 0));
+    const lean = { rect: [Math.min(x0, x1), fz - 1, Math.max(x0, x1), fz + 4], y0: S0.y0, y1: S0.y1, dir: s < 0 ? 'e' : 'w' };
+    stairs({ ...lean, mat: ZIG_SKIN[0], nosing: NOSE }, { bag, col });
+    if (LIT) stairParapet(bag, lean, -1, ZIG_SKIN[0], 0.8);
+    else bag.add(ZIG_SKIN[0], frustum([Math.min(x0, x1), fz - 1.4, Math.max(x0, x1), fz - 1], S0.y0, S0.y1 + 0.8, 0, 0, 0, 0));
   }
   // the gatehouse at the head of the stairs, its way 5 m wide and 4.8 m high, the single stair going on up through it
   const gz = fz + S0.b + 1, GH = 6.2, gw = 2.6;
@@ -208,7 +272,9 @@ function ziggurat(el, ctx) {
   // the stairs on up the second and third stages, each from the front edge of the stage below
   for (let i = 1; i < tops.length; i++) {
     const T = tops[i], P = tops[i - 1], foot = Math.max(P.r[1] + P.b + 0.6, i === 1 ? gz - 0.4 : -Infinity);
-    stairs({ rect: [cx - 2.5, foot, cx + 2.5, T.r[1] + T.b + 0.3], y0: T.y0, y1: T.y1, dir: 's', mat: ZIG_SKIN[i] || BB }, { bag, col });
+    const up = { rect: [cx - 2.5, foot, cx + 2.5, T.r[1] + T.b + 0.3], y0: T.y0, y1: T.y1, dir: 's' };
+    stairs({ ...up, mat: ZIG_SKIN[i] || BB, nosing: NOSE }, { bag, col });
+    if (LIT) for (const sx of [-1, 1]) stairParapet(bag, up, sx, BB, 0.7);   // (in baked brick: the upper stages' own brick would be a mesh of its own)
   }
   // the gardens of the stages (§4.1b): Woolley suggested that trees and gardens were planted along the top; date palms in brick pits along the
   // sides of the first two stages' tops, clear of the stairs, the gatehouse and the way to the shrine
@@ -228,6 +294,7 @@ function ziggurat(el, ctx) {
   // the shrine of Nanna on the top stage (§4.2)
   const tz = (tops[tops.length - 1].r[1] + tops[tops.length - 1].r[3]) / 2;
   shrine({ ...el.shrine, c: [cx, tz + 1], y: tops[tops.length - 1].y1, lit: LIT }, ctx);
+  flushSoup(bag);
 }
 
 /** The crescent of Nanna, horns up, a band from radius r1 to r0 and `depth` thick, its front at z, centred on (cx, cy). */
@@ -266,12 +333,27 @@ function shrine(el, { bag, col, lights }) {
   // the two towers either side of the entrance, standing proud of the front and above the roof
   const TH = H + 1.4;
   for (const s of [-1, 1]) {
+    if (LIT) {                                                     // the entrance of three stepped reveals (§4.2): each step of the jamb 0.35 m further out and 0.35 m deeper, the faces of the steps inlaid with blue glaze
+      for (const [o0, o1, d] of [[0.7, 2.0, 1.1], [0.35, 0.7, 0.75], [0, 0.35, 0.4]]) {
+        const a = cx + s * (dw / 2 + o0), b = cx + s * (dw / 2 + o1), r = [Math.min(a, b), z0 - d, Math.max(a, b), z0];
+        wall(r, y, y + TH); col.floor(r, y + TH);
+        if (o0 < 0.7) { const fa = cx + s * (dw / 2 + o0 + 0.05), fb = cx + s * (dw / 2 + o1 - 0.05); soupOf(bag).add('glaze_lapis', box(Math.min(fa, fb), y + 0.5, z0 - d - 0.03, Math.max(fa, fb), y + dh + 0.3, z0 - d)); }
+      }
+      const a = cx + s * (dw / 2 + 0.7), b = cx + s * (dw / 2 + 2.0);
+      soupOf(bag).add('glaze_lapis', box(Math.min(a, b) - 0.06, y + TH - 0.75, z0 - 1.16, Math.max(a, b) + 0.06, y + TH - 0.2, z0));
+      continue;
+    }
     const a = cx + s * dw / 2, b = cx + s * (dw / 2 + 2.0), r = [Math.min(a, b), z0 - 1.1, Math.max(a, b), z0];
     wall(r, y, y + TH); col.floor(r, y + TH);
-    bag.add(LIT ? 'glaze_lapis' : MP, box(r[0] - 0.06, y + TH - (LIT ? 0.75 : 0.35), r[1] - 0.06, r[2] + 0.06, y + TH - 0.2, r[3]));            // a band under the tower's top (blue glazed brick in Ur's reading)
+    bag.add(MP, box(r[0] - 0.06, y + TH - 0.35, r[1] - 0.06, r[2] + 0.06, y + TH - 0.2, r[3]));            // a band under the tower's top
+  }
+  if (LIT) {                                                       // over the door: a band of blue glazed brick with gold studs, and the step up to the threshold
+    for (let k = 0; k < 5; k++) { const u = cx - dw / 2 + k * dw / 5; soupOf(bag).add('glaze_lapis', box(u + 0.03, y + dh + 0.35, z0 - 0.03, u + dw / 5 - 0.03, y + dh + 0.95, z0)); }   // (a band of five tiles of blue glazed brick)
+    
+    soupOf(bag).add(BB, box(cx - dw / 2 - 0.35, y, z0 - 1.9, cx + dw / 2 + 0.35, y + 0.1, z0 - 1.1)); col.floor([cx - dw / 2 - 0.35, z0 - 1.9, cx + dw / 2 + 0.35, z0 - 1.1], y + 0.1);
   }
   // the lintel of palm trunk over the doorway, deep in its reveal between the towers; the cedar doors, open
-  const lt = []; beamTris(lt, [cx - dw / 2 - 0.25, y + dh, z0 - 0.5], [cx + dw / 2 + 0.25, y + dh, z0 - 0.5], 0.14, 0.24); bag.add('palm_trunk', fromTriangles(lt));
+  const lt = []; beamTris(lt, [cx - dw / 2 - (LIT ? 0.55 : 0.25), y + dh, z0 - 0.5], [cx + dw / 2 + (LIT ? 0.55 : 0.25), y + dh, z0 - 0.5], 0.14, 0.24); bag.add('palm_trunk', fromTriangles(lt));
   for (const s of [-1, 1]) {
     const q = [Math.min(cx + s * dw / 2, cx + s * (dw / 2 - 0.08)), z0 + 0.15, Math.max(cx + s * dw / 2, cx + s * (dw / 2 - 0.08)), z0 + 0.15 + dw / 2];
     bag.add('cedar', box(q[0], y + 0.06, q[1], q[2], y + dh - 0.05, q[3]));
@@ -284,7 +366,15 @@ function shrine(el, { bag, col, lights }) {
   // above the roof the standard of Nanna, a pole bearing the gilded crescent, so that the house of the god reads from the court
   if (LIT) for (const [a, b, c, d] of [[x0, z1, x1, z1 + 0.05], [x0 - 0.05, z0, x0, z1], [x1, z0, x1 + 0.05, z1], [x0, z0 - 0.05, cx - dw / 2 - 2.0, z0], [cx + dw / 2 + 2.0, z0 - 0.05, x1, z0]])
     bag.add('glaze_lapis', box(a, y + H - 1.15, b, c, y + H - 0.55, d));
-  if (LIT) for (const s of [-1, 1]) { const a = cx + s * (dw / 2 + 0.4), b = cx + s * (dw / 2 + 1.6); bag.add('glaze_lapis', box(Math.min(a, b), y + 1.4, z0 - 1.14, Math.max(a, b), y + TH - 1.0, z0 - 1.1)); }
+  if (LIT) for (const s of [-1, 1]) { const a = cx + s * (dw / 2 + 0.95), b = cx + s * (dw / 2 + 1.75); bag.add('glaze_lapis', box(Math.min(a, b), y + 1.4, z0 - 1.14, Math.max(a, b), y + TH - 1.0, z0 - 1.1)); }
+  if (LIT) for (const [ax, az, bx, bz, nx, nz] of [[x0, z0, x1, z0, 0, -1], [x0, z1, x1, z1, 0, 1], [x0, z0, x0, z1, -1, 0], [x1, z0, x1, z1, 1, 0]]) {   // a lapis cap on every buttress, where it meets the frieze (§4.2)
+    const Ln = Math.hypot(bx - ax, bz - az), n = Math.floor(Ln / 2.2);
+    for (let i = 1; i < n; i++) {
+      const u = i * Ln / n, px = ax + (bx - ax) * u / Ln, pz = az + (bz - az) * u / Ln;
+      if (nz < 0 && Math.abs(px - cx) < dw / 2 + 2.6) continue;
+      soupOf(bag).add('glaze_lapis', nx ? box(px + (nx > 0 ? 0.55 : -0.58), y + H - 1.15, pz - 0.38, px + (nx > 0 ? 0.58 : -0.55), y + H - 0.55, pz + 0.38) : box(px - 0.38, y + H - 1.15, pz + (nz > 0 ? 0.55 : -0.58), px + 0.38, y + H - 0.55, pz + (nz > 0 ? 0.58 : -0.55)));
+    }
+  }
   if (LIT) { const px = cx, pz = z0 + 0.9, top = y + H + 4.0;
     bag.add('bronze', lathe([[0.08, 0], [0.06, 0.3], [0.035, 4.4]], 8, null, px, y + H, pz));
     crescent(bag, px, top + 1.2, pz - 0.1, 1.2, 0.85, 0.2); }
@@ -338,8 +428,36 @@ function mirrored(ctx, cz) {
   return { ...ctx, bag, col };
 }
 
+/**
+ * The temenos wall of Ur III (docs/settlements/ur.md §4.1f) a→b { h, th, y }: a core of mud brick behind a footing of baked brick in two
+ * courses, a buttress every 4.2 m and between buttresses a tall blind recess (two jambs, a sill and a lintel course round a niche 0.9 m
+ * wide set 0.55 m back), a corbel course and a coping of baked brick under the walk, which stays at h. Axis-aligned. Its top is a walk.
+ */
+function litWall(el, { bag, col }) {
+  const [ax, az] = el.a, [bx, bz] = el.b, h = el.h ?? 6, th = el.th ?? 3, y = el.y ?? 0, m = el.mat ?? MB, alongX = Math.abs(bx - ax) >= Math.abs(bz - az);
+  const u0 = alongX ? Math.min(ax, bx) : Math.min(az, bz), u1 = alongX ? Math.max(ax, bx) : Math.max(az, bz), vc = alongX ? az : ax;
+  const acc = { [m]: [], [BB]: [] };                                    // (the pieces gathered into one soup per material, so that the viewer does not instance them as boxes)
+  const X = (mat, a, c, v0, v1, y0, y1) => { const g0 = alongX ? box(a, y + y0, vc + v0, c, y + y1, vc + v1) : box(vc + v0, y + y0, a, vc + v1, y + y1, c), g = g0.index ? g0.toNonIndexed() : g0; acc[mat].push(...g.attributes.position.array); };
+  const T = th / 2, side = (v0, v1, a, c, y0, y1, mat) => { X(mat, a, c, -v1, -v0, y0, y1); X(mat, a, c, v0, v1, y0, y1); };   // the same on both faces (v0..v1 measured outward from the axis)
+  X(m, u0, u1, -(T - 0.7), T - 0.7, 0, h - 0.3);
+  side(T - 0.7, T + 0.25, u0, u1, -0.3, 0.5, BB); side(T - 0.7, T + 0.15, u0, u1, 0.5, 1.2, BB);
+  side(T - 0.7, T + 0.1, u0, u1, h - 0.6, h - 0.3, m);
+  side(T - 0.7, T + 0.2, u0, u1, h - 0.3, h, BB);
+  const L = u1 - u0, n = Math.max(1, Math.floor(L / 4.2)), P = L / n;
+  for (let i = 0; i < n; i++) {
+    const c = u0 + i * P, mm = c + P / 2, e = Math.min(1.35, P / 2 - 0.8);
+    side(T - 0.7, T + 0.1, c - 0.75 < u0 ? u0 : c - 0.75, c + 0.75 > u1 ? u1 : c + 0.75, 1.2, h - 0.6, m);                    // the buttress
+    side(T - 0.7, T - 0.15, mm - e, mm - 0.45, 1.2, h - 0.6, m); side(T - 0.7, T - 0.15, mm + 0.45, mm + e, 1.2, h - 0.6, m);   // the jambs of the recess
+    side(T - 0.7, T - 0.15, mm - 0.45, mm + 0.45, 1.2, 1.9, m); side(T - 0.7, T - 0.15, mm - 0.45, mm + 0.45, h - 1.5, h - 0.6, m);   // its sill and its lintel course
+  }
+  const lastB = u1 - 0.75 < u0 ? u0 : u1 - 0.75; side(T - 0.7, T + 0.1, lastB, u1, 1.2, h - 0.6, m);                             // a buttress at the far end
+  for (const [mat, T] of Object.entries(acc)) if (T.length) bag.add(mat, fromTriangles(T));
+  col.segment(el.a, el.b, th, y, y + h);
+}
+
 /** precinct_wall: a buttressed mud-brick wall a→b { h, th }, plastered, its top a walk. */
 function precinctWall(el, { bag, col }) {
+  if (el.lit) return litWall(el, { bag, col });
   const a = el.a, b = el.b, h = el.h ?? 6, th = el.th ?? 3, t = [], y = el.y ?? 0;
   beamTris(t, [a[0], y, a[1]], [b[0], y, b[1]], th / 2, h); bag.add(el.mat ?? MB, fromTriangles(t));
   col.segment(a, b, th, y, y + h);
