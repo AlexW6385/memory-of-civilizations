@@ -68,8 +68,12 @@ export function upper(l) {
   return Math.hypot((l.rect[0] + l.rect[2]) / 2 - A[0], (l.rect[1] + l.rect[3]) / 2 - A[2]) <= UPPER_REACH;
 }
 
+/** Houses far from the arrival are drawn with less fine detail in their near form (quoins, rain streaks, shutters, every other eave bracket): the geometry budget is kept for the floors a visitor climbs. */
+const far = (l) => { const A = ARRIVALS['florence']; return Math.hypot((l.rect[0] + l.rect[2]) / 2 - A[0], (l.rect[1] + l.rect[3]) / 2 - A[2]) > LITE_FROM; };
+export const LITE_FROM = 340;
+
 export async function houses() {
   const all = lots(), open = enterable(all);
-  const mine = all.map((l) => ({ t: 'casa', ...l, ...(open.has(l) ? { open: true, use: open.get(l), ...(upper(l) ? { upper: true } : {}) } : {}) }));
+  const mine = all.map((l) => ({ t: 'casa', ...l, ...(!open.has(l) && far(l) ? { lite: true } : {}), ...(open.has(l) ? { open: true, use: open.get(l), ...(upper(l) ? { upper: true } : {}) } : {}) }));
   return [...tiles('florence-houses', 'renaissance', mine), ...insidePlans(mine.filter((l) => l.open))];
 }

@@ -178,7 +178,7 @@ function balcony(Lc, col, FM, uc, yf, y, shut) {
 
 export function casa(el, { bag, col }) {
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, foot = el.foot ?? y - 0.3;
-  const kind = el.kind ?? 'casa', simple = !!el.simple, f = el.front || 's', n = Math.max(2, el.storeys ?? 3);
+  const kind = el.kind ?? 'casa', simple = !!el.simple, lite = !!el.lite, f = el.front || 's', n = Math.max(2, el.storeys ?? 3);
   const pal = kind === 'palazzo', tow = kind === 'torre', open = !!el.open && !simple && !pal && !tow, shop = kind === 'bottega' && !open;
   // the storeys' heights
   const hs = [];
@@ -247,13 +247,13 @@ export function casa(el, { bag, col }) {
         const tr = up && main && s <= up.lay.m && nbU === up.nb;
         if (tr && up.bal && s === 1 && i === up.ib) { balcony(Lu2, col, FMu, bu(i), ys[1] + 0.1, y, shut); continue; }
         const wdt = s === 1 ? 1.05 : 0.95, sill = ys[s] + (s === 1 ? 0.95 : 0.9), hsw = s === 1 ? 1.55 : 1.35;
-        if (manner === 'quatt' && s === 1 && Lu > 4.5 && !simple) { bif(Lu2, bu(i), ys[s] + 0.9, 1.75, 1.95, false, tr); continue; }
-        win(Lu2, bu(i), sill, wdt, hsw, rand, shut, false, manner === 'gothic' ? 'pointed' : manner === 'rect' ? 'rect' : 'round', tr);
+        if (manner === 'quatt' && s === 1 && Lu > 4.5 && !simple) { bif(Lu2, bu(i), ys[s] + 0.9, 1.75, 1.95, lite, tr); continue; }
+        win(Lu2, bu(i), sill, wdt, hsw, rand, shut, lite, manner === 'gothic' ? 'pointed' : manner === 'rect' ? 'rect' : 'round', tr);
       }
     }
     // the tower's top floor: windows (shuttered) between the corbels
     if (tow) { for (let i = 0; i < nbU; i++) { const u = bu(i); Lu2.box('wood_dark', u - 0.4, ys[top] + 0.9, -0.03 - TJ, u + 0.4, ys[top] + 2.2, 0.02 - TJ); } }
-    if (quoins) for (let s = 1; s < top; s++) for (let k = 0, yy = ys[s]; yy < ys[s + 1] - 0.4; k++, yy += 0.5) { const wq = k % 2 ? 0.7 : 0.45; Lu2.box(SER, 0, yy, -0.03, wq, yy + 0.44, 0.07); Lu2.box(SER, Lu - (k % 2 ? 0.45 : 0.7), yy, -0.03, Lu, yy + 0.44, 0.07); }
+    if (quoins && !lite) for (let s = 1; s < top; s++) for (let k = 0, yy = ys[s]; yy < ys[s + 1] - 0.4; k++, yy += 0.5) { const wq = k % 2 ? 0.7 : 0.45; Lu2.box(SER, 0, yy, -0.03, wq, yy + 0.44, 0.07); Lu2.box(SER, Lu - (k % 2 ? 0.45 : 0.7), yy, -0.03, Lu, yy + 0.44, 0.07); }
     if (frieze) { Lu2.box('plaster_ochre', 0, H - 1.05, -0.03, Lu, H - 0.62, 0.03); for (let u = 0.4; u < Lu - 0.3; u += 0.8) Lu2.box(wall, u, H - 1.0, 0.03, u + 0.4, H - 0.67, 0.045); }
     // string courses at the floors, the plinth, the eave
     if (!pal) for (let s = 1; s < top; s++) Lu2.box(SER, -0.05, ys[s] - 0.1, -0.03, Lu + 0.05, ys[s] + 0.06, 0.12);
@@ -343,7 +343,7 @@ export function casa(el, { bag, col }) {
     // the corner, a street-corner shrine of the Madonna, damp rising from the pavement, rain streaks under the eave
     if (main && !simple) {
       const L = Lg, wet = !pal && !tow;
-      if (wet) {
+      if (wet && !lite) {
         for (let k = 0, n = 2 + Math.floor(L / 3); k < n; k++) { const u = rand() * (L - 1.5), w = 0.8 + rand() * 1.6; Lc.add('plaster_damp', flr(u, 0.0, Math.min(L, u + w), 0.5 + rand() * 0.7, 0.025)); }
         if (el.plaster) for (let k = 0, n = 1 + Math.floor(L / 2.5); k < n; k++) { const u = 0.3 + rand() * (L - 0.9), h0 = ys[Math.min(top, 2)] - rand() * 2.5; Lu2.add('plaster_streak', flr(u, h0 - 1.2 - rand() * 1.5, u + 0.2 + rand() * 0.3, h0, 0.0265)); }
       }
@@ -357,7 +357,7 @@ export function casa(el, { bag, col }) {
     }
     // the cornice / eave: on the upper rectangle (its brackets along the front and sides)
     if (!pal) {
-      for (let u = 0.3; u < Lu - 0.2; u += 1.25) Lu2.box(W, u, H - 0.5, -0.03, u + 0.11, H - 0.1, 0.8 + (tow ? 0 : 0.0));
+      for (let u = 0.3; u < Lu - 0.2; u += lite ? 2.5 : 1.25) Lu2.box(W, u, H - 0.5, -0.03, u + 0.11, H - 0.1, 0.8 + (tow ? 0 : 0.0));
     } else {
       const long = face === 'e' || face === 'w', ring = (a, b, d) => Lu2.box(PF, long ? -d : 0, H + a, -0.04, long ? Lu + d : Lu, H + b, d);
       ring(-0.55, 0, 0.3); ring(0, 0.2, 0.55);
