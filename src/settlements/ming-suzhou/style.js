@@ -38,6 +38,7 @@ function penjing(el, { bag, col }) {
   P.emit(bag, el.at[0], el.y ?? 0, el.at[1], el.rot ?? 0);
   col.circle(el.at[0], el.at[1], 0.35 * s, el.y ?? 0, (el.y ?? 0) + sh);
 }
+import { houseUp } from './upstairs.js';
 import { realLatticeBag, roofWork, terraceRail, moonDress } from './hallwork.js';
 const base = STYLES.ming;
 
@@ -103,6 +104,9 @@ function drapeTri(a, b, c, H, out, depth) {
 }
 
 registerStyle('suzhou-site', { ...base, elements: { ...base.elements, ming_hall: hall, terrace_rail: terraceRail, moon_dress: moonDress, scholar_study: scholarStudy, hall_furniture: hallFurniture, court_piece: courtPiece, plaque, penjing, path: drapedPath } });
+
+// the houses whose upper floors can be climbed: the canal quarter's style with `house_up` (upstairs.js)
+registerStyle('suzhou-town', { ...base, elements: { ...base.elements, house_up: houseUp } });
 
 // the shop fronts are an element of the street life (instanced pieces, shared settlement-wide)
 STYLES.life.elements.suzhou_shop = suzhouShop;

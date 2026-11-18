@@ -376,7 +376,8 @@ function suzhouShop(el, { bag, col }) {
     let first = true;
     for (const [name, m, top] of order) {
       const w = (name === 'trestle' || top ? 1.35 : name === 'umbrellas' || name === 'fans' || name === 'mortar' || name === 'woks' ? 1.4 : 1.2);
-      const xc = x + dir * w / 2;
+      let xc = x + dir * w / 2;
+      if (el.gap && xc + w / 2 > el.gap[0] && xc - w / 2 < el.gap[1]) { x = dir > 0 ? el.gap[1] : el.gap[0]; xc = x + dir * w / 2; }   // (the doorway of a climbable house is kept clear)
       if (!first && (xc - w / 2 < free0 - 0.25 || xc + w / 2 > free1 + 0.25)) break;
       first = false;
       const mats = { ...m };

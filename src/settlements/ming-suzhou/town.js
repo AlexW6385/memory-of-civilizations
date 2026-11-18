@@ -6,6 +6,7 @@
 
 import { RADIUS, LEVEL, CANALS, STREETS, BRIDGES, lots, onBridge } from './layout.js';
 import { northPlans } from './north.js';
+import { upOf, doorGap, shopkeeperAt } from './uphouses.js';
 import './style.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -137,8 +138,12 @@ function houses() {
   shopsNear.forEach((l, k) => { l.trade = TRADE_ORDER[k]; l.overhang = false; open.add(l); });
   for (const l of dry.filter((q) => !q.shop).slice(0, 3)) { l.overhang = false; open.add(l); }
   prepareShops(open);
+  // the houses whose upper floors can be climbed (uphouses.js): the open ones, and the weaver's beside them
+  for (const l of all) if (upOf(l) && !open.has(l)) { l.overhang = false; open.add(l); }
+  const ups = all.filter((l) => upOf(l));
   const quads = [[], [], [], [], [], [], [], []];
   for (const l of all) {
+    if (upOf(l)) continue;
     const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2;
     quads[(cx > 0 ? 1 : 0) + (cz > 0 ? 2 : 0) + (l.detail > 0 ? 0 : 4)].push(l);
   }
@@ -146,6 +151,14 @@ function houses() {
     const E = q.map((l) => ({ t: 'house_jiangnan', rect: l.rect, y: LEVEL.street, front: l.front, storeys: l.storeys, shop: l.shop, trade: HOUSE_TRADE[l.trade] || l.trade, water: l.water, seed: l.seed, open: open.has(l), kind: l.kind, roof: l.roof, detail: l.detail, overhang: l.overhang, balcony: l.balcony, tone: l.tone }));
     if (E.length) plans.push(base(`ming-suzhou-houses-${i}`, E));
   });
+  // the climbable houses, west and east of the way in, each side one plan with its own bounds (drawn only where they are near)
+  for (const [name, test] of [['w', (l) => l.rect[0] < 0], ['e', (l) => l.rect[0] > 0]]) {
+    const mine = ups.filter(test);
+    if (!mine.length) continue;
+    const E = mine.map((l) => { const u = upOf(l); return { t: 'house_up', rect: l.rect, y: LEVEL.street, front: l.front, use: u.use, Hf: u.Hf, Hu: u.Hu, mir: !!u.mir, seed: l.seed, roof: l.roof, tone: l.tone }; });
+    const xs = mine.flatMap((l) => [l.rect[0], l.rect[2]]);
+    plans.push({ ...base(`ming-suzhou-houses-up-${name}`, E), style: 'suzhou-town', bounds: [Math.min(...xs) - 3, 50, Math.max(...xs) + 3, 70] });
+  }
   return plans;
 }
 
@@ -176,7 +189,7 @@ function riverLife() {
   const faceTo = ([dx, dz]) => Math.atan2(-dx, -dz);
   const inDisc = ([x, z], m = 30) => Math.hypot(x, z) < R - m;
   for (const l of lots()) {
-    const F = frontOf(l), out = F.n, y = LEVEL.street;
+    const F = frontOf(l), out = F.n, y = LEVEL.street, n0 = L.length, uhouse = upOf(l);
     if (!inDisc(F.P(0.5, 0)) || l.kind === 'yard') continue;
     if (l.shop0) {
       // (the banner, the name board and the goods are the shop front's own: shops.js; the draws stay, so that the life keeps its places)
@@ -185,7 +198,7 @@ function riverLife() {
       if (rand() < 0.9) for (const t of [0.3, 0.7]) { rand(); if (!rail) L.push({ t: 'hang_lantern', at: F.P(t, -0.15), y: y + 2.95, rot: F.rot, kind: 'paper', seed: 1 }); }
       const ware = ({ tea: 'jar', medicine: 'jar', rice: 'sacks' })[l.trade0 || l.trade] || pick(['jar', 'basket', 'mixed', 'sacks']);
       if (l.detail < 2 || ware === 'sacks') for (let k = 0; k < 4; k++) { rand(); rand(); rand(); rand(); }
-      if (rand() < 0.55 && openLots.has(l)) person(F.P(0.35 + rand() * 0.3, -1.5), y + 0.45, faceTo(out), { pose: 'stand' });   // (the shopkeeper: seen only in the open shops)
+      if (rand() < 0.55 && openLots.has(l)) { const sp = F.P(0.35 + rand() * 0.3, -1.5), uh = upOf(l); person(uh ? shopkeeperAt(l, uh) : sp, y + 0.45, faceTo(out), { pose: 'stand' }); }   // (the shopkeeper: seen only in the open shops)
       if (rand() < 0.45 && !l.water) person(F.P(0.3 + rand() * 0.4, 1.5), y, faceTo([-out[0], -out[1]]), { pose: rand() < 0.5 ? 'talk' : 'stand', carry: rand() < 0.3 ? 'basket' : 'none' });
       // a tea table out in front (the street is 6 m wide), people sitting at it
       if (!l.water && rand() < 0.22) {
@@ -197,13 +210,15 @@ function riverLife() {
       if (rand() < 0.5 && !l.shop) L.push({ t: 'hang_lantern', at: F.P(0.5, -0.15), y: y + 2.95, rot: F.rot, kind: 'white', seed: 2 });
     }
     // washing out of an upper window: over the water behind the waterside houses, over the lanes on a few others
-    if (l.storeys > 1 && rand() < (l.water ? 0.45 : 0.12)) L.push({ t: 'laundry_pole', at: F.P(0.25 + rand() * 0.5, -0.5), y: y + 4.2, rot: F.rot, len: l.water ? 2.2 + rand() * 0.6 : 1.4, prop: false, seed: Math.floor(rand() * 1e9) });
+    if (l.storeys > 1 && rand() < (l.water ? 0.45 : 0.12) && !upOf(l)) L.push({ t: 'laundry_pole', at: F.P(0.25 + rand() * 0.5, -0.5), y: y + 4.2, rot: F.rot, len: l.water ? 2.2 + rand() * 0.6 : 1.4, prop: false, seed: Math.floor(rand() * 1e9) });
     // the waterside houses: their own steps down to the water, someone washing at the bottom
     if (l.water && rand() < 0.3) {
       const t = 0.5, w = 1.0 / F.L, a = F.P(t - w, 0.35), b = F.P(t + w, 0.35);
       M.push({ t: 'water_steps', a, b, dir: out, y, water: LEVEL.canal });
       if (rand() < 0.7) { const p = F.P(t + (rand() - 0.5) * w, 0.35 + 1.44); person(p, y - 0.6, faceTo(out), { pose: 'squat', dress: 'robe', cloth: pick(['cloth_indigo', 'cloth_white', 'cloth_grey']), hat: 'none', woman: true }); L.push({ t: 'basket', at: F.P(t + w * 0.8, 0.35 + 0.8), y: y - 0.3, rot: 0, s: 0.8, seed: Math.floor(rand() * 1e9) }); }
     }
+    // (a climbable house keeps its doorway clear: of what the street life put before it only the lanterns and the shopkeeper stay)
+    if (uhouse) { const keep = L.splice(n0).filter((e) => e.t === 'hang_lantern' || (e.t === 'figure' && e.y > y + 0.2)); L.push(...keep); }
   }
   // the public landings with no boat: women washing at the bottom slab — squatting at the water's
   // edge to rinse, a basket of washing beside, now and then one beating the cloth with a paddle on
@@ -284,7 +299,7 @@ function shopFronts() {
     const F = frontOf(l);
     if (!inDisc(F.P(0.5, 0), 20)) continue;
     const ovh = !!l.overhang && l.storeys > 1 && l.kind !== 'simple' && !open.has(l);
-    const at = F.P(0.5, 0), e = { t: 'suzhou_shop', at, y: LEVEL.street, rot: F.rot, L: F.L, v0: ovh ? 1.15 : 0.7, trade: l.trade, seed: l.seed + 7, open: open.has(l), detail: l.detail, water: l.water };
+    const at = F.P(0.5, 0), uh = upOf(l), e = { t: 'suzhou_shop', gap: uh ? doorGap(l, uh) : undefined, at, y: LEVEL.street, rot: F.rot, L: F.L, v0: ovh ? 1.15 : 0.7, trade: l.trade, seed: l.seed + 7, open: open.has(l), detail: l.detail, water: l.water };
     const k = `${Math.floor(at[0] / 100)},${Math.floor(at[1] / 100)}`;
     if (!tiles.has(k)) tiles.set(k, []);
     tiles.get(k).push(e);

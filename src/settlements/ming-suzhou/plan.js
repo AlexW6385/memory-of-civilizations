@@ -10,6 +10,8 @@ import {
   LEVEL, GARDEN, RESIDENCE, POND, ISLANDS, MOUNDS, BUILDINGS, GALLERIES, GARDEN_BRIDGES, LOQUAT_COURT, ROCK_PATHS, pondDistance, inRect, nearRockPath,
 } from './layout.js';
 import { ground } from './ground.js';
+import { lots } from './layout.js';
+import { upOf, routeOf } from './uphouses.js';
 
 void PLACED; void MOUNDS;
 const G = LEVEL.garden;
@@ -266,6 +268,8 @@ const rooms = [
 ];
 const walks = [[[0, 64], [0, 62], [0, 58.8], [0, 54], [0, 49], [0, 44], [0, 39.7], [3.4, 39.7], [3.4, 34.6], [0, 33], [0, 29.6], [14, 29.6], [14, 25.5], [14, 22], [11, 16.4], [11, 12.8], [0, 8], [0, -9], [0, -21], [0, -9.2], [-12, -8], [-20, -10.8]]];
 walks[0].y0 = 0;
+// from the street up the stair of each climbable house (uphouses.js) to its upper rooms and out onto its gallery
+for (const l of lots()) { const u = upOf(l); if (!u) continue; const r = routeOf(l, u); r.y0 = 0; walks.push(r); }
 
 export const garden = {
   id: 'ming-suzhou-garden',
