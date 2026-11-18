@@ -16,7 +16,8 @@
 import { PLANET_RADIUS as R, SITES, BLEND } from './sites.js';
 import { PLACED } from './layout.js';
 import { coastAt, climateAt } from './land.js';
-import { riverAt } from './rivers.js';
+import { riverAt, rapidsAt } from './rivers.js';
+import { landFeatures, stackAt, riverBed } from './wild.js';
 import { fbm3, ridged3, noise3 } from './noise.js';
 import { unit, enuFrame, add, sub, scale, dot, cross, norm, angle } from './geo.js';
 import { withFocus, terrainHeight, groundCover, inWater as legacyWater, waterLevel as legacyWaterLevel, RIM_FADE } from '../world/regions.js';
@@ -31,7 +32,7 @@ const sm = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e
  * Their levels and frames are set by initRelief() once the land map is loaded.
  */
 export const BUILT = SITES.filter((s) => s.legacy || GROUNDS[s.id]).map((s) => {
-  const S = { id: s.id, site: s, u: unit(...PLACED[s.id]), radius: s.radius, base: 0, enu: null, frame: null, cosMax: Math.cos((s.radius + BLEND + 20) / R) };
+  const S = { id: s.id, site: s, u: unit(...PLACED[s.id]), radius: s.radius, base: 0, enu: null, frame: null, cosMax: Math.cos((s.radius + BLEND + 20) / R), cosWild: Math.cos((s.radius + BLEND + 200) / R) };
   if (s.legacy) {
     // the ten of the previous design: their district of the old city, under a focus
     const focus = S.focus = { region: s.legacy.region, center: s.legacy.center, radius: s.radius };
@@ -105,6 +106,18 @@ export function initRelief() {
   layRoads();
 }
 
+/** 0 within every settlement's disc, blend and 20 m beyond, rising to 1 by 170 m beyond that. */
+function wildMask(u) {
+  let m = 1;
+  for (const S of BUILT) {
+    const c = dot(S.u, u);
+    if (c < S.cosWild) continue;
+    m = Math.min(m, sm(20, 170, Math.acos(Math.min(1, c)) * R - S.radius - BLEND));
+    if (m <= 0) return 0;
+  }
+  return m;
+}
+
 /**
  * The open country at direction u: { h (m above the sea), d (to the coast, m), mount (m), moist,
  * warm }. Land rises from the beach to a gently rolling country, with hills and, where Earth has
@@ -121,13 +134,31 @@ export function natural(u) {
   const hills = fbm3(px / 570, py / 570, pz / 570, 4) * 0.5 + 0.5;
   land += hills * (2.5 + 11 * rough) * sm(5, 120, d);
   if (mount > 0.5) land += mount * (0.3 + 0.7 * ridged3(px / 360, py / 360, pz / 360, 5)) * sm(10, 160, d);
+  // places worth walking to (src/planet/wild.js), nowhere near a settlement (wildMask)
+  // (the mask is found only where there is something to mask)
+  if (d > 0) { const a = landFeatures(u, px, py, pz, land, d, mount, moist, warm, 1); if (a !== 0) land += a * wildMask(u); }
   const sea = -(1.2 + 0.09 * Math.min(-d, 300));
   const t = sm(-4, 4, d);
   let h = sea + (land - sea) * t;
-  // a great river: its bed below the sea's level (the sea's surface is its water), the banks falling to it
-  const rv = d > 0 ? riverAt(u) : null;
-  if (rv) { const bed = -1.4, f = sm(rv.half, rv.half + rv.bank, rv.d); h = bed + (Math.max(h, 0.6) - bed) * f; }
-  return { h, d, mount, moist, warm, river: rv ? 1 - sm(rv.half, rv.half + rv.bank, rv.d) : 0 };
+  if (d < -7) { const a = stackAt(u, px, py, pz, d, 1); if (a !== 0) h += a * wildMask(u); }
+  // a great river: its bed below the sea's level (the sea's surface is its water), the banks falling to it;
+  // through high ground a gorge (wider banks, falling to the bed), gravel bars along the banks, rapids, and at the mouth sandbanks
+  let bar = 0, sandbar = false, riverK = 0;
+  const rv = d > -80 ? riverAt(u, h > 14 ? 34 : 0) : null;
+  if (rv) {
+    const mask = wildMask(u), gor = h > 14 ? 34 : 0;
+    const hl = Math.max(h, 0.6), steep = sm(10, 70, hl);
+    const bank = rv.bank + (gor ? Math.min(gor, 0.9 * Math.max(hl - 12, 0)) * mask : 0);
+    if (rv.d <= rv.half + bank + 1e-9 && d > 0) {
+      const B = riverBed(rv, steep * mask, mask, mask > 0 ? rapidsAt(rv, steep) : 0), f = sm(rv.half, rv.half + bank, rv.d);
+      h = B.bed + (hl - B.bed) * f; bar = B.bar; sandbar = B.sand;
+    } else if (d <= 0 && mask > 0) {
+      const B = riverBed(rv, 0, mask, 0);
+      if (B.sand) { h += (0.45 - h) * B.bar; bar = B.bar; sandbar = true; }
+    }
+    riverK = rv.d <= rv.half + rv.bank ? 1 - sm(rv.half, rv.half + rv.bank, rv.d) : 0;
+  }
+  return { h, d, mount, moist, warm, river: riverK, bar, sandbar };
 }
 
 /**
@@ -195,7 +226,7 @@ export function coverAt(g, ny, u) {
   const sand = Math.max(beach, desert * (1 - rock)) * (1 - snow);
   const forest = sm(0.5, 0.72, n.moist + 0.15 * patch) * sm(0.2, 0.38, n.warm) * (1 - high) * (1 - steep) * (1 - beach) * sm(-0.15, 0.2, patch + 0.1);
   const soil = Math.max(0, 0.12 + 0.15 * patch) * (1 - rock - sand);
-  const bank = n.river ?? 0;
+  const bank = n.river ?? 0, bar = n.bar ?? 0;
   const grass = Math.max(0, 1 - rock - sand - soil);
   const c = {
     sand, grass, rock, soil, fields: 0,
@@ -205,6 +236,8 @@ export function coverAt(g, ny, u) {
   };
   // a river's banks: mud and sand at the water, no trees
   if (bank > 0) { c.soil = c.soil * (1 - bank) + bank * 0.6; c.sand = c.sand * (1 - bank) + bank * 0.35; c.grass *= 1 - bank; c.forest *= 1 - bank; c.rock *= 1 - bank; c.snow *= 1 - bank; }
+  // gravel bars (grey stones with sand) and a mouth's sandbanks
+  if (bar > 0.02) { const k = Math.min(1, bar * 1.6); c.rock = c.rock * (1 - k) + (n.sandbar ? 0 : 0.55) * k; c.sand = c.sand * (1 - k) + (n.sandbar ? 1 : 0.45) * k; c.soil *= 1 - k; c.grass *= 1 - k; c.forest *= 1 - k; c.snow *= 1 - k; }
   // the roads between a region's settlements, and fields along them (on land, not on steep, high, snowy or desert ground)
   for (const rd of ROADS) {
     const off = dot(u, rd.n) * R;

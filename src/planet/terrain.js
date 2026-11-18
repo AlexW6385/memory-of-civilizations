@@ -216,6 +216,7 @@ export class PlanetTerrain {
       const w = new THREE.BufferGeometry();
       w.setAttribute('position', new THREE.BufferAttribute(d.water.position, 3));
       w.setAttribute('depth', new THREE.BufferAttribute(d.water.depth, 1));
+      w.setAttribute('flow', new THREE.BufferAttribute(d.water.flow, 4));
       w.setIndex(new THREE.BufferAttribute(d.water.index, 1));
       w.computeBoundingSphere();
       sea = new THREE.Mesh(w, this.seaMat);
