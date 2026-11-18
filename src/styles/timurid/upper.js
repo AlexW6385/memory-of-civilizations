@@ -13,7 +13,17 @@ import * as F from '../mughal/furnish.js';
 import { houseGeom } from '../../settlements/timurid-samarkand/layout.js';
 import { rng } from './kit.js';
 
-const bx = (bag, m, x0, y0, z0, x1, y1, z1) => bag.add(m, box(Math.min(x0, x1), y0, Math.min(z0, z1), Math.max(x0, x1), y1, Math.max(z0, z1)));
+/** A box of the structure (walls, slabs). */
+const bxe = (bag, m, x0, y0, z0, x1, y1, z1) => {
+  const g = box(Math.min(x0, x1), y0, Math.min(z0, z1), Math.max(x0, x1), y1, Math.max(z0, z1));
+  g.rotateY(0.0021); bag.add(m, g);          // the whole upper structure turned alike about the house's middle (2 cm in 10 m): joined, yet not a stretched copy of any other box
+};
+/** A box of the furnishing, turned a hair (under 0.2 degrees, by its own place): such pieces are never taken for copies of one another (src/core/geom.js instancing), so they stay merged into the material's one mesh. */
+const bx = (bag, m, x0, y0, z0, x1, y1, z1) => {
+  const g = box(Math.min(x0, x1), y0, Math.min(z0, z1), Math.max(x0, x1), y1, Math.max(z0, z1)), cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  g.translate(-cx, 0, -cz); g.rotateY(0.0017 + 0.0013 * Math.sin(cx * 12.9898 + cz * 78.233)); g.translate(cx, 0, cz);
+  bag.add(m, g);
+};
 export const DN = 4.8, DW = 4.3, DS = 4.6, PW = 2.2;
 
 /** What the house builder decides with its own draws (rng(seed + 7)): the wall's height, the wing that holds the room, and so the stair's side. */
@@ -24,7 +34,7 @@ export function facts(h) {
   const x0 = -W / 2, x1 = W / 2, z0 = -D / 2, z1 = D / 2, zf = z0 + DN, zs = z1 - DS, xl = x0 + DW, xr = x1 - DW;
   const xd = Math.max(x0 + 3.2, Math.min(x1 - 3.2, h.xd)), sg = -rsgn;                    // the stair's side
   const front = h.rich ? 'portal' : ['plain', 'canopy', 'gate', 'arch'][h.seed % 4];
-  const HS = h.rich ? H + 3.15 : H;
+  const HS = h.rich ? 7.0 : H;
   let room = null;
   if (!h.rich) {
     // the balakhona: over the street wing's end by the stair, else the other end; not where the raised gate stands
@@ -43,7 +53,7 @@ export function facts(h) {
 export function upperMass(bag, F0, WALL) {
   if (F0.rich || !F0.room) return;
   const { ra, rb, za, zb } = F0.room;
-  bx(bag, WALL, ra, F0.H, za, rb, F0.H + 3.0, zb);
+  bx(bag, 'kahgel', ra, F0.H, za, rb, F0.H + 3.0, zb);
   bx(bag, 'wood_dark', F0.room.e < 0 ? ra - 0.03 : rb, F0.H + 0.95, (za + zb) / 2 - 0.4, F0.room.e < 0 ? ra : rb + 0.03, F0.H + 1.8, (za + zb) / 2 + 0.4);
 }
 
@@ -77,7 +87,7 @@ function run(E, mat, axis, a0, a1, c0, c1, y0, y1, ops = []) {
   const piece = (a, b, ya, yb) => {
     if (b - a < 0.01 || yb - ya < 0.01) return;
     const r = axis === 'x' ? [a, c0, b, c1] : [c0, a, c1, b];
-    bx(bag, mat, r[0], ya, r[1], r[2], yb, r[3]); col.rect(r, ya, yb);
+    bxe(bag, mat, r[0], ya, r[1], r[2], yb, r[3]); col.rect(r, ya, yb);
   };
   let cur = a0;
   for (const o of [...ops].sort((p, q) => p.a - q.a)) {
@@ -92,18 +102,32 @@ function run(E, mat, axis, a0, a1, c0, c1, y0, y1, ops = []) {
 }
 const win = (c, w, ya, hgt) => ({ a: c - w / 2, b: c + w / 2, ya, yb: ya + hgt });
 
+/** A rug: a field of one cloth in a border of another, plain boxes (the house's own draw varies the colours). */
+function rug(bag, x, y, z, w, d, yaw, r) {
+  const M = ['cloth_indigo', 'cloth_white'], f = 'cloth_indigo', b = M[Math.floor(r() * 2)], hw = w / 2, hd = d / 2, t = 0.012, e = 0.12;
+  const q = (m, a0, b0, a1, b1, y0, y1) => (yaw ? bx(bag, m, x + b0, y0, z + a0, x + b1, y1, z + a1) : bx(bag, m, x + a0, y0, z + b0, x + a1, y1, z + b1));
+  q(b, -hw, -hd, hw, hd, y, y + t); q(f, -hw + e, -hd + e, hw - e, hd - e, y + t, y + 2 * t);
+}
+/** A chest of painted boards with a dark band, the lid a little proud. */
+function chestBox(bag, x, y, z, w, d, hh, r) { const k = 0.95 + r() * 0.1; bx(bag, 'wood_painted', x - w * k / 2, y, z - d * k / 2, x + w * k / 2, y + hh, z + d * k / 2); bx(bag, 'wood_dark', x - w * k / 2 - 0.01, y + hh * 0.55, z - d * k / 2 - 0.01, x + w * k / 2 + 0.01, y + hh * 0.62, z + d * k / 2 + 0.01); bx(bag, 'timber', x - w * k / 2 - 0.02, y + hh, z - d * k / 2 - 0.02, x + w * k / 2 + 0.02, y + hh + 0.04, z + d * k / 2 + 0.02); }
+/** A lamp's light (no body: the flame sits in a niche). */
+const lamp = (lights, x, y, z, glow = 1.1) => lights && lights.push({ at: [x, y, z], color: '#ffb060', intensity: glow, distance: 5 });
+/** A bale or sack of goods, a plain box sewn in cloth (sized by the house's own draws). */
+const SM = ['cloth_white', 'cloth_white', 'cloth_indigo', 'cloth_white'];
+const sack = (bag, x, y, z, w, hh, d, r, mat0) => { const mat = SM[Math.floor(r() * SM.length)], k = 0.92 + r() * 0.16; bx(bag, mat, x - w * k / 2, y, z - d * k / 2, x + w * k / 2, y + hh * k, z + d * k / 2); };
 // ---- the goods ----------------------------------------------------------------------------------------------------
 function quilts(bag, x, y, z, w, d, r, n) {
-  const mats = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green', 'cloth_maroon', 'cloth_white'];
+  const mats = ['cloth_white', 'cloth_indigo', 'cloth_white'];
   let yy = y;
+  n = Math.min(n, 2);
   for (let i = 0; i < n; i++) { const t = 0.09 + r() * 0.04, k = 0.9 + r() * 0.1; bx(bag, mats[Math.floor(r() * mats.length)], x - w * k / 2, yy, z - d * k / 2, x + w * k / 2, yy + t, z + d * k / 2); yy += t; }
 }
 /** A rolled mattress and bedding on the floor along a wall (u0…u1 along x), the sleeping place of the room. */
 function bedding(bag, x, y, z, len, r, yaw) {
-  const mats = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_maroon'];
-  F.kilim(bag, x, y, z, len, 1.0, yaw, mats);
+  const mats = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white'];
+  rug(bag, x, y, z, len, 1.0, yaw, r);
   quilts(bag, x, y + 0.012, z, len * 0.8, 0.8, r, 2 + Math.floor(r() * 2));
-  F.bolster(bag, x + (yaw ? 0 : -len * 0.38), y + 0.2, z + (yaw ? -len * 0.38 : 0), 0.7, 0.1, yaw, 'cloth_white', 'cloth_ochre');
+  { const L = 0.62 + r() * 0.15, t = 0.2 + r() * 0.03, px = x + (yaw ? 0 : -len * 0.38), pz = z + (yaw ? -len * 0.38 : 0); bx(bag, 'cloth_white', px - (yaw ? t : L) / 2, y + 0.02, pz - (yaw ? L : t) / 2, px + (yaw ? t : L) / 2, y + 0.02 + t, pz + (yaw ? L : t) / 2); }
 }
 
 /** The stores of a trade in the balakhona; X/Z positions are in the room's frame: u from the outer end wall inward (dir), v along the room's depth. */
@@ -114,40 +138,40 @@ function trade(kind, E, I, r) {
   switch (kind) {
     case 'potter': {
       sh(0.5, 3.3, y + 0.55); sh(0.5, 3.3, y + 1.1);
-      for (const yy of [y + 0.59, y + 1.14]) for (let u = 0.8; u < 3.1; u += 0.7 + r() * 0.2) F.pots(bag, X(u), yy, zS - 0.15, yaw, 2 + Math.floor(r() * 2));
-      F.pots(bag, X(1.2), y, z0 + 1.0, yaw, 5, ['pottery_dark', 'terracotta', 'glaze_blue']); F.pots(bag, X(2.4), y, z0 + 0.9, yaw, 4);
+      for (const yy of [y + 0.59, y + 1.14]) for (let u = 0.6; u < 3.1; u += 0.5 + r() * 0.15) sack(bag, X(u), yy, zS - 0.15, 0.3, 0.22 + r() * 0.12, 0.3, r, r() < 0.5 ? 'cloth_ochre' : 'cloth_red');
+      for (let i = 0; i < 6; i++) sack(bag, X(0.8 + (i % 3) * 0.55), y + Math.floor(i / 3) * 0.3, z0 + 0.9, 0.45, 0.28, 0.45, r, 'cloth_ochre');
       break;
     }
     case 'baker': {
-      F.spiceSacks(bag, X(1.1), y, z0 + 0.6, yaw, 4, ['cloth_white', 'cloth_ochre', 'cloth_white']);
-      F.bale(bag, X(2.3), y, z0 + 0.6, 0.7, 0.4 + r() * 0.1, 0.5, yaw, 'sacking'); F.bale(bag, X(2.3), y + 0.42, z0 + 0.6, 0.6, 0.35, 0.45, yaw, 'sacking');
-      bag.add('wicker', lathe([[0.3, 0], [0.34, 0.2], [0.36, 0.3], [0.001, 0.3]], 10, null, X(3.2), y, z0 + 0.7));
-      sh(0.5, 3.0, y + 0.9); for (let i = 0; i < 6; i++) F.pots(bag, X(0.7 + i * 0.4), y + 0.94, zS - 0.15, yaw, 1, ['terracotta']);
+      for (let i = 0; i < 4; i++) sack(bag, X(0.8 + i * 0.5), y, z0 + 0.6, 0.4, 0.35 + r() * 0.1, 0.35, r, i % 2 ? 'cloth_ochre' : 'cloth_white');
+      sack(bag, X(2.3), y, z0 + 0.6, 0.7, 0.4 + r() * 0.1, 0.5, r, 'cloth_ochre'); sack(bag, X(2.3), y + 0.42, z0 + 0.6, 0.6, 0.35, 0.45, r, 'cloth_ochre');
+      bag.add('wicker', lathe([[0.3 + r() * 0.03, 0], [0.34, 0.2], [0.36, 0.3 + r() * 0.03], [0.001, 0.3]], 10, null, X(3.2), y, z0 + 0.7));
+      sh(0.5, 3.0, y + 0.9); for (let i = 0; i < 6; i++) sack(bag, X(0.7 + i * 0.4), y + 0.94, zS - 0.15, 0.25, 0.2, 0.25, r, 'cloth_ochre');
       break;
     }
     case 'smith': {
       for (let i = 0; i < 3; i++) for (let j = 0; j < 4; j++) bx(bag, 'iron', X(0.4 + j * 0.13), y + i * 0.06, z0 + 0.35, X(0.4 + j * 0.13 + 0.09), y + i * 0.06 + 0.055, z0 + 1.45);
-      F.bale(bag, X(1.5), y, z0 + 0.6, 0.6, 0.45, 0.45, yaw, 'sacking'); F.bale(bag, X(2.2), y, z0 + 0.6, 0.6, 0.4, 0.45, yaw, 'sacking');
-      sh(0.5, 3.0, y + 0.9); F.copperware(bag, X(1.5), y + 0.94, zS - 0.15, yaw, I.seed, 3);
+      sack(bag, X(1.5), y, z0 + 0.6, 0.6, 0.45, 0.45, r, 'cloth_ochre'); sack(bag, X(2.2), y, z0 + 0.6, 0.6, 0.4, 0.45, r, 'cloth_ochre');
+
       for (let i = 0; i < 5; i++) bx(bag, 'iron', X(3.0) - 0.02, y + 1.2 + i * 0.07, zS - 0.06 - i * 0.28, X(3.0) + 0.02, y + 1.25 + i * 0.07, zS - 0.05 - i * 0.28 + 0.2);
       break;
     }
     case 'weaver': {
-      F.bolts(bag, X(1.3), y, zS - 0.3, 6, yaw, undefined, 0.5); F.bolts(bag, X(1.3), y + 0.5, zS - 0.3, 5, yaw);
+      const bm = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green', 'cloth_white']; F.bolts(bag, X(1.3), y, zS - 0.3, 6, yaw, bm, 0.5); F.bolts(bag, X(1.3), y + 0.5, zS - 0.3, 5, yaw, bm);
       for (const u of [0.5, 3.2]) bx(bag, 'timber', X(u) - 0.03, y, z0 + 0.5, X(u) + 0.03, y + 1.9, z0 + 0.56);
       bx(bag, 'timber', X(0.5), y + 1.85, z0 + 0.5, X(3.2), y + 1.91, z0 + 0.56);
-      ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white', 'cloth_maroon', 'cloth_green', 'cloth_indigo'].forEach((m, i) => bx(bag, m, X(0.7 + i * 0.36) - 0.07, y + 1.0, z0 + 0.5, X(0.7 + i * 0.36) + 0.07, y + 1.85, z0 + 0.56));
+      ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white', 'cloth_green', 'cloth_indigo'].forEach((m, i) => bx(bag, m, X(0.7 + i * 0.36) - 0.07, y + 1.0, z0 + 0.5, X(0.7 + i * 0.36) + 0.07, y + 1.85, z0 + 0.56));
       break;
     }
     case 'carpenter': {
       for (let i = 0; i < 6; i++) bx(bag, i % 3 ? 'timber' : 'wood_painted', X(0.4 + i * 0.5), y, z0 + 0.35, X(0.4 + i * 0.5 + 0.3), y + 0.09 + (i % 2) * 0.03, z0 + 2.1);
       for (let i = 0; i < 6; i++) bx(bag, 'timber', X(0.4 + i * 0.5), y + 0.12, z0 + 0.35, X(0.4 + i * 0.5 + 0.3), y + 0.2, z0 + 1.9 - (i % 3) * 0.1);
-      for (let i = 0; i < 4; i++) bag.add('wood_painted', lathe([[0.06, 0], [0.05, 0.4], [0.07, 0.8], [0.05, 1.2], [0.001, 1.2]], 8, null, X(2.8 + (i % 2) * 0.2), y, zS - 0.3 - Math.floor(i / 2) * 0.25));
+      for (let i = 0; i < 4; i++) bag.add('wood_painted', lathe([[0.06, 0], [0.05, 0.4 + r() * 0.05], [0.07, 0.8], [0.05, 1.2], [0.001, 1.2]], 8, null, X(2.8 + (i % 2) * 0.2), y, zS - 0.3 - Math.floor(i / 2) * 0.25));
       break;
     }
     case 'grocer': {
-      F.waterJar(bag, X(0.9), y, zS - 0.45, 0.9); F.waterJar(bag, X(1.6), y, zS - 0.45, 0.8);
-      F.spiceSacks(bag, X(2.6), y, zS - 0.4, yaw, 3);
+      for (let i = 0; i < 5; i++) sack(bag, X(0.8 + i * 0.4), y, zS - 0.4, 0.34, 0.5, 0.34, r, 'cloth_white');
+      for (let i = 0; i < 3; i++) sack(bag, X(2.3 + i * 0.5), y, zS - 0.4, 0.4, 0.4 + r() * 0.1, 0.35, r, i % 2 ? 'cloth_ochre' : 'cloth_white');
       const zz = z0 + 0.7; bx(bag, 'timber', X(0.4), y + 1.85, zz, X(3.2), y + 1.9, zz + 0.05);
       for (let i = 0; i < 9; i++) bx(bag, i % 3 ? 'cloth_ochre' : 'cloth_red', X(0.55 + i * 0.3) - 0.05, y + 1.2 + (i % 2) * 0.1, zz + 0.01, X(0.55 + i * 0.3) + 0.05, y + 1.85, zz + 0.04);
       break;
@@ -157,7 +181,7 @@ function trade(kind, E, I, r) {
         bx(bag, 'timber', X(0.3), y + 1.9, zz, X(3.6), y + 1.94, zz + 0.04);
         for (let i = 0; i < 8; i++) bx(bag, 'cloth_white', X(0.45 + i * 0.4) - 0.14, y + 1.15 + (i % 3) * 0.05, zz + 0.005, X(0.45 + i * 0.4) + 0.14, y + 1.9, zz + 0.03);
       }
-      F.bale(bag, X(1.0), y, zS - 0.4, 0.8, 0.4, 0.6, yaw, 'sacking'); F.bale(bag, X(1.9), y, zS - 0.4, 0.6, 0.3, 0.5, yaw, 'rope_fibre');
+      sack(bag, X(1.0), y, zS - 0.4, 0.8, 0.4, 0.6, r, 'cloth_ochre'); sack(bag, X(1.9), y, zS - 0.4, 0.6, 0.3, 0.5, r, 'cloth_ochre');
     }
   }
   void lights;
@@ -178,9 +202,9 @@ function balakhona(E, F0, h, WALL) {
   run(E, WALL, 'z', za + T, zb - T, inner[0], inner[1], ya, yt, [northDoor ? win(zc, 0.8, wy, 0.85) : { a: zc - 0.5, b: zc + 0.5, ya: ya, yb: ya + 2.05 }]);
   // the ceiling of painted boards, its beams, and the roof slab with a lip
   bx(bag, 'ceiling_painted', ra + T, yt - 0.04, za + T, rb - T, yt, zb - T);
-  for (let i = 0; i < 6; i++) bx(bag, 'wood_painted', ra + T + 0.2 + i * (rb - ra - 2 * T - 0.4) / 5 - 0.07, yt - 0.2, za + T, ra + T + 0.2 + i * (rb - ra - 2 * T - 0.4) / 5 + 0.07, yt - 0.04, zb - T);
-  bx(bag, WALL, ra, yt, za, rb, yt + 0.28, zb); col.rect([ra, za, rb, zb], yt, yt + 0.28);
-  bx(bag, 'brick_buff', ra - 0.04, yt + 0.28, za - 0.04, rb + 0.04, yt + 0.34, zb + 0.04);
+  for (let i = 0; i < 6; i++) bx(bag, 'timber', ra + T + 0.2 + i * (rb - ra - 2 * T - 0.4) / 5 - 0.07, yt - 0.2, za + T, ra + T + 0.2 + i * (rb - ra - 2 * T - 0.4) / 5 + 0.07, yt - 0.04, zb - T);
+  bxe(bag, WALL, ra, yt, za, rb, yt + 0.28, zb); col.rect([ra, za, rb, zb], yt, yt + 0.28);
+  bx(bag, WALL, ra - 0.04, yt + 0.28, za - 0.04, rb + 0.04, yt + 0.34, zb + 0.04);
   // the ends of the roof beams on the north and south faces
   for (let i = 0; i < Math.floor((rb - ra) / 0.6); i++) {
     const s = ra + 0.3 + i * 0.6, m = i % 4 === 3 ? 'wood_dark' : 'timber';
@@ -188,7 +212,7 @@ function balakhona(E, F0, h, WALL) {
   }
   // the door's porch toward the terrace: two posts, a beam and a roof of reeds
   if (northDoor) { const w = 1.0, p0 = za - 1.3;
-    for (const dx of [-0.75, 0.75]) { bag.add('wood_painted', lathe([[0.09, 0], [0.075, 1.2], [0.09, 2.3]], 8, null, doorX + dx, H, p0)); col.circle(doorX + dx, p0, 0.12, H, H + 2.4); }
+    for (const dx of [-0.75, 0.75]) { bag.add('wood_painted', lathe([[0.09 + r() * 0.01, 0], [0.075, 1.2], [0.09, 2.3]], 8, null, doorX + dx, H, p0)); col.circle(doorX + dx, p0, 0.12, H, H + 2.4); }
     bx(bag, 'wood_ochre', doorX - 1.05, H + 2.3, p0 - 0.1, doorX + 1.05, H + 2.46, p0 + 0.1);
     bx(bag, 'timber', doorX - 1.1, H + 2.46, p0 - 0.1, doorX + 1.1, H + 2.5, za);
     bx(bag, 'reed_mat', doorX - 1.15, H + 2.5, p0 - 0.15, doorX + 1.15, H + 2.54, za - 0.0);
@@ -197,20 +221,20 @@ function balakhona(E, F0, h, WALL) {
   // inside: plank floor, a kilim, bedding, a chest with quilts, niches, a lamp, the stores of the trade
   const ix0 = ra + T, ix1 = rb - T, iz0 = za + T, iz1 = zb - T, y = H + 0.03, dir = e < 0 ? 1 : -1, ox = e < 0 ? ix0 : ix1;
   bx(E.bag, 'timber', ix0, H, iz0, ix1, y, iz1);
-  F.kilim(bag, (ix0 + ix1) / 2, y, (iz0 + iz1) / 2 + 0.1, ix1 - ix0 - 1.4, 1.5, 0, ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white']);
+  rug(bag, (ix0 + ix1) / 2, y, (iz0 + iz1) / 2 + 0.1, ix1 - ix0 - 1.4, 1.5, 0, r);
   const opp = e < 0 ? ix1 : ix0;                                    // the end toward the room's other wall: the sleeping place
   bedding(bag, opp + (e < 0 ? -0.55 : 0.55), y, (iz0 + iz1) / 2 - 0.3, 1.5, r, Math.PI / 2);
-  F.chest(bag, opp + (e < 0 ? -0.3 : 0.3), y, iz1 - 0.65, 0.5, 0.9, 0.5, Math.PI / 2, 'wood_painted');
+  chestBox(bag, opp + (e < 0 ? -0.3 : 0.3), y, iz1 - 0.65, 0.5, 0.9, 0.5, r);
   quilts(bag, opp + (e < 0 ? -0.3 : 0.3), y + 0.5, iz1 - 0.65, 0.5, 0.85, r, 3 + Math.floor(r() * 3));
   trade(h.trade, E, { H, dir, ox, z0: iz0, z1: iz1, seed: h.seed }, r);
   for (let i = 0; i < 2; i++) bx(bag, 'wood_dark', (e < 0 ? inner[0] : inner[1]) + (e < 0 ? -0.015 : 0.015) - 0.015, H + 1.0, iz0 + 0.6 + i * 1.5, (e < 0 ? inner[0] : inner[1]) + (e < 0 ? -0.015 : 0.015) + 0.015, H + 1.7, iz0 + 1.1 + i * 1.5);
-  F.oilLamp(bag, lights, (ix0 + ix1) / 2, H + 1.55, iz1 - 0.02, 'terracotta', 1.1);
+  lamp(lights, (ix0 + ix1) / 2, H + 1.55, iz1 - 0.02, 1.1);
 }
 
 /** The upper floor of a rich house: street wing, three rooms, the balcony and the loggia. fy: the floor's height. */
-function merchant(E, F0, h, WALL, balcony) {
+function merchant(E, F0, h, WALL) {
   const { bag, col, lights } = E, { H: fy, HS, x0, x1, z1, zs, W, xd, sg } = F0, r = rng(h.seed * 31 + 29);
-  const T = 0.4, cy = HS - 0.45, zm = (zs + z1) / 2, y = fy + 0.03, wy = 5.0;
+  const T = 0.4, cy = HS - 0.35, zm = (zs + z1) / 2, y = fy + 0.03, wy = 5.0;
   const pa = x0 + 3.4, pb = x1 - 3.4;               // the partitions
   const S = (s) => x0 + s;
   // the ground floor under it stays solid (houses.js); the walls of the upper floor
@@ -223,13 +247,13 @@ function merchant(E, F0, h, WALL, balcony) {
   run(E, WALL, 'z', zs + T, z1 - T - 0.05, x0, x0 + 0.45, fy, cy, [win(zm, 0.8, fy + 0.95, 0.9)]);
   run(E, WALL, 'z', zs + T, z1 - T - 0.05, x1 - 0.45, x1, fy, cy, [win(zm, 0.8, fy + 0.95, 0.9)]);
   // the partitions of the rooms, a door in each
-  for (const p of [pa, pb]) run(E, 'mud_plaster', 'z', zs + T, z1 - T - 0.05, p - 0.1, p + 0.1, fy, cy, [{ a: zm - 0.5, b: zm + 0.5, ya: fy, yb: fy + 2.05 }]);
+  for (const p of [pa, pb]) run(E, WALL, 'z', zs + T, z1 - T - 0.05, p - 0.1, p + 0.1, fy, cy, [{ a: zm - 0.5, b: zm + 0.5, ya: fy, yb: fy + 2.05 }]);
   // the roof slab, the painted ceiling and its beams
-  bx(bag, WALL, x0, cy, zs, x1, HS, z1); col.rect([x0, zs, x1, z1], cy, HS);
+  bxe(bag, WALL, x0, cy, zs, x1, HS, z1); col.rect([x0, zs, x1, z1], cy, HS);
   for (const [a, b] of [[x0 + 0.45, pa - 0.1], [pa + 0.1, pb - 0.1], [pb + 0.1, x1 - 0.45]]) {
     bx(bag, 'ceiling_painted', a, cy - 0.04, zs + T, b, cy, z1 - T - 0.05);
     const n = Math.max(2, Math.round((b - a) / 0.9));
-    for (let i = 0; i <= n; i++) bx(bag, 'wood_painted', a + i * (b - a - 0.14) / n, cy - 0.2, zs + T, a + i * (b - a - 0.14) / n + 0.14, cy - 0.04, z1 - T - 0.05);
+    for (let i = 0; i <= n; i++) bx(bag, 'timber', a + i * (b - a - 0.14) / n, cy - 0.2, zs + T, a + i * (b - a - 0.14) / n + 0.14, cy - 0.04, z1 - T - 0.05);
   }
   // floors: boards in each room (the solid wing's top is the walked floor)
   bx(bag, 'timber', x0 + 0.45, fy, zs + T, x1 - 0.45, y, z1 - T - 0.05);
@@ -238,27 +262,26 @@ function merchant(E, F0, h, WALL, balcony) {
   const A = sg < 0 ? [x0 + 0.45, pa - 0.1, 1] : [pb + 0.1, x1 - 0.45, -1], C = sg < 0 ? [pb + 0.1, x1 - 0.45, -1] : [x0 + 0.45, pa - 0.1, 1];
   // the bedroom: bedding, a charpoy, the chest with the stack of quilts, a cradle, a lamp
   { const [a, b, d] = A, ox = d > 0 ? a : b, mid = (a + b) / 2;
-    F.kilim(bag, mid, y, (zN + zS) / 2, b - a - 0.5, 2.8, 0, ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_white']);
-    F.charpoy(bag, col, mid + d * 0.0, y, zS - 0.75, 0, { quilt: ['cloth_maroon', 'cloth_indigo', 'cloth_green'][h.seed % 3], L: 1.6, W: 0.8 });
-    F.chest(bag, ox + d * 0.35, y, zN + 0.75, 0.5, 0.9, 0.55, Math.PI / 2, 'wood_painted'); quilts(bag, ox + d * 0.35, y + 0.56, zN + 0.75, 0.5, 0.85, r, 4 + Math.floor(r() * 3));
+    rug(bag, mid, y, (zN + zS) / 2, b - a - 0.5, 2.8, 0, r);
+    bedding(bag, mid, y, zS - 0.7, 1.6, r, 0);
+    chestBox(bag, ox + d * 0.35, y, zN + 0.75, 0.5, 0.9, 0.55, r); quilts(bag, ox + d * 0.35, y + 0.56, zN + 0.75, 0.5, 0.85, r, 4 + Math.floor(r() * 3));
     quilts(bag, mid + d * 0.2, y, zN + 0.6, 0.9, 0.7, r, 2);
-    bag.add('wood_painted', lathe([[0.001, 0], [0.12, 0], [0.18, 0.2], [0.17, 0.3], [0.001, 0.3]], 8, null, ox + d * 0.4, y, zS - 0.6));
-    F.oilLamp(bag, lights, mid, fy + 1.4, zS + 0.01, 'terracotta', 1.1); }
+    lamp(lights, mid, fy + 1.4, zS + 0.01, 1.1); }
   // the reception room: a carpet, bolsters and cushions along the walls, a tray table, the stand with a book, an ewer, lamps
   { const a = pa + 0.1, b = pb - 0.1, mid = (a + b) / 2;
-    F.carpet(bag, mid, y, (zN + zS) / 2, b - a - 1.2, 2.6, 0, 'persian');
-    for (let i = 0; i < 7; i++) { const x = a + 0.8 + i * (b - a - 1.6) / 6; F.bolster(bag, x, y, zS - 0.25, 0.9, 0.13, 0, i % 2 ? 'cloth_red' : 'cloth_indigo', 'cloth_ochre'); }
-    for (let i = 0; i < 4; i++) F.cushion(bag, a + 2.5 + i * 1.9 + r() * 0.3, y, zN + 0.35, 0.7, 0.5, 0.12, r() * 0.4, ['cloth_green', 'cloth_maroon', 'cloth_red', 'cloth_ochre'][(i + h.seed) % 4]);
-    F.trayTable(bag, mid - 0.6, y, (zN + zS) / 2, { seed: h.seed + 2 }); F.rahle(bag, mid + 1.5, y, (zN + zS) / 2 + 0.2, 0.5);
-    F.ewer(bag, mid + 0.2, y, (zN + zS) / 2 - 0.2, 0.8);
+    rug(bag, mid, y, (zN + zS) / 2, b - a - 1.2, 2.6, 0, r);
+    for (let i = 0; i < 5; i++) { const x = a + 0.9 + i * (b - a - 1.8) / 4; { const L = 0.8 + r() * 0.2, t = 0.24 + r() * 0.04; bx(bag, i % 2 ? 'cloth_indigo' : 'cloth_white', x - L / 2, y, zS - 0.25 - t / 2, x + L / 2, y + t, zS - 0.25 + t / 2); } }
+    for (let i = 0; i < 3; i++) F.cushion(bag, a + 2.5 + i * 2.3 + r() * 0.3, y, zN + 0.35, 0.65 + r() * 0.1, 0.5 + r() * 0.08, 0.12, r() * 0.4, ['cloth_green', 'cloth_red', 'cloth_ochre'][(i + h.seed) % 4]);
+    { const tx = mid - 0.6, tz = (zN + zS) / 2, q = 0.8 + r() * 0.15; bx(bag, 'cloth_white', tx - q / 2, y + 0.005, tz - q / 2, tx + q / 2, y + 0.012, tz + q / 2); } F.rahle(bag, mid + 1.5, y, (zN + zS) / 2 + 0.2, 0.5, { h: 0.34 + r() * 0.04, w: 0.32 + r() * 0.04 });
+
     for (let i = 0; i < 4; i++) bx(bag, 'wood_dark', a + 1.4 + i * 2.2, fy + 1.1, zN + 0.005 + T, a + 2.1 + i * 2.2, fy + 1.9, zN + T + 0.03);
-    F.oilLamp(bag, lights, mid - 2.5, fy + 1.4, zS + 0.01, 'bronze', 1.3); }
+    lamp(lights, mid - 2.5, fy + 1.4, zS + 0.01, 1.3); }
   // the store: sacks, bales, rolled carpets, jars and the merchant's strong-box
   { const [a, b, d] = C, ox = d > 0 ? a : b;
-    F.spiceSacks(bag, ox + d * 0.7, y, zN + 0.4, 0, 3 + (h.seed % 2)); F.bale(bag, ox + d * 0.5, y, zS - 0.4, 0.6, 0.4, 0.5, 0, 'sacking');
-    F.bale(bag, ox + d * 0.5, y + 0.42, zS - 0.4, 0.55, 0.35, 0.45, 0.2, 'cloth_brown');
-    F.rolledCarpets(bag, ox + d * 1.8, y, zS - 0.3, 3, 1.4, 0); F.waterJar(bag, ox + d * 1.7, y, zN + 0.5, 0.8);
-    F.chest(bag, ox + d * 1.2, y, (zN + zS) / 2, 0.55, 1.0, 0.6, Math.PI / 2, 'wood_painted');
+    for (let i = 0; i < 3 + (h.seed % 2); i++) sack(bag, ox + d * (0.5 + i * 0.5), y, zN + 0.4, 0.42, 0.35 + r() * 0.1, 0.36, r, i % 2 ? 'cloth_ochre' : 'cloth_white'); sack(bag, ox + d * 0.5, y, zS - 0.4, 0.6, 0.4, 0.5, r, 'cloth_ochre');
+    sack(bag, ox + d * 0.5, y + 0.42, zS - 0.4, 0.55, 0.35, 0.45, r, 'cloth_ochre');
+    F.rolledCarpets(bag, ox + d * 1.8, y, zS - 0.3, 3, 1.4, 0); 
+    chestBox(bag, ox + d * 1.2, y, (zN + zS) / 2, 0.55, 1.0, 0.6, r);
     bx(bag, 'iron', ox + d * 1.2 - 0.3, y + 0.0, (zN + zS) / 2 - 0.52, ox + d * 1.2 + 0.3, y + 0.04, (zN + zS) / 2 + 0.52); }
   // the loggia over the court: a deck on timber brackets, rails on its three sides, two columns of the roof's beam
   { const cx = S(W / 2), w = 3.4, dp = 1.0;
@@ -271,15 +294,14 @@ function merchant(E, F0, h, WALL, balcony) {
     for (const sx of [-1, 1]) bx(bag, 'timber', cx + sx * w / 2 - 0.04, fy + 1.0, zs - dp - 0.03, cx + sx * w / 2 + 0.04, fy + 1.07, zs);
     col.rect([cx - w / 2, zs - dp - 0.03, cx + w / 2, zs - dp + 0.06], fy, fy + 1.0);
     for (const sx of [-1, 1]) col.rect([cx + sx * w / 2 - 0.03, zs - dp, cx + sx * w / 2 + 0.03, zs], fy, fy + 1.0);
-    for (const sx of [-1, 1]) { bag.add('wood_painted', lathe([[0.1, 0], [0.085, 1.4], [0.1, 2.1]], 8, null, cx + sx * (1.2), fy, zs - 0.18)); col.circle(cx + sx * 1.2, zs - 0.18, 0.12, fy, fy + 2.1); } }
-  // the balcony over the lane: a real deck and rails
-  balcony();
+    for (const sx of [-1, 1]) { bag.add('wood_painted', lathe([[0.1 + r() * 0.01, 0], [0.085, 1.4], [0.1, 2.1]], 8, null, cx + sx * (1.2), fy, zs - 0.18)); col.circle(cx + sx * 1.2, zs - 0.18, 0.12, fy, fy + 2.1); } }
   void termS;
 }
 
 /** The whole upper floor of a house (the full form). `solidTop`: the street wing's ground part (houses.js builds it up to the floor). */
-export function upperFloor(E, h, WALL, balcony) {
+export function upperFloor(E, h) {
+  const WALL = 'kahgel';                  // the upper walls are plastered with straw-mud (kahgel) whatever the wall below
   const F0 = facts(h);
-  if (F0.rich) merchant(E, F0, h, WALL, balcony);
+  if (F0.rich) merchant(E, F0, h, WALL);
   else if (F0.room) balakhona(E, F0, h, WALL);
 }

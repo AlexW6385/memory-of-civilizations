@@ -109,8 +109,6 @@ function dressFace(f, bag, rand, o) {
   // small high windows with a lattice in a brick frame
   for (const s of o.windows ?? []) {
     if (o.open) {
-      f.put(bag, 'brick_buff', s - 0.45, s - 0.35, o.wy - 0.07, o.wy + 0.6, 0, 0.05); f.put(bag, 'brick_buff', s + 0.35, s + 0.45, o.wy - 0.07, o.wy + 0.6, 0, 0.05);
-      f.put(bag, 'brick_buff', s - 0.35, s + 0.35, o.wy + 0.5, o.wy + 0.6, 0, 0.05); f.put(bag, 'brick_buff', s - 0.35, s + 0.35, o.wy - 0.07, o.wy, 0, 0.05);
       continue;
     }
     f.put(bag, 'brick_buff', s - 0.45, s + 0.45, o.wy - 0.07, o.wy + 0.6, 0, 0.05);
@@ -132,7 +130,7 @@ function bench(f, bag, col, s, len, rand) {
 export function timHouse(el, ctx) {
   const h = el.h, G = houseGeom(h), fr = frame(ctx, G.cx, G.cz, h.k), { bag, col, lights } = fr, rand = rng(h.seed + 7);
   const W = G.W, D = G.D, x0 = -W / 2, x1 = W / 2, z0 = -D / 2, z1 = D / 2;
-  const dN = 4.8, dW = 4.3, dS = 4.6, H = 3.9 + rand() * 0.5, HN = H + 0.45, rich = h.rich, HS = rich ? H + 3.15 : H, full = h.full;
+  const dN = 4.8, dW = 4.3, dS = 4.6, H = 3.9 + rand() * 0.5, HN = H + 0.45, rich = h.rich, HS = rich ? 7.0 : H, full = h.full;
   const WALL = rich ? 'brick_buff' : rand() < 0.2 ? 'mud_plaster' : 'kahgel';
   const zf = z0 + dN, zs = z1 - dS, xl = x0 + dW, xr = x1 - dW;      // the court's edges
   const xd = Math.max(x0 + 3.2, Math.min(x1 - 3.2, h.xd)), PW = 2.2, DH = 2.75;
@@ -152,7 +150,7 @@ export function timHouse(el, ctx) {
     const swin = []; for (const s0 of [3.4, W - 3.4]) if (Math.abs(s0 - (xd - x0)) > 2.2 && rand() < 0.8) swin.push(s0);
     const skip = [[xd - x0 - 1.8, xd - x0 + 1.8]], br = WALL === 'brick_buff';
     const face = (f, hh, wy, wins, sk) => { dressFace(f, nil, rand, { H: hh, wy, windows: wins, skip: sk, brick: br }); for (const s0 of wins) f.put(bag, D0, s0 - 0.34, s0 + 0.34, wy, wy + 0.5, 0, 0.03); f.put(bag, D0, 0.3, f.L - 0.3, hh - 0.3, hh - 0.2, 0, 0.03); };
-    face(S2, HS, rich ? 5.0 : 2.5, rich ? [1.8, 4.5, W / 2 + 3, W - 4.5, W - 1.8] : swin, skip);
+    face(S2, HS, rich ? 5.0 : 2.5, rich ? [4.5, W - 4.5, W / 2 + 3] : swin, skip);
     face(N2, HN, 2.5, rand() < 0.5 ? [W / 2] : []);
     face(E2, H, 2.4, full && rsgn > 0 ? [] : [D / 2]); face(W2, H, 2.4, full && rsgn < 0 ? [] : [D / 2]);
     bx(bag, D0, xd - PW / 2, 0, z1 - 0.6, xd + PW / 2, DH, z1 - 0.55);
@@ -309,6 +307,7 @@ export function timHouse(el, ctx) {
     for (const e of [s - bw / 2, s + bw / 2 - 0.1]) { const p = S.p(e, 0), q = S.p(e + 0.1, 1.05); col.rect([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], fy, fy + 1.0); }
     void rc;
   };
+  if (rich) balcony();
   // ---- the passage's screen, the court
   const sx = xd, scz = zs - 1.5;
   solid(fr, 'kahgel', sx - 1.8, scz - 0.2, sx + 1.8, scz + 0.2, 0, 2.3);
@@ -375,7 +374,7 @@ export function timHouse(el, ctx) {
     if (rand() < 0.4) { const px = (x0 + xl) / 2 * (rsgn > 0 ? -1 : 1) + (rsgn > 0 ? 0 : 0); bx(bag, 'kahgel', px - 0.7, HN, z0 + 1.5, px + 0.7, HN + 1.6, z0 + 2.9); for (let i = 0; i < 6; i++) bx(bag, 'wood_dark', px - 0.5 + (i % 3) * 0.4, HN + 0.9 + Math.floor(i / 3) * 0.35, z0 + 2.9, px - 0.4 + (i % 3) * 0.4, HN + 1.0 + Math.floor(i / 3) * 0.35, z0 + 2.95); }
   }
   if (!rich && rand() < 0.28 && !(upperFacts(h).room && upperFacts(h).room.e > 0)) { const r = 1.5; bag.add('kahgel', lathe([[r, 0], [r * 0.96, r * 0.35], [r * 0.7, r * 0.75], [r * 0.3, r * 0.98], [0.001, r]], 12, null, x1 - 3, HS + 0.05, z1 - 2.4)); }
-  upperFloor({ bag, col, lights }, h, WALL, balcony);
+  upperFloor({ bag, col, lights }, h);
   void lathe; void rod; void B;
 }
 
