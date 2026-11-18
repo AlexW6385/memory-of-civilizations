@@ -8,7 +8,7 @@
 // wetness, the strength of the baked light, and gives the base exposure.
 
 import { CITY, sunDirection, skyRadiance } from '../world/regions.js';
-import { ENV } from './env.js';
+import { ENV, THUNDER } from './env.js';
 import { unit } from '../planet/geo.js';
 import { withSetPieces, seasonNow, weightNow } from '../planet/setpieces.js';
 
@@ -25,14 +25,15 @@ const SEASON = seasonNow();
 // most like it stands in (for 'clear' the clearest; for a wet, snowy, dusty or misty id the one most so),
 // so that ?weather=clear never lets a region wander into its fog or rain set piece.
 const clearness = (w) => (w.clouds ?? 0) + Math.max(0, (w.fog ?? 1) - 1) / 3 + (w.rain ?? 0) + (w.snow ?? 0) + (w.dust ?? 0);
-const LIKE = [[/rain|shower|monsoon|storm|drizzle/, (w) => w.rain ?? 0], [/snow|blizzard/, (w) => w.snow ?? 0],
+const LIKE = [[/rain|shower|monsoon|storm|drizzle|lightning|thunder/, (w) => w.rain ?? 0], [/snow|blizzard/, (w) => w.snow ?? 0],
   [/dust|harmattan|khamsin|sand/, (w) => w.dust ?? 0], [/fog|mist|haze|smoke/, (w) => w.fog ?? 1]];
 /** The index of the held state in a region's states (S), or -1 when nothing is held. */
 export function forcedIndex(S, id = FORCE) {
   if (!id || !S?.length) return -1;
   const i = S.findIndex((w) => w.id === id);
   if (i >= 0) return i;
-  const like = LIKE.find(([re]) => re.test(id));
+  // (a rainbow is seen after the rain, the sky clearing: the clearest state, the rain just past)
+  const like = id === 'rainbow' ? null : LIKE.find(([re]) => re.test(id));
   let best = 0;
   for (let k = 1; k < S.length; k++) {
     if (like ? like[1](S[k]) > like[1](S[best]) : clearness(S[k]) < clearness(S[best])) best = k;
@@ -51,6 +52,15 @@ const MOON = [0.55, 0.64, 0.9];
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const lerp = (a, b, t) => a + (b - a) * t;
+
+// The cloud layers and the thunder of a weather state (DESIGN §4.3), unless it says (cirrus, deck,
+// storm 0…1): high cirrus streaks most in a fair or lightly clouded sky (thinning under heavy cloud);
+// a low deck in overcast, rain and snow; a thunderstorm possible in a heavy shower, downpour, squall
+// or monsoon of a humid climate (a storm is an event within it: Climate.update).
+const STORMY = /storm|squall|monsoon|downpour|shower|thunder/;
+const cirrusOf = (w) => w.cirrus ?? Math.min(1, (0.25 + 0.55 * Math.exp(-((((w.clouds ?? 0) - 0.25) / 0.3) ** 2)) + 0.3 * Math.max(0, 1 - (w.cloudDensity ?? 0.4) / 0.4)) * (1 - Math.min(1, w.rain ?? 0)));
+const deckOf = (w) => w.deck ?? Math.min(1, smooth(0.75, 0.97, w.clouds ?? 0) * (0.5 + 0.5 * (w.cloudDensity ?? 0.4)) + 0.6 * Math.min(1, w.rain ?? 0) + 0.3 * (w.snow ?? 0));
+const stormOf = (w, damp) => w.storm ?? (STORMY.test(w.id) && w.rain ? smooth(0.5, 0.85, w.rain) * smooth(0.3, 0.65, damp) : 0);
 
 /** The weather: a slow random walk through its states, each held for minutes. */
 class RegionWeather {
@@ -88,7 +98,9 @@ class RegionWeather {
     };
     const v = (k, d = 0) => lerp(soft(a, k, d), soft(b, k, d), this.cur === this.next ? 0 : t);
     const fc = a.fogColor || this.r.climate.fog.color, fd = b.fogColor || this.r.climate.fog.color;
+    const by = (f) => lerp(f(a), f(b), this.cur === this.next ? 0 : t), damp = this.damp ??= dampOf(this.r.climate);
     return {
+      cirrus: by(cirrusOf), deck: by(deckOf), storm: by((w) => stormOf(w, damp)),
       clouds: v('clouds'), cloudDensity: v('cloudDensity', 0.4), sun: v('sun', 1), fog: v('fog', 1), rain: v('rain'), windy: v('windy'),
       snow: v('snow'), dust: v('dust'), fall: v('fall', 1),
       fogColor: [0, 1, 2].map((i) => lerp(fc[i], fd[i], this.cur === this.next ? 0 : t)),
@@ -107,6 +119,11 @@ export class Climate {
     this.wet = 0;
     this.snowCover = 0;            // snow lying on the ground and roofs: grows while it snows, melts after
     this.forced = null;
+    // a thunderstorm: time left, its strength, the lightning's strokes, the rain gusting, and how
+    // lately it rained (for a rainbow)
+    this.rand = rng(4099 + (Date.now() / 6e4 | 0));
+    this.clock = 0; this.stormT = 0; this.stormLv = 0; this.nextFlash = 4; this.strokes = []; this.boltUntil = -1;
+    this.gustT = 0; this.rainLately = 0; this.flash = 0;
     // the time: 'cycle' (days pass) or an hour held fixed; kept as the hour at the prime meridian
     this.mode = 'cycle';
     this.utc = 12;
@@ -140,7 +157,7 @@ export class Climate {
     if (this.mode === 'cycle') this.utc = (this.utc + dt * 24 / DAY_SECONDS) % 24;
     const acc = { sun: [0, 0, 0], sunColor: [0, 0, 0], zen: [0, 0, 0], hor: [0, 0, 0], fogColor: [0, 0, 0], fog: 0, falloff: 0, clouds: 0, density: 0,
       turb: 0, ray: 0, mie: 0, mieG: 0, exposure: 0, wind: [0, 0], rain: 0, sunFactor: 0, sky: [0, 0, 0], ground: [0, 0, 0], windy: 0,
-      day: 0, moon: [0, 0, 0], moonLight: 0, sunEl: 0, damp: 0, snow: 0, dust: 0, fall: 0 };
+      day: 0, moon: [0, 0, 0], moonLight: 0, sunEl: 0, damp: 0, snow: 0, dust: 0, fall: 0, cirrus: 0, deck: 0, storm: 0 };
     const up = ctx.up || [0, 1, 0];
     const el = Math.asin(Math.max(-1, Math.min(1, ctx.sun[0] * up[0] + ctx.sun[1] * up[1] + ctx.sun[2] * up[2]))) * 180 / Math.PI;
     const moonEl = Math.asin(Math.max(-1, Math.min(1, ctx.moon[0] * up[0] + ctx.moon[1] * up[1] + ctx.moon[2] * up[2]))) * 180 / Math.PI;
@@ -174,6 +191,7 @@ export class Climate {
       acc.fog += w * c.fog.density * wx.fog; acc.falloff += w * c.fog.height * wx.fall;
       acc.snow += w * wx.snow; acc.dust += w * wx.dust; acc.fall += w * wx.fall;
       acc.clouds += w * wx.clouds; acc.density += w * wx.cloudDensity;
+      acc.cirrus += w * wx.cirrus; acc.deck += w * wx.deck; acc.storm += w * wx.storm;
       acc.turb += w * c.sky.turbidity * (1 + wx.clouds); acc.ray += w * c.sky.rayleigh; acc.mie += w * c.sky.mie * (1 + wx.fog * 0.3); acc.mieG += w * c.sky.mieG;
       acc.exposure += w * c.exposure; acc.wind[0] += w * c.wind[0] * (1 + 2 * wx.windy); acc.wind[1] += w * c.wind[1] * (1 + 2 * wx.windy);
       acc.rain += w * wx.rain; acc.sunFactor += w * wx.sun; acc.windy += w * wx.windy;
@@ -192,9 +210,55 @@ export class Climate {
     this.snowCover = Math.min(1, Math.max(0, this.snowCover));
     // a weather held by the tools is seen as it is after a while: the ground already wet or white
     if (FORCE && this.forced !== FORCE) { this.forced = FORCE; if (acc.rain > 0.3) this.wet = 1; if (acc.snow > 0.3) this.snowCover = Math.min(1, acc.snow); }
+    const gust = this.thunderstorm(acc, dt, el);
     this.apply(acc, dt);
-    this.state = { ...acc, wet: this.wet, snowCover: this.snowCover, ids, zone: ctx.zones[0]?.zone.id };
+    this.state = { ...acc, rain: acc.rain * gust, wet: this.wet, snowCover: this.snowCover, ids, zone: ctx.zones[0]?.zone.id };
     return this.state;
+  }
+
+  /**
+   * A thunderstorm, as an event: where the weather allows one (acc.storm), it breaks now and then and
+   * lasts minutes. Lightning flashes at random intervals, a few strokes each, at a random distance and
+   * bearing (sometimes a visible bolt, near); its thunder comes after the sound's delay (THUNDER,
+   * audio.js); the rain gusts with it. Also how lately it rained, and from that the rainbow.
+   * (?weather=storm holds a storm; ?weather=lightning also holds a flash and a bolt on, for stills;
+   * ?weather=rainbow the clearest state just after rain.) Returns the rain's gust factor.
+   */
+  thunderstorm(acc, dt, el) {
+    const r = this.rand, held = FORCE === 'storm' || FORCE === 'lightning';
+    this.clock += dt;
+    const pot = held ? (acc.rain > 0.1 ? 1 : 0) : acc.storm;
+    if (this.stormT > 0) { this.stormT -= dt; if (pot < 0.15) this.stormT = Math.min(this.stormT, 20); }
+    else if (pot > 0.05 && (held || r() < dt * pot / 360)) { this.stormT = 150 + r() * 240; this.nextFlash = held ? 2 : 6 + r() * 10; }
+    const target = this.stormT > 0 ? Math.min(1, 0.4 + pot) : 0;
+    this.stormLv = held && pot ? 1 : this.stormLv + (target - this.stormLv) * Math.min(1, dt / 25);
+    if (this.stormT > 0 && this.stormLv > 0.3 && (this.nextFlash -= dt) <= 0) {
+      // a stroke: nearer ones rarer; 1–4 return strokes in a few tenths of a second
+      const dist = 0.7 + 8 * r() ** 1.6, amp = this.stormLv * Math.min(1.3, 2.2 / (1 + dist)), az = r() * Math.PI * 2;
+      ENV.flashDir.value.set(Math.cos(az), 0, Math.sin(az));
+      let t = this.clock;
+      this.strokes = [{ t, a: amp * 0.25 }];
+      for (let n = 1 + Math.floor(r() * 3.5), k = 0; k < n; k++) { t += 0.04 + r() * 0.11; this.strokes.push({ t, a: amp * (k ? 0.5 + 0.5 * r() : 1) }); }
+      if (dist < 4.5 && r() < 0.65) { this.boltUntil = t + 0.12; ENV.boltDist.value = Math.min(3200, Math.max(700, dist * 700)); }
+      if (THUNDER.length < 6) THUNDER.push({ delay: dist / 0.343, dist, pan: (r() * 2 - 1) * 0.7 });
+      if (dist < 3) this.gustT = 1;
+      this.nextFlash = (held ? 5 + 9 * r() : 9 + 35 * r()) / Math.max(0.5, this.stormLv);
+    }
+    let f = 0;
+    for (const s of this.strokes) if (this.clock >= s.t) f += s.a * Math.exp(-(this.clock - s.t) / 0.055);
+    if (FORCE === 'lightning') { f = 1; this.boltUntil = this.clock + 1; ENV.boltDist.value = 1800; }
+    this.flash = f;
+    acc.flash = f; acc.bolt = this.clock < this.boltUntil ? Math.min(1.5, f * 1.3) : 0;
+    acc.stormLv = this.stormLv;
+    // the rain gusts in a storm: slow surges, a downpour after a near stroke
+    this.gustT -= this.gustT * Math.min(1, dt / 12);
+    const surge = 0.5 + 0.25 * (Math.sin(this.clock * 0.21) + Math.sin(this.clock * 0.53 + 1));
+    const gust = Math.min(1.6, 1 + this.stormLv * (0.45 * surge - 0.15) + 0.5 * this.gustT);
+    // a rainbow: the rain falling or just past (fading over some minutes), the sun out and low
+    this.rainLately = FORCE === 'rainbow' ? 1 : acc.rain > 0.15 ? this.rainLately + (1 - this.rainLately) * Math.min(1, dt / 5) : this.rainLately * (1 - Math.min(1, dt / 150));
+    if (FORCE === 'rainbow') this.wet = 1;
+    acc.rainbow = this.rainLately * smooth(-1, 2.5, el) * (1 - smooth(30, 42, el)) * smooth(0.45, 0.75, acc.sunFactor) * (1 - smooth(0.6, 0.9, acc.deck)) * (1 - Math.min(1, acc.dust + acc.snow));
+    return gust;
   }
 
   apply(a, dt) {
@@ -239,15 +303,21 @@ export class Climate {
     const sky = R.sky;
     sky.turbidity.value = a.turb; sky.rayleigh.value = a.ray; sky.mieCoefficient.value = a.mie * 0.6; sky.mieDirectionalG.value = Math.min(a.mieG, 0.74);   // a softer, smaller halo round the sun
     sky.cloudCoverage.value = a.clouds; sky.cloudDensity.value = a.density;
+    ENV.cirrus.value = a.cirrus; ENV.deck.value = a.deck; ENV.cloudDetail.value = R.quality && R.quality !== 'low' ? 1 : 0;
+    ENV.storm.value = a.stormLv ?? 0; ENV.flash.value = a.flash ?? 0; ENV.bolt.value = a.bolt ?? 0; ENV.rainbow.value = a.rainbow ?? 0;
     // thick haze (a dust storm, a fog, a mist) veils the sky too, less where it lies low (fall)
-    sky.haze.value = Math.min(0.95, smooth(0.0015, 0.0075, a.fog) / (1 + 0.12 * Math.max(0, a.fall - 1)) + 0.6 * a.dust);
+    sky.haze.value = Math.min(0.95, smooth(0.0015, 0.0075, a.fog) / (1 + 0.12 * Math.max(0, a.fall - 1)) + 0.6 * a.dust) * (1 - 0.75 * a.deck * Math.min(1, a.rain * 2));
+    // (under a raining deck the deck is the sky: its haze thinned so that its dark shows)
     sky.cloudSpeed.value = 0.00002 * (1 + 2 * a.windy);
     sky.sunPosition.value.set(a.sun[0], a.sun[1], a.sun[2]).multiplyScalar(1000);
     // the outdoor fallback for indirect light, and the strength of the baked light under cloud
-    R.gi.setHemisphere(a.sky, a.ground);
+    // (and a lightning flash: a blue-white light from the whole sky for its few frames)
+    const fl = a.flash ?? 0;
+    R.gi.setHemisphere(fl ? a.sky.map((v, k) => v + fl * [0.5, 0.55, 0.7][k]) : a.sky, fl ? a.ground.map((v) => v + fl * 0.12) : a.ground);
     // the baked light (sun and sky at the baked moment) follows the daylight; a little remains at
     // night for the moon and the lamps
-    R.gi.uIntensity.value = (0.72 + 0.28 * a.sunFactor) * (0.2 + 0.8 * a.day);
+    // (a lightning flash lifts it for its few frames)
+    R.gi.uIntensity.value = (0.72 + 0.28 * a.sunFactor) * (0.2 + 0.8 * a.day) * (1 + 4 * fl);
   }
 }
 

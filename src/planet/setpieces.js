@@ -12,6 +12,8 @@
 //   fall   ×    the haze's height falloff: > 1 keeps it low, lying on the ground and the water (mist)
 //   hours  [h0, h1]  the local hours it favours (×3 within, ×0.2 outside; a morning mist burns off)
 //   months [m…]  the months (1–12) it belongs to: ×1.5 in them, ×0.6 outside (never ruled out)
+//   cirrus, deck 0…1  the high streaks and the low deck of its sky (else from clouds, rain, snow: climate.js)
+//   storm  0…1  how likely a thunderstorm breaks in it (else from a heavy shower's rain and the climate's damp)
 //
 // Seasons: the sun keeps its fixed date (the equinox, §4.3), but the open country follows the
 // calendar of the visit (or ?season=winter|spring|summer|autumn): the snow line comes down in a
@@ -23,10 +25,10 @@ const query = () => (typeof location !== 'undefined' ? new URLSearchParams(locat
 /** Set pieces by settlement id: `add` states to its cycle, `tweak` existing ones by id. */
 export const SET_PIECES = {
   // the south-west monsoon (May–October): a heavy downpour most days, about two hours round noon,
-  // the sky clearing after
+  // often with thunder, the sky clearing after
   angkor: {
     add: [
-      { id: 'monsoon', weight: 2.4, clouds: 1, cloudDensity: 0.95, sun: 0.22, fog: 2.8, rain: 1.25, windy: 0.7, fall: 1.4,
+      { id: 'monsoon', weight: 2.4, clouds: 1, cloudDensity: 0.95, sun: 0.22, fog: 2.8, rain: 1.25, windy: 0.7, fall: 1.4, storm: 1,
         fogColor: [0.6, 0.64, 0.62], hours: [10, 16.5], months: [5, 6, 7, 8, 9, 10] },
     ],
   },

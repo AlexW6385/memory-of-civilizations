@@ -60,6 +60,7 @@ Resolve conflicts in this order, but the first three are near-equals: none is sa
 - **One sun, one date.** The sun's direction at any point follows from that point's latitude, the global hour and a fixed date (the equinox). The day lasts half an hour of real time. Night: moon, stars, the Milky Way, eye adaptation.
 - **Atmosphere.** A physically based sky and aerial perspective (Rayleigh + Mie, one model for the whole planet): blue haze over distance, the red limb at dusk, the curve of the horizon and the thin blue rim seen from height.
 - **Climate by settlement** drives ground, vegetation, haze and the weather cycle (clear, fair, cloudy, overcast, showers, dust, snow, monsoon), chosen from the real climate of the place; between regions the biome follows latitude and continent. Weather belongs to a region and moves slowly.
+- **Clouds and storms.** Inside the one sky shader: high cirrus, mid cumulus (self-shadowed toward the sun, silver-lined, gold and rose from below at a low sun, moonlit at night) and a low deck in overcast, rain and snow, set by the weather state. A heavy shower or monsoon of a humid climate may break into a thunderstorm now and then: lightning lights the clouds and the scene for a few frames, sometimes a visible bolt, thunder after the delay of sound, the rain gusting. A rainbow stands opposite a low sun when rain falls or has just passed with the sun out.
 - **Baked light** per settlement at its own chosen hour, scaled by the live daylight.
 
 ### 4.4 A settlement
