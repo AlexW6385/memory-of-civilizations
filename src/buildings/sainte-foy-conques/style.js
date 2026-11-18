@@ -9,6 +9,7 @@ import { STYLES, registerStyle } from '../../core/build.js';
 import { lathe, fromTriangles, box } from '../../core/geom.js';
 import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 import { hexa } from '../../styles/chinese/index.js';
+import { onBuildStart } from '../../core/build-reset.js';
 
 /**
  * The Majesty { at, y, yaw (the way she faces; default −x, toward the choir) }: a pedestal of yellow limestone (moulded
@@ -388,6 +389,7 @@ function garth(el, { bag }) {
 // ── the dressing of the stone: the portal's shafts and mouldings, the west front, the towers, the chevet ──────
 // (docs/settlements/conques.md §1l). Every repeated piece is varied by a millimetre so the renderer merges it.
 let SEQ = 0;
+onBuildStart(() => { SEQ = 0; });
 const jit = () => (SEQ++ % 13) * 0.0009;
 /** A frame in a vertical plane: P(u, v, d) = the point u along the tangent t, v up, d out along the normal n. */
 const frame = (o, t, n) => (u, v, d) => [o[0] + t[0] * u + n[0] * d, v, o[1] + t[1] * u + n[1] * d];

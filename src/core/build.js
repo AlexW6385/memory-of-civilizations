@@ -5,6 +5,7 @@
 // `origin` [x, z] places it in the world; `yaw` (multiple of 90°) turns it.
 
 import { Matrix4, BufferGeometry, Float32BufferAttribute } from './three.js';
+import { resetBuildState } from './build-reset.js';
 import { GeoBag, box, frustum, fromTriangles, quad, lathe, packNormals } from './geom.js';
 
 export const STYLES = {};
@@ -62,6 +63,7 @@ export async function buildPlanAsync(plan, budget = 4, opts = {}) {
 function startBuild(plan, { instancing = false, detail = false, weld = instancing } = {}) {
   const style = STYLES[plan.style];
   if (!style) throw new Error(`style ${plan.style} not registered`);
+  resetBuildState();   // the jitter counters of the styles restart, so the same plan always builds the same geometry
   // the life of the streets is gathered settlement-wide by the viewer (src/engine/life-instances.js),
   // so every placed piece of it is instanced however few there are in one tile
   return { bag: new GeoBag({ instancing, detail, weld, always: instancing && plan.style === 'life' }), col: new Colliders(), lights: [], style, plan };

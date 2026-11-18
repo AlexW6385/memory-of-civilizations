@@ -5,6 +5,7 @@ import { lathe } from '../../core/geom.js';
 import { tube } from '../../objects/kit.js';
 import { faceMap, fbox, ogeeHood, ropeLine, shield } from './belem-detail.js';
 import { orderCross } from './util.js';
+import { onBuildStart } from '../../core/build-reset.js';
 /** A stone armillary sphere: three rings (one the tilted ecliptic) and a core, all of the one carved stone. */
 function armillary(bag, mat, x, y, z, r) {
   const ring = (f) => tube(Array.from({ length: 17 }, (_, k) => { const t = k / 16 * Math.PI * 2; const [a, b, c] = f(Math.cos(t) * r, Math.sin(t) * r); return [x + a, y + b, z + c, r * 0.08 + jit()]; }), 4, { capA: false, capB: false });
@@ -14,6 +15,7 @@ function armillary(bag, mat, x, y, z, r) {
 
 const CARVED = 'limestone_carved', MAT = 'limestone_yellow';
 let s = 99;
+onBuildStart(() => { s = 99; });
 const jit = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296 - 0.5) * 0.003;
 
 /** A niche in the face: dark recess, carved jambs and sill, colonnettes, an ogee hood with a finial, a statue; w x h, base at v. */

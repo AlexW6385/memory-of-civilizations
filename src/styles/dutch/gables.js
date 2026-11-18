@@ -2,9 +2,11 @@
 // curling in on itself, in relief), the obelisk, the urn and the ball that stand on the shoulders and the steps.
 import { frustum, lathe } from '../../core/geom.js';
 import { relief, ribbon, spiral } from '../norse/carving.js';
+import { onBuildStart } from '../../core/build-reset.js';
 
 const ST = 'sandstone_dressed';
 let seq = 0;
+onBuildStart(() => { seq = 0; });
 /** A deterministic millimetre or so of difference (0–8 mm, 1024 values), so that repeated small pieces are not taken for copies of one shape and instanced: they merge into the material's mesh. */
 export const jit = () => { const k = (seq = (seq * 1103515245 + 12345) >>> 0) >>> 8; return ((k & 31) * 0.00025) + (((k >> 5) & 31) * 0.00025); };
 

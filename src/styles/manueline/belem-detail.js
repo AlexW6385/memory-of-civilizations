@@ -5,9 +5,11 @@
 import { box, lathe, frustum, place, fromTriangles } from '../../core/geom.js';
 import { tube } from '../../objects/kit.js';
 import { orderCross, armillary } from './util.js';
+import { onBuildStart } from '../../core/build-reset.js';
 
 const CARVED = 'limestone_carved', MAT = 'limestone';
 let seed = 12345;
+onBuildStart(() => { seed = 12345; });
 const jit = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296 - 0.5) * 0.003;
 const jb = (x0, y0, z0, x1, y1, z1) => box(x0 + jit(), y0 + jit(), z0 + jit(), x1 + jit(), y1 + jit(), z1 + jit());
 

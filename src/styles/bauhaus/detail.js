@@ -2,9 +2,11 @@
 // the vertical BAUHAUS lettering, the Prellerhaus' balconies with their tube railings, the entrance. Everything is merged per material by the bag.
 import { fromTriangles } from '../../core/geom.js';
 import { slab } from './kit.js';
+import { onBuildStart } from '../../core/build-reset.js';
 
 // a millimetre of difference between repeated shapes, so that they are merged into one mesh per material and not instanced (one more draw each)
 let J = 0;
+onBuildStart(() => { J = 0; });
 const jit = () => ((J = (J + 37) % 101) / 101) * 0.002;
 
 /** The workshop wing's curtain wall on x = x0 (west face), z0..z1, floors F = [F0, F1, F2, FR]: T-profile mullions every 1.25 m with a flat outer cap, transoms with a drip flange,

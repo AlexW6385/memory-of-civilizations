@@ -6,9 +6,11 @@
 import { STYLES } from '../../core/build.js';
 import { fromTriangles, orientOutward, box } from '../../core/geom.js';
 import { Parts } from '../../styles/qing/carving.js';
+import { onBuildStart } from '../../core/build-reset.js';
 
 const DROP = '__drop';
-let JIT = 0;                                     // a hair of difference in each piece: pieces of one shape would be drawn as instances of their own (a draw each), these are merged with the hall's meshes
+let JIT = 0;
+onBuildStart(() => { JIT = 0; });                                     // a hair of difference in each piece: pieces of one shape would be drawn as instances of their own (a draw each), these are merged with the hall's meshes
 const S3 = Math.sqrt(3) / 2;
 
 /** A convex prism of the polygon `poly` ([u, v] points) from depth z0 to z1, no back face; its triangles pushed into `out`. */

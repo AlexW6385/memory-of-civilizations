@@ -3,13 +3,12 @@
 // Every piece is merged into the material's own mesh: boxes are made by `jb`, which leans each face by a millimetre so that repeated pieces are
 // not drawn as instances (src/core/geom.js, INSTANCING); materials are those the terraces already use.
 import { frustum, lathe, rod, fromTriangles } from '../../core/geom.js';
-import { rng } from '../han/kit.js';
 
-const R = rng(1215);
-const e = () => 0.001 + R() * 0.002;
+/** A deterministic value in [0, 1) from numbers (the piece's own position): the same piece always gets the same millimetre, whatever was built before. */
+const H = (...v) => { let h = 2166136261 >>> 0; for (const x of v) { h = Math.imul(h ^ Math.round(x * 1e4), 16777619) >>> 0; h = Math.imul(h ^ (h >>> 15), 2246822519) >>> 0; } h ^= h >>> 13; return (h >>> 0) / 4294967296; };
 /** An axis-aligned box whose faces lean by a millimetre (never matched as a repeated instance). */
-export const jb = (x0, y0, z0, x1, y1, z1) => frustum([x0, z0, x1, z1], y0, y1, e(), e(), e(), e());
-const jr = (a, b, r, seg = 6) => rod([a[0] + (R() - 0.5) * 0.004, a[1], a[2]], [b[0], b[1] + (R() - 0.5) * 0.004, b[2]], r * (1 + (R() - 0.5) * 0.02), seg);
+export const jb = (x0, y0, z0, x1, y1, z1) => frustum([x0, z0, x1, z1], y0, y1, ...[1, 2, 3, 4].map((k) => 0.001 + H(x0, y0, z0, x1, y1, z1, k) * 0.002));
+const jr = (a, b, r, seg = 6) => rod([a[0] + (H(...a, ...b, 1) - 0.5) * 0.004, a[1], a[2]], [b[0], b[1] + (H(...a, ...b, 2) - 0.5) * 0.004, b[2]], r * (1 + (H(...a, ...b, 3) - 0.5) * 0.02), seg);
 /** A box about a centre (cx, cz) with half extents hn along the axis (nx, nz) and ht across it. */
 const ob = (bag, mat, cx, cz, nx, nz, hn, ht, y0, y1) => {
   const hx = nx ? hn : ht, hz = nx ? ht : hn;
@@ -103,7 +102,7 @@ export function tileRows(bag, el) {
     const au = Math.abs(u), avEnd = Math.max(0.3, au - (a - b)) + 0.4, avStart = b - 0.18;
     if (avEnd >= avStart - 0.3) continue;
     const n = Math.max(1, Math.ceil((avStart - avEnd) / 1.0)), pts = [];
-    for (let k = 0; k <= n; k++) pts.push(W(u + (R() - 0.5) * 0.004, sv * (avStart + (avEnd - avStart) * k / n)));
+    for (let k = 0; k <= n; k++) pts.push(W(u + (H(u, sv, k, a, b, 4) - 0.5) * 0.004, sv * (avStart + (avEnd - avStart) * k / n)));
     rib(pts, [1, 0]);
   }
   // the hip ends (u = ±a): rows run along u
@@ -111,7 +110,7 @@ export function tileRows(bag, el) {
     const av = Math.abs(v), auEnd = a - (b - av) + 0.4, auStart = a - 0.18;
     if (auEnd >= auStart - 0.3) continue;
     const n = Math.max(1, Math.ceil((auStart - auEnd) / 1.0)), pts = [];
-    for (let k = 0; k <= n; k++) pts.push(W(su * (auStart + (auEnd - auStart) * k / n), v + (R() - 0.5) * 0.004));
+    for (let k = 0; k <= n; k++) pts.push(W(su * (auStart + (auEnd - auStart) * k / n), v + (H(su, v, k, a, b, 5) - 0.5) * 0.004));
     rib(pts, [0, 1]);
   }
   bag.add('tile_dark', fromTriangles(out));
@@ -170,7 +169,7 @@ export function stairBalustrade(bag, rect, T, n, wallH, railH) {
       const y = slope(x);
       bag.add('bluestone', jb(x - 0.16, y + wallH - 0.2, zc - 0.16, x + 0.16, y + railH + 0.1, zc + 0.16));
       bag.add('bluestone', jb(x - 0.23, y + railH + 0.1, zc - 0.23, x + 0.23, y + railH + 0.2, zc + 0.23));
-      const r = 0.1 + (R() - 0.5) * 0.001;
+      const r = 0.1 + (H(x, y, zc, 6) - 0.5) * 0.001;
       bag.add('bronze', lathe([[0.001, 0], [r * 0.9, 0.03], [r * 1.5, 0.15], [r, 0.3], [0.001, 0.34]], 8, null, x, y + railH + 0.2, zc));
     }
     for (let q = 0; q < postX.length - 1; q++) {

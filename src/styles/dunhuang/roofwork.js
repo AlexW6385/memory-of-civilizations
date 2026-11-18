@@ -2,8 +2,10 @@
 // round eave-end discs, the stepped corbels (queti) under the beams, the balustrade of the decks, the owl-tail
 // ridge ends (chiwen) of the Tang roof. Everything goes into the bag's existing materials (merged per material).
 import { box, lathe, fromTriangles, rod } from '../../core/geom.js';
+import { onBuildStart } from '../../core/build-reset.js';
 
 let _n = 0;
+onBuildStart(() => { _n = 0; });
 /** A millimetre of variation so that repeated turned pieces merge instead of becoming instanced prototypes. */
 export const jit = () => 1 + (_n++ % 4000) * 0.00001;
 /** The triangles of a geometry as a flat list (so that many small pieces can be pushed into one piece of geometry). */

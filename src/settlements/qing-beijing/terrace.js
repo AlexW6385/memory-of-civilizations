@@ -7,6 +7,7 @@ import { box, lathe, fromTriangles, frustum, orientOutward } from '../../core/ge
 import { Matrix4, Vector3 } from '../../core/three.js';
 import { Parts, ball, limb, T, merge, post as oldPost } from '../../styles/qing/carving.js';
 import { dragon, cloud } from '../../styles/qing/throne.js';
+import { onBuildStart } from '../../core/build-reset.js';
 
 const M = 'marble_smooth';
 const hash01 = (v) => { const t = Math.sin(v * 12.9898) * 43758.5453; return t - Math.floor(t); };
@@ -71,6 +72,7 @@ function streak(out, x, z, f, y, len, k) {
 // ── the sumeru base's lotus band ──
 /** One lotus petal of the band (the upturned lotus of the base), facing +z, 0.27 wide, 0.42 high, standing 0.09 off the face. */
 let JIT = 0;
+onBuildStart(() => { JIT = 0; });
 function petal(P, h = 0.42, w = 0.27) {
   h += (JIT++ % 2003) * 0.0002;      // a hair taller each: petals merged with the terrace's meshes, not a draw per face
   const pts = [[-w / 2, 0], [w / 2, 0], [w / 2, h * 0.55], [0, h], [-w / 2, h * 0.55]], t = [];
