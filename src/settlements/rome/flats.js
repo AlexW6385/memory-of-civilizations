@@ -13,6 +13,9 @@ import { box, lathe, rod } from '../../core/geom.js';
 import { fromTriangles } from '../../core/geom.js';
 import { hexa } from '../../styles/chinese/index.js';
 import './domus.js';
+import { makeT, slab, wall as kwall, fence, hash, furnishElement, flatFrame } from './upper.js';
+
+export const FLAT_F1 = 4.6;
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const pick = (rand, a) => a[Math.floor(rand() * a.length) % a.length];
@@ -24,6 +27,7 @@ function insulaOpen(el, ctx) {
   const [X0, Z0, X1, Z1] = el.rect, NS = f === 'n' || f === 's';
   const W = NS ? X1 - X0 : Z1 - Z0, D = NS ? Z1 - Z0 : X1 - X0;
   const P = (u, d) => f === 's' ? [X0 + u, Z1 - d] : f === 'n' ? [X1 - u, Z0 + d] : f === 'e' ? [X1 - d, Z1 - u] : [X0 + d, Z0 + u];
+  const up = !!el.upper;                                                  // its first floor is walkable (docs §4.16)
   const mir = rand() < 0.5;                                              // the stair on the west (false) or the east (true) of the court
   const rr = (u0, u1, d0, d1) => { const a = P(u0, d0), b = P(u1, d1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
   /** a box in the street frame: u along the front, d inward; heights relative to y */
@@ -34,6 +38,7 @@ function insulaOpen(el, ctx) {
   const V = (mat, prof, u, d, yy, seg, tilt) => Vp(mat, prof, mir ? W - u : u, d, yy, seg, tilt);
   const Cr = (u, d, r, ya, yb) => { const [x, z] = P(mir ? W - u : u, d); col.circle(x, z, r, y + ya, y + yb); };
   const L = (at, color, intensity, distance) => { const [x, z] = P(mir ? W - at[0] : at[0], at[1]); lights.push({ at: [x, y + at[2], z], color, intensity, distance }); };
+  const Ts = makeT(ctx, y, P), Tc = makeT(ctx, y, (u, d) => P(mir ? W - u : u, d));          // the street frame and the court's canonical frame
   /** a wall along u (alongU) at d = c, or along d at u = c, from a to b, t thick, y0…y1, doorways [d0, d1, h] */
   const wallG = (alongU, c, a, b, t, y0, y1, mat, doors, B_) => {
     const seg = (p, q, ya, yb, m) => { if (q - p < 0.01 || yb - ya < 0.01) return; if (alongU) B_(m, p, q, c - t / 2, c + t / 2, ya, yb, true); else B_(m, c - t / 2, c + t / 2, p, q, ya, yb, true); };
@@ -67,6 +72,48 @@ function insulaOpen(el, ctx) {
 
   // ── floors: the court and the rooms ───────────────────────────────────────────────────────────────────────────
   const cd0 = DS + TI, cd1 = D - BR - TI;                                   // the court's depth band
+  // ── the first floor, when it is opened (docs §4.16): rooms over the shops, over the back cellae and over the kitchen, a gallery along each
+  //    long side of the court, the landing of the stair between them; all in the street frame (u along the front, d inward) ─────────────
+  const nw = win === 'single' ? Math.max(2, Math.round(W / 4.2)) : win === 'pair' ? Math.max(2, Math.round(W / 5.0)) : Math.max(2, Math.round(W / 6.0));
+  const F1 = G0, RH = 3.2, GW = 1.5, ceilY = F1 + RH;
+  const gridHoles = (len) => {                                                               // the windows of the first floor on a face: the grid windows() draws
+    const out = [];
+    for (let i = 0; i < nw; i++) { const uc = (i + 0.5) * len / nw, half = win === 'triple' ? 0.22 : win === 'pair' ? 0.3 : 0.5; for (const dg of win === 'pair' ? [-0.55, 0.55] : win === 'triple' ? [-0.8, 0, 0.8] : [0]) out.push({ cell: i, a: uc + dg - half, b: uc + dg + half, ya: F1 + 0.9, yb: F1 + 2.3 }); }
+    return out;
+  };
+  const udor = (uc, hw = 0.55) => ({ a: uc - hw, b: uc + hw, ya: F1, yb: F1 + 2.15 });
+  const cuts = Array.from({ length: nw + 1 }, (_, i) => (i === 0 ? T : i === nw ? W - T : i * W / nw));
+  const ivs = Array.from({ length: nw }, (_, i) => [cuts[i] + (i ? TI / 2 : 0), cuts[i + 1] - (i < nw - 1 ? TI / 2 : 0)]);
+  const stU = mir ? [W - T - 1.2, W - T] : [T, T + 1.2];                                       // the stair's strip
+  const gF = mir ? [SIDE + TI, W - T - 1.4] : [T + 1.4, W - SIDE - TI];                       // the gallery over the shops' side of the court (clear of the stair)
+  const gB = mir ? [SIDE + TI, W - T] : [T, W - SIDE - TI];                                   // the gallery along the back rooms
+  const kitU = mir ? [T, SIDE] : [W - SIDE, W - T], kitS = mir ? [T, SIDE + TI] : [W - SIDE - TI, W - T];
+  const doorC = ([a, b], [g0, g1]) => Math.min(Math.max((a + b) / 2, Math.max(a, g0) + 0.9), Math.min(b, g1) - 0.9);
+  const dF = ivs.map((iv) => doorC(iv, gF)), dB = ivs.map((iv) => doorC(iv, gB));
+  const balCell = 1, uBal = (balCell + 0.5) * W / nw;                                          // the room of the shops' side with the balcony over the street
+  const run0 = Math.min(5.4, cd1 - cd0 - 1.2), lendU = cd0 + 0.35 + run0, lE = Math.max(lendU, cd1 - GW);       // where the flight ends, where the back gallery begins
+  const faceH = { front: gridHoles(W).filter((h) => h.cell !== balCell), back: gridHoles(W) };
+  faceH.front.push(udor(uBal, 0.6));
+  const span = (lo, hi) => (h) => h.a >= lo && h.b <= hi;
+  const sideH = (kit) => gridHoles(D).filter((h) => span(T + 0.1, DS - 0.1)(h) || span(D - BR + 0.1, D - T - 0.1)(h) || (kit && span(cd0 + 0.1, cd1 - 0.1)(h)));
+  faceH.sideA = sideH(mir); faceH.sideB = sideH(!mir);                                           // (u = 0 and u = W; the kitchen is on the side opposite the stair)
+  const hasHole = (list) => (a, b) => list.some((h) => Math.abs(h.a - a) < 1e-6 && Math.abs(h.b - b) < 1e-6);
+  if (el.layoutOut) {
+    const role = (i, k) => { const h = hash(i, k, el.seed || 1); return k === 0 ? (i === balCell ? 'sleep' : h < 0.45 ? 'work' : h < 0.75 ? 'sleep' : 'living') : (h < 0.5 ? 'sleep' : h < 0.8 ? 'store' : 'sleep'); };
+    const rooms = ivs.map((iv, i) => ({ rect: [iv[0], iv[1], T, DS], door: 'd1', dc: dF[i] - iv[0], y: F1, role: role(i, 0) }));
+    ivs.forEach((iv, i) => rooms.push({ rect: [iv[0], iv[1], cd1 + TI, D - T], door: 'd0', dc: dB[i] - iv[0], y: F1, role: role(i, 1) }));
+    rooms.push({ rect: [kitU[0], kitU[1], cd0, cd1], door: mir ? 'u1' : 'u0', dc: 0.6, y: F1, role: 'living' });
+    const st = units.find((q) => q.stair), us = (st.a + st.b) / 2, su = (stU[0] + stU[1]) / 2, ks = mir ? kitS[1] : kitS[0], kin = (kitU[0] + kitU[1]) / 2, rB = mir ? nw - 1 : 0;
+    const d0s = cd0 + 0.35, onBal = dF[balCell], dm = (lE + cd1) / 2;
+    el.layoutOut.rooms = rooms;
+    el.layoutOut.routes = {                                                                     // street frame [u, d, height] (docs §4.16 walks)
+      back: [[us, -3], [us, 1.2], [us, DS + 0.6], [us, cd0 + 0.7], [su, cd0 + 0.7], [su, d0s + 1.0], [su, lendU - 0.6, F1 - 0.2], [su, lendU + 0.2, F1], [su, dm, F1], [dB[rB], dm, F1], [dB[rB], cd1 + TI + 1.0, F1], [dB[rB], D - T - 1.0, F1]],
+      front: [[us, -3], [us, 1.2], [us, DS + 0.6], [us, cd0 + 0.7], [su, cd0 + 0.7], [su, d0s + 1.0], [su, lendU - 0.6, F1 - 0.2], [su, lendU + 0.2, F1], [su, dm, F1], [ks + (mir ? 0.6 : -0.6), dm, F1], [kin, cd1 - GW / 2, F1], [kin, cd0 + GW / 2, F1], [ks + (mir ? 0.6 : -0.6), cd0 + GW / 2, F1],
+        [onBal, cd0 + GW / 2, F1], [onBal, DS - 0.5, F1], [uBal, T + 1.4, F1], [uBal, T / 2, F1], [uBal, -0.6, F1]],
+    };
+    el.layoutOut.F1 = F1;
+  }
+  if (el.dry) return;
   Bp('cotto_floor', T, W - T, T, D - T, -0.3, 0);
   { const r = rr(T, W - T, T, D - T); col.floor(r, y); }
   const cu0 = SIDE + TI;                                                    // (the court's frame: the stair side is u < cu1)
@@ -74,21 +121,40 @@ function insulaOpen(el, ctx) {
   // ── the outer walls: brick to the first string course, then the facing; the shops' doorways in the front ─────
   const doorsF = units.map((q) => q.stair ? [q.a + 0.4, q.b - 0.4, 2.8] : [(q.a + q.b) / 2 - Math.min(1.45, (q.b - q.a) / 2 - 0.55), (q.a + q.b) / 2 + Math.min(1.45, (q.b - q.a) / 2 - 0.55), 3.1]);
   wallP(true, T / 2, 0, W, T, -0.4, G0, 'brick', doorsF);
-  wallP(true, T / 2, 0, W, T, G0, H, upper);
-  for (const [c, a, b] of [[T / 2, 0, D], [W - T / 2, 0, D]]) { wallP(false, c, a, b, T, -0.4, G0, 'brick'); wallP(false, c, a, b, T, G0, H, upper); }
-  wallP(true, D - T / 2, T, W - T, T, -0.4, G0, 'brick'); wallP(true, D - T / 2, T, W - T, T, G0, H, upper);
+  const upperWall = (alongU, c, a, b, t, holes) => { if (up) kwall(Ts, upper, alongU, c - t / 2, t, a, b, G0, H, holes); else wallP(alongU, c, a, b, t, G0, H, upper); };
+  upperWall(true, T / 2, 0, W, T, faceH.front);
+  wallP(false, T / 2, 0, D, T, -0.4, G0, 'brick'); upperWall(false, T / 2, 0, D, T, faceH.sideA);
+  wallP(false, W - T / 2, 0, D, T, -0.4, G0, 'brick'); upperWall(false, W - T / 2, 0, D, T, faceH.sideB);
+  wallP(true, D - T / 2, T, W - T, T, -0.4, G0, 'brick'); upperWall(true, D - T / 2, T, W - T, T, faceH.back);
   // the shops' back wall with a door to the passage behind each, the partitions between the shops
   const doorsB = units.map((q) => q.stair ? [(q.a + q.b) / 2 - 0.9, (q.a + q.b) / 2 + 0.9, 2.8] : [(q.a + q.b) / 2 - 0.5, (q.a + q.b) / 2 + 0.5, 2.2]);
-  wallP(true, DS + TI / 2, T, W - T, TI, -0.4, H + 1.2, 'stucco_rome', doorsB);
+  if (up) { wallP(true, DS + TI / 2, T, W - T, TI, -0.4, G0, 'stucco_rome', doorsB); kwall(Ts, 'stucco_rome', true, DS, TI, T, W - T, G0, H + 1.2, dF.map((c) => udor(c))); }
+  else wallP(true, DS + TI / 2, T, W - T, TI, -0.4, H + 1.2, 'stucco_rome', doorsB);
   for (let i = 1; i < units.length; i++) wallP(false, units[i].a, T, DS, TI, -0.3, CEIL + 0.1, 'stucco_rome');
   // the court's other sides: the wall of the back rooms (a door for each room), the wall of the side rooms
   const rooms = [], nr = W > 20 ? 3 : 2, rw = (W - 2 * T) / nr;
   for (let i = 0; i < nr; i++) rooms.push([T + i * rw, T + (i + 1) * rw]);
-  wallP(true, D - BR - TI / 2, T, W - T, TI, -0.4, H + 1.2, 'stucco_rome', rooms.map(([a, b]) => [(a + b) / 2 - 0.55, (a + b) / 2 + 0.55, 2.2]));
+  if (up) { wallP(true, D - BR - TI / 2, T, W - T, TI, -0.4, G0, 'stucco_rome', rooms.map(([a, b]) => [(a + b) / 2 - 0.55, (a + b) / 2 + 0.55, 2.2])); kwall(Ts, 'stucco_rome', true, D - BR - TI, TI, T, W - T, G0, H + 1.2, dB.map((c) => udor(c))); }
+  else wallP(true, D - BR - TI / 2, T, W - T, TI, -0.4, H + 1.2, 'stucco_rome', rooms.map(([a, b]) => [(a + b) / 2 - 0.55, (a + b) / 2 + 0.55, 2.2]));
   for (let i = 1; i < nr; i++) wallP(false, rooms[i][0], D - BR, D - T, TI, -0.3, CEIL + 0.1, 'stucco_rome');
   // the kitchen's side (opposite the stair): a wall with a door, partition at the back wall of the shops
-  wallC(false, W - SIDE - TI / 2, cd0, cd1, TI, -0.4, H + 1.2, 'stucco_rome', [[(cd0 + cd1) / 2 - 0.55, (cd0 + cd1) / 2 + 0.55, 2.2]]);
+  if (up) { wallC(false, W - SIDE - TI / 2, cd0, cd1, TI, -0.4, G0, 'stucco_rome', [[(cd0 + cd1) / 2 - 0.55, (cd0 + cd1) / 2 + 0.55, 2.2]]); kwall(Tc, 'stucco_rome', false, W - SIDE - TI, TI, cd0, cd1, G0, H + 1.2, [udor(cd0 + GW / 2, 0.5), udor(cd1 - GW / 2, 0.5)]); }
+  else wallC(false, W - SIDE - TI / 2, cd0, cd1, TI, -0.4, H + 1.2, 'stucco_rome', [[(cd0 + cd1) / 2 - 0.55, (cd0 + cd1) / 2 + 0.55, 2.2]]);
   // the stair wall (the outer wall's inner face on the stair side) is the outer wall itself
+  if (up) {
+    // the floors (colliders), the ceilings over the rooms, the partitions between the rooms, the galleries on corbels with their rails
+    slab(Ts, [T, W - T, T, cd0], F1); slab(Ts, [T, W - T, cd1, D - T], F1); slab(Ts, [kitS[0], kitS[1], cd0, cd1], F1);
+    slab(Ts, [gF[0], gF[1], cd0, cd0 + GW], F1); slab(Ts, [gB[0], gB[1], lE, cd1], F1);
+    const ceil2 = (u0, u1, d0, d1) => { Ts.B('timber', u0, u1, d0, d1, ceilY - 0.15, ceilY); for (let u = u0 + 0.4; u < u1 - 0.2; u += 0.75) Ts.B('wood_dark', u - 0.07, u + 0.07, d0, d1, ceilY - 0.45, ceilY - 0.15); };
+    ceil2(T, W - T, T, cd0); ceil2(T, W - T, cd1, D - T); ceil2(kitS[0], kitS[1], cd0, cd1);
+    for (let i = 1; i < nw; i++) { kwall(Ts, 'stucco_rome', false, cuts[i] - TI / 2, TI, T, DS, F1, ceilY); kwall(Ts, 'stucco_rome', false, cuts[i] - TI / 2, TI, cd1 + TI, D - T, F1, ceilY); }
+    for (let u = gF[0] + 0.7; u < gF[1] - 0.3; u += 1.6) { Ts.B('travertine', u - 0.12, u + 0.12, cd0, cd0 + GW / 2, F1 - 0.62, F1 - 0.47); Ts.B('travertine', u - 0.1, u + 0.1, cd0 + 0.4, cd0 + 0.58, F1 - 0.47, F1 - 0.16); }
+    for (let u = gB[0] + 0.7; u < gB[1] - 0.3; u += 1.6) { Ts.B('travertine', u - 0.12, u + 0.12, cd1 - GW / 2, cd1, F1 - 0.62, F1 - 0.47); Ts.B('travertine', u - 0.1, u + 0.1, cd1 - 0.58, cd1 - 0.4, F1 - 0.47, F1 - 0.16); }
+    const sx = mir ? [gB[0], stU[0] - 0.65] : [stU[1] + 0.65, gB[1]];                                // the back gallery's rail runs clear of the stair's mouth
+    fence(Ts, gF[0], cd0 + GW - 0.05, gF[1], cd0 + GW - 0.05, F1); fence(Ts, mir ? gF[1] - 0.05 : gF[0] + 0.05, cd0, mir ? gF[1] - 0.05 : gF[0] + 0.05, cd0 + GW, F1);
+    fence(Ts, sx[0], lE + 0.05, sx[1], lE + 0.05, F1);
+    Ts.L((gB[0] + gB[1]) / 2, cd1 - 0.5, F1 + 2.3, '#ffcf8a', 0.5, 5); Ts.L((gF[0] + gF[1]) / 2, cd0 + 0.5, F1 + 2.3, '#ffcf8a', 0.5, 5);
+  }
   // ── ceilings: joists and boards at the mezzanine's floor ────────────────────────────────────────────────────
   const ceil = (u0, u1, d0, d1, canonical) => {
     const Bf = canonical ? B : Bp;
@@ -111,7 +177,6 @@ function insulaOpen(el, ctx) {
     if (pilasters && i < units.length - 1) Bp('travertine', q.b - 0.16, q.b + 0.16, -0.1, 0.05, 0, G0 - 0.3, false);
   });
   Bp('brick', 0, W, -0.12, 0.06, G0 - 0.3, G0, false);                                           // the first string course
-  const nw = win === 'single' ? Math.max(2, Math.round(W / 4.2)) : win === 'pair' ? Math.max(2, Math.round(W / 5.0)) : Math.max(2, Math.round(W / 6.0));
   const windows = (F) => {                                                                       // F: [uA, uB, fixedAxisDepth sign, alongU]
     const { len, put } = F;
     for (let k = 1; k < n; k++) {
@@ -120,9 +185,11 @@ function insulaOpen(el, ctx) {
         const uc = (i + 0.5) * len / cnt, groups = win === 'pair' ? [-0.55, 0.55] : win === 'triple' ? [-0.8, 0, 0.8] : [0];
         for (const dg of groups) {
           const half = win === 'triple' ? 0.22 : win === 'pair' ? 0.3 : 0.5;
-          put('opening', uc + dg - half, uc + dg + half, wy, wy + wh, 0);
-          put('travertine', uc + dg - half - 0.1, uc + dg + half + 0.1, wy - 0.1, wy, 1);
+          const real = up && k === 1 && F.real && F.real(uc + dg - half, uc + dg + half), none = up && k === 1 && F.skip && F.skip(i);       // a window with a real reveal, or the door to the balcony
+          if (!real && !none) put('opening', uc + dg - half, uc + dg + half, wy, wy + wh, 0);
+          if (!none) put('travertine', uc + dg - half - 0.1, uc + dg + half + 0.1, wy - 0.1, wy, 1);
           const r = rand();
+          if (none) continue;
           if (r < 0.12) put('shutter_brown', uc + dg - half, uc + dg + half, wy, wy + wh, 2);
           else if (r < 0.4) { put('shutter_brown', uc + dg - half - 0.42, uc + dg - half, wy, wy + wh, 2); put('shutter_brown', uc + dg + half, uc + dg + half + 0.42, wy, wy + wh, 2); }
         }
@@ -130,13 +197,13 @@ function insulaOpen(el, ctx) {
     }
   };
   // the street face and the two side faces and the back face (windows as dark openings with sills and shutters)
-  const faceEl = (alongU, c, sgn) => ({ len: alongU ? W : D, put: (mat, a, b, ya, yb, kind) => {
+  const faceEl = (alongU, c, sgn, holes, skip) => ({ len: alongU ? W : D, real: holes && hasHole(holes), skip, put: (mat, a, b, ya, yb, kind) => {
     const dd = kind === 0 ? [0.0, 0.03] : kind === 1 ? [0.0, 0.12] : [0.02, 0.06];
     const o = sgn > 0 ? [c - dd[1], c - dd[0]] : [c + dd[0], c + dd[1]];
     if (alongU) Bp(mat, a, b, o[0], o[1], ya, yb, false); else Bp(mat, o[0], o[1], a, b, ya, yb, false);
   } });
-  windows(faceEl(true, 0, 1));                                                                   // the street face (d = 0; out is d < 0)
-  windows(faceEl(false, 0, 1)); windows(faceEl(false, W, -1)); windows(faceEl(true, D, -1));
+  windows(faceEl(true, 0, 1, faceH.front, (i) => i === balCell && balcony || (i === balCell && up)));                                                                   // the street face (d = 0; out is d < 0)
+  windows(faceEl(false, 0, 1, faceH.sideA)); windows(faceEl(false, W, -1, faceH.sideB)); windows(faceEl(true, D, -1, faceH.back));
   // the cornice: a course of corbelled brick under the eaves, and (on half the blocks) a travertine crown
   for (const [alongU, c, sgn] of [[true, 0, 1], [true, D, -1], [false, 0, 1], [false, W, -1]]) {
     const len = alongU ? W : D, o1 = sgn > 0 ? [c - 0.2, c + 0.05] : [c - 0.05, c + 0.2], o2 = sgn > 0 ? [c - 0.34, c + 0.05] : [c - 0.05, c + 0.34];
@@ -144,11 +211,16 @@ function insulaOpen(el, ctx) {
     else { Bp('brick', o1[0], o1[1], -0.2, len + 0.2, H - 0.34, H - 0.14); if (travCrown) Bp('travertine', o2[0], o2[1], -0.32, len + 0.32, H - 0.14, H); }
   }
   // a balcony on corbels along the first floor of the street face, or a closed timber gallery (maenianum)
-  if (balcony) {
-    for (let u = 0.9; u < W - 0.6; u += 1.7) Bp('travertine', u - 0.14, u + 0.14, -1.0, 0.02, G0 - 0.5, G0 - 0.1, false);
-    Bp('brick', 0.5, W - 0.5, -1.1, 0.02, G0 - 0.1, G0 + 0.1, false);
-    for (let u = 0.6; u < W - 0.5; u += 1.2) Bp('timber', u - 0.04, u + 0.04, -1.08, -1.0, G0 + 0.1, G0 + 0.95, false);
-    Bp('timber', 0.55, W - 0.55, -1.1, -0.98, G0 + 0.95, G0 + 1.03, false);
+  if (balcony || (up && gallery)) {
+    const bo = up ? -0.1 : 0;                                                                       // (opened: the balcony's floor is the room's floor)
+    for (let u = 0.9; u < W - 0.6; u += 1.7) Bp('travertine', u - 0.14, u + 0.14, -1.0, 0.02, G0 - 0.5 + bo, G0 - 0.1 + bo, false);
+    Bp('brick', 0.5, W - 0.5, -1.1, 0.02, G0 - 0.1 + bo, G0 + 0.1 + bo, false);
+    for (let u = 0.6; u < W - 0.5; u += 1.2) Bp('timber', u - 0.04, u + 0.04, -1.08, -1.0, G0 + 0.1 + bo, G0 + 0.95 + bo, false);
+    Bp('timber', 0.55, W - 0.55, -1.1, -0.98, G0 + 0.95 + bo, G0 + 1.03 + bo, false);
+    if (up) {                                                                                       // one steps out of the door of the room and walks along it
+      col.floor(rr(0.5, W - 0.5, -1.1, 0), y + G0);
+      col.rect(rr(0.5, W - 0.5, -1.12, -1.0), y + G0, y + G0 + 1.0); col.rect(rr(0.42, 0.58, -1.1, 0.0), y + G0, y + G0 + 1.0); col.rect(rr(W - 0.58, W - 0.42, -1.1, 0.0), y + G0, y + G0 + 1.0);
+    }
   } else if (gallery) {
     const u0 = 1.0 + rand() * 2, u1 = Math.min(W - 1, u0 + 4.5 + rand() * 4);
     Bp('wood_ochre', u0, u1, -0.8, 0.02, G0 + SH * 0.1, G0 + SH * 0.1 + 0.18, false);
@@ -271,18 +343,24 @@ function insulaOpen(el, ctx) {
   { const ua = W - SIDE - 4.0, ub = W - SIDE - 1.4; B('cloth_white', ua, ub, cd1 - 1.88, cd1 - 1.84, 1.4, 2.2); B('cloth_indigo', ua + 0.5, ua + 1.0, cd1 - 1.9, cd1 - 1.82, 1.0, 1.9); B('cloth_red', ub - 0.7, ub - 0.2, cd1 - 1.9, cd1 - 1.82, 1.1, 2.0); B('timber', ua, ub, cd1 - 1.88, cd1 - 1.84, 2.3, 2.34); }
   // the timber stair up the wall to the landing at the first floor, with a handrail; a door to the flats
   {
-    const su0 = T, su1 = T + 1.2, d0 = cd0 + 0.35, run = Math.min(5.4, cd1 - cd0 - 1.2), N = 19, tread = run / N, rise = 0.2;
+    const su0 = T, su1 = T + 1.2, d0 = cd0 + 0.35, run = Math.min(5.4, cd1 - cd0 - 1.2), N = up ? 23 : 19, tread = run / N, rise = 0.2;
     for (let k = 0; k < N; k++) B(k % 2 ? 'travertine' : 'travertine', su0, su1, d0 + k * tread, d0 + (k + 1) * tread, 0, (k + 1) * rise);
     const ramp = rr(mir ? W - su1 : su0, mir ? W - su0 : su1, d0, d0 + run), dirW = { s: 'n', n: 's', e: 'w', w: 'e' }[f];
     col.ramp(ramp, y, y + N * rise, dirW);
     const lend = d0 + run, ly = N * rise;
-    B('timber', su0, su1, lend, cd1, ly - 0.2, ly); col.floor(rr(mir ? W - su1 : su0, mir ? W - su0 : su1, lend, cd1), y + ly);
-    for (const [u, d] of [[su1 - 0.08, cd1 - 0.1], [su1 - 0.08, lend + 0.1]]) B('timber', u - 0.07, u + 0.07, d - 0.07, d + 0.07, 0, ly - 0.2);
-    B('wood_dark', su1 - 0.1, su1, lend, cd1, ly - 0.2, ly - 0.05);
+    const lq = up ? lE : cd1;                                                                                // (opened: the landing ends where the back gallery begins)
+    if (lq - lend > 0.05) {
+      B('timber', su0, su1, lend, lq, ly - 0.2, ly); col.floor(rr(mir ? W - su1 : su0, mir ? W - su0 : su1, lend, lq), y + ly);
+      for (const [u, d] of [[su1 - 0.08, lq - 0.1], [su1 - 0.08, lend + 0.1]]) B('timber', u - 0.07, u + 0.07, d - 0.07, d + 0.07, 0, ly - 0.2);
+      B('wood_dark', su1 - 0.1, su1, lend, lq, ly - 0.2, ly - 0.05);
+    }
     // the rail along the open side of the flight and the landing
     for (let k = 0; k <= N; k += 3) B('timber', su1 - 0.06, su1, d0 + k * tread - 0.03, d0 + k * tread + 0.03, Math.min(k, N) * rise, Math.min(k, N) * rise + 0.95);
     { const pts = (u, dd, yy) => { const [x, z] = P(mir ? W - u : u, dd); return [x, y + yy, z]; }, rail = []; hexa(rail, [pts(su1 - 0.07, d0, 0.9), pts(su1, d0, 0.9), pts(su1, d0 + run, N * rise + 0.9), pts(su1 - 0.07, d0 + run, N * rise + 0.9)], [pts(su1 - 0.07, d0, 0.98), pts(su1, d0, 0.98), pts(su1, d0 + run, N * rise + 0.98), pts(su1 - 0.07, d0 + run, N * rise + 0.98)]); bag.add('timber', fromTriangles(rail)); }
-    B('timber', su1 - 0.07, su1, lend, cd1, ly + 0.9, ly + 0.98); B('timber', su1 - 0.07, su1, cd1 - 0.07, cd1, ly, ly + 0.9);
+    if (lq - lend > 0.05) {
+      B('timber', su1 - 0.07, su1, lend, lq, ly + 0.9, ly + 0.98); B('timber', su1 - 0.07, su1, lq - 0.07, lq, ly, ly + 0.9);
+      if (up) col.rect(rr(mir ? W - su1 : su1 - 0.08, mir ? W - su1 + 0.08 : su1, lend, lq), y + ly, y + ly + 1.0);
+    }
     // the door to the flats in the outer wall (a dark opening with a lintel and a threshold) and a lamp beside it
     B('opening', T - 0.02, T + 0.02, lend + 0.2, lend + 1.0, ly, ly + 2.1); B('travertine', T - 0.03, T + 0.06, lend + 0.1, lend + 1.1, ly + 2.1, ly + 2.3); B('lacquer_black', T, T + 0.02, lend + 0.2, lend + 1.0, ly, ly + 0.03);
     // a worn stain under the stair and a cat's dish (the household's)
@@ -334,4 +412,18 @@ function insulaOpen(el, ctx) {
   void midU; void BR; void SIDE;
 }
 
+/** The furnishing of the opened first floor (the element `up_cells_flat` of the plan of its own, shown near): the rooms of the layout the builder gives. */
+function flatFurn(el, ctx) {
+  const out = {};
+  insulaOpen({ rect: el.rect, front: el.front, seed: el.seed, y: el.y, upper: true, dry: true, layoutOut: out }, ctx);
+  furnishElement({ rect: el.rect, front: el.front, flat: true, y: el.y ?? 0, rooms: out.rooms }, ctx);
+}
+/** The walks into the first floor of an opened insula, in world coordinates (for the walk-check routes of plan.js). */
+export function flatRoutes(el) {
+  const out = {};
+  insulaOpen({ rect: el.rect, front: el.front, seed: el.seed, y: el.y, upper: true, dry: true, layoutOut: out }, { bag: { add() {} }, col: {}, lights: [] });
+  const P = flatFrame(el);
+  return Object.fromEntries(Object.entries(out.routes).map(([k, r]) => [k, r.map(([u, d, h]) => { const [x, z] = P(u, d); return h === undefined ? [+x.toFixed(2), +z.toFixed(2)] : [+x.toFixed(2), +z.toFixed(2), +((el.y ?? 0) + h).toFixed(2)]; })]));
+}
 STYLES['rome-site'].elements.insula_open = insulaOpen;
+STYLES['rome-site'].elements.up_cells_flat = flatFurn;

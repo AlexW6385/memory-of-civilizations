@@ -6,6 +6,7 @@ import { BATHS, SAEPTA, STADIUM, SAEPTA_GATES } from './layout.js';
 import '../../styles/roman/saepta.js';
 import '../../styles/roman/baths.js';
 import pantheonPlan from '../../buildings/pantheon/plan.js';
+import { UPPER_WALKS } from './walks.js';
 
 const E = [];
 E.push({ t: 'baths_agrippa', rect: BATHS });
@@ -32,5 +33,5 @@ export const campus = {
     ];
   })(),
 };
-export const pantheon = { ...pantheonPlan, origin: [0, 0], base: 0, district: undefined, view: [-30, -70, 30, -40] };
+export const pantheon = { ...pantheonPlan, origin: [0, 0], base: 0, district: undefined, view: [-30, -70, 30, -40], walks: [...(pantheonPlan.walks || []), ...UPPER_WALKS] };
 export default pantheon;
