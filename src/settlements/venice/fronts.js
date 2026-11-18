@@ -8,7 +8,7 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1
 const A = ARRIVALS['venice'];
 
 /** How deep the ground free of other houses and water is before the middle of a lot's front (0.5, 1.4 or 3). */
-function freeBefore(l) {
+export function freeBefore(l) {
   const [x0, z0, x1, z1] = l.rect, s = l.front === 's' ? 1 : -1, zf = s > 0 ? z1 : z0;
   let best = 3;
   for (const t of [0.35, 0.5, 0.65]) for (const d of [0.5, 1.4, 2.4]) {
@@ -18,10 +18,11 @@ function freeBefore(l) {
   return best;
 }
 /** The kinds of front of one lot. */
-export function kindsOf(l, open) {
+export function kindsOf(l, open, up = false) {
   const W = l.rect[2] - l.rect[0], f = freeBefore(l), r = rng(l.seed + 4141), h = Math.floor(r() * 12), out = [];
   if (f < 0.5) return out;
   const c = [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2], awning = !open && W >= 6.5 && Math.hypot(c[0] - A[0], c[1] - A[2]) <= 170 && rng(l.seed + 909)() <= 0.34;
+  if (up) { if (!awning && h % 2 === 0) out.push('portal'); if (h % 3 === 0) out.push('quoins'); return out; }
   if (W >= 9.2) { out.push('polifora'); if (!awning) out.push('portal'); if (h % 3 === 0) out.push('quoins'); }
   else switch (h % 4) {
     case 0: if (!awning) out.push('portal'); break;
@@ -32,10 +33,10 @@ export function kindsOf(l, open) {
   return out;
 }
 /** Plans of the fronts, one per 100 m tile, built within 150 m of the tile's centre. */
-export function frontPlans(open) {
+export function frontPlans(open, up = new Set()) {
   const tiles = new Map();
   for (const l of lots()) {
-    const kinds = kindsOf(l, open.has(l));
+    const kinds = kindsOf(l, open.has(l), up.has(l));
     if (!kinds.length) continue;
     const c = [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2], k = `${Math.floor(c[0] / 100)},${Math.floor(c[1] / 100)}`;
     if (!tiles.has(k)) tiles.set(k, []);

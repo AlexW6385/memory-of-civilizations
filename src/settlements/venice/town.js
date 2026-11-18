@@ -7,6 +7,7 @@ import { canalPlans } from './rialto.js';
 import { dressPlans } from './dress.js';
 import { roomPlans } from './rooms.js';
 import { frontPlans } from './fronts.js';
+import { upHouses } from './upper.js';
 import { inLot, wet } from './layout.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-120, -5], facing: 'e' } });
 export async function town() {
@@ -20,10 +21,14 @@ export async function town() {
     if ([0.35, 0.5, 0.65].some((t) => { const x = l.rect[0] + (l.rect[2] - l.rect[0]) * t; return [1.0, 2.0].some((d) => inLot(x, zf + s * d, 0.1) || wet(x, zf + s * d) < 1.2); })) continue;
     open.set(l, nf++ % 5 === 2 ? 'inn' : 'home');
   }
+  for (const u of upHouses()) open.set(u.lot, u.use);                       // the climbable houses are entered too (upper.js; set after the far rule, so its inns stay where they were)
   plans.push(...dressPlans());
-  plans.push(...frontPlans(open));
-  plans.push(...roomPlans(open));
-  plans.push(...lodTiles('venice-houses', 'vernacular', all.map((l) => ({ t: 'house_med', variant: 'venetian', ...l, ...(open.has(l) ? { open: true, use: open.get(l) } : {}) })), { R: RADIUS }));
+  const up = new Map(upHouses().map((u) => [u.lot, u]));
+  plans.push(...frontPlans(open, new Set(up.keys())));
+  plans.push(...roomPlans(open, up));
+  plans.push(...lodTiles('venice-houses', 'vernacular', all.filter((l) => !up.has(l)).map((l) => ({ t: 'house_med', variant: 'venetian', ...l, ...(open.has(l) ? { open: true, use: open.get(l) } : {}) })), { R: RADIUS }));
+  // the houses whose upper floors can be climbed: the same houses, built by ven_house (the far copy is house_med's simple one)
+  plans.push(...lodTiles('venice-houses-up', 'venetian', [...up.values()].map(({ lot, use, kind, balcony }) => ({ t: 'ven_house', variant: 'venetian', ...lot, open: true, use, up: { kind, balcony } })), { R: RADIUS }));
   // the piazza and the piazzetta paved in herringbone brick, laid from 1264, in fields between bands of white
   // Istrian stone (relaid in trachyte only from 1723) [stated: Wikipedia "Piazza San Marco"]; the bands every 10 m [inferred]
   const pave = [];

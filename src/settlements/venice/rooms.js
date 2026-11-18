@@ -9,7 +9,7 @@ const ARRIVAL = [ARRIVALS['venice'][0], ARRIVALS['venice'][2]];
 const MEN = ['cloth_brown', 'cloth_black', 'cloth_indigo', 'cloth_ochre', 'cloth_red'], WOMEN = ['cloth_red', 'cloth_indigo', 'cloth_green', 'cloth_ochre', 'cloth_brown'];
 
 /** The items (lamps and people) of one entered house { rect, front, seed } of use 'inn' | 'home', in world coordinates. */
-export function roomItems(lot, use) {
+export function roomItems(lot, use, SP = null) {
   const [x0, z0, x1, z1] = lot.rect, f = lot.front || 's', r = rng(lot.seed + 505), T = 0.4, fy = (lot.y ?? GROUND) + 0.6;
   const L = x1 - x0, D = z1 - z0;
   const P = (u, v) => (f === 's' ? [x1 - u, z1 - v] : [x0 + u, z0 + v]);
@@ -20,8 +20,10 @@ export function roomItems(lot, use) {
   if (use === 'inn') {
     const nt = Math.max(1, Math.floor((L - 2.6) / 2.2)), u0 = 1.6;
     if (u0 <= L - 1.8) out.push({ k: 'lamp', at: P(u0, D * 0.62 - 0.2), y: fy + 0.78 });
-    out.push({ k: 'lamp', at: P(L - T - 0.6, D / 2 + 0.28), y: fy + 1.1, intensity: 2.0 });
-    man(L - T - 1.25, D * 0.5, [1, 0], { over: 'apron', hat: 'none', cloth: 'cloth_white' });                       // the host, across his counter
+    // (in a house with its stair up, the counter is the stretch beyond the stair's foot, or none)
+    const c0 = SP ? SP.vB + 0.35 : 0, c1 = D - T - 1.2, cm = SP ? (c0 + c1) / 2 : D / 2;
+    if (!SP || c1 - c0 >= 1.0) { out.push({ k: 'lamp', at: P(L - T - 0.6, cm + 0.28), y: fy + 1.1, intensity: 2.0 }); man(L - T - 1.25, cm, [1, 0], { over: 'apron', hat: 'none', cloth: 'cloth_white' }); }   // the host, across his counter
+    else man(Math.min(L / 2, L - 2.5) + 1.3, D - T - 1.0, [0, -1], { over: 'apron', hat: 'none', cloth: 'cloth_white' });                                                                                     // the host by the hearth
     if (nt >= 1 && D * 0.38 - 0.55 > 0.8) {
       man(u0 - 0.2, D * 0.38 - 0.55, [0, 1], { pose: 'sit', over: 'cape', cloth: 'cloth_black' });                    // two patrons on the bench at the first table
       man(u0 + 0.35, D * 0.38 - 0.55, [0, 1], { pose: 'sit', over: 'none' });
@@ -38,7 +40,7 @@ export function roomItems(lot, use) {
 }
 
 /** Plans of the rooms' lamps and people, one per 100 m tile, built only near: `open` is the map lot → use. */
-export function roomPlans(open) {
+export function roomPlans(open, up = new Map()) {
   const tiles = new Map(), fronts = new Map(), A = ARRIVAL;
   // the shop fronts: a third of the houses within 170 m of the arrival that are not entered, on a front that has the calle before it (not a neighbour's wall or the water), get the bottega's striped awning
   for (const lot of lots()) {
@@ -53,7 +55,7 @@ export function roomPlans(open) {
   for (const [lot, use] of open) {
     const c = [(lot.rect[0] + lot.rect[2]) / 2, (lot.rect[1] + lot.rect[3]) / 2], k = `${Math.floor(c[0] / 100)},${Math.floor(c[1] / 100)}`;
     if (!tiles.has(k)) tiles.set(k, []);
-    tiles.get(k).push(...roomItems(lot, use));
+    tiles.get(k).push(...roomItems(lot, use, up.get(lot)?.SP ?? null));
   }
   const keys = new Set([...tiles.keys(), ...fronts.keys()]);
   return [...keys].map((k) => {

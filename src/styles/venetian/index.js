@@ -23,6 +23,7 @@ import { dome } from './domes.js';
 import { flank } from './flank.js';
 import { venRoom, venFront } from './rooms.js';
 import { sculpt } from './works.js';
+import { venHouse } from './house-up.js';
 
 const M = 'marble', B = 'brick', L = 'lead', I = 'limestone';
 /** basilica: { c, s (arm length), w (arm width), h, y } — the Greek cross with its five domes, the west front. */
@@ -54,6 +55,6 @@ function basilica(el, { bag, col, lights }) {
 }
 registerStyle('venetian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, basilica, bell_tower: bellTower, doges_palace: dogesPalace, procuratie: procuratieOld, clock_tower: clockTower, column_statue: columnStatue, gondola, palo, pennone, rive, rialto, palazzo, ponte, pozzo, squero, ven_room: venRoom, ven_front: venFront, ven_facade: venFacade, sculpt },
+  elements: { ...STYLES.qing.elements, basilica, bell_tower: bellTower, doges_palace: dogesPalace, procuratie: procuratieOld, clock_tower: clockTower, column_statue: columnStatue, gondola, palo, pennone, rive, rialto, palazzo, ponte, pozzo, squero, ven_room: venRoom, ven_front: venFront, ven_facade: venFacade, sculpt, ven_house: venHouse },
   objects: {},
 });
