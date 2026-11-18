@@ -42,12 +42,13 @@ export class Controls {
     this.feet.y = this.collide.groundAt(x, z, y + STEP);
     if (!Number.isFinite(this.feet.y)) this.feet.y = y;
     this.yaw = yaw; this.pitch = pitch; this.vy = 0; this.glide = false; this.setCruise(false); this.vel = { x: 0, z: 0 };
+    this.eyeY = this.feet.y; this.eyeV = 0;
     this.apply();
   }
 
   apply() {
     const c = this.camera;
-    c.position.set(this.feet.x, this.feet.y + EYE, this.feet.z);
+    c.position.set(this.feet.x, (this.eyeY ?? this.feet.y) + EYE, this.feet.z);
     c.rotation.set(this.pitch, this.yaw, 0, 'YXZ');
   }
 
@@ -239,6 +240,18 @@ export class Controls {
       if (want > 0.1 && v < want * 0.5) { const r = v / want; this.vel.x *= r; this.vel.z *= r; }
     }
     this.speedNow += (v - this.speedNow) * Math.min(1, dt * 6);
+    // the eye follows the feet over steps as a critically damped spring, so that a stair is a glide and not a
+    // jolt at every tread; in the air, after a fall or a jump of more than a step it is on the feet at once
+    {
+      const y = this.feet.y, d = y - (this.eyeY ?? y);
+      if (this.glide || this.vy !== 0 || this.free || Math.abs(d) > 0.9 || !(dt > 0)) { this.eyeY = y; this.eyeV = 0; }
+      else {
+        const w = 13, h = Math.min(dt, 0.05);
+        this.eyeV = (this.eyeV || 0) + (w * w * d - 2 * w * (this.eyeV || 0)) * h;
+        this.eyeY += this.eyeV * h;
+        if (Math.abs(y - this.eyeY) < 1e-3 && Math.abs(this.eyeV) < 1e-2) { this.eyeY = y; this.eyeV = 0; }
+      }
+    }
     this.apply();
   }
 }

@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.35 — upstairs, smoother stairs, a clearer loading bar (2026-11-18)
+
+Climbing and descending stairs is a glide now: the eye follows the feet smoothly instead of jolting at every tread. The loading bar shows the buildings as a share done (it showed a count of internal build units, such as 65/120, which read like a number of buildings) and its last step is named in Chinese too. More houses can be climbed: the Hakka tulou's second ring (two court stairs, forty rooms), Mohenjo-daro (thirteen houses to the roof terrace and upper rooms), Lhasa (the ladders of every house now work; twelve houses with weaving room, roof and loft), Himeji (twelve machiya by chest-stair, balconies over the street), Athens (ten houses by the court stair to the gallery), Constantinople (seventeen houses laid out upstairs, seven with a roof terrace), Agra (ten houses up to the third storey, the balcony and the roof).
+
 ## v12.34 — more upstairs (2026-11-18)
 
 Ten more settlements have houses you can climb. Shibam: seven tower houses up to the roof. Isfahan: ten courtyard houses with a roof room and terrace, and six arcade shops with a room and loggia over the square. Kyoto: nine machiya with a ladder-stair to the low upper room. Barcelona: ten Eixample houses, marble stair round a well to the principal flat and the roof terrace. Bhaktapur: eleven Newar houses by ladder to the kitchen under the roof. Rome: nine Borgo houses and palazzetti with balconies. Istanbul: twelve timber houses with the projecting bay to stand in. Vienna: sixteen houses with flats, a billiard room and the Pawlatschen gallery. New York: eight shop lots and a walk-up tenement with fire escapes and a roof. Fez: ten courtyard houses, tiled stair to the gallery, a cedar balcony and the roof terrace. Cairo, Granada and Babylon arrive lighter (459, 455, 454 draws down to 424, 397, 420); no arrival is over the budget now.

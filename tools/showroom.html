@@ -92,6 +92,8 @@ function sky(S, frame, up = [0, 1, 0], zones = null) {
   if (!climate) return null;
   climate.lonHours = latLon(S.u)[1] / 15;
   climate.hour = hour; climate.setTime('held');
+  // (the scene's frame on the planet, as world.js setAnchor sets it: the stars' sphere turns by it)
+  ENV.planetM.value.set(frame.x[0], frame.y[0], frame.z[0], frame.x[1], frame.y[1], frame.z[1], frame.x[2], frame.y[2], frame.z[2]);
   return climate.update({ sun: dirToLocal(frame, sunPlanet(climate.utc)), moon: dirToLocal(frame, moonPlanet(climate.utc)), up, zones: zones || [{ zone: { id: S.id, climate: climateOf(S) }, w: 1 }] }, 0.016);
 }
 function setFrame(frame) {

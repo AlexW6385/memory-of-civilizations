@@ -7,4 +7,6 @@ export const SPECIES = [
   'red_pine', 'sugi', 'maple', 'teak', 'neem', 'banyan', 'bamboo', 'fig', 'olive', 'aleppo_pine', 'maquis', 'oleander',
   'grass', 'grass_dry', 'boulder', 'spruce', 'birch', 'wheat', 'rice', 'maize', 'camphor', 'chinese_fir', 'masson_pine', 'mulberry', 'tea',
   'pagoda_tree', 'persimmon',
+  // ground cover of the open country (src/planet/trees.js coverMix)
+  'tall_grass', 'steppe_grass', 'fern', 'flowers', 'heather', 'rush',
 ];
