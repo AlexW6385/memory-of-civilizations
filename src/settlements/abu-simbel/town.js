@@ -4,6 +4,7 @@
 
 import { RADIUS, FX, FXS, ZS, WATER, BANK_X, QUAY, QUAY_Y, TERRACE, GATE, SGATE, ALTAR, MARKET, FIELDS, GRAN_YARD, CHAPEL, WAY, cliffFace, lots, lanes, granaries as granaryList } from './layout.js';
 import { ground } from './ground.js';
+import { sculptPlans } from './sculpt.js';
 import { cliffTop } from '../../styles/ramesside/dims.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -230,6 +231,7 @@ export async function town() {
   plans.push(base('abu-simbel-chapel', [{ t: 'camp_chapel', rect: CHAPEL, seed: 71 }]));
   plans.push(base('abu-simbel-granaries', [{ t: 'granaries', list: granaryList(), y: 0 }]));
   if (yardHere) plans.push(base('abu-simbel-yard', [{ t: 'masons_yard', rect: YARD, y: 0, seed: 53 }]));
+  plans.push(...sculptPlans());
   plans.push({ ...base('abu-simbel-people', people()), style: 'life' });
   plans.push({ ...base('abu-simbel-boats', [...boats(), ...crews()], 0), style: 'life' });
   void GRAN_YARD; void FXS; void ALTAR;

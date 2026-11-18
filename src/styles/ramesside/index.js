@@ -10,11 +10,12 @@ import { cliff, rampWay, bollards, granaries, sunAltar, stoneGate } from './shor
 import { ramHouse, ramShop } from './shops.js';
 import { campChapel } from './chapel.js';
 import { dmHouse } from './dmhouse.js';
+import { sculptFig, captives, kadeshWall } from './figs.js';
 import { terraceDress, talus, cliffWear, wayDress, laneDress, quayDress, masonsYard, shaduf, templeFurnish } from './dress.js';
 
 registerStyle('ramesside', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { great_temple: greatTemple, small_temple: smallTemple, cliff, ramp_way: rampWay, bollards, granaries, sun_altar: sunAltar, stone_gate: stoneGate,
+  elements: { ab_fig: sculptFig, ab_captives: captives, ab_kadesh: kadeshWall, great_temple: greatTemple, small_temple: smallTemple, cliff, ramp_way: rampWay, bollards, granaries, sun_altar: sunAltar, stone_gate: stoneGate,
     // the houses and bakeries of the workmen's quarter are the Old Kingdom's mudbrick ones (a courtyard house, furnished, and the bakery)
     mud_house: (el, c) => STYLES.oldkingdom.elements.mud_house(el, c), bakery: (el, c) => STYLES.oldkingdom.elements.bakery(el, c),
     // the lanes' houses turned to either lane, the shops of the market street, and the dressing of terrace, lanes, quay, masons' yard, bank and halls

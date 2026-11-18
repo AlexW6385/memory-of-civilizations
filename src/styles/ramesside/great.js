@@ -7,7 +7,9 @@ import { box, frustum, place, rod, lathe } from '../../core/geom.js';
 import { cavettoProfile } from '../egyptian/trim.js';
 import { figure, wallReliefs, astroCeiling } from '../egyptian/objects.js';
 import { colossus, royalStatue, baboon, uraeus, osiride, seatedGod, standing } from './statues.js';
-import { kadesh, campaigns } from './reliefs.js';
+import { campaigns } from './reliefs.js';
+import { standing as kitAt } from './fig.js';
+import { osiride as osirideK, seatedGod as godK, raNiche, royal as royalK } from './sculpted.js';
 import { rockWithRooms, extrudeProfile, turnedBag, rng, carve } from './util.js';
 import { carveGreat } from './carve.js';
 import { greatRooms, greatChambers, HALL1, HALL2, GREAT_FACADE, FLOOR, cliffTop } from './dims.js';
@@ -92,7 +94,7 @@ export function greatTemple(el, { bag, col, lights }) {
   figure(bag, 'sandstone_relief', 'offer', face, -1.95, 9.55, 2.3, 1, 0.08);
   figure(bag, 'sandstone_relief', 'offer', face, 1.95, 9.55, 2.3, -1, 0.08);
   // the god in his niche
-  put(bag, standing('ra', 2.2), nb + 0.4, nH, 0, EAST, 1);
+  { const F = kitAt(nb + 0.4, nH, 0, EAST); raNiche(F); F.flush(bag); }
   // the colossi, and at their feet the royal family (queen mother and Nefertari at the outer ones, princes and princesses at the inner)
   const X0 = FX + 1.0, r = rng(1255), kinds = ['queen', 'prince', 'princess'];
   G.colossi.forEach((zc, i) => {
@@ -101,7 +103,7 @@ export function greatTemple(el, { bag, col, lights }) {
     const outer = Math.abs(zc) > 10;
     [[-3.12, -3.2], [3.12, -3.2], [0, -5.0]].forEach(([lx, lz], k) => {
       const kind = outer ? (k < 2 ? 'queen' : 'princess') : (k < 2 ? kinds[1 + ((i + k) % 2)] : 'princess');
-      put(bag, royalStatue(kind), X0 - lz, 0.5, zc + lx, EAST, 1 + 0.0009 * (i * 3 + k));
+      { const F = kitAt(X0 - lz, 0.5, zc + lx, EAST, kind === 'queen' ? 1 : kind === 'princess' ? 0.86 : 0.8); royalK(F, kind); F.flush(bag); }
     });
   });
   void r;
@@ -138,7 +140,7 @@ export function greatTemple(el, { bag, col, lights }) {
     for (const s of [-1, 1]) {
       const z0 = s * H1.z0, z1 = s * H1.z1, a = Math.min(z0, z1), b = Math.max(z0, z1);
       bag.add('sandstone_dressed', box(xc - H1.w / 2, F.hall1, a, xc + H1.w / 2, H1.H, b));
-      put(bag, osiride(s > 0 ? 'white' : 'double'), xc, F.hall1, s * H1.statueZ, s > 0 ? 0 : Math.PI, 1);
+      { const K = kitAt(xc, F.hall1, s * H1.statueZ, s > 0 ? 0 : Math.PI); osirideK(K, s > 0 ? 'white' : 'double'); K.flush(bag); }
       col.rect([xc - 1.0, Math.min(a, s * 3.48), xc + 1.0, Math.max(b, s * 3.48)], F.hall1, H1.H);
     }
   });
@@ -147,7 +149,6 @@ export function greatTemple(el, { bag, col, lights }) {
     astroCeiling({ y: 9.9, bays: [[-zN, x0, zN, x1, 'vultures']] }, { bag: turnedBag(bag) }); }
   // the walls: the Battle of Kadesh (north), the campaigns (south), the king before the gods (the ends)
   { const y = F.hall1;
-    kadesh(bag, (u, v, d) => [X(8.3) - u, y + v, -8.35 + 0.012 + d], 0, 17.4, 3.35, 8.7, 1255);
     campaigns(bag, (u, v, d) => [X(8.3) - u, y + v, 8.35 - 0.012 - d], 0.3, 17.1, 3.4, 2, 2.2, 7);
     wallReliefs({ a: [X(8), -8.35], b: [X(8), 8.35], n: [-1, 0], y, v0: 1.0, top: 8.8, reg: 2.6, inward: 1, gaps: [[8.35 - 1.8, 8.35 + 1.8]], gods: 'paint' }, { bag });
     wallReliefs({ a: [X(26), -8.35], b: [X(26), 8.35], n: [1, 0], y, v0: 1.0, top: 8.8, reg: 2.6, inward: 1, gaps: [[8.35 - 1.8, 8.35 + 1.8]], gods: 'paint' }, { bag });
@@ -174,7 +175,7 @@ export function greatTemple(el, { bag, col, lights }) {
   lamp(bag, col, lights, X(47.2), 2.6, F.vest, 1.4, 3);
   // the sanctuary: four seated gods side by side on a bench against the rock — Ra-Horakhty, the deified king, Amun-Ra, Ptah — an offering stone before them
   { const xb = X(61.7), y = F.sanct;
-    [['ra', 1.5], ['ramesses', 0.5], ['amun', -0.5], ['ptah', -1.5]].forEach(([k, z]) => put(bag, seatedGod(k), xb + 0.3, y, z, EAST, 1));
+    [['ra', 1.5], ['ramesses', 0.5], ['amun', -0.5], ['ptah', -1.5]].forEach(([k, z]) => { const K = kitAt(xb + 0.3, y, z, EAST); godK(K, k); K.flush(bag); });
     col.rect([xb, -2.0, xb + 1.3, 2.0], y, y + 2.4);
     bag.add('sandstone_dressed', box(X(58.6) - 0.5, y, -0.5, X(58.6) + 0.5, y + 0.9, 0.5)); col.rect([X(58.6) - 0.5, -0.5, X(58.6) + 0.5, 0.5], y, y + 0.9);   // the offering stone
     bag.add('gold', box(X(58.6) - 0.15, y + 0.9, -0.15, X(58.6) + 0.15, y + 0.96, 0.15));
