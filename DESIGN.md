@@ -57,7 +57,7 @@ Resolve conflicts in this order, but the first three are near-equals: none is sa
 
 ### 4.3 Sun, sky, climate
 
-- **One sun, one date.** The sun's direction at any point follows from that point's latitude, the global hour and a fixed date (the equinox). The day lasts half an hour of real time. Night: moon, stars, the Milky Way, eye adaptation.
+- **One sun, the visit's date.** The sun's direction at any point follows from that point's latitude, the global hour and the date of the visit (its declination on an axis tilted 16°, two thirds of the Earth's), so day length and noon height change with the season. The day lasts half an hour of real time. Night: the moon on its own orbit with its phases (from the date; it lights the night by phase and height, a moonless night dark but walkable), stars and the Milky Way fixed to the turning celestial sphere, twilight, eye adaptation — all inside the sky's one shader.
 - **Atmosphere.** A physically based sky and aerial perspective (Rayleigh + Mie, one model for the whole planet): blue haze over distance, the red limb at dusk, the curve of the horizon and the thin blue rim seen from height.
 - **Climate by settlement** drives ground, vegetation, haze and the weather cycle (clear, fair, cloudy, overcast, showers, dust, snow, monsoon), chosen from the real climate of the place; between regions the biome follows latitude and continent. Weather belongs to a region and moves slowly.
 - **Baked light** per settlement at its own chosen hour, scaled by the live daylight.
