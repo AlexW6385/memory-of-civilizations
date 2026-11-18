@@ -1,7 +1,8 @@
 // The Great Mosque of Djenné and its square (docs/settlements/djenne.md §4): the mosque on its
 // platform, its qibla wall with the three towers on the east facing the market.
 
-import { MOSQUE } from './layout.js';
+import { MOSQUE, upperHomes } from './layout.js';
+import { upperWalk, upperPlan } from '../../styles/sahel/homeplan.js';
 
 const E = [];
 E.push({ t: 'lane', rect: [-58, -58, 58, 58], y: 0.03, mat: 'banco_smooth' });
@@ -12,6 +13,13 @@ const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('hall', [2, -29.5, 33.5, 29.5], 3, 'hall'), room('platform', [-37.5, -37.5, 37.5, 37.5], 3, 'open'), room('roof', [4, -27, 31, 27], 13.5, 'open')];
 const walks = [[[70, 0], [48, 0], [38, -48], [0, -48], [0, -39]]];
 walks[0].y0 = 0;
+// the upper floors opened (docs §19): from the street through the door, vestibule and court up the court stair to the room above and on up the roof stair to the
+// terrace; and into the loggia over the court where the house has one
+for (const [h, kind] of upperHomes()) {
+  const el = { rect: h.rect, front: h.front, kind };
+  walks.push(upperWalk(el, 'roof'));
+  if (upperPlan(el).loggia) walks.push(upperWalk(el, 'loggia'));
+}
 
 export const mosque = {
   id: 'djenne-great-mosque',

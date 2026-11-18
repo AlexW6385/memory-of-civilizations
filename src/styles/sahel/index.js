@@ -629,6 +629,8 @@ function houseBuild(el, { bag, col }) {
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, st = el.storeys ?? (rand() < 0.65 ? 2 : 1), H = st * 3.1;
   const kind = el.kind ?? (st > 1 && rand() < 0.55 ? 'moroccan' : 'tukulor'), plain = kind === 'plain';
   const hollow = !!el.hollow;           // an enterable house: the walls, roofs and furniture are built apart (interiors.js)
+  const wins = hollow && el.wins ? el.wins : null;     // an opened upper floor (docs §19): the windows are open reveals, reported here and cut through the front wall by homes.js
+  const jw = wins ? rng((el.seed || 1) * 5 + 1) : null, win = (a, b, ya, yb) => wins.push({ a: a + (jw() - 0.5) * 0.04, b: b + (jw() - 0.5) * 0.04, ya: ya + (jw() - 0.5) * 0.03, yb: yb + (jw() - 0.5) * 0.03 });
   const simple = !!el.simple;           // the far copy (settlements/lod.js): the solid form, the facade's masses and its door, none of the small fittings
   if (!hollow) {
   bag.add(B, box(x0, 0, z0, x1, H, z1));
@@ -666,7 +668,10 @@ function houseBuild(el, { bag, col }) {
   for (const s of [(0.3 + mid - hw) / 2, (mid + hw + L - 0.3) / 2]) if (Math.abs(s - 0.3) > 1.6 && Math.abs(s - (mid - hw)) > 1.2 && Math.abs(s - (mid + hw)) > 1.2) { const [px, pz] = P(s, 0.15); taper(bag, px, pz, 0, H + 0.6, 0.3, 0.22, 0.9); }
   // the facade panel between the entrance pilasters: proud of the wall, up past the parapet, a band of
   // square recesses (the frieze), a moulding, and the row of small mitre pinnacles along its top
-  if (!plain) lbox(B, mid - hw + 0.35, mid + hw - 0.35, -0.05, 0.14, 2.9, top + 0.35);
+  const midWin = wins && st > 1 && !plain ? (kind === 'tukulor' ? [mid - 0.28, mid + 0.28, 4.0, 4.65] : [mid - 0.32, mid + 0.32, 4.05, 4.8]) : null;
+  if (midWin) win(...midWin);
+  if (!plain && midWin) { const [wa, wb, ya, yb] = midWin; lbox(B, mid - hw + 0.35, wa, -0.05, 0.14, 2.9, top + 0.35); lbox(B, wb, mid + hw - 0.35, -0.05, 0.14, 2.9, top + 0.35); lbox(B, wa, wb, -0.05, 0.14, 2.9, ya); lbox(B, wa, wb, -0.05, 0.14, yb, top + 0.35); }
+  else if (!plain) lbox(B, mid - hw + 0.35, mid + hw - 0.35, -0.05, 0.14, 2.9, top + 0.35);
   if (!plain) lbox('banco_smooth', mid - hw + 0.3, mid + hw - 0.3, 0.1, 0.24, top + 0.35, top + 0.5);
   if (!plain) { const n = 5; for (let k = 0; k < n; k++) mitre(mid - hw + 0.6 + (2 * hw - 1.2) * k / (n - 1), 0.12, top + 0.5, k % 2 ? 0.75 : 0.95, 0.17); }
   if (st > 1 && !plain) { const n = Math.max(3, Math.round((2 * hw - 0.9) / 0.5)); for (let k = 0; k < n; k++) { const s = mid - hw + 0.55 + (2 * hw - 1.1) * (k + 0.5) / n; lbox('banco_smooth', s - 0.12, s + 0.12, 0.14, 0.17, H - 0.55, H - 0.3); } }
@@ -692,7 +697,7 @@ function houseBuild(el, { bag, col }) {
   if (!simple) for (const [ea, eb] of [[[x0, z1], [x1, z1]], [[x1, z0], [x0, z0]], [[x1, z1], [x1, z0]], [[x0, z0], [x0, z1]]]) {
     const cl = hollow ? 0.75 : 0.25;      // (a hollow house's walls meet in wall-thick blocks: keep the strips off the seams)
     const EL = Math.hypot(eb[0] - ea[0], eb[1] - ea[1]), ex = (eb[0] - ea[0]) / EL, ez = (eb[1] - ea[1]) / EL, front = ea[0] === a[0] && ea[1] === a[1] && eb[0] === b[0] && eb[1] === b[1];
-    const ok = front ? (q, m) => q > 0.85 + m && q < EL - 0.85 - m && Math.abs(q - mid) > hw + 0.65 + m : (q, m) => q > cl + m && q < EL - cl - m;
+    const ok = front ? (q, m) => q > 0.85 + m && q < EL - 0.85 - m && Math.abs(q - mid) > hw + 0.65 + m && !(wins && wins.some((w) => q > w.a - 0.4 - m && q < w.b + 0.4 + m)) : (q, m) => q > cl + m && q < EL - cl - m;
     erode(bag, (q, d) => [ea[0] + ex * q - ez * d, ea[1] + ez * q + ex * d], EL, Math.max(1, Math.round(EL / (front ? 1.1 : 1.8))), 0, hollow && !front ? Math.min(H, 3.1) : H, 0, ok, rng((el.seed || 1) * 13 + EL * 7), front ? 0.62 : 0.02);   // (on the front above the benches)
   }
   if (!hollow && !simple) { const [rx, rz] = P(mid + dw * 0.55, 0.09); bag.add('iron', lathe([[0.06, -0.06], [0.07, 0], [0.06, 0.06], [0.05, 0], [0.06, -0.06]], 8, null, 0, 0, 0).rotateX(Math.PI / 2).rotateY(Math.atan2(nx, nz)).translate(rx, 1.05, rz)); }
@@ -711,7 +716,7 @@ function houseBuild(el, { bag, col }) {
     }
     // the single small window over the entrance, its timber grille of bars
     if (st > 1 && !simple) {
-      lbox('lacquer_black', mid - 0.28, mid + 0.28, 0.16, 0.2, 4.0, 4.65);
+      if (!wins) lbox('lacquer_black', mid - 0.28, mid + 0.28, 0.16, 0.2, 4.0, 4.65);
       lbox('banco_smooth', mid - 0.42, mid + 0.42, 0.16, 0.34, 3.88, 4.0); lbox('banco_smooth', mid - 0.42, mid + 0.42, 0.16, 0.34, 4.65, 4.77);
       for (const s of [mid - 0.36, mid + 0.36]) lbox('banco_smooth', s - 0.06, s + 0.06, 0.16, 0.3, 4.0, 4.65);
       for (let k = 0; k < 4; k++) { const s = mid - 0.21 + k * 0.14; lbox('timber', s - 0.02, s + 0.02, 0.2, 0.26, 4.0, 4.65); }
@@ -723,7 +728,7 @@ function houseBuild(el, { bag, col }) {
       const r3 = rng((el.seed || 1) * 17 + 5), ws = L > 7.5 ? [mid - hw - 1.2, mid + hw + 1.2].filter((q) => q > 1.0 && q < L - 1.0) : [mid + (r3() < 0.5 ? -1 : 1) * (hw + 0.6)];
       for (const q of ws) {
         const y0 = 3.9 + r3() * 0.5, ww = 0.26 + r3() * 0.08, wh = 0.5 + r3() * 0.15;
-        lbox('lacquer_black', q - ww, q + ww, 0.0, 0.05, y0, y0 + wh);
+        if (wins) win(q - ww, q + ww, y0, y0 + wh); else lbox('lacquer_black', q - ww, q + ww, 0.0, 0.05, y0, y0 + wh);
         lbox('banco_smooth', q - ww - 0.1, q + ww + 0.1, 0.0, 0.2, y0 - 0.1, y0);
         lbox('timber', q - ww - 0.04, q + ww + 0.04, 0.0, 0.1, y0 + wh, y0 + wh + 0.1);
         if (r3() < 0.6) lbox('wood_dark', q - ww, q - 0.02, 0.05, 0.09, y0, y0 + wh);      // one shutter drawn to
@@ -740,7 +745,7 @@ function houseBuild(el, { bag, col }) {
     for (const s of ws) {
       const y0 = s === mid ? 4.05 : 3.9, wh = 0.75, ww = 0.32, o = s === mid ? 0.16 : 0;
       const wb = (mat, s0, s1, d0, d1, ya, yb) => lbox(mat, s0, s1, d0 + o, d1 + o, ya, yb);
-      wb('lacquer_black', s - ww, s + ww, 0.02, 0.06, y0, y0 + wh);
+      if (wins) { if (s !== mid) win(s - ww, s + ww, y0, y0 + wh); } else wb('lacquer_black', s - ww, s + ww, 0.02, 0.06, y0, y0 + wh);
       wb('banco_smooth', s - ww - 0.14, s - ww, 0.0, 0.2, y0 - 0.1, y0 + wh); wb('banco_smooth', s + ww, s + ww + 0.14, 0.0, 0.2, y0 - 0.1, y0 + wh);
       wb('banco_smooth', s - ww - 0.2, s + ww + 0.2, 0.0, 0.3, y0 - 0.2, y0 - 0.08);
       for (const sg of [-1, 1]) for (let k = 0; k < 3; k++) { const s0 = s + sg * (ww + 0.14 - (k + 1) * (ww + 0.14) / 3); wb('banco_smooth', Math.min(s0, s + sg * (ww + 0.14)) , Math.max(s0, s + sg * (ww + 0.14)), 0.0, 0.2, y0 + wh + k * 0.1, y0 + wh + (k + 1) * 0.1); }
@@ -935,7 +940,11 @@ function mudPit(el, { bag, col }) {
   bag.add('thatch', lathe([[0.9, 0], [0.75, 0.25], [0.4, 0.5], [0.001, 0.6]], 12, null, hx, y - 0.02, hz));
 }
 
-const s_home = (el, c) => { if (el.simple) sahelHouse(el, c); else { sahelHouse({ ...el, hollow: true, dw: 0.62 }, c); home(el, c); } };
+const s_home = (el, c) => {
+  if (el.simple) sahelHouse(el, c);
+  else if (el.up && (el.storeys ?? 2) > 1) { const wins = [], e2 = { ...el, hollow: true, dw: 0.62, wins }; sahelHouse(e2, c); home({ ...el, wins }, c); }     // (an opened upper floor: the facade reports its windows, which are cut through the wall)
+  else { sahelHouse({ ...el, hollow: true, dw: 0.62 }, c); home(el, c); }
+};
 registerStyle('sahel', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: { ...STYLES.qing.elements, great_mosque: greatMosque, sahel_house: sahelHouse, sahel_shops: shopRow, sahel_court_house: (el, c) => { sahelHouse({ ...el, hollow: true, front: 's', storeys: 2, kind: 'tukulor', dw: 0.65 }, c); courtHouse(el, c); }, sahel_home: s_home, mosque_fittings: mosqueFittings, brick_yard: brickYard, sahel_wall: sahelWall, sahel_near_wall: (el, c) => (el.home ? s_home(el, c) : sahelHouse(el, c)), sahel_house_lot: () => {}, market_stall: marketStall, market_mat: marketMat, net_rack: netRack, mud_pit: mudPit },
