@@ -45,7 +45,7 @@ const ROYAL = [];
     const x = ell(z), gx = (x - VALLEY.c[0]) / VALLEY.r[0] ** 2, gz = (z - VALLEY.c[1]) / VALLEY.r[1] ** 2, gl = Math.hypot(gx, gz), nx = gx / gl, nz = gz / gl;
     const at = [+(x + nx).toFixed(3), +(z + nz).toFixed(3)], y = +height(x - nx * 4, z - nz * 4).toFixed(3);
     const boxTop = kind === 'hegr' ? +(h * 0.66).toFixed(2) : h;
-    E.push({ t: 'rock_tomb', at, dir: [-nx, -nz].map((v) => +v.toFixed(5)), w, h, kind, back: 20, top: +(y + h + 0.6).toFixed(3), flank: 1.5, y, ...(kind === 'hegr' ? { boxTop, top: undefined } : {}) });
+    E.push({ t: 'rock_tomb', at, dir: [-nx, -nz].map((v) => +v.toFixed(5)), w, h, kind, back: 20, top: +(y + h + 0.6).toFixed(3), flank: 1.5, y, ...(kind === 'hegr' ? { boxTop, top: undefined, silk: true } : {}) });
     ROYAL.push({ x: at[0], z: at[1], nx, nz, w, base: y + boxTop + 0.15, set: kind === 'hegr' ? 1.6 : 0 });
   }
 }
