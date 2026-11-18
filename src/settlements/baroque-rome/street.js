@@ -25,7 +25,7 @@ export function streetPlans() {
   // a cardinal's coach before the steps, facing the church, its footmen; an ambassador's in the oval; one in the Borgo Nuovo
   coachAt(FRONT_X + 58, 24, Math.PI / 2, { footmen: true, cloth: 'cloth_red', livery: 'cloth_red' });
   coachAt(OVAL.c[0] + 30, -52, 0.35, { body: 'wood_painted', cloth: 'cloth_indigo', livery: 'cloth_indigo', footmen: true, horse: 'hide_grey' });
-  coachAt(150, BORGO[0], -Math.PI / 2, { cloth: 'cloth_green', livery: 'cloth_green', horse: 'hide_brown' });
+  coachAt(205, BORGO[0], -Math.PI / 2, { cloth: 'cloth_green', livery: 'cloth_green', horse: 'hide_brown' });
   // a sedan chair set down near the steps, its two bearers standing at the poles
   const sx = FRONT_X + 50, sz = -20, sr = Math.PI / 2;
   C.push({ t: 'sedan_chair', at: [sx, sz], rot: sr, y: 0, cloth: 'cloth_red' });

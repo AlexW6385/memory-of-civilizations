@@ -1,6 +1,22 @@
 // Baroque Rome about 1670 (docs/settlements/baroque-rome.md §2–§4).
-import { GARDEN, RADIUS, CROSSING, FRONT_X, FLOOR, OVAL, RETTA, PALACE, COURT, SISTINA_C, CASTEL, TIBER, tiberX, height } from './layout.js';
+import { faceFrame, toW } from '../../styles/renaissance/face.js';
+import { upRoute, balconyU } from '../../styles/baroque/upstairs.js';
+import { PALAZZO_STOREYS, CASA_STOREYS } from '../../styles/baroque/borgo.js';
+import { rows, GARDEN, RADIUS, CROSSING, FRONT_X, FLOOR, OVAL, RETTA, PALACE, COURT, SISTINA_C, CASTEL, TIBER, tiberX, height } from './layout.js';
 
+// the climbed houses (§5c): for each, the way from the street up the stair to a room of its top floor, and one to the first floor's balcony
+const upWalks = [];
+for (const r of rows()) {
+  const { M } = faceFrame(r.rect, r.face, 0), D = r.face === 'n' || r.face === 's' ? r.rect[3] - r.rect[1] : r.rect[2] - r.rect[0];
+  for (const u of r.units.filter((q) => q.up)) {
+    const o = { kind: u.kind, u0: u.u0, w: u.w, D, S: u.kind === 'palazzo' ? PALAZZO_STOREYS : CASA_STOREYS, storeys: u.storeys, flip: u.flip, terrace: u.terrace };
+    const world = (pts) => Object.assign(pts.map(([a, d]) => toW(M, a, d)), { y0: 0 });
+    upWalks.push(world(upRoute(o)));
+    const bu = balconyU(o);
+    if (u.kind === 'palazzo' || u.storeys > 3) upWalks.push(world([...upRoute(o, 1, { balcony: true }), [bu, -2.4], [bu, -0.9], [bu, 0.5]]));
+    if (u.terrace) upWalks.push(world(upRoute(o, 2, { terrace: true })));
+  }
+}
 export const stpeter = {
   id: 'baroque-rome-stpeter',
   name: { en: "St Peter's and Bernini's piazza", zh: '圣彼得大教堂与贝尼尼广场' },
@@ -26,7 +42,7 @@ export const stpeter = {
     { id: 'nave', rect: [CROSSING[0] + 21, -13.75, FRONT_X - 4 - 9.2, 13.75], y: FLOOR, kind: 'hall' },
     { id: 'crossing', rect: [CROSSING[0] - 21, -21, CROSSING[0] + 21, 21], y: FLOOR, kind: 'hall', sealed: true },
   ],
-  walks: [Object.assign([[125, 0], [58, 0], [56, 11], [24, 11], [22, 0], [FRONT_X + 26, 0], [FRONT_X - 3, 0], [FRONT_X - 20, 0]], { y0: 0 })],   // (round the obelisk, up the steps, through the portico into the nave)
+  walks: [...upWalks, Object.assign([[125, 0], [58, 0], [56, 11], [24, 11], [22, 0], [FRONT_X + 26, 0], [FRONT_X - 3, 0], [FRONT_X - 20, 0]], { y0: 0 })],   // (round the obelisk, up the steps, through the portico into the nave)
 };
 export const vatican = {
   id: 'baroque-rome-vatican', style: 'baroque', origin: [0, 0], base: 0, yaw: 0, feature: true,
