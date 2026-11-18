@@ -265,7 +265,7 @@ function house(el, { bag, col, lights }) {
       const u = c * L, w = Math.min(3, L * 0.4), a = u - w / 2, b = u + w / 2, D = 0.8, ya = s * st + 0.3, yb = (s + 1) * st - 0.2, wa = s * st + 0.95, wb = (s + 1) * st - 0.55;
       if (!UP) { put(wall, a, b, ya, yb, 0, D); put('timber', a - 0.1, b + 0.1, s * st + 0.2, s * st + 0.32, -0.02, D + 0.1); }
       else if (s === 1) { const mu = (f === 's' || f === 'w') ? L - u : u; cumbas.push({ a: mu - w / 2, b: mu + w / 2 }); }
-      if (s === 1) for (const ub of [a + 0.15, u, b - 0.15]) for (let k = 0; k < 3; k++) put('timber', ub - 0.07, ub + 0.07, st - 0.4 + k * 0.2, st - 0.2 + k * 0.2, 0, D * (k + 1) / 3);
+      if (s === 1) for (const ub of [a + 0.15, u, b - 0.15]) for (let k = 0; k < (UP ? 2 : 3); k++) put('timber', ub - 0.07, ub + 0.07, st - 0.4 + k * 0.2, st - 0.2 + k * 0.2, 0, D * (k + 1) / 3);
       const nw = Math.max(2, Math.round((w - 0.3) / 0.7)), ww2 = (w - 0.3) / nw;
       for (let k = 0; k < nw; k++) {
         const c0 = a + 0.15 + k * ww2 + 0.06, c1 = a + 0.15 + (k + 1) * ww2 - 0.06;
