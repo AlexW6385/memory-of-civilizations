@@ -3,6 +3,7 @@
 // mosque (west) and its twin (east); the charbagh with its raised channels, walks and central
 // pool; the walls and their octagonal towers; the great gate; the forecourt.
 
+import { upWalks } from './walks.js';
 import { TERRACE, PLINTH, GARDEN, GATE, FORECOURT, POOL, GWALKS, GW, GRIM } from './layout.js';
 
 const E = [];
@@ -98,6 +99,6 @@ export const taj = {
   bakeTop: 80,
   elements: E,
   rooms,
-  walks,
+  walks: [...walks, ...upWalks()],
 };
 export default taj;
