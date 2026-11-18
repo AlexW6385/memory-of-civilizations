@@ -8,6 +8,7 @@ import { GH, SH, K, T, SW, PT, RUN, F0, ys, fl, topOf, houseDims } from './dims.
 import { windowPieces } from './parts.js';
 import { Matrix4 } from '../../core/three.js';
 import { crown } from './crown.js';
+import { kindOf, frameOf, upOf } from './up.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 /** Boxes for a wall along one axis with openings cut: { along, u0, u1, t0, t1, y0, y1, holes: [{ a, b, lo, hi }] }. */
@@ -28,34 +29,37 @@ const jar = (bag, k, x, y, z, s = 1, mat = 'terracotta') => bag.add(mat, lathe(J
 
 function towerOpen(el, ctx) {
   const { bag, col, lights } = ctx, [X0, Z0, X1, Z1] = el.rect, n = el.storeys ?? 7, D = houseDims(el.rect), [I0, I1, I2, I3] = D.I, xp = D.xp, top = topOf(n), rand = rng(el.seed || 5);
+  if (el.doorAt) D.doorZ = I1 + el.doorAt;
+  const kf = el.kf ?? { w: K, n: K, e: K, s: K };
   const doorHole = { a: D.doorZ - 0.55, b: D.doorZ + 0.55, lo: -0.3, hi: 2.1 };
   // windows of the north face by storey: [centre x, width, sill above the floor, height]
   const rc = [xp + PT + 1.5, xp + PT + 4.3];
   const NW = (s) => {
+    if (el.noN) return [];
     if (s === 0) return [[I0 + 1.2, 0.22, 2.3, 0.5], [rc[0], 0.22, 2.3, 0.5], [rc[1], 0.22, 2.3, 0.5]];
     if (s <= 2) return [[I0 + 1.2, 0.25, 1.6, 0.7], [rc[0], 0.55, 1.2, 0.85], [rc[1], 0.55, 1.2, 0.85]];
     if (s === 4) return [[I0 + 1.2, 0.25, 1.6, 0.7], [xp + PT + 0.95, 1.0, 0.65, 1.75], [xp + PT + 2.85, 1.0, 0.65, 1.75], [xp + PT + 4.75, 1.0, 0.65, 1.75]];
     return [[I0 + 1.2, 0.25, 1.6, 0.7], [rc[0], 0.8, 0.95, 1.2], [rc[1], 0.8, 0.95, 1.2]];
   };
   for (let s = 0; s < n; s++) {
-    const y0 = s === 0 ? -0.6 : ys(s), y1 = s === n - 1 ? top : ys(s + 1), i = K * Math.max(0, y0), mat = s >= n - 2 ? 'lime_plaster' : 'mud_plaster', fy = fl(s);
+    const y0 = s === 0 ? -0.6 : ys(s), y1 = s === n - 1 ? top : ys(s + 1), iy = Math.max(0, y0), iw = kf.w * iy, iN = kf.n * iy, ie = kf.e * iy, is = kf.s * iy, mat = s >= n - 2 ? 'lime_plaster' : 'mud_plaster', fy = fl(s);
     const piece = (p) => { bag.add(mat, box(...p)); col.rect([p[0], p[2], p[3], p[5]], p[1], p[4]); };
     // north face with its windows, south and east faces plain (they touch the neighbours), west face with the door and the lobby's slits
     const nh = NW(s).map(([c, w, lo, h]) => ({ a: c - w / 2, b: c + w / 2, lo: fy + lo, hi: fy + lo + h }));
-    for (const p of wallBoxes({ along: 'x', u0: X0 + i, u1: X1 - i, t0: Z0 + i, t1: I1, y0, y1, holes: nh })) piece(p);
-    for (const p of wallBoxes({ along: 'x', u0: X0 + i, u1: X1 - i, t0: I3, t1: Z1 - i, y0, y1 })) piece(p);
-    for (const p of wallBoxes({ along: 'z', u0: Z0 + i, u1: Z1 - i, t0: I2, t1: X1 - i, y0, y1 })) piece(p);
+    for (const p of wallBoxes({ along: 'x', u0: X0 + iw, u1: X1 - ie, t0: Z0 + iN, t1: I1, y0, y1, holes: nh })) piece(p);
+    for (const p of wallBoxes({ along: 'x', u0: X0 + iw, u1: X1 - ie, t0: I3, t1: Z1 - is, y0, y1 })) piece(p);
+    for (const p of wallBoxes({ along: 'z', u0: Z0 + iN, u1: Z1 - is, t0: I2, t1: X1 - ie, y0, y1 })) piece(p);
     const wk = s <= 2 ? [0.5, 1.35, 0.8] : [0.8, 0.95, 1.25], wzs = [I1 + 2.4, D.doorZ + 0.2];
     const wh = s === 0 ? [doorHole, { a: I1 + 2.4 - 0.1, b: I1 + 2.4 + 0.1, lo: 2.3, hi: 2.8 }] : wzs.map((z) => ({ a: z - wk[0] / 2, b: z + wk[0] / 2, lo: fy + wk[1], hi: fy + wk[1] + wk[2] }));
     // the same windows' fittings on the outside of the west face (the shared window parts, instanced)
     for (const z of s === 0 ? [I1 + 2.4] : wzs) {
-      const kind = s === 0 ? 'slit' : s <= 2 ? 'small' : s >= n - 2 ? 'white' : 'big', sy = s === 0 ? 2.3 : fy + wk[1], m = new Matrix4().makeRotationY(-Math.PI / 2).setPosition(X0 + K * sy, sy, z);
+      const kind = s === 0 ? 'slit' : s <= 2 ? 'small' : s >= n - 2 ? 'white' : 'big', sy = s === 0 ? 2.3 : fy + wk[1], m = new Matrix4().makeRotationY(-Math.PI / 2).setPosition(X0 + kf.w * sy, sy, z);
       for (const [mt, g] of windowPieces(kind)) bag.addInstance(mt, g, m.clone(), { reach: 130 });
     }
-    for (const p of wallBoxes({ along: 'z', u0: Z0 + i, u1: Z1 - i, t0: X0 + i, t1: I0, y0, y1, holes: wh })) piece(p);
+    for (const p of wallBoxes({ along: 'z', u0: Z0 + iN, u1: Z1 - is, t0: X0 + iw, t1: I0, y0, y1, holes: wh })) piece(p);
     // the fittings of the north windows: a frame, the lower part shuttered with carved leaves, bars above
     for (const [c, w, lo, h] of NW(s)) {
-      const zo = Z0 + i, yb = fy + lo;
+      const zo = Z0 + iN, yb = fy + lo;
       if (w < 0.3) { bag.add('timber', box(c - w / 2 - 0.04, yb - 0.04, zo - 0.05, c + w / 2 + 0.04, yb, zo)); continue; }
       const f = 0.1, big = s >= 3;
       bag.add('lime_plaster', box(c - w / 2 - f, yb + h, zo - 0.07, c + w / 2 + f, yb + h + f, zo)); bag.add('lime_plaster', box(c - w / 2 - f, yb - f, zo - 0.1, c + w / 2 + f, yb, zo));
@@ -85,7 +89,7 @@ function towerOpen(el, ctx) {
     bag.add('mud_plaster', box(I0, fy + half - 0.3, I1, I0 + SW, fy + half, I1 + 1.2)); col.floor([I0, I1, I0 + SW, I1 + 1.2], fy + half);
     // the floor above this storey: the room's slab and the lobby's, a hole over the stair; beams of palm trunk under it
     const yf = s === n - 1 ? top : ys(s + 1);
-    const pieces = s === n - 1 ? subtractRects([X0 + K * top, Z0 + K * top, X1 - K * top, Z1 - K * top], [[I0, I1, I0 + SW, I1 + RUN]]) : [[xp, I1, I2, I3], [I0, I1 + RUN, xp, I3]];
+    const pieces = s === n - 1 ? subtractRects([X0 + kf.w * top, Z0 + kf.n * top, X1 - kf.e * top, Z1 - kf.s * top], [[I0, I1, I0 + SW, I1 + RUN]]) : [[xp, I1, I2, I3], [I0, I1 + RUN, xp, I3]];
     for (const r of pieces) { bag.add(s === n - 1 ? 'mud_plaster' : 'earth_wall', box(r[0], yf - 0.35, r[1], r[2], yf, r[3])); col.floor(r, yf); }
     if (s < n - 1) for (let b = 0; b < 6; b++) { const zz = I1 + 0.5 + b * (I3 - I1 - 1) / 5; bag.add('palm_trunk', rod([xp + PT, yf - 0.46, zz], [I2, yf - 0.46, zz], 0.1, 7)); }
   }
@@ -104,13 +108,13 @@ function towerOpen(el, ctx) {
     bag.add('wood_dark', box(I0 + 0.075, 0.88, dz + 0.78, I0 + 0.16, 1.0, dz + 1.3)); bag.add('wood_dark', box(I0 + 0.075, 0.93, dz + 0.65, I0 + 0.12, 0.96, dz + 1.45)); }
   bag.add('cedar', box(I0, 0.02, D.doorZ + 0.56, I0 + 0.06, 2.0, D.doorZ + 1.5)); bag.add('iron', box(I0 + 0.06, 0.95, D.doorZ + 0.6, I0 + 0.1, 1.0, D.doorZ + 1.4));
   // the parapet, its corner piers and the spouts on the roof
-  const t = K * top, pt = 0.34, [a0, b0, a1, b1] = [X0 + t, Z0 + t, X1 - t, Z1 - t];
+  const pt = 0.34, [a0, b0, a1, b1] = [X0 + kf.w * top, Z0 + kf.n * top, X1 - kf.e * top, Z1 - kf.s * top];
   for (const r of [[a0, b0, a1, b0 + pt], [a0, b1 - pt, a1, b1], [a0, b0 + pt, a0 + pt, b1 - pt], [a1 - pt, b0 + pt, a1, b1 - pt]]) { bag.add('lime_plaster', box(r[0], top, r[1], r[2], top + 1.0, r[3])); col.rect(r, top, top + 1.0); }
   for (const [cx, cz] of [[a0, b0], [a1 - 0.6, b0], [a0, b1 - 0.6], [a1 - 0.6, b1 - 0.6]]) bag.add('lime_plaster', box(cx, top, cz, cx + 0.6, top + 1.5, cz + 0.6));
   // the outer bands and the whitewash on the outside of the north and west faces, as in the town's towers
   for (const [y, hh] of [[ys(n - 2) - 0.01, 0.16], [top - 0.3, 0.3]]) {
-    const q = K * y;
-    bag.add('lime_plaster', box(X0 + q - 0.02, y, Z0 + q - 0.08, X1 - q + 0.02, y + hh, Z0 + q)); bag.add('lime_plaster', box(X0 + q - 0.08, y, Z0 + q, X0 + q, y + hh, Z1 - q));
+    const qw = kf.w * y, qn = kf.n * y, qe = kf.e * y, qs = kf.s * y;
+    bag.add('lime_plaster', box(X0 + qw - 0.02, y, Z0 + qn - 0.08, X1 - qe + 0.02, y + hh, Z0 + qn)); bag.add('lime_plaster', box(X0 + qw - 0.08, y, Z0 + qn, X0 + qw, y + hh, Z1 - qs));
   }
   furnish(ctx, el, D, rand);
   extras(ctx, el, D, rand, top);
@@ -128,9 +132,9 @@ function furnish(ctx, el, D, rand) {
   const mattress = (a, b, c, d, y) => { bag.add('cloth_white', box(a, y, b, c, y + 0.16, d)); bag.add('cloth_indigo', box(a, y + 0.16, b, c, y + 0.19, d)); };
   const wardrobe = (x, z, yaw, y) => { const w = 1.5; bag.add('wood_dark', box(x, y, z, x + (yaw ? 0.45 : w), y + 2.1, z + (yaw ? w : 0.45))); for (let k = 0; k < 2; k++) bag.add('cedar', yaw ? box(x + 0.44, y + 0.1, z + 0.08 + k * 0.7, x + 0.5, y + 2.0, z + 0.72 + k * 0.7) : box(x + 0.08 + k * 0.7, y + 0.1, z + 0.44, x + 0.72 + k * 0.7, y + 2.0, z + 0.5)); col.rect([x, z, x + (yaw ? 0.5 : w), z + (yaw ? w : 0.5)], y, y + 2.1); };
   void W;
+  const B = [], n = el.storeys ?? 7;
   // storey 0: store and stable — jars of grain and dates along the east wall, sacks, a trough, a heap of straw
-  {
-    const y = F0;
+  B[0] = (y) => {
     for (let k = 0; k < 5; k++) { jar(bag, 'big', x1 - 0.5, y, z0 + 0.5 + k * 0.85, 0.95, 'terracotta'); col.circle(x1 - 0.5, z0 + 0.5 + k * 0.85, 0.38, y, y + 0.9); }
     for (let k = 0; k < 4; k++) { jar(bag, 'sack', x0 + 0.5 + k * 0.5, y, z0 + 0.4, 1.2, 'sacking'); }
     col.rect([x0 + 0.2, z0 + 0.1, x0 + 2.3, z0 + 0.75], y, y + 0.7);
@@ -140,8 +144,8 @@ function furnish(ctx, el, D, rand) {
     lights.push({ at: [x0 + 2.0, y + 2.3, z0 + 3.4], color: '#ffd9a0', intensity: 1.4, distance: 6 });
   }
   // storey 1: the women's quarters — a hearth of stones with its pot, jars, bedding, a chest, a spindle
-  {
-    const y = ys(1), cx = (x0 + x1) / 2;
+  B[1] = (y) => {
+    const cx = (x0 + x1) / 2;
     bag.add('schist_rubble', box(x1 - 1.5, y, z1 - 1.4, x1 - 0.3, y + 0.3, z1 - 0.3)); jar(bag, 'pot', x1 - 0.9, y + 0.3, z1 - 0.85, 1.3, 'pottery_dark'); col.rect([x1 - 1.5, z1 - 1.4, x1 - 0.3, z1 - 0.3], y, y + 0.6);
     for (let k = 0; k < 4; k++) jar(bag, 'pot', x1 - 0.5, y, z0 + 0.5 + k * 0.5, 1.1, k % 2 ? 'terracotta' : 'pottery_dark');
     rug(cx - 1.4, z0 + 2.0, cx + 1.2, z0 + 4.2, y, 'cloth_ochre');
@@ -150,22 +154,21 @@ function furnish(ctx, el, D, rand) {
     lights.push({ at: [cx, y + 2.3, (z0 + z1) / 2], color: '#ffd9a0', intensity: 1.2, distance: 6 });
   }
   // storey 2: the family's room — a low carpet, mattresses rolled against the wall, chests, brass
-  {
-    const y = ys(2), cx = (x0 + x1) / 2;
+  B[2] = (y) => {
+    const cx = (x0 + x1) / 2;
     rug(x0 + 0.6, z0 + 1.2, x1 - 0.6, z1 - 1.2, y, 'cloth_maroon');
     for (let k = 0; k < 3; k++) bag.add('cloth_white', rod([x1 - 0.3, y + 0.14, z0 + 0.4 + k * 0.32], [x1 - 1.6, y + 0.14, z0 + 0.4 + k * 0.32], 0.14, 8));
     chest(x0 + 0.3, z1 - 0.9, x0 + 1.7, z1 - 0.3, y); chest(x0 + 1.9, z1 - 0.8, x0 + 3.0, z1 - 0.3, y, 0.5);
     jar(bag, 'pan', cx, y + 0.025, (z0 + z1) / 2, 2, 'bronze');
   }
   // storey 3: bedroom with its wardrobe doors
-  {
-    const y = ys(3);
+  B[3] = (y) => {
     wardrobe(x1 - 0.5, z0 + 0.4, 1, y); mattress(x0 + 0.3, z0 + 0.3, x0 + 2.3, z0 + 1.3, y + 0.0); mattress(x0 + 0.3, z0 + 1.5, x0 + 2.3, z0 + 2.5, y);
     chest(x0 + 0.3, z1 - 0.95, x0 + 1.6, z1 - 0.3, y); rug(x0 + 2.6, z0 + 2.6, x1 - 1.0, z1 - 0.6, y, 'cloth_red');
   }
   // storey 4: the majlis — seats round three walls, carpets, cushions, the coffee set and incense, a lamp in a niche
-  {
-    const y = ys(4), cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, sd = 0.75;
+  B[4] = (y) => {
+    const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, sd = 0.75;
     seat(x1 - sd, z0 + 0.1, x1 - 0.02, z1 - 0.1, y); seat(x0 + 0.05, z1 - sd, x1 - sd, z1 - 0.02, y);
     seat(x0 + 0.05, z0 + 0.1, x0 + sd, z0 + 3.2, y);
     for (let k = 0; k < 7; k++) cushion(x1 - 0.22, y + 0.18, z0 + 0.6 + k * 0.95, 'z');
@@ -181,67 +184,132 @@ function furnish(ctx, el, D, rand) {
     lights.push({ at: [x0 + 1.0, y + 1.7, z1 - 0.4], color: '#ff9a4a', intensity: 1.2, distance: 4 });
   }
   // storey 5: the pleasant upper room with its mashrabiya and wardrobe doors
-  {
-    const y = ys(5), cx = (x0 + x1) / 2;
+  B[5] = (y) => {
+    const cx = (x0 + x1) / 2;
     wardrobe(x1 - 0.5, z0 + 0.4, 1, y); wardrobe(x1 - 0.5, z0 + 2.2, 1, y);
     rug(x0 + 0.8, z0 + 1.2, x1 - 1.2, z1 - 0.8, y, 'cloth_red'); mattress(x0 + 0.3, z1 - 1.0, x0 + 2.4, z1 - 0.2, y);
     chest(x0 + 2.8, z1 - 0.9, x0 + 4.0, z1 - 0.3, y, 0.55);
     lights.push({ at: [cx, y + 2.3, (z0 + z1) / 2], color: '#ffe0b0', intensity: 2.0, distance: 7 });
   }
   // storey 6: a small room under the roof: water jars and a skin, bundles
-  {
-    const y = ys(6);
+  B[6] = (y) => {
     for (let k = 0; k < 4; k++) jar(bag, 'pot', x0 + 0.5 + k * 0.5, y, z1 - 0.45, 1.3, 'terracotta');
     bag.add('hide_tan', rod([x1 - 0.6, y + 0.3, z0 + 0.6], [x1 - 0.6, y + 0.3, z0 + 1.5], 0.25, 8));
     rug(x0 + 1.2, z0 + 1.0, x1 - 1.2, z1 - 1.6, y, 'cloth_ochre');
   }
+  for (let s = 0; s < n; s++) B[kindOf(s, n, el.seed)]?.(fl(s), s);
 }
 
 /** What the first furnishing leaves: the stair's lamps, the mangers and the quern, the oven, the book shelves, the weapons and plates of the majlis, the roof's life. */
 function extras(ctx, el, D, rand, top) {
   const { bag, col, lights } = ctx, [x0, z0, x1, z1] = D.room, [I0, I1] = D.I, n = el.storeys ?? 7, cx = (x0 + x1) / 2, [X0, Z0, X1, Z1] = el.rect;
   const bx = (m, a, b, c, d, y0, y1, solid = false) => { bag.add(m, box(a, y0, b, c, y1, d)); if (solid) col.rect([a, b, c, d], y0, y1); };
+  const B = [];
   // the stair: a lamp in a niche at every second landing, lit
   for (let s = 0; s < n; s += 2) { const fy = s === 0 ? F0 : ys(s); bx('lamp_glass', I0 + 1.08, I1 + 0.4, I0 + 1.2, I1 + 0.52, fy + 1.6, fy + 1.78); lights.push({ at: [I0 + 1.0, fy + 1.7, I1 + 0.8], color: '#ffc880', intensity: 0.9, distance: 4.5 }); }
   // storey 0: the manger with hay and the ring for the tether, the hand quern, a skin hung up
-  { const y = F0; bx('timber', x0 + 0.08, z0 + 1.3, x0 + 0.6, z0 + 3.3, y, y + 0.55, true); bx('thatch', x0 + 0.12, z0 + 1.35, x0 + 0.56, z0 + 3.25, y + 0.55, y + 0.7); bx('iron', x0 + 0.02, z0 + 2.2, x0 + 0.1, z0 + 2.3, y + 0.9, y + 1.0);
+  B[0] = (y) => { bx('timber', x0 + 0.08, z0 + 1.3, x0 + 0.6, z0 + 3.3, y, y + 0.55, true); bx('thatch', x0 + 0.12, z0 + 1.35, x0 + 0.56, z0 + 3.25, y + 0.55, y + 0.7); bx('iron', x0 + 0.02, z0 + 2.2, x0 + 0.1, z0 + 2.3, y + 0.9, y + 1.0);
     bag.add('granite_grey', lathe([[0.001, 0], [0.35, 0], [0.35, 0.1], [0.001, 0.1]], 12, null, cx + 0.6, y, z0 + 2.4)); bag.add('granite_grey', lathe([[0.001, 0.1], [0.3, 0.1], [0.3, 0.18], [0.001, 0.18]], 12, null, cx + 0.6, y, z0 + 2.4)); col.circle(cx + 0.6, z0 + 2.4, 0.35, y, y + 0.18);
     bag.add('hide_tan', rod([x1 - 0.1, y + 1.6, z0 + 5.5], [x1 - 0.1, y + 0.9, z0 + 5.5], 0.14, 8)); }
   // storey 1: the clay oven (tannur) by the hearth, a shelf of pots on the wall, a grain bin
-  { const y = ys(1);
+  B[1] = (y) => {
     bag.add('terracotta', lathe([[0.001, 0], [0.36, 0], [0.4, 0.2], [0.34, 0.6], [0.24, 0.82], [0.2, 0.86], [0.001, 0.86]], 12, null, x1 - 0.8, y, z1 - 2.3)); col.circle(x1 - 0.8, z1 - 2.3, 0.4, y, y + 0.86);
     bx('timber', x1 - 0.4, z0 + 2.4, x1 - 0.02, z0 + 4.6, y + 1.05, y + 1.09); for (let k = 0; k < 5; k++) bag.add(k % 2 ? 'pottery_dark' : 'terracotta', lathe([[0.001, 0], [0.09, 0.01], [0.13, 0.1], [0.1, 0.2], [0.001, 0.2]], 8, null, x1 - 0.2, y + 1.09, z0 + 2.6 + k * 0.4));
     bx('timber', x0 + 3.0, z0 + 0.2, x0 + 4.4, z0 + 1.1, y, y + 0.9, true); bx('wood_dark', x0 + 3.0, z0 + 0.2, x0 + 4.4, z0 + 1.1, y + 0.9, y + 0.95); }
   // storey 2: the Qur'an stand (two boards crossed) and a low table with a brass tray; cushions
-  { const y = ys(2);
+  B[2] = (y) => {
     for (const s of [-1, 1]) bag.add('wood_dark', rod([x0 + 2.2 + s * 0.3, y, z0 + 2.6], [x0 + 2.2 - s * 0.3, y + 0.45, z0 + 2.6], 0.025, 4));
     bx('cedar', x0 + 1.9, z0 + 2.45, x0 + 2.5, z0 + 2.75, y + 0.43, y + 0.46); bx('cloth_white', x0 + 2.0, z0 + 2.46, x0 + 2.4, z0 + 2.7, y + 0.46, y + 0.5);
     bx('timber', cx + 0.6, z0 + 3.0, cx + 1.4, z0 + 3.6, y, y + 0.32, true); bag.add('bronze', lathe([[0.001, 0], [0.2, 0.01], [0.28, 0.06], [0.001, 0.06]], 10, null, cx + 1.0, y + 0.32, z0 + 3.3)); }
   // storey 3: a cradle on its stand, an incense burner
-  { const y = ys(3);
+  B[3] = (y) => {
     bx('timber', x0 + 3.2, z0 + 0.4, x0 + 4.1, z0 + 0.9, y + 0.25, y + 0.45); bx('cloth_white', x0 + 3.25, z0 + 0.42, x0 + 4.05, z0 + 0.88, y + 0.45, y + 0.52); for (const dx of [0.15, 0.85]) bx('timber', x0 + 3.2 + dx - 0.04, z0 + 0.4, x0 + 3.2 + dx + 0.04, z0 + 0.9, y, y + 0.25);
     bag.add('bronze', lathe([[0.001, 0], [0.08, 0.01], [0.1, 0.06], [0.14, 0.14], [0.1, 0.18], [0.001, 0.18]], 10, null, cx - 0.6, y + 0.03, (z0 + z1) / 2 - 0.6)); bag.add('flame', lathe([[0.001, 0.18], [0.04, 0.19], [0.001, 0.22]], 6, null, cx - 0.6, y + 0.03, (z0 + z1) / 2 - 0.6)); }
   // storey 4, the majlis: plates and daggers and long guns hung, a lantern from the beam
-  { const y = ys(4);
+  B[4] = (y) => {
     for (let k = 0; k < 6; k++) { bx(k % 2 ? 'glaze_blue' : 'glaze_white', x1 - 0.06, z0 + 0.8 + k * 1.0, x1 - 0.02, z0 + 1.15 + k * 1.0, y + 1.5 + (k % 2) * 0.45, y + 1.85 + (k % 2) * 0.45); bx('cloth_red', x1 - 0.07, z0 + 0.9 + k * 1.0, x1 - 0.06, z0 + 1.05 + k * 1.0, y + 1.58 + (k % 2) * 0.45, y + 1.75 + (k % 2) * 0.45); }
     for (let k = 0; k < 3; k++) { const z = z0 + 0.6 + k * 0.9; bx('iron', x0 + 0.04, z, x0 + 0.07, z + 0.07, y + 1.5, y + 1.9); bx('silver', x0 + 0.04, z - 0.02, x0 + 0.08, z + 0.09, y + 1.9, y + 2.05); }
     for (let k = 0; k < 2; k++) bag.add('wood_dark', rod([x0 + 0.05, y + 1.2, z0 + 3.0 + k * 0.45], [x0 + 0.05, y + 2.4, z0 + 3.05 + k * 0.45], 0.022, 4));
     bag.add('rope_fibre', rod([cx - 0.3, y + 2.95, (z0 + z1) / 2 + 1.5], [cx - 0.3, y + 2.55, (z0 + z1) / 2 + 1.5], 0.01, 3)); bag.add('lamp_glass', lathe([[0.001, 0], [0.1, 0.05], [0.14, 0.2], [0.08, 0.3], [0.001, 0.32]], 8, null, cx - 0.3, y + 2.25, (z0 + z1) / 2 + 1.5));
     lights.push({ at: [cx - 0.3, y + 2.3, (z0 + z1) / 2 + 1.5], color: '#ffcf8a', intensity: 1.6, distance: 5 }); }
   // storey 5: a low writing desk with the books and the ink pot
-  { const y = ys(5);
+  B[5] = (y) => {
     bx('timber', x0 + 0.5, z0 + 1.0, x0 + 1.5, z0 + 1.6, y, y + 0.36, true); for (let k = 0; k < 5; k++) bx(['cloth_brown', 'cloth_maroon', 'cloth_white', 'cloth_green', 'cloth_indigo'][k], x0 + 0.6 + k * 0.1, z0 + 1.1, x0 + 0.68 + k * 0.1, z0 + 1.5, y + 0.36, y + 0.62);
     bag.add('pottery_dark', lathe([[0.001, 0], [0.04, 0], [0.04, 0.05], [0.001, 0.05]], 8, null, x0 + 1.3, y + 0.36, z0 + 1.3)); }
   // storey 6: baskets of dates under the roof
-  { const y = ys(6); for (let k = 0; k < 5; k++) { bag.add('wicker', lathe([[0.001, 0], [0.26, 0], [0.34, 0.25], [0.3, 0.28], [0.001, 0.28]], 9, null, x1 - 0.5, y, z0 + 1.0 + k * 0.7)); bag.add('cloth_brown', lathe([[0.001, 0.2], [0.28, 0.24], [0.001, 0.32]], 8, null, x1 - 0.5, y, z0 + 1.0 + k * 0.7)); } }
+  B[6] = (y) => { for (let k = 0; k < 5; k++) { bag.add('wicker', lathe([[0.001, 0], [0.26, 0], [0.34, 0.25], [0.3, 0.28], [0.001, 0.28]], 9, null, x1 - 0.5, y, z0 + 1.0 + k * 0.7)); bag.add('cloth_brown', lathe([[0.001, 0.2], [0.28, 0.24], [0.001, 0.32]], 8, null, x1 - 0.5, y, z0 + 1.0 + k * 0.7)); } }
+  for (let s = 0; s < n; s++) B[kindOf(s, n, el.seed)]?.(fl(s), s);
   // the roof terrace: the line with washing, the jars, a sleeping mat for the hot nights, dates drying on a mat, a stove, a cote
-  { const t = K * top, a0 = X0 + t, b0 = Z0 + t, a1 = X1 - t, b1 = Z1 - t, y = top;
-    for (const dx of [0, 3.4]) bag.add('palm_trunk', rod([a0 + 4.6 + dx, y, b0 + 0.8], [a0 + 4.6 + dx, y + 1.9, b0 + 0.8], 0.05, 5));
-    bag.add('rope_fibre', rod([a0 + 4.6, y + 1.85, b0 + 0.8], [a0 + 8.0, y + 1.8, b0 + 0.8], 0.012, 3)); for (let k = 0; k < 4; k++) bx(['cloth_white', 'cloth_indigo', 'cloth_ochre', 'cloth_white'][k], a0 + 4.8 + k * 0.8, b0 + 0.79, a0 + 5.4 + k * 0.8, b0 + 0.81, y + 0.8 + (k % 2) * 0.1, y + 1.82);
+  { const kf = el.kf ?? { w: K, n: K, e: K, s: K }, a0 = X0 + kf.w * top, b0 = Z0 + kf.n * top, a1 = X1 - kf.e * top, b1 = Z1 - kf.s * top, y = top, sh = Math.min(0, (a1 - a0) - 9.28);
+    for (const dx of [0, 3.4]) bag.add('palm_trunk', rod([a0 + sh + 4.6 + dx, y, b0 + 0.8], [a0 + sh + 4.6 + dx, y + 1.9, b0 + 0.8], 0.05, 5));
+    bag.add('rope_fibre', rod([a0 + sh + 4.6, y + 1.85, b0 + 0.8], [a0 + sh + 8.0, y + 1.8, b0 + 0.8], 0.012, 3)); for (let k = 0; k < 4; k++) bx(['cloth_white', 'cloth_indigo', 'cloth_ochre', 'cloth_white'][k], a0 + sh + 4.8 + k * 0.8, b0 + 0.79, a0 + sh + 5.4 + k * 0.8, b0 + 0.81, y + 0.8 + (k % 2) * 0.1, y + 1.82);
     for (let k = 0; k < 3; k++) bag.add('terracotta', lathe([[0.001, 0], [0.12, 0.02], [0.24, 0.2], [0.26, 0.4], [0.16, 0.6], [0.1, 0.66], [0.001, 0.66]], 8, null, a1 - 0.8, y, b0 + 1.0 + k * 0.6)); 
-    bx('reed_mat', a0 + 5.0, b1 - 2.8, a0 + 7.6, b1 - 1.0, y, y + 0.025); bx('cloth_white', a0 + 5.2, b1 - 2.6, a0 + 6.0, b1 - 2.0, y + 0.025, y + 0.1); for (let k = 0; k < 14; k++) bx('cloth_brown', a0 + 6.2 + (k % 5) * 0.25, b1 - 2.6 + Math.floor(k / 5) * 0.4, a0 + 6.35 + (k % 5) * 0.25, b1 - 2.4 + Math.floor(k / 5) * 0.4, y + 0.025, y + 0.045);
+    bx('reed_mat', a0 + sh + 5.0, b1 - 2.8, a0 + sh + 7.6, b1 - 1.0, y, y + 0.025); bx('cloth_white', a0 + sh + 5.2, b1 - 2.6, a0 + sh + 6.0, b1 - 2.0, y + 0.025, y + 0.1); for (let k = 0; k < 14; k++) bx('cloth_brown', a0 + sh + 6.2 + (k % 5) * 0.25, b1 - 2.6 + Math.floor(k / 5) * 0.4, a0 + sh + 6.35 + (k % 5) * 0.25, b1 - 2.4 + Math.floor(k / 5) * 0.4, y + 0.025, y + 0.045);
     bx('schist_rubble', a1 - 1.5, b1 - 1.4, a1 - 0.7, b1 - 0.6, y, y + 0.35); bag.add('bronze', lathe([[0.001, 0], [0.2, 0.01], [0.26, 0.16], [0.2, 0.3], [0.001, 0.3]], 10, null, a1 - 1.1, y + 0.35, b1 - 1.0));
     bx('mud_plaster', a1 - 1.6, b0 + 0.4, a1 - 0.5, b0 + 1.4, y, y + 1.4); bx('lime_plaster', a1 - 1.7, b0 + 0.3, a1 - 0.4, b0 + 1.5, y + 1.4, y + 1.5); for (let k = 0; k < 4; k++) bx('opening', a1 - 1.5 + (k % 2) * 0.45, b0 + 1.39, a1 - 1.3 + (k % 2) * 0.45, b0 + 1.42, y + 0.5 + Math.floor(k / 2) * 0.45, y + 0.68 + Math.floor(k / 2) * 0.45); }
 }
 
-export const OPEN_ELEMENTS = { tower_open: towerOpen };
+/**
+ * tower_up: a climbable tower house of the town's rows, { rect, front ('n'|'s'), storeys, seed, free }: the house of tower_open built in its own
+ * frame and turned onto the lot (up.js), with the taper on the free faces only and the side windows only where the side is free.
+ */
+/**
+ * What the bag's repeated-shape search (src/core/geom.js, INSTANCING) would make of seven towers' worth of the same boxes and jars: scores of instanced
+ * meshes, each a draw. A box gets normals a hair off the axes (3e-4: the search then takes it for a shape of its own size, as a rotated one is);
+ * a turned or round piece (a jar, a rod) is widened or narrowed by up to 10 % by a hash of its own place, so that no two are the same shape.
+ */
+function vary(g) {
+  const P = g.attributes.position.array, N = g.attributes.normal.array;
+  let round = false;
+  for (let i = 0; i < N.length; i++) { const v = Math.abs(N[i]); if (v > 1e-4 && Math.abs(v - 1) > 1e-4) { round = true; break; } }
+  if (round) {
+    let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity, y0 = Infinity;
+    for (let i = 0; i < P.length; i += 3) { if (P[i] < x0) x0 = P[i]; if (P[i] > x1) x1 = P[i]; if (P[i + 2] < z0) z0 = P[i + 2]; if (P[i + 2] > z1) z1 = P[i + 2]; if (P[i + 1] < y0) y0 = P[i + 1]; }
+    const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, f = 0.9 + 0.2 * hash(cx, y0, cz);
+    for (let i = 0; i < P.length; i += 3) { P[i] = cx + (P[i] - cx) * f; P[i + 2] = cz + (P[i + 2] - cz) * f; }
+    g.attributes.position.needsUpdate = true;
+  } else {
+    // (a small box, a millimetre or two larger or smaller by its place: the dates, the teeth, the bars of seven houses are then not copies of one another)
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+    for (let i = 0; i < P.length; i += 3) { if (P[i] < x0) x0 = P[i]; if (P[i] > x1) x1 = P[i]; if (P[i + 1] < y0) y0 = P[i + 1]; if (P[i + 1] > y1) y1 = P[i + 1]; if (P[i + 2] < z0) z0 = P[i + 2]; if (P[i + 2] > z1) z1 = P[i + 2]; }
+    if (Math.max(x1 - x0, y1 - y0, z1 - z0) < 0.6) {
+      const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, cz = (z0 + z1) / 2, d = [0, 1, 2].map((k) => (hash(cx, cy + k, cz) - 0.5) * 0.003);
+      for (let i = 0; i < P.length; i += 3) { P[i] += (P[i] > cx ? 1 : -1) * d[0]; P[i + 1] += (P[i + 1] > cy ? 1 : -1) * d[1]; P[i + 2] += (P[i + 2] > cz ? 1 : -1) * d[2]; }
+      g.attributes.position.needsUpdate = true;
+    }
+    for (let i = 0; i < N.length; i += 3) { if (Math.abs(N[i]) < 1e-4) N[i] = 3e-4; if (Math.abs(N[i + 1]) < 1e-4) N[i + 1] = -3e-4; if (Math.abs(N[i + 2]) < 1e-4) N[i + 2] = 3e-4; }
+  }
+  return g;
+}
+/** A hash of a position into [0, 1). */
+function hash(x, y, z) {
+  let h = Math.imul(Math.round(x * 50) + 0x9e3779b1, 0x85ebca6b) ^ Math.imul(Math.round(y * 50) + 0x7f4a7c15, 0xc2b2ae35) ^ Math.imul(Math.round(z * 50) + 0x165667b1, 0x27d4eb2f);
+  h ^= h >>> 15; h = Math.imul(h, 0x2c1b3c6d); h ^= h >>> 12; h = Math.imul(h, 0x297a2d39); h ^= h >>> 15;
+  return (h >>> 0) / 4294967296;
+}
+
+function towerUp(el, ctx) {
+  const F = frameOf(el.front, el.rect), u = upOf(el), M = new Matrix4().set(...F.M, 0, 0, 0, 1);
+  const rect = (r) => { const a = F.P(r[0], r[1]), b = F.P(r[2], r[3]); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
+  const bag = {
+    add: (m, g) => ctx.bag.add(m, vary(g.applyMatrix4(M))),
+    // (the window fittings are merged into the plan's meshes: copies placed here would be instanced meshes of their own, each a draw)
+    addInstance: (m, g, mx, o) => ctx.bag.add(o?.real ?? m, vary(g.clone().applyMatrix4(mx.clone().premultiply(M)))),
+  };
+  const col = {
+    rect: (r, y0, y1) => ctx.col.rect(rect(r), y0, y1),
+    floor: (r, y, tag) => ctx.col.floor(rect(r), y, tag),
+    ramp: (r, y0, y1, d) => ctx.col.ramp(rect(r), y0, y1, F.dir[d]),
+    circle: (x, z, r, y0, y1) => ctx.col.circle(...F.P(x, z), r, y0, y1),
+  };
+  const lights = { push: (l) => { const p = F.P(l.at[0], l.at[2]); ctx.lights.push({ ...l, at: [p[0], l.at[1], p[1]] }); } };
+  // the rubble plinth on the faces that show (the street's, and the sides where they are free), as the town's other towers have it
+  { const [, , DX, DZ] = u.rect, dz = houseDims(u.rect).doorZ + (u.doorAt - 5.3), put = (b) => bag.add('schist_rubble', box(...b));
+    put([-0.08, -0.6, 0, -0.08 + 0.08, 1.1, dz - 0.75]); put([-0.08, -0.6, dz + 0.75, 0.0, 1.1, DZ]);
+    if (u.kf.n) put([0, -0.6, -0.08, DX, 1.1, 0]);
+    if (u.kf.s) put([0, -0.6, DZ, DX, 1.1, DZ + 0.08]);
+    if (u.kf.e) put([DX, -0.6, 0, DX + 0.08, 1.1, DZ]); }
+  towerOpen({ rect: u.rect, storeys: el.storeys, seed: el.seed, kf: u.kf, noN: u.noN, doorAt: u.doorAt }, { ...ctx, bag, col, lights });
+}
+
+export const OPEN_ELEMENTS = { tower_open: towerOpen, tower_up: towerUp };

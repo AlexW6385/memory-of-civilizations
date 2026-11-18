@@ -1,8 +1,9 @@
 // Shibam's two landmarks (docs/settlements/shibam.md §2, §4): the tower house that can be entered — street door, stair, store and stable, the
 // women's floors, the majlis, the upper rooms, the roof terrace — and the Friday mosque, a court and a hall of piers with its minaret.
 
-import { LM, LMD, shops, HALL } from './layout.js';
-import { fl, topOf, T } from '../../styles/hadhrami/dims.js';
+import { LM, LMD, shops, HALL, ups } from './layout.js';
+import { fl, topOf, T, houseDims } from '../../styles/hadhrami/dims.js';
+import { kindOf, frameOf, upOf, upRoutes, routesIn } from '../../styles/hadhrami/up.js';
 
 const [X0, Z0, X1, Z1] = LM.rect, top = topOf(LM.storeys), dz = LMD.doorZ;
 const E = [{ t: 'tower_open', rect: LM.rect, storeys: LM.storeys, seed: 7 }];
@@ -18,6 +19,21 @@ rooms.push(room("the sultan's hall", HALL.rect, 0.06, 'hall'));
 rooms.push(room('the stair lobby', LMD.lobby, fl(0), 'hall'), room('the roof terrace', [X0 + 1.5, Z0 + 1.5, X1 - 1.5, Z1 - 1.5], top, 'open'));
 const walks = [[[X0 - 2.5, dz], [X0 - 0.3, dz], [LMD.I[0] + 1.2, dz], [LMD.xp + 0.15, dz], [LMD.room[0] + 2, dz]]];
 walks[0].y0 = 0;
+for (const r of routesIn(LM.rect, (u, v) => [u, v], LM.storeys)) { r.y0 = 0; walks.push(r); }
+// the towers of the rows nearest the arrival that can be climbed too (docs/settlements/shibam.md §15): each a tower_up, its rooms, and two walks from its door
+// (up the stair to the majlis, and to the roof's terrace)
+const NAMES6 = ['the store and stable', 'the women\'s floor', 'the family room', 'the bedroom', 'the majlis', 'the upper room', 'the room under the roof'];
+const bnd = [X0 - 6, Z0 - 6, X1 + 3, Z1 + 3];
+let upTop = top;
+for (const l of ups()) {
+  E.push({ t: 'tower_up', rect: l.rect, front: l.front, storeys: l.storeys, seed: l.seed, free: l.free });
+  const F = frameOf(l.front, l.rect), D = houseDims(upOf(l).rect), wr = (r) => { const a = F.P(r[0], r[1]), b = F.P(r[2], r[3]); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
+  for (let s = 0; s < l.storeys; s++) rooms.push(room(NAMES6[kindOf(s, l.storeys, l.seed)], wr(D.room), fl(s), 'hall'));
+  rooms.push(room('the stair', wr(D.lobby), fl(0), 'hall'), room('the roof terrace', wr([D.room[0] + 1.3, D.room[1] + 1.5, D.room[2] - 1.1, D.room[3] - 1.2]), topOf(l.storeys), 'open'));
+  for (const r of upRoutes(l)) { r.y0 = 0; walks.push(r); }
+  bnd[0] = Math.min(bnd[0], l.rect[0] - 4); bnd[1] = Math.min(bnd[1], l.rect[1] - 4); bnd[2] = Math.max(bnd[2], l.rect[2] + 4); bnd[3] = Math.max(bnd[3], l.rect[3] + 4);
+  upTop = Math.max(upTop, topOf(l.storeys));
+}
 
 export const house = {
   id: 'shibam-tower-house',
@@ -26,10 +42,10 @@ export const house = {
   style: 'hadhrami',
   origin: [0, 0], base: 0, yaw: 0,
   entrance: { at: [X0 - 2.2, dz], facing: 'e' },
-  bounds: [X0 - 6, Z0 - 6, X1 + 3, Z1 + 3],
+  bounds: bnd,
   view: [X0 - 2, Z0 - 2, X1 + 2, Z1 + 2],
   bakeBounds: [X0 - 2, Z0 - 2, X1 + 2, Z1 + 2],
-  bakeTop: top + 3,
+  bakeTop: upTop + 3,
   elements: E,
   rooms,
   walks,

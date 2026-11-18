@@ -4,6 +4,7 @@
 // outside. Pure data. Coordinates: metres, +x east, +z south.
 
 import { houseDims, topOf } from '../../styles/hadhrami/dims.js';
+import { UP_MIN, upDoor } from '../../styles/hadhrami/up.js';
 
 export const RADIUS = 190;
 /** The wall (its line) and the platform's height above the wadi floor outside. */
@@ -79,6 +80,8 @@ export function streets() {
 
 /** Where the street door stands along the front (the coordinate along the front: x for a front n or s), for a lot: off the middle, or in the middle for a shop. */
 export function doorOf(l) {
+  ups();
+  if (l.up) return upDoor(l);
   const r = rng(l.seed ^ 0x9e37), [x0, , x1] = l.rect, L = x1 - x0, t = l.shop ? 0.5 + (r() - 0.5) * 0.16 : 0.3 + 0.4 * r();
   return x0 + L * t;
 }
@@ -177,3 +180,17 @@ export function shopPoint(l, a, b) {
 export const shopSize = (l) => ({ W: l.shop.rect[2] - l.shop.rect[0], D: l.shop.rect[3] - l.shop.rect[1] });
 /** The palace hall's room (inside the ground storey's walls) and the door's coordinate. */
 export const HALL = { rect: [PALACE[0] + 0.9, PALACE[1] + 0.9, PALACE[2] - 0.9, PALACE[3] - 0.9], door: 0 };
+
+/**
+ * The tower houses of the rows nearest the arrival that can be climbed (docs/settlements/shibam.md §15): lots wide enough for the stair, the door and
+ * the rooms (UP_MIN), not the shops' (their ground floor is a shop), the nearest six to the arrival's square. Each gets .up = true.
+ */
+let UPS = null;
+export function ups(count = 6) {
+  if (UPS) return UPS;
+  shops();
+  const A = [-6, -8], d = (l) => Math.hypot(l.cx - A[0], l.cz - A[1]);
+  UPS = lots().filter((l) => !l.shop && l.rect[2] - l.rect[0] >= UP_MIN && (l.front === 'n' || l.front === 's')).sort((a, b) => d(a) - d(b)).slice(0, count);
+  for (const l of UPS) l.up = true;
+  return UPS;
+}

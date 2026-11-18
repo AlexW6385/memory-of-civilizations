@@ -12,7 +12,7 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1
 
 export function crown(ctx, el, D, top) {
   const { bag, col } = ctx, [X0, Z0, X1, Z1] = el.rect, n = el.storeys ?? 7, [I0, I1] = D.I, r = rng(((el.seed || 5) * 7919) >>> 0);
-  const t = K * top, a0 = X0 + t, b0 = Z0 + t, a1 = X1 - t, b1 = Z1 - t, pt = 0.34, L = 'lime_plaster';
+  const kf = el.kf ?? { w: K, n: K, e: K, s: K }, a0 = X0 + kf.w * top, b0 = Z0 + kf.n * top, a1 = X1 - kf.e * top, b1 = Z1 - kf.s * top, pt = 0.34, L = 'lime_plaster';
   const j = () => (r() - 0.5) * 0.004;
   const put = (pieces, x, y, z, nx, nz) => { const m = new Matrix4().makeRotationY(Math.atan2(nx, nz)).setPosition(x, y, z); for (const [mat, g] of pieces) bag.add(mat, g.clone().applyMatrix4(m)); };
 
@@ -51,7 +51,7 @@ export function crown(ctx, el, D, top) {
     bag.add('opening', box(sx0 + pt + 0.5, top + 0.9, sz0 + pt - 0.02, sx0 + pt + 1.1, top + 1.4, sz0 + pt)); }
 
   // ── the spouts of palm trunk through the parapet on the north and west faces, and the lime runnel the rain draws under each ──
-  const faceW = (y) => X0 + K * y, faceN = (y) => Z0 + K * y;
+  const faceW = (y) => X0 + kf.w * y, faceN = (y) => Z0 + kf.n * y;
   for (const x of [a0 + 3.3, a0 + 6.2, a0 + 8.6]) {
     put(spoutPieces(), x, top + 0.2, faceN(top + 0.2) - 0.0, 0, -1);
     bag.add(L, box(x - 0.15, top + 0.0, b0 - 0.02, x + 0.15, top + 0.04, b0 + 0.1)); bag.add(L, box(x - 0.15, top + 0.36, b0 - 0.02, x + 0.15, top + 0.41, b0 + 0.1));
@@ -65,20 +65,20 @@ export function crown(ctx, el, D, top) {
 
   // ── the floors' string courses (a lime band at each floor line, a drip under it), and the lime edging of the north-west corner ──
   for (let s = 1; s < n - 1; s++) {
-    const y = ys(s) - 0.42, q = K * y, p = 0.045;
+    const y = ys(s) - 0.42, qw = kf.w * y, qn = kf.n * y, p = 0.045;
     if (s === n - 2) continue;
-    bag.add(L, box(X0 + q - p, y, Z0 + q - p, X1 - K * y, y + 0.1, Z0 + q + 0.002)); bag.add(L, box(X0 + q - p, y + j(), Z0 + q, X0 + q + 0.002, y + 0.1, Z1 - K * y));
-    bag.add(L, box(X0 + q - p - 0.025, y - 0.04, Z0 + q - p - 0.025, X0 + q + 0.3, y, Z0 + q + 0.002)); bag.add(L, box(X0 + q - p - 0.025, y - 0.04 + j(), Z0 + q, X0 + q + 0.002, y, Z1 - K * y));
+    bag.add(L, box(X0 + qw - p, y, Z0 + qn - p, X1 - kf.e * y, y + 0.1, Z0 + qn + 0.002)); bag.add(L, box(X0 + qw - p, y + j(), Z0 + qn, X0 + qw + 0.002, y + 0.1, Z1 - kf.s * y));
+    bag.add(L, box(X0 + qw - p - 0.025, y - 0.04, Z0 + qn - p - 0.025, X0 + qw + 0.3, y, Z0 + qn + 0.002)); bag.add(L, box(X0 + qw - p - 0.025, y - 0.04 + j(), Z0 + qn, X0 + qw + 0.002, y, Z1 - kf.s * y));
   }
   for (let s = 0; s < n - 2; s++) {
-    const y0 = s === 0 ? 1.1 : ys(s), y1 = ys(s + 1), q = K * y0;
-    bag.add(L, box(X0 + q - 0.04, y0, Z0 + q - 0.04, X0 + q + 0.34, y1, Z0 + q + 0.003)); bag.add(L, box(X0 + q - 0.04 + j(), y0, Z0 + q, X0 + q + 0.003, y1, Z0 + q + 0.34));
+    const y0 = s === 0 ? 1.1 : ys(s), y1 = ys(s + 1), qw = kf.w * y0, qn = kf.n * y0;
+    bag.add(L, box(X0 + qw - 0.04, y0, Z0 + qn - 0.04, X0 + qw + 0.34, y1, Z0 + qn + 0.003)); bag.add(L, box(X0 + qw - 0.04 + j(), y0, Z0 + qn, X0 + qw + 0.003, y1, Z0 + qn + 0.34));
   }
 
   // ── the footing: a lime ledge on the plinth's head, and the rough courses of the stone (west either side of the door, and north) ──
-  { const dz = D.doorZ, q = K * 1.1;
+  { const dz = D.doorZ, qw = kf.w * 1.1, q = kf.n * 1.1;
     bag.add(L, box(X0 - 0.13, 1.1, Z0 - 0.13, X1, 1.18, Z0 + q + 0.002));
-    bag.add(L, box(X0 - 0.13, 1.1 + j(), Z0 - 0.1, X0 + q + 0.002, 1.18, dz - 0.75)); bag.add(L, box(X0 - 0.13, 1.1, dz + 0.75, X0 + q + 0.002, 1.18, Z1));
+    bag.add(L, box(X0 - 0.13, 1.1 + j(), Z0 - 0.1, X0 + qw + 0.002, 1.18, dz - 0.75)); bag.add(L, box(X0 - 0.13, 1.1, dz + 0.75, X0 + qw + 0.002, 1.18, Z1));
     const R = 'schist_rubble', row = (y0, h, k) => {
       // stones of 0.3–0.8 m, joggled, set a little proud of the plinth's face
       for (let u = X0 + 0.1; u < X1 - 0.1;) { const w = 0.3 + r() * 0.5, hh = h * (0.85 + r() * 0.3); bag.add(R, box(u, y0, Z0 - 0.15 - r() * 0.03, Math.min(u + w - 0.03, X1 - 0.1), y0 + hh, Z0 - 0.07)); u += w; }
