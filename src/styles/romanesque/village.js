@@ -6,6 +6,7 @@
 
 import { Shape, Path, ExtrudeGeometry, Matrix4 } from '../../core/three.js';
 import { box, lathe, rod, fromTriangles, orientOutward } from '../../core/geom.js';
+import { upPlan, slabPieces, stairZone, guard, upperFloor } from './upper.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 
@@ -79,6 +80,7 @@ function maison(el, { bag, col, lights }) {
   const hostel = !!el.hostel, open = el.open && !simple ? el.open : null, shop = !!el.shop && !hostel, dep = 0.5;
   const barn = el.kind === 'grange' && !hostel && !shop, vint = el.kind === 'vintner' && !hostel && !shop && !el.perron && L >= 5.6, ashlar = el.kind === 'ashlar' && !hostel && !shop;
   const ytop = y + G + (n - 1) * G2;
+  const UP = open && el.up && n > 1 ? upPlan(el) : null;           // the upper floor of this house is open (upper.js)
   const mir = rand() < 0.5, U = (u) => (mir ? L - u : u);        // the door's end
   // an outside stair to a door in the upper wall (front 's', wide houses: a stone flight along the front, a landing at the door)
   const perron = !!el.perron && !hostel && !shop && !open && !simple && n > 1 && L >= 7.4 && c.f === 's';
@@ -120,16 +122,28 @@ function maison(el, { bag, col, lights }) {
     const fy = y + 0.1, ceil = y + G;
     B(S, 0, dep, 0.5, D, y - 0.4, ceil); B(S, L - 0.5, dep, L, D, y - 0.4, ceil); B(S, 0.5, D - 0.5, L - 0.5, D, y - 0.4, ceil);
     B('flagstone', 0.5, dep, L - 0.5, D - 0.5, y - 0.4, fy);
-    B('timber', 0, 0, L, D, ceil - 0.22, ceil);
-    for (let u = 0.9; u < L - 0.5; u += 0.95) B('wood_dark', u - 0.1, dep, u + 0.1, D - 0.5, ceil - 0.46, ceil - 0.22);
+    if (UP) for (const q of slabPieces(UP)) B('timber', ...q, ceil - 0.22, ceil); else B('timber', 0, 0, L, D, ceil - 0.22, ceil);
+    for (let u = 0.9; u < L - 0.5; u += 0.95) {
+      // (over the stair's well the beam stops short of it: the climber's head)
+      const over = UP && u + 0.1 > UP.hole[0] - 0.15 && u - 0.1 < UP.hole[2] + 0.15;
+      B('wood_dark', u - 0.1, over ? UP.vT : dep, u + 0.1, D - 0.5, ceil - 0.46, ceil - 0.22);
+    }
     col.floor(c.R(0.5, dep, L - 0.5, D - 0.5), fy);
-    const rr = (a, b, e, f2) => col.rect(c.R(a, b, e, f2), y - 0.4, ytop + 1.5);
+    const rr = (a, b, e, f2, y0 = y - 0.4, y1 = ytop + 1.5) => col.rect(c.R(a, b, e, f2), y0, y1);
     rr(0, dep, 0.5, D); rr(L - 0.5, dep, L, D); rr(0.5, D - 0.5, L - 0.5, D);
-    rr(0, 0, doorCol[0], dep); rr(doorCol[1], 0, L, dep);
-    col.rect(el.rect, ceil - 0.22, ytop + 1.5);
-    furnish(c, open, { L, D, fy, ceil, du, dw, shopA, dep, rand, trade: el.trade, homeKind: el.homeKind ?? 0, barn });
+    if (UP) {
+      // the front wall: the door's gap below the floor above, the whole wall above it but for the balcony's door
+      rr(0, 0, doorCol[0], dep, y - 0.4, ceil - 0.22); rr(doorCol[1], 0, L, dep, y - 0.4, ceil - 0.22);
+      if (UP.bal) { rr(0, 0, UP.ub - 0.5, dep, ceil - 0.22, ytop + 1.5); rr(UP.ub + 0.5, 0, L, dep, ceil - 0.22, ytop + 1.5); } else rr(0, 0, L, dep, ceil - 0.22, ytop + 1.5);
+      col.rect(el.rect, ceil + G2 - 0.22, ytop + 1.5);
+    } else {
+      rr(0, 0, doorCol[0], dep); rr(doorCol[1], 0, L, dep);
+      col.rect(el.rect, ceil - 0.22, ytop + 1.5);
+    }
+    furnish(UP ? guard(c, stairZone(UP)) : c, open, { L, D, fy, ceil, du, dw, shopA, dep, rand, trade: el.trade, homeKind: el.homeKind ?? 0, barn });
     // the room is lit: a rushlight on its stand near the middle of the room (the hostel's long hall has two), at any hour
     for (const u of open === 'hostel' ? [L * 0.3, L * 0.7] : [L / 2]) { const q = c.P(u, D * 0.55); lights?.push({ at: [q[0], fy + 1.7, q[1]], color: '#ffb46b', intensity: 3, distance: 7 }); }
+    if (UP) upperFloor(c, el, UP, lights);
   }
   // the door: voussoirs of the arch in dressed stone, the step, the leaf of boards (shut unless the house is open)
   if (du !== null) {
@@ -195,12 +209,12 @@ function maison(el, { bag, col, lights }) {
   // string courses between the floors, the upper floors with their windows (single, or twin under one arch with a colonnette)
   for (let i = 1; i < n; i++) {
     const yi = y + G + (i - 1) * G2, wh = [];
-    const nw = Math.max(1, Math.floor(L / 2.3)), ws = [];
+    const nw = Math.max(1, Math.floor(L / 2.3)), ws = [], hollow = !!UP && i === 1;
     if (perron && i === 1) wh.push(arch(perD, 1.0, 0.0, 1.65));
     if (barn && i === 1) { ws.push([du, 'hatch']); wh.push(arch(du, 1.1, 0.0, 1.0)); }
-    else for (let k = 0; k < nw; k++) { const u = (k + 0.5) * L / nw; if (perron && i === 1 && Math.abs(u - perD) < 1.05) continue; const tw = (el.twin || ashlar) && (ashlar || k % 2 === 0 || nw === 1) && L / nw > 2.1; ws.push([u, tw]); wh.push(arch(u, tw ? 0.95 : 0.55, 0.85, 1.35)); }
-    X(S, wall(L, G2, 0, wh), dep, 0, yi);
-    B(S, 0, dep, L, D, yi, yi + G2);
+    else for (let k = 0; k < nw; k++) { const u = (k + 0.5) * L / nw; if (perron && i === 1 && Math.abs(u - perD) < 1.05) continue; const tw = (el.twin || ashlar) && (ashlar || k % 2 === 0 || nw === 1) && L / nw > 2.1; if (hollow && k === UP.balK) { wh.push(arch(UP.ub, 1.0, 0.0, 1.65)); continue; } ws.push([u, tw]); wh.push(arch(u, tw ? 0.95 : 0.55, 0.85, 1.35)); }
+    X(S, wall(L, G2, hollow ? -0.1 : 0, wh), dep, 0, yi);
+    if (hollow) { B(S, 0, dep, 0.5, D, yi, yi + G2); B(S, L - 0.5, dep, L, D, yi, yi + G2); B(S, 0.5, D - 0.5, L - 0.5, D, yi, yi + G2); } else B(S, 0, dep, L, D, yi, yi + G2);
     if (!simple) {
       B('limestone_yellow', -0.03, -0.07, L + 0.03, 0.04, yi - 0.1, yi + 0.06);
       for (const [u, tw] of ws) {
@@ -210,6 +224,7 @@ function maison(el, { bag, col, lights }) {
           B('limestone_yellow', u - 0.66, -0.06, u + 0.66, 0.1, yi - 0.08, yi + 0.0); continue;
         }
         const w = tw ? 0.95 : 0.55;
+        if (hollow) { if (tw) bag.add('limestone_yellow', lathe([[0.05, 0], [0.04, 0.4], [0.055, 0.45], [0.001, 0.45]], 8, null, ...(() => { const p = P(u, 0.25); return [p[0], yi + 0.85, p[1]]; })())); B('limestone_yellow', u - w / 2 - 0.1, -0.1, u + w / 2 + 0.1, 0.12, yi + 0.77, yi + 0.85); continue; }
         if (tw) {
           B('opening', u - w / 2, dep - 0.06, u + w / 2, dep - 0.03, yi + 0.85, yi + 1.6);
           bag.add('limestone_yellow', lathe([[0.05, 0], [0.04, 0.4], [0.055, 0.45], [0.001, 0.45]], 8, null, ...(() => { const p = P(u, 0.25); return [p[0], yi + 0.85, p[1]]; })()));
@@ -219,7 +234,7 @@ function maison(el, { bag, col, lights }) {
         B('limestone_yellow', u - w / 2 - 0.1, -0.1, u + w / 2 + 0.1, 0.12, yi + 0.77, yi + 0.85);
       }
       // a timber gallery on the upper floor's front: planks on beams, posts down to the lane, a rail
-      if (el.gallery && !perron && i === 1 && !shop && L > 4.4) {
+      if (el.gallery && !perron && i === 1 && !shop && L > 4.4 && !UP) {
         B('wood_dark', 0.2, -1.05, L - 0.2, 0.0, yi - 0.28, yi - 0.1); B('timber', 0.2, -1.05, L - 0.2, 0.0, yi - 0.1, yi);
         for (const u of [0.3, L / 2, L - 0.3]) B('wood_dark', u - 0.07, -1.0, u + 0.07, -0.86, y, yi - 0.28);
         B('wood_dark', 0.2, -1.04, L - 0.2, -0.98, yi + 0.9, yi + 0.98); B('wood_dark', 0.2, -1.04, L - 0.2, -0.98, yi + 0.4, yi + 0.46);
@@ -255,7 +270,7 @@ function maison(el, { bag, col, lights }) {
     bag.add('lauze', box(cx - 0.36, top + 0.1, cz - 0.3, cx + 0.36, top + 0.18, cz + 0.3));
   } else if (el.chim) bag.add(S, box(el.chim[0] - 0.36, ytop - 0.4, el.chim[1] - 0.3, el.chim[0] + 0.36, chimneyTop(el), el.chim[1] + 0.3));
   // wall plate under the eave (hides the slit between wall and slab)
-  if (!simple) { B('wood_dark', -0.02, -0.04, L + 0.02, 0.04, ytop - 0.1, ytop + 0.08); dress(c, el, { y, G, G2, n, L, D, du, dw, dh, dep, wins, shopA, shop, hostel, open, perron, perD, perS, mir, ytop, col, barn }); }
+  if (!simple) { B('wood_dark', -0.02, -0.04, L + 0.02, 0.04, ytop - 0.1, ytop + 0.08); dress(c, el, { up: UP, y, G, G2, n, L, D, du, dw, dh, dep, wins, shopA, shop, hostel, open, perron, perD, perS, mir, ytop, col, barn }); }
 }
 
 // ── the fronts dressed at eye level: what a visitor sees at 1–20 m (docs/settlements/conques.md §1i) ──
@@ -303,8 +318,9 @@ function dress(c, el, o) {
     for (let k = 0; k < nw; k++) {
       const u = (k + 0.5) * L / nw;
       if (perron && Math.abs(u - perD) < 1.05) continue;
+      if (o.up && k === o.up.balK) continue;
       if (r() < 0.35) { fill(bag, 'terracotta', c, u, 0.0, yi + 0.85, 0.09, 0.13); fill(bag, 'flax_leaf', c, u, 0.0, yi + 0.96, 0.13, 0.15); }
-      else if (r() < 0.25) { B('cloth_' + ['red', 'ochre', 'white', 'indigo'][Math.floor(r() * 4)], u - 0.22, -0.06, u + 0.22, -0.03, yi + 0.5, yi + 1.1); B('wood_dark', u - 0.24, -0.08, u + 0.24, -0.04, yi + 1.1, yi + 1.14); }
+      else if (r() < 0.25) { const cn = 'cloth_' + ['red', 'ochre', 'white', 'indigo'][Math.floor(r() * 4)]; if (!o.up) { B(cn, u - 0.22, -0.06, u + 0.22, -0.03, yi + 0.5, yi + 1.1); B('wood_dark', u - 0.24, -0.08, u + 0.24, -0.04, yi + 1.1, yi + 1.14); } }
     }
   }
   // iron anchor plates of the tie rods at the floor between the storeys, a pair on the front
@@ -810,4 +826,4 @@ function tannerie(el, { bag, col }) {
   B('wood_dark', sx0 + 2.5, sz0 + 0.5, sx0 + 3.7, sz0 + 0.9, y, y + 0.45, true);
   void gz;
 }
-export const villageElements = { maison, calade, stairs, retain, strip, jardin, croix, fontaine, porte, roue, tannerie };
+export const villageElements = { way_reserve: () => {}, maison, calade, stairs, retain, strip, jardin, croix, fontaine, porte, roue, tannerie };

@@ -92,6 +92,7 @@ export const worksLevel = () => ({ tannery: maxH([TANNERY.rect[0], TANNERY.rect[
 export const WORKS = [[TANNERY.rect[0] - 1.5, TANNERY.rect[1] - 2.5, TANNERY.rect[2] + 2, TANNERY.rect[3] + 1.5], [MILL.rect[0] - 2.5, MILL.rect[1] - 4, MILL.rect[2] + 2.5, MILL.rect[3] + 0.5]];
 
 const overlap = (a, b, m = 0) => a[0] < b[2] + m && a[2] > b[0] - m && a[1] < b[3] + m && a[3] > b[1] - m;
+const UP_MAX = 30, UP_R = 95;                         // how many houses have their upper floor open, within what distance of the arrival
 let LOTS = null, GARDENS = null;
 function build() {
   LOTS = []; GARDENS = [];
@@ -202,6 +203,15 @@ function build() {
     const want = l.kind ? roll < 0.8 : roll < 0.2;
     if (!want || more >= 70) continue;
     l.open = 'home'; l.homeKind = KINDHOME[l.kind] ?? plain++ % 3; more++;
+  }
+  // the upper floors (docs/settlements/conques.md §1m): the open houses nearest the arrival, each by its kind, some with a balcony onto the lane
+  const UPKIND = { ashlar: 'merchant', grange: 'hay', vintner: 'vintner', herder: 'herder', fisher: 'fisher' }, HOMEUP = ['family', 'spinner', 'farmer'];
+  let ups = 0;
+  for (const l of [...LOTS].filter((q) => q.open && q.storeys > 1).sort((a2, b2) => dist(a2) - dist(b2))) {
+    if (ups >= UP_MAX || dist(l) > UP_R) break;
+    l.up = l.hostel ? 'hostel' : l.open === 'shop' ? (l.trade === 'tavern' ? 'inn' : 'shop') : UPKIND[l.kind] ?? HOMEUP[l.homeKind % 3];
+    l.bal = l.up === 'inn' || l.up === 'merchant' || l.up === 'hostel' || l.gallery || (l.up === 'shop' && l.seed % 3 === 0);
+    ups++;
   }
 }
 /** The houses (and the hostel) on the shelves. */
