@@ -182,7 +182,7 @@ function lift(k, Y) {
     ...k,
     bx: (m, u0, y0, v0, u1, y1, v1, s) => k.bx(m, u0, y0 + Y, v0, u1, y1 + Y, v1, s),
     jar: (m, u, y, v, s) => k.jar(m, u, y + Y, v, s), bowl: (m, u, y, v, r) => k.bowl(m, u, y + Y, v, r), heap: (m, u, y, v, r, h) => k.heap(m, u, y + Y, v, r, h),
-    mat: (u0, v0, u1, v1, y = 0, m) => k.mat(u0, v0, u1, v1, y + Y, m), stool: (u, v, y = 0, s) => k.stool(u, v, y + Y, s), sack: (u, v, y = 0, m, s) => k.sack(u, v, y + Y, m, s),
+    mat: (u0, v0, u1, v1, y = 0, m) => k.mat(u0, v0, u1, v1, y + Y, m), stool: () => {},          // (no stools upstairs: they would be a small piece of timber more in every tile) sack: (u, v, y = 0, m, s) => k.sack(u, v, y + Y, m, s),
     bigjar: (u, v, y = 0) => k.bigjar(u, v, y + Y), lathe_: (m, prof, n, u, y, v) => k.lathe_(m, prof, n, u, y + Y, v),
   };
 }
@@ -221,8 +221,8 @@ function richStructure(k, U, el) {
   { const r3 = (a, b, c) => hh(a, b, c), um = 0.7 + r3(1, 1, 1) * Math.max(0.1, (hole ? hole[0] : W) - 3.2);
     k.mat(um, 0.7, um + 1.5 + r3(2, 2, 2) * 0.4, 1.5 + r3(3, 3, 3) * 0.3, Hf, 'reed_mat');
     k.bx(r3(4, 4, 4) < 0.5 ? 'cloth_indigo' : 'cloth_ochre', um + 0.15, Hf + 0.02, 0.8, um + 0.95 + r3(5, 5, 5) * 0.3, Hf + 0.05, 1.3);
-    for (let i = 0; i < 2; i++) k.jar(i ? "pottery_dark" : "terracotta", 0.9 + i * 0.6 + r3(6, i, 6) * 0.2, Hf, 0.42 + r3(7, i, 7) * 0.06, 1.2 + r3(8, i, 8) * 0.4);
-    for (let i = 0; i < 5; i++) { const u0 = W - 2.3 + i * 0.09 + r3(9, i, 9) * 0.04; k.bx('bark_pine', u0, Hf, 0.5 + i * 0.03, u0 + 0.07, Hf + 0.07, 1.45 + r3(10, i, 10) * 0.4); } }
+    for (let i = 0; i < 2; i++) k.jar('terracotta', 0.9 + i * 0.6 + r3(6, i, 6) * 0.2, Hf, 0.42 + r3(7, i, 7) * 0.06, 1.2 + r3(8, i, 8) * 0.4);
+    for (let i = 0; i < 5; i++) { const u0 = W - 2.3 + i * 0.09 + r3(9, i, 9) * 0.04; k.bx('timber', u0, Hf, 0.5 + i * 0.03, u0 + 0.07, Hf + 0.07, 1.45 + r3(10, i, 10) * 0.4); } }
   void tw;
 }
 
@@ -230,8 +230,8 @@ function richStructure(k, U, el) {
 function bedAt(k, u, v, len, seed) {
   const a = u + 0, h = hash(u, v, seed);
   k.bx(BS, a, 0, v, a + len, 0.48 + h * 0.04, v + 0.9 + h * 0.06, true);
-  k.mat(a, v, a + len, v + 0.9 + h * 0.06, 0.52 + h * 0.04);
-  k.bx(h < 0.5 ? 'cloth_indigo' : 'cloth_ochre', a + 0.15 + h * 0.1, 0.54 + h * 0.04, v + 0.08, a + len - 0.3 + h * 0.15, 0.59 + h * 0.04, v + 0.8);
+  k.mat(a, v, a + len, v + 0.9 + h * 0.06, 0.52 + h * 0.04, 'wicker');
+  k.bx(h < 0.5 ? 'cloth_blue' : 'cloth_ochre', a + 0.15 + h * 0.1, 0.54 + h * 0.04, v + 0.08, a + len - 0.3 + h * 0.15, 0.59 + h * 0.04, v + 0.8);
   k.bx('timber', a + len - 0.3, 0.52 + h * 0.04, v + 0.1, a + len - 0.05, 0.64 + h * 0.04, v + 0.75);
 }
 
@@ -256,36 +256,36 @@ function upperRooms(k, U, el) {
       bedAt(ky, at[0], 0.55, len, 1);
       if (z[1] - z[0] > 4.4) bedAt(ky, at[1], 0.55, len - 0.2, 2);
       const s = bs(z);
-      if (s) { ky.bx('timber', s[0] + 0.05, 0, 2.85, s[0] + 0.95 + hh(s[0], 3) * 0.1, 0.5, 3.45, true); ky.jar('pottery_dark', s[0] + 1.35, 0, 3.15, 1.1 + hh(s[0], 4) * 0.2); }
+      if (s) { ky.bx('timber', s[0] + 0.05, 0, 2.85, s[0] + 0.95 + hh(s[0], 3) * 0.1, 0.5, 3.45, true); ky.jar('terracotta', s[0] + 1.35, 0, 3.15, 1.1 + hh(s[0], 4) * 0.2); }
       else ky.bx('timber', z[0] + 0.1 + len + 0.15, 0, 0.6, z[0] + len + 1.1 + hh(z[0], 5) * 0.1, 0.5, 1.15, true);
     },
     store(z, e) {
       const s = bs(z);
       if (s) for (let i = 0; i < Math.min(3, Math.floor((s[1] - s[0]) / 1.1)); i++) ky.bigjar(s[0] + 0.6 + i * (1.05 + hh(s[0], i, 6) * 0.08), 2.95 + hh(s[0], i, 7) * 0.1);
       const n = Math.min(5, Math.floor((z[1] - z[0]) / 0.55));
-      for (let i = 0; i < n; i++) ky.sack(z[0] + 0.35 + i * 0.5, 0.75 + (i % 2) * 0.1 + hh(z[0], i, 8) * 0.08, 0, i % 3 ? 'sacking' : 'hide_tan', 0.85 + hh(z[0], i, 9) * 0.3);
-      for (let i = 0; i < 3; i++) ky.bx(['cloth_white', 'cloth_indigo', 'cloth_ochre'][(i + Math.floor(hh(z[0], 10) * 3)) % 3], z[1] - 1.1 + hh(z[0], i, 11) * 0.1, 0.42 * i, 0.55, z[1] - 0.1 - hh(z[0], i, 12) * 0.12, 0.42 * (i + 1), 1.3 + hh(z[0], i, 13) * 0.1);
+      for (let i = 0; i < n; i++) ky.sack(z[0] + 0.35 + i * 0.5, 0.75 + (i % 2) * 0.1 + hh(z[0], i, 8) * 0.08, 0, 'wicker', 0.85 + hh(z[0], i, 9) * 0.3);
+      for (let i = 0; i < 3; i++) ky.bx(['cloth_ochre', 'cloth_blue'][(i + Math.floor(hh(z[0], 10) * 2)) % 2], z[1] - 1.1 + hh(z[0], i, 11) * 0.1, 0.42 * i, 0.55, z[1] - 0.1 - hh(z[0], i, 12) * 0.12, 0.42 * (i + 1), 1.3 + hh(z[0], i, 13) * 0.1);
       void e;
     },
     work(z) { roomContents(ky, 'loom', uR, -1, 0.55 + hh(uR, 1) * 0.05, 2.35, rand); },
     study(z) { roomContents(ky, 'school', uR, -1, 0.55, 2.4, rand); },
     guest(z, e) {
       const a = z[0] + 0.15 + hh(z[0], 20) * 0.1;
-      for (let i = 0; i < 2 && a + 2.3 * (i + 1) < z[1]; i++) { const u = a + i * 2.1; ky.mat(u, 0.6, u + 1.9 + hh(u, 21) * 0.1, 1.5, 0, 'reed_mat'); ky.bx(i ? 'cloth_ochre' : 'cloth_indigo', u + 0.1, 0.02, 0.7, u + 1.4 + hh(u, 22) * 0.2, 0.08, 1.3); ky.sack(u + 1.7, 1.55 + hh(u, 23) * 0.1, 0, 'hide_tan', 0.7); }
+      for (let i = 0; i < 2 && a + 2.3 * (i + 1) < z[1]; i++) { const u = a + i * 2.1; ky.mat(u, 0.6, u + 1.9 + hh(u, 21) * 0.1, 1.5, 0, 'wicker'); ky.bx(i ? 'cloth_ochre' : 'cloth_blue', u + 0.1, 0.02, 0.7, u + 1.4 + hh(u, 22) * 0.2, 0.08, 1.3); ky.sack(u + 1.7, 1.55 + hh(u, 23) * 0.1, 0, 'wicker', 0.7); }
       const s = bs(z); if (s) { ky.bx(BS, s[0] + 0.1, 0, 2.95, s[1] - 0.1, 0.42, 3.45 + hh(s[0], 24) * 0.05, true); ky.jar('terracotta', s[0] + 0.4, 0.42, 3.2, 1.0 + hh(s[0], 25) * 0.2); }
       void e;
     },
     cell(z, e) {
       bedAt(ky, e ? z[1] - 2.0 : z[0] + 0.1, 0.55, 1.8 + hh(z[0], 30) * 0.12, 3);
       const u = e ? z[0] + 0.5 : z[1] - 0.6;
-      ky.bx(BS, u, 0, 0.6, u + 0.55 + hh(u, 31) * 0.05, 0.3, 1.1, true); ky.bowl('pottery_dark', u + 0.28, 0.3, 0.85, 0.2 + hh(u, 32) * 0.04);
+      ky.bx(BS, u, 0, 0.6, u + 0.55 + hh(u, 31) * 0.05, 0.3, 1.1, true); ky.bowl('terracotta', u + 0.28, 0.3, 0.85, 0.23 + hh(u, 32) * 0.04);
       const s = bs(z); if (s) ky.bx('timber', s[0] + 0.05, 0, 2.9, s[0] + 0.85 + hh(s[0], 33) * 0.1, 0.5, 3.45, true);
     },
   };
   roles.forEach((role, i) => fill[role](i ? east : west, i));
   // a calabash shelf on the street wall's inner face between the windows, as in the single room
   { const um = (west[0] + east[1]) / 2; k.bx('timber', um - 1.0, H1 + 1.7, 0.45, um + 1.0, H1 + 1.76, 0.75);
-    for (let i = 0; i < 4; i++) k.bowl('hide_tan', um - 0.8 + i * 0.5 + hh(um, i, 40) * 0.1, H1 + 1.76, 0.6, 0.17 + hh(um, i, 41) * 0.05); }
+    for (let i = 0; i < 4; i++) k.bowl('terracotta', um - 0.8 + i * 0.5 + hh(um, i, 40) * 0.1, H1 + 1.76, 0.6, 0.23 + hh(um, i, 41) * 0.04); }
   void vc0; void uB;
 }
 
