@@ -4,6 +4,9 @@
 import { RADIUS, MARKET, LEVEL, ISLAND, MOSQUE, SHOPS, COURT, houses, shore, inHouse } from './layout.js';
 import { ground } from './ground.js';
 import { boatFloat } from '../../objects/index.js';
+import { lodTiles } from '../lod.js';
+/** How far from the visitor the houses are built in full (m); the arrival (the market, 95 m from the mosque) sees the simple form only of what lies beyond. */
+const NEAR = 135;
 
 const base = (id, elements) => ({ id, style: 'sahel', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [70, 0], facing: 'w' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -322,7 +325,15 @@ export async function town() {
     plans.push({ ...base('djenne-yards-life', Pm), style: 'life' }); }
   plans.push(base('djenne-shops', [{ t: 'sahel_shops', rect: SHOPS, n: 8, seed: 3 }, { t: 'sahel_court_house', rect: COURT, seed: 9 }]));
   const all = houses(), homes = enterable(all);
-  for (let i = 0; i < all.length; i += 110) plans.push(base(`djenne-houses-${i / 110}`, all.slice(i, i + 110).map((h) => ({ t: homes.has(h) ? 'sahel_home' : 'sahel_house', ...h, kind: kindOf(h) }))));
+  // the houses in tiles of 100 m, each built twice (src/settlements/lod.js): in full (interiors, fittings, door work) within NEAR of the visitor, simple (the solid form, the
+  // facade's masses, the door) beyond; the arrival at the market sees the far form only of what is far
+  const lots = all.map((h) => ({ rect: h.rect, front: h.front, storeys: h.storeys, seed: h.seed, kind: kindOf(h), home: homes.has(h) }));
+  // (the street life reads the houses from the plans (src/objects/life.js) and chooses its places by their order: `sahel_house_lot` is the plan of the lots in their own order,
+  // drawing nothing; the tiles' elements are named `sahel_near_wall`, which it does not take for houses, so that the life lies as it lay before the tiles)
+  plans.push(base('djenne-lots', lots.map((l) => ({ t: 'sahel_house_lot', ...l }))));
+  const lod = lodTiles('djenne-houses', 'sahel', lots.map((l) => ({ t: 'sahel_near_wall', ...l })), { near: NEAR, R: RADIUS, entrance: { at: [70, 0], facing: 'w' } });
+  for (const p of lod) if (p.far) p.elements = p.elements.map((e) => ({ ...e, simple: true }));
+  plans.push(...lod);
   plans.push({ ...base('djenne-home-life', [...homeLife(homes), ...frontsLife(all), ...laneLife(all), ...mosqueLife(), ...plain()]), style: 'life' });
   return plans;
 }
