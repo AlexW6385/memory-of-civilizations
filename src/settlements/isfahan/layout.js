@@ -165,7 +165,7 @@ export const ARCADE_RUNS = (() => {
   return out;
 })();
 /** The shops that can be entered: every second bay of the arcade within 115 m of the arrival (a shop room 5 m deep behind the door, lit, furnished by its trade, the shopkeeper in it). */
-export const ARCADE_OPEN = { at: ARRIVAL, r: 115, every: 2, not: [[-84, 252, -12, 292]] };   // not: where the Shah Mosque's court and its masses stand behind the arcade
+export const ARCADE_OPEN = { at: ARRIVAL, r: 115, every: 2, up: 91, not: [[-84, 252, -12, 292]] };   // not: where the Shah Mosque's court and its masses stand behind the arcade
 export const SHOP_TRADES = ['cloth', 'carpet', 'copper', 'spice', 'pottery'];
 /** Every bay of the arcade: { c (on the wall line), u (along), n (away from the square), w (bay width), open, trade }. */
 export function arcadeBays() {
@@ -210,4 +210,12 @@ export function upWalk(h) {
   const path = []; for (let i = 1; i >= 0; i = prev[i]) path.unshift(nodes[i]);
   const tL = pl.uF + pl.run, vm = (0.35 + pl.dw - 0.47) / 2;
   return [...out, ...path, upP(pl, pl.uF + pl.run / 2, -STRIP / 2), upP(pl, tL + 0.5, -STRIP / 2), upP(pl, tL + 0.5, 0.8), upP(pl, pl.Lr + 0.5, 0.7), upP(pl, pl.Lr + 0.5, vm), upP(pl, pl.Lr - 0.9, vm), upP(pl, pl.Lr - 1.5, vm)];
+}
+
+/** The shops of the arcade with a room over them (stair behind the shop's back wall, room, loggia on the square): the open bays within ARCADE_OPEN.up m of the arrival. */
+export const arcadeUpBays = () => arcadeBays().filter((b) => b.open && Math.hypot(b.c[0] + b.n[0] * 8 - ARCADE_OPEN.at[0], b.c[1] + b.n[1] * 8 - ARCADE_OPEN.at[1]) < ARCADE_OPEN.up);
+/** The walk from the square into such a shop, up the two flights behind its back wall, through the room to the loggia over the passage. */
+export function arcadeUpWalk(b) {
+  const q = (s, d) => [b.c[0] + b.u[0] * s + b.n[0] * d, b.c[1] + b.u[1] * s + b.n[1] * d], s0 = -b.w / 2, sa = s0 + 1.35, sb = b.w / 2 - 1.15, k = b.c[0] < 0 && Math.abs(b.c[1] - 181.2) < 1 ? -2.2 : 2.2;   // (the side of the way in from the square that the street life's strollers leave free: found by search, re-run when the life's places shift)
+  return [q(k, -9), q(k, -4.8), q(0.3, -2.2), q(0, 2.2), q(0, 4.7), q(s0 + 0.9, 4.9), q(s0 + 0.8, 8.9), q(s0 + 0.8, 9.55), q(s0 + 0.8, 10.3), q(sa + 0.3, 10.1), q(sb - 0.3, 10.1), q(sb + 0.4, 10.6), q(sb - 0.2, 11.0), q(sa + 0.3, 11.0), q(s0 + 0.85, 11.0), q(s0 + 0.8, 10.0), q(s0 + 0.8, 9.55), q(s0 + 0.8, 8.8), q(0, 7.0), q(0, 4.4), q(0, 3.0), q(0, 1.0), q(0, 0.1)];
 }

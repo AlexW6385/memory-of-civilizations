@@ -105,7 +105,7 @@ export function houseUpstairs({ bag, col, lights }, pl, M, kind, seed) {
   lights.push({ at: [lc[0], hB + CH - 0.8, lc[1]], color: '#ffb46b', intensity: 3.2, distance: 6.5 });
 
   // ---- what the room is used for (t along the wing from the foot end, v from the court face; the door on the terrace side at T1)
-  const at = p, y = hB;
+  const at = p, y = hB + 0.012;
   const cush = (t, v, w, d, h, yw, m, yy = y) => { const q = at(t, v); F.cushion(bag, q[0], yy, q[1], w, d, h, yw, m); };
   const bolster = (t, v, ln, m, e) => { const q = at(t, v); F.bolster(bag, q[0], y, q[1], ln, 0.13, yawA, m, e); };
   const chest = (t, v, w, d, h, yw = yawA) => { const q = at(t, v); F.chest(bag, q[0], y, q[1], w, d, h, yw); };

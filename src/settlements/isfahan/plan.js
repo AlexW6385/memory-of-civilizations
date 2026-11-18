@@ -4,7 +4,7 @@
 // toward Mecca); the Sheikh Lotfollah Mosque; Ali Qapu with its talar; the Qeysarieh portal and the
 // first stretch of the vaulted bazaar; the royal garden behind Ali Qapu.
 
-import { SQUARE, ARCADE, CANAL, GARDEN, BAZAAR, PORTAL, COURT, M, C, LOTF, ALIQAPU, ARCADE_RUNS, ARCADE_OPEN, arcadeBays, openHouses, upWalk } from './layout.js';
+import { SQUARE, ARCADE, CANAL, GARDEN, BAZAAR, PORTAL, COURT, M, C, LOTF, ALIQAPU, ARCADE_RUNS, ARCADE_OPEN, arcadeBays, openHouses, upWalk, arcadeUpBays, arcadeUpWalk } from './layout.js';
 
 const E = [];
 const [sx0, sz0, sx1, sz1] = SQUARE, H = 12;
@@ -108,6 +108,7 @@ const walks = [[[0, -280], [1.3, -267.3], [0, 68.8], [0, 245]]];   // down the s
 walks[0].y0 = 0;
 walks.push([[-70, 167.5], [-82.6, 167.5], [-88, 167.5], [-82.6, 167.5]], [[70, 181.2], [82.6, 181.2], [88, 181.2]]);          // into an arcade shop on each side of the square, by the arch and the doorway
 walks.push(...openHouses().filter((h) => h.up).map((h) => upWalk(h)));   // up the stair of each house with an upstairs (docs/settlements/isfahan.md §25)
+walks.push(...arcadeUpBays().map((b) => arcadeUpWalk(b)));   // up behind the back wall of each shop with a room over it
 
 export const square = {
   id: 'isfahan-maidan',
