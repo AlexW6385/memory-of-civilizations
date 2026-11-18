@@ -289,18 +289,21 @@ export const acropolis = {
 const PE = parthenonPlan.elements, DE = PE.find((e) => e.t === 'doric_entablature'), PR = PE.find((e) => e.t === 'pediment_roof');
 const pediment = (dir) => {
   const [x0, z0, x1, z1] = PR.rect, inset = PR.tympanumInset, rg = PR.rakingGeison;
-  return { t: 'pediment_sculpture', x: (dir > 0 ? x1 : x0) - dir * inset, dir, zc: (z0 + z1) / 2, half: (z1 - z0) / 2, y: PR.y, rise: PR.rise, depth: inset,
-    apex: PR.y + PR.rise - rg * 0.9, tz: (z1 - z0) / 2 - inset * 0.6, programme: dir > 0 ? 'parthenon-east' : 'parthenon-west', paint: 'egyptian_blue' };
+  // (the groups built with the figure kit, src/buildings/parthenon/sculpture.js: the east, which the stair looks at, in full, the west reduced)
+  return { t: 'parthenon_pediment', x: (dir > 0 ? x1 : x0) - dir * inset, dir, zc: (z0 + z1) / 2, half: (z1 - z0) / 2, y: PR.y, rise: PR.rise, depth: inset,
+    apex: PR.y + PR.rise - rg * 0.9, tz: (z1 - z0) / 2 - inset * 0.6, programme: dir > 0 ? 'east' : 'west', lod: dir > 0 ? 0 : 1, paint: 'egyptian_blue' };
 };
 const FX = 26.725, FZ = 10.85, FY = DE.y + DE.arch;                      // the frieze: the outer faces of the cella walls and the porch beams
 const parthenonArt = [
   pediment(1), pediment(-1),
-  { ...DE, t: 'metopes', programme: { e: 'gigantomachy', w: 'amazonomachy', n: 'troy', s: 'centauromachy' }, bg: 'wall_red', band: 'egyptian_blue' },
+  // the fourteen metopes of the east front and the eight of the south side nearest it are rebuilt in high relief (parthenon_metopes)
+  { ...DE, t: 'metopes', programme: { e: 'gigantomachy', w: 'amazonomachy', n: 'troy', s: 'centauromachy' }, bg: 'wall_red', band: 'egyptian_blue', only: { e: [], s: Array.from({ length: 24 }, (_, i) => i) } },
+  { ...DE, t: 'parthenon_metopes', bg: 'wall_red', band: 'egyptian_blue', east: true, south: [24, 25, 26, 27, 28, 29, 30, 31] },
+  { t: 'parthenon_east_frieze', x: FX, zc: 0, half: FZ, y0: FY, h: 1.0, bg: 'egyptian_blue' },
   { t: 'frieze_relief', y0: FY, h: 1.0, bg: 'egyptian_blue', runs: [
     { a: [-FX, -FZ], b: [FX, -FZ], o: [0, -1], seq: 'procession', toward: 'b' },
     { a: [-FX, FZ], b: [FX, FZ], o: [0, 1], seq: 'procession', toward: 'b' },
     { a: [-FX, FZ], b: [-FX, -FZ], o: [-1, 0], seq: 'cavalcade', toward: 'b' },
-    { a: [FX, FZ], b: [FX, -FZ], o: [1, 0], seq: 'east', toward: 'mid' },
   ] },
 ];
 export const parthenon = { ...parthenonPlan, elements: [...PE.map((e) => (e === DE ? { ...e, triglyphMat: 'egyptian_blue' } : e)), ...parthenonArt],

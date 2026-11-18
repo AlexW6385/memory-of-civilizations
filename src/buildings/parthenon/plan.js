@@ -6,6 +6,7 @@ import { SITES } from '../../world/regions.js';
 import './treasury.js';
 import './parthenos.js';
 import './cornice.js';
+import './sculpture.js';
 
 const E = [];
 const add = (o) => (E.push(o), o);
