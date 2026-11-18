@@ -10,6 +10,7 @@ import { esagila, etemenanki, bridge, quay, quffa } from './temple.js';
 import { babylonianHouses } from './house.js';
 import { babylonShop, babylonYard } from './shop.js';
 import { babylonianLanes } from './lanes.js';
+import { Soup, soupy, figure, rosette as sRosette, freeRelief, hash } from './sculpt.js';
 
 // K: black glaze (the outlines and enamelled lines; no black glaze in the palette, the black lacquer stands in);
 // R: the opaque red enamel of the manes (Koldewey: since decomposed to green)
@@ -157,6 +158,33 @@ export function beasts(bag, r, face, y, { kind = 'lion', step = 3, size = 1, dir
     }
   }
 }
+
+/** The level of detail (0 full, 1 reduced, 2 far) of a piece at (x, z) by its distance from the arrival: lod = { at: [x, z], full, mid } (none: full). */
+function levelAt(lod, x, z) {
+  if (!lod) return 0;
+  const d = Math.hypot(x - lod.at[0], z - lod.at[1]);
+  return d < lod.full ? 0 : d < lod.mid ? 1 : 2;
+}
+const hidden = (lod) => lod && { ...lod, full: 0, mid: 0 };
+const frame = (P) => { const O = P(0, 0, 0), a = P(1, 0, 0), b = P(0, 1, 0), c = P(0, 0, 1); return { O, U: [a[0] - O[0], a[1] - O[1], a[2] - O[2]], V: [b[0] - O[0], b[1] - O[1], b[2] - O[2]], N: [c[0] - O[0], c[1] - O[1], c[2] - O[2]] }; };
+/** The modelled beasts (sculpt.js) in a row on a face, as beasts(): the level of each by its place (lod); without a soup the old relief. */
+function sBeasts(bag, r, face, y, o, lod) {
+  if (!bag.soup) return beasts(bag, r, face, y, o);
+  const { kind = 'lion', step = 3, size = 1, dir = 1 } = o, [a, b] = faceSpan(r, face), L = b - a, n = Math.max(1, Math.floor(L / step)), P = facePoint(r, face);
+  for (let i = 0; i < n; i++) {
+    const u0 = a + (i + 0.5) * L / n, place = (du, dv, w) => P(u0 + du, y + dv, w), c = place(0, 0.5 * size, 0);
+    figure(bag.soup, kind, place, { size, dir, level: levelAt(lod, c[0], c[2]), alt: i % 2 === 1, seed: Math.round(u0 * 100) * 7 + Math.round(y * 100) * 13 + face.charCodeAt(0) });
+  }
+}
+/** A row of modelled rosettes as rosettes(), of the radius rad, the level of each by its place. */
+function sRosettes(bag, r, face, y, step, rad, lod) {
+  if (!bag.soup) return rosettes(bag, r, face, y, step, rad);
+  const [a, b] = faceSpan(r, face), L = b - a, m = Math.max(1, Math.floor(L / step)), P = facePoint(r, face), { U, V, N } = frame(P);
+  for (let i = 0; i < m; i++) {
+    const at = P(a + (i + 0.5) * L / m, y, 0.004);
+    sRosette(bag.soup, at, U, V, N, rad, levelAt(lod, at[0], at[2]) + (levelAt(lod, at[0], at[2]) === 2 ? 0 : 0));
+  }
+}
 /**
  * The arch over a passage between x0 and x1 (along z from z0 to z1): a solid from the springing ys to
  * yt with a round-headed opening, and a ring of white and yellow glaze round it on both faces.
@@ -191,7 +219,8 @@ function archInfill(bag, col, x0, x1, ys, yt, z0, z1, mat) {
     const a = Math.PI * (0.1 + 0.8 * k / 10), px = cx + rr * Math.cos(a), py = ys + rr * Math.sin(a);
     if (px - 0.2 < x0 || px + 0.2 > x1 || py + 0.2 > yt - 1.2) continue;
     const f = s < 0 ? 'n' : 's';
-    bag.add(W, turnTo(RS.petals.clone(), f).translate(px, py, z + s * 0.004)); bag.add(Y, turnTo(RS.heart.clone(), f).translate(px, py, z + s * 0.004));
+    if (bag.soup) sRosette(bag.soup, [px, py, z + s * 0.004], [1, 0, 0], [0, 1, 0], [0, 0, s], 0.17, 0);
+    else { bag.add(W, turnTo(RS.petals.clone(), f).translate(px, py, z + s * 0.004)); bag.add(Y, turnTo(RS.heart.clone(), f).translate(px, py, z + s * 0.004)); }
   }
 }
 /**
@@ -199,7 +228,7 @@ function archInfill(bag, col, x0, x1, ys, yt, z0, z1, mat) {
  * with a yellow cap, a pier at each end of the beasts' panel (0.5 m proud, a column of large rosettes on each, a white cap),
  * and a two-step corbelled cornice under the battlements (the Pergamon reconstruction's towers are stepped like this).
  */
-function gateFront(bag, t, front, out, y, TH, s) {
+function gateFront(bag, t, front, out, y, TH, s, lod) {
   const zf = front === 'n' ? t[1] : t[3], dz = front === 'n' ? -1 : 1, zr = (a, b) => (dz < 0 ? [zf - b, zf - a] : [zf + a, zf + b]);
   const xa = t[0] - (s < 0 ? 0.3 : 0), xb = t[2] + (s > 0 ? 0.3 : 0), xo = s < 0 ? [t[0] - 0.3, t[0]] : [t[2], t[2] + 0.3];
   const slab = (mat, x0, z0, x1, z1, y0, y1) => bag.add(mat, box(x0, y0, z0, x1, y1, z1));
@@ -211,7 +240,7 @@ function gateFront(bag, t, front, out, y, TH, s) {
     const [a, b] = zr(0, 0.5);
     slab(G, x0, a, x1, b, y + 0.82, pierTop);
     const face = dz < 0 ? [x0, a, x1, b] : [x0, a, x1, b];
-    for (let yy = y + 1.5; yy < pierTop - 0.5; yy += 1.7) { const pc = (x0 + x1) / 2, [za, zb] = zr(0.5, 0.56); bag.add(W, box(pc - 0.3, yy - 0.3, za, pc + 0.3, yy + 0.3, zb)); bag.add(Y, box(pc - 0.15, yy - 0.15, zr(0.56, 0.6)[0], pc + 0.15, yy + 0.15, zr(0.56, 0.6)[1])); }
+    for (let yy = y + 1.5; yy < pierTop - 0.5; yy += 1.7) { const pc = (x0 + x1) / 2, P2 = facePoint([x0, a, x1, b], front), { U, V, N } = frame(P2), at = P2(pc, yy, 0.004); if (bag.soup) sRosette(bag.soup, at, U, V, N, 0.32, levelAt(lod, at[0], at[2])); else { const [za, zb] = zr(0.5, 0.56); bag.add(W, box(pc - 0.3, yy - 0.3, za, pc + 0.3, yy + 0.3, zb)); bag.add(Y, box(pc - 0.15, yy - 0.15, zr(0.56, 0.6)[0], pc + 0.15, yy + 0.15, zr(0.56, 0.6)[1])); } }
   }
   // the cornice
   for (const [e, y0, y1] of [[0.2, y + TH, y + TH + 0.2], [0.4, y + TH + 0.2, y + TH + 0.45]]) {
@@ -262,15 +291,15 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
  * towers, the arched passages; rows of bulls and of dragons by turn every 2 m up the faces (24 brick courses,
  * Koldewey), walking toward the passage; rosette bands at the foot and under the battlements.
  */
-function ishtarGate(el, { bag, col }) {
+const ishtarGate = soupy(function ishtarGate(el, { bag, col }) {
   const [cx, cz] = el.c, w = el.w ?? 5, D = el.d ?? 40, h = el.h ?? 14, h2 = el.h2 ?? 23, y = el.y ?? 0;
   const parts = [[cz - D / 2, cz - D / 2 + 14, h, 9], [cz - D / 2 + 16, cz + D / 2, h2, 12]];
   const deck = (r, H, out) => {
-    for (const f of ['n', 's', out]) { band(bag, r, f, y + H - 0.7); rosettes(bag, r, f, y + H - 0.25, 0.6, 0.17); }
+    for (const f of ['n', 's', out]) { band(bag, r, f, y + H - 0.7); sRosettes(bag, r, f, y + H - 0.25, 0.6, 0.17, el.lod); }
   };
-  const rows = (r, f, H, dir) => {
-    for (let k = 0; y + 1.6 + k * 2 + 1.4 < y + H - 1; k++) beasts(bag, r, f, y + 1.6 + k * 2, { kind: k % 2 ? 'dragon' : 'bull', step: 2.4, size: 0.82, dir });
-    rosettes(bag, r, f, y + 0.9, 0.6, 0.17); band(bag, r, f, y + 0.3);
+  const rows = (r, f, H, dir, lod = el.lod) => {
+    for (let k = 0; y + 1.6 + k * 2 + 1.4 < y + H - 1; k++) sBeasts(bag, r, f, y + 1.6 + k * 2, { kind: k % 2 ? 'dragon' : 'bull', step: 2.4, size: 0.82, dir }, lod);
+    sRosettes(bag, r, f, y + 0.9, 0.6, 0.17, lod); band(bag, r, f, y + 0.3);
   };
   for (const [z0, z1, H, tw] of parts) {
     for (const s of [-1, 1]) {
@@ -279,42 +308,42 @@ function ishtarGate(el, { bag, col }) {
       crenels(bag, r, y + H, G, 1.2);
       // on the fronts the beasts walk toward the passage, on the outer side toward the city
       const out = s < 0 ? 'w' : 'e';
-      rows(r, out, H, 1); deck(r, H, out);
+      rows(r, out, H, 1, hidden(el.lod)); deck(r, H, out);
       // the towers projecting at the corners: a plinth of baked brick, piers either side of the beasts' panel, a corbelled cornice
       for (const tz of [z0 - 1.5, z1 - 4.5]) {
         const t = s < 0 ? [r[0] - 1.5, tz, r[2], tz + 6] : [r[0], tz, r[2] + 1.5, tz + 6], front = tz < z0 ? 'n' : 's', TH = H + 2, top = y + TH + 0.45;
         bag.add(G, box(t[0], y - 0.5, t[1], t[2], top, t[3])); col.rect(t, y, top);
         crenels(bag, t, top, G, 1.6);
-        gateFront(bag, t, front, out, y, TH, s);
+        gateFront(bag, t, front, out, y, TH, s, el.lod);
         const tI = [t[0] + 1.3, t[1], t[2] - 1.3, t[3]];                                  // the beasts' panel between the piers
-        for (const f of [front, out]) { rows(f === front ? tI : t, f, H + 2, f === out ? 1 : -s); band(bag, t, f, y + H + 1.3); rosettes(bag, f === front ? tI : t, f, y + H + 1.75, 0.6, 0.17); }
+        for (const f of [front, out]) { rows(f === front ? tI : t, f, H + 2, f === out ? 1 : -s, f === out ? hidden(el.lod) : el.lod); band(bag, t, f, y + H + 1.3); sRosettes(bag, f === front ? tI : t, f, y + H + 1.75, 0.6, 0.17, el.lod); }
       }
     }
     // the arched passage: springing at a little over half the height
     const ys = y + Math.min(H * 0.5, H - w / 2 - 2.5);
     archInfill(bag, col, cx - w / 2, cx + w / 2, ys, y + H, z0, z1, G);
     crenels(bag, [cx - w / 2, z0, cx + w / 2, z1], y + H, G, 1.2);
-    passageWalls(bag, col, [cx - w / 2, z0, cx + w / 2, z1], y, ys, tw);
-    for (const f of ['n', 's']) { const r = [cx - w / 2, z0, cx + w / 2, z1]; band(bag, r, f, y + H - 0.7); rosettes(bag, r, f, y + H - 0.25, 0.6, 0.17); }
+    passageWalls(bag, col, [cx - w / 2, z0, cx + w / 2, z1], y, ys, tw, el.lod);
+    for (const f of ['n', 's']) { const r = [cx - w / 2, z0, cx + w / 2, z1]; band(bag, r, f, y + H - 0.7); sRosettes(bag, r, f, y + H - 0.25, 0.6, 0.17, el.lod); }
   }
   // the passage paved with limestone flags through both gates and the court between
   wayPaving({ rect: [cx - w / 2, cz - D / 2 - 1.5, cx + w / 2, cz + D / 2], centre: w, y: y + 0.12, seed: 576 }, { bag, col });
-}
+});
 /**
  * The inside of a gate's passage (docs/settlements/babylon.md §15.1): on both walls the rows of bulls and dragons up to the
  * springing of the arch, a rosette band at the foot and one under the springing, and the cedar leaves bound in bronze
  * standing open against the walls at the passage's northern mouth ("I hung doors of cedar adorned with bronze at all the
  * gate openings"). r = the passage [x0, z0, x1, z1], ys = the springing, tw = the towers' breadth.
  */
-function passageWalls(bag, col, r, y, ys, tw) {
+function passageWalls(bag, col, r, y, ys, tw, lod) {
   const [x0, z0, x1, z1] = r;
   for (const f of ['e', 'w']) {
     // the wall faces the passage: the west tower's east face, the east tower's west face
     const rr = f === 'e' ? [x0 - tw, z0, x0, z1] : [x1, z0, x1 + tw, z1];
     const row0 = y + 1.6;
-    for (let k = 0; row0 + k * 2 + 1.4 < ys - 0.2; k++) beasts(bag, rr, f, row0 + k * 2, { kind: k % 2 ? 'dragon' : 'bull', step: 2.4, size: 0.82, dir: 1 });
-    rosettes(bag, rr, f, y + 0.9, 0.6, 0.17); band(bag, rr, f, y + 0.3);
-    band(bag, rr, f, ys - 0.45); rosettes(bag, rr, f, ys - 0.05, 0.6, 0.17);
+    for (let k = 0; row0 + k * 2 + 1.4 < ys - 0.2; k++) sBeasts(bag, rr, f, row0 + k * 2, { kind: k % 2 ? 'dragon' : 'bull', step: 2.4, size: 0.82, dir: 1 }, lod);
+    sRosettes(bag, rr, f, y + 0.9, 0.6, 0.17, lod); band(bag, rr, f, y + 0.3);
+    band(bag, rr, f, ys - 0.45); sRosettes(bag, rr, f, ys - 0.05, 0.6, 0.17, lod);
   }
   // the doors: two cedar leaves, each a panelled board with bronze bands and studs, turned back flat against the walls and held
   // by a bronze-shod pivot post at the hinge
@@ -335,7 +364,7 @@ function passageWalls(bag, col, r, y, ys, tw) {
  * lions (about 2 m long) between enamelled bands walking toward `walk` (+1: toward b's side, along +u),
  * a rosette band above; stepped battlements.
  */
-function glazedWall(el, { bag, col }) {
+const glazedWall = soupy(function glazedWall(el, { bag, col }) {
   const [ax, az] = el.a, [bx, bz] = el.b, th = el.th ?? 2.5, h = el.h ?? 8, y = el.y ?? 0, mat = el.mat || G, alongZ = ax === bx;
   const r = [Math.min(ax, bx) - (alongZ ? th / 2 : 0), Math.min(az, bz) - (alongZ ? 0 : th / 2), Math.max(ax, bx) + (alongZ ? th / 2 : 0), Math.max(az, bz) + (alongZ ? 0 : th / 2)];
   bag.add(mat, box(r[0], y - 0.5, r[1], r[2], y + h, r[3])); col.rect(r, y, y + h);
@@ -343,11 +372,12 @@ function glazedWall(el, { bag, col }) {
   const tw = el.tower ?? 6, pr = el.projection ?? 0.8, nt = el.towers === false ? 0 : Math.max(1, Math.round(L / (2 * tw))), seg = L / Math.max(1, 2 * nt);
   const sub = (a, b, out) => (alongZ ? [r[0] - out, a, r[2] + out, b] : [a, r[1] - out, b, r[3] + out]);
   const deco = (q, f, top) => {
-    rosettes(bag, q, f, y + 0.55, 0.62, 0.2); rosettes(bag, q, f, y + 1.1, 0.62, 0.2);                 // the plinth
+    const inner = !el.lod || (f === 'e' ? ax < el.lod.at[0] : ax > el.lod.at[0]), lod = inner ? el.lod : hidden(el.lod);   // the faces turned from the Way are seen from the lanes only: far detail
+    sRosettes(bag, q, f, y + 0.55, 0.62, 0.2, lod); sRosettes(bag, q, f, y + 1.1, 0.62, 0.2, lod);                 // the plinth
     band(bag, q, f, y + 1.45);
-    if (el.lions !== false) beasts(bag, q, f, y + 1.85, { step: 3, size: 1.0, dir: el.walk ?? 1 });
+    if (el.lions !== false) sBeasts(bag, q, f, y + 1.85, { step: 3, size: 1.0, dir: el.walk ?? 1 }, lod);
     band(bag, q, f, y + 3.05);
-    rosettes(bag, q, f, y + 3.6, 0.62, 0.2);
+    sRosettes(bag, q, f, y + 3.6, 0.62, 0.2, lod);
     band(bag, q, f, top - 0.6);
     // the corbelled cornice under the battlements
     const e = 0.22, sl = f === 'n' ? [q[0], q[1] - e, q[2], q[1]] : f === 's' ? [q[0], q[3], q[2], q[3] + e] : f === 'w' ? [q[0] - e, q[1], q[0], q[3]] : [q[2], q[1], q[2] + e, q[3]];
@@ -367,7 +397,7 @@ function glazedWall(el, { bag, col }) {
       crenels(bag, q, y + h, mat, 1.5);
     }
   }
-}
+});
 /**
  * The courses of reed matting laid through a brick wall every thirtieth course, each over its bed of bitumen
  * (Herodotus 1.179), showing as a band of reed ends standing a little out of the faces of r (those named in
@@ -390,11 +420,11 @@ function layers(bag, r, y, h, faces) {
  * lines, Wikipedia after the Pergamon panel), framed by enamelled bands and rosettes. Each sign a cluster of wedges —
  * horizontal, vertical, oblique heads and the corner wedge — standing a little proud of the blue.
  */
-function gateInscription(el, { bag }) {
+const gateInscription = soupy(function gateInscription(el, { bag }) {
   const { x0, x1, z, y0, y1 } = el, s = el.face === 's' ? 1 : -1, n = el.lines ?? 60, rand = rng(el.seed ?? 605);
   const r = [x0, s < 0 ? z - 0.12 : z, x1, s < 0 ? z : z + 0.12], f = el.face ?? 'n', zf = s < 0 ? r[1] : r[3];
   bag.add(G, box(r[0], y0, r[1], r[2], y1, r[3]));
-  band(bag, r, f, y1 - 0.3); rosettes(bag, r, f, y1 - 0.62, 0.6, 0.17); band(bag, r, f, y0 + 0.05);
+  band(bag, r, f, y1 - 0.3); sRosettes(bag, r, f, y1 - 0.62, 0.6, 0.17, el.lod); band(bag, r, f, y0 + 0.05);
   // the frame's sides
   for (const xa of [x0, x1 - 0.27]) [W, K, W].forEach((m, k) => bag.add(m, box(xa + k * 0.09, y0 + 0.32, Math.min(zf, zf + s * 0.025), xa + (k + 1) * 0.09, y1 - 0.3, Math.max(zf, zf + s * 0.025))));
   const ta = y1 - 0.95, tb = y0 + 0.5, pitch = (ta - tb) / n, sh = pitch * 0.7, d = 0.012;
@@ -414,7 +444,7 @@ function gateInscription(el, { bag }) {
       x += w + sh * (0.3 + rand() * 0.25);
     }
   }
-}
+});
 /** city_wall: a double wall with towers a→b { h, th, gap (between the two walls), y }. */
 function cityWall(el, { bag, col }) {
   const [ax, az] = el.a, [bx, bz] = el.b, th = el.th ?? 6, h = el.h ?? 15, gap = el.gap ?? 12, y = el.y ?? 0, alongX = az === bz;
@@ -483,7 +513,7 @@ function palace(el, { bag, col, lights }) {
       : [[a0 - 4.5, f === 'n' ? z0 - 2.5 : z1 - 2, a0, f === 'n' ? z0 + 2 : z1 + 2.5], [a1, f === 'n' ? z0 - 2.5 : z1 - 2, a1 + 4.5, f === 'n' ? z0 + 2 : z1 + 2.5]];
     for (const t of tw) { bag.add(B, box(t[0], -0.5, t[1], t[2], H, t[3])); col.rect(t, 0, H); crenels(bag, t, H, B, 1.2); }
   }
-  if (el.throne) { throneFacade(bag, col, courts[el.throne.court], el.throne.doors || [0], h); throneRoom(bag, col, lights, hall, h); }
+  if (el.throne) { throneFacade(bag, col, courts[el.throne.court], el.throne.doors || [0], h, el.lod); throneRoom(bag, col, lights, hall, h); }
 }
 /** The enamelled facade of the throne room on the south side of court r (facing north into it). */
 /** The throne room: plastered walls with a dado of blue glaze, the dais with the king's throne, lampstands and braziers, long tables laid for a feast along the walls, hangings. */
@@ -532,7 +562,8 @@ function throneRoom(bag, col, lights, hall, h) {
   lights.push({ at: [x0 + 6, 5.5, (z0 + z1) / 2], color: '#ffb46b', intensity: 3.5, distance: 16 }, { at: [x1 - 6, 5.5, (z0 + z1) / 2], color: '#ffb46b', intensity: 3.5, distance: 16 });
 }
 const BZc = 'bronze';
-function throneFacade(bag, col, r, doors, h) {
+function throneFacade(bag0, col, r, doors, h, lod) {
+  const S = new Soup(bag0), bag = S.proxy;
   const [c0, , c1, zf] = r, xc = (c0 + c1) / 2, F = [c0, zf, c1, zf + 1], P = facePoint(F, 'n');
   const plate = (mat, u0, v0, u1, v1, w0, w1) => { const a = P(u0, v0, w0), b = P(u1, v1, w1); bag.add(mat, box(Math.min(a[0], b[0]), a[1], Math.min(a[2], b[2]), Math.max(a[0], b[0]), b[1], Math.max(a[2], b[2]))); };
   const top = h - 0.9;
@@ -555,19 +586,26 @@ function throneFacade(bag, col, r, doors, h) {
       col.rect(q, 0, d.ht);
     }
   }
-  // the columns: a yellow shaft on a base, two tiers of bright blue volutes, an abacus
-  const VOL = (rr) => lathe([[rr, 0], [rr, 0.07], [rr * 0.55, 0.1], [0.001, 0.11]], 16);
-  const vol = VOL(0.3), eye = lathe([[0.1, 0.1], [0.001, 0.15]], 10), clear = (u) => D.every((d) => Math.abs(u - d.u) > d.w / 2 + 1.6);
+  // a dado of lions striding round the base toward the middle (the Pergamon panels; Wikipedia "Striding Lion": "lions striding around the base"), between two bands
+  bandAt(1.72);
+  const sq0 = (u) => D.every((d) => Math.abs(u - d.u) > d.w / 2 + 1.6);
+  const nl = Math.floor((pan[2] - pan[0]) / 2.5);
+  for (let i = 0; i < nl; i++) {
+    const u = pan[0] + (i + 0.5) * (pan[2] - pan[0]) / nl;
+    if (!sq0(u)) continue;
+    const place = (du, dv, w) => PF(u + du, 0.55 + dv, 0.06 + w), at = place(0, 0.5, 0);
+    figure(S, 'lion', place, { size: 0.95, dir: u < xc ? 1 : -1, level: levelAt(lod, at[0], at[2]), alt: i % 2 === 1, seed: Math.round(u * 100) * 7 + 3 });
+  }
+  // the columns: a palm trunk of yellow glaze on a base, two tiers of volutes of bright blue glaze over a capital block, an abacus
+  const clear = (u) => D.every((d) => Math.abs(u - d.u) > d.w / 2 + 1.6);
   const step = 2.4, n = Math.floor((pan[2] - pan[0]) / step);
   for (let i = 0; i < n; i++) {
     const u = pan[0] + (i + 0.5) * (pan[2] - pan[0]) / n;
     if (!clear(u)) continue;
-    pl(Y, u - 0.38, 0.7, u + 0.38, 0.95, 0.16);                                          // the base
-    pl(Y, u - 0.2, 0.95, u + 0.2, 5.8, 0.12);                                            // the shaft
-    for (const [v, k] of [[6.15, 1], [6.8, 0.85]]) {
-      pl('tile_turquoise', u - 0.2, v - 0.33, u + 0.2, v + 0.3, 0.13);
-      for (const sx of [-1, 1]) { const p = PF(u + sx * 0.36 * k, v, 0.06); bag.add('tile_turquoise', turnTo(vol.clone().scale(k, 1, k), 'n').translate(...p)); bag.add(Y, turnTo(eye.clone(), 'n').translate(...p)); }
-    }
+    pl(Y, u - 0.38, 1.9, u + 0.38, 2.15, 0.16);                                          // the base
+    freeRelief(S, 'trunk', (du, dv, w) => PF(u + du, 2.15 + dv, 0.06 + w), { mat: Y, seed: i });
+    pl('tile_turquoise', u - 0.22, 5.8, u + 0.22, 6.5, 0.13);                           // the capital block
+    for (const [v, k, j] of [[6.05, 1.4, 0], [6.75, 1.1, 1]]) freeRelief(S, 'volute', (du, dv, w) => PF(u + du, v + dv, 0.06 + w), { size: k, mat: 'tile_turquoise', eye: Y, seed: i * 2 + j });
     pl(Y, u - 0.55, 7.12, u + 0.55, 7.32, 0.15);                                         // the abacus
   }
   // the band of squares, then the frieze of double palmettes, then the top band
@@ -576,9 +614,10 @@ function throneFacade(bag, col, r, doors, h) {
   const fy = 7.7 + sq + 0.75, np = Math.floor((pan[2] - pan[0]) / 1.1);
   for (let i = 0; i < np; i++) {
     const u = pan[0] + (i + 0.5) * (pan[2] - pan[0]) / np, place = (du, dv, w) => PF(u + du, fy + dv, 0.08 + w);
-    relief(bag, 'palmette', W, place, 0.62, 1, 0.06); relief(bag, 'palmette', W, place, -0.62, -1, 0.06);
+    freeRelief(S, 'palmette', place, { size: 0.62, mat: W, eye: W, seed: i }); freeRelief(S, 'palmette', (du, dv, w) => place(du, -dv, w), { size: 0.62, mat: W, eye: W, seed: i + 100 });
   }
   bandAt(top - 0.35);
+  S.flush();
 }
 registerStyle('babylonian', {
   trim: () => {}, opening: () => {}, column: () => {},
