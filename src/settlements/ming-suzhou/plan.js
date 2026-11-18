@@ -130,7 +130,7 @@ wall([gx0, gz1], [gx0, gz0], { gates: [{ at: 52, r: 1.3 }] });                  
 // the south wall: the door from the residence (the garden's own gate), leaky windows along it. The
 // women's building backs onto the wall on the axis, so the door is east of it, reached from the
 // court before that building along its east side
-wall([gx1, gz1], [gx0, gz1], { gates: [{ at: 60, w: 2.2, h: 2.8, plaque: true }], windows: [20, 34, 46, 102, 114, 128].map((at, k) => leaky(at, k + 1, 1.2, 1.2, 1.4)) });
+wall([gx1, gz1], [gx0, gz1], { gates: [{ at: 60, w: 2.2, h: 2.8, plaque: true, name: '拙政園' }], windows: [20, 34, 46, 102, 114, 128].map((at, k) => leaky(at, k + 1, 1.2, 1.2, 1.4)) });
 // the loquat court: low walls with a moon gate on the west and a gate north to the pond
 const [lx0, lz0, lx1, lz1] = LOQUAT_COURT;
 const low = { h: 3.2, th: 0.32 };
@@ -149,7 +149,7 @@ for (const e of [...E]) if (e.t === 'ming_wall') for (const g of e.gates || []) 
   if (moon ? g.plaque === false : !g.plaque) continue;
   const cv = moon ? 2 * g.r + 0.55 : (g.h ?? 2.4) + 0.55, w = Math.min(1.6, moon ? g.r * 1.2 : g.w * 0.8);
   if (cv + 0.33 > (e.h ?? 4.2)) continue;
-  E.push({ t: 'tablet_text', a: e.a, b: e.b, y: e.y, th: e.th ?? 0.4, at: g.at, cv, w, n: w > 1.25 ? 3 : 2, seed: Math.round(g.at * 7 + e.a[0] * 3 + e.a[1]) });
+  E.push({ t: 'tablet_text', a: e.a, b: e.b, y: e.y, th: e.th ?? 0.4, at: g.at, cv, w, n: w > 1.25 ? 3 : 2, text: g.name, seed: Math.round(g.at * 7 + e.a[0] * 3 + e.a[1]) });
 }
 
 // ── the galleries, along the walls and between the halls ─────────────────────
@@ -168,6 +168,8 @@ E.push({ t: 'ming_hall', rect: B.yiyu.rect, y: G + B.yiyu.y, H: 3.8, front: B.yi
 E.push({ t: 'ming_hall', rect: B.linglong.rect, y: G + B.linglong.y, H: 3.9, front: 'w', four: false, roof: 'xieshan', plat: 0.35, trim: true, carve: true, ...B.linglong.hall });
 E.push({ t: 'stone_boat', rect: B.xiangzhou.rect, y: G + B.xiangzhou.y });
 E.push({ t: 'lou', rect: B.jianshan.rect, y: G + B.jianshan.y });
+// the tower's name board on its water front, under the upper eave, as the halls' boards hang
+E.push({ t: 'plaque', at: [B.jianshan.rect[2] + 0.2, (B.jianshan.rect[1] + B.jianshan.rect[3]) / 2], y: G + B.jianshan.y + 6.4 - 1.02, facing: [1, 0], w: 1.7, h: 0.55, n: 3, seed: 17, text: '見山樓' });
 // Little Canglang: a water pavilion standing over the inlet on stone piers
 E.push({ t: 'ming_slab_bridge', pts: [[-52, 5], [-42, 5]], w: 5, y: G + B.xiaocanglang.y, bed: LEVEL.pondBed });
 E.push({ t: 'ming_hall', rect: B.xiaocanglang.rect, y: G + B.xiaocanglang.y, H: 3.4, front: 'n', four: true, roof: 'xieshan', plat: 0.01, eave: 1.0, platMargin: 0.02, trim: 'lite', ...B.xiaocanglang.hall });
@@ -266,10 +268,10 @@ for (const id of ['hefeng', 'xuexiang', 'daishuang', 'wuzhu', 'lvyi']) {
 }
 // the inscribed boards under the eaves over the doorways (the doorway is the front's middle bay, as ming_hall lays it out)
 const board = (at, y, facing, w, n, seed, extra = {}) => E.push({ t: 'plaque', at, y, facing, w, h: 0.72, n, seed, ...extra });
-board([1.8, B.yuanxiang.rect[1] - 0.2], G + B.yuanxiang.y + 5.0 - 1.02, [0, -1], 2.4, 4, 11);
-board([1.8, B.yuanxiang.rect[3] + 0.2], G + B.yuanxiang.y + 5.0 - 1.02, [0, 1], 2.4, 3, 12);
-board([-20, B.yiyu.rect[1] - 0.2], G + B.yiyu.y + 3.8 - 0.98, [0, -1], 1.8, 3, 13, { h: 0.6 });
-board([B.linglong.rect[0] - 0.2, -3.375], G + B.linglong.y + 3.9 - 0.98, [-1, 0], 1.8, 4, 14, { h: 0.6 });
+board([1.8, B.yuanxiang.rect[1] - 0.2], G + B.yuanxiang.y + 5.0 - 1.02, [0, -1], 2.4, 3, 11, { text: '遠香堂' });
+board([1.8, B.yuanxiang.rect[3] + 0.2], G + B.yuanxiang.y + 5.0 - 1.02, [0, 1], 2.4, 3, 12, { text: '遠香堂' });
+board([-20, B.yiyu.rect[1] - 0.2], G + B.yiyu.y + 3.8 - 0.98, [0, -1], 1.8, 3, 13, { h: 0.6, text: '倚玉軒' });
+board([B.linglong.rect[0] - 0.2, -3.375], G + B.linglong.y + 3.9 - 0.98, [-1, 0], 1.8, 3, 14, { h: 0.6, text: '玲瓏館' });
 board([0, 40.4], G + 0.45 + 5.0 - 1.02, [0, 1], 2.4, 4, 15);
 board([-21.8, 34.5], G + 0.35 + 3.8 - 0.98, [1, 0], 1.6, 3, 16, { h: 0.55 });
 // the couplet on the two columns of the Hall of Distant Fragrance's doorway, facing the pond

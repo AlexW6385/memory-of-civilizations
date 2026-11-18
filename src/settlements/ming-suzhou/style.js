@@ -18,7 +18,7 @@ import { Matrix4, Quaternion, Vector3 } from '../../core/three.js';
 /**
  * plaque: an inscribed board { at, y (its foot), facing ([dx, dz]), w, h, n (characters), ink }: a frame
  * of dark lacquer round a field of wood, the characters raised on it in malachite green — each a
- * few strokes (the inscriptions themselves are not modelled; ours are generic strokes).
+ * few strokes: the real characters of the name when `text` is one the script lists (script.js), generic strokes otherwise.
  */
 function plaque(el, { bag }) {
   const P = new Parts(); plaqueBuild(P, el);

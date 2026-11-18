@@ -4,6 +4,7 @@
 import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { Shape, ExtrudeGeometry } from '../../core/three.js';
 import { ball, limb, T, Parts, torus } from '../../styles/qing/carving.js';
+import { canWrite, inscription } from './script.js';
 
 export { ball, limb, T, Parts, torus, box, lathe, fromTriangles };
 export const W = 'lacquer_chestnut';
@@ -372,6 +373,11 @@ export function plaqueBuild(P, el) {
   P.add('lacquer_black', box(-w / 2, 0, -0.03, w / 2, h, 0.03));
   P.add(el.field ?? 'timber', box(-w / 2 + 0.06, 0.06, 0.03, w / 2 - 0.06, h - 0.06, 0.04));
   const ink = el.ink ?? 'inlay_jade', cell = vertical ? (h - 0.2) / n : (w - 0.3) / n, cs = Math.min(cell, vertical ? w - 0.12 : h - 0.2) * 0.72;
+  if (canWrite(el.text)) {                                                                  // the board's own name, in real characters (script.js)
+    const m = [...el.text].length, size = Math.min(h - 0.18, (vertical ? w - 0.1 : (w - 0.3) / m / 1.1)) * 0.9, pitch = Math.min(size * 1.12, (vertical ? h - 0.2 : w - 0.3) / m);
+    P.add(ink, inscription(el.text, { pitch, size, z0: 0.04, z1: 0.054, vertical, thick: el.thick ?? 1 }).translate(0, h / 2, 0));
+    return;
+  }
   for (let k = 0; k < n; k++) {
     const ccx = vertical ? 0 : -w / 2 + 0.15 + cell * (k + 0.5), ccy = vertical ? h - 0.1 - cell * (k + 0.5) : h / 2, t = cs * 0.09;
     const stroke = (x0, y0, x1, y1) => { const L = Math.hypot(x1 - x0, y1 - y0), g = box(-L / 2, -t / 2, 0, L / 2, t / 2, 0.012); g.rotateZ(Math.atan2(y1 - y0, x1 - x0)); P.add(ink, g.translate(ccx + (x0 + x1) / 2, ccy + (y0 + y1) / 2, 0.04)); };
