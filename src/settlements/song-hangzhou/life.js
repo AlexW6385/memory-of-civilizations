@@ -126,17 +126,25 @@ export function dwellingLots() {
 }
 const dwSpec = (l) => dwellingSpec({ rect: l.rect, front: l.front, seed: l.seed, shop: !!l.shop });
 export function dwellingRooms() { return dwellingLots().map((l, i) => ({ id: `hz-dwelling-${i}`, rect: dwellingRoomRect({ rect: l.rect, front: l.front, seed: l.seed, shop: !!l.shop }), y: LEVEL.street + 0.45, kind: l.shop ? 'shop' : 'house' })); }
-/** The furniture of the dwellings, in tiles of 150 m of the street life's style. */
+/**
+ * The furniture of the dwellings, in tiles of 150 m of the street life's style (as the generic street life reads their order). A tile is shown within DW_REACH (60 m)
+ * of its dwellings' rooms, measured from the middle of the rooms in it: a house's rooms are seen from its lane, and the
+ * nearest dwellings are 125 m from the arrival, so the arrival's frame has none of them.
+ */
+const DW_TILE = 150, DW_REACH = 60;
 export function dwellingPlans(base) {
   const tiles = new Map(), rooms = dwellingRooms();
   dwellingLots().forEach((l, i) => {
-    const r = rooms[i].rect, c = [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2], k = `${Math.floor(c[0] / 150)},${Math.floor(c[1] / 150)}`;
-    if (!tiles.has(k)) tiles.set(k, { els: [], rooms: [] });
+    const r = rooms[i].rect, c = [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2], k = `${Math.floor(c[0] / DW_TILE)},${Math.floor(c[1] / DW_TILE)}`;
+    if (!tiles.has(k)) tiles.set(k, { els: [], rooms: [], at: [] });
     tiles.get(k).els.push({ t: 'hz_dwelling_in', rect: l.rect, front: l.front, y: LEVEL.street, seed: l.seed || i + 1, shop: !!l.shop });
-    tiles.get(k).rooms.push(rooms[i]);
+    tiles.get(k).rooms.push(rooms[i]); tiles.get(k).at.push(c);
   });
   const out = [];
-  for (const [k, v] of tiles) { const [i, j] = k.split(',').map(Number); out.push({ ...base(`song-hangzhou-dwellings-${k}`, v.els, 'life'), center: [i * 150 + 75, j * 150 + 75], near: 260, rooms: v.rooms }); }
+  for (const [k, v] of tiles) {
+    const m = [v.at.reduce((a, c) => a + c[0], 0) / v.at.length, v.at.reduce((a, c) => a + c[1], 0) / v.at.length];
+    out.push({ ...base(`song-hangzhou-dwellings-${k}`, v.els, 'life'), center: m, near: Math.ceil(Math.max(...v.at.map((c) => Math.hypot(c[0] - m[0], c[1] - m[1]))) + DW_REACH), rooms: v.rooms });
+  }
   return out;
 }
 export const dwellingShells = () => dwellingLots().map((l) => ({ t: 'hz_dwelling', rect: l.rect, front: l.front, y: LEVEL.street, seed: l.seed, shop: !!l.shop }));

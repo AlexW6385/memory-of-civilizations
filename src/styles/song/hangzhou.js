@@ -5,7 +5,7 @@ import { rod, box, lathe, fromTriangles } from '../../core/geom.js';
 import { rectRoof, column, beamTris } from '../ming/index.js';
 import { hexa } from './kaifeng.js';
 import { STYLES } from '../../core/build.js';
-import { Matrix4, Float32BufferAttribute } from '../../core/three.js';
+import { Matrix4, Float32BufferAttribute, BufferGeometry } from '../../core/three.js';
 import { hzLakePavilion, hzArchBridge, bracketSet } from './hzlake.js';
 
 /**
@@ -1390,4 +1390,76 @@ function hzLanding(el, { bag, col }) {
   void t;
 }
 
-export const HANGZHOU_ELEMENTS = { hz_shell: hzShell, hz_imperial_way: imperialWay, view_tent: viewTent, tea_house: teaHouse, kaihua_hall: kaihuaHall, temple_gate: templeGate, court_censer: courtCenser, luohan_hall: luohanHall, hall_ceiling: hallCeiling, lake_boat: lakeBoat, sutra_pillar: sutraPillar, liuhe_pagoda: liuhePagoda, hall_offerings: hallOfferings, court_paving: courtPaving, hz_stair: hzStair, hz_lion_pair: hzLionPair, hz_tree: hzTree, hz_bank: hzBank, hz_wall_skin: hzWallSkin, hz_gate: hzGate, hz_revetment: hzRevetment, hz_slabs: hzSlabs, hz_landing: hzLanding, hz_lake_pavilion: hzLakePavilion, hz_arch_bridge: hzArchBridge };
+// Fine pieces folded into the plan's own meshes (DESIGN §8): a bag instances every shape it finds a dozen times
+// (the images' hair, the lanterns, the relief figures …), a draw call for each shape in each plan. Here the shapes
+// that few pieces make are added as plain geometry instead, a piece in its place, in cells of 0.3 m (so they stay
+// the plan's 'detail' mesh, drawn near): a material is one mesh of the plan whatever shapes stand in it. A shape
+// of many copies (more than FOLD_MAX vertices flattened) stays as it is, instanced: copies stored once are cheaper
+// than copies stored many times. The geometry is the same; the build is deterministic (cells by position, in order).
+const FOLD_FINE = 0.4, FOLD_CELL = 0.3, FOLD_MAX = 36000;
+const shapeHash = (g, m = null) => {
+  const A = g.attributes.position.array;
+  let x0 = Infinity, y0 = Infinity, z0 = Infinity;
+  if (!m) for (let i = 0; i < A.length; i += 3) { if (A[i] < x0) x0 = A[i]; if (A[i + 1] < y0) y0 = A[i + 1]; if (A[i + 2] < z0) z0 = A[i + 2]; }
+  else x0 = y0 = z0 = 0;
+  let h = A.length;
+  for (let i = 0; i < A.length; i += 3) h = (Math.imul(h, 31) + Math.round((A[i] - x0) * 1e3)) | 0, h = (Math.imul(h, 31) + Math.round((A[i + 1] - y0) * 1e3)) | 0, h = (Math.imul(h, 31) + Math.round((A[i + 2] - z0) * 1e3)) | 0;
+  return h;
+};
+
+/** `fn` (an element's builder) with the fine pieces that make shapes of few copies folded into geometry. */
+export function folded(fn, max = FOLD_MAX) {
+  return (el, ctx) => {
+    const real = ctx.bag, pieces = [], groups = new Map();
+    const note = (mat, g, matrix, o) => {
+      const flat = g.index ? g.toNonIndexed() : g, e = { mat, g, flat, matrix, o, key: `${mat}|${flat.attributes.position.count}|${shapeHash(flat, matrix)}` };
+      pieces.push(e);
+      groups.set(e.key, (groups.get(e.key) || 0) + flat.attributes.position.count);
+    };
+    const bag = new Proxy(real, {
+      get: (t, k) => {
+        if (k === 'add') {
+          return (mat, g) => {
+            if (!g) return;
+            if (g.attributes.hang || /\+wind$/.test(mat)) { t.add(mat, g); return; }
+            g.computeBoundingBox();
+            const b = g.boundingBox;
+            if (Math.max(b.max.x - b.min.x, b.max.y - b.min.y, b.max.z - b.min.z) < FOLD_FINE) note(mat, g, null, null); else t.add(mat, g);
+          };
+        }
+        if (k === 'addInstance') {
+          return (mat, g, matrix, o = {}) => {
+            if (!g) return;
+            // (cloth in the wind keeps its hang: left to the bag)
+            if (g.attributes.hang || /\+wind$/.test(o.real ?? mat)) { t.addInstance(mat, g, matrix, o); return; }
+            note(o.real ?? mat, g, matrix, { ...o, mat });
+          };
+        }
+        return typeof t[k] === 'function' ? t[k].bind(t) : t[k];
+      },
+    });
+    fn(el, { ...ctx, bag });
+    const held = new Map();
+    for (const e of pieces) {
+      if (groups.get(e.key) > max) { if (e.matrix) real.addInstance(e.o.mat, e.g, e.matrix, e.o); else real.add(e.mat, e.g); continue; }
+      const p = e.flat === e.g ? e.g.clone() : e.flat;
+      if (e.matrix) p.applyMatrix4(e.matrix);
+      p.computeBoundingBox();
+      const b = p.boundingBox, c = `${e.mat}|${Math.floor((b.min.x + b.max.x) / 2 / FOLD_CELL)},${Math.floor((b.min.y + b.max.y) / 2 / FOLD_CELL)},${Math.floor((b.min.z + b.max.z) / 2 / FOLD_CELL)}`;
+      let h = held.get(c);
+      if (!h) held.set(c, (h = { mat: e.mat, list: [], n: 0 }));
+      h.list.push(p); h.n += p.attributes.position.count;
+    }
+    for (const { mat, list, n } of held.values()) {
+      const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3);
+      let o = 0;
+      for (const p of list) { pos.set(p.attributes.position.array, o); nor.set(p.attributes.normal.array, o); o += p.attributes.position.count * 3; }
+      const g = new BufferGeometry();
+      g.setAttribute('position', new Float32BufferAttribute(pos, 3));
+      g.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+      real.add(mat, g);
+    }
+  };
+}
+
+export const HANGZHOU_ELEMENTS = { hz_shell: folded(hzShell), hz_imperial_way: folded(imperialWay), view_tent: folded(viewTent), tea_house: folded(teaHouse), kaihua_hall: folded(kaihuaHall), temple_gate: folded(templeGate), court_censer: folded(courtCenser), luohan_hall: folded(luohanHall), hall_ceiling: folded(hallCeiling), lake_boat: lakeBoat, sutra_pillar: folded(sutraPillar), liuhe_pagoda: folded(liuhePagoda), hall_offerings: folded(hallOfferings), court_paving: folded(courtPaving), hz_stair: folded(hzStair), hz_lion_pair: folded(hzLionPair), hz_tree: hzTree, hz_bank: hzBank, hz_wall_skin: folded(hzWallSkin), hz_gate: folded(hzGate), hz_revetment: folded(hzRevetment), hz_slabs: hzSlabs, hz_landing: folded(hzLanding), hz_lake_pavilion: hzLakePavilion, hz_arch_bridge: hzArchBridge };
