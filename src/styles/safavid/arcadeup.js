@@ -5,13 +5,18 @@
 // balustrade, on the square. Frame: s along the bay, d from the facade's axis away from the square; Q(s, d) → world.
 // Only materials the arcade's plan already has.
 
-import { box } from '../../core/geom.js';
+import { box, place } from '../../core/geom.js';
 import * as F from '../mughal/furnish.js';
 
 export const SHOP_CH = 5.35;                 // the ceiling of a shop with rooms over it (the vault of the arcade shops)
 export const UP_FLOOR = SHOP_CH + 0.2;       // the floor of the room and the loggia
 export const UP_ARCH_TOP = 10.3;
 
+/** A chest of dark wood with iron straps (only materials the arcade's plan has). */
+function chest(bag, x, y, z, w, d, h, yaw) {
+  bag.add('wood_dark', place(box(-w / 2, 0.04, -d / 2, w / 2, h, d / 2), x, y, z, yaw));
+  for (const u of [-w * 0.32, w * 0.32]) bag.add('iron', place(box(u - 0.025, 0.04, -d / 2 - 0.016, u + 0.025, h + 0.01, d / 2 + 0.016), x, y, z, yaw));
+}
 const cardinal = (ux, uz) => (Math.abs(ux) > Math.abs(uz) ? (ux > 0 ? 'e' : 'w') : (uz > 0 ? 's' : 'n'));
 
 export function arcadeUpper({ bag, col, lights }, G) {
@@ -41,6 +46,7 @@ export function arcadeUpper({ bag, col, lights }, G) {
   mat('plaster_persian', R(s0 + RW, s1 - RW, d1, d1 + 0.03), FU + 2.2, RC);
   for (const [a, b] of [[s0 + RW, c - dw], [c + dw, s1 - RW]]) mat('plaster_persian', R(a, b, d1, d1 + 0.03), FU, RC);
   mat('plaster_persian', R(c - dw, c - door, d1, d1 + 0.03), FU, RC); mat('plaster_persian', R(c + door, c + dw, d1, d1 + 0.03), FU, RC);
+  mat('plaster_persian', R(s0 + 1.25, s1 - RW, d2 - 0.03, d2), FU, RC); mat('plaster_persian', R(s0 + RW, s0 + 1.25, d2 - 0.03, d2), FU + 2.2, RC);
   // ---- the stair in the rear mass: lane 1 along the shop's back wall, lane 2 behind it, a divider between; the door at the s0 end
   const A = d2 + 0.3, B1 = d2 + 1.1, C1 = d2 + 1.4, B2 = d2 + 2.2, sa = s0 + RW + 1.0, sb = s1 - RW - 0.8, n = 12, ym = (fy + FU) / 2, dir = cardinal(ux, uz), opp = cardinal(-ux, -uz);
   const CT = FU + 3.2;
@@ -84,7 +90,7 @@ export function arcadeUpper({ bag, col, lights }, G) {
   // ---- what the room is used for: bedding on a chest at one side wall, the trade's stock along the other, a kilim, a lamp
   const f = FU + 0.012, ww = w / 2 - RW - 0.2;
   { const p = P(uc, 2.6); F.kilim(bag, p[0], f, p[1], 2 * ww - 1.6, 3.0, yaw, ['cloth_ochre', 'cloth_red', 'cloth_indigo', 'cloth_white']); }
-  { const p = P(uc - ww + 0.2, 4.7); F.chest(bag, p[0], f, p[1], 1.0, 0.55, 0.6, yaw); for (let k = 0; k < 3; k++) F.cushion(bag, p[0], f + 0.58 + k * 0.11, p[1], 0.95, 0.6, 0.12, yaw, ['cloth_white', 'cloth_red', 'cloth_indigo'][k]); const q = P(uc - ww + 0.2, 4.7); lights.push({ at: [q[0], f + 1.2, q[1]], color: '#ffb060', intensity: 1.2, distance: 4 }); }
+  { const p = P(uc - ww + 0.2, 4.7); chest(bag, p[0], f, p[1], 1.0, 0.55, 0.6, yaw); for (let k = 0; k < 3; k++) F.cushion(bag, p[0], f + 0.58 + k * 0.11, p[1], 0.95, 0.6, 0.12, yaw, ['cloth_white', 'cloth_red', 'cloth_indigo'][k]); const q = P(uc - ww + 0.2, 4.7); lights.push({ at: [q[0], f + 1.2, q[1]], color: '#ffb060', intensity: 1.2, distance: 4 }); }
   { const p = P(uc + ww - 0.35, 2.0); F.bolster(bag, p[0], f, p[1], 1.4, 0.13, yaw + Math.PI / 2, 'cloth_indigo', 'cloth_ochre'); const q = P(uc + ww - 0.35, 3.3); F.bolster(bag, q[0], f, q[1], 1.4, 0.13, yaw + Math.PI / 2, 'cloth_red', 'cloth_ochre'); }
   const stock = P(uc + ww - 0.5, 4.3);
   if (trade === 'cloth') { for (let k = 0; k < 3; k++) F.bolts(bag, stock[0], f + k * 0.01, stock[1], 6, yaw + Math.PI / 2 + k * 0.2, undefined, 0.45); }
