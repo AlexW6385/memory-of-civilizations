@@ -177,7 +177,7 @@ function extras() {
 
 export async function town() {
   const plans = [streets(), wien(), ...furniture(), naschmarkt(), karlsplatz(), houseRooms(), extras(), base('vienna-life', stillLife(), { style: 'life' })];
-  const els = lots().map((l) => ({ t: 'mietshaus', rect: l.rect, front: l.front, kind: l.kind, storeys: l.storeys, seed: l.seed, y: 0, side: l.side, lod: l.lod, faience: l.faience, medallions: l.medallions, mat: l.mat, passage: l.passage, yardAt: l.yardAt, open: l.open }));
+  const els = lots().map((l) => ({ t: 'mietshaus', rect: l.rect, front: l.front, kind: l.kind, storeys: l.storeys, seed: l.seed, y: 0, side: l.side, lod: l.lod, faience: l.faience, medallions: l.medallions, mat: l.mat, passage: l.passage, yardAt: l.yardAt, open: l.open, up: l.up }));
   els.push(...hofs());
   plans.push(...lodTiles('vienna-houses', 'viennese', els, { R: RADIUS, near: 150 }));
   void CAFE; void SEC;

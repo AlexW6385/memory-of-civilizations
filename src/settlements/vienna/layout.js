@@ -4,6 +4,7 @@
 // round every street. Pure data. +x east, +z south.
 
 import { subtractRects } from '../../core/build.js';
+import { faceFrame } from '../../styles/dutch/facade.js';
 
 export const RADIUS = 330;
 export const SEC = [-17, -40, 17, -12];
@@ -157,6 +158,15 @@ function assignUses(rand) {
     if (taken.some((t) => Math.hypot((t.rect[0] + t.rect[2]) / 2 - (l.rect[0] + l.rect[2]) / 2, (t.rect[1] + t.rect[3]) / 2 - (l.rect[1] + l.rect[3]) / 2) < 12)) continue;
     l.open = TRADES[n % TRADES.length]; taken.push(l); n++; if (n >= 52) break;
   }
+  // the houses whose stair, first floors and Zimmer-Küche can be walked: the open lots near the arrival that are wide enough for the hall
+  // beside the shop (styles/viennese/upper.js, upGeometry), the use of the first floor by the shop's trade
+  for (const l of LOTS) {
+    if (!l.open || l.kind !== 'gruender' || l.side || l.storeys < 4 || l.lod !== 0) continue;
+    const F = faceFrame(l.rect, l.front), W = F.w, bays = Math.max(2, Math.round(W / 3.3)), hi = W / bays - 0.15;
+    if (hi - 0.5 < 2.3 || W - hi - 0.8 < 5.5 || F.D < 14.5 || Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 + 66) > 125) continue;
+    const kind = ['kaffeehaus', 'konditorei'].includes(l.open) ? 'cafe' : ['schneider', 'huetemacher', 'tischler', 'uhrmacher', 'schuster', 'friseur', 'buchhandlung'].includes(l.open) ? 'craft' : l.open === 'weinstube' ? 'inn' : 'bourg';
+    l.up = { kind, left: ((l.seed >> 3) & 1) === 0, hi };
+  }
 }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m)) || inRect(CAFE, x, z, m);
 
@@ -200,7 +210,13 @@ export function paving() {
 /** The room of a shop that can be walked into (wall 0.5 m, room 8 m deep: styles/viennese/shopint.js) and the passage of a Durchhaus. */
 export function shopRoomRect(l) {
   const [x0, z0, x1, z1] = l.rect, T = 0.5, RD = Math.min(8, (l.front === 'n' || l.front === 's' ? z1 - z0 : x1 - x0) - 4);
-  return l.front === 's' ? [x0 + T, z1 - T - RD, x1 - T, z1 - T] : l.front === 'n' ? [x0 + T, z0 + T, x1 - T, z0 + T + RD] : l.front === 'e' ? [x1 - T - RD, z0 + T, x1 - T, z1 - T] : [x0 + T, z0 + T, x0 + T + RD, z1 - T];
+  let r = l.front === 's' ? [x0 + T, z1 - T - RD, x1 - T, z1 - T] : l.front === 'n' ? [x0 + T, z0 + T, x1 - T, z0 + T + RD] : l.front === 'e' ? [x1 - T - RD, z0 + T, x1 - T, z1 - T] : [x0 + T, z0 + T, x0 + T + RD, z1 - T];
+  // an opened house: the hall takes the width `hi` at one end of the front (the u = 0 end when left), the shop the rest
+  if (l.up) {
+    const F = faceFrame(l.rect, l.front), a = F.at(l.up.left ? l.up.hi + T : T, 0), b = F.at(l.up.left ? F.w - T : F.w - l.up.hi - T, 0);
+    r = (l.front === 's' || l.front === 'n') ? [Math.min(a[0], b[0]), r[1], Math.max(a[0], b[0]), r[3]] : [r[0], Math.min(a[1], b[1]), r[2], Math.max(a[1], b[1])];
+  }
+  return r;
 }
 export function passageRect(l) {
   const [x0, z0, x1, z1] = l.rect, along = l.front === 'n' || l.front === 's', c = along ? (x0 + x1) / 2 : (z0 + z1) / 2;

@@ -8,6 +8,7 @@ import { faceFrame, prism, outline, ngon, fbox } from '../dutch/facade.js';
 import { weather, flowerBox, curtains, enamelSign, numberPlate, oriel, turret, rearFace, passage } from './detail.js';
 import { lettering } from './lettering.js';
 import { shopFront, shopRoom, SHOP_T, SHOP_RD, NAMES } from './shopint.js';
+import { upHouse, upGeometry } from './upper.js';
 
 export function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const TINTS = ['stucco_cream', 'stucco_ochre', 'stucco_pale', 'stucco_rose', 'stucco_cream', 'stucco_ochre', 'stucco_saffron', 'stucco_pale'];
@@ -17,11 +18,11 @@ export const rectOf = (pts) => [Math.min(pts[0][0], pts[1][0]), Math.min(pts[0][
 /** A double casement window in white with a transom and a middle post; `head`: 'tri', 'seg', 'cornice' or 'plain'. */
 export function sashWindow(bag, F, y, u, v0, ww, hh, o = {}) {
   const A = (m, ...r) => bag.add(m, fbox(F, y, ...r)), u0 = u - ww / 2, u1 = u + ww / 2, b = 0.07, trim = o.trim ?? TRIM, vt = v0 + hh;
-  A('opening', u0, u1, v0, vt, -0.02, 0.05);
+  if (!o.open) A('opening', u0, u1, v0, vt, -0.02, 0.05);
   A('paint_white', u0, u0 + b, v0, vt, 0, 0.1); A('paint_white', u1 - b, u1, v0, vt, 0, 0.1);
   A('paint_white', u0 + b, u1 - b, vt - b, vt, 0, 0.1); A('paint_white', u0 + b, u1 - b, v0, v0 + b, 0, 0.1);
   if (!o.lod) { A('paint_white', u - b / 2, u + b / 2, v0 + b, vt - b, 0, 0.1); const tv = v0 + hh * 0.72; A('paint_white', u0 + b, u1 - b, tv - b / 2, tv + b / 2, 0, 0.1); }
-  A(trim, u0 - 0.14, u1 + 0.14, v0 - 0.14, v0, 0, 0.17);                    // the sill
+  if (!o.door) A(trim, u0 - 0.14, u1 + 0.14, v0 - 0.14, v0, 0, 0.17);                    // the sill
   if (o.head === 'plain') { A(trim, u0 - 0.12, u0, v0, vt + 0.1, 0, 0.08); A(trim, u1, u1 + 0.12, v0, vt + 0.1, 0, 0.08); A(trim, u0 - 0.12, u1 + 0.12, vt, vt + 0.14, 0, 0.1); return; }
   for (const s of [-1, 1]) A(trim, s < 0 ? u0 - 0.17 : u1, s < 0 ? u0 : u1 + 0.17, v0, vt + 0.1, 0, 0.1);
   A(trim, u0 - 0.17, u1 + 0.17, vt, vt + 0.2, 0, 0.15);                      // the lintel
@@ -85,7 +86,7 @@ export function facade(bag, F, y, o) {
   const H = n < 2 ? G : floors[n - 1] + (n === 2 ? PN : UP);
   const bays = o.bays ?? Math.max(2, Math.round(w / (kind === 'ring' ? 3.8 : 3.3))), bw = w / bays, ww = Math.min(1.45, bw - 1.2) + (kind === 'ring' ? 0.15 : 0);
   const lod = o.lod ?? 0, from = o.from ?? 0, doorBay = o.doorBay ?? (bays % 2 ? (r() < 0.6 ? Math.floor(bays / 2) : 0) : (r() < 0.5 ? 0 : bays - 1));
-  const openings = [];
+  const openings = [], windows = [], UPH = o.up;
   // ---- ground floor (unless the café draws it)
   if (from === 0) {
     const g = G, sh = kind !== 'biedermeier' && (o.shops ?? true);
@@ -137,13 +138,19 @@ export function facade(bag, F, y, o) {
     const alt = s === 1 ? (i) => (i % 2 ? 'seg' : 'tri') : () => head;
     for (let i = 0; i < bays; i++) {
       const u = (i + 0.5) * bw;
-      sashWindow(bag, F, y, u, v0, ww, hh, { head: kind === 'ring' && s === 1 ? alt(i) : head, lod, trim: trimM });
+      // an opened house (styles/viennese/upper.js): the windows of its first two upper floors have no glass (the room shows through the
+      // reveal), and the balcony's window is a door down to the floor
+      const isDoor = !!UPH && s === 1 && i === UPH.balconyBay, wv0 = isDoor ? floors[1] + 0.1 : v0, whh = isDoor ? hh + (v0 - wv0) : hh;
+      sashWindow(bag, F, y, u, wv0, ww, whh, { head: kind === 'ring' && s === 1 ? alt(i) : head, lod, trim: trimM, open: !!UPH && s <= 2, door: isDoor });
+      if (UPH && s <= 2) windows.push({ s, i, u, v0: wv0, hh: whh, ww, door: isDoor });
       if (!lod) {
         const q = r();
-        if (q < (kind === 'biedermeier' ? 0.42 : s < 3 ? 0.2 : 0.12)) flowerBox(bag, F, y, u, v0, ww, r);
+        if (isDoor) { /* the door's own curtains are inside */ }
+        else if (q < (kind === 'biedermeier' ? 0.42 : s < 3 ? 0.2 : 0.12)) flowerBox(bag, F, y, u, v0, ww, r);
         else curtains(bag, F, y, u, v0, ww, hh, r);
       }
-      if (s === 1 && kind !== 'biedermeier' && (i === Math.floor(bays / 2) || kind === 'ring' || (bays > 3 && i === doorBay))) balcony(bag, F, y, u, v0, ww + 0.9, lod);
+      if (UPH) { if (isDoor) balcony(bag, F, y, u, floors[1] + 0.22, ww + 0.9, lod); }
+      else if (s === 1 && kind !== 'biedermeier' && (i === Math.floor(bays / 2) || kind === 'ring' || (bays > 3 && i === doorBay))) balcony(bag, F, y, u, v0, ww + 0.9, lod);
       else if (s === 2 && kind === 'ring' && i % 2 === 0) balcony(bag, F, y, u, v0, ww + 0.6, lod, 0.45);
     }
     if (kind !== 'biedermeier') A(trimM, -0.03, w + 0.03, floors[s] - 0.2, floors[s] + 0.05, 0, 0.1);      // the floor's string
@@ -164,10 +171,10 @@ export function facade(bag, F, y, o) {
     const v = r();
     if (v < 0.24) for (let k = 0; k <= bays; k++) { const u = Math.max(0.2, Math.min(w - 0.2, k * bw)); A(trimM, u - 0.17, u + 0.17, G, floors[n - 1] + 0.1, 0, 0.1); }
     else if (v < 0.5 && !lod) for (let sI = 2; sI < n; sI++) for (let k = 0; k < bays * 2; k++) { const u = (k + 0.5) * bw / 2; A(sI % 2 ? 'stucco_ochre' : 'stucco_rose', u - 0.14, u + 0.14, floors[sI] - 0.62, floors[sI] - 0.34, 0.02, 0.04); }
-    if (w >= 10 && r() < 0.34 && !o.passage) { const bi = r() < 0.5 ? 1 : bays - 2, u = (bi + 0.5) * bw, ow = Math.min(3.8, bw * 1.15 + 0.6); oriel(bag, F, y, u, floors[2] - 0.15, floors[Math.min(n - 1, 4)] - 0.25, ow, o.mat ?? 'stucco_cream', trimM, lod); }
+    if (w >= 10 && r() < 0.34 && !o.passage && !UPH) { const bi = r() < 0.5 ? 1 : bays - 2, u = (bi + 0.5) * bw, ow = Math.min(3.8, bw * 1.15 + 0.6); oriel(bag, F, y, u, floors[2] - 0.15, floors[Math.min(n - 1, 4)] - 0.25, ow, o.mat ?? 'stucco_cream', trimM, lod); }
   }
   if (!lod && !o.noWeather) weather(bag, F, y, { w, H, G, floors, r, kind, bays });
-  return { H, floors, bays, bw, doorBay };
+  return { H, floors, bays, bw, doorBay, windows, ww };
 }
 
 /**
@@ -188,7 +195,10 @@ export function mietshaus(el, ctx) {
   const wantPass = el.passage !== undefined && el.passage !== null && !far, wantOpen = !!el.open && !far && !wantPass;
   const rb = rng((el.seed || 1) * 31 + 7), bays0 = kind === 'ring' ? Math.max(2, Math.round(W / 3.8)) : Math.max(2, Math.round(W / 3.3));
   const bays = wantPass ? (bays0 % 2 ? bays0 : bays0 + 1) : bays0;
-  const info = facade(bag, F, y, { n, kind, seed: el.seed || 1, lod, shops: wantOpen ? false : el.shops, doorBay: wantPass ? Math.floor(bays / 2) : el.doorBay, noShop: el.noShop, from: wantOpen ? 1 : 0, trim, bays, passage: wantPass, mat });
+  // an opened house (layout.js `up`: { kind, left }): its hall, stair and first two upper floors can be walked (styles/viennese/upper.js)
+  const UPD = el.up && !far && wantOpen && kind === 'gruender' && n >= 4 ? el.up : null, ug = UPD ? upGeometry(W, D) : null;
+  const balconyBay = UPD ? (UPD.left ? 1 + Math.floor((bays - 1) / 2) : Math.floor((bays - 1) / 2)) : -1;
+  const info = facade(bag, F, y, { n, kind, seed: el.seed || 1, lod, shops: wantOpen ? false : el.shops, doorBay: wantPass ? Math.floor(bays / 2) : el.doorBay, noShop: el.noShop, from: wantOpen ? 1 : 0, trim, bays, passage: wantPass, mat, up: UPD ? { balconyBay } : null });
   const H = info.H, G = kind === 'biedermeier' ? 3.6 : kind === 'ring' ? 5.4 : 4.5;
   if (el.faience || el.medallions) {
     const bays = Math.max(2, Math.round(F.w / 3.3)), bw = F.w / bays;
@@ -212,15 +222,28 @@ export function mietshaus(el, ctx) {
     // the yard end: the arch's frame, and a sill of granite
     bag.add('granite_grey', fbox(F, y, uc - hw, uc + hw, 0.0, 0.05, -D, 0));
   } else if (wantOpen) {
-    const sw = Math.min(W - 1, 1e9), RD = Math.min(SHOP_RD, D - 4);
-    void sw; void RD;
+    if (UPD && ug) {
+      const hi = ug.hi, off = UPD.left ? hi : 0, w2 = W - hi, F2 = { w: w2, D, at: (u, d) => F.at(u + off, d) }, b2 = Math.max(2, Math.round(w2 / 3.3));
+      shopRoom(ctx, F2, y, { w: w2, D, g: G, H: G, mat, bays: b2, trade: el.open, seed: el.seed || 1 });
+      shopFront(bag, F2, y, { w: w2, g: G, bays: b2, trade: el.open, seed: el.seed || 1, lod });
+      // the hall's bay of the front: plinth and string course either side of the Haustor (drawn by upHouse)
+      const h0 = UPD.left ? 0 : W - hi, h1 = h0 + hi;
+      bag.add('granite_grey', fbox(F, y, h0, h1, 0, 0.62, 0, 0.07)); bag.add(trim, fbox(F, y, h0 - 0.04, h1 + 0.04, G - 0.3, G, 0, 0.16));
+      const rear = [];
+      if (el.yardAt !== undefined && el.yardAt !== null) {
+        const rb2 = Math.max(2, Math.round(W / 3.1)), rw = W / rb2;
+        for (let s = 1; s <= 2; s++) for (let i = 0; i < rb2; i++) { const fh = (info.floors[s + 1] ?? H) - info.floors[s] - (s === n - 1 ? 0.6 : 0); rear.push({ u: W - ((i + 0.5) * rw + (s % 2 ? 0.25 : -0.1)), s, w: 1.05, h: Math.min(1.7, fh - 1.5) }); }
+      }
+      upHouse(ctx, F, y, { W, D, G, floors: info.floors, H, mat, left: UPD.left, hi, kind: UPD.kind, seed: el.seed || 1, windows: info.windows, rear, gallery: rear.length > 0, lod });
+    } else {
     shopRoom(ctx, F, y, { w: W, D, g: G, H, mat, bays, trade: el.open, seed: el.seed || 1 });
     shopFront(bag, F, y, { w: W, g: G, bays, trade: el.open, seed: el.seed || 1, lod });
+    }
   } else { bag.add(mat, box(x0, y - 0.6, z0, x1, y + H, z1)); col.rect(el.rect, y - 0.6, y + H); }
   // the rear face, to the yard it backs onto, with galleries on the houses that have a way in
   if (!far && el.yardAt !== undefined && el.yardAt !== null && kind !== 'biedermeier') {
     const Fr = faceFrame(el.rect, OPP[f]);
-    rearFace(bag, Fr, y, { n, floors: info.floors, H, r: rb, lod, gallery: wantPass || rb() < 0.5 }, sashWindow);
+    rearFace(bag, Fr, y, { n, floors: info.floors, H, r: rb, lod, gallery: wantPass || rb() < 0.5 || !!UPD }, sashWindow);
   }
   // the corner turret of a corner house
   if (el.side && !far && kind !== 'biedermeier' && n >= 5 && rng((el.seed || 1) * 17 + 3)() < 0.55) {
