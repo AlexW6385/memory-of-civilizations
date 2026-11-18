@@ -15,12 +15,8 @@ function wall() {
   const w = (a, b) => { E.push({ t: 'wall', a, b, th: WALL_TH, y0, y1: WALL_H, mat: 'mud_plaster' }); E.push({ t: 'merlons', a, b, y: WALL_H, step: 1.7 }); };
   w([x0, z0], [x1, z0]); w([x0, z0], [x0, z1]); w([x1, z0], [x1, z1]);
   w([x0, z1], [gx - 6, z1]); w([gx + 6, z1], [x1, z1]);
-  // the gate: a thick piece with the passage cut through, a tower's head over it; the leaves of cedar folded back along the passage's sides
-  E.push({ t: 'wall', a: [gx - 6, z1], b: [gx + 6, z1], th: 4.6, y0, y1: 8.4, mat: 'mud_plaster', openings: [{ at: 6, w: GATE.w, h: GATE.h, y0: 0 }] });
-  E.push({ t: 'merlons', a: [gx - 6, z1], b: [gx + 6, z1], y: 8.4, step: 1.7, th: 1.2 });
-  E.push({ t: 'block', rect: [gx - GATE.w / 2 - 0.12, z1 - 2.1, gx - GATE.w / 2, z1 + 0.9], y0: 0, y1: 3.3, mat: 'cedar', collide: false });
-  E.push({ t: 'block', rect: [gx + GATE.w / 2, z1 - 2.1, gx + GATE.w / 2 + 0.12, z1 + 0.9], y0: 0, y1: 3.3, mat: 'cedar', collide: false });
-  E.push({ t: 'block', rect: [gx - GATE.w / 2 - 0.3, z1 - 2.5, gx + GATE.w / 2 + 0.3, z1 - 2.3], y0: GATE.h - 0.05, y1: GATE.h + 0.2, mat: 'timber', collide: false });
+  // the gate: two battered towers with a pointed arch between, the roof's parapet with teeth and horns, the leaves of cedar folded back along the passage's sides (hadhrami gate_house)
+  E.push({ t: 'gate_house', c: [gx, z1], w: 12, th: 4.6, y0, H: 8.4, pw: GATE.w, ph: GATE.h });
   // the buttresses of the wall's outer face every thirteen metres, the rubble at its foot
   const bt = WALL_TH / 2, put = (rect, ba) => E.push({ t: 'block', rect, y0, y1: WALL_H - 0.5, batter: ba, mat: 'mud_plaster' });
   for (let x = x0 + 12; x < x1 - 8; x += 13) put([x - 0.6, z0 - bt - 0.8, x + 0.6, z0 - bt], [0.15, 0.15, 0.5, 0]);

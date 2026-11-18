@@ -1,11 +1,12 @@
 // Windows, doors and the bay of the Hadhrami tower house, built once at the origin facing +z (the wall's face at z = 0) and
 // placed by matrix (instanced in the viewer). Each is a list of [material, geometry].
-import { box, quad, fromTriangles, lathe, rod, orientOutward } from '../../core/geom.js';
+import { box as box0, frustum, quad, fromTriangles, lathe, rod, orientOutward } from '../../core/geom.js';
+const box = box0;
 /** A flat rectangle facing +z at depth z, from (xa, ya) to (xb, yb): two triangles. */
 export const fq = (xa, ya, xb, yb, z) => { const o = []; quad(o, [xb, ya, z], [xb, yb, z], [xa, yb, z], [xa, ya, z]); return fromTriangles(o); };
 
 const CACHE = {};
-const W = { slit: [0.2, 0.5], small: [0.5, 0.8], big: [0.8, 1.25], white: [0.85, 1.3] };
+export const WIN = { slit: [0.2, 0.5], small: [0.5, 0.8], big: [0.8, 1.25], white: [0.85, 1.3] };
 /**
  * A window of the town, built facing +z with its sill at y = 0 (the wall's face at z = 0), the parts standing out of the wall as the lime
  * (nurah) frames of the real houses do: the dark opening; for the larger a frame of three lime boards with a sill that projects and a stepped
@@ -14,16 +15,17 @@ const W = { slit: [0.2, 0.5], small: [0.5, 0.8], big: [0.8, 1.25], white: [0.85,
  */
 export function windowPieces(kind) {
   if (CACHE[kind]) return CACHE[kind];
-  const [w, h] = W[kind], hw = w / 2, out = [['opening', fq(-hw, 0, hw, h, 0.03)]];
+  const [w, h] = WIN[kind], hw = w / 2, out = [['opening', kind === 'slit' ? fq(-hw, 0, hw, h, 0.03) : fq(-hw, 0, hw, h, -0.2)]];
   if (kind === 'slit') {
     out.push(['lime_plaster', box(-hw - 0.05, -0.05, 0, hw + 0.05, 0, 0.1)], ['timber', box(-hw - 0.06, h, 0, hw + 0.06, h + 0.07, 0.1)]);
   } else if (kind === 'small') {
     const lh = h * 0.78;
     out.push(['timber', box(-hw - 0.06, 0, 0, -hw, h, 0.09)], ['timber', box(hw, 0, 0, hw + 0.06, h, 0.09)], ['timber', box(-hw - 0.1, h, 0, hw + 0.1, h + 0.08, 0.12)]);
     out.push(['lime_plaster', box(-hw - 0.1, -0.06, 0, hw + 0.1, 0, 0.14)]);
-    out.push(['timber', box(-hw + 0.005, 0.02, 0.04, -0.01, lh, 0.065)], ['timber', box(0.01, 0.02, 0.04, hw - 0.005, lh, 0.065)]);
-    out.push(['wood_dark', fq(-hw + 0.05, 0.1, -0.06, lh - 0.08, 0.068)], ['wood_dark', fq(0.06, 0.1, hw - 0.05, lh - 0.08, 0.068)]);
-    for (const x of [-hw * 0.5, 0, hw * 0.5]) out.push(['wood_dark', fq(x - 0.012, lh, x + 0.012, h - 0.02, 0.045)]);
+    // the two plank leaves stand in the recess (the reveal holds them), a lattice of slats above them, a timber sill inside
+    out.push(['timber', box(-hw + 0.005, 0.02, -0.14, -0.01, lh, -0.1)], ['timber', box(0.01, 0.02, -0.14, hw - 0.005, lh, -0.1)]);
+    out.push(['wood_dark', fq(-hw + 0.05, 0.1, -0.06, lh - 0.08, -0.098)], ['wood_dark', fq(0.06, 0.1, hw - 0.05, lh - 0.08, -0.098)]);
+    for (const x of [-hw * 0.5, 0, hw * 0.5]) out.push(['wood_dark', box(x - 0.012, lh, -0.07, x + 0.012, h - 0.02, -0.04)]);
   } else {
     const lh = h * 0.66, f = 0.11;
     // frame (jambs and lintel board) and the sill that projects, the stepped hood over them
@@ -31,12 +33,13 @@ export function windowPieces(kind) {
     out.push(['lime_plaster', box(-hw - f - 0.04, -0.08, 0, hw + f + 0.04, 0, 0.2)]);
     out.push(['lime_plaster', box(-hw - f - 0.08, h + 0.1, 0, hw + f + 0.08, h + 0.16, 0.16)], ['lime_plaster', box(-hw - 0.02, h + 0.16, 0, hw + 0.02, h + 0.21, 0.11)]);
     // the two carved leaves with their raised panels, and the rail between leaves and lattice
-    out.push(['cedar', box(-hw + 0.005, 0.02, 0.04, -0.012, lh, 0.075)], ['cedar', box(0.012, 0.02, 0.04, hw - 0.005, lh, 0.075)]);
-    for (const [a, b] of [[-hw + 0.06, -0.07], [0.07, hw - 0.06]]) out.push(['wood_dark', fq(a, 0.08, b, lh * 0.46, 0.078)], ['wood_dark', fq(a, lh * 0.54, b, lh - 0.07, 0.078)]);
-    out.push(['wood_dark', box(-hw, lh, 0.04, hw, lh + 0.045, 0.08)]);
+    // the carved leaves stand in the recess, the lattice screen in the plane of the frame above them, a timber sill inside
+    out.push(['cedar', box(-hw + 0.005, 0.02, -0.16, -0.012, lh, -0.1)], ['cedar', box(0.012, 0.02, -0.16, hw - 0.005, lh, -0.1)]);
+    for (const [a, b] of [[-hw + 0.06, -0.07], [0.07, hw - 0.06]]) out.push(['wood_dark', fq(a, 0.08, b, lh * 0.46, -0.098)], ['wood_dark', fq(a, lh * 0.54, b, lh - 0.07, -0.098)]);
+    out.push(['wood_dark', box(-hw, lh, -0.12, hw, lh + 0.045, 0.02)]);
     // the lattice: turned spindles between the rail and the frame, seen against the dark
     const n = kind === 'white' ? 6 : 5;
-    for (let i = 1; i <= n; i++) { const x = -hw + (w * i) / (n + 1); out.push(['wood_dark', box(x - 0.014, lh + 0.045, 0.04, x + 0.014, h - 0.01, 0.07)]); }
+    for (let i = 1; i <= n; i++) { const x = -hw + (w * i) / (n + 1); out.push(['wood_dark', fq(x - 0.014, lh + 0.045, x + 0.014, h - 0.01, 0.04)]); }
   }
   return (CACHE[kind] = out);
 }
