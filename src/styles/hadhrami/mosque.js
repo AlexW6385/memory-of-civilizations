@@ -72,8 +72,43 @@ function minaret(el, { bag, col }) {
   const [ya3, yb3] = st[2];
   onFace(2, ya3 + 1.2, 0, 0, (m) => { for (const [mt, g] of [['opening', archFill({ u0: -0.38, u1: 0.38, y0: 0, yS: 1.5, rise: 0.7, w: 0.02, dir: 1, axis: 'x' })], ['lime_plaster', archRing({ u0: -0.38, u1: 0.38, yS: 1.5, rise: 0.7, d: 0.14, w0: 0, w1: 0.06, axis: 'x' })]]) bag.addInstance(mt, g, m.clone(), { reach: 150 }); });
   bag.add('lime_plaster', box(cx - g3 - 0.15, yb3, cz - g3 - 0.15, cx + g3 + 0.15, yb3 + 0.22, cz + g3 + 0.15));
-  bag.add('lime_plaster', box(cx - g3 * 0.6, yb3 + 0.22, cz - g3 * 0.6, cx + g3 * 0.6, yb3 + 0.7, cz + g3 * 0.6));
-  bag.add('lime_plaster', lathe([[0.001, 0], [0.22, 0], [0.26, 0.12], [0.18, 0.26], [0.07, 0.34], [0.05, 0.9], [0.001, 1.05]], 8, null, cx, yb3 + 0.7, cz));
+  // the small dome: a square drum with a lime cornice, a hemisphere of lime on it with a ring at its foot, the finial above [dome inferred]
+  const dr = g3 * 0.8, dy = yb3 + 0.22;
+  bag.add('lime_plaster', box(cx - dr - 0.08, dy, cz - dr - 0.08, cx + dr + 0.08, dy + 0.5, cz + dr + 0.08));
+  bag.add('lime_plaster', box(cx - dr - 0.16, dy + 0.5, cz - dr - 0.16, cx + dr + 0.16, dy + 0.62, cz + dr + 0.16));
+  const R = dr * 1.2, dome = [];
+  for (let i = 0; i <= 8; i++) { const t = (i / 8) * Math.PI / 2; dome.push([Math.max(0.001, R * Math.cos(t)), R * 1.2 * Math.sin(t)]); }
+  bag.add('lime_plaster', lathe(dome, 14, null, cx, dy + 0.62, cz));
+  bag.add('lime_plaster', lathe([[0.001, 0], [0.16, 0], [0.2, 0.08], [0.12, 0.2], [0.05, 0.26], [0.04, 0.7], [0.001, 0.82]], 8, null, cx, dy + 0.62 + R * 1.2 - 0.02, cz));
+  // the four corner horns of the lantern's cornice
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) bag.add('lime_plaster', box(cx + sx * (g3 + 0.15) - 0.1 - (sx > 0 ? 0.1 : -0.0), yb3 + 0.22, cz + sz * (g3 + 0.15) - 0.1 - (sz > 0 ? 0.1 : 0), cx + sx * (g3 + 0.15) + 0.1 + (sx > 0 ? 0 : 0.1) * 0, yb3 + 0.5, cz + sz * (g3 + 0.15) + 0.1 + (sz > 0 ? 0 : 0.1) * 0));
   col.rect([cx - w / 2, cz - w / 2, cx + w / 2, cz + w / 2], -1, h + 2.4);
 }
-export const MOSQUE_ELEMENTS = { mosque_hall: mosqueHall, minaret };
+/**
+ * mosque_crown: { rect (the outer walls), y (their head), door: [x, z] } — the roof's parapet of the mosque: a lime parapet with its cap, teeth every 1.1 m and a
+ * horn on each corner, and over the street door a carved cedar lintel, a lime hood in three steps and jamb posts with bosses [forms inferred; docs/settlements/shibam.md §14].
+ */
+function mosqueCrown(el, { bag }) {
+  const [x0, z0, x1, z1] = el.rect, y = el.y, L = 'lime_plaster', pt = 0.4, ph = 0.8;
+  for (const [a, b, c, d] of [[x0, z0, x1, z0 + pt], [x0, z1 - pt, x1, z1], [x0, z0 + pt, x0 + pt, z1 - pt], [x1 - pt, z0 + pt, x1, z1 - pt]]) { bag.add(L, box(a, y, b, c, y + ph, d)); bag.add(L, box(a - 0.04, y + ph, b - 0.04, c + 0.04, y + ph + 0.07, d + 0.04)); }
+  for (let x = x0 + 1.0; x < x1 - 1.2; x += 1.1) for (const z of [z0, z1 - pt]) { bag.add(L, box(x, y + ph + 0.07, z + 0.05, x + 0.36, y + ph + 0.42, z + pt - 0.05)); bag.add(L, box(x + 0.07, y + ph + 0.42, z + 0.1, x + 0.29, y + ph + 0.52, z + pt - 0.1)); }
+  for (let z = z0 + 1.0; z < z1 - 1.2; z += 1.1) for (const x of [x0, x1 - pt]) { bag.add(L, box(x + 0.05, y + ph + 0.07, z, x + pt - 0.05, y + ph + 0.42, z + 0.36)); bag.add(L, box(x + 0.1, y + ph + 0.42, z + 0.07, x + pt - 0.1, y + ph + 0.52, z + 0.29)); }
+  for (const [cx, cz] of [[x0, z0], [x1 - 0.6, z0], [x0, z1 - 0.6], [x1 - 0.6, z1 - 0.6]]) {
+    bag.add(L, box(cx, y, cz, cx + 0.6, y + 1.3, cz + 0.6)); bag.add(L, box(cx - 0.05, y + 1.3, cz - 0.05, cx + 0.65, y + 1.38, cz + 0.65));
+    bag.add(L, box(cx + 0.1, y + 1.38, cz + 0.1, cx + 0.5, y + 1.6, cz + 0.5)); bag.add(L, box(cx + 0.2, y + 1.6, cz + 0.2, cx + 0.4, y + 1.85, cz + 0.4));
+  }
+  if (el.door) {
+    const [dx, dz] = el.door, xo = dx + 0.0;
+    for (const s of [-1, 1]) {
+      const zc = dz + s * 1.1;
+      bag.add('cedar', box(xo, 0.05, zc - 0.09, xo + 0.1, 2.9, zc + 0.09));
+      for (let k = 0; k < 8; k++) bag.add('wood_dark', box(xo + 0.1, 0.3 + k * 0.33, zc - 0.05, xo + 0.14, 0.42 + k * 0.33, zc + 0.05));
+      bag.add(L, box(xo - 0.04, 0, zc - 0.14, xo + 0.1, 0.12, zc + 0.14));
+    }
+    bag.add('cedar', box(xo, 2.8, dz - 1.2, xo + 0.1, 3.05, dz + 1.2));
+    for (let k = -4; k <= 4; k++) bag.add('wood_dark', box(xo + 0.1, 2.84, dz + k * 0.27 - 0.06, xo + 0.14, 3.0, dz + k * 0.27 + 0.06));
+    bag.add(L, box(xo - 0.1, 3.05, dz - 1.35, xo + 0.12, 3.22, dz + 1.35)); bag.add(L, box(xo - 0.1, 3.22, dz - 1.0, xo + 0.1, 3.42, dz + 1.0)); bag.add(L, box(xo - 0.08, 3.42, dz - 0.6, xo + 0.08, 3.6, dz + 0.6));
+    bag.add(L, box(xo - 0.06, 3.6, dz - 0.25, xo + 0.06, 3.85, dz + 0.25));
+  }
+}
+export const MOSQUE_ELEMENTS = { mosque_hall: mosqueHall, minaret, mosque_crown: mosqueCrown };

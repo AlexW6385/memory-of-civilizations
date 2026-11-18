@@ -118,3 +118,19 @@ Built (all in materials the plan already has, merged into one geometry per mater
 
 Departure from §4: none. Tried and dropped: two more windows per storey on the west face (a fourth and third column over the stair), which added a draw at the arrival.
 Still missing for L3: carved interior ceilings, the mastabas at the door (the square's props stand there, `town.js`), a polished-lime pattern on the top storeys.
+
+## 14. The town seen from the arrival (round 3)
+
+No new source was fetched; the pass works from §4, §12 and §13 (whitewashed upper storeys and lime "around windows and doors" [stated: MIT DOME, Global Dispatches]; "walls are topped with white lime caps" [stated: Architectural League]; a gate in the wall on the wadi side [stated: UNESCO/Ancient Origins]; the Hadhrami square adobe minaret with an inner stair [stated: Wikipedia "Al-Muhdhar Mosque"]). The forms and numbers are [inferred]. Code: `src/styles/hadhrami/index.js` (`tower_house`), `body.js`, `gate.js`, `mosque.js`.
+
+Built (arrival frame: main 315 draws before and after; main triangles 2.09 M before, 2.01 M after, the cheaper windows paying for the new detail):
+1. **Every tower house differs by rule from a hash of its own position** (`hs(x0, z0, salt)`, no counter, no `Math.random`): the batter (0.011–0.031 m per metre), the depth of the lime band (one to three storeys) and the height of its lower edge (±0.45 m), the parapet's height (0.85–1.15 m), the pitch and size of its teeth, the height of the corner piers and horns, the spacing of the windows (3.3–4.5 m), and on about four in ten houses a roof room (mafraj) set back from the parapet.
+2. **The skyline.** Teeth along every free parapet, each a block with a small cap; each corner pier stepped, capped and drawn up into a two-stepped horn.
+3. **The lime band's lower edge** runs down the mud in tongues of uneven length (whitewash laid on in strokes), a single triangle each.
+4. **Stone footing.** A row of joggled stones set proud of the plinth on every free face, left out at the door.
+5. **Windows as real recesses.** The wall of each house is built face by face (`body.js`) with a hole at every window; the reveals (soffit, jambs) are 0.2 m deep, the dark back plane and the carved leaves, lattice and frame stand in the hole (`windowPieces`, instanced). The reveals are split over three materials the plan already has so no merged mesh reaches 80 000 triangles (a cut mesh costs a draw per cell).
+6. **The gate** (`gate_house`): two battered towers (brown below, lime above with a band), arrow slits, a pointed arch over the 4.6 m passage with a moulded lime ring on each face, the roof's parapet with teeth and four horns, two leaves of cedar planks between rails with rows of iron studs and strap hinges standing open along the passage, a drawbar's beam on corbels.
+7. **The Friday mosque.** The wall's parapet with a cap, teeth and four horns; the street door with carved cedar jamb posts with bosses, a carved lintel and a three-step lime hood; the minaret raised to 31 m, its crown now a drum with cornice horns, a lime dome and a finial.
+
+Tried and dropped: thin reveal boards as boxes (+350 000 triangles and 7 draws); teeth as custom pyramids (new prototypes, draws).
+Still missing for L3: the palace is a flat wall of four window columns (its draws would rise with more), doors of the ordinary houses repeat four fashions, the wall's merlons are plain.

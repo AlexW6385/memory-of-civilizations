@@ -17,7 +17,7 @@ function putAt(bag, pieces, x, y, z, nx, nz, reach = 70) {
 }
 /** A point on a face at lateral coordinate u (the coordinate along it) and out o from the wall, at height y. */
 function onFace(el, f, u, y, o = 0) {
-  const [x0, z0, x1, z1] = el.rect, k = K * y;
+  const [x0, z0, x1, z1] = el.rect, k = (el._k ?? K) * y;
   switch (f) {
     case 'n': return [u, y, z0 + k - o];
     case 's': return [u, y, z1 - k + o];
@@ -76,10 +76,6 @@ export function dressRoof(ctx, el, top, [px0, pz0, px1, pz1], rand) {
       putAt(bag, spoutPieces(), q[0], q[1], q[2], nx, nz, 110);
       putAt(bag, streakPieces(2.4), q[0], q[1] - 0.12, q[2], nx, nz, 85);
     }
-  }
-  // the teeth of the parapet (lime stepped pieces every metre) on rich houses and the palace
-  if (el.rich || el.towers) {
-    for (let x = px0 + 0.7; x < px1 - 0.4; x += 1.0) { bag.add('lime_plaster', box(x, top + 0.9, pz0, x + 0.3, top + 1.2, pz0 + 0.28)); bag.add('lime_plaster', box(x, top + 0.9, pz1 - 0.28, x + 0.3, top + 1.2, pz1)); }
   }
   // on the roof: the stair-head in a corner, jars, a drying frame with its cloth
   const cx = px0 + 0.9 + r() * Math.max(0, px1 - px0 - 3), cz = pz0 + 0.9 + r() * Math.max(0, pz1 - pz0 - 3);
