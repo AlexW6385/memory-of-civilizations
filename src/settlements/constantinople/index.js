@@ -19,9 +19,10 @@ import { processionPlan } from './procession.js';
 import { laneLifePlans } from './lanelife.js';
 import { outerLifePlans } from './outerlife.js';
 import { hippodromePlan } from './hippodrome.js';
-import { interiorPlan, interiorLifePlan } from './interiors.js';
+import { interiorPlan, interiorLifePlan, houseWalks } from './interiors.js';
 export { music };
-export const landmarks = [{ plan: sophia, music }];
+// the walk-check routes up the enterable houses' stairs to their upper rooms and roof terraces ride on the landmark's plan (as Amsterdam's)
+export const landmarks = [{ plan: { ...sophia, walks: [...(sophia.walks ?? []), ...houseWalks()] }, music }];
 // the Column of Justinian's rider in two forms by distance: the old statue beyond 110 m, the modelled bronze rider within (the column's capital tops at y = 45.1)
 const riderPlans = () => {
   const mk = (id, t, o) => ({ id, style: 'roman', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: [{ t, at: JUSTINIAN, y: 0, h: 34, d: 3.2, ...(t === 'cn_rider' ? { y: 45.12, s: 3.4 } : {}) }], rooms: [], bounds: [-400, -160, 262, 362], entrance: { at: [-150, 110], facing: 'e' }, center: JUSTINIAN, nocollide: true, ...o });
