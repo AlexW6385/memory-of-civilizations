@@ -5,8 +5,11 @@
 // Each face is built in its own frame and merged per material (Florence has no mesh to spare).
 
 import { box, lathe } from '../../core/geom.js';
-import { faceFrame, Local, ext, archOutline, archRise, dropBack } from './face.js';
+import { faceFrame, Local, ext, archOutline, archRise, dropBack, toW } from './face.js';
 import { human } from '../greek/sculpture.js';
+import { Field, craftScene } from './relief.js';
+import { saint, placeFigure } from './statues.js';
+import { lodAt } from './walk.js';
 
 const M = 'marble', G = 'verde_antico', PINK = 'marble_pink', O = 'opening';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -14,7 +17,8 @@ const poly = (uc, yc, r, n, a0 = 0, ry = r) => Array.from({ length: n }, (_, i) 
 const flat = (Lc, mat, pts, holes, d0, d1) => Lc.add(mat, dropBack(ext(pts, holes, d0, d1, 4)));
 
 /** A figure in low relief: standing with a raised arm, seated at a bench, or standing with a long tool. */
-function relief(Lc, mat, uc, yc, kind, sc, d0, d1) {
+function relief(Lc, mat, uc, yc, kind, sc, d0, d1, lod = 2, v = 0) {
+  if (lod < 2) { const F = new Field(1.3 * sc / 1.35, 1.5 * sc / 1.35, lod ? 0.06 : 0.04); craftScene(F, kind, v); Lc.add(mat, F.geometry(uc - F.w / 2, yc - F.h / 2, d0)); return; }
   const P = (list) => list.map(([u, y]) => [uc + u * sc, yc + y * sc]);
   const head = (u, y, r) => flat(Lc, mat, P(poly(u, y, r, 8)), [], d0, d1);
   if (kind === 0) {
@@ -39,7 +43,7 @@ function relief(Lc, mat, uc, yc, kind, sc, d0, d1) {
  * The base and first storey of one face: the plinth, two rows of reliefs, the string, the niches with prophets,
  * the roundels over them and the string at the storey's top. L the face's length; y1 the storey's top.
  */
-function lower(Lc, L, y1, seed) {
+function lower(Lc, L, y1, seed, lod = 2) {
   const rand = rng(seed);
   // the plinth and the cornice over the reliefs
   Lc.box(M, 0.6, 0, 0, L - 0.6, 0.95, 0.32); Lc.box(G, 0.6, 0.95, 0, L - 0.6, 1.07, 0.36); Lc.box(M, 0.6, 1.07, 0, L - 0.6, 6.55, 0.06);
@@ -50,11 +54,11 @@ function lower(Lc, L, y1, seed) {
     const uc = 0.6 + (i + 0.5) * p;
     const hx = poly(uc, 2.5, 1.02, 6), hi = poly(uc, 2.5, 0.84, 6);
     flat(Lc, M, hx, [hi], 0.06, 0.2); flat(Lc, G, hi, [], 0.06, 0.1);
-    relief(Lc, M, uc, 2.5, Math.floor(rand() * 3), 1.35, 0.1, 0.17);
+    relief(Lc, M, uc, 2.5, Math.floor(rand() * 3), 1.35, 0.1, 0.17, lod, i);
     const dm = poly(uc, 4.95, 1.06, 4, Math.PI / 2, 1.2), di = poly(uc, 4.95, 0.86, 4, Math.PI / 2, 1.0);
     flat(Lc, M, dm, [di], 0.06, 0.2); flat(Lc, PINK, di, [], 0.06, 0.1);
     for (const [a, b] of [[0, 1.18], [1, 0], [0, -1.18], [-1, 0]]) flat(Lc, G, poly(uc + a * 1.06, 4.95 + b, 0.19, 8), [], 0.06, 0.2);   // the lobes at the points
-    relief(Lc, M, uc, 4.95, Math.floor(rand() * 3), 1.05, 0.1, 0.17);
+    relief(Lc, M, uc, 4.95, Math.floor(rand() * 3), 1.05, 0.1, 0.17, lod, i + 6);
   }
   // the first storey: green strips between the panels, the niches of the prophets, the roundels over them
   for (const u of [L / 2]) Lc.box(G, u - 0.3, 7.05, 0, u + 0.3, y1 - 0.3, 0.08);
@@ -65,8 +69,11 @@ function lower(Lc, L, y1, seed) {
     flat(Lc, M, outer, [open], 0.05, 0.28); flat(Lc, G, open, [], 0.04, 0.09);
     Lc.box(M, uc - wn / 2 - 0.3, y0 - 0.5, 0.04, uc + wn / 2 + 0.3, y0, 0.62);                                  // the sill, the statue's plinth
     Lc.box(G, uc - wn / 2 - 0.3, y0 - 0.58, 0.04, uc + wn / 2 + 0.3, y0 - 0.5, 0.66);
-    const f = human({ n: 5, h: 2.3, pose: rand() < 0.5 ? 'stand' : 'ease', drape: 'mantle', mirror: rand() < 0.5, lean: Math.floor(rand() * 5) - 2 });
-    for (const g of [...f.stone, ...f.metal, ...(f.skin ?? [])]) { g.translate(uc, y0, 0.3); Lc.add(M, g); }
+    if (lod < 2) Lc.add(M, placeFigure(saint, uc, y0, 0.36, 3.5, 1, Math.floor(rand() * 8)));
+    else {
+      const f = human({ n: 5, h: 2.3, pose: rand() < 0.5 ? 'stand' : 'ease', drape: 'mantle', mirror: rand() < 0.5, lean: Math.floor(rand() * 5) - 2 });
+      for (const g of [...f.stone, ...f.metal, ...(f.skin ?? [])]) { g.translate(uc, y0, 0.3); Lc.add(M, g); }
+    }
     // the roundel over the niche: a pink field in a green ring in a marble frame
     const rc = 17.0;
     flat(Lc, M, poly(uc, rc, 1.2, 12), [poly(uc, rc, 1.0, 12)], 0.05, 0.16); flat(Lc, G, poly(uc, rc, 1.0, 12), [poly(uc, rc, 0.75, 12)], 0.05, 0.1); flat(Lc, PINK, poly(uc, rc, 0.75, 12), [], 0.05, 0.09);
@@ -80,7 +87,8 @@ export function campanileDetail(bag, r, y, h, y1 = 19.4) {
   for (const f of 'nsew') {
     const { M: FM, L } = faceFrame(r, f, y), Lc = new Local();
     Lc.noBack = true; Lc.L = L;
-    lower(Lc, L, y1, 1334 + 7 * k++);
+    const [fx, fz] = toW(FM, L / 2, 0.5);
+    lower(Lc, L, y1, 1334 + 7 * k++, lodAt(fx, fz));
     // the crown's frieze of blind trefoil arches on its cornice, the corbels under the terrace
     const yb = h - 1.55;
     Lc.box(M, 0.6, yb - 0.25, 0, L - 0.6, yb, 0.22);

@@ -17,7 +17,11 @@
 
 import { Matrix4 } from '../../core/three.js';
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
-import { Local, ext, archOutline, headPts } from './face.js';
+import { Local, ext, archOutline, headPts, toW } from './face.js';
+import { Sculpt } from '../nabataean/sculpt.js';
+import { Field, paradiseScene, quatrefoilScene, figure as reliefFig } from './relief.js';
+import { saint, portraitHead } from './statues.js';
+import { lodAt } from './walk.js';
 import { ball, limb, T } from '../qing/carving.js';
 
 const M = 'marble', G = 'verde_antico', GB = 'gilt_bronze', BR = 'bronze', O = 'opening', PINK = 'marble_pink';
@@ -51,14 +55,19 @@ function reliefFigure(Lc, mat, x, y, z, h, dz, v) {
   ];
   for (const g of pieces) { g.scale(1, 1, dz / (h * 0.34)); g.translate(x, y, z); Lc.add(mat, g); }
 }
-/** A head in a roundel (a bust at a crossing of the frame), facing +z. */
-function head(Lc, mat, x, y, z, r) {
-  Lc.add(mat, T(ball(r * 0.62, r * 0.75, r * 0.5, 5, 3), x, y + r * 0.1, z + r * 0.25));
+/** A head in a roundel (a bust at a crossing of the frame), facing +z: the gilt ring, the modelled head (lod 0/1) or a dome (lod 2). */
+function head(Lc, mat, x, y, z, r, lod = 2, v = 0) {
   Lc.add(mat, lathe([[r, 0], [r * 0.85, r * 0.3], [0.001, r * 0.3]], 8, null, 0, 0, 0).rotateX(Math.PI / 2).translate(x, y, z));
+  if (lod > 1) { Lc.add(mat, T(ball(r * 0.62, r * 0.75, r * 0.5, 5, 3), x, y + r * 0.1, z + r * 0.25)); return; }
+  const S = new Sculpt(([a, b, w]) => [x + a * r / 0.085, y + b * r / 0.085, z + 0.012 + w * r / 0.085], { flat: 0.7, clip: true }); portraitHead(S, 1, v); Lc.add(mat, S.geometry());
+}
+/** A statuette in a niche of the frame: the modelled saint (the back half, against the niche), h tall. */
+function statuette(Lc, mat, x, y, z, h, v, lod) {
+  const S = new Sculpt(([a, b, w]) => [x + a * h, y + b * h, z + w * h], { flat: 0.8, clip: true }); saint(S, lod, v); Lc.add(mat, S.geometry());
 }
 
 /** The Gate of Paradise in face frame Lc, centred at uc, from y0; the leaves 2 × w0 by hh. Everything gilt. */
-function gateOfParadise(Lc, uc, y0, w0, hh) {
+function gateOfParadise(Lc, uc, y0, w0, hh, lod = 2) {
   const W = 2 * w0, rows = 5, bar = 0.19, side = 0.3, ph = (hh - (rows + 1) * bar) / rows;
   // the outer frame of foliage and fruit, its heads at the corners
   const fw = 0.3, fo = 0.06;
@@ -78,29 +87,19 @@ function gateOfParadise(Lc, uc, y0, w0, hh) {
       // the niches of the frame with their prophets and sibyls, both sides of the leaf
       for (const su of [u0 + side / 2, u1 - side / 2]) {
         Lc.add(GB, ext(archOutline(su, yb + 0.12, 0.13, yb + ph - 0.2, 'round', 5), [], 0.14, 0.145));
-        reliefFigure(Lc, GB, su, yb + 0.16, 0.15, ph * 0.62, 0.05, k + (su > uc ? 1 : 0));
+        if (lod < 2) statuette(Lc, BR, su, yb + 0.16, 0.15, ph * 0.62, k + (su > uc ? 1 : 0), 1); else reliefFigure(Lc, GB, su, yb + 0.16, 0.15, ph * 0.62, 0.05, k + (su > uc ? 1 : 0));
       }
-      // the panel: the scene in perspective, the far things flattest — a building, a hill, the figures before them
-      const pc = (pu0 + pu1) / 2, pw = pu1 - pu0;
-      if (k % 3 !== 1) {
-        const bw = pw * (0.35 + 0.1 * (k % 2)), bu = pc + (k % 2 ? -1 : 1) * pw * 0.2;
-        Lc.box(GB, bu - bw / 2, yb + ph * 0.3, 0.06, bu + bw / 2, yb + ph * 0.82, 0.085);
-        for (let i = 0; i < 3; i++) { const au = bu - bw / 2 + (i + 0.5) * bw / 3; Lc.add(GB, ext(archOutline(au, yb + ph * 0.34, bw / 3 - 0.04, yb + ph * 0.62, 'round', 4), [], 0.085, 0.1)); }
-        Lc.add(GB, ext([[bu - bw / 2 - 0.02, yb + ph * 0.82], [bu + bw / 2 + 0.02, yb + ph * 0.82], [bu, yb + ph * 0.95]], [], 0.06, 0.09));
-      } else {
-        Lc.add(GB, T(ball(pw * 0.34, ph * 0.3, 0.03, 8, 4), pc - pw * 0.12, yb + ph * 0.45, 0.07));
-        Lc.add(GB, T(ball(pw * 0.26, ph * 0.22, 0.03, 8, 4), pc + pw * 0.2, yb + ph * 0.4, 0.075));
-      }
-      const nf = 2 + (k % 3);
-      for (let i = 0; i < nf; i++) reliefFigure(Lc, GB, pu0 + (i + 0.7) * pw / (nf + 0.4), yb + ph * 0.08, 0.085, ph * (0.5 - 0.04 * (i % 2)), 0.06, k + i);
-      Lc.box(GB, pu0, yb, 0.06, pu1, yb + ph * 0.08, 0.1);                                  // the ground the figures stand on
+      // the panel: the scene as one continuous relief of gilt, the ground the bronze behind it
+      const pw = pu1 - pu0;
+      if (lod < 2) { const F = new Field(pw, ph, lod ? 0.024 : 0.015); paradiseScene(F, k); Lc.add(GB, F.geometry(pu0, yb, 0.06)); }
+      else { const F = new Field(pw, ph, 0.05); paradiseScene(F, k); Lc.add(GB, F.geometry(pu0, yb, 0.06)); }
     }
     // the heads at the crossings of the frame
-    for (let r = 0; r <= rows; r++) for (const su of [u0 + side / 2, u1 - side / 2]) head(Lc, GB, su, y0 + r * (ph + bar) + bar / 2, 0.14, 0.085);
+    for (let r = 0; r <= rows; r++) for (const su of [u0 + side / 2, u1 - side / 2]) head(Lc, GB, su, y0 + r * (ph + bar) + bar / 2, 0.14, 0.085, lod, r * 2 + leaf + (su > uc ? 1 : 0));
   }
 }
 /** A bronze door of 28 quatrefoils (seven rows of four over two leaves), the figures and heads gilt, centred at uc, from y0. */
-function quatrefoilDoor(Lc, uc, y0, w0, hh, seed) {
+function quatrefoilDoor(Lc, uc, y0, w0, hh, seed, lod = 2) {
   const W = 2 * w0, rows = 7, cols = 2, bar = 0.1, cw = (w0 - (cols + 1) * bar) / cols, ch = (hh - (rows + 1) * bar) / rows;
   Lc.box(BR, uc - W / 2 - 0.22, y0, 0.06, uc - W / 2, y0 + hh + 0.22, 0.15);
   Lc.box(BR, uc + W / 2, y0, 0.06, uc + W / 2 + 0.22, y0 + hh + 0.22, 0.15);
@@ -118,10 +117,10 @@ function quatrefoilDoor(Lc, uc, y0, w0, hh, seed) {
       Lc.add(GB, ext(out, [inn.slice().reverse()], 0.06, 0.1));
       const lz = [[pu, py - s * 1.02], [pu + s * 1.02, py], [pu, py + s * 1.02], [pu - s * 1.02, py]], lz2 = lz.map(([a, b]) => [pu + (a - pu) * 0.9, py + (b - py) * 0.9]);
       Lc.add(BR, ext(lz, [lz2.reverse()], 0.06, 0.085));
-      const nf = 1;
-      for (let i = 0; i < nf; i++) reliefFigure(Lc, GB, pu + (nf === 1 ? 0 : (i - 0.5) * s * 0.7), py - s * 0.62, 0.07, s * (nf === 1 ? 1.2 : 1.05), 0.05, k + i);
+      // the scene on the ground within: one continuous relief of gilt, the cell finer where it is seen close
+      const F = new Field(2 * s, 2 * s, lod === 0 ? 0.024 : lod === 1 ? 0.035 : 0.05); quatrefoilScene(F, k); Lc.add(GB, F.geometry(pu - s, py - s, 0.06));
     }
-    for (let r = 1; r < rows; r++) for (let c = 1; c < cols; c++) head(Lc, GB, u0 + c * (cw + bar) + bar / 2, y0 + r * (ch + bar) + bar / 2, 0.11, 0.07);
+    for (let r = 1; r < rows; r++) for (let c = 1; c < cols; c++) head(Lc, GB, u0 + c * (cw + bar) + bar / 2, y0 + r * (ch + bar) + bar / 2, 0.11, 0.07, lod, r + leaf * 3 + seed);
   }
 }
 
@@ -245,8 +244,9 @@ export function baptistery(el, { bag, col }) {
       Lc.box(M, uc - w0 - 0.75, dy + hh + 0.3 + (door === 'paradise' ? 0 : -0.08), 0, uc + w0 + 0.75, dy + hh + 0.9, 0.42);
       Lc.box(G, uc - w0 - 0.95, dy + hh + 0.9, 0, uc + w0 + 0.95, dy + hh + 1.15, 0.5);
       Lc.box(M, uc - w0 - 1.1, dy + hh + 1.15, 0, uc + w0 + 1.1, dy + hh + 1.45, 0.6);
-      if (door === 'paradise') gateOfParadise(Lc, uc, dy, w0, hh);
-      else quatrefoilDoor(Lc, uc, dy, w0, hh, door === 'pisano' ? 0 : 3);
+      const [wx, wz] = toW(FM, uc, 0.5), dl = lodAt(wx, wz);
+      if (door === 'paradise') gateOfParadise(Lc, uc, dy, w0, hh, dl);
+      else quatrefoilDoor(Lc, uc, dy, w0, hh, door === 'pisano' ? 0 : 3, dl);
       col.floor(octRectOf(FM, uc - w0 - 0.8, 0, uc + w0 + 0.8, 1.0), y + dy);
     }
     Lc.emit(bag, FM);

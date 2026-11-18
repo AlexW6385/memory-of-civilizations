@@ -17,6 +17,7 @@ import { faceFrame, Local, ext, archOutline, headPts, voussoirs, wrect, sheet } 
 import { ball, limb, T } from '../qing/carving.js';
 import { rectsMinus } from './medici.js';
 import { signoriaCourt } from './palace-rooms.js';
+import { placeFigure, marzocco as marzoccoFig } from './statues.js';
 
 const PF = 'limestone_yellow', M = 'marble', PINK = 'marble_pink', SER = 'pietra_serena', R = 'roof_tile', GB = 'gilt_bronze', W = 'wood_dark', O = 'opening';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -253,9 +254,15 @@ function ringhiera(bag, col, rect, front, y) {
   Lc.box(PF, a - 0.1, Hh - 0.12, -0.04, b + 0.1, Hh + 0.02, D + 0.12);
   for (let i = 0; i < 3; i++) Lc.box(PF, a + 0.6, -0.5, D, b - 0.6, Hh - (i + 1) * Hh / 4, D + 0.4 * (i + 1));
   for (const u of [a, b - 0.5]) Lc.box(PF, u, Hh, 0.0, u + 0.5, Hh + 0.9, D);                // the low walls at its ends
+  // the Marzocco at the end of the ringhiera on its sculpted base (about 1460), seated facing the piazza, the paw on the shield with the lily
+  const mu = b - 1.9, md = 2.7;
+  Lc.box(PF, mu - 0.62, Hh, md - 0.62, mu + 0.62, Hh + 0.22, md + 0.62); Lc.box(PF, mu - 0.5, Hh + 0.22, md - 0.5, mu + 0.5, Hh + 0.62, md + 0.5); Lc.box(PF, mu - 0.58, Hh + 0.62, md - 0.58, mu + 0.58, Hh + 0.72, md + 0.58);
+  for (const [du, dd] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) Lc.add(PF, lathe([[0.1, 0], [0.13, 0.12], [0.08, 0.26], [0.1, 0.34]], 8, null, mu + du * 0.58, Hh + 0.22, md + dd * 0.58));
+  Lc.add(PF, placeFigure(marzoccoFig, mu, Hh + 0.72, md - 0.1, 1.45, 0, 0));
   Lc.emit(bag, FM);
   const r = (u0, d0, u1, d1) => wrect(FM, u0, d0, u1, d1);
   col.floor(r(a + 0.5, 0, b - 0.5, D), y + Hh);
+  col.rect(r(mu - 0.66, md - 0.66, mu + 0.66, md + 0.66), y + Hh, y + Hh + 2.1);
   const dir = { w: 'e', e: 'w', n: 's', s: 'n' }[front];
   col.ramp(r(a + 0.6, D, b - 0.6, D + 1.2), y, y + Hh, dir);
   for (const u of [a, b - 0.5]) col.rect(r(u, 0, u + 0.5, D), y, y + Hh + 0.9);

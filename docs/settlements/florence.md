@@ -122,6 +122,17 @@ Code: `src/styles/renaissance/duomo-skin.js`, called from `index.js` (`duomo`) a
 - **Baptistery.** The Gate of Paradise reads as ten gilt panels in a gilt frame on a darker bronze ground, the panels near square (the real ones are about 80 cm square) [stated: Wikipedia "Gates of Paradise"; general knowledge].
 - Not found by search: any measured drawing of the 1480 front; the details above are of the type.
 
+## 14. Round 8: sculpture and relief seen from two metres
+
+Code: `src/styles/renaissance/relief.js` (low relief as one height field: domes, tapered rods, cloth folds, blocks with arches cut in; smoothed, normals from the slope, emitted only where it rises), `statues.js` (modelled standing saints and the seated lion from the sculptor's kit of `src/styles/nabataean/sculpt.js` and `figures.js`: rounded limbs, head with brow, nose, lips, hair and beard, tunic and mantle folding along the body), `walk.js` (the walks of the square: full carving within 15 m, reduced to 40 m, the coarse form beyond).
+
+- **Baptistery, Gate of Paradise.** Ten panels of the Old Testament in the order Creation of Adam and Eve, Cain and Abel, Noah, Abraham and Isaac, Jacob and Esau, Joseph, Moses, Joshua, David and Goliath, Solomon and Sheba (left to right, top to bottom), each a continuous gilt relief rising to 6 cm over the bronze ground: figures near and far, a building in perspective or a hill [stated: the ten subjects and their order; Wikipedia "Gates of Paradise"]; the compositions are the type of each scene, not copies [inferred]. The prophet and sibyl statuettes in the frame niches are modelled (half-round, against the niche) and in `bronze`, not `gilt_bronze`, to keep the gilt mesh under 80,000 triangles [inferred: budget]; the 24 heads in the frame are modelled busts in their roundels [stated: 24 heads].
+- **North and south doors.** The 28 quatrefoils each hold a modelled figure or two in relief; the north door (on the walk from the arrival) finer than the south [inferred].
+- **Campanile.** The hexagonal and lozenge panels of the base are modelled reliefs (a figure raising an arm, a worker at his bench, a figure with a long tool, with a small second figure or a tree) in place of flat plates; the niche prophets are modelled statues 3.5 m tall [inferred: the subjects generalised, as in §12].
+- **Cathedral front.** The eight jamb niches hold modelled saints; the lunette of the middle portal is a relief of the Virgin in a mandorla with two angels over the bier and six apostles [inferred, as in §13].
+- **Piazza della Signoria.** The Marzocco: the lion stood at the end of the ringhiera, on a sculpted base from about 1460, seated with a paw on the shield of the lily [stated: Wikipedia "Marzocco"]; ours on the platform's south end, facing the piazza, in pietraforte [inferred: its exact place]. Donatello's Judith (placed on the Piazza in 1495) and Michelangelo's David (1504) are after our date and the Medici lions of the Loggia (1598) are too: none is shown, as in §4 [stated: dates].
+- Sources: [Marzocco - Wikipedia](https://en.wikipedia.org/wiki/Marzocco); the rest as §4 and §12.
+
 ## Sources
 
 - [The Bottega (Shop) and the Street — yourwaytoflorence.com](https://www.yourwaytoflorence.com/db/brunell/bottega.htm)

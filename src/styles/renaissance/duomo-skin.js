@@ -9,6 +9,9 @@ import { Matrix4 } from '../../core/three.js';
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import { Local, ext, archOutline, headPts, faceFrame, wrect } from './face.js';
 import { ball, limb, T } from '../qing/carving.js';
+import { Field, lunetteScene } from './relief.js';
+import { saint, placeFigure } from './statues.js';
+import { lodAt } from './walk.js';
 
 const M = 'marble', G = 'verde_antico', PINK = 'marble_pink', PS = 'pietra_serena', GL = 'stained_glass', O = 'opening';
 
@@ -74,8 +77,9 @@ function frieze(Lc, u0, u1, v, n) {
   }
 }
 
-/** A statue (a draped standing figure) at (u, y, d), h tall, facing outward. */
-function statue(Lc, u, y, d, h, v) {
+/** A statue (a draped standing figure) at (u, y, d), h tall, facing outward: modelled (statues.js) where it is near the walks (lod 0/1), the old figure beyond. */
+function statue(Lc, u, y, d, h, v, lod = 2) {
+  if (lod < 2) { Lc.add(M, placeFigure(saint, u, y, d + 0.1, h, 1, v + 1)); return; }
   const lean = ((v % 3) - 1) * 0.04 * h;
   Lc.add(M, limb([u, y, d], [u + lean, y + h * 0.8, d], h * 0.15, h * 0.09, 6));
   Lc.add(M, T(ball(h * 0.075, h * 0.09, h * 0.075, 6, 4), u + lean, y + h * 0.9, d));
@@ -84,13 +88,13 @@ function statue(Lc, u, y, d, h, v) {
 }
 
 /** A niche for a statue: a pointed recess in a white frame under a small gable, the statue in it. */
-function niche(Lc, uc, y0, w, h, v) {
+function niche(Lc, uc, y0, w, h, v, lod = 2) {
   const ys = y0 + h - w * 0.866, out = archOutline(uc, y0, w, ys, 'pointed', 4), outer = archOutline(uc, y0 - 0.1, w + 0.6, ys, 'pointed', 4);
   Lc.add(PS, ext(out, [], 0, 0.05, 2)); Lc.add(M, ext(outer, [out], 0, 0.3, 2));
   Lc.add(G, ext(archOutline(uc, y0 - 0.25, w + 0.9, ys, 'pointed', 4), [outer], 0, 0.14, 2));
   Lc.box(M, uc - w / 2 - 0.45, y0 - 0.35, 0, uc + w / 2 + 0.45, y0 - 0.2, 0.5);
   Lc.box(M, uc - w * 0.4, y0, 0.05, uc + w * 0.4, y0 + 0.28, 0.5);                  // the corbel the statue stands on
-  statue(Lc, uc, y0 + 0.28, 0.3, h * 0.72, v);
+  statue(Lc, uc, y0 + 0.28, 0.3, h * 0.72, v, lod);
   Lc.add(M, ext([[uc - w / 2 - 0.55, y0 + h + 0.35], [uc + w / 2 + 0.55, y0 + h + 0.35], [uc, y0 + h + 1.45]], [], 0, 0.26, 1));
   Lc.add(G, ext([[uc - 0.3, y0 + h + 0.7], [uc + 0.3, y0 + h + 0.7], [uc, y0 + h + 1.15]], [], 0.26, 0.3, 1));
 }
@@ -238,7 +242,7 @@ export function drumSkin(TB, cx, cz, R0, y0, h) {
  */
 export function westFront(bag, col, nave, cz, y, H, W, IN) {
   const xw = nave[0] - 1.9, z0 = nave[1] - 0.4, z1 = nave[3] + 0.4, L = z1 - z0, uC = L / 2, yT = H * 0.38, pw = 4.6, ph = pw * 2.1;
-  const { M: FM } = faceFrame([xw, z0, xw, z1], 'w', y), Lc = new Local();
+  const { M: FM } = faceFrame([xw, z0, xw, z1], 'w', y), Lc = new Local(), FL = lodAt(xw - 6, cz);
   Lc.noBack = true; Lc.L = L;
   const side = 12, gaps = [[0, uC - side - 3.6], [uC - side + 3.6, uC - 3.5], [uC + 3.5, uC + side - 3.6], [uC + side + 3.6, L]];
   // plinth, cornice, corner piers
@@ -253,7 +257,7 @@ export function westFront(bag, col, nave, cz, y, H, W, IN) {
   // the niches with their statues, and the field under them, between the portals and at the ends
   gaps.forEach(([u0, u1], gi) => {
     const uc = (u0 + u1) / 2;
-    niche(Lc, uc, 2.7, 2.0, 4.0, gi * 2); niche(Lc, uc, 9.1, 2.0, 4.0, gi * 2 + 1);
+    niche(Lc, uc, 2.7, 2.0, 4.0, gi * 2, FL); niche(Lc, uc, 9.1, 2.0, 4.0, gi * 2 + 1, FL);
     string(Lc, u0 + 0.3, u1 - 0.3, 8.6, 0.3);
     if (u1 - u0 > 3) panel(Lc, u0 + 0.5, u1 - 0.5, 1.15, 1.95, gi);
   });
@@ -277,11 +281,14 @@ export function westFront(bag, col, nave, cz, y, H, W, IN) {
   for (const sg of [-1, 1]) for (const [j, mat] of [[0, M], [1, G], [2, M]]) { const wi = lw / 2 + 0.42 * j; Lc.box(mat, lc + (sg < 0 ? -(wi + 0.42) : wi), ph + 1.05, 0, lc + (sg < 0 ? -wi : wi + 0.42), ys, dep - 0.2 + j * 0.1); }
   // the lunette: the Virgin in a mandorla, the apostles about her bier below
   const ty = ph + 1.05 + 2.6;
+  if (FL < 2) { const F = new Field(5.4, 5.0, FL ? 0.09 : 0.07); lunetteScene(F); Lc.add(M, F.geometry(lc - 2.7, ph + 1.15, 0.46)); }
+  else {
   Lc.add(M, ext(Array.from({ length: 16 }, (_, i) => [lc + Math.cos(i / 16 * Math.PI * 2) * 1.0, ty + 0.5 + Math.sin(i / 16 * Math.PI * 2) * 1.7]), [], 0.45, 0.55, 1));
   Lc.add('gilt_bronze', ext(Array.from({ length: 16 }, (_, i) => [lc + Math.cos(i / 16 * Math.PI * 2) * 0.78, ty + 0.5 + Math.sin(i / 16 * Math.PI * 2) * 1.45]), [], 0.55, 0.6, 1));
-  statue(Lc, lc, ty - 0.6, 0.62, 2.4, 1);
+  statue(Lc, lc, ty - 0.6, 0.62, 2.4, 1, 2);
   Lc.add(M, limb([lc - 1.9, ph + 1.75, 0.6], [lc + 1.9, ph + 1.75, 0.6], 0.24, 0.24, 6));
   for (let i = 0; i < 6; i++) Lc.add(M, T(ball(0.16, 0.2, 0.14, 5, 3), lc - 2.2 + i * 0.88 + (i > 2 ? 0.3 : 0), ph + 2.3, 0.55));
+  }
   Lc.emit(bag, FM);
   // the colliders: the front stands out by its portals and niches, one slab of 1.2 m either side of the passage
   const zc = cz;
