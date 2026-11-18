@@ -114,6 +114,15 @@ Moai of yellow-brown tuff; ahu of fitted basalt with a paved ramp of rounded sto
 - **Each statue different:** width scaled 0.93-1.08 and depth a little with it, fixed by the statue's position, on top of the height already varied [inferred: statues were not cast to one pattern].
 - Departure: none from §4a; the geometry's triangle count is unchanged.
 
+## 4k. Round 3: ahu masonry, poro rows, pukao, quarry bays, hare paenga
+
+- **Ahu walls** (`pillow` in `ahu`): both faces are built of blocks whose faces are drawn in on every edge (3-6 cm) so that each reads as a fitted slab with a fine joint, the face tops a little out of true; great slabs below, courses of smaller blocks above [stated: carefully fitted basalt slabs, Wikipedia "Ahu Vinapu"; sizes inferred].
+- **Ramp** (`ahu`): the beach cobbles (poro) laid in wavering rows across the central 60 m, each row's stones alike, the next row set between them; scattered beyond [stated: poro paving, The Past; the rows inferred].
+- **Pukao** (`moai`): each one's width, height, turn, tilt and set on the head fixed by the statue's position (0.88-1.14 wide, 0.8-1.3 high) [stated: 1.8-3 m across, Wikipedia "Pukao"; variation inferred].
+- **Quarry bays** (`quarry_bay`): the cut face above the head stepped in three ledges, hewn blocks along the walls' tops, chips and spalls in the trench [inferred].
+- **Hare paenga** (`hare_paenga`): the crescent pavement's poro laid in four concentric rows; the pole ends crossed and lashed over each end of the ridge [stated: poles lashed to a ridge pole, The Past; crossing inferred].
+- Already in place from earlier passes: wings, plaza levelling, buried statues, the curb's pole holes, hare moa and manavai (§4i). Budget at the arrival: main 1.93 -> 2.03 M triangles (+5%), main draws 94 unchanged.
+
 ## 5. The town
 
 Fifty-six hare paenga, chicken houses and garden walls in eight hamlets on the plain, kept off the statue road (§4f). [inferred]
