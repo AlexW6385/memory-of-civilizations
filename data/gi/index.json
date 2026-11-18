@@ -3275,9 +3275,9 @@
  },
  "ming-suzhou-garden": {
   "site": "ming-suzhou",
-  "hash": "70849564f983b8b5",
+  "hash": "c5ff0e26461414e8",
   "rays": 128,
-  "probes": 9218,
+  "probes": 9503,
   "boxes": [
    {
     "min": [
@@ -3287,7 +3287,7 @@
     ],
     "n": [
      19,
-     11,
+     12,
      15
     ],
     "spacing": 1,
@@ -3329,9 +3329,9 @@
     ]
    }
   ],
-  "bytes": 155784,
-  "seconds": 18,
-  "baked": "2026-11-17"
+  "bytes": 160318,
+  "seconds": 22,
+  "baked": "2026-11-18"
  },
  "mohenjo-daro-citadel": {
   "site": "mohenjo-daro",
@@ -4456,7 +4456,7 @@
  },
  "shaolin-monastery": {
   "site": "shaolin",
-  "hash": "29383e2b529da4cf",
+  "hash": "4b108acd8bf002ba",
   "rays": 128,
   "probes": 74099,
   "boxes": [
@@ -4616,9 +4616,9 @@
     ]
    }
   ],
-  "bytes": 1191670,
-  "seconds": 110,
-  "baked": "2026-11-17"
+  "bytes": 1191672,
+  "seconds": 131,
+  "baked": "2026-11-18"
  },
  "shibam-friday-mosque": {
   "site": "shibam",
