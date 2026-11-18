@@ -2,6 +2,7 @@
 import '../../styles/maya/index.js';
 import '../../styles/ming/index.js';
 import './detail.js';
+import './carved.js';
 import './house.js';
 import plaza from './plan.js';
 import music from './music.js';

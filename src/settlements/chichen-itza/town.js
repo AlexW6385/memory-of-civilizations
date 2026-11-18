@@ -4,6 +4,7 @@
 import { RADIUS, PLAZA, CENOTE, lots, cenoteDist, PLAZA_STELAE, PLAZA_SHRINES, CEIBAS, SWEATBATH, WEAR_SKIP } from './layout.js';
 import { ground } from './ground.js';
 import { variant } from './house.js';
+import { sculptPlans } from './sculpt-plans.js';
 
 const base = (id, elements) => ({ id, style: 'maya', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 62], facing: 'n' } });
 
@@ -193,5 +194,5 @@ export async function town() {
   // the water in the Sacred Cenote, 20 m below the rim (docs/settlements/chichen-itza.md)
   const [cx, cz] = CENOTE.c, r = CENOTE.r;
   plans.push({ ...base('chichen-itza-cenote-water', [{ t: 'water_cells', rect: [cx - r, cz - r, cx + r, cz + r], y: CENOTE.water, cell: 0.75, inside: (x, z) => cenoteDist(x, z) < 0 && ground.height(x, z) < CENOTE.water }]), style: 'ming' });
-  return [...plans, ...market(), ...market('chichen-itza-market-e', 50, 54, 2, 4, 2001, 8), ...market('chichen-itza-market-w', -36, 58, 2, 3, 2002, 6), ...worksite(), rites(), riteObjects(), ...ballgame(), ...dressing()];
+  return [...plans, ...market(), ...market('chichen-itza-market-e', 50, 54, 2, 4, 2001, 8), ...market('chichen-itza-market-w', -36, 58, 2, 3, 2002, 6), ...worksite(), rites(), riteObjects(), ...ballgame(), ...dressing(), ...sculptPlans()];
 }
