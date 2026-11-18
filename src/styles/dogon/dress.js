@@ -4,7 +4,8 @@
 // merged (the viewer draws the fine ones only near).
 
 import { box, lathe, rod } from '../../core/geom.js';
-import { rng, WALL, SMOOTH, MUD, STONE, STONE2, DARK, LOG, HOLE, THATCH, STALK, jar, basket, mortar, firewood, milletStack } from './props.js';
+import { figure } from './door.js';
+import { rng, hv, WALL, SMOOTH, MUD, STONE, STONE2, DARK, LOG, HOLE, THATCH, STALK, jar, basket, mortar, firewood, milletStack } from './props.js';
 
 const POOL = 'pottery_dark';
 
@@ -120,3 +121,66 @@ export function hangings(bag, xs, z, F, rand) {
   }
 }
 void basket; void milletStack; void LOG;
+
+/** Millet spread to dry on a flat roof (rect [x0, z0, x1, z1] at y): a reed mat, the heads raked into rows and heaped in a few places, a wooden rake left leaning. */
+export function dryMillet(bag, col, rect, y) {
+  const [x0, z0, x1, z1] = rect, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, h = (k) => hv(cx, cz, k);
+  bag.add(STALK, box(x0, y, z0, x1, y + 0.02, z1));
+  const rows = Math.max(3, Math.floor((z1 - z0) / 0.32));
+  for (let i = 0; i < rows; i++) {
+    const z = z0 + 0.2 + (i + 0.5) * (z1 - z0 - 0.4) / rows, ex0 = x0 + 0.15 + 0.3 * h(i), ex1 = x1 - 0.15 - 0.3 * h(20 + i);
+    bag.add(THATCH, rod([ex0, y + 0.05, z], [ex1, y + 0.05 + 0.02 * h(40 + i), z + (h(60 + i) - 0.5) * 0.1], 0.03 + 0.012 * h(80 + i), 4));        // a raked row of heads
+  }
+  for (let k = 0; k < 4; k++) {
+    const px = x0 + 0.5 + (x1 - x0 - 1.0) * h(100 + k), pz = z0 + 0.4 + (z1 - z0 - 0.8) * h(120 + k), r = 0.3 + 0.16 * h(140 + k);
+    bag.add(THATCH, lathe([[r, 0.015], [r * 0.9, r * 0.35], [r * 0.5, r * 0.62], [0.001, r * 0.72]], 8, (t, i) => 1 + 0.2 * Math.sin(t * 3 + i * 2.3 + k), px, y, pz));   // a heap, turned by hand
+  }
+  const rx = x1 - 0.25, rz = z0 + 0.3 + (z1 - z0 - 0.6) * h(160);
+  bag.add(DARK, rod([rx, y, rz], [rx - 0.08, y + 1.1, rz + 0.5], 0.022, 4));          // the rake: haft and head
+  bag.add(DARK, rod([rx - 0.08 - 0.2, y + 1.08, rz + 0.5], [rx - 0.08 + 0.2, y + 1.08, rz + 0.5], 0.02, 4));
+  for (let i = 0; i < 4; i++) bag.add(DARK, rod([rx - 0.08 - 0.15 + i * 0.1, y + 1.08, rz + 0.5], [rx - 0.08 - 0.15 + i * 0.1, y + 0.94, rz + 0.52], 0.01, 3));
+  void col;
+}
+
+/** Pots on a roof, each its own: a water jar with a stone for a lid, a wide bowl upturned, a small jar on a ring of straw, a pair of mouth to mouth. */
+export function roofPots(bag, rect, y) {
+  const [x0, z0, x1, z1] = rect, h = (k) => hv(x0, z0, k);
+  const at = (k) => [x0 + 0.5 + (x1 - x0 - 1.0) * h(200 + k), z0 + 0.5 + (z1 - z0 - 1.0) * h(220 + k)];
+  let [px, pz] = at(0);
+  const kj = 1.3 + 0.35 * h(1) + 0.01 * h(7);
+  jar(bag, px, y, pz, kj, 'terracotta');
+  bag.add(STONE2, lathe([[0.17 * kj / 1.4, 0], [0.15 * kj / 1.4, 0.04], [0.001, 0.05]], 8, null, px, y + kj * 0.49, pz));
+  [px, pz] = at(1);
+  const kb = 0.85 + 0.3 * h(8) + 0.003 * h(9);
+  bag.add(POOL, lathe([[0.001, 0.2], [0.14, 0.2], [0.25, 0.12], [0.3, 0.0], [0.26, 0.0], [0.001, 0.0]].map(([r, v]) => [r * kb, v * (1.1 - 0.2 * h(10))]), 10, null, px, y, pz));
+  [px, pz] = at(2);
+  const kr = 0.9 + 0.2 * h(11) + 0.003 * h(12);
+  bag.add(STALK, lathe([[0.17 * kr, 0], [0.19 * kr, 0.03], [0.14 * kr, 0.07], [0.001, 0.07]], 8, null, px, y, pz));
+  jar(bag, px, y + 0.05, pz, 0.75 + 0.25 * h(3) + 0.004 * h(13), h(4) < 0.5 ? 'terracotta' : POOL);
+  [px, pz] = at(3);
+  jar(bag, px, y, pz, 0.95 + 0.15 * h(14), POOL); jar(bag, px + 0.42, y, pz + 0.05, 0.8 + 0.2 * h(15), 'terracotta');
+}
+
+/** A carved portal for the front of the senior lineage's house (the hogon's): a post either side of the door, figures in relief one above the other, a carved lintel board with a row of figures, and a stepped crown of smooth mud over it. Door at u, the wall's face at zf. */
+export function carvedPortal(bag, u, y, zf, h, rand) {
+  const o = 0.99, w = 0.18, d = 0.15, top = h + 0.56;
+  for (const s of [-1, 1]) {
+    const px = u + s * o;
+    bag.add(DARK, box(px - w / 2, y, zf, px + w / 2, y + top, zf + d));
+    bag.add(LOG, box(px - w / 2 - 0.02, y + top, zf - 0.01, px + w / 2 + 0.02, y + top + 0.08, zf + d + 0.03));              // the post's cap
+    for (let k = 0; k < 3; k++) figure((m, g) => bag.add(m, g), px, y + 0.1 + k * 0.62, 0.52, (k + (s > 0 ? 1 : 0) + Math.floor(rand() * 2)) % 2 === 1, zf + d, 0.02);
+    for (const v of [0.05, 0.62, 1.24, 1.86]) bag.add(LOG, box(px - w / 2, y + v, zf + d, px + w / 2, y + v + 0.035, zf + d + 0.015));   // the rings between the figures
+  }
+  const bw = o + w / 2 + 0.05, by = y + h + 0.24;
+  bag.add(DARK, box(u - bw, by, zf, u + bw, by + 0.36, zf + 0.1));
+  const n = 7;
+  for (let k = 0; k < n; k++) {
+    const fx = u - bw + 0.2 + k * (2 * bw - 0.4) / (n - 1);
+    if (k % 2 === 0) figure((m, g) => bag.add(m, g), fx, by + 0.05, 0.26, (k / 2 + Math.floor(rand() * 2)) % 2 === 1, zf + 0.1, 0.012);
+    else for (let t = 0; t < 3; t++) bag.add(LOG, box(fx - 0.04, by + 0.07 + t * 0.09, zf + 0.1, fx + 0.04, by + 0.11 + t * 0.09, zf + 0.112));
+  }
+  bag.add(LOG, box(u - bw, by + 0.36, zf, u + bw, by + 0.4, zf + 0.12));
+  bag.add(SMOOTH, box(u - bw - 0.08, by + 0.4, zf, u + bw + 0.08, by + 0.54, zf + 0.15));                   // the stepped crown of smooth mud
+  bag.add(SMOOTH, box(u - bw * 0.62, by + 0.54, zf, u + bw * 0.62, by + 0.68, zf + 0.15));
+  bag.add(SMOOTH, box(u - bw * 0.26, by + 0.68, zf, u + bw * 0.26, by + 0.82, zf + 0.15));
+}
