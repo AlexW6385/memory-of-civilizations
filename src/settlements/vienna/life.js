@@ -20,7 +20,7 @@ export function life() {
   // the shops and coffee houses
   for (const l of lots()) {
     if (!l.open) continue;
-    const F = faceFrame(l.rect, l.front), o = F.at(0, 1), p = F.at(0, 0), out = [o[0] - p[0], o[1] - p[1]], inward = [-out[0], -out[1]];
+    const F0 = faceFrame(l.rect, l.front), off = l.up && l.up.left ? l.up.hi : 0, F = l.up ? { w: F0.w - l.up.hi, D: F0.D, at: (u, d) => F0.at(u + off, d) } : F0, o = F.at(0, 1), p = F.at(0, 0), out = [o[0] - p[0], o[1] - p[1]], inward = [-out[0], -out[1]];
     const db = -(SHOP_T + Math.min(SHOP_RD, F.D - 4)), y = 0.12;
     if (l.open === 'kaffeehaus' || l.open === 'konditorei') {
       const T = tables(l.open, F.w);
