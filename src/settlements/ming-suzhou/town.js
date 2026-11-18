@@ -105,7 +105,7 @@ function waterways() {
 const TRADE_ORDER = ['cloth', 'medicine', 'tea', 'books', 'rice', 'lacquer'];
 // the trades of the shops outside the six open ones (weights), and the interior the house builder gives each (it knows six)
 const TRADE_W = { cloth: 1, tea: 1.2, rice: 1, medicine: 0.9, lacquer: 0.7, books: 0.8, wine: 1.2, pottery: 0.9, iron: 0.7, fans: 0.7, food: 1.2 };
-const HOUSE_TRADE = { wine: 'tea', food: 'tea', pottery: 'lacquer', iron: 'lacquer', fans: 'books' };
+const HOUSE_TRADE = { wine: 'tea', food: 'tea', pottery: 'lacquer', iron: 'lacquer', fans: 'books', pawn: 'lacquer' };
 /** More shops along the main streets, and every shop but the open six given one of the eleven trades (a separate stream: the lots stay as they were). */
 function prepareShops(open) {
   const all = lots();
@@ -126,6 +126,8 @@ function prepareShops(open) {
   const names = Object.keys(TRADE_W);
   mine.sort((a, b) => (a.water ? 1 : 0) - (b.water ? 1 : 0));            // (the shops on the canals show no goods outside: the others first, so that each trade has as many)
   mine.forEach((l, i) => { l.trade = names[i % names.length]; });
+  // a few of the wide dry shops are pawnshops (dang pu: a great 當 on the wall), by the lot's own seed: about one in twenty
+  for (const l of mine) if (!l.water && frontOf(l).L > 4.3 && ((l.seed * 2246822519) >>> 0) % 100 < 6) l.trade = 'pawn';
 }
 function houses() {
   const all = lots(), plans = [];
