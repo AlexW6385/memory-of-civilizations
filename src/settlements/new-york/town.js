@@ -6,6 +6,9 @@ import { entranceOf } from './plan.js';
 import { nearEntrance } from '../../styles/artdeco/dress.js';
 import { concoursePeople } from '../../styles/artdeco/concourse.js';
 import { libraryPeople } from '../../styles/artdeco/library.js';
+import './far.js';
+/** How far from the visitor the blocks are built in full (m, to a tile's middle); beyond, the simple form (far.js). */
+const NEAR = 200, TILE = 220, OFF = 160;   // (tiles of 220 m, their grid shifted 160 m: every tile is a plan of its own per form, and the count of meshes and of the arrival's draws depend on where the cuts fall)
 // (all laid out in the grid's frame (layout.js); the buildings and the yards turned into the
 // settlement's by the style's `turned`, the life of the streets — single placed things — moved and
 // turned here, and each tile's centre with it)
@@ -331,7 +334,14 @@ export async function buildings() {
     }
     return out.length ? out : undefined;
   };
-  for (let i = 0; i < all.length; i += 50) plans.push(base(`new-york-blocks-${i / 50}`, all.slice(i, i + 50).flatMap((l) => special(l) ?? [{ t: 'skyscraper', ...l, chimney: chimneyAt(l), ads: adsOf(l) }])));
+  // the buildings in 100 m tiles, each built twice: in full within NEAR of the visitor, simple (far.js) beyond, without colliders
+  const tiles = new Map();
+  for (const l of all) { const c = toCity((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2), k = `${Math.floor((c[0] + OFF) / TILE)},${Math.floor((c[1] + OFF) / TILE)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(l); }
+  for (const [k, list] of tiles) {
+    const [i, j] = k.split(',').map(Number), center = [(i + 0.5) * TILE - OFF, (j + 0.5) * TILE - OFF], els = list.flatMap((l) => special(l) ?? [{ t: 'skyscraper', ...l, chimney: chimneyAt(l), ads: adsOf(l) }]);
+    plans.push({ ...base(`new-york-blocks-${k}`, els), style: 'artdeco_near', near: NEAR, center });
+    plans.push({ ...base(`new-york-blocks-${k}-far`, els), style: 'artdeco_far', far: NEAR, center, nocollide: true });
+  }
   const dl = dinerLife(), c = toCity(...DINER_AT);
   // the walk from the entrance down Fifth Avenue to the Empire State's doors (plan.js walks) kept clear of the landmarks' stroll-about figures: an element with a rect and no items marks it for the life placer and draws nothing
   const route = base('new-york-route', [{ t: 'curb', items: [], rect: [2.2, 172, 5.8, 232] }]);
