@@ -6,6 +6,7 @@ import { box, fromTriangles, lathe } from '../../core/geom.js';
 import { local, wallRun, rng, domeShell, merlons, gardenTree } from './kit.js';
 import { archway } from './palace.js';
 import { buildRooms, furnish } from './dress.js';
+import { stairRun, slabPiece, rail, balcony, windowOp } from './upstairs.js';
 
 const YAWS = { s: 0, n: Math.PI, e: Math.PI / 2, w: -Math.PI / 2 };
 const mid = (r) => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
@@ -92,14 +93,18 @@ export const WORK = { bakery: 'bakery', perfumer: 'perfumer', coppersmith: 'copp
 function workshop(el, ctx) {
   const [cx, cz] = mid(el.rect), face = el.face || 's', y = el.y ?? 0, rand = rng(el.seed ?? 9), front = el.front ?? 'arch', wmat = el.mat ?? 'brick_buff';
   const turned = face === 's' || face === 'n', w = turned ? el.rect[2] - el.rect[0] : el.rect[3] - el.rect[1], d = turned ? el.rect[3] - el.rect[1] : el.rect[2] - el.rect[0], hw = w / 2, hd = d / 2;
-  const RH = el.RH ?? (front === 'tall' ? 7.0 : 4.4), TOP = RH + 1.0, ceil = front === 'tall' ? 4.2 : 3.8;
+  const upr = el.upper, F = front === 'tall' ? 4.62 : 3.8;       // the upper floor's top, when the room has a floor above it
+  const RH = el.RH ?? (upr ? F + 3.3 : front === 'tall' ? 7.0 : 4.4), TOP = RH + 1.0, ceil = upr ? F - 0.16 : front === 'tall' ? 4.2 : 3.8;
   local(ctx, [cx, cz], YAWS[face], (c) => {
     const { bag, col } = c, rect = [-hw, -hd, hw, hd], doorW = front === 'wide' ? 4.6 : front === 'domed' ? 2.2 : 3.0, doorH = front === 'wide' ? 3.1 : 3.0;
-    buildRooms(c, [{ rect, door: '+z', kind: WORK[el.kind] ?? el.kind ?? 'workshop', k: 0, n: 1, doorW, doorH }], { y, RH, TOP, ceil, floor: 'brick_paving', rand, mat: wmat, back: true, lightEvery: 1 });
+    // the dwelling over the room (docs §15): a brick stair against one side wall rising from the back, the floor with its opening, a balcony
+    const U = upr ? upperPlan({ hw, hd, F, front, rand, y }) : null;
+    buildRooms(c, [{ rect, door: '+z', kind: WORK[el.kind] ?? el.kind ?? 'workshop', k: 0, n: 1, doorW, doorH, upper: U && U.upper }], { y, RH, TOP, ceil, floor: 'brick_paving', rand, mat: wmat, back: true, lightEvery: 1 });
+    if (U) buildUpper(c, U, { hw, hd, y, F, RH, rand, front, kind: upr.kind });
     // the board over the door (not on the tall front, whose oriel carries the eye)
     const sy = front === 'tall' ? 3.5 : front === 'wide' ? 3.45 : 4.2;
-    if (front !== 'domed') { bag.add('cedar', box(-1.6, y + sy, hd + 0.02, 1.6, y + sy + 0.7, hd + 0.08)); bag.add('plaster_white', box(-1.5, y + sy + 0.08, hd + 0.08, 1.5, y + sy + 0.62, hd + 0.1)); for (let k = 0; k < 4; k++) bag.add('lacquer_black', box(-1.2 + k * 0.65, y + sy + 0.2, hd + 0.1, -0.95 + k * 0.65, y + sy + 0.45, hd + 0.105)); }
-    bag.add('limestone', box(-doorW / 2, y, hd - 0.1, doorW / 2, y + 0.1, hd + 0.5));
+    if (front !== 'domed' && !(upr && front !== 'tall')) { bag.add('cedar', box(-1.6, y + sy, hd + 0.02, 1.6, y + sy + 0.7, hd + 0.08)); bag.add('plaster_white', box(-1.5, y + sy + 0.08, hd + 0.08, 1.5, y + sy + 0.62, hd + 0.1)); for (let k = 0; k < 4; k++) bag.add('lacquer_black', box(-1.2 + k * 0.65, y + sy + 0.2, hd + 0.1, -0.95 + k * 0.65, y + sy + 0.45, hd + 0.105)); }
+    if (!upr) bag.add('limestone', box(-doorW / 2, y, hd - 0.1, doorW / 2, y + 0.1, hd + 0.5));   // (the dwellings' doors are flush: a step under an awning makes a shell of the awning for the walker)
     if (front === 'awning') {
       // a reed-mat awning from the wall at 3.4 m, sloping to 2.8 m at the outer edge on two posts, a fringe along it
       const D = 1.9, zA = hd, zB = hd + D;
@@ -116,13 +121,14 @@ function workshop(el, ctx) {
       bag.add('reed_mat', box(-hw, y + 3.55, hd, hw, y + 3.62, zB + 0.2)); bag.add('mud_plaster', box(-hw, y + 3.62, hd, hw, y + 3.7, zB + 0.2));
     } else if (front === 'tall') {
       // the upper storey: two small lattice windows and a projecting oriel (rawshan) of timber lattice on three brackets, a string course
-      const zf = hd, oy = y + 4.5;
+      const zf = hd, oy = upr ? y + F - 0.12 : y + 4.5, OH = upr ? 2.3 : 1.6, wy = upr ? y + F + 0.7 : oy;
       bag.add('brick_baked', box(-hw, y + 3.9, zf, hw, y + 4.02, zf + 0.06));
-      for (const sx of [-1, 1]) { const wx = sx * (hw - 1.4); bag.add('opening', box(wx - 0.35, oy + 0.2, zf - 0.02, wx + 0.35, oy + 1.3, zf + 0.04)); bag.add('lattice', box(wx - 0.35, oy + 0.2, zf + 0.04, wx + 0.35, oy + 1.3, zf + 0.06)); bag.add('cedar', box(wx - 0.45, oy + 0.13, zf, wx + 0.45, oy + 0.2, zf + 0.18)); }
-      const ox = 0, ow = 2.6;
-      bag.add('cedar', box(ox - ow / 2, oy, zf + 0.0, ox + ow / 2, oy + 0.12, zf + 0.8)); bag.add('cedar', box(ox - ow / 2, oy + 1.6, zf + 0.0, ox + ow / 2, oy + 1.76, zf + 0.84));
-      for (const sx of [-1, 1]) bag.add('cedar', box(ox + sx * (ow / 2 - 0.04) - 0.04, oy + 0.12, zf, ox + sx * (ow / 2 - 0.04) + 0.04, oy + 1.6, zf + 0.8));
-      bag.add('lattice', box(ox - ow / 2, oy + 0.12, zf + 0.76, ox + ow / 2, oy + 1.6, zf + 0.8)); bag.add('opening', box(ox - ow / 2 + 0.1, oy + 0.12, zf + 0.7, ox + ow / 2 - 0.1, oy + 1.6, zf + 0.74));
+      for (const sx of upr ? [] : [-1, 1]) { const wx = sx * (hw - 1.4); bag.add('opening', box(wx - 0.35, wy + 0.2, zf - 0.02, wx + 0.35, wy + 1.3, zf + 0.04)); bag.add('lattice', box(wx - 0.35, wy + 0.2, zf + 0.04, wx + 0.35, wy + 1.3, zf + 0.06)); bag.add('cedar', box(wx - 0.45, wy + 0.13, zf, wx + 0.45, wy + 0.2, zf + 0.18)); }
+      const ox = upr ? U.bx : 0, ow = 2.6;
+      bag.add('cedar', box(ox - ow / 2, oy, zf + 0.0, ox + ow / 2, oy + 0.12, zf + 0.8)); bag.add('cedar', box(ox - ow / 2, oy + OH, zf + 0.0, ox + ow / 2, oy + OH + 0.16, zf + 0.84));
+      for (const sx of [-1, 1]) bag.add('cedar', box(ox + sx * (ow / 2 - 0.04) - 0.04, oy + 0.12, zf, ox + sx * (ow / 2 - 0.04) + 0.04, oy + OH, zf + 0.8));
+      bag.add('lattice', box(ox - ow / 2, oy + 0.12, zf + 0.76, ox + ow / 2, oy + OH, zf + 0.8)); bag.add('opening', box(ox - ow / 2 + 0.1, oy + 0.12, zf + 0.7, ox + ow / 2 - 0.1, oy + OH, zf + 0.74));
+      if (upr) { col.floor([-ow / 2, zf - 0.4, ow / 2, zf + 0.8], y + F); col.rect([-ow / 2, zf + 0.76, ow / 2, zf + 0.84], y + F, y + F + OH); for (const sx of [-1, 1]) col.rect([sx * ow / 2 - 0.05, zf, sx * ow / 2 + 0.05, zf + 0.8], y + F, y + F + OH); }
       for (const bx of [-ow / 2 + 0.2, 0, ow / 2 - 0.2]) { bag.add('cedar', box(ox + bx - 0.05, oy - 0.5, zf, ox + bx + 0.05, oy, zf + 0.06)); bag.add('cedar', box(ox + bx - 0.05, oy - 0.5, zf, ox + bx + 0.05, oy - 0.44, zf + 0.7)); }
       bag.add('bitumen', box(-hw, y, hd, hw, y + 0.35, hd + 0.015));
     } else if (front === 'domed') {
@@ -140,4 +146,56 @@ function workshop(el, ctx) {
     }
   });
 }
+
+/** The plan of the upper floor of a one-room building (local frame, front +z): the stair's side, the opening, the ops of the walls, the ground room's clear rect. */
+function upperPlan({ hw, hd, F, front, rand, y }) {
+  const sgn = rand() < 0.5 ? -1 : 1, ix0 = -hw + 0.3, ix1 = hw - 0.3, iz0 = -hd + 0.6, iz1 = hd - 0.8, SW = 1.25;
+  const sx0 = sgn < 0 ? ix0 : ix1 - SW, sx1 = sx0 + SW, ox = sgn < 0 ? sx1 + 0.35 : sx0 - 0.35;
+  const rise = F - 0.03, L = rise / 0.66, zf = iz0 + 0.15, zt = zf + L, zo = zf + L * (rise - 1.95) / rise;
+  // the balcony's door: beside the shop door on the stair's side (the walls' openings may not overlap: wallRun's ops are side by side)
+  const doorW = front === 'wide' ? 4.6 : front === 'domed' ? 2.2 : 3.0, bx = sgn * (doorW / 2 + 0.8);
+  const wins = [];
+  for (const x of [-sgn * (doorW / 2 + 0.8), -sgn * (doorW / 2 + 2.5), ...(front === 'tall' ? [-(hw - 1.4), hw - 1.4] : [])]) {
+    if (Math.abs(x) >= doorW / 2 + 0.55 && Math.abs(x - bx) >= 1.35 && Math.abs(x) < hw - 0.7 && !wins.some((q) => Math.abs(q - x) < 1.2)) wins.push(x);
+  }
+  const frontOps = [{ at: bx + hw, w: 1.3, h: 2.25, y0: y + F, flat: true }, ...wins.map((x) => windowOp(x + hw, y + F, 0.9, 1.1))];
+  const backX = sgn < 0 ? ix1 - 1.1 : ix0 + 1.1;
+  const backOps = [windowOp(backX + hw, y + F)];
+  const clear = sgn < 0 ? [sx1 + 1.2, -hd + 0.1, hw - 0.3, hd - 0.8 - 1.0] : [-hw + 0.3, -hd + 0.1, sx0 - 1.2, hd - 0.8 - 1.0];
+  return { sgn, ix0, ix1, iz0, iz1, sx0, sx1, ox, rise, L, zf, zt, zo, bx, upper: { front: frontOps, back: backOps, sides: [], clear: [clear[0], clear[1] + 0.2, clear[2], clear[3]] } };
+}
+
+/** The floor with its opening, the stair, the rail, the balcony and the rooms of the dwelling over a one-room building. */
+function buildUpper(c, U, { hw, hd, y, F, RH, rand, front, kind }) {
+  const { bag, col } = c, { sgn, ix0, ix1, sx0, sx1, ox, rise, zf, zt, zo, bx } = U, yt = y + F, x0 = -hw, x1 = hw, z0 = -hd, z1 = hd;
+  // the floor: round the opening [ox side] × [zo, zt]
+  const oa = sgn < 0 ? ix0 : ox, ob = sgn < 0 ? ox : ix1;
+  slabPiece(c, x0, z0, x1, zo, yt);
+  if (sgn < 0) { slabPiece(c, ox, zo, x1, z1, yt); slabPiece(c, x0, zo, ix0, z1, yt); slabPiece(c, ix0, zt, ox, z1, yt); }
+  else { slabPiece(c, x0, zo, ox, z1, yt); slabPiece(c, ix1, zo, x1, z1, yt); slabPiece(c, ox, zt, ix1, z1, yt); }
+  void oa; void ob;
+  stairRun(c, { x0: sx0, x1: sx1, zFoot: zf, zTop: zt, y: y + 0.03, y0: y + 0.03, rise });
+  // the rail round the opening: along its room side and across its rear end
+  rail(c, ox, zo, ox, zt, yt);
+  rail(c, sgn < 0 ? ix0 : ox, zo + 0.04, sgn < 0 ? ox : ix1, zo + 0.04, yt);
+  // the balcony over the street (the 'tall' fronts have their rawshan instead)
+  if (front !== 'tall') balcony(c, { x: bx, zf: hd, w: 2.0, depth: 1.1, yTop: yt, rand });
+  // the rooms: the sleeping room behind, the family's room in front against the far side wall
+  const zs = (-hd + 0.6 + (hd - 0.8)) / 2;
+  const bedRect = sgn < 0 ? [ox + 0.15, -hd + 0.7, hw - 0.4, zs - 0.1] : [-hw + 0.4, -hd + 0.7, ox - 0.15, zs - 0.1];
+  furnish(c, 'bedroom', bedRect, '+z', yt + 0.01, RH - F - 0.2, rand, { light: false });
+  const fr = sgn < 0 ? [hw - 0.3 - 4.0, zs + 0.4, hw - 0.4, hd - 0.9] : [-hw + 0.4, zs + 0.4, -hw + 0.3 + 4.0, hd - 0.9];
+  furnish(c, kind || 'reception', fr, sgn < 0 ? '-x' : '+x', yt + 0.01, RH - F - 0.2, rand, { light: true });
+}
+
+/** The walk from the street up to the balcony of a workshop with a dwelling over it, in world [x, z] points (for the settlement's walk-check). */
+export function workshopWalk(el) {
+  const [cx, cz] = mid(el.rect), face = el.face || 's', rand = rng(el.seed ?? 9), front = el.front ?? 'arch', turned = face === 's' || face === 'n';
+  const w = turned ? el.rect[2] - el.rect[0] : el.rect[3] - el.rect[1], d = turned ? el.rect[3] - el.rect[1] : el.rect[2] - el.rect[0], hw = w / 2, hd = d / 2;
+  const F = front === 'tall' ? 4.62 : 3.8, U = upperPlan({ hw, hd, F, front, rand, y: 0 }), yaw = YAWS[face], c = Math.round(Math.cos(yaw)), sn = Math.round(Math.sin(yaw));
+  const P = (x, z) => [cx + x * c + z * sn, cz - x * sn + z * c], sxc = (U.sx0 + U.sx1) / 2;
+  const lane = U.sgn < 0 ? U.sx1 + 0.6 : U.sx0 - 0.6;
+  return [P(0.9, hd + 3), P(0.9, hd - 1.4), P(lane, hd - 1.4), P(lane, U.zf + 0.4), P(sxc, U.zf + 0.4), P(sxc, U.zt + 0.6), P(U.bx, hd - 1.6), P(U.bx, hd + 0.6)];
+}
+
 export const khanElements = { abbasid_khan: khan, abbasid_hammam: hammam, abbasid_workshop: workshop };

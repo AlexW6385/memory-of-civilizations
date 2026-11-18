@@ -2,7 +2,8 @@
 // Dome, the Great Mosque of al-Mansur beside it, and the House of Wisdom on the esplanade. The walls, the houses, the markets and the
 // river are the townscape (town.js).
 
-import { C, PALACE, MOSQUE, LIBRARY } from './layout.js';
+import { C, PALACE, MOSQUE, LIBRARY, ESPLANADE } from './layout.js';
+import { workshopWalk } from '../../styles/abbasid/khan.js';
 import { palaceRooms } from '../../styles/abbasid/palace.js';
 import '../../styles/abbasid/index.js';
 
@@ -25,6 +26,8 @@ const rooms = [
 for (const r of palaceRooms((PALACE[2] - PALACE[0]) / 2)) rooms.push(room(`palace ${r.id}`, [px + r.rect[0], pz + r.rect[1], px + r.rect[2], pz + r.rect[3]], 0.03, 'hall'));
 const walks = [[[px, pz + 150], [px, pz + 40], [px, pz + 35], [px + 8.5, pz + 31], [px + 8.5, pz + 21], [px, pz + 17], [px, pz - 2], [px, pz - 12]]];
 walks[0].y0 = 0;
+// the stairs of the esplanade's dwellings, walked from the street to the balcony (docs §15)
+ESPLANADE.forEach((b, i) => { if (!b.upper) return; const r = workshopWalk({ t: 'abbasid_workshop', rect: b.rect, face: b.face, front: b.front, seed: 120 + i * 7 }); r.y0 = 0; walks.push(r); });
 export const baghdad = {
   id: 'abbasid-baghdad',
   name: { en: 'The Palace of the Golden Gate and the Round City', zh: '金门宫与圆城' },
