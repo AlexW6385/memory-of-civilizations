@@ -113,7 +113,7 @@
  },
  "abu-simbel-great-temple": {
   "site": "abu-simbel",
-  "hash": "49a1cde389bb0208",
+  "hash": "97785cc1cc21bba3",
   "rays": 128,
   "probes": 77112,
   "boxes": [
@@ -147,8 +147,8 @@
     ]
    }
   ],
-  "bytes": 1178395,
-  "seconds": 74,
+  "bytes": 1178731,
+  "seconds": 144,
   "baked": "2026-11-18"
  },
  "abu-simbel-small-temple": {
@@ -385,7 +385,7 @@
  },
  "angkor-wat": {
   "site": "angkor",
-  "hash": "d81921521ff7ad21",
+  "hash": "3d670b7a39e293e0",
   "rays": 128,
   "probes": 10034,
   "boxes": [
@@ -454,9 +454,9 @@
     ]
    }
   ],
-  "bytes": 165776,
-  "seconds": 24,
-  "baked": "2026-11-17"
+  "bytes": 165833,
+  "seconds": 29,
+  "baked": "2026-11-18"
  },
  "ayutthaya-wat": {
   "site": "ayutthaya",
@@ -830,7 +830,7 @@
  },
  "borobudur-temple": {
   "site": "borobudur",
-  "hash": "7afa25cb988ac742",
+  "hash": "a402ebda14f4c41f",
   "rays": 128,
   "probes": 70448,
   "boxes": [
@@ -857,9 +857,9 @@
     ]
    }
   ],
-  "bytes": 1008602,
-  "seconds": 52,
-  "baked": "2026-11-17"
+  "bytes": 1008599,
+  "seconds": 66,
+  "baked": "2026-11-18"
  },
  "brasilia-cathedral": {
   "site": "brasilia",
@@ -1210,7 +1210,7 @@
  },
  "dogon-village": {
   "site": "dogon",
-  "hash": "f2aa577d02940b34",
+  "hash": "ac926efa07f1990e",
   "rays": 128,
   "probes": 27988,
   "boxes": [
@@ -1235,14 +1235,6 @@
      "house 4: store",
      "house 4: central room",
      "house 4: kitchen",
-     "house 5: hall",
-     "house 5: store",
-     "house 5: central room",
-     "house 5: kitchen",
-     "house 6: hall",
-     "house 6: store",
-     "house 6: central room",
-     "house 6: kitchen",
      "house 2: hall",
      "house 2: store",
      "house 2: central room",
@@ -1250,7 +1242,15 @@
      "house 3: hall",
      "house 3: store",
      "house 3: central room",
-     "house 3: kitchen"
+     "house 3: kitchen",
+     "house 5: hall",
+     "house 5: store",
+     "house 5: central room",
+     "house 5: kitchen",
+     "house 6: hall",
+     "house 6: store",
+     "house 6: central room",
+     "house 6: kitchen"
     ]
    },
    {
@@ -1317,8 +1317,8 @@
     ]
    }
   ],
-  "bytes": 462224,
-  "seconds": 39,
+  "bytes": 462141,
+  "seconds": 54,
   "baked": "2026-11-18"
  },
  "dome-of-the-rock": {
@@ -2603,7 +2603,7 @@
  },
  "lalibela-churches": {
   "site": "lalibela",
-  "hash": "f1da77bb3797cabe",
+  "hash": "557c4f796428a7fb",
   "rays": 128,
   "probes": 32743,
   "boxes": [
@@ -2737,9 +2737,9 @@
     ]
    }
   ],
-  "bytes": 572067,
-  "seconds": 54,
-  "baked": "2026-11-17"
+  "bytes": 573827,
+  "seconds": 67,
+  "baked": "2026-11-18"
  },
  "lhasa-potala": {
   "site": "lhasa",
@@ -3576,7 +3576,7 @@
  },
  "mycenae-citadel": {
   "site": "mycenae",
-  "hash": "15de7a2ce5dfd3ae",
+  "hash": "b3fde2eb622e3ee8",
   "rays": 128,
   "probes": 35960,
   "boxes": [
@@ -3603,13 +3603,13 @@
     ]
    }
   ],
-  "bytes": 598347,
-  "seconds": 41,
+  "bytes": 598250,
+  "seconds": 46,
   "baked": "2026-11-18"
  },
  "mycenae-treasury": {
   "site": "mycenae",
-  "hash": "5ca447d86ed63b57",
+  "hash": "54cf34024232dd08",
   "rays": 128,
   "probes": 8400,
   "boxes": [
@@ -3632,7 +3632,7 @@
     ]
    }
   ],
-  "bytes": 138717,
+  "bytes": 138704,
   "seconds": 11,
   "baked": "2026-11-18"
  },
@@ -3931,7 +3931,7 @@
  },
  "parthenon": {
   "site": "athens",
-  "hash": "3576853b170be386",
+  "hash": "e7e5efe7afe92361",
   "rays": 128,
   "probes": 23040,
   "boxes": [
@@ -3954,13 +3954,13 @@
     ]
    }
   ],
-  "bytes": 371267,
-  "seconds": 40,
-  "baked": "2026-11-17"
+  "bytes": 371275,
+  "seconds": 50,
+  "baked": "2026-11-18"
  },
  "persepolis-terrace": {
   "site": "persepolis",
-  "hash": "3d4b5787c942ab97",
+  "hash": "f2a9657c2d0f940b",
   "rays": 128,
   "probes": 75069,
   "boxes": [
@@ -4045,13 +4045,13 @@
     ]
    }
   ],
-  "bytes": 1259740,
-  "seconds": 124,
-  "baked": "2026-11-17"
+  "bytes": 1259866,
+  "seconds": 152,
+  "baked": "2026-11-18"
  },
  "petra-khazneh": {
   "site": "petra",
-  "hash": "8094e09978925ed3",
+  "hash": "90d165293f842fb8",
   "rays": 128,
   "probes": 59895,
   "boxes": [
@@ -4157,9 +4157,9 @@
     ]
    }
   ],
-  "bytes": 987640,
-  "seconds": 76,
-  "baked": "2026-11-17"
+  "bytes": 961558,
+  "seconds": 90,
+  "baked": "2026-11-18"
  },
  "qin-palace": {
   "site": "qin-xianyang",
@@ -4218,7 +4218,7 @@
  },
  "qing-beijing-palace": {
   "site": "qing-beijing",
-  "hash": "4b0ea2cca09e4c39",
+  "hash": "0d892cf78a94a7a0",
   "rays": 128,
   "probes": 78200,
   "boxes": [
@@ -4241,8 +4241,8 @@
     ]
    }
   ],
-  "bytes": 1198150,
-  "seconds": 112,
+  "bytes": 1197841,
+  "seconds": 123,
   "baked": "2026-11-18"
  },
  "sainte-chapelle": {
@@ -4582,7 +4582,7 @@
  },
  "shibam-friday-mosque": {
   "site": "shibam",
-  "hash": "24313395e4c0799c",
+  "hash": "05e5dea2030e5eb4",
   "rays": 128,
   "probes": 3248,
   "boxes": [
@@ -4603,13 +4603,13 @@
     ]
    }
   ],
-  "bytes": 57295,
-  "seconds": 6,
-  "baked": "2026-11-17"
+  "bytes": 57338,
+  "seconds": 70,
+  "baked": "2026-11-18"
  },
  "shibam-tower-house": {
   "site": "shibam",
-  "hash": "5b8758b1207cb836",
+  "hash": "bbf4b64a51c49558",
   "rays": 128,
   "probes": 3744,
   "boxes": [
@@ -4637,8 +4637,8 @@
     ]
    }
   ],
-  "bytes": 66690,
-  "seconds": 7,
+  "bytes": 66687,
+  "seconds": 50,
   "baked": "2026-11-18"
  },
  "song-hangzhou-liuhe": {
@@ -5012,7 +5012,7 @@
  },
  "ur-ziggurat": {
   "site": "ur",
-  "hash": "cd6b2a5aaedb97cb",
+  "hash": "276adf040ec8ae46",
   "rays": 128,
   "probes": 8984,
   "boxes": [
@@ -5049,9 +5049,9 @@
     ]
    }
   ],
-  "bytes": 154507,
-  "seconds": 12,
-  "baked": "2026-11-17"
+  "bytes": 154551,
+  "seconds": 13,
+  "baked": "2026-11-18"
  },
  "venice-san-marco": {
   "site": "venice",
