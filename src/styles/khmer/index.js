@@ -438,15 +438,17 @@ function wall(ctx, el, { wa, wb, len, ux, uz, y, h, np, f, subject = null }) {
  */
 const ROSETTE = (() => { const n = 8, f = (th) => 1 + 0.18 * Math.abs(Math.cos(th * n / 2)); return lathe([[0.001, 0.0], [0.2, 0.0], [0.17, -0.035], [0.1, -0.05], [0.05, -0.08], [0.001, -0.09]], 16, f); })();
 function ceiling(bag, A, B, half, yc, cell = 0.9) {
+  const ros = bag.rosettes ?? true;
   const X = Math.abs(B[0] - A[0]) > Math.abs(B[1] - A[1]), s0 = X ? Math.min(A[0], B[0]) : Math.min(A[1], B[1]), s1 = X ? Math.max(A[0], B[0]) : Math.max(A[1], B[1]), v = X ? A[1] : A[0];
   const R = (a0, a1, b0, b1, y0, y1) => (X ? box(a0, y0, b0, a1, y1, b1) : box(b0, y0, a0, b1, y1, a1));
   const L = s1 - s0, na = Math.max(1, Math.round(L / cell)), nb = Math.max(1, Math.round(2 * half / cell)), ca = L / na, cb = 2 * half / nb;
-  bag.add('timber_red', R(s0, s1, v - half, v + half, yc, yc + 0.06));
-  for (let j = 0; j <= nb; j++) { const b = v - half + j * cb; bag.add('wood_dark', R(s0, s1, b - 0.05, b + 0.05, yc - 0.1, yc + 0.001)); }
-  for (let i = 0; i <= na; i++) { const a = s0 + i * ca; bag.add('wood_dark', R(a - 0.05, a + 0.05, v - half + 0.05, v + half - 0.05, yc - 0.095, yc + 0.001)); }
-  for (let i = 0; i < na; i++) for (let j = 0; j < nb; j++) {
+  if (ros !== 'only') bag.add('timber_red', R(s0, s1, v - half, v + half, yc, yc + 0.06));
+  if (ros !== 'only') for (let j = 0; j <= nb; j++) { const b = v - half + j * cb; bag.add('wood_dark', R(s0, s1, b - 0.05, b + 0.05, yc - 0.1, yc + 0.001)); }
+  if (ros !== 'only') for (let i = 0; i <= na; i++) { const a = s0 + i * ca; bag.add('wood_dark', R(a - 0.05, a + 0.05, v - half + 0.05, v + half - 0.05, yc - 0.095, yc + 0.001)); }
+  if (ros !== false) for (let i = 0; i < na; i++) for (let j = 0; j < nb; j++) {
     const a = s0 + (i + 0.5) * ca, b = v - half + (j + 0.5) * cb, k = Math.min(ca, cb) / 0.9;
-    bag.add('paint_ochre', ROSETTE.clone().scale(k, k, k).translate(X ? a : b, yc - 0.001, X ? b : a));
+    const g = ROSETTE.clone().scale(k, k, k).translate(X ? a : b, yc - 0.001, X ? b : a); g.__ros = true;
+    bag.add('paint_ochre', g);
   }
 }
 /** A half-vault over a half-gallery: a quarter of a corbelled vault from the pillars' line (at P, its top yTop) down to the outer pillars `run` out along O, at yLow; `len` along U. */
@@ -469,9 +471,13 @@ function kGallery(el, ctx) {
     const L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uz = (b[1] - a[1]) / L;
     const out = el.solid === 'out' ? 1 : -1;               // the wall's side: outward (n) or inward
     const side = n[0] ? (n[0] > 0 ? 'e' : 'w') : (n[1] > 0 ? 's' : 'n');
+    if (el.rosSides && !el.rosSides.includes(side)) continue;         // (rosettes: 'only' for one side's ceilings)
     const gate = el.gates && (!el.gateSides || el.gateSides.includes(side)) ? el.gate ?? Math.min(18, L * 0.18) : 0;
     const pieces = gate ? [[0, L / 2 - gate / 2], [L / 2 + gate / 2, L]] : [[0, L]];
+    let pi = -1;
     for (const [s0, s1] of pieces) {
+      pi++;
+      if (el.rosPiece !== undefined && el.rosPiece !== pi) continue;   // (and for one piece of it)
       const A = [a[0] + ux * s0, a[1] + uz * s0], B = [a[0] + ux * s1, a[1] + uz * s1], len = s1 - s0;
       // the floor, raised a step
       const fl = [];
@@ -877,11 +883,23 @@ function kStair(el, { bag, col }) {
   }
 }
 
+/**
+ * The ceilings' rosettes as an option on k_gallery and k_cloister (default: built with the rest, as ever):
+ * `rosettes: false` leaves them out; `rosettes: 'only'` builds only them (for a plan drawn near the visitor).
+ */
+const sink = (bag) => ({ rosettes: 'only', add: (m, g) => { if (g?.__ros) bag.add(m, g); } });
+const withRosettes = (f) => (el, ctx) => {
+  if (el.rosettes === undefined || el.rosettes === true) return f(el, ctx);
+  const nul = new Proxy({}, { get: () => () => {} });
+  if (el.rosettes === 'only') return f(el, { ...ctx, bag: sink(ctx.bag), col: nul });
+  return f(el, { ...ctx, bag: new Proxy(ctx.bag, { get: (t, k) => (k === 'rosettes' ? false : typeof t[k] === 'function' ? t[k].bind(t) : t[k]) }) });
+};
+
 registerStyle('khmer', {
   trim: () => {}, opening: () => {}, column: () => {},
   elements: {
     ...STYLES.qing.elements,
-    k_tower: kTower, k_gallery: kGallery, k_terrace: kTerrace, naga_rail: nagaRail, k_library: kLibrary, k_lion: kLion, stilt_house: stiltHouse2, k_granary: granary, k_sala: sala, k_lotus: lotus, k_cloister: kCloister, k_stair: kStair, k_vishnu: kVishnu, sugar_palm: sugarPalm, k_palanquin: palanquin, k_parasol: parasol, k_banana: banana, k_areca: areca, k_fence: fence, k_rack: rack, k_hammock: hammock, k_loom: loom, k_workshop: workshop, k_bund: bund, k_offering: offering, k_banner: banner, k_shade: shade, k_clearway: () => {},
+    k_tower: kTower, k_gallery: withRosettes(kGallery), k_terrace: kTerrace, naga_rail: nagaRail, k_library: kLibrary, k_lion: kLion, stilt_house: stiltHouse2, k_granary: granary, k_sala: sala, k_lotus: lotus, k_cloister: withRosettes(kCloister), k_stair: kStair, k_vishnu: kVishnu, sugar_palm: sugarPalm, k_palanquin: palanquin, k_parasol: parasol, k_banana: banana, k_areca: areca, k_fence: fence, k_rack: rack, k_hammock: hammock, k_loom: loom, k_workshop: workshop, k_bund: bund, k_offering: offering, k_banner: banner, k_shade: shade, k_clearway: () => {},
   },
   objects: {},
 });

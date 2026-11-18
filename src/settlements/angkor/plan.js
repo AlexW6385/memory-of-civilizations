@@ -100,6 +100,21 @@ function carve(r, holes) {
   return out;
 }
 
+// the false ceilings' gilded rosettes (some 680 k triangles) are seen only from under the galleries: built apart, in plans drawn
+// within reach of the piece of gallery (or the cloister) they hang in (town.js), and left out of the temple's own plan
+export const ROSETTES = [];
+for (const el of E) {
+  if (el.t === 'k_cloister') { const [x0, z0, x1, z1] = el.rect; ROSETTES.push({ el: { ...el, rosettes: 'only' }, center: [(x0 + x1) / 2, (z0 + z1) / 2], near: Math.max(x1 - x0, z1 - z0) / 2 + 30 }); el.rosettes = false; }
+  if (el.t !== 'k_gallery') continue;
+  const [x0, z0, x1, z1] = el.rect;
+  for (const [side, a, b] of [['n', [x0, z0], [x1, z0]], ['s', [x0, z1], [x1, z1]], ['w', [x0, z1], [x0, z0]], ['e', [x1, z0], [x1, z1]]]) {
+    const L = Math.hypot(b[0] - a[0], b[1] - a[1]), gate = el.gates && (!el.gateSides || el.gateSides.includes(side)) ? el.gate ?? Math.min(18, L * 0.18) : 0;
+    const pieces = gate ? [[0, L / 2 - gate / 2], [L / 2 + gate / 2, L]] : [[0, L]], at = (u) => [a[0] + (b[0] - a[0]) * u / L, a[1] + (b[1] - a[1]) * u / L];
+    pieces.forEach(([s0, s1], i) => { const m = at((s0 + s1) / 2); ROSETTES.push({ el: { ...el, rosettes: 'only', rosSides: [side], rosPiece: i }, center: m, near: (s1 - s0) / 2 + 30 }); });
+  }
+  el.rosettes = false;
+}
+
 // the carving laid over the style's masses (dress.js, docs §27): the same parameters, the same places
 for (const el of E.slice()) {
   if (el.t === 'k_gallery' && el.reliefMap) E.push({ ...el, t: 'ak_relief' });

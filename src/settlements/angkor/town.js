@@ -6,6 +6,27 @@ import { ARRIVALS } from '../../planet/arrivals.js';
 import { yardPlans, enclosurePlan } from './yards.js';
 import { ENC_PATHS, inShop } from './layout.js';
 import { useOf, frontOf } from './uses.js';
+import { ROSETTES } from './plan.js';
+import './far.js';
+
+const NEAR_HOUSES = 170, NEAR_PALMS = 260;   // m: the village's tiles are drawn in full within this of the visitor (from the tile's middle), simple beyond
+/** Elements in tiles (200 m, or `size`), each tile twice (as src/settlements/lod.js): in full near, and by `farOf(element)` (a list) beyond, no colliders. */
+function tiled(id, elements, near, farOf, size = 200) {
+  const tiles = new Map();
+  for (const e of elements) {
+    const [x, z] = e.rect ? [(e.rect[0] + e.rect[2]) / 2, (e.rect[1] + e.rect[3]) / 2] : e.at;
+    const k = `${Math.floor(x / size)},${Math.floor(z / size)}`;
+    if (!tiles.has(k)) tiles.set(k, []);
+    tiles.get(k).push(e);
+  }
+  const out = [];
+  for (const [k, list] of tiles) {
+    const [i, j] = k.split(',').map(Number), center = [i * size + size / 2, j * size + size / 2];
+    out.push({ ...base(`${id}-${k}`, list), center, near });
+    out.push({ ...base(`${id}-${k}-far`, list.flatMap(farOf)), center, far: near, nocollide: true });
+  }
+  return out;
+}
 
 const base = (id, elements) => ({ id, style: 'khmer', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-206, 0], facing: 'e' } });
 
@@ -181,12 +202,14 @@ function village() {
   const all = houses(), plans = [], { granaries, salas } = stores();
   const AR = ARRIVALS.angkor, far = (h) => Math.hypot((h.rect[0] + h.rect[2]) / 2 - AR[0], (h.rect[1] + h.rect[3]) / 2 - AR[2]) > 100;
   // each house, and where it is far enough from the arrival, the use of its front-left corner and the dressing of its front (§24)
-  for (let i = 0; i < all.length; i += 45) plans.push(base(`angkor-village-${i / 45}`, all.slice(i, i + 45).flatMap((h) => {
+  const els = all.flatMap((h) => {
     const e = [{ t: 'stilt_house', ...h }], u = far(h) ? useOf(h) : null, f = far(h) ? frontOf(h) : null;
     if (u) e.push({ t: 'ak_use', ...h, use: u });
     if (f) e.push({ t: 'ak_front', ...h, dress: f });
     return e;
-  })));
+  });
+  // (each tile's houses in full, with the dressing of their fronts, near; the solid form of the house beyond)
+  plans.push(...tiled('angkor-village', els, NEAR_HOUSES, (e) => (e.t === 'stilt_house' ? [{ ...e, t: 'ak_far_house' }] : [])));
   const E = [];
   for (const g of granaries) E.push({ t: 'k_granary', ...g });
   for (const s of salas) E.push({ t: 'k_sala', ...s });
@@ -266,7 +289,9 @@ function templeLife() {
 }
 export async function town() {
   const P = palms(), { L, K } = market(), plans = [];
-  for (let i = 0; i < P.length; i += 120) plans.push(base(`angkor-palms-${i / 120}`, P.slice(i, i + 120)));
+  plans.push(...tiled('angkor-palms', P, NEAR_PALMS, (e) => [{ ...e, t: 'ak_far_palm' }], 400));
+  // the temple's ceilings' rosettes, in plans near the piece of gallery they hang in
+  ROSETTES.forEach((r, i) => plans.push({ ...base(`angkor-rosettes-${i}`, [r.el]), center: r.center, near: r.near }));
   plans.push(base('angkor-road', K), { ...base('angkor-market', L), style: 'life', center: [-222, 10], near: 260 });
   const PD = paddyPlans();
   plans.push({ ...base('angkor-paddy-tools', PD.K), center: [0, 0], near: 460 }, { ...base('angkor-farmers', PD.L), style: 'life', center: [0, 0], near: 230 });
