@@ -239,7 +239,7 @@ export function shopRows() {
   // from the avenue's mouth (a rule that follows the layout: it picks from whatever shops there are)
   const west = SHOPS.filter((r) => r.side === 'w').sort((a, b) => a.z0 - b.z0), all = west.flatMap((r) => r.shops.map((s) => ({ s, r })));
   const tea = all.find(({ s }) => s.z1 - s.z0 >= 7.0 && s.trade === 'tea') || all.find(({ s }) => s.z1 - s.z0 >= 7.0);
-  if (tea) { tea.s.trade = 'tea'; tea.s.storeys = 1; tea.s.interior = 'teahouse'; }
+  if (tea) { tea.s.trade = 'tea'; tea.s.storeys = 2; tea.s.interior = 'teahouse'; }
   const med = all.find(({ s, r }) => s !== tea?.s && s.z1 - s.z0 >= 5.6 && r !== tea?.r && s.z0 > (tea?.s.z1 ?? 0) + 6 && s.trade === 'medicine') || all.find(({ s, r }) => s !== tea?.s && s.z1 - s.z0 >= 5.6 && r !== tea?.r && s.z0 > (tea?.s.z1 ?? 0) + 6);
   if (med) { med.s.trade = 'medicine'; med.s.storeys = 1; med.s.interior = 'pharmacy'; }
   // more enterable shops (§30): in each of the first nine west rows the widest shop not yet taken, and in the first four rows a second,
@@ -269,6 +269,19 @@ export function interiorShops() {
 export const ENTER_R = 235;
 export function enterable(h) { const d = Math.hypot((h.rect[0] + h.rect[2]) / 2 + 30, (h.rect[1] + h.rect[3]) / 2 - 225); return h.rect[2] - h.rect[0] >= 24 && (h.lod <= 1 || (h.lod === 2 && d < ENTER_R)); }
 export function furnishedHouses() { return houses().filter(enterable); }
+/**
+ * The houses whose whole compound is open (round 6, §38): the DEEP_N enterable houses nearest the arrival at the avenue's mouth, the way the
+ * visitor walks first — the south row's rooms and the ear rooms as well as the main house and the side houses.
+ */
+export const DEEP_N = 12;
+let DEEP = null;
+export function deepHouses() {
+  if (DEEP) return DEEP;
+  const at = [0, 215], d = (h) => Math.hypot((h.rect[0] + h.rect[2]) / 2 - at[0], (h.rect[1] + h.rect[3]) / 2 - at[1]);
+  DEEP = new Set(furnishedHouses().sort((a, b) => d(a) - d(b)).slice(0, DEEP_N).map((h) => h.seed));
+  return DEEP;
+}
+export const isDeep = (h) => deepHouses().has(h.seed);
 export function inShopRow(x, z, m = 0) { return shopRows().some((r) => inRect([Math.min(r.front, r.back, r.yard[0], r.yard[2]), r.z0, Math.max(r.front, r.back, r.yard[0], r.yard[2]), r.z1], x, z, m)); }
 
 let WELLS = null;

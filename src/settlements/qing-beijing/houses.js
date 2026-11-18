@@ -169,13 +169,14 @@ export function gableRoof(bag, F, o) {
  * Returns { rect, top }.
  */
 export function house(bag, col, F, o) {
-  const { s0, s1, dB, dF, vw = 1.0, y = 0.4, H = 3.3, bays = 3, door = Math.floor((bays - 1) / 2), lod = 0, rich = false, win = true, ridgeOnly = false, enter = false } = o;
+  const { s0, s1, dB, dF, vw = 1.0, y = 0.4, H = 3.3, bays = 3, door = Math.floor((bays - 1) / 2), lod = 0, rich = false, win = true, ridgeOnly = false, enter = false, doors = null, parts = [] } = o;
   const L = s1 - s0, bw = L / bays, dW = dF - vw;      // the front wall's line
   const rise = (dF - dB + 1.8) * 0.5 * 0.46;
   const plinth = rich ? 'granite_grey' : 'brick_grey', wallM = o.wall || 'brick_grey', latM = o.lat || 'lattice_red', doorM = o.latDoor || latM;
   // an enterable house keeps the detail of the near ring in its front whatever its distance (its door is walked through)
   const fl = enter ? Math.min(lod, 1) : lod;
-  F.B(bag, plinth, s0 - 0.2, dB - 0.12, s1 + 0.2, dF + 0.05, -0.05, y);
+  const pe = o.plinthEnd ?? 0.2;
+  F.B(bag, plinth, s0 - pe, dB - 0.12, s1 + pe, dF + 0.05, -0.05, y);
   // back wall (it rises to the eave) and the side walls (chitou: they reach the front posts' line)
   F.B(bag, wallM, s0, dB, s1, dB + 0.5, y, y + H - 0.28);
   for (const [a, b] of [[s0, s0 + 0.5], [s1 - 0.5, s1]]) F.B(bag, wallM, a, dB + 0.5, b, dF, y, y + H);
@@ -194,12 +195,13 @@ export function house(bag, col, F, o) {
   const lx = (i0, i1) => [P2(s0 + 0.25 + (L - 0.5) * i0 / bays), P2(s0 + 0.25 + (L - 0.5) * i1 / bays)];
   const fh = lintelY - y, colw = enter ? col : (lod === 0 ? col : NOCOL);
   let doorC = null;
+  const doorCs = [];          // (a row of rooms has a door each: `doors` lists the bays)
   for (let i = 0; i < bays; i++) {
-    const [a, b] = lx(i, i + 1), isDoor = i === door;
+    const [a, b] = lx(i, i + 1), isDoor = doors ? doors.includes(i) : i === door;
     // posts' faces on the verandah give each leaf its bay; the first and last bays are shortened by the end walls
     const sa = i === 0 ? s0 + 0.5 : s0 + 0.25 + (L - 0.5) * i / bays, sb = i === bays - 1 ? s1 - 0.5 : s0 + 0.25 + (L - 0.5) * (i + 1) / bays;
     const aa = i === 0 ? P2(s0 + 0.5) : a, bb = i === bays - 1 ? P2(s1 - 0.5) : b;
-    if (enter && isDoor) { doorC = (sa + sb) / 2; doorway(bag, colw, F, o, sa, sb, y, fh, dW, lintelY, latM, doorM, fl); continue; }
+    if (enter && isDoor) { doorC ??= (sa + sb) / 2; doorCs.push((sa + sb) / 2); doorway(bag, colw, F, o, sa, sb, y, fh, dW, lintelY, latM, doorM, fl); continue; }
     if (win || isDoor) {
       // beyond ~250 m (lod 2) one flat leaf a bay
       if (fl >= 2) F.B(bag, isDoor ? 'lacquer_red' : latM, Math.min(sa, s1), dW - 0.05, Math.min(sb, s1), dW, y, lintelY);
@@ -209,9 +211,11 @@ export function house(bag, col, F, o) {
   }
   // the verandah's floor (the plinth is its floor) and the steps to the door
   if (o.steps !== false && lod < 3) {
-    const sc = enter && doorC !== null ? doorC : s0 + 0.25 + (L - 0.5) * (door + 0.5) / bays, n = Math.max(1, Math.round(y / 0.17));
-    for (let k = 0; k < n; k++) F.B(bag, 'granite_grey', sc - 0.9, dF + 0.05, sc + 0.9, dF + 0.05 + 0.3 * (n - k), -0.05, y * (k + 1) / (n + 1));
-    if (enter) col.ramp(F.rect(sc - 0.9, dF + 0.05, sc + 0.9, dF + 0.05 + 0.3 * n), 0.03, y, RISE[F.face]);
+    const n = Math.max(1, Math.round(y / 0.17));
+    for (const sc of (enter && doorCs.length ? doorCs : [s0 + 0.25 + (L - 0.5) * (door + 0.5) / bays])) {
+      for (let k = 0; k < n; k++) F.B(bag, 'granite_grey', sc - 0.9, dF + 0.05, sc + 0.9, dF + 0.05 + 0.3 * (n - k), -0.05, y * (k + 1) / (n + 1));
+      if (enter) col.ramp(F.rect(sc - 0.9, dF + 0.05, sc + 0.9, dF + 0.05 + 0.3 * n), 0.03, y, RISE[F.face]);
+    }
   }
   const roofKind = o.roof || 'qingshui';
   const yAt = gableRoof(bag, F, { s0, s1, dB: dB - 0.4, dF: dF + 0.9, dm: (dB + dF) / 2 + 0.1, ey: y + H - 0.55, rise, wd0: dB, wd1: dF, wy: y + H, lod, orn: rich && roofKind === 'qingshui', kind: roofKind, wall: wallM });
@@ -221,7 +225,7 @@ export function house(bag, col, F, o) {
     F.B(bag, 'brick_grey', sc - 0.22, dc - 0.22, sc + 0.22, dc + 0.22, base, top);
     F.B(bag, 'tile_grey', sc - 0.3, dc - 0.3, sc + 0.3, dc + 0.3, top, top + 0.09);
   }
-  const rect = F.rect(s0 - 0.2, dB - 0.12, s1 + 0.2, dF + 0.05);
+  const rect = F.rect(s0 - pe, dB - 0.12, s1 + pe, dF + 0.05);
   if (!enter) { col.rect(rect, 0, y + H + 1); return { rect, yAt }; }
   // ── an enterable house (§35): the walls are the obstacles, the floor and the ceiling are made, the door is open ──
   const T = y + H;
@@ -245,13 +249,20 @@ export function house(bag, col, F, o) {
     // the beam over the verandah posts and the inside of the lintel, painted
     F.B(bag, 'lacquer_red', s0 + 0.5, dW - 0.3, s1 - 0.5, dW - 0.2, yc - 0.28, yc - 0.04);
   }
+  // the partitions of a row of rooms (the south row's): plastered walls across from the back wall to the front wall, on the post lines
+  for (const bi of parts) {
+    const s = s0 + 0.25 + (L - 0.5) * bi / bays;
+    F.B(bag, 'plaster_white', s - 0.08, dB + 0.5, s + 0.08, dW, y + 0.02, yc);
+    F.B(bag, 'wood_dark', s - 0.09, dB + 0.5, s + 0.09, dW, y + 0.02, y + 0.14);
+    col.rect(F.rect(s - 0.1, dB + 0.5, s + 0.1, dW), 0, T);
+  }
   // the verandah's ceiling (under the eave): boards between the posts' line and the front wall
   const vc = []; quadTo(vc, F.P(s0 + 0.5, dW, lintelY + 0.02), F.P(s1 - 0.5, dW, lintelY + 0.02), F.P(s1 - 0.5, dF - 0.26, lintelY + 0.02), F.P(s0 + 0.5, dF - 0.26, lintelY + 0.02), [0, -1, 0]);
   bag.add('timber', fromTriangles(vc));
-  return { rect, yAt, doorC, T };
+  return { rect, yAt, doorC, doorCs, T };
 }
 /** The direction a flight of steps rises toward a house whose front faces `face` ('s' | 'n' | 'e' | 'w'), for col.ramp. */
-const RISE = { s: 'n', n: 's', e: 'w', w: 'e' };
+export const RISE = { s: 'n', n: 's', e: 'w', w: 'e' };
 /** The open door of an enterable house: a clear doorway in the middle of the door bay between two fixed leaves, its frame, a transom, the two leaves swung back inside. */
 function doorway(bag, col, F, o, sa, sb, y, fh, dW, lintelY, latM, doorM, fl) {
   const sc = (sa + sb) / 2, dw = Math.min(o.dw ?? 1.5, sb - sa - 0.5), P2 = (s) => { const p = F.P(s, dW, y); return [p[0], p[2]]; };
@@ -372,7 +383,9 @@ function southRow(bag, col, R, g, lod, rand, gxC) {
   // the rooms west of the gate: facing the yard
   const s0 = sOf(gL), s1 = sOf(x0);
   const bays = Math.max(2, Math.round(Math.abs(s1 - s0) / 3.3));
-  house(bag, col, F, { s0: Math.min(s0, s1), s1: Math.max(s0, s1), dB: -dS / 2, dF: dS / 2, vw: 0.9, y: 0.25, H: 3.05, bays, door: bays > 3 ? 1 : 0, lod, rich: g.wealth > 0.5, win: true, chimneyAt: 0.7 });
+  // a house whose whole compound is open (el.deep): the rooms of the south row, each with its door to the yard, between plastered partitions
+  const sp = g.deep ? southPlan(g.el) : null;
+  house(bag, col, F, { s0: Math.min(s0, s1), s1: Math.max(s0, s1), dB: -dS / 2, dF: dS / 2, vw: 0.9, y: 0.25, H: 3.05, bays, door: bays > 3 ? 1 : 0, lod, rich: g.wealth > 0.5, win: true, chimneyAt: 0.7, ...(sp ? { enter: true, doors: sp.rooms.map((r) => r.door), parts: sp.rooms.slice(1).map((r) => r.ia), dw: 1.2 } : {}) });
   // the gate block
   const gR = x1, Fg = Frame((gL + gR) / 2, z1 - dS / 2, 'n'), gwB = gR - gL, up = G.up, Hg = 3.05 + up;
   const zS = z1;                                           // the lane face
@@ -539,7 +552,9 @@ function chuihua(bag, col, cx, z, lod) {
 export function dwelling(el) {
   const r = rng(((el.seed | 0) * 3 + 11) >>> 0), w = el.wealth ?? 0.4, pick = (a) => a[Math.floor(r() * a.length)];
   const rich = w > 0.6, mid = w > 0.38;
-  return {
+  // (an open compound has no overhanging gables: the roofs would run out over the ear rooms' strips and the corridors beside the side houses)
+  const flat = (k) => (el.deep && k === 'xuanshan' ? 'guolong' : k);
+  const D = {
     latMain: rich ? pick(['lattice_bubujin', 'lattice_wan', 'lattice_haitang', 'lattice_bubujin']) : mid ? pick(['lattice_bubujin', 'lattice_ice', 'lattice_wan', 'lattice_red']) : pick(['lattice_red', 'lattice_ice', 'lattice_red']),
     latWing: rich ? pick(['lattice_ice', 'lattice_bubujin']) : pick(['lattice_red', 'lattice_ice']),
     roofMain: rich ? pick(['qingshui', 'qingshui', 'guolong']) : mid ? pick(['guolong', 'qingshui', 'xuanshan']) : pick(['guolong', 'xuanshan', 'xuanshan']),
@@ -547,9 +562,67 @@ export function dwelling(el) {
     wallMain: !rich && r() < 0.35 ? 'plaster_grey' : 'brick_grey',
     wallWing: w < 0.55 && r() < 0.5 ? 'plaster_grey' : 'brick_grey',
   };
+  D.roofMain = flat(D.roofMain); D.roofWing = flat(D.roofWing);
+  return D;
 }
 /** How many bays an enterable side house is built with (odd, so that the door is in the middle one): 1 under 5.6 m, 3 under 9 m, else 5. */
 export const wingBays = (L, enter) => (enter ? (L < 5.6 ? 1 : L < 9 ? 3 : 5) : Math.max(2, Math.round(L / 3.2)));
+
+/**
+ * The south row (daozuo) of a house whose compound is open (el.deep), as the builder and the furnishing both need it: the row's frame
+ * (centre x, centre z, depth dS; local s runs west, from the gate), its bays, and its rooms — the bays taken two by two from the gate
+ * westward — each with its door bay, its extent along s and its world rectangle (x0, x1) across the row's interior.
+ */
+export function southPlan(el) {
+  const [x0, , x1, z1] = el.rect, G = GATE[el.gate || 'ruyi'], dS = 4.6, rx0 = x0 + 0.44, rx1 = x1 - 0.44, cxr = (rx0 + rx1) / 2;
+  const gxC = x1 - 0.25 - G.gw / 2 - 0.15, gL = gxC - G.gw / 2 - 0.15, zr = z1 - 0.2 - dS / 2;
+  const s0 = cxr - gL, s1 = cxr - rx0, L = s1 - s0, bays = Math.max(2, Math.round(L / 3.3)), n = Math.max(1, Math.floor(bays / 2));
+  const edge = (i) => (i === 0 ? s0 + 0.5 : i === bays ? s1 - 0.5 : s0 + 0.25 + (L - 0.5) * i / bays);
+  const rooms = [];
+  for (let k = 0; k < n; k++) {
+    const ia = 2 * k, ib = k === n - 1 ? bays : 2 * k + 2, door = ia + Math.floor((ib - ia - 1) / 2);
+    const sA = edge(ia) + (k ? 0.1 : 0), sB = edge(ib) - (ib < bays ? 0.1 : 0);
+    rooms.push({ ia, ib, door, sA, sB, x0: cxr - sB, x1: cxr - sA, doorX: cxr - (edge(door) + edge(door + 1)) / 2 });
+  }
+  const zBack = z1 - 0.2, zW = z1 - 0.2 - dS + 0.9;                          // the back wall's outer face (the lane's), the front wall's plane
+  return { s0, s1, L, bays, rooms, cxr, zr, dS, zBack, zW, zN: z1 - 0.2 - dS, y: 0.25, gL, gxC };
+}
+/** The ear rooms (erfang) at the two ends of the main house of an open compound: low rooms 1.7–1.9 m wide, their doors to the little court beside the main house. */
+export function earPlan(el) {
+  const [x0, z0, x1] = el.rect, W = x1 - x0, dE = Math.min(3.8, W * 0.14), sideM = dE * 0.5, ea = 3.9;
+  return [{ side: 'w', xa: x0 + 0.44, xb: x0 + 0.44 + sideM }, { side: 'e', xa: x1 - 0.44 - sideM, xb: x1 - 0.44 }].map((e) => ({ ...e, za: z0 - 0.275, zb: z0 + 0.3 + ea, y: 0.35, H: 2.8, doorX: (e.xa + e.xb) / 2 }));
+}
+/** One ear room: front wall with its doorway, lattice leaves and sill-stone, the flat ceiling, the shed roof leaning on the main house's end wall. */
+function earRoom(bag, col, e, roofKind) {
+  const { xa, xb, za, zb, y, H } = e, Wd = xb - xa, F = Frame((xa + xb) / 2, zb, 's'), T = y + H, lintelY = y + H - 0.2, dw = 0.9;
+  const zIn = za + 0.5;                                                                       // the lot wall's inner face
+  // the floor, laid brick over the 0.35 m plinth; the front wall's two lattice leaves and the doorway (the shared doorway() of the houses)
+  F.B(bag, 'brick_grey', -Wd / 2, zIn - zb, Wd / 2, 0.05, -0.05, y);
+  F.B(bag, 'brick_paving', -Wd / 2, zIn - zb, Wd / 2, -0.3, y, y + 0.02);
+  doorway(bag, col, F, { dw }, -Wd / 2, Wd / 2, y, lintelY - y, 0, lintelY, 'lattice_red', 'lattice_red', 0);
+  F.B(bag, 'brick_grey', -Wd / 2, -0.3, Wd / 2, 0, lintelY, T);
+  for (const sg of [-1, 1]) col.rect(F.rect(sg < 0 ? -Wd / 2 : dw / 2, -0.12, sg < 0 ? -dw / 2 : Wd / 2, 0.1), 0, T);
+  // the steps down to the court (two) and their ramp
+  for (let k = 0; k < 2; k++) F.B(bag, 'granite_grey', -dw / 2 - 0.1, 0.05, dw / 2 + 0.1, 0.05 + 0.3 * (2 - k), -0.05, y * (k + 1) / 3);
+  col.ramp(F.rect(-dw / 2 - 0.1, 0.1, dw / 2 + 0.1, 0.65), 0.03, y, RISE.s);
+  col.floor(F.rect(-Wd / 2, zIn - zb, Wd / 2, -0.12), y + 0.02);
+  // the ceiling and the plastered walls inside (the lot wall's face and the main house's end wall)
+  const ceil = [];
+  quadTo(ceil, F.P(-Wd / 2, zIn - zb, T - 0.35), F.P(Wd / 2, zIn - zb, T - 0.35), F.P(Wd / 2, -0.3, T - 0.35), F.P(-Wd / 2, -0.3, T - 0.35), [0, -1, 0]);
+  bag.add('plaster_white', fromTriangles(ceil));
+  for (const sg of [-1, 1]) F.B(bag, 'plaster_white', sg < 0 ? -Wd / 2 : Wd / 2 - 0.02, zIn - zb, sg < 0 ? -Wd / 2 + 0.02 : Wd / 2, -0.3, y + 0.9, T - 0.35);
+  F.B(bag, 'plaster_white', -Wd / 2, zIn - zb, Wd / 2, zIn - zb + 0.02, y + 0.9, T - 0.35);
+  F.B(bag, 'wood_dark', -Wd / 2, -0.32, Wd / 2, -0.3, T - 0.5, T - 0.35);
+  // the shed roof: high at the back (the lot wall), falling to a lip over the door; edges tucked into the walls
+  const hi = T + 0.25, lo = T + 0.1, a = F.P(-Wd / 2, zIn - zb - 0.02, hi), b = F.P(Wd / 2, zIn - zb - 0.02, hi), c = F.P(Wd / 2, 0.15, lo), d = F.P(-Wd / 2, 0.15, lo);
+  const rf = [], un = [];
+  quadTo(rf, a, b, c, d, [0, 1, 0.3]);
+  const dn = (p) => [p[0], p[1] - 0.16, p[2]];
+  quadTo(un, dn(a), dn(b), dn(c), dn(d), [0, -1, -0.3]);
+  bag.add('tile_grey', fromTriangles(rf)); bag.add('timber', fromTriangles(un));
+  F.B(bag, 'tile_grey', -Wd / 2, 0.11, Wd / 2, 0.15, lo - 0.17, lo + 0.03);                    // the lip of eave tiles
+  void roofKind;
+}
 
 /** One courtyard house, as an element: { rect, seed, gate, courts, wealth, lod, trees }. */
 /**
@@ -563,17 +636,18 @@ export function houseParts(el) {
   const sideM = lod >= 2 ? 1.0 : dE * 0.5;
   const main = [x0 + 0.44 + sideM, z0 + 0.3, x1 - 0.44 - sideM, z0 + 0.3 + dN], mb = W > 27 ? 5 : 3;
   const yardTop = z0 + 0.3 + dN + 0.9, zWall = courts === 2 ? z0 + 12.95 : null;
-  const wingZ1 = (zWall ?? zN) - (courts === 2 ? 0.6 : 2.2), wingZ0 = yardTop + 0.2, ww = (el.enter && lod <= 2) ? Math.min(4.0, W * 0.15) : Math.min(3.4, W * 0.13);   // the side houses of an enterable house are deeper (room to walk past the kang)
+  const wingZ1 = (zWall ?? zN) - (courts === 2 ? 0.6 : 2.2), wingZ0 = yardTop + 0.2 + (el.deep && el.enter && lod <= 2 ? 0.9 : 0), ww = (el.enter && lod <= 2) ? Math.min(4.0, W * 0.15) : Math.min(3.4, W * 0.13);   // the side houses of an enterable house are deeper (room to walk past the kang)
   const wings = [];
   if (wingZ1 - wingZ0 > 3.5) for (const [side, xa] of [['e', x0 + 0.44], ['w', x1 - 0.44 - ww]]) wings.push({ side, rect: [xa, wingZ0, xa + ww, wingZ1], ww, L: wingZ1 - wingZ0, bays: wingBays(wingZ1 - wingZ0, !!el.enter && lod <= 2) });
   void G;
-  return { main, mb, mainY: 0.55, dN, wings, wingY: 0.35, zN, zWall };
+  const deep = !!el.deep && !!el.enter && lod <= 2;
+  return { main, mb, mainY: 0.55, dN, wings, wingY: 0.35, zN, zWall, ...(deep ? { south: southPlan(el), ears: earPlan(el) } : {}) };
 }
 
 export function hutongHouse(el, ctx0) {
   const { bag, col } = ctx0, lod = el.lod ?? 0, rand = rng(el.seed || 1);
   const [x0, z0, x1, z1] = el.rect, W = x1 - x0, D = z1 - z0, cx = (x0 + x1) / 2;
-  const g = { gate: el.gate || 'ruyi', wealth: el.wealth ?? 0.4, courts: el.courts || 1 };
+  const g = { gate: el.gate || 'ruyi', wealth: el.wealth ?? 0.4, courts: el.courts || 1, deep: !!el.deep && !!el.enter && lod <= 2, el };
   const G = GATE[g.gate], dS = 4.6, dN = 6.45, dE = Math.min(3.8, W * 0.14);
   const lw = { lod, h: 3.1 };
   // the lot's walls: north, west, east (the south is the south row's back)
@@ -593,15 +667,14 @@ export function hutongHouse(el, ctx0) {
   const mb = W > 27 ? 5 : 3;
   const Fm = Frame((mainR[0] + mainR[2]) / 2, (mainR[1] + mainR[3]) / 2, 's'), mL = mainR[2] - mainR[0];
   const enter = !!el.enter && lod <= 2, dwl = dwelling(el);
-  house(bag, col, Fm, { s0: -mL / 2, s1: mL / 2, dB: -dN / 2, dF: dN / 2, vw: 1.1, y: 0.55, H: 3.45, bays: mb, lod, rich: g.wealth > 0.45, chimneyAt: 0.2, enter, dw: 1.6, lat: dwl.latMain, roof: dwl.roofMain, wall: dwl.wallMain });
-  // the ear rooms (erfang) of the grander main house, lower, at its two ends
-  const earW = (sideM - 0.1);
-  void earW;
+  house(bag, col, Fm, { s0: -mL / 2, s1: mL / 2, dB: -dN / 2, dF: dN / 2, vw: 1.1, y: 0.55, H: 3.45, bays: mb, lod, rich: g.wealth > 0.45, chimneyAt: 0.2, enter, plinthEnd: g.deep ? 0 : 0.2, dw: 1.6, lat: dwl.latMain, roof: dwl.roofMain, wall: dwl.wallMain });
+  // the ear rooms (erfang), lower, at the two ends of the main house of an open compound
+  if (g.deep) for (const e of earPlan(el)) earRoom(bag, col, e, dwl.roofMain);
   // the side houses, east and west, of the yard (the inner one for two courts)
   const yardTop = z0 + 0.3 + dN + 0.9;                                      // the main house's steps
   const zWall = g.courts === 2 ? z0 + 12.95 : null;                    // the hanging-flower gate's wall
   const wingZ1 = (zWall ?? zN) - (g.courts === 2 ? 0.6 : 2.2);
-  const wingZ0 = yardTop + 0.2;
+  const wingZ0 = yardTop + 0.2 + (g.deep ? 0.9 : 0);                      // (an open compound: the corridor between the main house and the side houses is wide enough to walk along to the ear rooms)
   const ww = enter ? Math.min(4.0, W * 0.15) : Math.min(3.4, W * 0.13);
   if (wingZ1 - wingZ0 > 3.5) {
     for (const [side, xa] of [['e', x0 + 0.44], ['w', x1 - 0.44 - ww]]) {
@@ -641,7 +714,7 @@ export function hutongHouse(el, ctx0) {
       const jz = Math.min(mainR[3] + 2.6, (zWall ?? swZ) - 1.6), jx = cx + (rand() < 0.5 ? -3.4 : 3.4);
       if (!(el.trees || []).some(([tx, tz]) => Math.hypot(tx - jx, tz - jz) < 1.6)) { fishJar(yard, rand() < 0.5 ? 'glaze_green' : 'pottery_dark'); yard.emit(bag, jx, 0.03, jz); col.circle(jx, jz, 0.6, 0, 1); }
     }
-    const pt = new Parts(); pots(pt, rand); pt.emit(bag, cx + (rand() < 0.5 ? -4.6 : 3.6), 0.03, mainR[3] + 1.15);
+    const pt = new Parts(); pots(pt, rand); pt.emit(bag, cx + (rand() < 0.5 ? -4.6 : 3.6), 0.03, mainR[3] + (g.deep ? 0.4 : 1.15));
     const st = new Parts(); if (rand() < 0.55) { firewood(st); st.emit(bag, x0 + 1.6, 0.03, mainR[3] + 3.2, Math.PI / 2); }
     const cp = new Parts(); if (rand() < 0.5) { stove(cp); cp.emit(bag, x1 - 1.5, 0.03, mainR[3] + 3.0); }
   }

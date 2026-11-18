@@ -9,6 +9,7 @@
 import { LEVEL, WALL, RIVER, TIERS, HALLS } from './layout.js';
 import { IMPERIAL } from '../../styles/qing/index.js';
 import { dougongHeight } from '../../styles/qing/caihua.js';
+import { compoundWalks } from './depthwalk.js';
 
 const E = [];
 const [wx0, wz0, wx1, wz1] = WALL.rect, WH = WALL.h, WT = WALL.th;
@@ -203,6 +204,7 @@ const rooms = [
 // (up the Gate of Supreme Harmony's stair by its side flight: the middle slab is the emperor's carved ramp, not for the feet; then along the platform to the hall's doorway, the middle bay, and down the north side's side flight; the terrace's three tiers by the side flights too)
 const walks = [[[0, 215], [0, 190], [0, 165], [12, 152], [9.5, 134], [9.5, 123.8], [0, 123], [0, 108], [9.5, 107], [9.5, 98], [0, 70], [7.25, 46], [7.25, 36], [7.25, 31], [7.25, 26], [7.25, 20], [0, 14]]];
 walks[0].y0 = 0;
+walks.push(...compoundWalks());
 // The engine's street life scatters standing figures over the landmark's open rooms (src/objects/life.js) by what is free
 // of footprints; two of them once stood on the axis before the stair of the Gate of Supreme Harmony and shut the way. Blocks
 // laid just under the paving along the route (hidden, 3 m squares) keep the way clear of those figures.

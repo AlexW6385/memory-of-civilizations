@@ -142,7 +142,7 @@ export function bjTeahouse(el, { bag, col }) {
   const F = frame(el.rect, el.front ?? 'e'), y = el.y, S = new Parts(), rand = rng(el.seed || 11), m = 0.55;
   const put = (Q, a, b, yw = 0, up = 0) => Q.emit(S, a, up, b, yw);
   const blk = (a0, b0, a1, b1, h) => { const p = F.WC(a0, b0), q = F.WC(a1, b1); col.rect([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], y, y + h); };
-  const Wd = F.Wd, Dp = F.Dp, u0 = -Wd / 2 + 0.55, u1 = Wd / 2 - 0.55;
+  const Wd = F.Wd, Dp = F.Dp, u0 = -Wd / 2 + 0.55, u1 = Wd / 2 - 0.55 - (el.upper ? 1.6 : 0);          // (a two-storey house keeps the stair's side clear)
   // the back right: the counter and the stove with two great copper kettles, shelves of cups and tea above
   const cw = Math.max(1.6, u1 - 1.2 - (u0 + 2.2)), ca = u0 + 2.2 + cw / 2;
   { const Q = new Parts(); table(Q, cw, 0.7, 1.05, W, true); put(Q, ca, m + 0.5); blk(ca - cw / 2, m + 0.1, ca + cw / 2, m + 0.9, 1.05); }
@@ -175,6 +175,43 @@ export function bjTeahouse(el, { bag, col }) {
   }
   // paper lanterns, red, from the beams
   for (const [a, b] of [[-Wd / 4, Dp * 0.4], [Wd / 4, Dp * 0.4], [-Wd / 4, Dp * 0.75], [Wd / 4, Dp * 0.75]]) { const Q = new Parts(); Q.add('lamp_paper', lathe([[0.001, 0], [0.16, 0.05], [0.2, 0.2], [0.16, 0.36], [0.001, 0.4]], 10, null, 0, (el.H ?? 4) - 1.5, 0)); Q.add('lacquer_black', box(-0.03, (el.H ?? 4) - 1.1, -0.03, 0.03, (el.H ?? 4) - 0.8, 0.03)); put(Q, a, b); }
+  S.emit(bag, F.origin[0], y + 0.04, F.origin[1], F.yaw);
+  if (el.upper) teaUpper(F, el, { bag, col });
+}
+
+/**
+ * The upper tea room (§38): up the stair at the side wall; on the deck (y + 3.4) a column of tables with benches along the window wall, a long couch
+ * and a low table at the back, the middle left clear from the stair's head to the door on the balcony; bird cages and red lanterns from the beams.
+ */
+function teaUpper(F, el, { bag, col }) {
+  const y = el.y + 3.4, S = new Parts(), Wd = F.Wd, Dp = F.Dp, put = (Q, a, b, yw = 0, up = 0) => Q.emit(S, a, up, b, yw), r = rng((el.seed || 11) + 5);
+  const blk = (a0, b0, a1, b1, h) => { const p = F.WC(a0, b0), q = F.WC(a1, b1); col.rect([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], y, y + h); };
+  const u0 = -Wd / 2 + 0.6, aT = u0 + 0.35;
+  // tables in the window column (the street side wall's opposite end), each with a covered pot and bowls, a bench each side
+  for (const b of [2.4, 4.2, 6.0]) {
+    const Q = new Parts(); table(Q, 0.85, 0.85, 0.78);
+    Q.add('glaze_white', lathe([[0.001, 0], [0.08, 0.01], [0.09, 0.12], [0.06, 0.16], [0.001, 0.16]], 8, null, 0.1, 0.78, 0));
+    for (const dx of [-0.25, 0.3]) Q.add('glaze_white', lathe([[0.001, 0], [0.04, 0.0], [0.055, 0.06], [0.001, 0.06]], 8, null, dx, 0.78, 0.2));
+    put(Q, aT + 0.6, b);
+    for (const s of [-1, 1]) { const B = new Parts(); bench(B, 1.2); put(B, aT + 0.6, b + s * 0.7); }
+    blk(aT + 0.0, b - 0.9, aT + 1.25, b + 0.9, 0.8);
+  }
+  // a pair of tables by the back wall with a couch between, where the guests sit longest
+  { const Q = new Parts(); bench(Q, 1.8, 0.48); Q.add('cloth_indigo', box(-0.9, 0.48, -0.15, 0.9, 0.55, 0.15)); put(Q, 0.4, 0.85); blk(-0.5, 0.65, 1.3, 1.05, 0.6); }
+  { const Q = new Parts(); table(Q, 0.6, 0.45, 0.4, RED, true); put(Q, 0.4, 1.5); }
+  // a screen of painted panels across the corner at the stair's head
+  { const Q = new Parts(); for (let k = 0; k < 3; k++) { Q.add(W, box(-0.45 + k * 0.3, 0, -0.02, -0.15 + k * 0.3, 1.5, 0.02)); Q.add('paint_caihua', box(-0.43 + k * 0.3, 0.2, 0.02, -0.17 + k * 0.3, 1.4, 0.03)); } put(Q, aT + 1.7, 0.6); }
+  // bird cages and lanterns from the beams
+  for (let i = 0; i < 3; i++) {
+    const a = aT + 0.6 + i * 0.7, b = 2.6 + i * 1.6, Q = new Parts(), hy = 2.5;
+    Q.add('bamboo_culm', lathe([[0.15, 0], [0.16, 0.12], [0.15, 0.24], [0.001, 0.26]], 12, null, 0, hy - 0.26, 0));
+    for (let k = 0; k < 10; k++) { const t = k / 10 * Math.PI * 2; Q.add('bamboo_culm', limb([Math.cos(t) * 0.15, hy - 0.26, Math.sin(t) * 0.15], [Math.cos(t) * 0.15, hy, Math.sin(t) * 0.15], 0.004, 0.004, 3)); }
+    if (i % 2) Q.add('cloth_indigo', lathe([[0.17, hy - 0.26], [0.17, hy + 0.05], [0.001, hy + 0.12]], 12));
+    Q.add('timber', limb([0, hy + 0.12, 0], [0, hy + 0.5, 0], 0.006, 0.006, 3));
+    put(Q, a, b);
+  }
+  for (const [a, b] of [[0, 2.5], [0, 5.5], [1.2, 7.4]]) { const Q = new Parts(); Q.add('lamp_paper', lathe([[0.001, 0], [0.16, 0.05], [0.2, 0.2], [0.16, 0.36], [0.001, 0.4]], 10, null, 0, 1.95, 0)); put(Q, a, b); }
+  void r;
   S.emit(bag, F.origin[0], y + 0.04, F.origin[1], F.yaw);
 }
 

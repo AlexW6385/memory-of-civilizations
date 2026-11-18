@@ -8,7 +8,7 @@
 
 import { box, lathe } from '../../core/geom.js';
 import { Parts, ball, limb } from '../../styles/qing/carving.js';
-import { houseParts } from './houses.js';
+import { houseParts, southPlan } from './houses.js';
 import { table, chair, stool, bench, cabinet, kang, stove, vat, frame } from './interiors.js';
 
 const W = 'wood_dark', RED = 'lacquer_red';
@@ -16,20 +16,20 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
 const M = 0.5;                                       // the walls' thickness and the first strip of floor
 
 // ── small objects, local frame, facing −z, standing at the origin ──
-function oilLamp(Q, x, y, z) {
+export function oilLamp(Q, x, y, z) {
   Q.add('glaze_white', lathe([[0.001, 0], [0.05, 0], [0.068, 0.025], [0.05, 0.045], [0.001, 0.045]], 10, null, x, y, z));
   Q.add('bronze', lathe([[0.012, 0.045], [0.014, 0.17]], 6, null, x, y, z));
   Q.add('bronze', lathe([[0.001, 0.16], [0.05, 0.175], [0.056, 0.2], [0.001, 0.195]], 10, null, x, y, z));
 }
-function censer(Q, x, y, z, s = 1) {
+export function censer(Q, x, y, z, s = 1) {
   Q.add('bronze', lathe([[0.001, 0], [0.06 * s, 0], [0.085 * s, 0.03 * s], [0.095 * s, 0.09 * s], [0.08 * s, 0.115 * s], [0.001, 0.115 * s]], 12, null, x, y, z));
   for (const sx of [-1, 1]) Q.add('bronze', box(x + sx * 0.1 * s - 0.01, y + 0.09 * s, z - 0.02, x + sx * 0.1 * s + 0.01, y + 0.15 * s, z + 0.02));
 }
-function candlestick(Q, x, y, z) {
+export function candlestick(Q, x, y, z) {
   Q.add('bronze', lathe([[0.001, 0], [0.05, 0], [0.02, 0.05], [0.015, 0.2], [0.04, 0.22], [0.001, 0.22]], 8, null, x, y, z));
   Q.add('cloth_red', lathe([[0.001, 0.22], [0.018, 0.22], [0.018, 0.4], [0.001, 0.4]], 6, null, x, y, z));
 }
-function plate(Q, x, y, z, fruit = 'cloth_red', n = 3) {
+export function plate(Q, x, y, z, fruit = 'cloth_red', n = 3) {
   Q.add('glaze_white', lathe([[0.001, 0], [0.08, 0], [0.13, 0.03], [0.001, 0.02]], 10, null, x, y, z));
   for (let i = 0; i < n; i++) { const a = i / n * 6.28; Q.add(fruit, ball(0.036, 0.034, 0.036, 8, 5).translate(x + Math.cos(a) * (n > 1 ? 0.045 : 0), y + 0.06, z + Math.sin(a) * (n > 1 ? 0.045 : 0))); }
 }
@@ -39,13 +39,13 @@ function tablet(Q, x, y, z, h = 0.3) {                // a spirit tablet on its 
   Q.add('gilt_bronze', box(x - 0.012, y + 0.07, z - 0.0135, x + 0.012, y + 0.03 + h - 0.05, z - 0.012));
   Q.add('gilt_bronze', box(x - 0.045, y + 0.03 + h, z - 0.016, x + 0.045, y + 0.04 + h, z + 0.016));
 }
-function teapot(Q, x, y, z) {
+export function teapot(Q, x, y, z) {
   Q.add('glaze_white', lathe([[0.001, 0], [0.06, 0.005], [0.075, 0.07], [0.04, 0.13], [0.02, 0.14], [0.001, 0.14]], 10, null, x, y, z));
   Q.add('glaze_white', limb([x + 0.07, y + 0.06, z], [x + 0.13, y + 0.1, z], 0.012, 0.012, 4));
   for (const dx of [-0.16, 0.16]) Q.add('glaze_white', lathe([[0.001, 0], [0.03, 0], [0.042, 0.05], [0.001, 0.05]], 8, null, x + dx, y, z + 0.1));
 }
 /** A hanging picture on a mount between its two scrolls: a landscape, flowers or calligraphy. */
-function picture(Q, kind, a, y0, h, w = 0.84) {
+export function picture(Q, kind, a, y0, h, w = 0.84) {
   const z = M + 0.03;
   Q.add('cloth_indigo', box(a - w / 2, y0, z - 0.035, a + w / 2, y0 + h, z - 0.025));
   Q.add('paint_white', box(a - w / 2 + 0.08, y0 + 0.13, z - 0.025, a + w / 2 - 0.08, y0 + h - 0.13, z - 0.017));
@@ -61,15 +61,15 @@ function picture(Q, kind, a, y0, h, w = 0.84) {
     for (let k = 0; k < 5; k++) Q.add('lacquer_black', box(a + s * 0.7 - 0.07, y0 + 0.2 + k * (h - 0.3) / 5, z - 0.025, a + s * 0.7 + 0.07, y0 + 0.2 + k * (h - 0.3) / 5 + 0.1, z - 0.021));
   }
 }
-function brazier(Q) {
+export function brazier(Q) {
   Q.add('iron', lathe([[0.001, 0], [0.18, 0.02], [0.22, 0.22], [0.001, 0.22]], 12)); Q.add('flame', lathe([[0.001, 0.2], [0.17, 0.2], [0.001, 0.21]], 10));
   for (const a of [0, 2.1, 4.2]) Q.add('iron', limb([Math.cos(a) * 0.12, 0.05, Math.sin(a) * 0.12], [Math.cos(a) * 0.2, 0, Math.sin(a) * 0.2], 0.018, 0.016, 4));
 }
-function jar(Q, x, z, r = 0.24, h = 0.55, lid = 'slate') {
+export function jar(Q, x, z, r = 0.24, h = 0.55, lid = 'slate') {
   Q.add('pottery_dark', lathe([[0.001, 0], [r * 0.7, 0.01], [r, h * 0.45], [r * 0.9, h * 0.9], [r * 0.7, h], [0.001, h]], 12, null, x, 0, z));
   Q.add(lid, lathe([[0.001, h], [r * 0.8, h], [r * 0.8, h + 0.03], [0.001, h + 0.06]], 12, null, x, 0, z));
 }
-function sack(Q, x, y, z, r = 0.3) { Q.add('sacking', lathe([[0.001, 0], [r, 0.02], [r * 1.15, r * 0.6], [r * 0.9, r * 1.3], [r * 0.4, r * 1.55], [0.001, r * 1.6]], 9, null, x, y, z)); }
+export function sack(Q, x, y, z, r = 0.3) { Q.add('sacking', lathe([[0.001, 0], [r, 0.02], [r * 1.15, r * 0.6], [r * 0.9, r * 1.3], [r * 0.4, r * 1.55], [0.001, r * 1.6]], 9, null, x, y, z)); }
 
 // ── the rooms ──
 export function bjRooms(el, { bag, col, lights }) {
@@ -197,9 +197,94 @@ export function bjRooms(el, { bag, col, lights }) {
     }
     S.emit(bag, F.origin[0], rm.y + 0.04, F.origin[1], F.yaw);
   }
+  if (P.south) deepRooms(el, { bag, col, lights }, P, r, w);
 }
-function bookcase(P, w, h) {
+export function bookcase(P, w, h) {
   P.add(W, box(-w / 2, 0, -0.18, w / 2, h, 0.18));
   for (let r = 0; r < 5; r++) { const y = 0.14 + r * (h - 0.2) / 5, hh = (h - 0.2) / 5 - 0.05; P.add('cloth_brown', box(-w / 2 + 0.04, y, -0.2, w / 2 - 0.04, y + hh, -0.18));
     for (let k = 0; k < Math.floor(w / 0.12); k++) P.add(['cloth_white', 'cloth_indigo', 'cloth_brown', 'cloth_grey'][(r + k) % 4], box(-w / 2 + 0.06 + k * 0.12, y + 0.01, -0.205, -w / 2 + 0.06 + k * 0.12 + 0.09, y + hh * (0.7 + 0.3 * ((k * 7) % 3) / 2), -0.185)); }
+}
+
+// ── the rest of an open compound (round 6, docs/settlements/qing-beijing.md §38): the south row's rooms and the ear rooms ──
+// Each room in its own frame as the others (a across, centred; b from the back wall's outer face; y up), furniture by use.
+function chestBox(Q, x, y, z, w = 1.0, h = 0.55, d = 0.5) { Q.add(RED, box(x - w / 2, y, z - d / 2, x + w / 2, y + h, z + d / 2)); Q.add('gilt_bronze', box(x - 0.06, y + h * 0.6, z - d / 2 - 0.012, x + 0.06, y + h * 0.6 + 0.07, z - d / 2)); }
+function deepRooms(el, { bag, col, lights }, P, r, w) {
+  const SP = P.south, kinds = w > 0.5 ? ['gatehouse', 'reception', 'study', 'servants', 'store'] : w > 0.36 ? ['gatehouse', 'reception', 'servants', 'store', 'servants'] : ['gatehouse', 'servants', 'store', 'servants', 'store'];
+  const emit = (rect, front, y, H, kind, doorA) => {
+    const F = frame(rect, front), S = new Parts(), mir = doorA > 0.3 ? -1 : 1;
+    // (the room is laid out with its door on the left, a ≤ 0, the free side on the right; a room whose door lies right of the middle is mirrored)
+    const put = (Q, a, b, yw = 0, up = 0) => Q.emit(S, mir * a, up, b, mir * yw);
+    const blk = (a0, b0, a1, b1, h) => { const p = F.WC(mir * a0, b0), q = F.WC(mir * a1, b1); col.rect([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], y, y + h); };
+    const light = (a, b, up) => { const c = F.WC(mir * a, b); lights?.push({ at: [c[0], y + 0.04 + up, c[1]], color: '#ffb46b', intensity: 2.2, distance: 6 }); };
+    const SM = 0.12, Wd = F.Wd, bF = F.Dp - M, hw = Wd / 2 - SM, aMin = -Wd / 2 + SM, aMax = Wd / 2 - SM, ceil = H - 0.36, dA = mir * doorA;
+    if (kind === 'gatehouse') {
+      // the doorkeeper's room beside the gate: a kang across the back wall's far end with his quilt and a low table, a bench by the window, the brazier, the lantern on its pole and the rattle of the night watch on a nail
+      const kw = Math.min(2.6, Wd - 2.6), ka = aMax - kw / 2;
+      { const Q = new Parts(); kang(Q, kw, 1.7, true); put(Q, ka, M + 0.9); blk(ka - kw / 2, M, ka + kw / 2, M + 1.8, 0.6); }
+      { const Q = new Parts(); bench(Q, 1.5); put(Q, dA + 2.0, bF - 0.4, Math.PI); blk(dA + 1.25, bF - 0.65, dA + 2.75, bF - 0.15, 0.46); }
+      { const Q = new Parts(); brazier(Q); put(Q, aMin + 0.5, M + 0.6); }
+      { const Q = new Parts(); table(Q, 0.9, 0.55, 0.74, W); teapot(Q, 0, 0.74, 0); put(Q, aMin + 1.5, M + 0.6); blk(aMin + 1.05, M + 0.3, aMin + 1.95, M + 0.9, 0.75); const C = new Parts(); stool(C); put(C, aMin + 1.5, M + 1.3); }
+      { const Q = new Parts(); Q.add('timber', box(-0.02, 0, -0.02, 0.02, 1.9, 0.02)); Q.add('lamp_paper', lathe([[0.001, 1.9], [0.14, 1.85], [0.17, 1.65], [0.14, 1.45], [0.001, 1.4]], 9)); Q.add('timber', limb([0, 1.9, 0], [0.18, 1.95, 0], 0.012, 0.012, 3)); put(Q, aMin + 0.3, bF - 0.4); }
+      { const Q = new Parts(); Q.add('timber', box(-0.04, 1.4, 0, 0.04, 1.7, 0.04)); Q.add(W, box(-0.04, 1.45, 0.04, 0.04, 1.62, 0.12)); put(Q, 0.6, M + 0.02); }
+      light(aMin + 1.5, M + 0.6, 0.74 + 0.19);
+    } else if (kind === 'reception') {
+      // the guest room (keting): at the back wall a tea table between two armchairs under a hanging picture and its couplet; side chairs and tea tables along the side walls, a flower stand, a scroll case
+      const ma = (aMin + aMax) / 2;
+      { const Q = new Parts(); picture(Q, ['landscape', 'flowers', 'calligraphy'][Math.floor(r() * 3)], 0, 1.25, 1.5); put(Q, ma, 0); }
+      { const Q = new Parts(); table(Q, 0.5, 0.5, 0.78, RED); teapot(Q, 0, 0.78, 0); put(Q, ma, M + 0.3); blk(ma - 0.3, M, ma + 0.3, M + 0.6, 0.8); for (const s of [-1, 1]) { const C = new Parts(); chair(C); put(C, ma + s * 0.8, M + 0.3, Math.PI); } blk(ma - 1.1, M, ma + 1.1, M + 0.6, 1.0); }
+      for (const s of [-1, 1]) {
+        const a = s * (hw - 0.4);
+        for (const b of [M + 1.2, M + 2.3]) { const C = new Parts(); chair(C); put(C, a, b, s > 0 ? Math.PI / 2 : -Math.PI / 2); }
+        { const Q = new Parts(); table(Q, 0.4, 0.4, 0.7, W, true); put(Q, a, M + 1.75, 0); }
+        blk(a - 0.35, M + 0.9, a + 0.35, M + 2.6, 0.95);
+      }
+      { const Q = new Parts(); Q.add('glaze_blue', lathe([[0.06, 0], [0.11, 0.06], [0.12, 0.2], [0.06, 0.36], [0.045, 0.46], [0.001, 0.5]], 12, null, 0, 0.9, 0)); Q.add('timber', box(-0.15, 0, -0.15, 0.15, 0.9, 0.15)); put(Q, aMax - 0.25, M + 0.3); }
+      light(ma - 0.8, M + 0.3, 0.8);
+    } else if (kind === 'study') {
+      // the studio of the house's scholar: a wide desk with the four treasures, a chair, a bookcase of two leaves, a couch, a scroll jar
+      { const Q = new Parts(); table(Q, 1.5, 0.7, 0.78); Q.add('slate', box(-0.6, 0.78, -0.12, -0.35, 0.81, 0.12)); for (let i = 0; i < 4; i++) Q.add(['cloth_white', 'cloth_indigo', 'cloth_brown', 'cloth_white'][i], box(0.3, 0.78 + i * 0.02, -0.14, 0.65, 0.8 + i * 0.02, 0.14)); oilLamp(Q, 0.9 - 0.15, 0.78, 0.0); put(Q, aMin + 1.6, M + 0.6); blk(aMin + 0.8, M + 0.2, aMin + 2.4, M + 1.0, 0.8); light(aMin + 1.6 + 0.75, M + 0.6, 0.78 + 0.19); }
+      { const C = new Parts(); chair(C); put(C, aMin + 1.6, M + 1.5, Math.PI); }
+      { const Q = new Parts(); bookcase(Q, 1.4, 1.9); put(Q, aMax - 0.9, M + 0.25, Math.PI); blk(aMax - 1.6, M, aMax - 0.2, M + 0.5, 1.9); const B = new Parts(); bookcase(B, 1.4, 1.9); put(B, aMax - 2.4, M + 0.25, Math.PI); blk(aMax - 3.1, M, aMax - 1.7, M + 0.5, 1.9); }
+      { const Q = new Parts(); table(Q, 1.5, 0.7, 0.45, W, true); Q.add('cloth_indigo', box(-0.7, 0.45, -0.3, 0.7, 0.5, 0.3)); put(Q, aMax - 1.05, bF - 0.55, Math.PI); blk(aMax - 1.8, bF - 0.9, aMax - 0.3, bF - 0.2, 0.5); }
+      { const Q = new Parts(); jar(Q, 0, 0, 0.2, 0.55, 'slate'); for (let i = 0; i < 4; i++) Q.add(i % 2 ? 'cloth_red' : 'paint_white', limb([-0.05 + i * 0.04, 0.55, 0], [-0.07 + i * 0.05, 0.95, 0.02], 0.02, 0.02, 5)); put(Q, aMin + 0.35, bF - 0.4); }
+    } else if (kind === 'servants') {
+      // the servants' room: a plank kang along the back wall with two rolls of bedding, a chest, a rail for their clothes, a basin on its stand, a water jar; the cook's and groom's things in a corner
+      const kw = Math.min(3.0, Wd - 2.4), ka = aMax - kw / 2;
+      { const Q = new Parts(); kang(Q, kw, 1.9, false); put(Q, ka, M + 0.95); blk(ka - kw / 2, M, ka + kw / 2, M + 1.9, 0.6); }
+      for (let i = 0; i < 2; i++) { const Q = new Parts(); Q.add(i ? 'cloth_indigo' : 'cloth_grey', lathe([[0.001, 0], [0.16, 0], [0.16, 0.7], [0.001, 0.7]], 8).rotateZ(Math.PI / 2).translate(0, 0.72, 0)); put(Q, ka - kw / 2 + 0.6 + i * 0.9, M + 1.55); }
+      { const Q = new Parts(); chestBox(Q, 0, 0, 0, 0.9, 0.55, 0.5); put(Q, aMin + 0.7, M + 0.3); blk(aMin + 0.25, M, aMin + 1.15, M + 0.6, 0.55); }
+      { const Q = new Parts(); for (const sx of [-1, 1]) Q.add('timber', box(sx * 0.7 - 0.025, 0, -0.025, sx * 0.7 + 0.025, 1.7, 0.025)); Q.add('timber', limb([-0.7, 1.65, 0], [0.7, 1.65, 0], 0.025, 0.025, 5)); for (let i = 0; i < 3; i++) Q.add(['cloth_indigo', 'cloth_grey', 'cloth_brown'][i], box(-0.5 + i * 0.4, 0.95, -0.02, -0.25 + i * 0.4, 1.65, 0.02)); put(Q, aMin + 2.2, M + 0.15); }
+      { const Q = new Parts(); table(Q, 0.5, 0.5, 0.72, W, true); Q.add('bronze', lathe([[0.001, 0], [0.16, 0.02], [0.2, 0.1], [0.001, 0.11]], 10, null, 0, 0.72, 0)); put(Q, aMax - 0.4, bF - 0.45); blk(aMax - 0.65, bF - 0.7, aMax - 0.15, bF - 0.2, 0.74); }
+      { const Q = new Parts(); jar(Q, 0, 0, 0.3, 0.7, 'timber'); put(Q, aMax - 1.2, bF - 0.4); blk(aMax - 1.55, bF - 0.75, aMax - 0.85, bF - 0.05, 0.7); }
+      light(ka + 0.8, M + 1.2, 0.9);
+    } else if (kind === 'store') {
+      // the lumber room: jars of pickles and oil along the back wall, grain sacks, winter cabbages, a ladder, the cart's wheels and a plough-share hung on the wall, a heap of firewood and coal balls
+      for (let i = 0; i < 5; i++) { const Q = new Parts(); jar(Q, 0, 0, 0.26 + (i % 2) * 0.04, 0.62, 'slate'); put(Q, aMin + 0.5 + i * 0.62, M + 0.4); }
+      blk(aMin + 0.1, M + 0.05, aMin + 3.2, M + 0.8, 0.7);
+      { const Q = new Parts(); for (let i = 0; i < 6; i++) sack(Q, (i % 3) * 0.55, Math.floor(i / 3) * 0.4, (i % 2) * 0.1, 0.3); put(Q, aMax - 1.3, M + 0.6); blk(aMax - 1.7, M + 0.2, aMax - 0.1, M + 1.1, 1.1); }
+      { const Q = new Parts(); for (let i = 0; i < 10; i++) Q.add('timber', limb([-0.5 + (i % 5) * 0.2, 0.08 + Math.floor(i / 5) * 0.12, -0.2], [-0.5 + (i % 5) * 0.2, 0.08 + Math.floor(i / 5) * 0.12, 0.2], 0.05, 0.05, 5)); put(Q, aMin + 0.55, M + 2.0, Math.PI / 2); blk(aMin + 0.2, M + 1.4, aMin + 0.9, M + 2.6, 0.4); }
+      { const Q = new Parts(); for (let i = 0; i < 12; i++) Q.add('slate', limb([(i % 4) * 0.2 - 0.3, Math.floor(i / 4) * 0.13, 0], [(i % 4) * 0.2 - 0.3, Math.floor(i / 4) * 0.13 + 0.12, 0], 0.085, 0.085, 8)); put(Q, aMax - 0.7, bF - 0.6); blk(aMax - 1.2, bF - 0.9, aMax - 0.2, bF - 0.3, 0.4); }
+      { const Q = new Parts(); for (const sx of [-1, 1]) Q.add('timber', box(sx * 0.2 - 0.025, 0, -0.03, sx * 0.2 + 0.025, 2.2, 0.03)); for (let i = 0; i < 8; i++) Q.add('timber', box(-0.2, 0.2 + i * 0.27, -0.025, 0.2, 0.24 + i * 0.27, 0.025)); put(Q, (aMin + aMax) / 2 + 0.6, M + 0.04); }
+      { const Q = new Parts(); for (const sx of [-1, 1]) Q.add('wood_dark', lathe([[0.3, -0.03], [0.34, -0.03], [0.34, 0.03], [0.3, 0.03]], 12).rotateX(Math.PI / 2).translate(sx * 0.4, 0.34, 0)); put(Q, aMin + 3.7, M + 0.05); }
+      light(0, M + 1.5, 1.4);
+    } else if (kind === 'ear-store') {
+      // an ear room used for stores: three pickle jars at the back, coal balls and firewood, a small cupboard, strings of garlic from the beam
+      for (let i = 0; i < 3; i++) { const Q = new Parts(); jar(Q, 0, 0, 0.24, 0.6, 'slate'); put(Q, aMin + 0.4 + i * 0.5, M + 0.35); }
+      blk(aMin, M, aMax, M + 0.75, 0.6);
+      { const Q = new Parts(); for (let i = 0; i < 8; i++) Q.add('slate', limb([(i % 4) * 0.18 - 0.27, Math.floor(i / 4) * 0.13, 0], [(i % 4) * 0.18 - 0.27, Math.floor(i / 4) * 0.13 + 0.12, 0], 0.075, 0.075, 8)); put(Q, aMin + 0.45, M + 1.35); blk(aMin, M + 1.05, aMin + 0.85, M + 1.65, 0.3); }
+      { const Q = new Parts(); cabinet(Q, 0.8, 1.6, 0.4); put(Q, aMax - 0.2, M + 1.6, -Math.PI / 2); blk(aMax - 0.4, M + 1.2, aMax, M + 2.0, 1.6); }
+      for (let i = 0; i < 3; i++) { const Q = new Parts(), h = ceil - 0.2; Q.add('rope_fibre', limb([0, h + 0.3, 0], [0, h - 0.5, 0], 0.01, 0.01, 3)); for (let k = 0; k < 4; k++) Q.add('paint_white', ball(0.05, 0.07, 0.05, 6, 4).translate((k % 2) * 0.06 - 0.03, h - 0.2 - k * 0.1, (k % 2) * 0.03)); put(Q, aMin + 0.4 + i * 0.45, M + 1.0); }
+    } else if (kind === 'ear-bed') {
+      // an ear room as an attendant's room: a narrow kang across the back with a quilt, a stool and a little table with a lamp, a hanging towel
+      { const Q = new Parts(); kang(Q, Wd - 0.12, 1.25, false); put(Q, 0, M + 0.63); blk(aMin, M, aMax, M + 1.25, 0.6); }
+      { const Q = new Parts(); table(Q, 0.45, 0.4, 0.7, W, true); oilLamp(Q, 0, 0.7, 0); put(Q, aMax - 0.25, M + 1.65); blk(aMax - 0.5, M + 1.4, aMax, M + 1.9, 0.72); light(aMax - 0.25, M + 1.65, 0.9); }
+      { const C = new Parts(); stool(C, 0.36, 0.3); put(C, aMin + 0.3, M + 1.8); }
+    }
+    S.emit(bag, F.origin[0], y + 0.04, F.origin[1], F.yaw);
+  };
+  // the south row: one room to each of its door bays, from the gate westward
+  SP.rooms.forEach((rm, i) => emit([rm.x0, SP.zW - M, rm.x1, SP.zBack], 'n', SP.y, 3.05, kinds[Math.min(i, kinds.length - 1)], (rm.x0 + rm.x1) / 2 - rm.doorX));
+  // the ear rooms: the west one for stores, the east one an attendant's room (or the reverse, by lot)
+  const flip = r() < 0.5;
+  P.ears.forEach((e, i) => emit([e.xa, e.za, e.xb, e.zb - 0.3], 's', e.y, e.H, (i === 0) !== flip ? 'ear-store' : 'ear-bed', 0));
 }
