@@ -47,7 +47,7 @@ export function books(P, n, seed, w = 0.2, d = 0.28) {
 }
 export function deskThings(P, y) {
   // the inkstone with its well, the ink stick on it, the brush rest with three brushes, the brush pot of bamboo, the water dropper, the paperweights on a sheet
-  P.add('slate', box(-0.1, y, -0.08, 0.1, y + 0.03, 0.08).translate(-0.35, 0, -0.05));
+  P.add('lacquer_black', box(-0.1, y, -0.08, 0.1, y + 0.03, 0.08).translate(-0.35, 0, -0.05));
   P.add('lacquer_black', box(-0.06, y + 0.03, -0.065, 0.06, y + 0.036, 0.03).translate(-0.35, 0, -0.05));
   P.add('lacquer_black', box(-0.012, y + 0.036, -0.04, 0.012, y + 0.05, 0.05).translate(-0.31, 0, -0.04));
   P.add(W, box(-0.12, y, -0.015, 0.12, y + 0.05, 0.015).translate(0.05, 0, -0.18));

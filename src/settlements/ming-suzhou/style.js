@@ -40,6 +40,9 @@ function penjing(el, { bag, col }) {
 }
 import { houseUp } from './upstairs.js';
 import { realLatticeBag, roofWork, terraceRail, moonDress } from './hallwork.js';
+import { hallTrim, tabletText, doorCarving } from './corework.js';
+import { pebbleCourt } from './pebbles.js';
+import { hallLife } from './lifework.js';
 const base = STYLES.ming;
 
 /** ming_hall, with the fine work of the landmark's halls where the plan asks: `real` (lattice as geometry), `tiles` (cover tiles and rafters). */
@@ -47,6 +50,8 @@ function hall(el, ctx) {
   const c = el.real ? { ...ctx, bag: realLatticeBag(ctx.bag, 'lacquer_chestnut', { cell: el.realCell }) } : ctx;
   base.elements.ming_hall(el, c);
   if (el.tiles) roofWork(ctx.bag, el, { roof: 'tile_dark', wood: 'lacquer_chestnut' });
+  if (el.trim) hallTrim(ctx.bag, el);
+  if (el.carve) doorCarving(ctx.bag, el);
 }
 
 /**
@@ -103,7 +108,7 @@ function drapeTri(a, b, c, H, out, depth) {
   drapeTri(A, m, r, H, out, d); drapeTri(m, B, q, H, out, d); drapeTri(r, q, C, H, out, d); drapeTri(m, q, r, H, out, d);
 }
 
-registerStyle('suzhou-site', { ...base, elements: { ...base.elements, ming_hall: hall, terrace_rail: terraceRail, moon_dress: moonDress, scholar_study: scholarStudy, hall_furniture: hallFurniture, court_piece: courtPiece, plaque, penjing, path: drapedPath } });
+registerStyle('suzhou-site', { ...base, elements: { ...base.elements, ming_hall: hall, terrace_rail: terraceRail, moon_dress: moonDress, scholar_study: scholarStudy, hall_furniture: hallFurniture, court_piece: courtPiece, plaque, penjing, path: drapedPath, pebble_paving: pebbleCourt(base.elements.pebble_paving), hall_life: hallLife, tablet_text: tabletText } });
 
 // the houses whose upper floors can be climbed: the canal quarter's style with `house_up` (upstairs.js)
 registerStyle('suzhou-town', { ...base, elements: { ...base.elements, house_up: houseUp } });
