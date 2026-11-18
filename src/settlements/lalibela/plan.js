@@ -92,6 +92,19 @@ for (const [a, b] of [[-10.0, -5.6], [-5.2, -1.0]]) E.push({ t: 'floor_mat', rec
   for (const x of [x1 - 8 - 0.06, x1 + 0.06]) E.push({ t: 'rock_cut', a: [x, tz0 + EDGE - 0.2], b: [x, tz1 - EDGE + 0.2], y0: -7.75, th: 0.12, top: -7.1 });
   // niches cut in the trench walls beside the way down, each a pointed arch with a frame, as the masons left them for lamps
   for (const x of [-249, -241, -233, -226]) for (const [z, nz] of [[tz0 + EDGE, 1], [tz1 - EDGE, -1]]) E.push({ t: 'cave', c: [x, z], n: [0, nz], y: slope(x, zc) - cutDepth(x, zc) + 1.35, floor: -99, w: 0.5, h: 0.85 });
+  // pilgrims' cells and tombs cut in the trench's walls above the cut steps (docs §19): cells with a framed mouth at the floor, wide low arched tombs
+  // (arcosolia) with the body's bench cut under them; each at its own height on the sloping floor
+  const fl = (x) => slope(x, zc) - cutDepth(x, zc);
+  for (const [x, z, nz, kind] of [[-253, tz0 + EDGE, 1, 'tomb'], [-246, tz1 - EDGE, -1, 'cell'], [-237.5, tz0 + EDGE, 1, 'cell'], [-230, tz1 - EDGE, -1, 'tomb'], [-223.5, tz0 + EDGE, 1, 'tomb']]) {
+    if (kind === 'cell') E.push({ t: 'cave', c: [x, z], n: [0, nz], y: fl(x) + 0.12, floor: fl(x) + 0.1, w: 1.0, h: 1.7 });
+    else E.push({ t: 'cave', c: [x, z], n: [0, nz], y: fl(x) + 0.75, floor: fl(x), w: 1.9, h: 1.15 });
+  }
+}
+// the baptismal basin in the court by the church's west arm: a hewn kerb round water standing a hand deep (docs §19)
+{
+  const f = -G.depth + 0.15, [bx0, bz0, bx1, bz1] = [gc[0] - 17.8, gc[1] + 5.2, gc[0] - 15.6, gc[1] + 6.8], k = 0.3;
+  for (const r of [[bx0 - k, bz0 - k, bx1 + k, bz0], [bx0 - k, bz1, bx1 + k, bz1 + k], [bx0 - k, bz0, bx0, bz1], [bx1, bz0, bx1 + k, bz1]]) E.push({ t: 'block', walk: true, rect: r, y0: f - 0.3, y1: f + 0.55, mat: 'tuff_hewn' });
+  E.push({ t: 'water_rect', rect: [bx0, bz0, bx1, bz1], y: f + 0.12 });
 }
 
 // tunnels: stretches of the trenches from the Jordan to Bete Gabriel-Rufael and to Bete Amanuel left roofed, the rock

@@ -26,10 +26,11 @@ function solid(bag, col, mat, r, y0, y1) { bag.add(mat, box(r[0], y0, r[1], r[2]
  * jutting at the corners; a transom with its own heads in a tall window (Met: Aksumite windows
  * "framed with rounded cross beams, nicknamed 'monkey heads'"; carried on at Lalibela).
  */
-function aksWindow(bag, c, y, u, n, w, h, open = false) {
+function aksWindow(bag, c, y, u, n, w, h, open = false, dep = 0) {
   const P = (a, d) => [c[0] + u[0] * a + n[0] * d, c[1] + u[1] * a + n[1] * d];
   const bar = (a0, a1, y0, y1, d0, d1) => bag.add(TH, orientedBox(P(a0, (d0 + d1) / 2), P(a1, (d0 + d1) / 2), d1 - d0, y0, y1));
-  if (!open) bag.add('opening', orientedBox(P(-w / 2, -0.1), P(w / 2, -0.1), 0.26, y, y + h));
+  if (dep) bag.add('opening', orientedBox(P(-w / 2, 0.03 - dep), P(w / 2, 0.03 - dep), 0.06, y, y + h));      // a real recess: the dark back lies dep behind the face
+  else if (!open) bag.add('opening', orientedBox(P(-w / 2, -0.1), P(w / 2, -0.1), 0.26, y, y + h));
   const fw = 0.14, ext = 0.28;
   for (const sg of [-1, 1]) bar(sg * (w / 2) - (sg < 0 ? fw : 0), sg * (w / 2) + (sg > 0 ? fw : 0), y, y + h, -0.24, 0.09);          // jambs
   for (const yy of h > 1.2 ? [y - fw, y + h, y + h * 0.55 - fw / 2] : [y - fw, y + h]) {
@@ -39,22 +40,63 @@ function aksWindow(bag, c, y, u, n, w, h, open = false) {
   }
 }
 /** A window with a pointed (ogee) head, as Bete Giyorgis' upper row: the dark opening, a raised frame following it. */
-function ogeeWindow(bag, c, y, u, n, w, h) {
-  const hr = w * 0.75, N = 8, open = [], frame = [];
+function ogeeWindow(bag, c, y, u, n, w, h, dep = 0) {
+  const hr = w * 0.75, N = 8, open = [], frame = [], span = [];
   const V = (a, yy, d) => [c[0] + u[0] * a + n[0] * d, yy, c[1] + u[1] * a + n[1] * d];
   const prof = [];
   for (let k = 0; k <= N; k++) { const t = k / N, a = -w / 2 + w * t, f = Math.abs(a) / (w / 2); prof.push([a, y + h + hr * (1 - f) * (1 - f) * (1 + 0.6 * f)]); }
+  const dd = dep ? 0.03 - dep : 0.03;
   for (let k = 0; k < N; k++) {
     const [a0, y0] = prof[k], [a1, y1] = prof[k + 1];
-    open.push(...V(a0, y, 0.03), ...V(a1, y, 0.03), ...V(a1, y1, 0.03), ...V(a0, y, 0.03), ...V(a1, y1, 0.03), ...V(a0, y0, 0.03));
+    open.push(...V(a0, y, dd), ...V(a1, y, dd), ...V(a1, y1, dd), ...V(a0, y, dd), ...V(a1, y1, dd), ...V(a0, y0, dd));
     beamTris(frame, V(a0, y0, 0.04), V(a1, y1, 0.04), 0.05, 0.13);
+    if (dep) {        // the spandrels between the rectangle cut for the recess and the ogee head, flush with the wall; the curved reveal under them
+      const yt = y + h + hr;
+      span.push(...V(a0, y0, 0), ...V(a1, y1, 0), ...V(a1, yt, 0), ...V(a0, y0, 0), ...V(a1, yt, 0), ...V(a0, yt, 0));
+      const r = [];
+      r.push(...V(a0, y0, 0), ...V(a1, y1, 0), ...V(a1, y1, -dep), ...V(a0, y0, 0), ...V(a1, y1, -dep), ...V(a0, y0, -dep));
+      bag.add(TH, fromTriangles(orientBy(r, (p) => [c[0] - p[0], y - 1 - p[1], c[1] - p[2]])));
+    }
   }
   bag.add('opening', fromTriangles(orientOut(open, n)));
+  if (dep) {
+    bag.add(TH, fromTriangles(orientOut(span, n)));
+    // carved cross tracery standing on the dark back: a cross with flared arms, in a ring (the "floral" head)
+    const tr = [], d0 = 0.03 - dep, b = 0.05, yc = y + h * 0.55, hv = y + h + hr * 0.45;
+    beamTris(tr, V(-b * 0.6, y + 0.02, d0 + 0.02), V(b * 0.6, y + 0.02, d0 + 0.02), b * 0.7, hv - y);
+    beamTris(tr, V(-w * 0.34, yc, d0 + 0.02), V(w * 0.34, yc, d0 + 0.02), b * 0.7, b * 1.6);
+    for (const sg of [-1, 1]) beamTris(tr, V(sg * w * 0.34 - b * 0.8, yc - b, d0 + 0.02), V(sg * w * 0.34 + b * 0.8, yc - b, d0 + 0.02), b * 0.7, b * 3.2);
+    beamTris(tr, V(-b * 1.8, hv - 0.02, d0 + 0.02), V(b * 1.8, hv - 0.02, d0 + 0.02), b * 0.7, b * 1.4);
+    beamTris(tr, V(-b * 1.8, y + 0.02, d0 + 0.02), V(b * 1.8, y + 0.02, d0 + 0.02), b * 0.7, b * 1.4);
+    bag.add(TH, fromTriangles(tr));
+  }
   for (const sg of [-1, 1]) { const t = []; beamTris(t, V(sg * (w / 2 + 0.07) - 0.07, y - 0.12, 0.04), V(sg * (w / 2 + 0.07) + 0.07, y - 0.12, 0.04), 0.05, h + 0.12); frame.push(...t); }
   { const t = []; beamTris(t, V(-w / 2 - 0.25, y - 0.14, 0.05), V(w / 2 + 0.25, y - 0.14, 0.05), 0.06, 0.14); frame.push(...t); }
   bag.add(TH, fromTriangles(frame));
 }
 const orientOut = (tris, n) => { for (let i = 0; i < tris.length; i += 9) { const ux = tris[i + 3] - tris[i], uy = tris[i + 4] - tris[i + 1], uz = tris[i + 5] - tris[i + 2], vx = tris[i + 6] - tris[i], vy = tris[i + 7] - tris[i + 1], vz = tris[i + 8] - tris[i + 2]; const nx = uy * vz - uz * vy, nz = ux * vy - uy * vx; if (nx * n[0] + nz * n[1] < 0) for (let k = 0; k < 3; k++) { const t = tris[i + 3 + k]; tris[i + 3 + k] = tris[i + 6 + k]; tris[i + 6 + k] = t; } } return tris; };
+/**
+ * An Aksumite door frame on a face (the doorway's centre F [x, z] at the sill, u the face's direction, n its outward normal; half-width hw,
+ * clear height h): squared jambs, a lintel beam and a second beam above it, and the ends of the cross beams, the "monkey heads", jutting out
+ * of the wall at the beams' ends and at the jambs' middle (Met: Aksumite openings "framed with rounded cross beams, nicknamed 'monkey heads'").
+ */
+function monkeyDoor(bag, F, u, n, hw, y, h) {
+  const P = (a, d) => [F[0] + u[0] * a + n[0] * d, F[1] + u[1] * a + n[1] * d];
+  const bar = (a0, a1, d0, d1, y0, y1) => bag.add(TH, orientedBox(P(a0, (d0 + d1) / 2), P(a1, (d0 + d1) / 2), d1 - d0, y0, y1));
+  const j = 0.3, e1 = hw + j, e2 = hw + j + 0.16;
+  for (const sg of [-1, 1]) bar(sg * hw, sg * e1, 0, 0.2, y, y + h);
+  bar(-e1, e1, 0, 0.22, y + h, y + h + 0.3);
+  bar(-e2, e2, 0, 0.2, y + h + 0.62, y + h + 0.9);
+  for (const sg of [-1, 1]) {
+    for (const yy of [y + h + 0.05, y + h + 0.65, y + h * 0.5]) { const a = yy === y + h * 0.5 ? e1 - 0.1 : yy > y + h + 0.5 ? e2 - 0.05 : e1 - 0.05; bar(sg * a - 0.12, sg * a + 0.12, 0, 0.32, yy, yy + 0.22); }
+  }
+}
+/** A slab r (full thickness) with an outer layer `dep` thick on the side `out` ([ox, oz] unit): holes `through` go through both, `front` only through the outer layer (blind recesses). */
+function recessSlab(bag, col, mat, r, out, dep, y0, y1, through, front) {
+  const [x0, z0, x1, z1] = r, bk = [...r], fr = [...r];
+  if (out[0] > 0) { bk[2] = x1 - dep; fr[0] = x1 - dep; } else if (out[0] < 0) { bk[0] = x0 + dep; fr[2] = x0 + dep; } else if (out[1] > 0) { bk[3] = z1 - dep; fr[1] = z1 - dep; } else { bk[1] = z0 + dep; fr[3] = z0 + dep; }
+  piercedSlab(bag, col, mat, bk, y0, y1, through); piercedSlab(bag, col, mat, fr, y0, y1, [...through, ...front]);
+}
 /** Windows along the four faces of a box [x0, z0, x1, z1] at height y (n per side, w × h, every `step` m), Aksumite or ogee. */
 function openings(bag, r, y, h, w, step, skipMid = false, kind = 'aks') {
   const [x0, z0, x1, z1] = r;
@@ -134,10 +176,35 @@ function giyorgis(el, { bag, col }) {
   const [cx, cz] = el.c, y0 = el.y0, a = el.a, w = el.w, top = y0 + el.h, yf = y0 + 1.8;
   const T = 1.6, wi = w - T, wc = w - 0.8, ai = a - T, yT = yf + 6.4, ARMS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
   const quad = (r) => [[1, 1], [1, -1], [-1, 1], [-1, -1]].map(([sx, sz]) => { const x0 = cx + sx * r[0], x1 = cx + sx * r[2], z0 = cz + sz * r[1], z1 = cz + sz * r[3]; return [Math.min(x0, x1), Math.min(z0, z1), Math.max(x0, x1), Math.max(z0, z1)]; });
-  cross(bag, col, TH, cx, cz, a + 0.8, w + 0.8, y0, y0 + 0.9);
-  cross(bag, col, TH, cx, cz, a + 0.4, w + 0.4, y0 + 0.9, yf);
+  // the three-step plinth: each tier 0.4 m wider than the next, 0.6 m high; at the three doors the outer tiers leave the flight's width free
+  for (const [k, e] of [[0, 1.2], [1, 0.8], [2, 0.4]]) {
+    const A = a + e, W = w + e, ya = y0 + k * 0.6, yb = k === 2 ? yf : y0 + (k + 1) * 0.6, g = 1.35, lim = a + 0.4;
+    solid(bag, col, TH, [cx - W, cz - W, cx + W, cz + W], ya, yb);
+    for (const [dx, dz] of ARMS) {
+      const R = (s0, s1, u0, u1) => dx ? [cx + Math.min(dx * s0, dx * s1), cz + u0, cx + Math.max(dx * s0, dx * s1), cz + u1] : [cx + u0, cz + Math.min(dz * s0, dz * s1), cx + u1, cz + Math.max(dz * s0, dz * s1)];
+      if (dx === 1) { solid(bag, col, TH, R(W, A, -W, W), ya, yb); continue; }
+      solid(bag, col, TH, R(W, Math.min(A, lim), -W, W), ya, yb);
+      if (A > lim + 1e-6) for (const [u0, u1] of [[-W, -g], [g, W]]) solid(bag, col, TH, R(lim, A, u0, u1), ya, yb);
+    }
+  }
   // the walls round the crossing and the arms, to the roof (the four corners of the crossing stand as pilasters)
-  for (const r of [[wc, wi, a, w], [wi, wc, wc, w], [wi, w, w, a]]) for (const q of quad(r)) solid(bag, col, TH, q, yf, top);
+  for (const q of quad([wi, wc, wc, w])) solid(bag, col, TH, q, yf, top);
+  // the arms' long walls, each a back of rock under a 0.45 m outer layer in which the two rows of windows are cut as real recesses: the lower row
+  // Aksumite, framed by squared beams with the monkey heads at the corners, the upper ogee-headed with a carved cross on the dark back
+  const DEP = 0.45, ySl = yf + 2.7, hSl = 1.7, yOg = yf + 5.62, hOg = 0.7, hrOg = 0.7 * 0.75;
+  for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) for (const ew of [true, false]) {
+    const r = ew ? [Math.min(cx + sx * wc, cx + sx * a), Math.min(cz + sz * wi, cz + sz * w), Math.max(cx + sx * wc, cx + sx * a), Math.max(cz + sz * wi, cz + sz * w)]
+      : [Math.min(cx + sx * wi, cx + sx * w), Math.min(cz + sz * w, cz + sz * a), Math.max(cx + sx * wi, cx + sx * w), Math.max(cz + sz * w, cz + sz * a)];
+    const out = ew ? [0, sz] : [sx, 0], hs = [];
+    for (const d of [1.85, 5.55]) {
+      const uu = ew ? cx + sx * (w + d) : cz + sz * (w + d);
+      hs.push([uu - 0.45, uu + 0.45, ySl, ySl + hSl], [uu - 0.35, uu + 0.35, yOg, yOg + hOg + hrOg + 0.001]);
+      const F = ew ? [uu, cz + sz * w] : [cx + sx * w, uu], uv = ew ? [1, 0] : [0, 1];
+      aksWindow(bag, F, ySl, uv, out, 0.9, hSl, true, DEP);
+      ogeeWindow(bag, F, yOg, uv, out, 0.7, hOg, DEP);
+    }
+    recessSlab(bag, col, TH, r, out, DEP, yf, top, [], hs);
+  }
   // the mouldings that run round the whole cross (Senses Atlas / photographs: string courses between the window rows and a stepped cornice under the roof)
   { const P = [[a, -w], [a, w], [w, w], [w, a], [-w, a], [-w, w], [-a, w], [-a, -w], [-w, -w], [-w, -a], [w, -a], [w, -w]], conc = (p) => Math.abs(Math.abs(p[0]) - w) < 1e-6 && Math.abs(Math.abs(p[1]) - w) < 1e-6;
     const run = (ya, yb, d) => {
@@ -157,17 +224,16 @@ function giyorgis(el, { bag, col }) {
     const n = [dx, dz], u = dx ? [0, 1] : [1, 0], uc = dx ? cz : cx, F = [cx + dx * a, cz + dz * a], side = dx ? (dx > 0 ? 'e' : 'w') : (dz > 0 ? 's' : 'n');
     const endR = dx ? [Math.min(cx + dx * ai, cx + dx * a), cz - wi, Math.max(cx + dx * ai, cx + dx * a), cz + wi] : [cx - wi, Math.min(cz + dz * ai, cz + dz * a), cx + wi, Math.max(cz + dz * ai, cz + dz * a)];
     const holes = [], door = !(dx === 1);
-    for (const s of [-0.42, 0.42]) holes.push([uc + s * w - 0.45, uc + s * w + 0.45, yf + 2.7, yf + 4.4]);
+    const blind = [];
+    for (const s of [-0.42, 0.42]) { holes.push([uc + s * w - 0.45, uc + s * w + 0.45, yf + 2.7, yf + 4.4]); blind.push([uc + s * w - 0.35, uc + s * w + 0.35, yOg, yOg + hOg + hrOg + 0.001]); }
     if (door) holes.push([uc - 0.9, uc + 0.9, yf - 0.01, yf + 3.2]);
-    piercedSlab(bag, col, TH, endR, yf, top, holes);
+    recessSlab(bag, col, TH, endR, n, DEP, yf, top, holes, blind);
     for (const s of [-0.42, 0.42]) {
       const c = [F[0] + u[0] * s * w, F[1] + u[1] * s * w];
-      aksWindow(bag, c, yf + 2.7, u, n, 0.9, 1.7, true); ogeeWindow(bag, c, yf + 6.2, u, n, 0.8, 1.1);
+      aksWindow(bag, c, yf + 2.7, u, n, 0.9, 1.7, true); ogeeWindow(bag, c, yOg, u, n, 0.7, hOg, DEP);
     }
     if (door) {
-      const Pf = (s, d) => [F[0] + u[0] * s + n[0] * d, F[1] + u[1] * s + n[1] * d];
-      const bar = (s0, s1, d1, y1, y2) => bag.add(TH, orientedBox(Pf(s0, d1 / 2), Pf(s1, d1 / 2), d1, y1, y2));
-      bar(-1.15, -0.9, 0.2, yf, yf + 3.2); bar(0.9, 1.15, 0.2, yf, yf + 3.2); bar(-1.3, 1.3, 0.24, yf + 3.2, yf + 3.5);
+      monkeyDoor(bag, F, u, n, 0.9, yf, 3.2);
       openLeaves(bag, side, [cx - a, cz - a, cx + a, cz + a], T, uc - 0.9, uc + 0.9, yf, 3.18);
       doorSteps(bag, col, side, [cx - (a + 0.4), cz - (a + 0.4), cx + (a + 0.4), cz + (a + 0.4)], uc, 2.4, y0, yf);
     }
@@ -201,11 +267,41 @@ function giyorgis(el, { bag, col }) {
   { const A = a, Wd = w, yp = top;
     for (const r of [[cx - Wd, cz - Wd, cx + Wd, cz + Wd], [cx - A, cz - Wd, cx - Wd, cz + Wd], [cx + Wd, cz - Wd, cx + A, cz + Wd], [cx - Wd, cz - A, cx + Wd, cz - Wd], [cx - Wd, cz + Wd, cx + Wd, cz + A]]) bag.add('scoria_red', box(r[0], yp, r[1], r[2], yp + 0.06, r[3])); }
   let yr = top + 0.06;
-  for (const [sA, sW, hgt, mat] of [[0.86, 0.8, 0.38, TH], [0.6, 0.55, 0.38, 'plaster_damp'], [0.34, 0.3, 0.38, 'scoria_red']]) {
+  // the outline of a Greek cross of arm half-length A and half-width W, inset by i (concave corners move out): 12 points
+  const outline = (A, Wd, i) => [[A, -Wd], [A, Wd], [Wd, Wd], [Wd, A], [-Wd, A], [-Wd, Wd], [-A, Wd], [-A, -Wd], [-Wd, -Wd], [-Wd, -A], [Wd, -A], [Wd, -Wd]].map(([x, z]) => {
+    const conc = Math.abs(Math.abs(x) - Wd) < 1e-6 && Math.abs(Math.abs(z) - Wd) < 1e-6, sx = Math.sign(x), sz = Math.sign(z);
+    return conc ? [sx * (Wd + i), sz * (Wd + i)] : Math.abs(x) > Math.abs(z) ? [sx * (A - i), sz * (Wd - i)] : [sx * (Wd - i), sz * (A - i)]; });
+  const bead = (mat, pts, y, hh, bw) => {
+    for (let k = 0; k < 12; k++) {
+      const p = pts[k], q = pts[(k + 1) % 12], x0 = Math.min(p[0], q[0]) - bw / 2, x1 = Math.max(p[0], q[0]) + bw / 2, z0 = Math.min(p[1], q[1]) - bw / 2, z1 = Math.max(p[1], q[1]) + bw / 2;
+      bag.add(mat, box(cx + x0, y, cz + z0, cx + x1, y + hh, cz + z1));
+    }
+  };
+  // three crosses nested one within another, each standing 0.38 m above the last and carrying a raised bead along its own outline, so that
+  // the relief reads from the slope as rings of light and shade (Senses Atlas: the Greek cross "three times on the roof"); the innermost
+  // carries a lobed cross on its boss
+  for (const [sA, sW, hgt, mat, bmat] of [[0.86, 0.8, 0.38, TH, 'plaster_damp'], [0.6, 0.55, 0.38, 'plaster_damp', 'scoria_red'], [0.34, 0.3, 0.3, 'scoria_red', TH]]) {
     const A = a * sA, Wd = w * sW;
     for (const r of [[cx - Wd, cz - Wd, cx + Wd, cz + Wd], [cx - A, cz - Wd, cx - Wd, cz + Wd], [cx + Wd, cz - Wd, cx + A, cz + Wd], [cx - Wd, cz - A, cx + Wd, cz - Wd], [cx - Wd, cz + Wd, cx + Wd, cz + A]]) bag.add(mat, box(r[0], yr, r[1], r[2], yr + hgt, r[3]));
     yr += hgt;
+    bead(bmat, outline(A, Wd, 0.28), yr, 0.07, 0.16);
   }
+  { // the lobed cross on the boss: bars with flared ends
+    const y = yr, hb = 0.07, A = a * 0.34 - 0.9, bw = 0.12;
+    bag.add(TH, box(cx - bw, y, cz - A, cx + bw, y + hb, cz + A)); bag.add(TH, box(cx - A, y, cz - bw, cx - bw, y + hb, cz + bw)); bag.add(TH, box(cx + bw, y, cz - bw, cx + A, y + hb, cz + bw));
+    for (const [dx, dz] of ARMS) { const ex = cx + dx * A, ez = cz + dz * A, rx = dz ? 0.3 : 0.1, rz = dz ? 0.1 : 0.3; bag.add(TH, box(ex - rx, y, ez - rz, ex + rx, y + hb, ez + rz)); }
+    bag.add(TH, box(cx - 0.3, y, cz - 0.3, cx + 0.3, y + hb + 0.05, cz + 0.3)); }
+  // the drain spouts: hewn chutes standing out of the cornice, two on each arm's end and one on each long side, each with a flared lip
+  { const spout = (F, u, n) => {
+      const P = (s, d) => [F[0] + u[0] * s + n[0] * d, F[1] + u[1] * s + n[1] * d];
+      bag.add(TH, orientedBox(P(-0.17, 0.5), P(0.17, 0.5), 1.0, top - 0.42, top - 0.12));
+      bag.add(TH, orientedBox(P(-0.25, 0.9), P(0.25, 0.9), 0.2, top - 0.5, top - 0.04));
+    };
+    for (const [dx, dz] of ARMS) {
+      const n = [dx, dz], u = dx ? [0, 1] : [1, 0], F = [cx + dx * a, cz + dz * a];
+      for (const sg of [-1, 1]) spout([F[0] + u[0] * sg * 3.2, F[1] + u[1] * sg * 3.2], u, n);
+      for (const sg of [-1, 1]) { const m = w + 3.7; spout(dx ? [cx + dx * m, cz + sg * w] : [cx + sg * w, cz + dz * m], dx ? [1, 0] : [0, 1], dx ? [0, sg] : [sg, 0]); }
+    } }
 }
 /**
  * A round-headed arch in a wall: the solid between the arch (springing at ys, a semicircle over the
@@ -294,9 +390,7 @@ function basilica(el, { bag, col }) {
   for (const [side, u, w, dh] of doors) {
     openLeaves(bag, side, body, T, u - w / 2, u + w / 2, yf, dh - 0.02);
     // the lintel's frame standing proud round the doorway outside
-    const a = side === 'w' ? [bx0, u - w / 2 - 0.2] : [u - w / 2 - 0.2, side === 'n' ? bz0 : bz1], b = side === 'w' ? [bx0, u + w / 2 + 0.2] : [u + w / 2 + 0.2, side === 'n' ? bz0 : bz1];
-    bag.add(TH, orientedBox(a, b, 0.24, yf + dh, yf + dh + 0.22));
-    for (const sg of [-1, 1]) { const c = u + sg * (w / 2 + 0.1), p = side === 'w' ? [[bx0, c - 0.1], [bx0, c + 0.1]] : [[c - 0.1, a[1]], [c + 0.1, a[1]]]; bag.add(TH, orientedBox(p[0], p[1], 0.24, yf, yf + dh)); }
+    monkeyDoor(bag, side === 'w' ? [bx0, u] : [u, side === 'n' ? bz0 : bz1], side === 'w' ? [0, 1] : [1, 0], side === 'w' ? [-1, 0] : [0, side === 'n' ? -1 : 1], w / 2, yf, dh);
   }
   // the interior: four rows of seven pillars, five naves (the middle the widest), eight bays
   const ix0 = bx0 + T, ix1 = bx1 - T, iz0 = bz0 + T, iz1 = bz1 - T, P = 1.0, ws = [2.1, 2.5, 3.1, 2.5, 2.1], k = (iz1 - iz0 - 4 * P) / ws.reduce((a, b) => a + b, 0);
