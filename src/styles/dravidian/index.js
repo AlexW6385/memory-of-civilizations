@@ -14,12 +14,16 @@ import { merge } from '../../objects/kit.js';
 import { rite } from '../indian/rites.js';
 import { tamilHouse } from './houses.js';
 import { courtHouse } from './courthouse.js';
+import { figureParts, heroGuardian, hash3 } from './sculpture.js';
+import { beastParts } from './beasts.js';
 
 const G = 'granite_tamil';
 const PAINT = ['stucco_sky', 'stucco_rose', 'stucco_saffron', 'stucco_leaf', 'stucco_cream'];
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 /** A gilded pot finial (kalasha): the foot ring, the pot, the neck, the lid and the flame-shaped tip. */
-const kalasha = (bag, x, y, z, s = 1, mat = 'gilt_bronze') => bag.add(mat, lathe([[0.3 * s, 0], [0.36 * s, 0.06 * s], [0.28 * s, 0.13 * s], [0.42 * s, 0.36 * s], [0.4 * s, 0.6 * s], [0.2 * s, 0.76 * s], [0.13 * s, 0.82 * s], [0.24 * s, 0.9 * s], [0.1 * s, 1.04 * s], [0.07 * s, 1.35 * s], [0.001, 1.6 * s]], s > 0.5 ? 12 : 6, null, x, y, z));
+const kalasha = (bag, x, y, z, s = 1, mat = 'gilt_bronze', seg = 12) => bag.add(mat, s < 0.5
+  ? lathe([[0.3 * s, 0], [0.42 * s, 0.36 * s], [0.4 * s, 0.6 * s], [0.13 * s, 0.82 * s], [0.001, 1.35 * s]], 5, null, x, y, z)        // a small pot on a parapet, seen from far: 40 triangles
+  : lathe([[0.3 * s, 0], [0.36 * s, 0.06 * s], [0.28 * s, 0.13 * s], [0.42 * s, 0.36 * s], [0.4 * s, 0.6 * s], [0.2 * s, 0.76 * s], [0.13 * s, 0.82 * s], [0.24 * s, 0.9 * s], [0.1 * s, 1.04 * s], [0.07 * s, 1.35 * s], [0.001, 1.6 * s]], seg, null, x, y, z));
 const j3 = (u) => Math.abs(Math.round(u * 7)) % 3;
 
 /** gopuram: { c, dir ('ns' passage along z, 'ew' along x), w (along the wall), d (through), h, tiers, y }. */
@@ -45,26 +49,41 @@ function gopuram(el, { bag, col }) {
     for (let j = 0; j <= m; j++) {
       const u = -W / 2 + j * W / m;
       if (Math.abs(u) < pw / 2 + 0.4) continue;
+      const guarded = el.dvara && s === (el.out ?? 1);
       const q = R(u - 0.22, v - (s < 0 ? 0.18 : 0), u + 0.22, v + (s > 0 ? 0.18 : 0));
       bag.add(G, box(q[0], y + 1.2, q[1], q[2], y + base - 0.6, q[3]));
-      if (j < m && Math.abs(u + W / m / 2) > pw / 2 + 1.2) {
+      if (j < m && Math.abs(u + W / m / 2) > pw / 2 + (guarded ? 2.6 : 1.2)) {
         const c = u + W / m / 2, nq = R(c - 0.5, v - (s < 0 ? 0.04 : -0.02), c + 0.5, v + (s > 0 ? 0.04 : -0.02));
         bag.add('opening', box(nq[0], y + 2.4, nq[1], nq[2], y + Math.min(base * 0.6, 4.6), nq[3])); bag.add(G, box(nq[0] - 0.15, y + Math.min(base * 0.6, 4.6), Math.min(nq[1], nq[3]) - 0.1, nq[2] + 0.15, y + Math.min(base * 0.6, 4.6) + 0.5, Math.max(nq[1], nq[3]) + 0.1));
         // the guardian in the niche, carved in the granite: a god with four arms, a guardian with his club by turns
         { const pc = alongX ? [cx + v + s * 0.13, cz + c] : [cx + c, cz + v + s * 0.13], top = Math.min(base * 0.6, 4.6);
           bag.add(G, box(Math.min(nq[0], nq[2]) - 0.2, y + 2.3, Math.min(nq[1], nq[3]) - 0.2, Math.max(nq[0], nq[2]) + 0.2, y + 2.42, Math.max(nq[1], nq[3]) + 0.2));
-          figure(bag, { kind: j % 2 ? 5 : 0, gran: true, mat: 'stucco_cream', x: pc[0], y: y + 2.42, z: pc[1], nx: alongX ? s : 0, nz: alongX ? 0 : s, lean: 0, Hf: (top - 2.42) * 0.92, }); }
+          figure(bag, { lod: el.fig === 'near' ? 1 : 2, kind: j % 2 ? 5 : 0, gran: true, mat: 'stucco_cream', x: pc[0], y: y + 2.42, z: pc[1], nx: alongX ? s : 0, nz: alongX ? 0 : s, lean: 0, Hf: (top - 2.42) * 0.92, }); }
         { const yb = base * 0.66 + 0.75, yt = base - 1.1;       // the upper row of niches, between the bands
           if (yt - yb > 1.2) {
             const pc = alongX ? [cx + v + s * 0.13, cz + c] : [cx + c, cz + v + s * 0.13];
             bag.add('opening', box(nq[0], y + yb, nq[1], nq[2], y + yt, nq[3]));
             bag.add(G, box(Math.min(nq[0], nq[2]) - 0.2, y + yb - 0.12, Math.min(nq[1], nq[3]) - 0.2, Math.max(nq[0], nq[2]) + 0.2, y + yb, Math.max(nq[1], nq[3]) + 0.2));
             bag.add(G, box(nq[0] - 0.15, y + yt, Math.min(nq[1], nq[3]) - 0.1, nq[2] + 0.15, y + yt + 0.3, Math.max(nq[1], nq[3]) + 0.1));
-            figure(bag, { kind: j % 3 === 0 ? 3 : j % 2 ? 1 : 6, gran: true, mat: 'stucco_cream', x: pc[0], y: y + yb, z: pc[1], nx: alongX ? s : 0, nz: alongX ? 0 : s, lean: 0, Hf: (yt - yb) * 0.9, });
+            figure(bag, { lod: el.fig === 'near' ? 1 : 2, kind: j % 3 === 0 ? 3 : j % 2 ? 1 : 6, gran: true, mat: 'stucco_cream', x: pc[0], y: y + yb, z: pc[1], nx: alongX ? s : 0, nz: alongX ? 0 : s, lean: 0, Hf: (yt - yb) * 0.9, });
           } }
       }
     }
     for (const hh of [1.2, base * 0.66, base - 0.6]) { const q = R(-W / 2 - 0.1, v - (s < 0 ? 0.3 : 0), W / 2 + 0.1, v + (s > 0 ? 0.3 : 0)); bag.add(G, box(q[0], y + hh, q[1], q[2], y + hh + 0.35, q[3])); }
+  }
+  // the door guardians (dvarapalas) before the passage's piers on the outer face, each on a plinth, the club on the outer side
+  if (el.dvara) {
+    const os = el.out ?? 1, f = alongX ? [os, 0] : [0, os], rt = [f[1], -f[0]], yaw = Math.atan2(f[0], f[1]), H = 3.5, sc = H / 1.16;
+    for (const side of [-1, 1]) {
+      const vv = D / 2 + 0.95, uu = side * (pw / 2 + 1.55), px = cx + f[0] * vv + rt[0] * uu, pz = cz + f[1] * vv + rt[1] * uu;
+      const bx = (hw, hd, y0, y1) => { const xs = [px - Math.abs(rt[0]) * hw - Math.abs(f[0]) * hd, px + Math.abs(rt[0]) * hw + Math.abs(f[0]) * hd], zs = [pz - Math.abs(rt[1]) * hw - Math.abs(f[1]) * hd, pz + Math.abs(rt[1]) * hw + Math.abs(f[1]) * hd]; bag.add(G, box(xs[0], y + y0, zs[0], xs[1], y + y1, zs[1])); return [xs[0], zs[0], xs[1], zs[1]]; };
+      bx(1.0, 0.8, 0, 0.35); bx(0.88, 0.7, 0.35, 0.62); const cr = bx(0.95, 0.75, 0.62, 0.78);
+      col.rect(cr, y, y + 0.8);
+      const [gb, gg] = heroGuardian(side > 0 ? false : true);
+      _M.compose(_P.set(px, y + 0.78, pz), _Q.setFromAxisAngle(_YA, yaw), _Sc.set(sc, sc, sc));
+      bag.add('stucco_sky', gb.clone().applyMatrix4(_M)); bag.add('gilt_bronze', gg.clone().applyMatrix4(_M));
+      col.rect([px - 0.7, pz - 0.7, px + 0.7, pz + 0.7], y + 0.78, y + 4.3);
+    }
   }
   // the storeys, each a little smaller, with a cornice and a row of little shrines along the faces
   const topW = W * 0.42, topD = D * 0.45, tierH = (h - base - 6) / n;
@@ -113,7 +132,7 @@ function gopuram(el, { bag, col }) {
           const hsh = [0, 1, 2, 3, 5, 6, 0][(i * 5 + k * 3 + (sg > 0 ? 1 : 0) + (lf ? 0 : 2)) % 7];
           const body = PAINT[(i * 2 + k * 3 + (sg > 0 ? 2 : 0) + 1) % PAINT.length], bm = body === back ? PAINT[(PAINT.indexOf(body) + 1) % PAINT.length] : body;
           const nrm = alongX ? [ni[1], ni[0]] : ni;
-          figure(bag, { kind: hsh, mat: bm, x: pos[0], y: y0 + 0.3, z: pos[1], nx: nrm[0], nz: nrm[1], lean: lf ? lean : leanS, Hf });
+          figure(bag, { lod: el.fig === 'near' && i < 2 ? 0 : 2, kind: hsh, mat: bm, x: pos[0], y: y0 + 0.3, z: pos[1], nx: nrm[0], nz: nrm[1], lean: lf ? lean : leanS, Hf });
         }
       }
     }
@@ -199,58 +218,50 @@ function gopuram(el, { bag, col }) {
   // the ridge and its row of gilded pots (an odd number, about 1.35 m apart)
   { const q = R(-L, -0.25, L, 0.25); bag.add('stucco_cream', box(q[0], yv + vh - 0.12, q[1], q[2], yv + vh + 0.2, q[3])); }
   const nk = Math.max(3, 2 * Math.floor((2 * L - 1.6) / 2.7) + 1);
-  for (let j = 0; j < nk; j++) { const u = -L + 0.8 + j * (2 * L - 1.6) / (nk - 1), q = alongX ? [cx, cz + u] : [cx + u, cz]; kalasha(bag, q[0], yv + vh + 0.2, q[1], 1.15); }
+  for (let j = 0; j < nk; j++) { const u = -L + 0.8 + j * (2 * L - 1.6) / (nk - 1), q = alongX ? [cx, cz + u] : [cx + u, cz]; kalasha(bag, q[0], yv + vh + 0.2, q[1], 1.15, 'gilt_bronze', el.fig === 'near' ? 12 : 7); }
 }
 
-/** The sculptures of a gopuram's niches (docs/settlements/madurai.md §4), each built once at unit height (1.16, facing +z, flattened to
- *  a relief) and put in place as an instance (GeoBag.addInstance): 0 a god with four arms, 1 a goddess with a lotus, 2 a couple, 3 a
- *  seated deity, 5 a guardian with his club, 6 a goddess with a raised hand; each on a halo, crown and belt gilded. The body is
- *  cream, tinted to the paint it stands for (stucco_*), so one prototype serves every colour. */
-const SCULPT = new Map();
-const _t = (hex) => new Color(hex);
-const TINT = { stucco_sky: _t('#5a8fb8'), stucco_rose: _t('#c46a64'), stucco_saffron: _t('#d9a23e'), stucco_leaf: _t('#5f9a5a'), stucco_cream: _t('#e2d6b8') };
-function sculpt(kind) {
-  if (SCULPT.has(kind)) return SCULPT.get(kind);
-  const out = [], sq = (g, dx = 0) => g.applyMatrix4(new Matrix4().makeScale(1, 1, 0.55)).translate(dx, 0, 0);
-  const L = (pr, seg = 6) => lathe(pr, seg), A = (x0, y0, x1, y1, z1 = 0.03, r = 0.04) => rod([x0, y0, 0], [x1, y1, z1], r, 4);
-  const head = (top) => [[0.1, top - 0.1], [0.095, top - 0.03], [0.06, top + 0.03], [0.001, top + 0.04]];
-  const body = (m, g) => out.push(['body', m, g]), gilt = (g) => out.push(['gilt', 'gilt_bronze', g]), halo = (w, hh) => out.push(['halo', 'stucco_cream', nasiGeo(w, w * 1.15, hh, 0.05, 6).translate(0, 0, -0.1)]);
-  const standing = (dx, k, arms, club) => {
-    const wd = club ? 1.25 : 1, S = (pr) => pr.map(([r, yy]) => [r * k, yy * k]);
-    body('b', sq(L(S([[0.17 * wd, 0], [0.18 * wd, 0.04], [0.15 * wd, 0.3], [0.11, 0.47], [0.12, 0.52], [0.15 * wd, 0.6], [0.17 * wd, 0.68], [0.1, 0.72], [0.06, 0.75], [0.08, 0.79], ...head(0.9)])), dx));
-    gilt(sq(L(S([[0.115, 0.46], [0.125, 0.46], [0.125, 0.5], [0.115, 0.5]])), dx));
-    gilt(sq(L(S([[0.085, 0.9], [0.08, 0.99], [0.05, 1.07], [0.001, 1.15]])), dx));
-    for (const sd of [-1, 1]) {
-      body('b', sq(A(0.15 * sd * k, 0.67 * k, 0.27 * sd * k, 0.46 * k, 0.04), dx));
-      if (arms === 4) { body('b', sq(A(0.14 * sd * k, 0.7 * k, 0.27 * sd * k, 0.86 * k, 0.02), dx)); gilt(sq(L([[0.001, 0], [0.045 * k, 0.04 * k], [0.001, 0.12 * k]]).translate(0.27 * sd * k, 0.86 * k, 0.02), dx)); }
-    }
-    if (arms === 2) { body('b', sq(A(0.14 * k, 0.7 * k, 0.25 * k, 0.84 * k, 0.02), dx)); gilt(sq(L([[0.001, 0], [0.05 * k, 0.03 * k], [0.04 * k, 0.09 * k], [0.001, 0.12 * k]]).translate(0.25 * k, 0.83 * k, 0.02), dx)); }
-    if (club) { gilt(sq(A(0.3 * k, 0.15 * k, 0.3 * k, 0.98 * k, 0.05, 0.05), dx)); gilt(sq(L([[0.001, 0], [0.08 * k, 0.04 * k], [0.1 * k, 0.12 * k], [0.001, 0.2 * k]], 5).translate(0.3 * k, 0.98 * k, 0.05), dx)); }
-  };
-  if (kind === 2) { halo(0.25, 1.08); standing(-0.15, 0.5, 2, false); standing(0.15, 0.5, 0, false); }
-  else if (kind === 3) {
-    halo(0.2, 0.98); const k = 1.15;
-    body('b', sq(L([[0.3, 0], [0.31, 0.1], [0.22, 0.22], [0.12, 0.33], [0.15, 0.42], [0.17, 0.5], [0.1, 0.55], [0.06, 0.58], [0.08, 0.62], ...head(0.72)].map(([r, yy]) => [r * k, yy * k]))));
-    gilt(sq(L([[0.1, 0.7 * k], [0.085, 0.8 * k], [0.05, 0.88 * k], [0.001, 0.96 * k]])));
-    for (const sd of [-1, 1]) { body('b', sq(A(0.17 * sd * k, 0.5 * k, 0.27 * sd * k, 0.28 * k, 0.06))); body('b', sq(A(0.17 * sd * k, 0.55 * k, 0.3 * sd * k, 0.7 * k, 0.03))); }
-  } else { halo(0.17, 1.1); standing(0, 1, kind === 0 ? 4 : kind === 5 ? 0 : 2, kind === 5); }
-  const by = (r) => out.filter((o) => o[0] === r).map((o) => o[2]), res = [['body', 'stucco_cream', merge(by('body'))], ['gilt', 'gilt_bronze', merge(by('gilt'))], ['halo', 'stucco_cream', merge(by('halo'))], ['gran', G, merge([...by('body'), ...by('gilt')].map((g) => g.clone()))]];
-  SCULPT.set(kind, res);
-  return res;
-}
+/** The sculptures of a gopuram's niches (docs/settlements/madurai.md §16–17): modelled figures (src/styles/dravidian/sculpture.js) put in
+ *  place as instances (GeoBag.addInstance), one prototype per kind and level of detail: 0 the full carving (the arrival gopuram's lowest
+ *  two tiers), 1 the reduced one (its base's niches), 2 the far form (the upper tiers, the other gopurams). The body is cream, tinted
+ *  to the paint it stands for (stucco_*), so one prototype serves every colour; the crown, jewels and emblems are gilt. */
+const TINT = { stucco_sky: new Color('#5a8fb8'), stucco_rose: new Color('#c46a64'), stucco_saffron: new Color('#d9a23e'), stucco_leaf: new Color('#5f9a5a'), stucco_cream: new Color('#e2d6b8') };
+const GRAN = new Map();
 const _M = new Matrix4(), _Q = new Quaternion(), _P = new Vector3(), _Sc = new Vector3(), _X = new Quaternion(), _XA = new Vector3(1, 0, 0), _YA = new Vector3(0, 1, 0);
-/** A sculpture p = { kind, mat (paint), x, y, z (foot), nx, nz (outward), lean, Hf (height), gran (carved in the granite) } placed at its niche. */
+/** A sculpture p = { kind, lod, mat (paint), x, y, z (foot), nx, nz (outward), lean, Hf (height), gran (carved in the granite) } placed at its niche. */
 function figure(bag, p) {
-  const s = p.Hf / 1.16;
+  const s = p.Hf / 1.16, lod = p.lod ?? 2, kind = lod === 2 ? (p.kind === 2 || p.kind === 3 ? 3 : 0) : p.kind;
   _Q.setFromAxisAngle(_YA, Math.atan2(p.nx, p.nz)).multiply(_X.setFromAxisAngle(_XA, -p.lean));
   _M.compose(_P.set(p.x, p.y, p.z), _Q, _Sc.set(s, s, s));
-  for (const [role, mat, g] of sculpt(p.kind)) {
-    if (p.gran ? role !== 'gran' : role === 'gran') continue;
-    const m = p.gran ? G : mat, real = p.gran ? G : role === 'body' ? p.mat : mat;
-    const opt = role === 'body' && !p.gran ? { color: [TINT[p.mat].r / TINT.stucco_cream.r, TINT[p.mat].g / TINT.stucco_cream.g, TINT[p.mat].b / TINT.stucco_cream.b], real } : { real };
+  const parts = figureParts(kind, lod);
+  if (p.gran) {
+    const k = `${kind}/${lod}`; let g = GRAN.get(k);
+    if (!g) GRAN.set(k, (g = merge(parts.map(([, q]) => q.clone()))));
+    if (bag.addInstance) bag.addInstance(G, g.clone(), _M.clone(), { real: G, reach: 140 }); else bag.add(G, g.clone().applyMatrix4(_M));
+    return;
+  }
+  for (const [role, g] of parts) {
+    const m = role === 'gilt' ? 'gilt_bronze' : 'stucco_cream', real = role === 'gilt' ? m : p.mat;
+    const opt = role === 'body' ? { color: [TINT[p.mat].r / TINT.stucco_cream.r, TINT[p.mat].g / TINT.stucco_cream.g, TINT[p.mat].b / TINT.stucco_cream.b], real } : { real };
     if (bag.addInstance) bag.addInstance(m, g.clone(), _M.clone(), { ...opt, reach: 140 }); else bag.add(real, g.clone().applyMatrix4(_M));
   }
 }
+/** A modelled beast (a yali or a Nandi) put in the world: scale [sx, sy, sw], turned so that its front looks toward (sin yaw, cos yaw); each differs by a hair from its place. */
+function putBeast(bag, kind, lod, x, y, z, yaw, sc, bodyMat = G, giltMat = 'gilt_bronze') {
+  const h = hash3(x, y, z, 7), j = 1 + (h - 0.5) * 0.04;
+  _M.compose(_P.set(x, y, z), _Q.setFromAxisAngle(_YA, yaw + (h - 0.5) * 0.03), _Sc.set(sc[0] * j, sc[1] * j, sc[2] * (2 - j)));
+  const [gb, gg] = beastParts(kind, lod);
+  bag.add(bodyMat, gb.clone().applyMatrix4(_M)); bag.add(giltMat, gg.clone().applyMatrix4(_M));
+}
+/** A carved deity in granite on a pillar's face (a figure kind at a level of detail, the face's outward direction (nx, nz), its foot, height Hf). */
+function carveDeity(bag, kind, lod, x, y, z, nx, nz, Hf) {
+  const k = `${kind}/${lod}`; let g = GRAN.get(k);
+  if (!g) GRAN.set(k, (g = merge(figureParts(kind, lod).map(([, q]) => q.clone()))));
+  const h = hash3(x, y, z, 3), s = Hf / 1.16 * (1 + (h - 0.5) * 0.04);
+  _M.compose(_P.set(x, y, z), _Q.setFromAxisAngle(_YA, Math.atan2(nx, nz) + (h - 0.5) * 0.03), _Sc.set(s, s, s));
+  bag.add(G, g.clone().applyMatrix4(_M));
+}
+
 /** A horseshoe-gable outline (nāsī): base half-width a, arch radius r, height h, extruded th (z 0…th). */
 function nasiGeo(a, r, h, th, N = 16) {
   const sh = new Shape(), b = Math.acos(Math.min(0.999, a / r)), yc = h - r;
@@ -323,7 +334,8 @@ function mandapa(el, { bag, col }) {
     const edge = i === 0 || k === 0 || i === nx || k === nz;
     if (el.simple && !edge) continue;
     const x = xs[i], z = zs[k];
-    if (el.carved && !el.simple) carvedPillar(bag, x, z, y + 0.5, y + h, p);
+    const aisleRow = aisle && (i === aisle[0] || i === aisle[1]) && k > 0 && k < nz, dd = z1 - z;
+    if (el.carved && !el.simple) carvedPillar(bag, x, z, y + 0.5, y + h, p, aisleRow ? (dd < 15 ? 0 : dd < 40 ? 1 : -1) : -1);
     else plainPillar(bag, x, z, y + 0.5, y + h, p);
     col.rect([x - p / 2, z - p / 2, x + p / 2, z + p / 2], y, y + h);
   }
@@ -352,7 +364,11 @@ function mandapa(el, { bag, col }) {
   // the yalis on the aisle's two rows of pillars, facing across it; the lamps down the middle
   for (let k = 1; k < nz; k++) for (const [i, f] of [[aisle[0], 1], [aisle[1], -1]]) {
     const x = xs[i] + f * p / 2, z = zs[k];
-    yali(bag, x, y + 0.5, z, f);
+    const dd = z1 - z;
+    if (dd < 40) {                                                  // the rearing yali, modelled: full within 15 m of the hall's south end, reduced to 40 m
+      bag.add(G, box(x + (f > 0 ? 0 : -0.8), y + 0.5, z - 0.5, x + (f > 0 ? 0.8 : 0), y + 0.95, z + 0.5));
+      putBeast(bag, 'yali', dd < 15 ? 0 : 1, x + f * 0.02, y + 0.95, z, f > 0 ? Math.PI / 2 : -Math.PI / 2, [1.7, 2.8, 2.8]);
+    } else yali(bag, x, y + 0.5, z, f);
     col.rect([Math.min(x, x + f * 0.8), z - 0.35, Math.max(x, x + f * 0.8), z + 0.35], y, y + 3.4);
   }
   for (let k = 2; k < nz - 1; k += 3) {
@@ -380,7 +396,7 @@ function plainPillar(bag, x, z, y0, y1, p) {
 
 /** A Nayaka pillar from y0 to y1, section p: a moulded base, square blocks with relief panels
  *  between octagonal bands, a round neck and cushion, the plank, and the lotus-bud brackets (pushpapotika). */
-function carvedPillar(bag, x, z, y0, y1, p) {
+function carvedPillar(bag, x, z, y0, y1, p, dl = -1) {
   const H = y1 - y0, sq = (a, b, w = p / 2) => bag.add(G, box(x - w, y0 + a, z - w, x + w, y0 + b, z + w));
   sq(0, 0.28, p * 0.68); sq(0.28, 0.4, p * 0.6);
   const blocks = [[0.4, H * 0.27], [H * 0.42, H * 0.56], [H * 0.68, H * 0.76]];
@@ -390,9 +406,10 @@ function carvedPillar(bag, x, z, y0, y1, p) {
     bag.add(G, lathe([[r * 0.9, 0], [r, 0.06], [r * 0.86, 0.12], [r * 0.86, b - a - 0.12], [r, b - a - 0.06], [r * 0.9, b - a]], 8, null, x, y0 + a, z));
   }
   // relief panels on the two lower blocks, each face: a sunk field and a raised figure
-  for (const [a, b] of blocks.slice(0, 2)) {
+  for (const [bi, [a, b]] of blocks.slice(0, 2).entries()) {
     const m = 0.08, t = 0.022, w = p / 2;
     for (const f of [0, 1, 2, 3]) {
+      if (dl >= 0 && bi === 0 && f < 2) continue;               // (a carved deity stands on this face instead)
       const u0 = -w + m, u1 = w - m, fy0 = y0 + a + m, fy1 = y0 + b - m;
       const R = (u, v, uu, vv) => f === 0 ? [x + u, z + w + v, x + uu, z + w + vv] : f === 1 ? [x + u, z - w - vv, x + uu, z - w - v] : f === 2 ? [x + w + v, z + u, x + w + vv, z + uu] : [x - w - vv, z + u, x - w - v, z + uu];
       // a raised moulded frame round the field (the field itself is the block's face)
@@ -404,6 +421,10 @@ function carvedPillar(bag, x, z, y0, y1, p) {
       const aq = R(-fw * 2.2, 0, fw * 2.2, t * 1.3);
       bag.add(G, box(aq[0], fy0 + (fy1 - fy0) * 0.52, aq[1], aq[2], fy0 + (fy1 - fy0) * 0.6, aq[3]));
     }
+  }
+  if (dl >= 0) for (const [f, sg] of [[0, 1], [1, -1]]) {         // a deity on each of the two faces along the aisle, its foot on the block's moulding
+    const hs = hash3(x, y0, z + f, 5), kind = [0, 1, 6, 5, 3][Math.floor(hs * 5) % 5];
+    carveDeity(bag, kind, dl === 0 ? 0 : 1, x, y0 + 0.46, z + sg * (p / 2 - 0.03), 0, sg, Math.min(1.0, H * 0.27 - 0.52));
   }
   // the capital
   const yc = y1 - 0.85;
@@ -907,9 +928,16 @@ function dhvaja(el, { bag, col }) {
   col.circle(x, z, 1, 0, h);
   // the mount toward the shrine on a pedestal, and the balipitha beyond the staff
   const mx = x + vo;
-  bag.add(G, box(mx - 0.62, 0, z - 0.42, mx + 0.62, 0.5, z + 0.42)); bag.add(G, box(mx - 0.7, 0.5, z - 0.48, mx + 0.7, 0.62, z + 0.48));
-  (el.vahana === 'simha' ? simha : nandi)(bag, mx, 0.62, z, el.faceyaw ?? Math.PI, 1.15, 'stucco_cream');
-  col.rect([mx - 0.7, z - 0.48, mx + 0.7, z + 0.48], 0, 1.9);
+  if (el.vahana === 'simha') {
+    bag.add(G, box(mx - 0.62, 0, z - 0.42, mx + 0.62, 0.5, z + 0.42)); bag.add(G, box(mx - 0.7, 0.5, z - 0.48, mx + 0.7, 0.62, z + 0.48));
+    simha(bag, mx, 0.62, z, el.faceyaw ?? Math.PI, 1.15, 'stucco_cream');
+    col.rect([mx - 0.7, z - 0.48, mx + 0.7, z + 0.48], 0, 1.9);
+  } else {          // the Nandi, modelled: on a moulded pedestal (three courses, a lotus band), facing the shrine
+    const hl = 1.0, hw = 0.55;
+    bag.add(G, box(mx - hl, 0, z - hw, mx + hl, 0.4, z + hw)); bag.add(G, box(mx - hl + 0.08, 0.4, z - hw + 0.08, mx + hl - 0.08, 0.7, z + hw - 0.08)); bag.add(G, box(mx - hl - 0.06, 0.7, z - hw - 0.06, mx + hl + 0.06, 0.84, z + hw + 0.06));
+    putBeast(bag, 'nandi', 0, mx - 0.05, 0.84, z, Math.PI / 2 - (el.faceyaw ?? Math.PI), [1.6, 1.6, 1.6], 'stucco_cream');
+    col.rect([mx - hl - 0.06, z - hw - 0.06, mx + hl + 0.06, z + hw + 0.06], 0, 2.4);
+  }
   const bx = x + bo;
   bag.add(G, box(bx - 0.5, 0, z - 0.5, bx + 0.5, 0.3, z + 0.5)); bag.add(G, box(bx - 0.4, 0.3, z - 0.4, bx + 0.4, 0.5, z + 0.4));
   bag.add(G, lathe([[0.2, 0], [0.34, 0.03], [0.36, 0.1], [0.26, 0.2], [0.2, 0.3]], 12, null, bx, 0.5, z));
@@ -1012,8 +1040,12 @@ function house(el, { bag, col }) {
   bag.add('roof_tile', frustum([x0 - 0.5, z0 - 0.5, x1 + 0.5, z1 + 0.5], h - 0.4, h - 0.4 + rise, (x1 - x0) * 0.3, (x1 - x0) * 0.3, (z1 - z0) / 2 + 0.45, (z1 - z0) / 2 + 0.45));
 }
 
+function sculptShow(el, { bag }) {
+  const [x, z] = el.at ?? [0, 0], H = el.h ?? 2.5;
+  for (const [role, g] of figureParts(el.kind, el.lod ?? 0)) bag.add(role === 'gilt' ? 'gilt_bronze' : (el.mat ?? 'stucco_cream'), g.clone().scale(H / 1.16, H / 1.16, H / 1.16).translate(x, el.y ?? 0, z));
+}
 registerStyle('dravidian', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, ...STYLES.life.elements, gopuram, prakara, mandapa, vimana, tank, dhvaja, tamil_house: tamilHouse, court_house: courtHouse, ashta_shakti: ashtaShakti, elephant, ther, pudhu_mandapa: pudhu, rite, wayside, well, pandal },
+  elements: { sculpt_show: sculptShow, ...STYLES.qing.elements, ...STYLES.life.elements, gopuram, prakara, mandapa, vimana, tank, dhvaja, tamil_house: tamilHouse, court_house: courtHouse, ashta_shakti: ashtaShakti, elephant, ther, pudhu_mandapa: pudhu, rite, wayside, well, pandal },
   objects: {},
 });

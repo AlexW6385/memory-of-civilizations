@@ -4,7 +4,7 @@
 // seated), the open court (mutram) in its pillared verandah with the tulsi pedestal, the swing
 // (oonjal), water jars and a rice-flour kolam, and at the back the puja room with its lit lamps.
 import { box, lathe, disc, clothBox, addCloth } from '../../core/geom.js';
-import { frameOf, post, rng, vessel, lampStand } from './houses.js';
+import { frameOf, post, rng, vessel, lampStand, tamilHouse } from './houses.js';
 
 const G = 'granite_tamil';
 
@@ -21,6 +21,7 @@ function gable(F, wash, roof, vA, vB, h, t, oA, oB) {
 
 /** court_house: { rect, facing, seed, wash } */
 export function courtHouse(el, ctx) {
+  if (el.simple) return tamilHouse({ ...el, kind: 'house', simple: true }, ctx);           // far: a solid house with its thinnai
   const F = frameOf(el, ctx), { W, D, B, C, Fl, poly, P } = F, { bag, lights } = ctx;
   const rand = rng(el.seed || 7), wash = el.wash ?? 'stucco_cream', uc = W / 2, h = 4.0, py = 0.55, ver = 2.0, TH = 0.35;
   const roof = 'roof_tile', I = 'plaster_white';

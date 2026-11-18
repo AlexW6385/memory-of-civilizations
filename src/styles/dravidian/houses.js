@@ -201,11 +201,11 @@ export function tamilHouse(el, ctx) {
   B(G, 0, -0.3, 0, W, py, ver); Fl(0, 0, W, ver, py);
   if (!shop) { B(G, uc - 0.85, -0.3, -0.38, uc + 0.85, py - 0.27, 0); Fl(uc - 0.85, -0.38, uc + 0.85, 0, py - 0.27); }
   else { B(G, 0.3, -0.3, -0.34, W - 0.3, 0.3, 0); Fl(0.3, -0.34, W - 0.3, 0, 0.3); }
-  const rich = !!el.rich && !hut, pl = rich ? IN.plan(el, W, D, ver, rand) : null;
+  const simple = !!el.simple, rich = !!el.rich && !hut && !simple, pl = rich ? IN.plan(el, W, D, ver, rand) : null;
   let room = null;
   if (rich) room = IN.shell(F, { wash, h, ver, py, ...pl });
   else { B(wash, 0, -0.3, ver, W, h, D); C(0, ver, W, D, 0, h + 0.1); }
-  if (!hut) { B('limewash_red', 0.02, py, ver - 0.03, W - 0.02, py + 0.45, ver); B('stucco_cream', 0, h - 0.16, ver - 0.06, W, h, ver); }
+  if (!hut && !simple) { B('limewash_red', 0.02, py, ver - 0.03, W - 0.02, py + 0.45, ver); B('stucco_cream', 0, h - 0.16, ver - 0.06, W, h, ver); }
   // the lean-to over the platform on its posts
   const yb = shop ? 2.5 : 2.42, yEdge = shop ? 2.62 : 2.74, vf = shop ? -1.1 : -0.5;
   const yL = (v) => (h - 0.2) + (v - ver) * ((h - 0.2) - yEdge) / (ver - vf);
@@ -217,11 +217,12 @@ export function tamilHouse(el, ctx) {
   for (let i = 0; i <= nb; i++) {
     const u = 0.25 + i * (W - 0.5) / nb;
     if (hut) { B('timber', u - 0.07, py, vp - 0.07, u + 0.07, yb, vp + 0.07); C(u - 0.07, vp - 0.07, u + 0.07, vp + 0.07, py, yb); }
+    else if (simple) { B('timber', u - 0.1, shop ? 0 : py, vp - 0.1, u + 0.1, yb, vp + 0.1); C(u - 0.14, vp - 0.14, u + 0.14, vp + 0.14, 0, yb + 0.3); }
     else { postBy(F, shop ? 'inner' : zone, u, vp, shop ? 0 : py, yb); C(u - 0.14, vp - 0.14, u + 0.14, vp + 0.14, 0, yb + 0.3); }
   }
   if (!hut) B('timber', 0.015, yb - 0.02, vp - 0.1, W - 0.015, yb + 0.22, vp + 0.1);
   // the gabled porch (mukhamandapa) over the door bay of the wide houses (W > 7.4): two tile slopes and a gable on the lean-to
-  if (!hut && !shop && W > 7.4 && !thatched && nb >= 3) {
+  if (!hut && !shop && W > 7.4 && !thatched && nb >= 3 && !simple) {
     const pw = (W - 0.5) / nb / 2 + 0.05, pc = W / 2, rise = 0.75, vE = Math.min(ver + 1.8, vm - 0.3);   // (the slopes run on into the main roof)
     poly(roof, [[pc - pw, yL(vf), vf], [pc, yL(vf) + rise, vf], [pc, yL(vE) + rise, vE], [pc - pw, yL(vE), vE]], [0, 1, 0]);
     poly(roof, [[pc, yL(vf) + rise, vf], [pc + pw, yL(vf), vf], [pc + pw, yL(vE), vE], [pc, yL(vE) + rise, vE]], [0, 1, 0]);
@@ -237,7 +238,7 @@ export function tamilHouse(el, ctx) {
   poly('timber', [[0, yFe - 0.1, fe], [W, yFe - 0.1, fe], [W, h, ver], [0, h, ver]], [0, -1, 0]);
   poly('timber', [[0, h, D], [W, h, D], [W, yFe - 0.1, re], [0, yFe - 0.1, re]], [0, -1, 0]);
   B('timber', -0.03, yFe - 0.14, fe - 0.02, W + 0.03, yFe + 0.04, fe + 0.04); B('timber', -0.03, yFe - 0.14, re - 0.04, W + 0.03, yFe + 0.04, re + 0.02);
-  B(hut || thatched ? 'thatch_palm' : 'terracotta', -0.03, ry - 0.04, vm - 0.2, W + 0.03, ry + 0.17, vm + 0.2);
+  B(hut || thatched ? 'thatch_palm' : simple ? 'timber' : 'terracotta', -0.03, ry - 0.04, vm - 0.2, W + 0.03, ry + 0.17, vm + 0.2);
   for (const u of [0, W]) {
     poly(wash, [[u, h, ver], [u, h, D], [u, h + 0.1, D], [u, ry, vm], [u, h + 0.1, ver]], [u === 0 ? -1 : 1, 0, 0]);
   }
@@ -245,18 +246,18 @@ export function tamilHouse(el, ctx) {
   // the front
   const wins = [];
   if (!shop) {
-    if (rich) IN.openDoor(F, uc, ver); else door(F, uc, ver, 1.0, zone !== 'outer');
-    if (W > 5.6) for (const u of [uc - Math.min(2.3, (uc - 0.4) * 0.62 + 0.5), uc + Math.min(2.3, (W - uc - 0.4) * 0.62 + 0.5)]) if (u > 0.7 && u < W - 0.7) { window(F, u, ver); wins.push(u); }
-    if (!hut && rand() < 0.5) kolam(F, uc, -1.05, rand);
-    if (!hut) { const [lx, , lz] = F.P(uc + 1.0, 0, ver - 0.12); B('wood_dark', uc + 0.95, 1.5, ver - 0.12, uc + 1.2, 1.78, ver - 0.05); bag.add('lamp_glass', lathe([[0.001, 0], [0.03, 0.02], [0.001, 0.07]], 5, null, lx + (F.dv[0] * 0.0), 1.5, lz)); }
+    if (rich) IN.openDoor(F, uc, ver); else if (!simple) door(F, uc, ver, 1.0, zone !== 'outer');
+    if (W > 5.6 && !simple) for (const u of [uc - Math.min(2.3, (uc - 0.4) * 0.62 + 0.5), uc + Math.min(2.3, (W - uc - 0.4) * 0.62 + 0.5)]) if (u > 0.7 && u < W - 0.7) { window(F, u, ver); wins.push(u); }
+    if (!hut && !simple && rand() < 0.5) kolam(F, uc, -1.05, rand);
+    if (!hut && !simple) { const [lx, , lz] = F.P(uc + 1.0, 0, ver - 0.12); B('wood_dark', uc + 0.95, 1.5, ver - 0.12, uc + 1.2, 1.78, ver - 0.05); bag.add('lamp_glass', lathe([[0.001, 0], [0.03, 0.02], [0.001, 0.07]], 5, null, lx + (F.dv[0] * 0.0), 1.5, lz)); }
   } else {
     // the shop: the open front on the platform, shelves along the back wall with their goods, the shutter planks above
     const gs = rich ? [[0.2, pl.g0 - 0.1], [pl.g1 + 0.1, W - 0.2]] : [[0.2, W - 0.2]], inGap = (u) => rich && u > pl.g0 - 0.25 && u < pl.g1 + 0.25;
     for (const [a, b] of gs) { B('wood_dark', a, py, ver - 0.5, b, 2.2, ver - 0.04); for (const y of [0.95, 1.4, 1.85]) B('timber', a, y, ver - 0.55, b, y + 0.04, ver - 0.04); }
     if (rich) { B('stucco_cream', pl.g0 - 0.16, py, ver - 0.5, pl.g0 - 0.1, 2.2, ver - 0.04); B('stucco_cream', pl.g1 + 0.1, py, ver - 0.5, pl.g1 + 0.16, 2.2, ver - 0.04); B('wood_dark', pl.g0 - 0.1, 2.2, ver - 0.5, pl.g1 + 0.1, 2.35, ver - 0.04); }
-    for (let i = 0; i < Math.round(W * 1.5); i++) { if (inGap(0.5 + i * (W - 1) / Math.max(1, Math.round(W * 1.5) - 1))) continue; const [x, , z] = F.P(0.5 + i * (W - 1) / Math.max(1, Math.round(W * 1.5) - 1), 0, ver - 0.3); vessel(bag, x, [py + 0.35, py + 0.82, py + 1.27][i % 3] + 0.04, z, 0.45, ['bronze', 'terracotta', 'bronze'][(i + el.seed) % 3]); }
+    if (!simple) for (let i = 0; i < Math.round(W * 1.5); i++) { if (inGap(0.5 + i * (W - 1) / Math.max(1, Math.round(W * 1.5) - 1))) continue; const [x, , z] = F.P(0.5 + i * (W - 1) / Math.max(1, Math.round(W * 1.5) - 1), 0, ver - 0.3); vessel(bag, x, [py + 0.35, py + 0.82, py + 1.27][i % 3] + 0.04, z, 0.45, ['bronze', 'terracotta', 'bronze'][(i + el.seed) % 3]); }
     B('wood_dark', 0.2, 2.35, ver - 0.12, W - 0.2, 2.62, ver - 0.04);
-    goods(F, el.trade ?? 'cloth', py, W, ver, rand, { ay: yb - 0.04 });
+    if (!simple) goods(F, el.trade ?? 'cloth', py, W, ver, rand, { ay: yb - 0.04 });
     if (!(shop && ['cloth', 'flowers'].includes(el.trade))) void 0;
   }
   if (rich) {
