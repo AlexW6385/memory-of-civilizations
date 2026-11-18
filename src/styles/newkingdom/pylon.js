@@ -16,7 +16,7 @@ export function nkPylon(el, ctx) {
   for (const s of [-1, 1]) {
     const rect = s < 0 ? [-half, z0, -g, z1] : [g, z0, half, z1], tw = half - g;
     const niches = el.flags ? [0.28, 0.72].map((f) => ({ x: s * (g + tw * f), w: 1.6, depth: 0.7, top: h * 0.68 })) : [];
-    pylonTower({ rect, y0, h, batter: b, front: 'zp', batterEnds: s < 0 ? [b, 0] : [0, b], niches, trim: { torus: 0.45, cornice: Math.min(2.4, h * 0.07) }, mat, towardDoor: -s, simple, reliefs: !simple }, ctx);
+    pylonTower({ rect, y0, h, batter: b, front: 'zp', batterEnds: s < 0 ? [b, 0] : [0, b], niches, trim: { torus: 0.45, cornice: Math.min(2.4, h * 0.07) }, mat, towardDoor: -s, simple, reliefs: !simple && !el.sculpt }, ctx);
     for (const n of niches) flagstaff({ at: [n.x, z1 - 0.15], y: y0, h: el.poleH ?? 40, side: s, wall: (v) => z1 - b * (v / h), clamps: [h * 0.74, h * 0.88] }, ctx);
   }
   // the gate: the passage between the towers, the lintel mass over it, its own cornice
@@ -30,5 +30,5 @@ export function nkPylon(el, ctx) {
     wingedDiscObj({ at: [0, z0 + 0.4], y: y0 + gateH + 0.3, w: g * 2 - 0.8, h: 2.2, yaw: Math.PI }, ctx);
     gateReliefs({ z: z1 - 0.4, face: 'zp', y: y0, x0: -g + 0.2, x1: g - 0.2, door: [-g + 0.2, g - 0.2], doorTop: gateH, from: gateH + 3, top: top - 0.8 }, ctx);
   }
-  if (el.colossi) for (const s of [-1, 1]) colossus({ at: [s * (g + 5.5), z1 + 3.4], y: y0, yaw: 0, h: el.colossi }, ctx);
+  if (el.colossi && !el.sculpt) for (const s of [-1, 1]) colossus({ at: [s * (g + 5.5), z1 + 3.4], y: y0, yaw: 0, h: el.colossi }, ctx);
 }

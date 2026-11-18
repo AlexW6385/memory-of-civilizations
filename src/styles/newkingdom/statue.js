@@ -5,6 +5,7 @@
 // Authored in units of the statue's height (the whole scaled by `h`), facing +z, x to the viewer's right when seen from +z.
 import { lathe, box, frustum, fromTriangles, place } from '../../core/geom.js';
 import { glyphs, ellip, taper, curve, keep } from './kit.js';
+import { sculptColossus, sculptPrincess } from './statue2.js';
 
 const SK = 'granite_red', ST = 'sandstone_dressed', WH = 'plaster_white', BL = 'egyptian_blue', GD = 'gold', RD = 'limewash_red', GR = 'fresco_green', OC = 'paint_ochre', BK = 'lacquer_black';
 // the torso's radius at a height (scaled 1.5 across, 0.95 deep): the collar's bands follow it
@@ -15,6 +16,12 @@ const torsoR = (y) => { for (let i = 0; i < TP.length - 1; i++) if (y <= TP[i + 
 export function colossus(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0, yaw = el.yaw ?? 0, H = el.h ?? 11;
   const A = (mat, g) => { g.scale(H, H, H); place(g, x, y, z, yaw); bag.add(mat, g); };
+  // `sculpt`: the modelled version (statue2.js), 'mid' the volumes and 'fine' the additions seen within a few metres; without it the first form (shown far off)
+  const NEW = el.sculpt === 'mid', FINE = el.sculpt === 'fine', M = (mat, g) => { g.scale(1 / 11, 1 / 11, 1 / 11); A(mat, g); };
+  if (FINE) { sculptColossus(M, true); sculptPrincess(M, -0.57, 1.375, true); return; }
+  if (NEW) { sculptColossus(M, false); sculptPrincess(M, -0.57, 1.375, false); }
+  const Aold = A, OLD = new Set();
+  void Aold; void OLD;
   const AT = (mat, T) => { if (T.length) A(mat, fromTriangles(T)); };
   const wide = (g, sx = 1.5, sz = 0.95) => { g.scale(sx, 1, sz); return g; };
   // the base, the back pillar
@@ -23,8 +30,8 @@ export function colossus(el, { bag, col }) {
   A(ST, box(-0.082, 0.905, -0.108, 0.082, 0.92, -0.044));
   // the legs: the right straight, the left striding forward (turned about the hip), the feet on the base
   const legProfile = [[0.019, 0.04], [0.026, 0.09], [0.030, 0.15], [0.026, 0.21], [0.027, 0.26], [0.034, 0.33]];
-  A(SK, lathe(legProfile, 12, null, -0.043, 0, 0));
-  const left = lathe(legProfile, 12); left.translate(0, -0.33, 0); left.rotateX(-0.26); left.translate(0.043, 0.33, 0); A(SK, left);
+  if (!NEW) { A(SK, lathe(legProfile, 12, null, -0.043, 0, 0)); }
+  if (!NEW) { const left = lathe(legProfile, 12); left.translate(0, -0.33, 0); left.rotateX(-0.26); left.translate(0.043, 0.33, 0); A(SK, left); }
   A(SK, ellip(-0.043, 0.046, 0.026, 0.024, 0.016, 0.052, 10));
   A(SK, ellip(0.043, 0.046, 0.100, 0.024, 0.016, 0.052, 10));
   for (const [fx, fz] of [[-0.043, 0.07], [0.043, 0.144]]) for (let k = -2; k <= 2; k++) A(SK, ellip(fx + k * 0.0092, 0.042, fz, 0.0052, 0.008, 0.008, 6));   // the toes
@@ -39,14 +46,14 @@ export function colossus(el, { bag, col }) {
   A(SK, lathe([[0.028, 0.72], [0.026, 0.745], [0.030, 0.77]], 12));
   for (const s of [-1, 1]) {
     A(SK, ellip(s * 0.115, 0.69, 0, 0.032, 0.032, 0.032, 10));
-    A(SK, lathe([[0.027, 0.69], [0.027, 0.64], [0.022, 0.575]], 10, null, s * 0.118, 0, 0.004));
-    A(SK, ellip(s * 0.118, 0.572, 0.012, 0.024, 0.024, 0.024, 8));
+    if (!NEW) { A(SK, lathe([[0.027, 0.69], [0.027, 0.64], [0.022, 0.575]], 10, null, s * 0.118, 0, 0.004)); }
+    if (!NEW) { A(SK, ellip(s * 0.118, 0.572, 0.012, 0.024, 0.024, 0.024, 8)); }
     A(GD, lathe([[0.0265, 0.62], [0.0285, 0.622], [0.0285, 0.636], [0.0265, 0.638]], 10, null, s * 0.118, 0, 0.004));   // the armlet
   }
   // the arms crossed: right over left, the fists at the chest, the crook and the flail rising from them to the shoulders
   const fR = [0.030, 0.668, 0.090], fL = [-0.030, 0.652, 0.078];
-  A(SK, taper([-0.118, 0.572, 0.014], fR, 0.022, 0.018, 8)); A(SK, taper([0.118, 0.572, 0.012], fL, 0.022, 0.018, 8));
-  A(SK, ellip(...fR, 0.022, 0.02, 0.026, 8)); A(SK, ellip(...fL, 0.022, 0.02, 0.026, 8));
+  if (!NEW) { A(SK, taper([-0.118, 0.572, 0.014], fR, 0.022, 0.018, 8)); A(SK, taper([0.118, 0.572, 0.012], fL, 0.022, 0.018, 8)); }
+  if (!NEW) { A(SK, ellip(...fR, 0.022, 0.02, 0.026, 8)); A(SK, ellip(...fL, 0.022, 0.02, 0.026, 8)); }
   A(GD, taper(fR, [0.082, 0.80, 0.078], 0.0075, 0.0075, 6));                                                  // the crook
   for (const g of curve([[0.082, 0.80, 0.078], [0.092, 0.822, 0.088], [0.090, 0.838, 0.104], [0.076, 0.842, 0.116], [0.064, 0.832, 0.118]], 0.0075, 0.0075, 6)) A(GD, g);
   A(BL, taper([fR[0] + 0.01, fR[1] + 0.01, fR[2] + 0.002], [0.062, 0.76, 0.082], 0.0095, 0.0095, 6));          // (the crook's blue binding)
@@ -57,10 +64,10 @@ export function colossus(el, { bag, col }) {
   const tier = (y0, y1, d, mat) => A(mat, wide(lathe([[torsoR(y0) + d, y0], [torsoR((y0 + y1) / 2) + d, (y0 + y1) / 2], [torsoR(y1) + d, y1]], 16)));
   tier(0.715, 0.742, 0.005, OC); tier(0.685, 0.715, 0.009, BL); tier(0.655, 0.685, 0.013, GR); tier(0.635, 0.655, 0.017, GD);
   // the head: the face (brow, eyes, nose, mouth, the false beard), the nemes with its lappets, the uraeus
-  A(SK, ellip(0, 0.793, 0.030, 0.034, 0.049, 0.041, 12));
-  A(SK, ellip(0, 0.789, 0.073, 0.0075, 0.016, 0.011, 6));
-  for (const s of [-1, 1]) { A(BK, ellip(s * 0.0165, 0.806, 0.0695, 0.0085, 0.0038, 0.004, 6)); A(BK, box(s * 0.0165 - 0.0095, 0.8125, 0.0695, s * 0.0165 + 0.0095, 0.8155, 0.0715)); A(SK, ellip(s * 0.037, 0.792, 0.01, 0.005, 0.014, 0.01, 6)); }
-  A(RD, box(-0.011, 0.768, 0.0685, 0.011, 0.7715, 0.0705));
+  if (!NEW) { A(SK, ellip(0, 0.793, 0.030, 0.034, 0.049, 0.041, 12)); }
+  if (!NEW) { A(SK, ellip(0, 0.789, 0.073, 0.0075, 0.016, 0.011, 6)); }
+  if (!NEW) { for (const s of [-1, 1]) { A(BK, ellip(s * 0.0165, 0.806, 0.0695, 0.0085, 0.0038, 0.004, 6)); A(BK, box(s * 0.0165 - 0.0095, 0.8125, 0.0695, s * 0.0165 + 0.0095, 0.8155, 0.0715)); A(SK, ellip(s * 0.037, 0.792, 0.01, 0.005, 0.014, 0.01, 6)); } }
+  if (!NEW) { A(RD, box(-0.011, 0.768, 0.0685, 0.011, 0.7715, 0.0705)); }
   A(BL, frustum([-0.0075, 0.074, 0.0075, 0.090], 0.712, 0.762, 0, 0, 0, 0.004, { noBottom: false }));          // the false beard
   A(GD, box(-0.0085, 0.745, 0.0725, 0.0085, 0.748, 0.0915)); A(GD, box(-0.0085, 0.725, 0.0725, 0.0085, 0.728, 0.0915));
   const nemes = lathe([[0.058, 0.745], [0.054, 0.78], [0.050, 0.82], [0.042, 0.855], [0.028, 0.875], [0.001, 0.884]], 16); nemes.scale(1, 1, 1.14); nemes.translate(0, 0, -0.012);
@@ -80,14 +87,14 @@ export function colossus(el, { bag, col }) {
   for (const g of curve([[0, 0.928, 0.036], [0, 0.96, 0.050], [0, 0.99, 0.058], [0, 1.006, 0.074], [0, 0.998, 0.092], [0, 0.984, 0.088]], 0.0042, 0.0042, 5)) A(RD, g);
   // Bentanta at the king's right leg: the long sheath, the tripartite wig, the crown of uraei with its two plumes, a flower held to the breast
   const bx = -0.052, bz = 0.125;
-  A(WH, lathe([[0.026, 0.03], [0.029, 0.12], [0.030, 0.19], [0.032, 0.225], [0.033, 0.245], [0.027, 0.262], [0.018, 0.268]], 12, null, bx, 0, bz));
-  A(OC, lathe([[0.0345, 0.243], [0.0345, 0.252], [0.029, 0.264]], 12, null, bx, 0, bz));
-  A(OC, lathe([[0.012, 0.27], [0.013, 0.282], [0.011, 0.29]], 8, null, bx, 0, bz));
-  A(OC, ellip(bx, 0.298, bz + 0.003, 0.0135, 0.0165, 0.0145, 8));
-  A(BK, lathe([[0.024, 0.255], [0.025, 0.285], [0.020, 0.315], [0.001, 0.323]], 10, null, bx, 0, bz - 0.002));
-  A(GD, lathe([[0.0225, 0.318], [0.0225, 0.326], [0.019, 0.33]], 10, null, bx, 0, bz - 0.002));
-  for (const s of [-1, 1]) { A(GD, box(bx + s * 0.008 - 0.003, 0.33, bz - 0.0045, bx + s * 0.008 + 0.003, 0.378, bz + 0.0015)); A(BL, box(bx + s * 0.008 - 0.0032, 0.35, bz - 0.0047, bx + s * 0.008 + 0.0032, 0.358, bz + 0.0017)); }
-  A(GR, ellip(bx + 0.002, 0.243, bz + 0.03, 0.007, 0.007, 0.005, 6));
+  if (!NEW) { A(WH, lathe([[0.026, 0.03], [0.029, 0.12], [0.030, 0.19], [0.032, 0.225], [0.033, 0.245], [0.027, 0.262], [0.018, 0.268]], 12, null, bx, 0, bz)); }
+  if (!NEW) { A(OC, lathe([[0.0345, 0.243], [0.0345, 0.252], [0.029, 0.264]], 12, null, bx, 0, bz)); }
+  if (!NEW) { A(OC, lathe([[0.012, 0.27], [0.013, 0.282], [0.011, 0.29]], 8, null, bx, 0, bz)); }
+  if (!NEW) { A(OC, ellip(bx, 0.298, bz + 0.003, 0.0135, 0.0165, 0.0145, 8)); }
+  if (!NEW) { A(BK, lathe([[0.024, 0.255], [0.025, 0.285], [0.020, 0.315], [0.001, 0.323]], 10, null, bx, 0, bz - 0.002)); }
+  if (!NEW) { A(GD, lathe([[0.0225, 0.318], [0.0225, 0.326], [0.019, 0.33]], 10, null, bx, 0, bz - 0.002)); }
+  if (!NEW) { for (const s of [-1, 1]) { A(GD, box(bx + s * 0.008 - 0.003, 0.33, bz - 0.0045, bx + s * 0.008 + 0.003, 0.378, bz + 0.0015)); A(BL, box(bx + s * 0.008 - 0.0032, 0.35, bz - 0.0047, bx + s * 0.008 + 0.0032, 0.358, bz + 0.0017)); } }
+  if (!NEW) { A(GR, ellip(bx + 0.002, 0.243, bz + 0.03, 0.007, 0.007, 0.005, 6)); }
   // the signs: the row on the base's front, the columns down the back pillar
   const T = [], B = [];
   const frontPlace = (u, v, d) => [v, u, 0.30 + d];
