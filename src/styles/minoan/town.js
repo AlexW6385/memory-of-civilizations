@@ -5,7 +5,10 @@
 
 import { STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
+import { subtractRects } from '../../core/build.js';
 import { minoanHorns as horns } from './index.js';
+import { stairLayout, holeRects, buildUpper, onStair } from './upstairs.js';
+export { onStair };
 
 const G = 'gypsum_minoan', RED = 'paint_minoan_red', BLK = 'paint_minoan_black';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -39,6 +42,8 @@ function dwelling(el, ctx) {
   // by class: the elaborate houses near the palace stand on ashlar and are plastered fine, the outlying ones are of mud and rubble
   const PL = poor ? (PL0 === 'plaster_ochre' ? 'mud_plaster' : PL0) : elite && PL0 === 'lime_plaster' ? 'plaster_white' : PL0, base = elite ? G : poor ? 'rubble' : base0;
   const FR = dwellingFrame(el), du = FR.du, depth = FR.D;
+  const upOn = enter && !!el.up && n >= 2, UP = upOn ? stairLayout(FR, n, y) : null, UPH = upOn ? holeRects(FR, UP) : [];
+  let upper = null;
   const stepped = !far && !enter && n >= 2 && depth >= 9.5 && rand() < 0.3, TER = 2.8;
   const rect2 = stepped ? { n: [x0, z0 + TER, x1, z1], s: [x0, z0, x1, z1 - TER], w: [x0 + TER, z0, x1, z1], e: [x0, z0, x1 - TER, z1] }[f] : el.rect;
   // a face: its run along u from a0, its plane fp, its outward sign sg; at(mat, u0, u1, v0, v1, d0, d1) a box on it
@@ -69,13 +74,20 @@ function dwelling(el, ctx) {
     { const q = F.alongX ? [x0 + du - 0.55, F.fp - (F.sg > 0 ? T : 0), x0 + du + 0.55, F.fp + (F.sg > 0 ? 0 : T)] : [F.fp - (F.sg > 0 ? T : 0), z0 + du - 0.55, F.fp + (F.sg > 0 ? 0 : T), z0 + du + 0.55]; col.rect(q, y + 2.25, ceil); }
     col.floor([x0 + T, z0 + T, x1 - T, z1 - T], fl);
     bag.add(el.floor ?? 'mud_plaster', box(x0 + T, fl - 0.035, z0 + T, x1 - T, fl, z1 - T));
-    // the ceiling: planks on joists under the upper floor
-    bag.add('wood_ochre', box(x0 + T, ceil - 0.06, z0 + T, x1 - T, ceil, z1 - T));
-    const ax = FR.alongX; for (let u = T + 0.4; u < (ax ? FR.L : FR.D) - T; u += 0.65) bag.add('timber', ax ? box(x0 + u, ceil - 0.2, z0 + T, x0 + u + 0.14, ceil - 0.06, z1 - T) : box(x0 + T, ceil - 0.2, z0 + u, x1 - T, ceil - 0.06, z0 + u + 0.14));
-    bag.add(PL, box(x0, ceil, z0, x1, y + (n > 1 ? SH : H), z1)); col.rect(el.rect, ceil, y + H); col.floor(el.rect, y + H);
-    if (n > 1) bag.add(PL, box(x0, y + SH, z0, x1, y + H, z1));
+    // the ceiling: planks on joists under the upper floor (an opening in it where the stair comes up)
+    const hole1 = UPH[1] ? [UPH[1]] : [];
+    for (const r of subtractRects([x0 + T, z0 + T, x1 - T, z1 - T], hole1)) bag.add('wood_ochre', box(r[0], ceil - 0.06, r[1], r[2], ceil, r[3]));
+    const ax = FR.alongX; for (let u = T + 0.4; u < (ax ? FR.L : FR.D) - T; u += 0.65) {
+      const jr = ax ? [x0 + u, z0 + T, x0 + u + 0.14, z1 - T] : [x0 + T, z0 + u, x1 - T, z0 + u + 0.14];
+      for (const r of subtractRects(jr, hole1)) bag.add('timber', box(r[0], ceil - 0.2, r[1], r[2], ceil - 0.06, r[3]));
+    }
+    if (!upOn) {
+      bag.add(PL, box(x0, ceil, z0, x1, y + (n > 1 ? SH : H), z1)); col.rect(el.rect, ceil, y + H); col.floor(el.rect, y + H);
+      if (n > 1) bag.add(PL, box(x0, y + SH, z0, x1, y + H, z1));
+    }
     // light: through the door, and a lamp
     furnish(el, ctx, FR, y + 0.2, rand);
+    if (upOn) upper = buildUpper(el, ctx, FR, UP, PL, el.kind ?? 'home', cls);
   } else {
     bag.add(PL, box(x0, y + 0.5, z0, x1, stepped ? y + SH : y + H, z1));
     if (stepped) bag.add(PL, box(rect2[0], y + SH, rect2[1], rect2[2], y + H, rect2[3]));
@@ -112,7 +124,7 @@ function dwelling(el, ctx) {
   for (let i = 0, m = 2 + Math.floor(rand() * 3); i < m; i++) { const u = 0.6 + rand() * Math.max(0.1, F.L - 2.2), w = 0.3 + rand() * 0.6, v = y + 1.5 + rand() * Math.max(0.1, Math.min(H - 2.4, 4)); if (u < sp + 0.3 && u + w > sp - 0.3) continue; F.at(rand() < 0.75 ? 'rubble' : 'plaster_white', u, u + w, v, v + 0.2 + rand() * 0.5, 0.0, rand() < 0.5 ? 0.032 : 0.044); }
   // ── timber posts showing in the plaster of the front ──
   const mw = Math.max(1, Math.floor(F.L / 3.2));
-  for (let i = 0; i <= mw; i++) { const u = Math.min(F.L - 0.2, Math.max(0.05, i * F.L / mw - 0.07)); if (Math.abs(u - du) < 0.9 && !stepped) { F.at('timber', u, u + 0.14, y + 2.55, y + H - 0.3, 0, 0.05); continue; } F.at('timber', u, u + 0.14, y + 0.5, y + H - 0.3, 0, 0.05); }
+  for (let i = 0; i <= mw; i++) { const u = Math.min(F.L - 0.2, Math.max(0.05, i * F.L / mw - 0.07)); if (upOn) { if (Math.abs(u - du) > 0.9) F.at('timber', u, u + 0.14, y + 0.5, y + SH - 0.3, 0, 0.05); continue; } if (Math.abs(u - du) < 0.9 && !stepped) { F.at('timber', u, u + 0.14, y + 2.55, y + H - 0.3, 0, 0.05); continue; } F.at('timber', u, u + 0.14, y + 0.5, y + H - 0.3, 0, 0.05); }
   // the round ends of the floor beams on the front
   for (let k = 1; k < n; k++) for (let u = 0.45; u < F.L - 0.3; u += 0.78) {
     if (k === 1 && Math.abs(u - du) < 0.95) continue;
@@ -136,18 +148,18 @@ function dwelling(el, ctx) {
     W.at(G, u - 0.65, u + 0.65, yy - 0.08, yy, 0.0, 0.2);
   };
   const wm = Math.max(1, Math.floor(F.L / 2.6));
-  for (let fl = 1; fl < n; fl++) for (let i = 0; i < wm; i++) { const u = (i + 0.5) * F.L / wm; if (fl === 1 && stepped) { /* below the terrace */ } win(F, u, fl); }
-  for (const [k, ok] of [[f === 'n' || f === 's' ? 'w' : 'n', el.alW], [f === 'n' || f === 's' ? 'e' : 's', el.alE]]) if (ok) { const W = face(k), lim = stepped ? W.L - TER : W.L; for (let fl = 1; fl < n; fl++) { const u = lim * 0.5; if (rand() < 0.8 && u > 1) win(W, u, fl); } }
+  if (!upOn) for (let fl = 1; fl < n; fl++) for (let i = 0; i < wm; i++) { const u = (i + 0.5) * F.L / wm; if (fl === 1 && stepped) { /* below the terrace */ } win(F, u, fl); }
+  if (!upOn) for (const [k, ok] of [[f === 'n' || f === 's' ? 'w' : 'n', el.alW], [f === 'n' || f === 's' ? 'e' : 's', el.alE]]) if (ok) { const W = face(k), lim = stepped ? W.L - TER : W.L; for (let fl = 1; fl < n; fl++) { const u = lim * 0.5; if (rand() < 0.8 && u > 1) win(W, u, fl); } }
   // a painted band under the parapet (blue, red and ochre in turn) on many fronts, after the spiral friezes
   if (rand() < (elite ? 0.9 : poor ? 0.04 : 0.4)) { const m = Math.floor(F.L / 0.6); for (let i = 0; i < m; i++) F.at(i % 3 === 0 ? 'egyptian_blue' : i % 3 === 1 ? RED : 'paint_ochre', i * F.L / m, (i + 1) * F.L / m - 0.04, y + H - 0.85, y + H - 0.35, 0, 0.04); }
   // ── eye level: bench, shade, balcony, hung goods ──
   if (rand() < 0.5) { const u0 = du + 0.95, w = Math.min(1.8, F.L - u0 - 0.4); if (w > 0.8) { const q = F.at(G, u0, u0 + w, y, y + 0.46, 0.0, 0.5); const r = F.alongX ? [q[0], q[1], q[2], q[3]] : q; col.rect(r, y, y + 0.46); } }
-  if ((rand() < 0.35 || poor) && n >= 1) {
+  if ((rand() < 0.35 || poor) && n >= 1 && !upOn) {
     const w = Math.min(F.L - 0.6, 2.6 + rand() * 1.4), u0 = Math.max(0.3, du - w / 2), out = 1.0;
     F.at('cloth_ochre', u0, u0 + w, y + 2.62, y + 2.66, 0.06, out); F.at('timber', u0, u0 + w, y + 2.5, y + 2.62, 0.05, 0.1);
     for (const u of [u0 + 0.1, u0 + w - 0.1]) { const q = F.at('timber', u - 0.05, u + 0.05, y - 0.2, y + 2.62, out - 0.1, out); col.rect(q, y, y + 2.62); }
   }
-  if (n >= 2 && rand() < 0.28) {
+  if (n >= 2 && rand() < 0.28 && !upOn) {
     const w = Math.min(F.L - 0.8, 2.6 + rand() * 2), u0 = Math.max(0.4, du - w / 2 + (rand() - 0.5)), yb = y + SH, out = 0.95;
     F.at('timber', u0, u0 + w, yb, yb + 0.1, 0, out); F.at('timber', u0, u0 + w, yb + 0.1, yb + 0.16, 0, out);
     for (let u = u0; u <= u0 + w + 0.01; u += w / Math.max(2, Math.round(w / 0.7))) F.at('timber', u - 0.03, u + 0.03, yb + 0.16, yb + 1.0, out - 0.06, out);
@@ -159,9 +171,9 @@ function dwelling(el, ctx) {
     const u = du - 1.35; if (u > 0.4) { F.at('timber', u - 0.03, u + 0.03, y + 1.9, y + 2.0, 0, 0.5); for (let i = 0; i < 3; i++) F.at(i === 1 ? 'hide_tan' : 'cloth_ochre', u - 0.09 + i * 0.06 - 0.02, u - 0.09 + i * 0.06 + 0.07, y + 1.15 - i * 0.05, y + 1.9, 0.25 + i * 0.06, 0.34 + i * 0.06); }
   }
   // ── the roof: reed shade on poles, a rain spout, horns on a few, jars set to dry ──
-  if (rand() < 0.3) { const [a, b, c, d] = rect2, ux = a + 0.7 + rand() * Math.max(0.1, c - a - 3.4), uz = b + 0.7 + rand() * Math.max(0.1, d - b - 3.0); for (const [px, pz] of [[ux, uz], [ux + 2.2, uz], [ux, uz + 1.9], [ux + 2.2, uz + 1.9]]) bag.add('timber', box(px - 0.04, y + H, pz - 0.04, px + 0.04, y + H + 1.9, pz + 0.04)); bag.add('reed_mat', box(ux - 0.2, y + H + 1.9, uz - 0.2, ux + 2.4, y + H + 1.96, uz + 2.1)); }
-  { const [a, b, c, d] = rect2, jx = a + 0.6 + rand() * (c - a - 1.2), jz = b + 0.6 + rand() * (d - b - 1.2); for (let i = 0; i < 2; i++) bag.add('terracotta', jarG(0.2 + i * 0.05, 0.5 + i * 0.1).translate(jx + i * 0.5, y + H, jz)); }
-  if (elite ? rand() < 0.6 : !poor && rand() < 0.14) { const hs = 0.6; for (let x = x0 + 2.5; x < x1 - 1; x += 4.4) horns(bag, x, y + H + 0.38, f === 'n' ? z0 + 0.3 : f === 's' ? z1 - 0.3 : z0 + 0.3, hs, true); }
+  if (rand() < 0.3) { const [a, b, c, d] = rect2, ux = a + 0.7 + rand() * Math.max(0.1, c - a - 3.4), uz = b + 0.7 + rand() * Math.max(0.1, d - b - 3.0); const hb = upper?.hatch, hit = hb && ux < hb[2] + 0.6 && ux + 2.4 > hb[0] - 0.6 && uz < hb[3] + 0.6 && uz + 2.1 > hb[1] - 0.6; if (!hit) { for (const [px, pz] of [[ux, uz], [ux + 2.2, uz], [ux, uz + 1.9], [ux + 2.2, uz + 1.9]]) bag.add('timber', box(px - 0.04, y + H, pz - 0.04, px + 0.04, y + H + 1.9, pz + 0.04)); bag.add('reed_mat', box(ux - 0.2, y + H + 1.9, uz - 0.2, ux + 2.4, y + H + 1.96, uz + 2.1)); } }
+  { const [a, b, c, d] = rect2; let jx = a + 0.6 + rand() * (c - a - 1.2), jz = b + 0.6 + rand() * (d - b - 1.2); const hb = upper?.hatch; if (hb && jx < hb[2] + 0.9 && jx + 0.5 > hb[0] - 0.4 && jz < hb[3] + 0.4 && jz > hb[1] - 0.4) { jx = a + c - jx; jz = b + d - jz; } for (let i = 0; i < 2; i++) bag.add('terracotta', jarG(0.2 + i * 0.05, 0.5 + i * 0.1).translate(jx + i * 0.5, y + H, jz)); }
+  if (elite ? rand() < 0.6 : !poor && rand() < 0.14) { const hs = 0.6; for (let x = x0 + 2.5; x < x1 - 1; x += 4.4) { const hz = f === 'n' ? z0 + 0.3 : f === 's' ? z1 - 0.3 : z0 + 0.3, hb = upper?.hatch; if (hb && x > hb[0] - 1.0 && x < hb[2] + 1.0 && hz > hb[1] - 1.0 && hz < hb[3] + 1.0) continue; horns(bag, x, y + H + 0.38, hz, hs, true); } }
   { const q = F.at('terracotta', sp, sp + 0.14, y + H - 0.15, y + H - 0.01, 0.0, 0.5); void q; F.at('plaster_streak', sp - 0.02, sp + 0.16, Math.max(y + 1.45, y + H - 2.0), y + H - 0.15, 0.0, 0.02); }
   // the yard behind a shorter house: its gate in the back wall is the yard's own element (yard_garden)
 }

@@ -4,6 +4,7 @@
 // from the town; the slope east down to the Kairatos stream; the town all round. The town is laid
 // out in rows of houses with party walls along paved lanes (§5a). Pure data. +x east, +z south.
 
+import { dwellingStoreys } from '../../styles/minoan/town.js';
 export const RADIUS = 350;
 export const COURT = [-13.5, -25, 13.5, 25];
 export const PALACE = [-64, -72, 64, 60];
@@ -119,4 +120,13 @@ export function openHouses() {
     if (c) m.set(c, trades[(s * 2 + j + (s > 5 ? 1 : 0)) % trades.length]);
   }
   return m;
+}
+
+/** The open houses whose upper floors can be climbed (§4j): the nearest to the arrival of two or more storeys, with at least two shops or stores and a weaver among them. */
+export function upstairsHouses() {
+  const open = openHouses(), out = new Set(), d = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - ARRIVAL[0], (l.rect[1] + l.rect[3]) / 2 - ARRIVAL[1]);
+  const cand = [...open.keys()].filter((l) => dwellingStoreys(l.seed, l.r) >= 2).sort((a, b) => d(a) - d(b));
+  for (const l of cand.slice(0, 14)) out.add(l);
+  for (const k of ['shop', 'store']) for (const l of cand.filter((l) => open.get(l) === k && !out.has(l)).slice(0, 2)) out.add(l);
+  return out;
 }

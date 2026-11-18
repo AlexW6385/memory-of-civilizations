@@ -3,8 +3,9 @@
 // people in the West Court and the Central Court — the men in kilt or loincloth, bare above the belt, long-haired;
 // the women in the long flounced skirt; a priestess before the Tripartite Shrine.
 
-import { ROAD, LANE, STREAM, STREAM_LEVEL, WESTCOURT, lanes, lots, openHouses, height, inRect, onStream } from './layout.js';
-import { dwellingFrame } from '../../styles/minoan/town.js';
+import { ROAD, LANE, STREAM, STREAM_LEVEL, WESTCOURT, lanes, lots, openHouses, upstairsHouses, height, inRect, onStream } from './layout.js';
+import { dwellingFrame, dwellingStoreys } from '../../styles/minoan/town.js';
+import { stairLayout, onStair } from '../../styles/minoan/upstairs.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const T0 = 0.5;
@@ -106,10 +107,12 @@ export function life() {
   man([26.5, 28.6], 0, { y: 0.03, pose: 'stand', dress: 'shendyt', cloth: 'cloth_red' });
 
   // ── the town (§10a): those at home in the open houses, people in the lanes, the washing at the Kairatos, the flock on the slope ──
-  const R2 = rand, openKinds = openHouses();
+  const R2 = rand, openKinds = openHouses(), upH = upstairsHouses();
   for (const [l, kind] of openKinds) {
     const el = { rect: l.rect, front: l.front, seed: l.seed }, F = dwellingFrame(el), y0 = Math.min(height(l.rect[0], l.rect[1]), height(l.rect[2], l.rect[1]), height(l.rect[0], l.rect[3]), height(l.rect[2], l.rect[3])) + 0.22;
-    const at = (u, v) => F.P(u, v), look = (a, u, v) => faceTo(a, at(u, v));
+    // (in a house with a stair, a figure standing on the stair's strips or at its foot is set to the far side)
+    const UP = upH.has(l) ? stairLayout(F, dwellingStoreys(l.seed, l.r), 0) : null;
+    const at = (u, v) => (UP && onStair(F, UP, u, v) ? F.P(F.L - u, v) : F.P(u, v)), look = (a, u, v) => faceTo(a, at(u, v));
     if (kind === 'home') { const a = at(F.L / 2 - 1.1, F.D - 2.1); woman(a, look(a, F.L / 2, F.D - 1.2), { y: y0, pose: 'squat' }); if (R2() < 0.6) { const b = at(F.L / 2 + 1.0, 1.5 + T0); man(b, look(b, F.L / 2, 6), { y: y0, pose: 'sit_ground', child: true, h: 1.1 }); } }
     else if (kind === 'weaver') { const a = at(F.L / 2, F.D - 1.5); woman(a, look(a, F.L / 2, F.D), { y: y0, pose: 'stand', cloth: 'cloth_red' }); }
     else if (kind === 'shop') { const a = at(F.L / 2 + 0.4, 2.0 + T0 - 0.2 + 1.2 + 0.7); man(a, look(a, F.L / 2, 1), { y: y0, pose: 'stand', dress: 'shendyt', cloth: 'cloth_white' }); if (R2() < 0.5) { const b = at(F.L / 2 - 1.2, 1.4); woman(b, look(b, F.L / 2 - 1.2, 4), { y: y0, pose: 'talk' }); } }
@@ -126,9 +129,12 @@ export function life() {
   }
   // the lanes: people by the doors and on the way, a donkey with its driver, children at play, dogs and cats
   let n = 0;
+  const doors = [...upH].map((l) => { const F = dwellingFrame({ rect: l.rect, front: l.front, seed: l.seed }); return F.P(F.du, -1.0); });
   for (const Ln of lanes()) {
     if (Math.hypot((Ln.x0 + Ln.x1) / 2, Ln.z) > 230) continue;
     for (let x = Ln.x0 + 4 + rand() * 10; x < Ln.x1 - 2; x += 14 + rand() * 20) {
+      // (a group that would stand in the doorway of a house open upstairs is set along the lane, clear of the door)
+      for (const d of doors) if (Math.abs(x - d[0]) < 2.4 && Math.abs(Ln.z - d[1]) < 3) x = d[0] + (x < d[0] ? -1 : 1) * 2.6 * 1.0 + (x < d[0] ? -1 : 1) * 0.2;
       const near = Math.hypot(x, Ln.z) < 170, p = rand();
       if (!near && (p < 0.8 || Math.hypot(x, Ln.z) > 220)) continue;
       const z = Ln.z + (rand() - 0.5) * 1.8, y = height(x, z) + 0.08, dir = rand() < 0.5 ? Math.PI / 2 : -Math.PI / 2;

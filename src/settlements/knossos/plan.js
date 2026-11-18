@@ -4,7 +4,9 @@
 // Wing of four storeys (the residential quarter, the Grand Staircase) with its portico on the
 // court; the South Wing and the south propylon; the West Court; the theatral area.
 
-import { COURT, THEATRAL } from './layout.js';
+import { COURT, THEATRAL, upstairsHouses, openHouses } from './layout.js';
+import { dwellingFrame, dwellingStoreys } from '../../styles/minoan/town.js';
+import { stairLayout, B0 } from '../../styles/minoan/upstairs.js';
 
 const E = [];
 // the Central Court's paving
@@ -152,6 +154,17 @@ walks.push([[0, -46], [4.4, -47], [10, -46.5]], [[0, -46], [-6, -47], [-12, -46.
 walks.push([[-10, 16], [-17, 15.6], [-21.5, 15.9], [-24, 16], [-28.5, 16], [-31, 16], [-33, 12]]);
 walks.push([[10, 1], [19, 1], [24, 1.2], [28, 5.7], [28, 2], [28, -1.5], [25.9, -1.5], [25.9, -2.9], [25.9, -5], [24, -8], [22.8, -11], [21.5, -11], [19.9, -11], [17, -11]]);
 walks.push([[28, 5.7], [28, -1.5], [24, -1.5], [24, 4.5], [24.5, 5.65], [25.9, 5.7], [25.9, 6.8], [26, 9], [28, 11]]);
+// the town houses upstairs (§4j): from the lane through the door, up the stair to the room of the first floor, the balcony on the lane, and on up to the roof
+for (const l of upstairsHouses()) {
+  const F = dwellingFrame({ rect: l.rect, front: l.front, seed: l.seed }), n = dwellingStoreys(l.seed, l.r), UP = stairLayout(F, n, 0), { L, D } = F, sgn = UP.left ? 1 : -1;
+  const c = (sI) => (UP.strip(sI)[0] + UP.strip(sI)[1]) / 2, mid = UP.left ? (L + UP.strip(1)[1]) / 2 : (UP.strip(1)[0] + 0) / 2 + 0.0, free = UP.left ? [UP.strip(1)[1] + 0.55, L - 0.5] : [0.5, UP.strip(1)[0] - 0.55];
+  const uM = (free[0] + free[1]) / 2, uB = Math.max(free[0] + 0.9, Math.min(free[1] - 0.9, uM)), R = UP.R, pts = [];
+  pts.push([F.du, -1.5], [F.du, 1.0], [c(0), B0 + 0.4], [c(0), B0 + R - 0.15], [c(0), B0 + R + 0.5], [uM, B0 + R + 1.0], [uB, 2.3], [uB, -0.5], [uB, 2.3], [uM, B0 + R + 1.0]);
+  pts.push([c(1), B0 + R + 0.4], [c(1), B0 + 0.0]);
+  if (n === 2) pts.push([UP.left ? free[0] + 0.3 : free[1] - 0.3, B0 + 0.4], [uM, D * 0.5]);
+  else pts.push([c(0), B0 + 0.35], [c(0), B0 + R - 0.15], [c(0), B0 + R + 0.5], [uM, D * 0.5]);
+  const w = pts.map(([u, v]) => F.P(u, v)); w.y0 = 0; walks.push(w); void sgn; void mid; void openHouses;
+}
 for (const w of walks) w.y0 = 0;
 walks[2].y0 = 0;
 walks[1].y0 = 0;
