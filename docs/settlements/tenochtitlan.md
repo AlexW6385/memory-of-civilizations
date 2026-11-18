@@ -175,3 +175,15 @@ Built (`src/styles/aztec/index.js`):
 - **Coyolxauhqui stone**: rebuilt in two relief levels with head, bell, headdress, belt, skull-jointed limbs and the knotted rim [stated composition; inferred placing].
 
 Arrival frame (draw-count): before main 3.52 M tris / 558 draws; after 3.64 M / 554.
+
+## 19. Sculpture and relief seen from two metres (round 4)
+
+Sources as §10, §12, §17 and §18 (World History Encyclopedia, ancient-history-sites, mesoweb on the House of Eagles, INAH on the Huey Tzompantli). Built in `src/styles/aztec/carve.js` from the Petra sculptor's kit and the Parthenon's skeleton kit (both read-only); shown by distance from `src/settlements/tenochtitlan/sculpt.js` (old form from 38–45 m, modelled form within):
+- **Serpent heads at the stair feet** (4; the 12 on the lowest terrace's plinths in a reduced form): skull with brow, snout turned up, lower jaw open on the ground, red mouth, forked tongue, fangs and tooth rows, eyes, ear spools, scale bosses; Tlaloc's ringed in blue, Huitzilopochtli's crested with feathers [stated: balustrades ended in serpent heads; inferred: the forms].
+- **Coyolxauhqui stone**: one continuous relief surface 2–9 cm high (head with feather-ball headdress, bell, ear spool; torso, belt, skull buckle; limbs cut at skull-marked joints; serpent bands; knotted rim), eyes cut in [stated: composition; inferred: placing].
+- **Chacmool** (reclining, knees up, head turned, hands on the dish), **standard-bearers** (seated, fists on the pole, paper banner in folds), **sacrificial stone** (rounded basalt block, convex top, stain, flint knife) [stated: chacmool, stone, seated bearers; inferred: forms].
+- **House of the Eagles**: modelled eagle heads at the stair feet; bench fronts with eagle and jaguar knights in low relief processing to the zacatapayolli, serpents along the lip [stated: mesoweb; inferred: costume details].
+- **Tzompantli**: modelled skulls on the tower's lower outer rows and the rack's west face; the rest as before [stated: INAH].
+- **Braziers** of Tlaloc with the knotted bow of bark paper [inferred: the bow].
+Two levels only (old / modelled), not three: the viewer's near/far plans cannot nest. Budget: arrival main 559 → 370 draws, 3.70 M → 2.26 M triangles: the houses in 100 m tiles (full within 150 m, simple solid form beyond), yards, chinampa houses and waters in compact plans shown only near.
+Still crude: relief figures are small (0.4 m) so faces are only suggested; the chacmool's feet and the bow's loops are rough.

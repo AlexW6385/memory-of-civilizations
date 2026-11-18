@@ -2,6 +2,10 @@
 // round their patios, their rooms furnished; the farmers' houses of wattle and thatch on the chinampas.
 import { RADIUS, LEVEL, ISLAND, PRECINCT, TM, SITES, houses, yards, priestHouses, houseGate, houseTrade, houseNoble, chinampaHouses, inLake, inLakeWater } from './layout.js';
 import { ground } from './ground.js';
+import { sculptPlans } from './sculpt.js';
+import { lodTiles } from '../lod.js';
+/** How far from the visitor the houses are built in full (m); the arrival (the Templo Mayor's twin shrines, 160 m and more from the nearest) sees the simple form. */
+const NEAR = 150;
 const base = (id, elements) => ({ id, style: 'aztec', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-60, 0], facing: 'e' } });
 /**
  * The precinct's floor and the life before the Templo Mayor (docs/settlements/tenochtitlan.md §13): the plaza's plaster worn, stained and painted
@@ -59,13 +63,35 @@ function precinct() {
   return [base('tenochtitlan-precinct-floor', [...E, ...M, { t: 'mx_people', people: P }]), { ...base('tenochtitlan-precinct-goods', L), style: 'life' }];
 }
 
+const posOf = (e) => (e.rect ? [(e.rect[0] + e.rect[2]) / 2, (e.rect[1] + e.rect[3]) / 2] : e.c ?? e.at ?? [0, 0]);
+/** `elements` in square tiles of `size` m, each its own plan shown within `reach` m of its middle. */
+function near(id, elements, size, reach) {
+  const tiles = new Map();
+  for (const e of elements) { const [x, z] = posOf(e), k = `${Math.floor(x / size)},${Math.floor(z / size)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
+  return [...tiles].map(([k, list]) => { const [i, j] = k.split(',').map(Number); return { ...base(`${id}-${k}`, list), near: reach, center: [(i + 0.5) * size, (j + 0.5) * size], nocollide: false }; });
+}
+/** `elements` by the octant of their bearing from the island's middle, each octant its own plan shown within `reach` m of its elements' mean place. A `tule_beds` / `at` list is split by its own points. */
+function sectors(id, elements, n, reach) {
+  const oct = (x, z) => ((Math.round(Math.atan2(z, x) / (Math.PI * 2) * n) % n) + n) % n, by = new Map();
+  for (const e of elements) {
+    if (e.t === 'tule_beds') { const parts = new Map(); for (const p of e.at) { const k = oct(p[0], p[1]); if (!parts.has(k)) parts.set(k, []); parts.get(k).push(p); } for (const [k, at] of parts) { if (!by.has(k)) by.set(k, []); by.get(k).push({ ...e, at }); } continue; }
+    const [x, z] = posOf(e), k = oct(x, z); if (!by.has(k)) by.set(k, []); by.get(k).push(e);
+  }
+  return [...by].map(([k, list]) => {
+    const P = list.flatMap((e) => (e.t === 'tule_beds' ? e.at : [posOf(e)])), c = [P.reduce((a, p) => a + p[0], 0) / P.length, P.reduce((a, p) => a + p[1], 0) / P.length];
+    return { ...base(`${id}-${k}`, list), near: reach, center: c };
+  });
+}
+
 export async function town() {
   const all = houses(), plans = [];
-  for (let i = 0; i < all.length; i += 150) plans.push(base(`tenochtitlan-houses-${i / 150}`, all.slice(i, i + 150).flatMap((h) => {
+  // the houses in tiles of 100 m, each built twice (src/settlements/lod.js): in full within NEAR of the visitor, simple (solid rooms, the wall, no furniture)
+  // beyond: the arrival frame shows the far form only, a tile's meshes are batched per material and culled by their own bounds
+  plans.push(...lodTiles('tenochtitlan-houses', 'aztec', all.flatMap((h) => {
     const c = [(h.rect[0] + h.rect[2]) / 2, (h.rect[1] + h.rect[3]) / 2], r = Math.hypot(c[0], c[1]), lod = r < 170 ? 2 : r < 250 ? 1 : 0;
     const noble = houseNoble(h);
     return [{ t: 'calli', ...h, noble }, { t: 'calli_front', rect: h.rect, seed: h.seed, gate: houseGate(h), trade: noble ? null : houseTrade(h), lod }];
-  })));
+  }), { near: NEAR, R: RADIUS, entrance: { at: [-60, 0], facing: 'e' } }));
   // the people in the priests' compounds of the precinct (layout.js): in each patio, by the gate's side
   {
     const kinds = ['priest', 'woman', 'sweeper', 'priest', 'woman', 'man', 'child', 'woman', 'priest'], people = [];
@@ -89,9 +115,10 @@ export async function town() {
       { t: 'mx_people', people: P },
     ];
   })));
-  plans.push(base('tenochtitlan-yards', yards().map((y) => ({ t: 'huerto', ...y }))));
+  // (what lies far from the visitor is cut into compact plans shown only within their `near` of him, so that its meshes are neither drawn nor counted from the other side of the island)
+  plans.push(...near('tenochtitlan-yards', yards().map((y) => ({ t: 'huerto', ...y })), 100, 170));
   // the farmers' houses on the chinampas, with their granaries, maguey and nopal
-  plans.push(base('tenochtitlan-chinampa-houses', chinampaHouses().map((h) => ({ t: 'chinampa_house', ...h, y: ground.height(h.c[0], h.c[1]) }))));
+  plans.push(...sectors('tenochtitlan-chinampa-houses', chinampaHouses().map((h) => ({ t: 'chinampa_house', ...h, y: ground.height(h.c[0], h.c[1]) })), 8, 270));
   // the channels of the chinampas: tule in the water, canoes tied at the plots with the farmers' loads, fishers, the plots' own people
   {
     const rp = ((q) => () => ((q = (q * 1664525 + 1013904223) >>> 0) / 4294967296))(1523), E = [], tule = [], W = LEVEL.water;
@@ -111,7 +138,7 @@ export async function town() {
       if (r < 306 || r > 328 || ground.height(x, z) > W - 0.3 || (x < 0 && Math.abs(z) < 18)) continue;
       E.push({ t: 'fisher_canoe', at: [x, z], dir: [0, 1], len: 4.6 + rp() * 0.8, y: W, seed: Math.floor(rp() * 1e6), fisher: i % 3 ? 'fisher' : 'farmer', cargo: i % 2 ? 'maize' : undefined });
     }
-    plans.push(base('tenochtitlan-waters', E));
+    plans.push(...sectors('tenochtitlan-waters', E, 8, 270));
   }
   // the lake round the island out to its shore by the disc's edge, the channels between the chinampas, the
   // canals' mouths (the canals within the island are the precinct's: plan.js)
@@ -120,5 +147,5 @@ export async function town() {
     { t: 'water_cells', rect: [-RADIUS, -RADIUS, RADIUS, RADIUS], y: LEVEL.water, cell: 2, inside: lake },
     { t: 'water_cells', rect: [-ISLAND, -ISLAND, ISLAND, ISLAND], y: LEVEL.water, cell: 0.8, inside: (x, z) => Math.hypot(x, z) > 299 && !lake(x, z) && inLakeWater(x, z, ground.height(x, z)) },
   ]), style: 'ming' });
-  return [...plans, ...precinct()];
+  return [...plans, ...precinct(), ...sculptPlans()];
 }

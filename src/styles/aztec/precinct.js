@@ -11,6 +11,7 @@ import { box, frustum, lathe } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import { Kit, carved, serpentHeadKit } from '../maya/meso.js';
 import { treads } from './index.js';
+import { Carver, tlalocBrazier as tlalocBrazierCarving, benchTile as benchTileCarving, eagleHead as eagleHeadCarving } from './carve.js';
 import '../../objects/index.js';
 
 const W = 'plaster_white', R = 'stucco_red', B = 'maya_blue', BK = 'paint_minoan_black', OC = 'paint_ochre', TC = 'terracotta', BS = 'basalt', LF = 'stucco_leaf';
@@ -138,11 +139,13 @@ const mictlan = () => carved('mictlantecuhtli', (k) => {
   for (let i = 0; i < 5; i++) k.bx(W, -0.08 + i * 0.04, -0.065 + i * 0.04, 1.47, 1.53, 0.14, 0.17);    // the teeth
 });
 
-/** A ceramic brazier with Tlaloc's face (mesoweb: tears of rain), about 0.8 m, facing +z: the goggles, the moustache-lip and fangs. */
-export const tlalocBrazier = () => carved('tlaloc-brazier', (k) => {
-  k.geo(TC, lathe([[0.2, 0], [0.16, 0.12], [0.2, 0.3], [0.28, 0.62], [0.3, 0.78], [0.26, 0.8], [0.001, 0.7]], 14));
-  for (const sx of [-1, 1]) { k.disc(B, sx * 0.1, 0.56, 0.23, 0.08, 0.06, 12, 0.04); k.fy(W, [sx * 0.05 - 0.025, sx * 0.05 + 0.025, 0.25, 0.3], [sx * 0.05 - 0.005, sx * 0.05 + 0.005, 0.27, 0.29], 0.42, 0.32); for (let t = 0; t < 2; t++) k.bx(B, sx * 0.1 - 0.015, sx * 0.1 + 0.015, 0.36 - t * 0.09, 0.42 - t * 0.09, 0.2, 0.25); }
-  k.fz(B, [-0.12, 0.12, 0.42, 0.47], [-0.1, 0.1, 0.43, 0.46], 0.23, 0.29);                               // the lip
+/** A ceramic brazier with Tlaloc's face and the knotted bow of paper (carve.js tlalocBrazier), about 0.8 m, facing +z; emit as a kit's. */
+export const tlalocBrazier = () => ({
+  emit(bag, x, y, z, dx, dz, s = 1) {
+    const C = new Carver({ at: [x, y, z], yaw: Math.atan2(dx, dz), s });
+    tlalocBrazierCarving(C, { lod: 1, seed: Math.round(x * 3 + z * 5) });
+    C.emit(bag);
+  },
 });
 
 /** A cut-conch merlon of the calmecac's roof (archaeology.org: snail-shaped, about 2.4 m), facing +z: a spiral volute on a block. */
@@ -161,7 +164,7 @@ const conchMerlon = () => carved('cut-conch', (k) => {
 // ---- the buildings -------------------------------------------------------------------------------------
 
 /** Benches along a wall face (ax, c, side) from a0 to a1, height 0.62, depth 0.9, the procession converging on the middle. */
-function benches(bag, col, ax, c, side, a0, a1, y) {
+function benches(bag, col, ax, c, side, a0, a1, y, SC) {
   const d = 0.9, L = a1 - a0, n = Math.max(1, Math.round(L / 2)), t = L / n;
   const r = ax === 'x' ? [a0, side > 0 ? c : c - d, a1, side > 0 ? c + d : c] : [side > 0 ? c : c - d, a0, side > 0 ? c + d : c, a1];
   bag.add(BS, box(r[0], y, r[1], r[2], y + 0.47, r[3])); col.rect(r, y, y + 0.62); col.floor(r, y + 0.62);
@@ -171,7 +174,8 @@ function benches(bag, col, ax, c, side, a0, a1, y) {
     const u = a0 + t * (i + 0.5), mid = i === Math.floor(n / 2), dir = u < (a0 + a1) / 2 ? 1 : -1;
     // the tile's +x must run along increasing u where the procession heads that way
     const [fx, fz] = ax === 'x' ? [0, side] : [side, 0], right = ax === 'x' ? side : -side;
-    benchTile(dir * right, mid).emit(bag, ax === 'x' ? u : fc, y, ax === 'x' ? fc : u, fx, fz, t / 2);
+    if (SC.lvl === 'new') { const C = new Carver({ at: [ax === 'x' ? u : fc, y, ax === 'x' ? fc : u], yaw: Math.atan2(fx, fz), s: t / 2 }); benchTileCarving(C, { dir: dir * right, zac: mid, seed: Math.round(u * 3 + c), lod: 0 }); C.emit(SC.bag); }
+    else if (SC.lvl) benchTile(dir * right, mid).emit(SC.bag, ax === 'x' ? u : fc, y, ax === 'x' ? fc : u, fx, fz, t / 2);
   }
 }
 /** The painted bands of a room's walls above the benches: black, blue, red, ochre, bottom to top (mesoweb). */
@@ -187,7 +191,11 @@ function wallBands(bag, ax, c, side, a0, a1, y, doors = []) {
  * benches (two Mictlantecuhtli figures at its door), the sunken patio with a pillar at each corner, and the
  * room with its small altar and pair of Tlaloc braziers; benches round the rooms, the walls banded.
  */
-export function eagleHouse(el, ctx) {
+export function eagleHouse(el, ctx0) {
+  // mode: 'all' (the whole with the old carvings), 'struct' (without them), 'old' | 'new' (the carvings only, in their old or modelled form: tenochtitlan/sculpt.js)
+  const only = el.mode === 'old' || el.mode === 'new', NOOP = new Proxy({}, { get: () => () => {} });
+  const ctx = { ...ctx0, bag: only ? NOOP : ctx0.bag, col: only ? NOOP : ctx0.col };
+  const SC = { bag: ctx0.bag, lvl: el.mode === 'new' ? 'new' : el.mode === 'struct' ? null : 'old' };
   const { bag, col } = ctx, [X0, Z0, X1, Z1] = el.rect, PH = 1.4, y = PH, H = 3.4, T = 0.6, rt = y + H + 0.4;
   const NW = [X0, Z0, X1, Z0 + 16], EW = [X1 - 18, Z0 + 16, X1, Z1];
   platform(bag, col, NW, 0, PH, 0.4); platform(bag, col, [EW[0], EW[1] - 0.6, EW[2], EW[3]], 0, PH, 0.4);
@@ -202,8 +210,9 @@ export function eagleHouse(el, ctx) {
     for (const sx of [-1, 1]) k.discAt(BK, sx * 0.355, 0.6, 0.0, 0.07, 0.03, sx * Math.PI / 2);
     for (let i = 0; i < 4; i++) k.seg(W, [-0.3 + i * 0.2, 0.7, -0.3], [-0.36 + i * 0.24, 1.05, -0.45], 0.06, 0.03);   // the crest
   });
-  for (const x of [X0 + 18.25, X0 + 27.75]) { eagleHead.emit(bag, x, 0, NW[3] + 3.9, 0, 1); col.rect([x - 0.4, NW[3] + 3.4, x + 0.4, NW[3] + 4.6], 0, 1); }
-  for (const z of [Z1 - 11.75, Z1 - 4.25]) { eagleHead.emit(bag, EW[0] - 3.9, 0, z, -1, 0); col.rect([EW[0] - 4.6, z - 0.4, EW[0] - 3.4, z + 0.4], 0, 1); }
+  const head = (x, z, dx, dz) => { if (SC.lvl === 'new') { const C = new Carver({ at: [x, 0, z], yaw: Math.atan2(dx, dz), s: 1.2 }); eagleHeadCarving(C, { seed: Math.round(x * 5 + z * 3) }); C.emit(SC.bag); } else if (SC.lvl) eagleHead.emit(SC.bag, x, 0, z, dx, dz); };
+  for (const x of [X0 + 18.25, X0 + 27.75]) { head(x, NW[3] + 3.9, 0, 1); col.rect([x - 0.4, NW[3] + 3.4, x + 0.4, NW[3] + 4.6], 0, 1); }
+  for (const z of [Z1 - 11.75, Z1 - 4.25]) { head(EW[0] - 3.9, z, -1, 0); col.rect([EW[0] - 4.6, z - 0.4, EW[0] - 3.4, z + 0.4], 0, 1); }
   // ---- the east wing: the portico facing west on pilasters, the main room behind
   const px = ex + 3.4, mz = (EW[1] + EW[3]) / 2, door = [{ at: mz, w: 1.8, h: 2.6 }];
   wall(bag, col, W, 'z', px, px + T, EW[1], Z1 - 0.4, y, y + H, door);
@@ -217,7 +226,7 @@ export function eagleHouse(el, ctx) {
   const rm = [px + T, EW[1], X1 - 0.4 - T, Z1 - 0.4 - T];
   bag.add(BS, box(rm[2] - 1.4, y, mz - 2, rm[2], y + 1.1, mz + 2)); band(bag, R, 'z', rm[2] - 1.4, -1, mz - 2, mz + 2, y + 0.8, y + 1.0, 0.02); col.rect([rm[2] - 1.4, mz - 2, rm[2], mz + 2], y, y + 1.1);
   for (const s of [-1, 1]) tlalocBrazier().emit(bag, rm[2] - 2.2, y, mz + s * 2.6, -1, 0);
-  benches(bag, col, 'x', rm[3], -1, rm[0], rm[2] - 1.6, y); wallBands(bag, 'x', rm[3] - 0.9, -1, rm[0], rm[2] - 1.6, y);
+  benches(bag, col, 'x', rm[3], -1, rm[0], rm[2] - 1.6, y, SC); wallBands(bag, 'x', rm[3] - 0.9, -1, rm[0], rm[2] - 1.6, y);
   // ---- the north wing: its portico facing south, the hall of benches, the sunken patio, the room of the altar
   const pz = ny - 3.4, bz = pz - T, hallX = X0 + 20, patX = [X0 + 20.6, X0 + 31], q = Z0 + 0.4;
   const doorsN = [{ at: X0 + 10, w: 1.6, h: 2.5 }, { at: (patX[0] + patX[1]) / 2, w: 2.0, h: 2.6 }, { at: X1 - 24, w: 1.4, h: 2.4 }];
@@ -232,10 +241,10 @@ export function eagleHouse(el, ctx) {
   bag.add(W, box(X0 + 0.4, y + H - 0.6, pz, ex, y + H, ny - 0.1)); band(bag, R, 'x', ny - 0.1, 1, X0 + 0.4, ex, y + H - 0.6, y + H, 0.03);
   for (const s of [-1, 1]) { mictlan().emit(bag, X0 + 10 + s * 1.5, y, pz + 0.6, 0, 1); col.rect([X0 + 10 + s * 1.5 - 0.35, pz + 0.3, X0 + 10 + s * 1.5 + 0.35, pz + 0.9], y, y + 1.9); }
   // the hall of benches
-  benches(bag, col, 'x', q + T, 1, X0 + 1, hallX - T, y); wallBands(bag, 'x', q + T + 0.9, 1, X0 + 1, hallX - T, y);
-  benches(bag, col, 'z', X0 + 0.4 + T, 1, q + T + 0.9, bz, y); wallBands(bag, 'z', X0 + 0.4 + T + 0.9, 1, q + T + 0.9, bz, y);
-  benches(bag, col, 'z', hallX - T, -1, q + T + 0.9, bz, y); wallBands(bag, 'z', hallX - T - 0.9, -1, q + T + 0.9, bz, y);
-  for (const [a0, a1] of runs(X0 + 1, hallX - T, [{ at: X0 + 10, w: 1.6 }], 0.1)) { benches(bag, col, 'x', bz, -1, a0, a1, y); wallBands(bag, 'x', bz - 0.9, -1, a0, a1, y); }
+  benches(bag, col, 'x', q + T, 1, X0 + 1, hallX - T, y, SC); wallBands(bag, 'x', q + T + 0.9, 1, X0 + 1, hallX - T, y);
+  benches(bag, col, 'z', X0 + 0.4 + T, 1, q + T + 0.9, bz, y, SC); wallBands(bag, 'z', X0 + 0.4 + T + 0.9, 1, q + T + 0.9, bz, y);
+  benches(bag, col, 'z', hallX - T, -1, q + T + 0.9, bz, y, SC); wallBands(bag, 'z', hallX - T - 0.9, -1, q + T + 0.9, bz, y);
+  for (const [a0, a1] of runs(X0 + 1, hallX - T, [{ at: X0 + 10, w: 1.6 }], 0.1)) { benches(bag, col, 'x', bz, -1, a0, a1, y, SC); wallBands(bag, 'x', bz - 0.9, -1, a0, a1, y); }
   // the patio, open to the sky, a pillar at each of its corners (its floor kept level with the rooms': the sunken floor is not modelled)
   const ps = [patX[0], q + T, patX[1], bz];
   bag.add('lime_plaster', box(ps[0], PH - 0.05, ps[1], ps[2], PH + 0.035, ps[3]));
