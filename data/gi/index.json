@@ -385,7 +385,7 @@
  },
  "angkor-wat": {
   "site": "angkor",
-  "hash": "3d670b7a39e293e0",
+  "hash": "e9e7a5c27e7a95e8",
   "rays": 128,
   "probes": 10034,
   "boxes": [
@@ -454,8 +454,8 @@
     ]
    }
   ],
-  "bytes": 165833,
-  "seconds": 29,
+  "bytes": 165807,
+  "seconds": 24,
   "baked": "2026-11-18"
  },
  "ayutthaya-wat": {
@@ -4643,7 +4643,7 @@
  },
  "song-hangzhou-liuhe": {
   "site": "song-hangzhou",
-  "hash": "ef2dade740e520b5",
+  "hash": "24bab2834f20c5ac",
   "rays": 128,
   "probes": 28237,
   "boxes": [
@@ -4686,9 +4686,9 @@
     ]
    }
   ],
-  "bytes": 438084,
-  "seconds": 44,
-  "baked": "2026-11-17"
+  "bytes": 437022,
+  "seconds": 43,
+  "baked": "2026-11-18"
  },
  "song-kaifeng-iron-pagoda": {
   "site": "song-kaifeng",
@@ -5121,7 +5121,7 @@
  },
  "vienna-cafe-museum": {
   "site": "vienna",
-  "hash": "3eb70d84593b649b",
+  "hash": "4d26f01aa2af74c6",
   "rays": 128,
   "probes": 11592,
   "boxes": [
@@ -5143,12 +5143,12 @@
    }
   ],
   "bytes": 177189,
-  "seconds": 15,
-  "baked": "2026-11-14"
+  "seconds": 13,
+  "baked": "2026-11-18"
  },
  "vienna-secession": {
   "site": "vienna",
-  "hash": "d395752e1fea07c8",
+  "hash": "cce1a42222d9653d",
   "rays": 128,
   "probes": 23088,
   "boxes": [
@@ -5175,7 +5175,7 @@
    }
   ],
   "bytes": 380596,
-  "seconds": 40,
+  "seconds": 43,
   "baked": "2026-11-18"
  },
  "wei-ye-bronze-sparrow": {
