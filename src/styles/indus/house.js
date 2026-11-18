@@ -6,6 +6,7 @@ import { lathe } from './kit.js';
 import { rng, pick, lotFrame, wellAt } from './kit.js';
 import { dressWall, dressDoor, dressRoof, dressCourt, furnishRoom, dressChute } from './dress.js';
 import { notchedBrick } from './civic.js';
+import { upperFloor, upperPlan, stairRails } from './upper.js';
 
 const T = 0.7, H0 = 3.3, PAR = 0.35;
 
@@ -169,22 +170,31 @@ export function house(el, ctx) {
   // the stair to the roof, in the court against the back range's front wall
   const sx = W - T - (rs ? lw + 0.1 : 0) - 1.1, sv1 = D - T - rb;
   if (sv1 - (T + 3.2) > 3.6) F.stairs(sx - 0.45, sv1 - 3.8, sx + 0.45, sv1, 0.05, H, 1);
-  // a second storey over the first back room, its doorway on the roof of the next room (the roofs are one level), furnished
-  if (!small && !isTrade && rand() < 0.34) {
+  // the upper floor of the houses opened upstairs (docs/settlements/mohenjo-daro.md §14): rooms on the roof of the back range, a loggia on the court
+  const oldSecond = !small && !isTrade && rand() < 0.34;
+  const upPl = el.up && sv1 - (T + 3.2) > 3.6 ? upperPlan(roomsOpen.slice(0, nb), sx, ls, lw, T) : null;
+  let upRes = null;
+  if (upPl) {
+    const uses = isTrade ? ['work', 'sleep'] : small ? ['sleep'] : ['sleep', 'store'];
+    upRes = upperFloor(lotFrame(ctx, el.rect, el.front, (el.y ?? 0) + H), { pl: upPl, rooms: roomsOpen.slice(0, nb), D, W, T, sx, sv1, uses: uses.slice(-upPl.up.length), rect: el.rect, lit: !!el.open });
+    ctx.route = [[du, -2.0], [du, T + 2.2], [sx, T + 2.2], [sx, sv1 - 4.2], [sx, sv1 - 0.3], ...upRes.walk].map(([u, v]) => F.pt(u, v));
+    stairRails(F, sx, sv1, H);
+    stor = false;
+  } else if (oldSecond) {
     const r = roomsOpen[0], F2 = lotFrame(ctx, el.rect, el.front, (el.y ?? 0) + H);
     room(F2, r, 'u1', (r[1] + r[3]) / 2, { t: 0.4, h: 2.8, parapet: false });
     furnishRoom(F2, [r[0] + 0.4, r[1] + 0.4, r[2] - 0.4, r[3] - 0.4], 'u1', rand() < 0.6 ? 'sleep' : 'work', rand, ctx.lights);
     stor = true;
   }
   // the well, in the court's front corner, a quern or jars at the wall
-  if (isTrade) { trade(F, kind, T + (ls ? lw : 0) + 0.3, T + 2.2, W - T - (rs ? lw : 0) - 0.3, D - T - rb - 0.2, rand, ctx.lights); }
-  else if (rand() < 0.36 || el.open) { const p = F.pt(W - T - 1.6, T + 3.2); wellAt(ctx.bag, ctx.col, p[0], F.y, p[1], 0.55); }
+  if (isTrade) { trade(F, kind, T + (ls ? lw : 0) + 0.3, T + 2.2, W - T - (rs ? lw : 0) - 0.3 - (upPl ? 2.2 : 0), D - T - rb - 0.2, rand, ctx.lights); }
+  else if (rand() < 0.36 || el.open) { const wu = upPl ? [du + 3.4, du - 3.4, W * 0.5, W * 0.3].find((c) => c > T + 1.2 && c < W - T - 1.2 && Math.abs(c - sx) > 2.4 && Math.abs(c - du) > 1.8) ?? W * 0.5 : W - T - 1.6, p = F.pt(wu, upPl ? T + 4.2 : T + 3.2); wellAt(ctx.bag, ctx.col, p[0], F.y, p[1], 0.55); }
   if (!isTrade && rand() < 0.5) for (let k = 0; k < 2; k++) jar(F, 'terracotta', T + 0.8 + k * 0.5, D - T - rb - 0.5, 1.2);
   // every room furnished by use; light only in the open houses
   const uses = ['sleep', 'kitchen', 'store', 'bath', 'work', 'sleep', 'store'], off = Math.floor(rand() * uses.length);
   roomsOpen.forEach((r, i) => furnishRoom(F, [r[0] + 0.4, r[1] + 0.4, r[2] - 0.4, r[3] - 0.4], doors[i], uses[(off + i * 2) % uses.length], rand, ctx.lights, !!el.open && i < 2));
-  dressCourt(F, rand, T + (ls ? lw : 0) + 0.3, T + 2.4, W - T - (rs ? lw : 0) - 0.3, D - T - rb - 0.1);
-  dressRoof(F, rand, stor ? roomsOpen.slice(1) : roomsOpen, W, D, H, T);
+  dressCourt(F, rand, T + (ls ? lw : 0) + 0.3, T + 2.4, W - T - (rs ? lw : 0) - 0.3 - (upPl ? 2.2 : 0), D - T - rb - 0.1);
+  dressRoof(F, rand, upPl ? roomsOpen.slice(upPl.s).map((r) => [r[0], r[1] + 1.8, r[2], r[3]]) : stor ? roomsOpen.slice(1) : roomsOpen, W, D, H, T);
   if (stor && el.street) dressChute(F, rng((el.seed ?? 1) * 7 + 3), roomsOpen[0][0] + 0.7, D, H);          // the upper room's bathroom drains through a chute to the street
   void pick; void lathe;
 }
