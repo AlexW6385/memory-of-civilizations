@@ -16,6 +16,8 @@ import { beamTris } from '../ming/index.js';
 import { arcadeWall } from '../mughal/index.js';
 import { courtHouse } from '../mughal/courthouse.js';
 import * as F from '../mughal/furnish.js';
+import { upPlan, P as upP, STRIP as UP_STRIP } from './stairplan.js';
+import { houseUpstairs } from './upstairs.js';
 
 const B = 'brick_buff', T = 'tile_lapis', Q = 'tile_turquoise';
 const boxR = (r, y0, y1) => box(r[0], y0, r[1], r[2], y1, r[3]);
@@ -1215,6 +1217,11 @@ function khanehOpen(el, { bag, col, lights }) {
     return { kind: 'solid', h: H };
   };
   const wings = {}; for (const sd of ['n', 's', 'e', 'w']) wings[sd] = wing(v.wings[sd] ?? 'solid', sd);
+  // the upstairs (docs/settlements/isfahan.md §25): the stair wing's one door moves to the foot end, its windows go, the flight stands in the court
+  const up = el.up ? upPlan(rect, entry, v) : null;
+  const strip = up ? (() => { const a = upP(up, 0, -UP_STRIP - 0.6), b = upP(up, up.L, 0); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; })() : null;
+  const inStrip = (x, z, m = 0.3) => !!strip && x > strip[0] - m && x < strip[2] + m && z > strip[1] - m && z < strip[3] + m;
+  if (up) wings[up.side] = { kind: 'room', h: H - 0.3, arches: [{ at: 0.85 / up.L, w: 1.05, h: 2.4 }] };
   const R = courtHouse(bag, col, { rect, y: 0, th: 0.6, ti: 0.45, fh, H, d, mats: M, entry: { side: entry, span: [0.3, 0.72], at: 0.32, inner: 0.76, w: 1.25 }, wings });
   const c = R.court, cx = (c[0] + c[2]) / 2, cz = (c[1] + c[3]) / 2;
   const [pcx, pcz, pw, pd] = v.pool ?? [cx, cz, Math.min(2.4, (c[2] - c[0]) * 0.2), Math.min(1.6, (c[3] - c[1]) * 0.16)];
@@ -1223,9 +1230,9 @@ function khanehOpen(el, { bag, col, lights }) {
   col.rect([pcx - pw - 0.3, pcz - pd - 0.3, pcx + pw + 0.3, pcz + pd + 0.3], 0, 0.45);
   bag.add('tile_turquoise', box(pcx - pw, 0.04, pcz - pd, pcx + pw, 0.1, pcz + pd));
   bag.add('water', box(pcx - pw, 0.3, pcz - pd, pcx + pw, 0.36, pcz + pd));
-  for (const [bx, bz, hb = 1.0] of v.beds ?? [[cx - pw - 2.1, cz], [cx + pw + 2.1, cz]]) { bag.add('limestone', box(bx - hb, 0.04, bz - hb, bx + hb, 0.2, bz + hb)); bag.add('earth_wall', box(bx - hb + 0.12, 0.04, bz - hb + 0.12, bx + hb - 0.12, 0.22, bz + hb - 0.12)); }
+  for (const [bx, bz, hb = 1.0] of (v.beds ?? [[cx - pw - 2.1, cz], [cx + pw + 2.1, cz]]).filter(([bx, bz, hb = 1.0]) => !strip || !(bx + hb > strip[0] - 0.3 && bx - hb < strip[2] + 0.3 && bz + hb > strip[1] - 0.3 && bz - hb < strip[3] + 0.3))) { bag.add('limestone', box(bx - hb, 0.04, bz - hb, bx + hb, 0.2, bz + hb)); bag.add('earth_wall', box(bx - hb + 0.12, 0.04, bz - hb + 0.12, bx + hb - 0.12, 0.22, bz + hb - 0.12)); }
   // a takht: a raised platform of brick against the vestibule's wall, its carpet and bolsters, a step up
-  if (v.takht) {
+  if (v.takht && !up) {
     const al = entry === 's', len = 2.4, dep = 2.2, t = v.takht;
     bag.add('brick_buff', box(t[0], 0.04, t[1], t[2], 0.46, t[3])); bag.add('limestone', box(t[0], 0.46, t[1], t[2], 0.5, t[3])); col.floor(t, 0.5);
     const st = al ? [t[0], t[1] - 0.5, t[2], t[1]] : entry === 'w' ? [t[2], t[1], t[2] + 0.5, t[3]] : [t[0] - 0.5, t[1], t[0], t[3]];
@@ -1235,8 +1242,8 @@ function khanehOpen(el, { bag, col, lights }) {
     F.bolster(bag, al ? mx : (entry === 'w' ? t[0] + 0.25 : t[2] - 0.25), 0.5, al ? t[3] - 0.25 : mz, 1.5, 0.13, al ? 0 : Math.PI / 2, 'cloth_indigo', 'cloth_ochre');
     F.cushion(bag, al ? mx - 0.6 : mx, 0.512, al ? t[3] - 0.8 : mz - 0.6, 0.55, 0.55, 0.1, 0, 'cloth_red');
   }
-  F.waterJar(bag, c[2] - 0.6, 0.04, c[3] - 0.6, 1);
-  F.pots(bag, c[0] + 0.5, 0.04, c[3] - 0.45, 0, 3, ['terracotta', 'glaze_blue', 'terracotta']);
+  if (!inStrip(c[2] - 0.6, c[3] - 0.6)) F.waterJar(bag, c[2] - 0.6, 0.04, c[3] - 0.6, 1);
+  if (!inStrip(c[0] + 0.5, c[3] - 0.45)) F.pots(bag, c[0] + 0.5, 0.04, c[3] - 0.45, 0, 3, ['terracotta', 'glaze_blue', 'terracotta']);
   // the talar's frame on the court: brick pilasters, a band of tile across the head
   const t = R.n.room, ty = R.n.y, tw = t[2] - t[0], td = t[3] - t[1], tx = (t[0] + t[2]) / 2, tz = (t[1] + t[3]) / 2;
   { const zf = t[3] + 0.45, ar = wings.n.arches, g0 = t[0] + ar[0].at * tw - ar[0].w / 2, g1 = t[0] + ar[ar.length - 1].at * tw + ar[ar.length - 1].w / 2, hw0 = 0.55;
@@ -1321,7 +1328,7 @@ function khanehOpen(el, { bag, col, lights }) {
     const k = v.wings[sd]; if (!k || k === 'vestibule') continue;
     const f = frame(sd);
     if (k === 'sedari') sedari(f, false); else if (k === 'winter') sedari(f, true); else if (k === 'kitchen') hearth(f, 1); else if (k === 'store') store(f);
-    if (v.dome && (k === 'kitchen' || k === 'store')) { const rr = f.rr, r = Math.min(f.w, f.dep) * 0.36, hh = R[sd].h; bag.add('plaster_white', lathe(domeProfile(r, r * 0.8, 0), 14, null, (rr[0] + rr[2]) / 2, hh - 0.02, (rr[1] + rr[3]) / 2)); }
+    if (v.dome && !(up && up.side === sd) && (k === 'kitchen' || k === 'store')) { const rr = f.rr, r = Math.min(f.w, f.dep) * 0.36, hh = R[sd].h; bag.add('plaster_white', lathe(domeProfile(r, r * 0.8, 0), 14, null, (rr[0] + rr[2]) / 2, hh - 0.02, (rr[1] + rr[3]) / 2)); }
   }
   // the vestibule: a lamp, a clay jug hung in the dalan, a bench of brick by the wall
   { const ve = R[entry].room, vy = R[entry].y; hangingLamp(bag, lights, (ve[0] + ve[2]) / 2, vy + 2.6, (ve[1] + ve[3]) / 2, R[entry].top - 0.16, 2.5, 6); }
@@ -1346,6 +1353,7 @@ function khanehOpen(el, { bag, col, lights }) {
   } else {
     bx(door - 1.0, door + 1.0, 0.25, 0.8, 0, 0.1, 'limestone');
   }
+  if (up) houseUpstairs({ bag, col, lights }, up, M, el.up, seed);
 }
 
 /**

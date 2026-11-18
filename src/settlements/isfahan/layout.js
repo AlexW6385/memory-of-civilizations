@@ -5,6 +5,8 @@
 // north; and round them the town of courtyard houses. Pure data.
 // Coordinates: metres, +x east, +z south.
 
+import { upPlan, P as upP, STRIP } from '../../styles/safavid/stairplan.js';
+
 export const RADIUS = 420;
 export const SQUARE = [-80, -300, 80, 260];           // 160 × 560 m
 export const ARCADE = 12;                             // the arcade's depth
@@ -60,6 +62,7 @@ export const OPEN_HOUSE = () => houses().reduce((b, h) => (Math.hypot((h.rect[0]
 
 // ── the houses beyond the arrival's 120 m that can be entered (docs/settlements/isfahan.md §22) ──
 let OPENS = null;
+export const UP_HOUSES = 10, UP_KINDS = ['merchant', 'craftsman', 'tenement', 'inn'];
 const freeWay = (x, z) => !inHouse(x, z, 0.4) && !inMosque(x, z, 1) && !inRect(BUILT, x, z) && !inRect(GARDEN, x, z, 1) && !inRect(TEAHOUSE, x, z, 1) && !inRect(CHAHAR, x, z, 1) && !inRect([88, -58, 122, -8], x, z) && !(Math.abs(x) < 14 && z < -300);
 /**
  * The houses that can be entered: the lane house and about fourteen more spread over the town beyond 125 m of the arrival,
@@ -83,6 +86,9 @@ export function openHouses() {
   }
   void pickd;
   OPENS = chosen.map((h, i) => houseVar(h, i === 0 ? 'w' : doorSide(h)));
+  // the upstairs (docs/settlements/isfahan.md §25): the ten houses nearest the arrival whose kitchen or store wing is long enough for the flight, of four kinds in turn
+  const near = OPENS.filter((h) => upPlan(h.rect, h.entry, h.v)).sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2 - ARRIVAL[0], (a.rect[1] + a.rect[3]) / 2 - ARRIVAL[1]) - Math.hypot((b.rect[0] + b.rect[2]) / 2 - ARRIVAL[0], (b.rect[1] + b.rect[3]) / 2 - ARRIVAL[1])).slice(0, UP_HOUSES);
+  near.forEach((h, i) => { h.up = UP_KINDS[i % UP_KINDS.length]; });
   return OPENS;
 }
 /** The side of the street door: the lane (w, e or s) with the most free way before it, at least 2.4 m. */
@@ -124,13 +130,17 @@ export function houseSpots(h) {
   const [x0, z0, x1, z1] = h.rect, d = h.v.d, rr = { n: [x0 + d.w, z0 + 0.6, x1 - d.e, z0 + d.n - 0.45], w: [x0 + 0.6, z0 + d.n, x0 + d.w - 0.45, z1 - d.s], e: [x1 - d.e + 0.45, z0 + d.n, x1 - 0.6, z1 - d.s], s: [x0 + d.w, z1 - d.s + 0.45, x1 - d.e, z1 - 0.6] };
   const court = [x0 + d.w, z0 + d.n, x1 - d.e, z1 - d.s], t = rr.n, out = { rooms: rr, court, people: [] };
   out.people.push({ at: [(t[0] + t[2]) / 2 - 1.4, t[1] + 1.25], rot: Math.PI, y: 0.47, pose: 'cross', man: true, cloth: 'cloth_green' });
-  out.people.push({ at: [court[2] - 1.6, court[3] - 1.3], rot: Math.PI / 2, y: 0.04, pose: 'stand', man: true, cloth: 'cloth_white' });
+  // (a house with a stair keeps its servant clear of the flight and the pool)
+  const pl = h.up ? upPlan(h.rect, h.entry, h.v) : null, sr = pl ? (() => { const a = upP(pl, 0, -STRIP - 0.6), b = upP(pl, pl.L, 0); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; })() : null;
+  const [pcx, pcz, ppw, ppd] = h.v.pool, free = ([x, z]) => !(sr && x > sr[0] - 0.8 && x < sr[2] + 0.8 && z > sr[1] - 0.8 && z < sr[3] + 0.8) && !(Math.abs(x - pcx) < ppw + 1.0 && Math.abs(z - pcz) < ppd + 1.0);
+  const spot = [[court[2] - 1.6, court[3] - 1.3], [court[0] + 1.6, court[1] + 1.4], [court[2] - 1.6, court[1] + 1.4], [court[0] + 1.6, court[3] - 1.3]].find(free) ?? [court[2] - 1.6, court[3] - 1.3];
+  out.people.push({ at: spot, rot: Math.PI / 2, y: 0.04, pose: 'stand', man: true, cloth: 'cloth_white' });
   for (const side of ['s', 'w', 'e']) if (h.v.wings[side] === 'kitchen') {
     const r = rr[side], along = side === 's', cu = along ? (r[0] + r[2]) / 2 : (r[1] + r[3]) / 2, w = along ? r[2] - r[0] : r[3] - r[1];
     const at = along ? [cu + w * 0.28, r[3] - 1.4] : [side === 'w' ? r[0] + 1.4 : r[2] - 1.4, cu + w * 0.28], dir = along ? [0, 1] : [side === 'w' ? -1 : 1, 0];
     out.people.push({ at, rot: Math.atan2(-dir[0], -dir[1]), y: 0.47, pose: 'stand', woman: true });
   }
-  if (h.v.takht) { const k = h.v.takht, e = h.entry; out.people.push({ at: [(k[0] + k[2]) / 2 + (e === 'w' ? -0.1 : e === 'e' ? 0.1 : 0), (k[1] + k[3]) / 2 + (e === 's' ? 0.1 : 0)], rot: e === 'w' ? -Math.PI / 2 : e === 'e' ? Math.PI / 2 : 0, y: 0.52, pose: 'cross', man: true, cloth: 'cloth_ochre' }); }
+  if (h.v.takht && !h.up) { const k = h.v.takht, e = h.entry; out.people.push({ at: [(k[0] + k[2]) / 2 + (e === 'w' ? -0.1 : e === 'e' ? 0.1 : 0), (k[1] + k[3]) / 2 + (e === 's' ? 0.1 : 0)], rot: e === 'w' ? -Math.PI / 2 : e === 'e' ? Math.PI / 2 : 0, y: 0.52, pose: 'cross', man: true, cloth: 'cloth_ochre' }); }
   return out;
 }
 let GRID = null;
@@ -170,4 +180,34 @@ export function arcadeBays() {
     }
   }
   return out;
+}
+
+/**
+ * The walk from the lane up to the upper room of a house with a stair (walk-check): through the street door and the
+ * vestibule into the court, round the pool and the beds to the foot of the flight, up it and across the landing onto the
+ * roof, along the terrace to the room's door and in.
+ */
+export function upWalk(h) {
+  const pl = upPlan(h.rect, h.entry, h.v), [x0, z0, x1, z1] = h.rect, d = h.v.d, c = pl.court, sp = houseSpots(h);
+  const side = h.entry, alongX = side === 's', lo = alongX ? c[0] : c[1], Lf = alongX ? c[2] - c[0] : c[3] - c[1];
+  const a = lo + Lf * 0.3, L2 = Lf * 0.42, dA = a + L2 * 0.32, dB = a + L2 * 0.76;
+  const Wd = (k, u) => (side === 'w' ? [x0 + k, u] : side === 'e' ? [x1 - k, u] : [u, z1 - k]);       // k in from the outer edge, u along
+  const out = [Wd(-2.5, dA), Wd(1.4, dA), Wd(1.4, dB)];
+  const into = side === 'w' ? d.w + 1.0 : side === 'e' ? d.e + 1.0 : d.s + 1.0, start = Wd(into, dB);
+  const sr = (() => { const p = upP(pl, pl.uF - 0.1, -STRIP - 0.5), q = upP(pl, pl.L, 0.2); return [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; })();
+  const [pcx, pcz, pw, pd] = h.v.pool, rects = [sr, [pcx - pw - 0.8, pcz - pd - 0.8, pcx + pw + 0.8, pcz + pd + 0.8]];
+  const hit = (p) => rects.some((r) => p[0] > r[0] && p[0] < r[2] && p[1] > r[1] && p[1] < r[3]) || sp.people.some((q) => q.y < 0.1 && Math.hypot(p[0] - q.at[0], p[1] - q.at[1]) < 0.9);
+  const clear = (p, q) => { const n = Math.ceil(Math.hypot(q[0] - p[0], q[1] - p[1]) / 0.2); for (let i = 0; i <= n; i++) if (hit([p[0] + (q[0] - p[0]) * i / n, p[1] + (q[1] - p[1]) * i / n])) return false; return true; };
+  const foot = upP(pl, pl.uF - 0.2, -STRIP / 2), nodes = [start, foot];
+  for (let x = c[0] + 0.8; x <= c[2] - 0.8; x += 1.0) for (let z = c[1] + 0.8; z <= c[3] - 0.8; z += 1.0) if (!hit([x, z])) nodes.push([x, z]);
+  const dist = nodes.map(() => Infinity), prev = nodes.map(() => -1), done = nodes.map(() => false); dist[0] = 0;
+  for (;;) {
+    let u = -1; for (let i = 0; i < nodes.length; i++) if (!done[i] && (u < 0 || dist[i] < dist[u])) u = i;
+    if (u < 0 || u === 1 || dist[u] === Infinity) break;
+    done[u] = true;
+    for (let v = 0; v < nodes.length; v++) if (!done[v] && clear(nodes[u], nodes[v])) { const w = dist[u] + Math.hypot(nodes[u][0] - nodes[v][0], nodes[u][1] - nodes[v][1]); if (w < dist[v]) { dist[v] = w; prev[v] = u; } }
+  }
+  const path = []; for (let i = 1; i >= 0; i = prev[i]) path.unshift(nodes[i]);
+  const tL = pl.uF + pl.run, vm = (0.35 + pl.dw - 0.47) / 2;
+  return [...out, ...path, upP(pl, pl.uF + pl.run / 2, -STRIP / 2), upP(pl, tL + 0.5, -STRIP / 2), upP(pl, tL + 0.5, 0.8), upP(pl, pl.Lr + 0.5, 0.7), upP(pl, pl.Lr + 0.5, vm), upP(pl, pl.Lr - 0.9, vm), upP(pl, pl.Lr - 1.5, vm)];
 }
