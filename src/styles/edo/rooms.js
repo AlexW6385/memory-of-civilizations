@@ -22,7 +22,7 @@ export function tatami(B, u0, u1, q0, q1, v) {
  * things; H = { r (the house's block), H1 (the ground storey), H2 (the upper), roof } — the caller adds the upper
  * storey's front, the pent roof and the main roof as for any machiya.
  */
-export function machiyaShop(el, { bag, col }, { r, H1, H2 }) {
+export function machiyaShop(el, { bag, col }, { r, H1, H2, up }) {
   const rand = rng((el.seed || 1) * 3 + 7), f = el.front || 's', s = f === 's' ? 1 : -1, fz = f === 's' ? r[3] : r[1];
   const [x0, , x1] = r, dep = Math.abs(r[3] - r[1]), Z = (q) => fz - s * q;
   const B = (m, u0, u1, v0, v1, q0, q1) => bag.add(m, box(Math.min(u0, u1), Math.min(v0, v1), Math.min(Z(q0), Z(q1)), Math.max(u0, u1), Math.max(v0, v1), Math.max(Z(q0), Z(q1))));
@@ -33,10 +33,14 @@ export function machiyaShop(el, { bag, col }, { r, H1, H2 }) {
   // ---- the shell: the plastered side and back walls on a dark plinth, the upper storey solid over the ground storey's ceiling
   for (const [u0, u1] of [[x0, ua], [ub, x1]]) { B(PL, u0, u1, 0, H1, 0, dep); B('plaster_grey', u0 - 0.004, u1 + 0.004, 0, 0.5, 0.05, dep - 0.05); C(u0, u1, 0, dep, 0, H1); }
   B(PL, ua, ub, 0, H1, qb, dep); C(ua, ub, qb, dep, 0, H1);
-  B(PL, x0, x1, H1, H1 + H2, 0, dep); C(x0, x1, 0, dep, H1, H1 + H2);
+  if (!up) { B(PL, x0, x1, H1, H1 + H2, 0, dep); C(x0, x1, 0, dep, H1, H1 + H2); }
   // the ground storey's ceiling: the joists and the boards of the floor above
-  B('timber', ua, ub, H1 - 0.04, H1, 0.12, qb);
-  for (let q = 0.6; q < qb - 0.2; q += 0.9) B(WD, ua, ub, H1 - 0.16, H1 - 0.04, q - 0.05, q + 0.05);
+  // (over a chest-stair the boards leave its opening, and the joists stop at it)
+  const hl = up ? up.hole : null;
+  if (!hl) B('timber', ua, ub, H1 - 0.04, H1, 0.12, qb);
+  else { B('timber', ua, ub, H1 - 0.04, H1, 0.12, hl[2]); B('timber', ua, hl[0], H1 - 0.04, H1, hl[2], hl[3]); B('timber', ua, ub, H1 - 0.04, H1, hl[3], qb); }
+  for (let q = 0.6; q < qb - 0.2; q += 0.9) { if (hl && q + 0.05 > hl[2] && q - 0.05 < hl[3]) B(WD, ua, hl[0], H1 - 0.16, H1 - 0.04, q - 0.05, q + 0.05); else B(WD, ua, ub, H1 - 0.16, H1 - 0.04, q - 0.05, q + 0.05); }
+  if (hl) { B(WD, hl[0] - 0.05, hl[0], H1 - 0.16, H1, hl[2], hl[3]); B(WD, hl[0] - 0.05, ub, H1 - 0.16, H1, hl[2] - 0.05, hl[2]); }
   // the front's frame: the posts at the corners and between the passage and the shop, the head beam
   for (const u of [x0 + 0.08, du, x1 - 0.08]) { B(WD, u - 0.09, u + 0.09, 0, H1 - 0.25, 0.02, 0.2); C(u - 0.09, u + 0.09, 0.02, 0.2, 0, H1); }
   // ---- the passage (tōri-niwa): an earth floor from the street to the back; the shop's raised floor of mats beside it

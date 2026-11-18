@@ -6,11 +6,10 @@ import { OPENED } from './plan.js';
 import { insidePeople } from '../../styles/edo/stores.js';
 import { nagayaPeople, yardFace } from '../../styles/edo/nagaya.js';
 import { yashikiParts } from '../../styles/edo/yard.js';
-import { RADIUS, STREET, OUTER, MIDDLE, LEVEL, HON, DAI, NINO, lots, furniture } from './layout.js';
+import { RADIUS, STREET, OUTER, MIDDLE, LEVEL, HON, DAI, NINO, lots, furniture, isOpen, upperHouses } from './layout.js';
 const base = (id, elements, style = 'edo') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 240], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
-/** Which houses are open inside: a machiya in two (its shop), a samurai compound in two (reception room and retainers' row) (its reception room). */
-export const isOpen = (l) => (l.t === 'machiya' ? l.seed % 2 === 0 || l.trade === 'sake' || l.trade === 'tea' : l.seed % 2 === 0);
+export { isOpen };
 
 /**
  * The Honmaru's life as the visitor arrives (docs §5.2): the gate guards at the foot of the stair up to the keeps, a
@@ -75,7 +74,7 @@ function life() {
 
 export async function town() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 60) plans.push(base(`edo-himeji-town-${i / 60}`, all.slice(i, i + 60).map((l) => ({ ...l, simple: true, open: isOpen(l) }))));
+  for (let i = 0; i < all.length; i += 60) plans.push(base(`edo-himeji-town-${i / 60}`, all.slice(i, i + 60).map((l) => ({ ...l, simple: true, open: isOpen(l), up: upperHouses().get(l) }))));
   plans.push(base('edo-himeji-furniture', furniture().flatMap((f) => (f.t === 'landing'
     ? [{ t: 'stairs', rect: [f.x - 1.5, f.z0, f.x + 1.5, f.z0 + 1.7], y0: LEVEL.bed, y1: 0.3, dir: 'n', mat: 'ishigaki' }]
     : f.t === 'moat_boat' ? [{ ...f, y: LEVEL.water - 0.08 }] : [f]))));
