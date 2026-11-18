@@ -100,6 +100,9 @@ export function upperFloors(k) {
       for (const [a, b] of xs) if (b - a > 0.2) B(a, y - 0.46, z - 0.07, b, y - 0.32, z + 0.07, 'timber');
     }
     RC(0, y, 0, T, yc, D); RC(W - T, y, 0, W, yc, D); RC(0, y, D - T, W, yc, D);
+    // the walls' lower part washed with mud plaster, a hand's breadth proud of the brick (the kitchen's to the ceiling's beams)
+    const dh = R[i] === 'baiga' ? yc - y - 0.5 : 1.1;
+    B(T, y, T + 0.02, T + 0.03, y + dh, D - T, 'mud_plaster'); B(W - T - 0.03, y, T + 0.02, W - T, y + dh, D - T, 'mud_plaster'); B(T + 0.03, y, D - T - 0.03, W - T - 0.03, y + dh, D - T, 'mud_plaster');
   }
   // the ceiling of the top floor: a plank ceiling on joists under the soffit (the roof stands over it)
   B(T, H - 0.3, T, W - T, H - 0.2, D - T, 'wood_ochre');
@@ -207,9 +210,9 @@ export function upperFloors(k) {
       const segs = k.door ? [[seat.x0, k.door[0] - 0.04], [k.door[1] + 0.04, seat.x1]] : [[seat.x0, seat.x1]];
       for (const [a, b] of segs) {
         if (b - a < 0.15) continue;
-        B(a, y, 0.02, b, y + 0.4, T + 0.42, 'wood_ochre');
-        col.floor(wrect(a, 0.0, b, T + 0.42), y + 0.4);
-        for (let x = a + 0.08; x < b - 0.5; x += 1.15) B(x, y + 0.4, 0.06, Math.min(b - 0.06, x + 0.8), y + 0.46, T + 0.38, COLS[(Math.floor(x * 3) + rr) % 3]);
+        B(a, y, T, b, y + 0.42, T + 0.42, 'wood_ochre');                       // (the brick sill in the wall is the seat's back half)
+        col.floor(wrect(a, 0.0, b, T + 0.42), y + 0.42);
+        for (let x = a + 0.08; x < b - 0.5; x += 1.15) B(x, y + 0.42, 0.06, Math.min(b - 0.06, x + 0.8), y + 0.48, T + 0.38, COLS[(Math.floor(x * 3) + rr) % 3]);
       }
     }
     // the family's mat with cushions and a low table on the left in the middle, a lamp niche, the household shrine
@@ -244,6 +247,7 @@ export function upperFloors(k) {
     const hx = W - T - 1.5, hz = backZ - 1.3;
     B(hx, y, hz, hx + 1.4, y + 0.5, hz + 1.2, 'mud_plaster'); RC(hx, y, hz, hx + 1.4, y + 0.6, hz + 1.2);
     B(hx + 0.12, y + 0.5, hz + 0.12, hx + 0.48, y + 0.58, hz + 0.48, 'wood_dark'); B(hx + 0.82, y + 0.5, hz + 0.12, hx + 1.18, y + 0.58, hz + 0.48, 'wood_dark');
+    B(hx + 0.55, y + 0.5, hz + 0.55, hx + 0.8, y + 0.53, hz + 1.05, 'cloth_red');                // the embers between the pot-rests
     P(hx + 0.3, y + 0.58, hz + 0.3, 'round', 1.3, true); P(hx + 1.0, y + 0.58, hz + 0.3, 'bowl', 1.1, false);
     for (let j = 0; j < 4; j++) B(hx - 0.35, y + 0.0 + j * 0.1, hz + 0.1 + j * 0.02, hx - 0.05, y + 0.1 + j * 0.1, hz + 1.1 - j * 0.04, 'timber');
     // the shrine of the house's god on the back wall: a framed niche with a gilt image, a lamp and marigolds, a low plank before it
