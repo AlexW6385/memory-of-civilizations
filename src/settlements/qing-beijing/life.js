@@ -5,7 +5,7 @@
 // few officials at the foot of the terrace: no crowds), pigeons in the lanes. Positions come from
 // layout.js; nothing is hard-coded but the buildings' places on the avenue (shops.js).
 import './style.js';
-import { betweenGates, RADIUS, AVENUE, HALLS, TIERS, RING, MOAT, LEVEL, TEMPLE, DANBI, SHOP_APRONS, CARRIAGE, WALK_UP, interiorShops, furnishedHouses, shopRows, houses, lanes } from './layout.js';
+import { betweenGates, RADIUS, AVENUE, HALLS, TIERS, RING, MOAT, LEVEL, TEMPLE, DANBI, SHOP_APRONS, CARRIAGE, WALK_UP, interiorShops, furnishedHouses, isDeep, shopRows, houses, lanes } from './layout.js';
 import { SHOP_SITES } from './shops.js';
 
 const base = (id, style, elements, center = [0, 0]) => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 215], facing: 'n' }, center, near: 230 });
@@ -39,7 +39,7 @@ export async function lifePlans() {
   for (const h of near) { const k = Math.floor((h.rect[0] + h.rect[2]) / 2 / 200) + ',' + Math.floor((h.rect[1] + h.rect[3]) / 2 / 200); (tiles.get(k) || tiles.set(k, []).get(k)).push(h); }
   for (const [k, hs] of tiles) {
     const cx = hs.reduce((a, h) => a + (h.rect[0] + h.rect[2]) / 2, 0) / hs.length, cz = hs.reduce((a, h) => a + (h.rect[1] + h.rect[3]) / 2, 0) / hs.length;
-    out.push({ ...base('qing-beijing-interiors-houses-' + k, 'life', hs.map((h) => ({ t: 'bj_rooms', rect: h.rect, seed: h.seed, courts: h.courts, gate: h.gate, lod: h.lod, wealth: h.wealth }))), center: [cx, cz], near: 170 });
+    out.push({ ...base('qing-beijing-interiors-houses-' + k, 'life', hs.map((h) => ({ t: 'bj_rooms', rect: h.rect, seed: h.seed, courts: h.courts, gate: h.gate, lod: h.lod, wealth: h.wealth, deep: isDeep(h) }))), center: [cx, cz], near: 170 });
   }
   // pigeons on the paving and the roofs' feet of a few lanes
   const pig = [[-22, 230], [30, 225], [-120, 118], [120, 118], [-60, 60], [60, 62], [-8, 266], [8, 318]].map(([x, z]) => ({ t: 'chickens', kind: 'pigeon', at: [x, z], y: 0.04, n: 6 + Math.floor(rand() * 4), seed: Math.floor(rand() * 1e6) }));

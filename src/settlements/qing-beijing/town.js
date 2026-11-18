@@ -3,7 +3,7 @@
 // and the north–south streets, and the grey-brick courtyard houses between the lanes, in plans of
 // a few dozen each so that they build in turn.
 
-import { WALL, enterable, RADIUS, LEVEL, MOAT, RING, AVENUE, NOTCH, TEMPLE, DANBI, STREET_X, lanes, houses, houseTrees, shopRows, wells } from './layout.js';
+import { WALL, enterable, isDeep, RADIUS, LEVEL, MOAT, RING, AVENUE, NOTCH, TEMPLE, DANBI, STREET_X, lanes, houses, houseTrees, shopRows, wells } from './layout.js';
 import './townstyle.js';
 import { lifePlans } from './life.js';
 import { thrones, detailPlans } from './plan.js';
@@ -90,7 +90,7 @@ function courtyards() {
   const N = 8;
   for (let i = 0; i < all.length; i += N) {
     const part = all.slice(i, i + N);
-    plans.push(base(`qing-beijing-houses-${i / N}`, part.map((h) => ({ t: 'hutong_house', rect: h.rect, seed: h.seed, gate: h.gate, courts: h.courts, wealth: h.wealth, lod: h.lod, enter: enterable(h), trees: houseTrees(h).map((t) => [t[0], t[1]]) })), 'beijing-site'));
+    plans.push(base(`qing-beijing-houses-${i / N}`, part.map((h) => ({ t: 'hutong_house', rect: h.rect, seed: h.seed, gate: h.gate, courts: h.courts, wealth: h.wealth, lod: h.lod, enter: enterable(h), deep: isDeep(h), trees: houseTrees(h).map((t) => [t[0], t[1]]) })), 'beijing-site'));
   }
   return plans;
 }
