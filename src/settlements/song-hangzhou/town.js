@@ -4,11 +4,12 @@
 // peddlers come to the riverbank for the crowd: stalls along the foot of the flood wall, hawkers with
 // their shoulder poles, a fruit seller under a parasol.
 import { RADIUS, LEVEL, WALL, ROAD, PAGODA, CANAL, CANAL_BRIDGES, CITY, GATE, LAKE_GATE, WATER_GATE, WEST_LAKE, lakeDepth, canalLandings, TAFANG, TAFANG_FRONT, WATCH_TOWERS, lots, streets, wells, riverTeaHouses } from './layout.js';
-import { lifePlans, interiorLots, dwellingLots, dwellingPlans, dwellingShells } from './life.js';
+import { lifePlans, upLots, interiorLots, dwellingLots, dwellingPlans, dwellingShells } from './life.js';
 import './townscape.js';
 import './houses.js';
 import { streetsideElements } from './houses.js';
 import * as LAYOUT from './layout.js';
+import { doorLanes } from './storeys.js';
 import { RIVER_BOATS, CANAL_BOATS, HALLS } from './plan.js';
 const base = (id, elements, style = 'song') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-110, 136], facing: 'n' } });
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -62,7 +63,7 @@ function tideDay() {
   teaInside(S, L, rand, person);
   // the shops' name boards over their fronts, on the beam over the opening; the tea houses' on their front beam
   const tea = new Set([...teaHouses(), ...Object.entries(interiorLots()).filter(([k]) => k !== 'house').flatMap(([, v]) => v)]), F = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] };
-  const dwSet = new Set(dwellingLots());
+  const dwSet = new Set([...dwellingLots(), ...upLots()]);
   for (const l of lots()) {
     if (!l.shop || dwSet.has(l)) continue;
     const [x0, z0, x1, z1] = l.rect, o = F[l.front], len = o[0] ? z1 - z0 : x1 - x0, edge = [o[0] > 0 ? x1 : o[0] < 0 ? x0 : (x0 + x1) / 2, o[1] > 0 ? z1 : o[1] < 0 ? z0 : (z0 + z1) / 2];
@@ -213,12 +214,18 @@ export async function town() {
   plans.push(base('song-hangzhou-streetside', streetsideElements(LAYOUT)));
   // the lots the life furnishes (life.js): their shells raised here, the floor 0.45 m over the street; the furniture is the life's
   const shells = [];
-  for (const [kind, list] of Object.entries(chosen)) for (const l of list) shells.push({ t: 'hz_shell', rect: l.rect, front: l.front, y: LEVEL.street, kind, seed: l.seed, roof: l.roof });
+  const upS = new Set(upLots());
+  for (const r of doorLanes(upLots())) shells.push({ t: 'hz_clear', rect: r });
+  for (const l of upLots()) shells.push({ t: 'hz_upstairs', rect: l.rect, front: l.front, y: LEVEL.street, seed: l.seed, trade: l.trade });
+  for (const [kind, list] of Object.entries(chosen)) for (const l of list) if (!upS.has(l)) shells.push({ t: 'hz_shell', rect: l.rect, front: l.front, y: LEVEL.street, kind, seed: l.seed, roof: l.roof });
   shells.push(...dwellingShells());
   plans.push(base('song-hangzhou-shells', shells));
   for (const h of HALLS) plans.push({ ...base(`song-hangzhou-hall-${h.id}`, h.elements), center: h.center, near: h.near });
   plans.push(fabric(), ...tideDay(), boatPeople(), ...lifePlans(base), ...dwellingPlans(base));
   plans.push(...streetPlans(base));
+  // nothing of the street's life stands in the way to the doors of the houses opened upstairs
+  { const lanes = doorLanes(upLots()), inL = (p) => p && lanes.some((r) => p[0] > r[0] && p[0] < r[2] && p[1] > r[1] && p[1] < r[3]);
+    for (const p of plans) p.elements = p.elements.filter((e) => !(Array.isArray(e.at) && inL(e.at))).map((e) => (e.items ? { ...e, items: e.items.filter((i) => !inL(i.at)) } : e)); }
   // life at the water and at the city's posts (§25), in 100 m tiles of the street life; the river's stairs
   const tiles = new Map();
   for (const e of [...watersideLife(LEVEL.street), ...wayMarket(LEVEL.street)]) { const k = `${Math.floor(e.at[0] / 100)},${Math.floor(e.at[1] / 100)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(e); }
