@@ -154,3 +154,18 @@ export function inLot(x, z, m = 0) {
   const L = GRID.get(Math.floor(x / GC) + ',' + Math.floor(z / GC));
   return !!L && L.some((l) => inRect(l.rect, x, z, m));
 }
+
+/** The shops: the houses of the market block's first row (on the soko) and of the row on the mosque street. */
+export const isDuka = (l) => l.dh < 170 && !l.flip && (l.rect[1] === -78.4 || l.rect[1] === -23.9) && l.seed % 5 < 3;
+let UPS = null;
+/**
+ * The houses whose upper floors are open (docs/settlements/kilwa.md §21): the nine furnished houses (8 m wide or more) nearest the
+ * arrival and the main walk, and the two nearest shops with their dwellings above.
+ */
+export function upSet() {
+  if (UPS) return UPS;
+  const d = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 + 15, (l.rect[1] + l.rect[3]) / 2 + 30);
+  const L = lots().filter((l) => isOpen(l) && l.dh <= SIMPLE_FROM && l.rect[2] - l.rect[0] >= 8).sort((a, b) => d(a) - d(b));
+  UPS = new Set([...L.slice(0, 9), ...L.slice(9).filter(isDuka).slice(0, 2)]);
+  return UPS;
+}
