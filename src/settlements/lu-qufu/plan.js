@@ -49,7 +49,7 @@ E.push({ t: 'qing_hall', rect: KUIWEN.rect, y: KUIWEN.y, H: 7.6, double: 7.6, ro
 for (const x of [-8, 8, -16, 16]) E.push({ t: 'lu_stele', at: [x, 20], y: 0, yaw: Math.PI, s: 0.8, h: 3.2 });
 
 // ── the thirteen stele pavilions ──
-for (const p of STELE_PAV) E.push({ t: 'lu_stele_pavilion', c: p.c, w: p.w, y: 0.5, big: p.big, yaw: 0 });
+for (const p of STELE_PAV) E.push({ t: 'lu_stele_pavilion', c: p.c, w: p.w, y: 0.5, big: p.big, yaw: 0, ...(Math.abs(p.c[0]) <= 26 ? { bixi: true } : {}) });   // the pavilions nearest the axis carry the modelled bixi
 
 // ── the Apricot Altar, its steps on the four sides ──
 {
@@ -72,11 +72,13 @@ for (const p of STELE_PAV) E.push({ t: 'lu_stele_pavilion', c: p.c, w: p.w, y: 0
   // the imperial way (yulu): a carved marble slab of clouds and dragons laid over the middle of the front and of the back flight, lifted one tread
   // (0.17) above the steps and ending 0.4 m short of the terrace, so that it runs flush with the floor above (docs §12)
   { const lift = 0.17, cut = 0.4, w = 1.5, rise = y - 0.03, len = 5, y1s = 0.03 + lift + rise * (len - cut) / len;
-    E.push({ t: 'stairs', rect: [-w, mz1 + cut, w, mz1 + len], y0: 0.03 + lift, y1: y1s, dir: 'n', slab: true });
-    E.push({ t: 'stairs', rect: [-w, bz0 - len + 0, w, bz0 - cut], y0: 0.03 + lift, y1: y1s, dir: 's', slab: true }); }
+    E.push({ t: 'lu_ramp', rect: [-w, mz1 + cut, w, mz1 + len], y0: 0.03 + lift, y1: y1s, dir: 'n', slab: true });
+    E.push({ t: 'lu_ramp', rect: [-w, bz0 - len + 0, w, bz0 - cut], y0: 0.03 + lift, y1: y1s, dir: 's', slab: true }); }
   E.push({ t: 'lu_dacheng', rect: HALL.rect, y, H: HALL.H, double: HALL.double, seed: 5 });
   // the bronze burners on the terrace before the hall, the stone lions at the foot of the stairs
-  for (const s of [-1, 1]) E.push({ t: 'bronze', kind: 'tripod', at: [s * 12.5, mz0 + 5], y, s: 0.9, face: [0, 1] });
+  for (const s of [-1, 1]) E.push({ t: 'lu_burner', at: [s * 12.5, mz0 + 5], y, s: 0.8 });
+  // the stone lions at the foot of the moon terrace's flights are drawn by the near plans (sculpt.js); their places are kept solid here
+  for (const s of [-1, 1]) E.push({ t: 'lu_block', rect: [s * 13.5 - 1.0, -97, s * 13.5 + 1.0, -94], y0: 0, y1: 3.2 });
   void bz1;
 }
 

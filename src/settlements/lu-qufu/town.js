@@ -3,6 +3,7 @@
 // Confucius's tomb, and the people: the sacrificing officials and the guards of the temple, students in the court, the shopkeepers.
 
 import { RADIUS, TEMPLE, MANSION, MX, MANSION_HALLS, MANSION_RANGES, CITY_WALL, WANREN, JINSHENG, QUELI, SQUARE, HALL, GATE_HALLS, ALTAR, KONG_FOREST, DRUM, OLD, streets, lots, shopRuns, streetItems, laneZs, LANES_X, STREET_W, ANCILLARY, STELE_PAV } from './layout.js';
+import { detailPlans } from './sculpt.js';
 import { HOUSE } from '../../styles/qing/index.js';
 void [laneZs, LANES_X, STREET_W];
 
@@ -203,5 +204,5 @@ let CACHE = null;
 export async function town() {
   if (CACHE) return CACHE;
   void TEMPLE; void MANSION_RANGES;
-  return (CACHE = [paving(), cityWall(), drumTower(), mansion(), ...houses(), shops(), ...streetLife(), forest(), people()]);
+  return (CACHE = [...detailPlans, paving(), cityWall(), drumTower(), mansion(), ...houses(), shops(), ...streetLife(), forest(), people()]);
 }
