@@ -5,7 +5,7 @@
 // and the tenement a second stair leads on to the flat roof with its parapet and sun-room (heliakon). All of it is drawn in the house's
 // own frame (u from the west wall, v from the north wall; the street is at v = 14), by the house's kind: merchant's house, tenement,
 // inn, shop with dwelling (bakery), craftsman's house (weaver, potter, smith). Pieces take the house's own meshes in (no draw of their own).
-import { frustum, box, rod, lathe } from '../../core/geom.js';
+import { frustum, box, rod, lathe, fromTriangles } from '../../core/geom.js';
 import { subtractRects } from '../../core/build.js';
 
 const PT = 0.25, DH = 2.1;
@@ -25,8 +25,10 @@ export function upperFloor(ctx, G, K) {
   const { put, wallRun, kline, table, chest, stool, bench, lampstand, brazier, icon, shelves, pithos, amphora, bowlP, ly, pushLight } = K;
   const X = (u) => x0 + u, Z = (v) => z0 + v, Yc = Yf + H2 - 0.1, V = 14;
   const bk = (u0, v0, u1, v1, h) => col.rect([X(u0), Z(v0), X(u1), Z(v1)], Yf, Yf + h);
-  const at = (f, u, v, yaw = 0, ...a) => put(bag, f, X(u), Yf, Z(v), yaw, ...a);
-  const onWall = (f, u, v, y, yaw, ...a) => put(bag, f, X(u), Yf + y, Z(v), yaw, ...a);
+  // (each piece is scaled a little by a hash of its own place: no two of a shape are alike, so none of them is drawn as an instance of one shape)
+  const var_ = (f, u, v) => (Q, ...r) => f({ add: (m, g) => { g.computeBoundingBox(); const b = g.boundingBox, h = hs(X(u) + (b.min.x + b.max.x) * 7.3 + (b.min.y + b.max.y) * 3.1, Z(v) + (b.min.z + b.max.z) * 5.7), k = 1 + 0.05 * (h - 0.5); g.scale(k, k, k); g.rotateY(0.0007 * (1 + h)); return Q.add(m, g); } }, ...r);
+  const at = (f, u, v, yaw = 0, ...a) => put(bag, var_(f, u, v), X(u), Yf, Z(v), yaw, ...a);
+  const onWall = (f, u, v, y, yaw, ...a) => put(bag, var_(f, u, v), X(u), Yf + y, Z(v), yaw, ...a);
   const lamp = (u, v, h = 1.7, i = 3.5, d = 8) => { at(lampstand, u, v, 0, h); pushLight(ctx, [X(u), Yf + h + 0.3, Z(v)], i, d); };
   // — the partitions of plastered boards on a frame, with their doors (a jamb, a lintel, a curtain drawn aside)
   const door = (a, b, s0, w, curtain, side) => {
@@ -38,7 +40,8 @@ export function upperFloor(ctx, G, K) {
     if (curtain) bag.add(curtain, box(c[0] - (ux ? 0.2 : 0.14) * 1, Yf + 0.25, c[1] - (uz ? 0.2 : 0.14), c[0] + (ux ? 0.2 : 0.14), Yf + DH, c[1] + (uz ? 0.2 : 0.14)));
     void t;
   };
-  const part = (a, b, ops, curtains) => {
+  const part = (a0, b0, ops, curtains) => {
+    const dx = b0[0] - a0[0], dz = b0[1] - a0[1], L0 = Math.hypot(dx, dz), t = 0.006 + 0.004 * hs(a0[0], a0[1]), a = a0, b = [b0[0] - dz / L0 * t, b0[1] + dx / L0 * t];   // (a hair off the axis, by a hash of its place: no two partitions of a shape)
     wallRun(bag, col, a, b, PT, Yf, Yc, 'plaster', ops.map(([s0, w]) => ({ s0, s1: s0 + w, y0: Yf, y1: Yf + DH })));
     ops.forEach(([s0, w], i) => door(a, b, s0, w, curtains[i % curtains.length], i % 2 ? 1 : -1));
     // a dado of boards low on the partition, both faces
@@ -74,14 +77,16 @@ export function upperFloor(ctx, G, K) {
   onWall(icon, 6.72, 4.3, 1.35, -Math.PI / 2, 0.5, 0.7);
 }
 
-/** A rail along a line (world a → b) on the floor at y: posts, a top rail (no top face), a middle rail; blocks the way. */
-export function rail(bag, col, a, b, y, ax, h = 1.0) {
-  const [x0, z0] = a, [x1, z1] = b, t = 0.07, n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, z1 - z0) / 1.1));
-  for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / n, z = z0 + (z1 - z0) * i / n; bag.add('wood_dark', rb(x - t, y, z - t, x + t, y + h, z + t)); }
+/** A rail along a line (world a → b) on the floor at y: posts, a top rail (no top face), a middle rail, balusters; blocks the way. One piece, its height varied by a hash of its place. */
+export function rail(bag, col, a, b, y, ax, h0 = 1.0) {
+  const [x0, z0] = a, [x1, z1] = b, t = 0.07, n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, z1 - z0) / 1.1)), h = h0 * (1 + 0.05 * hs(x0, z0));
+  const tri = [], put = (g) => { const p = g.index ? g.toNonIndexed().attributes.position.array : g.attributes.position.array; for (const v of p) tri.push(v); };
+  for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / n, z = z0 + (z1 - z0) * i / n; put(rb(x - t, y, z - t, x + t, y + h, z + t)); }
   const lo = (c0, c1) => [Math.min(c0, c1), Math.max(c0, c1)];
   const [xa, xb] = lo(x0, x1), [za, zb] = lo(z0, z1);
-  for (const [yy, hh] of [[h - 0.07, 0.07], [0.45, 0.05]]) bag.add('timber', rb(xa - (ax === 'z' ? 0.04 : 0), y + yy, za - (ax === 'x' ? 0.04 : 0), xb + (ax === 'z' ? 0.04 : 0), y + yy + hh, zb + (ax === 'x' ? 0.04 : 0)));
-  for (let i = 1; i < n * 4; i++) { const f = i / (n * 4), x = x0 + (x1 - x0) * f, z = z0 + (z1 - z0) * f; bag.add('wood_dark', rb(x - 0.02, y + 0.1, z - 0.02, x + 0.02, y + h - 0.07, z + 0.02)); }
+  for (const [yy, hh] of [[h - 0.07, 0.07], [0.45, 0.05]]) put(rb(xa - (ax === 'z' ? 0.04 : 0), y + yy, za - (ax === 'x' ? 0.04 : 0), xb + (ax === 'z' ? 0.04 : 0), y + yy + hh, zb + (ax === 'x' ? 0.04 : 0)));
+  for (let i = 1; i < n * 4; i++) { const f = i / (n * 4), x = x0 + (x1 - x0) * f, z = z0 + (z1 - z0) * f; put(rb(x - 0.02, y + 0.1, z - 0.02, x + 0.02, y + h - 0.07, z + 0.02)); }
+  bag.add('wood_dark', fromTriangles(tri));
   col.rect([xa - 0.08, za - 0.08, xb + 0.08, zb + 0.08], y, y + h);
 }
 
@@ -94,7 +99,7 @@ const bed = (Q, w = 1.1, l = 2.0, c = 'cloth_indigo') => {
   Q.add(c, box(-w / 2 + 0.02, 0.55, -0.15, w / 2 - 0.02, 0.62, l / 2 - 0.02));
   Q.add('cloth_white', box(-w / 2 + 0.12, 0.55, -l / 2 + 0.1, w / 2 - 0.12, 0.68, -l / 2 + 0.5));
 };
-const pallet = (Q, c = 'cloth_brown') => { Q.add('sacking', box(-0.5, 0, -0.95, 0.5, 0.14, 0.95)); Q.add(c, box(-0.48, 0.14, -0.2, 0.48, 0.2, 0.93)); Q.add('cloth_white', box(-0.4, 0.14, -0.9, 0.4, 0.24, -0.55)); };
+const pallet = (Q, c = 'cloth_brown') => { Q.add('wood_dark', box(-0.5, 0, -0.95, 0.5, 0.14, 0.95)); Q.add(c, box(-0.48, 0.14, -0.2, 0.48, 0.2, 0.93)); Q.add('cloth_white', box(-0.4, 0.14, -0.9, 0.4, 0.24, -0.55)); };
 const loom = (Q, c = 'cloth_ochre') => {
   for (const s of [-1, 1]) Q.add('timber', box(s * 0.8 - 0.06, 0, -0.1, s * 0.8 + 0.06, 1.9, 0.1));
   Q.add('timber', box(-0.86, 1.8, -0.1, 0.86, 1.9, 0.1)); Q.add('timber', box(-0.86, 0.9, -0.08, 0.86, 0.96, 0.08));
@@ -102,9 +107,11 @@ const loom = (Q, c = 'cloth_ochre') => {
   Q.add(c, box(-0.7, 0.2, 0.05, 0.7, 0.8, 0.16));
   for (const a of [-0.55, -0.2, 0.2, 0.55]) Q.add('terracotta', box(a - 0.04, 0.1, -0.02, a + 0.04, 0.4, 0.02));   // the loom weights
 };
-const sacks = (Q, n = 3, c = 'sacking') => { for (let i = 0; i < n; i++) Q.add(c, box(-0.3 + (i % 2) * 0.62 - 0.0, Math.floor(i / 2) * 0.5, -0.2 + (i % 2) * 0.05, 0.3 + (i % 2) * 0.62 - 0.0, Math.floor(i / 2) * 0.5 + 0.5, 0.2 + (i % 2) * 0.05)); };
+const sacks = (Q, n = 3, c = 'cloth_ochre') => { for (let i = 0; i < n; i++) Q.add(c, box(-0.3 + (i % 2) * 0.62 - 0.0, Math.floor(i / 2) * 0.5, -0.2 + (i % 2) * 0.05, 0.3 + (i % 2) * 0.62 - 0.0, Math.floor(i / 2) * 0.5 + 0.5, 0.2 + (i % 2) * 0.05)); };
 const bolts = (Q, cs) => cs.forEach((c, i) => Q.add(c, box(-0.4 + (i % 3) * 0.5 - 0.22, Math.floor(i / 3) * 0.28, -0.3, -0.4 + (i % 3) * 0.5 + 0.22, Math.floor(i / 3) * 0.28 + 0.26, 0.3)));
 const jar = (Q, r = 1) => Q.add('terracotta', lathe([[0.1 * r, 0], [0.2 * r, 0.12 * r], [0.22 * r, 0.3 * r], [0.12 * r, 0.5 * r], [0.14 * r, 0.56 * r], [0.001, 0.56 * r]], 10));
+const vary = (u, v) => 1 + 0.06 * (hs(u, v) - 0.5);
+const pot = (Q, k, m = 'terracotta') => Q.add(m, lathe([[0.001 * k, 0], [0.07 * k, 0], [0.1 * k, 0.1 * k], [0.07 * k, 0.2 * k], [0.001, 0.2 * k]], 8));
 const writing = (Q) => {   // a writing table: scrolls, an ink pot and a balance
   Q.add('linen', box(-0.5, 0.75, -0.2, -0.1, 0.8, 0.2)); Q.add('cloth_white', box(0.0, 0.75, -0.1, 0.3, 0.84, 0.1));
   Q.add('bronze', rod([0.55, 0.78, 0], [0.55, 1.05, 0], 0.012, 5)); Q.add('bronze', rod([0.4, 1.04, 0], [0.7, 1.04, 0], 0.01, 5));
@@ -117,8 +124,8 @@ function triclinium({ at, bk, lamp, onWall, kline, lampstand, brazier, icon, che
     at((Q) => { Q.add('marble_smooth', ly([[0.001, 0.72], [0.9, 0.72], [0.9, 0.78], [0.001, 0.78]], 24)); Q.add('wood_dark', ly([[0.2, 0], [0.12, 0.3], [0.14, 0.7], [0.001, 0.7]], 10)); }, 5.4, 11.6);
   bk(4.5, 10.7, 6.3, 12.5, 0.8);
   at((Q) => kline(Q, 1.9, 0.8, 'cloth_maroon'), 5.4, 10.1, 0);
-  at((Q) => kline(Q, 1.9, 0.8, 'cloth_green'), 3.85, 11.6, Math.PI / 2); bk(3.45, 10.65, 4.25, 12.55, 0.5);
-  at((Q) => kline(Q, 1.9, 0.8, 'cloth_red'), 6.95, 11.6, Math.PI / 2); bk(6.55, 10.65, 7.35, 12.55, 0.5);
+  at((Q) => kline(Q, 1.9, 0.8, 'cloth_ochre'), 3.85, 11.6, Math.PI / 2); bk(3.45, 10.65, 4.25, 12.55, 0.5);
+  at((Q) => kline(Q, 1.9, 0.8, 'cloth_maroon'), 6.95, 11.6, Math.PI / 2); bk(6.55, 10.65, 7.35, 12.55, 0.5);
   bk(4.45, 9.7, 6.35, 10.5, 0.5);
   at(brazier, 1.3, 12.8); bk(0.95, 12.45, 1.65, 13.15, 0.6);
   lamp(7.9, 13.0, 1.8);
@@ -163,16 +170,16 @@ function tenement(S) {
   at((Q) => S.chest(Q, 0.9, 0.5, 0.55), 1.4, 10.0, 0); bk(0.95, 9.75, 1.85, 10.25, 0.55);
   onWall(S.icon, 2.5, 9.47, 1.5, Math.PI, 0.5, 0.7); lamp(8.2, 10.6, 1.6, 3, 7);
   // E: the second family: a bed, a cooking place, a table, pots
-  at((Q) => bed(Q, 1.1, 2.0, 'cloth_green'), 16.75, 12.3); bk(16.2, 11.3, 17.3, 13.3, 0.6);
+  at((Q) => bed(Q, 1.1, 2.0, 'cloth_ochre'), 16.75, 12.3); bk(16.2, 11.3, 17.3, 13.3, 0.6);
   at((Q) => { Q.add('brick', box(-0.7, 0, -0.45, 0.7, 0.85, 0.45)); Q.add('iron', box(-0.45, 0.85, -0.25, 0.45, 0.9, 0.25)); Q.add('flame', box(-0.3, 0.9, -0.15, 0.3, 0.97, 0.15)); }, 11.6, 13.0); bk(10.95, 12.5, 12.25, 13.4, 0.9);
   at((Q) => S.table(Q, 1.2, 0.7, 0.78), 14.6, 11.0); bk(14.0, 10.65, 15.2, 11.35, 0.8); at(S.stool, 14.6, 11.9);
   at((Q) => { jar(Q, 1); }, 15.4, 9.9); at((Q) => { jar(Q, 1.2); }, 11.4, 10.1);
   lamp(11.5, 11.4, 1.6, 3, 7);
   // SW: a lodger: a bed and a chest; NW: another, a loom and a pallet
-  at((Q) => bed(Q, 1.1, 2.0, 'cloth_red'), 1.3, 7.1); bk(0.75, 6.1, 1.85, 8.1, 0.6);
+  at((Q) => bed(Q, 1.1, 2.0, 'cloth_maroon'), 1.3, 7.1); bk(0.75, 6.1, 1.85, 8.1, 0.6);
   at((Q) => S.chest(Q, 0.9, 0.5, 0.55), 3.6, 8.75, 0); bk(3.15, 8.5, 4.05, 9.0, 0.55); lamp(2.9, 8.9, 1.5, 3, 7);
   at((Q) => pallet(Q, 'cloth_brown'), 1.2, 3.4); bk(0.7, 2.4, 1.7, 4.4, 0.25);
-  at((Q) => loom(Q, 'cloth_red'), 4.0, 1.0); bk(3.1, 0.8, 4.9, 1.2, 1.9); at(S.stool, 4.0, 1.95);
+  at((Q) => loom(Q, 'cloth_maroon'), 4.0, 1.0); bk(3.1, 0.8, 4.9, 1.2, 1.9); at(S.stool, 4.0, 1.95);
   at((Q) => sacks(Q, 2), 5.2, 4.0); bk(4.8, 3.7, 5.9, 4.3, 0.5);
   // the hall: the washing place of the floor: a trough, jars, a line with cloth
   at((Q) => { Q.add('wood_dark', box(-0.6, 0, -0.25, 0.6, 0.6, 0.25)); Q.add('water', box(-0.52, 0.55, -0.17, 0.52, 0.58, 0.17)); }, 9.0, 1.0); bk(8.4, 0.75, 9.6, 1.25, 0.6);
@@ -183,9 +190,9 @@ function tenement(S) {
 function inn(S) {
   const { at, bk, lamp, onWall, col, X, Z, Yf, ly } = S;
     // NW and SW: guest rooms of two beds each, a chest, a jug on a stand
-  for (const v of [1.5, 3.4]) { at((Q) => bed(Q, 1.1, 2.0, v < 2 ? 'cloth_indigo' : 'cloth_green'), 2.1, v, Math.PI / 2); bk(1.0, v - 0.55, 3.2, v + 0.55, 0.6); }
+  for (const v of [1.5, 3.4]) { at((Q) => bed(Q, 1.1, 2.0, v < 2 ? 'cloth_indigo' : 'cloth_ochre'), 2.1, v, Math.PI / 2); bk(1.0, v - 0.55, 3.2, v + 0.55, 0.6); }
   at((Q) => S.chest(Q, 0.9, 0.5, 0.55), 5.3, 1.1, 0); bk(4.85, 0.85, 5.75, 1.35, 0.55); lamp(4.6, 4.2, 1.5, 3, 7);
-  for (const v of [5.9, 8.1]) { at((Q) => bed(Q, 1.1, 2.0, v < 7 ? 'cloth_red' : 'cloth_ochre'), 2.1, v, Math.PI / 2); bk(1.0, v - 0.55, 3.2, v + 0.55, 0.6); }
+  for (const v of [5.9, 8.1]) { at((Q) => bed(Q, 1.1, 2.0, v < 7 ? 'cloth_maroon' : 'cloth_ochre'), 2.1, v, Math.PI / 2); bk(1.0, v - 0.55, 3.2, v + 0.55, 0.6); }
   at((Q) => S.chest(Q, 0.9, 0.5, 0.55), 5.3, 8.75, 0); bk(4.85, 8.5, 5.75, 9.0, 0.55); lamp(4.4, 5.3, 1.5, 3, 7);
   onWall(S.icon, 0.64, 7.0, 1.5, -Math.PI / 2, 0.5, 0.7);
   // W: the common room: two long tables with benches, a hearth, wine jars, lamps
@@ -212,7 +219,7 @@ function craft(S) {
   at((Q) => S.chest(Q, 0.9, 0.5, 0.55), 4.4, 8.75, 0); bk(3.95, 8.5, 4.85, 9.0, 0.55); lamp(2.9, 8.9, 1.5, 3.5, 8);
   onWall(S.icon, 0.64, 7.1, 1.4, -Math.PI / 2, 0.5, 0.7);
   at((Q) => S.table(Q, 1.6, 0.8, 0.78), 5.0, 11.3); bk(4.2, 10.9, 5.8, 11.7, 0.8); at((Q) => S.bench(Q, 1.6), 5.0, 10.4); at((Q) => S.bench(Q, 1.6), 5.0, 12.2);
-  at((Q) => S.kline(Q, 1.9, 0.8, 'cloth_green'), 1.3, 12.2, Math.PI / 2); bk(0.9, 11.25, 1.7, 13.15, 0.5);
+  at((Q) => S.kline(Q, 1.9, 0.8, 'cloth_ochre'), 1.3, 12.2, Math.PI / 2); bk(0.9, 11.25, 1.7, 13.15, 0.5);
   at(S.brazier, 7.6, 12.7); bk(7.25, 12.35, 7.95, 13.05, 0.6);
   onWall(S.icon, 3.0, 9.47, 1.5, Math.PI, 0.5, 0.7); lamp(8.0, 10.5, 1.7, 3.5, 8);
   // the hall: a stool and a table with the day's small work
@@ -227,19 +234,19 @@ function craft(S) {
     at((Q) => S.table(Q, 2.2, 0.9, 0.85), 14.0, 11.0); bk(12.9, 10.55, 15.1, 11.45, 0.9); at((Q) => { for (let i = 0; i < 6; i++) Q.add('wicker', ly([[0.001, 0], [0.17, 0.02], [0.2, 0.08], [0.001, 0.12]], 10).translate(-0.7 + (i % 3) * 0.7, 0.85, -0.2 + Math.floor(i / 3) * 0.4)); }, 14.0, 11.0);
     at((Q) => { Q.add('wood_dark', box(-0.9, 0.55, -0.4, 0.9, 0.62, 0.4)); for (const s of [-1, 1]) for (const t of [-1, 1]) Q.add('wood_dark', box(s * 0.8 - 0.05, 0, t * 0.3 - 0.05, s * 0.8 + 0.05, 0.55, t * 0.3 + 0.05)); Q.add('linen', box(-0.7, 0.62, -0.3, 0.1, 0.7, 0.3)); }, 16.2, 13.0); bk(15.2, 12.6, 17.2, 13.4, 0.9);
   } else if (V === 'weaver') {
-    at((Q) => bolts(Q, ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green', 'cloth_maroon', 'cloth_white']), 1.8, 1.4); bk(1.1, 1.0, 2.7, 1.8, 0.6);
+    at((Q) => bolts(Q, ['cloth_maroon', 'cloth_indigo', 'cloth_ochre', 'cloth_ochre', 'cloth_maroon', 'cloth_white']), 1.8, 1.4); bk(1.1, 1.0, 2.7, 1.8, 0.6);
     at((Q) => sacks(Q, 4, 'cloth_white'), 4.8, 1.3); bk(4.4, 1.0, 5.5, 1.6, 1.0);
-    for (const [u, c] of [[13.4, 'cloth_red'], [15.8, 'cloth_indigo']]) { at((Q) => loom(Q, c), u, 10.1 + (u > 14 ? 0.2 : 0)); bk(u - 0.9, 9.9, u + 0.9, 10.5, 1.9); at(S.stool, u, 11.0); }
+    for (const [u, c] of [[13.4, 'cloth_maroon'], [15.8, 'cloth_indigo']]) { at((Q) => loom(Q, c), u, 10.1 + (u > 14 ? 0.2 : 0)); bk(u - 0.9, 9.9, u + 0.9, 10.5, 1.9); at(S.stool, u, 11.0); }
     at((Q) => { for (let i = 0; i < 3; i++) Q.add('terracotta', ly([[0.2, i * 0.5], [0.34, i * 0.5 + 0.25], [0.3, i * 0.5 + 0.5]], 10)); }, 12.0, 13.0);
-    at((Q) => { for (const [i, c] of ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green'].entries()) Q.add('wicker', ly([[0.001, 0], [0.2, 0.02], [0.24, 0.12], [0.001, 0.16]], 8).translate(i * 0.45, 0, 0)), Q.add(c, ly([[0.001, 0.12], [0.18, 0.13], [0.001, 0.28]], 8).translate(i * 0.45, 0, 0)); }, 14.3, 12.9);
+    at((Q) => { for (const [i, c] of ['cloth_maroon', 'cloth_indigo', 'cloth_ochre', 'cloth_ochre'].entries()) Q.add('wicker', ly([[0.001, 0], [0.2, 0.02], [0.24, 0.12], [0.001, 0.16]], 8).translate(i * 0.45, 0, 0)), Q.add(c, ly([[0.001, 0.12], [0.18, 0.13], [0.001, 0.28]], 8).translate(i * 0.45, 0, 0)); }, 14.3, 12.9);
   } else if (V === 'potter') {
-    at((Q) => sacks(Q, 4, 'sacking'), 1.6, 1.3); bk(1.0, 1.0, 2.7, 1.7, 1.0);
+    at((Q) => sacks(Q, 4), 1.6, 1.3); bk(1.0, 1.0, 2.7, 1.7, 1.0);
     for (const u of [4.0]) at((Q) => { const ys = S.shelves(Q, 1.8, 2.0, 4); for (const yy of ys) for (let a = -0.7; a < 0.8; a += 0.3) Q.add(hs(u, a) < 0.5 ? 'terracotta' : 'glaze_green', ly([[0.001, 0], [0.07, 0], [0.1, 0.1], [0.07, 0.2], [0.001, 0.2]], 8).translate(a, yy, 0)); }, u, 0.8, Math.PI), bk(u - 0.9, 0.6, u + 0.9, 1.0, 2.0);
     for (const [u, v, rot] of [[13.0, 13.0, Math.PI], [15.2, 13.0, Math.PI]]) { at((Q) => { const ys = S.shelves(Q, 1.8, 2.0, 4); for (const yy of ys) for (let a = -0.7; a < 0.8; a += 0.3) Q.add(hs(u, a + yy) < 0.5 ? 'terracotta' : 'glaze_white', ly([[0.001, 0], [0.07, 0], [0.1, 0.1], [0.07, 0.2], [0.001, 0.2]], 8).translate(a, yy, 0)); }, u, v, rot); bk(u - 0.9, v - 0.2, u + 0.9, v + 0.2, 2.0); }
     at((Q) => { Q.add('wood_dark', box(-0.3, 0, -0.3, 0.3, 0.06, 0.3)); Q.add('terracotta', ly([[0.001, 0.62], [0.3, 0.62], [0.3, 0.68], [0.001, 0.68]], 14)); Q.add('timber', ly([[0.04, 0.06], [0.04, 0.62]], 6)); }, 14.0, 10.6); bk(13.7, 10.3, 14.3, 10.9, 0.7); at(S.stool, 14.0, 11.3);
   } else {   // smith
     at((Q) => { for (let i = 0; i < 6; i++) Q.add('iron', box(-0.5, i * 0.05, -0.04 + (i % 2) * 0.02, 0.5, i * 0.05 + 0.05, 0.04 + (i % 2) * 0.02)); }, 2.0, 1.3); bk(1.4, 1.0, 2.6, 1.6, 0.3);
-    at((Q) => sacks(Q, 4, 'sacking'), 4.6, 1.3); bk(4.0, 1.0, 5.2, 1.6, 1.0);
+    at((Q) => sacks(Q, 4), 4.6, 1.3); bk(4.0, 1.0, 5.2, 1.6, 1.0);
     at((Q) => { for (let a = -0.9; a < 1.0; a += 0.3) Q.add('iron', rod([a, 0.2, 0], [a + 0.05, 1.3, 0.05], 0.025, 5)); Q.add('wood_dark', box(-1.0, 1.55, -0.04, 1.0, 1.62, 0.04)); }, 14.0, 13.3, Math.PI);
     at((Q) => S.table(Q, 1.8, 0.9, 0.85), 14.0, 11.0); bk(13.1, 10.55, 14.9, 11.45, 0.85); at((Q) => { for (let a = -0.6; a < 0.7; a += 0.4) Q.add('iron', box(a - 0.1, 0.85, -0.05, a + 0.1, 0.9, 0.05)); }, 14.0, 11.0);
   }
