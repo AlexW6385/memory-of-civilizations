@@ -4,6 +4,7 @@ import { box, lathe, fromTriangles } from '../../core/geom.js';
 import { rectRoof, withPal, mingPavilion } from '../ming/index.js';
 import { IMPERIAL } from '../qing/index.js';
 import { Parts, tortoise, ball, T } from '../qing/carving.js';
+import { biXiParts } from './bixi.js';
 
 const TILE = 'tile_yellow';
 
@@ -56,9 +57,14 @@ export function stele(el, { bag, col }) {
 export function stelePavilion(el, ctx) {
   const { bag, col } = ctx, [cx, cz] = el.c, w = el.w ?? 6.4, y = el.y ?? 0.5;
   withPal(mingPavilion)({ c: el.c, shape: 'square', w, y, H: 4.6, plat: y, bench: false, steps: false, open: [0, 1, 2, 3], pal: IMPERIAL }, ctx);
-  stele({ at: [cx, cz], y, yaw: el.yaw ?? 0, s: el.big ? 1.05 : 0.62, h: el.big ? 3.9 : 2.6 }, ctx);
+  if (el.bixi) {
+    // the pavilions nearest the axis: the modelled tortoise-borne stele (bixi.js), its fine layer in the near plans
+    const s = el.big ? 0.8 : 0.55;
+    biXiParts('R', Math.round(cx * 7 + cz)).emit(bag, cx, y, cz, el.yaw ?? 0, s);
+    col.rect([cx - 1.3 * s, cz - 1.75 * s, cx + 1.3 * s, cz + 1.75 * s], y, y + 4.0 * s);
+  } else stele({ at: [cx, cz], y, yaw: el.yaw ?? 0, s: el.big ? 1.05 : 0.62, h: el.big ? 3.9 : 2.6 }, ctx);
   // what stands in it: the offering stand of granite before the stele with its bronze censer, a candle-stick either side, a hanging lantern from the beam, a worn kneeling mat
-  const big = !!el.big, sz = cz + (big ? 2.45 : 1.65);
+  const big = !!el.big, sz = cz + (el.bixi ? (big ? 2.45 : 1.85) : (big ? 2.45 : 1.65));
   bag.add('granite_grey', box(cx - 0.55, y, sz - 0.28, cx + 0.55, y + 0.78, sz + 0.28)); bag.add('granite_block', box(cx - 0.62, y + 0.78, sz - 0.34, cx + 0.62, y + 0.84, sz + 0.34));
   col.rect([cx - 0.62, sz - 0.34, cx + 0.62, sz + 0.34], y, y + 0.84);
   bag.add('bronze', lathe([[0.001, 0], [0.12, 0.02], [0.17, 0.12], [0.15, 0.2], [0.001, 0.2]], 10, null, cx, y + 0.84, sz));

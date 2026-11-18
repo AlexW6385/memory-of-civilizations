@@ -5,46 +5,15 @@ import { box, lathe } from '../../core/geom.js';
 import { STYLES } from '../../core/build.js';
 import { IMPERIAL } from '../qing/index.js';
 import { Parts, ball, limb, T } from '../qing/carving.js';
-import { dragon, cloud } from '../qing/throne.js';
+import { dragon } from '../qing/throne.js';
+import { placeColumn } from './colwork.js';
+import { confucius, correlate } from './statue.js';
 import { dougongHeight } from '../qing/caihua.js';
 import { rng } from './kit.js';
 import { glyph } from './plaques.js';
 import { tileCourses } from './tiles.js';
 
 const PAL = { ...IMPERIAL, column: 'granite_grey', base: 'marble' };
-
-/**
- * One dragon wound up a column of radius cr: the body on a helix of rate c (radians per metre) between yHead and yTail, the head set out from the
- * shaft at angle `a` (facing outward, up when it rises, down when it comes down). The same helix hand for both dragons of a column keeps them apart.
- */
-function coil(P, cr, yHead, yTail, r, phi, c, o = {}) {
-  const N = 38, pts = [], R = cr + r * 0.7, sg = Math.sign(yHead - yTail);
-  for (let k = 0; k <= N; k++) { const y = yHead + (yTail - yHead) * k / N, a = phi + c * y; pts.push([Math.cos(a) * R, y, Math.sin(a) * R]); }
-  const ah = phi + c * yHead;
-  pts[0] = [Math.cos(ah) * (cr + r * 2.1), yHead + sg * r * 0.7, Math.sin(ah) * (cr + r * 2.1) + r * 0.5];
-  dragon(P, 'granite_grey', pts, r, { up: [0, 1, 0], head: 1.55, ...o });
-}
-
-/** A coiled-dragon stone column (docs/settlements/lu-qufu.md §10): the carved shaft with two dragons in high relief, one rising with its head up
- *  toward a pearl, one coming down, among scrolls of cloud, on a stone plinth with a lotus drum and a banded neck under the bracket sets. */
-function dragonColumn(P, h, seed) {
-  const cr = 0.4, prof = [[0.52, 0.34], [0.5, 0.5], [0.44, 0.56], [0.4, 0.62]];
-  const N = 10;
-  for (let i = 1; i <= N; i++) prof.push([0.4 - 0.025 * i / N, 0.62 + (h - 1.1) * i / N]);
-  prof.push([0.42, h - 0.46], [0.46, h - 0.4], [0.46, h - 0.26], [0.42, h - 0.2], [0.41, h - 0.1], [0.001, h - 0.1]);
-  P.add('granite_grey', lathe(prof, 16));
-  P.add('marble', box(-0.68, 0, -0.68, 0.68, 0.22, 0.68));                                  // the square plinth
-  P.add('marble', lathe([[0.001, 0.22], [0.6, 0.22], [0.6, 0.3], [0.56, 0.34], [0.001, 0.34]], 16));   // the drum of lotus petals under the shaft
-  // two dragons: the heads' angles on the front of the column (+z), the helices half a turn apart
-  const c = 2.05, yA = h * 0.82, yB = h * 0.3, aA = Math.PI / 2 - 0.5 + (seed % 3 - 1) * 0.12, aB = Math.PI / 2 + 0.5 + (seed % 3 - 1) * 0.12;
-  coil(P, cr, yA, 1.15, 0.105, aA - c * yA, c, { pearl: true, pearlMat: 'gilt_bronze' });
-  coil(P, cr, yB, h - 0.7, 0.1, aB - c * yB, c);
-  // the clouds round the foot and the neck of the shaft, the ruyi scrolls turned to the four sides
-  for (let k = 0; k < 4; k++) {
-    const Q = new Parts(); cloud(Q, 'granite_grey', 0, 0.9, 0.5, 0.46); cloud(Q, 'granite_grey', 0, h - 1.0, 0.5, 0.46);
-    for (const [mat, list] of Q.m) for (const g of list) { g.rotateY(k * Math.PI / 2 + 0.4); P.add(mat, g); }
-  }
-}
 
 /** A seated statue facing +z: robe, torso, head, crown; s the scale (the Master about 3.4 m seated). */
 export function seatedSage(P, robe, s, crown) {
@@ -94,9 +63,8 @@ export function dacheng(el, ctx) {
   // the ten dragon columns before the front wall: on the front column line, the stone thicker than the posts behind
   const bw = (x1 - x0) / 9, hc = H - 0.4;
   for (let i = 0; i <= 9; i++) {
-    const x = x0 + i * bw, P = new Parts();
-    dragonColumn(P, hc, i);
-    P.emit(bag, x, y, z1 + 0.62, 0);
+    const x = x0 + i * bw;
+    placeColumn(bag, x, z1 + 0.62, y, hc, 'R');                       // the reduced sculpture, always drawn (the fine layer: the plan's near detail)
     col.circle(x, z1 + 0.62, 0.52, y, y + hc);
   }
   // the side columns of the peristyle, plain stone, on both long sides
@@ -121,13 +89,11 @@ export function dacheng(el, ctx) {
   bag.add('lacquer_red', box(cx - 4.6, y + 0.8, zb + 0.2, cx + 4.6, y + 7.4, zb + 0.5));         // the shrine's back screen
   bag.add('gilt_bronze', box(cx - 3.6, y + 3.6, zb + 0.5, cx + 3.6, y + 6.2, zb + 0.56));        // the gilt screen
   bag.add('clay_gilt', box(cx - 3.0, y + 7.95, zb + 0.9, cx + 3.0, y + 8.55, zb + 1.0));         // the plaque of the shrine
-  const stat = new Parts(); seatedSage(stat, 'clay_gilt', 1, true);
   bag.add('lacquer_red', box(cx - 1.5, y + 0.8, zb + 3.1, cx + 1.5, y + 1.6, zb + 6.2)); col.rect([cx - 1.5, zb + 3.1, cx + 1.5, zb + 6.2], y + 0.8, y + 5);
-  stat.emit(bag, cx, y + 1.6, zb + 4.6, Math.PI, 1.0);
+  confucius('R').emit(bag, cx, y + 1.6, zb + 4.6, 0, 1.0);                       // the enthroned statue, facing the door (fine layer: the plan's near detail)
   // the Four Correlates, two each side, smaller, in robes of green and red
   for (const sx of [-1, 1]) for (const [k, dz] of [[0, 3.4], [1, 6.4]]) {
-    const P = new Parts(); seatedSage(P, k ? 'clay_green' : 'clay_robe', 1, false);
-    P.emit(bag, cx + sx * 8.8, y, zb + 1.5 + dz, Math.PI, 0.62);
+    correlate(k ? 'clay_green' : 'clay_robe', (sx + 2) * 3 + k, 'R').emit(bag, cx + sx * 8.8, y + 0.5, zb + 1.5 + dz, 0, 0.72);
     bag.add('lacquer_red', box(cx + sx * 8.8 - 1.0, y, zb + dz + 0.1, cx + sx * 8.8 + 1.0, y + 0.5, zb + dz + 2.9));
   }
   // the table of offerings and the vessels, the burners before the shrine
