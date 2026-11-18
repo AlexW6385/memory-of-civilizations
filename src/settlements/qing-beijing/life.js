@@ -20,7 +20,7 @@ export async function lifePlans() {
   // the tea house and the pharmacy: furnished inside shops of the shop street (shopfront.js qing_shop with `enter`, picked by layout.js interiorShops);
   // the room's frame runs from the shop's back wall to its counter line, the floor at the shop's plinth (0.3)
   const ins = interiorShops().filter((s) => s.side === 'w');
-  out.push(base('qing-beijing-interiors-shops', 'life', ins.map((s) => ({ t: s.kind === 'teahouse' ? 'bj_teahouse' : s.kind === 'pharmacy' ? 'bj_pharmacy' : 'bj_shop_' + s.kind, rect: [s.front - s.depth, s.z0, s.front - 0.1, s.z1], y: 0.3, front: 'e', H: 3.4, seed: s.seed })), ins.length ? [ins[0].front - 4, (ins[0].z0 + ins[0].z1) / 2] : [0, 295]));
+  out.push(base('qing-beijing-interiors-shops', 'life', ins.map((s) => ({ t: s.kind === 'teahouse' ? 'bj_teahouse' : s.kind === 'pharmacy' ? 'bj_pharmacy' : 'bj_shop_' + s.kind, rect: [s.front - s.depth, s.z0, s.front - 0.1, s.z1], y: 0.3, front: 'e', H: 3.4, seed: s.seed, upper: s.kind === 'teahouse' })), ins.length ? [ins[0].front - 4, (ins[0].z0 + ins[0].z1) / 2] : [0, 295]));
   // the people in the shops (§30): the shopman at his counter, a customer or two, the storyteller on his platform; `a` across (towards −z), `b` from the back wall
   {
     const P2 = [], Fg = (s, a, b, dx, extra = {}) => P2.push({ t: 'figure', at: [s.front - s.depth + b, (s.z0 + s.z1) / 2 - a], y: 0.34 + (extra.up ?? 0), rot: face([dx, 0]), seed: Math.floor(rand() * 1e9), ...FIG, cloth: CL[Math.floor(rand() * CL.length)], pose: 'stand', ...extra });

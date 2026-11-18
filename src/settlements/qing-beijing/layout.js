@@ -239,7 +239,7 @@ export function shopRows() {
   // from the avenue's mouth (a rule that follows the layout: it picks from whatever shops there are)
   const west = SHOPS.filter((r) => r.side === 'w').sort((a, b) => a.z0 - b.z0), all = west.flatMap((r) => r.shops.map((s) => ({ s, r })));
   const tea = all.find(({ s }) => s.z1 - s.z0 >= 7.0 && s.trade === 'tea') || all.find(({ s }) => s.z1 - s.z0 >= 7.0);
-  if (tea) { tea.s.trade = 'tea'; tea.s.storeys = 1; tea.s.interior = 'teahouse'; }
+  if (tea) { tea.s.trade = 'tea'; tea.s.storeys = 2; tea.s.interior = 'teahouse'; }
   const med = all.find(({ s, r }) => s !== tea?.s && s.z1 - s.z0 >= 5.6 && r !== tea?.r && s.z0 > (tea?.s.z1 ?? 0) + 6 && s.trade === 'medicine') || all.find(({ s, r }) => s !== tea?.s && s.z1 - s.z0 >= 5.6 && r !== tea?.r && s.z0 > (tea?.s.z1 ?? 0) + 6);
   if (med) { med.s.trade = 'medicine'; med.s.storeys = 1; med.s.interior = 'pharmacy'; }
   // more enterable shops (§30): in each of the first nine west rows the widest shop not yet taken, and in the first four rows a second,

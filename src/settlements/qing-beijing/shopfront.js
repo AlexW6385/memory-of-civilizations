@@ -129,13 +129,16 @@ export function qingShop(el, ctx) {
   // plank shutters stacked against the end posts
   for (const sg of [-1, 1]) F.B(bag, 'wood_dark', sg < 0 ? s0 + 0.5 : s1 - 0.5 - 0.16, dF - 0.2, sg < 0 ? s0 + 0.5 + 0.16 : s1 - 0.5, dF, y, lintY);
   // the upper storey of a two-storey shop: a lattice gallery on the front
-  if (st === 2) {
+  if (st === 2 && !enter) {
     const gy = y + 3.4;
     F.B(bag, 'lacquer_red', s0 + 0.5, dF - 0.2, s1 - 0.5, dF + 0.5, gy - 0.06, gy);       // the gallery's floor
     F.B(bag, 'lacquer_red', s0 + 0.5, dF + 0.46, s1 - 0.5, dF + 0.5, gy, gy + 0.9);        // its rail
     for (let i = 0; i < bays; i++) F.B(bag, 'lattice_red', ps[i] + 0.12, dF - 0.1, ps[i + 1] - 0.12, dF - 0.04, gy, gy + 2.5);
     for (const s of ps) F.B(bag, 'lacquer_red', s - 0.12, dF + 0.34, s + 0.12, dF + 0.5, gy, gy + 2.7);
   }
+  // the upper tea room of an interior two-storey shop (§38): a deck over the ground room with the stair's opening, the stair up along the side wall,
+  // the front wall of lattice windows with a door to the balcony over the street, the balcony itself with its rail
+  if (st === 2 && enter) upperRoom(bag, col, F, { s0, s1, dB, dF, y, H, bays, bw, ps, doorBay, side: el.side });
   // the roof over the shop (ridge along the street), then the board facade over its front eave
   const roofY = y + H - 0.4;
   gableRoof(bag, F, { s0, s1, dB: dB - 0.4, dF: dF + 0.9, dm: 0.1, ey: roofY, rise: (dep + 1.3) * 0.5 * 0.45, wd0: dB, wd1: dF, wy: y + H, lod: 0, orn: false });
@@ -197,7 +200,7 @@ export function qingShop(el, ctx) {
     for (const sg of [-1, 1]) { const p = F.P(sg < 0 ? s0 + 0.7 : s1 - 0.7, dF + 2.5, 0); bag.add('timber', rod([p[0], 0, p[2]], [p[0], y + 2.45, p[2]], 0.05, 5)); col.circle(p[0], p[2], 0.1, 0, 2.5); }
   }
   // furniture on the walk: a long bench against the plinth, pots of plants, a crate or a stack of baskets, a hitching of firewood
-  const wy = 0.04 + WALK_UP;
+  const wy = 0.04 + WALK_UP, sdoor = (ps[doorBay] + ps[doorBay + 1]) / 2, clearDoor = (v) => (enter && Math.abs(v - sdoor) < 1.1 ? sdoor + (v < sdoor ? -1.1 : 1.1) : v);   // (nothing stands before an open door)
   if (!enter && r() < 0.55) {
     const bs = s0 + 1.0 + r() * (L - 3.2), b0 = F.P(bs, dF + 0.62, 0);
     F.B(bag, 'timber', bs, dF + 0.52, bs + 1.5, dF + 0.82, wy + 0.4, wy + 0.45);
@@ -205,13 +208,13 @@ export function qingShop(el, ctx) {
     col.rect(F.rect(bs, dF + 0.5, bs + 1.5, dF + 0.84), 0, 0.5); void b0;
   }
   for (let i = 0, n = 1 + Math.floor(r() * 3); i < n; i++) {
-    const ps0 = s0 + 0.9 + r() * (L - 1.8), p = F.P(ps0, dF + 0.9 + r() * 0.3, wy), h = 0.28 + r() * 0.12, glaze = r() < 0.5 ? 'pottery_dark' : 'glaze_green';
+    const ps0 = clearDoor(s0 + 0.9 + r() * (L - 1.8)), p = F.P(ps0, dF + 0.9 + r() * 0.3, wy), h = 0.28 + r() * 0.12, glaze = r() < 0.5 ? 'pottery_dark' : 'glaze_green';
     bag.add(glaze, lathe([[0.001, 0], [0.15, 0], [0.23, h], [0.25, h], [0.22, h * 0.9], [0.001, h * 0.9]], 8).translate(p[0], p[1], p[2]));
     bag.add('flax_leaf', lathe([[0.001, h * 0.9], [0.3, h * 1.3], [0.2, h * 2.2], [0.001, h * 2.6]], 7).translate(p[0], p[1], p[2]));
     col.circle(p[0], p[2], 0.25, 0, 0.8);
   }
   if (r() < 0.45) {
-    const ps0 = s0 + 0.9 + r() * (L - 1.8), kind = r();
+    const ps0 = clearDoor(s0 + 0.9 + r() * (L - 1.8)), kind = r();
     if (kind < 0.5) for (let k = 0; k < 3; k++) { const p = F.P(ps0, dF + 1.0, wy + k * 0.3); bag.add('wicker', lathe([[0.001, 0], [0.26, 0], [0.32, 0.26], [0.001, 0.26]], 9).translate(p[0], p[1], p[2])); }
     else F.B(bag, 'timber', ps0 - 0.35, dF + 0.85, ps0 + 0.35, dF + 1.35, wy, wy + 0.42);
     const cc = F.P(ps0, dF + 1.1, 0); col.circle(cc[0], cc[2], 0.38, 0, 1.0);
@@ -274,3 +277,49 @@ export function qingWell(el, { bag, col }) {
   col.rect([x + 0.9, z - 0.3, x + 1.9, z + 0.3], 0, 0.4);
   void torus;
 }
+
+/**
+ * The upper floor of an interior shop (the tea house): the deck at y + 3.4 with a hole over the stair, a straight stair of 17 treads along the
+ * side wall (s1 side) rising away from the street, the front wall's lattice windows, the middle bay open to the balcony (0.9 m deep, rail all round),
+ * a papered ceiling. Returns nothing; the stair's place is exported by stairOf() for the furnishing and the walk routes.
+ */
+export const STAIR = { w: 1.15, run: 4.4, hole: 2.7, foot: 0.7 };      // width, plan length, hole length past the top, the foot's distance back from the front line
+function upperRoom(bag, col, F, o) {
+  const { s0, s1, dB, dF, y, H, bays, ps, doorBay } = o, gy = y + 3.4, T = y + H, sB = s1 - 0.5, sA = sB - STAIR.w;
+  const dFoot = dF - STAIR.foot, dTop = dFoot - STAIR.run, n = 17, rise = (gy - y) / n, run = STAIR.run / n;
+  // the deck: boards over joists, in pieces around the hole (d from the stair's top to its end is open), the visible underside timber
+  const deck = (a0, d0, a1, d1) => { if (a1 - a0 < 0.05 || d1 - d0 < 0.05) return; F.B(bag, 'timber', a0, d0, a1, d1, gy - 0.14, gy); col.floor(F.rect(a0, d0, a1, d1), gy); };
+  const dH0 = dTop, dH1 = dTop + STAIR.hole, aL = s0 + 0.5, aR = s1 - 0.5, dBk = dB + 0.5, dFr = dF - 0.05;
+  deck(aL, dBk, aR, dH0); deck(aL, dH0, sA - 0.05, dH1); deck(aL, dH1, aR, dFr);
+  // the balcony floor, over the street, and its rail (collider), the end rails
+  deck(aL, dFr, aR, dF + 0.9);
+  F.B(bag, 'lacquer_red', aL, dF + 0.82, aR, dF + 0.9, gy + 0.8, gy + 0.92);
+  for (let i = 0; i <= bays; i++) { const sp = ps[i]; F.B(bag, 'lacquer_red', sp - 0.06, dF + 0.82, sp + 0.06, dF + 0.9, gy, gy + 0.92); }
+  for (let k = 1; k < bays * 4; k++) { const sp = aL + (aR - aL) * k / (bays * 4); F.B(bag, 'lacquer_red', sp - 0.02, dF + 0.84, sp + 0.02, dF + 0.88, gy, gy + 0.8); }
+  col.rect(F.rect(aL, dF + 0.8, aR, dF + 0.9), gy, gy + 1.0);
+  for (const sx of [aL, aR]) col.rect(F.rect(sx - 0.05, dFr, sx + 0.05, dF + 0.9), gy, gy + 1.0);
+  // the rail round the hole's open sides (the room side and the foot end) — a low red rail on posts
+  const rail = (a0, d0, a1, d1) => { F.B(bag, 'lacquer_red', a0, d0, a1, d1, gy + 0.85, gy + 0.95); F.B(bag, 'lacquer_red', a0, d0, a1, d1, gy + 0.2, gy + 0.26); col.rect(F.rect(a0, d0, a1, d1), gy, gy + 1.0); };
+  rail(sA - 0.12, dH0 + 0.05, sA - 0.06, dH1); rail(sA - 0.12, dH1 - 0.06, sB, dH1);
+  for (const d of [dH0 + 0.1, dH1 - 0.03]) F.B(bag, 'lacquer_red', sA - 0.14, d - 0.04, sA - 0.04, d + 0.04, gy, gy + 0.98);
+  // the stair: treads and risers solid to the floor, a stringer each side, a handrail on the room side
+  for (let i = 0; i < n; i++) { const d1 = dFoot - i * run, d0 = d1 - run; F.B(bag, 'timber', sA, d0, sB, d1, y, y + rise * (i + 1)); F.B(bag, 'wood_dark', sA, d1 - 0.01, sB, d1 + 0.04 - run, y + rise * (i + 1) - 0.02, y + rise * (i + 1)); }
+  col.ramp(F.rect(sA, dTop, sB, dFoot), y + 0.02, gy, o.side === 'w' ? 'w' : 'e');
+  for (let i = 0; i < n; i += 4) { const d = dFoot - i * run - run / 2; F.B(bag, 'lacquer_red', sA - 0.1, d - 0.04, sA - 0.02, d + 0.04, y + rise * (i + 1), y + rise * (i + 1) + 0.9); }
+  // the front wall: lattice windows in every bay but the middle one (the balcony door), posts, a lintel; colliders for the windows' sills and the posts
+  const a0 = (i) => ps[i] + 0.12, a1 = (i) => ps[i + 1] - 0.12;
+  for (let i = 0; i < bays; i++) {
+    if (i === doorBay) { F.B(bag, 'lacquer_red', a0(i), dF - 0.12, a1(i), dF - 0.04, gy + 2.2, gy + 2.5); continue; }
+    F.B(bag, 'lacquer_red', a0(i), dF - 0.12, a1(i), dF - 0.04, gy, gy + 0.9);
+    F.B(bag, 'lattice_red', a0(i), dF - 0.1, a1(i), dF - 0.04, gy + 0.9, gy + 2.5);
+    col.rect(F.rect(a0(i), dF - 0.14, a1(i), dF - 0.02), gy, T);
+  }
+  for (const sp of ps.slice(1, -1)) { F.B(bag, 'lacquer_red', sp - 0.12, dF - 0.3, sp + 0.12, dF, gy, gy + 2.7); col.rect(F.rect(sp - 0.12, dF - 0.3, sp + 0.12, dF), gy, T); }
+  F.B(bag, 'lacquer_red', s0 + 0.5, dF - 0.3, s1 - 0.5, dF, gy + 2.5, gy + 2.85);
+  // the walls' plaster inside, and the papered ceiling under the roof
+  F.B(bag, 'plaster_white', s0 + 0.5, dB + 0.5, s1 - 0.5, dB + 0.53, gy + 0.9, gy + 2.7);
+  for (const a of [s0 + 0.5, s1 - 0.53]) F.B(bag, 'plaster_white', a, dB + 0.5, a + 0.03, dF - 0.3, gy + 0.9, gy + 2.7);
+  F.B(bag, 'plaster_white', s0 + 0.5, dB + 0.5, s1 - 0.5, dF - 0.3, gy + 2.85, gy + 2.9);
+  col.rect(F.rect(s0 + 0.5, dB + 0.5, s1 - 0.5, dB + 0.55), gy, T);
+}
+export const stairOf = (L) => ({ aS: L / 2 - 0.5 - STAIR.w / 2, a0: L / 2 - 0.5 - STAIR.w, a1: L / 2 - 0.5 });

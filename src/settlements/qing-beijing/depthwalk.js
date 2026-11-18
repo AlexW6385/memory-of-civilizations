@@ -2,7 +2,7 @@
 // the gate and round the screen wall into the yard, into the main hall, into each ear room, into each room of the south row.
 // World coordinates (the plan has origin 0, yaw 0); the checker must bring the walker to every waypoint.
 
-import { houses, deepHouses } from './layout.js';
+import { houses, deepHouses, interiorShops } from './layout.js';
 import { houseParts, GATE } from './houses.js';
 
 export function compoundWalks() {
@@ -22,6 +22,12 @@ export function compoundWalks() {
     const rooms = [];
     for (const rm of SP.rooms) rooms.push([rm.doorX, SP.zN - 1.0], [rm.doorX, SP.zN + 0.5], [rm.doorX, SP.zN + 1.9], [rm.doorX, SP.zN - 1.0]);
     routes.push([[SP.gxC, z1 + 1.5], [SP.gxC, z1 - 2.6], [SP.gxC, SP.zN - 0.9], ...rooms]);
+  }
+  // the tea house's stair: from the street through the door bay, along the side wall to the stair's foot, up it to the deck, across to the balcony door
+  for (const t of interiorShops().filter((q) => q.kind === 'teahouse')) {
+    const L = t.z1 - t.z0, cz = (t.z0 + t.z1) / 2, bays = Math.max(2, Math.round(L / 3.2)), bw = (L - 1.0) / bays, db = Math.floor(bays / 2);
+    const sd = -L / 2 + 0.5 + bw * (db + 0.5), aS = L / 2 - 0.5 - 0.575, f = t.front, z = (a) => cz - a;
+    routes.push([[f + 3.0, z(sd)], [f - 1.4, z(sd)], [f - 1.4, z(aS)], [f - 0.9, z(aS)], [f - 2.5, z(aS)], [f - 4.2, z(aS)], [f - 5.3, z(aS)], [f - 5.6, z(aS - 1.0)], [f - 3.5, z(sd)], [f - 1.0, z(sd)], [f + 0.5, z(sd)]]);
   }
   for (const r of routes) r.y0 = 0;
   return routes;
