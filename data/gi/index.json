@@ -1,25 +1,73 @@
 {
  "abbasid-baghdad": {
   "site": "abbasid-baghdad",
-  "hash": "7db48e70c29cc5f9",
+  "hash": "32cdbc1ca6e0efae",
   "rays": 128,
-  "probes": 73040,
+  "probes": 79494,
   "boxes": [
+   {
+    "min": [
+     -117,
+     -0.45,
+     -76
+    ],
+    "n": [
+     14,
+     48,
+     33
+    ],
+    "spacing": 1.05,
+    "rooms": [
+     "great iwan",
+     "audience chamber"
+    ]
+   },
    {
     "min": [
      -208,
      -0.5,
+     -38
+    ],
+    "n": [
+     77,
+     9,
+     26
+    ],
+    "spacing": 1.05,
+    "rooms": [
+     "mosque hall",
+     "palace gate guard west 1"
+    ]
+   },
+   {
+    "min": [
+     -61,
+     -0.47,
      -101.5
     ],
     "n": [
-     83,
-     22,
-     40
+     41,
+     11,
+     15
     ],
-    "spacing": 2.3,
+    "spacing": 1.05,
     "rooms": [
-     "great iwan",
-     "audience chamber",
+     "house of wisdom hall"
+    ]
+   },
+   {
+    "min": [
+     -148.8,
+     -0.47,
+     -98.8
+    ],
+    "n": [
+     75,
+     9,
+     46
+    ],
+    "spacing": 1.05,
+    "rooms": [
      "palace diwan range 1",
      "palace diwan range 2",
      "palace diwan range 3",
@@ -39,21 +87,33 @@
      "palace household range 3",
      "palace household range 4",
      "palace household range 5",
-     "palace household range 6",
-     "palace gate guard east 1",
-     "mosque hall",
-     "palace gate guard west 1",
-     "house of wisdom hall"
+     "palace household range 6"
+    ]
+   },
+   {
+    "min": [
+     -92,
+     -0.47,
+     -31.2
+    ],
+    "n": [
+     15,
+     9,
+     11
+    ],
+    "spacing": 1.05,
+    "rooms": [
+     "palace gate guard east 1"
     ]
    }
   ],
-  "bytes": 1122827,
-  "seconds": 42,
-  "baked": "2026-11-17"
+  "bytes": 1283103,
+  "seconds": 135,
+  "baked": "2026-11-18"
  },
  "abu-simbel-great-temple": {
   "site": "abu-simbel",
-  "hash": "f921c63a650b018d",
+  "hash": "49a1cde389bb0208",
   "rays": 128,
   "probes": 77112,
   "boxes": [
@@ -87,13 +147,13 @@
     ]
    }
   ],
-  "bytes": 1178085,
-  "seconds": 60,
-  "baked": "2026-11-17"
+  "bytes": 1178395,
+  "seconds": 74,
+  "baked": "2026-11-18"
  },
  "abu-simbel-small-temple": {
   "site": "abu-simbel",
-  "hash": "21a10e1c70e76622",
+  "hash": "ccfd80eb5364bed9",
   "rays": 128,
   "probes": 12480,
   "boxes": [
@@ -119,13 +179,13 @@
     ]
    }
   ],
-  "bytes": 203470,
-  "seconds": 10,
-  "baked": "2026-11-17"
+  "bytes": 203424,
+  "seconds": 13,
+  "baked": "2026-11-18"
  },
  "ajanta-caves": {
   "site": "ajanta",
-  "hash": "bd645923ec208300",
+  "hash": "a0d4d13c009e30c4",
   "rays": 128,
   "probes": 11730,
   "boxes": [
@@ -179,9 +239,9 @@
     ]
    }
   ],
-  "bytes": 213354,
-  "seconds": 32,
-  "baked": "2026-11-17"
+  "bytes": 213737,
+  "seconds": 38,
+  "baked": "2026-11-18"
  },
  "alexandria-museion": {
   "site": "alexandria",
@@ -289,12 +349,12 @@
    }
   ],
   "bytes": 1245913,
-  "seconds": 190,
+  "seconds": 171,
   "baked": "2026-11-18"
  },
  "ananda-temple": {
   "site": "bagan",
-  "hash": "60250b8d6a88ccd7",
+  "hash": "0759c4487c8fa845",
   "rays": 128,
   "probes": 74727,
   "boxes": [
@@ -319,9 +379,9 @@
     ]
    }
   ],
-  "bytes": 1179207,
-  "seconds": 86,
-  "baked": "2026-11-17"
+  "bytes": 1178370,
+  "seconds": 103,
+  "baked": "2026-11-18"
  },
  "angkor-wat": {
   "site": "angkor",
@@ -400,9 +460,9 @@
  },
  "ayutthaya-wat": {
   "site": "ayutthaya",
-  "hash": "1c4cea244712f65d",
+  "hash": "46bbc52d0bcb5f41",
   "rays": 128,
-  "probes": 30405,
+  "probes": 28434,
   "boxes": [
    {
     "min": [
@@ -412,7 +472,7 @@
     ],
     "n": [
      27,
-     13,
+     14,
      11
     ],
     "spacing": 1,
@@ -428,7 +488,7 @@
     ],
     "n": [
      30,
-     12,
+     13,
      14
     ],
     "spacing": 1,
@@ -444,7 +504,7 @@
     ],
     "n": [
      64,
-     16,
+     14,
      21
     ],
     "spacing": 1,
@@ -453,9 +513,9 @@
     ]
    }
   ],
-  "bytes": 498329,
-  "seconds": 37,
-  "baked": "2026-11-17"
+  "bytes": 469302,
+  "seconds": 49,
+  "baked": "2026-11-18"
  },
  "babylon-centre": {
   "site": "babylon",
@@ -523,7 +583,7 @@
  },
  "bali-pura": {
   "site": "bali-village",
-  "hash": "c1c15749c8210832",
+  "hash": "00a8f61add5a9a39",
   "rays": 128,
   "probes": 7314,
   "boxes": [
@@ -560,13 +620,13 @@
     ]
    }
   ],
-  "bytes": 121796,
-  "seconds": 8,
-  "baked": "2026-11-17"
+  "bytes": 121930,
+  "seconds": 9,
+  "baked": "2026-11-18"
  },
  "barcelona-sagrada": {
   "site": "barcelona",
-  "hash": "89081d630d6944b0",
+  "hash": "9f25d860d576b35f",
   "rays": 128,
   "probes": 12096,
   "boxes": [
@@ -588,13 +648,13 @@
     ]
    }
   ],
-  "bytes": 193278,
-  "seconds": 12,
-  "baked": "2026-11-17"
+  "bytes": 193128,
+  "seconds": 15,
+  "baked": "2026-11-18"
  },
  "baroque-rome-stpeter": {
   "site": "baroque-rome",
-  "hash": "b087870bea0d17f4",
+  "hash": "8e3a0279d7a5bf25",
   "rays": 128,
   "probes": 73584,
   "boxes": [
@@ -615,13 +675,13 @@
     ]
    }
   ],
-  "bytes": 1143404,
-  "seconds": 139,
-  "baked": "2026-11-13"
+  "bytes": 1143343,
+  "seconds": 167,
+  "baked": "2026-11-18"
  },
  "bauhaus-school": {
   "site": "bauhaus-dessau",
-  "hash": "646cf1358e993257",
+  "hash": "a8b3d09900f0f6cc",
   "rays": 128,
   "probes": 69479,
   "boxes": [
@@ -662,9 +722,9 @@
     ]
    }
   ],
-  "bytes": 1107039,
-  "seconds": 74,
-  "baked": "2026-11-17"
+  "bytes": 1107635,
+  "seconds": 88,
+  "baked": "2026-11-18"
  },
  "benin-palace": {
   "site": "benin-city",
@@ -803,7 +863,7 @@
  },
  "brasilia-cathedral": {
   "site": "brasilia",
-  "hash": "ff9105df0699a692",
+  "hash": "0570a1a2b86364ca",
   "rays": 128,
   "probes": 75411,
   "boxes": [
@@ -824,13 +884,13 @@
     ]
    }
   ],
-  "bytes": 1221550,
-  "seconds": 144,
-  "baked": "2026-11-14"
+  "bytes": 1221650,
+  "seconds": 129,
+  "baked": "2026-11-18"
  },
  "brasilia-congress": {
   "site": "brasilia",
-  "hash": "f0f448f066a6795d",
+  "hash": "5097eafa8ebed49b",
   "rays": 128,
   "probes": 75240,
   "boxes": [
@@ -869,9 +929,9 @@
     ]
    }
   ],
-  "bytes": 1181864,
-  "seconds": 92,
-  "baked": "2026-11-17"
+  "bytes": 1182397,
+  "seconds": 107,
+  "baked": "2026-11-18"
  },
  "byodo-in-phoenix-hall": {
   "site": "heian-uji",
@@ -902,7 +962,7 @@
  },
  "cahokia-monks": {
   "site": "cahokia",
-  "hash": "bf1b1ec3f16ce0aa",
+  "hash": "cb5014c315befda3",
   "rays": 128,
   "probes": 37224,
   "boxes": [
@@ -955,13 +1015,13 @@
     ]
    }
   ],
-  "bytes": 583282,
-  "seconds": 48,
-  "baked": "2026-11-17"
+  "bytes": 589739,
+  "seconds": 77,
+  "baked": "2026-11-18"
  },
  "catalhoyuk-town": {
   "site": "catalhoyuk",
-  "hash": "39fe97f1ed4563c7",
+  "hash": "50f980233ae2bed9",
   "rays": 128,
   "probes": 9792,
   "boxes": [
@@ -995,13 +1055,13 @@
     ]
    }
   ],
-  "bytes": 169432,
-  "seconds": 10,
-  "baked": "2026-11-17"
+  "bytes": 169443,
+  "seconds": 13,
+  "baked": "2026-11-18"
  },
  "delphi-sanctuary": {
   "site": "delphi",
-  "hash": "5dd09e6486655933",
+  "hash": "3dfae69cdab81476",
   "rays": 128,
   "probes": 17685,
   "boxes": [
@@ -1089,13 +1149,13 @@
     ]
    }
   ],
-  "bytes": 300879,
-  "seconds": 18,
-  "baked": "2026-11-17"
+  "bytes": 300929,
+  "seconds": 24,
+  "baked": "2026-11-18"
  },
  "delphi-temple": {
   "site": "delphi",
-  "hash": "8d64e5140e88b605",
+  "hash": "95b5735038211250",
   "rays": 128,
   "probes": 12784,
   "boxes": [
@@ -1117,9 +1177,9 @@
     ]
    }
   ],
-  "bytes": 209340,
-  "seconds": 36,
-  "baked": "2026-11-17"
+  "bytes": 209341,
+  "seconds": 45,
+  "baked": "2026-11-18"
  },
  "djenne-great-mosque": {
   "site": "djenne",
@@ -1150,7 +1210,7 @@
  },
  "dogon-village": {
   "site": "dogon",
-  "hash": "a6cb1f19bb7cbf7f",
+  "hash": "f2aa577d02940b34",
   "rays": 128,
   "probes": 27988,
   "boxes": [
@@ -1257,9 +1317,9 @@
     ]
    }
   ],
-  "bytes": 462299,
-  "seconds": 33,
-  "baked": "2026-11-17"
+  "bytes": 462224,
+  "seconds": 39,
+  "baked": "2026-11-18"
  },
  "dome-of-the-rock": {
   "site": "jerusalem",
@@ -1323,7 +1383,7 @@
    }
   ],
   "bytes": 1251341,
-  "seconds": 185,
+  "seconds": 163,
   "baked": "2026-11-18"
  },
  "edo-himeji-castle": {
@@ -1872,7 +1932,7 @@
  },
  "hakka-tulou": {
   "site": "hakka-tulou",
-  "hash": "40c5e6f1a9e5eea7",
+  "hash": "12aa5d7df1ca716f",
   "rays": 128,
   "probes": 57188,
   "boxes": [
@@ -1890,79 +1950,95 @@
     "spacing": 1,
     "rooms": [
      "hall",
-     "gallery-2-n",
-     "gallery-3-n",
-     "gallery-4-n",
-     "tools-0-52",
-     "loom-1-52",
-     "tea-2-52",
-     "tea-3-52",
-     "kitchen-0-53",
-     "granary-1-53",
-     "bedroom-2-53",
-     "bedroom-3-53",
-     "kitchen-0-55",
-     "granary-1-55",
-     "bedroom-2-55",
-     "bedroom-3-55",
-     "kitchen-0-56",
-     "granary-1-56",
-     "bedroom-2-56",
-     "bedroom-3-56",
-     "tools-1-54",
-     "bedroom-2-54",
-     "bedroom-3-54",
-     "kitchen-0-50",
-     "granary-1-50",
-     "bedroom-2-50",
-     "bedroom-3-50",
-     "kitchen-0-51",
-     "granary-1-51",
-     "bedroom-2-51",
-     "bedroom-3-51",
-     "pen-0-57",
-     "tools-1-57",
-     "loom-2-57",
-     "loom-3-57",
-     "kitchen-0-58",
-     "granary-1-58",
-     "bedroom-2-58",
-     "bedroom-3-58",
-     "pen-0-46",
-     "tools-1-46",
-     "loom-2-46",
-     "loom-3-46",
-     "kitchen-0-47",
-     "granary-1-47",
-     "bedroom-2-47",
-     "bedroom-3-47",
-     "kitchen-0-48",
-     "granary-1-48",
-     "bedroom-2-48",
-     "bedroom-3-48",
-     "tools-0-49",
-     "loom-1-49",
-     "tea-2-49",
-     "tea-3-49",
-     "kitchen-0-59",
-     "granary-1-59",
-     "bedroom-2-59",
-     "bedroom-3-59",
-     "tools-0-60",
-     "loom-1-60",
-     "tea-2-60",
-     "tea-3-60",
-     "kitchen-0-61",
-     "granary-1-61",
-     "bedroom-2-61",
-     "bedroom-3-61",
-     "kitchen-0-62",
-     "granary-1-62",
-     "bedroom-2-62",
-     "bedroom-3-62",
+     "gallery-2-s",
+     "gallery-3-s",
+     "gallery-4-s",
+     "kitchen-0-16",
+     "loom-1-16",
+     "tea-2-16",
+     "bedroom-3-16",
+     "kitchen-0-17",
+     "granary-1-17",
+     "bedroom-2-17",
+     "bedroom-3-17",
+     "kitchen-0-19",
+     "loom-1-19",
+     "bedroom-2-19",
+     "tea-3-19",
+     "kitchen-0-20",
+     "granary-1-20",
+     "bedroom-2-20",
+     "bedroom-3-20",
+     "granary-1-18",
+     "bedroom-2-18",
+     "bedroom-3-18",
+     "kitchen-0-21",
+     "tools-1-21",
+     "bedroom-2-21",
+     "bedroom-3-21",
+     "kitchen-0-22",
+     "granary-1-22",
+     "bedroom-2-22",
+     "tea-3-22",
+     "kitchen-0-14",
+     "granary-1-14",
+     "bedroom-2-14",
+     "bedroom-3-14",
+     "kitchen-0-15",
+     "granary-1-15",
+     "bedroom-2-15",
+     "bedroom-3-15",
+     "kitchen-0-23",
+     "granary-1-23",
+     "bedroom-2-23",
+     "bedroom-3-23",
+     "pen-0-24",
+     "granary-1-24",
+     "loom-2-24",
+     "loom-3-24",
+     "kitchen-0-25",
+     "granary-1-25",
+     "bedroom-2-25",
+     "bedroom-3-25",
+     "kitchen-0-26",
+     "granary-1-26",
+     "bedroom-2-26",
+     "bedroom-3-26",
+     "kitchen-0-10",
+     "granary-1-10",
+     "bedroom-2-10",
+     "bedroom-3-10",
+     "kitchen-0-11",
+     "granary-1-11",
+     "tea-2-11",
+     "tea-3-11",
+     "kitchen-0-12",
+     "granary-1-12",
+     "bedroom-2-12",
+     "bedroom-3-12",
+     "kitchen-0-13",
+     "tools-1-13",
+     "bedroom-2-13",
+     "bedroom-3-13",
      "gallery-2-e",
      "gallery-3-e",
      "gallery-4-e",
+     "kitchen-0-67",
+     "granary-1-67",
+     "bedroom-2-67",
+     "bedroom-3-67",
+     "pen-0-68",
+     "loom-1-68",
+     "loom-2-68",
+     "loom-3-68",
+     "kitchen-0-69",
+     "granary-1-69",
+     "bedroom-2-69",
+     "bedroom-3-69",
+     "kitchen-0-70",
+     "granary-1-70",
+     "bedroom-2-70",
+     "bedroom-3-70",
      "kitchen-0-2",
      "tools-1-2",
      "bedroom-2-2",
@@ -1979,22 +2055,6 @@
      "tools-1-5",
      "loom-2-5",
      "loom-3-5",
-     "kitchen-0-69",
-     "granary-1-69",
-     "bedroom-2-69",
-     "bedroom-3-69",
-     "kitchen-0-70",
-     "granary-1-70",
-     "bedroom-2-70",
-     "bedroom-3-70",
-     "kitchen-0-67",
-     "granary-1-67",
-     "bedroom-2-67",
-     "bedroom-3-67",
-     "pen-0-68",
-     "loom-1-68",
-     "loom-2-68",
-     "loom-3-68",
      "kitchen-0-6",
      "granary-1-6",
      "bedroom-2-6",
@@ -2030,6 +2090,22 @@
      "gallery-2-w",
      "gallery-3-w",
      "gallery-4-w",
+     "kitchen-0-31",
+     "granary-1-31",
+     "bedroom-2-31",
+     "bedroom-3-31",
+     "kitchen-0-32",
+     "tools-1-32",
+     "bedroom-2-32",
+     "bedroom-3-32",
+     "kitchen-0-33",
+     "granary-1-33",
+     "bedroom-2-33",
+     "tea-3-33",
+     "kitchen-0-34",
+     "granary-1-34",
+     "bedroom-2-34",
+     "bedroom-3-34",
      "tools-0-38",
      "loom-1-38",
      "tea-2-38",
@@ -2046,38 +2122,6 @@
      "loom-1-41",
      "tea-2-41",
      "tea-3-41",
-     "kitchen-0-33",
-     "granary-1-33",
-     "bedroom-2-33",
-     "tea-3-33",
-     "kitchen-0-34",
-     "granary-1-34",
-     "bedroom-2-34",
-     "bedroom-3-34",
-     "kitchen-0-31",
-     "granary-1-31",
-     "bedroom-2-31",
-     "bedroom-3-31",
-     "kitchen-0-32",
-     "tools-1-32",
-     "bedroom-2-32",
-     "bedroom-3-32",
-     "tools-0-27",
-     "loom-1-27",
-     "bedroom-2-27",
-     "tea-3-27",
-     "kitchen-0-28",
-     "granary-1-28",
-     "bedroom-2-28",
-     "bedroom-3-28",
-     "kitchen-0-29",
-     "granary-1-29",
-     "bedroom-2-29",
-     "bedroom-3-29",
-     "tools-0-30",
-     "loom-1-30",
-     "tea-2-30",
-     "tea-3-30",
      "kitchen-0-42",
      "granary-1-42",
      "bedroom-2-42",
@@ -2094,86 +2138,102 @@
      "granary-1-45",
      "bedroom-2-45",
      "bedroom-3-45",
-     "gallery-2-s",
-     "gallery-3-s",
-     "gallery-4-s",
-     "kitchen-0-16",
-     "loom-1-16",
-     "tea-2-16",
-     "bedroom-3-16",
-     "kitchen-0-17",
-     "granary-1-17",
-     "bedroom-2-17",
-     "bedroom-3-17",
-     "kitchen-0-19",
-     "loom-1-19",
-     "bedroom-2-19",
-     "tea-3-19",
-     "kitchen-0-20",
-     "granary-1-20",
-     "bedroom-2-20",
-     "bedroom-3-20",
-     "granary-1-18",
-     "bedroom-2-18",
-     "bedroom-3-18",
-     "kitchen-0-14",
-     "granary-1-14",
-     "bedroom-2-14",
-     "bedroom-3-14",
-     "kitchen-0-15",
-     "granary-1-15",
-     "bedroom-2-15",
-     "bedroom-3-15",
-     "kitchen-0-21",
-     "tools-1-21",
-     "bedroom-2-21",
-     "bedroom-3-21",
-     "kitchen-0-22",
-     "granary-1-22",
-     "bedroom-2-22",
-     "tea-3-22",
-     "kitchen-0-10",
-     "granary-1-10",
-     "bedroom-2-10",
-     "bedroom-3-10",
-     "kitchen-0-11",
-     "granary-1-11",
-     "tea-2-11",
-     "tea-3-11",
-     "kitchen-0-12",
-     "granary-1-12",
-     "bedroom-2-12",
-     "bedroom-3-12",
-     "kitchen-0-13",
-     "tools-1-13",
-     "bedroom-2-13",
-     "bedroom-3-13",
-     "kitchen-0-23",
-     "granary-1-23",
-     "bedroom-2-23",
-     "bedroom-3-23",
-     "pen-0-24",
-     "granary-1-24",
-     "loom-2-24",
-     "loom-3-24",
-     "kitchen-0-25",
-     "granary-1-25",
-     "bedroom-2-25",
-     "bedroom-3-25",
-     "kitchen-0-26",
-     "granary-1-26",
-     "bedroom-2-26",
-     "bedroom-3-26"
+     "tools-0-27",
+     "loom-1-27",
+     "bedroom-2-27",
+     "tea-3-27",
+     "kitchen-0-28",
+     "granary-1-28",
+     "bedroom-2-28",
+     "bedroom-3-28",
+     "kitchen-0-29",
+     "granary-1-29",
+     "bedroom-2-29",
+     "bedroom-3-29",
+     "tools-0-30",
+     "loom-1-30",
+     "tea-2-30",
+     "tea-3-30",
+     "gallery-2-n",
+     "gallery-3-n",
+     "gallery-4-n",
+     "tools-0-52",
+     "loom-1-52",
+     "tea-2-52",
+     "tea-3-52",
+     "kitchen-0-53",
+     "granary-1-53",
+     "bedroom-2-53",
+     "bedroom-3-53",
+     "tools-1-54",
+     "bedroom-2-54",
+     "bedroom-3-54",
+     "kitchen-0-55",
+     "granary-1-55",
+     "bedroom-2-55",
+     "bedroom-3-55",
+     "kitchen-0-56",
+     "granary-1-56",
+     "bedroom-2-56",
+     "bedroom-3-56",
+     "pen-0-57",
+     "tools-1-57",
+     "loom-2-57",
+     "loom-3-57",
+     "kitchen-0-58",
+     "granary-1-58",
+     "bedroom-2-58",
+     "bedroom-3-58",
+     "kitchen-0-50",
+     "granary-1-50",
+     "bedroom-2-50",
+     "bedroom-3-50",
+     "kitchen-0-51",
+     "granary-1-51",
+     "bedroom-2-51",
+     "bedroom-3-51",
+     "pen-0-46",
+     "tools-1-46",
+     "loom-2-46",
+     "loom-3-46",
+     "kitchen-0-47",
+     "granary-1-47",
+     "bedroom-2-47",
+     "bedroom-3-47",
+     "kitchen-0-48",
+     "granary-1-48",
+     "bedroom-2-48",
+     "bedroom-3-48",
+     "tools-0-49",
+     "loom-1-49",
+     "tea-2-49",
+     "tea-3-49",
+     "kitchen-0-59",
+     "granary-1-59",
+     "bedroom-2-59",
+     "bedroom-3-59",
+     "tools-0-60",
+     "loom-1-60",
+     "tea-2-60",
+     "tea-3-60",
+     "kitchen-0-61",
+     "granary-1-61",
+     "bedroom-2-61",
+     "bedroom-3-61",
+     "kitchen-0-62",
+     "granary-1-62",
+     "bedroom-2-62",
+     "bedroom-3-62"
     ]
    }
   ],
-  "bytes": 959879,
-  "seconds": 112,
-  "baked": "2026-11-17"
+  "bytes": 962205,
+  "seconds": 154,
+  "baked": "2026-11-18"
  },
  "han-changan-weiyang": {
   "site": "han-changan",
-  "hash": "a0d8f494dce59fa4",
+  "hash": "15c1ce6e7ede8ed5",
   "rays": 128,
   "probes": 78430,
   "boxes": [
@@ -2212,9 +2272,9 @@
     ]
    }
   ],
-  "bytes": 1175210,
-  "seconds": 100,
-  "baked": "2026-11-17"
+  "bytes": 1179106,
+  "seconds": 122,
+  "baked": "2026-11-18"
  },
  "isfahan-maidan": {
   "site": "isfahan",
@@ -2321,7 +2381,7 @@
  },
  "kakadu-ubirr": {
   "site": "kakadu",
-  "hash": "bde672c6a7c5879f",
+  "hash": "9cb04ae603af6dfe",
   "rays": 128,
   "probes": 11259,
   "boxes": [
@@ -2358,13 +2418,13 @@
     ]
    }
   ],
-  "bytes": 189215,
-  "seconds": 12,
-  "baked": "2026-11-17"
+  "bytes": 188933,
+  "seconds": 16,
+  "baked": "2026-11-18"
  },
  "karakorum-ger-camp": {
   "site": "mongol-karakorum",
-  "hash": "3a21c78d31913274",
+  "hash": "8e30c74bc9e8ce7d",
   "rays": 128,
   "probes": 864,
   "boxes": [
@@ -2385,13 +2445,13 @@
     ]
    }
   ],
-  "bytes": 16002,
-  "seconds": 1,
-  "baked": "2026-11-13"
+  "bytes": 15978,
+  "seconds": 2,
+  "baked": "2026-11-18"
  },
  "karakorum-palace": {
   "site": "mongol-karakorum",
-  "hash": "be5e77292ff1efc0",
+  "hash": "5cb8e290297f1ee4",
   "rays": 128,
   "probes": 12186,
   "boxes": [
@@ -2428,9 +2488,9 @@
     ]
    }
   ],
-  "bytes": 208925,
-  "seconds": 25,
-  "baked": "2026-11-17"
+  "bytes": 209514,
+  "seconds": 33,
+  "baked": "2026-11-18"
  },
  "khajuraho-temples": {
   "site": "khajuraho",
@@ -2726,7 +2786,7 @@
  },
  "london-westminster": {
   "site": "london",
-  "hash": "d52f4ae1970b7052",
+  "hash": "07fb95e3f1c9cc51",
   "rays": 128,
   "probes": 78390,
   "boxes": [
@@ -2773,13 +2833,13 @@
     ]
    }
   ],
-  "bytes": 1223791,
-  "seconds": 90,
-  "baked": "2026-11-17"
+  "bytes": 1225274,
+  "seconds": 107,
+  "baked": "2026-11-18"
  },
  "lu-qufu-temple": {
   "site": "lu-qufu",
-  "hash": "aa3e79d1eec0abcb",
+  "hash": "59feb274b97b4f20",
   "rays": 128,
   "probes": 75852,
   "boxes": [
@@ -2848,9 +2908,9 @@
     ]
    }
   ],
-  "bytes": 1214602,
-  "seconds": 170,
-  "baked": "2026-11-17"
+  "bytes": 1214763,
+  "seconds": 213,
+  "baked": "2026-11-18"
  },
  "madurai-meenakshi": {
   "site": "madurai",
@@ -2925,9 +2985,9 @@
  },
  "manueline-belem": {
   "site": "manueline-lisbon",
-  "hash": "6d82098251e060f2",
+  "hash": "c345b8e21ce2f8b8",
   "rays": 128,
-  "probes": 17442,
+  "probes": 17955,
   "boxes": [
    {
     "min": [
@@ -2937,7 +2997,7 @@
     ],
     "n": [
      27,
-     34,
+     35,
      19
     ],
     "spacing": 1,
@@ -2951,13 +3011,13 @@
     ]
    }
   ],
-  "bytes": 283576,
-  "seconds": 22,
-  "baked": "2026-11-17"
+  "bytes": 292520,
+  "seconds": 30,
+  "baked": "2026-11-18"
  },
  "manueline-jeronimos": {
   "site": "manueline-lisbon",
-  "hash": "9257d4f951dc3d37",
+  "hash": "83c86423e75c0478",
   "rays": 128,
   "probes": 78936,
   "boxes": [
@@ -2985,9 +3045,9 @@
     ]
    }
   ],
-  "bytes": 1280816,
-  "seconds": 143,
-  "baked": "2026-11-14"
+  "bytes": 1280896,
+  "seconds": 127,
+  "baked": "2026-11-18"
  },
  "maori-pa": {
   "site": "maori",
@@ -3018,7 +3078,7 @@
  },
  "maya-tikal-plaza": {
   "site": "maya-tikal",
-  "hash": "37aae4c7a401fa67",
+  "hash": "7a41705db8c63b64",
   "rays": 128,
   "probes": 8278,
   "boxes": [
@@ -3169,9 +3229,9 @@
     ]
    }
   ],
-  "bytes": 153928,
-  "seconds": 9,
-  "baked": "2026-11-17"
+  "bytes": 154035,
+  "seconds": 12,
+  "baked": "2026-11-18"
  },
  "ming-suzhou-garden": {
   "site": "ming-suzhou",
@@ -3235,7 +3295,7 @@
  },
  "mohenjo-daro-citadel": {
   "site": "mohenjo-daro",
-  "hash": "d9df4bc1ff0c2fbf",
+  "hash": "c413b9304e9274ac",
   "rays": 128,
   "probes": 19006,
   "boxes": [
@@ -3273,9 +3333,9 @@
     ]
    }
   ],
-  "bytes": 313343,
-  "seconds": 23,
-  "baked": "2026-11-17"
+  "bytes": 313186,
+  "seconds": 30,
+  "baked": "2026-11-18"
  },
  "mughal-agra-taj": {
   "site": "mughal-agra",
@@ -3485,7 +3545,7 @@
  },
  "muscovy-red-square": {
   "site": "muscovy",
-  "hash": "409e83ae022159b2",
+  "hash": "5ba8afebf61789f2",
   "rays": 128,
   "probes": 79092,
   "boxes": [
@@ -3510,13 +3570,13 @@
     ]
    }
   ],
-  "bytes": 1202506,
-  "seconds": 94,
-  "baked": "2026-11-17"
+  "bytes": 1216206,
+  "seconds": 123,
+  "baked": "2026-11-18"
  },
  "mycenae-citadel": {
   "site": "mycenae",
-  "hash": "ad77c8c00e61ce28",
+  "hash": "15de7a2ce5dfd3ae",
   "rays": 128,
   "probes": 35960,
   "boxes": [
@@ -3543,13 +3603,13 @@
     ]
    }
   ],
-  "bytes": 598398,
-  "seconds": 36,
-  "baked": "2026-11-17"
+  "bytes": 598347,
+  "seconds": 41,
+  "baked": "2026-11-18"
  },
  "mycenae-treasury": {
   "site": "mycenae",
-  "hash": "bae114f5730608f7",
+  "hash": "5ca447d86ed63b57",
   "rays": 128,
   "probes": 8400,
   "boxes": [
@@ -3572,15 +3632,15 @@
     ]
    }
   ],
-  "bytes": 138881,
-  "seconds": 9,
-  "baked": "2026-11-17"
+  "bytes": 138717,
+  "seconds": 11,
+  "baked": "2026-11-18"
  },
  "nalanda-mahavihara": {
   "site": "nalanda",
-  "hash": "08734af46f54a707",
+  "hash": "f68f4b86a23fcb61",
   "rays": 128,
-  "probes": 11483,
+  "probes": 11593,
   "boxes": [
    {
     "min": [
@@ -3590,7 +3650,7 @@
     ],
     "n": [
      11,
-     9,
+     10,
      10
     ],
     "spacing": 1,
@@ -3681,9 +3741,9 @@
     ]
    }
   ],
-  "bytes": 167861,
-  "seconds": 9,
-  "baked": "2026-11-17"
+  "bytes": 170121,
+  "seconds": 12,
+  "baked": "2026-11-18"
  },
  "nandauwas": {
   "site": "nan-madol",
@@ -3742,7 +3802,7 @@
  },
  "new-york-esb": {
   "site": "new-york",
-  "hash": "5412f92e349ad8ee",
+  "hash": "7f02ddfe0ac7f40a",
   "rays": 128,
   "probes": 41616,
   "boxes": [
@@ -3763,15 +3823,15 @@
     ]
    }
   ],
-  "bytes": 689533,
-  "seconds": 390,
-  "baked": "2026-11-07"
+  "bytes": 685975,
+  "seconds": 214,
+  "baked": "2026-11-18"
  },
  "norse-borgund-church": {
   "site": "norse-borgund",
-  "hash": "9e665e232eed9539",
+  "hash": "140320b6b738b0ad",
   "rays": 128,
-  "probes": 6175,
+  "probes": 6422,
   "boxes": [
    {
     "min": [
@@ -3781,7 +3841,7 @@
     ],
     "n": [
      19,
-     25,
+     26,
      13
     ],
     "spacing": 1,
@@ -3791,9 +3851,9 @@
     ]
    }
   ],
-  "bytes": 96586,
-  "seconds": 7,
-  "baked": "2026-11-17"
+  "bytes": 100062,
+  "seconds": 11,
+  "baked": "2026-11-18"
  },
  "ottoman-istanbul-suleymaniye": {
   "site": "ottoman-istanbul",
@@ -4130,7 +4190,7 @@
  },
  "qin-pit1": {
   "site": "qin-xianyang",
-  "hash": "6828178b781ae54f",
+  "hash": "f8f0517e20c2f7ab",
   "rays": 128,
   "probes": 75480,
   "boxes": [
@@ -4152,9 +4212,9 @@
     ]
    }
   ],
-  "bytes": 1123997,
-  "seconds": 76,
-  "baked": "2026-11-17"
+  "bytes": 1099386,
+  "seconds": 95,
+  "baked": "2026-11-18"
  },
  "qing-beijing-palace": {
   "site": "qing-beijing",
@@ -4182,7 +4242,7 @@
    }
   ],
   "bytes": 1197918,
-  "seconds": 129,
+  "seconds": 113,
   "baked": "2026-11-18"
  },
  "sainte-chapelle": {
@@ -4261,7 +4321,7 @@
    }
   ],
   "bytes": 1128938,
-  "seconds": 128,
+  "seconds": 113,
   "baked": "2026-11-18"
  },
  "samarkand-registan": {
@@ -4329,7 +4389,7 @@
  },
  "sgang-gwaay-house": {
   "site": "sgang-gwaay",
-  "hash": "1c7c1a38608c40ee",
+  "hash": "f9b8e6c2cd23a3e3",
   "rays": 128,
   "probes": 3240,
   "boxes": [
@@ -4350,9 +4410,9 @@
     ]
    }
   ],
-  "bytes": 55468,
-  "seconds": 5,
-  "baked": "2026-11-17"
+  "bytes": 55481,
+  "seconds": 6,
+  "baked": "2026-11-18"
  },
  "shaolin-monastery": {
   "site": "shaolin",
@@ -4549,7 +4609,7 @@
  },
  "shibam-tower-house": {
   "site": "shibam",
-  "hash": "1c63f586853c5228",
+  "hash": "5b8758b1207cb836",
   "rays": 128,
   "probes": 3744,
   "boxes": [
@@ -4577,9 +4637,9 @@
     ]
    }
   ],
-  "bytes": 66469,
-  "seconds": 5,
-  "baked": "2026-11-17"
+  "bytes": 66690,
+  "seconds": 7,
+  "baked": "2026-11-18"
  },
  "song-hangzhou-liuhe": {
   "site": "song-hangzhou",
@@ -4707,7 +4767,7 @@
  },
  "sydney-opera": {
   "site": "sydney",
-  "hash": "d38286b4e6b34ec2",
+  "hash": "d02536c331f6daf4",
   "rays": 128,
   "probes": 76680,
   "boxes": [
@@ -4744,9 +4804,9 @@
     ]
    }
   ],
-  "bytes": 1266435,
-  "seconds": 238,
-  "baked": "2026-11-17"
+  "bytes": 1268471,
+  "seconds": 265,
+  "baked": "2026-11-18"
  },
  "tang-changan-daci-en": {
   "site": "tang-changan",
@@ -4925,7 +4985,7 @@
  },
  "thebes-karnak": {
   "site": "thebes",
-  "hash": "5aac615b1cf9f919",
+  "hash": "d79362feb0f05ae3",
   "rays": 128,
   "probes": 69445,
   "boxes": [
@@ -4946,9 +5006,9 @@
     ]
    }
   ],
-  "bytes": 1128087,
-  "seconds": 118,
-  "baked": "2026-11-17"
+  "bytes": 1128199,
+  "seconds": 144,
+  "baked": "2026-11-18"
  },
  "ur-ziggurat": {
   "site": "ur",
@@ -5088,7 +5148,7 @@
  },
  "vienna-secession": {
   "site": "vienna",
-  "hash": "e0eee489352c62a5",
+  "hash": "d395752e1fea07c8",
   "rays": 128,
   "probes": 23088,
   "boxes": [
@@ -5114,9 +5174,9 @@
     ]
    }
   ],
-  "bytes": 379731,
-  "seconds": 32,
-  "baked": "2026-11-17"
+  "bytes": 380596,
+  "seconds": 40,
+  "baked": "2026-11-18"
  },
  "wei-ye-bronze-sparrow": {
   "site": "wei-ye",
@@ -5174,7 +5234,7 @@
    }
   ],
   "bytes": 399328,
-  "seconds": 47,
+  "seconds": 42,
   "baked": "2026-11-18"
  },
  "wei-ye-wenchang": {
@@ -5233,7 +5293,7 @@
  },
  "yinxu-hall": {
   "site": "shang-yinxu",
-  "hash": "5430d753854e771c",
+  "hash": "de97b51155a1518d",
   "rays": 128,
   "probes": 24964,
   "boxes": [
@@ -5286,13 +5346,13 @@
     ]
    }
   ],
-  "bytes": 398404,
-  "seconds": 27,
-  "baked": "2026-11-17"
+  "bytes": 398008,
+  "seconds": 37,
+  "baked": "2026-11-18"
  },
  "yinxu-tomb": {
   "site": "shang-yinxu",
-  "hash": "c9975e45f66d4df5",
+  "hash": "a652c2fdafb100e8",
   "rays": 128,
   "probes": 1352,
   "boxes": [
@@ -5313,8 +5373,8 @@
     ]
    }
   ],
-  "bytes": 22448,
+  "bytes": 22450,
   "seconds": 2,
-  "baked": "2026-11-17"
+  "baked": "2026-11-18"
  }
 }
