@@ -15,6 +15,7 @@
 import { box, lathe, place, fromTriangles } from '../../core/geom.js';
 import * as F from './furnish.js';
 import { houseRoom, houseUpper, houseStairs, householdOf } from './household.js';
+import { openUp, mumtyOf } from './upper.js';
 
 const R = 'sandstone_red';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -65,6 +66,7 @@ function slope(B, mat, x, w, y0, z0, y1, z1) {
 
 export function townHouse(el, { bag, col }) {
   const L = layoutOf(el), { f, W, D, hw, shop, st, H, mat, accent, variant, dx, enter } = L, rand = L.r;
+  const up = !!el.up && st > 1 && enter;                              // an open upper floor (styles/mughal/upper.js)
   const B = { add: (m, g) => bag.add(m, place(g, f.ox, 0, f.oz, f.yaw)) };
   const C = { rect: (r, y0, y1) => col.rect(f.rect(r), y0, y1), floor: (r, y) => col.floor(f.rect(r), y), circle: (x, z, r, y0, y1) => { const [wx, wz] = f.pt(x, z); col.circle(wx, wz, r, y0, y1); },
     ramp: (r, y0, y1, ax, az) => col.ramp(f.rect(r), y0, y1, f.compass(ax, az)) };
@@ -106,11 +108,14 @@ export function townHouse(el, { bag, col }) {
       const holes = [];
       if (loggia) holes.push([-hw + 0.7, hw - 0.7, FH + 0.12, FH + 2.5]);
       else for (let x = -hw + 1.3; x < hw - 0.8; x += 2.5) if (Math.abs(x) >= 2.1) holes.push([x - 0.4, x + 0.4, FH + 0.75, FH + 2.1]);
+      if (up && variant === 'jharokha') holes.push([-0.55, 0.55, FH, FH + 2.5]);   // (its door stands open)
       // (the middle of the front is the jharokha's: its door set in the wall, shut)
       frontWall(FH, HL, holes);
+      if (!up) {
       if (st === 3) { B.add(mat, box(-hw, HL, -D, hw, H, 0)); C.rect([-hw, -D, hw, 0], HL, H); }
       B.add(mat, box(-hw + T, HL - 0.25, -D + T, hw - T, HL, -0.5)); C.floor([-hw + T, -D + T, hw - T, -0.5], HL);
       for (let z = -D + T + 0.9; z < -1.0; z += 1.1) B.add('wood_dark', box(-hw + T, HL - 0.4, z - 0.07, hw - T, HL - 0.25, z + 0.07));
+      }
       if (st === 2) { /* the slab is the roof: the parapet stands on it below */ }
     }
   } else if (enter) {
@@ -126,25 +131,28 @@ export function townHouse(el, { bag, col }) {
       const HL = FH + UH, wh = [];
       roomWalls(FH, HL);
       for (let x = -hw + 1.3; x < hw - 0.8; x += 2.5) if (Math.abs(x - dx) >= (variant === 'plain' ? 1.9 : 2.1)) wh.push([x - 0.4, x + 0.4, FH + 0.75, FH + 2.1]);
+      if (up && variant === 'jharokha') wh.push([dx - 0.55, dx + 0.55, FH, FH + 2.5]);   // (the jharokha's door stands open)
       frontWall(FH, HL, wh);
+      if (!up) {
       if (st === 3) { B.add(mat, box(-hw, HL, -D, hw, H, 0)); C.rect([-hw, -D, hw, 0], HL, H); }
       B.add(mat, box(-hw + T, HL - 0.25, -D + T, hw - T, HL, -0.5)); C.floor([-hw + T, -D + T, hw - T, -0.5], HL);
       for (let z = -D + T + 0.9; z < -1.0; z += 1.1) B.add('wood_dark', box(-hw + T, HL - 0.4, z - 0.07, hw - T, HL - 0.25, z + 0.07));
-      houseStairs(B, C, L, ground); houseUpper(B, C, L, el, FH);
+      }
+      houseStairs(B, C, L, ground); if (!up) houseUpper(B, C, L, el, FH);
     }
     houseRoom(B, C, L, el, ground, L.kind);
   } else {
     B.add(mat, box(-hw, 0, -D, hw, H, 0));
     C.rect([-hw, -D, hw, 0], 0, H);
   }
-  C.floor([-hw, -D, hw, 0], H);
+  if (up) openUp({ B, C, L, el, frontWall, roomWalls }); else C.floor([-hw, -D, hw, 0], H);
   // the parapet round the roof, a cornice on the front, merlons along the front and the sides
   const PT = 0.3, PH = 0.9;
   B.add(mat, box(-hw - 0.05, H, -0.3, hw + 0.05, H + PH, 0)); B.add(mat, box(-hw - 0.05, H, -D, hw + 0.05, H + PH, -D + PT));
   B.add(mat, box(-hw - 0.05, H, -D + PT, -hw + PT, H + PH, -0.3)); B.add(mat, box(hw - PT, H, -D + PT, hw + 0.05, H + PH, -0.3));
   B.add(accent, box(-hw - 0.1, H - 0.28, -0.14, hw + 0.1, H, 0.12)); B.add(accent, box(-hw - 0.14, H + PH, -0.36, hw + 0.14, H + PH + 0.08, 0.04));
   for (let x = -hw + 0.45; x < hw - 0.3; x += 0.9) B.add(accent, box(x - 0.24, H + PH + 0.08, -0.3, x + 0.24, H + PH + 0.5, -0.02));
-  for (const s of [-1, 1]) for (let z = -D + 1.2; z < -0.8; z += 1.5) B.add(accent, box(s < 0 ? -hw : hw - PT, H + PH, z - 0.22, s < 0 ? -hw + PT : hw, H + PH + 0.4, z + 0.22));
+  for (const s of [-1, 1]) for (let z = -D + 1.2; z < -0.8; z += 1.5) if (!(up && s < 0 && z < mumtyOf(L).z1 + 0.3)) B.add(accent, box(s < 0 ? -hw : hw - PT, H + PH, z - 0.22, s < 0 ? -hw + PT : hw, H + PH + 0.4, z + 0.22));
   // ── the door (houses) or the shop's verandah ──────────────────────────────────────────────────────────────────
   if (!shop) {
     B.add(R, box(dx - 0.95, 0, -0.02, dx - 0.75, 2.6, 0.1)); B.add(R, box(dx + 0.75, 0, -0.02, dx + 0.95, 2.6, 0.1)); B.add(R, box(dx - 0.95, 2.4, -0.02, dx + 0.95, 2.75, 0.12));
@@ -219,7 +227,7 @@ export function townHouse(el, { bag, col }) {
         B.add(R, box(jx + a + 0.07, y0, 1.0, jx + b - 0.07, y0 + 0.75, 1.1)); B.add('lattice', box(jx + a + 0.07, y0 + 0.75, 1.03, jx + b - 0.07, y0 + 1.75, 1.07)); B.add(R, box(jx + a + 0.07, y0 + 1.75, 1.0, jx + b - 0.07, y0 + 1.9, 1.1));
       }
       for (const s of [-1, 1]) { B.add('lattice', box(jx + s * 1.2, y0 + 0.75, 0.15, jx + s * 1.2 + 0.04, y0 + 1.75, 0.95)); B.add(R, box(jx + s * 1.2 - 0.03, y0, 0.1, jx + s * 1.2 + 0.07, y0 + 0.75, 1.0)); }
-      B.add('wood_dark', box(jx - 1.1, y0 + 0.2, 0.002, jx + 1.1, y0 + 1.8, 0.03));
+      if (!up) B.add('wood_dark', box(jx - 1.1, y0 + 0.2, 0.002, jx + 1.1, y0 + 1.8, 0.03));
       B.add(R, box(jx - 1.45, y0 + 1.9, 0, jx + 1.45, y0 + 2.1, 1.22));
       if (L.dome) {
         B.add('marble', lathe([[1.05, 0], [1.22, 0.16], [0.8, 0.5], [0.32, 0.85], [0.001, 1.05]], 12, null, jx, y0 + 2.1, 0.55));
@@ -266,9 +274,9 @@ export function townHouse(el, { bag, col }) {
   }
   // ── on the roof: the stair head, sometimes a chhatri at a corner ───────────────────────────────────────────────────
   const sx = L.sx, sxc = sx * (hw - 1.6);
-  if (D > 7) { B.add(mat, box(sxc - 1, H, -D + 1.4, sxc + 1, H + 2.3, -D + 3.4)); B.add(accent, box(sxc - 1.1, H + 2.3, -D + 1.3, sxc + 1.1, H + 2.42, -D + 3.5)); B.add('wood_dark', box(sxc - 0.4, H, -D + 3.4, sxc + 0.4, H + 1.8, -D + 3.43)); C.rect([sxc - 1, -D + 1.4, sxc + 1, -D + 3.4], H, H + 2.4); }
+  if (D > 7 && !up) { B.add(mat, box(sxc - 1, H, -D + 1.4, sxc + 1, H + 2.3, -D + 3.4)); B.add(accent, box(sxc - 1.1, H + 2.3, -D + 1.3, sxc + 1.1, H + 2.42, -D + 3.5)); B.add('wood_dark', box(sxc - 0.4, H, -D + 3.4, sxc + 0.4, H + 1.8, -D + 3.43)); C.rect([sxc - 1, -D + 1.4, sxc + 1, -D + 3.4], H, H + 2.4); }
   if (L.chh) {
-    const cx = -sx * (hw - 1.5), cz = -D + 2.2, y = H;
+    const cx = (up ? 1 : -sx) * (hw - 1.5), cz = -D + 2.2, y = H;
     B.add(accent, box(cx - 0.9, y, cz - 0.9, cx + 0.9, y + 0.15, cz + 0.9));
     for (const [a, b] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) B.add(accent, box(cx + a * 0.75 - 0.07, y + 0.15, cz + b * 0.75 - 0.07, cx + a * 0.75 + 0.07, y + 2.0, cz + b * 0.75 + 0.07));
     B.add(accent, box(cx - 0.95, y + 2.0, cz - 0.95, cx + 0.95, y + 2.12, cz + 0.95));
