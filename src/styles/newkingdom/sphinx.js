@@ -70,14 +70,14 @@ export function ram(el, { bag, col }) {
   col.rect([x - 1.0, z - 2.1, x + 1.0, z + 2.1], y, y + 2.6);
   for (const [mat, list] of L) bag.add(mat, joined(list));
   // beside it on the world's +x side, between this plinth and the next of its row: the planter of mud brick with its young tree
-  planter({ at: [x + 3.45, z], y, seed: Math.round(x * 3 + z) }, { bag, col });
+  if (el.planter !== false) planter({ at: [x + 3.45, z], y, seed: Math.round(x * 3 + z) }, { bag, col });
 }
 
 /**
  * A planter of mud brick (the avenue's "brick planters between each sphinx plinth, where trees were planted"): a low walled bed of earth with a
  * tamarisk-like tree in it, the leaves in separate tufts about a leaning trunk { at, y, seed }.
  */
-function planter(el, { bag, col }) {
+export function planter(el, { bag, col }) {
   const [x, z] = el.at, y = el.y ?? 0, r = rng(el.seed ?? 3), W = 1.5, D = 1.15, T = 0.28, Hh = 0.5;
   bag.add('mudbrick', box(x - W, y, z - D, x + W, y + Hh, z - D + T));
   bag.add('mudbrick', box(x - W, y, z + D - T, x + W, y + Hh, z + D));

@@ -9,7 +9,7 @@ const E = [];
 const P = (p, half, o = {}) => E.push({ t: 'nk_pylon', z0: -p.x1, z1: -p.x0, half, h: p.h, ...o });
 // the hall: z0 = the east end (x = −45), z1 = the entrance (x = −98)
 E.push({ t: 'nk_hall', z0: -HALL.x1, z1: -HALL.x0, half: 52, wall: HALL.wall });
-P(PYLON2, 56, { g: 5, gateH: 21, flags: true, poleH: 44, colossi: 11 });
+P(PYLON2, 56, { g: 5, gateH: 21, flags: true, poleH: 44, colossi: 11, sculpt: true });
 P(PYLON3, 55, { g: 5, gateH: 19 });
 P(PYLON4, PYLON4.half, { g: 4, gateH: 15, flags: true, poleH: 33 });
 P(PYLON5, PYLON5.half, { g: 4, gateH: 13, flags: true, poleH: 28 });
