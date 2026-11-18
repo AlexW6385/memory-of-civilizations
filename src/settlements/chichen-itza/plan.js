@@ -6,18 +6,19 @@
 // them shortened a little (§2).
 
 import { PLAZA, CENOTE, SACBE } from './layout.js';
+import { farElements } from './sculpt-plans.js';
 
 const E = [];
 E.push({ t: 'lane', rect: PLAZA, y: 0.04, mat: 'lime_plaster' });
 // the Castillo: 55.3 m at the base, 24 m to the top platform, the temple 6 m more
-E.push({ t: 'm_pyramid', c: [0, 0], base: 27.6, top: 9.8, h: 24, tiers: 9, stairs: 'nesw', steps: 91, stairW: 8.8, stairOut: 6.2, serpents: 'n', temple: { w: 13.5, d: 13.5, h: 6, doors: 'n', furnish: 'castillo' } });
+E.push({ t: 'm_pyramid', c: [0, 0], base: 27.6, top: 9.8, h: 24, tiers: 9, stairs: 'nesw', steps: 91, stairW: 8.8, stairOut: 6.2, serpents: '', temple: { w: 13.5, d: 13.5, h: 6, doors: 'n', furnish: 'castillo', serpentCols: false } });
 E.push({ t: 'cz_stair_serpent', c: [0, 0], base: 27.6, top: 9.8, h: 24, tiers: 9, stairW: 8.8, stairOut: 6.2, side: 'n' });
 E.push({ t: 'maya_weather', c: [0, 0], base: 27.6, top: 9.8, h: 24, tiers: 9, stairW: 8.8, seed: 11 });
 // the Great Ball Court: the alley 146 × 36 m, walls 8.5 m high
 E.push({ t: 'm_ballcourt', rect: [-133, -110, -97, 36], wallH: 8.5, bench: 4.5 });
 // the Temple of the Warriors, its colonnade, the Thousand Columns
 // the temple's floor 45 ft (13.7 m) up; the chacmool before the serpent columns; the rain god's masks on the frieze's corners and middles
-E.push({ t: 'm_pyramid', c: [112, -14], base: 20, top: 14, h: 13, tiers: 4, stairs: 'w', steps: 52, stairW: 9, serpents: 'w', temple: { w: 21, d: 18, h: 6.5, doors: 'w', masks: true, chacmool: true, inner: 'warriors' } });
+E.push({ t: 'm_pyramid', c: [112, -14], base: 20, top: 14, h: 13, tiers: 4, stairs: 'w', steps: 52, stairW: 9, serpents: '', temple: { w: 21, d: 18, h: 6.5, doors: 'w', masks: true, inner: 'warriors', serpentCols: false } });
 E.push({ t: 'maya_weather', c: [112, -14], base: 20, top: 14, h: 13, tiers: 4, stairW: 9, seed: 12 });
 E.push({ t: 'm_colonnade', rect: [62, -36, 86, 8], rows: 8, cols: 4, h: 4.2 });
 E.push({ t: 'm_colonnade', rect: [84, 28, 164, 46], rows: 4, cols: 20, h: 4.2 });
@@ -32,6 +33,8 @@ E.push({ t: 'm_caracol', c: [-50, 75] });
 E.push({ t: 'sacbe', a: SACBE.a, b: SACBE.b, w: SACBE.w, h: 0.8 });
 E.push({ t: 'm_platform', c: [0, CENOTE.c[1] + CENOTE.r + 5], a: 4, h: 1.6, stairs: 'n', stairOut: 0 });
 E.push({ t: 'm_temple', c: [0, CENOTE.c[1] + CENOTE.r + 5], y: 1.6, w: 5, d: 4, h: 4, doors: 's', serpentCols: false });
+
+E.push(...farElements());
 
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [
