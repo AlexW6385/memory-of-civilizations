@@ -6,6 +6,7 @@ import { frontage } from './frontage.js';
 const base = (id, elements) => ({ id, style: 'dravidian', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-20, 200], facing: 'n' } });
 /** How far from the temple wall the houses and shops are hollow and furnished (the first four streets' rows). */
 export const RICH = 200;
+const NEAR = 210;   // m: the houses' tiles are drawn in full within this of the visitor, simple beyond
 const TILE = 160;   // m: one plan per tile and material, so larger tiles mean fewer meshes (geometry budget)
 export async function town() {
   const plans = [], tiles = new Map();
@@ -15,7 +16,12 @@ export async function town() {
     if (!tiles.has(k)) tiles.set(k, []);
     tiles.get(k).push({ t: l.kind === 'court' ? 'court_house' : 'tamil_house', ...l, rich: l.kind !== 'court' && outside(cx, cz) < RICH });
   }
-  for (const [k, list] of tiles) plans.push({ ...base(`madurai-houses-${k}`, list) });
+  // each tile twice (as src/settlements/lod.js): in full within NEAR of the visitor, simple (solid, no interiors, goods or posts' carving) beyond
+  for (const [k, list] of tiles) {
+    const [i, j] = k.split(',').map(Number), center = [(i + 0.5) * TILE, (j + 0.5) * TILE];
+    plans.push({ ...base(`madurai-houses-${k}`, list), near: NEAR, center });
+    plans.push({ ...base(`madurai-houses-${k}-far`, list.map((e) => ({ ...e, simple: true, rich: false }))), far: NEAR, center, nocollide: true });
+  }
   plans.push(...shopLife(), ...frontage());
   plans.push(amenities(), festival(), pudhuMandapam, { ...street(), style: 'life', center: [0, 60], near: 260 });
   return plans;
