@@ -8,9 +8,11 @@ const AR = [19, 21];
 const dims = (l) => (l.front === 'n' || l.front === 's' ? [l.rect[2] - l.rect[0], l.rect[3] - l.rect[1]] : [l.rect[3] - l.rect[1], l.rect[2] - l.rect[0]]);
 const dist = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - AR[0], (l.rect[1] + l.rect[3]) / 2 - AR[1]);
 let _sel = null;
+export const NOFL = typeof process !== 'undefined' && !!process.env?.BHK_NOFLOORS;   // TEMP
 /** The opened lots (not HOUSE), nearest first: { l, kind }. */
 export function openedLots() {
   if (_sel) return _sel;
+  if (NOFL) return (_sel = []);
   const out = [], seen = {};
   for (const l of lots().filter((q) => q.open && (q.light || q.upper) && !q.use && q.trade !== 'curd' && q.trade !== 'pots' && q.n >= 3).sort((a, b) => dist(a) - dist(b))) {
     const [W, D] = dims(l);

@@ -6,6 +6,7 @@
 
 import { lathe, fromTriangles } from '../../core/geom.js';
 import { pot } from './pottery.js';
+import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 
 const hash = (a, b = 0) => (Math.imul((a >>> 0) ^ 0x9e3779b9, 2654435761) ^ Math.imul(b + 17, 40503)) >>> 0;
 
@@ -105,13 +106,19 @@ export function upperFloors(k) {
   for (let x = T + 0.3; x < W - T; x += 0.9) B(x - 0.07, H - 0.46, T, x + 0.07, H - 0.3, D - T, 'timber');
 
   // ── the furniture, by role ──
-  const P = (x, y, z, kind, s, dark) => { const p = toW(x, z); pot(bag, p[0], y, p[1], kind, s, dark); };
+  const URN = {
+    jar: [[0.001, 0], [0.22, 0.04], [0.28, 0.26], [0.18, 0.47], [0.14, 0.56], [0.001, 0.55]],
+    round: [[0.001, 0], [0.16, 0.05], [0.2, 0.19], [0.1, 0.36], [0.12, 0.42], [0.001, 0.4]],
+    cup: [[0.001, 0], [0.09, 0.04], [0.12, 0.13], [0.001, 0.12]],
+    bowl: [[0.001, 0], [0.18, 0.05], [0.24, 0.12], [0.001, 0.11]],
+  };
+  const P = (x, y, z, kind, s, dark) => { const p = toW(x, z); bag.add(dark ? 'pottery_dark' : 'terracotta', lathe(URN[kind].map(([r, h]) => [r * s, h * s]), 6, null, p[0], y, p[1])); };
   const cushion = (x, y, z, w, d, m) => B(x, y, z, x + w, y + 0.07, z + d, m);
-  const COLS = ['cloth_red', 'cloth_indigo', 'cloth_ochre', 'cloth_green', 'cloth_white'];
+  const COLS = ['cloth_red', 'cloth_maroon', 'cloth_ochre', 'cloth_green', 'cloth_black'];
   const bed = (i, x, z, w, l, y, alongX = false, j = 0) => {
     const q = hv(i, j + x * 3 + z * 7);
     B(x, y, z, x + w, y + 0.34, z + l, 'wood_dark');
-    B(x + 0.04, y + 0.34, z + 0.04, x + w - 0.04, y + 0.41, z + l - 0.04, 'cloth_white');
+    B(x + 0.04, y + 0.34, z + 0.04, x + w - 0.04, y + 0.41, z + l - 0.04, 'sacking');
     const quiltTo = alongX ? [x + w * 0.35, z + 0.06, x + w - 0.06, z + l - 0.06] : [x + 0.06, z + l * 0.3, x + w - 0.06, z + l - 0.06];
     B(quiltTo[0], y + 0.41, quiltTo[1], quiltTo[2], y + 0.47, quiltTo[3], COLS[q % 4]);
     if (alongX) B(x + 0.06, y + 0.41, z + 0.08, x + 0.34, y + 0.5, z + l - 0.08, 'cloth_ochre'); else B(x + 0.08, y + 0.41, z + 0.06, x + w - 0.08, y + 0.5, z + 0.34, 'cloth_ochre');
@@ -122,16 +129,15 @@ export function upperFloors(k) {
     if (alongZ) B(x + w - 0.01, y + 0.2, z + d * 0.4, x + w + 0.02, y + 0.3, z + d * 0.6, 'gilt_bronze'); else B(x + w * 0.4, y + 0.2, z + d - 0.01, x + w * 0.6, y + 0.3, z + d + 0.02, 'gilt_bronze');
     RC(x, y, z, x + w, y + 0.6, z + d);
   };
-  const mat = (x, z, w, d, y) => B(x, y, z, x + w, y + 0.025, z + d, 'reed_mat');
+  const mat = (x, z, w, d, y) => B(x, y, z, x + w, y + 0.025, z + d, 'wicker');
   const shrine = (y, z, side) => {
     // a framed niche in the left (or right) wall: a gilt image, a lamp lit before it
     const xw = side === 'left' ? T : W - T, s = side === 'left' ? 1 : -1;
     const ax = xw - s * 0.01, bx_ = xw + s * 0.12;
     B(Math.min(ax, bx_), y + 1.0, z - 0.45, Math.max(ax, bx_), y + 1.9, z + 0.45, 'wood_painted');
-    B(Math.min(xw + s * 0.1, xw + s * 0.13), y + 1.08, z - 0.35, Math.max(xw + s * 0.1, xw + s * 0.13), y + 1.82, z + 0.35, 'opening');
+    B(Math.min(xw + s * 0.1, xw + s * 0.13), y + 1.08, z - 0.35, Math.max(xw + s * 0.1, xw + s * 0.13), y + 1.82, z + 0.35, 'wood_dark');
     const p = toW(xw + s * 0.3, z);
     bag.add('gilt_bronze', lathe([[0.001, 0], [0.1, 0], [0.08, 0.2], [0.05, 0.3], [0.001, 0.36]], 6, null, p[0], y + 1.1, p[1]));
-    bag.add('flame', lathe([[0.03, 0], [0.001, 0.09]], 5, null, p[0], y + 1.02, p[1]));
     B(Math.min(xw, xw + s * 0.4), y + 0.95, z - 0.5, Math.max(xw, xw + s * 0.4), y + 1.0, z + 0.5, 'wood_dark');
   };
   const shelves = (y, x0, x1, zWall, heights, mats, dz = 0.4) => { for (const h of heights) B(x0, y + h, zWall - dz, x1, y + h + 0.05, zWall, 'wood_ochre'); void mats; };
@@ -150,9 +156,8 @@ export function upperFloors(k) {
     bed(i, W - T - 1.05, 1.0, 1.0, 1.9, y, false, 2); chest(W - T - 0.9, 3.05, 0.85, 0.55, y);
     if (hasPart) {
       partition(i, y, 7.1);
-      bed(i, T + 0.1, backZ - 1.05, 1.9, 1.0, y, true, 3); bed(i, W - T - 2.0, backZ - 1.05, 1.9, 1.0, y, true, 4);
+      bed(i, T + 0.1, backZ - 1.05, 1.9, 1.0, y, true, 3); bed(i, W - T - 3.15, backZ - 1.05, 1.9, 1.0, y, true, 4);
       chest(T + 0.1, 7.35, 0.55, 0.85, y, false);
-      P(W - T - 0.5, y, 7.6, 'jar', 1.2, rr % 2 === 0); col.circle(...toW(W - T - 0.5, 7.6), 0.3, y, y + 0.8);
     } else {
       bed(i, T + 0.1, backZ - 1.05, 1.9, 1.0, y, true, 3);
     }
@@ -167,14 +172,14 @@ export function upperFloors(k) {
         B(sx1 + 0.8, y + 0.78, 1.15, W - T - 0.1, y + 0.86, 2.0, 'wood_ochre'); for (const x of [sx1 + 0.85, W - T - 0.2]) for (const z of [1.2, 1.9]) B(x, y, z - 0.04, x + 0.1, y + 0.78, z + 0.04, 'wood_dark');
         RC(sx1 + 0.8, y, 1.15, W - T - 0.1, y + 0.9, 2.0);
         B(sx1 + 1.0, y + 0.86, 1.4, sx1 + 2.0, y + 0.98, 1.75, 'wood_painted');
-        for (let j = 0; j < 4; j++) B(sx1 + 1.3 + j * 0.2, y + 0.86, 1.2, sx1 + 1.33 + j * 0.2, y + 0.89, 1.5, 'iron');
+        for (let j = 0; j < 4; j++) B(sx1 + 1.3 + j * 0.2, y + 0.86, 1.2, sx1 + 1.33 + j * 0.2, y + 0.89, 1.5, 'wood_dark');
         for (let j = 0; j < 4; j++) { const x = sx1 + 0.8 + j * 0.28; B(x, y, W * 0 + D - T - 0.4, x + 0.22, y + 1.5 + (j % 2) * 0.2, D - T - 0.02, j % 2 ? 'wood_painted' : 'wood_dark'); }
         for (let j = 0; j < 5; j++) B(sx1 + 0.9 + (j * 0.31) % 1.6, y, 2.2 + (j * 0.47) % 1.0, sx1 + 1.06 + (j * 0.31) % 1.6, y + 0.025, 2.28 + (j * 0.47) % 1.0, 'thatch');
       } else if (trade === 'weaver') {
         // a frame loom by the window: two posts, the beams, the warp and the cloth woven so far
         for (const x of [sx1 + 0.9, sx1 + 2.0]) for (const z of [1.2, 2.5]) B(x - 0.05, y, z - 0.05, x + 0.05, y + 1.1, z + 0.05, 'wood_dark');
         B(sx1 + 0.85, y + 1.0, 1.15, sx1 + 2.05, y + 1.07, 1.25, 'wood_ochre'); B(sx1 + 0.85, y + 1.0, 2.45, sx1 + 2.05, y + 1.07, 2.55, 'wood_ochre');
-        B(sx1 + 0.95, y + 1.0, 1.25, sx1 + 1.95, y + 1.012, 2.45, 'cloth_white'); B(sx1 + 0.95, y + 1.012, 1.25, sx1 + 1.95, y + 1.024, 1.8, 'cloth_red');
+        B(sx1 + 0.95, y + 1.0, 1.25, sx1 + 1.95, y + 1.012, 2.45, 'sacking'); B(sx1 + 0.95, y + 1.012, 1.25, sx1 + 1.95, y + 1.024, 1.8, 'cloth_red');
         B(sx1 + 1.0, y, 2.7, sx1 + 1.9, y + 0.4, 3.05, 'wood_ochre');
         RC(sx1 + 0.8, y, 1.1, sx1 + 2.1, y + 1.1, 2.6);
       } else if (trade === 'cloth') {
@@ -190,7 +195,7 @@ export function upperFloors(k) {
       } else {
         // a farm house: the garlic and the maize hung to dry from the joists over a mat, grain in a basket
         mat(sx1 + 0.8, 1.2, 1.6, 1.4, y);
-        for (let j = 0; j < 4; j++) { const x = sx1 + 0.95 + j * 0.38; B(x, y + 1.3, 2.0, x + 0.05, Y[i + 1] - 0.46, 2.05, 'rope_fibre'); B(x - 0.04, y + 0.95, 1.98, x + 0.09, y + 1.3, 2.07, j % 2 ? 'cloth_ochre' : 'cloth_white'); }
+        for (let j = 0; j < 4; j++) { const x = sx1 + 0.95 + j * 0.38; B(x, y + 1.3, 2.0, x + 0.05, Y[i + 1] - 0.46, 2.05, 'rope_fibre'); B(x - 0.04, y + 0.95, 1.98, x + 0.09, y + 1.3, 2.07, j % 2 ? 'cloth_ochre' : 'sacking'); }
         const p = toW(W - T - 0.5, 2.9); bag.add('wicker', lathe([[0.2, 0], [0.26, 0.2], [0.3, 0.32], [0.26, 0.32], [0.001, 0.05]], 7, null, p[0], y, p[1]));
       }
     }
@@ -216,7 +221,7 @@ export function upperFloors(k) {
       } else {
         void mx;
         mat(T + 0.4, 2.8, 2.0, 1.3, y);
-        cushion(T + 1.5, y + 0.025, 2.9, 0.5, 0.4, 'cloth_red'); cushion(T + 1.5, y + 0.025, 3.5, 0.5, 0.4, 'cloth_ochre'); cushion(T + 0.5, y + 0.025, 3.7, 0.5, 0.4, 'cloth_indigo');
+        cushion(T + 1.5, y + 0.025, 2.9, 0.5, 0.4, 'cloth_red'); cushion(T + 1.5, y + 0.025, 3.5, 0.5, 0.4, 'cloth_ochre'); cushion(T + 0.5, y + 0.025, 3.7, 0.5, 0.4, 'cloth_maroon');
         B(T + 0.5, y + 0.025, 3.1, T + 1.3, y + 0.3, 3.5, 'wood_dark'); RC(T + 0.5, y, 3.1, T + 1.3, y + 0.55, 3.5);
       }
     }
@@ -226,11 +231,11 @@ export function upperFloors(k) {
     if (hasPart) {
       partition(i, y, 7.1);
       for (let j = 0; j < 2; j++) chest(T + 0.1 + j * 1.0, backZ - 0.65, 0.85, 0.6, y, false);
-      for (let j = 0; j < 4; j++) { P(W - T - 0.5 - (j % 2) * 0.6, y, backZ - 0.5 - Math.floor(j / 2) * 0.6, 'jar', 1.5 - 0.15 * j, j === 2); col.circle(...toW(W - T - 0.5 - (j % 2) * 0.6, backZ - 0.5 - Math.floor(j / 2) * 0.6), 0.3, y, y + 0.8); }
-      if (trade === 'grain' || trade === 'home' || trade === 'store' || trade === 'mill') for (let j = 0; j < 3; j++) { const x = T + 0.4 + j * 0.45; B(x, y, 7.4, x + 0.38, y + 0.58, 7.75, j % 2 ? 'sacking' : 'cloth_white'); }
+      if (i > 1) for (let j = 0; j < 4; j++) { P(W - T - 0.5 - (j % 2) * 0.6, y, backZ - 0.5 - Math.floor(j / 2) * 0.6, 'jar', 1.5 - 0.15 * j, j === 2); col.circle(...toW(W - T - 0.5 - (j % 2) * 0.6, backZ - 0.5 - Math.floor(j / 2) * 0.6), 0.3, y, y + 0.8); }
+      if (trade === 'grain' || trade === 'home' || trade === 'store' || trade === 'mill') for (let j = 0; j < 3; j++) { const x = T + 0.4 + j * 0.45; B(x, y, 7.4, x + 0.38, y + 0.58, 7.75, j % 2 ? 'sacking' : 'sacking'); }
     } else {
       for (let j = 0; j < 2; j++) chest(T + 0.1 + j * 1.0, backZ - 0.65, 0.85, 0.6, y, false);
-      bed(i, W - T - 2.0, backZ - 1.05, 1.9, 1.0, y, true, 3);
+      bed(i, W - T - 3.3, backZ - 1.05, 1.9, 1.0, y, true, 3);
     }
   };
   const baigaRoom = (i) => {
@@ -238,17 +243,15 @@ export function upperFloors(k) {
     // the hearth (a raised block of clay with two pot-rests, a fire, a pot on it) in the back right corner, firewood beside it
     const hx = W - T - 1.5, hz = backZ - 1.3;
     B(hx, y, hz, hx + 1.4, y + 0.5, hz + 1.2, 'mud_plaster'); RC(hx, y, hz, hx + 1.4, y + 0.6, hz + 1.2);
-    B(hx + 0.1, y + 0.5, hz + 0.1, hx + 0.5, y + 0.58, hz + 0.5, 'iron'); B(hx + 0.8, y + 0.5, hz + 0.1, hx + 1.2, y + 0.58, hz + 0.5, 'iron');
+    B(hx + 0.12, y + 0.5, hz + 0.12, hx + 0.48, y + 0.58, hz + 0.48, 'wood_dark'); B(hx + 0.82, y + 0.5, hz + 0.12, hx + 1.18, y + 0.58, hz + 0.48, 'wood_dark');
     P(hx + 0.3, y + 0.58, hz + 0.3, 'round', 1.3, true); P(hx + 1.0, y + 0.58, hz + 0.3, 'bowl', 1.1, false);
-    { const p = toW(hx + 0.7, hz + 0.9); bag.add('flame', lathe([[0.04, 0], [0.001, 0.1]], 5, null, p[0], y + 0.5, p[1])); }
     for (let j = 0; j < 4; j++) B(hx - 0.35, y + 0.0 + j * 0.1, hz + 0.1 + j * 0.02, hx - 0.05, y + 0.1 + j * 0.1, hz + 1.1 - j * 0.04, 'timber');
     // the shrine of the house's god on the back wall: a framed niche with a gilt image, a lamp and marigolds, a low plank before it
     {
       const sxc = Math.max(T + 1.2, W * 0.38), z0 = backZ;
-      B(sxc - 0.5, y + 0.9, z0 - 0.12, sxc + 0.5, y + 1.8, z0, 'wood_painted'); B(sxc - 0.4, y + 1.0, z0 - 0.14, sxc + 0.4, y + 1.7, z0 - 0.11, 'opening');
+      B(sxc - 0.5, y + 0.9, z0 - 0.12, sxc + 0.5, y + 1.8, z0, 'wood_painted'); B(sxc - 0.4, y + 1.0, z0 - 0.14, sxc + 0.4, y + 1.7, z0 - 0.11, 'wood_dark');
       const p = toW(sxc, z0 - 0.25);
       bag.add('gilt_bronze', lathe([[0.001, 0], [0.1, 0], [0.08, 0.2], [0.05, 0.3], [0.001, 0.36]], 6, null, p[0], y + 1.02, p[1]));
-      bag.add('flame', lathe([[0.03, 0], [0.001, 0.09]], 5, null, p[0], y + 0.95, p[1]));
       B(sxc - 0.55, y + 0.85, z0 - 0.5, sxc + 0.55, y + 0.9, z0, 'wood_dark'); B(sxc - 0.3, y + 0.9, z0 - 0.4, sxc + 0.3, y + 0.94, z0 - 0.15, 'cloth_ochre');
       B(sxc - 0.7, y, z0 - 0.6, sxc + 0.7, y + 0.3, z0 - 0.05, 'mud_plaster'); RC(sxc - 0.7, y, z0 - 0.6, sxc + 0.7, y + 0.35, z0 - 0.05);
     }
@@ -258,12 +261,27 @@ export function upperFloors(k) {
     for (let j = 0; j < 3; j++) { P(W - T - 0.45, y, 2.2 + j * 0.65, 'jar', 1.5 - 0.1 * j, j === 1); col.circle(...toW(W - T - 0.45, 2.2 + j * 0.65), 0.3, y, y + 0.8); }
     for (let j = 0; j < 2; j++) { const p = toW(W - T - 0.55, 4.4 + j * 0.8); bag.add('wicker', lathe([[0.001, 0], [0.38, 0], [0.45, 0.4], [0.4, 0.85], [0.001, 0.85]], 8, null, p[0], y, p[1])); bag.add('thatch', lathe([[0.45, 0.85], [0.3, 1.05], [0.001, 1.2]], 8, null, p[0], y, p[1])); col.circle(p[0], p[1], 0.46, y, y + 1.2); }
     // strings of chillies and garlic from the joists, along the back wall only (what hangs in the room is walked into)
-    for (let j = 0; j < 5; j++) { const x = T + 0.5 + j * 0.28; if (x > W * 0.38 - 1.0) break; B(x, yc - 1.25, backZ - 0.06, x + 0.04, yc - 0.46, backZ - 0.02, 'rope_fibre'); B(x - 0.04, yc - 1.4, backZ - 0.09, x + 0.09, yc - 1.15, backZ - 0.01, j % 2 ? 'cloth_red' : 'cloth_white'); }
+    for (let j = 0; j < 5; j++) { const x = T + 0.5 + j * 0.28; if (x > W * 0.38 - 1.0) break; B(x, yc - 1.25, backZ - 0.06, x + 0.04, yc - 0.46, backZ - 0.02, 'rope_fibre'); B(x - 0.04, yc - 1.4, backZ - 0.09, x + 0.09, yc - 1.15, backZ - 0.01, j % 2 ? 'cloth_red' : 'sacking'); }
     // a mat and a stool by the left wall (not where the ladder comes up at the front on a house of four storeys)
     if (k.n < 4) { mat(T + 0.2, 1.6, 1.5, 1.2, y); }
     else { mat(T + 2.2, 4.0, 1.5, 1.2, y); }
     void rr;
   };
+  // four storage jars in the back right corner of the first floor, of the shapes and places the town's houses have always had there (they stay instanced, as drawn before)
+  for (let j = 0; j < 4; j++) { const p = toW(W - T - 0.5 - (j % 2) * 0.55, D - T - 0.5 - Math.floor(j / 2) * 0.6); pot(k.realBag, p[0], Y[1], p[1], 'jar', 1.4 - 0.15 * j); col.circle(p[0], p[1], 0.3, Y[1], Y[1] + 0.8); }
   for (let i = 1; i <= top; i++) { const role = R[i]; if (role === 'matan') matanRoom(i); else if (role === 'chvata') chvataRoom(i); else baigaRoom(i); }
   return { flights, holes };
+}
+
+/** One geometry of several non-indexed ones (positions and normals concatenated). */
+export function mergeGeos(list) {
+  let n = 0;
+  for (const g of list) n += g.attributes.position.array.length;
+  const pos = new Float32Array(n), nor = new Float32Array(n);
+  let o = 0;
+  for (const g of list) { pos.set(g.attributes.position.array, o); nor.set(g.attributes.normal.array, o); o += g.attributes.position.array.length; }
+  const g = new BufferGeometry();
+  g.setAttribute('position', new Float32BufferAttribute(pos, 3));
+  g.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+  return g;
 }

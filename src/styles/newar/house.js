@@ -6,17 +6,21 @@
 
 import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import { pot } from './pottery.js';
-import { upperFloors } from './upstairs.js';
+import { upperFloors, mergeGeos } from './upstairs.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const bx = (x0, y0, z0, x1, y1, z1) => box(Math.min(x0, x1), Math.min(y0, y1), Math.min(z0, z1), Math.max(x0, x1), Math.max(y0, y1), Math.max(z0, z1));
 const HS = [2.9, 2.4, 2.25, 2.1];
+// the materials whose pieces of the walked floors are gathered into one piece each (the materials the town's houses already draw as large pieces; the plan's draws do not rise)
+const GATHER = new Set(['wood_ochre', 'wood_dark', 'wood_painted', 'timber', 'mud_plaster', 'brick', 'brick_baked', 'brick_grey', 'wicker', 'sacking', 'thatch', 'rope_fibre', 'terracotta', 'pottery_dark', 'cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_maroon', 'cloth_black', 'gilt_bronze']);
 
 /** The storeys' heights of a house of n storeys. */
 export const houseHeight = (n) => HS.slice(0, n).reduce((a, b) => a + b, 0);
 
 export function houseParts(el, ctx, { hipRoof }) {
-  const { bag, col, lights } = ctx;
+  const { col, lights } = ctx, realBag = ctx.bag, acc = new Map();
+  let cap = false;                                                                      // while set, the walked floors' pieces are gathered: one piece to a material, one draw
+  const bag = { add: (m, g) => { if (cap && GATHER.has(m)) (acc.get(m) || acc.set(m, []).get(m)).push(g); else realBag.add(m, g); } };
   const [x0, z0, x1, z1] = el.rect, f = el.front, rand = rng(el.seed || 1), det = el.detail ?? 2, n = el.n ?? 3;
   const ns = f === 'n' || f === 's', W = ns ? x1 - x0 : z1 - z0, D = ns ? z1 - z0 : x1 - x0;
   const toW = (lx, lz) => (f === 's' ? [x0 + lx, z1 - lz] : f === 'n' ? [x1 - lx, z0 + lz] : f === 'e' ? [x1 - lz, z1 - lx] : [x0 + lz, z0 + lx]);
@@ -142,6 +146,7 @@ export function houseParts(el, ctx, { hipRoof }) {
   }
   if (fl) {
     // the front wall of the walked house, cut by the windows (real reveals) and the door, and the floors above
+    cap = true;
     const wallBand = (y0, y1, ws) => {
       const xs = [0, W, ...ws.flatMap((w) => [w[0], w[1]])].sort((a, b) => a - b);
       for (let q = 0; q + 1 < xs.length; q++) {
@@ -152,6 +157,7 @@ export function houseParts(el, ctx, { hipRoof }) {
     };
     B(0, 0, 0, ox, Y[1], T, wm); B(ox + OW, 0, 0, W, Y[1], T, wm); B(ox, dh, 0, ox + OW, Y[1], T, wm);
     for (let i = 1; i < n; i++) wallBand(Y[i], Y[i + 1], wins[i]);
+    cap = false; for (const [m, list] of acc) realBag.add(m, mergeGeos(list)); acc.clear();
     const dm = (a, b, c, d) => { const p = toW(a, b), q = toW(c, d); return [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; };
     for (let i = 1; i < n; i++) {
       const ws = wins[i], band = [Y[i], Y[i + 1]];
@@ -266,8 +272,12 @@ export function houseParts(el, ctx, { hipRoof }) {
   function k_up() {
     const dirUp = { s: 'n', n: 's', e: 'w', w: 'e' }[f];
     const bal = !!el.balcony;
-    const res = upperFloors({ bag, col, lights, B, RC, toW, dirUp, W, D, T, Y, n, H, seed: el.seed || 1, trade: el.trade || 'home', ic, wins, seat: seat.x1 > seat.x0 ? seat : null, door: doorWin });
+    cap = true;
+    const res = upperFloors({ bag, realBag, col, lights, B, RC, toW, dirUp, W, D, T, Y, n, H, seed: el.seed || 1, trade: el.trade || 'home', ic, wins, seat: seat.x1 > seat.x0 ? seat : null, door: doorWin });
     if (bal) balcony(Y[ic], doorWin);
+    cap = false;
+    for (const [m, list] of acc) realBag.add(m, mergeGeos(list));
+    acc.clear();
     return res;
   }
   /** The loggia onto the street at the living floor: a plank floor on struts, a rail of vertical slats (no top face), stepped onto from the long window's middle bay. */
