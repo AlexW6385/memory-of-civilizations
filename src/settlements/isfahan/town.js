@@ -12,7 +12,7 @@ export async function town() {
     const [x0, z0, x1, z1] = h.rect, sp = houseSpots(h), kind = { hall: 'talar', sedari: 'sedari', winter: 'winter room', kitchen: 'kitchen', store: 'store', vestibule: 'vestibule' };
     const rooms = [{ id: i ? `house ${i} court` : 'house court', rect: sp.court, y: 0, kind: 'open' }];
     for (const side of ['n', 's', 'w', 'e']) rooms.push({ id: `${i ? `house ${i} ` : ''}${kind[h.v.wings[side]]}`, rect: sp.rooms[side], y: h.v.wings[side] === 'vestibule' ? 0.04 : 0.45, kind: 'hall' });
-    plans.push({ ...base(i ? `isfahan-open-house-${i}` : 'isfahan-open-house', [{ t: 'khaneh_open', rect: h.rect, entry: h.entry, seed: h.seed, v: h.v }]), bounds: [x0 - 3, z0 - 3, x1 + 3, z1 + 3], rooms });
+    plans.push({ ...base(i ? `isfahan-open-house-${i}` : 'isfahan-open-house', [{ t: 'khaneh_open', rect: h.rect, entry: h.entry, seed: h.seed, v: h.v, up: h.up }]), bounds: [x0 - 3, z0 - 3, x1 + 3, z1 + 3], rooms });
   });
   plans.push(base('isfahan-dovecotes', DOVECOTES.map((q) => ({ t: 'dovecote', ...q }))));
   plans.push(...quarter());
