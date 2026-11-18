@@ -117,7 +117,7 @@ export function shop(K, F, L, vb, t, rand, T = 0.5) {
   } else if (t === 'chandler') {
     for (let k = 0; k < 4; k++) coil(T + 0.5 + (k % 2) * 0.75, vs + 0.5 + Math.floor(k / 2) * 0.75, Math.floor(k / 2) * 0, 0.34);
     for (let k = 0; k < 3; k++) coil(L - T - 0.5 - k * 0.72, vs + 0.5, k % 2 ? 0.22 : 0, 0.34);
-    for (let k = 0; k < 4; k++) barrel(mid - 1.2 + k * 0.8, vb - 0.5);
+    for (let k = 0; k < 4; k++) barrel(L - T - 0.5, vb - 0.5 - k * 0.75);
     for (let k = 0; k < 5; k++) A(k % 2 ? 'linen' : 'cloth_white', T + 0.3 + k * 0.5, vb - 0.4, T + 0.7 + k * 0.5, vb - 0.1, 0, 0.5, false);
     counterAt(mid - 1.0, mid + 1.0, 2.4);
     for (let k = 0; k < 3; k++) { Lh('iron', [[0.001, 0], [0.1, 0.0], [0.12, 0.3], [0.001, 0.32]], mid - 0.6 + k * 0.6, 2.75, 1.06, 6); }
