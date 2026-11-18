@@ -42,14 +42,14 @@ export function saint(S, lod, v = 0) {
   if (pose !== 3 && pose !== 1) beard(S, hc, lod);                                                       // prophets and apostles bearded
   blobDir(S, [hc[0], hc[1] + 0.028, hc[2] - 0.034], [0, 0.4, -1], 0.04, 0.056, 0.02, [1, 0, 0], 3, lod ? 6 : 8);   // the hair fallen behind the neck
   // the tunic: the bodice with its girdle, the skirt falling in folds from the hips to the feet, its hem on the plinth
-  const seg = lod ? 12 : 20;
+  const seg = lod > 2 ? 7 : lod > 1 ? 9 : lod ? 12 : 20, sb = lod > 1 ? 1 : 3;
   tube(S, [[0.008, 0.815, 0.008, 0.096, 0.062], [0.006, 0.72, 0.01, 0.086, 0.06], [0.004, 0.62, 0.008, 0.074, 0.054]], { seg: lod ? 8 : 12, sub: 2, ref: [1, 0, 0], cap: [0, 0], fold: pleats(0.03, 5, 1.4) });
-  tube(S, [[0.004, 0.62, 0.008, 0.076, 0.056], [0.0, 0.42, 0.012, 0.102, 0.082], [-0.004, 0.2, 0.02, 0.122, 0.1], [-0.006, 0.012, 0.024, 0.134, 0.112]], { seg, sub: 3, ref: [1, 0, 0], cap: [0, 0], fold: pleats(0.1, 11, 1.6 + 0.3 * (v % 3), 0.05) });
+  tube(S, [[0.004, 0.62, 0.008, 0.076, 0.056], [0.0, 0.42, 0.012, 0.102, 0.082], [-0.004, 0.2, 0.02, 0.122, 0.1], [-0.006, 0.012, 0.024, 0.134, 0.112]], { seg, sub: sb, ref: [1, 0, 0], cap: [0, 0], fold: pleats(0.1, 11, 1.6 + 0.3 * (v % 3), 0.05) });
   blob(S, [x(0.052), 0.3, 0.078], [0.04, 0.07, 0.036], 3, 7);                                              // the free knee under the cloth
   torus(S, [0.004, 0.612, 0.01], [1, 0, 0], [0, 0, 1], 0.074, 0.007, { seg: lod ? 10 : 14, sec: 4 });      // the girdle
   // the mantle: over the left shoulder, across the breast to the right hip, the end hanging over the left forearm and down the back
   tube(S, [[x(-0.108), 0.84, 0.0, 0.034, 0.02], [x(-0.03), 0.75, 0.062, 0.036, 0.02], [x(0.05), 0.64, 0.07, 0.036, 0.02], [x(0.098), 0.5, 0.062, 0.04, 0.022]], { seg: lod ? 6 : 8, sub: 3, capN: 1, ref: [0, 0, 1], fold: pleats(0.14, 3, 1) });
-  for (let i = 0; i < (lod ? 2 : 3); i++) tube(S, [[x(-0.13 - i * 0.014), 0.7, 0.05, 0.024, 0.012], [x(-0.165 - i * 0.016), 0.5, 0.05, 0.026, 0.013], [x(-0.17 - i * 0.02), 0.3 - i * 0.03, 0.044, 0.022, 0.011]], { seg: 6, sub: 2, capN: 1, ref: [1, 0, 0], fold: pleats(0.15, 3, 2) });
+  for (let i = 0; i < (lod > 2 ? 0 : lod > 1 ? 1 : lod ? 2 : 3); i++) tube(S, [[x(-0.13 - i * 0.014), 0.7, 0.05, 0.024, 0.012], [x(-0.165 - i * 0.016), 0.5, 0.05, 0.026, 0.013], [x(-0.17 - i * 0.02), 0.3 - i * 0.03, 0.044, 0.022, 0.011]], { seg: 6, sub: 2, capN: 1, ref: [1, 0, 0], fold: pleats(0.15, 3, 2) });
   tube(S, [[x(-0.09), 0.84, -0.03, 0.07, 0.016], [x(-0.1), 0.55, -0.045, 0.084, 0.02], [x(-0.08), 0.2, -0.05, 0.1, 0.022]], { seg: lod ? 7 : 10, sub: 2, capN: 1, ref: [1, 0, 0], fold: pleats(0.18, 4, 1.4) });   // the mantle behind
   // what he carries
   const L = (n) => (flip < 0 ? n.replace('L', 'X').replace('R', 'L').replace('X', 'R') : n);
@@ -97,9 +97,10 @@ export function marzocco(S, lod) {
 }
 
 /** Build a figure `fn` (frame: height 1) into a new Sculpt placed by (u, y, d) with height H, turned `yaw` about the vertical, and return its geometry. */
-export function placeFigure(fn, u, y, d, H, lod, v = 0, yaw = 0) {
+export function placeFigure(fn, u, y, d, H, lod, v = 0, yaw = 0, clip = false) {
   const S = new Sculpt(), c = Math.cos(yaw), s = Math.sin(yaw);
   S.xf = ([a, b, w]) => [u + (a * c + w * s) * H, y + b * H, d + (-a * s + w * c) * H];
+  if (clip) { S.clip = true; S.shift = 0.06; }
   fn(S, lod, v);
   return S.geometry();
 }
@@ -111,4 +112,19 @@ export function portraitHead(S, lod, v = 0) {
   head(S, [0, 0, 0], { lod, hair: v % 5 === 4 ? 'bun' : 'curls', k });
   if (v % 3 === 0) beard(S, [0, 0, 0], lod);
   tube(S, [[0, -0.05, 0, 0.034], [0, -0.1, -0.01, 0.04]], { seg: 6, sub: 1, cap: [0, 0] });
+}
+
+/** A small standing saint for the niches of a frame (under 0.6 m): the head, the robe in folds, the mantle and the arms, no fingers or feet. */
+export function saintLite(S, lod, v = 0) {
+  const flip = (v >> 2) & 1 ? -1 : 1, x = (a) => a * flip, P = std();
+  head(S, [x(0.02), 0.935, 0.026], { lod: 1, hair: 'curls', k: 1 });
+  if (v % 4 < 2) beard(S, [x(0.02), 0.935, 0.026], 1);
+  tube(S, [[0.004, 0.86, 0.01, 0.034], [0.006, 0.82, 0.01, 0.05]], { seg: 6, sub: 1, cap: [0, 0] });
+  tube(S, [[0.008, 0.82, 0.01, 0.1, 0.064], [0.004, 0.62, 0.01, 0.078, 0.056], [0.0, 0.4, 0.014, 0.104, 0.084], [-0.004, 0.2, 0.02, 0.124, 0.1], [-0.006, 0.012, 0.024, 0.134, 0.112]], { seg: 10, sub: 1, ref: [1, 0, 0], cap: [1, 0], fold: pleats(0.1, 9, 1.6 + 0.3 * (v % 3), 0.05) });
+  tube(S, [[x(-0.108), 0.84, 0.0, 0.034, 0.02], [x(-0.03), 0.75, 0.062, 0.036, 0.02], [x(0.098), 0.5, 0.062, 0.04, 0.022]], { seg: 6, sub: 1, capN: 1, ref: [0, 0, 1], fold: pleats(0.14, 3, 1) });
+  const up = v % 2;
+  tube(S, [[x(0.108), 0.8, 0, 0.034], [x(0.16), 0.68, 0.05, 0.028], [x(up ? 0.2 : 0.14), up ? 0.94 : 0.58, up ? 0.05 : 0.11, 0.022]], { seg: 6, sub: 1, capN: 1 });
+  tube(S, [[x(-0.108), 0.8, 0, 0.034], [x(-0.15), 0.66, 0.05, 0.028], [x(-0.1), 0.6, 0.11, 0.022]], { seg: 6, sub: 1, capN: 1 });
+  blob(S, [x(-0.1), 0.62, 0.13], [0.07, 0.085, 0.022], 2, 6);                      // the book
+  void P;
 }

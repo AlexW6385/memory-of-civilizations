@@ -20,7 +20,7 @@ import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import { Local, ext, archOutline, headPts, toW } from './face.js';
 import { Sculpt } from '../nabataean/sculpt.js';
 import { Field, paradiseScene, quatrefoilScene, figure as reliefFig } from './relief.js';
-import { saint, portraitHead } from './statues.js';
+import { saintLite, portraitHead } from './statues.js';
 import { lodAt } from './walk.js';
 import { ball, limb, T } from '../qing/carving.js';
 
@@ -63,7 +63,7 @@ function head(Lc, mat, x, y, z, r, lod = 2, v = 0) {
 }
 /** A statuette in a niche of the frame: the modelled saint (the back half, against the niche), h tall. */
 function statuette(Lc, mat, x, y, z, h, v, lod) {
-  const S = new Sculpt(([a, b, w]) => [x + a * h, y + b * h, z + w * h], { flat: 0.8, clip: true }); saint(S, lod, v); Lc.add(mat, S.geometry());
+  const S = new Sculpt(([a, b, w]) => [x + a * h, y + b * h, z + w * h], { flat: 0.8, clip: true }); saintLite(S, lod, v); Lc.add(mat, S.geometry());
 }
 
 /** The Gate of Paradise in face frame Lc, centred at uc, from y0; the leaves 2 × w0 by hh. Everything gilt. */
@@ -87,15 +87,15 @@ function gateOfParadise(Lc, uc, y0, w0, hh, lod = 2) {
       // the niches of the frame with their prophets and sibyls, both sides of the leaf
       for (const su of [u0 + side / 2, u1 - side / 2]) {
         Lc.add(GB, ext(archOutline(su, yb + 0.12, 0.13, yb + ph - 0.2, 'round', 5), [], 0.14, 0.145));
-        if (lod < 2) statuette(Lc, BR, su, yb + 0.16, 0.15, ph * 0.62, k + (su > uc ? 1 : 0), 1); else reliefFigure(Lc, GB, su, yb + 0.16, 0.15, ph * 0.62, 0.05, k + (su > uc ? 1 : 0));
+        if (false) statuette(Lc, BR, su, yb + 0.16, 0.15, ph * 0.62, k + (su > uc ? 1 : 0), 3); else reliefFigure(Lc, GB, su, yb + 0.16, 0.15, ph * 0.62, 0.05, k + (su > uc ? 1 : 0));
       }
       // the panel: the scene as one continuous relief of gilt, the ground the bronze behind it
       const pw = pu1 - pu0;
-      if (lod < 2) { const F = new Field(pw, ph, lod ? 0.024 : 0.015); paradiseScene(F, k); Lc.add(GB, F.geometry(pu0, yb, 0.06)); }
+      if (lod < 2) { const F = new Field(pw, ph, lod ? 0.08 : 0.046); paradiseScene(F, k); Lc.add(GB, F.geometry(pu0, yb, 0.06)); }
       else { const F = new Field(pw, ph, 0.05); paradiseScene(F, k); Lc.add(GB, F.geometry(pu0, yb, 0.06)); }
     }
     // the heads at the crossings of the frame
-    for (let r = 0; r <= rows; r++) for (const su of [u0 + side / 2, u1 - side / 2]) head(Lc, GB, su, y0 + r * (ph + bar) + bar / 2, 0.14, 0.085, lod, r * 2 + leaf + (su > uc ? 1 : 0));
+    for (let r = 0; r <= rows; r++) for (const su of [u0 + side / 2, u1 - side / 2]) head(Lc, GB, su, y0 + r * (ph + bar) + bar / 2, 0.14, 0.085, 2, r * 2 + leaf + (su > uc ? 1 : 0));
   }
 }
 /** A bronze door of 28 quatrefoils (seven rows of four over two leaves), the figures and heads gilt, centred at uc, from y0. */
@@ -118,9 +118,9 @@ function quatrefoilDoor(Lc, uc, y0, w0, hh, seed, lod = 2) {
       const lz = [[pu, py - s * 1.02], [pu + s * 1.02, py], [pu, py + s * 1.02], [pu - s * 1.02, py]], lz2 = lz.map(([a, b]) => [pu + (a - pu) * 0.9, py + (b - py) * 0.9]);
       Lc.add(BR, ext(lz, [lz2.reverse()], 0.06, 0.085));
       // the scene on the ground within: one continuous relief of gilt, the cell finer where it is seen close
-      const F = new Field(2 * s, 2 * s, lod === 0 ? 0.024 : lod === 1 ? 0.035 : 0.05); quatrefoilScene(F, k); Lc.add(GB, F.geometry(pu - s, py - s, 0.06));
+      const F = new Field(2 * s, 2 * s, lod === 0 ? 0.1 : lod === 1 ? 0.14 : 0.16); quatrefoilScene(F, k); Lc.add(GB, F.geometry(pu - s, py - s, 0.06));
     }
-    for (let r = 1; r < rows; r++) for (let c = 1; c < cols; c++) head(Lc, GB, u0 + c * (cw + bar) + bar / 2, y0 + r * (ch + bar) + bar / 2, 0.11, 0.07, lod, r + leaf * 3 + seed);
+    for (let r = 1; r < rows; r++) for (let c = 1; c < cols; c++) head(Lc, GB, u0 + c * (cw + bar) + bar / 2, y0 + r * (ch + bar) + bar / 2, 0.11, 0.07, 2, r + leaf * 3 + seed);
   }
 }
 

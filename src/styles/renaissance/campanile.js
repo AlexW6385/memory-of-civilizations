@@ -18,7 +18,7 @@ const flat = (Lc, mat, pts, holes, d0, d1) => Lc.add(mat, dropBack(ext(pts, hole
 
 /** A figure in low relief: standing with a raised arm, seated at a bench, or standing with a long tool. */
 function relief(Lc, mat, uc, yc, kind, sc, d0, d1, lod = 2, v = 0) {
-  if (lod < 2) { const F = new Field(1.3 * sc / 1.35, 1.5 * sc / 1.35, lod ? 0.06 : 0.04); craftScene(F, kind, v); Lc.add(mat, F.geometry(uc - F.w / 2, yc - F.h / 2, d0)); return; }
+  if (true) { const F = new Field(1.3 * sc / 1.35, 1.5 * sc / 1.35, lod ? 0.25 : 0.12); craftScene(F, kind, v); Lc.add(mat, F.geometry(uc - F.w / 2, yc - F.h / 2, d0)); return; }
   const P = (list) => list.map(([u, y]) => [uc + u * sc, yc + y * sc]);
   const head = (u, y, r) => flat(Lc, mat, P(poly(u, y, r, 8)), [], d0, d1);
   if (kind === 0) {
@@ -57,7 +57,7 @@ function lower(Lc, L, y1, seed, lod = 2) {
     relief(Lc, M, uc, 2.5, Math.floor(rand() * 3), 1.35, 0.1, 0.17, lod, i);
     const dm = poly(uc, 4.95, 1.06, 4, Math.PI / 2, 1.2), di = poly(uc, 4.95, 0.86, 4, Math.PI / 2, 1.0);
     flat(Lc, M, dm, [di], 0.06, 0.2); flat(Lc, PINK, di, [], 0.06, 0.1);
-    for (const [a, b] of [[0, 1.18], [1, 0], [0, -1.18], [-1, 0]]) flat(Lc, G, poly(uc + a * 1.06, 4.95 + b, 0.19, 8), [], 0.06, 0.2);   // the lobes at the points
+    for (const [a, b] of [[0, 1.18], [1, 0], [0, -1.18], [-1, 0]]) flat(Lc, G, poly(uc + a * 1.06, 4.95 + b, 0.19, 5), [], 0.06, 0.2);   // the lobes at the points
     relief(Lc, M, uc, 4.95, Math.floor(rand() * 3), 1.05, 0.1, 0.17, lod, i + 6);
   }
   // the first storey: green strips between the panels, the niches of the prophets, the roundels over them
@@ -69,14 +69,14 @@ function lower(Lc, L, y1, seed, lod = 2) {
     flat(Lc, M, outer, [open], 0.05, 0.28); flat(Lc, G, open, [], 0.04, 0.09);
     Lc.box(M, uc - wn / 2 - 0.3, y0 - 0.5, 0.04, uc + wn / 2 + 0.3, y0, 0.62);                                  // the sill, the statue's plinth
     Lc.box(G, uc - wn / 2 - 0.3, y0 - 0.58, 0.04, uc + wn / 2 + 0.3, y0 - 0.5, 0.66);
-    if (lod < 2) Lc.add(M, placeFigure(saint, uc, y0, 0.36, 3.5, 1, Math.floor(rand() * 8)));
+    if (false) Lc.add(M, placeFigure(saint, uc, y0, 0.36, 3.5, 2, Math.floor(rand() * 8), 0, true));
     else {
       const f = human({ n: 5, h: 2.3, pose: rand() < 0.5 ? 'stand' : 'ease', drape: 'mantle', mirror: rand() < 0.5, lean: Math.floor(rand() * 5) - 2 });
       for (const g of [...f.stone, ...f.metal, ...(f.skin ?? [])]) { g.translate(uc, y0, 0.3); Lc.add(M, g); }
     }
     // the roundel over the niche: a pink field in a green ring in a marble frame
     const rc = 17.0;
-    flat(Lc, M, poly(uc, rc, 1.2, 12), [poly(uc, rc, 1.0, 12)], 0.05, 0.16); flat(Lc, G, poly(uc, rc, 1.0, 12), [poly(uc, rc, 0.75, 12)], 0.05, 0.1); flat(Lc, PINK, poly(uc, rc, 0.75, 12), [], 0.05, 0.09);
+    flat(Lc, M, poly(uc, rc, 1.2, 8), [poly(uc, rc, 1.0, 8)], 0.05, 0.16); flat(Lc, G, poly(uc, rc, 1.0, 8), [poly(uc, rc, 0.75, 8)], 0.05, 0.1); flat(Lc, PINK, poly(uc, rc, 0.75, 8), [], 0.05, 0.09);
   }
   Lc.box(G, 0.6, y1 - 0.45, 0, L - 0.6, y1 - 0.3, 0.25); Lc.box(M, 0.6, y1 - 0.3, 0, L - 0.6, y1, 0.4);
 }

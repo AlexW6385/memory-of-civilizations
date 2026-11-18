@@ -39,19 +39,23 @@ export class Field {
   smooth() { const { nx, ny, H } = this, o = H.slice(), g = (i, j) => o[Math.max(0, Math.min(ny - 1, j)) * nx + Math.max(0, Math.min(nx - 1, i))]; for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) H[j * nx + i] = (4 * g(i, j) + 2 * (g(i - 1, j) + g(i + 1, j) + g(i, j - 1) + g(i, j + 1)) + g(i - 1, j - 1) + g(i + 1, j - 1) + g(i - 1, j + 1) + g(i + 1, j + 1)) / 16; }
   geometry(u0, y0, d0, eps = 0.0008) {
     this.smooth();
-    const { nx, ny, H, cell: c } = this, pos = [], nor = [];
+    const { nx, ny, H, cell: c } = this, pos = [], nor = [], idx = [], at = new Map();
     const h = (i, j) => H[Math.max(0, Math.min(ny - 1, j)) * nx + Math.max(0, Math.min(nx - 1, i))];
-    const vert = (i, j) => { const gx = (h(i + 1, j) - h(i - 1, j)) / (2 * c), gy = (h(i, j + 1) - h(i, j - 1)) / (2 * c), l = Math.hypot(gx, gy, 1); return [[u0 + i * c, y0 + j * c, d0 + h(i, j)], [-gx / l, -gy / l, 1 / l]]; };
+    const vert = (i, j) => {
+      const key = j * nx + i; let n = at.get(key); if (n !== undefined) return n;
+      const gx = (h(i + 1, j) - h(i - 1, j)) / (2 * c), gy = (h(i, j + 1) - h(i, j - 1)) / (2 * c), l = Math.hypot(gx, gy, 1);
+      pos.push(u0 + i * c, y0 + j * c, d0 + h(i, j)); nor.push(-gx / l, -gy / l, 1 / l); n = pos.length / 3 - 1; at.set(key, n); return n;
+    };
     for (let j = 0; j + 1 < ny; j++) for (let i = 0; i + 1 < nx; i++) {
       const a = h(i, j), b = h(i + 1, j), cc = h(i + 1, j + 1), d = h(i, j + 1);
       if (a < eps && b < eps && cc < eps && d < eps) continue;
       const A = vert(i, j), B = vert(i + 1, j), C = vert(i + 1, j + 1), D = vert(i, j + 1);
-      const tris = Math.abs(a - cc) < Math.abs(b - d) ? [[A, B, C], [A, C, D]] : [[A, B, D], [B, C, D]];
-      for (const t of tris) for (const v of t) { pos.push(...v[0]); nor.push(...v[1]); }
+      if (Math.abs(a - cc) < Math.abs(b - d)) idx.push(A, B, C, A, C, D); else idx.push(A, B, D, B, C, D);
     }
     const g = new BufferGeometry();
     g.setAttribute('position', new Float32BufferAttribute(new Float32Array(pos), 3));
     g.setAttribute('normal', new Float32BufferAttribute(new Float32Array(nor), 3));
+    g.setIndex(idx);
     return g;
   }
 }

@@ -79,7 +79,7 @@ function frieze(Lc, u0, u1, v, n) {
 
 /** A statue (a draped standing figure) at (u, y, d), h tall, facing outward: modelled (statues.js) where it is near the walks (lod 0/1), the old figure beyond. */
 function statue(Lc, u, y, d, h, v, lod = 2) {
-  if (lod < 2) { Lc.add(M, placeFigure(saint, u, y, d + 0.1, h, 1, v + 1)); return; }
+  if (lod < 2) { Lc.add(M, placeFigure(saint, u, y, d + 0.1, h, 2, v + 1, 0, true)); return; }
   const lean = ((v % 3) - 1) * 0.04 * h;
   Lc.add(M, limb([u, y, d], [u + lean, y + h * 0.8, d], h * 0.15, h * 0.09, 6));
   Lc.add(M, T(ball(h * 0.075, h * 0.09, h * 0.075, 6, 4), u + lean, y + h * 0.9, d));
@@ -257,7 +257,7 @@ export function westFront(bag, col, nave, cz, y, H, W, IN) {
   // the niches with their statues, and the field under them, between the portals and at the ends
   gaps.forEach(([u0, u1], gi) => {
     const uc = (u0 + u1) / 2;
-    niche(Lc, uc, 2.7, 2.0, 4.0, gi * 2, FL); niche(Lc, uc, 9.1, 2.0, 4.0, gi * 2 + 1, FL);
+    niche(Lc, uc, 2.7, 2.0, 4.0, gi * 2, FL); niche(Lc, uc, 9.1, 2.0, 4.0, gi * 2 + 1, 2);
     string(Lc, u0 + 0.3, u1 - 0.3, 8.6, 0.3);
     if (u1 - u0 > 3) panel(Lc, u0 + 0.5, u1 - 0.5, 1.15, 1.95, gi);
   });
@@ -281,7 +281,7 @@ export function westFront(bag, col, nave, cz, y, H, W, IN) {
   for (const sg of [-1, 1]) for (const [j, mat] of [[0, M], [1, G], [2, M]]) { const wi = lw / 2 + 0.42 * j; Lc.box(mat, lc + (sg < 0 ? -(wi + 0.42) : wi), ph + 1.05, 0, lc + (sg < 0 ? -wi : wi + 0.42), ys, dep - 0.2 + j * 0.1); }
   // the lunette: the Virgin in a mandorla, the apostles about her bier below
   const ty = ph + 1.05 + 2.6;
-  if (FL < 2) { const F = new Field(5.4, 5.0, FL ? 0.09 : 0.07); lunetteScene(F); Lc.add(M, F.geometry(lc - 2.7, ph + 1.15, 0.46)); }
+  if (FL < 2) { const F = new Field(5.4, 5.0, FL ? 0.24 : 0.2); lunetteScene(F); Lc.add(M, F.geometry(lc - 2.7, ph + 1.15, 0.46)); }
   else {
   Lc.add(M, ext(Array.from({ length: 16 }, (_, i) => [lc + Math.cos(i / 16 * Math.PI * 2) * 1.0, ty + 0.5 + Math.sin(i / 16 * Math.PI * 2) * 1.7]), [], 0.45, 0.55, 1));
   Lc.add('gilt_bronze', ext(Array.from({ length: 16 }, (_, i) => [lc + Math.cos(i / 16 * Math.PI * 2) * 0.78, ty + 0.5 + Math.sin(i / 16 * Math.PI * 2) * 1.45]), [], 0.55, 0.6, 1));
