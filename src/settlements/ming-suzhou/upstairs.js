@@ -53,7 +53,7 @@ export function houseUp(el, { bag, col }) {
   const qF = (mat, a0, a1, ya, yb, b, side = -1) => quad4(mat, [W(a0, b, ya), W(a1, b, ya), W(a1, b, yb), W(a0, b, yb)], dirV(side));
   /** A lathe piece (pots, lamps) standing at (a, b, yy): its triangles join the material's geometry. */
   const lat = (mat, profile, seg, a, b, yy, sx = 1, sz = 1) => {
-    const p = W(a, b, yy), g = lathe(profile, seg, null, 0, 0, 0).toNonIndexed(), arr = g.attributes.position.array, o = [];
+    const p = W(a, b, yy), g = lathe(profile, seg, null, 0, 0, 0), arr = g.attributes.position.array, o = [];
     for (let i = 0; i < arr.length; i += 3) o.push(p[0] + arr[i] * sx, p[1] + arr[i + 1], p[2] + arr[i + 2] * sz);
     put(mat, o);
   };
@@ -212,21 +212,21 @@ export function houseUp(el, { bag, col }) {
   // the ends of the deck's rail are closed to the wall by the same rail; no gap but the door
 
   // ── the ceiling of the upper rooms (a flat boarded ceiling under the roof space) ──
-  B(0.25, ibU, L - 0.25, ibB, Y2 - 0.06, Y2, 'timber');
-  for (let a = 0.9; a < L - 0.3; a += 1.15) B(a - 0.07, ibU, a + 0.07, ibB, Y2 - 0.2, Y2 - 0.06, 'lacquer_chestnut');
+  if (!el.cut) B(0.25, ibU, L - 0.25, ibB, Y2 - 0.06, Y2, 'timber');          // (el.cut: roof and ceiling left off, to look into the rooms in a render)
+  if (!el.cut) for (let a = 0.9; a < L - 0.3; a += 1.15) B(a - 0.07, ibU, a + 0.07, ibB, Y2 - 0.2, Y2 - 0.06, 'lacquer_chestnut');
 
   // ── the roof (as the style's canal houses) ──
-  const R = roofOf(type === 'hip' ? -0.25 : type === 'gable' ? -0.15 : 0, type === 'hip' ? L + 0.25 : type === 'gable' ? L + 0.15 : L, vf, vbE, Y2, riseR, type === 'hip' ? 'hip' : 'gable', 5);
-  gables(R, { vf, vb: vbE, yE: Y2, rise: riseR, vw0: UF, vw1: vb }, type === 'hip' ? 'hip' : type);
+  const R = el.cut ? null : roofOf(type === 'hip' ? -0.25 : type === 'gable' ? -0.15 : 0, type === 'hip' ? L + 0.25 : type === 'gable' ? L + 0.15 : L, vf, vbE, Y2, riseR, type === 'hip' ? 'hip' : 'gable', 5);
+  if (!el.cut) gables(R, { vf, vb: vbE, yE: Y2, rise: riseR, vw0: UF, vw1: vb }, type === 'hip' ? 'hip' : type);
   // the soffit under the front eave, from the wall to the eave's edge
-  { const r0 = type === 'hip' ? -0.25 : type === 'gable' ? -0.15 : 0, r1 = type === 'hip' ? L + 0.25 : type === 'gable' ? L + 0.15 : L;
+  if (!el.cut) { const r0 = type === 'hip' ? -0.25 : type === 'gable' ? -0.15 : 0, r1 = type === 'hip' ? L + 0.25 : type === 'gable' ? L + 0.15 : L;
     quad4('timber', [W(r0, vf, Y2 - 0.14), W(r1, vf, Y2 - 0.14), W(r1, UF, Y2 - 0.14), W(r0, UF, Y2 - 0.14)], [0, -1, 0]);
     quad4('timber', [W(r0, vbE, Y2 - 0.14), W(r1, vbE, Y2 - 0.14), W(r1, vb, Y2 - 0.14), W(r0, vb, Y2 - 0.14)], [0, -1, 0]); }
 
   // ── the rooms ──
   const ctx = { B, blk, flr, put, lat, qF, W, wr, slab, quad4, rand, L, D, y0, Y1, Y2, lay, vb, ibB, ibU, S, bh0, use, el, wallMat, mir };
   if (lay.pa !== null) {
-    const pa = lay.pa, d0b = 3.1, d1b = 4.0;
+    const pa = lay.pa, [d0b, d1b] = lay.door;
     for (const [b0, b1] of [[ibU, d0b], [d1b, ibB]]) { B(pa - 0.06, b0, pa + 0.06, b1, Y1, Y2, 'timber'); blk(pa - 0.06, b0, pa + 0.06, b1, Y1, Y2); }
     B(pa - 0.06, d0b, pa + 0.06, d1b, Y1 + 2.1, Y2, 'timber'); B(pa - 0.09, d0b - 0.05, pa + 0.09, d0b, Y1, Y1 + 2.1, 'lacquer_chestnut'); B(pa - 0.09, d1b, pa + 0.09, d1b + 0.05, Y1, Y1 + 2.1, 'lacquer_chestnut');
     B(pa - 0.09, d0b - 0.05, pa + 0.09, d1b + 0.05, Y1 + 2.05, Y1 + 2.15, 'lacquer_chestnut');

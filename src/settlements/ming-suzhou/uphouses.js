@@ -50,17 +50,13 @@ export function frameOf(rect, mir) {
  */
 export function layoutOf(L) {
   const pa = L >= 5.5 ? 3.05 : null;
-  const e0 = pa === null ? 1.45 : pa + 0.06, e1 = L - 0.25, Wd = e1 - e0;
-  const wins = [], nb = Math.max(1, Math.round(Wd / 2.2));
-  let du;
-  if (pa === null) { du = (e0 + e1) / 2 + 0.2; wins.push({ ac: 0.85, w: 0.8 }); }
-  else {
-    wins.push({ ac: (0.25 + pa) / 2 + 0.2, w: 1.0 });
-    const k0 = Math.floor(nb / 2);
-    for (let k = 0; k < nb; k++) { const ac = e0 + Wd * (k + 0.5) / nb; if (k === k0) du = ac; else wins.push({ ac, w: 1.0 }); }
-  }
-  const via = pa === null ? [[1.9, 3.7], [du, 3.0], [du, 1.9], [du, 1.45]] : [[2.0, 3.6], [pa, 3.55], [pa + 0.7, 3.55], [du, 3.0], [du, 1.9], [du, 1.45]];
-  return { pa, dc: L - 0.9, wins, du, via, e0, e1, gal: [Math.max(e0 + 0.05, du - 1.45), Math.min(e1 - 0.05, du + 1.45)] };
+  const e0 = pa === null ? 1.45 : pa + 0.06, e1 = L - 0.25;
+  const wins = [], du = pa === null ? L - 1.15 : e1 - 0.9;
+  if (pa === null) wins.push({ ac: 0.85, w: 0.8 });
+  else { wins.push({ ac: 0.85, w: 0.9 }); for (let a = e0 + 0.75; a < du - 1.35; a += 1.9) wins.push({ ac: a, w: 1.0 }); }
+  // from the stair's top down the stair room's side to the doorway at the front, along the front to the gallery door
+  const via = pa === null ? [[1.9, 3.4], [du - 0.2, 2.2], [du, 1.45]] : [[1.9, 3.2], [1.9, 1.9], [pa, 1.9], [pa + 0.7, 1.9], [du - 0.3, 1.9], [du, 1.45]];
+  return { pa, dc: L - 0.9, wins, du, via, e0, e1, gal: [Math.max(e0 + 0.05, du - 1.35), Math.min(e1 - 0.05, du + 1.35)], door: [1.45, 2.35] };
 }
 
 /** The route one walks in each house for walk-check: from the street in at the door, to the stair's foot, up, through the upper floor and out onto the gallery. */
