@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.33 — upstairs (2026-11-18)
+
+In nine settlements the houses nearest the arrival can now be climbed: a real stair or ladder, floors you walk on, rooms furnished by use, and a balcony or gallery to step out on. Amsterdam: eleven canal houses, flight on flight through trap doors to box beds, a loom, and the attic with its hoist hatch. Kaifeng: twelve inns, wine houses and shops, with booths upstairs and balconies over the street. Suzhou: nine shop-houses by trade, each with a gallery over the street. Florence: eleven houses up to the second and third floors, the merchant's sala and camera, the kitchen at the top. Rome: tabernae with a dwelling above, inns, a fuller's drying terrace, three insulae with galleries on the court. Venice: nine houses, the merchant's with an altana on the roof. London: seven terrace houses, four shops and two pubs, up a dogleg stair to drawing room, bedrooms and attic, with cast-iron balconies. Paris: thirteen houses on the palace court, up to the attic, with galleries on corbels. Beijing: twelve courtyard houses opened through — the south row's rooms and the ear rooms — and a two-storey tea house with a balcony over the avenue.
+
 ## v12.32 — New York inside the budget; one façade box for every facing (2026-11-18)
 
 New York arrives at 411 draws instead of 624: its 791 lots are built twice in tiles, the far form keeping masses, setbacks, cornices, shop glass, awnings, stoops and water tanks and dropping sign lettering, fire-escape railings and interiors. The façade box shared by Amsterdam, London, Versailles and Vienna was drawn as a different shape for each facing; it is one shape now, which takes Amsterdam from 454 draws to 399, London from 438 to 420 and Versailles from 442 to 433 with nothing changed to the eye. Checked in the browser after v12.31: Samarkand and Madurai arrive lighter (Samarkand's frame from 5.2 M triangles to 3.5 M, Madurai's from 8.3 M to 5.5 M) and look the same.
