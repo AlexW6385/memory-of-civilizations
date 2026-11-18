@@ -787,7 +787,7 @@
  },
  "bhaktapur-taumadhi": {
   "site": "bhaktapur",
-  "hash": "6bc86fad0057cff2",
+  "hash": "248580bf8a9af4d5",
   "rays": 128,
   "probes": 3416,
   "boxes": [
@@ -824,9 +824,9 @@
     ]
    }
   ],
-  "bytes": 61413,
-  "seconds": 6,
-  "baked": "2026-11-17"
+  "bytes": 61461,
+  "seconds": 7,
+  "baked": "2026-11-18"
  },
  "borobudur-temple": {
   "site": "borobudur",
@@ -2278,7 +2278,7 @@
  },
  "isfahan-maidan": {
   "site": "isfahan",
-  "hash": "37eff0aafe3711aa",
+  "hash": "9786ceac853a6336",
   "rays": 128,
   "probes": 60467,
   "boxes": [
@@ -2348,9 +2348,9 @@
     ]
    }
   ],
-  "bytes": 1034615,
-  "seconds": 148,
-  "baked": "2026-11-17"
+  "bytes": 1034625,
+  "seconds": 177,
+  "baked": "2026-11-18"
  },
  "joseon-seoul-gyeongbokgung": {
   "site": "joseon-seoul",
@@ -4609,9 +4609,9 @@
  },
  "shibam-tower-house": {
   "site": "shibam",
-  "hash": "bbf4b64a51c49558",
+  "hash": "d73ae6e34ac21cd7",
   "rays": 128,
-  "probes": 3744,
+  "probes": 42480,
   "boxes": [
    {
     "min": [
@@ -4635,10 +4635,119 @@
      "the room under the roof",
      "the stair lobby"
     ]
+   },
+   {
+    "min": [
+     -34.1,
+     -0.44,
+     13
+    ],
+    "n": [
+     24,
+     33,
+     21
+    ],
+    "spacing": 1,
+    "rooms": [
+     "the store and stable",
+     "the women's floor",
+     "the family room",
+     "the bedroom",
+     "the majlis",
+     "the upper room",
+     "the family room",
+     "the upper room",
+     "the bedroom",
+     "the room under the roof",
+     "the stair",
+     "the store and stable",
+     "the women's floor",
+     "the family room",
+     "the bedroom",
+     "the majlis",
+     "the upper room",
+     "the bedroom",
+     "the family room",
+     "the upper room",
+     "the room under the roof",
+     "the stair",
+     "the store and stable",
+     "the women's floor",
+     "the family room",
+     "the bedroom",
+     "the majlis",
+     "the upper room",
+     "the upper room",
+     "the bedroom",
+     "the room under the roof",
+     "the stair"
+    ]
+   },
+   {
+    "min": [
+     15.64,
+     -0.44,
+     1.2
+    ],
+    "n": [
+     22,
+     33,
+     24
+    ],
+    "spacing": 1,
+    "rooms": [
+     "the store and stable",
+     "the women's floor",
+     "the family room",
+     "the bedroom",
+     "the majlis",
+     "the upper room",
+     "the bedroom",
+     "the family room",
+     "the upper room",
+     "the room under the roof",
+     "the stair",
+     "the store and stable",
+     "the women's floor",
+     "the family room",
+     "the bedroom",
+     "the majlis",
+     "the upper room",
+     "the bedroom",
+     "the family room",
+     "the upper room",
+     "the room under the roof",
+     "the stair"
+    ]
+   },
+   {
+    "min": [
+     -38.13,
+     -0.44,
+     -50
+    ],
+    "n": [
+     13,
+     30,
+     12
+    ],
+    "spacing": 1,
+    "rooms": [
+     "the store and stable",
+     "the women's floor",
+     "the family room",
+     "the bedroom",
+     "the majlis",
+     "the upper room",
+     "the bedroom",
+     "the family room",
+     "the room under the roof",
+     "the stair"
+    ]
    }
   ],
-  "bytes": 66687,
-  "seconds": 50,
+  "bytes": 711946,
+  "seconds": 74,
   "baked": "2026-11-18"
  },
  "song-hangzhou-liuhe": {
