@@ -187,3 +187,26 @@ export function yardItems() {
   }
   return out;
 }
+
+/**
+ * The open houses whose upper storeys can be climbed (docs/settlements/ottoman-istanbul.md §17): the nearest to the arrival
+ * (0, -91) with two or more storeys, each given a kind by rule: a shop of a craft is a craftsman's, any other shop a
+ * shopkeeper's dwelling; a front of 10 m or more an inn; a front of 7 m or more a merchant's house; a narrow house of three
+ * storeys a tenement; the rest a family house. Map lot → kind.
+ */
+let UPS = null;
+const CRAFTS = ['coppersmith', 'weaver', 'cobbler', 'saddler', 'tailor', 'potter'];
+export function upSet(max = 12) {
+  if (UPS) return UPS;
+  UPS = new Map();
+  const d = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2 + 91);
+  const cand = [...openSet()].filter((l) => l.storeys >= 2 && Math.abs(l.rect[3] - l.rect[1] - DEPTH) < 0.01 + (l.front === 'e' || l.front === 'w' ? 99 : 0)).sort((a, b) => d(a) - d(b));
+  for (const l of cand) {
+    if (UPS.size >= max) break;
+    const w = (l.front === 'n' || l.front === 's') ? l.rect[2] - l.rect[0] : l.rect[3] - l.rect[1], dep = (l.front === 'n' || l.front === 's') ? l.rect[3] - l.rect[1] : l.rect[2] - l.rect[0];
+    if (dep < DEPTH - 0.01 || w < 4.5) continue;
+    const kind = l.shop ? (CRAFTS.includes(l.trade) ? 'craftsman' : 'shopkeeper') : w >= 10 ? 'inn' : w >= 7 ? 'merchant' : l.storeys >= 3 && w < 6.5 ? 'tenement' : 'family';
+    UPS.set(l, kind);
+  }
+  return UPS;
+}
