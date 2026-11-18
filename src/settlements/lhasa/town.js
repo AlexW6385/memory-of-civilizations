@@ -6,6 +6,7 @@ import { RADIUS, POND, STREET, shops, PRINTERY, BENCHES, CHAPEL, lots, pondDist,
 import { ground } from './ground.js';
 import { teaSeats } from '../../styles/tibetan/index.js';
 import { dressing } from './dress.js';
+import { openFlags } from './upstairs.js';
 const base = (id, elements, style = 'tibetan') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-4, 60], facing: 'n' } });
 /** The street's incense burner and the tethered yaks (x, z, rot), by the booths and in the lane. */
 export const SANG = [-3.4, 166];
@@ -71,7 +72,7 @@ function people() {
 
 export async function town() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 130) plans.push(base(`lhasa-houses-${i / 130}`, all.slice(i, i + 130).map((l) => ({ t: 'tibetan_house', ...l, y: l.farm ? ground.height((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) : 0 }))));
+  for (let i = 0; i < all.length; i += 130) plans.push(base(`lhasa-houses-${i / 130}`, all.slice(i, i + 130).map((l) => ({ t: 'tibetan_house', ...l, ...openFlags(l), y: l.farm ? ground.height((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) : 0 }))));
   // yaks treading out the barley on the farmsteads' threshing floors (the post and floor are the house's: styles/tibetan house(), the same seed's draw)
   { const yk = [];
     for (const l of all) {
