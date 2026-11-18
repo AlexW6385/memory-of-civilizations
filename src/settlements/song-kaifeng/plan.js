@@ -4,6 +4,7 @@
 // city gate with its tower; the streets' paving.
 
 import { RADIUS, RIVER, BRIDGE, MONASTERY, PAGODA, WALL_X, STREETS, GATE, FIELDS_X, STONE_BANK, APPROACH, pavedWay, paveRects, RIVER_WALK, BRIDGE_APRON, STEPS } from './layout.js';
+import { upperSpecs, walkOf } from './upper.js';
 import './style.js';
 import { interiorRooms } from './interiors.js';
 
@@ -122,6 +123,7 @@ const rooms = [
 ];
 const walks = [[[0, 108], [0, 100], [0, 76], [0, 50], [0, -80], [160, -80], [160, -150]]];
 walks[0].y0 = 0;
+for (const l of upperSpecs().keys()) { const r = walkOf(l); r.y0 = 0; walks.push(r); }
 
 export const pagoda = {
   id: 'song-kaifeng-iron-pagoda',

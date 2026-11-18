@@ -16,6 +16,7 @@ import { lots, BRIDGE } from './layout.js';
 import { tradeOf, wineShops, teaHouses } from './trades.js';
 import { doorOf } from './houses.js';
 import { shopElements } from './shops.js';
+import { holdOf } from './upper.js';
 import { Parts, box, lathe, rod, ly, drum, bowl, jar, limb, rng, table, bench, stool, chair, couch, bed, chest, shelves, screen, brazier, teaSet, hanging, lantern, lampStand, plumVase, crockery, WD, LQ, DK } from './props.js';
 
 const FLOOR = 0.28;                                   // the floor of houses.js's shops and houses: the plinth's top, P0 (0.14 for thatch and farms)
@@ -48,8 +49,9 @@ function interior(el, { bag, col }) {
   const y = el.y ?? FLOOR, kind = el.kind, trade = el.trade || 'cloth', lite = !!el.lite;      // lite: the far rooms (vertex budget) have half the goods and the small furniture left out
   const yaw = Math.atan2(v[0], v[1]), cs = Math.cos(yaw), sn = Math.sin(yaw);
   const WC = (a, b) => [o[0] + a * cs + b * sn, o[1] - a * sn + b * cs];
-  const blk = (a0, b0, a1, b1, h) => { const p = WC(a0, b0), q = WC(a1, b1); col?.rect([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], y, y + h); };
-  const S = new Parts(), put = (build, a, b, yw = 0, up = 0, ...args) => { const Q = new Parts(); build(Q, ...args); Q.emit(S, a, up, b, yw); };
+  const blk = (a0, b0, a1, b1, h) => { if (keep.some((k) => a1 > k[0] - 0.1 && a0 < k[2] + 0.1 && b1 > k[1] - 0.1 && b0 < k[3] + 0.1)) return; const p = WC(a0, b0), q = WC(a1, b1); col?.rect([Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])], y, y + h); };
+  const keep = el.keep || [], inKeep = (a, b, m = 0.5) => keep.some((k) => a > k[0] - m && a < k[2] + m && b > k[1] - m && b < k[3] + m);
+  const S = new Parts(), put = (build, a, b, yw = 0, up = 0, ...args) => { if (inKeep(a, b)) return; const Q = new Parts(); build(Q, ...args); Q.emit(S, a, up, b, yw); };
   const hx = W / 2 - 0.5, b0 = 1.45, b1 = D - 0.3, ceil = el.ceil ?? 2.7;     // the room's inner limits in the house's own frame: the side walls are 0.3 thick, the back wall's face at D − 0.3, the open front's counters (houses.js) fill 0.8–1.3 in; ceil: the floor beams' underside above the floor
   const back = b1, doorA = (rand() - 0.5) * 1.2;
   const wallScroll = (a, up, w, h, seed) => put((Q) => hanging(Q, w, h, seed), a, b1 + 0.2, Math.PI, up);   // on the back wall, facing the front (−z)
@@ -152,7 +154,7 @@ export const furnishedLots = () => new Set(picks().filter((p) => p.furnish).map(
 const ceilOf = (l, kind) => (l.kind === 'wine' ? 3.2 : l.storeys === 2 ? 2.95 : 2.7);
 /** The furniture elements (style song) of the furnished lots. */
 export function interiorElements() {
-  return picks().filter((p) => p.furnish).map(({ l, kind, trade }) => ({ t: 'kf_interior', rect: l.foot, front: l.front, y: FLOOR, kind, trade, seed: l.seed + 3, ceil: ceilOf(l, kind), lite: Math.min(Math.hypot((l.foot[0] + l.foot[2]) / 2 - BRIDGE.at[0], (l.foot[1] + l.foot[3]) / 2 - BRIDGE.at[1]), Math.hypot((l.foot[0] + l.foot[2]) / 2 - ARRIVAL[0], (l.foot[1] + l.foot[3]) / 2 - ARRIVAL[1]) * 1.4) > 85 }));
+  return picks().filter((p) => p.furnish).map(({ l, kind, trade }) => ({ t: 'kf_interior', rect: l.foot, front: l.front, y: FLOOR, kind, trade, seed: l.seed + 3, ceil: ceilOf(l, kind), keep: holdOf(l), lite: Math.min(Math.hypot((l.foot[0] + l.foot[2]) / 2 - BRIDGE.at[0], (l.foot[1] + l.foot[3]) / 2 - BRIDGE.at[1]), Math.hypot((l.foot[0] + l.foot[2]) / 2 - ARRIVAL[0], (l.foot[1] + l.foot[3]) / 2 - ARRIVAL[1]) * 1.4) > 85 }));
 }
 /**
  * The rooms (music and acoustics: kinds shop, tea, tavern, inn, house) of the lots of picks(): { id, rect, y, kind }. The buildings
@@ -175,7 +177,8 @@ export function interiorLife() {
     const yaw = Math.atan2(v[0], v[1]), cs = Math.cos(yaw), sn = Math.sin(yaw), WC = (a, b) => [o[0] + a * cs + b * sn, o[1] - a * sn + b * cs];
     // (the figure's front is −z: it faces the front for rot = yaw + π... faceTo as the town's: a figure faces +b (inward) when rot = atan2(−v)...)
     const face = (dx, dz) => Math.atan2(-dx, -dz), toward = (a0, b0, a1, b1) => { const p = WC(a0, b0), q = WC(a1, b1); return face(q[0] - p[0], q[1] - p[1]); };
-    const person = (a, b, tx, tb, o2 = {}) => out.push({ t: 'figure', at: WC(a, b), y: FLOOR, rot: toward(a, b, tx, tb), seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: pk(CL), cloth2: pk(CL), skin: rand() < 0.75 ? 'skin_light' : 'skin_medium', hat: pk(['cap', 'cap', 'none']), hatMat: 'cloth_black', hair: 'topknot', carry: 'none', ...o2 });
+    const person0 = (a, b, tx, tb, o2 = {}) => out.push({ t: 'figure', at: WC(a, b), y: FLOOR, rot: toward(a, b, tx, tb), seed: Math.floor(rand() * 1e9), dress: 'robe', cloth: pk(CL), cloth2: pk(CL), skin: rand() < 0.75 ? 'skin_light' : 'skin_medium', hat: pk(['cap', 'cap', 'none']), hatMat: 'cloth_black', hair: 'topknot', carry: 'none', ...o2 });
+    const hold = holdOf(l) || [], person = (a, b, tx, tb, o2 = {}) => { const n = out.length; person0(a, b, tx, tb, o2); if (hold.some((k) => a > k[0] - 0.5 && a < k[2] + 0.5 && b > k[1] - 0.5 && b < k[3] + 0.5)) out.length = n; };     // (none stands in the stair's way)
     const hx = W / 2 - 0.5, b0 = 1.45, b1 = D - 0.3;
     if (kind === 'shop') person(W * 0.28, b0 + 0.1, W * 0.28, -5, { cloth: 'cloth_brown', cloth2: 'cloth_white' });          // the keeper behind the counter, facing out
     else if (kind === 'tea') { for (const a of W > 7 ? [-W * 0.22, W * 0.22] : [0]) { const b = b0 + 1.4; person(a, b + 0.62, a, b, { pose: 'sit' }); if (rand() < 0.7) person(a, b - 0.62, a, b, { pose: 'sit' }); } person(hx - 1.2, b1 - 0.95, hx - 1.2, 0, { cloth: 'cloth_white', cloth2: 'cloth_black' }); }

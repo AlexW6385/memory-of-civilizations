@@ -8,6 +8,7 @@
 
 import { box, fromTriangles, lathe, addCloth, clothBox } from '../../core/geom.js';
 import { inLot } from './layout.js';
+import { upperStorey, stairLayout, floorSlab } from './upper.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const pick = (r, a) => a[Math.floor(r() * a.length)];
@@ -68,7 +69,7 @@ export function doorOf(l) {
 }
 
 export function houseSong(el, { bag, col }) {
-  const rand = rng(el.seed || 1);
+  const rand = rng(el.seed || 1), up = el.up || null;
   const [x0, z0, x1, z1] = el.foot, f = el.front || 's', kind = el.kind || 'house', det = el.det ?? 2;
   const along = f === 'n' || f === 's';
   const L = along ? x1 - x0 : z1 - z0, D = along ? z1 - z0 : x1 - x0;
@@ -79,7 +80,7 @@ export function houseSong(el, { bag, col }) {
   const acc = new Map();
   const arr = (mat) => { let A = acc.get(mat); if (!A) acc.set(mat, A = []); return A; };
   /** A box in local coordinates (axis-aligned in the world as the fronts are). noB: leave out the bottom face. */
-  const B = (mat, a0, b0, a1, b1, ya, yb, noB = true) => {
+  const B = (mat, a0, b0, a1, b1, ya, yb, noB = true, noT = false) => {
     const p = W(a0, b0, 0), q = W(a1, b1, 0), X0 = Math.min(p[0], q[0]), X1 = Math.max(p[0], q[0]), Z0 = Math.min(p[2], q[2]), Z1 = Math.max(p[2], q[2]);
     const A = arr(mat);
     const quad = (a, b, c, d) => A.push(...a, ...b, ...c, ...a, ...c, ...d);
@@ -93,7 +94,8 @@ export function houseSong(el, { bag, col }) {
       else { quad([X0, ya, Z0], [X0, yb, Z0], [X1, yb, Z0], [X1, ya, Z0]); quad([X1, ya, Z1], [X1, yb, Z1], [X0, yb, Z1], [X0, ya, Z1]); }
       return;
     }
-    quad([X0, yb, Z0], [X0, yb, Z1], [X1, yb, Z1], [X1, yb, Z0]);
+    // (noT: the top face left off, for the rails of the walkable upper floors: a thin rail's top is a "roof" cell of the walker's top field and would shut the way beside it)
+    if (!noT) quad([X0, yb, Z0], [X0, yb, Z1], [X1, yb, Z1], [X1, yb, Z0]);
     // (a thing hung above head height gets its underside: without one the walker's collision field takes it for a solid mass down to the ground and one cannot walk under it)
     if (under) quad([X0, ya, Z0], [X1, ya, Z0], [X1, ya, Z1], [X0, ya, Z1]);
     quad([X0, ya, Z0], [X0, yb, Z0], [X1, yb, Z0], [X1, ya, Z0]);
@@ -273,7 +275,8 @@ export function houseSong(el, { bag, col }) {
 
   if (kind === 'shop' || kind === 'wine' || kind === 'tea' || kind === 'inn' || kind === 'warehouse') {
     const two = el.storeys === 2 || kind === 'wine' || kind === 'inn', wide = kind === 'wine' || kind === 'inn';
-    const H1 = kind === 'warehouse' ? 4.3 : wide ? 3.5 : two ? 3.25 : 3.0, H2 = two ? (wide ? 3.3 : 2.9) : 0;
+    const loft = !!up && up.type === 'loft' && !two;
+    const H1 = kind === 'warehouse' ? 4.3 : wide ? 3.5 : two ? 3.25 : 3.0, H2 = two ? (wide ? 3.3 : 2.9) : loft ? 1.25 : 0;
     const yF = P0 + H1, yTop = yF + H2;
     const oh = wide ? 1.7 : two ? 1.45 : 1.25, soh = 0.55, th = 0.17;
     const bayW = L / Math.max(1, el.bays || Math.round(L / 3.3));
@@ -292,6 +295,7 @@ export function houseSong(el, { bag, col }) {
     B('granite_block', -0.05, -0.05, L + 0.05, D + 0.05, -0.4, P0, false);
     const inn = kind === 'inn';
     const enter = !!el.furnished && (kind === 'shop' || kind === 'wine') && nb > 1;
+    let upS = null;
     const frontD = inn ? 7.6 : D;           // the inn: the front range only is two storeys
     // ---- the walls: back, sides, plastered over a timber frame
     const wm = kind === 'warehouse' ? 'plaster_grey' : wall;
@@ -351,7 +355,11 @@ export function houseSong(el, { bag, col }) {
         cRect(0, D - 0.3, L, D, 0, yTop); cRect(0, 0, 0.3, D, 0, yTop); cRect(L - 0.3, 0, L, D, 0, yTop);
         for (let k = 0; k < nb; k++) if (k !== doorBay) cRect(bayA(k) + 0.1, fb + 0.45, bayA(k + 1) - 0.1, fb + 1.15, 0, P0 + 1.0);
         cFloor(0.3, fb + 0.0, L - 0.3, D - 0.3, P0); cFloor(bayA(doorBay) + 0.15, -0.35, bayA(doorBay + 1) - 0.15, fb + 0.1, P0);
-        ceiling(0.3, fb + 0.12, L - 0.3, D - 0.3, P0 + (kind === 'wine' ? 3.2 : two ? 2.95 : 2.7) - 0.0);
+        if (up) {
+          const ch = kind === 'wine' ? 3.2 : two ? 2.95 : 2.7;
+          upS = stairLayout(L, D, P0, yF, ch, (doorBay + 0.5) * bayW < L / 2 ? 'l' : 'r');
+          floorSlab({ B }, 0.3, fb, L - 0.3, D - 0.3, P0 + ch, yF, upS);
+        } else ceiling(0.3, fb + 0.12, L - 0.3, D - 0.3, P0 + (kind === 'wine' ? 3.2 : two ? 2.95 : 2.7) - 0.0);
       } else cRect(0, fb + 0.45, L, D, 0, yTop);
       // the shop's inside, seen through the open front: the back wall's shelves with goods
       if (det >= 2 && !el.furnished) {
@@ -407,15 +415,15 @@ export function houseSong(el, { bag, col }) {
         if (det >= 1) {
           // the rail: posts every 0.9 m, a top rail and a lower one
           const nr = Math.max(2, Math.round(L / 0.95));
-          for (let k = 0; k <= nr; k++) { const a = Math.min(L - 0.05, Math.max(0.05, L * k / nr)); B('lacquer_chestnut', a - 0.04, b0 + 0.02, a + 0.04, b0 + 0.1, yF + 0.04, yF + 0.98); }
-          B('lacquer_chestnut', 0, b0 + 0.0, L, b0 + 0.14, yF + 0.94, yF + 1.02); B('lacquer_chestnut', 0, b0 + 0.04, L, b0 + 0.1, yF + 0.45, yF + 0.5);
-          B('lacquer_chestnut', 0, b0, 0.1, fb, yF + 0.04, yF + 1.02, true); B('lacquer_chestnut', L - 0.1, b0, L, fb, yF + 0.04, yF + 1.02, true);
+          for (let k = 0; k <= nr; k++) { const a = Math.min(L - 0.05, Math.max(0.05, L * k / nr)); B('lacquer_chestnut', a - 0.04, b0 + 0.02, a + 0.04, b0 + 0.1, yF + 0.04, yF + 0.98, true, !!up); }
+          B('lacquer_chestnut', 0, b0 + 0.0, L, b0 + 0.14, yF + 0.94, yF + 1.02, true, !!up); B('lacquer_chestnut', 0, b0 + 0.04, L, b0 + 0.1, yF + 0.45, yF + 0.5, true, !!up);
+          B('lacquer_chestnut', 0, b0, 0.1, fb, yF + 0.04, yF + 1.02, true, !!up); B('lacquer_chestnut', L - 0.1, b0, L, fb, yF + 0.04, yF + 1.02, true, !!up);
         }
         // upper front: posts, and between them in each bay a window, a shuttered panel or an open bay with the room's dark inside
         const open = kind === 'wine' || kind === 'tea' || (rand() < 0.3);
         for (let k = 0; k <= nb; k++) { const a = Math.min(L - 0.13, Math.max(0.13, bayA(k))); B('timber', a - 0.11, fb - 0.11, a + 0.11, fb + 0.11, yF, yTop - 0.3); }
         B('timber', 0, fb - 0.12, L, fb + 0.12, yTop - 0.3, yTop);
-        for (let k = 0; k < nb; k++) {
+        for (let k = 0; k < (up ? 0 : nb); k++) {
           const a0 = bayA(k) + 0.14, a1 = bayA(k + 1) - 0.14, q = rand();
           if (open && q < 0.6) { B('wood_dark', a0, fb + 0.4, a1, fb + 0.48, yF, yTop - 0.3); if (det >= 2) B('timber', a0 + 0.2, fb + 0.9, a0 + 0.8, fb + 1.5, yF, yF + 0.78); }
           else if (q < 0.75) {
@@ -491,7 +499,7 @@ export function houseSong(el, { bag, col }) {
               bd = 1.3 + rand() * (D - 3.2);
               S('timber', bd - 0.58, bd + 0.58, P0, P0 + 2.28, 0.07); S('wood_dark', bd - 0.46, bd + 0.46, P0, P0 + 2.12, 0.1);
               for (const dd of [-0.23, 0.23]) { S('timber', bd + dd - 0.015, bd + dd + 0.015, P0 + 0.1, P0 + 2.1, 0.115); }
-              S('timber', bd - 0.46, bd + 0.46, P0 + 1.0, P0 + 1.06, 0.115); S('iron', bd - 0.04, bd + 0.04, P0 + 0.95, P0 + 1.1, 0.14);
+              S('timber', bd - 0.46, bd + 0.46, P0 + 1.0, P0 + 1.06, 0.115); S('wood_dark', bd - 0.04, bd + 0.04, P0 + 0.95, P0 + 1.1, 0.14);
               B('granite_block', sa + (sg < 0 ? -0.45 : 0), bd - 0.65, sa + (sg > 0 ? 0.45 : 0), bd + 0.65, 0, P0 + 0.06);
             }
             if (D > 5 && rand() < 0.7) {
@@ -526,6 +534,26 @@ export function houseSong(el, { bag, col }) {
         }
       }
       // the wine shops: the dark bay above the door and its curtain of cloth
+    }
+    if (up && !inn && (two || loft) && upS) {
+      let lin = () => {}, ridgeB = 0;
+      if (loft) {
+        // the loft's front: a knee wall over the lintel with a small window (open reveal, the shutter swung back), and the lining of the roof's underside
+        const wa = L / 2, ww = 0.9, kb0 = fb - 0.1, kb1 = fb + 0.15;
+        B(wall, 0, kb0, wa - ww / 2, kb1, yF, yTop); B(wall, wa + ww / 2, kb0, L, kb1, yF, yTop);
+        B(wall, wa - ww / 2, kb0, wa + ww / 2, kb1, yF, yF + 0.3); B(wall, wa - ww / 2, kb0, wa + ww / 2, kb1, yF + 0.95, yTop);
+        B('timber', wa - ww / 2 - 0.05, kb0 - 0.03, wa + ww / 2 + 0.05, kb1 + 0.03, yF + 0.27, yF + 0.32); B('timber', wa - ww / 2 - 0.05, kb0 - 0.03, wa + ww / 2 + 0.05, kb1 + 0.03, yF + 0.95, yF + 1.0);
+        B('shutter_brown', wa - ww / 2 + 0.02, kb1, wa - ww / 2 + 0.05, kb1 + 0.45, yF + 0.33, yF + 0.93);
+        cRect(0, kb0, L, kb1, yF, yTop);
+        ridgeB = tmid;
+        lin = () => {
+          const pf = (t) => yE + rise * Math.pow(Math.max(0, 1 - Math.abs(t - tmid) / hb), 1.3) - th - 0.02, tA = kb1, tB = D - 0.3, n = 14, mat = 'timber';
+          for (let i = 0; i < n; i++) { const ta = tA + (tB - tA) * i / n, tb = tA + (tB - tA) * (i + 1) / n; surf(mat, [W(0.3, ta, pf(ta)), W(L - 0.3, ta, pf(ta)), W(L - 0.3, tb, pf(tb)), W(0.3, tb, pf(tb))], DN); }
+          for (const [a, h] of [[0.3, 1], [L - 0.3, -1]]) for (let i = 0; i < n; i++) { const ta = tA + (tB - tA) * i / n, tb = tA + (tB - tA) * (i + 1) / n; surf(wm, [W(a, ta, yTop - 0.02), W(a, tb, yTop - 0.02), W(a, tb, pf(tb)), W(a, ta, pf(ta))], dirU(h)); }
+          surf(wm, [W(0.3, tB, yTop - 0.02), W(L - 0.3, tB, yTop - 0.02), W(L - 0.3, tB, pf(tB)), W(0.3, tB, pf(tB))], dirV(-1));
+        };
+      }
+      upperStorey({ B, RB: (m, a0, b0, a1, b1, ya, yb) => B(m, a0, b0, a1, b1, ya, yb, true, true), surf, W: (a, b, y) => W(a, b, y), cRect, cFloor, cCircle, L, D, P0, yF, yTop, fb, nb, bayA, type: up.type, trade: el.trade, r: rng((Math.floor(x0 * 7) * 73856093 ^ Math.floor(z0 * 7) * 19349663 ^ 0x5bd1e995) >>> 0), wall: wm, seed: el.seed || 1, bag, o: [W(L / 2, 0, 0)[0], W(L / 2, 0, 0)[2]], yaw: Math.atan2(v[0], v[1]), lining: lin, ridgeB, house: false }, upS);
     }
     if (!inn) weather(wallTop, false);
     if (!inn && det >= 2 && (wide || kind === 'tea' || two) && L > 3.2) {
@@ -567,21 +595,23 @@ export function houseSong(el, { bag, col }) {
     function innBuild() {
       // the front range (two storeys, depth frontD) with a gate bay in the middle
       const gA = L / 2 - 1.8, gB = L / 2 + 1.8, fh = frontD;
-      B(wall, 0, 0.0, gA, fh, P0, yTop - 0.3); B(wall, gB, 0, L, fh, P0, yTop - 0.3);
-      B('timber', gA - 0.25, 0, gA, 0.3, P0, yTop - 0.3); B('timber', gB, 0, gB + 0.25, 0.3, P0, yTop - 0.3);
+      const yW = up ? yF : yTop - 0.3;
+      B(wall, 0, 0.0, gA, fh, P0, yW); B(wall, gB, 0, L, fh, P0, yW);
+      B('timber', gA - 0.25, 0, gA, 0.3, P0, up ? yF - 0.8 : yTop - 0.3); B('timber', gB, 0, gB + 0.25, 0.3, P0, up ? yF - 0.8 : yTop - 0.3);
       B('timber', gA - 0.25, 0, gB + 0.25, 0.4, yF - 0.8, yF - 0.2);                 // the lintel of the gate passage
-      B(wall, gA, 0.0, gB, fh, yF - 0.2, yTop - 0.3);                                  // the room over the passage
-      cRect(0, 0.0, gA, fh, 0, yTop); cRect(gB, 0.0, L, fh, 0, yTop);
+      if (!up) B(wall, gA, 0.0, gB, fh, yF - 0.2, yTop - 0.3);                          // the room over the passage
+      cRect(0, 0.0, gA, fh, 0, up ? yF : yTop); cRect(gB, 0.0, L, fh, 0, up ? yF : yTop);
       // the front's openings: lattice windows upstairs, a balcony on a beam
       const nbx = Math.max(2, Math.round(L / 3.4));
       for (let k = 0; k < nbx; k++) {
         const a = (k + 0.5) * L / nbx;
         if (a > gA - 0.5 && a < gB + 0.5) continue;
+        if (up) { B('shutter_brown', a - 0.55, -0.04, a + 0.55, 0.02, P0 + 0.8, P0 + 2.0); continue; }
         B('lattice', a - 0.8, -0.04, a + 0.8, 0.02, yF + 0.9, yF + 2.2); B('timber', a - 0.9, -0.06, a + 0.9, 0.04, yF + 0.85, yF + 0.92); B('timber', a - 0.9, -0.06, a + 0.9, 0.04, yF + 2.2, yF + 2.28);
         B('shutter_brown', a - 0.55, -0.04, a + 0.55, 0.02, P0 + 0.8, P0 + 2.0);
       }
       B('timber', 0, -0.9, L, 0.0, yF - 0.12, yF + 0.04);
-      if (det >= 1) { const nr = Math.round(L / 0.95); for (let k = 0; k <= nr; k++) { const a = Math.min(L - 0.05, Math.max(0.05, L * k / nr)); B('lacquer_chestnut', a - 0.04, -0.88, a + 0.04, -0.8, yF + 0.04, yF + 0.98); } B('lacquer_chestnut', 0, -0.9, L, -0.76, yF + 0.94, yF + 1.02); }
+      if (det >= 1) { const nr = Math.round(L / 0.95); for (let k = 0; k <= nr; k++) { const a = Math.min(L - 0.05, Math.max(0.05, L * k / nr)); B('lacquer_chestnut', a - 0.04, -0.88, a + 0.04, -0.8, yF + 0.04, yF + 0.98, true, !!up); } B('lacquer_chestnut', 0, -0.9, L, -0.76, yF + 0.94, yF + 1.02, true, !!up); }
       // the front range's roof (hipped at the ends, the passage's gable)
       const t0f = -oh, t1f = fh + 0.9, rf = (fh / 2 + oh * 0.5) * 0.3, tm2 = (t0f + t1f) / 2, hb2 = (t1f - t0f) / 2, ph2 = Math.pow(Math.max(0, 1 - Math.abs(0 - tm2) / hb2), 1.3);
       const yEf = yTop - th - rf * ph2 + th;
@@ -605,6 +635,10 @@ export function houseSong(el, { bag, col }) {
       cRect(0, cb0, 0.35, cb1, 0, 3); cRect(L - 0.35, cb0, L, cb1, 0, 3);
       // the stable and the well in the court
       if (det >= 2) { B('wood_dark', 1.2, cb0 + 1.2, 3.6, cb0 + 2.2, 0, 1.0); const g = lathe([[0.001, 0], [0.5, 0], [0.55, 0.5], [0.4, 0.55], [0.4, 0.1], [0.001, 0.1]], 10); const q = W(L - 3, cb0 + 3, 0); g.translate(q[0], q[1], q[2]); bag.add('granite_grey', g); cCircle(L - 3, cb0 + 3, 0.58, 0, 0.6); }
+      if (up) {
+        const n = Math.round((yF - 0.05) / 0.2), aT = up.side === "l" ? 1.6 : L - 1.6;
+        upperStorey({ B, RB: (m, a0, b0, a1, b1, ya, yb) => B(m, a0, b0, a1, b1, ya, yb, true, true), surf, W: (a, b, y) => W(a, b, y), cRect, cFloor, cCircle, L, D, P0, yF, yTop, fb, nb, bayA, fh, gA, gB, type: 'inn', trade: 'inn', r: rng((Math.floor(x0 * 7) * 73856093 ^ Math.floor(z0 * 7) * 19349663 ^ 0x5bd1e995) >>> 0), wall, seed: el.seed || 1, bag, o: [W(L / 2, 0, 0)[0], W(L / 2, 0, 0)[2]], yaw: Math.atan2(v[0], v[1]) }, { n, aTop: aT, dir: up.side === 'l' ? 1 : -1 });
+      }
       topY[0] = Math.max(yEf + rf + 0.3, yh + 1.4);
     }
     cleanUp(topY[0]);
@@ -613,10 +647,14 @@ export function houseSong(el, { bag, col }) {
 
   if (kind === 'house' || kind === 'thatch' || kind === 'farm') {
     const enter = !!el.furnished && kind === 'house';
-    const th = kind === 'house' ? 0.15 : 0.36, thatch = kind !== 'house', Hw = thatch ? 2.1 + rand() * 0.25 : 2.9 + rand() * 0.3;
+    let houseLoft = null;
+    const th = kind === 'house' ? 0.15 : 0.36, thatch = kind !== 'house';
+    let Hw = thatch ? 2.1 + rand() * 0.25 : 2.9 + rand() * 0.3;
+    const Hw0 = Hw, loftH = up && up.type === 'house' ? 1.3 : 0;
+    if (loftH) Hw += loftH;
     const wm = thatch ? (rand() < 0.6 ? 'mud_plaster' : 'earth_wall') : wall;
     const oh = thatch ? 0.7 : 1.15, soh = thatch ? 0.5 : 0.5;
-    const alongRidge = L >= D * 0.9 || rand() < 0.7;        // the ridge along the front for the broad ones, over the depth for the narrow
+    const alongRidge = L >= D * 0.9 || rand() < 0.7 || loftH > 0;        // the ridge along the front for the broad ones, over the depth for the narrow
     // the roof spans (the eave rectangle in the ridge's frame)
     const M = alongRidge ? MA : MB;
     const s0 = alongRidge ? -soh : -oh, s1 = alongRidge ? L + soh : D + 0.9;
@@ -637,8 +675,17 @@ export function houseSong(el, { bag, col }) {
     const nbays = Math.max(2, Math.round(L / 3.1)), dc = dA(nbays), dw = 1.15;
     const yw = P0 + Hw;
     B(wm, 0, D - 0.3, L, D, P0, yw); B(wm, 0, 0.3, 0.3, D - 0.3, P0, yw); B(wm, L - 0.3, 0.3, L, D - 0.3, P0, yw);
-    B(wm, 0, 0, dc - dw / 2, 0.3, P0, yw); B(wm, dc + dw / 2, 0, L, 0.3, P0, yw);
-    const dh = 2.1; B(wm, dc - dw / 2, 0, dc + dw / 2, 0.3, P0 + dh, yw);
+    const yfw = loftH ? P0 + Hw0 : yw;
+    B(wm, 0, 0, dc - dw / 2, 0.3, P0, yfw); B(wm, dc + dw / 2, 0, L, 0.3, P0, yfw);
+    const dh = 2.1; B(wm, dc - dw / 2, 0, dc + dw / 2, 0.3, P0 + dh, yfw);
+    if (loftH) {
+      // the loft's front: a knee wall over the ground storey with a small window (open reveal, the shutter swung back)
+      const wa = L / 2 + (dc < L / 2 ? 0.8 : -0.8), ww = 0.9, yl = P0 + Hw0;
+      B(wm, 0, 0, wa - ww / 2, 0.3, yl, yw); B(wm, wa + ww / 2, 0, L, 0.3, yl, yw);
+      B(wm, wa - ww / 2, 0, wa + ww / 2, 0.3, yl, yl + 0.35); B(wm, wa - ww / 2, 0, wa + ww / 2, 0.3, yl + 0.95, yw);
+      B('timber', wa - ww / 2 - 0.05, -0.03, wa + ww / 2 + 0.05, 0.33, yl + 0.31, yl + 0.36); B('timber', wa - ww / 2 - 0.05, -0.03, wa + ww / 2 + 0.05, 0.33, yl + 0.95, yl + 1.0);
+      B('shutter_brown', wa - ww / 2 + 0.02, 0.3, wa - ww / 2 + 0.05, 0.75, yl + 0.37, yl + 0.93);
+    }
     if (enter) for (const sg of [-1, 1]) { const j = dc + sg * (dw / 2 - 0.1); B('wood_dark', j - 0.03, 0.3, j + 0.03, 0.3 + dw / 2 - 0.08, P0, P0 + dh - 0.04); B('timber', j - 0.045, 0.3 + 0.1, j + 0.045, 0.3 + 0.2, P0 + 0.35, P0 + 0.48); B('timber', j - 0.045, 0.3 + 0.1, j + 0.045, 0.3 + 0.2, P0 + 1.5, P0 + 1.63); B('iron', j - 0.05, 0.3 + dw / 2 - 0.22, j + 0.05, 0.3 + dw / 2 - 0.16, P0 + 1.0, P0 + 1.07); }   // the two leaves folded open inward against the jambs
     else B('wood_dark', dc - dw / 2 + 0.06, 0.1, dc + dw / 2 - 0.06, 0.2, P0, P0 + dh - 0.04);     // the door leaf, a little back
     B('timber', dc - dw / 2, 0.0, dc - dw / 2 + 0.09, 0.32, P0, P0 + dh + 0.08); B('timber', dc + dw / 2 - 0.09, 0.0, dc + dw / 2, 0.32, P0, P0 + dh + 0.08); B('timber', dc - dw / 2, 0.0, dc + dw / 2, 0.32, P0 + dh, P0 + dh + 0.1);
@@ -677,7 +724,11 @@ export function houseSong(el, { bag, col }) {
       cRect(0, D - 0.3, L, D, 0, yw + 1); cRect(0, 0, 0.3, D, 0, yw + 1); cRect(L - 0.3, 0, L, D, 0, yw + 1);
       cRect(0, 0, dc - dw / 2, 0.3, 0, yw + 1); cRect(dc + dw / 2, 0, L, 0.3, 0, yw + 1);
       cFloor(0.3, 0.3, L - 0.3, D - 0.3, P0); cFloor(dc - dw / 2 + 0.05, -0.45, dc + dw / 2 - 0.05, 0.35, P0);
-      ceiling(0.3, 0.3, L - 0.3, D - 0.3, P0 + 2.7);
+      if (loftH) {
+        const uS = stairLayout(L, D, P0, P0 + Hw0, 2.7, dc < L / 2 ? 'l' : 'r');
+        floorSlab({ B }, 0.3, 0.3, L - 0.3, D - 0.3, P0 + 2.7, P0 + Hw0, uS);
+        houseLoft = uS;
+      } else ceiling(0.3, 0.3, L - 0.3, D - 0.3, P0 + 2.7);
     } else cRect(0, 0.0, L, D, 0, yw + 1);
     roof(M, s0, s1, t0, t1, { yE, rise, p, th, mat: thatch ? 'thatch' : tile, soffit: thatch ? 'thatch' : 'timber', w: alongRidge ? [0, 0, L, D] : [0, 0, D, L], ridge: thatch ? 'thatch' : 'tile', hip: thatch ? (alongRidge ? Math.min((t1 - t0) / 2 - 0.2, (s1 - s0) / 2 - 0.3) : Math.min((t1 - t0) / 2 - 0.2, (s1 - s0) / 2 - 0.3)) : 0, ridgeMat: thatch ? 'thatch' : tile });
     // the gable ends of the tiled house: plaster to the roof, the hanging fish
@@ -693,6 +744,14 @@ export function houseSong(el, { bag, col }) {
       if (det >= 2) { const yR = prof(tm) - th; if (alongRidge) for (const [aa, s] of [[0, -1], [L, 1]]) B('timber', aa + (s < 0 ? -0.12 : 0), tm - 0.09, aa + (s < 0 ? 0 : 0.12), tm + 0.09, yR - 0.9, yR); else B('timber', tm - 0.09, -0.12, tm + 0.09, 0, yR - 0.9, yR); }
     } else if (!alongRidge) { /* hipped thatch closes itself */ }
     topY[0] = yE + rise + 0.3;
+    if (houseLoft) {
+      const yF = P0 + Hw0, pf = (t) => yE + rise * Math.pow(Math.max(0, 1 - Math.abs(t - tm) / hb), p) - th - 0.02, tA = 0.3, tB = D - 0.3, n = 14;
+      const lin = () => {
+        for (let i = 0; i < n; i++) { const ta = tA + (tB - tA) * i / n, tb = tA + (tB - tA) * (i + 1) / n; surf('timber', [W(0.3, ta, pf(ta)), W(L - 0.3, ta, pf(ta)), W(L - 0.3, tb, pf(tb)), W(0.3, tb, pf(tb))], DN); }
+        for (const [a, h] of [[0.3, 1], [L - 0.3, -1]]) for (let i = 0; i < n; i++) { const ta = tA + (tB - tA) * i / n, tb = tA + (tB - tA) * (i + 1) / n; surf(wm, [W(a, ta, yw - 0.02), W(a, tb, yw - 0.02), W(a, tb, pf(tb)), W(a, ta, pf(ta))], dirU(h)); }
+      };
+      upperStorey({ B, RB: (m, a0, b0, a1, b1, ya, yb) => B(m, a0, b0, a1, b1, ya, yb, true, true), surf, W: (a, b, y) => W(a, b, y), cRect, cFloor, cCircle, L, D, P0, yF, yTop: yw, fb: 0.3, nb: 2, bayA: (k) => k * L / 2, type: 'house', trade: el.trade || 'cloth', r: rng((Math.floor(x0 * 7) * 73856093 ^ Math.floor(z0 * 7) * 19349663 ^ 0x5bd1e995) >>> 0), wall: wm, seed: el.seed || 1, bag, o: [W(L / 2, 0, 0)[0], W(L / 2, 0, 0)[2]], yaw: Math.atan2(v[0], v[1]), lining: lin, ridgeB: tm, house: true }, houseLoft);
+    }
     // a lean-to at the back or the side (the kitchen, the shed)
     if (det >= 1 && rand() < 0.55) {
       const aw = Math.min(3.2, L * 0.55), a0 = rand() < 0.5 ? 0.3 : L - aw - 0.3, hs = 2.1;
