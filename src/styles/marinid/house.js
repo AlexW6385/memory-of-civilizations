@@ -7,7 +7,7 @@ import { subtractRects } from '../../core/build.js';
 import { frame } from '../mamluk/kit.js';
 import { face, dado, dadoFlat, stucco, rng, q4, dbl, basin, door, gable } from './kit.js';
 import * as F from '../mughal/furnish.js';
-import { dukkan, wallLamp, bench, weather, beamEnds, shutters, spout, roofTop, orangeTree, potRow, jar } from './front.js';
+import { dukkan, wallLamp, houseLamp, folded, bench, weather, beamEnds, shutters, spout, roofTop, orangeTree, potRow, jar } from './front.js';
 
 const WALLS = ['stucco_ochre', 'stucco_ochre', 'stucco_warm', 'stucco_warm', 'mud_plaster', 'limewash_white', 'lime_plaster', 'lime_plaster'];
 export const FLOOR = 3.7, UPPER = 3.25;
@@ -80,8 +80,8 @@ export function house(el, ctx) {
     F.carpet(bag, cx, y + 0.01, cz, Math.max(1.0, Math.min(wide - 0.9, 2.2)), Math.max(1.0, Math.min(deep - 0.9, 2.8)), 0);
     if (wide >= deep) { F.divan(bag, col, [rx0 + 0.3, rz0 + 0.15], [rx1 - 0.3, rz0 + 0.15], y, 's', { depth: 0.7 }); F.chest(bag, rx1 - 0.55, y, rz1 - 0.4, 0.8, 0.45, 0.5, 0); }
     else { F.divan(bag, col, [rx0 + 0.15, rz0 + 0.3], [rx0 + 0.15, rz1 - 0.3], y, 'e', { depth: 0.7 }); F.chest(bag, rx1 - 0.4, y, rz1 - 0.55, 0.45, 0.8, 0.5, 0); }
-    F.trayTable(bag, cx, y, cz, { r: 0.32, seed: el.seed + i });
-    F.mosqueLamp(bag, ctx.lights, cx, y + 2.5, cz, y + 3.2, { k: 0.7, glow: 1.6, reach: 5 });
+    folded(bag, (b) => F.trayTable(b, cx, y, cz, { r: 0.32, seed: el.seed + i }));
+    houseLamp(bag, ctx.lights, cx, y + 2.55, cz, y + 3.2, { glow: 1.6, reach: 5 });
   });
   // the passage's floor and the court's; a tile floor with a border; the basin
   for (const v of [leg1, leg2]) { bag.add('cotto_floor', box(v[0], y - 0.3, v[1], v[2], y, v[3])); col.floor(v, y); }
@@ -139,8 +139,8 @@ export function house(el, ctx) {
     const cx = (sx0 + sx1) / 2, cz = (sz0 + sz1) / 2;
     F.carpet(bag, cx, y + 0.01, cz, Math.min(sx1 - sx0 - 1.4, 2.6), Math.min(sz1 - sz0 - 1.0, 3.2), 0);
     F.divan(bag, col, [sx0 + 0.15, sz0 + 0.3], [sx0 + 0.15, sz1 - 0.15], y, 'e', { depth: 0.75 }); F.divan(bag, col, [sx1 - 0.15, sz0 + 0.3], [sx1 - 0.15, sz1 - 0.15], y, 'w', { depth: 0.75 });
-    F.trayTable(bag, cx, y + 0.0, cz + 0.2, { r: 0.4, seed: el.seed });
-    F.mosqueLamp(bag, ctx.lights, cx, y + 2.6, cz, y + 3.2, { k: 0.8, glow: 2, reach: 6 });
+    folded(bag, (b) => F.trayTable(b, cx, y + 0.0, cz + 0.2, { r: 0.4, seed: el.seed }));
+    houseLamp(bag, ctx.lights, cx, y + 2.55, cz, y + 3.2, { glow: 2, reach: 6 });
   }
   // — the outer faces: the door in its frame; small windows high up; a cantilevered bay now and then
   const fo = e === 's' ? face('z', z1, 1) : e === 'n' ? face('z', z0, -1) : e === 'e' ? face('x', x1, 1) : face('x', x0, -1);

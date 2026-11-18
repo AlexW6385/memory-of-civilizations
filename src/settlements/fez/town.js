@@ -6,9 +6,10 @@ import { houseList, laneElements } from './houses.js';
 import { streetPlans } from './street.js';
 
 // The houses in two levels of detail as src/settlements/lod.js makes them, but in tiles of 150 m rather than 100 m: every house wears one of
-// eight stuccoes, so each tile costs a mesh per material and level, and fewer, larger tiles keep the mesh count in budget (DESIGN §8). The near
-// distance grows with the tile so that the full houses reach as far round the walker as before (220 m less the half-diagonal of a 100 m tile).
-const TILE = 150, NEAR = 220 - 50 * Math.SQRT2 + (TILE / 2) * Math.SQRT2;
+// eight stuccoes, so each tile costs a mesh per material and level, and fewer, larger tiles keep the mesh count in budget (DESIGN §8). A tile is
+// built in full within NEAR of its middle: that is FULL m from the walker to the tile's nearest corner (a window's shutters and a wall lamp are a
+// few pixels at 100 m, and a medina's lanes close the view), plus the tile's half-diagonal. Beyond it the arrival's frame sees the simple form only.
+const TILE = 150, FULL = 95, NEAR = FULL + (TILE / 2) * Math.SQRT2;
 function lodTiles(id, style, elements, { R, entrance }) {
   const by = new Map();
   for (const e of elements) {

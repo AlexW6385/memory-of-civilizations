@@ -8,6 +8,8 @@ import { frame } from '../mamluk/kit.js';
 import { q4, dbl } from './kit.js';
 import { GOODS } from './souk.js';
 import * as F from '../mughal/furnish.js';
+import { tube } from '../../objects/kit.js';
+import { BufferGeometry, Float32BufferAttribute } from '../../core/three.js';
 
 const AWN = [['cloth_white', 'cloth_indigo'], ['cloth_ochre', 'cloth_white'], ['cloth_red', 'cloth_white'], ['cloth_green', 'cloth_white'], ['cloth_brown', 'cloth_ochre']];
 const PATCH = ['mud_plaster', 'mud_plaster', 'brick_baked', 'plaster_white', 'limewash_white', 'plaster_ochre'];
@@ -136,4 +138,41 @@ export function potRow(bag, pts, y) {
     bag.add('terracotta', lathe([[0.001, 0], [0.12, 0], [0.17, 0.3], [0.19, 0.33], [0.15, 0.33], [0.001, 0.28]], 8, null, x, y, z));
     bag.add('palm_leaf', lathe([[0.001, 0.32], [0.2, 0.36], [0.22, 0.5], [0.12, 0.62], [0.001, 0.66]], 7, null, x, y, z));
   }
+}
+
+/** Non-indexed geometries joined into one (a piece of one material from several shapes, so that every copy is the same shape and instances as one). */
+function join(list) {
+  const pos = [], nor = [];
+  for (const g of list) { pos.push(...g.attributes.position.array); nor.push(...g.attributes.normal.array); }
+  const g = new BufferGeometry();
+  g.setAttribute('position', new Float32BufferAttribute(pos, 3)); g.setAttribute('normal', new Float32BufferAttribute(nor, 3));
+  return g;
+}
+/**
+ * The brass lamp of a room, hung by a short chain from the ceiling (the form of F.mosqueLamp, k 0.75, unenamelled): the glass body with its six
+ * oil cups, the three bronze ties and the boss, the iron chain: one piece per material. Each is turned by a hash of its own place (the oil cups and ties are not the same way round in every room), so that
+ * none of the hundreds is instanced: their three pieces fold into the tile's own meshes of those materials (no draws of their own).
+ */
+export function houseLamp(bag, lights, x, y, z, top, { glow = 1.8, reach = 5.5 } = {}) {
+  const k = 0.75, PI = Math.PI, P = [[0.001, 0], [0.06, 0], [0.062, 0.014], [0.045, 0.024], [0.1, 0.05], [0.15, 0.1], [0.165, 0.15], [0.15, 0.2], [0.1, 0.23], [0.085, 0.25], [0.1, 0.31], [0.135, 0.36], [0.14, 0.362]].map(([r, h]) => [r * k, h * k]);
+  const glass = [lathe(P, 12, null, x, y, z)], ly = y + 0.17 * k, ry = y + 0.62 * k, a0 = ((Math.sin(x * 12.9898 + z * 78.233) * 43758.5453) % 1 + 1) % 1 * PI * 2;
+  for (let i = 0; i < 6; i++) { const a = a0 + i / 6 * PI * 2, rx = Math.cos(a) * 0.168 * k, rz = Math.sin(a) * 0.168 * k; glass.push(tube(Array.from({ length: 5 }, (_, j) => { const t = j / 4 * PI; return [x + rx * (1 + 0.12 * Math.sin(t)), ly + Math.cos(t) * 0.025 * k, z + rz * (1 + 0.12 * Math.sin(t)), 0.006 * k]; }), 4)); }
+  bag.add('lamp_glass', join(glass));
+  const bronze = [];
+  for (let i = 0; i < 3; i++) { const a = a0 + i / 3 * PI * 2; bronze.push(rod([x + Math.cos(a) * 0.18 * k, ly + 0.02, z + Math.sin(a) * 0.18 * k], [x, ry, z], 0.005, 3)); }
+  bronze.push(lathe([[0.03, 0], [0.03, 0.02], [0.001, 0.02]], 8, null, x, ry, z));
+  bag.add('bronze', join(bronze));
+  if (top > ry + 0.05) bag.add('iron', rod([x, ry + 0.02, z], [x, top, z], 0.008, 3));
+  if (lights) lights.push({ at: [x, y + 0.12 * k, z], color: '#ffc27a', intensity: glow, distance: reach });
+}
+
+/**
+ * Whatever `fn(bag)` adds, gathered per material into one piece of its own (pieces that sway, or have no normals, are passed on as they are): the shapes
+ * of a furnishing that is never the same twice (a tray's cups at a seeded place) are then one unique piece per material, which the tile's mesh of
+ * that material takes in, where its loose pieces would each have been one more instanced shape and one more draw.
+ */
+export function folded(bag, fn) {
+  const acc = new Map();
+  fn({ add: (mat, g) => { if (!g) return; if (g.attributes.hang || !g.attributes.normal) { bag.add(mat, g); return; } if (!acc.has(mat)) acc.set(mat, []); acc.get(mat).push(g.index ? g.toNonIndexed() : g); } });
+  for (const [mat, list] of acc) bag.add(mat, list.length > 1 ? join(list) : list[0]);
 }
