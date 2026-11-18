@@ -32,7 +32,7 @@ export function frame(el) {
 }
 
 /** Where the shared roofLife puts the sleeping mats, reeds and jars on the roofs (it has its own stream): the rectangles that those that stand tall take, in the world. */
-function roofItems(el, F) {
+export function roofItems(el, F) {
   const { R, t, dF, dB, U, V, vC0, vC1, uC1, ti } = F;
   const rand = rng((el.seed || 1) * 13 + 5), wings = [R(t, 0, U - t, t + dF), R(t, V - t - dB, U - t, V - t), R(uC1 + ti, vC0, U - t, vC1)].filter((r) => r[2] - r[0] > 2.2 && r[3] - r[1] > 1.6), out = [];
   if (!wings.length) return out;
@@ -56,23 +56,27 @@ export function layout(el) {
   const solid = (L) => { const w = F.R(...L.all); return w; };
   let best = null;
   const r0 = rng((el.seed || 1) * 41 + 3), jit = r0();
-  for (let k = 0; k < 8; k++) {
+  for (let k = 0; k < 16; k++) {
+    const swap = k >= 8, doorB = swap ? [T1 - 1.2, T1 - 0.25] : [T0 + 0.25, T0 + 1.2], ul = swap ? T0 + 0.75 : T1 - 0.75;
     const lenA = two ? Math.max(3.4, Math.min(4.4, rest * 0.5 + (jit - 0.5) * 0.8 + (k % 4) * 0.35 * (k < 4 ? 1 : -1))) : rest;
     const uX = ua + lenA;                                                // the cross wall's west face (A's inner east face)
     const lenF = Math.min(U - 0.3 - (t + 0.9), 4.8 + ((el.seed >> 3) % 7) * 0.15 + (k % 2) * 0.5), uf0 = U - 0.3 - lenF;
     const vF1 = t + dF - 0.35;                                           // the front room's court-side wall's face
     const walls = [[ua - 0.35, vS, U, vS + 0.35], [ua - 0.35, vBk, U, V], [ua - 0.35, vS, ua, V], [U - 0.3, vS, U, V], [uf0 - 0.3, 0, U, 0.3], [uf0 - 0.3, vF1, U, t + dF], [uf0 - 0.3, 0, uf0, t + dF]];
     if (two) walls.push([uX, vS, uX + 0.3, V]);
-    const rects = walls.map((q) => F.R(...q));
+    const rects = [...walls.map((q) => F.R(...q)), F.R(ul - 0.9, vS - 2.0, ul + 0.9, vS), F.R(doorB[0] - 0.1, t + dF, doorB[1] + 0.1, vS)];   // (and the ladder's foot and the way from the store's door to the street room's)
     let bad = 0;
-    for (const q of items) for (const w of rects) if (q[0] < w[2] && q[2] > w[0] && q[1] < w[3] && q[3] > w[1]) bad++;
-    if (!best || bad < best.bad) best = { bad, lenA, uX, uf0, lenF, vF1 };
+    let badL = 0;
+    for (const q of items) for (const [i, w] of rects.entries()) if (q[0] < w[2] && q[2] > w[0] && q[1] < w[3] && q[3] > w[1]) { bad++; if (i === rects.length - 2) { badL++; bad += 4; } }
+    if (!best || bad < best.bad) best = { bad, lenA, uX, uf0, lenF, vF1, doorB, ul, ladder: badL === 0 };
     if (!bad) break;
   }
-  const { lenA, uX, uf0, lenF, vF1 } = best;
-  const doorB = [T0 + 0.25, T0 + 1.2], ul = T1 - 0.75;                    // the south door of the store; the ladder's place
-  return { F, vS, vin, vBk, T0, T1, ua, uX, two, uf0, lenF, vF1, doorB, ul, bB: two ? uX + 0.3 : ua, lenA };
+  const { lenA, uX, uf0, lenF, vF1, doorB, ul, ladder } = best;                   // the south door of the store; the ladder's place
+  return { ladder, F, vS, vin, vBk, T0, T1, ua, uX, two, uf0, lenF, vF1, doorB, ul, bB: two ? uX + 0.3 : ua, lenA };
 }
+
+/** Whether the house has the ladder to the roof of its rooms (not where a jar or reeds of the roofs' own life stand at its foot). */
+export const hasLadder = (el) => layout(el).ladder;
 
 /** Waypoints of a walk from the lane before the street door to the back room and on to the front room, in the world. */
 export function upperRoute(el) {
@@ -80,8 +84,8 @@ export function upperRoute(el) {
   const dc = t + 0.72, pts = [];
   const P = (u, v) => pts.push(W(u, v));
   P(dc, lane); P(dc, 0.3); P(dc, t + 0.9);                               // the lane, the street door, the lobby
-  P(t + 1.4, t + dF - 0.3); P(t + 1.4, vC0 + 0.42);                       // the lobby's door, the court
-  P(F.uC0 + 0.42, vC0 + 0.42);                                          // the foot of the stair
+  P(t + 1.4, t + dF - 0.3); P(t + 1.4, vC0 + 1.3); P(t + 1.4, vC0 + 0.5);                    // the lobby's door, the court
+  P(F.uC0 + 0.42, vC0 + 0.5);                                          // the foot of the stair
   P(F.uC0 + 0.42, F.vC1 + 0.9);                                         // the landing on the roof
   P(ua - 0.9, vin + 0.7);                                               // the terrace by the west door
   P(ua + 0.9, vin + 0.7);                                               // the bedchamber
@@ -95,9 +99,9 @@ export function upperRoute(el) {
 
 /** Waypoints from the terrace up the ladder to the roof of the rooms and across it, in the world (the walk starts at the lane like upperRoute's and follows it to the terrace). */
 export function roofRoute(el) {
-  const L = layout(el), { F, doorB, ul, vS } = L, r = upperRoute(el), n = L.two ? 13 : 11, base = r.slice(0, n), W = F.W;
+  const L = layout(el), { F, doorB, ul, vS } = L, r = upperRoute(el), n = L.two ? 14 : 12, base = r.slice(0, n), W = F.W;
   const mid = (doorB[0] + doorB[1]) / 2;
-  return [...base, W(mid, vS - 1.3), W(ul, vS - 1.3), W(ul, vS - 0.1), W(ul, vS + 1.5), W(ul - 2.2, vS + 1.5)];
+  return [...base, W(mid, vS - 1.6), W(ul, vS - 1.6), W(ul, vS - 0.1), W(ul, vS + 1.5), W(ul - 2.2, vS + 1.5)];
 }
 
 /** The segments of a wall (local rectangle with a long side along u or along v), holes [{ a, b, y0, y1 }] cut in it, as boxes of mat; colliders for what stands. */
@@ -274,7 +278,7 @@ export function upperStorey(ctx, el) {
   const holesS = [wn(win(aMid - 0.35, aMid + 0.35), 'S')];
   holesS.push(doorOf(doorB[0], doorB[1]));
   if (two && Math.abs(bMid - (doorB[0] + doorB[1]) / 2) > 1.0) holesS.push(wn(win(bMid - 0.3, bMid + 0.3), 'S'));
-  wall(up, ua - 0.35, vS, uE, vS + 0.35, H, TOP, holesS, [ul - 0.7, ul + 0.7]);
+  wall(up, ua - 0.35, vS, uE, vS + 0.35, H, TOP, holesS, L.ladder ? [ul - 0.7, ul + 0.7] : null);
   // the back wall (sits on the parapet: from the parapet's top up; the hole's frame the same)
   const holesN = [wn(win(aMid - 0.3, aMid + 0.3), 'N')];
   if (two) holesN.push(wn(win(bMid - 0.3, bMid + 0.3), 'N'));
@@ -284,7 +288,7 @@ export function upperStorey(ctx, el) {
   wall(up, ua - 0.35, vS + 0.35, ua, vBk, H, TOP, [doorOf(vin + 0.2, vin + 1.2)]);
   if (two) wall(MP, uX, vS + 0.35, uX + 0.3, vBk, H, TOP, [doorOf(vin + 0.2, vin + 1.2)]);
   wall(up, U - 0.3, vS + 0.35, U, vBk, H + 0.5, TOP, []); C(U - 0.3, vS, U, V, H, H + 0.5);
-  roofOver(kit, [ua - 0.35, vS, U, V], H, true, up, [ul - 0.8, ul + 0.8], seed);
+  roofOver(kit, [ua - 0.35, vS, U, V], H, true, up, L.ladder ? [ul - 0.8, ul + 0.8] : null, seed);
   // ---- the front range: the room on the street, its windows open to the lane; the door in its court-side wall
   const aF = (uf0 + U - 0.3) / 2;
   const holesF = [wn(win(aF - 0.4, aF + 0.4, H + 0.95, H + 1.85), 'F')];
@@ -360,16 +364,12 @@ export function upperStorey(ctx, el) {
     // the posts' feet: a base of baked brick
     for (const v of pv) B(BB, g0 - 0.01, v - 0.12, g0 + 0.2, v + 0.12, 0.06, 0.22);
   }
-  // ---- the rail along the stair's open side and the foot of the ladder
-  { const s0 = uC0 + 0.85, v0 = vC0 + 1.1, v1 = vC1 - 1.0, n = 6;
-    for (let k = 0; k <= n; k++) { const v = v0 + (v1 - v0) * k / n, y = 0.06 + (H - 0.06) * ((v - (vC0 + 0.2)) / (vC1 - vC0 - 0.2)); B('timber', s0 + 0.01, v - 0.03, s0 + 0.09, v + 0.03, y, y + 0.95); }
-    beam('timber', LP(s0 + 0.05, v0, 0.06 + (H - 0.06) * ((v0 - (vC0 + 0.2)) / (vC1 - vC0 - 0.2)) + 0.95), LP(s0 + 0.05, v1, 0.06 + (H - 0.06) * ((v1 - (vC0 + 0.2)) / (vC1 - vC0 - 0.2)) + 0.95), 0.03, 0.06);
-    C(s0 + 0.01, v0, s0 + 0.09, v1, 0, H + 0.95);
-  }
   // ---- the ladder to the roof of the rooms, leaning on the court-side wall at the terrace's east end, and its ramp
+  if (L.ladder) {
   ladder(kit, ul, vS - 0.8, vS - 0.02, TOP);
   col.ramp(R(ul - 0.65, vS - 0.8, ul + 0.65, vS + 0.1), H - 0.5, TOP, F.dir);   // (the ramp reaches the roof's height over the wall's foot, and a floor carries on over the wall's thickness: the engine's roof-shell test turns one back from a wall's top that has no floor under it)
   col.floor(R(ul - 0.65, vS + 0.1, ul + 0.65, vS + 0.6), TOP);
+  }
   // ---- the roof of the rooms: a mat, a bench for sleeping out, a jar in its stand
   { const ru = ua + 1.0 + hash(seed, 5) * 1.5, rv = vS + 1.4; B('reed_mat', ru - 0.9, rv - 0.4, ru + 0.9, rv + 0.4, TOP, TOP + 0.014); B('linen', ru - 0.85, rv - 0.35, ru + 0.85, rv + 0.35, TOP + 0.014, TOP + 0.06);
     Lat('terracotta', JAR(1.1), U - 0.85, V - 0.85, TOP, 12); Lat('terracotta', [[0.2, 0], [0.2, 0.08], [0.14, 0.08]], U - 0.85, V - 0.85, TOP, 10); }

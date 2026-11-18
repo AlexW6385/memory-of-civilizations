@@ -4,7 +4,7 @@
 // wall; the harbour's quay and boats.
 
 import { TEMENOS, TERRACE, COURT, GIPARU, PALACE, STORES, HARBOUR, RADIUS, BOATS, ZIG, houses } from './layout.js';
-import { upperRoute, roofRoute } from '../../styles/sumerian-ur/upper.js';
+import { upperRoute, roofRoute, hasLadder } from '../../styles/sumerian-ur/upper.js';
 
 const E = [];
 const [tx0, tz0, tx1, tz1] = TERRACE.rect, ty = TERRACE.y;
@@ -52,7 +52,7 @@ walks.push([[164, -16], [164, -7], [164, 5], [164, 14], [170, 20], [185.5, 44.4]
 walks[2].y0 = 0;
 
 // up into the houses (docs/settlements/ur.md §5.14): from the lane through the street door, the court and the brick stair to the bedchamber, the store, the terrace and the room on the street; and again to the roof of the rooms by the ladder
-for (const h of houses()) if (h.upper) for (const r of [upperRoute(h), roofRoute(h)]) { r.y0 = 0; walks.push(r); }
+for (const h of houses()) if (h.upper) for (const r of [upperRoute(h), hasLadder(h) ? roofRoute(h) : null]) if (r) { r.y0 = 0; walks.push(r); }
 
 export const precinct = {
   id: 'ur-ziggurat',
