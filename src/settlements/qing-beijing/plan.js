@@ -8,6 +8,7 @@
 
 import { LEVEL, WALL, RIVER, TIERS, HALLS } from './layout.js';
 import { IMPERIAL } from '../../styles/qing/index.js';
+import { dougongHeight } from '../../styles/qing/caihua.js';
 
 const E = [];
 const [wx0, wz0, wx1, wz1] = WALL.rect, WH = WALL.h, WT = WALL.th;
@@ -98,7 +99,7 @@ for (const [z, dir] of [[125, 'n'], [101, 's']]) {
 }
 E.push({ t: 'qing_hall', rect: tm.rect, y: tm.y, H: 7.2, double: 5, roof: 'xieshan', bays: [9, 4], front: 's', four: true, plat: 0.3, open: true, doors: ['n'], orn: { figures: 9 } });
 // the bronze lions: the male on the east, his right forepaw on the embroidered ball; the female on the west with her cub
-for (const s of [-1, 1]) E.push({ t: 'bronze', kind: 'lion', at: [s * 12, 127.5], y: 0.03, s: 1.1, face: [0, 1], paw: s > 0 ? 'ball' : 'cub' });
+for (const s of [-1, 1]) E.push({ t: 'bj_bronze', kind: 'lion', at: [s * 12, 127.5], y: 0.03, s: 1.1, face: [0, 1], paw: s > 0 ? 'ball' : 'cub' });
 E.push({ t: 'palace_wall', a: [wx0, 116], b: [-34, 116], y: 0, h: 6.5, th: 2.2, gates: gates([[38, 5, 4.8]]) });
 E.push({ t: 'palace_wall', a: [34, 116], b: [wx1, 116], y: 0, h: 6.5, th: 2.2, gates: gates([[40, 5, 4.8]]) });
 for (const x of [-74, 74]) E.push({ t: 'gate_doors', at: [x, 116], along: 'x', w: 5, h: 4.8, y: 0.03, swing: -1, off: 1.1 });
@@ -155,8 +156,8 @@ const top = TIERS[2].y;
 // Group / Wikipedia zh, docs §10]; the sundial on the east and the grain measure on the west, the tortoise and the
 // crane of each side together flanking the stair's opening, the tripods in a block of nine on each side of them [inferred: positions].
 // Gilt vats beside the halls and along the courts (water against fire).
-E.push({ t: 'bronze', kind: 'sundial', at: [45, 18], y: top, lat: 40 });
-E.push({ t: 'bronze', kind: 'jialiang', at: [-45, 18], y: top });
+E.push({ t: 'bj_bronze', kind: 'sundial', at: [45, 18], y: top, lat: 40 });
+E.push({ t: 'bj_bronze', kind: 'jialiang', at: [-45, 18], y: top });
 for (const s of [-1, 1]) {
   E.push({ t: 'bj_bronze', kind: 'tortoise', at: [s * 13.5, 19.6], y: top, face: [0, 1], s: 0.95 });
   E.push({ t: 'bj_bronze', kind: 'crane', at: [s * 13.5, 15.6], y: top, face: [0, 1], s: 1.3 });
@@ -170,10 +171,10 @@ for (const s of [-1, 1]) {
 
 // ── the Three Great Halls ──
 const th = HALLS.taihe, zh = HALLS.zhonghe, bh = HALLS.baohe;
-E.push({ t: 'bj_hall', rect: th.rect, y: th.y, H: 9.2, double: 7.5, roof: 'hip', bays: [11, 5], front: 's', four: false, plat: 0.5, eave: 2.2, sweep: 0.55, orn: { figures: 10 } });
+E.push({ t: 'bj_hall', rect: th.rect, y: th.y, H: 9.2, double: 7.5, roof: 'hip', bays: [11, 5], front: 's', four: false, plat: 0.5, eave: 2.2, sweep: 0.55, orn: { figures: 10 }, modelled: true });
 E.push({ t: 'bj_hall_doors', rect: th.rect, y: th.y, H: 9.2, bays: [11, 5] });
 E.push({ t: 'bj_ridges', rect: th.rect, y: th.y, H: 9.2, double: 7.5, eave: 2.2, sweep: 0.55, bays: [11, 5] });
-E.push({ t: 'throne_hall', rect: th.rect, y: th.y, H: 9.2, bays: [11, 5], kind: 'taihe' });
+E.push({ t: 'bj_throne_hall', rect: th.rect, y: th.y, H: 9.2, bays: [11, 5], kind: 'taihe' });
 E.push({ t: 'qing_hall', rect: zh.rect, y: zh.y, H: 6.4, roof: 'none', bays: [5, 5], front: 's', four: true, plat: 0.4 });
 E.push({ t: 'throne_hall', rect: zh.rect, y: zh.y, H: 6.4, bays: [5, 5], kind: 'zhonghe', d: 0.7 });
 E.push({ t: 'pyramid', poly: [[zh.rect[0] - 2, zh.rect[1] - 2], [zh.rect[2] + 2, zh.rect[1] - 2], [zh.rect[2] + 2, zh.rect[3] + 2], [zh.rect[0] - 2, zh.rect[3] + 2]], y: zh.y + 6.2, rise: 9, sweep: 0.6 });
@@ -188,7 +189,7 @@ for (const x of [-52, 52]) E.push({ t: 'qing_hall', rect: [x - 7, -173.2, x + 7,
 for (const x of [-52, 52]) E.push({ t: 'gate_doors', at: [x, -172], along: 'x', w: 5, h: 5, y: 0.03, swing: -1, off: 1.2 });
 E.push({ t: 'bj_stairs', rect: [-8, -164, 8, -159], y0: 0.03, y1: 1.6, dir: 'n', rakes: true });
 E.push({ t: 'qing_hall', rect: [-17, -175, 17, -166], y: 1.6, H: 6.2, roof: 'xieshan', bays: [5, 2], front: 's', four: true, plat: 0.1, orn: { figures: 7 } });
-for (const s of [-1, 1]) E.push({ t: 'bronze', kind: 'lion', at: [s * 11, -160], y: 0.03, s: 0.8, face: [0, 1], metal: 'gilt_bronze', paw: s > 0 ? 'ball' : 'cub' });
+for (const s of [-1, 1]) E.push({ t: 'bj_bronze', kind: 'lion', at: [s * 11, -160], y: 0.03, s: 0.8, face: [0, 1], metal: 'gilt_bronze', paw: s > 0 ? 'ball' : 'cub' });
 
 // ── rooms and the walk ──
 const room = (id, rect, y, kind) => ({ id, rect, y, kind });
@@ -220,8 +221,9 @@ E.push({ t: 'block', rect: [-22, 30, 22, 100], y0: -0.6, y1: -0.3, mat: 'brick_p
 // The throne rooms' fittings (the dragons, thrones, screens, ceilings: ~220 000 triangles) are a plan of their own, drawn only
 // within 100 m of the middle hall (the engine's `near`, as the town's tiles): from the Meridian Gate's forecourt they lie behind
 // walls and doors that show nothing of them, and were a tenth of that view's frame.
-const interiors = E.filter((e) => e.t === 'throne_hall');
-E.splice(0, E.length, ...E.filter((e) => e.t !== 'throne_hall'));
+const isThrone = (e) => e.t === 'throne_hall' || e.t === 'bj_throne_hall';
+const interiors = E.filter(isThrone);
+E.splice(0, E.length, ...E.filter((e) => !isThrone(e)));
 export const thrones = { id: 'qing-beijing-thrones', style: 'qing', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: interiors, rooms: [], bounds: [-70, -120, 70, 30], entrance: { at: [0, 215], facing: 'n' }, center: [0, -45], near: 100 };
 
 export const palace = {
@@ -240,3 +242,26 @@ export const palace = {
   walks,
 };
 export default palace;
+
+// ── the plans drawn only near (the fine layer over the sculpture): the same elements in finer detail, over the reduced forms the main plan
+// always has; each within its own reach of the thing it dresses (a plan names one centre), so that from the arrival and the great court
+// none is drawn. [docs/settlements/qing-beijing.md §37]
+const detail = (id, center, reach, elements, bounds) => ({ id, style: 'qing', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds, entrance: { at: [0, 215], facing: 'n' }, center, near: reach });
+const rampsAt = (pred) => E.filter((e) => e.t === 'bj_stairs' && e.slab && pred(e.rect)).map((e) => ({ t: 'bj_ramp_fine', rect: e.rect, y0: e.y0, y1: e.y1, dir: e.dir, slab: true }));
+const hallEl = E.find((e) => e.t === 'bj_hall');
+const hexiBase = { rect: th.rect, y: th.y, H: 9.2, bays: [11, 5], front: 's' };
+const hx = th.rect, dH = 9.2, inset = Math.min(hx[2] - hx[0], hx[3] - hx[1]) / 5.5, u = [hx[0] + inset, hx[1] + inset, hx[2] - inset, hx[3] - inset];
+const lin = (a, b, n) => Array.from({ length: n + 1 }, (_, i) => (b - a) * i / n);
+export const detailPlans = [
+  detail('qing-beijing-ramps-s', [0, 30], 34, rampsAt((r) => r[1] > 0 && r[1] < 60), [-12, 20, 12, 42]),
+  detail('qing-beijing-ramps-n', [0, -153], 34, rampsAt((r) => r[1] < -100), [-12, -165, 12, -140]),
+  detail('qing-beijing-ramps-gate', [0, 113], 36, rampsAt((r) => r[1] > 95 && r[1] < 130), [-12, 95, 12, 130]),
+  detail('qing-beijing-lions', [0, 127.5], 30, [-1, 1].map((s) => ({ t: 'bj_bronze', kind: 'lion', at: [s * 12, 127.5], y: 0.03, s: 1.1, face: [0, 1], paw: s > 0 ? 'ball' : 'cub', fine: true })), [-16, 122, 16, 133]),
+  detail('qing-beijing-hall-fine', [0, -6], 58, [
+    { t: 'bj_hexi_relief', ...hexiBase },
+    { t: 'bj_dougong_fine', rect: th.rect, y: th.y + dH - 0.17, tiers: 3, step: 0.24, pitch: 1.0, posts: [lin(0, hx[2] - hx[0], 11), lin(0, hx[3] - hx[1], 5)], sides: 's' },
+    { t: 'bj_dougong_fine', rect: u, y: th.y + dH + dougongHeight({ tiers: 3, pitch: 1.0 }) + 7.5 - 0.2, tiers: 3, step: 0.24, pitch: 1.0, posts: [lin(0, u[2] - u[0], 9), lin(0, u[3] - u[1], 3)], sides: 's' },
+    { t: 'bj_ridges', rect: th.rect, y: th.y, H: 9.2, double: 7.5, eave: 2.2, sweep: 0.55, bays: [11, 5], fine: true },
+  ], [-70, -50, 70, 30]),
+];
+void hallEl;

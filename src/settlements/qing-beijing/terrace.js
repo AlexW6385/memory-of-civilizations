@@ -6,7 +6,7 @@ import { STYLES } from '../../core/build.js';
 import { box, lathe, fromTriangles, frustum, orientOutward } from '../../core/geom.js';
 import { Matrix4, Vector3 } from '../../core/three.js';
 import { Parts, ball, limb, T, merge, post as oldPost } from '../../styles/qing/carving.js';
-import { dragon, cloud } from '../../styles/qing/throne.js';
+import { rampParts } from './ramp.js';
 import { onBuildStart } from '../../core/build-reset.js';
 
 const M = 'marble_smooth';
@@ -144,52 +144,17 @@ function bjTerrace(el, ctx) {
 
 // ── the carved ramp (yu lu) ──
 const reliefCache = new Map();
-/** The relief on a ramp W wide and S long, in its own frame (x across, y up the slope, z out of the stone): a double border with a band of
- *  cloud heads, the sea's breaking waves and three stepped mountains at the foot, two dragons (legs, claws, scales' fins, mane) rising among
- *  clouds to the flaming pearl between their heads. */
-function reliefParts(W, S) {
-  const key = `${W.toFixed(2)}x${S.toFixed(2)}`;
-  if (reliefCache.has(key)) return reliefCache.get(key);
-  const P = new Parts(), m = 'marble';
-  const e = 0.1, fw = 0.16;
-  for (const sx of [-1, 1]) { P.add(m, box(sx * (W / 2 - e) - fw / 2, e, 0, sx * (W / 2 - e) + fw / 2, S - e, 0.06)); P.add(m, box(sx * (W / 2 - e - 0.3) - 0.04, e + 0.3, 0, sx * (W / 2 - e - 0.3) + 0.04, S - e - 0.3, 0.045)); }
-  for (const y of [e, S - e - fw]) { P.add(m, box(-W / 2 + e, y, 0, W / 2 - e, y + fw, 0.06)); }
-  for (const y of [e + 0.3, S - e - 0.3 - 0.08]) P.add(m, box(-W / 2 + e + 0.3, y, 0, W / 2 - e - 0.3, y + 0.08, 0.045));
-  // the cloud heads (ruyi) in a row along the inner border's feet and head, and down its sides
-  for (let i = 0; i < Math.floor((W - 1.4) / 0.5); i++) { const x = -W / 2 + 0.7 + (i + 0.5) * ((W - 1.4) / Math.floor((W - 1.4) / 0.5)); cloud(P, m, x, e + 0.5, 0.2, 0.03); cloud(P, m, x, S - e - 0.58, 0.2, 0.03); }
-  const nw = Math.max(5, Math.round(W / 0.55));
-  for (let row = 0; row < 2; row++) for (let i = 0; i < nw + row; i++) {
-    const x = -W / 2 + (i + (row ? 0 : 0.5)) * (W / nw) - (row ? W / nw / 2 : 0);
-    if (Math.abs(x) > W / 2 - 0.9) continue;
-    P.add(m, T(ball(W / nw * 0.55, 0.17, 0.05, 8, 4), x, 0.78 + row * 0.24, 0.03));
-    P.add(m, T(ball(W / nw * 0.3, 0.08, 0.065, 6, 3), x + 0.06, 0.86 + row * 0.24, 0.06));
-  }
-  for (const [x, hgt, wd] of [[-W * 0.2, 0.8, 0.55], [0, 1.1, 0.7], [W * 0.2, 0.8, 0.55]]) {
-    P.add(m, T(lathe([[wd, 0], [wd * 0.6, hgt * 0.5], [0.001, hgt]], 6).scale(1, 1, 0.14), x, 1.1, 0.03));
-    P.add(m, T(lathe([[wd * 0.6, 0], [wd * 0.3, hgt * 0.4], [0.001, hgt * 0.7]], 6).scale(1, 1, 0.1), x + wd * 0.3, 1.1 + hgt * 0.25, 0.07));
-  }
-  // the dragons
-  const n = W > 5 ? 2 : 1, y0 = 2.35, hh = Math.max(1.6, S - y0 - 0.65), cw = (W - 1.1) / n;
-  for (let k = 0; k < n; k++) {
-    const D = new Parts(), cx = -W / 2 + 0.55 + cw * (k + 0.5), dr = n === 2 ? (k ? -1 : 1) : 1, ph = k ? Math.PI : 0, N = 28, pts = [], w = cw;
-    for (let q = 0; q <= N; q++) { const t = q / N; pts.push([Math.sin(t * Math.PI * 2.2 + ph) * w * 0.3 * (1 - t * 0.3), hh * (0.88 - t * 0.8), 0]); }
-    pts[0] = [pts[1][0] + w * 0.12 * dr, hh * 0.86, 0];
-    dragon(D, m, pts, Math.min(0.3, cw * 0.075), { up: [0, 0, 1], flat: 0.8, pearl: true, pearlMat: 'gilt_bronze', head: 0.95, lite: W < 6.5 });
-    for (const [mm, list] of D.m) P.add(mm, T(merge(list), cx, y0, 0.05));
-  }
-  for (let k = 0; k < 5; k++) for (const sx of [-1, 1]) {
-    const y = 2.0 + k * (S - 3.2) / 4, x = sx * (W / 2 - 0.95) * (k % 2 ? 0.8 : 1);
-    if (n === 1 && sx > 0 && k % 2) continue;
-    cloud(P, m, x, y, 0.5, 0.035);
-  }
-  if (n === 2) for (let k = 0; k < 4; k++) cloud(P, m, 0, 2.8 + k * (S - 3.9) / 3, 0.45, 0.035);
-  reliefCache.set(key, P);
-  return P;
+/** The relief on a ramp W wide and S long, in its own frame (x across, y up the slope, z out of the stone): see ramp.js. fine: the layer
+ *  drawn over it near (the scales, the finer teeth). */
+function reliefParts(W, S, fine) {
+  const key = `${W.toFixed(2)}x${S.toFixed(2)}${fine ? 'f' : ''}`;
+  if (!reliefCache.has(key)) reliefCache.set(key, rampParts(W, S, fine));
+  return reliefCache.get(key);
 }
-function rampRelief(bag, el) {
+function rampRelief(bag, el, fine = false) {
   const [x0, z0, x1, z1] = el.rect, dir = el.dir, alongZ = dir === 'n' || dir === 's', len = alongZ ? z1 - z0 : x1 - x0, rise = el.y1 - el.y0, S = Math.hypot(len, rise), W = alongZ ? x1 - x0 : z1 - z0;
   if (W < 2 || S < 2.5) return;
-  const P = reliefParts(W, S), qc = alongZ ? (x0 + x1) / 2 : (z0 + z1) / 2;
+  const P = reliefParts(W, S, fine), qc = alongZ ? (x0 + x1) / 2 : (z0 + z1) / 2;
   const [fx, fz] = dir === 'n' ? [qc, z1] : dir === 's' ? [qc, z0] : dir === 'e' ? [x0, qc] : [x1, qc];
   const h = { n: [0, -1], s: [0, 1], e: [1, 0], w: [-1, 0] }[dir], c = len / S, sn = rise / S;
   const Y = new Vector3(h[0] * c, sn, h[1] * c), Z = new Vector3(-h[0] * sn, c, -h[1] * sn), X = new Vector3().crossVectors(Y, Z);
@@ -204,3 +169,5 @@ function bjStairs(el, ctx) {
 
 STYLES.qing.elements.bj_terrace = bjTerrace;
 STYLES.qing.elements.bj_stairs = bjStairs;
+/** The fine layer of a carved ramp (the scales, the finer teeth), for the plan drawn only near. */
+STYLES.qing.elements.bj_ramp_fine = (el, ctx) => rampRelief(ctx.bag, el, true);

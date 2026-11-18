@@ -147,7 +147,17 @@ function without(bag, mat) {
 /** bj_hall: qing_hall with the lattice of the front side left out (bj_hall_doors hangs it). */
 function bjHall(el, ctx) {
   const side = el.front || 's';
-  STYLES.qing.elements.qing_hall({ ...el, lat: { ...(typeof el.lat === 'object' ? el.lat : {}), [side]: DROP } }, { ...ctx, bag: without(ctx.bag, DROP) });
+  // the style's own roof figures and ridge ends (small flat-built pieces of glazed tile, none of the roof's big sheets) are left out: bj_ridges sets the modelled ones
+  const base = without(ctx.bag, DROP), w = Object.create(base);
+  w.add = (k, g) => {
+    if (k === 'tile_yellow' && el.modelled && g && g.attributes && !g.index) {
+      const a = g.attributes.position.array; let mx = [1e9, 1e9, 1e9], Mx = [-1e9, -1e9, -1e9];
+      for (let i = 0; i < a.length; i += 3) for (let c = 0; c < 3; c++) { if (a[i + c] < mx[c]) mx[c] = a[i + c]; if (a[i + c] > Mx[c]) Mx[c] = a[i + c]; }
+      if (Math.max(Mx[0] - mx[0], Mx[1] - mx[1], Mx[2] - mx[2]) < 5) return;
+    }
+    base.add(k, g);
+  };
+  STYLES.qing.elements.qing_hall({ ...el, lat: { ...(typeof el.lat === 'object' ? el.lat : {}), [side]: DROP } }, { ...ctx, bag: w });
 }
 
 /**
