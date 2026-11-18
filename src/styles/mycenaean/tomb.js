@@ -59,13 +59,25 @@ function domeRosettes(el) {
   return mergeG(out);
 }
 
-/** A zigzag shaft for the half-columns of the façade: green stone, chevrons, tapering downward. */
+/**
+ * A half-column of the façade: green stone, the shaft tapering downward and cut with chevrons (raised diagonal bands that change their slant every
+ * fifth of the height, so that they meet in zigzags), a moulded base on a square plinth, an echinus capital and abacus. Standing against the wall at (x, z).
+ */
 function zigzagColumn(x, y, z, h, r) {
-  const prof = [[r * 0.8, 0], [r * 0.95, 0.12]];
-  const rows = Math.round(h / 0.22);
-  for (let i = 0; i <= rows; i++) { const t = i / rows, rr = r * (0.8 + 0.2 * t); prof.push([rr * (i % 2 ? 1.07 : 0.96), 0.12 + (h - 0.4) * t]); }
-  prof.push([r * 1.25, h - 0.28], [r * 1.35, h - 0.1], [r * 1.2, h], [0.001, h]);
-  return lathe(prof, 14, null, x, y, z);
+  const bh = 0.3, ch = 0.38, sh = h - bh - ch, rows = Math.max(14, Math.round(sh / 0.09)), per = rows / 6;
+  const out = [];
+  const prof = [[0.001, 0]];
+  for (let i = 0; i <= rows; i++) { const t = i / rows; prof.push([r * (0.82 + 0.2 * t), sh * t]); }
+  const chev = (th, i) => {
+    if (i < 2 || i > rows) return 1;
+    const band = Math.floor((i - 1) / per), d = band % 2 ? 1 : -1;
+    return 1 + 0.075 * Math.abs(Math.sin(th * 7 + d * i * 0.42)) - 0.03;
+  };
+  out.push(lathe(prof, 42, chev, x, y + bh, z));
+  out.push(lathe([[0.001, 0], [r * 1.35, 0], [r * 1.35, bh * 0.35], [r * 1.18, bh * 0.7], [r * 1.0, bh], [0.001, bh]], 20, null, x, y, z));
+  out.push(lathe([[r * 1.0, 0], [r * 1.12, 0.05], [r * 1.42, 0.17], [r * 1.62, 0.3], [r * 1.66, ch], [0.001, ch]], 20, null, x, y + bh + sh, z));
+  out.push(box(x - r * 1.9, y + bh + sh + ch, z - r * 1.9, x + r * 1.9, y + h, z + r * 1.9));
+  return mergeG(out);
 }
 
 
@@ -193,7 +205,7 @@ export function treasury(el, ctx) {
   }
   bag.add('timber', mergeG(leaf)); bag.add('timber', mergeG(rails)); bag.add('bronze', mergeG(nails));
   for (const s of [-1, 1]) {
-    bag.add('serpentine', zigzagColumn(xf - 0.12, y, Tz + s * (hw + 0.62), el.door - 0.35, 0.5)); col.circle(xf - 0.12, Tz + s * (hw + 0.62), 0.5, y, y + el.door);
+    bag.add('serpentine', zigzagColumn(xf - 0.12, y, Tz + s * (hw + 0.62), el.door - 0.2, 0.5)); col.circle(xf - 0.12, Tz + s * (hw + 0.62), 0.5, y, y + el.door);
     bag.add('serpentine', zigzagColumn(xf - 0.1, lintelTop, Tz + s * 2.2, 2.9, 0.26));
   }
   // the passage: walls and the roof slabs, the floor already laid
