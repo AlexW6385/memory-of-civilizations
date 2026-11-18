@@ -165,6 +165,41 @@ export function hallLife(el, ctx0) {
     person(ctx, x0 + 2.05, zc, y, faceYaw(-1, 0), { pose: 'sit', cloth: 'lacquer_black', cloth2: 'paint_white', hat: 'cap', cap: 'ming', seed: 8115 });   // the scholar at his qin
     return;
   }
+  if (k === 'boat') {
+    // the Fragrant Isle: the bow pavilion (at the east end) with a low table, two stools and a lookout, the cabin amidships with a couch-bed
+    // and a square table, the stern's ground floor a study corner; the line from door to door (the boat's middle) left clear
+    const [x0, z0, x1, z1] = el.rect, zc = (z0 + z1) / 2, bx = x1 - 3.0;
+    { const P = new Parts(); stoneTable(P, 0.34, 0.74); const Q = new Parts(); teaSet(Q); Q.emit(P, 0, 0.74, 0); put(P, bx + 0.45, zc, 0); circ(bx + 0.45, zc, 0.34, 0.78); }
+    for (const s2 of [-1, 1]) { const P = new Parts(); stoneStool(P); put(P, bx + 0.45, zc + s2 * 0.68, 0); circ(bx + 0.45, zc + s2 * 0.68, 0.22, 0.46); }
+    const cx0 = x0 + 3.6, cx1 = x1 - 4.6;
+    { const P = new Parts(); couch(P); const Q = new Parts(); table(Q, 0.5, 0.4, 0.22); const T2 = new Parts(); teaSet(T2); T2.emit(Q, 0, 0.22, 0); Q.emit(P, 0, 0.42, 0); put(P, (cx0 + cx1) / 2, zc - 1.35, Math.PI); blk((cx0 + cx1) / 2 - 1.05, zc - 1.75, (cx0 + cx1) / 2 + 1.05, zc - 0.95, 0.5); }
+    { const P = new Parts(); table(P, 0.8, 0.8, 0.82); const G = new Parts(); goBoard(G, 0, 21); G.emit(P, 0, 0.82, 0); const tx = (cx0 + cx1) / 2 - 0.4, tz = zc + 1.15; put(P, tx, tz, 0); blk(tx - 0.42, tz - 0.42, tx + 0.42, tz + 0.42, 0.86);
+      for (const [dx, dz] of [[-0.62, 0], [0.62, 0]]) { const St = new Parts(); drumStool(St); put(St, tx + dx, tz + dz, 0); circ(tx + dx, tz + dz, 0.2, 0.46); } }
+    for (const x of [cx0 + 0.9, cx1 - 0.9]) { const P = new Parts(); lantern(P, 0.2); put(P, x, zc, 0, 3.1 - 0.55 - 0.012); }
+    { const P = new Parts(); flowerStand(P, 0.82); const R = new Parts(); rock(R, 0.5, 44); R.emit(P, 0, 0.82, 0); put(P, cx1 - 0.5, zc + 1.45, 0); circ(cx1 - 0.5, zc + 1.45, 0.22, 1.2); }
+    // the stern: a long table with books and a lamp, a cabinet at the stern wall
+    { const P = new Parts(), h = 0.88; longTable(P, 2.0, 0.5, h); const D = new Parts(); books(D, 4, 6); D.emit(P, -0.4, h, 0); const L = new Parts(); lampStand(L, 0.5); L.emit(P, 0.55, h, 0); put(P, x0 + 1.9, zc - 1.2, 0); blk(x0 + 0.9, zc - 1.45, x0 + 2.9, zc - 0.95, 0.92); }
+    { const P = new Parts(); cabinet(P, 1.0, 0.5, 1.7); put(P, x0 + 0.45, zc + 0.9, faceYaw(1, 0)); blk(x0 + 0.2, zc + 0.4, x0 + 0.7, zc + 1.4, 1.75); }
+    S.emit(bag, 0, y, 0, 0);
+    person(ctx, bx + 0.45, zc + 0.68, y, faceYaw(0, -1), { pose: 'sit', cloth: 'paint_ochre', cloth2: 'paint_white', hat: 'cap', cap: 'ming', seed: 8119 });   // at the bow, looking at the lotus
+    return;
+  }
+  if (k === 'lou') {
+    // Mountain-in-View Tower, the lower room: a table with four stools in the west, a couch-bed and a stand with a rock by the walls,
+    // a long table with scrolls by the north wall, a cabinet of books; the doorway (east, south of the middle) and the way in left clear
+    const [x0, z0, x1, z1] = el.rect, zc = (z0 + z1) / 2;
+    { const P = new Parts(); table(P, 1.2, 1.2, 0.84); const Q = new Parts(); teaSet(Q); Q.emit(P, 0, 0.84, 0); put(P, x0 + 3.4, zc - 1.0, 0); blk(x0 + 2.78, zc - 1.62, x0 + 4.02, zc - 0.38, 0.88);
+      for (const [dx, dz] of [[-0.9, 0], [0.9, 0], [0, -0.9], [0, 0.9]]) { const St = new Parts(); drumStool(St); put(St, x0 + 3.4 + dx, zc - 1.0 + dz, 0); circ(x0 + 3.4 + dx, zc - 1.0 + dz, 0.2, 0.46); } }
+    { const P = new Parts(); couch(P); put(P, x0 + 1.3, z1 - 1.4, faceYaw(1, 0)); blk(x0 + 0.3, z1 - 2.45, x0 + 2.3, z1 - 0.35, 0.5); }
+    { const P = new Parts(), h = 0.88; longTable(P, 2.6, 0.5, h); const V = new Parts(); scrollRollsOn(V); V.emit(P, -0.6, h, 0); const D = new Parts(); deskThings(D, 0); D.emit(P, 0.5, h, 0); put(P, x0 + 5.6, z0 + 0.55, Math.PI); blk(x0 + 4.3, z0 + 0.3, x0 + 6.9, z0 + 0.8, 0.92); }
+    { const P = new Parts(); armchair(P); put(P, x0 + 5.6, z0 + 1.35, 0); circ(x0 + 5.6, z0 + 1.35, 0.3, 1.1); }
+    { const P = new Parts(); cabinet(P, 1.2, 0.5, 1.9); put(P, x0 + 0.45, z0 + 1.4, faceYaw(1, 0)); blk(x0 + 0.2, z0 + 0.8, x0 + 0.7, z0 + 2.0, 1.95); }
+    { const P = new Parts(); flowerStand(P, 0.82); const R = new Parts(); rock(R, 0.6, 52); R.emit(P, 0, 0.82, 0); put(P, x0 + 0.6, zc, 0); circ(x0 + 0.6, zc, 0.22, 1.2); }
+    for (const [x, z] of [[x0 + 3.4, zc - 1.0], [x0 + 6.5, z0 + 3.0]]) { const P = new Parts(); lantern(P, 0.2); put(P, x, z, 0, 5.9 - 0.55 - 0.012 - 0.7); }
+    S.emit(bag, 0, y, 0, 0);
+    person(ctx, x1 - 1.0, z0 + 2.6, y, faceYaw(1, 0), { cloth: 'lacquer_black', cloth2: 'paint_white', hat: 'cap', cap: 'ming', seed: 8120, arms: 'clasp' });   // a scholar at the east window, looking at the mountain
+    return;
+  }
   if (k === 'pav') {
     pavilion(el, ctx, S, y, put, blk, circ);
     return;

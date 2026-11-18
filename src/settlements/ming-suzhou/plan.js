@@ -259,6 +259,8 @@ E.push({ t: 'hall_life', kind: 'sedan', rect: halls[1].rect, y: G + 0.45, H: hal
 E.push({ t: 'hall_life', kind: 'women', rect: halls[3].rect, y: G + 0.45, H: halls[3].H });
 E.push({ t: 'hall_life', kind: 'east', rect: [22, 44, 34, 50], y: G + 0.35, H: 3.8 });
 E.push({ t: 'hall_life', kind: 'canglang', rect: B.xiaocanglang.rect, y: G + B.xiaocanglang.y, H: 3.4 });
+E.push({ t: 'hall_life', kind: 'boat', rect: B.xiangzhou.rect, y: G + B.xiangzhou.y });
+E.push({ t: 'hall_life', kind: 'lou', rect: B.jianshan.rect, y: G + B.jianshan.y });
 for (const id of ['hefeng', 'xuexiang', 'daishuang', 'wuzhu', 'lvyi']) {
   const b = B[id]; E.push({ t: 'hall_life', kind: 'pav', id, shape: b.kind === 'hex' ? 'hex' : b.kind === 'pav_rect' ? 'rect' : 'square', c: b.c, r: b.r, w: b.w, d: b.d, y: G + b.y });
 }

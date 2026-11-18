@@ -245,6 +245,35 @@ export function hallTrim(bag, el) {
   bag.add(WOOD, fromTriangles(wood));
 }
 
+/**
+ * pavilionTrim(bag, el): the eave work of a pyramid-roofed pavilion (hexagonal or square, as the
+ * style's pyramidRoof lays it, its eaves 1 m beyond the posts): a round tile end at every cover-tile
+ * row of every edge, a drip tile between, and a scroll at the foot of each hip.
+ */
+export function pavilionTrim(bag, el) {
+  const [cx, cz] = el.c, y0 = el.y + (el.H ?? 3.3) - 0.2, sweep = el.sweep ?? 1.0;
+  let poly;
+  if (el.shape === 'square' || el.shape === 'rect') { const w = el.w / 2, d = (el.d ?? el.w) / 2; poly = [[cx - w, cz - d], [cx + w, cz - d], [cx + w, cz + d], [cx - w, cz + d]]; }
+  else poly = Array.from({ length: el.shape === 'oct' ? 8 : 6 }, (_, k) => { const a = (k + 0.5) / (el.shape === 'oct' ? 8 : 6) * TAU; return [cx + Math.cos(a) * el.r, cz + Math.sin(a) * el.r]; });
+  const ext = poly.map((p) => { const dx = p[0] - cx, dz = p[1] - cz, l = Math.hypot(dx, dz); return [cx + dx / l * (l + 1.0), cz + dz / l * (l + 1.0)]; });
+  const tiles = [], n = ext.length, sp = 0.21;
+  for (let k = 0; k < n; k++) {
+    const A = ext[k], B = ext[(k + 1) % n], L = Math.hypot(B[0] - A[0], B[1] - A[1]), ux = (B[0] - A[0]) / L, uz = (B[1] - A[1]) / L;
+    const mx = (A[0] + B[0]) / 2 - cx, mz = (A[1] + B[1]) / 2 - cz;
+    let nx = uz, nz = -ux; if (nx * mx + nz * mz < 0) { nx = -nx; nz = -nz; }
+    const hAt = (a) => y0 + sweep * Math.pow(Math.abs(a - 0.5) * 2, 3);
+    const m = Math.floor((L - 0.3) / sp);
+    for (let i = 0; i <= m; i++) {
+      const a = (0.15 + i * sp) / L, s = a * L, px = A[0] + ux * s, pz = A[1] + uz * s;
+      if (hash(px, pz, 3) > 0.012) tileEnd(tiles, [px, hAt(a) - 0.038, pz], [nx, nz], 0.074, 0.033, 0.012);
+      if (i < m) { const a2 = (0.15 + (i + 0.5) * sp) / L, s2 = a2 * L; dripTile(tiles, [A[0] + ux * s2, hAt(a2) - 0.185, A[1] + uz * s2], [nx, nz], 0.062, 0.13); }
+    }
+    const V = ext[k], dx = V[0] - cx, dz = V[1] - cz, dl = Math.hypot(dx, dz);
+    hipScroll(tiles, [V[0] - dx / dl * 0.05, y0 + sweep + 0.14, V[1] - dz / dl * 0.05], [dx / dl, dz / dl], 0.6, 0.075);
+  }
+  bag.add(ROOF, fromTriangles(tiles));
+}
+
 // ── the gates' name tablets: characters on the brick plaques of the gates ──
 /** Strokes of n characters in a row of width w and height h (the glyphs generic: horizontals, verticals and falling strokes in the proportions of characters), facing +z, from z0 up 1.2 cm. */
 function glyphs(P, w, h, n, seed, z0, mat) {
