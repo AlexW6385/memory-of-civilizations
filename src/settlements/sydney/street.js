@@ -154,6 +154,18 @@ export function streets() {
       else person(at, l.y, toward + (rand() - 0.5) * 0.7);
     }
   }
+  // the doors of the shops whose upper floors are open (modern/upper.js): nobody and nothing stands on the way in
+  const DOOR = { pub: 0.5, newsagent: 0.3, milkbar: 0.3, butcher: 0.7, chemist: 0.5, barber: 0.3, greengrocer: 0.5 };
+  const gates = [];
+  for (const l of city) {
+    if (!l.up) continue;
+    const Wd = FACE_LEN(l.rect, l.front), k = DOOR[l.kind], du = l.t === 'espresso_bar' ? Wd * 0.62 : Wd * (k ?? 0.3) + (k > 0.4 ? 0 : 0.3);
+    for (let d = 0; d <= 3.4; d += 0.6) gates.push(onFace(l.rect, l.front, du, d));
+  }
+  for (const l of rocks) if (l.up) for (let d = 0; d <= 3.4; d += 0.6) gates.push(onFace(l.rect, l.front, 0.85, d));
+  const near = (e, r) => gates.some((g) => Math.hypot(e.at[0] - g[0], e.at[1] - g[1]) < r);
+  for (const t of tiles.values()) { t.items = t.items.filter((e) => !near(e, 1.1)); t.kit = t.kit.filter((e) => !near(e, 1.3)); }
+  for (const [k, list] of life) life.set(k, list.filter((e) => !near(e, 1.9)));
   CACHE = { tiles, life };
   return CACHE;
 }

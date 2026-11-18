@@ -5,10 +5,11 @@ import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import { frame, chair } from './rooms.js';
 import { milkbar, butcher, chemist, barber } from './shops2.js';
 import { fishChips, hardware, bakery } from './shops3.js';
+import { shopUpper, doorWedge, RES } from './upper.js';
 import { Quads, letters, textLen, fitCell, readDir } from '../artdeco/dress.js';
 
 const both = (t) => { const o = [...t]; for (let i = 0; i < t.length; i += 9) o.push(...t.slice(i, i + 3), ...t.slice(i + 6, i + 9), ...t.slice(i + 3, i + 6)); return o; };
-const KINDS = {
+export const KINDS = {
   pub: { name: 'HOTEL', wall: 'sandstone_dressed', floor: 'tile_grey', riser: 'tile_green', fascia: 'paint_ferry_green', letter: 'gold', awning: ['cloth_green', 'cloth_white'], door: 0.5, H1: 3.9 },
   newsagent: { name: 'NEWSAGENT', wall: 'brick', floor: 'tile_cream', riser: 'tile_cream', fascia: 'car_blue', letter: 'paint_white', awning: ['cloth_blue', 'cloth_white'], door: 0.3, H1: 3.5 },
   milkbar: { name: 'MILK BAR', wall: 'stucco_cream', floor: 'tile_cream', riser: 'tile_green', fascia: 'car_red', letter: 'paint_white', awning: ['cloth_red', 'cloth_white'], door: 0.3, H1: 3.4, top: 7.5, parapet: 'step', blade: 'car_red' },
@@ -43,7 +44,8 @@ export function shopRoom(el, { bag, col, lights }) {
   bag.add('aluminium_dull', B(du - dw / 2, du + dw / 2, 0.08, 0.16, fy1 - 0.03, fy1 + 0.03));
   bag.add('glass_outer', B(du + dw / 2 - 0.04, du + dw / 2 - 0.02, 0.25, 0.25 + dw - 0.1, F + 0.1, fy1 - 0.05));
   const n = Math.max(1, Math.ceil((F - gy) / 0.17)), hh = (F - gy) / n;
-  for (let k = 0; k < n; k++) { bag.add('granite_grey', B(du - dw / 2, du + dw / 2, -0.38 * (k + 1) - 0.02, 0.05, gy - 0.5, gy + hh * (n - k))); col.floor(R(du - dw / 2, du + dw / 2, -0.38 * (k + 1), -0.38 * k + 0.05), gy + hh * (n - k)); }
+  if (el.up) doorWedge({ bag, col, W, R }, du - dw / 2, du + dw / 2, gy, F);
+  else for (let k = 0; k < n; k++) { bag.add('granite_grey', B(du - dw / 2, du + dw / 2, -0.38 * (k + 1) - 0.02, 0.05, gy - 0.5, gy + hh * (n - k))); col.floor(R(du - dw / 2, du + dw / 2, -0.38 * (k + 1), -0.38 * k + 0.05), gy + hh * (n - k)); }
   col.floor(R(du - dw / 2, du + dw / 2, 0.05, T), F);
   bag.add(K.fascia, B(0.45, L - 0.45, -0.04, 0.3, fy1 + 0.05, F + H1)); bag.add('plaster_white', B(0.45, L - 0.45, -0.06, -0.04, fy1 + 0.03, fy1 + 0.08));
   const name = el.name ?? K.name, cell = fitCell(name, Math.min(L - 3, 7), 0.13), tl = textLen(name, cell), Q = new Quads(), v0 = fy1 + 0.1 + ((F + H1 - fy1 - 0.1) - 5 * cell) / 2;
@@ -56,9 +58,12 @@ export function shopRoom(el, { bag, col, lights }) {
   for (const [a, b] of [[0, T], [L - T, L]]) { S(wall, a, b, T + 0.15, Dp, F, F + H1); bag.add('plaster_white', B(a === 0 ? T : a - 0.03, a === 0 ? T + 0.03 : a, T + 0.15, Dp - T, F + (el.kind === 'pub' ? 1.5 : 0), F + H1 - 0.3)); }
   S(wall, 0, L, Dp - T, Dp, F, F + H1); bag.add('plaster_white', B(T, L - T, Dp - T - 0.03, Dp - T, F + (el.kind === 'pub' ? 1.5 : 0), F + H1 - 0.3));
   if (el.kind === 'pub') for (const [a, b, d0, d1] of [[T, T + 0.03, T + 0.15, Dp - T], [L - T - 0.03, L - T, T + 0.15, Dp - T], [T, L - T, Dp - T - 0.03, Dp - T]]) bag.add('tile_green', B(a, b, d0, d1, F, F + 1.5));   // the tiled dado of the public bar
+  if (el.up) { shopUpper({ bag, col, lights, B, W, R, L, Dq: Dp, F, H1, T, top, wall, kind: el.kind, front: el.front ?? 'n', balcony: el.kind === 'pub' ? 'lace' : 'slab' }); }
+  else {
   bag.add('plaster_white', B(0.45, L - 0.45, 0.16, Dp, F + H1 - 0.3, F + H1)); rc(0, L, 0, Dp, F + H1 - 0.3, F + H1);
   bag.add(wall, B(0, L, 0, Dp, F + H1, top)); rc(0, L, 0, Dp, F + H1, top + 1);
-  for (let u = 0.9; u + 1.1 < L - 0.5; u += 2.1) {
+  }
+  if (!el.up) for (let u = 0.9; u + 1.1 < L - 0.5; u += 2.1) {
     bag.add('glass_outer', B(u, u + 1.1, -0.02, 0, F + H1 + 0.9, F + H1 + 2.8)); bag.add('paint_white', B(u - 0.1, u + 1.2, -0.08, 0, F + H1 + 0.82, F + H1 + 0.9)); bag.add('paint_white', B(u + 0.52, u + 0.58, -0.05, 0, F + H1 + 0.9, F + H1 + 2.8));
     bag.add('sandstone_dressed', B(u - 0.12, u + 1.22, -0.05, 0, F + H1 + 2.8, F + H1 + 3.0));
     if (el.kind === 'pub') { bag.add('iron', B(u - 0.15, u + 1.25, -1.0, -0.96, F + H1 + 0.9, F + H1 + 1.0)); }
@@ -72,7 +77,7 @@ export function shopRoom(el, { bag, col, lights }) {
   const pend = (u, d, h = 0.7, m = 'lamp_white') => { const p = W(u, d, F + H1 - h); bag.add(m, lathe([[0.001, 0], [0.18, 0.1], [0.2, 0.25], [0.1, 0.42], [0.001, 0.42]], 12, null, p[0], p[1], p[2])); bag.add('iron', rod([p[0], F + H1 - 0.3, p[2]], [p[0], p[1] + 0.42, p[2]], 0.01, 4)); };
   const light = (u, d, color = '#ffe2b0') => lights.push({ at: W(u, d, F + H1 - 0.8), color, intensity: 1.5, distance: 6 });
   const fit = { pub, newsagent, greengrocer, milkbar, butcher, chemist, barber, fish_chips: fishChips, hardware, bakery }[el.kind] ?? newsagent;
-  fit({ rs, bag, col, lights, B, W, R, S, rc, L, Dp, F, T, H1, du, dw, pend, light });
+  fit({ rs, bag, col, lights, B, W, R, S, rc, L, Dp: el.up ? Dp - RES : Dp, F, T, H1, du, dw, pend, light });
 }
 
 /** The public bar: a long timber counter with its brass rail and hand pumps, bottle shelves and a mirror, stools, round tables and stools, a dartboard, a pool table, a jukebox. */
