@@ -20,7 +20,7 @@ export const VSTRIDE = 14;
 const K = {
   deer: { L: 1.25, H: 1.0, B: 0.2, neck: 0.42, na: 48, head: 0.3, ha: -50, hr: 0.42, leg: 0.03, ears: 0.13, horns: 0.34, back: 1, tail: 'stub', hoof: 1, graze: 1 },
   boar: { L: 1.25, H: 0.85, B: 0.3, neck: 0.1, na: 0, head: 0.46, ha: -22, hr: 0.55, leg: 0.036, ears: 0.1, tail: 'thin', snout: 1, hoof: 1, graze: 1 },
-  wolf: { L: 1.0, H: 0.8, B: 0.15, neck: 0.3, na: 40, head: 0.3, ha: -10, hr: 0.55, leg: 0.03, ears: 0.1, tail: 'hair', paw: 1 },
+  wolf: { L: 1.0, H: 0.8, B: 0.15, neck: 0.3, na: 40, head: 0.3, ha: -10, hr: 0.55, leg: 0.03, ears: 0.1, tail: 'thin', paw: 1 },
   reindeer: { L: 1.4, H: 1.12, B: 0.22, neck: 0.4, na: 40, head: 0.34, ha: -50, hr: 0.42, leg: 0.036, ears: 0.1, horns: 0.55, back: 1, tail: 'stub', hoof: 1, graze: 1 },
   antelope: { L: 1.0, H: 0.82, B: 0.15, neck: 0.34, na: 50, head: 0.27, ha: -50, hr: 0.4, leg: 0.026, ears: 0.1, horns: 0.3, back: 1, tail: 'thin', hoof: 1, graze: 1 },
   oryx: { L: 1.6, H: 1.25, B: 0.26, neck: 0.46, na: 42, head: 0.44, ha: -45, hr: 0.4, leg: 0.042, ears: 0.14, horns: 0.85, back: 1, tail: 'thin', hoof: 1, graze: 1 },
