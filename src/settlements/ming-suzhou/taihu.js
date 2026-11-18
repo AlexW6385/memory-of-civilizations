@@ -256,14 +256,14 @@ export const STONES = [
 ];
 export const SHORE = [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26];
 const CACHE = new Map();
-const TARGET = [2300, 400, 1000];
+const TARGET = [1700, 320, 700];
 /** The geometry of stone shape v at a level of detail (0 near, 1 far, 2 middle): { geometry (indexed? no: non-indexed with normals), H, bx, bz, kind }, cached. */
 export function stoneParts(v, lod = 1) {
   const key = `${v}/${lod}`;
   if (CACHE.has(key)) return CACHE.get(key);
   const [kind, seed] = STONES[((v % STONES.length) + STONES.length) % STONES.length];
   const S = makeStone(kind, seed, lod === 0 ? 1 : lod === 2 ? 0.6 : 0);
-  const target = TARGET[lod] * (S.H > 2.6 ? 1.3 : 1);
+  const target = TARGET[lod] * (S.H > 2.6 ? 1.35 : 1);
   let cell = lod === 0 ? Math.max(0.05, S.H * 0.04) : lod === 2 ? Math.max(0.065, S.H * 0.04) : Math.max(0.1, S.H * 0.07), net;
   for (let it = 0; it < 18; it++) {
     net = surfaceNets(S.sdf, [-S.bx, BASE - cell * 1.5, -S.bz], [S.bx, S.H + cell * 2.5, S.bz], cell);

@@ -79,18 +79,18 @@ function stoneStool(P) { P.add('granite_grey', lathe([[0.001, 0], [0.16, 0], [0.
 
 /** A figure element: seated or standing, Ming dress. */
 function person(ctx, x, z, y, rot, o = {}) {
-  figure({ at: [x, z], y, rot, seed: o.seed ?? Math.round(hash(x, z, 11) * 1e9), dress: o.dress ?? 'robe', cloth: o.cloth ?? 'lacquer_black', cloth2: o.cloth2 ?? 'paint_white', skin: o.skin ?? 'skin_light', pose: o.pose ?? 'stand', hat: o.hat ?? 'none', cap: o.cap, hair: o.hair ?? 'netknot', over: o.over, arms: o.arms, woman: o.woman, hairMat: 'lacquer_black' }, ctx);
+  figure({ at: [x, z], y, rot, seed: o.seed ?? Math.round(hash(x, z, 11) * 1e9), dress: o.dress ?? 'robe', cloth: o.cloth ?? 'lacquer_black', cloth2: o.cloth2 ?? 'paint_white', skin: o.skin ?? 'skin_light', pose: o.pose ?? 'stand', hat: o.hat ?? 'none', cap: o.cap, hair: o.hair ?? 'netknot', over: o.over, arms: o.arms, woman: o.woman, hairMat: 'lacquer_black', hatMat: o.hatMat ?? 'cloth_black' }, { ...ctx, bag: ctx.rawBag ?? ctx.bag });
 }
 
 /**
  * hall_life { kind: 'gate' | 'sedan' | 'women' | 'east' | 'canglang' | 'pav', rect or c…, y (the floor) }: the furnishing of one room
  * or pavilion, built from the plan's own data.
  */
-const MAT = { bronze: 'paint_ochre', gilt_bronze: 'paint_ochre', inlay_jade: 'tile_turquoise', cloth_brown: 'paint_ochre', cloth_indigo: 'lacquer_black', cloth_red: 'lacquer_red', cloth_green: 'tile_turquoise', cloth_grey: 'paint_ochre', cloth_white: 'paint_white' };
+const MAT = { bronze: 'paint_ochre', gilt_bronze: 'paint_ochre', inlay_jade: 'tile_turquoise' };
 /** (the room's pieces are drawn in the materials the garden's fine pieces already use, so that they add no mesh of their own) */
 const sameMats = (bag) => new Proxy(bag, { get: (t, k) => (k === 'add' ? (m, g, ...r) => t.add(MAT[m] ?? m, g, ...r) : k === 'addInstance' ? (m, g, M, o) => t.addInstance(MAT[m] ?? m, g, M, o && o.real ? { ...o, real: MAT[o.real] ?? o.real } : o) : typeof t[k] === 'function' ? t[k].bind(t) : t[k]) });
 export function hallLife(el, ctx0) {
-  const ctx = { ...ctx0, bag: sameMats(ctx0.bag) };
+  const ctx = { ...ctx0, bag: sameMats(ctx0.bag), rawBag: ctx0.bag };
   const { bag, col } = ctx, y = el.y + 0.012, S = new Parts();
   const put = (Q, x, z, yaw = 0, up = 0) => Q.emit(S, x, up, z, yaw);
   const blk = (x0, z0, x1, z1, h, yy = y) => col.rect([Math.min(x0, x1), Math.min(z0, z1), Math.max(x0, x1), Math.max(z0, z1)], yy, yy + h);
@@ -105,7 +105,7 @@ export function hallLife(el, ctx0) {
     for (const x of [3.3, 4.9]) { const P = new Parts(); armchair(P); put(P, x, zb + 1.05, 0); circ(x, zb + 1.05, 0.3, 1.1); }
     for (const x of [-3.3, 3.3]) { const P = new Parts(); lantern(P, 0.2); put(P, x, el.rect[1] + 1.9, 0, el.H - 0.55 - 0.012); }
     S.emit(bag, 0, y, 0, 0);
-    person(ctx, -4.6, zb + 0.12, y, Math.PI, { pose: 'sit', cloth: 'paint_ochre', hat: 'cap', cap: 'ming', seed: 8111 });   // the doorkeeper, watching the street door
+    person(ctx, -4.6, zb + 0.12, y, Math.PI, { pose: 'sit', cloth: 'cloth_brown', cloth2: 'cloth_white', hat: 'cap', cap: 'ming', seed: 8111 });   // the doorkeeper, watching the street door
     return;
   }
   if (k === 'sedan') {
@@ -119,7 +119,7 @@ export function hallLife(el, ctx0) {
     { const P = new Parts(); bench(P, 2.4); put(P, 5.0, el.rect[3] - 0.62, 0); blk(3.8, el.rect[3] - 0.8, 6.2, el.rect[3] - 0.44, 0.5); }
     for (const x of [-7.3, 7.3]) { const P = new Parts(); lantern(P, 0.2); put(P, x, zc, 0, el.H - 0.55 - 0.012); }
     S.emit(bag, 0, y, 0, 0);
-    person(ctx, -4.4, el.rect[3] - 0.62, y, 0, { pose: 'sit', dress: 'trousers', cloth: 'lacquer_black', cloth2: 'paint_ochre', seed: 8112 });   // a bearer resting
+    person(ctx, -4.4, el.rect[3] - 0.62, y, 0, { pose: 'sit', dress: 'trousers', cloth: 'cloth_blue', cloth2: 'cloth_grey', seed: 8112 });   // a bearer resting
     return;
   }
   if (k === 'women') {
@@ -135,7 +135,7 @@ export function hallLife(el, ctx0) {
     { const P = new Parts(); flowerStand(P, 0.82); const R = new Parts(); pine(R, 0.9, 17); R.emit(P, 0, 0.82, 0); put(P, -1.5, zn + 0.1, 0); circ(-1.5, zn + 0.1, 0.22, 1.1); }
     for (const x of [-3.8, 3.8]) { const P = new Parts(); lantern(P, 2.4); put(P, x, z0 + 1.7, 0, el.H - 0.55 - 0.012); }
     S.emit(bag, 0, y, 0, 0);
-    person(ctx, 3.9, z0 + 2.24, y, 0, { pose: 'sit', cloth: 'lacquer_red', cloth2: 'paint_white', hair: 'bun', woman: true, seed: 8113 });   // at the embroidery
+    person(ctx, 3.9, z0 + 2.24, y, 0, { pose: 'sit', cloth: 'cloth_red', cloth2: 'cloth_white', hair: 'bun', woman: true, seed: 8113 });   // at the embroidery
     void x1; void z1;
     return;
   }
@@ -151,7 +151,7 @@ export function hallLife(el, ctx0) {
     { const P = new Parts(); cabinet(P, 1.2, 0.5, 1.8); put(P, 27.0, z1 - 0.48, faceYaw(0, -1)); blk(26.4, z1 - 0.75, 27.6, z1 - 0.25, 1.85); }
     { const P = new Parts(); hangingScroll(P, 1.0, 2.0, 9); put(P, x1 - 0.12, 47.0, -Math.PI / 2, 0.85); }
     S.emit(bag, 0, y, 0, 0);
-    person(ctx, 29.4, z0 + 4.6, y, faceYaw(0, -1), { cloth: 'paint_ochre', cloth2: 'paint_white', hat: 'cap', cap: 'ming', seed: 8114, arms: 'clasp' });   // the steward, waiting
+    person(ctx, 29.4, z0 + 4.6, y, faceYaw(0, -1), { cloth: 'cloth_grey', cloth2: 'cloth_white', hat: 'cap', cap: 'ming', seed: 8114, arms: 'clasp' });   // the steward, waiting
     return;
   }
   if (k === 'canglang') {
@@ -162,7 +162,7 @@ export function hallLife(el, ctx0) {
     { const P = new Parts(); couch(P); const Q = new Parts(); table(Q, 0.5, 0.4, 0.22); const T2 = new Parts(); teaSet(T2); T2.emit(Q, 0, 0.22, 0); Q.emit(P, 0, 0.46 - 0.04, 0); put(P, x1 - 0.85, zc, Math.PI / 2); blk(x1 - 1.4, zc - 1.05, x1 - 0.3, zc + 1.05, 0.5); }
     { const P = new Parts(); flowerStand(P, 0.82); const R = new Parts(); rock(R, 0.55, 12); R.emit(P, 0, 0.82, 0); put(P, x0 + 0.7, z0 + 0.7, 0); circ(x0 + 0.7, z0 + 0.7, 0.22, 1.2); }
     S.emit(bag, 0, y, 0, 0);
-    person(ctx, x0 + 2.05, zc, y, faceYaw(-1, 0), { pose: 'sit', cloth: 'lacquer_black', cloth2: 'paint_white', hat: 'cap', cap: 'ming', seed: 8115 });   // the scholar at his qin
+    person(ctx, x0 + 2.05, zc, y, faceYaw(-1, 0), { pose: 'sit', cloth: 'cloth_indigo', cloth2: 'cloth_white', hat: 'cap', cap: 'ming', seed: 8115 });   // the scholar at his qin
     return;
   }
   if (k === 'boat') {
@@ -181,7 +181,7 @@ export function hallLife(el, ctx0) {
     { const P = new Parts(), h = 0.88; longTable(P, 2.0, 0.5, h); const D = new Parts(); books(D, 4, 6); D.emit(P, -0.4, h, 0); const L = new Parts(); lampStand(L, 0.5); L.emit(P, 0.55, h, 0); put(P, x0 + 1.9, zc - 1.2, 0); blk(x0 + 0.9, zc - 1.45, x0 + 2.9, zc - 0.95, 0.92); }
     { const P = new Parts(); cabinet(P, 1.0, 0.5, 1.7); put(P, x0 + 0.45, zc + 0.9, faceYaw(1, 0)); blk(x0 + 0.2, zc + 0.4, x0 + 0.7, zc + 1.4, 1.75); }
     S.emit(bag, 0, y, 0, 0);
-    person(ctx, bx + 0.45, zc + 0.68, y, faceYaw(0, -1), { pose: 'sit', cloth: 'paint_ochre', cloth2: 'paint_white', hat: 'cap', cap: 'ming', seed: 8119 });   // at the bow, looking at the lotus
+    person(ctx, bx + 0.45, zc + 0.68, y, faceYaw(0, -1), { pose: 'sit', cloth: 'cloth_green', cloth2: 'cloth_white', hat: 'cap', cap: 'ming', seed: 8119 });   // at the bow, looking at the lotus
     return;
   }
   if (k === 'lou') {
@@ -197,7 +197,7 @@ export function hallLife(el, ctx0) {
     { const P = new Parts(); flowerStand(P, 0.82); const R = new Parts(); rock(R, 0.6, 52); R.emit(P, 0, 0.82, 0); put(P, x0 + 0.6, zc, 0); circ(x0 + 0.6, zc, 0.22, 1.2); }
     for (const [x, z] of [[x0 + 3.4, zc - 1.0], [x0 + 6.5, z0 + 3.0]]) { const P = new Parts(); lantern(P, 0.2); put(P, x, z, 0, 5.9 - 0.55 - 0.012 - 0.7); }
     S.emit(bag, 0, y, 0, 0);
-    person(ctx, x1 - 1.0, z0 + 2.6, y, faceYaw(1, 0), { cloth: 'lacquer_black', cloth2: 'paint_white', hat: 'cap', cap: 'ming', seed: 8120, arms: 'clasp' });   // a scholar at the east window, looking at the mountain
+    person(ctx, x1 - 1.0, z0 + 2.6, y, faceYaw(1, 0), { cloth: 'cloth_indigo', cloth2: 'cloth_white', hat: 'cap', cap: 'ming', seed: 8120, arms: 'clasp' });   // a scholar at the east window, looking at the mountain
     return;
   }
   if (k === 'pav') {
@@ -219,7 +219,7 @@ function pavilion(el, ctx, S, y, put, blk, circ) {
     { const P = new Parts(); stoneTable(P, tr, 0.74); if (id === 'hefeng') { const G = new Parts(); goBoard(G, 0, 3); G.emit(P, 0, 0.74, 0); } else { const Q = new Parts(); teaSet(Q); Q.emit(P, 0, 0.74, 0); const V = new Parts(); V.add('glaze_blue', lathe([[0.001, 0], [0.05, 0.01], [0.06, 0.06], [0.001, 0.06]], 8)); V.emit(P, 0.14, 0.74, 0.1); } put(P, tx, tz, 0); circ(tx, tz, tr, 0.78); }
     const sp = el.r > 2.3 ? 0.68 : 0.58;
     for (const s of [-1, 1]) { const P = new Parts(); stoneStool(P); const sx = tx + ax[0] * s * sp, sz = tz + ax[1] * s * sp; put(P, sx, sz, 0); circ(sx, sz, 0.22, 0.46); }
-    if (id === 'hefeng') person(ctx, tx - ax[0] * sp, tz - ax[1] * sp, y, faceYaw(ax[0], ax[1]), { pose: 'sit', cloth: 'paint_ochre', cloth2: 'paint_white', hat: 'cap', cap: 'ming', seed: 8116 });
+    if (id === 'hefeng') person(ctx, tx - ax[0] * sp, tz - ax[1] * sp, y, faceYaw(ax[0], ax[1]), { pose: 'sit', cloth: 'cloth_blue', cloth2: 'cloth_white', hat: 'cap', cap: 'ming', seed: 8116 });
     S.emit(ctx.bag, 0, y, 0, 0);
     return;
   }
@@ -229,7 +229,7 @@ function pavilion(el, ctx, S, y, put, blk, circ) {
     for (const dz of [-0.8, 0.8]) { const P = new Parts(); armchair(P); put(P, tx, cz + dz, faceYaw(0, -dz)); circ(tx, cz + dz, 0.3, 1.1); }
     { const P = new Parts(); flowerStand(P, 0.82); const R = new Parts(); rock(R, 0.55, 22); R.emit(P, 0, 0.82, 0); put(P, cx - 1.35, cz, 0); circ(cx - 1.35, cz, 0.22, 1.2); }
     S.emit(ctx.bag, 0, y, 0, 0);
-    person(ctx, tx, cz + 0.8, y, faceYaw(0, -1), { pose: 'sit', cloth: 'lacquer_black', cloth2: 'paint_white', hat: 'cap', cap: 'ming', seed: 8117 });
+    person(ctx, tx, cz + 0.8, y, faceYaw(0, -1), { pose: 'sit', cloth: 'cloth_brown', cloth2: 'cloth_white', hat: 'cap', cap: 'ming', seed: 8117 });
     return;
   }
   if (id === 'lvyi') {
@@ -248,7 +248,7 @@ function pavilion(el, ctx, S, y, put, blk, circ) {
     { const P = new Parts(); flowerStand(P, 0.82); const R = new Parts(); rock(R, 0.6, 33); R.emit(P, 0, 0.82, 0); put(P, cx - 2.2, cz - 2.2, 0); circ(cx - 2.2, cz - 2.2, 0.22, 1.2); }
     { const P = new Parts(); stand(P); const Q = new Parts(); teaSet(Q); Q.emit(P, 0, 0.68, 0); put(P, cx - 2.2, cz + 2.2, 0); circ(cx - 2.2, cz + 2.2, 0.24, 0.72); }
     S.emit(ctx.bag, 0, y, 0, 0);
-    person(ctx, dx - 0.7, dz + 0.7, y, faceYaw(1, -1), { pose: 'sit', cloth: 'paint_ochre', cloth2: 'paint_white', hat: 'cap', cap: 'ming', seed: 8118 });
+    person(ctx, dx - 0.7, dz + 0.7, y, faceYaw(1, -1), { pose: 'sit', cloth: 'cloth_grey', cloth2: 'cloth_white', hat: 'cap', cap: 'ming', seed: 8118 });
     return;
   }
 }
