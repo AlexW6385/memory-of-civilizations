@@ -5,6 +5,7 @@
 // goods. Built facing +z (the street).
 import { local, tatami, quad2, rng, WD, TM } from './kit.js';
 import { trade as buildTrade, TRADES } from './trades.js';
+import { upWindows, upFront, upperRooms } from './upper.js';
 
 export { TRADES };
 const WALLS = ['planks_grey', 'planks_grey', 'mud_plaster', 'plaster_grey'];
@@ -104,6 +105,7 @@ function machiya(el, ctx) {
     r(); r(); r();
     const hw = w / 2, fl = 0.45, doma = 1.6, trade = el.trade || TRADES[Math.floor(r() * TRADES.length)], yT = y0 + HT;
     // the front of an open house: the shop (the hinged shutter propped up) or the dwelling (the front shut, the earth passage open) — one in three by seed
+    const up = !!el.up && D.two && open, wins = up ? upWindows(w, hw - doma) : [];
     const shutFront = !open || (el.front ? el.front === 'shut' : (el.seed >>> 2) % 3 === 1);
     const [nb, nm] = NOREN[trade] || ['cloth_indigo', 'cloth_white'], sg = rng((el.seed || 1) * 13 + 1);
     const noren = (top) => { const n = 3, wd = (doma - 0.2) / n; for (let k = 0; k < n; k++) { const a = hw - doma + 0.1 + k * wd; B(nb, a + 0.01, y0 + 1.15, 0.03, a + wd - 0.01, top, 0.06); B(nm, a + wd / 2 - 0.1, top - 0.6, 0.062, a + wd / 2 + 0.1, top - 0.25, 0.066); } };
@@ -126,11 +128,12 @@ function machiya(el, ctx) {
     // the low second storey: plaster between the posts, two slit windows with lattice, the pent hood over the shop below
     if (D.two) {
       const yb = y0 + H;
-      B('plaster_grey', -hw + 0.1, yb, -0.1, hw - 0.1, yT - 0.28, 0.03);
-      B('plaster_streak', -hw + 0.1, yb + 0.1, 0.03, hw - 0.1, yb + 0.5, 0.034);
+      if (up) upFront({ B }, { hw, y0, H, yT, wins });
+      else { B('plaster_grey', -hw + 0.1, yb, -0.1, hw - 0.1, yT - 0.28, 0.03);
+      B('plaster_streak', -hw + 0.1, yb + 0.1, 0.03, hw - 0.1, yb + 0.5, 0.034); }
       B(WD, -hw - 0.05, yb - 0.02, -0.1, hw + 0.05, yb + 0.16, 0.2);
       const nw = Math.max(2, Math.floor(w / 2.2));
-      for (let k = 0; k < nw; k++) { const xc = -hw + (k + 0.5) * w / nw; B(WD, xc - 0.62, yb + 0.55, 0.0, xc + 0.62, yb + 1.25, 0.1); B('koshi', xc - 0.54, yb + 0.6, 0.1, xc + 0.54, yb + 1.2, 0.14); }
+      if (!up) for (let k = 0; k < nw; k++) { const xc = -hw + (k + 0.5) * w / nw; B(WD, xc - 0.62, yb + 0.55, 0.0, xc + 0.62, yb + 1.25, 0.1); B('koshi', xc - 0.54, yb + 0.6, 0.1, xc + 0.54, yb + 1.2, 0.14); }
       const hd = [], hu = []; quad2(hd, [-hw - 0.35, yb + 0.02, 0.0], [hw + 0.35, yb + 0.02, 0.0], [hw + 0.35, yb - 0.3, 1.0], [-hw - 0.35, yb - 0.3, 1.0]); T('planks_grey', hd);
       quad2(hu, [-hw - 0.35, yb - 0.04, 0.0], [hw + 0.35, yb - 0.04, 0.0], [hw + 0.35, yb - 0.36, 1.0], [-hw - 0.35, yb - 0.36, 1.0]); T('timber', hu);
       for (let x = -hw; x <= hw + 0.01; x += 0.7) B(WD, x - 0.04, yb - 0.34, 0.8, x + 0.04, yb - 0.3, 1.0);
@@ -224,9 +227,10 @@ function machiya(el, ctx) {
       if (d > 10) L('pottery_dark', [[0.001, 0], [0.18, 0], [0.24, 0.2], [0.2, 0.4], [0.001, 0.4]], 8, a + 0.6, y0 + 0.03, -d + 4.2);
       B(WD, x1, y0 + 0.03, -d + 0.5, x1 + 0.04, y0 + 2.4, -d + 0.54); }
     // the loft over the back rooms (a floor of boards over the rear, its edge showing, a ladder)
-    if (D.two) { B(TM, x0, y0 + H - 0.1, -d + 0.1, x1, y0 + H, -d / 2); B(WD, x0, y0 + H - 0.2, -d / 2, x1, y0 + H, -d / 2 + 0.1); for (let k = 0; k < 8; k++) B(WD, x1 - 0.5 + 0.0, y0 + fl + k * 0.37, -d / 2 + 0.2, x1 - 0.2, y0 + fl + k * 0.37 + 0.06, -d / 2 + 0.3); }
+    if (D.two && !up) { B(TM, x0, y0 + H - 0.1, -d + 0.1, x1, y0 + H, -d / 2); B(WD, x0, y0 + H - 0.2, -d / 2, x1, y0 + H, -d / 2 + 0.1); for (let k = 0; k < 8; k++) B(WD, x1 - 0.5 + 0.0, y0 + fl + k * 0.37, -d / 2 + 0.2, x1 - 0.2, y0 + fl + k * 0.37 + 0.06, -d / 2 + 0.3); }
     buildTrade(trade, { B, L, col }, { x0, x1, y0, fl, qm, d, H, r });
-    { const v = rng((el.seed || 1) * 29 + 11), kind = trade === 'dye' ? 0 : Math.floor(v() * 5); if (kind) middleRoom(kind, { B, L, T, col }, { x1, f0: y0 + fl, zA: -(qm + 1.5), trade }, v); }
+    if (up) upperRooms({ B, T, col }, { hw, d, y0, H, yT, rise, x1, qm, fl, trade, keeper: !!el.keeper, seed: el.seed || 1, wins });
+    else { const v = rng((el.seed || 1) * 29 + 11), kind = trade === 'dye' ? 0 : Math.floor(v() * 5); if (kind) middleRoom(kind, { B, L, T, col }, { x1, f0: y0 + fl, zA: -(qm + 1.5), trade }, v); }
   });
 }
 export const machiyaElements = { machiya_m: machiya };

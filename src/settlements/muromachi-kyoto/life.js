@@ -34,7 +34,7 @@ export function fronts() {
     if (open || R() < 0.3) put({ t: 'hang_lantern', at: P(hw - 0.8, 0.95), y: hook, kind: tr === 'sake' || tr === 'food' || tr === 'tea' ? 'paper' : 'white', drop: 0.25 });
     if (open && R() < 0.55) put({ t: 'shop_sign', at: P(-hw + 0.02, 0.15), rot: out, h: D.two ? D.H - 0.5 : 2.75, cloth: BANNER[tr] || 'cloth_indigo', len: 1.2 + R() * 0.4, out: 0.95, letters: 2 + Math.floor(R() * 2) });
     // the trade's goods in front
-    const gx = -hw + 0.9 + R() * Math.max(0.1, l.w - 3.2);
+    const gx = -hw + 0.9 + R() * Math.max(0.1, l.w - 3.2) * (l.up ? 0.4 : 1);      // (the opened houses keep the way to the passage clear)
     if (open || R() < 0.4) {
       if (tr === 'sake') { put({ t: 'barrel', at: P(gx, 1.5), n: 2 + Math.floor(R() * 2), rot: F.rot }); }
       else if (tr === 'pottery') { put({ t: 'pot', at: P(gx, 1.55), kind: R() < 0.5 ? 'dark_pot' : 'glazed_jar', n: 3, rot: F.rot }); put({ t: 'pot', at: P(gx + 0.9, 1.45), kind: 'blue_jar', rot: F.rot }); }
@@ -76,9 +76,9 @@ export function inside() {
     const F = frame(l), R = rng(l.seed * 31 + 7), hw = l.w / 2, d = l.d, doma = 1.6, qm = Math.min(4.2, d * 0.4), fl = 0.45, tr = l.trade;
     if (d < 9) continue;
     // the housewife at the kamado in the doma, standing; the doma's floor is 0.03
-    if (R() < 0.6) P.push(person(rand, F.P(hw - 0.8, -d + 1.9), 0.03, F.rot + Math.PI * 0 + Math.PI, { woman: true, carry: 'none' }));
+    if (R() < 0.6) P.push(person(rand, F.P(hw - (l.up ? 0.4 : 0.8), -d + 1.9), 0.03, F.rot + Math.PI * 0 + Math.PI, { woman: true, carry: 'none' }));
     // a customer in the doma at the counter
-    if (R() < 0.45) P.push(person(rand, F.P(hw - 0.8, -0.9), 0.03, F.rot, { woman: R() < 0.5, hat: 'straw' }));
+    if (R() < 0.45) P.push(person(rand, F.P(hw - (l.up ? 0.4 : 0.8), -0.9), 0.03, F.rot, { woman: R() < 0.5, hat: 'straw' }));
     // a child on the mats at the back, or the old man by the hearth
     if (R() < 0.3) P.push(person(rand, F.P(-hw + 1.5, -d + 2.3), fl, R() * 6, { child: true, h: 0.95 + R() * 0.2, pose: 'sit_ground', hat: 'none' }));
     else if (R() < 0.3) P.push(person(rand, F.P(-hw + 2.3, -d + 1.0), fl, F.rot, { pose: 'seiza', woman: false, hat: 'none', hair: 'shaven' }));

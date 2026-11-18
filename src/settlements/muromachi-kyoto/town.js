@@ -65,7 +65,7 @@ function people() {
 
 export async function town() {
   const all = lots(), plans = [];
-  for (let i = 0; i < all.length; i += 60) plans.push(base(`muromachi-town-${i / 60}`, all.slice(i, i + 60).map((l) => ({ t: 'machiya_m', at: l.at, facing: l.facing, w: l.w, d: l.d, seed: l.seed, trade: l.trade, open: isOpen(l), mirror: mirrored(l), front: frontOf(l), y: 0 }))));
+  for (let i = 0; i < all.length; i += 60) plans.push(base(`muromachi-town-${i / 60}`, all.slice(i, i + 60).map((l) => ({ t: 'machiya_m', at: l.at, facing: l.facing, w: l.w, d: l.d, seed: l.seed, trade: l.trade, open: isOpen(l), mirror: mirrored(l), front: frontOf(l), up: !!l.up, keeper: !!l.keeper, y: 0 }))));
   plans.push(base('muromachi-civic', civic()));
   plans.push(base('muromachi-gutters', gutters()));
   plans.push(base('muromachi-furniture', [...furniture(), ...streamWork(), ...templeWork()]));
