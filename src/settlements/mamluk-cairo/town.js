@@ -3,30 +3,14 @@
 import { RADIUS, ARRIVAL, lots, yards, sabats, shops, tradeOf, SQUARE, SABILS, SUQ, QAA, BAYN, QALAWUN, NASIR, BARQUQ, KHAN, SUQ2, SUQ3, HAMMAM, SHOP, STALLS } from './layout.js';
 import { lifePlan } from './life.js';
 import { houseRooms } from './house.js';
+import { pickHomes } from './homes.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-37, -30], facing: 's' } });
 const dist = (l, [x, z]) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - x, (l.rect[1] + l.rect[3]) / 2 - z);
 const TILE = 160;
 export async function town() {
-  const all = lots(), plans = [];
-  // the corner lot nearest each sabil's place becomes the sabil-kuttab, its corner the one nearest the crossing
-  const taken = new Map();
-  for (const p of SABILS) { const l = all.filter((q) => !taken.has(q)).sort((a, b) => dist(a, p) - dist(b, p))[0]; taken.set(l, p); }
-  const { fronts, open } = shops();
-  const openSet = new Set(open), frontSet = new Set(fronts.filter((l) => !openSet.has(l)));
-  const rest = all.filter((l) => !taken.has(l) && !openSet.has(l));
-  // houses you can walk into (house.js): in the 200 m cells that hold four or more open shops (their plan and materials are shared),
-  // beyond 120 m of the arrival, at most three to a cell and 45 m apart
+  const plans = [], { all, taken, fronts, open, openSet, frontSet, rest, homes } = pickHomes();
   const cellN = new Map(); open.forEach((l) => { const k = Math.floor(l.rect[0] / 200) + ',' + Math.floor(l.rect[1] / 200); cellN.set(k, (cellN.get(k) || 0) + 1); });
-  const shopCells = new Set([...cellN].filter(([, n]) => n >= 4).map(([k]) => k));
   const cen = (l) => [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2];
-  const cand = rest.filter((l) => !frontSet.has(l) && !l.yard && l.rect[2] - l.rect[0] >= 9 && l.rect[3] - l.rect[1] >= 9.5 && shopCells.has(Math.floor(l.rect[0] / 200) + ',' + Math.floor(l.rect[1] / 200))
-    && Math.hypot(cen(l)[0] - ARRIVAL[0], cen(l)[1] - ARRIVAL[1]) > 120).sort((a, b) => (a.seed % 977) - (b.seed % 977));
-  const homes = [], perCell = new Map();
-  for (const l of cand) {
-    const k = Math.floor(l.rect[0] / 200) + ',' + Math.floor(l.rect[1] / 200), c = cen(l);
-    if ((perCell.get(k) || 0) >= 3 || homes.some((h) => Math.hypot(cen(h)[0] - c[0], cen(h)[1] - c[1]) < 45)) continue;
-    perCell.set(k, (perCell.get(k) || 0) + 1); homes.push(l);
-  }
   const homeSet = new Set(homes);
   const houses = rest.filter((l) => !frontSet.has(l) && !l.yard && !homeSet.has(l));
   // the houses (house_mamluk, style vernacular: stone storey, corbelled plastered storeys, mashrabiyas,

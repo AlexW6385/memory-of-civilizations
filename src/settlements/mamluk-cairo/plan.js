@@ -1,6 +1,8 @@
 // Sultan Hasan and the Citadel about 1363 (docs/settlements/mamluk-cairo.md §2–§4).
 import './tomb.js';
 import { HASAN, CITADEL, ROAD, roadAt, height } from './layout.js';
+import { pickHomes } from './homes.js';
+import { houseWalks } from './house.js';
 
 const E = [];
 // the court's four iwans, the qibla iwan (south here) the greatest; the way in from the portal: the domed vestibule,
@@ -51,6 +53,8 @@ const room = (id, rect, y, kind) => ({ id, rect, y, kind });
 const rooms = [room('qibla iwan', [-10, 56, 10, 72], 0, 'hall'), room('court', HASAN.court, 0, 'open'), room('mausoleum', [TC[0] - 10, TC[1] - 10, TC[0] + 10, TC[1] + 10], 0.06, 'hall')];
 const walks = [[[-37.5, -60], [-37.5, 2]]];
 walks[0].y0 = 0;
+// the open houses' upper floors walked (docs/settlements/mamluk-cairo.md §16): from the lane up the stair to the front rooms, and on to the upper hall, the ladder-stair and the terrace
+for (const l of pickHomes().homes) for (const r of houseWalks({ rect: l.rect, front: l.front, seed: l.seed })) { r.y0 = 0; walks.push(r); }
 export const hasan = {
   id: 'mamluk-cairo-hasan',
   name: { en: 'The Madrasa of Sultan Hasan', zh: '苏丹哈桑清真寺经学院' },
