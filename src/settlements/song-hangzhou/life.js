@@ -11,6 +11,7 @@
 import './shops.js';
 import './interiors.js';
 import { dwellingSpec, dwellingRoomRect } from './dwellings.js';
+import { storeyKind, storeyRooms } from './storeys.js';
 import { lots, onImperial, LEVEL, RADIUS } from './ways.js';
 import { riverTeaHouses } from './layout.js';
 
@@ -73,6 +74,10 @@ export function interiorLots() {
   CHOSEN.teahouse.forEach((l) => { l.trade = 'tea'; });
   return CHOSEN;
 }
+let UP = null;
+/** The furnished lots opened upstairs (storeys.js): chosen above, built there as two-storey houses with a stair. */
+export function upLots() { if (!UP) UP = Object.values(interiorLots()).flat().filter((l) => storeyKind(l)); return UP; }
+export const upSet = () => new Set(upLots());
 const ELEMENT = { winehouse: 'hz_restaurant', teahouse: 'hz_teahouse', shop: 'hz_imperial_shop', house: 'hz_house' };
 const ZONE = { winehouse: 'winehouse', teahouse: 'teahouse', shop: 'shop', house: 'house' };
 const inset = (l) => [l.rect[0] + 0.5, l.rect[1] + 0.5, l.rect[2] - 0.5, l.rect[3] - 0.5];
@@ -80,14 +85,16 @@ const inset = (l) => [l.rect[0] + 0.5, l.rect[1] + 0.5, l.rect[2] - 0.5, l.rect[
 /** Rooms (for the music zones and the sound of a room) of every furnished interior. */
 export function interiorRooms() {
   const out = [];
-  for (const [k, list] of Object.entries(interiorLots())) list.forEach((l, i) => out.push({ id: `hz-${k}-${i}`, rect: inset(l), y: LEVEL.street + 0.45, kind: ZONE[k] }));
+  const up = upSet();
+  for (const [k, list] of Object.entries(interiorLots())) list.forEach((l, i) => { if (!up.has(l)) out.push({ id: `hz-${k}-${i}`, rect: inset(l), y: LEVEL.street + 0.45, kind: ZONE[k] }); });
+  upLots().forEach((l, i) => storeyRooms({ ...l, y: LEVEL.street }).forEach(([r, yy], j) => out.push({ id: `hz-storey-${i}-${j}`, rect: r, y: yy, kind: l.shop ? 'shop' : 'house' })));
   return out;
 }
 
 /** The plans: shop fronts in tiles of 100 m (style 'life'), one plan per interior. base(id, elements, style) is the town's plan maker. */
 export function lifePlans(base) {
   const plans = [], tiles = new Map(), chosen = interiorLots(), inside = new Set(Object.values(chosen).flat());
-  const dwSet = new Set(dwellingLots());
+  const dwSet = new Set([...dwellingLots(), ...upLots()]);
   for (const l of lots()) {
     if (!l.shop || dwSet.has(l)) continue;   // (a dwelling's shop has its own goods inside, and no apron across its door)
     const F = frontOf(l), at = F.P(0.5, 0);
@@ -99,11 +106,17 @@ export function lifePlans(base) {
     tiles.get(k).push(e);
   }
   for (const [k, list] of tiles) { const [i, j] = k.split(',').map(Number); plans.push({ ...base(`song-hangzhou-shops-${k}`, list, 'life'), center: [i * 100 + 50, j * 100 + 50], near: 230 }); }
+  const upS = upSet();
   for (const [kind, list] of Object.entries(chosen)) list.forEach((l, i) => {
+    if (upS.has(l)) return;
     const F = frontOf(l), r = inset(l), c = [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2];
     const p = base(`song-hangzhou-${kind}-${i}`, [{ t: ELEMENT[kind], rect: r, front: l.front, y: LEVEL.street, floor: LEVEL.street + 0.45, seed: l.seed || (i + 1), trade: l.trade }], 'life');
     plans.push({ ...p, center: c, near: 70, rooms: [{ id: `hz-${kind}-${i}`, rect: r, y: LEVEL.street + 0.45, kind: ZONE[kind] }] });
     void F;
+  });
+  upLots().forEach((l, i) => {
+    const c = [(l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2];
+    plans.push({ ...base(`song-hangzhou-storey-${i}`, [{ t: 'hz_upstairs_in', rect: l.rect, front: l.front, y: LEVEL.street, seed: l.seed, trade: l.trade }], 'life'), center: c, near: 70 });
   });
   return plans;
 }
