@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.28 — light re-baked; landmarks build the same every time (2026-11-17)
+
+The baked light of every landmark was remade after the second detail wave. Eight landmarks (Ye, Dunhuang, the Forbidden City, Conques, Amsterdam, Lisbon's two, the Bauhaus) built slightly different geometry on each build, because the millimetre variation that keeps repeated pieces merged came from counters that were never reset; the counters now restart with every plan, so their light stays current.
+
 ## v12.27 — the landmarks, seen close: the last thirteen (2026-11-17)
 
 Every landmark has now had its close pass. Taos: every ladder can be climbed, so all eighteen upper rooms are reached on foot; rounded corners and parapet rolls. Kakadu: the rock paintings were drawn facing into the rock and never showed — they do now; lobed, bedded rock. Benin City: shingle courses and crest tiles on the palace roofs, dressed turrets, framed plaques. Bali: a split gate in thirteen moulded courses, a tiered kori crown, fringed meru roofs, guardians with clubs and checked skirts. Cahokia: mounds with long uneven slopes and erosion gullies, log stairs, ribbed thatch with carved birds, a lime-washed palisade. Çatalhöyük: rolled mud edges on every roof, modelled bucrania, leopards in soft relief. Dogon: niches with depth on the ginna, a lashed toguna roof with hanging stalks. Kilwa: pointed coral portals, fifty-five latticed windows, wall niches, moulded arches. The wharenui: bargeboard carving that was underground now shows, painted rafters, carved door and window, carved waka prow. Nan Madol: every basalt column its own prism, flaring corners, rubble crowns, a tomb roofed with beams. SGang Gwaay: poles carved in the round, a doorway through a being's mouth, mortuary chests, relief house fronts, canoe prows. Yinxu: a double-eaved thatch roof, taotie lintel boards, a leiwen band, the great ding in relief. Ye: a four-metre bronze bird, a bracketed colonnade, tile rows, stair balustrades, braced skyways.

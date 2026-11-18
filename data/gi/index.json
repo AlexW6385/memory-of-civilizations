@@ -290,7 +290,7 @@
  },
  "amsterdam-dam": {
   "site": "amsterdam",
-  "hash": "1078a44762891b6b",
+  "hash": "954376b0f7ecd74e",
   "rays": 128,
   "probes": 75905,
   "boxes": [
@@ -348,8 +348,8 @@
     ]
    }
   ],
-  "bytes": 1245913,
-  "seconds": 171,
+  "bytes": 1245922,
+  "seconds": 169,
   "baked": "2026-11-18"
  },
  "ananda-temple": {
@@ -681,7 +681,7 @@
  },
  "bauhaus-school": {
   "site": "bauhaus-dessau",
-  "hash": "a8b3d09900f0f6cc",
+  "hash": "c77fb4668001cff8",
   "rays": 128,
   "probes": 69479,
   "boxes": [
@@ -723,7 +723,7 @@
    }
   ],
   "bytes": 1107635,
-  "seconds": 88,
+  "seconds": 89,
   "baked": "2026-11-18"
  },
  "benin-palace": {
@@ -1351,7 +1351,7 @@
  },
  "dunhuang-mogao": {
   "site": "dunhuang",
-  "hash": "04c5d7ae6212303f",
+  "hash": "020485c980870b83",
   "rays": 128,
   "probes": 74340,
   "boxes": [
@@ -1382,8 +1382,8 @@
     ]
    }
   ],
-  "bytes": 1251341,
-  "seconds": 163,
+  "bytes": 1251346,
+  "seconds": 161,
   "baked": "2026-11-18"
  },
  "edo-himeji-castle": {
@@ -2985,7 +2985,7 @@
  },
  "manueline-belem": {
   "site": "manueline-lisbon",
-  "hash": "c345b8e21ce2f8b8",
+  "hash": "7677b7486018e648",
   "rays": 128,
   "probes": 17955,
   "boxes": [
@@ -3011,13 +3011,13 @@
     ]
    }
   ],
-  "bytes": 292520,
+  "bytes": 292491,
   "seconds": 30,
   "baked": "2026-11-18"
  },
  "manueline-jeronimos": {
   "site": "manueline-lisbon",
-  "hash": "83c86423e75c0478",
+  "hash": "eacf73156b6ec29b",
   "rays": 128,
   "probes": 78936,
   "boxes": [
@@ -3045,8 +3045,8 @@
     ]
    }
   ],
-  "bytes": 1280896,
-  "seconds": 127,
+  "bytes": 1280885,
+  "seconds": 126,
   "baked": "2026-11-18"
  },
  "maori-pa": {
@@ -4218,7 +4218,7 @@
  },
  "qing-beijing-palace": {
   "site": "qing-beijing",
-  "hash": "a48ecc3ea58ac00c",
+  "hash": "4b0ea2cca09e4c39",
   "rays": 128,
   "probes": 78200,
   "boxes": [
@@ -4241,8 +4241,8 @@
     ]
    }
   ],
-  "bytes": 1197918,
-  "seconds": 113,
+  "bytes": 1198150,
+  "seconds": 112,
   "baked": "2026-11-18"
  },
  "sainte-chapelle": {
@@ -4291,7 +4291,7 @@
  },
  "sainte-foy-conques": {
   "site": "conques",
-  "hash": "afbe2314d293bc2b",
+  "hash": "0c2ed743754e7bdf",
   "rays": 128,
   "probes": 71280,
   "boxes": [
@@ -4320,8 +4320,8 @@
     ]
    }
   ],
-  "bytes": 1128938,
-  "seconds": 113,
+  "bytes": 1128874,
+  "seconds": 111,
   "baked": "2026-11-18"
  },
  "samarkand-registan": {
@@ -5180,7 +5180,7 @@
  },
  "wei-ye-bronze-sparrow": {
   "site": "wei-ye",
-  "hash": "d51ae0a18f1c84ee",
+  "hash": "9e792628d9acf33b",
   "rays": 128,
   "probes": 25018,
   "boxes": [
@@ -5233,8 +5233,8 @@
     ]
    }
   ],
-  "bytes": 399328,
-  "seconds": 42,
+  "bytes": 399315,
+  "seconds": 41,
   "baked": "2026-11-18"
  },
  "wei-ye-wenchang": {
