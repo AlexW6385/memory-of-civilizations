@@ -13,7 +13,6 @@ const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base:
 export async function town() {
   const all = lots(), plans = [molo, moloFine, doge, iconostasis, masts, ...sculptPlans(), ...canalPlans()], open = openLots(all, [ARRIVALS['venice'][0], ARRIVALS['venice'][2]], 26);
   [...open.keys()].forEach((l, i) => open.set(l, i % 4 === 0 ? 'inn' : 'home'));                 // 26 houses to enter: an inn in every fourth
-  for (const u of upHouses()) open.set(u.lot, u.use);                                                    // the climbable houses are entered too (upper.js)
   // beyond the first 120 m: more houses to enter, spread over the islands by a rule (a hash of the seed, a free calle before the front), an inn in every fifth
   const A = ARRIVALS['venice'], far = all.filter((l) => !open.has(l) && l.rect[2] - l.rect[0] >= 6 && Math.hypot((l.rect[0] + l.rect[2]) / 2 - A[0], (l.rect[1] + l.rect[3]) / 2 - A[2]) > 120 && Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) < 300 && (l.seed % 6) === 3);
   let nf = 0;
@@ -22,6 +21,7 @@ export async function town() {
     if ([0.35, 0.5, 0.65].some((t) => { const x = l.rect[0] + (l.rect[2] - l.rect[0]) * t; return [1.0, 2.0].some((d) => inLot(x, zf + s * d, 0.1) || wet(x, zf + s * d) < 1.2); })) continue;
     open.set(l, nf++ % 5 === 2 ? 'inn' : 'home');
   }
+  for (const u of upHouses()) open.set(u.lot, u.use);                       // the climbable houses are entered too (upper.js; set after the far rule, so its inns stay where they were)
   plans.push(...dressPlans());
   const up = new Map(upHouses().map((u) => [u.lot, u]));
   plans.push(...frontPlans(open, new Set(up.keys())));
