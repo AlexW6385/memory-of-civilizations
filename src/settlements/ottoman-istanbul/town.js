@@ -1,7 +1,7 @@
 import { ARRIVALS } from '../../planet/arrivals.js';
 // The timber houses of the slopes (docs/settlements/ottoman-istanbul.md §5); the coffee house on the lane west of the
 // terrace by the Tiryaki shops (§10); the street life (§10, life.js).
-import { RADIUS, lots, COFFEE, openSet, yardItems } from './layout.js';
+import { RADIUS, lots, COFFEE, openSet, upSet, yardItems } from './layout.js';
 import { lifePlan } from './life.js';
 import { courtPaving } from './court-life.js';
 /** The houses cut into 160 m tiles in two levels (as lod.js, but coarser: the mesh count is plan x material, DESIGN §8; budget). */
@@ -24,8 +24,8 @@ function tiles(id, style, elements, { near = 240, R = RADIUS } = {}) {
 }
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -100], facing: 's' } });
 export async function town() {
-  const coffee = COFFEE(), all = lots().filter((l) => l !== coffee), plans = [], open = openSet();
-  plans.push(...tiles('ottoman-istanbul-houses', 'ottoman', all.map((l) => ({ t: 'ottoman_house', ...l, ...(l.shop ? { shop: true, use: l.trade } : {}), ...(open.has(l) ? { open: true, use: l.shop ? l.trade : 'home' } : {}) })), { R: RADIUS }));
+  const coffee = COFFEE(), all = lots().filter((l) => l !== coffee), plans = [], open = openSet(), ups = upSet();
+  plans.push(...tiles('ottoman-istanbul-houses', 'ottoman', all.map((l) => ({ t: 'ottoman_house', ...l, ...(l.shop ? { shop: true, use: l.trade } : {}), ...(open.has(l) ? { open: true, use: l.shop ? l.trade : 'home' } : {}), ...(ups.has(l) ? { up: true, upKind: ups.get(l), ...(ups.get(l) === 'inn' ? { use: 'inn' } : {}) } : {}) })), { R: RADIUS }));
   const [x0, z0, x1, z1] = coffee.rect;
   plans.push({ ...base('ottoman-istanbul-kahvehane', [{ t: 'kahvehane', rect: coffee.rect, y: coffee.y, foot: coffee.foot, front: 'e', seed: coffee.seed }]), style: 'ottoman', bounds: [x0 - 2, z0 - 2, x1 + 2, z1 + 2],
     rooms: [{ id: 'coffee house', rect: [x0 + 0.4, z0 + 0.4, x1 - 0.4, z1 - 0.4], y: coffee.y + 0.45, kind: 'hall' }] });

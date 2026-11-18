@@ -1,7 +1,8 @@
 // The Süleymaniye about 1560 (docs/settlements/ottoman-istanbul.md §2–§4): the mosque, its outer
 // court's wall, the külliye (medreses, shops, hospital, soup kitchen, bath, dar'ül-hadis), Süleyman's tomb, the terrace's retaining wall to the north.
 
-import { MOSQUE, PRECINCT, MEDRESES, ARASTA, DARUSSIFA, IMARET, HAMAM, DARULHADIS, TERRACE, MESCIT, TOP, TOMB, GRAVES, ROSES, CARSI, CESMES } from './layout.js';
+import { routes as upRoutes } from '../../styles/ottoman/upper.js';
+import { upSet, roomPoint, height, MOSQUE, PRECINCT, MEDRESES, ARASTA, DARUSSIFA, IMARET, HAMAM, DARULHADIS, TERRACE, MESCIT, TOP, TOMB, GRAVES, ROSES, CARSI, CESMES } from './layout.js';
 
 const E = [];
 E.push({ t: 'sinan_mosque', c: MOSQUE.c, d: MOSQUE.d, h: MOSQUE.h, y: TOP, court: 38.1 });
@@ -44,6 +45,15 @@ const hw = MOSQUE.d * 1.1 - 2.6, hd = MOSQUE.d * 1.1 - 2.6;
 const rooms = [room('prayer hall', [MOSQUE.c[0] - hw, MOSQUE.c[1] - hd, MOSQUE.c[0] + hw, MOSQUE.c[1] + hd], TOP + 0.05, 'hall'), room('outer court', PRECINCT, TOP, 'open'), room('tomb of hurrem sultan', [TOMB.c[0] - TOMB.r, TOMB.c[1] - TOMB.r, TOMB.c[0] + TOMB.r, TOMB.c[1] + TOMB.r], TOP + 0.26, 'hall'), room('bedesten', CARSI.bedesten, TOP + 0.05, 'hall')];
 const walks = [[[0, -100], [0, -80], [0, -40]]];
 walks[0].y0 = TOP;
+// the upstairs of the open houses walked (docs/settlements/ottoman-istanbul.md §17): from the lane in at the door, up the stair, round the rooms
+for (const [l, kind] of upSet()) {
+  const [a, b, c, d] = l.rect, fw = (l.front === 'n' || l.front === 's') ? c - a : d - b, st = l.storeys;
+  for (const r of upRoutes(fw, st, kind, !!l.shop)) {
+    const w = r.map(([u, v]) => roomPoint(l, u, v));
+    w.y0 = height(...w[0]) + 0.3;
+    walks.push(w);
+  }
+}
 
 export const suleymaniye = {
   id: 'ottoman-istanbul-suleymaniye',
