@@ -27,6 +27,8 @@ export const STORES = [-130, 40, -82, 108];
 export const MARKET = [-44, -217, 42, -178];
 /** The houses on the square's north side that can be entered, furnished (§5.1): their seeds, the street door toward the square. */
 const OPEN = new Set([987775, 589524, 632118]);
+/** The houses whose upper floor is opened (docs/settlements/ur.md §5.14): the merchants', brewers', bakers', a potter's, a weaver's and a smith's near the market square, each walked by plan.js's routes (the others' stairs are shut or a door awning bars the way: not opened). */
+export const UPPER = new Set([987775, 589524, 288976, 133847, 560805, 943015, 964785, 199360, 80560]);
 /** Where the scribal school's house stands: the lot nearest to this point west of the market square. */
 export const SCHOOL_AT = [-62, -200];
 /** The royal mausoleum of Shulgi, just outside the temenos's east side, on its made ground (docs/settlements/ur.md §5.11). */
@@ -141,6 +143,7 @@ export function houses() {
   for (const h of HOUSES) {
     const [cx, cz] = mid(h), d = Math.hypot(cx, cz + 120);
     h.lod = d < 200 ? 2 : d < 320 ? 1 : 0;
+    h.upper = UPPER.has(h.seed);   // the upper floor is opened (docs/settlements/ur.md §5.14)
     h.near = d < 120;                                   // the houses nearest the arrival are drawn closer (docs/settlements/ur.md §5.13)
     if (!h.trade && !h.chapel && !h.open && h.seed % 7 === 0) h.trade = ['potter', 'weaver', 'baker', 'reeder', 'smith', 'brewer'][h.seed % 6];
   }
