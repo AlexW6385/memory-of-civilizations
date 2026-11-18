@@ -8,6 +8,7 @@ import { RADIUS, LEVEL, CANALS, STREETS, BRIDGES, lots, onBridge } from './layou
 import { northPlans } from './north.js';
 import { upOf, doorGap, shopkeeperAt } from './uphouses.js';
 import './style.js';
+import './townwork.js';
 import { bridgeLamps } from './lamps.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -152,7 +153,7 @@ function houses() {
   }
   quads.forEach((q, i) => {
     const E = q.map((l) => ({ t: 'house_jiangnan', rect: l.rect, y: LEVEL.street, front: l.front, storeys: l.storeys, shop: l.shop, trade: HOUSE_TRADE[l.trade] || l.trade, water: l.water, seed: l.seed, open: open.has(l), kind: l.kind, roof: l.roof, detail: l.detail, overhang: l.overhang, balcony: l.balcony, tone: l.tone }));
-    if (E.length) plans.push(base(`ming-suzhou-houses-${i}`, E));
+    if (E.length) plans.push({ ...base(`ming-suzhou-houses-${i}`, E), style: 'suzhou-quarter' });
   });
   // the climbable houses, west and east of the way in, each side one plan with its own bounds (drawn only where they are near)
   for (const [name, test] of [['w', (l) => l.rect[0] < 0], ['e', (l) => l.rect[0] > 0]]) {
