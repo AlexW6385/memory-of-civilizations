@@ -87,10 +87,10 @@ function courtFront(el, ctx) {
     bag.add(G, bx(x0 - 0.1, x1 + 0.1, 0, 0.1, 0, 0.36));                                                  // the threshold step
     for (let i = 0; i < d.n; i++) {
       const c0 = d.u0 + i * (d.w + 0.5);
-      bag.add('opening', bx(c0, c0 + d.w, 0.1, d.h, 0, 0.035));
+      if (!d.real) bag.add('opening', bx(c0, c0 + d.w, 0.1, d.h, 0, 0.035));
       bag.add(RED, bx(c0 - 0.06, c0, 0.1, d.h, 0, 0.07)); bag.add(RED, bx(c0 + d.w, c0 + d.w + 0.06, 0.1, d.h, 0, 0.07));
       // a leaf of the door standing half open
-      if (i % 2 === 0) bag.add('timber', bx(c0 + 0.04, c0 + d.w * 0.45, 0.12, d.h - 0.05, 0.03, 0.07));
+      if (i % 2 === 0 && !d.real) bag.add('timber', bx(c0 + 0.04, c0 + d.w * 0.45, 0.12, d.h - 0.05, 0.03, 0.07));
     }
     for (let i = 0; i <= d.n; i++) { const c = d.u0 + i * (d.w + 0.5) - 0.25; if (i > 0 && i < d.n) { bag.add('plaster', bx(c - 0.25, c + 0.25, 0.1, d.h, 0, 0.12)); bag.add(BLK, bx(c - 0.27, c + 0.27, d.h - 0.2, d.h, 0, 0.13)); } }
   }

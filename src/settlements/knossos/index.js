@@ -4,6 +4,7 @@ import '../../styles/minoan/rooms.js';
 import '../../styles/minoan/interiors.js';
 import '../../styles/minoan/town.js';
 import '../../styles/minoan/court.js';
+import '../../styles/minoan/upper.js';
 import palace from './plan.js';
 import music from './music.js';
 export { town } from './town.js';

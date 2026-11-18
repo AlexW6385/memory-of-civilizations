@@ -20,7 +20,9 @@ const CORR = [-41, -48, -37.5, 22], MAG = { x0: -57, z0: -46, z1: 20, n: 18 }, M
 const magHoles = Array.from({ length: MAG.n }, (_, i) => ({ rect: [MAG.x0, MAG.z0 + i * MP + 0.8, CORR[0], MAG.z0 + (i + 1) * MP - 0.8], h: 3.2 }));
 E.push({ t: 'wing', rect: [-62, -60, -19, 58], storeys: 3, windows: 'w', seed: 1,
   holes: [{ rect: TR, h: 3.6 }, { rect: PIT, h: 99 }, { rect: [-19.8, -18.2, -19.0, -16.6], h: 2.6, lintel: true }, { rect: [-19.8, -15.6, -19.0, -14.0], h: 2.6, lintel: true },
-    { rect: CORR, h: 3.4 }, { rect: [CORR[0], -60, CORR[2], CORR[1]], h: 3.0, lintel: true }, ...magHoles],
+    { rect: CORR, h: 3.4 }, { rect: [CORR[0], -60, CORR[2], CORR[1]], h: 3.0, lintel: true }, ...magHoles,
+    { rect: [-20.6, 14.6, -19, 16.6], h: 2.8, lintel: true }, { rect: [-27.4, 14.6, -20.6, 17.4], h: 6.6 }],
+  up: [{ rect: [-36, 9, -27.4, 24], k: 1, h: 3.0 }],
   pits: [{ rect: PIT, depth: 1.0 }] });
 E.push({ t: 'magazines', corridor: CORR, ...MAG, y: 0 });
 E.push({ t: 'throne_room', rect: TR, y: 0, throne: [-23.2, -19.6], pit: PIT, pitDepth: 1.0 });
@@ -41,8 +43,20 @@ const LW = [23, -2, 29, 6], QM = [23, 6, 31, 13];
 const HALL = [23, 14, 41, 24], HALLW = [41, 14, 46, 24], WS = [23, 27, 41, 37], WSW = [41, 27, 46, 37];
 E.push({ t: 'wing', rect: [19, -28, 62, 58], storeys: 4, windows: 'es', seed: 4,
   holes: [{ rect: LW, h: 99 }, { rect: QM, h: 3.6 }, { rect: [19, 0, 23, 2], h: 2.6, lintel: true },
-    { rect: HALL, h: 3.4 }, { rect: HALLW, h: 99 }, { rect: [19, 18.5, 23, 21], h: 2.6, lintel: true }, { rect: [30.5, 24, 32.5, 27], h: 2.6, lintel: true }, { rect: WS, h: 3.4 }, { rect: WSW, h: 99 }] });
+    { rect: HALL, h: 3.4 }, { rect: HALLW, h: 99 }, { rect: [19, 18.5, 23, 21], h: 2.6, lintel: true }, { rect: [30.5, 24, 32.5, 27], h: 2.6, lintel: true }, { rect: WS, h: 3.4 }, { rect: WSW, h: 99 }],
+  up: [{ rect: [20.8, -17, 36, -3.4], k: 1, h: 3.4 }, { rect: [19, -15, 20.8, -7], yf: 4.6, h: 2.4, open: 'w' }, { rect: [24.6, -3.4, 27.4, -2.0], k: 1, h: 2.8 },
+    { rect: [21, 7.4, 36, 15], k: 2, h: 3.0 }, { rect: [24.6, 6.0, 27.4, 7.4], k: 2, h: 2.6 },
+    { rect: [21, -17, 36, -3.4], k: 3, h: 3.0 }, { rect: [24.6, -3.4, 27.4, -2.0], k: 3, h: 2.8 }] });
 E.push({ t: 'double_axe_hall', rect: HALL, well: HALLW, y: 0, seed: 5, door: [18.5, 21] }, { t: 'lapidary_workshop', rect: WS, well: WSW, y: 0, seed: 9, door: [30.5, 32.5] });
+// the stair of the Piano Nobile: from the doorway on the court's west side up to the hall of the first floor; the steps of the loggia
+E.push({ t: 'stair', rect: [-27.4, 14.6, -20.4, 17.4], dir: 'w', y0: 0.05, y1: 3.6, riser: 0.175, base: 0, mat: 'gypsum_minoan' });
+E.push({ t: 'stair', rect: [20.8, -15, 22.4, -7], dir: 'w', y0: 3.6, y1: 4.6, riser: 0.2, base: 3.6, mat: 'gypsum_minoan' });
+E.push({ t: 'upper_room', rect: [-36, 9, -27.4, 24], y: 3.6, h: 3.0, kind: 'pianohall', seed: 41, gaps: [['e', 14.6, 17.4]] },
+  { t: 'upper_room', rect: [20.8, -17, 36, -3.4], y: 3.6, h: 3.4, kind: 'hall', seed: 42, gaps: [['s', 24.6, 27.4], ['w', -15, -7]] },
+  { t: 'upper_room', rect: [21, 7.4, 36, 15], y: 7.2, h: 3.0, kind: 'chamber', seed: 43, gaps: [['n', 24.6, 27.4]] },
+  { t: 'upper_room', rect: [21, -17, 36, -3.4], y: 10.8, h: 3.0, kind: 'chamber', seed: 44, gaps: [['s', 24.6, 27.4]] });
+// the loggia on the gallery of the east portico: red columns at its open edge
+for (const z of [-14.2, -12.2, -10.2, -8.2]) E.push({ t: 'loggia_column', at: [19.45, z], y: 4.6, h: 2.15 });
 E.push({ t: 'lightwell_tiers', rect: LW, y: 0, storeys: 4, sh: 3.6 });
 E.push({ t: 'fresco', kind: 'dolphins', at: [27, 13], face: 'n', y0: 1.4, w: 3.6, h: 1.3, bg: 'plaster_white' });
 // the Queen's Megaron furnished (§4c): the bathroom at its east end behind the low partition and its column, the
@@ -114,7 +128,7 @@ E.push({ t: 'court_front', face: 's', p: -28, u0: -13.5, u1: -3.4, y: 0, seed: 2
 E.push({ t: 'court_front', face: 's', p: -28, u0: 3.4, u1: 13.5, y: 0, seed: 3, doors: [{ u: 5.6, n: 1 }, { u: 11.4, n: 2, w: 1.1 }], panels: [{ u: 8.4, kind: 'shields', w: 2.0 }], jars: [[13, 0.8, 1]] });
 E.push({ t: 'court_front', face: 'n', p: 28, u0: -13.5, u1: -3.4, y: 0, seed: 4, doors: [{ u: -11.2, n: 1 }, { u: -5.6, n: 1 }], panels: [{ u: -8.4, kind: 'grandstand', w: 2.0 }] });
 E.push({ t: 'court_front', face: 'n', p: 28, u0: 3.4, u1: 13.5, y: 0, seed: 5, doors: [{ u: 5.6, n: 1 }, { u: 11.2, n: 1 }], panels: [{ u: 8.4, kind: 'lilies', w: 2.0 }] });
-E.push({ t: 'court_front', face: 'e', p: -19, u0: 13, u1: 27.5, y: 0, seed: 6, doors: [{ u: 15.6, n: 1 }, { u: 25.4, n: 1 }], panels: [{ u: 18.6, kind: 'lilies', w: 2.6 }, { u: 22.2, kind: 'shields', w: 2.4 }], jars: [[20.5, 0.8, 1]] });
+E.push({ t: 'court_front', face: 'e', p: -19, u0: 13, u1: 27.5, y: 0, seed: 6, doors: [{ u: 15.6, n: 1, w: 2.0, real: true }, { u: 25.4, n: 1 }], panels: [{ u: 18.6, kind: 'lilies', w: 2.6 }, { u: 22.2, kind: 'shields', w: 2.4 }], jars: [[20.5, 0.8, 1]] });
 E.push({ t: 'court_front', face: 'e', p: -19, u0: -27.5, u1: -20.4, y: 0, seed: 7, doors: [{ u: -25.5, n: 1 }] });
 E.push({ t: 'tripartite_front', x: -19, z0: 0, z1: 12, y: 0 });
 // the youth vaulting the bull of the rehearsal (the bull stands in life.js, at [1.6, -3.2] facing +x, seed 11): its size as the animal code draws it
@@ -134,6 +148,10 @@ const rooms = [room('central court', COURT, 0.05, 'open'), room('west court', [-
 const walks = [[[-100, 0], [-90, -60], [-92, -87], [-92, -95], [-70, -95], [-60, -89], [0, -89], [0, -60], [0, 0]], [[-39, -66], [-39, -54], [-39, 0], [-46, 0.5]]];
 walks.push([[0, 20], [19, 19.75], [30, 19.75], [31.5, 25], [31.5, 31]]);
 walks.push([[0, -46], [4.4, -47], [10, -46.5]], [[0, -46], [-6, -47], [-12, -46.5]], [[0, 24], [11.2, 27], [11.2, 33], [11, 36]]);
+// upstairs (§4j): the Piano Nobile by its stair from the court; the Grand Staircase to the hall and loggia of the first floor and on to the chambers of the second
+walks.push([[-10, 16], [-17, 15.6], [-21.5, 15.9], [-24, 16], [-28.5, 16], [-31, 16], [-33, 12]]);
+walks.push([[10, 1], [19, 1], [24, 1.2], [28, 5.7], [28, 2], [28, -1.5], [25.9, -1.5], [25.9, -2.9], [25.9, -5], [24, -8], [22.8, -11], [21.5, -11], [19.9, -11], [17, -11]]);
+walks.push([[28, 5.7], [28, -1.5], [24, -1.5], [24, 4.5], [24.5, 5.65], [25.9, 5.7], [25.9, 6.8], [26, 9], [28, 11]]);
 for (const w of walks) w.y0 = 0;
 walks[2].y0 = 0;
 walks[1].y0 = 0;
