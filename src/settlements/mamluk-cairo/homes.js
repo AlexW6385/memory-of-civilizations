@@ -23,11 +23,11 @@ export function pickHomes() {
   const homes = [], perCell = new Map();
   for (const l of cand) {
     const k = cellOf(l), c = cen(l);
-    if ((perCell.get(k) || 0) >= 3 || homes.some((h) => Math.hypot(cen(h)[0] - c[0], cen(h)[1] - c[1]) < 45)) continue;
+    if ((perCell.get(k) || 0) >= 2 || homes.some((h) => Math.hypot(cen(h)[0] - c[0], cen(h)[1] - c[1]) < 45)) continue;
     perCell.set(k, (perCell.get(k) || 0) + 1); homes.push(l);
   }
   // and the houses nearest the arrival (within 115 m, 26 m apart, in a cell that has shops), the first ones a visitor comes to
   const near = rest.filter((l) => !frontSet.has(l) && !l.yard && wide(l) && cellN.has(cellOf(l)) && adist(l) <= 115).sort((a, b) => adist(a) - adist(b));
-  for (const l of near) { if (homes.filter((h) => adist(h) <= 115).length >= 5) break; const c = cen(l); if (homes.some((h) => Math.hypot(cen(h)[0] - c[0], cen(h)[1] - c[1]) < 26)) continue; homes.push(l); }
+  for (const l of near) { if (homes.filter((h) => adist(h) <= 115).length >= 4) break; const c = cen(l); if (homes.some((h) => Math.hypot(cen(h)[0] - c[0], cen(h)[1] - c[1]) < 26)) continue; homes.push(l); }
   return (CACHE = { all, taken, fronts, open, openSet, frontSet, rest, homes });
 }

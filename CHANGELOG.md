@@ -2,6 +2,10 @@
 
 Newest first. What you can visit and what looks better, in plain words.
 
+## v12.33 — Cairo: upstairs in nine town houses (2026-11-18)
+
+In nine Cairo houses you can climb a stone stair from the court to a gallery and the upper loggia, enter a bedroom or workroom over the lane and a store, and take a steep ladder to the roof terrace with its wind-catcher; the rab' tenements, the qa'a hall and the wikala upper floors are still shut.
+
 ## v12.32 — New York inside the budget; one façade box for every facing (2026-11-18)
 
 New York arrives at 411 draws instead of 624: its 791 lots are built twice in tiles, the far form keeping masses, setbacks, cornices, shop glass, awnings, stoops and water tanks and dropping sign lettering, fire-escape railings and interiors. The façade box shared by Amsterdam, London, Versailles and Vienna was drawn as a different shape for each facing; it is one shape now, which takes Amsterdam from 454 draws to 399, London from 438 to 420 and Versailles from 442 to 433 with nothing changed to the eye. Checked in the browser after v12.31: Samarkand and Madurai arrive lighter (Samarkand's frame from 5.2 M triangles to 3.5 M, Madurai's from 8.3 M to 5.5 M) and look the same.

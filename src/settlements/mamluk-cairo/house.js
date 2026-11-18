@@ -96,8 +96,8 @@ export function cairoHouseOpen(el, { bag, col, lights }) {
       continue;
     }
     if (rawshan) {
-      bag.add('lattice', B(c - ww / 2, c + ww / 2, UF + 0.95, UF + 2.45, -ARC - 0.38, -ARC - 0.06));
-      for (const s of [-1, 1]) { bag.add('lattice', B(c + s * ww / 2 - 0.03, c + s * ww / 2 + 0.03, UF + 0.95, UF + 2.45, -ARC - 0.38, -ARC)); bag.add('wood_dark', B(c + s * ww / 2 - 0.05, c + s * ww / 2 + 0.05, UF + 0.85, UF + 2.55, -ARC - 0.42, -ARC)); }
+      bag.add('lattice', B(c - ww / 2, c + ww / 2, UF + 0.98, UF + 2.42, -ARC - 0.36, -ARC - 0.08));
+      for (const s of [-1, 1]) { bag.add('lattice', B(c + s * ww / 2 - 0.03, c + s * ww / 2 + 0.03, UF + 0.98, UF + 2.42, -ARC - 0.36, -ARC - 0.02)); bag.add('wood_dark', B(c + s * ww / 2 - 0.05, c + s * ww / 2 + 0.05, UF + 0.85, UF + 2.55, -ARC - 0.42, -ARC)); }
       bag.add('wood_dark', B(c - ww / 2 - 0.08, c + ww / 2 + 0.08, UF + 2.45, UF + 2.6, -ARC - 0.46, -ARC)); bag.add('wood_dark', B(c - ww / 2 - 0.08, c + ww / 2 + 0.08, UF + 0.78, UF + 0.95, -ARC - 0.46, -ARC));
       bag.add('wood_dark', B(c - ww / 2 - 0.04, c + ww / 2 + 0.04, UF + 2.6, UF + 2.66, -ARC - 0.5, -ARC + 0.04));
       bag.add('timber', B(c - ww / 2 + 0.3, c + ww / 2 - 0.3, UF + 1.35, UF + 1.4, -ARC - 0.4, -ARC - 0.38));       // the middle rail of the screen
@@ -125,7 +125,7 @@ export function cairoHouseOpen(el, { bag, col, lights }) {
   wall(0, T, 0, D, y, y + HU); wall(L - T, L, 0, D, y, y + HU); wall(T, L - T, D - T, D, y, UF); col.rect(R(T, L - T, D - T, D), UF, y + HU);
   { const bw = [0.3, 0.72].map((f) => T + f * (L - 2 * T)), hs = bw.map((c) => [[c - 0.4, FB + 1.0], [c + 0.4, FB + 1.0], [c + 0.4, FB + 2.1], [c - 0.4, FB + 2.1]]);
     bag.add('plaster_white', poly([[T, UF], [L - T, UF], [L - T, y + HU], [T, y + HU]], D - T, D, hs));
-    for (const c of bw) { bag.add('lattice', B(c - 0.4, c + 0.4, FB + 1.0, FB + 2.1, D - 0.02, D + 0.04)); bag.add('wood_dark', B(c - 0.46, c + 0.46, FB + 2.1, FB + 2.2, D - 0.04, D + 0.1)); } }
+    for (const c of bw) { bag.add('lattice', B(c - 0.4, c + 0.4, FB + 1.0, FB + 2.08, D - 0.02, D + 0.04)); bag.add('wood_dark', B(c - 0.46, c + 0.46, FB + 2.1, FB + 2.2, D - 0.04, D + 0.1)); } }
   // ── the strip behind the front: the vestibule (u 0.5–3.4), the room beyond its partition (3.9–L−0.5), the wall to the court
   const sOpen = [2.2, 3.3], kd = [4.0, 5.0];
   wall(T, sOpen[0], DA, DA + SW, y, y + H); wall(sOpen[1], kd[0], DA, DA + SW, y, y + H); wall(kd[1], L - T, DA, DA + SW, y, y + H);
@@ -136,7 +136,7 @@ export function cairoHouseOpen(el, { bag, col, lights }) {
   bag.add(upper, poly([[T, UF], ...archPoly(dA, UF, 0.9, 2.3), [L - T, UF], [L - T, y + HU], [T, y + HU]], DA, DA + SW, cwin.map(({ c, w }) => [[c - w / 2 + 0.05, UF + 0.95], [c + w / 2 - 0.05, UF + 0.95], [c + w / 2 - 0.05, UF + 2.4], [c - w / 2 + 0.05, UF + 2.4]])));
   col.rect(R(T, dA, DA, DA + SW), UF, y + HU - 0.34); col.rect(R(dA + 0.9, L - T, DA, DA + SW), UF, y + HU - 0.34); col.rect(R(dA, dA + 0.9, DA, DA + SW), UF + 2.3, y + HU - 0.34);
   voussoirs(bag, fr, mu(dA, dA + 0.9), UF, 0.9, 2.3, 0.1, -dC0u - 0.02, -dC0u + 0.03, ['marble_dark', 'marble_smooth'], 5);
-  for (const { c, w } of cwin) { bag.add('lattice', B(c - w / 2, c + w / 2, UF + 0.95, UF + 2.4, dC0u, dC0u + 0.06)); bag.add('wood_dark', B(c - w / 2 - 0.06, c + w / 2 + 0.06, UF + 2.4, UF + 2.5, dC0u, dC0u + 0.2)); bag.add('wood_dark', B(c - w / 2 - 0.06, c + w / 2 + 0.06, UF + 0.86, UF + 0.95, dC0u, dC0u + 0.2)); }
+  for (const { c, w } of cwin) { bag.add('lattice', B(c - w / 2, c + w / 2, UF + 0.97, UF + 2.38, dC0u, dC0u + 0.06)); bag.add('wood_dark', B(c - w / 2 - 0.06, c + w / 2 + 0.06, UF + 2.4, UF + 2.5, dC0u, dC0u + 0.2)); bag.add('wood_dark', B(c - w / 2 - 0.06, c + w / 2 + 0.06, UF + 0.86, UF + 0.95, dC0u, dC0u + 0.2)); }
   for (const [d0, d1] of [[0.05, 1.2], [2.2, DA]]) { bag.add('plaster_white', B(3.4, 3.9, UF, y + HU - 0.34, d0, d1)); col.rect(R(3.4, 3.9, d0, d1), UF, y + HU - 0.34); }
   bag.add('plaster_white', B(3.4, 3.9, UF + 2.2, y + HU - 0.34, 1.2, 2.2)); col.rect(R(3.4, 3.9, 1.2, 2.2), UF + 2.2, y + HU - 0.34);
   bag.add('wood_dark', B(3.4, 3.9, UF + 2.2, UF + 2.28, 1.15, 2.25));
