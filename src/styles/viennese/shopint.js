@@ -6,8 +6,7 @@
 // buckets, the Kaffeehaus's marble tables with bentwood chairs and newspapers on their holders. Everything is on the face's frame
 // (u along the front, v up, d outward); the room is SHOP_RD deep behind a wall SHOP_T thick (layout.js keeps the same numbers).
 import { box, lathe, rod } from '../../core/geom.js';
-import {  } from '../dutch/facade.js';
-import { fbox } from './fbox.js';
+import { fbox } from '../dutch/facade.js';
 import { FURNITURE } from '../modernisme/furniture.js';
 import { lettering } from './lettering.js';
 import { rng } from './detail.js';

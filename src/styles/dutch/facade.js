@@ -3,7 +3,7 @@
 // face — so that a gable, a window or a stoop is written once whichever way the house fronts.
 // Convex prisms only (anything curved is built of strips); used by the Dutch and Victorian styles.
 
-import { fromTriangles, orientOutward } from '../../core/geom.js';
+import { box, fromTriangles, orientOutward } from '../../core/geom.js';
 
 /** The frame of a rect's face `f` ('n','s','e','w'): { w (face width), D (depth), at(u, d) → [x, z] }. */
 export function faceFrame(rect, f) {
@@ -22,7 +22,11 @@ export function prism(F, y, pts, d0, d1) {
 }
 
 /** A facade box: u0..u1, v0..v1, d0..d1. */
-export const fbox = (F, y, u0, u1, v0, v1, d0, d1) => prism(F, y, [[u0, v0], [u1, v0], [u1, v1], [u0, v1]], d0, d1);
+export function fbox(F, y, u0, u1, v0, v1, d0, d1) {
+  // An axis-aligned world box (core box()), so identical boxes of every facing share one prototype and instance as one draw per material.
+  const a = F.at(u0, d0), b = F.at(u1, d1);
+  return box(Math.min(a[0], b[0]), y + Math.min(v0, v1), Math.min(a[1], b[1]), Math.max(a[0], b[0]), y + Math.max(v0, v1), Math.max(a[1], b[1]));
+}
 
 /**
  * A symmetric outline round u = uc, half-width hw(v) from v0 to v1 in `n` strips (trapezoids):

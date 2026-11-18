@@ -3,8 +3,7 @@
 // their holders, marble tables with Thonet chairs, a counter and a billiard table, globe lamps — with the house's upper floors.
 // Built on the corner's two street faces (front 's' to Friedrichstraße, side 'e' to the cross street).
 import { box, lathe, rod } from '../../core/geom.js';
-import { faceFrame } from '../dutch/facade.js';
-import { fbox } from './fbox.js';
+import { faceFrame, fbox } from '../dutch/facade.js';
 import { facade, rng } from './mietshaus.js';
 import { FURNITURE } from '../modernisme/furniture.js';
 

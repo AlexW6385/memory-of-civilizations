@@ -4,8 +4,7 @@
 // rear face of a house on its Hof with the Pawlatschen galleries, and the Durchhaus passage with its lamp, its Portier's window and
 // its letter boxes. All drawn on a face's own frame (u along the front, v up, d outward; styles/dutch/facade.js).
 import { box, lathe, rod } from '../../core/geom.js';
-import { prism } from '../dutch/facade.js';
-import { fbox } from './fbox.js';
+import { prism, fbox } from '../dutch/facade.js';
 
 /** Soot, damp, streaks, patches and pipes on one front. o: { w, H, G (ground floor height), floors, kind, lod, seed-stream r, trim }. */
 export function weather(bag, F, y, o) {
