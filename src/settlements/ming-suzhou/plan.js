@@ -12,6 +12,7 @@ import {
 import { ground } from './ground.js';
 import { lots } from './layout.js';
 import { upOf, routeOf } from './uphouses.js';
+import { SHORE, hash2 } from './taihu.js';
 
 void PLACED; void MOUNDS;
 const G = LEVEL.garden;
@@ -43,6 +44,7 @@ const PATHS = [
   [[45, -57], [52, -62], [57, -66]],                                     // up to the Green Ripples
   [[-56, -50], [-58, -44], [-55, -40.6]],
 ];
+const hashAt = (x, z) => hash2(x, z, 9);
 const nearWalk = (x, z, m) => PATHS.some((p) => polyDist(x, z, p) < m) || nearBridge(x, z, m) || nearBuilding(x, z, m) || nearRockPath(x, z, m);
 // the revetment (bo an): rubble laid along the shore of the pond and of every island, two courses
 // stepping down into the water, so that nowhere does turf meet the water; it stops at the bridges'
@@ -63,7 +65,7 @@ E.push({ t: 'revetment', arcs, dist: pondDistance, ground: H, water: LEVEL.pond,
 // Taihu stones along the shores and on the hills: a few standing in the water, some on the bank,
 // singly or in pairs, none on a path; the near ones fine, the far ones plain (garden-stone.js).
 // The near shapes (lod 0) and the far (lod 1) are drawn from short lists so that each is instanced many times.
-const FAR = [7, 10, 12, 13], NEAR = [5, 6, 7, 8, 9, 10, 12, 13];
+const FAR = SHORE.slice(8, 12), NEAR = SHORE.slice(0, 8);      // (taihu.js: each shape is instanced a dozen times or more)
 const stones = [];
 for (const [si, sh] of shore.entries()) {
   const per = Math.PI * (sh.r[0] + sh.r[1]);
@@ -77,15 +79,15 @@ for (const [si, sh] of shore.entries()) {
     for (let k = 0; k < m; k++) {
       const off = (rand() < 0.35 ? -0.4 : 0.55 + rand() * 0.6) + k * 0.5, t = k * 1.1 + (rand() - 0.5) * 0.4;
       const px = x + nx * off - nz * t, pz = z + nz * off + nx * t;
-      stones.push({ x: px, z: pz, near: nearWalk(px, pz, 7), s: 0.65 + rand() * 0.7, si });
+      stones.push({ x: px, z: pz, near: nearWalk(px, pz, 9), s: 0.65 + rand() * 0.7, si });
     }
   }
 }
 const nNear = stones.filter((q) => q.near).length, nFar = stones.length - nNear;
 const useNear = NEAR.slice(0, Math.max(1, Math.min(NEAR.length, Math.floor(nNear / 12)))), useFar = FAR.slice(0, Math.max(1, Math.min(FAR.length, Math.floor(nFar / 12))));
-let kn = 0, kf = 0;
 for (const q of stones) {
-  const near = q.near, v = near ? useNear[kn++ % useNear.length] : useFar[kf++ % useFar.length];
+  // (the shape by a hash of the stone's own place: no two neighbours alike, and the same plan builds the same stones)
+  const near = q.near, hq = hashAt(q.x, q.z), v = near ? useNear[Math.floor(hq * useNear.length)] : useFar[Math.floor(hq * useFar.length)];
   E.push({ t: 'taihu', c: [q.x, q.z], y: H(q.x, q.z) + 0.12, v, s: q.s, lod: near ? 0 : 1, yaw: rand() * TAU, tx: (rand() - 0.5) * 0.12, tz: (rand() - 0.5) * 0.12 });
 }
 // the rockery hills on the islands and the mounds: tall single stones (the peaks of the garden) and piles
@@ -98,12 +100,12 @@ for (const [i, s] of [...ISLANDS.slice(0, 2), ...MOUNDS].entries()) {
     const feature = tall < 2 && i < 2;
     if (feature) tall++;
     const v = feature ? 2 + ((i + tall) % 2) : [5, 6, 7, 8, 9, 10][(i + k) % 6];
-    E.push({ t: 'taihu', c: [x, z], y: H(x, z) - 0.05, v, s: feature ? 0.8 + rand() * 0.35 : 0.7 + rand() * 0.5, lod: 0, yaw: rand() * TAU, tx: (rand() - 0.5) * 0.08, tz: (rand() - 0.5) * 0.08, solid: true });
+    E.push({ t: 'taihu', c: [x, z], y: H(x, z) - 0.05, v, s: feature ? 0.8 + rand() * 0.35 : 0.7 + rand() * 0.5, lod: feature ? 0 : 2, hero: feature, yaw: rand() * TAU, tx: (rand() - 0.5) * 0.08, tz: (rand() - 0.5) * 0.08, solid: true });
   }
 }
 // the standing stones at the focal points: two peaks flanking the terrace of the Hall of Distant
 // Fragrance, one in the loquat court's corner, one at the lake's west end by the Leaning Jade
-for (const [x, z, v, sc] of [[-12.5, -26.6, 0, 0.95], [12.5, -26.6, 2, 1.15], [47.8, -11, 3, 0.85], [-33.5, -21, 2, 0.9]]) E.push({ t: 'taihu', c: [x, z], y: H(x, z) - 0.05, v, s: sc, lod: 0, yaw: x > 0 ? 0.3 : -0.3, plinth: true, solid: true });
+for (const [x, z, v, sc] of [[-12.5, -26.6, 0, 0.95], [12.5, -26.6, 2, 1.15], [47.8, -11, 3, 0.85], [-33.5, -21, 2, 0.9]]) E.push({ t: 'taihu', c: [x, z], y: H(x, z) - 0.05, v, s: sc, lod: 0, hero: true, yaw: x > 0 ? 0.3 : -0.3, plinth: true, solid: true });
 // the paths up the island hills among piled stone, from the bridges to the hill pavilions (a
 // short grotto on the way up to Snowy Fragrance; docs/settlements/ming-suzhou.md §5)
 ROCK_PATHS.forEach((p, i) => {
@@ -224,8 +226,8 @@ for (const s of [-1, 1]) rwall([s * SX, rz1], [s * SX, rz0], { gates: [54, 44, 3
 E.push({ t: 'ming_hall', rect: [-34, 30, -22, 36], y: G + 0.35, H: 3.8, front: 'e', four: true, roof: 'xieshan', plat: 0.35, walls: { n: 'plaster', s: 'plaster', w: 'board' }, winWall: true, trim: true, lat: { door: 'lattice_ice', window: 'lattice_ice' } });
 E.push({ t: 'ming_hall', rect: [22, 44, 34, 50], y: G + 0.35, H: 3.8, front: 'w', four: false, roof: 'gable', plat: 0.35, winWall: true, trim: 'lite', lat: { door: 'lattice_wan', window: 'lattice_wan' } });
 // standing stones on rough stone feet in the side courts; round them the courts are paved in pebble mosaic: a crane before the east hall's door, a lotus before the study's, coins and a plum in the west court
-E.push({ t: 'taihu', c: [-30, 44], y: G + 0.04, v: 3, s: 0.95, lod: 0, yaw: 0.4, plinth: true, solid: true });
-E.push({ t: 'taihu', c: [28, 32], y: G + 0.04, v: 3, s: 1.0, lod: 0, yaw: -0.5, plinth: true, solid: true });
+E.push({ t: 'taihu', c: [-30, 44], y: G + 0.04, v: 3, s: 0.95, lod: 0, hero: true, yaw: 0.4, plinth: true, solid: true });
+E.push({ t: 'taihu', c: [28, 32], y: G + 0.04, v: 3, s: 1.0, lod: 0, hero: true, yaw: -0.5, plinth: true, solid: true });
 E.push({ t: 'pebble_paving', rect: [16.2, 42.2, 21.2, 51.2], y: G + 0.035, field: 'hex', medallion: 'crane', at: [18.7, 46.7], d: 4.6, seed: 3 });
 E.push({ t: 'pebble_paving', rect: [-21.4, 29.5, -16.2, 40.3], y: G + 0.035, field: 'coin', medallion: 'lotus', at: [-18.8, 35], d: 4.6, seed: 4 });
 E.push({ t: 'pebble_paving', rect: [-38, 42.2, -16.2, 51.2], y: G + 0.035, field: 'coin', medallion: 'plum', at: [-26, 46.7], d: 5.2, seed: 5 });
