@@ -7,16 +7,28 @@ import { lifePlan } from './life.js';
 
 const base = (id, elements, bounds, rooms = []) => ({ id, style: 'timurid', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms, bounds, entrance: { at: [38, 0], facing: 'w' } });
 
-export async function town() {
-  const all = houses().slice().sort((p, q) => Math.hypot(p.rect[0], p.rect[1]) - Math.hypot(q.rect[0], q.rect[1])), plans = [];
-  for (let i = 0; i < all.length; i += 24) {
-    const part = all.slice(i, i + 24), rooms = [];
+/** How far from the visitor the houses are built in full (m): a house within 69 m of him is always in full (tiles are 100 m); the arrival, in the Registan, sees the far form of every house but the nearest few. */
+const NEAR = 140;
+/** The houses in tiles of 100 m, each built twice (src/settlements/lod.js): in full within NEAR of the visitor (rooms and colliders with it), solid and bare beyond (no colliders). */
+function houseTiles(all) {
+  const tiles = new Map();
+  for (const h of all) { const k = `${Math.floor((h.rect[0] + h.rect[2]) / 200)},${Math.floor((h.rect[1] + h.rect[3]) / 200)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(h); }
+  const plans = [];
+  for (const [k, part] of tiles) {
+    const [i, j] = k.split(',').map(Number), center = [i * 100 + 50, j * 100 + 50], rooms = [];
     for (const h of part) if (h.full && !h.garden) {
       const G = houseGeom(h), [ax, az] = G.toWorld(-3.6, -G.D / 2 + 2.3), [bx2, bz] = G.toWorld(3.6, -G.D / 2 + 4.8);
       rooms.push({ id: `talar ${h.seed}`, rect: [Math.min(ax, bx2), Math.min(az, bz), Math.max(ax, bx2), Math.max(az, bz)], y: 0.45, kind: 'hall' });
     }
-    plans.push({ ...base(`samarkand-houses-${i / 24}`, part.map((h) => ({ t: h.garden ? 'tim_garden' : 'tim_house', h })), [-RADIUS, -RADIUS, RADIUS, RADIUS]), rooms });
+    const els = (simple) => part.map((h) => ({ t: h.garden ? 'tim_garden' : 'tim_house', h, ...(simple ? { simple: true } : {}) }));
+    plans.push({ ...base(`samarkand-houses-${k}`, els(false), [-RADIUS, -RADIUS, RADIUS, RADIUS], rooms), center, near: NEAR });
+    plans.push({ ...base(`samarkand-houses-${k}-far`, els(true), [-RADIUS, -RADIUS, RADIUS, RADIUS]), center, far: NEAR, nocollide: true });
   }
+  return plans;
+}
+
+export async function town() {
+  const plans = houseTiles(houses());
   plans.push(base('samarkand-bibi-khanym', [{ t: 'bibi_khanym', c: BIBI.c }], [BIBI.c[0] - 105, BIBI.c[1] - 105, BIBI.c[0] + 105, BIBI.c[1] + 105], [{ id: 'bibi prayer hall', rect: [BIBI.c[0] - 0.7071 * 62 - 8, BIBI.c[1] + 0.7071 * 62 - 8, BIBI.c[0] - 0.7071 * 62 + 8, BIBI.c[1] + 0.7071 * 62 + 8], y: 0, kind: 'hall' }, { id: 'bibi court', rect: [BIBI.c[0] - 30, BIBI.c[1] - 30, BIBI.c[0] + 30, BIBI.c[1] + 30], y: 0, kind: 'open' }]));
   plans.push(base('samarkand-gur-e-amir', [{ t: 'gur_e_amir', rect: GUR.rect }], [GUR.rect[0] - 8, GUR.rect[1] - 8, GUR.rect[2] + 8, GUR.rect[3] + 8], [{ id: 'mausoleum', rect: [(GUR.rect[0] + GUR.rect[2]) / 2 - 6, GUR.rect[3] - 13 - 6, (GUR.rect[0] + GUR.rect[2]) / 2 + 6, GUR.rect[3] - 13 + 6], y: 0, kind: 'hall' }, { id: 'mausoleum passage', rect: [(GUR.rect[0] + GUR.rect[2]) / 2 - 2, GUR.rect[3] - 26, (GUR.rect[0] + GUR.rect[2]) / 2 + 2, GUR.rect[3] - 19], y: 0, kind: 'hall' }]));
   plans.push({ ...base('samarkand-observatory', [{ t: 'observatory', c: OBS.c, y: OBS.y, r: OBS.r, ground: hillHeight }], [OBS.c[0] - 60, OBS.c[1] - 40, OBS.c[0] + 60, OBS.c[1] + 80], [{ id: 'observatory hall', rect: [OBS.c[0] - 14, OBS.c[1] - 14, OBS.c[0] + 14, OBS.c[1] + 14], y: OBS.y, kind: 'hall' }]) });

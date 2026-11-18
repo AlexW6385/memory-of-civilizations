@@ -131,6 +131,29 @@ export function timHouse(el, ctx) {
   const zf = z0 + dN, zs = z1 - dS, xl = x0 + dW, xr = x1 - dW;      // the court's edges
   const xd = Math.max(x0 + 3.2, Math.min(x1 - 3.2, h.xd)), PW = 2.2, DH = 2.75;
   const rsgn = rand() < 0.5 ? -1 : 1;                              // the wing with the room (west −1, east +1)
+  if (el.simple) {
+    // the far form (src/settlements/lod.js): the masses of the wings in the house's wall, the parapets, the passage's lintel; nothing inside, one material
+    const zb2 = zf - 2.5;
+    bx(bag, WALL, x0, 0, z0, -3.6, HN, zf); bx(bag, WALL, 3.6, 0, z0, x1, HN, zf); bx(bag, WALL, -3.6, 0, z0, 3.6, HN, zb2); bx(bag, WALL, -3.6, 3.3, zb2, 3.6, HN, zf);
+    bx(bag, WALL, x0, 0, zs, xd - PW / 2, HS, z1); bx(bag, WALL, xd + PW / 2, 0, zs, x1, HS, z1); bx(bag, WALL, xd - PW / 2, DH, zs, xd + PW / 2, HS, z1);
+    bx(bag, WALL, x0, 0, zf, xl, H, zs); bx(bag, WALL, xr, 0, zf, x1, H, zs);
+    bx(bag, WALL, x0, HN, z0, x1, HN + 0.6, z0 + 0.3); bx(bag, WALL, x0, H, z0 + 0.3, x0 + 0.3, H + 0.6, zs); bx(bag, WALL, x1 - 0.3, H, z0 + 0.3, x1, H + 0.6, zs);
+    bx(bag, WALL, x0 + 0.3, HN, zf - 0.3, x0 + 3.5, HN + 0.5, zf); bx(bag, WALL, 3.7, HN, zf - 0.3, x1 - 0.3, HN + 0.5, zf);
+    if (!rich) { bx(bag, WALL, x0, HS, z1 - 0.3, x1, HS + 0.65, z1); bx(bag, WALL, x0, HS, zs, x0 + 0.3, HS + 0.6, z1 - 0.3); bx(bag, WALL, x1 - 0.3, HS, zs, x1, HS + 0.6, z1 - 0.3); }
+    // the openings of the full form at the same places (the same random draws): windows and the passage's mouth as flat dark boxes, the beam ends as a dark strip under each parapet
+    const D0 = 'wood_dark', nil = { add() {} }, hW = [];
+    const S2 = faceOf([x0, z1], [x1, z1], [0, 1]), N2 = faceOf([x1, z0], [x0, z0], [0, -1]), E2 = faceOf([x1, z1], [x1, z0], [1, 0]), W2 = faceOf([x0, z0], [x0, z1], [-1, 0]);
+    const swin = []; for (const s0 of [3.4, W - 3.4]) if (Math.abs(s0 - (xd - x0)) > 2.2 && rand() < 0.8) swin.push(s0);
+    const skip = [[xd - x0 - 1.8, xd - x0 + 1.8]], br = WALL === 'brick_buff';
+    const face = (f, hh, wy, wins, sk) => { dressFace(f, nil, rand, { H: hh, wy, windows: wins, skip: sk, brick: br }); for (const s0 of wins) f.put(bag, D0, s0 - 0.34, s0 + 0.34, wy, wy + 0.5, 0, 0.03); f.put(bag, D0, 0.3, f.L - 0.3, hh - 0.3, hh - 0.2, 0, 0.03); };
+    face(S2, HS, rich ? 5.0 : 2.5, rich ? [4.5, W - 4.5, W / 2 + 3] : swin, skip);
+    face(N2, HN, 2.5, rand() < 0.5 ? [W / 2] : []);
+    face(E2, H, 2.4, full && rsgn > 0 ? [] : [D / 2]); face(W2, H, 2.4, full && rsgn < 0 ? [] : [D / 2]);
+    bx(bag, D0, xd - PW / 2, 0, z1 - 0.6, xd + PW / 2, DH, z1 - 0.55);
+    if (full) { const zc = (zf + zs) / 2; bx(bag, D0, rsgn < 0 ? x0 - 0.03 : x1, 1.6, zc - 0.4, rsgn < 0 ? x0 : x1 + 0.03, 2.4, zc + 0.4); }
+    void hW;
+    return;
+  }
   // ---- the wings (solid), the roofs walkable, the parapets
   solid(fr, WALL, x0, z0, -3.6, zf, 0, HN); solid(fr, WALL, 3.6, z0, x1, zf, 0, HN);          // the north wing round the talar's recess
   const zb = zf - 2.5;
@@ -348,6 +371,14 @@ export function timGarden(el, ctx) {
   const h = el.h, G = houseGeom(h), fr = frame(ctx, G.cx, G.cz, h.k), { bag, col, lights } = fr, rand = rng(h.seed + 11);
   const W = G.W, D = G.D, x0 = -W / 2, x1 = W / 2, z0 = -D / 2, z1 = D / 2, T = 0.55, HW = 2.4;
   const gx = Math.max(x0 + 3, Math.min(x1 - 3, h.xd)), GW = 2.4;
+  if (el.simple) {
+    // the far form: the wall round the orchard, the gate's lintel
+    const wb = (xa, za, xb, zb2) => bx(bag, 'kahgel', xa, 0, za, xb, HW, zb2);
+    wb(x0, z0, x1, z0 + T); wb(x0, z0 + T, x0 + T, z1); wb(x1 - T, z0 + T, x1, z1); wb(x0 + T, z1 - T, gx - GW / 2, z1); wb(gx + GW / 2, z1 - T, x1 - T, z1);
+    bx(bag, 'kahgel', gx - GW / 2, HW - 0.2, z1 - T, gx + GW / 2, HW, z1);
+    bx(bag, 'wood_dark', gx - GW / 2, 0, z1 - T - 0.05, gx + GW / 2, HW - 0.2, z1 - T);      // the gate's mouth
+    return;
+  }
   const wall = (xa, za, xb, zb2) => { solid(fr, 'kahgel', xa, za, xb, zb2, 0, HW); bx(bag, 'brick_buff', xa - 0.05, HW, za - 0.05, xb + 0.05, HW + 0.1, zb2 + 0.05); };
   wall(x0, z0, x1, z0 + T); wall(x0, z0 + T, x0 + T, z1); wall(x1 - T, z0 + T, x1, z1);
   wall(x0 + T, z1 - T, gx - GW / 2, z1); wall(gx + GW / 2, z1 - T, x1 - T, z1);
