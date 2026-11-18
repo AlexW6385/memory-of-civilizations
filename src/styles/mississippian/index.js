@@ -39,13 +39,13 @@ function greatHouse(el, { bag, col }) {
 /** house: { rect, y, foot, seed } — a wall-trench house: low clay walls, a steep thatched hip or gable, a doorway. */
 function house(el, ctx) {
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y ?? 0, foot = el.foot ?? y - 0.4, rand = rng(el.seed || 1);
-  if (el.open) return openHouse(el, ctx);
+  if (el.open && !el.simple) return openHouse(el, ctx);
   const wh = 1.75 + rand() * 0.5;                                            // wall height varies from house to house
   bag.add(WALL, box(x0, foot, z0, x1, y + wh, z1)); col.rect(el.rect, foot, y + wh);
   // earth banked against the foot of the walls [stated: "dirt banked along woven mat walls" — Illinois State Museum]
   const lod0 = el.lod ?? 0, fr = frontRule(el.seed || 1, lod0, x1 - x0), f = el.door ? (el.door === 'n' ? z0 : z1) : rand() < 0.5 ? z0 : z1, sg = f === z0 ? -1 : 1, mx = (x0 + x1) / 2 + fr.off, hw = fr.hw;
   bankRing(bag, el.rect, foot, fr.fin === 'banked' ? y + 0.9 : y + 0.32, fr.fin === 'banked' ? 0.65 : 0.45, sg < 0 ? 'n' : 's', mx, hw);
-  if (fr.fin !== 'plaster') matWalls(bag, el.rect, y, fr.fin === 'banked' ? 0.88 : 0.28, wh, { wall: sg < 0 ? 'n' : 's', x: mx, hw, top: 1.5 }, lod0);
+  if (fr.fin !== 'plaster') matWalls(bag, el.rect, y, fr.fin === 'banked' ? 0.88 : 0.28, wh, { wall: sg < 0 ? 'n' : 's', x: mx, hw, top: 1.5 }, el.simple ? 2 : lod0);
   const along = (x1 - x0) >= (z1 - z0), rise = 2.4 + rand() * 1.6, o = 0.3 + rand() * 0.25;
   const hipped = rand() < 0.5;
   if (hipped) thatchHip(bag, el.rect, y + wh, rise, o + 0.1, 3 + (rand() < 0.4 ? 1 : 0));
@@ -55,11 +55,13 @@ function house(el, ctx) {
     else { const hx = (x1 - x0) / 2 + o; bag.add(TH, frustum(r, y + wh, y + wh + rise, hx, hx, 0, 0, { noTop: true })); bag.add(TH, rod([(x0 + x1) / 2, y + wh + rise + 0.04, z0 - o - 0.1], [(x0 + x1) / 2, y + wh + rise + 0.04, z1 + o + 0.1], 0.2, 7)); }
   }
   // the ridge's ends finished with crossed poles on some of the gabled houses [inferred]
-  if (!hipped && (el.lod ?? 0) < 2 && rand() < 0.4) {
+  if (!hipped && (el.lod ?? 0) < 2 && rand() < 0.4 && !el.simple) {
     const ry = y + wh + rise + 0.05, cr = (a, b) => { for (const s2 of [-1, 1]) bag.add('timber', rod([a - (along ? 0.35 * s2 : 0), ry - 0.1, b - (along ? 0 : 0.35 * s2)], [a + (along ? 0.35 * s2 : 0), ry + 0.8, b + (along ? 0 : 0.35 * s2)], 0.03, 5)); };
     if (along) { cr(x0 - o - 0.1, (z0 + z1) / 2); cr(x1 + o + 0.1, (z0 + z1) / 2); } else { cr((x0 + x1) / 2, z0 - o - 0.1); cr((x0 + x1) / 2, z1 + o + 0.1); }
   }
   bag.add('opening', box(mx - hw, y, Math.min(f, f + sg * 0.05), mx + hw, y + 1.5, Math.max(f, f + sg * 0.05)));
+  // the far copy (el.simple, drawn beyond the near tiles' reach; no colliders: the plan is nocollide): walls, bank, roof and doorway only
+  if (el.simple) return;
   // the door posts and the lintel pole across them, the clay sill
   const z0d = Math.min(f, f + sg * 0.16), z1d = Math.max(f, f + sg * 0.16);
   for (const sd of [-1, 1]) bag.add(el.seed % 7 === 0 ? 'timber_red' : 'timber', box(mx + sd * (hw + 0.08) - 0.07, foot, z0d, mx + sd * (hw + 0.08) + 0.07, y + 1.72, z1d));

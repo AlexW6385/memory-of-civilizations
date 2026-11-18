@@ -8,6 +8,7 @@ function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 
 const face = (from, to) => Math.atan2(-(to[0] - from[0]), -(to[1] - from[1]));     // a figure faces −z when rot = 0
 const base = (id, elements, style = 'mississippian') => ({ id, style, origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-25, -5], facing: 'n' } });
 const dist0 = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 + 25, (l.rect[1] + l.rect[3]) / 2 + 5);
+const NEAR = 150, TILE = 100;   // m: the houses' tiles are drawn in full within NEAR of the visitor, simple beyond
 let OPEN = null;
 /** The houses that can be walked into: the 26 nearest the ramp below Monks Mound, then one in four to 230 m and one in six to 290 m, about 150 in all (docs §5.14). */
 export function openSet() {
@@ -22,8 +23,19 @@ const near = () => [...openSet().keys()].slice(0, 4);
 export async function houses() {
   const all = lots().map((l) => ({ ...l, g: height }));
   for (const [k, kind] of openSet()) { all[k].open = true; all[k].kind = kind; }
+  // each tile of houses twice (as src/settlements/lod.js): in full (open houses furnished, eye-level dressing, goods) within NEAR of the visitor, simple (solid, no interiors, no colliders) beyond
+  const tiles = new Map();
+  for (const l of all) {
+    const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, k = `${Math.floor(cx / TILE)},${Math.floor(cz / TILE)}`;
+    if (!tiles.has(k)) tiles.set(k, []);
+    tiles.get(k).push({ t: 'miss_house', ...l });
+  }
   const plans = [];
-  for (let i = 0; i < all.length; i += 150) plans.push(base(`cahokia-houses-${i / 150}`, all.slice(i, i + 150).map((l) => ({ t: 'miss_house', ...l }))));
+  for (const [k, list] of tiles) {
+    const [i, j] = k.split(',').map(Number), center = [(i + 0.5) * TILE, (j + 0.5) * TILE];
+    plans.push({ ...base(`cahokia-houses-${k}`, list), near: NEAR, center });
+    plans.push({ ...base(`cahokia-houses-${k}-far`, list.map((e) => ({ ...e, simple: true }))), far: NEAR, center, nocollide: true });
+  }
   return [...plans, ...yards(all), ...fences(all), ...fillers(), ...plazaGoods(), ...fieldsAndCreek(), base('cahokia-people', life(), 'life')];
 }
 
