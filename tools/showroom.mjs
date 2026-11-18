@@ -24,7 +24,8 @@
 //   --hour 10.5                the local hour (default mid-morning; --night 1 means 22)
 //   --weather <id>             hold the weather in this state (as ?weather=: snow, monsoon, lake-mist,
 //                              fog, harmattan, khamsin … src/planet/setpieces.js and the grounds)
-//   --season winter|spring|summer|autumn   the open country's season (as ?season=; default today's)
+//   --season winter|spring|summer|autumn   the season: the sun's height and the open country (as ?season=; default today's)
+//   --moon 0…1                 the moon's phase, held (as ?moon=: 0 new, 0.25 first quarter, 0.5 full; default today's)
 //   --fov 68                   the camera's field of view (default the game's: 68°, 78° portrait)
 //   --night 1  --size 1280x720 --quality high|medium|low  --frames 2
 //   --timeout 1200             seconds to wait for the page to build and draw, and again for the
@@ -103,7 +104,7 @@ const out = opt('out', 'shots/showroom.png');
 mkdirSync(dirname(resolve(out)), { recursive: true });
 try {
   // (no build workers: the page builds only what it was asked for)
-  await page.goto(`http://127.0.0.1:${srv.address().port}/tools/showroom.html?worker=0${opt('season') ? '&season=' + opt('season') : ''}${flag('nomerge') ? '&merge=0' : ''}`, { timeout: TIMEOUT });
+  await page.goto(`http://127.0.0.1:${srv.address().port}/tools/showroom.html?worker=0${opt('season') ? '&season=' + opt('season') : ''}${opt('moon') ? '&moon=' + opt('moon') : ''}${flag('nomerge') ? '&merge=0' : ''}`, { timeout: TIMEOUT });
   await Promise.race([page.waitForFunction('window.DONE === true', null, { timeout: TIMEOUT, polling: 1000 }), failed]);
   await page.screenshot({ path: out, timeout: TIMEOUT });
   const info = await page.evaluate(() => window.INFO), times = await page.evaluate(() => window.TIMES);

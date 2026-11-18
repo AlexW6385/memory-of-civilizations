@@ -251,3 +251,28 @@ Sources: [CCA, *White Walls and Black Tiles*](https://cca.qc.ca/en/articles/issu
 - **Roof tiles and rafters (L3, built).** The main slopes of the two halls carry rows of cover tiles (*gai wa*) every 21 cm from ridge to eave on the roof's own curve, standing 7 cm proud; under the eaves a rafter (*chuan*) every 27 cm, on the soffit's curve, from the wall plate to the eave edge. [inferred: a Jiangnan tiled roof is laid in alternating pan and cover tiles in rows down the slope, and the eaves are rafter-borne; dimensions ours]
 - **The terrace balustrade (L3, built).** Before the Hall of Distant Fragrance a bluestone parapet 0.95 m high along the pond edge and the two ends of the terrace: posts every ~1.9 m with foot, shaft, collar and a lotus-bud head, between them a top rail with an under-moulding, a foot rail, and a framed panel with a raised lozenge medallion on each face. [inferred: stone balustrades (*lan gan*) of posts, rails and panels on garden terraces; bluestone (*qing shi*) is the stone of the Suzhou gardens' paving and steps; the medallion is our reading]
 - **Moon gates dressed (L3, built).** Round the brick rim of each moon gate, on both faces, a stepped moulding of three rings (a broad band, a bead and a fillet), and a stepped rosette in each upper spandrel. [inferred: gates in Suzhou's walls are lined and framed with moulded grey brick (§5); the rosettes are our reading]
+
+## 18. The garden core and the residence at 2 m: audit and round 3 (`corework.js`, `pebbles.js`, `lifework.js`)
+
+Audit of DESIGN.md §5 against the garden core and the residence, from the code and close renders. State: done / partly / missing.
+
+| Item | State before | What was missing |
+|---|---|---|
+| Eave tile ends, drip tiles, ridge cap, hip scrolls | missing (rows of cover tiles only) | the round tile end at every cover-tile row, the drip tile, the ridge foot and the coin at its middle, the scroll at each hip |
+| Brackets, purlins, beam bosses | missing (plain dou block) | profile brackets under the eave, purlin run, carved bosses on the beam band |
+| Carved door panels | missing | the roundel on each foot panel of the door leaves |
+| Gate tablets | blank boards | an inscription |
+| Pebble medallions | flat tinted mosaic cells | real pebbles with relief |
+| Rooms' objects and figures (gate hall, sedan hall, women's room, east hall, Little Canglang, five pavilions) | empty or one table | furniture and one person each where the dossier gives one |
+| Taihu stones near the paths | partly (blobby, dark triangle patches, in the shared `garden-stone.js`) | piercing and wrinkling; not touched this round |
+| Zigzag bridge rail posts, thresholds, steps, terrace paving wear | partly | plain posts, little wear; not touched |
+| Pavilion roofs, Xiangzhou stone boat, Jianshan tower trim and interiors | missing | no trim, no furnishing; not touched |
+| Leaky windows' tracery variety, lamps and coloured light, sound, animals in the core | partly / missing | not re-audited this round |
+
+Built this round:
+
+- **Roof ends and bracket work** (`hallTrim`). Round tile ends and drip tiles on the cover-tile rows of each hall's eave, a footed ridge cap with a coin at the middle, a scroll at each of the four hips, profile brackets with a dou block, a purlin run on each side, three lobed bosses on the beam band. The Hall of Distant Fragrance, the Leaning Jade Pavilion and the main residence halls get all of it; the east hall and the gate halls get a lighter version. [inferred: from the roof forms of Suzhou halls (§5); the exact profiles are ours.]
+- **Carved door roundels** (`doorCarving`). A stepped roundel on both faces of each door leaf's foot panel, each one differing in size by a hash of its position. [inferred: foot panels of Jiangnan door leaves carry a carved panel (§5).]
+- **Gate tablets** (`tabletText`). Strokes cut into the tablet above each gate, generic strokes in the pattern of a three- or two-character inscription, not real characters. [inferred.]
+- **Pebble medallions** (`pebbleMedal`). The crane, plum and lotus laid in raised pebbles of the court's own materials, cell 13 cm, each pebble a low pyramid with a hash offset. [stated: Suzhou pebble courts carry crane, plum and lotus figures (§5, Sources).]
+- **Rooms furnished** (`hallLife`). Gate hall: a bench, a doorkeeper. Sedan hall: two sedan chairs on trestles, a bearer resting. Women's room: an embroidery frame with a woman at it, a dressing table with mirror, a couch, a wardrobe. East hall: two tables with four stools each, a long table, two cabinets, a hanging scroll, a steward. [inferred: a family dining and tea hall.] Little Canglang: a qin table with its player, a couch with a low table. The pavilions: a stone table and stools (Hefeng, with a go board; Daishuang; Wuzhu), a seat and table (Xuexiang, Lvyi), with a person in four. All in materials the garden's fine pieces already use, so the draws do not rise.

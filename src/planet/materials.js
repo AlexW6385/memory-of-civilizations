@@ -71,7 +71,8 @@ export function groundMaterial() {
   const rnoise = noiseT(vec3(P.x.mul(0.6), 0, P.z.mul(0.6)));
   const rphase = along.mul(48.0).add(rnoise.mul(5.0));
   const patch = smoothstep(-0.15, 0.45, noiseT(vec3(P.x.mul(0.07), 0, P.z.mul(0.07))));
-  const ripple = sin(rphase).mul(aaFade(fwidth(along.mul(48.0)))).mul(patch);
+  const dphase = along.mul(11.0).add(rnoise.mul(3.0).add(noiseT(vec3(P.x.mul(0.02), 0, P.z.mul(0.02))).mul(6.0)));
+  const ripple = sin(rphase).mul(aaFade(fwidth(along.mul(48.0)))).mul(patch).add(sin(dphase).mul(aaFade(fwidth(along.mul(11.0)))).mul(1.9).mul(float(1).sub(patch).mul(0.7).add(0.3)));
   const sandN = when(sandOn, () => noiseT(vec3(across.mul(0.08), 0, along.mul(0.6))));
   const sand = C('#c8aa80').mul(big.mul(0.16).add(1)).mul(huge.mul(0.12).add(1)).mul(sandN.mul(0.06).add(1));
   // grass: green to straw, in clumps; tropical grass richer
@@ -162,7 +163,15 @@ export function seaMaterial() {
   const w1 = noiseT(vec3(P.x.mul(0.05).add(t.mul(0.3)), t.mul(0.1), P.z.mul(0.05)));
   const w2 = noiseT(vec3(P.x.mul(0.31), t.mul(0.35), P.z.mul(0.27).sub(t.mul(0.6))));
   const w3 = noiseT(vec3(P.x.mul(1.7), t.mul(0.9), P.z.mul(1.5))).mul(detailFade());
-  const hgt = w1.mul(0.35).add(w2.mul(0.12)).add(w3.mul(0.03));
+  // a river's current (chunk.js flow: east, south, strength, rapids): streaks drawn out along the flow
+  // and running down it, quicker and whiter over rapids; the sea's own waves elsewhere
+  const fl = attribute('flow', 'vec4'), fdir = fl.xy.div(length(fl.xy).max(0.001)), fk = fl.z.mul(smoothstep(0.0, 0.25, length(fl.xy)));
+  const along = P.x.mul(fdir.x).add(P.z.mul(fdir.y)), across = P.z.mul(fdir.x).sub(P.x.mul(fdir.y));
+  const speed = float(1.1).add(fl.w.mul(2.2));
+  const r1 = noiseT(vec3(along.mul(0.16).sub(time.mul(speed)), across.mul(0.9), 3.7));
+  const r2 = noiseT(vec3(along.mul(0.55).sub(time.mul(speed.mul(1.7))), across.mul(2.6), 8.1));
+  const stream = r1.mul(0.1).add(r2.mul(0.05)).mul(detailFade().mul(0.7).add(0.3));
+  const hgt = mix(w1.mul(0.35).add(w2.mul(0.12)).add(w3.mul(0.03)), stream.add(w1.mul(0.08)), fk);
   // the surface normal in world space: the planet's up at this point, tilted by the waves
   const nrm = bump(hgt, 1);
   m.normalNode = nrm;
@@ -170,8 +179,10 @@ export function seaMaterial() {
   const foam = smoothstep(0.6, 0.0, depth).mul(smoothstep(-0.2, 0.5, noiseT(vec3(P.x.mul(0.8), t.mul(1.5), P.z.mul(0.8)))));
   const deep = mix(C('#0d2a3a'), C('#123b44'), fbmT(S.big.mul(0.002)).mul(0.5).add(0.5));
   const body = mix(deep, C('#2f6f6a'), shallow.mul(0.8));
-  m.colorNode = mix(body, C('#e8ecec'), foam.mul(0.8));
-  m.roughnessNode = mix(float(0.04), float(0.6), foam);
+  const white = fl.w.mul(smoothstep(0.1, 0.55, r2.mul(0.5).add(0.5).add(r1.mul(0.25)))).mul(fk);
+  const riverBody = mix(body, C('#4b6a58'), fk.mul(0.35));
+  m.colorNode = mix(riverBody, C('#e8ecec'), max(foam.mul(0.8), white.mul(0.85)));
+  m.roughnessNode = mix(float(0.04), float(0.6), max(foam, white));
   m.metalness = 0;
   m.name = 'planet-sea';
   return m;

@@ -14,6 +14,7 @@ import { quad4 } from '../japanese/shape.js';
 import { Acc, rafters, tileRows, stackedRidge, onigawara, hipRidge } from './roofwork.js';
 import { barredWindows, shachi as shachiFish, karaHafu, samaWall, katomado } from './detail.js';
 import { machiyaShop, zashiki, kago, daisho } from './rooms.js';
+import { upPlan, buildUp } from './upper.js';
 import { yashikiParts } from './yard.js';
 import { nagayaOpen, yardFace } from './nagaya.js';
 import { kido, hinomiYagura, kosatsu, jizo, inari } from './street.js';
@@ -806,7 +807,8 @@ function machiya(el, { bag, col }) {
   const rand = rng(el.seed || 1), [x0, z0, x1, z1] = el.rect, f = el.front || 's', dep = Math.min(11, z1 - z0);
   const r = f === 's' ? [x0, z1 - dep, x1, z1] : [x0, z0, x1, z0 + dep];
   const fz = f === 's' ? r[3] : r[1], s = f === 's' ? 1 : -1, H1 = 3.2, H2 = 2.5 + rand() * 0.6;
-  if (el.open) machiyaShop(el, { bag, col }, { r, H1, H2 });
+  const UP = el.open && el.up ? upPlan(el, r, H1, H2) : null;
+  if (el.open) machiyaShop(el, { bag, col }, { r, H1, H2, up: UP });
   else {
     bag.add(PL, box(r[0], 0, r[1], r[2], H1 + H2, r[3]));
     col.rect(r, 0, H1 + H2);
@@ -814,14 +816,16 @@ function machiya(el, { bag, col }) {
     machiyaFront(bag, col, { x0, x1, fz, s, H1, seed: el.seed, trade: el.trade || 'cloth' });
   }
   bag.add(WD, box(x0, H1 - 0.25, Math.min(fz, fz + s * 0.1), x1, H1, Math.max(fz, fz + s * 0.1)));
-  mushikoMado(bag, col, { x0, x1, fz, s, v0: H1 + 0.75, v1: H1 + H2 - 0.2, rand });
+  if (UP) buildUp(el, { bag, col }, UP); else mushikoMado(bag, col, { x0, x1, fz, s, v0: H1 + 0.75, v1: H1 + H2 - 0.2, rand });
   // the pent roof over the street, the main roof (ridge along the street)
   const pent = f === 's' ? [x0, fz - 0.2, x1, fz + 1.1] : [x0, fz - 1.1, x1, fz + 0.2];
   const pt = [], ye = H1 + 0.05;
+  if (!(UP && UP.balcony)) {
   const o = f === 's' ? [[pent[0], ye + 0.6, pent[1]], [pent[2], ye + 0.6, pent[1]], [pent[2], ye, pent[3]], [pent[0], ye, pent[3]]] : [[pent[0], ye, pent[1]], [pent[2], ye, pent[1]], [pent[2], ye + 0.6, pent[3]], [pent[0], ye + 0.6, pent[3]]];
   pt.push(...o[0], ...o[1], ...o[2], ...o[0], ...o[2], ...o[3]);
   bag.add(TL, fromTriangles(pt.concat([...o[0], ...o[2], ...o[1], ...o[0], ...o[3], ...o[2]])));
   eaveBand(bag, col, { x0, x1, fz, s, y: H1 + 0.05, q0: -1.1, q1: -1.04 });
+  }
   roof(bag, r, H1 + H2 - 0.1, 0.6, 'gable', dep * 0.3, { alongZ: false, sweep: 0 });
   ridgeCap(bag, x0 - 0.6, x1 + 0.6, H1 + H2 - 0.1 + dep * 0.3, (r[1] + r[3]) / 2);
   col.floor(r, H1 + H2);

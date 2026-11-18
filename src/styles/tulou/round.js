@@ -7,7 +7,7 @@
 import { STYLES } from '../../core/build.js';
 import { box, disc, lathe, rod } from '../../core/geom.js';
 import { DEG, P, hexa, sector, slope, lbox, frameOf, prism, plank } from './geo.js';
-import { furnishRooms } from './rooms.js';
+import { furnishRooms, fillRoom } from './rooms.js';
 import { roofRows, cobbleFoot, windowHood, jbox, lslab, couplet, rnd } from './detail.js';
 
 const EARTH = 'mud_plaster', INNER = 'earth_wall', TIMBER = 'timber', TILE = 'tile_grey';
@@ -355,20 +355,62 @@ export function tulouRound(el, ctx) {
   if (furn.length) furnishRooms(el, ctx, { front, wallIn, n, da, fl, c, furn });
 }
 
-/** The second ring: rooms of two storeys between r0 and r1: the ground floor walkable, the upper closed behind a lattice front. */
+/**
+ * The second ring: rooms of two storeys between r0 and r1; the ground floor walkable. The upper storey (g.up, docs §4.8) is open: a balcony
+ * g.bal wide on the court, carried on posts, with its rail; a door in every room's front under a lattice; partitions up to the roof; the
+ * floors colliders; each room furnished by its kind (g.kinds); two open stairs in the court (g.stair), straight flights with a landing
+ * onto the balcony. Without `up` the upper storey stays closed behind a lattice front.
+ */
 function ring2(el, ctx) {
   const { bag, col } = ctx, g = el.ring2, c = el.c, n = g.n, da = 2 * Math.PI / n, [, f1] = g.floors, top = g.eave;
-  const o = { ro: g.r1 + 1.0, ye: top - 0.15, rr: (g.r0 + g.r1) / 2 + 0.2, yr: g.ridge, ri: g.r0 - 1.1, yi: top + 0.15 };
+  const up = !!g.up, rb = g.r0 - (up ? g.bal ?? 1.5 : 0.9);
+  const o = { ro: g.r1 + 1.0, ye: top - 0.15, rr: (g.r0 + g.r1) / 2 + 0.2, yr: g.ridge, ri: g.r0 - (up ? 1.8 : 1.1), yi: top + 0.15 };
   const roofY = roofer(g.r1, o);
   const pass = (i) => i % (n / 4) === 0, ri = g.r1 - 0.7;
   const wedge = (a0, a1, rA, rB) => [P(c, rA, a0), P(c, rA, a1), P(c, rB, a1), P(c, rB, a0)];
+  // the stairs (two, the second the first turned half round the court): world rectangles, and the arc of the balcony's rail that the landing opens
+  const S = g.stair, stairs = up && S ? [1, -1].map((s) => {
+    const W = (X, Z) => [c[0] + s * X, c[1] + s * Z];
+    const rect = (X0, Z0, X1, Z1) => { const a = W(X0, Z0), b = W(X1, Z1); return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])]; };
+    const land = rect(S.X1, S.Zn, S.XL, S.Zs);
+    let a0 = Infinity, a1 = -Infinity;
+    for (let d = 0; d < 360; d += 0.1) { const [x, z] = P(c, rb, d * DEG); if (x >= land[0] && x <= land[2] && z >= land[1] && z <= land[3]) { a0 = Math.min(a0, d * DEG); a1 = Math.max(a1, d * DEG); } }
+    return { s, W, rect, land, a0: a0 - 0.004, a1: a1 + 0.004 };
+  }) : [];
+  const inGap = (a, m = 0) => { const q = ((a % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI); return stairs.some((st) => q >= st.a0 - m && q <= st.a1 + m); };
+  /** The part of [l, h] (angles) that the landings leave: the rail's pieces. */
+  const railPieces = (l, h) => {
+    if (l < 0) { l += 2 * Math.PI; h += 2 * Math.PI; }
+    let ps = [[l, h]];
+    for (const st of stairs) ps = ps.flatMap(([p, q]) => (st.a1 <= p || st.a0 >= q ? [[p, q]] : [...(st.a0 > p ? [[p, st.a0]] : []), ...(st.a1 < q ? [[st.a1, q]] : [])]));
+    return ps.filter(([p, q]) => (q - p) * rb > 0.05);
+  };
   for (let i = 0; i < n; i++) {
-    const a0 = (i - 0.5) * da, a1 = (i + 0.5) * da, ytO = roofY(g.r1) - 0.16, ytI = roofY(ri) - 0.16;
-    // the upper floor, on a balcony projecting 0.9 m into the court
-    bag.add(TIMBER, prism(wedge(a0, a1, g.r0 - 0.9, ri), f1 - 0.26, f1));
-    for (let b = 0; b < 3; b++) { const p = P(c, g.r0 - 0.9, a0 + (a1 - a0) * (b + 0.5) / 3); bag.add('timber', box(p[0] - 0.04, f1, p[1] - 0.04, p[0] + 0.04, f1 + 1.0, p[1] + 0.04)); }
-    const m0 = P(c, g.r0 - 0.9, a0), m1 = P(c, g.r0 - 0.9, a1);
-    bag.add(TIMBER, rod([m0[0], f1 + 1.0, m0[1]], [m1[0], f1 + 1.0, m1[1]], 0.035, 5));
+    const a0 = (i - 0.5) * da, a1 = (i + 0.5) * da, ac = i * da, ytO = roofY(g.r1) - 0.16, ytI = roofY(ri) - 0.16;
+    // the upper floor, on a balcony projecting into the court
+    bag.add(TIMBER, prism(wedge(a0, a1, rb, ri), f1 - 0.26, f1));
+    if (up) {
+      // the floor as colliders: the balcony strip and the room, each in slices (a bounding box of a slice overhangs little)
+      for (const [rA, rB, ns] of [[rb, g.r0, 5], [g.r0, ri, 4]]) for (let q = 0; q < ns; q++) {
+        const pts = wedge(a0 + (a1 - a0) * q / ns, a0 + (a1 - a0) * (q + 1) / ns, rA, rB), xs = pts.map((p) => p[0]), zs = pts.map((p) => p[1]);
+        col.floor([Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)], f1);
+      }
+      const b0 = P(c, rb - 0.02, a0), b1 = P(c, rb - 0.02, a1);
+      bag.add('timber', rod([b0[0], f1 - 0.22, b0[1]], [b1[0], f1 - 0.22, b1[1]], 0.08, 5));
+    }
+    for (let b = 0; b < 3; b++) {
+      const aa = a0 + (a1 - a0) * (b + 0.5) / 3;
+      if (up && inGap(aa, 0.004)) continue;
+      const p = P(c, rb, aa); bag.add('timber', box(p[0] - 0.04, f1, p[1] - 0.04, p[0] + 0.04, f1 + 1.0, p[1] + 0.04));
+    }
+    if (up) for (const [l, h] of railPieces(a0, a1)) {
+      const m0 = P(c, rb, l), m1 = P(c, rb, h);
+      bag.add(TIMBER, rod([m0[0], f1 + 1.0, m0[1]], [m1[0], f1 + 1.0, m1[1]], 0.035, 5));
+      col.segment(m0, m1, 0.12, f1, f1 + 1.1);
+    } else {
+      const m0 = P(c, rb, a0), m1 = P(c, rb, a1);
+      bag.add(TIMBER, rod([m0[0], f1 + 1.0, m0[1]], [m1[0], f1 + 1.0, m1[1]], 0.035, 5));
+    }
     // the outer wall: granite foot, rammed earth; over a passage only the lintel course
     if (pass(i)) bag.add(EARTH, sector(c, g.r1, ri, g.r1, ri, 3.1, [ytO, ytI], a0, a1));
     else {
@@ -376,22 +418,83 @@ function ring2(el, ctx) {
       bag.add(EARTH, sector(c, g.r1, ri, g.r1, ri, 0.9, [ytO, ytI], a0, a1));
       col.segment(P(c, (g.r1 + ri) / 2, a0), P(c, (g.r1 + ri) / 2, a1), g.r1 - ri, 0, top);
       bag.add('ground', prism(wedge(a0, a1, g.r0, ri), 0, 0.025));
-      // the room's front on the court, a door in it; above, the lattice
+      // the room's front on the court, a door in it; above, the lattice (the upper storey of an open ring: its own front, below)
       const f0 = P(c, g.r0, a0), f1p = P(c, g.r0, a1), L = Math.hypot(f1p[0] - f0[0], f1p[1] - f0[1]), ux = (f1p[0] - f0[0]) / L, uz = (f1p[1] - f0[1]) / L, at = (d) => [f0[0] + ux * d, f0[1] + uz * d];
       const d0 = L / 2 - 0.62, d1 = L / 2 + 0.62;
       bag.add(TIMBER, plank(f0, at(d0), 0, f1, 0.08)); bag.add(TIMBER, plank(at(d1), f1p, 0, f1, 0.08)); bag.add(TIMBER, plank(at(d0), at(d1), 2.1, f1, 0.08));
       col.segment(f0, at(d0), 0.08, 0, f1); col.segment(at(d1), f1p, 0.08, 0, f1);
       for (const q of [at(d0), at(d1)]) bag.add('wood_dark', box(q[0] - 0.045, 0, q[1] - 0.045, q[0] + 0.045, 2.1, q[1] + 0.045));
-      const sub = (s0, s1) => [P(c, g.r0, a0 + (a1 - a0) * s0), P(c, g.r0, a0 + (a1 - a0) * s1)];
-      bag.add(TIMBER, plank(...sub(0, 1), f1, f1 + 0.9, 0.1));
-      bag.add('lattice', plank(...sub(0.12, 0.88), f1 + 0.9, top - 0.45, 0.06));
-      bag.add(TIMBER, plank(...sub(0, 1), top - 0.45, roofY(g.r0) - 0.16, 0.1));
+      if (!up) {
+        const sub = (s0, s1) => [P(c, g.r0, a0 + (a1 - a0) * s0), P(c, g.r0, a0 + (a1 - a0) * s1)];
+        bag.add(TIMBER, plank(...sub(0, 1), f1, f1 + 0.9, 0.1));
+        bag.add('lattice', plank(...sub(0.12, 0.88), f1 + 0.9, top - 0.45, 0.06));
+        bag.add(TIMBER, plank(...sub(0, 1), top - 0.45, roofY(g.r0) - 0.16, 0.1));
+      }
     }
-    // the partition on the boundary at a1 (the sides of the passages too)
-    if (!(pass(i) && pass(i + 1))) { const q0 = P(c, g.r0, a1), q1 = P(c, ri, a1); bag.add(TIMBER, plank(q0, q1, 0, f1, 0.1)); col.segment(q0, q1, 0.1, 0, f1); }
+    if (up) {
+      // the upper front: boards either side of a door 1.24 wide, a header, a lattice transom, boards to the roof; couplets and a paper strip
+      const q0 = P(c, g.r0, a0), q1 = P(c, g.r0, a1), L = Math.hypot(q1[0] - q0[0], q1[1] - q0[1]), ux = (q1[0] - q0[0]) / L, uz = (q1[1] - q0[1]) / L, at = (d) => [q0[0] + ux * d, q0[1] + uz * d];
+      const d0 = L / 2 - 0.62, d1 = L / 2 + 0.62, yt = roofY(g.r0) - 0.16;
+      bag.add(TIMBER, plank(q0, at(d0), f1, yt, 0.08)); bag.add(TIMBER, plank(at(d1), q1, f1, yt, 0.08));
+      bag.add(TIMBER, plank(at(d0), at(d1), f1 + 2.1, f1 + 2.4, 0.08));
+      bag.add('lattice', plank(at(d0), at(d1), f1 + 2.4, f1 + 3.1, 0.05));
+      bag.add(TIMBER, plank(at(d0), at(d1), f1 + 3.1, yt, 0.08));
+      col.segment(q0, at(d0), 0.08, f1, f1 + 3.3); col.segment(at(d1), q1, 0.08, f1, f1 + 3.3);
+      for (const q of [at(d0), at(d1)]) bag.add('wood_dark', box(q[0] - 0.045, f1, q[1] - 0.045, q[0] + 0.045, f1 + 2.1, q[1] + 0.045));
+      const ph = Math.PI / 2 - ac, mid = P(c, g.r0, ac);
+      for (const sg of [-1, 1]) bag.add('lacquer_red', lbox(mid[0], mid[1], ph, sg > 0 ? 0.74 : -0.88, f1 + 0.9, -0.13, sg > 0 ? 0.88 : -0.74, f1 + 2.0, -0.06));
+      bag.add('cloth_red', lbox(mid[0], mid[1], ph, -0.5, f1 + 2.18, -0.13, 0.5, f1 + 2.3, -0.06));
+      // the partition on the boundary at a1, to the soffit
+      const p0 = P(c, g.r0, a1), p1 = P(c, ri, a1), th = 0.1, L2 = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]), nx = -(p1[1] - p0[1]) / L2 * th / 2, nz = (p1[0] - p0[0]) / L2 * th / 2;
+      const ring = (yp, yq, y0) => [[p0[0] - nx, yp, p0[1] - nz], [p0[0] + nx, yp, p0[1] + nz], [p1[0] + nx, yq, p1[1] + nz], [p1[0] - nx, yq, p1[1] - nz]].map((q) => (y0 === undefined ? q : [q[0], y0, q[2]]));
+      bag.add(TIMBER, hexa(ring(roofY(g.r0) - 0.16, roofY(ri) - 0.16), ring(0, 0, f1)));
+      col.segment(p0, p1, 0.1, f1, f1 + 3.3);
+      // the room, furnished by its kind: the grain floor, sleeping rooms, a sitting room, a loom
+      const rc = P(c, ri - 2.0, ac);
+      fillRoom(ctx, { ox: rc[0], oz: rc[1], phi: ph, y: f1 }, g.kinds?.[i] ?? 'bedroom', { light: g.light?.[i] ?? true, mirror: ((i * 7 + 3) % 5) < 2, seed: i * 13 + 41 });
+    } else if (!(pass(i) && pass(i + 1))) {
+      // the partition on the boundary at a1 (the sides of the passages too)
+      const q0 = P(c, g.r0, a1), q1 = P(c, ri, a1); bag.add(TIMBER, plank(q0, q1, 0, f1, 0.1)); col.segment(q0, q1, 0.1, 0, f1);
+    }
+    if (up && !(pass(i) && pass(i + 1))) { const q0 = P(c, g.r0, a1), q1 = P(c, ri, a1); bag.add(TIMBER, plank(q0, q1, 0, f1, 0.1)); col.segment(q0, q1, 0.1, 0, f1); }
   }
-  // the posts under the balcony, up to the roof
-  for (let i = 0; i < n; i++) { const p = P(c, g.r0 - 0.9, (i + 0.5) * da); bag.add('timber', box(p[0] - 0.09, 0, p[1] - 0.09, p[0] + 0.09, roofY(g.r0 - 0.9) - 0.14, p[1] + 0.09)); col.circle(p[0], p[1], 0.11, 0, top); }
+  // the posts under the balcony, up to the roof (none where a landing opens the rail)
+  for (let i = 0; i < n; i++) {
+    const aa = (i + 0.5) * da;
+    if (up && inGap(aa, 0.012)) continue;
+    const p = P(c, rb, aa); bag.add('timber', box(p[0] - 0.09, 0, p[1] - 0.09, p[0] + 0.09, roofY(rb) - 0.14, p[1] + 0.09)); col.circle(p[0], p[1], 0.11, 0, top);
+  }
+  for (const st of stairs) ringStair(ctx, g, st, f1);
   ringRoof(bag, c, n, o, true);
 }
-export { lathe, STYLES };
+
+/** One open stair of the second ring: a straight flight along an axis from the court floor to the balcony's level, a landing onto the balcony. */
+function ringStair({ bag, col }, g, st, f1) {
+  const S = g.stair, { s, W } = st, N = 17, rise = f1 / N, run = (S.X1 - S.X0) / N, [zl, zh] = [S.Zn, S.Zs];
+  const J = (m, x0, y0, z0, x1, y1, z1, sd) => { const a = W(x0, z0), b = W(x1, z1); bag.add(m, jbox(0, 0, 0, Math.min(a[0], b[0]), y0, Math.min(a[1], b[1]), Math.max(a[0], b[0]), y1, Math.max(a[1], b[1]), sd + (s > 0 ? 0 : 500))); };
+  for (let q = 0; q < N; q++) {
+    const xa = S.X0 + q * run, ty = (q + 1) * rise;
+    J(TIMBER, xa, ty - 0.05, zl, xa + run + 0.03, ty, zh, q * 3);
+    J('wood_dark', xa - 0.01, ty - rise, zl, xa + 0.02, ty - 0.05, zh, q * 3 + 1);
+  }
+  const r = st.rect(S.X0, zl, S.X1, zh);
+  col.ramp(r, 0, f1, s > 0 ? 'e' : 'w');
+  // stringers under the treads, the handrails on both sides with balusters
+  for (const [z, hz] of [[zl + 0.06, zl + 0.04], [zh - 0.06, zh - 0.04]]) {
+    const a = W(S.X0, z), b = W(S.X1, z), h0 = W(S.X0, hz), h1 = W(S.X1, hz);
+    bag.add(TIMBER, rod([a[0], -0.02, a[1]], [b[0], f1 - 0.14, b[1]], 0.06, 5));
+    bag.add(TIMBER, rod([h0[0], 0.95, h0[1]], [h1[0], f1 + 0.95, h1[1]], 0.03, 5));
+    for (let q = 0; q <= 6; q++) { const f = q / 6, p = W(S.X0 + (S.X1 - S.X0) * f, hz); bag.add(TIMBER, rod([p[0], f1 * f, p[1]], [p[0], f1 * f + 0.95, p[1]], 0.02, 4)); }
+  }
+  // the landing, on two posts, with a rail on its open side
+  J(TIMBER, S.X1, f1 - 0.26, zl, S.XL, f1, zh, 90);
+  col.floor(st.land, f1);
+  for (const [x, z, sd] of [[S.X1 + 0.12, zh - 0.1, 91], [S.XL - 0.12, zh - 0.1, 92]]) {
+    J(TIMBER, x - 0.08, 0, z - 0.08, x + 0.08, f1 - 0.26, z + 0.08, sd);
+    const p = W(x, z); col.circle(p[0], p[1], 0.11, 0, f1 - 0.3);
+  }
+  const l0 = W(S.X1, zh - 0.04), l1 = W(S.XL, zh - 0.04);
+  bag.add(TIMBER, rod([l0[0], f1 + 0.95, l0[1]], [l1[0], f1 + 1.0, l1[1]], 0.035, 5));
+  col.segment(l0, l1, 0.12, f1, f1 + 1.1);
+  for (const x of [S.X1 + 0.35, S.XL - 0.35]) { const p = W(x, zh - 0.04); bag.add(TIMBER, rod([p[0], f1, p[1]], [p[0], f1 + 0.98, p[1]], 0.02, 4)); }
+}

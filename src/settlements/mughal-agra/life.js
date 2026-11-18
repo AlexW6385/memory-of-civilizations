@@ -226,6 +226,18 @@ export function life() {
       person([wx, wz], kind === 'weaver' ? 0.32 : 0.04, f.yaw, o); n++;
     }
   }
-  return L;
+  // the doors of the houses whose upper floors are open (styles/mughal/upper.js): nobody stands in the lane to the door
+  const lanes = houses().filter((h) => h.up).map((h) => { const l = layoutOf(h), nCol = Math.max(1, Math.round((l.W - 0.8) / 2.7)), bw = (l.W - 0.8) / nCol; return { f: l.f, hw: l.hw, x: l.shop ? -l.hw + 0.4 + bw * (Math.min(nCol, 2) - 0.5) : l.dx }; });
+  const aside = (e) => {
+    for (const { f, x, hw } of lanes) {
+      if (!e.at || e.t === 'boat') continue;
+      const [wx, wz] = e.at, c = Math.cos(f.yaw), sn = Math.sin(f.yaw), dxw = wx - f.ox, dzw = wz - f.oz, lx = dxw * c - dzw * sn, lz = dxw * sn + dzw * c;
+      if (Math.abs(lx - x) >= 1.5 || lz <= -0.3 || lz >= 3.2) continue;
+      const to = x + (lx < x ? -1 : 1) * 1.7, x2 = Math.abs(to) > hw - 0.4 ? x + (lx < x ? 1 : -1) * 1.7 : to;
+      e.at = [f.ox + x2 * c + lz * sn, f.oz - x2 * sn + lz * c];
+    }
+    return e;
+  };
+  return L.map(aside);
 }
 export const lifePlan = () => ({ id: 'mughal-agra-life', style: 'life', origin: [0, 0], base: 0, yaw: 0, feature: true, elements: life(), rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, 245], facing: 'n' } });

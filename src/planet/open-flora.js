@@ -6,11 +6,12 @@ import * as THREE from 'three/webgpu';
 import { SPECIES, VARIANTS, speciesGeometry } from '../engine/flora/species.js';
 import { foliageMaterial, solidMaterial } from '../engine/flora/index.js';
 import { material as paletteMaterial } from '../engine/materials.js';
-import { TREE_SPECIES, CELL_LEVEL } from './trees.js';
+import { TREE_SPECIES, CELL_LEVEL, COVER_LEVEL } from './trees.js';
 import { dirFace } from './chunk.js';
 import { PLANET_RADIUS as R } from './relief.js';
 import { eastNorth } from './geo.js';
 
+const COVER_REACH = 80;                  // metres round the visitor with ground cover (times the quality's scale)
 const REACH = 650;                       // metres round the visitor whose cells are scattered
 
 export class OpenFlora {
@@ -18,7 +19,7 @@ export class OpenFlora {
     this.group = new THREE.Group();
     this.group.name = 'open-flora';
     group.add(this.group);
-    this.cells = new Map();              // key → { state, data }
+    this.cells = new Map();              // key → { state, data } (trees; ground cover under 'c:' keys)
     this.batches = new Map();
     this.scale = 1;
     this.dirty = false;
@@ -52,11 +53,21 @@ export class OpenFlora {
         want.add(`${f}/${i}/${j}`);
       }
     }
+    // ground cover: small cells within a short reach, only when low
+    if (alt < 120) {
+      const n3 = 1 << COVER_LEVEL, reach = COVER_REACH * Math.min(this.scale, 1.3) + 14, [e, n] = eastNorth(u);
+      for (let y = -reach; y <= reach; y += 12) for (let x = -reach; x <= reach; x += 12) {
+        if (x * x + y * y > reach * reach) continue;
+        const v = [u[0] + (e[0] * x + n[0] * y) / R, u[1] + (e[1] * x + n[1] * y) / R, u[2] + (e[2] * x + n[2] * y) / R];
+        const [f, s, t] = dirFace(v);
+        want.add(`c:${f}/${Math.min(n3 - 1, Math.floor((s + 1) / 2 * n3))}/${Math.min(n3 - 1, Math.floor((t + 1) / 2 * n3))}`);
+      }
+    }
     for (const k of want) if (!this.cells.has(k)) this.cells.set(k, { state: 'queued' });
     for (const [k, c] of this.cells) if (!want.has(k) && c.state !== 'pending') { this.cells.delete(k); this.dirty = true; }
-    this.queue = [...this.cells.entries()].filter(([, c]) => c.state === 'queued').map(([k]) => k);
+    this.queue = [...this.cells.entries()].filter(([, c]) => c.state === 'queued').map(([k]) => k).sort((a, b) => (b[0] === 'c') - (a[0] === 'c'));
     this.pump();
-    const moved = !this.last || Math.hypot(cam[0] - this.last[0], cam[1] - this.last[1], cam[2] - this.last[2]) > 15;
+    const moved = !this.last || Math.hypot(cam[0] - this.last[0], cam[1] - this.last[1], cam[2] - this.last[2]) > (alt < 120 ? 8 : 15);
     if (this.dirty || moved) { this.rebuild(cam); this.last = cam.slice(); this.dirty = false; }
   }
 
@@ -65,23 +76,30 @@ export class OpenFlora {
       if (!w.idle || !this.queue.length) continue;
       const k = this.queue.shift(), c = this.cells.get(k);
       if (!c) continue;
-      const [f, i, j] = k.split('/').map(Number);
+      const cover = k.startsWith('c:'), [f, i, j] = (cover ? k.slice(2) : k).split('/').map(Number);
       c.state = 'pending'; w.idle = false;
-      w.postMessage({ cell: true, key: k, f, i, j });
+      w.postMessage({ cell: true, cover, key: k, f, i, j });
     }
   }
 
   rebuild(cam) {
     const buckets = new Map();
-    for (const c of this.cells.values()) {
+    for (const [k, c] of this.cells) {
       if (c.state !== 'done') continue;
       const d = c.data;
+      const cover = k.startsWith('c:');
       for (let i = 0; i < d.length; i += 8) {
         const sp = TREE_SPECIES[d[i + 3]], S = SPECIES[sp];
         const dist = Math.hypot(d[i] - cam[0], d[i + 1] - cam[1], d[i + 2] - cam[2]);
-        const lod = dist < S.lod[0] * this.scale ? 0 : dist < Math.min(S.lod[1], REACH) * this.scale ? 1 : -1;
+        let lod;
+        if (cover) {
+          // ground cover thins out with distance (each plant has its rank)
+          const far = COVER_REACH * Math.min(this.scale, 1.3), t = Math.max(0, Math.min(1, (dist - 0.3 * far) / (0.7 * far)));
+          if (dist > far || d[i + 4] > 1 - t * t * (3 - 2 * t)) continue;
+          lod = 0;
+        } else lod = dist < S.lod[0] * this.scale ? 0 : dist < Math.min(S.lod[1], REACH) * this.scale ? 1 : -1;
         if (lod < 0) continue;
-        const key = `${sp}/${d[i + 4] % VARIANTS % 2}/${lod}`;          // (two shapes at each level: src/engine/flora/index.js NEAR_VARIANTS)
+        const key = cover ? `${sp}/0/0` : `${sp}/${d[i + 4] % VARIANTS % 2}/${lod}`;          // (two shapes at each level: src/engine/flora/index.js NEAR_VARIANTS)
         if (!buckets.has(key)) buckets.set(key, []);
         buckets.get(key).push(d, i);
       }
@@ -119,7 +137,7 @@ export class OpenFlora {
     if (b) for (const mesh of b.meshes) { this.group.remove(mesh); mesh.dispose(); }
     const S = SPECIES[sp], geo = speciesGeometry(sp, v, lod), cap = Math.max(1100, Math.ceil(n * 1.5));
     const meshes = [];
-    const sway = sp.includes('palm') ? 0.12 : 0.08;
+    const sway = S.sway ?? (sp.includes('palm') ? 0.12 : 0.08);
     if (geo.trunk) meshes.push(new THREE.InstancedMesh(geo.trunk, S.bark === 'rock_boulder' ? paletteMaterial('rock_boulder') : solidMaterial(S.bark, sway * 0.3), cap));
     if (geo.leaves) {
       const mesh = new THREE.InstancedMesh(geo.leaves, geo.solidLeaves ? solidMaterial(S.leafMat, sway) : foliageMaterial(S.foliage, sway, sp), cap);

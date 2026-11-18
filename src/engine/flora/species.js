@@ -353,6 +353,14 @@ export const SPECIES = {
   masson_pine: { make: (s, l) => tree({ height: 15, trunk: { r: 0.26, lean: 0.14, fork: 0.6, limbs: 6, gnarl: 0.3 }, crown: { shape: 'clumps', w: 5, h: 3.2, y: 0.8, clumps: 10, cards: 34, card: 1.5, up: 0.5 } }, s, l), foliage: 'needles', bark: 'bark_redpine', scale: [0.75, 1.2], shadow: true, lod: [180, 1600] },
   mulberry: { make: (s, l) => tree({ height: 5.5, trunk: { r: 0.18, lean: 0.1, fork: 0.22, limbs: 6, gnarl: 0.5 }, crown: { shape: 'round', w: 4.2, h: 2.8, y: 0.58, clumps: 10, cards: 36, card: 1.3, up: 0.2 } }, s, l), foliage: 'broad', bark: 'bark_grey', scale: [0.8, 1.2], shadow: true, lod: [130, 1000] },
   tea: { make: (s, l) => tree({ height: 1.1, trunk: { r: 0.03, lean: 0.1, fork: 0.1, limbs: 3, gnarl: 0.2 }, crown: { shape: 'round', w: 1.2, h: 0.7, y: 0.5, clumps: 5, cards: 20, card: 0.7, up: 0.3 } }, s, l), foliage: 'broad_dark', bark: 'bark_dark', scale: [0.7, 1.3], shadow: false, lod: [60, 300] },
+  // ground cover of the open country (src/planet/trees.js coverMix): meadow and steppe grass, ferns,
+  // wildflowers, heather, rushes; one shape each, drawn near the visitor only
+  tall_grass: { make: (s, l) => tuft(s, l, { h: 0.85, w: 1.0, cards: 4 }), foliage: 'meadow', scale: [0.7, 1.3], shadow: false, lod: [90, 90], sway: 0.16 },
+  steppe_grass: { make: (s, l) => tuft(s, l, { h: 0.8, w: 0.95, cards: 4 }), foliage: 'steppe', scale: [0.7, 1.3], shadow: false, lod: [90, 90], sway: 0.16 },
+  fern: { make: (s, l) => tuft(s, l, { h: 0.65, w: 1.15, cards: 5 }), foliage: 'fern', scale: [0.7, 1.4], shadow: false, lod: [90, 90], sway: 0.1 },
+  flowers: { make: (s, l) => tuft(s, l, { h: 0.55, w: 0.8, cards: 4 }), foliage: 'flowers', scale: [0.7, 1.3], shadow: false, lod: [90, 90], sway: 0.14 },
+  heather: { make: (s, l) => tuft(s, l, { h: 0.34, w: 0.9, cards: 4 }), foliage: 'heather', scale: [0.7, 1.5], shadow: false, lod: [90, 90], sway: 0.06 },
+  rush: { make: (s, l) => tuft(s, l, { h: 1.35, w: 1.0, cards: 5 }), foliage: 'rush', scale: [0.8, 1.3], shadow: false, lod: [90, 90], sway: 0.14 },
   boulder: { make: boulder, bark: 'rock_boulder', scale: [0.4, 2.4], shadow: true, lod: [160, 1000] },
 };
 

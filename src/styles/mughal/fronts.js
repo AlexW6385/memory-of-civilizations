@@ -60,7 +60,16 @@ function charpoyOut(el, { bag, col }) {
 function front(el, ctx) {
   const L = layoutOf(el), { f, hw, shop, st, dx } = L, r = rng(((el.seed | 0) * 13 + 5) >>> 0), E = STYLES.life.elements, pick = (a) => a[Math.floor(r() * a.length)];
   const yaw = f.yaw, at = (lx, lz) => f.pt(lx, lz), sd = () => Math.floor(r() * 1e9);
-  const sub = (name, o) => E[name]({ t: name, ...o }, ctx);
+  // a house with an open upper floor keeps the lane to its door free (styles/mughal/upper.js): what would stand in it is moved aside, along the front
+  const lane = new Set(['charpoy_out', 'chickens', 'animal', 'drying_tray', 'goods_mat', 'pot', 'sacks', 'basket']), laneX = shop ? -hw + 0.4 + ((L.W - 0.8) / Math.max(1, Math.round((L.W - 0.8) / 2.7))) * (Math.min(Math.max(1, Math.round((L.W - 0.8) / 2.7)), 2) - 0.5) : dx;
+  const aside = (o) => {
+    if (!el.up || !o.at) return o;
+    const c = Math.cos(f.yaw), sn = Math.sin(f.yaw), ddx = o.at[0] - f.ox, ddz = o.at[1] - f.oz, lx = ddx * c - ddz * sn, lz = ddx * sn + ddz * c;
+    if (Math.abs(lx - laneX) >= 1.5 || lz < -0.3 || lz > 3.2) return o;
+    const to = laneX + (lx < laneX ? -1 : 1) * 1.7, x2 = Math.abs(to) > hw - 0.5 ? laneX + (lx < laneX ? 1 : -1) * 1.7 : to;
+    return { ...o, at: at(x2, lz) };
+  };
+  const sub = (name, o) => E[name]({ t: name, ...(lane.has(name) ? aside(o) : o) }, ctx);
   const side = r() < 0.5 ? -1 : 1;
   if (shop) {
     // the lamp on the beam, the banner at one end on its bracket, the goods at the platform's other end on the street

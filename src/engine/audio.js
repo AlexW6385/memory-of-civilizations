@@ -4,6 +4,7 @@
 
 import { impulseResponse } from './acoustics.js';
 import { LIFE } from './soundscape.js';
+import { THUNDER } from './env.js';
 
 const mtof = (m) => 440 * Math.pow(2, (m - 69) / 12);
 // the first three formants (Hz) of the vowels a male voice sings, for the street calls and chants
@@ -91,7 +92,7 @@ export class Music {
    */
   ambience(rain, wind, indoors) {
     const ctx = this.ctx;
-    if (!ctx) return;
+    if (!ctx) { THUNDER.length = 0; return; }
     if (!this.amb) {
       const sr = ctx.sampleRate, n = sr * 4, b = ctx.createBuffer(1, n, sr), d = b.getChannelData(0);
       for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
@@ -107,12 +108,41 @@ export class Music {
       noise().connect(wBP); wBP.connect(windG);
       const muffle = ctx.createBiquadFilter(); muffle.type = 'lowpass'; muffle.frequency.value = 18000;
       rainG.connect(muffle); windG.connect(muffle); muffle.connect(this.makeup);
-      this.amb = { rainG, windG, muffle };
+      this.amb = { rainG, windG, muffle, noise: b };
     }
     const t = ctx.currentTime, a = this.amb;
+    while (THUNDER.length) { const th = THUNDER.shift(); this.thunder(t + th.delay, th.dist, th.pan); }
     a.rainG.gain.setTargetAtTime(rain * 0.09, t, 1.5);
     a.windG.gain.setTargetAtTime(0.004 + wind * 0.05, t, 2.5);
     a.muffle.frequency.setTargetAtTime(indoors ? 900 : 18000, t, 0.8);
+  }
+
+  /**
+   * Thunder after a lightning stroke dist km away, heard at `when` (the climate gives the delay of
+   * sound): low-passed noise, the higher frequencies lost with distance; near, a tearing crack and
+   * then the rolling, far only a long low rumble swelling and fading a few times. Indoors muffled
+   * with the rain.
+   */
+  thunder(when, dist, pan = 0) {
+    const ctx = this.ctx, a = this.amb, near = Math.max(0, 1 - dist / 3.5);
+    const level = 0.55 / (1 + dist * 0.55), dur = 3.5 + Math.min(6, dist * 0.8) + Math.random() * 2;
+    const s = ctx.createBufferSource(); s.buffer = a.noise; s.loop = true;
+    const lp1 = ctx.createBiquadFilter(), lp2 = ctx.createBiquadFilter(), g = ctx.createGain(), p = ctx.createStereoPanner();
+    lp1.type = lp2.type = 'lowpass'; lp1.Q.value = 0.7; lp2.Q.value = 0.5;
+    const f0 = 220 + 2600 * near * near;
+    for (const lp of [lp1, lp2]) { lp.frequency.setValueAtTime(f0, when); lp.frequency.exponentialRampToValueAtTime(260 + 500 * near, when + 0.5); lp.frequency.exponentialRampToValueAtTime(80, when + dur); }
+    p.pan.value = pan;
+    g.gain.setValueAtTime(0.0001, when);
+    if (near > 0.2) { g.gain.exponentialRampToValueAtTime(level * (1 + near), when + 0.012); g.gain.exponentialRampToValueAtTime(level * 0.35, when + 0.4); }
+    else g.gain.setTargetAtTime(level * 0.6, when, 0.35);
+    // the roll: swells as the sound arrives from farther parts of the channel
+    for (let k = 0, at = when + 0.5; k < 3 + Math.floor(Math.random() * 3) && at < when + dur * 0.8; k++, at += 0.5 + Math.random() * 1.4) {
+      g.gain.setTargetAtTime(level * (0.4 + 0.6 * Math.random()), at, 0.18);
+      g.gain.setTargetAtTime(level * 0.2, at + 0.3, 0.4);
+    }
+    g.gain.setTargetAtTime(0.0001, when + dur * 0.8, dur * 0.12);
+    s.connect(lp1); lp1.connect(lp2); lp2.connect(g); g.connect(p); p.connect(a.muffle);
+    s.start(when, Math.random() * 3); s.stop(when + dur * 1.3);
   }
 
   /**

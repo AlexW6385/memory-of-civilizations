@@ -7,6 +7,8 @@
 // of a place do not change with the ground's detail.
 
 import { faceDir, tileRect } from './chunk.js';
+import { noise3 } from './noise.js';
+import { cliffK } from './wild.js';
 import { surface, coverAt, PLANET_RADIUS as R } from './relief.js';
 import { SPECIES } from '../engine/flora/species-list.js';
 import { unmapPlanet } from './warp.js';
@@ -105,6 +107,87 @@ export function scatterCell(face, i, j) {
     if (!sp) continue;
     const r = R + g.h - 0.05;
     out.push(u[0] * r, u[1] * r, u[2] * r, IDX[sp], Math.floor(rand() * 4), rand() * Math.PI * 2, rand(), rand());
+  }
+  return new Float32Array(out);
+}
+
+// ── Ground cover ─────────────────────────────────────────────────────────────
+// What grows at the visitor's feet (src/planet/open-flora.js draws it within ~80 m): grass tufts and
+// tall grass, wildflowers in temperate meadows, steppe and savanna grass, heather in the north, ferns
+// in forest, rushes and reeds along rivers and coasts, dry stalks at desert margins. Cells of ~18 m.
+
+export const COVER_LEVEL = 10;
+const COVER_NODES = 8;
+
+/** What grows at a place, as [[species, plants per m²], …] (c: coverAt; ny: how level the ground is). */
+export function coverMix(g, c, u, ny) {
+  const { n, h } = g, warm = n.warm, moist = n.moist;
+  if (g.s && g.s.w > 0.02) return [];
+  if (h < -0.7 || c.snow > 0.35 || c.road > 0.3 || c.fields > 0.3 || ny < 0.62) return [];
+  const px = u[0] * R, py = u[1] * R, pz = u[2] * R;
+  const out = [], add = (sp, d) => { if (d > 0.01) out.push([sp, d]); };
+  const patch = noise3(px / 24 + 2.3, py / 24, pz / 24) * 0.5 + 0.5, blooms = sm(0.5, 0.72, noise3(px / 13 + 9, py / 13, pz / 13) * 0.5 + 0.5);
+  // the waterside: rushes and reeds on the banks of a river and in patches along sheltered coasts
+  const bank = (n.river ?? 0) * (1 - Math.min(1, (n.bar ?? 0) * 2)), shoreK = n.d > 0 ? sm(45, 8, n.d) * sm(0.5, 0.75, patch) * (1 - cliffK(px, py, pz)) * (1 - c.sand * 0.7) : 0;
+  const wet = Math.max(bank, shoreK) * sm(2.4, 0.9, h) * (1 - Math.min(1, c.rock * 2));
+  if (wet > 0.02) { add('reeds', 0.3 * wet); add('rush', 0.6 * wet); }
+  const desert = sm(0.25, 0.12, moist), boreal = sm(0.45, 0.3, warm);
+  const tropical = sm(0.7, 0.85, warm) * sm(0.5, 0.7, moist), savanna = sm(0.65, 0.8, warm) * sm(0.25, 0.4, moist) * (1 - tropical);
+  const steppe = sm(0.2, 0.28, moist) * sm(0.44, 0.34, moist) * (1 - boreal) * (1 - savanna);
+  const temperate = Math.max(0, 1 - desert - boreal - savanna - steppe - tropical * 0.5);
+  const veg = Math.max(0, c.grass + 0.5 * c.soil) * (1 - c.sand) * (1 - c.rock) * (1 - Math.min(1, bank * 2));
+  const forest = c.forest * (1 - bank);
+  const open = veg * (1 - forest * 0.7);
+  add('grass', 0.45 * open * (temperate + tropical * 0.5));
+  add('tall_grass', 0.24 * open * (temperate * patch + tropical * 0.9));
+  add('flowers', 0.34 * open * temperate * blooms * (1 - boreal));
+  add('steppe_grass', 0.5 * open * (steppe + savanna * 1.1));
+  add('grass_dry', 0.26 * open * (steppe + savanna));
+  add('heather', 0.6 * veg * boreal * (1 - forest * 0.5) + 0.15 * c.rock * boreal);
+  add('grass_dry', 0.12 * veg * boreal);
+  add('fern', 0.55 * forest * (1 - boreal * 0.4) * (1 + tropical * 0.6));
+  add('grass', 0.18 * forest * temperate);
+  // desert margins: dry stalks and scrub where something grows at all
+  add('halfa', 0.1 * desert * (1 - c.sand * 0.5) * (0.4 + patch) + 0.02 * desert * c.sand * sm(0.4, 0.7, patch));
+  add('steppe_grass', 0.05 * desert * (1 - c.sand) * sm(0.55, 0.8, patch));
+  return out;
+}
+
+/**
+ * The ground cover of cell (face, i, j) at COVER_LEVEL: a Float32Array of [x, y, z (planet), species,
+ * rank (0…1: the plant's place in the thinning with distance), yaw, scale (0…1), tint (0…1)].
+ */
+export function scatterCover(face, i, j) {
+  const [s0, t0, size] = tileRect(COVER_LEVEL, i, j);
+  const side = size * Math.PI / 4 * R, area = side * side, N = COVER_NODES, W = N + 1;
+  const rand = rng((face + 1) * 40503 ^ (i + 1) * 69069 ^ (j + 1) * 1103515245 ^ 0x5bd1e995);
+  // the ground on a grid of nodes: its height and, from the neighbours, how level it is; what grows at each
+  const U = [], G = [], H = new Float64Array(W * W);
+  for (let b = 0; b < W; b++) for (let a = 0; a < W; a++) {
+    const u = faceDir(face, s0 + size * a / N, t0 + size * b / N), g = surface(u);
+    U.push(u); G.push(g); H[b * W + a] = g.h;
+  }
+  const step = side / N, mixes = [];
+  let any = false;
+  for (let b = 0; b < W; b++) for (let a = 0; a < W; a++) {
+    const k = b * W + a, hx = (H[b * W + Math.min(N, a + 1)] - H[b * W + Math.max(0, a - 1)]) / (step * (Math.min(N, a + 1) - Math.max(0, a - 1)));
+    const hy = (H[Math.min(N, b + 1) * W + a] - H[Math.max(0, b - 1) * W + a]) / (step * (Math.min(N, b + 1) - Math.max(0, b - 1)));
+    const ny = 1 / Math.hypot(hx, hy, 1), c = coverAt(G[k], ny, U[k]), m = coverMix(G[k], c, U[k], ny);
+    mixes.push(m); if (m.length) any = true;
+  }
+  if (!any) return new Float32Array(0);
+  const out = [], cands = Math.round(area * 1.3);
+  for (let k = 0; k < cands; k++) {
+    const a = rand(), b = rand(), pick = rand(), rank = rand(), yaw = rand() * Math.PI * 2, sc = rand(), tint = rand();
+    const ia = Math.min(N - 1, Math.floor(a * N)), ib = Math.min(N - 1, Math.floor(b * N)), fa = a * N - ia, fb = b * N - ib;
+    const near = Math.round(b * N) * W + Math.round(a * N), m = mixes[near];
+    if (!m.length) continue;
+    let acc = 0, sp = null;
+    for (const [s, d] of m) { acc += d / 1.3; if (pick < acc) { sp = s; break; } }
+    if (!sp) continue;
+    const h = (H[ib * W + ia] * (1 - fa) + H[ib * W + ia + 1] * fa) * (1 - fb) + (H[(ib + 1) * W + ia] * (1 - fa) + H[(ib + 1) * W + ia + 1] * fa) * fb;
+    const u = faceDir(face, s0 + size * a, t0 + size * b), r = R + h - 0.04;
+    out.push(u[0] * r, u[1] * r, u[2] * r, IDX[sp], rank, yaw, sc, tint);
   }
   return new Float32Array(out);
 }

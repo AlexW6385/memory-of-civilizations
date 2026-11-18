@@ -2,7 +2,7 @@
 // (instances of shared shapes, in tiles of 100 m that cull by distance): firewood, fire tubs, pots, baskets, benches and
 // handcarts before the merchants' fronts, cats on the pent roofs, dogs in the street; at the samurai gates a lantern, a
 // fire tub, a horse at the hitching post; at the moat's landings baskets and tubs.
-import { lots, furniture, STREET, MIDDLE, LEVEL, RADIUS, HON, NINO } from './layout.js';
+import { lots, furniture, upperHouses, STREET, MIDDLE, LEVEL, RADIUS, HON, NINO } from './layout.js';
 import { yashikiParts } from '../../styles/edo/yard.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -15,15 +15,17 @@ export function props() {
     if (Math.hypot((x0 + x1) / 2, (z0 + z1) / 2) > RADIUS - 24) continue;
     if (l.t === 'machiya') {
       const s = l.front === 's' ? 1 : -1, fz = s > 0 ? z1 : z0, rot = s > 0 ? 0 : Math.PI, Z = (q) => fz + s * q, W = x1 - x0, sd = Math.floor(rand() * 1e9);
-      const r = rand();
+      const r = rand(), n0 = E.length;
       if (r < 0.25) E.push({ t: 'firewood', at: [x1 - 0.9, Z(1.0)], rot: Math.PI / 2, len: 1.25, seed: sd });
       else if (r < 0.45) E.push({ t: 'rain_tub', at: [x0 + 1.0, Z(1.6)], seed: sd });
       else if (r < 0.62) E.push({ t: 'pot', kind: pick(['dark_pot', 'glazed_jar', 'blue_jar']), at: [x0 + 0.9, Z(1.0)], n: 2, seed: sd });
       else if (r < 0.74 && l.trade !== 'tea') E.push({ t: 'bench', at: [x0 + W * 0.5, Z(1.0)], rot: Math.PI / 2 + (s > 0 ? 0 : 0), len: 1.6, seed: sd });
       else if (r < 0.82) E.push({ t: 'handcart', at: [x0 + W * 0.5, Z(2.6)], rot: Math.PI / 2, seed: sd });
       else if (r < 0.9) E.push({ t: 'basket', at: [x1 - 1.1, Z(1.1)], n: 3, seed: sd });
-      if (rand() < 0.3) E.push({ t: 'animal', kind: 'cat', at: [x0 + 0.6 + rand() * (W - 1.2), Z(0.5)], y: H1 + 0.05 + 0.2, rot: rand() * 6.28, seed: sd });
+      { const cat = rand() < 0.3, cx = x0 + 0.6 + (cat ? rand() * (W - 1.2) : 0), cr = cat ? rand() * 6.28 : 0; if (cat && !['inn', 'merchant'].includes(upperHouses().get(l))) E.push({ t: 'animal', kind: 'cat', at: [cx, Z(0.5)], y: H1 + 0.05 + 0.2, rot: cr, seed: sd }); }
       if (rand() < 0.05) E.push({ t: 'animal', kind: 'dog', at: [x0 + W / 2, Z(3.4)], rot: rand() * 6.28, seed: sd });
+      // (the passage of an open upper floor is kept clear: no tub or pot in front of it)
+      if (upperHouses().has(l)) { const keep = E.slice(n0).filter((e) => e.t !== 'rain_tub' && e.t !== 'pot'); E.length = n0; E.push(...keep); }
     } else {
       const P = yashikiParts(l), g = P.g, along = g === 'n' || g === 's', gc = along ? (P.gate[0] + P.gate[2]) / 2 : (P.gate[1] + P.gate[3]) / 2;
       const fq = g === 's' ? z1 : g === 'n' ? z0 : g === 'e' ? x1 : x0, sg = g === 's' || g === 'e' ? 1 : -1;

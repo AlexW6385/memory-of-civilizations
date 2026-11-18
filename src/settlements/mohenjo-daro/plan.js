@@ -2,7 +2,8 @@
 // towers and parapet, the east stair and the south ramp; the Great Bath (court, pool, stairs, gallery of stepped piers, doors, the cells and the well);
 // the granary or great hall on its 27 blocks; the Pillared Hall; the College of Priests. Authored in world coordinates (origin 0, yaw 0).
 
-import { PLAT, MOUND, MOUND_BATTER, EAST_STAIR, SOUTH_RAMP, BATH, GRANARY, PILLARED, COLLEGE, TOP, lanes, inRect } from './layout.js';
+import { PLAT, MOUND, MOUND_BATTER, EAST_STAIR, SOUTH_RAMP, BATH, GRANARY, PILLARED, COLLEGE, TOP, lanes, lots, houseEl, inRect } from './layout.js';
+import { house } from '../../styles/indus/house.js';
 
 const E = [];
 E.push({ t: 'indus_mound', rect: MOUND, y: PLAT, batter: MOUND_BATTER, gaps: [EAST_STAIR.rect, SOUTH_RAMP.rect], hole: BATH.pool });
@@ -49,6 +50,15 @@ const rooms = [
 // the way: up the east stair, across the platform past the Pillared Hall to the Bath's south doors, in, round the court to the pool
 const walks = [[[-30, -44], [-47, -44], [-64, -44], [-67, -48], [-67, -78], [-80, -78], [-114, -78], [-116, -70], [-116, -62], [-147.8, -62], [-147.8, -69], [-147.8, -75], [-147.8, -86], [-147.8, -94]]];
 walks[0].y0 = 0;
+// up the stair of each house with an upstairs: from the lane through the door and the court, up the flight, over the roof, along the loggia into the first upper room
+{
+  const sink = new Proxy(function () {}, { get: () => sink, apply: () => sink });
+  for (const l of lots()) if (l.up) {
+    const ctx = { bag: sink, col: sink, lights: [], route: null };
+    house(houseEl(l), ctx);
+    if (ctx.route) { const w = ctx.route.map(([x, z]) => [+x.toFixed(2), +z.toFixed(2)]); w.y0 = l.y; walks.push(w); }
+  }
+}
 const [bx0, bz0, bx1, bz1] = BATH.outer;
 
 export const citadel = {

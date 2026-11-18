@@ -67,6 +67,23 @@ export function lots() {
   near(-90, 'n').trade = 'sake'; near(70, 's').trade = 'tea'; near(-150, 's').trade = 'tea';
   return LOTS;
 }
+/** Which houses are open inside: a machiya in two (its shop), a samurai compound in two (reception room and retainers' row). */
+export const isOpen = (l) => (l.t === 'machiya' ? l.seed % 2 === 0 || l.trade === 'sake' || l.trade === 'tea' : l.seed % 2 === 0);
+const KIND_OF = { cloth: 'merchant', pottery: 'merchant', medicine: 'dwelling', rice: 'store', sake: 'store', dye: 'craft', oil: 'craft', bucket: 'craft', tea: 'inn', sandals: 'tenement', paper: 'tenement', fish: 'tenement', tofu: 'tenement' };
+let UPPER = null;
+/** The open machiya whose upper floors are open: the twelve nearest the middle of the merchants' street, where the avenue from the main gate meets it (lot -> kind). */
+export function upperHouses() {
+  if (UPPER) return UPPER;
+  const A = [0, STREET.z0], d = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - A[0], (l.rect[1] + l.rect[3]) / 2 - A[1]);
+  UPPER = new Map();
+  let stores = 0;
+  for (const l of lots().filter((l) => l.t === 'machiya' && isOpen(l)).sort((a, b) => d(a) - d(b)).slice(0, 12)) {
+    let k = KIND_OF[l.trade] || 'merchant';
+    if (k === 'store' && stores++ === 1) k = 'tenement';   // (the lodgers' rooms over a rice dealer's)
+    UPPER.set(l, k);
+  }
+  return UPPER;
+}
 let GRID = null;
 export function inLot(x, z, m = 0) {
   if (!GRID) { GRID = new Map(); for (const h of lots()) for (let i = Math.floor((h.rect[0] - 3) / 20); i <= Math.floor((h.rect[2] + 3) / 20); i++) for (let j = Math.floor((h.rect[1] - 3) / 20); j <= Math.floor((h.rect[3] + 3) / 20); j++) { const k = i + ',' + j; if (!GRID.has(k)) GRID.set(k, []); GRID.get(k).push(h); } }

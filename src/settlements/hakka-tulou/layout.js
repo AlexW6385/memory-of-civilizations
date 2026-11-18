@@ -15,11 +15,17 @@ export const T = {
   roomDepth: 4.0, gallery: 1.7,          // rooms from the wall's inner face (r 29.8) inward to 25.8; the gallery 25.8 → 24.1
   wallIn: 29.8, front: 25.8, rail: 24.1,
   // the second ring: 40 rooms, two storeys, between r 14.3 and 17.9; its inner face opens on the hall's court
-  ring2: { n: 40, r0: 14.3, r1: 17.9, floors: [0, 3.4], eave: 6.8, ridge: 8.3 },
+  // up: the upper storey is open (a balcony 1.5 m wide on the court, a door in every room's front, two open stairs in the court);
+  // the stairs are straight flights along an axis, in local x from X0 (foot) to X1 (top) between Zn and Zs, then a landing to XL (mirrored for the second)
+  ring2: { n: 40, r0: 14.3, r1: 17.9, floors: [0, 3.4], eave: 6.8, ridge: 8.3, up: true, bal: 1.5, stair: { X0: 3.3, X1: 7.9, XL: 9.2, Zn: -10.0, Zs: -8.8 } },
   hall: [-7, -5.5, 7, 5.5],
   wells: [[-10.2, 4.0], [10.2, -4.0]],
   gateW: 2.4,
 };
+/** The kind of each room of the second ring's upper storey (docs §4.8): the grain floor, the sleeping rooms and a loom. */
+const h2 = (i, k) => { let h = Math.imul(i + 1, 374761393) ^ Math.imul(k + 7, 668265263); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+T.ring2.kinds = Array.from({ length: T.ring2.n }, (_, i) => { const h = h2(i, 77); return h < 0.3 ? 'granary' : h < 0.8 ? 'bedroom' : 'loom'; });
+T.ring2.light = Array.from({ length: T.ring2.n }, (_, i) => h2(i, 91) > 0.5);
 export const gateOf = (c, R) => [c[0], c[1] + R];
 
 /** Neighbouring tulou (docs §2, §4.2): kind, centre, radius or half-size, storeys. */
