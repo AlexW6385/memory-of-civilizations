@@ -46,6 +46,11 @@ export function loft(rows0, seg = 32, mod = null, sub = 0, lift = null) {
     }
     return line;
   });
+  return ringsToGeometry(ring, seg);
+}
+
+/** The surface through closed rings (arrays of seg + 1 points, the last a copy of the first), smooth normals both ways. */
+export function ringsToGeometry(ring, seg) {
   const R = ring.length, N = ring.map((line, i) => line.map((p, s) => {
     const sp = s === 0 ? seg - 1 : s - 1, sn = s === seg ? 1 : s + 1, lo = ring[Math.max(0, i - 1)][s], hi = ring[Math.min(R - 1, i + 1)][s];
     _u.set(line[sn][0] - line[sp][0], line[sn][1] - line[sp][1], line[sn][2] - line[sp][2]);
@@ -66,6 +71,48 @@ export function loft(rows0, seg = 32, mod = null, sub = 0, lift = null) {
   g.setAttribute('position', new Float32BufferAttribute(pos, 3));
   g.setAttribute('normal', new Float32BufferAttribute(nor, 3));
   return g;
+}
+
+/**
+ * A rounded tube along a path of centres, its sections elliptical: path [[x, y, z]], radii [rx, rz] (or one number) for each
+ * centre, smoothed between them on a Catmull-Rom curve (`sub` rows between each pair). rx runs along `side` (a vector, or
+ * t => vector; default +x) and rz along side × tangent. mod(th, t, i) multiplies both radii (folds, muscle); the ends are
+ * rounded off unless capA / capB are false. This is the limb, the neck, the horse's barrel and the fold of cloth.
+ */
+export function tube(path, radii, o = {}) {
+  const seg = o.seg ?? 8, sub = o.sub ?? 1, n = path.length;
+  const rs = radii.map((r) => (Array.isArray(r) ? r : [r, r]));
+  let rows = path.map((p, i) => ({ x: p[0], y: p[1], z: p[2], rx: rs[i][0], rz: rs[i][1] }));
+  if (sub) {
+    const out = [];
+    for (let i = 0; i < n - 1; i++) {
+      const a = rows[Math.max(0, i - 1)], b = rows[i], c = rows[i + 1], d = rows[Math.min(n - 1, i + 2)];
+      for (let k = 0; k <= sub; k++) { const t = k / (sub + 1), r = {}; for (const f of ['x', 'y', 'z', 'rx', 'rz']) r[f] = cr(a[f], b[f], c[f], d[f], t); out.push(r); }
+    }
+    out.push(rows[n - 1]); rows = out;
+  }
+  const m = rows.length, tan = rows.map((r, i) => { const a = rows[Math.max(0, i - 1)], b = rows[Math.min(m - 1, i + 1)]; const v = [b.x - a.x, b.y - a.y, b.z - a.z], L = Math.hypot(...v) || 1; return [v[0] / L, v[1] / L, v[2] / L]; });
+  // the rounded ends
+  const caps = (end) => {
+    const i = end ? m - 1 : 0, r = rows[i], T = tan[i], s = end ? 1 : -1, rm = (r.rx + r.rz) / 2, out = [];
+    for (const [d, k] of [[0.5, 0.8], [0.92, 0.4], [1.0, 0.001]]) out.push({ x: r.x + s * T[0] * rm * d, y: r.y + s * T[1] * rm * d, z: r.z + s * T[2] * rm * d, rx: r.rx * k, rz: r.rz * k, T });
+    return out;
+  };
+  const head = o.capA === false ? [] : caps(false).reverse(), tail = o.capB === false ? [] : caps(true);
+  const all = [...head, ...rows.map((r, i) => ({ ...r, T: tan[i], i })), ...tail];
+  const ring = all.map((r, k) => {
+    const sd = typeof o.side === 'function' ? o.side(k / (all.length - 1)) : (o.side ?? [1, 0, 0]);
+    const T = r.T; let d = sd[0] * T[0] + sd[1] * T[1] + sd[2] * T[2], S = [sd[0] - T[0] * d, sd[1] - T[1] * d, sd[2] - T[2] * d], L = Math.hypot(...S);
+    if (L < 1e-3) { const alt = Math.abs(T[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0]; d = alt[0] * T[0] + alt[1] * T[1] + alt[2] * T[2]; S = [alt[0] - T[0] * d, alt[1] - T[1] * d, alt[2] - T[2] * d]; L = Math.hypot(...S); }
+    S = [S[0] / L, S[1] / L, S[2] / L];
+    const B = [S[1] * T[2] - S[2] * T[1], S[2] * T[0] - S[0] * T[2], S[0] * T[1] - S[1] * T[0]], t = k / (all.length - 1), line = [];
+    for (let s = 0; s <= seg; s++) {
+      const th = (s / seg) * TAU, f = o.mod ? o.mod(th, t, k) : 1, cx = Math.cos(th) * r.rx * f, cz = Math.sin(th) * r.rz * f;
+      line.push([r.x + S[0] * cx + B[0] * cz, r.y + S[1] * cx + B[1] * cz, r.z + S[2] * cx + B[2] * cz]);
+    }
+    return line;
+  });
+  return ringsToGeometry(ring, seg);
 }
 
 /** Radial multiplier of pleats: k folds round, amplitude a (a fraction of the radius), a second harmonic for sharp ridges. */
