@@ -10,6 +10,10 @@ import { box, frustum, lathe, fromTriangles, rod, orientOutward } from '../../co
 import '../qing/index.js';
 import { villageElements } from './village.js';
 import { rite, diya, lampStand, garland, kalasha, flowerPlate } from '../indian/rites.js';
+import { Form, hash3, seeded } from './form.js';
+import { figure, KINDS } from './figures.js';
+import { reliefGroup, reliefGround, RELIEF_W, RELIEF_KINDS } from './relief.js';
+import { lionForm, makaraForm, toranaForm } from './beasts.js';
 
 const S = 'sandstone_rail', RELIEF = 'sandstone_relief';
 // Legibility at 40–80 m (the arrival's view along the pilgrims' lane): the sculpture reads by tone, not by relief alone —
@@ -168,12 +172,21 @@ function dentils(bag, r, yb, gap, hide) {
   if (!hide.includes('w')) run(z0 - o, z1 + o, x0 - o, false);
   if (!hide.includes('e')) run(z0 - o, z1 + o, x1 + o, false, gap ? (u) => Math.abs(u - zc) < gap + 0.3 : null);
 }
+/** The order the twelve figures follow along a band: a step of five through twelve, so that neighbours differ and a dozen in a row are all different. */
+function sculptFig(bag, idx, x, y, z, nx, nz, h, lv) {
+  const h0 = hash3(x, y, z), kind = (Math.floor(h0 * KINDS) + idx * 5) % KINDS, sw = hash3(x, y, z, 5) < 0.5 ? 1 : -1;
+  const F = new Form({ x: x - nx * 0.05, y, z: z - nz * 0.05, nx, nz, s: h * (1 + 0.05 * (hash3(x, y, z, 7) - 0.5)) });
+  figure(F, kind, lv, sw, seeded(hash3(x, y, z, 3)));
+  if (!F.empty) bag.add(LIGHT, F.geometry());
+}
 /** A band of figures in high relief round a wall rect r, standing on yb, h tall — gods, attendants, couples, set in niches between pilasters.
  *  The band's ground is a dark recessed strip, the figures and pilasters pale stone, the ledges over and under it pale cornices:
  *  at 50 m the band reads as a row of bright figures in shade. `eskip`: where the east face is hidden by the next hall,
  *  the half-width of that hall — the step beyond it still shows the band. */
-function figureBand(bag, r, yb, h, gap = 0, hide = '', eskip = 0, tier = 0) {
+function figureBand(bag, r, yb, h, gap = 0, hide = '', eskip = 0, tier = 0, o = {}) {
   const [x0, z0, x1, z1] = r, zc = (z0 + z1) / 2;
+  // o.frame: the recessed ground, pilasters and ledges (default); o.fig: 'old' (default) the lathe figures, null none, or { lv, sides } modelled figures (sculptFig) on those sides only
+  const frame = o.frame !== false, fig = o.fig === undefined ? 'old' : o.fig;
   let fi = tier * 5;
   for (const [a, b, fx, fz] of [[[x0, z0], [x1, z0], 0, -1], [[x1, z1], [x0, z1], 0, 1], [[x0, z1], [x0, z0], -1, 0], [[x1, z0], [x1, z1], 1, 0]]) {
     if (fx === -1 && hide.includes('w')) continue;   // the faces against the next hall
@@ -181,7 +194,8 @@ function figureBand(bag, r, yb, h, gap = 0, hide = '', eskip = 0, tier = 0) {
     if (eh && !eskip) continue;
     const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.floor(L / (h * 0.62)));
     // the recessed ground of the band (not across a doorway, nor where the next hall covers the face)
-    if (fx === 0) bag.add(DARK, box(x0, yb - 0.05, fz < 0 ? z0 - 0.07 : z1, x1, yb + h + 0.1, fz < 0 ? z0 : z1 + 0.07));
+    if (!frame) { /* the figures only */ }
+    else if (fx === 0) bag.add(DARK, box(x0, yb - 0.05, fz < 0 ? z0 - 0.07 : z1, x1, yb + h + 0.1, fz < 0 ? z0 : z1 + 0.07));
     else if (fx === -1) bag.add(DARK, box(x0 - 0.07, yb - 0.05, z0, x0, yb + h + 0.1, z1));
     else {
       const cuts = gap ? [[z0, zc - gap], [zc + gap, z1]] : [[z0, z1]];
@@ -197,14 +211,16 @@ function figureBand(bag, r, yb, h, gap = 0, hide = '', eskip = 0, tier = 0) {
       if (gap && fx === 1 && Math.abs(z - zc) < gap) continue;          // the doorway into the hall
       if (eh && Math.abs(z - zc) < eskip + 0.3) continue;
       const kind = BAND_KINDS[fi++ % BAND_KINDS.length];
-      wallFig(bag, kind, x, yb + 0.06, z, fx, fz, h * 0.93, (i + tier) % 2 ? 1 : -1);
+      if (fig === 'old') wallFig(bag, kind, x, yb + 0.06, z, fx, fz, h * 0.93, (i + tier) % 2 ? 1 : -1);
+      else if (fig && fig.sides.includes(fx === 0 ? (fz < 0 ? 'n' : 's') : fx < 0 ? 'w' : 'e')) sculptFig(bag, fi + tier, x, yb + 0.06, z, fx, fz, h * 0.93, fig.lv);
       const pt = (a[0] + (b[0] - a[0]) * (i / n)), pz = (a[1] + (b[1] - a[1]) * (i / n));
       if (gap && fx === 1 && Math.abs(pz - zc) < gap + 0.1) continue;
       if (eh && Math.abs(pz - zc) < eskip + 0.3) continue;
-      bag.add(PALE, box(pt - 0.1 + fx * 0.05, yb, pz - 0.1 + fz * 0.05, pt + 0.1 + fx * 0.2, yb + h + 0.15, pz + 0.1 + fz * 0.2));
+      if (frame) bag.add(PALE, box(pt - 0.1 + fx * 0.05, yb, pz - 0.1 + fz * 0.05, pt + 0.1 + fx * 0.2, yb + h + 0.15, pz + 0.1 + fz * 0.2));
     }
   }
   // the ledges over and under the band (broken by a doorway on the east face)
+  if (!frame) return;
   dentils(bag, r, yb, gap, hide);
   for (const [o, ya, yb2] of [[0.25, yb + h + 0.1, yb + h + 0.35], [0.2, yb - 0.2, yb]]) {
     if (!gap) { bag.add(PALE, box(x0 - o, ya, z0 - o, x1 + o, yb2, z1 + o)); continue; }
@@ -386,7 +402,8 @@ function miniFig(bag, x, y, z, h, mat = LIGHT) {
  * The basement mouldings of a platform (the jagati) or a plinth (the adhisthana) round rect R from y0, H tall: the base,
  * the sloping khura, the swelling kumbha, a neck, the fillets about the carved band (between y = a and y = b), over it a
  * field of niches with a god in each between piers, the kapota's flaring eave on a row of lion-head blocks, the coping.
- * o: { a, b, cp (coping), kh (kapota), rich, gap: half-width of the stair on the east face, pier (spacing) }.
+ * o: { a, b, cp (coping), kh (kapota), rich, gap: half-width of the stair on the east face, pier (spacing),
+ *   slots: an array the niches are listed in ({ x, y, z, nx, nz, h, side }), nogods: the gods of the niches are left to the caller }.
  * Returns the piers' centres (the figure bands leave them clear).
  */
 function basement(bag, R, y0, H, o) {
@@ -426,7 +443,9 @@ function basement(bag, R, y0, H, o) {
       const [px, pz] = at(u), e = 0.01 + jit();
       onFace(bag, 'opening', px, pz, nx, nz, 0.34, 0.07, 0.05, ft + 0.05, ft + 0.05 + fh, e);
       onFace(bag, PALE, px, pz, nx, nz, 0.42, 0.1, 0.05, ft + 0.05 + fh, ft + 0.13 + fh);
-      miniFig(bag, ...(() => { const [fx, fz] = at(u, 0.045); return [fx, ft + 0.06, fz]; })(), fh * 0.92);
+      const [gx, gz] = at(u, 0.045);
+      if (o.slots) o.slots.push({ x: gx, y: ft + 0.06, z: gz, fx: at(u, 0.085)[0], fz: at(u, 0.085)[1], nx, nz, h: fh * 0.92, side: nz < 0 ? 'n' : nz > 0 ? 's' : nx < 0 ? 'w' : 'e' });
+      if (!o.nogods) miniFig(bag, gx, ft + 0.06, gz, fh * 0.92);
     }
   }
   return piers;
@@ -465,6 +484,50 @@ function lion(bag, x, y, z, dx, h) {
   bag.add(PALE, box(...(() => { const a = P(0.3, 0.8, -0.07), b = P(0.45, 0.9, 0.07); return [Math.min(a[0], b[0]), a[1], a[2], Math.max(a[0], b[0]), b[1], b[2]]; })()));
   bag.add(PALE, rod(P(-0.36, 0.1, 0), P(-0.55, 0.45, 0.12), 0.03 * k, 4));
 }
+/** The geometry a temple's sculpture depends on, as temple() lays it out: the jagati and the plinth with the options of their basements, the bands of the hall walls. */
+function layoutOf(el) {
+  const [cx, cz] = el.c, L = el.len, W = el.w, H = el.h, J = el.jagati ?? 4, y0 = el.y ?? 0, y = y0 + J, plinth = H * 0.12;
+  const T = el.terrace || [cx - W * 0.85, cz - W * 0.95, cx + L + 4, cz + W * 0.95];
+  const H4 = y - y0, rich = !!el.frieze, yb = y0 + H4 * 0.38, bh = Math.min(0.85, H4 * 0.28);
+  const jag = { kind: 'jag', R: T, y0, H: H4, rich, o: { a: rich ? yb : y0 + H4 * 0.5, b: rich ? yb + bh : y0 + H4 * 0.5, cp: 0.35, kh: H4 * 0.12, rich, gap: W * 0.14 + 0.2, pier: 6.4 }, sw: W * 0.14 + 0.2, cz };
+  const P = [cx - W / 2, cz - W * 0.42, cx + L, cz + W * 0.42], pa = y + plinth * 0.28 + 0.14, pb = pa + plinth * 0.34 - 0.28;
+  const plin = { kind: 'plin', R: P, y0: y, H: plinth, rich: true, o: { a: pa, b: pb, cp: Math.max(0.16, plinth * 0.05), kh: plinth * 0.14, rich: true, gap: W * 0.36 - 0.85, pier: 5.2 } };
+  const Lh = (L - W / 2) / 0.84;
+  const halls = [[cx - W / 2, W, H * 0.3], [cx + W / 2, Lh * 0.16, H * 0.27], [cx + W / 2 + Lh * 0.16, Lh * 0.3, H * 0.27], [cx + W / 2 + Lh * 0.46, Lh * 0.2, H * 0.24]];
+  const bands = [];
+  halls.forEach(([x, len, wh], i) => {
+    const hw = i === 0 ? W / 2 : W * (i === 2 ? 0.48 : 0.36), r = [x, cz - hw, x + len, cz + hw];
+    [0.2, 0.47, 0.74].forEach((k, tier) => bands.push({ r, yb: y + plinth + wh * k, h: Math.min(1.5, wh * 0.21), gap: i === 3 ? 1.6 : 0, hide: (i > 0 ? 'w' : '') + (i < 3 ? 'e' : ''), eskip: i === 0 ? W * 0.36 : i === 2 ? W * 0.36 : 0, tier: tier + i * 2 }));
+  });
+  return { jag, plin, bands };
+}
+const NULLBAG = { add() {} };
+/** A god or attendant in a niche of the basement: modelled in the near level, the old lathe beyond. */
+function nicheGod(bag, g, lv) {
+  if (lv < 2) { miniFig(bag, g.x, g.y, g.z, g.h); return; }
+  const h0 = hash3(g.x, g.y, g.z), kind = [6, 7, 8, 5, 9, 0, 10, 1, 4, 2, 3, 11][Math.floor(h0 * 12) % 12];
+  const F = new Form({ x: g.fx, y: g.y, z: g.fz, nx: g.nx, nz: g.nz, s: g.h * (1 + 0.05 * (hash3(g.x, g.y, g.z, 7) - 0.5)) });
+  figure(F, kind, 2, hash3(g.x, g.y, g.z, 5) < 0.5 ? 1 : -1, seeded(hash3(g.x, g.y, g.z, 3)));
+  if (!F.empty) bag.add(LIGHT, F.geometry());
+}
+/**
+ * The carved figures of the temple's faces `sides` (letters n s e w) of Kandariya, at level lv: 2 the full figures (figures.js) on the wall bands
+ * and in the niches of the basements, the procession in continuous relief; 1 the reduced figures, the niches' small lathes and the small
+ * round figures of the frieze. (The frames — the recessed ground, pilasters, mouldings — are the temple's own.)
+ */
+function sculptSide(bag, el, sides, lv) {
+  JIT = 0;
+  const Lc = layoutOf(el);
+  for (const b of Lc.bands) figureBand(bag, b.r, b.yb, b.h, b.gap, b.hide, b.eskip, b.tier, { frame: false, fig: { lv, sides } });
+  for (const B of [Lc.jag, Lc.plin]) {
+    const slots = [], piers = basement(NULLBAG, B.R, B.y0, B.H, { ...B.o, slots, nogods: true });
+    for (const g of slots) if (sides.includes(g.side)) nicheGod(bag, g, B.kind === 'plin' ? lv : 1);
+    const o = { strip: false, figs: 'relief', rlv: lv, sides };
+    if (B.kind === 'jag') { if (B.rich) platformFrieze(bag, B.R, B.y0, B.y0 + B.H, B.cz, B.sw, piers, o); } else plinthFrieze(bag, B.R, B.y0, B.H, piers, o);
+  }
+}
+/** nagara_sculpture: { temple (the nagara_temple element), sides ('s', 'es' …), lv (2 | 1) } — the carved figures of those faces of a temple, in one level of detail (a plan of its own, shown near or far). */
+function sculpture(el, { bag }) { sculptSide(bag, el.temple, el.sides, el.lv ?? 2); }
 /**
  * nagara_temple: { c (the sanctum's centre), len (west–east, the porch at the east), w, h (the
  * tower's top above the terrace), jagati (terrace height), y } — the temple faces east.
@@ -478,8 +541,8 @@ function temple(el, ctx) {
   JIT = 0;
   if (!el.simple) {
     const H4 = y - y0, rich = !!el.frieze, yb = y0 + H4 * 0.38, bh = Math.min(0.85, H4 * 0.28);
-    const piers = basement(bag, T, y0, H4, { a: rich ? yb : y0 + H4 * 0.5, b: rich ? yb + bh : y0 + H4 * 0.5, cp: 0.35, kh: H4 * 0.12, rich, gap: W * 0.14 + 0.2, pier: 6.4 });
-    if (rich) platformFrieze(bag, T, y0, y, cz, W * 0.14 + 0.2, piers);
+    const piers = basement(bag, T, y0, H4, { a: rich ? yb : y0 + H4 * 0.5, b: rich ? yb + bh : y0 + H4 * 0.5, cp: 0.35, kh: H4 * 0.12, rich, gap: W * 0.14 + 0.2, pier: 6.4, nogods: !!el.sculpt });
+    if (rich) platformFrieze(bag, T, y0, y, cz, W * 0.14 + 0.2, piers, el.sculpt ? { figs: null } : {});
   }
   const sw = W * 0.28, sr = [T[2], cz - sw / 2, T[2] + J * 2.2, cz + sw / 2], n = Math.round(J / 0.22);
   for (let i = 0; i < n; i++) { const z = sr[0] + (sr[2] - sr[0]) * (1 - (i + 1) / n), yy = y0 + J * (i + 1) / n; bag.add(S, box(z, y0 - 0.5, sr[1], z + (sr[2] - sr[0]) / n + 0.02, yy, sr[3])); col.floor([z, sr[1], z + (sr[2] - sr[0]) / n, sr[3]], yy); }
@@ -488,7 +551,10 @@ function temple(el, ctx) {
     for (const [zz, side] of [[sr[1] - 0.6, -1], [sr[3], 1]]) {
       flightWall(bag, sr[0], y, sr[2], y0, zz, zz + 0.6, side, y0 - 0.5, 0.95);
       bag.add(PALE, box(sr[2] - 0.8, y0 - 0.5, zz - 0.08, sr[2] + 0.2, y0 + 1.15, zz + 0.68));
-      lion(bag, sr[2] - 0.3, y0 + 1.15, zz + 0.3, 1, 1.05);
+      if (el.sculpt) {
+        const sz = zz < cz ? -1 : 1, F = new Form({ x: sr[2] - 0.3, y: y0 + 1.15, z: zz + 0.3, nx: 1, nz: 0, s: 1.05 * (1 + 0.03 * (hash3(sr[2], zz, 1) - 0.5)) }, { clip: -9 });
+        lionForm(F, true, sz); bag.add(PALE, F.geometry());
+      } else lion(bag, sr[2] - 0.3, y0 + 1.15, zz + 0.3, 1, 1.05);
     }
     bag.add(PALE, lathe([[0.001, 0], [sw * 0.62, 0], [sw * 0.62, 0.025], [sw * 0.5, 0.025], [sw * 0.5, 0.05], [sw * 0.38, 0.05], [sw * 0.38, 0.075], [sw * 0.26, 0.075], [sw * 0.26, 0.1], [0.001, 0.1]], 24, null, sr[2] + 0.4, y0 - 0.02, cz));
   }
@@ -498,8 +564,8 @@ function temple(el, ctx) {
   // the plinth's mouldings (khura, kumbha, the carved band of the procession, niches of gods between piers, the kapota on its row of lion heads, the coping)
   if (!el.simple) {
     const pa = y + plinth * 0.28 + 0.14, pb = pa + plinth * 0.34 - 0.28;
-    const piers = basement(bag, P, y, plinth, { a: pa, b: pb, cp: Math.max(0.16, plinth * 0.05), kh: plinth * 0.14, rich: true, gap: W * 0.36 - 0.85, pier: 5.2 });
-    plinthFrieze(bag, P, y, plinth, piers);
+    const piers = basement(bag, P, y, plinth, { a: pa, b: pb, cp: Math.max(0.16, plinth * 0.05), kh: plinth * 0.14, rich: true, gap: W * 0.36 - 0.85, pier: 5.2, nogods: !!el.sculpt });
+    plinthFrieze(bag, P, y, plinth, piers, el.sculpt ? { figs: null } : {});
   }
   // the halls' walls with their sculpture bands, from the sanctum eastward, each roof lower
   // (the halls fill the plinth from the sanctum's east wall to its east end)
@@ -565,9 +631,11 @@ function temple(el, ctx) {
     else if (el.interior) interiorHall(ctx, i, r, y + plinth, wh);
     else { bag.add(S, box(r[0], y + plinth, r[1], r[2], y + plinth + wh, r[3])); col.rect(r, y, y + plinth + wh); }
     if (i === 4) { /* the open porch */ } else if (el.simple) for (const k of [0.3, 0.62]) bag.add('sandstone', box(r[0] - 0.05, y + plinth + wh * k, r[1] - 0.05, r[2] + 0.05, y + plinth + wh * k + wh * 0.22, r[3] + 0.05));
-    else { [0.2, 0.47, 0.74].forEach((k, tier) => figureBand(bag, r, y + plinth + wh * k, Math.min(1.5, wh * 0.21), i === 3 ? 1.6 : 0, (i > 0 ? 'w' : '') + (i < 3 ? 'e' : ''), i === 0 ? W * 0.36 : i === 2 ? W * 0.36 : 0, tier + i * 2)); if (i === 3) doorway(bag, r[2], cz, y + plinth + 0.9, Math.min(3.2, wh * 0.62), !!el.interior); if (i === 2 || i === 0) for (const sd of [-1, 1]) balcony(bag, r[0] + len * 0.2, r[2] - len * 0.2, sd < 0 ? r[1] : r[3], sd, y + plinth + wh * 0.18, wh * 0.55); }
+    else { [0.2, 0.47, 0.74].forEach((k, tier) => figureBand(bag, r, y + plinth + wh * k, Math.min(1.5, wh * 0.21), i === 3 ? 1.6 : 0, (i > 0 ? 'w' : '') + (i < 3 ? 'e' : ''), i === 0 ? W * 0.36 : i === 2 ? W * 0.36 : 0, tier + i * 2, el.sculpt ? { fig: null } : {})); if (i === 3) doorway(bag, r[2], cz, y + plinth + 0.9, Math.min(3.2, wh * 0.62), !!el.interior); if (i === 2 || i === 0) for (const sd of [-1, 1]) balcony(bag, r[0] + len * 0.2, r[2] - len * 0.2, sd < 0 ? r[1] : r[3], sd, y + plinth + wh * 0.18, wh * 0.55); }
     if (i > 0) stepped(bag, [r[0] - 0.4, r[1] - 0.6, r[2] + 0.4, r[3] + 0.6], y + plinth + wh, el.simple ? H * roofH * 0.45 : Math.max(2.2, H * RISE[i] - wh));
   });
+  // the faces people do not walk first (north, west): the reduced figures, in the landmark; the south and east have plans of their own near and far (nagara_sculpture)
+  if (el.sculpt && !el.simple) sculptSide(bag, el, el.sculptHere ?? 'nw', 1);
   // the steep flight from the terrace up the plinth to the porch's floor
   {
     const top = y + plinth + 0.9, z0 = cz - W * 0.36 + 1.2, z1 = cz + W * 0.36 - 1.2, x0 = P[2], run = Math.min(T[2] - P[2] - 0.2, 3.9), n = Math.max(4, Math.round((top - y) / 0.25)), d = run / n;
@@ -624,6 +692,16 @@ function temple(el, ctx) {
   // the makara torana: the carved garland arching between the porch's front pillars, a sea-monster at either end
   {
     const pr = halls[4], px = pr[0] + pr[1] - 0.6, hw = W * 0.36 - 0.6, yb = y + plinth + pr[2] * 0.42, yt = y + plinth + pr[2] * 0.88;
+    if (el.sculpt) {
+      // modelled: the beam with its beads, the scalloped garland, the lion-faced crown, and at each end a makara whose open mouth the beam springs from
+      const F = new Form({ x: px + 0.25, y: yb, z: cz, nx: 1, nz: 0, s: 1 }, { clip: -9 });
+      toranaForm(F, hw - 0.4, yt - yb - 0.4, true); bag.add('sandstone', F.geometry());
+      for (const sz of [-1, 1]) {
+        const M = new Form({ x: px + 0.3, y: yb + 0.28, z: cz + sz * (hw - 0.4 + 0.15), nx: 1, nz: 0, s: 0.8 }, { clip: -9 });
+        makaraForm(M, true, sz); bag.add('sandstone', M.geometry());
+      }
+      return;
+    }
     const lobes = 7, pts = [];
     for (let k = 0; k <= lobes * 6; k++) {
       const t = k / (lobes * 6), z = cz - hw + 0.4 + t * (2 * hw - 0.8), arch = Math.sin(Math.PI * t), cusp = Math.abs(Math.sin(Math.PI * t * lobes)) * 0.28;
@@ -679,32 +757,86 @@ function friezeFig(bag, kind, x, y, z, ux, uz, h) {
   if (kind === 6) { man(-0.06 * k, 1, 1); man(0.06 * k, 0.94, -1); return; }
   man(0, 1); bag.add(M, rod(P(-0.2 * k, 0.5), P(0.2 * k, 0.5), 0.012 * k, 4)); for (const u of [-0.18, 0.18]) bag.add(M, lathe([[0.04 * k, 0], [0.05 * k, 0.05 * k], [0.001, 0.1 * k]], 5, null, ...P(u * k, 0.36)));
 }
+/** The side a face (outward normal nx, nz) is on. */
+const sideOf = (nx, nz) => (nz < 0 ? 'n' : nz > 0 ? 's' : nx < 0 ? 'w' : 'e');
+/**
+ * The procession along one face of a basement as CONTINUOUS RELIEF (relief.js): between the piers (clear by 0.75 m either side) the groups
+ * — an elephant with its mahout and rider, a horse and rider, a warrior with shield and sword, a drummer, a dancer, a flute-player, a
+ * lute-player, a porter with his yoke — follow one another along the band, spread to fill each stretch, on a ridge of earth and rocks, all
+ * walking the way the run goes. Their kinds follow from the hash of the stretch's place; no two builds differ. (ax, az) → (bx, bz) the run, n its outward
+ * normal, ya the band's foot, bh its height.
+ */
+function reliefRun(bag, ax, az, bx, bz, nx, nz, ya, bh, piers, rlv = 2) {
+  const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, s = bh * 0.93, face = [-nz, nx];
+  const runSign = ux * face[0] + uz * face[1] > 0 ? 1 : -1;
+  // the stretches between the piers
+  const cut = [];
+  for (const [qx, qz] of piers) { const u = (qx - ax) * ux + (qz - az) * uz, d = Math.abs((qx - ax) * -uz + (qz - az) * ux); if (d < 1 && u > -1 && u < L + 1) cut.push(u); }
+  cut.sort((p, q) => p - q);
+  const edges = [0, ...cut.flatMap((u) => [u - 0.75, u + 0.75]), L];
+  for (let k = 0; k < edges.length; k += 2) {
+    const f0 = Math.max(0, edges[k]) + 0.1, f1 = Math.min(L, edges[k + 1]) - 0.1, Lf = f1 - f0;
+    if (Lf < 0.5) continue;
+    const ox = ax + ux * f0, oz = az + uz * f0, h0 = hash3(ox, ya, oz), seq = [];
+    let w = 0, c = 0;
+    for (;;) {
+      const kind = [0, 3, 4, 2, 1, 5, 6, 2, 7, 0][(Math.floor(h0 * 10) + c * 3) % 10], wk = RELIEF_W[kind] * s;
+      if (w + wk + 0.06 * (seq.length + 1) > Lf && seq.length) break;
+      seq.push([kind, wk]); w += wk; c++;
+      if (c > 40) break;
+    }
+    const gap = (Lf - w) / (seq.length + 1);
+    let u = f0;
+    // the ridge under their feet, then the groups
+    {
+      const G = new Form({ x: ox - nx * 0.0, y: ya, z: oz - nz * 0.0, nx, nz, s });
+      // the form's u axis is (-nz, nx): along the run when runSign is +1, against it otherwise — start the ridge at the right end
+      const gx = runSign > 0 ? ox : ax + ux * f1, gz = runSign > 0 ? oz : az + uz * f1;
+      G.fr.x = gx; G.fr.z = gz;
+      reliefGround(G, 0, Lf / s, 0.045, seeded(hash3(ox, ya, oz, 11)));
+      if (!G.empty) bag.add(LIGHT, G.geometry());
+    }
+    for (const [kind, wk] of seq) {
+      u += gap;
+      const cu = u + wk / 2, px = ax + ux * cu, pz = az + uz * cu, hh = hash3(px, ya, pz);
+      const F = new Form({ x: px, y: ya + 0.01, z: pz, nx, nz, s: s * (1 + 0.04 * (hh - 0.5)) });
+      reliefGroup(F, kind, runSign, seeded(hash3(px, ya, pz, 3)), rlv);
+      if (!F.empty) bag.add(LIGHT, F.geometry());
+      u += wk;
+    }
+  }
+}
 /** The plinth's socle: between its fillets a recessed band carrying the procession "dancers, devotees, acrobats, musicians, warriors, hunters,
- *  horses, elephants" (mahavidya.ca), on the north, south and west faces; a row of niches on the kapota above is left to the mouldings. */
-function plinthFrieze(bag, P, y, plinth, piers = []) {
-  const [x0, z0, x1, z1] = P, ya = y + plinth * 0.28 + 0.14, bh = plinth * 0.34 - 0.28, mid = (z0 + z1) / 2;
-  for (const r of [[x0, z0 - 0.07, x1, z0], [x0, z1, x1, z1 + 0.07], [x0 - 0.07, z0, x0, z1]]) bag.add(DARK, box(r[0], ya, r[1], r[2], ya + bh, r[3]));
+ *  horses, elephants" (mahavidya.ca), on the north, south and west faces. o.strip: the dark ground (default); o.figs: 'old' (small figures in
+ *  the round, default), 'relief' (continuous modelled relief) or null; o.sides: the faces done. */
+function plinthFrieze(bag, P, y, plinth, piers = [], o = {}) {
+  const [x0, z0, x1, z1] = P, ya = y + plinth * 0.28 + 0.14, bh = plinth * 0.34 - 0.28, sides = o.sides ?? 'nsw', figs = o.figs === undefined ? 'old' : o.figs;
+  if (o.strip !== false) for (const r of [[x0, z0 - 0.07, x1, z0], [x0, z1, x1, z1 + 0.07], [x0 - 0.07, z0, x0, z1]]) bag.add(DARK, box(r[0], ya, r[1], r[2], ya + bh, r[3]));
   let n = 3;
   const run = (ax, az, bx, bz, nx, nz) => {
+    if (!sides.includes(sideOf(nx, nz)) || !figs) return;
+    if (figs === 'relief') { reliefRun(bag, ax + nx * 0.07, az + nz * 0.07, bx + nx * 0.07, bz + nz * 0.07, nx, nz, ya, bh, piers, o.rlv); return; }
     const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, m = Math.floor(L / 0.7);
     for (let i = 0; i < m; i++) { const u = (i + 0.5) * L / m, px = ax + ux * u + nx * 0.05, pz = az + uz * u + nz * 0.05; if (piers.some((q) => Math.hypot(q[0] - px, q[1] - pz) < 0.8)) { n++; continue; } friezeFig(bag, [0, 2, 4, 1, 3, 5, 6, 2, 4, 7, 0, 3][n++ % 12], px, ya, pz, ux, uz, bh * 0.92); }
   };
   run(x1, z0, x0, z0, 0, -1); run(x0, z1, x1, z1, 0, 1); run(x0, z0, x0, z1, -1, 0);
-  void mid;
 }
 /** The jagati's sides: a moulded base and coping, and between them a sunk band carved with the life of the
  *  kingdom in long processions — elephants and horsemen, soldiers, dancers and drummers, couples, porters.
- *  (The stair's opening on the east, half-width sw about cz, is left.) */
-function platformFrieze(bag, T, y0, y, cz, sw, piers = []) {
-  const [x0, z0, x1, z1] = T, H = y - y0, bh = Math.min(0.85, H * 0.28), yb = y0 + H * 0.38;
+ *  (The stair's opening on the east, half-width sw about cz, is left.) o as for plinthFrieze (sides 'nsew'). */
+function platformFrieze(bag, T, y0, y, cz, sw, piers = [], o = {}) {
+  const [x0, z0, x1, z1] = T, H = y - y0, bh = Math.min(0.85, H * 0.28), yb = y0 + H * 0.38, sides = o.sides ?? 'nsew', figs = o.figs === undefined ? 'old' : o.figs;
   // the sunk band between the mouldings: a dark ground the figures stand against (the stair's opening left)
-  for (const r of [[x0, z0 - 0.06, x1, z0], [x0, z1, x1, z1 + 0.06], [x0 - 0.06, z0, x0, z1], [x1, z0, x1 + 0.06, cz - sw], [x1, cz + sw, x1 + 0.06, z1]]) bag.add(DARK, box(r[0], yb, r[1], r[2], yb + bh, r[3]));
+  if (o.strip !== false) for (const r of [[x0, z0 - 0.06, x1, z0], [x0, z1, x1, z1 + 0.06], [x0 - 0.06, z0, x0, z1], [x1, z0, x1 + 0.06, cz - sw], [x1, cz + sw, x1 + 0.06, z1]]) bag.add(DARK, box(r[0], yb, r[1], r[2], yb + bh, r[3]));
   let n = 0;
   const run = (ax, az, bx, bz, nx, nz) => {
+    if (!sides.includes(sideOf(nx, nz)) || !figs) return;
+    if (figs === 'relief') { reliefRun(bag, ax + nx * 0.06, az + nz * 0.06, bx + nx * 0.06, bz + nz * 0.06, nx, nz, yb, bh, piers, o.rlv); return; }
     const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, step = 0.62, m = Math.floor(L / step);
     for (let i = 0; i < m; i++) { const u = (i + 0.5) * L / m, px = ax + ux * u + nx * 0.04, pz = az + uz * u + nz * 0.04; if (piers.some((q) => Math.hypot(q[0] - px, q[1] - pz) < 0.8)) { n++; continue; } friezeFig(bag, [0, 2, 3, 1, 2, 4, 5, 4, 6, 7, 2, 3][n++ % 12], px, yb, pz, ux, uz, bh * 0.92); }
   };
-  run(x1, z0, x0, z0, 0, -1); run(x0, z1, x1, z1, 0, 1); run(x0, z0, x0, z1, -1, 0); run(x1, z1, x1, cz + sw + 0.3, 1, 0); run(x1, cz - sw - 0.3, x1, z0, 1, 0);
+  run(x1, z0, x0, z0, 0, -1); run(x0, z1, x1, z1, 0, 1); run(x0, z0, x0, z1, -1, 0);
+  if (sides.includes('e')) { run(x1, z1, x1, cz + sw + 0.3, 1, 0); run(x1, cz - sw - 0.3, x1, z0, 1, 0); }
 }
 /**
  * sub_shrine: a small temple { c, w, h, y, face ('e' | 'n' | 's' | 'w') } — on a moulded base, the
@@ -776,6 +908,8 @@ function shrineCore(el, { bag, col }) {
 }
 registerStyle('nagara', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.qing.elements, nagara_temple: temple, sub_shrine: shrine, varaha_mandapa: varaha, rite, ...villageElements },
+  elements: { ...STYLES.qing.elements, nagara_temple: temple, nagara_sculpture: sculpture, sub_shrine: shrine, varaha_mandapa: varaha, rite, ...villageElements },
   objects: {},
 });
+/** (for the tools and tests: the pieces of the sculpture, built apart) */
+export const _sculpt = { layoutOf, basement, plinthFrieze, platformFrieze, figureBand, nicheGod, NULLBAG };
