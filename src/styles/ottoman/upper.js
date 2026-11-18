@@ -20,11 +20,11 @@ export const TW = 0.16;                    // the timber walls of the upper stor
 export const GT = 0.4;                     // the rubble walls of the ground storey
 export const LANE = [0.45, 1.35];          // the flight's width (u)
 export const FLIGHT1 = [1.45, 5.35];       // ground → first floor (v)
-export const FLIGHT2 = [6.05, 9.45];       // first → second floor (v)
+export const FLIGHT2 = [5.75, 9.0];       // first → second floor (v)
 export const GUARD = 1.5;                  // the stair's open side: the partition (ground) or the rail (upper), u
 /** The stair wells (u0, v0, u1, v1) in the floor of storey 1 and of storey 2. */
 export const WELL1 = [TW, 2.0, GUARD, FLIGHT1[1]];
-export const WELL2 = [TW, 6.9, GUARD, FLIGHT2[1]];
+export const WELL2 = [TW, 6.6, GUARD, FLIGHT2[1]];
 
 /** r (u0, v0, u1, v1) less the holes, as rectangles. */
 export function cutRect(r, holes) {
@@ -149,9 +149,9 @@ export function upperFloors(ctx) {
     const fy1 = FL(1), fy2 = FL(2);
     flight(fr, bag, LANE, FLIGHT2, fy1, fy2, 'timber');
     // its side towards the sofa: a partition, open at the foot and at the top
-    B('plaster_white', GUARD, 6.4, GUARD + 0.1, 8.7, fy1, y + 2 * st - 0.2, 0.0); col.rect(fr.rc(GUARD, 6.4, GUARD + 0.1, 8.7), fy1 - 0.3, y + 2 * st - 0.2);
+    B('plaster_white', GUARD, 6.4, GUARD + 0.1, 8.3, fy1, y + 2 * st - 0.2, 0.0); col.rect(fr.rc(GUARD, 6.4, GUARD + 0.1, 8.3), fy1 - 0.3, y + 2 * st - 0.2);
     // at the top: a rail along the well in the floor above
-    rail(fr, bag, FL(2), GUARD + 0.02, 7.0, GUARD + 0.02, 8.7);
+    rail(fr, bag, FL(2), GUARD + 0.02, 6.7, GUARD + 0.02, 8.3);
   }
 
   // ---- the rooms
@@ -413,7 +413,7 @@ export function routes(L, n, kind, shop) {
   out.push([...foot, ...up1, [mid, 3.6], [mid, 2.4], [mid, 1.2], [mid, 0.3], [mid, 2.4], [mid, 5.0], [bdoor, 6.1], [bdoor, 7.4]]);
   if (n >= 3) {
     const fd = Math.max(2.4, mid);
-    out.push([...foot, ...up1, [0.9, 5.8], [0.9, 6.3], [0.9, 9.0], [2.3, 9.0], [Math.max(2.3, fd), 7.0], [fd, 5.0], [fd, 3.5], [fd, 1.5]]);
+    out.push([...foot, ...up1, [0.9, 5.7], [0.9, 6.3], [0.9, 8.8], [2.3, 8.7], [Math.max(2.3, fd), 7.0], [fd, 5.0], [fd, 3.5], [fd, 1.5]]);
   }
   return out;
 }

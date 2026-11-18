@@ -4,7 +4,7 @@
 // the waterskin; donkeys bringing firewood to the soup kitchen; horses held at the outer court's gate.
 
 import { courtLife, laneLife } from './court-life.js';
-import { RADIUS, TOP, height, COFFEE, IMARET, ARASTA, PRECINCT, lanes, TERRACE, MESCIT, openSet, roomPoint } from './layout.js';
+import { RADIUS, TOP, height, COFFEE, IMARET, ARASTA, PRECINCT, lanes, TERRACE, MESCIT, openSet, upSet, roomPoint } from './layout.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -42,7 +42,7 @@ export function life() {
       const put = (u, v, o) => { const p = roomPoint(l, u, v); L.push({ t: 'figure', at: p, y: o.y ?? fy, rot: to(p, door), seed: Math.floor(rnd() * 1e9), skin: 'skin_light', dress: 'robe', cloth: pk(['cloth_red', 'cloth_green', 'cloth_indigo', 'cloth_brown', 'cloth_ochre', 'cloth_maroon']), cloth2: 'cloth_white', over: 'sash', hat: 'turban', hatMat: 'cloth_white', hair: 'short', beard: true, pose: 'stand', ...Object.fromEntries(Object.entries(o).filter(([, q]) => q !== undefined)) }); };
       if (l.shop) {
         const trade = l.trade, apron = ['baker', 'butcher', 'coppersmith', 'cobbler', 'saddler', 'weaver'].includes(trade);
-        put(Lw * 0.3, trade === 'coppersmith' ? Dw * 0.6 + 0.9 : 1.7, { over: apron ? 'apron' : 'sash', cloth: trade === 'baker' || trade === 'butcher' ? 'cloth_white' : undefined, ...(trade === 'baker' ? { hat: 'cap', hatMat: 'cloth_white' } : {}) });
+        put(upSet().has(l) ? Lw * 0.8 : Lw * 0.3, trade === 'coppersmith' ? Dw * 0.6 + 0.9 : upSet().has(l) ? 2.2 : 1.7, { over: apron ? 'apron' : 'sash', cloth: trade === 'baker' || trade === 'butcher' ? 'cloth_white' : undefined, ...(trade === 'baker' ? { hat: 'cap', hatMat: 'cloth_white' } : {}) });
       } else {
         put(Lw * 0.35, Dw - 0.4 - 0.45, { y: fy + 0.42, pose: 'cross', ...(rnd() < 0.6 ? { dress: 'robe', hat: 'veil', hair: 'long', beard: false, cloth: pk(['cloth_indigo', 'cloth_brown', 'cloth_maroon']), over: 'none' } : {}) });
       }
