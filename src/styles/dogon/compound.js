@@ -4,8 +4,8 @@
 
 import { box, lathe, rod, place } from '../../core/geom.js';
 import { orientedBox } from '../../core/build.js';
-import { frontDress, weatherFront, wallDress, roofRack, innerNiches, hangings } from './dress.js';
-import { rng, wallRun, WALL, PLASTER, SMOOTH, MUD, STONE, STONE2, DARK, LOG, HOLE, STALK, THATCH, RED, granary, kitchen, nicheFacade, carvedDoor, roofTop, mortar, milletStack, firewood, jar, basket, notchedLadder } from './props.js';
+import { frontDress, weatherFront, wallDress, roofRack, innerNiches, hangings, dryMillet, roofPots, carvedPortal } from './dress.js';
+import { rng, hv, spout, wallRun, WALL, PLASTER, SMOOTH, MUD, STONE, STONE2, DARK, LOG, HOLE, STALK, THATCH, RED, granary, kitchen, nicheFacade, carvedDoor, roofTop, mortar, milletStack, firewood, jar, basket, notchedLadder } from './props.js';
 
 const POOL = 'pottery_dark';
 
@@ -100,14 +100,21 @@ export function house(el, { bag, col, lights }) {
   // the lintels over the doorways: a beam
   for (const u of [1.5, 4.9]) { bag.add(DARK, box(lx(u) - 0.65, F + DOORH, lz(2.6) - 0.2, lx(u) + 0.65, F + DOORH + 0.12, lz(2.6) + 0.2)); }
   // the facade
-  nicheFacade(bag, x0 + 0.3, x1 - 0.3, z1, y, FH, rand, { kind: el.ginna ?? (el.plain ? 'plain' : 'niche'), doors: doorU.map((u) => x0 + T + u) });
+  nicheFacade(bag, x0 + 0.3, x1 - 0.3, z1, y, FH, rand, { kind: el.ginna ?? (el.plain ? 'plain' : 'niche'), doors: doorU.map((u) => x0 + T + u), clear: el.hogon ? 1.2 : 0.78 });
   for (const u of doorU) carvedDoor(bag, x0 + T + u, y, z1, DOORW, DOORH, rand, true);
+  if (el.hogon) for (const u of doorU) carvedPortal(bag, x0 + T + u, y, z1, DOORH, rand);       // the senior lineage's house: carved posts and lintel at each door
   weatherFront(bag, x0 + 0.3, x1 - 0.3, z1, y, FH, rand, doorU.map((u) => x0 + T + u));
   // the roof: beams under (logs across, from the south to the north wall), a mat of reeds, the mud over; a parapet; the facade above it
   for (let u = 0.25; u < 6.5; u += 0.5) bag.add(LOG, rod([lx(u), CH - 0.08, iz0 - 0.1], [lx(u) + (rand() - 0.5) * 0.03, CH - 0.08, iz1 + 0.1], 0.08 + rand() * 0.02, 7));
   bag.add(STALK, box(x0, CH, z0, x1, CH + 0.06, z1));
   bag.add(MUD, box(x0, CH + 0.06, z0, x1, ST, z1)); col.floor([x0, z0, x1, z1], ST);
-  roofTop(bag, col, [x0, z0, x1, z1], ST - 0.1, rand, { stalks: 2, pots: 2 });
+  const RT = ST - 0.1, east = el.outer > 0;
+  roofTop(bag, col, [x0, z0, x1, z1], RT, rand, { stalks: 1, sides: [east ? 'e' : 'w'] });
+  for (const u of [x0 + 1.3, x0 + 3.1]) spout(bag, u, RT + 0.08, z0, [0, -1]);                  // the north wall's spouts, clear of the round kitchen against it
+  dryMillet(bag, col, east ? [x1 - 4.7, z0 + 0.9, x1 - 2.3, z0 + 3.1] : [x0 + 2.3, z0 + 0.9, x0 + 4.7, z0 + 3.1], RT + 0.1);
+  roofPots(bag, east ? [x1 - 2.1, z0 + 0.5, x1 - 0.5, z0 + 3.0] : [x0 + 0.5, z0 + 0.5, x0 + 2.1, z0 + 3.0], RT + 0.1);
+  // the ladder cut from a forked trunk against the end wall on the lane side, its fork over the parapet
+  notchedLadder(bag, east ? x1 + 0.7 : x0 - 0.7, y, (z0 + z1) / 2 + 0.3 * (hv(x0, z0, 9) - 0.5), ST - y - 0.12, east ? -1 : 1, 0, 0.7);
   for (let i = 0; i < 6; i++) bag.add(LOG, rod([x0 - 0.15, ST - 0.18, z0 + 0.5 + i * 0.85], [x0, ST - 0.18, z0 + 0.5 + i * 0.85], 0.05, 5));
   // the forked post in the central room (it holds the main beam): trunk with its fork
   const px = lx(3.25), pz = lz(1.2);
@@ -239,7 +246,7 @@ export function houseOf(c) {
 export function landmarkCompound(el, ctx) {
   const { bag, col } = ctx, rand = rng(el.seed || 5), y = el.y;
   const h = houseOf({ rect: el.rect, hw: el.hw ?? true });
-  house({ rect: h.rect, y, seed: el.seed, ginna: el.ginna, plain: el.plain, lite: el.lite }, ctx);
+  house({ rect: h.rect, y, seed: el.seed, ginna: el.ginna, plain: el.plain, lite: el.lite, hogon: el.hogon, outer: h.side === 'e' ? -1 : 1 }, ctx);
   courtyard(bag, col, h.court, y, rand, { side: h.side, gate: true, south: true });
   furnish(bag, col, [h.court[0] + 0.4, h.court[1] + 0.4, h.court[2] - 0.4, h.court[3] - 0.4], y, rand, {});
   frontDress(bag, col, { x0: h.rect[0], x1: h.rect[2], zf: h.rect[3], y, doors: [h.rect[0] + 0.45 + 1.5, h.rect[0] + 0.45 + 4.9], seed: el.seed });

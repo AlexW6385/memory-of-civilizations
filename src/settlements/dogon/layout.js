@@ -106,7 +106,7 @@ export const COMPOUNDS = [];
   // a compound or two of the plainer, older kind (smooth facades)
   // and five kinds of front along the rows (docs/settlements/dogon.md §5): niched, tall, zig-zag banded, plain, two-tone wash
   const KIND = ['niche', 'zigzag', 'niche', 'tall', 'wash', 'plain', 'wash', 'tall', 'niche', 'zigzag', 'niche', 'plain', 'tall', 'plain', 'wash', 'niche', 'zigzag', 'tall'];
-  COMPOUNDS.forEach((c, n) => { c.ginna = c.landmark ? 'niche' : KIND[n % KIND.length]; });
+  COMPOUNDS.forEach((c, n) => { c.ginna = c.landmark ? 'tall' : KIND[n % KIND.length]; });
   // the compounds whose ginna is opened to walk into (the nearest of rows C and B, the middle of row A): the house on the pad's west
   // part (hw) or its east part, the courtyard beside it
   COMPOUNDS.forEach((c) => {

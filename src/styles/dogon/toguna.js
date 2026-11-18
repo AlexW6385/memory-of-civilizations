@@ -4,48 +4,77 @@
 // making. The real one is too low to stand in; ours is raised to 1.95 m clear so that a visitor can walk in (written in the dossier).
 
 import { box, lathe, rod, place, fromTriangles } from '../../core/geom.js';
-import { rng, DARK, LOG, STONE, STONE2, THATCH, STALK, WALL, MUD, SMOOTH, RED, basket } from './props.js';
+import { rng, hv, DARK, LOG, STONE, STONE2, THATCH, STALK, WALL, MUD, SMOOTH, RED, basket } from './props.js';
 
 export const CLEAR = 1.95;
 
-/** A carved post at (x, y, z): the shaft, bands of zig-zag, a face and, on some, a pair of breasts or the arms of an ancestor; forked at the top. `face` is the direction (yaw) the figure looks toward. */
+/** A carved post at (x, y, z): a round foot on a stone, the middle hewn square so that it can be carved on its faces (ancestors in relief, bands of zig-zag, a lizard up the side), collars at both ends of the carving, forked at the top to carry the beams. `face` is the direction (yaw) the main figure looks toward; k the post's number. */
 function post(bag, col, x, y, z, rand, face, k) {
-  const r = 0.2 + rand() * 0.04;
+  const r = 0.2 + rand() * 0.03, h = (n) => hv(x, z, n);
   bag.add(STONE, lathe([[0.42, -0.3], [0.4, 0.1], [0.3, 0.2], [0.001, 0.2]], 8, (t) => 1 + 0.08 * Math.sin(t * 5 + x), x, y, z));
-  bag.add(DARK, lathe([[r * 1.1, 0.18], [r, 0.4], [r * 0.96, 1.2], [r * 1.02, 1.75], [r * 0.9, 1.84]], 10, (t, i) => 1 + 0.025 * Math.sin(t * 3 + i * 2 + k), x, y, z));
+  bag.add(DARK, lathe([[r * 1.1, 0.18], [r, 0.3], [r * 0.96, 0.42]], 10, (t, i) => 1 + 0.025 * Math.sin(t * 3 + i * 2 + k), x, y, z));
+  bag.add(DARK, box(x - 0.2, y + 0.38, z - 0.2, x + 0.2, y + 0.45, z + 0.2));                                   // the collar where the round foot ends
+  bag.add(DARK, box(x - HD, y + 0.45, z - HD, x + HD, y + 1.72, z + HD));                                          // the hewn middle, its faces left flat for the carving
+  bag.add(DARK, box(x - 0.2, y + 1.7, z - 0.2, x + 0.2, y + 1.77, z + 0.2));                                     // and the collar above it
+  bag.add(DARK, lathe([[0.15, 0], [0.12, 0.05], [0.1, 0.1]], 8, null, x, y + 1.77, z));
   // the fork: two short branches opening upward, the beam lying in them
-  for (const s of [-1, 1]) bag.add(DARK, rod([x, y + 1.8, z], [x + s * 0.17 * Math.cos(face), y + 2.02, z + s * 0.17 * Math.sin(face)], 0.065, 6));
-  // carving (docs/settlements/dogon.md §13): ancestor figures in relief on the post's faces, built in the post's own frame (x across, z outward)
+  for (const s of [-1, 1]) bag.add(DARK, rod([x, y + 1.82, z], [x + s * 0.17 * Math.cos(face), y + 2.02, z + s * 0.17 * Math.sin(face)], 0.065, 6));
+  // carving (docs/settlements/dogon.md §13): the faces; the main one toward `face`, the other across when the post stands between two paths, a lizard and chevrons up a side
   const faces = k % 2 === 0 ? [face, face + Math.PI] : [face];
-  faces.forEach((fc, n) => carve(bag, x, y, z, r, fc, k + n));
-  col.circle(x, z, r + 0.08, y, y + 2.2);
+  faces.forEach((fc, n) => carve(bag, x, y, z, fc, h(1 + n * 7) < 0.4, h(2 + n * 7) < 0.5, h(3 + n * 7), x + n, z));
+  const side = face + (h(4) < 0.5 ? Math.PI / 2 : -Math.PI / 2);
+  if (h(5) < 0.7) lizardUp(bag, x, y, z, side, h(6)); else chevrons(bag, x, y, z, side);
+  col.circle(x, z, HD + 0.1, y, y + 2.2);
 }
 
+const HD = 0.17;
+const REL = 0.05;
 
-/** The relief on one face of a post: a zig-zag band at the foot, the ancestor above it — legs bent, hands to the belly or the arms raised, a face with nose, eyes and mouth, a flat cap — and a ring cut under the fork; some carry the breasts. */
-function carve(bag, x, y, z, r, yaw, k) {
-  const g = (mat, geo) => bag.add(mat, place(geo, x, y, z, yaw));
-  const zr = r * 0.93, d = 0.05, female = k % 3 === 0, raised = k % 2 === 0;
+/** A lizard in relief going up a post's face (head up), by the maker's hand: body, head, four bent legs, a tail with a curl. */
+function lizardUp(bag, x, y, z, yaw, hh) {
+  const g = (geo) => bag.add(LOG, place(geo, x, y, z, yaw)), zp = HD + 0.02, c = (hh - 0.5) * 0.05;
+  g(rod([c, 0.62, zp], [c, 1.2, zp], 0.028, 5));
+  g(lathe([[0.001, 0], [0.04, 0.03], [0.045, 0.08], [0.001, 0.14]], 6, null, c, 1.2, zp));                // the head
+  for (const [v, s] of [[0.68, -1], [0.68, 1], [1.1, -1], [1.1, 1]]) { g(rod([c + s * 0.02, v, zp], [c + s * 0.1, v + 0.06, zp], 0.015, 4)); g(rod([c + s * 0.1, v + 0.06, zp], [c + s * 0.12, v + 0.16, zp], 0.014, 4)); }
+  g(rod([c, 0.62, zp], [c + 0.07, 0.5, zp], 0.02, 4)); g(rod([c + 0.07, 0.5, zp], [c + 0.02, 0.42, zp], 0.014, 4));
+  for (let i = 0; i < 4; i++) g(box(-0.13, 0.46 + i * 0.35, zp - 0.02, 0.13, 0.48 + i * 0.35, zp + 0.01).translate(0, 0, 0));       // bars that close the registers
+}
+/** Two bands of chevrons on a face. */
+function chevrons(bag, x, y, z, yaw) {
+  const T = [], zp = HD + 0.012;
+  for (const [y0, y1] of [[0.55, 0.78], [1.3, 1.53]]) for (let i = 0; i < 5; i++) { const a = -0.14 + i * 0.056, b = a + 0.056; T.push(a, y0, zp, (a + b) / 2, y1, zp, b, y0, zp); }
+  bag.add(LOG, place(fromTriangles(T), x, y, z, yaw));
+}
+
+/** The relief on one face of a post (the face's plane at HD): a band of zig-zag at the foot of the carving, the ancestor above it — knees bent, hands at the belly or the arms raised, a head with nose, eyes and mouth and a cap, a few of them with the breasts and the scars dotted down the trunk — and the bars closing it. */
+function carve(bag, x, y, z, yaw, female, raised, hh, sx, sz) {
+  const g = (mat, geo) => bag.add(mat, place(geo.translate(0, -0.45, 0).scale(1, 0.88, 1).translate(0, 0.45, 0), x, y, z, yaw)), zp = HD, d = REL;      // the figure drawn at full height, squeezed to fit between the collars
+  const R = (x0, y0, x1, y1, dd = d) => box(x0, y0, zp - 0.012, x1, y1, zp + dd);
   const T = [];
-  for (let i = -2; i < 2; i++) { const a = i * 0.065, b = a + 0.065; T.push(a, 0.24, zr, (a + b) / 2, 0.42, zr, b, 0.24, zr); }
+  for (let i = -2; i < 3; i++) { const a = i * 0.06 - 0.03, b = a + 0.06; T.push(a, 0.5, zp + 0.012, (a + b) / 2, 0.66, zp + 0.012, b, 0.5, zp + 0.012); }
   g(LOG, fromTriangles(T));
-  for (const v of [0.46, 1.74]) g(LOG, lathe([[r + 0.012, 0], [r + 0.02, 0.014], [r + 0.012, 0.03]], 10, null, 0, v, 0));
-  for (const s of [-1, 1]) {                                                       // legs: thigh out, shin back in
-    g(LOG, rod([s * 0.06, 0.98, zr + 0.01], [s * 0.11, 0.78, zr + 0.04], 0.034, 5));
-    g(LOG, rod([s * 0.11, 0.78, zr + 0.04], [s * 0.08, 0.56, zr + 0.015], 0.03, 5));
+  g(LOG, R(-0.15, 0.7, 0.15, 0.735, 0.02));
+  for (const s of [-1, 1]) {                                                       // legs: thigh out, shin back in, the foot
+    g(LOG, rod([s * 0.05, 1.08, zp + 0.025], [s * 0.115, 0.92, zp + 0.03], 0.033, 5));
+    g(LOG, rod([s * 0.115, 0.92, zp + 0.03], [s * 0.08, 0.76, zp + 0.025], 0.03, 5));
+    g(LOG, R(s * 0.08 - 0.035, 0.735, s * 0.08 + 0.035, 0.775, 0.03));
   }
-  g(LOG, box(-0.13, 0.96, zr, 0.13, 1.34, zr + d));                               // trunk
-  g(LOG, box(-0.04, 1.34, zr, 0.04, 1.4, zr + d));                                // neck
+  g(LOG, R(-0.1, 1.06, 0.1, 1.44));                                               // trunk
+  g(LOG, R(-0.035, 1.44, 0.035, 1.5));                                            // neck
   for (const s of [-1, 1]) {
-    if (raised) { g(LOG, rod([s * 0.13, 1.3, zr + 0.02], [s * 0.19, 1.52, zr + 0.02], 0.03, 5)); g(LOG, rod([s * 0.19, 1.52, zr + 0.02], [s * 0.17, 1.74, zr + 0.02], 0.028, 5)); }
-    else { g(LOG, rod([s * 0.14, 1.3, zr + 0.02], [s * 0.15, 1.1, zr + 0.03], 0.03, 5)); g(LOG, rod([s * 0.15, 1.1, zr + 0.03], [s * 0.03, 1.04, zr + 0.05], 0.027, 5)); }
+    if (raised) { g(LOG, rod([s * 0.1, 1.4, zp + 0.025], [s * 0.14, 1.58, zp + 0.03], 0.028, 5)); g(LOG, rod([s * 0.14, 1.58, zp + 0.03], [s * 0.125, 1.76, zp + 0.025], 0.026, 5)); }
+    else { g(LOG, rod([s * 0.11, 1.4, zp + 0.025], [s * 0.145, 1.22, zp + 0.03], 0.028, 5)); g(LOG, rod([s * 0.145, 1.22, zp + 0.03], [s * 0.035, 1.14, zp + 0.045], 0.025, 5)); }
   }
-  if (female) for (const s of [-1, 1]) g(LOG, lathe([[0.001, 0], [0.05, 0.01], [0.04, 0.07], [0.001, 0.09]], 7, null, s * 0.07, 1.2, zr + d).rotateX(Math.PI / 2 * 0));
-  g(LOG, lathe([[0.001, 0], [0.065, 0.03], [0.085, 0.13], [0.06, 0.23], [0.001, 0.26]], 8, null, 0, 1.4, zr + 0.03));       // the head
-  g(LOG, box(-0.012, 1.48, zr + 0.1, 0.012, 1.58, zr + 0.16));                    // the nose
-  for (const s of [-1, 1]) g('opening', box(s * 0.04 - 0.012, 1.55, zr + 0.105, s * 0.04 + 0.012, 1.57, zr + 0.12));
-  g('opening', box(-0.03, 1.44, zr + 0.105, 0.03, 1.455, zr + 0.115));
-  g(LOG, lathe([[0.1, 0], [0.09, 0.03], [0.001, 0.045]], 8, null, 0, 1.64, zr + 0.03));                                       // a flat cap
+  if (female) for (const s of [-1, 1]) g(LOG, lathe([[0.001, 0], [0.045, 0.006], [0.036, 0.06], [0.001, 0.08]], 7, null, s * 0.055, 1.3, zp + d - 0.01).rotateX(0));
+  else for (let i = 0; i < 4; i++) g(LOG, R(-0.012 + (i % 2) * 0.07 - 0.035, 1.15 + i * 0.07, 0.012 + (i % 2) * 0.07 - 0.035, 1.17 + i * 0.07, 0.065));    // the scars down the trunk
+  g(LOG, lathe([[0.001, 0], [0.055, 0.03], [0.07, 0.11], [0.05, 0.2], [0.001, 0.23]], 8, null, 0, 1.5, zp + 0.03));         // the head
+  g(LOG, R(-0.011, 1.56, 0.011, 1.66, 0.105));                                    // the nose
+  for (const s of [-1, 1]) g('opening', box(s * 0.032 - 0.011, 1.63, zp + 0.08, s * 0.032 + 0.011, 1.65, zp + 0.092));
+  g('opening', box(-0.026, 1.545, zp + 0.085, 0.026, 1.56, zp + 0.095));
+  if (hh < 0.4) g(LOG, lathe([[0.09, 0], [0.085, 0.03], [0.001, 0.05]], 8, null, 0, 1.72, zp + 0.03));                       // a flat cap
+  else if (hh < 0.75) for (const s of [-1, 1]) g(LOG, rod([s * 0.04, 1.71, zp + 0.05], [s * 0.095, 1.8, zp + 0.05], 0.018, 4));   // a pair of horns of the headdress
+  else g(LOG, R(-0.06, 1.71, 0.06, 1.76, 0.05));                                  // a plaited crown
+  void sx; void sz;
 }
 
 /** toguna: { c: [x, z], w, d, y, yaw?, seed }: the plan about its centre, the floor at y + 0.12. */
