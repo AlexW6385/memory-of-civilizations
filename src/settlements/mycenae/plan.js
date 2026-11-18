@@ -1,7 +1,7 @@
 // The citadel of Mycenae as the landmark (docs/settlements/mycenae.md §4.1–§4.4): the Cyclopean circuit, the Lion Gate with its bastion and approach court,
 // the north gate, Grave Circle A, the granary, the palace round its Great Court on the summit and the megaron with its hall (the enterable interior).
 
-import { CIRCUIT, GATE_Y, PAL_Y, LION, BASTION, STUB, GCA, GRANARY, PALACE, TH, approachY, yIn, wallRuns, NORTH_GATE } from './layout.js';
+import { CIRCUIT, GATE_Y, PAL_Y, LION, BASTION, STUB, GCA, GRANARY, PALACE, TH, approachY, yIn, wallRuns, NORTH_GATE, RAMP, terrain } from './layout.js';
 
 const E = [];
 const { runs, gate } = wallRuns();
@@ -11,6 +11,10 @@ E.push({ t: 'north_gate', at: gate.at, u: gate.u, n: gate.n, w: NORTH_GATE.w, h:
 E.push({ t: 'lion_gate', x: LION.x - TH / 2, z: 0, y: GATE_Y, w: LION.w, h: LION.h, th: TH, y1: GATE_Y + 8.6, seed: 5, zExt: 11 });
 E.push({ t: 'wall_run', a: [BASTION[0], (BASTION[1] + BASTION[3]) / 2], b: [BASTION[2], (BASTION[1] + BASTION[3]) / 2], th: BASTION[3] - BASTION[1], y0: approachY(BASTION[0]) - 1.2, y1: GATE_Y + 6.2, yi: approachY(BASTION[0]) - 1.2, ashlar: true, seed: 31, ext: 0, caps: [true, false] });
 E.push({ t: 'wall_run', a: [STUB[0], (STUB[1] + STUB[3]) / 2], b: [STUB[2], (STUB[1] + STUB[3]) / 2], th: STUB[3] - STUB[1], y0: approachY(STUB[0]) - 1.2, y1: GATE_Y + 7.0, yi: approachY(STUB[0]) - 1.2, ashlar: true, seed: 32, ext: 0, caps: [true, false] });
+// the paved court between the stub and the bastion, and the stepped road up past Grave Circle A to the palace: the centre lines sampled a metre apart on the ground
+const along = (P, x0, x1) => { const out = []; let acc = 0; for (let i = 0; i + 1 < P.length; i++) { const L = Math.hypot(P[i + 1][0] - P[i][0], P[i + 1][1] - P[i][1]), ux = (P[i + 1][0] - P[i][0]) / L, uz = (P[i + 1][1] - P[i][1]) / L; for (let s = 0; s < L; s += 1.3) { const x = P[i][0] + (P[i + 1][0] - P[i][0]) * s / L, z = P[i][1] + (P[i + 1][1] - P[i][1]) * s / L; if (x >= x0 && x <= x1) out.push([Math.round(x * 100) / 100, Math.round(z * 100) / 100, Math.round(Math.max(...[-2.3, -1.15, 0, 1.15, 2.3].map((v) => terrain(x - uz * v, z + ux * v))) * 100) / 100]); } acc += L; } void acc; return out; };
+E.push({ t: 'ramp', pts: along([[-107, 0], [-92, 0]], -107, -92).map(([x, z]) => [x, z, approachY(x)]), w: 6.6, kerb: false, seed: 41 });
+E.push({ t: 'ramp', pts: along(RAMP, -85, 22), w: 4.6, kerb: true, seed: 42 });
 // the passage's floor inside the gate
 E.push({ t: 'floor', rect: [-86, -1.55, -82, 1.55], y: GATE_Y, th: 0.4, mat: 'flagstone' });
 E.push({ t: 'granary', rect: GRANARY, y: GATE_Y + 0.1, face: 'n', seed: 7 });

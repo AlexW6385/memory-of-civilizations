@@ -2,7 +2,7 @@
 // the green half-columns and the relieving triangle, the tholos of 33 corbelled courses, the side chamber. And Grave Circle A (§4.3).
 
 import { box, lathe, disc, frustum, fromTriangles, place } from '../../core/geom.js';
-import { rng, mergeG, courses } from './util.js';
+import { rng, mergeG, courses, hash2 } from './util.js';
 import { wallRun } from './wall.js';
 import { spiral, bar, rosette, stud } from './relief.js';
 import { profile, ell, cap, poly } from '../greek/sculpture.js';
@@ -59,13 +59,25 @@ function domeRosettes(el) {
   return mergeG(out);
 }
 
-/** A zigzag shaft for the half-columns of the façade: green stone, chevrons, tapering downward. */
+/**
+ * A half-column of the façade: green stone, the shaft tapering downward and cut with chevrons (raised diagonal bands that change their slant every
+ * fifth of the height, so that they meet in zigzags), a moulded base on a square plinth, an echinus capital and abacus. Standing against the wall at (x, z).
+ */
 function zigzagColumn(x, y, z, h, r) {
-  const prof = [[r * 0.8, 0], [r * 0.95, 0.12]];
-  const rows = Math.round(h / 0.22);
-  for (let i = 0; i <= rows; i++) { const t = i / rows, rr = r * (0.8 + 0.2 * t); prof.push([rr * (i % 2 ? 1.07 : 0.96), 0.12 + (h - 0.4) * t]); }
-  prof.push([r * 1.25, h - 0.28], [r * 1.35, h - 0.1], [r * 1.2, h], [0.001, h]);
-  return lathe(prof, 14, null, x, y, z);
+  const bh = 0.3, ch = 0.38, sh = h - bh - ch, rows = Math.max(14, Math.round(sh / 0.09)), per = rows / 6;
+  const out = [];
+  const prof = [[0.001, 0]];
+  for (let i = 0; i <= rows; i++) { const t = i / rows; prof.push([r * (0.82 + 0.2 * t), sh * t]); }
+  const chev = (th, i) => {
+    if (i < 2 || i > rows) return 1;
+    const band = Math.floor((i - 1) / per), d = band % 2 ? 1 : -1;
+    return 1 + 0.075 * Math.abs(Math.sin(th * 7 + d * i * 0.42)) - 0.03;
+  };
+  out.push(lathe(prof, 42, chev, x, y + bh, z));
+  out.push(lathe([[0.001, 0], [r * 1.35, 0], [r * 1.35, bh * 0.35], [r * 1.18, bh * 0.7], [r * 1.0, bh], [0.001, bh]], 20, null, x, y, z));
+  out.push(lathe([[r * 1.0, 0], [r * 1.12, 0.05], [r * 1.42, 0.17], [r * 1.62, 0.3], [r * 1.66, ch], [0.001, ch]], 20, null, x, y + bh + sh, z));
+  out.push(box(x - r * 1.9, y + bh + sh + ch, z - r * 1.9, x + r * 1.9, y + h, z + r * 1.9));
+  return mergeG(out);
 }
 
 
@@ -100,14 +112,14 @@ const rearing = (cu, cv, k = 1, dir = 1) => [
  * 'chase' a chariot over a lion after a beast (I's lower field); 'horses' four rearing horses stacked (VI); 'meander' three columns, the outer ones waved (II).
  */
 function stele(kind, h, w, rand) {
-  const body = [box(-w / 2, 0, -0.1, w / 2, h, 0.1)], carve = [], rel = [], F = (u, v, d) => [u, v, -0.1 - d];
-  const sp = (u, v, r, dir) => carve.push(...spiral(F, u, v, 0.012, r, 2.0, dir, 0.012, 0.012, 5));
-  const link = (u0, v0, u1, v1) => carve.push(bar(F, u0, v0, u1, v1, 0.011, 0.012, 5));
+  const body = [frustum([-w / 2, -0.1, w / 2, 0.1], 0, h - 0.18, 0, 0, 0, 0, { noBottom: true, noTop: true }), frustum([-w / 2, -0.1, w / 2, 0.1], h - 0.18, h, 0.1, 0.1, 0.03, 0.03, { noBottom: true }), box(-w / 2 - 0.05, 0, -0.16, w / 2 + 0.05, 0.12, 0.12)], carve = [], rel = [], F = (u, v, d) => [u, v, -0.1 - d];
+  const sp = (u, v, r, dir) => carve.push(...spiral(F, u, v, 0.014, r, 2.0, dir, 0.02, 0.02, 5));
+  const link = (u0, v0, u1, v1) => carve.push(bar(F, u0, v0, u1, v1, 0.018, 0.02, 5));
   const frameBorder = (u0, v0, u1, v1, n) => {
-    carve.push(bar(F, u0, v0, u1, v0, 0.012, 0.012), bar(F, u0, v1, u1, v1, 0.012, 0.012), bar(F, u0, v0, u0, v1, 0.012, 0.012), bar(F, u1, v0, u1, v1, 0.012, 0.012));
+    carve.push(bar(F, u0, v0, u1, v0, 0.02, 0.02), bar(F, u0, v1, u1, v1, 0.02, 0.02), bar(F, u0, v0, u0, v1, 0.02, 0.02), bar(F, u1, v0, u1, v1, 0.02, 0.02));
   void n; };
   const v0 = 0.3, top = h - 0.12, mid = (v0 + top) / 2;
-  const rel2 = (parts) => parts.length && rel.push(profile(parts, { p: [0, 0, -0.1], u: [1, 0, 0], o: [0, 0, -1], d: 0.03 }));
+  const rel2 = (parts) => parts.length && rel.push(profile(parts, { p: [0, 0, -0.1], u: [1, 0, 0], o: [0, 0, -1], d: 0.05 }));
   if (kind === 'cols') {
     for (const u of [-w * 0.24, w * 0.24]) for (let v = v0 + 0.12; v < top - 0.05; v += 0.26) { sp(u, v, 0.1, ((Math.round(v * 10) % 2) ? 1 : -1)); if (v + 0.26 < top - 0.05) link(u, v + 0.1, u, v + 0.16); }
   } else if (kind === 'frame') {
@@ -125,7 +137,7 @@ function stele(kind, h, w, rand) {
     const rows = Math.max(2, Math.min(4, Math.floor((top - v0) / 0.34)));
     for (let i = 0; i < rows; i++) rel2(rearing((i % 2 ? 0.08 : -0.12), v0 + 0.02 + i * ((top - v0 - 0.3) / Math.max(1, rows - 1)), 0.9, i % 2 ? -1 : 1));
   } else if (kind === 'meander') {
-    for (const sg of [-1, 1]) { const u = sg * (w / 2 - 0.14); let up = true; for (let v = v0 + 0.05; v < top - 0.14; v += 0.14) { carve.push(bar(F, u - (up ? 0.06 : -0.06), v, u + (up ? 0.06 : -0.06), v + 0.14, 0.012, 0.012)); up = !up; } }
+    for (const sg of [-1, 1]) { const u = sg * (w / 2 - 0.14); let up = true; for (let v = v0 + 0.05; v < top - 0.14; v += 0.14) { carve.push(bar(F, u - (up ? 0.06 : -0.06), v, u + (up ? 0.06 : -0.06), v + 0.14, 0.02, 0.02)); up = !up; } }
     carve.push(bar(F, 0, v0 + 0.05, 0, top - 0.05, 0.02, 0.012, 6)); for (let v = v0 + 0.15; v < top - 0.1; v += 0.2) carve.push(bar(F, -0.07, v, 0.07, v + 0.04, 0.01, 0.012));
   }
   void rand;
@@ -193,7 +205,7 @@ export function treasury(el, ctx) {
   }
   bag.add('timber', mergeG(leaf)); bag.add('timber', mergeG(rails)); bag.add('bronze', mergeG(nails));
   for (const s of [-1, 1]) {
-    bag.add('serpentine', zigzagColumn(xf - 0.12, y, Tz + s * (hw + 0.62), el.door - 0.35, 0.5)); col.circle(xf - 0.12, Tz + s * (hw + 0.62), 0.5, y, y + el.door);
+    bag.add('serpentine', zigzagColumn(xf - 0.12, y, Tz + s * (hw + 0.62), el.door - 0.2, 0.5)); col.circle(xf - 0.12, Tz + s * (hw + 0.62), 0.5, y, y + el.door);
     bag.add('serpentine', zigzagColumn(xf - 0.1, lintelTop, Tz + s * 2.2, 2.9, 0.26));
   }
   // the passage: walls and the roof slabs, the floor already laid
@@ -234,19 +246,42 @@ export function treasury(el, ctx) {
 
 /** grave_circle: { c: [x, z], r, y, entrance (the angle left open), seed } — the peribolos of two rings of upright slabs capped with flat ones, the paved temenos, six shaft graves with their stelae, the altar over one. */
 export function graveCircle(el, { bag, col }) {
-  const [cx, cz] = el.c, r = el.r, y = el.y, rand = rng(el.seed ?? 9), N = 44, up = [], cap = [];
+  const [cx, cz] = el.c, r = el.r, y = el.y, rand = rng(el.seed ?? 9), up = [], cap = [], rub = [];
   bag.add('limestone_yellow', disc(r + 0.2, y + 0.03, 40, cx, cz, true));
   col.floor([cx - r, cz - r, cx + r, cz + r], y + 0.03);
-  for (let i = 0; i < N; i++) {
-    const a = (i / N) * Math.PI * 2, d = Math.abs(Math.atan2(Math.sin(a - el.entrance), Math.cos(a - el.entrance)));
-    if (d < 0.14) continue;
-    const w = (Math.PI * 2 * r) / N * 0.92, hgt = 1.15 + rand() * 0.2;
-    for (const [rr, t] of [[r + 0.25, 0.3], [r - 0.35, 0.3]]) up.push(place(box(-w / 2, 0, -t / 2, w / 2, hgt, t / 2), cx + Math.cos(a) * rr, y, cz + Math.sin(a) * rr, -a + Math.PI / 2));
-    cap.push(place(box(-w / 2, 0, -0.55, w / 2, 0.22, 0.55), cx + Math.cos(a) * (r - 0.05), y + 1.28, cz + Math.sin(a) * (r - 0.05), -a + Math.PI / 2));
-    const a1 = ((i + 1) / N) * Math.PI * 2;
-    col.segment([cx + Math.cos(a) * (r - 0.05), cz + Math.sin(a) * (r - 0.05)], [cx + Math.cos(a1) * (r - 0.05), cz + Math.sin(a1) * (r - 0.05)], 1.1, y, y + 1.5);
+  // the peribolos: two rings of upright slabs set edge-on, 0.9 m apart, the gap packed with rubble, covered by horizontal slabs laid across both rings;
+  // each slab's width, height, lean and bedding come from a hash of its own place
+  const ring = (rr, tag) => {
+    let a = 0, k = 0;
+    while (a < Math.PI * 2 - 0.05) {
+      const hx = cx + Math.cos(a) * rr, hz = cz + Math.sin(a) * rr, h1 = hash2(hx, hz, tag), h2 = hash2(hz, hx, tag + 7);
+      const wl = 0.85 + h1 * 1.0, da = wl / rr, am = a + da / 2, d = Math.abs(Math.atan2(Math.sin(am - el.entrance), Math.cos(am - el.entrance)));
+      if (d > 0.15) {
+        const px = cx + Math.cos(am) * rr, pz = cz + Math.sin(am) * rr, hgt = 1.0 + h2 * 0.45, t = 0.26 + h1 * 0.1, w = wl * 0.95;
+        up.push(place(frustum([-w / 2, -t / 2, w / 2, t / 2], 0, hgt, 0.02 + h2 * 0.08, 0.02 + h1 * 0.08, 0.03, 0.03, { noBottom: true }), px, y + 0.02 - h2 * 0.05, pz, -am + Math.PI / 2 + (h1 - 0.5) * 0.04));
+      }
+      a += da + 0.006; k++;
+    }
+    return k;
+  };
+  ring(r + 0.25, 1); ring(r - 0.65, 2);
+  rub.push(lathe([[r - 0.7, 0], [r - 0.7, 1.4], [r + 0.38, 1.4], [r + 0.38, 0]], 40, null, cx, y, cz));
+  {
+    let a = 0;
+    while (a < Math.PI * 2 - 0.05) {
+      const rm = r - 0.2, hx = cx + Math.cos(a) * rm, hz = cz + Math.sin(a) * rm, h1 = hash2(hx, hz, 5), wl = 1.0 + h1 * 0.8, da = wl / rm, am = a + da / 2;
+      const d = Math.abs(Math.atan2(Math.sin(am - el.entrance), Math.cos(am - el.entrance)));
+      if (d > 0.16) cap.push(place(frustum([-wl / 2 + 0.03, -0.8, wl / 2 - 0.03, 0.8], 0, 0.2, 0.03, 0.03, 0.03, 0.03), cx + Math.cos(am) * rm, y + 1.42 + h1 * 0.06, cz + Math.sin(am) * rm, -am + Math.PI / 2 + (hash2(hz, hx, 9) - 0.5) * 0.06));
+      a += da;
+    }
   }
-  bag.add('limestone_yellow', mergeG(up)); bag.add('limestone_yellow', mergeG(cap));
+  for (let i = 0; i < 64; i++) {
+    const a = (i / 64) * Math.PI * 2, d = Math.abs(Math.atan2(Math.sin(a - el.entrance), Math.cos(a - el.entrance)));
+    if (d < 0.14) continue;
+    const a1 = ((i + 1) / 64) * Math.PI * 2;
+    col.segment([cx + Math.cos(a) * (r - 0.2), cz + Math.sin(a) * (r - 0.2)], [cx + Math.cos(a1) * (r - 0.2), cz + Math.sin(a1) * (r - 0.2)], 1.5, y, y + 1.6);
+  }
+  bag.add('limestone_yellow', mergeG(up)); bag.add('limestone_yellow', mergeG(cap)); bag.add('rubble', mergeG(rub));
   // six shaft graves: low covers of stones, each with its stele upright at the head (the chariot reliefs on three of them)
   const G = [[-5.2, -3.4, 0.2], [0.3, -6.4, 0.5], [5.0, -1.8, 1.4], [-2.2, 2.6, 0.1], [3.6, 5.6, 0.8], [-6.0, 4.6, 1.2]];
   const mounds = [], kerb = [], bodies = [], carved = [], reliefs = [], KINDS = ['cols', 'frame', 'panels', 'chase', 'horses', 'meander'];
@@ -255,7 +290,7 @@ export function graveCircle(el, { bag, col }) {
     mounds.push(place(box(-1.5, 0, -1.1, 1.5, 0.28, 1.1), x, y + 0.03, z, ang));
     // a kerb of upright slabs round each grave's cover
     for (const [a, b, c, d] of [[-1.55, -1.15, 1.55, -1.05], [-1.55, 1.05, 1.55, 1.15], [-1.55, -1.15, -1.45, 1.15], [1.45, -1.15, 1.55, 1.15]]) kerb.push(place(box(a, 0, b, c, 0.36, d), x, y + 0.03, z, ang));
-    const sx = x + Math.cos(ang) * -1.9, sz = z - Math.sin(ang) * -1.9, h = 1.35 + rand() * 0.5, st = stele(KINDS[i], h, 0.8, rand), yaw = ang + Math.PI / 2;
+    const sx = x + Math.cos(ang) * -1.9, sz = z - Math.sin(ang) * -1.9, h = 1.5 + rand() * 0.5, st = stele(KINDS[i], h, 0.9, rand), yaw = ang + Math.PI / 2;
     for (const [list, g] of [[bodies, st.body], [carved, st.carve], [reliefs, st.rel]]) if (g) list.push(place(g, sx, y, sz, yaw));
     col.circle(sx, sz, 0.5, y, y + 1.8);
   });

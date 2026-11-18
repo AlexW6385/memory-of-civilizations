@@ -1,7 +1,7 @@
 // The walls of Mycenae (docs/settlements/mycenae.md §4.1, §4.2): Cyclopean runs of rough boulders, the dressed conglomerate of the west front
 // (bastion, approach court), the Lion Gate with its relieving triangle and the lionesses, the north gate.
 
-import { box, frustum, fromTriangles } from '../../core/geom.js';
+import { box, frustum, fromTriangles, place } from '../../core/geom.js';
 import { profile, ell, cap, poly } from '../greek/sculpture.js';
 import { merge } from '../greek/columns.js';
 import { rng, mergeG, inFrame, courses } from './util.js';
@@ -69,23 +69,80 @@ export function wallRun(el, { bag, col }) {
   col.segment([ax - ux * ext, az - uz * ext], [bx + ux * ext, bz + uz * ext], th, y0, y1);
 }
 
-/** north_gate: { at, u, n, w, h, th, y, y1, yi, seed } — the postern in the north wall: two jambs, a lintel, the wall above, the paved passage. */
+/**
+ * north_gate: { at, u, n, w, h, th, y, y1, yi, seed } — the postern in the north wall (docs §15): two jambs each of two great squared blocks leaning in, a lintel of two monoliths,
+ * a corbelled hood of three stepped slabs over it standing for the relieving triangle (undecorated), the wall above, the paved passage with its threshold, pivot stones, bar-holes
+ * and the two plank doors swung back against the jambs.
+ */
 export function northGate(el, ctx) {
-  const { bag, col } = ctx, [x, z] = el.at, [ux, uz] = el.u, hw = el.w / 2, run = (s0, s1, y0, y1, k) => wallRun({ a: [x + ux * s0, z + uz * s0], b: [x + ux * s1, z + uz * s1], th: el.th, y0, y1, yi: el.yi, ashlar: false, seed: el.seed + k, ext: 0 }, ctx);
-  run(-4, -hw, el.y0, el.y1, 1); run(hw, 4, el.y0, el.y1, 2);
-  // the lintel over the passage and the wall above it
-  const top = el.y + el.h;
-  bag.add(DRESSED, inFrame(box(-hw - 0.6, top, -el.th / 2, hw + 0.6, top + 0.7, el.th / 2), [x - ux * 0, z - uz * 0], [x + ux, z + uz]));
-  col.segment([x - ux * (hw + 0.6), z - uz * (hw + 0.6)], [x + ux * (hw + 0.6), z + uz * (hw + 0.6)], el.th, top, top + 0.7);
-  run(-hw - 0.6, hw + 0.6, top + 0.7, el.y1, 3);
-  const p0 = [x - ux * hw, z - uz * hw], p1 = [x + ux * hw, z + uz * hw];
-  const q = [x + el.n[0] * el.th * 0.5, z + el.n[1] * el.th * 0.5];
-  void p0; void p1; void q;
-  // the floor of the passage
-  const nx = el.n[0], nz = el.n[1], pts = [[x - ux * hw - nx * el.th / 2, z - uz * hw - nz * el.th / 2], [x + ux * hw + nx * el.th / 2, z + uz * hw + nz * el.th / 2]];
+  const { bag, col } = ctx, [x, z] = el.at, [ux, uz] = el.u, hw = el.w / 2, J = 0.95, run = (s0, s1, y0, y1, k) => wallRun({ a: [x + ux * s0, z + uz * s0], b: [x + ux * s1, z + uz * s1], th: el.th, y0, y1, yi: el.yi, ashlar: false, seed: el.seed + k, ext: 0 }, ctx);
+  run(-4, -hw - J, el.y0, el.y1, 1); run(hw + J, 4, el.y0, el.y1, 2);
+  const top = el.y + el.h, th = el.th, L = hw + J + 0.4, F = (g) => inFrame(g, [x, z], [x + ux, z + uz]), dressed = [], rand = rng(el.seed);
+  // jambs: two blocks deep, leaning in; the outer face a little rough
+  for (const s of [-1, 1]) for (const [za, zb] of [[-th / 2, 0.1], [0.1, th / 2]]) {
+    const r = s > 0 ? [hw, za + 0.02, hw + J, zb - 0.02] : [-hw - J, za + 0.02, -hw, zb - 0.02];
+    dressed.push(frustum(r, el.y, top, s > 0 ? 0 : 0.05, s > 0 ? 0.05 : 0, 0, 0, { noBottom: true }));
+  }
+  // the lintel of two monoliths, and over it the corbelled hood: three slabs stepping in, each proud of the face
+  dressed.push(box(-L, top, -th / 2, L, top + 0.85, -0.02), box(-L, top, 0.02, L, top + 0.85, th / 2));
+  const hood = [[L - 0.1, 0.5, 0.42], [L - 0.5, 0.5, 0.5], [L - 0.9, 0.5, 0.58]];
+  hood.forEach(([hl, hh, pr], i) => dressed.push(box(-hl, top + 0.85 + i * hh, -th / 2 - pr, hl, top + 0.85 + (i + 1) * hh, th / 2)));
+  const hoodTop = top + 0.85 + 3 * 0.5;
+  col.segment([x - ux * L, z - uz * L], [x + ux * L, z + uz * L], th, top, top + 0.85);
+  bag.add(DRESSED, F(mergeG(dressed)));
+  run(-L, L, hoodTop, el.y1, 3);
+  run(-hw - J, hw + J, el.y0, el.y - 0.3, 4);      // the wall under the passage's floor (the postern stands high over the ravine)
+  // the core between the hood and the lintel's ends and the wall beside: filled by the wall's own core
+  // the floor: a threshold of one great stone with the door's pivot stones and the bar-holes cut in the jambs
+  const nx = el.n[0], nz = el.n[1], pts = [[x - ux * hw - nx * th / 2, z - uz * hw - nz * th / 2], [x + ux * hw + nx * th / 2, z + uz * hw + nz * th / 2]];
   const r = [Math.min(pts[0][0], pts[1][0]), Math.min(pts[0][1], pts[1][1]), Math.max(pts[0][0], pts[1][0]), Math.max(pts[0][1], pts[1][1])];
   bag.add('flagstone', box(r[0], el.y - 0.3, r[1], r[2], el.y, r[3]));
   col.floor(r, el.y);
+  const inner = [], leaf = [], rail = [], nails = [], pivot = [], bars = [], zD = th / 2 - 1.2;
+  for (const s of [-1, 1]) {
+    pivot.push(box(s * (hw - 0.05) - 0.17, el.y, zD - 0.17, s * (hw - 0.05) + 0.17, el.y + 0.1, zD + 0.17));
+    bars.push(box(s * (hw + 0.02) - 0.0, el.y + 1.3, zD - 1.2 - 0.12, s * (hw + 0.02) + (s > 0 ? 0.08 : -0.08), el.y + 1.46, zD - 1.2 + 0.12));
+    // the leaf lying along the jamb, planked, railed, studded
+    const a = s > 0 ? hw - 0.14 : -hw + 0.02, b = s > 0 ? hw - 0.02 : -hw + 0.14, za = zD - 1.45, zb = zD + 0.1;
+    for (let k = 0; k < 5; k++) { const q = za + k * ((zb - za) / 5); leaf.push(box(Math.min(a, b), el.y + 0.02, q + 0.01, Math.max(a, b), el.y + el.h - 0.1, q + (zb - za) / 5 - 0.01)); }
+    for (const v of [0.4, 1.35, 2.2]) rail.push(box(s > 0 ? hw - 0.19 : -hw + 0.14, el.y + v, za, s > 0 ? hw - 0.14 : -hw + 0.19, el.y + v + 0.14, zb));
+    for (let q = za + 0.16; q < zb - 0.05; q += 0.26) for (const v of [0.47, 1.42, 2.27]) nails.push(stud([s > 0 ? hw - 0.19 : -hw + 0.19, el.y + v + 0.07, q], [-s, 0, 0], 0.03));
+  }
+  void inner;
+  bag.add('timber', F(mergeG(leaf))); bag.add('cedar', F(mergeG(rail))); bag.add('bronze', F(mergeG(nails))); bag.add('granite_grey', F(mergeG(pivot))); bag.add(DRESSED, F(mergeG(bars)));
+  void rand;
+}
+
+/** ramp: { pts: [[x, z, ground y], ...] (a centre line a metre apart), w, kerb, seed } — the paved way: courses of flat limestone slabs a hand over the ground, the joints hashed, kerbs. */
+export function ramp(el, { bag }) {
+  const rand = rng(el.seed ?? 1), pts = el.pts, w = el.w, slabs = [], kerb = [];
+  const quad = (c, ux, uz, nx, nz, u0, u1, v0, v1, ya, yb, yt, list) => {
+    const P = (u, v) => [c[0] + ux * u + nx * v, c[1] + uz * u + nz * v];
+    const [a, b, d, e] = [P(u0, v0), P(u1, v0), P(u1, v1), P(u0, v1)];
+    const xs = [a[0], b[0], d[0], e[0]], zs = [a[1], b[1], d[1], e[1]];
+    list.push(box(Math.min(...xs), ya, Math.min(...zs), Math.max(...xs), yt, Math.max(...zs)));
+    void yb;
+  };
+  void quad;
+  for (let i = 0; i + 1 < pts.length; i++) {
+    const [ax, az, ay] = pts[i], [bx, bz, by] = pts[i + 1], L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, nx = -uz, nz = ux;
+    const n = 1 + (rand() < 0.35 ? 1 : 0), yc = Math.max(ay, by);
+    let v = -w / 2;
+    while (v < w / 2 - 0.3) {
+      const sw = Math.min(w / 2 - v, 0.9 + rand() * 1.0), v1 = v + sw, sl = L * (0.94 + rand() * 0.05) / n;
+      for (let k = 0; k < n; k++) {
+        // a slab: rotated to the way, its top flat, the sides down into the ground
+        const cu = L * (k + 0.5) / n, cx = ax + ux * cu + nx * (v + v1) / 2, cz = az + uz * cu + nz * (v + v1) / 2, yy = yc + 0.05 + rand() * 0.03;
+        slabs.push(place(box(-sl / 2 + 0.03, yy - 1.0, -(sw - 0.06) / 2, sl / 2 - 0.03, yy, (sw - 0.06) / 2), cx, 0, cz, -Math.atan2(uz, ux)));
+        void k;
+      }
+      v = v1;
+    }
+    if (el.kerb) for (const sgn of [-1, 1]) kerb.push(place(box(-L / 2, yc - 1.0, -0.16, L / 2, yc + 0.22, 0.16), ax + ux * L / 2 + nx * sgn * (w / 2 + 0.16), 0, az + uz * L / 2 + nz * sgn * (w / 2 + 0.16), -Math.atan2(uz, ux)));
+  }
+  void kerb;
+  bag.add('flagstone', mergeG(slabs));
+  if (kerb.length) bag.add('flagstone', mergeG(kerb));
 }
 
 // ── the Lion Gate ────────────────────────────────────────────────────────────────────────────
