@@ -8,11 +8,13 @@ import { human } from '../greek/sculpture.js';
 import { lionOfStMark } from './piazza.js';
 import { Local } from '../renaissance/face.js';
 import { band, column, moFig, circle, crocket } from './front.js';
+import { justice } from './works-b.js';
+import { at } from './stone.js';
 
 const M = 'marble', PK = 'marble_pink', PC = 'proconnesian', CV = 'limestone_carved', GB = 'gilt_bronze', BL = 'paint_blue', O = 'opening', WD = 'wood_dark';
 
 /** porta(Lc, uP): into the local frame of a wall (u along it, y up, d out), the gateway centred at uP on the ground. */
-export function porta(Lc, uP) {
+export function porta(Lc, uP, figs = true) {
   const W = 3.1;
   Lc.box(M, uP - W, 0, 0, uP + W, 8.0, 0.55);                                                                 // the body of the gate
   Lc.box(PC, uP - W - 0.15, 0, 0, uP + W + 0.15, 0.5, 0.75);                                                  // its plinth
@@ -31,15 +33,15 @@ export function porta(Lc, uP) {
   // the lunette over the door: the lion of St Mark in gilt on blue, the doge kneeling before him
   Lc.add(BL, ext(archOutline(uP, 4.6, 2.5, 5.7, 'ogee', 8), [], 0.55, 0.62));
   Lc.add(PK, ext(band(uP, 5.7, 1.25, 1.4, 4.6).slice(0, 0).concat(archOutline(uP, 4.55, 2.9, 5.7, 'ogee', 8)), [archOutline(uP, 4.6, 2.5, 5.7, 'ogee', 8)], 0.55, 0.7));
-  { const lion = new Local(); lionOfStMark(lion, GB, 0.5); for (const list of lion.m.values()) for (const g of list) { g.translate(uP - 0.1, 4.7, 0.65); Lc.add(GB, g); } }
-  moFig(Lc, uP - 0.85, 4.65, 1.2, GB, 0.64);
+  if (figs) { const lion = new Local(); lionOfStMark(lion, GB, 0.5); for (const list of lion.m.values()) for (const g of list) { g.translate(uP - 0.1, 4.7, 0.65); Lc.add(GB, g); } }
+  if (figs) moFig(Lc, uP - 0.85, 4.65, 1.2, GB, 0.64);
   // the four Virtues in niches under crocketed canopies: Prudence, Fortitude, Temperance, Charity
   for (const sg of [-1, 1]) for (const [y0, k] of [[0.9, 0], [5.0, 1]]) {
     const u = uP + sg * 2.1, w = 1.0;
     Lc.add(O, ext(archOutline(u, y0, w, y0 + 1.9, 'pointed', 6), [], 0.55, 0.58));
     Lc.add(PK, ext(archOutline(u, y0 - 0.1, w + 0.45, y0 + 1.9, 'pointed', 6), [archOutline(u, y0, w, y0 + 1.9, 'pointed', 6)], 0.55, 0.72));
     Lc.box(M, u - 0.5, y0 - 0.2, 0.55, u + 0.5, y0, 0.95);
-    const fg = human({ pose: 'stand', h: 1.65, drape: 'chiton', n: 5, mirror: sg > 0 }); for (const g of fg.stone) { g.translate(u, y0, 0.74); Lc.add(CV, g); }
+    if (figs) { const fg = human({ pose: 'stand', h: 1.65, drape: 'chiton', n: 5, mirror: sg > 0 }); for (const g of fg.stone) { g.translate(u, y0, 0.74); Lc.add(CV, g); } }
   }
   // the cornice, the great window with its balcony
   Lc.box(M, uP - W - 0.1, 7.7, 0, uP + W + 0.1, 8.1, 0.95);
@@ -61,7 +63,5 @@ export function porta(Lc, uP) {
     for (const sg of [-1, 1]) crocket(Lc, uP + sg * Math.abs(side[i][0]), side[i][1], th, sg, 0.5);
   }
   Lc.add(M, lathe([[0.3, 0], [0.4, 0.4], [0.2, 0.8], [0.001, 1.1]], 8, null, uP, gy + gh - 0.1, 0.6));
-  const ju = human({ pose: 'stand', h: 2.2, drape: 'peplos', n: 5, arms: { r: [[0.15, 0.62, 0.05], [0.16, 0.95, 0.05]], l: [[-0.15, 0.62, 0.05], [-0.17, 0.55, 0.15]] } });
-  for (const g of ju.stone) { g.translate(uP, gy + gh + 0.5, 0.6); Lc.add(CV, g); }
-  Lc.add(M, rod([uP + 0.32, gy + gh + 2.0, 0.65], [uP + 0.32, gy + gh + 3.1, 0.65], 0.04, 4));
+  justice(Lc, at(2.2, uP, gy + gh + 0.5, 0.6), 1, CV);
 }

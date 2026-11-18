@@ -9,6 +9,7 @@ import { box, lathe, rod, disc } from '../../core/geom.js';
 import { faceFrame, Local, ext, archOutline, wrect } from '../renaissance/face.js';
 import { human, horse, limb } from '../greek/sculpture.js';
 import { lionOfStMark } from './piazza.js';
+import { at, person } from './stone.js';
 
 const M = 'marble', PK = 'marble_pink', VA = 'verde_antico', PC = 'proconnesian', PO = 'porphyry', G = 'mosaic_gold', GB = 'gilt_bronze',
   BL = 'tile_lapis', RB = 'paint_robe', GR = 'mosaic_green', CV = 'limestone_carved', SK = 'skin_light', PL = 'plaster_white', O = 'opening';
@@ -178,11 +179,11 @@ export function westFront(bag, col, o) {
     // the finial and the statue at the tip: St Mark in the middle, saints on the others
     const tip = SU + hg;
     Lc.add(M, lathe([[0.4, 0], [0.34, 0.5], [0.5, 0.9], [0.3, 1.3], [0.2, 1.5]], 8, (th, j) => (j === 2 ? 1 + 0.15 * Math.cos(th * 4) : 1), uc, tip - 0.2, SD + 0.15));
-    const st = human({ pose: 'stand', h: mid ? 3.4 : 2.4, drape: 'peplos', n: 5 });
-    for (const g of st.stone) { g.translate(uc, tip + 1.3, SD + 0.15); Lc.add(CV, g); }
+    person(Lc, { pose: mid ? 'ease' : 'stand', drape: mid ? 'mantle' : 'peplos', bareLegs: false, beard: mid, hair: 'curls', lod: 2, arms: mid ? { R: [-0.14, 0.7, 0.1], L: [0.15, 0.6, 0.1] } : undefined }, CV, at(mid ? 3.4 : 2.4, uc, tip + 1.3, SD + 0.15, (k - 2) * 0.12));
     if (mid) for (const sg of [-1, 1]) {                                                                       // the angels either side of St Mark, on their pinnacles
       Lc.box(M, uc + sg * 2.2 - 0.3, SU + 6.0, SD - 0.3, uc + sg * 2.2 + 0.3, SU + 7.4, SD + 0.3);
-      const an = human({ pose: 'stand', h: 2.0, drape: 'chiton', n: 5 }); for (const g of an.stone) { g.translate(uc + sg * 2.2, SU + 7.4, SD); Lc.add(CV, g); }
+      person(Lc, { pose: 'stand', drape: 'chiton', hair: 'curls', lod: 2, arms: { R: [-0.14, 0.7, 0.12], L: [0.14, 0.7, 0.12] } }, CV, at(2.0, uc + sg * 2.2, SU + 7.4, SD, -sg * 0.5));
+      for (const w of [-1, 1]) Lc.add(CV, limb([w * 0.1, 1.35, -0.05], [w * 0.55, 2.05, -0.28], 0.07, 0.03, 5).translate(uc + sg * 2.2, SU + 7.4, SD));   // the wings, folded
     }
   }
   // the pinnacles between the gables: a shaft, a gablet, a saint
@@ -191,13 +192,12 @@ export function westFront(bag, col, o) {
     Lc.box(M, u - 0.45, T - 0.5, SD - 0.8, u + 0.45, top, SD + 0.15);
     Lc.add(M, lathe([[0.62, 0], [0.4, 0.6], [0.001, 1.6]], 4).rotateY(Math.PI / 4).translate(u, top, SD - 0.3));
     Lc.box(PC, u - 0.55, top - 0.2, SD - 0.9, u + 0.55, top, SD + 0.25);
-    const sa = human({ pose: 'stand', h: 2.0, drape: 'peplos', n: 5 });
-    for (const g of sa.stone) { g.translate(u, top, SD - 0.3); Lc.add(CV, g); }
+    person(Lc, { pose: k % 2 ? 'ease' : 'stand', drape: k % 3 ? 'mantle' : 'peplos', beard: k % 2 === 1, hair: 'curls', lod: 2 }, CV, at(2.0, u, top, SD - 0.3, (k - 2.5) * 0.1));
   }
   Lc.emit(bag, FM);
   // ── the four horses of gilt bronze on their plinths, the outer pair turned toward the inner, two lifting a foreleg
   const hy = y + T + 0.55;
-  for (const [dz, turn, lift] of [[-3.9, 0.22, 1], [-1.3, 0.08, 0], [1.3, -0.08, 1], [3.9, -0.22, 0]]) {
+  if (!o.noHorses) for (const [dz, turn, lift] of [[-3.9, 0.22, 1], [-1.3, 0.08, 0], [1.3, -0.08, 1], [3.9, -0.22, 0]]) {
     const hs = horse({ pose: 'stand', h: 1.65, mirror: true }).stone;
     if (lift) { hs.splice(hs.length - 8, 2, limb([-0.35 * 1.1, 1.0 * 1.1, 0.14], [-0.55 * 1.1, 0.72 * 1.1, 0.14], 0.085 * 1.1, 0.05 * 1.1, 6), limb([-0.55 * 1.1, 0.72 * 1.1, 0.14], [-0.5 * 1.1, 0.42 * 1.1, 0.14], 0.05 * 1.1, 0.035 * 1.1, 6)); }
     for (const g of hs) { g.rotateY(turn); g.translate(fx - (DP + 1.0 + 0.35), hy, z0 + zm + dz); bag.add(GB, g); }

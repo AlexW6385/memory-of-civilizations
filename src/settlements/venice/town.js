@@ -2,7 +2,7 @@ import { lodTiles, openLots } from '../lod.js';
 import { ARRIVALS } from '../../planet/arrivals.js';
 // The houses of the islands (docs/settlements/venice.md §5).
 import { RADIUS, lots, PIAZZA, PIAZZETTA, GROUND, MERCERIA } from './layout.js';
-import { molo, doge, iconostasis, masts } from './plan.js';
+import { molo, moloFine, doge, iconostasis, masts, sculptPlans } from './plan.js';
 import { canalPlans } from './rialto.js';
 import { dressPlans } from './dress.js';
 import { roomPlans } from './rooms.js';
@@ -10,7 +10,7 @@ import { frontPlans } from './fronts.js';
 import { inLot, wet } from './layout.js';
 const base = (id, elements) => ({ id, style: 'vernacular', origin: [0, 0], base: 0, yaw: 0, feature: true, elements, rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [-120, -5], facing: 'e' } });
 export async function town() {
-  const all = lots(), plans = [molo, doge, iconostasis, masts, ...canalPlans()], open = openLots(all, [ARRIVALS['venice'][0], ARRIVALS['venice'][2]], 26);
+  const all = lots(), plans = [molo, moloFine, doge, iconostasis, masts, ...sculptPlans(), ...canalPlans()], open = openLots(all, [ARRIVALS['venice'][0], ARRIVALS['venice'][2]], 26);
   [...open.keys()].forEach((l, i) => open.set(l, i % 4 === 0 ? 'inn' : 'home'));                 // 26 houses to enter: an inn in every fourth
   // beyond the first 120 m: more houses to enter, spread over the islands by a rule (a hash of the seed, a free calle before the front), an inn in every fifth
   const A = ARRIVALS['venice'], far = all.filter((l) => !open.has(l) && l.rect[2] - l.rect[0] >= 6 && Math.hypot((l.rect[0] + l.rect[2]) / 2 - A[0], (l.rect[1] + l.rect[3]) / 2 - A[2]) > 120 && Math.hypot((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2) < 300 && (l.seed % 6) === 3);
