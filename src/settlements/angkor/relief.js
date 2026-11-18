@@ -12,6 +12,9 @@ import { box, fromTriangles } from '../../core/geom.js';
 import { panel } from '../../styles/khmer/reliefs.js';
 import { composePanel } from './panels.js';
 import { galleryPieces } from './dress.js';
+import { puller, serpentRope, nagaFan } from './sculpt.js';
+import { merge } from '../../objects/kit.js';
+import { Matrix4, Vector3 } from '../../core/three.js';
 
 const C = 'sandstone_carved';
 const area = (o) => { let a = 0; for (let i = 0; i < o.length; i++) { const p = o[i], q = o[(i + 1) % o.length]; a += p[0] * q[1] - q[0] * p[1]; } return Math.abs(a) / 2; };
@@ -73,10 +76,17 @@ function akRelief(el, ctx) {
       for (const tl of pan.tiles) for (const x of tl.xs) for (const part of tl.parts) put(part, x, part.t ?? 0.05);
       const L = len - 0.8;
       if (subject === 'churning') {
-        // the sea: ridges of waves along the foot; the scales of the serpent's body between the pullers' hands
+        // the sea: ridges of waves along the foot
         for (let x = 0.3; x < L - 0.4; x += 0.15) carve(T, [[x, 0.03], [x + 0.15, 0.03], [x + 0.075, 0.1]], 0.02, mapFig, false);
-        const mid = L / 2;
-        for (let x = 1.5; x < L - 1.2; x += 0.11) if (Math.abs(x - mid) > 0.4) carve(T, sc(DIAM, 0.07, 0.045, x, 0.98), 0.02, mapFig, false);
+        // the modelled pullers, the thick scaled serpent and its five-hooded head (sculpt.js), in the panel's frame
+        const sg = toRight ? 1 : -1, s0 = toRight ? 0.4 : len - 0.4, o0 = P(s0, W0 + 0.04);
+        const M = new Matrix4().makeBasis(new Vector3(U[0] * sg, 0, U[1] * sg), new Vector3(0, 1, 0), new Vector3(f[0], 0, f[1])).setPosition(o0[0], y + 0.8, o0[1]);
+        const flip = M.determinant() < 0, G = [];
+        const into = (g) => { g.applyMatrix4(M); if (flip) for (const a of ['position', 'normal']) { const r = g.attributes[a].array; for (let i = 0; i < r.length; i += 9) for (let k = 0; k < 3; k++) { const t = r[i + 3 + k]; r[i + 3 + k] = r[i + 6 + k]; r[i + 6 + k] = t; } } G.push(g); };
+        for (const pl of mine.solids ?? []) into(puller(pl.kind, pl.d, pl.vr, pl.i, pl.k).translate(pl.x, pl.v, 0));
+        for (const [a, b, v, r] of mine.ropes ?? []) into(serpentRope(a, b, v, r));
+        if (mine.hood) { const h = mine.hood, g = nagaFan(0.8, h.heads, 0).scale(h.s, h.s, h.s * 0.6); into(g.translate(h.u, h.v - 0.8 * 0.95 * h.s, 0.03)); }
+        if (G.length) bag.add(C, merge(G));
       } else if (subject === 'procession' || subject === 'heavens') {
         for (let x = 0.3; x < L - 0.4; x += 0.2) carve(T, sc(DIAM, 0.07, 0.035, x, 0.025), 0.015, mapFig, false);     // a lozenge dado along the foot
       } else {

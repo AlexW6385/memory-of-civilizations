@@ -168,6 +168,16 @@ The style's relief panels (§13) were sparse flat silhouettes in a separate, war
 
 Basis as §13 [stated]; the denser composition and the direction of the files are ours [inferred]. Depth: figures stand 3.5 cm (principal figures 6 cm) from a 4 cm slab; bodies are truncated pyramids, limbs and spears pyramids (lit in facets). Budget at the arrival (`tools/draw-count.mjs`): main draws 613 to 587, main triangles 4.65 M to 4.46 M (the relief costs about as much as the one it replaces; 0.19 M returned by thinning the far dyke palms in `town.js`: 0.55 to 0.38 of the grid, 40 to 28 in the enclosure). Also: the naga's scales (dress.js) lowered to 3 cm so that they read as scales, not spikes.
 
+## 29. Modelled sculpture (round 4)
+
+`src/settlements/angkor/sculpt.js` builds figures as volumes with smooth normals (tubes with elliptical sections, ellipsoids, turned pieces), deterministic, one copy differing from the next by a hash of its own place or index.
+
+- Devatas [stated: 95-110 cm, frontal, three-pointed crown, in a pointed niche; §11]: 1.1 m, a torso with breasts, rounded arms (one raised, the hand holding a lotus flower; the other on the sash), a head with brow, eyes, nose, lips and long-lobed ears with earrings, the tall tiered crown with two side points, two necklaces, the girdle with its jewel, the sampot with fan pleats and a pleated fishtail [inferred from photographs]; her back let into the niche's ground, the breast 9 cm out. Three levels: full (about 1,500 triangles) on the gate wings' west face and on the cloister's north gallery wall facing the basin; reduced (about 450) on the cloister's other walls, the gate wings' east face and the third gallery's court face within 45 m of the west gate; the old faceted form beyond.
+- Naga hoods [stated: nine heads in the sources; seven drawn, as §2 chose]: seven heads on a scalloped fan over an upright neck rising off the moulded pedestal, each head with skull, snout, flared nostrils, lower jaw, bulging eyes under a brow and a crest of flames; the middle one largest. Element `ak_nhood` (dress.js); the rails in plan.js take `ends: false, hoods: true` so that the style's nine-headed ends are not drawn.
+- Churning of the Sea of Milk: the pullers (about 190) are rounded bodies, legs braced, torso leaning back, arms to the rope, each with its own helmet (round cap, pointed, horned and beard: asuras) or tiered crown (devas), standing 6 cm from the slab; the serpent is one thick banded tube, its five-hooded head the same fan as the naga's. Mandara, Kurma, Vishnu, Indra, apsaras and Hanuman stay in the faceted form.
+- Lions: the style's `k_lion` is already modelled (muscle, mane of curls, jewelled collar) and shared; left as is.
+- Budget at the arrival: main triangles 4.46 M to 4.44 M, main draws 587 to 576. Paid by: the nine-headed hoods (about 4.4 k triangles each) replaced by seven-headed ones (about 2.1 k); the battle panel of the gods (north, far) thinned to a 0.46 m step; lighter balustered windows (three balusters) and pillars (one medallion) on the sides of the third gallery away from the west gate.
+
 ## Sources
 
 - [Angkor Wat — wondermondo](https://wondermondo.com/angkor-wat)

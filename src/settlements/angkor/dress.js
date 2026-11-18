@@ -17,6 +17,7 @@ import { STYLES } from '../../core/build.js';
 import '../../styles/khmer/index.js';
 import { box, lathe, fromTriangles, orientOutward } from '../../core/geom.js';
 import { assembly, placer } from '../../objects/kit.js';
+import { devataGeom, nagaHood } from './sculpt.js';
 
 const C = 'sandstone_carved';
 const perp = (N) => [-N[1], N[0]];
@@ -90,12 +91,12 @@ const FACE = [[0, 1], [1, 0], [0, -1], [-1, 0]];
  * row of lotus petals under the capital (which the style draws), and up each face a stem with lotus medallions between
  * two fine lines. `ascetic`: a praying ascetic in a pointed niche on each face of the base (the cloister's pillars).
  */
-function pillarA(ph, hs, ascetic) {
-  return asm(`pil|${ph.toFixed(2)}|${hs}|${ascetic ? 1 : 0}`, (m) => {
+function pillarA(ph, hs, ascetic, lite = false) {
+  return asm(`pil|${ph.toFixed(2)}|${hs}|${ascetic ? 1 : 0}${lite ? 'l' : ''}`, (m) => {
     const bs = hs + 0.08;
     m.c.push(box(-bs, 0, -bs, bs, 0.2, bs), box(-hs - 0.045, 0.2, -hs - 0.045, hs + 0.045, 0.34, hs + 0.045));
     m.c.push(box(-hs - 0.035, ph - 0.5, -hs - 0.035, hs + 0.035, ph - 0.42, hs + 0.035));
-    const lo = ascetic ? 0.62 : 0.5, hi = ph - 0.95, n = Math.max(2, Math.round((hi - lo) / 0.8)), t = [];
+    const lo = ascetic ? 0.62 : 0.5, hi = ph - 0.95, n = lite ? 1 : Math.max(2, Math.round((hi - lo) / 0.8)), t = [];
     for (const N of FACE) {
       const U = perp(N), O = [N[0] * (hs - 0.005), 0, N[1] * (hs - 0.005)];
       facet(t, [[-0.025, lo], [0.025, lo], [0.025, hi], [-0.025, hi]], [0, (lo + hi) / 2, 0.035], O, U, N);
@@ -125,10 +126,10 @@ const DEVATA = [
   [[-0.08, 0.89], [0.08, 0.89], [0.02, 1.04], [-0.02, 1.04]], [[-0.1, 0.89], [-0.05, 0.89], [-0.12, 0.99]], [[0.05, 0.89], [0.1, 0.89], [0.12, 0.99]],
 ];
 /** An apsara 1.5 m tall in a pointed niche framed by a rib with a crest of leaves, standing on a small lotus ledge; the origin on the wall face, at her feet's level. */
-function devataA(s) {
-  return asm(`dev|${s}`, (m) => {
-    const t = [], N = [0, 1], U = [1, 0], O = [0, 0, 0];
-    const nw = 0.3 * s, nh = 0.92 * s;
+function devataA(s, tier = 'old') {
+  return asm(`dev|${s}|${tier}`, (m) => {
+    const t = [], N = [0, 1], U = [1, 0], O = [0, 0, 0], modelled = tier !== 'old';
+    const nw = (modelled ? 0.31 : 0.3) * s, nh = (modelled ? 1.02 : 0.92) * s;
     prism(t, [[-nw, -0.06], [nw, -0.06], [nw, nh], [0, nh + 0.26 * s], [-nw, nh]], O, U, N, 0.05);
     // the rib of the niche, and the crest
     const arc = [[-nw, nh], [-nw * 0.55, nh + 0.15 * s], [0, nh + 0.26 * s], [nw * 0.55, nh + 0.15 * s], [nw, nh]];
@@ -137,6 +138,12 @@ function devataA(s) {
     boss(t, scaled(LEAF7, 0.1 * s, 0.17 * s, 0, nh + 0.26 * s), O, U, N, 0.06);
     // the ledge: a lotus seat of three petals
     for (const k of [-1, 0, 1]) boss(t, scaled(KITE, 0.14 * s, 0.1 * s, k * 0.13 * s, -0.04), O, U, N, 0.09);
+    if (modelled) {
+      // a modelled figure on the lotus: volumes, not plates (sculpt.js), her back let into the niche's ground
+      tr(m, 'c', t);
+      m.c.push(devataGeom(tier === 'full' ? 1 : 0).scale(s, s, s).translate(0, 0.05, 0.05));
+      return;
+    }
     for (const part of DEVATA) boss(t, scaled(part, s, s, 0, 0.05), [0, 0, 0.04], U, N, 0.07 * s / 1.1);
     // her earrings, the armlets, the hanging end of the girdle
     for (const sg of [-1, 1]) boss(t, disc(sg * 0.075 * s, 0.83 * s + 0.05, 0.022 * s, 6), O, U, N, 0.13 * s);
@@ -146,13 +153,14 @@ function devataA(s) {
 }
 const BAL = [[0.07, 0], [0.07, 0.05], [0.045, 0.12], [0.075, 0.3], [0.05, 0.45], [0.04, 0.75], [0.075, 0.95], [0.05, 1.1], [0.075, 1.25], [0.045, 1.4], [0.07, 1.55], [0.07, 1.7]];
 /** A blind window, its sill at the origin: jambs and sill, a lintel under a little pediment with flame ends, the recessed ground, five turned balusters of wood. */
-function windowA(wh) {
-  return asm(`win|${wh}`, (m) => {
+function windowA(wh, lite = false) {
+  return asm(`win|${wh}${lite ? 'l' : ''}`, (m) => {
     const ww = 1.5, t = [];
     for (const sg of [-1, 1]) m.c.push(box(sg * (ww / 2 + 0.02) - 0.13, -0.1, -0.02, sg * (ww / 2 + 0.02) + 0.13, wh + 0.1, 0.16));
     m.c.push(box(-ww / 2 - 0.3, -0.18, -0.02, ww / 2 + 0.3, 0.02, 0.2), box(-ww / 2 - 0.3, wh - 0.02, -0.02, ww / 2 + 0.3, wh + 0.18, 0.2));
     m.o.push(box(-ww / 2 + 0.01, 0.01, -0.02, ww / 2 - 0.01, wh - 0.01, 0.04));
-    for (let i = 0; i < 5; i++) m.c.push(lathe(BAL.filter((_, k) => [0, 3, 5, 8, 11].includes(k)).map(([r, v]) => [r * 1.0, v * (wh - 0.04) / 1.7]), 4, null, -ww / 2 + 0.2 + i * (ww - 0.4) / 4, 0.02, 0.1));
+    const nb = lite ? 3 : 5;
+    for (let i = 0; i < nb; i++) m.c.push(lathe(BAL.filter((_, k) => (lite ? [0, 5, 11] : [0, 3, 5, 8, 11]).includes(k)).map(([r, v]) => [r * 1.0, v * (wh - 0.04) / 1.7]), lite ? 3 : 4, null, -ww / 2 + 0.2 + i * (ww - 0.4) / (nb - 1), 0.02, 0.1));
     const Ob = [0, wh + 0.18, 0], U = [1, 0], N = [0, 1];
     prism(t, ARCH(ww + 0.5, 0.45, 6), Ob, U, N, 0.1);
     for (const sg of [-1, 1]) boss(t, scaled(LEAF7, 0.13, 0.26, sg * (ww / 2 + 0.3), -0.02), Ob, U, N, 0.09);
@@ -333,7 +341,7 @@ function akGDress(el, ctx) {
         const q = [p[0] + pc.n[0] * off * pc.out, p[1] + pc.n[1] * off * pc.out], ph = off < -hw ? h * 0.62 : h, key = `${q[0].toFixed(2)}|${q[1].toFixed(2)}`;
         if (seen.has(key)) continue;
         seen.add(key);
-        put(bag, pillarA(ph, 0.32, false), q, y, [0, 1]);
+        put(bag, pillarA(ph, 0.32, false, el.reliefMap && pc.n[0] >= 0 || el.devatas), q, y, [0, 1]);
       }
     }
     // ── the wall's carved face (the one opposite the relief's)
@@ -356,13 +364,18 @@ function akGDress(el, ctx) {
     for (let k = 1; k < pc.np; k++) {
       const s = k * bay;
       if (s < a + 0.4 || s > b - 0.4) continue;
-      if (dr.dev) put(bag, devataA(1.0), P(s, 0.45), y + 0.62, Nn);
+      if (dr.dev) {
+        const q = P(s, 0.45), west = pc.n[0] < 0;
+        // full within reach of the way in (the gate wings' west face, seen from the causeway's end), reduced as far as 45 m of the temple's west gate, the old form beyond
+        const tier = el.rect[0] < -100 ? (west ? 'full' : 'red') : (el.reliefMap && west && Math.abs(q[1]) <= 45 ? 'red' : 'old');
+        put(bag, devataA(1.0, tier), q, y + 0.62, Nn);
+      }
       else if (dr.pil && k % 2 === 0) put(bag, pilasterA(h - 0.5), P(s, 0.45), y + 0.5, Nn);
     }
     if (dr.win) for (let k = 0; k < pc.np; k++) {
       const s = (k + 0.5) * bay;
       if (s < a + 0.9 || s > b - 0.9) continue;
-      put(bag, windowA(wh), P(s, 0.45), y + 0.9, Nn);
+      put(bag, windowA(wh, !(pc.n[0] < 0 && Math.abs(P(s, 0.45)[1]) <= 45)), P(s, 0.45), y + 0.9, Nn);
     }
   }
   for (const tw of towers) towerDress(ctx, tw);
@@ -372,7 +385,7 @@ function akGDress(el, ctx) {
 function akNDress(el, ctx) {
   const { bag } = ctx, [ax, az] = el.a, [bx, bz] = el.b, L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, y = el.y, h = el.h ?? 1.0;
   const yb = y + h - 0.12, r = Math.min(0.27, h * 0.27), U = [ux, uz], Ns = perp(U);
-  const trim = (k) => (el.ends === false || (typeof el.ends === 'string' && el.ends !== k) ? 0.2 : 1.15);
+  const trim = (k) => (el.hoods ? 1.15 : el.ends === false || (typeof el.ends === 'string' && el.ends !== k) ? 0.2 : 1.15);
   const s0 = trim('a'), s1 = L - trim('b'), t = [], crest = [];
   const pos = (s, o) => [ax + ux * s + Ns[0] * o, az + uz * s + Ns[1] * o];
   const ringAt = (s) => { const q = (s - 0.6) / 0.9; return Math.abs(q - Math.round(q)) * 0.9 < 0.24 && q > -0.5; };
@@ -400,6 +413,24 @@ function akNDress(el, ctx) {
   if (crest.length) bag.add(C, fromTriangles(crest));
 }
 
+/** The hood of a naga on each end of a rail that carries `hoods`: seven heads on a scalloped fan over a neck rising off a moulded pedestal (sculpt.js nagaHood). */
+function hoodA(h, heads) {
+  return asm(`hood|${h}|${heads}`, (m) => {
+    const yb = h - 0.12, hd = nagaHood(h, heads);
+    m.c.push(box(-0.62, 0, -0.35, 0.62, 0.16, 0.95), box(-0.6, yb - 0.32, -0.34, 0.6, yb - 0.2, 0.94), hd.c);
+    m.o.push(box(-0.55, 0.16, -0.28, 0.55, yb - 0.32, 0.88), hd.s);
+  });
+}
+function akNHood(el, ctx) {
+  const { bag, col } = ctx, [ax, az] = el.a, [bx, bz] = el.b, L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L, y = el.y, h = el.h ?? 1.0;
+  if (!el.hoods) return;
+  for (const [p, sg] of [[el.a, -1], [el.b, 1]]) {
+    const D = [ux * sg, uz * sg];
+    put(bag, hoodA(h, el.heads ?? 7), p, y, D);
+    col.rect([p[0] + D[0] * 0.4 - 0.8, p[1] + D[1] * 0.4 - 0.8, p[0] + D[0] * 0.4 + 0.8, p[1] + D[1] * 0.4 + 0.8], y, y + h + 2);
+  }
+}
+
 // ── the cloister ────────────────────────────────────────────────────────────────────────────────────────────────
 function akCDress(el, ctx) {
   const { bag } = ctx, [x0, z0, x1, z1] = el.rect, y = el.y, w = el.w ?? 4, h = el.h ?? 3.4, hw = w / 2, xs = el.stair;
@@ -419,10 +450,20 @@ function akCDress(el, ctx) {
   row({ axis: 'x', u0: x0, u1: x1, v: gs, sides: ['pillars', 'windows'], skip: [[xm - hw, xm + hw]] });
   row({ axis: 'x', u0: el.west ?? x0, u1: xs, v: 0, sides: ['pillars', 'pillars'], skip: [[xm - hw, xm + hw]] });
   for (const [a, b] of [[gn + hw + 0.6, -hw - 0.6], [hw + 0.6, gs - hw - 0.6]]) row({ axis: 'z', u0: a, u1: b, v: xm, sides: ['pillars', 'pillars'] });
+  // the devatas on the piers between the windows of the walls (north gallery both faces, the south gallery's outer face): modelled figures, the first a visitor passes
+  for (const [v, side, broken, tier] of [[gn, 0, false, 'red'], [gn, 1, true, 'full'], [gs, 1, false, 'red']]) {
+    const o = side ? hw : -hw, Nz = side ? 1 : -1, gaps = broken ? [[xm - hw, xm + hw]] : [], segs = [];
+    let s0 = x0;
+    for (const [a, b] of [...gaps, [x1, x1]]) { if (a - s0 > 0.3) segs.push([s0, a]); s0 = Math.max(s0, b); }
+    for (const [a, b] of segs) {
+      const np = Math.max(1, Math.round((b - a) / 3.2));
+      for (let k = 1; k < np; k++) put(bag, devataA(1.0, tier), [a + (b - a) * k / np, v + o + Nz * 0.45], fy + 0.5, [0, Nz]);
+    }
+  }
   // the four pediments of the crossing (the style's: width w + 1.2, height 0.9 w, frame 0.3, at hw + 0.85 from the middle)
   const W = w + 1.2, H = w * 0.9, f = 0.3, th = Math.min(0.08, 0.6 * f - 0.04);
   for (const N of [[1, 0], [-1, 0], [0, 1], [0, -1]]) put(bag, pedimentA(W - 0.5, H - 0.3, th), [xm + N[0] * (hw + 0.85 + 0.3 * f), N[1] * (hw + 0.85 + 0.3 * f)], fy + h + 1.1, N);
 }
 
-Object.assign(STYLES.khmer.elements, { ak_gdress: akGDress, ak_tdress: akTDress, ak_ndress: akNDress, ak_cdress: akCDress });
-export { akGDress, akTDress, akNDress, akCDress, galleryPieces };
+Object.assign(STYLES.khmer.elements, { ak_gdress: akGDress, ak_tdress: akTDress, ak_ndress: akNDress, ak_nhood: akNHood, ak_cdress: akCDress });
+export { akGDress, akTDress, akNDress, akCDress, galleryPieces, devataA, hoodA, put };
