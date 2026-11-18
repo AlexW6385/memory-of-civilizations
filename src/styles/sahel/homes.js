@@ -267,11 +267,11 @@ function upperRooms(k, U, el) {
       for (let i = 0; i < 3; i++) ky.bx(['cloth_ochre', 'cloth_blue'][(i + Math.floor(hh(z[0], 10) * 2)) % 2], z[1] - 1.1 + hh(z[0], i, 11) * 0.1, 0.42 * i, 0.55, z[1] - 0.1 - hh(z[0], i, 12) * 0.12, 0.42 * (i + 1), 1.3 + hh(z[0], i, 13) * 0.1);
       void e;
     },
-    work(z) { roomContents(ky, 'loom', uR, -1, 0.55 + hh(uR, 1) * 0.05, 2.35, rand); },
+    work(z) { roomContents({ ...ky, heap: () => {} }, 'loom', uR, -1, 0.55 + hh(uR, 1) * 0.05, 2.35, rand); },
     study(z) { roomContents(ky, 'school', uR, -1, 0.55, 2.4, rand); },
     guest(z, e) {
       const a = z[0] + 0.15 + hh(z[0], 20) * 0.1;
-      for (let i = 0; i < 2 && a + 2.3 * (i + 1) < z[1]; i++) { const u = a + i * 2.1; ky.mat(u, 0.6, u + 1.9 + hh(u, 21) * 0.1, 1.5, 0, 'wicker'); ky.bx(i ? 'cloth_ochre' : 'cloth_blue', u + 0.1, 0.02, 0.7, u + 1.4 + hh(u, 22) * 0.2, 0.08, 1.3); ky.sack(u + 1.7, 1.55 + hh(u, 23) * 0.1, 0, 'wicker', 0.7); }
+      for (let i = 0; i < 2 && a + 2.3 * (i + 1) < z[1]; i++) { const u = a + i * 2.1; ky.mat(u, 0.6, u + 1.9 + hh(u, 21) * 0.1, 1.5, 0, 'wicker'); ky.bx(i ? 'cloth_ochre' : 'cloth_blue', u + 0.1, 0.02, 0.7, u + 1.4 + hh(u, 22) * 0.2, 0.08, 1.3); ky.sack(u + 1.7, 1.55 + hh(u, 23) * 0.1, 0, 'wicker', 0.9); }
       const s = bs(z); if (s) { ky.bx(BS, s[0] + 0.1, 0, 2.95, s[1] - 0.1, 0.42, 3.45 + hh(s[0], 24) * 0.05, true); ky.jar('terracotta', s[0] + 0.4, 0.42, 3.2, 1.0 + hh(s[0], 25) * 0.2); }
       void e;
     },
