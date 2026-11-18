@@ -34,7 +34,16 @@ export class Acc {
     const g = lathe(profile, seg, null, x, y, z), A = g.attributes.position.array, o = this.arr(mat);
     for (let i = 0; i < A.length; i++) o.push(A[i]);
   }
-  flush(bag) { for (const [mat, a] of this.m) if (a.length) bag.add(mat, fromTriangles(a)); this.m.clear(); }
+  /** One geometry per material. Every corner moves by up to 1.2 mm by a hash of its own place (the same corner always moves the same, so nothing tears), so that the same
+   *  overlay on twelve identical houses is twelve shapes and the bag does not turn them into an instanced draw. */
+  flush(bag) {
+    for (const [mat, a] of this.m) {
+      if (!a.length) continue;
+      for (let i = 0; i < a.length; i += 3) { const x = a[i], y = a[i + 1], z = a[i + 2]; a[i] = x + (hash(x, z, y) - 0.5) * 0.0024; a[i + 1] = y + (hash(y, x, z + 0.37) - 0.5) * 0.0024; a[i + 2] = z + (hash(z, y, x + 0.71) - 0.5) * 0.0024; }
+      bag.add(mat, fromTriangles(a));
+    }
+    this.m.clear();
+  }
 }
 
 /** A point frame at c = [x, z] looking out along n (a unit axis vector): local (a along, o out) → world [x, z]. */
@@ -95,7 +104,7 @@ function doorWork(acc, n, leaf, wallO) {
   F.box(acc, 'lacquer_black', -0.006, 0.006, 0, 0.004, yb, yb + 2.3);
   for (const s of [-1, 1]) for (const yy of [0.32, 1.86]) F.box(acc, 'iron', s * 0.05 - (s > 0 ? 0 : 0.37), s * 0.05 + (s > 0 ? 0.37 : 0), 0, 0.012, yb + yy, yb + yy + 0.06);
   // the knockers: a boss on each leaf and a ring hung from it (the lion-head's face reduced to the boss)
-  for (const s of [-1, 1]) { bossAt(acc, F, 'gilt_bronze', s * 0.13, yb + 1.12, 0.0, 0.03, 0.045, 8); ringAt(acc, F, 'gilt_bronze', s * 0.13, yb + 1.04, 0.03, 0.05, 0.008, 8); }
+  for (const s of [-1, 1]) { bossAt(acc, F, 'iron', s * 0.13, yb + 1.12, 0.0, 0.03, 0.045, 8); ringAt(acc, F, 'iron', s * 0.13, yb + 1.04, 0.03, 0.05, 0.008, 8); }
   // the threshold: a board across the doorway, high at its ends and worn down in the middle where feet cross it
   F.box(acc, 'timber', -hw, -hw + 0.26, -0.05, 0.03, yb, yb + 0.16); F.box(acc, 'timber', hw - 0.26, hw, -0.05, 0.03, yb, yb + 0.16);
   F.box(acc, 'wood_dark', -hw + 0.26, hw - 0.26, -0.05, 0.03, yb, yb + 0.1);
@@ -118,10 +127,10 @@ function doorWork(acc, n, leaf, wallO) {
     for (const s of [-1, 1]) {
       const a0 = s * (hw + 0.16), x0 = a0 - 0.075, x1 = a0 + 0.075;
       F.box(acc, 'lacquer_red', x0, x1, wallO, wallO + 0.006, yb + 0.55, yb + 1.95);
-      for (let k = 0; k < 6; k++) { const jt = (hash(cx + s, k) - 0.5) * 0.03; F.box(acc, 'lacquer_black', a0 - 0.04 + jt, a0 + 0.04 + jt, wallO + 0.006, wallO + 0.009, yb + 0.66 + k * 0.215, yb + 0.66 + k * 0.215 + 0.12); }
+      for (let k = 0; k < 6; k++) { const jt = (hash(cx + s, k) - 0.5) * 0.03; F.box(acc, 'iron', a0 - 0.04 + jt, a0 + 0.04 + jt, wallO + 0.006, wallO + 0.009, yb + 0.66 + k * 0.215, yb + 0.66 + k * 0.215 + 0.12); }
     }
     F.box(acc, 'lacquer_red', -0.4, 0.4, wallO, wallO + 0.006, yb + 2.56, yb + 2.7);
-    for (let k = 0; k < 4; k++) F.box(acc, 'lacquer_black', -0.3 + k * 0.17, -0.2 + k * 0.17, wallO + 0.006, wallO + 0.009, yb + 2.6, yb + 2.66);
+    for (let k = 0; k < 4; k++) F.box(acc, 'iron', -0.3 + k * 0.17, -0.2 + k * 0.17, wallO + 0.006, wallO + 0.009, yb + 2.6, yb + 2.66);
   }
 }
 
@@ -140,8 +149,10 @@ function houseWear(el, ctx, rec, acc) {
       const alongX = Math.abs(n[0]) < 0.5, cx = (bb.min.x + bb.max.x) / 2, cz = (bb.min.z + bb.max.z) / 2;
       const fo = n[0] > 0.5 ? bb.max.x : n[0] < -0.5 ? bb.min.x : n[1] > 0.5 ? bb.max.z : bb.min.z;
       const F = frame(alongX ? [cx, fo] : [fo, cz], n), len = 0.55 + hash(cx, cz, 2) * 0.55, wid = Math.max(dx, dz);
-      F.box(acc, 'plaster_streak', -wid * 0.42, wid * 0.42, -0.099, -0.094, bb.min.y - len, bb.min.y);
-      for (const s of [-1, 1]) F.box(acc, 'plaster_streak', s * wid * 0.47 - 0.03, s * wid * 0.47 + 0.03, -0.099, -0.094, bb.min.y - len - 0.35, bb.min.y);
+      // (above the damp band and its tongues, which reach 1.9 m: where they meet the stain is the shared house's own)
+      const lo = Math.max(bb.min.y - len, y + 1.95), lo2 = Math.max(bb.min.y - len - 0.35, y + 1.95);
+      if (bb.min.y - lo > 0.15) F.box(acc, 'plaster_streak', -wid * 0.42, wid * 0.42, -0.0955, -0.0905, lo, bb.min.y);
+      if (bb.min.y - lo2 > 0.15) for (const s of [-1, 1]) F.box(acc, 'plaster_streak', s * wid * 0.47 - 0.03, s * wid * 0.47 + 0.03, -0.0955, -0.0905, lo2, bb.min.y);
     }
   }
   if (leaf) doorWork(acc, n, leaf, -0.032);

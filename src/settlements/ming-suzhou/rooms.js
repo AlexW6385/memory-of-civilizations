@@ -243,7 +243,7 @@ export function upperFit(c) {
     B(e0 + 1.35, 3.2, e0 + 1.62, 3.26, y + 0.9, y + 0.92, 'iron');
     k.shelves(e1 - 1.3, e1 - 0.05, back - 0.55, back - 0.05, y, [0.4, 0.95, 1.5], 'bolts'); k.shelves(e0 + 0.1, e0 + 2.2, back - 0.55, back - 0.05, y, [0.4, 0.95, 1.5], 'bolts');
     k.stool(e0 + 1.0, 4.1, y, 0.35, 0.16); k.hanging(e1 - 1.5, e1 - 0.1, 2.9, y, y + 2.4, ['cloth_indigo', 'cloth_red', 'cloth_ochre']);
-    k.chest(0.3, 1.3, 1.2, 1.9, y, 0.5); for (let q = 0; q < 3; q++) B(0.3 + q * 0.28, 2.05, 0.52 + q * 0.28, 2.6, y, y + 0.22, ['cloth_grey', 'thatch', 'cloth_grey'][q]);
+    k.chest(0.3, 1.3, 1.2, 1.9, y, 0.5); for (let q = 0; q < 3; q++) B(0.3 + q * 0.28, 2.05, 0.52 + q * 0.28, 2.6, y, y + 0.22, ['cloth_indigo', 'thatch', 'cloth_indigo'][q]);
     k.bed(e1 - 0.95, 2.75, e1 - 0.05, 3.9, y, false, 'cloth_grey');
   } else if (use === 'medicine') {
     // the physician's loft: herbs drying on racks of bamboo and hung in bundles, jars, the mortar, a narrow bed for the apprentice

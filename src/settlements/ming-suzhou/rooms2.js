@@ -67,7 +67,7 @@ export function groundExtra(c, k) {
     k.table(mid - 0.2, 3.0, mid + 0.8, 3.45, y0, 0.78, 'lacquer_chestnut', false); B(mid - 0.05, 3.1, mid + 0.3, 3.35, y0 + 0.78, y0 + 0.82, 'cloth_white'); B(mid + 0.4, 3.12, mid + 0.7, 3.25, y0 + 0.78, y0 + 0.84, 'wood_dark');
     k.chest(ir - 1.0, ib - 0.65, ir - 0.1, ib - 0.1, y0, 0.7, 'wood_dark'); B(ir - 1.0, ib - 0.1, ir - 0.1, ib - 0.08, y0 + 0.25, y0 + 0.3, 'iron');
     k.shelves(il + 0.05, ir - 1.2, ib - 0.5, ib, y0, [0.5, 1.15, 1.8], 'bolts');
-    for (let q = 0; q < 8; q++) { const a = il + 0.2 + q * 0.28; B(a, ib - 0.48, a + 0.2, ib - 0.1, y0 + 2.05, y0 + 2.4, ['cloth_grey', 'cloth_brown', 'cloth_indigo', 'thatch'][q % 4]); }   // bundles tied in cloth on the top shelf
+    for (let q = 0; q < 8; q++) { const a = il + 0.2 + q * 0.28; B(a, ib - 0.48, a + 0.2, ib - 0.1, y0 + 2.05, y0 + 2.4, ['cloth_indigo', 'cloth_brown', 'cloth_ochre', 'thatch'][q % 4]); }   // bundles tied in cloth on the top shelf
     lampAt(mid, 3.0);
     // before the counter, in the passage, a plain bench for those who wait, and the notice (a board of the rates) on the wall
     B(il + 0.2, 4.0, il + 0.35, 4.01, y0, y0, 'wood_dark');
@@ -76,7 +76,7 @@ export function groundExtra(c, k) {
     const sa = ir - 1.05;
     c.B(sa, ib - 0.9, ir, ib - 0.1, y0, y0 + 0.85, 'brick_grey'); B(sa - 0.03, ib - 0.93, ir + 0.03, ib - 0.07, y0 + 0.85, y0 + 0.9, 'granite_grey');
     k.jar('iron', sa + 0.5, ib - 0.5, y0 + 0.9, 2.2);
-    for (let q = 0; q < 3; q++) { c.lat('wicker', [[0.28, 0], [0.29, 0.02], [0.29, 0.1], [0.27, 0.11]], 12, sa + 0.5, ib - 0.5, y0 + 1.7 + q * 0.11); }
+    for (let q = 0; q < 3; q++) { c.lat('timber', [[0.28, 0], [0.29, 0.02], [0.29, 0.1], [0.27, 0.11]], 12, sa + 0.5, ib - 0.5, y0 + 1.7 + q * 0.11); }
     B(sa + 0.2, ib - 0.35, ir - 0.1, ib, y0 + 0.9, y0 + 2.5, 'brick_grey');
     blk(sa, ib - 0.9, ir, ib - 0.1, y0, y0 + 0.9);
     for (let q = 0; q < 6; q++) B(il + 0.1 + (q % 3) * 0.2, ib - 0.45, il + 0.25 + (q % 3) * 0.2, ib - 0.05, y0 + Math.floor(q / 3) * 0.14, y0 + Math.floor(q / 3) * 0.14 + 0.13, 'timber');   // firewood
@@ -128,7 +128,7 @@ export function groundExtra(c, k) {
     B(aa - 0.16, ab - 0.07, aa + 0.16, ab + 0.07, y0 + 0.4, y0 + 0.48, 'iron'); B(aa - 0.07, ab - 0.05, aa + 0.07, ab + 0.05, y0 + 0.48, y0 + 0.56, 'iron'); B(aa + 0.16, ab - 0.03, aa + 0.3, ab + 0.03, y0 + 0.43, y0 + 0.47, 'iron');
     B(aa - 0.24, ab + 0.12, aa - 0.04, ab + 0.15, y0 + 0.4, y0 + 0.43, 'iron'); B(aa - 0.24, ab + 0.12, aa - 0.2, ab + 0.15, y0 + 0.43, y0 + 0.5, 'iron');
     blk(aa - 0.22, ab - 0.22, aa + 0.22, ab + 0.22, y0, y0 + 0.56);
-    c.lat('wicker', [[0.001, 0], [0.14, 0], [0.2, 0.3], [0.17, 0.3], [0.12, 0.03], [0.001, 0.03]], 10, ir - 0.2, 3.8, y0);
+    c.lat('timber', [[0.001, 0], [0.14, 0], [0.2, 0.3], [0.17, 0.3], [0.12, 0.03], [0.001, 0.03]], 10, ir - 0.2, 3.8, y0);
     B(ir - 0.4, 3.6, ir, 4.0, y0, y0 + 0.02, 'cloth_black');
     lampAt(mid, 2.4);
   } else if (use === 'fans') {
@@ -158,7 +158,7 @@ export function upperExtra(c, k) {
     if (books) { B(x0 + 0.1, b0 + 0.1, x0 + 0.35, b0 + 0.35, y + 0.76, y + 0.9, 'cloth_indigo'); B(x0 + 0.4, b0 + 0.12, x0 + 0.6, b0 + 0.3, y + 0.76, y + 0.84, 'cloth_white'); }
     k.stool((x0 + x1) / 2, b1 + 0.3, y, 0.46, 0.15, false);
   };
-  const quilt = { wine: 'cloth_indigo', pawn: 'cloth_grey', food: 'cloth_brown', silk: 'cloth_red', pottery: 'cloth_grey', iron: 'cloth_brown', fans: 'cloth_indigo' }[use];
+  const quilt = { wine: 'cloth_indigo', pawn: 'cloth_indigo', food: 'cloth_brown', silk: 'cloth_red', pottery: 'cloth_indigo', iron: 'cloth_brown', fans: 'cloth_indigo' }[use];
   // the bed along the east wall, as the weaver's. In a narrow house the way from the stair's top (a 1.9, b 3.4–4.4) to the
   // gallery door runs between the bed and the stairwell, so the rest stands on the front landing (a 0.3–1.3, b 1.1–2.0), on
   // the back wall over the bed, and hangs from the beam
@@ -176,13 +176,13 @@ export function upperExtra(c, k) {
   } else if (use === 'pawn') {
     // the storeroom: the pledges kept in boxes and bundles on racks to the ceiling
     B(e0 + 0.1, back - 0.55, e1 - 1.05, back - 0.05, y, y + 2.0, 'lacquer_chestnut');
-    for (let r = 0; r < 4; r++) for (let q = 0; q < Math.floor((e1 - e0 - 1.35) / 0.35); q++) B(e0 + 0.18 + q * 0.35, back - 0.55, e0 + 0.45 + q * 0.35, back - 0.4, y + 0.1 + r * 0.45, y + 0.4 + r * 0.45, ['cloth_grey', 'cloth_indigo', 'cloth_brown', 'thatch', 'cloth_ochre'][(q + r) % 5]);
+    for (let r = 0; r < 4; r++) for (let q = 0; q < Math.floor((e1 - e0 - 1.35) / 0.35); q++) B(e0 + 0.18 + q * 0.35, back - 0.55, e0 + 0.45 + q * 0.35, back - 0.4, y + 0.1 + r * 0.45, y + 0.4 + r * 0.45, ['cloth_indigo', 'cloth_indigo', 'cloth_brown', 'thatch', 'cloth_ochre'][(q + r) % 5]);
     blk(e0 + 0.1, back - 0.55, e1 - 1.05, back - 0.05, y, y + 2.0);
     k.chest(0.3, 1.95, 0.8, 2.5, y, 0.55, 'wood_dark'); desk(0.4, 1.3, 1.25, 1.85, true);
   } else if (use === 'food') {
     shelf(['pottery_dark', 'glaze_white'], 'jar');
     desk(0.4, 1.3, 1.25, 1.85, false); k.bowl('pottery_dark', 0.7, 1.5, y + 0.76, 1.2);
-    k.hanging(a0, a1, 2.5, y, y + 2.3, ['cloth_white', 'cloth_grey']);
+    k.hanging(a0, a1, 2.5, y, y + 2.3, ['cloth_white', 'cloth_indigo']);
   } else if (use === 'silk') {
     // the workroom: an embroidery frame at the front window to take the light, the silks hung to the east
     const fa = 0.62;
