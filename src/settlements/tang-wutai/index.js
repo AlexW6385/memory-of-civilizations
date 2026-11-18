@@ -3,6 +3,7 @@ import '../../styles/greek/index.js';
 import '../../styles/byzantine/index.js';
 import '../../styles/chinese/index.js';
 import '../../buildings/foguang-east-hall/roofwork.js';
+import '../../buildings/foguang-east-hall/sculpture.js';
 import '../../styles/song/index.js';
 import '../../styles/vernacular/index.js';
 import { hall, pagoda, people, sengfang, gate, monastery, courts } from './plan.js';

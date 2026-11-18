@@ -40,13 +40,8 @@ for (const [x, y0, y1] of [[-62, 0, 6.5], [-30, 6.5, T]]) {
     block([x, z0, x + 0.5, z1], y1, y1 + 0.85, 'brick_grey');
     block([x - 0.08, z0 - 0.08, x + 0.58, z1 + 0.08], y1 + 0.85, y1 + 1.0, 'tile_grey', { collide: false });
   }
-  for (const sz of [-1, 1]) {
-    const run = 12, zc = sz * 4.25;
-    for (let i = 0; i < 6; i++) {
-      const t0 = i / 6, t1 = (i + 1) / 6;
-      block([x - run * (1 - t0), zc - 0.3, x - run * (1 - t1), zc + 0.3], y0, y0 + (y1 - y0) * t1 + 0.6, 'limestone', { collide: false });
-    }
-  }
+  // the stair's cheeks: sloping stone sides with a coping, a carved panel and a round newel at the foot (fg_cheek)
+  for (const sz of [-1, 1]) add({ t: 'fg_cheek', x, run: 12, y0, y1, z: sz * 4.25, w: 0.6 });
 }
 block([-13.5, -20.0, 11.0, 20.0], T, F - 0.15, 'limestone');
 floor([-13.5, -20.0, 11.0, 20.0], F, 'sandstone_floor', { th: 0.15 });
@@ -70,7 +65,9 @@ const outward = (x, z) => {
 };
 const isCorner = (x, z) => Math.abs(Math.abs(x) - 8.83) < 0.01 && Math.abs(Math.abs(z) - 17.0) < 0.01;
 const LV = 0.41, lvl = (z, k) => F + colH(z) + 0.24 + k * LV;           // the bottom of tier k of a set
-for (const [x, z] of outer) add({ t: 'tang_bracket_set', at: [x, z], y: F + colH(z), dir: outward(x, z), kind: isCorner(x, z) ? 'corner' : 'column' });
+// the sets the visitor stands beneath (the front, the corners, the first column of each side) are modelled with real profiles: fg_bracket_set
+const NEARX = -4.5;
+for (const [x, z] of outer) add({ t: x <= NEARX ? 'fg_bracket_set' : 'tang_bracket_set', at: [x, z], y: F + colH(z), dir: outward(x, z), kind: isCorner(x, z) ? 'corner' : 'column' });
 for (const [x, z] of inner) {
   const d = Math.abs(Math.abs(x) - 4.415) < 0.01 ? [Math.sign(x), 0] : [0, Math.sign(z)];
   add({ t: 'tang_bracket_set', at: [x, z], y: F + colH(z), dir: d, kind: 'inner' });
@@ -84,7 +81,7 @@ const fang = (p, q, y0, y1, w, h, mat = 'timber_red', ext = 0) => add({ t: 'tang
 for (const side of outerSides) for (let i = 0; i < side.length - 1; i++) {
   const [p, q] = [side[i], side[i + 1]], m = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
   const yc = (F + colH(p[1]) + F + colH(q[1])) / 2, yb = yc + 0.82, d = outward(m[0], m[1]);
-  add({ t: 'tang_bracket_set', at: m, y: yb, dir: d, kind: 'between', post: yb - (F + H0) });
+  add({ t: m[0] <= NEARX ? 'fg_bracket_set' : 'tang_bracket_set', at: m, y: yb, dir: d, kind: 'between', post: yb - (F + H0) });
 }
 // the timbers that tie the sets together, bay by bay, following the columns' rise toward the corners:
 // in the wall plane a stack of column-head fang; outside, the luohan fang on the second tier's tips
@@ -142,7 +139,7 @@ bayWalls(17.0, XS, 'x');
 bayWalls(-8.83, ZS, 'z', (i, L) => (i >= 1 && i <= 5 ? [{ at: L / 2, w: 3.6, h: 3.9, y0: F }] : [{ at: L / 2, w: 2.6, h: 1.8, y0: F + 1.8 }]));
 // the doors: jambs and head lining each opening, a threshold, two plank leaves swung open against the inner face
 // with their battens and iron studs; the end bays' straight-lattice windows with diagonal square bars
-for (let i = 1; i <= 5; i++) add({ t: 'tang_door', at: [-8.83, (ZS[i] + ZS[i + 1]) / 2], axis: 'z', y: F, w: 3.6, h: 3.9, th: 0.9, out: -1 });
+for (let i = 1; i <= 5; i++) add({ t: 'fg_door', at: [-8.83, (ZS[i] + ZS[i + 1]) / 2], axis: 'z', y: F, w: 3.6, h: 3.9, th: 0.9, out: -1 });
 for (const i of [0, 6]) add({ t: 'tang_window', at: [-8.83, (ZS[i] + ZS[i + 1]) / 2], axis: 'z', y: F + 1.8, w: 2.6, h: 1.8, th: 0.9 });
 
 // ── the interior: ceilings, the altar and its statues ───────────────────────
@@ -173,25 +170,29 @@ add({ t: 'tang_inscription', a: [-8.6, -7.56], b: [-4.65, -7.56], y: F + 7.2, w:
 // attendant bodhisattvas 3.7, the kneeling ones with their lotuses 1.95, the kings 4.1)
 const A = F + 0.9, W = [-1, 0];
 block([-3.0, -12.2, 3.8, 12.2], F, A, 'limestone', { walk: false });
-obj('buddha', 0.8, 0, A, { h: 5.2, dir: W, mudra: 'earth', robe: 'paint_ochre' });
-obj('buddha', 0.8, -5.04, A, { h: 5.2, dir: W, pendant: true });
-obj('buddha', 0.8, 5.04, A, { h: 5.2, dir: W, hexSeat: true, robe: 'paint_ochre' });
-const st = (type, x, z, h, extra = {}) => obj('statue', x, z, A, { type, h, dir: W, ...extra });
+// (modelled sculpture: fg_buddha etc. of sculpture.js; Amitābha's hands in his lap and Maitreya's right hand raised are inferred)
+obj('fg_buddha', 0.8, 0, A, { h: 5.2, dir: W, pose: 'earth', robe: 'clay_robe', robe2: 'clay_green' });
+obj('fg_buddha', 0.8, -5.04, A, { h: 5.2, dir: W, pendant: true, pose: 'abhaya', robe: 'clay_green', robe2: 'clay_robe' });
+obj('fg_buddha', 0.8, 5.04, A, { h: 5.2, dir: W, hexSeat: true, pose: 'dhyana', robe: 'clay_robe', robe2: 'clay_green' });
+const st = (type, x, z, h, extra = {}) => (type === 'bodhisattva' || type === 'kneel' ? obj('fg_bodhi', x, z, A, { pose: type === 'kneel' ? 'kneel' : 'stand', h, dir: W, ...extra }) : obj('statue', x, z, A, { type, h, dir: W, ...extra }));
 st('disciple', 0.4, -1.9, 3.3, { robe: 'clay_robe', robe2: 'clay_green' });
 st('disciple', 0.4, 1.9, 3.3, { robe: 'clay_robe', robe2: 'clay_robe' });
 for (const z0 of [0, -5.04, 5.04]) {
   for (const k of [-1, 1]) st('bodhisattva', -0.9, z0 + k * 2.05, 3.7, { robe: 'clay_robe', robe2: 'clay_green' });
   for (const k of [-1, 1]) st('kneel', -2.2, z0 + k * 0.85, 1.95, { robe: 'clay_green', robe2: 'clay_robe' });
 }
-obj('mount', 0.7, -10.08, A, { animal: 'elephant', dir: W, rider: 2.9 });
-obj('mount', 0.7, 10.08, A, { animal: 'lion', dir: W, rider: 2.9 });
+obj('fg_mount', 0.7, -10.08, A, { animal: 'elephant', dir: W, rider: 2.9 });
+obj('fg_mount', 0.7, 10.08, A, { animal: 'lion', dir: W, rider: 2.9 });
 for (const z0 of [-10.08, 10.08]) {
   for (const k of [-1, 1]) st('bodhisattva', 0.6, z0 + k * 1.75, 3.7, { robe: 'clay_green', robe2: 'clay_robe' });
   st('groom', -2.1, z0 - Math.sign(z0) * 0.9, 2.6, { robe: 'clay_robe', robe2: 'clay_green', dir: [-0.6, Math.sign(z0) * 0.8] });
 }
 // a rear row of attendants behind the three Buddhas' groups
-for (const [z0, k, r] of [[0, -1, 0], [0, 1, 1], [-5.04, -1, 1], [-5.04, 1, 0], [5.04, -1, 0], [5.04, 1, 1]]) st('bodhisattva', 2.55, z0 + k * 3.45, 3.5, { robe: r ? 'clay_robe' : 'clay_green', robe2: r ? 'clay_green' : 'clay_robe' });
+for (const [z0, k, r] of [[0, -1, 0], [0, 1, 1], [-5.04, -1, 1], [-5.04, 1, 0], [5.04, -1, 0], [5.04, 1, 1]]) st('bodhisattva', 2.55, z0 + k * 3.45, 3.5, { robe: r ? 'clay_robe' : 'clay_green', robe2: r ? 'clay_green' : 'clay_robe', lod: 1 });
 for (const sz of [-1, 1]) st('king', -2.35, sz * 11.6, 4.1, { robe: 'clay_green', robe2: 'clay_robe' });
+// the donor Ning Gongyu beside the north king (on the floor of the outer aisle, beyond the altar's end) and the monk Yuancheng under the south end-bay window (fg_portrait)
+obj('fg_portrait', -3.0, -13.7, F, { who: 'donor', dir: W });
+obj('fg_portrait', -7.85, 14.8, F, { who: 'monk', dir: [1, 0] });
 // oil lamps on bronze stands before the three Buddhas, the hall's only light besides the open doors
 for (const z0 of [0, -5.04, 5.04]) for (const k of [-1, 1]) add({ t: 'tang_lamp', at: [-3.55, z0 + k * 1.1], y: F, h: 1.25 });
 
