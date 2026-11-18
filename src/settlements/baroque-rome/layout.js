@@ -30,6 +30,7 @@ export const ROW_DEFS = [
   { id: 'V', rect: [132, 24, 228, 38], face: 'n', lanes: [[180, 183]] },   // the south side of the Borgo Vecchio
 ];
 const PAL_H = [5.0, 5.4, 4.6, 3.4], CAS_H = [3.9, 3.4, 3.2, 2.9];
+export const UPS = { N132: 'dwelling', N141: 'palazzetto', S132: 'tenement', S162: 'dwelling', S172: 'inn', S182: 'craftsman', V132: 'craftsman', V141: 'palazzetto', V164: 'palazzetto' };
 let ROWS = null;
 export function rows() {
   if (ROWS) return ROWS;
@@ -60,6 +61,15 @@ export function rows() {
     const casas = units.filter((u) => u.kind === 'casa' && u.w >= 7.2);
     if (def.id !== 'S' && casas[1]) { casas[1].fountain = true; casas[1].madonna = false; }
     casas.forEach((u, i) => { if (!u.fountain && i % 3 !== 2) u.open = true; });
+    // the houses whose upper floors can be climbed (docs/settlements/baroque-rome.md §5c), by the unit's west end: its kind of house
+    for (const u of units) {
+      const k = UPS[def.id + Math.round(u.x0)];
+      if (!k) continue;
+      Object.assign(u, { up: k, open: true, fountain: false });
+      if (k === 'dwelling') u.trade = 'devotional';
+      if (k === 'inn') u.trade = 'osteria';
+      if (k === 'palazzetto' && def.id === 'V') u.terrace = true;
+    }
     ROWS.push({ ...def, units });
   }
   return ROWS;

@@ -10,6 +10,7 @@
 
 import { box, lathe, frustum, clothBox, addCloth } from '../../core/geom.js';
 import { faceFrame, Local, ext, archOutline, voussoirs, wrect, toW } from '../renaissance/face.js';
+import { openUp, planUp } from './upstairs.js';
 
 const T = 'travertine';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
@@ -28,9 +29,11 @@ const openingPts = (uc, y0, y1, w, round) => (round ? archOutline(uc, y0, w, y1 
 // ── pieces ───────────────────────────────────────────────────────────────────
 
 /** A window: frame, sill, shutters (open against the wall, or closed), the dark opening; round/pediment heads by `head`. */
+let CUT = 0;                                          // above this height the windows are real openings (the house is climbed): no dark panel, the leaves open
 function window(L, uc, y0, w, h, o) {
-  const { head = 'flat', shut, rand, bracket = false, frame = T, glass = true } = o;
-  L.box('opening', uc - w / 2, y0, -0.02, uc + w / 2, y0 + h, 0.03);
+  const { head = 'flat', shut, rand, bracket = false, frame = T } = o, cut = CUT && y0 >= CUT, glass = o.glass !== false && !cut;
+  if (cut) o = { ...o, closed: false };
+  if (!cut) L.box('opening', uc - w / 2, y0, -0.02, uc + w / 2, y0 + h, 0.03);
   const f = Math.min(0.2, w * 0.18);
   L.box(frame, uc - w / 2 - f, y0 - 0.02, -0.02, uc - w / 2, y0 + h + 0.02, 0.13); L.box(frame, uc + w / 2, y0 - 0.02, -0.02, uc + w / 2 + f, y0 + h + 0.02, 0.13);
   L.box(frame, uc - w / 2 - f, y0 + h, -0.02, uc + w / 2 + f, y0 + h + f, 0.15);
@@ -114,6 +117,12 @@ function goods(L, uc, w, y, trade, rand) {
     row(3, (u) => { const b = lathe([[0.3, 0], [0.34, 0.3], [0.3, 0.6], [0.001, 0.6]], 12, null, 0, 0, 0); b.rotateX(Math.PI / 2); b.translate(u, y + 0.34, 0.5); L.add('timber', b); });
     row(4, (u, i) => L.add(i % 2 ? 'glaze_green' : 'terracotta', lathe([[0.07, 0], [0.09, 0.14], [0.04, 0.28], [0.03, 0.4], [0.001, 0.4]], 8, null, u, y, 0.3)));
     L.add('flax_leaf', lathe([[0.001, 0], [0.22, 0.12], [0.2, 0.4], [0.001, 0.5]], 7, null, uc + w / 2 - 0.2, y + 2.0, 0.3)); L.box('iron', uc + w / 2 - 0.21, y + 2.5, 0.29, uc + w / 2 - 0.19, y + 2.8, 0.31);   // the bush hung out: wine here
+  } else if (trade === 'devotional') {
+    // rosaries and medals: strings of beads hung from the lintel, medals and little statues of the Virgin on the board, boxes of them
+    for (let i = 0; i < 7; i++) { const u = uc - w / 2 + 0.3 + (w - 0.6) * (i + 0.5) / 7; L.box(i % 2 ? 'timber' : 'bronze', u - 0.02, y + 1.55, 0.2, u + 0.02, y + 2.3, 0.23); L.box('bronze', u - 0.05, y + 1.4, 0.19, u + 0.05, y + 1.55, 0.24); }
+    row(6, (u, i) => L.box(i % 2 ? 'cloth_blue' : 'cloth_red', u - 0.14, y, 0.3, u + 0.14, y + 0.03, 0.55));
+    row(6, (u, i) => L.add('bronze', lathe([[0.001, 0], [0.06, 0], [0.06, 0.012], [0.001, 0.012]], 8, null, u, y + 0.03, 0.42)));
+    row(3, (u) => L.add('limestone_yellow', lathe([[0.001, 0], [0.06, 0], [0.05, 0.1], [0.04, 0.22], [0.001, 0.26]], 8, null, u, y, 0.7)));
   } else if (trade === 'cobbler') {
     row(6, (u, i) => { L.box('hide_brown', u - 0.08, y, 0.3 + (i % 2) * 0.25, u + 0.08, y + 0.08, 0.5 + (i % 2) * 0.25); L.box('hide_black', u - 0.08, y + 0.08, 0.3 + (i % 2) * 0.25, u + 0.08, y + 0.2, 0.38 + (i % 2) * 0.25); });
     for (let i = 0; i < 5; i++) { const u = uc - w / 2 + 0.4 + (w - 0.8) * (i + 0.5) / 5; L.box(i % 2 ? 'hide_black' : 'hide_brown', u - 0.07, y + 1.7, 0.2, u + 0.07, y + 2.2, 0.28); L.box('iron', u - 0.004, y + 2.2, 0.22, u + 0.004, y + 2.4, 0.24); }   // boots hung up
@@ -141,7 +150,7 @@ function bottega(L, uc, w, o, rand, open) {
   // the sign: a painted board hung from an iron bracket at the jamb's side
   const su = uc + w / 2 + 0.5;
   L.box('iron', su - 0.02, 3.5, 0.02, su + 0.02, 3.54, 0.9); L.box('iron', su - 0.02, 3.3, 0.88, su + 0.02, 3.5, 0.9);
-  L.box('wood_painted', su - 0.02, 2.55, 0.5, su + 0.02, 3.3, 1.3); L.box({ grocer: 'cloth_red', baker: 'cloth_ochre', cloth: 'cloth_blue', wine: 'cloth_green', apothecary: 'cloth_white', osteria: 'cloth_maroon', cobbler: 'cloth_brown' }[o.trade] ?? 'cloth_red', su - 0.03, 2.75, 0.62, su + 0.03, 3.1, 1.18);
+  L.box('wood_painted', su - 0.02, 2.55, 0.5, su + 0.02, 3.3, 1.3); L.box({ grocer: 'cloth_red', baker: 'cloth_ochre', cloth: 'cloth_blue', wine: 'cloth_green', apothecary: 'cloth_white', osteria: 'cloth_maroon', cobbler: 'cloth_brown', devotional: 'cloth_blue' }[o.trade] ?? 'cloth_red', su - 0.03, 2.75, 0.62, su + 0.03, 3.1, 1.18);
 }
 
 /** The wall fountain in its niche: a scallop-headed travertine niche, the mascherone spouting into a trough, the water falling. */
@@ -250,6 +259,7 @@ function houseDress(L, o, free, ys) {
 function palazzo(bag, col, M, o) {
   const { u0, w, rand, simple } = o, H = o.H, L = new Local(); L.noBack = true;
   const wall = o.mat, S = PALAZZO_STOREYS.slice(0, o.storeys), y1 = S[0], y2 = y1 + S[1], y3 = y2 + (S[2] ?? 0);
+  CUT = o.climb ? y1 : 0;
   const nb = Math.max(3, Math.min(7, Math.round(w / 4.6) | 1)), bw = w / nb;
   const uc = u0 + w / 2, centre = Math.floor(nb / 2);
   const bayU = (k) => u0 + (k + 0.5) * bw;
@@ -276,10 +286,12 @@ function palazzo(bag, col, M, o) {
   voussoirs(L, T, uc, ps, pw / 2, pw / 2 + 0.62, 0, 0.17, 11, 0.04);
   for (const s of [-1, 1]) for (let k = 0, yy = 0; yy < ps - 0.1; k++, yy += 0.5) L.box(T, uc + s * (pw / 2 + (k % 2 ? 0.62 : 0.5)) - (k % 2 ? 0.0 : 0), yy, 0, uc + s * (pw / 2), Math.min(ps, yy + 0.46), 0.17);
   L.box(T, uc - 0.24, ps + pw / 2 + 0.55, 0.0, uc + 0.24, ps + pw / 2 + 0.85, 0.32);       // the keystone
-  L.add('opening', ext(openingPts(uc, 0, ps + pw / 2, pw, true), [], -0.02, 0.02, 8));
-  L.add('wood_dark', ext(openingPts(uc, 0, ps + pw / 2 - 0.12, pw - 0.2, true), [], 0.02, 0.09, 8));
-  L.box('opening', uc - 0.012, 0, 0.09, uc + 0.012, ps + 0.7, 0.1);                             // the joint of the leaves
-  if (!simple) for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) for (const s of [-1, 1]) L.box('iron', uc + s * (0.25 + c * 0.22) - 0.03, 0.5 + r * 0.55 - 0.03, 0.09, uc + s * (0.25 + c * 0.22) + 0.03, 0.5 + r * 0.55 + 0.03, 0.12);  // studs
+  if (!o.climb) {
+    L.add('opening', ext(openingPts(uc, 0, ps + pw / 2, pw, true), [], -0.02, 0.02, 8));
+    L.add('wood_dark', ext(openingPts(uc, 0, ps + pw / 2 - 0.12, pw - 0.2, true), [], 0.02, 0.09, 8));
+    L.box('opening', uc - 0.012, 0, 0.09, uc + 0.012, ps + 0.7, 0.1);                             // the joint of the leaves
+  }
+  if (!simple && !o.climb) for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) for (const s of [-1, 1]) L.box('iron', uc + s * (0.25 + c * 0.22) - 0.03, 0.5 + r * 0.55 - 0.03, 0.09, uc + s * (0.25 + c * 0.22) + 0.03, 0.5 + r * 0.55 + 0.03, 0.12);  // studs
   col.rect(wrect(M, u0, -0.0001, u0 + w, 0), 0, 0);                                        // (placeholder: the body carries the collider)
   // kneeling windows with grilles; mezzanine windows over them
   for (const u of wIn) {
@@ -312,9 +324,10 @@ function palazzo(bag, col, M, o) {
   if (!simple) for (const sg of [0, 1]) L.box('plaster_damp', sg ? u0 + w - 1.4 : u0 + 0.4, 0.1, 0.07, sg ? u0 + w - 0.5 : u0 + 1.3, 0.45, 0.085);
   cornice(L, u0, u0 + w, H, true, rand);
   L.emit(bag, M);
+  CUT = 0;
   // the roof, behind the cornice; chimneys; an altana now and then
   const rh = 3.0;
-  const rf = frustum(roofRect(M, u0, w, o.D, 0.5), H + 0.16, H + 0.16 + rh, 0, 0, o.D / 2 + 0.3, o.D / 2 + 0.3);
+  const rf = frustum(roofRect(M, u0, w, o.roofD ?? o.D, 0.5), H + 0.16, H + 0.16 + rh, 0, 0, (o.roofD ?? o.D) / 2 + 0.3, (o.roofD ?? o.D) / 2 + 0.3);
   bag.add('roof_tile', rf);
   if (o.altana) altanaOn(bag, M, o, H + 0.16 + rh * 0.55, rand);
   chimney(bag, M, o, H + 0.16 + rh * 0.8, rand);
@@ -330,13 +343,14 @@ function chimney(bag, M, o, y, rand) {
   }
   L.emit(bag, M);
 }
-function altanaOn(bag, M, o, y, rand) { altana(bag, M, o.u0, o.w, y, o.D, rand); }
+function altanaOn(bag, M, o, y, rand) { altana(bag, M, o.u0, o.w, y, o.roofD ?? o.D, rand); }
 
 // ── casa ─────────────────────────────────────────────────────────────────────
 function casa(bag, col, M, o) {
   const { u0, w, rand, simple } = o, H = o.H, L = new Local(); L.noBack = true;
   const S = CASA_STOREYS.slice(0, o.storeys);
   const ys = [0]; for (const s of S) ys.push(ys[ys.length - 1] + s);
+  CUT = o.climb ? ys[1] : 0;
   const dw = 1.1, sw = Math.min(2.8, w - dw - 1.6), shopU = u0 + 0.7 + sw / 2 + (o.flip ? dw + 0.4 : 0), doorU = o.flip ? u0 + 0.7 + dw / 2 : u0 + w - 0.7 - dw / 2;
   L.box(T, u0, 0, -0.02, u0 + w, 0.45, 0.1);
   // the ground: a bottega (or a wall fountain) and the door to the stair
@@ -345,7 +359,7 @@ function casa(bag, col, M, o) {
     bottega(L, shopU, sw, o, rand, !!o.open);
     // the door: a rectangular opening with a lintel and a stone step; the leaf
     L.box(T, doorU - dw / 2 - 0.18, 0, -0.02, doorU - dw / 2, 2.45, 0.14); L.box(T, doorU + dw / 2, 0, -0.02, doorU + dw / 2 + 0.18, 2.45, 0.14); L.box(T, doorU - dw / 2 - 0.25, 2.4, -0.02, doorU + dw / 2 + 0.25, 2.7, 0.2);
-    L.box('opening', doorU - dw / 2, 0, -0.02, doorU + dw / 2, 2.4, 0.03); L.box('wood_dark', doorU - dw / 2 + 0.03, 0, 0.03, doorU + dw / 2 - 0.03, 2.35, 0.08);
+    if (!o.climb) { L.box('opening', doorU - dw / 2, 0, -0.02, doorU + dw / 2, 2.4, 0.03); L.box('wood_dark', doorU - dw / 2 + 0.03, 0, 0.03, doorU + dw / 2 - 0.03, 2.35, 0.08); }
     L.box(T, doorU - dw / 2 - 0.2, 0, 0.14, doorU + dw / 2 + 0.2, 0.14, 0.6);
     const mu = o.flip ? u0 + w - 0.9 : u0 + 0.9, nb0 = w < 7.6 ? 2 : 3, bw0 = (w - 0.8) / nb0;
     if (o.madonna && !Array.from({ length: nb0 }, (_, k) => u0 + 0.4 + (k + 0.5) * bw0).some((c) => c > mu - 1.6 && c < mu + 2.1)) madonnella(L, mu, ys[1] + 0.75, rand);
@@ -357,6 +371,7 @@ function casa(bag, col, M, o) {
     L.box(T, u0, y0 - 0.1, -0.02, u0 + w, y0 + 0.09, 0.1);
     for (let k = 0; k < nb; k++) {
       const u = u0 + 0.4 + (k + 0.5) * bw, wh = s === 1 ? 2.0 : 1.7, sh = SHUT[Math.floor(rand() * SHUT.length)];
+      if (o.climb && s === 1 && k === (o.flip ? nb - 1 : 0)) { window(L, u, y0 + 0.12, 0.9, 2.45, { head: 'cornice', shut: sh, closed: false, rand, frame: T }); balcony(L, u, y0 + 0.12, 1.7, 0.95, 0.95); continue; }
       window(L, u, y0 + 0.75, 0.9, wh, { head: s === 1 ? 'cornice' : 'flat', shut: sh, closed: rand() < 0.4, rand, frame: T });
       if (s === 1 && rand() < 0.55) { balcony(L, u, y0 + 0.75, 1.5, 0.5, 0.9); }
       else if (rand() < 0.4) { pot(L, u - 0.25, y0 + 0.59, 0.12); pot(L, u + 0.25, y0 + 0.59, 0.12); }
@@ -371,6 +386,7 @@ function casa(bag, col, M, o) {
   }
   cornice(L, u0, u0 + w, H, false, rand);
   L.emit(bag, M);
+  CUT = 0;
   const rh = 2.4;
   bag.add('roof_tile', frustum(roofRect(M, u0, w, o.D, 0.4), H + 0.16, H + 0.16 + rh, 0, 0, o.D / 2 + 0.3, o.D / 2 + 0.3));
   if (rand() < 0.7) chimney(bag, M, o, H + 0.16 + rh * 0.8, rand);
@@ -425,12 +441,20 @@ export function borgoRow(el, { bag, col, lights }) {
     const r = wrect(M, un.u0, -D, un.u0 + un.w, 0);
     const wall = un.mat ?? WALLS[Math.floor(rand() * WALLS.length)];
     o.mat = wall;
-    if (un.open) openBody(bag, col, M, o, wall, lights);
+    // a house climbed (un.up: its kind; only the near copy): the stair, the floors and rooms above, the windows cut through
+    const climb = !!un.up && !simple && !!un.open;
+    let backH = un.H;
+    if (climb) {
+      const St = (un.kind === 'palazzo' ? PALAZZO_STOREYS : CASA_STOREYS).slice(0, un.storeys);
+      Object.assign(o, { climb: true, S: St, furnish });
+      if (un.terrace) { const P = planUp({ kind: un.kind, w: un.w, D, S: St, storeys: un.storeys }); o.roofD = P.eMax - 0.3; backH = P.ys[P.m] + 1.05; }
+      openUp(bag, col, M, o, wall, lights);
+    } else if (un.open) openBody(bag, col, M, o, wall, lights);
     else { bag.add(wall, box(r[0], y - 0.5, r[1], r[2], y + un.H, r[3])); col.rect(r, y, y + un.H); }
     (un.kind === 'palazzo' ? palazzo : casa)(bag, col, M, o);
     // the wall on the other side of the row (on the alley): plain, a few windows
     const ub = LEN - un.u0 - un.w;
-    plainFace(bag, B, ub, un.w, un.H, rng((un.seed ?? 1) + 77), simple);
+    plainFace(bag, B, ub, un.w, backH, rng((un.seed ?? 1) + 77), simple);
   }
   // the lanes between: nothing built (the sides are the neighbours' own walls)
   if (!simple) for (const l of el.laundry ?? []) laundry(bag, l.a, l.b, y + l.y, rng(Math.floor(l.a[0] * 13 + l.a[1] * 7)));
@@ -489,8 +513,9 @@ function furnish(bag, col, M, { u0, u1, d0, d1, y, trade, rand, vy }) {
     const ys = y + 0.55 + k * 0.62;
     Bx('wood_dark', u0 + 0.05, back, u1 - 0.05, back + 0.4, ys, ys + 0.05, true);
     for (let u = u0 + 0.3; u < u1 - 0.3; u += 0.34) {
-      const kind = trade === 'cloth' ? 'bolt' : trade === 'apothecary' ? 'jar' : trade === 'cobbler' ? 'shoe' : (k + Math.floor(u * 3)) % 3;
-      if (kind === 'jar') L.add(['glaze_white', 'glaze_blue', 'terracotta', 'glaze_white'][Math.floor(u * 5) % 4], lathe([[0.001, 0], [0.07, 0], [0.09, 0.1], [0.07, 0.2], [0.04, 0.24], [0.001, 0.24]], 8, null, u, ys + 0.05, back + 0.2));
+      const kind = trade === 'devotional' ? 'med' : trade === 'cloth' ? 'bolt' : trade === 'apothecary' ? 'jar' : trade === 'cobbler' ? 'shoe' : (k + Math.floor(u * 3)) % 3;
+      if (kind === 'med') { L.box(k % 2 ? 'cloth_blue' : 'cloth_red', u - 0.1, ys + 0.05, back + 0.12, u + 0.1, ys + 0.07, back + 0.3); L.add('bronze', lathe([[0.001, 0], [0.05, 0], [0.05, 0.01], [0.001, 0.01]], 8, null, u, ys + 0.07, back + 0.2)); L.box('timber', u - 0.07, ys + 0.05, back + 0.32, u + 0.07, ys + 0.16, back + 0.4); }
+      else if (kind === 'jar') L.add(['glaze_white', 'glaze_blue', 'terracotta', 'glaze_white'][Math.floor(u * 5) % 4], lathe([[0.001, 0], [0.07, 0], [0.09, 0.1], [0.07, 0.2], [0.04, 0.24], [0.001, 0.24]], 8, null, u, ys + 0.05, back + 0.2));
       else if (kind === 'shoe') { L.box(k % 2 ? 'hide_brown' : 'hide_black', u - 0.08, ys + 0.05, back + 0.12, u + 0.08, ys + 0.13, back + 0.34); L.box('hide_black', u - 0.08, ys + 0.13, back + 0.12, u + 0.08, ys + 0.26, back + 0.2); }
       else if (kind === 'bolt') { const g = lathe([[0.001, 0], [0.09, 0], [0.09, 0.3], [0.001, 0.3]], 8, null, 0, 0, 0); g.rotateX(Math.PI / 2); g.translate(u, ys + 0.14, back + 0.2); L.add(['cloth_red', 'cloth_blue', 'cloth_ochre', 'cloth_green', 'cloth_white', 'cloth_indigo', 'cloth_maroon'][Math.floor(rand() * 7)], g); }
       else if (kind === 0) L.add('terracotta', lathe([[0.08, 0], [0.12, 0.12], [0.09, 0.24], [0.06, 0.28], [0.001, 0.28]], 8, null, u, ys + 0.05, back + 0.2));
@@ -507,7 +532,7 @@ function furnish(bag, col, M, { u0, u1, d0, d1, y, trade, rand, vy }) {
   if (trade === 'apothecary' || trade === 'cobbler') {
     L.box('iron', u0 + 0.3, vy - 0.4, d1 + 1.4, u1 - 0.3, vy - 0.38, d1 + 1.42);
     for (let u = u0 + 0.6; u < u1 - 0.4; u += 0.38) { if (trade === 'apothecary') L.add('flax_leaf', lathe([[0.001, 0], [0.07, 0.1], [0.05, 0.3], [0.001, 0.38]], 6, null, u, vy - 0.78, d1 + 1.41)); else { L.box(rand() < 0.5 ? 'hide_brown' : 'hide_black', u - 0.07, vy - 0.9, d1 + 1.38, u + 0.07, vy - 0.45, d1 + 1.44); } }
-  } else if (trade !== 'cloth' && trade !== 'baker') {
+  } else if (trade !== 'cloth' && trade !== 'baker' && trade !== 'devotional') {
     L.box('iron', u0 + 0.3, vy - 0.4, d1 + 1.4, u1 - 0.3, vy - 0.38, d1 + 1.42);
     for (let u = u0 + 0.6; u < u1 - 0.4; u += 0.42) { const hh = 0.35 + rand() * 0.25; L.add(rand() < 0.5 ? 'hide_brown' : 'hide_tan', lathe([[0.001, 0], [0.06, 0.08], [0.07, 0.25], [0.045, 0.4], [0.001, 0.5]].map(([r, v]) => [r, v * hh / 0.4]), 7, null, u, vy - 0.4 - hh * 1.25, d1 + 1.41)); }
   }
