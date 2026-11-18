@@ -4,6 +4,8 @@
 // five tiers and the three small keeps joined by roofed passages; the long gallery of the
 // Nishinomaru; the lord's residence in the Sannomaru; the middle moat and its gate.
 
+import { upperHouses } from './layout.js';
+import { upPlan, upRoute, upRooms } from '../../styles/edo/upper.js';
 import { INNER, OUTER, BANK, LEVEL, NINO, HON, DAI, NISHI, KEEP, SMALL, GOTEN, OTEMON, MIDDLE, RADIUS } from './layout.js';
 
 const E = [], KURA_ROOMS = [];
@@ -144,6 +146,15 @@ const rooms = [room('main keep', [KEEP.c[0] - 12, KEEP.c[1] - 11, KEEP.c[0] + 12
 { let y = KEEP.base; for (const [i, t] of KEEP_TIERS.entries()) { rooms.push(room(`main keep floor ${i + 1}`, [KEEP.c[0] - t.hw + 1, KEEP.c[1] - t.hd + 1, KEEP.c[0] + t.hw - 1, KEEP.c[1] + t.hd - 1], y, 'hall')); y += t.h; } }
 const walks = [[[0, 300], [0, 215], [0, 180], [70, 180], [70, 90], [0, 80], [0, 40], [0, 14], [12, 14], [12, -3], [-31, -3], [-31, -30]]];
 walks[0].y0 = 0;
+// the machiya whose upper floors are open: from the street through the shop to the stair, up it and across the floor to a window of the front room
+for (const [l, kind] of upperHouses()) {
+  const [x0, z0, x1, z1] = l.rect, dep = Math.min(11, z1 - z0), f = l.front || 's', r = f === 's' ? [x0, z1 - dep, x1, z1] : [x0, z0, x1, z0 + dep];
+  const H2 = 2.5 + ((l0) => { let s = l0 >>> 0 || 1; return ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); })(l.seed || 1) * 0.6;
+  const P = upPlan({ ...l, up: kind }, r, 3.2, H2);
+  if (!P) continue;
+  const w = upRoute(P); w.y0 = 0; walks.push(w);
+  for (const [i, u] of upRooms(P).entries()) rooms.push(room(`${kind} upper room ${i + 1} (${Math.round(x0)}, ${Math.round(z0)})`, u.rect, u.y, 'hall'));
+}
 
 export const OPENED = { kura: KURA_ROOMS, turrets: TURRET_ROOMS };
 export const castle = {
