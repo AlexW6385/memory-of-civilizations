@@ -125,7 +125,7 @@ function extrude(out, prof, x, z, n, t) {
 }
 
 /** The outer posts of a hall, as ming_hall sets them out: [{ x, z, nx, nz }] (a corner post twice, once for each face). */
-function rimPosts(el) {
+export function rimPosts(el) {
   const [x0, z0, x1, z1] = el.rect, Lx = x1 - x0, Lz = z1 - z0, along = Lx >= Lz;
   const nb = el.bays?.[0] ?? Math.max(1, 2 * Math.round(((along ? Lx : Lz) / 3.6 - 1) / 2) + 1), nd = el.bays?.[1] ?? Math.max(1, Math.round((along ? Lz : Lx) / 3.4));
   const xs = [], zs = [];

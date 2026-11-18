@@ -161,7 +161,7 @@ GALLERIES.forEach((pts, i) => E.push({ t: 'ming_gallery', fine: true, wet: faces
 // ── the halls and pavilions ──────────────────────────────────────────────────
 const B = BUILDINGS;
 // the Hall of Distant Fragrance: lattice on all four sides, a terrace north over the pond
-E.push({ t: 'paving', rect: [-10, -26, 10, -19.6], y: G + B.yuanxiang.y - 0.05, th: 1.6, mat: 'bluestone' });
+E.push({ t: 'terrace_paving', rect: [-10, -26, 10, -19.6], y: G + B.yuanxiang.y - 0.05, th: 1.6, mat: 'bluestone' });
 E.push({ t: 'ming_hall', rect: B.yuanxiang.rect, y: G + B.yuanxiang.y, H: 5.0, front: 'n', four: true, roof: 'xieshan', plat: 0.6, eave: 1.5, sweep: 1.3, real: true, tiles: true, trim: true, carve: true, ...B.yuanxiang.hall });
 E.push({ t: 'terrace_rail', rect: [-10, -26, 10, -19.6], y: G + B.yuanxiang.y - 0.05, sides: ['n', 'w', 'e'] });
 E.push({ t: 'ming_hall', rect: B.yiyu.rect, y: G + B.yiyu.y, H: 3.8, front: B.yiyu.front, four: true, roof: 'xieshan', plat: 0.4, real: true, tiles: true, trim: true, carve: true, ...B.yiyu.hall });
