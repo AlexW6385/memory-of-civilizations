@@ -172,6 +172,19 @@ Sources (2026-11-16, §5.16–5.18):
 - **Stoops:** moulded landing, nosed steps, sloping stone cheek walls, wrought railings (level over the landing, raking beside the steps, balusters, newels with balls, a curl at the foot). [inferred]
 - **Bridges:** arch rings in dressed voussoirs, every second proud, a keystone to each vault, a string course under the parapets, stone end piers with pyramid caps and balls. [inferred]
 
+### 5.20 The upper floors of the open canal houses (L3, 2026-11-18; `src/styles/dutch/upper.js`, `house.js`, `interior.js`, `rooms.js`, `town.js`)
+
+Eleven houses nearest the arrival (the Dam's south row, then the Damrak and the first canal rows) are open up to the roof: merchants', an inn, craftsmen's (cooper, weaver, joiner), lodgings, a counting house and warehouses. The lot at the Town Hall's corner is left shut: its stoop lies in the 2 m gap beside the hall.
+
+- **The stair:** from the hall (voorhuis) a steep straight flight (about 52 degrees, treads 0.23 m, no more than a metre wide) rises beside the party wall; on each floor it turns, so flight on flight in two strips, each coming up through a trap in the floor above, with a foot rail and a balustrade at the opening. [inferred: the narrow, steep Amsterdam house stair is a given of the type, §5.1; the exact slope is our choice, kept walkable: ramp colliders, STEP 0.5]
+- **Floors:** each floor a collider with its holes cut; the front chamber (voorkamer) and back chamber (achterkamer) either side of a partition with a door. Ceiling heights fall with the floor (high first floor, low upper ones). [inferred]
+- **By use:** sleeping rooms with box beds (bedsteden) in the wall and chests; a press (kast) with linen; the merchant's table and chairs and a painting; the counting house's desks and ledger shelves; the cooper's barrels and staves, the weaver's loom, the joiner's bench; the lodgings' several beds. [inferred from the trades listed in §5.1-5.5 and from inventories of the period; nothing in a particular house is documented]
+- **Windows:** each room's windows are open reveals (cross-window with leaded upper lights, shutters to the lower lights) giving a street or canal view. [inferred, as §5.19]
+- **The attic (zolder) and the loft:** the roof is lined with boards, the loft deck under the gable is reached by a ladder, goods (sacks, bales, a barrel) stand under the slopes. In the gable the hoist hatch (luik) opens under the hoist beam (hijsbalk) with its hook; goods went up outside and in through the hatch, which is why the stair is not for furniture. [inferred; the hoist beam on the gable is stated in §5.1]
+- **Warehouse floors:** the spout-gable stores have loading doors at each floor and a hatch in the gable instead of a stair of rooms; sacks, bales and casks in aisles at least 1.2 m wide, a hole in each floor for the hoist.
+- **No loggia:** an upper gallery or loggia is not a feature of a 1670 Amsterdam house; the nearest equivalent is the hoist hatch with its bar, and at street level the warehouses' loading doors. Nothing was invented for it.
+- **Check:** `node tools/walk-check.mjs --sites amsterdam` walks 23 routes (from the street up every flight to the first-floor back chamber, then on to the attic and the loft deck), added to the plan's `walks`.
+
 ## 6. Ground and water
 
 Brick quays and streets; rows of elms on the quays; canals; the IJ. [stated: elms along canals — inferred from paintings]
