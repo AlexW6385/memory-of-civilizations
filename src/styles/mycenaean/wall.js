@@ -85,15 +85,14 @@ export function northGate(el, ctx) {
   }
   // the lintel of two monoliths, and over it the corbelled hood: three slabs stepping in, each proud of the face
   dressed.push(box(-L, top, -th / 2, L, top + 0.85, -0.02), box(-L, top, 0.02, L, top + 0.85, th / 2));
-  const hood = [[L - 0.1, 0.5, 0.42], [L - 0.75, 0.5, 0.52], [L - 1.4, 0.5, 0.62]];
-  hood.forEach(([hl, hh, pr], i) => dressed.push(box(-hl, top + 0.85 + i * hh, -th / 2 - pr, hl, top + 0.85 + (i + 1) * hh, -th / 2 + 0.3)));
+  const hood = [[L - 0.1, 0.5, 0.42], [L - 0.5, 0.5, 0.5], [L - 0.9, 0.5, 0.58]];
+  hood.forEach(([hl, hh, pr], i) => dressed.push(box(-hl, top + 0.85 + i * hh, -th / 2 - pr, hl, top + 0.85 + (i + 1) * hh, th / 2)));
   const hoodTop = top + 0.85 + 3 * 0.5;
   col.segment([x - ux * L, z - uz * L], [x + ux * L, z + uz * L], th, top, top + 0.85);
   bag.add(DRESSED, F(mergeG(dressed)));
   run(-L, L, hoodTop, el.y1, 3);
   run(-hw - J, hw + J, el.y0, el.y - 0.3, 4);      // the wall under the passage's floor (the postern stands high over the ravine)
   // the core between the hood and the lintel's ends and the wall beside: filled by the wall's own core
-  bag.add(CORE, F(box(-L, top + 0.85, -th / 2 + 0.5, L, hoodTop, th / 2 - 0.5)));
   // the floor: a threshold of one great stone with the door's pivot stones and the bar-holes cut in the jambs
   const nx = el.n[0], nz = el.n[1], pts = [[x - ux * hw - nx * th / 2, z - uz * hw - nz * th / 2], [x + ux * hw + nx * th / 2, z + uz * hw + nz * th / 2]];
   const r = [Math.min(pts[0][0], pts[1][0]), Math.min(pts[0][1], pts[1][1]), Math.max(pts[0][0], pts[1][0]), Math.max(pts[0][1], pts[1][1])];
@@ -142,8 +141,8 @@ export function ramp(el, { bag }) {
     if (el.kerb) for (const sgn of [-1, 1]) kerb.push(place(box(-L / 2, yc - 1.0, -0.16, L / 2, yc + 0.22, 0.16), ax + ux * L / 2 + nx * sgn * (w / 2 + 0.16), 0, az + uz * L / 2 + nz * sgn * (w / 2 + 0.16), -Math.atan2(uz, ux)));
   }
   void kerb;
-  bag.add(DRESSED, mergeG(slabs));
-  if (kerb.length) bag.add(ROUGH, mergeG(kerb));
+  bag.add('flagstone', mergeG(slabs));
+  if (kerb.length) bag.add('flagstone', mergeG(kerb));
 }
 
 // ── the Lion Gate ────────────────────────────────────────────────────────────────────────────

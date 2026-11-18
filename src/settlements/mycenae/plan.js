@@ -6,7 +6,7 @@ import { CIRCUIT, GATE_Y, PAL_Y, LION, BASTION, STUB, GCA, GRANARY, PALACE, TH, 
 const E = [];
 const { runs, gate } = wallRuns();
 runs.forEach((r, i) => E.push({ t: 'wall_run', a: r.a, b: r.b, th: TH, y0: r.y0, y1: r.y1, yi: r.yi, ashlar: r.ashlar, seed: 100 + i, ext: 1.7 }));
-E.push({ t: 'north_gate', at: gate.at, u: gate.u, n: gate.n, w: NORTH_GATE.w, h: NORTH_GATE.h, th: TH, y: gate.y, y0: gate.y0, y1: gate.y + 6.4, yi: gate.y, seed: 900 });
+E.push({ t: 'north_gate', at: gate.at, u: gate.u, n: gate.n, w: NORTH_GATE.w, h: NORTH_GATE.h, th: TH, y: gate.y, y0: gate.y0, y1: gate.y1, yi: gate.y, seed: 900 });
 // the Lion Gate, the bastion on the right and the end of the main wall on the left, the court between them
 E.push({ t: 'lion_gate', x: LION.x - TH / 2, z: 0, y: GATE_Y, w: LION.w, h: LION.h, th: TH, y1: GATE_Y + 8.6, seed: 5, zExt: 11 });
 E.push({ t: 'wall_run', a: [BASTION[0], (BASTION[1] + BASTION[3]) / 2], b: [BASTION[2], (BASTION[1] + BASTION[3]) / 2], th: BASTION[3] - BASTION[1], y0: approachY(BASTION[0]) - 1.2, y1: GATE_Y + 6.2, yi: approachY(BASTION[0]) - 1.2, ashlar: true, seed: 31, ext: 0, caps: [true, false] });
