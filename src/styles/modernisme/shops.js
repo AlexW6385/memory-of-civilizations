@@ -219,12 +219,18 @@ export function makeShops(H) {
     const { bag, col, lights } = ctx, F = fr.F;
     const wr = (s0, s1, t0, t1, y0, y1) => { const p = fr.at(s0, t0), q = fr.at(s1, t1); col.rect([p[0], p[1], q[0], q[1]], y0, y1); };
     const top = Math.max(y, ...shops.map((s) => yAt((s.s0 + s.s1) / 2))) + 4.3;
-    bag.add(mat, F(a, b, -D, 0, top, y + h)); wr(a, b, -D, 0, top, y + h);
+    if (!portal?.open) { bag.add(mat, F(a, b, -D, 0, top, y + h)); wr(a, b, -D, 0, top, y + h); }       // (an opened house's upper mass is built by upstairs.js)
     let c = a;
-    const solid = (s0, s1) => { if (s1 - s0 < 0.04) return; bag.add(mat, F(s0, s1, -D, 0, y - 1.2, top)); wr(s0, s1, -D, 0, y - 1.2, top); };
+    const solid = (s0, s1) => {
+      if (s1 - s0 < 0.04) return;
+      // (an opened house's solid is cut into boxes of about 3 m across the plot: the walker's top field smears a face's edge by 2 % of its size, and a stair beside a wide top read as a roof)
+      const ns = portal?.open ? Math.ceil((s1 - s0) / 3) : 1, nu = 1;
+      for (let i = 0; i < ns; i++) for (let j = 0; j < nu; j++) bag.add(mat, F(s0 + (s1 - s0) * i / ns, s0 + (s1 - s0) * (i + 1) / ns, -D + D * j / nu, -D + D * (j + 1) / nu, y - 1.2, top));
+      wr(s0, s1, -D, 0, y - 1.2, top);
+    };
     // the solid between two shops: with a portal's vestibule cut into it where the portal's bay lies (portal.js)
     const gap = (s0, s1) => {
-      if (portal && s0 <= portal.pc - PORTAL_HW - 0.1 && s1 >= portal.pc + PORTAL_HW + 0.1) { solid(s0, portal.pc - PORTAL_HW); portal.mass(ctx, fr, portal.pc, D, y, top, mat, yAt(portal.pc), portal.v, portal.lamp); solid(portal.pc + PORTAL_HW, s1); }
+      if (portal && s0 <= portal.pc - PORTAL_HW - 0.1 && s1 >= portal.pc + PORTAL_HW + 0.1) { solid(s0, portal.pc - PORTAL_HW); portal.mass(ctx, fr, portal.pc, D, y, top, mat, yAt(portal.pc), portal.v, portal.lamp, !!portal.open); solid(portal.pc + PORTAL_HW, s1); }
       else solid(s0, s1);
     };
     for (const sh of shops) {
