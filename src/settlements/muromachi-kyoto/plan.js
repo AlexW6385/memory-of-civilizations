@@ -1,6 +1,8 @@
 // Ginkaku-ji (Jishō-ji) about 1490 (docs/settlements/muromachi-kyoto.md §3): the Kannon-den over its pond, the Tōgu-dō
 // with the Dōjinsai, the gate and the earthen walls, stone lanterns, the court of white gravel. The landmark.
-import { GINKAKU, RADIUS } from './layout.js';
+import { GINKAKU, RADIUS, lots } from './layout.js';
+import { dims } from '../../styles/muromachi/machiya.js';
+import { upWindows, stairAt } from '../../styles/muromachi/upper.js';
 
 const E = [];
 const kx0 = GINKAKU.kannon[0] - 14;
@@ -46,6 +48,20 @@ const walks = [[[gx, z1 + 10], [gx, z1 - 6], [gx, 56], [P.c[0] - P.r[0] - 4.5, 5
 walks[0].y0 = 0;
 walks.push([[kx, kz + 14], [kx, kz + 9], [kx, kz + 6.6], [kx, kz + 4.6], [kx, kz + 2.5], [kx + 4.5, kz + 1.1], [kx + 2.0, kz + 1.1], [kx - 0.3, kz + 1.1], [kx - 1.6, kz + 1.0], [kx - 1.8, kz - 0.6]]);
 walks[1].y0 = 0;
+
+// the houses with an opened upper room (docs §11): from the street through the earth passage, up the ladder-stair, across the room to its window
+// (house frame: front +z; the world point of a local [x, z] as the style's `local` makes it, mirrored houses included)
+const TH = { s: 0, e: Math.PI / 2, n: Math.PI, w: -Math.PI / 2 };
+for (const l of lots()) {
+  if (!l.up) continue;
+  const th = TH[l.facing], co = Math.round(Math.cos(th)), si = Math.round(Math.sin(th)), mir = ((l.seed >>> 4) & 1) === 1;
+  const P = ([x, z]) => { if (mir) x = -x; return [l.at[0] + x * co + z * si, l.at[1] - x * si + z * co]; };
+  const hw = l.w / 2, x1 = hw - 1.6, qm = Math.min(4.2, l.d * 0.4), S = stairAt(qm), xc = upWindows(l.w, x1).slice(-1)[0], xl = x1 - 0.7;
+  void dims;
+  const r = [[hw - 1.25, 3.5], [hw - 1.25, -1.0], [hw - 1.25, S.foot - 0.5], [xl, S.foot - 0.5], [xl, S.foot + 0.8], [xl, S.top + 0.6], [xl, -0.9], [xc, -0.9]].map(P);
+  r.y0 = 0;
+  walks.push(r);
+}
 
 export const ginkaku = {
   id: 'muromachi-ginkaku',
