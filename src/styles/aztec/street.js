@@ -142,6 +142,7 @@ const WALL_IN = 0.25;                                                      // th
  * calli_front { rect, seed, gate ('n'…), trade, lod (0 far, 1 mid, 2 near) }: the lane faces of one compound.
  */
 export function calliFront(el, ctx) {
+  if (el.simple) return;
   const { bag } = ctx, rand = rng((el.seed || 1) * 7 + 3), r = el.rect, lod = el.lod ?? 2, P = 0.42;
   const sides = SIDES.filter((f) => f !== el.gate);
   const painted = rand() < 0.35, band = rand() < 0.5 ? 'stucco_red' : 'paint_ochre';

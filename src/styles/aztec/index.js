@@ -20,6 +20,8 @@ import { landing, fisherCanoe, tuleBeds, plazaDress } from './canal.js';
 import { courtHouse as courtHouse2, mxPyramid } from './palace.js';
 import { tianguis } from './market.js';
 import { mxDress } from './dress.js';
+import * as CV from './carve.js';
+import { Carver, serpentHead as carvedHead } from './carve.js';
 import { eagleHouse, calmecac, coatepantli, enclosure, ehecatl, mxTemple, causewayStakes, strip, tlalocBrazier } from './precinct.js';
 
 const W = 'plaster_white', R = 'stucco_red', B = 'maya_blue';
@@ -210,14 +212,14 @@ const reliefSerpent = (paint, len, tilt) => carved(`tm-relief:${paint}:${len}:${
  * north, Huitzilopochtli's ochre on the south; Tlaloc braziers along the first ledge (Stage IV: braziers of Tlaloc and
  * Huitzilopochtli round the platform); the seated standard-bearers at the stairheads (ancient-history-sites, "Templo Mayor").
  */
-function templeDress(bag, col, { cx, cz, H, a0, tH, ix, w1 }) {
+function templeDress(bag, col, { cx, cz, H, a0, tH, ix, w1 }, S) {
   const X = (y) => cx - a0 + ix * y / tH, tilt = Math.atan2(ix, tH);
   for (const s of [-1, 1]) {
     const tl = s < 0, paint = tl ? B : 'paint_ochre';
     for (const zz of [24, 32, 40]) {
       const z = cz + s * zz, hy = 1.0, xf = X(hy), sc = 0.8;
       bag.add(W, box(xf - 1.75, 0, z - 0.72, xf + 0.9, hy, z + 0.72)); col.rect([xf - 1.75, z - 0.72, xf + 0.9, z + 0.72], 0, hy);
-      serpentHeadKit({ stone: W, goggles: tl, plumes: !tl }).emit(bag, xf + 0.3 - 0.7 * sc, hy, z, -1, 0, sc);
+      if (S.struct) { const C = new Carver({ at: [xf + 0.3 - 0.55 * sc, hy, z], yaw: -Math.PI / 2, s: sc }); carvedHead(C, { tl, lod: 1, seed: Math.round(z * 9) }); C.emit(S.bag); }   // the modelled head, reduced (carve.js)
     }
     for (const zz of [28, 36]) reliefSerpent(paint, 6.2, tilt).emit(bag, cx - a0, 0, cz + s * zz, -1, 0);
     for (const zz of [23, 29, 35, 41]) {
@@ -228,7 +230,11 @@ function templeDress(bag, col, { cx, cz, H, a0, tH, ix, w1 }) {
   // the seated bearers at the stairheads, either side of each stair's top, facing the stair
   for (const s of [-1, 1]) for (const e of [-1, 1]) {
     const x = cx - w1 + 1.4, z = cz + s * 23 * 0.45 + e * 6.0;
-    standardBearer(s < 0 ? B : R).emit(bag, x, H, z, -1, 0, 1.15); col.circle(x, z, 0.5, H, H + 1.8);
+    if (S.has('summit')) {
+      if (S.lvl === 'new') { const C = new Carver({ at: [x, H, z], yaw: -Math.PI / 2, s: 1.5 }); CV.bearer(C, { paint: s < 0 ? B : R, seed: Math.round(z * 5) }); C.emit(S.bag); }
+      else standardBearer(s < 0 ? B : R).emit(S.bag, x, H, z, -1, 0, 1.15);
+    }
+    col.circle(x, z, 0.5, H, H + 1.8);
   }
 }
 
@@ -262,7 +268,14 @@ function balustradeRelief(bag, tl, sx0, sx1, H, z) {
  * templo_mayor: { c, w (east–west), d (north–south), h, terraces, top: { w, d } }: the terraces, the
  * two stairways on the west, the balustrades and serpent heads, the two shrines and their braziers.
  */
-function temploMayor(el, { bag, col }) {
+function temploMayor(el, ctx0) {
+  // mode: 'all' (the whole, the old sculpture in it), 'struct' (the structure, the figures left to their own plans), 'old' | 'new' (the figures
+  // of `parts` only, in their old or modelled form: tenochtitlan/sculpt.js shows one by the visitor's distance)
+  const only = el.mode === 'old' || el.mode === 'new', NOOP = new Proxy({}, { get: () => () => {} });
+  const bag = only ? NOOP : ctx0.bag, col = only ? NOOP : ctx0.col;
+  const lvl = el.mode === 'new' ? 'new' : el.mode === 'struct' ? null : 'old';
+  const S = { bag: ctx0.bag, struct: !only, lvl, has: (part) => !!lvl && (!el.parts || el.parts.includes(part)) };
+  const fig = (part, f) => { if (S.has(part)) f(); };
   const [cx, cz] = el.c, n = el.terraces ?? 4, H = el.h, [w0, d0] = [el.w / 2, el.d / 2], [w1, d1] = [el.top.w / 2, el.top.d / 2];
   for (let k = 0; k < n; k++) {
     const t0 = k / n, t1 = (k + 1) / n, y0 = H * t0, y1 = H * t1;
@@ -277,7 +290,7 @@ function temploMayor(el, { bag, col }) {
       for (const [yb, yt, ee, m] of [[y1 - 0.45, y1 - 0.3, e + 0.03, R], [y1 - 0.3, y1 + 0.1, e, W]]) for (const r of [[X0 - ee, Z0 - ee, X1 + ee, Z0 - ee + cw], [X0 - ee, Z1 + ee - cw, X1 + ee, Z1 + ee], [X0 - ee, Z0 - ee + cw, X0 - ee + cw, Z1 + ee - cw], [X1 + ee - cw, Z0 - ee + cw, X1 + ee, Z1 + ee - cw]]) bag.add(m, box(r[0], yb, r[1], r[2], yt, r[3]));
     }
   }
-  { const a = [w0, d0], b = [w0 - (w0 - w1) / n, d0 - (d0 - d1) / n]; templeDress(bag, col, { cx, cz, H, a0: a[0], tH: H / n, ix: a[0] - b[0] - 1.6, w1 }); }
+  { const a = [w0, d0], b = [w0 - (w0 - w1) / n, d0 - (d0 - d1) / n]; templeDress(bag, col, { cx, cz, H, a0: a[0], tH: H / n, ix: a[0] - b[0] - 1.6, w1 }, S); }
   // the stairways on the west face, side by side: Tlaloc's (north) blue and white, Huitzilopochtli's
   // (south) red; their balustrades steepen into a dado near the top and end at the foot in serpent
   // heads — Tlaloc's goggled, Huitzilopochtli's feathered
@@ -292,7 +305,10 @@ function temploMayor(el, { bag, col }) {
       bag.add(W, fromTriangles(t.concat(t.slice().reverse())));
       bag.add(tl ? B : R, box(sx1 - 3, H - 2, z - 1, sx1, H + 1.6, z + 1));
       balustradeRelief(bag, tl, sx0, sx1, H, z);
-      serpentHead(bag, sx0 - 0.4, 0, z, -1, 0, 1.1, tl ? 'tlaloc' : 'feathered');
+      fig('heads', () => {
+        if (lvl === 'new') { const C = new Carver({ at: [sx0 + 0.3, 0, z], yaw: -Math.PI / 2, s: 1.1 }); carvedHead(C, { tl, lod: 0, seed: Math.round(z * 11) }); C.emit(S.bag); }
+        else serpentHead(S.bag, sx0 - 0.4, 0, z, -1, 0, 1.1, tl ? 'tlaloc' : 'feathered');
+      });
       col.segment([sx0, z], [sx1, z], 1.8, 0, H + 1);
     }
   }
@@ -301,14 +317,21 @@ function temploMayor(el, { bag, col }) {
   const sy = H, sd = d1 * 0.38, sxw = cx - w1 * 0.55;
   shrine(bag, col, [sxw, cz - d1 * 0.85, cx + w1 * 0.55, cz - d1 * 0.85 + 2 * sd], sy, 6, 4.5, 'tlaloc');
   shrine(bag, col, [sxw, cz + d1 * 0.85 - 2 * sd, cx + w1 * 0.55, cz + d1 * 0.85], sy, 6, 4.5, 'huitzilopochtli');
-  chacmoolKit('andesite').emit(bag, sxw - 2.2, sy, cz - d1 * 0.85 + sd, -1, 0, 1.05);
-  techcatl().emit(bag, sxw - 2.2, sy, cz + d1 * 0.85 - sd, 0, 1);
+  fig('summit', () => {
+    if (lvl === 'new') {
+      const C = new Carver({ at: [sxw - 2.2, sy, cz - d1 * 0.85 + sd], yaw: Math.PI, s: 1.5 }); CV.chacmool(C, {}); C.emit(S.bag);
+      const T = new Carver({ at: [sxw - 2.2, sy, cz + d1 * 0.85 - sd], yaw: Math.PI / 2, s: 1.1 }); CV.techcatl(T, { seed: 3 }); T.emit(S.bag);
+    } else { chacmoolKit('andesite').emit(S.bag, sxw - 2.2, sy, cz - d1 * 0.85 + sd, -1, 0, 1.05); techcatl().emit(S.bag, sxw - 2.2, sy, cz + d1 * 0.85 - sd, 0, 1); }
+  });
   col.rect([sxw - 2.7, cz - d1 * 0.85 + sd - 0.9, sxw - 1.7, cz - d1 * 0.85 + sd + 0.9], sy, sy + 1);
   for (const s of [-1, 1]) bag.add('basalt', lathe([[0.9, 0], [1.2, 0.9], [0.8, 1.1], [0.001, 1.1]], 12, null, cx - w1 + 2, sy, cz + s * d1 * 0.45 + s * (d1 * 0.32 + 2.6)));
   // the huehuetl beside Huitzilopochtli's door, beaten from the summit
   huehuetl(bag, sxw - 1.2, sy, cz + d1 * 0.85 - 2 * sd + 1.0); col.circle(sxw - 1.2, cz + d1 * 0.85 - 2 * sd + 1.0, 0.4, sy, sy + 1.2);
   // the Coyolxauhqui stone at the foot of Huitzilopochtli's stair
-  coyolxauhqui().emit(bag, sx0 - 4.5, 0, cz + d1 * 0.45, 0, 1);
+  fig('coyol', () => {
+    if (lvl === 'new') { const C = new Carver({ at: [sx0 - 4.5, 0, cz + d1 * 0.45] }); CV.coyolxauhqui(C, {}); C.emit(S.bag); }
+    else coyolxauhqui().emit(S.bag, sx0 - 4.5, 0, cz + d1 * 0.45, 0, 1);
+  });
   col.circle(sx0 - 4.5, cz + d1 * 0.45, 1.75, 0, 0.37);
 }
 
@@ -430,8 +453,22 @@ function canalWallMx(el, { bag }) {
   bag.add('basalt', fromTriangles(c));
 }
 
+/** mx_serpent_head { at, y, yaw, kind ('tlaloc' | 'feathered'), lod, s }: the modelled serpent's head (carve.js). */
+function mxSerpentHead(el, { bag }) {
+  const C = new Carver({ at: [el.at[0], el.y ?? 0, el.at[1]], yaw: el.yaw ?? 0, s: el.s ?? 1 });
+  carvedHead(C, { tl: el.kind === 'tlaloc', lod: el.lod ?? 0, seed: Math.round(el.at[0] * 7 + el.at[1] * 13) });
+  C.emit(bag);
+}
+
+/** mx_carve { kind, at, y, yaw, s, …opts }: one modelled carving of carve.js by name. */
+function mxCarve(el, { bag }) {
+  const C = new Carver({ at: [el.at[0], el.y ?? 0, el.at[1]], yaw: el.yaw ?? 0, s: el.s ?? 1 });
+  CV[el.kind](C, { ...el, seed: Math.round(el.at[0] * 7 + el.at[1] * 13) });
+  C.emit(bag);
+}
+
 registerStyle('aztec', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: { ...STYLES.maya.elements, templo_mayor: temploMayor, round_temple: roundTemple, serpent_wall: serpentWall, court_house: courtHouse2, mx_pyramid: mxPyramid, ballcourt, acalli, beam_bridge: beamBridge, mx_canal_wall: canalWallMx, tianguis, calli, tecpan, tzompantli, eagle_house: eagleHouse, calmecac, coatepantli, mx_enclosure: enclosure, ehecatl_temple: ehecatl, mx_temple: mxTemple, causeway_stakes: causewayStakes, mx_people: mxPeople, calli_front: calliFront, landing, fisher_canoe: fisherCanoe, tule_beds: tuleBeds, plaza_dress: plazaDress, mx_dress: mxDress, huerto, chinampa_house: chinampaHouse, meso_plants: mesoPlants },
+  elements: { ...STYLES.maya.elements, templo_mayor: temploMayor, mx_serpent_head: mxSerpentHead, mx_carve: mxCarve, round_temple: roundTemple, serpent_wall: serpentWall, court_house: courtHouse2, mx_pyramid: mxPyramid, ballcourt, acalli, beam_bridge: beamBridge, mx_canal_wall: canalWallMx, tianguis, calli, tecpan, tzompantli, eagle_house: eagleHouse, calmecac, coatepantli, mx_enclosure: enclosure, ehecatl_temple: ehecatl, mx_temple: mxTemple, causeway_stakes: causewayStakes, mx_people: mxPeople, calli_front: calliFront, landing, fisher_canoe: fisherCanoe, tule_beds: tuleBeds, plaza_dress: plazaDress, mx_dress: mxDress, huerto, chinampa_house: chinampaHouse, meso_plants: mesoPlants },
   objects: {},
 });

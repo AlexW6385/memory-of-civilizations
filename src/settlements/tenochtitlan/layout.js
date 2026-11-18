@@ -6,6 +6,8 @@
 export const RADIUS = 400;
 export const PRECINCT = [-150, -150, 150, 150];
 export const TM = { c: [95, 0], w: 80, d: 100, h: 45, top: { w: 34, d: 46 } };
+/** The House of the Eagles' ground (north of the Templo Mayor). */
+export const EAGLE_HOUSE = [84, -138, 136, -104];
 export const PALACE = [160, 100, 211, 191];   // between the two canals (it straddled them)
 /** The Huey Tzompantli: about 38 × 13 m, north–south, west of the Templo Mayor's south stair. */
 export const TZOMPANTLI = [40, 22, 53, 60];

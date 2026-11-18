@@ -4,7 +4,7 @@
 // Eagles, the calmecac; the palace of Moctezuma; the causeway west over the lake; the canals,
 // their walls, timber bridges and dugout canoes; the market by the west canal.
 
-import { RADIUS, PRECINCT, TM, PALACE, MARKET, LEVEL, ISLAND, CAUSEWAY, CANALS, TZOMPANTLI, GAP, inChinampaHouse } from './layout.js';
+import { EAGLE_HOUSE, RADIUS, PRECINCT, TM, PALACE, MARKET, LEVEL, ISLAND, CAUSEWAY, CANALS, TZOMPANTLI, GAP, inChinampaHouse } from './layout.js';
 import { ground } from './ground.js';
 import { stalls, aisles, GEOM, JUDGES, LANDINGS } from './market.js';
 
@@ -19,16 +19,16 @@ E.push({ t: 'coatepantli', pts: [[58, -56], [142, -56], [142, -3]], paint: 'maya
 E.push({ t: 'coatepantli', pts: [[58, 56], [142, 56], [142, 3]], paint: 'paint_ochre', kind: 'feathered' });
 E.push({ t: 'lane', rect: [px0 + 2, pz0 + 2, px1 - 2, pz1 - 2], y: 0.03, mat: 'stucco' });
 // ---- the temples
-E.push({ t: 'templo_mayor', c: TM.c, w: TM.w, d: TM.d, h: TM.h, terraces: 4, top: TM.top });
+E.push({ t: 'templo_mayor', c: TM.c, w: TM.w, d: TM.d, h: TM.h, terraces: 4, top: TM.top, mode: 'struct' });
 E.push({ t: 'ehecatl_temple', c: [-4, -10], r: 9, h: 8, front: 24 });
 E.push({ t: 'mx_pyramid', c: [-55, 75], base: 17, top: 8, h: 15, tiers: 4, stairs: 'e', steps: 60, stairW: 7, serpents: 'e', shrine: { w: 10, d: 10, h: 5, door: 'e', god: 'sun' } });
 E.push({ t: 'mx_pyramid', c: [25, -95], base: 15, top: 7, h: 13, tiers: 3, stairs: 's', steps: 50, stairW: 6, serpents: 's', shrine: { w: 9, d: 9, h: 5, door: 's', god: 'earth' } });
 E.push({ t: 'mx_temple', c: [42, 102], base: 26, top: 10, h: 17.6, tiers: 4, stairW: 8, god: 'tezcatlipoca' });
 E.push({ t: 'ballcourt', c: [-50, -65], len: 60, w: 9, h: 4 });
 // the Huey Tzompantli before Huitzilopochtli's side of the temple: its platform north–south, the tower of skulls at its north end
-E.push({ t: 'tzompantli', rect: TZOMPANTLI, h: 4.6 });
+E.push({ t: 'tzompantli', rect: TZOMPANTLI, h: 4.6, mode: 'struct' });
 E.push({ t: 'm_platform', c: [-30, 40], a: 9, h: 2.4, serpents: 'w' });
-E.push({ t: 'eagle_house', rect: [84, -138, 136, -104], seed: 3 });
+E.push({ t: 'eagle_house', rect: EAGLE_HOUSE, seed: 3, mode: 'struct' });
 E.push({ t: 'calmecac', rect: [-140, -140, -84, -104], seed: 5 });
 E.push({ t: 'court_house', rect: [-138, 100, -90, 138], h: 3.8, ring: 8, seed: 6 });
 // ---- the palace of Moctezuma

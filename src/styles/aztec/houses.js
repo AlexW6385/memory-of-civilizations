@@ -11,6 +11,7 @@ import { STYLES } from '../../core/build.js';
 import { box, frustum, lathe, fromTriangles } from '../../core/geom.js';
 import { Kit, carved } from '../maya/meso.js';
 import { Matrix4 } from '../../core/three.js';
+import { Carver, skull as skullCarving } from './carve.js';
 import { hearthKit, ollaKit, storeJarKit, bowlsKit, bedKit, metateKit, waterJarKit, soot, put } from '../maya/household.js';
 import { maguey, nopal, mesoPlants } from '../maya/plants.js';
 import { hollow, pierMids } from './palace.js';
@@ -218,6 +219,14 @@ export function calli(el, ctx) {
       if (patioW < 3.2 || (tw ? r[3] - r[1] : r[2] - r[0]) > (tw ? I[3] - I[1] : I[2] - I[0]) - db - 2) continue;
       rooms.push({ r, door: OPP[f], side: f, ds });
     }
+  }
+  if (el.simple) {
+    // the far form (src/settlements/lod.js): the platform, the rooms as plastered blocks under flat roofs, the compound wall; nothing inside
+    for (const q of rooms) { const hh = H(); B(bag, ST, q.r, P, P + 0.35); B(bag, W, q.r, P + 0.35, P + hh); B(bag, W, [q.r[0] - 0.08, q.r[1] - 0.08, q.r[2] + 0.08, q.r[3] + 0.08], P + hh, P + hh + 0.14); }
+    const t = 0.4, wh = P + (noble ? 2.45 : 1.9);
+    for (const f of SIDES) B(bag, W, band(I, f, 0, t), P, wh);
+    if (noble) { const r = rooms[0].r; B(bag, W, [r[0] + 1, r[1] + 1, r[2] - 1, r[3] - 1], P + 2.7, P + 5.2); }
+    return;
   }
   const tops = rooms.map((q, i) => { const hh = H(); roomThings(ctx, { r: q.r, y: P, h: hh, door: q.door }, i === 0 ? 'hearth' : rand() < 0.65 ? 'sleep' : 'store', rand); return room(bag, col, { r: q.r, y: P, h: hh, door: q.door }); });
   // the compound wall along the rest of the perimeter (the walls on x run full length, those on z
@@ -457,7 +466,16 @@ function emitInstanced(bag, kit, x, y, z, dx, dz) {
   const m = new Matrix4().makeRotationY(Math.atan2(dx, dz)).setPosition(x, y, z);
   for (const [mat, list] of kit.m) for (const g of list) bag.addInstance(mat, g.clone(), m);
 }
-export function tzompantli(el, ctx) {
+export function tzompantli(el, ctx0) {
+  // mode: 'all' (the whole, every skull as the old instanced one), 'struct' (platform, tower wall, posts, poles), 'old' | 'new' (the skulls only: 'new' has
+  // the modelled skull (carve.js) on the outer face of the tower's lower rows and the rack's west face, the others as before; tenochtitlan/sculpt.js)
+  const only = el.mode === 'old' || el.mode === 'new', NOOP = new Proxy({}, { get: () => () => {} });
+  const ctx = { ...ctx0, bag: only ? NOOP : ctx0.bag, col: only ? NOOP : ctx0.col }, lvl = el.mode === 'new' ? 'new' : el.mode === 'struct' ? null : 'old';
+  const skullAt = (x, y, z, dx, dz, fine) => {
+    if (!lvl) return;
+    if (lvl === 'new' && fine) { const C = new Carver({ at: [x, y, z], yaw: Math.atan2(dx, dz) }); skullCarving(C, { seed: Math.round(x * 31 + y * 17 + z * 13), lod: 1 }); C.emit(ctx0.bag); }
+    else emitInstanced(ctx0.bag, sk, x, y, z, dx, dz);
+  };
   const { bag, col } = ctx, [x0, z0, x1, z1] = el.rect, P = 0.7, xc = (x0 + x1) / 2, Hh = el.h ?? 4.6;
   bag.add(W, frustum(el.rect, -0.2, P, 0.12, 0.12, 0.12, 0.12)); col.rect(el.rect, 0, P - 0.25); col.floor([x0 + 0.12, z0 + 0.12, x1 - 0.12, z1 - 0.12], P);
   B(bag, 'stucco_pale', [x0 + 0.14, z0 + 0.14, x1 - 0.14, z1 - 0.14], P, P + 0.02);
@@ -474,10 +492,10 @@ export function tzompantli(el, ctx) {
     const y = yt + 0.1 + r * 0.19;
     for (const [R0, out] of [[Ro - 0.07, 1], [Ri + 0.07, -1]]) {
       const n = Math.floor(2 * Math.PI * R0 / 0.2), off = (r % 2) * 0.5;
-      for (let i = 0; i < n; i++) { const a = (i + off) * 2 * Math.PI / n, dx = Math.cos(a), dz = Math.sin(a); emitInstanced(bag, sk, tc[0] + dx * (R0 - out * 0.075), y, tc[1] + dz * (R0 - out * 0.075), dx * out, dz * out); }
+      for (let i = 0; i < n; i++) { const a = (i + off) * 2 * Math.PI / n, dx = Math.cos(a), dz = Math.sin(a); skullAt(tc[0] + dx * (R0 - out * 0.075), y, tc[1] + dz * (R0 - out * 0.075), dx * out, dz * out, out === 1 && r < 5); }
     }
   }
-  for (let i = 0; i < 26; i++) { const a = i * 2 * Math.PI / 26, R0 = (Ri + Ro) / 2 + 0.25 * Math.sin(i * 2.3); emitInstanced(bag, sk, tc[0] + Math.cos(a) * R0, yt + th + 0.08, tc[1] + Math.sin(a) * R0, Math.cos(a), Math.sin(a)); }
+  for (let i = 0; i < 26; i++) { const a = i * 2 * Math.PI / 26, R0 = (Ri + Ro) / 2 + 0.25 * Math.sin(i * 2.3); skullAt(tc[0] + Math.cos(a) * R0, yt + th + 0.08, tc[1] + Math.sin(a) * R0, Math.cos(a), Math.sin(a), false); }
   // the rack: rows of posts 80 cm apart along the platform, the poles between them, the skulls on the poles
   const ra = tc[1] + Ro + 1.6, rb = z1 - 1.2, span = 2.4, nseg = Math.max(1, Math.round((rb - ra) / span)), lv = [1.35, 1.9, 2.45, 3.0, 3.55];
   for (const x of [xc - 0.8, xc, xc + 0.8]) {
@@ -489,7 +507,7 @@ export function tzompantli(el, ctx) {
       for (let i = 0; i < n; i++) {
         const z = ra + (i + 0.5) * (rb - ra) / n;
         if (Math.abs(((z - ra) / ((rb - ra) / nseg)) % 1 - 0) < 0.06 || Math.abs(((z - ra) / ((rb - ra) / nseg)) % 1 - 1) < 0.06) continue;      // clear of the posts
-        emitInstanced(bag, sk, x, P + y - 0.01, z, x < xc ? -1 : x > xc ? 1 : (i % 2 ? 1 : -1), 0);
+        skullAt(x, P + y - 0.01, z, x < xc ? -1 : x > xc ? 1 : (i % 2 ? 1 : -1), 0, x < xc && y < 2);
       }
     }
   }
