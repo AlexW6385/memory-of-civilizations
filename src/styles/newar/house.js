@@ -4,18 +4,23 @@
 // on carved struts. Built in the house's own frame (lx along the facade, lz into the house from it) and put on its lot.
 // `open`: the ground storey open as a shop-front room, furnished (a rest of the dossier's §4.1).
 
-import { box, lathe, rod } from '../../core/geom.js';
+import { box, lathe, rod, fromTriangles } from '../../core/geom.js';
 import { pot } from './pottery.js';
+import { upperFloors, mergeGeos } from './upstairs.js';
 
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const bx = (x0, y0, z0, x1, y1, z1) => box(Math.min(x0, x1), Math.min(y0, y1), Math.min(z0, z1), Math.max(x0, x1), Math.max(y0, y1), Math.max(z0, z1));
 const HS = [2.9, 2.4, 2.25, 2.1];
+// the materials whose pieces of the walked floors are gathered into one piece each (the materials the town's houses already draw as large pieces; the plan's draws do not rise)
+const GATHER = new Set(['wood_ochre', 'wood_dark', 'wood_painted', 'timber', 'mud_plaster', 'brick', 'brick_baked', 'brick_grey', 'wicker', 'sacking', 'thatch', 'rope_fibre', 'terracotta', 'pottery_dark', 'cloth_red', 'cloth_ochre', 'cloth_green', 'cloth_maroon', 'cloth_black', 'gilt_bronze']);
 
 /** The storeys' heights of a house of n storeys. */
 export const houseHeight = (n) => HS.slice(0, n).reduce((a, b) => a + b, 0);
 
 export function houseParts(el, ctx, { hipRoof }) {
-  const { bag, col, lights } = ctx;
+  const { col, lights } = ctx, realBag = ctx.bag, acc = new Map();
+  let cap = false;                                                                      // while set, the walked floors' pieces are gathered: one piece to a material, one draw
+  const bag = { add: (m, g) => { if (cap && GATHER.has(m)) (acc.get(m) || acc.set(m, []).get(m)).push(g); else realBag.add(m, g); } };
   const [x0, z0, x1, z1] = el.rect, f = el.front, rand = rng(el.seed || 1), det = el.detail ?? 2, n = el.n ?? 3;
   const ns = f === 'n' || f === 's', W = ns ? x1 - x0 : z1 - z0, D = ns ? z1 - z0 : x1 - x0;
   const toW = (lx, lz) => (f === 's' ? [x0 + lx, z1 - lz] : f === 'n' ? [x1 - lx, z0 + lz] : f === 'e' ? [x1 - lz, z1 - lx] : [x0 + lz, z0 + lx]);
@@ -25,7 +30,11 @@ export function houseParts(el, ctx, { hipRoof }) {
   const Y = [0]; for (let i = 0; i < n; i++) Y.push(Y[i] + HS[i]);
   const H = Y[n], open = !!el.open;
   const home = open && !!el.door;                                                          // a dwelling's ground floor (chidi), entered by a low door (layout.js homes)
-  const up = open && (!!el.light || !!el.upper) && n >= 2 && (el.trade || 'home') !== 'curd';       // the stair leads up to a furnished first floor (the lit shop-houses)
+  const up = open && (!!el.light || !!el.upper) && n >= 2 && (el.trade || 'home') !== 'curd';
+  const fl = up && !!el.floors && n >= 3;                                            // the floors above are walked: rooms, ladder-stairs, real windows (upstairs.js)
+  const ic = fl ? (n >= 4 ? 2 : 1) : -1;                                              // the living floor (chvata)
+  const wins = fl ? Array.from({ length: n }, () => []) : null, seat = { x0: 0, x1: 0 };
+  let recFloor = -1, doorWin = null;       // the stair leads up to a furnished first floor (the lit shop-houses)
   // the brick of this house: mostly the red, some darker-baked, an old one greyed [inferred]; the plan's own door place and kinds (layout.js lots())
   const wm = el.wall ?? ['brick', 'brick', 'brick', 'brick_baked', 'brick', 'brick_grey'][Math.floor(rand() * 6)];
   const damp = el.damp ?? rand();
@@ -39,9 +48,12 @@ export function houseParts(el, ctx, { hipRoof }) {
     B(0, 0, D - T, W, H, D, wm); RC(0, 0, D - T, W, h0, D);
     B(0, 0, 0, T, H, D, wm); RC(0, 0, 0, T, h0, D);
     B(W - T, 0, 0, W, H, D, wm); RC(W - T, 0, 0, W, h0, D);
-    B(0, 0, 0, ox, H, T, wm); RC(0, 0, 0, ox, h0, T);
-    B(ox + OW, 0, 0, W, H, T, wm); RC(ox + OW, 0, 0, W, h0, T);
-    B(ox, dh, 0, ox + OW, H, T, wm);                                                // over the opening
+    if (fl) { RC(0, 0, 0, ox, h0, T); RC(ox + OW, 0, 0, W, h0, T); }
+    else {
+      B(0, 0, 0, ox, H, T, wm); RC(0, 0, 0, ox, h0, T);
+      B(ox + OW, 0, 0, W, H, T, wm); RC(ox + OW, 0, 0, W, h0, T);
+      B(ox, dh, 0, ox + OW, H, T, wm);                                                // over the opening
+    }
     B(ox - 0.02, dh - 0.3, -0.14, ox + OW + 0.02, dh, T + 0.02, 'timber');                      // its lintel beam
     for (const x of [ox - 0.12, ox + OW - 0.1]) { B(x, 0.03, -0.14, x + 0.22, dh, 0.2, 'timber'); RC(x, 0, -0.14, x + 0.22, dh, 0.2); }
     // the floor, the ceiling of joists and planks (the upper storeys solid above it)
@@ -50,7 +62,7 @@ export function houseParts(el, ctx, { hipRoof }) {
     B(ox, 0, -0.5, ox + OW, 0.1, T, 'sandstone'); { const a = toW(ox, -0.5), b = toW(ox + OW, T); col.floor([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])], 0.1); }
     for (let x = T + 0.25; x < W - T; x += 0.55) RODL([x, 2.5, T + 0.02], [x, 2.5, D - T - 0.02], 0.09, 'timber', 5);
     if (!up) B(T, 2.58, T, W - T, 2.9, D - T, 'wood_ochre');
-    else upper();
+    else if (!fl) upper();
     for (const x of [W * 0.3, W * 0.7]) { B(x - 0.13, 0.1, D * 0.5 - 0.13, x + 0.13, 2.58, D * 0.5 + 0.13, 'timber'); B(x - 0.3, 2.3, D * 0.5 - 0.3, x + 0.3, 2.58, D * 0.5 + 0.3, 'wood_painted'); const c = toW(x, D * 0.5); col.circle(c[0], c[1], 0.17, 0, 2.6); }
     furnish(el.trade || 'home');
   }
@@ -92,28 +104,38 @@ export function houseParts(el, ctx, { hipRoof }) {
   }
   // the carved windows of the upper storeys
   for (let i = 1; i < n; i++) {
-    const y0 = Y[i], attic = i === n - 1 && n > 2, cx = W / 2 + (rand() - 0.5) * (W > 8 ? 0.8 : 0);
+    const y0 = Y[i], attic = i === n - 1 && n > 2, cx = W / 2 + (rand() - 0.5) * (W > 8 && !fl ? 0.8 : 0);
+    recFloor = fl ? i : -1;
     if (attic) {
       const k = Math.max(2, Math.floor((W - 1) / 1.7)), step = (W - 1) / k;
       for (let j = 0; j < k; j++) lattice(0.5 + step * (j + 0.5) - 0.3, y0 + 0.6, 0.6, 0.75, det);
       continue;
     }
     if (W >= 6.5) {
-      const wS = 0.85, wC = 1.05, g = 0.16, tw = wS * 2 + wC + g * 2, lx0 = cx - tw / 2, sill = y0 + 0.5;
+      const wS = 0.85, wC = 1.05, g = 0.16, tw = wS * 2 + wC + g * 2, lx0 = cx - tw / 2, sill = y0 + (i === ic ? 0.42 : 0.5), bal = fl && i === ic && !!el.balcony;
       // the projecting bay (sajhyah) of the better houses: the middle window stands out 0.6 m on brackets under its own small tiled roof [stated: Newar bay windows]
-      if (i === 1 && n > 2 && ((el.seed || 1) * 2654435761 >>> 0) % 100 < 38) {
+      if (i === 1 && n > 2 && i !== ic && ((el.seed || 1) * 2654435761 >>> 0) % 100 < 38) {
         lattice(lx0, sill, wS, 1.2, det); lattice(lx0 + wS + g + wC + g, sill, wS, 1.2, det);
         bay(lx0 + wS + g + wC / 2, sill, 1.7, 1.5);
-      } else { lattice(lx0, sill, wS, 1.2, det); lattice(lx0 + wS + g, sill - 0.05, wC, 1.45, det); lattice(lx0 + wS + g + wC + g, sill, wS, 1.2, det); }
-      B(lx0 - 0.12, sill - 0.12, -0.2, lx0 + tw + 0.12, sill - 0.02, 0.0, 'timber');            // the carved sill
+      } else {
+        const hS = i === ic ? 1.62 : 1.2, hC = i === ic ? 1.7 : 1.45, doorL = bal && n < 4;
+        if (doorL) { lattice(lx0, y0 + 0.14, wS, 1.9, det); doorWin = [lx0, lx0 + wS]; } else lattice(lx0, sill, wS, hS, det);
+        if (bal && !doorL) { lattice(lx0 + wS + g, y0 + 0.14, wC, 1.9, det); doorWin = [lx0 + wS + g, lx0 + wS + g + wC]; } else lattice(lx0 + wS + g, sill - 0.05, wC, hC, det);
+        lattice(lx0 + wS + g + wC + g, sill, wS, hS, det);
+      }
+      if (i === ic && fl) { seat.x0 = lx0; seat.x1 = lx0 + tw; }
+      if (bal && n < 4) B(lx0 + wS + g * 0.5, sill - 0.12, -0.2, lx0 + tw + 0.12, sill - 0.02, 0.0, 'timber');
+      else if (bal) { B(lx0 - 0.12, sill - 0.12, -0.2, lx0 + wS + g * 0.5, sill - 0.02, 0.0, 'timber'); B(lx0 + wS + wC + g * 1.5, sill - 0.12, -0.2, lx0 + tw + 0.12, sill - 0.02, 0.0, 'timber'); }
+      else B(lx0 - 0.12, sill - 0.12, -0.2, lx0 + tw + 0.12, sill - 0.02, 0.0, 'timber');            // the carved sill
       if (det > 1) B(lx0 - 0.12, sill + 1.5, -0.16, lx0 + tw + 0.12, sill + 1.64, 0.0, 'timber');  // the cornice
       if (det > 1 && rand() < 0.4) for (let k = 0; k < 3; k++) B(lx0 + 0.3 + k * 0.9, sill - 0.7, -0.14, lx0 + 0.42 + k * 0.9, sill - 0.14, -0.04, rand() < 0.5 ? 'cloth_red' : 'cloth_ochre');   // chillies and maize hung to dry
     } else {
       lattice(cx - 0.9, y0 + 0.55, 0.8, 1.15, det); lattice(cx + 0.1, y0 + 0.55, 0.8, 1.15, det);
     }
   }
+  recFloor = -1;
   // a balcony along the third storey of the taller houses: a plank slab on struts, a railing of turned balusters, a cloth thrown over it [inferred]
-  if (n > 3 && W >= 6.5 && ((el.seed || 1) * 69069 >>> 0) % 100 < 30) {
+  if (!fl && n > 3 && W >= 6.5 && ((el.seed || 1) * 69069 >>> 0) % 100 < 30) {
     const by = Y[2], x0b = 0.5, x1b = W - 0.5;
     B(x0b, by + 0.02, -0.65, x1b, by + 0.14, 0.0, 'wood_dark');
     for (let x = x0b + 0.3; x < x1b - 0.2; x += 1.4) RODL([x, by - 0.7, -0.02], [x, by + 0.02, -0.6], 0.045, 'wood_painted');
@@ -121,6 +143,38 @@ export function houseParts(el, ctx, { hipRoof }) {
     for (let x = x0b; x <= x1b; x += 0.32) B(x, by + 0.2, -0.655, x + 0.04, by + 1.0, -0.615, 'wood_dark');
     B(x0b, by + 0.14, -0.67, x0b + 0.05, by + 1.07, 0.0, 'wood_dark'); B(x1b - 0.05, by + 0.14, -0.67, x1b, by + 1.07, 0.0, 'wood_dark');
     if (((el.seed || 1) * 7) % 3 === 0) B(x0b + 1.0, by + 0.45, -0.7, x0b + 2.1, by + 1.05, -0.64, ['cloth_red', 'cloth_indigo', 'cloth_ochre'][(el.seed || 0) % 3]);
+  }
+  if (fl) {
+    // the front wall of the walked house, cut by the windows (real reveals) and the door, and the floors above
+    cap = true;
+    const wallBand = (y0, y1, ws) => {
+      const xs = [0, W, ...ws.flatMap((w) => [w[0], w[1]])].sort((a, b) => a - b);
+      for (let q = 0; q + 1 < xs.length; q++) {
+        const a = xs[q], b = xs[q + 1]; if (b - a < 0.01) continue;
+        const w = ws.find((u) => u[0] <= a + 0.001 && u[1] >= b - 0.001);
+        if (!w) B(a, y0, 0, b, y1, T, wm); else { if (w[2] > y0 + 0.01) B(a, y0, 0, b, w[2], T, wm); if (w[3] < y1 - 0.01) B(a, w[3], 0, b, y1, T, wm); }
+      }
+    };
+    B(0, 0, 0, ox, Y[1], T, wm); B(ox + OW, 0, 0, W, Y[1], T, wm); B(ox, dh, 0, ox + OW, Y[1], T, wm);
+    for (let i = 1; i < n; i++) wallBand(Y[i], Y[i + 1], wins[i]);
+    cap = false; for (const [m, list] of acc) realBag.add(m, mergeGeos(list)); acc.clear();
+    const dm = (a, b, c, d) => { const p = toW(a, b), q = toW(c, d); return [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; };
+    for (let i = 1; i < n; i++) {
+      const ws = wins[i], band = [Y[i], Y[i + 1]];
+      const xs = [0, W, ...ws.flatMap((w) => [w[0], w[1]])].sort((a, b) => a - b);
+      for (let q = 0; q + 1 < xs.length; q++) {
+        const a = xs[q], b = xs[q + 1]; if (b - a < 0.01) continue;
+        const w = ws.find((u) => u[0] <= a + 0.001 && u[1] >= b - 0.001);
+        const lowOpen = i === ic && !!w;                                     // the long window: the seat (a floor) and the head room over it, no wall collider
+        if (!w) col.rect(dm(a, 0, b, T), band[0], band[1]);
+        else { if (!lowOpen) col.rect(dm(a, 0, b, T), band[0], w[2]); if (!lowOpen) col.rect(dm(a, 0, b, T), w[3], band[1]); }
+      }
+      if (i === ic) {
+        // the lattice of the windows stops the walker at the street (the window is seen through, not left by); the balcony door is open
+        for (const w of ws) if (!doorWin || w[0] !== doorWin[0]) col.rect(dm(w[0], -0.1, w[1], 0.04), Y[i] + 0.3, Y[i] + 2.1);
+      }
+    }
+    k_up();
   }
   // ── weathering (the monsoon's damp, the plaster's loss) and the eye-level dressing of the front ──
   if (det > 0) {
@@ -215,6 +269,32 @@ export function houseParts(el, ctx, { hipRoof }) {
     if (det > 1) B(x - 0.04, H - 0.85, -0.5, x + 0.04, H - 0.35, -0.42, 'gilt_bronze');
   }
 
+  function k_up() {
+    const dirUp = { s: 'n', n: 's', e: 'w', w: 'e' }[f];
+    const bal = !!el.balcony;
+    cap = true;
+    const res = upperFloors({ bag, realBag, col, lights, B, RC, toW, dirUp, W, D, T, Y, n, H, seed: el.seed || 1, trade: el.trade || 'home', ic, wins, seat: seat.x1 > seat.x0 ? seat : null, door: doorWin });
+    if (bal) balcony(Y[ic], doorWin);
+    cap = false;
+    for (const [m, list] of acc) realBag.add(m, mergeGeos(list));
+    acc.clear();
+    return res;
+  }
+  /** The loggia onto the street at the living floor: a plank floor on struts, a rail of vertical slats (no top face), stepped onto from the long window's middle bay. */
+  function balcony(by, door) {
+    const x0b = 0.5, x1b = W - 0.5, tri = [];
+    B(x0b, by - 0.12, -0.65, x1b, by + 0.1, 0.0, 'wood_dark');
+    for (let x = x0b + 0.3; x < x1b - 0.2; x += 1.4) RODL([x, by - 0.9, -0.02], [x, by - 0.12, -0.6], 0.045, 'wood_painted');
+    const sh = (a, b, c, d, y0, y1) => { const p = toW(a, b), q = toW(c, d); tri.push(p[0], y0, p[1], q[0], y0, q[1], q[0], y1, q[1], p[0], y0, p[1], q[0], y1, q[1], p[0], y1, p[1], p[0], y0, p[1], q[0], y1, q[1], q[0], y0, q[1], p[0], y0, p[1], p[0], y1, p[1], q[0], y1, q[1]); };
+    for (const [y0, y1] of [[0.12, 0.2], [0.55, 0.62], [1.0, 1.08]]) { sh(x0b, -0.65, x1b, -0.65, by + y0, by + y1); sh(x0b, -0.65, x0b, 0, by + y0, by + y1); sh(x1b, -0.65, x1b, 0, by + y0, by + y1); }
+    for (let x = x0b; x <= x1b + 0.01; x += 0.34) sh(x, -0.65, x, -0.65, by + 0.12, by + 1.08);
+    for (const x of [x0b, x1b]) for (const z of [-0.65, -0.01]) { sh(x - 0.03, z, x + 0.03, z, by + 0.1, by + 1.1); sh(x, z - 0.03, x, z + 0.03, by + 0.1, by + 1.1); }
+    bag.add('wood_dark', fromTriangles(tri));
+    col.floor(dmr(x0b, -0.65, x1b, 0.0), by + 0.1); col.floor(dmr(door[0], 0, door[1], T), by + 0.1);
+    col.rect(dmr(x0b, -0.69, x1b, -0.61), by + 0.1, by + 1.1); col.rect(dmr(x0b - 0.04, -0.69, x0b + 0.04, 0), by + 0.1, by + 1.1); col.rect(dmr(x1b - 0.04, -0.69, x1b + 0.04, 0), by + 0.1, by + 1.1);
+  }
+  function dmr(a, b, c, d) { const p = toW(a, b), q = toW(c, d); return [Math.min(p[0], q[0]), Math.min(p[1], q[1]), Math.max(p[0], q[0]), Math.max(p[1], q[1])]; }
+
   /** The first floor of a lit shop-house: a plank floor round the stair's well, the walls closed to a man's height, a window seat under the lit lattice, mats, chests, a shrine, a lamp. */
   function upper() {
     const y = Y[1], yc = Y[2], sx0 = W - T - 3.4, sx1 = W - T - 2.5, sz1 = 4.5, fl = (a, b, c, d, y0, y1, m) => { B(a, y0, b, c, y1, d, m); };
@@ -259,7 +339,7 @@ export function houseParts(el, ctx, { hipRoof }) {
 
   /** A lattice window at (lx, y) of width w and height h: the dark recess, a carved frame, the screen of bars. */
   function lattice(lx, y, w, h, d) {
-    B(lx, y, -0.05, lx + w, y + h, 0.0, 'opening');
+    if (recFloor > 0) wins[recFloor].push([lx, lx + w, y, y + h]); else B(lx, y, -0.05, lx + w, y + h, 0.0, 'opening');
     const t = 0.09;
     B(lx - t, y - t, -0.11, lx + w + t, y, 0.02, 'wood_dark'); B(lx - t, y + h, -0.11, lx + w + t, y + h + t, 0.02, 'wood_dark');
     B(lx - t, y, -0.11, lx, y + h, 0.02, 'wood_dark'); B(lx + w, y, -0.11, lx + w + t, y + h, 0.02, 'wood_dark');
