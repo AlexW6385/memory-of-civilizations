@@ -182,6 +182,15 @@ Sources added:
 - **Chortens.** Six whitewashed chortens (three-tier plinth, vase with a niche, red-banded harmika, thirteen rings, gilt parasol, crescent and jewel) in a row on the open ground below the palace, about 4-7 m high [inferred: placing; Pargo Kaling not used].
 - Budget: arrival main draws 445 -> 444, main triangles 2.92 M -> 2.97 M.
 
+## 18. Upstairs in the houses (round 6)
+
+Gap found: the courtyard houses had upper rooms, but the steep ladder to the gallery could not be climbed (its collider was 0.8 m wide and the gallery's end post and rail stood in it), and nothing above the gallery was open.
+
+- **The way up** [stated: the gallery giving access to the upper rooms, §12; the steep ladder, §16]: in every house the ladder's collider is now 1.3 m across with the end post and rail left out of it. [inferred: dimensions]
+- **Twelve houses opened** (`upstairs.js`): ten in Shöl along the wide lane at the arrival (the row north of it and the rows behind and south of it, the merchant's house with a third storey among them) and two farmsteads by the south road. In each: the upper rooms' windows cut through the wall as open reveals (lattice only) onto the gallery, the court and the gate; the main room gets a bed with bedding and a painted chest [stated: the main room serves as "bedroom", with "a stove, a table, and a bed", §16]; a steep stair up the court's west wall to the gallery's roof and the flat roof (the roof as store, §15) [inferred]; a weaving room in the side range nearer the street, entered from the gallery's end, with a ground loom under a window onto the lane or street, fleece, yarn drying, a chest [inferred: household weaving; the room's size and place]; in houses with a third storey, that roof room is a sleeping loft with its own door onto the gallery roof and a west window [inferred].
+- **Proof**: `walks` in plan.js (36 routes): lane, gate, court, ladder, gallery, main room; the weaving room; the roof stair, the roof and the roof room.
+- Still shut: the shops and tea houses (single storey, §14), the other ~175 houses' side ranges and roofs, the printing house's roof.
+
 ## Sources
 
 - [Deyangshar — Wikipedia](https://en.wikipedia.org/wiki/Deyangshar)
