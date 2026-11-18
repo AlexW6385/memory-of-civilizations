@@ -3,11 +3,13 @@
 // wind. Faded out indoors (rooms that are not open to the sky) and when it is not raining.
 // Snow and blowing dust (ENV.snow, ENV.dust: the set pieces of src/planet/setpieces.js) are a
 // second such cloud of small round flakes: snow drifting down and swaying, dust motes driven
-// along the wind near the ground. One draw each, drawn only while it falls.
+// along the wind near the ground. One draw each, drawn only while it falls. And the lightning's
+// bolt in a thunderstorm (climate.js): one draw, only for the tenths of a second it shows.
 
 import * as THREE from 'three/webgpu';
-import { attribute, uniform, vec2, vec3, float, fract, time, cameraPosition, normalize, cross, mix, sin, length, smoothstep, max } from 'three/tsl';
+import { attribute, uniform, vec2, vec3, float, fract, time, cameraPosition, normalize, cross, mix, sin, length, smoothstep, max, exp } from 'three/tsl';
 import { ENV } from './env.js';
+import { PLANET_RADIUS } from '../planet/sites.js';
 
 const N = 7000, BOX = [44, 22, 44], SPEED = 9, LEN = 0.55, WIDTH = 0.012;
 
@@ -52,6 +54,7 @@ export class Rain {
     scene.add(this.mesh);
     this.level = 0;
     this.flakes = new Flakes(scene);
+    this.bolt = new Bolt(scene);
   }
 
   /** rain: 0…1 from the climate; outdoors: whether the viewer is under the open sky. */
@@ -61,6 +64,71 @@ export class Rain {
     this.amount.value = this.level;
     this.mesh.visible = this.level > 0.01;
     this.flakes.update(dt, outdoors);
+    this.bolt.update();
+  }
+}
+
+// The bolt: VARIANTS forked channels built once (hashes, no Math.random), each a strip of quads in a
+// flat frame (x across, y up, in units of its height) set upright at ENV.boltDist toward
+// ENV.flashDir, facing the viewer; its width grows with the distance (a few pixels wide at any),
+// a white core in a violet glow (added light), fading into the cloud at its top and into the haze.
+const VARIANTS = 4, MAIN = 26, FORKS = 3, FORK = 9, QUADS = MAIN + FORKS * FORK, BOLT_H = 1300;
+class Bolt {
+  constructor(scene) {
+    const pos = [], off = [], wt = [], index = [];
+    let h = 0x9e3779b9;
+    const rnd = () => { h = Math.imul(h ^ (h >>> 15), 2246822519); h = Math.imul(h ^ (h >>> 13), 3266489917); return ((h ^= h >>> 16) >>> 0) / 4294967296; };
+    const quad = (a, b, wa, wb) => {
+      const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l, i = pos.length / 3;
+      for (const [p, w, s] of [[a, wa, -1], [a, wa, 1], [b, wb, -1], [b, wb, 1]]) { pos.push(p[0], p[1], 0); off.push(nx * s, ny * s); wt.push(w, s); }
+      index.push(i, i + 1, i + 3, i, i + 3, i + 2);
+    };
+    for (let v = 0; v < VARIANTS; v++) {
+      const main = [[0, 1]];
+      for (let k = 1; k <= MAIN; k++) {
+        const [x] = main[k - 1], kink = rnd() < 0.18 ? 3 : 1;
+        main.push([x + (rnd() - 0.5) * 0.05 * kink, 1 - k / MAIN + (rnd() - 0.5) * 0.012]);
+      }
+      main[MAIN][1] = 0;
+      for (let k = 0; k < MAIN; k++) quad(main[k], main[k + 1], 1, 1);
+      for (let f = 0; f < FORKS; f++) {
+        let p = main[3 + Math.floor(rnd() * 14)];
+        const side = rnd() < 0.5 ? -1 : 1, len = 0.02 + rnd() * 0.02;
+        for (let k = 0; k < FORK; k++) {
+          const q = [p[0] + side * len * (0.4 + rnd()), p[1] - len * (0.6 + rnd())];
+          quad(p, q, 0.55 * (1 - k / FORK), 0.55 * (1 - (k + 1) / FORK));
+          p = q;
+        }
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute('off', new THREE.Float32BufferAttribute(off, 2));
+    g.setAttribute('wt', new THREE.Float32BufferAttribute(wt, 2));
+    g.setIndex(index);
+    const m = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });
+    const lp = attribute('position', 'vec3'), of = attribute('off', 'vec2'), w = attribute('wt', 'vec2');
+    const D = ENV.boltDist, dir = vec3(ENV.flashDir.x, 0, ENV.flashDir.z), right = vec3(dir.z.negate(), 0, dir.x);
+    // its foot a little below the sea round, beyond the planet's curve (the ground in front hides it)
+    const foot = vec3(cameraPosition.x, cameraPosition.y.sub(ENV.camAlt).sub(D.mul(D).div(2 * PLANET_RADIUS)).sub(30), cameraPosition.z).add(dir.mul(D));
+    const width = D.mul(0.008).mul(w.x.mul(0.6).add(0.4));
+    m.positionNode = foot.add(right.mul(lp.x.mul(BOLT_H).add(of.x.mul(width)))).add(vec3(0, lp.y.mul(BOLT_H).add(of.y.mul(width)), 0));
+    const core = exp(w.y.mul(w.y).mul(-9)).mul(0.85).add(0.15);
+    const fade = float(1).sub(smoothstep(0.82, 1.0, lp.y)).mul(exp(ENV.fogDensity.mul(D).mul(-0.25)));
+    m.colorNode = mix(vec3(0.55, 0.5, 1.0), vec3(1.0, 0.98, 1.0), core).mul(ENV.bolt.mul(w.x).mul(fade).mul(core).mul(40));
+    m.opacityNode = float(1);
+    m.fog = false;
+    this.mesh = new THREE.Mesh(g, m);
+    this.mesh.frustumCulled = false;
+    this.mesh.renderOrder = 9;
+    this.mesh.visible = false;
+    this.n = QUADS * 6; this.variant = 0;
+    scene.add(this.mesh);
+  }
+  update() {
+    const on = ENV.bolt.value > 0.01;
+    if (on && !this.mesh.visible) { this.variant = (this.variant + 1) % VARIANTS; this.mesh.geometry.setDrawRange(this.variant * this.n, this.n); }
+    this.mesh.visible = on;
   }
 }
 

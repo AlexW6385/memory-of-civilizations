@@ -12,8 +12,10 @@
 //   fall   ×    the haze's height falloff: > 1 keeps it low, lying on the ground and the water (mist)
 //   hours  [h0, h1]  the local hours it favours (×3 within, ×0.2 outside; a morning mist burns off)
 //   months [m…]  the months (1–12) it belongs to: ×1.5 in them, ×0.6 outside (never ruled out)
+//   cirrus, deck 0…1  the high streaks and the low deck of its sky (else from clouds, rain, snow: climate.js)
+//   storm  0…1  how likely a thunderstorm breaks in it (else from a heavy shower's rain and the climate's damp)
 //
-// Seasons: the sun keeps its fixed date (the equinox, §4.3), but the open country follows the
+// Seasons: the sun's declination (src/engine/climate.js) and the open country follow the
 // calendar of the visit (or ?season=winter|spring|summer|autumn): the snow line comes down in a
 // hemisphere's winter, the grass yellows and the broadleaf forest turns in autumn and stands bare
 // in winter, by latitude (none in the tropics). The settlements' own ground keeps its chosen moment.
@@ -23,10 +25,10 @@ const query = () => (typeof location !== 'undefined' ? new URLSearchParams(locat
 /** Set pieces by settlement id: `add` states to its cycle, `tweak` existing ones by id. */
 export const SET_PIECES = {
   // the south-west monsoon (May–October): a heavy downpour most days, about two hours round noon,
-  // the sky clearing after
+  // often with thunder, the sky clearing after
   angkor: {
     add: [
-      { id: 'monsoon', weight: 2.4, clouds: 1, cloudDensity: 0.95, sun: 0.22, fog: 2.8, rain: 1.25, windy: 0.7, fall: 1.4,
+      { id: 'monsoon', weight: 2.4, clouds: 1, cloudDensity: 0.95, sun: 0.22, fog: 2.8, rain: 1.25, windy: 0.7, fall: 1.4, storm: 1,
         fogColor: [0.6, 0.64, 0.62], hours: [10, 16.5], months: [5, 6, 7, 8, 9, 10] },
     ],
   },
@@ -91,7 +93,7 @@ export function withSetPieces(id, climate) {
 }
 
 /**
- * The season now: the month (1–12) of the visit, or as asked (?season=…), and two numbers for the
+ * The season now: the month (1–12) and day of the year of the visit, or as asked (?season=…), and two numbers for the
  * northern hemisphere (the southern has them negated): winter (1 in mid-January … −1 in mid-July)
  * and autumn (1 in mid-October … −1 in mid-April).
  */
@@ -99,7 +101,7 @@ export function seasonNow(date = new Date()) {
   const asked = { winter: 1, spring: 4, summer: 7, autumn: 10 }[query().get('season')];
   const doy = asked ? (asked - 1) * 30.4 + 15 : (Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) - Date.UTC(date.getUTCFullYear(), 0, 0)) / 864e5;
   const th = 2 * Math.PI * (doy - 15) / 365.25;
-  return { month: asked || date.getUTCMonth() + 1, winter: Math.cos(th), autumn: -Math.sin(th) };
+  return { month: asked || date.getUTCMonth() + 1, doy, winter: Math.cos(th), autumn: -Math.sin(th) };
 }
 
 /** A state's weight at a local hour and month. */
