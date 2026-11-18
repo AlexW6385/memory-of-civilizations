@@ -7,6 +7,9 @@ import '../../styles/roman/ways.js';
 import '../../styles/roman/houses.js';
 import { DOMUS, LITTER, lifePlan } from './life.js';
 import './flats.js';
+import { furnishElement } from './upper.js';
+import { rowFurnElement } from './upper-rows.js';
+import { cauponaFurn, fullonicaFurn } from './upper-inns.js';
 /** lodTiles of src/settlements/lod.js with a wider tile (the geometry budget counts plan x material buckets). */
 function tiles160(id, style, elements, { near, R, entrance, T = 160 }) {
   const tiles = new Map();
@@ -20,7 +23,7 @@ function tiles160(id, style, elements, { near, R, entrance, T = 160 }) {
   for (const [k, list] of tiles) {
     const [i, j] = k.split(',').map(Number), center = [i * T + T / 2, j * T + T / 2];
     const base = { style, origin: [0, 0], base: 0, yaw: 0, feature: true, rooms: [], bounds: [-R, -R, R, R], entrance, center };
-    plans.push({ ...base, id: `${id}-${k}`, near, elements: list });
+    plans.push({ ...base, id: `${id}-${k}`, near, elements: list.map((e) => (e.openRow ? { ...e, t: 'taberna_up' } : e)) });
     plans.push({ ...base, id: `${id}-${k}-far`, far: near, elements: list.map((e) => ({ ...e, simple: true })), nocollide: true });
   }
   return plans;
@@ -31,6 +34,13 @@ function shrineLares(w) {
   const zz = w.along !== 'x', side = w.shrine[1], u = w.shrine[0], off = side * (w.half - 0.6);
   const [x, z] = zz ? [w.at[0] + off, w.at[1] + u] : [w.at[0] + u, w.at[1] + off];
   return { t: 'rome_lares', at: [x, z], y: 0, yaw: zz ? (side > 0 ? -Math.PI / 2 : Math.PI / 2) : (side > 0 ? Math.PI : 0) };
+}
+/** The rows nearest the arrival whose flats are opened (src/settlements/rome/upper-rows.js). */
+const OPEN_ROWS = rows().filter((r) => r.front === 's').sort((a, b) => Math.hypot((a.rect[0] + a.rect[2]) / 2, (a.rect[1] + a.rect[3]) / 2 + 150) - Math.hypot((b.rect[0] + b.rect[2]) / 2, (b.rect[1] + b.rect[3]) / 2 + 150)).slice(0, 3);
+/** A small plan with the furnishing of an opened house, shown within 55 m of it. */
+function furnPlan(id, el, near = 18) {
+  const c = [(el.rect[0] + el.rect[2]) / 2, (el.rect[1] + el.rect[3]) / 2];
+  return { id, style: 'rome-site', origin: [0, 0], base: 0, yaw: 0, feature: true, near, center: c, elements: [el], rooms: [], bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -200], facing: 's' } };
 }
 export async function town() {
   // the lot by the street north of the Pantheon holds the atrium house with its thermopolium (§4.4), walked into
@@ -43,12 +53,15 @@ export async function town() {
     const cx = (l.rect[0] + l.rect[2]) / 2, cz = (l.rect[1] + l.rect[3]) / 2, ns = l.rect[3] - l.rect[1] >= 17.5;
     return { t: 'insula_open', rect: l.rect, seed: l.seed, front: ns ? (cz > 0 ? 'n' : 's') : (cx > 0 ? 'w' : 'e') };
   });
+  const dArr = (e) => Math.hypot((e.rect[0] + e.rect[2]) / 2, (e.rect[1] + e.rect[3]) / 2 + 200);
+  const upLots = [...openLots].sort((p, q) => dArr(p) - dArr(q)).slice(0, 3);                    // the three nearest the arrival: their first floors are walked (flats.js, docs §4.16)
+  for (const e of upLots) e.upper = true;
   const openSet = new Set(openLots.map((e) => e.rect));
   free.splice(0, free.length, ...free.filter((l) => !openSet.has(l.rect)));
   const inn = lots().find((l) => same(l.rect, INN)), full = lots().find((l) => same(l.rect, FULLER));
   const R = (r, u0, u1, d0, d1) => [r[0] + u0, r[3] - d1, r[0] + u1, r[3] - d0];                  // the frame of a building with its front on the south
   const houses = { id: 'rome-houses', style: 'roman', origin: [0, 0], base: 0, yaw: 0, feature: true, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -200], facing: 's' },
-    elements: [{ t: 'caupona', rect: inn.rect, front: 's', seed: inn.seed }, { t: 'fullonica', rect: full.rect, front: 's', seed: full.seed }, ...(inn2() ? [{ t: 'caupona', rect: inn2().rect, front: 's', seed: inn2().seed }] : [])],
+    elements: [{ t: 'caupona_up', rect: inn.rect, front: 's', seed: inn.seed }, { t: 'fullonica_up', rect: full.rect, front: 's', seed: full.seed }, ...(inn2() ? [{ t: 'caupona_up', rect: inn2().rect, front: 's', seed: inn2().seed }] : [])],
     rooms: [
       ...(inn2() ? [{ id: 'caupona2-bar', rect: R(inn2().rect, 0.6, 8.4, 0.6, 7.9), y: 0, kind: 'hall', market: false }, { id: 'caupona2-stable', rect: R(inn2().rect, 12.7, 19.4, 0.6, 7.9), y: 0, kind: 'hall', market: false }, { id: 'caupona2-court', rect: R(inn2().rect, 0.6, 17.4, 9.0, 13.6), y: 0, kind: 'hall', market: false }] : []),
       { id: 'caupona-bar', rect: R(inn.rect, 0.6, 8.4, 0.6, 7.9), y: 0, kind: 'hall', market: false },
@@ -89,7 +102,7 @@ export async function town() {
     for (const i of [4, 14, 24, 31]) if (E[i]) ways.push({ t: 'landing', at: [E[i][0], E[i][1]], land: 1, level: -5, w: 4 });
     for (const i of [9, 20]) if (E[i]) ways.push({ t: 'crane', at: [E[i][0] + 5.5, E[i][1]], rot: -Math.PI / 2, y: 0.06 });
     for (const r of quayRows()) ways.push({ t: 'taberna_row', ...r }); }
-  const tiles = tiles160('rome-insulae', 'roman', [...ways, ...free.map((l) => ({ t: 'insula', ...l })), ...rows().map((r) => ({ t: 'taberna_row', ...r, storeys: r.front === 's' && r.seed % 3 === 0 ? 2 : undefined })), ...saeptaRows().map((r) => ({ t: 'taberna_row', ...r })), ...fountains().map((f) => ({ t: 'rome_fountain', ...f })), ...ways.filter((w) => w.shrine).map(shrineLares), ...forum], { near: 270, R: RADIUS, entrance: { at: [0, -200], facing: 's' } });
+  const tiles = tiles160('rome-insulae', 'roman', [...ways, ...free.map((l) => ({ t: 'insula', ...l })), ...rows().map((r) => ({ t: 'taberna_row', ...r, storeys: r.front === 's' && r.seed % 3 === 0 ? 2 : undefined, openRow: OPEN_ROWS.includes(r) })), ...saeptaRows().map((r) => ({ t: 'taberna_row', ...r })), ...fountains().map((f) => ({ t: 'rome_fountain', ...f })), ...ways.filter((w) => w.shrine).map(shrineLares), ...forum], { near: 270, R: RADIUS, entrance: { at: [0, -200], facing: 's' } });
   const [x0, z0, x1, z1] = DOMUS;
   return [...tiles, houses,
     site('rome-domus', [{ t: 'domus', rect: DOMUS, y: 0 }, { t: 'litter', at: LITTER.at, y: 0, rot: LITTER.rot }], [
@@ -99,7 +112,11 @@ export async function town() {
     { id: 'rome-street', style: 'roman', origin: [0, 0], base: 0, yaw: 0, feature: true, bounds: [-RADIUS, -RADIUS, RADIUS, RADIUS], entrance: { at: [0, -200], facing: 's' },
       elements: [{ t: 'pistrinum', rect: PISTRINUM, front: 's', y: 0 }, { t: 'latrine', rect: LATRINE, front: 's', y: 0 }],
       rooms: [{ id: 'pistrinum', rect: [PISTRINUM[0] + 0.5, PISTRINUM[1] + 0.5, PISTRINUM[2] - 0.5, PISTRINUM[3] - 0.5], y: 0, kind: 'hall', market: false }, { id: 'latrine', rect: [LATRINE[0] + 0.5, LATRINE[1] + 0.5, LATRINE[2] - 0.5, LATRINE[3] - 0.5], y: 0, kind: 'hall', market: false }] },
-    site('rome-flats', openLots), lifePlan(), awningPlan()];
+    site('rome-flats', openLots), lifePlan(), awningPlan(),
+    ...upLots.map((e, i) => furnPlan(`rome-up-flat-${i}`, { t: 'up_cells_flat', rect: e.rect, front: e.front, seed: e.seed })),
+    furnPlan('rome-up-inn', { ...cauponaFurn({ rect: inn.rect, front: 's' }), seed: inn.seed }), furnPlan('rome-up-fuller', { ...fullonicaFurn({ rect: full.rect, front: 's' }), seed: full.seed }),
+    ...(inn2() ? [furnPlan('rome-up-inn2', { ...cauponaFurn({ rect: inn2().rect, front: 's' }), seed: inn2().seed })] : []),
+    ...OPEN_ROWS.map((r, i) => furnPlan(`rome-up-row-${i}`, { ...rowFurnElement({ ...r, storeys: r.front === 's' && r.seed % 3 === 0 ? 2 : 3 }), seed: r.seed }, 14))];
 }
 
 /** The cloth awnings over the doors of the tabernae along the street before the forecourt and the Via Lata (every other shop, in the colours of the cloth dyers). */

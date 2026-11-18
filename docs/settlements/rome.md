@@ -148,6 +148,14 @@ As for the Pantheon (`docs/buildings/pantheon.md` §9).
 - **Fountains:** the lacus' flat mask is replaced by a modelled lion's mask (mane, brow, nose, mouth); the round basin's jet by a boy holding a dolphin. The crossroads shrines carry two bronze lares each on the altar shelf [inferred].
 - Not built: no triumphal arch or spiral column exists in this plan; the pediment's eagle was left as it is. Fine-detail statues in the far tiles fall back to the old forms.
 
+## 4.16 Upper floors walked into (round 6: `upper.js`, `upper-rows.js`, `upper-inns.js`, `flats.js`)
+- [stated] The tabernae had a pergula (a timber mezzanine) reached by a ladder-stair, and the dwelling above was reached by a stair from the street door; the upper rooms opened off a medianum, the poorer cenacula lay higher, under the tiles. Windows were openings with shutters; balconies (maeniana) stood on brackets (the House of the Balcony with Corbels at Ostia).
+- [stated] Insulae stood round a court; the flats were reached by a timber stair and a gallery; the rich lived low, the poor high.
+- [inferred] Room use by place: the rooms over the street shops as the shopkeeper's living and working rooms, those at the back as sleeping and store rooms, the kitchen wing's floor as a living room; the tenement's rooms are furnished sparsely (a bed, a chest, a brazier, jars).
+- Opened in the near copy only (the far copy of the tiles is the old closed one): three rows of tabernae nearest the arrival (first floor and cenaculum floor, 3.85 and 6.85 m; stair bay at the end, balcony doors on the street), the two cauponae (loggia on the court, stair of the stable yard) and the fuller's (ladder-ramp, gallery on corbels, terrace for drying), and the first floor of the three insulae nearest the arrival (timber stair of 23 steps to 4.6 m, a gallery on corbels along each long side of the court, rooms over the shops with real window reveals on the street, a balcony reached through a door, the kitchen wing's floor).
+- All floors are colliders with their rails; the stairs are solid steps over a ramp collider; the furnishing is in small plans shown within 14-18 m (`up_cells`). The walks from the street to an upper room of each house are in `walks.js` (walk-check).
+- Still shut: the floors above the first of the insulae, the roof of the tenements, the domus's upper floor, all other houses.
+
 ## Sources
 
 - [The Bronze Roof Truss of the Vestibule of the Pantheon in Rome — University of Cologne](https://archaeologie.phil-fak.uni-koeln.de/en/research/research-projects/the-bronze-roof-truss-of-the-vestibule-of-the-pantheon-in-rome)
