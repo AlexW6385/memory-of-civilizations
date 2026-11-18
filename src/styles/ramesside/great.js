@@ -6,7 +6,7 @@
 import { box, frustum, place, rod, lathe } from '../../core/geom.js';
 import { cavettoProfile } from '../egyptian/trim.js';
 import { figure, wallReliefs, astroCeiling } from '../egyptian/objects.js';
-import { colossus, fallenHead, royalStatue, baboon, uraeus, osiride, seatedGod, standing } from './statues.js';
+import { colossus, royalStatue, baboon, uraeus, osiride, seatedGod, standing } from './statues.js';
 import { kadesh, campaigns } from './reliefs.js';
 import { rockWithRooms, extrudeProfile, turnedBag, rng, carve } from './util.js';
 import { carveGreat } from './carve.js';
@@ -96,16 +96,8 @@ export function greatTemple(el, { bag, col, lights }) {
   // the colossi, and at their feet the royal family (queen mother and Nefertari at the outer ones, princes and princesses at the inner)
   const X0 = FX + 1.0, r = rng(1255), kinds = ['queen', 'prince', 'princess'];
   G.colossi.forEach((zc, i) => {
-    const fallen = i === 2;                                              // the second from the left (south), whose upper body fell in an earthquake [stated: dossier §4.1]
-    put(bag, colossus(fallen), X0, 0, zc, EAST, 1 + 0.0012 * i);   // (a millimetre apart, so that the four merge into the material's mesh instead of being drawn as copies)
-    col.rect([X0 - 1.8, zc - 3.7, X0 + 7.6, zc + 3.7], 0, 7.4); col.rect([X0 - 1.9, zc - 3.9, X0 + 1.2, zc + 3.9], 7.4, fallen ? 11.5 : 17.5);
-    if (fallen) {
-      // its head on the terrace before the throne, on its back, and the blocks of the break around it
-      const fh = fallenHead(), hx = X0 + 13.2, hz = zc + 0.8;
-      put(bag, fh.parts, hx, FLOOR, hz, 0, 1);
-      col.rect([hx + fh.bounds[0], hz + fh.bounds[1], hx + fh.bounds[2], hz + fh.bounds[3]], FLOOR, FLOOR + fh.bounds[4] * 0.8);
-      [[8.5, -2.6, 1.3, 0.9, 0.8], [8.9, 2.4, 1.0, 0.7, 0.9], [9.2, 0.2, 0.7, 0.45, 0.6]].forEach(([dx, dz, a, h, b]) => { bag.add('sandstone_dressed', box(X0 + dx - a / 2, FLOOR, zc + dz - b / 2, X0 + dx + a / 2, FLOOR + h, zc + dz + b / 2)); col.rect([X0 + dx - a / 2, zc + dz - b / 2, X0 + dx + a / 2, zc + dz + b / 2], FLOOR, FLOOR + h); });
-    }
+    put(bag, colossus(), X0, 0, zc, EAST, 1 + 0.0012 * i);   // (a millimetre apart, so that the four merge into the material's mesh instead of being drawn as copies)
+    col.rect([X0 - 1.8, zc - 3.7, X0 + 7.6, zc + 3.7], 0, 7.4); col.rect([X0 - 1.9, zc - 3.9, X0 + 1.2, zc + 3.9], 7.4, 17.5);
     const outer = Math.abs(zc) > 10;
     [[-3.12, -3.2], [3.12, -3.2], [0, -5.0]].forEach(([lx, lz], k) => {
       const kind = outer ? (k < 2 ? 'queen' : 'princess') : (k < 2 ? kinds[1 + ((i + k) % 2)] : 'princess');

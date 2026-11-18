@@ -71,13 +71,11 @@ function cartouche(o, x, y, z, ax, dir, h) {
   [[-0.3, 0.2], [0, 0.26], [0.3, 0.16]].forEach(([v, ww]) => add(o, 'paint_minoan_black', bx(-ww * w, v * h - 0.07 * h, ww * w, v * h + 0.07 * h, d, d + 0.03)));   // the signs
 }
 
-/** The jagged top of a broken stone (a ring with a rough edge). */
-const rough = (seed, amp = 0.1) => (t) => 1 + amp * Math.sin(5 * t + seed) + amp * 0.6 * Math.sin(11 * t + 2 * seed);
 
 /**
  * The head of a colossus (its own frame as the colossus': centre of the head at y 15.35, faces −z): the face, the nemes (a dome over the
  * skull with the headband across the brow, the cloth falling behind the ears, the flat wings that flare at the sides, the two lappets
- * on the chest, the stripes in gold), the uraeus, the false beard, the red crown over the white. Also the broken head's.
+ * on the chest, the stripes in gold), the uraeus, the false beard, the red crown over the white..
  */
 function colossusHead(o, crown = 'double') {
   const S = 'sandstone_dressed', K = PAL.K, B = 'egyptian_blue', G = PAL.G, RD = 'limewash_red', W = 'plaster_white';
@@ -122,9 +120,9 @@ function colossusHead(o, crown = 'double') {
  * the false beard, the shendyt kilt, the hands flat on the thighs, the shins and feet on the plinth, a back slab to the
  * rock. Painted as such statues were (the skin red-brown, the kilt white, the nemes in blue and gold bands, the crowns red
  * and white) so that the four read against the pale rock; modelled in rounded limbs, not blocks. Origin: the spine's plane,
- * floor level; faces −z. `broken`: the one whose upper body fell (the second from the left): the torso ends in a rough break at the waist.
+ * floor level; faces −z.
  */
-export function colossus(broken = false) {
+export function colossus() {
   const o = {}, S = 'sandstone_dressed', K = 'paint_robe', W = 'plaster_white', B = 'egyptian_blue', G = 'paint_ochre', RD = 'limewash_red';
   // the ground field behind each figure: a panel leaning back with the façade, darker than the dressed face, so that the figure stands out of it
   add(o, 'sandstone_relief', frustum([-3.9, 0.5, 3.9, 3.8], 0.5, 21.2, 0, 0, 1.55, 0));
@@ -158,25 +156,21 @@ export function colossus(broken = false) {
   add(o, W, box(-0.85, 3.6, -6.05, 0.85, 7.0, -5.55));
   for (let k = 0; k < 5; k++) add(o, 'plaster_grey', box(-0.72 + k * 0.36, 3.7, -6.09, -0.6 + k * 0.36, 6.9, -6.05));   // the pleats
   add(o, G, box(-0.95, 3.45, -6.12, 0.95, 3.65, -5.5));                              // the apron's gold hem
-  // the torso, from the hips to the shoulders (to a rough break at the waist on the fallen one), and the neck
-  if (broken) add(o, K, rows([[5.2, 0.45, 2.35, 1.5], [6.2, 0.4, 2.3, 1.5], [8.0, 0.35, 2.15, 1.45], [9.6, 0.32, 2.3, 1.48]], 28));
-  else add(o, K, rows([[5.2, 0.45, 2.35, 1.5], [6.2, 0.4, 2.3, 1.5], [8.0, 0.35, 2.15, 1.45], [10.0, 0.3, 2.45, 1.5], [11.8, 0.2, 2.9, 1.55], [13.0, 0.15, 3.15, 1.5], [13.7, 0.2, 2.2, 1.3]], 28));
-  if (broken) {
-    add(o, K, loft([[9.6, 0.32, 2.3, 1.48], [10.2, 0.3, 2.15, 1.38], [10.7, 0.26, 1.9, 1.2]].map(([y, z, a, b], i) => ring([0, y, z], X, Zb, a, b, 28, i ? rough(2.3, 0.09) : null))));   // the break
-    for (const s of [-1, 1]) add(o, K, ell([s * 3.3, 10.5, -0.3], [0.95, 0.3, 0.95], 12, 4));                       // the stump of each arm
-  } else add(o, K, rows([[13.4, 0.1, 1.2, 1.15], [14.5, 0.05, 1.05, 1.05]], 16));
+  // the torso, from the hips to the shoulders, and the neck
+  add(o, K, rows([[5.2, 0.45, 2.35, 1.5], [6.2, 0.4, 2.3, 1.5], [8.0, 0.35, 2.15, 1.45], [10.0, 0.3, 2.45, 1.5], [11.8, 0.2, 2.9, 1.55], [13.0, 0.15, 3.15, 1.5], [13.7, 0.2, 2.2, 1.3]], 28));
+  add(o, K, rows([[13.4, 0.1, 1.2, 1.15], [14.5, 0.05, 1.05, 1.05]], 16));
   add(o, G, rows([[7.1, 0.4, 2.47, 1.54], [7.55, 0.4, 2.44, 1.52]], 28));          // the belt
-  if (!broken) {
+  {
     add(o, G, rows([[12.15, 0.2, 2.98, 1.6], [12.55, 0.19, 3.08, 1.6], [13.1, 0.16, 3.22, 1.58]], 28));   // the broad collar
     for (const s of [-1, 1]) add(o, K, ell([s * 1.0, 11.2, -1.0], [0.9, 0.7, 0.5], 12, 6));   // the pectoral
   }
   for (const s of [-1, 1]) {
-    if (!broken) {
+    {
       add(o, K, ell([s * 3.1, 12.6, 0.15], [1.15, 1.15, 1.15], 14, 7));              // the shoulder
       add(o, K, rod([s * 3.1, 12.6, 0.15], [s * 3.3, 8.9, -0.3], 0.95, 14));         // the upper arm
       add(o, G, rod([s * 3.19, 11.2, -0.08], [s * 3.22, 10.5, -0.12], 1.02, 14));    // the armband
       cartouche(o, s * 4.13, 9.9, -0.28, 'x', s, 1.5);                                // the king's name on the arm
-    } else add(o, K, rod([s * 3.29, 10.5, -0.3], [s * 3.3, 8.9, -0.3], 0.95, 14));
+    }
     add(o, K, ell([s * 3.3, 8.9, -0.3], [0.95, 0.95, 0.95], 12, 6));               // the elbow
     add(o, K, rod([s * 3.3, 8.9, -0.3], [s * 2.0, 7.55, -2.9], 0.78, 14));         // the forearm to the hand
     add(o, G, rod([s * 2.2, 7.8, -2.5], [s * 2.0, 7.55, -2.9], 0.84, 12));         // the bracelet
@@ -188,23 +182,12 @@ export function colossus(broken = false) {
     }
     add(o, K, rod([s * 1.55, 7.3, -3.2], [s * 1.5, 7.2, -4.2], 0.14, 6)); add(o, K, ell([s * 1.5, 7.2, -4.2], [0.14, 0.12, 0.17], 6, 4));
   }
-  if (!broken) colossusHead(o);
-  add(o, S, box(-2.0, 0.5, 0.9, 2.0, broken ? 11.5 : 13.5, 3.8));
-  if (!broken) add(o, S, box(-1.5, 13.0, 0.7, 1.5, 20.1, 3.8));                      // the back slab to the rock
+  colossusHead(o);
+  add(o, S, box(-2.0, 0.5, 0.9, 2.0, 13.5, 3.8));
+  add(o, S, box(-1.5, 13.0, 0.7, 1.5, 20.1, 3.8));                      // the back slab to the rock
   void RD;
   return o;
 }
-
-/** The head of the fallen colossus, lying on its back on the terrace before its throne (its parts at the origin, resting on y = 0): { parts, bounds [x0, z0, x1, z1, height] }. */
-export function fallenHead() {
-  const raw = {}; colossusHead(raw);
-  const parts = {}; let y0 = Infinity;
-  for (const [m, list] of Object.entries(raw)) for (const g of list) { g.translate(0, -15.35, 0.5); g.rotateX(1.4); g.rotateZ(0.18); g.rotateY(0.55); g.computeBoundingBox(); y0 = Math.min(y0, g.boundingBox.min.y); }
-  let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9, h = 0;
-  for (const [m, list] of Object.entries(raw)) for (const g of list) { g.translate(0, -y0, 0); g.computeBoundingBox(); const b = g.boundingBox; x0 = Math.min(x0, b.min.x); x1 = Math.max(x1, b.max.x); z0 = Math.min(z0, b.min.z); z1 = Math.max(z1, b.max.z); h = Math.max(h, b.max.y); (parts[m] ??= []).push(g); }
-  return { parts, bounds: [x0, z0, x1, z1, h] };
-}
-
 
 /** A small standing statue (about 1.75 m): `kind` 'queen' (the sheath, the tripartite wig, the plumes and sun disc), 'princess', 'prince' (the side-lock). */
 export function royalStatue(kind = 'queen') {
