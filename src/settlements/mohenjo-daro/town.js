@@ -1,7 +1,7 @@
 // Round the Citadel (docs/settlements/mohenjo-daro.md §2, §6, §7): the Lower Town's houses in their grid with the drains along the streets and
 // lanes, the workshops, the market place with its great well, the town wall on the south, the landing on the Indus with its boats and the
 // harbour office, and the people — priests at the Bath, craftsmen, merchants, porters, carts with zebu.
-import { RADIUS, PLAT, XS, STREET_W, PLAZA, WELL_BIG, WALL, WALL_Z, RIVER, QUAY, CUSTOMS, BATH, GRANARY, PILLARED, COLLEGE, EAST_STAIR, MOUND, riverX, streets, lanes, lots, inRect } from './layout.js';
+import { RADIUS, PLAT, XS, STREET_W, PLAZA, WELL_BIG, WALL, WALL_Z, RIVER, QUAY, CUSTOMS, BATH, GRANARY, PILLARED, COLLEGE, EAST_STAIR, MOUND, riverX, streets, lanes, lots, houseEl, inRect } from './layout.js';
 import { boatFloat } from '../../objects/index.js';
 import { stallSpots } from '../../styles/indus/town.js';
 
@@ -161,7 +161,7 @@ export async function town() {
     for (const x of [WALL.x0 + 14, WALL.x1 - 14, -40, 160]) E.push({ t: 'indus_tower', c: [x, WALL_Z], a: 2.6, y: 0, h: 7 });
     plans.push(base('md-wall', E));
   }
-  for (let i = 0; i < LT.length; i += 60) plans.push(base(`md-houses-${i / 60}`, LT.slice(i, i + 60).map((l) => ({ t: 'indus_house', rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, variant: l.variant, open: l.open, y: l.y, street: l.street, ends: l.ends }))));
+  for (let i = 0; i < LT.length; i += 60) plans.push(base(`md-houses-${i / 60}`, LT.slice(i, i + 60).map(houseEl)));
   plans.push({ ...base('md-life', life()), style: 'life' });
   plans.push({ ...base('md-people', people()), style: 'life' });
   return (CACHE = plans);

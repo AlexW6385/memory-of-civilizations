@@ -127,8 +127,13 @@ export function lots() {
   for (const l of LOTS) if (l.kind === 'house' && l.seed % 11 === 0 && !l.open) l.kind = 'small';
   // the platform's quarters are the nearest houses to the visitor on the Citadel: every third one is open, lit and furnished, with its well, so that the lanes show doors ajar
   const top = LOTS.filter((l) => l.tag === 'top'); top.forEach((l, i) => { if (i % 3 === 1 || i === 3) l.open = true; });
+  // the upstairs (docs/settlements/mohenjo-daro.md §14): the open houses of the platform nearest the arrival and the open workshops along First Street and the market
+  const A = [-155, -72.5], dist = (l) => Math.hypot((l.rect[0] + l.rect[2]) / 2 - A[0], (l.rect[1] + l.rect[3]) / 2 - A[1]);
+  LOTS.filter((l) => l.open && l.tag === 'top').sort((a, b) => dist(a) - dist(b)).slice(0, 8).forEach((l) => { l.up = l.kind === 'small' ? 'poor' : 'household'; });
+  LOTS.filter((l) => l.open && l.kind !== 'house' && l.kind !== 'small').forEach((l) => { l.up = 'craftsman'; });
   return LOTS;
 }
+export const houseEl = (l) => ({ t: 'indus_house', rect: l.rect, front: l.front, kind: l.kind, seed: l.seed, variant: l.variant, open: l.open, y: l.y, street: l.street, ends: l.ends, up: l.up ? 1 : 0 });
 export function lanes() { lots(); return LANES; }
 export const inLot = (x, z, m = 0) => lots().some((l) => inRect(l.rect, x, z, m));
 const GRID = new Map();
