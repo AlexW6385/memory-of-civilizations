@@ -1,5 +1,9 @@
 // Modern New York about 1931 (docs/settlements/new-york.md §2–§4).
-import { RADIUS, EL_STATIONS, VIADUCT, ESB, LIBRARY, BRYANT, GCT, CHRYSLER, CHANIN, LINCOLN, AVENUES, height, GRID, toCity } from './layout.js';
+import { lots } from './layout.js';
+import { upOf } from './upper-plan.js';
+import { routeOf } from './upper.js';
+import { tenementRoute } from './tenement.js';
+import { WALKUP_AT, RADIUS, EL_STATIONS, VIADUCT, ESB, LIBRARY, BRYANT, GCT, CHRYSLER, CHANIN, LINCOLN, AVENUES, height, GRID, toCity } from './layout.js';
 
 // (the plans stand at the origin unturned; their elements are laid out in the grid's frame and
 // turned with it by the style's `turned`; what the plans say of places — entrance, rooms, walks,
@@ -12,6 +16,9 @@ const ENTRANCE = P(4, 176);
 export const entranceOf = () => ({ at: ENTRANCE.map((v) => Math.round(v * 100) / 100), facing: 's' });
 
 const hy = (r) => height((r[0] + r[2]) / 2, (r[1] + r[3]) / 2);
+/** From the street to the rooms of each opened house: through the hall door, up the stair to the second floor's first room, back to the hall and on to the third floor's. */
+const tenWalk = () => { const l = lots().find((q) => q.rect[0] <= WALKUP_AT[0] && WALKUP_AT[0] <= q.rect[2] && q.rect[1] <= WALKUP_AT[1] && WALKUP_AT[1] <= q.rect[3]), [x0, z0, x1, z1] = l.rect, r = tenementRoute({ rect: [x1 - 7.6, z0, x1, z1], y: l.y }); return Object.assign(r.pts.map(([x, z]) => P(x, z)), { y0: r.y0 }); };
+const upWalks = () => lots().filter((l) => upOf(l)).map((l) => { const r = routeOf({ ...l, up: upOf(l) }), w = [...r.pts, ...r.up].map(([x, z]) => P(x, z)); return Object.assign(w, { y0: r.y0 }); });
 export const esb = {
   id: 'new-york-esb',
   name: { en: 'The Empire State Building and Midtown', zh: '帝国大厦与中城' },
@@ -33,7 +40,7 @@ export const esb = {
   // (Fifth Avenue's roadway in front of the tower: a box inside the turned avenue)
   rooms: [{ id: 'fifth', rect: [...P(0, 200).map((v) => v - 4), ...P(0, 200).map((v) => v + 4)], y: 0, kind: 'open' }],
   // (and in through the Fifth Avenue doors, down the lobby to the silhouette and along the corridor of the elevators)
-  walks: [Object.assign([P(4, 176), P(4, 230)], { y0: 0 }), Object.assign([P(2, 230), P(-14, 230), P(-37, 230), P(-29, 230), P(-29, 214), P(-29, 246)], { y0: hy(ESB) })],
+  walks: [Object.assign([P(4, 176), P(4, 230)], { y0: 0 }), Object.assign([P(2, 230), P(-14, 230), P(-37, 230), P(-29, 230), P(-29, 214), P(-29, 246)], { y0: hy(ESB) }), ...upWalks(), tenWalk()],
 };
 export const midtown = {
   id: 'new-york-midtown', style: 'artdeco', origin: [0, 0], base: 0, yaw: 0, feature: true,

@@ -7,6 +7,7 @@ import { nearEntrance } from '../../styles/artdeco/dress.js';
 import { concoursePeople } from '../../styles/artdeco/concourse.js';
 import { libraryPeople } from '../../styles/artdeco/library.js';
 import './far.js';
+import { upOf } from './upper-plan.js';
 /** How far from the visitor the blocks are built in full (m, to a tile's middle); beyond, the simple form (far.js). */
 const NEAR = 200, TILE = 220, OFF = 160;   // (tiles of 220 m, their grid shifted 160 m: every tile is a plan of its own per form, and the count of meshes and of the arrival's draws depend on where the cuts fall)
 // (all laid out in the grid's frame (layout.js); the buildings and the yards turned into the
@@ -338,7 +339,7 @@ export async function buildings() {
   const tiles = new Map();
   for (const l of all) { const c = toCity((l.rect[0] + l.rect[2]) / 2, (l.rect[1] + l.rect[3]) / 2), k = `${Math.floor((c[0] + OFF) / TILE)},${Math.floor((c[1] + OFF) / TILE)}`; if (!tiles.has(k)) tiles.set(k, []); tiles.get(k).push(l); }
   for (const [k, list] of tiles) {
-    const [i, j] = k.split(',').map(Number), center = [(i + 0.5) * TILE - OFF, (j + 0.5) * TILE - OFF], els = list.flatMap((l) => special(l) ?? [{ t: 'skyscraper', ...l, chimney: chimneyAt(l), ads: adsOf(l) }]);
+    const [i, j] = k.split(',').map(Number), center = [(i + 0.5) * TILE - OFF, (j + 0.5) * TILE - OFF], els = list.flatMap((l) => special(l) ?? [{ t: 'skyscraper', ...l, chimney: chimneyAt(l), ads: adsOf(l), up: upOf(l) }]);
     plans.push({ ...base(`new-york-blocks-${k}`, els), style: 'artdeco_near', near: NEAR, center });
     plans.push({ ...base(`new-york-blocks-${k}-far`, els), style: 'artdeco_far', far: NEAR, center, nocollide: true });
   }

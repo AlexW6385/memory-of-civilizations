@@ -13,6 +13,9 @@ import '../../styles/artdeco/index.js';
 import { face, rowPlan, rowStacks } from '../../styles/artdeco/blocks.js';
 import { shopRoom } from '../../styles/artdeco/shoprooms.js';
 import { nearEntrance, rng as rng2, fitCell } from '../../styles/artdeco/dress.js';
+import { narrowRect, stripRect, adsOf } from './upper-plan.js';
+import { withUpstairs } from './upper.js';
+import { withTenement } from './tenement.js';
 
 const LS = 'facade_limestone', PLAIN = 'limestone';
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -191,6 +194,14 @@ function skyscraper(el, { bag }) {
     bag.add(rand() < 0.5 ? 'lead' : mat, frustum([c[0] - s0, c[1] - s0, c[0] + s0, c[1] + s0], yy, yy + s0 * 1.4, s0 * 0.9, s0 * 0.9, s0 * 0.9, s0 * 0.9, { noBottom: true }));
   } else block(bag, mat, inset(r, -0.4), yy - 0.2, yy + 0.8);
 }
+/** A lot with its upper floors open (upper.js): the shop's body in the narrowed lot, as the near form takes its stream, and the stair hall's strip a plain mass with its cornice. */
+const withStrip = (fn) => (el, ctx) => {
+  if (!el.up) return fn(el, ctx);
+  fn({ ...el, rect: narrowRect(el), ads: adsOf(el) }, ctx);
+  const [x0, z0, x1, z1] = stripRect(el), y = el.y ?? 0, h = el.h, lo = el.up.end === 'lo', bag = ctx.bag;
+  bag.add(el.mat, box(x0, y - 0.5, z0, x1, y + h, z1)); bag.add('granite_grey', box(x0 - 0.15, y - 0.5, z0 - 0.15, x1 + 0.15, y + 4.5, z1 + 0.15));
+  bag.add(el.mat, box(lo ? x0 - 0.5 : x0 + 0.5, y + h - 0.2, z0 - 0.5, lo ? x1 - 0.5 : x1 + 0.5, y + h + 0.8, z1 + 0.5)); bag.add(PLAIN, box(lo ? x0 - 0.2 : x0 + 0.2, y + h - 1.6, z0 - 0.2, lo ? x1 - 0.2 : x1 + 0.2, y + h - 0.2, z1 + 0.2));
+};
 const lowBox = (h, m) => (el, { bag }) => { const [x0, z0, x1, z1] = el.rect, y = el.y ?? 0; bag.add(m, box(x0, y - 0.4, z0, x1, y + (el.h ?? h), z1)); bag.add(PLAIN, box(x0 - 0.2, y + (el.h ?? h) - 0.2, z0 - 0.2, x1 + 0.2, y + (el.h ?? h) + 0.4, z1 + 0.2)); };
 
 /**
@@ -211,8 +222,8 @@ const wrapAll = (els, T) => Object.fromEntries(Object.entries(els).map(([k, fn])
 const A = STYLES.artdeco.elements;
 registerStyle('artdeco_far', {
   trim: () => {}, opening: () => {}, column: () => {},
-  elements: wrapAll({ skyscraper, diner: lowBox(3.4, 'paint_white'), walkup: lowBox(15, 'facade_brick'), turned: A.turned }, FOLD_FAR),
+  elements: wrapAll({ skyscraper: withStrip(skyscraper), diner: lowBox(3.4, 'paint_white'), walkup: lowBox(15, 'facade_brick'), turned: A.turned }, FOLD_FAR),
   objects: {},
 });
 // the near form: the style's own builders, their materials folded
-registerStyle('artdeco_near', { ...STYLES.artdeco, elements: wrapAll(A, FOLD) });
+registerStyle('artdeco_near', { ...STYLES.artdeco, elements: wrapAll({ ...A, skyscraper: withUpstairs(A.skyscraper), walkup: withTenement(A.walkup) }, FOLD) });
