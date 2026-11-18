@@ -181,7 +181,7 @@ pwall({ o: [XWC, -ZO], u: [0, 1], th: 1.5, u0: 0, u1: 2 * ZO, y0: GF, y1: GR, ma
   arches: [{ uc: ZO, r: 4.0, spring: 18.0, sill: GF + 1.0 }, { uc: ZO - 11, r: 2.5, spring: 18.5, sill: GF + 1.0 }, { uc: ZO + 11, r: 2.5, spring: 18.5, sill: GF + 1.0 },
     { uc: ZO - 25.4, r: 2.2, spring: 18.0 }, { uc: ZO + 25.4, r: 2.2, spring: 18.0 }] });
 pwall({ o: [XWC, -5.2], u: [0, 1], th: 1.5, u0: 0, u1: 10.4, y0: GR, y1: YS + 5.2, outline: { uc: 5.2, r: 5.2, spring: YS }, holes: [{ u0: 2.2, u1: 8.2, y0: 23.0, y1: YS + 3.0 }], mat: 'stucco_warm', collide: false });
-obj('doors', XWC + 0.75, 0, 0, { yaw: Math.PI / 2, w: 4.0, h: 7.0, th: 0.2, depth: 0 });
+obj('hs_doors', XWC + 0.75, 0, 0, { yaw: Math.PI / 2, w: 4.0, h: 7.0, th: 0.2, depth: 0 });
 
 // ── outer walls of the aisles and galleries: stucco outside, marble inside ───
 function outerWall(o, u, L, inSide, holes, y1 = GR) {
@@ -278,6 +278,9 @@ for (const sx of [-1, 1]) {
   }
 }
 
+// the south door, from the Augustaion: its bronze leaves stand open into the aisle
+obj('hs_doors', -10, ZO, 0, { yaw: Math.PI, w: 3.2, h: 5.0, th: 0.16, depth: 0 });
+
 // ── the narthexes ────────────────────────────────────────────────────────────
 // inner narthex west wall: five doors below, windows above the outer narthex's roof
 outerWall([-42.75, -ZO], [0, 1], 2 * ZO, -1, [...[0, -10, 10, -20, 20].map((z) => ({ u0: z + ZO - 1.3, u1: z + ZO + 1.3, y0: 0, y1: 5.0 })),
@@ -292,8 +295,8 @@ pwall({ o: [-49.25, -36], u: [0, 1], th: 1.5, u0: 0, u1: 72, y0: 0, y1: 10.6, ma
 for (const sz of [-1, 1]) add({ t: 'wall', a: [-50, sz * 35.25], b: [-43.5, sz * 35.25], th: 1.5, y0: 0, y1: 10.6, openings: [], mat: 'stucco_warm' });
 slab([-50, -36, -43.5, 36], 9.9, 10.0, 'mosaic_gold');
 slab([-50, -36, -43.5, 36], 10.0, 10.6, 'lead');
-obj('doors', -42.0, 0, 0, { yaw: Math.PI / 2, w: 2.6, h: 5.0, th: 0.16, depth: 0 });
-obj('doors', -48.5, 0, 0, { yaw: Math.PI / 2, w: 2.6, h: 4.5, th: 0.16, depth: 0 });
+obj('hs_doors', -42.0, 0, 0, { yaw: Math.PI / 2, w: 2.6, h: 5.0, th: 0.16, depth: 0 });
+obj('hs_doors', -48.5, 0, 0, { yaw: Math.PI / 2, w: 2.6, h: 4.5, th: 0.16, depth: 0 });
 
 // ── the portals: stone frames with a gold lunette round every door of the narthexes (docs/settlements/constantinople.md §4.9) ──
 {
@@ -344,7 +347,7 @@ add({ t: 'obj', kind: 'pavement', at: [0, 0], y: 0, rect: [-98, -24, -50, 24], s
   add({ t: 'beam', a: [-93, -19], b: [-93, 19], y: PH, w: 0.7, h: 0.8, mat: 'marble' });
   slab([-98, -18.6, -92.6, 18.6], PH + 0.8, PH + 1.15, 'roof_tile');
   obj('phiale', -72, 0, 0, { r: 2.4 });
-  obj('doors', -99, 0, 0, { yaw: Math.PI / 2, w: 4, h: 5.0, th: 0.16, depth: 0.9 });
+  obj('hs_doors', -99, 0, 0, { yaw: Math.PI / 2, w: 4, h: 5.0, th: 0.16, depth: 0.9 });
 }
 
 // ── the furnishings of the liturgy ───────────────────────────────────────────

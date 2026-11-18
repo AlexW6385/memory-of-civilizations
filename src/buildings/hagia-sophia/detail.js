@@ -6,6 +6,7 @@
 
 import { box, lathe, fromTriangles, rod, frustum } from '../../core/geom.js';
 import { hexa } from '../../styles/chinese/index.js';
+import { carvedCapital, monogram } from './carve.js';
 
 const D2R = Math.PI / 180;
 
@@ -88,33 +89,7 @@ export function hsColumn(el, { bag, col }) {
   const T = [0, 0.12, 0.35, 0.62, 0.9, 1], RR = [0.9, 1.0, 1.08, 1.15, 1.2, 1.2];
   const J = (k, a = 0.03) => 1 + jit(x, z, k, a);
   const bellR = (t) => { for (let i = 1; i < T.length; i++) if (t <= T[i]) return r * J(1, 0.012) * lerp(RR[i - 1], RR[i], (t - T[i - 1]) / (T[i] - T[i - 1])); return r * RR[RR.length - 1]; };
-  bag.add('gold', lathe(T.map((t) => [bellR(t), t * capH]), 16, null, x, yc, z));
-  const lv = [];
-  const lobe = (ang, tan, t0, t1, wb, wt, th, out) => {
-    const e = [Math.cos(ang), Math.sin(ang)], tg = [-e[1], e[0]];
-    const P = (rad, tn, yy) => [x + e[0] * rad + tg[0] * tn, yy, z + e[1] * rad + tg[1] * tn];
-    const rb = bellR(t0) - th * 0.4, rt = bellR(t1) + out * J(2 + Math.round(ang * 10), 0.2);
-    hexa(lv, [P(rb, tan - wb / 2, yc + t0 * capH), P(rb, tan + wb / 2, yc + t0 * capH), P(rb + th, tan + wb / 2, yc + t0 * capH), P(rb + th, tan - wb / 2, yc + t0 * capH)],
-      [P(rt, tan - wt / 2, yc + t1 * capH), P(rt, tan + wt / 2, yc + t1 * capH), P(rt + th, tan + wt / 2, yc + t1 * capH), P(rt + th, tan - wt / 2, yc + t1 * capH)]);
-  };
-  const big = d >= 0.9;
-  for (let k = 0; k < 8; k++) {
-    const a = k * Math.PI / 4;
-    if (big) for (const [tn, t1] of [[-0.3 * r, 0.46], [0, 0.56], [0.3 * r, 0.46]]) lobe(a, tn, 0.08, t1, 0.3 * r, 0.1 * r, 0.07 * r, 0.1 * r);       // the lower tier
-    const b = a + Math.PI / 8;
-    if (big) for (const [tn, t1] of [[-0.3 * r, 0.78], [0, 0.93], [0.3 * r, 0.78]]) lobe(b, tn, 0.3, t1, 0.28 * r, 0.1 * r, 0.07 * r, 0.16 * r);     // the upper tier
-    else lobe(b, 0, 0.25, 0.9, 0.5 * r, 0.14 * r, 0.08 * r, 0.14 * r);
-    if (!big) lobe(a, 0, 0.08, 0.5, 0.45 * r, 0.14 * r, 0.08 * r, 0.1 * r);
-  }
-  // the horns under the corners of the abacus
-  for (let k = 0; k < 4; k++) {
-    const a = Math.PI / 4 + k * Math.PI / 2, e = [Math.cos(a), Math.sin(a)], tg = [-e[1], e[0]];
-    const P = (rad, tn, yy) => [x + e[0] * rad + tg[0] * tn, yy, z + e[1] * rad + tg[1] * tn];
-    const wb = 0.4 * r, wt = 0.46 * r, th = 0.12 * r, rb = bellR(0.62) - 0.08 * r, rt = 1.5 * r * J(3 + k, 0.03);
-    hexa(lv, [P(rb, -wb / 2, yc + 0.62 * capH), P(rb, wb / 2, yc + 0.62 * capH), P(rb + th, wb / 2, yc + 0.62 * capH), P(rb + th, -wb / 2, yc + 0.62 * capH)],
-      [P(rt, -wt / 2, yc + capH - 0.03 * d), P(rt, wt / 2, yc + capH - 0.03 * d), P(rt + th, wt / 2, yc + capH - 0.03 * d), P(rt + th, -wt / 2, yc + capH - 0.03 * d)]);
-  }
-  put(bag, capMat, lv);
+  carvedCapital(bag, { x, z, yc, r, capH, capMat, lod: d >= 0.9 ? 2 : d >= 0.52 ? 1 : 0, bellR });
   // the abacus and the impost block
   bag.add(capMat, frustum([x - sq, z - sq, x + sq, z + sq], yc + capH - 0.05 * d, yc + capH, 0, 0, 0, 0));
   if (!impH) return;
@@ -122,13 +97,11 @@ export function hsColumn(el, { bag, col }) {
   bag.add(capMat, frustum([x - wI, z - wI, x + wI, z + wI], yb, yb + impH * 0.8, 0, 0, 0, 0));
   bag.add(capMat, frustum([x - sq, z - sq, x + sq, z + sq], yb + impH * 0.8, yb + impH, 0, 0, 0, 0));
   const green = [], gold = [];
-  for (const [u, n] of [[[0, 1], [1, 0]], [[0, -1], [-1, 0]], [[-1, 0], [0, 1]], [[1, 0], [0, -1]]]) {
+  [[[0, 1], [1, 0]], [[0, -1], [-1, 0]], [[-1, 0], [0, 1]], [[1, 0], [0, -1]]].forEach(([u, n], fi) => {
     const W = frame([x, z], u, n), pw = wI * (0.74 + jp), y0 = yb + impH * 0.1, y1 = yb + impH * 0.7, ym = (y0 + y1) / 2, hh = (y1 - y0) / 2;
-    fbox(green, W, -pw, pw, y0, y1, wI - 0.01, wI + 0.014);
-    const dm = wI + 0.019, L = hh * (0.62 + jl), w = L * 0.13;
-    crossN(gold, W, 0, ym, L, w, dm);
-    for (const [su, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) rectN(gold, W, su * hh * 0.5 - hh * 0.13, su * hh * 0.5 + hh * 0.13, ym + sy * hh * 0.5 - hh * 0.13, ym + sy * hh * 0.5 + hh * 0.13, dm);
-  }
+    fbox(green, W, -pw, pw, y0, y1, wI - 0.01, wI + 0.022);
+    monogram(gold, W, 0, ym, hh * (0.8 + jl), wI + 0.022, wI + 0.05, fi % 2 ? 'T' : 'J', d >= 0.9 ? true : d >= 0.52 ? false : 'min');
+  });
   put(bag, 'verde_antico', green);
   put(bag, 'gold', gold);
 }
