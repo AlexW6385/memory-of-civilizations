@@ -6,6 +6,8 @@
 import { box } from '../../core/geom.js';
 import { L, RED } from './kit.js';
 import { lintelRelief } from './carve.js';
+import { sculptKing } from './king.js';
+import { jaguarLintel } from './lintel.js';
 
 /** A box in a frame: u (depth), v (breadth), y (absolute). */
 export const fbox = (bag, F, m, u0, u1, v0, v1, y0, y1) => { const r = F.R(u0, u1, v0, v1); bag.add(m, box(r[0], y0, r[1], r[2], y1, r[3])); };
@@ -50,7 +52,7 @@ function ruler(bag, F, ub, c, nBot, s) {
 }
 
 /** The roof comb of a shrine: F = the shrine's frame, y = the roof's top, D, W the shrine's size, cmb the comb's height. */
-export function roofComb(bag, F, y, D, W, cmb, rr) {
+export function roofComb(bag, F, y, D, W, cmb, rr, modelled = false) {
   const st = [[0.40, 1.0, 0.55], [0.46, 0.84, 0.28], [0.52, 0.66, 0.17]];
   let yy = y;
   st.forEach(([f0, vw, hf], i) => {
@@ -60,7 +62,7 @@ export function roofComb(bag, F, y, D, W, cmb, rr) {
     if (i === 0) {
       const nw = Math.min(2.8, vh * 0.7), n0 = y0 + (y1 - y0) * 0.14, n1 = y0 + (y1 - y0) * 0.86, s = Math.min((n1 - n0) / 4.6, nw / 2.3);
       nichedFront(bag, F, { u0, u1, vh, y0, y1, n0, n1, niches: [{ c: 0, w: nw }], depth, mat, back: 'maya_blue' });
-      ruler(bag, F, u0 + depth - 0.03, 0, n0, s);
+      if (modelled) { const U = (a) => u0 + depth - 0.03 - a * s, V = (a) => a * s, Yv = (a) => n0 + a * s, bx = (m, a0, a1, b0, b1, c0, c1) => fbox(bag, F, m, U(a0), U(a1), V(b0), V(b1), Yv(c0), Yv(c1)); bx(L, 0.02, 0.62, -1.0, 1.0, 0, 0.8); bx(RED, 0.04, 0.6, -1.04, 1.04, 0.5, 0.58); bx('stucco_ochre', 0.05, 0.58, -0.92, 0.92, 0.8, 0.9); sculptKing(bag, F, u0 + depth - 0.03, 0, n0, s); } else ruler(bag, F, u0 + depth - 0.03, 0, n0, s);
       for (const sg of [-1, 1]) {                                                                   // the glyph blocks on the piers, in rows
         const v0 = nw / 2 + 0.5, v1 = vh - 0.5, cols = Math.max(1, Math.floor((v1 - v0) / 1.0));
         if (v1 - v0 < 0.6) continue;
@@ -92,11 +94,11 @@ export function roofComb(bag, F, y, D, W, cmb, rr) {
 }
 
 /** A shrine door: jambs, a lintel of four sapodilla planks side by side (the central lintel of Temple I: four planks), the outer door's carved panel. */
-export function shrineDoor(bag, F, y, u0, u1, dw, dh, front) {
+export function shrineDoor(bag, F, y, u0, u1, dw, dh, front, jag = null) {
   const t = (u1 - u0 + 0.1) / 4;
   for (let p = 0; p < 4; p++) fbox(bag, F, 'timber', u0 - 0.05 + p * t, u0 - 0.05 + (p + 1) * t, -dw / 2 - 0.2, dw / 2 + 0.2, y + dh - 0.3 + (p % 2) * 0.02, y + dh);
   const Fu = { R: (a, b, c, d) => F.R(a + u0, b + u0, c, d) };
-  lintelRelief(bag, Fu, y + dh + 0.6, y + dh + 1.95, dw / 2 + 0.3);                                                                   // the carved lintel above: the ruler on his throne
+  if (jag && front) jaguarLintel(bag, F, jag, y + dh + 0.5, dw / 2 + 0.3); else lintelRelief(bag, Fu, y + dh + 0.6, y + dh + 1.95, dw / 2 + 0.3);                                                                   // the carved lintel above: the ruler on his throne
   if (!front) return;
   for (const sg of [-1, 1]) fbox(bag, F, L, -0.14, 0, sg > 0 ? dw / 2 : -dw / 2 - 0.3, sg > 0 ? dw / 2 + 0.3 : -dw / 2, y, y + dh);   // the stone jambs
   fbox(bag, F, L, -0.14, 0, -dw / 2 - 0.3, dw / 2 + 0.3, y + dh, y + dh + 0.14);                                                       // their cap

@@ -5,7 +5,7 @@
 
 import { box, lathe, rod } from '../../core/geom.js';
 import { patch, soot, put, hearthKit, ollaKit, metateKit, waterJarKit, storeJarKit } from '../maya/household.js';
-import { mask } from './carve.js';
+import { mask } from './masks.js';
 import { frame, slab, frust, hex, rng, L, RED, LIME } from './kit.js';
 
 /** Stains on a battered tier face: a rain runnel, a patch where the paint has gone, moss low down; `skip` {nx, nz, w} keeps the stair's face clear. */

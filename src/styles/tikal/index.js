@@ -11,7 +11,7 @@ import { hearthKit, ollaKit, metateKit, waterJarKit, bedKit, storeJarKit, put, p
 import { frame, slab, frust, flipGeo, hex, flight, rng, L, RED, LIME } from './kit.js';
 import { tapesco, midden, hives } from './yard.js';
 import { roofComb, shrineDoor, frontPanels } from './comb.js';
-import { stela } from './carve.js';
+import { stela } from './stela.js';
 import { crossPrism, crossRects } from './tiers.js';
 import { DRESS, tierWeather, wallWeather, curtain, hammock } from './dress.js';
 
@@ -33,7 +33,7 @@ function shrine(el, { bag, col }) {
     if (u1 === D) { wall(u0, u1, v0, v1, 0, ceil); continue; }                      // the back wall has no door
     wall(u0, u1, v0, -dw / 2, 0, ceil); wall(u0, u1, dw / 2, v1, 0, ceil);
     wall(u0, u1, -dw / 2, dw / 2, dh, ceil, dh);                                   // over the doorway
-    shrineDoor(bag, F, y, u0, u1, dw, dh, u0 === 0);                                  // jambs, the lintel of four sapodilla planks
+    shrineDoor(bag, F, y, u0, u1, dw, dh, u0 === 0, el.lintel ? el.face : null);                                  // jambs, the lintel of four sapodilla planks
   }
   // the corbel vault of each chamber: five steps in from each long wall, a capstone
   const inset = (ch / 2 - 0.15) / steps;
@@ -60,7 +60,7 @@ function shrine(el, { bag, col }) {
   const ax = (F.R(0, D, -W / 2, W / 2)[2] - F.R(0, D, -W / 2, W / 2)[0]) / 2 + 0.3, az = (F.R(0, D, -W / 2, W / 2)[3] - F.R(0, D, -W / 2, W / 2)[1]) / 2 + 0.3;
   frust(bag, RED, cx, cz, ax, az, ax - 0.9, az - 0.9, y + roof, y + roof + 2.2);
   // the roof comb: a tall slab over the rear, three stages, each narrower, niched and painted
-  roofComb(bag, F, y + roof + 2.2, D, W, el.comb ?? 12);
+  roofComb(bag, F, y + roof + 2.2, D, W, el.comb ?? 12, undefined, !!el.king);
   frontPanels(bag, F, y, len, dw, ceil);
   // inside: the innermost chamber has a low bench, a censer bowl on the floor of each
   { const ua = tf + (n - 1) * (ch + tp), r = F.R(ua + ch - 0.7, ua + ch, -len / 2 + 0.3, len / 2 - 0.3); slab(bag, L, r, y, y + 0.45, col); }
@@ -104,7 +104,7 @@ function pyramid(el, ctx) {
   }
   if (el.masks) for (let k = 1; k < n; k++) {                                                    // the stucco masks flanking the stair, one pair on each tier
     const [a, b] = A(k + 0.5), half = dir[0] ? a : b;
-    for (const sg of [-1, 1]) { const off = sg * (sw + 2.4), fx = cx - dir[0] * (half - 0.06), fz = cz - dir[1] * (half - 0.06); DRESS.k_mask({ c: dir[0] ? [fx, cz + off] : [cx + off, fz], face: f, y: Y + k * th + 0.2, s: Math.min(1, th / 3.3) }, ctx); }
+    for (const sg of [-1, 1]) { const off = sg * (sw + 2.4), fx = cx - dir[0] * (half - 0.06), fz = cz - dir[1] * (half - 0.06); DRESS.k_mask({ c: dir[0] ? [fx, cz + off] : [cx + off, fz], face: f, y: Y + k * th + 0.2, s: Math.min(1, th / 3.3), lod: el.maskLod }, ctx); }
   }
   flight(bag, col, { foot, dir, w: el.stairW, H, Lr, steps: Math.round(H / 0.3), y0: Y });
   if (el.shrine) shrine({ ...el.shrine, y: Y + H, face: { w: 'w', e: 'e', n: 'n', s: 's' }[f], c: el.shrine.c ?? (dir[0] ? [cx - dir[0] * (el.top[0] - 1.8), cz] : [cx, cz - dir[1] * (el.top[1] - 1.8)]) }, ctx);
